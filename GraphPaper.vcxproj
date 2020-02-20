@@ -211,7 +211,7 @@
     <PRIResource Include="Strings\en-US\Resources.resw">
       <SubType>Designer</SubType>
     </PRIResource>
-    <PRIResource Include="Strings\jp-JP\Resources.resw">
+    <PRIResource Include="Strings\ja-JP\Resources.resw">
       <SubType>Designer</SubType>
     </PRIResource>
   </ItemGroup>
