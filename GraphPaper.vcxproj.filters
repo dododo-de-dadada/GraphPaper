@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="MainPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="App.idl" />
+    <Midl Include="MainPage.idl" />
+    <Midl Include="Summary.idl" />
+    <Midl Include="SummaryViewModel.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="MainPage.cpp" />
+    <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="MainPage_app.cpp" />
+    <ClCompile Include="MainPage_arrange.cpp" />
+    <ClCompile Include="MainPage_arrow.cpp" />
+    <ClCompile Include="MainPage_disp.cpp" />
+    <ClCompile Include="MainPage_edit.cpp" />
+    <ClCompile Include="MainPage_file.cpp" />
+    <ClCompile Include="MainPage_fill.cpp" />
+    <ClCompile Include="MainPage_find.cpp" />
+    <ClCompile Include="MainPage_font.cpp" />
+    <ClCompile Include="MainPage_grid.cpp" />
+    <ClCompile Include="MainPage_group.cpp" />
+    <ClCompile Include="MainPage_kybd.cpp" />
+    <ClCompile Include="MainPage_mru.cpp" />
+    <ClCompile Include="MainPage_page.cpp" />
+    <ClCompile Include="MainPage_pointer.cpp" />
+    <ClCompile Include="MainPage_samp.cpp" />
+    <ClCompile Include="MainPage_scroll.cpp" />
+    <ClCompile Include="MainPage_select.cpp" />
+    <ClCompile Include="MainPage_status.cpp" />
+    <ClCompile Include="MainPage_stroke.cpp" />
+    <ClCompile Include="MainPage_summary.cpp" />
+    <ClCompile Include="MainPage_text.cpp" />
+    <ClCompile Include="MainPage_thread.cpp" />
+    <ClCompile Include="MainPage_tool.cpp" />
+    <ClCompile Include="MainPage_undo.cpp" />
+    <ClCompile Include="MainPage_xcvd.cpp" />
+    <ClCompile Include="MainPage_zoom.cpp" />
+    <ClCompile Include="shape.cpp" />
+    <ClCompile Include="shape_bezi.cpp" />
+    <ClCompile Include="shape_dx.cpp" />
+    <ClCompile Include="shape_elli.cpp" />
+    <ClCompile Include="shape_group.cpp" />
+    <ClCompile Include="shape_line.cpp" />
+    <ClCompile Include="shape_list.cpp" />
+    <ClCompile Include="shape_panel.cpp" />
+    <ClCompile Include="shape_quad.cpp" />
+    <ClCompile Include="shape_rect.cpp" />
+    <ClCompile Include="shape_rrect.cpp" />
+    <ClCompile Include="shape_stroke.cpp" />
+    <ClCompile Include="shape_text.cpp" />
+    <ClCompile Include="undo.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="shape.h" />
+    <ClInclude Include="shape_dx.h" />
+    <ClInclude Include="Summary.h" />
+    <ClInclude Include="SummaryViewModel.h" />
+    <ClInclude Include="undo.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Wide310x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\LockScreenLogo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{e48dc53e-40b1-40cb-970a-f89935452892}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PropertySheet.props" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt" />
+  </ItemGroup>
+</Project>

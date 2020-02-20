@@ -1,0 +1,403 @@
+//------------------------------
+// shape_rrect.cpp
+// ŠpŠÛ•ûŒ`}Œ`
+//------------------------------
+#include "pch.h"
+#include "shape.h"
+
+using namespace winrt;
+
+namespace winrt::GraphPaper::implementation
+{
+	// ŠpŠÛ•ûŒ`‚Ì’†“_‚Ì”z—ñ
+	constexpr ANCH_WHICH ANCH_ROUND[4]{
+		ANCH_R_SE,	// ‰E‰ºŠp
+		ANCH_R_NE,	// ‰EãŠp
+		ANCH_R_SW,	// ¶‰ºŠp
+		ANCH_R_NW	// ¶ãŠp
+	};
+
+	// ŠpŠÛ”¼Œa‚ğŒvZ‚·‚é.
+	static void calc_corner_radius(const D2D1_POINT_2F r_vec, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad);
+	// ŠpŠÛ”¼Œa‚Ìc‚Ü‚½‚Í‰¡‚Ì¬•ª‚ğŒvZ‚·‚é.
+	static void calc_corner_radius(const FLOAT r_vec, const FLOAT d_rad, FLOAT& c_rad);
+
+	// ŠpŠÛ”¼Œa‚ğŒvZ‚·‚é.
+	// r_vec	ŠpŠÛ•ûŒ`‚ÌI“_ƒxƒNƒgƒ‹
+	// d_rad	Šù’è‚ÌŠpŠÛ”¼Œa
+	// c_rad	ŒvZ‚³‚ê‚½ŠpŠÛ”¼Œa
+	static void calc_corner_radius(const D2D1_POINT_2F r_vec, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad)
+	{
+		calc_corner_radius(r_vec.x, d_rad.x, c_rad.x);
+		calc_corner_radius(r_vec.y, d_rad.y, c_rad.y);
+	}
+
+	// ŠpŠÛ”¼Œa‚Ìc‚Ü‚½‚Í‰¡‚Ì¬•ª‚ğŒvZ‚·‚é.
+	// r_vec	ŠpŠÛ•ûŒ`‚Ì‘å‚«‚³
+	// d_rad	‚à‚Æ‚ÌŠpŠÛ”¼Œa
+	// c_rad	“¾‚ç‚ê‚½ŠpŠÛ”¼Œa
+	static void calc_corner_radius(const FLOAT r_vec, const FLOAT d_rad, FLOAT& c_rad)
+	{
+		const double r = r_vec * 0.5;
+		if (fabs(d_rad) > fabs(r)) {
+			// ‚à‚Æ‚ÌŠpŠÛ”¼Œa‚ª•ûŒ`‚Ì‘å‚«‚³‚Ì”¼•ª‚ğ’´‚¦‚é‚È‚ç,
+			// ‘å‚«‚³‚Ì”¼•ª‚ğ“¾‚ç‚ê‚½ŠpŠÛ”¼Œa‚ÉŠi”[‚·‚é.
+			c_rad = static_cast<FLOAT>(r);
+		}
+		else if (r_vec * d_rad < 0.0f) {
+			// ŠpŠÛ•ûŒ`‚Ì‘å‚«‚³‚Æ‚à‚Æ‚ÌŠpŠÛ”¼Œa‚Ì•„†‚ª‹t‚È‚ç,
+			// ‚à‚Æ‚ÌŠpŠÛ”¼Œa‚Ì•„†‚ğ‹t‚É‚µ‚½’l‚ğ
+			// “¾‚ç‚ê‚½ŠpŠÛ”¼Œa‚ÉŠi”[‚·‚é.
+			c_rad = -d_rad;
+		}
+		else {
+			c_rad = d_rad;
+		}
+	}
+
+	// }Œ`‚ğ•\¦‚·‚é.
+	void ShapeRRect::draw(SHAPE_DX& dx)
+	{
+		auto sb = dx.m_shape_brush.get();
+		auto ss = m_d2d_stroke_style.get();
+		auto sw = static_cast<FLOAT>(m_stroke_width);
+		auto dc = dx.m_d2dContext;
+
+		D2D1_POINT_2F r_min;
+		pt_add(m_pos, min(m_vec.x, 0.0), min(m_vec.y, 0.0), r_min);
+		float rx = std::fabsf(m_corner_rad.x);
+		float ry = std::fabsf(m_corner_rad.y);
+		float vx = std::fabsf(m_vec.x);
+		float vy = std::fabsf(m_vec.y);
+		if (rx > vx * 0.5f) {
+			rx = vx * 0.5f;
+		}
+		if (ry > vy * 0.5f) {
+			ry = vy * 0.5f;
+		}
+		D2D1_ROUNDED_RECT r_rec;
+		r_rec.rect.left = r_min.x;
+		r_rec.rect.top = r_min.y;
+		r_rec.rect.right = r_min.x + vx;
+		r_rec.rect.bottom = r_min.y + vy;
+		r_rec.radiusX = rx;
+		r_rec.radiusY = ry;
+		if (is_opaque(m_fill_color)) {
+			sb->SetColor(m_fill_color);
+			dc->FillRoundedRectangle(r_rec, sb);
+		}
+		sb->SetColor(m_stroke_color);
+		dc->DrawRoundedRectangle(r_rec, sb, sw, ss);
+		if (is_selected()) {
+			const auto flag = (std::abs(m_vec.x) > FLT_MIN&& std::abs(m_vec.y) > FLT_MIN);
+			if (flag) {
+				D2D1_POINT_2F c_pos;
+				pt_add(r_min, rx, ry, c_pos);
+				draw_anchor_rounded(c_pos, dx);
+				c_pos.x = r_min.x + vx - rx;
+				draw_anchor_rounded(c_pos, dx);
+				pt_add(r_min, vx, vy, c_pos);
+				pt_add(c_pos, -rx, -ry, c_pos);
+				draw_anchor_rounded(c_pos, dx);
+				c_pos.x = r_min.x + rx;
+				draw_anchor_rounded(c_pos, dx);
+			}
+			D2D1_POINT_2F r_pos[4];
+			r_pos[0] = r_min;
+			r_pos[1].x = r_min.x + vx;
+			r_pos[1].y = r_min.y;
+			r_pos[2].x = r_pos[1].x;
+			r_pos[2].y = r_min.y + vy;
+			r_pos[3].x = r_min.x;
+			r_pos[3].y = r_pos[2].y;
+			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
+				D2D1_POINT_2F r_mid;
+				// •ûŒ`‚Ì’¸“_‚ÌƒAƒ“ƒJ[‚ğ•\¦‚·‚é.
+				// •Ó‚Ì’†“_‚ğ‹‚ß, ‚»‚ÌƒAƒ“ƒJ[‚ğ•\¦‚·‚é.
+				pt_avg(r_pos[j], r_pos[i], r_mid);
+				draw_anchor(r_pos[i], dx);
+				draw_anchor(r_mid, dx);
+			}
+			if (flag == false) {
+				D2D1_POINT_2F c_pos;
+				pt_add(r_min, rx, ry, c_pos);
+				draw_anchor_rounded(c_pos, dx);
+				c_pos.x = r_min.x + vx - rx;
+				draw_anchor_rounded(c_pos, dx);
+				pt_add(r_min, vx, vy, c_pos);
+				pt_add(c_pos, -rx, -ry, c_pos);
+				draw_anchor_rounded(c_pos, dx);
+				c_pos.x = r_min.x + rx;
+				draw_anchor_rounded(c_pos, dx);
+			}
+		}
+	}
+
+	// ŠpŠÛ”¼Œa‚ğ“¾‚é.
+	bool ShapeRRect::get_corner_radius(D2D1_POINT_2F& val) const noexcept
+	{
+		val = m_corner_rad;
+		return true;
+	}
+
+	// w’è‚³‚ê‚½•”ˆÊ‚ÌˆÊ’u‚ğ“¾‚é.
+	void ShapeRRect::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& pos) const noexcept
+	{
+		const double vx = m_vec.x;
+		const double vy = m_vec.y;
+		const double hx = vx * 0.5;
+		const double hy = vy * 0.5;
+		const double rx = fabs(hx) < fabs(m_corner_rad.x) ? hx : m_corner_rad.x;
+		const double ry = fabs(hy) < fabs(m_corner_rad.y) ? hy : m_corner_rad.y;
+		switch (a) {
+		case ANCH_R_NW:
+			// ¶ã‚ÌŠpŠÛ’†S“_‚ğ‹‚ß‚é
+			pt_add(m_pos, rx, ry, pos);
+			break;
+		case ANCH_R_NE:
+			// ‰Eã‚ÌŠpŠÛ’†S“_‚ğ‹‚ß‚é
+			pt_add(m_pos, vx - rx, ry, pos);
+			break;
+		case ANCH_R_SE:
+			// ‰E‰º‚ÌŠpŠÛ’†S“_‚ğ‹‚ß‚é
+			pt_add(m_pos, vx - rx, vy - ry, pos);
+			break;
+		case ANCH_R_SW:
+			// ¶‰º‚ÌŠpŠÛ’†S“_‚ğ‹‚ß‚é
+			pt_add(m_pos, rx, vy - ry, pos);
+			break;
+		default:
+			ShapeRect::get_pos(a, pos);
+			break;
+		}
+	}
+
+	static bool pt_in_rrect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max, const D2D1_POINT_2F r_rad)
+	{
+		if (t_pos.x < r_min.x) {
+			return false;
+		}
+		if (t_pos.x > r_max.x) {
+			return false;
+		}
+		if (t_pos.y < r_min.y) {
+			return false;
+		}
+		if (t_pos.y > r_max.y) {
+			return false;
+		}
+		D2D1_POINT_2F c_pos;
+		pt_add(r_min, r_rad, c_pos);
+		if (t_pos.x < c_pos.x) {
+			if (t_pos.y < c_pos.y) {
+				return pt_in_elli(t_pos, c_pos, r_rad.x, r_rad.y);
+			}
+		}
+		c_pos.x = r_max.x - r_rad.x;
+		c_pos.y = r_min.y + r_rad.y;
+		if (t_pos.x > c_pos.x) {
+			if (t_pos.y < c_pos.y) {
+				return pt_in_elli(t_pos, c_pos, r_rad.x, r_rad.y);
+			}
+		}
+		c_pos.x = r_max.x - r_rad.x;
+		c_pos.y = r_max.y - r_rad.y;
+		if (t_pos.x > c_pos.x) {
+			if (t_pos.y > c_pos.y) {
+				return pt_in_elli(t_pos, c_pos, r_rad.x, r_rad.y);
+			}
+		}
+		c_pos.x = r_min.x + r_rad.x;
+		c_pos.y = r_max.y - r_rad.y;
+		if (t_pos.x < c_pos.x) {
+			if (t_pos.y > c_pos.y) {
+				return pt_in_elli(t_pos, c_pos, r_rad.x, r_rad.y);
+			}
+		}
+		return true;
+	}
+
+	// ˆÊ’u‚ğŠÜ‚Ş‚©’²‚×‚é.
+	// t_pos	’²‚×‚éˆÊ’u
+	// a_len	•”ˆÊ‚Ì‘å‚«‚³
+	// –ß‚è’l	ˆÊ’u‚ğŠÜ‚Ş}Œ`‚Ì•”ˆÊ
+	ANCH_WHICH ShapeRRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	{
+		const auto flag = (fabs(m_vec.x) > FLT_MIN&& fabs(m_vec.y) > FLT_MIN);
+		if (flag) {
+			for (uint32_t i = 0; i < 4; i++) {
+				// ŠpŠÛ‚Ì’†S“_‚ğ“¾‚é.
+				D2D1_POINT_2F r_cen;
+				get_pos(ANCH_ROUND[i], r_cen);
+				// ˆÊ’u‚ªŠpŠÛ‚Ì•”ˆÊ‚ÉŠÜ‚Ü‚ê‚é‚©’²‚×‚é.
+				if (pt_in_anch(t_pos, r_cen, a_len)) {
+					// ŠÜ‚Ü‚ê‚é‚È‚çŠpŠÛ‚Ì•”ˆÊ‚ğ•Ô‚·.
+					return ANCH_ROUND[i];
+				}
+			}
+		}
+		for (uint32_t i = 0; i < 4; i++) {
+			D2D1_POINT_2F r_pos;	// •ûŒ`‚Ì’¸“_
+			get_pos(ANCH_CORNER[i], r_pos);
+			if (pt_in_anch(t_pos, r_pos, a_len)) {
+				return ANCH_CORNER[i];
+			}
+		}
+		for (uint32_t i = 0; i < 4; i++) {
+			D2D1_POINT_2F r_pos;	// •ûŒ`‚Ì•Ó‚Ì’†“_
+			get_pos(ANCH_MIDDLE[i], r_pos);
+			if (pt_in_anch(t_pos, r_pos, a_len)) {
+				return ANCH_MIDDLE[i];
+			}
+		}
+		if (flag == false) {
+			for (uint32_t i = 0; i < 4; i++) {
+				D2D1_POINT_2F r_cen;	// ŠpŠÛ•”•ª‚Ì’†S“_
+				get_pos(ANCH_ROUND[i], r_cen);
+				if (pt_in_anch(t_pos, r_cen, a_len)) {
+					return ANCH_ROUND[i];
+				}
+			}
+		}
+		D2D1_POINT_2F r_min;
+		D2D1_POINT_2F r_max;
+		D2D1_POINT_2F r_rad;
+		if (m_vec.x > 0.0f) {
+			r_min.x = m_pos.x;
+			r_max.x = m_pos.x + m_vec.x;
+		}
+		else {
+			r_min.x = m_pos.x + m_vec.x;
+			r_max.x = m_pos.x;
+		}
+		if (m_vec.y > 0.0f) {
+			r_min.y = m_pos.y;
+			r_max.y = m_pos.y + m_vec.y;
+		}
+		else {
+			r_min.y = m_pos.y + m_vec.y;
+			r_max.y = m_pos.y;
+		}
+		r_rad.x = std::abs(m_corner_rad.x);
+		r_rad.y = std::abs(m_corner_rad.y);
+		if (is_opaque(m_stroke_color) == false) {
+			return is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_min, r_max, r_rad) ? ANCH_INSIDE : ANCH_OUTSIDE;
+		}
+		const double s_width = max(m_stroke_width, a_len);
+		// ŠO‘¤‚ÌŠpŠÛ•ûŒ`‚Ì”»’è
+		pt_add(r_min, -s_width * 0.5, r_min);
+		pt_add(r_max, s_width * 0.5, r_max);
+		pt_add(r_rad, s_width * 0.5, r_rad);
+		//r_min.x -= s_width * 0.5;
+		//r_min.y -= s_width * 0.5;
+		//r_max.x += s_width * 0.5;
+		//r_max.y += s_width * 0.5;
+		//r_rad.x += s_width * 0.5;
+		//r_rad.y += s_width * 0.5;
+		if (pt_in_rrect(t_pos, r_min, r_max, r_rad) == false) {
+			return ANCH_OUTSIDE;
+		}
+		// “à‘¤‚ÌŠpŠÛ•ûŒ`‚Ì”»’è
+		pt_add(r_min, s_width, r_min);
+		pt_add(r_max, -s_width, r_max);
+		pt_add(r_rad, -s_width, r_rad);
+		//r_min.x += s_width;
+		//r_min.y += s_width;
+		//r_max.x -= s_width;
+		//r_max.y -= s_width;
+		//r_rad.x -= s_width;
+		//r_rad.y -= s_width;
+		if (pt_in_rrect(t_pos, r_min, r_max, r_rad) == false) {
+			return ANCH_FRAME;
+		}
+		return is_opaque(m_fill_color) ? ANCH_INSIDE : ANCH_OUTSIDE;
+	}
+
+	// ’l‚ğw’è‚µ‚½•”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚Í“®‚©‚È‚¢. 
+	void ShapeRRect::set_pos(const D2D1_POINT_2F pos, const ANCH_WHICH a)
+	{
+		D2D1_POINT_2F c_pos;
+		D2D1_POINT_2F d;
+		D2D1_POINT_2F r;
+
+		switch (a) {
+		case ANCH_R_NW:
+			ShapeRRect::get_pos(a, c_pos);
+			pt_sub(pos, c_pos, d);
+			pt_add(m_corner_rad, d, r);
+			calc_corner_radius(m_vec, r, m_corner_rad);
+			break;
+		case ANCH_R_NE:
+			ShapeRRect::get_pos(a, c_pos);
+			pt_sub(pos, c_pos, d);
+			r.x = m_corner_rad.x - d.x;
+			r.y = m_corner_rad.y + d.y;
+			calc_corner_radius(m_vec, r, m_corner_rad);
+			break;
+		case ANCH_R_SE:
+			ShapeRRect::get_pos(a, c_pos);
+			pt_sub(pos, c_pos, d);
+			r.x = m_corner_rad.x - d.x;
+			r.y = m_corner_rad.y - d.y;
+			calc_corner_radius(m_vec, r, m_corner_rad);
+			break;
+		case ANCH_R_SW:
+			ShapeRRect::get_pos(a, c_pos);
+			pt_sub(pos, c_pos, d);
+			r.x = m_corner_rad.x + d.x;
+			r.y = m_corner_rad.y - d.y;
+			calc_corner_radius(m_vec, r, m_corner_rad);
+			break;
+		default:
+			ShapeRect::set_pos(pos, a);
+			if (m_vec.x * m_corner_rad.x < 0.0f) {
+				m_corner_rad.x = -m_corner_rad.x;
+			}
+			if (m_vec.y * m_corner_rad.y < 0.0f) {
+				m_corner_rad.y = -m_corner_rad.y;
+			}
+			break;
+		}
+	}
+
+	// }Œ`‚ğì¬‚·‚é.
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr) :
+		ShapeRect::ShapeRect(pos, vec, attr)
+	{
+		calc_corner_radius(m_vec, attr->m_corner_rad, m_corner_rad);
+	}
+
+	// }Œ`‚ğƒf[ƒ^ƒŠ[ƒ_[‚©‚ç“Ç‚İ‚Ş.
+	ShapeRRect::ShapeRRect(DataReader const& dt_reader) :
+		ShapeRect::ShapeRect(dt_reader)
+	{
+		using winrt::GraphPaper::implementation::read;
+
+		read(m_corner_rad, dt_reader);
+	}
+
+	// ƒf[ƒ^ƒ‰ƒCƒ^[‚É‘‚«‚Ş.
+	void ShapeRRect::write(DataWriter const& dt_writer) const
+	{
+		using winrt::GraphPaper::implementation::write;
+
+		ShapeRect::write(dt_writer);
+		write(m_corner_rad, dt_writer);
+	}
+
+	// ƒf[ƒ^ƒ‰ƒCƒ^[‚É SVG ƒ^ƒO‚Æ‚µ‚Ä‘‚«‚Ş.
+	void ShapeRRect::write_svg(DataWriter const& dt_writer) const
+	{
+		using winrt::GraphPaper::implementation::write_svg;
+
+		write_svg("<rect ", dt_writer);
+		write_svg(m_pos, "x", "y", dt_writer);
+		write_svg(m_vec, "width", "height", dt_writer);
+		if (std::round(m_corner_rad.x) != 0.0f && std::round(m_corner_rad.y) != 0.0f) {
+			write_svg(m_corner_rad, "rx", "ry", dt_writer);
+		}
+		write_svg(m_fill_color, "fill", dt_writer);
+		ShapeStroke::write_svg(dt_writer);
+		write_svg("/>", dt_writer);
+	}
+}

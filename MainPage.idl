@@ -1,0 +1,11 @@
+import "SummaryViewModel.idl";  // ’Ç‰Á
+
+namespace GraphPaper
+{
+    [default_interface]
+    runtimeclass MainPage : Windows.UI.Xaml.Controls.Page
+    {
+        MainPage();
+        //Int32 MyProperty;
+    }
+}

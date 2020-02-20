@@ -1,0 +1,12 @@
+//import "oaidl.idl";
+//import "ocidl.idl";
+import "Summary.idl";
+
+namespace GraphPaper
+{
+	runtimeclass SummaryViewModel
+	{
+		Summary Summary{ get; };
+		Windows.Foundation.Collections.IObservableVector<Summary> Summaries{ get; };
+	}
+}

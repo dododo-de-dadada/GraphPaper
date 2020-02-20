@@ -1,0 +1,12 @@
+//import "oaidl.idl";
+//import "ocidl.idl";
+
+namespace GraphPaper
+{
+	runtimeclass Summary : Windows.UI.Xaml.Data.INotifyPropertyChanged
+	{
+		Windows.UI.Xaml.Media.Geometry Data;
+		String Hex;
+		String Name;
+	}
+}
