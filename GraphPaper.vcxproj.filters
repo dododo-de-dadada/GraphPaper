@@ -105,4 +105,8 @@
   <ItemGroup>
     <Text Include="readme.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Strings\en-US\Resources.resw" />
+    <PRIResource Include="Strings\jp-JP\Resources.resw" />
+  </ItemGroup>
 </Project>
