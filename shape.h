@@ -15,6 +15,7 @@
 //	shape_text.cpp	文字列図形
 //------------------------------
 #pragma once
+#include <list>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Storage.Streams.h>
 #include <winrt/Windows.UI.Xaml.Media.h>
@@ -370,6 +371,9 @@ namespace winrt::GraphPaper::implementation
 	struct Shape {
 		// D2D ファクトリのキャッシュ
 		static ID2D1Factory3* s_d2d_factory;
+		// DWRITE ファクトリのキャッシュ
+		static IDWriteFactory3* s_dwrite_factory;
+
 		// 図形を破棄する.
 		virtual ~Shape() {}
 		// 図形を表示する
@@ -929,6 +933,46 @@ namespace winrt::GraphPaper::implementation
 		void write_svg(DataWriter const& dt_writer) const;
 	};
 
+	struct ShapeRuler : ShapeRect {
+		double m_grid_len;
+		winrt::com_ptr<IDWriteTextFormat> m_text_fmt{};
+
+		ShapeRuler(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr) :
+			ShapeRect::ShapeRect(pos, vec, attr),
+			m_grid_len(attr->m_grid_len)
+		{
+			wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
+			GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
+			auto f_size = min(attr->m_font_size, attr->m_grid_len);
+			winrt::check_hresult(
+				Shape::s_dwrite_factory->CreateTextFormat(
+					attr->m_font_family,
+					static_cast<IDWriteFontCollection*>(nullptr),
+					attr->m_font_weight,
+					attr->m_font_style,
+					DWRITE_FONT_STRETCH_NORMAL,
+					static_cast<FLOAT>(f_size),
+					locale_name,
+					m_text_fmt.put()
+				)
+			);
+			m_text_fmt->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+			m_text_fmt->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		}
+		// 図形をデータリーダーから読み込む.
+		ShapeRuler(DataReader const& dt_reader) :
+			ShapeRect::ShapeRect(dt_reader),
+			m_grid_len(static_cast<double>(dt_reader.ReadSingle()))
+		{}
+
+		//------------------------------
+		// shape_ruler.cpp
+		//------------------------------
+
+		// 図形を表示する.
+		void draw(SHAPE_DX& dx);
+	};
+
 	//------------------------------
 	// だ円
 	//------------------------------
@@ -1104,7 +1148,6 @@ namespace winrt::GraphPaper::implementation
 	// 文字列
 	//------------------------------
 	struct ShapeText : ShapeRect {
-		static IDWriteFactory3* s_dwrite_factory;	// DWRITE ファクトリ
 		static wchar_t** s_available_fonts;		// 利用可能な書体名
 
 		DWRITE_TEXT_RANGE m_sel_range{ 0, 0 };	// 文字範囲

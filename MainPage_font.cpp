@@ -503,32 +503,32 @@ namespace winrt::GraphPaper::implementation
 			const double pt = val / m_page_dx.m_logical_dpi * PT_PER_INCH;
 			swprintf_s(buf, FMT_PT_UNIT, pt);
 			auto r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_size") + buf;
+			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == U_OP::FONT_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_RGB, val);
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_red") + buf;
+				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_RGB, val);
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_green") + buf;
+				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_RGB, val);
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_blue") + buf;
+				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_PERCENT, val / COLOR_MAX * 100.0);
+				conv_val_to_col(FMT_COL::CEN, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_opacity") + buf;
+				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {

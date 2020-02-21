@@ -23,7 +23,7 @@ namespace winrt::GraphPaper::implementation
 
 		if constexpr (U == U_OP::GRID_LEN) {
 			auto r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_length");
+			hdr = r_loader.GetString(L"str_grid_length");
 			val += 1.0;
 			if (m_samp_panel.m_page_unit == UNIT::PIXEL) {
 				wchar_t buf[16];
@@ -41,15 +41,15 @@ namespace winrt::GraphPaper::implementation
 				switch (m_samp_panel.m_page_unit) {
 				case UNIT::INCH:
 					swprintf_s(buf, FMT_IN_UNIT, inch);
-					hdr = hdr + buf;
+					hdr = hdr + L": " + buf;
 					break;
 				case UNIT::MILLI:
 					swprintf_s(buf, FMT_MM_UNIT, inch * MM_PER_INCH);
-					hdr = hdr + buf;
+					hdr = hdr + L": " + buf;
 					break;
 				case UNIT::POINT:
 					swprintf_s(buf, FMT_PT_UNIT, inch * PT_PER_INCH);
-					hdr = hdr + buf;
+					hdr = hdr + L": " + buf;
 					break;
 				}
 			}
@@ -57,9 +57,9 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == U_OP::GRID_OPAC) {
 			if constexpr (S == 3) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_PERCENT, val / COLOR_MAX * 100.0);
+				conv_val_to_col(FMT_COL::CEN, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_opacity") + buf;
+				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {

@@ -343,6 +343,11 @@
                         <PathIcon Data="{StaticResource data_text}" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_ruler" x:Uid="rmfi_tool_ruler" Click="rmfi_tool_ruler_click" GroupName="gn_tool_type" Text="Major" >
+                    <muxc:RadioMenuFlyoutItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xED5E;" Margin="0,0,4,0" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
+                </muxc:RadioMenuFlyoutItem>
             </muxc:MenuBarItem>
             <!-- ストロークメニュー -->
             <muxc:MenuBarItem x:Name="mbi_stroke" x:Uid="mbi_stroke" AccessKey="S" Title="Stroke">

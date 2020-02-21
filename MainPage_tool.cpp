@@ -76,4 +76,12 @@ namespace winrt::GraphPaper::implementation
 		set_pointer();
 	}
 
+	// 図形メニューの「文字列」が選択された.
+	void MainPage::rmfi_tool_ruler_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	{
+		m_tool_shape = TOOL_RULER;
+		stat_set_tool();
+		set_pointer();
+	}
+
 }

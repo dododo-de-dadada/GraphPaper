@@ -145,15 +145,15 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == U_OP::ARROW_SIZE) {
 			if constexpr (S == 0) {
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_width");
+				hdr = r_loader.GetString(L"str_arrow_width") + L": ";
 			}
 			if constexpr (S == 1) {
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_length");
+				hdr = r_loader.GetString(L"str_arrow_length") + L": ";
 			}
 			if constexpr (S == 2) {
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_offset");
+				hdr = r_loader.GetString(L"str_arrow_shift") + L": ";
 			}
 		}
 		if constexpr (U == U_OP::ARROW_SIZE) {

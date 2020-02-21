@@ -186,6 +186,7 @@
     <ClCompile Include="shape_quad.cpp" />
     <ClCompile Include="shape_rect.cpp" />
     <ClCompile Include="shape_rrect.cpp" />
+    <ClCompile Include="shape_ruler.cpp" />
     <ClCompile Include="shape_stroke.cpp" />
     <ClCompile Include="shape_text.cpp" />
     <ClCompile Include="undo.cpp" />

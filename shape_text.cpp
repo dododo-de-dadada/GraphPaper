@@ -6,7 +6,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	IDWriteFactory3* ShapeText::s_dwrite_factory = nullptr;	// DWRITE ファクトリ
 	wchar_t** ShapeText::s_available_fonts = nullptr;	//利用可能な書体名
 
 	//	テキストレイアウトからヒットテストのための計量の配列を得る.

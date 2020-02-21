@@ -340,6 +340,9 @@ namespace winrt::GraphPaper::implementation
 		else if (m_tool_shape == TOOL_TEXT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
+		else if (m_tool_shape == TOOL_RULER) {
+			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
+		}
 		else {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_select")));
 		}

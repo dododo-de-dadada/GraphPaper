@@ -10,6 +10,24 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	//	色成分を文字列に変換する.
+	void conv_val_to_col(const FMT_COL fmt_col, const double val, wchar_t* buf, const uint32_t len)
+	{
+		if (fmt_col == FMT_COL::DEC) {
+			swprintf_s(buf, len, L"%.0lf", std::round(val));
+		}
+		else if (fmt_col == FMT_COL::HEX) {
+			swprintf_s(buf, len, L"%02x", static_cast<uint32_t>(std::round(val)));
+		}
+		else if (fmt_col == FMT_COL::FLT) {
+			swprintf_s(buf, len, L"%.3lf", val / COLOR_MAX);
+		}
+		else if (fmt_col == FMT_COL::CEN) {
+			swprintf_s(buf, len, L"%.1lf%%", val / COLOR_MAX * 100.0);
+		}
+	}
+
+
 	//	メインページを破棄する.
 	MainPage::~MainPage(void)
 	{
@@ -330,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形リストとページパネルを操作クラスに格納する.
 		{
 			Shape::s_d2d_factory = m_page_dx.m_d2dFactory.get();
-			ShapeText::s_dwrite_factory = m_page_dx.m_dwriteFactory.get();
+			Shape::s_dwrite_factory = m_page_dx.m_dwriteFactory.get();
 			Undo::set(&m_list_shapes, &m_page_panel);
 		}
 

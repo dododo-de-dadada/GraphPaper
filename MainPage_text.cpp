@@ -279,7 +279,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			wchar_t buf[16];
 			swprintf_s(buf, fmt, px);
-			hdr = hdr + buf;
+			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == U_OP::TEXT_LINE) {
 			const double pt = val / m_page_dx.m_logical_dpi * PT_PER_INCH;
@@ -288,10 +288,10 @@ namespace winrt::GraphPaper::implementation
 			if (pt > FLT_MIN) {
 				wchar_t buf[16];
 				swprintf_s(buf, FMT_PT_UNIT, pt);
-				hdr = hdr + buf;
+				hdr = hdr + L": " + buf;
 			}
 			else {
-				hdr = hdr + r_loader.GetString(L"str_def_val");
+				hdr = hdr + L": " + r_loader.GetString(L"str_def_val");
 			}
 		}
 		if constexpr (S == 0) {

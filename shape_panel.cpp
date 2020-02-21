@@ -152,8 +152,6 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼線の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼線の開始・終了位置
 		auto br = dx.m_shape_brush.get();
-		double u;
-		double g;
 
 		m_grid_color.a = static_cast<FLOAT>(m_grid_opac);
 		br->SetColor(m_grid_color);
@@ -161,15 +159,17 @@ namespace winrt::GraphPaper::implementation
 		h_start.x = 0.0f;
 		v_end.y = m_page_size.height;
 		h_end.x = m_page_size.width;
-		g = max(m_grid_len + 1.0, 1.0);
+		const double g_len = max(m_grid_len + 1.0, 1.0);
 		// 垂直な方眼線を表示する.
-		for (uint32_t cnt = 0; (u = g * cnt + offset.x) < pw; cnt++) {
-			v_start.x = v_end.x = static_cast<FLOAT>(u);
+		double x;
+		for (uint32_t i = 0; (x = g_len * i + offset.x) < pw; i++) {
+			v_start.x = v_end.x = static_cast<FLOAT>(x);
 			dx.m_d2dContext->DrawLine(v_start, v_end, br, sw, nullptr);
 		}
 		// 水平な方眼線を表示する.
-		for (uint32_t cnt = 0; (u = g * cnt + offset.y) < ph; cnt++) {
-			h_start.y = h_end.y = static_cast<FLOAT>(u);
+		double y;
+		for (uint32_t i = 0; (y = g_len * i + offset.y) < ph; i++) {
+			h_start.y = h_end.y = static_cast<FLOAT>(y);
 			dx.m_d2dContext->DrawLine(h_start, h_end, br, sw, nullptr);
 		}
 	}

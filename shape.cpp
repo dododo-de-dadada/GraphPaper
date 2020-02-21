@@ -8,6 +8,7 @@ namespace winrt::GraphPaper::implementation
 {
 	// 図形が使用する D2D ファクトリへの参照.
 	ID2D1Factory3* Shape::s_d2d_factory = nullptr;
+	IDWriteFactory3* Shape::s_dwrite_factory = nullptr;	// DWRITE ファクトリ
 #if defined(_DEBUG)
 	uint32_t debug_leak_cnt = 0;
 #endif

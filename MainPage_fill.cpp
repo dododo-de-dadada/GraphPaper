@@ -129,29 +129,32 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::fill_set_slider(double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		wchar_t buf[8];
 		winrt::hstring hdr;
 
 		if constexpr (U == U_OP::FILL_COLOR) {
 			if constexpr (S == 0) {
-				swprintf_s(buf, FMT_RGB, val);
+				wchar_t buf[16];
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_red") + buf;
+				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
-				swprintf_s(buf, FMT_RGB, val);
+				wchar_t buf[16];
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_green") + buf;
+				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
-				swprintf_s(buf, FMT_RGB, val);
+				wchar_t buf[16];
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_blue") + buf;
+				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
-				swprintf_s(buf, FMT_PERCENT, val / COLOR_MAX * 100.0);
+				wchar_t buf[16];
+				conv_val_to_col(FMT_COL::CEN, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_opacity") + buf;
+				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {

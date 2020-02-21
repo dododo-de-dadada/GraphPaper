@@ -1,43 +1,121 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<root>	
-	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-		<xsd:element name="root" msdata:IsDataSet="true">
-			<xsd:complexType>
-				<xsd:choice maxOccurs="unbounded">
-					<xsd:element name="data">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
-							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-						</xsd:complexType>
-					</xsd:element>
-					<xsd:element name="resheader">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" use="required" />
-						</xsd:complexType>
-					</xsd:element>
-				</xsd:choice>
-			</xsd:complexType>
-		</xsd:element>
-	</xsd:schema>
-	<resheader name="resmimetype">
-		<value>text/microsoft-resx</value>
-	</resheader>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
   <resheader name="version">
-    <value>1.3</value>
+    <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="btn_find_next.Content" xml:space="preserve">
     <value>次を検索</value>
@@ -100,7 +178,7 @@
     <comment>CheckBox</comment>
   </data>
   <data name="cx_page_unit.Header" xml:space="preserve">
-    <value>単位:</value>
+    <value>単位</value>
     <comment>ComboBox</comment>
   </data>
   <data name="cxi_unit_grid.Content" xml:space="preserve">
@@ -571,6 +649,10 @@
     <value>角丸方形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
+  <data name="rmfi_tool_ruler.Text" xml:space="preserve">
+    <value>定規</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
   <data name="rmfi_tool_select.Text" xml:space="preserve">
     <value>図形を選択</value>
     <comment>RadioMenuFlyoutItem</comment>
@@ -599,20 +681,40 @@
     <value>矢じり</value>
     <comment>String</comment>
   </data>
-  <data name="str_blue" xml:space="preserve">
-    <value>B:</value>
+  <data name="str_arrow_length" xml:space="preserve">
+    <value>長さ</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_arrow_shift" xml:space="preserve">
+    <value>先端のずれ</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_arrow_width" xml:space="preserve">
+    <value>幅</value>
     <comment>String</comment>
   </data>
   <data name="str_close" xml:space="preserve">
     <value>閉じる</value>
     <comment>String</comment>
   </data>
+  <data name="str_col_b" xml:space="preserve">
+    <value>B</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_col_g" xml:space="preserve">
+    <value>G</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_col_r" xml:space="preserve">
+    <value>R</value>
+    <comment>String</comment>
+  </data>
   <data name="str_dash_gap" xml:space="preserve">
-    <value>破線の間隔:</value>
+    <value>破線の間隔</value>
     <comment>String</comment>
   </data>
   <data name="str_dash_len" xml:space="preserve">
-    <value>破線の長さ:</value>
+    <value>破線の長さ</value>
     <comment>String</comment>
   </data>
   <data name="str_def_val" xml:space="preserve">
@@ -628,15 +730,23 @@
     <comment>String</comment>
   </data>
   <data name="str_dot_gap" xml:space="preserve">
-    <value>点線の間隔:</value>
+    <value>点線の間隔</value>
     <comment>String</comment>
   </data>
   <data name="str_dot_len" xml:space="preserve">
-    <value>点線の長さ:</value>
+    <value>点線の長さ</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_err_found" xml:space="preserve">
+    <value>文字列が見つかりません.</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_err_number" xml:space="preserve">
+    <value>無効な数値です.</value>
     <comment>String</comment>
   </data>
   <data name="str_err_read" xml:space="preserve">
-    <value>ファイルを読み込めません</value>
+    <value>ファイルを読み込めません.</value>
     <comment>String</comment>
   </data>
   <data name="str_err_recent" xml:space="preserve">
@@ -655,12 +765,12 @@
     <value>方眼紙</value>
     <comment>String</comment>
   </data>
-  <data name="str_green" xml:space="preserve">
-    <value>G: </value>
-    <comment>String</comment>
-  </data>
   <data name="str_grid" xml:space="preserve">
     <value>方眼</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_grid_length" xml:space="preserve">
+    <value>大きさ</value>
     <comment>String</comment>
   </data>
   <data name="str_grouped" xml:space="preserve">
@@ -668,23 +778,11 @@
     <comment>String</comment>
   </data>
   <data name="str_height" xml:space="preserve">
-    <value>高さ:</value>
-    <comment>String</comment>
-  </data>
-  <data name="str_length" xml:space="preserve">
-    <value>長さ:</value>
-    <comment>String</comment>
-  </data>
-  <data name="str_no_text_found" xml:space="preserve">
-    <value>文字列が見つかりません.</value>
-    <comment>String</comment>
-  </data>
-  <data name="str_offset" xml:space="preserve">
-    <value>ずれ;</value>
+    <value>高さ</value>
     <comment>String</comment>
   </data>
   <data name="str_opacity" xml:space="preserve">
-    <value>不透明度:</value>
+    <value>不透明度</value>
     <comment>String</comment>
   </data>
   <data name="str_page" xml:space="preserve">
@@ -696,10 +794,6 @@
 1234567890</value>
     <comment>String</comment>
   </data>
-  <data name="str_red" xml:space="preserve">
-    <value>R: </value>
-    <comment>String</comment>
-  </data>
   <data name="str_size" xml:space="preserve">
     <value>大きさ</value>
     <comment>String</comment>
@@ -709,15 +803,15 @@
     <comment>String</comment>
   </data>
   <data name="str_stroke_width" xml:space="preserve">
-    <value>太さ:</value>
+    <value>太さ</value>
     <comment>String</comment>
   </data>
   <data name="str_text_mar_horzorz" xml:space="preserve">
-    <value>左右の余白:</value>
+    <value>左右の余白</value>
     <comment>String</comment>
   </data>
   <data name="str_text_mar_vertert" xml:space="preserve">
-    <value>上下の余白:</value>
+    <value>上下の余白</value>
     <comment>String</comment>
   </data>
   <data name="str_unavailable_font" xml:space="preserve">
@@ -734,10 +828,6 @@
   </data>
   <data name="str_version" xml:space="preserve">
     <value>バージョン 0.0.1</value>
-    <comment>String</comment>
-  </data>
-  <data name="str_width" xml:space="preserve">
-    <value>幅:</value>
     <comment>String</comment>
   </data>
   <data name="tk_conf_save.Text" xml:space="preserve">
@@ -773,19 +863,19 @@
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="tx_find_what.Header" xml:space="preserve">
-    <value>検索する文字列:</value>
+    <value>検索する文字列</value>
     <comment>TextBox</comment>
   </data>
   <data name="tx_page_height.Header" xml:space="preserve">
-    <value>高さ:</value>
+    <value>高さ</value>
     <comment>TextBox</comment>
   </data>
   <data name="tx_page_width.Header" xml:space="preserve">
-    <value>幅:</value>
+    <value>幅</value>
     <comment>TextBox</comment>
   </data>
   <data name="tx_repl_with.Header" xml:space="preserve">
-    <value>置換後の文字列:</value>
+    <value>置換後の文字列</value>
     <comment>TextBox</comment>
   </data>
 </root>

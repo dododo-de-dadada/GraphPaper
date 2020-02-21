@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr wchar_t NO_FOUND[] = L"str_no_text_found";
+	constexpr wchar_t NO_FOUND[] = L"str_err_found";
 
 	//	•¶š—ñ‚ğŒŸõ‚µ‚ÄŒ©‚Â‚©‚Á‚½ˆÊ’u‚ğ“¾‚é.
 	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool match_case, uint32_t& pos) noexcept;

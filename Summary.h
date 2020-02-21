@@ -61,6 +61,10 @@ namespace winrt::GraphPaper::implementation
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_text/Text");
 			}
+			else if (t_id == typeid(ShapeRuler)) {
+				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_riler/Text");
+			}
 			else {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_select")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_unknown");

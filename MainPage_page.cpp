@@ -20,8 +20,16 @@ namespace winrt::GraphPaper::implementation
 		UNIT unit;
 		D2D1_SIZE_F page;
 
-		swscanf_s(tx_page_width().Text().c_str(), L"%lf", &pw);
-		swscanf_s(tx_page_height().Text().c_str(), L"%lf", &ph);
+		//	無効な数値が入力されている場合, 「適用」ボタンは不可になっているので
+		//	本来は必要ないエラーチェックだが, 念のため.
+		if (swscanf_s(tx_page_width().Text().c_str(), L"%lf", &pw) != 1) {
+			cd_message_show(L"str_err_number", L"tx_page_width/Header");
+			return;
+		}
+		if (swscanf_s(tx_page_height().Text().c_str(), L"%lf", &ph) != 1) {
+			cd_message_show(L"str_err_number", L"tx_page_height/Header");
+			return;
+		}
 		switch (unit = static_cast<UNIT>(cx_page_unit().SelectedIndex())) {
 		default:
 			return;
@@ -98,7 +106,6 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::cx_page_unit_changed(IInspectable const& /*sender*/, SelectionChangedEventArgs const& /*args*/)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
-		//const double dpi = m_page_panel.m_dx.m_logical_dpi;
 		static double pw;
 		static double ph;
 		static int si = -1;
@@ -311,67 +318,26 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::page_set_slider(double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring hdr;
 
-		if constexpr (U == U_OP::GRID_LEN) {
-			auto r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_length");
-			val += 1.0;
-			if (m_samp_panel.m_page_unit == UNIT::PIXEL) {
-				wchar_t buf[16];
-				swprintf_s(buf, FMT_PX_UNIT, val);
-				hdr = hdr + buf;
-			}
-			else if (m_samp_panel.m_page_unit == UNIT::GRID) {
-				wchar_t buf[16];
-				swprintf_s(buf, FMT_GD_UNIT, val / (m_samp_panel.m_grid_len + 1.0));
-				hdr = hdr + buf;
-			}
-			else {
-				wchar_t buf[16];
-				const double inch = val / m_samp_dx.m_logical_dpi;
-				switch (m_samp_panel.m_page_unit) {
-				case UNIT::INCH:
-					swprintf_s(buf, FMT_IN_UNIT, inch);
-					hdr = hdr + buf;
-					break;
-				case UNIT::MILLI:
-					swprintf_s(buf, FMT_MM_UNIT, inch * MM_PER_INCH);
-					hdr = hdr + buf;
-					break;
-				case UNIT::POINT:
-					swprintf_s(buf, FMT_PT_UNIT, inch * PT_PER_INCH);
-					hdr = hdr + buf;
-					break;
-				}
-			}
-		}
+		winrt::hstring hdr;
 		if constexpr (U == U_OP::PAGE_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_RGB, val);
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_red") + buf;
+				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_RGB, val);
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_green") + buf;
+				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_RGB, val);
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_blue") + buf;
-			}
-		}
-		if constexpr (U == U_OP::GRID_OPAC) {
-			if constexpr (S == 3) {
-				wchar_t buf[16];
-				swprintf_s(buf, FMT_PERCENT, val / COLOR_MAX * 100.0);
-				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_opacity") + buf;
+				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {

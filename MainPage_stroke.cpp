@@ -360,18 +360,18 @@ namespace winrt::GraphPaper::implementation
 			}
 			wchar_t buf[16];
 			swprintf_s(buf, L"Å~%.0Lf", val);
-			hdr = hdr + buf;
+			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == U_OP::STROKE_WIDTH) {
 			if (m_samp_panel.m_page_unit == UNIT::PIXEL) {
 				wchar_t buf[16];
 				swprintf_s(buf, FMT_PX_UNIT, val);
-				hdr = hdr + buf;
+				hdr = hdr + L": " + buf;
 			}
 			else if (m_samp_panel.m_page_unit == UNIT::GRID) {
 				wchar_t buf[16];
 				swprintf_s(buf, FMT_GD_UNIT, val / (m_page_panel.m_grid_len + 1.0));
-				hdr = hdr + buf;
+				hdr = hdr + L": " + buf;
 			}
 			else {
 				wchar_t buf[16];
@@ -379,15 +379,15 @@ namespace winrt::GraphPaper::implementation
 				switch (m_samp_panel.m_page_unit) {
 				case UNIT::INCH:
 					swprintf_s(buf, FMT_IN_UNIT, inch);
-					hdr = hdr + buf;
+					hdr = hdr + L": " + buf;
 					break;
 				case UNIT::MILLI:
 					swprintf_s(buf, FMT_MM_UNIT, inch * MM_PER_INCH);
-					hdr = hdr + buf;
+					hdr = hdr + L": " + buf;
 					break;
 				case UNIT::POINT:
 					swprintf_s(buf, FMT_PT_UNIT, inch * PT_PER_INCH);
-					hdr = hdr + buf;
+					hdr = hdr + L": " + buf;
 					break;
 				}
 			}
@@ -395,27 +395,27 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == U_OP::STROKE_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_RGB, val);
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_red") + buf;
+				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_RGB, val);
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_green") + buf;
+				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_RGB, val);
+				conv_val_to_col(m_fmt_col, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_blue") + buf;
+				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_PERCENT, val / COLOR_MAX * 100.0);
+				conv_val_to_col(FMT_COL::CEN, val, buf, 16);
 				auto r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_opacity") + buf;
+				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {

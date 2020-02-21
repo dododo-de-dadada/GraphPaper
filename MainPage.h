@@ -77,12 +77,10 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_IN_UNIT = L"%.3lfin";	// インチ単位の書式
 	constexpr auto FMT_MM = L"%.3lf";	// ミリメートル単位の書式
 	constexpr auto FMT_MM_UNIT = L"%.3lfmm";	// ミリメートル単位の書式
-	constexpr auto FMT_PERCENT = L"%.2lf%%";	// パーセントの書式
 	constexpr auto FMT_PT = L"%.2lf";	// ポイント単位の書式
 	constexpr auto FMT_PT_UNIT = L"%.2lfpt";	// ポイント単位の書式
 	constexpr auto FMT_PX = L"%.0lf";	// ピクセル単位の書式
 	constexpr auto FMT_PX_UNIT = L"%.0lfpx";	// ピクセル単位の書式
-	constexpr auto FMT_RGB = L"%.0lf";	// 色成分の書式
 	constexpr auto FMT_ZOOM = L"%.lf%%";	// 倍率の書式
 	constexpr auto FMT_GD = L"%.3lf";	// グリッド単位の書式
 	constexpr auto FMT_GD_UNIT = L"%.3lfgd";	// グリッド単位の書式
@@ -129,12 +127,25 @@ namespace winrt::GraphPaper::implementation
 		TOOL_RECT,	// 方形
 		TOOL_RRECT,	// 角丸方形
 		TOOL_TEXT,	// 文字列
+		TOOL_RULER	// 定規
 	};
+
+	//-------------------------------
+	//	色成分の書式
+	//-------------------------------
+	enum FMT_COL {
+		DEC,	// 10 進数
+		HEX,	// 16 進数	
+		FLT,	// 浮動小数
+		CEN		// パーセント
+	};
+	void conv_val_to_col(const FMT_COL fmt_col, const double val, wchar_t *buf, const uint32_t len);
 
 	//-------------------------------
 	//	メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
+		FMT_COL m_fmt_col = FMT_COL::DEC;	// 色成分の書式
 		std::mutex m_dx_mutex;		// DX のための同期プリミティブ
 
 		winrt::hstring m_mru_token;	// 最近使ったファイルのトークン
@@ -830,6 +841,8 @@ namespace winrt::GraphPaper::implementation
 		void rmfi_tool_select_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	図形メニューの「文字列」が選択された.
 		void rmfi_tool_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	図形メニューの「定規」が選択された.
+		void rmfi_tool_ruler_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 
 		//-----------------------------
 		//	MainPage_undo.cpp
