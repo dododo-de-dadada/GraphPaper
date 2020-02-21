@@ -29,18 +29,22 @@ namespace winrt::GraphPaper::implementation
 		const double g_len = static_cast<double>(m_grid_len) + 1.0;
 		const double f_size = m_text_fmt->GetFontSize();
 		if (fabs(m_vec.x) >= fabs(m_vec.y)) {
-			const double vec_x = m_vec.x;
-			const double pos_x = m_pos.x;
-			const double delta = vec_x >= 0.0 ? g_len : -g_len;
-			const double end_x = pos_x + vec_x + (vec_x >= 0.0 ? FLT_MIN : -FLT_MIN);
-			const double bot_y = static_cast<double>(m_pos.y) + static_cast<double>(m_vec.y);
-			const double top_y = bot_y - (m_vec.y >= 0.0f ? min(f_size, g_len) : -min(f_size, g_len));
+			const double diff_x = m_vec.x;
+			const double diff_y = m_vec.y;
+			const double grad_x = diff_x >= 0.0 ? g_len : -g_len;
+			const double grad_y = min(f_size, g_len);
+			const uint32_t k = diff_x / grad_x;
+			const double x0 = m_pos.x;
+			const double y0 = static_cast<double>(m_pos.y) + diff_y;
+			const double y1 = y0 - (diff_y >= 0.0 ? grad_y : -grad_y);
+			const double y2 = y1 - (diff_y >= 0.0 ? f_size : -f_size);
 			double x;
-			for (size_t i = 0; (x = pos_x + i * delta) <= end_x; i++) {
-				D2D1_POINT_2F grad0{ x, bot_y };
-				D2D1_POINT_2F grad1{ x, top_y };
-				dx.m_d2dContext->DrawLine(grad0, grad1, br.get());
-				D2D1_RECT_F rect{ x - f_size * 0.5, top_y - (m_vec.y >= 0.0f ? f_size : -f_size), x + f_size * 0.5,  top_y };
+			for (uint32_t i = 0; i <= k; i++) {
+				const auto x = x0 + i * grad_x;
+				D2D1_POINT_2F p0{ x, y0 };
+				D2D1_POINT_2F p1{ x, y1 };
+				dx.m_d2dContext->DrawLine(p0, p1, br.get());
+				D2D1_RECT_F rect{ x - f_size * 0.5, y2, x + f_size * 0.5, y1 };
 				dx.m_d2dContext->DrawText(D[i % 10], 1u, m_text_fmt.get(), rect, br.get());
 			}
 		}
