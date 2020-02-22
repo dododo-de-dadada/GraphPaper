@@ -49,6 +49,9 @@ namespace winrt::GraphPaper::implementation
 		case SHAPE_GROUP:
 			s = new ShapeGroup(dt_reader);
 			break;
+		case SHAPE_RULER:
+			s = new ShapeRuler(dt_reader);
+			break;
 		}
 #if defined(_DEBUG)
 		if (s != nullptr) {
@@ -405,6 +408,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (s_type == typeid(ShapeRRect)) {
 				s_uint = SHAPE_RRECT;
+			}
+			else if (s_type == typeid(ShapeRuler)) {
+				s_uint = SHAPE_RULER;
 			}
 			else if (s_type == typeid(ShapeText)) {
 				s_uint = SHAPE_TEXT;

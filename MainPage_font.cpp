@@ -52,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(w - 2.0 * GRIDLEN_PX),
 			static_cast<FLOAT>(h - 2.0 * GRIDLEN_PX)
 		};
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		const auto t = wchar_cpy(r_loader.GetString(L"str_pangram").c_str());
 		m_samp_shape = new ShapeText(pos, vec, t, &m_samp_panel);
 #if defined(_DEBUG)
@@ -228,7 +228,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
 		show_cd_samp();
 	}
@@ -290,7 +290,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_font_family().Visibility(VISIBLE);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
 		show_cd_samp();
 	}
@@ -367,7 +367,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
 		show_cd_samp();
 	}
@@ -426,7 +426,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_font_stretch().Visibility(VISIBLE);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
 		show_cd_samp();
 	}
@@ -486,7 +486,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_font_weight().Visibility(VISIBLE);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
 		show_cd_samp();
 	}
@@ -502,32 +502,32 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[16];
 			const double pt = val / m_page_dx.m_logical_dpi * PT_PER_INCH;
 			swprintf_s(buf, FMT_PT_UNIT, pt);
-			auto r_loader = ResourceLoader::GetForCurrentView();
+			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == U_OP::FONT_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[16];
 				conv_val_to_col(m_fmt_col, val, buf, 16);
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[16];
 				conv_val_to_col(m_fmt_col, val, buf, 16);
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[16];
 				conv_val_to_col(m_fmt_col, val, buf, 16);
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[16];
 				conv_val_to_col(FMT_COL::CEN, val, buf, 16);
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
 		}

@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
 		show_cd_samp();
 	}
@@ -156,7 +156,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
 		show_cd_samp();
 	}
@@ -243,12 +243,12 @@ namespace winrt::GraphPaper::implementation
 			//const double dpi = m_page_panel.m_dx.m_logical_dpi;
 			double px;
 			if constexpr (S == 0) {
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_text_mar_horzorz");
 				px = val;
 			}
 			if constexpr (S == 1) {
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_text_mar_vertert");
 				px = val;
 			}
@@ -283,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == U_OP::TEXT_LINE) {
 			const double pt = val / m_page_dx.m_logical_dpi * PT_PER_INCH;
-			auto r_loader = ResourceLoader::GetForCurrentView();
+			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_height");
 			if (pt > FLT_MIN) {
 				wchar_t buf[16];

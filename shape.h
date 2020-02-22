@@ -120,6 +120,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_RRECT,	// 角丸方形
 		SHAPE_TEXT,		// 文字列
 		SHAPE_GROUP,	// グループ
+		SHAPE_RULER		// 定規
 	};
 
 	// 単位
@@ -933,37 +934,12 @@ namespace winrt::GraphPaper::implementation
 		void write_svg(DataWriter const& dt_writer) const;
 	};
 
+	//------------------------------
+	// 定規
+	//------------------------------
 	struct ShapeRuler : ShapeRect {
 		double m_grid_len;
 		winrt::com_ptr<IDWriteTextFormat> m_text_fmt{};
-
-		ShapeRuler(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr) :
-			ShapeRect::ShapeRect(pos, vec, attr),
-			m_grid_len(attr->m_grid_len)
-		{
-			wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
-			GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-			auto f_size = min(attr->m_font_size, attr->m_grid_len);
-			winrt::check_hresult(
-				Shape::s_dwrite_factory->CreateTextFormat(
-					attr->m_font_family,
-					static_cast<IDWriteFontCollection*>(nullptr),
-					attr->m_font_weight,
-					attr->m_font_style,
-					DWRITE_FONT_STRETCH_NORMAL,
-					static_cast<FLOAT>(f_size),
-					locale_name,
-					m_text_fmt.put()
-				)
-			);
-			m_text_fmt->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-			m_text_fmt->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		}
-		// 図形をデータリーダーから読み込む.
-		ShapeRuler(DataReader const& dt_reader) :
-			ShapeRect::ShapeRect(dt_reader),
-			m_grid_len(static_cast<double>(dt_reader.ReadSingle()))
-		{}
 
 		//------------------------------
 		// shape_ruler.cpp
@@ -971,6 +947,16 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
+		//	図形を破棄する.
+		~ShapeRuler(void);
+		//	図形を作成する.
+		ShapeRuler(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr);
+		// 図形をデータリーダーから読み込む.
+		ShapeRuler(DataReader const& dt_reader);
+		// データライターに書き込む.
+		void write(DataWriter const& dt_writer) const;
+		// データライターに SVG タグとして書き込む.
+		void write_svg(DataWriter const& /*dt_writer*/) const {}
 	};
 
 	//------------------------------

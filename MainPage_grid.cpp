@@ -22,18 +22,18 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring hdr;
 
 		if constexpr (U == U_OP::GRID_LEN) {
-			auto r_loader = ResourceLoader::GetForCurrentView();
+			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_grid_length");
 			val += 1.0;
 			if (m_samp_panel.m_page_unit == UNIT::PIXEL) {
 				wchar_t buf[16];
 				swprintf_s(buf, FMT_PX_UNIT, val);
-				hdr = hdr + buf;
+				hdr = hdr + L": " + buf;
 			}
 			else if (m_samp_panel.m_page_unit == UNIT::GRID) {
 				wchar_t buf[16];
 				swprintf_s(buf, FMT_GD_UNIT, val / (m_page_panel.m_grid_len + 1.0));
-				hdr = hdr + buf;
+				hdr = hdr + L": " + buf;
 			}
 			else {
 				wchar_t buf[16];
@@ -58,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 3) {
 				wchar_t buf[16];
 				conv_val_to_col(FMT_COL::CEN, val, buf, 16);
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
 		}
@@ -121,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token closed_token;
 
 		load_cd_samp();
-		const double val0 = m_samp_panel.m_grid_len;
+		const double val0 = m_page_panel.m_grid_len;
 		slider0().Value(val0);
 		grid_set_slider<U_OP::GRID_LEN, 0>(val0);
 		slider0().Visibility(VISIBLE);
@@ -167,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_grid"));
 		show_cd_samp();
 	}
@@ -257,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_grid"));
 		show_cd_samp();
 	}

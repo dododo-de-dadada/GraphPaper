@@ -104,7 +104,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_stroke"));
 		show_cd_samp();
 	}
@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_stroke"));
 		show_cd_samp();
 	}
@@ -263,7 +263,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto r_loader = ResourceLoader::GetForCurrentView();
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		tk_samp_caption().Text(r_loader.GetString(L"str_stroke"));
 		show_cd_samp();
 	}
@@ -338,24 +338,24 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring hdr;
 
 		if constexpr (U == U_OP::STROKE_WIDTH) {
-			auto r_loader = ResourceLoader::GetForCurrentView();
+			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_stroke_width");
 		}
 		if constexpr (U == U_OP::STROKE_PATTERN) {
 			if constexpr (S == 0) {
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_dash_len");
 			}
 			if constexpr (S == 1) {
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_dash_gap");
 			}
 			if constexpr (S == 2) {
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_dot_len");
 			}
 			if constexpr (S == 3) {
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_dot_gap");
 			}
 			wchar_t buf[16];
@@ -396,25 +396,25 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[16];
 				conv_val_to_col(m_fmt_col, val, buf, 16);
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[16];
 				conv_val_to_col(m_fmt_col, val, buf, 16);
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[16];
 				conv_val_to_col(m_fmt_col, val, buf, 16);
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[16];
 				conv_val_to_col(FMT_COL::CEN, val, buf, 16);
-				auto r_loader = ResourceLoader::GetForCurrentView();
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
 		}
