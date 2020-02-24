@@ -160,23 +160,23 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[16];
 			switch (m_samp_panel.m_page_unit) {
 			case UNIT::GRID:
-				swprintf_s(buf, FMT_GD_UNIT, val / (m_samp_panel.m_grid_len + 1.0));
+				swprintf_s(buf, FMT_GRID_UNIT, val / (m_samp_panel.m_grid_len + 1.0));
 				hdr = hdr + buf;
 				break;
 			case UNIT::PIXEL:
-				swprintf_s(buf, FMT_PX_UNIT, val);
+				swprintf_s(buf, FMT_PIXEL_UNIT, val);
 				hdr = hdr + buf;
 				break;
 			case UNIT::INCH:
-				swprintf_s(buf, FMT_IN_UNIT, val / m_samp_dx.m_logical_dpi);
+				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi);
 				hdr = hdr + buf;
 				break;
 			case UNIT::MILLI:
-				swprintf_s(buf, FMT_IN_UNIT, val / m_samp_dx.m_logical_dpi * MM_PER_INCH);
+				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi * MM_PER_INCH);
 				hdr = hdr + buf;
 				break;
 			case UNIT::POINT:
-				swprintf_s(buf, FMT_IN_UNIT, val / m_samp_dx.m_logical_dpi * PT_PER_INCH);
+				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi * PT_PER_INCH);
 				hdr = hdr + buf;
 				break;
 			}

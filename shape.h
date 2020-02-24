@@ -40,11 +40,14 @@
 // | ShapePoly*  | | ShapeLine   | | ShapeRect   |
 // +------+------+ +-------------+ +------+------+
 //        |                               |
-//        +---------------+               +---------------+---------------+
-//        |               |               |               |               |
-// +------+------+ +------+------+ +------+------+ +------+------+ +------+------+
-// | ShapeQuad   | | ShapeBezi   | | ShapeElli   | | ShapeRRect  | | ShapeText   |
-// +-------------+ +-------------+ +-------------+ +-------------+ +-------------+
+//        +---------------+               +---------------+---------------+---------------+
+//        |               |               |               |               |               |
+// +------+------+ +------+------+ +------+------+ +------+------+ +------+------+ +------+------+
+// | ShapeQuad   | | ShapeBezi   | | ShapeElli   | | ShapeRRect  | | ShapeText   | | ShapeRuler  |
+// +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+
+
+// SVG のためのテキスト改行コード
+#define SVG_NL	"\n"
 
 namespace winrt::GraphPaper::implementation
 {
@@ -158,14 +161,12 @@ namespace winrt::GraphPaper::implementation
 	constexpr float GRID_OPAC = 0.125f;
 	// 基準部位の不透明度
 	constexpr float ANCH_OPAC = 0.75f;
-	// SVG のためのテキスト改行コード
-#define SVG_NL	"\n"
 
-//------------------------------
-// shape.cpp
-//------------------------------
+	//------------------------------
+	// shape.cpp
+	//------------------------------
 
-// UWP のブラシを D2D1_COLOR_F に変換する.
+	// UWP のブラシを D2D1_COLOR_F に変換する.
 	bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept;
 	// UWP の色を D2D1_COLOR_F に変換する.
 	void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept;
@@ -583,19 +584,16 @@ namespace winrt::GraphPaper::implementation
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じりの形式
 		D2D1_POINT_2F m_corner_rad{ 0.0f, 0.0f };	// 角丸半径
 		D2D1_COLOR_F m_fill_color = S_WHITE;	// 塗りつぶしの色
-
 		D2D1_COLOR_F m_stroke_color = S_BLACK;	// 線枠の色 (MainPage のコンストラクタで設定)
 		STROKE_PATTERN m_stroke_pattern{ 4.0f, 3.0f, 1.0f, 3.0f };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_style = D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		double m_stroke_width = 1.0;	// 線枠の太さ
-
 		D2D1_COLOR_F m_font_color = S_BLACK;	// 書体の色 (MainPage のコンストラクタで設定)
 		wchar_t* m_font_family = nullptr;	// 書体名
 		double m_font_size = 12.0 * 96.0 / 72.0;	// 書体の大きさ
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH_UNDEFINED;	// 書体の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
-
 		double m_text_line = 0.0;	// 行間 (em)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
@@ -800,6 +798,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形を破棄する.
 		~ShapeStroke(void);
+
 		// 図形を囲む方形を得る.
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 図形を囲む方形の左上点を得る.
@@ -938,8 +937,9 @@ namespace winrt::GraphPaper::implementation
 	// 定規
 	//------------------------------
 	struct ShapeRuler : ShapeRect {
-		double m_grid_len;
-		winrt::com_ptr<IDWriteTextFormat> m_text_fmt{};
+		double m_grid_len;	// 方眼の大きさ
+
+		winrt::com_ptr<IDWriteTextFormat> m_dw_text_fmt{};	// テキストフォーマット
 
 		//------------------------------
 		// shape_ruler.cpp
@@ -949,6 +949,18 @@ namespace winrt::GraphPaper::implementation
 		void draw(SHAPE_DX& dx);
 		//	図形を破棄する.
 		~ShapeRuler(void);
+		// 値を書体の色に格納する.
+		//void set_font_color(const D2D1_COLOR_F& /*val*/) noexcept;
+		// 値を書体名に格納する.
+		void set_font_family(wchar_t* const /*val*/);
+		// 値を書体の大きさに格納する.
+		void set_font_size(const double /*val*/);
+		// 値を書体の横幅に格納する.
+		void set_font_stretch(const DWRITE_FONT_STRETCH /*val*/);
+		// 値を書体の字体に格納する.
+		void set_font_style(const DWRITE_FONT_STYLE /*val*/);
+		// 値を書体の太さに格納する.
+		void set_font_weight(const DWRITE_FONT_WEIGHT /*val*/);
 		//	図形を作成する.
 		ShapeRuler(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr);
 		// 図形をデータリーダーから読み込む.
@@ -1151,8 +1163,8 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<IDWriteTextLayout> m_dw_text_layout{};	// 文字列を表示するためのレイアウト
 		DWRITE_HIT_TEST_METRICS* m_dw_hit_metrics = nullptr;	// 文字列の計量
 		UINT32 m_dw_hit_linecnt = 0;	// 文字列の計量の要素数
-		DWRITE_HIT_TEST_METRICS* m_dw_rng_metrics = nullptr;	// 文字範囲の計量
-		UINT32 m_dw_rng_linecnt = 0;	// 文字範囲の計量の要素数
+		DWRITE_HIT_TEST_METRICS* m_dw_range_metrics = nullptr;	// 文字範囲の計量
+		UINT32 m_dw_range_linecnt = 0;	// 文字範囲の計量の要素数
 
 		// 図形を破棄する.
 		~ShapeText(void);

@@ -89,27 +89,26 @@ namespace winrt::GraphPaper::implementation
 		sb->SetColor(m_stroke_color);
 		dc->DrawRoundedRectangle(r_rec, sb, sw, ss);
 		if (is_selected()) {
-			const auto flag = (std::abs(m_vec.x) > FLT_MIN&& std::abs(m_vec.y) > FLT_MIN);
-			if (flag) {
-				D2D1_POINT_2F c_pos;
-				pt_add(r_min, rx, ry, c_pos);
-				draw_anchor_rounded(c_pos, dx);
-				c_pos.x = r_min.x + vx - rx;
-				draw_anchor_rounded(c_pos, dx);
-				pt_add(r_min, vx, vy, c_pos);
-				pt_add(c_pos, -rx, -ry, c_pos);
-				draw_anchor_rounded(c_pos, dx);
-				c_pos.x = r_min.x + rx;
-				draw_anchor_rounded(c_pos, dx);
-			}
+			const auto flag = (std::abs(m_vec.x) > FLT_MIN && std::abs(m_vec.y) > FLT_MIN);
+			//if (flag) {
+			//	D2D1_POINT_2F c_pos;
+			//	pt_add(r_min, rx, ry, c_pos);
+			//	draw_anchor_rounded(c_pos, dx);
+			//	c_pos.x = r_rec.rect.right - rx;
+			//	draw_anchor_rounded(c_pos, dx);
+			//	c_pos.y = r_rec.rect.bottom - ry;
+			//	draw_anchor_rounded(c_pos, dx);
+			//	c_pos.x = r_min.x + rx;
+			//	draw_anchor_rounded(c_pos, dx);
+			//}
 			D2D1_POINT_2F r_pos[4];
 			r_pos[0] = r_min;
-			r_pos[1].x = r_min.x + vx;
-			r_pos[1].y = r_min.y;
-			r_pos[2].x = r_pos[1].x;
-			r_pos[2].y = r_min.y + vy;
-			r_pos[3].x = r_min.x;
-			r_pos[3].y = r_pos[2].y;
+			r_pos[1].x = r_rec.rect.right;
+			r_pos[1].y = r_rec.rect.top;
+			r_pos[2].x = r_rec.rect.right;
+			r_pos[2].y = r_rec.rect.bottom;
+			r_pos[3].x = r_rec.rect.left;
+			r_pos[3].y = r_rec.rect.bottom;
 			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
 				D2D1_POINT_2F r_mid;
 				// 方形の頂点のアンカーを表示する.
@@ -118,18 +117,17 @@ namespace winrt::GraphPaper::implementation
 				draw_anchor(r_pos[i], dx);
 				draw_anchor(r_mid, dx);
 			}
-			if (flag == false) {
+			//if (flag == false) {
 				D2D1_POINT_2F c_pos;
 				pt_add(r_min, rx, ry, c_pos);
 				draw_anchor_rounded(c_pos, dx);
-				c_pos.x = r_min.x + vx - rx;
+				c_pos.x = r_rec.rect.right - rx;
 				draw_anchor_rounded(c_pos, dx);
-				pt_add(r_min, vx, vy, c_pos);
-				pt_add(c_pos, -rx, -ry, c_pos);
+				c_pos.y = r_rec.rect.bottom - ry;
 				draw_anchor_rounded(c_pos, dx);
 				c_pos.x = r_min.x + rx;
 				draw_anchor_rounded(c_pos, dx);
-			}
+			//}
 		}
 	}
 

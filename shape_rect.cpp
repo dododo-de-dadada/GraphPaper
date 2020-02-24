@@ -8,20 +8,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeRect::draw(SHAPE_DX& dx)
 	{
-		D2D1_POINT_2F s_pos;	// 始点
-		D2D1_POINT_2F e_pos;	// 終点
-		D2D1_RECT_F rect;
-		D2D1_POINT_2F r_pos[4];	// 方形の頂点
-		D2D1_POINT_2F r_mid;	// 方形の辺の中点
-		FLOAT w;
-
-		// 始点と終点から方形の左上位置と右下位置を得る.
-		pt_add(m_pos, m_vec, e_pos);
-		pt_min(m_pos, e_pos, s_pos);
-		rect.left = s_pos.x;
-		rect.top = s_pos.y;
-		rect.right = s_pos.x + std::fabsf(m_vec.x);
-		rect.bottom = s_pos.y + std::fabsf(m_vec.y);
+		const D2D1_RECT_F rect{
+			m_pos.x,
+			m_pos.y,
+			m_pos.x + m_vec.x,
+			m_pos.y + m_vec.y
+		};
 		if (is_opaque(m_fill_color)) {
 			// 塗りつぶし色が透明でなければ方形を塗りつぶす.
 			dx.m_shape_brush->SetColor(m_fill_color);
@@ -29,25 +21,28 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_opaque(m_stroke_color)) {
 			// 線枠の色が透明でなければ方形の枠を表示する.
-			w = static_cast<FLOAT>(m_stroke_width);
+			const auto w = static_cast<FLOAT>(m_stroke_width);
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawRectangle(
 				rect, dx.m_shape_brush.get(), w, m_d2d_stroke_style.get());
 		}
-		if (is_selected()) {
-			// 選択されているなら基準部位を表示する.
-			r_pos[0] = m_pos;
-			r_pos[1].x = m_pos.x + m_vec.x;
-			r_pos[1].y = m_pos.y;
-			r_pos[2].x = r_pos[1].x;
-			r_pos[2].y = m_pos.y + m_vec.y;
-			r_pos[3].x = m_pos.x;
-			r_pos[3].y = r_pos[2].y;
-			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-				draw_anchor(r_pos[i], dx);
-				pt_avg(r_pos[j], r_pos[i], r_mid);
-				draw_anchor(r_mid, dx);
-			}
+		if (is_selected() == false) {
+			return;
+		}
+		// 選択されているなら基準部位を表示する.
+		D2D1_POINT_2F r_pos[4];	// 方形の頂点
+		r_pos[0] = m_pos;
+		r_pos[1].y = rect.top;
+		r_pos[1].x = rect.right;
+		r_pos[2].x = rect.right;
+		r_pos[2].y = rect.bottom;
+		r_pos[3].y = rect.bottom;
+		r_pos[3].x = rect.left;
+		for (uint32_t i = 0, j = 3; i < 4; j = i++) {
+			draw_anchor(r_pos[i], dx);
+			D2D1_POINT_2F r_mid;	// 方形の辺の中点
+			pt_avg(r_pos[j], r_pos[i], r_mid);
+			draw_anchor(r_mid, dx);
 		}
 	}
 
@@ -80,40 +75,39 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F r_max;	// 方形の右下点
 		pt_bound(m_pos, r_pos, r_min, r_max);
 		if (is_opaque(m_stroke_color) == false) {
+			//	線枠の色が透明な場合,
 			if (is_opaque(m_fill_color)) {
-				if (r_min.x <= t_pos.x && t_pos.x <= r_max.x) {
-					if (r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
+				//	塗りつぶし色が不透明な場合,
+				if (pt_in_rect(t_pos, r_min, r_max)) {
+				//if (r_min.x <= t_pos.x && t_pos.x <= r_max.x) {
+				//	if (r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
+						//	位置が方形にふくまれる場合,
 						return ANCH_INSIDE;
-					}
+				//	}
 				}
 			}
 			return ANCH_OUTSIDE;
 		}
 		const double sw = max(m_stroke_width, a_len);	// 線枠の太さ
 		pt_add(r_min, sw * 0.5, r_min);
-		pt_add(r_max, -sw * 0.5, r_max);
-		//r_min.x = static_cast<FLOAT>(static_cast<double>(r_min.x) + sw * 0.5);
-		//r_min.y = static_cast<FLOAT>(static_cast<double>(r_min.y) + sw * 0.5);
-		//r_max.x = static_cast<FLOAT>(static_cast<double>(r_max.x) - sw * 0.5);
-		//r_max.y = static_cast<FLOAT>(static_cast<double>(r_max.y) - sw * 0.5);
-		if (r_min.x <= t_pos.x && t_pos.x <= r_max.x) {
-			if (r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
+		pt_add(r_max, sw * -0.5, r_max);
+		if (pt_in_rect(t_pos, r_min, r_max)) {
+		//if (r_min.x <= t_pos.x && t_pos.x <= r_max.x) {
+		//	if (r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
 				return is_opaque(m_fill_color) ? ANCH_INSIDE : ANCH_OUTSIDE;
-			}
+		//	}
 		}
 		pt_add(r_min, -sw, r_min);
 		pt_add(r_max, sw, r_max);
-		//r_min.x -= sw;
-		//r_min.y -= sw;
-		//r_max.x += sw;
-		//r_max.y += sw;
-		if (r_min.x <= t_pos.x && t_pos.x <= r_max.x) {
-			if (r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
+		if (pt_in_rect(t_pos, r_min, r_max)) {
+		//if (r_min.x <= t_pos.x && t_pos.x <= r_max.x) {
+		//	if (r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
 				return ANCH_FRAME;
-			}
+		//	}
 		}
 		return ANCH_OUTSIDE;
 	}
+
 	// 塗りつぶしの色を得る.
 	// val	得られた値.
 	bool ShapeRect::get_fill_color(D2D1_COLOR_F& val) const noexcept
@@ -167,11 +161,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 範囲に含まれるか調べる.
-	// a_min	範囲の左上位置
-	// a_max	範囲の右下位置
-	// 戻り値	含まれるなら true
-	// 線の太さは考慮されない.
+	//	範囲に含まれるか調べる.
+	//	a_min	範囲の左上位置
+	//	a_max	範囲の右下位置
+	//	戻り値	含まれるなら true
+	//	線の太さは考慮されない.
 	bool ShapeRect::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
 		D2D1_POINT_2F pos;
@@ -180,7 +174,7 @@ namespace winrt::GraphPaper::implementation
 		return pt_in_rect(m_pos, a_min, a_max) && pt_in_rect(pos, a_min, a_max);
 	}
 
-	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
+	//	値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
 	void ShapeRect::set_pos(const D2D1_POINT_2F pos, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F a_pos;
@@ -229,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を作成する.
+	//	図形を作成する.
 	ShapeRect::ShapeRect(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr) :
 		ShapeStroke::ShapeStroke(attr),
 		m_fill_color(attr->m_fill_color)

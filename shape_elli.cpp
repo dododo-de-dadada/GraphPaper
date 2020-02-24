@@ -17,26 +17,6 @@ namespace winrt::GraphPaper::implementation
 		ANCH_NORTH
 	};
 
-	// Çæâ~ÇÃïîà ÇìæÇÈ.
-	static void ep_get_anchor(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_vec, D2D1_POINT_2F a_pos[4]) noexcept;
-
-	// Çæâ~ÇÃïîà ÇìæÇÈ.
-	static void ep_get_anchor(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_vec, D2D1_POINT_2F a_pos[4]) noexcept
-	{
-		// ìÏ
-		a_pos[0].x = s_pos.x + d_vec.x * 0.5f;
-		a_pos[0].y = s_pos.y + d_vec.y;
-		// ìå
-		a_pos[1].x = s_pos.x + d_vec.x;
-		a_pos[1].y = s_pos.y + d_vec.y * 0.5f;
-		// êº
-		a_pos[2].x = s_pos.x;
-		a_pos[2].y = a_pos[1].y;
-		// ñk
-		a_pos[3].x = a_pos[0].x;
-		a_pos[3].y = s_pos.y;
-	}
-
 	// ê}å`Çï\é¶Ç∑ÇÈ.
 	void ShapeElli::draw(SHAPE_DX& dx)
 	{
@@ -62,12 +42,33 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(m_stroke_width),
 				m_d2d_stroke_style.get());
 		}
-		if (is_selected()) {
-			D2D1_POINT_2F a_pos[4];
-			ep_get_anchor(m_pos, m_vec, a_pos);
-			for (uint32_t i = 0; i < 4; i++) {
-				draw_anchor(a_pos[i], dx);
-			}
+		if (is_selected() == false) {
+			return;
+		}
+		D2D1_POINT_2F a_pos[4];
+		// ìÏ
+		a_pos[0].x = m_pos.x + m_vec.x * 0.5f;
+		a_pos[0].y = m_pos.y + m_vec.y;
+		// ìå
+		a_pos[1].x = m_pos.x + m_vec.x;
+		a_pos[1].y = m_pos.y + m_vec.y * 0.5f;
+		// êº
+		a_pos[2].x = m_pos.x;
+		a_pos[2].y = a_pos[1].y;
+		// ñk
+		a_pos[3].x = a_pos[0].x;
+		a_pos[3].y = m_pos.y;
+		for (uint32_t i = 0; i < 4; i++) {
+			draw_anchor(a_pos[i], dx);
+		}
+		a_pos[0] = m_pos;
+		pt_add(m_pos, m_vec, a_pos[3]);
+		a_pos[1].x = a_pos[0].x;
+		a_pos[1].y = a_pos[3].y;
+		a_pos[2].x = a_pos[3].x;
+		a_pos[2].y = a_pos[0].y;
+		for (uint32_t i = 0; i < 4; i++) {
+			draw_anchor_rounded(a_pos[i], dx);
 		}
 	}
 
@@ -77,15 +78,25 @@ namespace winrt::GraphPaper::implementation
 	// ñﬂÇËíl	à íuÇä‹Çﬁê}å`ÇÃïîà 
 	ANCH_WHICH ShapeElli::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		D2D1_POINT_2F a_pos[4];
-		ep_get_anchor(m_pos, m_vec, a_pos);
+		// Ç«ÇÃí∏ì_Ç™à íuÇä‹ÇﬁÇ©í≤Ç◊ÇÈ.
 		for (uint32_t i = 0; i < 4; i++) {
+			D2D1_POINT_2F pos;
+			get_pos(ANCH_CORNER[i], pos);
+			if (pt_in_anch(t_pos, pos, a_len)) {
+				return ANCH_CORNER[i];
+			}
+		}
+
+		for (uint32_t i = 0; i < 4; i++) {
+			D2D1_POINT_2F pos;
+			get_pos(ANCH_ELLI[i], pos);
 			// Çæâ~ÇÃäeïîà Ç™à íuÇä‹ÇﬁÇ©í≤Ç◊ÇÈ.
-			if (pt_in_anch(t_pos, a_pos[i], a_len)) {
+			if (pt_in_anch(t_pos, pos, a_len)) {
 				// ä‹ÇﬁÇ»ÇÁÇªÇÃïîà Çï‘Ç∑.
 				return ANCH_ELLI[i];
 			}
 		}
+
 		// îºåaÇìæÇÈ.
 		D2D1_POINT_2F rad;
 		pt_scale(m_vec, 0.5, rad);

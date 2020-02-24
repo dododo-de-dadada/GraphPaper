@@ -114,9 +114,9 @@ namespace winrt::GraphPaper::implementation
 		double m_anch_len = 6.0;	// 部位の方形の大きさ
 		winrt::com_ptr<ID2D1SolidColorBrush> m_aux_brush;	// 補助線の色ブラシ
 		winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
-		D2D1_COLOR_F m_rng_bcolor = RNG_BACK;	// 文字範囲の背景色
-		D2D1_COLOR_F m_rng_tcolor = RNG_TEXT;	// 文字範囲の文字色
-		winrt::com_ptr<ID2D1SolidColorBrush> m_rng_brush;	// 文字範囲の文字色ブラシ
+		D2D1_COLOR_F m_range_bcolor = RNG_BACK;	// 文字範囲の背景色
+		D2D1_COLOR_F m_range_tcolor = RNG_TEXT;	// 文字範囲の文字色
+		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush;	// 文字範囲の文字色ブラシ
 		winrt::com_ptr<ID2D1SolidColorBrush> m_shape_brush;	// 図形の色ブラシ
 		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック
 

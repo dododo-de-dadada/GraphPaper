@@ -73,17 +73,17 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto COLLAPSED = Visibility::Collapsed;	// 非表示
 
 	// 書式変換
-	constexpr auto FMT_IN = L"%.3lf";	// インチ単位の書式
-	constexpr auto FMT_IN_UNIT = L"%.3lfin";	// インチ単位の書式
-	constexpr auto FMT_MM = L"%.3lf";	// ミリメートル単位の書式
-	constexpr auto FMT_MM_UNIT = L"%.3lfmm";	// ミリメートル単位の書式
-	constexpr auto FMT_PT = L"%.2lf";	// ポイント単位の書式
-	constexpr auto FMT_PT_UNIT = L"%.2lfpt";	// ポイント単位の書式
-	constexpr auto FMT_PX = L"%.0lf";	// ピクセル単位の書式
-	constexpr auto FMT_PX_UNIT = L"%.0lfpx";	// ピクセル単位の書式
+	constexpr auto FMT_INCH = L"%.3lf";	// インチ単位の書式
+	constexpr auto FMT_INCH_UNIT = L"%.3lfin";	// インチ単位の書式
+	constexpr auto FMT_MILLI = L"%.3lf";	// ミリメートル単位の書式
+	constexpr auto FMT_MILLI_UNIT = L"%.3lfmm";	// ミリメートル単位の書式
+	constexpr auto FMT_POINT = L"%.2lf";	// ポイント単位の書式
+	constexpr auto FMT_POINT_UNIT = L"%.2lfpt";	// ポイント単位の書式
+	constexpr auto FMT_PIXEL = L"%.0lf";	// ピクセル単位の書式
+	constexpr auto FMT_PIXEL_UNIT = L"%.0lfpx";	// ピクセル単位の書式
 	constexpr auto FMT_ZOOM = L"%.lf%%";	// 倍率の書式
-	constexpr auto FMT_GD = L"%.3lf";	// グリッド単位の書式
-	constexpr auto FMT_GD_UNIT = L"%.3lfgd";	// グリッド単位の書式
+	constexpr auto FMT_GRID = L"%.3lf";	// グリッド単位の書式
+	constexpr auto FMT_GRID_UNIT = L"%.3lfgd";	// グリッド単位の書式
 
 	constexpr auto A4_PER_INCH = D2D1_SIZE_F{ 8.27f, 11.69f };	// A4 サイズの大きさ (インチ)
 	constexpr auto GRIDLEN_PX = 48.0f;	// 方眼の間隔の初期値 (ピクセル)
@@ -131,21 +131,21 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//-------------------------------
-	//	色成分の書式
+	//	色成分の形式
 	//-------------------------------
-	enum FMT_COL {
+	enum COL_STYLE {
 		DEC,	// 10 進数
 		HEX,	// 16 進数	
 		FLT,	// 浮動小数
 		CEN		// パーセント
 	};
-	void conv_val_to_col(const FMT_COL fmt_col, const double val, wchar_t *buf, const uint32_t len);
+	void conv_val_to_col(const COL_STYLE fmt_col, const double val, wchar_t *buf, const uint32_t len);
 
 	//-------------------------------
 	//	メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
-		FMT_COL m_fmt_col = FMT_COL::DEC;	// 色成分の書式
+		COL_STYLE m_fmt_col = COL_STYLE::DEC;	// 色成分の書式
 		std::mutex m_dx_mutex;		// DX のための同期プリミティブ
 
 		winrt::hstring m_mru_token;	// 最近使ったファイルのトークン

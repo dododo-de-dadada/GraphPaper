@@ -240,7 +240,6 @@ namespace winrt::GraphPaper::implementation
 
 		if constexpr (U == U_OP::TEXT_MARGIN) {
 			const double dpi = m_page_dx.m_logical_dpi;
-			//const double dpi = m_page_panel.m_dx.m_logical_dpi;
 			double px;
 			if constexpr (S == 0) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
@@ -256,24 +255,24 @@ namespace winrt::GraphPaper::implementation
 			switch (m_samp_panel.m_page_unit) {
 			default:
 			case UNIT::PIXEL:
-				fmt = FMT_PX_UNIT;
+				fmt = FMT_PIXEL_UNIT;
 				break;
 			case UNIT::INCH:
-				fmt = FMT_IN_UNIT;
+				fmt = FMT_INCH_UNIT;
 				px /= dpi;
 				break;
 			case UNIT::MILLI:
-				fmt = FMT_MM_UNIT;
+				fmt = FMT_MILLI_UNIT;
 				px /= dpi;
 				px *= MM_PER_INCH;
 				break;
 			case UNIT::POINT:
-				fmt = FMT_PT_UNIT;
+				fmt = FMT_POINT_UNIT;
 				px /= dpi;
 				px *= PT_PER_INCH;
 				break;
 			case UNIT::GRID:
-				fmt = FMT_GD_UNIT;
+				fmt = FMT_GRID_UNIT;
 				px /= m_samp_panel.m_grid_len;
 				break;
 			}
@@ -282,12 +281,12 @@ namespace winrt::GraphPaper::implementation
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == U_OP::TEXT_LINE) {
-			const double pt = val / m_page_dx.m_logical_dpi * PT_PER_INCH;
+			const auto pt = val / m_page_dx.m_logical_dpi * PT_PER_INCH;
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_height");
 			if (pt > FLT_MIN) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_PT_UNIT, pt);
+				swprintf_s(buf, FMT_POINT_UNIT, pt);
 				hdr = hdr + L": " + buf;
 			}
 			else {

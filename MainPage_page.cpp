@@ -143,25 +143,25 @@ namespace winrt::GraphPaper::implementation
 		m_samp_panel.m_page_unit = static_cast<UNIT>(cx_page_unit().SelectedIndex());
 		switch (m_samp_panel.m_page_unit) {
 		case UNIT::PIXEL:
-			fmt = FMT_PX;
+			fmt = FMT_PIXEL;
 			break;
 		case UNIT::INCH:
-			fmt = FMT_IN;
+			fmt = FMT_INCH;
 			pw /= dpi;
 			ph /= dpi;
 			break;
 		case UNIT::MILLI:
-			fmt = FMT_MM;
+			fmt = FMT_MILLI;
 			pw = pw / dpi * MM_PER_INCH;
 			ph = ph / dpi * MM_PER_INCH;
 			break;
 		case UNIT::POINT:
-			fmt = FMT_PT;
+			fmt = FMT_POINT;
 			pw = pw / dpi * PT_PER_INCH;
 			ph = ph / dpi * PT_PER_INCH;
 			break;
 		case UNIT::GRID:
-			fmt = FMT_GD;
+			fmt = FMT_GRID;
 			pw /= m_samp_panel.m_grid_len + 1.0;
 			ph /= m_samp_panel.m_grid_len + 1.0;
 			break;
@@ -276,25 +276,25 @@ namespace winrt::GraphPaper::implementation
 		default:
 			return;
 		case UNIT::PIXEL:
-			fmt = FMT_PX;
+			fmt = FMT_PIXEL;
 			break;
 		case UNIT::INCH:
-			fmt = FMT_IN;
+			fmt = FMT_INCH;
 			pw = pw / dpi;
 			ph = ph / dpi;
 			break;
 		case UNIT::MILLI:
-			fmt = FMT_MM;
+			fmt = FMT_MILLI;
 			pw = pw / dpi * MM_PER_INCH;
 			ph = ph / dpi * MM_PER_INCH;
 			break;
 		case UNIT::POINT:
-			fmt = FMT_PT;
+			fmt = FMT_POINT;
 			pw = pw / dpi * PT_PER_INCH;
 			ph = ph / dpi * PT_PER_INCH;
 			break;
 		case UNIT::GRID:
-			fmt = FMT_GD;
+			fmt = FMT_GRID;
 			pw /= m_samp_panel.m_grid_len + 1.0;
 			ph /= m_samp_panel.m_grid_len + 1.0;
 			break;

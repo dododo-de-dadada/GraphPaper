@@ -11,18 +11,22 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	//	色成分を文字列に変換する.
-	void conv_val_to_col(const FMT_COL fmt_col, const double val, wchar_t* buf, const uint32_t len)
+	//	fmt	色成分の形式
+	//	val	色成分の値
+	//	buf	得られた文字列
+	//	len	文字列の最大長 ('\0' を含む長さ)
+	void conv_val_to_col(const COL_STYLE fmt, const double val, wchar_t* buf, const uint32_t len)
 	{
-		if (fmt_col == FMT_COL::DEC) {
+		if (fmt == COL_STYLE::DEC) {
 			swprintf_s(buf, len, L"%.0lf", std::round(val));
 		}
-		else if (fmt_col == FMT_COL::HEX) {
+		else if (fmt == COL_STYLE::HEX) {
 			swprintf_s(buf, len, L"%02x", static_cast<uint32_t>(std::round(val)));
 		}
-		else if (fmt_col == FMT_COL::FLT) {
+		else if (fmt == COL_STYLE::FLT) {
 			swprintf_s(buf, len, L"%.3lf", val / COLOR_MAX);
 		}
-		else if (fmt_col == FMT_COL::CEN) {
+		else if (fmt == COL_STYLE::CEN) {
 			swprintf_s(buf, len, L"%.1lf%%", val / COLOR_MAX * 100.0);
 		}
 	}
@@ -146,7 +150,8 @@ namespace winrt::GraphPaper::implementation
 			m_page_dx.m_aux_brush->SetColor(m_page_panel.m_aux_color);
 			if (m_tool_shape == TOOL_SELECT
 				|| m_tool_shape == TOOL_RECT
-				|| m_tool_shape == TOOL_TEXT) {
+				|| m_tool_shape == TOOL_TEXT
+				|| m_tool_shape == TOOL_RULER) {
 				//	選択ツール
 				//	または方形
 				//	または文字列の場合,
@@ -360,12 +365,12 @@ namespace winrt::GraphPaper::implementation
 				auto t_key = box_value(L"SystemColorHighlightTextColor");
 				auto b_res = Resources().Lookup(b_key);
 				auto t_res = Resources().Lookup(t_key);
-				cast_to(unbox_value<Color>(b_res), m_page_dx.m_rng_bcolor);
-				cast_to(unbox_value<Color>(t_res), m_page_dx.m_rng_tcolor);
+				cast_to(unbox_value<Color>(b_res), m_page_dx.m_range_bcolor);
+				cast_to(unbox_value<Color>(t_res), m_page_dx.m_range_tcolor);
 			}
 			catch (winrt::hresult_error) {
-				m_page_dx.m_rng_bcolor = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
-				m_page_dx.m_rng_tcolor = S_WHITE;
+				m_page_dx.m_range_bcolor = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
+				m_page_dx.m_range_tcolor = S_WHITE;
 			}
 		}
 

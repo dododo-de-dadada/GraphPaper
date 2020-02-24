@@ -365,12 +365,12 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == U_OP::STROKE_WIDTH) {
 			if (m_samp_panel.m_page_unit == UNIT::PIXEL) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_PX_UNIT, val);
+				swprintf_s(buf, FMT_PIXEL_UNIT, val);
 				hdr = hdr + L": " + buf;
 			}
 			else if (m_samp_panel.m_page_unit == UNIT::GRID) {
 				wchar_t buf[16];
-				swprintf_s(buf, FMT_GD_UNIT, val / (m_page_panel.m_grid_len + 1.0));
+				swprintf_s(buf, FMT_GRID_UNIT, val / (m_page_panel.m_grid_len + 1.0));
 				hdr = hdr + L": " + buf;
 			}
 			else {
@@ -378,15 +378,15 @@ namespace winrt::GraphPaper::implementation
 				const double inch = val / m_samp_dx.m_logical_dpi;
 				switch (m_samp_panel.m_page_unit) {
 				case UNIT::INCH:
-					swprintf_s(buf, FMT_IN_UNIT, inch);
+					swprintf_s(buf, FMT_INCH_UNIT, inch);
 					hdr = hdr + L": " + buf;
 					break;
 				case UNIT::MILLI:
-					swprintf_s(buf, FMT_MM_UNIT, inch * MM_PER_INCH);
+					swprintf_s(buf, FMT_MILLI_UNIT, inch * MM_PER_INCH);
 					hdr = hdr + L": " + buf;
 					break;
 				case UNIT::POINT:
-					swprintf_s(buf, FMT_PT_UNIT, inch * PT_PER_INCH);
+					swprintf_s(buf, FMT_POINT_UNIT, inch * PT_PER_INCH);
 					hdr = hdr + L": " + buf;
 					break;
 				}
@@ -413,7 +413,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[16];
-				conv_val_to_col(FMT_COL::CEN, val, buf, 16);
+				conv_val_to_col(COL_STYLE::CEN, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}

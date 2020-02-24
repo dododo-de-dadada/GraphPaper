@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[16];
-				conv_val_to_col(FMT_COL::CEN, val, buf, 16);
+				conv_val_to_col(COL_STYLE::CEN, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}

@@ -684,9 +684,9 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(
 			m_d2dContext->CreateSolidColorBrush({}, m_aux_brush.put())
 		);
-		m_rng_brush = nullptr;
+		m_range_brush = nullptr;
 		winrt::check_hresult(
-			m_d2dContext->CreateSolidColorBrush({}, m_rng_brush.put())
+			m_d2dContext->CreateSolidColorBrush({}, m_range_brush.put())
 		);
 		m_aux_style = nullptr;
 		winrt::check_hresult(

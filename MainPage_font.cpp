@@ -501,7 +501,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == U_OP::FONT_SIZE) {
 			wchar_t buf[16];
 			const double pt = val / m_page_dx.m_logical_dpi * PT_PER_INCH;
-			swprintf_s(buf, FMT_PT_UNIT, pt);
+			swprintf_s(buf, FMT_POINT_UNIT, pt);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
@@ -526,7 +526,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[16];
-				conv_val_to_col(FMT_COL::CEN, val, buf, 16);
+				conv_val_to_col(COL_STYLE::CEN, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}

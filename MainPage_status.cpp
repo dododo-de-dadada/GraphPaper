@@ -208,27 +208,27 @@ namespace winrt::GraphPaper::implementation
 
 		switch (m_page_panel.m_page_unit) {
 		case UNIT::INCH:
-			fmt = FMT_IN;
+			fmt = FMT_INCH;
 			x = fx / dpi;
 			y = fy / dpi;
 			break;
 		case UNIT::MILLI:
-			fmt = FMT_MM;
+			fmt = FMT_MILLI;
 			x = fx / dpi * MM_PER_INCH;
 			y = fy / dpi * MM_PER_INCH;
 			break;
 		case UNIT::POINT:
-			fmt = FMT_PT;
+			fmt = FMT_POINT;
 			x = fx / dpi * PT_PER_INCH;
 			y = fy / dpi * PT_PER_INCH;
 			break;
 		case UNIT::GRID:
-			fmt = FMT_GD;
+			fmt = FMT_GRID;
 			x = fx / (m_page_panel.m_grid_len + 1.0);
 			y = fy / (m_page_panel.m_grid_len + 1.0);
 			break;
 		default:
-			fmt = FMT_PX;
+			fmt = FMT_PIXEL;
 			x = fx;
 			y = fy;
 			break;
@@ -250,23 +250,23 @@ namespace winrt::GraphPaper::implementation
 		wchar_t const* fmt;
 		switch (m_page_panel.m_page_unit) {
 		case UNIT::INCH:
-			fmt = FMT_IN;
+			fmt = FMT_INCH;
 			g = g / dpi;
 			break;
 		case UNIT::MILLI:
-			fmt = FMT_MM;
+			fmt = FMT_MILLI;
 			g = g / dpi * MM_PER_INCH;
 			break;
 		case UNIT::POINT:
-			fmt = FMT_PT;
+			fmt = FMT_POINT;
 			g = g / dpi * PT_PER_INCH;
 			break;
 		case UNIT::GRID:
-			fmt = FMT_GD;
+			fmt = FMT_GRID;
 			g = 1.0;
 			break;
 		default:
-			fmt = FMT_PX;
+			fmt = FMT_PIXEL;
 			break;
 		}
 		swprintf_s(buf, fmt, g);
@@ -283,28 +283,28 @@ namespace winrt::GraphPaper::implementation
 		wchar_t const* fmt;
 		switch (m_page_panel.m_page_unit) {
 		case UNIT::INCH:
-			fmt = FMT_IN;
+			fmt = FMT_INCH;
 			w = w / dpi;
 			h = h / dpi;
 			break;
 		case UNIT::MILLI:
-			fmt = FMT_MM;
+			fmt = FMT_MILLI;
 			w = w / dpi * MM_PER_INCH;
 			h = h / dpi * MM_PER_INCH;
 			break;
 		case UNIT::POINT:
-			fmt = FMT_PT;
+			fmt = FMT_POINT;
 			w = w / dpi * PT_PER_INCH;
 			h = h / dpi * PT_PER_INCH;
 			break;
 		case UNIT::GRID:
-			fmt = FMT_GD;
+			fmt = FMT_GRID;
 			w /= m_page_panel.m_grid_len + 1.0;
 			h /= m_page_panel.m_grid_len + 1.0;
 			break;
 
 		default:
-			fmt = FMT_PX;
+			fmt = FMT_PIXEL;
 			break;
 		}
 		wchar_t buf[16];
