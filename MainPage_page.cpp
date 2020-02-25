@@ -109,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 		static double pw;
 		static double ph;
 		static int si = -1;
-		wchar_t const* fmt = L"";
+		wchar_t const* format = L"";
 
 		if (static_cast<int32_t>(m_samp_panel.m_page_unit) == cx_page_unit().SelectedIndex()) {
 			return;
@@ -143,33 +143,33 @@ namespace winrt::GraphPaper::implementation
 		m_samp_panel.m_page_unit = static_cast<UNIT>(cx_page_unit().SelectedIndex());
 		switch (m_samp_panel.m_page_unit) {
 		case UNIT::PIXEL:
-			fmt = FMT_PIXEL;
+			format = FMT_PIXEL;
 			break;
 		case UNIT::INCH:
-			fmt = FMT_INCH;
+			format = FMT_INCH;
 			pw /= dpi;
 			ph /= dpi;
 			break;
 		case UNIT::MILLI:
-			fmt = FMT_MILLI;
+			format = FMT_MILLI;
 			pw = pw / dpi * MM_PER_INCH;
 			ph = ph / dpi * MM_PER_INCH;
 			break;
 		case UNIT::POINT:
-			fmt = FMT_POINT;
+			format = FMT_POINT;
 			pw = pw / dpi * PT_PER_INCH;
 			ph = ph / dpi * PT_PER_INCH;
 			break;
 		case UNIT::GRID:
-			fmt = FMT_GRID;
+			format = FMT_GRID;
 			pw /= m_samp_panel.m_grid_len + 1.0;
 			ph /= m_samp_panel.m_grid_len + 1.0;
 			break;
 		}
 		wchar_t buf[16];
-		swprintf_s(buf, fmt, pw);
+		swprintf_s(buf, format, pw);
 		tx_page_width().Text(buf);
-		swprintf_s(buf, fmt, ph);
+		swprintf_s(buf, format, ph);
 		tx_page_height().Text(buf);
 	}
 
@@ -265,7 +265,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
 		//const double dpi = m_page_panel.m_dx.m_logical_dpi;
-		wchar_t const* fmt = nullptr;
+		wchar_t const* format = nullptr;
 		double pw;
 		double ph;
 		m_samp_panel.m_page_unit = m_page_panel.m_page_unit;
@@ -276,33 +276,33 @@ namespace winrt::GraphPaper::implementation
 		default:
 			return;
 		case UNIT::PIXEL:
-			fmt = FMT_PIXEL;
+			format = FMT_PIXEL;
 			break;
 		case UNIT::INCH:
-			fmt = FMT_INCH;
+			format = FMT_INCH;
 			pw = pw / dpi;
 			ph = ph / dpi;
 			break;
 		case UNIT::MILLI:
-			fmt = FMT_MILLI;
+			format = FMT_MILLI;
 			pw = pw / dpi * MM_PER_INCH;
 			ph = ph / dpi * MM_PER_INCH;
 			break;
 		case UNIT::POINT:
-			fmt = FMT_POINT;
+			format = FMT_POINT;
 			pw = pw / dpi * PT_PER_INCH;
 			ph = ph / dpi * PT_PER_INCH;
 			break;
 		case UNIT::GRID:
-			fmt = FMT_GRID;
+			format = FMT_GRID;
 			pw /= m_samp_panel.m_grid_len + 1.0;
 			ph /= m_samp_panel.m_grid_len + 1.0;
 			break;
 		}
 		wchar_t buf[16];
-		swprintf_s(buf, fmt, pw);
+		swprintf_s(buf, format, pw);
 		tx_page_width().Text(buf);
-		swprintf_s(buf, fmt, ph);
+		swprintf_s(buf, format, ph);
 		tx_page_height().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
@@ -323,19 +323,19 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == U_OP::PAGE_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[16];
-				conv_val_to_col(m_fmt_col, val, buf, 16);
+				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[16];
-				conv_val_to_col(m_fmt_col, val, buf, 16);
+				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[16];
-				conv_val_to_col(m_fmt_col, val, buf, 16);
+				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}

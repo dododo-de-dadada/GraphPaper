@@ -366,18 +366,19 @@ namespace winrt::GraphPaper::implementation
 
 	// 線分が位置を含むか, 太さも考慮して調べる.
 	// t_pos	調べる位置
-	// s_pos	線分の両端
+	// s_pos	線分の始端
+	// e_pos	線分の終端
 	// s_width	線分の太さ
 	// 戻り値	含む場合 true
-	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos[], const double s_width) noexcept
+	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width) noexcept
 	{
 		D2D1_POINT_2F s_vec;	// 線分のベクトル
 		D2D1_POINT_2F q_pos[4];	// 四辺形の頂点
 
-		pt_sub(s_pos[1], s_pos[0], s_vec);
+		pt_sub(e_pos, s_pos, s_vec);
 		const double abs = pt_abs2(s_vec);
 		if (abs <= FLT_MIN) {
-			return equal(t_pos, s_pos[0]);
+			return equal(t_pos, s_pos);
 		}
 		// 線分の法線ベクトルを求める.
 		// 法線ベクトルの長さは, 線の太さの半分とする.
@@ -387,10 +388,10 @@ namespace winrt::GraphPaper::implementation
 		const double ny = -s_vec.x;
 		// 線分の両端から, 法線ベクトルの方向, またはその逆の方向にある点を求める.
 		// 求めた 4 点からなる四辺形が位置を含むか調べる.
-		pt_add(s_pos[0], nx, ny, q_pos[0]);
-		pt_add(s_pos[1], nx, ny, q_pos[1]);
-		pt_add(s_pos[1], -nx, -ny, q_pos[2]);
-		pt_add(s_pos[0], -nx, -ny, q_pos[3]);
+		pt_add(s_pos, nx, ny, q_pos[0]);
+		pt_add(e_pos, nx, ny, q_pos[1]);
+		pt_add(e_pos, -nx, -ny, q_pos[2]);
+		pt_add(s_pos, -nx, -ny, q_pos[3]);
 		return pt_in_quad(t_pos, q_pos);
 	}
 
@@ -551,6 +552,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		c.x = a.x - b.x;
 		c.y = a.y - b.y;
+	}
+
+	// 位置から大きさを引く.
+	void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& c) noexcept
+	{
+		c.x = a.x - b.width;
+		c.y = a.y - b.height;
 	}
 
 	// 矢じりの寸法をデータリーダーから読み込む.

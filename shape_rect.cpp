@@ -46,11 +46,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 位置を含むか調べる.
-	// t_pos	調べる位置
-	// a_len	部位の大きさ
-	// 戻り値	位置を含む図形の部位
-	ANCH_WHICH ShapeRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	ANCH_WHICH ShapeRect::hit_test_anchor(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		// どの頂点が位置を含むか調べる.
 		for (uint32_t i = 0; i < 4; i++) {
@@ -67,6 +63,19 @@ namespace winrt::GraphPaper::implementation
 			if (pt_in_anch(t_pos, pos, a_len)) {
 				return ANCH_MIDDLE[i];
 			}
+		}
+		return ANCH_OUTSIDE;
+	}
+
+	// 位置を含むか調べる.
+	// t_pos	調べる位置
+	// a_len	部位の大きさ
+	// 戻り値	位置を含む図形の部位
+	ANCH_WHICH ShapeRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	{
+		const auto anchor = hit_test_anchor(t_pos, a_len);
+		if (anchor != ANCH_OUTSIDE) {
+			return anchor;
 		}
 		// 方形の右上点と左下点を求める.
 		D2D1_POINT_2F r_pos;

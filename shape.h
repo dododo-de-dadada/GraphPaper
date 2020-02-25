@@ -241,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 	// だ円が位置を含むか調べる.
 	bool pt_in_elli(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept;
 	// 線分が位置を含むか, 太さも考慮して調べる.
-	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F l_pos[], const double s_width) noexcept;
+	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width) noexcept;
 	// 四へん形が位置を含むか調べる.
 	bool pt_in_quad(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F q_pos[]) noexcept;
 	// 方形が位置を含むか調べる.
@@ -264,6 +264,8 @@ namespace winrt::GraphPaper::implementation
 	void pt_scale(const Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept;
 	// 位置から位置を引く.
 	void pt_sub(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& sub) noexcept;
+	// 位置から大きさを引く.
+	void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& sub) noexcept;
 	// 矢じりの寸法を読み込む.
 	void read(ARROW_SIZE& val, DataReader const& dt_reader);
 	// 矢じりの形式をデータリーダーから読み込む.
@@ -917,6 +919,8 @@ namespace winrt::GraphPaper::implementation
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		// 位置を含むか調べる.
+		ANCH_WHICH hit_test_anchor(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 範囲に含まれるか調べる.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 塗りつぶしの色を得る.
@@ -934,33 +938,23 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// 定規
+	//	定規
+	//	作成したあとで文字列の属性の変更はできない.
 	//------------------------------
 	struct ShapeRuler : ShapeRect {
 		double m_grid_len;	// 方眼の大きさ
-
-		winrt::com_ptr<IDWriteTextFormat> m_dw_text_fmt{};	// テキストフォーマット
+		winrt::com_ptr<IDWriteTextFormat> m_dw_text_format{};	// テキストフォーマット
 
 		//------------------------------
 		// shape_ruler.cpp
 		//------------------------------
 
-		// 図形を表示する.
-		void draw(SHAPE_DX& dx);
 		//	図形を破棄する.
 		~ShapeRuler(void);
-		// 値を書体の色に格納する.
-		//void set_font_color(const D2D1_COLOR_F& /*val*/) noexcept;
-		// 値を書体名に格納する.
-		void set_font_family(wchar_t* const /*val*/);
-		// 値を書体の大きさに格納する.
-		void set_font_size(const double /*val*/);
-		// 値を書体の横幅に格納する.
-		void set_font_stretch(const DWRITE_FONT_STRETCH /*val*/);
-		// 値を書体の字体に格納する.
-		void set_font_style(const DWRITE_FONT_STYLE /*val*/);
-		// 値を書体の太さに格納する.
-		void set_font_weight(const DWRITE_FONT_WEIGHT /*val*/);
+		// 図形を表示する.
+		void draw(SHAPE_DX& dx);
+		// 位置を含むか調べる.
+		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		//	図形を作成する.
 		ShapeRuler(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr);
 		// 図形をデータリーダーから読み込む.

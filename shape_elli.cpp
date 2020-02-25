@@ -10,12 +10,12 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 方形の中点の配列
-	constexpr ANCH_WHICH ANCH_ELLI[4]{
-		ANCH_SOUTH,
-		ANCH_EAST,
-		ANCH_WEST,
-		ANCH_NORTH
-	};
+	//constexpr ANCH_WHICH ANCH_ELLI[4]{
+	//	ANCH_SOUTH,
+	//	ANCH_EAST,
+	//	ANCH_WEST,
+	//	ANCH_NORTH
+	//};
 
 	// 図形を表示する.
 	void ShapeElli::draw(SHAPE_DX& dx)
@@ -78,23 +78,9 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	ANCH_WHICH ShapeElli::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		// どの頂点が位置を含むか調べる.
-		for (uint32_t i = 0; i < 4; i++) {
-			D2D1_POINT_2F pos;
-			get_pos(ANCH_CORNER[i], pos);
-			if (pt_in_anch(t_pos, pos, a_len)) {
-				return ANCH_CORNER[i];
-			}
-		}
-
-		for (uint32_t i = 0; i < 4; i++) {
-			D2D1_POINT_2F pos;
-			get_pos(ANCH_ELLI[i], pos);
-			// だ円の各部位が位置を含むか調べる.
-			if (pt_in_anch(t_pos, pos, a_len)) {
-				// 含むならその部位を返す.
-				return ANCH_ELLI[i];
-			}
+		const auto anchor = hit_test_anchor(t_pos, a_len);
+		if (anchor != ANCH_OUTSIDE) {
+			return anchor;
 		}
 
 		// 半径を得る.

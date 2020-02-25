@@ -139,13 +139,13 @@ namespace winrt::GraphPaper::implementation
 		FLT,	// 浮動小数
 		CEN		// パーセント
 	};
-	void conv_val_to_col(const COL_STYLE fmt_col, const double val, wchar_t *buf, const uint32_t len);
+	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t *buf, const uint32_t len);
 
 	//-------------------------------
 	//	メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
-		COL_STYLE m_fmt_col = COL_STYLE::DEC;	// 色成分の書式
+		COL_STYLE m_col_style = COL_STYLE::DEC;	// 色成分の書式
 		std::mutex m_dx_mutex;		// DX のための同期プリミティブ
 
 		winrt::hstring m_mru_token;	// 最近使ったファイルのトークン
@@ -210,6 +210,8 @@ namespace winrt::GraphPaper::implementation
 		void cd_message_show(winrt::hstring const& res, winrt::hstring const& desc);
 		//	メッセージダイアログが閉じた.
 		void cd_message_closed(ContentDialog const& sender, ContentDialogClosedEventArgs const& args);
+		//	クリップボードにデータが含まれているか調べる.
+		bool clipboard_contains(winrt::hstring const c_formats[], const uint32_t c_count) const;
 		//	ページと図形を表示する.
 		void draw_page(void);
 		//	編集メニュー項目の使用の可否を設定する.

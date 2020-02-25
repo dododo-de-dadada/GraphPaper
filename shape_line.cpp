@@ -158,15 +158,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F e_pos;
 		pt_add(m_pos, m_vec, e_pos);
-		D2D1_POINT_2F line[2]{ m_pos, e_pos };
-
 		if (pt_in_anch(t_pos, e_pos, a_len)) {
 			return ANCH_END;
 		}
 		if (pt_in_anch(t_pos, m_pos, a_len)) {
 			return ANCH_BEGIN;
 		}
-		if (pt_in_line(t_pos, line, max(m_stroke_width, a_len))) {
+		if (pt_in_line(t_pos, m_pos, e_pos, max(m_stroke_width, a_len))) {
 			return ANCH_FRAME;
 		}
 		return ANCH_OUTSIDE;

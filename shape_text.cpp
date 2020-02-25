@@ -204,6 +204,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		ShapeRect::draw(dx);
 		if (m_dw_text_layout == nullptr) {
+			// || m_text == nullptr || m_text[0] == '\0') {
 			return;
 		}
 		D2D1_POINT_2F t_min;
@@ -390,19 +391,21 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	ANCH_WHICH ShapeText::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
+		const auto anchor = hit_test_anchor(t_pos, a_len);
+		if (anchor != ANCH_OUTSIDE) {
+			return anchor;
+		}
 		// 文字列図形の左上が原点になるよう, 調べる位置を移動する.
 		D2D1_POINT_2F pos;
-		ShapeRect::get_min_pos(pos);
-		const auto px = static_cast<double>(t_pos.x) - pos.x - m_text_mar.width;
-		const auto py = static_cast<double>(t_pos.y) - pos.y - m_text_mar.height;
+		ShapeStroke::get_min_pos(pos);
+		pt_sub(t_pos, pos, pos);
+		pt_sub(pos, m_text_mar, pos);
 		const auto cnt = m_dw_hit_linecnt;
 		for (uint32_t i = 0; i < cnt; i++) {
 			auto const& m = m_dw_hit_metrics[i];
-			const auto min_x = static_cast<double>(m.left);
-			const auto min_y = static_cast<double>(m.top) + static_cast<double>(m.height) - m_font_size;
-			const auto max_x = min_x + m.width;
-			const auto max_y = min_y + m_font_size;
-			if (min_x <= px && px <= max_x && min_y <= py && py <= max_y) {
+			D2D1_POINT_2F r_max{ m.left + m.width, m.top + m.height };
+			D2D1_POINT_2F r_min{ m.left, r_max.y - static_cast<FLOAT>(m_font_size) };
+			if (pt_in_rect(pos, r_min, r_max)) {
 				return ANCH_TEXT;
 			}
 		}
@@ -422,10 +425,10 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F h_max;
 
 		if (cnt > 0) {
-			ShapeRect::get_min_pos(pos);
+			ShapeStroke::get_min_pos(pos);
 			for (uint32_t i = 0; i < cnt; i++) {
-				auto const& m = m_dw_hit_metrics[i];
-				pt_add(pos, m.left, m.top + m.height - m_font_size, h_min);
+				auto const& metrix = m_dw_hit_metrics[i];
+				pt_add(pos, metrix.left, static_cast<double>(metrix.top) + static_cast<double>(metrix.height) - m_font_size, h_min);
 				if (pt_in_rect(h_min, a_min, a_max) == false) {
 					return false;
 				}

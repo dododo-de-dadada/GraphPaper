@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto APP_DATA = L"file_app_data";	// // アプリケーションデータを格納するファイル名のリソース名
 	static winrt::hstring app_data;	// アプリケーションデータを格納するファイル名
 
-	// アプリケーションがバックグラウンドに移った.
+	//	ｃｃアプリケーションがバックグラウンドに移った.
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
 		app_data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(APP_DATA)));
@@ -23,11 +23,11 @@ namespace winrt::GraphPaper::implementation
 		m_samp_dx.Trim();
 	}
 
-	// アプリケーションを非同期に延長する.
-	// s_op	中断操作
-	// 戻り値	なし
-	// 中断操作は, アプリ中断のハンドラーの引数
-	// SuspendingEventArgs から得られる.
+	//	アプリケーションを非同期に延長する.
+	//	s_op	中断操作
+	//	戻り値	なし
+	//	中断操作は, アプリ中断のハンドラーの引数
+	//	SuspendingEventArgs から得られる.
 	IAsyncAction MainPage::app_extended_session_async(SuspendingOperation const& s_op)
 	{
 		using concurrency::cancellation_token_source;
@@ -39,24 +39,24 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::ApplicationData;
 		using winrt::Windows::Storage::CreationCollisionOption;
 
-		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
+		//	コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
-		// 延長処理を中断するためのトークンの元を得る.
+		//	延長処理を中断するためのトークンの元を得る.
 		static auto ct_source = concurrency::cancellation_token_source();
-		// アプリの中断を管理するため中断延期 SuspendingDeferral を中断操作から得る.
+		//	アプリの中断を管理するため中断延期 SuspendingDeferral を中断操作から得る.
 		static auto s_deferral = s_op.GetDeferral();
-		// 延長実行セッションを得る.
+		//	延長実行するためのセッションを得る.
 		auto session = ExtendedExecutionSession();
-		// SavingData をセッションの目的に格納する.
+		//	SavingData をセッションの目的に格納する.
 		session.Reason(ExtendedExecutionReason::SavingData);
-		// 「...」をセッションの理由に格納する.
-		session.Description(L"...");
-		// セッションが取り消されたときのコルーチンを登録する.
+		//	「To save data.」をセッションの理由に格納する.
+		session.Description(L"To save data.");
+		//	セッションが取り消されたときのコルーチンを登録する.
 		static auto s_token = session.Revoked(
 			[this](auto, auto args)
 			{
 				using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
-				// トークンの元をキャンセルする.
+				//	トークンの元をキャンセルする.
 				ct_source.cancel();
 				switch (args.Reason()) {
 				case ExtendedExecutionRevokedReason::Resumed:
@@ -64,36 +64,41 @@ namespace winrt::GraphPaper::implementation
 				case ExtendedExecutionRevokedReason::SystemPolicy:
 					break;
 				}
-				// 中断延期を完了する.
 				if (s_deferral != nullptr) {
+					//	中断延期がヌルでない場合,
+					//	中断延期を完了する.
+					//	中断延長を完了し OS に通知しなければ, 
+					//	アプリは再び中断延期を要求できない.
 					s_deferral.Complete();
 					s_deferral = nullptr;
 				}
 			}
 		);
-		// セッションを要求し, その結果を得る.
+		//	セッションを要求し, その結果を得る.
 		auto hr = E_FAIL;
 		switch (co_await session.RequestExtensionAsync()) {
 		case ExtendedExecutionResult::Allowed:
-			// セッションが許可された場合,
-			// トークンがキャンセルされたか調べる.
+			//	セッションが許可された場合,
+			//	トークンがキャンセルされたか調べる.
 			if (ct_source.get_token().is_canceled()) {
-				// キャンセルされた場合, 中断する.
+				//	キャンセルされた場合, 中断する.
 				break;
 			}
 			try {
-				// キャンセルでない場合,
-				// アプリ用に作成されたローカルデータフォルダーを得る.
-				// ストレージファイルをローカルフォルダに作成する.
-				// 図形データをストレージファイルに非同期に書き込, 結果を得る.
+				//	キャンセルでない場合,
+				//	アプリケーションデータを格納するためのローカルフォルダーを得る.
+				//	ストレージファイルをローカルフォルダに作成する.
+				//	図形データをストレージファイルに非同期に書き込, 結果を得る.
+				//	LocalFolder は「有効な範囲外のデータにアクセスしようとしました」内部エラーを起こすが,
+				//	とりあえず, ファイルを作成して保存はできている.
 				auto l_folder = ApplicationData::Current().LocalFolder();
 				auto s_file = co_await l_folder.CreateFileAsync(app_data, CreationCollisionOption::ReplaceExisting);
 				hr = co_await file_write_gpf_async(s_file, true);
-				// ファイルを破棄する.
-				// フォルダーを破棄する.
+				//	ファイルを破棄する.
+				//	フォルダーを破棄する.
 				s_file = nullptr;
 				l_folder = nullptr;
-				// 操作スタックを消去する.
+				//	操作スタックを消去する.
 				undo_clear();
 				s_list_clear(m_list_shapes);
 			}
@@ -105,21 +110,23 @@ namespace winrt::GraphPaper::implementation
 		case ExtendedExecutionResult::Denied:
 			break;
 		}
-		// 取り消しコルーチンをセッションから解放し, 
-		// セッションを閉じる.
 		if (session != nullptr) {
+			//	セッションがヌルでない場合,
+			//	取り消しコルーチンをセッションから解放し, 
+			//	セッションを閉じる.
 			session.Revoked(s_token);
 			session.Close();
 			session = nullptr;
 		}
-		// 中断延期を完了する.
-		// 中断延長を完了し OS に通知しなければ, 
-		// アプリは再び中断延期を要求できない.
 		if (s_deferral != nullptr) {
+			//	中断延期がヌルでない場合,
+			//	中断延期を完了する.
+			//	中断延長を完了し OS に通知しなければ, 
+			//	アプリは再び中断延期を要求できない.
 			s_deferral.Complete();
 			s_deferral = nullptr;
 		}
-		// スレッドをメインページの UI スレッドに変える.
+		//	スレッドをメインページの UI スレッドに変える.
 		co_await winrt::resume_foreground(this->Dispatcher());
 		if (hr == S_OK) {
 			if (m_summary_visible) {

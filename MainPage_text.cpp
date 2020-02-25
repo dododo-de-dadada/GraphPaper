@@ -251,33 +251,33 @@ namespace winrt::GraphPaper::implementation
 				hdr = r_loader.GetString(L"str_text_mar_vertert");
 				px = val;
 			}
-			wchar_t const* fmt = nullptr;
+			wchar_t const* format = nullptr;
 			switch (m_samp_panel.m_page_unit) {
 			default:
 			case UNIT::PIXEL:
-				fmt = FMT_PIXEL_UNIT;
+				format = FMT_PIXEL_UNIT;
 				break;
 			case UNIT::INCH:
-				fmt = FMT_INCH_UNIT;
+				format = FMT_INCH_UNIT;
 				px /= dpi;
 				break;
 			case UNIT::MILLI:
-				fmt = FMT_MILLI_UNIT;
+				format = FMT_MILLI_UNIT;
 				px /= dpi;
 				px *= MM_PER_INCH;
 				break;
 			case UNIT::POINT:
-				fmt = FMT_POINT_UNIT;
+				format = FMT_POINT_UNIT;
 				px /= dpi;
 				px *= PT_PER_INCH;
 				break;
 			case UNIT::GRID:
-				fmt = FMT_GRID_UNIT;
+				format = FMT_GRID_UNIT;
 				px /= m_samp_panel.m_grid_len;
 				break;
 			}
 			wchar_t buf[16];
-			swprintf_s(buf, fmt, px);
+			swprintf_s(buf, format, px);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == U_OP::TEXT_LINE) {

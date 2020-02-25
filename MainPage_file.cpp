@@ -417,6 +417,7 @@ namespace winrt::GraphPaper::implementation
 			CachedFileManager::DeferUpdates(s_file);
 			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::ReadWrite) };
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
+			//dt_writer.WriteUInt32(static_cast<uint32_t>(m_col_style));
 			find_write(dt_writer);
 			stat_write(dt_writer);
 			m_page_panel.write(dt_writer);

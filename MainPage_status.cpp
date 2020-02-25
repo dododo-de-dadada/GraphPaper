@@ -203,39 +203,39 @@ namespace winrt::GraphPaper::implementation
 		const double fx = (wx - bx - tx) / ps + sx + px;
 		const double fy = (wy - by - ty) / ps + sy + py;
 		double x, y;
-		wchar_t const* fmt;
+		wchar_t const* format;
 		wchar_t buf[16];
 
 		switch (m_page_panel.m_page_unit) {
 		case UNIT::INCH:
-			fmt = FMT_INCH;
+			format = FMT_INCH;
 			x = fx / dpi;
 			y = fy / dpi;
 			break;
 		case UNIT::MILLI:
-			fmt = FMT_MILLI;
+			format = FMT_MILLI;
 			x = fx / dpi * MM_PER_INCH;
 			y = fy / dpi * MM_PER_INCH;
 			break;
 		case UNIT::POINT:
-			fmt = FMT_POINT;
+			format = FMT_POINT;
 			x = fx / dpi * PT_PER_INCH;
 			y = fy / dpi * PT_PER_INCH;
 			break;
 		case UNIT::GRID:
-			fmt = FMT_GRID;
+			format = FMT_GRID;
 			x = fx / (m_page_panel.m_grid_len + 1.0);
 			y = fy / (m_page_panel.m_grid_len + 1.0);
 			break;
 		default:
-			fmt = FMT_PIXEL;
+			format = FMT_PIXEL;
 			x = fx;
 			y = fy;
 			break;
 		}
-		swprintf_s(buf, fmt, x);
+		swprintf_s(buf, format, x);
 		tk_stat_pos_x().Text(winrt::hstring{ L"x:" } +buf);
-		swprintf_s(buf, fmt, y);
+		swprintf_s(buf, format, y);
 		tk_stat_pos_y().Text(winrt::hstring{ L"y:" } +buf);
 		swprintf_s(buf, L"%d", static_cast<uint32_t>(m_list_shapes.size()));
 		tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
@@ -247,29 +247,29 @@ namespace winrt::GraphPaper::implementation
 		wchar_t buf[16];
 		const double dpi = m_page_dx.m_logical_dpi;
 		double g = m_page_panel.m_grid_len + 1.0;
-		wchar_t const* fmt;
+		wchar_t const* format;
 		switch (m_page_panel.m_page_unit) {
 		case UNIT::INCH:
-			fmt = FMT_INCH;
+			format = FMT_INCH;
 			g = g / dpi;
 			break;
 		case UNIT::MILLI:
-			fmt = FMT_MILLI;
+			format = FMT_MILLI;
 			g = g / dpi * MM_PER_INCH;
 			break;
 		case UNIT::POINT:
-			fmt = FMT_POINT;
+			format = FMT_POINT;
 			g = g / dpi * PT_PER_INCH;
 			break;
 		case UNIT::GRID:
-			fmt = FMT_GRID;
+			format = FMT_GRID;
 			g = 1.0;
 			break;
 		default:
-			fmt = FMT_PIXEL;
+			format = FMT_PIXEL;
 			break;
 		}
-		swprintf_s(buf, fmt, g);
+		swprintf_s(buf, format, g);
 		tk_stat_grid().Text(winrt::hstring{ L"g:" } +buf);
 	}
 
@@ -280,37 +280,37 @@ namespace winrt::GraphPaper::implementation
 		//const double dpi = m_page_panel.m_dx.m_logical_dpi;
 		double w = m_page_panel.m_page_size.width;// m_page_max.x - m_page_min.x;
 		double h = m_page_panel.m_page_size.height;// m_page_max.y - m_page_min.y;
-		wchar_t const* fmt;
+		wchar_t const* format;
 		switch (m_page_panel.m_page_unit) {
 		case UNIT::INCH:
-			fmt = FMT_INCH;
+			format = FMT_INCH;
 			w = w / dpi;
 			h = h / dpi;
 			break;
 		case UNIT::MILLI:
-			fmt = FMT_MILLI;
+			format = FMT_MILLI;
 			w = w / dpi * MM_PER_INCH;
 			h = h / dpi * MM_PER_INCH;
 			break;
 		case UNIT::POINT:
-			fmt = FMT_POINT;
+			format = FMT_POINT;
 			w = w / dpi * PT_PER_INCH;
 			h = h / dpi * PT_PER_INCH;
 			break;
 		case UNIT::GRID:
-			fmt = FMT_GRID;
+			format = FMT_GRID;
 			w /= m_page_panel.m_grid_len + 1.0;
 			h /= m_page_panel.m_grid_len + 1.0;
 			break;
 
 		default:
-			fmt = FMT_PIXEL;
+			format = FMT_PIXEL;
 			break;
 		}
 		wchar_t buf[16];
-		swprintf_s(buf, fmt, w);
+		swprintf_s(buf, format, w);
 		tk_stat_width().Text(winrt::hstring{ L"w:" } +buf);
-		swprintf_s(buf, fmt, h);
+		swprintf_s(buf, format, h);
 		tk_stat_height().Text(winrt::hstring{ L"h:" } +buf);
 	}
 

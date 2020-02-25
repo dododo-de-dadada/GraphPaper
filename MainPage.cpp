@@ -11,22 +11,22 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	//	色成分を文字列に変換する.
-	//	fmt	色成分の形式
+	//	style	色成分の形式
 	//	val	色成分の値
 	//	buf	得られた文字列
 	//	len	文字列の最大長 ('\0' を含む長さ)
-	void conv_val_to_col(const COL_STYLE fmt, const double val, wchar_t* buf, const uint32_t len)
+	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t* buf, const uint32_t len)
 	{
-		if (fmt == COL_STYLE::DEC) {
+		if (style == COL_STYLE::DEC) {
 			swprintf_s(buf, len, L"%.0lf", std::round(val));
 		}
-		else if (fmt == COL_STYLE::HEX) {
+		else if (style == COL_STYLE::HEX) {
 			swprintf_s(buf, len, L"%02x", static_cast<uint32_t>(std::round(val)));
 		}
-		else if (fmt == COL_STYLE::FLT) {
+		else if (style == COL_STYLE::FLT) {
 			swprintf_s(buf, len, L"%.3lf", val / COLOR_MAX);
 		}
-		else if (fmt == COL_STYLE::CEN) {
+		else if (style == COL_STYLE::CEN) {
 			swprintf_s(buf, len, L"%.1lf%%", val / COLOR_MAX * 100.0);
 		}
 	}
@@ -266,20 +266,35 @@ namespace winrt::GraphPaper::implementation
 
 		mfi_cut().IsEnabled(sel > 0);
 		mfi_copy().IsEnabled(sel > 0);
-		bool cont;
+		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
+		winrt::hstring formats[2]{ FMT_DATA, StandardDataFormats::Text() };
+		mfi_paste().IsEnabled(clipboard_contains(formats, 2));
 		// Clipboard::GetContent() は, 
 		// WinRT originate error 0x80040904
 		// を引き起こすので, try ... catch 文が必要.
-		try {
+		//try {
+		/*
 			using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 			using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
-			cont = Clipboard::GetContent().Contains(FMT_DATA)
-				|| Clipboard::GetContent().Contains(StandardDataFormats::Text());
-		}
-		catch (winrt::hresult_error const&) {
-			cont = false;
-		}
-		mfi_paste().IsEnabled(cont);
+			auto formats = Clipboard::GetContent().AvailableFormats();
+			if (formats != nullptr) {
+				for (auto format : formats) {
+					if (format == FMT_DATA) {
+						cont = true;
+						break;
+					}
+					else if (format == StandardDataFormats::Text()) {
+						cont = true;
+						break;
+					}
+				}
+			}
+			*/
+		//}
+		//catch (winrt::hresult_error const&) {
+		//	cont = false;
+		//}
+		// mfi_paste().IsEnabled(cont);
 		mfi_delete().IsEnabled(sel > 0);
 		mfi_select_all().IsEnabled(sel < cnt);
 		mfi_group().IsEnabled(sel > 1);
