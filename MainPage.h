@@ -299,8 +299,10 @@ namespace winrt::GraphPaper::implementation
 		//	文字列の編集
 		//-------------------------------
 
-		//	図形の文字列を編集する.
-		void edit_text_in_shape(ShapeText* s);
+		//	図形が持つ文字列を編集する.
+		void edit_text_of_shape(void);
+		//	図形が持つ文字列を編集する.
+		void edit_text_of_shape(ShapeText* s);
 		//	編集メニューの「文字列の編集」が選択された.
 		void mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 
@@ -375,6 +377,8 @@ namespace winrt::GraphPaper::implementation
 		void btn_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　検索パネルの「置換して次に」ボタンが押された.
 		void btn_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	検索パネルを表示または非表示にする.
+		void find_show_or_hide_panel(void);
 		//　検索の値をデータリーダーから読み込む.
 		void find_read(DataReader const& dt_reader);
 		//	検索パネルから値を格納する.
@@ -767,6 +771,8 @@ namespace winrt::GraphPaper::implementation
 		void summary_select_head(void);
 		//	一覧の最後の項目を選択する.
 		void summary_select_tail(void);
+		//	一覧パネルを表示または非表示にする.
+		void summary_show_or_hide_panel(void);
 		//	一覧の項目を選択解除する.
 		void summary_unselect(uint32_t i);
 		//	一覧の図形を選択解除する.
@@ -899,6 +905,8 @@ namespace winrt::GraphPaper::implementation
 		//	切り取りとコピー, 貼り付け, 削除
 		//-------------------------------
 
+		// 選択された図形を削除する.
+		void delete_selected_shapes(void);
 		//	選択された図形をクリップボードに非同期に保存する.
 		template <uint32_t X> IAsyncAction clipboard_copy_async(void);
 		//	クリップボードに保存された図形を非同期に貼り付ける.

@@ -14,6 +14,12 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto APP_DATA = L"file_app_data";	// // アプリケーションデータを格納するファイル名のリソース名
 	static winrt::hstring app_data;	// アプリケーションデータを格納するファイル名
 
+	static auto app_data_folder(void)
+	{
+		using winrt::Windows::Storage::ApplicationData;
+		return ApplicationData::Current().LocalFolder();
+	}
+
 	//	ｃｃアプリケーションがバックグラウンドに移った.
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
@@ -36,7 +42,6 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionSession;
 		using winrt::Windows::ApplicationModel::SuspendingDeferral;
 		using winrt::Windows::Storage::StorageFolder;
-		using winrt::Windows::Storage::ApplicationData;
 		using winrt::Windows::Storage::CreationCollisionOption;
 
 		//	コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
@@ -56,6 +61,7 @@ namespace winrt::GraphPaper::implementation
 			[this](auto, auto args)
 			{
 				using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
+				//	セッションが取り消された場合,
 				//	トークンの元をキャンセルする.
 				ct_source.cancel();
 				switch (args.Reason()) {
@@ -79,7 +85,7 @@ namespace winrt::GraphPaper::implementation
 		switch (co_await session.RequestExtensionAsync()) {
 		case ExtendedExecutionResult::Allowed:
 			//	セッションが許可された場合,
-			//	トークンがキャンセルされたか調べる.
+			//	トークンを調べて, キャンセルされたか判定する.
 			if (ct_source.get_token().is_canceled()) {
 				//	キャンセルされた場合, 中断する.
 				break;
@@ -87,19 +93,20 @@ namespace winrt::GraphPaper::implementation
 			try {
 				//	キャンセルでない場合,
 				//	アプリケーションデータを格納するためのローカルフォルダーを得る.
-				//	ストレージファイルをローカルフォルダに作成する.
-				//	図形データをストレージファイルに非同期に書き込, 結果を得る.
 				//	LocalFolder は「有効な範囲外のデータにアクセスしようとしました」内部エラーを起こすが,
 				//	とりあえず, ファイルを作成して保存はできている.
-				auto l_folder = ApplicationData::Current().LocalFolder();
-				auto s_file = co_await l_folder.CreateFileAsync(app_data, CreationCollisionOption::ReplaceExisting);
+				auto l_folder{ app_data_folder() };
+				//	ストレージファイルをローカルフォルダに作成する.
+				auto s_file{ co_await l_folder.CreateFileAsync(app_data, CreationCollisionOption::ReplaceExisting) };
+				//	図形データをストレージファイルに非同期に書き込, 結果を得る.
 				hr = co_await file_write_gpf_async(s_file, true);
 				//	ファイルを破棄する.
-				//	フォルダーを破棄する.
 				s_file = nullptr;
+				//	フォルダーを破棄する.
 				l_folder = nullptr;
 				//	操作スタックを消去する.
 				undo_clear();
+				//	図形リストを消去する.
 				s_list_clear(m_list_shapes);
 			}
 			catch (winrt::hresult_error const& e) {
@@ -110,6 +117,21 @@ namespace winrt::GraphPaper::implementation
 		case ExtendedExecutionResult::Denied:
 			break;
 		}
+		//	スレッドをメインページの UI スレッドに変える.
+		//	スレッド変更は, セッションを閉じる前にでないとダメ.
+		co_await winrt::resume_foreground(this->Dispatcher());
+#if defined(_DEBUG)
+		if (debug_leak_cnt != 0) {
+			cd_message_show(L"Memory leak occurs", {});
+		}
+#endif
+		if (hr == S_OK) {
+			if (m_summary_visible) {
+				summary_clear();
+			}
+		}
+		// スレッドコンテキストを復元する.
+		co_await context;
 		if (session != nullptr) {
 			//	セッションがヌルでない場合,
 			//	取り消しコルーチンをセッションから解放し, 
@@ -126,20 +148,6 @@ namespace winrt::GraphPaper::implementation
 			s_deferral.Complete();
 			s_deferral = nullptr;
 		}
-		//	スレッドをメインページの UI スレッドに変える.
-		co_await winrt::resume_foreground(this->Dispatcher());
-		if (hr == S_OK) {
-			if (m_summary_visible) {
-				summary_clear();
-			}
-		}
-#if defined(_DEBUG)
-		if (debug_leak_cnt != 0) {
-			cd_message_show(L"Memory leak occurs", {});
-		}
-#endif
-		// スレッドコンテキストを復元する.
-		co_await context;
 	}
 
 	// アプリケーションがバックグラウンドから戻った.
@@ -158,15 +166,13 @@ namespace winrt::GraphPaper::implementation
 	// アプリケーションを非同期に再開する.
 	IAsyncAction MainPage::app_resuming_async(void)
 	{
-		using winrt::Windows::Storage::ApplicationData;
-
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// E_FAIL を結果に格納する.
 		auto hr = E_FAIL;
 		try {
 			// アプリ用に作成されたローカルデータフォルダーを得る.
-			auto l_folder{ ApplicationData::Current().LocalFolder() };
+			auto l_folder{ app_data_folder() };
 			auto s_file{ co_await l_folder.GetFileAsync(app_data) };
 			co_await file_read_async(s_file, true);
 			s_file = nullptr;

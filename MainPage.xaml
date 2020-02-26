@@ -357,7 +357,14 @@
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_summary" x:Uid="mfi_summary" Click="mfi_summary_click" Icon="List" IsEnabled="false" KeyboardAcceleratorTextOverride="Ctrl+L" Text="Shape List" />
+                <!--
+                <MenuFlyoutItem x:Name="mfi_summary" x:Uid="mfi_summary" Click="mfi_summary_click" Icon="List" IsEnabled="false" KeyboardAcceleratorTextOverride="Ctrl+L" Text="Shape List" >
+                -->
+                <MenuFlyoutItem x:Name="mfi_summary" x:Uid="mfi_summary" Click="mfi_summary_click" Icon="List" IsEnabled="false" Text="Shape List" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Invoked="ka_summaty_invoked" Key="L" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="mfi_edit_text_click" Icon="Edit" KeyboardAcceleratorTextOverride="Ctrl+E" Text="Edit Text" />
                 <MenuFlyoutItem x:Name="mfi_find_text" x:Uid="mfi_find_text" Click="mfi_find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text" />
@@ -656,7 +663,9 @@
                     <KeyboardAccelerator Invoked="ka_group_invoked" Key="G" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_send_to_back_invoked" Key="Home" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_send_backward_invoked" Key="PageUp" Modifiers="Control" />
+                    <!--
                     <KeyboardAccelerator Invoked="ka_summaty_invoked" Key="L" Modifiers="Control" />
+                    -->
                     <KeyboardAccelerator Invoked="ka_new_invoked" Key="N" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_zoom_reset_invoked" Key="Number0" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_zoom_reset_invoked" Key="NumberPad0" Modifiers="Control" />

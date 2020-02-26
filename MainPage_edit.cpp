@@ -9,9 +9,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 図形の文字列を編集する.
+	// 図形が持つ文字列を編集する.
 	// s	文字列図形
-	void MainPage::edit_text_in_shape(ShapeText* s)
+	void MainPage::edit_text_of_shape(ShapeText* s)
 	{
 		static winrt::event_token primary_token;
 		static winrt::event_token closed_token;
@@ -42,8 +42,8 @@ namespace winrt::GraphPaper::implementation
 		auto _{ cd_edit_text().ShowAsync() };
 	}
 
-	// 編集メニューの「文字列の編集」が選択された.
-	void MainPage::mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	// 図形が持つ文字列を編集する.
+	void MainPage::edit_text_of_shape(void)
 	{
 		ShapeText* s = nullptr;
 
@@ -69,8 +69,15 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (s != nullptr) {
-			edit_text_in_shape(s);
+			edit_text_of_shape(s);
 		}
+
+	}
+
+	// 編集メニューの「文字列の編集」が選択された.
+	void MainPage::mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	{
+		edit_text_of_shape();
 	}
 
 }

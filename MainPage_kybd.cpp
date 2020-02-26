@@ -13,7 +13,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_bring_forward_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	{
 		if (mfi_bring_forward().IsEnabled()) {
-			mfi_bring_forward_click(nullptr, nullptr);
+			//mfi_bring_forward_click(nullptr, nullptr);
+			arrange_order<S_LIST_T::reverse_iterator>();
 		}
 	}
 
@@ -21,7 +22,9 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_bring_to_front_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	{
 		if (mfi_bring_to_front().IsEnabled()) {
-			mfi_bring_to_front_click(nullptr, nullptr);
+			constexpr auto FRONT = false;
+			arrange_to<FRONT>();
+			//mfi_bring_to_front_click(nullptr, nullptr);
 		}
 	}
 
@@ -29,7 +32,9 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_copy_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	{
 		if (mfi_copy().IsEnabled()) {
-			mfi_copy_click(nullptr, nullptr);
+			constexpr uint32_t COPY = 1;
+			auto _{ clipboard_copy_async<COPY>() };
+			//mfi_copy_click(nullptr, nullptr);
 		}
 	}
 
@@ -37,7 +42,9 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_cut_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	{
 		if (mfi_cut().IsEnabled()) {
-			mfi_cut_click(nullptr, nullptr);
+			constexpr uint32_t CUT = 0;
+			auto _{ clipboard_copy_async<CUT>() };
+			//mfi_cut_click(nullptr, nullptr);
 		}
 	}
 
@@ -45,7 +52,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_delete_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	{
 		if (mfi_delete().IsEnabled()) {
-			mfi_delete_click(nullptr, nullptr);
+			delete_selected_shapes();
+			//mfi_delete_click(nullptr, nullptr);
 		}
 	}
 
@@ -53,7 +61,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_edit_text_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	{
 		if (mfi_edit_text().IsEnabled()) {
-			mfi_edit_text_click(nullptr, nullptr);
+			edit_text_of_shape();
+			//mfi_edit_text_click(nullptr, nullptr);
 		}
 	}
 
@@ -61,7 +70,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_find_text_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	{
 		if (mfi_find_text().IsEnabled()) {
-			mfi_find_text_click(nullptr, nullptr);
+			find_show_or_hide_panel();
+			//mfi_find_text_click(nullptr, nullptr);
 		}
 	}
 
@@ -169,7 +179,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_summaty_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	{
 		if (mfi_summary().IsEnabled()) {
-			mfi_summary_click(nullptr, nullptr);
+			//summary_show_or_hide_panel();
+			//mfi_summary_click(nullptr, nullptr);
 		}
 	}
 
