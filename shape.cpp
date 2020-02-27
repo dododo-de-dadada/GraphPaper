@@ -183,12 +183,6 @@ namespace winrt::GraphPaper::implementation
 		return a == b;
 	}
 
-	// 単位が同じか調べる.
-	bool equal(const UNIT a, const UNIT b) noexcept
-	{
-		return a == b;
-	}
-
 	// 文字列が同じか調べる.
 	bool equal(const wchar_t* a, const wchar_t* b) noexcept
 	{
@@ -688,12 +682,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 単位をデータリーダーから読み込む.
-	void read(UNIT& val, DataReader const& dt_reader)
-	{
-		val = static_cast<UNIT>(dt_reader.ReadUInt32());
-	}
-
 	// 方眼の表示をデータリーダーから読み込む.
 	void read(GRID_SHOW& val, DataReader const& dt_reader)
 	{
@@ -837,12 +825,6 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(val));
 	}
 
-	// 単位をデータライターに書き込む.
-	void write(const UNIT val, DataWriter const& dt_writer)
-	{
-		write(static_cast<uint32_t>(val), dt_writer);
-	}
-
 	// 文字列をデータライターに書き込む
 	void write(const wchar_t* val, DataWriter const& dt_writer)
 	{
@@ -947,43 +929,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		char buf[256];
 		std::snprintf(buf, sizeof(buf), "%s=\"%f\" %s=\"%f\" ", name_x, val.x, name_y, val.y);
-		write_svg(buf, dt_writer);
-	}
-
-	// 寸法と単位をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_SIZE_F val, const UNIT unit, const double dpi, DataWriter const& dt_writer)
-	{
-		constexpr char* SVG_UNIT_PX = "px";
-		constexpr char* SVG_UNIT_IN = "in";
-		constexpr char* SVG_UNIT_MM = "mm";
-		constexpr char* SVG_UNIT_PT = "pt";
-		double w, h;
-		char buf[256];
-		char* u;
-		switch (unit) {
-		default:
-		case UNIT::PIXEL:
-			w = val.width;
-			h = val.height;
-			u = SVG_UNIT_PX;
-			break;
-		case UNIT::INCH:
-			w = val.width / dpi;
-			h = val.height / dpi;
-			u = SVG_UNIT_IN;
-			break;
-		case UNIT::MILLI:
-			w = val.width * MM_PER_INCH / dpi;
-			h = val.height * MM_PER_INCH / dpi;
-			u = SVG_UNIT_MM;
-			break;
-		case UNIT::POINT:
-			w = val.width * PT_PER_INCH / dpi;
-			h = val.height * PT_PER_INCH / dpi;
-			u = SVG_UNIT_PT;
-			break;
-		}
-		std::snprintf(buf, sizeof(buf), "width=\"%lf%s\" height=\"%lf%s\" ", w, u, h, u);
 		write_svg(buf, dt_writer);
 	}
 

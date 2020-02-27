@@ -484,7 +484,39 @@ namespace winrt::GraphPaper::implementation
 		//	svg タグの開始を書き込む.
 		write_svg(SVG_TAG, dt_writer);
 		//	幅と高さの属性を書き込む.
-		write_svg(m_page_panel.m_page_size, m_page_panel.m_page_unit, m_page_dx.m_logical_dpi, dt_writer);
+		constexpr char* SVG_UNIT_PX = "px";
+		constexpr char* SVG_UNIT_IN = "in";
+		constexpr char* SVG_UNIT_MM = "mm";
+		constexpr char* SVG_UNIT_PT = "pt";
+		const auto dpi = m_page_dx.m_logical_dpi;
+		double w, h;
+		char buf[256];
+		char* u;
+		switch (m_page_unit) {
+		default:
+		case DIST_UNIT::PIXEL:
+			w = m_page_panel.m_page_size.width;
+			h = m_page_panel.m_page_size.height;
+			u = SVG_UNIT_PX;
+			break;
+		case DIST_UNIT::INCH:
+			w = m_page_panel.m_page_size.width / dpi;
+			h = m_page_panel.m_page_size.height / dpi;
+			u = SVG_UNIT_IN;
+			break;
+		case DIST_UNIT::MILLI:
+			w = m_page_panel.m_page_size.width * MM_PER_INCH / dpi;
+			h = m_page_panel.m_page_size.height * MM_PER_INCH / dpi;
+			u = SVG_UNIT_MM;
+			break;
+		case DIST_UNIT::POINT:
+			w = m_page_panel.m_page_size.width * PT_PER_INCH / dpi;
+			h = m_page_panel.m_page_size.height * PT_PER_INCH / dpi;
+			u = SVG_UNIT_PT;
+			break;
+		}
+		std::snprintf(buf, sizeof(buf), "width=\"%lf%s\" height=\"%lf%s\" ", w, u, h, u);
+		write_svg(buf, dt_writer);
 		//	viewBox 属性を書き込む.
 		write_svg("viewBox=\"0 0 ", dt_writer);
 		write_svg(m_page_panel.m_page_size.width, dt_writer);
@@ -574,10 +606,6 @@ namespace winrt::GraphPaper::implementation
 		tmfi_grid_snap().IsChecked(m_page_panel.m_grid_snap);
 		tmfi_grid_snap_2().IsChecked(m_page_panel.m_grid_snap);
 		stat_check_menu(m_stat_bar);
-		//rmfi_unit_pixel().IsChecked(m_page_panel.m_page_unit == UNIT::PIXEL);
-		//rmfi_unit_milli().IsChecked(m_page_panel.m_page_unit == UNIT::MILLI);
-		//rmfi_unit_inch().IsChecked(m_page_panel.m_page_unit == UNIT::INCH);
-		//rmfi_unit_point().IsChecked(m_page_panel.m_page_unit == UNIT::POINT);
 
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {

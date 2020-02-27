@@ -49,13 +49,10 @@ namespace winrt::GraphPaper::implementation
 		GRID_LEN,	// 方眼の大さを操作
 		GRID_OPAC,	// 方眼の色の濃さを操作
 		GRID_SHOW,	// 方眼の表示方法を操作
-		//GRID_SNAP,	// 方眼に揃えるを操作
 		GROUP,	// 図形をグループに挿入または削除する操作
 		LIST,	// 図形をリストに挿入または削除する操作
 		PAGE_COLOR,	// ページの色を操作
 		PAGE_SIZE,	// ページの寸法を操作
-		//PAGE_UNIT,	// ページの単位を操作
-		//PAGE_ZOOM,	// ページの倍率を操作
 		SELECT,	// 図形の選択を切り替え
 		START_POS,	// 図形の開始位置を操作
 		STROKE_COLOR,	// 線枠の色を操作
@@ -237,12 +234,9 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<U_OP::GRID_LEN> { using type = double; };
 	template <> struct U_TYPE<U_OP::GRID_OPAC> { using type = double; };
 	template <> struct U_TYPE<U_OP::GRID_SHOW> { using type = GRID_SHOW; };
-	//template <> struct U_TYPE<U_OP::GRID_SNAP> { using type = bool; };
 	template <> struct U_TYPE<U_OP::TEXT_LINE> { using type = double; };
 	template <> struct U_TYPE<U_OP::PAGE_COLOR> { using type = D2D1_COLOR_F; };
-	//template <> struct U_TYPE<U_OP::PAGE_ZOOM> { using type = double; };
 	template <> struct U_TYPE<U_OP::PAGE_SIZE> { using type = D2D1_SIZE_F; };
-	//template <> struct U_TYPE<U_OP::PAGE_UNIT> { using type = UNIT; };
 	template <> struct U_TYPE<U_OP::START_POS> { using type = D2D1_POINT_2F; };
 	template <> struct U_TYPE<U_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<U_OP::STROKE_PATTERN> { using type = STROKE_PATTERN; };

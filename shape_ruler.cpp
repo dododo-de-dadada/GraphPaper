@@ -36,7 +36,6 @@ namespace winrt::GraphPaper::implementation
 			const double y1 = y0 - (diff_y >= 0.0 ? grad_y : -grad_y);
 			const double y1_5 = y0 - 0.625 * (diff_y >= 0.0 ? grad_y : -grad_y);
 			const double y2 = y1 - (diff_y >= 0.0 ? f_size : -f_size);
-			DWRITE_PARAGRAPH_ALIGNMENT p_align;
 			for (uint32_t i = 0; i <= k; i++) {
 				//	•ûŠá‚Ì‘å‚«‚³‚²‚Æ‚É–Ú·‚è‚ð•\Ž¦‚·‚é.
 				const double x = x0 + i * grad_x;

@@ -313,13 +313,10 @@ namespace winrt::GraphPaper::implementation
 	template bool UndoSet<U_OP::GRID_LEN>::changed(void) const noexcept;
 	template bool UndoSet<U_OP::GRID_OPAC>::changed(void) const noexcept;
 	template bool UndoSet<U_OP::GRID_SHOW>::changed(void) const noexcept;
-	//template bool UndoSet<U_OP::GRID_SNAP>::changed(void) const noexcept;
 	template bool UndoSet<U_OP::TEXT_LINE>::changed(void) const noexcept;
 	template bool UndoSet<U_OP::TEXT_MARGIN>::changed(void) const noexcept;
 	template bool UndoSet<U_OP::PAGE_COLOR>::changed(void) const noexcept;
-	//template bool UndoSet<U_OP::PAGE_ZOOM>::changed(void) const noexcept;
 	template bool UndoSet<U_OP::PAGE_SIZE>::changed(void) const noexcept;
-	//template bool UndoSet<U_OP::PAGE_UNIT>::changed(void) const noexcept;
 	template bool UndoSet<U_OP::TEXT_ALIGN_P>::changed(void) const noexcept;
 	template bool UndoSet<U_OP::START_POS>::changed(void) const noexcept;
 	template bool UndoSet<U_OP::STROKE_COLOR>::changed(void) const noexcept;
@@ -366,8 +363,6 @@ namespace winrt::GraphPaper::implementation
 	template void UndoSet<U_OP::TEXT>::exec(void);
 	template void UndoSet<U_OP::TEXT_ALIGN_T>::exec(void);
 	template void UndoSet<U_OP::TEXT_RANGE>::exec(void);
-	//template void UndoSet<U_OP::PAGE_UNIT>::exec(void);
-	//template void UndoSet<U_OP::PAGE_ZOOM>::exec(void);
 
 	// ê}å`ÇÃëÆê´ílÇï€ë∂Ç∑ÇÈ.
 	template <U_OP U>
@@ -402,8 +397,6 @@ namespace winrt::GraphPaper::implementation
 	template UndoSet<U_OP::TEXT>::UndoSet(Shape* s);
 	template UndoSet<U_OP::TEXT_ALIGN_T>::UndoSet(Shape* s);
 	template UndoSet<U_OP::TEXT_RANGE>::UndoSet(Shape* s);
-	//template UndoSet<U_OP::PAGE_UNIT>::UndoSet(Shape* s);
-	//template UndoSet<U_OP::PAGE_ZOOM>::UndoSet(Shape* s);
 
 	// ê}å`ÇÃëÆê´ílÇï€ë∂ÇµÇΩÇ†Ç∆ílÇäiî[Ç∑ÇÈ.
 	template <U_OP U>
@@ -438,8 +431,6 @@ namespace winrt::GraphPaper::implementation
 	template UndoSet<U_OP::TEXT>::UndoSet(Shape* s, wchar_t* const& val);
 	template UndoSet<U_OP::TEXT_ALIGN_T>::UndoSet(Shape* s, const DWRITE_TEXT_ALIGNMENT& val);
 	template UndoSet<U_OP::TEXT_RANGE>::UndoSet(Shape* s, const DWRITE_TEXT_RANGE& val);
-	//template UndoSet<U_OP::PAGE_UNIT>::UndoSet(Shape* s, const UNIT& val);
-	//template UndoSet<U_OP::PAGE_ZOOM>::UndoSet(Shape* s, const double& val);
 
 	template <U_OP U>
 	UndoSet<U>::UndoSet(DataReader const& dt_reader) :
@@ -474,8 +465,6 @@ namespace winrt::GraphPaper::implementation
 	template UndoSet<U_OP::TEXT>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<U_OP::TEXT_ALIGN_T>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<U_OP::TEXT_RANGE>::UndoSet(DataReader const& dt_reader);
-	//template UndoSet<U_OP::PAGE_UNIT>::UndoSet(DataReader const& dt_reader);
-	//template UndoSet<U_OP::PAGE_ZOOM>::UndoSet(DataReader const& dt_reader);
 
 	// ê}å`ÇÃëÆê´ílÇ…ílÇäiî[Ç∑ÇÈ.
 	template <U_OP U>
@@ -547,18 +536,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		s->set_page_color(t_val);
 	}
-	//void UndoSet<U_OP::PAGE_ZOOM>::SET(Shape* s, const double& t_val)
-	//{
-	//	s->set_page_scale(t_val);
-	//}
 	void UndoSet<U_OP::PAGE_SIZE>::SET(Shape* s, const D2D1_SIZE_F& t_val)
 	{
 		s->set_page_size(t_val);
 	}
-	//void UndoSet<U_OP::PAGE_UNIT>::SET(Shape* s, const UNIT& t_val)
-	//{
-	//	s->set_page_unit(t_val);
-	//}
 	void UndoSet<U_OP::TEXT_ALIGN_P>::SET(Shape* s, const DWRITE_PARAGRAPH_ALIGNMENT& t_val)
 	{
 		s->set_text_align_p(t_val);
@@ -669,14 +650,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		return s->get_page_size(t_val);
 	}
-	//bool UndoSet<U_OP::PAGE_UNIT>::GET(Shape* s, UNIT& t_val) noexcept
-	//{
-	//	return s->get_page_unit(t_val);
-	//}
-	//bool UndoSet<U_OP::PAGE_ZOOM>::GET(Shape* s, double& t_val) noexcept
-	//{
-	//	return s->get_page_scale(t_val);
-	//}
 	bool UndoSet<U_OP::TEXT_ALIGN_P>::GET(Shape* s, DWRITE_PARAGRAPH_ALIGNMENT& t_val) noexcept
 	{
 		return s->get_text_align_p(t_val);
@@ -735,14 +708,11 @@ namespace winrt::GraphPaper::implementation
 	template void UndoSet<U_OP::GRID_LEN>::write(DataWriter const& dt_writer);
 	template void UndoSet<U_OP::GRID_OPAC>::write(DataWriter const& dt_writer);
 	template void UndoSet<U_OP::GRID_SHOW>::write(DataWriter const& dt_writer);
-	//template void UndoSet<U_OP::GRID_SNAP>::write(DataWriter const& dt_writer);
 	template void UndoSet<U_OP::TEXT_LINE>::write(DataWriter const& dt_writer);
 	template void UndoSet<U_OP::TEXT_MARGIN>::write(DataWriter const& dt_writer);
 	template void UndoSet<U_OP::PAGE_COLOR>::write(DataWriter const& dt_writer);
 	template void UndoSet<U_OP::PAGE_SIZE>::write(DataWriter const& dt_writer);
 	template void UndoSet<U_OP::TEXT_ALIGN_P>::write(DataWriter const& dt_writer);
-	//template void UndoSet<U_OP::PAGE_UNIT>::write(DataWriter const& dt_writer);
-	//template void UndoSet<U_OP::PAGE_ZOOM>::write(DataWriter const& dt_writer);
 	template void UndoSet<U_OP::START_POS>::write(DataWriter const& dt_writer);
 	template void UndoSet<U_OP::STROKE_COLOR>::write(DataWriter const& dt_writer);
 	template void UndoSet<U_OP::STROKE_PATTERN>::write(DataWriter const& dt_writer);

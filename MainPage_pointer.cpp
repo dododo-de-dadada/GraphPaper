@@ -116,6 +116,7 @@ namespace winrt::GraphPaper::implementation
 		unselect_all();
 		undo_push_append(s);
 		undo_push_null();
+		m_press_shape_summary = m_press_shape_prev = s;
 		enable_undo_menu();
 		enable_edit_menu();
 		s->get_bound(m_page_min, m_page_max);
@@ -150,6 +151,7 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				undo_push_append(s);
 				undo_push_null();
+				m_press_shape_prev = m_press_shape_summary = s;
 				enable_undo_menu();
 				enable_edit_menu();
 				s->get_bound(m_page_min, m_page_max);

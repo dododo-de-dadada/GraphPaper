@@ -416,8 +416,8 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	//	検索パネルを表示または非表示にする.
-	void MainPage::find_show_or_hide_panel(void)
+	//	編集メニューの「文字列の検索/置換」が選択された.
+	void MainPage::mfi_find_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		if (sp_find_text().Visibility() == VISIBLE) {
 			//	検索パネルが表示されている場合,
@@ -437,12 +437,6 @@ namespace winrt::GraphPaper::implementation
 		ck_match_case().IsChecked(m_find_case);
 		ck_wrap_around().IsChecked(m_find_wrap);
 		sp_find_text().Visibility(VISIBLE);
-	}
-
-	//	編集メニューの「文字列の検索/置換」が選択された.
-	void MainPage::mfi_find_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		find_show_or_hide_panel();
 	}
 
 	// 検索の値をデータリーダーに書き込む.

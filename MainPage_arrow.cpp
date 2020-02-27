@@ -104,9 +104,9 @@ namespace winrt::GraphPaper::implementation
 		primary_token = cd_samp().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				ARROW_SIZE val;
-				m_samp_shape->get_arrow_size(val);
-				undo_push_value<U_OP::ARROW_SIZE>(val);
+				ARROW_SIZE samp_val;
+				m_samp_shape->get_arrow_size(samp_val);
+				undo_push_value<U_OP::ARROW_SIZE>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -158,24 +158,24 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == U_OP::ARROW_SIZE) {
 			wchar_t buf[16];
-			switch (m_samp_panel.m_page_unit) {
-			case UNIT::GRID:
+			switch (m_page_unit) {
+			case DIST_UNIT::GRID:
 				swprintf_s(buf, FMT_GRID_UNIT, val / (m_samp_panel.m_grid_len + 1.0));
 				hdr = hdr + buf;
 				break;
-			case UNIT::PIXEL:
+			case DIST_UNIT::PIXEL:
 				swprintf_s(buf, FMT_PIXEL_UNIT, val);
 				hdr = hdr + buf;
 				break;
-			case UNIT::INCH:
+			case DIST_UNIT::INCH:
 				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi);
 				hdr = hdr + buf;
 				break;
-			case UNIT::MILLI:
+			case DIST_UNIT::MILLI:
 				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi * MM_PER_INCH);
 				hdr = hdr + buf;
 				break;
-			case UNIT::POINT:
+			case DIST_UNIT::POINT:
 				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi * PT_PER_INCH);
 				hdr = hdr + buf;
 				break;

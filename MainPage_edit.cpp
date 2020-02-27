@@ -42,8 +42,8 @@ namespace winrt::GraphPaper::implementation
 		auto _{ cd_edit_text().ShowAsync() };
 	}
 
-	// 図形が持つ文字列を編集する.
-	void MainPage::edit_text_of_shape(void)
+	// 編集メニューの「文字列の編集」が選択された.
+	void MainPage::mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		ShapeText* s = nullptr;
 
@@ -72,12 +72,6 @@ namespace winrt::GraphPaper::implementation
 			edit_text_of_shape(s);
 		}
 
-	}
-
-	// 編集メニューの「文字列の編集」が選択された.
-	void MainPage::mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		edit_text_of_shape();
 	}
 
 }

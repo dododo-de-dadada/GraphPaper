@@ -177,9 +177,21 @@
     <value>Wrap around</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="cx_page_unit.Header" xml:space="preserve">
-    <value>Unit</value>
-    <comment>ComboBox</comment>
+  <data name="cxi_color_cen.Content" xml:space="preserve">
+    <value>Percent</value>
+    <comment>ComboBoxItem</comment>
+  </data>
+  <data name="cxi_color_dec.Content" xml:space="preserve">
+    <value>Decimal</value>
+    <comment>ComboBoxItem</comment>
+  </data>
+  <data name="cxi_color_flt.Content" xml:space="preserve">
+    <value>Real number</value>
+    <comment>ComboBoxItem</comment>
+  </data>
+  <data name="cxi_color_hex.Content" xml:space="preserve">
+    <value>Hexdecimal</value>
+    <comment>ComboBoxItem</comment>
   </data>
   <data name="cxi_unit_grid.Content" xml:space="preserve">
     <value>Grid</value>
@@ -200,6 +212,14 @@
   <data name="cxi_unit_point.Content" xml:space="preserve">
     <value>Point</value>
     <comment>ComboBoxItem</comment>
+  </data>
+  <data name="cx_color_style.Header" xml:space="preserve">
+    <value>Color component format</value>
+    <comment>ComboBox</comment>
+  </data>
+  <data name="cx_page_unit.Header" xml:space="preserve">
+    <value>Unit</value>
+    <comment>ComboBox</comment>
   </data>
   <data name="lvi_stretch_condensed.Content" xml:space="preserve">
     <value>Condensed</value>

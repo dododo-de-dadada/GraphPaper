@@ -206,23 +206,23 @@ namespace winrt::GraphPaper::implementation
 		wchar_t const* format;
 		wchar_t buf[16];
 
-		switch (m_page_panel.m_page_unit) {
-		case UNIT::INCH:
+		switch (m_page_unit) {
+		case DIST_UNIT::INCH:
 			format = FMT_INCH;
 			x = fx / dpi;
 			y = fy / dpi;
 			break;
-		case UNIT::MILLI:
+		case DIST_UNIT::MILLI:
 			format = FMT_MILLI;
 			x = fx / dpi * MM_PER_INCH;
 			y = fy / dpi * MM_PER_INCH;
 			break;
-		case UNIT::POINT:
+		case DIST_UNIT::POINT:
 			format = FMT_POINT;
 			x = fx / dpi * PT_PER_INCH;
 			y = fy / dpi * PT_PER_INCH;
 			break;
-		case UNIT::GRID:
+		case DIST_UNIT::GRID:
 			format = FMT_GRID;
 			x = fx / (m_page_panel.m_grid_len + 1.0);
 			y = fy / (m_page_panel.m_grid_len + 1.0);
@@ -248,20 +248,20 @@ namespace winrt::GraphPaper::implementation
 		const double dpi = m_page_dx.m_logical_dpi;
 		double g = m_page_panel.m_grid_len + 1.0;
 		wchar_t const* format;
-		switch (m_page_panel.m_page_unit) {
-		case UNIT::INCH:
+		switch (m_page_unit) {
+		case DIST_UNIT::INCH:
 			format = FMT_INCH;
 			g = g / dpi;
 			break;
-		case UNIT::MILLI:
+		case DIST_UNIT::MILLI:
 			format = FMT_MILLI;
 			g = g / dpi * MM_PER_INCH;
 			break;
-		case UNIT::POINT:
+		case DIST_UNIT::POINT:
 			format = FMT_POINT;
 			g = g / dpi * PT_PER_INCH;
 			break;
-		case UNIT::GRID:
+		case DIST_UNIT::GRID:
 			format = FMT_GRID;
 			g = 1.0;
 			break;
@@ -277,27 +277,26 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::stat_set_page(void)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
-		//const double dpi = m_page_panel.m_dx.m_logical_dpi;
 		double w = m_page_panel.m_page_size.width;// m_page_max.x - m_page_min.x;
 		double h = m_page_panel.m_page_size.height;// m_page_max.y - m_page_min.y;
 		wchar_t const* format;
-		switch (m_page_panel.m_page_unit) {
-		case UNIT::INCH:
+		switch (m_page_unit) {
+		case DIST_UNIT::INCH:
 			format = FMT_INCH;
 			w = w / dpi;
 			h = h / dpi;
 			break;
-		case UNIT::MILLI:
+		case DIST_UNIT::MILLI:
 			format = FMT_MILLI;
 			w = w / dpi * MM_PER_INCH;
 			h = h / dpi * MM_PER_INCH;
 			break;
-		case UNIT::POINT:
+		case DIST_UNIT::POINT:
 			format = FMT_POINT;
 			w = w / dpi * PT_PER_INCH;
 			h = h / dpi * PT_PER_INCH;
 			break;
-		case UNIT::GRID:
+		case DIST_UNIT::GRID:
 			format = FMT_GRID;
 			w /= m_page_panel.m_grid_len + 1.0;
 			h /= m_page_panel.m_grid_len + 1.0;
@@ -356,19 +355,19 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		wchar_t* r_key;
-		if (m_page_panel.m_page_unit == UNIT::GRID) {
+		if (m_page_unit == DIST_UNIT::GRID) {
 			r_key = L"cxi_unit_grid/Content";
 		}
-		else if (m_page_panel.m_page_unit == UNIT::INCH) {
+		else if (m_page_unit == DIST_UNIT::INCH) {
 			r_key = L"cxi_unit_inch/Content";
 		}
-		else if (m_page_panel.m_page_unit == UNIT::MILLI) {
+		else if (m_page_unit == DIST_UNIT::MILLI) {
 			r_key = L"cxi_unit_milli/Content";
 		}
-		else if (m_page_panel.m_page_unit == UNIT::PIXEL) {
+		else if (m_page_unit == DIST_UNIT::PIXEL) {
 			r_key = L"cxi_unit_pixel/Content";
 		}
-		else if (m_page_panel.m_page_unit == UNIT::POINT) {
+		else if (m_page_unit == DIST_UNIT::POINT) {
 			r_key = L"cxi_unit_point/Content";
 		}
 		else {

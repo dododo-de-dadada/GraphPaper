@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 		if (mru_token.empty()) {
 			// 要素が空の場合,
 			// 最近使ったファイルのエラーメッセージダイアログを表示する.
-			cd_message_show(ERR_RECENT, {});
+			cd_message_show(ERR_RECENT, to_hstring(i + 1));
 			return;
 		}
 		if (m_stack_push == false) {

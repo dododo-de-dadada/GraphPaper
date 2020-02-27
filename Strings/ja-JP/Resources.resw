@@ -177,9 +177,21 @@
     <value>折り返しあり</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="cx_page_unit.Header" xml:space="preserve">
-    <value>単位</value>
-    <comment>ComboBox</comment>
+  <data name="cxi_color_cen.Content" xml:space="preserve">
+    <value>パーセント</value>
+    <comment>ComboBoxItem</comment>
+  </data>
+  <data name="cxi_color_dec.Content" xml:space="preserve">
+    <value>10 進数</value>
+    <comment>ComboBoxItem</comment>
+  </data>
+  <data name="cxi_color_flt.Content" xml:space="preserve">
+    <value>実数</value>
+    <comment>ComboBoxItem</comment>
+  </data>
+  <data name="cxi_color_hex.Content" xml:space="preserve">
+    <value>16 進数</value>
+    <comment>ComboBoxItem</comment>
   </data>
   <data name="cxi_unit_grid.Content" xml:space="preserve">
     <value>方眼</value>
@@ -200,6 +212,14 @@
   <data name="cxi_unit_point.Content" xml:space="preserve">
     <value>ポイント</value>
     <comment>ComboBoxItem</comment>
+  </data>
+  <data name="cx_color_style.Header" xml:space="preserve">
+    <value>色成分の書式</value>
+    <comment>ComboBox</comment>
+  </data>
+  <data name="cx_page_unit.Header" xml:space="preserve">
+    <value>単位</value>
+    <comment>ComboBox</comment>
   </data>
   <data name="lvi_stretch_condensed.Content" xml:space="preserve">
     <value>狭め</value>

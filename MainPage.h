@@ -130,22 +130,29 @@ namespace winrt::GraphPaper::implementation
 		TOOL_RULER	// 定規
 	};
 
-	//-------------------------------
+	// 距離の単位
+	enum DIST_UNIT {
+		PIXEL,	// ピクセル
+		INCH,	// インチ
+		MILLI,	// ミリメートル
+		POINT,	// ポイント
+		GRID	// 方眼 (グリッド)
+	};
+
 	//	色成分の形式
-	//-------------------------------
 	enum COL_STYLE {
 		DEC,	// 10 進数
 		HEX,	// 16 進数	
 		FLT,	// 浮動小数
 		CEN		// パーセント
 	};
+
 	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t *buf, const uint32_t len);
 
 	//-------------------------------
 	//	メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
-		COL_STYLE m_col_style = COL_STYLE::DEC;	// 色成分の書式
 		std::mutex m_dx_mutex;		// DX のための同期プリミティブ
 
 		winrt::hstring m_mru_token;	// 最近使ったファイルのトークン
@@ -159,6 +166,8 @@ namespace winrt::GraphPaper::implementation
 		ShapePanel m_page_panel;		// ページのパネル
 		D2D1_POINT_2F m_page_min{ 0.0, 0.0 };		// パネルの左上位置 (値がマイナスのときは, 図形がページの外側にある)
 		D2D1_POINT_2F m_page_max{ 0.0, 0.0 };		// パネルの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
+		DIST_UNIT m_page_unit = DIST_UNIT::PIXEL;	// 距離の単位
+		COL_STYLE m_col_style = COL_STYLE::DEC;	// 色成分の書式
 
 		uint64_t m_click_time = 0L;		// クリックの判定時間
 		double m_click_dist = 6.0;		// クリックの判定距離
@@ -210,8 +219,6 @@ namespace winrt::GraphPaper::implementation
 		void cd_message_show(winrt::hstring const& res, winrt::hstring const& desc);
 		//	メッセージダイアログが閉じた.
 		void cd_message_closed(ContentDialog const& sender, ContentDialogClosedEventArgs const& args);
-		//	クリップボードにデータが含まれているか調べる.
-		bool clipboard_contains(winrt::hstring const c_formats[], const uint32_t c_count) const;
 		//	ページと図形を表示する.
 		void draw_page(void);
 		//	編集メニュー項目の使用の可否を設定する.
@@ -300,8 +307,6 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//	図形が持つ文字列を編集する.
-		void edit_text_of_shape(void);
-		//	図形が持つ文字列を編集する.
 		void edit_text_of_shape(ShapeText* s);
 		//	編集メニューの「文字列の編集」が選択された.
 		void mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
@@ -377,8 +382,6 @@ namespace winrt::GraphPaper::implementation
 		void btn_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　検索パネルの「置換して次に」ボタンが押された.
 		void btn_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	検索パネルを表示または非表示にする.
-		void find_show_or_hide_panel(void);
 		//　検索の値をデータリーダーから読み込む.
 		void find_read(DataReader const& dt_reader);
 		//	検索パネルから値を格納する.
@@ -473,58 +476,58 @@ namespace winrt::GraphPaper::implementation
 		//　キーアクセラレーターのハンドラー
 		//-------------------------------
 
-		//　Cntrol + PgDn が押された.
-		void ka_bring_forward_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + End が押された.
-		void ka_bring_to_front_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + C が押された.
-		void ka_copy_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + X が押された.
-		void ka_cut_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Delete が押された.
-		void ka_delete_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + E が押された.
-		void ka_edit_text_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + F が押された.
-		void ka_find_text_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + G が押された.
-		void ka_group_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + N が押された.
-		void ka_new_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + O が押された.
-		void ka_open_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + V が押された.
-		void ka_paste_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
 		//　Shft + 下矢印キーが押された.
 		void ka_range_next_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
 		//　Shift + 上矢印キーが押された.
 		void ka_range_prev_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + Y が押された.
-		void ka_redo_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + Shift + S が押された.
-		void ka_save_as_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + S が押された.
-		void ka_save_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + A が押された.
-		void ka_select_all_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
 		//　下矢印キーが押された.
 		void ka_select_next_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
 		//　上矢印キーが押された.
 		void ka_select_prev_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + PgUp が押された.
-		void ka_send_backward_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + Home が押された.
-		void ka_send_to_back_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
-		//　Cntrol + L が押された.
-		void ka_summaty_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
 		//　Escape が押された.
 		void ka_tool_select_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + PgDn が押された.
+		//void ka_bring_forward_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + End が押された.
+		//void ka_bring_to_front_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + C が押された.
+		//void ka_copy_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + X が押された.
+		//void ka_cut_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Delete が押された.
+		//void ka_delete_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + E が押された.
+		//void ka_edit_text_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + F が押された.
+		//void ka_find_text_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + G が押された.
+		//void ka_group_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + N が押された.
+		//void ka_new_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + O が押された.
+		//void ka_open_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + V が押された.
+		//void ka_paste_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + Y が押された.
+		//void ka_redo_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + Shift + S が押された.
+		//void ka_save_as_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + S が押された.
+		//void ka_save_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + A が押された.
+		//void ka_select_all_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + PgUp が押された.
+		//void ka_send_backward_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + Home が押された.
+		//void ka_send_to_back_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//　Cntrol + L が押された.
+		//void ka_summaty_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
 		//　Cntrol + Z が押された.
-		void ka_undo_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_undo_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
 		//　Cntrol + U が押された.
-		void ka_ungroup_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_ungroup_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
 		//　Cntrol + 0 が押された.
-		void ka_zoom_reset_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_zoom_reset_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
 
 		//-------------------------------
 		//	MainPage_mru.cpp
@@ -561,16 +564,18 @@ namespace winrt::GraphPaper::implementation
 		//　ページの設定
 		//-------------------------------
 
-		//　ページ寸法ダイアログの「単位」コンボボックスが変更された.
-		void cx_page_unit_changed(IInspectable const& /*sender*/, SelectionChangedEventArgs const& /*args*/);
-		//　ページ寸法ダイアログの「適用」ボタンが押された.
+		//　ページの寸法入力ダイアログの「適用」ボタンが押された.
 		void cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/);
-		//	ページ寸法ダイアログの「図形に合わせる」ボタンが押された.
+		// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
 		void cd_page_size_sec_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/);
+		//　ページの単位ダイアログの「適用」ボタンが押された.
+		void cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/);
 		//	ページメニューの「色」が選択された.
 		void mfi_page_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	ページメニューの「大きさ」が選択された
 		void mfi_page_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	ページメニューの「単位」が選択された
+		void mfi_page_unit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	値をスライダーのヘッダーに格納する.
 		template <U_OP U, int S> void page_set_slider(double val);
 		//	値をスライダーのヘッダーと図形に格納する.
@@ -625,19 +630,19 @@ namespace winrt::GraphPaper::implementation
 		void show_context_menu(void);
 
 		//-------------------------------
-		// MainPage_samp.cpp
-		// 見本ダイアログの設定, 表示
+		//	MainPage_samp.cpp
+		//	見本ダイアログの設定, 表示
 		//-------------------------------
 
-		// 見本ダイアログが開かれた.
+		//	見本ダイアログが開かれた.
 		void cd_samp_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
-		// 見本のページと見本の図形を表示する
+		//	見本のページと見本の図形を表示する
 		void draw_samp(void);
-		// 見本ダイアログをロードする.
+		//	見本ダイアログをロードする.
 		void load_cd_samp(void) { auto _{ FindName(L"cd_samp") }; }
-		// 見本のパネルがロードされた.
+		//	見本のパネルがロードされた.
 		void samp_panel_loaded(void);
-		// 見本ダイアログを表示する.
+		//	見本ダイアログを表示する.
 		void show_cd_samp(void) { auto _{ cd_samp().ShowAsync() }; }
 
 		//-------------------------------
@@ -771,8 +776,6 @@ namespace winrt::GraphPaper::implementation
 		void summary_select_head(void);
 		//	一覧の最後の項目を選択する.
 		void summary_select_tail(void);
-		//	一覧パネルを表示または非表示にする.
-		void summary_show_or_hide_panel(void);
 		//	一覧の項目を選択解除する.
 		void summary_unselect(uint32_t i);
 		//	一覧の図形を選択解除する.
@@ -905,8 +908,8 @@ namespace winrt::GraphPaper::implementation
 		//	切り取りとコピー, 貼り付け, 削除
 		//-------------------------------
 
-		// 選択された図形を削除する.
-		void delete_selected_shapes(void);
+		//	クリップボードにデータが含まれているか調べる.
+		bool clipboard_contains(winrt::hstring const c_formats[], const uint32_t c_count) const;
 		//	選択された図形をクリップボードに非同期に保存する.
 		template <uint32_t X> IAsyncAction clipboard_copy_async(void);
 		//	クリップボードに保存された図形を非同期に貼り付ける.

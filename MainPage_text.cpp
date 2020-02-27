@@ -43,9 +43,9 @@ namespace winrt::GraphPaper::implementation
 		primary_token = cd_samp().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				double val;
-				m_samp_shape->get_text_line(val);
-				undo_push_value<U_OP::TEXT_LINE>(val);
+				double samp_val;
+				m_samp_shape->get_text_line(samp_val);
+				undo_push_value<U_OP::TEXT_LINE>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -132,9 +132,9 @@ namespace winrt::GraphPaper::implementation
 		primary_token = cd_samp().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				D2D1_SIZE_F val;
-				m_samp_shape->get_text_margin(val);
-				undo_push_value<U_OP::TEXT_MARGIN>(val);
+				D2D1_SIZE_F samp_val;
+				m_samp_shape->get_text_margin(samp_val);
+				undo_push_value<U_OP::TEXT_MARGIN>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -252,26 +252,26 @@ namespace winrt::GraphPaper::implementation
 				px = val;
 			}
 			wchar_t const* format = nullptr;
-			switch (m_samp_panel.m_page_unit) {
+			switch (m_page_unit) {
 			default:
-			case UNIT::PIXEL:
+			case DIST_UNIT::PIXEL:
 				format = FMT_PIXEL_UNIT;
 				break;
-			case UNIT::INCH:
+			case DIST_UNIT::INCH:
 				format = FMT_INCH_UNIT;
 				px /= dpi;
 				break;
-			case UNIT::MILLI:
+			case DIST_UNIT::MILLI:
 				format = FMT_MILLI_UNIT;
 				px /= dpi;
 				px *= MM_PER_INCH;
 				break;
-			case UNIT::POINT:
+			case DIST_UNIT::POINT:
 				format = FMT_POINT_UNIT;
 				px /= dpi;
 				px *= PT_PER_INCH;
 				break;
-			case UNIT::GRID:
+			case DIST_UNIT::GRID:
 				format = FMT_GRID_UNIT;
 				px /= m_samp_panel.m_grid_len;
 				break;

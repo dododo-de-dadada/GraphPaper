@@ -101,6 +101,7 @@
             <x:String x:Key="data_arrow_filled">
                 M0, 8 L3, 8 L3, 5.48 L16, 8.5 L3, 11.52 L3,9 L0, 9 Z
             </x:String>
+            <PathIcon x:Key="icon_dash" Data="{StaticResource data_dash}" Width="16" Height="16" />
             <!-- 均等アイコンの描画コマンド -->
             <!--
             <x:String x:Key="data_align_justified">
@@ -213,40 +214,13 @@
                 <MenuFlyoutSubItem x:Uid="mfsi_text_align_t" Text="Text Alignment">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left_2" x:Uid="rmfi_text_align_left" Click="rmfi_text_align_left_click" Text="Left" GroupName="gn_text_align_t"/>
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right_2" x:Uid="rmfi_text_align_right" Click="rmfi_text_align_right_click" Text="Right" GroupName="gn_text_align_t"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center_2" x:Uid="rmfi_text_align_center" Click="rmfi_text_align_center_click" Text="Center" GroupName="gn_text_align_t"></muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center_2" x:Uid="rmfi_text_align_center" Click="rmfi_text_align_center_click" Text="Center" GroupName="gn_text_align_t" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_justified_2" x:Uid="rmfi_text_align_justified" Click="rmfi_text_align_justified_click" Text="Justified" GroupName="gn_text_align_t" />
-                    <!--
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left_2" x:Uid="rmfi_text_align_left" Click="rmfi_text_align_left_click" Icon="AlignLeft"  Text="Left" GroupName="gn_text_align_t"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right_2" x:Uid="rmfi_text_align_right" Click="rmfi_text_align_right_click" Icon="AlignRight"  Text="Right" GroupName="gn_text_align_t"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center_2" x:Uid="rmfi_text_align_center" Click="rmfi_text_align_center_click" Icon="AlignCenter"  Text="Center" GroupName="gn_text_align_t"></muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_justified_2" x:Uid="rmfi_text_align_justified" Click="rmfi_text_align_justified_click" Text="Justified" GroupName="gn_text_align_t">
-                        <muxc:RadioMenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_align_justified}" VerticalAlignment="Center" Width="16" Height="16" />
-                        </muxc:RadioMenuFlyoutItem.Icon>
-                    </muxc:RadioMenuFlyoutItem>
-                    -->
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_text_align_p" Text="Paragraph Alignment">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top_2" x:Uid="rmfi_text_align_top" Click="rmfi_text_align_top_click" Text="Top" GroupName="gn_text_align_p" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bottom_2" x:Uid="rmfi_text_align_bottom" Click="rmfi_text_align_bottom_click" Text="Bottom" GroupName="gn_text_align_p" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_middle_2" x:Uid="rmfi_text_align_middle" Click="rmfi_text_align_middle_click" Text="Middle" GroupName="gn_text_align_p" />
-                    <!--
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top_2" x:Uid="rmfi_text_align_top" Click="rmfi_text_align_top_click" Text="Top" GroupName="gn_text_align_p">
-                        <muxc:RadioMenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_align_top}" VerticalAlignment="Center" Width="16" Height="16" />
-                        </muxc:RadioMenuFlyoutItem.Icon>
-                    </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bottom_2" x:Uid="rmfi_text_align_bottom" Click="rmfi_text_align_bottom_click" Text="Bottom" GroupName="gn_text_align_p">
-                        <muxc:RadioMenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_align_bot}" VerticalAlignment="Center" Width="16" Height="16" />
-                        </muxc:RadioMenuFlyoutItem.Icon>
-                    </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_middle_2" x:Uid="rmfi_text_align_middle" Click="rmfi_text_align_middle_click" Text="Middle" GroupName="gn_text_align_p">
-                        <muxc:RadioMenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_align_mid}" VerticalAlignment="Center" Width="16" Height="16" />
-                        </muxc:RadioMenuFlyoutItem.Icon>
-                    </muxc:RadioMenuFlyoutItem>
-                    -->
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_text_line" Text="Line Spacing">
                     <MenuFlyoutItem x:Name="mfi_text_line_contract_2" x:Uid="mfi_text_line_contract" Click="mfi_text_line_contract_click" Text="Condense" />
@@ -279,14 +253,15 @@
                     <MenuFlyoutItem x:Name="mfi_zoom_in_2" x:Uid="mfi_zoom_in" Click="mfi_zoom_in_clicked" Icon="ZoomIn" Text="In" />
                     <MenuFlyoutItem x:Name="mfi_zoom_out_2" x:Uid="mfi_zoom_out" Click="mfi_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Name="mfi_zoom_reset_2" x:Uid="mfi_zoom_reset" Click="mfi_zoom_reset_click" Icon="Zoom" Text="Reset" />
+                    <MenuFlyoutItem x:Name="mfi_zoom_reset_2" x:Uid="mfi_zoom_reset" Click="mfi_zoom_reset_click" KeyboardAcceleratorTextOverride="Ctrl+0" Icon="Zoom" Text="Reset" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Name="mfi_page_size_2" x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
                 <MenuFlyoutItem x:Name="mfi_page_color_2" x:Uid="mfi_page_color" Click="mfi_page_color_click" Text="Color..." />
+                <MenuFlyoutItem x:Name="mfi_page_unit_2" x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />
             </MenuFlyout>
             <!-- グループコンテキストメニュー -->
             <MenuFlyout x:Key="mf_ungroup">
-                <MenuFlyoutItem x:Name="mfi_ungroup_2" x:Uid="mfi_ungroup" Click="mfi_ungroup_click" Text="Ungroup" >
+                <MenuFlyoutItem x:Name="mfi_ungroup_2" x:Uid="mfi_ungroup" Click="mfi_ungroup_click" KeyboardAcceleratorTextOverride="Ctrl+U" Text="Ungroup" >
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_ungroup}" VerticalAlignment="Center" Width="16" Height="16"  />
                     </MenuFlyoutItem.Icon>
@@ -308,13 +283,28 @@
         <muxc:MenuBar Grid.Row="0" Grid.ColumnSpan="2" Background="{ThemeResource SystemBaseLowColor}">
             <!-- ファイルメニュー -->
             <muxc:MenuBarItem x:Uid="mbi_file" AccessKey="F" Title="File">
-                <MenuFlyoutItem x:Name="mfi_new" x:Uid="mfi_new" Click="mfi_new_click" Icon="Page2" KeyboardAcceleratorTextOverride="Ctrl+N" Text="New" />
-                <MenuFlyoutItem x:Name="mfi_open" x:Uid="mfi_open" Click="mfi_open_click" Icon="OpenFile" KeyboardAcceleratorTextOverride="Ctrl+O" Text="Open..." />
-                <MenuFlyoutItem x:Name="mfi_save" x:Uid="mfi_save" Click="mfi_save_click" Icon="Save" KeyboardAcceleratorTextOverride="Ctrl+S" Text="Save" />
-                <MenuFlyoutItem x:Name="mfi_save_as" x:Uid="mfi_save_as" Click="mfi_save_as_click" KeyboardAcceleratorTextOverride="Ctrl+Shift+S" Text="Save As..." >
+                <MenuFlyoutItem x:Name="mfi_new" x:Uid="mfi_new" Click="mfi_new_click" Icon="Page2" Text="New" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="N" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_open" x:Uid="mfi_open" Click="mfi_open_click" Icon="OpenFile" Text="Open...">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="O" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_save" x:Uid="mfi_save" Click="mfi_save_click" Icon="Save" Text="Save" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="S" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_save_as" x:Uid="mfi_save_as" Click="mfi_save_as_click" Text="Save As..." >
                     <MenuFlyoutItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE792;" />
                     </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_recent_files" Text="Recent Files">
@@ -332,42 +322,97 @@
             </muxc:MenuBarItem>
             <!-- 編集メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_edit" AccessKey="E" Title="Edit">
-                <MenuFlyoutItem x:Name="mfi_undo" x:Uid="mfi_undo" Click="mfi_undo_click" Icon="Undo" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Z" Text="Undo" />
-                <MenuFlyoutItem x:Name="mfi_redo" x:Uid="mfi_redo" Click="mfi_redo_click" Icon="Redo" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Y" Text="Redo" />
-                <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_cut" x:Uid="mfi_cut" Click="mfi_cut_click" Icon="Cut" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+X" Text="Cut" />
-                <MenuFlyoutItem x:Name="mfi_copy" x:Uid="mfi_copy" Click="mfi_copy_click" Icon="Copy" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+C" Text="Copy" />
-                <MenuFlyoutItem x:Name="mfi_paste" x:Uid="mfi_paste" Click="mfi_paste_click" Icon="Paste" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+V" Text="Paste" />
-                <MenuFlyoutItem x:Name="mfi_delete" x:Uid="mfi_delete" Click="mfi_delete_click" Icon="Delete" IsEnabled="False" KeyboardAcceleratorTextOverride="Del" Text="Delete" />
-                <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_select_all" x:Uid="mfi_select_all" Click="mfi_select_all_click" Icon="SelectAll" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+A" Text="Select All" />
-                <MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="mfi_bring_to_front_click" IsEnabled="false" KeyboardAcceleratorTextOverride="Ctrl+End" Text="Bring to Front" />
-                <MenuFlyoutItem x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward" Click="mfi_bring_forward_click" IsEnabled="false" KeyboardAcceleratorTextOverride="Ctrl+PgDn" Text="Bring Forward" />
-                <MenuFlyoutItem x:Name="mfi_send_backward" x:Uid="mfi_send_backward" Click="mfi_send_backward_click" IsEnabled="false" KeyboardAcceleratorTextOverride="Ctrl+PgUp" Text="Send Backward" />
-                <MenuFlyoutItem x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back" Click="mfi_send_to_back_click" IsEnabled="false" KeyboardAcceleratorTextOverride="Ctrl+Home" Text="Send to Back"/>
-                <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_group" x:Uid="mfi_group" Click="mfi_group_click" IsEnabled="false" KeyboardAcceleratorTextOverride="Ctrl+G" Text="Group" >
-                    <MenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_group}" VerticalAlignment="Center" Width="16" Height="16"  />
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_ungroup" x:Uid="mfi_ungroup" Click="mfi_ungroup_click" IsEnabled="false" KeyboardAcceleratorTextOverride="Ctrl+U" Text="Ungroup" >
-                    <MenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_ungroup}" VerticalAlignment="Center" Width="16" Height="16"  />
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
-                <MenuFlyoutSeparator />
-                <!--
-                <MenuFlyoutItem x:Name="mfi_summary" x:Uid="mfi_summary" Click="mfi_summary_click" Icon="List" IsEnabled="false" KeyboardAcceleratorTextOverride="Ctrl+L" Text="Shape List" >
-                -->
-                <MenuFlyoutItem x:Name="mfi_summary" x:Uid="mfi_summary" Click="mfi_summary_click" Icon="List" IsEnabled="false" Text="Shape List" >
+                <MenuFlyoutItem x:Name="mfi_undo" x:Uid="mfi_undo" Click="mfi_undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
                     <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Invoked="ka_summaty_invoked" Key="L" Modifiers="Control" />
+                        <KeyboardAccelerator Key="Z" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_redo" x:Uid="mfi_redo" Click="mfi_redo_click" Icon="Redo" IsEnabled="False" Text="Redo" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Y" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="mfi_edit_text_click" Icon="Edit" KeyboardAcceleratorTextOverride="Ctrl+E" Text="Edit Text" />
-                <MenuFlyoutItem x:Name="mfi_find_text" x:Uid="mfi_find_text" Click="mfi_find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text" />
+                <MenuFlyoutItem x:Name="mfi_cut" x:Uid="mfi_cut" Click="mfi_cut_click" Icon="Cut" IsEnabled="False" Text="Cut" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="X" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_copy" x:Uid="mfi_copy" Click="mfi_copy_click" Icon="Copy" IsEnabled="False" Text="Copy" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="C" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_paste" x:Uid="mfi_paste" Click="mfi_paste_click" Icon="Paste" IsEnabled="False" Text="Paste" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="V" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_delete" x:Uid="mfi_delete" Click="mfi_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Delete" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Name="mfi_select_all" x:Uid="mfi_select_all" Click="mfi_select_all_click" Icon="SelectAll" IsEnabled="False" Text="Select All" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="A" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="mfi_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="End" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward" Click="mfi_bring_forward_click" IsEnabled="false" Text="Bring Forward">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="PageDown" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_send_backward" x:Uid="mfi_send_backward" Click="mfi_send_backward_click" IsEnabled="false" Text="Send Backward" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="PageUp" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back" Click="mfi_send_to_back_click" IsEnabled="false" Text="Send to Back">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Home" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Name="mfi_group" x:Uid="mfi_group" Click="mfi_group_click" IsEnabled="false" Text="Group" >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_group}" VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="G" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_ungroup" x:Uid="mfi_ungroup" Click="mfi_ungroup_click" IsEnabled="false" Text="Ungroup" >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon  Data="{StaticResource data_ungroup}" VerticalAlignment="Center" Width="16" Height="16"  />
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="U" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Name="mfi_summary" x:Uid="mfi_summary" Click="mfi_summary_click" Icon="List" IsEnabled="false" Text="Shape List" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="L" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="mfi_edit_text_click" Icon="Edit" Text="Edit Text" >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="E" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_find_text" x:Uid="mfi_find_text" Click="mfi_find_text_click" Icon="Find" Text="Find/Replace Text">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="F" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
             </muxc:MenuBarItem>
             <!-- 図形ツールメニュー -->
             <muxc:MenuBarItem x:Uid="mbi_tool" AccessKey="O" Title="Tool">
@@ -497,38 +542,11 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="rmfi_text_align_right_click" Text="Right" GroupName="gn_text_align_t"/>
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="rmfi_text_align_center_click" Text="Center" GroupName="gn_text_align_t"/>
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_justified" x:Uid="rmfi_text_align_justified" Click="rmfi_text_align_justified_click" Text="Justified" GroupName="gn_text_align_t" />
-                    <!--
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left" x:Uid="rmfi_text_align_left" Click="rmfi_text_align_left_click" Icon="AlignLeft" Text="Left" GroupName="gn_text_align_t"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="rmfi_text_align_right_click" Icon="AlignRight" Text="Right" GroupName="gn_text_align_t"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="rmfi_text_align_center_click" Icon="AlignCenter" Text="Center" GroupName="gn_text_align_t"/>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_justified" x:Uid="rmfi_text_align_justified" Click="rmfi_text_align_justified_click" Text="Justified" GroupName="gn_text_align_t">
-                        <muxc:RadioMenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_align_justified}" VerticalAlignment="Center" Width="16" Height="16" />
-                        </muxc:RadioMenuFlyoutItem.Icon>
-                    </muxc:RadioMenuFlyoutItem>
-                    -->
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_text_align_p" Text="Paragraph Alignment">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="rmfi_text_align_top_click" Text="Top" GroupName="gn_text_align_p" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bottom" x:Uid="rmfi_text_align_bottom" Click="rmfi_text_align_bottom_click" Text="Bottom" GroupName="gn_text_align_p" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_middle" x:Uid="rmfi_text_align_middle" Click="rmfi_text_align_middle_click" Text="Middle" GroupName="gn_text_align_p" />
-                    <!--
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="rmfi_text_align_top_click" Text="Top" GroupName="gn_text_align_p">
-                        <muxc:RadioMenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_align_top}" VerticalAlignment="Center" Width="16" Height="16" />
-                        </muxc:RadioMenuFlyoutItem.Icon>
-                    </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bottom" x:Uid="rmfi_text_align_bottom" Click="rmfi_text_align_bottom_click" Text="Bottom" GroupName="gn_text_align_p">
-                        <muxc:RadioMenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_align_bot}" VerticalAlignment="Center" Width="16" Height="16" />
-                        </muxc:RadioMenuFlyoutItem.Icon>
-                    </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_middle" x:Uid="rmfi_text_align_middle" Click="rmfi_text_align_middle_click" Text="Middle" GroupName="gn_text_align_p">
-                        <muxc:RadioMenuFlyoutItem.Icon>
-                            <PathIcon Data="{StaticResource data_align_mid}" VerticalAlignment="Center" Width="16" Height="16" />
-                        </muxc:RadioMenuFlyoutItem.Icon>
-                    </muxc:RadioMenuFlyoutItem>
-                    -->
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_text_line" Text="Line Spacing">
                     <MenuFlyoutItem x:Name="mfi_text_line_contract" x:Uid="mfi_text_line_contract" Click="mfi_text_line_contract_click" Text="Condense" />
@@ -563,20 +581,17 @@
                     <MenuFlyoutItem x:Name="mfi_zoom_in" x:Uid="mfi_zoom_in" Click="mfi_zoom_in_clicked" Icon="ZoomIn" Text="In" />
                     <MenuFlyoutItem x:Name="mfi_zoom_out" x:Uid="mfi_zoom_out" Click="mfi_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Name="mfi_zoom_reset" x:Uid="mfi_zoom_reset" Click="mfi_zoom_reset_click" Icon="Zoom" KeyboardAcceleratorTextOverride="Ctrl+0" Text="Reset" />
+                    <MenuFlyoutItem x:Name="mfi_zoom_reset" x:Uid="mfi_zoom_reset" Click="mfi_zoom_reset_click" Icon="Zoom" Text="Reset">
+                        <MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Number0" Modifiers="Control"/>
+                            <KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
+                        </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <!--
-                <MenuFlyoutSubItem x:Uid="mfsi_page_unit" Text="Unit">
-                    <ToggleMenuFlyoutItem x:Name="rmfi_unit_pixel" x:Uid="rmfi_unit_pixel" Click="rmfi_unit_pixel_click" Text="pixel" />
-                    <ToggleMenuFlyoutItem x:Name="rmfi_unit_milli" x:Uid="rmfi_unit_milli" Click="rmfi_unit_milli_click" Text="mm" />
-                    <ToggleMenuFlyoutItem x:Name="rmfi_unit_inch" x:Uid="rmfi_unit_inch" Click="rmfi_unit_inch_click" Text="inch" />
-                    <ToggleMenuFlyoutItem x:Name="rmfi_unit_point" x:Uid="rmfi_unit_point" Click="rmfi_unit_point_click" Text="point" />
-                </MenuFlyoutSubItem>
-                <MenuFlyoutSeparator />
-                -->
                 <!-- ページパネルメニュー -->
                 <MenuFlyoutItem x:Name="mfi_page_size" x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
                 <MenuFlyoutItem x:Name="mfi_page_color" x:Uid="mfi_page_color" Click="mfi_page_color_click" Text="Color..." />
+                <MenuFlyoutItem x:Name="mfi_page_unit" x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />
                 <MenuFlyoutSeparator />
                 <!-- ステータスバーメニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_stat_bar" Text="Status Bar">
@@ -650,22 +665,23 @@
                 されてしまう。つまり, メンバ変数にアクセスできない。
                 -->
                 <SwapChainPanel.KeyboardAccelerators>
+                    <KeyboardAccelerator Invoked="ka_range_next_invoked" Key="Down" Modifiers="Shift" />
+                    <KeyboardAccelerator Invoked="ka_range_prev_invoked" Key="Up" Modifiers="Shift" />
+                    <KeyboardAccelerator Invoked="ka_tool_select_invoked" Key="Escape" />
+                    <KeyboardAccelerator Invoked="ka_select_prev_invoked" Key="Up" />
+                    <KeyboardAccelerator Invoked="ka_select_next_invoked" Key="Down" />
+                    <!--
                     <KeyboardAccelerator Invoked="ka_select_all_invoked" Key="A" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_copy_invoked" Key="C" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_delete_invoked" Key="Delete" />
-                    <KeyboardAccelerator Invoked="ka_select_next_invoked" Key="Down" />
-                    <KeyboardAccelerator Invoked="ka_range_next_invoked" Key="Down" Modifiers="Shift" />
                     <KeyboardAccelerator Invoked="ka_edit_text_invoked" Key="E" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_bring_to_front_invoked" Key="End" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_bring_forward_invoked" Key="PageDown" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_tool_select_invoked" Key="Escape" />
                     <KeyboardAccelerator Invoked="ka_find_text_invoked" Key="F" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_group_invoked" Key="G" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_send_to_back_invoked" Key="Home" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_send_backward_invoked" Key="PageUp" Modifiers="Control" />
-                    <!--
                     <KeyboardAccelerator Invoked="ka_summaty_invoked" Key="L" Modifiers="Control" />
-                    -->
                     <KeyboardAccelerator Invoked="ka_new_invoked" Key="N" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_zoom_reset_invoked" Key="Number0" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_zoom_reset_invoked" Key="NumberPad0" Modifiers="Control" />
@@ -673,12 +689,11 @@
                     <KeyboardAccelerator Invoked="ka_save_invoked" Key="S" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_save_as_invoked" Key="S" Modifiers="Control,Shift" />
                     <KeyboardAccelerator Invoked="ka_ungroup_invoked" Key="U" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_select_prev_invoked" Key="Up" />
-                    <KeyboardAccelerator Invoked="ka_range_prev_invoked" Key="Up" Modifiers="Shift" />
                     <KeyboardAccelerator Invoked="ka_paste_invoked" Key="V" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_cut_invoked" Key="X" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_redo_invoked" Key="Y" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_undo_invoked" Key="Z" Modifiers="Control" />
+                    -->
                 </SwapChainPanel.KeyboardAccelerators>
             </SwapChainPanel>
             <ScrollBar x:Name="sb_horz" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,16,0" Orientation="Horizontal" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Scroll="sb_scroll" Visibility="Visible" Width="Auto" />
@@ -758,17 +773,28 @@
             </StackPanel>
         </ContentDialog>
         -->
-        <!-- ページの大きさ入力ダイアログ -->
+        <!-- ページの寸法入力ダイアログ -->
         <ContentDialog x:Name="cd_page_size" x:Uid="cd_page_size" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonClick="cd_page_size_pri_btn_click" PrimaryButtonText="Apply" SecondaryButtonClick="cd_page_size_sec_btn_click" SecondaryButtonText="Adjust to Shapes">
             <StackPanel>
                 <TextBox x:Name="tx_page_width" x:Uid="tx_page_width" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="tx_page_size_text_changed" />
                 <TextBox x:Name="tx_page_height" x:Uid="tx_page_height" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="tx_page_size_text_changed" />
-                <ComboBox x:Name="cx_page_unit" x:Uid="cx_page_unit" Header="Unit" SelectionChanged="cx_page_unit_changed" >
+            </StackPanel>
+        </ContentDialog>
+        <!-- ページの単位ダイアログ -->
+        <ContentDialog x:Name="cd_page_unit" x:Uid="cd_page_unit" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonClick="cd_page_unit_pri_btn_click" PrimaryButtonText="Apply" >
+            <StackPanel>
+                <ComboBox x:Name="cx_page_unit" x:Uid="cx_page_unit" Header="Distance unit" >
                     <ComboBoxItem x:Uid="cxi_unit_pixel" Content="Pixel" />
                     <ComboBoxItem x:Uid="cxi_unit_inch" Content="Inch" />
                     <ComboBoxItem x:Uid="cxi_unit_milli" Content="Millimeter" />
                     <ComboBoxItem x:Uid="cxi_unit_point" Content="Point" />
                     <ComboBoxItem x:Uid="cxi_unit_grid" Content="Grid" />
+                </ComboBox>
+                <ComboBox x:Name="cx_color_style" x:Uid="cx_color_style" Header="Color component format" >
+                    <ComboBoxItem x:Uid="cxi_color_dec" Content="Decimal" />
+                    <ComboBoxItem x:Uid="cxi_color_hex" Content="Hexadecimal" />
+                    <ComboBoxItem x:Uid="cxi_color_flt" Content="Real number" />
+                    <ComboBoxItem x:Uid="cxi_color_cen" Content="Percent" />
                 </ComboBox>
             </StackPanel>
         </ContentDialog>
@@ -814,7 +840,7 @@
                 <Slider x:Name="slider0" x:Uid = "slider0" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignLeftWith="scp_samp_panel" RelativePanel.AlignRightWith="scp_samp_panel" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="slider1" x:Uid = "slider1" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="slider0" RelativePanel.AlignLeftWith="scp_samp_panel" RelativePanel.AlignRightWith="scp_samp_panel" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="slider2" x:Uid = "slider2" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="slider1" RelativePanel.AlignLeftWith="scp_samp_panel" RelativePanel.AlignRightWith="scp_samp_panel" StepFrequency="1" Visibility="Collapsed" />
-                <Slider x:Name="slider3" x:Uid = "slider3" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="slider2" RelativePanel.AlignLeftWith="scp_samp_panel" RelativePanel.AlignRightWith="scp_samp_panel"  StepFrequency="1" Visibility="Collapsed" />
+                <Slider x:Name="slider3" x:Uid = "slider3" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="slider2" RelativePanel.AlignLeftWith="scp_samp_panel" RelativePanel.AlignRightWith="scp_samp_panel" StepFrequency="1" Visibility="Collapsed" />
             </RelativePanel>
         </ContentDialog>
     </Grid>

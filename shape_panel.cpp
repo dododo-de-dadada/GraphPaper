@@ -293,13 +293,6 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// ページの単位を得る.
-	bool ShapePanel::get_page_unit(UNIT& val) const noexcept
-	{
-		val = m_page_unit;
-		return true;
-	}
-
 	// 線枠の色を得る.
 	bool ShapePanel::get_stroke_color(D2D1_COLOR_F& val) const noexcept
 	{
@@ -369,7 +362,8 @@ namespace winrt::GraphPaper::implementation
 		read(m_page_color, dt_reader);
 		m_page_scale = dt_reader.ReadDouble();
 		read(m_page_size, dt_reader);
-		read(m_page_unit, dt_reader);
+uint32_t dummy;
+read(dummy, dt_reader);
 
 		read(m_arrow_size, dt_reader);	// 矢じりの寸法
 		read(m_arrow_style, dt_reader);	// 矢じりの形式
@@ -492,12 +486,6 @@ namespace winrt::GraphPaper::implementation
 		m_page_size = val;
 	}
 
-	// 値をページの単位に格納する.
-	void ShapePanel::set_page_unit(const UNIT val) noexcept
-	{
-		m_page_unit = val;
-	}
-
 	// 線枠の色に格納する.
 	void ShapePanel::set_stroke_color(const D2D1_COLOR_F& val) noexcept
 	{
@@ -590,7 +578,8 @@ namespace winrt::GraphPaper::implementation
 		write(m_page_color, dt_writer);
 		dt_writer.WriteDouble(m_page_scale);
 		write(m_page_size, dt_writer);
-		write(m_page_unit, dt_writer);
+uint32_t dummy = 0;
+write(dummy, dt_writer);
 
 		write(m_arrow_size, dt_writer);	// 矢じりの寸法
 		write(m_arrow_style, dt_writer);	// 矢じりの形式

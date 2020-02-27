@@ -126,15 +126,6 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_RULER		// 定規
 	};
 
-	// 単位
-	enum struct UNIT {
-		PIXEL,	// ピクセル
-		INCH,	// インチ
-		MILLI,	// ミリメートル
-		POINT,	// ポイント
-		GRID	// 方眼 (グリッド)
-	};
-
 	// 矢じりの寸法
 	struct ARROW_SIZE {
 		float m_width = 7.0f;		// 返しの幅
@@ -210,8 +201,6 @@ namespace winrt::GraphPaper::implementation
 	bool equal(const STROKE_PATTERN& a, const STROKE_PATTERN& b) noexcept;
 	// 32 ビット整数が同じか調べる.
 	bool equal(const uint32_t a, const uint32_t b) noexcept;
-	// 単位が同じか調べる.
-	bool equal(const UNIT a, const UNIT b) noexcept;
 	// ワイド文字列が同じか調べる.
 	bool equal(const wchar_t* a, const wchar_t* b) noexcept;
 	// winrt 文字列が同じか調べる.
@@ -300,8 +289,6 @@ namespace winrt::GraphPaper::implementation
 	void read(STROKE_PATTERN& val, DataReader const& dt_reader);
 	// 32 ビット整数をデータリーダーから読み込む.
 	void read(uint32_t& val, DataReader const& dt_reader);
-	// 単位をデータリーダーから読み込む.
-	void read(UNIT& val, DataReader const& dt_reader);
 	// 文字列をデータリーダーから読み込む.
 	void read(wchar_t*& val, DataReader const& dt_reader);
 	// 文字列を複製する. 元の文字列がヌルポインター, または元の文字数が 0 のときは, ヌルポインターを返す.
@@ -342,8 +329,6 @@ namespace winrt::GraphPaper::implementation
 	void write(const STROKE_PATTERN& val, DataWriter const& dt_writer);
 	// 32 ビット整数をデータライターに書き込む.
 	void write(const uint32_t val, DataWriter const& dt_writer);
-	// 単位をデータライターに書き込む.
-	void write(const UNIT val, DataWriter const& dt_writer);
 	// 文字列をデータライターに書き込む.
 	void write(const wchar_t* val, DataWriter const& dt_writer);
 	// シングルバイト文字列をデータライターに SVG として書き込む.
@@ -352,8 +337,6 @@ namespace winrt::GraphPaper::implementation
 	void write_svg(const wchar_t* val, const uint32_t v_len, DataWriter const& dt_writer);
 	// 属性名とシングルバイト文字列をデータライターに SVG として書き込む.
 	void write_svg(const char* val, const char* name, DataWriter const& dt_writer);
-	// 寸法と単位をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_SIZE_F val, const UNIT unit, const double dpi, DataWriter const& dt_writer);
 	// 命令と位置をデータライターに SVG として書き込む.
 	void write_svg(const D2D1_POINT_2F val, const char* cmd, DataWriter const& dt_writer);
 	// 属性名と位置をデータライターに SVG として書き込む.
@@ -421,7 +404,7 @@ namespace winrt::GraphPaper::implementation
 		// ページの大きさを得る.
 		virtual bool get_page_size(D2D1_SIZE_F& /*val*/) const noexcept { return false; }
 		// 単位を得る.
-		virtual bool get_page_unit(UNIT& /*val*/) const noexcept { return false; }
+		//virtual bool get_page_unit(UNIT& /*val*/) const noexcept { return false; }
 		// 指定された部位の位置を得る.
 		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F&/*val*/) const noexcept {}
 		// 始点を得る
@@ -490,8 +473,6 @@ namespace winrt::GraphPaper::implementation
 		virtual void set_page_scale(const double /*val*/) noexcept {}
 		// 値をページの大きさに格納する.
 		virtual void set_page_size(const D2D1_SIZE_F /*val*/) noexcept {}
-		// 値をページの単位に格納する.
-		virtual void set_page_unit(const UNIT /*val*/) noexcept {}
 		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
 		virtual void set_pos(const D2D1_POINT_2F /*val*/, const ANCH_WHICH /*a*/) {}
 		// 値を選択フラグに格納する.
@@ -579,7 +560,6 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_page_color = S_WHITE;	// 背景色 (MainPage のコンストラクタで設定)
 		double m_page_scale = 1.0;	// ページの拡大率
 		D2D1_SIZE_F	m_page_size{ 8.27f * 96.0f, 11.69f * 96.0f };	// ページの大きさ (MainPage のコンストラクタで設定)
-		UNIT m_page_unit = UNIT::PIXEL;	// 単位
 
 		// 図形の属性
 		ARROW_SIZE m_arrow_size{ 7.0f, 16.0f, 0.0f };	// 矢じりの寸法
@@ -641,7 +621,7 @@ namespace winrt::GraphPaper::implementation
 		// ページの拡大率を得る.
 		bool get_page_scale(double& val) const noexcept;
 		// ページの単位を得る.
-		bool get_page_unit(UNIT& val) const noexcept;
+		//bool get_page_unit(UNIT& val) const noexcept;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& val) const noexcept;
 		// 塗りつぶし色を得る.
@@ -692,8 +672,6 @@ namespace winrt::GraphPaper::implementation
 		void set_page_size(const D2D1_SIZE_F val) noexcept;
 		// 値をページの拡大率に格納する.
 		void set_page_scale(const double val) noexcept;
-		// 値をページの単位に格納する.
-		void set_page_unit(const UNIT val) noexcept;
 		// 値を矢じりの寸法に格納する.
 		void set_arrow_size(const ARROW_SIZE& val);
 		// 値を矢じりの形式に格納する.

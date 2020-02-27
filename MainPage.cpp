@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 			swprintf_s(buf, len, L"%02x", static_cast<uint32_t>(std::round(val)));
 		}
 		else if (style == COL_STYLE::FLT) {
-			swprintf_s(buf, len, L"%.3lf", val / COLOR_MAX);
+			swprintf_s(buf, len, L"%.4lf", val / COLOR_MAX);
 		}
 		else if (style == COL_STYLE::CEN) {
 			swprintf_s(buf, len, L"%.1lf%%", val / COLOR_MAX * 100.0);
@@ -47,6 +47,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialog;
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
 		const wchar_t QUOT[] = L"\"";	// 引用符
 		const wchar_t NL[] = L"\u2028";	// テキストブロック内での改行
 		const wchar_t CLOSE[] = L"str_close";	// 「閉じる」文字列のリソース名
@@ -56,14 +57,22 @@ namespace winrt::GraphPaper::implementation
 		//	リソースローダーを得る.
 		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		//	表示する文字列をリソースローダーから得る.
-		auto cont = r_loader.GetString(msg);
+		winrt::hstring cont;
+		try {
+			cont = r_loader.GetString(msg);
+		}
+		catch (winrt::hresult_error const&) {}
 		if (cont.empty()) {
 			//	文字列が空の場合,
 			//	リソース名をそのまま表示する文字列に格納する.
 			cont = msg;
 		}
 		//	説明文をリソースローダーから得る.
-		auto b = r_loader.GetString(desc);
+		winrt::hstring b;
+		try {
+			b = r_loader.GetString(desc);
+		}
+		catch (winrt::hresult_error const&) {}
 		if (b.empty()) {
 			if (desc.empty() == false) {
 				//	説明文が空でない場合,
@@ -80,6 +89,8 @@ namespace winrt::GraphPaper::implementation
 		dialog.Content(box_value(cont));
 		//	ダイアログのクローズボタンに「閉じる」文字列を格納する.
 		dialog.CloseButtonText(close);
+		//	クローズボタンを既定のボタンに設定する.
+		dialog.DefaultButton(ContentDialogButton::Close);
 		//	ダイアログを非同期に表示する.
 		auto _{ dialog.ShowAsync() };
 	}
@@ -398,7 +409,6 @@ namespace winrt::GraphPaper::implementation
 			m_page_panel.m_grid_len = static_cast<double>(GRIDLEN_PX) - 1.0;
 			m_page_panel.m_page_size.width = std::floor(A4_PER_INCH.width * dpi);
 			m_page_panel.m_page_size.height = std::floor(A4_PER_INCH.height * dpi);
-			m_page_panel.m_page_unit = UNIT::PIXEL;
 			// 色の初期値はテーマに依存する.
 			D2D1_COLOR_F b_col;
 			D2D1_COLOR_F f_col;
@@ -464,6 +474,8 @@ namespace winrt::GraphPaper::implementation
 			m_page_min.y = 0.0;
 			m_page_max.x = m_page_panel.m_page_size.width;
 			m_page_max.y = m_page_panel.m_page_size.height;
+			m_page_unit = DIST_UNIT::PIXEL;
+			m_col_style = COL_STYLE::DEC;
 		}
 		/*
 		try {

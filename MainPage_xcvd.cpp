@@ -214,7 +214,8 @@ namespace winrt::GraphPaper::implementation
 		auto _{ clipboard_copy_async<CUT>() };
 	}
 
-	void MainPage::delete_selected_shapes(void)
+	// 編集メニューの「削除」が選択された.
+	void MainPage::mfi_delete_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		S_LIST_T sel_list;
 		s_list_select<Shape>(m_list_shapes, sel_list);
@@ -234,12 +235,6 @@ namespace winrt::GraphPaper::implementation
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		draw_page();
-	}
-
-	// 編集メニューの「削除」が選択された.
-	void MainPage::mfi_delete_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		delete_selected_shapes();
 	}
 
 	// 編集メニューの「貼り付け」が選択された.

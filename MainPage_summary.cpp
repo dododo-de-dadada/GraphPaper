@@ -173,27 +173,19 @@ namespace winrt::GraphPaper::implementation
 		draw_page();
 	}
 
-	//	一覧パネルを表示または非表示にする.
-	void MainPage::summary_show_or_hide_panel(void)
+	// 編集メニューの「リストを表示」が選択された.
+	void MainPage::mfi_summary_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		if (m_summary_visible) {
 			summary_close();
 			return;
 		}
 		if (sp_find_text().Visibility() == VISIBLE) {
-			find_show_or_hide_panel();
-			//mfi_find_text_click(nullptr, nullptr);
+			mfi_find_text_click(nullptr, nullptr);
 		}
 		auto _{ FindName(L"rp_summary") };
 		rp_summary().Visibility(VISIBLE);
 		m_summary_visible = true;
-
-	}
-
-	// 編集メニューの「リストを表示」が選択された.
-	void MainPage::mfi_summary_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		summary_show_or_hide_panel();
 	}
 
 	// 図形を一覧に追加する.

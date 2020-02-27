@@ -143,6 +143,7 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token slider1_token;
 		static winrt::event_token slider2_token;
 		static winrt::event_token slider3_token;
+		//static winrt::event_token c_style_token;
 		static winrt::event_token primary_token;
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
@@ -156,6 +157,7 @@ namespace winrt::GraphPaper::implementation
 		slider1().Value(val1);
 		slider2().Value(val2);
 		slider3().Value(val3);
+		//cx_color_style().SelectedIndex(m_page_panel.m_col_style);
 		font_set_slider<U_OP::FONT_COLOR, 0>(val0);
 		font_set_slider<U_OP::FONT_COLOR, 1>(val1);
 		font_set_slider<U_OP::FONT_COLOR, 2>(val2);
@@ -164,6 +166,7 @@ namespace winrt::GraphPaper::implementation
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
 		slider3().Visibility(VISIBLE);
+		//cx_color_style().Visibility(VISIBLE);
 		loaded_token = scp_samp_panel().Loaded(
 			[this](auto, auto)
 			{
@@ -196,12 +199,28 @@ namespace winrt::GraphPaper::implementation
 				font_set_slider<U_OP::FONT_COLOR, 3>(m_samp_shape, args.NewValue());
 			}
 		);
+		//c_style_token = cx_color_style().SelectionChanged(
+		//	[this](auto, auto args)
+		//	{
+		//		m_samp_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
+		//		font_set_slider<U_OP::FONT_COLOR, 0>(m_samp_shape, slider0().Value());
+		//		font_set_slider<U_OP::FONT_COLOR, 1>(m_samp_shape, slider1().Value());
+		//		font_set_slider<U_OP::FONT_COLOR, 2>(m_samp_shape, slider2().Value());
+		//		font_set_slider<U_OP::FONT_COLOR, 3>(m_samp_shape, slider3().Value());
+		//	}
+		//);
 		primary_token = cd_samp().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				D2D1_COLOR_F val;
-				m_samp_shape->get_font_color(val);
-				undo_push_value<U_OP::FONT_COLOR>(val);
+				//m_page_panel.m_col_style = m_samp_panel.m_col_style;
+				D2D1_COLOR_F samp_val;
+				m_samp_shape->get_font_color(samp_val);
+				//D2D1_COLOR_F page_val;
+				//m_page_shape->get_font_color(page_val);
+				//if (equal(samp_val, page_val)) {
+				//	return;
+				//}
+				undo_push_value<U_OP::FONT_COLOR>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -216,12 +235,13 @@ namespace winrt::GraphPaper::implementation
 				slider1().Visibility(COLLAPSED);
 				slider2().Visibility(COLLAPSED);
 				slider3().Visibility(COLLAPSED);
+				//cx_color_style().Visibility(COLLAPSED);
 				scp_samp_panel().Loaded(loaded_token);
 				slider0().ValueChanged(slider0_token);
 				slider1().ValueChanged(slider1_token);
 				slider2().ValueChanged(slider2_token);
 				slider3().ValueChanged(slider3_token);
-				//cd_samp().Opened(opened_token);
+				//cx_color_style().SelectionChanged(c_style_token);
 				cd_samp().PrimaryButtonClick(primary_token);
 				cd_samp().Closed(closed_token);
 				UnloadObject(cd_samp());
@@ -266,9 +286,9 @@ namespace winrt::GraphPaper::implementation
 		primary_token = cd_samp().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				wchar_t* val;
-				m_samp_shape->get_font_family(val);
-				undo_push_value<U_OP::FONT_FAMILY>(val);
+				wchar_t* samp_val;
+				m_samp_shape->get_font_family(samp_val);
+				undo_push_value<U_OP::FONT_FAMILY>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -345,9 +365,9 @@ namespace winrt::GraphPaper::implementation
 		primary_token = cd_samp().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				double val;
-				m_samp_shape->get_font_size(val);
-				undo_push_value<U_OP::FONT_SIZE>(val);
+				double samp_val;
+				m_samp_shape->get_font_size(samp_val);
+				undo_push_value<U_OP::FONT_SIZE>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -403,9 +423,9 @@ namespace winrt::GraphPaper::implementation
 		primary_token = cd_samp().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				DWRITE_FONT_STRETCH val;
-				m_samp_shape->get_font_stretch(val);
-				undo_push_value<U_OP::FONT_STRETCH>(val);
+				DWRITE_FONT_STRETCH samp_val;
+				m_samp_shape->get_font_stretch(samp_val);
+				undo_push_value<U_OP::FONT_STRETCH>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -462,9 +482,9 @@ namespace winrt::GraphPaper::implementation
 		primary_token = cd_samp().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				DWRITE_FONT_WEIGHT val;
-				m_samp_shape->get_font_weight(val);
-				undo_push_value<U_OP::FONT_WEIGHT>(val);
+				DWRITE_FONT_WEIGHT samp_val;
+				m_samp_shape->get_font_weight(samp_val);
+				undo_push_value<U_OP::FONT_WEIGHT>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -526,7 +546,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[16];
-				conv_val_to_col(COL_STYLE::CEN, val, buf, 16);
+				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
