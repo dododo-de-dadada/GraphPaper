@@ -158,10 +158,10 @@ namespace winrt::GraphPaper::implementation
 		slider2().Value(val2);
 		slider3().Value(val3);
 		//cx_color_style().SelectedIndex(m_page_panel.m_col_style);
-		font_set_slider<U_OP::FONT_COLOR, 0>(val0);
-		font_set_slider<U_OP::FONT_COLOR, 1>(val1);
-		font_set_slider<U_OP::FONT_COLOR, 2>(val2);
-		font_set_slider<U_OP::FONT_COLOR, 3>(val3);
+		font_set_slider<UNDO_OP::FONT_COLOR, 0>(val0);
+		font_set_slider<UNDO_OP::FONT_COLOR, 1>(val1);
+		font_set_slider<UNDO_OP::FONT_COLOR, 2>(val2);
+		font_set_slider<UNDO_OP::FONT_COLOR, 3>(val3);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
@@ -178,35 +178,35 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				font_set_slider<U_OP::FONT_COLOR, 0>(m_samp_shape, args.NewValue());
+				font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				font_set_slider<U_OP::FONT_COLOR, 1>(m_samp_shape, args.NewValue());
+				font_set_slider<UNDO_OP::FONT_COLOR, 1>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				font_set_slider<U_OP::FONT_COLOR, 2>(m_samp_shape, args.NewValue());
+				font_set_slider<UNDO_OP::FONT_COLOR, 2>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider3_token = slider3().ValueChanged(
 			[this](auto, auto args)
 			{
-				font_set_slider<U_OP::FONT_COLOR, 3>(m_samp_shape, args.NewValue());
+				font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_samp_shape, args.NewValue());
 			}
 		);
 		//c_style_token = cx_color_style().SelectionChanged(
 		//	[this](auto, auto args)
 		//	{
 		//		m_samp_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
-		//		font_set_slider<U_OP::FONT_COLOR, 0>(m_samp_shape, slider0().Value());
-		//		font_set_slider<U_OP::FONT_COLOR, 1>(m_samp_shape, slider1().Value());
-		//		font_set_slider<U_OP::FONT_COLOR, 2>(m_samp_shape, slider2().Value());
-		//		font_set_slider<U_OP::FONT_COLOR, 3>(m_samp_shape, slider3().Value());
+		//		font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_samp_shape, slider0().Value());
+		//		font_set_slider<UNDO_OP::FONT_COLOR, 1>(m_samp_shape, slider1().Value());
+		//		font_set_slider<UNDO_OP::FONT_COLOR, 2>(m_samp_shape, slider2().Value());
+		//		font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_samp_shape, slider3().Value());
 		//	}
 		//);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -220,7 +220,7 @@ namespace winrt::GraphPaper::implementation
 				//if (equal(samp_val, page_val)) {
 				//	return;
 				//}
-				undo_push_value<U_OP::FONT_COLOR>(samp_val);
+				undo_push_value<UNDO_OP::FONT_COLOR>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -288,7 +288,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				wchar_t* samp_val;
 				m_samp_shape->get_font_family(samp_val);
-				undo_push_value<U_OP::FONT_FAMILY>(samp_val);
+				undo_push_value<UNDO_OP::FONT_FAMILY>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -318,19 +318,19 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「イタリック体」が選択された.
 	void MainPage::rmfi_font_italic_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		undo_push_value<U_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC);
+		undo_push_value<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC);
 	}
 
 	// 書体メニューの「標準」が選択された.
 	void MainPage::rmfi_font_normal_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		undo_push_value<U_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL);
+		undo_push_value<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL);
 	}
 
 	// 書体メニューの「斜体」が選択された.
 	void MainPage::rmfi_font_oblique_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		undo_push_value<U_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE);
+		undo_push_value<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE);
 	}
 
 	// 書体メニューの「大きさ」が選択された.
@@ -346,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 		load_cd_samp();
 		const double val0 = m_page_panel.m_font_size;
 		slider0().Value(val0);
-		font_set_slider<U_OP::FONT_SIZE, 0>(val0);
+		font_set_slider<UNDO_OP::FONT_SIZE, 0>(val0);
 		slider0().Visibility(VISIBLE);
 		loaded_token = scp_samp_panel().Loaded(
 			[this](auto, auto)
@@ -359,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				font_set_slider<U_OP::FONT_SIZE, 0>(m_samp_shape, args.NewValue());
+				font_set_slider<UNDO_OP::FONT_SIZE, 0>(m_samp_shape, args.NewValue());
 			}
 		);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -367,7 +367,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				double samp_val;
 				m_samp_shape->get_font_size(samp_val);
-				undo_push_value<U_OP::FONT_SIZE>(samp_val);
+				undo_push_value<UNDO_OP::FONT_SIZE>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -425,7 +425,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				DWRITE_FONT_STRETCH samp_val;
 				m_samp_shape->get_font_stretch(samp_val);
-				undo_push_value<U_OP::FONT_STRETCH>(samp_val);
+				undo_push_value<UNDO_OP::FONT_STRETCH>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -484,7 +484,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				DWRITE_FONT_WEIGHT samp_val;
 				m_samp_shape->get_font_weight(samp_val);
-				undo_push_value<U_OP::FONT_WEIGHT>(samp_val);
+				undo_push_value<UNDO_OP::FONT_WEIGHT>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -512,20 +512,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::font_set_slider(const double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		if constexpr (U == U_OP::FONT_SIZE) {
+		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[16];
 			const double pt = val / m_page_dx.m_logical_dpi * PT_PER_INCH;
 			swprintf_s(buf, FMT_POINT_UNIT, pt);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
-		if constexpr (U == U_OP::FONT_COLOR) {
+		if constexpr (U == UNDO_OP::FONT_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[16];
 				conv_val_to_col(m_col_style, val, buf, 16);
@@ -566,14 +566,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーと図形に格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::font_set_slider(Shape* s, const double val)
 	{
 		font_set_slider<U, S>(val);
-		if constexpr (U == U_OP::FONT_SIZE) {
+		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			s->set_font_size(val);
 		}
-		if constexpr (U == U_OP::FONT_COLOR) {
+		if constexpr (U == UNDO_OP::FONT_COLOR) {
 			D2D1_COLOR_F col;
 			s->get_font_color(col);
 			if constexpr (S == 0) {

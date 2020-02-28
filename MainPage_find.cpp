@@ -221,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 				w_pos += r_len;
 			}
 			if (flag) {
-				undo_push_set<U_OP::TEXT>(t, w_text);
+				undo_push_set<UNDO_OP::TEXT>(t, w_text);
 			}
 		}
 		undo_push_null();
@@ -284,8 +284,8 @@ namespace winrt::GraphPaper::implementation
 				//	置換文字列と置換する.
 				const auto r_len = wchar_len(m_find_repl);
 				auto r_text = replace_text(t->m_text, w_pos, f_len, m_find_repl, r_len);
-				undo_push_set<U_OP::TEXT>(t, r_text);
-				undo_push_set<U_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
+				undo_push_set<UNDO_OP::TEXT>(t, r_text);
+				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 				undo_push_null();
 				enable_undo_menu();
 			}
@@ -394,13 +394,13 @@ namespace winrt::GraphPaper::implementation
 					else {
 						//	新たに別の図形が見つかった場合,
 						//	範囲選択された図形の文字範囲を消去する.
-						undo_push_set<U_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
+						undo_push_set<UNDO_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
 					}
 				}
 				else {
 					//	新たに別の図形が見つかった場合,
 					//	範囲選択された図形の文字範囲を消去する.
-					undo_push_set<U_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
+					undo_push_set<UNDO_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
 				}
 			}
 			else {
@@ -410,7 +410,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		//	新たに見つけた図形の文字範囲に格納する.
 		//	(操作スタックにヌルは積まない.)
-		undo_push_set<U_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ f_pos, f_len });
+		undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ f_pos, f_len });
 		redo_clear();
 		scroll_to_shape(t);
 		return true;

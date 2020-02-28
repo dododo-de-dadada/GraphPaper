@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr double TEXT_LINE_DELTA = 1.5;	// 行間の変分 (dpi)
+	constexpr double TEXT_LINE_DELTA = 2;	// 行間の変分 (DPIs)
 
 	// 書体メニューの「行間」>「高さ」が選択された.
 	void MainPage::mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 		load_cd_samp();
 		const double val0 = m_page_panel.m_text_line;
 		slider0().Value(val0);
-		text_set_slider<U_OP::TEXT_LINE, 0>(val0);
+		text_set_slider<UNDO_OP::TEXT_LINE, 0>(val0);
 		slider0().Visibility(VISIBLE);
 		loaded_token = scp_samp_panel().Loaded(
 			[this](auto, auto)
@@ -37,7 +37,7 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				text_set_slider<U_OP::TEXT_LINE, 0>(m_samp_shape, args.NewValue());
+				text_set_slider<UNDO_OP::TEXT_LINE, 0>(m_samp_shape, args.NewValue());
 			}
 		);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				double samp_val;
 				m_samp_shape->get_text_line(samp_val);
-				undo_push_value<U_OP::TEXT_LINE>(samp_val);
+				undo_push_value<UNDO_OP::TEXT_LINE>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -73,20 +73,22 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「行間」>「狭める」が選択された.
 	void MainPage::mfi_text_line_contract_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		auto h = m_page_panel.m_text_line <= FLT_MIN ? m_page_panel.m_font_size * 1.25 : m_page_panel.m_text_line;
-		auto val = h - TEXT_LINE_DELTA;
+		auto val = m_page_panel.m_text_line - TEXT_LINE_DELTA;
 		if (val <= FLT_MIN) {
 			val = 0.0f;
 		}
-		undo_push_value<U_OP::TEXT_LINE>(val);
+		if (m_page_panel.m_text_line != val) {
+			undo_push_value<UNDO_OP::TEXT_LINE>(val);
+		}
 	}
 
 	// 書体メニューの「行間」>「広げる」が選択された.
 	void MainPage::mfi_text_line_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		auto h = m_page_panel.m_text_line <= FLT_MIN ? m_page_panel.m_font_size * 1.25 : m_page_panel.m_text_line;
-		auto val = h + TEXT_LINE_DELTA;
-		undo_push_value<U_OP::TEXT_LINE>(val);
+		auto val = m_page_panel.m_text_line + TEXT_LINE_DELTA;
+		if (m_page_panel.m_text_line != val) {
+			undo_push_value<UNDO_OP::TEXT_LINE>(val);
+		}
 	}
 
 	// 書体メニューの「余白」が選択された.
@@ -105,8 +107,8 @@ namespace winrt::GraphPaper::implementation
 		const double val1 = m_page_panel.m_text_mar.height;
 		slider0().Value(val0);
 		slider1().Value(val1);
-		text_set_slider<U_OP::TEXT_MARGIN, 0>(val0);
-		text_set_slider<U_OP::TEXT_MARGIN, 1>(val1);
+		text_set_slider<UNDO_OP::TEXT_MARGIN, 0>(val0);
+		text_set_slider<UNDO_OP::TEXT_MARGIN, 1>(val1);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		loaded_token = scp_samp_panel().Loaded(
@@ -120,13 +122,13 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				text_set_slider<U_OP::TEXT_MARGIN, 0>(m_samp_shape, args.NewValue());
+				text_set_slider<UNDO_OP::TEXT_MARGIN, 0>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				text_set_slider<U_OP::TEXT_MARGIN, 1>(m_samp_shape, args.NewValue());
+				text_set_slider<UNDO_OP::TEXT_MARGIN, 1>(m_samp_shape, args.NewValue());
 			}
 		);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -134,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				D2D1_SIZE_F samp_val;
 				m_samp_shape->get_text_margin(samp_val);
-				undo_push_value<U_OP::TEXT_MARGIN>(samp_val);
+				undo_push_value<UNDO_OP::TEXT_MARGIN>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -164,43 +166,43 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
 	void MainPage::rmfi_text_align_bottom_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		undo_push_value<U_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「中央」が選択された.
 	void MainPage::rmfi_text_align_center_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		undo_push_value<U_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_CENTER);
+		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「均等」が選択された.
 	void MainPage::rmfi_text_align_justified_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		undo_push_value<U_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
 	void MainPage::rmfi_text_align_left_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		undo_push_value<U_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
+		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
 	}
 
 	// 書体メニューの「段落のそろえ」>「中段」が選択された.
 	void MainPage::rmfi_text_align_middle_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		undo_push_value<U_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
 	void MainPage::rmfi_text_align_right_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		undo_push_value<U_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
+		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	}
 
 	// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
 	void MainPage::rmfi_text_align_top_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		undo_push_value<U_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 	}
 
 	// 書体メニューの「段落のそろえ」に印をつける.
@@ -232,15 +234,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::text_set_slider(const double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		if constexpr (U == U_OP::TEXT_MARGIN) {
-			const double dpi = m_page_dx.m_logical_dpi;
-			double px;
+		const double dpi = m_page_dx.m_logical_dpi;
+		double px;
+		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_text_mar_horzorz");
@@ -251,48 +253,47 @@ namespace winrt::GraphPaper::implementation
 				hdr = r_loader.GetString(L"str_text_mar_vertert");
 				px = val;
 			}
-			wchar_t const* format = nullptr;
-			switch (m_page_unit) {
-			default:
-			case DIST_UNIT::PIXEL:
-				format = FMT_PIXEL_UNIT;
-				break;
-			case DIST_UNIT::INCH:
-				format = FMT_INCH_UNIT;
-				px /= dpi;
-				break;
-			case DIST_UNIT::MILLI:
-				format = FMT_MILLI_UNIT;
-				px /= dpi;
-				px *= MM_PER_INCH;
-				break;
-			case DIST_UNIT::POINT:
-				format = FMT_POINT_UNIT;
-				px /= dpi;
-				px *= PT_PER_INCH;
-				break;
-			case DIST_UNIT::GRID:
-				format = FMT_GRID_UNIT;
-				px /= m_samp_panel.m_grid_len;
-				break;
-			}
-			wchar_t buf[16];
-			swprintf_s(buf, format, px);
-			hdr = hdr + L": " + buf;
 		}
-		if constexpr (U == U_OP::TEXT_LINE) {
-			const auto pt = val / m_page_dx.m_logical_dpi * PT_PER_INCH;
+		if constexpr (U == UNDO_OP::TEXT_LINE) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_height");
-			if (pt > FLT_MIN) {
-				wchar_t buf[16];
-				swprintf_s(buf, FMT_POINT_UNIT, pt);
-				hdr = hdr + L": " + buf;
+			if (val > FLT_MIN) {
+				px = val * dpi / 96.0;
 			}
 			else {
 				hdr = hdr + L": " + r_loader.GetString(L"str_def_val");
+				goto SET;
 			}
 		}
+		wchar_t const* format = nullptr;
+		switch (m_page_unit) {
+		default:
+		case DIST_UNIT::PIXEL:
+			format = FMT_PIXEL_UNIT;
+			break;
+		case DIST_UNIT::INCH:
+			format = FMT_INCH_UNIT;
+			px /= dpi;
+			break;
+		case DIST_UNIT::MILLI:
+			format = FMT_MILLI_UNIT;
+			px /= dpi;
+			px *= MM_PER_INCH;
+			break;
+		case DIST_UNIT::POINT:
+			format = FMT_POINT_UNIT;
+			px /= dpi;
+			px *= PT_PER_INCH;
+			break;
+		case DIST_UNIT::GRID:
+			format = FMT_GRID_UNIT;
+			px /= m_samp_panel.m_grid_len;
+			break;
+		}
+		wchar_t buf[16];
+		swprintf_s(buf, format, px);
+		hdr = hdr + L": " + buf;
+	SET:
 		if constexpr (S == 0) {
 			slider0().Header(box_value(hdr));
 		}
@@ -308,14 +309,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーと図形に格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::text_set_slider(Shape* s, const double val)
 	{
 		text_set_slider<U, S>(val);
-		if constexpr (U == U_OP::TEXT_LINE) {
+		if constexpr (U == UNDO_OP::TEXT_LINE) {
 			s->set_text_line(val);
 		}
-		if constexpr (U == U_OP::TEXT_MARGIN) {
+		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			D2D1_SIZE_F mar;
 			s->get_text_margin(mar);
 			if constexpr (S == 0) {

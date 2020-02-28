@@ -218,7 +218,7 @@
     <comment>ComboBox</comment>
   </data>
   <data name="cx_page_unit.Header" xml:space="preserve">
-    <value>単位</value>
+    <value>距離の単位</value>
     <comment>ComboBox</comment>
   </data>
   <data name="lvi_stretch_condensed.Content" xml:space="preserve">
@@ -433,6 +433,10 @@
     <value>大きさ...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
+  <data name="mfi_page_unit.Text" xml:space="preserve">
+    <value>単位と書式...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
   <data name="mfi_paste.Text" xml:space="preserve">
     <value>貼り付け</value>
     <comment>MenuFlyoutItem</comment>
@@ -527,10 +531,6 @@
   </data>
   <data name="mfsi_grid_size.Text" xml:space="preserve">
     <value>方眼の大きさ</value>
-    <comment>MenuFlyoutSubItem</comment>
-  </data>
-  <data name="mfsi_page_unit.Text" xml:space="preserve">
-    <value>単位</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_recent_files.Text" xml:space="preserve">

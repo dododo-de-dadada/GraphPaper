@@ -112,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 		CURS = (8 | 16),	// カーソルの位置
 		ZOOM = 32,	// 拡大率
 		TOOL = 64,	// 図形ツール
-		UNIT = 128	// 単位
+		UNIT = 128	// 距離の単位
 	};
 
 	//-------------------------------
@@ -285,9 +285,9 @@ namespace winrt::GraphPaper::implementation
 		//	線枠メニューの「矢じりの大きさ」が選択された.
 		void mfi_arrow_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	値をスライダーのヘッダーに格納する.
-		template <U_OP U, int S> void arrow_set_slider(double val);
+		template <UNDO_OP U, int S> void arrow_set_slider(double val);
 		//	値をスライダーのヘッダーと図形に格納する.
-		template <U_OP U, int S> void arrow_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void arrow_set_slider(Shape* s, const double val);
 
 		//-------------------------------
 		//	MainPage_disp.cpp
@@ -365,9 +365,9 @@ namespace winrt::GraphPaper::implementation
 		//	塗りつぶしメニューの「色」が選択された.
 		void mfi_fill_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	値をスライダーのヘッダーと図形に格納する.
-		template <U_OP U, int S> void fill_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void fill_set_slider(Shape* s, const double val);
 		//	値をスライダーのヘッダーに格納する.
-		template <U_OP U, int S> void fill_set_slider(double val);
+		template <UNDO_OP U, int S> void fill_set_slider(double val);
 
 		//-------------------------------
 		//	MainPage_find.cpp
@@ -429,9 +429,9 @@ namespace winrt::GraphPaper::implementation
 		//　書体メニューの「太さ」が選択された.
 		void mfi_font_weight_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　値をスライダーのヘッダーに格納する.
-		template <U_OP U, int S> void font_set_slider(const double val);
+		template <UNDO_OP U, int S> void font_set_slider(const double val);
 		//　値をスライダーのヘッダーと図形に格納する.
-		template <U_OP U, int S> void font_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void font_set_slider(Shape* s, const double val);
 
 		//-------------------------------
 		//　MainPage_grid.cpp
@@ -457,9 +457,9 @@ namespace winrt::GraphPaper::implementation
 		//　ページメニューの「方眼にそろえる」が選択された.
 		void tmfi_grid_snap_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　値をスライダーのヘッダーと図形に格納する.
-		template <U_OP U, int S> void grid_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void grid_set_slider(Shape* s, const double val);
 		//　値をスライダーのヘッダーに格納する.
-		template <U_OP U, int S> void grid_set_slider(double val);
+		template <UNDO_OP U, int S> void grid_set_slider(double val);
 
 		//-------------------------------
 		//	MainPage_group.cpp
@@ -568,18 +568,18 @@ namespace winrt::GraphPaper::implementation
 		void cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/);
 		// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
 		void cd_page_size_sec_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/);
-		//　ページの単位ダイアログの「適用」ボタンが押された.
+		//　ページの単位と書式ダイアログの「適用」ボタンが押された.
 		void cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/);
 		//	ページメニューの「色」が選択された.
 		void mfi_page_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	ページメニューの「大きさ」が選択された
 		void mfi_page_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	ページメニューの「単位」が選択された
+		//	ページメニューの「単位と書式」が選択された
 		void mfi_page_unit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	値をスライダーのヘッダーに格納する.
-		template <U_OP U, int S> void page_set_slider(double val);
+		template <UNDO_OP U, int S> void page_set_slider(double val);
 		//	値をスライダーのヘッダーと図形に格納する.
-		template <U_OP U, int S> void page_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void page_set_slider(Shape* s, const double val);
 		//	ページのパネルがロードされた.
 		void scp_page_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
 		//	ページのパネルの寸法が変わった.
@@ -733,9 +733,9 @@ namespace winrt::GraphPaper::implementation
 		//	線枠メニューの「太さ」が選択された.
 		void mfi_stroke_width_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	値をスライダーのヘッダーに格納する.
-		template<U_OP U, int S> void stroke_set_slider(double val);
+		template<UNDO_OP U, int S> void stroke_set_slider(double val);
 		//	値をスライダーのヘッダーと図形に格納する.
-		template<U_OP U, int S> void stroke_set_slider(Shape* s, const double val);
+		template<UNDO_OP U, int S> void stroke_set_slider(Shape* s, const double val);
 
 		//-------------------------------
 		//	MainPage_summary.cpp
@@ -817,9 +817,9 @@ namespace winrt::GraphPaper::implementation
 		//	書体メニューの「文字列のそろえ」>「右よせ」が選択された.
 		void rmfi_text_align_right_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	値をスライダーのヘッダーに格納する.
-		template <U_OP U, int S> void text_set_slider(const double val);
+		template <UNDO_OP U, int S> void text_set_slider(const double val);
 		//	値をスライダーのヘッダーと図形に格納する.
-		template <U_OP U, int S> void text_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void text_set_slider(Shape* s, const double val);
 
 		//-------------------------------
 		//	MainPage_thread.cpp
@@ -893,11 +893,11 @@ namespace winrt::GraphPaper::implementation
 		//	図形の選択を反転して, その操作をスタックに積む.
 		void undo_push_select(Shape* s);
 		//	値を図形へ格納して, その操作をスタックに積む.
-		template <U_OP U, typename T> void undo_push_set(Shape* s, T const& val);
+		template <UNDO_OP U, typename T> void undo_push_set(Shape* s, T const& val);
 		//	図形の値をスタックに保存する.
-		template <U_OP U> void undo_push_set(Shape* s);
+		template <UNDO_OP U> void undo_push_set(Shape* s);
 		//	値を図形に格納して, その操作をスタックに積む.
-		template<U_OP U, typename T> void undo_push_value(T const& val);
+		template<UNDO_OP U, typename T> void undo_push_value(T const& val);
 		//	操作スタックをデータリーダーから読み込む.
 		void undo_read(DataReader const& dt_reader);
 		//	操作スタックをデータリーダーに書き込む.

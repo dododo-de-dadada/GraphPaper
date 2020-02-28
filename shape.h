@@ -403,8 +403,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_page_scale(double& /*val*/) const noexcept { return false; }
 		// ページの大きさを得る.
 		virtual bool get_page_size(D2D1_SIZE_F& /*val*/) const noexcept { return false; }
-		// 単位を得る.
-		//virtual bool get_page_unit(UNIT& /*val*/) const noexcept { return false; }
 		// 指定された部位の位置を得る.
 		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F&/*val*/) const noexcept {}
 		// 始点を得る
@@ -576,7 +574,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH_UNDEFINED;	// 書体の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
-		double m_text_line = 0.0;	// 行間 (em)
+		double m_text_line = 0.0;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
 		D2D1_SIZE_F m_text_mar{ 4.0f, 4.0f };	// 文字列の左右と上下の余白
@@ -620,8 +618,6 @@ namespace winrt::GraphPaper::implementation
 		bool get_page_size(D2D1_SIZE_F& val) const noexcept;
 		// ページの拡大率を得る.
 		bool get_page_scale(double& val) const noexcept;
-		// ページの単位を得る.
-		//bool get_page_unit(UNIT& val) const noexcept;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& val) const noexcept;
 		// 塗りつぶし色を得る.
@@ -1127,14 +1123,17 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH_UNDEFINED;	// 書体の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
-		double m_text_line = 0.0;		// 行間 (em)
+		double m_text_line = 0.0;	// 行間 (DIPs 96dpi固定)
 		wchar_t* m_text = nullptr;	// 文字列
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落そろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字揃え
 		D2D1_SIZE_F m_text_mar{ 4.0f, 4.0f };	// 文字列のまわりの上下と左右の余白
+
 		winrt::com_ptr<IDWriteTextLayout> m_dw_text_layout{};	// 文字列を表示するためのレイアウト
-		DWRITE_HIT_TEST_METRICS* m_dw_hit_metrics = nullptr;	// 文字列の計量
-		UINT32 m_dw_hit_linecnt = 0;	// 文字列の計量の要素数
+		DWRITE_HIT_TEST_METRICS* m_dw_test_metrics = nullptr;	// 文字列の計量
+		DWRITE_LINE_METRICS* m_dw_line_metrics = nullptr;	// 文字列の計量
+		UINT32 m_dw_linecnt = 0;	// 文字列の計量の要素数
+		double m_dw_descent = 0.0f;
 		DWRITE_HIT_TEST_METRICS* m_dw_range_metrics = nullptr;	// 文字範囲の計量
 		UINT32 m_dw_range_linecnt = 0;	// 文字範囲の計量の要素数
 

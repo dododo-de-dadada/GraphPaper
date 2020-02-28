@@ -22,7 +22,7 @@ namespace winrt::GraphPaper::implementation
 			[this, s](auto, auto)
 			{
 				auto text = wchar_cpy(tx_edit().Text().c_str());
-				undo_push_set<U_OP::TEXT>(s, text);
+				undo_push_set<UNDO_OP::TEXT>(s, text);
 				if (ck_ignore_blank().IsChecked().GetBoolean()) {
 					s->delete_bottom_blank();
 				}

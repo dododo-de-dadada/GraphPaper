@@ -29,8 +29,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_page_panel.m_arrow_style == ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(true);
+			mfi_arrow_size_2().IsEnabled(true);
 		}
-		undo_push_value<U_OP::ARROW_STYLE>(ARROW_STYLE::FILLED);
+		undo_push_value<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::FILLED);
 	}
 
 	// ストロークメニューの「矢じりの種類」>「なし」が選択された.
@@ -38,8 +39,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_page_panel.m_arrow_style != ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(false);
+			mfi_arrow_size_2().IsEnabled(false);
 		}
-		undo_push_value<U_OP::ARROW_STYLE>(ARROW_STYLE::NONE);
+		undo_push_value<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::NONE);
 	}
 
 	// ストロークメニューの「矢じりの種類」>「開いた」が選択された.
@@ -47,8 +49,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_page_panel.m_arrow_style == ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(true);
+			mfi_arrow_size_2().IsEnabled(true);
 		}
-		undo_push_value<U_OP::ARROW_STYLE>(ARROW_STYLE::OPENED);
+		undo_push_value<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::OPENED);
 	}
 
 	// ストロークメニューの「矢じりの大きさ」が選択された.
@@ -69,9 +72,9 @@ namespace winrt::GraphPaper::implementation
 		slider0().Value(val0);
 		slider1().Value(val1);
 		slider2().Value(val2);
-		arrow_set_slider<U_OP::ARROW_SIZE, 0>(val0);
-		arrow_set_slider<U_OP::ARROW_SIZE, 1>(val1);
-		arrow_set_slider<U_OP::ARROW_SIZE, 2>(val2);
+		arrow_set_slider<UNDO_OP::ARROW_SIZE, 0>(val0);
+		arrow_set_slider<UNDO_OP::ARROW_SIZE, 1>(val1);
+		arrow_set_slider<UNDO_OP::ARROW_SIZE, 2>(val2);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
@@ -86,19 +89,19 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				arrow_set_slider<U_OP::ARROW_SIZE, 0>(m_samp_shape, args.NewValue());
+				arrow_set_slider<UNDO_OP::ARROW_SIZE, 0>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				arrow_set_slider<U_OP::ARROW_SIZE, 1>(m_samp_shape, args.NewValue());
+				arrow_set_slider<UNDO_OP::ARROW_SIZE, 1>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				arrow_set_slider<U_OP::ARROW_SIZE, 2>(m_samp_shape, args.NewValue());
+				arrow_set_slider<UNDO_OP::ARROW_SIZE, 2>(m_samp_shape, args.NewValue());
 			}
 		);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -106,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				ARROW_SIZE samp_val;
 				m_samp_shape->get_arrow_size(samp_val);
-				undo_push_value<U_OP::ARROW_SIZE>(samp_val);
+				undo_push_value<UNDO_OP::ARROW_SIZE>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -136,13 +139,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::arrow_set_slider(double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		if constexpr (U == U_OP::ARROW_SIZE) {
+		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			if constexpr (S == 0) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_arrow_width") + L": ";
@@ -156,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 				hdr = r_loader.GetString(L"str_arrow_shift") + L": ";
 			}
 		}
-		if constexpr (U == U_OP::ARROW_SIZE) {
+		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[16];
 			switch (m_page_unit) {
 			case DIST_UNIT::GRID:
@@ -196,11 +199,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーと図形に格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::arrow_set_slider(Shape* s, const double val)
 	{
 		arrow_set_slider<U, S>(val);
-		if constexpr (U == U_OP::ARROW_SIZE) {
+		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			ARROW_SIZE size;
 			s->get_arrow_size(size);
 			if constexpr (S == 0) {

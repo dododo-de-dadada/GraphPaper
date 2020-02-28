@@ -33,10 +33,10 @@ namespace winrt::GraphPaper::implementation
 		slider2().Value(val2);
 		slider3().Value(val3);
 		//cx_color_style().SelectedIndex(m_page_panel.m_col_style);
-		stroke_set_slider<U_OP::STROKE_COLOR, 0>(val0);
-		stroke_set_slider<U_OP::STROKE_COLOR, 1>(val1);
-		stroke_set_slider<U_OP::STROKE_COLOR, 2>(val2);
-		stroke_set_slider<U_OP::STROKE_COLOR, 3>(val3);
+		stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(val0);
+		stroke_set_slider<UNDO_OP::STROKE_COLOR, 1>(val1);
+		stroke_set_slider<UNDO_OP::STROKE_COLOR, 2>(val2);
+		stroke_set_slider<UNDO_OP::STROKE_COLOR, 3>(val3);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
@@ -53,35 +53,35 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<U_OP::STROKE_COLOR, 0>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<U_OP::STROKE_COLOR, 1>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_COLOR, 1>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<U_OP::STROKE_COLOR, 2>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_COLOR, 2>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider3_token = slider3().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<U_OP::STROKE_COLOR, 3>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_COLOR, 3>(m_samp_shape, args.NewValue());
 			}
 		);
 		//c_style_token = cx_color_style().SelectionChanged(
 		//	[this](auto, auto args)
 		//	{
 		//		m_samp_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
-		//		stroke_set_slider<U_OP::STROKE_COLOR, 0>(m_samp_shape, slider0().Value());
-		//		stroke_set_slider<U_OP::STROKE_COLOR, 1>(m_samp_shape, slider1().Value());
-		//		stroke_set_slider<U_OP::STROKE_COLOR, 2>(m_samp_shape, slider2().Value());
-		//		stroke_set_slider<U_OP::STROKE_COLOR, 3>(m_samp_shape, slider3().Value());
+		//		stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(m_samp_shape, slider0().Value());
+		//		stroke_set_slider<UNDO_OP::STROKE_COLOR, 1>(m_samp_shape, slider1().Value());
+		//		stroke_set_slider<UNDO_OP::STROKE_COLOR, 2>(m_samp_shape, slider2().Value());
+		//		stroke_set_slider<UNDO_OP::STROKE_COLOR, 3>(m_samp_shape, slider3().Value());
 		//	}
 		//);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 				//m_page_panel.m_col_style = m_samp_panel.m_col_style;
 				D2D1_COLOR_F samp_val;
 				m_samp_shape->get_stroke_color(samp_val);
-				undo_push_value<U_OP::STROKE_COLOR>(samp_val);
+				undo_push_value<UNDO_OP::STROKE_COLOR>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -149,10 +149,10 @@ namespace winrt::GraphPaper::implementation
 		slider1().Visibility(m_page_panel.m_stroke_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
 		slider2().Visibility(m_page_panel.m_stroke_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
 		slider3().Visibility(m_page_panel.m_stroke_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
-		stroke_set_slider<U_OP::STROKE_PATTERN, 0>(val0);
-		stroke_set_slider<U_OP::STROKE_PATTERN, 1>(val1);
-		stroke_set_slider<U_OP::STROKE_PATTERN, 2>(val2);
-		stroke_set_slider<U_OP::STROKE_PATTERN, 3>(val3);
+		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0>(val0);
+		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 1>(val1);
+		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 2>(val2);
+		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 3>(val3);
 		loaded_token = scp_samp_panel().Loaded(
 			[this](auto, auto)
 			{
@@ -164,25 +164,25 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<U_OP::STROKE_PATTERN, 0>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<U_OP::STROKE_PATTERN, 1>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 1>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<U_OP::STROKE_PATTERN, 2>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 2>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider3_token = slider3().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<U_OP::STROKE_PATTERN, 3>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 3>(m_samp_shape, args.NewValue());
 			}
 		);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -190,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				STROKE_PATTERN samp_val;
 				m_samp_shape->get_stroke_pattern(samp_val);
-				undo_push_value<U_OP::STROKE_PATTERN>(samp_val);
+				undo_push_value<UNDO_OP::STROKE_PATTERN>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -236,7 +236,7 @@ namespace winrt::GraphPaper::implementation
 		double val0 = m_page_panel.m_stroke_width;
 		slider0().Value(val0);
 		slider0().Visibility(VISIBLE);
-		stroke_set_slider<U_OP::STROKE_WIDTH, 0>(val0);
+		stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0>(val0);
 		loaded_token = scp_samp_panel().Loaded(
 			[this](auto, auto)
 			{
@@ -248,7 +248,7 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<U_OP::STROKE_WIDTH, 0>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0>(m_samp_shape, args.NewValue());
 			}
 		);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -256,7 +256,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				double samp_val;
 				m_samp_shape->get_stroke_width(samp_val);
-				undo_push_value<U_OP::STROKE_WIDTH>(samp_val);
+				undo_push_value<UNDO_OP::STROKE_WIDTH>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -289,7 +289,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
-		undo_push_value<U_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH);
+		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH);
 	}
 
 	// 線枠メニューの「一点破線」が選択された.
@@ -299,7 +299,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
-		undo_push_value<U_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH_DOT);
+		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH_DOT);
 	}
 
 	// 線枠メニューの「二点破線」が選択された.
@@ -309,7 +309,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
-		undo_push_value<U_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH_DOT_DOT);
+		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH_DOT_DOT);
 	}
 
 	// 線枠メニューの「点線」が選択された.
@@ -319,7 +319,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
-		undo_push_value<U_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DOT);
+		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DOT);
 	}
 
 	// 線枠メニューの「実線」が選択された.
@@ -329,7 +329,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_stroke_pattern().IsEnabled(false);
 			mfi_stroke_pattern_2().IsEnabled(false);
 		}
-		undo_push_value<U_OP::STROKE_STYLE>(D2D1_DASH_STYLE_SOLID);
+		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_SOLID);
 	}
 
 	// 線枠の見本を作成する.
@@ -350,38 +350,33 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::stroke_set_slider(double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		if constexpr (U == U_OP::STROKE_WIDTH) {
+		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_stroke_width");
 		}
-		if constexpr (U == U_OP::STROKE_PATTERN) {
+		if constexpr (U == UNDO_OP::STROKE_PATTERN) {
+			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			if constexpr (S == 0) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_dash_len");
 			}
 			if constexpr (S == 1) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_dash_gap");
 			}
 			if constexpr (S == 2) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_dot_len");
 			}
 			if constexpr (S == 3) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_dot_gap");
 			}
-			wchar_t buf[16];
-			swprintf_s(buf, L"×%.0Lf", val);
-			hdr = hdr + L": " + buf;
+			val *= m_samp_panel.m_stroke_width;
 		}
-		if constexpr (U == U_OP::STROKE_WIDTH) {
+		if constexpr (U == UNDO_OP::STROKE_WIDTH || U == UNDO_OP::STROKE_PATTERN) {
 			if (m_page_unit == DIST_UNIT::PIXEL) {
 				wchar_t buf[16];
 				swprintf_s(buf, FMT_PIXEL_UNIT, val);
@@ -411,7 +406,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		if constexpr (U == U_OP::STROKE_COLOR) {
+		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[16];
 				conv_val_to_col(m_col_style, val, buf, 16);
@@ -452,11 +447,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーと図形に格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::stroke_set_slider(Shape* s, const double val)
 	{
 		stroke_set_slider<U, S>(val);
-		if constexpr (U == U_OP::STROKE_PATTERN) {
+		if constexpr (U == UNDO_OP::STROKE_PATTERN) {
 			STROKE_PATTERN pat;
 			s->get_stroke_pattern(pat);
 			if constexpr (S == 0) {
@@ -473,10 +468,10 @@ namespace winrt::GraphPaper::implementation
 			}
 			s->set_stroke_pattern(pat);
 		}
-		if constexpr (U == U_OP::STROKE_WIDTH) {
+		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			s->set_stroke_width(val);
 		}
-		if constexpr (U == U_OP::STROKE_COLOR) {
+		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			D2D1_COLOR_F col;
 			s->get_stroke_color(col);
 			if constexpr (S == 0) {

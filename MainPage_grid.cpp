@@ -15,13 +15,13 @@ namespace winrt::GraphPaper::implementation
 	//	U	操作
 	//	S	スライダー
 	//	val	値
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::grid_set_slider(double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		if constexpr (U == U_OP::GRID_LEN) {
+		if constexpr (U == UNDO_OP::GRID_LEN) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_grid_length");
 			val += 1.0;
@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		if constexpr (U == U_OP::GRID_OPAC) {
+		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			if constexpr (S == 3) {
 				wchar_t buf[16];
 				conv_val_to_col(m_col_style, val, buf, 16);
@@ -82,14 +82,14 @@ namespace winrt::GraphPaper::implementation
 	//	s	図形	
 	//	val	値
 	//	戻り値	なし
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::grid_set_slider(Shape* s, const double val)
 	{
 		grid_set_slider<U, S>(val);
-		if constexpr (U == U_OP::GRID_LEN) {
+		if constexpr (U == UNDO_OP::GRID_LEN) {
 			s->set_grid_len(val);
 		}
-		if constexpr (U == U_OP::GRID_OPAC) {
+		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			s->set_grid_opac(val / COLOR_MAX);
 		}
 		if (scp_samp_panel().IsLoaded()) {
@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 		load_cd_samp();
 		const double val0 = m_page_panel.m_grid_len;
 		slider0().Value(val0);
-		grid_set_slider<U_OP::GRID_LEN, 0>(val0);
+		grid_set_slider<UNDO_OP::GRID_LEN, 0>(val0);
 		slider0().Visibility(VISIBLE);
 		loaded_token = scp_samp_panel().Loaded(
 			[this](auto, auto)
@@ -135,7 +135,7 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				grid_set_slider<U_OP::GRID_LEN, 0>(&m_samp_panel, args.NewValue());
+				grid_set_slider<UNDO_OP::GRID_LEN, 0>(&m_samp_panel, args.NewValue());
 			}
 		);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 				if (equal(page_val, samp_val)) {
 					return;
 				}
-				undo_push_set<U_OP::GRID_LEN>(&m_page_panel, samp_val);
+				undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, samp_val);
 				undo_push_null();
 				enable_undo_menu();
 				draw_page();
@@ -179,7 +179,7 @@ namespace winrt::GraphPaper::implementation
 		if (val < 1.0) {
 			return;
 		}
-		undo_push_set<U_OP::GRID_LEN>(&m_page_panel, val);
+		undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, val);
 		undo_push_null();
 		enable_undo_menu();
 		draw_page();
@@ -194,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 			//	中断する.
 			return;
 		}
-		undo_push_set<U_OP::GRID_LEN>(&m_page_panel, val);
+		undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, val);
 		undo_push_null();
 		enable_undo_menu();
 		draw_page();
@@ -215,7 +215,7 @@ namespace winrt::GraphPaper::implementation
 		const double val3 = m_samp_panel.m_grid_opac * COLOR_MAX;
 		slider3().Value(val3);
 		//cx_color_style().SelectedIndex(m_samp_panel.m_col_style);
-		grid_set_slider<U_OP::GRID_OPAC, 3>(val3);
+		grid_set_slider<UNDO_OP::GRID_OPAC, 3>(val3);
 		slider3().Visibility(VISIBLE);
 		//cx_color_style().Visibility(VISIBLE);
 		loaded_token = scp_samp_panel().Loaded(
@@ -228,14 +228,14 @@ namespace winrt::GraphPaper::implementation
 		slider3_token = slider3().ValueChanged(
 			[this](auto, auto args)
 			{
-				grid_set_slider<U_OP::GRID_OPAC, 3>(&m_samp_panel, args.NewValue());
+				grid_set_slider<UNDO_OP::GRID_OPAC, 3>(&m_samp_panel, args.NewValue());
 			}
 		);
 		//c_style_token = cx_color_style().SelectionChanged(
 		//	[this](auto, auto args)
 		//	{
 		//		m_samp_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
-		//		grid_set_slider<U_OP::GRID_OPAC, 3>(&m_samp_panel, slider3().Value());
+		//		grid_set_slider<UNDO_OP::GRID_OPAC, 3>(&m_samp_panel, slider3().Value());
 		//	}
 		//);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -249,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 				if (equal(page_val, samp_val)) {
 					return;
 				}
-				undo_push_set<U_OP::GRID_OPAC>(&m_page_panel, samp_val);
+				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_panel, samp_val);
 				undo_push_null();
 				enable_undo_menu();
 				draw_page();
@@ -280,7 +280,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_page_panel.m_grid_show == GRID_SHOW::BACK) {
 			return;
 		}
-		undo_push_set<U_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::BACK);
+		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::BACK);
 		undo_push_null();
 		enable_undo_menu();
 		draw_page();
@@ -292,7 +292,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_page_panel.m_grid_show == GRID_SHOW::FRONT) {
 			return;
 		}
-		undo_push_set<U_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::FRONT);
+		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::FRONT);
 		undo_push_null();
 		enable_undo_menu();
 		draw_page();
@@ -304,7 +304,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_page_panel.m_grid_show == GRID_SHOW::HIDE) {
 			return;
 		}
-		undo_push_set<U_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::HIDE);
+		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::HIDE);
 		undo_push_null();
 		enable_undo_menu();
 		draw_page();
@@ -341,7 +341,7 @@ namespace winrt::GraphPaper::implementation
 			if (flag == true) {
 				flag = false;
 			}
-			undo_push_set<U_OP::START_POS>(s);
+			undo_push_set<UNDO_OP::START_POS>(s);
 			pt_sub(g_pos, s_pos, d);
 			s->move(d);
 		}

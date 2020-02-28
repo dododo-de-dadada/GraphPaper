@@ -32,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 操作
 	//------------------------------
-	enum struct U_OP {
+	enum struct UNDO_OP {
 		END = -1,	// 操作スタックの終端 (ファイルの読み書きで使用)
 		NULLPTR = 0,	// 操作の区切り (ファイルの読み書きで使用)
 		ARRANGE,	// 図形の順番の入れ替え
@@ -218,40 +218,40 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 操作の種類から型を得るテンプレート
 	//------------------------------
-	template <U_OP U>
+	template <UNDO_OP U>
 	struct U_TYPE {
 		using type = int;
 	};
-	template <> struct U_TYPE<U_OP::ARROW_SIZE> { using type = ARROW_SIZE; };
-	template <> struct U_TYPE<U_OP::ARROW_STYLE> { using type = ARROW_STYLE; };
-	template <> struct U_TYPE<U_OP::FILL_COLOR> { using type = D2D1_COLOR_F; };
-	template <> struct U_TYPE<U_OP::FONT_COLOR> { using type = D2D1_COLOR_F; };
-	template <> struct U_TYPE<U_OP::FONT_FAMILY> { using type = wchar_t*; };
-	template <> struct U_TYPE<U_OP::FONT_SIZE> { using type = double; };
-	template <> struct U_TYPE<U_OP::FONT_STRETCH> { using type = DWRITE_FONT_STRETCH; };
-	template <> struct U_TYPE<U_OP::FONT_STYLE> { using type = DWRITE_FONT_STYLE; };
-	template <> struct U_TYPE<U_OP::FONT_WEIGHT> { using type = DWRITE_FONT_WEIGHT; };
-	template <> struct U_TYPE<U_OP::GRID_LEN> { using type = double; };
-	template <> struct U_TYPE<U_OP::GRID_OPAC> { using type = double; };
-	template <> struct U_TYPE<U_OP::GRID_SHOW> { using type = GRID_SHOW; };
-	template <> struct U_TYPE<U_OP::TEXT_LINE> { using type = double; };
-	template <> struct U_TYPE<U_OP::PAGE_COLOR> { using type = D2D1_COLOR_F; };
-	template <> struct U_TYPE<U_OP::PAGE_SIZE> { using type = D2D1_SIZE_F; };
-	template <> struct U_TYPE<U_OP::START_POS> { using type = D2D1_POINT_2F; };
-	template <> struct U_TYPE<U_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
-	template <> struct U_TYPE<U_OP::STROKE_PATTERN> { using type = STROKE_PATTERN; };
-	template <> struct U_TYPE<U_OP::STROKE_STYLE> { using type = D2D1_DASH_STYLE; };
-	template <> struct U_TYPE<U_OP::STROKE_WIDTH> { using type = double; };
-	template <> struct U_TYPE<U_OP::TEXT> { using type = wchar_t*; };
-	template <> struct U_TYPE<U_OP::TEXT_ALIGN_P> { using type = DWRITE_PARAGRAPH_ALIGNMENT; };
-	template <> struct U_TYPE<U_OP::TEXT_ALIGN_T> { using type = DWRITE_TEXT_ALIGNMENT; };
-	template <> struct U_TYPE<U_OP::TEXT_MARGIN> { using type = D2D1_SIZE_F; };
-	template <> struct U_TYPE<U_OP::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
+	template <> struct U_TYPE<UNDO_OP::ARROW_SIZE> { using type = ARROW_SIZE; };
+	template <> struct U_TYPE<UNDO_OP::ARROW_STYLE> { using type = ARROW_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::FILL_COLOR> { using type = D2D1_COLOR_F; };
+	template <> struct U_TYPE<UNDO_OP::FONT_COLOR> { using type = D2D1_COLOR_F; };
+	template <> struct U_TYPE<UNDO_OP::FONT_FAMILY> { using type = wchar_t*; };
+	template <> struct U_TYPE<UNDO_OP::FONT_SIZE> { using type = double; };
+	template <> struct U_TYPE<UNDO_OP::FONT_STRETCH> { using type = DWRITE_FONT_STRETCH; };
+	template <> struct U_TYPE<UNDO_OP::FONT_STYLE> { using type = DWRITE_FONT_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::FONT_WEIGHT> { using type = DWRITE_FONT_WEIGHT; };
+	template <> struct U_TYPE<UNDO_OP::GRID_LEN> { using type = double; };
+	template <> struct U_TYPE<UNDO_OP::GRID_OPAC> { using type = double; };
+	template <> struct U_TYPE<UNDO_OP::GRID_SHOW> { using type = GRID_SHOW; };
+	template <> struct U_TYPE<UNDO_OP::TEXT_LINE> { using type = double; };
+	template <> struct U_TYPE<UNDO_OP::PAGE_COLOR> { using type = D2D1_COLOR_F; };
+	template <> struct U_TYPE<UNDO_OP::PAGE_SIZE> { using type = D2D1_SIZE_F; };
+	template <> struct U_TYPE<UNDO_OP::START_POS> { using type = D2D1_POINT_2F; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_PATTERN> { using type = STROKE_PATTERN; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_STYLE> { using type = D2D1_DASH_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_WIDTH> { using type = double; };
+	template <> struct U_TYPE<UNDO_OP::TEXT> { using type = wchar_t*; };
+	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_P> { using type = DWRITE_PARAGRAPH_ALIGNMENT; };
+	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_T> { using type = DWRITE_TEXT_ALIGNMENT; };
+	template <> struct U_TYPE<UNDO_OP::TEXT_MARGIN> { using type = D2D1_SIZE_F; };
+	template <> struct U_TYPE<UNDO_OP::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
 
 	//------------------------------
 	// 図形の属性の値を保存して変更する操作.
 	//------------------------------
-	template <U_OP U>
+	template <UNDO_OP U>
 	struct UndoSet : Undo, U_TYPE<U> {
 		// 属性の値
 		U_TYPE<U>::type m_val;

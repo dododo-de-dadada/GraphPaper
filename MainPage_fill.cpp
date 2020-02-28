@@ -33,10 +33,10 @@ namespace winrt::GraphPaper::implementation
 		slider2().Value(val2);
 		slider3().Value(val3);
 		//cx_color_style().SelectedIndex(m_page_panel.m_col_style);
-		fill_set_slider<U_OP::FILL_COLOR, 0>(val0);
-		fill_set_slider<U_OP::FILL_COLOR, 1>(val1);
-		fill_set_slider<U_OP::FILL_COLOR, 2>(val2);
-		fill_set_slider<U_OP::FILL_COLOR, 3>(val3);
+		fill_set_slider<UNDO_OP::FILL_COLOR, 0>(val0);
+		fill_set_slider<UNDO_OP::FILL_COLOR, 1>(val1);
+		fill_set_slider<UNDO_OP::FILL_COLOR, 2>(val2);
+		fill_set_slider<UNDO_OP::FILL_COLOR, 3>(val3);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
@@ -53,35 +53,35 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				fill_set_slider<U_OP::FILL_COLOR, 0>(m_samp_shape, args.NewValue());
+				fill_set_slider<UNDO_OP::FILL_COLOR, 0>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				fill_set_slider<U_OP::FILL_COLOR, 1>(m_samp_shape, args.NewValue());
+				fill_set_slider<UNDO_OP::FILL_COLOR, 1>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				fill_set_slider<U_OP::FILL_COLOR, 2>(m_samp_shape, args.NewValue());
+				fill_set_slider<UNDO_OP::FILL_COLOR, 2>(m_samp_shape, args.NewValue());
 			}
 		);
 		slider3_token = slider3().ValueChanged(
 			[this](auto, auto args)
 			{
-				fill_set_slider<U_OP::FILL_COLOR, 3>(m_samp_shape, args.NewValue());
+				fill_set_slider<UNDO_OP::FILL_COLOR, 3>(m_samp_shape, args.NewValue());
 			}
 		);
 		//c_style_token = cx_color_style().SelectionChanged(
 		//	[this](auto, auto args)
 		//	{
 		//		m_samp_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
-		//		fill_set_slider<U_OP::FILL_COLOR, 0>(m_samp_shape, slider0().Value());
-		//		fill_set_slider<U_OP::FILL_COLOR, 1>(m_samp_shape, slider1().Value());
-		//		fill_set_slider<U_OP::FILL_COLOR, 2>(m_samp_shape, slider2().Value());
-		//		fill_set_slider<U_OP::FILL_COLOR, 3>(m_samp_shape, slider3().Value());
+		//		fill_set_slider<UNDO_OP::FILL_COLOR, 0>(m_samp_shape, slider0().Value());
+		//		fill_set_slider<UNDO_OP::FILL_COLOR, 1>(m_samp_shape, slider1().Value());
+		//		fill_set_slider<UNDO_OP::FILL_COLOR, 2>(m_samp_shape, slider2().Value());
+		//		fill_set_slider<UNDO_OP::FILL_COLOR, 3>(m_samp_shape, slider3().Value());
 		//	}
 		//);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 				//if (equal(samp_val, page_val)) {
 				//	return;
 				//}
-				undo_push_value<U_OP::FILL_COLOR>(samp_val);
+				undo_push_value<UNDO_OP::FILL_COLOR>(samp_val);
 			}
 		);
 		closed_token = cd_samp().Closed(
@@ -146,13 +146,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::fill_set_slider(double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		if constexpr (U == U_OP::FILL_COLOR) {
+		if constexpr (U == UNDO_OP::FILL_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[16];
 				conv_val_to_col(m_col_style, val, buf, 16);
@@ -193,11 +193,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーと図形に格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::fill_set_slider(Shape* s, const double val)
 	{
 		fill_set_slider<U, S>(val);
-		if constexpr (U == U_OP::FILL_COLOR) {
+		if constexpr (U == UNDO_OP::FILL_COLOR) {
 			D2D1_COLOR_F col;
 			s->get_fill_color(col);
 			if constexpr (S == 0) {
@@ -209,7 +209,7 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 2) {
 				col.b = static_cast<FLOAT>(val / COLOR_MAX);
 			}
-			if constexpr (U != U_OP::PAGE_COLOR && S == 3) {
+			if constexpr (U != UNDO_OP::PAGE_COLOR && S == 3) {
 				col.a = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			s->set_fill_color(col);

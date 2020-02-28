@@ -24,37 +24,40 @@ namespace winrt::GraphPaper::implementation
 		}
 		Shape* s = nullptr;
 		auto s_type = dt_reader.ReadUInt32();
-		switch (s_type) {
-		case SHAPE_BEZI:
+		if (s_type == SHAPE_NULL) {
+		}
+		else if (s_type == SHAPE_BEZI) {
 			s = new ShapeBezi(dt_reader);
-			break;
-		case SHAPE_ELLI:
+		}
+		else if (s_type == SHAPE_ELLI) {
 			s = new ShapeElli(dt_reader);
-			break;
-		case SHAPE_LINE:
+		}
+		else if (s_type == SHAPE_LINE) {
 			s = new ShapeLine(dt_reader);
-			break;
-		case SHAPE_QUAD:
+		}
+		else if (s_type == SHAPE_QUAD) {
 			s = new ShapeQuad(dt_reader);
-			break;
-		case SHAPE_RECT:
+		}
+		else if (s_type == SHAPE_RECT) {
 			s = new ShapeRect(dt_reader);
-			break;
-		case SHAPE_RRECT:
+		}
+		else if (s_type == SHAPE_RRECT) {
 			s = new ShapeRRect(dt_reader);
-			break;
-		case SHAPE_TEXT:
+		}
+		else if (s_type == SHAPE_TEXT) {
 			s = new ShapeText(dt_reader);
-			break;
-		case SHAPE_GROUP:
+		}
+		else if (s_type == SHAPE_GROUP) {
 			s = new ShapeGroup(dt_reader);
-			break;
-		case SHAPE_RULER:
+		}
+		else if (s_type == SHAPE_RULER) {
 			s = new ShapeRuler(dt_reader);
-			break;
+		}
+		else {
+			s = reinterpret_cast<Shape*>(-1);
 		}
 #if defined(_DEBUG)
-		if (s != nullptr) {
+		if (s != nullptr && s != reinterpret_cast<Shape*>(-1)) {
 			debug_leak_cnt++;
 		}
 #endif
@@ -324,6 +327,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		Shape* s;
 		while ((s = s_list_read_shape(dt_reader)) != static_cast<Shape*>(nullptr)) {
+			if (s == reinterpret_cast<Shape*>(-1)) {
+				break;
+			}
 			s_list.push_back(s);
 		}
 	}

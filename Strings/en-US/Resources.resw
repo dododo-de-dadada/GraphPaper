@@ -433,6 +433,10 @@
     <value>Size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
+  <data name="mfi_page_unit.Text" xml:space="preserve">
+    <value>Unit and format...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
   <data name="mfi_paste.Text" xml:space="preserve">
     <value>Paste</value>
     <comment>MenuFlyoutItem</comment>
@@ -527,10 +531,6 @@
   </data>
   <data name="mfsi_grid_size.Text" xml:space="preserve">
     <value>Size Grid</value>
-    <comment>MenuFlyoutSubItem</comment>
-  </data>
-  <data name="mfsi_page_unit.Text" xml:space="preserve">
-    <value>Unit</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_recent_files.Text" xml:space="preserve">

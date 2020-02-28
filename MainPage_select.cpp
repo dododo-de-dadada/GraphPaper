@@ -333,7 +333,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			if (t_range.length > 0 || t_range.startPosition > 0) {
-				undo_push_set<U_OP::TEXT_RANGE>(s, DWRITE_TEXT_RANGE{ 0, 0 });
+				undo_push_set<UNDO_OP::TEXT_RANGE>(s, DWRITE_TEXT_RANGE{ 0, 0 });
 				flag = true;
 			}
 		}

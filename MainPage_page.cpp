@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 			break;
 		}
 		if (equal(m_page_panel.m_page_size, page) == false) {
-			undo_push_set<U_OP::PAGE_SIZE>(&m_page_panel, page);
+			undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_panel, page);
 			undo_push_null();
 			enable_undo_menu();
 		}
@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 		pt_max(b_max, p_max, m_page_max);
 		const D2D1_SIZE_F page = { p_max.x, p_max.y };
 		if (equal(m_page_panel.m_page_size, page) == false) {
-			undo_push_set<U_OP::PAGE_SIZE>(&m_page_panel, page);
+			undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_panel, page);
 			undo_push_null();
 			enable_undo_menu();
 		}
@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 		stat_set_page();
 	}
 
-	// ページの単位ダイアログの「適用」ボタンが押された.
+	// ページの「単位と書式」ダイアログの「適用」ボタンが押された.
 	void MainPage::cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/)
 	{
 		auto p_unit = m_page_unit;
@@ -130,9 +130,9 @@ namespace winrt::GraphPaper::implementation
 		slider0().Value(val0);
 		slider1().Value(val1);
 		slider2().Value(val2);
-		page_set_slider<U_OP::PAGE_COLOR, 0>(val0);
-		page_set_slider<U_OP::PAGE_COLOR, 1>(val1);
-		page_set_slider<U_OP::PAGE_COLOR, 2>(val2);
+		page_set_slider<UNDO_OP::PAGE_COLOR, 0>(val0);
+		page_set_slider<UNDO_OP::PAGE_COLOR, 1>(val1);
+		page_set_slider<UNDO_OP::PAGE_COLOR, 2>(val2);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
@@ -146,19 +146,19 @@ namespace winrt::GraphPaper::implementation
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				page_set_slider<U_OP::PAGE_COLOR, 0>(&m_samp_panel, args.NewValue());
+				page_set_slider<UNDO_OP::PAGE_COLOR, 0>(&m_samp_panel, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				page_set_slider<U_OP::PAGE_COLOR, 1>(&m_samp_panel, args.NewValue());
+				page_set_slider<UNDO_OP::PAGE_COLOR, 1>(&m_samp_panel, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				page_set_slider<U_OP::PAGE_COLOR, 2>(&m_samp_panel, args.NewValue());
+				page_set_slider<UNDO_OP::PAGE_COLOR, 2>(&m_samp_panel, args.NewValue());
 			}
 		);
 		primary_token = cd_samp().PrimaryButtonClick(
@@ -171,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 				if (equal(page_val, samp_val)) {
 					return;
 				}
-				undo_push_set<U_OP::PAGE_COLOR>(&m_page_panel, samp_val);
+				undo_push_set<UNDO_OP::PAGE_COLOR>(&m_page_panel, samp_val);
 				undo_push_null();
 				enable_undo_menu();
 				draw_page();
@@ -249,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 		const auto _ = cd_page_size().ShowAsync();
 	}
 
-	// ページメニューの「単位」が選択された
+	// ページメニューの「単位と書式」が選択された
 	void MainPage::mfi_page_unit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		cx_page_unit().SelectedIndex(m_page_unit);
@@ -258,13 +258,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::page_set_slider(double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		winrt::hstring hdr;
-		if constexpr (U == U_OP::PAGE_COLOR) {
+		if constexpr (U == UNDO_OP::PAGE_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[16];
 				conv_val_to_col(m_col_style, val, buf, 16);
@@ -299,17 +299,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーと図形に格納する.
-	template <U_OP U, int S>
+	template <UNDO_OP U, int S>
 	void MainPage::page_set_slider(Shape* s, const double val)
 	{
 		page_set_slider<U, S>(val);
-		if constexpr (U == U_OP::GRID_LEN) {
+		if constexpr (U == UNDO_OP::GRID_LEN) {
 			s->set_grid_len(val);
 		}
-		if constexpr (U == U_OP::GRID_OPAC) {
+		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			s->set_grid_opac(val / COLOR_MAX);
 		}
-		if constexpr (U == U_OP::PAGE_COLOR) {
+		if constexpr (U == UNDO_OP::PAGE_COLOR) {
 			D2D1_COLOR_F col;
 			s->get_page_color(col);
 			if constexpr (S == 0) {

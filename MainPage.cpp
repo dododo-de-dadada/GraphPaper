@@ -21,7 +21,7 @@ namespace winrt::GraphPaper::implementation
 			swprintf_s(buf, len, L"%.0lf", std::round(val));
 		}
 		else if (style == COL_STYLE::HEX) {
-			swprintf_s(buf, len, L"%02x", static_cast<uint32_t>(std::round(val)));
+			swprintf_s(buf, len, L"%02X", static_cast<uint32_t>(std::round(val)));
 		}
 		else if (style == COL_STYLE::FLT) {
 			swprintf_s(buf, len, L"%.4lf", val / COLOR_MAX);
@@ -30,7 +30,6 @@ namespace winrt::GraphPaper::implementation
 			swprintf_s(buf, len, L"%.1lf%%", val / COLOR_MAX * 100.0);
 		}
 	}
-
 
 	//	メインページを破棄する.
 	MainPage::~MainPage(void)
