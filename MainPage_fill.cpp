@@ -12,8 +12,6 @@ namespace winrt::GraphPaper::implementation
 	// 塗りつぶしメニューの「色」が選択された.
 	void MainPage::mfi_fill_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token slider0_token;
 		static winrt::event_token slider1_token;
 		static winrt::event_token slider2_token;
@@ -123,21 +121,23 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_fill"));
-		show_cd_samp();
+		show_cd_samp(L"str_fill");
 	}
 
 	// 塗りつぶしの見本を作成する.
 	void MainPage::fill_create_samp(void)
 	{
 		const auto dpi = m_samp_dx.m_logical_dpi;
-		const D2D1_POINT_2F pos = { GRIDLEN_PX, GRIDLEN_PX };
 		const auto w = scp_samp_panel().ActualWidth();
 		const auto h = scp_samp_panel().ActualHeight();
+		const auto padding = w * 0.125;
+		const D2D1_POINT_2F pos = {
+			static_cast<FLOAT>(padding),
+			static_cast<FLOAT>(padding)
+		};
 		const D2D1_POINT_2F vec = {
-			static_cast<FLOAT>(w - 2.0 * GRIDLEN_PX),
-			static_cast<FLOAT>(h - 2.0 * GRIDLEN_PX)
+			static_cast<FLOAT>(w - 2.0 * padding),
+			static_cast<FLOAT>(h - 2.0 * padding)
 		};
 		m_samp_shape = new ShapeRect(pos, vec, &m_samp_panel);
 #if defined(_DEBUG)

@@ -11,6 +11,8 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 
+	constexpr wchar_t TITLE_GRID[] = L"str_grid";
+
 	//	値をスライダーのヘッダーに格納する.
 	//	U	操作
 	//	S	スライダー
@@ -28,15 +30,15 @@ namespace winrt::GraphPaper::implementation
 			const auto dpi = m_samp_dx.m_logical_dpi;
 			const auto g_len = m_page_panel.m_grid_len + 1.0;
 			wchar_t buf[16];
-			conv_px_to_dist(m_page_unit, val, dpi, g_len, buf, 16);
+			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
 			hdr = hdr + L": " + buf;
 			/*
-			if (m_page_unit == DIST_UNIT::PIXEL) {
+			if (m_page_unit == LEN_UNIT::PIXEL) {
 				wchar_t buf[16];
 				swprintf_s(buf, FMT_PIXEL_UNIT, val);
 				hdr = hdr + L": " + buf;
 			}
-			else if (m_page_unit == DIST_UNIT::GRID) {
+			else if (m_page_unit == LEN_UNIT::GRID) {
 				wchar_t buf[16];
 				swprintf_s(buf, FMT_GRID_UNIT, val / (m_page_panel.m_grid_len + 1.0));
 				hdr = hdr + L": " + buf;
@@ -45,15 +47,15 @@ namespace winrt::GraphPaper::implementation
 				wchar_t buf[16];
 				const double inch = val / m_samp_dx.m_logical_dpi;
 				switch (m_page_unit) {
-				case DIST_UNIT::INCH:
+				case LEN_UNIT::INCH:
 					swprintf_s(buf, FMT_INCH_UNIT, inch);
 					hdr = hdr + L": " + buf;
 					break;
-				case DIST_UNIT::MILLI:
+				case LEN_UNIT::MILLI:
 					swprintf_s(buf, FMT_MILLI_UNIT, inch * MM_PER_INCH);
 					hdr = hdr + L": " + buf;
 					break;
-				case DIST_UNIT::POINT:
+				case LEN_UNIT::POINT:
 					swprintf_s(buf, FMT_POINT_UNIT, inch * PT_PER_INCH);
 					hdr = hdr + L": " + buf;
 					break;
@@ -119,8 +121,6 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼の大きさ」>「大きさ」が選択された.
 	void MainPage::mfi_grid_len_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token slider0_token;
 		static winrt::event_token primary_token;
 		static winrt::event_token loaded_token;
@@ -173,9 +173,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_grid"));
-		show_cd_samp();
+		show_cd_samp(TITLE_GRID);
 	}
 
 	// ページメニューの「方眼の大きさ」>「狭める」が選択された.
@@ -209,10 +207,7 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼線の濃さ」が選択された.
 	void MainPage::mfi_grid_opac_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token slider3_token;
-		//static winrt::event_token c_style_token;
 		static winrt::event_token primary_token;
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
@@ -220,10 +215,8 @@ namespace winrt::GraphPaper::implementation
 		load_cd_samp();
 		const double val3 = m_samp_panel.m_grid_opac * COLOR_MAX;
 		slider3().Value(val3);
-		//cx_color_style().SelectedIndex(m_samp_panel.m_col_style);
 		grid_set_slider<UNDO_OP::GRID_OPAC, 3>(val3);
 		slider3().Visibility(VISIBLE);
-		//cx_color_style().Visibility(VISIBLE);
 		loaded_token = scp_samp_panel().Loaded(
 			[this](auto, auto)
 			{
@@ -237,13 +230,6 @@ namespace winrt::GraphPaper::implementation
 				grid_set_slider<UNDO_OP::GRID_OPAC, 3>(&m_samp_panel, args.NewValue());
 			}
 		);
-		//c_style_token = cx_color_style().SelectionChanged(
-		//	[this](auto, auto args)
-		//	{
-		//		m_samp_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
-		//		grid_set_slider<UNDO_OP::GRID_OPAC, 3>(&m_samp_panel, slider3().Value());
-		//	}
-		//);
 		primary_token = cd_samp().PrimaryButtonClick(
 			[this](auto, auto)
 			{
@@ -275,9 +261,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_grid"));
-		show_cd_samp();
+		show_cd_samp(TITLE_GRID);
 	}
 
 	// ページメニューの「方眼線の表示」>「最背面」が選択された.

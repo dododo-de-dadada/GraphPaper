@@ -36,36 +36,36 @@ namespace winrt::GraphPaper::implementation
 	// Escape が押された.
 	void MainPage::ka_tool_select_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	{
-		if (m_tool_shape == TOOL_SELECT) {
+		if (m_draw_shape == DRAW_SELECT) {
 			return;
 		}
 		rmfi_tool_select().IsChecked(true);
 		// グループ名を指定していてもコードビハインドからは
 		// 自動でチェックが外れない.
-		switch (m_tool_shape) {
-		case TOOL_BEZI:
-			rmfi_tool_bezi().IsChecked(false);
+		switch (m_draw_shape) {
+		case DRAW_BEZI:
+			rmfi_draw_bezi().IsChecked(false);
 			break;
-		case TOOL_ELLI:
-			rmfi_tool_elli().IsChecked(false);
+		case DRAW_ELLI:
+			rmfi_draw_elli().IsChecked(false);
 			break;
-		case TOOL_LINE:
-			rmfi_tool_line().IsChecked(false);
+		case DRAW_LINE:
+			rmfi_draw_line().IsChecked(false);
 			break;
-		case TOOL_QUAD:
-			rmfi_tool_quad().IsChecked(false);
+		case DRAW_QUAD:
+			rmfi_draw_quad().IsChecked(false);
 			break;
-		case TOOL_RECT:
-			rmfi_tool_rect().IsChecked(false);
+		case DRAW_RECT:
+			rmfi_draw_rect().IsChecked(false);
 			break;
-		case TOOL_RRECT:
-			rmfi_tool_rrect().IsChecked(false);
+		case DRAW_RRECT:
+			rmfi_draw_rrect().IsChecked(false);
 			break;
-		case TOOL_TEXT:
-			rmfi_tool_text().IsChecked(false);
+		case DRAW_TEXT:
+			rmfi_draw_text().IsChecked(false);
 			break;
-		case TOOL_RULER:
-			rmfi_tool_scale().IsChecked(false);
+		case DRAW_SCALE:
+			rmfi_draw_scale().IsChecked(false);
 			break;
 		}
 		rmfi_tool_select_click(nullptr, nullptr);

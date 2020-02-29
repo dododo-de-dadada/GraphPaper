@@ -31,11 +31,11 @@ namespace winrt::GraphPaper::implementation
 			auto const& t_id = typeid(*s);
 			if (t_id == typeid(ShapeBezi)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_bezi")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_bezi/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_draw_bezi/Text");
 			}
 			else if (t_id == typeid(ShapeElli)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_elli")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_elli/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_draw_elli/Text");
 			}
 			else if (t_id == typeid(ShapeGroup)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_group")));
@@ -43,27 +43,27 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (t_id == typeid(ShapeLine)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_line/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_draw_line/Text");
 			}
 			else if (t_id == typeid(ShapeQuad)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_quad")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_quad/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_draw_quad/Text");
 			}
 			else if (t_id == typeid(ShapeRect)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rect")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_rect/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_draw_rect/Text");
 			}
 			else if (t_id == typeid(ShapeRRect)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rrect")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_rrect/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_draw_rrect/Text");
 			}
 			else if (t_id == typeid(ShapeScale)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_scale")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_scale/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_draw_scale/Text");
 			}
 			else if (t_id == typeid(ShapeText)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_text/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_draw_text/Text");
 			}
 			else {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_select")));

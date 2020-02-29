@@ -549,7 +549,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 方眼の属性
 		D2D1_COLOR_F m_grid_color;	// 方眼線の色 (MainPage のコンストラクタで設定)
-		double m_grid_len = 0.0;	// 方眼の一辺の長さ (を -1 した値)
+		double m_grid_len = 0.0;	// 方眼の大きさ (を -1 した値)
 		double m_grid_opac = GRID_OPAC;	// 方眼線の不透明度
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼線の表示
 		bool m_grid_snap = true;	// 方眼に整列

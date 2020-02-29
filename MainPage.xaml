@@ -415,50 +415,50 @@
                 </MenuFlyoutItem>
             </muxc:MenuBarItem>
             <!-- 図形ツールメニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_tool" AccessKey="O" Title="Tool">
+            <muxc:MenuBarItem x:Uid="mbi_draw" AccessKey="D" Title="Draw">
                 <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_select" x:Uid="rmfi_tool_select" Click="rmfi_tool_select_click" GroupName="gn_tool_type" IsChecked="true" KeyboardAcceleratorTextOverride="Esc" Text="Select">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_select}" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_rect" x:Uid="rmfi_tool_rect" Click="rmfi_tool_rect_click" GroupName="gn_tool_type" Text="Rectangle">
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_draw_rect" x:Uid="rmfi_draw_rect" Click="rmfi_draw_rect_click" GroupName="gn_tool_type" Text="Rectangle">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_rect}" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_rrect" x:Uid="rmfi_tool_rrect" Click="rmfi_tool_rrect_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_draw_rrect" x:Uid="rmfi_draw_rrect" Click="rmfi_draw_rrect_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_rrect}" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_quad" x:Uid="rmfi_tool_quad" Click="rmfi_tool_quad_click" GroupName="gn_tool_type" Text="Quadrangle">
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_draw_quad" x:Uid="rmfi_draw_quad" Click="rmfi_draw_quad_click" GroupName="gn_tool_type" Text="Quadrangle">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_quad}" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_elli" x:Uid="rmfi_tool_elli" Click="rmfi_tool_elli_click" GroupName="gn_tool_type" Text="Ellipse">
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_draw_elli" x:Uid="rmfi_draw_elli" Click="rmfi_draw_elli_click" GroupName="gn_tool_type" Text="Ellipse">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_elli}" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_line" x:Uid="rmfi_tool_line" Click="rmfi_tool_line_click" GroupName="gn_tool_type" Text="Line" >
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_draw_line" x:Uid="rmfi_draw_line" Click="rmfi_draw_line_click" GroupName="gn_tool_type" Text="Line" >
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_line}" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_bezi" x:Uid="rmfi_tool_bezi" Click="rmfi_tool_bezi_click" GroupName="gn_tool_type" Text="Curve" >
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_draw_bezi" x:Uid="rmfi_draw_bezi" Click="rmfi_draw_bezi_click" GroupName="gn_tool_type" Text="Curve" >
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_bezi}" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_text" x:Uid="rmfi_tool_text" Click="rmfi_tool_text_click" GroupName="gn_tool_type" Text="Text" >
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_draw_text" x:Uid="rmfi_draw_text" Click="rmfi_draw_text_click" GroupName="gn_tool_type" Text="Text" >
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_text}" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_scale" x:Uid="rmfi_tool_scale" Click="rmfi_tool_scale_click" GroupName="gn_tool_type" Text="Major" >
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_draw_scale" x:Uid="rmfi_draw_scale" Click="rmfi_draw_scale_click" GroupName="gn_tool_type" Text="Major" >
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_scale}" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
@@ -775,15 +775,16 @@
         -->
         <!-- ページの寸法入力ダイアログ -->
         <ContentDialog x:Name="cd_page_size" x:Uid="cd_page_size" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonClick="cd_page_size_pri_btn_click" PrimaryButtonText="Apply" SecondaryButtonClick="cd_page_size_sec_btn_click" SecondaryButtonText="Adjust to Shapes">
-            <StackPanel>
-                <TextBox x:Name="tx_page_width" x:Uid="tx_page_width" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="tx_page_size_text_changed" />
-                <TextBox x:Name="tx_page_height" x:Uid="tx_page_height" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="tx_page_size_text_changed" />
+            <StackPanel >
+                <TextBox x:Name="tx_page_width" x:Uid="tx_page_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="tx_page_size_text_changed" />
+                <TextBox x:Name="tx_page_height" x:Uid="tx_page_height" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="tx_page_size_text_changed" />
+                <TextBlock x:Name="tk_page_unit" x:Uid="tk_page_unit" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Text="Unit of distance"/>
             </StackPanel>
         </ContentDialog>
         <!-- ページの単位と書式ダイアログ -->
         <ContentDialog x:Name="cd_page_unit" x:Uid="cd_page_unit" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonClick="cd_page_unit_pri_btn_click" PrimaryButtonText="Apply" >
             <StackPanel>
-                <ComboBox x:Name="cx_page_unit" x:Uid="cx_page_unit" Header="Distance unit" >
+                <ComboBox x:Name="cx_page_unit" x:Uid="cx_page_unit" Header="Distance unit" Margin="0,0,0,4" >
                     <ComboBoxItem x:Uid="cxi_unit_pixel" Content="Pixel" />
                     <ComboBoxItem x:Uid="cxi_unit_inch" Content="Inch" />
                     <ComboBoxItem x:Uid="cxi_unit_milli" Content="Millimeter" />
@@ -801,17 +802,18 @@
         <!-- 属性入力ダイアログ -->
         <ContentDialog x:Name="cd_samp" x:Load="False" CloseButtonText="Close" DefaultButton="Close" Opened="cd_samp_opened" PrimaryButtonText="Apply" >
             <RelativePanel>
-                <TextBlock x:Name="tk_samp_caption" RelativePanel.AlignTopWithPanel="True" Text="Sample" />
                 <SwapChainPanel
                     x:Name="scp_samp_panel"
-                    Height="256"
-                    MaxHeight="256"
-                    MaxWidth="256"
-                    RelativePanel.Below="tk_samp_caption"
-                    Width="256"
+                    Height="170"
+                    Margin="0,0,0,4"
+                    MaxHeight="170"
+                    MaxWidth="170"
+                    RelativePanel.AlignTopWithPanel="True"
+                    RelativePanel.AlignHorizontalCenterWithPanel="True"
+                    Width="170"
                     />
                 <!-- Height を指定するこれ大事 -->
-                <ListView x:Name="lv_font_stretch" Loaded="lv_font_stretch_loaded" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256">
+                <ListView x:Name="lv_font_stretch" Loaded="lv_font_stretch_loaded" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256">
                     <ListViewItem x:Uid="lvi_stretch_undefined" Content="Undefined" />
                     <ListViewItem x:Uid="lvi_stretch_ultra_condensed" Content="Ultra Condensed" />
                     <ListViewItem x:Uid="lvi_stretch_extra_condensed" Content="Extra Condensed" />
@@ -823,8 +825,8 @@
                     <ListViewItem x:Uid="lvi_stretch_extra_expanded" Content="Extra Expanded" />
                     <ListViewItem x:Uid="lvi_stretch_ultra_expanded" Content="Ultra Expanded" />
                 </ListView>
-                <ListView x:Name="lv_font_family" Loaded="lv_font_family_loaded" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
-                <ListView x:Name="lv_font_weight" Loaded="lv_font_weight_loaded" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256">
+                <ListView x:Name="lv_font_family" Loaded="lv_font_family_loaded" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
+                <ListView x:Name="lv_font_weight" Loaded="lv_font_weight_loaded" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256">
                     <ListViewItem x:Uid="lvi_weight_thin" Content="Thin" />
                     <ListViewItem x:Uid="lvi_weight_extra_light" Content="Extra Light" />
                     <ListViewItem x:Uid="lvi_weight_light" Content="Light" />
@@ -837,10 +839,10 @@
                     <ListViewItem x:Uid="lvi_weight_black" Content="Black" />
                     <ListViewItem x:Uid="lvi_weight_extra_black" Content="Extra Black" />
                 </ListView>
-                <Slider x:Name="slider0" x:Uid = "slider0" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignLeftWith="scp_samp_panel" RelativePanel.AlignRightWith="scp_samp_panel" StepFrequency="1" Visibility="Collapsed" />
-                <Slider x:Name="slider1" x:Uid = "slider1" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="slider0" RelativePanel.AlignLeftWith="scp_samp_panel" RelativePanel.AlignRightWith="scp_samp_panel" StepFrequency="1" Visibility="Collapsed" />
-                <Slider x:Name="slider2" x:Uid = "slider2" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="slider1" RelativePanel.AlignLeftWith="scp_samp_panel" RelativePanel.AlignRightWith="scp_samp_panel" StepFrequency="1" Visibility="Collapsed" />
-                <Slider x:Name="slider3" x:Uid = "slider3" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="slider2" RelativePanel.AlignLeftWith="scp_samp_panel" RelativePanel.AlignRightWith="scp_samp_panel" StepFrequency="1" Visibility="Collapsed" />
+                <Slider x:Name="slider0" x:Uid = "slider0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+                <Slider x:Name="slider1" x:Uid = "slider1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+                <Slider x:Name="slider2" x:Uid = "slider2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+                <Slider x:Name="slider3" x:Uid = "slider3" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
             </RelativePanel>
         </ContentDialog>
     </Grid>

@@ -10,12 +10,11 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr double TEXT_LINE_DELTA = 2;	// 行間の変分 (DPIs)
+	constexpr wchar_t TITLE_PAGE[] = L"str_page";
 
 	// 書体メニューの「行間」>「高さ」が選択された.
 	void MainPage::mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token slider0_token;
 		static winrt::event_token primary_token;
 		static winrt::event_token loaded_token;
@@ -65,12 +64,10 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
-		show_cd_samp();
+		show_cd_samp(TITLE_PAGE);
 	}
 
-	// 書体メニューの「行間」>「狭める」が選択された.
+	//	書体メニューの「行間」>「狭める」が選択された.
 	void MainPage::mfi_text_line_contract_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		auto val = m_page_panel.m_text_line - TEXT_LINE_DELTA;
@@ -82,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 書体メニューの「行間」>「広げる」が選択された.
+	//	書体メニューの「行間」>「広げる」が選択された.
 	void MainPage::mfi_text_line_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		auto val = m_page_panel.m_text_line + TEXT_LINE_DELTA;
@@ -91,11 +88,9 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 書体メニューの「余白」が選択された.
+	//	書体メニューの「余白」が選択された.
 	void MainPage::mfi_text_margin_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token slider0_token;
 		static winrt::event_token slider1_token;
 		static winrt::event_token primary_token;
@@ -158,9 +153,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
-		show_cd_samp();
+		show_cd_samp(TITLE_PAGE);
 	}
 
 	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
@@ -187,26 +180,26 @@ namespace winrt::GraphPaper::implementation
 		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
 	}
 
-	// 書体メニューの「段落のそろえ」>「中段」が選択された.
+	//	書体メニューの「段落のそろえ」>「中段」が選択された.
 	void MainPage::rmfi_text_align_middle_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
-	// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
+	//	書体メニューの「文字列のそろえ」>「右よせ」が選択された.
 	void MainPage::rmfi_text_align_right_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	}
 
-	// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
+	//	書体メニューの「段落のそろえ」>「上よせ」が選択された.
 	void MainPage::rmfi_text_align_top_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 	}
 
-	// 書体メニューの「段落のそろえ」に印をつける.
-	// p_align	段落のそろえ
+	//	書体メニューの「段落のそろえ」に印をつける.
+	//	p_align	段落のそろえ
 	void MainPage::text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align)
 	{
 		rmfi_text_align_top().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
@@ -249,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 				hdr = r_loader.GetString(L"str_text_mar_horzorz");
 				px = val;
 				wchar_t buf[16];
-				conv_px_to_dist(m_page_unit, px, dpi, g_len, buf, 16);
+				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 16);
 				hdr = hdr + L": " + buf;
 			}
 			if constexpr (S == 1) {
@@ -257,7 +250,7 @@ namespace winrt::GraphPaper::implementation
 				hdr = r_loader.GetString(L"str_text_mar_vertert");
 				px = val;
 				wchar_t buf[16];
-				conv_px_to_dist(m_page_unit, px, dpi, g_len, buf, 16);
+				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 16);
 				hdr = hdr + L": " + buf;
 			}
 		}
@@ -265,9 +258,11 @@ namespace winrt::GraphPaper::implementation
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_height");
 			if (val > FLT_MIN) {
+				//	行の高さの単位は DIPs (96dpi 固定) なので,
+				//	これをピクセル単位に変換する.
 				px = val * dpi / 96.0;
 				wchar_t buf[16];
-				conv_px_to_dist(m_page_unit, px, dpi, g_len, buf, 16);
+				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 16);
 				hdr = hdr + L": " + buf;
 			}
 			else {
@@ -276,33 +271,33 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		/*
-		if (m_page_unit == DIST_UNIT::PIXEL) {
+		if (m_page_unit == LEN_UNIT::PIXEL) {
 			wchar_t buf[16];
 			swprintf_s(buf, FMT_PIXEL_UNIT, px);
 			hdr = hdr + L": " + buf;
 		}
-		else if (m_page_unit == DIST_UNIT::INCH) {
+		else if (m_page_unit == LEN_UNIT::INCH) {
 			wchar_t buf[16];
 			swprintf_s(buf, FMT_INCH_UNIT, px / dpi);
 			hdr = hdr + L": " + buf;
 		}
-		else if (m_page_unit == DIST_UNIT::MILLI) {
+		else if (m_page_unit == LEN_UNIT::MILLI) {
 			wchar_t buf[16];
 			swprintf_s(buf, FMT_MILLI_UNIT, px * MM_PER_INCH / dpi);
 			hdr = hdr + L": " + buf;
 		}
-		else if (m_page_unit == DIST_UNIT::POINT) {
+		else if (m_page_unit == LEN_UNIT::POINT) {
 			wchar_t buf[16];
 			swprintf_s(buf, FMT_POINT_UNIT, px * PT_PER_INCH / dpi);
 			hdr = hdr + L": " + buf;
 		}
-		else if (m_page_unit == DIST_UNIT::GRID) {
+		else if (m_page_unit == LEN_UNIT::GRID) {
 			wchar_t buf[16];
 			swprintf_s(buf, FMT_GRID_UNIT, px / (m_samp_panel.m_grid_len + 1.0));
 			hdr = hdr + L": " + buf;
 		}
 		wchar_t buf[16];
-		conv_px_to_dist(m_page_unit, dpi,g_len, buf, 16);
+		conv_val_to_len(m_page_unit, dpi,g_len, buf, 16);
 		hdr = hdr + L": " + buf;
 	SET:
 	*/

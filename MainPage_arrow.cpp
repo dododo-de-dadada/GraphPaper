@@ -57,7 +57,7 @@ namespace winrt::GraphPaper::implementation
 	// ストロークメニューの「矢じりの大きさ」が選択された.
 	void MainPage::mfi_arrow_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		static winrt::event_token slider0_token;
 		static winrt::event_token slider1_token;
 		static winrt::event_token slider2_token;
@@ -133,9 +133,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_arrow"));
-		show_cd_samp();
+		show_cd_samp(L"str_arrow");
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -163,27 +161,27 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[16];
 			const auto dpi = m_samp_dx.m_logical_dpi;
 			const auto g_len = m_samp_panel.m_grid_len + 1.0;
-			conv_px_to_dist(m_page_unit, val, dpi, g_len, buf, 16);
+			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
 			hdr = hdr + buf;
 			/*
 			switch (m_page_unit) {
-			case DIST_UNIT::GRID:
+			case LEN_UNIT::GRID:
 				swprintf_s(buf, FMT_GRID_UNIT, val / (m_samp_panel.m_grid_len + 1.0));
 				hdr = hdr + buf;
 				break;
-			case DIST_UNIT::PIXEL:
+			case LEN_UNIT::PIXEL:
 				swprintf_s(buf, FMT_PIXEL_UNIT, val);
 				hdr = hdr + buf;
 				break;
-			case DIST_UNIT::INCH:
+			case LEN_UNIT::INCH:
 				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi);
 				hdr = hdr + buf;
 				break;
-			case DIST_UNIT::MILLI:
+			case LEN_UNIT::MILLI:
 				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi * MM_PER_INCH);
 				hdr = hdr + buf;
 				break;
-			case DIST_UNIT::POINT:
+			case LEN_UNIT::POINT:
 				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi * PT_PER_INCH);
 				hdr = hdr + buf;
 				break;

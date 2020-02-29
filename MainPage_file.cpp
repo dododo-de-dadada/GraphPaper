@@ -494,22 +494,22 @@ namespace winrt::GraphPaper::implementation
 		char* u;
 		switch (m_page_unit) {
 		default:
-		case DIST_UNIT::PIXEL:
+		case LEN_UNIT::PIXEL:
 			w = m_page_panel.m_page_size.width;
 			h = m_page_panel.m_page_size.height;
 			u = SVG_UNIT_PX;
 			break;
-		case DIST_UNIT::INCH:
+		case LEN_UNIT::INCH:
 			w = m_page_panel.m_page_size.width / dpi;
 			h = m_page_panel.m_page_size.height / dpi;
 			u = SVG_UNIT_IN;
 			break;
-		case DIST_UNIT::MILLI:
+		case LEN_UNIT::MILLI:
 			w = m_page_panel.m_page_size.width * MM_PER_INCH / dpi;
 			h = m_page_panel.m_page_size.height * MM_PER_INCH / dpi;
 			u = SVG_UNIT_MM;
 			break;
-		case DIST_UNIT::POINT:
+		case LEN_UNIT::POINT:
 			w = m_page_panel.m_page_size.width * PT_PER_INCH / dpi;
 			h = m_page_panel.m_page_size.height * PT_PER_INCH / dpi;
 			u = SVG_UNIT_PT;
@@ -634,7 +634,7 @@ namespace winrt::GraphPaper::implementation
 		stat_set_curs();
 		stat_set_grid();
 		stat_set_page();
-		stat_set_tool();
+		stat_set_draw();
 		stat_set_zoom();
 		stat_set_unit();
 		stat_visibility();

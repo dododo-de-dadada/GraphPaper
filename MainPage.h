@@ -1,5 +1,8 @@
 ﻿#pragma once
 //------------------------------
+//	1	「ビルド」>「構成マネージャー」>「アクティブソリューションプラットフォーム」を x64
+//	2	「プロジェクト」>「NuGetパッケージの管理」>「復元」. 必要なら「MicroSoft.UI.Xaml」と「Microsoft.Windows.CppWinRT」を更新.
+//	3
 //	MainPage.h
 //
 //	MainPage.cpp	メインページの作成と表示
@@ -83,10 +86,10 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_PIXEL_UNIT = L"%.0lfpx";	// ピクセル単位の書式
 	constexpr auto FMT_ZOOM = L"%.lf%%";	// 倍率の書式
 	constexpr auto FMT_GRID = L"%.3lf";	// グリッド単位の書式
-	constexpr auto FMT_GRID_UNIT = L"%.3lfgd";	// グリッド単位の書式
+	constexpr auto FMT_GRID_UNIT = L"%.3lfgr";	// グリッド単位の書式
 
 	constexpr auto A4_PER_INCH = D2D1_SIZE_F{ 8.27f, 11.69f };	// A4 サイズの大きさ (インチ)
-	constexpr auto GRIDLEN_PX = 48.0f;	// 方眼の間隔の初期値 (ピクセル)
+	constexpr auto GRIDLEN_PX = 48.0f;	// 方眼の大きさの初期値 (ピクセル)
 	static const winrt::hstring FMT_DATA{ L"graph_paper_data" };	// 図形データのクリップボード書式
 
 	//-------------------------------
@@ -111,44 +114,49 @@ namespace winrt::GraphPaper::implementation
 		PAGE = (2 | 4),	// ページの大きさ
 		CURS = (8 | 16),	// カーソルの位置
 		ZOOM = 32,	// 拡大率
-		TOOL = 64,	// 図形ツール
-		UNIT = 128	// 距離の単位
+		DRAW = 64,	// 作図ツール
+		UNIT = 128	// 長さの単位
 	};
 
 	//-------------------------------
-	//	図形ツール
+	//	作図
 	//-------------------------------
-	enum TOOL_SHAPE {
-		TOOL_SELECT,	// 選択ツール
-		TOOL_BEZI,	// 曲線
-		TOOL_ELLI,	// だ円
-		TOOL_LINE,	// 線分
-		TOOL_QUAD,	// 四辺形
-		TOOL_RECT,	// 方形
-		TOOL_RRECT,	// 角丸方形
-		TOOL_TEXT,	// 文字列
-		TOOL_RULER	// 目盛り
+	enum DRAW_SHAPE {
+		DRAW_SELECT,	// 選択ツール
+		DRAW_BEZI,	// 曲線
+		DRAW_ELLI,	// だ円
+		DRAW_LINE,	// 線分
+		DRAW_QUAD,	// 四辺形
+		DRAW_RECT,	// 方形
+		DRAW_RRECT,	// 角丸方形
+		DRAW_TEXT,	// 文字列
+		DRAW_SCALE	// 目盛り
 	};
 
-	// 距離の単位
-	enum DIST_UNIT {
+	//-------------------------------
+	// 長さの単位
+	//-------------------------------
+	enum LEN_UNIT {
 		PIXEL,	// ピクセル
 		INCH,	// インチ
 		MILLI,	// ミリメートル
 		POINT,	// ポイント
 		GRID	// 方眼 (グリッド)
 	};
+	//	ピクセル単位の長さを他の単位の文字列に変換する.
+	void conv_val_to_len(const LEN_UNIT unit, const double px, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 
+	//-------------------------------
 	//	色成分の形式
+	//-------------------------------
 	enum COL_STYLE {
 		DEC,	// 10 進数
 		HEX,	// 16 進数	
 		FLT,	// 浮動小数
 		CEN		// パーセント
 	};
-
+	//	色成分の値を文字列に変換する.
 	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t *buf, const uint32_t len);
-	void conv_px_to_dist(const DIST_UNIT unit, const double px, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 
 	//-------------------------------
 	//	メインページ
@@ -167,11 +175,11 @@ namespace winrt::GraphPaper::implementation
 		ShapePanel m_page_panel;		// ページのパネル
 		D2D1_POINT_2F m_page_min{ 0.0, 0.0 };		// パネルの左上位置 (値がマイナスのときは, 図形がページの外側にある)
 		D2D1_POINT_2F m_page_max{ 0.0, 0.0 };		// パネルの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
-		DIST_UNIT m_page_unit = DIST_UNIT::PIXEL;	// 距離の単位
+		LEN_UNIT m_page_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COL_STYLE m_col_style = COL_STYLE::DEC;	// 色成分の書式
 
 		uint64_t m_click_time = 0L;		// クリックの判定時間
-		double m_click_dist = 6.0;		// クリックの判定距離
+		double m_click_dist = 6.0;		// クリックの判定長さ
 		D2D1_POINT_2F m_curr_pos{ 0.0, 0.0 };		// ポインターの現在位置
 		D2D1_POINT_2F m_prev_pos{ 0.0, 0.0 };		// ポインターの前回位置
 		S_TRAN m_press_state = S_TRAN::BEGIN;		// ポインターが押された状態
@@ -188,7 +196,7 @@ namespace winrt::GraphPaper::implementation
 		MenuFlyout m_menu_page;	// ページコンテキストメニュー
 		MenuFlyout m_menu_ungroup;	// グループ解除コンテキストメニュー
 
-		TOOL_SHAPE m_tool_shape = TOOL_SHAPE::TOOL_SELECT;		// 図形ツール
+		DRAW_SHAPE m_draw_shape = DRAW_SHAPE::DRAW_SELECT;		// 図形ツール
 
 		uint32_t m_list_select = 0;		// 選択された図形の数
 		S_LIST_T m_list_shapes;		// 図形リスト
@@ -207,7 +215,6 @@ namespace winrt::GraphPaper::implementation
 
 		bool m_summary_visible = false;	// 一覧パネルの表示フラグ
 		bool m_window_visible = false;		// ウィンドウが表示されている/表示されてない
-		//CoreWindow const& m_core_window = Window::Current().CoreWindow();	// ウィンドウへの参照
 
 		//-------------------------------
 		//	MainPage.cpp
@@ -233,6 +240,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			cd_message_show(L"str_graph_paper", L"str_version");
 		}
+		winrt::hstring get_dist_unit_name(void);
 
 		//-------------------------------
 		//	MainPage_app.cpp
@@ -644,7 +652,7 @@ namespace winrt::GraphPaper::implementation
 		//	見本のパネルがロードされた.
 		void samp_panel_loaded(void);
 		//	見本ダイアログを表示する.
-		void show_cd_samp(void) { auto _{ cd_samp().ShowAsync() }; }
+		void show_cd_samp(const wchar_t* r_key);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -697,8 +705,8 @@ namespace winrt::GraphPaper::implementation
 		void stat_set_grid(void);
 		// ページの大きさをステータスバーに格納する.
 		void stat_set_page(void);
-		// 図形ツールをステータスバーに格納する.
-		void stat_set_tool(void);
+		// 作図ツールをステータスバーに格納する.
+		void stat_set_draw(void);
 		// 単位をステータスバーに格納する.
 		void stat_set_unit(void);
 		// 拡大率をステータスバーに格納する.
@@ -838,23 +846,23 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//	図形メニューの「曲線」が選択された.
-		void rmfi_tool_bezi_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_draw_bezi_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	図形メニューの「だ円」が選択された.
-		void rmfi_tool_elli_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_draw_elli_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	図形メニューの「直線」が選択された.
-		void rmfi_tool_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_draw_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	図形メニューの「四へん形」が選択された.
-		void rmfi_tool_quad_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_draw_quad_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	図形メニューの「方形」が選択された.
-		void rmfi_tool_rect_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_draw_rect_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	図形メニューの「角丸方形」が選択された.
-		void rmfi_tool_rrect_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_draw_rrect_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	図形メニューの「図形を選択」が選択された.
 		void rmfi_tool_select_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	図形メニューの「文字列」が選択された.
-		void rmfi_tool_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_draw_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	図形メニューの「目盛り」が選択された.
-		void rmfi_tool_scale_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_draw_scale_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 
 		//-----------------------------
 		//	MainPage_undo.cpp

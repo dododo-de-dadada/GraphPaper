@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 	using winrt::Windows::UI::Xaml::Controls::ListView;
 
-	// 図形の距離を一覧から得る.
+	// 図形の長さを一覧から得る.
 	static uint32_t summary_distance(ItemCollection const& items, const Shape* s);
 	// 一覧の要素を選択する.
 	static void summary_select_item(ListView const& view, const uint32_t i);
@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 	// 一覧の要素の選択を解除する.
 	static void summary_unselect_item(ListView const& view, const uint32_t i);
 
-	// 図形の距離を一覧から得る.
+	// 図形の長さを一覧から得る.
 	static uint32_t summary_distance(ItemCollection const& items, const Shape* s)
 	{
 		// for (auto item : items) はエラーになるので使えない.

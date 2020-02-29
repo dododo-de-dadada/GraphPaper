@@ -873,7 +873,7 @@ namespace winrt::GraphPaper::implementation
 		//	デセントを用いて計算する必要もある.
 		//	テキストレイアウトからフォントメトリックスを取得して, 以下のように求める.
 		//	ちなみに, designUnitsPerEm は, 配置 (Em) ボックスの単位あたりの大きさ.
-		//	デセントは, フォント文字の配置ボックスの下部からベースラインまでの距離.
+		//	デセントは, フォント文字の配置ボックスの下部からベースラインまでの長さ.
 		//	dy = その行のヒットテストメトリックスの高さ - フォントの大きさ × (デセント ÷ 単位大きさ) となる, はず.
 		IDWriteFontCollection* fonts;
 		m_dw_text_layout->GetFontCollection(&fonts);

@@ -244,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// •ûŠá‚Ìˆê•Ó‚Ì’·‚³‚ð“¾‚é.
+	//	•ûŠá‚Ì‘å‚«‚³‚ð“¾‚é.
 	bool ShapePanel::get_grid_len(double& val) const noexcept
 	{
 		val = m_grid_len;
@@ -441,7 +441,7 @@ read(dummy, dt_reader);
 		m_font_weight = val;
 	}
 
-	// ’l‚ð•ûŠá‚Ìˆê•Ó‚Ì’·‚³‚ÉŠi”[‚·‚é.
+	// ’l‚ð•ûŠá‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
 	void ShapePanel::set_grid_len(const double val) noexcept
 	{
 		m_grid_len = val;

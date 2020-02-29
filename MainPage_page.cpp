@@ -32,23 +32,23 @@ namespace winrt::GraphPaper::implementation
 		switch (m_page_unit) {
 		default:
 			return;
-		case DIST_UNIT::PIXEL:
-			page.width = static_cast<FLOAT>(pw);
-			page.height = static_cast<FLOAT>(ph);
+		case LEN_UNIT::PIXEL:
+			page.width = static_cast<FLOAT>(std::round(pw));
+			page.height = static_cast<FLOAT>(std::round(ph));
 			break;
-		case DIST_UNIT::INCH:
+		case LEN_UNIT::INCH:
 			page.width = static_cast<FLOAT>(std::round(pw * dpi));
 			page.height = static_cast<FLOAT>(std::round(ph * dpi));
 			break;
-		case DIST_UNIT::MILLI:
+		case LEN_UNIT::MILLI:
 			page.width = static_cast<FLOAT>(std::round(pw / MM_PER_INCH * dpi));
 			page.height = static_cast<FLOAT>(std::round(ph / MM_PER_INCH * dpi));
 			break;
-		case DIST_UNIT::POINT:
+		case LEN_UNIT::POINT:
 			page.width = static_cast<FLOAT>(std::round(pw / PT_PER_INCH * dpi));
 			page.height = static_cast<FLOAT>(std::round(ph / PT_PER_INCH * dpi));
 			break;
-		case DIST_UNIT::GRID:
+		case LEN_UNIT::GRID:
 			page.width = static_cast<FLOAT>(std::round(pw * (m_samp_panel.m_grid_len + 1.0)));
 			page.height = static_cast<FLOAT>(std::round(ph * (m_samp_panel.m_grid_len + 1.0)));
 			break;
@@ -102,7 +102,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/)
 	{
 		auto p_unit = m_page_unit;
-		m_page_unit = static_cast<DIST_UNIT>(cx_page_unit().SelectedIndex());
+		m_page_unit = static_cast<LEN_UNIT>(cx_page_unit().SelectedIndex());
 		m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
 		if (p_unit != m_page_unit) {
 			stat_set_curs();
@@ -115,7 +115,6 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「色」が選択された.
 	void MainPage::mfi_page_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		static winrt::event_token slider0_token;
 		static winrt::event_token slider1_token;
 		static winrt::event_token slider2_token;
@@ -193,44 +192,43 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_page"));
-		show_cd_samp();
+		show_cd_samp(L"str_page");
 	}
 
 	// ページメニューの「大きさ」が選択された
 	void MainPage::mfi_page_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
-		wchar_t const* format = nullptr;
+		//wchar_t const* format = nullptr;
 		double pw;
 		double ph;
-		//m_samp_panel.m_page_unit = m_page_panel.m_page_unit;
 		m_samp_panel.m_grid_len = m_page_panel.m_grid_len;
+		const auto g_len = m_samp_panel.m_grid_len + 1.0;
 		pw = m_page_panel.m_page_size.width;
 		ph = m_page_panel.m_page_size.height;
+		wchar_t const* format;
 		switch (m_page_unit) {
 		default:
-			return;
-		case DIST_UNIT::PIXEL:
+		//	return;
+		//case LEN_UNIT::PIXEL:
 			format = FMT_PIXEL;
 			break;
-		case DIST_UNIT::INCH:
+		case LEN_UNIT::INCH:
 			format = FMT_INCH;
 			pw = pw / dpi;
 			ph = ph / dpi;
 			break;
-		case DIST_UNIT::MILLI:
+		case LEN_UNIT::MILLI:
 			format = FMT_MILLI;
 			pw = pw / dpi * MM_PER_INCH;
 			ph = ph / dpi * MM_PER_INCH;
 			break;
-		case DIST_UNIT::POINT:
+		case LEN_UNIT::POINT:
 			format = FMT_POINT;
 			pw = pw / dpi * PT_PER_INCH;
 			ph = ph / dpi * PT_PER_INCH;
 			break;
-		case DIST_UNIT::GRID:
+		case LEN_UNIT::GRID:
 			format = FMT_GRID;
 			pw /= m_samp_panel.m_grid_len + 1.0;
 			ph /= m_samp_panel.m_grid_len + 1.0;
@@ -241,6 +239,7 @@ namespace winrt::GraphPaper::implementation
 		tx_page_width().Text(buf);
 		swprintf_s(buf, format, ph);
 		tx_page_height().Text(buf);
+		tk_page_unit().Text(get_dist_unit_name());
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
@@ -379,16 +378,16 @@ namespace winrt::GraphPaper::implementation
 		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &value, ws, 2);
 		if (cnt == 1 && value > 0.0) {
 			switch (m_page_unit) {
-			case DIST_UNIT::INCH:
+			case LEN_UNIT::INCH:
 				value = std::round(value * dpi);
 				break;
-			case DIST_UNIT::MILLI:
+			case LEN_UNIT::MILLI:
 				value = std::round(value * dpi / MM_PER_INCH);
 				break;
-			case DIST_UNIT::POINT:
+			case LEN_UNIT::POINT:
 				value = std::round(value * dpi / PT_PER_INCH);
 				break;
-			case DIST_UNIT::GRID:
+			case LEN_UNIT::GRID:
 				value = std::round(value * (m_page_panel.m_grid_len + 1.0));
 				break;
 			default:

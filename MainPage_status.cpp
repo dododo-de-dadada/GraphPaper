@@ -112,17 +112,17 @@ namespace winrt::GraphPaper::implementation
 			stat_visiblity(check, tk_stat_zoom());
 		}
 		else if (sender == tmfi_stat_tool()) {
-			s_bar = STAT_BAR::TOOL;
+			s_bar = STAT_BAR::DRAW;
 			check = tmfi_stat_tool().IsChecked();
 			tmfi_stat_tool_2().IsChecked(check);
-			stat_set_tool();
+			stat_set_draw();
 			stat_visiblity(check, sp_stat_tool());
 		}
 		else if (sender == tmfi_stat_tool_2()) {
-			s_bar = STAT_BAR::TOOL;
+			s_bar = STAT_BAR::DRAW;
 			check = tmfi_stat_tool_2().IsChecked();
 			tmfi_stat_tool().IsChecked(check);
-			stat_set_tool();
+			stat_set_draw();
 			stat_visiblity(check, sp_stat_tool());
 		}
 		else if (sender == tmfi_stat_unit()) {
@@ -157,13 +157,13 @@ namespace winrt::GraphPaper::implementation
 		tmfi_stat_curs().IsChecked(stat_mask(st_bar, STAT_BAR::CURS));
 		tmfi_stat_grid().IsChecked(stat_mask(st_bar, STAT_BAR::GRID));
 		tmfi_stat_page().IsChecked(stat_mask(st_bar, STAT_BAR::PAGE));
-		tmfi_stat_tool().IsChecked(stat_mask(st_bar, STAT_BAR::TOOL));
+		tmfi_stat_tool().IsChecked(stat_mask(st_bar, STAT_BAR::DRAW));
 		tmfi_stat_unit().IsChecked(stat_mask(st_bar, STAT_BAR::UNIT));
 		tmfi_stat_zoom().IsChecked(stat_mask(st_bar, STAT_BAR::ZOOM));
 		tmfi_stat_curs_2().IsChecked(stat_mask(st_bar, STAT_BAR::CURS));
 		tmfi_stat_grid_2().IsChecked(stat_mask(st_bar, STAT_BAR::GRID));
 		tmfi_stat_page_2().IsChecked(stat_mask(st_bar, STAT_BAR::PAGE));
-		tmfi_stat_tool_2().IsChecked(stat_mask(st_bar, STAT_BAR::TOOL));
+		tmfi_stat_tool_2().IsChecked(stat_mask(st_bar, STAT_BAR::DRAW));
 		tmfi_stat_unit_2().IsChecked(stat_mask(st_bar, STAT_BAR::UNIT));
 		tmfi_stat_zoom_2().IsChecked(stat_mask(st_bar, STAT_BAR::ZOOM));
 	}
@@ -207,22 +207,22 @@ namespace winrt::GraphPaper::implementation
 		wchar_t buf[16];
 
 		switch (m_page_unit) {
-		case DIST_UNIT::INCH:
+		case LEN_UNIT::INCH:
 			format = FMT_INCH;
 			x = fx / dpi;
 			y = fy / dpi;
 			break;
-		case DIST_UNIT::MILLI:
+		case LEN_UNIT::MILLI:
 			format = FMT_MILLI;
 			x = fx / dpi * MM_PER_INCH;
 			y = fy / dpi * MM_PER_INCH;
 			break;
-		case DIST_UNIT::POINT:
+		case LEN_UNIT::POINT:
 			format = FMT_POINT;
 			x = fx / dpi * PT_PER_INCH;
 			y = fy / dpi * PT_PER_INCH;
 			break;
-		case DIST_UNIT::GRID:
+		case LEN_UNIT::GRID:
 			format = FMT_GRID;
 			x = fx / (m_page_panel.m_grid_len + 1.0);
 			y = fy / (m_page_panel.m_grid_len + 1.0);
@@ -234,11 +234,11 @@ namespace winrt::GraphPaper::implementation
 			break;
 		}
 		swprintf_s(buf, format, x);
-		tk_stat_pos_x().Text(winrt::hstring{ L"x:" } +buf);
+		tk_stat_pos_x().Text(winrt::hstring{ L"x:" } + buf);
 		swprintf_s(buf, format, y);
-		tk_stat_pos_y().Text(winrt::hstring{ L"y:" } +buf);
-		swprintf_s(buf, L"%d", static_cast<uint32_t>(m_list_shapes.size()));
-		tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
+		tk_stat_pos_y().Text(winrt::hstring{ L"y:" } + buf);
+swprintf_s(buf, L"%d", static_cast<uint32_t>(m_list_shapes.size()));
+tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	}
 
 	// 方眼の大きさをステータスバーに格納する.
@@ -246,30 +246,30 @@ namespace winrt::GraphPaper::implementation
 	{
 		wchar_t buf[16];
 		const double dpi = m_page_dx.m_logical_dpi;
-		double g = m_page_panel.m_grid_len + 1.0;
+		double g_len = m_page_panel.m_grid_len + 1.0;
 		wchar_t const* format;
 		switch (m_page_unit) {
-		case DIST_UNIT::INCH:
+		case LEN_UNIT::INCH:
 			format = FMT_INCH;
-			g = g / dpi;
+			g_len = g_len / dpi;
 			break;
-		case DIST_UNIT::MILLI:
+		case LEN_UNIT::MILLI:
 			format = FMT_MILLI;
-			g = g / dpi * MM_PER_INCH;
+			g_len = g_len * MM_PER_INCH / dpi;
 			break;
-		case DIST_UNIT::POINT:
+		case LEN_UNIT::POINT:
 			format = FMT_POINT;
-			g = g / dpi * PT_PER_INCH;
+			g_len = g_len * PT_PER_INCH / dpi;
 			break;
-		case DIST_UNIT::GRID:
+		case LEN_UNIT::GRID:
 			format = FMT_GRID;
-			g = 1.0;
+			g_len = 1.0;
 			break;
 		default:
 			format = FMT_PIXEL;
 			break;
 		}
-		swprintf_s(buf, format, g);
+		swprintf_s(buf, format, g_len);
 		tk_stat_grid().Text(winrt::hstring{ L"g:" } +buf);
 	}
 
@@ -281,22 +281,22 @@ namespace winrt::GraphPaper::implementation
 		double h = m_page_panel.m_page_size.height;// m_page_max.y - m_page_min.y;
 		wchar_t const* format;
 		switch (m_page_unit) {
-		case DIST_UNIT::INCH:
+		case LEN_UNIT::INCH:
 			format = FMT_INCH;
 			w = w / dpi;
 			h = h / dpi;
 			break;
-		case DIST_UNIT::MILLI:
+		case LEN_UNIT::MILLI:
 			format = FMT_MILLI;
 			w = w / dpi * MM_PER_INCH;
 			h = h / dpi * MM_PER_INCH;
 			break;
-		case DIST_UNIT::POINT:
+		case LEN_UNIT::POINT:
 			format = FMT_POINT;
 			w = w / dpi * PT_PER_INCH;
 			h = h / dpi * PT_PER_INCH;
 			break;
-		case DIST_UNIT::GRID:
+		case LEN_UNIT::GRID:
 			format = FMT_GRID;
 			w /= m_page_panel.m_grid_len + 1.0;
 			h /= m_page_panel.m_grid_len + 1.0;
@@ -314,32 +314,32 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形ツールをステータスバーに格納する.
-	void MainPage::stat_set_tool(void)
+	void MainPage::stat_set_draw(void)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring data;
-		if (m_tool_shape == TOOL_BEZI) {
+		if (m_draw_shape == DRAW_BEZI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));
 		}
-		else if (m_tool_shape == TOOL_ELLI) {
+		else if (m_draw_shape == DRAW_ELLI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_elli")));
 		}
-		else if (m_tool_shape == TOOL_LINE) {
+		else if (m_draw_shape == DRAW_LINE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 		}
-		else if (m_tool_shape == TOOL_QUAD) {
+		else if (m_draw_shape == DRAW_QUAD) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_quad")));
 		}
-		else if (m_tool_shape == TOOL_RECT) {
+		else if (m_draw_shape == DRAW_RECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
 		}
-		else if (m_tool_shape == TOOL_RRECT) {
+		else if (m_draw_shape == DRAW_RRECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")));
 		}
-		else if (m_tool_shape == TOOL_TEXT) {
+		else if (m_draw_shape == DRAW_TEXT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
-		else if (m_tool_shape == TOOL_RULER) {
+		else if (m_draw_shape == DRAW_SCALE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
 		else {
@@ -352,30 +352,7 @@ namespace winrt::GraphPaper::implementation
 	// 単位をステータスバーに格納する.
 	void MainPage::stat_set_unit(void)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
-		wchar_t* r_key;
-		if (m_page_unit == DIST_UNIT::GRID) {
-			r_key = L"cxi_unit_grid/Content";
-		}
-		else if (m_page_unit == DIST_UNIT::INCH) {
-			r_key = L"cxi_unit_inch/Content";
-		}
-		else if (m_page_unit == DIST_UNIT::MILLI) {
-			r_key = L"cxi_unit_milli/Content";
-		}
-		else if (m_page_unit == DIST_UNIT::PIXEL) {
-			r_key = L"cxi_unit_pixel/Content";
-		}
-		else if (m_page_unit == DIST_UNIT::POINT) {
-			r_key = L"cxi_unit_point/Content";
-		}
-		else {
-			return;
-		}
-		auto r_loader{ ResourceLoader::GetForCurrentView() };
-		auto unit = winrt::hstring{ L"u:" } +r_loader.GetString(r_key);
-		tk_stat_unit().Text(unit);
+		tk_stat_unit().Text(winrt::hstring{ L"u:" } + get_dist_unit_name());
 	}
 
 	// 拡大率をステータスバーに格納する.
@@ -397,7 +374,7 @@ namespace winrt::GraphPaper::implementation
 		//sp_stat_curs().Visibility(stat_mask(m_stat_bar, STAT_BAR::CURS) ? VISIBLE : COLLAPSED);
 		//sp_stat_grid().Visibility(stat_mask(m_stat_bar, STAT_BAR::GRID) ? VISIBLE : COLLAPSED);
 		//sp_stat_page().Visibility(stat_mask(m_stat_bar, STAT_BAR::PAGE) ? VISIBLE : COLLAPSED);
-		sp_stat_tool().Visibility(stat_mask(m_stat_bar, STAT_BAR::TOOL) ? VISIBLE : COLLAPSED);
+		sp_stat_tool().Visibility(stat_mask(m_stat_bar, STAT_BAR::DRAW) ? VISIBLE : COLLAPSED);
 		tk_stat_unit().Visibility(stat_mask(m_stat_bar, STAT_BAR::UNIT) ? VISIBLE : COLLAPSED);
 		tk_stat_zoom().Visibility(stat_mask(m_stat_bar, STAT_BAR::ZOOM) ? VISIBLE : COLLAPSED);
 		//sp_stat_unit().Visibility(stat_mask(m_stat_bar, STAT_BAR::UNIT) ? VISIBLE : COLLAPSED);

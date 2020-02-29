@@ -10,10 +10,10 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//	色成分を文字列に変換する.
+	//	色成分の値を文字列に変換する.
 	//	style	色成分の形式
 	//	val	色成分の値
-	//	buf	得られた文字列
+	//	buf	文字列の配列
 	//	len	文字列の最大長 ('\0' を含む長さ)
 	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t* buf, const uint32_t len)
 	{
@@ -31,28 +31,52 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	色成分を文字列に変換する.
-	//	style	色成分の形式
-	//	val	色成分の値
-	//	buf	得られた文字列
-	//	len	文字列の最大長 ('\0' を含む長さ)
-	void conv_px_to_dist(const DIST_UNIT unit, const double px, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len)
+	//	ピクセル単位の長さを他の単位の文字列に変換する.
+	//	unit	長さの単位
+	//	val	ピクセル単位の長さ
+	//	dpi	DPI
+	//	g_len	方眼の大きさ
+	//	buf	文字列の配列
+	//	b_len	文字列の最大長 ('\0' を含む長さ)
+	void conv_val_to_len(const LEN_UNIT unit, const double val, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len)
 	{
-		if (unit == DIST_UNIT::PIXEL) {
-			swprintf_s(buf, b_len, FMT_PIXEL_UNIT, px);
+		if (unit == LEN_UNIT::PIXEL) {
+			swprintf_s(buf, b_len, FMT_PIXEL_UNIT, val);
 		}
-		else if (unit == DIST_UNIT::INCH) {
-			swprintf_s(buf, b_len, FMT_INCH_UNIT, px / dpi);
+		else if (unit == LEN_UNIT::INCH) {
+			swprintf_s(buf, b_len, FMT_INCH_UNIT, val / dpi);
 		}
-		else if (unit == DIST_UNIT::MILLI) {
-			swprintf_s(buf, b_len, FMT_MILLI_UNIT, px * MM_PER_INCH / dpi);
+		else if (unit == LEN_UNIT::MILLI) {
+			swprintf_s(buf, b_len, FMT_MILLI_UNIT, val * MM_PER_INCH / dpi);
 		}
-		else if (unit == DIST_UNIT::POINT) {
-			swprintf_s(buf, b_len, FMT_POINT_UNIT, px * PT_PER_INCH / dpi);
+		else if (unit == LEN_UNIT::POINT) {
+			swprintf_s(buf, b_len, FMT_POINT_UNIT, val * PT_PER_INCH / dpi);
 		}
-		else if (unit == DIST_UNIT::GRID) {
-			swprintf_s(buf, b_len, FMT_GRID_UNIT, px / g_len);
+		else if (unit == LEN_UNIT::GRID) {
+			swprintf_s(buf, b_len, FMT_GRID_UNIT, val / g_len);
 		}
+	}
+
+	winrt::hstring MainPage::get_dist_unit_name(void)
+	{
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		if (m_page_unit == LEN_UNIT::GRID) {
+			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_grid/Content");
+		}
+		else if (m_page_unit == LEN_UNIT::INCH) {
+			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_inch/Content");
+		}
+		else if (m_page_unit == LEN_UNIT::MILLI) {
+			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_milli/Content");
+		}
+		else if (m_page_unit == LEN_UNIT::PIXEL) {
+			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_pixel/Content");
+		}
+		else if (m_page_unit == LEN_UNIT::POINT) {
+			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_point/Content");
+		}
+		return {};
 	}
 
 	//	メインページを破棄する.
@@ -63,7 +87,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	メッセージダイアログを表示する.
-	//	res	メッセージのリソース名
+	//	msg	メッセージ
 	//	desc	説明文
 	//	戻り値	なし
 	void MainPage::cd_message_show(winrt::hstring const& msg, winrt::hstring const& desc)
@@ -182,37 +206,37 @@ namespace winrt::GraphPaper::implementation
 			//	押された状態が範囲を選択している場合,
 			//	補助線の色をブラシに格納する.
 			m_page_dx.m_aux_brush->SetColor(m_page_panel.m_aux_color);
-			if (m_tool_shape == TOOL_SELECT
-				|| m_tool_shape == TOOL_RECT
-				|| m_tool_shape == TOOL_TEXT
-				|| m_tool_shape == TOOL_RULER) {
+			if (m_draw_shape == DRAW_SELECT
+				|| m_draw_shape == DRAW_RECT
+				|| m_draw_shape == DRAW_TEXT
+				|| m_draw_shape == DRAW_SCALE) {
 				//	選択ツール
 				//	または方形
 				//	または文字列の場合,
 				//	方形の補助線を表示する.
 				m_page_panel.draw_auxiliary_rect(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_tool_shape == TOOL_BEZI) {
+			else if (m_draw_shape == DRAW_BEZI) {
 				//	曲線の場合,
 				//	曲線の補助線を表示する.
 				m_page_panel.draw_auxiliary_bezi(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_tool_shape == TOOL_ELLI) {
+			else if (m_draw_shape == DRAW_ELLI) {
 				//	だ円の場合,
 				//	だ円の補助線を表示する.
 				m_page_panel.draw_auxiliary_elli(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_tool_shape == TOOL_LINE) {
+			else if (m_draw_shape == DRAW_LINE) {
 				//	直線の場合,
 				//	直線の補助線を表示する.
 				m_page_panel.draw_auxiliary_line(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_tool_shape == TOOL_RRECT) {
+			else if (m_draw_shape == DRAW_RRECT) {
 				//	角丸方形の場合,
 				//	角丸方形の補助線を表示する.
 				m_page_panel.draw_auxiliary_rrect(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_tool_shape == TOOL_QUAD) {
+			else if (m_draw_shape == DRAW_QUAD) {
 				//	四へん形の場合,
 				//	四へん形の補助線を表示する.
 				m_page_panel.draw_auxiliary_quad(m_page_dx, m_press_pos, m_curr_pos);
@@ -497,7 +521,7 @@ namespace winrt::GraphPaper::implementation
 			m_page_min.y = 0.0;
 			m_page_max.x = m_page_panel.m_page_size.width;
 			m_page_max.y = m_page_panel.m_page_size.height;
-			m_page_unit = DIST_UNIT::PIXEL;
+			m_page_unit = LEN_UNIT::PIXEL;
 			m_col_style = COL_STYLE::DEC;
 		}
 		/*

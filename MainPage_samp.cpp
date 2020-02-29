@@ -64,4 +64,12 @@ namespace winrt::GraphPaper::implementation
 		m_samp_dx.SetSwapChainPanel(scp_samp_panel());
 	}
 
+	//	見本ダイアログを表示する.
+	void MainPage::show_cd_samp(const wchar_t* r_key)
+	{
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		cd_samp().Title(box_value(ResourceLoader::GetForCurrentView().GetString(r_key)));
+		auto _{ cd_samp().ShowAsync() };
+	}
 }

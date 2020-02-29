@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	static Shape* s_list_read_shape(DataReader const& dt_reader);
 	// 次の図形を得る.
 	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, const Shape* s) noexcept;
-	// 次の図形とその距離を得る.
+	// 次の図形とその長さを得る.
 	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& i) noexcept;
 
 	// データリーダーから図形を作成する.
@@ -82,10 +82,10 @@ namespace winrt::GraphPaper::implementation
 	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::iterator const& it_begin, S_LIST_T::iterator const& it_end, const Shape* s) noexcept;
 	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::reverse_iterator const& it_begin, S_LIST_T::reverse_iterator const& it_end, const Shape* s) noexcept;
 
-	// 次の図形とその距離をリストから得る.
+	// 次の図形とその長さをリストから得る.
 	// it_begin	リストの始端
 	// it_end	リストの終端
-	// dist	次の図形との距離
+	// dist	次の図形との長さ
 	// 戻り値	次の図形, ヌルならば次の図形はない.
 	template <typename T>
 	static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& dist) noexcept
@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 最初の図形とその順番をリストから得る.
 	// s_list	図形リスト
-	// dist	距離
+	// dist	長さ
 	// 戻り値	最初の図形
 	// 消去フラグが立っている図形は勘定されない.
 	//Shape* S_LIST::front(S_LIST_T const& s_list, uint32_t& dist) noexcept

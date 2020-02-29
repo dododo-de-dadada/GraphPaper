@@ -884,11 +884,11 @@ namespace winrt::GraphPaper::implementation
 					}
 					// ü•ª pq ‚Í x ²‚É‚Ù‚Ú•½s ?
 					else if (pr[1].y < pr_next.y) {
-						// ’†“_‚Æ’¼ü pq ‚Ì Y ¬•ª‚Ì·•ª‚ğ‹——£‚ÉŠi”[‚·‚é.
+						// ’†“_‚Æ’¼ü pq ‚Ì Y ¬•ª‚Ì·•ª‚ğ’·‚³‚ÉŠi”[‚·‚é.
 						dist = br_mid.y - p.y;
 					}
 					else {
-						// ’†“_‚Æ’¼ü pq ‚Ì‹——£‚ğ‹‚ß‚é.
+						// ’†“_‚Æ’¼ü pq ‚Ì’·‚³‚ğ‹‚ß‚é.
 						dist = br_mid.dist(a, b, c, d);
 					}
 					if (dist < 1.0) {
@@ -911,7 +911,7 @@ namespace winrt::GraphPaper::implementation
 					}
 					// ü•ª pq ‚Í x ²‚É‚Ù‚Ú•½s ?
 					else if (pr[1].y < pr_next.y) {
-						// ’†“_‚Æ’¼ü pq ‚Ì Y ¬•ª‚Ì·•ª‚ğ‹——£‚ÉŠi”[‚·‚é.
+						// ’†“_‚Æ’¼ü pq ‚Ì Y ¬•ª‚Ì·•ª‚ğ’·‚³‚ÉŠi”[‚·‚é.
 						f0 = bz[0].y - pb.y;
 						f1 = bz[1].y - pb.y;
 						f2 = bz[2].y - pb.y;

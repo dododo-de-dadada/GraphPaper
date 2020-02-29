@@ -85,25 +85,25 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F d;
 		pt_sub(m_curr_pos, m_press_pos, d);
 		Shape* s;
-		if (m_tool_shape == TOOL_RECT) {
+		if (m_draw_shape == DRAW_RECT) {
 			s = new ShapeRect(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_tool_shape == TOOL_RRECT) {
+		else if (m_draw_shape == DRAW_RRECT) {
 			s = new ShapeRRect(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_tool_shape == TOOL_QUAD) {
+		else if (m_draw_shape == DRAW_QUAD) {
 			s = new ShapeQuad(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_tool_shape == TOOL_ELLI) {
+		else if (m_draw_shape == DRAW_ELLI) {
 			s = new ShapeElli(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_tool_shape == TOOL_LINE) {
+		else if (m_draw_shape == DRAW_LINE) {
 			s = new ShapeLine(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_tool_shape == TOOL_BEZI) {
+		else if (m_draw_shape == DRAW_BEZI) {
 			s = new ShapeBezi(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_tool_shape == TOOL_RULER) {
+		else if (m_draw_shape == DRAW_SCALE) {
 			s = new ShapeScale(m_press_pos, d, &m_page_panel);
 		}
 		else {
@@ -206,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F d;
 		if (m_page_panel.m_grid_snap) {
-			// 方眼に整列の場合, 始点と終点を方眼の一辺の長さで丸める
+			// 方眼に整列の場合, 始点と終点を方眼の大きさで丸める
 			double g = max(m_page_panel.m_grid_len + 1.0, 1.0);
 			pt_round(m_press_pos, g, m_press_pos);
 			pt_round(m_curr_pos, g, m_curr_pos);
@@ -214,7 +214,7 @@ namespace winrt::GraphPaper::implementation
 		// ポインターの現在の位置と押された位置の差分を求める.
 		pt_sub(m_curr_pos, m_press_pos, d);
 		if (fabs(d.x) >= 1.0f || fabs(d.y) >= 1.0f) {
-			if (m_tool_shape == TOOL_TEXT) {
+			if (m_draw_shape == DRAW_TEXT) {
 				create_shape_text();
 				// 画面に範囲を表示したままにするために中断する.
 				return;
@@ -247,7 +247,7 @@ namespace winrt::GraphPaper::implementation
 				pt_min(pos, p_min, p_min);
 			}
 			if (flag == false) {
-				// 得た左上点を方眼の一辺の長さで丸める.
+				// 得た左上点を方眼の大きさで丸める.
 				// 丸めの前後で生じた差を得る.
 				D2D1_POINT_2F g_pos;
 				pt_round(p_min, m_page_panel.m_grid_len + 1.0, g_pos);
@@ -343,11 +343,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (m_press_state == S_TRAN::CLICK) {
 			// 状態がクリックした状態の場合,
-			// ポインターの現在位置と押された位置の距離を得る.
+			// ポインターの現在位置と押された位置の長さを得る.
 			D2D1_POINT_2F d;
 			pt_sub(m_curr_pos, m_press_pos, d);
 			if (pt_abs2(d) > m_click_dist) {
-				// 距離が閾値を超える場合, 初期状態に戻る.
+				// 長さが閾値を超える場合, 初期状態に戻る.
 				m_press_state = S_TRAN::BEGIN;
 				set_pointer();
 			}
@@ -382,12 +382,12 @@ namespace winrt::GraphPaper::implementation
 			|| m_press_state == S_TRAN::CLICK_2) {
 			// 状態が左ボタンを押している状態,
 			// またはクリック後に左ボタンを押している状態の場合,
-			// ポインターの現在位置と押された位置の距離を得る.
+			// ポインターの現在位置と押された位置の長さを得る.
 			D2D1_POINT_2F d;
 			pt_sub(m_curr_pos, m_press_pos, d);
 			if (pt_abs2(d) > m_click_dist) {
-				// 距離が閾値を超える場合,
-				if (m_tool_shape != TOOL_SELECT) {
+				// 長さが閾値を超える場合,
+				if (m_draw_shape != DRAW_SELECT) {
 					// 図形ツールが選択ツールでない場合,
 					// 範囲を選択している状態に遷移する.
 					m_press_state = S_TRAN::PRESS_AREA;
@@ -487,7 +487,7 @@ namespace winrt::GraphPaper::implementation
 		// イベント発生位置をポインターが押された位置に格納する.
 		m_press_time = t_stamp;
 		m_press_pos = m_curr_pos;
-		if (m_tool_shape != TOOL_SELECT) {
+		if (m_draw_shape != DRAW_SELECT) {
 			// 図形ツールが選択ツールでない場合,
 			// 終了する.
 			return;
@@ -625,7 +625,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (m_press_state == S_TRAN::PRESS_AREA) {
 			// 状態が範囲選択している状態の場合,
-			if (m_tool_shape == TOOL_SHAPE::TOOL_SELECT) {
+			if (m_draw_shape == DRAW_SHAPE::DRAW_SELECT) {
 				// 図形ツールが選択ツールの場合,
 				// 範囲選択を終了する.
 				finish_area_select(args.KeyModifiers());
@@ -699,7 +699,7 @@ namespace winrt::GraphPaper::implementation
 	// 状況に応じた形状のカーソルを設定する.
 	void MainPage::set_pointer(void)
 	{
-		if (m_tool_shape != TOOL_SELECT) {
+		if (m_draw_shape != DRAW_SELECT) {
 			Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 			return;
 		}

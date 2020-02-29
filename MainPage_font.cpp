@@ -40,17 +40,22 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STRETCH_ULTRA_EXPANDED,
 	};
 
+	constexpr wchar_t TITLE_FONT[] = L"str_font";
+
 	// 書体の見本を作成する.
 	void MainPage::font_create_samp(void)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		//const auto dpi = m_samp_dx.m_logical_dpi;
-		const D2D1_POINT_2F pos{ GRIDLEN_PX, GRIDLEN_PX };
 		const auto w = scp_samp_panel().ActualWidth();
 		const auto h = scp_samp_panel().ActualHeight();
+		const auto padding = w * 0.125;
+		const D2D1_POINT_2F pos = {
+			static_cast<FLOAT>(padding),
+			static_cast<FLOAT>(padding)
+		};
 		const D2D1_POINT_2F vec = {
-			static_cast<FLOAT>(w - 2.0 * GRIDLEN_PX),
-			static_cast<FLOAT>(h - 2.0 * GRIDLEN_PX)
+			static_cast<FLOAT>(w - 2.0 * padding),
+			static_cast<FLOAT>(h - 2.0 * padding)
 		};
 		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		const auto t = wchar_cpy(r_loader.GetString(L"str_pangram").c_str());
@@ -137,8 +142,6 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「色」が選択された.
 	void MainPage::mfi_font_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token slider0_token;
 		static winrt::event_token slider1_token;
 		static winrt::event_token slider2_token;
@@ -248,16 +251,12 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
-		show_cd_samp();
+		show_cd_samp(TITLE_FONT);
 	}
 
 	// 書体メニューの「書体名」が選択された.
 	void MainPage::mfi_font_family_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token changed_token;
 		static winrt::event_token primary_token;
 		static winrt::event_token loaded_token;
@@ -310,9 +309,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_font_family().Visibility(VISIBLE);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
-		show_cd_samp();
+		show_cd_samp(TITLE_FONT);
 	}
 
 	// 書体メニューの「イタリック体」が選択された.
@@ -336,8 +333,6 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「大きさ」が選択された.
 	void MainPage::mfi_font_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token slider0_token;
 		static winrt::event_token primary_token;
 		static winrt::event_token loaded_token;
@@ -387,16 +382,12 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
-		show_cd_samp();
+		show_cd_samp(TITLE_FONT);
 	}
 
 	// 書体メニューの「伸縮」が選択された.
 	void MainPage::mfi_font_stretch_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token changed_token;
 		static winrt::event_token primary_token;
 		static winrt::event_token loaded_token;
@@ -446,16 +437,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_font_stretch().Visibility(VISIBLE);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
-		show_cd_samp();
+		show_cd_samp(TITLE_FONT);
 	}
 
 	// 書体メニューの「太さ」が選択された.
 	void MainPage::mfi_font_weight_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token changed_token;
 		static winrt::event_token primary_token;
 		static winrt::event_token loaded_token;
@@ -506,9 +493,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_font_weight().Visibility(VISIBLE);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_font"));
-		show_cd_samp();
+		show_cd_samp(TITLE_FONT);
 	}
 
 	// 値をスライダーのヘッダーに格納する.

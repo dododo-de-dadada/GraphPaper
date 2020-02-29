@@ -9,16 +9,15 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	constexpr wchar_t TITLE_STROKE[] = L"str_stroke";
+
 	// 線枠メニューの「色」が選択された.
 	void MainPage::mfi_stroke_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token slider0_token;
 		static winrt::event_token slider1_token;
 		static winrt::event_token slider2_token;
 		static winrt::event_token slider3_token;
-		//static winrt::event_token c_style_token;
 		static winrt::event_token primary_token;
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
@@ -32,7 +31,6 @@ namespace winrt::GraphPaper::implementation
 		slider1().Value(val1);
 		slider2().Value(val2);
 		slider3().Value(val3);
-		//cx_color_style().SelectedIndex(m_page_panel.m_col_style);
 		stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(val0);
 		stroke_set_slider<UNDO_OP::STROKE_COLOR, 1>(val1);
 		stroke_set_slider<UNDO_OP::STROKE_COLOR, 2>(val2);
@@ -41,7 +39,6 @@ namespace winrt::GraphPaper::implementation
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
 		slider3().Visibility(VISIBLE);
-		//cx_color_style().Visibility(VISIBLE);
 		loaded_token = scp_samp_panel().Loaded(
 			[this](auto, auto)
 			{
@@ -74,16 +71,6 @@ namespace winrt::GraphPaper::implementation
 				stroke_set_slider<UNDO_OP::STROKE_COLOR, 3>(m_samp_shape, args.NewValue());
 			}
 		);
-		//c_style_token = cx_color_style().SelectionChanged(
-		//	[this](auto, auto args)
-		//	{
-		//		m_samp_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
-		//		stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(m_samp_shape, slider0().Value());
-		//		stroke_set_slider<UNDO_OP::STROKE_COLOR, 1>(m_samp_shape, slider1().Value());
-		//		stroke_set_slider<UNDO_OP::STROKE_COLOR, 2>(m_samp_shape, slider2().Value());
-		//		stroke_set_slider<UNDO_OP::STROKE_COLOR, 3>(m_samp_shape, slider3().Value());
-		//	}
-		//);
 		primary_token = cd_samp().PrimaryButtonClick(
 			[this](auto, auto)
 			{
@@ -105,29 +92,23 @@ namespace winrt::GraphPaper::implementation
 				slider1().Visibility(COLLAPSED);
 				slider2().Visibility(COLLAPSED);
 				slider3().Visibility(COLLAPSED);
-				//cx_color_style().Visibility(COLLAPSED);
 				scp_samp_panel().Loaded(loaded_token);
 				slider0().ValueChanged(slider0_token);
 				slider1().ValueChanged(slider1_token);
 				slider2().ValueChanged(slider2_token);
 				slider3().ValueChanged(slider3_token);
-				//cx_color_style().SelectionChanged(c_style_token);
 				cd_samp().PrimaryButtonClick(primary_token);
 				cd_samp().Closed(closed_token);
 				UnloadObject(cd_samp());
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_stroke"));
-		show_cd_samp();
+		show_cd_samp(TITLE_STROKE);
 	}
 
 	// 線枠メニューの「破線の配置」が選択された.
 	void MainPage::mfi_stroke_pattern_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token slider0_token;
 		static winrt::event_token slider1_token;
 		static winrt::event_token slider2_token;
@@ -210,23 +191,18 @@ namespace winrt::GraphPaper::implementation
 				slider1().ValueChanged(slider1_token);
 				slider2().ValueChanged(slider2_token);
 				slider3().ValueChanged(slider3_token);
-				//cd_samp().Opened(opened_token);
 				cd_samp().PrimaryButtonClick(primary_token);
 				cd_samp().Closed(closed_token);
 				UnloadObject(cd_samp());
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_stroke"));
-		show_cd_samp();
+		show_cd_samp(TITLE_STROKE);
 	}
 
 	// 線枠メニューの「太さ」が選択された.
 	void MainPage::mfi_stroke_width_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		static winrt::event_token slider0_token;
 		static winrt::event_token primary_token;
 		static winrt::event_token loaded_token;
@@ -277,9 +253,7 @@ namespace winrt::GraphPaper::implementation
 				draw_page();
 			}
 		);
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		tk_samp_caption().Text(r_loader.GetString(L"str_stroke"));
-		show_cd_samp();
+		show_cd_samp(TITLE_STROKE);
 	}
 
 	// 線枠メニューの「破線」が選択された.
@@ -336,12 +310,16 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::stroke_create_samp(void)
 	{
 		const auto dpi = m_samp_dx.m_logical_dpi;
-		const D2D1_POINT_2F pos = { GRIDLEN_PX, GRIDLEN_PX };
 		const auto w = scp_samp_panel().ActualWidth();
 		const auto h = scp_samp_panel().ActualHeight();
+		const auto padding = w * 0.125;
+		const D2D1_POINT_2F pos = {
+			static_cast<FLOAT>(padding),
+			static_cast<FLOAT>(padding)
+		};
 		const D2D1_POINT_2F vec = {
-			static_cast<FLOAT>(w - 2.0 * GRIDLEN_PX),
-			static_cast<FLOAT>(h - 2.0 * GRIDLEN_PX)
+			static_cast<FLOAT>(w - 2.0 * padding),
+			static_cast<FLOAT>(h - 2.0 * padding)
 		};
 		m_samp_shape = new ShapeLine(pos, vec, &m_samp_panel);
 #if defined(_DEBUG)
@@ -377,12 +355,17 @@ namespace winrt::GraphPaper::implementation
 			val *= m_samp_panel.m_stroke_width;
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH || U == UNDO_OP::STROKE_PATTERN) {
-			if (m_page_unit == DIST_UNIT::PIXEL) {
-				wchar_t buf[16];
+			wchar_t buf[16];
+			const auto dpi = m_samp_dx.m_logical_dpi;
+			const auto g_len = m_page_panel.m_grid_len + 1.0;
+			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
+			hdr = hdr + L": " + buf;
+			/*
+			if (m_page_unit == LEN_UNIT::PIXEL) {
 				swprintf_s(buf, FMT_PIXEL_UNIT, val);
 				hdr = hdr + L": " + buf;
 			}
-			else if (m_page_unit == DIST_UNIT::GRID) {
+			else if (m_page_unit == LEN_UNIT::GRID) {
 				wchar_t buf[16];
 				swprintf_s(buf, FMT_GRID_UNIT, val / (m_page_panel.m_grid_len + 1.0));
 				hdr = hdr + L": " + buf;
@@ -391,20 +374,21 @@ namespace winrt::GraphPaper::implementation
 				wchar_t buf[16];
 				const double inch = val / m_samp_dx.m_logical_dpi;
 				switch (m_page_unit) {
-				case DIST_UNIT::INCH:
+				case LEN_UNIT::INCH:
 					swprintf_s(buf, FMT_INCH_UNIT, inch);
 					hdr = hdr + L": " + buf;
 					break;
-				case DIST_UNIT::MILLI:
+				case LEN_UNIT::MILLI:
 					swprintf_s(buf, FMT_MILLI_UNIT, inch * MM_PER_INCH);
 					hdr = hdr + L": " + buf;
 					break;
-				case DIST_UNIT::POINT:
+				case LEN_UNIT::POINT:
 					swprintf_s(buf, FMT_POINT_UNIT, inch * PT_PER_INCH);
 					hdr = hdr + L": " + buf;
 					break;
 				}
 			}
+			*/
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			if constexpr (S == 0) {
