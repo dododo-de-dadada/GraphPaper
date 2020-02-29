@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 			rmfi_tool_text().IsChecked(false);
 			break;
 		case TOOL_RULER:
-			rmfi_tool_ruler().IsChecked(false);
+			rmfi_tool_scale().IsChecked(false);
 			break;
 		}
 		rmfi_tool_select_click(nullptr, nullptr);

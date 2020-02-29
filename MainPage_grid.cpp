@@ -25,6 +25,12 @@ namespace winrt::GraphPaper::implementation
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_grid_length");
 			val += 1.0;
+			const auto dpi = m_samp_dx.m_logical_dpi;
+			const auto g_len = m_page_panel.m_grid_len + 1.0;
+			wchar_t buf[16];
+			conv_px_to_dist(m_page_unit, val, dpi, g_len, buf, 16);
+			hdr = hdr + L": " + buf;
+			/*
 			if (m_page_unit == DIST_UNIT::PIXEL) {
 				wchar_t buf[16];
 				swprintf_s(buf, FMT_PIXEL_UNIT, val);
@@ -52,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 					hdr = hdr + L": " + buf;
 					break;
 				}
-			}
+			}*/
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			if constexpr (S == 3) {
@@ -320,7 +326,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_page_panel.m_grid_snap == false) {
 			return;
 		}
-		const double g_len = m_page_panel.m_grid_len;
+		const double g_len = m_page_panel.m_grid_len + 1.0;
 		auto flag = true;	// ñ¢ïœçX
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F g_pos;

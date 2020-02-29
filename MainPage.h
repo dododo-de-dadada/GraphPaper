@@ -127,7 +127,7 @@ namespace winrt::GraphPaper::implementation
 		TOOL_RECT,	// 方形
 		TOOL_RRECT,	// 角丸方形
 		TOOL_TEXT,	// 文字列
-		TOOL_RULER	// 定規
+		TOOL_RULER	// 目盛り
 	};
 
 	// 距離の単位
@@ -148,6 +148,7 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t *buf, const uint32_t len);
+	void conv_px_to_dist(const DIST_UNIT unit, const double px, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 
 	//-------------------------------
 	//	メインページ
@@ -852,8 +853,8 @@ namespace winrt::GraphPaper::implementation
 		void rmfi_tool_select_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	図形メニューの「文字列」が選択された.
 		void rmfi_tool_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	図形メニューの「定規」が選択された.
-		void rmfi_tool_ruler_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	図形メニューの「目盛り」が選択された.
+		void rmfi_tool_scale_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 
 		//-----------------------------
 		//	MainPage_undo.cpp

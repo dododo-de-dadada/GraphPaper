@@ -161,6 +161,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[16];
+			const auto dpi = m_samp_dx.m_logical_dpi;
+			const auto g_len = m_samp_panel.m_grid_len + 1.0;
+			conv_px_to_dist(m_page_unit, val, dpi, g_len, buf, 16);
+			hdr = hdr + buf;
+			/*
 			switch (m_page_unit) {
 			case DIST_UNIT::GRID:
 				swprintf_s(buf, FMT_GRID_UNIT, val / (m_samp_panel.m_grid_len + 1.0));
@@ -183,6 +188,7 @@ namespace winrt::GraphPaper::implementation
 				hdr = hdr + buf;
 				break;
 			}
+			*/
 		}
 		if constexpr (S == 0) {
 			slider0().Header(box_value(hdr));

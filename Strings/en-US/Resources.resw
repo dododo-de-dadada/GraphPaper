@@ -669,8 +669,8 @@
     <value>Rounded Rect</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_ruler.Text" xml:space="preserve">
-    <value>Ruler</value>
+  <data name="rmfi_tool_scale.Text" xml:space="preserve">
+    <value>Scale</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_select.Text" xml:space="preserve">

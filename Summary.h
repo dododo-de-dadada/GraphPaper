@@ -57,9 +57,9 @@ namespace winrt::GraphPaper::implementation
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rrect")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_rrect/Text");
 			}
-			else if (t_id == typeid(ShapeRuler)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ruler")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_ruler/Text");
+			else if (t_id == typeid(ShapeScale)) {
+				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_scale")));
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_scale/Text");
 			}
 			else if (t_id == typeid(ShapeText)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));

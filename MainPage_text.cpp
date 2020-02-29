@@ -241,17 +241,24 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring hdr;
 
 		const double dpi = m_page_dx.m_logical_dpi;
+		const double g_len = m_samp_panel.m_grid_len + 1.0;
 		double px;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_text_mar_horzorz");
 				px = val;
+				wchar_t buf[16];
+				conv_px_to_dist(m_page_unit, px, dpi, g_len, buf, 16);
+				hdr = hdr + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_text_mar_vertert");
 				px = val;
+				wchar_t buf[16];
+				conv_px_to_dist(m_page_unit, px, dpi, g_len, buf, 16);
+				hdr = hdr + L": " + buf;
 			}
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE) {
@@ -259,41 +266,46 @@ namespace winrt::GraphPaper::implementation
 			hdr = r_loader.GetString(L"str_height");
 			if (val > FLT_MIN) {
 				px = val * dpi / 96.0;
+				wchar_t buf[16];
+				conv_px_to_dist(m_page_unit, px, dpi, g_len, buf, 16);
+				hdr = hdr + L": " + buf;
 			}
 			else {
 				hdr = hdr + L": " + r_loader.GetString(L"str_def_val");
-				goto SET;
+				//goto SET;
 			}
 		}
-		wchar_t const* format = nullptr;
-		switch (m_page_unit) {
-		default:
-		case DIST_UNIT::PIXEL:
-			format = FMT_PIXEL_UNIT;
-			break;
-		case DIST_UNIT::INCH:
-			format = FMT_INCH_UNIT;
-			px /= dpi;
-			break;
-		case DIST_UNIT::MILLI:
-			format = FMT_MILLI_UNIT;
-			px /= dpi;
-			px *= MM_PER_INCH;
-			break;
-		case DIST_UNIT::POINT:
-			format = FMT_POINT_UNIT;
-			px /= dpi;
-			px *= PT_PER_INCH;
-			break;
-		case DIST_UNIT::GRID:
-			format = FMT_GRID_UNIT;
-			px /= m_samp_panel.m_grid_len;
-			break;
+		/*
+		if (m_page_unit == DIST_UNIT::PIXEL) {
+			wchar_t buf[16];
+			swprintf_s(buf, FMT_PIXEL_UNIT, px);
+			hdr = hdr + L": " + buf;
+		}
+		else if (m_page_unit == DIST_UNIT::INCH) {
+			wchar_t buf[16];
+			swprintf_s(buf, FMT_INCH_UNIT, px / dpi);
+			hdr = hdr + L": " + buf;
+		}
+		else if (m_page_unit == DIST_UNIT::MILLI) {
+			wchar_t buf[16];
+			swprintf_s(buf, FMT_MILLI_UNIT, px * MM_PER_INCH / dpi);
+			hdr = hdr + L": " + buf;
+		}
+		else if (m_page_unit == DIST_UNIT::POINT) {
+			wchar_t buf[16];
+			swprintf_s(buf, FMT_POINT_UNIT, px * PT_PER_INCH / dpi);
+			hdr = hdr + L": " + buf;
+		}
+		else if (m_page_unit == DIST_UNIT::GRID) {
+			wchar_t buf[16];
+			swprintf_s(buf, FMT_GRID_UNIT, px / (m_samp_panel.m_grid_len + 1.0));
+			hdr = hdr + L": " + buf;
 		}
 		wchar_t buf[16];
-		swprintf_s(buf, format, px);
+		conv_px_to_dist(m_page_unit, dpi,g_len, buf, 16);
 		hdr = hdr + L": " + buf;
 	SET:
+	*/
 		if constexpr (S == 0) {
 			slider0().Header(box_value(hdr));
 		}

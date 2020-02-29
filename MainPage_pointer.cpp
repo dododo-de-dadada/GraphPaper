@@ -104,7 +104,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeBezi(m_press_pos, d, &m_page_panel);
 		}
 		else if (m_tool_shape == TOOL_RULER) {
-			s = new ShapeRuler(m_press_pos, d, &m_page_panel);
+			s = new ShapeScale(m_press_pos, d, &m_page_panel);
 		}
 		else {
 			return;

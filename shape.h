@@ -43,7 +43,7 @@
 //        +---------------+               +---------------+---------------+---------------+
 //        |               |               |               |               |               |
 // +------+------+ +------+------+ +------+------+ +------+------+ +------+------+ +------+------+
-// | ShapeQuad   | | ShapeBezi   | | ShapeElli   | | ShapeRRect  | | ShapeText   | | ShapeRuler  |
+// | ShapeQuad   | | ShapeBezi   | | ShapeElli   | | ShapeRRect  | | ShapeText   | | ShapeScale  |
 // +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+
 
 // SVG のためのテキスト改行コード
@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_RRECT,	// 角丸方形
 		SHAPE_TEXT,		// 文字列
 		SHAPE_GROUP,	// グループ
-		SHAPE_RULER		// 定規
+		SHAPE_RULER		// 目盛り
 	};
 
 	// 矢じりの寸法
@@ -912,27 +912,27 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	//	定規
+	//	目盛り
 	//	作成したあとで文字列の属性の変更はできない.
 	//------------------------------
-	struct ShapeRuler : ShapeRect {
+	struct ShapeScale : ShapeRect {
 		double m_grid_len;	// 方眼の大きさ
 		winrt::com_ptr<IDWriteTextFormat> m_dw_text_format{};	// テキストフォーマット
 
 		//------------------------------
-		// shape_ruler.cpp
+		// shape_scale.cpp
 		//------------------------------
 
 		//	図形を破棄する.
-		~ShapeRuler(void);
+		~ShapeScale(void);
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		//	図形を作成する.
-		ShapeRuler(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr);
+		ShapeScale(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr);
 		// 図形をデータリーダーから読み込む.
-		ShapeRuler(DataReader const& dt_reader);
+		ShapeScale(DataReader const& dt_reader);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG タグとして書き込む.

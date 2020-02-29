@@ -31,6 +31,30 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//	色成分を文字列に変換する.
+	//	style	色成分の形式
+	//	val	色成分の値
+	//	buf	得られた文字列
+	//	len	文字列の最大長 ('\0' を含む長さ)
+	void conv_px_to_dist(const DIST_UNIT unit, const double px, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len)
+	{
+		if (unit == DIST_UNIT::PIXEL) {
+			swprintf_s(buf, b_len, FMT_PIXEL_UNIT, px);
+		}
+		else if (unit == DIST_UNIT::INCH) {
+			swprintf_s(buf, b_len, FMT_INCH_UNIT, px / dpi);
+		}
+		else if (unit == DIST_UNIT::MILLI) {
+			swprintf_s(buf, b_len, FMT_MILLI_UNIT, px * MM_PER_INCH / dpi);
+		}
+		else if (unit == DIST_UNIT::POINT) {
+			swprintf_s(buf, b_len, FMT_POINT_UNIT, px * PT_PER_INCH / dpi);
+		}
+		else if (unit == DIST_UNIT::GRID) {
+			swprintf_s(buf, b_len, FMT_GRID_UNIT, px / g_len);
+		}
+	}
+
 	//	メインページを破棄する.
 	MainPage::~MainPage(void)
 	{

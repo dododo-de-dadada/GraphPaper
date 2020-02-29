@@ -669,8 +669,8 @@
     <value>角丸方形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_ruler.Text" xml:space="preserve">
-    <value>定規</value>
+  <data name="rmfi_tool_scale.Text" xml:space="preserve">
+    <value>目盛り</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_select.Text" xml:space="preserve">

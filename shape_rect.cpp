@@ -5,7 +5,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 図形を表示する.
+	//	図形を表示する.
+	//	dx	描画環境
 	void ShapeRect::draw(SHAPE_DX& dx)
 	{
 		const D2D1_RECT_F rect{
@@ -15,12 +16,14 @@ namespace winrt::GraphPaper::implementation
 			m_pos.y + m_vec.y
 		};
 		if (is_opaque(m_fill_color)) {
-			// 塗りつぶし色が透明でなければ方形を塗りつぶす.
+			//	塗りつぶし色が不透明な場合,
+			//	方形を塗りつぶす.
 			dx.m_shape_brush->SetColor(m_fill_color);
 			dx.m_d2dContext->FillRectangle(&rect, dx.m_shape_brush.get());
 		}
 		if (is_opaque(m_stroke_color)) {
-			// 線枠の色が透明でなければ方形の枠を表示する.
+			//	線枠の色が不透明な場合,
+			//	方形の枠を表示する.
 			const auto w = static_cast<FLOAT>(m_stroke_width);
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawRectangle(
@@ -29,7 +32,8 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected() == false) {
 			return;
 		}
-		// 選択されているなら基準部位を表示する.
+		//	選択フラグが立っている場合,
+		//	部位を表示する.
 		D2D1_POINT_2F r_pos[4];	// 方形の頂点
 		r_pos[0] = m_pos;
 		r_pos[1].y = rect.top;
