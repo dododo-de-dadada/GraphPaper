@@ -795,7 +795,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::new_doc(void)
 	{
 		if (m_summary_visible) {
-			//	一覧パネルの表示フラグが立っている場合,
+			//	図形一覧パネルの表示フラグが立っている場合,
 			//	一覧を閉じる.
 			summary_close();
 		}

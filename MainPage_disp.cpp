@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 			m_samp_dx.ValidateDevice();
 		}
 		if (scp_samp_panel().IsLoaded()) {
-			draw_samp();
+			samp_draw();
 		}
 		if (scp_page_panel().IsLoaded()) {
 			draw_page();
@@ -47,7 +47,7 @@ namespace winrt::GraphPaper::implementation
 			m_samp_dx.SetDpi(dpi);
 		}
 		if (scp_samp_panel().IsLoaded()) {
-			draw_samp();
+			samp_draw();
 		}
 		if (scp_page_panel().IsLoaded()) {
 			draw_page();
@@ -70,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 			m_samp_dx.SetCurrentOrientation(ori);
 		}
 		if (scp_samp_panel().IsLoaded()) {
-			draw_samp();
+			samp_draw();
 		}
 		if (scp_page_panel().IsLoaded()) {
 			draw_page();

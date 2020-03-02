@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				samp_panel_loaded();
 				stroke_create_samp();
-				draw_samp();
+				samp_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
@@ -222,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 			s->set_arrow_size(size);
 		}
 		if (scp_samp_panel().IsLoaded()) {
-			draw_samp();
+			samp_draw();
 		}
 	}
 

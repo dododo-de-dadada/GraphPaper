@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 			s->set_grid_opac(val / COLOR_MAX);
 		}
 		if (scp_samp_panel().IsLoaded()) {
-			draw_samp();
+			samp_draw();
 		}
 	}
 
@@ -135,7 +135,7 @@ namespace winrt::GraphPaper::implementation
 			[this](auto, auto)
 			{
 				samp_panel_loaded();
-				draw_samp();
+				samp_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
@@ -221,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 			[this](auto, auto)
 			{
 				samp_panel_loaded();
-				draw_samp();
+				samp_draw();
 			}
 		);
 		slider3_token = slider3().ValueChanged(

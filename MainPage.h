@@ -26,8 +26,8 @@
 //	MainPage_select.cpp	図形の選択
 //	MainPage_status.cpp	ステータスバーの設定
 //	MainPage_stroke.cpp	線枠の設定
-//	MainPage_summary.cpp	一覧パネルの表示, 設定
-//	MainPage_text.cpp	文字列レイアウトの設定
+//	MainPage_summary.cpp	図形一覧パネルの表示, 設定
+//	MainPage_text.cpp	文字列の編集, または検索 / 置換
 //	MainPage_thread.cpp	ウィンドウ表示のハンドラー
 //	MainPage_tool.cpp	図形ツールの設定
 //	MainPage_undo.cpp	元に戻すとやり直す
@@ -213,7 +213,7 @@ namespace winrt::GraphPaper::implementation
 		ShapePanel m_samp_panel;		// 見本のパネル
 		Shape* m_samp_shape = nullptr;	// 見本の図形
 
-		bool m_summary_visible = false;	// 一覧パネルの表示フラグ
+		bool m_summary_visible = false;	// 図形一覧パネルの表示フラグ
 		bool m_window_visible = false;		// ウィンドウが表示されている/表示されてない
 
 		//-------------------------------
@@ -240,7 +240,8 @@ namespace winrt::GraphPaper::implementation
 		{
 			cd_message_show(L"str_graph_paper", L"str_version");
 		}
-		winrt::hstring get_dist_unit_name(void);
+		//	長さの単位の名前を得る.
+		winrt::hstring get_unit_name(void);
 
 		//-------------------------------
 		//	MainPage_app.cpp
@@ -315,11 +316,6 @@ namespace winrt::GraphPaper::implementation
 		//	文字列の編集
 		//-------------------------------
 
-		//	図形が持つ文字列を編集する.
-		void edit_text_of_shape(ShapeText* s);
-		//	編集メニューの「文字列の編集」が選択された.
-		void mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-
 		//-------------------------------
 		//	MainPage_file.cpp
 		//	ファイルの読み書き, アプリの終了
@@ -379,34 +375,6 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_OP U, int S> void fill_set_slider(double val);
 
 		//-------------------------------
-		//	MainPage_find.cpp
-		//	文字列の編集と検索/置換
-		//-------------------------------
-
-		//	検索パネルの「閉じる」ボタンが押された.
-		void btn_find_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//　検索パネルの「次を検索」ボタンが押された.
-		void btn_find_next_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//　検索パネルの「すべて置換」ボタンが押された.
-		void btn_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//　検索パネルの「置換して次に」ボタンが押された.
-		void btn_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//　検索の値をデータリーダーから読み込む.
-		void find_read(DataReader const& dt_reader);
-		//	検索パネルから値を格納する.
-		void find_set_to_panel(void);
-		//　図形の文字列を検索する.
-		bool find_text_whithin_shapes(void);
-		//　検索の値をデータリーダーに書き込む.
-		void find_write(DataWriter const& dt_writer);
-		//　編集メニューの「文字列の検索/置換」が選択された.
-		void mfi_find_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//　検索文字列が変更された.
-		void tx_find_what_text_changed(IInspectable const& /*sender*/, TextChangedEventArgs const& /*args*/);
-		// 文字範囲が選択された図形と文字範囲を見つける.
-		S_LIST_T::iterator find_range_selected_shape(DWRITE_TEXT_RANGE& t_range);
-
-		//-------------------------------
 		//　MainPage_font.cpp
 		//　書体の設定
 		//-------------------------------
@@ -441,6 +409,36 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_OP U, int S> void font_set_slider(const double val);
 		//　値をスライダーのヘッダーと図形に格納する.
 		template <UNDO_OP U, int S> void font_set_slider(Shape* s, const double val);
+		//	書体メニューの「文字列のそろえ」に印をつける.
+		void text_align_t_check_menu(const DWRITE_TEXT_ALIGNMENT t_align);
+		//	書体メニューの「段落のそろえ」に印をつける.
+		void text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align);
+		//	書体メニューの「行間」>「狭める」が選択された.
+		void mfi_text_line_contract_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「行間」>「広げる」が選択された.
+		void mfi_text_line_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「行間」>「高さ」が選択された.
+		void mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「余白」が選択された.
+		void mfi_text_margin_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「段落のそろえ」>「中段」が選択された.
+		void rmfi_text_align_middle_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「段落のそろえ」>「下よせ」が選択された.
+		void rmfi_text_align_bottom_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「段落のそろえ」>「上よせ」が選択された.
+		void rmfi_text_align_top_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「文字列のそろえ」>「中央」が選択された.
+		void rmfi_text_align_center_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「文字列のそろえ」>「均等」が選択された.
+		void rmfi_text_align_justified_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「文字列のそろえ」>「左よせ」が選択された.
+		void rmfi_text_align_left_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「文字列のそろえ」>「右よせ」が選択された.
+		void rmfi_text_align_right_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	値をスライダーのヘッダーに格納する.
+		template <UNDO_OP U, int S> void text_set_slider(const double val);
+		//	値をスライダーのヘッダーと図形に格納する.
+		template <UNDO_OP U, int S> void text_set_slider(Shape* s, const double val);
 
 		//-------------------------------
 		//　MainPage_grid.cpp
@@ -646,7 +644,7 @@ namespace winrt::GraphPaper::implementation
 		//	見本ダイアログが開かれた.
 		void cd_samp_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
 		//	見本のページと見本の図形を表示する
-		void draw_samp(void);
+		void samp_draw(void);
 		//	見本ダイアログをロードする.
 		void load_cd_samp(void) { auto _{ FindName(L"cd_samp") }; }
 		//	見本のパネルがロードされた.
@@ -748,14 +746,14 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		//	MainPage_summary.cpp
-		//	一覧パネルの表示, 設定
+		//	図形一覧パネルの表示, 設定
 		//-------------------------------
 
-		//	一覧パネルの「閉じる」ボタンが押された.
+		//	図形一覧パネルの「閉じる」ボタンが押された.
 		void btn_summary_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	一覧の項目が選択された.
+		//	図形一覧の項目が選択された.
 		void lv_summary_selection_changed(IInspectable const& sender, SelectionChangedEventArgs const& e);
-		// 一覧がロードされた.
+		//	図形一覧パネルがロードされた.
 		void lv_summary_loaded(IInspectable const& sender, RoutedEventArgs const& e);
 		//	編集メニューの「リストを表示」が選択された.
 		void mfi_summary_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
@@ -763,15 +761,15 @@ namespace winrt::GraphPaper::implementation
 		void summary_append(Shape* s);
 		//	一覧の中で図形を入れ替える.
 		void summary_arrange(Shape* s, Shape* t);
-		//	一覧を消去する.
+		//	図形一覧を消去する.
 		void summary_clear(void);
-		//	一覧を閉じて消去する.
+		//	図形一覧パネルを閉じて消去する.
 		void summary_close(void);
 		//	図形を一覧に挿入する.
 		void summary_insert(Shape* s, uint32_t i);
-		//	これから実行する操作を一覧に反映する.
+		// これから実行する操作を図形一覧に反映する.
 		void summary_reflect(Undo* u);
-		//	一覧を作成しなおす.
+		//	図形一覧を作成しなおす.
 		void summary_remake(void);
 		//	図形を一覧から消去する.
 		uint32_t summary_remove(Shape* s);
@@ -796,39 +794,35 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		//	MainPage_text.cpp
-		//	文字列レイアウトの設定
+		//	文字列の編集, または検索 / 置換
 		//-------------------------------
 
-		//	書体メニューの「文字列のそろえ」に印をつける.
-		void text_align_t_check_menu(const DWRITE_TEXT_ALIGNMENT t_align);
-		//	書体メニューの「段落のそろえ」に印をつける.
-		void text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align);
-		//	書体メニューの「行間」>「狭める」が選択された.
-		void mfi_text_line_contract_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「行間」>「広げる」が選択された.
-		void mfi_text_line_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「行間」>「高さ」が選択された.
-		void mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「余白」が選択された.
-		void mfi_text_margin_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「段落のそろえ」>「中段」が選択された.
-		void rmfi_text_align_middle_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「段落のそろえ」>「下よせ」が選択された.
-		void rmfi_text_align_bottom_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「段落のそろえ」>「上よせ」が選択された.
-		void rmfi_text_align_top_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「文字列のそろえ」>「中央」が選択された.
-		void rmfi_text_align_center_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「文字列のそろえ」>「均等」が選択された.
-		void rmfi_text_align_justified_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「文字列のそろえ」>「左よせ」が選択された.
-		void rmfi_text_align_left_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「文字列のそろえ」>「右よせ」が選択された.
-		void rmfi_text_align_right_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void text_set_slider(const double val);
-		//	値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_OP U, int S> void text_set_slider(Shape* s, const double val);
+		//	文字列検索パネルの「閉じる」ボタンが押された.
+		void btn_find_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//　文字列検索パネルの「次を検索」ボタンが押された.
+		void btn_find_next_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//　文字列検索パネルの「すべて置換」ボタンが押された.
+		void btn_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//　文字列検索パネルの「置換して次に」ボタンが押された.
+		void btn_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//　検索の値をデータリーダーから読み込む.
+		void find_read(DataReader const& dt_reader);
+		//	文字列検索パネルから値を格納する.
+		void find_set_to_panel(void);
+		//　図形の文字列を検索する.
+		bool find_text_whithin_shapes(void);
+		//　検索の値をデータリーダーに書き込む.
+		void find_write(DataWriter const& dt_writer);
+		//　編集メニューの「文字列の検索/置換」が選択された.
+		void mfi_find_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//　検索文字列が変更された.
+		void tx_find_what_text_changed(IInspectable const& /*sender*/, TextChangedEventArgs const& /*args*/);
+		//	文字範囲が選択された図形と文字範囲を見つける.
+		S_LIST_T::iterator find_text_range_selected(DWRITE_TEXT_RANGE& t_range);
+		//	図形が持つ文字列を編集する.
+		void edit_text_of_shape(ShapeText* s);
+		//	編集メニューの「文字列の編集」が選択された.
+		void mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 
 		//-------------------------------
 		//	MainPage_thread.cpp

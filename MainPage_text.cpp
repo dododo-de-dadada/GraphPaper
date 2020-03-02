@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_text.cpp
-// 文字列レイアウトの設定
+// 文字列の編集, または検索 / 置換
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -9,334 +9,517 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr double TEXT_LINE_DELTA = 2;	// 行間の変分 (DPIs)
-	constexpr wchar_t TITLE_PAGE[] = L"str_page";
+	constexpr wchar_t NO_FOUND[] = L"str_err_found";
 
-	// 書体メニューの「行間」>「高さ」が選択された.
-	void MainPage::mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	//	文字列を検索して見つかった位置を得る.
+	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool match_case, uint32_t& pos) noexcept;
+	//	図形リストの中から文字列を検索し, 見つかった図形と位置を得る.
+	static bool find_text_whithin_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool match_case, ShapeText*& s, uint32_t& pos) noexcept;
+	//	文字列の一部を置換する.
+	static wchar_t* replace_text(wchar_t const* w_text, const uint32_t w_pos, const uint32_t w_len, wchar_t const* r_text, const uint32_t r_len) noexcept;
+
+	//	文字列を検索して見つかった位置を得る.
+	//	w_text	検索される文字列
+	//	w_len	検索される文字列の文字数
+	//	w_pos	検索を開始する位置
+	//	f_text	検索文字列
+	//	f_len	検索文字列の文字数
+	//	match_case	英文字の区別フラグ
+	//	pos	見つかった位置
+	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool match_case, uint32_t& pos) noexcept
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
-
-		load_cd_samp();
-		const double val0 = m_page_panel.m_text_line;
-		slider0().Value(val0);
-		text_set_slider<UNDO_OP::TEXT_LINE, 0>(val0);
-		slider0().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
-			[this](auto, auto)
-			{
-				samp_panel_loaded();
-				font_create_samp();
-				draw_samp();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				text_set_slider<UNDO_OP::TEXT_LINE, 0>(m_samp_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_samp().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				double samp_val;
-				m_samp_shape->get_text_line(samp_val);
-				undo_push_value<UNDO_OP::TEXT_LINE>(samp_val);
-			}
-		);
-		closed_token = cd_samp().Closed(
-			[this](auto, auto)
-			{
-				delete m_samp_shape;
-#if defined(_DEBUG)
-				debug_leak_cnt--;
-#endif
-				m_samp_shape = nullptr;
-				slider0().Visibility(COLLAPSED);
-				scp_samp_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
-			}
-		);
-		show_cd_samp(TITLE_PAGE);
-	}
-
-	//	書体メニューの「行間」>「狭める」が選択された.
-	void MainPage::mfi_text_line_contract_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		auto val = m_page_panel.m_text_line - TEXT_LINE_DELTA;
-		if (val <= FLT_MIN) {
-			val = 0.0f;
+		if (w_text == nullptr
+			|| f_text == nullptr
+			|| f_len > w_len || f_len == 0) {
+			//	検索される文字列がヌル, 
+			//	または検索文字列がヌル, 
+			//	または文字数が検索文字列の文字数より小さい,
+			//	または検索文字列の文字数が 0 の場合
+			//	false を返す.
+			return false;
 		}
-		if (m_page_panel.m_text_line != val) {
-			undo_push_value<UNDO_OP::TEXT_LINE>(val);
-		}
-	}
-
-	//	書体メニューの「行間」>「広げる」が選択された.
-	void MainPage::mfi_text_line_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		auto val = m_page_panel.m_text_line + TEXT_LINE_DELTA;
-		if (m_page_panel.m_text_line != val) {
-			undo_push_value<UNDO_OP::TEXT_LINE>(val);
-		}
-	}
-
-	//	書体メニューの「余白」が選択された.
-	void MainPage::mfi_text_margin_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token slider1_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
-
-		load_cd_samp();
-		const double val0 = m_page_panel.m_text_mar.width;
-		const double val1 = m_page_panel.m_text_mar.height;
-		slider0().Value(val0);
-		slider1().Value(val1);
-		text_set_slider<UNDO_OP::TEXT_MARGIN, 0>(val0);
-		text_set_slider<UNDO_OP::TEXT_MARGIN, 1>(val1);
-		slider0().Visibility(VISIBLE);
-		slider1().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
-			[this](auto, auto)
-			{
-				samp_panel_loaded();
-				font_create_samp();
-				draw_samp();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				text_set_slider<UNDO_OP::TEXT_MARGIN, 0>(m_samp_shape, args.NewValue());
-			}
-		);
-		slider1_token = slider1().ValueChanged(
-			[this](auto, auto args)
-			{
-				text_set_slider<UNDO_OP::TEXT_MARGIN, 1>(m_samp_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_samp().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				D2D1_SIZE_F samp_val;
-				m_samp_shape->get_text_margin(samp_val);
-				undo_push_value<UNDO_OP::TEXT_MARGIN>(samp_val);
-			}
-		);
-		closed_token = cd_samp().Closed(
-			[this](auto, auto)
-			{
-				delete m_samp_shape;
-#if defined(_DEBUG)
-				debug_leak_cnt--;
-#endif
-				m_samp_shape = nullptr;
-				slider0().Visibility(COLLAPSED);
-				slider1().Visibility(COLLAPSED);
-				scp_samp_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				slider1().ValueChanged(slider1_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
-			}
-		);
-		show_cd_samp(TITLE_PAGE);
-	}
-
-	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
-	void MainPage::rmfi_text_align_bottom_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-	}
-
-	// 書体メニューの「文字列のそろえ」>「中央」が選択された.
-	void MainPage::rmfi_text_align_center_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_CENTER);
-	}
-
-	// 書体メニューの「文字列のそろえ」>「均等」が選択された.
-	void MainPage::rmfi_text_align_justified_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-	}
-
-	// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
-	void MainPage::rmfi_text_align_left_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
-	}
-
-	//	書体メニューの「段落のそろえ」>「中段」が選択された.
-	void MainPage::rmfi_text_align_middle_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	}
-
-	//	書体メニューの「文字列のそろえ」>「右よせ」が選択された.
-	void MainPage::rmfi_text_align_right_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
-	}
-
-	//	書体メニューの「段落のそろえ」>「上よせ」が選択された.
-	void MainPage::rmfi_text_align_top_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-	}
-
-	//	書体メニューの「段落のそろえ」に印をつける.
-	//	p_align	段落のそろえ
-	void MainPage::text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align)
-	{
-		rmfi_text_align_top().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bottom().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_middle().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-
-		rmfi_text_align_top_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bottom_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_middle_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	}
-
-	// 書体メニューの「文字列のそろえ」に印をつける.
-	// t_align	文字列のそろえ
-	void MainPage::text_align_t_check_menu(const DWRITE_TEXT_ALIGNMENT t_align)
-	{
-		rmfi_text_align_left().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_text_align_right().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_text_align_center().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_justified().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-
-		rmfi_text_align_left_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_text_align_right_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_text_align_center_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_justified_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-	}
-
-	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S>
-	void MainPage::text_set_slider(const double val)
-	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring hdr;
-
-		const double dpi = m_page_dx.m_logical_dpi;
-		const double g_len = m_samp_panel.m_grid_len + 1.0;
-		double px;
-		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
-			if constexpr (S == 0) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_text_mar_horzorz");
-				px = val;
-				wchar_t buf[16];
-				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 16);
-				hdr = hdr + L": " + buf;
-			}
-			if constexpr (S == 1) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_text_mar_vertert");
-				px = val;
-				wchar_t buf[16];
-				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 16);
-				hdr = hdr + L": " + buf;
+		if (match_case) {
+			for (uint32_t i = 0; i <= w_len - f_len; i++) {
+				if (wcsncmp(w_text + i, f_text, f_len) == 0) {
+					pos = i;
+					return true;
+				}
 			}
 		}
-		if constexpr (U == UNDO_OP::TEXT_LINE) {
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_height");
-			if (val > FLT_MIN) {
-				//	行の高さの単位は DIPs (96dpi 固定) なので,
-				//	これをピクセル単位に変換する.
-				px = val * dpi / 96.0;
-				wchar_t buf[16];
-				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 16);
-				hdr = hdr + L": " + buf;
+		else {
+			for (uint32_t i = 0; i <= w_len - f_len; i++) {
+				if (_wcsnicmp(w_text + i, f_text, f_len) == 0) {
+					pos = i;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	// 図形リストの中から文字列を検索し, 見つかった図形と位置を得る.
+	// it_beg	範囲の最初の反復子
+	// it_end	範囲の最後の次の反復子
+	// f_text	検索する文字列
+	// f_len	検索する文字列の文字数
+	// match_case	英文字の区別フラグ
+	// t	見つかった文字列図形
+	// pos	見つかった位置
+	// 戻り値	見つかったら true
+	static bool find_text_whithin_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool match_case, ShapeText*& t, uint32_t& pos) noexcept
+	{
+		for (auto it = it_beg; it != it_end; it++) {
+			auto s = *it;
+			if (s->is_deleted()) {
+				//	消去フラグが立っている場合,
+				//	継続する.
+				continue;
+			}
+			//	文字列を得る.
+			wchar_t* w;
+			if (s->get_text(w) == false) {
+				//	得られない場合,
+				//	継続する.
+				continue;
+			}
+			// 文字列を検索して見つかった位置を得る.
+			if (find_text(w, wchar_len(w), f_text, f_len, match_case, pos)) {
+				//	見つかった場合,
+				//	見つかった図形に格納する.
+				//	true を返す.
+				t = static_cast<ShapeText*>(s);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	//	文字列の一部を置換する.
+	//	w_text	置換される前の文字列
+	//	f_pos	置換される文字列の開始位置
+	//	f_len	置換される文字数
+	//	r_text	置換文字列
+	//	r_len	置換文字列の文字数
+	//	戻り値	置換された文字列
+	static wchar_t* replace_text(wchar_t const* w_text, const uint32_t f_pos, const uint32_t f_len, wchar_t const* r_text, const uint32_t r_len) noexcept
+	{
+		if (w_text != nullptr) {
+			//	置換される前の文字列の文字数を得る.
+			const uint32_t w_len = wchar_len(w_text);
+			//	置換される文字列の終了位置を得る.
+			const uint32_t f_end = f_pos + f_len;
+			if (f_end <= w_len) {
+				//	終了位置が文字数以下の場合,
+				//	置換された後の文字列の終了位置を得る.
+				const size_t r_end = static_cast<size_t>(f_pos) + static_cast<size_t>(r_len);
+				//	置換された後の文字列の文字数を得る.
+				const uint32_t n_len = static_cast<size_t>(w_len) + static_cast<size_t>(r_len) - static_cast<size_t>(f_len);
+				//	置換された後の文字列を格納する配列を確保する.
+				wchar_t* const n_text = new wchar_t[n_len + 1];
+				//	開始位置までの文字列を配列に格納する.
+				wcsncpy_s(n_text, n_len + 1, w_text, f_pos);
+				//for (uint32_t i = 0; i < f_pos; i++) {
+				//	n_text[i] = w_text[i];
+				//}
+				//	置換文字列を配列に格納する.
+				wcsncpy_s(n_text + f_pos, n_len - f_pos + 1, r_text, r_len);
+				//for (uint32_t i = f_pos, j = 0; i < n_len && i < r_end && j < r_len; i++, j++) {
+				//	n_text[i] = r_text[j];
+				//}
+				//	終了位置から後の文字列を配列に格納する.
+				wcsncpy_s(n_text + r_end, n_len - r_end + 1, w_text + f_end, w_len - f_end);
+				//for (uint32_t i = r_end, j = f_end; i < n_len && j < w_len; i++, j++) {
+				//	n_text[i] = w_text[j];
+				//}
+				//n_text[n_len] = L'\0';
+				return n_text;
+			}
+		}
+		return wchar_cpy(r_text);
+	}
+
+	// 文字列検索パネルの「閉じる」ボタンが押された.
+	void MainPage::btn_find_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	{
+		//	文字列検索パネルから値を格納する.
+		find_set_to_panel();
+		sp_find_text().Visibility(COLLAPSED);
+	}
+
+	// 文字列検索パネルの「次を検索」ボタンが押された.
+	void MainPage::btn_find_next_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	{
+		if (find_text_whithin_shapes()) {
+			draw_page();
+			return;
+		}
+		// 検索できなければ,
+		// 「見つかりません」メッセージダイアログを表示する.
+		cd_message_show(NO_FOUND, tx_find_what().Text());
+	}
+
+	// 文字列検索パネルの「すべて置換」ボタンが押された.
+	void MainPage::btn_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	{
+		//	文字列検索パネルから値を格納する.
+		find_set_to_panel();
+
+		//	検索文字列の文字数を得る.
+		const auto f_len = wchar_len(m_find_text);
+		if (f_len == 0) {
+			//	文字数が 0 の場合,
+			//	終了する.
+			return;
+		}
+
+		//	あらかじめ検索文字列を含む文字列図形があるか調べる.
+		auto flag = false;
+		for (auto s : m_list_shapes) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			wchar_t* w_text;
+			if (s->get_text(w_text) == false) {
+				continue;
+			}
+			uint32_t f_pos = 0;
+			if (find_text(w_text, wchar_len(w_text), m_find_text, f_len, m_find_case, f_pos)) {
+				flag = true;
+				break;
+			}
+		}
+		if (flag == false) {
+			//	図形がなければ,
+			// 「見つかりません」メッセージダイアログを表示する.
+			cd_message_show(NO_FOUND, tx_find_what().Text());
+			return;
+		}
+		// 文字範囲の選択を解除する.
+		unselect_all(true);
+
+		const auto r_len = wchar_len(m_find_repl);
+		for (auto s : m_list_shapes) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			if (typeid(*s) != typeid(ShapeText)) {
+				continue;
+			}
+			auto t = static_cast<ShapeText*>(s); // 検索される文字列図形
+			auto w_text = wchar_cpy(t->m_text);	// 検索される文字列
+			auto w_len = wchar_len(w_text);// 検索される文字列の文字数
+			uint32_t w_pos = 0;	// 検索される文字列中の位置
+			uint32_t f_pos = 0;
+			flag = false;	// 一致フラグ
+			while (find_text(w_text + w_pos, w_len - w_pos, m_find_text, f_len, m_find_case, f_pos)) {
+				flag = true;
+				w_pos += f_pos;
+				auto t_text = replace_text(w_text, w_pos, f_len, m_find_repl, r_len);
+				delete[] w_text;
+				w_text = t_text;
+				w_len += r_len - f_len;
+				w_pos += r_len;
+			}
+			if (flag) {
+				undo_push_set<UNDO_OP::TEXT>(t, w_text);
+			}
+		}
+		undo_push_null();
+		enable_undo_menu();
+		draw_page();
+	}
+
+	//	文字列検索パネルから値を格納する.
+	void MainPage::find_set_to_panel(void)
+	{
+		//	検索文字列を格納する.
+		if (m_find_text != nullptr) {
+			delete[] m_find_text;
+		}
+		m_find_text = wchar_cpy(tx_find_what().Text().c_str());
+		//	置換文字列を格納する.
+		if (m_find_repl != nullptr) {
+			delete[] m_find_repl;
+		}
+		m_find_repl = wchar_cpy(tx_repl_with().Text().c_str());
+		//	英文字の区別フラグを格納する.
+		m_find_case = ck_match_case().IsChecked().GetBoolean();
+		//	回り込み検索フラグを格納する.
+		m_find_wrap = ck_wrap_around().IsChecked().GetBoolean();
+	}
+
+	//	文字列検索パネルの「置換」ボタンが押された.
+	void MainPage::btn_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	{
+		//	文字列検索パネルから値を格納する.
+		find_set_to_panel();
+		//	検索文字列の文字数を得る.
+		const auto f_len = wchar_len(m_find_text);
+		if (f_len == 0) {
+			//	文字数が 0 の場合,
+			//	終了する.
+			return;
+		}
+
+		//	文字範囲が選択された図形を見つける.
+		DWRITE_TEXT_RANGE t_range;
+		auto it = find_text_range_selected(t_range);
+
+		bool flag = false;	// 一致または置換フラグ.
+		if (it != m_list_shapes.end()) {
+			//	図形が見つかった場合,
+			//	選択された範囲と検索文字列が一致するか調べる.
+			auto t = static_cast<ShapeText*>(*it);
+			const auto w_pos = t_range.startPosition;
+			if (m_find_case) {
+				//	英文字の区別フラグが立っている場合,
+				flag = wcsncmp(t->m_text + w_pos, m_find_text, f_len) == 0;
 			}
 			else {
-				hdr = hdr + L": " + r_loader.GetString(L"str_def_val");
-				//goto SET;
+				//	英文字の区別フラグがない場合,
+				flag = _wcsnicmp(t->m_text + w_pos, m_find_text, f_len) == 0;
+			}
+			if (flag) {
+				//	一致した場合,
+				//	置換文字列と置換する.
+				const auto r_len = wchar_len(m_find_repl);
+				auto r_text = replace_text(t->m_text, w_pos, f_len, m_find_repl, r_len);
+				undo_push_set<UNDO_OP::TEXT>(t, r_text);
+				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
+				undo_push_null();
+				enable_undo_menu();
 			}
 		}
-		/*
-		if (m_page_unit == LEN_UNIT::PIXEL) {
-			wchar_t buf[16];
-			swprintf_s(buf, FMT_PIXEL_UNIT, px);
-			hdr = hdr + L": " + buf;
+		//	次の図形の文字列を検索する.
+		if (find_text_whithin_shapes() || flag) {
+			//	見つかった, または置換された場合
+			//	再表示する.
+			draw_page();
+			return;
 		}
-		else if (m_page_unit == LEN_UNIT::INCH) {
-			wchar_t buf[16];
-			swprintf_s(buf, FMT_INCH_UNIT, px / dpi);
-			hdr = hdr + L": " + buf;
-		}
-		else if (m_page_unit == LEN_UNIT::MILLI) {
-			wchar_t buf[16];
-			swprintf_s(buf, FMT_MILLI_UNIT, px * MM_PER_INCH / dpi);
-			hdr = hdr + L": " + buf;
-		}
-		else if (m_page_unit == LEN_UNIT::POINT) {
-			wchar_t buf[16];
-			swprintf_s(buf, FMT_POINT_UNIT, px * PT_PER_INCH / dpi);
-			hdr = hdr + L": " + buf;
-		}
-		else if (m_page_unit == LEN_UNIT::GRID) {
-			wchar_t buf[16];
-			swprintf_s(buf, FMT_GRID_UNIT, px / (m_samp_panel.m_grid_len + 1.0));
-			hdr = hdr + L": " + buf;
-		}
-		wchar_t buf[16];
-		conv_val_to_len(m_page_unit, dpi,g_len, buf, 16);
-		hdr = hdr + L": " + buf;
-	SET:
-	*/
-		if constexpr (S == 0) {
-			slider0().Header(box_value(hdr));
-		}
-		if constexpr (S == 1) {
-			slider1().Header(box_value(hdr));
-		}
-		if constexpr (S == 2) {
-			slider2().Header(box_value(hdr));
-		}
-		if constexpr (S == 3) {
-			slider3().Header(box_value(hdr));
-		}
+		//	検索できない, かつ置換もされてない場合,
+		// 「見つかりません」メッセージダイアログを表示する.
+		cd_message_show(NO_FOUND, tx_find_what().Text());
 	}
 
-	// 値をスライダーのヘッダーと図形に格納する.
-	template <UNDO_OP U, int S>
-	void MainPage::text_set_slider(Shape* s, const double val)
+	//	文字範囲が選択された図形と文字範囲を見つける.
+	//	t_range	見つかった文字範囲
+	//	戻り値	見つかった図形の反復子
+	S_LIST_T::iterator MainPage::find_text_range_selected(DWRITE_TEXT_RANGE& t_range)
 	{
-		text_set_slider<U, S>(val);
-		if constexpr (U == UNDO_OP::TEXT_LINE) {
-			s->set_text_line(val);
-		}
-		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
-			D2D1_SIZE_F mar;
-			s->get_text_margin(mar);
-			if constexpr (S == 0) {
-				mar.width = static_cast<FLOAT>(val);
+		auto const& it_end = m_list_shapes.end();
+		for (auto it = m_list_shapes.begin(); it != it_end; it++) {
+			auto s = *it;
+			if (s->is_deleted()) {
+				continue;
 			}
-			if constexpr (S == 1) {
-				mar.height = static_cast<FLOAT>(val);
+			if (s->get_text_range(t_range) == false) {
+				continue;
 			}
-			s->set_text_margin(mar);
+			if (t_range.startPosition > 0 || t_range.length > 0) {
+				return it;
+			}
 		}
-		if (scp_samp_panel().IsLoaded()) {
-			draw_samp();
+		return it_end;
+	}
+
+	//	検索の値をデータリーダーから読み込む.
+	void MainPage::find_read(DataReader const& dt_reader)
+	{
+		read(m_find_text, dt_reader);
+		read(m_find_repl, dt_reader);
+		m_find_case = dt_reader.ReadBoolean();
+		m_find_wrap = dt_reader.ReadBoolean();
+	}
+
+	//	図形の文字列を検索する.
+	bool MainPage::find_text_whithin_shapes(void)
+	{
+		using winrt::GraphPaper::implementation::find_text;
+		using winrt::GraphPaper::implementation::find_text_whithin_shapes;
+
+		//	文字列検索パネルから値を格納する.
+		find_set_to_panel();
+		//	検索文字列の文字数を得る.
+		const auto f_len = wchar_len(m_find_text);
+		if (f_len == 0) {
+			return false;
 		}
+		//	文字範囲が選択された図形と文字範囲を見つける.
+		DWRITE_TEXT_RANGE t_range;
+		auto it = find_text_range_selected(t_range);
+
+		auto t = static_cast<ShapeText*>(nullptr);
+		auto const& it_end = m_list_shapes.end();
+		uint32_t f_pos = 0;	// 見つかった位置
+		if (it == it_end) {
+			//	選択された図形が見つからない場合,
+			//	リストの最初の図形から最後まで検索する.
+			auto const& it_begin = m_list_shapes.begin();
+			if (find_text_whithin_shapes(it_begin, it_end, m_find_text, f_len, m_find_case, t, f_pos) == false) {
+				//	見つからない場合 false を返す.
+				return false;
+			}
+		}
+		else {
+			//	選択された図形が見つけた場合,
+			t = static_cast<ShapeText*>(*it);
+			const auto t_text = t->m_text;
+			const auto t_pos = t_range.startPosition;
+			const auto t_end = t_pos + t_range.length;
+
+			//	範囲選択された図形の, 文字範囲より後ろの文字列を検索する.
+			if (find_text(t_text + t_end, wchar_len(t_text) - t_end, m_find_text, f_len, m_find_case, f_pos) == false) {
+				//	新たに見つからない場合,
+				//	範囲選択された図形の次から最後まで検索する.
+				auto const& it_next = std::next(it, 1);
+				if (find_text_whithin_shapes(it_next, it_end, m_find_text, f_len, m_find_case, t, f_pos) == false) {
+					if (m_find_wrap == false) {
+						//	新たに見つからない, かつ回り込み検索でない場合,
+						//	false を返す.
+						return false;
+					}
+					//	新たに見つからない, かつ回り込み検索の場合,
+					//	リストの最初から範囲選択された図形の直前まで検索する.
+					auto const& it_begin = m_list_shapes.begin();
+					if (find_text_whithin_shapes(it_begin, it, m_find_text, f_len, m_find_case, t, f_pos) == false) {
+						//	新たに見つからない場合,
+						//	文字範囲より前にある文字列を検索する.
+						if (find_text(t_text, t_pos, m_find_text, f_len, m_find_case, f_pos) == false) {
+							//	新たに見つからない場合,
+							//	false を返す.
+							return false;
+						}
+					}
+					else {
+						//	新たに別の図形が見つかった場合,
+						//	範囲選択された図形の文字範囲を消去する.
+						undo_push_set<UNDO_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
+					}
+				}
+				else {
+					//	新たに別の図形が見つかった場合,
+					//	範囲選択された図形の文字範囲を消去する.
+					undo_push_set<UNDO_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
+				}
+			}
+			else {
+				//	範囲選択された図形の中に文字列を新たに見つけた場合
+				f_pos += t_end;
+			}
+		}
+		//	新たに見つけた図形の文字範囲に格納する.
+		//	(操作スタックにヌルは積まない.)
+		undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ f_pos, f_len });
+		redo_clear();
+		scroll_to_shape(t);
+		return true;
+	}
+
+	//	編集メニューの「文字列の検索/置換」が選択された.
+	void MainPage::mfi_find_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	{
+		if (sp_find_text().Visibility() == VISIBLE) {
+			//	文字列検索パネルが表示されている場合,
+			//	文字列検索パネルを非表示にする.
+			sp_find_text().Visibility(COLLAPSED);
+			//	文字列検索パネルから値を格納する.
+			find_set_to_panel();
+			return;
+		}
+		if (m_summary_visible) {
+			//	図形一覧パネルが表示されている場合,
+			//	図形一覧パネルを非表示にする.
+			summary_close();
+		}
+		tx_find_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
+		tx_repl_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });
+		ck_match_case().IsChecked(m_find_case);
+		ck_wrap_around().IsChecked(m_find_wrap);
+		sp_find_text().Visibility(VISIBLE);
+	}
+
+	// 検索の値をデータリーダーに書き込む.
+	void MainPage::find_write(DataWriter const& dt_writer)
+	{
+		write(m_find_text, dt_writer);
+		write(m_find_repl, dt_writer);
+		dt_writer.WriteBoolean(m_find_case);
+		dt_writer.WriteBoolean(m_find_wrap);
+	}
+
+	// 検索文字列が変更された.
+	void MainPage::tx_find_what_text_changed(IInspectable const& /*sender*/, TextChangedEventArgs const& /*args*/)
+	{
+		const auto not_empty = (tx_find_what().Text().empty() == false);
+		btn_find_next().IsEnabled(not_empty);
+		btn_replace().IsEnabled(not_empty);
+		btn_replace_all().IsEnabled(not_empty);
+	}
+
+	// 図形が持つ文字列を編集する.
+	// s	文字列図形
+	void MainPage::edit_text_of_shape(ShapeText* s)
+	{
+		static winrt::event_token primary_token;
+		static winrt::event_token closed_token;
+
+		tx_edit().Text(s->m_text == nullptr ? L"" : s->m_text);
+		tx_edit().SelectAll();
+		primary_token = cd_edit_text().PrimaryButtonClick(
+			[this, s](auto, auto)
+			{
+				auto text = wchar_cpy(tx_edit().Text().c_str());
+				undo_push_set<UNDO_OP::TEXT>(s, text);
+				if (ck_ignore_blank().IsChecked().GetBoolean()) {
+					s->delete_bottom_blank();
+				}
+				undo_push_null();
+				enable_undo_menu();
+				enable_edit_menu();
+			}
+		);
+		closed_token = cd_edit_text().Closed(
+			[this](auto, auto)
+			{
+				cd_edit_text().PrimaryButtonClick(primary_token);
+				cd_edit_text().Closed(closed_token);
+				draw_page();
+			}
+		);
+		auto _{ cd_edit_text().ShowAsync() };
+	}
+
+	// 編集メニューの「文字列の編集」が選択された.
+	void MainPage::mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	{
+		ShapeText* s = nullptr;
+
+		if (m_press_shape_prev != nullptr && typeid(*m_press_shape_prev) == typeid(ShapeText)) {
+			//	前回ポインターが押されたのが文字列図形の場合,
+			//	その図形を得る.
+			s = static_cast<ShapeText*>(m_press_shape_prev);
+		}
+		else {
+			// 選択された図形のうち最前面にある文字列図形を得る.
+			for (auto it = m_list_shapes.rbegin(); it != m_list_shapes.rend(); it++) {
+				auto t = *it;
+				if (t->is_deleted()) {
+					continue;
+				}
+				if (t->is_selected() == false) {
+					continue;
+				}
+				if (typeid(*t) == typeid(ShapeText)) {
+					s = static_cast<ShapeText*>(t);
+					break;
+				}
+			}
+		}
+		if (s != nullptr) {
+			edit_text_of_shape(s);
+		}
+
 	}
 
 }

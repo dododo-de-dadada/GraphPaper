@@ -57,28 +57,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	winrt::hstring MainPage::get_dist_unit_name(void)
-	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
-		if (m_page_unit == LEN_UNIT::GRID) {
-			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_grid/Content");
-		}
-		else if (m_page_unit == LEN_UNIT::INCH) {
-			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_inch/Content");
-		}
-		else if (m_page_unit == LEN_UNIT::MILLI) {
-			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_milli/Content");
-		}
-		else if (m_page_unit == LEN_UNIT::PIXEL) {
-			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_pixel/Content");
-		}
-		else if (m_page_unit == LEN_UNIT::POINT) {
-			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_point/Content");
-		}
-		return {};
-	}
-
 	//	メインページを破棄する.
 	MainPage::~MainPage(void)
 	{
@@ -327,32 +305,6 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 		winrt::hstring formats[2]{ FMT_DATA, StandardDataFormats::Text() };
 		mfi_paste().IsEnabled(clipboard_contains(formats, 2));
-		// Clipboard::GetContent() は, 
-		// WinRT originate error 0x80040904
-		// を引き起こすので, try ... catch 文が必要.
-		//try {
-		/*
-			using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
-			using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
-			auto formats = Clipboard::GetContent().AvailableFormats();
-			if (formats != nullptr) {
-				for (auto format : formats) {
-					if (format == FMT_DATA) {
-						cont = true;
-						break;
-					}
-					else if (format == StandardDataFormats::Text()) {
-						cont = true;
-						break;
-					}
-				}
-			}
-			*/
-		//}
-		//catch (winrt::hresult_error const&) {
-		//	cont = false;
-		//}
-		// mfi_paste().IsEnabled(cont);
 		mfi_delete().IsEnabled(sel > 0);
 		mfi_select_all().IsEnabled(sel < cnt);
 		mfi_group().IsEnabled(sel > 1);
@@ -375,6 +327,29 @@ namespace winrt::GraphPaper::implementation
 		mfi_send_backward().IsEnabled(enable_back);
 		mfi_summary().IsEnabled(cnt > 0);
 		m_list_select = sel;
+	}
+
+	//	長さの単位の名前を得る.
+	winrt::hstring MainPage::get_unit_name(void)
+	{
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		if (m_page_unit == LEN_UNIT::GRID) {
+			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_grid/Content");
+		}
+		else if (m_page_unit == LEN_UNIT::INCH) {
+			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_inch/Content");
+		}
+		else if (m_page_unit == LEN_UNIT::MILLI) {
+			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_milli/Content");
+		}
+		else if (m_page_unit == LEN_UNIT::PIXEL) {
+			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_pixel/Content");
+		}
+		else if (m_page_unit == LEN_UNIT::POINT) {
+			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_point/Content");
+		}
+		return {};
 	}
 
 	// メインページを作成する.
@@ -524,29 +499,17 @@ namespace winrt::GraphPaper::implementation
 			m_page_unit = LEN_UNIT::PIXEL;
 			m_col_style = COL_STYLE::DEC;
 		}
-		/*
-		try {
-			auto mru_list = winrt::Windows::Storage::AccessCache::StorageApplicationPermissions::MostRecentlyUsedList();
-			mru_list.Clear();
-		}
-		catch (winrt::hresult_error) {
-
-		}
-		*/
-		//auto const& r_loader = ResourceLoader::GetForCurrentView();
-		//ApplicationView::GetForCurrentView().Title(r_loader.GetString(L"str_untitled"));
 		mru_add_file(nullptr);
-		//file_mru_menu();
 		finish_file_read();
 	}
 
-	// メインページの内容を破棄する.
+	//	メインページの内容を破棄する.
 	void MainPage::release(void)
 	{
 		if (m_summary_visible) {
 			summary_close();
 		}
-		// 操作スタックを消去する.
+		//	操作スタックを消去する.
 		undo_clear();
 		s_list_clear(m_list_shapes);
 #if defined(_DEBUG)

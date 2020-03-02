@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				samp_panel_loaded();
 				stroke_create_samp();
-				draw_samp();
+				samp_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
@@ -139,7 +139,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				samp_panel_loaded();
 				stroke_create_samp();
-				draw_samp();
+				samp_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
@@ -218,7 +218,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				samp_panel_loaded();
 				stroke_create_samp();
-				draw_samp();
+				samp_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
@@ -473,7 +473,7 @@ namespace winrt::GraphPaper::implementation
 			s->set_stroke_color(col);
 		}
 		if (scp_samp_panel().IsLoaded()) {
-			draw_samp();
+			samp_draw();
 		}
 	}
 

@@ -13,12 +13,12 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::cd_samp_opened(ContentDialog const& /*sender*/, ContentDialogOpenedEventArgs const& /*args*/)
 	{
 		if (scp_samp_panel().IsLoaded()) {
-			draw_samp();
+			samp_draw();
 		}
 	}
 
 	// 見本のページと見本の図形を表示する.
-	void MainPage::draw_samp(void)
+	void MainPage::samp_draw(void)
 	{
 #if defined(_DEBUG)
 		if (scp_samp_panel().IsLoaded() == false) {

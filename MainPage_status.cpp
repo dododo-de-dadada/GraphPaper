@@ -352,7 +352,7 @@ tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	// 単位をステータスバーに格納する.
 	void MainPage::stat_set_unit(void)
 	{
-		tk_stat_unit().Text(winrt::hstring{ L"u:" } + get_dist_unit_name());
+		tk_stat_unit().Text(winrt::hstring{ L"u:" } + get_unit_name());
 	}
 
 	// 拡大率をステータスバーに格納する.

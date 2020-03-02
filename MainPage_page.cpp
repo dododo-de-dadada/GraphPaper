@@ -139,7 +139,7 @@ namespace winrt::GraphPaper::implementation
 			[this](auto, auto)
 			{
 				samp_panel_loaded();
-				draw_samp();
+				samp_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
@@ -239,7 +239,7 @@ namespace winrt::GraphPaper::implementation
 		tx_page_width().Text(buf);
 		swprintf_s(buf, format, ph);
 		tx_page_height().Text(buf);
-		tk_page_unit().Text(get_dist_unit_name());
+		tk_page_unit().Text(get_unit_name());
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
@@ -323,7 +323,7 @@ namespace winrt::GraphPaper::implementation
 			s->set_page_color(col);
 		}
 		if (scp_samp_panel().IsLoaded()) {
-			draw_samp();
+			samp_draw();
 		}
 	}
 

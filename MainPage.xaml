@@ -607,7 +607,7 @@
                 <MenuFlyoutItem x:Uid="mfi_about_graph_paper" Click="mfi_about_graph_paper_click" Text="About Graph paper..." />
             </muxc:MenuBarItem>
         </muxc:MenuBar>
-        <!-- 検索パネル -->
+        <!-- 文字列検索パネル -->
         <StackPanel x:Name="sp_find_text" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
             <Button Click="btn_find_close_click" Background="White" Content="&#xE894;" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
             <TextBox x:Name="tx_find_what" x:Uid="tx_find_what" Header="Find what" Margin="4,4" TextChanged="tx_find_what_text_changed" Width="128" />
@@ -618,7 +618,7 @@
             <Button x:Name="btn_replace" x:Uid="btn_replace" Click="btn_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
             <Button x:Name="btn_replace_all" x:Uid="btn_replace_all" Click="btn_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
         </StackPanel>
-        <!-- 一覧パネル -->
+        <!-- 図形一覧パネル -->
         <RelativePanel x:Name="rp_summary" x:Load="false" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" >
             <Button x:Name="btn_summary_close" Click="btn_summary_close_click" Background="White" Content="&#xE894;" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignRightWithPanel="True" VerticalAlignment="Top" />
             <ListView x:Name="lv_summary" IsItemClickEnabled="False" Loaded="lv_summary_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True"  RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_summary_close" SelectionChanged="lv_summary_selection_changed" SelectionMode="Extended" >
