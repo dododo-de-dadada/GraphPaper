@@ -43,11 +43,11 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t TITLE_FONT[] = L"str_font";
 
 	// 書体の見本を作成する.
-	void MainPage::font_create_samp(void)
+	void MainPage::font_create_sample(void)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		const auto w = scp_samp_panel().ActualWidth();
-		const auto h = scp_samp_panel().ActualHeight();
+		const auto w = scp_sample_panel().ActualWidth();
+		const auto h = scp_sample_panel().ActualHeight();
 		const auto padding = w * 0.125;
 		const D2D1_POINT_2F pos = {
 			static_cast<FLOAT>(padding),
@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		const auto t = wchar_cpy(r_loader.GetString(L"str_pangram").c_str());
-		m_samp_shape = new ShapeText(pos, vec, t, &m_samp_panel);
+		m_sample_shape = new ShapeText(pos, vec, t, &m_sample_panel);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -151,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		const double val0 = m_page_panel.m_font_color.r * COLOR_MAX;
 		const double val1 = m_page_panel.m_font_color.g * COLOR_MAX;
 		const double val2 = m_page_panel.m_font_color.b * COLOR_MAX;
@@ -170,88 +170,88 @@ namespace winrt::GraphPaper::implementation
 		slider2().Visibility(VISIBLE);
 		slider3().Visibility(VISIBLE);
 		//cx_color_style().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				font_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				font_create_sample();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_samp_shape, args.NewValue());
+				font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 1>(m_samp_shape, args.NewValue());
+				font_set_slider<UNDO_OP::FONT_COLOR, 1>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 2>(m_samp_shape, args.NewValue());
+				font_set_slider<UNDO_OP::FONT_COLOR, 2>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider3_token = slider3().ValueChanged(
 			[this](auto, auto args)
 			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_samp_shape, args.NewValue());
+				font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_sample_shape, args.NewValue());
 			}
 		);
 		//c_style_token = cx_color_style().SelectionChanged(
 		//	[this](auto, auto args)
 		//	{
-		//		m_samp_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
-		//		font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_samp_shape, slider0().Value());
-		//		font_set_slider<UNDO_OP::FONT_COLOR, 1>(m_samp_shape, slider1().Value());
-		//		font_set_slider<UNDO_OP::FONT_COLOR, 2>(m_samp_shape, slider2().Value());
-		//		font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_samp_shape, slider3().Value());
+		//		m_sample_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
+		//		font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, slider0().Value());
+		//		font_set_slider<UNDO_OP::FONT_COLOR, 1>(m_sample_shape, slider1().Value());
+		//		font_set_slider<UNDO_OP::FONT_COLOR, 2>(m_sample_shape, slider2().Value());
+		//		font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_sample_shape, slider3().Value());
 		//	}
 		//);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				//m_page_panel.m_col_style = m_samp_panel.m_col_style;
-				D2D1_COLOR_F samp_val;
-				m_samp_shape->get_font_color(samp_val);
+				//m_page_panel.m_col_style = m_sample_panel.m_col_style;
+				D2D1_COLOR_F sample_val;
+				m_sample_shape->get_font_color(sample_val);
 				//D2D1_COLOR_F page_val;
 				//m_page_shape->get_font_color(page_val);
-				//if (equal(samp_val, page_val)) {
+				//if (equal(sample_val, page_val)) {
 				//	return;
 				//}
-				undo_push_value<UNDO_OP::FONT_COLOR>(samp_val);
+				undo_push_value<UNDO_OP::FONT_COLOR>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
+				m_sample_shape = nullptr;
 				slider0().Visibility(COLLAPSED);
 				slider1().Visibility(COLLAPSED);
 				slider2().Visibility(COLLAPSED);
 				slider3().Visibility(COLLAPSED);
 				//cx_color_style().Visibility(COLLAPSED);
-				scp_samp_panel().Loaded(loaded_token);
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().ValueChanged(slider0_token);
 				slider1().ValueChanged(slider1_token);
 				slider2().ValueChanged(slider2_token);
 				slider3().ValueChanged(slider3_token);
 				//cx_color_style().SelectionChanged(c_style_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(TITLE_FONT);
+		show_cd_sample(TITLE_FONT);
 	}
 
 	// 書体メニューの「書体名」が選択された.
@@ -262,13 +262,13 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
-		loaded_token = scp_samp_panel().Loaded(
+		load_cd_sample();
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				font_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				font_create_sample();
+				sample_draw();
 			}
 		);
 		changed_token = lv_font_family().SelectionChanged(
@@ -276,40 +276,40 @@ namespace winrt::GraphPaper::implementation
 			{
 				//int32_t i = lv_font_family().SelectedIndex();
 				auto i = lv_font_family().SelectedIndex();
-				m_samp_shape->set_font_family(ShapeText::get_available_font(i));
-				if (scp_samp_panel().IsLoaded()) {
-					samp_draw();
+				m_sample_shape->set_font_family(ShapeText::get_available_font(i));
+				if (scp_sample_panel().IsLoaded()) {
+					sample_draw();
 				}
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				wchar_t* samp_val;
-				m_samp_shape->get_font_family(samp_val);
-				undo_push_value<UNDO_OP::FONT_FAMILY>(samp_val);
+				wchar_t* sample_val;
+				m_sample_shape->get_font_family(sample_val);
+				undo_push_value<UNDO_OP::FONT_FAMILY>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
+				m_sample_shape = nullptr;
 				lv_font_family().SelectionChanged(changed_token);
-				scp_samp_panel().Loaded(loaded_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				//cd_samp().Opened(opened_token);
-				cd_samp().Closed(closed_token);
+				scp_sample_panel().Loaded(loaded_token);
+				cd_sample().PrimaryButtonClick(primary_token);
+				//cd_sample().Opened(opened_token);
+				cd_sample().Closed(closed_token);
 				lv_font_family().Visibility(COLLAPSED);
-				UnloadObject(cd_samp());
-				draw_page();
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
 		lv_font_family().Visibility(VISIBLE);
-		show_cd_samp(TITLE_FONT);
+		show_cd_sample(TITLE_FONT);
 	}
 
 	// 書体メニューの「イタリック体」が選択された.
@@ -338,51 +338,51 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		const double val0 = m_page_panel.m_font_size;
 		slider0().Value(val0);
 		font_set_slider<UNDO_OP::FONT_SIZE, 0>(val0);
 		slider0().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				font_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				font_create_sample();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				font_set_slider<UNDO_OP::FONT_SIZE, 0>(m_samp_shape, args.NewValue());
+				font_set_slider<UNDO_OP::FONT_SIZE, 0>(m_sample_shape, args.NewValue());
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				double samp_val;
-				m_samp_shape->get_font_size(samp_val);
-				undo_push_value<UNDO_OP::FONT_SIZE>(samp_val);
+				double sample_val;
+				m_sample_shape->get_font_size(sample_val);
+				undo_push_value<UNDO_OP::FONT_SIZE>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
+				m_sample_shape = nullptr;
 				slider0().Visibility(COLLAPSED);
-				scp_samp_panel().Loaded(loaded_token);
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().ValueChanged(slider0_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(TITLE_FONT);
+		show_cd_sample(TITLE_FONT);
 	}
 
 	// 書体メニューの「伸縮」が選択された.
@@ -393,51 +393,51 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
-		loaded_token = scp_samp_panel().Loaded(
+		load_cd_sample();
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				font_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				font_create_sample();
+				sample_draw();
 			}
 		);
 		changed_token = lv_font_stretch().SelectionChanged(
 			[this](auto, auto args) {
 				uint32_t i = lv_font_stretch().SelectedIndex();
-				m_samp_shape->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
-				if (scp_samp_panel().IsLoaded()) {
-					samp_draw();
+				m_sample_shape->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
+				if (scp_sample_panel().IsLoaded()) {
+					sample_draw();
 				}
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				DWRITE_FONT_STRETCH samp_val;
-				m_samp_shape->get_font_stretch(samp_val);
-				undo_push_value<UNDO_OP::FONT_STRETCH>(samp_val);
+				DWRITE_FONT_STRETCH sample_val;
+				m_sample_shape->get_font_stretch(sample_val);
+				undo_push_value<UNDO_OP::FONT_STRETCH>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
-				scp_samp_panel().Loaded(loaded_token);
+				m_sample_shape = nullptr;
+				scp_sample_panel().Loaded(loaded_token);
 				lv_font_stretch().SelectionChanged(changed_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
 				lv_font_stretch().Visibility(COLLAPSED);
-				UnloadObject(cd_samp());
-				draw_page();
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
 		lv_font_stretch().Visibility(VISIBLE);
-		show_cd_samp(TITLE_FONT);
+		show_cd_sample(TITLE_FONT);
 	}
 
 	// 書体メニューの「太さ」が選択された.
@@ -448,52 +448,52 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
-		loaded_token = scp_samp_panel().Loaded(
+		load_cd_sample();
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				font_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				font_create_sample();
+				sample_draw();
 			}
 		);
 		changed_token = lv_font_weight().SelectionChanged(
 			[this](auto, auto args) {
 				uint32_t i = lv_font_weight().SelectedIndex();
-				m_samp_shape->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
-				if (scp_samp_panel().IsLoaded()) {
-					samp_draw();
+				m_sample_shape->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
+				if (scp_sample_panel().IsLoaded()) {
+					sample_draw();
 				}
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				DWRITE_FONT_WEIGHT samp_val;
-				m_samp_shape->get_font_weight(samp_val);
-				undo_push_value<UNDO_OP::FONT_WEIGHT>(samp_val);
+				DWRITE_FONT_WEIGHT sample_val;
+				m_sample_shape->get_font_weight(sample_val);
+				undo_push_value<UNDO_OP::FONT_WEIGHT>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
-				scp_samp_panel().Loaded(loaded_token);
+				m_sample_shape = nullptr;
+				scp_sample_panel().Loaded(loaded_token);
 				lv_font_weight().SelectionChanged(changed_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				//cd_samp().Opened(opened_token);
-				cd_samp().Closed(closed_token);
+				cd_sample().PrimaryButtonClick(primary_token);
+				//cd_sample().Opened(opened_token);
+				cd_sample().Closed(closed_token);
 				lv_font_weight().Visibility(COLLAPSED);
-				UnloadObject(cd_samp());
-				draw_page();
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
 		lv_font_weight().Visibility(VISIBLE);
-		show_cd_samp(TITLE_FONT);
+		show_cd_sample(TITLE_FONT);
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -575,8 +575,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			s->set_font_color(col);
 		}
-		if (scp_samp_panel().IsLoaded()) {
-			samp_draw();
+		if (scp_sample_panel().IsLoaded()) {
+			sample_draw();
 		}
 	}
 
@@ -591,51 +591,51 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		const double val0 = m_page_panel.m_text_line;
 		slider0().Value(val0);
 		text_set_slider<UNDO_OP::TEXT_LINE, 0>(val0);
 		slider0().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				font_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				font_create_sample();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				text_set_slider<UNDO_OP::TEXT_LINE, 0>(m_samp_shape, args.NewValue());
+				text_set_slider<UNDO_OP::TEXT_LINE, 0>(m_sample_shape, args.NewValue());
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				double samp_val;
-				m_samp_shape->get_text_line(samp_val);
-				undo_push_value<UNDO_OP::TEXT_LINE>(samp_val);
+				double sample_val;
+				m_sample_shape->get_text_line(sample_val);
+				undo_push_value<UNDO_OP::TEXT_LINE>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
+				m_sample_shape = nullptr;
 				slider0().Visibility(COLLAPSED);
-				scp_samp_panel().Loaded(loaded_token);
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().ValueChanged(slider0_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(TITLE_PAGE);
+		show_cd_sample(TITLE_PAGE);
 	}
 
 	//	書体メニューの「行間」>「狭める」が選択された.
@@ -668,7 +668,7 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		const double val0 = m_page_panel.m_text_mar.width;
 		const double val1 = m_page_panel.m_text_mar.height;
 		slider0().Value(val0);
@@ -677,54 +677,54 @@ namespace winrt::GraphPaper::implementation
 		text_set_slider<UNDO_OP::TEXT_MARGIN, 1>(val1);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				font_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				font_create_sample();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				text_set_slider<UNDO_OP::TEXT_MARGIN, 0>(m_samp_shape, args.NewValue());
+				text_set_slider<UNDO_OP::TEXT_MARGIN, 0>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				text_set_slider<UNDO_OP::TEXT_MARGIN, 1>(m_samp_shape, args.NewValue());
+				text_set_slider<UNDO_OP::TEXT_MARGIN, 1>(m_sample_shape, args.NewValue());
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				D2D1_SIZE_F samp_val;
-				m_samp_shape->get_text_margin(samp_val);
-				undo_push_value<UNDO_OP::TEXT_MARGIN>(samp_val);
+				D2D1_SIZE_F sample_val;
+				m_sample_shape->get_text_margin(sample_val);
+				undo_push_value<UNDO_OP::TEXT_MARGIN>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
+				m_sample_shape = nullptr;
 				slider0().Visibility(COLLAPSED);
 				slider1().Visibility(COLLAPSED);
-				scp_samp_panel().Loaded(loaded_token);
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().ValueChanged(slider0_token);
 				slider1().ValueChanged(slider1_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(TITLE_PAGE);
+		show_cd_sample(TITLE_PAGE);
 	}
 
 	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
@@ -805,7 +805,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring hdr;
 
 		const double dpi = m_page_dx.m_logical_dpi;
-		const double g_len = m_samp_panel.m_grid_len + 1.0;
+		const double g_len = m_sample_panel.m_grid_len + 1.0;
 		double px;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
@@ -864,7 +864,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (m_page_unit == LEN_UNIT::GRID) {
 			wchar_t buf[16];
-			swprintf_s(buf, FMT_GRID_UNIT, px / (m_samp_panel.m_grid_len + 1.0));
+			swprintf_s(buf, FMT_GRID_UNIT, px / (m_sample_panel.m_grid_len + 1.0));
 			hdr = hdr + L": " + buf;
 		}
 		wchar_t buf[16];
@@ -905,8 +905,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			s->set_text_margin(mar);
 		}
-		if (scp_samp_panel().IsLoaded()) {
-			samp_draw();
+		if (scp_sample_panel().IsLoaded()) {
+			sample_draw();
 		}
 	}
 

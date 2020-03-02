@@ -403,12 +403,12 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="mfi_edit_text_click" Icon="Edit" Text="Edit Text" >
+                <MenuFlyoutItem x:Name="mfi_text_edit" x:Uid="mfi_text_edit" Click="mfi_text_edit_click" Icon="Edit" Text="Edit Text" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="E" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_find_text" x:Uid="mfi_find_text" Click="mfi_find_text_click" Icon="Find" Text="Find/Replace Text">
+                <MenuFlyoutItem x:Name="mfi_text_find" x:Uid="mfi_text_find" Click="mfi_text_find_click" Icon="Find" Text="Find/Replace Text">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -608,15 +608,15 @@
             </muxc:MenuBarItem>
         </muxc:MenuBar>
         <!-- 文字列検索パネル -->
-        <StackPanel x:Name="sp_find_text" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
-            <Button Click="btn_find_close_click" Background="White" Content="&#xE894;" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
-            <TextBox x:Name="tx_find_what" x:Uid="tx_find_what" Header="Find what" Margin="4,4" TextChanged="tx_find_what_text_changed" Width="128" />
-            <TextBox x:Name="tx_repl_with" x:Uid="tx_repl_with" Header="Replace width" Margin="4,4" Width="128" />
-            <CheckBox x:Name="ck_match_case" x:Uid="ck_match_case" Content="Match case." Margin="4,4" />
-            <CheckBox x:Name="ck_wrap_around" x:Uid="ck_wrap_around" Content="Wrap around." Margin="4,4" />
-            <Button x:Name="btn_find_next" x:Uid="btn_find_next" Click="btn_find_next_click" Content="Find Next" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
-            <Button x:Name="btn_replace" x:Uid="btn_replace" Click="btn_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
-            <Button x:Name="btn_replace_all" x:Uid="btn_replace_all" Click="btn_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
+        <StackPanel x:Name="sp_text_find" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
+            <Button Click="btn_text_find_close_click" Background="White" Content="&#xE894;" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
+            <TextBox x:Name="tx_text_find_what" x:Uid="tx_text_find_what" Header="Find what" Margin="4,4" TextChanged="tx_text_find_what_changed" Width="128" />
+            <TextBox x:Name="tx_text_replace_with" x:Uid="tx_text_replace_with" Header="Replace width" Margin="4,4" Width="128" />
+            <CheckBox x:Name="ck_text_match_case" x:Uid="ck_text_match_case" Content="Match case." Margin="4,4" />
+            <CheckBox x:Name="ck_text_wrap_around" x:Uid="ck_text_wrap_around" Content="Wrap around." Margin="4,4" />
+            <Button x:Name="btn_text_find_next" x:Uid="btn_text_find_next" Click="btn_text_find_next_click" Content="Find Next" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
+            <Button x:Name="btn_text_replace" x:Uid="btn_text_replace" Click="btn_text_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
+            <Button x:Name="btn_text_replace_all" x:Uid="btn_text_replace_all" Click="btn_text_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
         </StackPanel>
         <!-- 図形一覧パネル -->
         <RelativePanel x:Name="rp_summary" x:Load="false" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" >
@@ -800,10 +800,10 @@
             </StackPanel>
         </ContentDialog>
         <!-- 属性入力ダイアログ -->
-        <ContentDialog x:Name="cd_samp" x:Load="False" CloseButtonText="Close" DefaultButton="Close" Opened="cd_samp_opened" PrimaryButtonText="Apply" >
+        <ContentDialog x:Name="cd_sample" x:Load="False" CloseButtonText="Close" DefaultButton="Close" Opened="cd_sample_opened" PrimaryButtonText="Apply" >
             <RelativePanel>
                 <SwapChainPanel
-                    x:Name="scp_samp_panel"
+                    x:Name="scp_sample_panel"
                     Height="170"
                     Margin="0,0,0,4"
                     MaxHeight="170"
@@ -813,7 +813,7 @@
                     Width="170"
                     />
                 <!-- Height を指定するこれ大事 -->
-                <ListView x:Name="lv_font_stretch" Loaded="lv_font_stretch_loaded" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256">
+                <ListView x:Name="lv_font_stretch" Loaded="lv_font_stretch_loaded" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256">
                     <ListViewItem x:Uid="lvi_stretch_undefined" Content="Undefined" />
                     <ListViewItem x:Uid="lvi_stretch_ultra_condensed" Content="Ultra Condensed" />
                     <ListViewItem x:Uid="lvi_stretch_extra_condensed" Content="Extra Condensed" />
@@ -825,8 +825,8 @@
                     <ListViewItem x:Uid="lvi_stretch_extra_expanded" Content="Extra Expanded" />
                     <ListViewItem x:Uid="lvi_stretch_ultra_expanded" Content="Ultra Expanded" />
                 </ListView>
-                <ListView x:Name="lv_font_family" Loaded="lv_font_family_loaded" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
-                <ListView x:Name="lv_font_weight" Loaded="lv_font_weight_loaded" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256">
+                <ListView x:Name="lv_font_family" Loaded="lv_font_family_loaded" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
+                <ListView x:Name="lv_font_weight" Loaded="lv_font_weight_loaded" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256">
                     <ListViewItem x:Uid="lvi_weight_thin" Content="Thin" />
                     <ListViewItem x:Uid="lvi_weight_extra_light" Content="Extra Light" />
                     <ListViewItem x:Uid="lvi_weight_light" Content="Light" />
@@ -839,7 +839,7 @@
                     <ListViewItem x:Uid="lvi_weight_black" Content="Black" />
                     <ListViewItem x:Uid="lvi_weight_extra_black" Content="Extra Black" />
                 </ListView>
-                <Slider x:Name="slider0" x:Uid = "slider0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_samp_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+                <Slider x:Name="slider0" x:Uid = "slider0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="slider1" x:Uid = "slider1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="slider2" x:Uid = "slider2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="slider3" x:Uid = "slider3" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />

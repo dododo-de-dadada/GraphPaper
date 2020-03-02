@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_null();
 			s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 			set_page_panle_size();
-			draw_page();
+			page_draw();
 		}
 		//	コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
@@ -153,7 +153,7 @@ namespace winrt::GraphPaper::implementation
 							enable_undo_menu();
 							enable_edit_menu();
 							set_page_panle_size();
-							draw_page();
+							page_draw();
 						}
 					}
 					const auto _{ dt_reader.DetachStream() };
@@ -188,7 +188,7 @@ namespace winrt::GraphPaper::implementation
 						enable_edit_menu();
 						t->get_bound(m_page_min, m_page_max);
 						set_page_panle_size();
-						draw_page();
+						page_draw();
 					}
 					*/
 				}
@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 		enable_edit_menu();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
-		draw_page();
+		page_draw();
 	}
 
 	// 編集メニューの「貼り付け」が選択された.

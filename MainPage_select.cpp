@@ -32,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 		redo_clear();
 		enable_undo_menu();
 		enable_edit_menu();
-		draw_page();
+		page_draw();
 	}
 
 	// 範囲に含まれる図形を選択し, 含まれない図形の選択を解除する.
@@ -92,7 +92,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_select(m_press_shape_summary);
 				enable_undo_menu();
 				enable_edit_menu();
-				draw_page();
+				page_draw();
 				if constexpr (K == VirtualKey::Down) {
 					if (m_summary_visible) {
 						summary_select_head();
@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		enable_undo_menu();
 		enable_edit_menu();
-		draw_page();
+		page_draw();
 	}
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_select(s);
 			enable_undo_menu();
 			enable_edit_menu();
-			draw_page();
+			page_draw();
 			if (s->is_selected()) {
 				// 押された図形が選択されている場合,
 				// 押された図形の属性をページのパネルに格納する.
@@ -243,7 +243,7 @@ namespace winrt::GraphPaper::implementation
 				redo_clear();
 				enable_undo_menu();
 				enable_edit_menu();
-				draw_page();
+				page_draw();
 			}
 			// 押された図形の属性をページのパネルに格納する.
 			m_page_panel.set_to_shape(s);
@@ -266,7 +266,7 @@ namespace winrt::GraphPaper::implementation
 				redo_clear();
 				enable_undo_menu();
 				enable_edit_menu();
-				draw_page();
+				page_draw();
 				arrow_style_check_menu(m_page_panel.m_arrow_style);
 				font_style_check_menu(m_page_panel.m_font_style);
 				text_align_p_check_menu(m_page_panel.m_text_align_p);

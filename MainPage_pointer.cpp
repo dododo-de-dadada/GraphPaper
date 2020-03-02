@@ -9,7 +9,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::UI::Core::CoreCursor;
 	using winrt::Windows::UI::Core::CoreCursorType;
 
 	static auto const& CUR_ARROW = CoreCursor(CoreCursorType::Arrow, 0);	// 矢印カーソル
@@ -121,7 +120,7 @@ namespace winrt::GraphPaper::implementation
 		enable_edit_menu();
 		s->get_bound(m_page_min, m_page_max);
 		set_page_panle_size();
-		draw_page();
+		page_draw();
 		if (m_summary_visible) {
 			summary_append(s);
 		}
@@ -170,7 +169,7 @@ namespace winrt::GraphPaper::implementation
 				m_press_shape = nullptr;
 				m_press_anchor = ANCH_OUTSIDE;
 				m_press_shape_prev = nullptr;
-				draw_page();
+				page_draw();
 			}
 		);
 		auto _{ cd_edit_text().ShowAsync() };
@@ -355,7 +354,7 @@ namespace winrt::GraphPaper::implementation
 		else if (m_press_state == S_TRAN::PRESS_AREA) {
 			// 状態が範囲選択している状態の場合,
 			// ページと図形を表示する.
-			draw_page();
+			page_draw();
 		}
 		else if (m_press_state == S_TRAN::PRESS_MOVE) {
 			// 状態が図形を移動している状態の場合,
@@ -367,7 +366,7 @@ namespace winrt::GraphPaper::implementation
 			// ポインターの現在位置を前回位置に格納する.
 			m_prev_pos = m_curr_pos;
 			// ページと図形を表示する.
-			draw_page();
+			page_draw();
 		}
 		else if (m_press_state == S_TRAN::PRESS_FORM) {
 			// 状態が図形を変形している状態の場合,
@@ -376,7 +375,7 @@ namespace winrt::GraphPaper::implementation
 			// ポインターの現在位置を前回位置に格納する.
 			m_prev_pos = m_curr_pos;
 			// ページと図形を表示する.
-			draw_page();
+			page_draw();
 		}
 		else if (m_press_state == S_TRAN::PRESS_L
 			|| m_press_state == S_TRAN::CLICK_2) {
@@ -420,7 +419,7 @@ namespace winrt::GraphPaper::implementation
 					// 図形の変形前の位置をスタックに保存して, 図形を変形する.
 					undo_push_form(m_press_shape, m_press_anchor, m_curr_pos);
 				}
-				draw_page();
+				page_draw();
 			}
 		}
 	}
@@ -527,7 +526,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		// ページと図形を表示する.
-		draw_page();
+		page_draw();
 	}
 
 	// コンテキストメニューを表示する.
@@ -609,7 +608,7 @@ namespace winrt::GraphPaper::implementation
 				if (m_press_shape != nullptr && typeid(*m_press_shape) == typeid(ShapeText)) {
 					// 押された図形が文字列図形の場合, 
 					// 文字列編集ダイアログを表示する.
-					edit_text_of_shape(static_cast<ShapeText*>(m_press_shape));
+					text_edit_in(static_cast<ShapeText*>(m_press_shape));
 				}
 			}
 		}
@@ -643,7 +642,7 @@ namespace winrt::GraphPaper::implementation
 		m_press_state = S_TRAN::BEGIN;
 		m_press_shape = nullptr;
 		m_press_anchor = ANCH_OUTSIDE;
-		draw_page();
+		page_draw();
 	}
 
 	// ポインターのホイールボタンが操作された.
@@ -692,7 +691,7 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 			sb.Value(val);
-			draw_page();
+			page_draw();
 		}
 	}
 

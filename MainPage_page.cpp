@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_page.cpp
-// ページの設定
+// ページの設定と表示
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -49,8 +49,8 @@ namespace winrt::GraphPaper::implementation
 			page.height = static_cast<FLOAT>(std::round(ph / PT_PER_INCH * dpi));
 			break;
 		case LEN_UNIT::GRID:
-			page.width = static_cast<FLOAT>(std::round(pw * (m_samp_panel.m_grid_len + 1.0)));
-			page.height = static_cast<FLOAT>(std::round(ph * (m_samp_panel.m_grid_len + 1.0)));
+			page.width = static_cast<FLOAT>(std::round(pw * (m_sample_panel.m_grid_len + 1.0)));
+			page.height = static_cast<FLOAT>(std::round(ph * (m_sample_panel.m_grid_len + 1.0)));
 			break;
 		}
 		if (equal(m_page_panel.m_page_size, page) == false) {
@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
-		draw_page();
+		page_draw();
 		stat_set_curs();
 		stat_set_page();
 		stat_set_unit();
@@ -94,7 +94,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
-		draw_page();
+		page_draw();
 		stat_set_page();
 	}
 
@@ -122,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		const double val0 = m_page_panel.m_page_color.r * COLOR_MAX;
 		const double val1 = m_page_panel.m_page_color.g * COLOR_MAX;
 		const double val2 = m_page_panel.m_page_color.b * COLOR_MAX;
@@ -135,64 +135,64 @@ namespace winrt::GraphPaper::implementation
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				samp_draw();
+				sample_panel_loaded();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				page_set_slider<UNDO_OP::PAGE_COLOR, 0>(&m_samp_panel, args.NewValue());
+				page_set_slider<UNDO_OP::PAGE_COLOR, 0>(&m_sample_panel, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				page_set_slider<UNDO_OP::PAGE_COLOR, 1>(&m_samp_panel, args.NewValue());
+				page_set_slider<UNDO_OP::PAGE_COLOR, 1>(&m_sample_panel, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				page_set_slider<UNDO_OP::PAGE_COLOR, 2>(&m_samp_panel, args.NewValue());
+				page_set_slider<UNDO_OP::PAGE_COLOR, 2>(&m_sample_panel, args.NewValue());
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				D2D1_COLOR_F samp_val;
-				m_samp_panel.get_page_color(samp_val);
+				D2D1_COLOR_F sample_val;
+				m_sample_panel.get_page_color(sample_val);
 				D2D1_COLOR_F page_val;
 				m_page_panel.get_page_color(page_val);
-				if (equal(page_val, samp_val)) {
+				if (equal(page_val, sample_val)) {
 					return;
 				}
-				undo_push_set<UNDO_OP::PAGE_COLOR>(&m_page_panel, samp_val);
+				undo_push_set<UNDO_OP::PAGE_COLOR>(&m_page_panel, sample_val);
 				undo_push_null();
 				enable_undo_menu();
-				draw_page();
+				page_draw();
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
 				slider0().Visibility(COLLAPSED);
 				slider1().Visibility(COLLAPSED);
 				slider2().Visibility(COLLAPSED);
-				scp_samp_panel().Loaded(loaded_token);
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().ValueChanged(slider0_token);
 				slider1().ValueChanged(slider1_token);
 				slider2().ValueChanged(slider2_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(L"str_page");
+		show_cd_sample(L"str_page");
 	}
 
 	// ページメニューの「大きさ」が選択された
@@ -202,8 +202,8 @@ namespace winrt::GraphPaper::implementation
 		//wchar_t const* format = nullptr;
 		double pw;
 		double ph;
-		m_samp_panel.m_grid_len = m_page_panel.m_grid_len;
-		const auto g_len = m_samp_panel.m_grid_len + 1.0;
+		m_sample_panel.m_grid_len = m_page_panel.m_grid_len;
+		const auto g_len = m_sample_panel.m_grid_len + 1.0;
 		pw = m_page_panel.m_page_size.width;
 		ph = m_page_panel.m_page_size.height;
 		wchar_t const* format;
@@ -230,8 +230,8 @@ namespace winrt::GraphPaper::implementation
 			break;
 		case LEN_UNIT::GRID:
 			format = FMT_GRID;
-			pw /= m_samp_panel.m_grid_len + 1.0;
-			ph /= m_samp_panel.m_grid_len + 1.0;
+			pw /= m_sample_panel.m_grid_len + 1.0;
+			ph /= m_sample_panel.m_grid_len + 1.0;
 			break;
 		}
 		wchar_t buf[16];
@@ -254,6 +254,119 @@ namespace winrt::GraphPaper::implementation
 		cx_page_unit().SelectedIndex(m_page_unit);
 		cx_color_style().SelectedIndex(m_col_style);
 		const auto _ = cd_page_unit().ShowAsync();
+	}
+
+	//	ページと図形を表示する.
+	void MainPage::page_draw(void)
+	{
+#if defined(_DEBUG)
+		if (m_page_dx.m_swapChainPanel.IsLoaded() == false) {
+			return;
+		}
+#endif
+		std::lock_guard<std::mutex> lock(m_dx_mutex);
+
+		auto const& dc = m_page_dx.m_d2dContext;
+		//	デバイスコンテキストの描画状態を保存ブロックに保持する.
+		dc->SaveDrawingState(m_page_dx.m_state_block.get());
+		//	デバイスコンテキストから変換行列を得る.
+		D2D1_MATRIX_3X2_F tran;
+		dc->GetTransform(&tran);
+		//	拡大率を変換行列の拡大縮小の成分に格納する.
+		const auto scale = max(m_page_panel.m_page_scale, 0.0);
+		tran.m11 = tran.m22 = static_cast<FLOAT>(scale);
+		//	スクロールの変分に拡大率を掛けた値を
+		//	変換行列の平行移動の成分に格納する.
+		D2D1_POINT_2F d;
+		pt_add(m_page_min, sb_horz().Value(), sb_vert().Value(), d);
+		pt_scale(d, scale, d);
+		tran.dx = -d.x;
+		tran.dy = -d.y;
+		//	変換行列をデバイスコンテキストに格納する.
+		dc->SetTransform(&tran);
+		//	描画を開始する.
+		dc->BeginDraw();
+		//	ページ色で塗りつぶす.
+		dc->Clear(m_page_panel.m_page_color);
+		if (m_page_panel.m_grid_show == GRID_SHOW::BACK) {
+			//	方眼線の表示が最背面に表示の場合,
+			//	方眼線を表示する.
+			m_page_panel.draw_grid_line(m_page_dx, { 0.0f, 0.0f });
+		}
+		//	部位の色をブラシに格納する.
+		m_page_dx.m_anch_brush->SetColor(m_page_panel.m_anch_color);
+		for (auto s : m_list_shapes) {
+			if (s->is_deleted()) {
+				//	消去フラグが立っている場合,
+				//	継続する.
+				continue;
+			}
+			//	図形を表示する.
+			s->draw(m_page_dx);
+		}
+		if (m_page_panel.m_grid_show == GRID_SHOW::FRONT) {
+			//	方眼線の表示が最前面に表示の場合,
+			//	方眼線を表示する.
+			m_page_panel.draw_grid_line(m_page_dx, { 0.0f, 0.0f });
+		}
+		if (m_press_state == S_TRAN::PRESS_AREA) {
+			//	押された状態が範囲を選択している場合,
+			//	補助線の色をブラシに格納する.
+			m_page_dx.m_aux_brush->SetColor(m_page_panel.m_aux_color);
+			if (m_draw_shape == DRAW_SELECT
+				|| m_draw_shape == DRAW_RECT
+				|| m_draw_shape == DRAW_TEXT
+				|| m_draw_shape == DRAW_SCALE) {
+				//	選択ツール
+				//	または方形
+				//	または文字列の場合,
+				//	方形の補助線を表示する.
+				m_page_panel.draw_auxiliary_rect(m_page_dx, m_press_pos, m_curr_pos);
+			}
+			else if (m_draw_shape == DRAW_BEZI) {
+				//	曲線の場合,
+				//	曲線の補助線を表示する.
+				m_page_panel.draw_auxiliary_bezi(m_page_dx, m_press_pos, m_curr_pos);
+			}
+			else if (m_draw_shape == DRAW_ELLI) {
+				//	だ円の場合,
+				//	だ円の補助線を表示する.
+				m_page_panel.draw_auxiliary_elli(m_page_dx, m_press_pos, m_curr_pos);
+			}
+			else if (m_draw_shape == DRAW_LINE) {
+				//	直線の場合,
+				//	直線の補助線を表示する.
+				m_page_panel.draw_auxiliary_line(m_page_dx, m_press_pos, m_curr_pos);
+			}
+			else if (m_draw_shape == DRAW_RRECT) {
+				//	角丸方形の場合,
+				//	角丸方形の補助線を表示する.
+				m_page_panel.draw_auxiliary_rrect(m_page_dx, m_press_pos, m_curr_pos);
+			}
+			else if (m_draw_shape == DRAW_QUAD) {
+				//	四へん形の場合,
+				//	四へん形の補助線を表示する.
+				m_page_panel.draw_auxiliary_quad(m_page_dx, m_press_pos, m_curr_pos);
+			}
+		}
+		//	描画を終了する.
+		HRESULT hr = dc->EndDraw();
+		//	保存された描画環境を元に戻す.
+		dc->RestoreDrawingState(m_page_dx.m_state_block.get());
+		if (hr == S_OK) {
+			//	結果が S_OK の場合,
+			//	スワップチェーンの内容を画面に表示する.
+			m_page_dx.Present();
+			//	ポインターの位置をスタックバーに格納する.
+			stat_set_curs();
+		}
+#if defined(_DEBUG)
+		else {
+			//	結果が S_OK でない場合,
+			//	メッセージダイアログを表示する.
+			cd_message_show(L"Cannot draw", {});
+		}
+#endif
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -322,8 +435,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			s->set_page_color(col);
 		}
-		if (scp_samp_panel().IsLoaded()) {
-			samp_draw();
+		if (scp_sample_panel().IsLoaded()) {
+			sample_draw();
 		}
 	}
 
@@ -336,7 +449,7 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif // _DEBUG
 		m_page_dx.SetSwapChainPanel(scp_page_panel());
-		draw_page();
+		page_draw();
 	}
 
 	// ページのパネルの寸法が変わった.
@@ -356,7 +469,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_page_dx.SetLogicalSize2({ w, h });
 		//m_page_panel.m_dx.SetLogicalSize2({ w, h });
-		draw_page();
+		page_draw();
 	}
 
 	// ページの大きさを設定する.

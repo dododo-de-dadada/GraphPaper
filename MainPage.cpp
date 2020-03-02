@@ -127,119 +127,6 @@ namespace winrt::GraphPaper::implementation
 		UnloadObject(sender);
 	}
 
-	//	ページと図形を表示する.
-	void MainPage::draw_page(void)
-	{
-#if defined(_DEBUG)
-		if (m_page_dx.m_swapChainPanel.IsLoaded() == false) {
-			return;
-		}
-#endif
-		std::lock_guard<std::mutex> lock(m_dx_mutex);
-
-		auto const& dc = m_page_dx.m_d2dContext;
-		//	デバイスコンテキストの描画状態を保存ブロックに保持する.
-		dc->SaveDrawingState(m_page_dx.m_state_block.get());
-		//	デバイスコンテキストから変換行列を得る.
-		D2D1_MATRIX_3X2_F tran;
-		dc->GetTransform(&tran);
-		//	拡大率を変換行列の拡大縮小の成分に格納する.
-		const auto scale = max(m_page_panel.m_page_scale, 0.0);
-		tran.m11 = tran.m22 = static_cast<FLOAT>(scale);
-		//	スクロールの変分に拡大率を掛けた値を
-		//	変換行列の平行移動の成分に格納する.
-		D2D1_POINT_2F d;
-		pt_add(m_page_min, sb_horz().Value(), sb_vert().Value(), d);
-		pt_scale(d, scale, d);
-		tran.dx = -d.x;
-		tran.dy = -d.y;
-		//	変換行列をデバイスコンテキストに格納する.
-		dc->SetTransform(&tran);
-		//	描画を開始する.
-		dc->BeginDraw();
-		//	ページ色で塗りつぶす.
-		dc->Clear(m_page_panel.m_page_color);
-		if (m_page_panel.m_grid_show == GRID_SHOW::BACK) {
-			//	方眼線の表示が最背面に表示の場合,
-			//	方眼線を表示する.
-			m_page_panel.draw_grid_line(m_page_dx, { 0.0f, 0.0f });
-		}
-		//	部位の色をブラシに格納する.
-		m_page_dx.m_anch_brush->SetColor(m_page_panel.m_anch_color);
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				//	消去フラグが立っている場合,
-				//	継続する.
-				continue;
-			}
-			//	図形を表示する.
-			s->draw(m_page_dx);
-		}
-		if (m_page_panel.m_grid_show == GRID_SHOW::FRONT) {
-			//	方眼線の表示が最前面に表示の場合,
-			//	方眼線を表示する.
-			m_page_panel.draw_grid_line(m_page_dx, { 0.0f, 0.0f });
-		}
-		if (m_press_state == S_TRAN::PRESS_AREA) {
-			//	押された状態が範囲を選択している場合,
-			//	補助線の色をブラシに格納する.
-			m_page_dx.m_aux_brush->SetColor(m_page_panel.m_aux_color);
-			if (m_draw_shape == DRAW_SELECT
-				|| m_draw_shape == DRAW_RECT
-				|| m_draw_shape == DRAW_TEXT
-				|| m_draw_shape == DRAW_SCALE) {
-				//	選択ツール
-				//	または方形
-				//	または文字列の場合,
-				//	方形の補助線を表示する.
-				m_page_panel.draw_auxiliary_rect(m_page_dx, m_press_pos, m_curr_pos);
-			}
-			else if (m_draw_shape == DRAW_BEZI) {
-				//	曲線の場合,
-				//	曲線の補助線を表示する.
-				m_page_panel.draw_auxiliary_bezi(m_page_dx, m_press_pos, m_curr_pos);
-			}
-			else if (m_draw_shape == DRAW_ELLI) {
-				//	だ円の場合,
-				//	だ円の補助線を表示する.
-				m_page_panel.draw_auxiliary_elli(m_page_dx, m_press_pos, m_curr_pos);
-			}
-			else if (m_draw_shape == DRAW_LINE) {
-				//	直線の場合,
-				//	直線の補助線を表示する.
-				m_page_panel.draw_auxiliary_line(m_page_dx, m_press_pos, m_curr_pos);
-			}
-			else if (m_draw_shape == DRAW_RRECT) {
-				//	角丸方形の場合,
-				//	角丸方形の補助線を表示する.
-				m_page_panel.draw_auxiliary_rrect(m_page_dx, m_press_pos, m_curr_pos);
-			}
-			else if (m_draw_shape == DRAW_QUAD) {
-				//	四へん形の場合,
-				//	四へん形の補助線を表示する.
-				m_page_panel.draw_auxiliary_quad(m_page_dx, m_press_pos, m_curr_pos);
-			}
-		}
-		//	描画を終了する.
-		HRESULT hr = dc->EndDraw();
-		//	保存された描画環境を元に戻す.
-		dc->RestoreDrawingState(m_page_dx.m_state_block.get());
-		if (hr == S_OK) {
-			//	結果が S_OK の場合,
-			//	スワップチェーンの内容を画面に表示する.
-			m_page_dx.Present();
-			//	ポインターの位置をスタックバーに格納する.
-			stat_set_curs();
-		}
-#if defined(_DEBUG)
-		else {
-			//	結果が S_OK でない場合,
-			//	メッセージダイアログを表示する.
-			cd_message_show(L"Cannot draw", {});
-		}
-#endif
-	}
-
 	// 編集メニュー項目の使用の可否を設定する.
 	void MainPage::enable_edit_menu(void)
 	{
@@ -309,8 +196,8 @@ namespace winrt::GraphPaper::implementation
 		mfi_select_all().IsEnabled(sel < cnt);
 		mfi_group().IsEnabled(sel > 1);
 		mfi_ungroup().IsEnabled(grp > 0);
-		mfi_edit_text().IsEnabled(t_sel > 0);
-		mfi_find_text().IsEnabled(t_cnt > 0);
+		mfi_text_edit().IsEnabled(t_sel > 0);
+		mfi_text_find().IsEnabled(t_cnt > 0);
 		// 前面に配置可能か調べる.
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 

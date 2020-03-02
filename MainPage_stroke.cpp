@@ -22,7 +22,7 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		double val0 = m_page_panel.m_stroke_color.r * COLOR_MAX;
 		double val1 = m_page_panel.m_stroke_color.g * COLOR_MAX;
 		double val2 = m_page_panel.m_stroke_color.b * COLOR_MAX;
@@ -39,71 +39,71 @@ namespace winrt::GraphPaper::implementation
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
 		slider3().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				stroke_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				stroke_create_sample();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<UNDO_OP::STROKE_COLOR, 1>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_COLOR, 1>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<UNDO_OP::STROKE_COLOR, 2>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_COLOR, 2>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider3_token = slider3().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<UNDO_OP::STROKE_COLOR, 3>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_COLOR, 3>(m_sample_shape, args.NewValue());
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				//m_page_panel.m_col_style = m_samp_panel.m_col_style;
-				D2D1_COLOR_F samp_val;
-				m_samp_shape->get_stroke_color(samp_val);
-				undo_push_value<UNDO_OP::STROKE_COLOR>(samp_val);
+				//m_page_panel.m_col_style = m_sample_panel.m_col_style;
+				D2D1_COLOR_F sample_val;
+				m_sample_shape->get_stroke_color(sample_val);
+				undo_push_value<UNDO_OP::STROKE_COLOR>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
+				m_sample_shape = nullptr;
 				slider0().Visibility(COLLAPSED);
 				slider1().Visibility(COLLAPSED);
 				slider2().Visibility(COLLAPSED);
 				slider3().Visibility(COLLAPSED);
-				scp_samp_panel().Loaded(loaded_token);
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().ValueChanged(slider0_token);
 				slider1().ValueChanged(slider1_token);
 				slider2().ValueChanged(slider2_token);
 				slider3().ValueChanged(slider3_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(TITLE_STROKE);
+		show_cd_sample(TITLE_STROKE);
 	}
 
 	// 線枠メニューの「破線の配置」が選択された.
@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		double val0 = m_page_panel.m_stroke_pattern.m_[0];
 		double val1 = m_page_panel.m_stroke_pattern.m_[1];
 		double val2 = m_page_panel.m_stroke_pattern.m_[2];
@@ -134,70 +134,70 @@ namespace winrt::GraphPaper::implementation
 		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 1>(val1);
 		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 2>(val2);
 		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 3>(val3);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				stroke_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				stroke_create_sample();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 1>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 1>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 2>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 2>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider3_token = slider3().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 3>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 3>(m_sample_shape, args.NewValue());
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				STROKE_PATTERN samp_val;
-				m_samp_shape->get_stroke_pattern(samp_val);
-				undo_push_value<UNDO_OP::STROKE_PATTERN>(samp_val);
+				STROKE_PATTERN sample_val;
+				m_sample_shape->get_stroke_pattern(sample_val);
+				undo_push_value<UNDO_OP::STROKE_PATTERN>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
+				m_sample_shape = nullptr;
 				slider0().Visibility(COLLAPSED);
 				slider1().Visibility(COLLAPSED);
 				slider2().Visibility(COLLAPSED);
 				slider3().Visibility(COLLAPSED);
-				scp_samp_panel().Loaded(loaded_token);
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().ValueChanged(slider0_token);
 				slider1().ValueChanged(slider1_token);
 				slider2().ValueChanged(slider2_token);
 				slider3().ValueChanged(slider3_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(TITLE_STROKE);
+		show_cd_sample(TITLE_STROKE);
 	}
 
 	// 線枠メニューの「太さ」が選択された.
@@ -208,52 +208,52 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		double val0 = m_page_panel.m_stroke_width;
 		slider0().Value(val0);
 		slider0().Visibility(VISIBLE);
 		stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0>(val0);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				stroke_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				stroke_create_sample();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0>(m_samp_shape, args.NewValue());
+				stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0>(m_sample_shape, args.NewValue());
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				double samp_val;
-				m_samp_shape->get_stroke_width(samp_val);
-				undo_push_value<UNDO_OP::STROKE_WIDTH>(samp_val);
+				double sample_val;
+				m_sample_shape->get_stroke_width(sample_val);
+				undo_push_value<UNDO_OP::STROKE_WIDTH>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
-				scp_samp_panel().Loaded(loaded_token);
+				m_sample_shape = nullptr;
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().Visibility(COLLAPSED);
 				slider0().ValueChanged(slider0_token);
-				//cd_samp().Opened(opened_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				//cd_sample().Opened(opened_token);
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(TITLE_STROKE);
+		show_cd_sample(TITLE_STROKE);
 	}
 
 	// 線枠メニューの「破線」が選択された.
@@ -307,11 +307,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠の見本を作成する.
-	void MainPage::stroke_create_samp(void)
+	void MainPage::stroke_create_sample(void)
 	{
-		const auto dpi = m_samp_dx.m_logical_dpi;
-		const auto w = scp_samp_panel().ActualWidth();
-		const auto h = scp_samp_panel().ActualHeight();
+		const auto dpi = m_sample_dx.m_logical_dpi;
+		const auto w = scp_sample_panel().ActualWidth();
+		const auto h = scp_sample_panel().ActualHeight();
 		const auto padding = w * 0.125;
 		const D2D1_POINT_2F pos = {
 			static_cast<FLOAT>(padding),
@@ -321,7 +321,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(w - 2.0 * padding),
 			static_cast<FLOAT>(h - 2.0 * padding)
 		};
-		m_samp_shape = new ShapeLine(pos, vec, &m_samp_panel);
+		m_sample_shape = new ShapeLine(pos, vec, &m_sample_panel);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -352,43 +352,14 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 3) {
 				hdr = r_loader.GetString(L"str_dot_gap");
 			}
-			val *= m_samp_panel.m_stroke_width;
+			val *= m_sample_panel.m_stroke_width;
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH || U == UNDO_OP::STROKE_PATTERN) {
 			wchar_t buf[16];
-			const auto dpi = m_samp_dx.m_logical_dpi;
+			const auto dpi = m_sample_dx.m_logical_dpi;
 			const auto g_len = m_page_panel.m_grid_len + 1.0;
 			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
 			hdr = hdr + L": " + buf;
-			/*
-			if (m_page_unit == LEN_UNIT::PIXEL) {
-				swprintf_s(buf, FMT_PIXEL_UNIT, val);
-				hdr = hdr + L": " + buf;
-			}
-			else if (m_page_unit == LEN_UNIT::GRID) {
-				wchar_t buf[16];
-				swprintf_s(buf, FMT_GRID_UNIT, val / (m_page_panel.m_grid_len + 1.0));
-				hdr = hdr + L": " + buf;
-			}
-			else {
-				wchar_t buf[16];
-				const double inch = val / m_samp_dx.m_logical_dpi;
-				switch (m_page_unit) {
-				case LEN_UNIT::INCH:
-					swprintf_s(buf, FMT_INCH_UNIT, inch);
-					hdr = hdr + L": " + buf;
-					break;
-				case LEN_UNIT::MILLI:
-					swprintf_s(buf, FMT_MILLI_UNIT, inch * MM_PER_INCH);
-					hdr = hdr + L": " + buf;
-					break;
-				case LEN_UNIT::POINT:
-					swprintf_s(buf, FMT_POINT_UNIT, inch * PT_PER_INCH);
-					hdr = hdr + L": " + buf;
-					break;
-				}
-			}
-			*/
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			if constexpr (S == 0) {
@@ -472,8 +443,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			s->set_stroke_color(col);
 		}
-		if (scp_samp_panel().IsLoaded()) {
-			samp_draw();
+		if (scp_sample_panel().IsLoaded()) {
+			sample_draw();
 		}
 	}
 

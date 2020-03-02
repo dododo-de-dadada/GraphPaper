@@ -32,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		enable_undo_menu();
 		enable_edit_menu();
-		draw_page();
+		page_draw();
 		if (m_summary_visible) {
 			summary_append(g);
 		}
@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		enable_undo_menu();
 		enable_edit_menu();
-		draw_page();
+		page_draw();
 	}
 
 }

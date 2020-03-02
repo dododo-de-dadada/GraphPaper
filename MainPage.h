@@ -10,7 +10,6 @@
 //	MainPage_arrange.cpp	図形リストの要素の並び替え
 //	MainPage_arrow.cpp	矢じりの形式と寸法を設定
 //	MainPage_disp.cpp	表示デバイスのハンドラー
-//	MainPage_edit.cpp	文字列の編集
 //	MainPage_file.cpp	ファイルの読み書き, アプリの終了
 //	MainPage_fill.cpp	塗りつぶしの設定
 //	MainPage_find.cpp	文字列の検索/置換
@@ -19,16 +18,16 @@
 //	MainPage_group.cpp	グループ化とグループの解除
 //	MainPage_kybd.cpp	キーボードアクセラレーターのハンドラー
 //	MainPage_mru.cpp	最近使ったファイル
-//	MainPage_page.cpp	ページの設定
+//	MainPage_page.cpp	ページの設定と表示
 //	MainPage_pointer.cpp	ポインターイベントのハンドラー
-//	MainPage_samp.cpp	見本ダイアログの設定, 表示
+//	MainPage_sample.cpp	見本ダイアログの設定, 表示
 //	MainPage_scroll.cpp	スクロールバーの設定
 //	MainPage_select.cpp	図形の選択
 //	MainPage_status.cpp	ステータスバーの設定
 //	MainPage_stroke.cpp	線枠の設定
 //	MainPage_summary.cpp	図形一覧パネルの表示, 設定
-//	MainPage_text.cpp	文字列の編集, または検索 / 置換
-//	MainPage_thread.cpp	ウィンドウ表示のハンドラー
+//	MainPage_text.cpp	文字列の編集と検索/置換
+//	MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
 //	MainPage_tool.cpp	図形ツールの設定
 //	MainPage_undo.cpp	元に戻すとやり直す
 //	MainPage_xcvd.cpp	切り取りとコピー, 貼り付け, 削除
@@ -209,16 +208,16 @@ namespace winrt::GraphPaper::implementation
 
 		STAT_BAR m_stat_bar = stat_or(STAT_BAR::CURS, STAT_BAR::ZOOM);	// ステータスバーの状態
 
-		SHAPE_DX m_samp_dx;		// 見本の描画環境
-		ShapePanel m_samp_panel;		// 見本のパネル
-		Shape* m_samp_shape = nullptr;	// 見本の図形
+		SHAPE_DX m_sample_dx;		// 見本の描画環境
+		ShapePanel m_sample_panel;		// 見本のパネル
+		Shape* m_sample_shape = nullptr;	// 見本の図形
 
 		bool m_summary_visible = false;	// 図形一覧パネルの表示フラグ
 		bool m_window_visible = false;		// ウィンドウが表示されている/表示されてない
 
 		//-------------------------------
 		//	MainPage.cpp
-		//	メインページの作成, 表示
+		//	メインページの作成
 		//-------------------------------
 
 		//	メインページを破棄する.
@@ -227,8 +226,6 @@ namespace winrt::GraphPaper::implementation
 		void cd_message_show(winrt::hstring const& res, winrt::hstring const& desc);
 		//	メッセージダイアログが閉じた.
 		void cd_message_closed(ContentDialog const& sender, ContentDialogClosedEventArgs const& args);
-		//	ページと図形を表示する.
-		void draw_page(void);
 		//	編集メニュー項目の使用の可否を設定する.
 		void enable_edit_menu(void);
 		//	メインページを作成する.
@@ -366,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//	塗りつぶしの見本を作成する.
-		void fill_create_samp(void);
+		void fill_create_sample(void);
 		//	塗りつぶしメニューの「色」が選択された.
 		void mfi_fill_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	値をスライダーのヘッダーと図形に格納する.
@@ -380,7 +377,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//　書体の見本を作成する.
-		void font_create_samp(void);
+		void font_create_sample(void);
 		//　書体メニューの「字体」に印をつける.
 		void font_style_check_menu(const DWRITE_FONT_STYLE f_style);
 		//　リストビュー「書体名」がロードされた.
@@ -568,7 +565,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		//　MainPage_page.cpp
-		//　ページの設定
+		//　ページの設定と表示
 		//-------------------------------
 
 		//　ページの寸法入力ダイアログの「適用」ボタンが押された.
@@ -583,6 +580,8 @@ namespace winrt::GraphPaper::implementation
 		void mfi_page_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	ページメニューの「単位と書式」が選択された
 		void mfi_page_unit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	ページと図形を表示する.
+		void page_draw(void);
 		//	値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void page_set_slider(double val);
 		//	値をスライダーのヘッダーと図形に格納する.
@@ -637,20 +636,20 @@ namespace winrt::GraphPaper::implementation
 		void show_context_menu(void);
 
 		//-------------------------------
-		//	MainPage_samp.cpp
+		//	MainPage_sample.cpp
 		//	見本ダイアログの設定, 表示
 		//-------------------------------
 
 		//	見本ダイアログが開かれた.
-		void cd_samp_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
+		void cd_sample_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
 		//	見本のページと見本の図形を表示する
-		void samp_draw(void);
+		void sample_draw(void);
 		//	見本ダイアログをロードする.
-		void load_cd_samp(void) { auto _{ FindName(L"cd_samp") }; }
+		void load_cd_sample(void) { auto _{ FindName(L"cd_sample") }; }
 		//	見本のパネルがロードされた.
-		void samp_panel_loaded(void);
+		void sample_panel_loaded(void);
 		//	見本ダイアログを表示する.
-		void show_cd_samp(const wchar_t* r_key);
+		void show_cd_sample(const wchar_t* r_key);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -720,7 +719,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		//	線枠の見本を作成する.
-		void stroke_create_samp(void);
+		void stroke_create_sample(void);
 		//	線枠メニューの「種類」に印をつける.
 		void stroke_style_check_menu(const D2D1_DASH_STYLE d_style);
 		//	線枠メニューの「色」が選択された.
@@ -794,39 +793,39 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		//	MainPage_text.cpp
-		//	文字列の編集, または検索 / 置換
+		//	文字列の編集と検索/置換
 		//-------------------------------
 
 		//	文字列検索パネルの「閉じる」ボタンが押された.
-		void btn_find_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void btn_text_find_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　文字列検索パネルの「次を検索」ボタンが押された.
-		void btn_find_next_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void btn_text_find_next_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　文字列検索パネルの「すべて置換」ボタンが押された.
-		void btn_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void btn_text_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　文字列検索パネルの「置換して次に」ボタンが押された.
-		void btn_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void btn_text_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　検索の値をデータリーダーから読み込む.
-		void find_read(DataReader const& dt_reader);
+		void text_find_read(DataReader const& dt_reader);
 		//	文字列検索パネルから値を格納する.
-		void find_set_to_panel(void);
-		//　図形の文字列を検索する.
-		bool find_text_whithin_shapes(void);
+		void text_find_set_to(void);
+		//　	図形リストの中から文字列を検索する.
+		bool text_find_whithin_shapes(void);
 		//　検索の値をデータリーダーに書き込む.
-		void find_write(DataWriter const& dt_writer);
+		void text_find_write(DataWriter const& dt_writer);
 		//　編集メニューの「文字列の検索/置換」が選択された.
-		void mfi_find_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_text_find_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　検索文字列が変更された.
-		void tx_find_what_text_changed(IInspectable const& /*sender*/, TextChangedEventArgs const& /*args*/);
+		void tx_text_find_what_changed(IInspectable const& /*sender*/, TextChangedEventArgs const& /*args*/);
 		//	文字範囲が選択された図形と文字範囲を見つける.
-		S_LIST_T::iterator find_text_range_selected(DWRITE_TEXT_RANGE& t_range);
+		S_LIST_T::iterator text_find_range_selected(DWRITE_TEXT_RANGE& t_range);
 		//	図形が持つ文字列を編集する.
-		void edit_text_of_shape(ShapeText* s);
+		void text_edit_in(ShapeText* s);
 		//	編集メニューの「文字列の編集」が選択された.
-		void mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_text_edit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 
 		//-------------------------------
 		//	MainPage_thread.cpp
-		//	ウィンドウ表示のハンドラー
+		//	ウィンドウ切り替えのハンドラー
 		//-------------------------------
 
 		//	ウィンドウが前面に出された.

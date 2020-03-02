@@ -127,16 +127,16 @@ namespace winrt::GraphPaper::implementation
 	/*
 	void MainPage::ka_edit_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		if (mfi_edit_text().IsEnabled()) {
-			mfi_edit_text_click(nullptr, nullptr);
+		if (mfi_text_edit().IsEnabled()) {
+			mfi_text_edit_click(nullptr, nullptr);
 		}
 	}
 	*/
 	// Cntrol + F ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_find_text_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	//{
-	//	if (mfi_find_text().IsEnabled()) {
-	//		mfi_find_text_click(nullptr, nullptr);
+	//	if (mfi_text_find().IsEnabled()) {
+	//		mfi_text_find_click(nullptr, nullptr);
 	//	}
 	//}
 

@@ -117,15 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="btn_find_next.Content" xml:space="preserve">
+  <data name="btn_text_find_next.Content" xml:space="preserve">
     <value>Find Next</value>
     <comment>Button</comment>
   </data>
-  <data name="btn_replace.Content" xml:space="preserve">
+  <data name="btn_text_replace.Content" xml:space="preserve">
     <value>Replace</value>
     <comment>Button</comment>
   </data>
-  <data name="btn_replace_all.Content" xml:space="preserve">
+  <data name="btn_text_replace_all.Content" xml:space="preserve">
     <value>Replace All</value>
     <comment>Buttom</comment>
   </data>
@@ -169,11 +169,11 @@
     <value>Ignore bottom blank line.</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="ck_match_case.Content" xml:space="preserve">
+  <data name="ck_text_match_case.Content" xml:space="preserve">
     <value>Match case</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="ck_wrap_around.Content" xml:space="preserve">
+  <data name="ck_text_wrap_around.Content" xml:space="preserve">
     <value>Wrap around</value>
     <comment>CheckBox</comment>
   </data>
@@ -361,7 +361,7 @@
     <value>Delete</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_edit_text.Text" xml:space="preserve">
+  <data name="mfi_text_edit.Text" xml:space="preserve">
     <value>Edit Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -373,7 +373,7 @@
     <value>Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_find_text.Text" xml:space="preserve">
+  <data name="mfi_text_find.Text" xml:space="preserve">
     <value>Find/Replace Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -886,7 +886,7 @@
     <value>Zoom</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tx_find_what.Header" xml:space="preserve">
+  <data name="tx_text_find_what.Header" xml:space="preserve">
     <value>Find what</value>
     <comment>TextBox</comment>
   </data>
@@ -898,7 +898,7 @@
     <value>Width</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_repl_with.Header" xml:space="preserve">
+  <data name="tx_text_replace_with.Header" xml:space="preserve">
     <value>Replace width</value>
     <comment>TextBox</comment>
   </data>

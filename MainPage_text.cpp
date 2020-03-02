@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	//	文字列を検索して見つかった位置を得る.
 	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool match_case, uint32_t& pos) noexcept;
 	//	図形リストの中から文字列を検索し, 見つかった図形と位置を得る.
-	static bool find_text_whithin_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool match_case, ShapeText*& s, uint32_t& pos) noexcept;
+	static bool text_find_whithin_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool match_case, ShapeText*& s, uint32_t& pos) noexcept;
 	//	文字列の一部を置換する.
 	static wchar_t* replace_text(wchar_t const* w_text, const uint32_t w_pos, const uint32_t w_len, wchar_t const* r_text, const uint32_t r_len) noexcept;
 
@@ -66,7 +66,7 @@ namespace winrt::GraphPaper::implementation
 	// t	見つかった文字列図形
 	// pos	見つかった位置
 	// 戻り値	見つかったら true
-	static bool find_text_whithin_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool match_case, ShapeText*& t, uint32_t& pos) noexcept
+	static bool text_find_whithin_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool match_case, ShapeText*& t, uint32_t& pos) noexcept
 	{
 		for (auto it = it_beg; it != it_end; it++) {
 			auto s = *it;
@@ -139,30 +139,30 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列検索パネルの「閉じる」ボタンが押された.
-	void MainPage::btn_find_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::btn_text_find_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		//	文字列検索パネルから値を格納する.
-		find_set_to_panel();
-		sp_find_text().Visibility(COLLAPSED);
+		text_find_set_to();
+		sp_text_find().Visibility(COLLAPSED);
 	}
 
 	// 文字列検索パネルの「次を検索」ボタンが押された.
-	void MainPage::btn_find_next_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::btn_text_find_next_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		if (find_text_whithin_shapes()) {
-			draw_page();
+		if (text_find_whithin_shapes()) {
+			page_draw();
 			return;
 		}
 		// 検索できなければ,
 		// 「見つかりません」メッセージダイアログを表示する.
-		cd_message_show(NO_FOUND, tx_find_what().Text());
+		cd_message_show(NO_FOUND, tx_text_find_what().Text());
 	}
 
 	// 文字列検索パネルの「すべて置換」ボタンが押された.
-	void MainPage::btn_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::btn_text_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		//	文字列検索パネルから値を格納する.
-		find_set_to_panel();
+		text_find_set_to();
 
 		//	検索文字列の文字数を得る.
 		const auto f_len = wchar_len(m_find_text);
@@ -191,7 +191,7 @@ namespace winrt::GraphPaper::implementation
 		if (flag == false) {
 			//	図形がなければ,
 			// 「見つかりません」メッセージダイアログを表示する.
-			cd_message_show(NO_FOUND, tx_find_what().Text());
+			cd_message_show(NO_FOUND, tx_text_find_what().Text());
 			return;
 		}
 		// 文字範囲の選択を解除する.
@@ -226,33 +226,33 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		enable_undo_menu();
-		draw_page();
+		page_draw();
 	}
 
 	//	文字列検索パネルから値を格納する.
-	void MainPage::find_set_to_panel(void)
+	void MainPage::text_find_set_to(void)
 	{
 		//	検索文字列を格納する.
 		if (m_find_text != nullptr) {
 			delete[] m_find_text;
 		}
-		m_find_text = wchar_cpy(tx_find_what().Text().c_str());
+		m_find_text = wchar_cpy(tx_text_find_what().Text().c_str());
 		//	置換文字列を格納する.
 		if (m_find_repl != nullptr) {
 			delete[] m_find_repl;
 		}
-		m_find_repl = wchar_cpy(tx_repl_with().Text().c_str());
+		m_find_repl = wchar_cpy(tx_text_replace_with().Text().c_str());
 		//	英文字の区別フラグを格納する.
-		m_find_case = ck_match_case().IsChecked().GetBoolean();
+		m_find_case = ck_text_match_case().IsChecked().GetBoolean();
 		//	回り込み検索フラグを格納する.
-		m_find_wrap = ck_wrap_around().IsChecked().GetBoolean();
+		m_find_wrap = ck_text_wrap_around().IsChecked().GetBoolean();
 	}
 
 	//	文字列検索パネルの「置換」ボタンが押された.
-	void MainPage::btn_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::btn_text_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		//	文字列検索パネルから値を格納する.
-		find_set_to_panel();
+		text_find_set_to();
 		//	検索文字列の文字数を得る.
 		const auto f_len = wchar_len(m_find_text);
 		if (f_len == 0) {
@@ -263,7 +263,7 @@ namespace winrt::GraphPaper::implementation
 
 		//	文字範囲が選択された図形を見つける.
 		DWRITE_TEXT_RANGE t_range;
-		auto it = find_text_range_selected(t_range);
+		auto it = text_find_range_selected(t_range);
 
 		bool flag = false;	// 一致または置換フラグ.
 		if (it != m_list_shapes.end()) {
@@ -291,21 +291,21 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//	次の図形の文字列を検索する.
-		if (find_text_whithin_shapes() || flag) {
+		if (text_find_whithin_shapes() || flag) {
 			//	見つかった, または置換された場合
 			//	再表示する.
-			draw_page();
+			page_draw();
 			return;
 		}
 		//	検索できない, かつ置換もされてない場合,
 		// 「見つかりません」メッセージダイアログを表示する.
-		cd_message_show(NO_FOUND, tx_find_what().Text());
+		cd_message_show(NO_FOUND, tx_text_find_what().Text());
 	}
 
 	//	文字範囲が選択された図形と文字範囲を見つける.
 	//	t_range	見つかった文字範囲
 	//	戻り値	見つかった図形の反復子
-	S_LIST_T::iterator MainPage::find_text_range_selected(DWRITE_TEXT_RANGE& t_range)
+	S_LIST_T::iterator MainPage::text_find_range_selected(DWRITE_TEXT_RANGE& t_range)
 	{
 		auto const& it_end = m_list_shapes.end();
 		for (auto it = m_list_shapes.begin(); it != it_end; it++) {
@@ -324,7 +324,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	検索の値をデータリーダーから読み込む.
-	void MainPage::find_read(DataReader const& dt_reader)
+	void MainPage::text_find_read(DataReader const& dt_reader)
 	{
 		read(m_find_text, dt_reader);
 		read(m_find_repl, dt_reader);
@@ -332,14 +332,14 @@ namespace winrt::GraphPaper::implementation
 		m_find_wrap = dt_reader.ReadBoolean();
 	}
 
-	//	図形の文字列を検索する.
-	bool MainPage::find_text_whithin_shapes(void)
+	//	図形リストの中から文字列を検索する.
+	bool MainPage::text_find_whithin_shapes(void)
 	{
 		using winrt::GraphPaper::implementation::find_text;
-		using winrt::GraphPaper::implementation::find_text_whithin_shapes;
+		using winrt::GraphPaper::implementation::text_find_whithin_shapes;
 
 		//	文字列検索パネルから値を格納する.
-		find_set_to_panel();
+		text_find_set_to();
 		//	検索文字列の文字数を得る.
 		const auto f_len = wchar_len(m_find_text);
 		if (f_len == 0) {
@@ -347,7 +347,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		//	文字範囲が選択された図形と文字範囲を見つける.
 		DWRITE_TEXT_RANGE t_range;
-		auto it = find_text_range_selected(t_range);
+		auto it = text_find_range_selected(t_range);
 
 		auto t = static_cast<ShapeText*>(nullptr);
 		auto const& it_end = m_list_shapes.end();
@@ -356,7 +356,7 @@ namespace winrt::GraphPaper::implementation
 			//	選択された図形が見つからない場合,
 			//	リストの最初の図形から最後まで検索する.
 			auto const& it_begin = m_list_shapes.begin();
-			if (find_text_whithin_shapes(it_begin, it_end, m_find_text, f_len, m_find_case, t, f_pos) == false) {
+			if (text_find_whithin_shapes(it_begin, it_end, m_find_text, f_len, m_find_case, t, f_pos) == false) {
 				//	見つからない場合 false を返す.
 				return false;
 			}
@@ -373,7 +373,7 @@ namespace winrt::GraphPaper::implementation
 				//	新たに見つからない場合,
 				//	範囲選択された図形の次から最後まで検索する.
 				auto const& it_next = std::next(it, 1);
-				if (find_text_whithin_shapes(it_next, it_end, m_find_text, f_len, m_find_case, t, f_pos) == false) {
+				if (text_find_whithin_shapes(it_next, it_end, m_find_text, f_len, m_find_case, t, f_pos) == false) {
 					if (m_find_wrap == false) {
 						//	新たに見つからない, かつ回り込み検索でない場合,
 						//	false を返す.
@@ -382,7 +382,7 @@ namespace winrt::GraphPaper::implementation
 					//	新たに見つからない, かつ回り込み検索の場合,
 					//	リストの最初から範囲選択された図形の直前まで検索する.
 					auto const& it_begin = m_list_shapes.begin();
-					if (find_text_whithin_shapes(it_begin, it, m_find_text, f_len, m_find_case, t, f_pos) == false) {
+					if (text_find_whithin_shapes(it_begin, it, m_find_text, f_len, m_find_case, t, f_pos) == false) {
 						//	新たに見つからない場合,
 						//	文字範囲より前にある文字列を検索する.
 						if (find_text(t_text, t_pos, m_find_text, f_len, m_find_case, f_pos) == false) {
@@ -417,14 +417,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	編集メニューの「文字列の検索/置換」が選択された.
-	void MainPage::mfi_find_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_text_find_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		if (sp_find_text().Visibility() == VISIBLE) {
+		if (sp_text_find().Visibility() == VISIBLE) {
 			//	文字列検索パネルが表示されている場合,
 			//	文字列検索パネルを非表示にする.
-			sp_find_text().Visibility(COLLAPSED);
+			sp_text_find().Visibility(COLLAPSED);
 			//	文字列検索パネルから値を格納する.
-			find_set_to_panel();
+			text_find_set_to();
 			return;
 		}
 		if (m_summary_visible) {
@@ -432,15 +432,15 @@ namespace winrt::GraphPaper::implementation
 			//	図形一覧パネルを非表示にする.
 			summary_close();
 		}
-		tx_find_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
-		tx_repl_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });
-		ck_match_case().IsChecked(m_find_case);
-		ck_wrap_around().IsChecked(m_find_wrap);
-		sp_find_text().Visibility(VISIBLE);
+		tx_text_find_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
+		tx_text_replace_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });
+		ck_text_match_case().IsChecked(m_find_case);
+		ck_text_wrap_around().IsChecked(m_find_wrap);
+		sp_text_find().Visibility(VISIBLE);
 	}
 
 	// 検索の値をデータリーダーに書き込む.
-	void MainPage::find_write(DataWriter const& dt_writer)
+	void MainPage::text_find_write(DataWriter const& dt_writer)
 	{
 		write(m_find_text, dt_writer);
 		write(m_find_repl, dt_writer);
@@ -449,17 +449,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 検索文字列が変更された.
-	void MainPage::tx_find_what_text_changed(IInspectable const& /*sender*/, TextChangedEventArgs const& /*args*/)
+	void MainPage::tx_text_find_what_changed(IInspectable const& /*sender*/, TextChangedEventArgs const& /*args*/)
 	{
-		const auto not_empty = (tx_find_what().Text().empty() == false);
-		btn_find_next().IsEnabled(not_empty);
-		btn_replace().IsEnabled(not_empty);
-		btn_replace_all().IsEnabled(not_empty);
+		const auto not_empty = (tx_text_find_what().Text().empty() == false);
+		btn_text_find_next().IsEnabled(not_empty);
+		btn_text_replace().IsEnabled(not_empty);
+		btn_text_replace_all().IsEnabled(not_empty);
 	}
 
 	// 図形が持つ文字列を編集する.
 	// s	文字列図形
-	void MainPage::edit_text_of_shape(ShapeText* s)
+	void MainPage::text_edit_in(ShapeText* s)
 	{
 		static winrt::event_token primary_token;
 		static winrt::event_token closed_token;
@@ -484,14 +484,14 @@ namespace winrt::GraphPaper::implementation
 			{
 				cd_edit_text().PrimaryButtonClick(primary_token);
 				cd_edit_text().Closed(closed_token);
-				draw_page();
+				page_draw();
 			}
 		);
 		auto _{ cd_edit_text().ShowAsync() };
 	}
 
 	// 編集メニューの「文字列の編集」が選択された.
-	void MainPage::mfi_edit_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_text_edit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		ShapeText* s = nullptr;
 
@@ -517,7 +517,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (s != nullptr) {
-			edit_text_of_shape(s);
+			text_edit_in(s);
 		}
 
 	}

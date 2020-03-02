@@ -205,7 +205,7 @@ namespace winrt::GraphPaper::implementation
 		enable_edit_menu();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
-		draw_page();
+		page_draw();
 		if (m_summary_visible) {
 			summary_update();
 		}
@@ -244,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 		enable_edit_menu();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
-		draw_page();
+		page_draw();
 		if (m_summary_visible) {
 			summary_update();
 		}
@@ -500,7 +500,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		enable_undo_menu();
 		enable_edit_menu();
-		draw_page();
+		page_draw();
 	}
 
 	template void MainPage::undo_push_value<UNDO_OP::ARROW_SIZE>(ARROW_SIZE const& val);

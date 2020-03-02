@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_grid_length");
 			val += 1.0;
-			const auto dpi = m_samp_dx.m_logical_dpi;
+			const auto dpi = m_sample_dx.m_logical_dpi;
 			const auto g_len = m_page_panel.m_grid_len + 1.0;
 			wchar_t buf[16];
 			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				wchar_t buf[16];
-				const double inch = val / m_samp_dx.m_logical_dpi;
+				const double inch = val / m_sample_dx.m_logical_dpi;
 				switch (m_page_unit) {
 				case LEN_UNIT::INCH:
 					swprintf_s(buf, FMT_INCH_UNIT, inch);
@@ -100,8 +100,8 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			s->set_grid_opac(val / COLOR_MAX);
 		}
-		if (scp_samp_panel().IsLoaded()) {
-			samp_draw();
+		if (scp_sample_panel().IsLoaded()) {
+			sample_draw();
 		}
 	}
 
@@ -126,54 +126,54 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		const double val0 = m_page_panel.m_grid_len;
 		slider0().Value(val0);
 		grid_set_slider<UNDO_OP::GRID_LEN, 0>(val0);
 		slider0().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				samp_draw();
+				sample_panel_loaded();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				grid_set_slider<UNDO_OP::GRID_LEN, 0>(&m_samp_panel, args.NewValue());
+				grid_set_slider<UNDO_OP::GRID_LEN, 0>(&m_sample_panel, args.NewValue());
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				double samp_val;
+				double sample_val;
 				double page_val;
 
 				m_page_panel.get_grid_len(page_val);
-				m_samp_panel.get_grid_len(samp_val);
-				if (equal(page_val, samp_val)) {
+				m_sample_panel.get_grid_len(sample_val);
+				if (equal(page_val, sample_val)) {
 					return;
 				}
-				undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, samp_val);
+				undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, sample_val);
 				undo_push_null();
 				enable_undo_menu();
-				draw_page();
+				page_draw();
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				scp_samp_panel().Loaded(loaded_token);
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().Visibility(COLLAPSED);
 				slider0().ValueChanged(slider0_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(TITLE_GRID);
+		show_cd_sample(TITLE_GRID);
 	}
 
 	// ページメニューの「方眼の大きさ」>「狭める」が選択された.
@@ -186,7 +186,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, val);
 		undo_push_null();
 		enable_undo_menu();
-		draw_page();
+		page_draw();
 	}
 
 	// ページメニューの「方眼の大きさ」>「広げる」が選択された.
@@ -201,7 +201,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, val);
 		undo_push_null();
 		enable_undo_menu();
-		draw_page();
+		page_draw();
 	}
 
 	// ページメニューの「方眼線の濃さ」が選択された.
@@ -212,56 +212,56 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
-		const double val3 = m_samp_panel.m_grid_opac * COLOR_MAX;
+		load_cd_sample();
+		const double val3 = m_sample_panel.m_grid_opac * COLOR_MAX;
 		slider3().Value(val3);
 		grid_set_slider<UNDO_OP::GRID_OPAC, 3>(val3);
 		slider3().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				samp_draw();
+				sample_panel_loaded();
+				sample_draw();
 			}
 		);
 		slider3_token = slider3().ValueChanged(
 			[this](auto, auto args)
 			{
-				grid_set_slider<UNDO_OP::GRID_OPAC, 3>(&m_samp_panel, args.NewValue());
+				grid_set_slider<UNDO_OP::GRID_OPAC, 3>(&m_sample_panel, args.NewValue());
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				//m_page_panel.m_col_style = m_samp_panel.m_col_style;
-				double samp_val;
-				m_samp_panel.get_grid_opac(samp_val);
+				//m_page_panel.m_col_style = m_sample_panel.m_col_style;
+				double sample_val;
+				m_sample_panel.get_grid_opac(sample_val);
 				double page_val;
 				m_page_panel.get_grid_opac(page_val);
-				if (equal(page_val, samp_val)) {
+				if (equal(page_val, sample_val)) {
 					return;
 				}
-				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_panel, samp_val);
+				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_panel, sample_val);
 				undo_push_null();
 				enable_undo_menu();
-				draw_page();
+				page_draw();
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				scp_samp_panel().Loaded(loaded_token);
+				scp_sample_panel().Loaded(loaded_token);
 				slider3().Visibility(COLLAPSED);
 				//cx_color_style().Visibility(COLLAPSED);
 				slider3().ValueChanged(slider3_token);
 				//cx_color_style().SelectionChanged(c_style_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(TITLE_GRID);
+		show_cd_sample(TITLE_GRID);
 	}
 
 	// ページメニューの「方眼線の表示」>「最背面」が選択された.
@@ -273,7 +273,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::BACK);
 		undo_push_null();
 		enable_undo_menu();
-		draw_page();
+		page_draw();
 	}
 
 	// ページメニューの「方眼線の表示」>「最前面」が選択された.
@@ -285,7 +285,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::FRONT);
 		undo_push_null();
 		enable_undo_menu();
-		draw_page();
+		page_draw();
 	}
 
 	// ページメニューの「方眼線の表示」>「隠す」が選択された.
@@ -297,7 +297,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::HIDE);
 		undo_push_null();
 		enable_undo_menu();
-		draw_page();
+		page_draw();
 	}
 
 	// ページメニューの「方眼にそろえる」が選択された.
@@ -342,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 		enable_undo_menu();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
-		draw_page();
+		page_draw();
 	}
 
 }

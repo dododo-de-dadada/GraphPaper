@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 			sb.Value(min(sv + vs, mx));
 			break;
 		}
-		draw_page();
+		page_draw();
 	}
 
 	// スクロールバーの値を設定する.

@@ -21,7 +21,7 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		const double val0 = m_page_panel.m_fill_color.r * COLOR_MAX;
 		const double val1 = m_page_panel.m_fill_color.g * COLOR_MAX;
 		const double val2 = m_page_panel.m_fill_color.b * COLOR_MAX;
@@ -40,71 +40,71 @@ namespace winrt::GraphPaper::implementation
 		slider2().Visibility(VISIBLE);
 		slider3().Visibility(VISIBLE);
 		//cx_color_style().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				fill_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				fill_create_sample();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				fill_set_slider<UNDO_OP::FILL_COLOR, 0>(m_samp_shape, args.NewValue());
+				fill_set_slider<UNDO_OP::FILL_COLOR, 0>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				fill_set_slider<UNDO_OP::FILL_COLOR, 1>(m_samp_shape, args.NewValue());
+				fill_set_slider<UNDO_OP::FILL_COLOR, 1>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				fill_set_slider<UNDO_OP::FILL_COLOR, 2>(m_samp_shape, args.NewValue());
+				fill_set_slider<UNDO_OP::FILL_COLOR, 2>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider3_token = slider3().ValueChanged(
 			[this](auto, auto args)
 			{
-				fill_set_slider<UNDO_OP::FILL_COLOR, 3>(m_samp_shape, args.NewValue());
+				fill_set_slider<UNDO_OP::FILL_COLOR, 3>(m_sample_shape, args.NewValue());
 			}
 		);
 		//c_style_token = cx_color_style().SelectionChanged(
 		//	[this](auto, auto args)
 		//	{
-		//		m_samp_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
-		//		fill_set_slider<UNDO_OP::FILL_COLOR, 0>(m_samp_shape, slider0().Value());
-		//		fill_set_slider<UNDO_OP::FILL_COLOR, 1>(m_samp_shape, slider1().Value());
-		//		fill_set_slider<UNDO_OP::FILL_COLOR, 2>(m_samp_shape, slider2().Value());
-		//		fill_set_slider<UNDO_OP::FILL_COLOR, 3>(m_samp_shape, slider3().Value());
+		//		m_sample_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
+		//		fill_set_slider<UNDO_OP::FILL_COLOR, 0>(m_sample_shape, slider0().Value());
+		//		fill_set_slider<UNDO_OP::FILL_COLOR, 1>(m_sample_shape, slider1().Value());
+		//		fill_set_slider<UNDO_OP::FILL_COLOR, 2>(m_sample_shape, slider2().Value());
+		//		fill_set_slider<UNDO_OP::FILL_COLOR, 3>(m_sample_shape, slider3().Value());
 		//	}
 		//);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				//m_page_panel.m_col_style = m_samp_panel.m_col_style;
-				D2D1_COLOR_F samp_val;
-				m_samp_shape->get_fill_color(samp_val);
+				//m_page_panel.m_col_style = m_sample_panel.m_col_style;
+				D2D1_COLOR_F sample_val;
+				m_sample_shape->get_fill_color(sample_val);
 				//D2D1_COLOR_F page_val;
 				//m_page_shape->get_fill_color(page_val);
-				//if (equal(samp_val, page_val)) {
+				//if (equal(sample_val, page_val)) {
 				//	return;
 				//}
-				undo_push_value<UNDO_OP::FILL_COLOR>(samp_val);
+				undo_push_value<UNDO_OP::FILL_COLOR>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
-				scp_samp_panel().Loaded(loaded_token);
+				m_sample_shape = nullptr;
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().Visibility(COLLAPSED);
 				slider1().Visibility(COLLAPSED);
 				slider2().Visibility(COLLAPSED);
@@ -115,21 +115,21 @@ namespace winrt::GraphPaper::implementation
 				slider2().ValueChanged(slider2_token);
 				slider3().ValueChanged(slider3_token);
 				//cx_color_style().SelectionChanged(c_style_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(L"str_fill");
+		show_cd_sample(L"str_fill");
 	}
 
 	// ìhÇËÇ¬Ç‘ÇµÇÃå©ñ{ÇçÏê¨Ç∑ÇÈ.
-	void MainPage::fill_create_samp(void)
+	void MainPage::fill_create_sample(void)
 	{
-		const auto dpi = m_samp_dx.m_logical_dpi;
-		const auto w = scp_samp_panel().ActualWidth();
-		const auto h = scp_samp_panel().ActualHeight();
+		const auto dpi = m_sample_dx.m_logical_dpi;
+		const auto w = scp_sample_panel().ActualWidth();
+		const auto h = scp_sample_panel().ActualHeight();
 		const auto padding = w * 0.125;
 		const D2D1_POINT_2F pos = {
 			static_cast<FLOAT>(padding),
@@ -139,7 +139,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(w - 2.0 * padding),
 			static_cast<FLOAT>(h - 2.0 * padding)
 		};
-		m_samp_shape = new ShapeRect(pos, vec, &m_samp_panel);
+		m_sample_shape = new ShapeRect(pos, vec, &m_sample_panel);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -214,8 +214,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			s->set_fill_color(col);
 		}
-		if (scp_samp_panel().IsLoaded()) {
-			samp_draw();
+		if (scp_sample_panel().IsLoaded()) {
+			sample_draw();
 		}
 	}
 

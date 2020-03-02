@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_thread.cpp
-// ウィンドウ表示のハンドラー
+// ウィンドウ切り替えのハンドラー
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -49,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 		if (sender == CoreWindow::GetForCurrentThread()) {
 			m_window_visible = args.Visible();
 			if (m_window_visible) {
-				draw_page();
+				page_draw();
 			}
 		}
 	}

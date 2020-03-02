@@ -170,7 +170,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		enable_undo_menu();
 		enable_edit_menu();
-		draw_page();
+		page_draw();
 	}
 
 	// 編集メニューの「リストを表示」が選択された.
@@ -180,8 +180,8 @@ namespace winrt::GraphPaper::implementation
 			summary_close();
 			return;
 		}
-		if (sp_find_text().Visibility() == VISIBLE) {
-			mfi_find_text_click(nullptr, nullptr);
+		if (sp_text_find().Visibility() == VISIBLE) {
+			mfi_text_find_click(nullptr, nullptr);
 		}
 		auto _{ FindName(L"rp_summary") };
 		rp_summary().Visibility(VISIBLE);

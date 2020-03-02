@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token loaded_token;
 		static winrt::event_token closed_token;
 
-		load_cd_samp();
+		load_cd_sample();
 		double val0 = m_page_panel.m_arrow_size.m_width;
 		double val1 = m_page_panel.m_arrow_size.m_length;
 		double val2 = m_page_panel.m_arrow_size.m_offset;
@@ -78,62 +78,62 @@ namespace winrt::GraphPaper::implementation
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
-		loaded_token = scp_samp_panel().Loaded(
+		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
-				samp_panel_loaded();
-				stroke_create_samp();
-				samp_draw();
+				sample_panel_loaded();
+				stroke_create_sample();
+				sample_draw();
 			}
 		);
 		slider0_token = slider0().ValueChanged(
 			[this](auto, auto args)
 			{
-				arrow_set_slider<UNDO_OP::ARROW_SIZE, 0>(m_samp_shape, args.NewValue());
+				arrow_set_slider<UNDO_OP::ARROW_SIZE, 0>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider1_token = slider1().ValueChanged(
 			[this](auto, auto args)
 			{
-				arrow_set_slider<UNDO_OP::ARROW_SIZE, 1>(m_samp_shape, args.NewValue());
+				arrow_set_slider<UNDO_OP::ARROW_SIZE, 1>(m_sample_shape, args.NewValue());
 			}
 		);
 		slider2_token = slider2().ValueChanged(
 			[this](auto, auto args)
 			{
-				arrow_set_slider<UNDO_OP::ARROW_SIZE, 2>(m_samp_shape, args.NewValue());
+				arrow_set_slider<UNDO_OP::ARROW_SIZE, 2>(m_sample_shape, args.NewValue());
 			}
 		);
-		primary_token = cd_samp().PrimaryButtonClick(
+		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				ARROW_SIZE samp_val;
-				m_samp_shape->get_arrow_size(samp_val);
-				undo_push_value<UNDO_OP::ARROW_SIZE>(samp_val);
+				ARROW_SIZE sample_val;
+				m_sample_shape->get_arrow_size(sample_val);
+				undo_push_value<UNDO_OP::ARROW_SIZE>(sample_val);
 			}
 		);
-		closed_token = cd_samp().Closed(
+		closed_token = cd_sample().Closed(
 			[this](auto, auto)
 			{
-				delete m_samp_shape;
+				delete m_sample_shape;
 #if defined(_DEBUG)
 				debug_leak_cnt--;
 #endif
-				m_samp_shape = nullptr;
+				m_sample_shape = nullptr;
 				slider0().Visibility(COLLAPSED);
 				slider1().Visibility(COLLAPSED);
 				slider2().Visibility(COLLAPSED);
-				scp_samp_panel().Loaded(loaded_token);
+				scp_sample_panel().Loaded(loaded_token);
 				slider0().ValueChanged(slider0_token);
 				slider1().ValueChanged(slider1_token);
 				slider2().ValueChanged(slider2_token);
-				cd_samp().PrimaryButtonClick(primary_token);
-				cd_samp().Closed(closed_token);
-				UnloadObject(cd_samp());
-				draw_page();
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
 			}
 		);
-		show_cd_samp(L"str_arrow");
+		show_cd_sample(L"str_arrow");
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -159,34 +159,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[16];
-			const auto dpi = m_samp_dx.m_logical_dpi;
-			const auto g_len = m_samp_panel.m_grid_len + 1.0;
+			const auto dpi = m_sample_dx.m_logical_dpi;
+			const auto g_len = m_sample_panel.m_grid_len + 1.0;
 			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
 			hdr = hdr + buf;
-			/*
-			switch (m_page_unit) {
-			case LEN_UNIT::GRID:
-				swprintf_s(buf, FMT_GRID_UNIT, val / (m_samp_panel.m_grid_len + 1.0));
-				hdr = hdr + buf;
-				break;
-			case LEN_UNIT::PIXEL:
-				swprintf_s(buf, FMT_PIXEL_UNIT, val);
-				hdr = hdr + buf;
-				break;
-			case LEN_UNIT::INCH:
-				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi);
-				hdr = hdr + buf;
-				break;
-			case LEN_UNIT::MILLI:
-				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi * MM_PER_INCH);
-				hdr = hdr + buf;
-				break;
-			case LEN_UNIT::POINT:
-				swprintf_s(buf, FMT_INCH_UNIT, val / m_samp_dx.m_logical_dpi * PT_PER_INCH);
-				hdr = hdr + buf;
-				break;
-			}
-			*/
 		}
 		if constexpr (S == 0) {
 			slider0().Header(box_value(hdr));
@@ -221,8 +197,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			s->set_arrow_size(size);
 		}
-		if (scp_samp_panel().IsLoaded()) {
-			samp_draw();
+		if (scp_sample_panel().IsLoaded()) {
+			sample_draw();
 		}
 	}
 

@@ -9,24 +9,26 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Foundation::IAsyncAction;
-
 	constexpr auto APP_DATA = L"file_app_data";	// // アプリケーションデータを格納するファイル名のリソース名
 	static winrt::hstring app_data;	// アプリケーションデータを格納するファイル名
 
+	//	アプリケーションデータを保存するフォルダーを得る.
+	static auto app_data_folder(void);
+
+	//	アプリケーションデータを保存するフォルダーを得る.
 	static auto app_data_folder(void)
 	{
 		using winrt::Windows::Storage::ApplicationData;
 		return ApplicationData::Current().LocalFolder();
 	}
 
-	//	ｃｃアプリケーションがバックグラウンドに移った.
+	//	アプリケーションがバックグラウンドに移った.
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
 		app_data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(APP_DATA)));
 		std::lock_guard<std::mutex> lock(m_dx_mutex);
 		m_page_dx.Trim();
-		m_samp_dx.Trim();
+		m_sample_dx.Trim();
 	}
 
 	//	アプリケーションを非同期に延長する.

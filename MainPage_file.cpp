@@ -183,7 +183,7 @@ namespace winrt::GraphPaper::implementation
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
-			find_read(dt_reader);
+			text_find_read(dt_reader);
 			stat_read(dt_reader);
 			m_page_panel.read(dt_reader);
 			//	操作スタックを消去する.
@@ -418,7 +418,7 @@ namespace winrt::GraphPaper::implementation
 			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::ReadWrite) };
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
 			//dt_writer.WriteUInt32(static_cast<uint32_t>(m_col_style));
-			find_write(dt_writer);
+			text_find_write(dt_writer);
 			stat_write(dt_writer);
 			m_page_panel.write(dt_writer);
 			if (suspend) {
@@ -630,7 +630,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
-		draw_page();
+		page_draw();
 		stat_set_curs();
 		stat_set_grid();
 		stat_set_page();

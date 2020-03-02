@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		enable_undo_menu();
 		enable_edit_menu();
-		draw_page();
+		page_draw();
 	}
 	template void MainPage::arrange_to<true>(void);
 	template void MainPage::arrange_to<false>(void);
@@ -113,7 +113,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_null();
 			enable_undo_menu();
 			enable_edit_menu();
-			draw_page();
+			page_draw();
 		}
 	}
 	template void MainPage::arrange_order<S_LIST_T::iterator>(void);

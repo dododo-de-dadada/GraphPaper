@@ -117,15 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="btn_find_next.Content" xml:space="preserve">
+  <data name="btn_text_find_next.Content" xml:space="preserve">
     <value>次を検索</value>
     <comment>Button</comment>
   </data>
-  <data name="btn_replace.Content" xml:space="preserve">
+  <data name="btn_text_replace.Content" xml:space="preserve">
     <value>置換して次に</value>
     <comment>Button</comment>
   </data>
-  <data name="btn_replace_all.Content" xml:space="preserve">
+  <data name="btn_text_replace_all.Content" xml:space="preserve">
     <value>すべて置換</value>
     <comment>Buttom</comment>
   </data>
@@ -169,11 +169,11 @@
     <value>文末の空白行を無視する.</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="ck_match_case.Content" xml:space="preserve">
+  <data name="ck_text_match_case.Content" xml:space="preserve">
     <value>大文字と小文字を区別する</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="ck_wrap_around.Content" xml:space="preserve">
+  <data name="ck_text_wrap_around.Content" xml:space="preserve">
     <value>折り返しあり</value>
     <comment>CheckBox</comment>
   </data>
@@ -361,7 +361,7 @@
     <value>消去</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_edit_text.Text" xml:space="preserve">
+  <data name="mfi_text_edit.Text" xml:space="preserve">
     <value>文字列の編集...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -373,7 +373,7 @@
     <value>色...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_find_text.Text" xml:space="preserve">
+  <data name="mfi_text_find.Text" xml:space="preserve">
     <value>文字列の検索と置換...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -886,7 +886,7 @@
     <value>拡大率</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tx_find_what.Header" xml:space="preserve">
+  <data name="tx_text_find_what.Header" xml:space="preserve">
     <value>検索する文字列</value>
     <comment>TextBox</comment>
   </data>
@@ -898,7 +898,7 @@
     <value>幅</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_repl_with.Header" xml:space="preserve">
+  <data name="tx_text_replace_with.Header" xml:space="preserve">
     <value>置換後の文字列</value>
     <comment>TextBox</comment>
   </data>
