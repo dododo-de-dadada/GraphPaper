@@ -23,7 +23,7 @@ namespace winrt::GraphPaper::implementation
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
-	void ShapePanel::draw_auxiliary_bezi(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+	void ShapePanel::TOOL_auxiliary_bezi(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		ID2D1Brush* br = dx.m_aux_brush.get();
 		ID2D1StrokeStyle* ss = dx.m_aux_style.get();
@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 	// だ円の補助線を表示する.
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
-	void ShapePanel::draw_auxiliary_elli(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+	void ShapePanel::TOOL_auxiliary_elli(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		auto br = dx.m_aux_brush.get();
 		auto ss = dx.m_aux_style.get();
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 	// 直線の補助線を表示する.
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
-	void ShapePanel::draw_auxiliary_line(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+	void ShapePanel::TOOL_auxiliary_line(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		auto br = dx.m_aux_brush.get();
 		auto ss = dx.m_aux_style.get();
@@ -75,7 +75,7 @@ namespace winrt::GraphPaper::implementation
 	// ひし形の補助線を表示する.
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
-	void ShapePanel::draw_auxiliary_quad(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+	void ShapePanel::TOOL_auxiliary_quad(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		auto br = dx.m_aux_brush.get();
 		auto ss = dx.m_aux_style.get();
@@ -97,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 	// 方形の補助線を表示する.
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
-	void ShapePanel::draw_auxiliary_rect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+	void ShapePanel::TOOL_auxiliary_rect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		auto br = dx.m_aux_brush.get();
 		auto ss = dx.m_aux_style.get();
@@ -112,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	// c_rad	角丸半径
-	void ShapePanel::draw_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+	void ShapePanel::TOOL_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		auto br = dx.m_aux_brush.get();
 		auto ss = dx.m_aux_style.get();
@@ -143,7 +143,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 方眼線を表示する.
 	// offset	方眼線のずらし量
-	void ShapePanel::draw_grid_line(SHAPE_DX const& dx, const D2D1_POINT_2F offset)
+	void ShapePanel::TOOL_grid_line(SHAPE_DX const& dx, const D2D1_POINT_2F offset)
 	{
 		const double pw = m_page_size.width;	// ページの大きさ
 		const double ph = m_page_size.height;

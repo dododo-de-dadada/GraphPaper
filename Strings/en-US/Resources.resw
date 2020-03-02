@@ -645,31 +645,31 @@
     <value>Top</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_bezi.Text" xml:space="preserve">
+  <data name="rmfi_tool_BEZI.Text" xml:space="preserve">
     <value>Curve</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_elli.Text" xml:space="preserve">
+  <data name="rmfi_tool_elli.Text" xml:space="preserve">
     <value>Ellipse</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_line.Text" xml:space="preserve">
+  <data name="rmfi_tool_line.Text" xml:space="preserve">
     <value>Line</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_quad.Text" xml:space="preserve">
+  <data name="rmfi_tool_quad.Text" xml:space="preserve">
     <value>Quadrilateral</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_rect.Text" xml:space="preserve">
+  <data name="rmfi_tool_rect.Text" xml:space="preserve">
     <value>Rectangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_rrect.Text" xml:space="preserve">
+  <data name="rmfi_tool_rrect.Text" xml:space="preserve">
     <value>Rounded Rect</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_scale.Text" xml:space="preserve">
+  <data name="rmfi_tool_scale.Text" xml:space="preserve">
     <value>Scale</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -677,7 +677,7 @@
     <value>Select Shape</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_text.Text" xml:space="preserve">
+  <data name="rmfi_tool_text.Text" xml:space="preserve">
     <value>Text</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>

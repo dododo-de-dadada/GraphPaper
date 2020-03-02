@@ -645,31 +645,31 @@
     <value>上よせ</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_bezi.Text" xml:space="preserve">
+  <data name="rmfi_tool_BEZI.Text" xml:space="preserve">
     <value>曲線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_elli.Text" xml:space="preserve">
+  <data name="rmfi_tool_elli.Text" xml:space="preserve">
     <value>だ円形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_line.Text" xml:space="preserve">
+  <data name="rmfi_tool_line.Text" xml:space="preserve">
     <value>直線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_quad.Text" xml:space="preserve">
+  <data name="rmfi_tool_quad.Text" xml:space="preserve">
     <value>四へん形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_rect.Text" xml:space="preserve">
+  <data name="rmfi_tool_rect.Text" xml:space="preserve">
     <value>方形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_rrect.Text" xml:space="preserve">
+  <data name="rmfi_tool_rrect.Text" xml:space="preserve">
     <value>角丸方形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_scale.Text" xml:space="preserve">
+  <data name="rmfi_tool_scale.Text" xml:space="preserve">
     <value>目盛り</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -677,7 +677,7 @@
     <value>図形を選択</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_draw_text.Text" xml:space="preserve">
+  <data name="rmfi_tool_text.Text" xml:space="preserve">
     <value>文字列</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>

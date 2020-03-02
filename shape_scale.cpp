@@ -171,10 +171,10 @@ namespace winrt::GraphPaper::implementation
 		r_pos[3].y = rect.bottom;
 		r_pos[3].x = rect.left;
 		for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-			draw_anchor(r_pos[i], dx);
+			TOOL_anchor(r_pos[i], dx);
 			D2D1_POINT_2F r_mid;	// •ûŒ`‚Ì•Ó‚Ì’†“_
 			pt_avg(r_pos[j], r_pos[i], r_mid);
-			draw_anchor(r_mid, dx);
+			TOOL_anchor(r_mid, dx);
 		}
 	}
 

@@ -1,8 +1,9 @@
 ﻿#pragma once
 //------------------------------
-//	1	「ビルド」>「構成マネージャー」>「アクティブソリューションプラットフォーム」を x64
-//	2	「プロジェクト」>「NuGetパッケージの管理」>「復元」. 必要なら「MicroSoft.UI.Xaml」と「Microsoft.Windows.CppWinRT」を更新.
-//	3
+//	1	「ソリューションエクスプローラー」>「ビューを切り替える」>「フォルダービュー」
+//	2	「ビルド」>「構成マネージャー」>「アクティブソリューションプラットフォーム」を x64
+//	3	「プロジェクト」>「NuGetパッケージの管理」>「復元」. 必要なら「MicroSoft.UI.Xaml」と「Microsoft.Windows.CppWinRT」を更新.
+//
 //	MainPage.h
 //
 //	MainPage.cpp	メインページの作成と表示
@@ -118,18 +119,18 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//-------------------------------
-	//	作図
+	//	作図ツール
 	//-------------------------------
-	enum DRAW_SHAPE {
-		DRAW_SELECT,	// 選択ツール
-		DRAW_BEZI,	// 曲線
-		DRAW_ELLI,	// だ円
-		DRAW_LINE,	// 線分
-		DRAW_QUAD,	// 四辺形
-		DRAW_RECT,	// 方形
-		DRAW_RRECT,	// 角丸方形
-		DRAW_TEXT,	// 文字列
-		DRAW_SCALE	// 目盛り
+	enum DRAW_TOOL {
+		TOOL_SELECT,	// 選択ツール
+		TOOL_BEZI,	// 曲線
+		TOOL_ELLI,	// だ円
+		TOOL_LINE,	// 線分
+		TOOL_QUAD,	// 四辺形
+		TOOL_RECT,	// 方形
+		TOOL_RRECT,	// 角丸方形
+		TOOL_TEXT,	// 文字列
+		TOOL_SCALE	// 目盛り
 	};
 
 	//-------------------------------
@@ -195,7 +196,7 @@ namespace winrt::GraphPaper::implementation
 		MenuFlyout m_menu_page;	// ページコンテキストメニュー
 		MenuFlyout m_menu_ungroup;	// グループ解除コンテキストメニュー
 
-		DRAW_SHAPE m_draw_shape = DRAW_SHAPE::DRAW_SELECT;		// 図形ツール
+		DRAW_TOOL m_draw_tool = DRAW_TOOL::TOOL_SELECT;		// 図形ツール
 
 		uint32_t m_list_select = 0;		// 選択された図形の数
 		S_LIST_T m_list_shapes;		// 図形リスト
@@ -307,11 +308,6 @@ namespace winrt::GraphPaper::implementation
 		void disp_dpi_changed(DisplayInformation const& sender, IInspectable const& args);
 		//	ディスプレーの向きが変更された場合のハンドラー
 		void disp_orientation_changed(DisplayInformation const& sender, IInspectable const& args);
-
-		//-------------------------------
-		//	MainPage_edit.cpp
-		//	文字列の編集
-		//-------------------------------
 
 		//-------------------------------
 		//	MainPage_file.cpp
@@ -838,24 +834,24 @@ namespace winrt::GraphPaper::implementation
 		//	図形ツールメニューのハンドラー
 		//-------------------------------
 
-		//	図形メニューの「曲線」が選択された.
-		void rmfi_draw_bezi_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	図形メニューの「だ円」が選択された.
-		void rmfi_draw_elli_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	図形メニューの「直線」が選択された.
-		void rmfi_draw_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	図形メニューの「四へん形」が選択された.
-		void rmfi_draw_quad_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	図形メニューの「方形」が選択された.
-		void rmfi_draw_rect_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	図形メニューの「角丸方形」が選択された.
-		void rmfi_draw_rrect_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	図形メニューの「図形を選択」が選択された.
+		//	作図メニューの「曲線」が選択された.
+		void rmfi_tool_bezi_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	作図メニューの「だ円」が選択された.
+		void rmfi_tool_elli_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	作図メニューの「直線」が選択された.
+		void rmfi_tool_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	作図メニューの「四へん形」が選択された.
+		void rmfi_tool_quad_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	作図メニューの「方形」が選択された.
+		void rmfi_tool_rect_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	作図メニューの「角丸方形」が選択された.
+		void rmfi_tool_rrect_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	作図メニューの「図形を選択」が選択された.
 		void rmfi_tool_select_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	図形メニューの「文字列」が選択された.
-		void rmfi_draw_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	図形メニューの「目盛り」が選択された.
-		void rmfi_draw_scale_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	作図メニューの「文字列」が選択された.
+		void rmfi_tool_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	作図メニューの「目盛り」が選択された.
+		void rmfi_tool_scale_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 
 		//-----------------------------
 		//	MainPage_undo.cpp

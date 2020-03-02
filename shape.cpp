@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 	// 部位の方形を表示する.
 	// a_pos	部位の位置
 	// dx		図形の描画環境
-	void draw_anchor(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
+	void TOOL_anchor(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
 	{
 		// 部位の左上位置を得る.
 		D2D1_POINT_2F r_min;
@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 	// 丸い部位を表示する.
 	// a_pos	部位の位置
 	// dx		図形の描画環境
-	void draw_anchor_rounded(const D2D1_POINT_2F& a_pos, SHAPE_DX& dx)
+	void TOOL_anchor_rounded(const D2D1_POINT_2F& a_pos, SHAPE_DX& dx)
 	{
 		const FLOAT rad = static_cast<FLOAT>(dx.m_anch_len * 0.5 + 1.0);
 		const D2D1_ELLIPSE elli = { a_pos, rad, rad };

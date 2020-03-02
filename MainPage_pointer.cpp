@@ -84,25 +84,25 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F d;
 		pt_sub(m_curr_pos, m_press_pos, d);
 		Shape* s;
-		if (m_draw_shape == DRAW_RECT) {
+		if (m_draw_tool == TOOL_RECT) {
 			s = new ShapeRect(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_shape == DRAW_RRECT) {
+		else if (m_draw_tool == TOOL_RRECT) {
 			s = new ShapeRRect(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_shape == DRAW_QUAD) {
+		else if (m_draw_tool == TOOL_QUAD) {
 			s = new ShapeQuad(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_shape == DRAW_ELLI) {
+		else if (m_draw_tool == TOOL_ELLI) {
 			s = new ShapeElli(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_shape == DRAW_LINE) {
+		else if (m_draw_tool == TOOL_LINE) {
 			s = new ShapeLine(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_shape == DRAW_BEZI) {
+		else if (m_draw_tool == TOOL_BEZI) {
 			s = new ShapeBezi(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_shape == DRAW_SCALE) {
+		else if (m_draw_tool == TOOL_SCALE) {
 			s = new ShapeScale(m_press_pos, d, &m_page_panel);
 		}
 		else {
@@ -213,7 +213,7 @@ namespace winrt::GraphPaper::implementation
 		// ポインターの現在の位置と押された位置の差分を求める.
 		pt_sub(m_curr_pos, m_press_pos, d);
 		if (fabs(d.x) >= 1.0f || fabs(d.y) >= 1.0f) {
-			if (m_draw_shape == DRAW_TEXT) {
+			if (m_draw_tool == TOOL_TEXT) {
 				create_shape_text();
 				// 画面に範囲を表示したままにするために中断する.
 				return;
@@ -386,7 +386,7 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(m_curr_pos, m_press_pos, d);
 			if (pt_abs2(d) > m_click_dist) {
 				// 長さが閾値を超える場合,
-				if (m_draw_shape != DRAW_SELECT) {
+				if (m_draw_tool != TOOL_SELECT) {
 					// 図形ツールが選択ツールでない場合,
 					// 範囲を選択している状態に遷移する.
 					m_press_state = S_TRAN::PRESS_AREA;
@@ -486,7 +486,7 @@ namespace winrt::GraphPaper::implementation
 		// イベント発生位置をポインターが押された位置に格納する.
 		m_press_time = t_stamp;
 		m_press_pos = m_curr_pos;
-		if (m_draw_shape != DRAW_SELECT) {
+		if (m_draw_tool != TOOL_SELECT) {
 			// 図形ツールが選択ツールでない場合,
 			// 終了する.
 			return;
@@ -624,7 +624,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (m_press_state == S_TRAN::PRESS_AREA) {
 			// 状態が範囲選択している状態の場合,
-			if (m_draw_shape == DRAW_SHAPE::DRAW_SELECT) {
+			if (m_draw_tool == DRAW_TOOL::TOOL_SELECT) {
 				// 図形ツールが選択ツールの場合,
 				// 範囲選択を終了する.
 				finish_area_select(args.KeyModifiers());
@@ -698,7 +698,7 @@ namespace winrt::GraphPaper::implementation
 	// 状況に応じた形状のカーソルを設定する.
 	void MainPage::set_pointer(void)
 	{
-		if (m_draw_shape != DRAW_SELECT) {
+		if (m_draw_tool != TOOL_SELECT) {
 			Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 			return;
 		}

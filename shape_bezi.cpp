@@ -489,21 +489,21 @@ namespace winrt::GraphPaper::implementation
 		auto sb = dx.m_anch_brush.get();
 		auto ss = dx.m_aux_style.get();
 
-		draw_anchor(m_pos, dx);
+		TOOL_anchor(m_pos, dx);
 		s_pos = m_pos;
 		pt_add(s_pos, m_vec, e_pos);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, sb, sw, ss);
-		draw_anchor_rounded(e_pos, dx);
+		TOOL_anchor_rounded(e_pos, dx);
 
 		s_pos = e_pos;
 		pt_add(s_pos, m_vec_1, e_pos);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, sb, sw, ss);
-		draw_anchor_rounded(e_pos, dx);
+		TOOL_anchor_rounded(e_pos, dx);
 
 		s_pos = e_pos;
 		pt_add(s_pos, m_vec_2, e_pos);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, sb, sw, ss);
-		draw_anchor(e_pos, dx);
+		TOOL_anchor(e_pos, dx);
 	}
 
 	// –î‚¶‚è‚Ì¡–@‚ğ“¾‚é.

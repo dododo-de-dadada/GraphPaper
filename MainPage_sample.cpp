@@ -36,14 +36,14 @@ namespace winrt::GraphPaper::implementation
 		offset.x = static_cast<FLOAT>(ox);
 		offset.y = offset.x;
 		if (m_sample_panel.m_grid_show == GRID_SHOW::BACK) {
-			m_sample_panel.draw_grid_line(m_sample_dx, offset);
+			m_sample_panel.TOOL_grid_line(m_sample_dx, offset);
 		}
 		if (m_sample_shape != nullptr) {
 			m_sample_dx.m_anch_brush->SetColor(m_sample_panel.m_anch_color);
 			m_sample_shape->draw(m_sample_dx);
 		}
 		if (m_sample_panel.m_grid_show == GRID_SHOW::FRONT) {
-			m_sample_panel.draw_grid_line(m_sample_dx, offset);
+			m_sample_panel.TOOL_grid_line(m_sample_dx, offset);
 		}
 		winrt::check_hresult(dc->EndDraw());
 		dc->RestoreDrawingState(m_sample_dx.m_state_block.get());

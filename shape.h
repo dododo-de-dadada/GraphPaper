@@ -162,9 +162,9 @@ namespace winrt::GraphPaper::implementation
 	// UWP の色を D2D1_COLOR_F に変換する.
 	void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept;
 	// 部位 (方形) を表示する.
-	void draw_anchor(const D2D1_POINT_2F a_pos, SHAPE_DX& dx);
+	void TOOL_anchor(const D2D1_POINT_2F a_pos, SHAPE_DX& dx);
 	// 部位 (円) を表示する.
-	void draw_anchor_rounded(const D2D1_POINT_2F& c_pos, SHAPE_DX& dx);
+	void TOOL_anchor_rounded(const D2D1_POINT_2F& c_pos, SHAPE_DX& dx);
 	// 矢じりの寸法が同じか調べる.
 	bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept;
 	// 矢じりの形式が同じか調べる.
@@ -587,19 +587,19 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 曲線の補助線を表示する.
-		void draw_auxiliary_bezi(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
+		void TOOL_auxiliary_bezi(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
 		// だ円の補助線を表示する.
-		void draw_auxiliary_elli(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
+		void TOOL_auxiliary_elli(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
 		// 直線の補助線を表示する.
-		void draw_auxiliary_line(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
+		void TOOL_auxiliary_line(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
 		// 方形の補助線を表示する.
-		void draw_auxiliary_rect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
+		void TOOL_auxiliary_rect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
 		// 四辺形の補助線を表示する.
-		void draw_auxiliary_quad(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
+		void TOOL_auxiliary_quad(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
 		// 角丸方形の補助線を表示する.
-		void draw_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
+		void TOOL_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
 		// 方眼線を表示する,
-		void draw_grid_line(SHAPE_DX const& dx, const D2D1_POINT_2F offset);
+		void TOOL_grid_line(SHAPE_DX const& dx, const D2D1_POINT_2F offset);
 		// 矢じりの寸法を得る.
 		bool get_arrow_size(ARROW_SIZE& val) const noexcept;
 		// 矢じりの形式を得る.

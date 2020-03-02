@@ -207,14 +207,14 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected() == false) {
 			return;
 		}
-		draw_anchor(m_pos, dx);
+		TOOL_anchor(m_pos, dx);
 		D2D1_POINT_2F a_pos;
 		pt_add(m_pos, m_vec, a_pos);
-		draw_anchor(a_pos, dx);
+		TOOL_anchor(a_pos, dx);
 		pt_add(a_pos, m_vec_1, a_pos);
-		draw_anchor(a_pos, dx);
+		TOOL_anchor(a_pos, dx);
 		pt_add(a_pos, m_vec_2, a_pos);
-		draw_anchor(a_pos, dx);
+		TOOL_anchor(a_pos, dx);
 	}
 
 	// ìhÇËÇ¬Ç‘ÇµêFÇìæÇÈ.

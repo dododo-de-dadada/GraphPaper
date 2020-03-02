@@ -119,9 +119,9 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected()) {
 			D2D1_POINT_2F mid;
 			pt_scale(m_vec, 0.5, m_pos, mid);
-			draw_anchor(m_pos, dx);
-			draw_anchor(mid, dx);
-			draw_anchor(e_pos, dx);
+			TOOL_anchor(m_pos, dx);
+			TOOL_anchor(mid, dx);
+			TOOL_anchor(e_pos, dx);
 		}
 	}
 

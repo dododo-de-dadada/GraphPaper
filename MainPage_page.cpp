@@ -291,7 +291,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_page_panel.m_grid_show == GRID_SHOW::BACK) {
 			//	方眼線の表示が最背面に表示の場合,
 			//	方眼線を表示する.
-			m_page_panel.draw_grid_line(m_page_dx, { 0.0f, 0.0f });
+			m_page_panel.TOOL_grid_line(m_page_dx, { 0.0f, 0.0f });
 		}
 		//	部位の色をブラシに格納する.
 		m_page_dx.m_anch_brush->SetColor(m_page_panel.m_anch_color);
@@ -307,46 +307,46 @@ namespace winrt::GraphPaper::implementation
 		if (m_page_panel.m_grid_show == GRID_SHOW::FRONT) {
 			//	方眼線の表示が最前面に表示の場合,
 			//	方眼線を表示する.
-			m_page_panel.draw_grid_line(m_page_dx, { 0.0f, 0.0f });
+			m_page_panel.TOOL_grid_line(m_page_dx, { 0.0f, 0.0f });
 		}
 		if (m_press_state == S_TRAN::PRESS_AREA) {
 			//	押された状態が範囲を選択している場合,
 			//	補助線の色をブラシに格納する.
 			m_page_dx.m_aux_brush->SetColor(m_page_panel.m_aux_color);
-			if (m_draw_shape == DRAW_SELECT
-				|| m_draw_shape == DRAW_RECT
-				|| m_draw_shape == DRAW_TEXT
-				|| m_draw_shape == DRAW_SCALE) {
+			if (m_draw_tool == TOOL_SELECT
+				|| m_draw_tool == TOOL_RECT
+				|| m_draw_tool == TOOL_TEXT
+				|| m_draw_tool == TOOL_SCALE) {
 				//	選択ツール
 				//	または方形
 				//	または文字列の場合,
 				//	方形の補助線を表示する.
-				m_page_panel.draw_auxiliary_rect(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_panel.TOOL_auxiliary_rect(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_draw_shape == DRAW_BEZI) {
+			else if (m_draw_tool == TOOL_BEZI) {
 				//	曲線の場合,
 				//	曲線の補助線を表示する.
-				m_page_panel.draw_auxiliary_bezi(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_panel.TOOL_auxiliary_bezi(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_draw_shape == DRAW_ELLI) {
+			else if (m_draw_tool == TOOL_ELLI) {
 				//	だ円の場合,
 				//	だ円の補助線を表示する.
-				m_page_panel.draw_auxiliary_elli(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_panel.TOOL_auxiliary_elli(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_draw_shape == DRAW_LINE) {
+			else if (m_draw_tool == TOOL_LINE) {
 				//	直線の場合,
 				//	直線の補助線を表示する.
-				m_page_panel.draw_auxiliary_line(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_panel.TOOL_auxiliary_line(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_draw_shape == DRAW_RRECT) {
+			else if (m_draw_tool == TOOL_RRECT) {
 				//	角丸方形の場合,
 				//	角丸方形の補助線を表示する.
-				m_page_panel.draw_auxiliary_rrect(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_panel.TOOL_auxiliary_rrect(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_draw_shape == DRAW_QUAD) {
+			else if (m_draw_tool == TOOL_QUAD) {
 				//	四へん形の場合,
 				//	四へん形の補助線を表示する.
-				m_page_panel.draw_auxiliary_quad(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_panel.TOOL_auxiliary_quad(m_page_dx, m_press_pos, m_curr_pos);
 			}
 		}
 		//	描画を終了する.

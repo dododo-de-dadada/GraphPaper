@@ -93,13 +93,13 @@ namespace winrt::GraphPaper::implementation
 			//if (flag) {
 			//	D2D1_POINT_2F c_pos;
 			//	pt_add(r_min, rx, ry, c_pos);
-			//	draw_anchor_rounded(c_pos, dx);
+			//	TOOL_anchor_rounded(c_pos, dx);
 			//	c_pos.x = r_rec.rect.right - rx;
-			//	draw_anchor_rounded(c_pos, dx);
+			//	TOOL_anchor_rounded(c_pos, dx);
 			//	c_pos.y = r_rec.rect.bottom - ry;
-			//	draw_anchor_rounded(c_pos, dx);
+			//	TOOL_anchor_rounded(c_pos, dx);
 			//	c_pos.x = r_min.x + rx;
-			//	draw_anchor_rounded(c_pos, dx);
+			//	TOOL_anchor_rounded(c_pos, dx);
 			//}
 			D2D1_POINT_2F r_pos[4];
 			r_pos[0] = r_min;
@@ -114,19 +114,19 @@ namespace winrt::GraphPaper::implementation
 				// 方形の頂点のアンカーを表示する.
 				// 辺の中点を求め, そのアンカーを表示する.
 				pt_avg(r_pos[j], r_pos[i], r_mid);
-				draw_anchor(r_pos[i], dx);
-				draw_anchor(r_mid, dx);
+				TOOL_anchor(r_pos[i], dx);
+				TOOL_anchor(r_mid, dx);
 			}
 			//if (flag == false) {
 				D2D1_POINT_2F c_pos;
 				pt_add(r_min, rx, ry, c_pos);
-				draw_anchor_rounded(c_pos, dx);
+				TOOL_anchor_rounded(c_pos, dx);
 				c_pos.x = r_rec.rect.right - rx;
-				draw_anchor_rounded(c_pos, dx);
+				TOOL_anchor_rounded(c_pos, dx);
 				c_pos.y = r_rec.rect.bottom - ry;
-				draw_anchor_rounded(c_pos, dx);
+				TOOL_anchor_rounded(c_pos, dx);
 				c_pos.x = r_min.x + rx;
-				draw_anchor_rounded(c_pos, dx);
+				TOOL_anchor_rounded(c_pos, dx);
 			//}
 		}
 	}

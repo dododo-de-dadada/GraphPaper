@@ -318,28 +318,28 @@ tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring data;
-		if (m_draw_shape == DRAW_BEZI) {
+		if (m_draw_tool == TOOL_BEZI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));
 		}
-		else if (m_draw_shape == DRAW_ELLI) {
+		else if (m_draw_tool == TOOL_ELLI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_elli")));
 		}
-		else if (m_draw_shape == DRAW_LINE) {
+		else if (m_draw_tool == TOOL_LINE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 		}
-		else if (m_draw_shape == DRAW_QUAD) {
+		else if (m_draw_tool == TOOL_QUAD) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_quad")));
 		}
-		else if (m_draw_shape == DRAW_RECT) {
+		else if (m_draw_tool == TOOL_RECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
 		}
-		else if (m_draw_shape == DRAW_RRECT) {
+		else if (m_draw_tool == TOOL_RRECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")));
 		}
-		else if (m_draw_shape == DRAW_TEXT) {
+		else if (m_draw_tool == TOOL_TEXT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
-		else if (m_draw_shape == DRAW_SCALE) {
+		else if (m_draw_tool == TOOL_SCALE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
 		else {
