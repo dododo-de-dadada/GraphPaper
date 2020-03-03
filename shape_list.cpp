@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 		else if (s_type == SHAPE_GROUP) {
 			s = new ShapeGroup(dt_reader);
 		}
-		else if (s_type == SHAPE_RULER) {
+		else if (s_type == SHAPE_SCALE) {
 			s = new ShapeScale(dt_reader);
 		}
 		else {
@@ -199,12 +199,12 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			const auto a = t->hit_test(t_pos, a_len);
-			if (a != ANCH_OUTSIDE) {
+			if (a != ANCH_WHICH::ANCH_OUTSIDE) {
 				s = t;
 				return a;
 			}
 		}
-		return ANCH_OUTSIDE;
+		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	// ê}å`ÇÉäÉXÉgÇ…ë}ì¸Ç∑ÇÈ.
@@ -416,7 +416,7 @@ namespace winrt::GraphPaper::implementation
 				s_uint = SHAPE_RRECT;
 			}
 			else if (s_type == typeid(ShapeScale)) {
-				s_uint = SHAPE_RULER;
+				s_uint = SHAPE_SCALE;
 			}
 			else if (s_type == typeid(ShapeText)) {
 				s_uint = SHAPE_TEXT;

@@ -78,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 		rmfi_font_oblique_2().IsChecked(f_style == DWRITE_FONT_STYLE_OBLIQUE);
 	}
 
-	// リストビュー「書体名」がロードされた.
+	//	リストビュー「書体名」がロードされた.
 	void MainPage::lv_font_family_loaded(IInspectable const& /*sender*/, RoutedEventArgs const& /*e*/)
 	{
 		lv_font_family().Items().Clear();
@@ -96,14 +96,6 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 		}
-		//for (auto item : lv_font_family().Items()) {
-		//	auto hstr = unbox_value<winrt::hstring>(item);
-		//	if (wcscmp(hstr.c_str(), m_page_panel.m_font_family) == 0) {
-		//		lv_font_family().SelectedItem(item);
-		//		lv_font_family().ScrollIntoView(item);
-		//		return;
-		//	}
-		//}
 		lv_font_family().SelectedIndex(-1);
 	}
 
@@ -139,37 +131,18 @@ namespace winrt::GraphPaper::implementation
 		lv_font_weight().SelectedIndex(-1);
 	}
 
-	// 書体メニューの「色」が選択された.
-	void MainPage::mfi_font_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::font_color_dialog_show(void)
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token slider1_token;
-		static winrt::event_token slider2_token;
-		static winrt::event_token slider3_token;
-		//static winrt::event_token c_style_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		winrt::event_token slider0_token;
+		winrt::event_token slider1_token;
+		winrt::event_token slider2_token;
+		winrt::event_token slider3_token;
+		winrt::event_token primary_token;
+		winrt::event_token loaded_token;
+		winrt::event_token closed_token;
 
-		load_cd_sample();
-		const double val0 = m_page_panel.m_font_color.r * COLOR_MAX;
-		const double val1 = m_page_panel.m_font_color.g * COLOR_MAX;
-		const double val2 = m_page_panel.m_font_color.b * COLOR_MAX;
-		const double val3 = m_page_panel.m_font_color.a * COLOR_MAX;
-		slider0().Value(val0);
-		slider1().Value(val1);
-		slider2().Value(val2);
-		slider3().Value(val3);
-		//cx_color_style().SelectedIndex(m_page_panel.m_col_style);
-		font_set_slider<UNDO_OP::FONT_COLOR, 0>(val0);
-		font_set_slider<UNDO_OP::FONT_COLOR, 1>(val1);
-		font_set_slider<UNDO_OP::FONT_COLOR, 2>(val2);
-		font_set_slider<UNDO_OP::FONT_COLOR, 3>(val3);
-		slider0().Visibility(VISIBLE);
-		slider1().Visibility(VISIBLE);
-		slider2().Visibility(VISIBLE);
-		slider3().Visibility(VISIBLE);
-		//cx_color_style().Visibility(VISIBLE);
+		winrt::apartment_context context;
+		co_await winrt::resume_foreground(this->Dispatcher());
 		loaded_token = scp_sample_panel().Loaded(
 			[this](auto, auto)
 			{
@@ -202,32 +175,16 @@ namespace winrt::GraphPaper::implementation
 				font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_sample_shape, args.NewValue());
 			}
 		);
-		//c_style_token = cx_color_style().SelectionChanged(
-		//	[this](auto, auto args)
-		//	{
-		//		m_sample_panel.m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
-		//		font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, slider0().Value());
-		//		font_set_slider<UNDO_OP::FONT_COLOR, 1>(m_sample_shape, slider1().Value());
-		//		font_set_slider<UNDO_OP::FONT_COLOR, 2>(m_sample_shape, slider2().Value());
-		//		font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_sample_shape, slider3().Value());
-		//	}
-		//);
 		primary_token = cd_sample().PrimaryButtonClick(
 			[this](auto, auto)
 			{
-				//m_page_panel.m_col_style = m_sample_panel.m_col_style;
 				D2D1_COLOR_F sample_val;
 				m_sample_shape->get_font_color(sample_val);
-				//D2D1_COLOR_F page_val;
-				//m_page_shape->get_font_color(page_val);
-				//if (equal(sample_val, page_val)) {
-				//	return;
-				//}
 				undo_push_value<UNDO_OP::FONT_COLOR>(sample_val);
 			}
 		);
 		closed_token = cd_sample().Closed(
-			[this](auto, auto)
+			[this, &loaded_token, &slider0_token, &slider1_token, &slider2_token, &slider3_token, &primary_token, &closed_token](auto, auto)
 			{
 				delete m_sample_shape;
 #if defined(_DEBUG)
@@ -244,23 +201,126 @@ namespace winrt::GraphPaper::implementation
 				slider1().ValueChanged(slider1_token);
 				slider2().ValueChanged(slider2_token);
 				slider3().ValueChanged(slider3_token);
-				//cx_color_style().SelectionChanged(c_style_token);
 				cd_sample().PrimaryButtonClick(primary_token);
 				cd_sample().Closed(closed_token);
 				UnloadObject(cd_sample());
 				page_draw();
 			}
 		);
-		show_cd_sample(TITLE_FONT);
+		//co_await show_cd_sample(TITLE_FONT);
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
+		co_await cd_sample().ShowAsync();
+		co_await context;
+	}
+
+	// 書体メニューの「色」が選択された.
+	IAsyncAction MainPage::mfi_font_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	{
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		winrt::event_token slider0_token;
+		winrt::event_token slider1_token;
+		winrt::event_token slider2_token;
+		winrt::event_token slider3_token;
+		winrt::event_token primary_token;
+		winrt::event_token loaded_token;
+		winrt::event_token closed_token;
+
+		load_cd_sample();
+		const double val0 = m_page_panel.m_font_color.r * COLOR_MAX;
+		const double val1 = m_page_panel.m_font_color.g * COLOR_MAX;
+		const double val2 = m_page_panel.m_font_color.b * COLOR_MAX;
+		const double val3 = m_page_panel.m_font_color.a * COLOR_MAX;
+		slider0().Value(val0);
+		slider1().Value(val1);
+		slider2().Value(val2);
+		slider3().Value(val3);
+		font_set_slider<UNDO_OP::FONT_COLOR, 0>(val0);
+		font_set_slider<UNDO_OP::FONT_COLOR, 1>(val1);
+		font_set_slider<UNDO_OP::FONT_COLOR, 2>(val2);
+		font_set_slider<UNDO_OP::FONT_COLOR, 3>(val3);
+		slider0().Visibility(VISIBLE);
+		slider1().Visibility(VISIBLE);
+		slider2().Visibility(VISIBLE);
+		slider3().Visibility(VISIBLE);
+		loaded_token = scp_sample_panel().Loaded(
+			[this](auto, auto)
+			{
+				sample_panel_loaded();
+				font_create_sample();
+				sample_draw();
+			}
+		);
+		slider0_token = slider0().ValueChanged(
+			[this](auto, auto args)
+			{
+				font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, args.NewValue());
+			}
+		);
+		slider1_token = slider1().ValueChanged(
+			[this](auto, auto args)
+			{
+				font_set_slider<UNDO_OP::FONT_COLOR, 1>(m_sample_shape, args.NewValue());
+			}
+		);
+		slider2_token = slider2().ValueChanged(
+			[this](auto, auto args)
+			{
+				font_set_slider<UNDO_OP::FONT_COLOR, 2>(m_sample_shape, args.NewValue());
+			}
+		);
+		slider3_token = slider3().ValueChanged(
+			[this](auto, auto args)
+			{
+				font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_sample_shape, args.NewValue());
+			}
+		);
+		primary_token = cd_sample().PrimaryButtonClick(
+			[this](auto, auto)
+			{
+				D2D1_COLOR_F sample_val;
+				m_sample_shape->get_font_color(sample_val);
+				undo_push_value<UNDO_OP::FONT_COLOR>(sample_val);
+			}
+		);
+		closed_token = cd_sample().Closed(
+			[this, &loaded_token, &slider0_token, &slider1_token, &slider2_token, &slider3_token, &primary_token, &closed_token](auto, auto)
+			{
+				delete m_sample_shape;
+#if defined(_DEBUG)
+				debug_leak_cnt--;
+#endif
+				m_sample_shape = nullptr;
+				slider0().Visibility(COLLAPSED);
+				slider1().Visibility(COLLAPSED);
+				slider2().Visibility(COLLAPSED);
+				slider3().Visibility(COLLAPSED);
+				scp_sample_panel().Loaded(loaded_token);
+				slider0().ValueChanged(slider0_token);
+				slider1().ValueChanged(slider1_token);
+				slider2().ValueChanged(slider2_token);
+				slider3().ValueChanged(slider3_token);
+				cd_sample().PrimaryButtonClick(primary_token);
+				cd_sample().Closed(closed_token);
+				UnloadObject(cd_sample());
+				page_draw();
+			}
+		);
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
+		co_await cd_sample().ShowAsync();
 	}
 
 	// 書体メニューの「書体名」が選択された.
-	void MainPage::mfi_font_family_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_font_family_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		static winrt::event_token changed_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		winrt::event_token changed_token;
+		winrt::event_token primary_token;
+		winrt::event_token loaded_token;
+		winrt::event_token closed_token;
 
 		load_cd_sample();
 		loaded_token = scp_sample_panel().Loaded(
@@ -274,7 +334,6 @@ namespace winrt::GraphPaper::implementation
 		changed_token = lv_font_family().SelectionChanged(
 			[this](auto, auto)
 			{
-				//int32_t i = lv_font_family().SelectedIndex();
 				auto i = lv_font_family().SelectedIndex();
 				m_sample_shape->set_font_family(ShapeText::get_available_font(i));
 				if (scp_sample_panel().IsLoaded()) {
@@ -291,7 +350,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		closed_token = cd_sample().Closed(
-			[this](auto, auto)
+			[this, &loaded_token, &changed_token, &primary_token, &closed_token](auto, auto)
 			{
 				delete m_sample_shape;
 #if defined(_DEBUG)
@@ -301,7 +360,6 @@ namespace winrt::GraphPaper::implementation
 				lv_font_family().SelectionChanged(changed_token);
 				scp_sample_panel().Loaded(loaded_token);
 				cd_sample().PrimaryButtonClick(primary_token);
-				//cd_sample().Opened(opened_token);
 				cd_sample().Closed(closed_token);
 				lv_font_family().Visibility(COLLAPSED);
 				UnloadObject(cd_sample());
@@ -309,7 +367,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_font_family().Visibility(VISIBLE);
-		show_cd_sample(TITLE_FONT);
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
+		co_await cd_sample().ShowAsync();
 	}
 
 	// 書体メニューの「イタリック体」が選択された.
@@ -331,12 +390,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「大きさ」が選択された.
-	void MainPage::mfi_font_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_font_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		winrt::event_token slider0_token;
+		winrt::event_token primary_token;
+		winrt::event_token loaded_token;
+		winrt::event_token closed_token;
 
 		load_cd_sample();
 		const double val0 = m_page_panel.m_font_size;
@@ -366,7 +427,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		closed_token = cd_sample().Closed(
-			[this](auto, auto)
+			[this, &loaded_token, &slider0_token, &primary_token, &closed_token](auto, auto)
 			{
 				delete m_sample_shape;
 #if defined(_DEBUG)
@@ -382,16 +443,19 @@ namespace winrt::GraphPaper::implementation
 				page_draw();
 			}
 		);
-		show_cd_sample(TITLE_FONT);
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
+		co_await cd_sample().ShowAsync();
 	}
 
 	// 書体メニューの「伸縮」が選択された.
-	void MainPage::mfi_font_stretch_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_font_stretch_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		static winrt::event_token changed_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		winrt::event_token changed_token;
+		winrt::event_token primary_token;
+		winrt::event_token loaded_token;
+		winrt::event_token closed_token;
 
 		load_cd_sample();
 		loaded_token = scp_sample_panel().Loaded(
@@ -420,7 +484,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		closed_token = cd_sample().Closed(
-			[this](auto, auto)
+			[this, &loaded_token, &changed_token, &primary_token, &closed_token](auto, auto)
 			{
 				delete m_sample_shape;
 #if defined(_DEBUG)
@@ -437,16 +501,19 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_font_stretch().Visibility(VISIBLE);
-		show_cd_sample(TITLE_FONT);
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
+		co_await cd_sample().ShowAsync();
 	}
 
 	// 書体メニューの「太さ」が選択された.
-	void MainPage::mfi_font_weight_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_font_weight_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		static winrt::event_token changed_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		winrt::event_token changed_token;
+		winrt::event_token primary_token;
+		winrt::event_token loaded_token;
+		winrt::event_token closed_token;
 
 		load_cd_sample();
 		loaded_token = scp_sample_panel().Loaded(
@@ -475,7 +542,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		closed_token = cd_sample().Closed(
-			[this](auto, auto)
+			[this, &loaded_token, &changed_token, &primary_token, &closed_token](auto, auto)
 			{
 				delete m_sample_shape;
 #if defined(_DEBUG)
@@ -493,7 +560,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_font_weight().Visibility(VISIBLE);
-		show_cd_sample(TITLE_FONT);
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
+		co_await cd_sample().ShowAsync();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -584,12 +652,14 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t TITLE_PAGE[] = L"str_page";
 
 	// 書体メニューの「行間」>「高さ」が選択された.
-	void MainPage::mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		winrt::event_token slider0_token;
+		winrt::event_token primary_token;
+		winrt::event_token loaded_token;
+		winrt::event_token closed_token;
 
 		load_cd_sample();
 		const double val0 = m_page_panel.m_text_line;
@@ -619,7 +689,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		closed_token = cd_sample().Closed(
-			[this](auto, auto)
+			[this, &loaded_token, &slider0_token, &primary_token, &closed_token](auto, auto)
 			{
 				delete m_sample_shape;
 #if defined(_DEBUG)
@@ -635,7 +705,8 @@ namespace winrt::GraphPaper::implementation
 				page_draw();
 			}
 		);
-		show_cd_sample(TITLE_PAGE);
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
+		co_await cd_sample().ShowAsync();
 	}
 
 	//	書体メニューの「行間」>「狭める」が選択された.
@@ -660,13 +731,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	書体メニューの「余白」が選択された.
-	void MainPage::mfi_text_margin_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_text_margin_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token slider1_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		winrt::event_token slider0_token;
+		winrt::event_token slider1_token;
+		winrt::event_token primary_token;
+		winrt::event_token loaded_token;
+		winrt::event_token closed_token;
 
 		load_cd_sample();
 		const double val0 = m_page_panel.m_text_mar.width;
@@ -706,7 +779,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		closed_token = cd_sample().Closed(
-			[this](auto, auto)
+			[this, &loaded_token, &slider0_token, &slider1_token, &primary_token, &closed_token](auto, auto)
 			{
 				delete m_sample_shape;
 #if defined(_DEBUG)
@@ -724,7 +797,8 @@ namespace winrt::GraphPaper::implementation
 				page_draw();
 			}
 		);
-		show_cd_sample(TITLE_PAGE);
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
+		co_await cd_sample().ShowAsync();
 	}
 
 	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
@@ -805,7 +879,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring hdr;
 
 		const double dpi = m_page_dx.m_logical_dpi;
-		const double g_len = m_sample_panel.m_grid_len + 1.0;
+		const double g_len = m_sample_panel.m_grid_size + 1.0;
 		double px;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
@@ -838,40 +912,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				hdr = hdr + L": " + r_loader.GetString(L"str_def_val");
-				//goto SET;
 			}
 		}
-		/*
-		if (m_page_unit == LEN_UNIT::PIXEL) {
-			wchar_t buf[16];
-			swprintf_s(buf, FMT_PIXEL_UNIT, px);
-			hdr = hdr + L": " + buf;
-		}
-		else if (m_page_unit == LEN_UNIT::INCH) {
-			wchar_t buf[16];
-			swprintf_s(buf, FMT_INCH_UNIT, px / dpi);
-			hdr = hdr + L": " + buf;
-		}
-		else if (m_page_unit == LEN_UNIT::MILLI) {
-			wchar_t buf[16];
-			swprintf_s(buf, FMT_MILLI_UNIT, px * MM_PER_INCH / dpi);
-			hdr = hdr + L": " + buf;
-		}
-		else if (m_page_unit == LEN_UNIT::POINT) {
-			wchar_t buf[16];
-			swprintf_s(buf, FMT_POINT_UNIT, px * PT_PER_INCH / dpi);
-			hdr = hdr + L": " + buf;
-		}
-		else if (m_page_unit == LEN_UNIT::GRID) {
-			wchar_t buf[16];
-			swprintf_s(buf, FMT_GRID_UNIT, px / (m_sample_panel.m_grid_len + 1.0));
-			hdr = hdr + L": " + buf;
-		}
-		wchar_t buf[16];
-		conv_val_to_len(m_page_unit, dpi,g_len, buf, 16);
-		hdr = hdr + L": " + buf;
-	SET:
-	*/
 		if constexpr (S == 0) {
 			slider0().Header(box_value(hdr));
 		}

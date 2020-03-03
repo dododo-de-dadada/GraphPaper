@@ -8,10 +8,10 @@ namespace winrt::GraphPaper::implementation
 {
 	// 折れ線の頂点の配列
 	constexpr ANCH_WHICH ANCH_QUAD[4]{
-		ANCH_R_SE,
-		ANCH_R_SW,
-		ANCH_R_NE,
-		ANCH_R_NW
+		ANCH_WHICH::ANCH_R_SE,
+		ANCH_WHICH::ANCH_R_SW,
+		ANCH_WHICH::ANCH_R_NE,
+		ANCH_WHICH::ANCH_R_NW
 	};
 
 	// 四へん形の各辺の法線ベクトルを得る.
@@ -257,16 +257,16 @@ namespace winrt::GraphPaper::implementation
 				// 位置が, 拡張する太さを半径とする円に含まれるか調べる.
 				if (pt_abs2(q_pos[0]) <= exp * exp) {
 					// 含まれるなら ANCH_FRAME を返す.
-					return ANCH_FRAME;
+					return ANCH_WHICH::ANCH_FRAME;
 				}
 				// そうでなければ ANCH_NONE を返す.
-				return ANCH_OUTSIDE;
+				return ANCH_WHICH::ANCH_OUTSIDE;
 			}
 			// 四辺形の辺が位置を含むか調べる.
 			D2D1_POINT_2F q_exp[4][4];
 			if (qd_test_expanded(ZP, q_pos, q_nor, exp, q_exp)) {
 				// 含むなら ANCH_FRAME を返す.
-				return ANCH_FRAME;
+				return ANCH_WHICH::ANCH_FRAME;
 			}
 			// 四辺形の角が位置を含むか調べる.
 			// 角を延長する長さは辺の太さの 5 倍.
@@ -274,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 			const auto ext = m_stroke_width * 5.0;
 			if (qd_test_extended(ZP, q_exp, q_nor, ext)) {
 				// 含むなら ANCH_FRAME を返す.
-				return ANCH_FRAME;
+				return ANCH_WHICH::ANCH_FRAME;
 			}
 		}
 		// 辺が不透明, または位置が辺に含まれていないなら,
@@ -283,10 +283,10 @@ namespace winrt::GraphPaper::implementation
 			// 不透明なら, 位置が四へん形に含まれるか調べる.
 			if (pt_in_quad(ZP, q_pos)) {
 				// 含まれるなら ANCH_INSIDE を返す.
-				return ANCH_INSIDE;
+				return ANCH_WHICH::ANCH_INSIDE;
 			}
 		}
-		return ANCH_OUTSIDE;
+		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	// 範囲に含まれるか調べる.

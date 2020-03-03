@@ -91,11 +91,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(t_pos, a_len) != ANCH_OUTSIDE) {
-				return ANCH_INSIDE;
+			if (s->hit_test(t_pos, a_len) != ANCH_WHICH::ANCH_OUTSIDE) {
+				return ANCH_WHICH::ANCH_INSIDE;
 			}
 		}
-		return ANCH_OUTSIDE;
+		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	// ”ÍˆÍ‚ÉŠÜ‚Ü‚ê‚é‚©’²‚×‚é.

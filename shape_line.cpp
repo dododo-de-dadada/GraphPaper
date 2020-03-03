@@ -9,8 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr ANCH_WHICH ANCH_BEGIN = ANCH_R_NW;
-	constexpr ANCH_WHICH ANCH_END = ANCH_R_SE;
+	constexpr ANCH_WHICH ANCH_BEGIN = ANCH_WHICH::ANCH_R_NW;
+	constexpr ANCH_WHICH ANCH_END = ANCH_WHICH::ANCH_R_SE;
 
 	static bool ln_calc_arrowhead(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip_pos) noexcept
 	{
@@ -165,9 +165,9 @@ namespace winrt::GraphPaper::implementation
 			return ANCH_BEGIN;
 		}
 		if (pt_in_line(t_pos, m_pos, e_pos, max(m_stroke_width, a_len))) {
-			return ANCH_FRAME;
+			return ANCH_WHICH::ANCH_FRAME;
 		}
-		return ANCH_OUTSIDE;
+		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	// ”ÍˆÍ‚ÉŠÜ‚Ü‚ê‚é‚©’²‚×‚é.

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "shape.h"
+#include "shape_rect.h"
 
 using namespace winrt;
 
@@ -68,7 +68,7 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_MIDDLE[i];
 			}
 		}
-		return ANCH_OUTSIDE;
+		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	// 位置を含むか調べる.
@@ -78,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 	ANCH_WHICH ShapeRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
-		if (anchor != ANCH_OUTSIDE) {
+		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 			return anchor;
 		}
 		// 方形の右上点と左下点を求める.
@@ -92,33 +92,24 @@ namespace winrt::GraphPaper::implementation
 			if (is_opaque(m_fill_color)) {
 				//	塗りつぶし色が不透明な場合,
 				if (pt_in_rect(t_pos, r_min, r_max)) {
-				//if (r_min.x <= t_pos.x && t_pos.x <= r_max.x) {
-				//	if (r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
-						//	位置が方形にふくまれる場合,
-						return ANCH_INSIDE;
-				//	}
+					//	位置が方形にふくまれる場合,
+					return ANCH_WHICH::ANCH_INSIDE;
 				}
 			}
-			return ANCH_OUTSIDE;
+			return ANCH_WHICH::ANCH_OUTSIDE;
 		}
 		const double sw = max(m_stroke_width, a_len);	// 線枠の太さ
 		pt_add(r_min, sw * 0.5, r_min);
 		pt_add(r_max, sw * -0.5, r_max);
 		if (pt_in_rect(t_pos, r_min, r_max)) {
-		//if (r_min.x <= t_pos.x && t_pos.x <= r_max.x) {
-		//	if (r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
-				return is_opaque(m_fill_color) ? ANCH_INSIDE : ANCH_OUTSIDE;
-		//	}
+			return is_opaque(m_fill_color) ? ANCH_WHICH::ANCH_INSIDE : ANCH_WHICH::ANCH_OUTSIDE;
 		}
 		pt_add(r_min, -sw, r_min);
 		pt_add(r_max, sw, r_max);
 		if (pt_in_rect(t_pos, r_min, r_max)) {
-		//if (r_min.x <= t_pos.x && t_pos.x <= r_max.x) {
-		//	if (r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
-				return ANCH_FRAME;
-		//	}
+			return ANCH_WHICH::ANCH_FRAME;
 		}
-		return ANCH_OUTSIDE;
+		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	// 塗りつぶしの色を得る.
@@ -140,31 +131,31 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRect::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& a_pos) const noexcept
 	{
 		switch (a) {
-		case ANCH_NORTH:
+		case ANCH_WHICH::ANCH_NORTH:
 			a_pos.x = m_pos.x + m_vec.x * 0.5f;
 			a_pos.y = m_pos.y;
 			break;
-		case ANCH_NE:
+		case ANCH_WHICH::ANCH_NE:
 			a_pos.x = m_pos.x + m_vec.x;
 			a_pos.y = m_pos.y;
 			break;
-		case ANCH_WEST:
+		case ANCH_WHICH::ANCH_WEST:
 			a_pos.x = m_pos.x;
 			a_pos.y = m_pos.y + m_vec.y * 0.5f;
 			break;
-		case ANCH_EAST:
+		case ANCH_WHICH::ANCH_EAST:
 			a_pos.x = m_pos.x + m_vec.x;
 			a_pos.y = m_pos.y + m_vec.y * 0.5f;
 			break;
-		case ANCH_SW:
+		case ANCH_WHICH::ANCH_SW:
 			a_pos.x = m_pos.x;
 			a_pos.y = m_pos.y + m_vec.y;
 			break;
-		case ANCH_SOUTH:
+		case ANCH_WHICH::ANCH_SOUTH:
 			a_pos.x = m_pos.x + m_vec.x * 0.5f;
 			a_pos.y = m_pos.y + m_vec.y;
 			break;
-		case ANCH_SE:
+		case ANCH_WHICH::ANCH_SE:
 			a_pos.x = m_pos.x + m_vec.x;
 			a_pos.y = m_pos.y + m_vec.y;
 			break;
@@ -194,43 +185,43 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F d;
 
 		switch (a) {
-		case ANCH_OUTSIDE:
+		case ANCH_WHICH::ANCH_OUTSIDE:
 			m_pos = pos;
 			break;
-		case ANCH_NW:
+		case ANCH_WHICH::ANCH_NW:
 			pt_sub(pos, m_pos, d);
 			pt_add(m_pos, d, m_pos);
 			pt_sub(m_vec, d, m_vec);
 			break;
-		case ANCH_NORTH:
+		case ANCH_WHICH::ANCH_NORTH:
 			m_vec.y -= pos.y - m_pos.y;
 			m_pos.y = pos.y;
 			break;
-		case ANCH_NE:
+		case ANCH_WHICH::ANCH_NE:
 			a_pos.x = m_pos.x + m_vec.x;
 			a_pos.y = m_pos.y;
 			m_pos.y = pos.y;
 			pt_sub(pos, a_pos, d);
 			pt_add(m_vec, d.x, -d.y, m_vec);
 			break;
-		case ANCH_WEST:
+		case ANCH_WHICH::ANCH_WEST:
 			m_vec.x -= pos.x - m_pos.x;
 			m_pos.x = pos.x;
 			break;
-		case ANCH_EAST:
+		case ANCH_WHICH::ANCH_EAST:
 			m_vec.x = pos.x - m_pos.x;
 			break;
-		case ANCH_SW:
+		case ANCH_WHICH::ANCH_SW:
 			a_pos.x = m_pos.x;
 			a_pos.y = m_pos.y + m_vec.y;
 			m_pos.x = pos.x;
 			pt_sub(pos, a_pos, d);
 			pt_add(m_vec, -d.x, d.y, m_vec);
 			break;
-		case ANCH_SOUTH:
+		case ANCH_WHICH::ANCH_SOUTH:
 			m_vec.y = pos.y - m_pos.y;
 			break;
-		case ANCH_SE:
+		case ANCH_WHICH::ANCH_SE:
 			pt_sub(pos, m_pos, m_vec);
 			break;
 		}

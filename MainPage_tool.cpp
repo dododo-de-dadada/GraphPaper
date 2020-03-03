@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 		m_draw_tool = DRAW_TOOL::TOOL_SELECT;
 		m_press_state = S_TRAN::BEGIN;
 		m_press_shape = nullptr;
-		m_press_anchor = ANCH_OUTSIDE;
+		m_press_anchor = ANCH_WHICH::ANCH_OUTSIDE;
 		stat_set_draw();
 		set_pointer();
 	}

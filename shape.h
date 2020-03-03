@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 
 	// 図形の部位 (アンカー)
-	enum ANCH_WHICH {
+	enum struct ANCH_WHICH {
 		ANCH_OUTSIDE,		// 外部 (矢印カーソル)
 		ANCH_INSIDE,		// 内部 (移動カーソル)
 		ANCH_FRAME,		// 線枠 (移動カーソル)
@@ -81,20 +81,20 @@ namespace winrt::GraphPaper::implementation
 		ANCH_R_SW,		// 角丸の左下の中心点 (十字カーソル)
 	};
 
-	// 方形の頂点の配列
-	constexpr ANCH_WHICH ANCH_CORNER[4]{
-		ANCH_SE,
-		ANCH_NE,
-		ANCH_SW,
-		ANCH_NW
-	};
-
 	// 方形の中点の配列
 	constexpr ANCH_WHICH ANCH_MIDDLE[4]{
-		ANCH_SOUTH,
-		ANCH_EAST,
-		ANCH_WEST,
-		ANCH_NORTH
+		ANCH_WHICH::ANCH_SOUTH,
+		ANCH_WHICH::ANCH_EAST,
+		ANCH_WHICH::ANCH_WEST,
+		ANCH_WHICH::ANCH_NORTH
+	};
+
+	// 方形の頂点の配列
+	constexpr ANCH_WHICH ANCH_CORNER[4]{
+		ANCH_WHICH::ANCH_SE,
+		ANCH_WHICH::ANCH_NE,
+		ANCH_WHICH::ANCH_SW,
+		ANCH_WHICH::ANCH_NW
 	};
 
 	// 矢じりの形式
@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_RRECT,	// 角丸方形
 		SHAPE_TEXT,		// 文字列
 		SHAPE_GROUP,	// グループ
-		SHAPE_RULER		// 目盛り
+		SHAPE_SCALE		// 目盛り
 	};
 
 	// 矢じりの寸法
@@ -388,7 +388,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体の太さを得る.
 		virtual bool get_font_weight(DWRITE_FONT_WEIGHT& /*val*/) const noexcept { return false; }
 		// 方眼の大きさを得る.
-		virtual bool get_grid_len(double& /*val*/) const noexcept { return false; }
+		virtual bool get_grid_size(double& /*val*/) const noexcept { return false; }
 		// 方眼の大きさを得る.
 		virtual bool get_grid_opac(double& /*val*/) const noexcept { return false; }
 		// 方眼の表示を得る.
@@ -428,7 +428,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字範囲を得る
 		virtual bool get_text_range(DWRITE_TEXT_RANGE& /*val*/) const noexcept { return false; }
 		// 位置を含むか調べる.
-		virtual ANCH_WHICH hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept { return ANCH_OUTSIDE; }
+		virtual ANCH_WHICH hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept { return ANCH_WHICH::ANCH_OUTSIDE; }
 		// 範囲に含まれるか調べる.
 		virtual bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept { return false; }
 		// 消去フラグを調べる.
@@ -458,7 +458,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		virtual void set_font_weight(const DWRITE_FONT_WEIGHT /*val*/) {}
 		// 値を方眼の大きさに格納する.
-		virtual void set_grid_len(const double /*val*/) noexcept {}
+		virtual void set_grid_size(const double /*val*/) noexcept {}
 		// 値を方眼の大きさに格納する.
 		virtual void set_grid_opac(const double /*val*/) noexcept {}
 		// 値を方眼の表示に格納する.
@@ -549,7 +549,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 方眼の属性
 		D2D1_COLOR_F m_grid_color;	// 方眼線の色 (MainPage のコンストラクタで設定)
-		double m_grid_len = 0.0;	// 方眼の大きさ (を -1 した値)
+		double m_grid_size = 0.0;	// 方眼の大きさ (を -1 した値)
 		double m_grid_opac = GRID_OPAC;	// 方眼線の不透明度
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼線の表示
 		bool m_grid_snap = true;	// 方眼に整列
@@ -605,7 +605,7 @@ namespace winrt::GraphPaper::implementation
 		// 矢じりの形式を得る.
 		bool get_arrow_style(ARROW_STYLE& val) const noexcept;
 		// 方眼の大きさを得る.
-		bool get_grid_len(double& val) const noexcept;
+		bool get_grid_size(double& val) const noexcept;
 		// 方眼の大きさを得る.
 		bool get_grid_opac(double& val) const noexcept;
 		// 方眼の表示の状態を得る.
@@ -655,7 +655,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形の属性値を格納する.
 		void set_to_shape(Shape* s) noexcept;
 		// 値を方眼の大きさに格納する.
-		void set_grid_len(const double val) noexcept;
+		void set_grid_size(const double val) noexcept;
 		// 値を方眼の不透明度に格納する.
 		void set_grid_opac(const double val) noexcept;
 		// 値を方眼の表示に格納する.
@@ -916,7 +916,7 @@ namespace winrt::GraphPaper::implementation
 	//	作成したあとで文字列の属性の変更はできない.
 	//------------------------------
 	struct ShapeScale : ShapeRect {
-		double m_grid_len;	// 方眼の大きさ
+		double m_grid_size;	// 方眼の大きさ (を -1 した値)
 		winrt::com_ptr<IDWriteTextFormat> m_dw_text_format{};	// テキストフォーマット
 
 		//------------------------------

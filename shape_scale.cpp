@@ -19,11 +19,11 @@ namespace winrt::GraphPaper::implementation
 	ANCH_WHICH ShapeScale::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
-		if (anchor != ANCH_OUTSIDE) {
+		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 			return anchor;
 		}
 		if (is_opaque(m_stroke_color)) {
-			const double g_len = static_cast<double>(m_grid_len) + 1.0;
+			const double g_len = static_cast<double>(m_grid_size) + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
 			const bool xy = fabs(m_vec.x) >= fabs(m_vec.y);
 			const double diff_x = (xy ? m_vec.x : m_vec.y);
@@ -49,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				if (pt_in_line(t_pos, p0, p1, m_stroke_width)) {
-					return ANCH_FRAME;
+					return ANCH_WHICH::ANCH_FRAME;
 				}
 				//	目盛りの値を表示する.
 				const double x1 = x + f_size * 0.5;
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 				};
 				pt_bound(r_min, r_max, r_min, r_max);
 				if (pt_in_rect(t_pos, r_min, r_max)) {
-					return ANCH_FRAME;
+					return ANCH_WHICH::ANCH_FRAME;
 				}
 			}
 		}
@@ -74,10 +74,10 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F r_min, r_max;
 			pt_bound(m_pos, e_pos, r_min, r_max);
 			if (pt_in_rect(t_pos, r_min, r_max)) {
-				return ANCH_INSIDE;
+				return ANCH_WHICH::ANCH_INSIDE;
 			}
 		}
-		return ANCH_OUTSIDE;
+		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	//	図形を表示する.
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_opaque(m_stroke_color)) {
 			//	線枠の色が不透明な場合,
-			const double g_len = static_cast<double>(m_grid_len) + 1.0;
+			const double g_len = static_cast<double>(m_grid_size) + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
 			const bool xy = fabs(m_vec.x) >= fabs(m_vec.y);
 			const double diff_x = (xy ? m_vec.x : m_vec.y);
@@ -184,11 +184,11 @@ namespace winrt::GraphPaper::implementation
 	//	attr	属性値
 	ShapeScale::ShapeScale(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr) :
 		ShapeRect::ShapeRect(pos, vec, attr),
-		m_grid_len(attr->m_grid_len)
+		m_grid_size(attr->m_grid_size)
 	{
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-		auto f_size = min(attr->m_font_size, attr->m_grid_len + 1.0);
+		auto f_size = min(attr->m_font_size, attr->m_grid_size + 1.0);
 		winrt::check_hresult(
 			Shape::s_dwrite_factory->CreateTextFormat(
 				attr->m_font_family,
@@ -207,7 +207,7 @@ namespace winrt::GraphPaper::implementation
 	//	図形をデータリーダーから読み込む.
 	ShapeScale::ShapeScale(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader),
-		m_grid_len(dt_reader.ReadDouble())
+		m_grid_size(dt_reader.ReadDouble())
 	{
 		//	書体名
 		wchar_t* f_family;
@@ -223,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-		auto size = min(f_size, m_grid_len + 1.0);
+		auto size = min(f_size, m_grid_size + 1.0);
 		winrt::check_hresult(
 			Shape::s_dwrite_factory->CreateTextFormat(
 				f_family,
@@ -246,7 +246,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write;
 
 		ShapeRect::write(dt_writer);
-		dt_writer.WriteDouble(m_grid_len);
+		dt_writer.WriteDouble(m_grid_size);
 		//	書体名
 		auto n_size = m_dw_text_format->GetFontFamilyNameLength() + 1;
 		wchar_t* f_name = new wchar_t[n_size];

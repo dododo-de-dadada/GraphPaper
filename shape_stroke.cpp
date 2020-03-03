@@ -90,20 +90,20 @@ namespace winrt::GraphPaper::implementation
 	void ShapePoly::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& pos) const noexcept
 	{
 		switch (a) {
-		case ANCH_OUTSIDE:
+		case ANCH_WHICH::ANCH_OUTSIDE:
 			pos = m_pos;
 			break;
-		case ANCH_R_NW:
+		case ANCH_WHICH::ANCH_R_NW:
 			pos = m_pos;
 			break;
-		case ANCH_R_NE:
+		case ANCH_WHICH::ANCH_R_NE:
 			pt_add(m_pos, m_vec, pos);
 			break;
-		case ANCH_R_SW:
+		case ANCH_WHICH::ANCH_R_SW:
 			pt_add(m_pos, m_vec, pos);
 			pt_add(pos, m_vec_1, pos);
 			break;
-		case ANCH_R_SE:
+		case ANCH_WHICH::ANCH_R_SE:
 			pt_add(m_pos, m_vec, pos);
 			pt_add(pos, m_vec_1, pos);
 			pt_add(pos, m_vec_2, pos);
@@ -127,28 +127,28 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F d;
 
 		switch (a) {
-		case ANCH_OUTSIDE:
+		case ANCH_WHICH::ANCH_OUTSIDE:
 			m_pos = pos;
 			break;
-		case ANCH_R_NW:
+		case ANCH_WHICH::ANCH_R_NW:
 			pt_sub(pos, m_pos, d);
 			m_pos = pos;
 			pt_sub(m_vec, d, m_vec);
 			break;
-		case ANCH_R_NE:
-			get_pos(ANCH_R_NE, a_pos);
+		case ANCH_WHICH::ANCH_R_NE:
+			get_pos(ANCH_WHICH::ANCH_R_NE, a_pos);
 			pt_sub(pos, a_pos, d);
 			pt_add(m_vec, d, m_vec);
 			pt_sub(m_vec_1, d, m_vec_1);
 			break;
-		case ANCH_R_SW:
-			get_pos(ANCH_R_SW, a_pos);
+		case ANCH_WHICH::ANCH_R_SW:
+			get_pos(ANCH_WHICH::ANCH_R_SW, a_pos);
 			pt_sub(pos, a_pos, d);
 			pt_add(m_vec_1, d, m_vec_1);
 			pt_sub(m_vec_2, d, m_vec_2);
 			break;
-		case ANCH_R_SE:
-			get_pos(ANCH_R_SE, a_pos);
+		case ANCH_WHICH::ANCH_R_SE:
+			get_pos(ANCH_WHICH::ANCH_R_SE, a_pos);
 			pt_sub(pos, a_pos, d);
 			pt_add(m_vec_2, d, m_vec_2);
 			break;
@@ -261,7 +261,7 @@ namespace winrt::GraphPaper::implementation
 	// –ß‚è’l	‚Â‚Ë‚É ANCH_OUTSIDE
 	ANCH_WHICH ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept
 	{
-		return ANCH_OUTSIDE;
+		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	// ”ÍˆÍ‚ÉŠÜ‚Ü‚ê‚é‚©’²‚×‚é.

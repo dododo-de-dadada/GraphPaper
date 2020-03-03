@@ -36,34 +36,34 @@ namespace winrt::GraphPaper::implementation
 	// Escape が押された.
 	void MainPage::ka_tool_select_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
 	{
-		if (m_draw_tool == TOOL_SELECT) {
+		if (m_draw_tool == DRAW_TOOL::TOOL_SELECT) {
 			return;
 		}
 		rmfi_tool_select().IsChecked(true);
 		// グループ名を指定していてもコードビハインドからは
 		// 自動でチェックが外れない.
-		if (m_draw_tool == TOOL_BEZI) {
+		if (m_draw_tool == DRAW_TOOL::TOOL_BEZI) {
 			rmfi_tool_BEZI().IsChecked(false);
 		}
-		else if (m_draw_tool == TOOL_ELLI) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_ELLI) {
 			rmfi_tool_elli().IsChecked(false);
 		}
-		else if (m_draw_tool == TOOL_LINE) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_LINE) {
 			rmfi_tool_line().IsChecked(false);
 		}
-		else if (m_draw_tool == TOOL_QUAD) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_QUAD) {
 			rmfi_tool_quad().IsChecked(false);
 		}
-		else if (m_draw_tool == TOOL_RECT) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_RECT) {
 			rmfi_tool_rect().IsChecked(false);
 		}
-		else if (m_draw_tool == TOOL_RRECT) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_RRECT) {
 			rmfi_tool_rrect().IsChecked(false);
 		}
-		else if (m_draw_tool == TOOL_TEXT) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_TEXT) {
 			rmfi_tool_text().IsChecked(false);
 		}
-		else if (m_draw_tool == TOOL_SCALE) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_SCALE) {
 			rmfi_tool_scale().IsChecked(false);
 		}
 		rmfi_tool_select_click(nullptr, nullptr);

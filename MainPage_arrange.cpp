@@ -9,50 +9,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 選択された図形を最背面または最前面に移動する.
-	template<bool TO_BACK>
-	void MainPage::arrange_to(void)
-	{
-		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
-
-		// 選択された図形をリストに追加する.
-		S_LIST_T sel_list;	// 選択された図形のリスト
-		s_list_select<Shape>(m_list_shapes, sel_list);
-		if (sel_list.size() == 0) {
-			return;
-		}
-		if constexpr (TO_BACK) {
-			uint32_t i = 0;	// 図形を挿入する位置
-			//auto s_pos = S_LIST::front(m_list_shapes, i);
-			auto s_pos = s_list_front(m_list_shapes);
-			for (auto s : sel_list) {
-				if (m_summary_visible) {
-					summary_remove(s);
-					summary_insert(s, i++);
-				}
-				undo_push_remove(s);
-				undo_push_insert(s, s_pos);
-			}
-		}
-		else {
-			for (auto s : sel_list) {
-				if (m_summary_visible) {
-					summary_remove(s);
-					summary_append(s);
-				}
-				undo_push_remove(s);
-				undo_push_insert(s, nullptr);
-			}
-		}
-		sel_list.clear();
-		undo_push_null();
-		enable_undo_menu();
-		enable_edit_menu();
-		page_draw();
-	}
-	template void MainPage::arrange_to<true>(void);
-	template void MainPage::arrange_to<false>(void);
-
 	// 選択された図形について, 次あるいは前の図形と入れ替える.
 	template<typename T>
 	void MainPage::arrange_order(void)
@@ -118,6 +74,50 @@ namespace winrt::GraphPaper::implementation
 	}
 	template void MainPage::arrange_order<S_LIST_T::iterator>(void);
 	template void MainPage::arrange_order<S_LIST_T::reverse_iterator>(void);
+
+	// 選択された図形を最背面または最前面に移動する.
+	template<bool TO_BACK>
+	void MainPage::arrange_to(void)
+	{
+		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
+
+		// 選択された図形をリストに追加する.
+		S_LIST_T sel_list;	// 選択された図形のリスト
+		s_list_select<Shape>(m_list_shapes, sel_list);
+		if (sel_list.size() == 0) {
+			return;
+		}
+		if constexpr (TO_BACK) {
+			uint32_t i = 0;	// 図形を挿入する位置
+			//auto s_pos = S_LIST::front(m_list_shapes, i);
+			auto s_pos = s_list_front(m_list_shapes);
+			for (auto s : sel_list) {
+				if (m_summary_visible) {
+					summary_remove(s);
+					summary_insert(s, i++);
+				}
+				undo_push_remove(s);
+				undo_push_insert(s, s_pos);
+			}
+		}
+		else {
+			for (auto s : sel_list) {
+				if (m_summary_visible) {
+					summary_remove(s);
+					summary_append(s);
+				}
+				undo_push_remove(s);
+				undo_push_insert(s, nullptr);
+			}
+		}
+		sel_list.clear();
+		undo_push_null();
+		enable_undo_menu();
+		enable_edit_menu();
+		page_draw();
+	}
+	template void MainPage::arrange_to<true>(void);
+	template void MainPage::arrange_to<false>(void);
 
 	// 編集メニューの「前面に移動」が選択された.
 	void MainPage::mfi_bring_forward_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)

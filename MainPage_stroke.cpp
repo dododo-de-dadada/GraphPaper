@@ -357,7 +357,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::STROKE_WIDTH || U == UNDO_OP::STROKE_PATTERN) {
 			wchar_t buf[16];
 			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_page_panel.m_grid_len + 1.0;
+			const auto g_len = m_page_panel.m_grid_size + 1.0;
 			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
 			hdr = hdr + L": " + buf;
 		}

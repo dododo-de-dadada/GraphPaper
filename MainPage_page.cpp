@@ -12,47 +12,27 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::TextBox;
 
 	// ページ寸法ダイアログの「適用」ボタンが押された.
-	void MainPage::cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/)
+	void MainPage::cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
-		double pw;
-		double ph;
-		D2D1_SIZE_F page;
 
-		//	無効な数値が入力されている場合, 「適用」ボタンは不可になっているので
-		//	本来は必要ないエラーチェックだが, 念のため.
+		//	本来, 無効な数値が入力されている場合, 「適用」ボタンは不可になっているので
+		//	必要ないエラーチェックだが, 念のため.
+		double pw;
 		if (swscanf_s(tx_page_width().Text().c_str(), L"%lf", &pw) != 1) {
 			cd_message_show(L"str_err_number", L"tx_page_width/Header");
 			return;
 		}
+		double ph;
 		if (swscanf_s(tx_page_height().Text().c_str(), L"%lf", &ph) != 1) {
 			cd_message_show(L"str_err_number", L"tx_page_height/Header");
 			return;
 		}
-		switch (m_page_unit) {
-		default:
-			return;
-		case LEN_UNIT::PIXEL:
-			page.width = static_cast<FLOAT>(std::round(pw));
-			page.height = static_cast<FLOAT>(std::round(ph));
-			break;
-		case LEN_UNIT::INCH:
-			page.width = static_cast<FLOAT>(std::round(pw * dpi));
-			page.height = static_cast<FLOAT>(std::round(ph * dpi));
-			break;
-		case LEN_UNIT::MILLI:
-			page.width = static_cast<FLOAT>(std::round(pw / MM_PER_INCH * dpi));
-			page.height = static_cast<FLOAT>(std::round(ph / MM_PER_INCH * dpi));
-			break;
-		case LEN_UNIT::POINT:
-			page.width = static_cast<FLOAT>(std::round(pw / PT_PER_INCH * dpi));
-			page.height = static_cast<FLOAT>(std::round(ph / PT_PER_INCH * dpi));
-			break;
-		case LEN_UNIT::GRID:
-			page.width = static_cast<FLOAT>(std::round(pw * (m_sample_panel.m_grid_len + 1.0)));
-			page.height = static_cast<FLOAT>(std::round(ph * (m_sample_panel.m_grid_len + 1.0)));
-			break;
-		}
+		const auto g_len = m_sample_panel.m_grid_size + 1.0;
+		D2D1_SIZE_F page{
+			static_cast<FLOAT>(conv_len_to_val(m_page_unit, pw, dpi, g_len)),
+			static_cast<FLOAT>(conv_len_to_val(m_page_unit, ph, dpi, g_len))
+		};
 		if (equal(m_page_panel.m_page_size, page) == false) {
 			undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_panel, page);
 			undo_push_null();
@@ -101,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 	// ページの「単位と書式」ダイアログの「適用」ボタンが押された.
 	void MainPage::cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/)
 	{
-		auto p_unit = m_page_unit;
+		const auto p_unit = m_page_unit;
 		m_page_unit = static_cast<LEN_UNIT>(cx_page_unit().SelectedIndex());
 		m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
 		if (p_unit != m_page_unit) {
@@ -202,10 +182,11 @@ namespace winrt::GraphPaper::implementation
 		//wchar_t const* format = nullptr;
 		double pw;
 		double ph;
-		m_sample_panel.m_grid_len = m_page_panel.m_grid_len;
-		const auto g_len = m_sample_panel.m_grid_len + 1.0;
-		pw = m_page_panel.m_page_size.width;
-		ph = m_page_panel.m_page_size.height;
+		m_sample_panel.m_grid_size = m_page_panel.m_grid_size;
+		const auto g_len = m_sample_panel.m_grid_size + 1.0;
+		pw = m_sample_panel.m_page_size.width;
+		ph = m_sample_panel.m_page_size.height;
+		/*
 		wchar_t const* format;
 		switch (m_page_unit) {
 		default:
@@ -234,10 +215,15 @@ namespace winrt::GraphPaper::implementation
 			ph /= m_sample_panel.m_grid_len + 1.0;
 			break;
 		}
+
 		wchar_t buf[16];
 		swprintf_s(buf, format, pw);
+		*/
+		wchar_t buf[16];
+		conv_val_to_len(m_page_unit, pw, dpi, g_len, buf, 16);
 		tx_page_width().Text(buf);
-		swprintf_s(buf, format, ph);
+		conv_val_to_len(m_page_unit, ph, dpi, g_len, buf, 16);
+		//swprintf_s(buf, format, ph);
 		tx_page_height().Text(buf);
 		tk_page_unit().Text(get_unit_name());
 		// この時点では, テキストボックスに正しい数値を格納しても, 
@@ -249,10 +235,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「単位と書式」が選択された
-	void MainPage::mfi_page_unit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_page_unit_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		cx_page_unit().SelectedIndex(m_page_unit);
-		cx_color_style().SelectedIndex(m_col_style);
+		cx_page_unit().SelectedIndex(static_cast<uint32_t>(m_page_unit));
+		cx_color_style().SelectedIndex(static_cast<uint32_t>(m_col_style));
 		const auto _ = cd_page_unit().ShowAsync();
 	}
 
@@ -313,37 +299,37 @@ namespace winrt::GraphPaper::implementation
 			//	押された状態が範囲を選択している場合,
 			//	補助線の色をブラシに格納する.
 			m_page_dx.m_aux_brush->SetColor(m_page_panel.m_aux_color);
-			if (m_draw_tool == TOOL_SELECT
-				|| m_draw_tool == TOOL_RECT
-				|| m_draw_tool == TOOL_TEXT
-				|| m_draw_tool == TOOL_SCALE) {
+			if (m_draw_tool == DRAW_TOOL::TOOL_SELECT
+				|| m_draw_tool == DRAW_TOOL::TOOL_RECT
+				|| m_draw_tool == DRAW_TOOL::TOOL_TEXT
+				|| m_draw_tool == DRAW_TOOL::TOOL_SCALE) {
 				//	選択ツール
 				//	または方形
 				//	または文字列の場合,
 				//	方形の補助線を表示する.
 				m_page_panel.TOOL_auxiliary_rect(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_draw_tool == TOOL_BEZI) {
+			else if (m_draw_tool == DRAW_TOOL::TOOL_BEZI) {
 				//	曲線の場合,
 				//	曲線の補助線を表示する.
 				m_page_panel.TOOL_auxiliary_bezi(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_draw_tool == TOOL_ELLI) {
+			else if (m_draw_tool == DRAW_TOOL::TOOL_ELLI) {
 				//	だ円の場合,
 				//	だ円の補助線を表示する.
 				m_page_panel.TOOL_auxiliary_elli(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_draw_tool == TOOL_LINE) {
+			else if (m_draw_tool == DRAW_TOOL::TOOL_LINE) {
 				//	直線の場合,
 				//	直線の補助線を表示する.
 				m_page_panel.TOOL_auxiliary_line(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_draw_tool == TOOL_RRECT) {
+			else if (m_draw_tool == DRAW_TOOL::TOOL_RRECT) {
 				//	角丸方形の場合,
 				//	角丸方形の補助線を表示する.
 				m_page_panel.TOOL_auxiliary_rrect(m_page_dx, m_press_pos, m_curr_pos);
 			}
-			else if (m_draw_tool == TOOL_QUAD) {
+			else if (m_draw_tool == DRAW_TOOL::TOOL_QUAD) {
 				//	四へん形の場合,
 				//	四へん形の補助線を表示する.
 				m_page_panel.TOOL_auxiliary_quad(m_page_dx, m_press_pos, m_curr_pos);
@@ -416,7 +402,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		page_set_slider<U, S>(val);
 		if constexpr (U == UNDO_OP::GRID_LEN) {
-			s->set_grid_len(val);
+			s->set_grid_size(val);
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			s->set_grid_opac(val / COLOR_MAX);
@@ -468,7 +454,6 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_page_dx.SetLogicalSize2({ w, h });
-		//m_page_panel.m_dx.SetLogicalSize2({ w, h });
 		page_draw();
 	}
 
@@ -481,34 +466,18 @@ namespace winrt::GraphPaper::implementation
 		m_page_dx.SetLogicalSize2({ static_cast<float>(w), static_cast<float>(h) });
 	}
 
-	// テキストボックス「ページの幅」「ページの高さ」の値が変更された.
+	//	テキストボックス「ページの幅」「ページの高さ」の値が変更された.
 	void MainPage::tx_page_size_text_changed(IInspectable const& sender, TextChangedEventArgs const& /*args*/)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
-		double value;
+		double val;
 		wchar_t ws[2];
 		int cnt;
-		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &value, ws, 2);
-		if (cnt == 1 && value > 0.0) {
-			switch (m_page_unit) {
-			case LEN_UNIT::INCH:
-				value = std::round(value * dpi);
-				break;
-			case LEN_UNIT::MILLI:
-				value = std::round(value * dpi / MM_PER_INCH);
-				break;
-			case LEN_UNIT::POINT:
-				value = std::round(value * dpi / PT_PER_INCH);
-				break;
-			case LEN_UNIT::GRID:
-				value = std::round(value * (m_page_panel.m_grid_len + 1.0));
-				break;
-			default:
-				value = std::round(value);
-				break;
-			}
+		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &val, ws, 2);
+		if (cnt == 1 && val > 0.0) {
+			val = conv_len_to_val(m_page_unit, val, dpi, m_sample_panel.m_grid_size + 1.0);
 		}
-		cd_page_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < 32768.0);
+		cd_page_size().IsPrimaryButtonEnabled(cnt == 1 && val >= 1.0 && val < 32768.0);
 	}
 
 }

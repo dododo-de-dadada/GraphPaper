@@ -448,7 +448,7 @@ namespace winrt::GraphPaper::implementation
 	ANCH_WHICH ShapeText::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
-		if (anchor != ANCH_OUTSIDE) {
+		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 			return anchor;
 		}
 		// •¶š—ñ}Œ`‚Ì¶ã‚ªŒ´“_‚É‚È‚é‚æ‚¤, ’²‚×‚éˆÊ’u‚ğˆÚ“®‚·‚é.
@@ -469,7 +469,7 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(r_max.y - m_font_size)
 			};
 			if (pt_in_rect(pos, r_min, r_max)) {
-				return ANCH_TEXT;
+				return ANCH_WHICH::ANCH_TEXT;
 			}
 		}
 		return ShapeRect::hit_test(t_pos, a_len);

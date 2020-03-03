@@ -668,13 +668,13 @@ namespace winrt::GraphPaper::implementation
 			[this](auto, auto)
 			{
 				// アプリケーションを終了する.
-				using winrt::Windows::UI::Xaml::Application;
 				release();
 				Application::Current().Exit();
 			}
 		);
 		closed_token = cd_conf_save().Closed(
 			[this](auto, auto)
+			//[this, &save_token, &dont_token, &closed_token](auto, auto)
 			{
 				// イベントハンドラーをすべて解除し,
 				// 保存確認ダイアログを破棄する.
@@ -685,15 +685,15 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		// 保存確認ダイアログを表示する.
-		{ auto _{ cd_conf_save().ShowAsync() }; }
+		auto _{ cd_conf_save().ShowAsync() };
 	}
 
 	// ファイルメニューの「新規」が選択された
-	void MainPage::mfi_new_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_new_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		static winrt::event_token save_token;
-		static winrt::event_token dont_token;
-		static winrt::event_token closed_token;
+		winrt::event_token save_token;
+		winrt::event_token dont_token;
+		winrt::event_token closed_token;
 
 		auto dialog = winrt::Windows::UI::Xaml::Controls::ContentDialog();
 		if (m_stack_push == false) {
@@ -701,7 +701,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形データは変更されていないので,
 			// 空白の文書にする.
 			new_doc();
-			return;
+			co_return;
 		}
 		cd_load_conf_save();
 		save_token = cd_conf_save().PrimaryButtonClick(
@@ -719,7 +719,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		closed_token = cd_conf_save().Closed(
-			[this](auto, auto)
+			[this, &save_token, &dont_token, &closed_token](auto, auto)
 			{
 				// イベントハンドラーをすべて解除し,
 				// 保存確認ダイアログを破棄する.
@@ -730,22 +730,24 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		// 保存確認ダイアログを表示する.
-		{ auto _{ cd_conf_save().ShowAsync() }; }
+		co_await cd_conf_save().ShowAsync();
 	}
 
 	// ファイルメニューの「開く」が選択された
-	void MainPage::mfi_open_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_open_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		static winrt::event_token save_token;
-		static winrt::event_token dont_token;
-		static winrt::event_token closed_token;
+		winrt::event_token save_token;
+		winrt::event_token dont_token;
+		winrt::event_token closed_token;
 
 		if (m_stack_push == false) {
 			//	操作スタックの更新フラグがない場合,
 			//	図形データは変更されていないので,
 			//	ファイルを非同期に開く.
 			auto _{ file_open_async() };
-			return;
+			//return;
+			//co_await file_open_async();
+			co_return;
 		}
 		cd_load_conf_save();
 		save_token = cd_conf_save().PrimaryButtonClick(
@@ -763,7 +765,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		closed_token = cd_conf_save().Closed(
-			[this](auto, auto)
+			[this, &save_token, &dont_token, &closed_token](auto, auto)
 			{
 				//	イベントハンドラーをすべて解除し,
 				//	保存確認ダイアログを破棄する.
@@ -774,7 +776,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		//	保存確認ダイアログを表示する.
-		{ auto _{ cd_conf_save().ShowAsync() }; }
+		co_await cd_conf_save().ShowAsync();
+		//{ auto _{ cd_conf_save().ShowAsync() }; }
 	}
 
 	//	ファイルメニューの「名前を付けて保存」が選択された

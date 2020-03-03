@@ -510,7 +510,7 @@ namespace winrt::GraphPaper::implementation
 	}
 	void UndoSet<UNDO_OP::GRID_LEN>::SET(Shape* s, const double& t_val)
 	{
-		s->set_grid_len(t_val);
+		s->set_grid_size(t_val);
 	}
 	void UndoSet<UNDO_OP::GRID_OPAC>::SET(Shape* s, const double& t_val)
 	{
@@ -620,7 +620,7 @@ namespace winrt::GraphPaper::implementation
 	}
 	bool UndoSet<UNDO_OP::GRID_LEN>::GET(Shape* s, double& t_val) noexcept
 	{
-		return s->get_grid_len(t_val);
+		return s->get_grid_size(t_val);
 	}
 	bool UndoSet<UNDO_OP::GRID_OPAC>::GET(Shape* s, double& t_val) noexcept
 	{

@@ -224,8 +224,8 @@ namespace winrt::GraphPaper::implementation
 			break;
 		case LEN_UNIT::GRID:
 			format = FMT_GRID;
-			x = fx / (m_page_panel.m_grid_len + 1.0);
-			y = fy / (m_page_panel.m_grid_len + 1.0);
+			x = fx / (m_page_panel.m_grid_size + 1.0);
+			y = fy / (m_page_panel.m_grid_size + 1.0);
 			break;
 		default:
 			format = FMT_PIXEL;
@@ -246,7 +246,7 @@ tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	{
 		wchar_t buf[16];
 		const double dpi = m_page_dx.m_logical_dpi;
-		double g_len = m_page_panel.m_grid_len + 1.0;
+		double g_len = m_page_panel.m_grid_size + 1.0;
 		wchar_t const* format;
 		switch (m_page_unit) {
 		case LEN_UNIT::INCH:
@@ -277,40 +277,12 @@ tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	void MainPage::stat_set_page(void)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
-		double w = m_page_panel.m_page_size.width;// m_page_max.x - m_page_min.x;
-		double h = m_page_panel.m_page_size.height;// m_page_max.y - m_page_min.y;
-		wchar_t const* format;
-		switch (m_page_unit) {
-		case LEN_UNIT::INCH:
-			format = FMT_INCH;
-			w = w / dpi;
-			h = h / dpi;
-			break;
-		case LEN_UNIT::MILLI:
-			format = FMT_MILLI;
-			w = w / dpi * MM_PER_INCH;
-			h = h / dpi * MM_PER_INCH;
-			break;
-		case LEN_UNIT::POINT:
-			format = FMT_POINT;
-			w = w / dpi * PT_PER_INCH;
-			h = h / dpi * PT_PER_INCH;
-			break;
-		case LEN_UNIT::GRID:
-			format = FMT_GRID;
-			w /= m_page_panel.m_grid_len + 1.0;
-			h /= m_page_panel.m_grid_len + 1.0;
-			break;
-
-		default:
-			format = FMT_PIXEL;
-			break;
-		}
+		const double g_len = m_page_panel.m_grid_size + 1.0;
 		wchar_t buf[16];
-		swprintf_s(buf, format, w);
-		tk_stat_width().Text(winrt::hstring{ L"w:" } +buf);
-		swprintf_s(buf, format, h);
-		tk_stat_height().Text(winrt::hstring{ L"h:" } +buf);
+		conv_val_to_len(m_page_unit, m_page_panel.m_page_size.width, dpi, g_len, buf, 16);
+		tk_stat_width().Text(winrt::hstring{ L"w:" } + buf);
+		conv_val_to_len(m_page_unit, m_page_panel.m_page_size.height, dpi, g_len, buf, 16);
+		tk_stat_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 
 	// 図形ツールをステータスバーに格納する.
@@ -318,28 +290,28 @@ tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring data;
-		if (m_draw_tool == TOOL_BEZI) {
+		if (m_draw_tool == DRAW_TOOL::TOOL_BEZI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));
 		}
-		else if (m_draw_tool == TOOL_ELLI) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_ELLI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_elli")));
 		}
-		else if (m_draw_tool == TOOL_LINE) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_LINE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 		}
-		else if (m_draw_tool == TOOL_QUAD) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_QUAD) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_quad")));
 		}
-		else if (m_draw_tool == TOOL_RECT) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_RECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
 		}
-		else if (m_draw_tool == TOOL_RRECT) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_RRECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")));
 		}
-		else if (m_draw_tool == TOOL_TEXT) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_TEXT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
-		else if (m_draw_tool == TOOL_SCALE) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_SCALE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
 		else {

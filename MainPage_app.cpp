@@ -9,8 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr auto APP_DATA = L"file_app_data";	// // アプリケーションデータを格納するファイル名のリソース名
 	static winrt::hstring app_data;	// アプリケーションデータを格納するファイル名
+	constexpr auto APP_DATA = L"file_app_data";	// // アプリケーションデータを格納するファイル名のリソース名
 
 	//	アプリケーションデータを保存するフォルダーを得る.
 	static auto app_data_folder(void);
@@ -39,19 +39,24 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::app_extended_session_async(SuspendingOperation const& s_op)
 	{
 		using concurrency::cancellation_token_source;
+		using winrt::Windows::Foundation::TypedEventHandler;// <winrt::Windows::Foundation::IInspectable const&, winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedEventArgs const&>;
 		using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionReason;
 		using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionResult;
 		using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionSession;
+		using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedEventArgs;
 		using winrt::Windows::ApplicationModel::SuspendingDeferral;
 		using winrt::Windows::Storage::StorageFolder;
 		using winrt::Windows::Storage::CreationCollisionOption;
+		//static cancellation_token_source ct_source;
+		//static SuspendingDeferral s_deferral;
+		//static winrt::event_token s_token;
 
 		//	コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		//	延長処理を中断するためのトークンの元を得る.
-		static auto ct_source = concurrency::cancellation_token_source();
+		auto ct_source = cancellation_token_source();
 		//	アプリの中断を管理するため中断延期 SuspendingDeferral を中断操作から得る.
-		static auto s_deferral = s_op.GetDeferral();
+		auto s_deferral = s_op.GetDeferral();
 		//	延長実行するためのセッションを得る.
 		auto session = ExtendedExecutionSession();
 		//	SavingData をセッションの目的に格納する.
@@ -59,29 +64,31 @@ namespace winrt::GraphPaper::implementation
 		//	「To save data.」をセッションの理由に格納する.
 		session.Description(L"To save data.");
 		//	セッションが取り消されたときのコルーチンを登録する.
-		static auto s_token = session.Revoked(
-			[this](auto, auto args)
-			{
-				using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
-				//	セッションが取り消された場合,
-				//	トークンの元をキャンセルする.
-				ct_source.cancel();
-				switch (args.Reason()) {
-				case ExtendedExecutionRevokedReason::Resumed:
-					break;
-				case ExtendedExecutionRevokedReason::SystemPolicy:
-					break;
-				}
-				if (s_deferral != nullptr) {
-					//	中断延期がヌルでない場合,
-					//	中断延期を完了する.
-					//	中断延長を完了し OS に通知しなければ, 
-					//	アプリは再び中断延期を要求できない.
-					s_deferral.Complete();
-					s_deferral = nullptr;
-				}
+		//	RequestExtensionAsync の中でこのコルーチンは呼び出されるので, 
+		//	上位関数のローカル変数は参照できる, はず.
+		auto handler = [&ct_source, &s_deferral](IInspectable const&, ExtendedExecutionRevokedEventArgs const& args)
+		{
+			using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
+			//	セッションが取り消された場合,
+			//	トークンの元をキャンセルする.
+			ct_source.cancel();
+			switch (args.Reason()) {
+			case ExtendedExecutionRevokedReason::Resumed:
+				break;
+			case ExtendedExecutionRevokedReason::SystemPolicy:
+				break;
 			}
-		);
+			if (s_deferral != nullptr) {
+				//	中断延期がヌルでない場合,
+				//	中断延期を完了する.
+				//	中断延長を完了し OS に通知しなければ, 
+				//	アプリは再び中断延期を要求できない.
+				s_deferral.Complete();
+				s_deferral = nullptr;
+			}
+		};
+		auto s_token = session.Revoked(handler);
+
 		//	セッションを要求し, その結果を得る.
 		auto hr = E_FAIL;
 		switch (co_await session.RequestExtensionAsync()) {

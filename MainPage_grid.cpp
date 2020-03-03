@@ -28,39 +28,10 @@ namespace winrt::GraphPaper::implementation
 			hdr = r_loader.GetString(L"str_grid_length");
 			val += 1.0;
 			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_page_panel.m_grid_len + 1.0;
+			const auto g_len = m_page_panel.m_grid_size + 1.0;
 			wchar_t buf[16];
 			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
 			hdr = hdr + L": " + buf;
-			/*
-			if (m_page_unit == LEN_UNIT::PIXEL) {
-				wchar_t buf[16];
-				swprintf_s(buf, FMT_PIXEL_UNIT, val);
-				hdr = hdr + L": " + buf;
-			}
-			else if (m_page_unit == LEN_UNIT::GRID) {
-				wchar_t buf[16];
-				swprintf_s(buf, FMT_GRID_UNIT, val / (m_page_panel.m_grid_len + 1.0));
-				hdr = hdr + L": " + buf;
-			}
-			else {
-				wchar_t buf[16];
-				const double inch = val / m_sample_dx.m_logical_dpi;
-				switch (m_page_unit) {
-				case LEN_UNIT::INCH:
-					swprintf_s(buf, FMT_INCH_UNIT, inch);
-					hdr = hdr + L": " + buf;
-					break;
-				case LEN_UNIT::MILLI:
-					swprintf_s(buf, FMT_MILLI_UNIT, inch * MM_PER_INCH);
-					hdr = hdr + L": " + buf;
-					break;
-				case LEN_UNIT::POINT:
-					swprintf_s(buf, FMT_POINT_UNIT, inch * PT_PER_INCH);
-					hdr = hdr + L": " + buf;
-					break;
-				}
-			}*/
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			if constexpr (S == 3) {
@@ -95,7 +66,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		grid_set_slider<U, S>(val);
 		if constexpr (U == UNDO_OP::GRID_LEN) {
-			s->set_grid_len(val);
+			s->set_grid_size(val);
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			s->set_grid_opac(val / COLOR_MAX);
@@ -127,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token closed_token;
 
 		load_cd_sample();
-		const double val0 = m_page_panel.m_grid_len;
+		const double val0 = m_page_panel.m_grid_size;
 		slider0().Value(val0);
 		grid_set_slider<UNDO_OP::GRID_LEN, 0>(val0);
 		slider0().Visibility(VISIBLE);
@@ -150,8 +121,8 @@ namespace winrt::GraphPaper::implementation
 				double sample_val;
 				double page_val;
 
-				m_page_panel.get_grid_len(page_val);
-				m_sample_panel.get_grid_len(sample_val);
+				m_page_panel.get_grid_size(page_val);
+				m_sample_panel.get_grid_size(sample_val);
 				if (equal(page_val, sample_val)) {
 					return;
 				}
@@ -179,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼の大きさ」>「狭める」が選択された.
 	void MainPage::mfi_grid_len_contract_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		const double val = (m_page_panel.m_grid_len + 1.0) * 0.5 - 1.0;
+		const double val = (m_page_panel.m_grid_size + 1.0) * 0.5 - 1.0;
 		if (val < 1.0) {
 			return;
 		}
@@ -192,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼の大きさ」>「広げる」が選択された.
 	void MainPage::mfi_grid_len_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
-		const double val = (m_page_panel.m_grid_len + 1.0) * 2.0 - 1.0;
+		const double val = (m_page_panel.m_grid_size + 1.0) * 2.0 - 1.0;
 		if (val > max(m_page_panel.m_page_size.width, m_page_panel.m_page_size.height)) {
 			//	方眼の一片の長さが, ページの幅か高さの大きいほうの値を超える場合,
 			//	中断する.
@@ -310,7 +281,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_page_panel.m_grid_snap == false) {
 			return;
 		}
-		const double g_len = m_page_panel.m_grid_len + 1.0;
+		const double g_len = m_page_panel.m_grid_size + 1.0;
 		auto flag = true;	// 未変更
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F g_pos;

@@ -31,6 +31,33 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//	長さの値ををピクセル単位の値に変換する.
+	//	unit	長さの単位
+	//	val	長さの値
+	//	dpi	DPI
+	//	g_len	方眼の長さ
+	double conv_len_to_val(const LEN_UNIT unit, const double val, const double dpi, const double g_len)
+	{
+		double ret;
+
+		if (unit == LEN_UNIT::INCH) {
+			ret = val * dpi;
+		}
+		else if (unit == LEN_UNIT::MILLI) {
+			ret = val * dpi / MM_PER_INCH;
+		}
+		else if (unit == LEN_UNIT::POINT) {
+			ret = val * dpi / PT_PER_INCH;
+		}
+		else if (unit == LEN_UNIT::GRID) {
+			ret = val * g_len;
+		}
+		else {
+			ret = val;
+		}
+		return std::round(val);
+	}
+
 	//	ピクセル単位の長さを他の単位の文字列に変換する.
 	//	unit	長さの単位
 	//	val	ピクセル単位の長さ
@@ -283,7 +310,10 @@ namespace winrt::GraphPaper::implementation
 			disp.OrientationChanged({ this, &MainPage::disp_orientation_changed });
 			disp.DisplayContentsInvalidated({ this, &MainPage::disp_contents_invalidated });
 		}
-
+		{
+			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
+			//SystemNavigationManagerPreview::GetForCurrentView().CloseRequested
+		}
 		// D2D/DWRITE ファクトリを図形/文字列図形クラスに, 
 		// 図形リストとページパネルを操作クラスに格納する.
 		{
@@ -315,7 +345,7 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::UI::Xaml::Media::Brush;
 			m_page_panel.m_corner_rad.x = GRIDLEN_PX;
 			m_page_panel.m_corner_rad.y = m_page_panel.m_corner_rad.x;
-			m_page_panel.m_grid_len = static_cast<double>(GRIDLEN_PX) - 1.0;
+			m_page_panel.m_grid_size = static_cast<double>(GRIDLEN_PX) - 1.0;
 			m_page_panel.m_page_size.width = std::floor(A4_PER_INCH.width * dpi);
 			m_page_panel.m_page_size.height = std::floor(A4_PER_INCH.height * dpi);
 			// 色の初期値はテーマに依存する.

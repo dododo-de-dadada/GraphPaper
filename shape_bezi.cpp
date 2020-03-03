@@ -11,10 +11,10 @@ namespace winrt::GraphPaper::implementation
 {
 	// 折れ線の頂点の配列
 	constexpr ANCH_WHICH ANCH_BEZI[4]{
-		ANCH_R_SE,
-		ANCH_R_SW,
-		ANCH_R_NE,
-		ANCH_R_NW
+		ANCH_WHICH::ANCH_R_SE,
+		ANCH_WHICH::ANCH_R_SW,
+		ANCH_WHICH::ANCH_R_NE,
+		ANCH_WHICH::ANCH_R_NW
 	};
 
 	// セグメントの区切る助変数の値
@@ -606,7 +606,7 @@ namespace winrt::GraphPaper::implementation
 				// 曲線は調べる位置を含むとみなす.
 				// (これ以上分割しても結果に影響がない)
 				// ANCH_FRAME を返す.
-				return ANCH_FRAME;
+				return ANCH_WHICH::ANCH_FRAME;
 			}
 			// スタックがオバーフローするなら, スタックに積まれている
 			// 他の制御点の組を調べる.
@@ -634,7 +634,7 @@ namespace winrt::GraphPaper::implementation
 			s_arr[s_cnt + 5] = b_pos[3];
 			s_cnt += 6;
 		}
-		return ANCH_OUTSIDE;
+		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	// 範囲に含まれるか調べる.

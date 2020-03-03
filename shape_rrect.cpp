@@ -3,7 +3,7 @@
 // 角丸方形図形
 //------------------------------
 #include "pch.h"
-#include "shape.h"
+#include "shape_rect.h"
 
 using namespace winrt;
 
@@ -11,10 +11,10 @@ namespace winrt::GraphPaper::implementation
 {
 	// 角丸方形の中点の配列
 	constexpr ANCH_WHICH ANCH_ROUND[4]{
-		ANCH_R_SE,	// 右下角
-		ANCH_R_NE,	// 右上角
-		ANCH_R_SW,	// 左下角
-		ANCH_R_NW	// 左上角
+		ANCH_WHICH::ANCH_R_SE,	// 右下角
+		ANCH_WHICH::ANCH_R_NE,	// 右上角
+		ANCH_WHICH::ANCH_R_SW,	// 左下角
+		ANCH_WHICH::ANCH_R_NW	// 左上角
 	};
 
 	// 角丸半径を計算する.
@@ -148,19 +148,19 @@ namespace winrt::GraphPaper::implementation
 		const double rx = fabs(hx) < fabs(m_corner_rad.x) ? hx : m_corner_rad.x;
 		const double ry = fabs(hy) < fabs(m_corner_rad.y) ? hy : m_corner_rad.y;
 		switch (a) {
-		case ANCH_R_NW:
+		case ANCH_WHICH::ANCH_R_NW:
 			// 左上の角丸中心点を求める
 			pt_add(m_pos, rx, ry, pos);
 			break;
-		case ANCH_R_NE:
+		case ANCH_WHICH::ANCH_R_NE:
 			// 右上の角丸中心点を求める
 			pt_add(m_pos, vx - rx, ry, pos);
 			break;
-		case ANCH_R_SE:
+		case ANCH_WHICH::ANCH_R_SE:
 			// 右下の角丸中心点を求める
 			pt_add(m_pos, vx - rx, vy - ry, pos);
 			break;
-		case ANCH_R_SW:
+		case ANCH_WHICH::ANCH_R_SW:
 			// 左下の角丸中心点を求める
 			pt_add(m_pos, rx, vy - ry, pos);
 			break;
@@ -279,36 +279,24 @@ namespace winrt::GraphPaper::implementation
 		r_rad.x = std::abs(m_corner_rad.x);
 		r_rad.y = std::abs(m_corner_rad.y);
 		if (is_opaque(m_stroke_color) == false) {
-			return is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_min, r_max, r_rad) ? ANCH_INSIDE : ANCH_OUTSIDE;
+			return is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_min, r_max, r_rad) ? ANCH_WHICH::ANCH_INSIDE : ANCH_WHICH::ANCH_OUTSIDE;
 		}
 		const double s_width = max(m_stroke_width, a_len);
 		// 外側の角丸方形の判定
 		pt_add(r_min, -s_width * 0.5, r_min);
 		pt_add(r_max, s_width * 0.5, r_max);
 		pt_add(r_rad, s_width * 0.5, r_rad);
-		//r_min.x -= s_width * 0.5;
-		//r_min.y -= s_width * 0.5;
-		//r_max.x += s_width * 0.5;
-		//r_max.y += s_width * 0.5;
-		//r_rad.x += s_width * 0.5;
-		//r_rad.y += s_width * 0.5;
 		if (pt_in_rrect(t_pos, r_min, r_max, r_rad) == false) {
-			return ANCH_OUTSIDE;
+			return ANCH_WHICH::ANCH_OUTSIDE;
 		}
 		// 内側の角丸方形の判定
 		pt_add(r_min, s_width, r_min);
 		pt_add(r_max, -s_width, r_max);
 		pt_add(r_rad, -s_width, r_rad);
-		//r_min.x += s_width;
-		//r_min.y += s_width;
-		//r_max.x -= s_width;
-		//r_max.y -= s_width;
-		//r_rad.x -= s_width;
-		//r_rad.y -= s_width;
 		if (pt_in_rrect(t_pos, r_min, r_max, r_rad) == false) {
-			return ANCH_FRAME;
+			return ANCH_WHICH::ANCH_FRAME;
 		}
-		return is_opaque(m_fill_color) ? ANCH_INSIDE : ANCH_OUTSIDE;
+		return is_opaque(m_fill_color) ? ANCH_WHICH::ANCH_INSIDE : ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
@@ -319,27 +307,27 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F r;
 
 		switch (a) {
-		case ANCH_R_NW:
+		case ANCH_WHICH::ANCH_R_NW:
 			ShapeRRect::get_pos(a, c_pos);
 			pt_sub(pos, c_pos, d);
 			pt_add(m_corner_rad, d, r);
 			calc_corner_radius(m_vec, r, m_corner_rad);
 			break;
-		case ANCH_R_NE:
+		case ANCH_WHICH::ANCH_R_NE:
 			ShapeRRect::get_pos(a, c_pos);
 			pt_sub(pos, c_pos, d);
 			r.x = m_corner_rad.x - d.x;
 			r.y = m_corner_rad.y + d.y;
 			calc_corner_radius(m_vec, r, m_corner_rad);
 			break;
-		case ANCH_R_SE:
+		case ANCH_WHICH::ANCH_R_SE:
 			ShapeRRect::get_pos(a, c_pos);
 			pt_sub(pos, c_pos, d);
 			r.x = m_corner_rad.x - d.x;
 			r.y = m_corner_rad.y - d.y;
 			calc_corner_radius(m_vec, r, m_corner_rad);
 			break;
-		case ANCH_R_SW:
+		case ANCH_WHICH::ANCH_R_SW:
 			ShapeRRect::get_pos(a, c_pos);
 			pt_sub(pos, c_pos, d);
 			r.x = m_corner_rad.x + d.x;

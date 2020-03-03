@@ -84,25 +84,25 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F d;
 		pt_sub(m_curr_pos, m_press_pos, d);
 		Shape* s;
-		if (m_draw_tool == TOOL_RECT) {
+		if (m_draw_tool == DRAW_TOOL::TOOL_RECT) {
 			s = new ShapeRect(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_tool == TOOL_RRECT) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_RRECT) {
 			s = new ShapeRRect(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_tool == TOOL_QUAD) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_QUAD) {
 			s = new ShapeQuad(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_tool == TOOL_ELLI) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_ELLI) {
 			s = new ShapeElli(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_tool == TOOL_LINE) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_LINE) {
 			s = new ShapeLine(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_tool == TOOL_BEZI) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_BEZI) {
 			s = new ShapeBezi(m_press_pos, d, &m_page_panel);
 		}
-		else if (m_draw_tool == TOOL_SCALE) {
+		else if (m_draw_tool == DRAW_TOOL::TOOL_SCALE) {
 			s = new ShapeScale(m_press_pos, d, &m_page_panel);
 		}
 		else {
@@ -167,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 				cd_edit_text().Closed(closed_token);
 				m_press_state = S_TRAN::BEGIN;
 				m_press_shape = nullptr;
-				m_press_anchor = ANCH_OUTSIDE;
+				m_press_anchor = ANCH_WHICH::ANCH_OUTSIDE;
 				m_press_shape_prev = nullptr;
 				page_draw();
 			}
@@ -206,14 +206,14 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F d;
 		if (m_page_panel.m_grid_snap) {
 			// 方眼に整列の場合, 始点と終点を方眼の大きさで丸める
-			double g = max(m_page_panel.m_grid_len + 1.0, 1.0);
+			double g = max(m_page_panel.m_grid_size + 1.0, 1.0);
 			pt_round(m_press_pos, g, m_press_pos);
 			pt_round(m_curr_pos, g, m_curr_pos);
 		}
 		// ポインターの現在の位置と押された位置の差分を求める.
 		pt_sub(m_curr_pos, m_press_pos, d);
 		if (fabs(d.x) >= 1.0f || fabs(d.y) >= 1.0f) {
-			if (m_draw_tool == TOOL_TEXT) {
+			if (m_draw_tool == DRAW_TOOL::TOOL_TEXT) {
 				create_shape_text();
 				// 画面に範囲を表示したままにするために中断する.
 				return;
@@ -249,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 				// 得た左上点を方眼の大きさで丸める.
 				// 丸めの前後で生じた差を得る.
 				D2D1_POINT_2F g_pos;
-				pt_round(p_min, m_page_panel.m_grid_len + 1.0, g_pos);
+				pt_round(p_min, m_page_panel.m_grid_size + 1.0, g_pos);
 				D2D1_POINT_2F d;
 				pt_sub(g_pos, p_min, d);
 				s_list_move(m_list_shapes, d);
@@ -269,7 +269,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::finish_form_shape(void)
 	{
 		if (m_page_panel.m_grid_snap) {
-			pt_round(m_curr_pos, m_page_panel.m_grid_len + 1.0, m_curr_pos);
+			pt_round(m_curr_pos, m_page_panel.m_grid_size + 1.0, m_curr_pos);
 		}
 		m_press_shape->set_pos(m_curr_pos, m_press_anchor);
 		if (undo_pop_if_invalid()) {
@@ -386,7 +386,7 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(m_curr_pos, m_press_pos, d);
 			if (pt_abs2(d) > m_click_dist) {
 				// 長さが閾値を超える場合,
-				if (m_draw_tool != TOOL_SELECT) {
+				if (m_draw_tool != DRAW_TOOL::TOOL_SELECT) {
 					// 図形ツールが選択ツールでない場合,
 					// 範囲を選択している状態に遷移する.
 					m_press_state = S_TRAN::PRESS_AREA;
@@ -399,9 +399,9 @@ namespace winrt::GraphPaper::implementation
 					Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 				}
 				else if (m_list_select > 1
-					|| m_press_anchor == ANCH_FRAME
-					|| m_press_anchor == ANCH_INSIDE
-					|| m_press_anchor == ANCH_TEXT) {
+					|| m_press_anchor == ANCH_WHICH::ANCH_FRAME
+					|| m_press_anchor == ANCH_WHICH::ANCH_INSIDE
+					|| m_press_anchor == ANCH_WHICH::ANCH_TEXT) {
 					// 選択された図形の数が 1 を超える
 					// または押された図形の部位が線枠
 					// または押された図形の部位が内側
@@ -412,7 +412,7 @@ namespace winrt::GraphPaper::implementation
 					// 図形の位置をスタックに積み, 差分だけ移動する.
 					undo_push_pos(d);
 				}
-				else if (m_press_anchor != ANCH_OUTSIDE) {
+				else if (m_press_anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 					m_press_state = S_TRAN::PRESS_FORM;
 					// ポインターの現在位置を前回位置に格納する.
 					m_prev_pos = m_curr_pos;
@@ -486,14 +486,14 @@ namespace winrt::GraphPaper::implementation
 		// イベント発生位置をポインターが押された位置に格納する.
 		m_press_time = t_stamp;
 		m_press_pos = m_curr_pos;
-		if (m_draw_tool != TOOL_SELECT) {
+		if (m_draw_tool != DRAW_TOOL::TOOL_SELECT) {
 			// 図形ツールが選択ツールでない場合,
 			// 終了する.
 			return;
 		}
 		// ポインターが押された位置を含む図形とその部位をリストから得る.
 		m_press_anchor = s_list_hit_test(m_list_shapes, m_press_pos, m_page_dx.m_anch_len, m_press_shape);
-		if (m_press_anchor != ANCH_OUTSIDE) {
+		if (m_press_anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 			// 図形とその部位を得た場合,
 			// 得た値をポインターが押された図形と部位に格納する.
 			// 得た図形を一覧でポインターが押された図形に格納する.
@@ -505,7 +505,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// ヌルを, ポインターが押された図形と前回ポインターが押された図形, 一覧でポインターが押された図形に格納する.
 		// ANCH_OUTSIDE をポインターが押された部位に格納する.
-		m_press_anchor = ANCH_OUTSIDE;
+		m_press_anchor = ANCH_WHICH::ANCH_OUTSIDE;
 		m_press_shape = nullptr;
 		m_press_shape_prev = nullptr;
 		m_press_shape_summary = nullptr;
@@ -533,7 +533,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::show_context_menu(void)
 	{
 		if (m_press_shape == nullptr
-			|| m_press_anchor == ANCH_OUTSIDE) {
+			|| m_press_anchor == ANCH_WHICH::ANCH_OUTSIDE) {
 			//	押された図形がヌル, 
 			//	または押された部位は外側の場合,
 			//	ページコンテキストメニューを表示する.
@@ -548,19 +548,19 @@ namespace winrt::GraphPaper::implementation
 		else {
 			// 押された図形の属性値をページのパネルに格納する.
 			m_page_panel.set_to_shape(m_press_shape);
-			if (m_press_anchor == ANCH_INSIDE) {
+			if (m_press_anchor == ANCH_WHICH::ANCH_INSIDE) {
 				// 押された図形の部位が内側の場合,
 				// 塗りつぶしコンテキストメニューを表示する.
 				scp_page_panel().ContextFlyout(nullptr);
 				scp_page_panel().ContextFlyout(m_menu_fill);
 			}
-			else if (m_press_anchor == ANCH_TEXT) {
+			else if (m_press_anchor == ANCH_WHICH::ANCH_TEXT) {
 				// 押された図形の部位が文字列の場合,
 				// 書体コンテキストメニューを表示する.
 				scp_page_panel().ContextFlyout(nullptr);
 				scp_page_panel().ContextFlyout(m_menu_font);
 			}
-			else if (m_press_anchor == ANCH_FRAME) {
+			else if (m_press_anchor == ANCH_WHICH::ANCH_FRAME) {
 				// 押された図形の部位が枠上の場合,
 				// 線枠コンテキストメニューを表示する.
 				scp_page_panel().ContextFlyout(nullptr);
@@ -641,7 +641,7 @@ namespace winrt::GraphPaper::implementation
 		// 初期状態に戻す.
 		m_press_state = S_TRAN::BEGIN;
 		m_press_shape = nullptr;
-		m_press_anchor = ANCH_OUTSIDE;
+		m_press_anchor = ANCH_WHICH::ANCH_OUTSIDE;
 		page_draw();
 	}
 
@@ -698,39 +698,39 @@ namespace winrt::GraphPaper::implementation
 	// 状況に応じた形状のカーソルを設定する.
 	void MainPage::set_pointer(void)
 	{
-		if (m_draw_tool != TOOL_SELECT) {
+		if (m_draw_tool != DRAW_TOOL::TOOL_SELECT) {
 			Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 			return;
 		}
 		Shape* s;
 		const auto a = s_list_hit_test(m_list_shapes, m_curr_pos, m_page_dx.m_anch_len, s);
-		if (a != ANCH_OUTSIDE && s->is_selected()) {
+		if (a != ANCH_WHICH::ANCH_OUTSIDE && s->is_selected()) {
 			switch (a) {
-			case ANCH_R_NW:
-			case ANCH_R_NE:
-			case ANCH_R_SE:
-			case ANCH_R_SW:
+			case ANCH_WHICH::ANCH_R_NW:
+			case ANCH_WHICH::ANCH_R_NE:
+			case ANCH_WHICH::ANCH_R_SE:
+			case ANCH_WHICH::ANCH_R_SW:
 				Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 				break;
-			case ANCH_INSIDE:
-			case ANCH_FRAME:
-			case ANCH_TEXT:
+			case ANCH_WHICH::ANCH_INSIDE:
+			case ANCH_WHICH::ANCH_FRAME:
+			case ANCH_WHICH::ANCH_TEXT:
 				Window::Current().CoreWindow().PointerCursor(CUR_SIZEALL);
 				break;
-			case ANCH_NE:
-			case ANCH_SW:
+			case ANCH_WHICH::ANCH_NE:
+			case ANCH_WHICH::ANCH_SW:
 				Window::Current().CoreWindow().PointerCursor(CUR_SIZENESW);
 				break;
-			case ANCH_NORTH:
-			case ANCH_SOUTH:
+			case ANCH_WHICH::ANCH_NORTH:
+			case ANCH_WHICH::ANCH_SOUTH:
 				Window::Current().CoreWindow().PointerCursor(CUR_SIZENS);
 				break;
-			case ANCH_NW:
-			case ANCH_SE:
+			case ANCH_WHICH::ANCH_NW:
+			case ANCH_WHICH::ANCH_SE:
 				Window::Current().CoreWindow().PointerCursor(CUR_SIZENWSE);
 				break;
-			case ANCH_WEST:
-			case ANCH_EAST:
+			case ANCH_WHICH::ANCH_WEST:
+			case ANCH_WHICH::ANCH_EAST:
 				Window::Current().CoreWindow().PointerCursor(CUR_SIZEWE);
 				break;
 			}

@@ -3,7 +3,7 @@
 //	1	「ソリューションエクスプローラー」>「ビューを切り替える」>「フォルダービュー」
 //	2	「ビルド」>「構成マネージャー」>「アクティブソリューションプラットフォーム」を x64
 //	3	「プロジェクト」>「NuGetパッケージの管理」>「復元」. 必要なら「MicroSoft.UI.Xaml」と「Microsoft.Windows.CppWinRT」を更新.
-//
+//	4	「デバッグ」>「GraphPaper のプロパティ」>「構成プロパティ」>「ターゲットプラットフォームの最小バージョン」>「10.0.18362.0」
 //	MainPage.h
 //
 //	MainPage.cpp	メインページの作成と表示
@@ -121,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	//	作図ツール
 	//-------------------------------
-	enum DRAW_TOOL {
+	enum struct DRAW_TOOL {
 		TOOL_SELECT,	// 選択ツール
 		TOOL_BEZI,	// 曲線
 		TOOL_ELLI,	// だ円
@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// 長さの単位
 	//-------------------------------
-	enum LEN_UNIT {
+	enum struct LEN_UNIT {
 		PIXEL,	// ピクセル
 		INCH,	// インチ
 		MILLI,	// ミリメートル
@@ -145,18 +145,19 @@ namespace winrt::GraphPaper::implementation
 	};
 	//	ピクセル単位の長さを他の単位の文字列に変換する.
 	void conv_val_to_len(const LEN_UNIT unit, const double px, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
+	double conv_len_to_val(const LEN_UNIT unit, const double val, const double dpi, const double g_len);
 
 	//-------------------------------
 	//	色成分の形式
 	//-------------------------------
-	enum COL_STYLE {
+	enum struct COL_STYLE {
 		DEC,	// 10 進数
 		HEX,	// 16 進数	
 		FLT,	// 浮動小数
 		CEN		// パーセント
 	};
 	//	色成分の値を文字列に変換する.
-	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t *buf, const uint32_t len);
+	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t* buf, const uint32_t len);
 
 	//-------------------------------
 	//	メインページ
@@ -183,7 +184,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_curr_pos{ 0.0, 0.0 };		// ポインターの現在位置
 		D2D1_POINT_2F m_prev_pos{ 0.0, 0.0 };		// ポインターの前回位置
 		S_TRAN m_press_state = S_TRAN::BEGIN;		// ポインターが押された状態
-		ANCH_WHICH m_press_anchor = ANCH_OUTSIDE;		// ポインターが押された図形の部位
+		ANCH_WHICH m_press_anchor = ANCH_WHICH::ANCH_OUTSIDE;		// ポインターが押された図形の部位
 		D2D1_POINT_2F m_press_pos{ 0.0, 0.0 };		// ポインターが押された位置
 		Shape* m_press_shape = nullptr;		// ポインターが押された図形
 		Shape* m_press_shape_prev = nullptr;		// 前回ポインターが押された図形
@@ -293,7 +294,7 @@ namespace winrt::GraphPaper::implementation
 		//	線枠メニューの「矢じりの大きさ」が選択された.
 		void mfi_arrow_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void arrow_set_slider(double val);
+		template <UNDO_OP U, int S> void arrow_set_slider(const double val);
 		//	値をスライダーのヘッダーと図形に格納する.
 		template <UNDO_OP U, int S> void arrow_set_slider(Shape* s, const double val);
 
@@ -341,9 +342,9 @@ namespace winrt::GraphPaper::implementation
 		//	ファイルメニューの「終了」が選択された
 		void mfi_exit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	ファイルメニューの「新規」が選択された
-		void mfi_new_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_new_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	ファイルメニューの「開く」が選択された
-		void mfi_open_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_open_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	ファイルメニューの「名前を付けて保存」が選択された
 		void mfi_save_as_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	ファイルメニューの「保存」が選択された
@@ -382,10 +383,12 @@ namespace winrt::GraphPaper::implementation
 		void lv_font_weight_loaded(IInspectable const& /*sender*/, RoutedEventArgs const& /*e*/);
 		//　リストビュー「書体の伸縮」がロードされた.
 		void lv_font_stretch_loaded(IInspectable const& /*sender*/, RoutedEventArgs const& /*e*/);
+		//	書体の色ダイアログを表示する.
+		IAsyncAction MainPage::font_color_dialog_show(void);
 		//　書体メニューの「色」が選択された.
-		void mfi_font_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_font_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　書体メニューの「書体名」が選択された.
-		void mfi_font_family_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_font_family_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　書体メニューの「イタリック体」が選択された.
 		void rmfi_font_italic_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　書体メニューの「標準」が選択された.
@@ -393,11 +396,11 @@ namespace winrt::GraphPaper::implementation
 		//　書体メニューの「斜体」が選択された.
 		void rmfi_font_oblique_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　書体メニューの「大きさ」が選択された.
-		void mfi_font_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_font_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　書体メニューの「伸縮」が選択された.
-		void mfi_font_stretch_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_font_stretch_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　書体メニューの「太さ」が選択された.
-		void mfi_font_weight_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_font_weight_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//　値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void font_set_slider(const double val);
 		//　値をスライダーのヘッダーと図形に格納する.
@@ -411,9 +414,9 @@ namespace winrt::GraphPaper::implementation
 		//	書体メニューの「行間」>「広げる」が選択された.
 		void mfi_text_line_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	書体メニューの「行間」>「高さ」が選択された.
-		void mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	書体メニューの「余白」が選択された.
-		void mfi_text_margin_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_text_margin_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	書体メニューの「段落のそろえ」>「中段」が選択された.
 		void rmfi_text_align_middle_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	書体メニューの「段落のそろえ」>「下よせ」が選択された.

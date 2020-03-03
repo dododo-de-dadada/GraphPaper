@@ -79,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 	ANCH_WHICH ShapeElli::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
-		if (anchor != ANCH_OUTSIDE) {
+		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 			return anchor;
 		}
 
@@ -108,7 +108,7 @@ namespace winrt::GraphPaper::implementation
 			if (pt_in_elli(t_pos, c_pos, r_outer.x, r_outer.y) == false) {
 				// 外径のだ円に含まれないなら, 
 				// ANCH_OUTSIDE を返す.
-				return ANCH_OUTSIDE;
+				return ANCH_WHICH::ANCH_OUTSIDE;
 			}
 			// 位置がだ円の枠上にあるか調べる.
 			D2D1_POINT_2F r_inner;
@@ -117,23 +117,23 @@ namespace winrt::GraphPaper::implementation
 			// 内径が負数なら,
 			// ANCH_FRAME を返す.
 			if (r_inner.x <= 0.0f) {
-				return ANCH_FRAME;
+				return ANCH_WHICH::ANCH_FRAME;
 			}
 			if (r_inner.y <= 0.0f) {
-				return ANCH_FRAME;
+				return ANCH_WHICH::ANCH_FRAME;
 			}
 			if (pt_in_elli(t_pos, c_pos, r_inner.x, r_inner.y) == false) {
 				// 内径のだ円に含まれないなら ANCH_FRAME を返す.
-				return ANCH_FRAME;
+				return ANCH_WHICH::ANCH_FRAME;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
 			// 位置がだ円の内側にあるか調べる.
 			if (pt_in_elli(t_pos, c_pos, rad.x, rad.y)) {
-				return ANCH_INSIDE;
+				return ANCH_WHICH::ANCH_INSIDE;
 			}
 		}
-		return ANCH_OUTSIDE;
+		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
 	// データライターに SVG タグとして書き込む.

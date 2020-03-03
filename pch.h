@@ -25,6 +25,7 @@
 #include <winrt/Windows.Storage.Pickers.h>
 #include <winrt/Windows.System.Threading.h>
 #include <winrt/Windows.UI.Core.h>
+#include <winrt/Windows.UI.Core.Preview.h>
 #include <winrt/Windows.UI.Input.h>
 #include <winrt/Windows.UI.ViewManagement.h>
 #include <winrt/Windows.UI.Xaml.Input.h>

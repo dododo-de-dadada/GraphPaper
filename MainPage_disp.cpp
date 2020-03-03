@@ -11,7 +11,7 @@ namespace winrt::GraphPaper::implementation
 {
 	// 再描画が必要になった
 	// sender	イベントが発生したデイスプレイ
-	void MainPage::disp_contents_invalidated(DisplayInformation const& sender, IInspectable const& /*args*/)
+	void MainPage::disp_contents_invalidated(DisplayInformation const& sender, IInspectable const&)
 	{
 #if defined(_DEBUG)
 		if (sender != DisplayInformation::GetForCurrentView()) {
