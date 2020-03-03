@@ -312,7 +312,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		{
 			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
-			//SystemNavigationManagerPreview::GetForCurrentView().CloseRequested
+			using winrt::Windows::UI::Xaml::Application;
+			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(
+				[this](auto, auto args) {
+					args.Handled(true);
+					auto _{ mfi_exit_click(nullptr, nullptr) };
+				}
+			);
 		}
 		// D2D/DWRITE ファクトリを図形/文字列図形クラスに, 
 		// 図形リストとページパネルを操作クラスに格納する.

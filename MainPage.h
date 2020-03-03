@@ -340,7 +340,7 @@ namespace winrt::GraphPaper::implementation
 		//	ファイルの読み込みが終了した.
 		void finish_file_read(void);
 		//	ファイルメニューの「終了」が選択された
-		void mfi_exit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_exit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	ファイルメニューの「新規」が選択された
 		IAsyncAction mfi_new_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	ファイルメニューの「開く」が選択された

@@ -641,12 +641,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ファイルメニューの「終了」が選択された
-	void MainPage::mfi_exit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_exit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
 	{
 		using winrt::Windows::UI::Xaml::Application;
-		static winrt::event_token save_token;
-		static winrt::event_token dont_token;
-		static winrt::event_token closed_token;
+
+		winrt::event_token save_token;
+		winrt::event_token dont_token;
+		winrt::event_token cancel_token;
 
 		if (m_stack_push == false) {
 			// 操作スタックの更新フラグがない場合,
@@ -654,7 +655,7 @@ namespace winrt::GraphPaper::implementation
 			// アプリケーションを終了する.
 			release();
 			Application::Current().Exit();
-			return;
+			co_return;
 		}
 		cd_load_conf_save();
 		save_token = cd_conf_save().PrimaryButtonClick(
@@ -672,20 +673,21 @@ namespace winrt::GraphPaper::implementation
 				Application::Current().Exit();
 			}
 		);
-		closed_token = cd_conf_save().Closed(
-			[this](auto, auto)
-			//[this, &save_token, &dont_token, &closed_token](auto, auto)
+		cancel_token = cd_conf_save().CloseButtonClick(
+		//closed_token = cd_conf_save().Closed(
+			[this, &save_token, &dont_token, &cancel_token](auto, auto)
 			{
 				// イベントハンドラーをすべて解除し,
 				// 保存確認ダイアログを破棄する.
 				cd_conf_save().PrimaryButtonClick(save_token);
 				cd_conf_save().SecondaryButtonClick(dont_token);
-				cd_conf_save().Closed(closed_token);
+				cd_conf_save().CloseButtonClick(cancel_token);
 				UnloadObject(cd_conf_save());
 			}
 		);
 		// 保存確認ダイアログを表示する.
-		auto _{ cd_conf_save().ShowAsync() };
+		//auto _{ cd_conf_save().ShowAsync() };
+		co_await cd_conf_save().ShowAsync();
 	}
 
 	// ファイルメニューの「新規」が選択された
