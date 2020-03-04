@@ -11,6 +11,8 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::UI::Xaml::Controls::TextBox;
 
+	constexpr wchar_t TITLE_PAGE[] = L"str_page";
+
 	// ページ寸法ダイアログの「適用」ボタンが押された.
 	void MainPage::cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&)
 	{
@@ -48,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
-	void MainPage::cd_page_size_sec_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/)
+	void MainPage::cd_page_size_sec_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&)
 	{
 		D2D1_POINT_2F b_min = { FLT_MAX, FLT_MAX };
 		D2D1_POINT_2F b_max = { -FLT_MAX, -FLT_MAX };
@@ -79,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページの「単位と書式」ダイアログの「適用」ボタンが押された.
-	void MainPage::cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/)
+	void MainPage::cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&)
 	{
 		const auto p_unit = m_page_unit;
 		m_page_unit = static_cast<LEN_UNIT>(cx_page_unit().SelectedIndex());
@@ -93,90 +95,51 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「色」が選択された.
-	void MainPage::mfi_page_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_page_color_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token slider1_token;
-		static winrt::event_token slider2_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		load_cd_sample();
 		const double val0 = m_page_panel.m_page_color.r * COLOR_MAX;
 		const double val1 = m_page_panel.m_page_color.g * COLOR_MAX;
 		const double val2 = m_page_panel.m_page_color.b * COLOR_MAX;
 		slider0().Value(val0);
 		slider1().Value(val1);
 		slider2().Value(val2);
-		page_set_slider<UNDO_OP::PAGE_COLOR, 0>(val0);
-		page_set_slider<UNDO_OP::PAGE_COLOR, 1>(val1);
-		page_set_slider<UNDO_OP::PAGE_COLOR, 2>(val2);
+		page_set_slider_header<UNDO_OP::PAGE_COLOR, 0>(val0);
+		page_set_slider_header<UNDO_OP::PAGE_COLOR, 1>(val1);
+		page_set_slider_header<UNDO_OP::PAGE_COLOR, 2>(val2);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				page_set_slider<UNDO_OP::PAGE_COLOR, 0>(&m_sample_panel, args.NewValue());
-			}
-		);
-		slider1_token = slider1().ValueChanged(
-			[this](auto, auto args)
-			{
-				page_set_slider<UNDO_OP::PAGE_COLOR, 1>(&m_sample_panel, args.NewValue());
-			}
-		);
-		slider2_token = slider2().ValueChanged(
-			[this](auto, auto args)
-			{
-				page_set_slider<UNDO_OP::PAGE_COLOR, 2>(&m_sample_panel, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				D2D1_COLOR_F sample_val;
-				m_sample_panel.get_page_color(sample_val);
-				D2D1_COLOR_F page_val;
-				m_page_panel.get_page_color(page_val);
-				if (equal(page_val, sample_val)) {
-					return;
-				}
+		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 0> });
+		const auto slider1_token = slider1().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 1> });
+		const auto slider2_token = slider2().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 2> });
+		m_sample_type = SAMP_TYPE::NONE;
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_PAGE)));
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			D2D1_COLOR_F sample_val;
+			m_sample_panel.get_page_color(sample_val);
+			D2D1_COLOR_F page_val;
+			m_page_panel.get_page_color(page_val);
+			if (equal(page_val, sample_val) == false) {
 				undo_push_set<UNDO_OP::PAGE_COLOR>(&m_page_panel, sample_val);
 				undo_push_null();
 				enable_undo_menu();
-				page_draw();
 			}
-		);
-		closed_token = cd_sample().Closed(
-			[this](auto, auto)
-			{
-				slider0().Visibility(COLLAPSED);
-				slider1().Visibility(COLLAPSED);
-				slider2().Visibility(COLLAPSED);
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				slider1().ValueChanged(slider1_token);
-				slider2().ValueChanged(slider2_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		show_cd_sample(L"str_page");
+		}
+		slider0().Visibility(COLLAPSED);
+		slider1().Visibility(COLLAPSED);
+		slider2().Visibility(COLLAPSED);
+		slider0().ValueChanged(slider0_token);
+		slider1().ValueChanged(slider1_token);
+		slider2().ValueChanged(slider2_token);
+		page_draw();
 	}
 
 	// ページメニューの「大きさ」が選択された
-	void MainPage::mfi_page_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_page_size_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
 		//wchar_t const* format = nullptr;
@@ -357,7 +320,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::page_set_slider(double val)
+	void MainPage::page_set_slider_header(double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
@@ -398,9 +361,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーと図形に格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::page_set_slider(Shape* s, const double val)
+	void MainPage::page_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		page_set_slider<U, S>(val);
+		Shape* s = &m_sample_panel;
+		const double val = args.NewValue();
+		page_set_slider_header<U, S>(val);
 		if constexpr (U == UNDO_OP::GRID_LEN) {
 			s->set_grid_size(val);
 		}
@@ -467,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	テキストボックス「ページの幅」「ページの高さ」の値が変更された.
-	void MainPage::tx_page_size_text_changed(IInspectable const& sender, TextChangedEventArgs const& /*args*/)
+	void MainPage::tx_page_size_text_changed(IInspectable const& sender, TextChangedEventArgs const&)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
 		double val;

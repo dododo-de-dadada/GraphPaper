@@ -10,31 +10,31 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// Shift + 下矢印キーが押された.
-	void MainPage::ka_range_next_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	void MainPage::ka_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Down>();
 	}
 
 	// Shift + 上矢印キーが押された.
-	void MainPage::ka_range_prev_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	void MainPage::ka_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Up>();
 	}
 
 	// 下矢印キーが押された.
-	void MainPage::ka_select_next_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	void MainPage::ka_select_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
 	}
 
 	// 上矢印キーが押された.
-	void MainPage::ka_select_prev_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	void MainPage::ka_select_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
 	}
 
 	// Escape が押された.
-	void MainPage::ka_tool_select_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	void MainPage::ka_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		if (m_draw_tool == DRAW_TOOL::TOOL_SELECT) {
 			return;
@@ -70,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// Cntrol + PgDn が押された.
-	//void MainPage::ka_bring_forward_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_bring_forward().IsEnabled()) {
 	//		//mfi_bring_forward_click(nullptr, nullptr);
@@ -131,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 	}
 	*/
 	// Cntrol + F が押された.
-	//void MainPage::ka_find_text_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_text_find().IsEnabled()) {
 	//		mfi_text_find_click(nullptr, nullptr);
@@ -139,7 +139,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + G が押された.
-	//void MainPage::ka_group_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_group_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_group().IsEnabled()) {
 	//		mfi_group_click(nullptr, nullptr);
@@ -147,19 +147,19 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + N が押された.
-	//void MainPage::ka_new_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_new_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	mfi_new_click(nullptr, nullptr);
 	//}
 
 	// Cntrol + O が押された.
-	//void MainPage::ka_open_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_open_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	mfi_open_click(nullptr, nullptr);
 	//}
 
 	// Cntrol + V が押された.
-	//void MainPage::ka_paste_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_paste().IsEnabled()) {
 	//		mfi_paste_click(nullptr, nullptr);
@@ -167,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + Y が押された.
-	//void MainPage::ka_redo_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_redo().IsEnabled()) {
 	//		mfi_redo_click(nullptr, nullptr);
@@ -175,7 +175,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + Shift + S が押された.
-	//void MainPage::ka_save_as_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_save_as_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_save_as().IsEnabled()) {
 	//		mfi_save_as_click(nullptr, nullptr);
@@ -183,7 +183,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + S が押された.
-	//void MainPage::ka_save_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_save_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_save().IsEnabled()) {
 	//		mfi_save_click(nullptr, nullptr);
@@ -191,7 +191,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + A が押された.
-	//void MainPage::ka_select_all_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_select_all_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_select_all().IsEnabled()) {
 	//		mfi_select_all_click(nullptr, nullptr);
@@ -199,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + PgUp が押された.
-	//void MainPage::ka_send_backward_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_send_backward().IsEnabled()) {
 	//		mfi_send_backward_click(nullptr, nullptr);
@@ -207,7 +207,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + Home が押された.
-	//void MainPage::ka_send_to_back_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_send_to_back().IsEnabled()) {
 	//		mfi_send_to_back_click(nullptr, nullptr);
@@ -215,7 +215,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + L が押された.
-	//void MainPage::ka_summaty_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_summaty_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_summary().IsEnabled()) {
 	//		mfi_summary_click(nullptr, nullptr);
@@ -223,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + Z が押された.
-	//void MainPage::ka_undo_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_undo().IsEnabled()) {
 	//		mfi_undo_click(nullptr, nullptr);
@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + U が押された.
-	//void MainPage::ka_ungroup_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_ungroup_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_ungroup().IsEnabled()) {
 	//		mfi_ungroup_click(nullptr, nullptr);
@@ -239,19 +239,19 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// Cntrol + 0 が押された.
-	//void MainPage::ka_zoom_reset_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (m_page_panel.m_page_scale != 1.0) {
 	//		mfi_zoom_reset_click(nullptr, nullptr);
 	//	}
 	//}
 
-	//void MainPage::ka_zoom_in_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/)
+	//void MainPage::ka_zoom_in_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//
 	//}
 
-	//void MainPage::scp_manipulation_delta(IInspectable const& /*sender*/, ManipulationDeltaRoutedEventArgs const& args)
+	//void MainPage::scp_manipulation_delta(IInspectable const&, ManipulationDeltaRoutedEventArgs const& args)
 	//{
 	//
 	//}

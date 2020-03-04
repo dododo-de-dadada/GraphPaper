@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「やり直し」が選択された.
-	void MainPage::mfi_redo_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_redo_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// スタックが空でない間以下を繰り返す
 		// 操作をスタックからポップする.
@@ -212,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「元に戻す」が選択された.
-	void MainPage::mfi_undo_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_undo_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		//	フラグを消去する.
 		//	スタックが空でない間以下を繰り返す.

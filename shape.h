@@ -421,8 +421,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& /*val*/) const noexcept { return false; }
 		// •¶š—ñ‚Ì‚»‚ë‚¦‚ğ“¾‚é.
 		virtual bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& /*val*/) const noexcept { return false; }
-		// sŠÔ‚ğ“¾‚é.
-		virtual bool get_text_line(double& /*val*/) const noexcept { return false; }
+		// s‚Ì‚‚³‚ğ“¾‚é.
+		virtual bool get_text_line_height(double& /*val*/) const noexcept { return false; }
 		// •¶š—ñ‚ÌüˆÍ‚Ì—]”’‚ğ“¾‚é.
 		virtual bool get_text_margin(D2D1_SIZE_F& /*val*/) const noexcept { return false; }
 		// •¶š”ÍˆÍ‚ğ“¾‚é
@@ -490,7 +490,7 @@ namespace winrt::GraphPaper::implementation
 		// ’l‚ğ•¶š—ñ‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
 		virtual void set_text_align_t(const DWRITE_TEXT_ALIGNMENT /*val*/) {}
 		// ’l‚ğsŠÔ‚ÉŠi”[‚·‚é.
-		virtual void set_text_line(const double /*val*/) {}
+		virtual void set_text_line_height(const double /*val*/) {}
 		// ’l‚ğ•¶š—ñ‚Ì—]”’‚ÉŠi”[‚·‚é.
 		virtual void set_text_margin(const D2D1_SIZE_F /*val*/) {}
 		// ’l‚ğ•¶š”ÍˆÍ‚ÉŠi”[‚·‚é.
@@ -635,7 +635,7 @@ namespace winrt::GraphPaper::implementation
 		// ‘‘Ì‚Ì‘¾‚³‚ğ“¾‚é.
 		bool get_font_weight(DWRITE_FONT_WEIGHT& val) const noexcept;
 		// sŠÔ‚ğ“¾‚é.
-		bool get_text_line(double& val) const noexcept;
+		bool get_text_line_height(double& val) const noexcept;
 		// •¶š—ñ‚ÌüˆÍ‚Ì—]”’‚ğ“¾‚é.
 		bool get_text_margin(D2D1_SIZE_F& val) const noexcept;
 		// ’i—‚Ì‚»‚ë‚¦‚ğ“¾‚é.
@@ -687,7 +687,7 @@ namespace winrt::GraphPaper::implementation
 		// ’l‚ğ‘‘Ì‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
 		void set_font_weight(const DWRITE_FONT_WEIGHT val);
 		// ’l‚ğsŠÔ‚ÉŠi”[‚·‚é.
-		void set_text_line(const double val);
+		void set_text_line_height(const double val);
 		// ’l‚ğ•¶š—ñ‚Ì—]”’‚ÉŠi”[‚·‚é.
 		void set_text_margin(const D2D1_SIZE_F val);
 		// ’l‚ğ’i—‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
@@ -1162,7 +1162,7 @@ namespace winrt::GraphPaper::implementation
 		// ‘‘Ì‚Ìš‘Ì‚ğ“¾‚é.
 		bool get_font_style(DWRITE_FONT_STYLE& val) const noexcept;
 		// sŠÔ‚ğ“¾‚é.
-		bool get_text_line(double& val) const noexcept;
+		bool get_text_line_height(double& val) const noexcept;
 		// ‘‘Ì‚Ì‘¾‚³‚ğ“¾‚é.
 		bool get_font_weight(DWRITE_FONT_WEIGHT& val) const noexcept;
 		// •¶š—ñ‚Ì—]”’‚ğ“¾‚é.
@@ -1198,7 +1198,7 @@ namespace winrt::GraphPaper::implementation
 		// ’l‚ğ‘‘Ì‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
 		void set_font_weight(const DWRITE_FONT_WEIGHT val);
 		// ’l‚ğsŠÔ‚ÉŠi”[‚·‚é.
-		void set_text_line(const double val);
+		void set_text_line_height(const double val);
 		// ’l‚ğ•¶š—ñ‚Ì—]”’‚ÉŠi”[‚·‚é.
 		void set_text_margin(const D2D1_SIZE_F val);
 		// ’l‚ğ’i—‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.

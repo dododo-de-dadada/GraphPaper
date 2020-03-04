@@ -166,7 +166,7 @@ namespace winrt::GraphPaper::implementation
 
 	// アプリケーションが再開された.
 	// アプリ起動のときは呼ばれない.
-	void MainPage::app_resuming(IInspectable const& /*sender*/, IInspectable const& /*object*/)
+	void MainPage::app_resuming(IInspectable const&, IInspectable const& /*object*/)
 	{
 		// アプリケーションを非同期に再開する.
 		auto _{ app_resuming_async() };
@@ -201,7 +201,7 @@ namespace winrt::GraphPaper::implementation
 	// アプリケーションが中断された.
 	// アプリの現在の状態を保存する.
 	// EnteredBackground が先.
-	void MainPage::app_suspending(IInspectable const& /*sender*/, SuspendingEventArgs const& args)
+	void MainPage::app_suspending(IInspectable const&, SuspendingEventArgs const& args)
 	{
 		// 引数から中断操作を得る.
 		// 得られた中断操作を指定して,

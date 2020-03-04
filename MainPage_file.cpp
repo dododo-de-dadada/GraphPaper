@@ -1,6 +1,6 @@
 //-------------------------------
-// MainPage_file.cpp
-// ファイルの読み書き, アプリの終了
+//	MainPage_file.cpp
+//	ファイルの読み書き
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -26,7 +26,7 @@
 //			winrt::resume_foreground
 //			mru_add_file
 //				mru_update_menu_items
-//			finish_file_read
+//		finish_file_read
 //		winrt::resume_foreground
 //	file_save_as_async
 //		file_wait_cursor
@@ -55,28 +55,14 @@
 //			winrt::resume_foreground
 //			mru_add_file
 //				mru_update_menu_items
-//	mfi_exit_click
-//		file_save_and_exit_async
-//			file_save_async
-//			Exit
-//		Exit
 //	mfi_new_click
-//		file_save_and_new_async
-//			file_save_async
-//			new_doc
+//		file_save_async
 //		new_doc
 //	mfi_open_click
-//		file_save_and_open_async
-//			file_save_async
-//			file_open_async
 //		file_open_async
+//		file_save_async
 //	mfi_recent_files_N_click
-//		file_read_recent
-//			mru_get_token
-//			file_save_and_read_recent_async
-//				file_save_async
-//				file_read_recent_async
-//			file_read_recent_async
+//		file_read_recent_async
 //	mfi_save_as_click
 //		file_save_as_async
 //	mfi_save_click
@@ -236,42 +222,6 @@ namespace winrt::GraphPaper::implementation
 		co_await context;
 		// 結果を返し終了する.
 		co_return hr;
-	}
-
-	//	ファイルに非同期に保存して, アプリケーションを終了する.
-	IAsyncAction MainPage::file_save_and_exit_async(void)
-	{
-		using winrt::Windows::UI::Xaml::Application;
-
-		//	ファイルに非同期に保存する
-		if (co_await file_save_async() == S_OK) {
-			//	保存できた場合,
-			//	アプリケーションを終了する.
-			release();
-			Application::Current().Exit();
-		}
-	}
-
-	//	ファイルに非同期に保存して, 空白の文書にする.
-	IAsyncAction MainPage::file_save_and_new_async(void)
-	{
-		//	ファイルに非同期に保存する
-		if (co_await file_save_async() == S_OK) {
-			//	保存できた場合,
-			//	空白の文書にする.
-			new_doc();
-		}
-	}
-
-	//	ファイルに非同期に保存して, ファイルを非同期に開く.
-	IAsyncAction MainPage::file_save_and_open_async(void)
-	{
-		//	ファイルに非同期に保存する
-		if (co_await file_save_async() == S_OK) {
-			//	保存できた場合,
-			//	ファイルを非同期に開く.
-			co_await file_open_async();
-		}
 	}
 
 	//	名前を付けてファイルに非同期に保存する.
@@ -640,64 +590,21 @@ namespace winrt::GraphPaper::implementation
 		stat_visibility();
 	}
 
-	// ファイルメニューの「終了」が選択された
-	IAsyncAction MainPage::mfi_exit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
-	{
-		using winrt::Windows::UI::Xaml::Application;
-
-		winrt::event_token save_token;
-		winrt::event_token dont_token;
-		winrt::event_token cancel_token;
-
-		if (m_stack_push == false) {
-			// 操作スタックの更新フラグがない場合,
-			// 図形データは変更されていないので,
-			// アプリケーションを終了する.
-			release();
-			Application::Current().Exit();
-			co_return;
-		}
-		cd_load_conf_save();
-		save_token = cd_conf_save().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				// ファイルに非同期に保存して, アプリケーションを終了する.
-				auto _{ file_save_and_exit_async() };
-			}
-		);
-		dont_token = cd_conf_save().SecondaryButtonClick(
-			[this](auto, auto)
-			{
-				// アプリケーションを終了する.
-				release();
-				Application::Current().Exit();
-			}
-		);
-		cancel_token = cd_conf_save().CloseButtonClick(
-		//closed_token = cd_conf_save().Closed(
-			[this, &save_token, &dont_token, &cancel_token](auto, auto)
-			{
-				// イベントハンドラーをすべて解除し,
-				// 保存確認ダイアログを破棄する.
-				cd_conf_save().PrimaryButtonClick(save_token);
-				cd_conf_save().SecondaryButtonClick(dont_token);
-				cd_conf_save().CloseButtonClick(cancel_token);
-				UnloadObject(cd_conf_save());
-			}
-		);
-		// 保存確認ダイアログを表示する.
-		//auto _{ cd_conf_save().ShowAsync() };
-		co_await cd_conf_save().ShowAsync();
-	}
-
 	// ファイルメニューの「新規」が選択された
-	IAsyncAction MainPage::mfi_new_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_new_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		winrt::event_token save_token;
-		winrt::event_token dont_token;
-		winrt::event_token closed_token;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		auto dialog = winrt::Windows::UI::Xaml::Controls::ContentDialog();
+		if (m_stack_push) {
+			const auto d_result = co_await cd_conf_save().ShowAsync();
+			if (d_result == ContentDialogResult::None
+				|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
+				co_return;
+			}
+		}
+		// 空白の文書にする.
+		new_doc();
+		/*
 		if (m_stack_push == false) {
 			// 操作スタックの更新フラグがない場合,
 			// 図形データは変更されていないので,
@@ -705,92 +612,75 @@ namespace winrt::GraphPaper::implementation
 			new_doc();
 			co_return;
 		}
-		cd_load_conf_save();
-		save_token = cd_conf_save().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				//	ファイルに非同期に保存して, 空白の文書にする.
-				auto _{ file_save_and_new_async() };
-			}
-		);
-		dont_token = cd_conf_save().SecondaryButtonClick(
-			[this](auto, auto)
-			{
-				// 空白の文書にする.
+		// 保存確認ダイアログを表示する.
+		const auto d_result = co_await cd_conf_save().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			//	保存するが押された場合,
+			//	ファイルに非同期に保存する
+			if (co_await file_save_async() == S_OK) {
+				//	保存できた場合,
+				//	空白の文書にする.
 				new_doc();
 			}
-		);
-		closed_token = cd_conf_save().Closed(
-			[this, &save_token, &dont_token, &closed_token](auto, auto)
-			{
-				// イベントハンドラーをすべて解除し,
-				// 保存確認ダイアログを破棄する.
-				cd_conf_save().PrimaryButtonClick(save_token);
-				cd_conf_save().SecondaryButtonClick(dont_token);
-				cd_conf_save().Closed(closed_token);
-				UnloadObject(cd_conf_save());
-			}
-		);
-		// 保存確認ダイアログを表示する.
-		co_await cd_conf_save().ShowAsync();
+		}
+		else if (d_result == ContentDialogResult::Secondary) {
+			// 空白の文書にする.
+			new_doc();
+		}
+		*/
 	}
 
-	// ファイルメニューの「開く」が選択された
-	IAsyncAction MainPage::mfi_open_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	//	ファイルメニューの「開く」が選択された
+	IAsyncAction MainPage::mfi_open_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		winrt::event_token save_token;
-		winrt::event_token dont_token;
-		winrt::event_token closed_token;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
+		if (m_stack_push) {
+			//	操作スタックの更新フラグが立っている場合,
+			//	保存確認ダイアログを表示する.
+			const auto d_result = co_await cd_conf_save().ShowAsync();
+			if (d_result == ContentDialogResult::None
+				|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
+				//	ダイアログの結果が「キャンセル」の場合,
+				//	または「保存する」かつファイルに保存して失敗した場合
+				co_return;
+			}
+		}
+		auto _{ file_open_async() };
+		/*
 		if (m_stack_push == false) {
 			//	操作スタックの更新フラグがない場合,
 			//	図形データは変更されていないので,
 			//	ファイルを非同期に開く.
 			auto _{ file_open_async() };
-			//return;
-			//co_await file_open_async();
 			co_return;
 		}
-		cd_load_conf_save();
-		save_token = cd_conf_save().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				//	ファイルに非同期に保存して, ファイルを非同期に開く.
-				auto _{ file_save_and_open_async() };
-			}
-		);
-		dont_token = cd_conf_save().SecondaryButtonClick(
-			[this](auto, auto)
-			{
+		//	保存確認ダイアログを表示する.
+		const auto d_result = co_await cd_conf_save().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			//	ファイルに非同期に保存する
+			if (co_await file_save_async() == S_OK) {
+				//	保存できた場合,
 				//	ファイルを非同期に開く.
 				auto _{ file_open_async() };
 			}
-		);
-		closed_token = cd_conf_save().Closed(
-			[this, &save_token, &dont_token, &closed_token](auto, auto)
-			{
-				//	イベントハンドラーをすべて解除し,
-				//	保存確認ダイアログを破棄する.
-				cd_conf_save().PrimaryButtonClick(save_token);
-				cd_conf_save().SecondaryButtonClick(dont_token);
-				cd_conf_save().Closed(closed_token);
-				UnloadObject(cd_conf_save());
-			}
-		);
-		//	保存確認ダイアログを表示する.
-		co_await cd_conf_save().ShowAsync();
-		//{ auto _{ cd_conf_save().ShowAsync() }; }
+		}
+		else if (d_result == ContentDialogResult::Secondary) {
+			//	ファイルを非同期に開く.
+			auto _{ file_open_async() };
+		}
+		*/
 	}
 
 	//	ファイルメニューの「名前を付けて保存」が選択された
-	void MainPage::mfi_save_as_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_save_as_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		//	名前を付けてファイルに非同期に保存する.
 		auto _{ file_save_as_async(true) };
 	}
 
 	//	ファイルメニューの「保存」が選択された
-	void MainPage::mfi_save_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_save_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		//	ファイルに非同期に保存する
 		auto _{ file_save_async() };

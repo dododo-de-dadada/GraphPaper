@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 見本ダイアログが開かれた.
-	void MainPage::cd_sample_opened(ContentDialog const& /*sender*/, ContentDialogOpenedEventArgs const& /*args*/)
+	void MainPage::cd_sample_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
 	{
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -50,26 +50,52 @@ namespace winrt::GraphPaper::implementation
 		m_sample_dx.Present();
 	}
 
-	// 見本のパネルがロードされた.
-	void MainPage::sample_panel_loaded(void)
+	//	見本パネルの大きさが変わった.
+	void MainPage::scp_sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_sample_dx.m_dxgi_swap_chain) {
+		if (m_sample_dx.m_dxgi_swap_chain != nullptr) {
 			m_sample_dx.m_dxgi_swap_chain = nullptr;
 		}
 		m_sample_panel = m_page_panel;
-		auto w = scp_sample_panel().ActualWidth();
-		auto h = scp_sample_panel().ActualHeight();
+		const auto w = scp_sample_panel().ActualWidth();
+		const auto h = scp_sample_panel().ActualHeight();
 		m_sample_panel.m_page_size.width = static_cast<FLOAT>(w);
 		m_sample_panel.m_page_size.height = static_cast<FLOAT>(h);
 		m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		if (m_sample_type != SAMP_TYPE::NONE) {
+			const auto padding = w * 0.125;
+			const D2D1_POINT_2F pos = {
+				static_cast<FLOAT>(padding),
+				static_cast<FLOAT>(padding)
+			};
+			const D2D1_POINT_2F vec = {
+				static_cast<FLOAT>(w - 2.0 * padding),
+				static_cast<FLOAT>(h - 2.0 * padding)
+			};
+			if (m_sample_type == SAMP_TYPE::FONT) {
+				using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
+				const auto t = wchar_cpy(r_loader.GetString(L"str_pangram").c_str());
+				m_sample_shape = new ShapeText(pos, vec, t, &m_sample_panel);
+#if defined(_DEBUG)
+				debug_leak_cnt++;
+#endif
+			}
+			else if (m_sample_type == SAMP_TYPE::STROKE) {
+				m_sample_shape = new ShapeLine(pos, vec, &m_sample_panel);
+#if defined(_DEBUG)
+				debug_leak_cnt++;
+#endif
+			}
+			else if (m_sample_type == SAMP_TYPE::FILL) {
+				m_sample_shape = new ShapeRect(pos, vec, &m_sample_panel);
+#if defined(_DEBUG)
+				debug_leak_cnt++;
+#endif
+			}
+		}
+		sample_draw();
+
 	}
 
-	//	見本ダイアログを表示する.
-	void MainPage::show_cd_sample(const wchar_t* r_key)
-	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(r_key)));
-		auto _{ cd_sample().ShowAsync() };
-	}
 }

@@ -139,7 +139,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列検索パネルの「閉じる」ボタンが押された.
-	void MainPage::btn_text_find_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::btn_text_find_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		//	文字列検索パネルから値を格納する.
 		text_find_set_to();
@@ -147,7 +147,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列検索パネルの「次を検索」ボタンが押された.
-	void MainPage::btn_text_find_next_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::btn_text_find_next_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (text_find_whithin_shapes()) {
 			page_draw();
@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列検索パネルの「すべて置換」ボタンが押された.
-	void MainPage::btn_text_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::btn_text_replace_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		//	文字列検索パネルから値を格納する.
 		text_find_set_to();
@@ -249,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	文字列検索パネルの「置換」ボタンが押された.
-	void MainPage::btn_text_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::btn_text_replace_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		//	文字列検索パネルから値を格納する.
 		text_find_set_to();
@@ -417,7 +417,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	編集メニューの「文字列の検索/置換」が選択された.
-	void MainPage::mfi_text_find_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_text_find_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (sp_text_find().Visibility() == VISIBLE) {
 			//	文字列検索パネルが表示されている場合,
@@ -449,7 +449,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 検索文字列が変更された.
-	void MainPage::tx_text_find_what_changed(IInspectable const& /*sender*/, TextChangedEventArgs const& /*args*/)
+	void MainPage::tx_text_find_what_changed(IInspectable const&, TextChangedEventArgs const&)
 	{
 		const auto not_empty = (tx_text_find_what().Text().empty() == false);
 		btn_text_find_next().IsEnabled(not_empty);
@@ -491,7 +491,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「文字列の編集」が選択された.
-	void MainPage::mfi_text_edit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_text_edit_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		ShapeText* s = nullptr;
 

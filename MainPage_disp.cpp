@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 
 	// デイスプレイの DPI が変わった
 	// sender	イベントが発生したデイスプレイ
-	void MainPage::disp_dpi_changed(DisplayInformation const& sender, IInspectable const& /*args*/)
+	void MainPage::disp_dpi_changed(DisplayInformation const& sender, IInspectable const&)
 	{
 #if defined(_DEBUG)
 		if (sender == DisplayInformation::GetForCurrentView()) {
@@ -56,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 
 	// デイスプレイの向きが変わった
 	// sender	イベントが発生したデイスプレイ
-	void MainPage::disp_orientation_changed(DisplayInformation const& sender, IInspectable const& /*args*/)
+	void MainPage::disp_orientation_changed(DisplayInformation const& sender, IInspectable const&)
 	{
 #if defined(_DEBUG)
 		if (sender != DisplayInformation::GetForCurrentView()) {

@@ -148,7 +148,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	メッセージダイアログが閉じた.
-	void MainPage::cd_message_closed(ContentDialog const& sender, ContentDialogClosedEventArgs const& /*args*/)
+	void MainPage::cd_message_closed(ContentDialog const& sender, ContentDialogClosedEventArgs const&)
 	{
 		//	ダイアログを解放する.
 		UnloadObject(sender);
@@ -440,6 +440,41 @@ namespace winrt::GraphPaper::implementation
 			cd_message_show(L"Memory leak occurs", {});
 		}
 #endif
+	}
+
+	// ファイルメニューの「終了」が選択された
+	IAsyncAction MainPage::mfi_exit_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		using winrt::Windows::UI::Xaml::Application;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+
+		if (m_stack_push == false) {
+			// 操作スタックの更新フラグがない場合,
+			// 図形データは変更されていないので,
+			// アプリケーションを終了する.
+			release();
+			Application::Current().Exit();
+			co_return;
+		}
+		//cd_load_conf_save();
+		// 保存確認ダイアログを表示する.
+		const auto d_result = co_await cd_conf_save().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			// ファイルに非同期に保存して, アプリケーションを終了する.
+			//auto _{ file_save_and_exit_async() };
+			//	ファイルに非同期に保存する
+			if (co_await file_save_async() == S_OK) {
+				//	保存できた場合,
+				//	アプリケーションを終了する.
+				release();
+				Application::Current().Exit();
+			}
+		}
+		else if (d_result == ContentDialogResult::Secondary) {
+			// アプリケーションを終了する.
+			release();
+			Application::Current().Exit();
+		}
 	}
 
 }

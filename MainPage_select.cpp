@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 編集メニューの「すべて選択」が選択された.
-	void MainPage::mfi_select_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_select_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		bool flag = false;
 		for (auto s : m_list_shapes) {

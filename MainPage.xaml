@@ -222,11 +222,11 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bottom_2" x:Uid="rmfi_text_align_bottom" Click="rmfi_text_align_bottom_click" Text="Bottom" GroupName="gn_text_align_p" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_middle_2" x:Uid="rmfi_text_align_middle" Click="rmfi_text_align_middle_click" Text="Middle" GroupName="gn_text_align_p" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_text_line" Text="Line Spacing">
-                    <MenuFlyoutItem x:Uid="mfi_text_line_contract" Click="mfi_text_line_contract_click" Text="Condense" />
-                    <MenuFlyoutItem x:Uid="mfi_text_line_expand" Click="mfi_text_line_expand_click" Text="Expand" />
+                <MenuFlyoutSubItem x:Uid="mfsi_text_line_height" Text="Line height">
+                    <MenuFlyoutItem x:Uid="mfi_text_line_height_contract" Click="mfi_text_line_height_contract_click" Text="Condense" />
+                    <MenuFlyoutItem x:Uid="mfi_text_line_height_expand" Click="mfi_text_line_height_expand_click" Text="Expand" />
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Uid="mfi_text_line" Click="mfi_text_line_click" Text="Height" />
+                    <MenuFlyoutItem x:Uid="mfi_text_line_height" Click="mfi_text_line_height_click" Text="Height" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_text_margin" Click="mfi_text_margin_click" Text="Margin..." />
                 <MenuFlyoutSeparator />
@@ -548,11 +548,11 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bottom" x:Uid="rmfi_text_align_bottom" Click="rmfi_text_align_bottom_click" Text="Bottom" GroupName="gn_text_align_p" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_middle" x:Uid="rmfi_text_align_middle" Click="rmfi_text_align_middle_click" Text="Middle" GroupName="gn_text_align_p" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_text_line" Text="Line Spacing">
-                    <MenuFlyoutItem x:Uid="mfi_text_line_contract" Click="mfi_text_line_contract_click" Text="Condense" />
-                    <MenuFlyoutItem x:Uid="mfi_text_line_expand" Click="mfi_text_line_expand_click" Text="Expand" />
+                <MenuFlyoutSubItem x:Uid="mfsi_text_line_height" Text="Line height">
+                    <MenuFlyoutItem x:Uid="mfi_text_line_height_contract" Click="mfi_text_line_height_contract_click" Text="Condense" />
+                    <MenuFlyoutItem x:Uid="mfi_text_line_height_expand" Click="mfi_text_line_height_expand_click" Text="Expand" />
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Uid="mfi_text_line" Click="mfi_text_line_click" Text="Height" />
+                    <MenuFlyoutItem x:Uid="mfi_text_line_height" Click="mfi_text_line_height_click" Text="Height" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_text_margin" Click="mfi_text_margin_click" Text="Margin..." />
                 <MenuFlyoutSeparator />
@@ -740,39 +740,12 @@
             </StackPanel>
         </ContentDialog>
         <!-- 保存確認ダイアログ -->
-        <ContentDialog x:Name="cd_conf_save" x:Load="False" x:Uid="cd_conf_save" DefaultButton="Close">
+        <ContentDialog x:Name="cd_conf_save" x:Uid="cd_conf_save" DefaultButton="Close">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
                 <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE946;" Margin="0,0,4,0" />
                 <TextBlock x:Uid="tk_conf_save"/>
             </StackPanel>
         </ContentDialog>
-        <!-- 見つからないメッセージダイアログ -->
-        <!--
-        <ContentDialog x:Name="cd_not_found" x:Load="False" CloseButtonText="Ok" Closed="cd_message_closed" DefaultButton="Close" >
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
-                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE946;" Margin="0,0,4,0" />
-                <TextBlock x:Uid="tk_not_found" Text="No search text was found." />
-            </StackPanel>
-        </ContentDialog>
-        -->
-        <!-- アクセス拒否メッセージダイアログ -->
-        <!--
-        <ContentDialog x:Name="cd_acc_denied" x:Load="False" CloseButtonText="Ok" Closed="cd_message_closed" DefaultButton="Close">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
-                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xEA39;" Margin="0,0,4,0" />
-                <TextBlock x:Uid="tk_acc_denied" Text="Access is denied." />
-            </StackPanel>
-        </ContentDialog>
-        -->
-        <!-- 書体使用不可メッセージダイアログ -->
-        <!--
-        <ContentDialog x:Name="cd_unavailable_fonts" x:Load="False" CloseButtonText="Ok" Closed="cd_message_closed" DefaultButton="Close">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
-                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE946;" Margin="0,0,4,0" />
-                <TextBlock x:Uid="tk_unavailable_fonts" Text="Document uses unavailable fonts." />
-            </StackPanel>
-        </ContentDialog>
-        -->
         <!-- ページの寸法入力ダイアログ -->
         <ContentDialog x:Name="cd_page_size" x:Uid="cd_page_size" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonClick="cd_page_size_pri_btn_click" PrimaryButtonText="Apply" SecondaryButtonClick="cd_page_size_sec_btn_click" SecondaryButtonText="Adjust to Shapes">
             <StackPanel >
@@ -800,7 +773,7 @@
             </StackPanel>
         </ContentDialog>
         <!-- 属性入力ダイアログ -->
-        <ContentDialog x:Name="cd_sample" x:Load="False" CloseButtonText="Close" DefaultButton="Close" Opened="cd_sample_opened" PrimaryButtonText="Apply" >
+        <ContentDialog x:Name="cd_sample" CloseButtonText="Close" DefaultButton="Close" Opened="cd_sample_opened" PrimaryButtonText="Apply" >
             <RelativePanel>
                 <SwapChainPanel
                     x:Name="scp_sample_panel"
@@ -810,35 +783,11 @@
                     MaxWidth="170"
                     RelativePanel.AlignTopWithPanel="True"
                     RelativePanel.AlignHorizontalCenterWithPanel="True"
+                    SizeChanged="scp_sample_panel_size_changed"
                     Width="170"
                     />
                 <!-- Height を指定するこれ大事 -->
-                <ListView x:Name="lv_font_stretch" Loaded="lv_font_stretch_loaded" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256">
-                    <ListViewItem x:Uid="lvi_stretch_undefined" Content="Undefined" />
-                    <ListViewItem x:Uid="lvi_stretch_ultra_condensed" Content="Ultra Condensed" />
-                    <ListViewItem x:Uid="lvi_stretch_extra_condensed" Content="Extra Condensed" />
-                    <ListViewItem x:Uid="lvi_stretch_condensed" Content="Condensed" />
-                    <ListViewItem x:Uid="lvi_stretch_semi_condensed" Content="Semi Condensed" />
-                    <ListViewItem x:Uid="lvi_stretch_normal" Content="Normal" />
-                    <ListViewItem x:Uid="lvi_stretch_semi_expanded" Content="Semi Expanded" />
-                    <ListViewItem x:Uid="lvi_stretch_expanded" Content="Expanded" />
-                    <ListViewItem x:Uid="lvi_stretch_extra_expanded" Content="Extra Expanded" />
-                    <ListViewItem x:Uid="lvi_stretch_ultra_expanded" Content="Ultra Expanded" />
-                </ListView>
-                <ListView x:Name="lv_font_family" Loaded="lv_font_family_loaded" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
-                <ListView x:Name="lv_font_weight" Loaded="lv_font_weight_loaded" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256">
-                    <ListViewItem x:Uid="lvi_weight_thin" Content="Thin" />
-                    <ListViewItem x:Uid="lvi_weight_extra_light" Content="Extra Light" />
-                    <ListViewItem x:Uid="lvi_weight_light" Content="Light" />
-                    <ListViewItem x:Uid="lvi_weight_semi_light" Content="Semi Light" />
-                    <ListViewItem x:Uid="lvi_weight_normal" Content="Normal" />
-                    <ListViewItem x:Uid="lvi_weight_medium" Content="Medium" />
-                    <ListViewItem x:Uid="lvi_weight_demi_bold" Content="Demi Bold" />
-                    <ListViewItem x:Uid="lvi_weight_bold" Content="Bold" />
-                    <ListViewItem x:Uid="lvi_weight_extra_bold" Content="Extra Bold" />
-                    <ListViewItem x:Uid="lvi_weight_black" Content="Black" />
-                    <ListViewItem x:Uid="lvi_weight_extra_black" Content="Extra Black" />
-                </ListView>
+                <ListView x:Name="lv_sample_list" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
                 <Slider x:Name="slider0" x:Uid = "slider0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="slider1" x:Uid = "slider1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="slider2" x:Uid = "slider2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />

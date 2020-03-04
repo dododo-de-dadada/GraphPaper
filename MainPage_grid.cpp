@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 	//	S	スライダー
 	//	val	値
 	template <UNDO_OP U, int S>
-	void MainPage::grid_set_slider(double val)
+	void MainPage::grid_set_slider_header(double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -62,9 +62,12 @@ namespace winrt::GraphPaper::implementation
 	//	val	値
 	//	戻り値	なし
 	template <UNDO_OP U, int S>
-	void MainPage::grid_set_slider(Shape* s, const double val)
+	void MainPage::grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		grid_set_slider<U, S>(val);
+		Shape* s = &m_sample_panel;
+		const double val = args.NewValue();
+
+		grid_set_slider_header<U, S>(val);
 		if constexpr (U == UNDO_OP::GRID_LEN) {
 			s->set_grid_size(val);
 		}
@@ -90,65 +93,39 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼の大きさ」>「大きさ」が選択された.
-	void MainPage::mfi_grid_len_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_grid_len_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		load_cd_sample();
 		const double val0 = m_page_panel.m_grid_size;
 		slider0().Value(val0);
-		grid_set_slider<UNDO_OP::GRID_LEN, 0>(val0);
+		grid_set_slider_header<UNDO_OP::GRID_LEN, 0>(val0);
 		slider0().Visibility(VISIBLE);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				grid_set_slider<UNDO_OP::GRID_LEN, 0>(&m_sample_panel, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				double sample_val;
-				double page_val;
+		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_LEN, 0> });
+		m_sample_type = SAMP_TYPE::NONE;
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			double sample_val;
+			double page_val;
 
-				m_page_panel.get_grid_size(page_val);
-				m_sample_panel.get_grid_size(sample_val);
-				if (equal(page_val, sample_val)) {
-					return;
-				}
+			m_page_panel.get_grid_size(page_val);
+			m_sample_panel.get_grid_size(sample_val);
+			if (equal(page_val, sample_val) == false) {
 				undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, sample_val);
 				undo_push_null();
 				enable_undo_menu();
-				page_draw();
 			}
-		);
-		closed_token = cd_sample().Closed(
-			[this](auto, auto)
-			{
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().Visibility(COLLAPSED);
-				slider0().ValueChanged(slider0_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		show_cd_sample(TITLE_GRID);
+
+		}
+		slider0().Visibility(COLLAPSED);
+		slider0().ValueChanged(slider0_token);
+		page_draw();
 	}
 
 	// ページメニューの「方眼の大きさ」>「狭める」が選択された.
-	void MainPage::mfi_grid_len_contract_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_grid_len_contract_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		const double val = (m_page_panel.m_grid_size + 1.0) * 0.5 - 1.0;
 		if (val < 1.0) {
@@ -161,7 +138,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼の大きさ」>「広げる」が選択された.
-	void MainPage::mfi_grid_len_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_grid_len_expand_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		const double val = (m_page_panel.m_grid_size + 1.0) * 2.0 - 1.0;
 		if (val > max(m_page_panel.m_page_size.width, m_page_panel.m_page_size.height)) {
@@ -176,67 +153,37 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の濃さ」が選択された.
-	void MainPage::mfi_grid_opac_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_grid_opac_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		static winrt::event_token slider3_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		load_cd_sample();
 		const double val3 = m_sample_panel.m_grid_opac * COLOR_MAX;
 		slider3().Value(val3);
-		grid_set_slider<UNDO_OP::GRID_OPAC, 3>(val3);
+		grid_set_slider_header<UNDO_OP::GRID_OPAC, 3>(val3);
 		slider3().Visibility(VISIBLE);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				sample_draw();
-			}
-		);
-		slider3_token = slider3().ValueChanged(
-			[this](auto, auto args)
-			{
-				grid_set_slider<UNDO_OP::GRID_OPAC, 3>(&m_sample_panel, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				//m_page_panel.m_col_style = m_sample_panel.m_col_style;
-				double sample_val;
-				m_sample_panel.get_grid_opac(sample_val);
-				double page_val;
-				m_page_panel.get_grid_opac(page_val);
-				if (equal(page_val, sample_val)) {
-					return;
-				}
+		const auto slider3_token = slider3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_OPAC, 3> });
+		m_sample_type = SAMP_TYPE::NONE;
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			double sample_val;
+			m_sample_panel.get_grid_opac(sample_val);
+			double page_val;
+			m_page_panel.get_grid_opac(page_val);
+			if (equal(page_val, sample_val) == false) {
 				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_panel, sample_val);
 				undo_push_null();
 				enable_undo_menu();
-				page_draw();
 			}
-		);
-		closed_token = cd_sample().Closed(
-			[this](auto, auto)
-			{
-				scp_sample_panel().Loaded(loaded_token);
-				slider3().Visibility(COLLAPSED);
-				//cx_color_style().Visibility(COLLAPSED);
-				slider3().ValueChanged(slider3_token);
-				//cx_color_style().SelectionChanged(c_style_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		show_cd_sample(TITLE_GRID);
+		}
+		slider3().Visibility(COLLAPSED);
+		slider3().ValueChanged(slider3_token);
+		page_draw();
 	}
 
 	// ページメニューの「方眼線の表示」>「最背面」が選択された.
-	void MainPage::rmfi_grid_show_back_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_grid_show_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_grid_show == GRID_SHOW::BACK) {
 			return;
@@ -248,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の表示」>「最前面」が選択された.
-	void MainPage::rmfi_grid_show_front_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_grid_show_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_grid_show == GRID_SHOW::FRONT) {
 			return;
@@ -260,7 +207,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の表示」>「隠す」が選択された.
-	void MainPage::rmfi_grid_show_hide_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_grid_show_hide_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_grid_show == GRID_SHOW::HIDE) {
 			return;
@@ -272,7 +219,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼にそろえる」が選択された.
-	void MainPage::tmfi_grid_snap_click(IInspectable const& sender, RoutedEventArgs const& /*args*/)
+	void MainPage::tmfi_grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		auto g_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
 		if (m_page_panel.m_grid_snap != g_snap) {

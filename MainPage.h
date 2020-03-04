@@ -6,12 +6,12 @@
 //	4	「デバッグ」>「GraphPaper のプロパティ」>「構成プロパティ」>「ターゲットプラットフォームの最小バージョン」>「10.0.18362.0」
 //	MainPage.h
 //
-//	MainPage.cpp	メインページの作成と表示
+//	MainPage.cpp	メインページの作成, アプリの終了
 //	MainPage_app.cpp	アプリケーションの中断と再開
 //	MainPage_arrange.cpp	図形リストの要素の並び替え
 //	MainPage_arrow.cpp	矢じりの形式と寸法を設定
 //	MainPage_disp.cpp	表示デバイスのハンドラー
-//	MainPage_file.cpp	ファイルの読み書き, アプリの終了
+//	MainPage_file.cpp	ファイルの読み書き
 //	MainPage_fill.cpp	塗りつぶしの設定
 //	MainPage_find.cpp	文字列の検索/置換
 //	MainPage_font.cpp	書体の設定
@@ -60,6 +60,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollEventArgs;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
@@ -160,6 +161,16 @@ namespace winrt::GraphPaper::implementation
 	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t* buf, const uint32_t len);
 
 	//-------------------------------
+	//	見本の型
+	//-------------------------------
+	enum struct SAMP_TYPE {
+		NONE,	// なし
+		STROKE,	// ストローク
+		FILL,	// 塗りつぶし
+		FONT,	// 書体
+	};
+
+	//-------------------------------
 	//	メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
@@ -213,13 +224,14 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_DX m_sample_dx;		// 見本の描画環境
 		ShapePanel m_sample_panel;		// 見本のパネル
 		Shape* m_sample_shape = nullptr;	// 見本の図形
+		SAMP_TYPE m_sample_type = SAMP_TYPE::NONE;	// 見本の型
 
 		bool m_summary_visible = false;	// 図形一覧パネルの表示フラグ
 		bool m_window_visible = false;		// ウィンドウが表示されている/表示されてない
 
 		//-------------------------------
 		//	MainPage.cpp
-		//	メインページの作成
+		//	メインページの作成, アプリケーションの終了
 		//-------------------------------
 
 		//	メインページを破棄する.
@@ -235,12 +247,14 @@ namespace winrt::GraphPaper::implementation
 		//	メインページの内容を破棄する.
 		void release(void);
 		//	ページメニューの「バージョン情報」が選択された.
-		void mfi_about_graph_paper_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+		void mfi_about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 		{
 			cd_message_show(L"str_graph_paper", L"str_version");
 		}
 		//	長さの単位の名前を得る.
 		winrt::hstring get_unit_name(void);
+		//	ファイルメニューの「終了」が選択された
+		IAsyncAction mfi_exit_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		//	MainPage_app.cpp
@@ -270,13 +284,13 @@ namespace winrt::GraphPaper::implementation
 		//	選択された図形を最背面または最前面に移動する.
 		template<bool TO_BACK> void arrange_to(void);
 		//	編集メニューの「前面に移動」が選択された.
-		void mfi_bring_forward_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_bring_forward_click(IInspectable const&, RoutedEventArgs const&);
 		//	編集メニューの「最前面に移動」が選択された.
-		void mfi_bring_to_front_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_bring_to_front_click(IInspectable const&, RoutedEventArgs const&);
 		//	編集メニューの「ひとつ背面に移動」が選択された.
-		void mfi_send_backward_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_send_backward_click(IInspectable const&, RoutedEventArgs const&);
 		//	編集メニューの「最背面に移動」が選択された.
-		void mfi_send_to_back_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_send_to_back_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		//	MainPage_arrow.cpp
@@ -286,17 +300,17 @@ namespace winrt::GraphPaper::implementation
 		//	線枠メニューの「矢じりの種類」に印をつける.
 		void arrow_style_check_menu(const ARROW_STYLE a_style);
 		//	線枠メニューの「矢じりの種類」>「閉じた」が選択された.
-		void rmfi_arrow_filled_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_arrow_filled_click(IInspectable const&, RoutedEventArgs const&);
 		//	線枠メニューの「矢じりの種類」>「なし」が選択された.
-		void rmfi_arrow_none_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_arrow_none_click(IInspectable const&, RoutedEventArgs const&);
 		//	線枠メニューの「矢じりの種類」>「開いた」が選択された.
-		void rmfi_arrow_opened_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_arrow_opened_click(IInspectable const&, RoutedEventArgs const&);
 		//	線枠メニューの「矢じりの大きさ」が選択された.
-		void mfi_arrow_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_arrow_size_click(IInspectable const&, RoutedEventArgs const&);
 		//	値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void arrow_set_slider(const double val);
+		template <UNDO_OP U, int S> void arrow_set_slider_header(const double val);
 		//	値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_OP U, int S> void arrow_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		//	MainPage_disp.cpp
@@ -312,19 +326,13 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		//	MainPage_file.cpp
-		//	ファイルの読み書き, アプリの終了
+		//	ファイルの読み書き
 		//-------------------------------
 
 		//	ファイルを非同期に開く.
 		IAsyncAction file_open_async(void);
 		//	ストレージファイルを非同期に読む.
 		IAsyncOperation<winrt::hresult> file_read_async(StorageFile const& s_file, const bool suspend = false) noexcept;
-		//	ファイルに非同期に保存して, アプリケーションを終了する.
-		IAsyncAction file_save_and_exit_async(void);
-		//	ファイルに非同期に保存して, 空白の文書にする.
-		IAsyncAction file_save_and_new_async(void);
-		//	ファイルに非同期に保存して, ファイルを非同期に開く.
-		IAsyncAction file_save_and_open_async(void);
 		//	名前を付けてファイルに非同期に保存する
 		IAsyncOperation<winrt::hresult> file_save_as_async(const bool gpf_only = false) noexcept;
 		//	ファイルに非同期に保存する
@@ -339,18 +347,14 @@ namespace winrt::GraphPaper::implementation
 		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile const& s_file);
 		//	ファイルの読み込みが終了した.
 		void finish_file_read(void);
-		//	ファイルメニューの「終了」が選択された
-		IAsyncAction mfi_exit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
 		//	ファイルメニューの「新規」が選択された
-		IAsyncAction mfi_new_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_new_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「開く」が選択された
-		IAsyncAction mfi_open_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_open_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「名前を付けて保存」が選択された
-		void mfi_save_as_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_save_as_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「保存」が選択された
-		void mfi_save_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	保存確認ダイアログをロードする.
-		void cd_load_conf_save(void) { auto _{ FindName(L"cd_conf_save") }; }
+		void mfi_save_click(IInspectable const&, RoutedEventArgs const&);
 		//	空白の文書にする.
 		void new_doc(void);
 
@@ -359,82 +363,72 @@ namespace winrt::GraphPaper::implementation
 		//	塗りつぶしの設定
 		//-------------------------------
 
-		//	塗りつぶしの見本を作成する.
-		void fill_create_sample(void);
 		//	塗りつぶしメニューの「色」が選択された.
-		void mfi_fill_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_fill_color_click(IInspectable const&, RoutedEventArgs const&);
 		//	値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_OP U, int S> void fill_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void fill_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		//	値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void fill_set_slider(double val);
+		template <UNDO_OP U, int S> void fill_set_slider_header(double val);
 
 		//-------------------------------
 		//　MainPage_font.cpp
 		//　書体の設定
 		//-------------------------------
 
-		//　書体の見本を作成する.
-		void font_create_sample(void);
 		//　書体メニューの「字体」に印をつける.
 		void font_style_check_menu(const DWRITE_FONT_STYLE f_style);
-		//　リストビュー「書体名」がロードされた.
-		void lv_font_family_loaded(IInspectable const& /*sender*/, RoutedEventArgs const& /*e*/);
-		//　リストビュー「書体の太さ」がロードされた.
-		void lv_font_weight_loaded(IInspectable const& /*sender*/, RoutedEventArgs const& /*e*/);
-		//　リストビュー「書体の伸縮」がロードされた.
-		void lv_font_stretch_loaded(IInspectable const& /*sender*/, RoutedEventArgs const& /*e*/);
-		//	書体の色ダイアログを表示する.
-		IAsyncAction MainPage::font_color_dialog_show(void);
+		//　リストビュー「見本リスト」がロードされた.
+		void lv_sample_list_loaded(IInspectable const&, RoutedEventArgs const& /*e*/);
 		//　書体メニューの「色」が選択された.
-		IAsyncAction mfi_font_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_font_color_click(IInspectable const&, RoutedEventArgs const&);
 		//　書体メニューの「書体名」が選択された.
-		IAsyncAction mfi_font_family_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_font_family_click(IInspectable const&, RoutedEventArgs const&);
 		//　書体メニューの「イタリック体」が選択された.
-		void rmfi_font_italic_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_font_italic_click(IInspectable const&, RoutedEventArgs const&);
 		//　書体メニューの「標準」が選択された.
-		void rmfi_font_normal_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_font_normal_click(IInspectable const&, RoutedEventArgs const&);
 		//　書体メニューの「斜体」が選択された.
-		void rmfi_font_oblique_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_font_oblique_click(IInspectable const&, RoutedEventArgs const&);
 		//　書体メニューの「大きさ」が選択された.
-		IAsyncAction mfi_font_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_font_size_click(IInspectable const&, RoutedEventArgs const&);
 		//　書体メニューの「伸縮」が選択された.
-		IAsyncAction mfi_font_stretch_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_font_stretch_click(IInspectable const&, RoutedEventArgs const&);
 		//　書体メニューの「太さ」が選択された.
-		IAsyncAction mfi_font_weight_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_font_weight_click(IInspectable const&, RoutedEventArgs const&);
 		//　値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void font_set_slider(const double val);
+		template <UNDO_OP U, int S> void font_set_slider_header(const double val);
 		//　値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_OP U, int S> void font_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		//	書体メニューの「文字列のそろえ」に印をつける.
 		void text_align_t_check_menu(const DWRITE_TEXT_ALIGNMENT t_align);
 		//	書体メニューの「段落のそろえ」に印をつける.
 		void text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align);
-		//	書体メニューの「行間」>「狭める」が選択された.
-		void mfi_text_line_contract_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「行間」>「広げる」が選択された.
-		void mfi_text_line_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//	書体メニューの「行間」>「高さ」が選択された.
-		IAsyncAction mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		//	書体メニューの「行の高さ」>「狭める」が選択された.
+		void mfi_text_line_height_contract_click(IInspectable const&, RoutedEventArgs const&);
+		//	書体メニューの「行の高さ」>「広げる」が選択された.
+		void mfi_text_line_height_expand_click(IInspectable const&, RoutedEventArgs const&);
+		//	書体メニューの「行の高さ」>「高さ」が選択された.
+		IAsyncAction mfi_text_line_height_click(IInspectable const&, RoutedEventArgs const&);
 		//	書体メニューの「余白」が選択された.
-		IAsyncAction mfi_text_margin_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_text_margin_click(IInspectable const&, RoutedEventArgs const&);
 		//	書体メニューの「段落のそろえ」>「中段」が選択された.
-		void rmfi_text_align_middle_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_text_align_middle_click(IInspectable const&, RoutedEventArgs const&);
 		//	書体メニューの「段落のそろえ」>「下よせ」が選択された.
-		void rmfi_text_align_bottom_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_text_align_bottom_click(IInspectable const&, RoutedEventArgs const&);
 		//	書体メニューの「段落のそろえ」>「上よせ」が選択された.
-		void rmfi_text_align_top_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_text_align_top_click(IInspectable const&, RoutedEventArgs const&);
 		//	書体メニューの「文字列のそろえ」>「中央」が選択された.
-		void rmfi_text_align_center_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_text_align_center_click(IInspectable const&, RoutedEventArgs const&);
 		//	書体メニューの「文字列のそろえ」>「均等」が選択された.
-		void rmfi_text_align_justified_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_text_align_justified_click(IInspectable const&, RoutedEventArgs const&);
 		//	書体メニューの「文字列のそろえ」>「左よせ」が選択された.
-		void rmfi_text_align_left_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_text_align_left_click(IInspectable const&, RoutedEventArgs const&);
 		//	書体メニューの「文字列のそろえ」>「右よせ」が選択された.
-		void rmfi_text_align_right_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_text_align_right_click(IInspectable const&, RoutedEventArgs const&);
 		//	値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void text_set_slider(const double val);
+		template <UNDO_OP U, int S> void text_set_slider_header(const double val);
 		//	値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_OP U, int S> void text_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		//　MainPage_grid.cpp
@@ -444,25 +438,25 @@ namespace winrt::GraphPaper::implementation
 		//　ページメニューの「方眼の表示」に印をつける.
 		void grid_show_check_menu(const GRID_SHOW g_show);
 		//　ページメニューの「方眼の大きさ」>「大きさ」が選択された.
-		void mfi_grid_len_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_grid_len_click(IInspectable const&, RoutedEventArgs const&);
 		//　ページメニューの「方眼の大きさ」>「狭める」が選択された.
-		void mfi_grid_len_contract_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_grid_len_contract_click(IInspectable const&, RoutedEventArgs const&);
 		//　ページメニューの「方眼の大きさ」>「広げる」が選択された.
-		void mfi_grid_len_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_grid_len_expand_click(IInspectable const&, RoutedEventArgs const&);
 		//　ページメニューの「方眼線の濃さ」が選択された.
-		void mfi_grid_opac_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_grid_opac_click(IInspectable const&, RoutedEventArgs const&);
 		//　ページメニューの「方眼線の表示」>「最背面」が選択された.
-		void rmfi_grid_show_back_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_grid_show_back_click(IInspectable const&, RoutedEventArgs const&);
 		//　ページメニューの「方眼線の表示」>「最前面」が選択された.
-		void rmfi_grid_show_front_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_grid_show_front_click(IInspectable const&, RoutedEventArgs const&);
 		//　ページメニューの「方眼線の表示」>「隠す」が選択された.
-		void rmfi_grid_show_hide_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_grid_show_hide_click(IInspectable const&, RoutedEventArgs const&);
 		//　ページメニューの「方眼にそろえる」が選択された.
-		void tmfi_grid_snap_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void tmfi_grid_snap_click(IInspectable const&, RoutedEventArgs const&);
 		//　値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_OP U, int S> void grid_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void grid_set_slider_header(const double val);
 		//　値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void grid_set_slider(double val);
+		template <UNDO_OP U, int S> void grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		//	MainPage_group.cpp
@@ -470,9 +464,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 「グループ化」が選択された.
-		void mfi_group_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_group_click(IInspectable const&, RoutedEventArgs const&);
 		// 「グループの解除」が選択された.
-		void mfi_ungroup_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_ungroup_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		//　MainPage_keyacc.cpp
@@ -480,79 +474,75 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//　Shft + 下矢印キーが押された.
-		void ka_range_next_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		void ka_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Shift + 上矢印キーが押された.
-		void ka_range_prev_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		void ka_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　下矢印キーが押された.
-		void ka_select_next_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		void ka_select_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　上矢印キーが押された.
-		void ka_select_prev_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		void ka_select_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Escape が押された.
-		void ka_tool_select_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		void ka_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + PgDn が押された.
-		//void ka_bring_forward_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + End が押された.
-		//void ka_bring_to_front_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_bring_to_front_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + C が押された.
-		//void ka_copy_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_copy_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + X が押された.
-		//void ka_cut_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_cut_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Delete が押された.
-		//void ka_delete_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + E が押された.
-		//void ka_edit_text_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_edit_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + F が押された.
-		//void ka_find_text_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + G が押された.
-		//void ka_group_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_group_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + N が押された.
-		//void ka_new_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_new_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + O が押された.
-		//void ka_open_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_open_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + V が押された.
-		//void ka_paste_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + Y が押された.
-		//void ka_redo_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + Shift + S が押された.
-		//void ka_save_as_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_save_as_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + S が押された.
-		//void ka_save_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_save_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + A が押された.
-		//void ka_select_all_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_select_all_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + PgUp が押された.
-		//void ka_send_backward_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + Home が押された.
-		//void ka_send_to_back_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + L が押された.
-		//void ka_summaty_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_summaty_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + Z が押された.
-		//void ka_undo_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + U が押された.
-		//void ka_ungroup_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_ungroup_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + 0 が押された.
-		//void ka_zoom_reset_invoked(IInspectable const& /*sender*/, KeyboardAcceleratorInvokedEventArgs const& /*args*/);
+		//void ka_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//-------------------------------
 		//	MainPage_mru.cpp
 		//	最近使ったファイル
 		//-------------------------------
 
-		//	最近使ったファイルを読み込む.
-		void file_read_recent(const uint32_t i);
 		//	最近使ったファイルを非同期に読む.
-		IAsyncAction file_read_recent_async(const winrt::hstring token);
-		//	ファイルに非同期に保存して, 最近使ったファイルを非同期に読み込む.
-		IAsyncAction file_save_and_read_recent_async(winrt::hstring const& token);
+		IAsyncAction file_read_recent_async(const uint32_t i);
 		//	ファイルメニューの「最近使ったファイル 1」が選択された
-		void mfi_recent_files_1_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_recent_files_1_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「最近使ったファイル 2」が選択された
-		void mfi_recent_files_2_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_recent_files_2_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「最近使ったファイル 3」が選択された
-		void mfi_recent_files_3_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_recent_files_3_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「最近使ったファイル 4」が選択された
-		void mfi_recent_files_4_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_recent_files_4_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「最近使ったファイル 5」が選択された
-		void mfi_recent_files_5_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_recent_files_5_click(IInspectable const&, RoutedEventArgs const&);
 		//	最近使ったファイルにストレージファイルを追加する.
 		void mru_add_file(StorageFile const& s_file);
 		//	最近使ったファイルのトークンからストレージファイルを得る.
@@ -568,23 +558,23 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//　ページの寸法入力ダイアログの「適用」ボタンが押された.
-		void cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/);
+		void cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
 		// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
-		void cd_page_size_sec_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/);
+		void cd_page_size_sec_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
 		//　ページの単位と書式ダイアログの「適用」ボタンが押された.
-		void cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const& /*args*/);
+		void cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
 		//	ページメニューの「色」が選択された.
-		void mfi_page_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_page_color_click(IInspectable const&, RoutedEventArgs const&);
 		//	ページメニューの「大きさ」が選択された
-		void mfi_page_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_page_size_click(IInspectable const&, RoutedEventArgs const&);
 		//	ページメニューの「単位と書式」が選択された
-		void mfi_page_unit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_page_unit_click(IInspectable const&, RoutedEventArgs const&);
 		//	ページと図形を表示する.
 		void page_draw(void);
 		//	値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void page_set_slider(double val);
+		template <UNDO_OP U, int S> void page_set_slider_header(double val);
 		//	値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_OP U, int S> void page_set_slider(Shape* s, const double val);
+		template <UNDO_OP U, int S> void page_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		//	ページのパネルがロードされた.
 		void scp_page_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
 		//	ページのパネルの寸法が変わった.
@@ -592,11 +582,7 @@ namespace winrt::GraphPaper::implementation
 		//	ページのパネルの大きさを設定する.
 		void set_page_panle_size(void);
 		//	ページ寸法ダイアログの「ページの幅」「ページの高さ」テキストボックスの値が変更された.
-		void tx_page_size_text_changed(IInspectable const& /*sender*/, TextChangedEventArgs const& /*args*/);
-		//void rmfi_unit_pixel_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//void rmfi_unit_milli_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//void rmfi_unit_inch_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-		//void rmfi_unit_point_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void tx_page_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
 
 		//-------------------------------
 		//	MainPage_pointer.cpp
@@ -643,12 +629,8 @@ namespace winrt::GraphPaper::implementation
 		void cd_sample_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
 		//	見本のページと見本の図形を表示する
 		void sample_draw(void);
-		//	見本ダイアログをロードする.
-		void load_cd_sample(void) { auto _{ FindName(L"cd_sample") }; }
-		//	見本のパネルがロードされた.
-		void sample_panel_loaded(void);
-		//	見本ダイアログを表示する.
-		void show_cd_sample(const wchar_t* r_key);
+		//	見本パネルの大きさが変わった.
+		void scp_sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -668,7 +650,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 編集メニューの「すべて選択」が選択された.
-		void mfi_select_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_select_all_click(IInspectable const&, RoutedEventArgs const&);
 		// 領域に含まれる図形を選択し, 含まれない図形の選択を解除する.
 		bool select_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max);
 		// 次の図形を選択する.
@@ -688,7 +670,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// ページメニューの「ステータスバー」が選択された.
-		void mi_stat_bar_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mi_stat_bar_click(IInspectable const&, RoutedEventArgs const&);
 		// ステータスバーのメニュー項目に印をつける.
 		void stat_check_menu(const STAT_BAR a);
 		// 列挙型を OR 演算する.
@@ -717,30 +699,28 @@ namespace winrt::GraphPaper::implementation
 		//	線枠の設定
 		//------------------------------
 
-		//	線枠の見本を作成する.
-		void stroke_create_sample(void);
 		//	線枠メニューの「種類」に印をつける.
 		void stroke_style_check_menu(const D2D1_DASH_STYLE d_style);
 		//	線枠メニューの「色」が選択された.
-		void mfi_stroke_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_stroke_color_click(IInspectable const&, RoutedEventArgs const&);
 		//	線枠メニューの「破線」が選択された.
-		void rmfi_stroke_dash_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_stroke_dash_click(IInspectable const&, RoutedEventArgs const&);
 		//	線枠メニューの「一点破線」が選択された.
-		void rmfi_stroke_dash_dot_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_stroke_dash_dot_click(IInspectable const&, RoutedEventArgs const&);
 		//	線枠メニューの「二点破線」が選択された.
-		void rmfi_stroke_dash_dot_dot_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_stroke_dash_dot_dot_click(IInspectable const&, RoutedEventArgs const&);
 		//	線枠メニューの「点線」が選択された.
-		void rmfi_stroke_dot_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_stroke_dot_click(IInspectable const&, RoutedEventArgs const&);
 		//	線枠メニューの「実線」が選択された.
-		void rmfi_stroke_solid_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_stroke_solid_click(IInspectable const&, RoutedEventArgs const&);
 		//	線枠メニューの「破線の配列」が選択された.
-		void mfi_stroke_pattern_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_stroke_pattern_click(IInspectable const&, RoutedEventArgs const&);
 		//	線枠メニューの「太さ」が選択された.
-		void mfi_stroke_width_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		IAsyncAction mfi_stroke_width_click(IInspectable const&, RoutedEventArgs const&);
 		//	値をスライダーのヘッダーに格納する.
-		template<UNDO_OP U, int S> void stroke_set_slider(double val);
+		template<UNDO_OP U, int S> void stroke_set_slider_header(double val);
 		//	値をスライダーのヘッダーと図形に格納する.
-		template<UNDO_OP U, int S> void stroke_set_slider(Shape* s, const double val);
+		template<UNDO_OP U, int S> void stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		//	MainPage_summary.cpp
@@ -748,13 +728,13 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//	図形一覧パネルの「閉じる」ボタンが押された.
-		void btn_summary_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void btn_summary_close_click(IInspectable const&, RoutedEventArgs const&);
 		//	図形一覧の項目が選択された.
 		void lv_summary_selection_changed(IInspectable const& sender, SelectionChangedEventArgs const& e);
 		//	図形一覧パネルがロードされた.
 		void lv_summary_loaded(IInspectable const& sender, RoutedEventArgs const& e);
 		//	編集メニューの「リストを表示」が選択された.
-		void mfi_summary_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_summary_click(IInspectable const&, RoutedEventArgs const&);
 		//	図形を一覧に追加する.
 		void summary_append(Shape* s);
 		//	一覧の中で図形を入れ替える.
@@ -796,13 +776,13 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//	文字列検索パネルの「閉じる」ボタンが押された.
-		void btn_text_find_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void btn_text_find_close_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「次を検索」ボタンが押された.
-		void btn_text_find_next_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void btn_text_find_next_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「すべて置換」ボタンが押された.
-		void btn_text_replace_all_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void btn_text_replace_all_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「置換して次に」ボタンが押された.
-		void btn_text_replace_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void btn_text_replace_click(IInspectable const&, RoutedEventArgs const&);
 		//　検索の値をデータリーダーから読み込む.
 		void text_find_read(DataReader const& dt_reader);
 		//	文字列検索パネルから値を格納する.
@@ -812,15 +792,15 @@ namespace winrt::GraphPaper::implementation
 		//　検索の値をデータリーダーに書き込む.
 		void text_find_write(DataWriter const& dt_writer);
 		//　編集メニューの「文字列の検索/置換」が選択された.
-		void mfi_text_find_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_text_find_click(IInspectable const&, RoutedEventArgs const&);
 		//　検索文字列が変更された.
-		void tx_text_find_what_changed(IInspectable const& /*sender*/, TextChangedEventArgs const& /*args*/);
+		void tx_text_find_what_changed(IInspectable const&, TextChangedEventArgs const&);
 		//	文字範囲が選択された図形と文字範囲を見つける.
 		S_LIST_T::iterator text_find_range_selected(DWRITE_TEXT_RANGE& t_range);
 		//	図形が持つ文字列を編集する.
 		void text_edit_in(ShapeText* s);
 		//	編集メニューの「文字列の編集」が選択された.
-		void mfi_text_edit_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_text_edit_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		//	MainPage_thread.cpp
@@ -838,23 +818,23 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//	作図メニューの「曲線」が選択された.
-		void rmfi_tool_bezi_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_tool_bezi_click(IInspectable const&, RoutedEventArgs const&);
 		//	作図メニューの「だ円」が選択された.
-		void rmfi_tool_elli_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_tool_elli_click(IInspectable const&, RoutedEventArgs const&);
 		//	作図メニューの「直線」が選択された.
-		void rmfi_tool_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_tool_line_click(IInspectable const&, RoutedEventArgs const&);
 		//	作図メニューの「四へん形」が選択された.
-		void rmfi_tool_quad_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_tool_quad_click(IInspectable const&, RoutedEventArgs const&);
 		//	作図メニューの「方形」が選択された.
-		void rmfi_tool_rect_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_tool_rect_click(IInspectable const&, RoutedEventArgs const&);
 		//	作図メニューの「角丸方形」が選択された.
-		void rmfi_tool_rrect_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_tool_rrect_click(IInspectable const&, RoutedEventArgs const&);
 		//	作図メニューの「図形を選択」が選択された.
-		void rmfi_tool_select_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_tool_select_click(IInspectable const&, RoutedEventArgs const&);
 		//	作図メニューの「文字列」が選択された.
-		void rmfi_tool_text_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_tool_text_click(IInspectable const&, RoutedEventArgs const&);
 		//	作図メニューの「目盛り」が選択された.
-		void rmfi_tool_scale_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void rmfi_tool_scale_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-----------------------------
 		//	MainPage_undo.cpp
@@ -864,9 +844,9 @@ namespace winrt::GraphPaper::implementation
 		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		void enable_undo_menu(void);
 		//	編集メニューの「やり直し」が選択された.
-		void mfi_redo_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_redo_click(IInspectable const&, RoutedEventArgs const&);
 		//	編集メニューの「元に戻す」が選択された.
-		void mfi_undo_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_undo_click(IInspectable const&, RoutedEventArgs const&);
 		//	やり直す操作スタックを消去する.
 		void redo_clear(void);
 		//	操作スタックを消去する.
@@ -916,13 +896,13 @@ namespace winrt::GraphPaper::implementation
 		//	クリップボードに保存された図形を非同期に貼り付ける.
 		IAsyncAction clipboard_paste_async(void);
 		//	編集メニューの「コピー」が選択された.
-		void mfi_copy_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_copy_click(IInspectable const&, RoutedEventArgs const&);
 		//	編集メニューの「切り取り」が選択された.
-		void mfi_cut_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_cut_click(IInspectable const&, RoutedEventArgs const&);
 		//	編集メニューの「削除」が選択された.
-		void mfi_delete_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_delete_click(IInspectable const&, RoutedEventArgs const&);
 		//	編集メニューの「貼り付け」が選択された.
-		void mfi_paste_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_paste_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		//	MainPage_zoom.cpp
@@ -930,12 +910,12 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//	ページメニューの「拡大縮小」>「拡大」が選択された.
-		void mfi_zoom_in_clicked(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_zoom_in_clicked(IInspectable const&, RoutedEventArgs const&);
 		//	ページメニューの「拡大縮小」>「縮小」が選択された.
-		void mfi_zoom_out_clicked(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
+		void mfi_zoom_out_clicked(IInspectable const&, RoutedEventArgs const&);
 		//	ページメニューの「拡大縮小」>「100%に戻す」が選択された.
-		void mfi_zoom_reset_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/);
-	};
+		void mfi_zoom_reset_click(IInspectable const&, RoutedEventArgs const&);
+};
 
 }
 

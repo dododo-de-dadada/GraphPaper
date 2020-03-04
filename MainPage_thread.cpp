@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// ウィンドウが前面に出された
-	void MainPage::thread_activated(IInspectable const& /*sender*/, WindowActivatedEventArgs const& args)
+	void MainPage::thread_activated(IInspectable const&, WindowActivatedEventArgs const& args)
 	{
 		using winrt::Windows::UI::Core::CoreWindowActivationState;
 

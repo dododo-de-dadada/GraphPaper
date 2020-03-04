@@ -120,26 +120,26 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::arrange_to<false>(void);
 
 	// 編集メニューの「前面に移動」が選択された.
-	void MainPage::mfi_bring_forward_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		arrange_order<S_LIST_T::reverse_iterator>();
 	}
 
 	// 編集メニューの「最前面に移動」が選択された.
-	void MainPage::mfi_bring_to_front_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		constexpr auto FRONT = false;
 		arrange_to<FRONT>();
 	}
 
 	// 編集メニューの「ひとつ背面に移動」が選択された.
-	void MainPage::mfi_send_backward_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_send_backward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		arrange_order<S_LIST_T::iterator>();
 	}
 
 	// 編集メニューの「最背面に移動」が選択された.
-	void MainPage::mfi_send_to_back_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		constexpr auto BACK = true;
 		arrange_to<BACK>();

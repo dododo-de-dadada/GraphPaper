@@ -203,19 +203,19 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「コピー」が選択された.
-	void MainPage::mfi_copy_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_copy_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto _{ clipboard_copy_async<COPY>() };
 	}
 
 	// 編集メニューの「切り取る」が選択された.
-	void MainPage::mfi_cut_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_cut_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto _{ clipboard_copy_async<CUT>() };
 	}
 
 	// 編集メニューの「削除」が選択された.
-	void MainPage::mfi_delete_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		S_LIST_T sel_list;
 		s_list_select<Shape>(m_list_shapes, sel_list);
@@ -238,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「貼り付け」が選択された.
-	void MainPage::mfi_paste_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_paste_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto _{ clipboard_paste_async() };
 	}

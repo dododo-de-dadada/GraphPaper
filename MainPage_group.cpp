@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 編集メニューの「グループ化」が選択された.
-	void MainPage::mfi_group_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_group_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		S_LIST_T sel_list;
 		s_list_select<Shape>(m_list_shapes, sel_list);
@@ -39,7 +39,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「グループの解除」が選択された.
-	void MainPage::mfi_ungroup_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_ungroup_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択されたグループ図形をすべて得る.
 		S_LIST_T grp_list;

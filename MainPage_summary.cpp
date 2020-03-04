@@ -105,14 +105,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形一覧パネルの「閉じる」ボタンが押された.
-	void MainPage::btn_summary_close_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::btn_summary_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		summary_close();
 		//mfi_summary_click(nullptr, nullptr);
 	}
 
 	//	図形一覧パネルがロードされた.
-	void MainPage::lv_summary_loaded(IInspectable const& /*sender*/, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
+	void MainPage::lv_summary_loaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
 	{
 		bool s_visible = m_summary_visible;
 		if (m_summary_visible) {
@@ -135,7 +135,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	図形一覧の項目が選択された.
-	void MainPage::lv_summary_selection_changed(IInspectable const& /*sender*/, SelectionChangedEventArgs const& e)
+	void MainPage::lv_summary_selection_changed(IInspectable const&, SelectionChangedEventArgs const& e)
 	{
 		if (m_summary_visible == false) {
 			// 一覧の表示フラグがなければ中断する.
@@ -174,7 +174,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「リストを表示」が選択された.
-	void MainPage::mfi_summary_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::mfi_summary_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_summary_visible) {
 			summary_close();

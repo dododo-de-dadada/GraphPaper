@@ -336,7 +336,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// sŠÔ‚ð“¾‚é.
-	bool ShapePanel::get_text_line(double& val) const noexcept
+	bool ShapePanel::get_text_line_height(double& val) const noexcept
 	{
 		val = m_text_line;
 		return true;
@@ -523,7 +523,7 @@ read(dummy, dt_reader);
 	}
 
 	// ’l‚ðsŠÔ‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_text_line(const double val)
+	void ShapePanel::set_text_line_height(const double val)
 	{
 		m_text_line = val;
 	}
@@ -551,7 +551,7 @@ read(dummy, dt_reader);
 		s->get_grid_size(m_grid_size);
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
-		s->get_text_line(m_text_line);
+		s->get_text_line_height(m_text_line);
 		D2D1_COLOR_F color;
 		if (s->get_page_color(color)) {
 			set_page_color(color);

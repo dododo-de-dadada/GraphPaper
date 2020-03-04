@@ -9,9 +9,11 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrowhead";
+
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::arrow_set_slider(const double val)
+	void MainPage::arrow_set_slider_header(const double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -53,9 +55,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーと図形に格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::arrow_set_slider(Shape* s, const double val)
+	void MainPage::arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		arrow_set_slider<U, S>(val);
+		Shape* s = m_sample_shape;
+		const double val = args.NewValue();
+		arrow_set_slider_header<U, S>(val);
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			ARROW_SIZE size;
 			s->get_arrow_size(size);
@@ -91,88 +95,50 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ストロークメニューの「矢じりの大きさ」が選択された.
-	void MainPage::mfi_arrow_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_arrow_size_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token slider1_token;
-		static winrt::event_token slider2_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		load_cd_sample();
-		double val0 = m_page_panel.m_arrow_size.m_width;
-		double val1 = m_page_panel.m_arrow_size.m_length;
-		double val2 = m_page_panel.m_arrow_size.m_offset;
+		const double val0 = m_page_panel.m_arrow_size.m_width;
+		const double val1 = m_page_panel.m_arrow_size.m_length;
+		const double val2 = m_page_panel.m_arrow_size.m_offset;
 		slider0().Value(val0);
 		slider1().Value(val1);
 		slider2().Value(val2);
-		arrow_set_slider<UNDO_OP::ARROW_SIZE, 0>(val0);
-		arrow_set_slider<UNDO_OP::ARROW_SIZE, 1>(val1);
-		arrow_set_slider<UNDO_OP::ARROW_SIZE, 2>(val2);
+		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 0>(val0);
+		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 1>(val1);
+		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 2>(val2);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				stroke_create_sample();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				arrow_set_slider<UNDO_OP::ARROW_SIZE, 0>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider1_token = slider1().ValueChanged(
-			[this](auto, auto args)
-			{
-				arrow_set_slider<UNDO_OP::ARROW_SIZE, 1>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider2_token = slider2().ValueChanged(
-			[this](auto, auto args)
-			{
-				arrow_set_slider<UNDO_OP::ARROW_SIZE, 2>(m_sample_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				ARROW_SIZE sample_val;
-				m_sample_shape->get_arrow_size(sample_val);
-				undo_push_value<UNDO_OP::ARROW_SIZE>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this](auto, auto)
-			{
-				delete m_sample_shape;
+		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 0> });
+		const auto slider1_token = slider1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 1> });
+		const auto slider2_token = slider2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 2> });
+		m_sample_type = SAMP_TYPE::STROKE;
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			ARROW_SIZE sample_val;
+			m_sample_shape->get_arrow_size(sample_val);
+			undo_push_value<UNDO_OP::ARROW_SIZE>(sample_val);
+		}
+		delete m_sample_shape;
 #if defined(_DEBUG)
-				debug_leak_cnt--;
+		debug_leak_cnt--;
 #endif
-				m_sample_shape = nullptr;
-				slider0().Visibility(COLLAPSED);
-				slider1().Visibility(COLLAPSED);
-				slider2().Visibility(COLLAPSED);
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				slider1().ValueChanged(slider1_token);
-				slider2().ValueChanged(slider2_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		show_cd_sample(L"str_arrow");
+		m_sample_shape = nullptr;
+		slider0().Visibility(COLLAPSED);
+		slider1().Visibility(COLLAPSED);
+		slider2().Visibility(COLLAPSED);
+		slider0().ValueChanged(slider0_token);
+		slider1().ValueChanged(slider1_token);
+		slider2().ValueChanged(slider2_token);
+		page_draw();
 	}
 
 	//	ストロークメニューの「矢じりの種類」>「閉じた矢」が選択された.
-	void MainPage::rmfi_arrow_filled_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_arrow_filled_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_arrow_style == ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(true);
@@ -182,7 +148,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	ストロークメニューの「矢じりの種類」>「なし」が選択された.
-	void MainPage::rmfi_arrow_none_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_arrow_none_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_arrow_style != ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(false);
@@ -192,7 +158,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	ストロークメニューの「矢じりの種類」>「開いた」が選択された.
-	void MainPage::rmfi_arrow_opened_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_arrow_opened_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_arrow_style == ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(true);

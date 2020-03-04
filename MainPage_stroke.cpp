@@ -12,116 +12,70 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t TITLE_STROKE[] = L"str_stroke";
 
 	// 線枠メニューの「色」が選択された.
-	void MainPage::mfi_stroke_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_stroke_color_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token slider1_token;
-		static winrt::event_token slider2_token;
-		static winrt::event_token slider3_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		load_cd_sample();
-		double val0 = m_page_panel.m_stroke_color.r * COLOR_MAX;
-		double val1 = m_page_panel.m_stroke_color.g * COLOR_MAX;
-		double val2 = m_page_panel.m_stroke_color.b * COLOR_MAX;
-		double val3 = m_page_panel.m_stroke_color.a * COLOR_MAX;
+		const double val0 = m_page_panel.m_stroke_color.r * COLOR_MAX;
+		const double val1 = m_page_panel.m_stroke_color.g * COLOR_MAX;
+		const double val2 = m_page_panel.m_stroke_color.b * COLOR_MAX;
+		const double val3 = m_page_panel.m_stroke_color.a * COLOR_MAX;
 		slider0().Value(val0);
 		slider1().Value(val1);
 		slider2().Value(val2);
 		slider3().Value(val3);
-		stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(val0);
-		stroke_set_slider<UNDO_OP::STROKE_COLOR, 1>(val1);
-		stroke_set_slider<UNDO_OP::STROKE_COLOR, 2>(val2);
-		stroke_set_slider<UNDO_OP::STROKE_COLOR, 3>(val3);
+		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 0>(val0);
+		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 1>(val1);
+		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 2>(val2);
+		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 3>(val3);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
 		slider3().Visibility(VISIBLE);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				stroke_create_sample();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider1_token = slider1().ValueChanged(
-			[this](auto, auto args)
-			{
-				stroke_set_slider<UNDO_OP::STROKE_COLOR, 1>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider2_token = slider2().ValueChanged(
-			[this](auto, auto args)
-			{
-				stroke_set_slider<UNDO_OP::STROKE_COLOR, 2>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider3_token = slider3().ValueChanged(
-			[this](auto, auto args)
-			{
-				stroke_set_slider<UNDO_OP::STROKE_COLOR, 3>(m_sample_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				//m_page_panel.m_col_style = m_sample_panel.m_col_style;
-				D2D1_COLOR_F sample_val;
-				m_sample_shape->get_stroke_color(sample_val);
-				undo_push_value<UNDO_OP::STROKE_COLOR>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this](auto, auto)
-			{
-				delete m_sample_shape;
+		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 0> });
+		//	[this](auto, auto args)
+		//	{
+		//		stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(m_sample_shape, args.NewValue());
+		//	}
+		//);
+		const auto slider1_token = slider1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 1> });
+		const auto slider2_token = slider2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 2> });
+		const auto slider3_token = slider3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 3> });
+		m_sample_type = SAMP_TYPE::STROKE;
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			D2D1_COLOR_F sample_val;
+			m_sample_shape->get_stroke_color(sample_val);
+			undo_push_value<UNDO_OP::STROKE_COLOR>(sample_val);
+		}
+		delete m_sample_shape;
 #if defined(_DEBUG)
-				debug_leak_cnt--;
+		debug_leak_cnt--;
 #endif
-				m_sample_shape = nullptr;
-				slider0().Visibility(COLLAPSED);
-				slider1().Visibility(COLLAPSED);
-				slider2().Visibility(COLLAPSED);
-				slider3().Visibility(COLLAPSED);
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				slider1().ValueChanged(slider1_token);
-				slider2().ValueChanged(slider2_token);
-				slider3().ValueChanged(slider3_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		show_cd_sample(TITLE_STROKE);
+		m_sample_shape = nullptr;
+		slider0().Visibility(COLLAPSED);
+		slider1().Visibility(COLLAPSED);
+		slider2().Visibility(COLLAPSED);
+		slider3().Visibility(COLLAPSED);
+		slider0().ValueChanged(slider0_token);
+		slider1().ValueChanged(slider1_token);
+		slider2().ValueChanged(slider2_token);
+		slider3().ValueChanged(slider3_token);
+		page_draw();
 	}
 
 	// 線枠メニューの「破線の配置」が選択された.
-	void MainPage::mfi_stroke_pattern_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_stroke_pattern_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token slider1_token;
-		static winrt::event_token slider2_token;
-		static winrt::event_token slider3_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		load_cd_sample();
-		double val0 = m_page_panel.m_stroke_pattern.m_[0];
-		double val1 = m_page_panel.m_stroke_pattern.m_[1];
-		double val2 = m_page_panel.m_stroke_pattern.m_[2];
-		double val3 = m_page_panel.m_stroke_pattern.m_[3];
+		const double val0 = m_page_panel.m_stroke_pattern.m_[0];
+		const double val1 = m_page_panel.m_stroke_pattern.m_[1];
+		const double val2 = m_page_panel.m_stroke_pattern.m_[2];
+		const double val3 = m_page_panel.m_stroke_pattern.m_[3];
 		slider0().Value(val0);
 		slider1().Value(val1);
 		slider2().Value(val2);
@@ -130,134 +84,79 @@ namespace winrt::GraphPaper::implementation
 		slider1().Visibility(m_page_panel.m_stroke_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
 		slider2().Visibility(m_page_panel.m_stroke_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
 		slider3().Visibility(m_page_panel.m_stroke_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
-		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0>(val0);
-		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 1>(val1);
-		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 2>(val2);
-		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 3>(val3);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				stroke_create_sample();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider1_token = slider1().ValueChanged(
-			[this](auto, auto args)
-			{
-				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 1>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider2_token = slider2().ValueChanged(
-			[this](auto, auto args)
-			{
-				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 2>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider3_token = slider3().ValueChanged(
-			[this](auto, auto args)
-			{
-				stroke_set_slider<UNDO_OP::STROKE_PATTERN, 3>(m_sample_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				STROKE_PATTERN sample_val;
-				m_sample_shape->get_stroke_pattern(sample_val);
-				undo_push_value<UNDO_OP::STROKE_PATTERN>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this](auto, auto)
-			{
-				delete m_sample_shape;
+		stroke_set_slider_header<UNDO_OP::STROKE_PATTERN, 0>(val0);
+		stroke_set_slider_header<UNDO_OP::STROKE_PATTERN, 1>(val1);
+		stroke_set_slider_header<UNDO_OP::STROKE_PATTERN, 2>(val2);
+		stroke_set_slider_header<UNDO_OP::STROKE_PATTERN, 3>(val3);
+		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0> });
+		//	[this](auto, auto args)
+		//	{
+		//		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0>(m_sample_shape, args.NewValue());
+		//	}
+		//);
+		const auto slider1_token = slider1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 1> });
+		const auto slider2_token = slider2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 2> });
+		const auto slider3_token = slider3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 3> });
+		m_sample_type = SAMP_TYPE::STROKE;
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			STROKE_PATTERN sample_val;
+			m_sample_shape->get_stroke_pattern(sample_val);
+			undo_push_value<UNDO_OP::STROKE_PATTERN>(sample_val);
+		}
+		delete m_sample_shape;
 #if defined(_DEBUG)
-				debug_leak_cnt--;
+		debug_leak_cnt--;
 #endif
-				m_sample_shape = nullptr;
-				slider0().Visibility(COLLAPSED);
-				slider1().Visibility(COLLAPSED);
-				slider2().Visibility(COLLAPSED);
-				slider3().Visibility(COLLAPSED);
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				slider1().ValueChanged(slider1_token);
-				slider2().ValueChanged(slider2_token);
-				slider3().ValueChanged(slider3_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		show_cd_sample(TITLE_STROKE);
+		m_sample_shape = nullptr;
+		slider0().Visibility(COLLAPSED);
+		slider1().Visibility(COLLAPSED);
+		slider2().Visibility(COLLAPSED);
+		slider3().Visibility(COLLAPSED);
+		slider0().ValueChanged(slider0_token);
+		slider1().ValueChanged(slider1_token);
+		slider2().ValueChanged(slider2_token);
+		slider3().ValueChanged(slider3_token);
+		page_draw();
 	}
 
 	// 線枠メニューの「太さ」が選択された.
-	void MainPage::mfi_stroke_width_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_stroke_width_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		static winrt::event_token slider0_token;
-		static winrt::event_token primary_token;
-		static winrt::event_token loaded_token;
-		static winrt::event_token closed_token;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		load_cd_sample();
-		double val0 = m_page_panel.m_stroke_width;
+		const double val0 = m_page_panel.m_stroke_width;
 		slider0().Value(val0);
 		slider0().Visibility(VISIBLE);
-		stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0>(val0);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				stroke_create_sample();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0>(m_sample_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				double sample_val;
-				m_sample_shape->get_stroke_width(sample_val);
-				undo_push_value<UNDO_OP::STROKE_WIDTH>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this](auto, auto)
-			{
-				delete m_sample_shape;
+		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
+		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0> });
+		//	[this](auto, auto args)
+		//	{
+		//		stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0>(m_sample_shape, args.NewValue());
+		//	}
+		//);
+		m_sample_type = SAMP_TYPE::STROKE;
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			double sample_val;
+			m_sample_shape->get_stroke_width(sample_val);
+			undo_push_value<UNDO_OP::STROKE_WIDTH>(sample_val);
+		}
+		delete m_sample_shape;
 #if defined(_DEBUG)
-				debug_leak_cnt--;
+		debug_leak_cnt--;
 #endif
-				m_sample_shape = nullptr;
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().Visibility(COLLAPSED);
-				slider0().ValueChanged(slider0_token);
-				//cd_sample().Opened(opened_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		show_cd_sample(TITLE_STROKE);
+		m_sample_shape = nullptr;
+		slider0().Visibility(COLLAPSED);
+		slider0().ValueChanged(slider0_token);
+		page_draw();
 	}
 
 	// 線枠メニューの「破線」が選択された.
-	void MainPage::rmfi_stroke_dash_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_stroke_dash_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_pattern().IsEnabled(true);
@@ -267,7 +166,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「一点破線」が選択された.
-	void MainPage::rmfi_stroke_dash_dot_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_stroke_dash_dot_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_pattern().IsEnabled(true);
@@ -277,7 +176,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「二点破線」が選択された.
-	void MainPage::rmfi_stroke_dash_dot_dot_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_stroke_dash_dot_dot_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_pattern().IsEnabled(true);
@@ -287,7 +186,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「点線」が選択された.
-	void MainPage::rmfi_stroke_dot_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_stroke_dot_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_pattern().IsEnabled(true);
@@ -297,7 +196,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「実線」が選択された.
-	void MainPage::rmfi_stroke_solid_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_stroke_solid_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_stroke_style != D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_pattern().IsEnabled(false);
@@ -307,6 +206,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠の見本を作成する.
+	/*
 	void MainPage::stroke_create_sample(void)
 	{
 		const auto dpi = m_sample_dx.m_logical_dpi;
@@ -326,10 +226,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 	}
-
+	*/
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::stroke_set_slider(double val)
+	void MainPage::stroke_set_slider_header(double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -403,9 +303,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーと図形に格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::stroke_set_slider(Shape* s, const double val)
+	void MainPage::stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		stroke_set_slider<U, S>(val);
+		Shape* s = m_sample_shape;
+		const double val = args.NewValue();
+		stroke_set_slider_header<U, S>(val);
 		if constexpr (U == UNDO_OP::STROKE_PATTERN) {
 			STROKE_PATTERN pat;
 			s->get_stroke_pattern(pat);

@@ -304,7 +304,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ポインターがページのパネルから出た.
-	void MainPage::scp_pointer_exited(IInspectable const& sender, PointerRoutedEventArgs const& /*args*/)
+	void MainPage::scp_pointer_exited(IInspectable const& sender, PointerRoutedEventArgs const&)
 	{
 		if (sender != scp_page_panel()) {
 			return;

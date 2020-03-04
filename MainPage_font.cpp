@@ -25,6 +25,20 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_WEIGHT_BLACK,
 		DWRITE_FONT_WEIGHT_EXTRA_BLACK
 	};
+	constexpr wchar_t* FONT_WEIGHT_NAME[] = {
+		L"str_font_weight_thin",
+		L"str_font_weight_extra_light",
+		L"str_font_weight_light",
+		L"str_font_weight_semi_light",
+		L"str_font_weight_normal",
+		L"str_font_weight_medium",
+		L"str_font_weight_demi_bold",
+		L"str_font_weight_bold",
+		L"str_font_weight_extra_bold",
+		L"str_font_weight_black",
+		L"str_font_weight_extra_black",
+		nullptr
+	};
 
 	// 書体の伸縮の配列
 	constexpr std::underlying_type_t<DWRITE_FONT_STRETCH> FONT_STRETCH[] = {
@@ -39,31 +53,21 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STRETCH_EXTRA_EXPANDED,
 		DWRITE_FONT_STRETCH_ULTRA_EXPANDED,
 	};
+	constexpr wchar_t* FONT_STRETCH_NAME[] = {
+		L"str_font_stretch_undefined",
+		L"str_font_stretch_ultra_condensed",
+		L"str_font_stretch_extra_condensed",
+		L"str_font_stretch_condensed",
+		L"str_font_stretch_semi_condensed",
+		L"str_font_stretch_normal",
+		L"str_font_stretch_semi_expanded",
+		L"str_font_stretch_expanded",
+		L"str_font_stretch_extra_expanded",
+		L"str_font_stretch_ultra_expanded",
+		nullptr
+	};
 
 	constexpr wchar_t TITLE_FONT[] = L"str_font";
-
-	// 書体の見本を作成する.
-	void MainPage::font_create_sample(void)
-	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		const auto w = scp_sample_panel().ActualWidth();
-		const auto h = scp_sample_panel().ActualHeight();
-		const auto padding = w * 0.125;
-		const D2D1_POINT_2F pos = {
-			static_cast<FLOAT>(padding),
-			static_cast<FLOAT>(padding)
-		};
-		const D2D1_POINT_2F vec = {
-			static_cast<FLOAT>(w - 2.0 * padding),
-			static_cast<FLOAT>(h - 2.0 * padding)
-		};
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		const auto t = wchar_cpy(r_loader.GetString(L"str_pangram").c_str());
-		m_sample_shape = new ShapeText(pos, vec, t, &m_sample_panel);
-#if defined(_DEBUG)
-		debug_leak_cnt++;
-#endif
-	}
 
 	// 書体メニューの「字体」に印をつける.
 	// f_style	書体の字体
@@ -78,157 +82,21 @@ namespace winrt::GraphPaper::implementation
 		rmfi_font_oblique_2().IsChecked(f_style == DWRITE_FONT_STYLE_OBLIQUE);
 	}
 
-	//	リストビュー「書体名」がロードされた.
-	void MainPage::lv_font_family_loaded(IInspectable const& /*sender*/, RoutedEventArgs const& /*e*/)
+	//　リストビュー「見本リスト」がロードされた.
+	void MainPage::lv_sample_list_loaded(IInspectable const&, RoutedEventArgs const&)
 	{
-		lv_font_family().Items().Clear();
-		for (uint32_t i = 0u; wchar_t* name = ShapeText::get_available_font(i); i++) {
-			auto item = box_value(winrt::hstring(name));
-			lv_font_family().Items().Append(item);
+		const auto item = lv_sample_list().SelectedItem();
+		if (item != nullptr) {
+			lv_sample_list().ScrollIntoView(item);
 		}
-		for (uint32_t i = 0; i < lv_font_family().Items().Size(); i++) {
-			IInspectable item[1];
-			lv_font_family().Items().GetMany(i, item);
-			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
-			if (wcscmp(name, m_page_panel.m_font_family) == 0) {
-				lv_font_family().SelectedItem(item[0]);
-				lv_font_family().ScrollIntoView(item[0]);
-				return;
-			}
-		}
-		lv_font_family().SelectedIndex(-1);
-	}
-
-	// リストビュー「書体の伸縮」がロードされた.
-	void MainPage::lv_font_stretch_loaded(IInspectable const& /*sender*/, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
-	{
-		const auto k = lv_font_stretch().Items().Size();
-		for (uint32_t i = 0; i < k; i++) {
-			if (FONT_STRETCH[i] == m_page_panel.m_font_stretch) {
-				lv_font_stretch().SelectedIndex(i);
-				IInspectable item[1];
-				lv_font_stretch().Items().GetMany(i, item);
-				lv_font_stretch().ScrollIntoView(item[0]);
-				return;
-			}
-		}
-		lv_font_stretch().SelectedIndex(-1);
-	}
-
-	// リストビュー「書体の太さ」がロードされた.
-	void MainPage::lv_font_weight_loaded(IInspectable const& /*sender*/, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
-	{
-		const auto k = lv_font_weight().Items().Size();
-		for (uint32_t i = 0; i < k; i++) {
-			if (FONT_WEIGHTS[i] == m_page_panel.m_font_weight) {
-				lv_font_weight().SelectedIndex(i);
-				IInspectable item[1];
-				lv_font_weight().Items().GetMany(i, item);
-				lv_font_weight().ScrollIntoView(item[0]);
-				return;
-			}
-		}
-		lv_font_weight().SelectedIndex(-1);
-	}
-
-	IAsyncAction MainPage::font_color_dialog_show(void)
-	{
-		winrt::event_token slider0_token;
-		winrt::event_token slider1_token;
-		winrt::event_token slider2_token;
-		winrt::event_token slider3_token;
-		winrt::event_token primary_token;
-		winrt::event_token loaded_token;
-		winrt::event_token closed_token;
-
-		winrt::apartment_context context;
-		co_await winrt::resume_foreground(this->Dispatcher());
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				font_create_sample();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider1_token = slider1().ValueChanged(
-			[this](auto, auto args)
-			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 1>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider2_token = slider2().ValueChanged(
-			[this](auto, auto args)
-			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 2>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider3_token = slider3().ValueChanged(
-			[this](auto, auto args)
-			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_sample_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				D2D1_COLOR_F sample_val;
-				m_sample_shape->get_font_color(sample_val);
-				undo_push_value<UNDO_OP::FONT_COLOR>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this, &loaded_token, &slider0_token, &slider1_token, &slider2_token, &slider3_token, &primary_token, &closed_token](auto, auto)
-			{
-				delete m_sample_shape;
-#if defined(_DEBUG)
-				debug_leak_cnt--;
-#endif
-				m_sample_shape = nullptr;
-				slider0().Visibility(COLLAPSED);
-				slider1().Visibility(COLLAPSED);
-				slider2().Visibility(COLLAPSED);
-				slider3().Visibility(COLLAPSED);
-				//cx_color_style().Visibility(COLLAPSED);
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				slider1().ValueChanged(slider1_token);
-				slider2().ValueChanged(slider2_token);
-				slider3().ValueChanged(slider3_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		//co_await show_cd_sample(TITLE_FONT);
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
-		co_await cd_sample().ShowAsync();
-		co_await context;
 	}
 
 	// 書体メニューの「色」が選択された.
-	IAsyncAction MainPage::mfi_font_color_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_font_color_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		winrt::event_token slider0_token;
-		winrt::event_token slider1_token;
-		winrt::event_token slider2_token;
-		winrt::event_token slider3_token;
-		winrt::event_token primary_token;
-		winrt::event_token loaded_token;
-		winrt::event_token closed_token;
-
-		load_cd_sample();
 		const double val0 = m_page_panel.m_font_color.r * COLOR_MAX;
 		const double val1 = m_page_panel.m_font_color.g * COLOR_MAX;
 		const double val2 = m_page_panel.m_font_color.b * COLOR_MAX;
@@ -237,344 +105,264 @@ namespace winrt::GraphPaper::implementation
 		slider1().Value(val1);
 		slider2().Value(val2);
 		slider3().Value(val3);
-		font_set_slider<UNDO_OP::FONT_COLOR, 0>(val0);
-		font_set_slider<UNDO_OP::FONT_COLOR, 1>(val1);
-		font_set_slider<UNDO_OP::FONT_COLOR, 2>(val2);
-		font_set_slider<UNDO_OP::FONT_COLOR, 3>(val3);
+		font_set_slider_header<UNDO_OP::FONT_COLOR, 0>(val0);
+		font_set_slider_header<UNDO_OP::FONT_COLOR, 1>(val1);
+		font_set_slider_header<UNDO_OP::FONT_COLOR, 2>(val2);
+		font_set_slider_header<UNDO_OP::FONT_COLOR, 3>(val3);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
 		slider2().Visibility(VISIBLE);
 		slider3().Visibility(VISIBLE);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				font_create_sample();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider1_token = slider1().ValueChanged(
-			[this](auto, auto args)
-			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 1>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider2_token = slider2().ValueChanged(
-			[this](auto, auto args)
-			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 2>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider3_token = slider3().ValueChanged(
-			[this](auto, auto args)
-			{
-				font_set_slider<UNDO_OP::FONT_COLOR, 3>(m_sample_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				D2D1_COLOR_F sample_val;
-				m_sample_shape->get_font_color(sample_val);
-				undo_push_value<UNDO_OP::FONT_COLOR>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this, &loaded_token, &slider0_token, &slider1_token, &slider2_token, &slider3_token, &primary_token, &closed_token](auto, auto)
-			{
-				delete m_sample_shape;
-#if defined(_DEBUG)
-				debug_leak_cnt--;
-#endif
-				m_sample_shape = nullptr;
-				slider0().Visibility(COLLAPSED);
-				slider1().Visibility(COLLAPSED);
-				slider2().Visibility(COLLAPSED);
-				slider3().Visibility(COLLAPSED);
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				slider1().ValueChanged(slider1_token);
-				slider2().ValueChanged(slider2_token);
-				slider3().ValueChanged(slider3_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
+		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 0> });
+		//const auto slider0_token = slider0().ValueChanged(
+		//	[this](auto, auto args)
+		//	{
+		//		font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, args.NewValue());
+		//	}
+		//);
+		const auto slider1_token = slider1().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 1> });
+		const auto slider2_token = slider2().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 2> });
+		const auto slider3_token = slider3().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 3> });
+		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
-		co_await cd_sample().ShowAsync();
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			D2D1_COLOR_F sample_val;
+			m_sample_shape->get_font_color(sample_val);
+			undo_push_value<UNDO_OP::FONT_COLOR>(sample_val);
+		}
+		delete m_sample_shape;
+#if defined(_DEBUG)
+		debug_leak_cnt--;
+#endif
+		m_sample_shape = nullptr;
+		slider0().Visibility(COLLAPSED);
+		slider1().Visibility(COLLAPSED);
+		slider2().Visibility(COLLAPSED);
+		slider3().Visibility(COLLAPSED);
+		slider0().ValueChanged(slider0_token);
+		slider1().ValueChanged(slider1_token);
+		slider2().ValueChanged(slider2_token);
+		slider3().ValueChanged(slider3_token);
+		page_draw();
+
 	}
 
 	// 書体メニューの「書体名」が選択された.
-	IAsyncAction MainPage::mfi_font_family_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_font_family_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		winrt::event_token changed_token;
-		winrt::event_token primary_token;
-		winrt::event_token loaded_token;
-		winrt::event_token closed_token;
-
-		load_cd_sample();
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				font_create_sample();
-				sample_draw();
+		for (uint32_t i = 0; wchar_t* name = ShapeText::get_available_font(i); i++) {
+			auto item = box_value(winrt::hstring(name));
+			lv_sample_list().Items().Append(item);
+		}
+		for (uint32_t i = 0; i < lv_sample_list().Items().Size(); i++) {
+			IInspectable item[1];
+			lv_sample_list().Items().GetMany(i, item);
+			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
+			if (wcscmp(name, m_page_panel.m_font_family) == 0) {
+				//	書体名が同じ場合,
+				//	その書体をリストビューの選択済み項目に格納する.
+				lv_sample_list().SelectedItem(item[0]);
+				lv_sample_list().ScrollIntoView(item[0]);
+				break;
 			}
-		);
-		changed_token = lv_font_family().SelectionChanged(
+		}
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::lv_sample_list_loaded });
+		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto)
 			{
-				auto i = lv_font_family().SelectedIndex();
+				auto i = lv_sample_list().SelectedIndex();
 				m_sample_shape->set_font_family(ShapeText::get_available_font(i));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
 			}
 		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				wchar_t* sample_val;
-				m_sample_shape->get_font_family(sample_val);
-				undo_push_value<UNDO_OP::FONT_FAMILY>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this, &loaded_token, &changed_token, &primary_token, &closed_token](auto, auto)
-			{
-				delete m_sample_shape;
-#if defined(_DEBUG)
-				debug_leak_cnt--;
-#endif
-				m_sample_shape = nullptr;
-				lv_font_family().SelectionChanged(changed_token);
-				scp_sample_panel().Loaded(loaded_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				lv_font_family().Visibility(COLLAPSED);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		lv_font_family().Visibility(VISIBLE);
+		lv_sample_list().Visibility(VISIBLE);
+		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
-		co_await cd_sample().ShowAsync();
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			wchar_t* sample_val;
+			m_sample_shape->get_font_family(sample_val);
+			undo_push_value<UNDO_OP::FONT_FAMILY>(sample_val);
+		}
+		delete m_sample_shape;
+#if defined(_DEBUG)
+		debug_leak_cnt--;
+#endif
+		m_sample_shape = nullptr;
+		lv_sample_list().Loaded(loaded_token);
+		lv_sample_list().SelectionChanged(changed_token);
+		lv_sample_list().Visibility(COLLAPSED);
+		lv_sample_list().Items().Clear();
+		page_draw();
 	}
 
 	// 書体メニューの「イタリック体」が選択された.
-	void MainPage::rmfi_font_italic_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_font_italic_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC);
 	}
 
 	// 書体メニューの「標準」が選択された.
-	void MainPage::rmfi_font_normal_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_font_normal_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL);
 	}
 
 	// 書体メニューの「斜体」が選択された.
-	void MainPage::rmfi_font_oblique_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_font_oblique_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE);
 	}
 
 	// 書体メニューの「大きさ」が選択された.
-	IAsyncAction MainPage::mfi_font_size_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_font_size_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		winrt::event_token slider0_token;
-		winrt::event_token primary_token;
-		winrt::event_token loaded_token;
-		winrt::event_token closed_token;
-
-		load_cd_sample();
 		const double val0 = m_page_panel.m_font_size;
 		slider0().Value(val0);
-		font_set_slider<UNDO_OP::FONT_SIZE, 0>(val0);
+		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
 		slider0().Visibility(VISIBLE);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				font_create_sample();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				font_set_slider<UNDO_OP::FONT_SIZE, 0>(m_sample_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				double sample_val;
-				m_sample_shape->get_font_size(sample_val);
-				undo_push_value<UNDO_OP::FONT_SIZE>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this, &loaded_token, &slider0_token, &primary_token, &closed_token](auto, auto)
-			{
-				delete m_sample_shape;
-#if defined(_DEBUG)
-				debug_leak_cnt--;
-#endif
-				m_sample_shape = nullptr;
-				slider0().Visibility(COLLAPSED);
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
+		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_SIZE, 0> });
+		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
-		co_await cd_sample().ShowAsync();
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			double sample_val;
+			m_sample_shape->get_font_size(sample_val);
+			undo_push_value<UNDO_OP::FONT_SIZE>(sample_val);
+		}
+		delete m_sample_shape;
+#if defined(_DEBUG)
+		debug_leak_cnt--;
+#endif
+		m_sample_shape = nullptr;
+		slider0().Visibility(COLLAPSED);
+		slider0().ValueChanged(slider0_token);
+		page_draw();
 	}
 
 	// 書体メニューの「伸縮」が選択された.
-	IAsyncAction MainPage::mfi_font_stretch_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_font_stretch_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		winrt::event_token changed_token;
-		winrt::event_token primary_token;
-		winrt::event_token loaded_token;
-		winrt::event_token closed_token;
-
-		load_cd_sample();
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				font_create_sample();
-				sample_draw();
+		for (uint32_t i = 0; FONT_STRETCH_NAME[i] != nullptr; i++) {
+			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_STRETCH_NAME[i]));
+			lv_sample_list().Items().Append(item);
+		}
+		lv_sample_list().SelectedIndex(-1);
+		const auto k = lv_sample_list().Items().Size();
+		for (uint32_t i = 0; i < k; i++) {
+			if (FONT_STRETCH[i] == m_page_panel.m_font_stretch) {
+				lv_sample_list().SelectedIndex(i);
+				IInspectable item[1];
+				lv_sample_list().Items().GetMany(i, item);
+				lv_sample_list().ScrollIntoView(item[0]);
+				break;
 			}
-		);
-		changed_token = lv_font_stretch().SelectionChanged(
+		}
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::lv_sample_list_loaded });
+		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto args) {
-				uint32_t i = lv_font_stretch().SelectedIndex();
+				uint32_t i = lv_sample_list().SelectedIndex();
 				m_sample_shape->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
 			}
 		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				DWRITE_FONT_STRETCH sample_val;
-				m_sample_shape->get_font_stretch(sample_val);
-				undo_push_value<UNDO_OP::FONT_STRETCH>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this, &loaded_token, &changed_token, &primary_token, &closed_token](auto, auto)
-			{
-				delete m_sample_shape;
-#if defined(_DEBUG)
-				debug_leak_cnt--;
-#endif
-				m_sample_shape = nullptr;
-				scp_sample_panel().Loaded(loaded_token);
-				lv_font_stretch().SelectionChanged(changed_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				lv_font_stretch().Visibility(COLLAPSED);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		lv_font_stretch().Visibility(VISIBLE);
+		lv_sample_list().Visibility(VISIBLE);
+		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
-		co_await cd_sample().ShowAsync();
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			DWRITE_FONT_STRETCH sample_val;
+			m_sample_shape->get_font_stretch(sample_val);
+			undo_push_value<UNDO_OP::FONT_STRETCH>(sample_val);
+		}
+		delete m_sample_shape;
+#if defined(_DEBUG)
+		debug_leak_cnt--;
+#endif
+		m_sample_shape = nullptr;
+		lv_sample_list().Loaded(loaded_token);
+		lv_sample_list().SelectionChanged(changed_token);
+		lv_sample_list().Visibility(COLLAPSED);
+		lv_sample_list().Items().Clear();
+		page_draw();
 	}
 
 	// 書体メニューの「太さ」が選択された.
-	IAsyncAction MainPage::mfi_font_weight_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_font_weight_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		winrt::event_token changed_token;
-		winrt::event_token primary_token;
-		winrt::event_token loaded_token;
-		winrt::event_token closed_token;
-
-		load_cd_sample();
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				font_create_sample();
-				sample_draw();
+		for (uint32_t i = 0; FONT_WEIGHT_NAME[i] != nullptr; i++) {
+			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_WEIGHT_NAME[i]));
+			lv_sample_list().Items().Append(item);
+		}
+		lv_sample_list().SelectedIndex(-1);
+		const auto k = lv_sample_list().Items().Size();
+		for (uint32_t i = 0; i < k; i++) {
+			if (FONT_WEIGHTS[i] == m_page_panel.m_font_weight) {
+				lv_sample_list().SelectedIndex(i);
+				IInspectable item[1];
+				lv_sample_list().Items().GetMany(i, item);
+				lv_sample_list().ScrollIntoView(item[0]);
+				break;
 			}
-		);
-		changed_token = lv_font_weight().SelectionChanged(
+		}
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::lv_sample_list_loaded });
+		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto args) {
-				uint32_t i = lv_font_weight().SelectedIndex();
+				uint32_t i = lv_sample_list().SelectedIndex();
 				m_sample_shape->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
 			}
 		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				DWRITE_FONT_WEIGHT sample_val;
-				m_sample_shape->get_font_weight(sample_val);
-				undo_push_value<UNDO_OP::FONT_WEIGHT>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this, &loaded_token, &changed_token, &primary_token, &closed_token](auto, auto)
-			{
-				delete m_sample_shape;
-#if defined(_DEBUG)
-				debug_leak_cnt--;
-#endif
-				m_sample_shape = nullptr;
-				scp_sample_panel().Loaded(loaded_token);
-				lv_font_weight().SelectionChanged(changed_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				//cd_sample().Opened(opened_token);
-				cd_sample().Closed(closed_token);
-				lv_font_weight().Visibility(COLLAPSED);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
-		lv_font_weight().Visibility(VISIBLE);
+		lv_sample_list().Visibility(VISIBLE);
+		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
-		co_await cd_sample().ShowAsync();
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			DWRITE_FONT_WEIGHT sample_val;
+			m_sample_shape->get_font_weight(sample_val);
+			undo_push_value<UNDO_OP::FONT_WEIGHT>(sample_val);
+		}
+		delete m_sample_shape;
+#if defined(_DEBUG)
+		debug_leak_cnt--;
+#endif
+		m_sample_shape = nullptr;
+		lv_sample_list().Loaded(loaded_token);
+		lv_sample_list().SelectionChanged(changed_token);
+		lv_sample_list().Visibility(COLLAPSED);
+		lv_sample_list().Items().Clear();
+		page_draw();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::font_set_slider(const double val)
+	void MainPage::font_set_slider_header(const double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[16];
-			const double pt = val / m_page_dx.m_logical_dpi * PT_PER_INCH;
-			swprintf_s(buf, FMT_POINT_UNIT, pt);
+			conv_val_to_len(m_page_unit, val, m_sample_dx.m_logical_dpi, m_sample_panel.m_grid_size + 1.0, buf, 16);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
@@ -620,9 +408,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーと図形に格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::font_set_slider(Shape* s, const double val)
+	void MainPage::font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		font_set_slider<U, S>(val);
+		Shape* s = m_sample_shape;
+		const auto val = args.NewValue();
+		font_set_slider_header<U, S>(val);
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			s->set_font_size(val);
 		}
@@ -648,69 +438,40 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	constexpr double TEXT_LINE_DELTA = 2;	// 行間の変分 (DPIs)
+	constexpr double TEXT_LINE_DELTA = 2;	// 行の高さの変分 (DPIs)
 	constexpr wchar_t TITLE_PAGE[] = L"str_page";
 
-	// 書体メニューの「行間」>「高さ」が選択された.
-	IAsyncAction MainPage::mfi_text_line_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	// 書体メニューの「行の高さ」>「高さ」が選択された.
+	IAsyncAction MainPage::mfi_text_line_height_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		winrt::event_token slider0_token;
-		winrt::event_token primary_token;
-		winrt::event_token loaded_token;
-		winrt::event_token closed_token;
-
-		load_cd_sample();
 		const double val0 = m_page_panel.m_text_line;
 		slider0().Value(val0);
-		text_set_slider<UNDO_OP::TEXT_LINE, 0>(val0);
+		text_set_slider_header<UNDO_OP::TEXT_LINE, 0>(val0);
 		slider0().Visibility(VISIBLE);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				font_create_sample();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				text_set_slider<UNDO_OP::TEXT_LINE, 0>(m_sample_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				double sample_val;
-				m_sample_shape->get_text_line(sample_val);
-				undo_push_value<UNDO_OP::TEXT_LINE>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this, &loaded_token, &slider0_token, &primary_token, &closed_token](auto, auto)
-			{
-				delete m_sample_shape;
-#if defined(_DEBUG)
-				debug_leak_cnt--;
-#endif
-				m_sample_shape = nullptr;
-				slider0().Visibility(COLLAPSED);
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
+		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_LINE, 0> });
+		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
-		co_await cd_sample().ShowAsync();
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			double sample_val;
+			m_sample_shape->get_text_line_height(sample_val);
+			undo_push_value<UNDO_OP::TEXT_LINE>(sample_val);
+		}
+		delete m_sample_shape;
+#if defined(_DEBUG)
+		debug_leak_cnt--;
+#endif
+		m_sample_shape = nullptr;
+		slider0().Visibility(COLLAPSED);
+		slider0().ValueChanged(slider0_token);
+		page_draw();
 	}
 
-	//	書体メニューの「行間」>「狭める」が選択された.
-	void MainPage::mfi_text_line_contract_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	//	書体メニューの「行の高さ」>「狭める」が選択された.
+	void MainPage::mfi_text_line_height_contract_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto val = m_page_panel.m_text_line - TEXT_LINE_DELTA;
 		if (val <= FLT_MIN) {
@@ -721,8 +482,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	書体メニューの「行間」>「広げる」が選択された.
-	void MainPage::mfi_text_line_expand_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	//	書体メニューの「行の高さ」>「広げる」が選択された.
+	void MainPage::mfi_text_line_height_expand_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto val = m_page_panel.m_text_line + TEXT_LINE_DELTA;
 		if (m_page_panel.m_text_line != val) {
@@ -731,114 +492,79 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	書体メニューの「余白」が選択された.
-	IAsyncAction MainPage::mfi_text_margin_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	IAsyncAction MainPage::mfi_text_margin_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		winrt::event_token slider0_token;
-		winrt::event_token slider1_token;
-		winrt::event_token primary_token;
-		winrt::event_token loaded_token;
-		winrt::event_token closed_token;
-
-		load_cd_sample();
 		const double val0 = m_page_panel.m_text_mar.width;
 		const double val1 = m_page_panel.m_text_mar.height;
 		slider0().Value(val0);
 		slider1().Value(val1);
-		text_set_slider<UNDO_OP::TEXT_MARGIN, 0>(val0);
-		text_set_slider<UNDO_OP::TEXT_MARGIN, 1>(val1);
+		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 0>(val0);
+		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 1>(val1);
 		slider0().Visibility(VISIBLE);
 		slider1().Visibility(VISIBLE);
-		loaded_token = scp_sample_panel().Loaded(
-			[this](auto, auto)
-			{
-				sample_panel_loaded();
-				font_create_sample();
-				sample_draw();
-			}
-		);
-		slider0_token = slider0().ValueChanged(
-			[this](auto, auto args)
-			{
-				text_set_slider<UNDO_OP::TEXT_MARGIN, 0>(m_sample_shape, args.NewValue());
-			}
-		);
-		slider1_token = slider1().ValueChanged(
-			[this](auto, auto args)
-			{
-				text_set_slider<UNDO_OP::TEXT_MARGIN, 1>(m_sample_shape, args.NewValue());
-			}
-		);
-		primary_token = cd_sample().PrimaryButtonClick(
-			[this](auto, auto)
-			{
-				D2D1_SIZE_F sample_val;
-				m_sample_shape->get_text_margin(sample_val);
-				undo_push_value<UNDO_OP::TEXT_MARGIN>(sample_val);
-			}
-		);
-		closed_token = cd_sample().Closed(
-			[this, &loaded_token, &slider0_token, &slider1_token, &primary_token, &closed_token](auto, auto)
-			{
-				delete m_sample_shape;
-#if defined(_DEBUG)
-				debug_leak_cnt--;
-#endif
-				m_sample_shape = nullptr;
-				slider0().Visibility(COLLAPSED);
-				slider1().Visibility(COLLAPSED);
-				scp_sample_panel().Loaded(loaded_token);
-				slider0().ValueChanged(slider0_token);
-				slider1().ValueChanged(slider1_token);
-				cd_sample().PrimaryButtonClick(primary_token);
-				cd_sample().Closed(closed_token);
-				UnloadObject(cd_sample());
-				page_draw();
-			}
-		);
+		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_MARGIN, 0> });
+		const auto slider1_token = slider1().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_MARGIN, 1> });
+		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
-		co_await cd_sample().ShowAsync();
+		const auto d_result = co_await cd_sample().ShowAsync();
+		if (d_result == ContentDialogResult::Primary) {
+			D2D1_SIZE_F sample_val;
+			m_sample_shape->get_text_margin(sample_val);
+			undo_push_value<UNDO_OP::TEXT_MARGIN>(sample_val);
+		}
+		delete m_sample_shape;
+#if defined(_DEBUG)
+		debug_leak_cnt--;
+#endif
+		m_sample_shape = nullptr;
+		slider0().Visibility(COLLAPSED);
+		slider1().Visibility(COLLAPSED);
+		slider0().ValueChanged(slider0_token);
+		slider1().ValueChanged(slider1_token);
+		page_draw();
 	}
 
 	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
-	void MainPage::rmfi_text_align_bottom_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_text_align_bottom_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「中央」が選択された.
-	void MainPage::rmfi_text_align_center_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_text_align_center_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「均等」が選択された.
-	void MainPage::rmfi_text_align_justified_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_text_align_justified_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
-	void MainPage::rmfi_text_align_left_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_text_align_left_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
 	}
 
 	//	書体メニューの「段落のそろえ」>「中段」が選択された.
-	void MainPage::rmfi_text_align_middle_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_text_align_middle_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
 	//	書体メニューの「文字列のそろえ」>「右よせ」が選択された.
-	void MainPage::rmfi_text_align_right_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_text_align_right_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	}
 
 	//	書体メニューの「段落のそろえ」>「上よせ」が選択された.
-	void MainPage::rmfi_text_align_top_click(IInspectable const& /*sender*/, RoutedEventArgs const& /*args*/)
+	void MainPage::rmfi_text_align_top_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 	}
@@ -873,7 +599,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::text_set_slider(const double val)
+	void MainPage::text_set_slider_header(const double val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -930,11 +656,13 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーと図形に格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::text_set_slider(Shape* s, const double val)
+	void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		text_set_slider<U, S>(val);
+		Shape* s = m_sample_shape;
+		const double val = args.NewValue();
+		text_set_slider_header<U, S>(val);
 		if constexpr (U == UNDO_OP::TEXT_LINE) {
-			s->set_text_line(val);
+			s->set_text_line_height(val);
 		}
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			D2D1_SIZE_F mar;
