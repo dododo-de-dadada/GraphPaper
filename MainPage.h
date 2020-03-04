@@ -18,7 +18,6 @@
 //	MainPage_grid.cpp	方眼の設定
 //	MainPage_group.cpp	グループ化とグループの解除
 //	MainPage_kybd.cpp	キーボードアクセラレーターのハンドラー
-//	MainPage_mru.cpp	最近使ったファイル
 //	MainPage_page.cpp	ページの設定と表示
 //	MainPage_pointer.cpp	ポインターイベントのハンドラー
 //	MainPage_sample.cpp	見本ダイアログの設定, 表示
@@ -329,8 +328,6 @@ namespace winrt::GraphPaper::implementation
 		//	ファイルの読み書き
 		//-------------------------------
 
-		//	ファイルを非同期に開く.
-		IAsyncAction file_open_async(void);
 		//	ストレージファイルを非同期に読む.
 		IAsyncOperation<winrt::hresult> file_read_async(StorageFile const& s_file, const bool suspend = false) noexcept;
 		//	名前を付けてファイルに非同期に保存する
@@ -355,8 +352,26 @@ namespace winrt::GraphPaper::implementation
 		void mfi_save_as_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「保存」が選択された
 		void mfi_save_click(IInspectable const&, RoutedEventArgs const&);
-		//	空白の文書にする.
-		void new_doc(void);
+		//	最近使ったファイルを非同期に読む.
+		IAsyncAction file_read_recent_async(const uint32_t i);
+		//	ファイルメニューの「最近使ったファイル 1」が選択された
+		void mfi_recent_files_1_click(IInspectable const&, RoutedEventArgs const&);
+		//	ファイルメニューの「最近使ったファイル 2」が選択された
+		void mfi_recent_files_2_click(IInspectable const&, RoutedEventArgs const&);
+		//	ファイルメニューの「最近使ったファイル 3」が選択された
+		void mfi_recent_files_3_click(IInspectable const&, RoutedEventArgs const&);
+		//	ファイルメニューの「最近使ったファイル 4」が選択された
+		void mfi_recent_files_4_click(IInspectable const&, RoutedEventArgs const&);
+		//	ファイルメニューの「最近使ったファイル 5」が選択された
+		void mfi_recent_files_5_click(IInspectable const&, RoutedEventArgs const&);
+		//	最近使ったファイルにストレージファイルを追加する.
+		void mru_add_file(StorageFile const& s_file);
+		//	最近使ったファイルのトークンからストレージファイルを得る.
+		IAsyncOperation<StorageFile> mru_get_file(const winrt::hstring token);
+		//	最近使ったファイルからトークンを得る.
+		winrt::hstring mru_get_token(const uint32_t i);
+		//	最近使ったファイルのメニュー項目を更新する.
+		void mru_update_menu_items(void);
 
 		//-------------------------------
 		//	MainPage_fill.cpp
@@ -525,32 +540,6 @@ namespace winrt::GraphPaper::implementation
 		//void ka_ungroup_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + 0 が押された.
 		//void ka_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-
-		//-------------------------------
-		//	MainPage_mru.cpp
-		//	最近使ったファイル
-		//-------------------------------
-
-		//	最近使ったファイルを非同期に読む.
-		IAsyncAction file_read_recent_async(const uint32_t i);
-		//	ファイルメニューの「最近使ったファイル 1」が選択された
-		void mfi_recent_files_1_click(IInspectable const&, RoutedEventArgs const&);
-		//	ファイルメニューの「最近使ったファイル 2」が選択された
-		void mfi_recent_files_2_click(IInspectable const&, RoutedEventArgs const&);
-		//	ファイルメニューの「最近使ったファイル 3」が選択された
-		void mfi_recent_files_3_click(IInspectable const&, RoutedEventArgs const&);
-		//	ファイルメニューの「最近使ったファイル 4」が選択された
-		void mfi_recent_files_4_click(IInspectable const&, RoutedEventArgs const&);
-		//	ファイルメニューの「最近使ったファイル 5」が選択された
-		void mfi_recent_files_5_click(IInspectable const&, RoutedEventArgs const&);
-		//	最近使ったファイルにストレージファイルを追加する.
-		void mru_add_file(StorageFile const& s_file);
-		//	最近使ったファイルのトークンからストレージファイルを得る.
-		IAsyncOperation<StorageFile> mru_get_file(const winrt::hstring token);
-		//	最近使ったファイルからトークンを得る.
-		winrt::hstring mru_get_token(const uint32_t i);
-		//	最近使ったファイルのメニュー項目を更新する.
-		void mru_update_menu_items(void);
 
 		//-------------------------------
 		//　MainPage_page.cpp

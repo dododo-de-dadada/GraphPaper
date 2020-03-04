@@ -5,16 +5,6 @@
 #include "pch.h"
 #include "MainPage.h"
 
-//	file_open_async
-//		file_wait_cursor
-//		PickSingleFileAsync
-//		file_read_async
-//			winrt::resume_background
-//			OpenAsync
-//			winrt::resume_foreground
-//			mru_add_file
-//				mru_update_menu_items
-//			finish_file_read
 //	file_read_recent_async
 //		file_wait_cursor
 //		mru_get_file
@@ -56,11 +46,22 @@
 //			mru_add_file
 //				mru_update_menu_items
 //	mfi_new_click
+//		cd_conf_save().ShowAsync
 //		file_save_async
-//		new_doc
+//		mru_add_file
+//			mru_update_menu_items
 //	mfi_open_click
-//		file_open_async
+//		cd_conf_save().ShowAsync
 //		file_save_async
+//		file_wait_cursor
+//		PickSingleFileAsync
+//		file_read_async
+//			winrt::resume_background
+//			OpenAsync
+//			winrt::resume_foreground
+//			mru_add_file
+//				mru_update_menu_items
+//			finish_file_read
 //	mfi_recent_files_N_click
 //		file_read_recent_async
 //	mfi_save_as_click
@@ -103,8 +104,11 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t ERR_FONT[] = L"str_unavailable_font";	// 有効でない書体のエラーメッセージのリソース名
 	constexpr wchar_t ERR_READ[] = L"str_err_read";	// 読み込みエラーメッセージのリソース名
 	constexpr wchar_t ERR_WRITE[] = L"str_err_write";	// 書き込みエラーメッセージのリソース名
+	constexpr wchar_t ERR_RECENT[] = L"str_err_recent";	// 最近使ったファイルのエラーメッセージのリソース名
 	constexpr wchar_t FT_GPF[] = L".gpf";	// 図形データファイルの拡張子
 	constexpr wchar_t FT_SVG[] = L".svg";	// SVG ファイルの拡張子
+	constexpr uint32_t MRU_MAX = 25;	// 最近使ったリストの最大数.
+	constexpr wchar_t UNTITLED[] = L"str_untitled";	// 無題のリソース名
 
 	//	待機カーソルを表示, 表示する前のカーソルを得る.
 	CoreCursor MainPage::file_wait_cursor(void) const
@@ -113,38 +117,6 @@ namespace winrt::GraphPaper::implementation
 		auto p_cur = c_win.PointerCursor();
 		c_win.PointerCursor(CUR_WAIT);
 		return p_cur;
-	}
-
-	// ファイルを非同期に開く
-	IAsyncAction MainPage::file_open_async(void)
-	{
-		using winrt::Windows::Storage::Pickers::FileOpenPicker;
-
-		//	待機カーソルを表示, 表示する前のカーソルを得る.
-		auto const& p_cur = file_wait_cursor();
-		//	コルーチンの開始時のスレッドコンテキストを保存する.
-		winrt::apartment_context context;
-		//	ファイル「オープン」ピッカーを取得して開く.
-		auto o_picker{ FileOpenPicker() };
-		//o_picker.ViewMode(PickerViewMode::Thumbnail);
-		//	ファイルタイプを「.gdf」に設定する.
-		o_picker.FileTypeFilter().Append(FT_GPF);
-		//	ピッカーを非同期で表示してストレージファイルを取得する.
-		//	（「閉じる」ボタンが押された場合ストレージファイルとして nullptr が返る.）
-		auto s_file{ co_await o_picker.PickSingleFileAsync() };
-		if (s_file != nullptr) {
-			//	ファイルがnullptrの場合、
-			//	ファイルを非同期で読む.
-			co_await file_read_async(s_file);
-			//	ストレージファイルを解放する.
-			s_file = nullptr;
-		}
-		//	ピッカーを解放する.
-		o_picker = nullptr;
-		//	スレッドコンテキストを復元する.
-		co_await context;
-		//	ウィンドウカーソルを復元する.
-		Window::Current().CoreWindow().PointerCursor(p_cur);
 	}
 
 	//	ストレージファイルを非同期に読む.
@@ -602,93 +574,6 @@ namespace winrt::GraphPaper::implementation
 				co_return;
 			}
 		}
-		// 空白の文書にする.
-		new_doc();
-		/*
-		if (m_stack_push == false) {
-			// 操作スタックの更新フラグがない場合,
-			// 図形データは変更されていないので,
-			// 空白の文書にする.
-			new_doc();
-			co_return;
-		}
-		// 保存確認ダイアログを表示する.
-		const auto d_result = co_await cd_conf_save().ShowAsync();
-		if (d_result == ContentDialogResult::Primary) {
-			//	保存するが押された場合,
-			//	ファイルに非同期に保存する
-			if (co_await file_save_async() == S_OK) {
-				//	保存できた場合,
-				//	空白の文書にする.
-				new_doc();
-			}
-		}
-		else if (d_result == ContentDialogResult::Secondary) {
-			// 空白の文書にする.
-			new_doc();
-		}
-		*/
-	}
-
-	//	ファイルメニューの「開く」が選択された
-	IAsyncAction MainPage::mfi_open_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
-		if (m_stack_push) {
-			//	操作スタックの更新フラグが立っている場合,
-			//	保存確認ダイアログを表示する.
-			const auto d_result = co_await cd_conf_save().ShowAsync();
-			if (d_result == ContentDialogResult::None
-				|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
-				//	ダイアログの結果が「キャンセル」の場合,
-				//	または「保存する」かつファイルに保存して失敗した場合
-				co_return;
-			}
-		}
-		auto _{ file_open_async() };
-		/*
-		if (m_stack_push == false) {
-			//	操作スタックの更新フラグがない場合,
-			//	図形データは変更されていないので,
-			//	ファイルを非同期に開く.
-			auto _{ file_open_async() };
-			co_return;
-		}
-		//	保存確認ダイアログを表示する.
-		const auto d_result = co_await cd_conf_save().ShowAsync();
-		if (d_result == ContentDialogResult::Primary) {
-			//	ファイルに非同期に保存する
-			if (co_await file_save_async() == S_OK) {
-				//	保存できた場合,
-				//	ファイルを非同期に開く.
-				auto _{ file_open_async() };
-			}
-		}
-		else if (d_result == ContentDialogResult::Secondary) {
-			//	ファイルを非同期に開く.
-			auto _{ file_open_async() };
-		}
-		*/
-	}
-
-	//	ファイルメニューの「名前を付けて保存」が選択された
-	void MainPage::mfi_save_as_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		//	名前を付けてファイルに非同期に保存する.
-		auto _{ file_save_as_async(true) };
-	}
-
-	//	ファイルメニューの「保存」が選択された
-	void MainPage::mfi_save_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		//	ファイルに非同期に保存する
-		auto _{ file_save_async() };
-	}
-
-	//	空白の文書にする.
-	void MainPage::new_doc(void)
-	{
 		if (m_summary_visible) {
 			//	図形一覧パネルの表示フラグが立っている場合,
 			//	一覧を閉じる.
@@ -710,6 +595,258 @@ namespace winrt::GraphPaper::implementation
 		m_mru_token.clear();
 		mru_add_file(nullptr);
 		finish_file_read();
+	}
+
+	//	ファイルメニューの「開く」が選択された
+	IAsyncAction MainPage::mfi_open_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::Storage::Pickers::FileOpenPicker;
+
+		if (m_stack_push) {
+			//	操作スタックの更新フラグが立っている場合,
+			//	保存確認ダイアログを表示する.
+			const auto d_result = co_await cd_conf_save().ShowAsync();
+			if (d_result == ContentDialogResult::None
+				|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
+				//	ダイアログの結果が「キャンセル」の場合,
+				//	または「保存する」かつファイルに保存して失敗した場合
+				co_return;
+			}
+		}
+		//	待機カーソルを表示, 表示する前のカーソルを得る.
+		auto const& p_cur = file_wait_cursor();
+		//	コルーチンの開始時のスレッドコンテキストを保存する.
+		winrt::apartment_context context;
+		//	ファイル「オープン」ピッカーを取得して開く.
+		auto o_picker{ FileOpenPicker() };
+		//o_picker.ViewMode(PickerViewMode::Thumbnail);
+		//	ファイルタイプを「.gdf」に設定する.
+		o_picker.FileTypeFilter().Append(FT_GPF);
+		//	ピッカーを非同期で表示してストレージファイルを取得する.
+		//	（「閉じる」ボタンが押された場合ストレージファイルとして nullptr が返る.）
+		auto s_file{ co_await o_picker.PickSingleFileAsync() };
+		if (s_file != nullptr) {
+			//	ファイルがnullptrの場合、
+			//	ファイルを非同期で読む.
+			co_await file_read_async(s_file);
+			//	ストレージファイルを解放する.
+			s_file = nullptr;
+		}
+		//	ピッカーを解放する.
+		o_picker = nullptr;
+		//	スレッドコンテキストを復元する.
+		co_await context;
+		//	ウィンドウカーソルを復元する.
+		Window::Current().CoreWindow().PointerCursor(p_cur);
+	}
+
+	//	ファイルメニューの「名前を付けて保存」が選択された
+	void MainPage::mfi_save_as_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		//	名前を付けてファイルに非同期に保存する.
+		auto _{ file_save_as_async(true) };
+	}
+
+	//	ファイルメニューの「保存」が選択された
+	void MainPage::mfi_save_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		//	ファイルに非同期に保存する
+		auto _{ file_save_async() };
+	}
+
+	// 最近使ったファイルを読み込む.
+	// i	最近使ったファイルの番号 (最も直近が 0).
+	IAsyncAction MainPage::file_read_recent_async(const uint32_t i)
+	{
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+
+		//	最近使ったファイルからトークンを得る.
+		auto mru_token = mru_get_token(i);
+		if (mru_token.empty()) {
+			// 要素が空の場合,
+			// 最近使ったファイルのエラーメッセージダイアログを表示する.
+			cd_message_show(ERR_RECENT, to_hstring(i + 1));
+		}
+		else {
+			if (m_stack_push) {
+				//	保存確認ダイアログを表示する.
+				const auto d_result = co_await cd_conf_save().ShowAsync();
+				if (d_result == ContentDialogResult::None
+					|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
+					co_return;
+				}
+			}
+			auto hr = E_FAIL;
+			//	待機カーソルを表示, 表示する前のカーソルを得る.
+			auto const p_cur = file_wait_cursor();
+			//	コルーチンの開始時のスレッドコンテキストを保存する.
+			winrt::apartment_context context;
+			//	ストレージファイルを最近使ったファイルのトークンから得る.
+			auto s_file{ co_await mru_get_file(mru_token) };
+			if (s_file != nullptr) {
+				//	ストレージファイルが空でない場合,
+				//	ストレージファイルから非同期に読み込む.
+				hr = co_await file_read_async(s_file);
+				//	ストレージファイルを破棄する.
+				s_file = nullptr;
+				finish_file_read();
+				co_await winrt::resume_foreground(this->Dispatcher());
+			}
+			else {
+				//	ストレージファイルが空の場合,
+				//	スレッドをメインページの UI スレッドに変える.
+				//	最近使ったファイルのエラーメッセージダイアログを表示する.
+				co_await winrt::resume_foreground(this->Dispatcher());
+				cd_message_show(ERR_RECENT, mru_token);
+			}
+
+			Window::Current().CoreWindow().PointerCursor(p_cur);
+			// スレッドコンテキストを復元する.
+			// ウィンドウのカーソルを復元する.
+			co_await context;
+		}
+	}
+
+	// ファイルメニューの「最近使ったファイル 1」が選択された
+	void MainPage::mfi_recent_files_1_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		//	最近使ったファイル (0) を読み込む.
+		auto _{ file_read_recent_async(0) };
+	}
+
+	// ファイルメニューの「最近使ったファイル 2」が選択された
+	void MainPage::mfi_recent_files_2_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		//	最近使ったファイル (1) を読み込む.
+		auto _{ file_read_recent_async(1) };
+	}
+
+	// ファイルメニューの「最近使ったファイル 3」が選択された
+	void MainPage::mfi_recent_files_3_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		//	最近使ったファイル (2) を読み込む.
+		auto _{ file_read_recent_async(2) };
+	}
+
+	// ファイルメニューの「最近使ったファイル 4」が選択された
+	void MainPage::mfi_recent_files_4_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		//	最近使ったファイル (3) を読み込む.
+		auto _{ file_read_recent_async(3) };
+	}
+
+	//	ファイルメニューの「最近使ったファイル 5」が選択された
+	void MainPage::mfi_recent_files_5_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		//	最近使ったファイル (4) を読み込む.
+		auto _{ file_read_recent_async(4) };
+	}
+
+	//	最近使ったファイルのトークンからストレージファイルを得る.
+	//	token	最近使ったファイルのトークン
+	//	戻り値	ストレージファイル
+	IAsyncOperation<StorageFile> MainPage::mru_get_file(const winrt::hstring token)
+	{
+		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
+
+		//	コルーチンの開始時のスレッドコンテキストを保存する.
+		winrt::apartment_context context;
+
+		//	ストレージファイルにヌルを格納する.
+		StorageFile s_file = nullptr;
+		try {
+			if (token.empty() == false) {
+				//	トークンが空でない場合,
+				//	トークンからストレージファイルを得る.
+				auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
+				s_file = co_await mru_list.GetFileAsync(token);
+			}
+		}
+		catch (winrt::hresult_error) {
+		}
+		//	スレッドをメインページの UI スレッドに変える.
+		co_await winrt::resume_foreground(this->Dispatcher());
+		//	取得できても出来なくても最近使ったリストの順番は入れ替わるので,
+		//	最近使ったファイルメニュを更新する.
+		mru_update_menu_items();
+		//	スレッドコンテキストを復元する.
+		co_await context;
+		//	ストレージファイルを返す.
+		co_return s_file;
+	}
+
+	//	ストレージファイルを最近使ったファイルに登録する.
+	//	s_file	ストレージファイル
+	//	戻り値	なし
+	//	最近使ったファイルメニューとウィンドウタイトルも更新される.
+	//	ストレージファイルがヌルの場合, 最近使ったファイルはそのままで, 
+	//	ウィンドウタイトルに無題が格納される.
+	void MainPage::mru_add_file(StorageFile const& s_file)
+	{
+		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
+		using winrt::Windows::UI::ViewManagement::ApplicationView;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
+		if (s_file != nullptr) {
+			m_mru_token = mru_list.Add(s_file, s_file.Path());
+			ApplicationView::GetForCurrentView().Title(s_file.Name());
+		}
+		else {
+			auto const& r_loader = ResourceLoader::GetForCurrentView();
+			ApplicationView::GetForCurrentView().Title(r_loader.GetString(UNTITLED));
+		}
+		//	最近使ったファイルメニュを更新する.
+		mru_update_menu_items();
+	}
+
+	//	最近使ったファイルからトークンを得る.
+	//	i	最近使ったファイルの番号 (最も直近が 0).
+	//	戻り値	i　番目のファイルのトークン
+	winrt::hstring MainPage::mru_get_token(const uint32_t i)
+	{
+		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
+		using winrt::Windows::Storage::AccessCache::AccessListEntry;
+
+		auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
+		auto const& mru_ent = mru_list.Entries();
+		//	最近使ったファイルの番号と最近使ったリストの要素数を比較する.
+		if (i < mru_ent.Size()) {
+			//	番号が要素数より小さい場合,
+			//	最近使ったリストから要素を得る.
+			AccessListEntry item[1];
+			mru_ent.GetMany(i, item);
+			//	要素のトークンを返す.
+			return item[0].Token;
+		}
+		// 空の文字列を返す.
+		return {};
+	}
+
+	// 最近使ったファイルメニュを更新する.
+	void MainPage::mru_update_menu_items(void)
+	{
+		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
+		using winrt::Windows::Storage::AccessCache::AccessListEntry;
+
+		auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
+		auto const& mru_entries = mru_list.Entries();
+		const auto ent_size = mru_entries.Size();
+		AccessListEntry items[MRU_MAX];
+		winrt::hstring data[MRU_MAX];
+		mru_entries.GetMany(0, items);
+		for (uint32_t i = MRU_MAX; i > 0; i--) {
+			data[i - 1] = winrt::to_hstring(i) + L":";
+			if (ent_size >= i) {
+				data[i - 1] = data[i - 1] + L" " + items[i - 1].Metadata;
+			}
+		}
+		mfi_recent_files_1().Text(data[0]);
+		mfi_recent_files_2().Text(data[1]);
+		mfi_recent_files_3().Text(data[2]);
+		mfi_recent_files_4().Text(data[3]);
+		mfi_recent_files_5().Text(data[4]);
 	}
 
 }
