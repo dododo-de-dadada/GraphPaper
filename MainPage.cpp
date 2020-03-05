@@ -294,13 +294,12 @@ namespace winrt::GraphPaper::implementation
 		{
 			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
 			using winrt::Windows::UI::Xaml::Application;
-			//SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(
-			//	[this](auto, auto args)->IAsyncAction {
-			//		//args.Handled(true);
-			//		//co_await resume_foreground(this->Dispatcher());
-			//		co_await mfi_exit_click(nullptr, nullptr);
-			//	}
-			//);
+			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(
+				[this](auto, auto args) {
+					args.Handled(true);
+					mfi_exit_click(nullptr, nullptr);
+				}
+			);
 		}
 
 		//	D2D/DWRITE ファクトリを図形/文字列図形クラスに, 
