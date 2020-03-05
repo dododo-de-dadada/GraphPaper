@@ -292,7 +292,7 @@ namespace winrt::GraphPaper::implementation
 			arrow_style_check_menu(m_page_panel.m_arrow_style);
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::GRID_LEN>)) {
-			stat_set_grid();
+			status_set_grid();
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::FONT_STYLE>)) {
 			font_style_check_menu(m_page_panel.m_font_style);
@@ -304,7 +304,7 @@ namespace winrt::GraphPaper::implementation
 			text_align_p_check_menu(m_page_panel.m_text_align_p);
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::PAGE_SIZE>)) {
-			stat_set_page();
+			status_set_page();
 		}
 	}
 

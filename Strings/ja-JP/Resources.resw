@@ -334,7 +334,7 @@
     <comment>MenuBarItem</comment>
   </data>
   <data name="mfi_about_graph_paper.Text" xml:space="preserve">
-    <value>バージョン情報</value>
+    <value>バージョン情報...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_arrow_size.Text" xml:space="preserve">
@@ -533,11 +533,11 @@
     <value>方眼の大きさ</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_recent_files.Text" xml:space="preserve">
+  <data name="mfsi_file_recent.Text" xml:space="preserve">
     <value>最近使ったファイル</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_stat_bar.Text" xml:space="preserve">
+  <data name="mfsi_status_bar.Text" xml:space="preserve">
     <value>ステータスバー</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -713,10 +713,6 @@
     <value>幅</value>
     <comment>String</comment>
   </data>
-  <data name="str_close" xml:space="preserve">
-    <value>閉じる</value>
-    <comment>String</comment>
-  </data>
   <data name="str_col_b" xml:space="preserve">
     <value>B</value>
     <comment>String</comment>
@@ -779,10 +775,6 @@
   </data>
   <data name="str_font" xml:space="preserve">
     <value>書体</value>
-    <comment>String</comment>
-  </data>
-  <data name="str_graph_paper" xml:space="preserve">
-    <value>方眼紙</value>
     <comment>String</comment>
   </data>
   <data name="str_grid" xml:space="preserve">
@@ -862,27 +854,27 @@
     <value>方眼にそろえる</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_stat_curs.Text" xml:space="preserve">
+  <data name="tmfi_status_curs.Text" xml:space="preserve">
     <value>カーソルの位置</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stat_grid.Text" xml:space="preserve">
+  <data name="tmfi_status_grid.Text" xml:space="preserve">
     <value>方眼の大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stat_page.Text" xml:space="preserve">
+  <data name="tmfi_status_page.Text" xml:space="preserve">
     <value>ページの大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stat_tool.Text" xml:space="preserve">
+  <data name="tmfi_status_tool.Text" xml:space="preserve">
     <value>ツール</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stat_unit.Text" xml:space="preserve">
+  <data name="tmfi_status_unit.Text" xml:space="preserve">
     <value>単位</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stat_zoom.Text" xml:space="preserve">
+  <data name="tmfi_status_zoom.Text" xml:space="preserve">
     <value>拡大率</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -901,5 +893,21 @@
   <data name="tx_text_replace_with.Header" xml:space="preserve">
     <value>置換後の文字列</value>
     <comment>TextBox</comment>
+  </data>
+  <data name="cd_message.CloseButtonText" xml:space="preserve">
+    <value>閉じる</value>
+    <comment>ContentDialog</comment>
+  </data>
+  <data name="str_appname" xml:space="preserve">
+    <value>方眼紙</value>
+    <comment>String</comment>
+  </data>
+  <data name="btn_text_find_close.Content" xml:space="preserve">
+    <value>閉じる</value>
+    <comment>Button</comment>
+  </data>
+  <data name="btn_summary_close.Content" xml:space="preserve">
+    <value>閉じる</value>
+    <comment>Button</comment>
   </data>
 </root>

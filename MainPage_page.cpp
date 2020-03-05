@@ -22,12 +22,12 @@ namespace winrt::GraphPaper::implementation
 		//	必要ないエラーチェックだが, 念のため.
 		double pw;
 		if (swscanf_s(tx_page_width().Text().c_str(), L"%lf", &pw) != 1) {
-			cd_message_show(L"str_err_number", L"tx_page_width/Header");
+			cd_message_show(L"icon_alert", L"str_err_number", L"tx_page_width/Header");
 			return;
 		}
 		double ph;
 		if (swscanf_s(tx_page_height().Text().c_str(), L"%lf", &ph) != 1) {
-			cd_message_show(L"str_err_number", L"tx_page_height/Header");
+			cd_message_show(L"icon_alert", L"str_err_number", L"tx_page_height/Header");
 			return;
 		}
 		const auto g_len = m_sample_panel.m_grid_size + 1.0;
@@ -43,10 +43,10 @@ namespace winrt::GraphPaper::implementation
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
-		stat_set_curs();
-		stat_set_page();
-		stat_set_unit();
-		stat_set_grid();
+		status_set_curs();
+		status_set_page();
+		status_set_unit();
+		status_set_grid();
 	}
 
 	// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
@@ -77,7 +77,7 @@ namespace winrt::GraphPaper::implementation
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
-		stat_set_page();
+		status_set_page();
 	}
 
 	// ページの「単位と書式」ダイアログの「適用」ボタンが押された.
@@ -87,10 +87,10 @@ namespace winrt::GraphPaper::implementation
 		m_page_unit = static_cast<LEN_UNIT>(cx_page_unit().SelectedIndex());
 		m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
 		if (p_unit != m_page_unit) {
-			stat_set_curs();
-			stat_set_grid();
-			stat_set_page();
-			stat_set_unit();
+			status_set_curs();
+			status_set_grid();
+			status_set_page();
+			status_set_unit();
 		}
 	}
 
@@ -103,18 +103,18 @@ namespace winrt::GraphPaper::implementation
 		const double val0 = m_page_panel.m_page_color.r * COLOR_MAX;
 		const double val1 = m_page_panel.m_page_color.g * COLOR_MAX;
 		const double val2 = m_page_panel.m_page_color.b * COLOR_MAX;
-		slider0().Value(val0);
-		slider1().Value(val1);
-		slider2().Value(val2);
+		sample_slider_0().Value(val0);
+		sample_slider_1().Value(val1);
+		sample_slider_2().Value(val2);
 		page_set_slider_header<UNDO_OP::PAGE_COLOR, 0>(val0);
 		page_set_slider_header<UNDO_OP::PAGE_COLOR, 1>(val1);
 		page_set_slider_header<UNDO_OP::PAGE_COLOR, 2>(val2);
-		slider0().Visibility(VISIBLE);
-		slider1().Visibility(VISIBLE);
-		slider2().Visibility(VISIBLE);
-		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 0> });
-		const auto slider1_token = slider1().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 1> });
-		const auto slider2_token = slider2().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 2> });
+		sample_slider_0().Visibility(VISIBLE);
+		sample_slider_1().Visibility(VISIBLE);
+		sample_slider_2().Visibility(VISIBLE);
+		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 0> });
+		const auto sample_slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 1> });
+		const auto sample_slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 2> });
 		m_sample_type = SAMP_TYPE::NONE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_PAGE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -129,12 +129,12 @@ namespace winrt::GraphPaper::implementation
 				enable_undo_menu();
 			}
 		}
-		slider0().Visibility(COLLAPSED);
-		slider1().Visibility(COLLAPSED);
-		slider2().Visibility(COLLAPSED);
-		slider0().ValueChanged(slider0_token);
-		slider1().ValueChanged(slider1_token);
-		slider2().ValueChanged(slider2_token);
+		sample_slider_0().Visibility(COLLAPSED);
+		sample_slider_1().Visibility(COLLAPSED);
+		sample_slider_2().Visibility(COLLAPSED);
+		sample_slider_0().ValueChanged(sample_slider_0_token);
+		sample_slider_1().ValueChanged(sample_slider_1_token);
+		sample_slider_2().ValueChanged(sample_slider_2_token);
 		page_draw();
 	}
 
@@ -307,13 +307,13 @@ namespace winrt::GraphPaper::implementation
 			//	スワップチェーンの内容を画面に表示する.
 			m_page_dx.Present();
 			//	ポインターの位置をスタックバーに格納する.
-			stat_set_curs();
+			status_set_curs();
 		}
 #if defined(_DEBUG)
 		else {
 			//	結果が S_OK でない場合,
 			//	メッセージダイアログを表示する.
-			cd_message_show(L"Cannot draw", {});
+			cd_message_show(L"icon_alert", L"Cannot draw", {});
 		}
 #endif
 	}
@@ -346,16 +346,16 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if constexpr (S == 0) {
-			slider0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(hdr));
 		}
 		if constexpr (S == 1) {
-			slider1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(hdr));
 		}
 		if constexpr (S == 2) {
-			slider2().Header(box_value(hdr));
+			sample_slider_2().Header(box_value(hdr));
 		}
 		if constexpr (S == 3) {
-			slider3().Header(box_value(hdr));
+			sample_slider_3().Header(box_value(hdr));
 		}
 	}
 

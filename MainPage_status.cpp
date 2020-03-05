@@ -11,34 +11,34 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 列挙型を AND 演算する.
-	static STAT_BAR stat_and(const STAT_BAR a, const STAT_BAR b) noexcept;
+	static STAT_BAR status_and(const STAT_BAR a, const STAT_BAR b) noexcept;
 	// 列挙型をビットマスクする.
-	static bool stat_mask(const STAT_BAR a, const STAT_BAR b) noexcept;
+	static bool status_mask(const STAT_BAR a, const STAT_BAR b) noexcept;
 	// 列挙型を NOT 演算する.
-	static STAT_BAR stat_not(const STAT_BAR a) noexcept;
+	static STAT_BAR status_not(const STAT_BAR a) noexcept;
 	// ステータスバーの項目のビジビリティを設定する.
-	static void stat_visiblity(const bool check, FrameworkElement const& f_elem) noexcept;
+	static void status_visiblity(const bool check, FrameworkElement const& f_elem) noexcept;
 
 	// 列挙型を AND 演算する.
-	static STAT_BAR stat_and(const STAT_BAR a, const STAT_BAR b) noexcept
+	static STAT_BAR status_and(const STAT_BAR a, const STAT_BAR b) noexcept
 	{
 		return static_cast<STAT_BAR>(static_cast<uint32_t>(a)& static_cast<uint32_t>(b));
 	}
 
 	// 列挙型をビットマスクする.
-	static bool stat_mask(const STAT_BAR a, const STAT_BAR b) noexcept
+	static bool status_mask(const STAT_BAR a, const STAT_BAR b) noexcept
 	{
 		return static_cast<uint32_t>(a)& static_cast<uint32_t>(b);
 	}
 
 	// 列挙型を NOT 演算する.
-	static STAT_BAR stat_not(const STAT_BAR a) noexcept
+	static STAT_BAR status_not(const STAT_BAR a) noexcept
 	{
 		return static_cast<STAT_BAR>(~static_cast<uint32_t>(a));
 	}
 
 	// ステータスバーの項目のビジビリティを設定する.
-	static void stat_visiblity(const bool check, FrameworkElement const& f_elem) noexcept
+	static void status_visiblity(const bool check, FrameworkElement const& f_elem) noexcept
 	{
 		if (f_elem.Visibility() == (check ? COLLAPSED : VISIBLE)) {
 			f_elem.Visibility(check ? VISIBLE : COLLAPSED);
@@ -46,142 +46,142 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「ステータスバー」が選択された.
-	void MainPage::mi_stat_bar_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::mi_status_bar_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		STAT_BAR s_bar;	// ステータスバーの状態
 		bool check;	// チェックマークの有無
 
-		if (sender == tmfi_stat_grid()) {
+		if (sender == tmfi_status_grid()) {
 			s_bar = STAT_BAR::GRID;
-			check = tmfi_stat_grid().IsChecked();
-			tmfi_stat_grid_2().IsChecked(check);
-			stat_set_grid();
-			stat_visiblity(check, tk_stat_grid());
+			check = tmfi_status_grid().IsChecked();
+			tmfi_status_grid_2().IsChecked(check);
+			status_set_grid();
+			status_visiblity(check, tk_status_grid());
 		}
-		else if (sender == tmfi_stat_grid_2()) {
+		else if (sender == tmfi_status_grid_2()) {
 			s_bar = STAT_BAR::GRID;
-			check = tmfi_stat_grid_2().IsChecked();
-			tmfi_stat_grid().IsChecked(check);
-			stat_set_grid();
-			stat_visiblity(check, tk_stat_grid());
+			check = tmfi_status_grid_2().IsChecked();
+			tmfi_status_grid().IsChecked(check);
+			status_set_grid();
+			status_visiblity(check, tk_status_grid());
 		}
-		else if (sender == tmfi_stat_page()) {
+		else if (sender == tmfi_status_page()) {
 			s_bar = STAT_BAR::PAGE;
-			check = tmfi_stat_page().IsChecked();
-			tmfi_stat_page_2().IsChecked(check);
-			stat_set_page();
-			stat_visiblity(check, tk_stat_width());
-			stat_visiblity(check, tk_stat_height());
+			check = tmfi_status_page().IsChecked();
+			tmfi_status_page_2().IsChecked(check);
+			status_set_page();
+			status_visiblity(check, tk_status_width());
+			status_visiblity(check, tk_status_height());
 		}
-		else if (sender == tmfi_stat_page_2()) {
+		else if (sender == tmfi_status_page_2()) {
 			s_bar = STAT_BAR::PAGE;
-			check = tmfi_stat_page_2().IsChecked();
-			tmfi_stat_page().IsChecked(check);
-			stat_set_page();
-			stat_visiblity(check, tk_stat_width());
-			stat_visiblity(check, tk_stat_height());
+			check = tmfi_status_page_2().IsChecked();
+			tmfi_status_page().IsChecked(check);
+			status_set_page();
+			status_visiblity(check, tk_status_width());
+			status_visiblity(check, tk_status_height());
 		}
-		else if (sender == tmfi_stat_curs()) {
+		else if (sender == tmfi_status_curs()) {
 			s_bar = STAT_BAR::CURS;
-			check = tmfi_stat_curs().IsChecked();
-			tmfi_stat_curs_2().IsChecked(check);
-			stat_set_curs();
-			stat_visiblity(check, tk_stat_pos_x());
-			stat_visiblity(check, tk_stat_pos_y());
+			check = tmfi_status_curs().IsChecked();
+			tmfi_status_curs_2().IsChecked(check);
+			status_set_curs();
+			status_visiblity(check, tk_status_pos_x());
+			status_visiblity(check, tk_status_pos_y());
 		}
-		else if (sender == tmfi_stat_curs_2()) {
+		else if (sender == tmfi_status_curs_2()) {
 			s_bar = STAT_BAR::CURS;
-			check = tmfi_stat_curs_2().IsChecked();
-			tmfi_stat_curs().IsChecked(check);
-			stat_set_curs();
-			stat_visiblity(check, tk_stat_pos_x());
-			stat_visiblity(check, tk_stat_pos_y());
+			check = tmfi_status_curs_2().IsChecked();
+			tmfi_status_curs().IsChecked(check);
+			status_set_curs();
+			status_visiblity(check, tk_status_pos_x());
+			status_visiblity(check, tk_status_pos_y());
 		}
-		else if (sender == tmfi_stat_zoom()) {
+		else if (sender == tmfi_status_zoom()) {
 			s_bar = STAT_BAR::ZOOM;
-			check = tmfi_stat_zoom().IsChecked();
-			tmfi_stat_zoom_2().IsChecked(check);
-			stat_set_zoom();
-			stat_visiblity(check, tk_stat_zoom());
+			check = tmfi_status_zoom().IsChecked();
+			tmfi_status_zoom_2().IsChecked(check);
+			status_set_zoom();
+			status_visiblity(check, tk_status_zoom());
 		}
-		else if (sender == tmfi_stat_zoom_2()) {
+		else if (sender == tmfi_status_zoom_2()) {
 			s_bar = STAT_BAR::ZOOM;
-			check = tmfi_stat_zoom_2().IsChecked();
-			tmfi_stat_zoom().IsChecked(check);
-			stat_set_zoom();
-			stat_visiblity(check, tk_stat_zoom());
+			check = tmfi_status_zoom_2().IsChecked();
+			tmfi_status_zoom().IsChecked(check);
+			status_set_zoom();
+			status_visiblity(check, tk_status_zoom());
 		}
-		else if (sender == tmfi_stat_tool()) {
+		else if (sender == tmfi_status_tool()) {
 			s_bar = STAT_BAR::DRAW;
-			check = tmfi_stat_tool().IsChecked();
-			tmfi_stat_tool_2().IsChecked(check);
-			stat_set_draw();
-			stat_visiblity(check, sp_stat_tool());
+			check = tmfi_status_tool().IsChecked();
+			tmfi_status_tool_2().IsChecked(check);
+			status_set_draw();
+			status_visiblity(check, sp_status_tool());
 		}
-		else if (sender == tmfi_stat_tool_2()) {
+		else if (sender == tmfi_status_tool_2()) {
 			s_bar = STAT_BAR::DRAW;
-			check = tmfi_stat_tool_2().IsChecked();
-			tmfi_stat_tool().IsChecked(check);
-			stat_set_draw();
-			stat_visiblity(check, sp_stat_tool());
+			check = tmfi_status_tool_2().IsChecked();
+			tmfi_status_tool().IsChecked(check);
+			status_set_draw();
+			status_visiblity(check, sp_status_tool());
 		}
-		else if (sender == tmfi_stat_unit()) {
+		else if (sender == tmfi_status_unit()) {
 			s_bar = STAT_BAR::UNIT;
-			check = tmfi_stat_unit().IsChecked();
-			tmfi_stat_unit_2().IsChecked(check);
-			stat_set_unit();
-			stat_visiblity(check, tk_stat_unit());
+			check = tmfi_status_unit().IsChecked();
+			tmfi_status_unit_2().IsChecked(check);
+			status_set_unit();
+			status_visiblity(check, tk_status_unit());
 		}
-		else if (sender == tmfi_stat_unit_2()) {
+		else if (sender == tmfi_status_unit_2()) {
 			s_bar = STAT_BAR::UNIT;
-			check = tmfi_stat_unit_2().IsChecked();
-			tmfi_stat_unit().IsChecked(check);
-			stat_set_unit();
-			stat_visiblity(check, tk_stat_unit());
+			check = tmfi_status_unit_2().IsChecked();
+			tmfi_status_unit().IsChecked(check);
+			status_set_unit();
+			status_visiblity(check, tk_status_unit());
 		}
 		else {
 			return;
 		}
 		if (check) {
-			m_stat_bar = stat_or(m_stat_bar, s_bar);
+			m_status_bar = status_or(m_status_bar, s_bar);
 		}
 		else {
-			m_stat_bar = stat_and(m_stat_bar, stat_not(s_bar));
+			m_status_bar = status_and(m_status_bar, status_not(s_bar));
 		}
-		stat_visiblity(m_stat_bar != static_cast<STAT_BAR>(0), sp_stat_bar());
+		status_visiblity(m_status_bar != static_cast<STAT_BAR>(0), sp_status_bar());
 	}
 
 	// ステータスバーのメニュー項目に印をつける.
-	void MainPage::stat_check_menu(const STAT_BAR st_bar)
+	void MainPage::status_check_menu(const STAT_BAR st_bar)
 	{
-		tmfi_stat_curs().IsChecked(stat_mask(st_bar, STAT_BAR::CURS));
-		tmfi_stat_grid().IsChecked(stat_mask(st_bar, STAT_BAR::GRID));
-		tmfi_stat_page().IsChecked(stat_mask(st_bar, STAT_BAR::PAGE));
-		tmfi_stat_tool().IsChecked(stat_mask(st_bar, STAT_BAR::DRAW));
-		tmfi_stat_unit().IsChecked(stat_mask(st_bar, STAT_BAR::UNIT));
-		tmfi_stat_zoom().IsChecked(stat_mask(st_bar, STAT_BAR::ZOOM));
-		tmfi_stat_curs_2().IsChecked(stat_mask(st_bar, STAT_BAR::CURS));
-		tmfi_stat_grid_2().IsChecked(stat_mask(st_bar, STAT_BAR::GRID));
-		tmfi_stat_page_2().IsChecked(stat_mask(st_bar, STAT_BAR::PAGE));
-		tmfi_stat_tool_2().IsChecked(stat_mask(st_bar, STAT_BAR::DRAW));
-		tmfi_stat_unit_2().IsChecked(stat_mask(st_bar, STAT_BAR::UNIT));
-		tmfi_stat_zoom_2().IsChecked(stat_mask(st_bar, STAT_BAR::ZOOM));
+		tmfi_status_curs().IsChecked(status_mask(st_bar, STAT_BAR::CURS));
+		tmfi_status_grid().IsChecked(status_mask(st_bar, STAT_BAR::GRID));
+		tmfi_status_page().IsChecked(status_mask(st_bar, STAT_BAR::PAGE));
+		tmfi_status_tool().IsChecked(status_mask(st_bar, STAT_BAR::DRAW));
+		tmfi_status_unit().IsChecked(status_mask(st_bar, STAT_BAR::UNIT));
+		tmfi_status_zoom().IsChecked(status_mask(st_bar, STAT_BAR::ZOOM));
+		tmfi_status_curs_2().IsChecked(status_mask(st_bar, STAT_BAR::CURS));
+		tmfi_status_grid_2().IsChecked(status_mask(st_bar, STAT_BAR::GRID));
+		tmfi_status_page_2().IsChecked(status_mask(st_bar, STAT_BAR::PAGE));
+		tmfi_status_tool_2().IsChecked(status_mask(st_bar, STAT_BAR::DRAW));
+		tmfi_status_unit_2().IsChecked(status_mask(st_bar, STAT_BAR::UNIT));
+		tmfi_status_zoom_2().IsChecked(status_mask(st_bar, STAT_BAR::ZOOM));
 	}
 
 	// 列挙型を OR 演算する.
-	STAT_BAR MainPage::stat_or(const STAT_BAR a, const STAT_BAR b) noexcept
+	STAT_BAR MainPage::status_or(const STAT_BAR a, const STAT_BAR b) noexcept
 	{
 		return static_cast<STAT_BAR>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 	}
 
 	// ステータスバーの状態をデータリーダーから読み込む.
-	void MainPage::stat_read(DataReader const& dt_reader)
+	void MainPage::status_read(DataReader const& dt_reader)
 	{
-		m_stat_bar = static_cast<STAT_BAR>(dt_reader.ReadUInt32());
+		m_status_bar = static_cast<STAT_BAR>(dt_reader.ReadUInt32());
 	}
 
 	// ポインターの位置をステータスバーに格納する.
-	void MainPage::stat_set_curs(void)
+	void MainPage::status_set_curs(void)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
 		//const double dpi = m_page_panel.m_dx.m_logical_dpi;
@@ -234,15 +234,15 @@ namespace winrt::GraphPaper::implementation
 			break;
 		}
 		swprintf_s(buf, format, x);
-		tk_stat_pos_x().Text(winrt::hstring{ L"x:" } + buf);
+		tk_status_pos_x().Text(winrt::hstring{ L"x:" } + buf);
 		swprintf_s(buf, format, y);
-		tk_stat_pos_y().Text(winrt::hstring{ L"y:" } + buf);
+		tk_status_pos_y().Text(winrt::hstring{ L"y:" } + buf);
 swprintf_s(buf, L"%d", static_cast<uint32_t>(m_list_shapes.size()));
-tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
+tk_status_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	}
 
 	// 方眼の大きさをステータスバーに格納する.
-	void MainPage::stat_set_grid(void)
+	void MainPage::status_set_grid(void)
 	{
 		wchar_t buf[16];
 		const double dpi = m_page_dx.m_logical_dpi;
@@ -270,23 +270,23 @@ tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
 			break;
 		}
 		swprintf_s(buf, format, g_len);
-		tk_stat_grid().Text(winrt::hstring{ L"g:" } +buf);
+		tk_status_grid().Text(winrt::hstring{ L"g:" } +buf);
 	}
 
 	// ページの大きさをステータスバーに格納する.
-	void MainPage::stat_set_page(void)
+	void MainPage::status_set_page(void)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
 		const double g_len = m_page_panel.m_grid_size + 1.0;
 		wchar_t buf[16];
 		conv_val_to_len(m_page_unit, m_page_panel.m_page_size.width, dpi, g_len, buf, 16);
-		tk_stat_width().Text(winrt::hstring{ L"w:" } + buf);
+		tk_status_width().Text(winrt::hstring{ L"w:" } + buf);
 		conv_val_to_len(m_page_unit, m_page_panel.m_page_size.height, dpi, g_len, buf, 16);
-		tk_stat_height().Text(winrt::hstring{ L"h:" } + buf);
+		tk_status_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 
-	// 図形ツールをステータスバーに格納する.
-	void MainPage::stat_set_draw(void)
+	// 作図ツールをステータスバーに格納する.
+	void MainPage::status_set_draw(void)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring data;
@@ -322,42 +322,42 @@ tk_stat_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	}
 
 	// 単位をステータスバーに格納する.
-	void MainPage::stat_set_unit(void)
+	void MainPage::status_set_unit(void)
 	{
-		tk_stat_unit().Text(winrt::hstring{ L"u:" } + get_unit_name());
+		tk_status_unit().Text(winrt::hstring{ L"u:" } + get_unit_name());
 	}
 
 	// 拡大率をステータスバーに格納する.
-	void MainPage::stat_set_zoom(void)
+	void MainPage::status_set_zoom(void)
 	{
 		wchar_t buf[16];
 		swprintf_s(buf, FMT_ZOOM, m_page_panel.m_page_scale * 100.0);
-		tk_stat_zoom().Text(winrt::hstring{ L"z:" } +buf);
+		tk_status_zoom().Text(winrt::hstring{ L"z:" } +buf);
 	}
 
 	// ステータスバーの表示を設定する.
-	void MainPage::stat_visibility(void)
+	void MainPage::status_visibility(void)
 	{
-		tk_stat_pos_x().Visibility(stat_mask(m_stat_bar, STAT_BAR::CURS) ? VISIBLE : COLLAPSED);
-		tk_stat_pos_y().Visibility(stat_mask(m_stat_bar, STAT_BAR::CURS) ? VISIBLE : COLLAPSED);
-		tk_stat_grid().Visibility(stat_mask(m_stat_bar, STAT_BAR::GRID) ? VISIBLE : COLLAPSED);
-		tk_stat_width().Visibility(stat_mask(m_stat_bar, STAT_BAR::PAGE) ? VISIBLE : COLLAPSED);
-		tk_stat_height().Visibility(stat_mask(m_stat_bar, STAT_BAR::PAGE) ? VISIBLE : COLLAPSED);
-		//sp_stat_curs().Visibility(stat_mask(m_stat_bar, STAT_BAR::CURS) ? VISIBLE : COLLAPSED);
-		//sp_stat_grid().Visibility(stat_mask(m_stat_bar, STAT_BAR::GRID) ? VISIBLE : COLLAPSED);
-		//sp_stat_page().Visibility(stat_mask(m_stat_bar, STAT_BAR::PAGE) ? VISIBLE : COLLAPSED);
-		sp_stat_tool().Visibility(stat_mask(m_stat_bar, STAT_BAR::DRAW) ? VISIBLE : COLLAPSED);
-		tk_stat_unit().Visibility(stat_mask(m_stat_bar, STAT_BAR::UNIT) ? VISIBLE : COLLAPSED);
-		tk_stat_zoom().Visibility(stat_mask(m_stat_bar, STAT_BAR::ZOOM) ? VISIBLE : COLLAPSED);
-		//sp_stat_unit().Visibility(stat_mask(m_stat_bar, STAT_BAR::UNIT) ? VISIBLE : COLLAPSED);
-		//sp_stat_zoom().Visibility(stat_mask(m_stat_bar, STAT_BAR::ZOOM) ? VISIBLE : COLLAPSED);
-		sp_stat_bar().Visibility(m_stat_bar != static_cast<STAT_BAR>(0) ? VISIBLE : COLLAPSED);
+		tk_status_pos_x().Visibility(status_mask(m_status_bar, STAT_BAR::CURS) ? VISIBLE : COLLAPSED);
+		tk_status_pos_y().Visibility(status_mask(m_status_bar, STAT_BAR::CURS) ? VISIBLE : COLLAPSED);
+		tk_status_grid().Visibility(status_mask(m_status_bar, STAT_BAR::GRID) ? VISIBLE : COLLAPSED);
+		tk_status_width().Visibility(status_mask(m_status_bar, STAT_BAR::PAGE) ? VISIBLE : COLLAPSED);
+		tk_status_height().Visibility(status_mask(m_status_bar, STAT_BAR::PAGE) ? VISIBLE : COLLAPSED);
+		//sp_status_curs().Visibility(status_mask(m_status_bar, STAT_BAR::CURS) ? VISIBLE : COLLAPSED);
+		//sp_status_grid().Visibility(status_mask(m_status_bar, STAT_BAR::GRID) ? VISIBLE : COLLAPSED);
+		//sp_status_page().Visibility(status_mask(m_status_bar, STAT_BAR::PAGE) ? VISIBLE : COLLAPSED);
+		sp_status_tool().Visibility(status_mask(m_status_bar, STAT_BAR::DRAW) ? VISIBLE : COLLAPSED);
+		tk_status_unit().Visibility(status_mask(m_status_bar, STAT_BAR::UNIT) ? VISIBLE : COLLAPSED);
+		tk_status_zoom().Visibility(status_mask(m_status_bar, STAT_BAR::ZOOM) ? VISIBLE : COLLAPSED);
+		//sp_status_unit().Visibility(status_mask(m_status_bar, STAT_BAR::UNIT) ? VISIBLE : COLLAPSED);
+		//sp_status_zoom().Visibility(status_mask(m_status_bar, STAT_BAR::ZOOM) ? VISIBLE : COLLAPSED);
+		sp_status_bar().Visibility(m_status_bar != static_cast<STAT_BAR>(0) ? VISIBLE : COLLAPSED);
 	}
 
 	// ステータスバーの状態をデータライターに書き込む.
-	void MainPage::stat_write(DataWriter const& dt_writer)
+	void MainPage::status_write(DataWriter const& dt_writer)
 	{
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stat_bar));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_status_bar));
 	}
 
 }

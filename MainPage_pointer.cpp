@@ -300,7 +300,7 @@ namespace winrt::GraphPaper::implementation
 		const auto ui_pos{ args.GetCurrentPoint(scp_page_panel()).Position() };
 		pt_scale(ui_pos, 1.0 / m_page_panel.m_page_scale, p_offs, m_curr_pos);
 		set_pointer();
-		stat_set_curs();
+		status_set_curs();
 	}
 
 	// ポインターがページのパネルから出た.
@@ -334,7 +334,7 @@ namespace winrt::GraphPaper::implementation
 		pt_scale(ui_pos, 1.0 / m_page_panel.m_page_scale, p_offs, m_curr_pos);
 
 		// ポインターの位置をステータスバーに格納する.
-		stat_set_curs();
+		status_set_curs();
 		if (m_press_state == S_TRAN::BEGIN) {
 			// 状態が初期状態の場合,
 			// 状況に応じた形状のカーソルを設定する.
@@ -387,7 +387,7 @@ namespace winrt::GraphPaper::implementation
 			if (pt_abs2(d) > m_click_dist) {
 				// 長さが閾値を超える場合,
 				if (m_draw_tool != DRAW_TOOL::TOOL_SELECT) {
-					// 図形ツールが選択ツールでない場合,
+					// 作図ツールが選択ツールでない場合,
 					// 範囲を選択している状態に遷移する.
 					m_press_state = S_TRAN::PRESS_AREA;
 				}
@@ -487,7 +487,7 @@ namespace winrt::GraphPaper::implementation
 		m_press_time = t_stamp;
 		m_press_pos = m_curr_pos;
 		if (m_draw_tool != DRAW_TOOL::TOOL_SELECT) {
-			// 図形ツールが選択ツールでない場合,
+			// 作図ツールが選択ツールでない場合,
 			// 終了する.
 			return;
 		}
@@ -625,7 +625,7 @@ namespace winrt::GraphPaper::implementation
 		else if (m_press_state == S_TRAN::PRESS_AREA) {
 			// 状態が範囲選択している状態の場合,
 			if (m_draw_tool == DRAW_TOOL::TOOL_SELECT) {
-				// 図形ツールが選択ツールの場合,
+				// 作図ツールが選択ツールの場合,
 				// 範囲選択を終了する.
 				finish_area_select(args.KeyModifiers());
 			}

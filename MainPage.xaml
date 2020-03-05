@@ -9,6 +9,12 @@
     mc:Ignorable="d">
     <Page.Resources>
         <ResourceDictionary>
+            <x:String x:Key="icon_info">&#xE946;</x:String>
+            <x:String x:Key="icon_alert">&#xEA39;</x:String>
+            <x:String x:Key="icon_conf">&#xE9CE;</x:String>
+            <x:String x:Key="icon_save_as">&#xE792;</x:String>
+            <x:String x:Key="icon_recent">&#xE81C;</x:String>
+            <x:String x:Key="icon_close">&#xE894;</x:String>
             <!-- 曲線アイコンの描画コマンド -->
             <x:String x:Key="data_bezi">
                 M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841
@@ -300,22 +306,22 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="mfi_save_as" x:Uid="mfi_save_as" Click="mfi_save_as_click" Text="Save As..." >
                     <MenuFlyoutItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE792;" />
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_save_as}" />
                     </MenuFlyoutItem.Icon>
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutSubItem x:Uid="mfsi_recent_files" Text="Recent Files">
+                <MenuFlyoutSubItem x:Uid="mfsi_file_recent" Text="Recent Files">
                     <MenuFlyoutSubItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE823;" />
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_recent}" />
                     </MenuFlyoutSubItem.Icon>
-                    <MenuFlyoutItem x:Name="mfi_recent_files_1" Click="mfi_recent_files_1_click" Text="1" />
-                    <MenuFlyoutItem x:Name="mfi_recent_files_2" Click="mfi_recent_files_2_click" Text="2" />
-                    <MenuFlyoutItem x:Name="mfi_recent_files_3" Click="mfi_recent_files_3_click" Text="3" />
-                    <MenuFlyoutItem x:Name="mfi_recent_files_4" Click="mfi_recent_files_4_click" Text="4" />
-                    <MenuFlyoutItem x:Name="mfi_recent_files_5" Click="mfi_recent_files_5_click" Text="5" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_1" Click="mfi_file_recent_1_click" Text="1" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_2" Click="mfi_file_recent_2_click" Text="2" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_3" Click="mfi_file_recent_3_click" Text="3" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_4" Click="mfi_file_recent_4_click" Text="4" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_5" Click="mfi_file_recent_5_click" Text="5" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Name="mfi_exit" x:Uid="mfi_exit" Click="mfi_exit_click" Icon="Cancel" Text="Exit" />
@@ -414,7 +420,7 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
             </muxc:MenuBarItem>
-            <!-- 図形ツールメニュー -->
+            <!-- 作図ツールメニュー -->
             <muxc:MenuBarItem x:Uid="mbi_draw" AccessKey="D" Title="Draw">
                 <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_select" x:Uid="rmfi_tool_select" Click="rmfi_tool_select_click" GroupName="gn_tool_type" IsChecked="true" KeyboardAcceleratorTextOverride="Esc" Text="Select">
                     <muxc:RadioMenuFlyoutItem.Icon>
@@ -594,13 +600,13 @@
                 <MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />
                 <MenuFlyoutSeparator />
                 <!-- ステータスバーメニュー -->
-                <MenuFlyoutSubItem x:Uid="mfsi_stat_bar" Text="Status Bar">
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_tool" x:Uid="tmfi_stat_tool" Click="mi_stat_bar_click" Text="Tool" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_unit" x:Uid="tmfi_stat_unit" Click="mi_stat_bar_click" Text="Unit" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_curs" x:Uid="tmfi_stat_curs" Click="mi_stat_bar_click" Text="Cursor Position" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_grid" x:Uid="tmfi_stat_grid" Click="mi_stat_bar_click" Text="Grid Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_page" x:Uid="tmfi_stat_page" Click="mi_stat_bar_click" Text="Page Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_zoom" x:Uid="tmfi_stat_zoom" Click="mi_stat_bar_click" Text="Scale" />
+                <MenuFlyoutSubItem x:Uid="mfsi_status_bar" Text="Status Bar">
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_tool" x:Uid="tmfi_status_tool" Click="mi_status_bar_click" Text="Tool" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_unit" x:Uid="tmfi_status_unit" Click="mi_status_bar_click" Text="Unit" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_curs" x:Uid="tmfi_status_curs" Click="mi_status_bar_click" Text="Cursor Position" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_grid" x:Uid="tmfi_status_grid" Click="mi_status_bar_click" Text="Grid Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_page" x:Uid="tmfi_status_page" Click="mi_status_bar_click" Text="Page Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_zoom" x:Uid="tmfi_status_zoom" Click="mi_status_bar_click" Text="Scale" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- バージョン情報メニュー -->
@@ -609,19 +615,27 @@
         </muxc:MenuBar>
         <!-- 文字列検索パネル -->
         <StackPanel x:Name="sp_text_find" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
-            <Button Click="btn_text_find_close_click" Background="White" Content="&#xE894;" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
-            <TextBox x:Name="tx_text_find_what" x:Uid="tx_text_find_what" Header="Find what" Margin="4,4" TextChanged="tx_text_find_what_changed" Width="128" />
-            <TextBox x:Name="tx_text_replace_with" x:Uid="tx_text_replace_with" Header="Replace width" Margin="4,4" Width="128" />
-            <CheckBox x:Name="ck_text_match_case" x:Uid="ck_text_match_case" Content="Match case." Margin="4,4" />
-            <CheckBox x:Name="ck_text_wrap_around" x:Uid="ck_text_wrap_around" Content="Wrap around." Margin="4,4" />
-            <Button x:Name="btn_text_find_next" x:Uid="btn_text_find_next" Click="btn_text_find_next_click" Content="Find Next" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
-            <Button x:Name="btn_text_replace" x:Uid="btn_text_replace" Click="btn_text_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
-            <Button x:Name="btn_text_replace_all" x:Uid="btn_text_replace_all" Click="btn_text_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="4,4" VerticalAlignment="Bottom" />
+            <Button Click="btn_text_find_close_click" Background="White" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
+            <StackPanel Padding="8,8,8,8">
+                <TextBox x:Name="tx_text_find_what" x:Uid="tx_text_find_what" Header="Find what" Margin="0,4" TextChanged="tx_text_find_what_changed" Width="128" />
+                <TextBox x:Name="tx_text_replace_with" x:Uid="tx_text_replace_with" Header="Replace width" Margin="0,4" Width="128" />
+                <CheckBox x:Name="ck_text_match_case" x:Uid="ck_text_match_case" Content="Match case." Margin="0,4" />
+                <CheckBox x:Name="ck_text_wrap_around" x:Uid="ck_text_wrap_around" Content="Wrap around." Margin="0,4" />
+                <Button x:Name="btn_text_find_next" x:Uid="btn_text_find_next" Click="btn_text_find_next_click" Content="Find Next" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
+                <Button x:Name="btn_text_replace" x:Uid="btn_text_replace" Click="btn_text_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
+                <Button x:Name="btn_text_replace_all" x:Uid="btn_text_replace_all" Click="btn_text_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
+                <Button x:Uid="btn_text_find_close" Click="btn_text_find_close_click" Content="Close" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+            </StackPanel>
         </StackPanel>
         <!-- 図形一覧パネル -->
-        <RelativePanel x:Name="rp_summary" x:Load="false" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" >
-            <Button x:Name="btn_summary_close" Click="btn_summary_close_click" Background="White" Content="&#xE894;" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignRightWithPanel="True" VerticalAlignment="Top" />
-            <ListView x:Name="lv_summary" IsItemClickEnabled="False" Loaded="lv_summary_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True"  RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_summary_close" SelectionChanged="lv_summary_selection_changed" SelectionMode="Extended" >
+        <Grid x:Name="rp_summary" x:Load="false" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Button Click="btn_summary_close_click" Grid.Row="0" Background="White" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" />
+            <ListView x:Name="lv_summary" Grid.Row="1" IsItemClickEnabled="False" Loaded="lv_summary_loaded" SelectionChanged="lv_summary_selection_changed" SelectionMode="Extended" >
                 <!--<ListView x:Name="lv_summary" IsItemClickEnabled="False" Loaded="lv_summary_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True"  RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_summary_close" SelectionChanged="lv_summary_selection_changed" SelectionMode="Extended" >-->
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="local:Summary">
@@ -635,7 +649,8 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ListView>
-        </RelativePanel>
+            <Button x:Name="btn_summary_close" x:Uid="btn_summary_close" Click="btn_summary_close_click" Content="Close" Grid.Row="2" HorizontalAlignment="Stretch" Margin="12,12,12,12" />
+        </Grid>
         <!-- ページパネル -->
         <RelativePanel x:Name="rp_page" Grid.Row="1" Grid.Column="0" >
             <SwapChainPanel
@@ -701,21 +716,21 @@
         </RelativePanel>
         <!-- ステータスバー -->
         <!--
-        <StackPanel x:Name="sp_stat_bar" Background="{ThemeResource SystemChromeHighColor}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
+        <StackPanel x:Name="sp_status_bar" Background="{ThemeResource SystemChromeHighColor}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
         -->
-        <StackPanel x:Name="sp_stat_bar" Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
+        <StackPanel x:Name="sp_status_bar" Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
             <!-- ステータスバーコンテキストメニュー -->
             <StackPanel.ContextFlyout>
                 <MenuFlyout>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_tool_2" x:Uid="tmfi_stat_tool" Click="mi_stat_bar_click" Text="Tool" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_unit_2" x:Uid="tmfi_stat_unit" Click="mi_stat_bar_click" Text="Unit" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_curs_2" x:Uid="tmfi_stat_curs" Click="mi_stat_bar_click" Text="Cursor Position" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_grid_2" x:Uid="tmfi_stat_grid" Click="mi_stat_bar_click" Text="Grid Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_page_2" x:Uid="tmfi_stat_page" Click="mi_stat_bar_click" Text="Page Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stat_zoom_2" x:Uid="tmfi_stat_zoom" Click="mi_stat_bar_click" Text="Scale" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_tool_2" x:Uid="tmfi_status_tool" Click="mi_status_bar_click" Text="Tool" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_unit_2" x:Uid="tmfi_status_unit" Click="mi_status_bar_click" Text="Unit" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_curs_2" x:Uid="tmfi_status_curs" Click="mi_status_bar_click" Text="Cursor Position" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_grid_2" x:Uid="tmfi_status_grid" Click="mi_status_bar_click" Text="Grid Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_page_2" x:Uid="tmfi_status_page" Click="mi_status_bar_click" Text="Page Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_zoom_2" x:Uid="tmfi_status_zoom" Click="mi_status_bar_click" Text="Scale" />
                 </MenuFlyout>
             </StackPanel.ContextFlyout>
-            <StackPanel x:Name="sp_stat_tool" Margin="0,0,4,0" Orientation="Horizontal">
+            <StackPanel x:Name="sp_status_tool" Margin="0,0,4,0" Orientation="Horizontal">
                 <TextBlock Margin="0,0,0,0" Text="t:"/>
                 <PathIcon x:Name="pi_tool" Data="M0,0" VerticalAlignment="Center" Width="16" Height="16">
                     <PathIcon.RenderTransform>
@@ -723,14 +738,14 @@
                     </PathIcon.RenderTransform>
                 </PathIcon>
             </StackPanel>
-            <TextBlock x:Name="tk_stat_unit" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_stat_pos_x" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_stat_pos_y" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_stat_grid" Margin="0,0,4,0"  Text="0" />
-            <TextBlock x:Name="tk_stat_width" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_stat_height" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_stat_zoom" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_stat_cnt" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_status_unit" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_status_pos_x" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_status_pos_y" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_status_grid" Margin="0,0,4,0"  Text="0" />
+            <TextBlock x:Name="tk_status_width" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_status_height" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_status_zoom" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_status_cnt" Margin="0,0,4,0" Text="0"/>
         </StackPanel>
         <!-- 文字列入力ダイアログ -->
         <ContentDialog x:Name="cd_edit_text" x:Uid="cd_edit_text" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
@@ -740,13 +755,20 @@
             </StackPanel>
         </ContentDialog>
         <!-- 保存確認ダイアログ -->
-        <ContentDialog x:Name="cd_conf_save" x:Uid="cd_conf_save" DefaultButton="Close">
+        <ContentDialog x:Name="cd_conf_save" x:Uid="cd_conf_save" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Save" SecondaryButtonText="Don't Save">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
-                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE946;" Margin="0,0,4,0" />
+                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_conf}" Margin="0,0,12,0" />
                 <TextBlock x:Uid="tk_conf_save"/>
             </StackPanel>
         </ContentDialog>
-        <!-- ページの寸法入力ダイアログ -->
+        <!-- メッセージダイアログ -->
+        <ContentDialog x:Name="cd_message" x:Uid="cd_message" CloseButtonText="Close" DefaultButton="Close">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
+                <FontIcon x:Name="fi_message" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_alert}" Margin="0,0,12,0" />
+                <TextBlock x:Name="tk_message"/>
+            </StackPanel>
+        </ContentDialog>
+       <!-- ページの寸法入力ダイアログ -->
         <ContentDialog x:Name="cd_page_size" x:Uid="cd_page_size" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonClick="cd_page_size_pri_btn_click" PrimaryButtonText="Apply" SecondaryButtonClick="cd_page_size_sec_btn_click" SecondaryButtonText="Adjust to Shapes">
             <StackPanel >
                 <TextBox x:Name="tx_page_width" x:Uid="tx_page_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="tx_page_size_text_changed" />
@@ -764,7 +786,7 @@
                     <ComboBoxItem x:Uid="cxi_unit_point" Content="Point" />
                     <ComboBoxItem x:Uid="cxi_unit_grid" Content="Grid" />
                 </ComboBox>
-                <ComboBox x:Name="cx_color_style" x:Uid="cx_color_style" Header="Color component format" >
+                <ComboBox x:Name="cx_color_style" x:Uid="cx_color_style" Header="Color component format" Margin="0,0,0,4" >
                     <ComboBoxItem x:Uid="cxi_color_dec" Content="Decimal" />
                     <ComboBoxItem x:Uid="cxi_color_hex" Content="Hexadecimal" />
                     <ComboBoxItem x:Uid="cxi_color_flt" Content="Real number" />
@@ -778,7 +800,7 @@
                 <SwapChainPanel
                     x:Name="scp_sample_panel"
                     Height="170"
-                    Margin="0,0,0,4"
+                    Margin="0,0,0,8"
                     MaxHeight="170"
                     MaxWidth="170"
                     RelativePanel.AlignTopWithPanel="True"
@@ -788,10 +810,10 @@
                     />
                 <!-- Height を指定するこれ大事 -->
                 <ListView x:Name="lv_sample_list" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
-                <Slider x:Name="slider0" x:Uid = "slider0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-                <Slider x:Name="slider1" x:Uid = "slider1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-                <Slider x:Name="slider2" x:Uid = "slider2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-                <Slider x:Name="slider3" x:Uid = "slider3" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="slider2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+                <Slider x:Name="sample_slider_0" x:Uid = "sample_slider_0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+                <Slider x:Name="sample_slider_1" x:Uid = "sample_slider_1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+                <Slider x:Name="sample_slider_2" x:Uid = "sample_slider_2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+                <Slider x:Name="sample_slider_3" x:Uid = "sample_slider_3" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
             </RelativePanel>
         </ContentDialog>
     </Grid>

@@ -28,7 +28,7 @@
 //	MainPage_summary.cpp	図形一覧パネルの表示, 設定
 //	MainPage_text.cpp	文字列の編集と検索/置換
 //	MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
-//	MainPage_tool.cpp	図形ツールの設定
+//	MainPage_tool.cpp	作図ツールの設定
 //	MainPage_undo.cpp	元に戻すとやり直す
 //	MainPage_xcvd.cpp	切り取りとコピー, 貼り付け, 削除
 //------------------------------
@@ -169,6 +169,11 @@ namespace winrt::GraphPaper::implementation
 		FONT,	// 書体
 	};
 
+	enum struct MSG_ICON {
+		ALERT,
+		INFO
+	};
+
 	//-------------------------------
 	//	メインページ
 	//-------------------------------
@@ -207,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 		MenuFlyout m_menu_page;	// ページコンテキストメニュー
 		MenuFlyout m_menu_ungroup;	// グループ解除コンテキストメニュー
 
-		DRAW_TOOL m_draw_tool = DRAW_TOOL::TOOL_SELECT;		// 図形ツール
+		DRAW_TOOL m_draw_tool = DRAW_TOOL::TOOL_SELECT;		// 作図ツール
 
 		uint32_t m_list_select = 0;		// 選択された図形の数
 		S_LIST_T m_list_shapes;		// 図形リスト
@@ -218,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_stack_over = false;	// 操作スタックに積まれた要素が最大数を超えた
 		bool m_stack_push = false;	// 操作スタックの更新フラグ (ヌルが積まれたら true)
 
-		STAT_BAR m_stat_bar = stat_or(STAT_BAR::CURS, STAT_BAR::ZOOM);	// ステータスバーの状態
+		STAT_BAR m_status_bar = status_or(STAT_BAR::CURS, STAT_BAR::ZOOM);	// ステータスバーの状態
 
 		SHAPE_DX m_sample_dx;		// 見本の描画環境
 		ShapePanel m_sample_panel;		// 見本のパネル
@@ -236,9 +241,7 @@ namespace winrt::GraphPaper::implementation
 		//	メインページを破棄する.
 		~MainPage(void);
 		//	メッセージダイアログを表示する.
-		void cd_message_show(winrt::hstring const& res, winrt::hstring const& desc);
-		//	メッセージダイアログが閉じた.
-		void cd_message_closed(ContentDialog const& sender, ContentDialogClosedEventArgs const& args);
+		void cd_message_show(winrt::hstring const& glyph, winrt::hstring const& message, winrt::hstring const& desc);
 		//	編集メニュー項目の使用の可否を設定する.
 		void enable_edit_menu(void);
 		//	メインページを作成する.
@@ -248,7 +251,7 @@ namespace winrt::GraphPaper::implementation
 		//	ページメニューの「バージョン情報」が選択された.
 		void mfi_about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 		{
-			cd_message_show(L"str_graph_paper", L"str_version");
+			cd_message_show(L"icon_info", L"str_appname", L"str_version");
 		}
 		//	長さの単位の名前を得る.
 		winrt::hstring get_unit_name(void);
@@ -331,7 +334,7 @@ namespace winrt::GraphPaper::implementation
 		//	ストレージファイルを非同期に読む.
 		IAsyncOperation<winrt::hresult> file_read_async(StorageFile const& s_file, const bool suspend = false) noexcept;
 		//	名前を付けてファイルに非同期に保存する
-		IAsyncOperation<winrt::hresult> file_save_as_async(const bool gpf_only = false) noexcept;
+		IAsyncOperation<winrt::hresult> file_save_as_async(const bool svg_allowed = false) noexcept;
 		//	ファイルに非同期に保存する
 		IAsyncOperation<winrt::hresult> file_save_async(void) noexcept;
 		//	待機カーソルを表示, 表示する前のカーソルを得る.
@@ -355,15 +358,15 @@ namespace winrt::GraphPaper::implementation
 		//	最近使ったファイルを非同期に読む.
 		IAsyncAction file_read_recent_async(const uint32_t i);
 		//	ファイルメニューの「最近使ったファイル 1」が選択された
-		void mfi_recent_files_1_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_file_recent_1_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「最近使ったファイル 2」が選択された
-		void mfi_recent_files_2_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_file_recent_2_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「最近使ったファイル 3」が選択された
-		void mfi_recent_files_3_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_file_recent_3_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「最近使ったファイル 4」が選択された
-		void mfi_recent_files_4_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_file_recent_4_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「最近使ったファイル 5」が選択された
-		void mfi_recent_files_5_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_file_recent_5_click(IInspectable const&, RoutedEventArgs const&);
 		//	最近使ったファイルにストレージファイルを追加する.
 		void mru_add_file(StorageFile const& s_file);
 		//	最近使ったファイルのトークンからストレージファイルを得る.
@@ -622,8 +625,8 @@ namespace winrt::GraphPaper::implementation
 		void scp_sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
-		// MainPage_scroll.cpp
-		// スクロールバーの設定
+		//	MainPage_scroll.cpp
+		//	スクロールバーの設定
 		//-------------------------------
 
 		// スクロールバーが操作された
@@ -634,8 +637,8 @@ namespace winrt::GraphPaper::implementation
 		bool scroll_to_shape(Shape* s);
 
 		//-------------------------------
-		// MainPage_select.cpp
-		// 図形の選択
+		//	MainPage_select.cpp
+		//	図形の選択
 		//-------------------------------
 
 		// 編集メニューの「すべて選択」が選択された.
@@ -654,34 +657,34 @@ namespace winrt::GraphPaper::implementation
 		bool unselect_all(const bool t_range_only = false);
 
 		//-------------------------------
-		// MainPage_status.cpp
-		// ステータスバーの設定
+		//	MainPage_status.cpp
+		//	ステータスバーの設定
 		//-------------------------------
 
 		// ページメニューの「ステータスバー」が選択された.
-		void mi_stat_bar_click(IInspectable const&, RoutedEventArgs const&);
+		void mi_status_bar_click(IInspectable const&, RoutedEventArgs const&);
 		// ステータスバーのメニュー項目に印をつける.
-		void stat_check_menu(const STAT_BAR a);
+		void status_check_menu(const STAT_BAR a);
 		// 列挙型を OR 演算する.
-		static STAT_BAR stat_or(const STAT_BAR a, const STAT_BAR b) noexcept;
+		static STAT_BAR status_or(const STAT_BAR a, const STAT_BAR b) noexcept;
 		// ステータスバーの状態をデータリーダーから読み込む.
-		void stat_read(DataReader const& dt_reader);
+		void status_read(DataReader const& dt_reader);
 		// ポインターの位置をステータスバーに格納する.
-		void stat_set_curs(void);
+		void status_set_curs(void);
 		// 方眼の大きさをステータスバーに格納する.
-		void stat_set_grid(void);
+		void status_set_grid(void);
 		// ページの大きさをステータスバーに格納する.
-		void stat_set_page(void);
+		void status_set_page(void);
 		// 作図ツールをステータスバーに格納する.
-		void stat_set_draw(void);
+		void status_set_draw(void);
 		// 単位をステータスバーに格納する.
-		void stat_set_unit(void);
+		void status_set_unit(void);
 		// 拡大率をステータスバーに格納する.
-		void stat_set_zoom(void);
+		void status_set_zoom(void);
 		// ステータスバーの表示を設定する.
-		void stat_visibility(void);
+		void status_visibility(void);
 		// ステータスバーの状態をデータライターに書き込む.
-		void stat_write(DataWriter const& dt_writer);
+		void status_write(DataWriter const& dt_writer);
 
 		//------------------------------
 		//	MainPage_stroke.cpp
@@ -803,7 +806,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		//	MainPage_tool.cpp
-		//	図形ツールメニューのハンドラー
+		//	作図メニューのハンドラー
 		//-------------------------------
 
 		//	作図メニューの「曲線」が選択された.

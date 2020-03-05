@@ -40,16 +40,16 @@ namespace winrt::GraphPaper::implementation
 			hdr = hdr + buf;
 		}
 		if constexpr (S == 0) {
-			slider0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(hdr));
 		}
 		if constexpr (S == 1) {
-			slider1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(hdr));
 		}
 		if constexpr (S == 2) {
-			slider2().Header(box_value(hdr));
+			sample_slider_2().Header(box_value(hdr));
 		}
 		if constexpr (S == 3) {
-			slider3().Header(box_value(hdr));
+			sample_slider_3().Header(box_value(hdr));
 		}
 	}
 
@@ -103,18 +103,18 @@ namespace winrt::GraphPaper::implementation
 		const double val0 = m_page_panel.m_arrow_size.m_width;
 		const double val1 = m_page_panel.m_arrow_size.m_length;
 		const double val2 = m_page_panel.m_arrow_size.m_offset;
-		slider0().Value(val0);
-		slider1().Value(val1);
-		slider2().Value(val2);
+		sample_slider_0().Value(val0);
+		sample_slider_1().Value(val1);
+		sample_slider_2().Value(val2);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 0>(val0);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 1>(val1);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 2>(val2);
-		slider0().Visibility(VISIBLE);
-		slider1().Visibility(VISIBLE);
-		slider2().Visibility(VISIBLE);
-		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 0> });
-		const auto slider1_token = slider1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 1> });
-		const auto slider2_token = slider2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 2> });
+		sample_slider_0().Visibility(VISIBLE);
+		sample_slider_1().Visibility(VISIBLE);
+		sample_slider_2().Visibility(VISIBLE);
+		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 0> });
+		const auto sample_slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 1> });
+		const auto sample_slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 2> });
 		m_sample_type = SAMP_TYPE::STROKE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -128,12 +128,12 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		slider0().Visibility(COLLAPSED);
-		slider1().Visibility(COLLAPSED);
-		slider2().Visibility(COLLAPSED);
-		slider0().ValueChanged(slider0_token);
-		slider1().ValueChanged(slider1_token);
-		slider2().ValueChanged(slider2_token);
+		sample_slider_0().Visibility(COLLAPSED);
+		sample_slider_1().Visibility(COLLAPSED);
+		sample_slider_2().Visibility(COLLAPSED);
+		sample_slider_0().ValueChanged(sample_slider_0_token);
+		sample_slider_1().ValueChanged(sample_slider_1_token);
+		sample_slider_2().ValueChanged(sample_slider_2_token);
 		page_draw();
 	}
 

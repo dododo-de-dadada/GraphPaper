@@ -21,22 +21,22 @@ namespace winrt::GraphPaper::implementation
 		const double val1 = m_page_panel.m_fill_color.g * COLOR_MAX;
 		const double val2 = m_page_panel.m_fill_color.b * COLOR_MAX;
 		const double val3 = m_page_panel.m_fill_color.a * COLOR_MAX;
-		slider0().Value(val0);
-		slider1().Value(val1);
-		slider2().Value(val2);
-		slider3().Value(val3);
+		sample_slider_0().Value(val0);
+		sample_slider_1().Value(val1);
+		sample_slider_2().Value(val2);
+		sample_slider_3().Value(val3);
 		fill_set_slider_header<UNDO_OP::FILL_COLOR, 0>(val0);
 		fill_set_slider_header<UNDO_OP::FILL_COLOR, 1>(val1);
 		fill_set_slider_header<UNDO_OP::FILL_COLOR, 2>(val2);
 		fill_set_slider_header<UNDO_OP::FILL_COLOR, 3>(val3);
-		slider0().Visibility(VISIBLE);
-		slider1().Visibility(VISIBLE);
-		slider2().Visibility(VISIBLE);
-		slider3().Visibility(VISIBLE);
-		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 0> });
-		const auto slider1_token = slider1().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 1> });
-		const auto slider2_token = slider2().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 2> });
-		const auto slider3_token = slider3().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 3> });
+		sample_slider_0().Visibility(VISIBLE);
+		sample_slider_1().Visibility(VISIBLE);
+		sample_slider_2().Visibility(VISIBLE);
+		sample_slider_3().Visibility(VISIBLE);
+		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 0> });
+		const auto sample_slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 1> });
+		const auto sample_slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 2> });
+		const auto sample_slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 3> });
 		m_sample_type = SAMP_TYPE::FILL;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FILL)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -50,14 +50,14 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		slider0().Visibility(COLLAPSED);
-		slider1().Visibility(COLLAPSED);
-		slider2().Visibility(COLLAPSED);
-		slider3().Visibility(COLLAPSED);
-		slider0().ValueChanged(slider0_token);
-		slider1().ValueChanged(slider1_token);
-		slider2().ValueChanged(slider2_token);
-		slider3().ValueChanged(slider3_token);
+		sample_slider_0().Visibility(COLLAPSED);
+		sample_slider_1().Visibility(COLLAPSED);
+		sample_slider_2().Visibility(COLLAPSED);
+		sample_slider_3().Visibility(COLLAPSED);
+		sample_slider_0().ValueChanged(sample_slider_0_token);
+		sample_slider_1().ValueChanged(sample_slider_1_token);
+		sample_slider_2().ValueChanged(sample_slider_2_token);
+		sample_slider_3().ValueChanged(sample_slider_3_token);
 		page_draw();
 	}
 
@@ -95,16 +95,16 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if constexpr (S == 0) {
-			slider0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(hdr));
 		}
 		if constexpr (S == 1) {
-			slider1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(hdr));
 		}
 		if constexpr (S == 2) {
-			slider2().Header(box_value(hdr));
+			sample_slider_2().Header(box_value(hdr));
 		}
 		if constexpr (S == 3) {
-			slider3().Header(box_value(hdr));
+			sample_slider_3().Header(box_value(hdr));
 		}
 	}
 

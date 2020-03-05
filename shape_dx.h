@@ -120,6 +120,23 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1SolidColorBrush> m_shape_brush;	// 図形の色ブラシ
 		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック
 
+		void Release(void)
+		{
+			Trim();
+			m_state_block = nullptr;
+			m_shape_brush = nullptr;
+			m_range_brush = nullptr;
+			m_aux_style = nullptr;
+			m_aux_brush = nullptr;
+			m_anch_brush = nullptr;
+			m_swapChainPanel = nullptr;
+			m_d2dTargetBitmap = nullptr;
+			m_d2dContext = nullptr;
+			m_d2dDevice = nullptr;
+			m_d3dContext = nullptr;
+			m_d3dDevice = nullptr;
+		}
+
 		//------------------------------
 		// shape_dx.cpp
 		//------------------------------

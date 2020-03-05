@@ -92,66 +92,55 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	メッセージダイアログを表示する.
-	//	msg	メッセージ
+	//	glyph	フォントアイコンのグリフ
+	//	message	メッセージ
 	//	desc	説明文
 	//	戻り値	なし
-	void MainPage::cd_message_show(winrt::hstring const& msg, winrt::hstring const& desc)
+	void MainPage::cd_message_show(winrt::hstring const& glyph, winrt::hstring const& message, winrt::hstring const& desc)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialog;
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
 		const wchar_t QUOT[] = L"\"";	// 引用符
 		const wchar_t NL[] = L"\u2028";	// テキストブロック内での改行
-		const wchar_t CLOSE[] = L"str_close";	// 「閉じる」文字列のリソース名
 
-		//	コンテキストダイアログを作成する.
-		auto dialog = ContentDialog();
 		//	リソースローダーを得る.
 		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		//	表示する文字列をリソースローダーから得る.
-		winrt::hstring cont;
+		//	メッセージをキーとする文字列をリソースローダーから得る.
+		winrt::hstring text;
 		try {
-			cont = r_loader.GetString(msg);
+			text = r_loader.GetString(message);
 		}
 		catch (winrt::hresult_error const&) {}
-		if (cont.empty()) {
+		if (text.empty()) {
 			//	文字列が空の場合,
-			//	リソース名をそのまま表示する文字列に格納する.
-			cont = msg;
+			//	メッセージをそのまま文字列に格納する.
+			text = message;
 		}
-		//	説明文をリソースローダーから得る.
-		winrt::hstring b;
+		//	説明をキーとする, 追加する文字列をリソースローダーから得る.
+		winrt::hstring added_text;
 		try {
-			b = r_loader.GetString(desc);
+			added_text = r_loader.GetString(desc);
 		}
 		catch (winrt::hresult_error const&) {}
-		if (b.empty()) {
-			if (desc.empty() == false) {
-				//	説明文が空でない場合,
-				//	改行と, 引用符で囲んだ説明文を表示する文字列に加える.
-				cont = cont + NL + QUOT + desc + QUOT;
-			}
+		if (added_text.empty() == false) {
+			//	追加する文字列が空でない場合,
+			//	文字列に, 改行と追加する文字列を追加する.
+			text = text + NL + added_text;
 		}
-		else {
-			cont = cont + NL + b;
+		else if (desc.empty() == false) {
+			//	説明そのものが空でない場合,
+			//	文字列に, 改行と, 引用符で囲んだ説明とを追加する.
+			text = text + NL + QUOT + desc + QUOT;
 		}
-		//	「閉じる」文字列をリソースローダーから得る.
-		const auto close = r_loader.GetString(CLOSE);
+		//	グリフをキーとして, フォントアイコンのグリフを静的リソースから得る.
+		auto icon = Resources().TryLookup(box_value(glyph));
+		//	フォントアイコンのグリフをダイアログのアイコンに格納する.
+		fi_message().Glyph(icon != nullptr ? unbox_value<winrt::hstring>(icon) : glyph);
 		//	表示する文字列をダイアログの内容に格納する.
-		dialog.Content(box_value(cont));
-		//	ダイアログのクローズボタンに「閉じる」文字列を格納する.
-		dialog.CloseButtonText(close);
-		//	クローズボタンを既定のボタンに設定する.
-		dialog.DefaultButton(ContentDialogButton::Close);
+		tk_message().Text(text);
 		//	ダイアログを非同期に表示する.
-		auto _{ dialog.ShowAsync() };
-	}
-
-	//	メッセージダイアログが閉じた.
-	void MainPage::cd_message_closed(ContentDialog const& sender, ContentDialogClosedEventArgs const&)
-	{
-		//	ダイアログを解放する.
-		UnloadObject(sender);
+		auto _{ cd_message().ShowAsync() };
 	}
 
 	// 編集メニュー項目の使用の可否を設定する.
@@ -273,20 +262,10 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::ViewManagement::ApplicationView;
 		using winrt::Windows::UI::ViewManagement::UISettings;
 
-		// お約束.
+		//	お約束.
 		InitializeComponent();
 
-		// コンテキストメニューをリソースから読み込む.
-		m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke")));
-		m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill")));
-		m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_font")));
-		m_menu_page = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_page")));
-		m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup")));
-
-		// クリックの判定時間をシステムから得る.
-		m_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
-
-		// アプリケーションの中断・継続などのイベントハンドラーを設定する.
+		//	アプリケーションの中断・継続などのイベントハンドラーを設定する.
 		{
 			using winrt::Windows::UI::Xaml::Application;
 			auto const& app{ Application::Current() };
@@ -296,39 +275,43 @@ namespace winrt::GraphPaper::implementation
 			app.LeavingBackground({ this, &MainPage::app_leaving_background });
 		}
 
-		// ウィンドウの表示が変わったときのイベントハンドラーを設定する.
+		//	ウィンドウの表示が変わったときのイベントハンドラーを設定する.
 		{
 			auto const& thread{ CoreWindow::GetForCurrentThread() };
 			thread.Activated({ this, &MainPage::thread_activated });
 			thread.VisibilityChanged({ this, &MainPage::thread_visibility_changed });
 		}
 
-		// ディスプレイの状態が変わったときのイベントハンドラーを設定する.
+		//	ディスプレイの状態が変わったときのイベントハンドラーを設定する.
 		{
 			auto const& disp{ DisplayInformation::GetForCurrentView() };
 			disp.DpiChanged({ this, &MainPage::disp_dpi_changed });
 			disp.OrientationChanged({ this, &MainPage::disp_orientation_changed });
 			disp.DisplayContentsInvalidated({ this, &MainPage::disp_contents_invalidated });
 		}
+
+		//	アプリケーションを閉じる前の確認のハンドラーを設定する.
 		{
 			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
 			using winrt::Windows::UI::Xaml::Application;
-			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(
-				[this](auto, auto args) {
-					args.Handled(true);
-					auto _{ mfi_exit_click(nullptr, nullptr) };
-				}
-			);
+			//SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(
+			//	[this](auto, auto args)->IAsyncAction {
+			//		//args.Handled(true);
+			//		//co_await resume_foreground(this->Dispatcher());
+			//		co_await mfi_exit_click(nullptr, nullptr);
+			//	}
+			//);
 		}
-		// D2D/DWRITE ファクトリを図形/文字列図形クラスに, 
-		// 図形リストとページパネルを操作クラスに格納する.
+
+		//	D2D/DWRITE ファクトリを図形/文字列図形クラスに, 
+		//	図形リストとページパネルを操作クラスに格納する.
 		{
 			Shape::s_d2d_factory = m_page_dx.m_d2dFactory.get();
 			Shape::s_dwrite_factory = m_page_dx.m_dwriteFactory.get();
 			Undo::set(&m_list_shapes, &m_page_panel);
 		}
 
-		// 文字範囲の背景色, 文字範囲の文字色をリソースから得る.
+		//	文字範囲の背景色, 文字範囲の文字色をリソースから得る.
 		{
 			using winrt::Windows::UI::Color;
 			try {
@@ -345,7 +328,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 
-		// ページパネルの属性を初期化する.
+		//	ページパネルの属性を初期化する.
 		const auto dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 		{
 			using winrt::Windows::UI::Xaml::Media::Brush;
@@ -375,7 +358,7 @@ namespace winrt::GraphPaper::implementation
 			m_page_panel.m_font_color = f_col;
 		}
 
-		// ページパネルの書体の属性を初期化する.
+		//	ページパネルの書体の属性を初期化する.
 		{
 			wchar_t lang[LOCALE_NAME_MAX_LENGTH];	// 地域・言語名
 			// 地域・言語名を得る.
@@ -412,9 +395,18 @@ namespace winrt::GraphPaper::implementation
 			m_page_panel.m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(tx_edit().FontWeight().Weight);
 			coll = nullptr;
 		}
+
 		{
-			//m_page_dx.m_anch_brush->SetColor(m_page_panel.m_anch_color);
-			//m_page_dx.m_aux_brush->SetColor(m_page_panel.m_aux_color);
+			//	コンテキストメニューをリソースから読み込む.
+			m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke")));
+			m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill")));
+			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_font")));
+			m_menu_page = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_page")));
+			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup")));
+
+			//	クリックの判定時間をシステムから得る.
+			m_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
+
 			m_page_min.x = 0.0;
 			m_page_min.y = 0.0;
 			m_page_max.x = m_page_panel.m_page_size.width;
@@ -437,7 +429,7 @@ namespace winrt::GraphPaper::implementation
 		s_list_clear(m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
-			cd_message_show(L"Memory leak occurs", {});
+			cd_message_show(L"icon_alert", L"Memory leak occurs", {});
 		}
 #endif
 	}
@@ -448,6 +440,37 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Application;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
+		if (m_stack_push) {
+			//	操作スタックの更新フラグが立っている場合,
+			//	保存確認ダイアログを表示する.
+			const auto d_result = co_await cd_conf_save().ShowAsync();
+			//	ダイアログの戻り値を判定する.
+			if (d_result == ContentDialogResult::None
+				|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
+				//	「キャンセル」が押された場合,
+				//	または「保存する」が押されたがファイルに保存できなかた場合,
+				//	中断する.
+				co_return;
+			}
+		}
+		//	上記以外の場合,
+		if (m_summary_visible) {
+			summary_close();
+		}
+		//	操作スタックを消去する.
+		undo_clear();
+		//	図形リストを消去する.
+		s_list_clear(m_list_shapes);
+		m_page_dx.Release();
+		m_sample_dx.Release();
+#if defined(_DEBUG)
+		if (debug_leak_cnt != 0) {
+			cd_message_show(L"icon_alert", L"Memory leak occurs", {});
+		}
+#endif
+		//	アプリケーションを終了する.
+		Application::Current().Exit();
+		/*
 		if (m_stack_push == false) {
 			// 操作スタックの更新フラグがない場合,
 			// 図形データは変更されていないので,
@@ -456,7 +479,6 @@ namespace winrt::GraphPaper::implementation
 			Application::Current().Exit();
 			co_return;
 		}
-		//cd_load_conf_save();
 		// 保存確認ダイアログを表示する.
 		const auto d_result = co_await cd_conf_save().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -475,6 +497,7 @@ namespace winrt::GraphPaper::implementation
 			release();
 			Application::Current().Exit();
 		}
+		*/
 	}
 
 }

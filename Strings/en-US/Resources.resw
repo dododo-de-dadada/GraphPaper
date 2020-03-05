@@ -334,7 +334,7 @@
     <comment>MenuBarItem</comment>
   </data>
   <data name="mfi_about_graph_paper.Text" xml:space="preserve">
-    <value>About Graph paper</value>
+    <value>About Graph paper...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_arrow_size.Text" xml:space="preserve">
@@ -533,11 +533,11 @@
     <value>Size Grid</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_recent_files.Text" xml:space="preserve">
+  <data name="mfsi_file_recent.Text" xml:space="preserve">
     <value>Recent Files</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_stat_bar.Text" xml:space="preserve">
+  <data name="mfsi_status_bar.Text" xml:space="preserve">
     <value>Status Bar</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -713,10 +713,6 @@
     <value>Width</value>
     <comment>String</comment>
   </data>
-  <data name="str_close" xml:space="preserve">
-    <value>Close</value>
-    <comment>String</comment>
-  </data>
   <data name="str_col_b" xml:space="preserve">
     <value>B</value>
     <comment>String</comment>
@@ -781,7 +777,7 @@
     <value>Font</value>
     <comment>String</comment>
   </data>
-  <data name="str_graph_paper" xml:space="preserve">
+  <data name="tk_appname.Text" xml:space="preserve">
     <value>Graph Paper</value>
     <comment>String</comment>
   </data>
@@ -862,27 +858,27 @@
     <value>Snap to Grid</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_stat_curs.Text" xml:space="preserve">
+  <data name="tmfi_status_curs.Text" xml:space="preserve">
     <value>Cursor Position</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stat_grid.Text" xml:space="preserve">
+  <data name="tmfi_status_grid.Text" xml:space="preserve">
     <value>Grid Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stat_page.Text" xml:space="preserve">
+  <data name="tmfi_status_page.Text" xml:space="preserve">
     <value>Page Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stat_tool.Text" xml:space="preserve">
+  <data name="tmfi_status_tool.Text" xml:space="preserve">
     <value>Tool</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stat_unit.Text" xml:space="preserve">
+  <data name="tmfi_status_unit.Text" xml:space="preserve">
     <value>Unit</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stat_zoom.Text" xml:space="preserve">
+  <data name="tmfi_status_zoom.Text" xml:space="preserve">
     <value>Zoom</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -901,5 +897,21 @@
   <data name="tx_text_replace_with.Header" xml:space="preserve">
     <value>Replace width</value>
     <comment>TextBox</comment>
+  </data>
+  <data name="cd_message.CloseButtonText" xml:space="preserve">
+    <value>Close</value>
+    <comment>ContentDialog</comment>
+  </data>
+  <data name="str_appname" xml:space="preserve">
+    <value>GrapPaper</value>
+    <comment>String</comment>
+  </data>
+  <data name="btn_text_find_close.Content" xml:space="preserve">
+    <value>Close</value>
+    <comment>Button</comment>
+  </data>
+  <data name="btn_summary_close.Content" xml:space="preserve">
+    <value>Close</value>
+    <comment>Button</comment>
   </data>
 </root>

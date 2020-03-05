@@ -100,6 +100,7 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 			try {
+				/*
 				//	キャンセルでない場合,
 				//	アプリケーションデータを格納するためのローカルフォルダーを得る.
 				//	LocalFolder は「有効な範囲外のデータにアクセスしようとしました」内部エラーを起こすが,
@@ -117,6 +118,7 @@ namespace winrt::GraphPaper::implementation
 				undo_clear();
 				//	図形リストを消去する.
 				s_list_clear(m_list_shapes);
+				*/
 			}
 			catch (winrt::hresult_error const& e) {
 				// エラーが発生した場合, エラーコードを結果に格納する.
@@ -131,7 +133,7 @@ namespace winrt::GraphPaper::implementation
 		co_await winrt::resume_foreground(this->Dispatcher());
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
-			cd_message_show(L"Memory leak occurs", {});
+			cd_message_show(L"icon_alert", L"Memory leak occurs", {});
 		}
 #endif
 		if (hr == S_OK) {

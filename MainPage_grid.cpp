@@ -42,16 +42,16 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if constexpr (S == 0) {
-			slider0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(hdr));
 		}
 		if constexpr (S == 1) {
-			slider1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(hdr));
 		}
 		if constexpr (S == 2) {
-			slider2().Header(box_value(hdr));
+			sample_slider_2().Header(box_value(hdr));
 		}
 		if constexpr (S == 3) {
-			slider3().Header(box_value(hdr));
+			sample_slider_3().Header(box_value(hdr));
 		}
 	}
 
@@ -99,10 +99,10 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		const double val0 = m_page_panel.m_grid_size;
-		slider0().Value(val0);
+		sample_slider_0().Value(val0);
 		grid_set_slider_header<UNDO_OP::GRID_LEN, 0>(val0);
-		slider0().Visibility(VISIBLE);
-		const auto slider0_token = slider0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_LEN, 0> });
+		sample_slider_0().Visibility(VISIBLE);
+		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_LEN, 0> });
 		m_sample_type = SAMP_TYPE::NONE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -119,8 +119,8 @@ namespace winrt::GraphPaper::implementation
 			}
 
 		}
-		slider0().Visibility(COLLAPSED);
-		slider0().ValueChanged(slider0_token);
+		sample_slider_0().Visibility(COLLAPSED);
+		sample_slider_0().ValueChanged(sample_slider_0_token);
 		page_draw();
 	}
 
@@ -159,10 +159,10 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		const double val3 = m_sample_panel.m_grid_opac * COLOR_MAX;
-		slider3().Value(val3);
+		sample_slider_3().Value(val3);
 		grid_set_slider_header<UNDO_OP::GRID_OPAC, 3>(val3);
-		slider3().Visibility(VISIBLE);
-		const auto slider3_token = slider3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_OPAC, 3> });
+		sample_slider_3().Visibility(VISIBLE);
+		const auto sample_slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_OPAC, 3> });
 		m_sample_type = SAMP_TYPE::NONE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -177,8 +177,8 @@ namespace winrt::GraphPaper::implementation
 				enable_undo_menu();
 			}
 		}
-		slider3().Visibility(COLLAPSED);
-		slider3().ValueChanged(slider3_token);
+		sample_slider_3().Visibility(COLLAPSED);
+		sample_slider_3().ValueChanged(sample_slider_3_token);
 		page_draw();
 	}
 
