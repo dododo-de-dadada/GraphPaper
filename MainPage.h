@@ -3,7 +3,13 @@
 //	1	「ソリューションエクスプローラー」>「ビューを切り替える」>「フォルダービュー」
 //	2	「ビルド」>「構成マネージャー」>「アクティブソリューションプラットフォーム」を x64
 //	3	「プロジェクト」>「NuGetパッケージの管理」>「復元」. 必要なら「MicroSoft.UI.Xaml」と「Microsoft.Windows.CppWinRT」を更新.
-//	4	「デバッグ」>「GraphPaper のプロパティ」>「構成プロパティ」>「ターゲットプラットフォームの最小バージョン」>「10.0.18362.0」
+//	4	「デバッグ」>「GraphPaper のプロパティ」>「構成プロパティ」>「ターゲットプラットフォームの最小バージョン」>「10.0.17134.0」
+//
+//	デバッガーの停止で終了したときはすべて 0 になるが,
+//	アプリケーションを「×」ボタンなどで終了したとき「スレッド 0xXXXX はコード 1 (0x1) で終了しました。」が表示される.
+//	とりわけ Application::Current().Exit で終了した場合, すべてのスレッドで 1 が表示される.
+//	Blank App (c++/winrt) でまっさらなアプリケーションを作成したときも同じ表示なので, とりあえず気にしないようにする.
+//
 //	MainPage.h
 //
 //	MainPage.cpp	メインページの作成, アプリの終了
@@ -233,13 +239,22 @@ namespace winrt::GraphPaper::implementation
 		bool m_summary_visible = false;	// 図形一覧パネルの表示フラグ
 		bool m_window_visible = false;		// ウィンドウが表示されている/表示されてない
 
+		winrt::event_token m_token_suspending;
+		winrt::event_token m_token_resuming;
+		winrt::event_token m_token_entered_background;
+		winrt::event_token m_token_leaving_background;
+		winrt::event_token m_token_activated;
+		winrt::event_token m_token_visibility_changed;
+		winrt::event_token m_token_dpi_changed;
+		winrt::event_token m_token_orientation_changed;
+		winrt::event_token m_token_contents_invalidated;
+		winrt::event_token m_token_close_requested;
+
 		//-------------------------------
 		//	MainPage.cpp
 		//	メインページの作成, アプリケーションの終了
 		//-------------------------------
 
-		//	メインページを破棄する.
-		~MainPage(void);
 		//	メッセージダイアログを表示する.
 		void cd_message_show(winrt::hstring const& glyph, winrt::hstring const& message, winrt::hstring const& desc);
 		//	編集メニュー項目の使用の可否を設定する.

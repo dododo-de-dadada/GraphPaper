@@ -1114,7 +1114,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字列
 	//------------------------------
 	struct ShapeText : ShapeRect {
-		static wchar_t** s_available_fonts;		// 利用可能な書体名
+		static wchar_t** s_available_fonts;		// 有効な書体名
 
 		DWRITE_TEXT_RANGE m_sel_range{ 0, 0 };	// 文字範囲
 		D2D1_COLOR_F m_font_color = S_BLACK;	// 書体の色
@@ -1149,7 +1149,7 @@ namespace winrt::GraphPaper::implementation
 		void delete_bottom_blank(void) noexcept;
 		// 表示する.
 		void draw(SHAPE_DX& dx);
-		// 利用可能な書体名から要素を得る.
+		// 有効な書体名から要素を得る.
 		static wchar_t* get_available_font(const uint32_t i);
 		// 書体の色を得る.
 		bool get_font_color(D2D1_COLOR_F& val) const noexcept;
@@ -1179,12 +1179,12 @@ namespace winrt::GraphPaper::implementation
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 範囲に含まれるか調べる.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
-		// 利用可能な書体名か調べ, 利用可能なら, もともとの書体名を破棄し, 利用可能な書体名要素へのポインターと置き換える.
+		// 有効な書体名か調べ, 有効なら, もともとの書体名を破棄し, 有効な書体名要素へのポインターと置き換える.
 		static bool is_available_font(wchar_t*& font);
-		// 利用可能な書体名を破棄する.
+		// 有効な書体名を破棄する.
 		static void release_available_fonts(void);
-		// 利用可能な書体名に格納する.
-		static void set_available_fonts(IDWriteFontCollection* coll, wchar_t lang[]);
+		// 有効な書体名を取得する.
+		static void set_available_fonts(void);
 		// 値を書体の色に格納する.
 		void set_font_color(const D2D1_COLOR_F& val) noexcept;
 		// 値を書体名に格納する.

@@ -703,6 +703,9 @@ namespace winrt::GraphPaper::implementation
 	// このメソッドは, アプリが停止/中断したときに呼び出される.
 	void SHAPE_DX::Trim()
 	{
+		if (m_d3dDevice == nullptr) {
+			return;
+		}
 		winrt::com_ptr<IDXGIDevice3> dxgiDevice;
 		m_d3dDevice.as(dxgiDevice);
 		dxgiDevice->Trim();

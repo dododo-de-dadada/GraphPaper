@@ -141,9 +141,7 @@
             </x:String>
             -->
             <!-- アプリケーションデータを格納するファイル名 -->
-            <x:String x:Key="file_app_data">
-                app_data
-            </x:String>
+            <x:String x:Key="file_app_data">app_data</x:String>
             <!-- ストロークコンテキストメニュー -->
             <MenuFlyout x:Key="mf_stroke">
                 <MenuFlyoutSubItem x:Uid="mfsi_stroke_style" Text="Style">

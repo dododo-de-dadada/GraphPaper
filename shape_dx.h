@@ -120,6 +120,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1SolidColorBrush> m_shape_brush;	// 図形の色ブラシ
 		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック
 
+		//	描画環境を破棄する.
 		void Release(void)
 		{
 			Trim();

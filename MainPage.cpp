@@ -84,13 +84,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	メインページを破棄する.
-	MainPage::~MainPage(void)
-	{
-		//	メインページの内容を破棄する.
-		release();
-	}
-
 	//	メッセージダイアログを表示する.
 	//	glyph	フォントアイコンのグリフ
 	//	message	メッセージ
@@ -269,35 +262,35 @@ namespace winrt::GraphPaper::implementation
 		{
 			using winrt::Windows::UI::Xaml::Application;
 			auto const& app{ Application::Current() };
-			app.Suspending({ this, &MainPage::app_suspending });
-			app.Resuming({ this, &MainPage::app_resuming });
-			app.EnteredBackground({ this, &MainPage::app_entered_background });
-			app.LeavingBackground({ this, &MainPage::app_leaving_background });
+			m_token_suspending = app.Suspending({ this, &MainPage::app_suspending });
+			m_token_resuming = app.Resuming({ this, &MainPage::app_resuming });
+			m_token_entered_background = app.EnteredBackground({ this, &MainPage::app_entered_background });
+			m_token_leaving_background = app.LeavingBackground({ this, &MainPage::app_leaving_background });
 		}
 
 		//	ウィンドウの表示が変わったときのイベントハンドラーを設定する.
 		{
 			auto const& thread{ CoreWindow::GetForCurrentThread() };
-			thread.Activated({ this, &MainPage::thread_activated });
-			thread.VisibilityChanged({ this, &MainPage::thread_visibility_changed });
+			m_token_activated = thread.Activated({ this, &MainPage::thread_activated });
+			m_token_visibility_changed = thread.VisibilityChanged({ this, &MainPage::thread_visibility_changed });
 		}
 
 		//	ディスプレイの状態が変わったときのイベントハンドラーを設定する.
 		{
 			auto const& disp{ DisplayInformation::GetForCurrentView() };
-			disp.DpiChanged({ this, &MainPage::disp_dpi_changed });
-			disp.OrientationChanged({ this, &MainPage::disp_orientation_changed });
-			disp.DisplayContentsInvalidated({ this, &MainPage::disp_contents_invalidated });
+			m_token_dpi_changed = disp.DpiChanged({ this, &MainPage::disp_dpi_changed });
+			m_token_orientation_changed = disp.OrientationChanged({ this, &MainPage::disp_orientation_changed });
+			m_token_contents_invalidated = disp.DisplayContentsInvalidated({ this, &MainPage::disp_contents_invalidated });
 		}
 
 		//	アプリケーションを閉じる前の確認のハンドラーを設定する.
 		{
 			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
-			using winrt::Windows::UI::Xaml::Application;
-			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(
+			auto const& sys{ SystemNavigationManagerPreview::GetForCurrentView() };
+			m_token_close_requested = sys.CloseRequested(
 				[this](auto, auto args) {
 					args.Handled(true);
-					mfi_exit_click(nullptr, nullptr);
+					auto _{ mfi_exit_click(nullptr, nullptr) };
 				}
 			);
 		}
@@ -314,10 +307,8 @@ namespace winrt::GraphPaper::implementation
 		{
 			using winrt::Windows::UI::Color;
 			try {
-				auto b_key = box_value(L"SystemColorHighlightColor");
-				auto t_key = box_value(L"SystemColorHighlightTextColor");
-				auto b_res = Resources().Lookup(b_key);
-				auto t_res = Resources().Lookup(t_key);
+				auto b_res = Resources().Lookup(box_value(L"SystemColorHighlightColor"));
+				auto t_res = Resources().Lookup(box_value(L"SystemColorHighlightTextColor"));
 				cast_to(unbox_value<Color>(b_res), m_page_dx.m_range_bcolor);
 				cast_to(unbox_value<Color>(t_res), m_page_dx.m_range_tcolor);
 			}
@@ -340,10 +331,8 @@ namespace winrt::GraphPaper::implementation
 			D2D1_COLOR_F b_col;
 			D2D1_COLOR_F f_col;
 			try {
-				auto b_key = box_value(L"ApplicationPageBackgroundThemeBrush");
-				auto f_key = box_value(L"ApplicationForegroundThemeBrush");
-				auto const& b_res = Resources().Lookup(b_key);
-				auto const& f_res = Resources().Lookup(f_key);
+				auto const& b_res = Resources().Lookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
+				auto const& f_res = Resources().Lookup(box_value(L"ApplicationForegroundThemeBrush"));
 				cast_to(unbox_value<Brush>(b_res), b_col);
 				cast_to(unbox_value<Brush>(f_res), f_col);
 			}
@@ -359,10 +348,9 @@ namespace winrt::GraphPaper::implementation
 
 		//	ページパネルの書体の属性を初期化する.
 		{
-			wchar_t lang[LOCALE_NAME_MAX_LENGTH];	// 地域・言語名
 			// 地域・言語名を得る.
 			// DWriteFactory からフォントコレクションを得る.
-			// 地域・言語名とフォントコレクションを利用可能な書体名に格納する.
+			// 地域・言語名とフォントコレクションを有効な書体名に格納する.
 			// 地域・言語名を指定してシステムから UI 本文用の書体を得る.
 			// コレクションから UI 本文用と同じ書体を検索する.
 			// それが存在する場合, それをコレクションから得られた書体名を既定の書体名に格納する.
@@ -370,29 +358,39 @@ namespace winrt::GraphPaper::implementation
 			// UI 本文用の書体名, 太さ, 字体, 幅を図形属性の既定値に格納する.
 			// UI 本文用の書体を破棄する.
 			// フォントコレクションを破棄する.
-			GetUserDefaultLocaleName(lang, LOCALE_NAME_MAX_LENGTH);
-			winrt::com_ptr<IDWriteFontCollection> coll;
-			winrt::check_hresult(
-				m_page_dx.m_dwriteFactory->GetSystemFontCollection(coll.put())
-			);
-			ShapeText::set_available_fonts(coll.get(), lang);
-			auto name = tx_edit().FontFamily().Source();
-			UINT32 index = 0;
-			BOOL exists = false;
-			winrt::check_hresult(
-				coll->FindFamilyName(name.c_str(), &index, &exists)
-			);
-			if (exists) {
-				m_page_panel.m_font_family = ShapeText::get_available_font(index);
+			ShapeText::set_available_fonts();
+			m_page_panel.m_font_family = nullptr;
+			auto const& style = unbox_value<winrt::Windows::UI::Xaml::Style>(Resources().Lookup(box_value(L"BaseTextBlockStyle")));
+			auto const& setters = style.Setters();
+			for (auto const& base : setters) {
+				using winrt::Windows::UI::Xaml::Setter;
+				using winrt::Windows::UI::Xaml::Controls::TextBlock;
+				using winrt::Windows::UI::Xaml::Media::FontFamily;
+				auto const& setter = base.try_as<Setter>();
+				if (setter.Property() == TextBlock::FontFamilyProperty()) {
+					auto value = unbox_value<FontFamily>(setter.Value());
+					m_page_panel.m_font_family = wchar_cpy(value.Source().c_str());
+				}
+				else if (setter.Property() == TextBlock::FontSizeProperty()) {
+					auto value = unbox_value<double>(setter.Value());
+					m_page_panel.m_font_size = value;
+				}
+				else if (setter.Property() == TextBlock::FontStretchProperty()) {
+					auto value = unbox_value<winrt::Windows::UI::Text::FontStretch>(setter.Value());
+					m_page_panel.m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(value);
+				}
+				else if (setter.Property() == TextBlock::FontStyleProperty()) {
+					auto value = unbox_value<winrt::Windows::UI::Text::FontStyle>(setter.Value());
+					m_page_panel.m_font_style = static_cast<DWRITE_FONT_STYLE>(value);
+				}
+				else if (setter.Property() == TextBlock::FontWeightProperty()) {
+					//auto value = unbox_value<winrt::Windows::UI::Text::FontWeight>(setter.Value());
+				}
 			}
-			else {
-				m_page_panel.m_font_family = wchar_cpy(name.c_str());
-			}
-			m_page_panel.m_font_size = tx_edit().FontSize();
-			m_page_panel.m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(tx_edit().FontStretch());
-			m_page_panel.m_font_style = static_cast<DWRITE_FONT_STYLE>(tx_edit().FontStyle());
+			ShapeText::is_available_font(m_page_panel.m_font_family);
+			//m_page_panel.m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(tx_edit().FontStretch());
+			//m_page_panel.m_font_style = static_cast<DWRITE_FONT_STYLE>(tx_edit().FontStyle());
 			m_page_panel.m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(tx_edit().FontWeight().Weight);
-			coll = nullptr;
 		}
 
 		{
@@ -415,22 +413,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		mru_add_file(nullptr);
 		finish_file_read();
-	}
-
-	//	メインページの内容を破棄する.
-	void MainPage::release(void)
-	{
-		if (m_summary_visible) {
-			summary_close();
-		}
-		//	操作スタックを消去する.
-		undo_clear();
-		s_list_clear(m_list_shapes);
-#if defined(_DEBUG)
-		if (debug_leak_cnt != 0) {
-			cd_message_show(L"icon_alert", L"Memory leak occurs", {});
-		}
-#endif
 	}
 
 	// ファイルメニューの「終了」が選択された
@@ -460,43 +442,45 @@ namespace winrt::GraphPaper::implementation
 		undo_clear();
 		//	図形リストを消去する.
 		s_list_clear(m_list_shapes);
-		m_page_dx.Release();
-		m_sample_dx.Release();
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			cd_message_show(L"icon_alert", L"Memory leak occurs", {});
 		}
 #endif
+		//	有効な書体名の配列を破棄する.
+		ShapeText::release_available_fonts();
+		m_page_dx.Release();
+		m_sample_dx.Release();
+		//	静的リソースから読み込んだコンテキストメニューを破棄する.
+		{
+			m_menu_stroke = nullptr;
+			m_menu_fill = nullptr;
+			m_menu_font = nullptr;
+			m_menu_page = nullptr;
+			m_menu_ungroup = nullptr;
+		}
+		//	コードビハインドで設定したハンドラーの設定を解除する.
+		{
+			using winrt::Windows::UI::Xaml::Application;
+			auto const& app{ Application::Current() };
+			app.Suspending(m_token_suspending);
+			app.Resuming(m_token_resuming);
+			app.EnteredBackground(m_token_entered_background);
+			app.LeavingBackground(m_token_leaving_background);
+			auto const& thread{ CoreWindow::GetForCurrentThread() };
+			thread.Activated(m_token_activated);
+			thread.VisibilityChanged(m_token_visibility_changed);
+			auto const& disp{ DisplayInformation::GetForCurrentView() };
+			disp.DpiChanged(m_token_dpi_changed);
+			disp.OrientationChanged(m_token_orientation_changed);
+			disp.DisplayContentsInvalidated(m_token_contents_invalidated);
+			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
+			auto const& sys{ SystemNavigationManagerPreview::GetForCurrentView() };
+			sys.CloseRequested(m_token_close_requested);
+		}
+
 		//	アプリケーションを終了する.
 		Application::Current().Exit();
-		/*
-		if (m_stack_push == false) {
-			// 操作スタックの更新フラグがない場合,
-			// 図形データは変更されていないので,
-			// アプリケーションを終了する.
-			release();
-			Application::Current().Exit();
-			co_return;
-		}
-		// 保存確認ダイアログを表示する.
-		const auto d_result = co_await cd_conf_save().ShowAsync();
-		if (d_result == ContentDialogResult::Primary) {
-			// ファイルに非同期に保存して, アプリケーションを終了する.
-			//auto _{ file_save_and_exit_async() };
-			//	ファイルに非同期に保存する
-			if (co_await file_save_async() == S_OK) {
-				//	保存できた場合,
-				//	アプリケーションを終了する.
-				release();
-				Application::Current().Exit();
-			}
-		}
-		else if (d_result == ContentDialogResult::Secondary) {
-			// アプリケーションを終了する.
-			release();
-			Application::Current().Exit();
-		}
-		*/
 	}
 
 }
