@@ -597,6 +597,9 @@ namespace winrt::GraphPaper::implementation
 			cd_message_show(L"icon_alert", L"Memory leak occurs", {});
 		}
 #endif
+		//	—LŒø‚È‘‘Ì–¼‚Ì”z—ñ‚ğ”jŠü‚·‚é.
+		ShapeText::release_available_fonts();
+		font_set_base_style();
 		m_page_min.x = 0.0;
 		m_page_min.y = 0.0;
 		m_page_max.x = m_page_panel.m_page_size.width;

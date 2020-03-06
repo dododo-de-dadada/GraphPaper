@@ -529,7 +529,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 有効な書体名を破棄する.
+	//	有効な書体名の配列を破棄する.
 	void ShapeText::release_available_fonts(void)
 	{
 		if (s_available_fonts == nullptr) {
@@ -542,31 +542,29 @@ namespace winrt::GraphPaper::implementation
 		s_available_fonts = nullptr;
 	}
 
-	// 有効な書体名に格納する.
-	// coll		DWRITE フォントコレクション
-	// lang		地域・言語名
+	//	有効な書体名の配列を設定する.
+	//
+	//	DWriteFactory のシステムフォントコレクションから,
+	//	既定の地域・言語名に対応した書体を得て,
+	//	それらを配列に格納する.
 	void ShapeText::set_available_fonts(void)
 	{
-		wchar_t lang[LOCALE_NAME_MAX_LENGTH];	// 地域・言語名
+		//	有効な書体名の配列を破棄する.
+		ShapeText::release_available_fonts();
 
+		//	既定の地域・言語名を得る.
+		wchar_t lang[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(lang, LOCALE_NAME_MAX_LENGTH);
+
+		//	DWriteFactory のシステムフォントコレクションを得る.
 		winrt::com_ptr<IDWriteFontCollection> collection;
 		winrt::check_hresult(
 			Shape::s_dwrite_factory->GetSystemFontCollection(collection.put())
 		);
-		UINT32 index = 0;
-		BOOL exists = false;
+
 		// フォントコレクションの要素数を得る.
-		// 得られた要素数の有効な書体名を確保する.
 		const auto f_cnt = collection->GetFontFamilyCount();
-		if (s_available_fonts != nullptr) {
-			// 有効な書体名が空でなければ, それらを破棄する.
-			for (auto i = 0; s_available_fonts[i] != nullptr; i++) {
-				delete[] s_available_fonts[i];
-			}
-			delete[] s_available_fonts;
-			s_available_fonts = nullptr;
-		}
+		// 得られた要素数 + 1 の配列を確保する.
 		s_available_fonts = new wchar_t* [static_cast<size_t>(f_cnt) + 1];
 		// フォントコレクションの各要素について.
 		for (uint32_t i = 0; i < f_cnt; i++) {
@@ -586,6 +584,8 @@ namespace winrt::GraphPaper::implementation
 			winrt::check_hresult(
 				font_family->GetFamilyNames(localized_name.put())
 			);
+			UINT32 index = 0;
+			BOOL exists = false;
 			winrt::check_hresult(
 				localized_name->FindLocaleName(lang, &index, &exists)
 			);

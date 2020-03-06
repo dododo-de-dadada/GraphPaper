@@ -1181,7 +1181,7 @@ namespace winrt::GraphPaper::implementation
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 有効な書体名か調べ, 有効なら, もともとの書体名を破棄し, 有効な書体名要素へのポインターと置き換える.
 		static bool is_available_font(wchar_t*& font);
-		// 有効な書体名を破棄する.
+		//	有効な書体名の配列を破棄する.
 		static void release_available_fonts(void);
 		// 有効な書体名を取得する.
 		static void set_available_fonts(void);

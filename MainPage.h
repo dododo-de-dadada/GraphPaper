@@ -462,6 +462,7 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_OP U, int S> void text_set_slider_header(const double val);
 		//	値をスライダーのヘッダーと図形に格納する.
 		template <UNDO_OP U, int S> void text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		void font_set_base_style(void);
 
 		//-------------------------------
 		//　MainPage_grid.cpp

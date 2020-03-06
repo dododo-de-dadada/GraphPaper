@@ -136,6 +136,79 @@ namespace winrt::GraphPaper::implementation
 		auto _{ cd_message().ShowAsync() };
 	}
 
+	//	ページパネルの書体の属性を初期化する.
+	void MainPage::font_set_base_style(void)
+	{
+		using winrt::Windows::UI::Xaml::Setter;
+		using winrt::Windows::UI::Xaml::Controls::TextBlock;
+		using winrt::Windows::UI::Xaml::Media::FontFamily;
+		using winrt::Windows::UI::Text::FontWeight;
+		using winrt::Windows::UI::Text::FontStretch;
+		using winrt::Windows::UI::Xaml::Style;
+
+		// 地域・言語名を得る.
+		// DWriteFactory からフォントコレクションを得る.
+		// 地域・言語名とフォントコレクションを有効な書体名に格納する.
+		// 地域・言語名を指定してシステムから UI 本文用の書体を得る.
+		// コレクションから UI 本文用と同じ書体を検索する.
+		// それが存在する場合, それをコレクションから得られた書体名を既定の書体名に格納する.
+		// それが存在しない場合, UI 本文用の書体を既定の書体名に格納する.
+		// UI 本文用の書体名, 太さ, 字体, 幅を図形属性の既定値に格納する.
+		// UI 本文用の書体を破棄する.
+		// フォントコレクションを破棄する.
+		ShapeText::set_available_fonts();
+		m_page_panel.m_font_family = wchar_cpy(L"Segoe UI");
+		m_page_panel.m_font_size = 14.0;
+		m_page_panel.m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;
+		m_page_panel.m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;
+		m_page_panel.m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;
+		auto resource = Resources().Lookup(box_value(L"BodyTextBlockStyle"));
+		std::list<Style> stack;
+		auto style = unbox_value<Style>(resource);
+		while (style != nullptr) {
+			stack.push_back(style);
+			style = style.BasedOn();
+		}
+		while (stack.empty() == false) {
+			style = stack.back();
+			stack.pop_back();
+			auto const& setters = style.Setters();
+			for (auto const& base : setters) {
+				auto const& setter = base.try_as<Setter>();
+				if (setter.Property() == TextBlock::FontFamilyProperty()) {
+					auto value = unbox_value<FontFamily>(setter.Value());
+					m_page_panel.m_font_family = wchar_cpy(value.Source().c_str());
+				}
+				else if (setter.Property() == TextBlock::FontSizeProperty()) {
+					auto value = unbox_value<double>(setter.Value());
+					m_page_panel.m_font_size = value;
+				}
+				else if (setter.Property() == TextBlock::FontStretchProperty()) {
+					auto value = unbox_value<int32_t>(setter.Value());
+					m_page_panel.m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(value);
+				}
+				else if (setter.Property() == TextBlock::FontStyleProperty()) {
+					auto value = unbox_value<int32_t>(setter.Value());
+					m_page_panel.m_font_style = static_cast<DWRITE_FONT_STYLE>(value);
+				}
+				else if (setter.Property() == TextBlock::FontWeightProperty()) {
+					auto value = unbox_value<int32_t>(setter.Value());
+					m_page_panel.m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(value);
+					//Determine the type of a boxed value
+					//auto prop = setter.Value().try_as<winrt::Windows::Foundation::IPropertyValue>();
+					//auto type = prop.Type();
+					//if (type == winrt::Windows::Foundation::PropertyType::Inspectable) {
+					//	...
+					//}
+				}
+			}
+		}
+		stack.clear();
+		style = nullptr;
+		resource = nullptr;
+		ShapeText::is_available_font(m_page_panel.m_font_family);
+	}
+
 	// 編集メニュー項目の使用の可否を設定する.
 	void MainPage::enable_edit_menu(void)
 	{
@@ -344,53 +417,7 @@ namespace winrt::GraphPaper::implementation
 			m_page_panel.m_stroke_color = f_col;
 			m_page_panel.m_fill_color = b_col;
 			m_page_panel.m_font_color = f_col;
-		}
-
-		//	ページパネルの書体の属性を初期化する.
-		{
-			// 地域・言語名を得る.
-			// DWriteFactory からフォントコレクションを得る.
-			// 地域・言語名とフォントコレクションを有効な書体名に格納する.
-			// 地域・言語名を指定してシステムから UI 本文用の書体を得る.
-			// コレクションから UI 本文用と同じ書体を検索する.
-			// それが存在する場合, それをコレクションから得られた書体名を既定の書体名に格納する.
-			// それが存在しない場合, UI 本文用の書体を既定の書体名に格納する.
-			// UI 本文用の書体名, 太さ, 字体, 幅を図形属性の既定値に格納する.
-			// UI 本文用の書体を破棄する.
-			// フォントコレクションを破棄する.
-			ShapeText::set_available_fonts();
-			m_page_panel.m_font_family = nullptr;
-			auto const& style = unbox_value<winrt::Windows::UI::Xaml::Style>(Resources().Lookup(box_value(L"BaseTextBlockStyle")));
-			auto const& setters = style.Setters();
-			for (auto const& base : setters) {
-				using winrt::Windows::UI::Xaml::Setter;
-				using winrt::Windows::UI::Xaml::Controls::TextBlock;
-				using winrt::Windows::UI::Xaml::Media::FontFamily;
-				auto const& setter = base.try_as<Setter>();
-				if (setter.Property() == TextBlock::FontFamilyProperty()) {
-					auto value = unbox_value<FontFamily>(setter.Value());
-					m_page_panel.m_font_family = wchar_cpy(value.Source().c_str());
-				}
-				else if (setter.Property() == TextBlock::FontSizeProperty()) {
-					auto value = unbox_value<double>(setter.Value());
-					m_page_panel.m_font_size = value;
-				}
-				else if (setter.Property() == TextBlock::FontStretchProperty()) {
-					auto value = unbox_value<winrt::Windows::UI::Text::FontStretch>(setter.Value());
-					m_page_panel.m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(value);
-				}
-				else if (setter.Property() == TextBlock::FontStyleProperty()) {
-					auto value = unbox_value<winrt::Windows::UI::Text::FontStyle>(setter.Value());
-					m_page_panel.m_font_style = static_cast<DWRITE_FONT_STYLE>(value);
-				}
-				else if (setter.Property() == TextBlock::FontWeightProperty()) {
-					//auto value = unbox_value<winrt::Windows::UI::Text::FontWeight>(setter.Value());
-				}
-			}
-			ShapeText::is_available_font(m_page_panel.m_font_family);
-			//m_page_panel.m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(tx_edit().FontStretch());
-			//m_page_panel.m_font_style = static_cast<DWRITE_FONT_STYLE>(tx_edit().FontStyle());
-			m_page_panel.m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(tx_edit().FontWeight().Weight);
+			font_set_base_style();
 		}
 
 		{
