@@ -135,14 +135,16 @@ namespace winrt::GraphPaper::implementation
 		co_await winrt::resume_background();
 		try {
 			//	ファイルを開いてランダムアクセスストリームを得る.
-			//	ストリームから読み込むためのデータリーダーを作成する.
-			//	データリーダーにファイルを読み込む.
 			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
+			//	ストリームから読み込むためのデータリーダーを作成する.
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
+			//	データリーダーにファイルを読み込む.
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
 			text_find_read(dt_reader);
 			status_read(dt_reader);
+			m_page_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
+			m_col_style = static_cast<COL_STYLE>(dt_reader.ReadUInt32());
 			m_page_panel.read(dt_reader);
 			//	操作スタックを消去する.
 			undo_clear();
@@ -225,7 +227,7 @@ namespace winrt::GraphPaper::implementation
 				s_picker.FileTypeChoices().Insert(desc_svg, type_svg);
 			}
 			//	最近使ったファイルのトークンが空か判定する.
-			if (m_mru_token.empty()) {
+			if (m_token_mru.empty()) {
 				//	トークンが空の場合, 
 				//	提案されたファイル名に拡張子を格納する.
 				s_picker.SuggestedFileName(FT_GPF);
@@ -233,7 +235,7 @@ namespace winrt::GraphPaper::implementation
 			else {
 				//	トークンが空でない場合,
 				//	ストレージファイルを最近使ったファイルのトークンから得る.
-				auto s_file{ co_await mru_get_file(m_mru_token) };
+				auto s_file{ co_await mru_get_file(m_token_mru) };
 				if (s_file != nullptr) {
 					//	取得した場合,
 					if (s_file.FileType() == FT_GPF) {
@@ -285,7 +287,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::AccessCache::AccessListEntry;
 
 		// 最近使ったファイルのトークンからストレージファイルを得る.
-		auto s_file{ co_await mru_get_file(m_mru_token) };
+		auto s_file{ co_await mru_get_file(m_token_mru) };
 		if (s_file == nullptr) {
 			// ストレージファイルが空の場合,
 			// 名前を付けてファイルに非同期に保存する.
@@ -308,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 			// スレッドをメインページの UI スレッドに変える.
 			// 最近使ったファイルのエラーメッセージダイアログを表示する.
 			co_await winrt::resume_foreground(this->Dispatcher());
-			cd_message_show(L"icon_alert", ERR_WRITE, m_mru_token);
+			cd_message_show(L"icon_alert", ERR_WRITE, m_token_mru);
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;
@@ -342,9 +344,11 @@ namespace winrt::GraphPaper::implementation
 			CachedFileManager::DeferUpdates(s_file);
 			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::ReadWrite) };
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
-			//dt_writer.WriteUInt32(static_cast<uint32_t>(m_col_style));
+			
 			text_find_write(dt_writer);
 			status_write(dt_writer);
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_page_unit));
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_col_style));
 			m_page_panel.write(dt_writer);
 			if (suspend) {
 				s_list_write<!REDUCE>(m_list_shapes, dt_writer);
@@ -384,6 +388,7 @@ namespace winrt::GraphPaper::implementation
 			//	中断フラグがない場合,
 			//	スレッドをメインページの UI スレッドに変える.
 			co_await winrt::resume_foreground(this->Dispatcher());
+			// if you need to complete an asynchronous operation before your application is suspended, call args.setPromise()”
 			mru_add_file(s_file);
 			//	false を操作スタックの更新フラグに格納する.
 			m_stack_push = false;
@@ -563,50 +568,6 @@ namespace winrt::GraphPaper::implementation
 		status_set_zoom();
 		status_set_unit();
 		status_visibility();
-	}
-
-	// ファイルメニューの「新規」が選択された
-	IAsyncAction MainPage::mfi_new_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
-		if (m_stack_push) {
-			//	操作スタックの更新フラグが立っている場合,
-			//	保存確認ダイアログを表示する.
-			const auto d_result = co_await cd_conf_save().ShowAsync();
-			//	ダイアログの戻り値を判定する.
-			if (d_result == ContentDialogResult::None
-				|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
-				//	「キャンセル」が押された場合,
-				//	または「保存する」が押されたがファイルに保存できなかた場合,
-				//	中断する.
-				co_return;
-			}
-		}
-		if (m_summary_visible) {
-			//	図形一覧パネルの表示フラグが立っている場合,
-			//	一覧を閉じる.
-			summary_close();
-		}
-		//	操作スタックを消去する.
-		undo_clear();
-		//	図形リストを消去する.
-		s_list_clear(m_list_shapes);
-#if defined(_DEBUG)
-		if (debug_leak_cnt != 0) {
-			cd_message_show(L"icon_alert", L"Memory leak occurs", {});
-		}
-#endif
-		//	有効な書体名の配列を破棄する.
-		ShapeText::release_available_fonts();
-		font_set_base_style();
-		m_page_min.x = 0.0;
-		m_page_min.y = 0.0;
-		m_page_max.x = m_page_panel.m_page_size.width;
-		m_page_max.y = m_page_panel.m_page_size.height;
-		m_mru_token.clear();
-		mru_add_file(nullptr);
-		finish_file_read();
 	}
 
 	//	ファイルメニューの「開く」が選択された
@@ -810,7 +771,7 @@ namespace winrt::GraphPaper::implementation
 
 		auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
 		if (s_file != nullptr) {
-			m_mru_token = mru_list.Add(s_file, s_file.Path());
+			m_token_mru = mru_list.Add(s_file, s_file.Path());
 			ApplicationView::GetForCurrentView().Title(s_file.Name());
 		}
 		else {

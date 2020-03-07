@@ -36,10 +36,11 @@ namespace winrt::GraphPaper::implementation
 		);
 	}
 
+	//	書体のディセントをテキストレイアウトから得る.
 	static void get_font_descent(IDWriteTextLayout* text_layout, double& descent)
 	{
-		IDWriteFontCollection* fonts;
-		text_layout->GetFontCollection(&fonts);
+		winrt::com_ptr<IDWriteFontCollection> fonts;
+		text_layout->GetFontCollection(fonts.put());
 		IDWriteFontFamily* family;
 		fonts->GetFontFamily(0, &family);
 		fonts->Release();
@@ -50,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 		family = nullptr;
 		DWRITE_FONT_METRICS metrics;
 		font->GetMetrics(&metrics);
-		font->Release();
+		//font->Release();
 		font = nullptr;
 		const auto f_size = text_layout->GetFontSize();
 		descent = f_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
@@ -449,11 +450,11 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	ANCH_WHICH ShapeText::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		const auto anchor = hit_test_anchor(t_pos, a_len);
+		const auto anchor = ShapeRect::hit_test_anchor(t_pos, a_len);
 		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 			return anchor;
 		}
-		// 文字列図形の左上が原点になるよう, 調べる位置を移動する.
+		// 文字列の範囲の左上が原点になるよう, 調べる位置を移動する.
 		D2D1_POINT_2F pos;
 		ShapeStroke::get_min_pos(pos);
 		pt_sub(t_pos, pos, pos);
@@ -484,14 +485,13 @@ namespace winrt::GraphPaper::implementation
 	// 線の太さは考慮されない.
 	bool ShapeText::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
-		const uint32_t cnt = m_dw_linecnt;
 		D2D1_POINT_2F pos;
 		D2D1_POINT_2F h_min;
 		D2D1_POINT_2F h_max;
 
-		if (cnt > 0) {
+		if (m_dw_linecnt > 0) {
 			ShapeStroke::get_min_pos(pos);
-			for (uint32_t i = 0; i < cnt; i++) {
+			for (uint32_t i = 0; i < m_dw_linecnt; i++) {
 				auto const& test = m_dw_test_metrics[i];
 				auto const& line = m_dw_line_metrics[i];
 				auto const top = static_cast<double>(test.top) + static_cast<double>(line.baseline) + m_dw_descent - m_font_size;
@@ -549,61 +549,57 @@ namespace winrt::GraphPaper::implementation
 	//	それらを配列に格納する.
 	void ShapeText::set_available_fonts(void)
 	{
-		//	有効な書体名の配列を破棄する.
-		ShapeText::release_available_fonts();
-
 		//	既定の地域・言語名を得る.
 		wchar_t lang[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(lang, LOCALE_NAME_MAX_LENGTH);
-
-		//	DWriteFactory のシステムフォントコレクションを得る.
+		//	システムフォントコレクションを DWriteFactory から得る.
 		winrt::com_ptr<IDWriteFontCollection> collection;
 		winrt::check_hresult(
 			Shape::s_dwrite_factory->GetSystemFontCollection(collection.put())
 		);
-
-		// フォントコレクションの要素数を得る.
+		//	フォントコレクションの要素数を得る.
 		const auto f_cnt = collection->GetFontFamilyCount();
-		// 得られた要素数 + 1 の配列を確保する.
+		//	得られた要素数 + 1 の配列を確保する.
 		s_available_fonts = new wchar_t* [static_cast<size_t>(f_cnt) + 1];
-		// フォントコレクションの各要素について.
+		//	フォントコレクションの各要素について.
 		for (uint32_t i = 0; i < f_cnt; i++) {
-			// 要素から書体名を得る.
-			// 書体名からローカライズされた書体名を得る.
-			// ローカライズされた書体名から, 地域名をのぞいた書体名の開始位置を得る.
-			// 地域名が含まれてなければ 0 を開始位置に格納する.
-			// 開始位置より後ろの文字数を得る (ヌル文字は含まれない).
-			// 文字数 + 1 の文字配列を確保し, 書体名の配列に格納する.
-			// ローカライズされた書体名を破棄する.
-			// フォントファミリーをを破棄する.
+			//	要素から書体を得る.
 			winrt::com_ptr<IDWriteFontFamily> font_family;
 			winrt::check_hresult(
 				collection->GetFontFamily(i, font_family.put())
 			);
+			//	書体からローカライズされた書体名を得る.
 			winrt::com_ptr<IDWriteLocalizedStrings> localized_name;
 			winrt::check_hresult(
 				font_family->GetFamilyNames(localized_name.put())
 			);
+			//	ローカライズされた書体名から, 地域名をのぞいた書体名の開始位置を得る.
 			UINT32 index = 0;
 			BOOL exists = false;
 			winrt::check_hresult(
 				localized_name->FindLocaleName(lang, &index, &exists)
 			);
 			if (exists == false) {
+				//	地域名がない場合,
+				//	0 を開始位置に格納する.
 				index = 0;
 			}
+			//	開始位置より後ろの文字数を得る (ヌル文字は含まれない).
 			UINT32 length;
 			winrt::check_hresult(
 				localized_name->GetStringLength(index, &length)
 			);
+			//	文字数 + 1 の文字配列を確保し, 書体名の配列に格納する.
 			s_available_fonts[i] = new wchar_t[static_cast<size_t>(length) + 1];
 			winrt::check_hresult(
 				localized_name->GetString(index, s_available_fonts[i], length + 1)
 			);
+			//	ローカライズされた書体名を破棄する.
 			localized_name = nullptr;
+			//	書体をを破棄する.
 			font_family = nullptr;
 		}
-		// 有効な書体名の末尾に終端としてヌルを格納する.
+		// 有効な書体名の配列の末尾に終端としてヌルを格納する.
 		s_available_fonts[f_cnt] = nullptr;
 	}
 

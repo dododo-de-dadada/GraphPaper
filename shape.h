@@ -1183,7 +1183,7 @@ namespace winrt::GraphPaper::implementation
 		static bool is_available_font(wchar_t*& font);
 		//	有効な書体名の配列を破棄する.
 		static void release_available_fonts(void);
-		// 有効な書体名を取得する.
+		//	有効な書体名の配列を設定する.
 		static void set_available_fonts(void);
 		// 値を書体の色に格納する.
 		void set_font_color(const D2D1_COLOR_F& val) noexcept;

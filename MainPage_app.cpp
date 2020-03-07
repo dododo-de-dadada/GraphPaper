@@ -9,23 +9,21 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	static winrt::hstring app_data;	// アプリケーションデータを格納するファイル名
-	constexpr auto APP_DATA = L"file_app_data";	// // アプリケーションデータを格納するファイル名のリソース名
+	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 
 	//	アプリケーションデータを保存するフォルダーを得る.
-	static auto app_data_folder(void);
+	static auto data_folder(void);
 
 	//	アプリケーションデータを保存するフォルダーを得る.
-	static auto app_data_folder(void)
+	static auto data_folder(void)
 	{
 		using winrt::Windows::Storage::ApplicationData;
-		return ApplicationData::Current().LocalFolder();
+		return ApplicationData::Current().LocalCacheFolder();
 	}
 
 	//	アプリケーションがバックグラウンドに移った.
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
-		app_data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(APP_DATA)));
 		std::lock_guard<std::mutex> lock(m_dx_mutex);
 		m_page_dx.Trim();
 		m_sample_dx.Trim();
@@ -36,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 	//	戻り値	なし
 	//	中断操作は, アプリ中断のハンドラーの引数
 	//	SuspendingEventArgs から得られる.
-	IAsyncAction MainPage::app_extended_session_async(SuspendingOperation const& s_op)
+	IAsyncAction MainPage::app_suspending(IInspectable const&, SuspendingEventArgs const& args)
 	{
 		using concurrency::cancellation_token_source;
 		using winrt::Windows::Foundation::TypedEventHandler;// <winrt::Windows::Foundation::IInspectable const&, winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedEventArgs const&>;
@@ -47,10 +45,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::SuspendingDeferral;
 		using winrt::Windows::Storage::StorageFolder;
 		using winrt::Windows::Storage::CreationCollisionOption;
-		//static cancellation_token_source ct_source;
-		//static SuspendingDeferral s_deferral;
-		//static winrt::event_token s_token;
 
+		auto const& s_op = args.SuspendingOperation();
 		//	コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		//	延長処理を中断するためのトークンの元を得る.
@@ -100,25 +96,25 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 			try {
-				/*
 				//	キャンセルでない場合,
-				//	アプリケーションデータを格納するためのローカルフォルダーを得る.
+				//	アプリケーションデータを格納するためのフォルダーを得る.
 				//	LocalFolder は「有効な範囲外のデータにアクセスしようとしました」内部エラーを起こすが,
 				//	とりあえず, ファイルを作成して保存はできている.
-				auto l_folder{ app_data_folder() };
+				auto folder{ data_folder() };
 				//	ストレージファイルをローカルフォルダに作成する.
-				auto s_file{ co_await l_folder.CreateFileAsync(app_data, CreationCollisionOption::ReplaceExisting) };
+				auto s_file{ co_await folder.CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 				//	図形データをストレージファイルに非同期に書き込, 結果を得る.
 				hr = co_await file_write_gpf_async(s_file, true);
 				//	ファイルを破棄する.
 				s_file = nullptr;
 				//	フォルダーを破棄する.
-				l_folder = nullptr;
+				folder = nullptr;
 				//	操作スタックを消去する.
 				undo_clear();
 				//	図形リストを消去する.
 				s_list_clear(m_list_shapes);
-				*/
+				//	有効な書体名の配列を破棄する.
+				ShapeText::release_available_fonts();
 			}
 			catch (winrt::hresult_error const& e) {
 				// エラーが発生した場合, エラーコードを結果に格納する.
@@ -168,26 +164,25 @@ namespace winrt::GraphPaper::implementation
 
 	// アプリケーションが再開された.
 	// アプリ起動のときは呼ばれない.
-	void MainPage::app_resuming(IInspectable const&, IInspectable const& /*object*/)
-	{
-		// アプリケーションを非同期に再開する.
-		auto _{ app_resuming_async() };
-	}
-
-	// アプリケーションを非同期に再開する.
-	IAsyncAction MainPage::app_resuming_async(void)
+	IAsyncAction MainPage::app_resuming(IInspectable const&, IInspectable const& /*object*/)
 	{
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
+
+		//	有効な書体名の配列を破棄する.
+		//	ShapeText::release_available_fonts();
+		//	有効な書体名の配列を設定する.
+		ShapeText::set_available_fonts();
+
 		// E_FAIL を結果に格納する.
 		auto hr = E_FAIL;
 		try {
 			// アプリ用に作成されたローカルデータフォルダーを得る.
-			auto l_folder{ app_data_folder() };
-			auto s_file{ co_await l_folder.GetFileAsync(app_data) };
+			auto folder{ data_folder() };
+			auto s_file{ co_await folder.GetFileAsync(FILE_NAME) };
 			co_await file_read_async(s_file, true);
 			s_file = nullptr;
-			l_folder = nullptr;
+			folder = nullptr;
 			// スレッドをメインページの UI スレッドに変える.
 			co_await winrt::resume_foreground(this->Dispatcher());
 			finish_file_read();
@@ -198,17 +193,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;
-	}
-
-	// アプリケーションが中断された.
-	// アプリの現在の状態を保存する.
-	// EnteredBackground が先.
-	void MainPage::app_suspending(IInspectable const&, SuspendingEventArgs const& args)
-	{
-		// 引数から中断操作を得る.
-		// 得られた中断操作を指定して,
-		// アプリケーションを非同期に延長する.
-		auto _{ app_extended_session_async(args.SuspendingOperation()) };
 	}
 
 }

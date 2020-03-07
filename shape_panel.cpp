@@ -354,16 +354,14 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::read;
 
-		read(m_grid_color, dt_reader);
-		m_grid_size = dt_reader.ReadDouble();
+		read(m_grid_color, dt_reader);	// 方眼の色
+		m_grid_size = dt_reader.ReadDouble();	// 方眼の大きさ
 		m_grid_opac = dt_reader.ReadDouble();
 		read(m_grid_show, dt_reader);
 		m_grid_snap = dt_reader.ReadBoolean();
 		read(m_page_color, dt_reader);
 		m_page_scale = dt_reader.ReadDouble();
 		read(m_page_size, dt_reader);
-uint32_t dummy;
-read(dummy, dt_reader);
 
 		read(m_arrow_size, dt_reader);	// 矢じりの寸法
 		read(m_arrow_style, dt_reader);	// 矢じりの形式
@@ -578,8 +576,6 @@ read(dummy, dt_reader);
 		write(m_page_color, dt_writer);
 		dt_writer.WriteDouble(m_page_scale);
 		write(m_page_size, dt_writer);
-uint32_t dummy = 0;
-write(dummy, dt_writer);
 
 		write(m_arrow_size, dt_writer);	// 矢じりの寸法
 		write(m_arrow_style, dt_writer);	// 矢じりの形式

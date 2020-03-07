@@ -3,7 +3,8 @@
 //	1	「ソリューションエクスプローラー」>「ビューを切り替える」>「フォルダービュー」
 //	2	「ビルド」>「構成マネージャー」>「アクティブソリューションプラットフォーム」を x64
 //	3	「プロジェクト」>「NuGetパッケージの管理」>「復元」. 必要なら「MicroSoft.UI.Xaml」と「Microsoft.Windows.CppWinRT」を更新.
-//	4	「デバッグ」>「GraphPaper のプロパティ」>「構成プロパティ」>「ターゲットプラットフォームの最小バージョン」>「10.0.17134.0」
+//	4	「デバッグ」>「GraphPaper のプロパティ」>「構成プロパティ」>「ターゲットプラットフォームの最小バージョン」>「10.0.17763.0」
+//		(MenuBar には、Windows 10 Version 1809 (SDK 17763) 以降、または Windows UI ライブラリが必要)
 //
 //	デバッガーの停止で終了したときはすべて 0 になるが,
 //	アプリケーションを「×」ボタンなどで終了したとき「スレッド 0xXXXX はコード 1 (0x1) で終了しました。」が表示される.
@@ -175,6 +176,9 @@ namespace winrt::GraphPaper::implementation
 		FONT,	// 書体
 	};
 
+	//-------------------------------
+	//	メッセージダイアログのアイコン
+	//-------------------------------
 	enum struct MSG_ICON {
 		ALERT,
 		INFO
@@ -184,24 +188,24 @@ namespace winrt::GraphPaper::implementation
 	//	メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
-		std::mutex m_dx_mutex;		// DX のための同期プリミティブ
+		std::mutex m_dx_mutex;	// DX のための同期プリミティブ
 
-		winrt::hstring m_mru_token;	// 最近使ったファイルのトークン
+		winrt::hstring m_token_mru;	// 最近使ったファイルのトークン
 
-		wchar_t* m_find_text = nullptr;		// 検索の検索文字列
-		bool m_find_case = false;		// 英文字の区別フラグ
-		wchar_t* m_find_repl = nullptr;		// 検索の置換文字列
-		bool m_find_wrap = false;		// 回り込み検索フラグ
+		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
+		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
+		bool m_find_case = false;	// 英文字の区別フラグ
+		bool m_find_wrap = false;	// 回り込み検索フラグ
+		LEN_UNIT m_page_unit = LEN_UNIT::PIXEL;	// 長さの単位
+		COL_STYLE m_col_style = COL_STYLE::DEC;	// 色成分の書式
+		STAT_BAR m_status_bar = status_or(STAT_BAR::CURS, STAT_BAR::ZOOM);	// ステータスバーの状態
 
+		DRAW_TOOL m_draw_tool = DRAW_TOOL::TOOL_SELECT;		// 作図ツール
 		SHAPE_DX m_page_dx;		// ページの描画環境
 		ShapePanel m_page_panel;		// ページのパネル
 		D2D1_POINT_2F m_page_min{ 0.0, 0.0 };		// パネルの左上位置 (値がマイナスのときは, 図形がページの外側にある)
 		D2D1_POINT_2F m_page_max{ 0.0, 0.0 };		// パネルの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
-		LEN_UNIT m_page_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COL_STYLE m_col_style = COL_STYLE::DEC;	// 色成分の書式
 
-		uint64_t m_click_time = 0L;		// クリックの判定時間
-		double m_click_dist = 6.0;		// クリックの判定長さ
 		D2D1_POINT_2F m_curr_pos{ 0.0, 0.0 };		// ポインターの現在位置
 		D2D1_POINT_2F m_prev_pos{ 0.0, 0.0 };		// ポインターの前回位置
 		S_TRAN m_press_state = S_TRAN::BEGIN;		// ポインターが押された状態
@@ -212,14 +216,6 @@ namespace winrt::GraphPaper::implementation
 		Shape* m_press_shape_summary = nullptr;		// 一覧でポインターが押された図形
 		uint64_t m_press_time = 0;		// ポインターが押された時刻
 
-		MenuFlyout m_menu_stroke;	// 線枠コンテキストメニュー
-		MenuFlyout m_menu_fill;	// 塗りつぶしコンテキストメニュー
-		MenuFlyout m_menu_font;	// 書体コンテキストメニュー
-		MenuFlyout m_menu_page;	// ページコンテキストメニュー
-		MenuFlyout m_menu_ungroup;	// グループ解除コンテキストメニュー
-
-		DRAW_TOOL m_draw_tool = DRAW_TOOL::TOOL_SELECT;		// 作図ツール
-
 		uint32_t m_list_select = 0;		// 選択された図形の数
 		S_LIST_T m_list_shapes;		// 図形リスト
 
@@ -229,8 +225,6 @@ namespace winrt::GraphPaper::implementation
 		bool m_stack_over = false;	// 操作スタックに積まれた要素が最大数を超えた
 		bool m_stack_push = false;	// 操作スタックの更新フラグ (ヌルが積まれたら true)
 
-		STAT_BAR m_status_bar = status_or(STAT_BAR::CURS, STAT_BAR::ZOOM);	// ステータスバーの状態
-
 		SHAPE_DX m_sample_dx;		// 見本の描画環境
 		ShapePanel m_sample_panel;		// 見本のパネル
 		Shape* m_sample_shape = nullptr;	// 見本の図形
@@ -239,11 +233,18 @@ namespace winrt::GraphPaper::implementation
 		bool m_summary_visible = false;	// 図形一覧パネルの表示フラグ
 		bool m_window_visible = false;		// ウィンドウが表示されている/表示されてない
 
-		winrt::event_token m_token_suspending;
-		winrt::event_token m_token_resuming;
-		winrt::event_token m_token_entered_background;
-		winrt::event_token m_token_leaving_background;
-		winrt::event_token m_token_activated;
+		uint64_t m_click_time = 0L;		// クリックの判定時間
+		double m_click_dist = 6.0;		// クリックの判定距離
+		MenuFlyout m_menu_stroke = nullptr;	// 線枠コンテキストメニュー
+		MenuFlyout m_menu_fill = nullptr;	// 塗りつぶしコンテキストメニュー
+		MenuFlyout m_menu_font = nullptr;	// 書体コンテキストメニュー
+		MenuFlyout m_menu_page = nullptr;	// ページコンテキストメニュー
+		MenuFlyout m_menu_ungroup = nullptr;	// グループ解除コンテキストメニュー
+		winrt::event_token m_token_suspending;	// アプリケーション中断ハンドラーのトークン
+		winrt::event_token m_token_resuming;	// アプリケーション再開ハンドラーのトークン
+		winrt::event_token m_token_entered_background;		// アプリケーションバックグランド実行のトークン
+		winrt::event_token m_token_leaving_background;		// アプリケーションフォアグランド実行のトークン
+		winrt::event_token m_token_activated;	// ウィンドウが前面
 		winrt::event_token m_token_visibility_changed;
 		winrt::event_token m_token_dpi_changed;
 		winrt::event_token m_token_orientation_changed;
@@ -280,16 +281,12 @@ namespace winrt::GraphPaper::implementation
 
 		//	アプリケーションがバックグラウンドに移った.
 		void app_entered_background(IInspectable const& sender, EnteredBackgroundEventArgs const& args);
-		//	アプリケーションを非同期に延長する.
-		IAsyncAction app_extended_session_async(SuspendingOperation const& s_op);
 		//	アプリケーションがバックグラウンドに移った.
 		void app_leaving_background(IInspectable const& sender, LeavingBackgroundEventArgs const& args);
 		//	アプリケーションが再開された.
-		void app_resuming(IInspectable const& sender, IInspectable const& object);
-		//	アプリケーションを非同期に再開する.
-		IAsyncAction app_resuming_async(void);
+		IAsyncAction app_resuming(IInspectable const& sender, IInspectable const& object);
 		//	アプリケーションが中断された.
-		void app_suspending(IInspectable const& sender, SuspendingEventArgs const& args);
+		IAsyncAction app_suspending(IInspectable const& sender, SuspendingEventArgs const& args);
 
 		//-------------------------------
 		//	MainPage_arrange.cpp
@@ -815,9 +812,9 @@ namespace winrt::GraphPaper::implementation
 		//	ウィンドウ切り替えのハンドラー
 		//-------------------------------
 
-		//	ウィンドウが前面に出された.
+		//	ウィンドウの実行/停止が切り替わった.
 		void thread_activated(IInspectable const& sender, WindowActivatedEventArgs const& args);
-		//	ウィンドウの表示状態が変わった.
+		//	ウィンドウの表示/非表示が変わった.
 		void thread_visibility_changed(CoreWindow const& sender, VisibilityChangedEventArgs const& args);
 
 		//-------------------------------
