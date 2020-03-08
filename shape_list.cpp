@@ -323,15 +323,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形リストをデータリーダーから読み込む.
-	void s_list_read(S_LIST_T& s_list, DataReader const& dt_reader)
+	bool s_list_read(S_LIST_T& s_list, DataReader const& dt_reader)
 	{
 		Shape* s;
 		while ((s = s_list_read_shape(dt_reader)) != static_cast<Shape*>(nullptr)) {
 			if (s == reinterpret_cast<Shape*>(-1)) {
-				break;
+				return false;
 			}
 			s_list.push_back(s);
 		}
+		return true;
 	}
 
 	// 図形をリストから削除し, 削除した図形の次の図形を得る.

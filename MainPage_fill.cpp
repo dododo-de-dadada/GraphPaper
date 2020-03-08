@@ -33,10 +33,10 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(VISIBLE);
 		sample_slider_2().Visibility(VISIBLE);
 		sample_slider_3().Visibility(VISIBLE);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 0> });
-		const auto sample_slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 1> });
-		const auto sample_slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 2> });
-		const auto sample_slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 3> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 3> });
 		m_sample_type = SAMP_TYPE::FILL;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FILL)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -54,10 +54,10 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(COLLAPSED);
 		sample_slider_2().Visibility(COLLAPSED);
 		sample_slider_3().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
-		sample_slider_1().ValueChanged(sample_slider_1_token);
-		sample_slider_2().ValueChanged(sample_slider_2_token);
-		sample_slider_3().ValueChanged(sample_slider_3_token);
+		sample_slider_0().ValueChanged(slider_0_token);
+		sample_slider_1().ValueChanged(slider_1_token);
+		sample_slider_2().ValueChanged(slider_2_token);
+		sample_slider_3().ValueChanged(slider_3_token);
 		page_draw();
 	}
 
@@ -70,25 +70,25 @@ namespace winrt::GraphPaper::implementation
 
 		if constexpr (U == UNDO_OP::FILL_COLOR) {
 			if constexpr (S == 0) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;

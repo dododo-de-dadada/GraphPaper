@@ -530,7 +530,7 @@ namespace winrt::GraphPaper::implementation
 	// 前の図形をリストから得る.
 	Shape* s_list_prev(S_LIST_T const& s_list, const Shape* s) noexcept;
 	// 図形リストをデータリーダーから読み込む.
-	void s_list_read(S_LIST_T& s_list, DataReader const& dt_reader);
+	bool s_list_read(S_LIST_T& s_list, DataReader const& dt_reader);
 	// 図形をリストから削除し, 削除した図形の次の図形を得る.
 	Shape* s_list_remove(S_LIST_T& s_list, const Shape* s) noexcept;
 	// 選択された図形のリストを得る.

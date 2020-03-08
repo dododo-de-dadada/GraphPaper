@@ -113,16 +113,16 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(VISIBLE);
 		sample_slider_2().Visibility(VISIBLE);
 		sample_slider_3().Visibility(VISIBLE);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 0> });
-		//const auto sample_slider_0_token = sample_slider_0().ValueChanged(
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 0> });
+		//const auto slider_0_token = sample_slider_0().ValueChanged(
 		//	[this](auto, auto args)
 		//	{
 		//		font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, args.NewValue());
 		//	}
 		//);
-		const auto sample_slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 1> });
-		const auto sample_slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 2> });
-		const auto sample_slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 3> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 3> });
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -140,10 +140,10 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(COLLAPSED);
 		sample_slider_2().Visibility(COLLAPSED);
 		sample_slider_3().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
-		sample_slider_1().ValueChanged(sample_slider_1_token);
-		sample_slider_2().ValueChanged(sample_slider_2_token);
-		sample_slider_3().ValueChanged(sample_slider_3_token);
+		sample_slider_0().ValueChanged(slider_0_token);
+		sample_slider_1().ValueChanged(slider_1_token);
+		sample_slider_2().ValueChanged(slider_2_token);
+		sample_slider_3().ValueChanged(slider_3_token);
 		page_draw();
 
 	}
@@ -230,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(val0);
 		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_SIZE, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_SIZE, 0> });
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -245,7 +245,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		m_sample_shape = nullptr;
 		sample_slider_0().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
+		sample_slider_0().ValueChanged(slider_0_token);
 		page_draw();
 	}
 
@@ -361,32 +361,32 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring hdr;
 
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
-			wchar_t buf[16];
+			wchar_t buf[32];
 			conv_val_to_len(m_page_unit, val, m_sample_dx.m_logical_dpi, m_sample_panel.m_grid_size + 1.0, buf, 16);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::FONT_COLOR) {
 			if constexpr (S == 0) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
@@ -451,7 +451,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(val0);
 		text_set_slider_header<UNDO_OP::TEXT_LINE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_LINE, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_LINE, 0> });
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -466,7 +466,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		m_sample_shape = nullptr;
 		sample_slider_0().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
+		sample_slider_0().ValueChanged(slider_0_token);
 		page_draw();
 	}
 
@@ -505,8 +505,8 @@ namespace winrt::GraphPaper::implementation
 		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 1>(val1);
 		sample_slider_0().Visibility(VISIBLE);
 		sample_slider_1().Visibility(VISIBLE);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_MARGIN, 0> });
-		const auto sample_slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_MARGIN, 1> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_MARGIN, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_MARGIN, 1> });
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -522,8 +522,8 @@ namespace winrt::GraphPaper::implementation
 		m_sample_shape = nullptr;
 		sample_slider_0().Visibility(COLLAPSED);
 		sample_slider_1().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
-		sample_slider_1().ValueChanged(sample_slider_1_token);
+		sample_slider_0().ValueChanged(slider_0_token);
+		sample_slider_1().ValueChanged(slider_1_token);
 		page_draw();
 	}
 
@@ -612,16 +612,16 @@ namespace winrt::GraphPaper::implementation
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_text_mar_horzorz");
 				px = val;
-				wchar_t buf[16];
-				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 16);
+				wchar_t buf[32];
+				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 31);
 				hdr = hdr + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_text_mar_vertert");
 				px = val;
-				wchar_t buf[16];
-				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 16);
+				wchar_t buf[32];
+				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 31);
 				hdr = hdr + L": " + buf;
 			}
 		}
@@ -632,8 +632,8 @@ namespace winrt::GraphPaper::implementation
 				//	行の高さの単位は DIPs (96dpi 固定) なので,
 				//	これをピクセル単位に変換する.
 				px = val * dpi / 96.0;
-				wchar_t buf[16];
-				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 16);
+				wchar_t buf[32];
+				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 31);
 				hdr = hdr + L": " + buf;
 			}
 			else {

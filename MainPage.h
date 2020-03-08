@@ -365,7 +365,7 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction mfi_open_click(IInspectable const&, RoutedEventArgs const&);
 		//	ファイルメニューの「名前を付けて保存」が選択された
 		void mfi_save_as_click(IInspectable const&, RoutedEventArgs const&);
-		//	ファイルメニューの「保存」が選択された
+		//	ファイルメニューの「上書き保存」が選択された
 		void mfi_save_click(IInspectable const&, RoutedEventArgs const&);
 		//	最近使ったファイルを非同期に読む.
 		IAsyncAction file_read_recent_async(const uint32_t i);
@@ -384,7 +384,7 @@ namespace winrt::GraphPaper::implementation
 		//	最近使ったファイルのトークンからストレージファイルを得る.
 		IAsyncOperation<StorageFile> mru_get_file(const winrt::hstring token);
 		//	最近使ったファイルからトークンを得る.
-		winrt::hstring mru_get_token(const uint32_t i);
+		//winrt::hstring mru_get_token(const uint32_t i);
 		//	最近使ったファイルのメニュー項目を更新する.
 		void mru_update_menu_items(void);
 

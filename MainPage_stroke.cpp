@@ -33,15 +33,10 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(VISIBLE);
 		sample_slider_2().Visibility(VISIBLE);
 		sample_slider_3().Visibility(VISIBLE);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 0> });
-		//	[this](auto, auto args)
-		//	{
-		//		stroke_set_slider<UNDO_OP::STROKE_COLOR, 0>(m_sample_shape, args.NewValue());
-		//	}
-		//);
-		const auto sample_slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 1> });
-		const auto sample_slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 2> });
-		const auto sample_slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 3> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 3> });
 		m_sample_type = SAMP_TYPE::STROKE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -59,10 +54,10 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(COLLAPSED);
 		sample_slider_2().Visibility(COLLAPSED);
 		sample_slider_3().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
-		sample_slider_1().ValueChanged(sample_slider_1_token);
-		sample_slider_2().ValueChanged(sample_slider_2_token);
-		sample_slider_3().ValueChanged(sample_slider_3_token);
+		sample_slider_0().ValueChanged(slider_0_token);
+		sample_slider_1().ValueChanged(slider_1_token);
+		sample_slider_2().ValueChanged(slider_2_token);
+		sample_slider_3().ValueChanged(slider_3_token);
 		page_draw();
 	}
 
@@ -88,15 +83,10 @@ namespace winrt::GraphPaper::implementation
 		stroke_set_slider_header<UNDO_OP::STROKE_PATTERN, 1>(val1);
 		stroke_set_slider_header<UNDO_OP::STROKE_PATTERN, 2>(val2);
 		stroke_set_slider_header<UNDO_OP::STROKE_PATTERN, 3>(val3);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0> });
-		//	[this](auto, auto args)
-		//	{
-		//		stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0>(m_sample_shape, args.NewValue());
-		//	}
-		//);
-		const auto sample_slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 1> });
-		const auto sample_slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 2> });
-		const auto sample_slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 3> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATTERN, 3> });
 		m_sample_type = SAMP_TYPE::STROKE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -114,10 +104,10 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(COLLAPSED);
 		sample_slider_2().Visibility(COLLAPSED);
 		sample_slider_3().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
-		sample_slider_1().ValueChanged(sample_slider_1_token);
-		sample_slider_2().ValueChanged(sample_slider_2_token);
-		sample_slider_3().ValueChanged(sample_slider_3_token);
+		sample_slider_0().ValueChanged(slider_0_token);
+		sample_slider_1().ValueChanged(slider_1_token);
+		sample_slider_2().ValueChanged(slider_2_token);
+		sample_slider_3().ValueChanged(slider_3_token);
 		page_draw();
 	}
 
@@ -131,12 +121,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(val0);
 		sample_slider_0().Visibility(VISIBLE);
 		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0> });
-		//	[this](auto, auto args)
-		//	{
-		//		stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0>(m_sample_shape, args.NewValue());
-		//	}
-		//);
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0> });
 		m_sample_type = SAMP_TYPE::STROKE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -151,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		m_sample_shape = nullptr;
 		sample_slider_0().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
+		sample_slider_0().ValueChanged(slider_0_token);
 		page_draw();
 	}
 
@@ -205,28 +190,6 @@ namespace winrt::GraphPaper::implementation
 		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_SOLID);
 	}
 
-	// 線枠の見本を作成する.
-	/*
-	void MainPage::stroke_create_sample(void)
-	{
-		const auto dpi = m_sample_dx.m_logical_dpi;
-		const auto w = scp_sample_panel().ActualWidth();
-		const auto h = scp_sample_panel().ActualHeight();
-		const auto padding = w * 0.125;
-		const D2D1_POINT_2F pos = {
-			static_cast<FLOAT>(padding),
-			static_cast<FLOAT>(padding)
-		};
-		const D2D1_POINT_2F vec = {
-			static_cast<FLOAT>(w - 2.0 * padding),
-			static_cast<FLOAT>(h - 2.0 * padding)
-		};
-		m_sample_shape = new ShapeLine(pos, vec, &m_sample_panel);
-#if defined(_DEBUG)
-		debug_leak_cnt++;
-#endif
-	}
-	*/
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
 	void MainPage::stroke_set_slider_header(double val)
@@ -255,33 +218,33 @@ namespace winrt::GraphPaper::implementation
 			val *= m_sample_panel.m_stroke_width;
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH || U == UNDO_OP::STROKE_PATTERN) {
-			wchar_t buf[16];
+			wchar_t buf[32];
 			const auto dpi = m_sample_dx.m_logical_dpi;
 			const auto g_len = m_page_panel.m_grid_size + 1.0;
-			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
+			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 31);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			if constexpr (S == 0) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;

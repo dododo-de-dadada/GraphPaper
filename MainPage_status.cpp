@@ -204,7 +204,7 @@ namespace winrt::GraphPaper::implementation
 		const double fy = (wy - by - ty) / ps + sy + py;
 		double x, y;
 		wchar_t const* format;
-		wchar_t buf[16];
+		wchar_t buf[32];
 
 		switch (m_page_unit) {
 		case LEN_UNIT::INCH:
@@ -244,7 +244,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	// 方眼の大きさをステータスバーに格納する.
 	void MainPage::status_set_grid(void)
 	{
-		wchar_t buf[16];
+		wchar_t buf[32];
 		const double dpi = m_page_dx.m_logical_dpi;
 		double g_len = m_page_panel.m_grid_size + 1.0;
 		wchar_t const* format;
@@ -278,10 +278,10 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
 		const double g_len = m_page_panel.m_grid_size + 1.0;
-		wchar_t buf[16];
-		conv_val_to_len(m_page_unit, m_page_panel.m_page_size.width, dpi, g_len, buf, 16);
+		wchar_t buf[32];
+		conv_val_to_len(m_page_unit, m_page_panel.m_page_size.width, dpi, g_len, buf, 31);
 		tk_status_width().Text(winrt::hstring{ L"w:" } + buf);
-		conv_val_to_len(m_page_unit, m_page_panel.m_page_size.height, dpi, g_len, buf, 16);
+		conv_val_to_len(m_page_unit, m_page_panel.m_page_size.height, dpi, g_len, buf, 31);
 		tk_status_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 
@@ -330,8 +330,8 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	// 拡大率をステータスバーに格納する.
 	void MainPage::status_set_zoom(void)
 	{
-		wchar_t buf[16];
-		swprintf_s(buf, FMT_ZOOM, m_page_panel.m_page_scale * 100.0);
+		wchar_t buf[32];
+		swprintf_s(buf, 31, FMT_ZOOM, m_page_panel.m_page_scale * 100.0);
 		tk_status_zoom().Text(winrt::hstring{ L"z:" } +buf);
 	}
 

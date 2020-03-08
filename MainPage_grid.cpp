@@ -29,13 +29,13 @@ namespace winrt::GraphPaper::implementation
 			val += 1.0;
 			const auto dpi = m_sample_dx.m_logical_dpi;
 			const auto g_len = m_page_panel.m_grid_size + 1.0;
-			wchar_t buf[16];
-			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
+			wchar_t buf[32];
+			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 31);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			if constexpr (S == 3) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
@@ -102,7 +102,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(val0);
 		grid_set_slider_header<UNDO_OP::GRID_LEN, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_LEN, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_LEN, 0> });
 		m_sample_type = SAMP_TYPE::NONE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -120,7 +120,7 @@ namespace winrt::GraphPaper::implementation
 
 		}
 		sample_slider_0().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
+		sample_slider_0().ValueChanged(slider_0_token);
 		page_draw();
 	}
 
@@ -162,7 +162,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_3().Value(val3);
 		grid_set_slider_header<UNDO_OP::GRID_OPAC, 3>(val3);
 		sample_slider_3().Visibility(VISIBLE);
-		const auto sample_slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_OPAC, 3> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_OPAC, 3> });
 		m_sample_type = SAMP_TYPE::NONE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		sample_slider_3().Visibility(COLLAPSED);
-		sample_slider_3().ValueChanged(sample_slider_3_token);
+		sample_slider_3().ValueChanged(slider_3_token);
 		page_draw();
 	}
 

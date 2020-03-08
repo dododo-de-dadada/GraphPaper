@@ -118,85 +118,86 @@ namespace winrt::GraphPaper::implementation
 		// Clipboard::GetContent() は, 
 		// WinRT originate error 0x80040904
 		// を引き起こすので, try ... catch 文が必要.
-			try {
-				// 図形データがクリップボードに含まれているか調べる.
-				auto pkg_view{ Clipboard::GetContent() };
-				if (pkg_view.Contains(FMT_DATA)) {
-					// クリップボードから読み込むためのデータリーダーを得る.
-					auto dt_object{ co_await pkg_view.GetDataAsync(FMT_DATA) };
-					auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
-					auto in_stream{ ra_stream.GetInputStreamAt(0) };
-					auto dt_reader{ DataReader(in_stream) };
-					auto dt_size = static_cast<UINT32>(ra_stream.Size());
-					auto operation{ co_await dt_reader.LoadAsync(dt_size) };
-					//	図形のためのメモリの確保が別スレッドで行われた場合,
-					//	D2DERR_WRONG_STATE を引き起こすことがある.
-					//	図形を貼り付ける前に, スレッドをメインページの UI スレッドに変える.
-					co_await winrt::resume_foreground(this->Dispatcher());
-					if (operation == ra_stream.Size()) {
-						S_LIST_T paste_list;	// 貼り付けリスト
-						s_list_read(paste_list, dt_reader);
-						if (paste_list.empty() == false) {
-							// 貼り付けリストが空でない場合,
-							// 図形リストの中の図形の選択をすべて解除し,
-							// 貼り付けリストの図形を追加する.
-							unselect_all();
-							for (auto s : paste_list) {
-								if (m_summary_visible) {
-									summary_append(s);
-								}
-								undo_push_append(s);
-								s->get_bound(m_page_min, m_page_max);
-							}
-							undo_push_null();
-							paste_list.clear();
-							enable_undo_menu();
-							enable_edit_menu();
-							set_page_panle_size();
-							page_draw();
-						}
+		try {
+			// 図形データがクリップボードに含まれているか調べる.
+			auto pkg_view{ Clipboard::GetContent() };
+			if (pkg_view.Contains(FMT_DATA)) {
+				// クリップボードから読み込むためのデータリーダーを得る.
+				auto dt_object{ co_await pkg_view.GetDataAsync(FMT_DATA) };
+				auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
+				auto in_stream{ ra_stream.GetInputStreamAt(0) };
+				auto dt_reader{ DataReader(in_stream) };
+				auto dt_size = static_cast<UINT32>(ra_stream.Size());
+				auto operation{ co_await dt_reader.LoadAsync(dt_size) };
+				//	図形のためのメモリの確保が別スレッドで行われた場合,
+				//	D2DERR_WRONG_STATE を引き起こすことがある.
+				//	図形を貼り付ける前に, スレッドをメインページの UI スレッドに変える.
+				co_await winrt::resume_foreground(this->Dispatcher());
+				if (operation == ra_stream.Size()) {
+					S_LIST_T paste_list;	// 貼り付けリスト
+					if (s_list_read(paste_list, dt_reader) == false) {
+
 					}
-					const auto _{ dt_reader.DetachStream() };
-					//	データリーダーを閉じる.
-					dt_reader.Close();
-					in_stream.Close();
-				}
-				else if (pkg_view.Contains(StandardDataFormats::Text())) {
-					// クリップボードから読み込むためのデータリーダーを得る.
-					/*
-					テキストを直接貼り付ける
-					auto text{ co_await pkg_view.GetTextAsync() };
-					if (text.empty() == false) {
-						wchar_t const* w = text.c_str();
-						D2D1_POINT_2F d = { 100, 100 };
-						D2D1_POINT_2F p;
-						const double sh = sb_horz().Value();
-						const double sv = sb_vert().Value();
-						const double sc = m_page_panel.m_page_scale;
-						const double aw = scp_page_panel().ActualWidth();
-						const double ah = scp_page_panel().ActualHeight();
-						p.x = static_cast<FLOAT>(sc * (sh + aw * 0.5) - d.x * 0.5);
-						p.y = static_cast<FLOAT>(sc * (sv + ah * 0.5) - d.y * 0.5);
-						auto t = new ShapeText(p, d, wchar_cpy(w), &m_page_panel);
+					else if (paste_list.empty() == false) {
+						// 貼り付けリストが空でない場合,
+						// 図形リストの中の図形の選択をすべて解除し,
+						// 貼り付けリストの図形を追加する.
 						unselect_all();
-						if (m_summary_visible) {
-							summary_append(t);
+						for (auto s : paste_list) {
+							if (m_summary_visible) {
+								summary_append(s);
+							}
+							undo_push_append(s);
+							s->get_bound(m_page_min, m_page_max);
 						}
-						undo_push_append(t);
 						undo_push_null();
+						paste_list.clear();
 						enable_undo_menu();
 						enable_edit_menu();
-						t->get_bound(m_page_min, m_page_max);
 						set_page_panle_size();
 						page_draw();
 					}
-					*/
 				}
+				const auto _{ dt_reader.DetachStream() };
+				//	データリーダーを閉じる.
+				dt_reader.Close();
+				in_stream.Close();
 			}
-			catch (winrt::hresult_error const& e) {
-				auto a = e.code();
+			else if (pkg_view.Contains(StandardDataFormats::Text())) {
+				// クリップボードから読み込むためのデータリーダーを得る.
+				/*
+				テキストを直接貼り付ける
+				auto text{ co_await pkg_view.GetTextAsync() };
+				if (text.empty() == false) {
+					wchar_t const* w = text.c_str();
+					D2D1_POINT_2F d = { 100, 100 };
+					D2D1_POINT_2F p;
+					const double sh = sb_horz().Value();
+					const double sv = sb_vert().Value();
+					const double sc = m_page_panel.m_page_scale;
+					const double aw = scp_page_panel().ActualWidth();
+					const double ah = scp_page_panel().ActualHeight();
+					p.x = static_cast<FLOAT>(sc * (sh + aw * 0.5) - d.x * 0.5);
+					p.y = static_cast<FLOAT>(sc * (sv + ah * 0.5) - d.y * 0.5);
+					auto t = new ShapeText(p, d, wchar_cpy(w), &m_page_panel);
+					unselect_all();
+					if (m_summary_visible) {
+						summary_append(t);
+					}
+					undo_push_append(t);
+					undo_push_null();
+					enable_undo_menu();
+					enable_edit_menu();
+					t->get_bound(m_page_min, m_page_max);
+					set_page_panle_size();
+					page_draw();
+				}
+				*/
 			}
-		//}
+		}
+		catch (winrt::hresult_error const& e) {
+			auto a = e.code();
+		}
 		//スレッドコンテキストを復元する.
 		co_await context;
 		co_return;

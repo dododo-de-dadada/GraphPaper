@@ -672,10 +672,12 @@ namespace winrt::GraphPaper::implementation
 		n = dt_reader.ReadUInt32();
 		if (n > 0) {
 			val = new wchar_t[static_cast<size_t>(n) + 1];
-			for (uint32_t i = 0; i < n; i++) {
-				val[i] = dt_reader.ReadUInt16();
+			if (val != nullptr) {
+				for (uint32_t i = 0; i < n; i++) {
+					val[i] = dt_reader.ReadUInt16();
+				}
+				val[n] = L'\0';
 			}
-			val[n] = L'\0';
 		}
 		else {
 			val = nullptr;
@@ -866,7 +868,7 @@ namespace winrt::GraphPaper::implementation
 		const uint32_t vr = static_cast<uint32_t>(std::round(val.r * 255.0)) & 0xff;
 		const uint32_t vb = static_cast<uint32_t>(std::round(val.b * 255.0)) & 0xff;
 		const uint32_t vg = static_cast<uint32_t>(std::round(val.g * 255.0)) & 0xff;
-		std::snprintf(buf, sizeof(buf), "%s=\"#%02x%02x%02x\" ", name, vr, vg, vb);
+		sprintf_s(buf, "%s=\"#%02x%02x%02x\" ", name, vr, vg, vb);
 		write_svg(buf, dt_writer);
 		if (is_opaque(val) == false) {
 			std::snprintf(buf, sizeof(buf), "%s-opacity=\"%.3f\" ", name, val.a);
@@ -881,7 +883,7 @@ namespace winrt::GraphPaper::implementation
 		const uint32_t vr = static_cast<uint32_t>(std::round(val.r * 255.0)) & 0xff;
 		const uint32_t vb = static_cast<uint32_t>(std::round(val.b * 255.0)) & 0xff;
 		const uint32_t vg = static_cast<uint32_t>(std::round(val.g * 255.0)) & 0xff;
-		std::snprintf(buf, sizeof(buf), "#%02x%02x%02x", vr, vg, vb);
+		sprintf_s(buf, "#%02x%02x%02x", vr, vg, vb);
 		write_svg(buf, dt_writer);
 	}
 
@@ -899,7 +901,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		char buf[256];
 		if (style == D2D1_DASH_STYLE_DASH) {
-			snprintf(buf, sizeof(buf), "stroke-dasharray=\"%.0f %.0f\" ", a[0], a[1]);
+			sprintf_s(buf, "stroke-dasharray=\"%.0f %.0f\" ", a[0], a[1]);
 		}
 		else if (style == D2D1_DASH_STYLE_DOT) {
 			snprintf(buf, sizeof(buf), "stroke-dasharray=\"%.0f %.0f\" ", a[2], a[3]);
@@ -920,7 +922,7 @@ namespace winrt::GraphPaper::implementation
 	void write_svg(const D2D1_POINT_2F val, const char* cmd, DataWriter const& dt_writer)
 	{
 		char buf[256];
-		std::snprintf(buf, sizeof(buf), "%s%f %f ", cmd, val.x, val.y);
+		sprintf_s(buf, "%s%f %f ", cmd, val.x, val.y);
 		write_svg(buf, dt_writer);
 	}
 
@@ -928,7 +930,7 @@ namespace winrt::GraphPaper::implementation
 	void write_svg(const D2D1_POINT_2F val, const char* name_x, const char* name_y, DataWriter const& dt_writer)
 	{
 		char buf[256];
-		std::snprintf(buf, sizeof(buf), "%s=\"%f\" %s=\"%f\" ", name_x, val.x, name_y, val.y);
+		sprintf_s(buf, "%s=\"%f\" %s=\"%f\" ", name_x, val.x, name_y, val.y);
 		write_svg(buf, dt_writer);
 	}
 
@@ -936,7 +938,7 @@ namespace winrt::GraphPaper::implementation
 	void write_svg(const double val, const char* name, DataWriter const& dt_writer)
 	{
 		char buf[256];
-		std::snprintf(buf, sizeof(buf), "%s=\"%f\" ", name, val);
+		sprintf_s(buf, "%s=\"%f\" ", name, val);
 		write_svg(buf, dt_writer);
 	}
 
@@ -944,7 +946,7 @@ namespace winrt::GraphPaper::implementation
 	void write_svg(const float val, DataWriter const& dt_writer)
 	{
 		char buf[256];
-		std::snprintf(buf, sizeof(buf), "%f ", val);
+		sprintf_s(buf, "%f ", val);
 		write_svg(buf, dt_writer);
 	}
 
@@ -952,7 +954,7 @@ namespace winrt::GraphPaper::implementation
 	void write_svg(const uint32_t val, const char* name, DataWriter const& dt_writer)
 	{
 		char buf[256];
-		std::snprintf(buf, sizeof(buf), "%s=\"%u\" ", name, val);
+		sprintf_s(buf, "%s=\"%u\" ", name, val);
 		write_svg(buf, dt_writer);
 	}
 

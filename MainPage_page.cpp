@@ -112,9 +112,9 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(VISIBLE);
 		sample_slider_1().Visibility(VISIBLE);
 		sample_slider_2().Visibility(VISIBLE);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 0> });
-		const auto sample_slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 1> });
-		const auto sample_slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 2> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::page_set_slider<UNDO_OP::PAGE_COLOR, 2> });
 		m_sample_type = SAMP_TYPE::NONE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_PAGE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -132,9 +132,9 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(COLLAPSED);
 		sample_slider_1().Visibility(COLLAPSED);
 		sample_slider_2().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
-		sample_slider_1().ValueChanged(sample_slider_1_token);
-		sample_slider_2().ValueChanged(sample_slider_2_token);
+		sample_slider_0().ValueChanged(slider_0_token);
+		sample_slider_1().ValueChanged(slider_1_token);
+		sample_slider_2().ValueChanged(slider_2_token);
 		page_draw();
 	}
 
@@ -179,13 +179,13 @@ namespace winrt::GraphPaper::implementation
 			break;
 		}
 
-		wchar_t buf[16];
+		wchar_t buf[32];
 		swprintf_s(buf, format, pw);
 		*/
-		wchar_t buf[16];
-		conv_val_to_len(m_page_unit, pw, dpi, g_len, buf, 16);
+		wchar_t buf[32];
+		conv_val_to_len(m_page_unit, pw, dpi, g_len, buf, 31);
 		tx_page_width().Text(buf);
-		conv_val_to_len(m_page_unit, ph, dpi, g_len, buf, 16);
+		conv_val_to_len(m_page_unit, ph, dpi, g_len, buf, 31);
 		//swprintf_s(buf, format, ph);
 		tx_page_height().Text(buf);
 		tk_page_unit().Text(get_unit_name());
@@ -327,19 +327,19 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring hdr;
 		if constexpr (U == UNDO_OP::PAGE_COLOR) {
 			if constexpr (S == 0) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
-				wchar_t buf[16];
+				wchar_t buf[32];
 				conv_val_to_col(m_col_style, val, buf, 16);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;

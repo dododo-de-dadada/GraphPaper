@@ -146,6 +146,12 @@ namespace winrt::GraphPaper::implementation
 			m_page_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_col_style = static_cast<COL_STYLE>(dt_reader.ReadUInt32());
 			m_page_panel.read(dt_reader);
+			if (m_page_panel.m_page_scale <= 1.0 / 128.0) {
+				m_page_panel.m_page_scale = 1.0;
+			}
+			else if (m_page_panel.m_page_scale >= 128.0) {
+				m_page_panel.m_page_scale = 1.0;
+			}
 			//	操作スタックを消去する.
 			undo_clear();
 			s_list_clear(m_list_shapes);
@@ -160,17 +166,18 @@ namespace winrt::GraphPaper::implementation
 				co_return hr;
 			}
 #endif
-			s_list_read(m_list_shapes, dt_reader);
-			if (suspend) {
-				//	中断フラグが立っている場合,
-				//	データリーダーから操作スタックを読み込む.
-				undo_read(dt_reader);
+			if (s_list_read(m_list_shapes, dt_reader)) {
+				if (suspend) {
+					//	中断フラグが立っている場合,
+					//	データリーダーから操作スタックを読み込む.
+					undo_read(dt_reader);
+				}
+				hr = S_OK;
 			}
 			//	データリーダーを閉じる.
 			dt_reader.Close();
 			//	ストリームを閉じる.
 			ra_stream.Close();
-			hr = S_OK;
 		}
 		catch (winrt::hresult_error const& e) {
 			//	エラーが発生した場合, 
@@ -180,13 +187,13 @@ namespace winrt::GraphPaper::implementation
 		if (hr != S_OK) {
 			//	結果が S_OK でない場合,
 			//	スレッドをメインページの UI スレッドに変える.
-			//	読み込み失敗のメッセージダイアログを表示する.
 			co_await winrt::resume_foreground(this->Dispatcher());
+			//	読み込み失敗のメッセージダイアログを表示する.
 			cd_message_show(L"icon_alert", ERR_READ, s_file.Path());
 		}
 		else if (suspend == false) {
 			//	中断フラグがない場合,
-			//	スレッドをメインページの UI スレッドに変更える.
+			//	スレッドをメインページの UI スレッドに変える.
 			co_await winrt::resume_foreground(this->Dispatcher());
 			//	ストレージファイルを最近使ったファイルに追加する.
 			mru_add_file(s_file);
@@ -209,7 +216,8 @@ namespace winrt::GraphPaper::implementation
 		//	待機カーソルを表示, 表示する前のカーソルを得る.
 		auto const& p_cur = file_wait_cursor();
 		//	コルーチンの開始時のスレッドコンテキストを保存する.
-		winrt::apartment_context context;
+		//winrt::apartment_context context;
+		//co_await resume_background(this->Dispatcher());
 		try {
 			// ファイル保存ピッカーを得る.
 			// ファイルタイプに拡張子 GPF とその説明を追加する.
@@ -271,11 +279,12 @@ namespace winrt::GraphPaper::implementation
 			//	エラーが発生した場合, エラーコードを結果に格納する.
 			hr = e.code();
 		}
-		co_await winrt::resume_foreground(this->Dispatcher());
+		// スレッドをメインページの UI スレッドに変える.
+		//co_await winrt::resume_foreground(this->Dispatcher());
 		//	ウィンドウのカーソルを復元する.
 		Window::Current().CoreWindow().PointerCursor(p_cur);
 		//	スレッドコンテキストを復元する.
-		co_await context;
+		//co_await context;
 		//	結果を返し終了する.
 		co_return hr;
 	}
@@ -299,9 +308,9 @@ namespace winrt::GraphPaper::implementation
 		//	待機カーソルを表示, 表示する前のカーソルを得る.
 		auto const& p_cur = file_wait_cursor();
 		//	コルーチンの開始時のスレッドコンテキストを保存する.
-		winrt::apartment_context context;
+		//winrt::apartment_context context;
 		// スレッドをバックグラウンドに変える.
-		co_await winrt::resume_background();
+		//co_await winrt::resume_background();
 		// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
 		hr = co_await file_write_gpf_async(s_file);
 		// 結果を判定する.
@@ -313,7 +322,7 @@ namespace winrt::GraphPaper::implementation
 			cd_message_show(L"icon_alert", ERR_WRITE, m_token_mru);
 		}
 		// スレッドコンテキストを復元する.
-		co_await context;
+		//co_await context;
 		// ウィンドウのカーソルを復元する.
 		Window::Current().CoreWindow().PointerCursor(p_cur);
 		// 結果を返し終了する.
@@ -380,15 +389,16 @@ namespace winrt::GraphPaper::implementation
 		if (hr != S_OK) {
 			//	結果が S_OK でない場合,
 			//	スレッドをメインページの UI スレッドに変える.
-			//	書き込み失敗のメッセージダイアログを表示する.
 			co_await winrt::resume_foreground(this->Dispatcher());
+			//	書き込み失敗のメッセージダイアログを表示する.
 			cd_message_show(L"icon_alert", ERR_WRITE, s_file.Path());
 		}
 		else if (suspend == false) {
 			//	中断フラグがない場合,
 			//	スレッドをメインページの UI スレッドに変える.
 			co_await winrt::resume_foreground(this->Dispatcher());
-			// if you need to complete an asynchronous operation before your application is suspended, call args.setPromise()”
+			//	ストレージファイルを最近使ったファイルに登録する.
+			//	ここでエラーが出る.
 			mru_add_file(s_file);
 			//	false を操作スタックの更新フラグに格納する.
 			m_stack_push = false;
@@ -414,21 +424,15 @@ namespace winrt::GraphPaper::implementation
 		//	svg タグの開始を書き込む.
 		write_svg(SVG_TAG, dt_writer);
 		//	幅と高さの属性を書き込む.
+		char buf[256];
 		constexpr char* SVG_UNIT_PX = "px";
 		constexpr char* SVG_UNIT_IN = "in";
 		constexpr char* SVG_UNIT_MM = "mm";
 		constexpr char* SVG_UNIT_PT = "pt";
 		const auto dpi = m_page_dx.m_logical_dpi;
 		double w, h;
-		char buf[256];
 		char* u;
 		switch (m_page_unit) {
-		default:
-		case LEN_UNIT::PIXEL:
-			w = m_page_panel.m_page_size.width;
-			h = m_page_panel.m_page_size.height;
-			u = SVG_UNIT_PX;
-			break;
 		case LEN_UNIT::INCH:
 			w = m_page_panel.m_page_size.width / dpi;
 			h = m_page_panel.m_page_size.height / dpi;
@@ -443,6 +447,12 @@ namespace winrt::GraphPaper::implementation
 			w = m_page_panel.m_page_size.width * PT_PER_INCH / dpi;
 			h = m_page_panel.m_page_size.height * PT_PER_INCH / dpi;
 			u = SVG_UNIT_PT;
+			break;
+		default:
+		case LEN_UNIT::PIXEL:
+			w = m_page_panel.m_page_size.width;
+			h = m_page_panel.m_page_size.height;
+			u = SVG_UNIT_PX;
 			break;
 		}
 		std::snprintf(buf, sizeof(buf), "width=\"%lf%s\" height=\"%lf%s\" ", w, u, h, u);
@@ -576,6 +586,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::Storage::Pickers::FileOpenPicker;
 
+		// SHCore.dll スレッド
 		if (m_stack_push) {
 			//	操作スタックの更新フラグが立っている場合,
 			//	保存確認ダイアログを表示する.
@@ -592,7 +603,7 @@ namespace winrt::GraphPaper::implementation
 		//	待機カーソルを表示, 表示する前のカーソルを得る.
 		auto const& p_cur = file_wait_cursor();
 		//	コルーチンの開始時のスレッドコンテキストを保存する.
-		winrt::apartment_context context;
+		//winrt::apartment_context context;
 		//	ファイル「オープン」ピッカーを取得して開く.
 		auto o_picker{ FileOpenPicker() };
 		//o_picker.ViewMode(PickerViewMode::Thumbnail);
@@ -611,7 +622,7 @@ namespace winrt::GraphPaper::implementation
 		//	ピッカーを解放する.
 		o_picker = nullptr;
 		//	スレッドコンテキストを復元する.
-		co_await context;
+		//co_await context;
 		//	ウィンドウカーソルを復元する.
 		Window::Current().CoreWindow().PointerCursor(p_cur);
 	}
@@ -624,7 +635,7 @@ namespace winrt::GraphPaper::implementation
 		auto _{ file_save_as_async(SVG_ALLOWED) };
 	}
 
-	//	ファイルメニューの「保存」が選択された
+	//	ファイルメニューの「上書き保存」が選択された
 	void MainPage::mfi_save_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		//	ファイルに非同期に保存する
@@ -636,58 +647,70 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::file_read_recent_async(const uint32_t i)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
+		using winrt::Windows::Storage::AccessCache::AccessListEntry;
 
-		//	最近使ったファイルからトークンを得る.
-		auto mru_token = mru_get_token(i);
-		if (mru_token.empty()) {
+		// SHCore.dll スレッド
+		auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
+		auto const& mru_entries = mru_list.Entries();
+		winrt::hstring mru_token;
+		//	最近使ったファイルの番号と最近使ったリストの要素数を比較する.
+		if (i >= mru_entries.Size()) {
 			// 要素が空の場合,
 			// 最近使ったファイルのエラーメッセージダイアログを表示する.
 			cd_message_show(L"icon_alert", ERR_RECENT, to_hstring(i + 1));
+			co_return;
+		}
+		//	番号が要素数より小さい場合,
+		//	最近使ったリストから要素を得る.
+		AccessListEntry item[1];
+		mru_entries.GetMany(i, item);
+		//	要素のトークンを返す.
+		mru_token = item[0].Token;
+		//	最近使ったファイルからトークンを得る.
+		//auto mru_token = mru_get_token(i);
+		if (m_stack_push) {
+			//	操作スタックの更新フラグが立っている場合,
+			//	保存確認ダイアログを表示する.
+			const auto d_result = co_await cd_conf_save().ShowAsync();
+			//	ダイアログの戻り値を判定する.
+			if (d_result == ContentDialogResult::None
+				|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
+				//	「キャンセル」が押された場合,
+				//	または「保存する」が押されたがファイルに保存できなかた場合,
+				//	中断する.
+				co_return;
+			}
+		}
+		auto hr = E_FAIL;
+		//	待機カーソルを表示, 表示する前のカーソルを得る.
+		auto const p_cur = file_wait_cursor();
+		//	コルーチンの開始時のスレッドコンテキストを保存する.
+		//winrt::apartment_context context;
+		//	ストレージファイルを最近使ったファイルのトークンから得る.
+		auto s_file{ co_await mru_get_file(mru_token) };
+		if (s_file != nullptr) {
+			//	取得できた場合,
+			//	ストレージファイルから非同期に読み込む.
+			hr = co_await file_read_async(s_file);
+			//	ストレージファイルを破棄する.
+			s_file = nullptr;
+			finish_file_read();
+			//	スレッドをメインページの UI スレッドに変える.
+			//co_await winrt::resume_foreground(this->Dispatcher());
 		}
 		else {
-			if (m_stack_push) {
-				//	操作スタックの更新フラグが立っている場合,
-				//	保存確認ダイアログを表示する.
-				const auto d_result = co_await cd_conf_save().ShowAsync();
-				//	ダイアログの戻り値を判定する.
-				if (d_result == ContentDialogResult::None
-					|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
-					//	「キャンセル」が押された場合,
-					//	または「保存する」が押されたがファイルに保存できなかた場合,
-					//	中断する.
-					co_return;
-				}
-			}
-			auto hr = E_FAIL;
-			//	待機カーソルを表示, 表示する前のカーソルを得る.
-			auto const p_cur = file_wait_cursor();
-			//	コルーチンの開始時のスレッドコンテキストを保存する.
-			winrt::apartment_context context;
-			//	ストレージファイルを最近使ったファイルのトークンから得る.
-			auto s_file{ co_await mru_get_file(mru_token) };
-			if (s_file != nullptr) {
-				//	取得できた場合,
-				//	ストレージファイルから非同期に読み込む.
-				hr = co_await file_read_async(s_file);
-				//	ストレージファイルを破棄する.
-				s_file = nullptr;
-				finish_file_read();
-				//	スレッドをメインページの UI スレッドに変える.
-				co_await winrt::resume_foreground(this->Dispatcher());
-			}
-			else {
-				//	取得できない場合,
-				//	スレッドをメインページの UI スレッドに変える.
-				co_await winrt::resume_foreground(this->Dispatcher());
-				//	最近使ったファイルのエラーメッセージダイアログを表示する.
-				cd_message_show(L"icon_alert", ERR_RECENT, mru_token);
-			}
-
-			Window::Current().CoreWindow().PointerCursor(p_cur);
-			// スレッドコンテキストを復元する.
-			// ウィンドウのカーソルを復元する.
-			co_await context;
+			//	取得できない場合,
+			//	スレッドをメインページの UI スレッドに変える.
+			//co_await winrt::resume_foreground(this->Dispatcher());
+			//	最近使ったファイルのエラーメッセージダイアログを表示する.
+			cd_message_show(L"icon_alert", ERR_RECENT, mru_token);
 		}
+
+		// ウィンドウのカーソルを復元する.
+		Window::Current().CoreWindow().PointerCursor(p_cur);
+		// スレッドコンテキストを復元する.
+		//co_await context;
 	}
 
 	// ファイルメニューの「最近使ったファイル 1」が選択された
@@ -735,6 +758,8 @@ namespace winrt::GraphPaper::implementation
 		//	コルーチンの開始時のスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 
+		// スレッドをメインページの UI スレッドに変える.
+		//co_await winrt::resume_foreground(this->Dispatcher());
 		//	ストレージファイルにヌルを格納する.
 		StorageFile s_file = nullptr;
 		try {
@@ -747,8 +772,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		catch (winrt::hresult_error) {
 		}
-		//	スレッドをメインページの UI スレッドに変える.
-		co_await winrt::resume_foreground(this->Dispatcher());
 		//	取得できても出来なくても最近使ったリストの順番は入れ替わるので,
 		//	最近使ったファイルメニュを更新する.
 		mru_update_menu_items();
@@ -769,8 +792,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
 		using winrt::Windows::UI::ViewManagement::ApplicationView;
 
-		auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
 		if (s_file != nullptr) {
+			auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
 			m_token_mru = mru_list.Add(s_file, s_file.Path());
 			ApplicationView::GetForCurrentView().Title(s_file.Name());
 		}
@@ -786,6 +809,7 @@ namespace winrt::GraphPaper::implementation
 	//	最近使ったファイルからトークンを得る.
 	//	i	最近使ったファイルの番号 (最も直近が 0).
 	//	戻り値	i　番目のファイルのトークン
+	/*
 	winrt::hstring MainPage::mru_get_token(const uint32_t i)
 	{
 		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
@@ -805,6 +829,7 @@ namespace winrt::GraphPaper::implementation
 		// 空の文字列を返す.
 		return {};
 	}
+	*/
 
 	// 最近使ったファイルメニュを更新する.
 	void MainPage::mru_update_menu_items(void)

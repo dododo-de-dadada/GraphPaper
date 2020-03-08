@@ -33,10 +33,10 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
-			wchar_t buf[16];
+			wchar_t buf[32];
 			const auto dpi = m_sample_dx.m_logical_dpi;
 			const auto g_len = m_sample_panel.m_grid_size + 1.0;
-			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 16);
+			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 31);
 			hdr = hdr + buf;
 		}
 		if constexpr (S == 0) {
@@ -112,9 +112,9 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(VISIBLE);
 		sample_slider_1().Visibility(VISIBLE);
 		sample_slider_2().Visibility(VISIBLE);
-		const auto sample_slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 0> });
-		const auto sample_slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 1> });
-		const auto sample_slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 2> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 2> });
 		m_sample_type = SAMP_TYPE::STROKE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -131,9 +131,9 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(COLLAPSED);
 		sample_slider_1().Visibility(COLLAPSED);
 		sample_slider_2().Visibility(COLLAPSED);
-		sample_slider_0().ValueChanged(sample_slider_0_token);
-		sample_slider_1().ValueChanged(sample_slider_1_token);
-		sample_slider_2().ValueChanged(sample_slider_2_token);
+		sample_slider_0().ValueChanged(slider_0_token);
+		sample_slider_1().ValueChanged(slider_1_token);
+		sample_slider_2().ValueChanged(slider_2_token);
 		page_draw();
 	}
 
