@@ -113,9 +113,8 @@ namespace winrt::GraphPaper::implementation
 		return s_list_next(s_list.rbegin(), s_list.rend(), _);
 	}
 
-	// 図形リストを消去する.
+	// 図形リストを消去し, 含まれる図形を破棄する.
 	// s_list	図形リスト
-	// 含まれている図形は破棄される.
 	void s_list_clear(S_LIST_T& s_list) noexcept
 	{
 		for (auto s : s_list) {
@@ -277,7 +276,7 @@ namespace winrt::GraphPaper::implementation
 					stack.push_back(it);
 					stack.push_back(it_end);
 					k++;
-					auto& grp_list = static_cast<ShapeGroup*>(r)->m_grp_list;
+					auto& grp_list = static_cast<ShapeGroup*>(r)->m_list_grouped;
 					stack.push_back(grp_list.begin());
 					stack.push_back(grp_list.end());
 					k++;
@@ -293,8 +292,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 選択フラグの立つすべての図形を差分だけ移動する.
 	// s_list	図形リスト
-	// d	差分
-	void s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F d) noexcept
+	// d_pos	移動する差分
+	void s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F d_pos) noexcept
 	{
 		for (auto s : s_list) {
 			if (s->is_deleted()) {
@@ -303,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_selected() == false) {
 				continue;
 			}
-			s->move(d);
+			s->move(d_pos);
 		}
 	}
 

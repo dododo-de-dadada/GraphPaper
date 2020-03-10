@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 	// 部位の方形を表示する.
 	// a_pos	部位の位置
 	// dx		図形の描画環境
-	void TOOL_anchor(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
+	void anchor_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
 	{
 		// 部位の左上位置を得る.
 		D2D1_POINT_2F r_min;
@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 	// 丸い部位を表示する.
 	// a_pos	部位の位置
 	// dx		図形の描画環境
-	void TOOL_anchor_rounded(const D2D1_POINT_2F& a_pos, SHAPE_DX& dx)
+	void anchor_draw_rounded(const D2D1_POINT_2F& a_pos, SHAPE_DX& dx)
 	{
 		const FLOAT rad = static_cast<FLOAT>(dx.m_anch_len * 0.5 + 1.0);
 		const D2D1_ELLIPSE elli = { a_pos, rad, rad };
@@ -366,22 +366,21 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	含む場合 true
 	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width) noexcept
 	{
-		D2D1_POINT_2F s_vec;	// 線分のベクトル
-		D2D1_POINT_2F q_pos[4];	// 四辺形の頂点
-
-		pt_sub(e_pos, s_pos, s_vec);
-		const double abs = pt_abs2(s_vec);
+		D2D1_POINT_2F d_pos;	// 差分線分のベクトル
+		pt_sub(e_pos, s_pos, d_pos);
+		const double abs = pt_abs2(d_pos);
 		if (abs <= FLT_MIN) {
 			return equal(t_pos, s_pos);
 		}
 		// 線分の法線ベクトルを求める.
 		// 法線ベクトルの長さは, 線の太さの半分とする.
 		// 長さが 0.5 未満の場合は, 0.5 とする.
-		pt_scale(s_vec, max(s_width * 0.5, 0.5) / sqrt(abs), s_vec);
-		const double nx = s_vec.y;
-		const double ny = -s_vec.x;
+		pt_scale(d_pos, max(s_width * 0.5, 0.5) / sqrt(abs), d_pos);
+		const double nx = d_pos.y;
+		const double ny = -d_pos.x;
 		// 線分の両端から, 法線ベクトルの方向, またはその逆の方向にある点を求める.
 		// 求めた 4 点からなる四辺形が位置を含むか調べる.
+		D2D1_POINT_2F q_pos[4];
 		pt_add(s_pos, nx, ny, q_pos[0]);
 		pt_add(e_pos, nx, ny, q_pos[1]);
 		pt_add(e_pos, -nx, -ny, q_pos[2]);
@@ -396,20 +395,20 @@ namespace winrt::GraphPaper::implementation
 	// 四へん形の各辺と, 指定された点を開始点とする水平線が交差する数を求める.
 	bool pt_in_quad(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F q_pos[]) noexcept
 	{
-		D2D1_POINT_2F pos;
+		D2D1_POINT_2F p_pos;
 		int cnt;
 		int i;
 
 		cnt = 0;
-		for (pos = q_pos[3], i = 0; i < 4; pos = q_pos[i++]) {
+		for (p_pos = q_pos[3], i = 0; i < 4; p_pos = q_pos[i++]) {
 			// 上向きの辺。点Pがy軸方向について、始点と終点の間にある。ただし、終点は含まない。(ルール1)
-			if ((pos.y <= t_pos.y && q_pos[i].y > t_pos.y)
+			if ((p_pos.y <= t_pos.y && q_pos[i].y > t_pos.y)
 				// 下向きの辺。点Pがy軸方向について、始点と終点の間にある。ただし、始点は含まない。(ルール2)
-				|| (pos.y > t_pos.y&& q_pos[i].y <= t_pos.y)) {
+				|| (p_pos.y > t_pos.y&& q_pos[i].y <= t_pos.y)) {
 				// ルール1,ルール2を確認することで、ルール3も確認できている。
 				// 辺は点pよりも右側にある。ただし、重ならない。(ルール4)
 				// 辺が点pと同じ高さになる位置を特定し、その時のxの値と点pのxの値を比較する。
-				if (t_pos.x < pos.x + (t_pos.y - pos.y) / (q_pos[i].y - pos.y) * (q_pos[i].x - pos.x)) {
+				if (t_pos.x < p_pos.x + (t_pos.y - p_pos.y) / (q_pos[i].y - p_pos.y) * (q_pos[i].x - p_pos.x)) {
 					cnt++;
 				}
 			}
@@ -582,6 +581,10 @@ namespace winrt::GraphPaper::implementation
 		val.r = dt_reader.ReadSingle();
 		val.g = dt_reader.ReadSingle();
 		val.b = dt_reader.ReadSingle();
+		val.a = min(max(val.a, 0.0F), 1.0F);
+		val.r = min(max(val.r, 0.0F), 1.0F);
+		val.g = min(max(val.g, 0.0F), 1.0F);
+		val.b = min(max(val.b, 0.0F), 1.0F);
 	}
 
 	// 線枠の形式をデータリーダーから読み込む.

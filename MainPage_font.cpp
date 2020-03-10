@@ -362,32 +362,37 @@ namespace winrt::GraphPaper::implementation
 
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[32];
-			conv_val_to_len(m_page_unit, val, m_sample_dx.m_logical_dpi, m_sample_panel.m_grid_size + 1.0, buf, 16);
+			//	ピクセル単位の長さを他の単位の文字列に変換する.
+			conv_val_to_len<true>(m_page_unit, val, m_sample_dx.m_logical_dpi, m_sample_panel.m_grid_size + 1.0, buf, 16);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::FONT_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
-				conv_val_to_col(m_col_style, val, buf, 16);
+				//	色成分の値を文字列に変換する.
+				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
-				conv_val_to_col(m_col_style, val, buf, 16);
+				//	色成分の値を文字列に変換する.
+				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
-				conv_val_to_col(m_col_style, val, buf, 16);
+				//	色成分の値を文字列に変換する.
+				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
-				conv_val_to_col(m_col_style, val, buf, 16);
+				//	色成分の値を文字列に変換する.
+				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
@@ -406,7 +411,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと図形に格納する.
+	//	値をスライダーのヘッダーと、見本の図形に格納する.
+	//	U	操作の種類
+	//	S	スライダーの番号
+	//	args	ValueChanged で渡された引数
+	//	戻り値	なし
 	template <UNDO_OP U, int S>
 	void MainPage::font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
@@ -613,7 +622,8 @@ namespace winrt::GraphPaper::implementation
 				hdr = r_loader.GetString(L"str_text_mar_horzorz");
 				px = val;
 				wchar_t buf[32];
-				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 31);
+				//	ピクセル単位の長さを他の単位の文字列に変換する.
+				conv_val_to_len<true>(m_page_unit, px, dpi, g_len, buf);
 				hdr = hdr + L": " + buf;
 			}
 			if constexpr (S == 1) {
@@ -621,7 +631,8 @@ namespace winrt::GraphPaper::implementation
 				hdr = r_loader.GetString(L"str_text_mar_vertert");
 				px = val;
 				wchar_t buf[32];
-				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 31);
+				//	ピクセル単位の長さを他の単位の文字列に変換する.
+				conv_val_to_len<true>(m_page_unit, px, dpi, g_len, buf);
 				hdr = hdr + L": " + buf;
 			}
 		}
@@ -633,7 +644,8 @@ namespace winrt::GraphPaper::implementation
 				//	これをピクセル単位に変換する.
 				px = val * dpi / 96.0;
 				wchar_t buf[32];
-				conv_val_to_len(m_page_unit, px, dpi, g_len, buf, 31);
+				//	ピクセル単位の長さを他の単位の文字列に変換する.
+				conv_val_to_len<true>(m_page_unit, px, dpi, g_len, buf);
 				hdr = hdr + L": " + buf;
 			}
 			else {
@@ -654,7 +666,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと図形に格納する.
+	//	値をスライダーのヘッダーと、見本の図形に格納する.
+	//	U	操作の種類
+	//	S	スライダーの番号
+	//	args	ValueChanged で渡された引数
+	//	戻り値	なし
 	template <UNDO_OP U, int S>
 	void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{

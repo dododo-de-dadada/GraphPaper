@@ -12,8 +12,8 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_RECT_F rect{
 			m_pos.x,
 			m_pos.y,
-			m_pos.x + m_vec.x,
-			m_pos.y + m_vec.y
+			m_pos.x + m_diff.x,
+			m_pos.y + m_diff.y
 		};
 		if (is_opaque(m_fill_color)) {
 			//	塗りつぶし色が不透明な場合,
@@ -43,10 +43,10 @@ namespace winrt::GraphPaper::implementation
 		r_pos[3].y = rect.bottom;
 		r_pos[3].x = rect.left;
 		for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-			TOOL_anchor(r_pos[i], dx);
+			anchor_draw_rect(r_pos[i], dx);
 			D2D1_POINT_2F r_mid;	// 方形の辺の中点
 			pt_avg(r_pos[j], r_pos[i], r_mid);
-			TOOL_anchor(r_mid, dx);
+			anchor_draw_rect(r_mid, dx);
 		}
 	}
 
@@ -54,17 +54,17 @@ namespace winrt::GraphPaper::implementation
 	{
 		// どの頂点が位置を含むか調べる.
 		for (uint32_t i = 0; i < 4; i++) {
-			D2D1_POINT_2F pos;
-			get_pos(ANCH_CORNER[i], pos);
-			if (pt_in_anch(t_pos, pos, a_len)) {
+			D2D1_POINT_2F a_pos;
+			get_pos(ANCH_CORNER[i], a_pos);
+			if (pt_in_anch(t_pos, a_pos, a_len)) {
 				return ANCH_CORNER[i];
 			}
 		}
 		// どの中点が位置を含むか調べる.
 		for (uint32_t i = 0; i < 4; i++) {
-			D2D1_POINT_2F pos;
-			get_pos(ANCH_MIDDLE[i], pos);
-			if (pt_in_anch(t_pos, pos, a_len)) {
+			D2D1_POINT_2F a_pos;
+			get_pos(ANCH_MIDDLE[i], a_pos);
+			if (pt_in_anch(t_pos, a_pos, a_len)) {
 				return ANCH_MIDDLE[i];
 			}
 		}
@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 方形の右上点と左下点を求める.
 		D2D1_POINT_2F r_pos;
-		pt_add(m_pos, m_vec, r_pos);
+		pt_add(m_pos, m_diff, r_pos);
 		D2D1_POINT_2F r_min;	// 方形の左上点
 		D2D1_POINT_2F r_max;	// 方形の右下点
 		pt_bound(m_pos, r_pos, r_min, r_max);
@@ -128,39 +128,39 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapeRect::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& a_pos) const noexcept
+	void ShapeRect::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept
 	{
 		switch (a) {
 		case ANCH_WHICH::ANCH_NORTH:
-			a_pos.x = m_pos.x + m_vec.x * 0.5f;
-			a_pos.y = m_pos.y;
+			val.x = m_pos.x + m_diff.x * 0.5f;
+			val.y = m_pos.y;
 			break;
 		case ANCH_WHICH::ANCH_NE:
-			a_pos.x = m_pos.x + m_vec.x;
-			a_pos.y = m_pos.y;
+			val.x = m_pos.x + m_diff.x;
+			val.y = m_pos.y;
 			break;
 		case ANCH_WHICH::ANCH_WEST:
-			a_pos.x = m_pos.x;
-			a_pos.y = m_pos.y + m_vec.y * 0.5f;
+			val.x = m_pos.x;
+			val.y = m_pos.y + m_diff.y * 0.5f;
 			break;
 		case ANCH_WHICH::ANCH_EAST:
-			a_pos.x = m_pos.x + m_vec.x;
-			a_pos.y = m_pos.y + m_vec.y * 0.5f;
+			val.x = m_pos.x + m_diff.x;
+			val.y = m_pos.y + m_diff.y * 0.5f;
 			break;
 		case ANCH_WHICH::ANCH_SW:
-			a_pos.x = m_pos.x;
-			a_pos.y = m_pos.y + m_vec.y;
+			val.x = m_pos.x;
+			val.y = m_pos.y + m_diff.y;
 			break;
 		case ANCH_WHICH::ANCH_SOUTH:
-			a_pos.x = m_pos.x + m_vec.x * 0.5f;
-			a_pos.y = m_pos.y + m_vec.y;
+			val.x = m_pos.x + m_diff.x * 0.5f;
+			val.y = m_pos.y + m_diff.y;
 			break;
 		case ANCH_WHICH::ANCH_SE:
-			a_pos.x = m_pos.x + m_vec.x;
-			a_pos.y = m_pos.y + m_vec.y;
+			val.x = m_pos.x + m_diff.x;
+			val.y = m_pos.y + m_diff.y;
 			break;
 		default:
-			a_pos = m_pos;
+			val = m_pos;
 			break;
 		}
 	}
@@ -172,68 +172,68 @@ namespace winrt::GraphPaper::implementation
 	//	線の太さは考慮されない.
 	bool ShapeRect::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
-		D2D1_POINT_2F pos;
+		D2D1_POINT_2F e_pos;
 
-		pt_add(m_pos, m_vec, pos);
-		return pt_in_rect(m_pos, a_min, a_max) && pt_in_rect(pos, a_min, a_max);
+		pt_add(m_pos, m_diff, e_pos);
+		return pt_in_rect(m_pos, a_min, a_max) && pt_in_rect(e_pos, a_min, a_max);
 	}
 
 	//	値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapeRect::set_pos(const D2D1_POINT_2F pos, const ANCH_WHICH a)
+	void ShapeRect::set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F a_pos;
-		D2D1_POINT_2F d;
+		D2D1_POINT_2F d_pos;
 
 		switch (a) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
-			m_pos = pos;
+			m_pos = val;
 			break;
 		case ANCH_WHICH::ANCH_NW:
-			pt_sub(pos, m_pos, d);
-			pt_add(m_pos, d, m_pos);
-			pt_sub(m_vec, d, m_vec);
+			pt_sub(val, m_pos, d_pos);
+			pt_add(m_pos, d_pos, m_pos);
+			pt_sub(m_diff, d_pos, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_NORTH:
-			m_vec.y -= pos.y - m_pos.y;
-			m_pos.y = pos.y;
+			m_diff.y -= val.y - m_pos.y;
+			m_pos.y = val.y;
 			break;
 		case ANCH_WHICH::ANCH_NE:
-			a_pos.x = m_pos.x + m_vec.x;
+			a_pos.x = m_pos.x + m_diff.x;
 			a_pos.y = m_pos.y;
-			m_pos.y = pos.y;
-			pt_sub(pos, a_pos, d);
-			pt_add(m_vec, d.x, -d.y, m_vec);
+			m_pos.y = val.y;
+			pt_sub(val, a_pos, d_pos);
+			pt_add(m_diff, d_pos.x, -d_pos.y, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_WEST:
-			m_vec.x -= pos.x - m_pos.x;
-			m_pos.x = pos.x;
+			m_diff.x -= val.x - m_pos.x;
+			m_pos.x = val.x;
 			break;
 		case ANCH_WHICH::ANCH_EAST:
-			m_vec.x = pos.x - m_pos.x;
+			m_diff.x = val.x - m_pos.x;
 			break;
 		case ANCH_WHICH::ANCH_SW:
 			a_pos.x = m_pos.x;
-			a_pos.y = m_pos.y + m_vec.y;
-			m_pos.x = pos.x;
-			pt_sub(pos, a_pos, d);
-			pt_add(m_vec, -d.x, d.y, m_vec);
+			a_pos.y = m_pos.y + m_diff.y;
+			m_pos.x = val.x;
+			pt_sub(val, a_pos, d_pos);
+			pt_add(m_diff, -d_pos.x, d_pos.y, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_SOUTH:
-			m_vec.y = pos.y - m_pos.y;
+			m_diff.y = val.y - m_pos.y;
 			break;
 		case ANCH_WHICH::ANCH_SE:
-			pt_sub(pos, m_pos, m_vec);
+			pt_sub(val, m_pos, m_diff);
 			break;
 		}
 	}
 
 	//	図形を作成する.
-	ShapeRect::ShapeRect(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr) :
+	ShapeRect::ShapeRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr) :
 		ShapeStroke::ShapeStroke(attr),
 		m_fill_color(attr->m_fill_color)
 	{
-		m_pos = pos;
-		m_vec = vec;
+		m_pos = s_pos;
+		m_diff = d_pos;
 	}
 
 	// 図形をデータリーダーから読み込む.
@@ -261,7 +261,7 @@ namespace winrt::GraphPaper::implementation
 
 		write_svg("<rect ", dt_writer);
 		write_svg(m_pos, "x", "y", dt_writer);
-		write_svg(m_vec, "width", "height", dt_writer);
+		write_svg(m_diff, "width", "height", dt_writer);
 		write_svg(m_fill_color, "fill", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
 		write_svg("/>" SVG_NL, dt_writer);

@@ -36,14 +36,14 @@ namespace winrt::GraphPaper::implementation
 		offset.x = static_cast<FLOAT>(ox);
 		offset.y = offset.x;
 		if (m_sample_panel.m_grid_show == GRID_SHOW::BACK) {
-			m_sample_panel.TOOL_grid_line(m_sample_dx, offset);
+			m_sample_panel.draw_grid(m_sample_dx, offset);
 		}
 		if (m_sample_shape != nullptr) {
 			m_sample_dx.m_anch_brush->SetColor(m_sample_panel.m_anch_color);
 			m_sample_shape->draw(m_sample_dx);
 		}
 		if (m_sample_panel.m_grid_show == GRID_SHOW::FRONT) {
-			m_sample_panel.TOOL_grid_line(m_sample_dx, offset);
+			m_sample_panel.draw_grid(m_sample_dx, offset);
 		}
 		winrt::check_hresult(dc->EndDraw());
 		dc->RestoreDrawingState(m_sample_dx.m_state_block.get());
@@ -64,11 +64,11 @@ namespace winrt::GraphPaper::implementation
 		m_sample_dx.SetSwapChainPanel(scp_sample_panel());
 		if (m_sample_type != SAMP_TYPE::NONE) {
 			const auto padding = w * 0.125;
-			const D2D1_POINT_2F pos = {
+			const D2D1_POINT_2F s_pos = {
 				static_cast<FLOAT>(padding),
 				static_cast<FLOAT>(padding)
 			};
-			const D2D1_POINT_2F vec = {
+			const D2D1_POINT_2F d_pos = {
 				static_cast<FLOAT>(w - 2.0 * padding),
 				static_cast<FLOAT>(h - 2.0 * padding)
 			};
@@ -76,19 +76,19 @@ namespace winrt::GraphPaper::implementation
 				using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				const auto t = wchar_cpy(r_loader.GetString(L"str_pangram").c_str());
-				m_sample_shape = new ShapeText(pos, vec, t, &m_sample_panel);
+				m_sample_shape = new ShapeText(s_pos, d_pos, t, &m_sample_panel);
 #if defined(_DEBUG)
 				debug_leak_cnt++;
 #endif
 			}
 			else if (m_sample_type == SAMP_TYPE::STROKE) {
-				m_sample_shape = new ShapeLine(pos, vec, &m_sample_panel);
+				m_sample_shape = new ShapeLine(s_pos, d_pos, &m_sample_panel);
 #if defined(_DEBUG)
 				debug_leak_cnt++;
 #endif
 			}
 			else if (m_sample_type == SAMP_TYPE::FILL) {
-				m_sample_shape = new ShapeRect(pos, vec, &m_sample_panel);
+				m_sample_shape = new ShapeRect(s_pos, d_pos, &m_sample_panel);
 #if defined(_DEBUG)
 				debug_leak_cnt++;
 #endif

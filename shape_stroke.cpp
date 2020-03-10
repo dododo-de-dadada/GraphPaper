@@ -64,49 +64,49 @@ namespace winrt::GraphPaper::implementation
 	// 図形を囲む方形を得る.
 	void ShapePoly::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
-		D2D1_POINT_2F pos;
+		D2D1_POINT_2F e_pos;
 		pt_inc(m_pos, b_min, b_max);
-		pt_add(m_pos, m_vec, pos);
-		pt_inc(pos, b_min, b_max);
-		pt_add(pos, m_vec_1, pos);
-		pt_inc(pos, b_min, b_max);
-		pt_add(pos, m_vec_2, pos);
-		pt_inc(pos, b_min, b_max);
+		pt_add(m_pos, m_diff, e_pos);
+		pt_inc(e_pos, b_min, b_max);
+		pt_add(e_pos, m_diff_1, e_pos);
+		pt_inc(e_pos, b_min, b_max);
+		pt_add(e_pos, m_diff_2, e_pos);
+		pt_inc(e_pos, b_min, b_max);
 	}
 
 	// 図形を囲む方形の左上点を得る.
 	void ShapePoly::get_min_pos(D2D1_POINT_2F& val) const noexcept
 	{
-		D2D1_POINT_2F pos;
-		pt_add(m_pos, m_vec, pos);
-		pt_min(m_pos, pos, val);
-		pt_add(pos, m_vec_1, pos);
-		pt_min(val, pos, val);
-		pt_add(pos, m_vec_2, pos);
-		pt_min(val, pos, val);
+		D2D1_POINT_2F e_pos;
+		pt_add(m_pos, m_diff, e_pos);
+		pt_min(m_pos, e_pos, val);
+		pt_add(e_pos, m_diff_1, e_pos);
+		pt_min(val, e_pos, val);
+		pt_add(e_pos, m_diff_2, e_pos);
+		pt_min(val, e_pos, val);
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapePoly::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& pos) const noexcept
+	void ShapePoly::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept
 	{
 		switch (a) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
-			pos = m_pos;
+			val = m_pos;
 			break;
 		case ANCH_WHICH::ANCH_R_NW:
-			pos = m_pos;
+			val = m_pos;
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
-			pt_add(m_pos, m_vec, pos);
+			pt_add(m_pos, m_diff, val);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
-			pt_add(m_pos, m_vec, pos);
-			pt_add(pos, m_vec_1, pos);
+			pt_add(m_pos, m_diff, val);
+			pt_add(val, m_diff_1, val);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
-			pt_add(m_pos, m_vec, pos);
-			pt_add(pos, m_vec_1, pos);
-			pt_add(pos, m_vec_2, pos);
+			pt_add(m_pos, m_diff, val);
+			pt_add(val, m_diff_1, val);
+			pt_add(val, m_diff_2, val);
 			break;
 		default:
 			return;
@@ -114,43 +114,43 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する.
-	void ShapePoly::move(const D2D1_POINT_2F d)
+	void ShapePoly::move(const D2D1_POINT_2F d_pos)
 	{
-		ShapeStroke::move(d);
+		ShapeStroke::move(d_pos);
 		create_path_geometry();
 	}
 
 	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapePoly::set_pos(const D2D1_POINT_2F pos, const ANCH_WHICH a)
+	void ShapePoly::set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F a_pos;
-		D2D1_POINT_2F d;
+		D2D1_POINT_2F d_pos;
 
 		switch (a) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
-			m_pos = pos;
+			m_pos = val;
 			break;
 		case ANCH_WHICH::ANCH_R_NW:
-			pt_sub(pos, m_pos, d);
-			m_pos = pos;
-			pt_sub(m_vec, d, m_vec);
+			pt_sub(val, m_pos, d_pos);
+			m_pos = val;
+			pt_sub(m_diff, d_pos, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
 			get_pos(ANCH_WHICH::ANCH_R_NE, a_pos);
-			pt_sub(pos, a_pos, d);
-			pt_add(m_vec, d, m_vec);
-			pt_sub(m_vec_1, d, m_vec_1);
+			pt_sub(val, a_pos, d_pos);
+			pt_add(m_diff, d_pos, m_diff);
+			pt_sub(m_diff_1, d_pos, m_diff_1);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
 			get_pos(ANCH_WHICH::ANCH_R_SW, a_pos);
-			pt_sub(pos, a_pos, d);
-			pt_add(m_vec_1, d, m_vec_1);
-			pt_sub(m_vec_2, d, m_vec_2);
+			pt_sub(val, a_pos, d_pos);
+			pt_add(m_diff_1, d_pos, m_diff_1);
+			pt_sub(m_diff_2, d_pos, m_diff_2);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
 			get_pos(ANCH_WHICH::ANCH_R_SE, a_pos);
-			pt_sub(pos, a_pos, d);
-			pt_add(m_vec_2, d, m_vec_2);
+			pt_sub(val, a_pos, d_pos);
+			pt_add(m_diff_2, d_pos, m_diff_2);
 			break;
 		default:
 			return;
@@ -159,9 +159,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 始点に値を格納する. 他の部位の位置も動く.
-	void ShapePoly::set_start_pos(const D2D1_POINT_2F pos)
+	void ShapePoly::set_start_pos(const D2D1_POINT_2F val)
 	{
-		ShapeStroke::set_start_pos(pos);
+		ShapeStroke::set_start_pos(val);
 		create_path_geometry();
 	}
 
@@ -176,8 +176,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::read;
 
-		read(m_vec_1, dt_reader);
-		read(m_vec_2, dt_reader);
+		read(m_diff_1, dt_reader);
+		read(m_diff_2, dt_reader);
 	}
 
 	// データライターに書き込む.
@@ -186,8 +186,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write;
 
 		ShapeStroke::write(dt_writer);
-		write(m_vec_1, dt_writer);
-		write(m_vec_2, dt_writer);
+		write(m_diff_1, dt_writer);
+		write(m_diff_2, dt_writer);
 	}
 
 	// 図形を破棄する.
@@ -201,25 +201,24 @@ namespace winrt::GraphPaper::implementation
 	// b_max	領域の右下点
 	void ShapeStroke::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
-		D2D1_POINT_2F pos;
-
 		pt_inc(m_pos, b_min, b_max);
-		pt_add(m_pos, m_vec, pos);
-		pt_inc(pos, b_min, b_max);
+		D2D1_POINT_2F e_pos;
+		pt_add(m_pos, m_diff, e_pos);
+		pt_inc(e_pos, b_min, b_max);
 	}
 
 	// 図形を囲む方形の左上点を得る.
 	// D2D1_POINT_2F& pos	// 方形の左上点
 	void ShapeStroke::get_min_pos(D2D1_POINT_2F& val) const noexcept
 	{
-		val.x = m_vec.x >= 0.0f ? m_pos.x : m_pos.x + m_vec.x;
-		val.y = m_vec.y >= 0.0f ? m_pos.y : m_pos.y + m_vec.y;
+		val.x = m_diff.x >= 0.0f ? m_pos.x : m_pos.x + m_diff.x;
+		val.y = m_diff.y >= 0.0f ? m_pos.y : m_pos.y + m_diff.y;
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapeStroke::get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& pos) const noexcept
+	void ShapeStroke::get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& val) const noexcept
 	{
-		pos = m_pos;
+		val = m_pos;
 	}
 
 	// 始点を得る
@@ -272,15 +271,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する.
-	void ShapeStroke::move(const D2D1_POINT_2F d)
+	void ShapeStroke::move(const D2D1_POINT_2F d_pos)
 	{
-		pt_add(m_pos, d, m_pos);
+		pt_add(m_pos, d_pos, m_pos);
 	}
 
 	// 始点に値を格納する. 他の部位の位置も動く.
-	void ShapeStroke::set_start_pos(const D2D1_POINT_2F pos)
+	void ShapeStroke::set_start_pos(const D2D1_POINT_2F val)
 	{
-		m_pos = pos;
+		m_pos = val;
 	}
 
 	// 線枠の色に格納する.
@@ -364,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 		set_delete(dt_reader.ReadBoolean());
 		set_select(dt_reader.ReadBoolean());
 		read(m_pos, dt_reader);
-		read(m_vec, dt_reader);
+		read(m_diff, dt_reader);
 		read(m_stroke_color, dt_reader);
 		read(m_stroke_pattern, dt_reader);
 		read(m_stroke_style, dt_reader);
@@ -380,7 +379,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBoolean(is_deleted());
 		dt_writer.WriteBoolean(is_selected());
 		write(m_pos, dt_writer);
-		write(m_vec, dt_writer);
+		write(m_diff, dt_writer);
 		write(m_stroke_color, dt_writer);
 		dt_writer.WriteSingle(m_stroke_pattern.m_[0]);
 		dt_writer.WriteSingle(m_stroke_pattern.m_[1]);

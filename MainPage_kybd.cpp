@@ -36,34 +36,34 @@ namespace winrt::GraphPaper::implementation
 	// Escape が押された.
 	void MainPage::ka_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		if (m_draw_tool == DRAW_TOOL::TOOL_SELECT) {
+		if (m_draw_tool == DRAW_TOOL::SELECT) {
 			return;
 		}
 		rmfi_tool_select().IsChecked(true);
 		// グループ名を指定していてもコードビハインドからは
 		// 自動でチェックが外れない.
-		if (m_draw_tool == DRAW_TOOL::TOOL_BEZI) {
+		if (m_draw_tool == DRAW_TOOL::BEZI) {
 			rmfi_tool_BEZI().IsChecked(false);
 		}
-		else if (m_draw_tool == DRAW_TOOL::TOOL_ELLI) {
+		else if (m_draw_tool == DRAW_TOOL::ELLI) {
 			rmfi_tool_elli().IsChecked(false);
 		}
-		else if (m_draw_tool == DRAW_TOOL::TOOL_LINE) {
+		else if (m_draw_tool == DRAW_TOOL::LINE) {
 			rmfi_tool_line().IsChecked(false);
 		}
-		else if (m_draw_tool == DRAW_TOOL::TOOL_QUAD) {
+		else if (m_draw_tool == DRAW_TOOL::QUAD) {
 			rmfi_tool_quad().IsChecked(false);
 		}
-		else if (m_draw_tool == DRAW_TOOL::TOOL_RECT) {
+		else if (m_draw_tool == DRAW_TOOL::RECT) {
 			rmfi_tool_rect().IsChecked(false);
 		}
-		else if (m_draw_tool == DRAW_TOOL::TOOL_RRECT) {
+		else if (m_draw_tool == DRAW_TOOL::RRECT) {
 			rmfi_tool_rrect().IsChecked(false);
 		}
-		else if (m_draw_tool == DRAW_TOOL::TOOL_TEXT) {
+		else if (m_draw_tool == DRAW_TOOL::TEXT) {
 			rmfi_tool_text().IsChecked(false);
 		}
-		else if (m_draw_tool == DRAW_TOOL::TOOL_SCALE) {
+		else if (m_draw_tool == DRAW_TOOL::SCALE) {
 			rmfi_tool_scale().IsChecked(false);
 		}
 		rmfi_tool_select_click(nullptr, nullptr);
@@ -96,8 +96,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (mfi_copy().IsEnabled()) {
 			constexpr uint32_t COPY = 1;
-			auto _{ clipboard_copy_async<COPY>() };
-			//mfi_copy_click(nullptr, nullptr);
+			auto _{ xcvd_copy_async<COPY>() };
+			//mfi_xcvd_copy_click(nullptr, nullptr);
 		}
 	}*/
 
@@ -107,8 +107,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (mfi_cut().IsEnabled()) {
 			constexpr uint32_t CUT = 0;
-			auto _{ clipboard_copy_async<CUT>() };
-			//mfi_cut_click(nullptr, nullptr);
+			auto _{ xcvd_copy_async<CUT>() };
+			//mfi_xcvd_cut_click(nullptr, nullptr);
 		}
 	}
 	*/
@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		if (mfi_delete().IsEnabled()) {
-			mfi_delete_click(nullptr, nullptr);
+			mfi_xcvd_delete_click(nullptr, nullptr);
 		}
 	}
 	*/
@@ -162,7 +162,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	//	if (mfi_paste().IsEnabled()) {
-	//		mfi_paste_click(nullptr, nullptr);
+	//		mfi_xcvd_paste_click(nullptr, nullptr);
 	//	}
 	//}
 

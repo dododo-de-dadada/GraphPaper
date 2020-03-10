@@ -167,8 +167,8 @@ namespace winrt::GraphPaper::implementation
 				format.put()
 			)
 		);
-		const auto w = static_cast<FLOAT>(max(std::fabsf(m_vec.x) - 2.0 * m_text_mar.width, 0.0));
-		const auto h = static_cast<FLOAT>(max(std::fabsf(m_vec.y) - 2.0 * m_text_mar.height, 0.0));
+		const auto w = static_cast<FLOAT>(max(std::fabsf(m_diff.x) - 2.0 * m_text_mar.width, 0.0));
+		const auto h = static_cast<FLOAT>(max(std::fabsf(m_diff.y) - 2.0 * m_text_mar.height, 0.0));
 		winrt::check_hresult(
 			s_dwrite_factory->CreateTextLayout(
 				m_text, len, format.get(),
@@ -211,8 +211,8 @@ namespace winrt::GraphPaper::implementation
 				create_text_layout();
 			}
 			else {
-				const FLOAT w = static_cast<FLOAT>(max(std::fabs(m_vec.x) - m_text_mar.width * 2.0, 0.0));
-				const FLOAT h = static_cast<FLOAT>(max(std::fabs(m_vec.y) - m_text_mar.height * 2.0, 0.0));
+				const FLOAT w = static_cast<FLOAT>(max(std::fabs(m_diff.x) - m_text_mar.width * 2.0, 0.0));
+				const FLOAT h = static_cast<FLOAT>(max(std::fabs(m_diff.y) - m_text_mar.height * 2.0, 0.0));
 				bool flag = false;
 				if (equal(w, m_dw_text_layout->GetMaxWidth()) == false) {
 					m_dw_text_layout->SetMaxWidth(w);
@@ -254,10 +254,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		D2D1_POINT_2F t_min;
-		pt_add(m_pos, m_vec, t_min);
+		pt_add(m_pos, m_diff, t_min);
 		pt_min(m_pos, t_min, t_min);
-		auto hm = min(m_text_mar.width, fabs(m_vec.x) * 0.5);
-		auto vm = min(m_text_mar.height, fabs(m_vec.y) * 0.5);
+		auto hm = min(m_text_mar.width, fabs(m_diff.x) * 0.5);
+		auto vm = min(m_text_mar.height, fabs(m_diff.y) * 0.5);
 		pt_add(t_min, hm, vm, t_min);
 //uint32_t line_cnt;
 //m_dw_text_layout->GetLineMetrics(nullptr, 0, &line_cnt);
@@ -455,10 +455,10 @@ namespace winrt::GraphPaper::implementation
 			return anchor;
 		}
 		// 文字列の範囲の左上が原点になるよう, 調べる位置を移動する.
-		D2D1_POINT_2F pos;
-		ShapeStroke::get_min_pos(pos);
-		pt_sub(t_pos, pos, pos);
-		pt_sub(pos, m_text_mar, pos);
+		D2D1_POINT_2F nw_pos;
+		ShapeStroke::get_min_pos(nw_pos);
+		pt_sub(t_pos, nw_pos, nw_pos);
+		pt_sub(nw_pos, m_text_mar, nw_pos);
 		const auto l_cnt = m_dw_linecnt;
 		for (uint32_t i = 0; i < l_cnt; i++) {
 			auto const& test = m_dw_test_metrics[i];
@@ -471,7 +471,7 @@ namespace winrt::GraphPaper::implementation
 				test.left,
 				static_cast<FLOAT>(r_max.y - m_font_size)
 			};
-			if (pt_in_rect(pos, r_min, r_max)) {
+			if (pt_in_rect(nw_pos, r_min, r_max)) {
 				return ANCH_WHICH::ANCH_TEXT;
 			}
 		}
@@ -485,17 +485,17 @@ namespace winrt::GraphPaper::implementation
 	// 線の太さは考慮されない.
 	bool ShapeText::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
-		D2D1_POINT_2F pos;
+		D2D1_POINT_2F nw_pos;
 		D2D1_POINT_2F h_min;
 		D2D1_POINT_2F h_max;
 
 		if (m_dw_linecnt > 0) {
-			ShapeStroke::get_min_pos(pos);
+			ShapeStroke::get_min_pos(nw_pos);
 			for (uint32_t i = 0; i < m_dw_linecnt; i++) {
 				auto const& test = m_dw_test_metrics[i];
 				auto const& line = m_dw_line_metrics[i];
 				auto const top = static_cast<double>(test.top) + static_cast<double>(line.baseline) + m_dw_descent - m_font_size;
-				pt_add(pos, test.left, top, h_min);
+				pt_add(nw_pos, test.left, top, h_min);
 				if (pt_in_rect(h_min, a_min, a_max) == false) {
 					return false;
 				}
@@ -795,11 +795,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// pos	開始位置
-	// vec	終了ベクトル
+	// d_pos	終了位置への差分
 	// text	文字列
 	// attr	既定の属性値
-	ShapeText::ShapeText(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, wchar_t* const text, const ShapePanel* attr) :
-		ShapeRect::ShapeRect(pos, vec, attr),
+	ShapeText::ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, wchar_t* const text, const ShapePanel* attr) :
+		ShapeRect::ShapeRect(s_pos, d_pos, attr),
 		m_font_color(attr->m_font_color),
 		m_font_family(attr->m_font_family),
 		m_font_size(attr->m_font_size),
@@ -918,14 +918,14 @@ namespace winrt::GraphPaper::implementation
 		write_svg("none", "stroke", dt_writer);
 		write_svg(">" SVG_NL, dt_writer);
 		//	書体を表示する左上位置に余白を加える.
-		D2D1_POINT_2F pos;
-		pt_add(m_pos, m_text_mar.width, m_text_mar.height, pos);
+		D2D1_POINT_2F nw_pos;
+		pt_add(m_pos, m_text_mar.width, m_text_mar.height, nw_pos);
 		for (uint32_t i = 0; i < m_dw_linecnt; i++) {
 			const wchar_t* t = m_text + m_dw_test_metrics[i].textPosition;
 			const uint32_t t_len = m_dw_test_metrics[i].length;
-			const double px = static_cast<double>(pos.x);
+			const double px = static_cast<double>(nw_pos.x);
 			const double qx = static_cast<double>(m_dw_test_metrics[i].left);
-			const double py = static_cast<double>(pos.y);
+			const double py = static_cast<double>(nw_pos.y);
 			const double qy = static_cast<double>(m_dw_test_metrics[i].top);
 			//	文字列を表示する垂直なずらし位置を求める.
 			const double dy = m_dw_line_metrics[i].baseline;

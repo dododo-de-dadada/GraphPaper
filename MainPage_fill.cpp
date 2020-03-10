@@ -71,25 +71,29 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::FILL_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
-				conv_val_to_col(m_col_style, val, buf, 16);
+				//	色成分の値を文字列に変換する.
+				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
-				conv_val_to_col(m_col_style, val, buf, 16);
+				//	色成分の値を文字列に変換する.
+				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
-				conv_val_to_col(m_col_style, val, buf, 16);
+				//	色成分の値を文字列に変換する.
+				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
-				conv_val_to_col(m_col_style, val, buf, 16);
+				//	色成分の値を文字列に変換する.
+				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
@@ -108,7 +112,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと図形に格納する.
+	//	値をスライダーのヘッダーと、見本の図形に格納する.
+	//	U	操作の種類
+	//	S	スライダーの番号
+	//	args	ValueChanged で渡された引数
+	//	戻り値	なし
 	template <UNDO_OP U, int S>
 	void MainPage::fill_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{

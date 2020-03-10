@@ -18,16 +18,16 @@ namespace winrt::GraphPaper::implementation
 	constexpr uint32_t U_MAX_CNT = 64;
 
 	// 操作スタックを消去する.
-	static uint32_t clear_stack(U_STACK_T& u_stack);
+	static uint32_t undo_clear_stack(U_STACK_T& u_stack);
 	// 操作をデータリーダーから読み込む.
-	static bool read_undo(Undo*& u, DataReader const& dt_reader);
+	static bool undo_read_op(Undo*& u, DataReader const& dt_reader);
 	// 操作をデータリーダーに書き込む.
-	static void write_undo(Undo* u, DataWriter const& dt_writer);
+	static void undo_write_op(Undo* u, DataWriter const& dt_writer);
 
-	// 操作スタックを消去する.
-	// u_stack	操作スタック
-	// 戻り値	消去した操作の組数
-	static uint32_t clear_stack(U_STACK_T& u_stack)
+	//	操作スタックを消去し, 含まれる操作を破棄する.
+	//	u_stack	操作スタック
+	//	戻り値	消去した操作の組数
+	static uint32_t undo_clear_stack(U_STACK_T& u_stack)
 	{
 		uint32_t n = 0;
 		for (auto u : u_stack) {
@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作をデータリーダーから読み込む.
 	// u	操作
 	// dt_reader	データリーダー
-	static bool read_undo(Undo*& u, DataReader const& dt_reader)
+	static bool undo_read_op(Undo*& u, DataReader const& dt_reader)
 	{
 		if (dt_reader.UnconsumedBufferLength() < sizeof(uint32_t)) {
 			return false;
@@ -157,8 +157,8 @@ namespace winrt::GraphPaper::implementation
 	// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 	void MainPage::enable_undo_menu(void)
 	{
-		// 操作スタックに図形の選択以外の操作が
-		// 積まれているか調べる.
+		//	操作スタックに図形の選択以外の操作が
+		//	積まれているか調べる.
 		bool enable_undo = false;
 		for (auto u : m_stack_undo) {
 			if (u == nullptr) {
@@ -201,7 +201,7 @@ namespace winrt::GraphPaper::implementation
 			// フラグがない場合, 中断する.
 			return;
 		}
-		enable_undo_menu();
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
@@ -240,7 +240,7 @@ namespace winrt::GraphPaper::implementation
 		if (flag == false) {
 			return;
 		}
-		enable_undo_menu();
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
@@ -250,18 +250,18 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// やり直す操作スタックを消去する.
+	//	やり直す操作スタックを消去し, 含まれる操作を破棄する.
 	void MainPage::redo_clear(void)
 	{
-		m_stack_nset -= clear_stack(m_stack_redo);
+		m_stack_nset -= undo_clear_stack(m_stack_redo);
 	}
 
-	// 操作スタックを消去する.
+	//	操作スタックを消去し, 含まれる操作を破棄する.
 	void MainPage::undo_clear(void)
 	{
 		m_stack_push = false;
-		m_stack_nset -= clear_stack(m_stack_redo);
-		m_stack_nset -= clear_stack(m_stack_undo);
+		m_stack_nset -= undo_clear_stack(m_stack_redo);
+		m_stack_nset -= undo_clear_stack(m_stack_undo);
 #if defined(_DEBUG)
 		if (m_stack_nset == 0) {
 			return;
@@ -277,9 +277,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作を実行する.
 	void MainPage::undo_exec(Undo* u)
 	{
-		if (m_summary_visible) {
-			summary_reflect(u);
-		}
+		summary_reflect(u);
 		u->exec();
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoSet<UNDO_OP::GRID_SHOW>)) {
@@ -289,6 +287,7 @@ namespace winrt::GraphPaper::implementation
 			stroke_style_check_menu(m_page_panel.m_stroke_style);
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::ARROW_STYLE>)) {
+			//	線枠メニューの「矢じりの種類」に印をつける.
 			arrow_style_check_menu(m_page_panel.m_arrow_style);
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::GRID_LEN>)) {
@@ -360,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 		// ヌルで区切られた一連の操作の組が一定の組数を超えたら,
 		// スタックの底から一組の操作を取り除く.
 		// 操作の組数から 1 減じる.
-		m_stack_nset -= clear_stack(m_stack_redo);
+		m_stack_nset -= undo_clear_stack(m_stack_redo);
 		m_stack_undo.push_back(nullptr);
 		m_stack_push = true;
 		m_stack_nset++;
@@ -379,7 +378,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を差分だけ移動して, 移動前の値をスタックに積む.
-	void MainPage::undo_push_pos(const D2D1_POINT_2F d)
+	// d_pos	移動させる差分
+	void MainPage::undo_push_pos(const D2D1_POINT_2F d_pos)
 	{
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
@@ -389,7 +389,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			undo_push_set<UNDO_OP::START_POS>(s);
-			s->move(d);
+			s->move(d_pos);
 		}
 	}
 
@@ -498,7 +498,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_null();
-		enable_undo_menu();
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 	}
@@ -524,12 +524,14 @@ namespace winrt::GraphPaper::implementation
 	// 操作スタックをデータリーダーから読み込む.
 	void MainPage::undo_read(DataReader const& dt_reader)
 	{
+		using winrt::GraphPaper::implementation::read;
+
 		Undo* r;
-		while (read_undo(r, dt_reader)) {
+		while (undo_read_op(r, dt_reader)) {
 			m_stack_redo.push_back(r);
 		}
 		Undo* u;
-		while (read_undo(u, dt_reader)) {
+		while (undo_read_op(u, dt_reader)) {
 			m_stack_undo.push_back(u);
 		}
 		m_stack_nset = dt_reader.ReadUInt32();
@@ -540,11 +542,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::undo_write(DataWriter const& dt_writer)
 	{
 		for (const auto& r : m_stack_redo) {
-			write_undo(r, dt_writer);
+			undo_write_op(r, dt_writer);
 		}
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::END));
 		for (const auto& u : m_stack_undo) {
-			write_undo(u, dt_writer);
+			undo_write_op(u, dt_writer);
 		}
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::END));
 		dt_writer.WriteUInt32(m_stack_nset);
@@ -554,7 +556,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作をデータリーダーに書き込む.
 	// u	操作
 	// dt_writer	データライター
-	static void write_undo(Undo* u, DataWriter const& dt_writer)
+	static void undo_write_op(Undo* u, DataWriter const& dt_writer)
 	{
 		if (u != nullptr) {
 			u->write(dt_writer);

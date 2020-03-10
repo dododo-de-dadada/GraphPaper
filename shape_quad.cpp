@@ -160,13 +160,13 @@ namespace winrt::GraphPaper::implementation
 	// パスジオメトリを作成する.
 	void ShapeQuad::create_path_geometry(void)
 	{
-		D2D1_POINT_2F pos[4];
+		D2D1_POINT_2F q_pos[4];
 
 		m_poly_geom = nullptr;
-		pos[0] = m_pos;
-		pt_add(pos[0], m_vec, pos[1]);
-		pt_add(pos[1], m_vec_1, pos[2]);
-		pt_add(pos[2], m_vec_2, pos[3]);
+		q_pos[0] = m_pos;
+		pt_add(q_pos[0], m_diff, q_pos[1]);
+		pt_add(q_pos[1], m_diff_1, q_pos[2]);
+		pt_add(q_pos[2], m_diff_2, q_pos[3]);
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 		winrt::check_hresult(
 			s_d2d_factory->CreatePathGeometry(m_poly_geom.put())
@@ -176,13 +176,13 @@ namespace winrt::GraphPaper::implementation
 		const auto figure_begin = is_opaque(m_fill_color)
 			? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
 			: D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
-		sink->BeginFigure(pos[0], figure_begin);
-		sink->AddLine(pos[1]);
-		sink->AddLine(pos[2]);
-		sink->AddLine(pos[3]);
+		sink->BeginFigure(q_pos[0], figure_begin);
+		sink->AddLine(q_pos[1]);
+		sink->AddLine(q_pos[2]);
+		sink->AddLine(q_pos[3]);
 		// Shape 上で始点と終点を重ねたとき,
 		// パスに始点を加えないと, LINE_JOINT がへんなことになる.
-		sink->AddLine(pos[0]);
+		sink->AddLine(q_pos[0]);
 		sink->EndFigure(D2D1_FIGURE_END_CLOSED);
 		sink->Close();
 		sink = nullptr;
@@ -207,14 +207,14 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected() == false) {
 			return;
 		}
-		TOOL_anchor(m_pos, dx);
+		anchor_draw_rect(m_pos, dx);
 		D2D1_POINT_2F a_pos;
-		pt_add(m_pos, m_vec, a_pos);
-		TOOL_anchor(a_pos, dx);
-		pt_add(a_pos, m_vec_1, a_pos);
-		TOOL_anchor(a_pos, dx);
-		pt_add(a_pos, m_vec_2, a_pos);
-		TOOL_anchor(a_pos, dx);
+		pt_add(m_pos, m_diff, a_pos);
+		anchor_draw_rect(a_pos, dx);
+		pt_add(a_pos, m_diff_1, a_pos);
+		anchor_draw_rect(a_pos, dx);
+		pt_add(a_pos, m_diff_2, a_pos);
+		anchor_draw_rect(a_pos, dx);
 	}
 
 	// 塗りつぶし色を得る.
@@ -236,9 +236,9 @@ namespace winrt::GraphPaper::implementation
 		// 調べる位置が原点となるよう平行移動した四へん形の各頂点を得る.
 		D2D1_POINT_2F q_pos[4];
 		pt_sub(m_pos, t_pos, q_pos[3]);
-		pt_add(q_pos[3], m_vec, q_pos[2]);
-		pt_add(q_pos[2], m_vec_1, q_pos[1]);
-		pt_add(q_pos[1], m_vec_2, q_pos[0]);
+		pt_add(q_pos[3], m_diff, q_pos[2]);
+		pt_add(q_pos[2], m_diff_1, q_pos[1]);
+		pt_add(q_pos[1], m_diff_2, q_pos[0]);
 		for (int i = 0; i < 4; i++) {
 			// 位置が, 四へん形の各部位 (頂点) に含まれるか調べる.
 			if (pt_in_anch(q_pos[i], a_len)) {
@@ -296,14 +296,14 @@ namespace winrt::GraphPaper::implementation
 	// 線の太さは考慮されない.
 	bool ShapeQuad::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
-		D2D1_POINT_2F pos;
+		D2D1_POINT_2F e_pos;	// 次の位置
 		if (pt_in_rect(m_pos, a_min, a_max)) {
-			pt_add(m_pos, m_vec, pos);
-			if (pt_in_rect(pos, a_min, a_max)) {
-				pt_add(pos, m_vec_1, pos);
-				if (pt_in_rect(pos, a_min, a_max)) {
-					pt_add(pos, m_vec_2, pos);
-					return pt_in_rect(pos, a_min, a_max);
+			pt_add(m_pos, m_diff, e_pos);
+			if (pt_in_rect(e_pos, a_min, a_max)) {
+				pt_add(e_pos, m_diff_1, e_pos);
+				if (pt_in_rect(e_pos, a_min, a_max)) {
+					pt_add(e_pos, m_diff_2, e_pos);
+					return pt_in_rect(e_pos, a_min, a_max);
 				}
 			}
 		}
@@ -321,26 +321,26 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// pos	開始位置
-	// vec	終了ベクトル
+	// s_pos	開始位置
+	// d_pos	終了位置への差分
 	// attr	既定の属性値
-	ShapeQuad::ShapeQuad(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr) :
+	ShapeQuad::ShapeQuad(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr) :
 		ShapePoly::ShapePoly(attr)
 	{
-		m_pos.x = static_cast<FLOAT>(pos.x + 0.5 * vec.x);
-		m_pos.y = pos.y;
-		pt_scale(vec, 0.5, m_vec);
-		m_vec_1.x = -m_vec.x;
-		m_vec_1.y = m_vec.y;
-		m_vec_2.x = m_vec_1.x;
-		m_vec_2.y = -m_vec.y;
+		m_pos.x = static_cast<FLOAT>(s_pos.x + 0.5 * d_pos.x);
+		m_pos.y = s_pos.y;
+		pt_scale(d_pos, 0.5, m_diff);
+		m_diff_1.x = -m_diff.x;
+		m_diff_1.y = m_diff.y;
+		m_diff_2.x = m_diff_1.x;
+		m_diff_2.y = -m_diff.y;
 		m_fill_color = attr->m_fill_color;
 		create_path_geometry();
 		D2D1_POINT_2F q_pos[4];
 		q_pos[0] = { 0.0f, 0.0f };
-		q_pos[1] = m_vec;
-		q_pos[2] = m_vec_1;
-		q_pos[3] = m_vec_2;
+		q_pos[1] = m_diff;
+		q_pos[2] = m_diff_1;
+		q_pos[3] = m_diff_2;
 	}
 
 	// 図形をデータリーダーから読み込む.
@@ -370,9 +370,9 @@ namespace winrt::GraphPaper::implementation
 
 		write_svg("<path d=\"", dt_writer);
 		write_svg(m_pos, "M", dt_writer);
-		write_svg(m_vec, "l", dt_writer);
-		write_svg(m_vec_1, "l", dt_writer);
-		write_svg(m_vec_2, "l", dt_writer);
+		write_svg(m_diff, "l", dt_writer);
+		write_svg(m_diff_1, "l", dt_writer);
+		write_svg(m_diff_2, "l", dt_writer);
 		write_svg("Z\" ", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
 		write_svg(m_fill_color, "fill", dt_writer);

@@ -15,27 +15,29 @@ namespace winrt::GraphPaper::implementation
 	//	val	色成分の値
 	//	buf	文字列の配列
 	//	len	文字列の最大長 ('\0' を含む長さ)
-	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t* buf, const uint32_t len)
+	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t* buf, const size_t b_len)
 	{
 		if (style == COL_STYLE::DEC) {
-			swprintf_s(buf, len, L"%.0lf", std::round(val));
+			swprintf_s(buf, b_len, L"%.0lf", std::round(val));
 		}
 		else if (style == COL_STYLE::HEX) {
-			swprintf_s(buf, len, L"%02X", static_cast<uint32_t>(std::round(val)));
+			swprintf_s(buf, b_len, L"%02X", static_cast<uint32_t>(std::round(val)));
 		}
 		else if (style == COL_STYLE::FLT) {
-			swprintf_s(buf, len, L"%.4lf", val / COLOR_MAX);
+			swprintf_s(buf, b_len, L"%.4lf", val / COLOR_MAX);
 		}
 		else if (style == COL_STYLE::CEN) {
-			swprintf_s(buf, len, L"%.1lf%%", val / COLOR_MAX * 100.0);
+			swprintf_s(buf, b_len, L"%.1lf%%", val / COLOR_MAX * 100.0);
 		}
 	}
+
 
 	//	長さの値ををピクセル単位の値に変換する.
 	//	unit	長さの単位
 	//	val	長さの値
 	//	dpi	DPI
 	//	g_len	方眼の長さ
+	//	戻り値	ピクセル単位の値
 	double conv_len_to_val(const LEN_UNIT unit, const double val, const double dpi, const double g_len)
 	{
 		double ret;
@@ -59,30 +61,59 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	ピクセル単位の長さを他の単位の文字列に変換する.
+	//	WHIT_UNIT	単位付加フラグ
 	//	unit	長さの単位
 	//	val	ピクセル単位の長さ
 	//	dpi	DPI
 	//	g_len	方眼の大きさ
 	//	buf	文字列の配列
 	//	b_len	文字列の最大長 ('\0' を含む長さ)
-	void conv_val_to_len(const LEN_UNIT unit, const double val, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len)
+	template <bool WHIT_UNIT>
+	void conv_val_to_len(const LEN_UNIT unit, const double val, const double dpi, const double g_len, wchar_t *buf, const uint32_t b_len)
 	{
 		if (unit == LEN_UNIT::PIXEL) {
-			swprintf_s(buf, b_len, FMT_PIXEL_UNIT, val);
+			if constexpr (WHIT_UNIT) {
+				swprintf_s(buf, b_len, FMT_PIXEL_UNIT, val);
+			}
+			else {
+				swprintf_s(buf, b_len, FMT_PIXEL, val);
+			}
 		}
 		else if (unit == LEN_UNIT::INCH) {
-			swprintf_s(buf, b_len, FMT_INCH_UNIT, val / dpi);
+			if constexpr (WHIT_UNIT) {
+				swprintf_s(buf, b_len, FMT_INCH_UNIT, val / dpi);
+			}
+			else {
+				swprintf_s(buf, b_len, FMT_INCH, val);
+			}
 		}
 		else if (unit == LEN_UNIT::MILLI) {
-			swprintf_s(buf, b_len, FMT_MILLI_UNIT, val * MM_PER_INCH / dpi);
+			if constexpr (WHIT_UNIT) {
+				swprintf_s(buf, b_len, FMT_MILLI_UNIT, val * MM_PER_INCH / dpi);
+			}
+			else {
+				swprintf_s(buf, b_len, FMT_MILLI, val);
+			}
 		}
 		else if (unit == LEN_UNIT::POINT) {
-			swprintf_s(buf, b_len, FMT_POINT_UNIT, val * PT_PER_INCH / dpi);
+			if constexpr (WHIT_UNIT) {
+				swprintf_s(buf, b_len, FMT_POINT_UNIT, val * PT_PER_INCH / dpi);
+			}
+			else {
+				swprintf_s(buf, b_len, FMT_POINT, val * PT_PER_INCH / dpi);
+			}
 		}
 		else if (unit == LEN_UNIT::GRID) {
-			swprintf_s(buf, b_len, FMT_GRID_UNIT, val / g_len);
+			if constexpr (WHIT_UNIT) {
+				swprintf_s(buf, b_len, FMT_GRID_UNIT, val / g_len);
+			}
+			else {
+				swprintf_s(buf, b_len, FMT_GRID, val / g_len);
+			}
 		}
 	}
+	template void conv_val_to_len<true>(const LEN_UNIT unit, const double val, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
+	template void conv_val_to_len<false>(const LEN_UNIT unit, const double val, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 
 	//	メッセージダイアログを表示する.
 	//	glyph	フォントアイコンのグリフ
@@ -107,7 +138,7 @@ namespace winrt::GraphPaper::implementation
 		catch (winrt::hresult_error const&) {}
 		if (text.empty()) {
 			//	文字列が空の場合,
-			//	メッセージをそのまま文字列に格納する.
+			//	そのままのメッセージを文字列に格納する.
 			text = message;
 		}
 		//	説明をキーとする, 追加する文字列をリソースローダーから得る.
@@ -213,6 +244,8 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニュー項目の使用の可否を設定する.
 	void MainPage::enable_edit_menu(void)
 	{
+		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		enable_undo_menu();
 		//	選択の有無や動的な型ごとに図形を数え,
 		//	それらによって, メニュー項目の可否を判定する.
 		uint32_t cnt = 0;	// 消去フラグがない図形の数
@@ -226,10 +259,11 @@ namespace winrt::GraphPaper::implementation
 		bool back_sel = false;	// 最背面の図形の選択フラグ
 		bool prev_sel = false;	// ひとつ前の図形の選択
 
+		//	図形リストの各図形について以下を繰り返す.
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				//	消去フラグが立っている場合,
-				//	継続する.
+				//	以下を無視する.
 				continue;
 			}
 			//	消去フラグがない図形の数をインクリメントする.
@@ -273,8 +307,8 @@ namespace winrt::GraphPaper::implementation
 		mfi_cut().IsEnabled(sel > 0);
 		mfi_copy().IsEnabled(sel > 0);
 		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
-		winrt::hstring formats[2]{ FMT_DATA, StandardDataFormats::Text() };
-		mfi_paste().IsEnabled(clipboard_contains(formats, 2));
+		winrt::hstring formats[2]{ CF_GPD, StandardDataFormats::Text() };
+		mfi_paste().IsEnabled(xcvd_contains(formats, 2));
 		mfi_delete().IsEnabled(sel > 0);
 		mfi_select_all().IsEnabled(sel < cnt);
 		mfi_group().IsEnabled(sel > 1);
@@ -297,29 +331,6 @@ namespace winrt::GraphPaper::implementation
 		mfi_send_backward().IsEnabled(enable_back);
 		mfi_summary().IsEnabled(cnt > 0);
 		m_list_select = sel;
-	}
-
-	//	長さの単位の名前を得る.
-	winrt::hstring MainPage::get_unit_name(void)
-	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
-		if (m_page_unit == LEN_UNIT::GRID) {
-			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_grid/Content");
-		}
-		else if (m_page_unit == LEN_UNIT::INCH) {
-			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_inch/Content");
-		}
-		else if (m_page_unit == LEN_UNIT::MILLI) {
-			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_milli/Content");
-		}
-		else if (m_page_unit == LEN_UNIT::PIXEL) {
-			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_pixel/Content");
-		}
-		else if (m_page_unit == LEN_UNIT::POINT) {
-			return ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_point/Content");
-		}
-		return {};
 	}
 
 	// メインページを作成する.
@@ -408,25 +419,32 @@ namespace winrt::GraphPaper::implementation
 			//	保存確認ダイアログを表示する.
 			const auto d_result = co_await cd_conf_save().ShowAsync();
 			//	ダイアログの戻り値を判定する.
-			if (d_result == ContentDialogResult::None
-				|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
+			if (d_result == ContentDialogResult::None) {
 				//	「キャンセル」が押された場合,
-				//	または「保存する」が押されたがファイルに保存できなかた場合,
-				//	中断する.
 				co_return;
+			}
+			else if (d_result == ContentDialogResult::Primary) {
+				//	「保存する」が押された場合,
+				//	ファイルに非同期に保存する.
+				if (co_await file_save_async() != S_OK) {
+					//	保存できなかった場合,
+					//	中断する.
+					co_return;
+				}
 			}
 		}
 		//	上記以外の場合,
 		if (m_summary_visible) {
 			summary_close();
 		}
-		//	操作スタックを消去する.
+		//	操作スタックを消去し, 含まれる操作を破棄する.
 		undo_clear();
-		//	図形リストを消去する.
+		//	図形リストを消去し, 含まれる図形を破棄する.
 		s_list_clear(m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
-			cd_message_show(L"icon_alert", L"Memory leak occurs", {});
+			// 「メモリリーク」メッセージダイアログを表示する.
+			cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
 		}
 #endif
 		//	有効な書体名の配列を破棄する.
@@ -474,13 +492,18 @@ namespace winrt::GraphPaper::implementation
 			//	操作スタックの更新フラグが立っている場合,
 			//	保存確認ダイアログを表示する.
 			const auto d_result = co_await cd_conf_save().ShowAsync();
-			//	ダイアログの戻り値を判定する.
-			if (d_result == ContentDialogResult::None
-				|| (d_result == ContentDialogResult::Primary && co_await file_save_async() != S_OK)) {
+			if (d_result == ContentDialogResult::None) {
 				//	「キャンセル」が押された場合,
-				//	または「保存する」が押されたがファイルに保存できなかた場合,
-				//	中断する.
 				co_return;
+			}
+			else if (d_result == ContentDialogResult::Primary) {
+				//	「保存する」が押された場合,
+				//	ファイルに非同期に保存する.
+				if (co_await file_save_async() != S_OK) {
+					//	保存できなかった場合,
+					//	中断する.
+					co_return;
+				}
 			}
 		}
 		if (m_summary_visible) {
@@ -488,13 +511,14 @@ namespace winrt::GraphPaper::implementation
 			//	一覧を閉じる.
 			summary_close();
 		}
-		//	操作スタックを消去する.
+		//	操作スタックを消去し, 含まれる操作を破棄する.
 		undo_clear();
-		//	図形リストを消去する.
+		//	図形リストを消去し, 含まれる図形を破棄する.
 		s_list_clear(m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
-			cd_message_show(L"icon_alert", L"Memory leak occurs", {});
+			// 「メモリリーク」メッセージダイアログを表示する.
+			cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
 		}
 #endif
 		//	有効な書体名の配列を破棄する.

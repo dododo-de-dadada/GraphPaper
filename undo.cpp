@@ -168,14 +168,14 @@ namespace winrt::GraphPaper::implementation
 			if (it_del != s_shape_list->end()) {
 				s_shape_list->erase(it_del);
 			}
-			S_LIST_T& grp_list = m_g_pos->m_grp_list;
+			S_LIST_T& grp_list = m_g_pos->m_list_grouped;
 			auto it_ins{ std::find(grp_list.begin(), grp_list.end(), m_s_pos) };
 			grp_list.insert(it_ins, m_shape);
 			m_shape->set_delete(false);
 		}
 		else {
 			m_shape->set_delete(true);
-			S_LIST_T& grp_list = m_g_pos->m_grp_list;
+			S_LIST_T& grp_list = m_g_pos->m_list_grouped;
 			auto it_del{ std::find(grp_list.begin(), grp_list.end(), m_shape) };
 			auto it_pos{ grp_list.erase(it_del) };
 			m_s_pos = (it_pos == grp_list.end() ? nullptr : *it_pos);

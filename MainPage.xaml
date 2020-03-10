@@ -9,6 +9,7 @@
     mc:Ignorable="d">
     <Page.Resources>
         <ResourceDictionary>
+            <!-- 情報フォントアイコンのグリフ -->
             <x:String x:Key="icon_info">&#xE946;</x:String>
             <x:String x:Key="icon_alert">&#xEA39;</x:String>
             <x:String x:Key="icon_conf">&#xE9CE;</x:String>
@@ -337,22 +338,22 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_cut" x:Uid="mfi_cut" Click="mfi_cut_click" Icon="Cut" IsEnabled="False" Text="Cut" >
+                <MenuFlyoutItem x:Name="mfi_cut" x:Uid="mfi_cut" Click="mfi_xcvd_cut_click" Icon="Cut" IsEnabled="False" Text="Cut" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="X" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_copy" x:Uid="mfi_copy" Click="mfi_copy_click" Icon="Copy" IsEnabled="False" Text="Copy" >
+                <MenuFlyoutItem x:Name="mfi_copy" x:Uid="mfi_copy" Click="mfi_xcvd_copy_click" Icon="Copy" IsEnabled="False" Text="Copy" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="C" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_paste" x:Uid="mfi_paste" Click="mfi_paste_click" Icon="Paste" IsEnabled="False" Text="Paste" >
+                <MenuFlyoutItem x:Name="mfi_paste" x:Uid="mfi_paste" Click="mfi_xcvd_paste_click" Icon="Paste" IsEnabled="False" Text="Paste" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="V" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_delete" x:Uid="mfi_delete" Click="mfi_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
+                <MenuFlyoutItem x:Name="mfi_delete" x:Uid="mfi_delete" Click="mfi_xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Delete" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -771,7 +772,7 @@
             <StackPanel >
                 <TextBox x:Name="tx_page_width" x:Uid="tx_page_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="tx_page_size_text_changed" />
                 <TextBox x:Name="tx_page_height" x:Uid="tx_page_height" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="tx_page_size_text_changed" />
-                <TextBlock x:Name="tk_page_unit" x:Uid="tk_page_unit" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Text="Unit of distance"/>
+                <TextBox x:Name="tx_page_size_max" x:Uid="tx_page_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum size" IsEnabled="false" />
             </StackPanel>
         </ContentDialog>
         <!-- ページの単位と書式ダイアログ -->

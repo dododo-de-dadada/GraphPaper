@@ -10,17 +10,22 @@ namespace winrt::GraphPaper::implementation
 	// 図形を破棄する.
 	ShapeGroup::~ShapeGroup(void)
 	{
-		s_list_clear(m_grp_list);
+		//	図形リストを消去し, 含まれる図形を破棄する.
+		s_list_clear(m_list_grouped);
 	}
 
 	// 図形を表示する.
 	void ShapeGroup::draw(SHAPE_DX& sc)
 	{
 		if (is_selected()) {
+			//	選択フラグが立っている場合,
 			D2D1_POINT_2F b_min{ FLT_MAX, FLT_MAX };
 			D2D1_POINT_2F b_max{ -FLT_MAX, -FLT_MAX };
-			for (const auto s : m_grp_list) {
+			//	グループ化された各図形について以下を繰り返す.
+			for (const auto s : m_list_grouped) {
 				if (s->is_deleted()) {
+					//	消去フラグが立っている場合,
+					//	無視する.
 					continue;
 				}
 				s->draw(sc);
@@ -35,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 			sc.m_d2dContext->DrawRectangle(r, br, 1.0f, ss);
 		}
 		else {
-			for (const auto s : m_grp_list) {
+			for (const auto s : m_list_grouped) {
 				if (s->is_deleted()) {
 					continue;
 				}
@@ -47,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を囲む方形を得る.
 	void ShapeGroup::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
-		for (const auto s : m_grp_list) {
+		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -59,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapeGroup::get_min_pos(D2D1_POINT_2F& val) const noexcept
 	{
 		auto flag = true;
-		for (const auto s : m_grp_list) {
+		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -68,16 +73,20 @@ namespace winrt::GraphPaper::implementation
 				s->get_min_pos(val);
 				continue;
 			}
-			D2D1_POINT_2F pos;
-			s->get_min_pos(pos);
-			pt_min(pos, val, val);
+			D2D1_POINT_2F nw_pos;
+			s->get_min_pos(nw_pos);
+			pt_min(nw_pos, val, val);
 		}
 	}
 
 	// 始点を得る
 	bool ShapeGroup::get_start_pos(D2D1_POINT_2F& val) const noexcept
 	{
-		get_min_pos(val);
+		//get_min_pos(val);
+		if (m_list_grouped.empty()) {
+			return false;
+		}
+		m_list_grouped.front()->get_start_pos(val);
 		return true;
 	}
 
@@ -87,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	ANCH_WHICH ShapeGroup::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		for (const auto s : m_grp_list) {
+		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -105,7 +114,7 @@ namespace winrt::GraphPaper::implementation
 	// 線の太さは考慮されない.
 	bool ShapeGroup::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
-		for (const auto s : m_grp_list) {
+		for (const auto s : m_list_grouped) {
 			if (s->in_area(a_min, a_max) == false) {
 				return false;
 			}
@@ -116,26 +125,26 @@ namespace winrt::GraphPaper::implementation
 	// 消去フラグを調べる.
 	bool ShapeGroup::is_deleted(void) const noexcept
 	{
-		return m_grp_list.size() == 0 || m_grp_list.back()->is_deleted();
+		return m_list_grouped.size() == 0 || m_list_grouped.back()->is_deleted();
 	}
 
 	// 選択フラグを調べる.
 	bool ShapeGroup::is_selected(void) const noexcept
 	{
 		// グループに含まれる図形が選択されてるか調べる.
-		return m_grp_list.size() > 0 && m_grp_list.back()->is_selected();
+		return m_list_grouped.size() > 0 && m_list_grouped.back()->is_selected();
 	}
 
 	// 差分だけ移動する
-	void ShapeGroup::move(const D2D1_POINT_2F d)
+	void ShapeGroup::move(const D2D1_POINT_2F d_pos)
 	{
-		s_list_move(m_grp_list, d);
+		s_list_move(m_list_grouped, d_pos);
 	}
 
 	// 値を消去フラグに格納する.
 	void ShapeGroup::set_delete(const bool val) noexcept
 	{
-		for (const auto s : m_grp_list) {
+		for (const auto s : m_list_grouped) {
 			s->set_delete(val);
 		}
 	}
@@ -143,36 +152,36 @@ namespace winrt::GraphPaper::implementation
 	// 値を選択フラグに格納する.
 	void ShapeGroup::set_select(const bool val) noexcept
 	{
-		for (const auto s : m_grp_list) {
+		for (const auto s : m_list_grouped) {
 			s->set_select(val);
 		}
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	void ShapeGroup::set_start_pos(const D2D1_POINT_2F pos)
+	void ShapeGroup::set_start_pos(const D2D1_POINT_2F val)
 	{
 		D2D1_POINT_2F b_min;
-		D2D1_POINT_2F d;
+		D2D1_POINT_2F d_pos;
 
 		get_min_pos(b_min);
-		if (equal(pos, b_min)) {
+		if (equal(val, b_min)) {
 			return;
 		}
-		pt_sub(pos, b_min, d);
-		move(d);
+		pt_sub(val, b_min, d_pos);
+		move(d_pos);
 	}
 
 	// 図形をデータリーダーから作成する.
 	ShapeGroup::ShapeGroup(DataReader const& dt_reader)
 	{
-		s_list_read(m_grp_list, dt_reader);
+		s_list_read(m_list_grouped, dt_reader);
 	}
 
 	// データライターに書き込む.
 	void ShapeGroup::write(DataWriter const& dt_writer) const
 	{
 		constexpr bool REDUCED = true;
-		s_list_write<!REDUCED>(m_grp_list, dt_writer);
+		s_list_write<!REDUCED>(m_list_grouped, dt_writer);
 	}
 
 	// データライターに SVG として書き込む.
@@ -181,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write_svg;
 
 		write_svg("<g>" SVG_NL, dt_writer);
-		for (const auto s : m_grp_list) {
+		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}

@@ -30,13 +30,15 @@ namespace winrt::GraphPaper::implementation
 			const auto dpi = m_sample_dx.m_logical_dpi;
 			const auto g_len = m_page_panel.m_grid_size + 1.0;
 			wchar_t buf[32];
-			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 31);
+			//	ピクセル単位の長さを他の単位の文字列に変換する.
+			conv_val_to_len<true>(m_page_unit, val, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			if constexpr (S == 3) {
 				wchar_t buf[32];
-				conv_val_to_col(m_col_style, val, buf, 16);
+				//	色成分の値を文字列に変換する.
+				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
@@ -55,11 +57,10 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	値をスライダーのヘッダーと図形に格納する.
-	//	U	操作
-	//	S	スライダー
-	//	s	図形	
-	//	val	値
+	//	値をスライダーのヘッダーと、見本の図形に格納する.
+	//	U	操作の種類
+	//	S	スライダーの番号
+	//	args	ValueChanged で渡された引数
 	//	戻り値	なし
 	template <UNDO_OP U, int S>
 	void MainPage::grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
@@ -115,6 +116,7 @@ namespace winrt::GraphPaper::implementation
 			if (equal(page_val, sample_val) == false) {
 				undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, sample_val);
 				undo_push_null();
+				//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
 
@@ -133,6 +135,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, val);
 		undo_push_null();
+		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -148,6 +151,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, val);
 		undo_push_null();
+		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -174,6 +178,7 @@ namespace winrt::GraphPaper::implementation
 			if (equal(page_val, sample_val) == false) {
 				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_panel, sample_val);
 				undo_push_null();
+				//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
 		}
@@ -190,6 +195,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::BACK);
 		undo_push_null();
+		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -202,6 +208,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::FRONT);
 		undo_push_null();
+		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -214,6 +221,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::HIDE);
 		undo_push_null();
+		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -230,33 +238,41 @@ namespace winrt::GraphPaper::implementation
 		}
 		const double g_len = m_page_panel.m_grid_size + 1.0;
 		auto flag = true;	// 未変更
-		D2D1_POINT_2F s_pos;
-		D2D1_POINT_2F g_pos;
-		D2D1_POINT_2F d;
 
+		//	図形リストの各図形について以下を繰り返す.
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
+				//	消去フラグが立っている場合,
+				//	以下を無視する.
 				continue;
 			}
 			if (s->is_selected() == false) {
+				//	選択フラグがない場合,
+				//	以下を無視する.
 				continue;
 			}
+			D2D1_POINT_2F s_pos;
 			s->get_min_pos(s_pos);
+			D2D1_POINT_2F g_pos;
 			pt_round(s_pos, g_len, g_pos);
 			if (equal(g_pos, s_pos)) {
+				//	開始位置と丸めた位置が同じ場合,
+				//	以下を無視する.
 				continue;
 			}
 			if (flag == true) {
 				flag = false;
 			}
 			undo_push_set<UNDO_OP::START_POS>(s);
-			pt_sub(g_pos, s_pos, d);
-			s->move(d);
+			D2D1_POINT_2F d_pos;
+			pt_sub(g_pos, s_pos, d_pos);
+			s->move(d_pos);
 		}
 		if (flag == true) {
 			return;
 		}
 		undo_push_null();
+		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();

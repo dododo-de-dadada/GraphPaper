@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr uint32_t CUT = 0;
 	constexpr uint32_t COPY = 1;
 	template <uint32_t X>
-	IAsyncAction MainPage::clipboard_copy_async(void)
+	IAsyncAction MainPage::xcvd_copy_async(void)
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 		using winrt::Windows::ApplicationModel::DataTransfer::DataPackage;
@@ -37,6 +37,7 @@ namespace winrt::GraphPaper::implementation
 				if (m_summary_visible) {
 					summary_remove(s);
 				}
+				//	図形を削除して, その操作をスタックに積む.
 				undo_push_remove(s);
 			}
 			undo_push_null();
@@ -67,7 +68,7 @@ namespace winrt::GraphPaper::implementation
 			auto dt_pkg{ DataPackage() };
 			//	ストリームをデータパッケージに格納する.
 			dt_pkg.RequestedOperation(DataPackageOperation::Copy);
-			dt_pkg.SetData(FMT_DATA, winrt::box_value(ra_stream));
+			dt_pkg.SetData(CF_GPD, winrt::box_value(ra_stream));
 			if (text.empty() == false) {
 				//	文字列が空でない場合,
 				//	文字列をデータパッケージに格納する.
@@ -80,15 +81,13 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.Close();
 		//	出力ストリームを閉じる.
 		out_stream.Close();
-		//	元に戻す/やり直すメニュー項目の使用可否を設定する.
-		enable_undo_menu();
-		//	編集メニュー項目の使用可否を設定する.
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		//	スレッドコンテキストを復元する.
 		co_await context;
 	}
 
-	bool MainPage::clipboard_contains(winrt::hstring const c_formats[], const uint32_t c_count) const
+	bool MainPage::xcvd_contains(winrt::hstring const c_formats[], const uint32_t c_count) const
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 
@@ -104,7 +103,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// クリップボードに保存された図形を非同期に貼り付ける
-	IAsyncAction MainPage::clipboard_paste_async(void)
+	IAsyncAction MainPage::xcvd_paste_async(void)
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 		using winrt::Windows::ApplicationModel::DataTransfer::DataPackageView;
@@ -121,9 +120,9 @@ namespace winrt::GraphPaper::implementation
 		try {
 			// 図形データがクリップボードに含まれているか調べる.
 			auto pkg_view{ Clipboard::GetContent() };
-			if (pkg_view.Contains(FMT_DATA)) {
+			if (pkg_view.Contains(CF_GPD)) {
 				// クリップボードから読み込むためのデータリーダーを得る.
-				auto dt_object{ co_await pkg_view.GetDataAsync(FMT_DATA) };
+				auto dt_object{ co_await pkg_view.GetDataAsync(CF_GPD) };
 				auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
 				auto in_stream{ ra_stream.GetInputStreamAt(0) };
 				auto dt_reader{ DataReader(in_stream) };
@@ -134,16 +133,16 @@ namespace winrt::GraphPaper::implementation
 				//	図形を貼り付ける前に, スレッドをメインページの UI スレッドに変える.
 				co_await winrt::resume_foreground(this->Dispatcher());
 				if (operation == ra_stream.Size()) {
-					S_LIST_T paste_list;	// 貼り付けリスト
-					if (s_list_read(paste_list, dt_reader) == false) {
+					S_LIST_T list_pasted;	// 貼り付けリスト
+					if (s_list_read(list_pasted, dt_reader) == false) {
 
 					}
-					else if (paste_list.empty() == false) {
-						// 貼り付けリストが空でない場合,
-						// 図形リストの中の図形の選択をすべて解除し,
-						// 貼り付けリストの図形を追加する.
+					else if (list_pasted.empty() == false) {
+						// 得られたリストが空でない場合,
+						// 図形リストの中の図形の選択をすべて解除する.
 						unselect_all();
-						for (auto s : paste_list) {
+						// 得られたリストの各図形について以下を繰り返す.
+						for (auto s : list_pasted) {
 							if (m_summary_visible) {
 								summary_append(s);
 							}
@@ -151,8 +150,8 @@ namespace winrt::GraphPaper::implementation
 							s->get_bound(m_page_min, m_page_max);
 						}
 						undo_push_null();
-						paste_list.clear();
-						enable_undo_menu();
+						list_pasted.clear();
+						//	編集メニュー項目の使用の可否を設定する.
 						enable_edit_menu();
 						set_page_panle_size();
 						page_draw();
@@ -186,7 +185,6 @@ namespace winrt::GraphPaper::implementation
 					}
 					undo_push_append(t);
 					undo_push_null();
-					enable_undo_menu();
 					enable_edit_menu();
 					t->get_bound(m_page_min, m_page_max);
 					set_page_panle_size();
@@ -204,34 +202,39 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「コピー」が選択された.
-	void MainPage::mfi_copy_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_xcvd_copy_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto _{ clipboard_copy_async<COPY>() };
+		auto _{ xcvd_copy_async<COPY>() };
 	}
 
 	// 編集メニューの「切り取る」が選択された.
-	void MainPage::mfi_cut_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_xcvd_cut_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto _{ clipboard_copy_async<CUT>() };
+		auto _{ xcvd_copy_async<CUT>() };
 	}
 
 	// 編集メニューの「削除」が選択された.
-	void MainPage::mfi_delete_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_xcvd_delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		S_LIST_T sel_list;
-		s_list_select<Shape>(m_list_shapes, sel_list);
-		if (sel_list.size() == 0) {
+		//	選択された図形のリストを得る.
+		S_LIST_T list_selected;
+		s_list_select<Shape>(m_list_shapes, list_selected);
+		if (list_selected.empty()) {
+			//	得られたリストが空の場合,
+			//	終了する.
 			return;
 		}
-		for (auto s : sel_list) {
+		//	得られたリストの各図形について以下を繰り返す.
+		for (auto s : list_selected) {
 			if (m_summary_visible) {
 				summary_remove(s);
 			}
+			//	図形を削除して, その操作をスタックに積む.
 			undo_push_remove(s);
 		}
-		sel_list.clear();
+		list_selected.clear();
 		undo_push_null();
-		enable_undo_menu();
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
@@ -239,9 +242,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「貼り付け」が選択された.
-	void MainPage::mfi_paste_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_xcvd_paste_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto _{ clipboard_paste_async() };
+		auto _{ xcvd_paste_async() };
 	}
 
 }

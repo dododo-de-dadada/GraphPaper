@@ -79,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 	static bool bz_test_param(const double t_min, const double t_max) noexcept;
 
 	// 助変数から曲線上の接線ベクトルを求める.
-	static void bz_tvec_by_param(const BZP bz[4], const double t, BZP& vec) noexcept;
+	static void bz_tvec_by_param(const BZP bz[4], const double t, BZP& t_vec) noexcept;
 
 	// 矢じりの両端点を計算する.
 	static bool bz_calc_arrowhead(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
@@ -264,13 +264,12 @@ namespace winrt::GraphPaper::implementation
 	// 助変数をもとにベジェ曲線上の微分値を求める.
 	static double bz_derivative(const BZP bz[4], const double t) noexcept
 	{
-		BZP vec;
+		BZP t_vec;
 
 		// 助変数をもとにベジェ曲線上の接線ベクトルを求め,
 		// その接線ベクトルの長さを返す.
-		bz_tvec_by_param(bz, t, vec);
-		return sqrt(vec * vec);
-		//return sqrt(vec.abs());
+		bz_tvec_by_param(bz, t, t_vec);
+		return sqrt(t_vec * t_vec);
 	}
 
 	// 方形が分割可能かどうか判定し, その重心点を返す.
@@ -423,13 +422,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 助変数から曲線上の接線ベクトルを求める.
-	static void bz_tvec_by_param(const BZP bz[4], const double t, BZP& vec) noexcept
+	//	bz	曲線
+	//	t	助変数
+	//	t_vec	接線ベクトル
+	static void bz_tvec_by_param(const BZP bz[4], const double t, BZP& t_vec) noexcept
 	{
 		const double a = -3.0 * (1.0 - t) * (1.0 - t);
 		const double b = 3.0 * (1.0 - t) * (1.0 - 3.0 * t);
 		const double c = 3.0 * t * (2.0 - 3.0 * t);
 		const double d = (3.0 * t * t);
-		vec = bz[0] * a + bz[1] * b + bz[2] * c + bz[3] * d;
+		t_vec = bz[0] * a + bz[1] * b + bz[2] * c + bz[3] * d;
 	}
 
 	// パスジオメトリを作成する.
@@ -440,9 +442,9 @@ namespace winrt::GraphPaper::implementation
 
 		m_poly_geom = nullptr;
 		m_arrow_geom = nullptr;
-		pt_add(m_pos, m_vec, b_seg.point1);
-		pt_add(b_seg.point1, m_vec_1, b_seg.point2);
-		pt_add(b_seg.point2, m_vec_2, b_seg.point3);
+		pt_add(m_pos, m_diff, b_seg.point1);
+		pt_add(b_seg.point1, m_diff_1, b_seg.point2);
+		pt_add(b_seg.point2, m_diff_2, b_seg.point3);
 		winrt::check_hresult(
 			s_d2d_factory->CreatePathGeometry(m_poly_geom.put())
 		);
@@ -489,21 +491,21 @@ namespace winrt::GraphPaper::implementation
 		auto sb = dx.m_anch_brush.get();
 		auto ss = dx.m_aux_style.get();
 
-		TOOL_anchor(m_pos, dx);
+		anchor_draw_rect(m_pos, dx);
 		s_pos = m_pos;
-		pt_add(s_pos, m_vec, e_pos);
+		pt_add(s_pos, m_diff, e_pos);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, sb, sw, ss);
-		TOOL_anchor_rounded(e_pos, dx);
+		anchor_draw_rounded(e_pos, dx);
 
 		s_pos = e_pos;
-		pt_add(s_pos, m_vec_1, e_pos);
+		pt_add(s_pos, m_diff_1, e_pos);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, sb, sw, ss);
-		TOOL_anchor_rounded(e_pos, dx);
+		anchor_draw_rounded(e_pos, dx);
 
 		s_pos = e_pos;
-		pt_add(s_pos, m_vec_2, e_pos);
+		pt_add(s_pos, m_diff_2, e_pos);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, sb, sw, ss);
-		TOOL_anchor(e_pos, dx);
+		anchor_draw_rect(e_pos, dx);
 	}
 
 	// 矢じりの寸法を得る.
@@ -530,9 +532,9 @@ namespace winrt::GraphPaper::implementation
 		// 調べる位置が原点となるよう平行移動し, 制御点を得る.
 		D2D1_POINT_2F a_pos[4];
 		pt_sub(m_pos, t_pos, a_pos[3]);
-		pt_add(a_pos[3], m_vec, a_pos[2]);
-		pt_add(a_pos[2], m_vec_1, a_pos[1]);
-		pt_add(a_pos[1], m_vec_2, a_pos[0]);
+		pt_add(a_pos[3], m_diff, a_pos[2]);
+		pt_add(a_pos[2], m_diff_1, a_pos[1]);
+		pt_add(a_pos[1], m_diff_2, a_pos[0]);
 		// 制御点の各部位について,
 		for (uint32_t i = 0; i < 4; i++) {
 			// 部位が位置を含むか調べる.
@@ -650,9 +652,9 @@ namespace winrt::GraphPaper::implementation
 		const auto h = static_cast<double>(a_max.y) - a_min.y;
 		D2D1_POINT_2F a_pos[4];
 		pt_sub(m_pos, a_min, a_pos[0]);
-		pt_add(a_pos[0], m_vec, a_pos[1]);
-		pt_add(a_pos[1], m_vec_1, a_pos[2]);
-		pt_add(a_pos[2], m_vec_2, a_pos[3]);
+		pt_add(a_pos[0], m_diff, a_pos[1]);
+		pt_add(a_pos[1], m_diff_1, a_pos[2]);
+		pt_add(a_pos[2], m_diff_2, a_pos[3]);
 		// 最初の制御点の組をプッシュする.
 		constexpr auto D_MAX = 52;	// 分割する最大回数
 		BZP s_arr[1 + D_MAX * 3] = {};
@@ -754,23 +756,23 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	void ShapeBezi::set_start_pos(const D2D1_POINT_2F pos)
+	void ShapeBezi::set_start_pos(const D2D1_POINT_2F val)
 	{
-		ShapeStroke::set_start_pos(pos);
+		ShapeStroke::set_start_pos(val);
 		create_path_geometry();
 	}
 
 	// 図形を作成する.
-	ShapeBezi::ShapeBezi(const D2D1_POINT_2F pos, const D2D1_POINT_2F d, const ShapePanel* attr) :
+	ShapeBezi::ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr) :
 		ShapePoly::ShapePoly(attr)
 	{
-		m_pos = pos;
-		m_vec.x = d.x;
-		m_vec.y = 0.0f;
-		m_vec_1.x = -d.x;
-		m_vec_1.y = d.y;
-		m_vec_2.x = d.x;
-		m_vec_2.y = 0.0f;
+		m_pos = s_pos;
+		m_diff.x = d_pos.x;
+		m_diff.y = 0.0f;
+		m_diff_1.x = -d_pos.x;
+		m_diff_1.y = d_pos.y;
+		m_diff_2.x = d_pos.x;
+		m_diff_2.y = 0.0f;
 		m_arrow_style = attr->m_arrow_style;
 		m_arrow_size = attr->m_arrow_size;
 		create_path_geometry();
@@ -803,11 +805,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::write_svg;
 		D2D1_BEZIER_SEGMENT b_seg;
-		//D2D1_POINT_2F pos;
 
-		pt_add(m_pos, m_vec, b_seg.point1);
-		pt_add(b_seg.point1, m_vec_1, b_seg.point2);
-		pt_add(b_seg.point2, m_vec_2, b_seg.point3);
+		pt_add(m_pos, m_diff, b_seg.point1);
+		pt_add(b_seg.point1, m_diff_1, b_seg.point2);
+		pt_add(b_seg.point2, m_diff_2, b_seg.point3);
 		write_svg("<path d=\"", dt_writer);
 		write_svg(m_pos, "M", dt_writer);
 		write_svg(b_seg.point1, "C", dt_writer);
@@ -846,12 +847,12 @@ namespace winrt::GraphPaper::implementation
 
 		// 計算精度をなるべく一定にするため, ベジェ制御点 bz を, その始点が原点となるよう平行移動する.
 		bz[0] = 0.0;
-		bz[1].x = m_vec.x;
-		bz[1].y = m_vec.y;
-		bz[2].x = bz[1].x + m_vec_1.x;
-		bz[2].y = bz[1].y + m_vec_1.y;
-		bz[3].x = bz[2].x + m_vec_2.x;
-		bz[3].y = bz[2].y + m_vec_2.y;
+		bz[1].x = m_diff.x;
+		bz[1].y = m_diff.y;
+		bz[2].x = bz[1].x + m_diff_1.x;
+		bz[2].y = bz[1].y + m_diff_1.y;
+		bz[3].x = bz[2].x + m_diff_2.x;
+		bz[3].y = bz[2].y + m_diff_2.y;
 		// 線分 pq に外接する方形 pr を求める.
 		pb.x = p.x - m_pos.x;
 		pb.y = p.y - m_pos.y;

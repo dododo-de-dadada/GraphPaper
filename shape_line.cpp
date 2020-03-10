@@ -11,24 +11,26 @@ namespace winrt::GraphPaper::implementation
 {
 	constexpr ANCH_WHICH ANCH_BEGIN = ANCH_WHICH::ANCH_R_NW;
 	constexpr ANCH_WHICH ANCH_END = ANCH_WHICH::ANCH_R_SE;
-
-	static bool ln_calc_arrowhead(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip_pos) noexcept
+	//	s_pos	軸の開始位置
+	//	d_pos	軸の終了位置への差分
+	//	a_size	矢じりの寸法
+	//	barbs_pos	返しの位置
+	//	tip_pos		先端の位置
+	static bool ln_calc_arrowhead(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs_pos[2], D2D1_POINT_2F& tip_pos) noexcept
 	{
-		const auto len = std::sqrt(pt_abs2(vec));	// 軸の長さ
-		if (len > FLT_MIN) {
+		const auto d_len = std::sqrt(pt_abs2(d_pos));	// 軸の長さ
+		if (d_len > FLT_MIN) {
 			// 矢じりの先端と返しの位置を計算する.
-			get_arrow_barbs(
-				vec, len,
-				a_size.m_width, a_size.m_length, barbs);
-			if (a_size.m_offset >= len) {
+			get_arrow_barbs(d_pos, d_len, a_size.m_width, a_size.m_length, barbs_pos);
+			if (a_size.m_offset >= d_len) {
 				// 矢じりの先端
-				tip_pos = pos;
+				tip_pos = s_pos;
 			}
 			else {
-				pt_scale(vec, 1.0 - a_size.m_offset / len, pos, tip_pos);
+				pt_scale(d_pos, 1.0 - a_size.m_offset / d_len, s_pos, tip_pos);
 			}
-			pt_add(barbs[0], tip_pos, barbs[0]);
-			pt_add(barbs[1], tip_pos, barbs[1]);
+			pt_add(barbs_pos[0], tip_pos, barbs_pos[0]);
+			pt_add(barbs_pos[1], tip_pos, barbs_pos[1]);
 			return true;
 		}
 		return false;
@@ -36,18 +38,18 @@ namespace winrt::GraphPaper::implementation
 
 	// 矢じりの D2D1 パスジオメトリを作成する
 	// fa	D2D ファクトリー
-	// pos	軸の始点
-	// vec	軸の終点ベクトル
+	// s_pos	軸の開始位置
+	// d_pos	軸の終了位置への差分
 	// style	矢じりの形式
 	// size	矢じりの寸法
 	// geo	作成されたパスジオメトリ
-	static void ln_create_arrow_geometry(ID2D1Factory3* fa, const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo)
+	static void ln_create_arrow_geometry(ID2D1Factory3* fa, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo)
 	{
 		D2D1_POINT_2F barbs[2];	// 矢じりの返しの端点
 		D2D1_POINT_2F tip_pos;	// 矢じりの先端点
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (ln_calc_arrowhead(pos, vec, a_size, barbs, tip_pos)) {
+		if (ln_calc_arrowhead(s_pos, d_pos, a_size, barbs, tip_pos)) {
 			// ジオメトリパスを作成する.
 			winrt::check_hresult(
 				fa->CreatePathGeometry(geo)
@@ -55,19 +57,19 @@ namespace winrt::GraphPaper::implementation
 			winrt::check_hresult(
 				(*geo)->Open(sink.put())
 			);
-			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
+			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(
-				barbs[0],
+				barbs[0], 
 				style == ARROW_STYLE::FILLED
-				? D2D1_FIGURE_BEGIN_FILLED
-				: D2D1_FIGURE_BEGIN_HOLLOW
+				? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
+				: D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW
 			);
 			sink->AddLine(tip_pos);
 			sink->AddLine(barbs[1]);
 			sink->EndFigure(
 				style == ARROW_STYLE::FILLED
-				? D2D1_FIGURE_END_CLOSED
-				: D2D1_FIGURE_END_OPEN
+				? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED
+				: D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN
 			);
 			winrt::check_hresult(sink->Close());
 			//sink.attach(nullptr);
@@ -87,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F e_pos;
 
 		dx.m_shape_brush->SetColor(m_stroke_color);
-		pt_add(m_pos, m_vec, e_pos);
+		pt_add(m_pos, m_diff, e_pos);
 		dx.m_d2dContext->DrawLine(
 			m_pos,
 			e_pos,
@@ -99,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_arrow_geometry.get() == nullptr) {
 				//ID2D1Factory3 *factory = dev->2DFactory();
 				ln_create_arrow_geometry(
-					s_d2d_factory, m_pos, m_vec, m_arrow_style,
+					s_d2d_factory, m_pos, m_diff, m_arrow_style,
 					m_arrow_size, m_d2d_arrow_geometry.put());
 			}
 			*/
@@ -118,10 +120,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_selected()) {
 			D2D1_POINT_2F mid;
-			pt_scale(m_vec, 0.5, m_pos, mid);
-			TOOL_anchor(m_pos, dx);
-			TOOL_anchor(mid, dx);
-			TOOL_anchor(e_pos, dx);
+			pt_scale(m_diff, 0.5, m_pos, mid);
+			anchor_draw_rect(m_pos, dx);
+			anchor_draw_rect(mid, dx);
+			anchor_draw_rect(e_pos, dx);
 		}
 	}
 
@@ -140,13 +142,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapeLine::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& pos) const noexcept
+	void ShapeLine::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept
 	{
 		if (a == ANCH_END) {
-			pt_add(m_pos, m_vec, pos);
+			pt_add(m_pos, m_diff, val);
 		}
 		else {
-			pos = m_pos;
+			val = m_pos;
 		}
 	}
 
@@ -157,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 	ANCH_WHICH ShapeLine::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		D2D1_POINT_2F e_pos;
-		pt_add(m_pos, m_vec, e_pos);
+		pt_add(m_pos, m_diff, e_pos);
 		if (pt_in_anch(t_pos, e_pos, a_len)) {
 			return ANCH_END;
 		}
@@ -177,23 +179,23 @@ namespace winrt::GraphPaper::implementation
 	// 線の太さは考慮されない.
 	bool ShapeLine::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
-		D2D1_POINT_2F pos;
+		D2D1_POINT_2F e_pos;
 
 		if (pt_in_rect(m_pos, a_min, a_max)) {
-			pt_add(m_pos, m_vec, pos);
-			return pt_in_rect(pos, a_min, a_max);
+			pt_add(m_pos, m_diff, e_pos);
+			return pt_in_rect(e_pos, a_min, a_max);
 		}
 		return false;
 	}
 
 	// 差分だけ移動する.
-	void ShapeLine::move(const D2D1_POINT_2F d)
+	void ShapeLine::move(const D2D1_POINT_2F d_pos)
 	{
-		ShapeStroke::move(d);
+		ShapeStroke::move(d_pos);
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			ln_create_arrow_geometry(
-				s_d2d_factory, m_pos, m_vec, m_arrow_style,
+				s_d2d_factory, m_pos, m_diff, m_arrow_style,
 				m_arrow_size, m_d2d_arrow_geometry.put());
 		}
 	}
@@ -208,7 +210,7 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			ln_create_arrow_geometry(
-				s_d2d_factory, m_pos, m_vec, m_arrow_style,
+				s_d2d_factory, m_pos, m_diff, m_arrow_style,
 				m_arrow_size, m_d2d_arrow_geometry.put());
 		}
 	}
@@ -223,7 +225,7 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			ln_create_arrow_geometry(
-				s_d2d_factory, m_pos, m_vec, m_arrow_style,
+				s_d2d_factory, m_pos, m_diff, m_arrow_style,
 				m_arrow_size, m_d2d_arrow_geometry.put());
 		}
 	}
@@ -236,63 +238,62 @@ namespace winrt::GraphPaper::implementation
 			m_d2d_arrow_geometry = nullptr;
 			if (val != ARROW_STYLE::NONE) {
 				ln_create_arrow_geometry(
-					s_d2d_factory, m_pos, m_vec, m_arrow_style,
+					s_d2d_factory, m_pos, m_diff, m_arrow_style,
 					m_arrow_size, m_d2d_arrow_geometry.put());
 			}
 		}
 	}
 
 	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapeLine::set_pos(const D2D1_POINT_2F pos, const ANCH_WHICH a)
+	void ShapeLine::set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a)
 	{
-		D2D1_POINT_2F d;
+		D2D1_POINT_2F d_pos;
 
 		if (a == ANCH_END) {
-			pt_sub(pos, m_pos, m_vec);
+			pt_sub(val, m_pos, m_diff);
 		}
 		else if (a == ANCH_BEGIN) {
-			pt_sub(pos, m_pos, d);
-			pt_sub(m_vec, d, m_vec);
-			m_pos = pos;
+			pt_sub(val, m_pos, d_pos);
+			pt_sub(m_diff, d_pos, m_diff);
+			m_pos = val;
 		}
 		else {
-			m_pos = pos;
+			m_pos = val;
 		}
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			ln_create_arrow_geometry(
-				s_d2d_factory, m_pos, m_vec, m_arrow_style,
+				s_d2d_factory, m_pos, m_diff, m_arrow_style,
 				m_arrow_size, m_d2d_arrow_geometry.put());
 		}
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	void ShapeLine::set_start_pos(const D2D1_POINT_2F pos)
+	void ShapeLine::set_start_pos(const D2D1_POINT_2F val)
 	{
-		ShapeStroke::set_start_pos(pos);
+		ShapeStroke::set_start_pos(val);
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			ln_create_arrow_geometry(
-				s_d2d_factory, m_pos, m_vec, m_arrow_style,
+				s_d2d_factory, m_pos, m_diff, m_arrow_style,
 				m_arrow_size, m_d2d_arrow_geometry.put());
 		}
 	}
 
 	// 図形を作成する.
 	// pos	開始位置
-	// vec	終了ベクトル
+	// d_pos	終了位置への差分
 	// attr	既定の属性値
-	ShapeLine::ShapeLine(const D2D1_POINT_2F pos, const D2D1_POINT_2F vec, const ShapePanel* attr) :
+	ShapeLine::ShapeLine(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr) :
 		ShapeStroke::ShapeStroke(attr),
 		m_arrow_style(attr->m_arrow_style),
 		m_arrow_size(attr->m_arrow_size)
 	{
-		m_pos = pos;
-		m_vec = vec;
+		m_pos = s_pos;
+		m_diff = d_pos;
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			ln_create_arrow_geometry(
-				s_d2d_factory, m_pos, m_vec, m_arrow_style,
+			ln_create_arrow_geometry(s_d2d_factory, m_pos, m_diff, m_arrow_style,
 				m_arrow_size, m_d2d_arrow_geometry.put());
 		}
 	}
@@ -309,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			ln_create_arrow_geometry(
-				s_d2d_factory, m_pos, m_vec, m_arrow_style,
+				s_d2d_factory, m_pos, m_diff, m_arrow_style,
 				m_arrow_size, m_d2d_arrow_geometry.put());
 		}
 	}
@@ -328,12 +329,12 @@ namespace winrt::GraphPaper::implementation
 	void ShapeLine::write_svg(DataWriter const& dt_writer) const
 	{
 		using winrt::GraphPaper::implementation::write_svg;
-		D2D1_POINT_2F pos;
+		D2D1_POINT_2F e_pos;
 
-		pt_add(m_pos, m_vec, pos);
+		pt_add(m_pos, m_diff, e_pos);
 		write_svg("<line ", dt_writer);
 		write_svg(m_pos, "x1", "y1", dt_writer);
-		write_svg(pos, "x2", "y2", dt_writer);
+		write_svg(e_pos, "x2", "y2", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
 		write_svg("/>" SVG_NL, dt_writer);
 		if (m_arrow_style == ARROW_STYLE::NONE) {
@@ -341,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		D2D1_POINT_2F barbs[2];
 		D2D1_POINT_2F tip_pos;
-		if (ln_calc_arrowhead(m_pos, m_vec, m_arrow_size, barbs, tip_pos)) {
+		if (ln_calc_arrowhead(m_pos, m_diff, m_arrow_size, barbs, tip_pos)) {
 			ShapeStroke::write_svg(barbs, tip_pos, m_arrow_style, dt_writer);
 		}
 	}

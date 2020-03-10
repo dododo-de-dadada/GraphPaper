@@ -826,8 +826,8 @@
     <value>上下の余白</value>
     <comment>String</comment>
   </data>
-  <data name="str_unavailable_font" xml:space="preserve">
-    <value>有効な書体ではありません.</value>
+  <data name="str_err_font" xml:space="preserve">
+    <value>無効な書体が使用されています.</value>
     <comment>String</comment>
   </data>
   <data name="str_unknown" xml:space="preserve">
@@ -846,9 +846,9 @@
     <value>変更を保存しますか?</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tk_page_unit.Text" xml:space="preserve">
-    <value>長さの単位</value>
-    <comment>TextBlock</comment>
+  <data name="tx_page_size_max.Header" xml:space="preserve">
+    <value>最大の大きさ</value>
+    <comment>TextBox</comment>
   </data>
   <data name="tmfi_grid_snap.Text" xml:space="preserve">
     <value>方眼にそろえる</value>
@@ -909,5 +909,13 @@
   <data name="btn_summary_close.Content" xml:space="preserve">
     <value>閉じる</value>
     <comment>Button</comment>
+  </data>
+  <data name="str_err_write" xml:space="preserve">
+    <value>ファイルに書き込めません.</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_err_draw" xml:space="preserve">
+    <value>描画できません.</value>
+    <comment>String</comment>
   </data>
 </root>

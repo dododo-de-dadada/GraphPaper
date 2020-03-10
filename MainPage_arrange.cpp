@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 選択された図形について, 次あるいは前の図形と入れ替える.
+	//	選択された図形について, 次あるいは前の図形と入れ替える.
 	template<typename T>
 	void MainPage::arrange_order(void)
 	{
@@ -50,6 +50,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			auto s = *it_src;	// 交換元の図形
 			if (s->is_deleted()) {
+				//	消去フラグが立っている場合,
+				//	交換元の反復子をインクリメントする.
+				//	以下を無視する.
 				it_src++;
 				continue;
 			}
@@ -67,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag == true) {
 			undo_push_null();
-			enable_undo_menu();
+			//	編集メニュー項目の使用の可否を設定する.
 			enable_edit_menu();
 			page_draw();
 		}
@@ -96,6 +99,7 @@ namespace winrt::GraphPaper::implementation
 					summary_remove(s);
 					summary_insert(s, i++);
 				}
+				//	図形を削除して, その操作をスタックに積む.
 				undo_push_remove(s);
 				undo_push_insert(s, s_pos);
 			}
@@ -106,13 +110,14 @@ namespace winrt::GraphPaper::implementation
 					summary_remove(s);
 					summary_append(s);
 				}
+				//	図形を削除して, その操作をスタックに積む.
 				undo_push_remove(s);
 				undo_push_insert(s, nullptr);
 			}
 		}
 		sel_list.clear();
 		undo_push_null();
-		enable_undo_menu();
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 	}
@@ -122,12 +127,14 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「前面に移動」が選択された.
 	void MainPage::mfi_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		//	選択された図形について, 次あるいは前の図形と入れ替える.
 		arrange_order<S_LIST_T::reverse_iterator>();
 	}
 
 	// 編集メニューの「最前面に移動」が選択された.
 	void MainPage::mfi_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		//	選択された図形を最背面または最前面に移動する.
 		constexpr auto FRONT = false;
 		arrange_to<FRONT>();
 	}
@@ -135,12 +142,14 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「ひとつ背面に移動」が選択された.
 	void MainPage::mfi_send_backward_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		//	選択された図形について, 次あるいは前の図形と入れ替える.
 		arrange_order<S_LIST_T::iterator>();
 	}
 
 	// 編集メニューの「最背面に移動」が選択された.
 	void MainPage::mfi_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		//	選択された図形を最背面または最前面に移動する.
 		constexpr auto BACK = true;
 		arrange_to<BACK>();
 	}

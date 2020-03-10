@@ -168,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 			scroll_to_shape(t);
 			m_page_panel.set_to_shape(t);
 		}
-		enable_undo_menu();
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 	}
@@ -235,7 +235,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧の添え字の位置に図形を挿入する.
-	void MainPage::summary_insert(Shape* s, uint32_t i)
+	void MainPage::summary_insert(Shape* s, const uint32_t i)
 	{
 		if (m_summary_visible == false) {
 			return;
@@ -246,9 +246,9 @@ namespace winrt::GraphPaper::implementation
 		m_summary_visible = true;
 	}
 
-	// これから実行する操作を図形一覧に反映する.
-	// この関数は, 操作を実行する前に呼び出す.
-	void MainPage::summary_reflect(Undo* u)
+	//	操作を図形一覧に反映する.
+	//	この関数は, 操作を実行する前に呼び出す.
+	void MainPage::summary_reflect(const Undo* u)
 	{
 		if (m_summary_visible == false) {
 			return;

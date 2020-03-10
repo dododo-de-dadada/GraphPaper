@@ -830,7 +830,7 @@
     <value>Top and Bottom Margin</value>
     <comment>String</comment>
   </data>
-  <data name="str_unavailable_font" xml:space="preserve">
+  <data name="str_err_font" xml:space="preserve">
     <value>Document uses unavailable fonts.</value>
     <comment>String</comment>
   </data>
@@ -850,9 +850,9 @@
     <value>Do you want to save changes ?</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tk_page_unit.Text" xml:space="preserve">
-    <value>Unit of distance</value>
-    <comment>TextBlock</comment>
+  <data name="tx_page_size_max.Header" xml:space="preserve">
+    <value>Maximum size</value>
+    <comment>TextBox</comment>
   </data>
   <data name="tmfi_grid_snap.Text" xml:space="preserve">
     <value>Snap to Grid</value>
@@ -913,5 +913,13 @@
   <data name="btn_summary_close.Content" xml:space="preserve">
     <value>Close</value>
     <comment>Button</comment>
+  </data>
+  <data name="str_err_write" xml:space="preserve">
+    <value>Con not write file.</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_err_draw" xml:space="preserve">
+    <value>Cannot draw</value>
+    <comment>String</comment>
   </data>
 </root>

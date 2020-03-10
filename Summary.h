@@ -77,14 +77,14 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 移動と描画のコマンド文字列をジオメトリに変換する.
-		static winrt::Windows::UI::Xaml::Media::Geometry Data(winrt::hstring const& move_and_TOOL_command)
+		static winrt::Windows::UI::Xaml::Media::Geometry Data(winrt::hstring const& move_and_draw_command)
 		{
 			using winrt::Windows::UI::Xaml::Markup::XamlReader;
 			using winrt::Windows::UI::Xaml::Controls::PathIcon;
 
-			constexpr auto PATH_ICON = L"<PathIcon xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"><PathIcon.Data>";
+			constexpr auto START_TAG = L"<PathIcon xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"><PathIcon.Data>";
 			constexpr auto END_TAG = L"</PathIcon.Data></PathIcon>";
-			winrt::hstring xaml = PATH_ICON + move_and_TOOL_command + END_TAG;
+			winrt::hstring xaml = START_TAG + move_and_draw_command + END_TAG;
 			auto icon = unbox_value<PathIcon>(XamlReader::Load(xaml));
 			auto geom = icon.Data();
 			icon.Data(nullptr);

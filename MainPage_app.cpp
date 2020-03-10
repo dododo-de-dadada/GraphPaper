@@ -29,12 +29,10 @@ namespace winrt::GraphPaper::implementation
 		m_sample_dx.Trim();
 	}
 
-	//	アプリケーションを非同期に延長する.
-	//	s_op	中断操作
+	//	アプリケーションの中断の処理を行う.
+	//	args	中断ハンドラーに渡された引数.
 	//	戻り値	なし
-	//	中断操作は, アプリ中断のハンドラーの引数
-	//	SuspendingEventArgs から得られる.
-	IAsyncAction MainPage::app_suspending(IInspectable const&, SuspendingEventArgs const& args)
+	IAsyncAction MainPage::app_suspending_async(SuspendingEventArgs const& args)
 	{
 		using concurrency::cancellation_token_source;
 		using winrt::Windows::Foundation::TypedEventHandler;// <winrt::Windows::Foundation::IInspectable const&, winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedEventArgs const&>;
@@ -103,15 +101,15 @@ namespace winrt::GraphPaper::implementation
 				auto folder{ data_folder() };
 				//	ストレージファイルをローカルフォルダに作成する.
 				auto s_file{ co_await folder.CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
-				//	図形データをストレージファイルに非同期に書き込, 結果を得る.
+				//	図形データをストレージファイルに非同期に書き込み, 結果を得る.
 				hr = co_await file_write_gpf_async(s_file, true);
 				//	ファイルを破棄する.
 				s_file = nullptr;
 				//	フォルダーを破棄する.
 				folder = nullptr;
-				//	操作スタックを消去する.
+				//	操作スタックを消去し, 含まれる操作を破棄する.
 				undo_clear();
-				//	図形リストを消去する.
+				//	図形リストを消去し, 含まれる図形を破棄する.
 				s_list_clear(m_list_shapes);
 				//	有効な書体名の配列を破棄する.
 				ShapeText::release_available_fonts();
@@ -129,7 +127,8 @@ namespace winrt::GraphPaper::implementation
 		co_await winrt::resume_foreground(this->Dispatcher());
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
-			cd_message_show(L"icon_alert", L"Memory leak occurs", {});
+			// 「メモリリーク」メッセージダイアログを表示する.
+			cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
 		}
 #endif
 		if (hr == S_OK) {
@@ -162,9 +161,9 @@ namespace winrt::GraphPaper::implementation
 	{
 	}
 
-	// アプリケーションが再開された.
+	//	アプリケーションの再開の処理を行う.
 	// アプリ起動のときは呼ばれない.
-	IAsyncAction MainPage::app_resuming(IInspectable const&, IInspectable const& /*object*/)
+	IAsyncAction MainPage::app_resuming_async(void)
 	{
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
@@ -180,6 +179,7 @@ namespace winrt::GraphPaper::implementation
 			// アプリ用に作成されたローカルデータフォルダーを得る.
 			auto folder{ data_folder() };
 			auto s_file{ co_await folder.GetFileAsync(FILE_NAME) };
+			//	ストレージファイルを非同期に読む.
 			co_await file_read_async(s_file, true);
 			s_file = nullptr;
 			folder = nullptr;

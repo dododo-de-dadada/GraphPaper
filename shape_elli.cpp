@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 半径を求める.
 		D2D1_POINT_2F rad;
-		pt_scale(m_vec, 0.5, rad);
+		pt_scale(m_diff, 0.5, rad);
 		// 中心点を求める.
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
@@ -47,11 +47,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		D2D1_POINT_2F a_pos[4];
 		// 南
-		a_pos[0].x = m_pos.x + m_vec.x * 0.5f;
-		a_pos[0].y = m_pos.y + m_vec.y;
+		a_pos[0].x = m_pos.x + m_diff.x * 0.5f;
+		a_pos[0].y = m_pos.y + m_diff.y;
 		// 東
-		a_pos[1].x = m_pos.x + m_vec.x;
-		a_pos[1].y = m_pos.y + m_vec.y * 0.5f;
+		a_pos[1].x = m_pos.x + m_diff.x;
+		a_pos[1].y = m_pos.y + m_diff.y * 0.5f;
 		// 西
 		a_pos[2].x = m_pos.x;
 		a_pos[2].y = a_pos[1].y;
@@ -59,16 +59,16 @@ namespace winrt::GraphPaper::implementation
 		a_pos[3].x = a_pos[0].x;
 		a_pos[3].y = m_pos.y;
 		for (uint32_t i = 0; i < 4; i++) {
-			TOOL_anchor(a_pos[i], dx);
+			anchor_draw_rect(a_pos[i], dx);
 		}
 		a_pos[0] = m_pos;
-		pt_add(m_pos, m_vec, a_pos[3]);
+		pt_add(m_pos, m_diff, a_pos[3]);
 		a_pos[1].x = a_pos[0].x;
 		a_pos[1].y = a_pos[3].y;
 		a_pos[2].x = a_pos[3].x;
 		a_pos[2].y = a_pos[0].y;
 		for (uint32_t i = 0; i < 4; i++) {
-			TOOL_anchor_rounded(a_pos[i], dx);
+			anchor_draw_rounded(a_pos[i], dx);
 		}
 	}
 
@@ -85,7 +85,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 半径を得る.
 		D2D1_POINT_2F rad;
-		pt_scale(m_vec, 0.5, rad);
+		pt_scale(m_diff, 0.5, rad);
 		// 中心点を得る.
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write_svg;
 
 		D2D1_POINT_2F rad;
-		pt_scale(m_vec, 0.5, rad);
+		pt_scale(m_diff, 0.5, rad);
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
 		write_svg("<ellipse ", dt_writer);

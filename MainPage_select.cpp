@@ -29,8 +29,9 @@ namespace winrt::GraphPaper::implementation
 		if (m_summary_visible) {
 			summary_select_all();
 		}
+		//	やり直す操作スタックを消去し, 含まれる操作を破棄する.
 		redo_clear();
-		enable_undo_menu();
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 	}
@@ -90,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 					m_press_shape_summary = s_prev;
 				}
 				undo_push_select(m_press_shape_summary);
-				enable_undo_menu();
+				//	編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
 				if constexpr (K == VirtualKey::Down) {
@@ -124,6 +125,7 @@ namespace winrt::GraphPaper::implementation
 	SEL:
 		if constexpr (M == VirtualKeyModifiers::Shift) {
 			select_range(m_press_shape_prev, m_press_shape_summary);
+			//	やり直す操作スタックを消去し, 含まれる操作を破棄する.
 			redo_clear();
 		}
 		if constexpr (M == VirtualKeyModifiers::None) {
@@ -134,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 				summary_select(m_press_shape_summary);
 			}
 		}
-		enable_undo_menu();
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 	}
@@ -209,13 +211,14 @@ namespace winrt::GraphPaper::implementation
 			// コントロールキーが押されている場合,
 			// ポインターが押された図形の選択を反転させる.
 			undo_push_select(s);
-			enable_undo_menu();
+			//	編集メニュー項目の使用の可否を設定する.
 			enable_edit_menu();
 			page_draw();
 			if (s->is_selected()) {
 				// 押された図形が選択されている場合,
 				// 押された図形の属性をページのパネルに格納する.
 				m_page_panel.set_to_shape(s);
+				//	線枠メニューの「矢じりの種類」に印をつける.
 				arrow_style_check_menu(m_page_panel.m_arrow_style);
 				font_style_check_menu(m_page_panel.m_font_style);
 				text_align_p_check_menu(m_page_panel.m_text_align_p);
@@ -240,13 +243,15 @@ namespace winrt::GraphPaper::implementation
 				m_press_shape_prev = m_list_shapes.front();
 			}
 			if (select_range(s, m_press_shape_prev)) {
+				//	やり直す操作スタックを消去し, 含まれる操作を破棄する.
 				redo_clear();
-				enable_undo_menu();
+				//	編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
 			}
 			// 押された図形の属性をページのパネルに格納する.
 			m_page_panel.set_to_shape(s);
+			//	線枠メニューの「矢じりの種類」に印をつける.
 			arrow_style_check_menu(m_page_panel.m_arrow_style);
 			font_style_check_menu(m_page_panel.m_font_style);
 			text_align_p_check_menu(m_page_panel.m_text_align_p);
@@ -254,19 +259,19 @@ namespace winrt::GraphPaper::implementation
 			text_align_t_check_menu(m_page_panel.m_text_align_t);
 		}
 		else {
+			// シフトキーもコントロールキーもどちらも押されていない場合
 			if (s->is_selected() == false) {
-				// シフトキーもコントロールキーもどちらも押されていない,
-				// 押された図形が選択されていなければ, 
-				// 図形の選択をすべて解除し.
-				// 押された図形の選択を反転する.
-				// 反転操作を元に戻す操作スタックに積む.
-				// やり直しスタックを消去し, ページと図形を表示する.
+				// 図形の選択フラグがない場合,
+				// 図形の選択をすべて解除する.
 				unselect_all();
+				// 図形の選択を反転して, その操作スタックに積む.
 				undo_push_select(s);
+				//	やり直す操作スタックを消去し, 含まれる操作を破棄する.
 				redo_clear();
-				enable_undo_menu();
+				//	編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
+				//	線枠メニューの「矢じりの種類」に印をつける.
 				arrow_style_check_menu(m_page_panel.m_arrow_style);
 				font_style_check_menu(m_page_panel.m_font_style);
 				text_align_p_check_menu(m_page_panel.m_text_align_p);

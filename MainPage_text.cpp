@@ -9,6 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	//	「文字列が見つかりません」メッセージのリソースキー
 	constexpr wchar_t NO_FOUND[] = L"str_err_found";
 
 	//	文字列を検索して見つかった位置を得る.
@@ -149,13 +150,16 @@ namespace winrt::GraphPaper::implementation
 	// 文字列検索パネルの「次を検索」ボタンが押された.
 	void MainPage::btn_text_find_next_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		//	図形リストの中から文字列を検索する.
 		if (text_find_whithin_shapes()) {
+			//	検索できた場合,
+			//	ページと図形を表示する.
 			page_draw();
 			return;
 		}
-		// 検索できなければ,
-		// 「見つかりません」メッセージダイアログを表示する.
-		cd_message_show(L"icon_info", NO_FOUND, tx_text_find_what().Text());
+		//	検索できない場合,
+		// 「文字列は見つかりません」メッセージダイアログを表示する.
+		cd_message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
 	}
 
 	// 文字列検索パネルの「すべて置換」ボタンが押された.
@@ -189,9 +193,9 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (flag == false) {
-			//	図形がなければ,
-			// 「見つかりません」メッセージダイアログを表示する.
-			cd_message_show(L"icon_info", NO_FOUND, tx_text_find_what().Text());
+			//	図形がない場合,
+			// 「文字列は見つかりません」メッセージダイアログを表示する.
+			cd_message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
 			return;
 		}
 		// 文字範囲の選択を解除する.
@@ -225,6 +229,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		undo_push_null();
+		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -287,6 +292,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_OP::TEXT>(t, r_text);
 				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 				undo_push_null();
+				//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
 		}
@@ -298,8 +304,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		//	検索できない, かつ置換もされてない場合,
-		// 「見つかりません」メッセージダイアログを表示する.
-		cd_message_show(L"icon_info", NO_FOUND, tx_text_find_what().Text());
+		// 「文字列は見つかりません」メッセージダイアログを表示する.
+		cd_message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
 	}
 
 	//	文字範囲が選択された図形と文字範囲を見つける.
@@ -475,7 +481,7 @@ namespace winrt::GraphPaper::implementation
 					s->delete_bottom_blank();
 				}
 				undo_push_null();
-				enable_undo_menu();
+				//	編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 			}
 		);

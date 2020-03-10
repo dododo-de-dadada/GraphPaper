@@ -26,11 +26,12 @@ namespace winrt::GraphPaper::implementation
 			if (m_summary_visible) {
 				summary_remove(s);
 			}
+			//	図形を削除して, その操作をスタックに積む.
 			undo_push_remove(s);
 			m_stack_undo.push_back(new UndoAppendG(g, s));
 		}
 		undo_push_null();
-		enable_undo_menu();
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 		if (m_summary_visible) {
@@ -41,45 +42,46 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「グループの解除」が選択された.
 	void MainPage::mfi_ungroup_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 選択されたグループ図形をすべて得る.
-		S_LIST_T grp_list;
-		s_list_select<ShapeGroup>(m_list_shapes, grp_list);
-		if (grp_list.size() == 0) {
+		//	選択されたグループ図形のリストを得る.
+		S_LIST_T list_group;
+		s_list_select<ShapeGroup>(m_list_shapes, list_group);
+		if (list_group.empty()) {
+			//	得られたリストが空の場合,
+			//	終了する.
 			return;
 		}
-		// 得られた各グループ図形について.
-		for (auto t : grp_list) {
-			//if (t->is_deleted()) {
-			//	continue;
-			//}
+		//	得られたリストの各グループ図形について以下を繰り返す.
+		for (auto t : list_group) {
 			uint32_t i = 0;
 			if (m_summary_visible) {
 				i = summary_remove(t);
 			}
-			// グループに含まれる各図形について.
 			auto g = static_cast<ShapeGroup*>(t);
-			while (g->m_grp_list.size() > 0) {
-				auto s = g->m_grp_list.front();
+			while (g->m_list_grouped.empty() == false) {
+				//	グループ化された図形のリストから最初の図形を得る.
+				auto s = g->m_list_grouped.front();
 				if (s->is_deleted()) {
+					//	図形の消去フラグが立っている場合,
+					//	以下を無視する.
 					continue;
 				}
 				if (m_summary_visible) {
-					// 図形を一覧に挿入する.
+					//	図形を一覧に挿入する.
 					summary_insert(s, i++);
 				}
-				// 図形をグループから取り除く.
+				//	図形をグループから削除して, その操作をスタックに積む.
 				undo_push_remove(g, s);
 				//m_stack_undo.push_back(new UndoRemoveG(g, s));
 				// 図形を図形の直前に挿入する.
 				undo_push_insert(s, g);
 				//t = s;
 			}
-			// グループ図形を削除する.
+			//	図形を削除して, その操作をスタックに積む.
 			undo_push_remove(g);
 		}
-		grp_list.clear();
+		list_group.clear();
 		undo_push_null();
-		enable_undo_menu();
+		//	編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 	}

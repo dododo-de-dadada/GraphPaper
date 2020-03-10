@@ -36,7 +36,8 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			const auto dpi = m_sample_dx.m_logical_dpi;
 			const auto g_len = m_sample_panel.m_grid_size + 1.0;
-			conv_val_to_len(m_page_unit, val, dpi, g_len, buf, 31);
+			//	ピクセル単位の長さを他の単位の文字列に変換する.
+			conv_val_to_len<true>(m_page_unit, val, dpi, g_len, buf, 31);
 			hdr = hdr + buf;
 		}
 		if constexpr (S == 0) {
@@ -53,26 +54,31 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと図形に格納する.
+	//	値をスライダーのヘッダーと、見本の図形に格納する.
+	//	U	操作の種類
+	//	S	スライダーの番号
+	//	args	ValueChanged で渡された引数
+	//	戻り値	なし
 	template <UNDO_OP U, int S>
 	void MainPage::arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = m_sample_shape;
 		const double val = args.NewValue();
+		//	値をスライダーのヘッダーに格納する.
 		arrow_set_slider_header<U, S>(val);
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
-			ARROW_SIZE size;
-			s->get_arrow_size(size);
+			ARROW_SIZE a_size;
+			s->get_arrow_size(a_size);
 			if constexpr (S == 0) {
-				size.m_width = static_cast<FLOAT>(val);
+				a_size.m_width = static_cast<FLOAT>(val);
 			}
 			if constexpr (S == 1) {
-				size.m_length = static_cast<FLOAT>(val);
+				a_size.m_length = static_cast<FLOAT>(val);
 			}
 			if constexpr (S == 2) {
-				size.m_offset = static_cast<FLOAT>(val);
+				a_size.m_offset = static_cast<FLOAT>(val);
 			}
-			s->set_arrow_size(size);
+			s->set_arrow_size(a_size);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -106,6 +112,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
+		//	値をスライダーのヘッダーに格納する.
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 0>(val0);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 1>(val1);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 2>(val2);
