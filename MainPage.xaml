@@ -143,7 +143,7 @@
             -->
             <!-- アプリケーションデータを格納するファイル名 -->
             <x:String x:Key="file_app_data">app_data</x:String>
-            <!-- ストロークコンテキストメニュー -->
+            <!-- 線枠コンテキストメニュー -->
             <MenuFlyout x:Key="mf_stroke">
                 <MenuFlyoutSubItem x:Uid="mfsi_stroke_style" Text="Style">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_solid_2" x:Uid="rmfi_stroke_solid" Click="rmfi_stroke_solid_click" Text="Solid" GroupName="gn_stroke_style">
@@ -338,22 +338,22 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_cut" x:Uid="mfi_cut" Click="mfi_xcvd_cut_click" Icon="Cut" IsEnabled="False" Text="Cut" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_cut" x:Uid="mfi_xcvd_cut" Click="mfi_xcvd_cut_click" Icon="Cut" IsEnabled="False" Text="Cut" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="X" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_copy" x:Uid="mfi_copy" Click="mfi_xcvd_copy_click" Icon="Copy" IsEnabled="False" Text="Copy" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_copy" x:Uid="mfi_xcvd_copy" Click="mfi_xcvd_copy_click" Icon="Copy" IsEnabled="False" Text="Copy" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="C" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_paste" x:Uid="mfi_paste" Click="mfi_xcvd_paste_click" Icon="Paste" IsEnabled="False" Text="Paste" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_paste" x:Uid="mfi_xcvd_paste" Click="mfi_xcvd_paste_click" Icon="Paste" IsEnabled="False" Text="Paste" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="V" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_delete" x:Uid="mfi_delete" Click="mfi_xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_delete" x:Uid="mfi_xcvd_delete" Click="mfi_xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Delete" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -469,7 +469,7 @@
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
             </muxc:MenuBarItem>
-            <!-- ストロークメニュー -->
+            <!-- 線枠メニュー -->
             <muxc:MenuBarItem x:Name="mbi_stroke" x:Uid="mbi_stroke" AccessKey="S" Title="Stroke">
                 <MenuFlyoutSubItem x:Uid="mfsi_stroke_style" Text="Style">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_solid" x:Uid="rmfi_stroke_solid" Click="rmfi_stroke_solid_click" Text="Solid" GroupName="gn_stroke_style">
@@ -751,6 +751,13 @@
             <StackPanel>
                 <TextBox x:Name="tx_edit" AcceptsReturn="True" Height="128" HorizontalAlignment="Stretch" PlaceholderText="Text" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
                 <CheckBox x:Name="ck_ignore_blank" x:Uid="ck_ignore_blank" Content="Ignore bottom blank line." Margin="4,4" />
+            </StackPanel>
+        </ContentDialog>
+        <!-- 貼り付け確認ダイアログ -->
+        <ContentDialog x:Name="cd_conf_paste" x:Uid="cd_conf_paste" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Paste">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
+                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_conf}" Margin="0,0,12,0" />
+                <TextBlock x:Uid="tk_conf_paste" />
             </StackPanel>
         </ContentDialog>
         <!-- 保存確認ダイアログ -->

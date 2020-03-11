@@ -51,40 +51,11 @@ namespace winrt::GraphPaper::implementation
 		STATUS_BAR s_bar;	// ステータスバーの状態
 		bool check;	// チェックマークの有無
 
-		if (sender == tmfi_status_grid()) {
-			s_bar = STATUS_BAR::GRID;
-			check = tmfi_status_grid().IsChecked();
-			tmfi_status_grid_2().IsChecked(check);
-			status_set_grid();
-			status_visiblity(check, tk_status_grid());
-		}
-		else if (sender == tmfi_status_grid_2()) {
-			s_bar = STATUS_BAR::GRID;
-			check = tmfi_status_grid_2().IsChecked();
-			tmfi_status_grid().IsChecked(check);
-			status_set_grid();
-			status_visiblity(check, tk_status_grid());
-		}
-		else if (sender == tmfi_status_page()) {
-			s_bar = STATUS_BAR::PAGE;
-			check = tmfi_status_page().IsChecked();
-			tmfi_status_page_2().IsChecked(check);
-			status_set_page();
-			status_visiblity(check, tk_status_width());
-			status_visiblity(check, tk_status_height());
-		}
-		else if (sender == tmfi_status_page_2()) {
-			s_bar = STATUS_BAR::PAGE;
-			check = tmfi_status_page_2().IsChecked();
-			tmfi_status_page().IsChecked(check);
-			status_set_page();
-			status_visiblity(check, tk_status_width());
-			status_visiblity(check, tk_status_height());
-		}
-		else if (sender == tmfi_status_curs()) {
+		if (sender == tmfi_status_curs()) {
 			s_bar = STATUS_BAR::CURS;
 			check = tmfi_status_curs().IsChecked();
 			tmfi_status_curs_2().IsChecked(check);
+			// ポインターの位置をステータスバーに格納する.
 			status_set_curs();
 			status_visiblity(check, tk_status_pos_x());
 			status_visiblity(check, tk_status_pos_y());
@@ -93,9 +64,44 @@ namespace winrt::GraphPaper::implementation
 			s_bar = STATUS_BAR::CURS;
 			check = tmfi_status_curs_2().IsChecked();
 			tmfi_status_curs().IsChecked(check);
+			// ポインターの位置をステータスバーに格納する.
 			status_set_curs();
 			status_visiblity(check, tk_status_pos_x());
 			status_visiblity(check, tk_status_pos_y());
+		}
+		else if (sender == tmfi_status_grid()) {
+			s_bar = STATUS_BAR::GRID;
+			check = tmfi_status_grid().IsChecked();
+			tmfi_status_grid_2().IsChecked(check);
+			// 方眼の大きさをステータスバーに格納する.
+			status_set_grid();
+			status_visiblity(check, tk_status_grid());
+		}
+		else if (sender == tmfi_status_grid_2()) {
+			s_bar = STATUS_BAR::GRID;
+			check = tmfi_status_grid_2().IsChecked();
+			tmfi_status_grid().IsChecked(check);
+			// 方眼の大きさをステータスバーに格納する.
+			status_set_grid();
+			status_visiblity(check, tk_status_grid());
+		}
+		else if (sender == tmfi_status_page()) {
+			s_bar = STATUS_BAR::PAGE;
+			check = tmfi_status_page().IsChecked();
+			tmfi_status_page_2().IsChecked(check);
+			// ページの大きさをステータスバーに格納する.
+			status_set_page();
+			status_visiblity(check, tk_status_width());
+			status_visiblity(check, tk_status_height());
+		}
+		else if (sender == tmfi_status_page_2()) {
+			s_bar = STATUS_BAR::PAGE;
+			check = tmfi_status_page_2().IsChecked();
+			tmfi_status_page().IsChecked(check);
+			// ページの大きさをステータスバーに格納する.
+			status_set_page();
+			status_visiblity(check, tk_status_width());
+			status_visiblity(check, tk_status_height());
 		}
 		else if (sender == tmfi_status_zoom()) {
 			s_bar = STATUS_BAR::ZOOM;
@@ -115,6 +121,7 @@ namespace winrt::GraphPaper::implementation
 			s_bar = STATUS_BAR::DRAW;
 			check = tmfi_status_tool().IsChecked();
 			tmfi_status_tool_2().IsChecked(check);
+			// 作図ツールをステータスバーに格納する.
 			status_set_draw();
 			status_visiblity(check, sp_status_tool());
 		}
@@ -122,6 +129,7 @@ namespace winrt::GraphPaper::implementation
 			s_bar = STATUS_BAR::DRAW;
 			check = tmfi_status_tool_2().IsChecked();
 			tmfi_status_tool().IsChecked(check);
+			// 作図ツールをステータスバーに格納する.
 			status_set_draw();
 			status_visiblity(check, sp_status_tool());
 		}
@@ -184,7 +192,6 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::status_set_curs(void)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
-		//const double dpi = m_page_panel.m_dx.m_logical_dpi;
 		const auto wp = CoreWindow::GetForCurrentThread().PointerPosition();
 		const auto wb = CoreWindow::GetForCurrentThread().Bounds();
 		const auto tr = scp_page_panel().TransformToVisual(nullptr);
@@ -202,17 +209,18 @@ namespace winrt::GraphPaper::implementation
 		const double ps = m_page_panel.m_page_scale;
 		const double fx = (wx - bx - tx) / ps + sx + px;
 		const double fy = (wy - by - ty) / ps + sy + py;
-		const double g_len = m_page_panel.m_grid_size + 1.0;
+		const double g_len = m_page_panel.m_grid_base + 1.0;
 
 		wchar_t buf[32];
-		//	ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<false>(m_page_unit, fx, dpi, g_len, buf);
+		// ピクセル単位の長さを他の単位の文字列に変換する.
+		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, fx, dpi, g_len, buf);
 		tk_status_pos_x().Text(winrt::hstring{ L"x:" } + buf);
-		//	ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<false>(m_page_unit, fy, dpi, g_len, buf);
+		// ピクセル単位の長さを他の単位の文字列に変換する.
+		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, fy, dpi, g_len, buf);
 		tk_status_pos_y().Text(winrt::hstring{ L"y:" } + buf);
+
 swprintf_s(buf, L"%d", static_cast<uint32_t>(m_list_shapes.size()));
-tk_status_cnt().Text(winrt::hstring{ L"c:" } +buf);
+tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	}
 
 	// 方眼の大きさをステータスバーに格納する.
@@ -220,9 +228,9 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	{
 		wchar_t buf[32];
 		const double dpi = m_page_dx.m_logical_dpi;
-		double g_len = m_page_panel.m_grid_size + 1.0;
-		//	ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<true>(m_page_unit, g_len, dpi, g_len, buf);
+		double g_len = m_page_panel.m_grid_base + 1.0;
+		// ピクセル単位の長さを他の単位の文字列に変換する.
+		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, g_len, dpi, g_len, buf);
 		tk_status_grid().Text(winrt::hstring{ L"g:" } +buf);
 	}
 
@@ -230,13 +238,13 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	void MainPage::status_set_page(void)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
-		const double g_len = m_page_panel.m_grid_size + 1.0;
+		const double g_len = m_page_panel.m_grid_base + 1.0;
 		wchar_t buf[32];
-		//	ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<true>(m_page_unit, m_page_panel.m_page_size.width, dpi, g_len, buf);
+		// ピクセル単位の長さを他の単位の文字列に変換する.
+		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, m_page_panel.m_page_size.width, dpi, g_len, buf);
 		tk_status_width().Text(winrt::hstring{ L"w:" } + buf);
-		//	ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<true>(m_page_unit, m_page_panel.m_page_size.height, dpi, g_len, buf);
+		// ピクセル単位の長さを他の単位の文字列に変換する.
+		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, m_page_panel.m_page_size.height, dpi, g_len, buf);
 		tk_status_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 
@@ -244,6 +252,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } +buf);
 	void MainPage::status_set_draw(void)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
 		winrt::hstring data;
 		if (m_draw_tool == DRAW_TOOL::BEZI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));
@@ -263,14 +272,17 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } +buf);
 		else if (m_draw_tool == DRAW_TOOL::RRECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")));
 		}
-		else if (m_draw_tool == DRAW_TOOL::TEXT) {
-			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
-		}
 		else if (m_draw_tool == DRAW_TOOL::SCALE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
-		else {
+		else if (m_draw_tool == DRAW_TOOL::SELECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_select")));
+		}
+		else if (m_draw_tool == DRAW_TOOL::TEXT) {
+			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
+		}
+		else {
+			throw winrt::hresult_not_implemented();
 		}
 		pi_tool().Data(nullptr);
 		pi_tool().Data(Summary::Data(data));

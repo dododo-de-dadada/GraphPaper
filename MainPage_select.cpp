@@ -29,9 +29,9 @@ namespace winrt::GraphPaper::implementation
 		if (m_summary_visible) {
 			summary_select_all();
 		}
-		//	やり直す操作スタックを消去し, 含まれる操作を破棄する.
+		// やり直す操作スタックを消去し, 含まれる操作を破棄する.
 		redo_clear();
-		//	編集メニュー項目の使用の可否を設定する.
+		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 	}
@@ -91,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 					m_press_shape_summary = s_prev;
 				}
 				undo_push_select(m_press_shape_summary);
-				//	編集メニュー項目の使用の可否を設定する.
+				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
 				if constexpr (K == VirtualKey::Down) {
@@ -125,7 +125,7 @@ namespace winrt::GraphPaper::implementation
 	SEL:
 		if constexpr (M == VirtualKeyModifiers::Shift) {
 			select_range(m_press_shape_prev, m_press_shape_summary);
-			//	やり直す操作スタックを消去し, 含まれる操作を破棄する.
+			// やり直す操作スタックを消去し, 含まれる操作を破棄する.
 			redo_clear();
 		}
 		if constexpr (M == VirtualKeyModifiers::None) {
@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 				summary_select(m_press_shape_summary);
 			}
 		}
-		//	編集メニュー項目の使用の可否を設定する.
+		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 	}
@@ -211,18 +211,20 @@ namespace winrt::GraphPaper::implementation
 			// コントロールキーが押されている場合,
 			// ポインターが押された図形の選択を反転させる.
 			undo_push_select(s);
-			//	編集メニュー項目の使用の可否を設定する.
+			// 編集メニュー項目の使用の可否を設定する.
 			enable_edit_menu();
 			page_draw();
 			if (s->is_selected()) {
 				// 押された図形が選択されている場合,
 				// 押された図形の属性をページのパネルに格納する.
 				m_page_panel.set_to_shape(s);
-				//	線枠メニューの「矢じりの種類」に印をつける.
+				// 線枠メニューの「矢じりの種類」に印をつける.
 				arrow_style_check_menu(m_page_panel.m_arrow_style);
+				// 書体メニューの「字体」に印をつける.
 				font_style_check_menu(m_page_panel.m_font_style);
-				text_align_p_check_menu(m_page_panel.m_text_align_p);
+				// 線枠メニューの「種類」に印をつける.
 				stroke_style_check_menu(m_page_panel.m_stroke_style);
+				text_align_p_check_menu(m_page_panel.m_text_align_p);
 				text_align_t_check_menu(m_page_panel.m_text_align_t);
 				if (m_summary_visible) {
 					summary_select(s);
@@ -243,20 +245,22 @@ namespace winrt::GraphPaper::implementation
 				m_press_shape_prev = m_list_shapes.front();
 			}
 			if (select_range(s, m_press_shape_prev)) {
-				//	やり直す操作スタックを消去し, 含まれる操作を破棄する.
+				// やり直す操作スタックを消去し, 含まれる操作を破棄する.
 				redo_clear();
-				//	編集メニュー項目の使用の可否を設定する.
+				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
 			}
 			// 押された図形の属性をページのパネルに格納する.
 			m_page_panel.set_to_shape(s);
-			//	線枠メニューの「矢じりの種類」に印をつける.
+			// 線枠メニューの「矢じりの種類」に印をつける.
 			arrow_style_check_menu(m_page_panel.m_arrow_style);
+			// 書体メニューの「字体」に印をつける.
 			font_style_check_menu(m_page_panel.m_font_style);
-			text_align_p_check_menu(m_page_panel.m_text_align_p);
+			// 線枠メニューの「種類」に印をつける.
 			stroke_style_check_menu(m_page_panel.m_stroke_style);
 			text_align_t_check_menu(m_page_panel.m_text_align_t);
+			text_align_p_check_menu(m_page_panel.m_text_align_p);
 		}
 		else {
 			// シフトキーもコントロールキーもどちらも押されていない場合
@@ -266,16 +270,18 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				// 図形の選択を反転して, その操作スタックに積む.
 				undo_push_select(s);
-				//	やり直す操作スタックを消去し, 含まれる操作を破棄する.
+				// やり直す操作スタックを消去し, 含まれる操作を破棄する.
 				redo_clear();
-				//	編集メニュー項目の使用の可否を設定する.
+				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
-				//	線枠メニューの「矢じりの種類」に印をつける.
+				// 線枠メニューの「矢じりの種類」に印をつける.
 				arrow_style_check_menu(m_page_panel.m_arrow_style);
+				// 書体メニューの「字体」に印をつける.
 				font_style_check_menu(m_page_panel.m_font_style);
-				text_align_p_check_menu(m_page_panel.m_text_align_p);
+				// 線枠メニューの「種類」に印をつける.
 				stroke_style_check_menu(m_page_panel.m_stroke_style);
+				text_align_p_check_menu(m_page_panel.m_text_align_p);
 				text_align_t_check_menu(m_page_panel.m_text_align_t);
 				if (m_summary_visible) {
 					summary_select(s);
@@ -315,11 +321,11 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
-	//	図形の選択をすべて解除する.
-	//	t_range_only	文字範囲のみフラグ
-	//	戻り値	選択が解除された図形がある場合 true, ない場合 false
-	//	文字範囲のみフラグが立っている場合, 文字範囲の選択のみ解除される.
-	//	文字範囲のみフラグがない場合, 図形の選択も文字範囲の選択も両方解除される.
+	// 図形の選択をすべて解除する.
+	// t_range_only	文字範囲のみフラグ
+	// 戻り値	選択が解除された図形がある場合 true, ない場合 false
+	// 文字範囲のみフラグが立っている場合, 文字範囲の選択のみ解除される.
+	// 文字範囲のみフラグがない場合, 図形の選択も文字範囲の選択も両方解除される.
 	bool MainPage::unselect_all(const bool t_range_only)
 	{
 		auto flag = false;
@@ -328,8 +334,8 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			if (t_range_only == false && s->is_selected()) {
-				//	文字範囲フラグがない, かつ図形の選択フラグが立っている場合,
-				//	
+				// 文字範囲フラグがない, かつ図形の選択フラグが立っている場合,
+				// 
 				undo_push_select(s);
 				flag = true;
 			}

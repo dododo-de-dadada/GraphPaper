@@ -97,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 			flag = select_area(a_min, a_max);
 		}
 		if (flag == true) {
-			//	編集メニュー項目の使用の可否を設定する.
+			// 編集メニュー項目の使用の可否を設定する.
 			enable_edit_menu();
 		}
 		Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
@@ -108,7 +108,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_page_panel.m_grid_snap) {
 			// 方眼に整列の場合, 始点と終点を方眼の大きさで丸める
-			double g = max(m_page_panel.m_grid_size + 1.0, 1.0);
+			double g = max(m_page_panel.m_grid_base + 1.0, 1.0);
 			pt_round(m_press_pos, g, m_press_pos);
 			pt_round(m_curr_pos, g, m_curr_pos);
 		}
@@ -137,9 +137,10 @@ namespace winrt::GraphPaper::implementation
 						reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);
 						unselect_all();
 						undo_push_append(s);
-						undo_push_null();
 						m_press_shape_prev = m_press_shape_summary = s;
-						//	編集メニュー項目の使用の可否を設定する.
+						// 一連の操作の区切としてヌル操作をスタックに積む.
+						undo_push_null();
+						// 編集メニュー項目の使用の可否を設定する.
 						enable_edit_menu();
 						s->get_bound(m_page_min, m_page_max);
 						set_page_panle_size();
@@ -195,9 +196,10 @@ namespace winrt::GraphPaper::implementation
 			reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);
 			unselect_all();
 			undo_push_append(s);
+			// 一連の操作の区切としてヌル操作をスタックに積む.
 			undo_push_null();
 			m_press_shape_summary = m_press_shape_prev = s;
-			//	編集メニュー項目の使用の可否を設定する.
+			// 編集メニュー項目の使用の可否を設定する.
 			enable_edit_menu();
 			s->get_bound(m_page_min, m_page_max);
 			set_page_panle_size();
@@ -235,7 +237,7 @@ namespace winrt::GraphPaper::implementation
 				// 得た左上点を方眼の大きさで丸める.
 				// 丸めの前後で生じた差を得る.
 				D2D1_POINT_2F g_pos;
-				pt_round(p_min, m_page_panel.m_grid_size + 1.0, g_pos);
+				pt_round(p_min, m_page_panel.m_grid_base + 1.0, g_pos);
 				D2D1_POINT_2F d_pos;
 				pt_sub(g_pos, p_min, d_pos);
 				s_list_move(m_list_shapes, d_pos);
@@ -244,10 +246,11 @@ namespace winrt::GraphPaper::implementation
 		if (undo_pop_if_invalid()) {
 			return;
 		}
+		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
-		//	編集メニュー項目の使用の可否を設定する.
+		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 	}
 
@@ -255,12 +258,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::finish_form_shape(void)
 	{
 		if (m_page_panel.m_grid_snap) {
-			pt_round(m_curr_pos, m_page_panel.m_grid_size + 1.0, m_curr_pos);
+			pt_round(m_curr_pos, m_page_panel.m_grid_base + 1.0, m_curr_pos);
 		}
 		m_press_shape->set_pos(m_curr_pos, m_press_anchor);
 		if (undo_pop_if_invalid()) {
 			return;
 		}
+		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
@@ -286,6 +290,7 @@ namespace winrt::GraphPaper::implementation
 		const auto ui_pos{ args.GetCurrentPoint(scp_page_panel()).Position() };
 		pt_scale(ui_pos, 1.0 / m_page_panel.m_page_scale, p_offs, m_curr_pos);
 		set_pointer();
+		// ポインターの位置をステータスバーに格納する.
 		status_set_curs();
 	}
 
@@ -384,7 +389,7 @@ namespace winrt::GraphPaper::implementation
 					// 十字カーソルをカーソルに設定する.
 					Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 				}
-				else if (m_list_select > 1
+				else if (m_list_selected > 1
 					|| m_press_anchor == ANCH_WHICH::ANCH_FRAME
 					|| m_press_anchor == ANCH_WHICH::ANCH_INSIDE
 					|| m_press_anchor == ANCH_WHICH::ANCH_TEXT) {
@@ -505,9 +510,9 @@ namespace winrt::GraphPaper::implementation
 			// 選択が解除された図形がない場合, 終了する.
 			return;
 		}
-		//	やり直す操作スタックを消去し, 含まれる操作を破棄する.
+		// やり直す操作スタックを消去し, 含まれる操作を破棄する.
 		redo_clear();
-		//	編集メニュー項目の使用の可否を設定する.
+		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		// ページと図形を表示する.
 		page_draw();
@@ -518,14 +523,14 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_press_shape == nullptr
 			|| m_press_anchor == ANCH_WHICH::ANCH_OUTSIDE) {
-			//	押された図形がヌル, 
-			//	または押された部位は外側の場合,
-			//	ページコンテキストメニューを表示する.
+			// 押された図形がヌル, 
+			// または押された部位は外側の場合,
+			// ページコンテキストメニューを表示する.
 			scp_page_panel().ContextFlyout(nullptr);
 			scp_page_panel().ContextFlyout(m_menu_page);
 		}
 		else if (typeid(*m_press_shape) == typeid(ShapeGroup)) {
-			//	押された図形がグループの場合,
+			// 押された図形がグループの場合,
 			scp_page_panel().ContextFlyout(nullptr);
 			scp_page_panel().ContextFlyout(m_menu_ungroup);
 		}

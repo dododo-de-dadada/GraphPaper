@@ -422,9 +422,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 助変数から曲線上の接線ベクトルを求める.
-	//	bz	曲線
-	//	t	助変数
-	//	t_vec	接線ベクトル
+	// bz	曲線
+	// t	助変数
+	// t_vec	接線ベクトル
 	static void bz_tvec_by_param(const BZP bz[4], const double t, BZP& t_vec) noexcept
 	{
 		const double a = -3.0 * (1.0 - t) * (1.0 - t);

@@ -11,10 +11,10 @@ namespace winrt::GraphPaper::implementation
 {
 	// 方形の中点の配列
 	//constexpr ANCH_WHICH ANCH_ELLI[4]{
-	//	ANCH_SOUTH,
-	//	ANCH_EAST,
-	//	ANCH_WEST,
-	//	ANCH_NORTH
+	// ANCH_SOUTH,
+	// ANCH_EAST,
+	// ANCH_WEST,
+	// ANCH_NORTH
 	//};
 
 	// 図形を表示する.

@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	ウィンドウの表示/非表示が切り替わった.
+	// ウィンドウの表示/非表示が切り替わった.
 	void MainPage::thread_visibility_changed(CoreWindow const& sender, VisibilityChangedEventArgs const& args)
 	{
 		if (sender == CoreWindow::GetForCurrentThread()) {

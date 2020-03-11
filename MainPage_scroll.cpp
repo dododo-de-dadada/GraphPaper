@@ -66,10 +66,10 @@ namespace winrt::GraphPaper::implementation
 		//sb_horz().ViewportSize(vw);
 		//if (pw > vw) {
 			//if (ph > vh) {
-			//	sb_horz().Maximum(pw + SB_SIZE - vw);
+			// sb_horz().Maximum(pw + SB_SIZE - vw);
 			//}
 			//else {
-			//	sb_horz().Maximum(pw - vw);
+			// sb_horz().Maximum(pw - vw);
 			//}
 			//sb_horz().Visibility(VISIBLE);
 			//sb_vert().Margin({ 0, 0, 0, SB_SIZE });
@@ -82,10 +82,10 @@ namespace winrt::GraphPaper::implementation
 		//sb_vert().ViewportSize(vh);
 		//if (ph > vh) {
 			//if (pw > vw) {
-			//	sb_vert().Maximum(ph + SB_SIZE - vh);
+			// sb_vert().Maximum(ph + SB_SIZE - vh);
 			//}
 			//else {
-			//	sb_vert().Maximum(ph - vh);
+			// sb_vert().Maximum(ph - vh);
 			//}
 			//sb_vert().Visibility(VISIBLE);
 			//sb_horz().Margin({ 0, 0, SB_SIZE, 0 });

@@ -111,7 +111,7 @@ namespace winrt::GraphPaper::implementation
 		//mfi_summary_click(nullptr, nullptr);
 	}
 
-	//	図形一覧パネルがロードされた.
+	// 図形一覧パネルがロードされた.
 	void MainPage::lv_summary_loaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
 	{
 		bool s_visible = m_summary_visible;
@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	図形一覧の項目が選択された.
+	// 図形一覧の項目が選択された.
 	void MainPage::lv_summary_selection_changed(IInspectable const&, SelectionChangedEventArgs const& e)
 	{
 		if (m_summary_visible == false) {
@@ -168,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 			scroll_to_shape(t);
 			m_page_panel.set_to_shape(t);
 		}
-		//	編集メニュー項目の使用の可否を設定する.
+		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 	}
@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 		m_summary_visible = true;
 	}
 
-	//	図形一覧を消去する.
+	// 図形一覧を消去する.
 	void MainPage::summary_clear(void)
 	{
 		if (m_summary_visible == false) {
@@ -222,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 		m_summary_visible = true;
 	}
 
-	//	図形一覧パネルを閉じて消去する.
+	// 図形一覧パネルを閉じて消去する.
 	void MainPage::summary_close(void)
 	{
 		if (m_summary_visible == false) {
@@ -246,8 +246,8 @@ namespace winrt::GraphPaper::implementation
 		m_summary_visible = true;
 	}
 
-	//	操作を図形一覧に反映する.
-	//	この関数は, 操作を実行する前に呼び出す.
+	// 操作を図形一覧に反映する.
+	// この関数は, 操作を実行する前に呼び出す.
 	void MainPage::summary_reflect(const Undo* u)
 	{
 		if (m_summary_visible == false) {
@@ -298,7 +298,7 @@ namespace winrt::GraphPaper::implementation
 		m_summary_visible = true;
 	}
 
-	//	図形一覧を作成しなおす.
+	// 図形一覧を作成しなおす.
 	void MainPage::summary_remake(void)
 	{
 		if (m_summary_visible == false) {

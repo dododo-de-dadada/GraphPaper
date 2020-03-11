@@ -11,11 +11,11 @@ namespace winrt::GraphPaper::implementation
 {
 	constexpr ANCH_WHICH ANCH_BEGIN = ANCH_WHICH::ANCH_R_NW;
 	constexpr ANCH_WHICH ANCH_END = ANCH_WHICH::ANCH_R_SE;
-	//	s_pos	軸の開始位置
-	//	d_pos	軸の終了位置への差分
-	//	a_size	矢じりの寸法
-	//	barbs_pos	返しの位置
-	//	tip_pos		先端の位置
+	// s_pos	軸の開始位置
+	// d_pos	軸の終了位置への差分
+	// a_size	矢じりの寸法
+	// barbs_pos	返しの位置
+	// tip_pos		先端の位置
 	static bool ln_calc_arrowhead(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs_pos[2], D2D1_POINT_2F& tip_pos) noexcept
 	{
 		const auto d_len = std::sqrt(pt_abs2(d_pos));	// 軸の長さ

@@ -1,6 +1,6 @@
 //-------------------------------
-//	MainPage_find.cpp
-//	•¶š—ñ‚ÌŒŸõ/’uŠ·
+// MainPage_find.cpp
+// •¶š—ñ‚ÌŒŸõ/’uŠ·
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"

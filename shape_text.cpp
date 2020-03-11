@@ -8,35 +8,35 @@ namespace winrt::GraphPaper::implementation
 {
 	wchar_t** ShapeText::s_available_fonts = nullptr;	//有効な書体名
 
-	//	テキストレイアウトからヒットテストのための計量の配列を得る.
+	// テキストレイアウトからヒットテストのための計量の配列を得る.
 	static void create_test_metrics(IDWriteTextLayout* t_layout, const DWRITE_TEXT_RANGE t_range, DWRITE_HIT_TEST_METRICS*& t_metrics, UINT32& m_count);
-	//	文字列をデータライターに SVG として書き込む.
+	// 文字列をデータライターに SVG として書き込む.
 	static void write_svg_text(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer);
 
 	static void get_font_descent(IDWriteTextLayout* text_layout, double& descent);
 
-	//	テキストレイアウトからヒットテストのための計量の配列を得る.
-	//	t_layout	もとになるテキストレイアウト
-	//	t_range	文字列の範囲
-	//	t_metrics	得られた計量の配列
-	//	m_count	得られ配列の要素数
+	// テキストレイアウトからヒットテストのための計量の配列を得る.
+	// t_layout	もとになるテキストレイアウト
+	// t_range	文字列の範囲
+	// t_metrics	得られた計量の配列
+	// m_count	得られ配列の要素数
 	static void create_test_metrics(IDWriteTextLayout* t_layout, const DWRITE_TEXT_RANGE t_range, DWRITE_HIT_TEST_METRICS*& t_metrics, UINT32& m_count)
 	{
 		const uint32_t pos = t_range.startPosition;
 		const uint32_t len = t_range.length;
 		DWRITE_HIT_TEST_METRICS test[1];
 
-		//	失敗することが前提なので, 最初の HitTestTextRange 関数
-		//	呼び出しは, check_hresult しない.
+		// 失敗することが前提なので, 最初の HitTestTextRange 関数
+		// 呼び出しは, check_hresult しない.
 		t_layout->HitTestTextRange(pos, len, 0, 0, test, 1, &m_count);
-		//	配列を確保して, 関数をあらためて呼び出す.
+		// 配列を確保して, 関数をあらためて呼び出す.
 		t_metrics = new DWRITE_HIT_TEST_METRICS[m_count];
 		winrt::check_hresult(
 			t_layout->HitTestTextRange(pos, len, 0, 0, t_metrics, m_count, &m_count)
 		);
 	}
 
-	//	書体のディセントをテキストレイアウトから得る.
+	// 書体のディセントをテキストレイアウトから得る.
 	static void get_font_descent(IDWriteTextLayout* text_layout, double& descent)
 	{
 		winrt::com_ptr<IDWriteFontCollection> fonts;
@@ -57,7 +57,7 @@ namespace winrt::GraphPaper::implementation
 		descent = f_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
 	}
 
-	//	図形を破棄する.
+	// 図形を破棄する.
 	ShapeText::~ShapeText(void)
 	{
 		m_dw_text_layout = nullptr;
@@ -78,8 +78,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (m_font_family != nullptr) {
 			if (is_available_font(m_font_family) == false) {
-				//	有効な書体名でない場合,
-				//	配列に含まれていない書体名なので破棄する.
+				// 有効な書体名でない場合,
+				// 配列に含まれていない書体名なので破棄する.
 				delete[] m_font_family;
 			}
 			m_font_family = nullptr;
@@ -529,7 +529,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	//	有効な書体名の配列を破棄する.
+	// 有効な書体名の配列を破棄する.
 	void ShapeText::release_available_fonts(void)
 	{
 		if (s_available_fonts == nullptr) {
@@ -542,61 +542,61 @@ namespace winrt::GraphPaper::implementation
 		s_available_fonts = nullptr;
 	}
 
-	//	有効な書体名の配列を設定する.
+	// 有効な書体名の配列を設定する.
 	//
-	//	DWriteFactory のシステムフォントコレクションから,
-	//	既定の地域・言語名に対応した書体を得て,
-	//	それらを配列に格納する.
+	// DWriteFactory のシステムフォントコレクションから,
+	// 既定の地域・言語名に対応した書体を得て,
+	// それらを配列に格納する.
 	void ShapeText::set_available_fonts(void)
 	{
-		//	既定の地域・言語名を得る.
+		// 既定の地域・言語名を得る.
 		wchar_t lang[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(lang, LOCALE_NAME_MAX_LENGTH);
-		//	システムフォントコレクションを DWriteFactory から得る.
+		// システムフォントコレクションを DWriteFactory から得る.
 		winrt::com_ptr<IDWriteFontCollection> collection;
 		winrt::check_hresult(
 			Shape::s_dwrite_factory->GetSystemFontCollection(collection.put())
 		);
-		//	フォントコレクションの要素数を得る.
+		// フォントコレクションの要素数を得る.
 		const auto f_cnt = collection->GetFontFamilyCount();
-		//	得られた要素数 + 1 の配列を確保する.
+		// 得られた要素数 + 1 の配列を確保する.
 		s_available_fonts = new wchar_t* [static_cast<size_t>(f_cnt) + 1];
-		//	フォントコレクションの各要素について.
+		// フォントコレクションの各要素について.
 		for (uint32_t i = 0; i < f_cnt; i++) {
-			//	要素から書体を得る.
+			// 要素から書体を得る.
 			winrt::com_ptr<IDWriteFontFamily> font_family;
 			winrt::check_hresult(
 				collection->GetFontFamily(i, font_family.put())
 			);
-			//	書体からローカライズされた書体名を得る.
+			// 書体からローカライズされた書体名を得る.
 			winrt::com_ptr<IDWriteLocalizedStrings> localized_name;
 			winrt::check_hresult(
 				font_family->GetFamilyNames(localized_name.put())
 			);
-			//	ローカライズされた書体名から, 地域名をのぞいた書体名の開始位置を得る.
+			// ローカライズされた書体名から, 地域名をのぞいた書体名の開始位置を得る.
 			UINT32 index = 0;
 			BOOL exists = false;
 			winrt::check_hresult(
 				localized_name->FindLocaleName(lang, &index, &exists)
 			);
 			if (exists == false) {
-				//	地域名がない場合,
-				//	0 を開始位置に格納する.
+				// 地域名がない場合,
+				// 0 を開始位置に格納する.
 				index = 0;
 			}
-			//	開始位置より後ろの文字数を得る (ヌル文字は含まれない).
+			// 開始位置より後ろの文字数を得る (ヌル文字は含まれない).
 			UINT32 length;
 			winrt::check_hresult(
 				localized_name->GetStringLength(index, &length)
 			);
-			//	文字数 + 1 の文字配列を確保し, 書体名の配列に格納する.
+			// 文字数 + 1 の文字配列を確保し, 書体名の配列に格納する.
 			s_available_fonts[i] = new wchar_t[static_cast<size_t>(length) + 1];
 			winrt::check_hresult(
 				localized_name->GetString(index, s_available_fonts[i], length + 1)
 			);
-			//	ローカライズされた書体名を破棄する.
+			// ローカライズされた書体名を破棄する.
 			localized_name = nullptr;
-			//	書体をを破棄する.
+			// 書体をを破棄する.
 			font_family = nullptr;
 		}
 		// 有効な書体名の配列の末尾に終端としてヌルを格納する.
@@ -870,19 +870,19 @@ namespace winrt::GraphPaper::implementation
 			"condensed", "semi-condensed", "normal", "semi-expanded",
 			"expanded", "extra-expanded", "ultra-expanded"
 		};
-		//	垂直方向のずらし量を求める.
+		// 垂直方向のずらし量を求める.
 		//
-		//	Chrome では, テキストタグに属性 alignment-baseline="text-before-edge" 
-		//	を指定するだけで, 左上位置を基準にして Dwrite と同じように表示される.
-		//	しかし, IE や Edge では, alignment-baseline 属性は期待した働きをしないので,
-		//	上部からのベースラインまで値である, 垂直方向のずらし量 dy を
-		//	行ごとに計算を必要がある.
-		//	このとき, 上部からのベースラインの高さ = アセントにはならないので
-		//	デセントを用いて計算する必要もある.
-		//	テキストレイアウトからフォントメトリックスを取得して, 以下のように求める.
-		//	ちなみに, designUnitsPerEm は, 配置 (Em) ボックスの単位あたりの大きさ.
-		//	デセントは, フォント文字の配置ボックスの下部からベースラインまでの長さ.
-		//	dy = その行のヒットテストメトリックスの高さ - フォントの大きさ × (デセント ÷ 単位大きさ) となる, はず.
+		// Chrome では, テキストタグに属性 alignment-baseline="text-before-edge" 
+		// を指定するだけで, 左上位置を基準にして Dwrite と同じように表示される.
+		// しかし, IE や Edge では, alignment-baseline 属性は期待した働きをしないので,
+		// 上部からのベースラインまで値である, 垂直方向のずらし量 dy を
+		// 行ごとに計算を必要がある.
+		// このとき, 上部からのベースラインの高さ = アセントにはならないので
+		// デセントを用いて計算する必要もある.
+		// テキストレイアウトからフォントメトリックスを取得して, 以下のように求める.
+		// ちなみに, designUnitsPerEm は, 配置 (Em) ボックスの単位あたりの大きさ.
+		// デセントは, フォント文字の配置ボックスの下部からベースラインまでの長さ.
+		// dy = その行のヒットテストメトリックスの高さ - フォントの大きさ × (デセント ÷ 単位大きさ) となる, はず.
 		IDWriteFontCollection* fonts;
 		m_dw_text_layout->GetFontCollection(&fonts);
 		IDWriteFontFamily* family;
@@ -896,28 +896,28 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_fill_color) || is_opaque(m_stroke_color)) {
 			ShapeRect::write_svg(dt_writer);
 		}
-		//	文字列全体の属性を指定するための g タグを開始する.
+		// 文字列全体の属性を指定するための g タグを開始する.
 		write_svg("<g ", dt_writer);
-		//	書体の色を書き込む.
+		// 書体の色を書き込む.
 		write_svg(m_font_color, "fill", dt_writer);
-		//	書体名を書き込む.
+		// 書体名を書き込む.
 		write_svg("font-family=\"", dt_writer);
 		write_svg(m_font_family, wchar_len(m_font_family), dt_writer);
 		write_svg("\" ", dt_writer);
-		//	書体の大きさを書き込む.
+		// 書体の大きさを書き込む.
 		write_svg(m_font_size, "font-size", dt_writer);
-		//	書体の伸縮を書き込む.
+		// 書体の伸縮を書き込む.
 		const auto stretch = static_cast<int32_t>(m_font_stretch);
 		write_svg(SVG_STRETCH[stretch], "font-stretch", dt_writer);
-		//	書体の形式を書き込む.
+		// 書体の形式を書き込む.
 		const auto style = static_cast<int32_t>(m_font_style);
 		write_svg(SVG_STYLE[style], "font-style", dt_writer);
-		//	書体の太さを書き込む.
+		// 書体の太さを書き込む.
 		const auto weight = static_cast<uint32_t>(m_font_weight);
 		write_svg(weight, "font-weight", dt_writer);
 		write_svg("none", "stroke", dt_writer);
 		write_svg(">" SVG_NL, dt_writer);
-		//	書体を表示する左上位置に余白を加える.
+		// 書体を表示する左上位置に余白を加える.
 		D2D1_POINT_2F nw_pos;
 		pt_add(m_pos, m_text_mar.width, m_text_mar.height, nw_pos);
 		for (uint32_t i = 0; i < m_dw_linecnt; i++) {
@@ -927,21 +927,21 @@ namespace winrt::GraphPaper::implementation
 			const double qx = static_cast<double>(m_dw_test_metrics[i].left);
 			const double py = static_cast<double>(nw_pos.y);
 			const double qy = static_cast<double>(m_dw_test_metrics[i].top);
-			//	文字列を表示する垂直なずらし位置を求める.
+			// 文字列を表示する垂直なずらし位置を求める.
 			const double dy = m_dw_line_metrics[i].baseline;
-			//	文字列を書き込む.
+			// 文字列を書き込む.
 			write_svg_text(t, t_len, px + qx, py + qy, dy, dt_writer);
 		}
 		write_svg("</g>" SVG_NL, dt_writer);
 	}
 
-	//	文字列をデータライターに SVG として書き込む.
-	//	t	文字列
-	//	t_len	文字数
-	//	x, y	位置
-	//	dy	垂直なずらし量
-	//	dt_writer	データライター
-	//	戻り値	なし
+	// 文字列をデータライターに SVG として書き込む.
+	// t	文字列
+	// t_len	文字数
+	// x, y	位置
+	// dy	垂直なずらし量
+	// dt_writer	データライター
+	// 戻り値	なし
 	static void write_svg_text(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer)
 	{
 		write_svg("<text ", dt_writer);
@@ -964,10 +964,10 @@ namespace winrt::GraphPaper::implementation
 				ent = "&amp;";
 			}
 			//else if (c == L'"') {
-			//	ent = "&quot;";
+			// ent = "&quot;";
 			//}
 			//else if (c == L'\'') {
-			//	ent = "&apos;";
+			// ent = "&apos;";
 			//}
 			else {
 				continue;

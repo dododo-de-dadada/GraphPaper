@@ -522,7 +522,7 @@ namespace winrt::GraphPaper::implementation
 	}
 	//void UndoSet<UNDO_OP::GRID_SNAP>::SET(Shape* s, const bool& t_val)
 	//{
-	//	s->set_grid_snap(t_val);
+	// s->set_grid_snap(t_val);
 	//}
 	void UndoSet<UNDO_OP::TEXT_LINE>::SET(Shape* s, const double& t_val)
 	{
@@ -632,7 +632,7 @@ namespace winrt::GraphPaper::implementation
 	}
 	//bool UndoSet<UNDO_OP::GRID_SNAP>::GET(Shape* s, bool& t_val) noexcept
 	//{
-	//	return s->get_grid_snap(t_val);
+	// return s->get_grid_snap(t_val);
 	//}
 	bool UndoSet<UNDO_OP::TEXT_LINE>::GET(Shape* s, double& t_val) noexcept
 	{

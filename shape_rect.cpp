@@ -5,8 +5,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//	図形を表示する.
-	//	dx	描画環境
+	// 図形を表示する.
+	// dx	描画環境
 	void ShapeRect::draw(SHAPE_DX& dx)
 	{
 		const D2D1_RECT_F rect{
@@ -16,14 +16,14 @@ namespace winrt::GraphPaper::implementation
 			m_pos.y + m_diff.y
 		};
 		if (is_opaque(m_fill_color)) {
-			//	塗りつぶし色が不透明な場合,
-			//	方形を塗りつぶす.
+			// 塗りつぶし色が不透明な場合,
+			// 方形を塗りつぶす.
 			dx.m_shape_brush->SetColor(m_fill_color);
 			dx.m_d2dContext->FillRectangle(&rect, dx.m_shape_brush.get());
 		}
 		if (is_opaque(m_stroke_color)) {
-			//	線枠の色が不透明な場合,
-			//	方形の枠を表示する.
+			// 線枠の色が不透明な場合,
+			// 方形の枠を表示する.
 			const auto w = static_cast<FLOAT>(m_stroke_width);
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawRectangle(
@@ -32,8 +32,8 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected() == false) {
 			return;
 		}
-		//	選択フラグが立っている場合,
-		//	部位を表示する.
+		// 選択フラグが立っている場合,
+		// 部位を表示する.
 		D2D1_POINT_2F r_pos[4];	// 方形の頂点
 		r_pos[0] = m_pos;
 		r_pos[1].y = rect.top;
@@ -88,11 +88,11 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F r_max;	// 方形の右下点
 		pt_bound(m_pos, r_pos, r_min, r_max);
 		if (is_opaque(m_stroke_color) == false) {
-			//	線枠の色が透明な場合,
+			// 線枠の色が透明な場合,
 			if (is_opaque(m_fill_color)) {
-				//	塗りつぶし色が不透明な場合,
+				// 塗りつぶし色が不透明な場合,
 				if (pt_in_rect(t_pos, r_min, r_max)) {
-					//	位置が方形にふくまれる場合,
+					// 位置が方形にふくまれる場合,
 					return ANCH_WHICH::ANCH_INSIDE;
 				}
 			}
@@ -165,11 +165,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	範囲に含まれるか調べる.
-	//	a_min	範囲の左上位置
-	//	a_max	範囲の右下位置
-	//	戻り値	含まれるなら true
-	//	線の太さは考慮されない.
+	// 範囲に含まれるか調べる.
+	// a_min	範囲の左上位置
+	// a_max	範囲の右下位置
+	// 戻り値	含まれるなら true
+	// 線の太さは考慮されない.
 	bool ShapeRect::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
 		D2D1_POINT_2F e_pos;
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 		return pt_in_rect(m_pos, a_min, a_max) && pt_in_rect(e_pos, a_min, a_max);
 	}
 
-	//	値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
+	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
 	void ShapeRect::set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F a_pos;
@@ -227,7 +227,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	図形を作成する.
+	// 図形を作成する.
 	ShapeRect::ShapeRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr) :
 		ShapeStroke::ShapeStroke(attr),
 		m_fill_color(attr->m_fill_color)

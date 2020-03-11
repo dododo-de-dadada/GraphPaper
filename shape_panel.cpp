@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 		h_start.x = 0.0f;
 		v_end.y = m_page_size.height;
 		h_end.x = m_page_size.width;
-		const double g_len = max(m_grid_size + 1.0, 1.0);
+		const double g_len = max(m_grid_base + 1.0, 1.0);
 		// êÇíºÇ»ï˚ä·ê¸Çï\é¶Ç∑ÇÈ.
 		double x;
 		for (uint32_t i = 0; (x = g_len * i + offset.x) < pw; i++) {
@@ -244,10 +244,10 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	//	ï˚ä·ÇÃëÂÇ´Ç≥ÇìæÇÈ.
+	// ï˚ä·ÇÃëÂÇ´Ç≥ÇìæÇÈ.
 	bool ShapePanel::get_grid_size(double& val) const noexcept
 	{
-		val = m_grid_size;
+		val = m_grid_base;
 		return true;
 	}
 
@@ -355,7 +355,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::read;
 
 		read(m_grid_color, dt_reader);	// ï˚ä·ÇÃêF
-		m_grid_size = dt_reader.ReadDouble();	// ï˚ä·ÇÃëÂÇ´Ç≥
+		m_grid_base = dt_reader.ReadDouble();	// ï˚ä·ÇÃëÂÇ´Ç≥
 		m_grid_opac = dt_reader.ReadDouble();
 		read(m_grid_show, dt_reader);
 		m_grid_snap = dt_reader.ReadBoolean();
@@ -442,7 +442,7 @@ namespace winrt::GraphPaper::implementation
 	// ílÇï˚ä·ÇÃëÂÇ´Ç≥Ç…äiî[Ç∑ÇÈ.
 	void ShapePanel::set_grid_size(const double val) noexcept
 	{
-		m_grid_size = val;
+		m_grid_base = val;
 	}
 
 	// ílÇï˚ä·ê¸ÇÃïsìßñæìxÇ…äiî[Ç∑ÇÈ.
@@ -546,7 +546,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_font_style(m_font_style);
 		s->get_font_weight(m_font_weight);
 		s->get_grid_opac(m_grid_opac);
-		s->get_grid_size(m_grid_size);
+		s->get_grid_size(m_grid_base);
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
 		s->get_text_line_height(m_text_line);
@@ -569,7 +569,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write;
 
 		write(m_grid_color, dt_writer);
-		dt_writer.WriteDouble(m_grid_size);
+		dt_writer.WriteDouble(m_grid_base);
 		dt_writer.WriteDouble(m_grid_opac);
 		write(m_grid_show, dt_writer);
 		dt_writer.WriteBoolean(m_grid_snap);

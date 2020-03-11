@@ -115,10 +115,10 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_3().Visibility(VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 0> });
 		//const auto slider_0_token = sample_slider_0().ValueChanged(
-		//	[this](auto, auto args)
-		//	{
-		//		font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, args.NewValue());
-		//	}
+		// [this](auto, auto args)
+		// {
+		// 	font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, args.NewValue());
+		// }
 		//);
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 2> });
@@ -163,8 +163,8 @@ namespace winrt::GraphPaper::implementation
 			lv_sample_list().Items().GetMany(i, item);
 			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
 			if (wcscmp(name, m_page_panel.m_font_family) == 0) {
-				//	書体名が同じ場合,
-				//	その書体をリストビューの選択済み項目に格納する.
+				// 書体名が同じ場合,
+				// その書体をリストビューの選択済み項目に格納する.
 				lv_sample_list().SelectedItem(item[0]);
 				lv_sample_list().ScrollIntoView(item[0]);
 				break;
@@ -362,36 +362,36 @@ namespace winrt::GraphPaper::implementation
 
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[32];
-			//	ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<true>(m_page_unit, val, m_sample_dx.m_logical_dpi, m_sample_panel.m_grid_size + 1.0, buf, 16);
+			// ピクセル単位の長さを他の単位の文字列に変換する.
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, val, m_sample_dx.m_logical_dpi, m_sample_panel.m_grid_base + 1.0, buf, 16);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::FONT_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
-				//	色成分の値を文字列に変換する.
+				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
-				//	色成分の値を文字列に変換する.
+				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
-				//	色成分の値を文字列に変換する.
+				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
-				//	色成分の値を文字列に変換する.
+				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
@@ -411,11 +411,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	値をスライダーのヘッダーと、見本の図形に格納する.
-	//	U	操作の種類
-	//	S	スライダーの番号
-	//	args	ValueChanged で渡された引数
-	//	戻り値	なし
+	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// U	操作の種類
+	// S	スライダーの番号
+	// args	ValueChanged で渡された引数
+	// 戻り値	なし
 	template <UNDO_OP U, int S>
 	void MainPage::font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
@@ -479,7 +479,7 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	//	書体メニューの「行の高さ」>「狭める」が選択された.
+	// 書体メニューの「行の高さ」>「狭める」が選択された.
 	void MainPage::mfi_text_line_height_contract_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto val = m_page_panel.m_text_line - TEXT_LINE_DELTA;
@@ -491,7 +491,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	書体メニューの「行の高さ」>「広げる」が選択された.
+	// 書体メニューの「行の高さ」>「広げる」が選択された.
 	void MainPage::mfi_text_line_height_expand_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto val = m_page_panel.m_text_line + TEXT_LINE_DELTA;
@@ -500,7 +500,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	書体メニューの「余白」が選択された.
+	// 書体メニューの「余白」が選択された.
 	IAsyncAction MainPage::mfi_text_margin_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
@@ -560,26 +560,26 @@ namespace winrt::GraphPaper::implementation
 		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
 	}
 
-	//	書体メニューの「段落のそろえ」>「中段」が選択された.
+	// 書体メニューの「段落のそろえ」>「中段」が選択された.
 	void MainPage::rmfi_text_align_middle_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
-	//	書体メニューの「文字列のそろえ」>「右よせ」が選択された.
+	// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
 	void MainPage::rmfi_text_align_right_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	}
 
-	//	書体メニューの「段落のそろえ」>「上よせ」が選択された.
+	// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
 	void MainPage::rmfi_text_align_top_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 	}
 
-	//	書体メニューの「段落のそろえ」に印をつける.
-	//	p_align	段落のそろえ
+	// 書体メニューの「段落のそろえ」に印をつける.
+	// p_align	段落のそろえ
 	void MainPage::text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align)
 	{
 		rmfi_text_align_top().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
@@ -614,7 +614,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring hdr;
 
 		const double dpi = m_page_dx.m_logical_dpi;
-		const double g_len = m_sample_panel.m_grid_size + 1.0;
+		const double g_len = m_sample_panel.m_grid_base + 1.0;
 		double px;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
@@ -622,8 +622,8 @@ namespace winrt::GraphPaper::implementation
 				hdr = r_loader.GetString(L"str_text_mar_horzorz");
 				px = val;
 				wchar_t buf[32];
-				//	ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<true>(m_page_unit, px, dpi, g_len, buf);
+				// ピクセル単位の長さを他の単位の文字列に変換する.
+				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, px, dpi, g_len, buf);
 				hdr = hdr + L": " + buf;
 			}
 			if constexpr (S == 1) {
@@ -631,8 +631,8 @@ namespace winrt::GraphPaper::implementation
 				hdr = r_loader.GetString(L"str_text_mar_vertert");
 				px = val;
 				wchar_t buf[32];
-				//	ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<true>(m_page_unit, px, dpi, g_len, buf);
+				// ピクセル単位の長さを他の単位の文字列に変換する.
+				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, px, dpi, g_len, buf);
 				hdr = hdr + L": " + buf;
 			}
 		}
@@ -640,12 +640,12 @@ namespace winrt::GraphPaper::implementation
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_height");
 			if (val > FLT_MIN) {
-				//	行の高さの単位は DIPs (96dpi 固定) なので,
-				//	これをピクセル単位に変換する.
+				// 行の高さの単位は DIPs (96dpi 固定) なので,
+				// これをピクセル単位に変換する.
 				px = val * dpi / 96.0;
 				wchar_t buf[32];
-				//	ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<true>(m_page_unit, px, dpi, g_len, buf);
+				// ピクセル単位の長さを他の単位の文字列に変換する.
+				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, px, dpi, g_len, buf);
 				hdr = hdr + L": " + buf;
 			}
 			else {
@@ -666,11 +666,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	値をスライダーのヘッダーと、見本の図形に格納する.
-	//	U	操作の種類
-	//	S	スライダーの番号
-	//	args	ValueChanged で渡された引数
-	//	戻り値	なし
+	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// U	操作の種類
+	// S	スライダーの番号
+	// args	ValueChanged で渡された引数
+	// 戻り値	なし
 	template <UNDO_OP U, int S>
 	void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{

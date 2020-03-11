@@ -35,9 +35,9 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
 			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_sample_panel.m_grid_size + 1.0;
-			//	ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<true>(m_page_unit, val, dpi, g_len, buf, 31);
+			const auto g_len = m_sample_panel.m_grid_base + 1.0;
+			// ピクセル単位の長さを他の単位の文字列に変換する.
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, val, dpi, g_len, buf, 31);
 			hdr = hdr + buf;
 		}
 		if constexpr (S == 0) {
@@ -54,21 +54,21 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	値をスライダーのヘッダーと、見本の図形に格納する.
-	//	U	操作の種類
-	//	S	スライダーの番号
-	//	args	ValueChanged で渡された引数
-	//	戻り値	なし
+	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// U	操作の種類
+	// S	スライダーの番号
+	// args	ValueChanged で渡された引数
+	// 戻り値	なし
 	template <UNDO_OP U, int S>
 	void MainPage::arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		Shape* s = m_sample_shape;
+		//Shape* s = m_sample_shape;
 		const double val = args.NewValue();
-		//	値をスライダーのヘッダーに格納する.
+		// 値をスライダーのヘッダーに格納する.
 		arrow_set_slider_header<U, S>(val);
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			ARROW_SIZE a_size;
-			s->get_arrow_size(a_size);
+			m_sample_shape->get_arrow_size(a_size);
 			if constexpr (S == 0) {
 				a_size.m_width = static_cast<FLOAT>(val);
 			}
@@ -78,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 2) {
 				a_size.m_offset = static_cast<FLOAT>(val);
 			}
-			s->set_arrow_size(a_size);
+			m_sample_shape->set_arrow_size(a_size);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -100,7 +100,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
 	}
 
-	// ストロークメニューの「矢じりの大きさ」が選択された.
+	// 線枠メニューの「矢じりの大きさ」が選択された.
 	IAsyncAction MainPage::mfi_arrow_size_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
@@ -112,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
-		//	値をスライダーのヘッダーに格納する.
+		// 値をスライダーのヘッダーに格納する.
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 0>(val0);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 1>(val1);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 2>(val2);
@@ -144,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	//	ストロークメニューの「矢じりの種類」>「閉じた矢」が選択された.
+	// 線枠メニューの「矢じりの種類」>「閉じた矢」が選択された.
 	void MainPage::rmfi_arrow_filled_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_arrow_style == ARROW_STYLE::NONE) {
@@ -154,7 +154,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_value<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::FILLED);
 	}
 
-	//	ストロークメニューの「矢じりの種類」>「なし」が選択された.
+	// 線枠メニューの「矢じりの種類」>「なし」が選択された.
 	void MainPage::rmfi_arrow_none_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_arrow_style != ARROW_STYLE::NONE) {
@@ -164,7 +164,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_value<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::NONE);
 	}
 
-	//	ストロークメニューの「矢じりの種類」>「開いた」が選択された.
+	// 線枠メニューの「矢じりの種類」>「開いた」が選択された.
 	void MainPage::rmfi_arrow_opened_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_panel.m_arrow_style == ARROW_STYLE::NONE) {

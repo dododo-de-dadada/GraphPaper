@@ -13,6 +13,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::rmfi_tool_bezi_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_draw_tool = DRAW_TOOL::BEZI;
+		// 作図ツールをステータスバーに格納する.
 		status_set_draw();
 		set_pointer();
 	}
@@ -21,6 +22,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::rmfi_tool_elli_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_draw_tool = DRAW_TOOL::ELLI;
+		// 作図ツールをステータスバーに格納する.
 		status_set_draw();
 		set_pointer();
 	}
@@ -29,6 +31,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::rmfi_tool_line_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_draw_tool = DRAW_TOOL::LINE;
+		// 作図ツールをステータスバーに格納する.
 		status_set_draw();
 		set_pointer();
 	}
@@ -37,6 +40,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::rmfi_tool_quad_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_draw_tool = DRAW_TOOL::QUAD;
+		// 作図ツールをステータスバーに格納する.
 		status_set_draw();
 		set_pointer();
 	}
@@ -45,6 +49,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::rmfi_tool_rect_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_draw_tool = DRAW_TOOL::RECT;
+		// 作図ツールをステータスバーに格納する.
 		status_set_draw();
 		set_pointer();
 	}
@@ -53,6 +58,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::rmfi_tool_rrect_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_draw_tool = DRAW_TOOL::RRECT;
+		// 作図ツールをステータスバーに格納する.
 		status_set_draw();
 		set_pointer();
 	}
@@ -64,6 +70,7 @@ namespace winrt::GraphPaper::implementation
 		m_press_state = STATE_TRAN::BEGIN;
 		m_press_shape = nullptr;
 		m_press_anchor = ANCH_WHICH::ANCH_OUTSIDE;
+		// 作図ツールをステータスバーに格納する.
 		status_set_draw();
 		set_pointer();
 	}
@@ -72,6 +79,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::rmfi_tool_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_draw_tool = DRAW_TOOL::TEXT;
+		// 作図ツールをステータスバーに格納する.
 		status_set_draw();
 		set_pointer();
 	}
@@ -80,6 +88,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::rmfi_tool_scale_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_draw_tool = DRAW_TOOL::SCALE;
+		// 作図ツールをステータスバーに格納する.
 		status_set_draw();
 		set_pointer();
 	}

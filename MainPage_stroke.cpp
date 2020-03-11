@@ -220,15 +220,15 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::STROKE_WIDTH || U == UNDO_OP::STROKE_PATTERN) {
 			wchar_t buf[32];
 			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_page_panel.m_grid_size + 1.0;
-			//	ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<true>(m_page_unit, val, dpi, g_len, buf);
+			const auto g_len = m_page_panel.m_grid_base + 1.0;
+			// ピクセル単位の長さを他の単位の文字列に変換する.
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, val, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
-				//	色成分の値を文字列に変換する.
+				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
@@ -241,14 +241,14 @@ namespace winrt::GraphPaper::implementation
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
-				//	色成分の値を文字列に変換する.
+				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
-				//	色成分の値を文字列に変換する.
+				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
@@ -268,11 +268,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	値をスライダーのヘッダーと、見本の図形に格納する.
-	//	U	操作の種類
-	//	S	スライダーの番号
-	//	args	ValueChanged で渡された引数
-	//	戻り値	なし
+	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// U	操作の種類
+	// S	スライダーの番号
+	// args	ValueChanged で渡された引数
+	// 戻り値	なし
 	template <UNDO_OP U, int S>
 	void MainPage::stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{

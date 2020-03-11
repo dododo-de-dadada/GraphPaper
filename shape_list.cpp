@@ -13,8 +13,8 @@ namespace winrt::GraphPaper::implementation
 	static Shape* s_list_read_shape(DataReader const& dt_reader);
 	// 次の図形を得る.
 	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, const Shape* s) noexcept;
-	// 次の図形とその長さを得る.
-	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& i) noexcept;
+	// 次の図形とその距離を得る.
+	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept;
 
 	// データリーダーから図形を作成する.
 	static Shape* s_list_read_shape(DataReader const& dt_reader)
@@ -80,29 +80,29 @@ namespace winrt::GraphPaper::implementation
 		return static_cast<Shape*>(nullptr);
 	}
 	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::iterator const& it_begin, S_LIST_T::iterator const& it_end, const Shape* s) noexcept;
-	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::reverse_iterator const& it_begin, S_LIST_T::reverse_iterator const& it_end, const Shape* s) noexcept;
+	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::reverse_iterator const& it_rbegin, S_LIST_T::reverse_iterator const& it_rend, const Shape* s) noexcept;
 
 	// 次の図形とその長さをリストから得る.
 	// it_begin	リストの始端
 	// it_end	リストの終端
-	// dist	次の図形との長さ
+	// distance	次の図形との長さ
 	// 戻り値	次の図形, ヌルならば次の図形はない.
 	template <typename T>
-	static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& dist) noexcept
+	static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept
 	{
 		uint32_t i = 0;
 		for (auto it = it_begin; it != it_end; it++) {
 			auto s = *it;
 			if (s->is_deleted() == false) {
-				dist = i;
+				distance = i;
 				return s;
 			}
 			i++;
 		}
 		return static_cast<Shape*>(nullptr);
 	}
-	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::iterator const& it_begin, S_LIST_T::iterator const& it_end, uint32_t& dist) noexcept;
-	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::reverse_iterator const& it_begin, S_LIST_T::reverse_iterator const& it_end, uint32_t& dist) noexcept;
+	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::iterator const& it_begin, S_LIST_T::iterator const& it_end, uint32_t& distance) noexcept;
+	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::reverse_iterator const& it_rbegin, S_LIST_T::reverse_iterator const& it_rend, uint32_t& distance) noexcept;
 
 	// 最後の図形をリストから得る.
 	// s_list	図形リスト
@@ -155,16 +155,6 @@ namespace winrt::GraphPaper::implementation
 		uint32_t _;
 		return s_list_next(s_list.begin(), s_list.end(), _);
 	}
-
-	// 最初の図形とその順番をリストから得る.
-	// s_list	図形リスト
-	// dist	長さ
-	// 戻り値	最初の図形
-	// 消去フラグが立っている図形は勘定されない.
-	//Shape* S_LIST::front(S_LIST_T const& s_list, uint32_t& dist) noexcept
-	//{
-	//	return s_list_next(s_list.begin(), s_list.end(), dist);
-	//}
 
 	// 図形全体の領域をリストから得る.
 	// s_list	図形リスト
@@ -358,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 	// s_list	図形リスト
 	// t_list	得られたリスト
 	template <typename S>
-	void s_list_select(S_LIST_T const& s_list, S_LIST_T& t_list) noexcept
+	void s_list_selected(S_LIST_T const& s_list, S_LIST_T& t_list) noexcept
 	{
 		for (auto s : s_list) {
 			if (s->is_deleted()) {
@@ -375,8 +365,8 @@ namespace winrt::GraphPaper::implementation
 			t_list.push_back(s);
 		}
 	}
-	template void s_list_select<Shape>(const S_LIST_T& s_list, S_LIST_T& t_list) noexcept;
-	template void s_list_select<ShapeGroup>(const S_LIST_T& s_list, S_LIST_T& t_list) noexcept;
+	template void s_list_selected<Shape>(const S_LIST_T& s_list, S_LIST_T& t_list) noexcept;
+	template void s_list_selected<ShapeGroup>(const S_LIST_T& s_list, S_LIST_T& t_list) noexcept;
 
 	// 図形リストをデータライターに書き込む.
 	// REDUCE	消去フラグが立っている図形を除く.
@@ -435,7 +425,7 @@ namespace winrt::GraphPaper::implementation
 	template void s_list_write<!REDUCE>(S_LIST_T const& s_list, DataWriter const& dt_writer);
 	template void s_list_write<REDUCE>(S_LIST_T const& s_list, DataWriter const& dt_writer);
 
-	//	図形リストから文字列を得る.
+	// 図形リストから文字列を得る.
 	winrt::hstring s_list_text(S_LIST_T const& s_list) noexcept
 	{
 		winrt::hstring text;

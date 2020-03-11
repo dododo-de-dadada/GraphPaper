@@ -1,18 +1,18 @@
 //------------------------------
 // shape.h
-//	shape.cpp
-//	shape_bezi.cpp	ベジェ曲線
-//	shape_dx.cpp	図形の描画環境
-//	shape_elli.cpp	だ円
-//	shape_group.cpp	グループ図形
-//	shape_line.cpp	直線
-//	shape_list.cpp	図形リスト
-//	shape_panel.cpp	パネル
-//	shape_quad.cpp	四へん形
-//	shape.rect.cpp	方形
-//	shape_rrect.cpp	角丸方形
-//	shape_stroke.cpp	線枠, 折れ線のひな型
-//	shape_text.cpp	文字列図形
+// shape.cpp
+// shape_bezi.cpp	ベジェ曲線
+// shape_dx.cpp	図形の描画環境
+// shape_elli.cpp	だ円
+// shape_group.cpp	グループ図形
+// shape_line.cpp	直線
+// shape_list.cpp	図形リスト
+// shape_panel.cpp	パネル
+// shape_quad.cpp	四へん形
+// shape.rect.cpp	方形
+// shape_rrect.cpp	角丸方形
+// shape_stroke.cpp	線枠, 折れ線のひな型
+// shape_text.cpp	文字列図形
 //------------------------------
 #pragma once
 #include <list>
@@ -511,7 +511,7 @@ namespace winrt::GraphPaper::implementation
 	typedef std::list<struct Shape*>	S_LIST_T;
 	// 最後の図形をリストから得る.
 	Shape* s_list_back(S_LIST_T const& s_list) noexcept;
-	//	図形リストを消去し, 含まれる図形を破棄する.
+	// 図形リストを消去し, 含まれる図形を破棄する.
 	void s_list_clear(S_LIST_T& s_list) noexcept;
 	// 図形のリスト上での位置を得る.
 	uint32_t s_list_distance(S_LIST_T const& s_list, const Shape* s) noexcept;
@@ -534,12 +534,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形をリストから削除し, 削除した図形の次の図形を得る.
 	Shape* s_list_remove(S_LIST_T& s_list, const Shape* s) noexcept;
 	// 選択された図形のリストを得る.
-	template <typename S> void s_list_select(S_LIST_T const& s_list, S_LIST_T& sel_list) noexcept;
+	template <typename S> void s_list_selected(S_LIST_T const& s_list, S_LIST_T& sel_list) noexcept;
 	// 図形リストをデータライターに書き込む. REDUCE 場合の消去フラグの立つ図形は無視する.
 	template<bool REDUCE> void s_list_write(const S_LIST_T& s_list, DataWriter const& dt_writer);
 	// リストの中の図形の順番を得る.
 	template <typename S, typename T> bool s_list_match(S_LIST_T const& s_list, S s, T& t);
-	//	図形リストから文字列を得る.
+	// 図形リストから文字列を得る.
 	winrt::hstring s_list_text(S_LIST_T const& s_list) noexcept;
 
 	//------------------------------
@@ -549,7 +549,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 方眼の属性
 		D2D1_COLOR_F m_grid_color;	// 方眼線の色 (MainPage のコンストラクタで設定)
-		double m_grid_size = 0.0;	// 方眼の大きさ (を -1 した値)
+		double m_grid_base = 0.0;	// 方眼の大きさ (を -1 した値)
 		double m_grid_opac = GRID_OPAC;	// 方眼線の不透明度
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼線の表示
 		bool m_grid_snap = true;	// 方眼に整列
@@ -913,24 +913,24 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	//	目盛り
-	//	作成したあとで文字列の属性の変更はできない.
+	// 目盛り
+	// 作成したあとで文字列の属性の変更はできない.
 	//------------------------------
 	struct ShapeScale : ShapeRect {
-		double m_grid_size;	// 方眼の大きさ (を -1 した値)
+		double m_grid_base;	// 方眼の大きさ (を -1 した値)
 		winrt::com_ptr<IDWriteTextFormat> m_dw_text_format{};	// テキストフォーマット
 
 		//------------------------------
 		// shape_scale.cpp
 		//------------------------------
 
-		//	図形を破棄する.
+		// 図形を破棄する.
 		~ShapeScale(void);
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
-		//	図形を作成する.
+		// 図形を作成する.
 		ShapeScale(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr);
 		// 図形をデータリーダーから読み込む.
 		ShapeScale(DataReader const& dt_reader);
@@ -1182,9 +1182,9 @@ namespace winrt::GraphPaper::implementation
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 有効な書体名か調べ, 有効なら, もともとの書体名を破棄し, 有効な書体名要素へのポインターと置き換える.
 		static bool is_available_font(wchar_t*& font);
-		//	有効な書体名の配列を破棄する.
+		// 有効な書体名の配列を破棄する.
 		static void release_available_fonts(void);
-		//	有効な書体名の配列を設定する.
+		// 有効な書体名の配列を設定する.
 		static void set_available_fonts(void);
 		// 値を書体の色に格納する.
 		void set_font_color(const D2D1_COLOR_F& val) noexcept;

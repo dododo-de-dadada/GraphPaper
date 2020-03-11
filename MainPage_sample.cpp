@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
 		dc->Clear(m_sample_panel.m_page_color);
-		auto ox = std::fmod(m_sample_panel.m_page_size.width * 0.5, m_sample_panel.m_grid_size + 1.0);
+		auto ox = std::fmod(m_sample_panel.m_page_size.width * 0.5, m_sample_panel.m_grid_base + 1.0);
 		D2D1_POINT_2F offset;
 		offset.x = static_cast<FLOAT>(ox);
 		offset.y = offset.x;
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 		m_sample_dx.Present();
 	}
 
-	//	見本パネルの大きさが変わった.
+	// 見本パネルの大きさが変わった.
 	void MainPage::scp_sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_sample_dx.m_dxgi_swap_chain != nullptr) {

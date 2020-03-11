@@ -91,15 +91,15 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected()) {
 			const auto flag = (std::abs(m_diff.x) > FLT_MIN && std::abs(m_diff.y) > FLT_MIN);
 			//if (flag) {
-			//	D2D1_POINT_2F c_pos;
-			//	pt_add(r_min, rx, ry, c_pos);
-			//	anchor_draw_rounded(c_pos, dx);
-			//	c_pos.x = r_rec.rect.right - rx;
-			//	anchor_draw_rounded(c_pos, dx);
-			//	c_pos.y = r_rec.rect.bottom - ry;
-			//	anchor_draw_rounded(c_pos, dx);
-			//	c_pos.x = r_min.x + rx;
-			//	anchor_draw_rounded(c_pos, dx);
+			// D2D1_POINT_2F c_pos;
+			// pt_add(r_min, rx, ry, c_pos);
+			// anchor_draw_rounded(c_pos, dx);
+			// c_pos.x = r_rec.rect.right - rx;
+			// anchor_draw_rounded(c_pos, dx);
+			// c_pos.y = r_rec.rect.bottom - ry;
+			// anchor_draw_rounded(c_pos, dx);
+			// c_pos.x = r_min.x + rx;
+			// anchor_draw_rounded(c_pos, dx);
 			//}
 			D2D1_POINT_2F r_pos[4];
 			r_pos[0] = r_min;

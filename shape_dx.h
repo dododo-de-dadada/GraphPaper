@@ -120,7 +120,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1SolidColorBrush> m_shape_brush;	// }Œ`‚ÌFƒuƒ‰ƒV
 		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// •`‰æó‘Ô‚Ì•Û‘¶ƒuƒƒbƒN
 
-		//	•`‰æŠÂ‹«‚ğ”jŠü‚·‚é.
+		// •`‰æŠÂ‹«‚ğ”jŠü‚·‚é.
 		void Release(void)
 		{
 			Trim();

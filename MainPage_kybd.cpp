@@ -72,10 +72,10 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + PgDn ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_bring_forward().IsEnabled()) {
-	//		//mfi_bring_forward_click(nullptr, nullptr);
-	//		arrange_order<S_LIST_T::reverse_iterator>();
-	//	}
+	// if (mfi_bring_forward().IsEnabled()) {
+	// 	//mfi_bring_forward_click(nullptr, nullptr);
+	// 	arrange_order<S_LIST_T::reverse_iterator>();
+	// }
 	//}
 
 	// Cntrol + End ‚ª‰Ÿ‚³‚ê‚½.
@@ -94,7 +94,7 @@ namespace winrt::GraphPaper::implementation
 	/*
 	void MainPage::ka_copy_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		if (mfi_copy().IsEnabled()) {
+		if (mfi_xcvd_copy().IsEnabled()) {
 			constexpr uint32_t COPY = 1;
 			auto _{ xcvd_copy_async<COPY>() };
 			//mfi_xcvd_copy_click(nullptr, nullptr);
@@ -105,7 +105,7 @@ namespace winrt::GraphPaper::implementation
 	/*
 	void MainPage::ka_cut_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		if (mfi_cut().IsEnabled()) {
+		if (mfi_xcvd_cut().IsEnabled()) {
 			constexpr uint32_t CUT = 0;
 			auto _{ xcvd_copy_async<CUT>() };
 			//mfi_xcvd_cut_click(nullptr, nullptr);
@@ -116,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 	/*
 	void MainPage::ka_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		if (mfi_delete().IsEnabled()) {
+		if (mfi_xcvd_delete().IsEnabled()) {
 			mfi_xcvd_delete_click(nullptr, nullptr);
 		}
 	}
@@ -133,117 +133,117 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + F ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_text_find().IsEnabled()) {
-	//		mfi_text_find_click(nullptr, nullptr);
-	//	}
+	// if (mfi_text_find().IsEnabled()) {
+	// 	mfi_text_find_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + G ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_group_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_group().IsEnabled()) {
-	//		mfi_group_click(nullptr, nullptr);
-	//	}
+	// if (mfi_group().IsEnabled()) {
+	// 	mfi_group_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + N ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_new_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	mfi_new_click(nullptr, nullptr);
+	// mfi_new_click(nullptr, nullptr);
 	//}
 
 	// Cntrol + O ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_open_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	mfi_open_click(nullptr, nullptr);
+	// mfi_open_click(nullptr, nullptr);
 	//}
 
 	// Cntrol + V ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_paste().IsEnabled()) {
-	//		mfi_xcvd_paste_click(nullptr, nullptr);
-	//	}
+	// if (mfi_xcvd_paste().IsEnabled()) {
+	// 	mfi_xcvd_paste_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + Y ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_redo().IsEnabled()) {
-	//		mfi_redo_click(nullptr, nullptr);
-	//	}
+	// if (mfi_redo().IsEnabled()) {
+	// 	mfi_redo_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + Shift + S ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_save_as_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_save_as().IsEnabled()) {
-	//		mfi_save_as_click(nullptr, nullptr);
-	//	}
+	// if (mfi_save_as().IsEnabled()) {
+	// 	mfi_save_as_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + S ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_save_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_save().IsEnabled()) {
-	//		mfi_save_click(nullptr, nullptr);
-	//	}
+	// if (mfi_save().IsEnabled()) {
+	// 	mfi_save_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + A ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_select_all_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_select_all().IsEnabled()) {
-	//		mfi_select_all_click(nullptr, nullptr);
-	//	}
+	// if (mfi_select_all().IsEnabled()) {
+	// 	mfi_select_all_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + PgUp ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_send_backward().IsEnabled()) {
-	//		mfi_send_backward_click(nullptr, nullptr);
-	//	}
+	// if (mfi_send_backward().IsEnabled()) {
+	// 	mfi_send_backward_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + Home ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_send_to_back().IsEnabled()) {
-	//		mfi_send_to_back_click(nullptr, nullptr);
-	//	}
+	// if (mfi_send_to_back().IsEnabled()) {
+	// 	mfi_send_to_back_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + L ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_summaty_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_summary().IsEnabled()) {
-	//		mfi_summary_click(nullptr, nullptr);
-	//	}
+	// if (mfi_summary().IsEnabled()) {
+	// 	mfi_summary_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + Z ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_undo().IsEnabled()) {
-	//		mfi_undo_click(nullptr, nullptr);
-	//	}
+	// if (mfi_undo().IsEnabled()) {
+	// 	mfi_undo_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + U ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_ungroup_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (mfi_ungroup().IsEnabled()) {
-	//		mfi_ungroup_click(nullptr, nullptr);
-	//	}
+	// if (mfi_ungroup().IsEnabled()) {
+	// 	mfi_ungroup_click(nullptr, nullptr);
+	// }
 	//}
 
 	// Cntrol + 0 ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	//	if (m_page_panel.m_page_scale != 1.0) {
-	//		mfi_zoom_reset_click(nullptr, nullptr);
-	//	}
+	// if (m_page_panel.m_page_scale != 1.0) {
+	// 	mfi_zoom_reset_click(nullptr, nullptr);
+	// }
 	//}
 
 	//void MainPage::ka_zoom_in_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)

@@ -13,10 +13,10 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr wchar_t TITLE_GRID[] = L"str_grid";
 
-	//	値をスライダーのヘッダーに格納する.
-	//	U	操作
-	//	S	スライダー
-	//	val	値
+	// 値をスライダーのヘッダーに格納する.
+	// U	操作
+	// S	スライダー
+	// val	値
 	template <UNDO_OP U, int S>
 	void MainPage::grid_set_slider_header(double val)
 	{
@@ -28,16 +28,16 @@ namespace winrt::GraphPaper::implementation
 			hdr = r_loader.GetString(L"str_grid_length");
 			val += 1.0;
 			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_page_panel.m_grid_size + 1.0;
+			const auto g_len = m_page_panel.m_grid_base + 1.0;
 			wchar_t buf[32];
-			//	ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<true>(m_page_unit, val, dpi, g_len, buf);
+			// ピクセル単位の長さを他の単位の文字列に変換する.
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, val, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			if constexpr (S == 3) {
 				wchar_t buf[32];
-				//	色成分の値を文字列に変換する.
+				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, val, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
@@ -57,11 +57,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	値をスライダーのヘッダーと、見本の図形に格納する.
-	//	U	操作の種類
-	//	S	スライダーの番号
-	//	args	ValueChanged で渡された引数
-	//	戻り値	なし
+	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// U	操作の種類
+	// S	スライダーの番号
+	// args	ValueChanged で渡された引数
+	// 戻り値	なし
 	template <UNDO_OP U, int S>
 	void MainPage::grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
@@ -99,7 +99,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_panel.m_grid_size;
+		const double val0 = m_page_panel.m_grid_base;
 		sample_slider_0().Value(val0);
 		grid_set_slider_header<UNDO_OP::GRID_LEN, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -115,8 +115,9 @@ namespace winrt::GraphPaper::implementation
 			m_sample_panel.get_grid_size(sample_val);
 			if (equal(page_val, sample_val) == false) {
 				undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, sample_val);
+				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
-				//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
+				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
 
@@ -129,13 +130,14 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼の大きさ」>「狭める」が選択された.
 	void MainPage::mfi_grid_len_contract_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		const double val = (m_page_panel.m_grid_size + 1.0) * 0.5 - 1.0;
+		const double val = (m_page_panel.m_grid_base + 1.0) * 0.5 - 1.0;
 		if (val < 1.0) {
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, val);
+		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -143,15 +145,16 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼の大きさ」>「広げる」が選択された.
 	void MainPage::mfi_grid_len_expand_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		const double val = (m_page_panel.m_grid_size + 1.0) * 2.0 - 1.0;
+		const double val = (m_page_panel.m_grid_base + 1.0) * 2.0 - 1.0;
 		if (val > max(m_page_panel.m_page_size.width, m_page_panel.m_page_size.height)) {
-			//	方眼の一片の長さが, ページの幅か高さの大きいほうの値を超える場合,
-			//	中断する.
+			// 方眼の一片の長さが, ページの幅か高さの大きいほうの値を超える場合,
+			// 中断する.
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, val);
+		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -177,8 +180,9 @@ namespace winrt::GraphPaper::implementation
 			m_page_panel.get_grid_opac(page_val);
 			if (equal(page_val, sample_val) == false) {
 				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_panel, sample_val);
+				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
-				//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
+				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
 		}
@@ -194,8 +198,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::BACK);
+		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -207,8 +212,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::FRONT);
+		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -220,8 +226,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::HIDE);
+		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -236,19 +243,19 @@ namespace winrt::GraphPaper::implementation
 		if (m_page_panel.m_grid_snap == false) {
 			return;
 		}
-		const double g_len = m_page_panel.m_grid_size + 1.0;
+		const double g_len = m_page_panel.m_grid_base + 1.0;
 		auto flag = true;	// 未変更
 
-		//	図形リストの各図形について以下を繰り返す.
+		// 図形リストの各図形について以下を繰り返す.
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
-				//	消去フラグが立っている場合,
-				//	以下を無視する.
+				// 消去フラグが立っている場合,
+				// 以下を無視する.
 				continue;
 			}
 			if (s->is_selected() == false) {
-				//	選択フラグがない場合,
-				//	以下を無視する.
+				// 選択フラグがない場合,
+				// 以下を無視する.
 				continue;
 			}
 			D2D1_POINT_2F s_pos;
@@ -256,8 +263,8 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F g_pos;
 			pt_round(s_pos, g_len, g_pos);
 			if (equal(g_pos, s_pos)) {
-				//	開始位置と丸めた位置が同じ場合,
-				//	以下を無視する.
+				// 開始位置と丸めた位置が同じ場合,
+				// 以下を無視する.
 				continue;
 			}
 			if (flag == true) {
@@ -271,8 +278,9 @@ namespace winrt::GraphPaper::implementation
 		if (flag == true) {
 			return;
 		}
+		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		//	元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();

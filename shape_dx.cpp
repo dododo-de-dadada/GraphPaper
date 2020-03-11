@@ -277,8 +277,8 @@ namespace winrt::GraphPaper::implementation
 			// スケーリングには DXGI_SCALING_STRETCH を指定する.
 			// 原因はよくわからないが, たとえバッファサイズが一致していたとしても DXGI_SCALING_NONE を指定するとエラーになる.
 			//if (DisplayMetrics::SupportHighResolutions
-			//	|| m_logical_dpi <= DisplayMetrics::DpiThreshold) {
-			//	swapChainDesc.Scaling = DXGI_SCALING_NONE;
+			// || m_logical_dpi <= DisplayMetrics::DpiThreshold) {
+			// swapChainDesc.Scaling = DXGI_SCALING_NONE;
 			//}
 			//else {
 			swapChainDesc.Scaling = DXGI_SCALING_STRETCH;

@@ -10,7 +10,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を破棄する.
 	ShapeGroup::~ShapeGroup(void)
 	{
-		//	図形リストを消去し, 含まれる図形を破棄する.
+		// 図形リストを消去し, 含まれる図形を破棄する.
 		s_list_clear(m_list_grouped);
 	}
 
@@ -18,14 +18,14 @@ namespace winrt::GraphPaper::implementation
 	void ShapeGroup::draw(SHAPE_DX& sc)
 	{
 		if (is_selected()) {
-			//	選択フラグが立っている場合,
+			// 選択フラグが立っている場合,
 			D2D1_POINT_2F b_min{ FLT_MAX, FLT_MAX };
 			D2D1_POINT_2F b_max{ -FLT_MAX, -FLT_MAX };
-			//	グループ化された各図形について以下を繰り返す.
+			// グループ化された各図形について以下を繰り返す.
 			for (const auto s : m_list_grouped) {
 				if (s->is_deleted()) {
-					//	消去フラグが立っている場合,
-					//	無視する.
+					// 消去フラグが立っている場合,
+					// 無視する.
 					continue;
 				}
 				s->draw(sc);
