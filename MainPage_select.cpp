@@ -343,10 +343,35 @@ namespace winrt::GraphPaper::implementation
 			if (s->get_text_range(t_range) == false) {
 				continue;
 			}
-			if (t_range.length > 0 || t_range.startPosition > 0) {
-				undo_push_set<UNDO_OP::TEXT_RANGE>(s, DWRITE_TEXT_RANGE{ 0, 0 });
-				flag = true;
+			if (t_range.length == 0 && t_range.startPosition == 0) {
+				continue;
 			}
+			auto del = false;
+			for (auto it = m_stack_undo.rbegin(); it != m_stack_undo.rend(); it++) {
+				const auto u = *it;
+				if (u == nullptr) {
+					break;
+				}
+				else if (typeid(*u) != typeid(UndoSet<UNDO_OP::TEXT_RANGE>)) {
+					if (typeid(*u) != typeid(UndoSelect)) {
+						break;
+					}
+				}
+				else if (u->m_shape == s) {
+					auto const& v = static_cast<UndoSet<UNDO_OP::TEXT_RANGE>*>(u)->m_val;
+					if (v.length > 0 || v.startPosition > 0) {
+						m_stack_undo.erase(it.base());
+						delete u;
+						s->set_text_range({ 0, 0 });
+						del = true;
+						break;
+					}
+				}
+			}
+			if (del == false) {
+				undo_push_set<UNDO_OP::TEXT_RANGE>(s, DWRITE_TEXT_RANGE{ 0, 0 });
+			}
+			flag = true;
 		}
 		if (m_summary_visible) {
 			summary_unselect_all();

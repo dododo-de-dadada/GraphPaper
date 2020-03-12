@@ -37,6 +37,10 @@ namespace winrt::GraphPaper::implementation
 		return n;
 	}
 
+	// 図形をグループ図形に追加して, その操作をスタックに積む.
+	// g	グループ図形
+	// s	追加する図形
+	// 戻り値	なし
 	void MainPage::undo_push_group(ShapeGroup* g, Shape* s)
 	{
 		m_stack_undo.push_back(new UndoAppendG(g, s));
