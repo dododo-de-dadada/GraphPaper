@@ -119,20 +119,10 @@ namespace winrt::GraphPaper::implementation
 				wchar_t* const n_text = new wchar_t[n_len + 1];
 				// 開始位置までの文字列を配列に格納する.
 				wcsncpy_s(n_text, n_len + 1, w_text, f_pos);
-				//for (uint32_t i = 0; i < f_pos; i++) {
-				// n_text[i] = w_text[i];
-				//}
 				// 置換文字列を配列に格納する.
 				wcsncpy_s(n_text + f_pos, n_len - f_pos + 1, r_text, r_len);
-				//for (uint32_t i = f_pos, j = 0; i < n_len && i < r_end && j < r_len; i++, j++) {
-				// n_text[i] = r_text[j];
-				//}
 				// 終了位置から後の文字列を配列に格納する.
 				wcsncpy_s(n_text + r_end, n_len - r_end + 1, w_text + f_end, w_len - f_end);
-				//for (uint32_t i = r_end, j = f_end; i < n_len && j < w_len; i++, j++) {
-				// n_text[i] = w_text[j];
-				//}
-				//n_text[n_len] = L'\0';
 				return n_text;
 			}
 		}
@@ -301,6 +291,8 @@ namespace winrt::GraphPaper::implementation
 		// 次の図形の文字列を検索する.
 		if (text_find_whithin_shapes() || flag) {
 			// 見つかった, または置換された場合
+			// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+			enable_undo_menu();
 			// 再表示する.
 			page_draw();
 			return;
@@ -370,7 +362,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			// 選択された図形が見つけた場合,
+			// 選択された図形を見つけた場合,
 			t = static_cast<ShapeText*>(*it);
 			const auto t_text = t->m_text;
 			const auto t_pos = t_range.startPosition;
@@ -388,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 						return false;
 					}
 					// 新たに見つからない, かつ回り込み検索の場合,
-					// リストの最初から範囲選択された図形の直前まで検索する.
+					// リストの最初から文字範囲が選択された図形の直前まで検索する.
 					auto const& it_begin = m_list_shapes.begin();
 					if (text_find_whithin_shapes(it_begin, it, m_find_text, f_len, m_find_case, t, f_pos) == false) {
 						// 新たに見つからない場合,
@@ -399,28 +391,24 @@ namespace winrt::GraphPaper::implementation
 							return false;
 						}
 					}
-					else {
-						// 新たに別の図形が見つかった場合,
-						// 範囲選択された図形の文字範囲を消去する.
-						undo_push_set<UNDO_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
-					}
-				}
-				else {
-					// 新たに別の図形が見つかった場合,
-					// 範囲選択された図形の文字範囲を消去する.
-					undo_push_set<UNDO_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
 				}
 			}
 			else {
-				// 範囲選択された図形の中に文字列を新たに見つけた場合
+				//  文字範囲が選択された図形の中に文字列を新たに見つけた場合
 				f_pos += t_end;
 			}
+		}
+		if (it != it_end && t != *it) {
+			// 新たに別の図形が見つかった場合,
+			// 元の図形の文字範囲の選択を消去する.
+			undo_push_set<UNDO_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
 		}
 		// 新たに見つけた図形の文字範囲に格納する.
 		// (操作スタックにヌルは積まない.)
 		undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ f_pos, f_len });
-		redo_clear();
+		// 図形が表示されるようページをスクロールする.
 		scroll_to_shape(t);
+		// true を返す.
 		return true;
 	}
 

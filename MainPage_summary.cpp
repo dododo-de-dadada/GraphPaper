@@ -165,6 +165,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (t != nullptr) {
+			// 図形が表示されるようページをスクロールする.
 			scroll_to_shape(t);
 			m_page_panel.set_to_shape(t);
 		}

@@ -30,7 +30,7 @@ namespace winrt::GraphPaper::implementation
 			summary_select_all();
 		}
 		// やり直す操作スタックを消去し, 含まれる操作を破棄する.
-		redo_clear();
+		//redo_clear();
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
@@ -126,7 +126,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (M == VirtualKeyModifiers::Shift) {
 			select_range(m_press_shape_prev, m_press_shape_summary);
 			// やり直す操作スタックを消去し, 含まれる操作を破棄する.
-			redo_clear();
+			//redo_clear();
 		}
 		if constexpr (M == VirtualKeyModifiers::None) {
 			m_press_shape_prev = m_press_shape_summary;
@@ -246,7 +246,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (select_range(s, m_press_shape_prev)) {
 				// やり直す操作スタックを消去し, 含まれる操作を破棄する.
-				redo_clear();
+				//redo_clear();
 				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
@@ -271,7 +271,7 @@ namespace winrt::GraphPaper::implementation
 				// 図形の選択を反転して, その操作スタックに積む.
 				undo_push_select(s);
 				// やり直す操作スタックを消去し, 含まれる操作を破棄する.
-				redo_clear();
+				//redo_clear();
 				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();

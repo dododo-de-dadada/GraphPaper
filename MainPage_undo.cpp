@@ -11,7 +11,7 @@ namespace winrt::GraphPaper::implementation
 {
 	// ヌルで区切られる一連の操作を, 操作の組とみなし, その数を組数とする.
 	// スタックに積むことができる最大の組数.
-	constexpr uint32_t U_MAX_CNT = 1;
+	constexpr uint32_t U_MAX_CNT = 32;
 
 	// 操作スタックを消去する.
 	static uint32_t undo_clear_stack(U_STACK_T& u_stack);
@@ -37,12 +37,9 @@ namespace winrt::GraphPaper::implementation
 		return n;
 	}
 
-	void MainPage::undo_push(Undo* u)
+	void MainPage::undo_push_group(ShapeGroup* g, Shape* s)
 	{
-		if (m_stack_redo.empty()) {
-			m_stack_rcnt -= undo_clear_stack(m_stack_redo);
-		}
-		m_stack_undo.push_back(u);
+		m_stack_undo.push_back(new UndoAppendG(g, s));
 	}
 
 	// 操作をデータリーダーから読み込む.
@@ -189,12 +186,17 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「やり直し」が選択された.
 	void MainPage::mfi_redo_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// スタックが空でない間以下を繰り返す
-		// 操作をスタックからポップする.
-		// ポップした操作をもう一方のスタックにプッシュする.
-		// ポップした操作がヌルの場合, 繰り返しを中断する.
-		// フラグを立てる.
-		// ポップした操作を実行する.
+		if (m_stack_rcnt == 0) {
+			return;
+		}
+		while (m_stack_undo.empty() == false) {
+			auto u = m_stack_undo.back();
+			if (u == nullptr) {
+				break;
+			}
+			m_stack_undo.pop_back();
+			undo_exec(u);
+		}
 		auto flag = false;
 		while (m_stack_redo.size() > 0) {
 			auto r = m_stack_redo.back();
@@ -225,34 +227,37 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「元に戻す」が選択された.
 	void MainPage::mfi_undo_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// フラグを消去する.
-		// スタックが空でない間以下を繰り返す.
-		// 	操作をスタックからピークする.
-		// 	ピークした操作がヌルの場合,
-		// 		かつフラグが立っている場合, 繰り返しを中断する.
-		// 	ピークした操作がヌルでない場合,
-		// 		フラグを立て, 操作を実行する.
-		// 	ピークした操作をポップし, もう一方のスタックにプッシュする.
-		auto flag = false;
-		while (m_stack_undo.size() > 0) {
+		if (m_stack_ucnt == 0) {
+			return;
+		}
+		auto st = 0;
+		while (m_stack_undo.empty() == false) {
 			auto u = m_stack_undo.back();
-			if (u == nullptr) {
-				if (flag) {
+			if (st == 0) {
+				m_stack_undo.pop_back();
+				if (u != nullptr) {
+					undo_exec(u);
+				}
+				else {
+					m_stack_redo.push_back(nullptr);
+					st = 1;
+				}
+			}
+			else if (st == 1) {
+				if (u != nullptr) {
+					m_stack_undo.pop_back();
+					undo_exec(u);
+					m_stack_redo.push_back(u);
+				}
+				else {
 					break;
 				}
 			}
-			else {
-				flag = true;
-				undo_exec(u);
-			}
-			m_stack_undo.pop_back();
-			m_stack_redo.push_back(u);
 		}
-		if (flag == false) {
-			return;
+		if (st != 0) {
+			m_stack_ucnt--;
+			m_stack_rcnt++;
 		}
-		m_stack_ucnt--;
-		m_stack_rcnt++;
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
@@ -264,11 +269,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// やり直す操作スタックを消去し, 含まれる操作を破棄する.
+	/*
 	void MainPage::redo_clear(void)
 	{
 		//m_stack_nset -= undo_clear_stack(m_stack_redo);
 		m_stack_rcnt -= undo_clear_stack(m_stack_redo);
 	}
+	*/
 
 	// 操作スタックを消去し, 含まれる操作を破棄する.
 	void MainPage::undo_clear(void)
@@ -351,30 +358,26 @@ namespace winrt::GraphPaper::implementation
 	// 図形を追加して, その操作をスタックに積む.
 	void MainPage::undo_push_append(Shape* s)
 	{
-		undo_push(new UndoAppend(s));
-		//m_stack_undo.push_back(new UndoAppend(s));
+		m_stack_undo.push_back(new UndoAppend(s));
 	}
 
 	// 図形を入れ替えて, その操作をスタックに積む.
 	void MainPage::undo_push_arrange(Shape* s, Shape* t)
 	{
-		undo_push(new UndoArrange2(s, t));
-		//m_stack_undo.push_back(new UndoArrange2(s, t));
+		m_stack_undo.push_back(new UndoArrange2(s, t));
 	}
 
 	// 図形の部位の位置を変更して, 変更前の値をスタックに積む.
 	void MainPage::undo_push_form(Shape* s, const ANCH_WHICH a, const D2D1_POINT_2F a_pos)
 	{
-		undo_push(new UndoForm(s, a));
-		//m_stack_undo.push_back(new UndoForm(s, a));
+		m_stack_undo.push_back(new UndoForm(s, a));
 		s->set_pos(a_pos, a);
 	}
 
 	// 図形を挿入して, その操作をスタックに積む.
 	void MainPage::undo_push_insert(Shape* s, Shape* s_pos)
 	{
-		undo_push(new UndoInsert(s, s_pos));
-		//m_stack_undo.push_back(new UndoInsert(s, s_pos));
+		m_stack_undo.push_back(new UndoInsert(s, s_pos));
 	}
 
 	// 一連の操作の区切としてヌル操作をスタックに積む.
@@ -383,10 +386,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		// やり直す操作スタックを消去し, 消去された操作の組数を, 操作の組数から引く.
 		//m_stack_nset -= undo_clear_stack(m_stack_redo);
-		//m_stack_rcnt -= undo_clear_stack(m_stack_redo);
+		m_stack_rcnt -= undo_clear_stack(m_stack_redo);
 		// 元に戻す操作スタックにヌルを積む.
-		undo_push(nullptr);
-		//m_stack_undo.push_back(nullptr);
+		m_stack_undo.push_back(nullptr);
 		// 操作スタックの更新フラグを立てる.
 		m_stack_push = true;
 		// 操作の組数をインクリメントする.
@@ -433,15 +435,13 @@ namespace winrt::GraphPaper::implementation
 	// 図形をグループから削除して, その操作をスタックに積む.
 	void MainPage::undo_push_remove(Shape* g, Shape* s)
 	{
-		undo_push(new UndoRemoveG(g, s));
-		//m_stack_undo.push_back(new UndoRemoveG(g, s));
+		m_stack_undo.push_back(new UndoRemoveG(g, s));
 	}
 
 	// 図形を削除して, その操作をスタックに積む.
 	void MainPage::undo_push_remove(Shape* s)
 	{
-		undo_push(new UndoRemove(s));
-		//m_stack_undo.push_back(new UndoRemove(s));
+		m_stack_undo.push_back(new UndoRemove(s));
 	}
 
 	// 図形の選択を反転して, その操作をスタックに積む.
@@ -480,16 +480,14 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 図形の選択を反転して, その操作をスタックに積む.
-		undo_push(new UndoSelect(s));
-		//m_stack_undo.push_back(new UndoSelect(s));
+		m_stack_undo.push_back(new UndoSelect(s));
 	}
 
 	// 値を図形へ格納して, その操作をスタックに積む.
 	template <UNDO_OP U, typename T>
 	void MainPage::undo_push_set(Shape* s, T const& val)
 	{
-		undo_push(new UndoSet<U>(s, val));
-		//m_stack_undo.push_back(new UndoSet<U>(s, val));
+		m_stack_undo.push_back(new UndoSet<U>(s, val));
 	}
 
 	template void MainPage::undo_push_set<UNDO_OP::GRID_LEN>(Shape* s, double const& val);
@@ -505,8 +503,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U>
 	void MainPage::undo_push_set(Shape* s)
 	{
-		undo_push(new UndoSet<U>(s));
-		//m_stack_undo.push_back(new UndoSet<U>(s));
+		m_stack_undo.push_back(new UndoSet<U>(s));
 	}
 
 	// 値を図形に格納して, その操作をスタックに積む.
@@ -517,8 +514,7 @@ namespace winrt::GraphPaper::implementation
 	template<UNDO_OP U, typename T>
 	void MainPage::undo_push_value(T const& val)
 	{
-		undo_push(new UndoSet<U>(&m_page_panel, val));
-		//m_stack_undo.push_back(new UndoSet<U>(&m_page_panel, val));
+		m_stack_undo.push_back(new UndoSet<U>(&m_page_panel, val));
 		auto flag = false;
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
@@ -534,8 +530,7 @@ namespace winrt::GraphPaper::implementation
 			if (equal(old_val, val)) {
 				continue;
 			}
-			undo_push(new UndoSet<U>(s, val));
-			//m_stack_undo.push_back(new UndoSet<U>(s, val));
+			m_stack_undo.push_back(new UndoSet<U>(s, val));
 			flag = true;
 		}
 		if (flag == false) {

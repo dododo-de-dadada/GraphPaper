@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 
 	}
 
-	// 図形が表示されるようパネルをスクロールする.
+	// 図形が表示されるようページをスクロールする.
 	// s	表示される図形
 	bool MainPage::scroll_to_shape(Shape* s)
 	{

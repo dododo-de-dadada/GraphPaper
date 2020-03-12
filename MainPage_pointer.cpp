@@ -511,7 +511,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// やり直す操作スタックを消去し, 含まれる操作を破棄する.
-		redo_clear();
+		//redo_clear();
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		// ページと図形を表示する.

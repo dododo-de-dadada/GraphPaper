@@ -876,7 +876,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「元に戻す」が選択された.
 		void mfi_undo_click(IInspectable const&, RoutedEventArgs const&);
 		// やり直す操作スタックを消去し, 含まれる操作を破棄する.
-		void redo_clear(void);
+		//void redo_clear(void);
 		// 操作スタックを消去し, 含まれる操作を破棄する.
 		void undo_clear(void);
 		// 操作を実行する.
@@ -911,7 +911,8 @@ namespace winrt::GraphPaper::implementation
 		void undo_read(DataReader const& dt_reader);
 		// 操作スタックをデータリーダーに書き込む.
 		void undo_write(DataWriter const& dt_writer);
-		void undo_push(Undo* u);
+		// 図形をグループ図形に追加して, その操作をスタックに積む.
+		void undo_push_group(ShapeGroup* g, Shape* s);
 
 		//-------------------------------
 		// MainPage_xcvd.cpp
