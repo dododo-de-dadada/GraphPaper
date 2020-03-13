@@ -13,9 +13,9 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t NO_FOUND[] = L"str_err_found";
 
 	// 文字列を検索して見つかった位置を得る.
-	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool match_case, uint32_t& pos) noexcept;
+	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept;
 	// 図形リストの中から文字列を検索し, 見つかった図形と位置を得る.
-	static bool text_find_whithin_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool match_case, ShapeText*& s, uint32_t& pos) noexcept;
+	static bool text_find_whithin_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool f_case, ShapeText*& s, uint32_t& pos) noexcept;
 	// 文字列の一部を置換する.
 	static wchar_t* replace_text(wchar_t const* w_text, const uint32_t w_pos, const uint32_t w_len, wchar_t const* r_text, const uint32_t r_len) noexcept;
 
@@ -25,9 +25,9 @@ namespace winrt::GraphPaper::implementation
 	// w_pos	検索を開始する位置
 	// f_text	検索文字列
 	// f_len	検索文字列の文字数
-	// match_case	英文字の区別フラグ
-	// pos	見つかった位置
-	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool match_case, uint32_t& pos) noexcept
+	// f_case	英文字の区別フラグ
+	// f_pos	見つかった位置
+	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept
 	{
 		if (w_text == nullptr
 			|| f_text == nullptr
@@ -39,18 +39,20 @@ namespace winrt::GraphPaper::implementation
 			// false を返す.
 			return false;
 		}
-		if (match_case) {
+		if (f_case) {
+			// 英文字の区別フラグが立っている場合,
 			for (uint32_t i = 0; i <= w_len - f_len; i++) {
 				if (wcsncmp(w_text + i, f_text, f_len) == 0) {
-					pos = i;
+					f_pos = i;
 					return true;
 				}
 			}
 		}
 		else {
+			// 英文字の区別フラグがない場合,
 			for (uint32_t i = 0; i <= w_len - f_len; i++) {
 				if (_wcsnicmp(w_text + i, f_text, f_len) == 0) {
-					pos = i;
+					f_pos = i;
 					return true;
 				}
 			}
@@ -63,11 +65,11 @@ namespace winrt::GraphPaper::implementation
 	// it_end	範囲の最後の次の反復子
 	// f_text	検索する文字列
 	// f_len	検索する文字列の文字数
-	// match_case	英文字の区別フラグ
+	// f_case	英文字の区別フラグ
 	// t	見つかった文字列図形
 	// pos	見つかった位置
 	// 戻り値	見つかったら true
-	static bool text_find_whithin_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool match_case, ShapeText*& t, uint32_t& pos) noexcept
+	static bool text_find_whithin_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool f_case, ShapeText*& t, uint32_t& pos) noexcept
 	{
 		for (auto it = it_beg; it != it_end; it++) {
 			auto s = *it;
@@ -84,7 +86,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			// 文字列を検索して見つかった位置を得る.
-			if (find_text(w, wchar_len(w), f_text, f_len, match_case, pos)) {
+			if (find_text(w, wchar_len(w), f_text, f_len, f_case, pos)) {
 				// 見つかった場合,
 				// 見つかった図形に格納する.
 				// true を返す.
@@ -114,15 +116,16 @@ namespace winrt::GraphPaper::implementation
 				// 置換された後の文字列の終了位置を得る.
 				const size_t r_end = static_cast<size_t>(f_pos) + static_cast<size_t>(r_len);
 				// 置換された後の文字列の文字数を得る.
-				const uint32_t n_len = static_cast<size_t>(w_len) + static_cast<size_t>(r_len) - static_cast<size_t>(f_len);
+				const size_t n_len = static_cast<size_t>(w_len) + static_cast<size_t>(r_len) - static_cast<size_t>(f_len);
 				// 置換された後の文字列を格納する配列を確保する.
 				wchar_t* const n_text = new wchar_t[n_len + 1];
 				// 開始位置までの文字列を配列に格納する.
-				wcsncpy_s(n_text, n_len + 1, w_text, f_pos);
+				wcsncpy_s(n_text, n_len + 1, w_text, static_cast<size_t>(f_pos));
 				// 置換文字列を配列に格納する.
 				wcsncpy_s(n_text + f_pos, n_len - f_pos + 1, r_text, r_len);
 				// 終了位置から後の文字列を配列に格納する.
 				wcsncpy_s(n_text + r_end, n_len - r_end + 1, w_text + f_end, w_len - f_end);
+				// 置換された文字列を返す.
 				return n_text;
 			}
 		}
@@ -188,7 +191,7 @@ namespace winrt::GraphPaper::implementation
 			cd_message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
 			return;
 		}
-		// 文字範囲の選択を解除する.
+		// 文字範囲の選択のみを解除する.
 		unselect_all(true);
 
 		const auto r_len = wchar_len(m_find_repl);
@@ -215,7 +218,7 @@ namespace winrt::GraphPaper::implementation
 				w_pos += r_len;
 			}
 			if (flag) {
-				undo_push_set<UNDO_OP::TEXT>(t, w_text);
+				undo_push_set<UNDO_OP::TEXT_CONTENT>(t, w_text);
 			}
 		}
 		// 一連の操作の区切としてヌル操作をスタックに積む.
@@ -239,9 +242,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_find_repl = wchar_cpy(tx_text_replace_with().Text().c_str());
 		// 英文字の区別フラグを格納する.
-		m_find_case = ck_text_match_case().IsChecked().GetBoolean();
+		m_find_case = ck_text_find_case().IsChecked().GetBoolean();
 		// 回り込み検索フラグを格納する.
-		m_find_wrap = ck_text_wrap_around().IsChecked().GetBoolean();
+		m_find_wrap = ck_text_find_wrap().IsChecked().GetBoolean();
 	}
 
 	// 文字列検索パネルの「置換」ボタンが押された.
@@ -279,8 +282,9 @@ namespace winrt::GraphPaper::implementation
 				// 一致した場合,
 				// 置換文字列と置換する.
 				const auto r_len = wchar_len(m_find_repl);
-				auto r_text = replace_text(t->m_text, w_pos, f_len, m_find_repl, r_len);
-				undo_push_set<UNDO_OP::TEXT>(t, r_text);
+				const auto r_text = replace_text(t->m_text, w_pos, f_len, m_find_repl, r_len);
+				undo_push_set<UNDO_OP::TEXT_CONTENT>(t, r_text);
+				// 文字範囲の値を図形に格納して, その操作をスタックに積む.
 				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
@@ -400,10 +404,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (it != it_end && t != *it) {
 			// 新たに別の図形が見つかった場合,
-			// 元の図形の文字範囲の選択を消去する.
+			// { 0, 0 } を図形に格納して, その操作をスタックに積む.
+			// (元の図形の文字範囲の選択を消去する.)
 			undo_push_set<UNDO_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
 		}
-		// 新たに見つけた図形の文字範囲に格納する.
+		// 文字範囲を新たに見つけた図形にして, その操作をスタックに積む.
 		// (操作スタックにヌルは積まない.)
 		undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ f_pos, f_len });
 		// 図形が表示されるようページをスクロールする.
@@ -430,8 +435,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		tx_text_find_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
 		tx_text_replace_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });
-		ck_text_match_case().IsChecked(m_find_case);
-		ck_text_wrap_around().IsChecked(m_find_wrap);
+		ck_text_find_case().IsChecked(m_find_case);
+		ck_text_find_wrap().IsChecked(m_find_wrap);
 		sp_text_find().Visibility(VISIBLE);
 	}
 
@@ -466,7 +471,7 @@ namespace winrt::GraphPaper::implementation
 			[this, s](auto, auto)
 			{
 				auto text = wchar_cpy(tx_edit().Text().c_str());
-				undo_push_set<UNDO_OP::TEXT>(s, text);
+				undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
 				if (ck_ignore_blank().IsChecked().GetBoolean()) {
 					s->delete_bottom_blank();
 				}

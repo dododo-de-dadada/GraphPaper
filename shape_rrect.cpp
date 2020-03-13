@@ -132,14 +132,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 角丸半径を得る.
-	bool ShapeRRect::get_corner_radius(D2D1_POINT_2F& val) const noexcept
+	bool ShapeRRect::get_corner_radius(D2D1_POINT_2F& value) const noexcept
 	{
-		val = m_corner_rad;
+		value = m_corner_rad;
 		return true;
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapeRRect::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept
+	void ShapeRRect::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept
 	{
 		const double vx = m_diff.x;
 		const double vy = m_diff.y;
@@ -150,22 +150,22 @@ namespace winrt::GraphPaper::implementation
 		switch (a) {
 		case ANCH_WHICH::ANCH_R_NW:
 			// 左上の角丸中心点を求める
-			pt_add(m_pos, rx, ry, val);
+			pt_add(m_pos, rx, ry, value);
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
 			// 右上の角丸中心点を求める
-			pt_add(m_pos, vx - rx, ry, val);
+			pt_add(m_pos, vx - rx, ry, value);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
 			// 右下の角丸中心点を求める
-			pt_add(m_pos, vx - rx, vy - ry, val);
+			pt_add(m_pos, vx - rx, vy - ry, value);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
 			// 左下の角丸中心点を求める
-			pt_add(m_pos, rx, vy - ry, val);
+			pt_add(m_pos, rx, vy - ry, value);
 			break;
 		default:
-			ShapeRect::get_pos(a, val);
+			ShapeRect::get_pos(a, value);
 			break;
 		}
 	}
@@ -300,7 +300,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapeRRect::set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a)
+	void ShapeRRect::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F c_pos;
 		D2D1_POINT_2F d_pos;
@@ -309,33 +309,33 @@ namespace winrt::GraphPaper::implementation
 		switch (a) {
 		case ANCH_WHICH::ANCH_R_NW:
 			ShapeRRect::get_pos(a, c_pos);
-			pt_sub(val, c_pos, d_pos);
+			pt_sub(value, c_pos, d_pos);
 			pt_add(m_corner_rad, d_pos, rad);
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
 			ShapeRRect::get_pos(a, c_pos);
-			pt_sub(val, c_pos, d_pos);
+			pt_sub(value, c_pos, d_pos);
 			rad.x = m_corner_rad.x - d_pos.x;
 			rad.y = m_corner_rad.y + d_pos.y;
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
 			ShapeRRect::get_pos(a, c_pos);
-			pt_sub(val, c_pos, d_pos);
+			pt_sub(value, c_pos, d_pos);
 			rad.x = m_corner_rad.x - d_pos.x;
 			rad.y = m_corner_rad.y - d_pos.y;
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
 			ShapeRRect::get_pos(a, c_pos);
-			pt_sub(val, c_pos, d_pos);
+			pt_sub(value, c_pos, d_pos);
 			rad.x = m_corner_rad.x + d_pos.x;
 			rad.y = m_corner_rad.y - d_pos.y;
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		default:
-			ShapeRect::set_pos(val, a);
+			ShapeRect::set_pos(value, a);
 			if (m_diff.x * m_corner_rad.x < 0.0f) {
 				m_corner_rad.x = -m_corner_rad.x;
 			}

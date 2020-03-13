@@ -18,27 +18,26 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダー
 	// val	値
 	template <UNDO_OP U, int S>
-	void MainPage::grid_set_slider_header(double val)
+	void MainPage::grid_set_slider_header(double value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		if constexpr (U == UNDO_OP::GRID_LEN) {
+		if constexpr (U == UNDO_OP::GRID_BASE) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_grid_length");
-			val += 1.0;
 			const auto dpi = m_sample_dx.m_logical_dpi;
 			const auto g_len = m_page_panel.m_grid_base + 1.0;
 			wchar_t buf[32];
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, val, dpi, g_len, buf);
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value + 1.0, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
@@ -66,14 +65,14 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = &m_sample_panel;
-		const double val = args.NewValue();
+		const double value = args.NewValue();
 
-		grid_set_slider_header<U, S>(val);
-		if constexpr (U == UNDO_OP::GRID_LEN) {
-			s->set_grid_size(val);
+		grid_set_slider_header<U, S>(value);
+		if constexpr (U == UNDO_OP::GRID_BASE) {
+			s->set_grid_base(value);
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
-			s->set_grid_opac(val / COLOR_MAX);
+			s->set_grid_opac(value / COLOR_MAX);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -101,20 +100,20 @@ namespace winrt::GraphPaper::implementation
 
 		const double val0 = m_page_panel.m_grid_base;
 		sample_slider_0().Value(val0);
-		grid_set_slider_header<UNDO_OP::GRID_LEN, 0>(val0);
+		grid_set_slider_header<UNDO_OP::GRID_BASE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_LEN, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_BASE, 0> });
 		m_sample_type = SAMP_TYPE::NONE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			double sample_val;
-			double page_val;
+			double sample_value;
+			double page_value;
 
-			m_page_panel.get_grid_size(page_val);
-			m_sample_panel.get_grid_size(sample_val);
-			if (equal(page_val, sample_val) == false) {
-				undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, sample_val);
+			m_page_panel.get_grid_base(page_value);
+			m_sample_panel.get_grid_base(sample_value);
+			if (equal(page_value, sample_value) == false) {
+				undo_push_set<UNDO_OP::GRID_BASE>(&m_page_panel, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
 				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -130,11 +129,11 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼の大きさ」>「狭める」が選択された.
 	void MainPage::mfi_grid_len_contract_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		const double val = (m_page_panel.m_grid_base + 1.0) * 0.5 - 1.0;
-		if (val < 1.0) {
+		const double value = (m_page_panel.m_grid_base + 1.0) * 0.5 - 1.0;
+		if (value < 1.0) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, val);
+		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_panel, value);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -145,13 +144,13 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼の大きさ」>「広げる」が選択された.
 	void MainPage::mfi_grid_len_expand_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		const double val = (m_page_panel.m_grid_base + 1.0) * 2.0 - 1.0;
-		if (val > max(m_page_panel.m_page_size.width, m_page_panel.m_page_size.height)) {
+		const double value = (m_page_panel.m_grid_base + 1.0) * 2.0 - 1.0;
+		if (value > max(m_page_panel.m_page_size.width, m_page_panel.m_page_size.height)) {
 			// 方眼の一片の長さが, ページの幅か高さの大きいほうの値を超える場合,
 			// 中断する.
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_LEN>(&m_page_panel, val);
+		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_panel, value);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -174,12 +173,12 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			double sample_val;
-			m_sample_panel.get_grid_opac(sample_val);
-			double page_val;
-			m_page_panel.get_grid_opac(page_val);
-			if (equal(page_val, sample_val) == false) {
-				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_panel, sample_val);
+			double sample_value;
+			m_sample_panel.get_grid_opac(sample_value);
+			double page_value;
+			m_page_panel.get_grid_opac(page_value);
+			if (equal(page_value, sample_value) == false) {
+				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_panel, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
 				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.

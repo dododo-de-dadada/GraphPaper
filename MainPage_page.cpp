@@ -136,12 +136,12 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_PAGE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F sample_val;
-			m_sample_panel.get_page_color(sample_val);
-			D2D1_COLOR_F page_val;
-			m_page_panel.get_page_color(page_val);
-			if (equal(page_val, sample_val) == false) {
-				undo_push_set<UNDO_OP::PAGE_COLOR>(&m_page_panel, sample_val);
+			D2D1_COLOR_F sample_value;
+			m_sample_panel.get_page_color(sample_value);
+			D2D1_COLOR_F page_value;
+			m_page_panel.get_page_color(page_value);
+			if (equal(page_value, sample_value) == false) {
+				undo_push_set<UNDO_OP::PAGE_COLOR>(&m_page_panel, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
 				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -342,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::page_set_slider_header(double val)
+	void MainPage::page_set_slider_header(const double value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
@@ -351,21 +351,21 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
@@ -393,27 +393,27 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::page_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = &m_sample_panel;
-		const double val = args.NewValue();
-		page_set_slider_header<U, S>(val);
-		if constexpr (U == UNDO_OP::GRID_LEN) {
-			s->set_grid_size(val);
+		const double value = args.NewValue();
+		page_set_slider_header<U, S>(value);
+		if constexpr (U == UNDO_OP::GRID_BASE) {
+			s->set_grid_base(value);
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
-			s->set_grid_opac(val / COLOR_MAX);
+			s->set_grid_opac(value / COLOR_MAX);
 		}
 		if constexpr (U == UNDO_OP::PAGE_COLOR) {
-			D2D1_COLOR_F col;
-			s->get_page_color(col);
+			D2D1_COLOR_F color;
+			s->get_page_color(color);
 			if constexpr (S == 0) {
-				col.r = static_cast<FLOAT>(val / COLOR_MAX);
+				color.r = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 1) {
-				col.g = static_cast<FLOAT>(val / COLOR_MAX);
+				color.g = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 2) {
-				col.b = static_cast<FLOAT>(val / COLOR_MAX);
+				color.b = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			s->set_page_color(col);
+			s->set_page_color(color);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -464,16 +464,16 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::tx_page_size_text_changed(IInspectable const& sender, TextChangedEventArgs const&)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
-		double val;
-		wchar_t ws[2];
+		double value;
+		wchar_t buf[2];
 		int cnt;
 		// テキストボックスの文字列を数値に変換する.
-		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &val, ws, 2);
-		if (cnt == 1 && val > 0.0) {
+		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &value, buf, 2);
+		if (cnt == 1 && value > 0.0) {
 			// 値ををピクセル単位の値に変換する.
-			val = conv_len_to_val(m_page_unit, val, dpi, m_sample_panel.m_grid_base + 1.0);
+			value = conv_len_to_val(m_page_unit, value, dpi, m_sample_panel.m_grid_base + 1.0);
 		}
-		cd_page_size().IsPrimaryButtonEnabled(cnt == 1 && val >= 1.0 && val < m_page_size_max);
+		cd_page_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < m_page_size_max);
 	}
 
 }

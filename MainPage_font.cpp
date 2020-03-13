@@ -127,9 +127,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F sample_val;
-			m_sample_shape->get_font_color(sample_val);
-			undo_push_value<UNDO_OP::FONT_COLOR>(sample_val);
+			D2D1_COLOR_F sample_value;
+			m_sample_shape->get_font_color(sample_value);
+			undo_push_set<UNDO_OP::FONT_COLOR>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -186,9 +186,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			wchar_t* sample_val;
-			m_sample_shape->get_font_family(sample_val);
-			undo_push_value<UNDO_OP::FONT_FAMILY>(sample_val);
+			wchar_t* sample_value;
+			m_sample_shape->get_font_family(sample_value);
+			undo_push_set<UNDO_OP::FONT_FAMILY>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -205,19 +205,19 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「イタリック体」が選択された.
 	void MainPage::rmfi_font_italic_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_value<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC);
+		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC);
 	}
 
 	// 書体メニューの「標準」が選択された.
 	void MainPage::rmfi_font_normal_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_value<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL);
+		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL);
 	}
 
 	// 書体メニューの「斜体」が選択された.
 	void MainPage::rmfi_font_oblique_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_value<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE);
+		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE);
 	}
 
 	// 書体メニューの「大きさ」が選択された.
@@ -235,9 +235,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			double sample_val;
-			m_sample_shape->get_font_size(sample_val);
-			undo_push_value<UNDO_OP::FONT_SIZE>(sample_val);
+			double sample_value;
+			m_sample_shape->get_font_size(sample_value);
+			undo_push_set<UNDO_OP::FONT_SIZE>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -285,9 +285,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			DWRITE_FONT_STRETCH sample_val;
-			m_sample_shape->get_font_stretch(sample_val);
-			undo_push_value<UNDO_OP::FONT_STRETCH>(sample_val);
+			DWRITE_FONT_STRETCH sample_value;
+			m_sample_shape->get_font_stretch(sample_value);
+			undo_push_set<UNDO_OP::FONT_STRETCH>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -337,9 +337,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			DWRITE_FONT_WEIGHT sample_val;
-			m_sample_shape->get_font_weight(sample_val);
-			undo_push_value<UNDO_OP::FONT_WEIGHT>(sample_val);
+			DWRITE_FONT_WEIGHT sample_value;
+			m_sample_shape->get_font_weight(sample_value);
+			undo_push_set<UNDO_OP::FONT_WEIGHT>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -355,7 +355,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::font_set_slider_header(const double val)
+	void MainPage::font_set_slider_header(const double value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -363,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[32];
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, val, m_sample_dx.m_logical_dpi, m_sample_panel.m_grid_base + 1.0, buf, 16);
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, m_sample_dx.m_logical_dpi, m_sample_panel.m_grid_base + 1.0, buf, 16);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
@@ -371,28 +371,28 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
@@ -420,27 +420,27 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = m_sample_shape;
-		const auto val = args.NewValue();
-		font_set_slider_header<U, S>(val);
+		const auto value = args.NewValue();
+		font_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
-			s->set_font_size(val);
+			s->set_font_size(value);
 		}
 		if constexpr (U == UNDO_OP::FONT_COLOR) {
-			D2D1_COLOR_F col;
-			s->get_font_color(col);
+			D2D1_COLOR_F color;
+			s->get_font_color(color);
 			if constexpr (S == 0) {
-				col.r = static_cast<FLOAT>(val / COLOR_MAX);
+				color.r = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 1) {
-				col.g = static_cast<FLOAT>(val / COLOR_MAX);
+				color.g = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 2) {
-				col.b = static_cast<FLOAT>(val / COLOR_MAX);
+				color.b = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 3) {
-				col.a = static_cast<FLOAT>(val / COLOR_MAX);
+				color.a = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			s->set_font_color(col);
+			s->set_font_color(color);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -465,9 +465,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			double sample_val;
-			m_sample_shape->get_text_line_height(sample_val);
-			undo_push_value<UNDO_OP::TEXT_LINE>(sample_val);
+			double sample_value;
+			m_sample_shape->get_text_line_height(sample_value);
+			undo_push_set<UNDO_OP::TEXT_LINE>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -482,21 +482,21 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「行の高さ」>「狭める」が選択された.
 	void MainPage::mfi_text_line_height_contract_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto val = m_page_panel.m_text_line - TEXT_LINE_DELTA;
-		if (val <= FLT_MIN) {
-			val = 0.0f;
+		auto value = m_page_panel.m_text_line - TEXT_LINE_DELTA;
+		if (value <= FLT_MIN) {
+			value = 0.0f;
 		}
-		if (m_page_panel.m_text_line != val) {
-			undo_push_value<UNDO_OP::TEXT_LINE>(val);
+		if (m_page_panel.m_text_line != value) {
+			undo_push_set<UNDO_OP::TEXT_LINE>(value);
 		}
 	}
 
 	// 書体メニューの「行の高さ」>「広げる」が選択された.
 	void MainPage::mfi_text_line_height_expand_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto val = m_page_panel.m_text_line + TEXT_LINE_DELTA;
-		if (m_page_panel.m_text_line != val) {
-			undo_push_value<UNDO_OP::TEXT_LINE>(val);
+		auto value = m_page_panel.m_text_line + TEXT_LINE_DELTA;
+		if (m_page_panel.m_text_line != value) {
+			undo_push_set<UNDO_OP::TEXT_LINE>(value);
 		}
 	}
 
@@ -520,9 +520,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_SIZE_F sample_val;
-			m_sample_shape->get_text_margin(sample_val);
-			undo_push_value<UNDO_OP::TEXT_MARGIN>(sample_val);
+			D2D1_SIZE_F sample_value;
+			m_sample_shape->get_text_margin(sample_value);
+			undo_push_set<UNDO_OP::TEXT_MARGIN>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -539,43 +539,43 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
 	void MainPage::rmfi_text_align_bottom_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「中央」が選択された.
 	void MainPage::rmfi_text_align_center_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_CENTER);
+		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「均等」が選択された.
 	void MainPage::rmfi_text_align_justified_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
 	void MainPage::rmfi_text_align_left_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
+		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
 	}
 
 	// 書体メニューの「段落のそろえ」>「中段」が選択された.
 	void MainPage::rmfi_text_align_middle_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
 	void MainPage::rmfi_text_align_right_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
+		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	}
 
 	// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
 	void MainPage::rmfi_text_align_top_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_value<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 	}
 
 	// 書体メニューの「段落のそろえ」に印をつける.
@@ -608,44 +608,41 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::text_set_slider_header(const double val)
+	void MainPage::text_set_slider_header(const double value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
 		const double dpi = m_page_dx.m_logical_dpi;
 		const double g_len = m_sample_panel.m_grid_base + 1.0;
-		double px;
+		//double px;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_text_mar_horzorz");
-				px = val;
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, px, dpi, g_len, buf);
+				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf);
 				hdr = hdr + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_text_mar_vertert");
-				px = val;
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, px, dpi, g_len, buf);
+				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf);
 				hdr = hdr + L": " + buf;
 			}
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_height");
-			if (val > FLT_MIN) {
+			if (value > FLT_MIN) {
 				// 行の高さの単位は DIPs (96dpi 固定) なので,
 				// これをピクセル単位に変換する.
-				px = val * dpi / 96.0;
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, px, dpi, g_len, buf);
+				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * dpi / 96.0, dpi, g_len, buf);
 				hdr = hdr + L": " + buf;
 			}
 			else {
@@ -675,21 +672,21 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = m_sample_shape;
-		const double val = args.NewValue();
-		text_set_slider_header<U, S>(val);
+		const double value = args.NewValue();
+		text_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::TEXT_LINE) {
-			s->set_text_line_height(val);
+			s->set_text_line_height(value);
 		}
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
-			D2D1_SIZE_F mar;
-			s->get_text_margin(mar);
+			D2D1_SIZE_F margin;
+			s->get_text_margin(margin);
 			if constexpr (S == 0) {
-				mar.width = static_cast<FLOAT>(val);
+				margin.width = static_cast<FLOAT>(value);
 			}
 			if constexpr (S == 1) {
-				mar.height = static_cast<FLOAT>(val);
+				margin.height = static_cast<FLOAT>(value);
 			}
-			s->set_text_margin(mar);
+			s->set_text_margin(margin);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

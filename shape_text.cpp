@@ -361,86 +361,86 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ‘‘Ì‚ÌF‚ğ“¾‚é.
-	bool ShapeText::get_font_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapeText::get_font_color(D2D1_COLOR_F& value) const noexcept
 	{
-		val = m_font_color;
+		value = m_font_color;
 		return true;
 	}
 
 	// ‘‘Ì–¼‚ğ“¾‚é.
-	bool ShapeText::get_font_family(wchar_t*& val) const noexcept
+	bool ShapeText::get_font_family(wchar_t*& value) const noexcept
 	{
-		val = m_font_family;
+		value = m_font_family;
 		return true;
 	}
 
 	// ‘‘Ì‚Ì‘å‚«‚³‚ğ“¾‚é.
-	bool ShapeText::get_font_size(double& val) const noexcept
+	bool ShapeText::get_font_size(double& value) const noexcept
 	{
-		val = m_font_size;
+		value = m_font_size;
 		return true;
 	}
 
 	// ‘‘Ì‚ÌLk‚ğ“¾‚é.
-	bool ShapeText::get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept
+	bool ShapeText::get_font_stretch(DWRITE_FONT_STRETCH& value) const noexcept
 	{
-		val = m_font_stretch;
+		value = m_font_stretch;
 		return true;
 	}
 
 	// ‘‘Ì‚Ìš‘Ì‚ğ“¾‚é.
-	bool ShapeText::get_font_style(DWRITE_FONT_STYLE& val) const noexcept
+	bool ShapeText::get_font_style(DWRITE_FONT_STYLE& value) const noexcept
 	{
-		val = m_font_style;
+		value = m_font_style;
 		return true;
 	}
 
 	// ‘‘Ì‚Ì‘¾‚³‚ğ“¾‚é.
-	bool ShapeText::get_font_weight(DWRITE_FONT_WEIGHT& val) const noexcept
+	bool ShapeText::get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept
 	{
-		val = m_font_weight;
+		value = m_font_weight;
 		return true;
 	}
 
 	// •¶š—ñ‚ğ“¾‚é.
-	bool ShapeText::get_text(wchar_t*& val) const noexcept
+	bool ShapeText::get_text(wchar_t*& value) const noexcept
 	{
-		val = m_text;
+		value = m_text;
 		return true;
 	}
 
 	// ’i—‚Ì‚»‚ë‚¦‚ğ“¾‚é.
-	bool ShapeText::get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept
+	bool ShapeText::get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& value) const noexcept
 	{
-		val = m_text_align_p;
+		value = m_text_align_p;
 		return true;
 	}
 
 	// •¶š—ñ‚Ì‚»‚ë‚¦‚ğ“¾‚é.
-	bool ShapeText::get_text_align_t(DWRITE_TEXT_ALIGNMENT& val) const noexcept
+	bool ShapeText::get_text_align_t(DWRITE_TEXT_ALIGNMENT& value) const noexcept
 	{
-		val = m_text_align_t;
+		value = m_text_align_t;
 		return true;
 	}
 
 	// sŠÔ‚ğ“¾‚é.
-	bool ShapeText::get_text_line_height(double& val) const noexcept
+	bool ShapeText::get_text_line_height(double& value) const noexcept
 	{
-		val = m_text_line;
+		value = m_text_line;
 		return true;
 	}
 
 	// •¶š—ñ‚Ì—]”’‚ğ“¾‚é.
-	bool ShapeText::get_text_margin(D2D1_SIZE_F& val) const noexcept
+	bool ShapeText::get_text_margin(D2D1_SIZE_F& value) const noexcept
 	{
-		val = m_text_mar;
+		value = m_text_mar;
 		return true;
 	}
 
 	// •¶š”ÍˆÍ‚ğ“¾‚é
-	bool ShapeText::get_text_range(DWRITE_TEXT_RANGE& val) const noexcept
+	bool ShapeText::get_text_range(DWRITE_TEXT_RANGE& value) const noexcept
 	{
-		val = m_sel_range;
+		value = m_sel_range;
 		return true;
 	}
 
@@ -604,20 +604,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ‘‘Ì‚ÌF‚ÉŠi”[‚·‚é.
-	void ShapeText::set_font_color(const D2D1_COLOR_F& val) noexcept
+	void ShapeText::set_font_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_font_color = val;
+		m_font_color = value;
 	}
 
 	// ’l‚ğ‘‘Ì–¼‚ÉŠi”[‚·‚é.
-	void ShapeText::set_font_family(wchar_t* const val)
+	void ShapeText::set_font_family(wchar_t* const value)
 	{
 		// ’l‚ª‘‘Ì–¼‚Æ“¯‚¶‚©’²‚×‚é.
-		if (equal(m_font_family, val)) {
+		if (equal(m_font_family, value)) {
 			// “¯‚¶‚È‚çI—¹‚·‚é.
 			return;
 		}
-		m_font_family = val;
+		m_font_family = value;
 		if (m_dw_text_layout != nullptr) {
 			const DWRITE_TEXT_RANGE t_range{ 0, wchar_len(m_text) };
 			m_dw_text_layout->SetFontFamilyName(m_font_family, t_range);
@@ -630,14 +630,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ‘‘Ì‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
-	void ShapeText::set_font_size(const double val)
+	void ShapeText::set_font_size(const double value)
 	{
-		if (equal(m_font_size, val)) {
+		if (equal(m_font_size, value)) {
 			return;
 		}
-		m_font_size = val;
+		m_font_size = value;
 		if (m_dw_text_layout.get() != nullptr) {
-			const FLOAT z = static_cast<FLOAT>(val);
+			const FLOAT z = static_cast<FLOAT>(value);
 			m_dw_text_layout->SetFontSize(z, { 0, wchar_len(m_text) });
 			create_test_metrics();
 		}
@@ -647,149 +647,155 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ‘‘Ì‚Ì‰¡•‚ÉŠi”[‚·‚é.
-	void ShapeText::set_font_stretch(const DWRITE_FONT_STRETCH val)
+	void ShapeText::set_font_stretch(const DWRITE_FONT_STRETCH value)
 	{
-		if (m_font_stretch != val) {
-			m_font_stretch = val;
-			if (m_dw_text_layout.get() != nullptr) {
-				m_dw_text_layout->SetFontStretch(val, { 0, wchar_len(m_text) });
-				create_test_metrics();
-			}
-			else {
-				create_text_layout();
-			}
+		if (m_font_stretch == value) {
+			return;
+		}
+		m_font_stretch = value;
+		if (m_dw_text_layout.get() != nullptr) {
+			m_dw_text_layout->SetFontStretch(value, { 0, wchar_len(m_text) });
+			create_test_metrics();
+		}
+		else {
+			create_text_layout();
 		}
 	}
 
 	// ’l‚ğ‘‘Ì‚Ìš‘Ì‚ÉŠi”[‚·‚é.
-	void ShapeText::set_font_style(const DWRITE_FONT_STYLE val)
+	void ShapeText::set_font_style(const DWRITE_FONT_STYLE value)
 	{
-		if (m_font_style != val) {
-			m_font_style = val;
-			if (m_dw_text_layout.get() != nullptr) {
-				m_dw_text_layout->SetFontStyle(val, { 0, wchar_len(m_text) });
-				create_test_metrics();
-			}
-			else {
-				create_text_layout();
-			}
+		if (m_font_style == value) {
+			return;
+		}
+		m_font_style = value;
+		if (m_dw_text_layout.get() != nullptr) {
+			m_dw_text_layout->SetFontStyle(value, { 0, wchar_len(m_text) });
+			create_test_metrics();
+		}
+		else {
+			create_text_layout();
 		}
 	}
 
 	// ’l‚ğ‘‘Ì‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-	void ShapeText::set_font_weight(const DWRITE_FONT_WEIGHT val)
+	void ShapeText::set_font_weight(const DWRITE_FONT_WEIGHT value)
 	{
-		if (m_font_weight != val) {
-			m_font_weight = val;
-			if (m_dw_text_layout.get() != nullptr) {
-				m_dw_text_layout->SetFontWeight(val, { 0, wchar_len(m_text) });
-				create_test_metrics();
-			}
-			else {
-				create_text_layout();
-			}
+		if (m_font_weight == value) {
+			return;
+		}
+		m_font_weight = value;
+		if (m_dw_text_layout.get() != nullptr) {
+			m_dw_text_layout->SetFontWeight(value, { 0, wchar_len(m_text) });
+			create_test_metrics();
+		}
+		else {
+			create_text_layout();
 		}
 	}
 
 	// ’l‚ğw’è‚µ‚½•”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚Í“®‚©‚È‚¢. 
-	void ShapeText::set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a)
+	void ShapeText::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
 	{
-		ShapeRect::set_pos(val, a);
+		ShapeRect::set_pos(value, a);
 		create_text_metrics();
 	}
 
 	// ’l‚ğ•¶š—ñ‚ÉŠi”[‚·‚é.
-	void ShapeText::set_text(wchar_t* const val)
+	void ShapeText::set_text(wchar_t* const value)
 	{
-		if (equal(m_text, val)) {
+		if (equal(m_text, value)) {
 			return;
 		}
-		m_text = val;
+		m_text = value;
 		m_sel_range.startPosition = 0;
 		m_sel_range.length = 0;
 		create_text_layout();
 	}
 
 	// ’l‚ğ’i—‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
-	void ShapeText::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT val)
+	void ShapeText::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value)
 	{
-		if (m_text_align_p != val) {
-			m_text_align_p = val;
-			if (m_dw_text_layout.get() != nullptr) {
-				m_dw_text_layout->SetParagraphAlignment(val);
-				create_test_metrics();
-			}
-			else {
-				create_text_layout();
-			}
+		if (m_text_align_p == value) {
+			return;
+		}
+		m_text_align_p = value;
+		if (m_dw_text_layout.get() != nullptr) {
+			m_dw_text_layout->SetParagraphAlignment(value);
+			create_test_metrics();
+		}
+		else {
+			create_text_layout();
 		}
 	}
 
 	// ’l‚ğ•¶š—ñ‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
-	void ShapeText::set_text_align_t(const DWRITE_TEXT_ALIGNMENT align)
+	void ShapeText::set_text_align_t(const DWRITE_TEXT_ALIGNMENT value)
 	{
-		if (m_text_align_t != align) {
-			m_text_align_t = align;
-			if (m_text != nullptr && m_text[0] != L'\0') {
-				if (m_dw_text_layout.get() == nullptr) {
-					create_text_layout();
-				}
-				else {
-					m_dw_text_layout->SetTextAlignment(align);
-					create_test_metrics();
-				}
+		if (m_text_align_t == value) {
+			return;
+		}
+		m_text_align_t = value;
+		if (m_text != nullptr && m_text[0] != L'\0') {
+			if (m_dw_text_layout.get() == nullptr) {
+				create_text_layout();
+			}
+			else {
+				m_dw_text_layout->SetTextAlignment(value);
+				create_test_metrics();
 			}
 		}
 	}
 
 	// ’l‚ğsŠÔ‚ÉŠi”[‚·‚é.
-	void ShapeText::set_text_line_height(const double val)
+	void ShapeText::set_text_line_height(const double value)
 	{
-		if (m_text_line != val) {
-			m_text_line = val;
-			if (m_dw_text_layout.get() != nullptr) {
-				winrt::com_ptr<IDWriteTextLayout3> t3;
-				if (m_dw_text_layout.try_as(t3)) {
-					DWRITE_LINE_SPACING ls;
-					if (m_text_line > 0.0) {
-						ls.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-						ls.height = static_cast<FLOAT>(m_text_line);
-						ls.baseline = static_cast<FLOAT>(m_text_line - m_dw_descent);
-					}
-					else {
-						ls.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
-						ls.height = 0.0f;
-						ls.baseline = 0.0f;
-					}
-					ls.leadingBefore = 0.0f;
-					ls.fontLineGapUsage = DWRITE_FONT_LINE_GAP_USAGE_DEFAULT;
-					t3->SetLineSpacing(&ls);
+		if (m_text_line == value) {
+			return;
+		}
+		m_text_line = value;
+		if (m_dw_text_layout.get() != nullptr) {
+			winrt::com_ptr<IDWriteTextLayout3> t3;
+			if (m_dw_text_layout.try_as(t3)) {
+				DWRITE_LINE_SPACING l_spacing;
+				if (m_text_line > 0.0) {
+					l_spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
+					l_spacing.height = static_cast<FLOAT>(m_text_line);
+					l_spacing.baseline = static_cast<FLOAT>(m_text_line - m_dw_descent);
 				}
-				create_test_metrics();
+				else {
+					l_spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
+					l_spacing.height = 0.0f;
+					l_spacing.baseline = 0.0f;
+				}
+				l_spacing.leadingBefore = 0.0f;
+				l_spacing.fontLineGapUsage = DWRITE_FONT_LINE_GAP_USAGE_DEFAULT;
+				t3->SetLineSpacing(&l_spacing);
 			}
-			else {
-				create_text_layout();
-			}
+			create_test_metrics();
+		}
+		else {
+			create_text_layout();
 		}
 	}
 
 	// ’l‚ğ•¶š—ñ‚Ì—]”’‚ÉŠi”[‚·‚é.
-	void ShapeText::set_text_margin(const D2D1_SIZE_F val)
+	void ShapeText::set_text_margin(const D2D1_SIZE_F value)
 	{
-		if (equal(m_text_mar, val)) {
+		if (equal(m_text_mar, value)) {
 			return;
 		}
-		m_text_mar = val;
+		m_text_mar = value;
 		create_text_metrics();
 	}
 
 	// ’l‚ğ•¶š”ÍˆÍ‚ÉŠi”[‚·‚é.
-	void ShapeText::set_text_range(const DWRITE_TEXT_RANGE val)
+	void ShapeText::set_text_range(const DWRITE_TEXT_RANGE value)
 	{
-		if (equal(m_sel_range, val)) {
+		if (equal(m_sel_range, value)) {
 			return;
 		}
-		m_sel_range = val;
+		m_sel_range = value;
 		create_test_metrics();
 	}
 

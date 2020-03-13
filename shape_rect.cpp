@@ -114,53 +114,53 @@ namespace winrt::GraphPaper::implementation
 
 	// ìhÇËÇ¬Ç‘ÇµÇÃêFÇìæÇÈ.
 	// val	ìæÇÁÇÍÇΩíl.
-	bool ShapeRect::get_fill_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapeRect::get_fill_color(D2D1_COLOR_F& value) const noexcept
 	{
-		val = m_fill_color;
+		value = m_fill_color;
 		return true;
 	}
 
 	// ìhÇËÇ¬Ç‘ÇµÇÃêFÇ…äiî[Ç∑ÇÈ.
 	// val	äiî[Ç∑ÇÈíl.
-	void ShapeRect::set_fill_color(const D2D1_COLOR_F& val) noexcept
+	void ShapeRect::set_fill_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_fill_color = val;
+		m_fill_color = value;
 	}
 
 	// éwíËÇ≥ÇÍÇΩïîà ÇÃà íuÇìæÇÈ.
-	void ShapeRect::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept
+	void ShapeRect::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept
 	{
 		switch (a) {
 		case ANCH_WHICH::ANCH_NORTH:
-			val.x = m_pos.x + m_diff.x * 0.5f;
-			val.y = m_pos.y;
+			value.x = m_pos.x + m_diff.x * 0.5f;
+			value.y = m_pos.y;
 			break;
 		case ANCH_WHICH::ANCH_NE:
-			val.x = m_pos.x + m_diff.x;
-			val.y = m_pos.y;
+			value.x = m_pos.x + m_diff.x;
+			value.y = m_pos.y;
 			break;
 		case ANCH_WHICH::ANCH_WEST:
-			val.x = m_pos.x;
-			val.y = m_pos.y + m_diff.y * 0.5f;
+			value.x = m_pos.x;
+			value.y = m_pos.y + m_diff.y * 0.5f;
 			break;
 		case ANCH_WHICH::ANCH_EAST:
-			val.x = m_pos.x + m_diff.x;
-			val.y = m_pos.y + m_diff.y * 0.5f;
+			value.x = m_pos.x + m_diff.x;
+			value.y = m_pos.y + m_diff.y * 0.5f;
 			break;
 		case ANCH_WHICH::ANCH_SW:
-			val.x = m_pos.x;
-			val.y = m_pos.y + m_diff.y;
+			value.x = m_pos.x;
+			value.y = m_pos.y + m_diff.y;
 			break;
 		case ANCH_WHICH::ANCH_SOUTH:
-			val.x = m_pos.x + m_diff.x * 0.5f;
-			val.y = m_pos.y + m_diff.y;
+			value.x = m_pos.x + m_diff.x * 0.5f;
+			value.y = m_pos.y + m_diff.y;
 			break;
 		case ANCH_WHICH::ANCH_SE:
-			val.x = m_pos.x + m_diff.x;
-			val.y = m_pos.y + m_diff.y;
+			value.x = m_pos.x + m_diff.x;
+			value.y = m_pos.y + m_diff.y;
 			break;
 		default:
-			val = m_pos;
+			value = m_pos;
 			break;
 		}
 	}
@@ -179,50 +179,50 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ílÇéwíËÇµÇΩïîà ÇÃà íuÇ…äiî[Ç∑ÇÈ. ëºÇÃïîà ÇÃà íuÇÕìÆÇ©Ç»Ç¢. 
-	void ShapeRect::set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a)
+	void ShapeRect::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F a_pos;
 		D2D1_POINT_2F d_pos;
 
 		switch (a) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
-			m_pos = val;
+			m_pos = value;
 			break;
 		case ANCH_WHICH::ANCH_NW:
-			pt_sub(val, m_pos, d_pos);
+			pt_sub(value, m_pos, d_pos);
 			pt_add(m_pos, d_pos, m_pos);
 			pt_sub(m_diff, d_pos, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_NORTH:
-			m_diff.y -= val.y - m_pos.y;
-			m_pos.y = val.y;
+			m_diff.y -= value.y - m_pos.y;
+			m_pos.y = value.y;
 			break;
 		case ANCH_WHICH::ANCH_NE:
 			a_pos.x = m_pos.x + m_diff.x;
 			a_pos.y = m_pos.y;
-			m_pos.y = val.y;
-			pt_sub(val, a_pos, d_pos);
+			m_pos.y = value.y;
+			pt_sub(value, a_pos, d_pos);
 			pt_add(m_diff, d_pos.x, -d_pos.y, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_WEST:
-			m_diff.x -= val.x - m_pos.x;
-			m_pos.x = val.x;
+			m_diff.x -= value.x - m_pos.x;
+			m_pos.x = value.x;
 			break;
 		case ANCH_WHICH::ANCH_EAST:
-			m_diff.x = val.x - m_pos.x;
+			m_diff.x = value.x - m_pos.x;
 			break;
 		case ANCH_WHICH::ANCH_SW:
 			a_pos.x = m_pos.x;
 			a_pos.y = m_pos.y + m_diff.y;
-			m_pos.x = val.x;
-			pt_sub(val, a_pos, d_pos);
+			m_pos.x = value.x;
+			pt_sub(value, a_pos, d_pos);
 			pt_add(m_diff, -d_pos.x, d_pos.y, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_SOUTH:
-			m_diff.y = val.y - m_pos.y;
+			m_diff.y = value.y - m_pos.y;
 			break;
 		case ANCH_WHICH::ANCH_SE:
-			pt_sub(val, m_pos, m_diff);
+			pt_sub(value, m_pos, m_diff);
 			break;
 		}
 	}

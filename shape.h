@@ -256,101 +256,101 @@ namespace winrt::GraphPaper::implementation
 	// 位置から大きさを引く.
 	void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& sub) noexcept;
 	// 矢じりの寸法を読み込む.
-	void read(ARROW_SIZE& val, DataReader const& dt_reader);
+	void read(ARROW_SIZE& value, DataReader const& dt_reader);
 	// 矢じりの形式をデータリーダーから読み込む.
-	void read(ARROW_STYLE& val, DataReader const& dt_reader);
+	void read(ARROW_STYLE& value, DataReader const& dt_reader);
 	// ブール値をデータリーダーから読み込む.
-	void read(bool& val, DataReader const& dt_reader);
+	void read(bool& value, DataReader const& dt_reader);
 	// 倍精度浮動小数をデータリーダーから読み込む.
-	void read(double& val, DataReader const& dt_reader);
+	void read(double& value, DataReader const& dt_reader);
 	// 色をデータリーダーから読み込む.
-	void read(D2D1_COLOR_F& val, DataReader const& dt_reader);
+	void read(D2D1_COLOR_F& value, DataReader const& dt_reader);
 	// 破線の形式をデータリーダーから読み込む.
-	void read(D2D1_DASH_STYLE& val, DataReader const& dt_reader);
+	void read(D2D1_DASH_STYLE& value, DataReader const& dt_reader);
 	// 位置をデータリーダーから読み込む.
-	void read(D2D1_POINT_2F& val, DataReader const& dt_reader);
+	void read(D2D1_POINT_2F& value, DataReader const& dt_reader);
 	// 寸法をデータリーダーから読み込む.
-	void read(D2D1_SIZE_F& val, DataReader const& dt_reader);
+	void read(D2D1_SIZE_F& value, DataReader const& dt_reader);
 	// 書体の字体をデータリーダーから読み込む.
-	void read(DWRITE_FONT_STYLE& val, DataReader const& dt_reader);
+	void read(DWRITE_FONT_STYLE& value, DataReader const& dt_reader);
 	// 書体の太さをデータリーダーから読み込む.
-	void read(DWRITE_FONT_WEIGHT& val, DataReader const& dt_reader);
+	void read(DWRITE_FONT_WEIGHT& value, DataReader const& dt_reader);
 	// 書体の伸縮をデータリーダーから読み込む.
-	void read(DWRITE_FONT_STRETCH& val, DataReader const& dt_reader);
+	void read(DWRITE_FONT_STRETCH& value, DataReader const& dt_reader);
 	// 段落のそろえをデータリーダーから読み込む.
-	void read(DWRITE_PARAGRAPH_ALIGNMENT& val, DataReader const& dt_reader);
+	void read(DWRITE_PARAGRAPH_ALIGNMENT& value, DataReader const& dt_reader);
 	// 文字列のそろえをデータリーダーから読み込む.
-	void read(DWRITE_TEXT_ALIGNMENT& val, DataReader const& dt_reader);
+	void read(DWRITE_TEXT_ALIGNMENT& value, DataReader const& dt_reader);
 	// 文字範囲をデータリーダーから読み込む.
-	void read(DWRITE_TEXT_RANGE& val, DataReader const& dt_reader);
+	void read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader);
 	// 方眼の表示をデータリーダーから読み込む.
-	void read(GRID_SHOW& val, DataReader const& dt_reader);
+	void read(GRID_SHOW& value, DataReader const& dt_reader);
 	// 破線の配置をデータリーダーから読み込む.
-	void read(STROKE_PATTERN& val, DataReader const& dt_reader);
+	void read(STROKE_PATTERN& value, DataReader const& dt_reader);
 	// 32 ビット整数をデータリーダーから読み込む.
-	void read(uint32_t& val, DataReader const& dt_reader);
+	void read(uint32_t& value, DataReader const& dt_reader);
 	// 文字列をデータリーダーから読み込む.
-	void read(wchar_t*& val, DataReader const& dt_reader);
+	void read(wchar_t*& value, DataReader const& dt_reader);
 	// 文字列を複製する. 元の文字列がヌルポインター, または元の文字数が 0 のときは, ヌルポインターを返す.
 	wchar_t* wchar_cpy(const wchar_t* const s);
 	// 文字列の長さ. 引数がヌルポインタの場合, 0 を返す.
 	uint32_t wchar_len(const wchar_t* const t) noexcept;
 	// 矢じりの寸法をデータライターに書き込む.
-	void write(const ARROW_SIZE& val, DataWriter const& dt_writer);
+	void write(const ARROW_SIZE& value, DataWriter const& dt_writer);
 	// 矢じりの形式をデータライターに書き込む.
-	void write(const ARROW_STYLE val, DataWriter const& dt_writer);
+	void write(const ARROW_STYLE value, DataWriter const& dt_writer);
 	// ブール値をデータライターに書き込む.
-	void write(const bool val, DataWriter const& dt_writer);
+	void write(const bool value, DataWriter const& dt_writer);
 	// 色をデータライターに書き込む.
-	void write(const D2D1_COLOR_F& val, DataWriter const& dt_writer);
+	void write(const D2D1_COLOR_F& value, DataWriter const& dt_writer);
 	// 破線の形式をデータライターに書き込む.
-	void write(const D2D1_DASH_STYLE val, DataWriter const& dt_writer);
+	void write(const D2D1_DASH_STYLE value, DataWriter const& dt_writer);
 	// 位置をデータライターに書き込む.
-	void write(const D2D1_POINT_2F val, DataWriter const& dt_writer);
+	void write(const D2D1_POINT_2F value, DataWriter const& dt_writer);
 	// 寸法をデータライターに書き込む.
-	void write(const D2D1_SIZE_F val, DataWriter const& dt_writer);
+	void write(const D2D1_SIZE_F value, DataWriter const& dt_writer);
 	// 倍精度浮動小数をデータライターに書き込む.
-	void write(const double val, DataWriter const& dt_writer);
+	void write(const double value, DataWriter const& dt_writer);
 	// 書体の字体をデータライターに書き込む.
-	void write(const DWRITE_FONT_STYLE val, DataWriter const& dt_writer);
+	void write(const DWRITE_FONT_STYLE value, DataWriter const& dt_writer);
 	// 書体の伸縮をデータライターに書き込む.
-	void write(const DWRITE_FONT_STRETCH val, DataWriter const& dt_writer);
+	void write(const DWRITE_FONT_STRETCH value, DataWriter const& dt_writer);
 	// 書体の太さをデータライターに書き込む.
-	void write(const DWRITE_FONT_WEIGHT val, DataWriter const& dt_writer);
+	void write(const DWRITE_FONT_WEIGHT value, DataWriter const& dt_writer);
 	// 段落のそろえをデータライターに書き込む.
-	void write(const DWRITE_PARAGRAPH_ALIGNMENT val, DataWriter const& dt_writer);
+	void write(const DWRITE_PARAGRAPH_ALIGNMENT value, DataWriter const& dt_writer);
 	// 文字列のそろえをデータライターに書き込む.
-	void write(const DWRITE_TEXT_ALIGNMENT val, DataWriter const& dt_writer);
+	void write(const DWRITE_TEXT_ALIGNMENT value, DataWriter const& dt_writer);
 	// 文字列範囲をデータライターに書き込む.
-	void write(const DWRITE_TEXT_RANGE val, DataWriter const& dt_writer);
+	void write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer);
 	// 方眼の表示をデータライターに書き込む.
-	void write(const GRID_SHOW val, DataWriter const& dt_writer);
+	void write(const GRID_SHOW value, DataWriter const& dt_writer);
 	// 破線の配置をデータライターに書き込む.
-	void write(const STROKE_PATTERN& val, DataWriter const& dt_writer);
+	void write(const STROKE_PATTERN& value, DataWriter const& dt_writer);
 	// 32 ビット整数をデータライターに書き込む.
-	void write(const uint32_t val, DataWriter const& dt_writer);
+	void write(const uint32_t value, DataWriter const& dt_writer);
 	// 文字列をデータライターに書き込む.
-	void write(const wchar_t* val, DataWriter const& dt_writer);
+	void write(const wchar_t* value, DataWriter const& dt_writer);
 	// シングルバイト文字列をデータライターに SVG として書き込む.
-	void write_svg(const char* val, DataWriter const& dt_writer);
+	void write_svg(const char* value, DataWriter const& dt_writer);
 	// マルチバイト文字列をデータライターに SVG として書き込む.
-	void write_svg(const wchar_t* val, const uint32_t v_len, DataWriter const& dt_writer);
+	void write_svg(const wchar_t* value, const uint32_t v_len, DataWriter const& dt_writer);
 	// 属性名とシングルバイト文字列をデータライターに SVG として書き込む.
-	void write_svg(const char* val, const char* name, DataWriter const& dt_writer);
+	void write_svg(const char* value, const char* name, DataWriter const& dt_writer);
 	// 命令と位置をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_POINT_2F val, const char* cmd, DataWriter const& dt_writer);
+	void write_svg(const D2D1_POINT_2F value, const char* cmd, DataWriter const& dt_writer);
 	// 属性名と位置をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_POINT_2F val, const char* name_x, const char* name_y, DataWriter const& dt_writer);
+	void write_svg(const D2D1_POINT_2F value, const char* name_x, const char* name_y, DataWriter const& dt_writer);
 	// 属性名と色をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_COLOR_F val, const char* name, DataWriter const& dt_writer);
+	void write_svg(const D2D1_COLOR_F value, const char* name, DataWriter const& dt_writer);
 	// 色をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_COLOR_F val, DataWriter const& dt_writer);
+	void write_svg(const D2D1_COLOR_F value, DataWriter const& dt_writer);
 	// 浮動小数をデータライターに書き込む
-	void write_svg(const float val, DataWriter const& dt_writer);
+	void write_svg(const float value, DataWriter const& dt_writer);
 	// 属性名と浮動小数値をデータライターに SVG として書き込む
-	void write_svg(const double val, const char* name, DataWriter const& dt_writer);
+	void write_svg(const double value, const char* name, DataWriter const& dt_writer);
 	// 属性名と 32 ビット正整数をデータライターに SVG として書き込む
-	void write_svg(const uint32_t val, const char* name, DataWriter const& dt_writer);
+	void write_svg(const uint32_t value, const char* name, DataWriter const& dt_writer);
 	// 破線の形式と配置をデータライターに SVG として書き込む.
 	void write_svg(const D2D1_DASH_STYLE style, const STROKE_PATTERN& pattern, const double width, DataWriter const& dt_writer);
 
@@ -387,8 +387,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_font_style(DWRITE_FONT_STYLE& /*val*/) const noexcept { return false; }
 		// 書体の太さを得る.
 		virtual bool get_font_weight(DWRITE_FONT_WEIGHT& /*val*/) const noexcept { return false; }
-		// 方眼の大きさを得る.
-		virtual bool get_grid_size(double& /*val*/) const noexcept { return false; }
+		// 方眼の基準の大きさを得る.
+		virtual bool get_grid_base(double& /*val*/) const noexcept { return false; }
 		// 方眼の大きさを得る.
 		virtual bool get_grid_opac(double& /*val*/) const noexcept { return false; }
 		// 方眼の表示を得る.
@@ -458,7 +458,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		virtual void set_font_weight(const DWRITE_FONT_WEIGHT /*val*/) {}
 		// 値を方眼の大きさに格納する.
-		virtual void set_grid_size(const double /*val*/) noexcept {}
+		virtual void set_grid_base(const double /*val*/) noexcept {}
 		// 値を方眼の大きさに格納する.
 		virtual void set_grid_opac(const double /*val*/) noexcept {}
 		// 値を方眼の表示に格納する.
@@ -549,7 +549,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 方眼の属性
 		D2D1_COLOR_F m_grid_color;	// 方眼線の色 (MainPage のコンストラクタで設定)
-		double m_grid_base = 0.0;	// 方眼の大きさ (を -1 した値)
+		double m_grid_base = 0.0;	// 方眼の基準の大きさ (を -1 した値)
 		double m_grid_opac = GRID_OPAC;	// 方眼線の不透明度
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼線の表示
 		bool m_grid_snap = true;	// 方眼に整列
@@ -601,111 +601,111 @@ namespace winrt::GraphPaper::implementation
 		// 方眼線を表示する,
 		void draw_grid(SHAPE_DX const& dx, const D2D1_POINT_2F offset);
 		// 矢じりの寸法を得る.
-		bool get_arrow_size(ARROW_SIZE& val) const noexcept;
+		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
 		// 矢じりの形式を得る.
-		bool get_arrow_style(ARROW_STYLE& val) const noexcept;
+		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
+		// 方眼の基準の大きさを得る.
+		bool get_grid_base(double& value) const noexcept;
 		// 方眼の大きさを得る.
-		bool get_grid_size(double& val) const noexcept;
-		// 方眼の大きさを得る.
-		bool get_grid_opac(double& val) const noexcept;
+		bool get_grid_opac(double& value) const noexcept;
 		// 方眼の表示の状態を得る.
-		bool get_grid_show(GRID_SHOW& val) const noexcept;
+		bool get_grid_show(GRID_SHOW& value) const noexcept;
 		// 方眼へのそろえを得る.
-		bool get_grid_snap(bool& val) const noexcept;
+		bool get_grid_snap(bool& value) const noexcept;
 		// ページの色を得る.
-		bool get_page_color(D2D1_COLOR_F& val) const noexcept;
+		bool get_page_color(D2D1_COLOR_F& value) const noexcept;
 		// ページの色を得る.
-		bool get_page_size(D2D1_SIZE_F& val) const noexcept;
+		bool get_page_size(D2D1_SIZE_F& value) const noexcept;
 		// ページの拡大率を得る.
-		bool get_page_scale(double& val) const noexcept;
+		bool get_page_scale(double& value) const noexcept;
 		// 角丸半径を得る.
-		bool get_corner_radius(D2D1_POINT_2F& val) const noexcept;
+		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
 		// 塗りつぶし色を得る.
-		bool get_fill_color(D2D1_COLOR_F& val) const noexcept;
+		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
 		// 書体の色を得る.
-		bool get_font_color(D2D1_COLOR_F& val) const noexcept;
+		bool get_font_color(D2D1_COLOR_F& value) const noexcept;
 		// 書体名を得る.
-		bool get_font_family(wchar_t*& val) const noexcept;
+		bool get_font_family(wchar_t*& value) const noexcept;
 		// 書体の大きさを得る.
-		bool get_font_size(double& val) const noexcept;
+		bool get_font_size(double& value) const noexcept;
 		// 書体の横幅を得る.
-		bool get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept;
+		bool get_font_stretch(DWRITE_FONT_STRETCH& value) const noexcept;
 		// 書体の字体を得る.
-		bool get_font_style(DWRITE_FONT_STYLE& val) const noexcept;
+		bool get_font_style(DWRITE_FONT_STYLE& value) const noexcept;
 		// 書体の太さを得る.
-		bool get_font_weight(DWRITE_FONT_WEIGHT& val) const noexcept;
+		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept;
 		// 行間を得る.
-		bool get_text_line_height(double& val) const noexcept;
+		bool get_text_line_height(double& value) const noexcept;
 		// 文字列の周囲の余白を得る.
-		bool get_text_margin(D2D1_SIZE_F& val) const noexcept;
+		bool get_text_margin(D2D1_SIZE_F& value) const noexcept;
 		// 段落のそろえを得る.
-		bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept;
+		bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& value) const noexcept;
 		// 線枠の色を得る.
-		bool get_stroke_color(D2D1_COLOR_F& val) const noexcept;
+		bool get_stroke_color(D2D1_COLOR_F& value) const noexcept;
 		// 破線の配置を得る.
-		bool get_stroke_pattern(STROKE_PATTERN& val) const noexcept;
+		bool get_stroke_pattern(STROKE_PATTERN& value) const noexcept;
 		// 破線の形式を得る.
-		bool get_stroke_style(D2D1_DASH_STYLE& val) const noexcept;
+		bool get_stroke_style(D2D1_DASH_STYLE& value) const noexcept;
 		// 書体の太さを得る
-		bool get_stroke_width(double& val) const noexcept;
+		bool get_stroke_width(double& value) const noexcept;
 		// 文字列のそろえを得る.
-		bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& val) const noexcept;
+		bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& value) const noexcept;
 		// データリーダーから読み込む.
 		void read(DataReader const& dt_reader);
 		// 図形の属性値を格納する.
 		void set_to_shape(Shape* s) noexcept;
-		// 値を方眼の大きさに格納する.
-		void set_grid_size(const double val) noexcept;
+		// 値を方眼の基準の大きさに格納する.
+		void set_grid_base(const double value) noexcept;
 		// 値を方眼の不透明度に格納する.
-		void set_grid_opac(const double val) noexcept;
+		void set_grid_opac(const double value) noexcept;
 		// 値を方眼の表示に格納する.
-		void set_grid_show(const GRID_SHOW val) noexcept;
+		void set_grid_show(const GRID_SHOW value) noexcept;
 		// 値を方眼へのそろえに格納する.
-		void set_grid_snap(const bool val) noexcept;
+		void set_grid_snap(const bool value) noexcept;
 		// 値をページの色に格納する.
-		void set_page_color(const D2D1_COLOR_F& val) noexcept;
+		void set_page_color(const D2D1_COLOR_F& value) noexcept;
 		// 値をページの寸法に格納する.
-		void set_page_size(const D2D1_SIZE_F val) noexcept;
+		void set_page_size(const D2D1_SIZE_F value) noexcept;
 		// 値をページの拡大率に格納する.
-		void set_page_scale(const double val) noexcept;
+		void set_page_scale(const double value) noexcept;
 		// 値を矢じりの寸法に格納する.
-		void set_arrow_size(const ARROW_SIZE& val);
+		void set_arrow_size(const ARROW_SIZE& value);
 		// 値を矢じりの形式に格納する.
-		void set_arrow_style(const ARROW_STYLE val);
+		void set_arrow_style(const ARROW_STYLE value);
 		// 値を塗りつぶし色に格納する.
-		void set_fill_color(const D2D1_COLOR_F& val) noexcept;
+		void set_fill_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を書体の色に格納する.
-		void set_font_color(const D2D1_COLOR_F& val) noexcept;
+		void set_font_color(const D2D1_COLOR_F& value) noexcept;
 		// 書体名に格納する.
-		void set_font_family(wchar_t* const val);
+		void set_font_family(wchar_t* const value);
 		// 書体の大きさに格納する.
-		void set_font_size(const double val);
+		void set_font_size(const double value);
 		// 値を書体の伸縮に格納する.
-		void set_font_stretch(const DWRITE_FONT_STRETCH val);
+		void set_font_stretch(const DWRITE_FONT_STRETCH value);
 		// 値を書体の字体に格納する.
-		void set_font_style(const DWRITE_FONT_STYLE val);
+		void set_font_style(const DWRITE_FONT_STYLE value);
 		// 値を書体の太さに格納する.
-		void set_font_weight(const DWRITE_FONT_WEIGHT val);
+		void set_font_weight(const DWRITE_FONT_WEIGHT value);
 		// 値を行間に格納する.
-		void set_text_line_height(const double val);
+		void set_text_line_height(const double value);
 		// 値を文字列の余白に格納する.
-		void set_text_margin(const D2D1_SIZE_F val);
+		void set_text_margin(const D2D1_SIZE_F value);
 		// 値を段落のそろえに格納する.
-		void set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT val);
+		void set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value);
 		// 値を線枠の色に格納する.
-		void set_stroke_color(const D2D1_COLOR_F& val) noexcept;
+		void set_stroke_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を破線の配置に格納する.
-		void set_stroke_pattern(const STROKE_PATTERN& val);
+		void set_stroke_pattern(const STROKE_PATTERN& value);
 		// 値を線枠の形式に格納する.
-		void set_stroke_style(const D2D1_DASH_STYLE val);
+		void set_stroke_style(const D2D1_DASH_STYLE value);
 		// 値を書体の太さに格納する.
-		void set_stroke_width(const double val) noexcept;
+		void set_stroke_width(const double value) noexcept;
 		// 値を文字列のそろえに格納する.
-		void set_text_align_t(const DWRITE_TEXT_ALIGNMENT val);
+		void set_text_align_t(const DWRITE_TEXT_ALIGNMENT value);
 		// データリーダーに書き込む.
 		void write(DataWriter const& dt_writer);
 
-		void write_svg(DataWriter const& dr_writer);
+		//void write_svg(DataWriter const& dr_writer);
 	};
 
 	//------------------------------
@@ -728,9 +728,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形を囲む方形を得る.
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 図形を囲む方形の左上点を得る.
-		void get_min_pos(D2D1_POINT_2F& val) const noexcept;
+		void get_min_pos(D2D1_POINT_2F& value) const noexcept;
 		// 始点を得る
-		bool get_start_pos(D2D1_POINT_2F& val) const noexcept;
+		bool get_start_pos(D2D1_POINT_2F& value) const noexcept;
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 範囲に含まれるか調べる.
@@ -742,11 +742,11 @@ namespace winrt::GraphPaper::implementation
 		// 差分だけ移動する
 		void move(const D2D1_POINT_2F d_pos);
 		// 値を消去フラグに格納する.
-		void set_delete(const bool val) noexcept;
+		void set_delete(const bool value) noexcept;
 		// 値を選択フラグに格納する.
-		void set_select(const bool val) noexcept;
+		void set_select(const bool value) noexcept;
 		// 値を始点に格納する. 他の部位の位置も動く.
-		void set_start_pos(const D2D1_POINT_2F val);
+		void set_start_pos(const D2D1_POINT_2F value);
 		// 図形をデータリーダーから読み込む.
 		ShapeGroup(DataReader const& dt_reader);
 		// データライターに書き込む.
@@ -779,19 +779,19 @@ namespace winrt::GraphPaper::implementation
 		// 図形を囲む方形を得る.
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 図形を囲む方形の左上点を得る.
-		virtual void get_min_pos(D2D1_POINT_2F& val) const noexcept;
+		virtual void get_min_pos(D2D1_POINT_2F& value) const noexcept;
 		// 指定された部位の位置を得る.
-		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& val) const noexcept;
+		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& value) const noexcept;
 		// 始点を得る
-		virtual bool get_start_pos(D2D1_POINT_2F& val) const noexcept;
+		virtual bool get_start_pos(D2D1_POINT_2F& value) const noexcept;
 		// 線枠の色を得る.
-		bool get_stroke_color(D2D1_COLOR_F& val) const noexcept;
+		bool get_stroke_color(D2D1_COLOR_F& value) const noexcept;
 		// 破線の配置を得る.
-		bool get_stroke_pattern(STROKE_PATTERN& val) const noexcept;
+		bool get_stroke_pattern(STROKE_PATTERN& value) const noexcept;
 		// 破線の形式を得る.
-		bool get_stroke_style(D2D1_DASH_STYLE& val) const noexcept;
+		bool get_stroke_style(D2D1_DASH_STYLE& value) const noexcept;
 		// 線枠の太さを得る.
-		bool get_stroke_width(double& val) const noexcept;
+		bool get_stroke_width(double& value) const noexcept;
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept;
 		// 範囲に含まれるか調べる.
@@ -803,17 +803,17 @@ namespace winrt::GraphPaper::implementation
 		// 差分だけ移動する.
 		virtual	void move(const D2D1_POINT_2F d_pos);
 		// 値を選択フラグに格納する.
-		void set_select(const bool val) noexcept { m_selected = val; }
+		void set_select(const bool value) noexcept { m_selected = value; }
 		// 値を消去フラグに格納する.
-		void set_delete(const bool val) noexcept { m_deleted = val; }
+		void set_delete(const bool value) noexcept { m_deleted = value; }
 		// 値を始点に格納する. 他の部位の位置も動く.
-		virtual void set_start_pos(const D2D1_POINT_2F val);
+		virtual void set_start_pos(const D2D1_POINT_2F value);
 		// 値を線枠の色に格納する.
-		void set_stroke_color(const D2D1_COLOR_F& val) noexcept;
+		void set_stroke_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を破線の配置に格納する.
-		void set_stroke_pattern(const STROKE_PATTERN& val);
+		void set_stroke_pattern(const STROKE_PATTERN& value);
 		// 値を線枠の形式に格納する.
-		void set_stroke_style(const D2D1_DASH_STYLE val);
+		void set_stroke_style(const D2D1_DASH_STYLE value);
 		// 値を線枠の太さに格納する.
 		void set_stroke_width(const double width) noexcept;
 		// 図形を作成する.
@@ -855,17 +855,17 @@ namespace winrt::GraphPaper::implementation
 		// 矢じりの寸法を得る.
 		bool get_arrow_size(ARROW_SIZE& size) const noexcept;
 		// 矢じりの形式を得る.
-		bool get_arrow_style(ARROW_STYLE& val) const noexcept;
+		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
 		// 値を矢じりの寸法に格納する.
-		void set_arrow_size(const ARROW_SIZE& size);
+		void set_arrow_size(const ARROW_SIZE& value);
 		// 値を矢じりの形式に格納する.
-		void set_arrow_style(const ARROW_STYLE arrow_style);
+		void set_arrow_style(const ARROW_STYLE value);
 		// 指定された部位の位置を得る.
-		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept;
+		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept;
 		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		void set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a);
+		void set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a);
 		// 値を始点に格納する. 他の部位の位置も動く.
-		void set_start_pos(const D2D1_POINT_2F val);
+		void set_start_pos(const D2D1_POINT_2F value);
 		// 差分だけ移動する.
 		void move(const D2D1_POINT_2F d_pos);
 		// データリーダーから読み込む.
@@ -899,13 +899,13 @@ namespace winrt::GraphPaper::implementation
 		// 範囲に含まれるか調べる.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 塗りつぶしの色を得る.
-		bool get_fill_color(D2D1_COLOR_F& val) const noexcept;
+		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
 		// 値を塗りつぶしの色に格納する.
-		void set_fill_color(const D2D1_COLOR_F& val) noexcept;
+		void set_fill_color(const D2D1_COLOR_F& value) noexcept;
 		// 指定された部位の位置を得る.
-		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept;
+		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept;
 		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		void set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a);
+		void set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG タグとして書き込む.
@@ -985,11 +985,11 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 角丸半径を得る.
-		bool get_corner_radius(D2D1_POINT_2F& val) const noexcept;
+		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
 		// 指定された部位の位置を得る.
-		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept;
+		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept;
 		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		void set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a);
+		void set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG タグとして書き込む.
@@ -1018,17 +1018,17 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapePoly(void);
 		// 図形を囲む方形の左上点を得る.
-		void get_min_pos(D2D1_POINT_2F& val) const noexcept;
+		void get_min_pos(D2D1_POINT_2F& value) const noexcept;
 		// 図形を囲む方形を得る.
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 差分だけ移動する.
 		void move(const D2D1_POINT_2F d_pos);
 		// 指定された部位の位置を得る.
-		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept;
+		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept;
 		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		void set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a);
+		void set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a);
 		// 値を始点に格納する. 他の部位の位置も動く.
-		void set_start_pos(const D2D1_POINT_2F val);
+		void set_start_pos(const D2D1_POINT_2F value);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 	};
@@ -1048,13 +1048,13 @@ namespace winrt::GraphPaper::implementation
 		// 表示する
 		void draw(SHAPE_DX& dx);
 		// 塗りつぶし色を得る.
-		bool get_fill_color(D2D1_COLOR_F& val) const noexcept;
+		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 範囲に含まれるか調べる.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 値を塗りつぶし色に格納する.
-		void set_fill_color(const D2D1_COLOR_F& color) noexcept;
+		void set_fill_color(const D2D1_COLOR_F& value) noexcept;
 		// 図形を作成する.
 		ShapeQuad(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr);
 		// 図形をデータリーダーから読み込む.
@@ -1088,19 +1088,19 @@ namespace winrt::GraphPaper::implementation
 		// 表示する.
 		void draw(SHAPE_DX& dx);
 		// 矢じりの寸法を得る
-		bool get_arrow_size(ARROW_SIZE& val) const noexcept;
+		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
 		// 矢じりの形式を得る.
-		bool get_arrow_style(ARROW_STYLE& val) const noexcept;
+		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 範囲に含まれるか調べる.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 値を矢じりの寸法に格納する.
-		void set_arrow_size(const ARROW_SIZE& val);
+		void set_arrow_size(const ARROW_SIZE& value);
 		// 値を矢じりの形式に格納する.
-		void set_arrow_style(const ARROW_STYLE val);
+		void set_arrow_style(const ARROW_STYLE value);
 		// 値を始点に格納する. 他の部位の位置も動く.
-		void set_start_pos(const D2D1_POINT_2F val);
+		void set_start_pos(const D2D1_POINT_2F value);
 		// 図形を作成する.
 		ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr);
 		// 図形をデータリーダーから読み込む.
@@ -1153,29 +1153,29 @@ namespace winrt::GraphPaper::implementation
 		// 有効な書体名から要素を得る.
 		static wchar_t* get_available_font(const uint32_t i);
 		// 書体の色を得る.
-		bool get_font_color(D2D1_COLOR_F& val) const noexcept;
+		bool get_font_color(D2D1_COLOR_F& value) const noexcept;
 		// 書体名を得る.
-		bool get_font_family(wchar_t*& val) const noexcept;
+		bool get_font_family(wchar_t*& value) const noexcept;
 		// 書体の大きさを得る.
-		bool get_font_size(double& val) const noexcept;
+		bool get_font_size(double& value) const noexcept;
 		// 書体の伸縮を得る.
-		bool get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept;
+		bool get_font_stretch(DWRITE_FONT_STRETCH& value) const noexcept;
 		// 書体の字体を得る.
-		bool get_font_style(DWRITE_FONT_STYLE& val) const noexcept;
+		bool get_font_style(DWRITE_FONT_STYLE& value) const noexcept;
 		// 行間を得る.
-		bool get_text_line_height(double& val) const noexcept;
+		bool get_text_line_height(double& value) const noexcept;
 		// 書体の太さを得る.
-		bool get_font_weight(DWRITE_FONT_WEIGHT& val) const noexcept;
+		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept;
 		// 文字列の余白を得る.
-		bool get_text_margin(D2D1_SIZE_F& val) const noexcept;
+		bool get_text_margin(D2D1_SIZE_F& value) const noexcept;
 		// 段落のそろえを得る.
-		bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept;
+		bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& value) const noexcept;
 		// 文字列を得る.
-		bool get_text(wchar_t*& val) const noexcept;
+		bool get_text(wchar_t*& value) const noexcept;
 		// 文字列のそろえを得る.
-		bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& val) const noexcept;
+		bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& value) const noexcept;
 		// 文字範囲を得る.
-		bool get_text_range(DWRITE_TEXT_RANGE& val) const noexcept;
+		bool get_text_range(DWRITE_TEXT_RANGE& value) const noexcept;
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 範囲に含まれるか調べる.
@@ -1187,31 +1187,31 @@ namespace winrt::GraphPaper::implementation
 		// 有効な書体名の配列を設定する.
 		static void set_available_fonts(void);
 		// 値を書体の色に格納する.
-		void set_font_color(const D2D1_COLOR_F& val) noexcept;
+		void set_font_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を書体名に格納する.
-		void set_font_family(wchar_t* const val);
+		void set_font_family(wchar_t* const value);
 		// 値を書体の大きさに格納する.
-		void set_font_size(const double val);
+		void set_font_size(const double value);
 		// 値を書体の伸縮に格納する.
-		void set_font_stretch(const DWRITE_FONT_STRETCH val);
+		void set_font_stretch(const DWRITE_FONT_STRETCH value);
 		// 値を書体の字体に格納する.
-		void set_font_style(const DWRITE_FONT_STYLE val);
+		void set_font_style(const DWRITE_FONT_STYLE value);
 		// 値を書体の太さに格納する.
-		void set_font_weight(const DWRITE_FONT_WEIGHT val);
+		void set_font_weight(const DWRITE_FONT_WEIGHT value);
 		// 値を行間に格納する.
-		void set_text_line_height(const double val);
+		void set_text_line_height(const double value);
 		// 値を文字列の余白に格納する.
-		void set_text_margin(const D2D1_SIZE_F val);
+		void set_text_margin(const D2D1_SIZE_F value);
 		// 値を段落のそろえに格納する.
-		void set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT val);
+		void set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value);
 		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		void set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a);
+		void set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a);
 		// 値を文字列に格納する.
-		void set_text(wchar_t* const text);
+		void set_text(wchar_t* const value);
 		// 値を文字列のそろえに格納する.
-		void set_text_align_t(const DWRITE_TEXT_ALIGNMENT val);
+		void set_text_align_t(const DWRITE_TEXT_ALIGNMENT value);
 		// 値を文字範囲に格納する.
-		void set_text_range(const DWRITE_TEXT_RANGE val);
+		void set_text_range(const DWRITE_TEXT_RANGE value);
 		// 図形を作成する.
 		ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, wchar_t* const text, const ShapePanel* attr);
 		// 図形をデータリーダーから読み込む.

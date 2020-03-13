@@ -29,7 +29,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形を削除して, その操作をスタックに積む.
 			undo_push_remove(s);
 			// 図形をグループ図形に追加して, その操作をスタックに積む.
-			undo_push_group(g, s);
+			undo_push_append(g, s);
 		}
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();

@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::arrow_set_slider_header(const double val)
+	void MainPage::arrow_set_slider_header(const double value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -37,7 +37,7 @@ namespace winrt::GraphPaper::implementation
 			const auto dpi = m_sample_dx.m_logical_dpi;
 			const auto g_len = m_sample_panel.m_grid_base + 1.0;
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, val, dpi, g_len, buf, 31);
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf, 31);
 			hdr = hdr + buf;
 		}
 		if constexpr (S == 0) {
@@ -62,21 +62,20 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S>
 	void MainPage::arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		//Shape* s = m_sample_shape;
-		const double val = args.NewValue();
+		const auto value = args.NewValue();
 		// 値をスライダーのヘッダーに格納する.
-		arrow_set_slider_header<U, S>(val);
+		arrow_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			ARROW_SIZE a_size;
 			m_sample_shape->get_arrow_size(a_size);
 			if constexpr (S == 0) {
-				a_size.m_width = static_cast<FLOAT>(val);
+				a_size.m_width = static_cast<FLOAT>(value);
 			}
 			if constexpr (S == 1) {
-				a_size.m_length = static_cast<FLOAT>(val);
+				a_size.m_length = static_cast<FLOAT>(value);
 			}
 			if constexpr (S == 2) {
-				a_size.m_offset = static_cast<FLOAT>(val);
+				a_size.m_offset = static_cast<FLOAT>(value);
 			}
 			m_sample_shape->set_arrow_size(a_size);
 		}
@@ -126,9 +125,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			ARROW_SIZE sample_val;
-			m_sample_shape->get_arrow_size(sample_val);
-			undo_push_value<UNDO_OP::ARROW_SIZE>(sample_val);
+			ARROW_SIZE sample_value;
+			m_sample_shape->get_arrow_size(sample_value);
+			undo_push_set<UNDO_OP::ARROW_SIZE>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -151,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_arrow_size().IsEnabled(true);
 			mfi_arrow_size_2().IsEnabled(true);
 		}
-		undo_push_value<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::FILLED);
+		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::FILLED);
 	}
 
 	// 線枠メニューの「矢じりの種類」>「なし」が選択された.
@@ -161,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_arrow_size().IsEnabled(false);
 			mfi_arrow_size_2().IsEnabled(false);
 		}
-		undo_push_value<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::NONE);
+		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::NONE);
 	}
 
 	// 線枠メニューの「矢じりの種類」>「開いた」が選択された.
@@ -171,7 +170,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_arrow_size().IsEnabled(true);
 			mfi_arrow_size_2().IsEnabled(true);
 		}
-		undo_push_value<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::OPENED);
+		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::OPENED);
 	}
 
 }

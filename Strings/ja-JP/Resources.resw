@@ -169,11 +169,11 @@
     <value>文末の空白行を無視する.</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="ck_text_match_case.Content" xml:space="preserve">
+  <data name="ck_text_find_case.Content" xml:space="preserve">
     <value>大文字と小文字を区別する</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="ck_text_wrap_around.Content" xml:space="preserve">
+  <data name="ck_text_find_wrap.Content" xml:space="preserve">
     <value>折り返しあり</value>
     <comment>CheckBox</comment>
   </data>

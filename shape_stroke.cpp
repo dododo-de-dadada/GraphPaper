@@ -75,38 +75,38 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を囲む方形の左上点を得る.
-	void ShapePoly::get_min_pos(D2D1_POINT_2F& val) const noexcept
+	void ShapePoly::get_min_pos(D2D1_POINT_2F& value) const noexcept
 	{
 		D2D1_POINT_2F e_pos;
 		pt_add(m_pos, m_diff, e_pos);
-		pt_min(m_pos, e_pos, val);
+		pt_min(m_pos, e_pos, value);
 		pt_add(e_pos, m_diff_1, e_pos);
-		pt_min(val, e_pos, val);
+		pt_min(value, e_pos, value);
 		pt_add(e_pos, m_diff_2, e_pos);
-		pt_min(val, e_pos, val);
+		pt_min(value, e_pos, value);
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapePoly::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept
+	void ShapePoly::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept
 	{
 		switch (a) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
-			val = m_pos;
+			value = m_pos;
 			break;
 		case ANCH_WHICH::ANCH_R_NW:
-			val = m_pos;
+			value = m_pos;
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
-			pt_add(m_pos, m_diff, val);
+			pt_add(m_pos, m_diff, value);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
-			pt_add(m_pos, m_diff, val);
-			pt_add(val, m_diff_1, val);
+			pt_add(m_pos, m_diff, value);
+			pt_add(value, m_diff_1, value);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
-			pt_add(m_pos, m_diff, val);
-			pt_add(val, m_diff_1, val);
-			pt_add(val, m_diff_2, val);
+			pt_add(m_pos, m_diff, value);
+			pt_add(value, m_diff_1, value);
+			pt_add(value, m_diff_2, value);
 			break;
 		default:
 			return;
@@ -121,35 +121,35 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapePoly::set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a)
+	void ShapePoly::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F a_pos;
 		D2D1_POINT_2F d_pos;
 
 		switch (a) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
-			m_pos = val;
+			m_pos = value;
 			break;
 		case ANCH_WHICH::ANCH_R_NW:
-			pt_sub(val, m_pos, d_pos);
-			m_pos = val;
+			pt_sub(value, m_pos, d_pos);
+			m_pos = value;
 			pt_sub(m_diff, d_pos, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
 			get_pos(ANCH_WHICH::ANCH_R_NE, a_pos);
-			pt_sub(val, a_pos, d_pos);
+			pt_sub(value, a_pos, d_pos);
 			pt_add(m_diff, d_pos, m_diff);
 			pt_sub(m_diff_1, d_pos, m_diff_1);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
 			get_pos(ANCH_WHICH::ANCH_R_SW, a_pos);
-			pt_sub(val, a_pos, d_pos);
+			pt_sub(value, a_pos, d_pos);
 			pt_add(m_diff_1, d_pos, m_diff_1);
 			pt_sub(m_diff_2, d_pos, m_diff_2);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
 			get_pos(ANCH_WHICH::ANCH_R_SE, a_pos);
-			pt_sub(val, a_pos, d_pos);
+			pt_sub(value, a_pos, d_pos);
 			pt_add(m_diff_2, d_pos, m_diff_2);
 			break;
 		default:
@@ -159,9 +159,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 始点に値を格納する. 他の部位の位置も動く.
-	void ShapePoly::set_start_pos(const D2D1_POINT_2F val)
+	void ShapePoly::set_start_pos(const D2D1_POINT_2F value)
 	{
-		ShapeStroke::set_start_pos(val);
+		ShapeStroke::set_start_pos(value);
 		create_path_geometry();
 	}
 
@@ -209,50 +209,50 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を囲む方形の左上点を得る.
 	// D2D1_POINT_2F& pos	// 方形の左上点
-	void ShapeStroke::get_min_pos(D2D1_POINT_2F& val) const noexcept
+	void ShapeStroke::get_min_pos(D2D1_POINT_2F& value) const noexcept
 	{
-		val.x = m_diff.x >= 0.0f ? m_pos.x : m_pos.x + m_diff.x;
-		val.y = m_diff.y >= 0.0f ? m_pos.y : m_pos.y + m_diff.y;
+		value.x = m_diff.x >= 0.0f ? m_pos.x : m_pos.x + m_diff.x;
+		value.y = m_diff.y >= 0.0f ? m_pos.y : m_pos.y + m_diff.y;
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapeStroke::get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& val) const noexcept
+	void ShapeStroke::get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& value) const noexcept
 	{
-		val = m_pos;
+		value = m_pos;
 	}
 
 	// 始点を得る
-	bool ShapeStroke::get_start_pos(D2D1_POINT_2F& val) const noexcept
+	bool ShapeStroke::get_start_pos(D2D1_POINT_2F& value) const noexcept
 	{
-		val = m_pos;
+		value = m_pos;
 		return true;
 	}
 
 	// 線枠の色を得る.
-	bool ShapeStroke::get_stroke_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapeStroke::get_stroke_color(D2D1_COLOR_F& value) const noexcept
 	{
-		val = m_stroke_color;
+		value = m_stroke_color;
 		return true;
 	}
 
 	// 破線の配置を得る.
-	bool ShapeStroke::get_stroke_pattern(STROKE_PATTERN& val) const noexcept
+	bool ShapeStroke::get_stroke_pattern(STROKE_PATTERN& value) const noexcept
 	{
-		val = m_stroke_pattern;
+		value = m_stroke_pattern;
 		return true;
 	}
 
 	// 線枠の形式を得る.
-	bool ShapeStroke::get_stroke_style(D2D1_DASH_STYLE& val) const noexcept
+	bool ShapeStroke::get_stroke_style(D2D1_DASH_STYLE& value) const noexcept
 	{
-		val = m_stroke_style;
+		value = m_stroke_style;
 		return true;
 	}
 
 	// 線枠の太さを得る.
-	bool ShapeStroke::get_stroke_width(double& val) const noexcept
+	bool ShapeStroke::get_stroke_width(double& value) const noexcept
 	{
-		val = m_stroke_width;
+		value = m_stroke_width;
 		return true;
 	}
 
@@ -277,15 +277,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 始点に値を格納する. 他の部位の位置も動く.
-	void ShapeStroke::set_start_pos(const D2D1_POINT_2F val)
+	void ShapeStroke::set_start_pos(const D2D1_POINT_2F value)
 	{
-		m_pos = val;
+		m_pos = value;
 	}
 
 	// 線枠の色に格納する.
-	void ShapeStroke::set_stroke_color(const D2D1_COLOR_F& val) noexcept
+	void ShapeStroke::set_stroke_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_stroke_color = val;
+		m_stroke_color = value;
 	}
 
 	// 矢じりをデータライターに SVG タグとして書き込む.
@@ -316,31 +316,31 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を破線の配置に格納する.
-	void ShapeStroke::set_stroke_pattern(const STROKE_PATTERN& val)
+	void ShapeStroke::set_stroke_pattern(const STROKE_PATTERN& value)
 	{
-		if (equal(m_stroke_pattern, val)) {
+		if (equal(m_stroke_pattern, value)) {
 			return;
 		}
-		m_stroke_pattern = val;
+		m_stroke_pattern = value;
 		m_d2d_stroke_style = nullptr;
 		create_stroke_style(m_stroke_style, m_stroke_pattern, m_d2d_stroke_style.put());
 	}
 
 	// 値を線枠の形式に格納する.
-	void ShapeStroke::set_stroke_style(const D2D1_DASH_STYLE val)
+	void ShapeStroke::set_stroke_style(const D2D1_DASH_STYLE value)
 	{
-		if (equal(m_stroke_style, val)) {
+		if (equal(m_stroke_style, value)) {
 			return;
 		}
-		m_stroke_style = val;
+		m_stroke_style = value;
 		m_d2d_stroke_style = nullptr;
 		create_stroke_style(m_stroke_style, m_stroke_pattern, m_d2d_stroke_style.put());
 	}
 
 	// 値を線枠の太さに格納する.
-	void ShapeStroke::set_stroke_width(const double val) noexcept
+	void ShapeStroke::set_stroke_width(const double value) noexcept
 	{
-		m_stroke_width = val;
+		m_stroke_width = value;
 	}
 
 	// 図形を作成する.

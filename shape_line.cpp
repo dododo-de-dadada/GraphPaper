@@ -128,27 +128,27 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの寸法を得る.
-	bool ShapeLine::get_arrow_size(ARROW_SIZE& val) const noexcept
+	bool ShapeLine::get_arrow_size(ARROW_SIZE& value) const noexcept
 	{
-		val = m_arrow_size;
+		value = m_arrow_size;
 		return true;
 	}
 
 	// 矢じりの形式を得る.
-	bool ShapeLine::get_arrow_style(ARROW_STYLE& val) const noexcept
+	bool ShapeLine::get_arrow_style(ARROW_STYLE& value) const noexcept
 	{
-		val = m_arrow_style;
+		value = m_arrow_style;
 		return true;
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapeLine::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& val) const noexcept
+	void ShapeLine::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept
 	{
 		if (a == ANCH_END) {
-			pt_add(m_pos, m_diff, val);
+			pt_add(m_pos, m_diff, value);
 		}
 		else {
-			val = m_pos;
+			value = m_pos;
 		}
 	}
 
@@ -216,12 +216,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を矢じりの寸法に格納する.
-	void ShapeLine::set_arrow_size(const ARROW_SIZE& val)
+	void ShapeLine::set_arrow_size(const ARROW_SIZE& value)
 	{
-		if (equal(m_arrow_size, val)) {
+		if (equal(m_arrow_size, value)) {
 			return;
 		}
-		m_arrow_size = val;
+		m_arrow_size = value;
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			ln_create_arrow_geometry(
@@ -231,34 +231,34 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を矢じりの形式に格納する.
-	void ShapeLine::set_arrow_style(const ARROW_STYLE val)
+	void ShapeLine::set_arrow_style(const ARROW_STYLE value)
 	{
-		if (m_arrow_style != val) {
-			m_arrow_style = val;
-			m_d2d_arrow_geometry = nullptr;
-			if (val != ARROW_STYLE::NONE) {
-				ln_create_arrow_geometry(
-					s_d2d_factory, m_pos, m_diff, m_arrow_style,
-					m_arrow_size, m_d2d_arrow_geometry.put());
-			}
+		if (m_arrow_style == value) {
+			return;
+		}
+		m_arrow_style = value;
+		m_d2d_arrow_geometry = nullptr;
+		if (value != ARROW_STYLE::NONE) {
+			ln_create_arrow_geometry(
+				s_d2d_factory, m_pos, m_diff, m_arrow_style,
+				m_arrow_size, m_d2d_arrow_geometry.put());
 		}
 	}
 
 	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapeLine::set_pos(const D2D1_POINT_2F val, const ANCH_WHICH a)
+	void ShapeLine::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F d_pos;
 
 		if (a == ANCH_END) {
-			pt_sub(val, m_pos, m_diff);
-		}
-		else if (a == ANCH_BEGIN) {
-			pt_sub(val, m_pos, d_pos);
-			pt_sub(m_diff, d_pos, m_diff);
-			m_pos = val;
+			pt_sub(value, m_pos, m_diff);
 		}
 		else {
-			m_pos = val;
+			if (a == ANCH_BEGIN) {
+				pt_sub(value, m_pos, d_pos);
+				pt_sub(m_diff, d_pos, m_diff);
+			}
+			m_pos = value;
 		}
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
@@ -269,9 +269,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	void ShapeLine::set_start_pos(const D2D1_POINT_2F val)
+	void ShapeLine::set_start_pos(const D2D1_POINT_2F value)
 	{
-		ShapeStroke::set_start_pos(val);
+		ShapeStroke::set_start_pos(value);
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			ln_create_arrow_geometry(

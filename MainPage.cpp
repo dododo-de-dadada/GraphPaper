@@ -12,22 +12,23 @@ namespace winrt::GraphPaper::implementation
 {
 	// 色成分の値を文字列に変換する.
 	// style	色成分の形式
-	// val	色成分の値
+	// value	色成分の値
 	// buf	文字列の配列
 	// len	文字列の最大長 ('\0' を含む長さ)
-	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t* buf, const size_t b_len)
+	// 戻り値	なし
+	void conv_val_to_col(const COL_STYLE style, const double value, wchar_t* buf, const size_t b_len)
 	{
 		if (style == COL_STYLE::DEC) {
-			swprintf_s(buf, b_len, L"%.0lf", std::round(val));
+			swprintf_s(buf, b_len, L"%.0lf", std::round(value));
 		}
 		else if (style == COL_STYLE::HEX) {
-			swprintf_s(buf, b_len, L"%02X", static_cast<uint32_t>(std::round(val)));
+			swprintf_s(buf, b_len, L"%02X", static_cast<uint32_t>(std::round(value)));
 		}
 		else if (style == COL_STYLE::FLT) {
-			swprintf_s(buf, b_len, L"%.4lf", val / COLOR_MAX);
+			swprintf_s(buf, b_len, L"%.4lf", value / COLOR_MAX);
 		}
 		else if (style == COL_STYLE::CEN) {
-			swprintf_s(buf, b_len, L"%.1lf%%", val / COLOR_MAX * 100.0);
+			swprintf_s(buf, b_len, L"%.1lf%%", value / COLOR_MAX * 100.0);
 		}
 		else {
 			throw hresult_not_implemented();
@@ -37,30 +38,30 @@ namespace winrt::GraphPaper::implementation
 
 	// 長さの値ををピクセル単位の値に変換する.
 	// unit	長さの単位
-	// val	長さの値
+	// value	長さの値
 	// dpi	DPI
 	// g_len	方眼の長さ
 	// 戻り値	ピクセル単位の値
-	double conv_len_to_val(const LEN_UNIT unit, const double val, const double dpi, const double g_len) noexcept
+	double conv_len_to_val(const LEN_UNIT unit, const double value, const double dpi, const double g_len) noexcept
 	{
 		double ret;
 
 		if (unit == LEN_UNIT::INCH) {
-			ret = val * dpi;
+			ret = value * dpi;
 		}
 		else if (unit == LEN_UNIT::MILLI) {
-			ret = val * dpi / MM_PER_INCH;
+			ret = value * dpi / MM_PER_INCH;
 		}
 		else if (unit == LEN_UNIT::POINT) {
-			ret = val * dpi / PT_PER_INCH;
+			ret = value * dpi / PT_PER_INCH;
 		}
 		else if (unit == LEN_UNIT::GRID) {
-			ret = val * g_len;
+			ret = value * g_len;
 		}
 		else {
-			ret = val;
+			ret = value;
 		}
-		return std::round(val);
+		return std::round(ret);
 	}
 
 	// ピクセル単位の長さを他の単位の文字列に変換する.
@@ -72,51 +73,51 @@ namespace winrt::GraphPaper::implementation
 	// buf	文字列の配列
 	// b_len	文字列の最大長 ('\0' を含む長さ)
 	template <bool B>
-	void conv_val_to_len(const LEN_UNIT unit, const double val, const double dpi, const double g_len, wchar_t *buf, const uint32_t b_len)
+	void conv_val_to_len(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t *buf, const uint32_t b_len)
 	{
 		if (unit == LEN_UNIT::PIXEL) {
 			if constexpr (B == WITH_UNIT_NAME) {
-				swprintf_s(buf, b_len, FMT_PIXEL_UNIT, val);
+				swprintf_s(buf, b_len, FMT_PIXEL_UNIT, value);
 			}
 			else {
-				swprintf_s(buf, b_len, FMT_PIXEL, val);
+				swprintf_s(buf, b_len, FMT_PIXEL, value);
 			}
 		}
 		else if (unit == LEN_UNIT::INCH) {
 			if constexpr (B == WITH_UNIT_NAME) {
-				swprintf_s(buf, b_len, FMT_INCH_UNIT, val / dpi);
+				swprintf_s(buf, b_len, FMT_INCH_UNIT, value / dpi);
 			}
 			else {
-				swprintf_s(buf, b_len, FMT_INCH, val / dpi);
+				swprintf_s(buf, b_len, FMT_INCH, value / dpi);
 			}
 		}
 		else if (unit == LEN_UNIT::MILLI) {
 			if constexpr (B == WITH_UNIT_NAME) {
-				swprintf_s(buf, b_len, FMT_MILLI_UNIT, val * MM_PER_INCH / dpi);
+				swprintf_s(buf, b_len, FMT_MILLI_UNIT, value * MM_PER_INCH / dpi);
 			}
 			else {
-				swprintf_s(buf, b_len, FMT_MILLI, val * MM_PER_INCH / dpi);
+				swprintf_s(buf, b_len, FMT_MILLI, value * MM_PER_INCH / dpi);
 			}
 		}
 		else if (unit == LEN_UNIT::POINT) {
 			if constexpr (B == WITH_UNIT_NAME) {
-				swprintf_s(buf, b_len, FMT_POINT_UNIT, val * PT_PER_INCH / dpi);
+				swprintf_s(buf, b_len, FMT_POINT_UNIT, value * PT_PER_INCH / dpi);
 			}
 			else {
-				swprintf_s(buf, b_len, FMT_POINT, val * PT_PER_INCH / dpi);
+				swprintf_s(buf, b_len, FMT_POINT, value * PT_PER_INCH / dpi);
 			}
 		}
 		else if (unit == LEN_UNIT::GRID) {
 			if constexpr (B == WITH_UNIT_NAME) {
-				swprintf_s(buf, b_len, FMT_GRID_UNIT, val / g_len);
+				swprintf_s(buf, b_len, FMT_GRID_UNIT, value / g_len);
 			}
 			else {
-				swprintf_s(buf, b_len, FMT_GRID, val / g_len);
+				swprintf_s(buf, b_len, FMT_GRID, value / g_len);
 			}
 		}
 	}
-	template void conv_val_to_len<WITH_UNIT_NAME>(const LEN_UNIT unit, const double val, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
-	template void conv_val_to_len<!WITH_UNIT_NAME>(const LEN_UNIT unit, const double val, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
+	template void conv_val_to_len<WITH_UNIT_NAME>(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
+	template void conv_val_to_len<!WITH_UNIT_NAME>(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 
 	// メッセージダイアログを表示する.
 	// glyph	フォントアイコンのグリフ

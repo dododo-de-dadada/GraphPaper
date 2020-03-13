@@ -61,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を囲む方形の左上点を得る.
-	void ShapeGroup::get_min_pos(D2D1_POINT_2F& val) const noexcept
+	void ShapeGroup::get_min_pos(D2D1_POINT_2F& value) const noexcept
 	{
 		auto flag = true;
 		for (const auto s : m_list_grouped) {
@@ -70,23 +70,22 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (flag == true) {
 				flag = false;
-				s->get_min_pos(val);
+				s->get_min_pos(value);
 				continue;
 			}
 			D2D1_POINT_2F nw_pos;
 			s->get_min_pos(nw_pos);
-			pt_min(nw_pos, val, val);
+			pt_min(nw_pos, value, value);
 		}
 	}
 
 	// 始点を得る
-	bool ShapeGroup::get_start_pos(D2D1_POINT_2F& val) const noexcept
+	bool ShapeGroup::get_start_pos(D2D1_POINT_2F& value) const noexcept
 	{
-		//get_min_pos(val);
 		if (m_list_grouped.empty()) {
 			return false;
 		}
-		m_list_grouped.front()->get_start_pos(val);
+		m_list_grouped.front()->get_start_pos(value);
 		return true;
 	}
 
@@ -142,32 +141,32 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を消去フラグに格納する.
-	void ShapeGroup::set_delete(const bool val) noexcept
+	void ShapeGroup::set_delete(const bool value) noexcept
 	{
 		for (const auto s : m_list_grouped) {
-			s->set_delete(val);
+			s->set_delete(value);
 		}
 	}
 
 	// 値を選択フラグに格納する.
-	void ShapeGroup::set_select(const bool val) noexcept
+	void ShapeGroup::set_select(const bool value) noexcept
 	{
 		for (const auto s : m_list_grouped) {
-			s->set_select(val);
+			s->set_select(value);
 		}
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	void ShapeGroup::set_start_pos(const D2D1_POINT_2F val)
+	void ShapeGroup::set_start_pos(const D2D1_POINT_2F value)
 	{
 		D2D1_POINT_2F b_min;
 		D2D1_POINT_2F d_pos;
 
 		get_min_pos(b_min);
-		if (equal(val, b_min)) {
+		if (equal(value, b_min)) {
 			return;
 		}
-		pt_sub(val, b_min, d_pos);
+		pt_sub(value, b_min, d_pos);
 		move(d_pos);
 	}
 

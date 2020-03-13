@@ -509,16 +509,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// –î‚¶‚è‚Ì¡–@‚ğ“¾‚é.
-	bool ShapeBezi::get_arrow_size(ARROW_SIZE& val) const noexcept
+	bool ShapeBezi::get_arrow_size(ARROW_SIZE& value) const noexcept
 	{
-		val = m_arrow_size;
+		value = m_arrow_size;
 		return true;
 	}
 
 	// –î‚¶‚è‚ÌŒ`®‚ğ“¾‚é.
-	bool ShapeBezi::get_arrow_style(ARROW_STYLE& val) const noexcept
+	bool ShapeBezi::get_arrow_style(ARROW_STYLE& value) const noexcept
 	{
-		val = m_arrow_style;
+		value = m_arrow_style;
 		return true;
 	}
 
@@ -736,29 +736,29 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// –î‚¶‚è‚Ì¡–@‚ÉŠi”[‚·‚é.
-	void ShapeBezi::set_arrow_size(const ARROW_SIZE& val)
+	void ShapeBezi::set_arrow_size(const ARROW_SIZE& value)
 	{
-		if (equal(m_arrow_size, val)) {
+		if (equal(m_arrow_size, value)) {
 			return;
 		}
-		m_arrow_size = val;
+		m_arrow_size = value;
 		create_path_geometry();
 	}
 
 	// –î‚¶‚è‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	void ShapeBezi::set_arrow_style(const ARROW_STYLE val)
+	void ShapeBezi::set_arrow_style(const ARROW_STYLE value)
 	{
-		if (m_arrow_style == val) {
+		if (m_arrow_style == value) {
 			return;
 		}
-		m_arrow_style = val;
+		m_arrow_style = value;
 		create_path_geometry();
 	}
 
 	// ’l‚ğn“_‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚à“®‚­.
-	void ShapeBezi::set_start_pos(const D2D1_POINT_2F val)
+	void ShapeBezi::set_start_pos(const D2D1_POINT_2F value)
 	{
-		ShapeStroke::set_start_pos(val);
+		ShapeStroke::set_start_pos(value);
 		create_path_geometry();
 	}
 

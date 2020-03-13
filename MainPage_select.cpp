@@ -322,7 +322,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の選択をすべて解除する.
-	// t_range_only	文字範囲のみフラグ
+	// t_range_only	文字範囲のみ解除フラグ
 	// 戻り値	選択が解除された図形がある場合 true, ない場合 false
 	// 文字範囲のみフラグが立っている場合, 文字範囲の選択のみ解除される.
 	// 文字範囲のみフラグがない場合, 図形の選択も文字範囲の選択も両方解除される.
@@ -334,43 +334,25 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			if (t_range_only == false && s->is_selected()) {
-				// 文字範囲フラグがない, かつ図形の選択フラグが立っている場合,
-				// 
+				// 文字範囲のみ解除フラグがない, かつ図形の選択フラグが立っている場合,
 				undo_push_select(s);
 				flag = true;
 			}
-			DWRITE_TEXT_RANGE t_range;
-			if (s->get_text_range(t_range) == false) {
+			DWRITE_TEXT_RANGE d_range;
+			if (s->get_text_range(d_range) == false) {
+				// 文字範囲が取得できない
+				// (文字列図形でない) 場合,
+				// 以下を無視する.
 				continue;
 			}
-			if (t_range.length == 0 && t_range.startPosition == 0) {
+			const DWRITE_TEXT_RANGE s_range = DWRITE_TEXT_RANGE{ 0, 0 };
+			if (equal(s_range, d_range)) {
+				// 得た文字範囲が { 0, 0 } の場合,
+				// 以下を無視する.
 				continue;
 			}
-			auto del = false;
-			for (auto it = m_stack_undo.rbegin(); it != m_stack_undo.rend(); it++) {
-				const auto u = *it;
-				if (u == nullptr) {
-					break;
-				}
-				else if (typeid(*u) != typeid(UndoSet<UNDO_OP::TEXT_RANGE>)) {
-					if (typeid(*u) != typeid(UndoSelect)) {
-						break;
-					}
-				}
-				else if (u->m_shape == s) {
-					auto const& v = static_cast<UndoSet<UNDO_OP::TEXT_RANGE>*>(u)->m_val;
-					if (v.length > 0 || v.startPosition > 0) {
-						m_stack_undo.erase(it.base());
-						delete u;
-						s->set_text_range({ 0, 0 });
-						del = true;
-						break;
-					}
-				}
-			}
-			if (del == false) {
-				undo_push_set<UNDO_OP::TEXT_RANGE>(s, DWRITE_TEXT_RANGE{ 0, 0 });
-			}
+			// { 0, 0 } を図形に格納して, その操作をスタックに積む.
+			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
 			flag = true;
 		}
 		if (m_summary_visible) {

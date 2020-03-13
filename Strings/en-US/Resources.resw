@@ -169,11 +169,11 @@
     <value>Ignore bottom blank line.</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="ck_text_match_case.Content" xml:space="preserve">
+  <data name="ck_text_find_case.Content" xml:space="preserve">
     <value>Match case</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="ck_text_wrap_around.Content" xml:space="preserve">
+  <data name="ck_text_find_wrap.Content" xml:space="preserve">
     <value>Wrap around</value>
     <comment>CheckBox</comment>
   </data>

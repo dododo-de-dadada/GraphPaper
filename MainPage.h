@@ -158,12 +158,12 @@ namespace winrt::GraphPaper::implementation
 	// 長さの値をピクセル単位の値に変換する.
 	double conv_len_to_val(const LEN_UNIT unit, const double len, const double dpi, const double g_len) noexcept;
 	// ピクセル単位の長さを他の単位の文字列に変換する.
-	template <bool B> void conv_val_to_len(const LEN_UNIT unit, const double px, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
+	template <bool B> void conv_val_to_len(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 	// ピクセル単位の長さを他の単位の文字列に変換する.
-	template <bool B, size_t Z> void conv_val_to_len(const LEN_UNIT unit, const double val, const double dpi, const double g_len, wchar_t(&buf)[Z])
+	template <bool B, size_t Z> void conv_val_to_len(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t(&buf)[Z])
 	{
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<B>(unit, val, dpi, g_len, buf, Z);
+		conv_val_to_len<B>(unit, value, dpi, g_len, buf, Z);
 	}
 
 	//-------------------------------
@@ -176,12 +176,12 @@ namespace winrt::GraphPaper::implementation
 		CEN		// パーセント
 	};
 	// 色成分の値を文字列に変換する.
-	void conv_val_to_col(const COL_STYLE style, const double val, wchar_t* buf, const size_t b_len);
+	void conv_val_to_col(const COL_STYLE style, const double value, wchar_t* buf, const size_t b_len);
 	// 色成分の値を文字列に変換する.
-	template <size_t Z> void conv_val_to_col(const COL_STYLE style, const double val, wchar_t(&buf)[Z])
+	template <size_t Z> void conv_val_to_col(const COL_STYLE style, const double value, wchar_t(&buf)[Z])
 	{
 		// 色成分の値を文字列に変換する.
-		conv_val_to_col(style, val, buf, Z);
+		conv_val_to_col(style, value, buf, Z);
 	}
 
 	//-------------------------------
@@ -351,7 +351,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「矢じりの大きさ」が選択された.
 		IAsyncAction mfi_arrow_size_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void arrow_set_slider_header(const double val);
+		template <UNDO_OP U, int S> void arrow_set_slider_header(const double value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
@@ -425,7 +425,7 @@ namespace winrt::GraphPaper::implementation
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void fill_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void fill_set_slider_header(double val);
+		template <UNDO_OP U, int S> void fill_set_slider_header(const double value);
 
 		//-------------------------------
 		//　MainPage_font.cpp
@@ -453,7 +453,7 @@ namespace winrt::GraphPaper::implementation
 		//　書体メニューの「太さ」が選択された.
 		IAsyncAction mfi_font_weight_click(IInspectable const&, RoutedEventArgs const&);
 		//　値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void font_set_slider_header(const double val);
+		template <UNDO_OP U, int S> void font_set_slider_header(const double value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」に印をつける.
@@ -483,7 +483,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
 		void rmfi_text_align_right_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void text_set_slider_header(const double val);
+		template <UNDO_OP U, int S> void text_set_slider_header(const double value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		void font_set_base_style(void);
@@ -512,7 +512,7 @@ namespace winrt::GraphPaper::implementation
 		//　ページメニューの「方眼にそろえる」が選択された.
 		void tmfi_grid_snap_click(IInspectable const&, RoutedEventArgs const&);
 		//　値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_OP U, int S> void grid_set_slider_header(const double val);
+		template <UNDO_OP U, int S> void grid_set_slider_header(const double value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
@@ -604,7 +604,7 @@ namespace winrt::GraphPaper::implementation
 		// ページと図形を表示する.
 		void page_draw(void);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void page_set_slider_header(double val);
+		template <UNDO_OP U, int S> void page_set_slider_header(const double value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void page_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// ページのパネルがロードされた.
@@ -746,7 +746,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「太さ」が選択された.
 		IAsyncAction mfi_stroke_width_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template<UNDO_OP U, int S> void stroke_set_slider_header(double val);
+		template<UNDO_OP U, int S> void stroke_set_slider_header(const double value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template<UNDO_OP U, int S> void stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
@@ -885,6 +885,8 @@ namespace winrt::GraphPaper::implementation
 		bool undo_pop_if_invalid(void);
 		// 図形を追加して, その操作をスタックに積む.
 		void undo_push_append(Shape* s);
+		// 図形をグループ図形に追加して, その操作をスタックに積む.
+		void undo_push_append(ShapeGroup* g, Shape* s);
 		// 図形を入れ替えて, その操作をスタックに積む.
 		void undo_push_arrange(Shape* s, Shape* t);
 		// 図形の部位の位置を変更して, 変更前の値をスタックに積む.
@@ -901,18 +903,16 @@ namespace winrt::GraphPaper::implementation
 		void undo_push_remove(Shape* s);
 		// 図形の選択を反転して, その操作をスタックに積む.
 		void undo_push_select(Shape* s);
-		// 値を図形へ格納して, その操作をスタックに積む.
-		template <UNDO_OP U, typename T> void undo_push_set(Shape* s, T const& val);
 		// 図形の値をスタックに保存する.
 		template <UNDO_OP U> void undo_push_set(Shape* s);
-		// 値を図形に格納して, その操作をスタックに積む.
-		template<UNDO_OP U, typename T> void undo_push_value(T const& val);
+		// 値を図形へ格納して, その操作をスタックに積む.
+		template <UNDO_OP U, typename T> void undo_push_set(Shape* s, T const& value);
+		// 値を選択された図形に格納して, その操作をスタックに積む.
+		template <UNDO_OP U, typename T> void undo_push_set(T const& value);
 		// 操作スタックをデータリーダーから読み込む.
 		void undo_read(DataReader const& dt_reader);
 		// 操作スタックをデータリーダーに書き込む.
 		void undo_write(DataWriter const& dt_writer);
-		// 図形をグループ図形に追加して, その操作をスタックに積む.
-		void undo_push_group(ShapeGroup* g, Shape* s);
 
 		//-------------------------------
 		// MainPage_xcvd.cpp

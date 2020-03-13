@@ -646,40 +646,40 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		int32_t wd = args.GetCurrentPoint(scp_page_panel()).Properties().MouseWheelDelta();
+		int32_t delta = args.GetCurrentPoint(scp_page_panel()).Properties().MouseWheelDelta();
 		if (args.KeyModifiers() == VirtualKeyModifiers::Control) {
 			// コントロールキーが押されていた場合, パネルを拡大縮小する.
-			if (wd > 0) {
+			if (delta > 0) {
 				mfi_zoom_in_clicked(nullptr, nullptr);
 			}
-			else if (wd < 0) {
+			else if (delta < 0) {
 				mfi_zoom_out_clicked(nullptr, nullptr);
 			}
 		}
 		else {
-			ScrollBar sb;
+			ScrollBar s_bar;
 			if (args.KeyModifiers() == VirtualKeyModifiers::Shift) {
-				sb = sb_horz();
+				s_bar = sb_horz();
 			}
 			else if (args.KeyModifiers() == VirtualKeyModifiers::None) {
-				sb = sb_vert();
+				s_bar = sb_vert();
 			}
 			else {
 				return;
 			}
 			// シフトキーが押されていた場合, 横スクロールする.
-			double val = sb.Value();
-			double sm = 0.0;
-			if (wd < 0 && val < (sm = sb.Maximum())) {
-				val = min(val + 32.0 * m_page_panel.m_page_scale, sm);
+			double value = s_bar.Value();
+			double limit = 0.0;
+			if (delta < 0 && value < (limit = s_bar.Maximum())) {
+				value = min(value + 32.0 * m_page_panel.m_page_scale, limit);
 			}
-			else if (wd > 0 && val > (sm = sb.Minimum())) {
-				val = max(val - 32.0 * m_page_panel.m_page_scale, sm);
+			else if (delta > 0 && value > (limit = s_bar.Minimum())) {
+				value = max(value - 32.0 * m_page_panel.m_page_scale, limit);
 			}
 			else {
 				return;
 			}
-			sb.Value(val);
+			s_bar.Value(value);
 			page_draw();
 		}
 	}

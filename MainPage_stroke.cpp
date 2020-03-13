@@ -41,9 +41,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F sample_val;
-			m_sample_shape->get_stroke_color(sample_val);
-			undo_push_value<UNDO_OP::STROKE_COLOR>(sample_val);
+			D2D1_COLOR_F sample_value;
+			m_sample_shape->get_stroke_color(sample_value);
+			undo_push_set<UNDO_OP::STROKE_COLOR>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -91,9 +91,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			STROKE_PATTERN sample_val;
-			m_sample_shape->get_stroke_pattern(sample_val);
-			undo_push_value<UNDO_OP::STROKE_PATTERN>(sample_val);
+			STROKE_PATTERN sample_value;
+			m_sample_shape->get_stroke_pattern(sample_value);
+			undo_push_set<UNDO_OP::STROKE_PATTERN>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -126,9 +126,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			double sample_val;
-			m_sample_shape->get_stroke_width(sample_val);
-			undo_push_value<UNDO_OP::STROKE_WIDTH>(sample_val);
+			double sample_value;
+			m_sample_shape->get_stroke_width(sample_value);
+			undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -147,7 +147,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
-		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH);
+		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH);
 	}
 
 	// 線枠メニューの「一点破線」が選択された.
@@ -157,7 +157,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
-		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH_DOT);
+		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH_DOT);
 	}
 
 	// 線枠メニューの「二点破線」が選択された.
@@ -167,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
-		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH_DOT_DOT);
+		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH_DOT_DOT);
 	}
 
 	// 線枠メニューの「点線」が選択された.
@@ -177,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
-		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DOT);
+		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DOT);
 	}
 
 	// 線枠メニューの「実線」が選択された.
@@ -187,12 +187,12 @@ namespace winrt::GraphPaper::implementation
 			mfi_stroke_pattern().IsEnabled(false);
 			mfi_stroke_pattern_2().IsEnabled(false);
 		}
-		undo_push_value<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_SOLID);
+		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_SOLID);
 	}
 
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::stroke_set_slider_header(double val)
+	void MainPage::stroke_set_slider_header(const double value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -202,54 +202,59 @@ namespace winrt::GraphPaper::implementation
 			hdr = r_loader.GetString(L"str_stroke_width");
 		}
 		if constexpr (U == UNDO_OP::STROKE_PATTERN) {
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			if constexpr (S == 0) {
-				hdr = r_loader.GetString(L"str_dash_len");
-			}
-			if constexpr (S == 1) {
-				hdr = r_loader.GetString(L"str_dash_gap");
-			}
-			if constexpr (S == 2) {
-				hdr = r_loader.GetString(L"str_dot_len");
-			}
-			if constexpr (S == 3) {
-				hdr = r_loader.GetString(L"str_dot_gap");
-			}
-			val *= m_sample_panel.m_stroke_width;
-		}
-		if constexpr (U == UNDO_OP::STROKE_WIDTH || U == UNDO_OP::STROKE_PATTERN) {
 			wchar_t buf[32];
 			const auto dpi = m_sample_dx.m_logical_dpi;
 			const auto g_len = m_page_panel.m_grid_base + 1.0;
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, val, dpi, g_len, buf);
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * m_sample_panel.m_stroke_width, dpi, g_len, buf);
+			auto const& r_loader = ResourceLoader::GetForCurrentView();
+			if constexpr (S == 0) {
+				hdr = r_loader.GetString(L"str_dash_len") + L": " + buf;
+			}
+			if constexpr (S == 1) {
+				hdr = r_loader.GetString(L"str_dash_gap") + L": " + buf;
+			}
+			if constexpr (S == 2) {
+				hdr = r_loader.GetString(L"str_dot_len") + L": " + buf;
+			}
+			if constexpr (S == 3) {
+				hdr = r_loader.GetString(L"str_dot_gap") + L": " + buf;
+			}
+		}
+		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
+			wchar_t buf[32];
+			const auto dpi = m_sample_dx.m_logical_dpi;
+			const auto g_len = m_page_panel.m_grid_base + 1.0;
+			// ピクセル単位の長さを他の単位の文字列に変換する.
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
-				conv_val_to_col(m_col_style, val, buf);
+				// 色成分の値を文字列に変換する.
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
@@ -277,44 +282,44 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = m_sample_shape;
-		const double val = args.NewValue();
-		stroke_set_slider_header<U, S>(val);
+		const double value = args.NewValue();
+		stroke_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::STROKE_PATTERN) {
-			STROKE_PATTERN pat;
-			s->get_stroke_pattern(pat);
+			STROKE_PATTERN pattern;
+			s->get_stroke_pattern(pattern);
 			if constexpr (S == 0) {
-				pat.m_[0] = static_cast<FLOAT>(val);
+				pattern.m_[0] = static_cast<FLOAT>(value);
 			}
 			if constexpr (S == 1) {
-				pat.m_[1] = static_cast<FLOAT>(val);
+				pattern.m_[1] = static_cast<FLOAT>(value);
 			}
 			if constexpr (S == 2) {
-				pat.m_[2] = pat.m_[4] = static_cast<FLOAT>(val);
+				pattern.m_[2] = pattern.m_[4] = static_cast<FLOAT>(value);
 			}
 			if constexpr (S == 3) {
-				pat.m_[3] = pat.m_[5] = static_cast<FLOAT>(val);
+				pattern.m_[3] = pattern.m_[5] = static_cast<FLOAT>(value);
 			}
-			s->set_stroke_pattern(pat);
+			s->set_stroke_pattern(pattern);
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
-			s->set_stroke_width(val);
+			s->set_stroke_width(value);
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
-			D2D1_COLOR_F col;
-			s->get_stroke_color(col);
+			D2D1_COLOR_F color;
+			s->get_stroke_color(color);
 			if constexpr (S == 0) {
-				col.r = static_cast<FLOAT>(val / COLOR_MAX);
+				color.r = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 1) {
-				col.g = static_cast<FLOAT>(val / COLOR_MAX);
+				color.g = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 2) {
-				col.b = static_cast<FLOAT>(val / COLOR_MAX);
+				color.b = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 3) {
-				col.a = static_cast<FLOAT>(val / COLOR_MAX);
+				color.a = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			s->set_stroke_color(col);
+			s->set_stroke_color(color);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

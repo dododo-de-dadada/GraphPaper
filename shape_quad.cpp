@@ -220,9 +220,9 @@ namespace winrt::GraphPaper::implementation
 	// “h‚è‚Â‚Ô‚µF‚ğ“¾‚é.
 	// val	“¾‚ç‚ê‚½’l
 	// –ß‚è’l	“¾‚ç‚ê‚½‚È‚ç true
-	bool ShapeQuad::get_fill_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapeQuad::get_fill_color(D2D1_COLOR_F& value) const noexcept
 	{
-		val = m_fill_color;
+		value = m_fill_color;
 		return true;
 	}
 
@@ -311,12 +311,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// “h‚è‚Â‚Ô‚µ‚ÌF‚ÉŠi”[‚·‚é.
-	void ShapeQuad::set_fill_color(const D2D1_COLOR_F& val) noexcept
+	void ShapeQuad::set_fill_color(const D2D1_COLOR_F& value) noexcept
 	{
-		if (equal(m_fill_color, val)) {
+		if (equal(m_fill_color, value)) {
 			return;
 		}
-		m_fill_color = val;
+		m_fill_color = value;
 		create_path_geometry();
 	}
 

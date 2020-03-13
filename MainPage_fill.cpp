@@ -41,9 +41,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FILL)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F sample_val;
-			m_sample_shape->get_fill_color(sample_val);
-			undo_push_value<UNDO_OP::FILL_COLOR>(sample_val);
+			D2D1_COLOR_F sample_value;
+			m_sample_shape->get_fill_color(sample_value);
+			undo_push_set<UNDO_OP::FILL_COLOR>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
-	void MainPage::fill_set_slider_header(double val)
+	void MainPage::fill_set_slider_header(const double value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -72,28 +72,28 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, val, buf);
+				conv_val_to_col(m_col_style, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
@@ -121,24 +121,24 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::fill_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = m_sample_shape;
-		const double val = args.NewValue();
-		fill_set_slider_header<U, S>(val);
+		const double value = args.NewValue();
+		fill_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::FILL_COLOR) {
-			D2D1_COLOR_F col;
-			s->get_fill_color(col);
+			D2D1_COLOR_F color;
+			s->get_fill_color(color);
 			if constexpr (S == 0) {
-				col.r = static_cast<FLOAT>(val / COLOR_MAX);
+				color.r = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 1) {
-				col.g = static_cast<FLOAT>(val / COLOR_MAX);
+				color.g = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 2) {
-				col.b = static_cast<FLOAT>(val / COLOR_MAX);
+				color.b = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (U != UNDO_OP::PAGE_COLOR && S == 3) {
-				col.a = static_cast<FLOAT>(val / COLOR_MAX);
+				color.a = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			s->set_fill_color(col);
+			s->set_fill_color(color);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

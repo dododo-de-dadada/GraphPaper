@@ -628,11 +628,11 @@ namespace winrt::GraphPaper::implementation
 				// 以下を無視する.
 				continue;
 			}
-			wchar_t* val;
-			if (s->get_font_family(val)) {
-				if (ShapeText::is_available_font(val) == false) {
+			wchar_t* value;
+			if (s->get_font_family(value)) {
+				if (ShapeText::is_available_font(value) == false) {
 					// 「無効な書体が使用されています」メッセージダイアログを表示する.
-					cd_message_show(ICON_ALERT, ERR_FONT, val);
+					cd_message_show(ICON_ALERT, ERR_FONT, value);
 					break;
 				}
 			}

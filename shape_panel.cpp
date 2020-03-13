@@ -175,177 +175,177 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// –î‚¶‚è‚Ì¡–@‚ð“¾‚é.
-	bool ShapePanel::get_arrow_size(ARROW_SIZE& val) const noexcept
+	bool ShapePanel::get_arrow_size(ARROW_SIZE& value) const noexcept
 	{
-		val = m_arrow_size;
+		value = m_arrow_size;
 		return true;
 	}
 
 	// –î‚¶‚è‚ÌŒ`Ž®‚ð“¾‚é.
-	bool ShapePanel::get_arrow_style(ARROW_STYLE& val) const noexcept
+	bool ShapePanel::get_arrow_style(ARROW_STYLE& value) const noexcept
 	{
-		val = m_arrow_style;
+		value = m_arrow_style;
 		return true;
 	}
 
 	// ŠpŠÛ”¼Œa‚ð“¾‚é.
-	bool ShapePanel::get_corner_radius(D2D1_POINT_2F& val) const noexcept
+	bool ShapePanel::get_corner_radius(D2D1_POINT_2F& value) const noexcept
 	{
-		val = m_corner_rad;
+		value = m_corner_rad;
 		return true;
 	}
 
 	// “h‚è‚Â‚Ô‚µ‚ÌF‚ð“¾‚é.
-	bool ShapePanel::get_fill_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapePanel::get_fill_color(D2D1_COLOR_F& value) const noexcept
 	{
-		val = m_fill_color;
+		value = m_fill_color;
 		return true;
 	}
 
 	// ‘‘Ì‚ÌF‚ð“¾‚é.
-	bool ShapePanel::get_font_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapePanel::get_font_color(D2D1_COLOR_F& value) const noexcept
 	{
-		val = m_font_color;
+		value = m_font_color;
 		return true;
 	}
 
 	// ‘‘Ì–¼‚ð“¾‚é.
-	bool ShapePanel::get_font_family(wchar_t*& val) const noexcept
+	bool ShapePanel::get_font_family(wchar_t*& value) const noexcept
 	{
-		val = m_font_family;
+		value = m_font_family;
 		return true;
 	}
 
 	// ‘‘Ì‚Ì‘å‚«‚³‚ð“¾‚é.
-	bool ShapePanel::get_font_size(double& val) const noexcept
+	bool ShapePanel::get_font_size(double& value) const noexcept
 	{
-		val = m_font_size;
+		value = m_font_size;
 		return true;
 	}
 
 	// ‘‘Ì‚ÌLk‚ð“¾‚é.
-	bool ShapePanel::get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept
+	bool ShapePanel::get_font_stretch(DWRITE_FONT_STRETCH& value) const noexcept
 	{
-		val = m_font_stretch;
+		value = m_font_stretch;
 		return true;
 	}
 
 	// ‘‘Ì‚ÌŽš‘Ì‚ð“¾‚é.
-	bool ShapePanel::get_font_style(DWRITE_FONT_STYLE& val) const noexcept
+	bool ShapePanel::get_font_style(DWRITE_FONT_STYLE& value) const noexcept
 	{
-		val = m_font_style;
+		value = m_font_style;
 		return true;
 	}
 
 	// ‘‘Ì‚Ì‘¾‚³‚ð“¾‚é.
-	bool ShapePanel::get_font_weight(DWRITE_FONT_WEIGHT& val) const noexcept
+	bool ShapePanel::get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept
 	{
-		val = m_font_weight;
+		value = m_font_weight;
 		return true;
 	}
 
-	// •ûŠá‚Ì‘å‚«‚³‚ð“¾‚é.
-	bool ShapePanel::get_grid_size(double& val) const noexcept
+	// •ûŠá‚ÌŠî€‚Ì‘å‚«‚³‚ð“¾‚é.
+	bool ShapePanel::get_grid_base(double& value) const noexcept
 	{
-		val = m_grid_base;
+		value = m_grid_base;
 		return true;
 	}
 
 	// •ûŠáü‚Ì•s“§–¾“x‚ð“¾‚é.
-	bool ShapePanel::get_grid_opac(double& val) const noexcept
+	bool ShapePanel::get_grid_opac(double& value) const noexcept
 	{
-		val = m_grid_opac;
+		value = m_grid_opac;
 		return true;
 	}
 
 	// •ûŠáü‚Ì•\Ž¦‚ð“¾‚é.
-	bool ShapePanel::get_grid_show(GRID_SHOW& val) const noexcept
+	bool ShapePanel::get_grid_show(GRID_SHOW& value) const noexcept
 	{
-		val = m_grid_show;
+		value = m_grid_show;
 		return true;
 	}
 
 	// •ûŠá‚Ö‚Ì‚»‚ë‚¦‚ð“¾‚é.
-	bool ShapePanel::get_grid_snap(bool& val) const noexcept
+	bool ShapePanel::get_grid_snap(bool& value) const noexcept
 	{
-		val = m_grid_snap;
+		value = m_grid_snap;
 		return true;
 	}
 
 	// ƒy[ƒW‚ÌF‚ð“¾‚é.
-	bool ShapePanel::get_page_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapePanel::get_page_color(D2D1_COLOR_F& value) const noexcept
 	{
-		val = m_page_color;
+		value = m_page_color;
 		return true;
 	}
 
 	// ƒy[ƒW‚ÌŠg‘å—¦‚ð“¾‚é.
-	bool ShapePanel::get_page_scale(double& val) const noexcept
+	bool ShapePanel::get_page_scale(double& value) const noexcept
 	{
-		val = m_page_scale;
+		value = m_page_scale;
 		return true;
 	}
 
 	// ƒy[ƒW‚Ì¡–@‚ð“¾‚é.
-	bool ShapePanel::get_page_size(D2D1_SIZE_F& val) const noexcept
+	bool ShapePanel::get_page_size(D2D1_SIZE_F& value) const noexcept
 	{
-		val = m_page_size;
+		value = m_page_size;
 		return true;
 	}
 
 	// ü˜g‚ÌF‚ð“¾‚é.
-	bool ShapePanel::get_stroke_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapePanel::get_stroke_color(D2D1_COLOR_F& value) const noexcept
 	{
-		val = m_stroke_color;
+		value = m_stroke_color;
 		return true;
 	}
 
 	// ”jü‚Ì”z’u‚ð“¾‚é.
-	bool ShapePanel::get_stroke_pattern(STROKE_PATTERN& val) const noexcept
+	bool ShapePanel::get_stroke_pattern(STROKE_PATTERN& value) const noexcept
 	{
-		val = m_stroke_pattern;
+		value = m_stroke_pattern;
 		return true;
 	}
 
 	// ü˜g‚ÌŒ`Ž®‚ð“¾‚é.
-	bool ShapePanel::get_stroke_style(D2D1_DASH_STYLE& val) const noexcept
+	bool ShapePanel::get_stroke_style(D2D1_DASH_STYLE& value) const noexcept
 	{
-		val = m_stroke_style;
+		value = m_stroke_style;
 		return true;
 	}
 
 	// ü˜g‚Ì‘¾‚³‚ð“¾‚é.
-	bool ShapePanel::get_stroke_width(double& val) const noexcept
+	bool ShapePanel::get_stroke_width(double& value) const noexcept
 	{
-		val = m_stroke_width;
+		value = m_stroke_width;
 		return true;
 	}
 
 	// ’i—Ž‚Ì‘µ‚¦‚ð“¾‚é.
-	bool ShapePanel::get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept
+	bool ShapePanel::get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& value) const noexcept
 	{
-		val = m_text_align_p;
+		value = m_text_align_p;
 		return true;
 	}
 
 	// •¶Žš—ñ‚Ì‚»‚ë‚¦‚ð“¾‚é.
-	bool ShapePanel::get_text_align_t(DWRITE_TEXT_ALIGNMENT& val) const noexcept
+	bool ShapePanel::get_text_align_t(DWRITE_TEXT_ALIGNMENT& value) const noexcept
 	{
-		val = m_text_align_t;
+		value = m_text_align_t;
 		return true;
 	}
 
 	// sŠÔ‚ð“¾‚é.
-	bool ShapePanel::get_text_line_height(double& val) const noexcept
+	bool ShapePanel::get_text_line_height(double& value) const noexcept
 	{
-		val = m_text_line;
+		value = m_text_line;
 		return true;
 	}
 
 	// •¶Žš—ñ‚Ì—]”’‚ð“¾‚é.
-	bool ShapePanel::get_text_margin(D2D1_SIZE_F& val) const noexcept
+	bool ShapePanel::get_text_margin(D2D1_SIZE_F& value) const noexcept
 	{
-		val = m_text_mar;
+		value = m_text_mar;
 		return true;
 	}
 
@@ -386,150 +386,150 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ð–î‚¶‚è‚Ì¡–@‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_arrow_size(const ARROW_SIZE& val)
+	void ShapePanel::set_arrow_size(const ARROW_SIZE& value)
 	{
-		m_arrow_size = val;
+		m_arrow_size = value;
 	}
 
 	// ’l‚ð–î‚¶‚è‚ÌŒ`Ž®‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_arrow_style(const ARROW_STYLE val)
+	void ShapePanel::set_arrow_style(const ARROW_STYLE value)
 	{
-		m_arrow_style = val;
+		m_arrow_style = value;
 	}
 
 	// ’l‚ð“h‚è‚Â‚Ô‚µ‚ÌF‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_fill_color(const D2D1_COLOR_F& val) noexcept
+	void ShapePanel::set_fill_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_fill_color = val;
+		m_fill_color = value;
 	}
 
 	// ’l‚ð‘‘Ì‚ÌF‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_font_color(const D2D1_COLOR_F& val) noexcept
+	void ShapePanel::set_font_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_font_color = val;
+		m_font_color = value;
 	}
 
 	// ’l‚ð‘‘Ì–¼‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_font_family(wchar_t* const val)
+	void ShapePanel::set_font_family(wchar_t* const value)
 	{
-		m_font_family = val;
+		m_font_family = value;
 	}
 
 	// ’l‚ð‘‘Ì‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_font_size(const double val)
+	void ShapePanel::set_font_size(const double value)
 	{
-		m_font_size = val;
+		m_font_size = value;
 	}
 
 	// ’l‚ð‘‘Ì‚ÌLk‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_font_stretch(const DWRITE_FONT_STRETCH val)
+	void ShapePanel::set_font_stretch(const DWRITE_FONT_STRETCH value)
 	{
-		m_font_stretch = val;
+		m_font_stretch = value;
 	}
 
 	// ‘‘Ì‚ÌŽš‘Ì‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_font_style(const DWRITE_FONT_STYLE val)
+	void ShapePanel::set_font_style(const DWRITE_FONT_STYLE value)
 	{
-		m_font_style = val;
+		m_font_style = value;
 	}
 
 	// ’l‚ð‘‘Ì‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_font_weight(const DWRITE_FONT_WEIGHT val)
+	void ShapePanel::set_font_weight(const DWRITE_FONT_WEIGHT value)
 	{
-		m_font_weight = val;
+		m_font_weight = value;
 	}
 
-	// ’l‚ð•ûŠá‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_grid_size(const double val) noexcept
+	// ’l‚ð•ûŠá‚ÌŠî€‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
+	void ShapePanel::set_grid_base(const double value) noexcept
 	{
-		m_grid_base = val;
+		m_grid_base = value;
 	}
 
 	// ’l‚ð•ûŠáü‚Ì•s“§–¾“x‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_grid_opac(const double val) noexcept
+	void ShapePanel::set_grid_opac(const double value) noexcept
 	{
-		m_grid_opac = val;
+		m_grid_opac = value;
 	}
 
 	// ’l‚ð•ûŠáü‚Ì•\Ž¦‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_grid_show(const GRID_SHOW val) noexcept
+	void ShapePanel::set_grid_show(const GRID_SHOW value) noexcept
 	{
-		m_grid_show = val;
+		m_grid_show = value;
 	}
 
 	// ’l‚ð•ûŠá‚Ö‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_grid_snap(const bool val) noexcept
+	void ShapePanel::set_grid_snap(const bool value) noexcept
 	{
-		m_grid_snap = val;
+		m_grid_snap = value;
 	}
 
 	// ’l‚ðƒy[ƒW, •ûŠá, •â•ü‚ÌF‚ÉŠi”[‚·‚é
-	void ShapePanel::set_page_color(const D2D1_COLOR_F& val) noexcept
+	void ShapePanel::set_page_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_page_color = val;
-		get_opposite_color(val, m_grid_opac, m_grid_color);
-		get_opposite_color(val, ANCH_OPAC, m_anch_color);
-		get_opposite_color(val, AUX_OPAC, m_aux_color);
+		m_page_color = value;
+		get_opposite_color(value, m_grid_opac, m_grid_color);
+		get_opposite_color(value, ANCH_OPAC, m_anch_color);
+		get_opposite_color(value, AUX_OPAC, m_aux_color);
 	}
 
 	// ’l‚ðƒy[ƒW‚ÌŠg‘å—¦‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_page_scale(const double val) noexcept
+	void ShapePanel::set_page_scale(const double value) noexcept
 	{
-		m_page_scale = val;
+		m_page_scale = value;
 	}
 
 	// ’l‚ðƒy[ƒW‚Ì¡–@‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_page_size(const D2D1_SIZE_F val) noexcept
+	void ShapePanel::set_page_size(const D2D1_SIZE_F value) noexcept
 	{
-		m_page_size = val;
+		m_page_size = value;
 	}
 
 	// ü˜g‚ÌF‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_stroke_color(const D2D1_COLOR_F& val) noexcept
+	void ShapePanel::set_stroke_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_stroke_color = val;
+		m_stroke_color = value;
 	}
 
 	// ”jü‚Ì”z’u‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_stroke_pattern(const STROKE_PATTERN& val)
+	void ShapePanel::set_stroke_pattern(const STROKE_PATTERN& value)
 	{
-		m_stroke_pattern = val;
+		m_stroke_pattern = value;
 	}
 
 	// ü˜g‚ÌŒ`Ž®‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_stroke_style(const D2D1_DASH_STYLE val)
+	void ShapePanel::set_stroke_style(const D2D1_DASH_STYLE value)
 	{
-		m_stroke_style = val;
+		m_stroke_style = value;
 	}
 
 	// ü˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_stroke_width(const double val) noexcept
+	void ShapePanel::set_stroke_width(const double value) noexcept
 	{
-		m_stroke_width = val;
+		m_stroke_width = value;
 	}
 
 	// ’l‚ð’i—Ž‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT val)
+	void ShapePanel::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value)
 	{
-		m_text_align_p = val;
+		m_text_align_p = value;
 	}
 
 	// •¶Žš—ñ‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_text_align_t(const DWRITE_TEXT_ALIGNMENT val)
+	void ShapePanel::set_text_align_t(const DWRITE_TEXT_ALIGNMENT value)
 	{
-		m_text_align_t = val;
+		m_text_align_t = value;
 	}
 
 	// ’l‚ðsŠÔ‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_text_line_height(const double val)
+	void ShapePanel::set_text_line_height(const double value)
 	{
-		m_text_line = val;
+		m_text_line = value;
 	}
 
 	// ’l‚ð•¶Žš—ñ‚Ì—]”’‚ÉŠi”[‚·‚é.
-	void ShapePanel::set_text_margin(const D2D1_SIZE_F val)
+	void ShapePanel::set_text_margin(const D2D1_SIZE_F value)
 	{
-		m_text_mar = val;
+		m_text_mar = value;
 	}
 
 	// }Œ`‚Ì‘®«’l‚ðŠi”[‚·‚é.
@@ -546,7 +546,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_font_style(m_font_style);
 		s->get_font_weight(m_font_weight);
 		s->get_grid_opac(m_grid_opac);
-		s->get_grid_size(m_grid_base);
+		s->get_grid_base(m_grid_base);
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
 		s->get_text_line_height(m_text_line);
