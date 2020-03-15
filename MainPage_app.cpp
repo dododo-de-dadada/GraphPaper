@@ -12,10 +12,10 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 
 	// アプリケーションデータを保存するフォルダーを得る.
-	static auto data_folder(void);
+	static auto cache_folder(void);
 
 	// アプリケーションデータを保存するフォルダーを得る.
-	static auto data_folder(void)
+	static auto cache_folder(void)
 	{
 		using winrt::Windows::Storage::ApplicationData;
 		return ApplicationData::Current().LocalCacheFolder();
@@ -98,21 +98,20 @@ namespace winrt::GraphPaper::implementation
 				// アプリケーションデータを格納するためのフォルダーを得る.
 				// LocalFolder は「有効な範囲外のデータにアクセスしようとしました」内部エラーを起こすが,
 				// とりあえず, ファイルを作成して保存はできている.
-				auto folder{ data_folder() };
 				// ストレージファイルをローカルフォルダに作成する.
-				auto s_file{ co_await folder.CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
-				// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
-				hr = co_await file_write_gpf_async(s_file, true);
-				// ファイルを破棄する.
-				s_file = nullptr;
-				// フォルダーを破棄する.
-				folder = nullptr;
-				// 操作スタックを消去し, 含まれる操作を破棄する.
-				undo_clear();
-				// 図形リストを消去し, 含まれる図形を破棄する.
-				s_list_clear(m_list_shapes);
-				// 有効な書体名の配列を破棄する.
-				ShapeText::release_available_fonts();
+				auto s_file{ co_await cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
+				if (s_file != nullptr) {
+					// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
+					hr = co_await file_write_gpf_async(s_file, true);
+					// ファイルを破棄する.
+					s_file = nullptr;
+					// 操作スタックを消去し, 含まれる操作を破棄する.
+					undo_clear();
+					// 図形リストを消去し, 含まれる図形を破棄する.
+					s_list_clear(m_list_shapes);
+					// 有効な書体名の配列を破棄する.
+					ShapeText::release_available_fonts();
+				}
 			}
 			catch (winrt::hresult_error const& e) {
 				// エラーが発生した場合, エラーコードを結果に格納する.
@@ -173,23 +172,24 @@ namespace winrt::GraphPaper::implementation
 		// 有効な書体名の配列を設定する.
 		ShapeText::set_available_fonts();
 
-		// E_FAIL を結果に格納する.
-		auto hr = E_FAIL;
-		try {
-			// アプリ用に作成されたローカルデータフォルダーを得る.
-			auto folder{ data_folder() };
-			auto s_file{ co_await folder.GetFileAsync(FILE_NAME) };
-			// ストレージファイルを非同期に読む.
-			co_await file_read_async(s_file, true);
-			s_file = nullptr;
-			folder = nullptr;
-			// スレッドをメインページの UI スレッドに変える.
-			co_await winrt::resume_foreground(this->Dispatcher());
-			finish_file_read();
-		}
-		catch (winrt::hresult_error const& e) {
-			// エラーが発生した場合, エラーコードを結果に格納する.
-			hr = e.code();
+		auto hr = S_FALSE;
+		auto item{ co_await cache_folder().TryGetItemAsync(FILE_NAME) };
+		if (item != nullptr) {
+			auto s_file = item.try_as<StorageFile>();
+			if (s_file != nullptr) {
+				// ストレージファイルを非同期に読む.
+				try {
+					hr = co_await file_read_async(s_file, true, false);
+					// スレッドをメインページの UI スレッドに変える.
+					co_await winrt::resume_foreground(this->Dispatcher());
+					finish_file_read();
+				}
+				catch (winrt::hresult_error const& e) {
+					hr = e.code();
+				}
+				s_file = nullptr;
+			}
+			item = nullptr;
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;

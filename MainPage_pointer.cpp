@@ -527,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 			// または押された部位は外側の場合,
 			// ページコンテキストメニューを表示する.
 			scp_page_panel().ContextFlyout(nullptr);
-			scp_page_panel().ContextFlyout(m_menu_page);
+			scp_page_panel().ContextFlyout(m_menu_layout);
 		}
 		else if (typeid(*m_press_shape) == typeid(ShapeGroup)) {
 			// 押された図形がグループの場合,
@@ -693,7 +693,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		Shape* s;
 		const auto a = s_list_hit_test(m_list_shapes, m_curr_pos, m_page_dx.m_anch_len, s);
-		if (a != ANCH_WHICH::ANCH_OUTSIDE && s->is_selected()) {
+		if (a == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() == false) {
+			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
+			return;
+		}
+		//if (a != ANCH_WHICH::ANCH_OUTSIDE && s->is_selected()) {
 			switch (a) {
 			case ANCH_WHICH::ANCH_R_NW:
 			case ANCH_WHICH::ANCH_R_NE:
@@ -724,8 +728,8 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 			return;
-		}
-		Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
+		//}
+		//Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 	}
 
 }

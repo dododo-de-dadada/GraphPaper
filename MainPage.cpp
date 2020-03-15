@@ -10,6 +10,18 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
+
+	// アプリケーションデータを保存するフォルダーを得る.
+	static auto local_folder(void);
+
+	// アプリケーションデータを保存するフォルダーを得る.
+	static auto local_folder(void)
+	{
+		using winrt::Windows::Storage::ApplicationData;
+		return ApplicationData::Current().LocalFolder();
+	}
+
 	// 色成分の値を文字列に変換する.
 	// style	色成分の形式
 	// value	色成分の値
@@ -275,7 +287,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
 		uint32_t selected_text_cnt = 0;	// 選択された文字列図形の数
 		uint32_t text_cnt = 0;	// 文字列図形の数
-		Shape* r = nullptr;	// ひとつ背面の図形
+		//Shape* prev_shape = nullptr;	// ひとつ背面の図形
 		bool fore_selected = false;	// 最前面の図形の選択フラグ
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
@@ -317,14 +329,14 @@ namespace winrt::GraphPaper::implementation
 					// 選択された文字列図形の数をインクリメントする.
 					selected_text_cnt++;
 				}
-				if (r == nullptr || prev_selected == false) {
+				if (/*prev_shape == nullptr ||*/ prev_selected == false) {
 					// ひとつ背面の図形がヌル
 					// またはひとつ背面の図形の選択フラグがない場合,
 					// 選択された図形のランレングスの数をインクリメントする.
 					runlength_cnt++;
 				}
 			}
-			r = s;
+			//prev_shape = s;
 			prev_selected = fore_selected;
 		}
 		// 図形がひとつ以上ある場合.
@@ -345,12 +357,12 @@ namespace winrt::GraphPaper::implementation
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最前面の図形は選択されいない.
-		const auto enable_forward = (runlength_cnt > 1 || (exsits_selected && !fore_selected));
+		const auto enable_forward = (runlength_cnt > 1 || (exsits_selected && fore_selected == false));
 		// 背面に配置可能か調べる.
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最背面の図形は選択されいない.
-		const auto enable_backward = (runlength_cnt > 1 || (exsits_selected && !back_selected));
+		const auto enable_backward = (runlength_cnt > 1 || (exsits_selected && back_selected == false));
 
 		mfi_xcvd_cut().IsEnabled(exsits_selected);
 		mfi_xcvd_copy().IsEnabled(exsits_selected);
@@ -381,7 +393,7 @@ namespace winrt::GraphPaper::implementation
 			m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke")));
 			m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill")));
 			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_font")));
-			m_menu_page = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_page")));
+			m_menu_layout = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_layout")));
 			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup")));
 		}
 
@@ -414,14 +426,20 @@ namespace winrt::GraphPaper::implementation
 		// アプリケーションを閉じる前の確認のハンドラーを設定する.
 		{
 			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
+			using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
 
 			auto const& sys{ SystemNavigationManagerPreview::GetForCurrentView() };
-			m_token_close_requested = sys.CloseRequested(
-				[this](auto, auto args) {
-					args.Handled(true);
-					auto _{ mfi_exit_click(nullptr, nullptr) };
-				}
-			);
+			auto handler = [this](IInspectable const&, SystemNavigationCloseRequestedPreviewEventArgs const& args)
+			{
+				args.Handled(true);
+				auto _{ mfi_exit_click(nullptr, nullptr) };
+			};
+			m_token_close_requested = sys.CloseRequested(handler);
+			//	[this](auto, auto args) {
+			//		args.Handled(true);
+			//		auto _{ mfi_exit_click(nullptr, nullptr) };
+			//	}
+			//);
 		}
 
 		// アプリケーションが受け入れ可能なフォーマット ID をクリップボードに設定する.
@@ -502,7 +520,7 @@ namespace winrt::GraphPaper::implementation
 			m_menu_stroke = nullptr;
 			m_menu_fill = nullptr;
 			m_menu_font = nullptr;
-			m_menu_page = nullptr;
+			m_menu_layout = nullptr;
 			m_menu_ungroup = nullptr;
 		}
 
@@ -572,6 +590,26 @@ namespace winrt::GraphPaper::implementation
 		ShapeText::release_available_fonts();
 		// 有効な書体名の配列を設定する.
 		ShapeText::set_available_fonts();
+		auto hr = S_FALSE;
+		auto item{ co_await local_folder().TryGetItemAsync(FILE_NAME) };
+		if (item != nullptr) {
+			auto s_file = item.try_as<StorageFile>();
+			if (s_file != nullptr) {
+				try {
+					// ストレージファイルを非同期に読む.
+					hr = co_await file_read_async(s_file, false, true);
+				}
+				catch (winrt::hresult_error const& e) {
+					hr = e.code();
+				}
+				s_file = nullptr;
+			}
+			item = nullptr;
+		}
+		if (hr == S_OK) {
+			co_return;
+		}
+
 		// ページパネルの書体の属性を初期化する.
 		font_set_base_style();
 		ShapeText::is_available_font(m_page_panel.m_font_family);
@@ -627,4 +665,34 @@ namespace winrt::GraphPaper::implementation
 		finish_file_read();
 	}
 
+	// 
+	IAsyncAction MainPage::mfi_layout_save_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		using winrt::Windows::Storage::CreationCollisionOption;
+
+		try {
+			auto s_file{ co_await local_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
+			if (s_file != nullptr) {
+				co_await file_write_gpf_async(s_file, false, true);
+				s_file = nullptr;
+			}
+		}
+		catch (winrt::hresult_error const&) {}
+		//using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
+		//auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
+		//mru_list.Clear();
+	}
+
+	// 
+	IAsyncAction MainPage::mfi_layout_reset_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		using winrt::Windows::Storage::StorageDeleteOption;
+
+		try {
+			auto s_file{ co_await local_folder().GetFileAsync(FILE_NAME) };
+			co_await s_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
+			s_file = nullptr;
+		}
+		catch (winrt::hresult_error const&) {}
+	}
 }

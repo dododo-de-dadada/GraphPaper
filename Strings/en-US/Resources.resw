@@ -321,8 +321,8 @@
     <value>Font</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_page.Title" xml:space="preserve">
-    <value>Page</value>
+  <data name="mbi_layout.Title" xml:space="preserve">
+    <value>Layout</value>
     <comment>MenuBarItem</comment>
   </data>
   <data name="mbi_stroke.Title" xml:space="preserve">
@@ -426,15 +426,15 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_page_color.Text" xml:space="preserve">
-    <value>Color...</value>
+    <value>Page color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_page_size.Text" xml:space="preserve">
-    <value>Size...</value>
+    <value>Page size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_page_unit.Text" xml:space="preserve">
-    <value>Unit and format...</value>
+    <value>Page unit and color format...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_xcvd_paste.Text" xml:space="preserve">
@@ -933,5 +933,13 @@
   <data name="tk_conf_paste.Text" xml:space="preserve">
     <value>Paste text from clipboard?</value>
     <comment>TextBlock</comment>
+  </data>
+  <data name="mfi_layout_reset.Text" xml:space="preserve">
+    <value>Reset layout</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="mfi_layout_save.Text" xml:space="preserve">
+    <value>Save layout</value>
+    <comment>MenuFlyoutItem</comment>
   </data>
 </root>

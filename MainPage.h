@@ -258,7 +258,7 @@ namespace winrt::GraphPaper::implementation
 		MenuFlyout m_menu_stroke = nullptr;	// 線枠コンテキストメニュー
 		MenuFlyout m_menu_fill = nullptr;	// 塗りつぶしコンテキストメニュー
 		MenuFlyout m_menu_font = nullptr;	// 書体コンテキストメニュー
-		MenuFlyout m_menu_page = nullptr;	// ページコンテキストメニュー
+		MenuFlyout m_menu_layout = nullptr;	// レイアウトコンテキストメニュー
 		MenuFlyout m_menu_ungroup = nullptr;	// グループ解除コンテキストメニュー
 		winrt::event_token m_token_suspending;	// アプリケーション中断ハンドラーのトークン
 		winrt::event_token m_token_resuming;	// アプリケーション再開ハンドラーのトークン
@@ -282,7 +282,7 @@ namespace winrt::GraphPaper::implementation
 		void enable_edit_menu(void);
 		// メインページを作成する.
 		MainPage(void);
-		// ページメニューの「バージョン情報」が選択された.
+		// レイアウトメニューの「バージョン情報」が選択された.
 		void mfi_about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 		{
 			// バージョン情報のメッセージダイアログを表示する.
@@ -373,7 +373,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// ストレージファイルを非同期に読む.
-		IAsyncOperation<winrt::hresult> file_read_async(StorageFile const& s_file, const bool suspend = false) noexcept;
+		IAsyncOperation<winrt::hresult> file_read_async(StorageFile const& s_file, const bool suspend = false, const bool layout = false) noexcept;
 		// 名前を付けてファイルに非同期に保存する
 		IAsyncOperation<winrt::hresult> file_save_as_async(const bool svg_allowed = false) noexcept;
 		// ファイルに非同期に保存する
@@ -381,9 +381,9 @@ namespace winrt::GraphPaper::implementation
 		// 待機カーソルを表示, 表示する前のカーソルを得る.
 		CoreCursor file_wait_cursor(void) const;
 		// 図形データをストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile const& s_file, const bool suspend = false);
+		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile const& s_file, const bool suspend = false, const bool layout = false);
 		// 図形データを SVG としてデータライターに書き込む.
-		void file_write_svg(DataWriter const& dt_writer);
+		//void file_write_svg(DataWriter const& dt_writer);
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
 		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile const& s_file);
 		// ファイルの読み込みが終了した.
@@ -493,25 +493,25 @@ namespace winrt::GraphPaper::implementation
 		//　方眼の設定
 		//-------------------------------
 
-		// ページメニューの「方眼の表示」に印をつける.
+		// レイアウトメニューの「方眼の表示」に印をつける.
 		void grid_show_check_menu(const GRID_SHOW g_show);
-		// ページメニューの「方眼の大きさ」>「大きさ」が選択された.
+		// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
 		IAsyncAction mfi_grid_len_click(IInspectable const&, RoutedEventArgs const&);
-		// ページメニューの「方眼の大きさ」>「狭める」が選択された.
+		// レイアウトメニューの「方眼の大きさ」>「狭める」が選択された.
 		void mfi_grid_len_contract_click(IInspectable const&, RoutedEventArgs const&);
-		//　ページメニューの「方眼の大きさ」>「広げる」が選択された.
+		// レイアウトメニューの「方眼の大きさ」>「広げる」が選択された.
 		void mfi_grid_len_expand_click(IInspectable const&, RoutedEventArgs const&);
-		//　ページメニューの「方眼線の濃さ」が選択された.
+		// レイアウトメニューの「方眼線の濃さ」が選択された.
 		IAsyncAction mfi_grid_opac_click(IInspectable const&, RoutedEventArgs const&);
-		//　ページメニューの「方眼線の表示」>「最背面」が選択された.
+		// レイアウトメニューの「方眼線の表示」>「最背面」が選択された.
 		void rmfi_grid_show_back_click(IInspectable const&, RoutedEventArgs const&);
-		//　ページメニューの「方眼線の表示」>「最前面」が選択された.
+		// レイアウトメニューの「方眼線の表示」>「最前面」が選択された.
 		void rmfi_grid_show_front_click(IInspectable const&, RoutedEventArgs const&);
-		//　ページメニューの「方眼線の表示」>「隠す」が選択された.
+		// レイアウトメニューの「方眼線の表示」>「隠す」が選択された.
 		void rmfi_grid_show_hide_click(IInspectable const&, RoutedEventArgs const&);
-		//　ページメニューの「方眼にそろえる」が選択された.
+		// レイアウトメニューの「方眼にそろえる」が選択された.
 		void tmfi_grid_snap_click(IInspectable const&, RoutedEventArgs const&);
-		//　値をスライダーのヘッダーと図形に格納する.
+		// 値をスライダーのヘッダーと図形に格納する.
 		template <UNDO_OP U, int S> void grid_set_slider_header(const double value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
@@ -593,13 +593,13 @@ namespace winrt::GraphPaper::implementation
 		void cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
 		// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
 		void cd_page_size_sec_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
-		//　ページの単位と書式ダイアログの「適用」ボタンが押された.
+		// ページの単位と書式ダイアログの「適用」ボタンが押された.
 		void cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
-		// ページメニューの「色」が選択された.
+		// レイアウトメニューの「ページの色」が選択された.
 		IAsyncAction mfi_page_color_click(IInspectable const&, RoutedEventArgs const&);
-		// ページメニューの「大きさ」が選択された
+		// レイアウトメニューの「ページの大きさ」が選択された
 		void mfi_page_size_click(IInspectable const&, RoutedEventArgs const&);
-		// ページメニューの「単位と書式」が選択された
+		// レイアウトメニューの「ページの単位と色の書式」が選択された
 		void mfi_page_unit_click(IInspectable const&, RoutedEventArgs const&);
 		// ページと図形を表示する.
 		void page_draw(void);
@@ -697,7 +697,7 @@ namespace winrt::GraphPaper::implementation
 		// ステータスバーの設定
 		//-------------------------------
 
-		// ページメニューの「ステータスバー」が選択された.
+		// レイアウトメニューの「ステータスバー」が選択された.
 		void mi_status_bar_click(IInspectable const&, RoutedEventArgs const&);
 		// ステータスバーのメニュー項目に印をつける.
 		void status_check_menu(const STATUS_BAR a);
@@ -956,13 +956,19 @@ namespace winrt::GraphPaper::implementation
 		// 表示倍率の設定
 		//-------------------------------
 
-		// ページメニューの「拡大縮小」>「拡大」が選択された.
+		// レイアウトメニューの「拡大縮小」>「拡大」が選択された.
 		void mfi_zoom_in_clicked(IInspectable const&, RoutedEventArgs const&);
-		// ページメニューの「拡大縮小」>「縮小」が選択された.
+		// レイアウトメニューの「拡大縮小」>「縮小」が選択された.
 		void mfi_zoom_out_clicked(IInspectable const&, RoutedEventArgs const&);
-		// ページメニューの「拡大縮小」>「100%に戻す」が選択された.
+		// レイアウトメニューの「拡大縮小」>「100%に戻す」が選択された.
 		void mfi_zoom_reset_click(IInspectable const&, RoutedEventArgs const&);
-};
+
+		// 
+		IAsyncAction mfi_layout_save_click(IInspectable const&, RoutedEventArgs const&);
+		// 
+		IAsyncAction mfi_layout_reset_click(IInspectable const&, RoutedEventArgs const&);
+
+	};
 
 }
 

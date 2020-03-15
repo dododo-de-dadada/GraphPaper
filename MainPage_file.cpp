@@ -127,11 +127,11 @@ namespace winrt::GraphPaper::implementation
 	// suspend	中断フラグ
 	// 戻り値	読み込めたら S_OK.
 	// 中断フラグが立っている場合, 操作スタックも保存する.
-	IAsyncOperation<winrt::hresult> MainPage::file_read_async(StorageFile const& s_file, const bool suspend) noexcept
+	IAsyncOperation<winrt::hresult> MainPage::file_read_async(StorageFile const& s_file, const bool suspend, const bool layout) noexcept
 	{
 		using winrt::Windows::Storage::FileAccessMode;
 
-		auto hr = E_FAIL;
+		auto hr = S_FALSE;
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// スレッドをバックグラウンドに変更する.
@@ -166,7 +166,7 @@ namespace winrt::GraphPaper::implementation
 				co_return hr;
 			}
 #endif
-			if (s_list_read(m_list_shapes, dt_reader)) {
+			if (layout || s_list_read(m_list_shapes, dt_reader)) {
 				if (suspend) {
 					// 中断フラグが立っている場合,
 					// データリーダーから操作スタックを読み込む.
@@ -191,7 +191,7 @@ namespace winrt::GraphPaper::implementation
 			// 「ファイルを読み込めません」メッセージダイアログを表示する.
 			cd_message_show(ICON_ALERT, ERR_READ, s_file.Path());
 		}
-		else if (suspend == false) {
+		else if (suspend == false && layout == false) {
 			// 中断フラグがない場合,
 			// スレッドをメインページの UI スレッドに変える.
 			co_await winrt::resume_foreground(this->Dispatcher());
@@ -331,7 +331,7 @@ namespace winrt::GraphPaper::implementation
 	// s_file	ストレージファイル
 	// suspend	中断フラグ
 	// 戻り値	書き込みに成功したら true
-	IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async(StorageFile const& s_file, const bool suspend)
+	IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async(StorageFile const& s_file, const bool suspend, const bool layout)
 	{
 		using winrt::Windows::Storage::CachedFileManager;
 		using winrt::Windows::Storage::FileAccessMode;
@@ -360,6 +360,8 @@ namespace winrt::GraphPaper::implementation
 			if (suspend) {
 				s_list_write<!REDUCE>(m_list_shapes, dt_writer);
 				undo_write(dt_writer);
+			}
+			else if (layout) {
 			}
 			else {
 				s_list_write<REDUCE>(m_list_shapes, dt_writer);
@@ -391,7 +393,7 @@ namespace winrt::GraphPaper::implementation
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
 			cd_message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
 		}
-		else if (suspend == false) {
+		else if (suspend == false && layout == false) {
 			// 中断フラグがない場合,
 			// スレッドをメインページの UI スレッドに変える.
 			co_await winrt::resume_foreground(this->Dispatcher());
@@ -409,6 +411,7 @@ namespace winrt::GraphPaper::implementation
 
 	// SVG としてデータライターに書き込む.
 	// dt_writer	データライター
+	/*
 	void MainPage::file_write_svg(DataWriter const& dt_writer)
 	{
 		constexpr char XML_DEC[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" SVG_NL;
@@ -430,28 +433,30 @@ namespace winrt::GraphPaper::implementation
 		const auto dpi = m_page_dx.m_logical_dpi;
 		double w, h;
 		char* u;
-		switch (m_page_unit) {
-		case LEN_UNIT::INCH:
+		if (m_page_unit == LEN_UNIT::INCH) {
 			w = m_page_panel.m_page_size.width / dpi;
 			h = m_page_panel.m_page_size.height / dpi;
 			u = SVG_UNIT_IN;
-			break;
-		case LEN_UNIT::MILLI:
+		}
+		else if (m_page_unit == LEN_UNIT::MILLI) {
 			w = m_page_panel.m_page_size.width * MM_PER_INCH / dpi;
 			h = m_page_panel.m_page_size.height * MM_PER_INCH / dpi;
 			u = SVG_UNIT_MM;
-			break;
-		case LEN_UNIT::POINT:
+		}
+		else if (m_page_unit == LEN_UNIT::POINT) {
 			w = m_page_panel.m_page_size.width * PT_PER_INCH / dpi;
 			h = m_page_panel.m_page_size.height * PT_PER_INCH / dpi;
 			u = SVG_UNIT_PT;
-			break;
-		default:
-		case LEN_UNIT::PIXEL:
+		}
+		else if (m_page_unit == LEN_UNIT::PIXEL) {
 			w = m_page_panel.m_page_size.width;
 			h = m_page_panel.m_page_size.height;
 			u = SVG_UNIT_PX;
-			break;
+		}
+		else {
+			w = m_page_panel.m_page_size.width;
+			h = m_page_panel.m_page_size.height;
+			u = SVG_UNIT_PX;
 		}
 		std::snprintf(buf, sizeof(buf) - 1, "width=\"%lf%s\" height=\"%lf%s\" ", w, u, h, u);
 		write_svg(buf, dt_writer);
@@ -478,6 +483,7 @@ namespace winrt::GraphPaper::implementation
 		// svg の終了タグを書き込む.
 		write_svg("</svg>" SVG_NL, dt_writer);
 	}
+	*/
 
 	// SVG 開始タグをデータライターに書き込む.
 	static void file_write_svg_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer)
@@ -494,28 +500,25 @@ namespace winrt::GraphPaper::implementation
 		char buf[256];
 		double w, h;
 		char* u;
-		switch (unit) {
-		case LEN_UNIT::INCH:
+		if (unit == LEN_UNIT::INCH) {
 			w = size.width / dpi;
 			h = size.height / dpi;
 			u = SVG_UNIT_IN;
-			break;
-		case LEN_UNIT::MILLI:
+		}
+		else if (unit == LEN_UNIT::MILLI) {
 			w = size.width * MM_PER_INCH / dpi;
 			h = size.height * MM_PER_INCH / dpi;
 			u = SVG_UNIT_MM;
-			break;
-		case LEN_UNIT::POINT:
+		}
+		else if (unit == LEN_UNIT::POINT) {
 			w = size.width * PT_PER_INCH / dpi;
 			h = size.height * PT_PER_INCH / dpi;
 			u = SVG_UNIT_PT;
-			break;
-		default:
-		case LEN_UNIT::PIXEL:
+		}
+		else {
 			w = size.width;
 			h = size.height;
 			u = SVG_UNIT_PX;
-			break;
 		}
 		sprintf_s(buf, "width=\"%lf%s\" height=\"%lf%s\" ", w, u, h, u);
 		write_svg(buf, dt_writer);
@@ -855,7 +858,9 @@ namespace winrt::GraphPaper::implementation
 				// トークンが空でない場合,
 				// トークンからストレージファイルを得る.
 				auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
-				s_file = co_await mru_list.GetFileAsync(token);
+				if (mru_list.ContainsItem(token)) {
+					s_file = co_await mru_list.GetFileAsync(token);
+				}
 			}
 		}
 		catch (winrt::hresult_error) {

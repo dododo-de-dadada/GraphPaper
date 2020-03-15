@@ -11,6 +11,8 @@ namespace winrt::GraphPaper::implementation
 	IDWriteFactory3* Shape::s_dwrite_factory = nullptr;	// DWRITE ファクトリ
 #if defined(_DEBUG)
 	uint32_t debug_leak_cnt = 0;
+	uint32_t debug_shape_cnt = 0;
+	uint32_t debug_deleted_cnt = 0;
 #endif
 
 	// 色の成分が同じか調べる.

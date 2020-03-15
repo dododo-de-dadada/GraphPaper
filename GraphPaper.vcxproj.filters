@@ -57,6 +57,7 @@
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="shape_scale.cpp" />
     <ClCompile Include="MainPage_sample.cpp" />
+    <ClCompile Include="MainPage_layout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

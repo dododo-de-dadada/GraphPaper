@@ -321,8 +321,8 @@
     <value>書体(T)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_page.Title" xml:space="preserve">
-    <value>ページ(P)</value>
+  <data name="mbi_layout.Title" xml:space="preserve">
+    <value>レイアウト(L)</value>
     <comment>MenuBarItem</comment>
   </data>
   <data name="mbi_stroke.Title" xml:space="preserve">
@@ -426,15 +426,15 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_page_color.Text" xml:space="preserve">
-    <value>色...</value>
+    <value>ページの色...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_page_size.Text" xml:space="preserve">
-    <value>大きさ...</value>
+    <value>ページの大きさ...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_page_unit.Text" xml:space="preserve">
-    <value>単位と書式...</value>
+    <value>ページの単位と色の書式...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_xcvd_paste.Text" xml:space="preserve">
@@ -929,5 +929,13 @@
   <data name="tk_conf_paste.Text" xml:space="preserve">
     <value>クリップボードからテキストを貼り付けますか？</value>
     <comment>TextBlock</comment>
+  </data>
+  <data name="mfi_layout_reset.Text" xml:space="preserve">
+    <value>レイアウトをリセット</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="mfi_layout_save.Text" xml:space="preserve">
+    <value>レイアウトを保存</value>
+    <comment>MenuFlyoutItem</comment>
   </data>
 </root>

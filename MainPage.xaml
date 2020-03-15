@@ -237,8 +237,8 @@
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="mfi_font_color_click" Text="Color..." />
             </MenuFlyout>
-            <!-- ページコンテキストメニュー -->
-            <MenuFlyout x:Key="mf_page">
+            <!-- レイアウトコンテキストメニュー -->
+            <MenuFlyout x:Key="mf_layout">
                 <MenuFlyoutSubItem x:Uid="mfsi_grid_show" Text="Show Grid">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_hide_2" x:Uid="rmfi_grid_show_hide" Click="rmfi_grid_show_hide_click" Text="Hide" GroupName="gn_grid_show"/>
                     <MenuFlyoutSeparator />
@@ -254,15 +254,16 @@
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_grid_opac" Click="mfi_grid_opac_click" Text="Opacity..." />
                 <MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
+                <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />
+                <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_zoom" Text="Zoom">
                     <MenuFlyoutItem x:Uid="mfi_zoom_in" Click="mfi_zoom_in_clicked" Icon="ZoomIn" Text="In" />
                     <MenuFlyoutItem x:Uid="mfi_zoom_out" Click="mfi_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem x:Uid="mfi_zoom_reset" Click="mfi_zoom_reset_click" KeyboardAcceleratorTextOverride="Ctrl+0" Icon="Zoom" Text="Reset" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
-                <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click" Text="Color..." />
-                <MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />
             </MenuFlyout>
             <!-- グループコンテキストメニュー -->
             <MenuFlyout x:Key="mf_ungroup">
@@ -563,8 +564,8 @@
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="mfi_font_color_click" Text="Color..." />
             </muxc:MenuBarItem>
-            <!-- ページメニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_page" AccessKey="P" Title="Page">
+            <!-- レイアウトメニュー -->
+            <muxc:MenuBarItem x:Uid="mbi_layout" AccessKey="L" Title="Layout">
                 <!-- 方眼メニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_grid_show" Text="Show Grid">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_hide" x:Uid="rmfi_grid_show_hide" Click="rmfi_grid_show_hide_click" Text="Hide" GroupName="gn_grid_show"/>
@@ -581,6 +582,14 @@
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_grid_opac" Click="mfi_grid_opac_click" Text="Opacity..." />
                 <MenuFlyoutSeparator />
+                <!-- ページパネルメニュー -->
+                <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
+                <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Uid="mfi_layout_save" Click="mfi_layout_save_click" Text="Save layout" />
+                <MenuFlyoutItem x:Name="mfi_layout_reset" x:Uid="mfi_layout_reset" Click="mfi_layout_reset_click" Text="Reset layout" />
+                <MenuFlyoutSeparator />
                 <!-- 拡大縮小メニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_zoom" Text="Zoom">
                     <MenuFlyoutItem x:Uid="mfi_zoom_in" Click="mfi_zoom_in_clicked" Icon="ZoomIn" Text="In" />
@@ -593,10 +602,6 @@
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <!-- ページパネルメニュー -->
-                <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
-                <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click" Text="Color..." />
-                <MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />
                 <MenuFlyoutSeparator />
                 <!-- ステータスバーメニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_status_bar" Text="Status Bar">

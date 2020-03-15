@@ -221,10 +221,6 @@ namespace winrt::GraphPaper::implementation
 		if (m_stack_ucnt == 0) {
 			return;
 		}
-		// 元に戻す操作スタックから操作を取り出し,
-		// 最初の操作がヌル (確定した操作) でない場合, ヌルになるまで操作をキャンセルする.
-		// 区切りのヌル操作を取り除く.
-		// 操作がヌルでないあいだ, 操作スタック操作を取り出し, 実行して, やり直す操作スタックに積む.
 		auto st = 0;
 		while (m_stack_undo.empty() == false) {
 			auto u = m_stack_undo.back();
