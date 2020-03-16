@@ -216,16 +216,16 @@ namespace winrt::GraphPaper::implementation
 			page_draw();
 			if (s->is_selected()) {
 				// 押された図形が選択されている場合,
-				// 押された図形の属性をページのパネルに格納する.
-				m_page_panel.set_to_shape(s);
+				// 押された図形の属性をページレイアウトに格納する.
+				m_page_layout.set_to_shape(s);
 				// 線枠メニューの「矢じりの種類」に印をつける.
-				arrow_style_check_menu(m_page_panel.m_arrow_style);
+				arrow_style_check_menu(m_page_layout.m_arrow_style);
 				// 書体メニューの「字体」に印をつける.
-				font_style_check_menu(m_page_panel.m_font_style);
+				font_style_check_menu(m_page_layout.m_font_style);
 				// 線枠メニューの「種類」に印をつける.
-				stroke_style_check_menu(m_page_panel.m_stroke_style);
-				text_align_p_check_menu(m_page_panel.m_text_align_p);
-				text_align_t_check_menu(m_page_panel.m_text_align_t);
+				stroke_style_check_menu(m_page_layout.m_stroke_style);
+				text_align_p_check_menu(m_page_layout.m_text_align_p);
+				text_align_t_check_menu(m_page_layout.m_text_align_t);
 				if (m_summary_visible) {
 					summary_select(s);
 				}
@@ -251,16 +251,16 @@ namespace winrt::GraphPaper::implementation
 				enable_edit_menu();
 				page_draw();
 			}
-			// 押された図形の属性をページのパネルに格納する.
-			m_page_panel.set_to_shape(s);
+			// 押された図形の属性をページレイアウトに格納する.
+			m_page_layout.set_to_shape(s);
 			// 線枠メニューの「矢じりの種類」に印をつける.
-			arrow_style_check_menu(m_page_panel.m_arrow_style);
+			arrow_style_check_menu(m_page_layout.m_arrow_style);
 			// 書体メニューの「字体」に印をつける.
-			font_style_check_menu(m_page_panel.m_font_style);
+			font_style_check_menu(m_page_layout.m_font_style);
 			// 線枠メニューの「種類」に印をつける.
-			stroke_style_check_menu(m_page_panel.m_stroke_style);
-			text_align_t_check_menu(m_page_panel.m_text_align_t);
-			text_align_p_check_menu(m_page_panel.m_text_align_p);
+			stroke_style_check_menu(m_page_layout.m_stroke_style);
+			text_align_t_check_menu(m_page_layout.m_text_align_t);
+			text_align_p_check_menu(m_page_layout.m_text_align_p);
 		}
 		else {
 			// シフトキーもコントロールキーもどちらも押されていない場合
@@ -276,19 +276,19 @@ namespace winrt::GraphPaper::implementation
 				enable_edit_menu();
 				page_draw();
 				// 線枠メニューの「矢じりの種類」に印をつける.
-				arrow_style_check_menu(m_page_panel.m_arrow_style);
+				arrow_style_check_menu(m_page_layout.m_arrow_style);
 				// 書体メニューの「字体」に印をつける.
-				font_style_check_menu(m_page_panel.m_font_style);
+				font_style_check_menu(m_page_layout.m_font_style);
 				// 線枠メニューの「種類」に印をつける.
-				stroke_style_check_menu(m_page_panel.m_stroke_style);
-				text_align_p_check_menu(m_page_panel.m_text_align_p);
-				text_align_t_check_menu(m_page_panel.m_text_align_t);
+				stroke_style_check_menu(m_page_layout.m_stroke_style);
+				text_align_p_check_menu(m_page_layout.m_text_align_p);
+				text_align_t_check_menu(m_page_layout.m_text_align_t);
 				if (m_summary_visible) {
 					summary_select(s);
 				}
 			}
-			// 押された図形の属性をページのパネルに格納する.
-			m_page_panel.set_to_shape(s);
+			// 押された図形の属性をページレイアウトに格納する.
+			m_page_layout.set_to_shape(s);
 			m_press_shape_prev = s;
 		}
 	}

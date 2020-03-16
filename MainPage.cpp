@@ -10,18 +10,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
-
-	// アプリケーションデータを保存するフォルダーを得る.
-	static auto local_folder(void);
-
-	// アプリケーションデータを保存するフォルダーを得る.
-	static auto local_folder(void)
-	{
-		using winrt::Windows::Storage::ApplicationData;
-		return ApplicationData::Current().LocalFolder();
-	}
-
 	// 色成分の値を文字列に変換する.
 	// style	色成分の形式
 	// value	色成分の値
@@ -181,94 +169,6 @@ namespace winrt::GraphPaper::implementation
 		tk_message().Text(text);
 		// ダイアログを非同期に表示する.
 		auto _{ cd_message().ShowAsync() };
-	}
-
-	// ページパネルの書体の属性を初期化する.
-	void MainPage::font_set_base_style(void)
-	{
-		using winrt::Windows::UI::Xaml::Setter;
-		using winrt::Windows::UI::Xaml::Controls::TextBlock;
-		using winrt::Windows::UI::Xaml::Media::FontFamily;
-		using winrt::Windows::UI::Text::FontWeight;
-		using winrt::Windows::UI::Text::FontStretch;
-		using winrt::Windows::UI::Xaml::Style;
-
-		// リソースの取得に失敗した場合に備えて,
-		// 以下の既定値を書体の属性に格納する.
-		m_page_panel.m_font_family = wchar_cpy(L"Segoe UI");
-		m_page_panel.m_font_size = 14.0;
-		m_page_panel.m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;
-		m_page_panel.m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;
-		m_page_panel.m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;
-		try {
-			// BodyTextBlockStyle をリソースディクショナリから得る.
-			auto resource = Resources().Lookup(box_value(L"BodyTextBlockStyle"));
-			// リソースからスタイルを得る.
-			std::list<Style> stack;
-			auto style = unbox_value<Style>(resource);
-			while (style != nullptr) {
-				// スタイルが空でない場合.
-				// スタイルをスタックに積む.
-				stack.push_back(style);
-				// スタイルの継承元のスタイルを得る.
-				style = style.BasedOn();
-			}
-			while (stack.empty() == false) {
-				// スタックが空でない場合,
-				// スタイルをスタックから取り出す.
-				style = stack.back();
-				stack.pop_back();
-				auto const& setters = style.Setters();
-				for (auto const& base : setters) {
-					// スタイルの中の各セッターについて.
-					auto const& setter = base.try_as<Setter>();
-					// セッターのプロパティーを得る.
-					auto const& prop = setter.Property();
-					if (prop == TextBlock::FontFamilyProperty()) {
-						// プロパティーが FontFamily の場合,
-						// セッターの値から, 書体名を得る.
-						auto value = unbox_value<FontFamily>(setter.Value());
-						m_page_panel.m_font_family = wchar_cpy(value.Source().c_str());
-					}
-					else if (prop == TextBlock::FontSizeProperty()) {
-						// プロパティーが FontSize の場合,
-						// セッターの値から, 書体の大きさを得る.
-						auto value = unbox_value<double>(setter.Value());
-						m_page_panel.m_font_size = value;
-					}
-					else if (prop == TextBlock::FontStretchProperty()) {
-						// プロパティーが FontStretch の場合,
-						// セッターの値から, 書体の伸縮を得る.
-						auto value = unbox_value<int32_t>(setter.Value());
-						m_page_panel.m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(value);
-					}
-					else if (prop == TextBlock::FontStyleProperty()) {
-						// プロパティーが FontStyle の場合,
-						// セッターの値から, 字体を得る.
-						auto value = unbox_value<int32_t>(setter.Value());
-						m_page_panel.m_font_style = static_cast<DWRITE_FONT_STYLE>(value);
-					}
-					else if (prop == TextBlock::FontWeightProperty()) {
-						// プロパティーが FontWeight の場合,
-						// セッターの値から, 書体の太さを得る.
-						auto value = unbox_value<int32_t>(setter.Value());
-						m_page_panel.m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(value);
-						//Determine the type of a boxed value
-						//auto prop = setter.Value().try_as<winrt::Windows::Foundation::IPropertyValue>();
-						//if (prop.Type() == winrt::Windows::Foundation::PropertyType::Inspectable) {
-						// ...
-						//}
-						//else if (prop.Type() == winrt::Windows::Foundation::PropertyType::int32) {
-						// ...
-						//}
-					}
-				}
-			}
-			stack.clear();
-			style = nullptr;
-			resource = nullptr;
-		}
-		catch (winrt::hresult_error const&) {}
 	}
 
 	// 編集メニュー項目の使用の可否を設定する.
@@ -435,11 +335,6 @@ namespace winrt::GraphPaper::implementation
 				auto _{ mfi_exit_click(nullptr, nullptr) };
 			};
 			m_token_close_requested = sys.CloseRequested(handler);
-			//	[this](auto, auto args) {
-			//		args.Handled(true);
-			//		auto _{ mfi_exit_click(nullptr, nullptr) };
-			//	}
-			//);
 		}
 
 		// アプリケーションが受け入れ可能なフォーマット ID をクリップボードに設定する.
@@ -453,11 +348,11 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// D2D/DWRITE ファクトリを図形/文字列図形クラスに, 
-		// 図形リストとページパネルを操作クラスに格納する.
+		// 図形リストとページレイアウトを操作クラスに格納する.
 		{
 			Shape::s_d2d_factory = m_page_dx.m_d2dFactory.get();
 			Shape::s_dwrite_factory = m_page_dx.m_dwriteFactory.get();
-			Undo::set(&m_list_shapes, &m_page_panel);
+			Undo::set(&m_list_shapes, &m_page_layout);
 		}
 
 		// クリックの判定時間をシステムから得る.
@@ -590,109 +485,13 @@ namespace winrt::GraphPaper::implementation
 		ShapeText::release_available_fonts();
 		// 有効な書体名の配列を設定する.
 		ShapeText::set_available_fonts();
-		auto hr = S_FALSE;
-		auto item{ co_await local_folder().TryGetItemAsync(FILE_NAME) };
-		if (item != nullptr) {
-			auto s_file = item.try_as<StorageFile>();
-			if (s_file != nullptr) {
-				try {
-					// ストレージファイルを非同期に読む.
-					hr = co_await file_read_async(s_file, false, true);
-				}
-				catch (winrt::hresult_error const& e) {
-					hr = e.code();
-				}
-				s_file = nullptr;
-			}
-			item = nullptr;
-		}
-		if (hr == S_OK) {
-			co_return;
-		}
 
-		// ページパネルの書体の属性を初期化する.
-		font_set_base_style();
-		ShapeText::is_available_font(m_page_panel.m_font_family);
-		// 文字範囲の背景色, 文字範囲の文字色をリソースから得る.
-		{
-			using winrt::Windows::UI::Color;
-			m_page_dx.m_range_bcolor = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
-			m_page_dx.m_range_tcolor = S_WHITE;
-			try {
-				auto b_res = Resources().Lookup(box_value(L"SystemColorHighlightColor"));
-				auto t_res = Resources().Lookup(box_value(L"SystemColorHighlightTextColor"));
-				cast_to(unbox_value<Color>(b_res), m_page_dx.m_range_bcolor);
-				cast_to(unbox_value<Color>(t_res), m_page_dx.m_range_tcolor);
-			}
-			catch (winrt::hresult_error) {
-			}
-		}
-
-		// ページパネルの属性を初期化する.
-		{
-			using winrt::Windows::UI::Xaml::Media::Brush;
-			m_page_panel.m_corner_rad.x = GRIDLEN_PX;
-			m_page_panel.m_corner_rad.y = m_page_panel.m_corner_rad.x;
-			m_page_panel.m_grid_base = static_cast<double>(GRIDLEN_PX) - 1.0;
-			const auto dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			m_page_panel.m_page_size.width = std::floor(A4_PER_INCH.width * dpi);
-			m_page_panel.m_page_size.height = std::floor(A4_PER_INCH.height * dpi);
-			// 色の初期値はテーマに依存する.
-			D2D1_COLOR_F b_col = S_WHITE;
-			D2D1_COLOR_F f_col = S_BLACK;
-			try {
-				auto const& b_res = Resources().Lookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
-				auto const& f_res = Resources().Lookup(box_value(L"ApplicationForegroundThemeBrush"));
-				cast_to(unbox_value<Brush>(b_res), b_col);
-				cast_to(unbox_value<Brush>(f_res), f_col);
-			}
-			catch (winrt::hresult_error e) {}
-			m_page_panel.set_page_color(b_col);
-			m_page_panel.m_stroke_color = f_col;
-			m_page_panel.m_fill_color = b_col;
-			m_page_panel.m_font_color = f_col;
-		}
-
-		{
-			m_page_min.x = 0.0;
-			m_page_min.y = 0.0;
-			m_page_max.x = m_page_panel.m_page_size.width;
-			m_page_max.y = m_page_panel.m_page_size.height;
-			//m_page_unit = LEN_UNIT::PIXEL;
-			//m_col_style = COL_STYLE::DEC;
+		if (co_await layout_load_async() != S_OK) {
+			// レイアウトの読み込みに失敗した場合,
+			layout_init();
 		}
 		mru_add_file(nullptr);
 		finish_file_read();
 	}
 
-	// 
-	IAsyncAction MainPage::mfi_layout_save_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		using winrt::Windows::Storage::CreationCollisionOption;
-
-		try {
-			auto s_file{ co_await local_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
-			if (s_file != nullptr) {
-				co_await file_write_gpf_async(s_file, false, true);
-				s_file = nullptr;
-			}
-		}
-		catch (winrt::hresult_error const&) {}
-		//using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
-		//auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
-		//mru_list.Clear();
-	}
-
-	// 
-	IAsyncAction MainPage::mfi_layout_reset_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		using winrt::Windows::Storage::StorageDeleteOption;
-
-		try {
-			auto s_file{ co_await local_folder().GetFileAsync(FILE_NAME) };
-			co_await s_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
-			s_file = nullptr;
-		}
-		catch (winrt::hresult_error const&) {}
-	}
 }

@@ -17,10 +17,10 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_panel.m_stroke_color.r * COLOR_MAX;
-		const double val1 = m_page_panel.m_stroke_color.g * COLOR_MAX;
-		const double val2 = m_page_panel.m_stroke_color.b * COLOR_MAX;
-		const double val3 = m_page_panel.m_stroke_color.a * COLOR_MAX;
+		const double val0 = m_page_layout.m_stroke_color.r * COLOR_MAX;
+		const double val1 = m_page_layout.m_stroke_color.g * COLOR_MAX;
+		const double val2 = m_page_layout.m_stroke_color.b * COLOR_MAX;
+		const double val3 = m_page_layout.m_stroke_color.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -62,23 +62,23 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「破線の配置」が選択された.
-	IAsyncAction MainPage::mfi_stroke_pattern_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_stroke_pattern_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_panel.m_stroke_pattern.m_[0];
-		const double val1 = m_page_panel.m_stroke_pattern.m_[1];
-		const double val2 = m_page_panel.m_stroke_pattern.m_[2];
-		const double val3 = m_page_panel.m_stroke_pattern.m_[3];
+		const double val0 = m_page_layout.m_stroke_pattern.m_[0];
+		const double val1 = m_page_layout.m_stroke_pattern.m_[1];
+		const double val2 = m_page_layout.m_stroke_pattern.m_[2];
+		const double val3 = m_page_layout.m_stroke_pattern.m_[3];
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
 		sample_slider_3().Value(val3);
-		sample_slider_0().Visibility(m_page_panel.m_stroke_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
-		sample_slider_1().Visibility(m_page_panel.m_stroke_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
-		sample_slider_2().Visibility(m_page_panel.m_stroke_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
-		sample_slider_3().Visibility(m_page_panel.m_stroke_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
+		sample_slider_0().Visibility(m_page_layout.m_stroke_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
+		sample_slider_1().Visibility(m_page_layout.m_stroke_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
+		sample_slider_2().Visibility(m_page_layout.m_stroke_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
+		sample_slider_3().Visibility(m_page_layout.m_stroke_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
 		stroke_set_slider_header<UNDO_OP::STROKE_PATTERN, 0>(val0);
 		stroke_set_slider_header<UNDO_OP::STROKE_PATTERN, 1>(val1);
 		stroke_set_slider_header<UNDO_OP::STROKE_PATTERN, 2>(val2);
@@ -112,12 +112,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「太さ」が選択された.
-	IAsyncAction MainPage::mfi_stroke_width_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_stroke_width_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_panel.m_stroke_width;
+		const double val0 = m_page_layout.m_stroke_width;
 		sample_slider_0().Value(val0);
 		sample_slider_0().Visibility(VISIBLE);
 		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
@@ -143,7 +143,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「破線」が選択された.
 	void MainPage::rmfi_stroke_dash_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
+		if (m_page_layout.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
@@ -153,7 +153,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「一点破線」が選択された.
 	void MainPage::rmfi_stroke_dash_dot_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
+		if (m_page_layout.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
@@ -163,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「二点破線」が選択された.
 	void MainPage::rmfi_stroke_dash_dot_dot_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
+		if (m_page_layout.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
@@ -173,7 +173,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「点線」が選択された.
 	void MainPage::rmfi_stroke_dot_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
+		if (m_page_layout.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_pattern().IsEnabled(true);
 			mfi_stroke_pattern_2().IsEnabled(true);
 		}
@@ -183,7 +183,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「実線」が選択された.
 	void MainPage::rmfi_stroke_solid_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_stroke_style != D2D1_DASH_STYLE_SOLID) {
+		if (m_page_layout.m_stroke_style != D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_pattern().IsEnabled(false);
 			mfi_stroke_pattern_2().IsEnabled(false);
 		}
@@ -204,9 +204,9 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::STROKE_PATTERN) {
 			wchar_t buf[32];
 			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_page_panel.m_grid_base + 1.0;
+			const auto g_len = m_page_layout.m_grid_base + 1.0;
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * m_sample_panel.m_stroke_width, dpi, g_len, buf);
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * m_sample_layout.m_stroke_width, dpi, g_len, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			if constexpr (S == 0) {
 				hdr = r_loader.GetString(L"str_dash_len") + L": " + buf;
@@ -224,7 +224,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			wchar_t buf[32];
 			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_page_panel.m_grid_base + 1.0;
+			const auto g_len = m_page_layout.m_grid_base + 1.0;
 			// ピクセル単位の長さを他の単位の文字列に変換する.
 			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;

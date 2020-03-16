@@ -347,7 +347,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚ğì¬‚·‚é.
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr) :
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
 		ShapeRect::ShapeRect(s_pos, d_pos, attr)
 	{
 		calc_corner_radius(m_diff, attr->m_corner_rad, m_corner_rad);

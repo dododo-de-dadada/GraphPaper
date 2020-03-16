@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_grid_length");
 			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_page_panel.m_grid_base + 1.0;
+			const auto g_len = m_page_layout.m_grid_base + 1.0;
 			wchar_t buf[32];
 			// ピクセル単位の長さを他の単位の文字列に変換する.
 			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value + 1.0, dpi, g_len, buf);
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S>
 	void MainPage::grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		Shape* s = &m_sample_panel;
+		Shape* s = &m_sample_layout;
 		const double value = args.NewValue();
 
 		grid_set_slider_header<U, S>(value);
@@ -93,12 +93,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼の大きさ」>「大きさ」が選択された.
-	IAsyncAction MainPage::mfi_grid_len_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_panel.m_grid_base;
+		const double val0 = m_page_layout.m_grid_base;
 		sample_slider_0().Value(val0);
 		grid_set_slider_header<UNDO_OP::GRID_BASE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -110,10 +110,10 @@ namespace winrt::GraphPaper::implementation
 			double sample_value;
 			double page_value;
 
-			m_page_panel.get_grid_base(page_value);
-			m_sample_panel.get_grid_base(sample_value);
+			m_page_layout.get_grid_base(page_value);
+			m_sample_layout.get_grid_base(sample_value);
 			if (equal(page_value, sample_value) == false) {
-				undo_push_set<UNDO_OP::GRID_BASE>(&m_page_panel, sample_value);
+				undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
 				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -129,11 +129,11 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼の大きさ」>「狭める」が選択された.
 	void MainPage::mfi_grid_len_contract_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		const double value = (m_page_panel.m_grid_base + 1.0) * 0.5 - 1.0;
+		const double value = (m_page_layout.m_grid_base + 1.0) * 0.5 - 1.0;
 		if (value < 1.0) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_panel, value);
+		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, value);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -144,13 +144,13 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼の大きさ」>「広げる」が選択された.
 	void MainPage::mfi_grid_len_expand_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		const double value = (m_page_panel.m_grid_base + 1.0) * 2.0 - 1.0;
-		if (value > max(m_page_panel.m_page_size.width, m_page_panel.m_page_size.height)) {
+		const double value = (m_page_layout.m_grid_base + 1.0) * 2.0 - 1.0;
+		if (value > max(m_page_layout.m_page_size.width, m_page_layout.m_page_size.height)) {
 			// 方眼の一片の長さが, ページの幅か高さの大きいほうの値を超える場合,
 			// 中断する.
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_panel, value);
+		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, value);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -159,12 +159,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の濃さ」が選択された.
-	IAsyncAction MainPage::mfi_grid_opac_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_grid_opac_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val3 = m_sample_panel.m_grid_opac * COLOR_MAX;
+		const double val3 = m_sample_layout.m_grid_opac * COLOR_MAX;
 		sample_slider_3().Value(val3);
 		grid_set_slider_header<UNDO_OP::GRID_OPAC, 3>(val3);
 		sample_slider_3().Visibility(VISIBLE);
@@ -174,11 +174,11 @@ namespace winrt::GraphPaper::implementation
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			double sample_value;
-			m_sample_panel.get_grid_opac(sample_value);
+			m_sample_layout.get_grid_opac(sample_value);
 			double page_value;
-			m_page_panel.get_grid_opac(page_value);
+			m_page_layout.get_grid_opac(page_value);
 			if (equal(page_value, sample_value) == false) {
-				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_panel, sample_value);
+				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
 				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -193,10 +193,10 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼線の表示」>「最背面」が選択された.
 	void MainPage::rmfi_grid_show_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_grid_show == GRID_SHOW::BACK) {
+		if (m_page_layout.m_grid_show == GRID_SHOW::BACK) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::BACK);
+		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_layout, GRID_SHOW::BACK);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -207,10 +207,10 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼線の表示」>「最前面」が選択された.
 	void MainPage::rmfi_grid_show_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_grid_show == GRID_SHOW::FRONT) {
+		if (m_page_layout.m_grid_show == GRID_SHOW::FRONT) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::FRONT);
+		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_layout, GRID_SHOW::FRONT);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -221,10 +221,10 @@ namespace winrt::GraphPaper::implementation
 	// ページメニューの「方眼線の表示」>「隠す」が選択された.
 	void MainPage::rmfi_grid_show_hide_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_grid_show == GRID_SHOW::HIDE) {
+		if (m_page_layout.m_grid_show == GRID_SHOW::HIDE) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_panel, GRID_SHOW::HIDE);
+		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_layout, GRID_SHOW::HIDE);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
@@ -236,13 +236,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::tmfi_grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		auto g_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
-		if (m_page_panel.m_grid_snap != g_snap) {
-			m_page_panel.m_grid_snap = g_snap;
+		if (m_page_layout.m_grid_snap != g_snap) {
+			m_page_layout.m_grid_snap = g_snap;
 		}
-		if (m_page_panel.m_grid_snap == false) {
+		if (m_page_layout.m_grid_snap == false) {
 			return;
 		}
-		const double g_len = m_page_panel.m_grid_base + 1.0;
+		const double g_len = m_page_layout.m_grid_base + 1.0;
 		auto flag = true;	// 未変更
 
 		// 図形リストの各図形について以下を繰り返す.
@@ -281,7 +281,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
-		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
+		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
 	}

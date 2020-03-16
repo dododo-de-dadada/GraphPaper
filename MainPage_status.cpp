@@ -206,10 +206,10 @@ namespace winrt::GraphPaper::implementation
 		const double by = wb.Y;
 		const double px = m_page_min.x;
 		const double py = m_page_min.y;
-		const double ps = m_page_panel.m_page_scale;
+		const double ps = m_page_layout.m_page_scale;
 		const double fx = (wx - bx - tx) / ps + sx + px;
 		const double fy = (wy - by - ty) / ps + sy + py;
-		const double g_len = m_page_panel.m_grid_base + 1.0;
+		const double g_len = m_page_layout.m_grid_base + 1.0;
 
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
@@ -228,7 +228,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	{
 		wchar_t buf[32];
 		const double dpi = m_page_dx.m_logical_dpi;
-		double g_len = m_page_panel.m_grid_base + 1.0;
+		double g_len = m_page_layout.m_grid_base + 1.0;
 		// ピクセル単位の長さを他の単位の文字列に変換する.
 		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, g_len, dpi, g_len, buf);
 		tk_status_grid().Text(winrt::hstring{ L"g:" } +buf);
@@ -238,13 +238,13 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::status_set_page(void)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
-		const double g_len = m_page_panel.m_grid_base + 1.0;
+		const double g_len = m_page_layout.m_grid_base + 1.0;
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, m_page_panel.m_page_size.width, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, m_page_layout.m_page_size.width, dpi, g_len, buf);
 		tk_status_width().Text(winrt::hstring{ L"w:" } + buf);
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, m_page_panel.m_page_size.height, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, m_page_layout.m_page_size.height, dpi, g_len, buf);
 		tk_status_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 
@@ -319,7 +319,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::status_set_zoom(void)
 	{
 		wchar_t buf[32];
-		swprintf_s(buf, 31, FMT_ZOOM, m_page_panel.m_page_scale * 100.0);
+		swprintf_s(buf, 31, FMT_ZOOM, m_page_layout.m_page_scale * 100.0);
 		tk_status_zoom().Text(winrt::hstring{ L"z:" } +buf);
 	}
 

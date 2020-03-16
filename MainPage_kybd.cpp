@@ -97,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 		if (mfi_xcvd_copy().IsEnabled()) {
 			constexpr uint32_t COPY = 1;
 			auto _{ xcvd_copy_async<COPY>() };
-			//mfi_xcvd_copy_click(nullptr, nullptr);
+			//mfi_xcvd_copy_click_async(nullptr, nullptr);
 		}
 	}*/
 
@@ -108,7 +108,7 @@ namespace winrt::GraphPaper::implementation
 		if (mfi_xcvd_cut().IsEnabled()) {
 			constexpr uint32_t CUT = 0;
 			auto _{ xcvd_copy_async<CUT>() };
-			//mfi_xcvd_cut_click(nullptr, nullptr);
+			//mfi_xcvd_cut_click_async(nullptr, nullptr);
 		}
 	}
 	*/
@@ -131,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 	}
 	*/
 	// Cntrol + F ‚ª‰Ÿ‚³‚ê‚½.
-	//void MainPage::ka_find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	//void MainPage::ka_text_find_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_text_find().IsEnabled()) {
 	// 	mfi_text_find_click(nullptr, nullptr);
@@ -155,14 +155,14 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + O ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_open_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// mfi_open_click(nullptr, nullptr);
+	// mfi_open_click_async(nullptr, nullptr);
 	//}
 
 	// Cntrol + V ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_xcvd_paste().IsEnabled()) {
-	// 	mfi_xcvd_paste_click(nullptr, nullptr);
+	// 	mfi_xcvd_paste_click_async(nullptr, nullptr);
 	// }
 	//}
 
@@ -241,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + 0 ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// if (m_page_panel.m_page_scale != 1.0) {
+	// if (m_page_layout.m_page_scale != 1.0) {
 	// 	mfi_zoom_reset_click(nullptr, nullptr);
 	// }
 	//}

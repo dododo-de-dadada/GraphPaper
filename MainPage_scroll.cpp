@@ -44,13 +44,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		std::lock_guard<std::mutex> lock(m_dx_mutex);
 		constexpr double SB_SIZE = 16.0;
-		const auto ps = m_page_panel.m_page_scale;	// ページの表示倍率
+		const auto ps = m_page_layout.m_page_scale;	// ページの表示倍率
 		const double vw = aw / ps;	// 見えている部分の幅
 		const double vh = ah / ps;	// 見えている部分の高さ
-		//const auto sw = sb_vert().ActualWidth();	// 垂直スクロールバーの幅
-		//const auto sh = sb_horz().ActualHeight();	// 水平スクロールバーの高さ
-		//const auto pw = m_page_max.x - static_cast<double>(m_page_min.x);	// パネルの幅
-		//const auto ph = m_page_max.y - static_cast<double>(m_page_min.y);	// パネルの高さ
 		const auto mw = m_page_max.x - static_cast<double>(m_page_min.x) - vw;
 		const auto mh = m_page_max.y - static_cast<double>(m_page_min.y) - vh;
 		const auto wgt0 = mw > 0.0;

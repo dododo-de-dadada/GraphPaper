@@ -182,7 +182,7 @@ namespace winrt::GraphPaper::implementation
 	// pos	開始位置
 	// d_pos	終了位置への差分
 	// attr	属性値
-	ShapeScale::ShapeScale(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr) :
+	ShapeScale::ShapeScale(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
 		ShapeRect::ShapeRect(s_pos, d_pos, attr),
 		m_grid_base(attr->m_grid_base)
 	{

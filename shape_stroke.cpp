@@ -166,7 +166,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚ðì¬‚·‚é.
-	ShapePoly::ShapePoly(const ShapePanel* attr) :
+	ShapePoly::ShapePoly(const ShapeLayout* attr) :
 		ShapeStroke::ShapeStroke(attr)
 	{}
 
@@ -344,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚ðì¬‚·‚é.
-	ShapeStroke::ShapeStroke(const ShapePanel* attr) :
+	ShapeStroke::ShapeStroke(const ShapeLayout* attr) :
 		m_stroke_color(attr->m_stroke_color),
 		m_stroke_pattern(attr->m_stroke_pattern),
 		m_stroke_style(attr->m_stroke_style),

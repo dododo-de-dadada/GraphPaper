@@ -763,7 +763,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ê}å`ÇçÏê¨Ç∑ÇÈ.
-	ShapeBezi::ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr) :
+	ShapeBezi::ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
 		ShapePoly::ShapePoly(attr)
 	{
 		m_pos = s_pos;

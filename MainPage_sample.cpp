@@ -30,37 +30,37 @@ namespace winrt::GraphPaper::implementation
 		auto dc = m_sample_dx.m_d2dContext.get();
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
-		dc->Clear(m_sample_panel.m_page_color);
-		auto ox = std::fmod(m_sample_panel.m_page_size.width * 0.5, m_sample_panel.m_grid_base + 1.0);
+		dc->Clear(m_sample_layout.m_page_color);
+		auto ox = std::fmod(m_sample_layout.m_page_size.width * 0.5, m_sample_layout.m_grid_base + 1.0);
 		D2D1_POINT_2F offset;
 		offset.x = static_cast<FLOAT>(ox);
 		offset.y = offset.x;
-		if (m_sample_panel.m_grid_show == GRID_SHOW::BACK) {
-			m_sample_panel.draw_grid(m_sample_dx, offset);
+		if (m_sample_layout.m_grid_show == GRID_SHOW::BACK) {
+			m_sample_layout.draw_grid(m_sample_dx, offset);
 		}
 		if (m_sample_shape != nullptr) {
-			m_sample_dx.m_anch_brush->SetColor(m_sample_panel.m_anch_color);
+			m_sample_dx.m_anch_brush->SetColor(m_sample_layout.m_anch_color);
 			m_sample_shape->draw(m_sample_dx);
 		}
-		if (m_sample_panel.m_grid_show == GRID_SHOW::FRONT) {
-			m_sample_panel.draw_grid(m_sample_dx, offset);
+		if (m_sample_layout.m_grid_show == GRID_SHOW::FRONT) {
+			m_sample_layout.draw_grid(m_sample_dx, offset);
 		}
 		winrt::check_hresult(dc->EndDraw());
 		dc->RestoreDrawingState(m_sample_dx.m_state_block.get());
 		m_sample_dx.Present();
 	}
 
-	// 見本パネルの大きさが変わった.
+	// 見本スワップチェーンパネルの大きさが変わった.
 	void MainPage::scp_sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_sample_dx.m_dxgi_swap_chain != nullptr) {
 			m_sample_dx.m_dxgi_swap_chain = nullptr;
 		}
-		m_sample_panel = m_page_panel;
+		m_sample_layout = m_page_layout;
 		const auto w = scp_sample_panel().ActualWidth();
 		const auto h = scp_sample_panel().ActualHeight();
-		m_sample_panel.m_page_size.width = static_cast<FLOAT>(w);
-		m_sample_panel.m_page_size.height = static_cast<FLOAT>(h);
+		m_sample_layout.m_page_size.width = static_cast<FLOAT>(w);
+		m_sample_layout.m_page_size.height = static_cast<FLOAT>(h);
 		m_sample_dx.SetSwapChainPanel(scp_sample_panel());
 		if (m_sample_type != SAMP_TYPE::NONE) {
 			const auto padding = w * 0.125;
@@ -76,19 +76,19 @@ namespace winrt::GraphPaper::implementation
 				using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				const auto t = wchar_cpy(r_loader.GetString(L"str_pangram").c_str());
-				m_sample_shape = new ShapeText(s_pos, d_pos, t, &m_sample_panel);
+				m_sample_shape = new ShapeText(s_pos, d_pos, t, &m_sample_layout);
 #if defined(_DEBUG)
 				debug_leak_cnt++;
 #endif
 			}
 			else if (m_sample_type == SAMP_TYPE::STROKE) {
-				m_sample_shape = new ShapeLine(s_pos, d_pos, &m_sample_panel);
+				m_sample_shape = new ShapeLine(s_pos, d_pos, &m_sample_layout);
 #if defined(_DEBUG)
 				debug_leak_cnt++;
 #endif
 			}
 			else if (m_sample_type == SAMP_TYPE::FILL) {
-				m_sample_shape = new ShapeRect(s_pos, d_pos, &m_sample_panel);
+				m_sample_shape = new ShapeRect(s_pos, d_pos, &m_sample_layout);
 #if defined(_DEBUG)
 				debug_leak_cnt++;
 #endif

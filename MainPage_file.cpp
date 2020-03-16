@@ -7,7 +7,7 @@
 
 // file_read_recent_async
 // 	file_wait_cursor
-// 	mru_get_file
+// 	mru_get_file_async
 // 		GetFileAsync
 // 		winrt::resume_foreground
 // 	file_read_async
@@ -20,7 +20,7 @@
 // 	winrt::resume_foreground
 // file_save_as_async
 // 	file_wait_cursor
-// 	mru_get_file
+// 	mru_get_file_async
 // 		GetFileAsync
 // 		winrt::resume_foreground
 // 	PickSaveFileAsync
@@ -35,7 +35,7 @@
 // 		mru_add_file
 // 			mru_update_menu_items
 // file_save_async
-// 	mru_get_file
+// 	mru_get_file_async
 // 		GetFileAsync
 // 		winrt::resume_foreground
 // 	file_save_as_async
@@ -50,7 +50,7 @@
 // 	file_save_async
 // 	mru_add_file
 // 		mru_update_menu_items
-// mfi_open_click
+// mfi_open_click_async
 // 	cd_conf_save().ShowAsync
 // 	file_save_async
 // 	file_wait_cursor
@@ -131,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::Storage::FileAccessMode;
 
-		auto hr = S_FALSE;
+		auto hr = E_FAIL;
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// スレッドをバックグラウンドに変更する.
@@ -148,8 +148,8 @@ namespace winrt::GraphPaper::implementation
 			status_read(dt_reader);
 			m_page_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_col_style = static_cast<COL_STYLE>(dt_reader.ReadUInt32());
-			m_page_panel.read(dt_reader);
-			m_page_panel.m_page_scale = min(max(m_page_panel.m_page_scale, SCALE_MIN), SCALE_MAX);
+			m_page_layout.read(dt_reader);
+			m_page_layout.m_page_scale = min(max(m_page_layout.m_page_scale, SCALE_MIN), SCALE_MAX);
 			// 操作スタックを消去し, 含まれる操作を破棄する.
 			undo_clear();
 			// 図形リストを消去し, 含まれる図形を破棄する.
@@ -244,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 			else {
 				// トークンが空でない場合,
 				// ストレージファイルを最近使ったファイルのトークンから得る.
-				auto s_file{ co_await mru_get_file(m_token_mru) };
+				auto s_file{ co_await mru_get_file_async(m_token_mru) };
 				if (s_file != nullptr) {
 					// 取得した場合,
 					if (s_file.FileType() == FT_GPF) {
@@ -297,7 +297,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::AccessCache::AccessListEntry;
 
 		// 最近使ったファイルのトークンからストレージファイルを得る.
-		auto s_file{ co_await mru_get_file(m_token_mru) };
+		auto s_file{ co_await mru_get_file_async(m_token_mru) };
 		if (s_file == nullptr) {
 			// ストレージファイルが空の場合,
 			constexpr bool SVG_ALLOWED = true;
@@ -356,7 +356,7 @@ namespace winrt::GraphPaper::implementation
 			status_write(dt_writer);
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_page_unit));
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_col_style));
-			m_page_panel.write(dt_writer);
+			m_page_layout.write(dt_writer);
 			if (suspend) {
 				s_list_write<!REDUCE>(m_list_shapes, dt_writer);
 				undo_write(dt_writer);
@@ -434,40 +434,40 @@ namespace winrt::GraphPaper::implementation
 		double w, h;
 		char* u;
 		if (m_page_unit == LEN_UNIT::INCH) {
-			w = m_page_panel.m_page_size.width / dpi;
-			h = m_page_panel.m_page_size.height / dpi;
+			w = m_page_layout.m_page_size.width / dpi;
+			h = m_page_layout.m_page_size.height / dpi;
 			u = SVG_UNIT_IN;
 		}
 		else if (m_page_unit == LEN_UNIT::MILLI) {
-			w = m_page_panel.m_page_size.width * MM_PER_INCH / dpi;
-			h = m_page_panel.m_page_size.height * MM_PER_INCH / dpi;
+			w = m_page_layout.m_page_size.width * MM_PER_INCH / dpi;
+			h = m_page_layout.m_page_size.height * MM_PER_INCH / dpi;
 			u = SVG_UNIT_MM;
 		}
 		else if (m_page_unit == LEN_UNIT::POINT) {
-			w = m_page_panel.m_page_size.width * PT_PER_INCH / dpi;
-			h = m_page_panel.m_page_size.height * PT_PER_INCH / dpi;
+			w = m_page_layout.m_page_size.width * PT_PER_INCH / dpi;
+			h = m_page_layout.m_page_size.height * PT_PER_INCH / dpi;
 			u = SVG_UNIT_PT;
 		}
 		else if (m_page_unit == LEN_UNIT::PIXEL) {
-			w = m_page_panel.m_page_size.width;
-			h = m_page_panel.m_page_size.height;
+			w = m_page_layout.m_page_size.width;
+			h = m_page_layout.m_page_size.height;
 			u = SVG_UNIT_PX;
 		}
 		else {
-			w = m_page_panel.m_page_size.width;
-			h = m_page_panel.m_page_size.height;
+			w = m_page_layout.m_page_size.width;
+			h = m_page_layout.m_page_size.height;
 			u = SVG_UNIT_PX;
 		}
 		std::snprintf(buf, sizeof(buf) - 1, "width=\"%lf%s\" height=\"%lf%s\" ", w, u, h, u);
 		write_svg(buf, dt_writer);
 		// viewBox 属性を書き込む.
 		write_svg("viewBox=\"0 0 ", dt_writer);
-		write_svg(m_page_panel.m_page_size.width, dt_writer);
-		write_svg(m_page_panel.m_page_size.height, dt_writer);
+		write_svg(m_page_layout.m_page_size.width, dt_writer);
+		write_svg(m_page_layout.m_page_size.height, dt_writer);
 		write_svg("\" ", dt_writer);
 		// 背景色をスタイル属性として書き込む.
 		write_svg("style=\"background-color:", dt_writer);
-		write_svg(m_page_panel.m_page_color, dt_writer);
+		write_svg(m_page_layout.m_page_color, dt_writer);
 		// svg タグの終了を書き込む.
 		write_svg("\" >" SVG_NL, dt_writer);
 		// 消去フラグのない図形をすべて SVG として書き込む.
@@ -563,7 +563,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			write_svg(DOCTYPE, dt_writer);
 			// SVG 開始タグをデータライターに書き込む.
-			file_write_svg_tag(m_page_panel.m_page_size, m_page_panel.m_page_color, m_page_dx.m_logical_dpi, m_page_unit, dt_writer);
+			file_write_svg_tag(m_page_layout.m_page_size, m_page_layout.m_page_color, m_page_dx.m_logical_dpi, m_page_unit, dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {
@@ -611,18 +611,18 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		// 線枠メニューの「種類」に印をつける.
-		stroke_style_check_menu(m_page_panel.m_stroke_style);
+		stroke_style_check_menu(m_page_layout.m_stroke_style);
 		// 線枠メニューの「矢じりの種類」に印をつける.
-		arrow_style_check_menu(m_page_panel.m_arrow_style);
+		arrow_style_check_menu(m_page_layout.m_arrow_style);
 		// 書体メニューの「字体」に印をつける.
-		font_style_check_menu(m_page_panel.m_font_style);
+		font_style_check_menu(m_page_layout.m_font_style);
 		// ページメニューの「方眼の表示」に印をつける.
-		grid_show_check_menu(m_page_panel.m_grid_show);
+		grid_show_check_menu(m_page_layout.m_grid_show);
 		status_check_menu(m_status_bar);
-		text_align_t_check_menu(m_page_panel.m_text_align_t);
-		text_align_p_check_menu(m_page_panel.m_text_align_p);
-		tmfi_grid_snap().IsChecked(m_page_panel.m_grid_snap);
-		tmfi_grid_snap_2().IsChecked(m_page_panel.m_grid_snap);
+		text_align_t_check_menu(m_page_layout.m_text_align_t);
+		text_align_p_check_menu(m_page_layout.m_text_align_p);
+		tmfi_grid_snap().IsChecked(m_page_layout.m_grid_snap);
+		tmfi_grid_snap_2().IsChecked(m_page_layout.m_grid_snap);
 
 		// 図形リストの各図形について以下を繰り返す.
 		for (auto s : m_list_shapes) {
@@ -648,7 +648,7 @@ namespace winrt::GraphPaper::implementation
 				summary_close();
 			}
 		}
-		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
+		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
 		// ポインターの位置をステータスバーに格納する.
@@ -665,7 +665,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ファイルメニューの「開く」が選択された
-	IAsyncAction MainPage::mfi_open_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_open_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::Storage::Pickers::FileOpenPicker;
@@ -783,7 +783,7 @@ namespace winrt::GraphPaper::implementation
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		//winrt::apartment_context context;
 		// ストレージファイルを最近使ったファイルのトークンから得る.
-		auto s_file{ co_await mru_get_file(mru_token) };
+		auto s_file{ co_await mru_get_file_async(mru_token) };
 		if (s_file != nullptr) {
 			// 取得できた場合,
 			// ストレージファイルから非同期に読み込む.
@@ -842,7 +842,7 @@ namespace winrt::GraphPaper::implementation
 	// 最近使ったファイルのトークンからストレージファイルを得る.
 	// token	最近使ったファイルのトークン
 	// 戻り値	ストレージファイル
-	IAsyncOperation<StorageFile> MainPage::mru_get_file(const winrt::hstring token)
+	IAsyncOperation<StorageFile> MainPage::mru_get_file_async(const winrt::hstring token)
 	{
 		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
 

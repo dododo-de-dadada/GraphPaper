@@ -18,17 +18,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataReader;
 	using winrt::Windows::Storage::Streams::DataWriter;
 
-	// 図形をリストに追加する.
-#define UndoAppend(s)	UndoList(static_cast<Shape*>(s), static_cast<Shape*>(nullptr))
-// 図形をリストに挿入する.
-#define UndoInsert(s, p)	UndoList(static_cast<Shape*>(s), static_cast<Shape*>(p))
-// 図形をリストから取り除く.
-#define UndoRemove(s)	UndoList(static_cast<Shape*>(s))
-// 図形をグループに追加する.
-#define UndoAppendG(g, s)		UndoListG(static_cast<ShapeGroup*>(g), static_cast<Shape*>(s), static_cast<Shape*>(nullptr))
-// 図形をグループから取り除く.
-#define UndoRemoveG(g, s)		UndoListG(static_cast<ShapeGroup*>(g), static_cast<Shape*>(s))
-
 	//------------------------------
 	// 操作
 	//------------------------------
@@ -79,7 +68,7 @@ namespace winrt::GraphPaper::implementation
 		// 参照する図形リスト
 		static S_LIST_T* s_shape_list;
 		// 参照するページ図形
-		static ShapePanel* s_shape_page;
+		static ShapeLayout* s_shape_page;
 		// 操作する図形
 		Shape* m_shape;
 
@@ -94,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を参照しているか調べる.
 		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
 		// 参照する図形リストとページ図形を格納する.
-		static void set(S_LIST_T* s_list, ShapePanel* s_page) noexcept;
+		static void set(S_LIST_T* s_list, ShapeLayout* s_page) noexcept;
 		// 操作する図形を得る.
 		Shape* shape(void) const noexcept { return m_shape; }
 		// 操作を作成する.

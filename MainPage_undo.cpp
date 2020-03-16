@@ -7,6 +7,17 @@
 
 using namespace winrt;
 
+// 図形をリストに追加する.
+#define UndoAppend(s)	UndoList(static_cast<Shape*>(s), static_cast<Shape*>(nullptr))
+// 図形をグループに追加する.
+#define UndoAppendG(g, s)	UndoListG(static_cast<ShapeGroup*>(g), static_cast<Shape*>(s), static_cast<Shape*>(nullptr))
+// 図形をリストに挿入する.
+#define UndoInsert(s, p)	UndoList(static_cast<Shape*>(s), static_cast<Shape*>(p))
+// 図形をリストから取り除く.
+#define UndoRemove(s)	UndoList(static_cast<Shape*>(s))
+// 図形をグループから取り除く.
+#define UndoRemoveG(g, s)	UndoListG(static_cast<ShapeGroup*>(g), static_cast<Shape*>(s))
+
 namespace winrt::GraphPaper::implementation
 {
 	// ヌルで区切られる一連の操作を, 操作の組とみなし, その数を組数とする.
@@ -207,7 +218,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// メニューや表示を更新する.
 		enable_edit_menu();
-		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
+		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
 		if (m_summary_visible) {
@@ -251,21 +262,12 @@ namespace winrt::GraphPaper::implementation
 			m_stack_rcnt++;
 		}
 		enable_edit_menu();
-		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
+		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
 		if (m_summary_visible) {
 			summary_update();
 		}
-	}
-
-	// 図形をグループ図形に追加して, その操作をスタックに積む.
-	// g	グループ図形
-	// s	追加する図形
-	// 戻り値	なし
-	void MainPage::undo_push_append(ShapeGroup* g, Shape* s)
-	{
-		m_stack_undo.push_back(new UndoAppendG(g, s));
 	}
 
 	// 操作スタックを消去し, 含まれる操作を破棄する.
@@ -293,7 +295,7 @@ namespace winrt::GraphPaper::implementation
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoSet<UNDO_OP::ARROW_STYLE>)) {
 			// 線枠メニューの「矢じりの種類」に印をつける.
-			arrow_style_check_menu(m_page_panel.m_arrow_style);
+			arrow_style_check_menu(m_page_layout.m_arrow_style);
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
@@ -301,11 +303,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::GRID_SHOW>)) {
 			// ページメニューの「方眼の表示」に印をつける.
-			grid_show_check_menu(m_page_panel.m_grid_show);
+			grid_show_check_menu(m_page_layout.m_grid_show);
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
-			font_style_check_menu(m_page_panel.m_font_style);
+			font_style_check_menu(m_page_layout.m_font_style);
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::PAGE_SIZE>)) {
 			// ページの大きさをステータスバーに格納する.
@@ -313,13 +315,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::STROKE_STYLE>)) {
 			// 線枠メニューの「種類」に印をつける.
-			stroke_style_check_menu(m_page_panel.m_stroke_style);
+			stroke_style_check_menu(m_page_layout.m_stroke_style);
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::TEXT_ALIGN_T>)) {
-			text_align_t_check_menu(m_page_panel.m_text_align_t);
+			text_align_t_check_menu(m_page_layout.m_text_align_t);
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::TEXT_ALIGN_P>)) {
-			text_align_p_check_menu(m_page_panel.m_text_align_p);
+			text_align_p_check_menu(m_page_layout.m_text_align_p);
 		}
 	}
 
@@ -346,6 +348,15 @@ namespace winrt::GraphPaper::implementation
 		m_stack_undo.push_back(new UndoAppend(s));
 	}
 
+	// 図形をグループ図形に追加して, その操作をスタックに積む.
+	// g	グループ図形
+	// s	追加する図形
+	// 戻り値	なし
+	void MainPage::undo_push_append(ShapeGroup* g, Shape* s)
+	{
+		m_stack_undo.push_back(new UndoAppendG(g, s));
+	}
+
 	// 図形を入れ替えて, その操作をスタックに積む.
 	void MainPage::undo_push_arrange(Shape* s, Shape* t)
 	{
@@ -365,12 +376,27 @@ namespace winrt::GraphPaper::implementation
 		m_stack_undo.push_back(new UndoInsert(s, s_pos));
 	}
 
+	// 図形を差分だけ移動して, 移動前の値をスタックに積む.
+	// d_pos	移動させる差分
+	void MainPage::undo_push_move(const D2D1_POINT_2F d_pos)
+	{
+		for (auto s : m_list_shapes) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			if (s->is_selected() == false) {
+				continue;
+			}
+			undo_push_set<UNDO_OP::START_POS>(s);
+			s->move(d_pos);
+		}
+	}
+
 	// 一連の操作の区切としてヌル操作をスタックに積む.
 	// やり直す操作スタックは消去される.
 	void MainPage::undo_push_null(void)
 	{
 		// やり直す操作スタックを消去し, 消去された操作の組数を, 操作の組数から引く.
-		//m_stack_nset -= undo_clear_stack(m_stack_redo);
 		m_stack_rcnt -= undo_clear_stack(m_stack_redo);
 		// 元に戻す操作スタックにヌルを積む.
 		m_stack_undo.push_back(nullptr);
@@ -399,22 +425,6 @@ namespace winrt::GraphPaper::implementation
 		// 操作の組数を 1 減じる.
 		//m_stack_nset--;
 		m_stack_ucnt--;
-	}
-
-	// 図形を差分だけ移動して, 移動前の値をスタックに積む.
-	// d_pos	移動させる差分
-	void MainPage::undo_push_pos(const D2D1_POINT_2F d_pos)
-	{
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			if (s->is_selected() == false) {
-				continue;
-			}
-			undo_push_set<UNDO_OP::START_POS>(s);
-			s->move(d_pos);
-		}
 	}
 
 	// 図形をグループから削除して, その操作をスタックに積む.
@@ -485,20 +495,6 @@ namespace winrt::GraphPaper::implementation
 		// 
 		m_stack_undo.push_back(new UndoSet<U>(s, value));
 	}
-	template void MainPage::undo_push_set<UNDO_OP::GRID_BASE>(Shape* s, double const& value);
-	template void MainPage::undo_push_set<UNDO_OP::GRID_OPAC>(Shape* s, double const& value);
-	template void MainPage::undo_push_set<UNDO_OP::GRID_SHOW>(Shape* s, GRID_SHOW const& value);
-	template void MainPage::undo_push_set<UNDO_OP::PAGE_COLOR>(Shape* s, D2D1_COLOR_F const& value);
-	template void MainPage::undo_push_set<UNDO_OP::PAGE_SIZE>(Shape* s, D2D1_SIZE_F const& value);
-	template void MainPage::undo_push_set<UNDO_OP::START_POS>(Shape* s);
-	template void MainPage::undo_push_set<UNDO_OP::TEXT_CONTENT>(Shape* s, wchar_t* const& value);
-
-	// 図形の値の保存を実行して, その操作をスタックに積む.
-	template <UNDO_OP U>
-	void MainPage::undo_push_set(Shape* s)
-	{
-		m_stack_undo.push_back(new UndoSet<U>(s));
-	}
 
 	// 値を選択された図形に格納して, その操作をスタックに積む.
 	// U	操作の種類.
@@ -508,7 +504,7 @@ namespace winrt::GraphPaper::implementation
 	template<UNDO_OP U, typename T>
 	void MainPage::undo_push_set(T const& value)
 	{
-		m_stack_undo.push_back(new UndoSet<U>(&m_page_panel, value));
+		m_stack_undo.push_back(new UndoSet<U>(&m_page_layout, value));
 		auto flag = false;
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
@@ -529,6 +525,13 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
+	// 図形の値の保存を実行して, その操作をスタックに積む.
+	template <UNDO_OP U>
+	void MainPage::undo_push_set(Shape* s)
+	{
+		m_stack_undo.push_back(new UndoSet<U>(s));
+	}
+
 	template void MainPage::undo_push_set<UNDO_OP::ARROW_SIZE>(ARROW_SIZE const& value);
 	template void MainPage::undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FILL_COLOR>(D2D1_COLOR_F const& value);
@@ -538,12 +541,19 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::undo_push_set<UNDO_OP::FONT_STRETCH>(DWRITE_FONT_STRETCH const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& value);
+	template void MainPage::undo_push_set<UNDO_OP::GRID_BASE>(Shape* s, double const& value);
+	template void MainPage::undo_push_set<UNDO_OP::GRID_OPAC>(Shape* s, double const& value);
+	template void MainPage::undo_push_set<UNDO_OP::GRID_SHOW>(Shape* s, GRID_SHOW const& value);
+	template void MainPage::undo_push_set<UNDO_OP::PAGE_COLOR>(Shape* s, D2D1_COLOR_F const& value);
+	template void MainPage::undo_push_set<UNDO_OP::PAGE_SIZE>(Shape* s, D2D1_SIZE_F const& value);
+	template void MainPage::undo_push_set<UNDO_OP::START_POS>(Shape* s);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_PATTERN>(STROKE_PATTERN const& value);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE const& value);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_WIDTH>(double const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& value);
+	template void MainPage::undo_push_set<UNDO_OP::TEXT_CONTENT>(Shape* s, wchar_t* const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_LINE>(double const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_MARGIN>(D2D1_SIZE_F const& value);
 
@@ -595,7 +605,6 @@ namespace winrt::GraphPaper::implementation
 		}
 
 	}
-
 
 	// 操作スタックをデータリーダーから読み込む.
 	void MainPage::undo_read(DataReader const& dt_reader)

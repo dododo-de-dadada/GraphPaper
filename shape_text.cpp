@@ -804,7 +804,7 @@ namespace winrt::GraphPaper::implementation
 	// d_pos	I—¹ˆÊ’u‚Ö‚Ì·•ª
 	// text	•¶Žš—ñ
 	// attr	Šù’è‚Ì‘®«’l
-	ShapeText::ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, wchar_t* const text, const ShapePanel* attr) :
+	ShapeText::ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, wchar_t* const text, const ShapeLayout* attr) :
 		ShapeRect::ShapeRect(s_pos, d_pos, attr),
 		m_font_color(attr->m_font_color),
 		m_font_family(attr->m_font_family),

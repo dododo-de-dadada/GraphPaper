@@ -23,7 +23,6 @@
     <ClCompile Include="MainPage_disp.cpp" />
     <ClCompile Include="MainPage_file.cpp" />
     <ClCompile Include="MainPage_fill.cpp" />
-    <ClCompile Include="MainPage_find.cpp" />
     <ClCompile Include="MainPage_font.cpp" />
     <ClCompile Include="MainPage_grid.cpp" />
     <ClCompile Include="MainPage_group.cpp" />
@@ -48,7 +47,6 @@
     <ClCompile Include="shape_group.cpp" />
     <ClCompile Include="shape_line.cpp" />
     <ClCompile Include="shape_list.cpp" />
-    <ClCompile Include="shape_panel.cpp" />
     <ClCompile Include="shape_quad.cpp" />
     <ClCompile Include="shape_rect.cpp" />
     <ClCompile Include="shape_rrect.cpp" />
@@ -58,6 +56,7 @@
     <ClCompile Include="shape_scale.cpp" />
     <ClCompile Include="MainPage_sample.cpp" />
     <ClCompile Include="MainPage_layout.cpp" />
+    <ClCompile Include="shape_layout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

@@ -173,9 +173,9 @@
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Name="mfi_stroke_pattern_2" x:Uid="mfi_stroke_pattern" Click="mfi_stroke_pattern_click" IsEnabled="False" Text="Dash Pattern..." />
+                <MenuFlyoutItem x:Name="mfi_stroke_pattern_2" x:Uid="mfi_stroke_pattern" Click="mfi_stroke_pattern_click_async" IsEnabled="False" Text="Dash Pattern..." />
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Uid="mfi_stroke_width" Click="mfi_stroke_width_click" Text="Width..." />
+                <MenuFlyoutItem x:Uid="mfi_stroke_width" Click="mfi_stroke_width_click_async" Text="Width..." />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_arrow_none_2" x:Uid="rmfi_arrow_none" Click="rmfi_arrow_none_click" Text="None" GroupName="gn_arrow_style">
@@ -195,20 +195,20 @@
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Name="mfi_arrow_size_2" x:Uid="mfi_arrow_size" Click="mfi_arrow_size_click" IsEnabled="False" Text="Arrowhead Size..." />
+                <MenuFlyoutItem x:Name="mfi_arrow_size_2" x:Uid="mfi_arrow_size" Click="mfi_arrow_size_click_async" IsEnabled="False" Text="Arrowhead Size..." />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_stroke_color" Click="mfi_stroke_color_click" Text="Color..." />
             </MenuFlyout>
             <!-- 塗りつぶしコンテキストメニュー -->
             <MenuFlyout x:Key="mf_fill">
-                <MenuFlyoutItem x:Uid="mfi_fill_color" Click="mfi_fill_color_click" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_fill_color" Click="mfi_fill_color_click_async" Text="Color..." />
             </MenuFlyout>
             <!-- 書体コンテキストメニュー -->
             <MenuFlyout x:Key="mf_font">
-                <MenuFlyoutItem x:Uid="mfi_font_family" Click="mfi_font_family_click" Icon="Font" Text="Family..." />
-                <MenuFlyoutItem x:Uid="mfi_font_size" Click="mfi_font_size_click" Icon="FontSize" Text="Size..." />
-                <MenuFlyoutItem x:Uid="mfi_font_weight" Click="mfi_font_weight_click" Icon="Bold" Text="Weight..." />
-                <MenuFlyoutItem x:Uid="mfi_font_stretch" Click="mfi_font_stretch_click" Text="Stretch..."/>
+                <MenuFlyoutItem x:Uid="mfi_font_family" Click="mfi_font_family_click_async" Icon="Font" Text="Family..." />
+                <MenuFlyoutItem x:Uid="mfi_font_size" Click="mfi_font_size_click_async" Icon="FontSize" Text="Size..." />
+                <MenuFlyoutItem x:Uid="mfi_font_weight" Click="mfi_font_weight_click_async" Icon="Bold" Text="Weight..." />
+                <MenuFlyoutItem x:Uid="mfi_font_stretch" Click="mfi_font_stretch_click_async" Text="Stretch..."/>
                 <MenuFlyoutSubItem x:Uid="mfsi_font_style" Icon="Italic" Text="Style">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_normal_2" x:Uid="rmfi_font_normal" Click="rmfi_font_normal_click" Text="Normal" GroupName="gn_font_style"/>
                     <MenuFlyoutSeparator />
@@ -231,11 +231,11 @@
                     <MenuFlyoutItem x:Uid="mfi_text_line_height_contract" Click="mfi_text_line_height_contract_click" Text="Condense" />
                     <MenuFlyoutItem x:Uid="mfi_text_line_height_expand" Click="mfi_text_line_height_expand_click" Text="Expand" />
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Uid="mfi_text_line_height" Click="mfi_text_line_height_click" Text="Height" />
+                    <MenuFlyoutItem x:Uid="mfi_text_line_height" Click="mfi_text_line_height_click_async" Text="Height" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Uid="mfi_text_margin" Click="mfi_text_margin_click" Text="Margin..." />
+                <MenuFlyoutItem x:Uid="mfi_text_margin" Click="mfi_text_margin_click_async" Text="Margin..." />
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Uid="mfi_font_color" Click="mfi_font_color_click" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_font_color" Click="mfi_font_color_click_async" Text="Color..." />
             </MenuFlyout>
             <!-- レイアウトコンテキストメニュー -->
             <MenuFlyout x:Key="mf_layout">
@@ -250,12 +250,12 @@
                     <MenuFlyoutItem x:Uid="mfi_grid_contract" Click="mfi_grid_len_contract_click" Text="Condense" />
                     <MenuFlyoutItem x:Uid="mfi_grid_expand" Click="mfi_grid_len_expand_click" Text="Expand" />
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Uid="mfi_grid_len" Click="mfi_grid_len_click" Text="Length..." />
+                    <MenuFlyoutItem x:Uid="mfi_grid_len" Click="mfi_grid_len_click_async" Text="Length..." />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Uid="mfi_grid_opac" Click="mfi_grid_opac_click" Text="Opacity..." />
+                <MenuFlyoutItem x:Uid="mfi_grid_opac" Click="mfi_grid_opac_click_async" Text="Opacity..." />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
-                <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click_async" Text="Color..." />
                 <MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_zoom" Text="Zoom">
@@ -294,7 +294,7 @@
                         <KeyboardAccelerator Key="N" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_open" x:Uid="mfi_open" Click="mfi_open_click" Icon="OpenFile" Text="Open...">
+                <MenuFlyoutItem x:Name="mfi_open" x:Uid="mfi_open" Click="mfi_open_click_async" Icon="OpenFile" Text="Open...">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="O" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -339,17 +339,17 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_xcvd_cut" x:Uid="mfi_xcvd_cut" Click="mfi_xcvd_cut_click" Icon="Cut" IsEnabled="False" Text="Cut" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_cut" x:Uid="mfi_xcvd_cut" Click="mfi_xcvd_cut_click_async" Icon="Cut" IsEnabled="False" Text="Cut" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="X" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_xcvd_copy" x:Uid="mfi_xcvd_copy" Click="mfi_xcvd_copy_click" Icon="Copy" IsEnabled="False" Text="Copy" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_copy" x:Uid="mfi_xcvd_copy" Click="mfi_xcvd_copy_click_async" Icon="Copy" IsEnabled="False" Text="Copy" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="C" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_xcvd_paste" x:Uid="mfi_xcvd_paste" Click="mfi_xcvd_paste_click" Icon="Paste" IsEnabled="False" Text="Paste" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_paste" x:Uid="mfi_xcvd_paste" Click="mfi_xcvd_paste_click_async" Icon="Paste" IsEnabled="False" Text="Paste" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="V" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -500,9 +500,9 @@
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Name="mfi_stroke_pattern" x:Uid="mfi_stroke_pattern" Click="mfi_stroke_pattern_click" IsEnabled="False" Text="Dash Pattern..." />
+                <MenuFlyoutItem x:Name="mfi_stroke_pattern" x:Uid="mfi_stroke_pattern" Click="mfi_stroke_pattern_click_async" IsEnabled="False" Text="Dash Pattern..." />
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_stroke_width" x:Uid="mfi_stroke_width" Click="mfi_stroke_width_click" Text="Width..." />
+                <MenuFlyoutItem x:Name="mfi_stroke_width" x:Uid="mfi_stroke_width" Click="mfi_stroke_width_click_async" Text="Width..." />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_arrow_none" x:Uid="rmfi_arrow_none" Click="rmfi_arrow_none_click" Text="None" GroupName="gn_arrow_style">
@@ -522,20 +522,20 @@
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Name="mfi_arrow_size" x:Uid="mfi_arrow_size" Click="mfi_arrow_size_click" IsEnabled="False" Text="Arrowhead Size..." />
+                <MenuFlyoutItem x:Name="mfi_arrow_size" x:Uid="mfi_arrow_size" Click="mfi_arrow_size_click_async" IsEnabled="False" Text="Arrowhead Size..." />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_stroke_color" Click="mfi_stroke_color_click" Text="Color..." />
             </muxc:MenuBarItem>
             <!-- 塗りつぶしメニュー -->
             <muxc:MenuBarItem x:Uid="mbi_fill" AccessKey="L" Title="Fill">
-                <MenuFlyoutItem x:Uid="mfi_fill_color" Click="mfi_fill_color_click" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_fill_color" Click="mfi_fill_color_click_async" Text="Color..." />
             </muxc:MenuBarItem>
             <!-- 書体メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_font" AccessKey="T" Title="Font">
-                <MenuFlyoutItem x:Uid="mfi_font_family" Click="mfi_font_family_click" Icon="Font" Text="Family..." />
-                <MenuFlyoutItem x:Uid="mfi_font_size" Click="mfi_font_size_click" Icon="FontSize" Text="Size..." />
-                <MenuFlyoutItem x:Uid="mfi_font_weight" Click="mfi_font_weight_click" Icon="Bold" Text="Weight..." />
-                <MenuFlyoutItem x:Uid="mfi_font_stretch" Click="mfi_font_stretch_click" Text="Stretch..."/>
+                <MenuFlyoutItem x:Uid="mfi_font_family" Click="mfi_font_family_click_async" Icon="Font" Text="Family..." />
+                <MenuFlyoutItem x:Uid="mfi_font_size" Click="mfi_font_size_click_async" Icon="FontSize" Text="Size..." />
+                <MenuFlyoutItem x:Uid="mfi_font_weight" Click="mfi_font_weight_click_async" Icon="Bold" Text="Weight..." />
+                <MenuFlyoutItem x:Uid="mfi_font_stretch" Click="mfi_font_stretch_click_async" Text="Stretch..."/>
                 <MenuFlyoutSubItem x:Uid="mfsi_font_style" Icon="Italic" Text="Style">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_normal" x:Uid="rmfi_font_normal" Click="rmfi_font_normal_click" Text="Normal" GroupName="gn_font_style"/>
                     <MenuFlyoutSeparator />
@@ -558,11 +558,11 @@
                     <MenuFlyoutItem x:Uid="mfi_text_line_height_contract" Click="mfi_text_line_height_contract_click" Text="Condense" />
                     <MenuFlyoutItem x:Uid="mfi_text_line_height_expand" Click="mfi_text_line_height_expand_click" Text="Expand" />
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Uid="mfi_text_line_height" Click="mfi_text_line_height_click" Text="Height" />
+                    <MenuFlyoutItem x:Uid="mfi_text_line_height" Click="mfi_text_line_height_click_async" Text="Height" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Uid="mfi_text_margin" Click="mfi_text_margin_click" Text="Margin..." />
+                <MenuFlyoutItem x:Uid="mfi_text_margin" Click="mfi_text_margin_click_async" Text="Margin..." />
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Uid="mfi_font_color" Click="mfi_font_color_click" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_font_color" Click="mfi_font_color_click_async" Text="Color..." />
             </muxc:MenuBarItem>
             <!-- レイアウトメニュー -->
             <muxc:MenuBarItem x:Uid="mbi_layout" AccessKey="L" Title="Layout">
@@ -578,17 +578,17 @@
                     <MenuFlyoutItem x:Uid="mfi_grid_contract" Click="mfi_grid_len_contract_click" Text="Condense" />
                     <MenuFlyoutItem x:Uid="mfi_grid_expand" Click="mfi_grid_len_expand_click" Text="Expand" />
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Uid="mfi_grid_len" Click="mfi_grid_len_click" Text="Length..." />
+                    <MenuFlyoutItem x:Uid="mfi_grid_len" Click="mfi_grid_len_click_async" Text="Length..." />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Uid="mfi_grid_opac" Click="mfi_grid_opac_click" Text="Opacity..." />
+                <MenuFlyoutItem x:Uid="mfi_grid_opac" Click="mfi_grid_opac_click_async" Text="Opacity..." />
                 <MenuFlyoutSeparator />
-                <!-- ページパネルメニュー -->
+                <!-- ページメニュー -->
                 <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
-                <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click_async" Text="Color..." />
                 <MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Uid="mfi_layout_save" Click="mfi_layout_save_click" Text="Save layout" />
-                <MenuFlyoutItem x:Name="mfi_layout_reset" x:Uid="mfi_layout_reset" Click="mfi_layout_reset_click" Text="Reset layout" />
+                <MenuFlyoutItem x:Uid="mfi_layout_save" Click="mfi_layout_save_click_async" Text="Save layout" />
+                <MenuFlyoutItem x:Name="mfi_layout_reset" x:Uid="mfi_layout_reset" Click="mfi_layout_reset_click_async" Text="Reset layout" />
                 <MenuFlyoutSeparator />
                 <!-- 拡大縮小メニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_zoom" Text="Zoom">
@@ -696,7 +696,7 @@
                     <KeyboardAccelerator Invoked="ka_edit_text_invoked" Key="E" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_bring_to_front_invoked" Key="End" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_bring_forward_invoked" Key="PageDown" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_find_text_invoked" Key="F" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="ka_text_find_invoked" Key="F" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_group_invoked" Key="G" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_send_to_back_invoked" Key="Home" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="ka_send_backward_invoked" Key="PageUp" Modifiers="Control" />

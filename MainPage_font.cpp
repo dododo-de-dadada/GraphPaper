@@ -92,15 +92,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「色」が選択された.
-	IAsyncAction MainPage::mfi_font_color_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_font_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_panel.m_font_color.r * COLOR_MAX;
-		const double val1 = m_page_panel.m_font_color.g * COLOR_MAX;
-		const double val2 = m_page_panel.m_font_color.b * COLOR_MAX;
-		const double val3 = m_page_panel.m_font_color.a * COLOR_MAX;
+		const double val0 = m_page_layout.m_font_color.r * COLOR_MAX;
+		const double val1 = m_page_layout.m_font_color.g * COLOR_MAX;
+		const double val2 = m_page_layout.m_font_color.b * COLOR_MAX;
+		const double val3 = m_page_layout.m_font_color.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「書体名」が選択された.
-	IAsyncAction MainPage::mfi_font_family_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_font_family_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -162,7 +162,7 @@ namespace winrt::GraphPaper::implementation
 			IInspectable item[1];
 			lv_sample_list().Items().GetMany(i, item);
 			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
-			if (wcscmp(name, m_page_panel.m_font_family) == 0) {
+			if (wcscmp(name, m_page_layout.m_font_family) == 0) {
 				// 書体名が同じ場合,
 				// その書体をリストビューの選択済み項目に格納する.
 				lv_sample_list().SelectedItem(item[0]);
@@ -221,12 +221,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「大きさ」が選択された.
-	IAsyncAction MainPage::mfi_font_size_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_font_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_panel.m_font_size;
+		const double val0 = m_page_layout.m_font_size;
 		sample_slider_0().Value(val0);
 		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -250,7 +250,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「伸縮」が選択された.
-	IAsyncAction MainPage::mfi_font_stretch_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_font_stretch_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -262,7 +262,7 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().SelectedIndex(-1);
 		const auto k = lv_sample_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
-			if (FONT_STRETCH[i] == m_page_panel.m_font_stretch) {
+			if (FONT_STRETCH[i] == m_page_layout.m_font_stretch) {
 				lv_sample_list().SelectedIndex(i);
 				IInspectable item[1];
 				lv_sample_list().Items().GetMany(i, item);
@@ -302,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「太さ」が選択された.
-	IAsyncAction MainPage::mfi_font_weight_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_font_weight_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -314,7 +314,7 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().SelectedIndex(-1);
 		const auto k = lv_sample_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
-			if (FONT_WEIGHTS[i] == m_page_panel.m_font_weight) {
+			if (FONT_WEIGHTS[i] == m_page_layout.m_font_weight) {
 				lv_sample_list().SelectedIndex(i);
 				IInspectable item[1];
 				lv_sample_list().Items().GetMany(i, item);
@@ -363,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[32];
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, m_sample_dx.m_logical_dpi, m_sample_panel.m_grid_base + 1.0, buf, 16);
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, m_sample_dx.m_logical_dpi, m_sample_layout.m_grid_base + 1.0, buf, 16);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
@@ -451,12 +451,12 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t TITLE_PAGE[] = L"str_page";
 
 	// 書体メニューの「行の高さ」>「高さ」が選択された.
-	IAsyncAction MainPage::mfi_text_line_height_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_text_line_height_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_panel.m_text_line;
+		const double val0 = m_page_layout.m_text_line;
 		sample_slider_0().Value(val0);
 		text_set_slider_header<UNDO_OP::TEXT_LINE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -482,11 +482,11 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「行の高さ」>「狭める」が選択された.
 	void MainPage::mfi_text_line_height_contract_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto value = m_page_panel.m_text_line - TEXT_LINE_DELTA;
+		auto value = m_page_layout.m_text_line - TEXT_LINE_DELTA;
 		if (value <= FLT_MIN) {
 			value = 0.0f;
 		}
-		if (m_page_panel.m_text_line != value) {
+		if (m_page_layout.m_text_line != value) {
 			undo_push_set<UNDO_OP::TEXT_LINE>(value);
 		}
 	}
@@ -494,20 +494,20 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「行の高さ」>「広げる」が選択された.
 	void MainPage::mfi_text_line_height_expand_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto value = m_page_panel.m_text_line + TEXT_LINE_DELTA;
-		if (m_page_panel.m_text_line != value) {
+		auto value = m_page_layout.m_text_line + TEXT_LINE_DELTA;
+		if (m_page_layout.m_text_line != value) {
 			undo_push_set<UNDO_OP::TEXT_LINE>(value);
 		}
 	}
 
 	// 書体メニューの「余白」が選択された.
-	IAsyncAction MainPage::mfi_text_margin_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_text_margin_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_panel.m_text_mar.width;
-		const double val1 = m_page_panel.m_text_mar.height;
+		const double val0 = m_page_layout.m_text_mar.width;
+		const double val1 = m_page_layout.m_text_mar.height;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 0>(val0);
@@ -614,7 +614,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring hdr;
 
 		const double dpi = m_page_dx.m_logical_dpi;
-		const double g_len = m_sample_panel.m_grid_base + 1.0;
+		const double g_len = m_sample_layout.m_grid_base + 1.0;
 		//double px;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {

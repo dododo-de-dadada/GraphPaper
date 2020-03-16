@@ -9,7 +9,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto INDEX_NULL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
 
 	S_LIST_T* Undo::s_shape_list = nullptr;
-	ShapePanel* Undo::s_shape_page = nullptr;
+	ShapeLayout* Undo::s_shape_page = nullptr;
 
 	// 添え字をデータリーダーから読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader)
@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作が参照するための図形リストとページ図形を格納する.
-	void Undo::set(S_LIST_T* s_list, ShapePanel* s_page) noexcept
+	void Undo::set(S_LIST_T* s_list, ShapeLayout* s_page) noexcept
 	{
 		s_shape_list = s_list;
 		s_shape_page = s_page;

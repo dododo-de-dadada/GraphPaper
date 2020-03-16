@@ -35,7 +35,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
 			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_sample_panel.m_grid_base + 1.0;
+			const auto g_len = m_sample_layout.m_grid_base + 1.0;
 			// ピクセル単位の長さを他の単位の文字列に変換する.
 			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf, 31);
 			hdr = hdr + buf;
@@ -100,14 +100,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「矢じりの大きさ」が選択された.
-	IAsyncAction MainPage::mfi_arrow_size_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_arrow_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_panel.m_arrow_size.m_width;
-		const double val1 = m_page_panel.m_arrow_size.m_length;
-		const double val2 = m_page_panel.m_arrow_size.m_offset;
+		const double val0 = m_page_layout.m_arrow_size.m_width;
+		const double val1 = m_page_layout.m_arrow_size.m_length;
+		const double val2 = m_page_layout.m_arrow_size.m_offset;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -146,7 +146,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「矢じりの種類」>「閉じた矢」が選択された.
 	void MainPage::rmfi_arrow_filled_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_arrow_style == ARROW_STYLE::NONE) {
+		if (m_page_layout.m_arrow_style == ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(true);
 			mfi_arrow_size_2().IsEnabled(true);
 		}
@@ -156,7 +156,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「矢じりの種類」>「なし」が選択された.
 	void MainPage::rmfi_arrow_none_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_page_layout.m_arrow_style != ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(false);
 			mfi_arrow_size_2().IsEnabled(false);
 		}
@@ -166,7 +166,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「矢じりの種類」>「開いた」が選択された.
 	void MainPage::rmfi_arrow_opened_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_panel.m_arrow_style == ARROW_STYLE::NONE) {
+		if (m_page_layout.m_arrow_style == ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(true);
 			mfi_arrow_size_2().IsEnabled(true);
 		}

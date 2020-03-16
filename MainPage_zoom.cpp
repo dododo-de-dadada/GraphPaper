@@ -22,8 +22,8 @@ namespace winrt::GraphPaper::implementation
 		const int o = 1;
 
 		for (int i = s; i < e; i++) {
-			if (m_page_panel.m_page_scale <= ZOOM_LEVEL[i]) {
-				m_page_panel.m_page_scale = ZOOM_LEVEL[i + o];
+			if (m_page_layout.m_page_scale <= ZOOM_LEVEL[i]) {
+				m_page_layout.m_page_scale = ZOOM_LEVEL[i + o];
 				set_page_panle_size();
 				page_draw();
 				status_set_zoom();
@@ -42,8 +42,8 @@ namespace winrt::GraphPaper::implementation
 		const int o = -1;
 
 		for (int i = s; i < e; i++) {
-			if (m_page_panel.m_page_scale <= ZOOM_LEVEL[i]) {
-				m_page_panel.m_page_scale = ZOOM_LEVEL[i + o];
+			if (m_page_layout.m_page_scale <= ZOOM_LEVEL[i]) {
+				m_page_layout.m_page_scale = ZOOM_LEVEL[i + o];
 				set_page_panle_size();
 				page_draw();
 				status_set_zoom();
@@ -57,10 +57,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ToolTipService;
 
-		if (m_page_panel.m_page_scale == 1.0) {
+		if (m_page_layout.m_page_scale == 1.0) {
 			return;
 		}
-		m_page_panel.m_page_scale = 1.0;
+		m_page_layout.m_page_scale = 1.0;
 		set_page_panle_size();
 		page_draw();
 		status_set_zoom();

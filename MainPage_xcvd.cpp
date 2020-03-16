@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 編集メニューの「コピー」が選択された.
-	IAsyncAction MainPage::mfi_xcvd_copy_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 		using winrt::Windows::ApplicationModel::DataTransfer::DataPackage;
@@ -70,9 +70,9 @@ namespace winrt::GraphPaper::implementation
 
 	// 編集メニューの「切り取る」が選択された.
 	//constexpr uint32_t CUT = 0;
-	IAsyncAction MainPage::mfi_xcvd_cut_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		co_await mfi_xcvd_copy_click(nullptr, nullptr);
+		co_await mfi_xcvd_copy_click_async(nullptr, nullptr);
 		mfi_xcvd_delete_click(nullptr, nullptr);
 	}
 
@@ -102,13 +102,13 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
-		s_list_bound(m_list_shapes, m_page_panel.m_page_size, m_page_min, m_page_max);
+		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
 	}
 
 	// 編集メニューの「貼り付け」が選択された.
-	IAsyncAction MainPage::mfi_xcvd_paste_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_xcvd_paste_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 		using winrt::Windows::ApplicationModel::DataTransfer::DataPackageView;
@@ -174,8 +174,8 @@ namespace winrt::GraphPaper::implementation
 					auto text{ co_await Clipboard::GetContent().GetTextAsync() };
 					if (text.empty() == false) {
 						// 文字列が空でない場合,
-						const double scale = m_page_panel.m_page_scale;
-						const auto g_len = m_page_panel.m_grid_base + 1.0;
+						const double scale = m_page_layout.m_page_scale;
+						const auto g_len = m_page_layout.m_grid_base + 1.0;
 						D2D1_POINT_2F pos{
 							static_cast<FLOAT>(scale * (sb_horz().Value() + scp_page_panel().ActualWidth() * 0.5) - g_len),
 							static_cast<FLOAT>(scale * (sb_vert().Value() + scp_page_panel().ActualHeight() * 0.5) - g_len)
@@ -184,10 +184,10 @@ namespace winrt::GraphPaper::implementation
 							static_cast<FLOAT>(2.0 * g_len),
 							static_cast<FLOAT>(2.0 * g_len)
 						};
-						if (m_page_panel.m_grid_snap) {
+						if (m_page_layout.m_grid_snap) {
 							pt_round(pos, g_len, pos);
 						}
-						auto t = new ShapeText(pos, diff, wchar_cpy(text.c_str()), &m_page_panel);
+						auto t = new ShapeText(pos, diff, wchar_cpy(text.c_str()), &m_page_layout);
 #if (_DEBUG)
 						debug_leak_cnt++;
 #endif
@@ -210,6 +210,26 @@ namespace winrt::GraphPaper::implementation
 		}
 		//スレッドコンテキストを復元する.
 		co_await context;
+	}
+
+	// クリップボードにデータが含まれているか調べる.
+	bool MainPage::xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const
+	{
+		// DataPackageView::Contains を使用すると, 次の内部エラーが発生する.
+		// WinRT originate error - 0x8004006A : '指定された形式が DataPackage に含まれていません。
+		// DataPackageView.Contains または DataPackageView.AvailableFormats を使って、その形式が存在することを確かめてください。
+		// 念のため, DataPackageView::AvailableFormats を使う.
+		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
+
+		auto const& a_formats = Clipboard::GetContent().AvailableFormats();
+		for (auto const& a_format : a_formats) {
+			for (size_t i = 0; i < f_cnt; i++) {
+				if (a_format == formats[i]) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }

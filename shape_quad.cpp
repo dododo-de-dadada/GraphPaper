@@ -324,7 +324,7 @@ namespace winrt::GraphPaper::implementation
 	// s_pos	開始位置
 	// d_pos	終了位置への差分
 	// attr	既定の属性値
-	ShapeQuad::ShapeQuad(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapePanel* attr) :
+	ShapeQuad::ShapeQuad(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
 		ShapePoly::ShapePoly(attr)
 	{
 		m_pos.x = static_cast<FLOAT>(s_pos.x + 0.5 * d_pos.x);

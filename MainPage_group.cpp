@@ -73,7 +73,6 @@ namespace winrt::GraphPaper::implementation
 				}
 				// 図形をグループから削除して, その操作をスタックに積む.
 				undo_push_remove(g, s);
-				//m_stack_undo.push_back(new UndoRemoveG(g, s));
 				// 図形を図形の直前に挿入する.
 				undo_push_insert(s, g);
 				//t = s;
