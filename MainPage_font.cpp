@@ -114,12 +114,6 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_2().Visibility(VISIBLE);
 		sample_slider_3().Visibility(VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 0> });
-		//const auto slider_0_token = sample_slider_0().ValueChanged(
-		// [this](auto, auto args)
-		// {
-		// 	font_set_slider<UNDO_OP::FONT_COLOR, 0>(m_sample_shape, args.NewValue());
-		// }
-		//);
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 3> });
@@ -372,29 +366,25 @@ namespace winrt::GraphPaper::implementation
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_val_to_col(m_col_style, value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {
@@ -448,9 +438,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	constexpr double TEXT_LINE_DELTA = 2;	// 行の高さの変分 (DPIs)
-	constexpr wchar_t TITLE_PAGE[] = L"str_page";
 
-	// 書体メニューの「行の高さ」>「高さ」が選択された.
+											// 書体メニューの「行の高さ」>「高さ」が選択された.
 	IAsyncAction MainPage::mfi_text_line_height_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
@@ -506,8 +495,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_text_mar.width;
-		const double val1 = m_page_layout.m_text_mar.height;
+		const double val0 = m_page_layout.m_text_margin.width;
+		const double val1 = m_page_layout.m_text_margin.height;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 0>(val0);
@@ -618,35 +607,30 @@ namespace winrt::GraphPaper::implementation
 		//double px;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_text_mar_horzorz");
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
 				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf);
-				hdr = hdr + L": " + buf;
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_horzorz") + L": " + buf;
 			}
 			if constexpr (S == 1) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_text_mar_vertert");
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
 				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf);
-				hdr = hdr + L": " + buf;
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_vertert") + L": " + buf;
 			}
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE) {
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_height");
 			if (value > FLT_MIN) {
 				// 行の高さの単位は DIPs (96dpi 固定) なので,
 				// これをピクセル単位に変換する.
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
 				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * dpi / 96.0, dpi, g_len, buf);
-				hdr = hdr + L": " + buf;
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_height") + L": " + buf;
 			}
 			else {
-				hdr = hdr + L": " + r_loader.GetString(L"str_def_val");
+				auto const& r_loader = ResourceLoader::GetForCurrentView();
+				hdr = r_loader.GetString(L"str_height") + L": " + r_loader.GetString(L"str_def_val");
 			}
 		}
 		if constexpr (S == 0) {

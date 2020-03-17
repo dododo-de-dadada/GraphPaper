@@ -115,7 +115,7 @@ namespace winrt::GraphPaper::implementation
 			if (equal(page_value, sample_value) == false) {
 				undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
-				undo_push_null();
+				//undo_push_null();
 				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
@@ -135,7 +135,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, value);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
-		undo_push_null();
+		//undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, value);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
-		undo_push_null();
+		//undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
@@ -180,7 +180,7 @@ namespace winrt::GraphPaper::implementation
 			if (equal(page_value, sample_value) == false) {
 				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
-				undo_push_null();
+				//undo_push_null();
 				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
@@ -198,7 +198,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_layout, GRID_SHOW::BACK);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
-		undo_push_null();
+		//undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
@@ -212,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_layout, GRID_SHOW::FRONT);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
-		undo_push_null();
+		//undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
@@ -226,7 +226,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_layout, GRID_SHOW::HIDE);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
-		undo_push_null();
+		//undo_push_null();
 		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();

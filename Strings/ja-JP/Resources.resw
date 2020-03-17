@@ -165,7 +165,7 @@
     <value>ページの大きさ</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_ignore_blank.Content" xml:space="preserve">
+  <data name="ck_text_ignore_bottom_blank.Content" xml:space="preserve">
     <value>文末の空白行を無視する.</value>
     <comment>CheckBox</comment>
   </data>

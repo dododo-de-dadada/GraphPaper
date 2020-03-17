@@ -1,6 +1,6 @@
 //-------------------------------
-// MainPage_app.cpp
-// アプリケーションの中断と再開
+// MainPage_layout.cpp
+// レイアウトの初期化, 保存と削除
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -21,9 +21,10 @@ namespace winrt::GraphPaper::implementation
 		return ApplicationData::Current().LocalFolder();
 	}
 
+	// ページレイアウトを既定値で初期化する.
 	void MainPage::layout_init(void)
 	{
-		// ページレイアウトの書体の属性を初期化する.
+		// 書体の属性を初期化する.
 		{
 			using winrt::Windows::UI::Xaml::Setter;
 			using winrt::Windows::UI::Xaml::Controls::TextBlock;
@@ -33,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::UI::Xaml::Style;
 
 			// リソースの取得に失敗した場合に備えて,
-			// 以下の既定値を書体の属性に格納する.
+			// 固定の既定値を書体属性に格納する.
 			m_page_layout.m_font_family = wchar_cpy(L"Segoe UI");
 			m_page_layout.m_font_size = 14.0;
 			m_page_layout.m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;
@@ -58,9 +59,9 @@ namespace winrt::GraphPaper::implementation
 						// スタイルをスタックから取り出す.
 						style = stack.back();
 						stack.pop_back();
+						// スタイルの中の各セッターについて.
 						auto const& setters = style.Setters();
 						for (auto const& base : setters) {
-							// スタイルの中の各セッターについて.
 							auto const& setter = base.try_as<Setter>();
 							// セッターのプロパティーを得る.
 							auto const& prop = setter.Property();
@@ -129,58 +130,65 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 
-		// ページレイアウトの属性を初期化する.
 		{
 			using winrt::Windows::UI::Xaml::Media::Brush;
-			m_page_layout.m_corner_rad.x = GRIDLEN_PX;
-			m_page_layout.m_corner_rad.y = m_page_layout.m_corner_rad.x;
-			m_page_layout.m_grid_base = static_cast<double>(GRIDLEN_PX) - 1.0;
+
 			const auto dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			m_page_layout.m_page_size.width = std::floor(A4_PER_INCH.width * dpi);
-			m_page_layout.m_page_size.height = std::floor(A4_PER_INCH.height * dpi);
 			// 色の初期値はテーマに依存する.
-			D2D1_COLOR_F b_col = S_WHITE;
-			D2D1_COLOR_F f_col = S_BLACK;
+			D2D1_COLOR_F b_color = S_WHITE;
+			D2D1_COLOR_F f_color = S_BLACK;
 			try {
 				auto const& b_res = Resources().Lookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
 				auto const& f_res = Resources().Lookup(box_value(L"ApplicationForegroundThemeBrush"));
-				cast_to(unbox_value<Brush>(b_res), b_col);
-				cast_to(unbox_value<Brush>(f_res), f_col);
+				cast_to(unbox_value<Brush>(b_res), b_color);
+				cast_to(unbox_value<Brush>(f_res), f_color);
 			}
-			catch (winrt::hresult_error e) {}
-			m_page_layout.set_page_color(b_col);
-			m_page_layout.m_stroke_color = f_col;
-			m_page_layout.m_fill_color = b_col;
-			m_page_layout.m_font_color = f_col;
+			catch (winrt::hresult_error e) {
+			}
+			m_page_layout.m_arrow_size = ARROW_SIZE();
+			m_page_layout.m_arrow_style = ARROW_STYLE::NONE;
+			m_page_layout.m_corner_rad = { GRIDLEN_PX, GRIDLEN_PX };
+			m_page_layout.set_fill_color(b_color);
+			m_page_layout.set_font_color(f_color);
+			m_page_layout.m_grid_base = static_cast<double>(GRIDLEN_PX) - 1.0;
+			m_page_layout.m_grid_opac = GRID_OPAC;
+			m_page_layout.m_grid_show = GRID_SHOW::BACK;
+			m_page_layout.m_grid_snap = true;
+			m_page_layout.set_page_color(b_color);
+			m_page_layout.m_page_scale = 1.0;
+			m_page_layout.m_page_size.width = std::floor(A4_PER_INCH.width * dpi);
+			m_page_layout.m_page_size.height = std::floor(A4_PER_INCH.height * dpi);
+			m_page_layout.set_stroke_color(f_color);
+			m_page_layout.m_stroke_pattern = STROKE_PATTERN();
+			m_page_layout.m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;
+			m_page_layout.m_stroke_width = 1.0F;
+			m_page_layout.m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
+			m_page_layout.m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
+			m_page_layout.m_text_line = 0.0F;
+			m_page_layout.m_text_margin = { 4.0F, 4.0F };
 		}
 
-		{
-			m_page_min.x = 0.0;
-			m_page_min.y = 0.0;
-			m_page_max.x = m_page_layout.m_page_size.width;
-			m_page_max.y = m_page_layout.m_page_size.height;
-			//m_page_unit = LEN_UNIT::PIXEL;
-			//m_col_style = COL_STYLE::DEC;
-		}
 	}
 
 	// 保存されたレイアウトデータを読み込む.
+	// レイアウトを保存したファイルがローカルフォルダーにある場合, それを読み込む.
 	// 戻り値	読み込めたら S_OK.
 	IAsyncOperation<winrt::hresult> MainPage::layout_load_async(void)
 	{
+		mfi_layout_reset().IsEnabled(false);
 		auto hr = E_FAIL;
 		auto item{ co_await local_folder().TryGetItemAsync(FILE_NAME) };
 		if (item != nullptr) {
 			auto s_file = item.try_as<StorageFile>();
 			if (s_file != nullptr) {
 				try {
-					// ストレージファイルを非同期に読む.
 					hr = co_await file_read_async(s_file, false, true);
 				}
 				catch (winrt::hresult_error const& e) {
 					hr = e.code();
 				}
 				s_file = nullptr;
+				mfi_layout_reset().IsEnabled(true);
 			}
 			item = nullptr;
 		}
@@ -188,6 +196,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// レイアウトメニューの「レイアウトを保存」が選択された
+	// ローカルフォルダーにファイルを作成し, レイアウトを保存する.
 	IAsyncAction MainPage::mfi_layout_save_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::Storage::CreationCollisionOption;
@@ -197,6 +206,7 @@ namespace winrt::GraphPaper::implementation
 			if (s_file != nullptr) {
 				co_await file_write_layout_async(s_file);
 				s_file = nullptr;
+				mfi_layout_reset().IsEnabled(true);
 			}
 		}
 		catch (winrt::hresult_error const&) {
@@ -206,17 +216,26 @@ namespace winrt::GraphPaper::implementation
 		//mru_list.Clear();
 	}
 
-	// レイアウトメニューの「レイアウトをリセット」が選択された
+	// レイアウトメニューの「レイアウトをリセット」が選択された.
+	// レイアウトを保存したファイルがローカルフォルダーにある場合, それを削除する.
 	IAsyncAction MainPage::mfi_layout_reset_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::Storage::StorageDeleteOption;
 
-		try {
-			auto s_file{ co_await local_folder().GetFileAsync(FILE_NAME) };
-			co_await s_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
-			s_file = nullptr;
-		}
-		catch (winrt::hresult_error const&) {
+		auto item{ co_await local_folder().TryGetItemAsync(FILE_NAME) };
+		if (item != nullptr) {
+			auto s_file = item.try_as<StorageFile>();
+			if (s_file != nullptr) {
+				try {
+					co_await s_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
+					mfi_layout_reset().IsEnabled(false);
+				}
+				catch (winrt::hresult_error const&) {
+				}
+				s_file = nullptr;
+			}
+			item = nullptr;
 		}
 	}
+
 }

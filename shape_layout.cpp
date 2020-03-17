@@ -153,8 +153,9 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼線の開始・終了位置
 		auto br = dx.m_shape_brush.get();
 
-		m_grid_color.a = static_cast<FLOAT>(m_grid_opac);
-		br->SetColor(m_grid_color);
+		D2D1_COLOR_F grid_color;
+		get_grid_color(grid_color);
+		br->SetColor(grid_color);
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
 		v_end.y = m_page_size.height;
@@ -174,6 +175,12 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 部位の色を得る.
+	void ShapeLayout::get_anchor_color(D2D1_COLOR_F& value) const noexcept
+	{
+		get_opposite_color(m_page_color, ANCH_OPAC, value);
+	}
+
 	// 矢じりの寸法を得る.
 	bool ShapeLayout::get_arrow_size(ARROW_SIZE& value) const noexcept
 	{
@@ -186,6 +193,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		value = m_arrow_style;
 		return true;
+	}
+
+	// 補助線の色を得る.
+	void ShapeLayout::get_auxiliary_color(D2D1_COLOR_F& value) const noexcept
+	{
+		get_opposite_color(m_page_color, AUX_OPAC, value);
 	}
 
 	// 角丸半径を得る.
@@ -249,6 +262,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		value = m_grid_base;
 		return true;
+	}
+
+	// 方眼線の色を得る.
+	void ShapeLayout::get_grid_color(D2D1_COLOR_F& value) const noexcept
+	{
+		get_opposite_color(m_page_color, m_grid_opac, value);
 	}
 
 	// 方眼線の不透明度を得る.
@@ -345,7 +364,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字列の余白を得る.
 	bool ShapeLayout::get_text_margin(D2D1_SIZE_F& value) const noexcept
 	{
-		value = m_text_mar;
+		value = m_text_margin;
 		return true;
 	}
 
@@ -354,12 +373,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::read;
 
-		read(m_grid_color, dt_reader);	// 方眼の色
+		D2D1_COLOR_F dummy;
+		read(dummy, dt_reader);	// 方眼の色
 		m_grid_base = dt_reader.ReadDouble();	// 方眼の大きさ
 		m_grid_opac = dt_reader.ReadDouble();
 		read(m_grid_show, dt_reader);
 		m_grid_snap = dt_reader.ReadBoolean();
 		read(m_page_color, dt_reader);
+		//D2D1_COLOR_F color;
+		//read(color, dt_reader);
+		//set_page_color(color);
 		m_page_scale = dt_reader.ReadDouble();
 		read(m_page_size, dt_reader);
 
@@ -380,7 +403,7 @@ namespace winrt::GraphPaper::implementation
 		read(m_text_align_p, dt_reader);	// 段落のそろえ
 		read(m_text_align_t, dt_reader);	// 文字列のそろえ
 		read(m_text_line, dt_reader);	// 行間
-		read(m_text_mar, dt_reader);	// 文字列の余白
+		read(m_text_margin, dt_reader);	// 文字列の余白
 
 		ShapeText::is_available_font(m_font_family);
 	}
@@ -467,9 +490,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapeLayout::set_page_color(const D2D1_COLOR_F& value) noexcept
 	{
 		m_page_color = value;
-		get_opposite_color(value, m_grid_opac, m_grid_color);
-		get_opposite_color(value, ANCH_OPAC, m_anch_color);
-		get_opposite_color(value, AUX_OPAC, m_aux_color);
+		m_page_color.a = 1.0F;
 	}
 
 	// 値をページの拡大率に格納する.
@@ -481,7 +502,8 @@ namespace winrt::GraphPaper::implementation
 	// 値をページの寸法に格納する.
 	void ShapeLayout::set_page_size(const D2D1_SIZE_F value) noexcept
 	{
-		m_page_size = value;
+		m_page_size.width = min(max(value.width, 32768.0F), 1.0F);
+		m_page_size.height = min(max(value.height, 32768.0F), 1.0F);
 	}
 
 	// 線枠の色に格納する.
@@ -529,7 +551,7 @@ namespace winrt::GraphPaper::implementation
 	// 値を文字列の余白に格納する.
 	void ShapeLayout::set_text_margin(const D2D1_SIZE_F value)
 	{
-		m_text_mar = value;
+		m_text_margin = value;
 	}
 
 	// 図形の属性値を格納する.
@@ -550,17 +572,18 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
 		s->get_text_line_height(m_text_line);
-		D2D1_COLOR_F color;
-		if (s->get_page_color(color)) {
-			set_page_color(color);
-		}
+		s->get_page_color(m_page_color);
+		//D2D1_COLOR_F color;
+		//if (s->get_page_color(color)) {
+		//	set_page_color(color);
+		//}
 		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_pattern(m_stroke_pattern);
 		s->get_stroke_style(m_stroke_style);
 		s->get_stroke_width(m_stroke_width);
 		s->get_text_align_t(m_text_align_t);
 		s->get_text_align_p(m_text_align_p);
-		s->get_text_margin(m_text_mar);
+		s->get_text_margin(m_text_margin);
 	}
 
 	// データリーダーに書き込む.
@@ -568,7 +591,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::write;
 
-		write(m_grid_color, dt_writer);
+		D2D1_COLOR_F dummy;
+		write(dummy, dt_writer);
 		dt_writer.WriteDouble(m_grid_base);
 		dt_writer.WriteDouble(m_grid_opac);
 		write(m_grid_show, dt_writer);
@@ -594,7 +618,7 @@ namespace winrt::GraphPaper::implementation
 		write(m_text_align_p, dt_writer);	// 段落のそろえ
 		write(m_text_align_t, dt_writer);	// 文字列のそろえ
 		write(m_text_line, dt_writer);	// 行間
-		write(m_text_mar, dt_writer);	// 文字列の余白
+		write(m_text_margin, dt_writer);	// 文字列の余白
 
 	}
 

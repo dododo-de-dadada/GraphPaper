@@ -131,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 						debug_leak_cnt++;
 #endif
-						if (ck_ignore_blank().IsChecked().GetBoolean()) {
+						if (ck_text_ignore_bottom_blank().IsChecked().GetBoolean()) {
 							s->delete_bottom_blank();
 						}
 						reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);

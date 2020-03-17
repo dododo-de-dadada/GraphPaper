@@ -165,7 +165,7 @@
     <value>Page Size</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_ignore_blank.Content" xml:space="preserve">
+  <data name="ck_text_ignore_bottom_blank.Content" xml:space="preserve">
     <value>Ignore bottom blank line.</value>
     <comment>CheckBox</comment>
   </data>

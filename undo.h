@@ -67,8 +67,8 @@ namespace winrt::GraphPaper::implementation
 	struct Undo {
 		// 参照する図形リスト
 		static S_LIST_T* s_shape_list;
-		// 参照するページ図形
-		static ShapeLayout* s_shape_page;
+		// 参照するページレイアウト
+		static ShapeLayout* s_shape_layout;
 		// 操作する図形
 		Shape* m_shape;
 

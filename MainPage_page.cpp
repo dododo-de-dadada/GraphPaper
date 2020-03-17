@@ -265,7 +265,9 @@ namespace winrt::GraphPaper::implementation
 			m_page_layout.draw_grid(m_page_dx, { 0.0f, 0.0f });
 		}
 		// 部位の色をブラシに格納する.
-		m_page_dx.m_anch_brush->SetColor(m_page_layout.m_anch_color);
+		D2D1_COLOR_F anch_color;
+		m_page_layout.get_anchor_color(anch_color);
+		m_page_dx.m_anch_brush->SetColor(anch_color);
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				// 消去フラグが立っている場合,
@@ -283,7 +285,9 @@ namespace winrt::GraphPaper::implementation
 		if (m_press_state == STATE_TRAN::PRESS_AREA) {
 			// 押された状態が範囲を選択している場合,
 			// 補助線の色をブラシに格納する.
-			m_page_dx.m_aux_brush->SetColor(m_page_layout.m_aux_color);
+			D2D1_COLOR_F aux_color;
+			m_page_layout.get_auxiliary_color(aux_color);
+			m_page_dx.m_aux_brush->SetColor(aux_color);
 			if (m_draw_tool == DRAW_TOOL::SELECT
 				|| m_draw_tool == DRAW_TOOL::RECT
 				|| m_draw_tool == DRAW_TOOL::TEXT

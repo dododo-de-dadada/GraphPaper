@@ -39,7 +39,9 @@ namespace winrt::GraphPaper::implementation
 			m_sample_layout.draw_grid(m_sample_dx, offset);
 		}
 		if (m_sample_shape != nullptr) {
-			m_sample_dx.m_anch_brush->SetColor(m_sample_layout.m_anch_color);
+			D2D1_COLOR_F anch_color;
+			m_sample_layout.get_anchor_color(anch_color);
+			m_sample_dx.m_anch_brush->SetColor(anch_color);
 			m_sample_shape->draw(m_sample_dx);
 		}
 		if (m_sample_layout.m_grid_show == GRID_SHOW::FRONT) {

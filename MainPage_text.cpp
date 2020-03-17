@@ -356,7 +356,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				auto text = wchar_cpy(tx_edit().Text().c_str());
 				undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
-				if (ck_ignore_blank().IsChecked().GetBoolean()) {
+				if (ck_text_ignore_bottom_blank().IsChecked().GetBoolean()) {
 					s->delete_bottom_blank();
 				}
 				// 一連の操作の区切としてヌル操作をスタックに積む.

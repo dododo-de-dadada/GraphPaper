@@ -183,7 +183,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ステータスバーの状態をデータリーダーから読み込む.
-	void MainPage::status_read(DataReader const& dt_reader)
+	void MainPage::status_bar_read(DataReader const& dt_reader)
 	{
 		m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt32());
 	}

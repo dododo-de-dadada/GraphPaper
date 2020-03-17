@@ -755,7 +755,7 @@
         <ContentDialog x:Name="cd_edit_text" x:Uid="cd_edit_text" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
             <StackPanel>
                 <TextBox x:Name="tx_edit" AcceptsReturn="True" Height="128" HorizontalAlignment="Stretch" PlaceholderText="Text" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-                <CheckBox x:Name="ck_ignore_blank" x:Uid="ck_ignore_blank" Content="Ignore bottom blank line." Margin="4,4" />
+                <CheckBox x:Name="ck_text_ignore_bottom_blank" x:Uid="ck_text_ignore_bottom_blank" Content="Ignore bottom blank line." Margin="4,4" />
             </StackPanel>
         </ContentDialog>
         <!-- 貼り付け確認ダイアログ -->

@@ -240,7 +240,6 @@ namespace winrt::GraphPaper::implementation
 
 		U_STACK_T m_stack_redo;		// やり直し操作スタック
 		U_STACK_T m_stack_undo;		// 元に戻す操作スタック
-		//uint32_t m_stack_nset = 0;	// 操作スタックに積まれた要素の組数
 		uint32_t m_stack_ucnt = 0;	// 元に戻す操作スタックに積まれた要素の組数
 		uint32_t m_stack_rcnt = 0;	// やり直す操作スタックに積まれた要素の組数
 		bool m_stack_push = false;	// 操作スタックの更新フラグ (ヌルが積まれたら true)
@@ -415,11 +414,11 @@ namespace winrt::GraphPaper::implementation
 		// ファイルメニューの「最近使ったファイル 5」が選択された
 		void mfi_file_recent_5_click(IInspectable const&, RoutedEventArgs const&);
 		// 最近使ったファイルにストレージファイルを追加する.
-		void mru_add_file(StorageFile const& s_file);
+		void file_recent_add(StorageFile const& s_file);
 		// 最近使ったファイルのトークンからストレージファイルを得る.
-		IAsyncOperation<StorageFile> mru_get_file_async(const winrt::hstring token);
+		IAsyncOperation<StorageFile> file_recent_get_async(const winrt::hstring token);
 		// 最近使ったファイルのメニュー項目を更新する.
-		void mru_update_menu_items(void);
+		void file_recent_update_menu(void);
 
 		//-------------------------------
 		// MainPage_fill.cpp
@@ -591,14 +590,14 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_layout.cpp
-		// レイアウトの設定
+		// レイアウトの初期化, 保存と削除
 		//-------------------------------
 
 		// レイアウトメニューの「レイアウトをリセット」が選択された.
 		IAsyncAction mfi_layout_reset_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「レイアウトを保存」が選択された.
 		IAsyncAction mfi_layout_save_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 既定値でレイアウトを初期化する.
+		// ページレイアウトを既定値で初期化する.
 		void layout_init(void);
 		// 保存されたレイアウトデータを読み込む.
 		IAsyncOperation<winrt::hresult> MainPage::layout_load_async(void);
@@ -608,7 +607,7 @@ namespace winrt::GraphPaper::implementation
 		//　ページの設定と表示
 		//-------------------------------
 
-		//　ページの寸法入力ダイアログの「適用」ボタンが押された.
+		// ページの寸法入力ダイアログの「適用」ボタンが押された.
 		void cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
 		// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
 		void cd_page_size_sec_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
@@ -723,7 +722,7 @@ namespace winrt::GraphPaper::implementation
 		// 列挙型を OR 演算する.
 		static STATUS_BAR status_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 		// ステータスバーの状態をデータリーダーから読み込む.
-		void status_read(DataReader const& dt_reader);
+		void status_bar_read(DataReader const& dt_reader);
 		// ポインターの位置をステータスバーに格納する.
 		void status_set_curs(void);
 		// 作図ツールをステータスバーに格納する.

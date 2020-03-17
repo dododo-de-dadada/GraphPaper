@@ -167,8 +167,8 @@ namespace winrt::GraphPaper::implementation
 				format.put()
 			)
 		);
-		const auto w = static_cast<FLOAT>(max(std::fabsf(m_diff.x) - 2.0 * m_text_mar.width, 0.0));
-		const auto h = static_cast<FLOAT>(max(std::fabsf(m_diff.y) - 2.0 * m_text_mar.height, 0.0));
+		const auto w = static_cast<FLOAT>(max(std::fabsf(m_diff.x) - 2.0 * m_text_margin.width, 0.0));
+		const auto h = static_cast<FLOAT>(max(std::fabsf(m_diff.y) - 2.0 * m_text_margin.height, 0.0));
 		winrt::check_hresult(
 			s_dwrite_factory->CreateTextLayout(
 				m_text, len, format.get(),
@@ -211,8 +211,8 @@ namespace winrt::GraphPaper::implementation
 				create_text_layout();
 			}
 			else {
-				const FLOAT w = static_cast<FLOAT>(max(std::fabs(m_diff.x) - m_text_mar.width * 2.0, 0.0));
-				const FLOAT h = static_cast<FLOAT>(max(std::fabs(m_diff.y) - m_text_mar.height * 2.0, 0.0));
+				const FLOAT w = static_cast<FLOAT>(max(std::fabs(m_diff.x) - m_text_margin.width * 2.0, 0.0));
+				const FLOAT h = static_cast<FLOAT>(max(std::fabs(m_diff.y) - m_text_margin.height * 2.0, 0.0));
 				bool flag = false;
 				if (equal(w, m_dw_text_layout->GetMaxWidth()) == false) {
 					m_dw_text_layout->SetMaxWidth(w);
@@ -256,8 +256,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F t_min;
 		pt_add(m_pos, m_diff, t_min);
 		pt_min(m_pos, t_min, t_min);
-		auto hm = min(m_text_mar.width, fabs(m_diff.x) * 0.5);
-		auto vm = min(m_text_mar.height, fabs(m_diff.y) * 0.5);
+		auto hm = min(m_text_margin.width, fabs(m_diff.x) * 0.5);
+		auto vm = min(m_text_margin.height, fabs(m_diff.y) * 0.5);
 		pt_add(t_min, hm, vm, t_min);
 //uint32_t line_cnt;
 //m_dw_text_layout->GetLineMetrics(nullptr, 0, &line_cnt);
@@ -433,7 +433,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字列の余白を得る.
 	bool ShapeText::get_text_margin(D2D1_SIZE_F& value) const noexcept
 	{
-		value = m_text_mar;
+		value = m_text_margin;
 		return true;
 	}
 
@@ -458,7 +458,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F nw_pos;
 		ShapeStroke::get_min_pos(nw_pos);
 		pt_sub(t_pos, nw_pos, nw_pos);
-		pt_sub(nw_pos, m_text_mar, nw_pos);
+		pt_sub(nw_pos, m_text_margin, nw_pos);
 		const auto l_cnt = m_dw_linecnt;
 		for (uint32_t i = 0; i < l_cnt; i++) {
 			auto const& test = m_dw_test_metrics[i];
@@ -782,10 +782,10 @@ namespace winrt::GraphPaper::implementation
 	// 値を文字列の余白に格納する.
 	void ShapeText::set_text_margin(const D2D1_SIZE_F value)
 	{
-		if (equal(m_text_mar, value)) {
+		if (equal(m_text_margin, value)) {
 			return;
 		}
-		m_text_mar = value;
+		m_text_margin = value;
 		create_text_metrics();
 	}
 
@@ -813,7 +813,7 @@ namespace winrt::GraphPaper::implementation
 		m_font_style(attr->m_font_style),
 		m_font_weight(attr->m_font_weight),
 		m_text_line(attr->m_text_line),
-		m_text_mar(attr->m_text_mar),
+		m_text_margin(attr->m_text_margin),
 		m_text(text),
 		m_text_align_t(attr->m_text_align_t),
 		m_text_align_p(attr->m_text_align_p),
@@ -839,7 +839,7 @@ namespace winrt::GraphPaper::implementation
 		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_line = dt_reader.ReadDouble();
-		read(m_text_mar, dt_reader);
+		read(m_text_margin, dt_reader);
 		create_text_layout();
 	}
 
@@ -860,7 +860,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
 		dt_writer.WriteDouble(m_text_line);
-		write(m_text_mar, dt_writer);
+		write(m_text_margin, dt_writer);
 	}
 
 	// データライターに SVG タグとして書き込む.
@@ -925,7 +925,7 @@ namespace winrt::GraphPaper::implementation
 		write_svg(">" SVG_NL, dt_writer);
 		// 書体を表示する左上位置に余白を加える.
 		D2D1_POINT_2F nw_pos;
-		pt_add(m_pos, m_text_mar.width, m_text_mar.height, nw_pos);
+		pt_add(m_pos, m_text_margin.width, m_text_margin.height, nw_pos);
 		for (uint32_t i = 0; i < m_dw_linecnt; i++) {
 			const wchar_t* t = m_text + m_dw_test_metrics[i].textPosition;
 			const uint32_t t_len = m_dw_test_metrics[i].length;

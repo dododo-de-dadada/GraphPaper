@@ -395,17 +395,13 @@ namespace winrt::GraphPaper::implementation
 		if (m_summary_visible) {
 			summary_close();
 		}
-		// 操作スタックを消去し, 含まれる操作を破棄する.
 		undo_clear();
-		// 図形リストを消去し, 含まれる図形を破棄する.
 		s_list_clear(m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
-			// 「メモリリーク」メッセージダイアログを表示する.
 			cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
 		}
 #endif
-		// 有効な書体名の配列を破棄する.
 		ShapeText::release_available_fonts();
 		m_page_dx.Release();
 		m_sample_dx.Release();
@@ -490,7 +486,16 @@ namespace winrt::GraphPaper::implementation
 			// レイアウトの読み込みに失敗した場合,
 			layout_init();
 		}
-		mru_add_file(nullptr);
+		{
+			m_page_min.x = 0.0;
+			m_page_min.y = 0.0;
+			m_page_max.x = m_page_layout.m_page_size.width;
+			m_page_max.y = m_page_layout.m_page_size.height;
+			m_page_unit = LEN_UNIT::PIXEL;
+			m_col_style = COL_STYLE::DEC;
+			m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
+		}
+		file_recent_add(nullptr);
 		finish_file_read();
 	}
 

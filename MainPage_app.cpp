@@ -96,21 +96,12 @@ namespace winrt::GraphPaper::implementation
 			}
 			try {
 				// キャンセルでない場合,
-				// アプリケーションデータを格納するためのフォルダーを得る.
-				// LocalCacheFolder は「有効な範囲外のデータにアクセスしようとしました」内部エラーを起こすが,
-				// とりあえず, ファイルを作成して保存はできている.
-				// ストレージファイルをローカルフォルダに作成する.
 				auto s_file{ co_await cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 				if (s_file != nullptr) {
-					// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
 					hr = co_await file_write_suspend_async(s_file);
-					// ファイルを破棄する.
 					s_file = nullptr;
-					// 操作スタックを消去し, 含まれる操作を破棄する.
 					undo_clear();
-					// 図形リストを消去し, 含まれる図形を破棄する.
 					s_list_clear(m_list_shapes);
-					// 有効な書体名の配列を破棄する.
 					ShapeText::release_available_fonts();
 				}
 			}
@@ -168,8 +159,6 @@ namespace winrt::GraphPaper::implementation
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 
-		// 有効な書体名の配列を破棄する.
-		// ShapeText::release_available_fonts();
 		// 有効な書体名の配列を設定する.
 		ShapeText::set_available_fonts();
 

@@ -135,7 +135,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 破線の配置
 	union STROKE_PATTERN {
-		float m_[6];
+		float m_[6] = { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F };
 	};
 
 	// 色成分の最大値
@@ -548,7 +548,6 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeLayout : Shape {
 
 		// 方眼の属性
-		D2D1_COLOR_F m_grid_color;	// 方眼線の色 (MainPage のコンストラクタで設定)
 		double m_grid_base = 0.0;	// 方眼の基準の大きさ (を -1 した値)
 		double m_grid_opac = GRID_OPAC;	// 方眼線の不透明度
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼線の表示
@@ -566,21 +565,18 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_fill_color = S_WHITE;	// 塗りつぶしの色
 		D2D1_COLOR_F m_stroke_color = S_BLACK;	// 線枠の色 (MainPage のコンストラクタで設定)
 		STROKE_PATTERN m_stroke_pattern{ 4.0f, 3.0f, 1.0f, 3.0f };	// 破線の配置
-		D2D1_DASH_STYLE m_stroke_style = D2D1_DASH_STYLE_SOLID;	// 破線の形式
+		D2D1_DASH_STYLE m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		double m_stroke_width = 1.0;	// 線枠の太さ
 		D2D1_COLOR_F m_font_color = S_BLACK;	// 書体の色 (MainPage のコンストラクタで設定)
 		wchar_t* m_font_family = nullptr;	// 書体名
 		double m_font_size = 12.0 * 96.0 / 72.0;	// 書体の大きさ
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH_UNDEFINED;	// 書体の伸縮
-		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
-		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
+		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
+		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		double m_text_line = 0.0;	// 行間 (DIPs 96dpi固定)
-		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
-		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
-		D2D1_SIZE_F m_text_mar{ 4.0f, 4.0f };	// 文字列の左右と上下の余白
-
-		D2D1_COLOR_F m_anch_color;	// 部位の色
-		D2D1_COLOR_F m_aux_color;	// 補助線の色
+		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
+		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
+		D2D1_SIZE_F m_text_margin{ 4.0f, 4.0f };	// 文字列の左右と上下の余白
 
 		//------------------------------
 		// shape_layout.cpp
@@ -600,12 +596,18 @@ namespace winrt::GraphPaper::implementation
 		void draw_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
 		// 方眼線を表示する,
 		void draw_grid(SHAPE_DX const& dx, const D2D1_POINT_2F offset);
+		// 部位の色を得る.
+		void get_anchor_color(D2D1_COLOR_F& value) const noexcept;
 		// 矢じりの寸法を得る.
 		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
 		// 矢じりの形式を得る.
 		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
+		// 補助線の色を得る.
+		void get_auxiliary_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の基準の大きさを得る.
 		bool get_grid_base(double& value) const noexcept;
+		// 方眼線の色を得る.
+		void get_grid_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の大きさを得る.
 		bool get_grid_opac(double& value) const noexcept;
 		// 方眼の表示の状態を得る.
@@ -1126,7 +1128,7 @@ namespace winrt::GraphPaper::implementation
 		wchar_t* m_text = nullptr;	// 文字列
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落そろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字揃え
-		D2D1_SIZE_F m_text_mar{ 4.0f, 4.0f };	// 文字列のまわりの上下と左右の余白
+		D2D1_SIZE_F m_text_margin{ 4.0f, 4.0f };	// 文字列のまわりの上下と左右の余白
 
 		winrt::com_ptr<IDWriteTextLayout> m_dw_text_layout{};	// 文字列を表示するためのレイアウト
 		DWRITE_HIT_TEST_METRICS* m_dw_test_metrics = nullptr;	// 文字列の計量
