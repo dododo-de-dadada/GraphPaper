@@ -56,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 			check = tmfi_status_curs().IsChecked();
 			tmfi_status_curs_2().IsChecked(check);
 			// ポインターの位置をステータスバーに格納する.
-			status_set_curs();
+			status_bar_set_curs();
 			status_visiblity(check, tk_status_pos_x());
 			status_visiblity(check, tk_status_pos_y());
 		}
@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 			check = tmfi_status_curs_2().IsChecked();
 			tmfi_status_curs().IsChecked(check);
 			// ポインターの位置をステータスバーに格納する.
-			status_set_curs();
+			status_bar_set_curs();
 			status_visiblity(check, tk_status_pos_x());
 			status_visiblity(check, tk_status_pos_y());
 		}
@@ -74,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 			check = tmfi_status_grid().IsChecked();
 			tmfi_status_grid_2().IsChecked(check);
 			// 方眼の大きさをステータスバーに格納する.
-			status_set_grid();
+			status_bar_set_grid();
 			status_visiblity(check, tk_status_grid());
 		}
 		else if (sender == tmfi_status_grid_2()) {
@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 			check = tmfi_status_grid_2().IsChecked();
 			tmfi_status_grid().IsChecked(check);
 			// 方眼の大きさをステータスバーに格納する.
-			status_set_grid();
+			status_bar_set_grid();
 			status_visiblity(check, tk_status_grid());
 		}
 		else if (sender == tmfi_status_page()) {
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 			check = tmfi_status_page().IsChecked();
 			tmfi_status_page_2().IsChecked(check);
 			// ページの大きさをステータスバーに格納する.
-			status_set_page();
+			status_bar_set_page();
 			status_visiblity(check, tk_status_width());
 			status_visiblity(check, tk_status_height());
 		}
@@ -99,7 +99,7 @@ namespace winrt::GraphPaper::implementation
 			check = tmfi_status_page_2().IsChecked();
 			tmfi_status_page().IsChecked(check);
 			// ページの大きさをステータスバーに格納する.
-			status_set_page();
+			status_bar_set_page();
 			status_visiblity(check, tk_status_width());
 			status_visiblity(check, tk_status_height());
 		}
@@ -107,14 +107,14 @@ namespace winrt::GraphPaper::implementation
 			s_bar = STATUS_BAR::ZOOM;
 			check = tmfi_status_zoom().IsChecked();
 			tmfi_status_zoom_2().IsChecked(check);
-			status_set_zoom();
+			status_bar_set_zoom();
 			status_visiblity(check, tk_status_zoom());
 		}
 		else if (sender == tmfi_status_zoom_2()) {
 			s_bar = STATUS_BAR::ZOOM;
 			check = tmfi_status_zoom_2().IsChecked();
 			tmfi_status_zoom().IsChecked(check);
-			status_set_zoom();
+			status_bar_set_zoom();
 			status_visiblity(check, tk_status_zoom());
 		}
 		else if (sender == tmfi_status_tool()) {
@@ -122,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 			check = tmfi_status_tool().IsChecked();
 			tmfi_status_tool_2().IsChecked(check);
 			// 作図ツールをステータスバーに格納する.
-			status_set_draw();
+			status_bar_set_draw();
 			status_visiblity(check, sp_status_tool());
 		}
 		else if (sender == tmfi_status_tool_2()) {
@@ -130,21 +130,21 @@ namespace winrt::GraphPaper::implementation
 			check = tmfi_status_tool_2().IsChecked();
 			tmfi_status_tool().IsChecked(check);
 			// 作図ツールをステータスバーに格納する.
-			status_set_draw();
+			status_bar_set_draw();
 			status_visiblity(check, sp_status_tool());
 		}
 		else if (sender == tmfi_status_unit()) {
 			s_bar = STATUS_BAR::UNIT;
 			check = tmfi_status_unit().IsChecked();
 			tmfi_status_unit_2().IsChecked(check);
-			status_set_unit();
+			status_bar_set_unit();
 			status_visiblity(check, tk_status_unit());
 		}
 		else if (sender == tmfi_status_unit_2()) {
 			s_bar = STATUS_BAR::UNIT;
 			check = tmfi_status_unit_2().IsChecked();
 			tmfi_status_unit().IsChecked(check);
-			status_set_unit();
+			status_bar_set_unit();
 			status_visiblity(check, tk_status_unit());
 		}
 		else {
@@ -160,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ステータスバーのメニュー項目に印をつける.
-	void MainPage::status_check_menu(const STATUS_BAR st_bar)
+	void MainPage::status_bar_check_menu(const STATUS_BAR st_bar)
 	{
 		tmfi_status_curs().IsChecked(status_mask(st_bar, STATUS_BAR::CURS));
 		tmfi_status_grid().IsChecked(status_mask(st_bar, STATUS_BAR::GRID));
@@ -189,7 +189,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ポインターの位置をステータスバーに格納する.
-	void MainPage::status_set_curs(void)
+	void MainPage::status_bar_set_curs(void)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
 		const auto wp = CoreWindow::GetForCurrentThread().PointerPosition();
@@ -224,7 +224,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	}
 
 	// 方眼の大きさをステータスバーに格納する.
-	void MainPage::status_set_grid(void)
+	void MainPage::status_bar_set_grid(void)
 	{
 		wchar_t buf[32];
 		const double dpi = m_page_dx.m_logical_dpi;
@@ -235,7 +235,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	}
 
 	// ページの大きさをステータスバーに格納する.
-	void MainPage::status_set_page(void)
+	void MainPage::status_bar_set_page(void)
 	{
 		const double dpi = m_page_dx.m_logical_dpi;
 		const double g_len = m_page_layout.m_grid_base + 1.0;
@@ -249,7 +249,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	}
 
 	// 作図ツールをステータスバーに格納する.
-	void MainPage::status_set_draw(void)
+	void MainPage::status_bar_set_draw(void)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
@@ -289,7 +289,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	}
 
 	// 単位をステータスバーに格納する.
-	void MainPage::status_set_unit(void)
+	void MainPage::status_bar_set_unit(void)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
@@ -316,7 +316,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	}
 
 	// 拡大率をステータスバーに格納する.
-	void MainPage::status_set_zoom(void)
+	void MainPage::status_bar_set_zoom(void)
 	{
 		wchar_t buf[32];
 		swprintf_s(buf, 31, FMT_ZOOM, m_page_layout.m_page_scale * 100.0);
@@ -324,7 +324,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	}
 
 	// ステータスバーの表示を設定する.
-	void MainPage::status_visibility(void)
+	void MainPage::status_bar_visibility(void)
 	{
 		tk_status_pos_x().Visibility(status_mask(m_status_bar, STATUS_BAR::CURS) ? VISIBLE : COLLAPSED);
 		tk_status_pos_y().Visibility(status_mask(m_status_bar, STATUS_BAR::CURS) ? VISIBLE : COLLAPSED);
@@ -343,7 +343,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	}
 
 	// ステータスバーの状態をデータライターに書き込む.
-	void MainPage::status_write(DataWriter const& dt_writer)
+	void MainPage::status_bar_write(DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_status_bar));
 	}

@@ -133,7 +133,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			using winrt::Windows::UI::Xaml::Media::Brush;
 
-			const auto dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
+			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			// 色の初期値はテーマに依存する.
 			D2D1_COLOR_F b_color = S_WHITE;
 			D2D1_COLOR_F f_color = S_BLACK;
@@ -156,8 +156,8 @@ namespace winrt::GraphPaper::implementation
 			m_page_layout.m_grid_snap = true;
 			m_page_layout.set_page_color(b_color);
 			m_page_layout.m_page_scale = 1.0;
-			m_page_layout.m_page_size.width = std::floor(A4_PER_INCH.width * dpi);
-			m_page_layout.m_page_size.height = std::floor(A4_PER_INCH.height * dpi);
+			m_page_layout.m_page_size.width = static_cast<FLOAT>(std::floor(A4_PER_INCH.width * dpi));
+			m_page_layout.m_page_size.height = static_cast<FLOAT>(std::floor(A4_PER_INCH.height * dpi));
 			m_page_layout.set_stroke_color(f_color);
 			m_page_layout.m_stroke_pattern = STROKE_PATTERN();
 			m_page_layout.m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;

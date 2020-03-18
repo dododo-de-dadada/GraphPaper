@@ -50,7 +50,7 @@
 // 	file_save_async
 // 	file_recent_add
 // 		file_recent_update_menu
-// mfi_open_click_async
+// mfi_file_open_click_async
 // 	cd_conf_save().ShowAsync
 // 	file_save_async
 // 	file_wait_cursor
@@ -64,9 +64,9 @@
 // 		finish_file_read
 // mfi_file_recent_N_click
 // 	file_read_recent_async
-// mfi_save_as_click
+// mfi_file_save_as_click
 // 	file_save_as_async
-// mfi_save_click
+// mfi_file_save_click
 // 	file_save_async
 /*
 ただし、4つのWindowsランタイム非同期操作タイプ（IAsyncXxx）のいずれかを
@@ -132,56 +132,61 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::FileAccessMode;
 
 		auto hr = E_FAIL;
-		// コルーチンの開始時のスレッドコンテキストを保存する.
 		winrt::apartment_context context;
-		// スレッドをバックグラウンドに変更する.
 		co_await winrt::resume_background();
 		try {
-			// ファイルを開いてランダムアクセスストリームを得る.
 			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
-			// ストリームから読み込むためのデータリーダーを作成する.
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
-			// データリーダーにファイルを読み込む.
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
 			text_find_read(dt_reader);
 			status_bar_read(dt_reader);
 			m_page_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_col_style = static_cast<COL_STYLE>(dt_reader.ReadUInt32());
+
 			m_page_layout.read(dt_reader);
+			// 無効なデータを読み込んでアプリが落ちることがないよう, 値を制限する.
+			m_page_layout.m_grid_base = max(m_page_layout.m_grid_base, 0.0F);
 			m_page_layout.m_page_scale = min(max(m_page_layout.m_page_scale, SCALE_MIN), SCALE_MAX);
+			m_page_layout.m_page_size.width = max(min(m_page_layout.m_page_size.width, m_page_size_max), 1.0F);
+			m_page_layout.m_page_size.height = max(min(m_page_layout.m_page_size.height, m_page_size_max), 1.0F);
+
 			undo_clear();
 			s_list_clear(m_list_shapes);
 #if defined(_DEBUG)
 			if (debug_leak_cnt != 0) {
-				co_await winrt::resume_foreground(this->Dispatcher());
+				auto cd = this->Dispatcher();
+				co_await winrt::resume_foreground(cd);
 				cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
 				co_await context;
 				co_return hr;
 			}
 #endif
-			if (layout || s_list_read(m_list_shapes, dt_reader)) {
+			if (layout) {
+				// レイアウトフラグが立っている場合,
+				hr = S_OK;
+			}
+			else if (s_list_read(m_list_shapes, dt_reader)) {
 				if (suspend) {
 					// 中断フラグが立っている場合,
-					// データリーダーから操作スタックを読み込む.
 					undo_read(dt_reader);
 				}
 				hr = S_OK;
 			}
-			// データリーダーを閉じる.
 			dt_reader.Close();
-			// ストリームを閉じる.
 			ra_stream.Close();
 		}
 		catch (winrt::hresult_error const& e) {
 			hr = e.code();
 		}
 		if (hr != S_OK) {
-			co_await winrt::resume_foreground(this->Dispatcher());
+			auto cd = this->Dispatcher();
+			co_await winrt::resume_foreground(cd);
 			cd_message_show(ICON_ALERT, ERR_READ, s_file.Path());
 		}
 		else if (suspend == false && layout == false) {
-			co_await winrt::resume_foreground(this->Dispatcher());
+			auto cd = this->Dispatcher();
+			co_await winrt::resume_foreground(cd);
 			file_recent_add(s_file);
 			finish_file_read();
 		}
@@ -300,7 +305,8 @@ namespace winrt::GraphPaper::implementation
 			// 結果が S_OK でない場合,
 			// スレッドをメインページの UI スレッドに変える.
 			// 最近使ったファイルのエラーメッセージダイアログを表示する.
-			co_await winrt::resume_foreground(this->Dispatcher());
+			auto cd = this->Dispatcher();
+			co_await winrt::resume_foreground(cd);
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
 			cd_message_show(ICON_ALERT, ERR_WRITE, m_token_mru);
 		}
@@ -338,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
 			
 			text_find_write(dt_writer);
-			status_write(dt_writer);
+			status_bar_write(dt_writer);
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_page_unit));
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_col_style));
 			m_page_layout.write(dt_writer);
@@ -374,14 +380,16 @@ namespace winrt::GraphPaper::implementation
 		if (hr != S_OK) {
 			// 結果が S_OK でない場合,
 			// スレッドをメインページの UI スレッドに変える.
-			co_await winrt::resume_foreground(this->Dispatcher());
+			auto cd = this->Dispatcher();
+			co_await winrt::resume_foreground(cd);
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
 			cd_message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
 		}
 		else if (suspend == false && layout == false) {
 			// 中断フラグがない場合,
 			// スレッドをメインページの UI スレッドに変える.
-			co_await winrt::resume_foreground(this->Dispatcher());
+			auto cd = this->Dispatcher();
+			co_await winrt::resume_foreground(cd);
 			// ストレージファイルを最近使ったファイルに登録する.
 			// ここでエラーが出る.
 			file_recent_add(s_file);
@@ -580,7 +588,8 @@ namespace winrt::GraphPaper::implementation
 		if (hr != S_OK) {
 			// 結果が S_OK でない場合,
 			// スレッドをメインページの UI スレッドに変える.
-			co_await winrt::resume_foreground(this->Dispatcher());
+			auto cd = this->Dispatcher();
+			co_await winrt::resume_foreground(cd);
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
 			cd_message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
 		}
@@ -597,8 +606,9 @@ namespace winrt::GraphPaper::implementation
 		stroke_style_check_menu(m_page_layout.m_stroke_style);
 		arrow_style_check_menu(m_page_layout.m_arrow_style);
 		font_style_check_menu(m_page_layout.m_font_style);
+		grid_patt_check_menu(m_page_layout.m_grid_patt);
 		grid_show_check_menu(m_page_layout.m_grid_show);
-		status_check_menu(m_status_bar);
+		status_bar_check_menu(m_status_bar);
 		text_align_t_check_menu(m_page_layout.m_text_align_t);
 		text_align_p_check_menu(m_page_layout.m_text_align_p);
 		tmfi_grid_snap().IsChecked(m_page_layout.m_grid_snap);
@@ -629,17 +639,17 @@ namespace winrt::GraphPaper::implementation
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
-		status_set_curs();
-		status_set_draw();
-		status_set_grid();
-		status_set_page();
-		status_set_zoom();
-		status_set_unit();
-		status_visibility();
+		status_bar_set_curs();
+		status_bar_set_draw();
+		status_bar_set_grid();
+		status_bar_set_page();
+		status_bar_set_zoom();
+		status_bar_set_unit();
+		status_bar_visibility();
 	}
 
 	// ファイルメニューの「開く」が選択された
-	IAsyncAction MainPage::mfi_open_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_file_open_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::Storage::Pickers::FileOpenPicker;
@@ -683,14 +693,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ファイルメニューの「名前を付けて保存」が選択された
-	void MainPage::mfi_save_as_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_file_save_as_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		constexpr bool SVG_ALLOWED = true;
 		auto _{ file_save_as_async(SVG_ALLOWED) };
 	}
 
 	// ファイルメニューの「上書き保存」が選択された
-	void MainPage::mfi_save_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_file_save_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto _{ file_save_async() };
 	}

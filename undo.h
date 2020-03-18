@@ -4,7 +4,7 @@
 //
 // undo.cpp
 //
-// 元に戻す / やり直す操作
+// 元に戻す / やり直し操作
 // 図形の追加や削除, 変更は, 「操作」を通じて行われる.
 //------------------------------
 #include <list>
@@ -37,6 +37,7 @@ namespace winrt::GraphPaper::implementation
 		FONT_WEIGHT,	// 書体の太さを操作
 		GRID_BASE,	// 方眼の基準の大さを操作
 		GRID_OPAC,	// 方眼の色の濃さを操作
+		GRID_PATT,	// 方眼の形式を操作
 		GRID_SHOW,	// 方眼の表示方法を操作
 		GROUP,	// 図形をグループに挿入または削除する操作
 		LIST,	// 図形をリストに挿入または削除する操作
@@ -222,6 +223,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::FONT_WEIGHT> { using type = DWRITE_FONT_WEIGHT; };
 	template <> struct U_TYPE<UNDO_OP::GRID_BASE> { using type = double; };
 	template <> struct U_TYPE<UNDO_OP::GRID_OPAC> { using type = double; };
+	template <> struct U_TYPE<UNDO_OP::GRID_PATT> { using type = GRID_PATT; };
 	template <> struct U_TYPE<UNDO_OP::GRID_SHOW> { using type = GRID_SHOW; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_LINE> { using type = double; };
 	template <> struct U_TYPE<UNDO_OP::PAGE_COLOR> { using type = D2D1_COLOR_F; };

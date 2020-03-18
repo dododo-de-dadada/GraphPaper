@@ -161,18 +161,39 @@ namespace winrt::GraphPaper::implementation
 		v_end.y = m_page_size.height;
 		h_end.x = m_page_size.width;
 		const double g_len = max(m_grid_base + 1.0, 1.0);
+
 		// 垂直な方眼線を表示する.
+		float w;
 		double x;
 		for (uint32_t i = 0; (x = g_len * i + offset.x) < pw; i++) {
+			if (m_grid_patt == GRID_PATT::PATT_3 && (i % 10) == 0) {
+				w = 2.0F * sw;
+			}
+			else if (m_grid_patt == GRID_PATT::PATT_1 || (i % 2) == 0) {
+				w = sw;
+			}
+			else {
+				w = 0.5F * sw;
+			}
 			v_start.x = v_end.x = static_cast<FLOAT>(x);
-			dx.m_d2dContext->DrawLine(v_start, v_end, br, sw, nullptr);
+			dx.m_d2dContext->DrawLine(v_start, v_end, br, w, nullptr);
 		}
 		// 水平な方眼線を表示する.
 		double y;
 		for (uint32_t i = 0; (y = g_len * i + offset.y) < ph; i++) {
+			if (m_grid_patt == GRID_PATT::PATT_3 && (i % 10) == 0) {
+				w = 2.0F * sw;
+			}
+			else if (m_grid_patt == GRID_PATT::PATT_1 || (i % 2) == 0) {
+				w = sw;
+			}
+			else {
+				w = 0.5F * sw;
+			}
 			h_start.y = h_end.y = static_cast<FLOAT>(y);
-			dx.m_d2dContext->DrawLine(h_start, h_end, br, sw, nullptr);
+			dx.m_d2dContext->DrawLine(h_start, h_end, br, w, nullptr);
 		}
+
 	}
 
 	// 部位の色を得る.
@@ -277,6 +298,13 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
+	// 方眼線の形式を得る.
+	bool ShapeLayout::get_grid_patt(GRID_PATT& value) const noexcept
+	{
+		value = m_grid_patt;
+		return true;
+	}
+
 	// 方眼線の表示を得る.
 	bool ShapeLayout::get_grid_show(GRID_SHOW& value) const noexcept
 	{
@@ -377,6 +405,7 @@ namespace winrt::GraphPaper::implementation
 		read(dummy, dt_reader);	// 方眼の色
 		m_grid_base = dt_reader.ReadDouble();	// 方眼の大きさ
 		m_grid_opac = dt_reader.ReadDouble();
+		read(m_grid_patt, dt_reader);
 		read(m_grid_show, dt_reader);
 		m_grid_snap = dt_reader.ReadBoolean();
 		read(m_page_color, dt_reader);
@@ -474,6 +503,12 @@ namespace winrt::GraphPaper::implementation
 		m_grid_opac = value;
 	}
 
+	// 値を方眼線の形式に格納する.
+	void ShapeLayout::set_grid_patt(const GRID_PATT value) noexcept
+	{
+		m_grid_patt = value;
+	}
+
 	// 値を方眼線の表示に格納する.
 	void ShapeLayout::set_grid_show(const GRID_SHOW value) noexcept
 	{
@@ -502,8 +537,7 @@ namespace winrt::GraphPaper::implementation
 	// 値をページの寸法に格納する.
 	void ShapeLayout::set_page_size(const D2D1_SIZE_F value) noexcept
 	{
-		m_page_size.width = min(max(value.width, 32768.0F), 1.0F);
-		m_page_size.height = min(max(value.height, 32768.0F), 1.0F);
+		m_page_size = value;
 	}
 
 	// 線枠の色に格納する.
@@ -567,20 +601,17 @@ namespace winrt::GraphPaper::implementation
 		s->get_font_stretch(m_font_stretch);
 		s->get_font_style(m_font_style);
 		s->get_font_weight(m_font_weight);
-		s->get_grid_opac(m_grid_opac);
 		s->get_grid_base(m_grid_base);
+		s->get_grid_opac(m_grid_opac);
+		s->get_grid_patt(m_grid_patt);
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
-		s->get_text_line_height(m_text_line);
 		s->get_page_color(m_page_color);
-		//D2D1_COLOR_F color;
-		//if (s->get_page_color(color)) {
-		//	set_page_color(color);
-		//}
 		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_pattern(m_stroke_pattern);
 		s->get_stroke_style(m_stroke_style);
 		s->get_stroke_width(m_stroke_width);
+		s->get_text_line_height(m_text_line);
 		s->get_text_align_t(m_text_align_t);
 		s->get_text_align_p(m_text_align_p);
 		s->get_text_margin(m_text_margin);
@@ -595,6 +626,7 @@ namespace winrt::GraphPaper::implementation
 		write(dummy, dt_writer);
 		dt_writer.WriteDouble(m_grid_base);
 		dt_writer.WriteDouble(m_grid_opac);
+		write(m_grid_patt, dt_writer);
 		write(m_grid_show, dt_writer);
 		dt_writer.WriteBoolean(m_grid_snap);
 		write(m_page_color, dt_writer);

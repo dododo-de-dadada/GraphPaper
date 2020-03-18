@@ -312,6 +312,7 @@ namespace winrt::GraphPaper::implementation
 	template bool UndoSet<UNDO_OP::FONT_WEIGHT>::changed(void) const noexcept;
 	template bool UndoSet<UNDO_OP::GRID_BASE>::changed(void) const noexcept;
 	template bool UndoSet<UNDO_OP::GRID_OPAC>::changed(void) const noexcept;
+	template bool UndoSet<UNDO_OP::GRID_PATT>::changed(void) const noexcept;
 	template bool UndoSet<UNDO_OP::GRID_SHOW>::changed(void) const noexcept;
 	template bool UndoSet<UNDO_OP::TEXT_LINE>::changed(void) const noexcept;
 	template bool UndoSet<UNDO_OP::TEXT_MARGIN>::changed(void) const noexcept;
@@ -348,6 +349,7 @@ namespace winrt::GraphPaper::implementation
 	template void UndoSet<UNDO_OP::FONT_WEIGHT>::exec(void);
 	template void UndoSet<UNDO_OP::GRID_BASE>::exec(void);
 	template void UndoSet<UNDO_OP::GRID_OPAC>::exec(void);
+	template void UndoSet<UNDO_OP::GRID_PATT>::exec(void);
 	template void UndoSet<UNDO_OP::GRID_SHOW>::exec(void);
 	//template void UndoSet<UNDO_OP::GRID_SNAP>::exec(void);
 	template void UndoSet<UNDO_OP::TEXT_LINE>::exec(void);
@@ -382,6 +384,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoSet<UNDO_OP::FONT_WEIGHT>::UndoSet(Shape* s);
 	template UndoSet<UNDO_OP::GRID_BASE>::UndoSet(Shape* s);
 	template UndoSet<UNDO_OP::GRID_OPAC>::UndoSet(Shape* s);
+	template UndoSet<UNDO_OP::GRID_PATT>::UndoSet(Shape* s);
 	template UndoSet<UNDO_OP::GRID_SHOW>::UndoSet(Shape* s);
 	//template UndoSet<UNDO_OP::GRID_SNAP>::UndoSet(Shape* s);
 	template UndoSet<UNDO_OP::TEXT_LINE>::UndoSet(Shape* s);
@@ -416,6 +419,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoSet<UNDO_OP::FONT_WEIGHT>::UndoSet(Shape* s, const DWRITE_FONT_WEIGHT& value);
 	template UndoSet<UNDO_OP::GRID_BASE>::UndoSet(Shape* s, const double& value);
 	template UndoSet<UNDO_OP::GRID_OPAC>::UndoSet(Shape* s, const double& value);
+	template UndoSet<UNDO_OP::GRID_PATT>::UndoSet(Shape* s, const GRID_PATT& value);
 	template UndoSet<UNDO_OP::GRID_SHOW>::UndoSet(Shape* s, const GRID_SHOW& value);
 	template UndoSet<UNDO_OP::TEXT_LINE>::UndoSet(Shape* s, const double& value);
 	template UndoSet<UNDO_OP::TEXT_MARGIN>::UndoSet(Shape* s, const D2D1_SIZE_F& value);
@@ -449,6 +453,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoSet<UNDO_OP::FONT_WEIGHT>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<UNDO_OP::GRID_BASE>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<UNDO_OP::GRID_OPAC>::UndoSet(DataReader const& dt_reader);
+	template UndoSet<UNDO_OP::GRID_PATT>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<UNDO_OP::GRID_SHOW>::UndoSet(DataReader const& dt_reader);
 	//template UndoSet<UNDO_OP::GRID_SNAP>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<UNDO_OP::TEXT_LINE>::UndoSet(DataReader const& dt_reader);
@@ -514,6 +519,10 @@ namespace winrt::GraphPaper::implementation
 	void UndoSet<UNDO_OP::GRID_OPAC>::SET(Shape* s, const double& value)
 	{
 		s->set_grid_opac(value);
+	}
+	void UndoSet<UNDO_OP::GRID_PATT>::SET(Shape* s, const GRID_PATT& value)
+	{
+		s->set_grid_patt(value);
 	}
 	void UndoSet<UNDO_OP::GRID_SHOW>::SET(Shape* s, const GRID_SHOW& value)
 	{
@@ -621,6 +630,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		return s->get_grid_opac(value);
 	}
+	bool UndoSet<UNDO_OP::GRID_PATT>::GET(Shape* s, GRID_PATT& value) noexcept
+	{
+		return s->get_grid_patt(value);
+	}
 	bool UndoSet<UNDO_OP::GRID_SHOW>::GET(Shape* s, GRID_SHOW& value) noexcept
 	{
 		return s->get_grid_show(value);
@@ -698,6 +711,7 @@ namespace winrt::GraphPaper::implementation
 	template void UndoSet<UNDO_OP::FONT_WEIGHT>::write(DataWriter const& dt_writer);
 	template void UndoSet<UNDO_OP::GRID_BASE>::write(DataWriter const& dt_writer);
 	template void UndoSet<UNDO_OP::GRID_OPAC>::write(DataWriter const& dt_writer);
+	template void UndoSet<UNDO_OP::GRID_PATT>::write(DataWriter const& dt_writer);
 	template void UndoSet<UNDO_OP::GRID_SHOW>::write(DataWriter const& dt_writer);
 	template void UndoSet<UNDO_OP::TEXT_LINE>::write(DataWriter const& dt_writer);
 	template void UndoSet<UNDO_OP::TEXT_MARGIN>::write(DataWriter const& dt_writer);

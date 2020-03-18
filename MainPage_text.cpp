@@ -223,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -269,14 +269,14 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
-				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
 		}
 		// 次の図形の文字列を検索する.
 		if (text_find_whithin_shapes() || flag) {
 			// 見つかった, または置換された場合
-			// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+			// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 			enable_undo_menu();
 			// 再表示する.
 			page_draw();
@@ -292,10 +292,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		ShapeText* s = nullptr;
 
-		if (m_press_shape_prev != nullptr && typeid(*m_press_shape_prev) == typeid(ShapeText)) {
+		if (m_pointer_shape_prev != nullptr && typeid(*m_pointer_shape_prev) == typeid(ShapeText)) {
 			// 前回ポインターが押されたのが文字列図形の場合,
 			// その図形を得る.
-			s = static_cast<ShapeText*>(m_press_shape_prev);
+			s = static_cast<ShapeText*>(m_pointer_shape_prev);
 		}
 		else {
 			// 選択された図形のうち最前面にある文字列図形を得る.

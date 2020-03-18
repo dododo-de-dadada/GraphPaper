@@ -1,6 +1,6 @@
 //------------------------------
 // MainPage_undo.cpp
-// 元に戻すとやり直す
+// 元に戻すとやり直し
 //------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -103,6 +103,9 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::GRID_OPAC:
 			u = new UndoSet<UNDO_OP::GRID_OPAC>(dt_reader);
 			break;
+		case UNDO_OP::GRID_PATT:
+			u = new UndoSet<UNDO_OP::GRID_PATT>(dt_reader);
+			break;
 		case UNDO_OP::GRID_SHOW:
 			u = new UndoSet<UNDO_OP::GRID_SHOW>(dt_reader);
 			break;
@@ -174,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+	// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 	void MainPage::enable_undo_menu(void)
 	{
 		mfi_undo().IsEnabled(m_stack_ucnt > 0);
@@ -198,7 +201,7 @@ namespace winrt::GraphPaper::implementation
 			undo_exec(u);
 			flag = true;
 		}
-		// やり直す操作スタックから操作を取り出し, 実行して, 元に戻す操作に積む.
+		// やり直し操作スタックから操作を取り出し, 実行して, 元に戻す操作に積む.
 		// 操作がヌルでないあいだこれを繰り返す.
 		while (m_stack_redo.size() > 0) {
 			auto r = m_stack_redo.back();
@@ -299,7 +302,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
-			status_set_grid();
+			status_bar_set_grid();
+		}
+		else if (u_type == typeid(UndoSet<UNDO_OP::GRID_PATT>)) {
+			// ページメニューの「方眼の表示」に印をつける.
+			grid_patt_check_menu(m_page_layout.m_grid_patt);
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::GRID_SHOW>)) {
 			// ページメニューの「方眼の表示」に印をつける.
@@ -311,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::PAGE_SIZE>)) {
 			// ページの大きさをステータスバーに格納する.
-			status_set_page();
+			status_bar_set_page();
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::STROKE_STYLE>)) {
 			// 線枠メニューの「種類」に印をつける.
@@ -393,10 +400,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一連の操作の区切としてヌル操作をスタックに積む.
-	// やり直す操作スタックは消去される.
+	// やり直し操作スタックは消去される.
 	void MainPage::undo_push_null(void)
 	{
-		// やり直す操作スタックを消去し, 消去された操作の組数を, 操作の組数から引く.
+		// やり直し操作スタックを消去し, 消去された操作の組数を, 操作の組数から引く.
 		m_stack_rcnt -= undo_clear_stack(m_stack_redo);
 		// 元に戻す操作スタックにヌルを積む.
 		m_stack_undo.push_back(nullptr);
@@ -543,6 +550,7 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::undo_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_BASE>(Shape* s, double const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_OPAC>(Shape* s, double const& value);
+	template void MainPage::undo_push_set<UNDO_OP::GRID_PATT>(Shape* s, GRID_PATT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_SHOW>(Shape* s, GRID_SHOW const& value);
 	template void MainPage::undo_push_set<UNDO_OP::PAGE_COLOR>(Shape* s, D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::PAGE_SIZE>(Shape* s, D2D1_SIZE_F const& value);

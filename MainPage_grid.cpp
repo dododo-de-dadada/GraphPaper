@@ -12,6 +12,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 
 	constexpr wchar_t TITLE_GRID[] = L"str_grid";
+	constexpr double SLIDER_STEP = 0.5;
 
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作
@@ -26,11 +27,11 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_grid_length");
-			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_page_layout.m_grid_base + 1.0;
+			const double dpi = m_page_dx.m_logical_dpi;
+			const double g_len = m_page_layout.m_grid_base + 1.0;
 			wchar_t buf[32];
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value + 1.0, dpi, g_len, buf);
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP + 1.0, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
@@ -69,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 
 		grid_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::GRID_BASE) {
-			s->set_grid_base(value);
+			s->set_grid_base(value * SLIDER_STEP);
 		}
 		if constexpr (U == UNDO_OP::GRID_OPAC) {
 			s->set_grid_opac(value / COLOR_MAX);
@@ -92,13 +93,27 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
 
+	// ページメニューの「方眼の形式」に印をつける.
+	// g_show	方眼線の表示
+	void MainPage::grid_patt_check_menu(const GRID_PATT g_patt)
+	{
+		rmfi_grid_patt_1().IsChecked(g_patt == GRID_PATT::PATT_1);
+		rmfi_grid_patt_2().IsChecked(g_patt == GRID_PATT::PATT_2);
+		rmfi_grid_patt_3().IsChecked(g_patt == GRID_PATT::PATT_3);
+
+		rmfi_grid_patt_1_2().IsChecked(g_patt == GRID_PATT::PATT_1);
+		rmfi_grid_patt_2_2().IsChecked(g_patt == GRID_PATT::PATT_2);
+		rmfi_grid_patt_3_2().IsChecked(g_patt == GRID_PATT::PATT_3);
+	}
+
 	// ページメニューの「方眼の大きさ」>「大きさ」が選択された.
 	IAsyncAction MainPage::mfi_grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_grid_base;
+		m_sample_layout.set_to_shape(&m_page_layout);
+		const double val0 = m_sample_layout.m_grid_base / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		grid_set_slider_header<UNDO_OP::GRID_BASE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -116,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				//undo_push_null();
-				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
 
@@ -134,9 +149,6 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, value);
-		// 一連の操作の区切としてヌル操作をスタックに積む.
-		//undo_push_null();
-		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -151,9 +163,6 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, value);
-		// 一連の操作の区切としてヌル操作をスタックに積む.
-		//undo_push_null();
-		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -164,6 +173,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
+		m_sample_layout.set_to_shape(&m_page_layout);
 		const double val3 = m_sample_layout.m_grid_opac * COLOR_MAX;
 		sample_slider_3().Value(val3);
 		grid_set_slider_header<UNDO_OP::GRID_OPAC, 3>(val3);
@@ -181,12 +191,45 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				//undo_push_null();
-				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
 		}
 		sample_slider_3().Visibility(COLLAPSED);
 		sample_slider_3().ValueChanged(slider_3_token);
+		page_draw();
+	}
+
+	// ページメニューの「方眼の形式」>「パターン 1」が選択された.
+	void MainPage::rmfi_grid_patt_1_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_1) {
+			return;
+		}
+		undo_push_set<UNDO_OP::GRID_PATT>(&m_page_layout, GRID_PATT::PATT_1);
+		enable_undo_menu();
+		page_draw();
+	}
+
+	// ページメニューの「方眼の形式」>「パターン 1」が選択された.
+	void MainPage::rmfi_grid_patt_2_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_2) {
+			return;
+		}
+		undo_push_set<UNDO_OP::GRID_PATT>(&m_page_layout, GRID_PATT::PATT_2);
+		enable_undo_menu();
+		page_draw();
+	}
+
+	// ページメニューの「方眼の形式」>「パターン 3」が選択された.
+	void MainPage::rmfi_grid_patt_3_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_3) {
+			return;
+		}
+		undo_push_set<UNDO_OP::GRID_PATT>(&m_page_layout, GRID_PATT::PATT_3);
+		enable_undo_menu();
 		page_draw();
 	}
 
@@ -197,9 +240,6 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_layout, GRID_SHOW::BACK);
-		// 一連の操作の区切としてヌル操作をスタックに積む.
-		//undo_push_null();
-		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -213,7 +253,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_layout, GRID_SHOW::FRONT);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		//undo_push_null();
-		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -227,7 +267,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_layout, GRID_SHOW::HIDE);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		//undo_push_null();
-		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
@@ -279,7 +319,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();

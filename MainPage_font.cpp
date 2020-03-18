@@ -11,6 +11,8 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::Foundation::IInspectable;
 
+	constexpr double SLIDER_STEP = 0.5;
+
 	// 書体の太さの配列
 	constexpr std::underlying_type_t<DWRITE_FONT_WEIGHT> FONT_WEIGHTS[] = {
 		DWRITE_FONT_WEIGHT_THIN,
@@ -82,25 +84,17 @@ namespace winrt::GraphPaper::implementation
 		rmfi_font_oblique_2().IsChecked(f_style == DWRITE_FONT_STYLE_OBLIQUE);
 	}
 
-	//　リストビュー「見本リスト」がロードされた.
-	void MainPage::lv_sample_list_loaded(IInspectable const&, RoutedEventArgs const&)
-	{
-		const auto item = lv_sample_list().SelectedItem();
-		if (item != nullptr) {
-			lv_sample_list().ScrollIntoView(item);
-		}
-	}
-
 	// 書体メニューの「色」が選択された.
 	IAsyncAction MainPage::mfi_font_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_font_color.r * COLOR_MAX;
-		const double val1 = m_page_layout.m_font_color.g * COLOR_MAX;
-		const double val2 = m_page_layout.m_font_color.b * COLOR_MAX;
-		const double val3 = m_page_layout.m_font_color.a * COLOR_MAX;
+		m_sample_layout.set_to_shape(&m_page_layout);
+		const double val0 = m_sample_layout.m_font_color.r * COLOR_MAX;
+		const double val1 = m_sample_layout.m_font_color.g * COLOR_MAX;
+		const double val2 = m_sample_layout.m_font_color.b * COLOR_MAX;
+		const double val3 = m_sample_layout.m_font_color.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -148,6 +142,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
+		m_sample_layout.set_to_shape(&m_page_layout);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::get_available_font(i); i++) {
 			auto item = box_value(winrt::hstring(name));
 			lv_sample_list().Items().Append(item);
@@ -220,7 +215,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_font_size;
+		m_sample_layout.set_to_shape(&m_page_layout);
+		const double val0 = m_sample_layout.m_font_size;
 		sample_slider_0().Value(val0);
 		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -249,6 +245,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
+		m_sample_layout.set_to_shape(&m_page_layout);
 		for (uint32_t i = 0; FONT_STRETCH_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_STRETCH_NAME[i]));
 			lv_sample_list().Items().Append(item);
@@ -301,6 +298,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
+		m_sample_layout.set_to_shape(&m_page_layout);
 		for (uint32_t i = 0; FONT_WEIGHT_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_WEIGHT_NAME[i]));
 			lv_sample_list().Items().Append(item);
@@ -445,7 +443,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_text_line;
+		m_sample_layout.set_to_shape(&m_page_layout);
+		const double val0 = m_sample_layout.m_text_line / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		text_set_slider_header<UNDO_OP::TEXT_LINE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -495,8 +494,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_text_margin.width;
-		const double val1 = m_page_layout.m_text_margin.height;
+		m_sample_layout.set_to_shape(&m_page_layout);
+		const double val0 = m_sample_layout.m_text_margin.width / SLIDER_STEP;
+		const double val1 = m_sample_layout.m_text_margin.height / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 0>(val0);
@@ -609,13 +609,13 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf);
+				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_horzorz") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf);
+				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_vertert") + L": " + buf;
 			}
 		}
@@ -625,7 +625,7 @@ namespace winrt::GraphPaper::implementation
 				// これをピクセル単位に変換する.
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * dpi / 96.0, dpi, g_len, buf);
+				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP * dpi / 96.0, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_height") + L": " + buf;
 			}
 			else {
@@ -655,20 +655,21 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S>
 	void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
+		const double dpi = m_page_dx.m_logical_dpi;
 		Shape* s = m_sample_shape;
 		const double value = args.NewValue();
 		text_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::TEXT_LINE) {
-			s->set_text_line_height(value);
+			s->set_text_line_height(value * SLIDER_STEP * dpi / 96.0);
 		}
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			D2D1_SIZE_F margin;
 			s->get_text_margin(margin);
 			if constexpr (S == 0) {
-				margin.width = static_cast<FLOAT>(value);
+				margin.width = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
 			if constexpr (S == 1) {
-				margin.height = static_cast<FLOAT>(value);
+				margin.height = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
 			s->set_text_margin(margin);
 		}

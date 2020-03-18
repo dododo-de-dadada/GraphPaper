@@ -36,7 +36,7 @@
 // MainPage_text.cpp	文字列の編集と検索/置換
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
 // MainPage_tool.cpp	作図ツールの設定
-// MainPage_undo.cpp	元に戻すとやり直す
+// MainPage_undo.cpp	元に戻すとやり直し
 // MainPage_xcvd.cpp	切り取りとコピー, 貼り付け, 削除
 //------------------------------
 #include <ppltasks.h>
@@ -58,6 +58,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::UI::Core::CoreCursor;
 	using winrt::Windows::UI::Core::CoreWindow;
+	using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
 	using winrt::Windows::UI::Core::VisibilityChangedEventArgs;
 	using winrt::Windows::UI::Core::WindowActivatedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialog;
@@ -89,8 +90,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_MILLI_UNIT = L"%.3lf mm";	// ミリメートル単位の書式
 	constexpr auto FMT_POINT = L"%.2lf";	// ポイント単位の書式
 	constexpr auto FMT_POINT_UNIT = L"%.2lf pt";	// ポイント単位の書式
-	constexpr auto FMT_PIXEL = L"%.0lf";	// ピクセル単位の書式
-	constexpr auto FMT_PIXEL_UNIT = L"%.0lf px";	// ピクセル単位の書式
+	constexpr auto FMT_PIXEL = L"%.1lf";	// ピクセル単位の書式
+	constexpr auto FMT_PIXEL_UNIT = L"%.1lf px";	// ピクセル単位の書式
 	constexpr auto FMT_ZOOM = L"%.lf%%";	// 倍率の書式
 	constexpr auto FMT_GRID = L"%.3lf";	// グリッド単位の書式
 	constexpr auto FMT_GRID_UNIT = L"%.3lf gr";	// グリッド単位の書式
@@ -221,27 +222,27 @@ namespace winrt::GraphPaper::implementation
 		DRAW_TOOL m_draw_tool = DRAW_TOOL::SELECT;		// 作図ツール
 		SHAPE_DX m_page_dx;		// ページの描画環境
 		ShapeLayout m_page_layout;		// ページのレイアウト
-		D2D1_POINT_2F m_page_min{ 0.0, 0.0 };		// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
-		D2D1_POINT_2F m_page_max{ 0.0, 0.0 };		// ページの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
-		double m_page_size_max = 32767.0;	// ページの大きさの最大値 (ピクセル)
+		D2D1_POINT_2F m_page_min{ 0.0F, 0.0F };		// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_page_max{ 0.0F, 0.0F };		// ページの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
+		float m_page_size_max = 32767.0;	// ページの大きさの最大値 (ピクセル)
 
-		D2D1_POINT_2F m_curr_pos{ 0.0, 0.0 };		// ポインターの現在位置
-		D2D1_POINT_2F m_prev_pos{ 0.0, 0.0 };		// ポインターの前回位置
-		STATE_TRAN m_press_state = STATE_TRAN::BEGIN;		// ポインターが押された状態
-		ANCH_WHICH m_press_anchor = ANCH_WHICH::ANCH_OUTSIDE;		// ポインターが押された図形の部位
-		D2D1_POINT_2F m_press_pos{ 0.0, 0.0 };		// ポインターが押された位置
-		Shape* m_press_shape = nullptr;		// ポインターが押された図形
-		Shape* m_press_shape_prev = nullptr;		// 前回ポインターが押された図形
-		Shape* m_press_shape_summary = nullptr;		// 一覧でポインターが押された図形
-		uint64_t m_press_time = 0;		// ポインターが押された時刻
+		D2D1_POINT_2F m_pointer_cur{ 0.0F, 0.0F };		// ポインターの現在位置
+		D2D1_POINT_2F m_pointer_pre{ 0.0F, 0.0F };		// ポインターの前回位置
+		STATE_TRAN m_pointer_state = STATE_TRAN::BEGIN;		// ポインターが押された状態
+		ANCH_WHICH m_pointer_anchor = ANCH_WHICH::ANCH_OUTSIDE;		// ポインターが押された図形の部位
+		D2D1_POINT_2F m_pointer_pressed{ 0.0F, 0.0F };		// ポインターが押された位置
+		Shape* m_pointer_shape = nullptr;		// ポインターが押された図形
+		Shape* m_pointer_shape_prev = nullptr;		// 前回ポインターが押された図形
+		Shape* m_pointer_shape_summary = nullptr;		// 一覧でポインターが押された図形
+		uint64_t m_pointer_time = 0ULL;		// ポインターが押された時刻
 
 		uint32_t m_list_selected = 0;		// 選択された図形の数
 		S_LIST_T m_list_shapes;		// 図形リスト
 
+		uint32_t m_stack_rcnt = 0;	// やり直し操作スタックに積まれた要素の組数
 		U_STACK_T m_stack_redo;		// やり直し操作スタック
-		U_STACK_T m_stack_undo;		// 元に戻す操作スタック
 		uint32_t m_stack_ucnt = 0;	// 元に戻す操作スタックに積まれた要素の組数
-		uint32_t m_stack_rcnt = 0;	// やり直す操作スタックに積まれた要素の組数
+		U_STACK_T m_stack_undo;		// 元に戻す操作スタック
 		bool m_stack_push = false;	// 操作スタックの更新フラグ (ヌルが積まれたら true)
 
 		SHAPE_DX m_sample_dx;		// 見本の描画環境
@@ -252,31 +253,32 @@ namespace winrt::GraphPaper::implementation
 		bool m_summary_visible = false;	// 図形一覧パネルの表示フラグ
 		bool m_window_visible = false;		// ウィンドウが表示されている/表示されてない
 
-		uint64_t m_click_time = 0L;		// クリックの判定時間
-		double m_click_dist = 6.0;		// クリックの判定距離
+		uint64_t m_click_time = 0L;		// クリックの判定時間 (マイクロ秒)
+		double m_click_dist = 6.0;		// クリックの判定距離 (DIPs)
+
 		MenuFlyout m_menu_stroke = nullptr;	// 線枠コンテキストメニュー
 		MenuFlyout m_menu_fill = nullptr;	// 塗りつぶしコンテキストメニュー
 		MenuFlyout m_menu_font = nullptr;	// 書体コンテキストメニュー
 		MenuFlyout m_menu_layout = nullptr;	// レイアウトコンテキストメニュー
 		MenuFlyout m_menu_ungroup = nullptr;	// グループ解除コンテキストメニュー
-		winrt::event_token m_token_suspending;	// アプリケーション中断ハンドラーのトークン
-		winrt::event_token m_token_resuming;	// アプリケーション再開ハンドラーのトークン
-		winrt::event_token m_token_entered_background;		// アプリケーションバックグランド実行のトークン
-		winrt::event_token m_token_leaving_background;		// アプリケーションフォアグランド実行のトークン
-		winrt::event_token m_token_activated;	// ウィンドウが前面
-		winrt::event_token m_token_visibility_changed;
-		winrt::event_token m_token_dpi_changed;
-		winrt::event_token m_token_orientation_changed;
-		winrt::event_token m_token_contents_invalidated;
-		winrt::event_token m_token_close_requested;
+		winrt::event_token m_token_suspending;	// アプリケーションの中断ハンドラーのトークン
+		winrt::event_token m_token_resuming;	// アプリケーションの再開ハンドラーのトークン
+		winrt::event_token m_token_entered_background;		// アプリケーションのバックグランド切り替えハンドラーのトークン
+		winrt::event_token m_token_leaving_background;		// アプリケーションのフォアグランド切り替えハンドラーのトークン
+		winrt::event_token m_token_activated;	// ウィンドウの前面背面切り替えハンドラーのトークン
+		winrt::event_token m_token_visibility_changed;	// ウィンドウの表示非表示切り替えハンドラーのトークン
+		winrt::event_token m_token_dpi_changed;	// ディスプレーの解像度切り替えハンドラーのトークン
+		winrt::event_token m_token_orientation_changed;	// ディスプレーの方向切り替えハンドラーのトークン
+		winrt::event_token m_token_contents_invalidated;	// ディスプレーの表示内容切り替えハンドラーのトークン
+		winrt::event_token m_token_close_requested;	// アプリケーションを閉じるハンドラーのトークン
 
 		//-------------------------------
 		// MainPage.cpp
-		// メインページの作成, アプリケーションの終了
+		// メインページの作成と, 「新規」, 「終了」, 「バージョン情報」
 		//-------------------------------
 
 		// メッセージダイアログを表示する.
-		void cd_message_show(winrt::hstring const& glyph, winrt::hstring const& message, winrt::hstring const& desc);
+		void cd_message_show(winrt::hstring const& glyph_key, winrt::hstring const& message_key, winrt::hstring const& desc_key);
 		// 編集メニュー項目の使用の可否を設定する.
 		void enable_edit_menu(void);
 		// メインページを作成する.
@@ -291,6 +293,12 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction mfi_exit_click(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「新規」が選択された
 		IAsyncAction mfi_new_click(IInspectable const&, RoutedEventArgs const&);
+		// ウィンドウの閉じるボタンが押された.
+		void navi_close_requested(IInspectable const&, SystemNavigationCloseRequestedPreviewEventArgs const& args)
+		{
+			args.Handled(true);
+			auto _{ mfi_exit_click(nullptr, nullptr) };
+		}
 
 		//-------------------------------
 		// MainPage_app.cpp
@@ -396,11 +404,11 @@ namespace winrt::GraphPaper::implementation
 		// ファイルの読み込みが終了した.
 		void finish_file_read(void);
 		// ファイルメニューの「開く」が選択された
-		IAsyncAction mfi_open_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction mfi_file_open_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「名前を付けて保存」が選択された
-		void mfi_save_as_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_file_save_as_click(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「上書き保存」が選択された
-		void mfi_save_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_file_save_click(IInspectable const&, RoutedEventArgs const&);
 		// 最近使ったファイルを非同期に読む.
 		IAsyncAction file_read_recent_async(const uint32_t i);
 		// ファイルメニューの「最近使ったファイル 1」が選択された
@@ -439,8 +447,6 @@ namespace winrt::GraphPaper::implementation
 
 		// 書体メニューの「字体」に印をつける.
 		void font_style_check_menu(const DWRITE_FONT_STYLE f_style);
-		//　リストビュー「見本リスト」がロードされた.
-		void lv_sample_list_loaded(IInspectable const&, RoutedEventArgs const& /*e*/);
 		//　書体メニューの「色」が選択された.
 		IAsyncAction mfi_font_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		//　書体メニューの「書体名」が選択された.
@@ -497,6 +503,8 @@ namespace winrt::GraphPaper::implementation
 		//　方眼の設定
 		//-------------------------------
 
+		// レイアウトメニューの「方眼の形式」に印をつける.
+		void grid_patt_check_menu(const GRID_PATT g_patt);
 		// レイアウトメニューの「方眼の表示」に印をつける.
 		void grid_show_check_menu(const GRID_SHOW g_show);
 		// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -507,6 +515,12 @@ namespace winrt::GraphPaper::implementation
 		void mfi_grid_len_expand_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の濃さ」が選択された.
 		IAsyncAction mfi_grid_opac_click_async(IInspectable const&, RoutedEventArgs const&);
+		// レイアウトメニューの「方眼線の形式」>「パターン 1」が選択された.
+		void rmfi_grid_patt_1_click(IInspectable const&, RoutedEventArgs const&);
+		// レイアウトメニューの「方眼線の形式」>「パターン 2」が選択された.
+		void rmfi_grid_patt_2_click(IInspectable const&, RoutedEventArgs const&);
+		// レイアウトメニューの「方眼線の形式」>「パターン 3」が選択された.
+		void rmfi_grid_patt_3_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の表示」>「最背面」が選択された.
 		void rmfi_grid_show_back_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の表示」>「最前面」が選択された.
@@ -677,6 +691,8 @@ namespace winrt::GraphPaper::implementation
 		void sample_draw(void);
 		// 見本のスワップチェーンパネルの大きさが変わった.
 		void scp_sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&);
+		//　リストビュー「見本リスト」がロードされた.
+		void lv_sample_list_loaded(IInspectable const&, RoutedEventArgs const& /*e*/);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -718,27 +734,27 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトメニューの「ステータスバー」が選択された.
 		void mi_status_bar_click(IInspectable const&, RoutedEventArgs const&);
 		// ステータスバーのメニュー項目に印をつける.
-		void status_check_menu(const STATUS_BAR a);
+		void status_bar_check_menu(const STATUS_BAR a);
 		// 列挙型を OR 演算する.
 		static STATUS_BAR status_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 		// ステータスバーの状態をデータリーダーから読み込む.
 		void status_bar_read(DataReader const& dt_reader);
 		// ポインターの位置をステータスバーに格納する.
-		void status_set_curs(void);
+		void status_bar_set_curs(void);
 		// 作図ツールをステータスバーに格納する.
-		void status_set_draw(void);
+		void status_bar_set_draw(void);
 		// 方眼の大きさをステータスバーに格納する.
-		void status_set_grid(void);
+		void status_bar_set_grid(void);
 		// ページの大きさをステータスバーに格納する.
-		void status_set_page(void);
+		void status_bar_set_page(void);
 		// 単位をステータスバーに格納する.
-		void status_set_unit(void);
+		void status_bar_set_unit(void);
 		// 拡大率をステータスバーに格納する.
-		void status_set_zoom(void);
+		void status_bar_set_zoom(void);
 		// ステータスバーの表示を設定する.
-		void status_visibility(void);
+		void status_bar_visibility(void);
 		// ステータスバーの状態をデータライターに書き込む.
-		void status_write(DataWriter const& dt_writer);
+		void status_bar_write(DataWriter const& dt_writer);
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -884,10 +900,10 @@ namespace winrt::GraphPaper::implementation
 
 		//-----------------------------
 		// MainPage_undo.cpp
-		// 元に戻すとやり直す
+		// 元に戻すとやり直し
 		//-----------------------------
 
-		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		void enable_undo_menu(void);
 		// 編集メニューの「やり直し」が選択された.
 		void mfi_redo_click(IInspectable const&, RoutedEventArgs const&);

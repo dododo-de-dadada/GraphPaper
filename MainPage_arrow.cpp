@@ -10,6 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrowhead";
+	constexpr double SLIDER_STEP = 0.5;
 
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
@@ -34,10 +35,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
-			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_sample_layout.m_grid_base + 1.0;
+			const double dpi = m_page_dx.m_logical_dpi;
+			const double g_len = m_page_layout.m_grid_base + 1.0;
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf, 31);
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP, dpi, g_len, buf, 31);
 			hdr = hdr + buf;
 		}
 		if constexpr (S == 0) {
@@ -69,13 +70,13 @@ namespace winrt::GraphPaper::implementation
 			ARROW_SIZE a_size;
 			m_sample_shape->get_arrow_size(a_size);
 			if constexpr (S == 0) {
-				a_size.m_width = static_cast<FLOAT>(value);
+				a_size.m_width = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
 			if constexpr (S == 1) {
-				a_size.m_length = static_cast<FLOAT>(value);
+				a_size.m_length = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
 			if constexpr (S == 2) {
-				a_size.m_offset = static_cast<FLOAT>(value);
+				a_size.m_offset = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
 			m_sample_shape->set_arrow_size(a_size);
 		}
@@ -105,9 +106,10 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_arrow_size.m_width;
-		const double val1 = m_page_layout.m_arrow_size.m_length;
-		const double val2 = m_page_layout.m_arrow_size.m_offset;
+		m_sample_layout.set_to_shape(&m_page_layout);
+		const double val0 = m_sample_layout.m_arrow_size.m_width / SLIDER_STEP;
+		const double val1 = m_sample_layout.m_arrow_size.m_length / SLIDER_STEP;
+		const double val2 = m_sample_layout.m_arrow_size.m_offset / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -143,7 +145,7 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	// 線枠メニューの「矢じりの種類」>「閉じた矢」が選択された.
+	// 線枠メニューの「矢じりの種類」>「閉じた」が選択された.
 	void MainPage::rmfi_arrow_filled_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_arrow_style == ARROW_STYLE::NONE) {

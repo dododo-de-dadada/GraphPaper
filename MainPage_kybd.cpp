@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + O ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_open_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// mfi_open_click_async(nullptr, nullptr);
+	// mfi_file_open_click_async(nullptr, nullptr);
 	//}
 
 	// Cntrol + V ‚ª‰Ÿ‚³‚ê‚½.
@@ -177,16 +177,16 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + Shift + S ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_save_as_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// if (mfi_save_as().IsEnabled()) {
-	// 	mfi_save_as_click(nullptr, nullptr);
+	// if (mfi_file_save_as().IsEnabled()) {
+	// 	mfi_file_save_as_click(nullptr, nullptr);
 	// }
 	//}
 
 	// Cntrol + S ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_save_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// if (mfi_save().IsEnabled()) {
-	// 	mfi_save_click(nullptr, nullptr);
+	// if (mfi_file_save().IsEnabled()) {
+	// 	mfi_file_save_click(nullptr, nullptr);
 	// }
 	//}
 

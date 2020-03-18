@@ -29,7 +29,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_summary_visible) {
 			summary_select_all();
 		}
-		// やり直す操作スタックを消去し, 含まれる操作を破棄する.
+		// やり直し操作スタックを消去し, 含まれる操作を破棄する.
 		//redo_clear();
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
@@ -72,25 +72,25 @@ namespace winrt::GraphPaper::implementation
 	template <VirtualKeyModifiers M, VirtualKey K>
 	void MainPage::select_next_shape(void)
 	{
-		if (m_press_shape_summary == nullptr) {
-			auto s_prev = m_press_shape_prev;
+		if (m_pointer_shape_summary == nullptr) {
+			auto s_prev = m_pointer_shape_prev;
 			if (s_prev != nullptr && s_prev->is_selected()) {
-				m_press_shape_summary = s_prev;
+				m_pointer_shape_summary = s_prev;
 			}
 			else {
 				if (s_prev == nullptr) {
 					if constexpr (K == VirtualKey::Down) {
-						m_press_shape_summary = s_list_front(m_list_shapes);
+						m_pointer_shape_summary = s_list_front(m_list_shapes);
 					}
 					if constexpr (K == VirtualKey::Up) {
-						m_press_shape_summary = s_list_back(m_list_shapes);
+						m_pointer_shape_summary = s_list_back(m_list_shapes);
 					}
-					m_press_shape_prev = m_press_shape_summary;
+					m_pointer_shape_prev = m_pointer_shape_summary;
 				}
 				else {
-					m_press_shape_summary = s_prev;
+					m_pointer_shape_summary = s_prev;
 				}
-				undo_push_select(m_press_shape_summary);
+				undo_push_select(m_pointer_shape_summary);
 				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
@@ -108,32 +108,30 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if constexpr (K == VirtualKey::Down) {
-			auto s = s_list_next(m_list_shapes, m_press_shape_summary);
+			auto s = s_list_next(m_list_shapes, m_pointer_shape_summary);
 			if (s != nullptr) {
-				m_press_shape_summary = s;
+				m_pointer_shape_summary = s;
 				goto SEL;
 			}
 		}
 		if constexpr (K == VirtualKey::Up) {
-			auto s = s_list_prev(m_list_shapes, m_press_shape_summary);
+			auto s = s_list_prev(m_list_shapes, m_pointer_shape_summary);
 			if (s != nullptr) {
-				m_press_shape_summary = s;
+				m_pointer_shape_summary = s;
 				goto SEL;
 			}
 		}
 		return;
 	SEL:
 		if constexpr (M == VirtualKeyModifiers::Shift) {
-			select_range(m_press_shape_prev, m_press_shape_summary);
-			// やり直す操作スタックを消去し, 含まれる操作を破棄する.
-			//redo_clear();
+			select_range(m_pointer_shape_prev, m_pointer_shape_summary);
 		}
 		if constexpr (M == VirtualKeyModifiers::None) {
-			m_press_shape_prev = m_press_shape_summary;
+			m_pointer_shape_prev = m_pointer_shape_summary;
 			unselect_all();
-			undo_push_select(m_press_shape_summary);
+			undo_push_select(m_pointer_shape_summary);
 			if (m_summary_visible) {
-				summary_select(m_press_shape_summary);
+				summary_select(m_pointer_shape_summary);
 			}
 		}
 		// 編集メニュー項目の使用の可否を設定する.
@@ -235,17 +233,17 @@ namespace winrt::GraphPaper::implementation
 					summary_unselect(s);
 				}
 			}
-			m_press_shape_prev = s;
+			m_pointer_shape_prev = s;
 		}
 		else if (vk == VirtualKeyModifiers::Shift) {
 			// シフトキーが押されている場合
 			// 前回ポインターが押された図形から今回押された図形までの
 			// 範囲にある図形を選択して, そうでない図形を選択しない.
-			if (m_press_shape_prev == nullptr) {
-				m_press_shape_prev = m_list_shapes.front();
+			if (m_pointer_shape_prev == nullptr) {
+				m_pointer_shape_prev = m_list_shapes.front();
 			}
-			if (select_range(s, m_press_shape_prev)) {
-				// やり直す操作スタックを消去し, 含まれる操作を破棄する.
+			if (select_range(s, m_pointer_shape_prev)) {
+				// やり直し操作スタックを消去し, 含まれる操作を破棄する.
 				//redo_clear();
 				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
@@ -270,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				// 図形の選択を反転して, その操作スタックに積む.
 				undo_push_select(s);
-				// やり直す操作スタックを消去し, 含まれる操作を破棄する.
+				// やり直し操作スタックを消去し, 含まれる操作を破棄する.
 				//redo_clear();
 				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
@@ -289,7 +287,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 押された図形の属性をページレイアウトに格納する.
 			m_page_layout.set_to_shape(s);
-			m_press_shape_prev = s;
+			m_pointer_shape_prev = s;
 		}
 	}
 

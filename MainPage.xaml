@@ -253,6 +253,11 @@
                     <MenuFlyoutItem x:Uid="mfi_grid_len" Click="mfi_grid_len_click_async" Text="Length..." />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_grid_opac" Click="mfi_grid_opac_click_async" Text="Opacity..." />
+                <MenuFlyoutSubItem x:Uid="mfsi_grid_patt" Text="Grid pattern">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_1_2" x:Uid="rmfi_grid_patt_1" Click="rmfi_grid_patt_1_click" Text="No emphasis" GroupName="gn_grid_patt" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_2_2" x:Uid="rmfi_grid_patt_2" Click="rmfi_grid_patt_2_click" Text="Emphasize the 2nd" GroupName="gn_grid_patt" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_3_2" x:Uid="rmfi_grid_patt_3" Click="rmfi_grid_patt_3_click" Text="Emphasize the 2nd and 5th" GroupName="gn_grid_patt" />
+                </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
                 <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click_async" Text="Color..." />
@@ -294,17 +299,17 @@
                         <KeyboardAccelerator Key="N" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_open" x:Uid="mfi_open" Click="mfi_open_click_async" Icon="OpenFile" Text="Open...">
+                <MenuFlyoutItem x:Name="mfi_file_open" x:Uid="mfi_file_open" Click="mfi_file_open_click_async" Icon="OpenFile" Text="Open...">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="O" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_save" x:Uid="mfi_save" Click="mfi_save_click" Icon="Save" Text="Save" >
+                <MenuFlyoutItem x:Name="mfi_file_save" x:Uid="mfi_file_save" Click="mfi_file_save_click" Icon="Save" Text="Save" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="S" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_save_as" x:Uid="mfi_save_as" Click="mfi_save_as_click" Text="Save As..." >
+                <MenuFlyoutItem x:Name="mfi_file_save_as" x:Uid="mfi_file_save_as" Click="mfi_file_save_as_click" Text="Save As..." >
                     <MenuFlyoutItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_save_as}" />
                     </MenuFlyoutItem.Icon>
@@ -581,6 +586,11 @@
                     <MenuFlyoutItem x:Uid="mfi_grid_len" Click="mfi_grid_len_click_async" Text="Length..." />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_grid_opac" Click="mfi_grid_opac_click_async" Text="Opacity..." />
+                <MenuFlyoutSubItem x:Uid="mfsi_grid_patt" Text="Grid pattern">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_1" x:Uid="rmfi_grid_patt_1" Click="rmfi_grid_patt_1_click" Text="Pattern 1" GroupName="gn_grid_patt" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_2" x:Uid="rmfi_grid_patt_2" Click="rmfi_grid_patt_2_click" Text="Pattern 2" GroupName="gn_grid_patt" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_3" x:Uid="rmfi_grid_patt_3" Click="rmfi_grid_patt_3_click" Text="Pattern 3" GroupName="gn_grid_patt" />
+                </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- ページメニュー -->
                 <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />

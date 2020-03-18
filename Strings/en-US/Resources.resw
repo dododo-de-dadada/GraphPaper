@@ -421,7 +421,7 @@
     <value>New</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_open.Text" xml:space="preserve">
+  <data name="mfi_file_open.Text" xml:space="preserve">
     <value>Open...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -445,11 +445,11 @@
     <value>Redo</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_save.Text" xml:space="preserve">
+  <data name="mfi_file_save.Text" xml:space="preserve">
     <value>Save</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_save_as.Text" xml:space="preserve">
+  <data name="mfi_file_save_as.Text" xml:space="preserve">
     <value>Save As...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -941,5 +941,21 @@
   <data name="mfi_layout_save.Text" xml:space="preserve">
     <value>Save layout</value>
     <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="mfsi_grid_patt.Text" xml:space="preserve">
+    <value>Grid pattern</value>
+    <comment>MenuFlyoutSubItem</comment>
+  </data>
+  <data name="rmfi_grid_patt_1.Text" xml:space="preserve">
+    <value>No emphasis</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_grid_patt_2.Text" xml:space="preserve">
+    <value>Emphasize the 2nd</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_grid_patt_3.Text" xml:space="preserve">
+    <value>Emphasize the 2nd and 5th</value>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
 </root>

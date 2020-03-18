@@ -10,6 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 選択された図形を次または前の図形と入れ替える.
+	// T	S_LIST_T::iterator の場合は背面の図形と入れ替え, S_LIST_T::reverse_iterator の場合は前面の図形と入れ替える. 
 	template<typename T>
 	void MainPage::arrange_order(void)
 	{
@@ -89,16 +90,15 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 
 		// 選択された図形をリストに追加する.
-		S_LIST_T sel_list;	// 選択された図形のリスト
-		s_list_selected<Shape>(m_list_shapes, sel_list);
-		if (sel_list.size() == 0) {
+		S_LIST_T list_selected;	// 選択された図形のリスト
+		s_list_selected<Shape>(m_list_shapes, list_selected);
+		if (list_selected.size() == 0) {
 			return;
 		}
 		if constexpr (B) {
 			uint32_t i = 0;	// 図形を挿入する位置
-			//auto s_pos = S_LIST::front(m_list_shapes, i);
 			auto s_pos = s_list_front(m_list_shapes);
-			for (auto s : sel_list) {
+			for (auto s : list_selected) {
 				if (m_summary_visible) {
 					summary_remove(s);
 					summary_insert(s, i++);
@@ -109,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			for (auto s : sel_list) {
+			for (auto s : list_selected) {
 				if (m_summary_visible) {
 					summary_remove(s);
 					summary_append(s);
@@ -119,10 +119,8 @@ namespace winrt::GraphPaper::implementation
 				undo_push_insert(s, nullptr);
 			}
 		}
-		sel_list.clear();
-		// 一連の操作の区切としてヌル操作をスタックに積む.
+		list_selected.clear();
 		undo_push_null();
-		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
 	}

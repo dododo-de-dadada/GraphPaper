@@ -10,6 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr wchar_t TITLE_STROKE[] = L"str_stroke";
+	constexpr double SLIDER_STEP = 0.5;
 
 	// 線枠メニューの「色」が選択された.
 	IAsyncAction MainPage::mfi_stroke_color_click(IInspectable const&, RoutedEventArgs const&)
@@ -17,10 +18,11 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_stroke_color.r * COLOR_MAX;
-		const double val1 = m_page_layout.m_stroke_color.g * COLOR_MAX;
-		const double val2 = m_page_layout.m_stroke_color.b * COLOR_MAX;
-		const double val3 = m_page_layout.m_stroke_color.a * COLOR_MAX;
+		m_sample_layout.set_to_shape(&m_page_layout);
+		const double val0 = m_sample_layout.m_stroke_color.r * COLOR_MAX;
+		const double val1 = m_sample_layout.m_stroke_color.g * COLOR_MAX;
+		const double val2 = m_sample_layout.m_stroke_color.b * COLOR_MAX;
+		const double val3 = m_sample_layout.m_stroke_color.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -67,10 +69,11 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_stroke_pattern.m_[0];
-		const double val1 = m_page_layout.m_stroke_pattern.m_[1];
-		const double val2 = m_page_layout.m_stroke_pattern.m_[2];
-		const double val3 = m_page_layout.m_stroke_pattern.m_[3];
+		m_sample_layout.set_to_shape(&m_page_layout);
+		const double val0 = m_page_layout.m_stroke_pattern.m_[0] / SLIDER_STEP;
+		const double val1 = m_page_layout.m_stroke_pattern.m_[1] / SLIDER_STEP;
+		const double val2 = m_page_layout.m_stroke_pattern.m_[2] / SLIDER_STEP;
+		const double val3 = m_page_layout.m_stroke_pattern.m_[3] / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -117,7 +120,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_stroke_width;
+		m_sample_layout.set_to_shape(&m_page_layout);
+		const double val0 = m_sample_layout.m_stroke_width / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_0().Visibility(VISIBLE);
 		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
@@ -203,10 +207,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::STROKE_PATTERN) {
 			wchar_t buf[32];
-			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_page_layout.m_grid_base + 1.0;
+			const double dpi = m_page_dx.m_logical_dpi;
+			const double g_len = m_page_layout.m_grid_base + 1.0;
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * m_sample_layout.m_stroke_width, dpi, g_len, buf);
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP * m_sample_layout.m_stroke_width, dpi, g_len, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			if constexpr (S == 0) {
 				hdr = r_loader.GetString(L"str_dash_len") + L": " + buf;
@@ -223,10 +227,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			wchar_t buf[32];
-			const auto dpi = m_sample_dx.m_logical_dpi;
-			const auto g_len = m_page_layout.m_grid_base + 1.0;
+			const double dpi = m_page_dx.m_logical_dpi;
+			const double g_len = m_page_layout.m_grid_base + 1.0;
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, dpi, g_len, buf);
+			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
@@ -288,21 +292,21 @@ namespace winrt::GraphPaper::implementation
 			STROKE_PATTERN pattern;
 			s->get_stroke_pattern(pattern);
 			if constexpr (S == 0) {
-				pattern.m_[0] = static_cast<FLOAT>(value);
+				pattern.m_[0] = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
 			if constexpr (S == 1) {
-				pattern.m_[1] = static_cast<FLOAT>(value);
+				pattern.m_[1] = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
 			if constexpr (S == 2) {
-				pattern.m_[2] = pattern.m_[4] = static_cast<FLOAT>(value);
+				pattern.m_[2] = pattern.m_[4] = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
 			if constexpr (S == 3) {
-				pattern.m_[3] = pattern.m_[5] = static_cast<FLOAT>(value);
+				pattern.m_[3] = pattern.m_[5] = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
 			s->set_stroke_pattern(pattern);
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
-			s->set_stroke_width(value);
+			s->set_stroke_width(value * SLIDER_STEP);
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			D2D1_COLOR_F color;

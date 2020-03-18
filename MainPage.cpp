@@ -1,6 +1,6 @@
 ﻿//-------------------------------
 // MainPage.cpp
-// メインページの作成と表示
+// メインページの作成と, ファイルメニューの「新規」と「終了」
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -10,33 +10,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 色成分の値を文字列に変換する.
-	// style	色成分の形式
-	// value	色成分の値
-	// buf	文字列の配列
-	// len	文字列の最大長 ('\0' を含む長さ)
-	// 戻り値	なし
-	void conv_val_to_col(const COL_STYLE style, const double value, wchar_t* buf, const size_t b_len)
-	{
-		if (style == COL_STYLE::DEC) {
-			swprintf_s(buf, b_len, L"%.0lf", std::round(value));
-		}
-		else if (style == COL_STYLE::HEX) {
-			swprintf_s(buf, b_len, L"%02X", static_cast<uint32_t>(std::round(value)));
-		}
-		else if (style == COL_STYLE::FLT) {
-			swprintf_s(buf, b_len, L"%.4lf", value / COLOR_MAX);
-		}
-		else if (style == COL_STYLE::CEN) {
-			swprintf_s(buf, b_len, L"%.1lf%%", value / COLOR_MAX * 100.0);
-		}
-		else {
-			throw hresult_not_implemented();
-		}
-	}
-
-
-	// 長さの値ををピクセル単位の値に変換する.
+	// 長さををピクセル単位の値に変換する.
 	// unit	長さの単位
 	// value	長さの値
 	// dpi	DPI
@@ -61,7 +35,32 @@ namespace winrt::GraphPaper::implementation
 		else {
 			ret = value;
 		}
-		return std::round(ret);
+		return std::round(2.0 * ret) * 0.5;
+	}
+
+	// 色成分の値を文字列に変換する.
+	// style	色成分の形式
+	// value	色成分の値
+	// buf	文字列の配列
+	// len	文字列の最大長 ('\0' を含む長さ)
+	// 戻り値	なし
+	void conv_val_to_col(const COL_STYLE style, const double value, wchar_t* buf, const size_t b_len)
+	{
+		if (style == COL_STYLE::DEC) {
+			swprintf_s(buf, b_len, L"%.0lf", std::round(value));
+		}
+		else if (style == COL_STYLE::HEX) {
+			swprintf_s(buf, b_len, L"%02X", static_cast<uint32_t>(std::round(value)));
+		}
+		else if (style == COL_STYLE::FLT) {
+			swprintf_s(buf, b_len, L"%.4lf", value / COLOR_MAX);
+		}
+		else if (style == COL_STYLE::CEN) {
+			swprintf_s(buf, b_len, L"%.1lf%%", value / COLOR_MAX * 100.0);
+		}
+		else {
+			throw hresult_not_implemented();
+		}
 	}
 
 	// ピクセル単位の長さを他の単位の文字列に変換する.
@@ -116,15 +115,15 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 	}
-	template void conv_val_to_len<WITH_UNIT_NAME>(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 	template void conv_val_to_len<!WITH_UNIT_NAME>(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
+	template void conv_val_to_len<WITH_UNIT_NAME>(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 
 	// メッセージダイアログを表示する.
-	// glyph	フォントアイコンのグリフ
-	// message	メッセージ
-	// desc	説明文
+	// glyph_key	フォントアイコンのグリフの静的リソースのキー
+	// message_key	メッセージのアプリケーションリソースのキー
+	// desc_key		説明文のアプリケーションリソースのキー
 	// 戻り値	なし
-	void MainPage::cd_message_show(winrt::hstring const& glyph, winrt::hstring const& message, winrt::hstring const& desc)
+	void MainPage::cd_message_show(winrt::hstring const& glyph_key, winrt::hstring const& message_key, winrt::hstring const& desc_key)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialog;
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
@@ -132,42 +131,35 @@ namespace winrt::GraphPaper::implementation
 		const wchar_t QUOT[] = L"\"";	// 引用符
 		const wchar_t NL[] = L"\u2028";	// テキストブロック内での改行
 
-		// リソースローダーを得る.
 		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		// メッセージをキーとする文字列をリソースローダーから得る.
 		winrt::hstring text;
 		try {
-			text = r_loader.GetString(message);
+			text = r_loader.GetString(message_key);
 		}
 		catch (winrt::hresult_error const&) {}
 		if (text.empty()) {
 			// 文字列が空の場合,
-			// そのままのメッセージを文字列に格納する.
-			text = message;
+			text = message_key;
 		}
 		// 説明をキーとする, 追加する文字列をリソースローダーから得る.
 		winrt::hstring added_text;
 		try {
-			added_text = r_loader.GetString(desc);
+			added_text = r_loader.GetString(desc_key);
 		}
 		catch (winrt::hresult_error const&) {}
 		if (added_text.empty() == false) {
 			// 追加する文字列が空でない場合,
-			// 文字列に, 改行と追加する文字列を追加する.
 			text = text + NL + added_text;
 		}
-		else if (desc.empty() == false) {
+		else if (desc_key.empty() == false) {
 			// 説明そのものが空でない場合,
-			// 文字列に, 改行と, 引用符で囲んだ説明とを追加する.
-			text = text + NL + QUOT + desc + QUOT;
+			text = text + NL + QUOT + desc_key + QUOT;
 		}
 		// グリフをキーとして, フォントアイコンのグリフを静的リソースから得る.
-		auto icon = Resources().TryLookup(box_value(glyph));
-		// フォントアイコンのグリフをダイアログのアイコンに格納する.
-		fi_message().Glyph(icon != nullptr ? unbox_value<winrt::hstring>(icon) : glyph);
-		// 表示する文字列をダイアログの内容に格納する.
+		auto glyph = Resources().TryLookup(box_value(glyph_key));
+		fi_message().Glyph(glyph != nullptr ? unbox_value<winrt::hstring>(glyph) : glyph_key);
 		tk_message().Text(text);
-		// ダイアログを非同期に表示する.
 		auto _{ cd_message().ShowAsync() };
 	}
 
@@ -178,7 +170,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 
-		// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
@@ -239,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 			//prev_shape = s;
 			prev_selected = fore_selected;
 		}
-		// 図形がひとつ以上ある場合.
+		// 消去されていない図形がひとつ以上ある場合.
 		const auto exists_undeleted = (undeleted_cnt > 0);
 		// 選択された図形がひとつ以上ある場合.
 		const auto exsits_selected = (selected_cnt > 0);
@@ -326,15 +318,7 @@ namespace winrt::GraphPaper::implementation
 		// アプリケーションを閉じる前の確認のハンドラーを設定する.
 		{
 			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
-			using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
-
-			auto const& sys{ SystemNavigationManagerPreview::GetForCurrentView() };
-			auto handler = [this](IInspectable const&, SystemNavigationCloseRequestedPreviewEventArgs const& args)
-			{
-				args.Handled(true);
-				auto _{ mfi_exit_click(nullptr, nullptr) };
-			};
-			m_token_close_requested = sys.CloseRequested(handler);
+			m_token_close_requested = SystemNavigationManagerPreview::GetForCurrentView().CloseRequested({ this, &MainPage::navi_close_requested });
 		}
 
 		// アプリケーションが受け入れ可能なフォーマット ID をクリップボードに設定する.
@@ -374,19 +358,15 @@ namespace winrt::GraphPaper::implementation
 
 		if (m_stack_push) {
 			// 操作スタックの更新フラグが立っている場合,
-			// 保存確認ダイアログを表示する.
 			const auto d_result = co_await cd_conf_save().ShowAsync();
-			// ダイアログの戻り値を判定する.
 			if (d_result == ContentDialogResult::None) {
 				// 「キャンセル」が押された場合,
 				co_return;
 			}
 			else if (d_result == ContentDialogResult::Primary) {
 				// 「保存する」が押された場合,
-				// ファイルに非同期に保存する.
 				if (co_await file_save_async() != S_OK) {
 					// 保存できなかった場合,
-					// 中断する.
 					co_return;
 				}
 			}
@@ -431,8 +411,7 @@ namespace winrt::GraphPaper::implementation
 			disp.OrientationChanged(m_token_orientation_changed);
 			disp.DisplayContentsInvalidated(m_token_contents_invalidated);
 			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
-			auto const& sys{ SystemNavigationManagerPreview::GetForCurrentView() };
-			sys.CloseRequested(m_token_close_requested);
+			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(m_token_close_requested);
 		}
 
 		// アプリケーションを終了する.
@@ -446,7 +425,6 @@ namespace winrt::GraphPaper::implementation
 
 		if (m_stack_push) {
 			// 操作スタックの更新フラグが立っている場合,
-			// 保存確認ダイアログを表示する.
 			const auto d_result = co_await cd_conf_save().ShowAsync();
 			if (d_result == ContentDialogResult::None) {
 				// 「キャンセル」が押された場合,
@@ -454,22 +432,17 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (d_result == ContentDialogResult::Primary) {
 				// 「保存する」が押された場合,
-				// ファイルに非同期に保存する.
 				if (co_await file_save_async() != S_OK) {
 					// 保存できなかった場合,
-					// 中断する.
 					co_return;
 				}
 			}
 		}
 		if (m_summary_visible) {
 			// 図形一覧パネルの表示フラグが立っている場合,
-			// 一覧を閉じる.
 			summary_close();
 		}
-		// 操作スタックを消去し, 含まれる操作を破棄する.
 		undo_clear();
-		// 図形リストを消去し, 含まれる図形を破棄する.
 		s_list_clear(m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
@@ -477,23 +450,21 @@ namespace winrt::GraphPaper::implementation
 			cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
 		}
 #endif
-		// 有効な書体名の配列を破棄する.
 		ShapeText::release_available_fonts();
-		// 有効な書体名の配列を設定する.
 		ShapeText::set_available_fonts();
 
 		if (co_await layout_load_async() != S_OK) {
 			// レイアウトの読み込みに失敗した場合,
 			layout_init();
+			m_page_unit = LEN_UNIT::PIXEL;
+			m_col_style = COL_STYLE::DEC;
+			m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
 		}
 		{
 			m_page_min.x = 0.0;
 			m_page_min.y = 0.0;
 			m_page_max.x = m_page_layout.m_page_size.width;
 			m_page_max.y = m_page_layout.m_page_size.height;
-			m_page_unit = LEN_UNIT::PIXEL;
-			m_col_style = COL_STYLE::DEC;
-			m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
 		}
 		file_recent_add(nullptr);
 		finish_file_read();

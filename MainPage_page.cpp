@@ -45,19 +45,19 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_layout, p_size);
 			// 一連の操作の区切としてヌル操作をスタックに積む.
 			undo_push_null();
-			// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+			// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 			enable_undo_menu();
 		}
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
 		// ポインターの位置をステータスバーに格納する.
-		status_set_curs();
+		status_bar_set_curs();
 		// 方眼の大きさをステータスバーに格納する.
-		status_set_grid();
+		status_bar_set_grid();
 		// ページの大きさをステータスバーに格納する.
-		status_set_page();
-		status_set_unit();
+		status_bar_set_page();
+		status_bar_set_unit();
 	}
 
 	// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
@@ -84,17 +84,17 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_layout, page);
 			// 一連の操作の区切としてヌル操作をスタックに積む.
 			undo_push_null();
-			// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+			// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 			enable_undo_menu();
 		}
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
 		// ページの大きさをステータスバーに格納する.
-		status_set_page();
+		status_bar_set_page();
 	}
 
-	// ページの「単位と書式」ダイアログの「適用」ボタンが押された.
+	// ページの「ページの単位と色の書式」ダイアログの「適用」ボタンが押された.
 	void MainPage::cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&)
 	{
 		const auto p_unit = m_page_unit;
@@ -102,12 +102,12 @@ namespace winrt::GraphPaper::implementation
 		m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
 		if (p_unit != m_page_unit) {
 			// ポインターの位置をステータスバーに格納する.
-			status_set_curs();
+			status_bar_set_curs();
 			// 方眼の大きさをステータスバーに格納する.
-			status_set_grid();
+			status_bar_set_grid();
 			// ページの大きさをステータスバーに格納する.
-			status_set_page();
-			status_set_unit();
+			status_bar_set_page();
+			status_bar_set_unit();
 		}
 	}
 
@@ -117,9 +117,10 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		const double val0 = m_page_layout.m_page_color.r * COLOR_MAX;
-		const double val1 = m_page_layout.m_page_color.g * COLOR_MAX;
-		const double val2 = m_page_layout.m_page_color.b * COLOR_MAX;
+		m_sample_layout.set_to_shape(&m_page_layout);
+		const double val0 = m_sample_layout.m_page_color.r * COLOR_MAX;
+		const double val1 = m_sample_layout.m_page_color.g * COLOR_MAX;
+		const double val2 = m_sample_layout.m_page_color.b * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -144,7 +145,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_OP::PAGE_COLOR>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
-				// 元に戻す/やり直すメニュー項目の使用の可否を設定する.
+				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
 		}
@@ -164,7 +165,7 @@ namespace winrt::GraphPaper::implementation
 		//wchar_t const* format = nullptr;
 		double pw;
 		double ph;
-		m_sample_layout.m_grid_base = m_page_layout.m_grid_base;
+		m_sample_layout.set_to_shape(&m_page_layout);
 		const auto g_len = m_sample_layout.m_grid_base + 1.0;
 		pw = m_sample_layout.m_page_size.width;
 		ph = m_sample_layout.m_page_size.height;
@@ -282,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 			// 方眼線を表示する.
 			m_page_layout.draw_grid(m_page_dx, { 0.0f, 0.0f });
 		}
-		if (m_press_state == STATE_TRAN::PRESS_AREA) {
+		if (m_pointer_state == STATE_TRAN::PRESS_AREA) {
 			// 押された状態が範囲を選択している場合,
 			// 補助線の色をブラシに格納する.
 			D2D1_COLOR_F aux_color;
@@ -296,32 +297,32 @@ namespace winrt::GraphPaper::implementation
 				// または方形
 				// または文字列の場合,
 				// 方形の補助線を表示する.
-				m_page_layout.draw_auxiliary_rect(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_layout.draw_auxiliary_rect(m_page_dx, m_pointer_pressed, m_pointer_cur);
 			}
 			else if (m_draw_tool == DRAW_TOOL::BEZI) {
 				// 曲線の場合,
 				// 曲線の補助線を表示する.
-				m_page_layout.draw_auxiliary_bezi(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_layout.draw_auxiliary_bezi(m_page_dx, m_pointer_pressed, m_pointer_cur);
 			}
 			else if (m_draw_tool == DRAW_TOOL::ELLI) {
 				// だ円の場合,
 				// だ円の補助線を表示する.
-				m_page_layout.draw_auxiliary_elli(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_layout.draw_auxiliary_elli(m_page_dx, m_pointer_pressed, m_pointer_cur);
 			}
 			else if (m_draw_tool == DRAW_TOOL::LINE) {
 				// 直線の場合,
 				// 直線の補助線を表示する.
-				m_page_layout.draw_auxiliary_line(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_layout.draw_auxiliary_line(m_page_dx, m_pointer_pressed, m_pointer_cur);
 			}
 			else if (m_draw_tool == DRAW_TOOL::RRECT) {
 				// 角丸方形の場合,
 				// 角丸方形の補助線を表示する.
-				m_page_layout.draw_auxiliary_rrect(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_layout.draw_auxiliary_rrect(m_page_dx, m_pointer_pressed, m_pointer_cur);
 			}
 			else if (m_draw_tool == DRAW_TOOL::QUAD) {
 				// 四へん形の場合,
 				// 四へん形の補助線を表示する.
-				m_page_layout.draw_auxiliary_quad(m_page_dx, m_press_pos, m_curr_pos);
+				m_page_layout.draw_auxiliary_quad(m_page_dx, m_pointer_pressed, m_pointer_cur);
 			}
 		}
 		// 描画を終了する.
@@ -333,7 +334,7 @@ namespace winrt::GraphPaper::implementation
 			// スワップチェーンの内容を画面に表示する.
 			m_page_dx.Present();
 			// ポインターの位置をステータスバーに格納する.
-			status_set_curs();
+			status_bar_set_curs();
 		}
 #if defined(_DEBUG)
 		else {

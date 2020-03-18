@@ -44,19 +44,12 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::StorageFolder;
 		using winrt::Windows::Storage::CreationCollisionOption;
 
-		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
-		// 引数から中断操作に関する情報を得る.
 		auto const& s_operation = args.SuspendingOperation();
-		// 延長処理を中断するためのトークンの元を得る.
 		auto ct_source = cancellation_token_source();
-		// 中断操作に関する情報からアプリの中断を管理するため中断延期 SuspendingDeferral を得る.
 		auto s_deferral = s_operation.GetDeferral();
-		// 延長実行するための延長実行セッションを得る.
 		auto e_session = ExtendedExecutionSession();
-		// SavingData を延長実行セッションの目的に格納する.
 		e_session.Reason(ExtendedExecutionReason::SavingData);
-		// 「To save data.」を延長実行セッションの理由に格納する.
 		e_session.Description(L"To save data.");
 		// 延長実行セッションが取り消されたときのコルーチンを登録する.
 		// RequestExtensionAsync の中でこのコルーチンは呼び出されるので, 
@@ -64,7 +57,6 @@ namespace winrt::GraphPaper::implementation
 		auto handler = [&ct_source, &s_deferral](IInspectable const&, ExtendedExecutionRevokedEventArgs const& args)
 		{
 			using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
-			// セッションが取り消された場合,
 			// トークンの元をキャンセルする.
 			ct_source.cancel();
 			switch (args.Reason()) {
@@ -74,8 +66,6 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 			if (s_deferral != nullptr) {
-				// 中断延期がヌルでない場合,
-				// 中断延期を完了する.
 				// 中断延長を完了し OS に通知しなければ, 
 				// アプリは再び中断延期を要求できない.
 				s_deferral.Complete();
@@ -89,7 +79,6 @@ namespace winrt::GraphPaper::implementation
 		switch (co_await e_session.RequestExtensionAsync()) {
 		case ExtendedExecutionResult::Allowed:
 			// 延長実行セッションが許可された場合,
-			// トークンを調べて, キャンセルされたか判定する.
 			if (ct_source.get_token().is_canceled()) {
 				// キャンセルされた場合, 中断する.
 				break;
@@ -106,7 +95,6 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			catch (winrt::hresult_error const& e) {
-				// エラーが発生した場合, エラーコードを結果に格納する.
 				hr = e.code();
 			}
 			break;
@@ -115,7 +103,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		// スレッドをメインページの UI スレッドに変える.
 		// スレッド変更は, セッションを閉じる前にでないとダメ.
-		co_await winrt::resume_foreground(this->Dispatcher());
+		auto cd = this->Dispatcher();
+		co_await winrt::resume_foreground(cd);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			// 「メモリリーク」メッセージダイアログを表示する.
@@ -130,16 +119,11 @@ namespace winrt::GraphPaper::implementation
 		// スレッドコンテキストを復元する.
 		co_await context;
 		if (e_session != nullptr) {
-			// 延長実行セッションがヌルでない場合,
-			// 取り消しコルーチンをセッションから解放し, 
-			// セッションを閉じる.
 			e_session.Revoked(s_token);
 			e_session.Close();
 			e_session = nullptr;
 		}
 		if (s_deferral != nullptr) {
-			// 中断延期がヌルでない場合,
-			// 中断延期を完了する.
 			// 中断延長を完了し OS に通知しなければ, 
 			// アプリは再び中断延期を要求できない.
 			s_deferral.Complete();
@@ -156,10 +140,8 @@ namespace winrt::GraphPaper::implementation
 	// アプリ起動のときは呼ばれない.
 	IAsyncAction MainPage::app_resuming_async(void)
 	{
-		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 
-		// 有効な書体名の配列を設定する.
 		ShapeText::set_available_fonts();
 
 		auto hr = E_FAIL;
@@ -171,7 +153,8 @@ namespace winrt::GraphPaper::implementation
 				try {
 					hr = co_await file_read_async(s_file, true, false);
 					// スレッドをメインページの UI スレッドに変える.
-					co_await winrt::resume_foreground(this->Dispatcher());
+					auto cd = this->Dispatcher();
+					co_await winrt::resume_foreground(cd);
 					finish_file_read();
 				}
 				catch (winrt::hresult_error const& e) {

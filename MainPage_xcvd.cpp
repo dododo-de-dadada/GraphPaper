@@ -42,7 +42,8 @@ namespace winrt::GraphPaper::implementation
 		// 図形リストから文字列を得る.
 		auto text = s_list_text(m_list_shapes);
 		// スレッドをメインページの UI スレッドに変える.
-		co_await winrt::resume_foreground(this->Dispatcher());
+		auto cd = this->Dispatcher();
+		co_await winrt::resume_foreground(cd);
 		if (n_byte > 0) {
 			// 格納したバイト数が 0 を超える場合,
 			// データパッケージを作成する.
@@ -135,7 +136,8 @@ namespace winrt::GraphPaper::implementation
 				// 図形のためのメモリの確保が別スレッドで行われた場合,
 				// D2DERR_WRONG_STATE を引き起こすことがある.
 				// 図形を貼り付ける前に, スレッドをメインページの UI スレッドに変える.
-				co_await winrt::resume_foreground(this->Dispatcher());
+				auto cd = this->Dispatcher();
+				co_await winrt::resume_foreground(cd);
 				if (operation == ra_stream.Size()) {
 					S_LIST_T list_pasted;	// 貼り付けリスト
 					if (s_list_read(list_pasted, dt_reader) == false) {
