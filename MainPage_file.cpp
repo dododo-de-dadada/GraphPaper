@@ -142,7 +142,8 @@ namespace winrt::GraphPaper::implementation
 			text_find_read(dt_reader);
 			status_bar_read(dt_reader);
 			m_page_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
-			m_col_style = static_cast<COL_STYLE>(dt_reader.ReadUInt32());
+			m_color_fmt = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
+			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 
 			m_page_layout.read(dt_reader);
 			// 無効なデータを読み込んでアプリが落ちることがないよう, 値を制限する.
@@ -346,7 +347,8 @@ namespace winrt::GraphPaper::implementation
 			text_find_write(dt_writer);
 			status_bar_write(dt_writer);
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_page_unit));
-			dt_writer.WriteUInt32(static_cast<uint32_t>(m_col_style));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_fmt));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
 			m_page_layout.write(dt_writer);
 			if (suspend) {
 				s_list_write<!REDUCE>(m_list_shapes, dt_writer);
@@ -603,6 +605,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::finish_file_read(void)
 	{
 		enable_edit_menu();
+		color_code_check_menu();
 		stroke_style_check_menu(m_page_layout.m_stroke_style);
 		arrow_style_check_menu(m_page_layout.m_arrow_style);
 		font_style_check_menu(m_page_layout.m_font_style);
@@ -613,6 +616,7 @@ namespace winrt::GraphPaper::implementation
 		text_align_p_check_menu(m_page_layout.m_text_align_p);
 		tmfi_grid_snap().IsChecked(m_page_layout.m_grid_snap);
 		tmfi_grid_snap_2().IsChecked(m_page_layout.m_grid_snap);
+		unit_check_menu();
 
 		// 図形リストの各図形について以下を繰り返す.
 		for (auto s : m_list_shapes) {

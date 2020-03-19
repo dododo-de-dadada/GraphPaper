@@ -49,14 +49,16 @@ namespace winrt::GraphPaper::implementation
 	// dx		図形の描画環境
 	void anchor_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
 	{
-		// 部位の左上位置を得る.
 		D2D1_POINT_2F r_min;
 		pt_add(a_pos, -0.5 * dx.m_anch_len, r_min);
-		// 部位の右下位置を得る.
 		D2D1_POINT_2F r_max;
 		pt_add(r_min, dx.m_anch_len, r_max);
-		D2D1_RECT_F r{ r_min.x, r_min.y, r_max.x, r_max.y };
-		dx.m_d2dContext->FillRectangle(r, dx.m_anch_brush.get());
+		const D2D1_RECT_F r{ r_min.x, r_min.y, r_max.x, r_max.y };
+
+		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_d2dContext->DrawRectangle(r, dx.m_shape_brush.get(), 2.0, nullptr);
+		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_d2dContext->FillRectangle(r, dx.m_shape_brush.get());
 	}
 
 	// 丸い部位を表示する.
@@ -65,8 +67,10 @@ namespace winrt::GraphPaper::implementation
 	void anchor_draw_rounded(const D2D1_POINT_2F& a_pos, SHAPE_DX& dx)
 	{
 		const FLOAT rad = static_cast<FLOAT>(dx.m_anch_len * 0.5 + 1.0);
-		const D2D1_ELLIPSE elli = { a_pos, rad, rad };
-		dx.m_d2dContext->DrawEllipse(elli, dx.m_anch_brush.get(), 2.0F);
+		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_d2dContext->FillEllipse({ a_pos, rad, rad }, dx.m_shape_brush.get());
+		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_d2dContext->FillEllipse({ a_pos, rad - 1.0F, rad - 1.0F }, dx.m_shape_brush.get());
 	}
 
 	// 矢じりの寸法が同じか調べる.
@@ -175,7 +179,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置が同じか調べる.
-	bool equal(const STROKE_PATTERN& a, const STROKE_PATTERN& b) noexcept
+	bool equal(const STROKE_PATT& a, const STROKE_PATT& b) noexcept
 	{
 		return equal(a.m_[0], b.m_[0])
 			&& equal(a.m_[1], b.m_[1])
@@ -659,7 +663,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置をデータリーダーから読み込む.
-	void read(STROKE_PATTERN& value, DataReader const& dt_reader)
+	void read(STROKE_PATT& value, DataReader const& dt_reader)
 	{
 		value.m_[0] = dt_reader.ReadSingle();
 		value.m_[1] = dt_reader.ReadSingle();
@@ -842,7 +846,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置をデータライターに書き込む.
-	void write(const STROKE_PATTERN& value, DataWriter const& dt_writer)
+	void write(const STROKE_PATT& value, DataWriter const& dt_writer)
 	{
 		dt_writer.WriteSingle(value.m_[0]);
 		dt_writer.WriteSingle(value.m_[1]);
@@ -919,16 +923,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の形式と配置をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_DASH_STYLE style, const STROKE_PATTERN& pattern, const double width, DataWriter const& dt_writer)
+	void write_svg(const D2D1_DASH_STYLE style, const STROKE_PATT& patt, const double width, DataWriter const& dt_writer)
 	{
 		if (width <= FLT_MIN) {
 			return;
 		}
 		const double a[]{
-			pattern.m_[0] * width,
-			pattern.m_[1] * width,
-			pattern.m_[2] * width,
-			pattern.m_[3] * width
+			patt.m_[0] * width,
+			patt.m_[1] * width,
+			patt.m_[2] * width,
+			patt.m_[3] * width
 		};
 		char buf[256];
 		if (style == D2D1_DASH_STYLE_DASH) {

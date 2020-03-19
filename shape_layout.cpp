@@ -6,40 +6,82 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 指定した色と不透明度から反対色を得る.
-	static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept;
+	//static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept;
 
 	// 指定した色と不透明度から反対色を得る.
 	// src	指定した色
 	// opa	指定した不透明度
 	// dst	反対色
+	/*
 	static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept
 	{
-		dst.r = (src.r <= 0.5f ? 1.0f : 0.0f);
+		const auto R = src.r;
+		const auto G = src.g;
+		const auto B = src.b;
+		const auto X = max(R, max(G, B)) + min(R, min(G, B));
+		const auto Y = 0.29900 * R + 0.58700 * G + 0.11400 * B;
+		const auto Cb = -0.168736 * R - 0.331264 * G + 0.5 * B;
+		const auto Cr = 0.5 * R - 0.418688 * G - 0.081312 * B;
+		//const auto _Y = 1.0 - Y;
+		const auto _Cb = Cr;
+		const auto _Cr = Cb;
+		//const auto _R = _Y + 1.402 * _Cr;
+		//const auto _G = _Y - 0.344136 * _Cb - 0.714136 * _Cr;
+		//const auto _B = _Y + 1.772 * _Cb;
+
+		const auto _R = (X - R);
+		const auto _G = (X - G);
+		const auto _B = (X - B);
+		const auto _Y = 0.29900 * _R + 0.58700 * _G + 0.11400 * _B;
+		if (abs(_Y - Y) > 0.2) {
+			dst.r = _R;
+			dst.g = _G;
+			dst.b = _B;
+		}
+		else {
+			dst.r = Y < 0.5 ? 1.0 : 0.0;
+			dst.g = Y < 0.5 ? 1.0 : 0.0;
+			dst.b = Y < 0.5 ? 1.0 : 0.0;
+		}
+		dst.a = opa;
+		return;
+
+		dst.r = (src.g <= 0.5f ? 1.0f : 0.0f);
 		dst.g = (src.g <= 0.5f ? 1.0f : 0.0f);
-		dst.b = (src.b <= 0.5f ? 1.0f : 0.0f);
+		dst.b = (src.g <= 0.5f ? 1.0f : 0.0f);
 		dst.a = static_cast<FLOAT>(opa);
 	}
+	*/
 
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	void ShapeLayout::draw_auxiliary_bezi(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		ID2D1Brush* br = dx.m_aux_brush.get();
-		ID2D1StrokeStyle* ss = dx.m_aux_style.get();
+		//ID2D1SolidColorBrush* br = dx.m_aux_brush.get();
+		//ID2D1StrokeStyle* ss = dx.m_aux_style.get();
 		const FLOAT sw = static_cast<FLOAT>(1.0 / m_page_scale);
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
 
 		e_pos.x = c_pos.x;
 		e_pos.y = p_pos.y;
-		dx.m_d2dContext->DrawLine(p_pos, e_pos, br, sw, ss);
+		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_d2dContext->DrawLine(p_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_d2dContext->DrawLine(p_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		s_pos = e_pos;
 		e_pos.x = p_pos.x;
 		e_pos.y = c_pos.y;
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, br, sw, ss);
+		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		s_pos = e_pos;
-		dx.m_d2dContext->DrawLine(s_pos, c_pos, br, sw, ss);
+		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_d2dContext->DrawLine(s_pos, c_pos, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_d2dContext->DrawLine(s_pos, c_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
 	// だ円の補助線を表示する.
@@ -47,8 +89,8 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeLayout::draw_auxiliary_elli(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		auto br = dx.m_aux_brush.get();
-		auto ss = dx.m_aux_style.get();
+		//auto br = dx.m_aux_brush.get();
+		//auto ss = dx.m_aux_style.get();
 		const FLOAT sw = static_cast<FLOAT>(1.0 / m_page_scale);
 		D2D1_POINT_2F r;	// 方形
 		D2D1_ELLIPSE e;		// だ円
@@ -58,7 +100,10 @@ namespace winrt::GraphPaper::implementation
 		pt_add(p_pos, r, e.point);
 		e.radiusX = r.x;
 		e.radiusY = r.y;
-		dx.m_d2dContext->DrawEllipse(e, br, sw, ss);
+		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_d2dContext->DrawEllipse(e, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_d2dContext->DrawEllipse(e, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
 	// 直線の補助線を表示する.
@@ -66,10 +111,13 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeLayout::draw_auxiliary_line(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		auto br = dx.m_aux_brush.get();
-		auto ss = dx.m_aux_style.get();
+		//auto br = dx.m_aux_brush.get();
+		//auto ss = dx.m_aux_style.get();
 		const FLOAT sw = static_cast<FLOAT>(1.0 / m_page_scale);
-		dx.m_d2dContext->DrawLine(p_pos, c_pos, br, sw, ss);
+		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
 	// ひし形の補助線を表示する.
@@ -77,8 +125,8 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeLayout::draw_auxiliary_quad(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		auto br = dx.m_aux_brush.get();
-		auto ss = dx.m_aux_style.get();
+		//auto br = dx.m_aux_brush.get();
+		//auto ss = dx.m_aux_style.get();
 		const FLOAT sw = static_cast<FLOAT>(1.0 / m_page_scale);
 		D2D1_POINT_2F m_pos;
 		D2D1_POINT_2F q_pos[4];
@@ -88,10 +136,16 @@ namespace winrt::GraphPaper::implementation
 		q_pos[1] = { c_pos.x, m_pos.y };
 		q_pos[2] = { m_pos.x, c_pos.y };
 		q_pos[3] = { p_pos.x, m_pos.y };
-		dx.m_d2dContext->DrawLine(q_pos[0], q_pos[1], br, sw, ss);
-		dx.m_d2dContext->DrawLine(q_pos[1], q_pos[2], br, sw, ss);
-		dx.m_d2dContext->DrawLine(q_pos[2], q_pos[3], br, sw, ss);
-		dx.m_d2dContext->DrawLine(q_pos[3], q_pos[0], br, sw, ss);
+		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_d2dContext->DrawLine(q_pos[0], q_pos[1], dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_d2dContext->DrawLine(q_pos[1], q_pos[2], dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_d2dContext->DrawLine(q_pos[2], q_pos[3], dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_d2dContext->DrawLine(q_pos[3], q_pos[0], dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_d2dContext->DrawLine(q_pos[0], q_pos[1], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawLine(q_pos[1], q_pos[2], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawLine(q_pos[2], q_pos[3], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawLine(q_pos[3], q_pos[0], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
 	// 方形の補助線を表示する.
@@ -99,13 +153,16 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeLayout::draw_auxiliary_rect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		auto br = dx.m_aux_brush.get();
-		auto ss = dx.m_aux_style.get();
+		//auto br = dx.m_aux_brush.get();
+		//auto ss = dx.m_aux_style.get();
 		const FLOAT sw = static_cast<FLOAT>(1.0 / m_page_scale);
 		const D2D1_RECT_F rc = {
 			p_pos.x, p_pos.y, c_pos.x, c_pos.y
 		};
-		dx.m_d2dContext->DrawRectangle(&rc, br, sw, ss);
+		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
 	// 角丸方形の補助線を表示する.
@@ -114,8 +171,8 @@ namespace winrt::GraphPaper::implementation
 	// c_rad	角丸半径
 	void ShapeLayout::draw_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		auto br = dx.m_aux_brush.get();
-		auto ss = dx.m_aux_style.get();
+		//auto br = dx.m_aux_brush.get();
+		//auto ss = dx.m_aux_style.get();
 		auto c_rad = m_corner_rad;
 		const FLOAT sw = static_cast<FLOAT>(1.0 / m_page_scale);
 		const double cx = c_pos.x;
@@ -138,7 +195,10 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(rx),
 			static_cast<FLOAT>(ry)
 		};
-		dx.m_d2dContext->DrawRoundedRectangle(&rr, br, sw, ss);
+		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
 	// 方眼線を表示する.
@@ -197,10 +257,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 部位の色を得る.
-	void ShapeLayout::get_anchor_color(D2D1_COLOR_F& value) const noexcept
-	{
-		get_opposite_color(m_page_color, ANCH_OPAC, value);
-	}
+	//void ShapeLayout::get_anchor_color(D2D1_COLOR_F& value) const noexcept
+	//{
+	//	get_opposite_color(m_page_color, ANCH_OPAC, value);
+	//}
 
 	// 矢じりの寸法を得る.
 	bool ShapeLayout::get_arrow_size(ARROW_SIZE& value) const noexcept
@@ -217,10 +277,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 補助線の色を得る.
-	void ShapeLayout::get_auxiliary_color(D2D1_COLOR_F& value) const noexcept
-	{
-		get_opposite_color(m_page_color, AUX_OPAC, value);
-	}
+	//void ShapeLayout::get_auxiliary_color(D2D1_COLOR_F& value) const noexcept
+	//{
+	//	get_opposite_color(m_page_color, AUX_OPAC, value);
+	//}
 
 	// 角丸半径を得る.
 	bool ShapeLayout::get_corner_radius(D2D1_POINT_2F& value) const noexcept
@@ -285,16 +345,20 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 方眼線の色を得る.
+	// 方眼線の濃淡を得る.
 	void ShapeLayout::get_grid_color(D2D1_COLOR_F& value) const noexcept
 	{
-		get_opposite_color(m_page_color, m_grid_opac, value);
+		value.r = static_cast<FLOAT>(1.0 - m_grid_gray);
+		value.g = value.r;
+		value.b = value.r;
+		value.a = 0.875F;
+		//get_opposite_color(m_page_color, m_grid_gray, value);
 	}
 
-	// 方眼線の不透明度を得る.
-	bool ShapeLayout::get_grid_opac(double& value) const noexcept
+	// 方眼線の濃淡を得る.
+	bool ShapeLayout::get_grid_gray(double& value) const noexcept
 	{
-		value = m_grid_opac;
+		value = m_grid_gray;
 		return true;
 	}
 
@@ -348,9 +412,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置を得る.
-	bool ShapeLayout::get_stroke_pattern(STROKE_PATTERN& value) const noexcept
+	bool ShapeLayout::get_stroke_patt(STROKE_PATT& value) const noexcept
 	{
-		value = m_stroke_pattern;
+		value = m_stroke_patt;
 		return true;
 	}
 
@@ -404,7 +468,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F dummy;
 		read(dummy, dt_reader);	// 方眼の色
 		m_grid_base = dt_reader.ReadDouble();	// 方眼の大きさ
-		m_grid_opac = dt_reader.ReadDouble();
+		m_grid_gray = dt_reader.ReadDouble();
 		read(m_grid_patt, dt_reader);
 		read(m_grid_show, dt_reader);
 		m_grid_snap = dt_reader.ReadBoolean();
@@ -419,7 +483,7 @@ namespace winrt::GraphPaper::implementation
 		read(m_arrow_style, dt_reader);	// 矢じりの形式
 		read(m_corner_rad, dt_reader);	// 角丸半径
 		read(m_stroke_color, dt_reader);	// 線・枠の色
-		read(m_stroke_pattern, dt_reader);	// 破線の配置
+		read(m_stroke_patt, dt_reader);	// 破線の配置
 		read(m_stroke_style, dt_reader);	// 破線の形式
 		read(m_stroke_width, dt_reader);	// 線・枠の太さ
 		read(m_fill_color, dt_reader);	// 塗りつぶしの色
@@ -497,10 +561,10 @@ namespace winrt::GraphPaper::implementation
 		m_grid_base = value;
 	}
 
-	// 値を方眼線の不透明度に格納する.
-	void ShapeLayout::set_grid_opac(const double value) noexcept
+	// 値を方眼線の濃淡に格納する.
+	void ShapeLayout::set_grid_gray(const double value) noexcept
 	{
-		m_grid_opac = value;
+		m_grid_gray = value;
 	}
 
 	// 値を方眼線の形式に格納する.
@@ -547,9 +611,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置に格納する.
-	void ShapeLayout::set_stroke_pattern(const STROKE_PATTERN& value)
+	void ShapeLayout::set_stroke_patt(const STROKE_PATT& value)
 	{
-		m_stroke_pattern = value;
+		m_stroke_patt = value;
 	}
 
 	// 線枠の形式に格納する.
@@ -602,13 +666,13 @@ namespace winrt::GraphPaper::implementation
 		s->get_font_style(m_font_style);
 		s->get_font_weight(m_font_weight);
 		s->get_grid_base(m_grid_base);
-		s->get_grid_opac(m_grid_opac);
+		s->get_grid_gray(m_grid_gray);
 		s->get_grid_patt(m_grid_patt);
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
 		s->get_page_color(m_page_color);
 		s->get_stroke_color(m_stroke_color);
-		s->get_stroke_pattern(m_stroke_pattern);
+		s->get_stroke_patt(m_stroke_patt);
 		s->get_stroke_style(m_stroke_style);
 		s->get_stroke_width(m_stroke_width);
 		s->get_text_line_height(m_text_line);
@@ -625,7 +689,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F dummy;
 		write(dummy, dt_writer);
 		dt_writer.WriteDouble(m_grid_base);
-		dt_writer.WriteDouble(m_grid_opac);
+		dt_writer.WriteDouble(m_grid_gray);
 		write(m_grid_patt, dt_writer);
 		write(m_grid_show, dt_writer);
 		dt_writer.WriteBoolean(m_grid_snap);
@@ -637,7 +701,7 @@ namespace winrt::GraphPaper::implementation
 		write(m_arrow_style, dt_writer);	// 矢じりの形式
 		write(m_corner_rad, dt_writer);	// 角丸半径
 		write(m_stroke_color, dt_writer);	// 線枠の色
-		write(m_stroke_pattern, dt_writer);	// 破線の配置
+		write(m_stroke_patt, dt_writer);	// 破線の配置
 		write(m_stroke_style, dt_writer);	// 線枠の形式
 		write(m_stroke_width, dt_writer);	// 線枠の太さ
 		write(m_fill_color, dt_writer);	// 塗りつぶしの色

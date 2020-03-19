@@ -23,6 +23,10 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::SwapChainPanel;
 	using winrt::Windows::Graphics::Display::DisplayOrientations;
 
+	// 白
+	constexpr D2D1_COLOR_F S_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };
+	// 黒
+	constexpr D2D1_COLOR_F S_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };
 	// 補助線の不透明度
 	constexpr float AUX_OPAC = 0.975f;
 	// 補助線の破線の配置
@@ -110,12 +114,14 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形表示用の D2D オブジェクト
 
-		winrt::com_ptr<ID2D1SolidColorBrush> m_anch_brush;	// 部位の色ブラシ
+		//winrt::com_ptr<ID2D1SolidColorBrush> m_anch_brush;	// 部位の色ブラシ
 		double m_anch_len = 6.0;	// 部位の方形の大きさ
-		winrt::com_ptr<ID2D1SolidColorBrush> m_aux_brush;	// 補助線の色ブラシ
+		//winrt::com_ptr<ID2D1SolidColorBrush> m_aux_brush;	// 補助線の色ブラシ
 		winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
 		D2D1_COLOR_F m_range_bcolor = RNG_BACK;	// 文字範囲の背景色
 		D2D1_COLOR_F m_range_tcolor = RNG_TEXT;	// 文字範囲の文字色
+		D2D1_COLOR_F m_color_frg = S_BLACK;	// 背景色
+		D2D1_COLOR_F m_color_bkg = S_WHITE;	// 前景色
 		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush;	// 文字範囲の文字色ブラシ
 		winrt::com_ptr<ID2D1SolidColorBrush> m_shape_brush;	// 図形の色ブラシ
 		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック
@@ -128,8 +134,8 @@ namespace winrt::GraphPaper::implementation
 			m_shape_brush = nullptr;
 			m_range_brush = nullptr;
 			m_aux_style = nullptr;
-			m_aux_brush = nullptr;
-			m_anch_brush = nullptr;
+			//m_aux_brush = nullptr;
+			//m_anch_brush = nullptr;
 			m_swapChainPanel = nullptr;
 			m_d2dTargetBitmap = nullptr;
 			m_d2dContext = nullptr;

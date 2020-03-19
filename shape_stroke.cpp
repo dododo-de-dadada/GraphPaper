@@ -6,13 +6,13 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 線枠の形式を作成する.
-	static void create_stroke_style(const D2D1_DASH_STYLE style, const STROKE_PATTERN& array, ID2D1StrokeStyle** d2d_stroke_style);
+	static void create_stroke_style(const D2D1_DASH_STYLE style, const STROKE_PATT& array, ID2D1StrokeStyle** d2d_stroke_style);
 
 	// D2D ストローク特性を作成する.
 	// ds	破線の種類
 	// da	破線の配置配列
 	// ss	作成されたストローク特性
-	static void create_stroke_style(const D2D1_DASH_STYLE ds, const STROKE_PATTERN& da, ID2D1StrokeStyle** ss)
+	static void create_stroke_style(const D2D1_DASH_STYLE ds, const STROKE_PATT& da, ID2D1StrokeStyle** ss)
 	{
 		D2D1_STROKE_STYLE_PROPERTIES prop{
 			D2D1_CAP_STYLE_SQUARE,	// startCap
@@ -236,9 +236,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置を得る.
-	bool ShapeStroke::get_stroke_pattern(STROKE_PATTERN& value) const noexcept
+	bool ShapeStroke::get_stroke_patt(STROKE_PATT& value) const noexcept
 	{
-		value = m_stroke_pattern;
+		value = m_stroke_patt;
 		return true;
 	}
 
@@ -316,14 +316,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を破線の配置に格納する.
-	void ShapeStroke::set_stroke_pattern(const STROKE_PATTERN& value)
+	void ShapeStroke::set_stroke_patt(const STROKE_PATT& value)
 	{
-		if (equal(m_stroke_pattern, value)) {
+		if (equal(m_stroke_patt, value)) {
 			return;
 		}
-		m_stroke_pattern = value;
+		m_stroke_patt = value;
 		m_d2d_stroke_style = nullptr;
-		create_stroke_style(m_stroke_style, m_stroke_pattern, m_d2d_stroke_style.put());
+		create_stroke_style(m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
 	}
 
 	// 値を線枠の形式に格納する.
@@ -334,7 +334,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_stroke_style = value;
 		m_d2d_stroke_style = nullptr;
-		create_stroke_style(m_stroke_style, m_stroke_pattern, m_d2d_stroke_style.put());
+		create_stroke_style(m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
 	}
 
 	// 値を線枠の太さに格納する.
@@ -346,12 +346,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	ShapeStroke::ShapeStroke(const ShapeLayout* attr) :
 		m_stroke_color(attr->m_stroke_color),
-		m_stroke_pattern(attr->m_stroke_pattern),
+		m_stroke_patt(attr->m_stroke_patt),
 		m_stroke_style(attr->m_stroke_style),
 		m_stroke_width(attr->m_stroke_width),
 		m_d2d_stroke_style(nullptr)
 	{
-		create_stroke_style(m_stroke_style, m_stroke_pattern, m_d2d_stroke_style.put());
+		create_stroke_style(m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
 	}
 
 	// 図形をデータリーダーから読み込む.
@@ -365,10 +365,10 @@ namespace winrt::GraphPaper::implementation
 		read(m_pos, dt_reader);
 		read(m_diff, dt_reader);
 		read(m_stroke_color, dt_reader);
-		read(m_stroke_pattern, dt_reader);
+		read(m_stroke_patt, dt_reader);
 		read(m_stroke_style, dt_reader);
 		m_stroke_width = dt_reader.ReadDouble();
-		create_stroke_style(m_stroke_style, m_stroke_pattern, m_d2d_stroke_style.put());
+		create_stroke_style(m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
 	}
 
 	// データライターに書き込む.
@@ -381,12 +381,12 @@ namespace winrt::GraphPaper::implementation
 		write(m_pos, dt_writer);
 		write(m_diff, dt_writer);
 		write(m_stroke_color, dt_writer);
-		dt_writer.WriteSingle(m_stroke_pattern.m_[0]);
-		dt_writer.WriteSingle(m_stroke_pattern.m_[1]);
-		dt_writer.WriteSingle(m_stroke_pattern.m_[2]);
-		dt_writer.WriteSingle(m_stroke_pattern.m_[3]);
-		dt_writer.WriteSingle(m_stroke_pattern.m_[4]);
-		dt_writer.WriteSingle(m_stroke_pattern.m_[5]);
+		dt_writer.WriteSingle(m_stroke_patt.m_[0]);
+		dt_writer.WriteSingle(m_stroke_patt.m_[1]);
+		dt_writer.WriteSingle(m_stroke_patt.m_[2]);
+		dt_writer.WriteSingle(m_stroke_patt.m_[3]);
+		dt_writer.WriteSingle(m_stroke_patt.m_[4]);
+		dt_writer.WriteSingle(m_stroke_patt.m_[5]);
 		dt_writer.WriteInt32(static_cast<int32_t>(m_stroke_style));
 		dt_writer.WriteDouble(m_stroke_width);
 	}
@@ -397,7 +397,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write_svg;
 
 		write_svg(m_stroke_color, "stroke", dt_writer);
-		write_svg(m_stroke_style, m_stroke_pattern, m_stroke_width, dt_writer);
+		write_svg(m_stroke_style, m_stroke_patt, m_stroke_width, dt_writer);
 		write_svg(m_stroke_width, "stroke-width", dt_writer);
 	}
 

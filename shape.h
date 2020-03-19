@@ -140,24 +140,18 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 破線の配置
-	union STROKE_PATTERN {
+	union STROKE_PATT {
 		float m_[6] = { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F };
 	};
 
 	// 色成分の最大値
 	constexpr double COLOR_MAX = 255.0;
-	// 白
-	constexpr D2D1_COLOR_F S_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };
-	// 黒
-	constexpr D2D1_COLOR_F S_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };
 	// 1 インチあたりのポイント数
 	constexpr double PT_PER_INCH = 72.0;
 	// 1 インチあたりのミリメートル数
 	constexpr double MM_PER_INCH = 25.4;
-	// 方眼線の不透明度
-	constexpr float GRID_OPAC = 0.125f;
-	// 基準部位の不透明度
-	constexpr float ANCH_OPAC = 0.75f;
+	// 方眼線の濃さ
+	constexpr float GRID_GRAY = 0.25f;
 
 	//------------------------------
 	// shape.cpp
@@ -206,7 +200,7 @@ namespace winrt::GraphPaper::implementation
 	// 方眼線の表示が同じか調べる.
 	bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept;
 	// 破線の配置が同じか調べる.
-	bool equal(const STROKE_PATTERN& a, const STROKE_PATTERN& b) noexcept;
+	bool equal(const STROKE_PATT& a, const STROKE_PATT& b) noexcept;
 	// 32 ビット整数が同じか調べる.
 	bool equal(const uint32_t a, const uint32_t b) noexcept;
 	// ワイド文字列が同じか調べる.
@@ -296,7 +290,7 @@ namespace winrt::GraphPaper::implementation
 	// 方眼の表示をデータリーダーから読み込む.
 	void read(GRID_SHOW& value, DataReader const& dt_reader);
 	// 破線の配置をデータリーダーから読み込む.
-	void read(STROKE_PATTERN& value, DataReader const& dt_reader);
+	void read(STROKE_PATT& value, DataReader const& dt_reader);
 	// 32 ビット整数をデータリーダーから読み込む.
 	void read(uint32_t& value, DataReader const& dt_reader);
 	// 文字列をデータリーダーから読み込む.
@@ -338,7 +332,7 @@ namespace winrt::GraphPaper::implementation
 	// 方眼の表示をデータライターに書き込む.
 	void write(const GRID_SHOW value, DataWriter const& dt_writer);
 	// 破線の配置をデータライターに書き込む.
-	void write(const STROKE_PATTERN& value, DataWriter const& dt_writer);
+	void write(const STROKE_PATT& value, DataWriter const& dt_writer);
 	// 32 ビット整数をデータライターに書き込む.
 	void write(const uint32_t value, DataWriter const& dt_writer);
 	// 文字列をデータライターに書き込む.
@@ -364,7 +358,7 @@ namespace winrt::GraphPaper::implementation
 	// 属性名と 32 ビット正整数をデータライターに SVG として書き込む
 	void write_svg(const uint32_t value, const char* name, DataWriter const& dt_writer);
 	// 破線の形式と配置をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_DASH_STYLE style, const STROKE_PATTERN& pattern, const double width, DataWriter const& dt_writer);
+	void write_svg(const D2D1_DASH_STYLE style, const STROKE_PATT& patt, const double width, DataWriter const& dt_writer);
 
 	// 図形のひな型
 	struct Shape {
@@ -402,7 +396,7 @@ namespace winrt::GraphPaper::implementation
 		// 方眼の基準の大きさを得る.
 		virtual bool get_grid_base(double& /*val*/) const noexcept { return false; }
 		// 方眼の大きさを得る.
-		virtual bool get_grid_opac(double& /*val*/) const noexcept { return false; }
+		virtual bool get_grid_gray(double& /*val*/) const noexcept { return false; }
 		// 方眼の形式を得る.
 		virtual bool get_grid_patt(GRID_PATT& /*val*/) const noexcept { return false; }
 		// 方眼の表示を得る.
@@ -424,7 +418,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠の色を得る.
 		virtual bool get_stroke_color(D2D1_COLOR_F& /*val*/) const noexcept { return false; }
 		// 破線の配置を得る.
-		virtual bool get_stroke_pattern(STROKE_PATTERN& /*val*/) const noexcept { return false; }
+		virtual bool get_stroke_patt(STROKE_PATT& /*val*/) const noexcept { return false; }
 		// 破線の形式を得る.
 		virtual bool get_stroke_style(D2D1_DASH_STYLE& /*val*/) const noexcept { return false; }
 		// 書体の太さを得る
@@ -473,8 +467,8 @@ namespace winrt::GraphPaper::implementation
 		virtual void set_font_weight(const DWRITE_FONT_WEIGHT /*val*/) {}
 		// 値を方眼の大きさに格納する.
 		virtual void set_grid_base(const double /*val*/) noexcept {}
-		// 値を方眼の大きさに格納する.
-		virtual void set_grid_opac(const double /*val*/) noexcept {}
+		// 値を方眼の濃淡に格納する.
+		virtual void set_grid_gray(const double /*val*/) noexcept {}
 		// 値を方眼の形式に格納する.
 		virtual void set_grid_patt(const GRID_PATT /*val*/) noexcept {}
 		// 値を方眼の表示に格納する.
@@ -494,7 +488,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線枠の色に格納する.
 		virtual void set_stroke_color(const D2D1_COLOR_F& /*val*/) noexcept {}
 		// 値を破線の配置に格納する.
-		virtual void set_stroke_pattern(const STROKE_PATTERN& /*val*/) {}
+		virtual void set_stroke_patt(const STROKE_PATT& /*val*/) {}
 		// 値を線枠の形式に格納する.
 		virtual void set_stroke_style(const D2D1_DASH_STYLE /*val*/) {}
 		// 値を書体の太さに格納する.
@@ -575,7 +569,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		D2D1_COLOR_F m_stroke_color = S_BLACK;	// 線枠の色 (MainPage のコンストラクタで設定)
-		STROKE_PATTERN m_stroke_pattern{ 4.0f, 3.0f, 1.0f, 3.0f };	// 破線の配置
+		STROKE_PATT m_stroke_patt{ 4.0f, 3.0f, 1.0f, 3.0f };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		double m_stroke_width = 1.0;	// 線枠の太さ
 		double m_text_line = 0.0;	// 行間 (DIPs 96dpi固定)
@@ -585,7 +579,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 方眼の属性
 		double m_grid_base = 0.0;	// 方眼の基準の大きさ (を -1 した値)
-		double m_grid_opac = GRID_OPAC;	// 方眼線の不透明度
+		double m_grid_gray = GRID_GRAY;	// 方眼線の濃さ
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼線の表示
 		GRID_PATT m_grid_patt = GRID_PATT::PATT_1;	// 方眼の形式
 		bool m_grid_snap = true;	// 方眼に整列
@@ -614,19 +608,19 @@ namespace winrt::GraphPaper::implementation
 		// 方眼線を表示する,
 		void draw_grid(SHAPE_DX const& dx, const D2D1_POINT_2F offset);
 		// 部位の色を得る.
-		void get_anchor_color(D2D1_COLOR_F& value) const noexcept;
+		//void get_anchor_color(D2D1_COLOR_F& value) const noexcept;
 		// 矢じりの寸法を得る.
 		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
 		// 矢じりの形式を得る.
 		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
 		// 補助線の色を得る.
-		void get_auxiliary_color(D2D1_COLOR_F& value) const noexcept;
+		//void get_auxiliary_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の基準の大きさを得る.
 		bool get_grid_base(double& value) const noexcept;
 		// 方眼線の色を得る.
 		void get_grid_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の大きさを得る.
-		bool get_grid_opac(double& value) const noexcept;
+		bool get_grid_gray(double& value) const noexcept;
 		// 方眼の形式を得る.
 		bool get_grid_patt(GRID_PATT& value) const noexcept;
 		// 方眼の表示の状態を得る.
@@ -664,7 +658,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠の色を得る.
 		bool get_stroke_color(D2D1_COLOR_F& value) const noexcept;
 		// 破線の配置を得る.
-		bool get_stroke_pattern(STROKE_PATTERN& value) const noexcept;
+		bool get_stroke_patt(STROKE_PATT& value) const noexcept;
 		// 破線の形式を得る.
 		bool get_stroke_style(D2D1_DASH_STYLE& value) const noexcept;
 		// 書体の太さを得る
@@ -677,8 +671,8 @@ namespace winrt::GraphPaper::implementation
 		void set_to_shape(Shape* s) noexcept;
 		// 値を方眼の基準の大きさに格納する.
 		void set_grid_base(const double value) noexcept;
-		// 値を方眼の不透明度に格納する.
-		void set_grid_opac(const double value) noexcept;
+		// 値を方眼の濃淡に格納する.
+		void set_grid_gray(const double value) noexcept;
 		// 値を方眼の表示に格納する.
 		void set_grid_patt(const GRID_PATT value) noexcept;
 		// 値を方眼の表示に格納する.
@@ -718,7 +712,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線枠の色に格納する.
 		void set_stroke_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を破線の配置に格納する.
-		void set_stroke_pattern(const STROKE_PATTERN& value);
+		void set_stroke_patt(const STROKE_PATT& value);
 		// 値を線枠の形式に格納する.
 		void set_stroke_style(const D2D1_DASH_STYLE value);
 		// 値を書体の太さに格納する.
@@ -785,7 +779,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		D2D1_POINT_2F m_diff{ 0.0f, 0.0f };	// 終了位置への差分
 		D2D1_COLOR_F m_stroke_color;	// 線枠の色
-		STROKE_PATTERN m_stroke_pattern{};	// 破線の配置
+		STROKE_PATT m_stroke_patt{};	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_style;	// 破線の形式
 		double m_stroke_width;	// 線枠の太さ
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
@@ -808,7 +802,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠の色を得る.
 		bool get_stroke_color(D2D1_COLOR_F& value) const noexcept;
 		// 破線の配置を得る.
-		bool get_stroke_pattern(STROKE_PATTERN& value) const noexcept;
+		bool get_stroke_patt(STROKE_PATT& value) const noexcept;
 		// 破線の形式を得る.
 		bool get_stroke_style(D2D1_DASH_STYLE& value) const noexcept;
 		// 線枠の太さを得る.
@@ -832,7 +826,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線枠の色に格納する.
 		void set_stroke_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を破線の配置に格納する.
-		void set_stroke_pattern(const STROKE_PATTERN& value);
+		void set_stroke_patt(const STROKE_PATT& value);
 		// 値を線枠の形式に格納する.
 		void set_stroke_style(const D2D1_DASH_STYLE value);
 		// 値を線枠の太さに格納する.

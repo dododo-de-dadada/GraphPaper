@@ -177,49 +177,49 @@
     <value>Wrap around</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="cxi_color_cen.Content" xml:space="preserve">
+  <data name="rmfi_color_cent.Text" xml:space="preserve">
     <value>Percent</value>
-    <comment>ComboBoxItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="cxi_color_dec.Content" xml:space="preserve">
+  <data name="rmfi_color_dec.Text" xml:space="preserve">
     <value>Decimal</value>
-    <comment>ComboBoxItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="cxi_color_flt.Content" xml:space="preserve">
+  <data name="rmfi_color_real.Text" xml:space="preserve">
     <value>Real number</value>
-    <comment>ComboBoxItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="cxi_color_hex.Content" xml:space="preserve">
+  <data name="rmfi_color_hex.Text" xml:space="preserve">
     <value>Hexdecimal</value>
-    <comment>ComboBoxItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="cxi_unit_grid.Content" xml:space="preserve">
+  <data name="rmfi_unit_grid.Text" xml:space="preserve">
     <value>Grid</value>
-    <comment>ComboBoxItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="cxi_unit_inch.Content" xml:space="preserve">
+  <data name="rmfi_unit_inch.Text" xml:space="preserve">
     <value>Inch</value>
-    <comment>ComboBoxItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="cxi_unit_milli.Content" xml:space="preserve">
+  <data name="rmfi_unit_milli.Text" xml:space="preserve">
     <value>Millimeter</value>
-    <comment>ComboBoxItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="cxi_unit_pixel.Content" xml:space="preserve">
+  <data name="rmfi_unit_pixel.Text" xml:space="preserve">
     <value>Pixel</value>
-    <comment>ComboBoxItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="cxi_unit_point.Content" xml:space="preserve">
+  <data name="rmfi_unit_point.Text" xml:space="preserve">
     <value>Point</value>
-    <comment>ComboBoxItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="cx_color_style.Header" xml:space="preserve">
-    <value>Color component format</value>
-    <comment>ComboBox</comment>
+  <data name="mfsi_color_code.Text" xml:space="preserve">
+    <value>Color code</value>
+    <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="cx_page_unit.Header" xml:space="preserve">
-    <value>Unit of distance</value>
-    <comment>ComboBox</comment>
+  <data name="mfsi_len_unit.Text" xml:space="preserve">
+    <value>Length unit</value>
+    <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="str_font_stretch_condensed" xml:space="preserve">
     <value>Condensed</value>
@@ -409,8 +409,8 @@
     <value>Grid Length...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_grid_opac.Text" xml:space="preserve">
-    <value>Grid Opacity...</value>
+  <data name="mfi_grid_gray.Text" xml:space="preserve">
+    <value>Grid Gray Scale...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_group.Text" xml:space="preserve">
@@ -469,7 +469,7 @@
     <value>Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_stroke_pattern.Text" xml:space="preserve">
+  <data name="mfi_stroke_patt.Text" xml:space="preserve">
     <value>Dash Pattern...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -681,6 +681,7 @@
     <value>Text</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
+  <!--
   <data name="rmfi_unit_inch.Text" xml:space="preserve">
     <value>inch</value>
     <comment>RadioMenuFlyoutItem</comment>
@@ -697,6 +698,7 @@
     <value>point</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
+  -->
   <data name="str_arrowhead" xml:space="preserve">
     <value>Arrowhead</value>
     <comment>String</comment>
@@ -799,6 +801,10 @@
   </data>
   <data name="str_opacity" xml:space="preserve">
     <value>Opacity</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_gray_scale" xml:space="preserve">
+    <value>Gray scale</value>
     <comment>String</comment>
   </data>
   <data name="str_page" xml:space="preserve">
@@ -943,7 +949,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_patt.Text" xml:space="preserve">
-    <value>Grid pattern</value>
+    <value>Grid patt</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="rmfi_grid_patt_1.Text" xml:space="preserve">

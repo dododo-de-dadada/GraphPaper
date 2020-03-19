@@ -295,19 +295,19 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 
 		winrt::hstring unit_name{};
 		if (m_page_unit == LEN_UNIT::GRID) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_grid/Content");
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_unit_grid/Text");
 		}
 		else if (m_page_unit == LEN_UNIT::INCH) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_inch/Content");
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_unit_inch/Text");
 		}
 		else if (m_page_unit == LEN_UNIT::MILLI) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_milli/Content");
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_unit_milli/Text");
 		}
 		else if (m_page_unit == LEN_UNIT::PIXEL) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_pixel/Content");
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_unit_pixel/Text");
 		}
 		else if (m_page_unit == LEN_UNIT::POINT) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"cxi_unit_point/Content");
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_unit_point/Text");
 		}
 		else {
 			return;

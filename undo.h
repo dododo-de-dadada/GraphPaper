@@ -36,7 +36,7 @@ namespace winrt::GraphPaper::implementation
 		FONT_STRETCH,	// 書体の伸縮を操作
 		FONT_WEIGHT,	// 書体の太さを操作
 		GRID_BASE,	// 方眼の基準の大さを操作
-		GRID_OPAC,	// 方眼の色の濃さを操作
+		GRID_GRAY,	// 方眼の色の濃さを操作
 		GRID_PATT,	// 方眼の形式を操作
 		GRID_SHOW,	// 方眼の表示方法を操作
 		GROUP,	// 図形をグループに挿入または削除する操作
@@ -46,7 +46,7 @@ namespace winrt::GraphPaper::implementation
 		SELECT,	// 図形の選択を切り替え
 		START_POS,	// 図形の開始位置を操作
 		STROKE_COLOR,	// 線枠の色を操作
-		STROKE_PATTERN,	// 破線の配置を操作
+		STROKE_PATT,	// 破線の配置を操作
 		STROKE_STYLE,	// 線枠の形式を操作
 		STROKE_WIDTH,	// 線枠の太さを操作
 		TEXT_CONTENT,	// 文字列を操作
@@ -222,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::FONT_STYLE> { using type = DWRITE_FONT_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::FONT_WEIGHT> { using type = DWRITE_FONT_WEIGHT; };
 	template <> struct U_TYPE<UNDO_OP::GRID_BASE> { using type = double; };
-	template <> struct U_TYPE<UNDO_OP::GRID_OPAC> { using type = double; };
+	template <> struct U_TYPE<UNDO_OP::GRID_GRAY> { using type = double; };
 	template <> struct U_TYPE<UNDO_OP::GRID_PATT> { using type = GRID_PATT; };
 	template <> struct U_TYPE<UNDO_OP::GRID_SHOW> { using type = GRID_SHOW; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_LINE> { using type = double; };
@@ -230,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::PAGE_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::START_POS> { using type = D2D1_POINT_2F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_PATTERN> { using type = STROKE_PATTERN; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_PATT> { using type = STROKE_PATT; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_STYLE> { using type = D2D1_DASH_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_WIDTH> { using type = double; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_CONTENT> { using type = wchar_t*; };

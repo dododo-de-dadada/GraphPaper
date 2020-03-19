@@ -363,25 +363,25 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, value, buf);
+				conv_val_to_col(m_color_fmt, value, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, value, buf);
+				conv_val_to_col(m_color_fmt, value, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, value, buf);
+				conv_val_to_col(m_color_fmt, value, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, value, buf);
+				conv_val_to_col(m_color_fmt, value, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
 			}
 		}

@@ -265,8 +265,7 @@ namespace winrt::GraphPaper::implementation
 //m_dw_text_layout->GetLineMetrics(l_met, line_cnt, &line_cnt);
 		if (m_sel_range.length > 0) {
 			// •¶Žš”ÍˆÍ‚ÌŒv—Ê‚ð“h‚è‚Â‚Ô‚µ‚Å•\Ž¦‚·‚é.
-			const auto br = dx.m_shape_brush.get();
-			br->SetColor(dx.m_range_bcolor);
+			//const auto br = dx.m_shape_brush.get();
 			const auto cnt = m_dw_range_linecnt;
 			const auto dc = dx.m_d2dContext.get();
 			for (uint32_t i = 0; i < m_dw_range_linecnt; i++) {
@@ -280,7 +279,10 @@ namespace winrt::GraphPaper::implementation
 						r.top = static_cast<FLOAT>(t_min.y + test.top + line.baseline + m_dw_descent - m_font_size);
 						r.right = r.left + range.width;
 						r.bottom = static_cast<FLOAT>(r.top + m_font_size);
-						dc->FillRectangle(r, br);
+						dx.m_shape_brush->SetColor(dx.m_range_tcolor);
+						dc->DrawRectangle(r, dx.m_shape_brush.get() , 2.0, nullptr);
+						dx.m_shape_brush->SetColor(dx.m_range_bcolor);
+						dc->FillRectangle(r, dx.m_shape_brush.get());
 						break;
 					}
 				}
@@ -288,7 +290,7 @@ namespace winrt::GraphPaper::implementation
 			dx.m_range_brush->SetColor(dx.m_range_tcolor);
 			m_dw_text_layout->SetDrawingEffect(dx.m_range_brush.get(), m_sel_range);
 		}
-//delete[] l_met;
+
 		dx.m_shape_brush->SetColor(m_font_color);
 		dx.m_d2dContext->DrawTextLayout(t_min, m_dw_text_layout.get(), dx.m_shape_brush.get());
 		if (m_sel_range.length > 0 && m_text != nullptr) {
@@ -305,8 +307,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		const auto dc = dx.m_d2dContext.get();
 		const auto l_cnt = m_dw_linecnt;
-		const auto br = dx.m_shape_brush.get();
-		br->SetColor(dx.m_range_bcolor);
+		//const auto br = dx.m_shape_brush.get();
 		D2D1_MATRIX_3X2_F tran;
 		dc->GetTransform(&tran);
 		auto sw = static_cast<FLOAT>(1.0 / tran.m11);
@@ -341,15 +342,18 @@ namespace winrt::GraphPaper::implementation
 			p[1].y = p[0].y;
 			p[3].x = p[0].x;
 			p[3].y = p[2].y;
+			dx.m_shape_brush->SetColor(dx.m_range_tcolor);
+			dc->DrawRectangle({ p[0].x, p[0].y, p[2].x, p[2].y }, dx.m_shape_brush.get(), sw, nullptr);
+			dx.m_shape_brush->SetColor(dx.m_range_bcolor);
 			sp.dashOffset = static_cast<FLOAT>(std::fmod(p[0].x, mod));
 			fa->CreateStrokeStyle(&sp, d_arr, d_cnt, style.put());
-			dc->DrawLine(p[0], p[1], br, sw, style.get());
-			dc->DrawLine(p[3], p[2], br, sw, style.get());
+			dc->DrawLine(p[0], p[1], dx.m_shape_brush.get(), sw, style.get());
+			dc->DrawLine(p[3], p[2], dx.m_shape_brush.get(), sw, style.get());
 			style = nullptr;
 			sp.dashOffset = static_cast<FLOAT>(std::fmod(p[0].y, mod));
-			fa->CreateStrokeStyle(&sp, d_arr, d_cnt, style.put());
-			dc->DrawLine(p[1], p[2], br, sw, style.get());
-			dc->DrawLine(p[0], p[3], br, sw, style.get());
+			fa->CreateStrokeStyle(&sp, d_arr, d_cnt, style.put()); 
+			dc->DrawLine(p[1], p[2], dx.m_shape_brush.get(), sw, style.get());
+			dc->DrawLine(p[0], p[3], dx.m_shape_brush.get(), sw, style.get());
 			style = nullptr;
 		}
 	}

@@ -135,31 +135,31 @@ namespace winrt::GraphPaper::implementation
 
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			// 色の初期値はテーマに依存する.
-			D2D1_COLOR_F b_color = S_WHITE;
-			D2D1_COLOR_F f_color = S_BLACK;
+			m_page_dx.m_color_bkg = S_WHITE;
+			m_page_dx.m_color_frg = S_BLACK;
 			try {
 				auto const& b_res = Resources().Lookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
 				auto const& f_res = Resources().Lookup(box_value(L"ApplicationForegroundThemeBrush"));
-				cast_to(unbox_value<Brush>(b_res), b_color);
-				cast_to(unbox_value<Brush>(f_res), f_color);
+				cast_to(unbox_value<Brush>(b_res), m_page_dx.m_color_bkg);
+				cast_to(unbox_value<Brush>(f_res), m_page_dx.m_color_frg);
 			}
 			catch (winrt::hresult_error e) {
 			}
 			m_page_layout.m_arrow_size = ARROW_SIZE();
 			m_page_layout.m_arrow_style = ARROW_STYLE::NONE;
 			m_page_layout.m_corner_rad = { GRIDLEN_PX, GRIDLEN_PX };
-			m_page_layout.set_fill_color(b_color);
-			m_page_layout.set_font_color(f_color);
+			m_page_layout.set_fill_color(m_page_dx.m_color_bkg);
+			m_page_layout.set_font_color(m_page_dx.m_color_frg);
 			m_page_layout.m_grid_base = static_cast<double>(GRIDLEN_PX) - 1.0;
-			m_page_layout.m_grid_opac = GRID_OPAC;
+			m_page_layout.m_grid_gray = GRID_GRAY;
 			m_page_layout.m_grid_show = GRID_SHOW::BACK;
 			m_page_layout.m_grid_snap = true;
-			m_page_layout.set_page_color(b_color);
+			m_page_layout.set_page_color(m_page_dx.m_color_bkg);
 			m_page_layout.m_page_scale = 1.0;
 			m_page_layout.m_page_size.width = static_cast<FLOAT>(std::floor(A4_PER_INCH.width * dpi));
 			m_page_layout.m_page_size.height = static_cast<FLOAT>(std::floor(A4_PER_INCH.height * dpi));
-			m_page_layout.set_stroke_color(f_color);
-			m_page_layout.m_stroke_pattern = STROKE_PATTERN();
+			m_page_layout.set_stroke_color(m_page_dx.m_color_frg);
+			m_page_layout.m_stroke_patt = STROKE_PATT();
 			m_page_layout.m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;
 			m_page_layout.m_stroke_width = 1.0F;
 			m_page_layout.m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;

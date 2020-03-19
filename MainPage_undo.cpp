@@ -100,8 +100,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::GRID_BASE:
 			u = new UndoSet<UNDO_OP::GRID_BASE>(dt_reader);
 			break;
-		case UNDO_OP::GRID_OPAC:
-			u = new UndoSet<UNDO_OP::GRID_OPAC>(dt_reader);
+		case UNDO_OP::GRID_GRAY:
+			u = new UndoSet<UNDO_OP::GRID_GRAY>(dt_reader);
 			break;
 		case UNDO_OP::GRID_PATT:
 			u = new UndoSet<UNDO_OP::GRID_PATT>(dt_reader);
@@ -139,8 +139,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::STROKE_COLOR:
 			u = new UndoSet<UNDO_OP::STROKE_COLOR>(dt_reader);
 			break;
-		case UNDO_OP::STROKE_PATTERN:
-			u = new UndoSet<UNDO_OP::STROKE_PATTERN>(dt_reader);
+		case UNDO_OP::STROKE_PATT:
+			u = new UndoSet<UNDO_OP::STROKE_PATT>(dt_reader);
 			break;
 		case UNDO_OP::STROKE_STYLE:
 			u = new UndoSet<UNDO_OP::STROKE_STYLE>(dt_reader);
@@ -549,14 +549,14 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_BASE>(Shape* s, double const& value);
-	template void MainPage::undo_push_set<UNDO_OP::GRID_OPAC>(Shape* s, double const& value);
+	template void MainPage::undo_push_set<UNDO_OP::GRID_GRAY>(Shape* s, double const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_PATT>(Shape* s, GRID_PATT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_SHOW>(Shape* s, GRID_SHOW const& value);
 	template void MainPage::undo_push_set<UNDO_OP::PAGE_COLOR>(Shape* s, D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::PAGE_SIZE>(Shape* s, D2D1_SIZE_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::START_POS>(Shape* s);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
-	template void MainPage::undo_push_set<UNDO_OP::STROKE_PATTERN>(STROKE_PATTERN const& value);
+	template void MainPage::undo_push_set<UNDO_OP::STROKE_PATT>(STROKE_PATT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE const& value);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_WIDTH>(double const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& value);

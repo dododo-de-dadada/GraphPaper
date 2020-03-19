@@ -34,13 +34,13 @@ namespace winrt::GraphPaper::implementation
 			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP + 1.0, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
-		if constexpr (U == UNDO_OP::GRID_OPAC) {
+		if constexpr (U == UNDO_OP::GRID_GRAY) {
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, value, buf);
+				conv_val_to_col(m_color_fmt, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
+				hdr = r_loader.GetString(L"str_gray_scale") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {
@@ -72,8 +72,8 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			s->set_grid_base(value * SLIDER_STEP);
 		}
-		if constexpr (U == UNDO_OP::GRID_OPAC) {
-			s->set_grid_opac(value / COLOR_MAX);
+		if constexpr (U == UNDO_OP::GRID_GRAY) {
+			s->set_grid_gray(value / COLOR_MAX);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -168,27 +168,27 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の濃さ」が選択された.
-	IAsyncAction MainPage::mfi_grid_opac_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_grid_gray_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_layout.set_to_shape(&m_page_layout);
-		const double val3 = m_sample_layout.m_grid_opac * COLOR_MAX;
+		const double val3 = m_sample_layout.m_grid_gray * COLOR_MAX;
 		sample_slider_3().Value(val3);
-		grid_set_slider_header<UNDO_OP::GRID_OPAC, 3>(val3);
+		grid_set_slider_header<UNDO_OP::GRID_GRAY, 3>(val3);
 		sample_slider_3().Visibility(VISIBLE);
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_OPAC, 3> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_GRAY, 3> });
 		m_sample_type = SAMP_TYPE::NONE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			double sample_value;
-			m_sample_layout.get_grid_opac(sample_value);
+			m_sample_layout.get_grid_gray(sample_value);
 			double page_value;
-			m_page_layout.get_grid_opac(page_value);
+			m_page_layout.get_grid_gray(page_value);
 			if (equal(page_value, sample_value) == false) {
-				undo_push_set<UNDO_OP::GRID_OPAC>(&m_page_layout, sample_value);
+				undo_push_set<UNDO_OP::GRID_GRAY>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				//undo_push_null();
 				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.

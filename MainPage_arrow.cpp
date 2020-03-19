@@ -37,7 +37,6 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			const double dpi = m_page_dx.m_logical_dpi;
 			const double g_len = m_page_layout.m_grid_base + 1.0;
-			// ピクセル単位の長さを他の単位の文字列に変換する.
 			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP, dpi, g_len, buf, 31);
 			hdr = hdr + buf;
 		}
@@ -113,7 +112,6 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
-		// 値をスライダーのヘッダーに格納する.
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 0>(val0);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 1>(val1);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 2>(val2);

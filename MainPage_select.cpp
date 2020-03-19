@@ -216,11 +216,8 @@ namespace winrt::GraphPaper::implementation
 				// 押された図形が選択されている場合,
 				// 押された図形の属性をページレイアウトに格納する.
 				m_page_layout.set_to_shape(s);
-				// 線枠メニューの「矢じりの種類」に印をつける.
 				arrow_style_check_menu(m_page_layout.m_arrow_style);
-				// 書体メニューの「字体」に印をつける.
 				font_style_check_menu(m_page_layout.m_font_style);
-				// 線枠メニューの「種類」に印をつける.
 				stroke_style_check_menu(m_page_layout.m_stroke_style);
 				text_align_p_check_menu(m_page_layout.m_text_align_p);
 				text_align_t_check_menu(m_page_layout.m_text_align_t);
@@ -251,11 +248,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 押された図形の属性をページレイアウトに格納する.
 			m_page_layout.set_to_shape(s);
-			// 線枠メニューの「矢じりの種類」に印をつける.
 			arrow_style_check_menu(m_page_layout.m_arrow_style);
-			// 書体メニューの「字体」に印をつける.
 			font_style_check_menu(m_page_layout.m_font_style);
-			// 線枠メニューの「種類」に印をつける.
 			stroke_style_check_menu(m_page_layout.m_stroke_style);
 			text_align_t_check_menu(m_page_layout.m_text_align_t);
 			text_align_p_check_menu(m_page_layout.m_text_align_p);
@@ -273,11 +267,8 @@ namespace winrt::GraphPaper::implementation
 				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
-				// 線枠メニューの「矢じりの種類」に印をつける.
 				arrow_style_check_menu(m_page_layout.m_arrow_style);
-				// 書体メニューの「字体」に印をつける.
 				font_style_check_menu(m_page_layout.m_font_style);
-				// 線枠メニューの「種類」に印をつける.
 				stroke_style_check_menu(m_page_layout.m_stroke_style);
 				text_align_p_check_menu(m_page_layout.m_text_align_p);
 				text_align_t_check_menu(m_page_layout.m_text_align_t);

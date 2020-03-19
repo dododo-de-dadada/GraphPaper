@@ -170,16 +170,16 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// 色成分の形式
 	//-------------------------------
-	enum struct COL_STYLE {
+	enum struct COLOR_CODE {
 		DEC,	// 10 進数
 		HEX,	// 16 進数	
-		FLT,	// 浮動小数
-		CEN		// パーセント
+		REAL,	// 実数
+		CENT		// パーセント
 	};
 	// 色成分の値を文字列に変換する.
-	void conv_val_to_col(const COL_STYLE style, const double value, wchar_t* buf, const size_t b_len);
+	void conv_val_to_col(const COLOR_CODE style, const double value, wchar_t* buf, const size_t b_len);
 	// 色成分の値を文字列に変換する.
-	template <size_t Z> void conv_val_to_col(const COL_STYLE style, const double value, wchar_t(&buf)[Z])
+	template <size_t Z> void conv_val_to_col(const COLOR_CODE style, const double value, wchar_t(&buf)[Z])
 	{
 		// 色成分の値を文字列に変換する.
 		conv_val_to_col(style, value, buf, Z);
@@ -216,7 +216,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_text_find_case = false;	// 英文字の区別フラグ
 		bool m_text_find_wrap = false;	// 回り込み検索フラグ
 		LEN_UNIT m_page_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COL_STYLE m_col_style = COL_STYLE::DEC;	// 色成分の書式
+		COLOR_CODE m_color_fmt = COLOR_CODE::DEC;	// 色成分の書式
 		STATUS_BAR m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		DRAW_TOOL m_draw_tool = DRAW_TOOL::SELECT;		// 作図ツール
@@ -514,7 +514,7 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトメニューの「方眼の大きさ」>「広げる」が選択された.
 		void mfi_grid_len_expand_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の濃さ」が選択された.
-		IAsyncAction mfi_grid_opac_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction mfi_grid_gray_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の形式」>「パターン 1」が選択された.
 		void rmfi_grid_patt_1_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の形式」>「パターン 2」が選択された.
@@ -626,13 +626,13 @@ namespace winrt::GraphPaper::implementation
 		// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
 		void cd_page_size_sec_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
 		// ページの単位と書式ダイアログの「適用」ボタンが押された.
-		void cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
+		//void cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
 		// レイアウトメニューの「ページの色」が選択された.
 		IAsyncAction mfi_page_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「ページの大きさ」が選択された
 		void mfi_page_size_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「ページの単位と色の書式」が選択された
-		void mfi_page_unit_click(IInspectable const&, RoutedEventArgs const&);
+		//void mfi_page_unit_click(IInspectable const&, RoutedEventArgs const&);
 		// ページと図形を表示する.
 		void page_draw(void);
 		// 値をスライダーのヘッダーに格納する.
@@ -765,18 +765,18 @@ namespace winrt::GraphPaper::implementation
 		void stroke_style_check_menu(const D2D1_DASH_STYLE d_style);
 		// 線枠メニューの「色」が選択された.
 		IAsyncAction mfi_stroke_color_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「破線」が選択された.
+		// 線枠メニューの「種類」>「破線」が選択された.
 		void rmfi_stroke_dash_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「一点破線」が選択された.
+		// 線枠メニューの「種類」>「一点破線」が選択された.
 		void rmfi_stroke_dash_dot_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「二点破線」が選択された.
+		// 線枠メニューの「種類」>「二点破線」が選択された.
 		void rmfi_stroke_dash_dot_dot_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「点線」が選択された.
+		// 線枠メニューの「種類」>「点線」が選択された.
 		void rmfi_stroke_dot_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「実線」が選択された.
+		// 線枠メニューの「種類」>「実線」が選択された.
 		void rmfi_stroke_solid_click(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「破線の配列」が選択された.
-		IAsyncAction mfi_stroke_pattern_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction mfi_stroke_patt_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「太さ」が選択された.
 		IAsyncAction mfi_stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
@@ -979,6 +979,22 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトメニューの「拡大縮小」>「100%に戻す」が選択された.
 		void mfi_zoom_reset_click(IInspectable const&, RoutedEventArgs const&);
 
+		template <COLOR_CODE C> void color_code_click(void);
+		void rmfi_color_dec_click(IInspectable const&, RoutedEventArgs const&);
+		void rmfi_color_hex_click(IInspectable const&, RoutedEventArgs const&);
+		void rmfi_color_real_click(IInspectable const&, RoutedEventArgs const&);
+		void rmfi_color_cent_click(IInspectable const&, RoutedEventArgs const&);
+		void color_code_check_menu(void);
+
+		template <LEN_UNIT L> void unit_click(void);
+		void rmfi_unit_inch_click(IInspectable const&, RoutedEventArgs const&);
+		void rmfi_unit_grid_click(IInspectable const&, RoutedEventArgs const&);
+		void rmfi_unit_milli_click(IInspectable const&, RoutedEventArgs const&);
+		void rmfi_unit_pixel_click(IInspectable const&, RoutedEventArgs const&);
+		void rmfi_unit_point_click(IInspectable const&, RoutedEventArgs const&);
+
+		// レイアウトメニューの「長さの単位」に印をつける.
+		void unit_check_menu(void);
 	};
 
 }

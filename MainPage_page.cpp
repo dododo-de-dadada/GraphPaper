@@ -94,12 +94,98 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_page();
 	}
 
+	void MainPage::unit_check_menu(void)
+	{
+		rmfi_unit_grid().IsChecked(m_page_unit == LEN_UNIT::GRID);
+		rmfi_unit_inch().IsChecked(m_page_unit == LEN_UNIT::INCH);
+		rmfi_unit_milli().IsChecked(m_page_unit == LEN_UNIT::MILLI);
+		rmfi_unit_pixel().IsChecked(m_page_unit == LEN_UNIT::PIXEL);
+		rmfi_unit_point().IsChecked(m_page_unit == LEN_UNIT::POINT);
+		rmfi_unit_grid_2().IsChecked(m_page_unit == LEN_UNIT::GRID);
+		rmfi_unit_inch_2().IsChecked(m_page_unit == LEN_UNIT::INCH);
+		rmfi_unit_milli_2().IsChecked(m_page_unit == LEN_UNIT::MILLI);
+		rmfi_unit_pixel_2().IsChecked(m_page_unit == LEN_UNIT::PIXEL);
+		rmfi_unit_point_2().IsChecked(m_page_unit == LEN_UNIT::POINT);
+	}
+
+	template <LEN_UNIT L>
+	void MainPage::unit_click(void)
+	{
+		if (m_page_unit == L) {
+			return;
+		}
+		m_page_unit = L;
+		status_bar_set_curs();
+		status_bar_set_grid();
+		status_bar_set_page();
+		status_bar_set_unit();
+	}
+	void MainPage::rmfi_unit_inch_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		unit_click<LEN_UNIT::INCH>();
+	}
+	void MainPage::rmfi_unit_grid_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		unit_click<LEN_UNIT::GRID>();
+	}
+	void MainPage::rmfi_unit_milli_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		unit_click<LEN_UNIT::MILLI>();
+	}
+	void MainPage::rmfi_unit_pixel_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		unit_click<LEN_UNIT::PIXEL>();
+	}
+	void MainPage::rmfi_unit_point_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		unit_click<LEN_UNIT::POINT>();
+	}
+
+	void MainPage::color_code_check_menu(void)
+	{
+		rmfi_color_dec().IsChecked(m_color_fmt == COLOR_CODE::DEC);
+		rmfi_color_hex().IsChecked(m_color_fmt == COLOR_CODE::HEX);
+		rmfi_color_real().IsChecked(m_color_fmt == COLOR_CODE::REAL);
+		rmfi_color_cent().IsChecked(m_color_fmt == COLOR_CODE::CENT);
+		rmfi_color_dec_2().IsChecked(m_color_fmt == COLOR_CODE::DEC);
+		rmfi_color_hex_2().IsChecked(m_color_fmt == COLOR_CODE::HEX);
+		rmfi_color_real_2().IsChecked(m_color_fmt == COLOR_CODE::REAL);
+		rmfi_color_cent_2().IsChecked(m_color_fmt == COLOR_CODE::CENT);
+	}
+
+	template <COLOR_CODE C>
+	void MainPage::color_code_click(void)
+	{
+		if (m_color_fmt == C) {
+			return;
+		}
+		m_color_fmt = C;
+	}
+	void MainPage::rmfi_color_dec_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		color_code_click<COLOR_CODE::DEC>();
+	}
+	void MainPage::rmfi_color_hex_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		color_code_click<COLOR_CODE::HEX>();
+	}
+	void MainPage::rmfi_color_real_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		color_code_click<COLOR_CODE::REAL>();
+	}
+	void MainPage::rmfi_color_cent_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		color_code_click<COLOR_CODE::CENT>();
+	}
+
+
 	// ページの「ページの単位と色の書式」ダイアログの「適用」ボタンが押された.
+	/*
 	void MainPage::cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&)
 	{
 		const auto p_unit = m_page_unit;
 		m_page_unit = static_cast<LEN_UNIT>(cx_page_unit().SelectedIndex());
-		m_col_style = static_cast<COL_STYLE>(cx_color_style().SelectedIndex());
+		m_color_fmt = static_cast<COLOR_CODE>(cx_color_style().SelectedIndex());
 		if (p_unit != m_page_unit) {
 			// ポインターの位置をステータスバーに格納する.
 			status_bar_set_curs();
@@ -110,6 +196,7 @@ namespace winrt::GraphPaper::implementation
 			status_bar_set_unit();
 		}
 	}
+	*/
 
 	// ページメニューの「色」が選択された.
 	IAsyncAction MainPage::mfi_page_color_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -221,13 +308,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「単位と書式」が選択された
+	/*
 	void MainPage::mfi_page_unit_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		cx_page_unit().SelectedIndex(static_cast<uint32_t>(m_page_unit));
-		cx_color_style().SelectedIndex(static_cast<uint32_t>(m_col_style));
+		cx_color_style().SelectedIndex(static_cast<uint32_t>(m_color_fmt));
 		const auto _ = cd_page_unit().ShowAsync();
 	}
-
+	*/
 	// ページと図形を表示する.
 	void MainPage::page_draw(void)
 	{
@@ -266,9 +354,9 @@ namespace winrt::GraphPaper::implementation
 			m_page_layout.draw_grid(m_page_dx, { 0.0f, 0.0f });
 		}
 		// 部位の色をブラシに格納する.
-		D2D1_COLOR_F anch_color;
-		m_page_layout.get_anchor_color(anch_color);
-		m_page_dx.m_anch_brush->SetColor(anch_color);
+		//D2D1_COLOR_F anch_color;
+		//m_page_layout.get_anchor_color(anch_color);
+		//m_page_dx.m_anch_brush->SetColor(anch_color);
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				// 消去フラグが立っている場合,
@@ -286,9 +374,9 @@ namespace winrt::GraphPaper::implementation
 		if (m_pointer_state == STATE_TRAN::PRESS_AREA) {
 			// 押された状態が範囲を選択している場合,
 			// 補助線の色をブラシに格納する.
-			D2D1_COLOR_F aux_color;
-			m_page_layout.get_auxiliary_color(aux_color);
-			m_page_dx.m_aux_brush->SetColor(aux_color);
+			//D2D1_COLOR_F aux_color;
+			//m_page_layout.get_auxiliary_color(aux_color);
+			//m_page_dx.m_aux_brush->SetColor(aux_color);
 			if (m_draw_tool == DRAW_TOOL::SELECT
 				|| m_draw_tool == DRAW_TOOL::RECT
 				|| m_draw_tool == DRAW_TOOL::TEXT
@@ -356,21 +444,21 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, value, buf);
+				conv_val_to_col(m_color_fmt, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, value, buf);
+				conv_val_to_col(m_color_fmt, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_col_style, value, buf);
+				conv_val_to_col(m_color_fmt, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
@@ -403,8 +491,8 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			s->set_grid_base(value);
 		}
-		if constexpr (U == UNDO_OP::GRID_OPAC) {
-			s->set_grid_opac(value / COLOR_MAX);
+		if constexpr (U == UNDO_OP::GRID_GRAY) {
+			s->set_grid_gray(value / COLOR_MAX);
 		}
 		if constexpr (U == UNDO_OP::PAGE_COLOR) {
 			D2D1_COLOR_F color;
