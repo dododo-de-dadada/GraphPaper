@@ -193,23 +193,23 @@
     <value>Hexdecimal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_unit_grid.Text" xml:space="preserve">
+  <data name="rmfi_len_grid.Text" xml:space="preserve">
     <value>Grid</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_unit_inch.Text" xml:space="preserve">
+  <data name="rmfi_len_inch.Text" xml:space="preserve">
     <value>Inch</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_unit_milli.Text" xml:space="preserve">
+  <data name="rmfi_len_milli.Text" xml:space="preserve">
     <value>Millimeter</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_unit_pixel.Text" xml:space="preserve">
+  <data name="rmfi_len_pixel.Text" xml:space="preserve">
     <value>Pixel</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_unit_point.Text" xml:space="preserve">
+  <data name="rmfi_len_point.Text" xml:space="preserve">
     <value>Point</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -681,24 +681,6 @@
     <value>Text</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <!--
-  <data name="rmfi_unit_inch.Text" xml:space="preserve">
-    <value>inch</value>
-    <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  <data name="rmfi_unit_milli.Text" xml:space="preserve">
-    <value>mm</value>
-    <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  <data name="rmfi_unit_pixel.Text" xml:space="preserve">
-    <value>pixel</value>
-    <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  <data name="rmfi_unit_point.Text" xml:space="preserve">
-    <value>point</value>
-    <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  -->
   <data name="str_arrowhead" xml:space="preserve">
     <value>Arrowhead</value>
     <comment>String</comment>
@@ -941,7 +923,7 @@
     <comment>TextBlock</comment>
   </data>
   <data name="mfi_layout_reset.Text" xml:space="preserve">
-    <value>Reset layout</value>
+    <value>Delete saved layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_layout_save.Text" xml:space="preserve">

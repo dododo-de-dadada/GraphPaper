@@ -36,8 +36,8 @@ namespace winrt::GraphPaper::implementation
 		const auto g_len = m_sample_layout.m_grid_base + 1.0;
 		// ページの縦横の長さの値をピクセル単位の値に変換する.
 		D2D1_SIZE_F p_size{
-			static_cast<FLOAT>(conv_len_to_val(m_page_unit, pw, dpi, g_len)),
-			static_cast<FLOAT>(conv_len_to_val(m_page_unit, ph, dpi, g_len))
+			static_cast<FLOAT>(conv_len_to_val(m_len_unit, pw, dpi, g_len)),
+			static_cast<FLOAT>(conv_len_to_val(m_len_unit, ph, dpi, g_len))
 		};
 		if (equal(p_size, m_page_layout.m_page_size) == false) {
 			// 変換された値がページの大きさと異なる場合,
@@ -94,99 +94,14 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_page();
 	}
 
-	void MainPage::unit_check_menu(void)
-	{
-		rmfi_unit_grid().IsChecked(m_page_unit == LEN_UNIT::GRID);
-		rmfi_unit_inch().IsChecked(m_page_unit == LEN_UNIT::INCH);
-		rmfi_unit_milli().IsChecked(m_page_unit == LEN_UNIT::MILLI);
-		rmfi_unit_pixel().IsChecked(m_page_unit == LEN_UNIT::PIXEL);
-		rmfi_unit_point().IsChecked(m_page_unit == LEN_UNIT::POINT);
-		rmfi_unit_grid_2().IsChecked(m_page_unit == LEN_UNIT::GRID);
-		rmfi_unit_inch_2().IsChecked(m_page_unit == LEN_UNIT::INCH);
-		rmfi_unit_milli_2().IsChecked(m_page_unit == LEN_UNIT::MILLI);
-		rmfi_unit_pixel_2().IsChecked(m_page_unit == LEN_UNIT::PIXEL);
-		rmfi_unit_point_2().IsChecked(m_page_unit == LEN_UNIT::POINT);
-	}
-
-	template <LEN_UNIT L>
-	void MainPage::unit_click(void)
-	{
-		if (m_page_unit == L) {
-			return;
-		}
-		m_page_unit = L;
-		status_bar_set_curs();
-		status_bar_set_grid();
-		status_bar_set_page();
-		status_bar_set_unit();
-	}
-	void MainPage::rmfi_unit_inch_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		unit_click<LEN_UNIT::INCH>();
-	}
-	void MainPage::rmfi_unit_grid_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		unit_click<LEN_UNIT::GRID>();
-	}
-	void MainPage::rmfi_unit_milli_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		unit_click<LEN_UNIT::MILLI>();
-	}
-	void MainPage::rmfi_unit_pixel_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		unit_click<LEN_UNIT::PIXEL>();
-	}
-	void MainPage::rmfi_unit_point_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		unit_click<LEN_UNIT::POINT>();
-	}
-
-	void MainPage::color_code_check_menu(void)
-	{
-		rmfi_color_dec().IsChecked(m_color_fmt == COLOR_CODE::DEC);
-		rmfi_color_hex().IsChecked(m_color_fmt == COLOR_CODE::HEX);
-		rmfi_color_real().IsChecked(m_color_fmt == COLOR_CODE::REAL);
-		rmfi_color_cent().IsChecked(m_color_fmt == COLOR_CODE::CENT);
-		rmfi_color_dec_2().IsChecked(m_color_fmt == COLOR_CODE::DEC);
-		rmfi_color_hex_2().IsChecked(m_color_fmt == COLOR_CODE::HEX);
-		rmfi_color_real_2().IsChecked(m_color_fmt == COLOR_CODE::REAL);
-		rmfi_color_cent_2().IsChecked(m_color_fmt == COLOR_CODE::CENT);
-	}
-
-	template <COLOR_CODE C>
-	void MainPage::color_code_click(void)
-	{
-		if (m_color_fmt == C) {
-			return;
-		}
-		m_color_fmt = C;
-	}
-	void MainPage::rmfi_color_dec_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		color_code_click<COLOR_CODE::DEC>();
-	}
-	void MainPage::rmfi_color_hex_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		color_code_click<COLOR_CODE::HEX>();
-	}
-	void MainPage::rmfi_color_real_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		color_code_click<COLOR_CODE::REAL>();
-	}
-	void MainPage::rmfi_color_cent_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		color_code_click<COLOR_CODE::CENT>();
-	}
-
-
 	// ページの「ページの単位と色の書式」ダイアログの「適用」ボタンが押された.
 	/*
 	void MainPage::cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&)
 	{
-		const auto p_unit = m_page_unit;
-		m_page_unit = static_cast<LEN_UNIT>(cx_page_unit().SelectedIndex());
-		m_color_fmt = static_cast<COLOR_CODE>(cx_color_style().SelectedIndex());
-		if (p_unit != m_page_unit) {
+		const auto p_unit = m_len_unit;
+		m_len_unit = static_cast<LEN_UNIT>(cx_page_unit().SelectedIndex());
+		m_color_code = static_cast<COLOR_CODE>(cx_color_style().SelectedIndex());
+		if (p_unit != m_len_unit) {
 			// ポインターの位置をステータスバーに格納する.
 			status_bar_set_curs();
 			// 方眼の大きさをステータスバーに格納する.
@@ -256,48 +171,12 @@ namespace winrt::GraphPaper::implementation
 		const auto g_len = m_sample_layout.m_grid_base + 1.0;
 		pw = m_sample_layout.m_page_size.width;
 		ph = m_sample_layout.m_page_size.height;
-		/*
-		wchar_t const* format;
-		switch (m_page_unit) {
-		default:
-		// return;
-		//case LEN_UNIT::PIXEL:
-			format = FMT_PIXEL;
-			break;
-		case LEN_UNIT::INCH:
-			format = FMT_INCH;
-			pw = pw / dpi;
-			ph = ph / dpi;
-			break;
-		case LEN_UNIT::MILLI:
-			format = FMT_MILLI;
-			pw = pw / dpi * MM_PER_INCH;
-			ph = ph / dpi * MM_PER_INCH;
-			break;
-		case LEN_UNIT::POINT:
-			format = FMT_POINT;
-			pw = pw / dpi * PT_PER_INCH;
-			ph = ph / dpi * PT_PER_INCH;
-			break;
-		case LEN_UNIT::GRID:
-			format = FMT_GRID;
-			pw /= m_sample_layout.m_grid_len + 1.0;
-			ph /= m_sample_layout.m_grid_len + 1.0;
-			break;
-		}
-
 		wchar_t buf[32];
-		swprintf_s(buf, format, pw);
-		*/
-		wchar_t buf[32];
-		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, pw, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, pw, dpi, g_len, buf);
 		tx_page_width().Text(buf);
-		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, ph, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, ph, dpi, g_len, buf);
 		tx_page_height().Text(buf);
-		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, m_page_size_max, dpi, g_len, buf);
+		conv_val_to_len<WITH_UNIT_NAME>(m_len_unit, m_page_size_max, dpi, g_len, buf);
 		tx_page_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
@@ -309,10 +188,10 @@ namespace winrt::GraphPaper::implementation
 
 	// ページメニューの「単位と書式」が選択された
 	/*
-	void MainPage::mfi_page_unit_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_page_len_unit_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		cx_page_unit().SelectedIndex(static_cast<uint32_t>(m_page_unit));
-		cx_color_style().SelectedIndex(static_cast<uint32_t>(m_color_fmt));
+		cx_page_unit().SelectedIndex(static_cast<uint32_t>(m_len_unit));
+		cx_color_style().SelectedIndex(static_cast<uint32_t>(m_color_code));
 		const auto _ = cd_page_unit().ShowAsync();
 	}
 	*/
@@ -444,21 +323,21 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_fmt, value, buf);
+				conv_val_to_col(m_color_code, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_fmt, value, buf);
+				conv_val_to_col(m_color_code, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_fmt, value, buf);
+				conv_val_to_col(m_color_code, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
@@ -564,7 +443,7 @@ namespace winrt::GraphPaper::implementation
 		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &value, buf, 2);
 		if (cnt == 1 && value > 0.0) {
 			// 値ををピクセル単位の値に変換する.
-			value = conv_len_to_val(m_page_unit, value, dpi, m_sample_layout.m_grid_base + 1.0);
+			value = conv_len_to_val(m_len_unit, value, dpi, m_sample_layout.m_grid_base + 1.0);
 		}
 		cd_page_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < m_page_size_max);
 	}

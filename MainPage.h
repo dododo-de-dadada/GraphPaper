@@ -20,11 +20,10 @@
 // MainPage_disp.cpp	表示デバイスのハンドラー
 // MainPage_file.cpp	ファイルの読み書き
 // MainPage_fill.cpp	塗りつぶしの設定
-// MainPage_find.cpp	文字列の検索/置換
 // MainPage_font.cpp	書体の設定
 // MainPage_grid.cpp	方眼の設定
 // MainPage_group.cpp	グループ化とグループの解除
-// MainPage_layout.cpp	レイアウトの
+// MainPage_layout.cpp	レイアウトの保存とリセット
 // MainPage_page.cpp	ページの設定と表示
 // MainPage_pointer.cpp	ポインターイベントのハンドラー
 // MainPage_sample.cpp	見本ダイアログの設定, 表示
@@ -215,8 +214,9 @@ namespace winrt::GraphPaper::implementation
 		wchar_t* m_text_repl = nullptr;	// 検索の置換文字列
 		bool m_text_find_case = false;	// 英文字の区別フラグ
 		bool m_text_find_wrap = false;	// 回り込み検索フラグ
-		LEN_UNIT m_page_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COLOR_CODE m_color_fmt = COLOR_CODE::DEC;	// 色成分の書式
+
+		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
+		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
 		STATUS_BAR m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		DRAW_TOOL m_draw_tool = DRAW_TOOL::SELECT;		// 作図ツール
@@ -283,12 +283,6 @@ namespace winrt::GraphPaper::implementation
 		void enable_edit_menu(void);
 		// メインページを作成する.
 		MainPage(void);
-		// レイアウトメニューの「バージョン情報」が選択された.
-		void mfi_about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
-		{
-			// バージョン情報のメッセージダイアログを表示する.
-			cd_message_show(ICON_INFO, L"str_appname", L"str_version");
-		}
 		// ファイルメニューの「終了」が選択された
 		IAsyncAction mfi_exit_click(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「新規」が選択された
@@ -607,14 +601,14 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトの初期化, 保存と削除
 		//-------------------------------
 
+		// レイアウトの初期化
+		void MainPage::layout_init(void);
+		// 保存されたレイアウトデータを読み込む.
+		IAsyncOperation<winrt::hresult> layout_load_async(void);
 		// レイアウトメニューの「レイアウトをリセット」が選択された.
 		IAsyncAction mfi_layout_reset_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「レイアウトを保存」が選択された.
 		IAsyncAction mfi_layout_save_click_async(IInspectable const&, RoutedEventArgs const&);
-		// ページレイアウトを既定値で初期化する.
-		void layout_init(void);
-		// 保存されたレイアウトデータを読み込む.
-		IAsyncOperation<winrt::hresult> MainPage::layout_load_async(void);
 
 		//-------------------------------
 		//　MainPage_page.cpp
@@ -631,8 +625,6 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction mfi_page_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「ページの大きさ」が選択された
 		void mfi_page_size_click(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「ページの単位と色の書式」が選択された
-		//void mfi_page_unit_click(IInspectable const&, RoutedEventArgs const&);
 		// ページと図形を表示する.
 		void page_draw(void);
 		// 値をスライダーのヘッダーに格納する.
@@ -979,22 +971,43 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトメニューの「拡大縮小」>「100%に戻す」が選択された.
 		void mfi_zoom_reset_click(IInspectable const&, RoutedEventArgs const&);
 
-		template <COLOR_CODE C> void color_code_click(void);
-		void rmfi_color_dec_click(IInspectable const&, RoutedEventArgs const&);
-		void rmfi_color_hex_click(IInspectable const&, RoutedEventArgs const&);
-		void rmfi_color_real_click(IInspectable const&, RoutedEventArgs const&);
-		void rmfi_color_cent_click(IInspectable const&, RoutedEventArgs const&);
+		//-----------------------------
+		// MainPage_misc.cpp
+		// 
+		//-----------------------------
+
+		// その他メニューの「色成分の表記」に印をつける.
 		void color_code_check_menu(void);
-
-		template <LEN_UNIT L> void unit_click(void);
-		void rmfi_unit_inch_click(IInspectable const&, RoutedEventArgs const&);
-		void rmfi_unit_grid_click(IInspectable const&, RoutedEventArgs const&);
-		void rmfi_unit_milli_click(IInspectable const&, RoutedEventArgs const&);
-		void rmfi_unit_pixel_click(IInspectable const&, RoutedEventArgs const&);
-		void rmfi_unit_point_click(IInspectable const&, RoutedEventArgs const&);
-
-		// レイアウトメニューの「長さの単位」に印をつける.
-		void unit_check_menu(void);
+		// 色成分表記を選択する.
+		template <COLOR_CODE C> void color_code_click(void);
+		// その他メニューの「長さの単位」に印をつける.
+		void len_unit_check_menu(void);
+		// 長さの単位を選択する.
+		template <LEN_UNIT L> void len_unit_click(void);
+		// その他メニューの「色成分の表記」>「10進数」が選択された.
+		void rmfi_color_dec_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「色成分の表記」>「16進数」が選択された.
+		void rmfi_color_hex_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「色成分の表記」>「実数」が選択された.
+		void rmfi_color_real_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「色成分の表記」>「パーセント」が選択された.
+		void rmfi_color_cent_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「バージョン情報」が選択された.
+		void mfi_about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
+		{
+			// バージョン情報のメッセージダイアログを表示する.
+			cd_message_show(ICON_INFO, L"str_appname", L"str_version");
+		}
+		// その他メニューの「長さの単位」>「インチ」が選択された.
+		void rmfi_len_inch_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「長さの単位」>「方眼」が選択された.
+		void rmfi_len_grid_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「長さの単位」>「ポイント」が選択された.
+		void rmfi_len_milli_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「長さの単位」>「ピクセル」が選択された.
+		void rmfi_len_pixel_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「長さの単位」>「ポイント」が選択された.
+		void rmfi_len_point_click(IInspectable const&, RoutedEventArgs const&);
 	};
 
 }

@@ -213,10 +213,10 @@ namespace winrt::GraphPaper::implementation
 
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, fx, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, fx, dpi, g_len, buf);
 		tk_status_pos_x().Text(winrt::hstring{ L"x:" } + buf);
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, fy, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, fy, dpi, g_len, buf);
 		tk_status_pos_y().Text(winrt::hstring{ L"y:" } + buf);
 
 swprintf_s(buf, L"%d", static_cast<uint32_t>(m_list_shapes.size()));
@@ -230,7 +230,7 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 		const double dpi = m_page_dx.m_logical_dpi;
 		double g_len = m_page_layout.m_grid_base + 1.0;
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, g_len, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, g_len, dpi, g_len, buf);
 		tk_status_grid().Text(winrt::hstring{ L"g:" } +buf);
 	}
 
@@ -241,10 +241,10 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 		const double g_len = m_page_layout.m_grid_base + 1.0;
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, m_page_layout.m_page_size.width, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, m_page_layout.m_page_size.width, dpi, g_len, buf);
 		tk_status_width().Text(winrt::hstring{ L"w:" } + buf);
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_page_unit, m_page_layout.m_page_size.height, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, m_page_layout.m_page_size.height, dpi, g_len, buf);
 		tk_status_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 
@@ -294,20 +294,20 @@ tk_status_cnt().Text(winrt::hstring{ L"c:" } + buf);
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		winrt::hstring unit_name{};
-		if (m_page_unit == LEN_UNIT::GRID) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_unit_grid/Text");
+		if (m_len_unit == LEN_UNIT::GRID) {
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_grid/Text");
 		}
-		else if (m_page_unit == LEN_UNIT::INCH) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_unit_inch/Text");
+		else if (m_len_unit == LEN_UNIT::INCH) {
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_inch/Text");
 		}
-		else if (m_page_unit == LEN_UNIT::MILLI) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_unit_milli/Text");
+		else if (m_len_unit == LEN_UNIT::MILLI) {
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_milli/Text");
 		}
-		else if (m_page_unit == LEN_UNIT::PIXEL) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_unit_pixel/Text");
+		else if (m_len_unit == LEN_UNIT::PIXEL) {
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_pixel/Text");
 		}
-		else if (m_page_unit == LEN_UNIT::POINT) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_unit_point/Text");
+		else if (m_len_unit == LEN_UNIT::POINT) {
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_point/Text");
 		}
 		else {
 			return;

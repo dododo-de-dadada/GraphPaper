@@ -71,6 +71,96 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr wchar_t TITLE_FONT[] = L"str_font";
 
+	// 値をスライダーのヘッダーに格納する.
+	template <UNDO_OP U, int S>
+	void MainPage::font_set_slider_header(const double value)
+	{
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		winrt::hstring hdr;
+
+		if constexpr (U == UNDO_OP::FONT_SIZE) {
+			wchar_t buf[32];
+			// ピクセル単位の長さを他の単位の文字列に変換する.
+			conv_val_to_len<WITH_UNIT_NAME>(m_len_unit, value, m_sample_dx.m_logical_dpi, m_sample_layout.m_grid_base + 1.0, buf, 16);
+			auto const& r_loader = ResourceLoader::GetForCurrentView();
+			hdr = r_loader.GetString(L"str_size") + L": " + buf;
+		}
+		if constexpr (U == UNDO_OP::FONT_COLOR) {
+			if constexpr (S == 0) {
+				wchar_t buf[32];
+				// 色成分の値を文字列に変換する.
+				conv_val_to_col(m_color_code, value, buf);
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
+			}
+			if constexpr (S == 1) {
+				wchar_t buf[32];
+				// 色成分の値を文字列に変換する.
+				conv_val_to_col(m_color_code, value, buf);
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
+			}
+			if constexpr (S == 2) {
+				wchar_t buf[32];
+				// 色成分の値を文字列に変換する.
+				conv_val_to_col(m_color_code, value, buf);
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
+			}
+			if constexpr (S == 3) {
+				wchar_t buf[32];
+				// 色成分の値を文字列に変換する.
+				conv_val_to_col(m_color_code, value, buf);
+				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
+			}
+		}
+		if constexpr (S == 0) {
+			sample_slider_0().Header(box_value(hdr));
+		}
+		if constexpr (S == 1) {
+			sample_slider_1().Header(box_value(hdr));
+		}
+		if constexpr (S == 2) {
+			sample_slider_2().Header(box_value(hdr));
+		}
+		if constexpr (S == 3) {
+			sample_slider_3().Header(box_value(hdr));
+		}
+	}
+
+	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// U	操作の種類
+	// S	スライダーの番号
+	// args	ValueChanged で渡された引数
+	// 戻り値	なし
+	template <UNDO_OP U, int S>
+	void MainPage::font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	{
+		Shape* s = m_sample_shape;
+		const auto value = args.NewValue();
+		font_set_slider_header<U, S>(value);
+		if constexpr (U == UNDO_OP::FONT_SIZE) {
+			s->set_font_size(value);
+		}
+		if constexpr (U == UNDO_OP::FONT_COLOR) {
+			D2D1_COLOR_F color;
+			s->get_font_color(color);
+			if constexpr (S == 0) {
+				color.r = static_cast<FLOAT>(value / COLOR_MAX);
+			}
+			if constexpr (S == 1) {
+				color.g = static_cast<FLOAT>(value / COLOR_MAX);
+			}
+			if constexpr (S == 2) {
+				color.b = static_cast<FLOAT>(value / COLOR_MAX);
+			}
+			if constexpr (S == 3) {
+				color.a = static_cast<FLOAT>(value / COLOR_MAX);
+			}
+			s->set_font_color(color);
+		}
+		if (scp_sample_panel().IsLoaded()) {
+			sample_draw();
+		}
+	}
+
 	// 書体メニューの「字体」に印をつける.
 	// f_style	書体の字体
 	void MainPage::font_style_check_menu(const DWRITE_FONT_STYLE f_style)
@@ -189,24 +279,6 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().Visibility(COLLAPSED);
 		lv_sample_list().Items().Clear();
 		page_draw();
-	}
-
-	// 書体メニューの「イタリック体」が選択された.
-	void MainPage::rmfi_font_italic_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC);
-	}
-
-	// 書体メニューの「標準」が選択された.
-	void MainPage::rmfi_font_normal_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL);
-	}
-
-	// 書体メニューの「斜体」が選択された.
-	void MainPage::rmfi_font_oblique_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE);
 	}
 
 	// 書体メニューの「大きさ」が選択された.
@@ -345,99 +417,9 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S>
-	void MainPage::font_set_slider_header(const double value)
-	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring hdr;
-
-		if constexpr (U == UNDO_OP::FONT_SIZE) {
-			wchar_t buf[32];
-			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value, m_sample_dx.m_logical_dpi, m_sample_layout.m_grid_base + 1.0, buf, 16);
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_size") + L": " + buf;
-		}
-		if constexpr (U == UNDO_OP::FONT_COLOR) {
-			if constexpr (S == 0) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_fmt, value, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
-			}
-			if constexpr (S == 1) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_fmt, value, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
-			}
-			if constexpr (S == 2) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_fmt, value, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
-			}
-			if constexpr (S == 3) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_fmt, value, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
-			}
-		}
-		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(hdr));
-		}
-		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(hdr));
-		}
-		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(hdr));
-		}
-		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(hdr));
-		}
-	}
-
-	// 値をスライダーのヘッダーと、見本の図形に格納する.
-	// U	操作の種類
-	// S	スライダーの番号
-	// args	ValueChanged で渡された引数
-	// 戻り値	なし
-	template <UNDO_OP U, int S>
-	void MainPage::font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
-	{
-		Shape* s = m_sample_shape;
-		const auto value = args.NewValue();
-		font_set_slider_header<U, S>(value);
-		if constexpr (U == UNDO_OP::FONT_SIZE) {
-			s->set_font_size(value);
-		}
-		if constexpr (U == UNDO_OP::FONT_COLOR) {
-			D2D1_COLOR_F color;
-			s->get_font_color(color);
-			if constexpr (S == 0) {
-				color.r = static_cast<FLOAT>(value / COLOR_MAX);
-			}
-			if constexpr (S == 1) {
-				color.g = static_cast<FLOAT>(value / COLOR_MAX);
-			}
-			if constexpr (S == 2) {
-				color.b = static_cast<FLOAT>(value / COLOR_MAX);
-			}
-			if constexpr (S == 3) {
-				color.a = static_cast<FLOAT>(value / COLOR_MAX);
-			}
-			s->set_font_color(color);
-		}
-		if (scp_sample_panel().IsLoaded()) {
-			sample_draw();
-		}
-	}
-
 	constexpr double TEXT_LINE_DELTA = 2;	// 行の高さの変分 (DPIs)
 
-											// 書体メニューの「行の高さ」>「高さ」が選択された.
+	// 書体メニューの「行の高さ」>「高さ」が選択された.
 	IAsyncAction MainPage::mfi_text_line_height_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
@@ -525,6 +507,24 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
+	// 書体メニューの「イタリック体」が選択された.
+	void MainPage::rmfi_font_italic_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC);
+	}
+
+	// 書体メニューの「標準」が選択された.
+	void MainPage::rmfi_font_normal_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL);
+	}
+
+	// 書体メニューの「斜体」が選択された.
+	void MainPage::rmfi_font_oblique_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE);
+	}
+
 	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
 	void MainPage::rmfi_text_align_bottom_click(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -609,13 +609,13 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP, dpi, g_len, buf);
+				conv_val_to_len<WITH_UNIT_NAME>(m_len_unit, value * SLIDER_STEP, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_horzorz") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP, dpi, g_len, buf);
+				conv_val_to_len<WITH_UNIT_NAME>(m_len_unit, value * SLIDER_STEP, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_vertert") + L": " + buf;
 			}
 		}
@@ -625,7 +625,7 @@ namespace winrt::GraphPaper::implementation
 				// これをピクセル単位に変換する.
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP * dpi / 96.0, dpi, g_len, buf);
+				conv_val_to_len<WITH_UNIT_NAME>(m_len_unit, value * SLIDER_STEP * dpi / 96.0, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_height") + L": " + buf;
 			}
 			else {

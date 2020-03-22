@@ -141,8 +141,8 @@ namespace winrt::GraphPaper::implementation
 
 			text_find_read(dt_reader);
 			status_bar_read(dt_reader);
-			m_page_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
-			m_color_fmt = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
+			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
+			m_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
 			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 
 			m_page_layout.read(dt_reader);
@@ -346,8 +346,8 @@ namespace winrt::GraphPaper::implementation
 			
 			text_find_write(dt_writer);
 			status_bar_write(dt_writer);
-			dt_writer.WriteUInt32(static_cast<uint32_t>(m_page_unit));
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_fmt));
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_code));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
 			m_page_layout.write(dt_writer);
 			if (suspend) {
@@ -428,22 +428,22 @@ namespace winrt::GraphPaper::implementation
 		const auto dpi = m_page_dx.m_logical_dpi;
 		double w, h;
 		char* u;
-		if (m_page_unit == LEN_UNIT::INCH) {
+		if (m_len_unit == LEN_UNIT::INCH) {
 			w = m_page_layout.m_page_size.width / dpi;
 			h = m_page_layout.m_page_size.height / dpi;
 			u = SVG_UNIT_IN;
 		}
-		else if (m_page_unit == LEN_UNIT::MILLI) {
+		else if (m_len_unit == LEN_UNIT::MILLI) {
 			w = m_page_layout.m_page_size.width * MM_PER_INCH / dpi;
 			h = m_page_layout.m_page_size.height * MM_PER_INCH / dpi;
 			u = SVG_UNIT_MM;
 		}
-		else if (m_page_unit == LEN_UNIT::POINT) {
+		else if (m_len_unit == LEN_UNIT::POINT) {
 			w = m_page_layout.m_page_size.width * PT_PER_INCH / dpi;
 			h = m_page_layout.m_page_size.height * PT_PER_INCH / dpi;
 			u = SVG_UNIT_PT;
 		}
-		else if (m_page_unit == LEN_UNIT::PIXEL) {
+		else if (m_len_unit == LEN_UNIT::PIXEL) {
 			w = m_page_layout.m_page_size.width;
 			h = m_page_layout.m_page_size.height;
 			u = SVG_UNIT_PX;
@@ -558,7 +558,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			write_svg(DOCTYPE, dt_writer);
 			// SVG 開始タグをデータライターに書き込む.
-			file_write_svg_tag(m_page_layout.m_page_size, m_page_layout.m_page_color, m_page_dx.m_logical_dpi, m_page_unit, dt_writer);
+			file_write_svg_tag(m_page_layout.m_page_size, m_page_layout.m_page_color, m_page_dx.m_logical_dpi, m_len_unit, dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {
@@ -616,7 +616,7 @@ namespace winrt::GraphPaper::implementation
 		text_align_p_check_menu(m_page_layout.m_text_align_p);
 		tmfi_grid_snap().IsChecked(m_page_layout.m_grid_snap);
 		tmfi_grid_snap_2().IsChecked(m_page_layout.m_grid_snap);
-		unit_check_menu();
+		len_unit_check_menu();
 
 		// 図形リストの各図形について以下を繰り返す.
 		for (auto s : m_list_shapes) {

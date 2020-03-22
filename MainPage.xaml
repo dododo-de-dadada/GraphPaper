@@ -261,7 +261,7 @@
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
                 <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click_async" Text="Color..." />
-                <!--<MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />-->
+                <!--<MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_len_unit_click" Text="Unit..." />-->
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_zoom" Text="Zoom">
                     <MenuFlyoutItem x:Uid="mfi_zoom_in" Click="mfi_zoom_in_clicked" Icon="ZoomIn" Text="In" />
@@ -270,11 +270,11 @@
                     <MenuFlyoutItem x:Uid="mfi_zoom_reset" Click="mfi_zoom_reset_click" KeyboardAcceleratorTextOverride="Ctrl+0" Icon="Zoom" Text="Reset" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_unit_pixel_2" x:Uid="rmfi_unit_pixel" Click="rmfi_unit_pixel_click" Text="Pixel" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_unit_inch_2" x:Uid="rmfi_unit_inch" Click="rmfi_unit_inch_click" Text="Inch" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_unit_milli_2" x:Uid="rmfi_unit_milli" Click="rmfi_unit_milli_click" Text="Millimeter" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_unit_point_2" x:Uid="rmfi_unit_point" Click="rmfi_unit_point_click" Text="Point" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_unit_grid_2" x:Uid="rmfi_unit_grid" Click="rmfi_unit_grid_click" Text="Per Grid" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_pixel_2" x:Uid="rmfi_len_pixel" Click="rmfi_len_pixel_click" Text="Pixel" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_inch_2" x:Uid="rmfi_len_inch" Click="rmfi_len_inch_click" Text="Inch" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_milli_2" x:Uid="rmfi_len_milli" Click="rmfi_len_milli_click" Text="Millimeter" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_point_2" x:Uid="rmfi_len_point" Click="rmfi_len_point_click" Text="Point" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_grid_2" x:Uid="rmfi_len_grid" Click="rmfi_len_grid_click" Text="Per Grid" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color code">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_dec_2" x:Uid="rmfi_color_dec" Click="rmfi_color_dec_click" Text="Decimal" GroupName="gn_color_code" />
@@ -608,7 +608,7 @@
                 <!-- ページメニュー -->
                 <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
                 <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click_async" Text="Color..." />
-                <!--<MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_unit_click" Text="Unit..." />-->
+                <!--<MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_len_unit_click" Text="Unit..." />-->
                 <MenuFlyoutSeparator />
                 <!-- 拡大縮小メニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_zoom" Text="Zoom">
@@ -622,12 +622,18 @@
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
                 </MenuFlyoutSubItem>
+                <MenuFlyoutSeparator />
+                <!-- レイアウトメニュー -->
+                <MenuFlyoutItem x:Uid="mfi_layout_save" Click="mfi_layout_save_click_async" Text="Save layout" />
+                <MenuFlyoutItem x:Name="mfi_layout_reset" x:Uid="mfi_layout_reset" Click="mfi_layout_reset_click_async" Text="Reset layout" />
+            </muxc:MenuBarItem>
+            <muxc:MenuBarItem x:Uid="mbi_misc" AccessKey="M" Title="Misc">
                 <MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_unit_pixel" x:Uid="rmfi_unit_pixel" Click="rmfi_unit_pixel_click" Text="Pixel" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_unit_inch" x:Uid="rmfi_unit_inch" Click="rmfi_unit_inch_click" Text="Inch" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_unit_milli" x:Uid="rmfi_unit_milli" Click="rmfi_unit_milli_click" Text="Millimeter" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_unit_point" x:Uid="rmfi_unit_point" Click="rmfi_unit_point_click" Text="Point" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_unit_grid" x:Uid="rmfi_unit_grid" Click="rmfi_unit_grid_click" Text="Per Grid" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_pixel" x:Uid="rmfi_len_pixel" Click="rmfi_len_pixel_click" Text="Pixel" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_inch" x:Uid="rmfi_len_inch" Click="rmfi_len_inch_click" Text="Inch" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_milli" x:Uid="rmfi_len_milli" Click="rmfi_len_milli_click" Text="Millimeter" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_point" x:Uid="rmfi_len_point" Click="rmfi_len_point_click" Text="Point" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_grid" x:Uid="rmfi_len_grid" Click="rmfi_len_grid_click" Text="Per Grid" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color code">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_dec" x:Uid="rmfi_color_dec" Click="rmfi_color_dec_click" Text="Decimal" GroupName="gn_color_code" />
@@ -644,10 +650,6 @@
                     <ToggleMenuFlyoutItem x:Name="tmfi_status_page" x:Uid="tmfi_status_page" Click="mi_status_bar_click" Text="Page Size" />
                     <ToggleMenuFlyoutItem x:Name="tmfi_status_zoom" x:Uid="tmfi_status_zoom" Click="mi_status_bar_click" Text="Scale" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSeparator />
-                <!-- レイアウトメニュー -->
-                <MenuFlyoutItem x:Uid="mfi_layout_save" Click="mfi_layout_save_click_async" Text="Save layout" />
-                <MenuFlyoutItem x:Name="mfi_layout_reset" x:Uid="mfi_layout_reset" Click="mfi_layout_reset_click_async" Text="Reset layout" />
                 <MenuFlyoutSeparator />
                 <!-- バージョン情報メニュー -->
                 <MenuFlyoutItem x:Uid="mfi_about_graph_paper" Click="mfi_about_graph_paper_click" Text="About Graph paper..." />

@@ -231,13 +231,9 @@ namespace winrt::GraphPaper::implementation
 	// 文字列検索パネルの「置換」ボタンが押された.
 	void MainPage::btn_text_replace_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 文字列検索パネルから値を格納する.
 		text_find_set_to();
-		// 検索文字列の文字数を得る.
 		const auto f_len = wchar_len(m_text_find);
 		if (f_len == 0) {
-			// 文字数が 0 の場合,
-			// 終了する.
 			return;
 		}
 
@@ -248,7 +244,6 @@ namespace winrt::GraphPaper::implementation
 		bool flag = false;	// 一致または置換フラグ.
 		if (it != m_list_shapes.end()) {
 			// 図形が見つかった場合,
-			// 選択された範囲と検索文字列が一致するか調べる.
 			auto t = static_cast<ShapeText*>(*it);
 			const auto w_pos = t_range.startPosition;
 			if (m_text_find_case) {
@@ -276,9 +271,7 @@ namespace winrt::GraphPaper::implementation
 		// 次の図形の文字列を検索する.
 		if (text_find_whithin_shapes() || flag) {
 			// 見つかった, または置換された場合
-			// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 			enable_undo_menu();
-			// 再表示する.
 			page_draw();
 			return;
 		}
@@ -409,19 +402,15 @@ namespace winrt::GraphPaper::implementation
 	// 文字列検索パネルから値を格納する.
 	void MainPage::text_find_set_to(void)
 	{
-		// 検索文字列を格納する.
 		if (m_text_find != nullptr) {
 			delete[] m_text_find;
 		}
 		m_text_find = wchar_cpy(tx_text_find_what().Text().c_str());
-		// 置換文字列を格納する.
 		if (m_text_repl != nullptr) {
 			delete[] m_text_repl;
 		}
 		m_text_repl = wchar_cpy(tx_text_replace_with().Text().c_str());
-		// 英文字の区別フラグを格納する.
 		m_text_find_case = ck_text_find_case().IsChecked().GetBoolean();
-		// 回り込み検索フラグを格納する.
 		m_text_find_wrap = ck_text_find_wrap().IsChecked().GetBoolean();
 	}
 

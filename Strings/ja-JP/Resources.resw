@@ -193,23 +193,23 @@
     <value>16進数</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_unit_grid.Text" xml:space="preserve">
+  <data name="rmfi_len_grid.Text" xml:space="preserve">
     <value>方眼</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_unit_inch.Text" xml:space="preserve">
+  <data name="rmfi_len_inch.Text" xml:space="preserve">
     <value>インチ</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_unit_milli.Text" xml:space="preserve">
+  <data name="rmfi_len_milli.Text" xml:space="preserve">
     <value>ミリメートル</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_unit_pixel.Text" xml:space="preserve">
+  <data name="rmfi_len_pixel.Text" xml:space="preserve">
     <value>ピクセル</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_unit_point.Text" xml:space="preserve">
+  <data name="rmfi_len_point.Text" xml:space="preserve">
     <value>ポイント</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -677,28 +677,6 @@
     <value>図形を選択</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <!--
-  <data name="rmfi_tool_text.Text" xml:space="preserve">
-    <value>文字列</value>
-    <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  <data name="rmfi_unit_inch.Text" xml:space="preserve">
-    <value>インチ</value>
-    <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  <data name="rmfi_unit_milli.Text" xml:space="preserve">
-    <value>ミリ</value>
-    <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  <data name="rmfi_unit_pixel.Text" xml:space="preserve">
-    <value>ピクセル</value>
-    <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  <data name="rmfi_unit_point.Text" xml:space="preserve">
-    <value>ポイント</value>
-    <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  -->
   <data name="str_arrowhead" xml:space="preserve">
     <value>矢じり</value>
     <comment>String</comment>
@@ -937,7 +915,7 @@
     <comment>TextBlock</comment>
   </data>
   <data name="mfi_layout_reset.Text" xml:space="preserve">
-    <value>レイアウトをリセット</value>
+    <value>保存したレイアウトを削除</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_layout_save.Text" xml:space="preserve">

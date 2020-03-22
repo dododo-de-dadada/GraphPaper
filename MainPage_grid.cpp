@@ -31,14 +31,14 @@ namespace winrt::GraphPaper::implementation
 			const double g_len = m_page_layout.m_grid_base + 1.0;
 			wchar_t buf[32];
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_page_unit, value * SLIDER_STEP + 1.0, dpi, g_len, buf);
+			conv_val_to_len<WITH_UNIT_NAME>(m_len_unit, value * SLIDER_STEP + 1.0, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_GRAY) {
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_fmt, value, buf);
+				conv_val_to_col(m_color_code, value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_gray_scale") + L": " + buf;
 			}

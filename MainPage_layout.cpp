@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_layout.cpp
-// レイアウトの初期化, 保存と削除
+// レイアウトの保存とリセット
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -21,7 +21,6 @@ namespace winrt::GraphPaper::implementation
 		return ApplicationData::Current().LocalFolder();
 	}
 
-	// ページレイアウトを既定値で初期化する.
 	void MainPage::layout_init(void)
 	{
 		// 書体の属性を初期化する.
@@ -115,36 +114,7 @@ namespace winrt::GraphPaper::implementation
 			ShapeText::is_available_font(m_page_layout.m_font_family);
 		}
 
-		// 文字範囲の背景色, 文字範囲の文字色をリソースから得る.
 		{
-			using winrt::Windows::UI::Color;
-			m_page_dx.m_range_bcolor = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
-			m_page_dx.m_range_tcolor = S_WHITE;
-			try {
-				auto b_res = Resources().Lookup(box_value(L"SystemColorHighlightColor"));
-				auto t_res = Resources().Lookup(box_value(L"SystemColorHighlightTextColor"));
-				cast_to(unbox_value<Color>(b_res), m_page_dx.m_range_bcolor);
-				cast_to(unbox_value<Color>(t_res), m_page_dx.m_range_tcolor);
-			}
-			catch (winrt::hresult_error) {
-			}
-		}
-
-		{
-			using winrt::Windows::UI::Xaml::Media::Brush;
-
-			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			// 色の初期値はテーマに依存する.
-			m_page_dx.m_color_bkg = S_WHITE;
-			m_page_dx.m_color_frg = S_BLACK;
-			try {
-				auto const& b_res = Resources().Lookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
-				auto const& f_res = Resources().Lookup(box_value(L"ApplicationForegroundThemeBrush"));
-				cast_to(unbox_value<Brush>(b_res), m_page_dx.m_color_bkg);
-				cast_to(unbox_value<Brush>(f_res), m_page_dx.m_color_frg);
-			}
-			catch (winrt::hresult_error e) {
-			}
 			m_page_layout.m_arrow_size = ARROW_SIZE();
 			m_page_layout.m_arrow_style = ARROW_STYLE::NONE;
 			m_page_layout.m_corner_rad = { GRIDLEN_PX, GRIDLEN_PX };
@@ -152,10 +122,12 @@ namespace winrt::GraphPaper::implementation
 			m_page_layout.set_font_color(m_page_dx.m_color_frg);
 			m_page_layout.m_grid_base = static_cast<double>(GRIDLEN_PX) - 1.0;
 			m_page_layout.m_grid_gray = GRID_GRAY;
+			m_page_layout.m_grid_patt = GRID_PATT::PATT_1;
 			m_page_layout.m_grid_show = GRID_SHOW::BACK;
 			m_page_layout.m_grid_snap = true;
 			m_page_layout.set_page_color(m_page_dx.m_color_bkg);
 			m_page_layout.m_page_scale = 1.0;
+			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_page_layout.m_page_size.width = static_cast<FLOAT>(std::floor(A4_PER_INCH.width * dpi));
 			m_page_layout.m_page_size.height = static_cast<FLOAT>(std::floor(A4_PER_INCH.height * dpi));
 			m_page_layout.set_stroke_color(m_page_dx.m_color_frg);
@@ -167,7 +139,9 @@ namespace winrt::GraphPaper::implementation
 			m_page_layout.m_text_line = 0.0F;
 			m_page_layout.m_text_margin = { 4.0F, 4.0F };
 		}
-
+		m_len_unit = LEN_UNIT::PIXEL;
+		m_color_code = COLOR_CODE::DEC;
+		m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
 	}
 
 	// 保存されたレイアウトデータを読み込む.

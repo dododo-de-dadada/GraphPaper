@@ -151,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-		winrt::com_ptr<IDWriteTextFormat> format;
+		winrt::com_ptr<IDWriteTextFormat> t_format;
 		// CreateTextFormat で,
 		// DWRITE_FONT_STRETCH_UNDEFINED が指定された場合, エラーになることがある.
 		// 属性値がなんであれ, DWRITE_FONT_STRETCH_NORMAL でテキストフォーマットは作成する.
@@ -164,17 +164,17 @@ namespace winrt::GraphPaper::implementation
 				DWRITE_FONT_STRETCH_NORMAL,
 				static_cast<FLOAT>(m_font_size),
 				locale_name,
-				format.put()
+				t_format.put()
 			)
 		);
 		const auto w = static_cast<FLOAT>(max(std::fabsf(m_diff.x) - 2.0 * m_text_margin.width, 0.0));
 		const auto h = static_cast<FLOAT>(max(std::fabsf(m_diff.y) - 2.0 * m_text_margin.height, 0.0));
 		winrt::check_hresult(
 			s_dwrite_factory->CreateTextLayout(
-				m_text, len, format.get(),
+				m_text, len, t_format.get(),
 				w, h, m_dw_text_layout.put())
 		);
-		format = nullptr;
+		t_format = nullptr;
 		winrt::com_ptr<IDWriteTextLayout3> t3;
 		if (m_dw_text_layout.try_as(t3)) {
 			DWRITE_LINE_SPACING ls;

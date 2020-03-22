@@ -11,25 +11,25 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 長さををピクセル単位の値に変換する.
-	// unit	長さの単位
+	// l_unit	長さの単位
 	// value	長さの値
 	// dpi	DPI
 	// g_len	方眼の長さ
 	// 戻り値	ピクセル単位の値
-	double conv_len_to_val(const LEN_UNIT unit, const double value, const double dpi, const double g_len) noexcept
+	double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept
 	{
 		double ret;
 
-		if (unit == LEN_UNIT::INCH) {
+		if (l_unit == LEN_UNIT::INCH) {
 			ret = value * dpi;
 		}
-		else if (unit == LEN_UNIT::MILLI) {
+		else if (l_unit == LEN_UNIT::MILLI) {
 			ret = value * dpi / MM_PER_INCH;
 		}
-		else if (unit == LEN_UNIT::POINT) {
+		else if (l_unit == LEN_UNIT::POINT) {
 			ret = value * dpi / PT_PER_INCH;
 		}
-		else if (unit == LEN_UNIT::GRID) {
+		else if (l_unit == LEN_UNIT::GRID) {
 			ret = value * g_len;
 		}
 		else {
@@ -39,23 +39,23 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 色成分の値を文字列に変換する.
-	// style	色成分の形式
+	// c_code	色成分の形式
 	// value	色成分の値
 	// buf	文字列の配列
 	// len	文字列の最大長 ('\0' を含む長さ)
 	// 戻り値	なし
-	void conv_val_to_col(const COLOR_CODE style, const double value, wchar_t* buf, const size_t b_len)
+	void conv_val_to_col(const COLOR_CODE c_code, const double value, wchar_t* buf, const size_t b_len)
 	{
-		if (style == COLOR_CODE::DEC) {
+		if (c_code == COLOR_CODE::DEC) {
 			swprintf_s(buf, b_len, L"%.0lf", std::round(value));
 		}
-		else if (style == COLOR_CODE::HEX) {
+		else if (c_code == COLOR_CODE::HEX) {
 			swprintf_s(buf, b_len, L"%02X", static_cast<uint32_t>(std::round(value)));
 		}
-		else if (style == COLOR_CODE::REAL) {
+		else if (c_code == COLOR_CODE::REAL) {
 			swprintf_s(buf, b_len, L"%.4lf", value / COLOR_MAX);
 		}
-		else if (style == COLOR_CODE::CENT) {
+		else if (c_code == COLOR_CODE::CENT) {
 			swprintf_s(buf, b_len, L"%.1lf%%", value / COLOR_MAX * 100.0);
 		}
 		else {
@@ -65,16 +65,16 @@ namespace winrt::GraphPaper::implementation
 
 	// ピクセル単位の長さを他の単位の文字列に変換する.
 	// B	単位付加フラグ
-	// unit	長さの単位
-	// val	ピクセル単位の長さ
+	// l_unit	長さの単位
+	// value	ピクセル単位の長さ
 	// dpi	DPI
 	// g_len	方眼の大きさ
 	// buf	文字列の配列
 	// b_len	文字列の最大長 ('\0' を含む長さ)
 	template <bool B>
-	void conv_val_to_len(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t *buf, const uint32_t b_len)
+	void conv_val_to_len(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t *buf, const uint32_t b_len)
 	{
-		if (unit == LEN_UNIT::PIXEL) {
+		if (l_unit == LEN_UNIT::PIXEL) {
 			if constexpr (B == WITH_UNIT_NAME) {
 				swprintf_s(buf, b_len, FMT_PIXEL_UNIT, value);
 			}
@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 				swprintf_s(buf, b_len, FMT_PIXEL, value);
 			}
 		}
-		else if (unit == LEN_UNIT::INCH) {
+		else if (l_unit == LEN_UNIT::INCH) {
 			if constexpr (B == WITH_UNIT_NAME) {
 				swprintf_s(buf, b_len, FMT_INCH_UNIT, value / dpi);
 			}
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 				swprintf_s(buf, b_len, FMT_INCH, value / dpi);
 			}
 		}
-		else if (unit == LEN_UNIT::MILLI) {
+		else if (l_unit == LEN_UNIT::MILLI) {
 			if constexpr (B == WITH_UNIT_NAME) {
 				swprintf_s(buf, b_len, FMT_MILLI_UNIT, value * MM_PER_INCH / dpi);
 			}
@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 				swprintf_s(buf, b_len, FMT_MILLI, value * MM_PER_INCH / dpi);
 			}
 		}
-		else if (unit == LEN_UNIT::POINT) {
+		else if (l_unit == LEN_UNIT::POINT) {
 			if constexpr (B == WITH_UNIT_NAME) {
 				swprintf_s(buf, b_len, FMT_POINT_UNIT, value * PT_PER_INCH / dpi);
 			}
@@ -106,7 +106,7 @@ namespace winrt::GraphPaper::implementation
 				swprintf_s(buf, b_len, FMT_POINT, value * PT_PER_INCH / dpi);
 			}
 		}
-		else if (unit == LEN_UNIT::GRID) {
+		else if (l_unit == LEN_UNIT::GRID) {
 			if constexpr (B == WITH_UNIT_NAME) {
 				swprintf_s(buf, b_len, FMT_GRID_UNIT, value / g_len);
 			}
@@ -115,8 +115,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 	}
-	template void conv_val_to_len<!WITH_UNIT_NAME>(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
-	template void conv_val_to_len<WITH_UNIT_NAME>(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
+	template void conv_val_to_len<!WITH_UNIT_NAME>(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
+	template void conv_val_to_len<WITH_UNIT_NAME>(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 
 	// メッセージダイアログを表示する.
 	// glyph_key	フォントアイコンのグリフの静的リソースのキー
@@ -453,128 +453,6 @@ namespace winrt::GraphPaper::implementation
 		ShapeText::release_available_fonts();
 		ShapeText::set_available_fonts();
 
-		if (co_await layout_load_async() != S_OK) {
-			// レイアウトの読み込みに失敗した場合,
-			// 書体の属性を初期化する.
-			{
-				using winrt::Windows::UI::Xaml::Setter;
-				using winrt::Windows::UI::Xaml::Controls::TextBlock;
-				using winrt::Windows::UI::Xaml::Media::FontFamily;
-				using winrt::Windows::UI::Text::FontWeight;
-				using winrt::Windows::UI::Text::FontStretch;
-				using winrt::Windows::UI::Xaml::Style;
-
-				// リソースの取得に失敗した場合に備えて,
-				// 固定の既定値を書体属性に格納する.
-				m_page_layout.m_font_family = wchar_cpy(L"Segoe UI");
-				m_page_layout.m_font_size = 14.0;
-				m_page_layout.m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;
-				m_page_layout.m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;
-				m_page_layout.m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;
-				// BodyTextBlockStyle をリソースディクショナリから得る.
-				auto resource = Resources().TryLookup(box_value(L"BodyTextBlockStyle"));
-				if (resource != nullptr) {
-					auto style = resource.try_as<Style>();
-					std::list<Style> stack;
-					// リソースからスタイルを得る.
-					while (style != nullptr) {
-						// スタイルが空でない場合.
-						// スタイルをスタックに積む.
-						stack.push_back(style);
-						// スタイルの継承元のスタイルを得る.
-						style = style.BasedOn();
-					}
-					try {
-						while (stack.empty() == false) {
-							// スタックが空でない場合,
-							// スタイルをスタックから取り出す.
-							style = stack.back();
-							stack.pop_back();
-							// スタイルの中の各セッターについて.
-							auto const& setters = style.Setters();
-							for (auto const& base : setters) {
-								auto const& setter = base.try_as<Setter>();
-								// セッターのプロパティーを得る.
-								auto const& prop = setter.Property();
-								if (prop == TextBlock::FontFamilyProperty()) {
-									// プロパティーが FontFamily の場合,
-									// セッターの値から, 書体名を得る.
-									auto value = unbox_value<FontFamily>(setter.Value());
-									m_page_layout.m_font_family = wchar_cpy(value.Source().c_str());
-								}
-								else if (prop == TextBlock::FontSizeProperty()) {
-									// プロパティーが FontSize の場合,
-									// セッターの値から, 書体の大きさを得る.
-									auto value = unbox_value<double>(setter.Value());
-									m_page_layout.m_font_size = value;
-								}
-								else if (prop == TextBlock::FontStretchProperty()) {
-									// プロパティーが FontStretch の場合,
-									// セッターの値から, 書体の伸縮を得る.
-									auto value = unbox_value<int32_t>(setter.Value());
-									m_page_layout.m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(value);
-								}
-								else if (prop == TextBlock::FontStyleProperty()) {
-									// プロパティーが FontStyle の場合,
-									// セッターの値から, 字体を得る.
-									auto value = unbox_value<int32_t>(setter.Value());
-									m_page_layout.m_font_style = static_cast<DWRITE_FONT_STYLE>(value);
-								}
-								else if (prop == TextBlock::FontWeightProperty()) {
-									// プロパティーが FontWeight の場合,
-									// セッターの値から, 書体の太さを得る.
-									auto value = unbox_value<int32_t>(setter.Value());
-									m_page_layout.m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(value);
-									//Determine the type of a boxed value
-									//auto prop = setter.Value().try_as<winrt::Windows::Foundation::IPropertyValue>();
-									//if (prop.Type() == winrt::Windows::Foundation::PropertyType::Inspectable) {
-									// ...
-									//}
-									//else if (prop.Type() == winrt::Windows::Foundation::PropertyType::int32) {
-									// ...
-									//}
-								}
-							}
-						}
-					}
-					catch (winrt::hresult_error const&) {
-					}
-					stack.clear();
-					style = nullptr;
-					resource = nullptr;
-				}
-				ShapeText::is_available_font(m_page_layout.m_font_family);
-			}
-
-			{
-				m_page_layout.m_arrow_size = ARROW_SIZE();
-				m_page_layout.m_arrow_style = ARROW_STYLE::NONE;
-				m_page_layout.m_corner_rad = { GRIDLEN_PX, GRIDLEN_PX };
-				m_page_layout.set_fill_color(m_page_dx.m_color_bkg);
-				m_page_layout.set_font_color(m_page_dx.m_color_frg);
-				m_page_layout.m_grid_base = static_cast<double>(GRIDLEN_PX) - 1.0;
-				m_page_layout.m_grid_gray = GRID_GRAY;
-				m_page_layout.m_grid_show = GRID_SHOW::BACK;
-				m_page_layout.m_grid_snap = true;
-				m_page_layout.set_page_color(m_page_dx.m_color_bkg);
-				m_page_layout.m_page_scale = 1.0;
-				const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-				m_page_layout.m_page_size.width = static_cast<FLOAT>(std::floor(A4_PER_INCH.width * dpi));
-				m_page_layout.m_page_size.height = static_cast<FLOAT>(std::floor(A4_PER_INCH.height * dpi));
-				m_page_layout.set_stroke_color(m_page_dx.m_color_frg);
-				m_page_layout.m_stroke_patt = STROKE_PATT();
-				m_page_layout.m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;
-				m_page_layout.m_stroke_width = 1.0F;
-				m_page_layout.m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
-				m_page_layout.m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
-				m_page_layout.m_text_line = 0.0F;
-				m_page_layout.m_text_margin = { 4.0F, 4.0F };
-			}
-			m_page_unit = LEN_UNIT::PIXEL;
-			m_color_fmt = COLOR_CODE::DEC;
-			m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
-
-		}
 		// 背景色, 前景色, 文字範囲の背景色, 文字範囲の文字色をリソースから得る.
 		{
 			using winrt::Windows::UI::Color;
@@ -601,6 +479,12 @@ namespace winrt::GraphPaper::implementation
 			m_sample_dx.m_color_bkg = m_page_dx.m_color_bkg;
 			m_sample_dx.m_color_frg = m_page_dx.m_color_frg;
 		}
+
+		if (co_await layout_load_async() != S_OK) {
+			// レイアウトの読み込みに失敗した場合,
+			layout_init();
+		}
+
 		{
 			m_page_min.x = 0.0;
 			m_page_min.y = 0.0;
