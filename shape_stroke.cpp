@@ -5,14 +5,14 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 線枠の形式を作成する.
-	static void create_stroke_style(const D2D1_DASH_STYLE style, const STROKE_PATT& array, ID2D1StrokeStyle** d2d_stroke_style);
+	// D2D ストローク特性を作成する.
+	static void create_stroke_style(const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style);
 
 	// D2D ストローク特性を作成する.
-	// ds	破線の種類
-	// da	破線の配置配列
-	// ss	作成されたストローク特性
-	static void create_stroke_style(const D2D1_DASH_STYLE ds, const STROKE_PATT& da, ID2D1StrokeStyle** ss)
+	// d_style	破線の種類
+	// s_patt	破線の配置配列
+	// s_style	作成されたストローク特性
+	static void create_stroke_style(const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style)
 	{
 		D2D1_STROKE_STYLE_PROPERTIES prop{
 			D2D1_CAP_STYLE_SQUARE,	// startCap
@@ -26,20 +26,20 @@ namespace winrt::GraphPaper::implementation
 		UINT32 d_cnt;
 		const FLOAT* d_arr;
 
-		if (ds != D2D1_DASH_STYLE_SOLID) {
-			if (ds == D2D1_DASH_STYLE_DOT) {
-				d_arr = da.m_ + 2;
+		if (d_style != D2D1_DASH_STYLE_SOLID) {
+			if (d_style == D2D1_DASH_STYLE_DOT) {
+				d_arr = s_patt.m_ + 2;
 				d_cnt = 2;
 			}
 			else {
-				d_arr = da.m_;
-				if (ds == D2D1_DASH_STYLE_DASH) {
+				d_arr = s_patt.m_;
+				if (d_style == D2D1_DASH_STYLE_DASH) {
 					d_cnt = 2;
 				}
-				else if (ds == D2D1_DASH_STYLE_DASH_DOT) {
+				else if (d_style == D2D1_DASH_STYLE_DASH_DOT) {
 					d_cnt = 4;
 				}
-				else if (ds == D2D1_DASH_STYLE_DASH_DOT_DOT) {
+				else if (d_style == D2D1_DASH_STYLE_DASH_DOT_DOT) {
 					d_cnt = 6;
 				}
 				else {
@@ -47,11 +47,11 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			winrt::check_hresult(
-				Shape::s_d2d_factory->CreateStrokeStyle(prop, d_arr, d_cnt, ss)
+				Shape::s_d2d_factory->CreateStrokeStyle(prop, d_arr, d_cnt, s_style)
 			);
 		}
 		else {
-			*ss = nullptr;
+			*s_style = nullptr;
 		}
 	}
 
@@ -61,7 +61,9 @@ namespace winrt::GraphPaper::implementation
 		m_poly_geom = nullptr;
 	}
 
-	// 図形を囲む方形を得る.
+	// 図形を囲む領域を得る.
+	// b_min	領域の左上位置.
+	// b_max	領域の右下位置.
 	void ShapePoly::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
 		D2D1_POINT_2F e_pos;
@@ -74,7 +76,8 @@ namespace winrt::GraphPaper::implementation
 		pt_inc(e_pos, b_min, b_max);
 	}
 
-	// 図形を囲む方形の左上点を得る.
+	// 図形を囲む領域の左上位置を得る.
+	// value	領域の左上位置
 	void ShapePoly::get_min_pos(D2D1_POINT_2F& value) const noexcept
 	{
 		D2D1_POINT_2F e_pos;
@@ -197,8 +200,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を囲む領域を得る.
-	// b_min	領域の左上点
-	// b_max	領域の右下点
+	// b_min	領域の左上位置
+	// b_max	領域の右下位置
 	void ShapeStroke::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
 		pt_inc(m_pos, b_min, b_max);
@@ -207,8 +210,8 @@ namespace winrt::GraphPaper::implementation
 		pt_inc(e_pos, b_min, b_max);
 	}
 
-	// 図形を囲む方形の左上点を得る.
-	// D2D1_POINT_2F& pos	// 方形の左上点
+	// 図形を囲む領域の左上位置を得る.
+	// value	領域の左上位置
 	void ShapeStroke::get_min_pos(D2D1_POINT_2F& value) const noexcept
 	{
 		value.x = m_diff.x >= 0.0f ? m_pos.x : m_pos.x + m_diff.x;
@@ -216,12 +219,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 指定された部位の位置を得る.
+	// 戻り値	つねに true
 	void ShapeStroke::get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& value) const noexcept
 	{
 		value = m_pos;
 	}
 
-	// 始点を得る
+	// 開始位置を得る
+	// 戻り値	つねに true
 	bool ShapeStroke::get_start_pos(D2D1_POINT_2F& value) const noexcept
 	{
 		value = m_pos;
@@ -229,6 +234,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠の色を得る.
+	// 戻り値	つねに true
 	bool ShapeStroke::get_stroke_color(D2D1_COLOR_F& value) const noexcept
 	{
 		value = m_stroke_color;
@@ -236,6 +242,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置を得る.
+	// 戻り値	つねに true
 	bool ShapeStroke::get_stroke_patt(STROKE_PATT& value) const noexcept
 	{
 		value = m_stroke_patt;
@@ -243,6 +250,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠の形式を得る.
+	// 戻り値	つねに true
 	bool ShapeStroke::get_stroke_style(D2D1_DASH_STYLE& value) const noexcept
 	{
 		value = m_stroke_style;
@@ -250,6 +258,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠の太さを得る.
+	// 戻り値	つねに true
 	bool ShapeStroke::get_stroke_width(double& value) const noexcept
 	{
 		value = m_stroke_width;
@@ -289,6 +298,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりをデータライターに SVG タグとして書き込む.
+	// barbs	矢じりの両端の位置
+	// tip_pos	矢じりの先端の位置
+	// a_style	矢じりの形状
+	// dt_writer	データライター
 	void ShapeStroke::write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, const ARROW_STYLE a_style, DataWriter const& dt_writer) const
 	{
 		using  winrt::GraphPaper::implementation::write_svg;

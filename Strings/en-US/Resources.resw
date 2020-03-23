@@ -922,7 +922,7 @@
     <value>Paste text from clipboard?</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="mfi_layout_reset.Text" xml:space="preserve">
+  <data name="mfi_layout_delete.Text" xml:space="preserve">
     <value>Delete saved layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -945,5 +945,9 @@
   <data name="rmfi_grid_patt_3.Text" xml:space="preserve">
     <value>Emphasize the 2nd and 5th</value>
     <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="mfsi_arrange.Text" xml:space="preserve">
+    <value>Arrange</value>
+    <comment>MenuFlyoutSubItem</comment>
   </data>
 </root>

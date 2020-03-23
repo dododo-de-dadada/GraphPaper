@@ -403,7 +403,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_grid_show(GRID_SHOW& /*val*/) const noexcept { return false; }
 		// 方眼の表示を得る.
 		virtual bool get_grid_snap(bool& /*val*/) const noexcept { return false; }
-		// 図形を囲む方形の左上点を得る.
+		// 図形を囲む領域の左上位置を得る.
 		virtual void get_min_pos(D2D1_POINT_2F& /*val*/) const noexcept {}
 		// ページの色を得る.
 		virtual bool get_page_color(D2D1_COLOR_F& /*val*/) const noexcept { return false; }
@@ -528,7 +528,7 @@ namespace winrt::GraphPaper::implementation
 	// 最初の図形をリストから得る.
 	Shape* s_list_front(S_LIST_T const& s_list) noexcept;
 	// 図形全体の領域をリストから得る.
-	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F p_size, D2D1_POINT_2F& p_min, D2D1_POINT_2F& p_max) noexcept;
+	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F p_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
 	// 位置を含む図形とその部位をリストから得る.
 	ANCH_WHICH s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, const double a_len, Shape*& s) noexcept;
 	// 図形をリストに挿入する.
@@ -546,7 +546,7 @@ namespace winrt::GraphPaper::implementation
 	// 選択された図形のリストを得る.
 	template <typename S> void s_list_selected(S_LIST_T const& s_list, S_LIST_T& sel_list) noexcept;
 	// 図形リストをデータライターに書き込む. REDUCE 場合の消去フラグの立つ図形は無視する.
-	template<bool REDUCE> void s_list_write(const S_LIST_T& s_list, DataWriter const& dt_writer);
+	template <bool REDUCE> void s_list_write(const S_LIST_T& s_list, DataWriter const& dt_writer);
 	// リストの中の図形の順番を得る.
 	template <typename S, typename T> bool s_list_match(S_LIST_T const& s_list, S s, T& t);
 	// 図形リストから文字列を得る.
@@ -613,8 +613,6 @@ namespace winrt::GraphPaper::implementation
 		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
 		// 矢じりの形式を得る.
 		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
-		// 補助線の色を得る.
-		//void get_auxiliary_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の基準の大きさを得る.
 		bool get_grid_base(double& value) const noexcept;
 		// 方眼線の色を得る.
@@ -740,9 +738,9 @@ namespace winrt::GraphPaper::implementation
 		~ShapeGroup(void);
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
-		// 図形を囲む方形を得る.
+		// 図形を囲む領域を得る.
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
-		// 図形を囲む方形の左上点を得る.
+		// 図形を囲む領域の左上位置を得る.
 		void get_min_pos(D2D1_POINT_2F& value) const noexcept;
 		// 始点を得る
 		bool get_start_pos(D2D1_POINT_2F& value) const noexcept;
@@ -791,9 +789,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapeStroke(void);
 
-		// 図形を囲む方形を得る.
+		// 図形を囲む領域を得る.
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
-		// 図形を囲む方形の左上点を得る.
+		// 図形を囲む領域の左上位置を得る.
 		virtual void get_min_pos(D2D1_POINT_2F& value) const noexcept;
 		// 指定された部位の位置を得る.
 		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& value) const noexcept;
@@ -1032,9 +1030,9 @@ namespace winrt::GraphPaper::implementation
 		ShapePoly(DataReader const& dt_reader);
 		// 図形を破棄する.
 		~ShapePoly(void);
-		// 図形を囲む方形の左上点を得る.
+		// 図形を囲む領域の左上位置を得る.
 		void get_min_pos(D2D1_POINT_2F& value) const noexcept;
-		// 図形を囲む方形を得る.
+		// 図形を囲む領域を得る.
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 差分だけ移動する.
 		void move(const D2D1_POINT_2F d_pos);

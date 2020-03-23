@@ -351,7 +351,6 @@ namespace winrt::GraphPaper::implementation
 	template void UndoSet<UNDO_OP::GRID_GRAY>::exec(void);
 	template void UndoSet<UNDO_OP::GRID_PATT>::exec(void);
 	template void UndoSet<UNDO_OP::GRID_SHOW>::exec(void);
-	//template void UndoSet<UNDO_OP::GRID_SNAP>::exec(void);
 	template void UndoSet<UNDO_OP::TEXT_LINE>::exec(void);
 	template void UndoSet<UNDO_OP::TEXT_MARGIN>::exec(void);
 	template void UndoSet<UNDO_OP::PAGE_COLOR>::exec(void);
@@ -386,7 +385,6 @@ namespace winrt::GraphPaper::implementation
 	template UndoSet<UNDO_OP::GRID_GRAY>::UndoSet(Shape* s);
 	template UndoSet<UNDO_OP::GRID_PATT>::UndoSet(Shape* s);
 	template UndoSet<UNDO_OP::GRID_SHOW>::UndoSet(Shape* s);
-	//template UndoSet<UNDO_OP::GRID_SNAP>::UndoSet(Shape* s);
 	template UndoSet<UNDO_OP::TEXT_LINE>::UndoSet(Shape* s);
 	template UndoSet<UNDO_OP::TEXT_MARGIN>::UndoSet(Shape* s);
 	template UndoSet<UNDO_OP::PAGE_COLOR>::UndoSet(Shape* s);
@@ -455,7 +453,6 @@ namespace winrt::GraphPaper::implementation
 	template UndoSet<UNDO_OP::GRID_GRAY>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<UNDO_OP::GRID_PATT>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<UNDO_OP::GRID_SHOW>::UndoSet(DataReader const& dt_reader);
-	//template UndoSet<UNDO_OP::GRID_SNAP>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<UNDO_OP::TEXT_LINE>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<UNDO_OP::TEXT_MARGIN>::UndoSet(DataReader const& dt_reader);
 	template UndoSet<UNDO_OP::PAGE_COLOR>::UndoSet(DataReader const& dt_reader);

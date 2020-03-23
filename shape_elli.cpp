@@ -9,19 +9,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// •ûŒ`‚Ì’†“_‚Ì”z—ñ
-	//constexpr ANCH_WHICH ANCH_ELLI[4]{
-	// ANCH_SOUTH,
-	// ANCH_EAST,
-	// ANCH_WEST,
-	// ANCH_NORTH
-	//};
-
 	// }Œ`‚ğ•\¦‚·‚é.
 	void ShapeElli::draw(SHAPE_DX& dx)
 	{
-		auto br = dx.m_shape_brush.get();
-
 		// ”¼Œa‚ğ‹‚ß‚é.
 		D2D1_POINT_2F rad;
 		pt_scale(m_diff, 0.5, rad);
@@ -31,16 +21,14 @@ namespace winrt::GraphPaper::implementation
 		// ‚¾‰~\‘¢‘Ì‚ÉŠi”[‚·‚é.
 		D2D1_ELLIPSE elli{ c_pos, rad.x, rad.y };
 		if (is_opaque(m_fill_color)) {
-			// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚È‚ç‚¾‰~‚ğ“h‚è‚Â‚Ô‚·.
+			// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚Èê‡,
 			dx.m_shape_brush->SetColor(m_fill_color);
-			dx.m_d2dContext->FillEllipse(elli, br);
+			dx.m_d2dContext->FillEllipse(elli, dx.m_shape_brush.get());
 		}
 		if (is_opaque(m_stroke_color)) {
-			// ˜g/ü‚ÌF‚ª•s“§–¾‚È‚ç‚¾‰~‚ğ“h‚è‚Â‚Ô‚·.
+			// ˜gü‚ÌF‚ª•s“§–¾‚Èê‡,
 			dx.m_shape_brush->SetColor(m_stroke_color);
-			dx.m_d2dContext->DrawEllipse(elli, br,
-				static_cast<FLOAT>(m_stroke_width),
-				m_d2d_stroke_style.get());
+			dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), static_cast<FLOAT>(m_stroke_width), m_d2d_stroke_style.get());
 		}
 		if (is_selected() == false) {
 			return;
@@ -90,13 +78,13 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
 		// ‰¡‚ÌŒa‚ª•‰”‚È‚ç‚Î³”‚É‚·‚é.
-		if (rad.x < 0.0) {
-			rad.x = -rad.x;
-		}
+		//if (rad.x < 0.0F) {
+			rad.x = fabsf(rad.x);
+		//}
 		// c‚ÌŒa‚ª•‰”‚È‚ç‚Î³”‚É‚·‚é.
-		if (rad.y < 0.0) {
-			rad.y = -rad.y;
-		}
+		//if (rad.y < 0.0F) {
+			rad.y = fabsf(rad.y);
+		//}
 		if (is_opaque(m_stroke_color)) {
 			// ˆÊ’u‚ª‚¾‰~‚ÌŠO‘¤‚É‚ ‚é‚©’²‚×‚é.
 			// ˜g‚Ì‘¾‚³‚ª•”ˆÊ‚Ì‘å‚«‚³–¢–‚È‚ç‚Î,

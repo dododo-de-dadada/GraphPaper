@@ -11,6 +11,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 長さををピクセル単位の値に変換する.
+	// 変換された値は, 0.5 ピクセル単位に丸められる.
 	// l_unit	長さの単位
 	// value	長さの値
 	// dpi	DPI
@@ -114,6 +115,9 @@ namespace winrt::GraphPaper::implementation
 				swprintf_s(buf, b_len, FMT_GRID, value / g_len);
 			}
 		}
+		else {
+			throw hresult_not_implemented();
+		}
 	}
 	template void conv_val_to_len<!WITH_UNIT_NAME>(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 	template void conv_val_to_len<WITH_UNIT_NAME>(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
@@ -132,7 +136,6 @@ namespace winrt::GraphPaper::implementation
 		const wchar_t NL[] = L"\u2028";	// テキストブロック内での改行
 
 		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		// メッセージをキーとする文字列をリソースローダーから得る.
 		winrt::hstring text;
 		try {
 			text = r_loader.GetString(message_key);
@@ -142,7 +145,6 @@ namespace winrt::GraphPaper::implementation
 			// 文字列が空の場合,
 			text = message_key;
 		}
-		// 説明をキーとする, 追加する文字列をリソースローダーから得る.
 		winrt::hstring added_text;
 		try {
 			added_text = r_loader.GetString(desc_key);
@@ -156,8 +158,7 @@ namespace winrt::GraphPaper::implementation
 			// 説明そのものが空でない場合,
 			text = text + NL + QUOT + desc_key + QUOT;
 		}
-		// グリフをキーとして, フォントアイコンのグリフを静的リソースから得る.
-		auto glyph = Resources().TryLookup(box_value(glyph_key));
+		const auto glyph = Resources().TryLookup(box_value(glyph_key));
 		fi_message().Glyph(glyph != nullptr ? unbox_value<winrt::hstring>(glyph) : glyph_key);
 		tk_message().Text(text);
 		auto _{ cd_message().ShowAsync() };
@@ -282,6 +283,7 @@ namespace winrt::GraphPaper::implementation
 		// コンテキストメニューを静的リソースから読み込む.
 		// ポップアップは静的なリソースとして定義して、複数の要素で使用することができる.
 		{
+
 			m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke")));
 			m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill")));
 			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_font")));
@@ -458,30 +460,34 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::UI::Color;
 			using winrt::Windows::UI::Xaml::Media::Brush;
 
-			m_page_dx.m_range_bcolor = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
-			m_page_dx.m_range_tcolor = S_WHITE;
-			m_page_dx.m_color_bkg = S_WHITE;
-			m_page_dx.m_color_frg = S_BLACK;
-			try {
-				auto h_color = Resources().Lookup(box_value(L"SystemColorHighlightColor"));
-				auto t_color = Resources().Lookup(box_value(L"SystemColorHighlightTextColor"));
-				auto const& b_theme = Resources().Lookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
-				auto const& f_theme = Resources().Lookup(box_value(L"ApplicationForegroundThemeBrush"));
-				cast_to(unbox_value<Color>(h_color), m_page_dx.m_range_bcolor);
-				cast_to(unbox_value<Color>(t_color), m_page_dx.m_range_tcolor);
-				cast_to(unbox_value<Brush>(b_theme), m_page_dx.m_color_bkg);
-				cast_to(unbox_value<Brush>(f_theme), m_page_dx.m_color_frg);
+			auto h_color = Resources().TryLookup(box_value(L"SystemColorHighlightColor"));
+			auto t_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
+			if (h_color != nullptr && t_color != nullptr) {
+				cast_to(unbox_value<Color>(h_color), m_page_dx.m_range_background);
+				cast_to(unbox_value<Color>(t_color), m_page_dx.m_range_foreground);
 			}
-			catch (winrt::hresult_error) {
+			else {
+				m_page_dx.m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
+				m_page_dx.m_range_foreground = S_WHITE;
 			}
-			m_sample_dx.m_range_bcolor = m_page_dx.m_range_bcolor;
-			m_sample_dx.m_range_tcolor = m_page_dx.m_range_tcolor;
-			m_sample_dx.m_color_bkg = m_page_dx.m_color_bkg;
-			m_sample_dx.m_color_frg = m_page_dx.m_color_frg;
+			auto const& b_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
+			auto const& f_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
+			if (b_theme != nullptr && f_theme != nullptr) {
+				cast_to(unbox_value<Brush>(b_theme), m_page_dx.m_theme_background);
+				cast_to(unbox_value<Brush>(f_theme), m_page_dx.m_theme_foreground);
+			}
+			else {
+				m_page_dx.m_theme_background = S_WHITE;
+				m_page_dx.m_theme_foreground = S_BLACK;
+			}
+			m_sample_dx.m_range_background = m_page_dx.m_range_background;
+			m_sample_dx.m_range_foreground = m_page_dx.m_range_foreground;
+			m_sample_dx.m_theme_background = m_page_dx.m_theme_background;
+			m_sample_dx.m_theme_foreground = m_page_dx.m_theme_foreground;
 		}
 
 		if (co_await layout_load_async() != S_OK) {
-			// レイアウトの読み込みに失敗した場合,
+			// 読み込みに失敗した場合,
 			layout_init();
 		}
 

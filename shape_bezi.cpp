@@ -494,25 +494,25 @@ namespace winrt::GraphPaper::implementation
 		anchor_draw_rect(m_pos, dx);
 		s_pos = m_pos;
 		pt_add(s_pos, m_diff, e_pos);
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		anchor_draw_rounded(e_pos, dx);
 
 		s_pos = e_pos;
 		pt_add(s_pos, m_diff_1, e_pos);
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		anchor_draw_rounded(e_pos, dx);
 
 		s_pos = e_pos;
 		pt_add(s_pos, m_diff_2, e_pos);
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		anchor_draw_rect(e_pos, dx);
 	}

@@ -66,21 +66,21 @@ namespace winrt::GraphPaper::implementation
 
 		e_pos.x = c_pos.x;
 		e_pos.y = p_pos.y;
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(p_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawLine(p_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		s_pos = e_pos;
 		e_pos.x = p_pos.x;
 		e_pos.y = c_pos.y;
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		s_pos = e_pos;
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, c_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, c_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
@@ -100,9 +100,9 @@ namespace winrt::GraphPaper::implementation
 		pt_add(p_pos, r, e.point);
 		e.radiusX = r.x;
 		e.radiusY = r.y;
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawEllipse(e, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawEllipse(e, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
@@ -114,9 +114,9 @@ namespace winrt::GraphPaper::implementation
 		//auto br = dx.m_aux_brush.get();
 		//auto ss = dx.m_aux_style.get();
 		const FLOAT sw = static_cast<FLOAT>(1.0 / m_page_scale);
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
@@ -136,12 +136,12 @@ namespace winrt::GraphPaper::implementation
 		q_pos[1] = { c_pos.x, m_pos.y };
 		q_pos[2] = { m_pos.x, c_pos.y };
 		q_pos[3] = { p_pos.x, m_pos.y };
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(q_pos[0], q_pos[1], dx.m_shape_brush.get(), sw, nullptr);
 		dx.m_d2dContext->DrawLine(q_pos[1], q_pos[2], dx.m_shape_brush.get(), sw, nullptr);
 		dx.m_d2dContext->DrawLine(q_pos[2], q_pos[3], dx.m_shape_brush.get(), sw, nullptr);
 		dx.m_d2dContext->DrawLine(q_pos[3], q_pos[0], dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawLine(q_pos[0], q_pos[1], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		dx.m_d2dContext->DrawLine(q_pos[1], q_pos[2], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		dx.m_d2dContext->DrawLine(q_pos[2], q_pos[3], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
@@ -159,9 +159,9 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_RECT_F rc = {
 			p_pos.x, p_pos.y, c_pos.x, c_pos.y
 		};
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
@@ -195,9 +195,9 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(rx),
 			static_cast<FLOAT>(ry)
 		};
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 

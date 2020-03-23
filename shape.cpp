@@ -55,9 +55,9 @@ namespace winrt::GraphPaper::implementation
 		pt_add(r_min, dx.m_anch_len, r_max);
 		const D2D1_RECT_F r{ r_min.x, r_min.y, r_max.x, r_max.y };
 
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawRectangle(r, dx.m_shape_brush.get(), 2.0, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->FillRectangle(r, dx.m_shape_brush.get());
 	}
 
@@ -67,9 +67,9 @@ namespace winrt::GraphPaper::implementation
 	void anchor_draw_rounded(const D2D1_POINT_2F& a_pos, SHAPE_DX& dx)
 	{
 		const FLOAT rad = static_cast<FLOAT>(dx.m_anch_len * 0.5 + 1.0);
-		dx.m_shape_brush->SetColor(dx.m_color_bkg);
+		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->FillEllipse({ a_pos, rad, rad }, dx.m_shape_brush.get());
-		dx.m_shape_brush->SetColor(dx.m_color_frg);
+		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
 		dx.m_d2dContext->FillEllipse({ a_pos, rad - 1.0F, rad - 1.0F }, dx.m_shape_brush.get());
 	}
 

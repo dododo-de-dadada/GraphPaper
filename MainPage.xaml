@@ -12,6 +12,7 @@
             <!-- 情報フォントアイコンのグリフ -->
             <x:String x:Key="icon_info">&#xE946;</x:String>
             <x:String x:Key="icon_alert">&#xEA39;</x:String>
+            <x:String x:Key="icon_arrange">&#xE8CB;</x:String>
             <x:String x:Key="icon_conf">&#xE9CE;</x:String>
             <x:String x:Key="icon_save_as">&#xE792;</x:String>
             <x:String x:Key="icon_recent">&#xE81C;</x:String>
@@ -174,9 +175,9 @@
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Name="mfi_stroke_patt_2" x:Uid="mfi_stroke_patt" Click="mfi_stroke_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
-                <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_stroke_width" Click="mfi_stroke_width_click_async" Text="Width..." />
                 <MenuFlyoutSeparator />
+                <!-- 矢じりメニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_arrow_none_2" x:Uid="rmfi_arrow_none" Click="rmfi_arrow_none_click" Text="None" GroupName="gn_arrow_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
@@ -383,28 +384,33 @@
                         <KeyboardAccelerator Key="A" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="mfi_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="End" Modifiers="Control" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward" Click="mfi_bring_forward_click" IsEnabled="false" Text="Bring Forward">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="PageDown" Modifiers="Control" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_send_backward" x:Uid="mfi_send_backward" Click="mfi_send_backward_click" IsEnabled="false" Text="Send Backward" >
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="PageUp" Modifiers="Control" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back" Click="mfi_send_to_back_click" IsEnabled="false" Text="Send to Back">
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="Home" Modifiers="Control" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
+                <MenuFlyoutSubItem x:Uid="mfsi_arrange" Text="Arrange">
+                    <MenuFlyoutSubItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_arrange}" Margin="0,0,12,0" />
+                    </MenuFlyoutSubItem.Icon>
+                    <MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="mfi_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
+                        <MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="End" Modifiers="Control" />
+                        </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward" Click="mfi_bring_forward_click" IsEnabled="false" Text="Bring Forward">
+                        <MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="PageDown" Modifiers="Control" />
+                        </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="mfi_send_backward" x:Uid="mfi_send_backward" Click="mfi_send_backward_click" IsEnabled="false" Text="Send Backward" >
+                        <MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="PageUp" Modifiers="Control" />
+                        </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back" Click="mfi_send_to_back_click" IsEnabled="false" Text="Send to Back">
+                        <MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Home" Modifiers="Control" />
+                        </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_group" x:Uid="mfi_group" Click="mfi_group_click" IsEnabled="false" Text="Group" >
+                    <MenuFlyoutItem x:Name="mfi_group" x:Uid="mfi_group" Click="mfi_group_click" IsEnabled="false" Text="Group" >
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_group}" VerticalAlignment="Center" Width="16" Height="16" />
                     </MenuFlyoutItem.Icon>
@@ -519,9 +525,9 @@
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Name="mfi_stroke_patt" x:Uid="mfi_stroke_patt" Click="mfi_stroke_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
-                <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Name="mfi_stroke_width" x:Uid="mfi_stroke_width" Click="mfi_stroke_width_click_async" Text="Width..." />
                 <MenuFlyoutSeparator />
+                <!-- 矢じりメニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_arrow_none" x:Uid="rmfi_arrow_none" Click="rmfi_arrow_none_click" Text="None" GroupName="gn_arrow_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
@@ -625,8 +631,9 @@
                 <MenuFlyoutSeparator />
                 <!-- レイアウトメニュー -->
                 <MenuFlyoutItem x:Uid="mfi_layout_save" Click="mfi_layout_save_click_async" Text="Save layout" />
-                <MenuFlyoutItem x:Name="mfi_layout_reset" x:Uid="mfi_layout_reset" Click="mfi_layout_reset_click_async" Text="Reset layout" />
+                <MenuFlyoutItem x:Name="mfi_layout_delete" x:Uid="mfi_layout_delete" Click="mfi_layout_delete_click_async" Text="Reset layout" />
             </muxc:MenuBarItem>
+            <!-- その他メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_misc" AccessKey="M" Title="Misc">
                 <MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_pixel" x:Uid="rmfi_len_pixel" Click="rmfi_len_pixel_click" Text="Pixel" />
@@ -641,7 +648,6 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_real" x:Uid="rmfi_color_real" Click="rmfi_color_real_click" Text="Real" GroupName="gn_color_code" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_cent" x:Uid="rmfi_color_cent" Click="rmfi_color_cent_click" Text="Percent" GroupName="gn_color_code" />
                 </MenuFlyoutSubItem>
-                <!-- ステータスバーメニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_status_bar" Text="Status Bar">
                     <ToggleMenuFlyoutItem x:Name="tmfi_status_tool" x:Uid="tmfi_status_tool" Click="mi_status_bar_click" Text="Tool" />
                     <ToggleMenuFlyoutItem x:Name="tmfi_status_unit" x:Uid="tmfi_status_unit" Click="mi_status_bar_click" Text="Unit" />
@@ -817,7 +823,7 @@
                 <TextBlock x:Name="tk_message"/>
             </StackPanel>
         </ContentDialog>
-       <!-- ページの寸法入力ダイアログ -->
+        <!-- ページの寸法入力ダイアログ -->
         <ContentDialog x:Name="cd_page_size" x:Uid="cd_page_size" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonClick="cd_page_size_pri_btn_click" PrimaryButtonText="Apply" SecondaryButtonClick="cd_page_size_sec_btn_click" SecondaryButtonText="Adjust to Shapes">
             <StackPanel >
                 <TextBox x:Name="tx_page_width" x:Uid="tx_page_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="tx_page_size_text_changed" />

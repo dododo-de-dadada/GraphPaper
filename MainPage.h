@@ -601,12 +601,12 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトの初期化, 保存と削除
 		//-------------------------------
 
-		// レイアウトの初期化
-		void MainPage::layout_init(void);
-		// 保存されたレイアウトデータを読み込む.
+		// ページレイアウトとその他の属性を初期化する.
+		void layout_init(void) noexcept;
+		// 保存されたレイアウトとその他の属性を読み込む.
 		IAsyncOperation<winrt::hresult> layout_load_async(void);
-		// レイアウトメニューの「レイアウトをリセット」が選択された.
-		IAsyncAction mfi_layout_reset_click_async(IInspectable const&, RoutedEventArgs const&);
+		// レイアウトメニューの「保存されたレイアウトを削除」が選択された.
+		IAsyncAction mfi_layout_delete_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「レイアウトを保存」が選択された.
 		IAsyncAction mfi_layout_save_click_async(IInspectable const&, RoutedEventArgs const&);
 

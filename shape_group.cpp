@@ -10,7 +10,6 @@ namespace winrt::GraphPaper::implementation
 	// 図形を破棄する.
 	ShapeGroup::~ShapeGroup(void)
 	{
-		// 図形リストを消去し, 含まれる図形を破棄する.
 		s_list_clear(m_list_grouped);
 	}
 
@@ -49,7 +48,9 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を囲む方形を得る.
+	// 図形を囲む領域を得る.
+	// b_min	領域の左上位置.
+	// b_max	領域の右下位置.
 	void ShapeGroup::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
 		for (const auto s : m_list_grouped) {
@@ -60,7 +61,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を囲む方形の左上点を得る.
+	// 図形を囲む領域の左上位置を得る.
+	// value	領域の左上位置
 	void ShapeGroup::get_min_pos(D2D1_POINT_2F& value) const noexcept
 	{
 		auto flag = true;

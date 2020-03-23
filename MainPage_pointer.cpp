@@ -214,7 +214,6 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::finish_move_shape(void)
 	{
 		if (m_page_layout.m_grid_snap) {
-			// 選択された図形を囲む方形の左上点を得る.
 			D2D1_POINT_2F p_min = {};
 			bool flag = true;
 			for (auto s : m_list_shapes) {
@@ -250,7 +249,6 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
-		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 	}
 

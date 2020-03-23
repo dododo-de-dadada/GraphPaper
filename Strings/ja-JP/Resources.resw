@@ -914,7 +914,7 @@
     <value>クリップボードからテキストを貼り付けますか？</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="mfi_layout_reset.Text" xml:space="preserve">
+  <data name="mfi_layout_delete.Text" xml:space="preserve">
     <value>保存したレイアウトを削除</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -937,5 +937,9 @@
   <data name="rmfi_grid_patt_3.Text" xml:space="preserve">
     <value>2番目と5番目を強調</value>
     <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="mfsi_arrange.Text" xml:space="preserve">
+    <value>並び替え</value>
+    <comment>MenuFlyoutSubItem</comment>
   </data>
 </root>

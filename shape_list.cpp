@@ -159,17 +159,17 @@ namespace winrt::GraphPaper::implementation
 	// 図形全体の領域をリストから得る.
 	// s_list	図形リスト
 	// p_size	ページの寸法
-	// p_min	領域の左上位置
-	// p_max	領域の右下位置
-	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F p_size, D2D1_POINT_2F& p_min, D2D1_POINT_2F& p_max) noexcept
+	// b_min	領域の左上位置
+	// b_max	領域の右下位置
+	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F p_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
 	{
-		p_min = { 0.0f, 0.0f };	// 左上位置
-		p_max = { p_size.width, p_size.height };	// 右下位置
+		b_min = { 0.0F, 0.0F };	// 左上位置
+		b_max = { p_size.width, p_size.height };	// 右下位置
 		for (auto s : s_list) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->get_bound(p_min, p_max);
+			s->get_bound(b_min, b_max);
 		}
 	}
 
@@ -206,6 +206,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// リストの中の図形の順番を得る.
+	// S	探索する型
+	// T	得られた型
+	// s_list	図形リスト
+	// s	探索する値
+	// t	得られた値
 	template <typename S, typename T>
 	bool s_list_match(S_LIST_T const& s_list, S s, T& t)
 	{
@@ -277,8 +282,8 @@ namespace winrt::GraphPaper::implementation
 		stack.clear();
 		return match;
 	}
-	template bool s_list_match(S_LIST_T const& s_list, Shape* s, uint32_t& t);
-	template bool s_list_match(S_LIST_T const& s_list, uint32_t s, Shape*& t);
+	template bool winrt::GraphPaper::implementation::s_list_match<Shape*, uint32_t>(S_LIST_T const& s_list, Shape* s, uint32_t& t);
+	template bool winrt::GraphPaper::implementation::s_list_match<uint32_t, Shape*>(S_LIST_T const& s_list, uint32_t s, Shape*& t);
 
 	// 選択フラグの立つすべての図形を差分だけ移動する.
 	// s_list	図形リスト
