@@ -207,26 +207,14 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ListViewItem;
 		if (vk == VirtualKeyModifiers::Control) {
 			// コントロールキーが押されている場合,
-			// ポインターが押された図形の選択を反転させる.
 			undo_push_select(s);
-			// 編集メニュー項目の使用の可否を設定する.
 			enable_edit_menu();
 			page_draw();
-			if (s->is_selected()) {
-				// 押された図形が選択されている場合,
-				// 押された図形の属性をページレイアウトに格納する.
-				m_page_layout.set_to_shape(s);
-				arrow_style_check_menu(m_page_layout.m_arrow_style);
-				font_style_check_menu(m_page_layout.m_font_style);
-				stroke_style_check_menu(m_page_layout.m_stroke_style);
-				text_align_p_check_menu(m_page_layout.m_text_align_p);
-				text_align_t_check_menu(m_page_layout.m_text_align_t);
-				if (m_summary_visible) {
+			if (m_summary_visible) {
+				if (s->is_selected()) {
 					summary_select(s);
 				}
-			}
-			else {
-				if (m_summary_visible) {
+				else {
 					summary_unselect(s);
 				}
 			}
@@ -240,45 +228,33 @@ namespace winrt::GraphPaper::implementation
 				m_pointer_shape_prev = m_list_shapes.front();
 			}
 			if (select_range(s, m_pointer_shape_prev)) {
-				// やり直し操作スタックを消去し, 含まれる操作を破棄する.
-				//redo_clear();
 				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
 			}
-			// 押された図形の属性をページレイアウトに格納する.
-			m_page_layout.set_to_shape(s);
-			arrow_style_check_menu(m_page_layout.m_arrow_style);
-			font_style_check_menu(m_page_layout.m_font_style);
-			stroke_style_check_menu(m_page_layout.m_stroke_style);
-			text_align_t_check_menu(m_page_layout.m_text_align_t);
-			text_align_p_check_menu(m_page_layout.m_text_align_p);
 		}
 		else {
 			// シフトキーもコントロールキーもどちらも押されていない場合
 			if (s->is_selected() == false) {
 				// 図形の選択フラグがない場合,
-				// 図形の選択をすべて解除する.
 				unselect_all();
-				// 図形の選択を反転して, その操作スタックに積む.
 				undo_push_select(s);
-				// やり直し操作スタックを消去し, 含まれる操作を破棄する.
-				//redo_clear();
-				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
-				arrow_style_check_menu(m_page_layout.m_arrow_style);
-				font_style_check_menu(m_page_layout.m_font_style);
-				stroke_style_check_menu(m_page_layout.m_stroke_style);
-				text_align_p_check_menu(m_page_layout.m_text_align_p);
-				text_align_t_check_menu(m_page_layout.m_text_align_t);
 				if (m_summary_visible) {
 					summary_select(s);
 				}
 			}
-			// 押された図形の属性をページレイアウトに格納する.
-			m_page_layout.set_to_shape(s);
 			m_pointer_shape_prev = s;
+		}
+		if (s->is_selected()) {
+			// 押された図形が選択されている場合,
+			m_page_layout.set_to(s);
+			arrow_style_check_menu(m_page_layout.m_arrow_style);
+			font_style_check_menu(m_page_layout.m_font_style);
+			stroke_style_check_menu(m_page_layout.m_stroke_style);
+			text_align_p_check_menu(m_page_layout.m_text_align_p);
+			text_align_t_check_menu(m_page_layout.m_text_align_t);
 		}
 	}
 

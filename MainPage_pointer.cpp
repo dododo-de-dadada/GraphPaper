@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 	static void reduce_list(S_LIST_T& s_list, U_STACK_T const& u_stack, U_STACK_T const& r_stack)
 	{
 		// 消去フラグの立つ図形を消去リストに格納する.
-		S_LIST_T d_list;
+		S_LIST_T list_deleted;
 		for (const auto t : s_list) {
 			if (t->is_deleted() == false) {
 				// 消去フラグがない図形は無視する.
@@ -43,11 +43,11 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			// 上記のいずれでもない図形を消去リストに追加する.
-			d_list.push_back(t);
+			list_deleted.push_back(t);
 		}
 		// 消去リストに含まれる図形をリストから取り除き, 解放する.
 		auto it_begin = s_list.begin();
-		for (const auto s : d_list) {
+		for (const auto s : list_deleted) {
 			auto it = std::find(it_begin, s_list.end(), s);
 			it_begin = s_list.erase(it);
 			delete s;
@@ -56,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		}
 		// 消去リストを消去する.
-		d_list.clear();
+		list_deleted.clear();
 
 	}
 
@@ -78,33 +78,58 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 範囲選択を終了する.
-	void MainPage::finish_area_select(const VirtualKeyModifiers k_mod)
+	// コンテキストメニューを表示する.
+	void MainPage::pointer_context_menu(void)
 	{
-		using winrt::Windows::UI::Xaml::Window;
+		if (m_pointer_shape == nullptr
+			|| m_pointer_anchor == ANCH_WHICH::ANCH_OUTSIDE) {
+			// 押された図形がヌル, 
+			// または押された部位は外側の場合,
+			// ページコンテキストメニューを表示する.
+			scp_page_panel().ContextFlyout(nullptr);
+			scp_page_panel().ContextFlyout(m_menu_layout);
+		}
+		else if (typeid(*m_pointer_shape) == typeid(ShapeGroup)) {
+			// 押された図形がグループの場合,
+			scp_page_panel().ContextFlyout(nullptr);
+			scp_page_panel().ContextFlyout(m_menu_ungroup);
+		}
+		else {
+			// 押された図形の属性値をページレイアウトに格納する.
+			m_page_layout.set_to(m_pointer_shape);
+			if (m_pointer_anchor == ANCH_WHICH::ANCH_INSIDE) {
+				// 押された図形の部位が内側の場合,
+				// 塗りつぶしコンテキストメニューを表示する.
+				scp_page_panel().ContextFlyout(nullptr);
+				scp_page_panel().ContextFlyout(m_menu_fill);
+			}
+			else if (m_pointer_anchor == ANCH_WHICH::ANCH_TEXT) {
+				// 押された図形の部位が文字列の場合,
+				// 書体コンテキストメニューを表示する.
+				scp_page_panel().ContextFlyout(nullptr);
+				scp_page_panel().ContextFlyout(m_menu_font);
+			}
+			else if (m_pointer_anchor == ANCH_WHICH::ANCH_FRAME) {
+				// 押された図形の部位が枠上の場合,
+				// 線枠コンテキストメニューを表示する.
+				scp_page_panel().ContextFlyout(nullptr);
+				scp_page_panel().ContextFlyout(m_menu_stroke);
+			}
+		}
+	}
 
-		auto flag = false;
-		if (k_mod == VirtualKeyModifiers::Control) {
-			D2D1_POINT_2F a_min;
-			D2D1_POINT_2F a_max;
-			pt_bound(m_pointer_pressed, m_pointer_cur, a_min, a_max);
-			flag = toggle_area(a_min, a_max);
-		}
-		else if (k_mod == VirtualKeyModifiers::None) {
-			D2D1_POINT_2F a_min;
-			D2D1_POINT_2F a_max;
-			pt_bound(m_pointer_pressed, m_pointer_cur, a_min, a_max);
-			flag = select_area(a_min, a_max);
-		}
-		if (flag == true) {
-			// 編集メニュー項目の使用の可否を設定する.
-			enable_edit_menu();
-		}
-		Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
+	// ポインターの現在位置を得る.
+	void MainPage::pointer_cur_pos(PointerRoutedEventArgs const& args)
+	{
+		// スワップチェーンパネル上でのポインターの位置を得て, 
+		// ページ座標系に変換し, ポインターの現在位置に格納する.
+		D2D1_POINT_2F p_offs;
+		pt_add(m_page_min, sb_horz().Value(), sb_vert().Value(), p_offs);
+		pt_scale(args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / m_page_layout.m_page_scale, p_offs, m_pointer_cur);
 	}
 
 	// 図形の作成を終了する.
-	void MainPage::finish_create_shape(void)
+	void MainPage::pointer_finish_creating(void)
 	{
 		if (m_page_layout.m_grid_snap) {
 			// 方眼に整列の場合, 始点と終点を方眼の大きさで丸める
@@ -196,10 +221,8 @@ namespace winrt::GraphPaper::implementation
 			reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);
 			unselect_all();
 			undo_push_append(s);
-			// 一連の操作の区切としてヌル操作をスタックに積む.
 			undo_push_null();
 			m_pointer_shape_summary = m_pointer_shape_prev = s;
-			// 編集メニュー項目の使用の可否を設定する.
 			enable_edit_menu();
 			s->get_bound(m_page_min, m_page_max);
 			set_page_panle_size();
@@ -210,8 +233,24 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 図形の変形を終了する.
+	void MainPage::pointer_finish_forming(void)
+	{
+		if (m_page_layout.m_grid_snap) {
+			pt_round(m_pointer_cur, m_page_layout.m_grid_base + 1.0, m_pointer_cur);
+		}
+		m_pointer_shape->set_pos(m_pointer_cur, m_pointer_anchor);
+		if (undo_pop_if_invalid()) {
+			return;
+		}
+		// 一連の操作の区切としてヌル操作をスタックに積む.
+		undo_push_null();
+		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
+		set_page_panle_size();
+	}
+
 	// 図形の移動を終了する.
-	void MainPage::finish_move_shape(void)
+	void MainPage::pointer_finish_moving(void)
 	{
 		if (m_page_layout.m_grid_snap) {
 			D2D1_POINT_2F p_min = {};
@@ -252,20 +291,77 @@ namespace winrt::GraphPaper::implementation
 		enable_edit_menu();
 	}
 
-	// 図形の変形を終了する.
-	void MainPage::finish_form_shape(void)
+	// 範囲選択を終了する.
+	void MainPage::pointer_finish_selecting_area(const VirtualKeyModifiers k_mod)
 	{
-		if (m_page_layout.m_grid_snap) {
-			pt_round(m_pointer_cur, m_page_layout.m_grid_base + 1.0, m_pointer_cur);
+		using winrt::Windows::UI::Xaml::Window;
+
+		auto flag = false;
+		if (k_mod == VirtualKeyModifiers::Control) {
+			D2D1_POINT_2F a_min;
+			D2D1_POINT_2F a_max;
+			pt_bound(m_pointer_pressed, m_pointer_cur, a_min, a_max);
+			flag = toggle_area(a_min, a_max);
 		}
-		m_pointer_shape->set_pos(m_pointer_cur, m_pointer_anchor);
-		if (undo_pop_if_invalid()) {
+		else if (k_mod == VirtualKeyModifiers::None) {
+			D2D1_POINT_2F a_min;
+			D2D1_POINT_2F a_max;
+			pt_bound(m_pointer_pressed, m_pointer_cur, a_min, a_max);
+			flag = select_area(a_min, a_max);
+		}
+		if (flag == true) {
+			// 編集メニュー項目の使用の可否を設定する.
+			enable_edit_menu();
+		}
+		Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
+	}
+
+	// 状況に応じた形状のカーソルを設定する.
+	void MainPage::pointer_set(void)
+	{
+		if (m_draw_tool != DRAW_TOOL::SELECT) {
+			Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 			return;
 		}
-		// 一連の操作の区切としてヌル操作をスタックに積む.
-		undo_push_null();
-		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
-		set_page_panle_size();
+		Shape* s;
+		const auto a = s_list_hit_test(m_list_shapes, m_pointer_cur, m_page_dx.m_anch_len, s);
+		if (a == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() == false) {
+			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
+			return;
+		}
+		//if (a != ANCH_WHICH::ANCH_OUTSIDE && s->is_selected()) {
+		switch (a) {
+		case ANCH_WHICH::ANCH_R_NW:
+		case ANCH_WHICH::ANCH_R_NE:
+		case ANCH_WHICH::ANCH_R_SE:
+		case ANCH_WHICH::ANCH_R_SW:
+			Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
+			break;
+		case ANCH_WHICH::ANCH_INSIDE:
+		case ANCH_WHICH::ANCH_FRAME:
+		case ANCH_WHICH::ANCH_TEXT:
+			Window::Current().CoreWindow().PointerCursor(CUR_SIZEALL);
+			break;
+		case ANCH_WHICH::ANCH_NE:
+		case ANCH_WHICH::ANCH_SW:
+			Window::Current().CoreWindow().PointerCursor(CUR_SIZENESW);
+			break;
+		case ANCH_WHICH::ANCH_NORTH:
+		case ANCH_WHICH::ANCH_SOUTH:
+			Window::Current().CoreWindow().PointerCursor(CUR_SIZENS);
+			break;
+		case ANCH_WHICH::ANCH_NW:
+		case ANCH_WHICH::ANCH_SE:
+			Window::Current().CoreWindow().PointerCursor(CUR_SIZENWSE);
+			break;
+		case ANCH_WHICH::ANCH_WEST:
+		case ANCH_WHICH::ANCH_EAST:
+			Window::Current().CoreWindow().PointerCursor(CUR_SIZEWE);
+			break;
+		}
+		return;
+		//}
+		//Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 	}
 
 	// ポインターのボタンが上げられた.
@@ -283,12 +379,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		// スワップチェーンパネル上でのポインターの位置を得て, ページ座標に変換し,
 		// ポインターの現在位置に格納する.
-		D2D1_POINT_2F p_offs;
-		pt_add(m_page_min, sb_horz().Value(), sb_vert().Value(), p_offs);
-		const auto ui_pos{ args.GetCurrentPoint(scp_page_panel()).Position() };
-		pt_scale(ui_pos, 1.0 / m_page_layout.m_page_scale, p_offs, m_pointer_cur);
-		set_pointer();
-		// ポインターの位置をステータスバーに格納する.
+		pointer_cur_pos(args);
+		pointer_set();
 		status_bar_set_curs();
 	}
 
@@ -315,19 +407,14 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		// スワップチェーンパネル上でのポインターの位置を得て, ページ座標に変換し,
-		// ポインターの現在位置に格納する.
-		D2D1_POINT_2F p_offs;
-		pt_add(m_page_min, sb_horz().Value(), sb_vert().Value(), p_offs);
-		const auto ui_pos{ args.GetCurrentPoint(scp_page_panel()).Position() };
-		pt_scale(ui_pos, 1.0 / m_page_layout.m_page_scale, p_offs, m_pointer_cur);
-
+		// ポインターの現在位置を得る.
+		pointer_cur_pos(args);
 		// ポインターの位置をステータスバーに格納する.
 		status_bar_set_curs();
 		if (m_pointer_state == STATE_TRAN::BEGIN) {
 			// 状態が初期状態の場合,
 			// 状況に応じた形状のカーソルを設定する.
-			set_pointer();
+			pointer_set();
 		}
 		else if (m_pointer_state == STATE_TRAN::CLICK) {
 			// 状態がクリックした状態の場合,
@@ -337,7 +424,7 @@ namespace winrt::GraphPaper::implementation
 			if (pt_abs2(d_pos) > m_click_dist) {
 				// 長さが閾値を超える場合, 初期状態に戻る.
 				m_pointer_state = STATE_TRAN::BEGIN;
-				set_pointer();
+				pointer_set();
 			}
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_AREA) {
@@ -424,25 +511,22 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		// スワップチェーンパネルのポインターのプロパティーを得る.
-		auto const& p_prop = args.GetCurrentPoint(scp_page_panel()).Properties();
+		auto const& scp = sender.as<SwapChainPanel>();
+		// ポインターのプロパティーを得る.
+		auto const& p_prop = args.GetCurrentPoint(scp).Properties();
 		// ポインターのキャプチャを始める.
-		scp_page_panel().CapturePointer(args.Pointer());
-		// イベント発生時間を得る.
-		auto t_stamp = args.GetCurrentPoint(scp_page_panel()).Timestamp();
-		// スワップチェーンパネル上でのポインターの位置を得て, 
-		// ページ座標系に変換し, ポインターの現在位置に格納する.
-		D2D1_POINT_2F p_offs;
-		pt_add(m_page_min, sb_horz().Value(), sb_vert().Value(), p_offs);
-		const auto ui_pos{ args.GetCurrentPoint(scp_page_panel()).Position() };
-		pt_scale(ui_pos, 1.0 / m_page_layout.m_page_scale, p_offs, m_pointer_cur);
+		scp.CapturePointer(args.Pointer());
+		// ポインターのイベント発生時間を得る.
+		auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
+		// ポインターの現在位置を得る.
+		pointer_cur_pos(args);
 		switch (m_pointer_state) {
 		case STATE_TRAN::CLICK:
 			// 状態がクリックした状態の場合,
 			// イベント発生時間と前回押された時間との時間差を得る.
 			if (t_stamp - m_pointer_time <= m_click_time) {
+				// 時間差が閾値以下の場合
 				if (p_prop.IsLeftButtonPressed()) {
-					// 時間差が閾値以下,
 					// かつプロパティーが左ボタンの押下の場合,
 					// クリック直後に左ボタンを押した状態に遷移する.
 					m_pointer_state = STATE_TRAN::CLICK_2;
@@ -453,16 +537,16 @@ namespace winrt::GraphPaper::implementation
 		case STATE_TRAN::BEGIN:
 			// 状態が初期状態の場合, 
 			// スワップチェーンパネルのポインターのプロパティーを得る.
-			if (p_prop.IsLeftButtonPressed()) {
-				// プロパティーが左ボタンの押下の場合,
-				// 左ボタンが押された状態に遷移する.
-				m_pointer_state = STATE_TRAN::PRESS_L;
-				break;
-			}
-			else if (p_prop.IsRightButtonPressed()) {
+			if (p_prop.IsRightButtonPressed()) {
 				// プロパティーが右ボタンの押下の場合,
 				// 右ボタンが押された状態に遷移する.
 				m_pointer_state = STATE_TRAN::PRESS_R;
+				break;
+			}
+			else if (p_prop.IsLeftButtonPressed()) {
+				// プロパティーが左ボタンの押下の場合,
+				// 左ボタンが押された状態に遷移する.
+				m_pointer_state = STATE_TRAN::PRESS_L;
 				break;
 			}
 			// ブレークなし.
@@ -505,55 +589,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		// すべての図形の選択を解除する.
 		if (unselect_all() == false) {
-			// 選択が解除された図形がない場合, 終了する.
+			// 選択が解除された図形がない場合
 			return;
 		}
-		// やり直し操作スタックを消去し, 含まれる操作を破棄する.
-		//redo_clear();
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		// ページと図形を表示する.
 		page_draw();
-	}
-
-	// コンテキストメニューを表示する.
-	void MainPage::show_context_menu(void)
-	{
-		if (m_pointer_shape == nullptr
-			|| m_pointer_anchor == ANCH_WHICH::ANCH_OUTSIDE) {
-			// 押された図形がヌル, 
-			// または押された部位は外側の場合,
-			// ページコンテキストメニューを表示する.
-			scp_page_panel().ContextFlyout(nullptr);
-			scp_page_panel().ContextFlyout(m_menu_layout);
-		}
-		else if (typeid(*m_pointer_shape) == typeid(ShapeGroup)) {
-			// 押された図形がグループの場合,
-			scp_page_panel().ContextFlyout(nullptr);
-			scp_page_panel().ContextFlyout(m_menu_ungroup);
-		}
-		else {
-			// 押された図形の属性値をページレイアウトに格納する.
-			m_page_layout.set_to_shape(m_pointer_shape);
-			if (m_pointer_anchor == ANCH_WHICH::ANCH_INSIDE) {
-				// 押された図形の部位が内側の場合,
-				// 塗りつぶしコンテキストメニューを表示する.
-				scp_page_panel().ContextFlyout(nullptr);
-				scp_page_panel().ContextFlyout(m_menu_fill);
-			}
-			else if (m_pointer_anchor == ANCH_WHICH::ANCH_TEXT) {
-				// 押された図形の部位が文字列の場合,
-				// 書体コンテキストメニューを表示する.
-				scp_page_panel().ContextFlyout(nullptr);
-				scp_page_panel().ContextFlyout(m_menu_font);
-			}
-			else if (m_pointer_anchor == ANCH_WHICH::ANCH_FRAME) {
-				// 押された図形の部位が枠上の場合,
-				// 線枠コンテキストメニューを表示する.
-				scp_page_panel().ContextFlyout(nullptr);
-				scp_page_panel().ContextFlyout(m_menu_stroke);
-			}
-		}
 	}
 
 	// ポインターのボタンが上げられた.
@@ -565,31 +607,29 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
+		auto const& scp = sender.as<SwapChainPanel>();
 		// ポインターの追跡を停止する.
-		scp_page_panel().ReleasePointerCaptures();
+		scp.ReleasePointerCaptures();
 		// スワップチェーンパネル上でのポインターの位置を得て, ページ座標に変換し,
 		// ポインターの現在位置に格納する.
-		D2D1_POINT_2F p_offs;
-		pt_add(m_page_min, sb_horz().Value(), sb_vert().Value(), p_offs);
-		const auto ui_pos{ args.GetCurrentPoint(scp_page_panel()).Position() };
-		pt_scale(ui_pos, 1.0 / m_page_layout.m_page_scale, p_offs, m_pointer_cur);
+		pointer_cur_pos(args);
 		if (m_pointer_state == STATE_TRAN::PRESS_L) {
 			// 左ボタンが押された状態の場合,
 			// ボタンが離れた時刻と押された時刻の差分を得る.
-			const auto t_stamp = args.GetCurrentPoint(scp_page_panel()).Timestamp();
+			const auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
 			if (t_stamp - m_pointer_time <= m_click_time) {
 				// 差分がクリックの判定時間以下の場合,
 				// クリックした状態に遷移する.
 				// 状況に応じた形状のカーソルを設定する.
 				m_pointer_state = STATE_TRAN::CLICK;
-				set_pointer();
+				pointer_set();
 				return;
 			}
 		}
 		else if (m_pointer_state == STATE_TRAN::CLICK_2) {
 			// クリック後に左ボタンが押した状態の場合,
 			// ボタンが離された時刻と押された時刻の差分を得る.
-			const auto t_stamp = args.GetCurrentPoint(scp_page_panel()).Timestamp();
+			const auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
 			if (t_stamp - m_pointer_time <= m_click_time) {
 				// 差分がクリックの判定時間以下で
 				if (m_pointer_shape != nullptr && typeid(*m_pointer_shape) == typeid(ShapeText)) {
@@ -602,28 +642,28 @@ namespace winrt::GraphPaper::implementation
 		else if (m_pointer_state == STATE_TRAN::PRESS_MOVE) {
 			// 状態が図形を移動している状態の場合,
 			// 図形の移動を終了する.
-			finish_move_shape();
+			pointer_finish_moving();
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_FORM) {
 			// 状態が図形を変形している状態の場合,
 			// 図形の変形を終了する.
-			finish_form_shape();
+			pointer_finish_forming();
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_AREA) {
 			// 状態が範囲選択している状態の場合,
 			if (m_draw_tool == DRAW_TOOL::SELECT) {
 				// 作図ツールが選択ツールの場合,
 				// 範囲選択を終了する.
-				finish_area_select(args.KeyModifiers());
+				pointer_finish_selecting_area(args.KeyModifiers());
 			}
 			else {
 				// 図形の作成を終了する.
-				finish_create_shape();
+				pointer_finish_creating();
 			}
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_R) {
 			// 状態が右ボタンを押した状態の場合
-			show_context_menu();
+			pointer_context_menu();
 		}
 		// 初期状態に戻す.
 		m_pointer_state = STATE_TRAN::BEGIN;
@@ -680,54 +720,6 @@ namespace winrt::GraphPaper::implementation
 			s_bar.Value(value);
 			page_draw();
 		}
-	}
-
-	// 状況に応じた形状のカーソルを設定する.
-	void MainPage::set_pointer(void)
-	{
-		if (m_draw_tool != DRAW_TOOL::SELECT) {
-			Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
-			return;
-		}
-		Shape* s;
-		const auto a = s_list_hit_test(m_list_shapes, m_pointer_cur, m_page_dx.m_anch_len, s);
-		if (a == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() == false) {
-			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
-			return;
-		}
-		//if (a != ANCH_WHICH::ANCH_OUTSIDE && s->is_selected()) {
-			switch (a) {
-			case ANCH_WHICH::ANCH_R_NW:
-			case ANCH_WHICH::ANCH_R_NE:
-			case ANCH_WHICH::ANCH_R_SE:
-			case ANCH_WHICH::ANCH_R_SW:
-				Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
-				break;
-			case ANCH_WHICH::ANCH_INSIDE:
-			case ANCH_WHICH::ANCH_FRAME:
-			case ANCH_WHICH::ANCH_TEXT:
-				Window::Current().CoreWindow().PointerCursor(CUR_SIZEALL);
-				break;
-			case ANCH_WHICH::ANCH_NE:
-			case ANCH_WHICH::ANCH_SW:
-				Window::Current().CoreWindow().PointerCursor(CUR_SIZENESW);
-				break;
-			case ANCH_WHICH::ANCH_NORTH:
-			case ANCH_WHICH::ANCH_SOUTH:
-				Window::Current().CoreWindow().PointerCursor(CUR_SIZENS);
-				break;
-			case ANCH_WHICH::ANCH_NW:
-			case ANCH_WHICH::ANCH_SE:
-				Window::Current().CoreWindow().PointerCursor(CUR_SIZENWSE);
-				break;
-			case ANCH_WHICH::ANCH_WEST:
-			case ANCH_WHICH::ANCH_EAST:
-				Window::Current().CoreWindow().PointerCursor(CUR_SIZEWE);
-				break;
-			}
-			return;
-		//}
-		//Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 	}
 
 }

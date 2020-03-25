@@ -155,8 +155,6 @@ namespace winrt::GraphPaper::implementation
 		GRID	// 方眼 (グリッド)
 	};
 	constexpr auto WITH_UNIT_NAME = true;
-	// 長さの値をピクセル単位の値に変換する.
-	double conv_len_to_val(const LEN_UNIT unit, const double len, const double dpi, const double g_len) noexcept;
 	// ピクセル単位の長さを他の単位の文字列に変換する.
 	template <bool B> void conv_val_to_len(const LEN_UNIT unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 	// ピクセル単位の長さを他の単位の文字列に変換する.
@@ -303,20 +301,20 @@ namespace winrt::GraphPaper::implementation
 		void app_entered_background(IInspectable const& sender, EnteredBackgroundEventArgs const& args);
 		// アプリケーションがバックグラウンドに移った.
 		void app_leaving_background(IInspectable const& sender, LeavingBackgroundEventArgs const& args);
+		// アプリケーションの再開の処理を行う.
+		IAsyncAction app_resuming_async(void);
+		// アプリケーションの中断の処理を行う.
+		IAsyncAction app_suspending_async(SuspendingEventArgs const& args);
 		// アプリケーションが再開された.
 		void app_resuming(IInspectable const&, IInspectable const&)
 		{
 			auto _{ app_resuming_async() };
 		}
-		// アプリケーションの再開の処理を行う.
-		IAsyncAction app_resuming_async(void);
 		// アプリケーションが中断された.
 		void app_suspending(IInspectable const&, SuspendingEventArgs const& args)
 		{
 			auto _{ app_suspending_async(args) };
 		}
-		// アプリケーションの中断の処理を行う.
-		IAsyncAction app_suspending_async(SuspendingEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_arrange.cpp
@@ -396,7 +394,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
 		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile const& s_file);
 		// ファイルの読み込みが終了した.
-		void finish_file_read(void);
+		void file_finish_reading(void);
 		// ファイルメニューの「開く」が選択された
 		IAsyncAction mfi_file_open_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「名前を付けて保存」が選択された
@@ -645,14 +643,20 @@ namespace winrt::GraphPaper::implementation
 		// ポインターイベントのハンドラー
 		//-------------------------------
 
+		// コンテキストメニューを表示する.
+		void pointer_context_menu(void);
+		// ポインターの現在位置を得る.
+		void pointer_cur_pos(PointerRoutedEventArgs const& args);
 		// 範囲選択を終了する.
-		void finish_area_select(const VirtualKeyModifiers k_mod);
+		void pointer_finish_selecting_area(const VirtualKeyModifiers k_mod);
 		// 図形の作成を終了する.
-		void finish_create_shape(void);
+		void pointer_finish_creating(void);
 		// 図形の移動を終了する.
-		void finish_move_shape(void);
+		void pointer_finish_moving(void);
 		// 押された図形の編集を終了する.
-		void finish_form_shape(void);
+		void pointer_finish_forming(void);
+		// 状況に応じた形状のポインターを設定する.
+		void pointer_set(void);
 		// ポインターのボタンが上げられた.
 		void scp_pointer_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがページのスワップチェーンパネルの中に入った.
@@ -667,10 +671,6 @@ namespace winrt::GraphPaper::implementation
 		void scp_pointer_released(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターのホイールボタンが操作された.
 		void scp_pointer_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
-		// 状況に応じた形状のポインターを設定する.
-		void set_pointer(void);
-		// コンテキストメニューを表示する.
-		void show_context_menu(void);
 
 		//-------------------------------
 		// MainPage_sample.cpp
@@ -696,7 +696,7 @@ namespace winrt::GraphPaper::implementation
 		// スクロールバーの値を設定する.
 		void scroll_set(const double aw, const double ah);
 		// 図形が表示されるようパネルをスクロールする.
-		bool scroll_to_shape(Shape* s);
+		bool scroll_to(Shape* s);
 
 		//-------------------------------
 		// MainPage_select.cpp
@@ -840,7 +840,7 @@ namespace winrt::GraphPaper::implementation
 		//　検索の値をデータリーダーから読み込む.
 		void text_find_read(DataReader const& dt_reader);
 		// 文字列検索パネルから値を格納する.
-		void text_find_set_to(void);
+		void text_find_set(void);
 		//　	図形リストの中から文字列を検索する.
 		bool text_find_whithin_shapes(void);
 		//　検索の値をデータリーダーに書き込む.
@@ -1008,6 +1008,10 @@ namespace winrt::GraphPaper::implementation
 		void rmfi_len_pixel_click(IInspectable const&, RoutedEventArgs const&);
 		// その他メニューの「長さの単位」>「ポイント」が選択された.
 		void rmfi_len_point_click(IInspectable const&, RoutedEventArgs const&);
+		// UWP のブラシを D2D1_COLOR_F に変換する.
+		//bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept;
+		// UWP の色を D2D1_COLOR_F に変換する.
+		//void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept;
 	};
 
 }

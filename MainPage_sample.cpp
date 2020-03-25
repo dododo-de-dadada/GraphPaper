@@ -17,6 +17,15 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//　リストビュー「見本リスト」がロードされた.
+	void MainPage::lv_sample_list_loaded(IInspectable const&, RoutedEventArgs const&)
+	{
+		const auto item = lv_sample_list().SelectedItem();
+		if (item != nullptr) {
+			lv_sample_list().ScrollIntoView(item);
+		}
+	}
+
 	// 見本のページと見本の図形を表示する.
 	void MainPage::sample_draw(void)
 	{
@@ -39,9 +48,6 @@ namespace winrt::GraphPaper::implementation
 			m_sample_layout.draw_grid(m_sample_dx, offset);
 		}
 		if (m_sample_shape != nullptr) {
-			//D2D1_COLOR_F anch_color;
-			//m_sample_layout.get_anchor_color(anch_color);
-			//m_sample_dx.m_anch_brush->SetColor(anch_color);
 			m_sample_shape->draw(m_sample_dx);
 		}
 		if (m_sample_layout.m_grid_show == GRID_SHOW::FRONT) {
@@ -58,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_sample_dx.m_dxgi_swap_chain != nullptr) {
 			m_sample_dx.m_dxgi_swap_chain = nullptr;
 		}
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		const auto w = scp_sample_panel().ActualWidth();
 		const auto h = scp_sample_panel().ActualHeight();
 		m_sample_layout.m_page_size.width = static_cast<FLOAT>(w);
@@ -76,37 +82,31 @@ namespace winrt::GraphPaper::implementation
 			};
 			if (m_sample_type == SAMP_TYPE::FONT) {
 				using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				const auto t = wchar_cpy(r_loader.GetString(L"str_pangram").c_str());
-				m_sample_shape = new ShapeText(s_pos, d_pos, t, &m_sample_layout);
-#if defined(_DEBUG)
-				debug_leak_cnt++;
-#endif
+				const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
+				const wchar_t* w = nullptr;
+				if (text.empty()) {
+					w = L"The quick brown fox jumps over a lazy dog.";
+				}
+				else {
+					w = text.c_str();
+				}
+				m_sample_shape = new ShapeText(s_pos, d_pos, wchar_cpy(w), &m_sample_layout);
 			}
 			else if (m_sample_type == SAMP_TYPE::STROKE) {
 				m_sample_shape = new ShapeLine(s_pos, d_pos, &m_sample_layout);
-#if defined(_DEBUG)
-				debug_leak_cnt++;
-#endif
 			}
 			else if (m_sample_type == SAMP_TYPE::FILL) {
 				m_sample_shape = new ShapeRect(s_pos, d_pos, &m_sample_layout);
-#if defined(_DEBUG)
-				debug_leak_cnt++;
-#endif
 			}
+			else {
+				throw winrt::hresult_not_implemented();
+			}
+#if defined(_DEBUG)
+			debug_leak_cnt++;
+#endif
 		}
 		sample_draw();
 
-	}
-
-	//　リストビュー「見本リスト」がロードされた.
-	void MainPage::lv_sample_list_loaded(IInspectable const&, RoutedEventArgs const&)
-	{
-		const auto item = lv_sample_list().SelectedItem();
-		if (item != nullptr) {
-			lv_sample_list().ScrollIntoView(item);
-		}
 	}
 
 }

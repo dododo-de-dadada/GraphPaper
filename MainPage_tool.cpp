@@ -15,7 +15,7 @@ namespace winrt::GraphPaper::implementation
 		m_draw_tool = DRAW_TOOL::BEZI;
 		// 作図ツールをステータスバーに格納する.
 		status_bar_set_draw();
-		set_pointer();
+		pointer_set();
 	}
 
 	// 作図メニューの「だ円」が選択された.
@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 		m_draw_tool = DRAW_TOOL::ELLI;
 		// 作図ツールをステータスバーに格納する.
 		status_bar_set_draw();
-		set_pointer();
+		pointer_set();
 	}
 
 	// 作図メニューの「直線」が選択された.
@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 		m_draw_tool = DRAW_TOOL::LINE;
 		// 作図ツールをステータスバーに格納する.
 		status_bar_set_draw();
-		set_pointer();
+		pointer_set();
 	}
 
 	// 作図メニューの「四へん形」が選択された.
@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 		m_draw_tool = DRAW_TOOL::QUAD;
 		// 作図ツールをステータスバーに格納する.
 		status_bar_set_draw();
-		set_pointer();
+		pointer_set();
 	}
 
 	// 作図メニューの「方形」が選択された.
@@ -51,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 		m_draw_tool = DRAW_TOOL::RECT;
 		// 作図ツールをステータスバーに格納する.
 		status_bar_set_draw();
-		set_pointer();
+		pointer_set();
 	}
 
 	// 作図メニューの「角丸方形」が選択された.
@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 		m_draw_tool = DRAW_TOOL::RRECT;
 		// 作図ツールをステータスバーに格納する.
 		status_bar_set_draw();
-		set_pointer();
+		pointer_set();
 	}
 
 	// 作図メニューの「図形を選択」が選択された.
@@ -72,7 +72,7 @@ namespace winrt::GraphPaper::implementation
 		m_pointer_anchor = ANCH_WHICH::ANCH_OUTSIDE;
 		// 作図ツールをステータスバーに格納する.
 		status_bar_set_draw();
-		set_pointer();
+		pointer_set();
 	}
 
 	// 作図メニューの「文字列」が選択された.
@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 		m_draw_tool = DRAW_TOOL::TEXT;
 		// 作図ツールをステータスバーに格納する.
 		status_bar_set_draw();
-		set_pointer();
+		pointer_set();
 	}
 
 	// 作図メニューの「文字列」が選択された.
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 		m_draw_tool = DRAW_TOOL::SCALE;
 		// 作図ツールをステータスバーに格納する.
 		status_bar_set_draw();
-		set_pointer();
+		pointer_set();
 	}
 
 }

@@ -180,7 +180,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		const double val0 = m_sample_layout.m_font_color.r * COLOR_MAX;
 		const double val1 = m_sample_layout.m_font_color.g * COLOR_MAX;
 		const double val2 = m_sample_layout.m_font_color.b * COLOR_MAX;
@@ -232,7 +232,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::get_available_font(i); i++) {
 			auto item = box_value(winrt::hstring(name));
 			lv_sample_list().Items().Append(item);
@@ -287,7 +287,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		const double val0 = m_sample_layout.m_font_size;
 		sample_slider_0().Value(val0);
 		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
@@ -317,7 +317,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		for (uint32_t i = 0; FONT_STRETCH_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_STRETCH_NAME[i]));
 			lv_sample_list().Items().Append(item);
@@ -370,7 +370,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		for (uint32_t i = 0; FONT_WEIGHT_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_WEIGHT_NAME[i]));
 			lv_sample_list().Items().Append(item);
@@ -425,7 +425,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		const double val0 = m_sample_layout.m_text_line / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		text_set_slider_header<UNDO_OP::TEXT_LINE, 0>(val0);
@@ -476,7 +476,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		const double val0 = m_sample_layout.m_text_margin.width / SLIDER_STEP;
 		const double val1 = m_sample_layout.m_text_margin.height / SLIDER_STEP;
 		sample_slider_0().Value(val0);

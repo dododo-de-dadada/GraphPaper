@@ -18,32 +18,6 @@ namespace winrt::GraphPaper::implementation
 	// 色の成分が同じか調べる.
 	static bool equal_component(const FLOAT a, const FLOAT b) noexcept;
 
-	// UWP のブラシを D2D1_COLOR_F に変換する.
-	bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept
-	{
-		using winrt::Windows::UI::Xaml::Media::SolidColorBrush;
-
-		const auto s = a.try_as<SolidColorBrush>();
-		if (s == nullptr) {
-			return false;
-		}
-		const auto c = s.Color();
-		b.r = static_cast<FLOAT>(static_cast<double>(c.R) / COLOR_MAX);
-		b.g = static_cast<FLOAT>(static_cast<double>(c.G) / COLOR_MAX);
-		b.b = static_cast<FLOAT>(static_cast<double>(c.B) / COLOR_MAX);
-		b.a = static_cast<FLOAT>(static_cast<double>(c.A) / COLOR_MAX);
-		return true;
-	}
-
-	// UWP のブラシを D2D1_COLOR_F に変換する.
-	void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept
-	{
-		b.r = static_cast<FLOAT>(static_cast<double>(a.R) / COLOR_MAX);
-		b.g = static_cast<FLOAT>(static_cast<double>(a.G) / COLOR_MAX);
-		b.b = static_cast<FLOAT>(static_cast<double>(a.B) / COLOR_MAX);
-		b.a = static_cast<FLOAT>(static_cast<double>(a.A) / COLOR_MAX);
-	}
-
 	// 部位の方形を表示する.
 	// a_pos	部位の位置
 	// dx		図形の描画環境

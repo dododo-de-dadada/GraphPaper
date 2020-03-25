@@ -13,6 +13,38 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr wchar_t TITLE_PAGE[] = L"str_page";
 
+	// 長さををピクセル単位の値に変換する.
+	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept;
+
+	// 長さををピクセル単位の値に変換する.
+	// 変換された値は, 0.5 ピクセル単位に丸められる.
+	// l_unit	長さの単位
+	// value	長さの値
+	// dpi	DPI
+	// g_len	方眼の長さ
+	// 戻り値	ピクセル単位の値
+	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept
+	{
+		double ret;
+
+		if (l_unit == LEN_UNIT::INCH) {
+			ret = value * dpi;
+		}
+		else if (l_unit == LEN_UNIT::MILLI) {
+			ret = value * dpi / MM_PER_INCH;
+		}
+		else if (l_unit == LEN_UNIT::POINT) {
+			ret = value * dpi / PT_PER_INCH;
+		}
+		else if (l_unit == LEN_UNIT::GRID) {
+			ret = value * g_len;
+		}
+		else {
+			ret = value;
+		}
+		return std::round(2.0 * ret) * 0.5;
+	}
+
 	// ページ寸法ダイアログの「適用」ボタンが押された.
 	void MainPage::cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&)
 	{
@@ -51,11 +83,8 @@ namespace winrt::GraphPaper::implementation
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
-		// ポインターの位置をステータスバーに格納する.
 		status_bar_set_curs();
-		// 方眼の大きさをステータスバーに格納する.
 		status_bar_set_grid();
-		// ページの大きさをステータスバーに格納する.
 		status_bar_set_page();
 		status_bar_set_unit();
 	}
@@ -90,36 +119,17 @@ namespace winrt::GraphPaper::implementation
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
-		// ページの大きさをステータスバーに格納する.
 		status_bar_set_page();
 	}
 
 	// ページの「ページの単位と色の書式」ダイアログの「適用」ボタンが押された.
-	/*
-	void MainPage::cd_page_unit_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&)
-	{
-		const auto p_unit = m_len_unit;
-		m_len_unit = static_cast<LEN_UNIT>(cx_page_unit().SelectedIndex());
-		m_color_code = static_cast<COLOR_CODE>(cx_color_style().SelectedIndex());
-		if (p_unit != m_len_unit) {
-			// ポインターの位置をステータスバーに格納する.
-			status_bar_set_curs();
-			// 方眼の大きさをステータスバーに格納する.
-			status_bar_set_grid();
-			// ページの大きさをステータスバーに格納する.
-			status_bar_set_page();
-			status_bar_set_unit();
-		}
-	}
-	*/
-
 	// ページメニューの「色」が選択された.
 	IAsyncAction MainPage::mfi_page_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		const double val0 = m_sample_layout.m_page_color.r * COLOR_MAX;
 		const double val1 = m_sample_layout.m_page_color.g * COLOR_MAX;
 		const double val2 = m_sample_layout.m_page_color.b * COLOR_MAX;
@@ -167,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 		//wchar_t const* format = nullptr;
 		double pw;
 		double ph;
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		const auto g_len = m_sample_layout.m_grid_base + 1.0;
 		pw = m_sample_layout.m_page_size.width;
 		ph = m_sample_layout.m_page_size.height;
@@ -186,15 +196,6 @@ namespace winrt::GraphPaper::implementation
 		const auto _ = cd_page_size().ShowAsync();
 	}
 
-	// ページメニューの「単位と書式」が選択された
-	/*
-	void MainPage::mfi_page_len_unit_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		cx_page_unit().SelectedIndex(static_cast<uint32_t>(m_len_unit));
-		cx_color_style().SelectedIndex(static_cast<uint32_t>(m_color_code));
-		const auto _ = cd_page_unit().ShowAsync();
-	}
-	*/
 	// ページと図形を表示する.
 	void MainPage::page_draw(void)
 	{
@@ -365,7 +366,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::page_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = &m_sample_layout;
-		const double value = args.NewValue();
+		const auto value = args.NewValue();
 		page_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			s->set_grid_base(value);
@@ -393,7 +394,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページのスワップチェーンパネルがロードされた.
-	void MainPage::scp_page_panel_loaded(IInspectable const& sender, RoutedEventArgs const&/*args*/)
+#if defined(_DEBUG)
+	void MainPage::scp_page_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
+#else
+	void MainPage::scp_page_panel_loaded(IInspectable const&, RoutedEventArgs const&)
+#endif
 	{
 #if defined(_DEBUG)
 		if (sender != scp_page_panel()) {
@@ -405,7 +410,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページのスワップチェーンパネルの寸法が変わった.
+#if defined(_DEBUG)
 	void MainPage::scp_page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
+#else
+	void MainPage::scp_page_panel_size_changed(IInspectable const&, SizeChangedEventArgs const& args)
+#endif	// _DEBUG
 	{
 #if defined(_DEBUG)
 		if (sender != scp_page_panel()) {
@@ -442,7 +451,7 @@ namespace winrt::GraphPaper::implementation
 		// テキストボックスの文字列を数値に変換する.
 		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &value, buf, 2);
 		if (cnt == 1 && value > 0.0) {
-			// 値ををピクセル単位の値に変換する.
+			// 文字列が数値に変換できた場合,
 			value = conv_len_to_val(m_len_unit, value, dpi, m_sample_layout.m_grid_base + 1.0);
 		}
 		cd_page_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < m_page_size_max);

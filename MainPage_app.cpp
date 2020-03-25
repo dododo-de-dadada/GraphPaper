@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 					// スレッドをメインページの UI スレッドに変える.
 					auto cd = this->Dispatcher();
 					co_await winrt::resume_foreground(cd);
-					finish_file_read();
+					file_finish_reading();
 				}
 				catch (winrt::hresult_error const& e) {
 					hr = e.code();

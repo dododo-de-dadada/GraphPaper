@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::btn_text_find_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 文字列検索パネルから値を格納する.
-		text_find_set_to();
+		text_find_set();
 		sp_text_find().Visibility(COLLAPSED);
 	}
 
@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::btn_text_replace_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 文字列検索パネルから値を格納する.
-		text_find_set_to();
+		text_find_set();
 
 		// 検索文字列の文字数を得る.
 		const auto f_len = wchar_len(m_text_find);
@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字列検索パネルの「置換」ボタンが押された.
 	void MainPage::btn_text_replace_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		text_find_set_to();
+		text_find_set();
 		const auto f_len = wchar_len(m_text_find);
 		if (f_len == 0) {
 			return;
@@ -320,7 +320,7 @@ namespace winrt::GraphPaper::implementation
 			// 文字列検索パネルを非表示にする.
 			sp_text_find().Visibility(COLLAPSED);
 			// 文字列検索パネルから値を格納する.
-			text_find_set_to();
+			text_find_set();
 			return;
 		}
 		if (m_summary_visible) {
@@ -400,7 +400,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列検索パネルから値を格納する.
-	void MainPage::text_find_set_to(void)
+	void MainPage::text_find_set(void)
 	{
 		if (m_text_find != nullptr) {
 			delete[] m_text_find;
@@ -421,7 +421,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::text_find_whithin_shapes;
 
 		// 文字列検索パネルから値を格納する.
-		text_find_set_to();
+		text_find_set();
 		// 検索文字列の文字数を得る.
 		const auto f_len = wchar_len(m_text_find);
 		if (f_len == 0) {
@@ -490,7 +490,7 @@ namespace winrt::GraphPaper::implementation
 		// (操作スタックにヌルは積まない.)
 		undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ f_pos, f_len });
 		// 図形が表示されるようページをスクロールする.
-		scroll_to_shape(t);
+		scroll_to(t);
 		// true を返す.
 		return true;
 	}

@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		const double val0 = m_sample_layout.m_stroke_color.r * COLOR_MAX;
 		const double val1 = m_sample_layout.m_stroke_color.g * COLOR_MAX;
 		const double val2 = m_sample_layout.m_stroke_color.b * COLOR_MAX;
@@ -69,7 +69,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		const double val0 = m_page_layout.m_stroke_patt.m_[0] / SLIDER_STEP;
 		const double val1 = m_page_layout.m_stroke_patt.m_[1] / SLIDER_STEP;
 		const double val2 = m_page_layout.m_stroke_patt.m_[2] / SLIDER_STEP;
@@ -120,7 +120,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to_shape(&m_page_layout);
+		m_sample_layout.set_to(&m_page_layout);
 		const double val0 = m_sample_layout.m_stroke_width / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_0().Visibility(VISIBLE);

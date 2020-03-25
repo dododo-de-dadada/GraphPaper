@@ -157,10 +157,6 @@ namespace winrt::GraphPaper::implementation
 	// shape.cpp
 	//------------------------------
 
-	// UWP のブラシを D2D1_COLOR_F に変換する.
-	bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept;
-	// UWP の色を D2D1_COLOR_F に変換する.
-	void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept;
 	// 部位 (方形) を表示する.
 	void anchor_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx);
 	// 部位 (円) を表示する.
@@ -666,7 +662,7 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから読み込む.
 		void read(DataReader const& dt_reader);
 		// 図形の属性値を格納する.
-		void set_to_shape(Shape* s) noexcept;
+		void set_to(Shape* s) noexcept;
 		// 値を方眼の基準の大きさに格納する.
 		void set_grid_base(const double value) noexcept;
 		// 値を方眼の濃淡に格納する.

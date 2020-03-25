@@ -166,8 +166,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (t != nullptr) {
 			// 図形が表示されるようページをスクロールする.
-			scroll_to_shape(t);
-			m_page_layout.set_to_shape(t);
+			scroll_to(t);
+			m_page_layout.set_to(t);
 		}
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();

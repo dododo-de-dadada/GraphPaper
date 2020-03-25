@@ -653,7 +653,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚Ì‘®«’l‚ðŠi”[‚·‚é.
-	void ShapeLayout::set_to_shape(Shape* s) noexcept
+	void ShapeLayout::set_to(Shape* s) noexcept
 	{
 		s->get_arrow_size(m_arrow_size);
 		s->get_arrow_style(m_arrow_style);

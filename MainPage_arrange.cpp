@@ -14,9 +14,8 @@ namespace winrt::GraphPaper::implementation
 	template<typename T>
 	void MainPage::arrange_order(void)
 	{
-		T it_end;	// 終端の反復子
-		T it_src;	// 交換元の反復子
-		auto flag = false;
+		T it_end;	// 終端
+		T it_src;	// 交換元反復子
 		if constexpr (std::is_same<T, FORWARD>::value) {
 			it_end = m_list_shapes.rend();
 			it_src = m_list_shapes.rbegin();
@@ -30,6 +29,55 @@ namespace winrt::GraphPaper::implementation
 				throw winrt::hresult_not_implemented();
 			}
 		}
+		// 選択されていない図形の中から最初の図形を得る.
+		for (;;) {
+			if (it_src == it_end) {
+				// 図形がない場合
+				return;
+			}
+			if ((*it_src)->is_deleted() == false && (*it_src)->is_selected() == false) {
+				// 消去フラグがない, かつ選択フラグがない場合,
+				break;
+			}
+			it_src++;
+		}
+		// 交換フラグを消去する.
+		auto flag = false;
+		for (;;) {
+			// 交換元反復子を交換先反復子に格納して,
+			// 交換元反復子をインクリメントする.
+			auto it_dst = it_src++;
+			// 次の図形を得る.
+			for (;;) {
+				if (it_src == it_end) {
+					// 次の図形がない場合,
+					if (flag == true) {
+						// 交換フラグが立っている場合,
+						undo_push_null();
+						enable_edit_menu();
+						page_draw();
+					}
+					return;
+				}
+				if ((*it_src)->is_deleted() == false) {
+					break;
+				}
+				it_src++;
+			}
+			if ((*it_src)->is_selected() == false) {
+				// 次の図形が選択されてない場合,
+				continue;
+			}
+			auto s = *it_src;
+			auto t = *it_dst;
+			if (m_summary_visible) {
+				summary_arrange(s, t);
+			}
+			undo_push_arrange(s, t);
+			// 交換フラグを立てる.
+			flag = true;
+		}
+		/*
 		for (;;) {
 			if ((*it_src)->is_deleted() == false) {
 				break;
@@ -37,6 +85,8 @@ namespace winrt::GraphPaper::implementation
 			it_src++;
 		}
 		for (;;) {
+			// 交換元反復子を交換先反復に格納して, 交換元反復子をインクリメントする.
+			// 交換元反復子が終端でない
 			auto it_dst = it_src++;
 			while (it_src != it_end) {
 				if ((*it_src)->is_deleted() == false) {
@@ -57,9 +107,9 @@ namespace winrt::GraphPaper::implementation
 				it_src++;
 				continue;
 			}
-			// 交換元の反復子が指す図形が選択されていて,
-			// 交換先の反復子が指す図形が選択されてない場合,
-			// それらの図形の組を組リストに保存し, 入れ替える.
+			// 交換元反復子が指す図形が選択されていて,
+			// 交換先反復子が指す図形が選択されてない場合,
+			// それらの図形を入れ替える.
 			auto t = *it_dst;	// 交換先の図形
 			if (s->is_selected() && !t->is_selected()) {
 				flag = true;
@@ -76,6 +126,7 @@ namespace winrt::GraphPaper::implementation
 			enable_edit_menu();
 			page_draw();
 		}
+		*/
 	}
 	using BACKWARD = S_LIST_T::iterator;
 	using FORWARD = S_LIST_T::reverse_iterator;
@@ -89,21 +140,19 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 
-		// 選択された図形をリストに追加する.
-		S_LIST_T list_selected;	// 選択された図形のリスト
+		S_LIST_T list_selected;
 		s_list_selected<Shape>(m_list_shapes, list_selected);
 		if (list_selected.size() == 0) {
 			return;
 		}
 		if constexpr (B) {
-			uint32_t i = 0;	// 図形を挿入する位置
+			uint32_t i = 0;
 			auto s_pos = s_list_front(m_list_shapes);
 			for (auto s : list_selected) {
 				if (m_summary_visible) {
 					summary_remove(s);
 					summary_insert(s, i++);
 				}
-				// 図形を削除して, その操作をスタックに積む.
 				undo_push_remove(s);
 				undo_push_insert(s, s_pos);
 			}
@@ -114,7 +163,6 @@ namespace winrt::GraphPaper::implementation
 					summary_remove(s);
 					summary_append(s);
 				}
-				// 図形を削除して, その操作をスタックに積む.
 				undo_push_remove(s);
 				undo_push_insert(s, nullptr);
 			}
@@ -124,8 +172,10 @@ namespace winrt::GraphPaper::implementation
 		enable_edit_menu();
 		page_draw();
 	}
-	template void MainPage::arrange_to<true>(void);
-	template void MainPage::arrange_to<false>(void);
+	constexpr auto BACK = true;
+	template void MainPage::arrange_to<BACK>(void);
+	constexpr auto FRONT = false;
+	template void MainPage::arrange_to<FRONT>(void);
 
 	// 編集メニューの「前面に移動」が選択された.
 	void MainPage::mfi_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
@@ -138,7 +188,6 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::mfi_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を最背面または最前面に移動する.
-		constexpr auto FRONT = false;
 		arrange_to<FRONT>();
 	}
 
@@ -153,7 +202,6 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::mfi_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を最背面または最前面に移動する.
-		constexpr auto BACK = true;
 		arrange_to<BACK>();
 	}
 

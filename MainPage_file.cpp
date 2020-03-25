@@ -16,7 +16,7 @@
 // 		winrt::resume_foreground
 // 		file_recent_add
 // 			file_recent_update_menu
-// 	finish_file_read
+// 	file_finish_reading
 // 	winrt::resume_foreground
 // file_save_as_async
 // 	file_wait_cursor
@@ -61,7 +61,7 @@
 // 		winrt::resume_foreground
 // 		file_recent_add
 // 			file_recent_update_menu
-// 		finish_file_read
+// 		file_finish_reading
 // mfi_file_recent_N_click
 // 	file_read_recent_async
 // mfi_file_save_as_click
@@ -189,7 +189,7 @@ namespace winrt::GraphPaper::implementation
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
 			file_recent_add(s_file);
-			finish_file_read();
+			file_finish_reading();
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;
@@ -602,7 +602,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ファイルの読み込みが終了した.
-	void MainPage::finish_file_read(void)
+	void MainPage::file_finish_reading(void)
 	{
 		enable_edit_menu();
 		color_code_check_menu();
@@ -750,7 +750,7 @@ namespace winrt::GraphPaper::implementation
 			// 取得できた場合,
 			hr = co_await file_read_async(s_file);
 			s_file = nullptr;
-			finish_file_read();
+			file_finish_reading();
 		}
 		else {
 			// 取得できない場合,

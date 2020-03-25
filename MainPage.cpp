@@ -10,33 +10,35 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 長さををピクセル単位の値に変換する.
-	// 変換された値は, 0.5 ピクセル単位に丸められる.
-	// l_unit	長さの単位
-	// value	長さの値
-	// dpi	DPI
-	// g_len	方眼の長さ
-	// 戻り値	ピクセル単位の値
-	double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept
-	{
-		double ret;
+	// UWP のブラシを D2D1_COLOR_F に変換する.
+	static bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept;
+	// UWP の Color を D2D1_COLOR_F に変換する.
+	static void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept;
 
-		if (l_unit == LEN_UNIT::INCH) {
-			ret = value * dpi;
+	// UWP のブラシを D2D1_COLOR_F に変換する.
+	static bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept
+	{
+		using winrt::Windows::UI::Xaml::Media::SolidColorBrush;
+
+		const auto brush = a.try_as<SolidColorBrush>();
+		if (brush == nullptr) {
+			return false;
 		}
-		else if (l_unit == LEN_UNIT::MILLI) {
-			ret = value * dpi / MM_PER_INCH;
-		}
-		else if (l_unit == LEN_UNIT::POINT) {
-			ret = value * dpi / PT_PER_INCH;
-		}
-		else if (l_unit == LEN_UNIT::GRID) {
-			ret = value * g_len;
-		}
-		else {
-			ret = value;
-		}
-		return std::round(2.0 * ret) * 0.5;
+		const auto color = brush.Color();
+		b.r = static_cast<FLOAT>(static_cast<double>(color.R) / COLOR_MAX);
+		b.g = static_cast<FLOAT>(static_cast<double>(color.G) / COLOR_MAX);
+		b.b = static_cast<FLOAT>(static_cast<double>(color.B) / COLOR_MAX);
+		b.a = static_cast<FLOAT>(static_cast<double>(color.A) / COLOR_MAX);
+		return true;
+	}
+
+	// UWP の Color を D2D1_COLOR_F に変換する.
+	static void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept
+	{
+		b.r = static_cast<FLOAT>(static_cast<double>(a.R) / COLOR_MAX);
+		b.g = static_cast<FLOAT>(static_cast<double>(a.G) / COLOR_MAX);
+		b.b = static_cast<FLOAT>(static_cast<double>(a.B) / COLOR_MAX);
+		b.a = static_cast<FLOAT>(static_cast<double>(a.A) / COLOR_MAX);
 	}
 
 	// 色成分の値を文字列に変換する.
@@ -180,7 +182,6 @@ namespace winrt::GraphPaper::implementation
 		uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
 		uint32_t selected_text_cnt = 0;	// 選択された文字列図形の数
 		uint32_t text_cnt = 0;	// 文字列図形の数
-		//Shape* prev_shape = nullptr;	// ひとつ背面の図形
 		bool fore_selected = false;	// 最前面の図形の選択フラグ
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
@@ -209,27 +210,26 @@ namespace winrt::GraphPaper::implementation
 				selected_cnt++;
 				if (undeleted_cnt == 1) {
 					// 消去フラグがない図形の数が 1 の場合,
-					// 最前面の図形の選択フラグを立てる.
+					// 最背面の図形の選択フラグを立てる.
 					back_selected = true;
 				}
 				if (s_type == typeid(ShapeGroup)) {
-					// 図形の動的な型がグループ図形の場合,
+					// 図形の型がグループ図形の場合,
 					// 選択されたグループ図形の数をインクリメントする.
 					selected_group_cnt++;
 				}
 				else if (s_type == typeid(ShapeText)) {
-					// 図形の動的な型が文字列図形の場合,
+					// 図形の型が文字列図形の場合,
 					// 選択された文字列図形の数をインクリメントする.
 					selected_text_cnt++;
 				}
-				if (/*prev_shape == nullptr ||*/ prev_selected == false) {
+				if (prev_selected == false) {
 					// ひとつ背面の図形がヌル
 					// またはひとつ背面の図形の選択フラグがない場合,
 					// 選択された図形のランレングスの数をインクリメントする.
 					runlength_cnt++;
 				}
 			}
-			//prev_shape = s;
 			prev_selected = fore_selected;
 		}
 		// 消去されていない図形がひとつ以上ある場合.
@@ -283,7 +283,6 @@ namespace winrt::GraphPaper::implementation
 		// コンテキストメニューを静的リソースから読み込む.
 		// ポップアップは静的なリソースとして定義して、複数の要素で使用することができる.
 		{
-
 			m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke")));
 			m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill")));
 			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_font")));
@@ -323,7 +322,7 @@ namespace winrt::GraphPaper::implementation
 			m_token_close_requested = SystemNavigationManagerPreview::GetForCurrentView().CloseRequested({ this, &MainPage::navi_close_requested });
 		}
 
-		// アプリケーションが受け入れ可能なフォーマット ID をクリップボードに設定する.
+		// クリップボードに受け入れ可能なフォーマットを設定する.
 		{
 			using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 			using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
@@ -342,12 +341,14 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// クリックの判定時間をシステムから得る.
-		using winrt::Windows::UI::ViewManagement::UISettings;
-		m_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
-		// クリックの判定距離を物理 DPI に合わせる.
-		auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
-		auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-		m_click_dist = 6.0 * raw_dpi / log_dpi;
+		{
+			using winrt::Windows::UI::ViewManagement::UISettings;
+			m_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
+			// クリックの判定距離を物理 DPI に合わせる.
+			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
+			auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
+			m_click_dist = 6.0 * raw_dpi / log_dpi;
+		}
 
 		auto _{ mfi_new_click(nullptr, nullptr) };
 	}
@@ -385,8 +386,6 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		ShapeText::release_available_fonts();
-		m_page_dx.Release();
-		m_sample_dx.Release();
 
 		// 静的リソースから読み込んだコンテキストメニューを破棄する.
 		{
@@ -415,6 +414,12 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
 			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(m_token_close_requested);
 		}
+
+		// 本来なら DirectX をコードビハインドでリリースしたいところだが,
+		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがある.
+		// なので, Trim を呼び出すだけにする.
+		m_page_dx.Trim();
+		m_sample_dx.Trim();
 
 		// アプリケーションを終了する.
 		Application::Current().Exit();
@@ -498,7 +503,7 @@ namespace winrt::GraphPaper::implementation
 			m_page_max.y = m_page_layout.m_page_size.height;
 		}
 		file_recent_add(nullptr);
-		finish_file_read();
+		file_finish_reading();
 	}
 
 }
