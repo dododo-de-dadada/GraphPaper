@@ -514,17 +514,46 @@ static int dcnt = 0;
 		}
 #endif
 		auto const& scp = sender.as<SwapChainPanel>();
-		// ポインターのプロパティーを得る.
-		auto const& p_prop = args.GetCurrentPoint(scp).Properties();
-		const auto p_type = args.GetCurrentPoint(scp).PointerDevice().PointerDeviceType();
 		// ポインターのキャプチャを始める.
 		scp.CapturePointer(args.Pointer());
 		// ポインターのイベント発生時間を得る.
 		auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
-		// ポインターの現在位置を得る.
 		pointer_cur_pos(args);
-		if (m_pointer_state == STATE_TRAN::CLICK) {
+		//if (m_pointer_state == STATE_TRAN::CLICK) {
 			using winrt::Windows::Devices::Input::PointerDeviceType;
+			// ポインターのプロパティーを得る.
+			auto const& p_prop = args.GetCurrentPoint(scp).Properties();
+			switch (args.GetCurrentPoint(scp).PointerDevice().PointerDeviceType()) {
+			case PointerDeviceType::Mouse:
+				if (p_prop.IsRightButtonPressed()) {
+					// プロパティーが右ボタン押下の場合,
+					m_pointer_state = STATE_TRAN::PRESS_R;
+				}
+				else if (p_prop.IsLeftButtonPressed()) {
+					// プロパティーが左ボタン押下の場合,
+			case PointerDeviceType::Pen:
+			case PointerDeviceType::Touch:
+					switch (m_pointer_state) {
+					case STATE_TRAN::CLICK:
+						// ポインターが押された状態がクリックした状態の場合,
+						if (t_stamp - m_pointer_time <= m_click_time) {
+							m_pointer_state = STATE_TRAN::CLICK_2;
+						}
+						else {
+					case STATE_TRAN::BEGIN:
+					default:
+						// ポインターが押された状態がクリックした状態の場合,
+							m_pointer_state = STATE_TRAN::PRESS_L;
+						}
+					}
+				}
+				else {
+			default:
+					m_pointer_state = STATE_TRAN::BEGIN;
+					return;
+				}
+			}
+			/*
 			if (p_type == PointerDeviceType::Pen
 				|| p_type == PointerDeviceType::Touch
 				|| (p_type == PointerDeviceType::Mouse && p_prop.IsLeftButtonPressed())) {
@@ -542,11 +571,30 @@ static int dcnt = 0;
 				m_pointer_state = STATE_TRAN::BEGIN;
 				return;
 			}
-		}
-		else /*if (m_pointer_state == STATE_TRAN::BEGIN)*/ {
+			*/
+		//}
+		//else /*if (m_pointer_state == STATE_TRAN::BEGIN)*/ {
 			// 状態が初期状態の場合, 
 			// スワップチェーンパネルのポインターのプロパティーを得る.
-			using winrt::Windows::Devices::Input::PointerDeviceType;
+		//	using winrt::Windows::Devices::Input::PointerDeviceType;
+		//	switch (args.GetCurrentPoint(scp).PointerDevice().PointerDeviceType()) {
+		//	case PointerDeviceType::Mouse:
+		//		if (p_prop.IsRightButtonPressed()) {
+		//			m_pointer_state = STATE_TRAN::PRESS_R;
+		//			break;
+		//		}
+		//		else if (p_prop.IsLeftButtonPressed()) {
+		//	case PointerDeviceType::Pen:
+		//	case PointerDeviceType::Touch:
+		//			m_pointer_state = STATE_TRAN::PRESS_L;
+		//			break;
+		//		}
+		//	default:
+		//		// それ以外の場合, 状態を初期状態に戻して終了する.
+		//		m_pointer_state = STATE_TRAN::BEGIN;
+		//		return;
+		//	}
+			/*
 			if (p_type == PointerDeviceType::Pen
 				|| p_type == PointerDeviceType::Touch
 				|| (p_type == PointerDeviceType::Mouse && p_prop.IsLeftButtonPressed())) {
@@ -564,7 +612,8 @@ static int dcnt = 0;
 				m_pointer_state = STATE_TRAN::BEGIN;
 				return;
 			}
-		}
+			*/
+		//}
 		//else {
 			// それ以外の場合, 状態を初期状態に戻して終了する.
 		//	m_pointer_state = STATE_TRAN::BEGIN;
@@ -574,10 +623,8 @@ static int dcnt = 0;
 		m_pointer_pressed = m_pointer_cur;
 		if (m_draw_tool != DRAW_TOOL::SELECT) {
 			// 作図ツールが選択ツールでない場合,
-			// 終了する.
 			return;
 		}
-		// ポインターが押された位置を含む図形とその部位をリストから得る.
 		m_pointer_anchor = s_list_hit_test(m_list_shapes, m_pointer_pressed, m_page_dx.m_anch_len, m_pointer_shape);
 		if (m_pointer_anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 			// 図形とその部位を得た場合,
@@ -593,17 +640,14 @@ static int dcnt = 0;
 		m_pointer_shape_summary = nullptr;
 		// キー修飾子をハンドラーの引数から得る.
 		if (args.KeyModifiers() != VirtualKeyModifiers::None) {
-			// キー修飾子が None でない場合, 終了する.
+			// キー修飾子が None でない場合
 			return;
 		}
-		// すべての図形の選択を解除する.
 		if (unselect_all() == false) {
-			// 選択が解除された図形がない場合
+			// 解除された図形がない場合
 			return;
 		}
-		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
-		// ページと図形を表示する.
 		page_draw();
 	}
 
