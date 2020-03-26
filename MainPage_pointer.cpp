@@ -500,7 +500,9 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+static int dcnt = 0;
 	// ポインターのボタンが押された.
+	// キャプチャの有無にかかわらず, 片方のマウスボタンを押した状態で, もう一方のボタンを押しても, それは通知されない.
 	void MainPage::scp_pointer_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 		using winrt::Windows::System::VirtualKeyModifiers;
@@ -514,49 +516,60 @@ namespace winrt::GraphPaper::implementation
 		auto const& scp = sender.as<SwapChainPanel>();
 		// ポインターのプロパティーを得る.
 		auto const& p_prop = args.GetCurrentPoint(scp).Properties();
+		const auto p_type = args.GetCurrentPoint(scp).PointerDevice().PointerDeviceType();
 		// ポインターのキャプチャを始める.
 		scp.CapturePointer(args.Pointer());
 		// ポインターのイベント発生時間を得る.
 		auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
 		// ポインターの現在位置を得る.
 		pointer_cur_pos(args);
-		switch (m_pointer_state) {
-		case STATE_TRAN::CLICK:
-			// 状態がクリックした状態の場合,
-			// イベント発生時間と前回押された時間との時間差を得る.
-			if (t_stamp - m_pointer_time <= m_click_time) {
-				// 時間差が閾値以下の場合
-				if (p_prop.IsLeftButtonPressed()) {
-					// かつプロパティーが左ボタンの押下の場合,
-					// クリック直後に左ボタンを押した状態に遷移する.
+		if (m_pointer_state == STATE_TRAN::CLICK) {
+			using winrt::Windows::Devices::Input::PointerDeviceType;
+			if (p_type == PointerDeviceType::Pen
+				|| p_type == PointerDeviceType::Touch
+				|| (p_type == PointerDeviceType::Mouse && p_prop.IsLeftButtonPressed())) {
+				if (t_stamp - m_pointer_time <= m_click_time) {
 					m_pointer_state = STATE_TRAN::CLICK_2;
-					break;
+				}
+				else {
+					m_pointer_state = STATE_TRAN::PRESS_L;
 				}
 			}
-			// ブレークなし.
-		case STATE_TRAN::BEGIN:
+			else if (p_type == PointerDeviceType::Mouse && p_prop.IsRightButtonPressed()) {
+				m_pointer_state = STATE_TRAN::PRESS_R;
+			}
+			else {
+				m_pointer_state = STATE_TRAN::BEGIN;
+				return;
+			}
+		}
+		else /*if (m_pointer_state == STATE_TRAN::BEGIN)*/ {
 			// 状態が初期状態の場合, 
 			// スワップチェーンパネルのポインターのプロパティーを得る.
-			if (p_prop.IsRightButtonPressed()) {
-				// プロパティーが右ボタンの押下の場合,
-				// 右ボタンが押された状態に遷移する.
-				m_pointer_state = STATE_TRAN::PRESS_R;
-				break;
-			}
-			else if (p_prop.IsLeftButtonPressed()) {
+			using winrt::Windows::Devices::Input::PointerDeviceType;
+			if (p_type == PointerDeviceType::Pen
+				|| p_type == PointerDeviceType::Touch
+				|| (p_type == PointerDeviceType::Mouse && p_prop.IsLeftButtonPressed())) {
 				// プロパティーが左ボタンの押下の場合,
 				// 左ボタンが押された状態に遷移する.
 				m_pointer_state = STATE_TRAN::PRESS_L;
-				break;
 			}
-			// ブレークなし.
-		default:
-			// それ以外の場合, 状態を初期状態に戻して終了する.
-			m_pointer_state = STATE_TRAN::BEGIN;
-			return;
+			else if (p_type == PointerDeviceType::Mouse && p_prop.IsRightButtonPressed()) {
+				// プロパティーが右ボタンの押下の場合,
+				// 右ボタンが押された状態に遷移する.
+				m_pointer_state = STATE_TRAN::PRESS_R;
+			}
+			else {
+				// それ以外の場合, 状態を初期状態に戻して終了する.
+				m_pointer_state = STATE_TRAN::BEGIN;
+				return;
+			}
 		}
-		// イベント発生時間をポインターが押された時間に格納する.
-		// イベント発生位置をポインターが押された位置に格納する.
+		//else {
+			// それ以外の場合, 状態を初期状態に戻して終了する.
+		//	m_pointer_state = STATE_TRAN::BEGIN;
+		//	return;
+		//}
 		m_pointer_time = t_stamp;
 		m_pointer_pressed = m_pointer_cur;
 		if (m_draw_tool != DRAW_TOOL::SELECT) {
@@ -568,12 +581,8 @@ namespace winrt::GraphPaper::implementation
 		m_pointer_anchor = s_list_hit_test(m_list_shapes, m_pointer_pressed, m_page_dx.m_anch_len, m_pointer_shape);
 		if (m_pointer_anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 			// 図形とその部位を得た場合,
-			// 得た値をポインターが押された図形と部位に格納する.
-			// 得た図形を一覧でポインターが押された図形に格納する.
 			m_pointer_shape_summary = m_pointer_shape;
-			// 得た図形を選択する.
 			select_shape(m_pointer_shape, args.KeyModifiers());
-			// 終了する.
 			return;
 		}
 		// ヌルを, ポインターが押された図形と前回ポインターが押された図形, 一覧でポインターが押された図形に格納する.

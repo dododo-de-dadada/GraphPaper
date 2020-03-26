@@ -20,6 +20,7 @@
 
 #include <winrt/Windows.ApplicationModel.Resources.h>
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
+#include <winrt/Windows.Devices.Input.h>
 #include <winrt/Windows.Globalization.Fonts.h>
 #include <winrt/Windows.Storage.AccessCache.h>
 #include <winrt/Windows.Storage.Pickers.h>
