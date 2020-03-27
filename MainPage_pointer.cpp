@@ -500,13 +500,13 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-static int dcnt = 0;
 	// ポインターのボタンが押された.
 	// キャプチャの有無にかかわらず, 片方のマウスボタンを押した状態で, もう一方のボタンを押しても, それは通知されない.
 	void MainPage::scp_pointer_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 		using winrt::Windows::System::VirtualKeyModifiers;
 		using winrt::Windows::UI::Input::PointerPointProperties;
+		using winrt::Windows::Devices::Input::PointerDeviceType;
 
 #if defined(_DEBUG)
 		if (sender != scp_page_panel()) {
@@ -519,106 +519,42 @@ static int dcnt = 0;
 		// ポインターのイベント発生時間を得る.
 		auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
 		pointer_cur_pos(args);
-		//if (m_pointer_state == STATE_TRAN::CLICK) {
-			using winrt::Windows::Devices::Input::PointerDeviceType;
-			// ポインターのプロパティーを得る.
-			auto const& p_prop = args.GetCurrentPoint(scp).Properties();
-			switch (args.GetCurrentPoint(scp).PointerDevice().PointerDeviceType()) {
-			case PointerDeviceType::Mouse:
-				if (p_prop.IsRightButtonPressed()) {
-					// プロパティーが右ボタン押下の場合,
-					m_pointer_state = STATE_TRAN::PRESS_R;
-				}
-				else if (p_prop.IsLeftButtonPressed()) {
-					// プロパティーが左ボタン押下の場合,
-			case PointerDeviceType::Pen:
-			case PointerDeviceType::Touch:
-					switch (m_pointer_state) {
-					case STATE_TRAN::CLICK:
-						// ポインターが押された状態がクリックした状態の場合,
-						if (t_stamp - m_pointer_time <= m_click_time) {
-							m_pointer_state = STATE_TRAN::CLICK_2;
-						}
-						else {
-					case STATE_TRAN::BEGIN:
-					default:
-						// ポインターが押された状態がクリックした状態の場合,
-							m_pointer_state = STATE_TRAN::PRESS_L;
-						}
+		// ポインターのプロパティーを得る.
+		auto const& p_prop = args.GetCurrentPoint(scp).Properties();
+		switch (args.GetCurrentPoint(scp).PointerDevice().PointerDeviceType()) {
+		case PointerDeviceType::Mouse:
+			// ポインターのデバイスタイプがマウスの場合
+			if (p_prop.IsRightButtonPressed()) {
+				// プロパティーが右ボタン押下の場合,
+				m_pointer_state = STATE_TRAN::PRESS_R;
+			}
+			else if (p_prop.IsLeftButtonPressed()) {
+				// プロパティーが左ボタン押下の場合,
+		case PointerDeviceType::Pen:
+		case PointerDeviceType::Touch:
+			// ポインターのデバイスタイプがペンまたはタッチの場合
+				switch (m_pointer_state) {
+				case STATE_TRAN::CLICK:
+					// ポインターが押された状態がクリックした状態の場合,
+					if (t_stamp - m_pointer_time <= m_click_time) {
+						m_pointer_state = STATE_TRAN::CLICK_2;
+					}
+					else {
+				case STATE_TRAN::BEGIN:
+				default:
+					// ポインターが押された状態がクリックした状態の場合,
+						m_pointer_state = STATE_TRAN::PRESS_L;
 					}
 				}
-				else {
-			default:
-					m_pointer_state = STATE_TRAN::BEGIN;
-					return;
-				}
-			}
-			/*
-			if (p_type == PointerDeviceType::Pen
-				|| p_type == PointerDeviceType::Touch
-				|| (p_type == PointerDeviceType::Mouse && p_prop.IsLeftButtonPressed())) {
-				if (t_stamp - m_pointer_time <= m_click_time) {
-					m_pointer_state = STATE_TRAN::CLICK_2;
-				}
-				else {
-					m_pointer_state = STATE_TRAN::PRESS_L;
-				}
-			}
-			else if (p_type == PointerDeviceType::Mouse && p_prop.IsRightButtonPressed()) {
-				m_pointer_state = STATE_TRAN::PRESS_R;
+				break;
 			}
 			else {
+		default:
+			// ポインターのデバイスタイプがそれ以外の場合
 				m_pointer_state = STATE_TRAN::BEGIN;
 				return;
 			}
-			*/
-		//}
-		//else /*if (m_pointer_state == STATE_TRAN::BEGIN)*/ {
-			// 状態が初期状態の場合, 
-			// スワップチェーンパネルのポインターのプロパティーを得る.
-		//	using winrt::Windows::Devices::Input::PointerDeviceType;
-		//	switch (args.GetCurrentPoint(scp).PointerDevice().PointerDeviceType()) {
-		//	case PointerDeviceType::Mouse:
-		//		if (p_prop.IsRightButtonPressed()) {
-		//			m_pointer_state = STATE_TRAN::PRESS_R;
-		//			break;
-		//		}
-		//		else if (p_prop.IsLeftButtonPressed()) {
-		//	case PointerDeviceType::Pen:
-		//	case PointerDeviceType::Touch:
-		//			m_pointer_state = STATE_TRAN::PRESS_L;
-		//			break;
-		//		}
-		//	default:
-		//		// それ以外の場合, 状態を初期状態に戻して終了する.
-		//		m_pointer_state = STATE_TRAN::BEGIN;
-		//		return;
-		//	}
-			/*
-			if (p_type == PointerDeviceType::Pen
-				|| p_type == PointerDeviceType::Touch
-				|| (p_type == PointerDeviceType::Mouse && p_prop.IsLeftButtonPressed())) {
-				// プロパティーが左ボタンの押下の場合,
-				// 左ボタンが押された状態に遷移する.
-				m_pointer_state = STATE_TRAN::PRESS_L;
-			}
-			else if (p_type == PointerDeviceType::Mouse && p_prop.IsRightButtonPressed()) {
-				// プロパティーが右ボタンの押下の場合,
-				// 右ボタンが押された状態に遷移する.
-				m_pointer_state = STATE_TRAN::PRESS_R;
-			}
-			else {
-				// それ以外の場合, 状態を初期状態に戻して終了する.
-				m_pointer_state = STATE_TRAN::BEGIN;
-				return;
-			}
-			*/
-		//}
-		//else {
-			// それ以外の場合, 状態を初期状態に戻して終了する.
-		//	m_pointer_state = STATE_TRAN::BEGIN;
-		//	return;
-		//}
+		}
 		m_pointer_time = t_stamp;
 		m_pointer_pressed = m_pointer_cur;
 		if (m_draw_tool != DRAW_TOOL::SELECT) {
