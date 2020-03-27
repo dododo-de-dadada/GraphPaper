@@ -407,9 +407,7 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		// ポインターの現在位置を得る.
 		pointer_cur_pos(args);
-		// ポインターの位置をステータスバーに格納する.
 		status_bar_set_curs();
 		if (m_pointer_state == STATE_TRAN::BEGIN) {
 			// 状態が初期状態の場合,
@@ -429,7 +427,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_AREA) {
 			// 状態が範囲選択している状態の場合,
-			// ページと図形を表示する.
 			page_draw();
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_MOVE) {

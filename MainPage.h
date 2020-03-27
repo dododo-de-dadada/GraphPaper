@@ -842,7 +842,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列検索パネルから値を格納する.
 		void text_find_set(void);
 		//　	図形リストの中から文字列を検索する.
-		bool text_find_whithin_shapes(void);
+		bool text_find_within(void);
 		//　検索の値をデータリーダーに書き込む.
 		void text_find_write(DataWriter const& dt_writer);
 		//　編集メニューの「文字列の検索/置換」が選択された.
