@@ -14,11 +14,12 @@ namespace winrt::GraphPaper::implementation
 
 	// 文字列を検索して見つかった位置を得る.
 	static bool text_find(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept;
-	// 図形リストの中から文字列を検索し, 見つかった図形と位置を得る.
-	static bool text_find_within_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool f_case, ShapeText*& t, uint32_t& pos) noexcept;
-	static bool text_find_within_shapes(S_LIST_T const& s_list, Shape* beg, Shape* end, wchar_t* f_text, uint32_t f_len, bool f_case, ShapeText*& t, uint32_t& pos) noexcept;
+	// 図形リストの中から文字列を検索し, それまで文字範囲が選択されていた図形, 新たに文字列が見つかった図形とその文字範囲を得る.
+	static bool text_find(S_LIST_T& s_list, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s, DWRITE_TEXT_RANGE& s_range);
 	// 文字列の一部を置換する.
 	static wchar_t* text_replace(wchar_t const* w_text, const uint32_t w_pos, const uint32_t w_len, wchar_t const* r_text, const uint32_t r_len) noexcept;
+	// 文字範囲が選択された図形と文字範囲を見つける.
+	static ShapeText* text_find_range_selected(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, DWRITE_TEXT_RANGE& t_range);
 
 	// 文字列を検索して見つかった位置を得る.
 	// w_text	検索される文字列
@@ -61,85 +62,162 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 図形リストの中から文字列を検索し, 見つかった図形と位置を得る.
-	// it_beg	範囲の最初の反復子
-	// it_end	範囲の最後の次の反復子
-	// f_text	検索する文字列
-	// f_len	検索する文字列の文字数
+	// 図形リストの中から文字列を検索し, それまで文字範囲が選択されていた図形, 新たに文字列が見つかった図形とその文字範囲を得る.
+	// s_list	図形リスト
+	// f_text	検索文字列
+	// f_len	検索文字列の文字数
 	// f_case	英文字の区別フラグ
-	// t	見つかった文字列図形
-	// pos	見つかった位置
-	// 戻り値	見つかったら true
-	static bool text_find_within_shapes(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, wchar_t* f_text, uint32_t f_len, bool f_case, ShapeText*& t, uint32_t& pos) noexcept
+	// f_wrap	回り込み検索フラグ
+	// t	それまで文字範囲が選択されていた図形
+	// s_found	新たに文字列が見つかった図形
+	// s_range	新たに文字列が見つかった図形の文字範囲
+	static bool text_find(S_LIST_T& s_list, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s_found, DWRITE_TEXT_RANGE& s_range)
 	{
-		for (auto it = it_beg; it != it_end; it++) {
-			auto s = *it;
-			if (s->is_deleted()) {
-				// 消去フラグが立っている場合,
-				// 継続する.
-				continue;
-			}
-			if (typeid(*s) == typeid(ShapeGroup)) {
-				auto list_grouped = static_cast<ShapeGroup*>(s)->m_list_grouped;
-				if (text_find_within_shapes(list_grouped.begin(), list_grouped.end(), f_text, f_len, f_case, t, pos)) {
+		const auto f_len = wchar_len(f_text);
+		if (f_len == 0) {
+			return false;
+		}
+		std::list<S_LIST_T::iterator> stack;
+		stack.push_back(s_list.begin());
+		stack.push_back(s_list.end());
+		t = static_cast<ShapeText*>(nullptr);
+		uint32_t t_pos = 0;
+		while (stack.empty() == false) {
+			auto j = stack.back();
+			stack.pop_back();
+			auto i = stack.back();
+			stack.pop_back();
+			while (i != j) {
+				auto s = *i++;
+				if (s == nullptr || s->is_deleted()) {
+					continue;
+				}
+				if (typeid(*s) == typeid(ShapeGroup)) {
+					stack.push_back(i);
+					stack.push_back(j);
+					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
+					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
+					continue;
+				}
+				DWRITE_TEXT_RANGE t_range;
+				if (s->get_text_range(t_range) == false) {
+					continue;
+				}
+				if (t == nullptr) {
+					if (t_range.length == 0 && t_range.startPosition == 0) {
+						continue;
+					}
+					// 文字範囲が選択された図形の, 文字範囲より後ろの文字列を検索する.
+					t = static_cast<ShapeText*>(s);
+					t_pos = t_range.startPosition;
+					const auto t_end = t_pos + t_range.length;
+					uint32_t f_pos;
+					if (text_find(t->m_text + t_end, wchar_len(t->m_text) - t_end, f_text, f_len, f_case, f_pos)) {
+						// 文字範囲より後ろの文字列の中で見つかった場合
+						s_found = s;
+						s_range.startPosition = t_end + f_pos;
+						s_range.length = f_len;
+						return true;
+					}
+					continue;
+				}
+				uint32_t f_pos;
+				const auto t_text = static_cast<ShapeText*>(s)->m_text;
+				if (text_find(t_text, wchar_len(t_text), f_text, f_len, f_case, f_pos)) {
+					s_found = s;
+					s_range.startPosition = f_pos;
+					s_range.length = f_len;
 					return true;
 				}
-				continue;
 			}
-			// 文字列を得る.
-			wchar_t* w;
-			if (s->get_text(w) == false) {
-				// 得られない場合,
-				// 継続する.
-				continue;
-			}
-			// 文字列を検索して見つかった位置を得る.
-			if (text_find(w, wchar_len(w), f_text, f_len, f_case, pos)) {
-				// 見つかった場合,
-				// 見つかった図形に格納する.
-				// true を返す.
-				t = static_cast<ShapeText*>(s);
-				return true;
+		}
+		if (f_wrap == false && t != nullptr) {
+			// 回り込み検索がない, かつ文字範囲が選択された図形が見つかった場合,
+			return false;
+		}
+		stack.push_back(s_list.begin());
+		stack.push_back(s_list.end());
+		while (stack.empty() == false) {
+			auto j = stack.back();
+			stack.pop_back();
+			auto i = stack.back();
+			stack.pop_back();
+			while (i != j) {
+				auto s = *i++;
+				if (s == nullptr || s->is_deleted()) {
+					continue;
+				}
+				if (typeid(*s) == typeid(ShapeGroup)) {
+					stack.push_back(i);
+					stack.push_back(j);
+					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
+					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
+					continue;
+				}
+				if (typeid(*s) != typeid(ShapeText)) {
+					continue;
+				}
+				if (s == t) {
+					uint32_t f_pos;
+					const auto t_text = static_cast<ShapeText*>(s)->m_text;
+					if (t_pos != 0 && text_find(t_text, t_pos, f_text, f_len, f_case, f_pos)) {
+						s_found = s;
+						s_range.startPosition = f_pos;
+						s_range.length = f_len;
+						return true;
+					}
+					return false;
+				}
+				uint32_t f_pos;
+				const auto t_text = static_cast<ShapeText*>(s)->m_text;
+				if (text_find(t_text, wchar_len(t_text), f_text, f_len, f_case, f_pos)) {
+					s_found = s;
+					s_range.startPosition = f_pos;
+					s_range.length = f_len;
+					return true;
+				}
 			}
 		}
 		return false;
 	}
-	static bool text_find_within_shapes(S_LIST_T const& s_list,  Shape* beg, Shape* end, wchar_t* f_text, uint32_t f_len, bool f_case, ShapeText*& t, uint32_t& pos) noexcept
+
+	// 文字範囲が選択された図形と文字範囲を見つける.
+	// t_range	見つかった文字範囲
+	// 戻り値	見つかった図形
+	static ShapeText* text_find_range_selected(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, DWRITE_TEXT_RANGE& t_range)
 	{
-		int st = 0;
-		for (auto s : s_list) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			if (st == 0) {
-				if (s != beg) {
+		std::list<S_LIST_T::iterator> stack;
+		stack.push_back(it_beg);
+		stack.push_back(it_end);
+		while (stack.empty() == false) {
+			auto j = stack.back();
+			stack.pop_back();
+			auto i = stack.back();
+			stack.pop_back();
+			while (i != j) {
+				auto k = i;
+				auto s = *i++;
+				if (s->is_deleted()) {
 					continue;
 				}
-				st = 1;
-			}
-			if (s == end) {
-				return false;
-			}
-			if (typeid(*s) == typeid(ShapeGroup)) {
-
-			}
-			// 文字列を得る.
-			wchar_t* w;
-			if (s->get_text(w) == false) {
-				// 得られない場合,
-				// 継続する.
-				continue;
-			}
-			// 文字列を検索して見つかった位置を得る.
-			if (text_find(w, wchar_len(w), f_text, f_len, f_case, pos)) {
-				// 見つかった場合,
-				// 見つかった図形に格納する.
-				// true を返す.
-				t = static_cast<ShapeText*>(s);
-				return true;
+				if (typeid(*s) == typeid(ShapeGroup)) {
+					stack.push_back(i);
+					stack.push_back(j);
+					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
+					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
+					continue;
+				}
+				if (s->get_text_range(t_range) == false) {
+					continue;
+				}
+				if (t_range.startPosition > 0 || t_range.length > 0) {
+					return static_cast<ShapeText*>(s);
+				}
 			}
 		}
+		return static_cast<ShapeText*>(nullptr);
 	}
+
 	// 文字列の一部を置換する.
 	// w_text	置換される前の文字列
 	// f_pos	置換される文字列の開始位置
@@ -178,7 +256,6 @@ namespace winrt::GraphPaper::implementation
 	// 文字列検索パネルの「閉じる」ボタンが押された.
 	void MainPage::btn_text_find_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 文字列検索パネルから値を格納する.
 		text_find_set();
 		sp_text_find().Visibility(COLLAPSED);
 	}
@@ -186,10 +263,16 @@ namespace winrt::GraphPaper::implementation
 	// 文字列検索パネルの「次を検索」ボタンが押された.
 	void MainPage::btn_text_find_next_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 図形リストの中から文字列を検索する.
-		if (text_find_within()) {
-			// 検索できた場合,
-			// ページと図形を表示する.
+		text_find_set();
+		ShapeText* t;
+		Shape* s;
+		DWRITE_TEXT_RANGE s_range;
+		if (text_find(m_list_shapes, m_text_find, m_text_find_case, m_text_find_wrap, t, s, s_range)) {
+			if (t != nullptr && s != t) {
+				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+			}
+			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
+			scroll_to(s);
 			page_draw();
 			return;
 		}
@@ -201,30 +284,34 @@ namespace winrt::GraphPaper::implementation
 	// 文字列検索パネルの「すべて置換」ボタンが押された.
 	void MainPage::btn_text_replace_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 文字列検索パネルから値を格納する.
 		text_find_set();
-
 		// 検索文字列の文字数を得る.
 		const auto f_len = wchar_len(m_text_find);
 		if (f_len == 0) {
 			// 文字数が 0 の場合,
-			// 終了する.
 			return;
 		}
 
 		// あらかじめ検索文字列を含む文字列図形があるか調べる.
 		auto flag = false;
-		std::list<S_LIST_T*> stack;
-		stack.push_back(&m_list_shapes);
+		std::list <S_LIST_T::iterator> stack;
+		stack.push_back(m_list_shapes.begin());
+		stack.push_back(m_list_shapes.end());
 		while (stack.empty() == false) {
-			auto s_list = stack.back();
+			auto j = stack.back();
 			stack.pop_back();
-			for (auto s : *s_list) {
+			auto i = stack.back();
+			stack.pop_back();
+			while (i != j) {
+				auto s = *i++;
 				if (s->is_deleted()) {
 					continue;
 				}
 				if (typeid(*s) == typeid(ShapeGroup)) {
-					stack.push_back(&static_cast<ShapeGroup*>(s)->m_list_grouped);
+					stack.push_back(i);
+					stack.push_back(j);
+					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
+					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
 					continue;
 				}
 				wchar_t* w_text;
@@ -249,16 +336,23 @@ namespace winrt::GraphPaper::implementation
 		unselect_all(true);
 
 		const auto r_len = wchar_len(m_text_repl);
-		stack.push_back(&m_list_shapes);
+		stack.push_back(m_list_shapes.begin());
+		stack.push_back(m_list_shapes.end());
 		while (stack.empty() == false) {
-			auto s_list = stack.back();
+			auto j = stack.back();
 			stack.pop_back();
-			for (auto s : *s_list) {
+			auto i = stack.back();
+			stack.pop_back();
+			while (i != j) {
+				auto s = *i++;
 				if (s->is_deleted()) {
 					continue;
 				}
 				if (typeid(*s) != typeid(ShapeGroup)) {
-					stack.push_back(&static_cast<ShapeGroup*>(s)->m_list_grouped);
+					stack.push_back(i);
+					stack.push_back(j);
+					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
+					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
 					continue;
 				}
 				if (typeid(*s) != typeid(ShapeText)) {
@@ -284,14 +378,12 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		page_draw();
 	}
 
-	// 文字列検索パネルの「置換」ボタンが押された.
+	// 文字列検索パネルの「置換して次に」ボタンが押された.
 	void MainPage::btn_text_replace_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		text_find_set();
@@ -300,14 +392,11 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		// 文字範囲が選択された図形を見つける.
-		DWRITE_TEXT_RANGE t_range;
-		auto it = text_find_range_selected(t_range);
-
 		bool flag = false;	// 一致または置換フラグ.
-		if (it != m_list_shapes.end()) {
+		DWRITE_TEXT_RANGE t_range;
+		auto t = text_find_range_selected(m_list_shapes.begin(), m_list_shapes.end(), t_range);
+		if (t != nullptr) {
 			// 図形が見つかった場合,
-			auto t = static_cast<ShapeText*>(*it);
 			const auto w_pos = t_range.startPosition;
 			if (m_text_find_case) {
 				// 英文字の区別フラグが立っている場合,
@@ -318,28 +407,33 @@ namespace winrt::GraphPaper::implementation
 				flag = _wcsnicmp(t->m_text + w_pos, m_text_find, f_len) == 0;
 			}
 			if (flag) {
-				// 一致した場合,
-				// 置換文字列と置換する.
+				// 一致した場合
 				const auto r_len = wchar_len(m_text_repl);
 				const auto r_text = text_replace(t->m_text, w_pos, f_len, m_text_repl, r_len);
 				undo_push_set<UNDO_OP::TEXT_CONTENT>(t, r_text);
-				// 文字範囲の値を図形に格納して, その操作をスタックに積む.
 				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
-				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
-				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 				enable_undo_menu();
 			}
 		}
-		// 次の図形の文字列を検索する.
-		if (text_find_within() || flag) {
-			// 見つかった, または置換された場合
-			enable_undo_menu();
+		// 次を検索する.
+		Shape* s;
+		DWRITE_TEXT_RANGE s_range;
+		if (text_find(m_list_shapes, m_text_find, m_text_find_case, m_text_find_wrap, t, s, s_range)) {
+			// 検索できた場合,
+			if (t != nullptr && s != t) {
+				// 文字範囲が選択された図形があり, それが次の図形と異なる場合,
+				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+			}
+			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
+			scroll_to(s);
+			flag = true;
+		}
+		if (flag) {
 			page_draw();
 			return;
 		}
 		// 検索できない, かつ置換もされてない場合,
-		// 「文字列は見つかりません」メッセージダイアログを表示する.
 		cd_message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
 	}
 
@@ -347,10 +441,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::mfi_text_edit_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		ShapeText* s = nullptr;
-
 		if (m_pointer_shape_prev != nullptr && typeid(*m_pointer_shape_prev) == typeid(ShapeText)) {
 			// 前回ポインターが押されたのが文字列図形の場合,
-			// その図形を得る.
 			s = static_cast<ShapeText*>(m_pointer_shape_prev);
 		}
 		else {
@@ -370,7 +462,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (s != nullptr) {
-			text_edit_in(s);
+			text_edit_shape(s);
 		}
 
 	}
@@ -400,7 +492,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が持つ文字列を編集する.
 	// s	文字列図形
-	void MainPage::text_edit_in(ShapeText* s)
+	void MainPage::text_edit_shape(ShapeText* s)
 	{
 		static winrt::event_token primary_token;
 		static winrt::event_token closed_token;
@@ -432,33 +524,6 @@ namespace winrt::GraphPaper::implementation
 		auto _{ cd_edit_text().ShowAsync() };
 	}
 
-	// 文字範囲が選択された図形と文字範囲を見つける.
-	// t_range	見つかった文字範囲
-	// 戻り値	見つかった図形の反復子
-	S_LIST_T::iterator MainPage::text_find_range_selected(DWRITE_TEXT_RANGE& t_range)
-	{
-		std::list<S_LIST_T*> stack;
-		stack.push_back(&m_list_shapes);
-		while (stack.empty() == false) {
-			auto s_list = stack.back();
-			stack.pop_back();
-			auto const& it_end = s_list->end();
-			for (auto it = s_list->begin(); it != it_end; it++) {
-				auto s = *it;
-				if (s->is_deleted()) {
-					continue;
-				}
-				if (s->get_text_range(t_range) == false) {
-					continue;
-				}
-				if (t_range.startPosition > 0 || t_range.length > 0) {
-					return it;
-				}
-			}
-		}
-		return m_list_shapes.end();
-	}
-
 	// 検索の値をデータリーダーから読み込む.
 	void MainPage::text_find_read(DataReader const& dt_reader)
 	{
@@ -481,87 +546,6 @@ namespace winrt::GraphPaper::implementation
 		m_text_repl = wchar_cpy(tx_text_replace_with().Text().c_str());
 		m_text_find_case = ck_text_find_case().IsChecked().GetBoolean();
 		m_text_find_wrap = ck_text_find_wrap().IsChecked().GetBoolean();
-	}
-
-	// 図形リストの中から文字列を検索する.
-	bool MainPage::text_find_within(void)
-	{
-		using winrt::GraphPaper::implementation::text_find;
-		using winrt::GraphPaper::implementation::text_find_within_shapes;
-
-		// 文字列検索パネルから値を格納する.
-		text_find_set();
-		// 検索文字列の文字数を得る.
-		const auto f_len = wchar_len(m_text_find);
-		if (f_len == 0) {
-			return false;
-		}
-		// 文字範囲が選択された図形と文字範囲を見つける.
-		DWRITE_TEXT_RANGE t_range;
-		auto it = text_find_range_selected(t_range);
-
-		auto t = static_cast<ShapeText*>(nullptr);
-		auto it_end = m_list_shapes.end();
-		uint32_t f_pos = 0;	// 見つかった位置
-		if (it == it_end) {
-			// 選択された図形が見つからない場合,
-			// リストの最初の図形から最後まで検索する.
-			auto it_begin = m_list_shapes.begin();
-			if (text_find_within_shapes(it_begin, it_end, m_text_find, f_len, m_text_find_case, t, f_pos) == false) {
-				// 見つからない場合 false を返す.
-				return false;
-			}
-		}
-		else {
-			// 選択された図形を見つけた場合,
-			t = static_cast<ShapeText*>(*it);
-			const auto t_text = t->m_text;
-			const auto t_pos = t_range.startPosition;
-			const auto t_end = t_pos + t_range.length;
-
-			// 範囲選択された図形の, 文字範囲より後ろの文字列を検索する.
-			if (text_find(t_text + t_end, wchar_len(t_text) - t_end, m_text_find, f_len, m_text_find_case, f_pos) == false) {
-				// 新たに見つからない場合,
-				// 範囲選択された図形の次から最後まで検索する.
-				auto it_next = std::next(it, 1);
-				if (text_find_within_shapes(it_next, it_end, m_text_find, f_len, m_text_find_case, t, f_pos) == false) {
-					if (m_text_find_wrap == false) {
-						// 新たに見つからない, かつ回り込み検索でない場合,
-						// false を返す.
-						return false;
-					}
-					// 新たに見つからない, かつ回り込み検索の場合,
-					// リストの最初から文字範囲が選択された図形の直前まで検索する.
-					auto it_begin = m_list_shapes.begin();
-					if (text_find_within_shapes(it_begin, it, m_text_find, f_len, m_text_find_case, t, f_pos) == false) {
-						// 新たに見つからない場合,
-						// 文字範囲より前にある文字列を検索する.
-						if (text_find(t_text, t_pos, m_text_find, f_len, m_text_find_case, f_pos) == false) {
-							// 新たに見つからない場合,
-							// false を返す.
-							return false;
-						}
-					}
-				}
-			}
-			else {
-				//  文字範囲が選択された図形の中に文字列を新たに見つけた場合
-				f_pos += t_end;
-			}
-		}
-		if (it != it_end && t != *it) {
-			// 新たに別の図形が見つかった場合,
-			// { 0, 0 } を図形に格納して, その操作をスタックに積む.
-			// (元の図形の文字範囲の選択を消去する.)
-			undo_push_set<UNDO_OP::TEXT_RANGE>(*it, DWRITE_TEXT_RANGE{ 0, 0 });
-		}
-		// 文字範囲を新たに見つけた図形にして, その操作をスタックに積む.
-		// (操作スタックにヌルは積まない.)
-		undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ f_pos, f_len });
-		// 図形が表示されるようページをスクロールする.
-		scroll_to(t);
-		// true を返す.
-		return true;
 	}
 
 	// 検索の値をデータリーダーに書き込む.

@@ -202,6 +202,13 @@ namespace winrt::GraphPaper::implementation
 				// 文字列図形の数をインクリメントする.
 				text_cnt++;
 			}
+			else if (s_type == typeid(ShapeGroup)) {
+				if (static_cast<ShapeGroup*>(s)->has_text()) {
+					// 型が文字列図形の場合,
+					// 文字列図形の数をインクリメントする.
+					text_cnt++;
+				}
+			}
 			// 図形の選択フラグを最前面の図形の選択フラグに格納する.
 			fore_selected = s->is_selected();
 			if (fore_selected) {

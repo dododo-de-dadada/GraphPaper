@@ -91,6 +91,37 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
+	// •¶š—ñ}Œ`‚ğŠÜ‚Ş‚©’²‚×‚é.
+	bool ShapeGroup::has_text(void) noexcept
+	{
+		std::list<S_LIST_T::iterator> stack;
+		stack.push_back(m_list_grouped.begin());
+		stack.push_back(m_list_grouped.end());
+		while (stack.empty() == false) {
+			auto j = stack.back();
+			stack.pop_back();
+			auto i = stack.back();
+			stack.pop_back();
+			while (i != j) {
+				auto s = *i++;
+				if (s == nullptr || s->is_deleted()) {
+					continue;
+				}
+				if (typeid(*s) == typeid(ShapeText)) {
+					return true;
+				}
+				else if (typeid(*s) == typeid(ShapeGroup)) {
+					stack.push_back(i);
+					stack.push_back(j);
+					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
+					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
+					continue;
+				}
+			}
+		}
+		return false;
+	}
+
 	// ˆÊ’u‚ğŠÜ‚Ş‚©’²‚×‚é.
 	// t_pos	’²‚×‚éˆÊ’u
 	// a_len	•”ˆÊ‚Ì‘å‚«‚³

@@ -82,15 +82,15 @@ namespace winrt::GraphPaper::implementation
 			};
 			if (m_sample_type == SAMP_TYPE::FONT) {
 				using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-				const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
-				const wchar_t* w = nullptr;
-				if (text.empty()) {
-					w = L"The quick brown fox jumps over a lazy dog.";
+				const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
+				const wchar_t* text = nullptr;
+				if (pang.empty()) {
+					text = L"The quick brown fox jumps over a lazy dog.";
 				}
 				else {
-					w = text.c_str();
+					text = pang.c_str();
 				}
-				m_sample_shape = new ShapeText(s_pos, d_pos, wchar_cpy(w), &m_sample_layout);
+				m_sample_shape = new ShapeText(s_pos, d_pos, wchar_cpy(text), &m_sample_layout);
 			}
 			else if (m_sample_type == SAMP_TYPE::STROKE) {
 				m_sample_shape = new ShapeLine(s_pos, d_pos, &m_sample_layout);

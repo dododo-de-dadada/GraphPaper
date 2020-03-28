@@ -581,7 +581,6 @@ namespace winrt::GraphPaper::implementation
 			const auto u = *it;
 			if (u == nullptr) {
 				// 操作がヌルの場合,
-				// 中断する.
 				break;
 			}
 			else if (typeid(*u) != typeid(UndoSet<UNDO_OP::TEXT_RANGE>)) {
@@ -595,15 +594,8 @@ namespace winrt::GraphPaper::implementation
 			// 操作が文字範囲の選択する操作の場合,
 			else if (u->m_shape == s) {
 				// 操作する図形が引数の図形と同じ場合,
-				// 操作の変更する前の値を得る.
-				DWRITE_TEXT_RANGE& u_value = static_cast<UndoSet<UNDO_OP::TEXT_RANGE>*>(u)->m_value;
-				if (equal(u_value, value) == false) {
-					// 変更する前の値と引数の値が異なる場合,
-					// 引数の値を操作の値に格納する.
-					u_value = value;
-					// 引数の値を図形の文字範囲に格納する.
-					s->set_text_range(value);
-				}
+				// 図形を直接操作してスタックには積まないようにする.
+				s->set_text_range(value);
 				flag = true;
 				break;
 			}

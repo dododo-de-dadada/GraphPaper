@@ -621,7 +621,7 @@ namespace winrt::GraphPaper::implementation
 				if (m_pointer_shape != nullptr && typeid(*m_pointer_shape) == typeid(ShapeText)) {
 					// 押された図形が文字列図形の場合, 
 					// 文字列編集ダイアログを表示する.
-					text_edit_in(static_cast<ShapeText*>(m_pointer_shape));
+					text_edit_shape(static_cast<ShapeText*>(m_pointer_shape));
 				}
 			}
 		}

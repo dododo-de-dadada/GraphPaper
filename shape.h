@@ -740,6 +740,8 @@ namespace winrt::GraphPaper::implementation
 		void get_min_pos(D2D1_POINT_2F& value) const noexcept;
 		// 始点を得る
 		bool get_start_pos(D2D1_POINT_2F& value) const noexcept;
+		// 文字列図形を含むか調べる.
+		bool has_text(void) noexcept;
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 範囲に含まれるか調べる.
