@@ -39,8 +39,7 @@ namespace winrt::GraphPaper::implementation
 		list_selected.clear();
 		// 書き込んだデータを出力ストリームに格納し, 格納したバイト数を得る.
 		auto n_byte{ co_await dt_writer.StoreAsync() };
-		// 図形リストから文字列を得る.
-		auto text = s_list_text(m_list_shapes);
+		auto text = s_list_text_selected_all(m_list_shapes);
 		// スレッドをメインページの UI スレッドに変える.
 		auto cd = this->Dispatcher();
 		co_await winrt::resume_foreground(cd);
@@ -63,7 +62,6 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.Close();
 		// 出力ストリームを閉じる.
 		out_stream.Close();
-		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		// スレッドコンテキストを復元する.
 		co_await context;

@@ -254,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_page_layout.m_grid_snap) {
 			D2D1_POINT_2F p_min = {};
-			bool flag = true;
+			bool flag = false;
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {
 					continue;
@@ -262,8 +262,8 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_selected() == false) {
 					continue;
 				}
-				if (flag == true) {
-					flag = false;
+				if (flag == false) {
+					flag = true;
 					s->get_min_pos(p_min);
 					continue;
 				}
@@ -271,7 +271,7 @@ namespace winrt::GraphPaper::implementation
 				s->get_min_pos(nw_pos);
 				pt_min(nw_pos, p_min, p_min);
 			}
-			if (flag == false) {
+			if (flag) {
 				// 得た左上点を方眼の大きさで丸める.
 				// 丸めの前後で生じた差を得る.
 				D2D1_POINT_2F g_pos;
@@ -411,7 +411,6 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_curs();
 		if (m_pointer_state == STATE_TRAN::BEGIN) {
 			// 状態が初期状態の場合,
-			// 状況に応じた形状のカーソルを設定する.
 			pointer_set();
 		}
 		else if (m_pointer_state == STATE_TRAN::CLICK) {
@@ -426,19 +425,17 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_AREA) {
-			// 状態が範囲選択している状態の場合,
+			// 状態が範囲を選択している状態の場合,
 			page_draw();
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_MOVE) {
 			// 状態が図形を移動している状態の場合,
 			// ポインターの現在位置と前回位置の差分を得る.
-			// 選択フラグの立つすべての図形を差分だけ移動する.
 			D2D1_POINT_2F d_pos;
 			pt_sub(m_pointer_cur, m_pointer_pre, d_pos);
 			s_list_move(m_list_shapes, d_pos);
 			// ポインターの現在位置を前回位置に格納する.
 			m_pointer_pre = m_pointer_cur;
-			// ページと図形を表示する.
 			page_draw();
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_FORM) {
@@ -447,7 +444,6 @@ namespace winrt::GraphPaper::implementation
 			m_pointer_shape->set_pos(m_pointer_cur, m_pointer_anchor);
 			// ポインターの現在位置を前回位置に格納する.
 			m_pointer_pre = m_pointer_cur;
-			// ページと図形を表示する.
 			page_draw();
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_L
@@ -482,14 +478,14 @@ namespace winrt::GraphPaper::implementation
 					m_pointer_state = STATE_TRAN::PRESS_MOVE;
 					// ポインターの現在位置を前回位置に格納する.
 					m_pointer_pre = m_pointer_cur;
-					// 図形の位置をスタックに積み, 差分だけ移動する.
 					undo_push_move(d_pos);
 				}
 				else if (m_pointer_anchor != ANCH_WHICH::ANCH_OUTSIDE) {
+					// 押された図形の部位が図形の外部でない場合,
+					// 図形を変形している状態に遷移する.
 					m_pointer_state = STATE_TRAN::PRESS_FORM;
 					// ポインターの現在位置を前回位置に格納する.
 					m_pointer_pre = m_pointer_cur;
-					// 図形の変形前の位置をスタックに保存して, 図形を変形する.
 					undo_push_form(m_pointer_shape, m_pointer_anchor, m_pointer_cur);
 				}
 				page_draw();
@@ -596,8 +592,6 @@ namespace winrt::GraphPaper::implementation
 		auto const& scp = sender.as<SwapChainPanel>();
 		// ポインターの追跡を停止する.
 		scp.ReleasePointerCaptures();
-		// スワップチェーンパネル上でのポインターの位置を得て, ページ座標に変換し,
-		// ポインターの現在位置に格納する.
 		pointer_cur_pos(args);
 		if (m_pointer_state == STATE_TRAN::PRESS_L) {
 			// 左ボタンが押された状態の場合,
@@ -606,7 +600,6 @@ namespace winrt::GraphPaper::implementation
 			if (t_stamp - m_pointer_time <= m_click_time) {
 				// 差分がクリックの判定時間以下の場合,
 				// クリックした状態に遷移する.
-				// 状況に応じた形状のカーソルを設定する.
 				m_pointer_state = STATE_TRAN::CLICK;
 				pointer_set();
 				return;
@@ -620,7 +613,6 @@ namespace winrt::GraphPaper::implementation
 				// 差分がクリックの判定時間以下で
 				if (m_pointer_shape != nullptr && typeid(*m_pointer_shape) == typeid(ShapeText)) {
 					// 押された図形が文字列図形の場合, 
-					// 文字列編集ダイアログを表示する.
 					text_edit_shape(static_cast<ShapeText*>(m_pointer_shape));
 				}
 			}
@@ -639,7 +631,6 @@ namespace winrt::GraphPaper::implementation
 			// 状態が範囲選択している状態の場合,
 			if (m_draw_tool == DRAW_TOOL::SELECT) {
 				// 作図ツールが選択ツールの場合,
-				// 範囲選択を終了する.
 				pointer_finish_selecting_area(args.KeyModifiers());
 			}
 			else {

@@ -173,6 +173,23 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 図形全体の領域をリストから得る.
+	// s_list	図形リスト
+	// p_size	ページの寸法
+	// b_min	領域の左上位置
+	// b_max	領域の右下位置
+	void s_list_bound(S_LIST_T const& s_list, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	{
+		b_min = { FLT_MAX, FLT_MAX };	// 左上位置
+		b_max = { -FLT_MAX, -FLT_MAX };	// 右下位置
+		for (auto s : s_list) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			s->get_bound(b_min, b_max);
+		}
+	}
+
 	// 図形リストの中から, 位置を含む図形とその部位を調べる.
 	// s_list	図形リスト
 	// t_pos	調べる位置
@@ -430,8 +447,8 @@ namespace winrt::GraphPaper::implementation
 	template void s_list_write<!REDUCE>(S_LIST_T const& s_list, DataWriter const& dt_writer);
 	template void s_list_write<REDUCE>(S_LIST_T const& s_list, DataWriter const& dt_writer);
 
-	// 図形リストから文字列を得る.
-	winrt::hstring s_list_text(S_LIST_T const& s_list) noexcept
+	// 選択された図形から, それらを全て合わせた文字列を得る.
+	winrt::hstring s_list_text_selected_all(S_LIST_T const& s_list) noexcept
 	{
 		winrt::hstring text;
 		for (auto s : s_list) {

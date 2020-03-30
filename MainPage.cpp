@@ -242,37 +242,37 @@ namespace winrt::GraphPaper::implementation
 		// 消去されていない図形がひとつ以上ある場合.
 		const auto exists_undeleted = (undeleted_cnt > 0);
 		// 選択された図形がひとつ以上ある場合.
-		const auto exsits_selected = (selected_cnt > 0);
+		const auto exists_selected = (selected_cnt > 0);
 		// 選択された文字列図形がひとつ以上ある場合.
-		const auto exsits_selected_text = (selected_text_cnt > 0);
+		const auto exists_selected_text = (selected_text_cnt > 0);
 		// 文字列図形がひとつ以上ある場合.
-		const auto exsits_text = (text_cnt > 0);
+		const auto exists_text = (text_cnt > 0);
 		// 選択されてない図形がひとつ以上ある場合.
-		const auto exits_unselected = (selected_cnt < undeleted_cnt);
+		const auto exists_unselected = (selected_cnt < undeleted_cnt);
 		// 選択された図形がふたつ以上ある場合.
-		const auto exsits_selected_2 = (selected_cnt > 1);
+		const auto exists_selected_2 = (selected_cnt > 1);
 		// 選択されたグループ図形がひとつ以上ある場合.
-		const auto exsits_selected_group = (selected_group_cnt > 0);
+		const auto exists_selected_group = (selected_group_cnt > 0);
 		// 前面に配置可能か調べる.
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最前面の図形は選択されいない.
-		const auto enable_forward = (runlength_cnt > 1 || (exsits_selected && fore_selected == false));
+		const auto enable_forward = (runlength_cnt > 1 || (exists_selected && fore_selected == false));
 		// 背面に配置可能か調べる.
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最背面の図形は選択されいない.
-		const auto enable_backward = (runlength_cnt > 1 || (exsits_selected && back_selected == false));
+		const auto enable_backward = (runlength_cnt > 1 || (exists_selected && back_selected == false));
 
-		mfi_xcvd_cut().IsEnabled(exsits_selected);
-		mfi_xcvd_copy().IsEnabled(exsits_selected);
+		mfi_xcvd_cut().IsEnabled(exists_selected);
+		mfi_xcvd_copy().IsEnabled(exists_selected);
 		mfi_xcvd_paste().IsEnabled(xcvd_contains({ CF_GPD, StandardDataFormats::Text() }));
-		mfi_xcvd_delete().IsEnabled(exsits_selected);
-		mfi_select_all().IsEnabled(exits_unselected);
-		mfi_group().IsEnabled(exsits_selected_2);
-		mfi_ungroup().IsEnabled(exsits_selected_group);
-		mfi_text_edit().IsEnabled(exsits_selected_text);
-		mfi_text_find().IsEnabled(exsits_text);
+		mfi_xcvd_delete().IsEnabled(exists_selected);
+		mfi_select_all().IsEnabled(exists_unselected);
+		mfi_group().IsEnabled(exists_selected_2);
+		mfi_ungroup().IsEnabled(exists_selected_group);
+		mfi_text_edit().IsEnabled(exists_selected_text);
+		mfi_text_find().IsEnabled(exists_text);
 		mfi_bring_forward().IsEnabled(enable_forward);
 		mfi_bring_to_front().IsEnabled(enable_forward);
 		mfi_send_to_back().IsEnabled(enable_backward);

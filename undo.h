@@ -247,6 +247,7 @@ namespace winrt::GraphPaper::implementation
 		// 変更される前の値
 		U_TYPE<U>::type m_value;
 
+		~UndoSet() {};
 		// 操作を実行すると値が変わるか調べる.
 		bool changed(void) const noexcept;
 		// 操作を実行する.
@@ -264,5 +265,11 @@ namespace winrt::GraphPaper::implementation
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};
-
+	template <> UndoSet<UNDO_OP::TEXT_CONTENT>::~UndoSet() 
+	{
+		if (m_value != nullptr) {
+			delete[] m_value;
+			m_value = nullptr;
+		}
+	}
 }

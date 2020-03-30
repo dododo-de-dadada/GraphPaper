@@ -282,10 +282,10 @@ namespace winrt::GraphPaper::implementation
 		if (m_page_layout.m_grid_snap == false) {
 			return;
 		}
-		const double g_len = m_page_layout.m_grid_base + 1.0;
-		auto flag = true;	// 未変更
 
 		// 図形リストの各図形について以下を繰り返す.
+		const double g_len = m_page_layout.m_grid_base + 1.0;
+		auto flag = false;
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				// 消去フラグが立っている場合,
@@ -294,7 +294,6 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (s->is_selected() == false) {
 				// 選択フラグがない場合,
-				// 以下を無視する.
 				continue;
 			}
 			D2D1_POINT_2F s_pos;
@@ -303,23 +302,20 @@ namespace winrt::GraphPaper::implementation
 			pt_round(s_pos, g_len, g_pos);
 			if (equal(g_pos, s_pos)) {
 				// 開始位置と丸めた位置が同じ場合,
-				// 以下を無視する.
 				continue;
 			}
-			if (flag == true) {
-				flag = false;
+			if (flag == false) {
+				flag = true;
 			}
 			undo_push_set<UNDO_OP::START_POS>(s);
 			D2D1_POINT_2F d_pos;
 			pt_sub(g_pos, s_pos, d_pos);
 			s->move(d_pos);
 		}
-		if (flag == true) {
+		if (flag == false) {
 			return;
 		}
-		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		enable_undo_menu();
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();

@@ -911,11 +911,11 @@ namespace winrt::GraphPaper::implementation
 		void undo_push_append(ShapeGroup* g, Shape* s);
 		// 図形を入れ替えて, その操作をスタックに積む.
 		void undo_push_arrange(Shape* s, Shape* t);
-		// 図形の部位の位置を変更して, 変更前の値をスタックに積む.
+		// 図形の頂点や制御点の位置をスタックに保存してから変更する.
 		void undo_push_form(Shape*, const ANCH_WHICH a, const D2D1_POINT_2F a_pos);
 		// 図形を挿入して, その操作をスタックに積む.
 		void undo_push_insert(Shape* s, Shape* s_pos);
-		// 図形を差分だけ移動して, 移動前の値をスタックに積む.
+		// 図形の位置をスタックに保存してから差分だけ移動する.
 		void undo_push_move(const D2D1_POINT_2F d_pos);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void undo_push_null(void);

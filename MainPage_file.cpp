@@ -404,82 +404,6 @@ namespace winrt::GraphPaper::implementation
 		co_return hr;
 	}
 
-	// SVG としてデータライターに書き込む.
-	// dt_writer	データライター
-	/*
-	void MainPage::file_write_svg(DataWriter const& dt_writer)
-	{
-		constexpr char XML_DEC[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" SVG_NL;
-		constexpr char DOCTYPE[] = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" SVG_NL;
-		constexpr char SVG_TAG[] = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" ";
-
-		// XML 宣言を書き込む.
-		write_svg(XML_DEC, dt_writer);
-		// DOCTYPE を書き込む.
-		write_svg(DOCTYPE, dt_writer);
-		// svg タグの開始を書き込む.
-		write_svg(SVG_TAG, dt_writer);
-		// 幅と高さの属性を書き込む.
-		char buf[256];
-		constexpr char* SVG_UNIT_PX = "px";
-		constexpr char* SVG_UNIT_IN = "in";
-		constexpr char* SVG_UNIT_MM = "mm";
-		constexpr char* SVG_UNIT_PT = "pt";
-		const auto dpi = m_page_dx.m_logical_dpi;
-		double w, h;
-		char* u;
-		if (m_len_unit == LEN_UNIT::INCH) {
-			w = m_page_layout.m_page_size.width / dpi;
-			h = m_page_layout.m_page_size.height / dpi;
-			u = SVG_UNIT_IN;
-		}
-		else if (m_len_unit == LEN_UNIT::MILLI) {
-			w = m_page_layout.m_page_size.width * MM_PER_INCH / dpi;
-			h = m_page_layout.m_page_size.height * MM_PER_INCH / dpi;
-			u = SVG_UNIT_MM;
-		}
-		else if (m_len_unit == LEN_UNIT::POINT) {
-			w = m_page_layout.m_page_size.width * PT_PER_INCH / dpi;
-			h = m_page_layout.m_page_size.height * PT_PER_INCH / dpi;
-			u = SVG_UNIT_PT;
-		}
-		else if (m_len_unit == LEN_UNIT::PIXEL) {
-			w = m_page_layout.m_page_size.width;
-			h = m_page_layout.m_page_size.height;
-			u = SVG_UNIT_PX;
-		}
-		else {
-			w = m_page_layout.m_page_size.width;
-			h = m_page_layout.m_page_size.height;
-			u = SVG_UNIT_PX;
-		}
-		std::snprintf(buf, sizeof(buf) - 1, "width=\"%lf%s\" height=\"%lf%s\" ", w, u, h, u);
-		write_svg(buf, dt_writer);
-		// viewBox 属性を書き込む.
-		write_svg("viewBox=\"0 0 ", dt_writer);
-		write_svg(m_page_layout.m_page_size.width, dt_writer);
-		write_svg(m_page_layout.m_page_size.height, dt_writer);
-		write_svg("\" ", dt_writer);
-		// 背景色をスタイル属性として書き込む.
-		write_svg("style=\"background-color:", dt_writer);
-		write_svg(m_page_layout.m_page_color, dt_writer);
-		// svg タグの終了を書き込む.
-		write_svg("\" >" SVG_NL, dt_writer);
-		// 消去フラグのない図形をすべて SVG として書き込む.
-		// 図形リストの各図形について以下を繰り返す.
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				// 消去フラグが立っている場合,
-				// 以下を無視する.
-				continue;
-			}
-			s->write_svg(dt_writer);
-		}
-		// svg の終了タグを書き込む.
-		write_svg("</svg>" SVG_NL, dt_writer);
-	}
-	*/
-
 	// SVG 開始タグをデータライターに書き込む.
 	static void file_write_svg_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer)
 	{
@@ -633,11 +557,11 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (m_summary_visible) {
-			if (m_list_shapes.size() > 0) {
-				summary_remake();
+			if (m_list_shapes.empty()) {
+				summary_close();
 			}
 			else {
-				summary_close();
+				summary_remake();
 			}
 		}
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);

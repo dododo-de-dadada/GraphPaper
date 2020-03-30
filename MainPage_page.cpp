@@ -94,26 +94,18 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F b_min = { FLT_MAX, FLT_MAX };
 		D2D1_POINT_2F b_max = { -FLT_MAX, -FLT_MAX };
-		D2D1_POINT_2F p_max;
+		D2D1_POINT_2F p_size;
 
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			s->get_bound(b_min, b_max);
-		}
-		pt_add(b_max, b_min, p_max);
-		if (p_max.x < 1.0 || p_max.y < 1.0) {
+		s_list_bound(m_list_shapes, b_min, b_max);
+		pt_sub(b_max, b_min, p_size);
+		if (p_size.x < 1.0F || p_size.y < 1.0F) {
 			return;
 		}
-		pt_min({ 0.0f, 0.0f }, b_min, m_page_min);
-		pt_max(b_max, p_max, m_page_max);
-		const D2D1_SIZE_F page = { p_max.x, p_max.y };
-		if (equal(m_page_layout.m_page_size, page) == false) {
-			undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_layout, page);
-			// 一連の操作の区切としてヌル操作をスタックに積む.
+		pt_min({ 0.0F, 0.0F }, b_min, m_page_min);
+		pt_max(b_max, p_size, m_page_max);
+		if (equal(m_page_layout.m_page_size, { p_size.x, p_size.y }) == false) {
+			undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_layout, D2D1_SIZE_F{ p_size.x, p_size.y });
 			undo_push_null();
-			// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 			enable_undo_menu();
 		}
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);

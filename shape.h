@@ -63,8 +63,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形の部位 (アンカー)
 	enum struct ANCH_WHICH {
-		ANCH_OUTSIDE,		// 外部 (矢印カーソル)
-		ANCH_INSIDE,		// 内部 (移動カーソル)
+		ANCH_OUTSIDE,		// 図形の外部
+		ANCH_INSIDE,		// 図形の内部
 		ANCH_FRAME,		// 線枠 (移動カーソル)
 		ANCH_TEXT,		// 文字列
 		ANCH_NW,		// 方形の左上の頂点 (北西南東カーソル)
@@ -525,6 +525,8 @@ namespace winrt::GraphPaper::implementation
 	Shape* s_list_front(S_LIST_T const& s_list) noexcept;
 	// 図形全体の領域をリストから得る.
 	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F p_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
+	// 図形全体の領域をリストから得る.
+	void s_list_bound(S_LIST_T const& s_list, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
 	// 位置を含む図形とその部位をリストから得る.
 	ANCH_WHICH s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, const double a_len, Shape*& s) noexcept;
 	// 図形をリストに挿入する.
@@ -545,8 +547,8 @@ namespace winrt::GraphPaper::implementation
 	template <bool REDUCE> void s_list_write(const S_LIST_T& s_list, DataWriter const& dt_writer);
 	// リストの中の図形の順番を得る.
 	template <typename S, typename T> bool s_list_match(S_LIST_T const& s_list, S s, T& t);
-	// 図形リストから文字列を得る.
-	winrt::hstring s_list_text(S_LIST_T const& s_list) noexcept;
+	// 選択された図形から, それらを全て合わせた文字列を得る.
+	winrt::hstring s_list_text_selected_all(S_LIST_T const& s_list) noexcept;
 
 	//------------------------------
 	// レイアウト

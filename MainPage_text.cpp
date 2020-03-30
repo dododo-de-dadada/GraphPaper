@@ -348,14 +348,14 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
-				if (typeid(*s) != typeid(ShapeGroup)) {
+				if (typeid(*s) == typeid(ShapeGroup)) {
 					stack.push_back(i);
 					stack.push_back(j);
 					i = static_cast<ShapeGroup*>(s)->m_list_grouped.begin();
 					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
 					continue;
 				}
-				if (typeid(*s) != typeid(ShapeText)) {
+				else if (typeid(*s) != typeid(ShapeText)) {
 					continue;
 				}
 				auto t = static_cast<ShapeText*>(s); // 検索される文字列図形
@@ -474,7 +474,6 @@ namespace winrt::GraphPaper::implementation
 			// 文字列検索パネルが表示されている場合,
 			// 文字列検索パネルを非表示にする.
 			sp_text_find().Visibility(COLLAPSED);
-			// 文字列検索パネルから値を格納する.
 			text_find_set();
 			return;
 		}

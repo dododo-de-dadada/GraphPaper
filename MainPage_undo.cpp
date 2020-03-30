@@ -370,7 +370,7 @@ namespace winrt::GraphPaper::implementation
 		m_stack_undo.push_back(new UndoArrange2(s, t));
 	}
 
-	// 図形の部位の位置を変更して, 変更前の値をスタックに積む.
+	// 図形の頂点や制御点の位置をスタックに保存してから変更する.
 	void MainPage::undo_push_form(Shape* s, const ANCH_WHICH a, const D2D1_POINT_2F a_pos)
 	{
 		m_stack_undo.push_back(new UndoForm(s, a));
@@ -383,7 +383,7 @@ namespace winrt::GraphPaper::implementation
 		m_stack_undo.push_back(new UndoInsert(s, s_pos));
 	}
 
-	// 図形を差分だけ移動して, 移動前の値をスタックに積む.
+	// 図形の位置をスタックに保存してから差分だけ移動する.
 	// d_pos	移動させる差分
 	void MainPage::undo_push_move(const D2D1_POINT_2F d_pos)
 	{
