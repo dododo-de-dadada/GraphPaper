@@ -144,6 +144,12 @@ namespace winrt::GraphPaper::implementation
 		float m_[6] = { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F };
 	};
 
+	enum struct WCHAR_CPY {
+		EXACT,
+		ESC_CHR,
+		CHR_ESC
+	};
+
 	// 色成分の最大値
 	constexpr double COLOR_MAX = 255.0;
 	// 1 インチあたりのポイント数
@@ -292,7 +298,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字列をデータリーダーから読み込む.
 	void read(wchar_t*& value, DataReader const& dt_reader);
 	// 文字列を複製する. 元の文字列がヌルポインター, または元の文字数が 0 のときは, ヌルポインターを返す.
-	wchar_t* wchar_cpy(const wchar_t* const s);
+	wchar_t* wchar_cpy(const wchar_t* const s, const bool exact = true);
 	// 文字列の長さ. 引数がヌルポインタの場合, 0 を返す.
 	uint32_t wchar_len(const wchar_t* const t) noexcept;
 	// 矢じりの寸法をデータライターに書き込む.
@@ -1144,12 +1150,13 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_text_margin{ 4.0f, 4.0f };	// 文字列のまわりの上下と左右の余白
 
 		winrt::com_ptr<IDWriteTextLayout> m_dw_text_layout{};	// 文字列を表示するためのレイアウト
-		DWRITE_HIT_TEST_METRICS* m_dw_test_metrics = nullptr;	// 文字列の計量
-		DWRITE_LINE_METRICS* m_dw_line_metrics = nullptr;	// 文字列の計量
-		UINT32 m_dw_linecnt = 0;	// 文字列の計量の要素数
 		double m_dw_descent = 0.0f;
+		UINT32 m_dw_line_cnt = 0;	// 文字列の計量の要素数
+		DWRITE_LINE_METRICS* m_dw_line_metrics = nullptr;	// 文字列の計量
+		UINT32 m_dw_range_cnt = 0;	// 文字範囲の計量の要素数
 		DWRITE_HIT_TEST_METRICS* m_dw_range_metrics = nullptr;	// 文字範囲の計量
-		UINT32 m_dw_range_linecnt = 0;	// 文字範囲の計量の要素数
+		UINT32 m_dw_test_cnt = 0;	// 文字列の計量の要素数
+		DWRITE_HIT_TEST_METRICS* m_dw_test_metrics = nullptr;	// 文字列の計量
 
 		// 図形を破棄する.
 		~ShapeText(void);
@@ -1163,6 +1170,10 @@ namespace winrt::GraphPaper::implementation
 		void delete_bottom_blank(void) noexcept;
 		// 表示する.
 		void draw(SHAPE_DX& dx);
+		// 選択された文字範囲を塗る.
+		void fill_range(SHAPE_DX& dx, const D2D1_POINT_2F t_min);
+		// 文字列の枠を表示する.
+		void draw_frame(SHAPE_DX& dx, const D2D1_POINT_2F t_min);
 		// 有効な書体名から要素を得る.
 		static wchar_t* get_available_font(const uint32_t i);
 		// 書体の色を得る.

@@ -696,15 +696,186 @@ namespace winrt::GraphPaper::implementation
 	// 文字列を複製する.
 	// 元の文字列がヌルポインター, または元の文字数が 0 のときは,
 	// ヌルポインターを返す.
-	wchar_t* wchar_cpy(const wchar_t* const s)
+	wchar_t* wchar_cpy(const wchar_t* const s, const bool exact)
 	{
-		const auto i = wchar_len(s);
-		if (i == 0) {
+		const auto len = wchar_len(s);
+		if (len == 0) {
 			return nullptr;
 		}
-		const auto j = static_cast<size_t>(i) + 1;
-		auto t = new wchar_t[j];
-		wcscpy_s(t, j, s);
+		const auto k = static_cast<size_t>(len) + 1;
+		auto t = new wchar_t[k];
+		if (exact) {
+			wcscpy_s(t, k, s);
+		}
+		else {
+			auto st = 0;
+			uint32_t j = 0;
+			uint32_t n = 0;
+			for (uint32_t i = 0; i < len && s[i] != '\0'; i++) {
+				if (st == 0) {
+					if (s[i] == '\\') {
+						st = 1;
+					}
+					else {
+						t[j++] = s[i];
+					}
+				}
+				else if (st == 1) {
+					if (s[i] == '0') {
+						t[j++] = '\0';
+						break;
+					}
+					else if (isdigit(s[i])) {
+						n = s[i] - '0';
+						st = 2;
+					}
+					else if (s[i] == 'n') {
+						t[j++] = '\n';
+						st = 0;
+					}
+					else if (s[i] == 't') {
+						t[j++] = '\t';
+						st = 0;
+					}
+					else if (s[i] == 'r') {
+						t[j++] = '\r';
+						st = 0;
+					}
+					else if (s[i] == 's') {
+						t[j++] = ' ';
+						st = 0;
+					}
+					else if (s[i] == 'x') {
+						st = 4;
+					}
+					else if (s[i] == 'u') {
+						st = 6;
+					}
+					else {
+						t[j++] = s[i];
+						st = 0;
+					}
+				}
+				else if (st == 2) {
+					if (isdigit(s[i])) {
+						n = n * 8 + s[i] - '0';
+						st = 3;
+					}
+					else {
+						t[j++] = static_cast<wchar_t>(n);
+						t[j++] = s[i];
+						st = 0;
+					}
+				}
+				else if (st == 3) {
+					if (isdigit(s[i])) {
+						n = n * 8 + s[i] - '0';
+						st = 0;
+					}
+					else {
+						t[j++] = static_cast<wchar_t>(n);
+						t[j++] = s[i];
+						st = 0;
+					}
+				}
+				else if (st == 4) {
+					if (isdigit(s[i])) {
+						n = s[i] - '0';
+						st = 5;
+					}
+					else if (s[i] >= 'a' && s[i] <= 'f') {
+						n = s[i] - 'a' + 10;
+						st = 5;
+					}
+					else if (s[i] >= 'A' && s[i] <= 'F') {
+						n = s[i] - 'A' + 10;
+						st = 5;
+					}
+					else {
+						t[j++] = 'x';
+						t[j++] = s[i];
+						st = 0;
+					}
+				}
+				else if (st == 5) {
+					if (isdigit(s[i])) {
+						t[j++] = static_cast<wchar_t>(n * 16 + s[i] - '0');
+						st = 0;
+					}
+					else if (s[i] >= 'a' && s[i] <= 'f') {
+						t[j++] = static_cast<wchar_t>(n * 16 + s[i] - 'a' + 10);
+						st = 0;
+					}
+					else if (s[i] >= 'A' && s[i] <= 'F') {
+						t[j++] = static_cast<wchar_t>(n * 16 + s[i] - 'A' + 10);
+						st = 0;
+					}
+					else {
+						t[j++] = static_cast<wchar_t>(n);
+						t[j++] = s[i];
+						st = 0;
+					}
+				}
+				else if (st == 6) {
+					if (isdigit(s[i])) {
+						n = s[i] - '0';
+						st = 7;
+					}
+					else if (s[i] >= 'a' && s[i] <= 'f') {
+						n = s[i] - 'a' + 10;
+						st = 7;
+					}
+					else if (s[i] >= 'A' && s[i] <= 'F') {
+						n = s[i] - 'A' + 10;
+						st = 7;
+					}
+					else {
+						t[j++] = 'x';
+						t[j++] = s[i];
+						st = 0;
+					}
+				}
+				else if (st == 7) {
+					if (isdigit(s[i])) {
+						n = n * 16 + s[i] - '0';
+						st = 8;
+					}
+					else if (s[i] >= 'a' && s[i] <= 'f') {
+						n = n * 16 + s[i] - 'a' + 10;
+						st = 8;
+					}
+					else if (s[i] >= 'A' && s[i] <= 'F') {
+						n = n * 16 + s[i] - 'A' + 10;
+						st = 8;
+					}
+					else {
+						t[j++] = static_cast<wchar_t>(n);
+						t[j++] = s[i];
+						st = 0;
+					}
+				}
+				else if (st == 8) {
+					if (isdigit(s[i])) {
+						n = n * 16 + s[i] - '0';
+						st = 5;
+					}
+					else if (s[i] >= 'a' && s[i] <= 'f') {
+						n = n * 16 + s[i] - 'a' + 10;
+						st = 5;
+					}
+					else if (s[i] >= 'A' && s[i] <= 'F') {
+						n = n * 16 + s[i] - 'A' + 10;
+						st = 5;
+					}
+					else {
+						t[j++] = static_cast<wchar_t>(n);
+						t[j++] = s[i];
+						st = 0;
+					}
+				}
+			}
+			t[j] = '\0';
+		}
 		return t;
 	}
 

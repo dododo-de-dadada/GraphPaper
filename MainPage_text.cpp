@@ -28,6 +28,7 @@ namespace winrt::GraphPaper::implementation
 	// f_text	検索文字列
 	// f_len	検索文字列の文字数
 	// f_case	英文字の区別フラグ
+	// f_break	改行を無視フラグ
 	// f_pos	見つかった位置
 	static bool text_find(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept
 	{
@@ -538,11 +539,11 @@ namespace winrt::GraphPaper::implementation
 		if (m_text_find != nullptr) {
 			delete[] m_text_find;
 		}
-		m_text_find = wchar_cpy(tx_text_find_what().Text().c_str());
+		m_text_find = wchar_cpy(tx_text_find_what().Text().c_str(), false);
 		if (m_text_repl != nullptr) {
 			delete[] m_text_repl;
 		}
-		m_text_repl = wchar_cpy(tx_text_replace_with().Text().c_str());
+		m_text_repl = wchar_cpy(tx_text_replace_with().Text().c_str(), false);
 		m_text_find_case = ck_text_find_case().IsChecked().GetBoolean();
 		m_text_find_wrap = ck_text_find_wrap().IsChecked().GetBoolean();
 	}

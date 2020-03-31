@@ -121,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_TEXT_RANGE t_range;
 		if (s->get_text_range(t_range) && t_range.length > 0) {
 			const auto s_text = static_cast<ShapeText*>(s);
-			const auto cnt = s_text->m_dw_range_linecnt;
+			const auto cnt = s_text->m_dw_range_cnt;
 			const auto mat = s_text->m_dw_range_metrics;
 			D2D1_POINT_2F t_pos;
 			s->get_start_pos(t_pos);

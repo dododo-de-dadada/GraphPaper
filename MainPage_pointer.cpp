@@ -461,7 +461,7 @@ namespace winrt::GraphPaper::implementation
 					m_pointer_state = STATE_TRAN::PRESS_AREA;
 				}
 				else if (m_pointer_shape == nullptr) {
-					// 押された図形がヌルの場合,
+					// 押された図形がない場合,
 					// 範囲を選択している状態に遷移する.
 					m_pointer_state = STATE_TRAN::PRESS_AREA;
 					// 十字カーソルをカーソルに設定する.
