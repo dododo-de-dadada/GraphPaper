@@ -942,4 +942,8 @@
     <value>並び替え</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
+  <data name="ck_text_find_escs.Content" xml:space="preserve">
+    <value>特殊文字を使用する.</value>
+    <comment>CheckBox</comment>
+  </data>
 </root>

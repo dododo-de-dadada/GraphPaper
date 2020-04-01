@@ -167,6 +167,7 @@ namespace winrt::GraphPaper::implementation
 				in_stream.Close();
 			}
 			else if (xcvd_contains({ StandardDataFormats::Text() })) {
+				// クリップボードの中身がテキストの場合,
 				using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 				const auto d_result = co_await cd_conf_paste().ShowAsync();
 				if (d_result == ContentDialogResult::Primary) {
@@ -175,6 +176,7 @@ namespace winrt::GraphPaper::implementation
 					if (text.empty() == false) {
 						// 文字列が空でない場合,
 						const double scale = m_page_layout.m_page_scale;
+
 						const auto g_len = m_page_layout.m_grid_base + 1.0;
 						D2D1_POINT_2F pos{
 							static_cast<FLOAT>(scale * (sb_horz().Value() + scp_page_panel().ActualWidth() * 0.5) - g_len),
@@ -187,7 +189,7 @@ namespace winrt::GraphPaper::implementation
 						if (m_page_layout.m_grid_snap) {
 							pt_round(pos, g_len, pos);
 						}
-						auto t = new ShapeText(pos, diff, wchar_cpy(text.c_str()), &m_page_layout);
+						auto t = new ShapeText(pos, diff, wchar_cpy(text.c_str()), &m_page_layout, true);
 #if (_DEBUG)
 						debug_leak_cnt++;
 #endif

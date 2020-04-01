@@ -669,6 +669,7 @@
                 <TextBox x:Name="tx_text_replace_with" x:Uid="tx_text_replace_with" Header="Replace width" Margin="0,4" Width="128" />
                 <CheckBox x:Name="ck_text_find_case" x:Uid="ck_text_find_case" Content="Match case." Margin="0,4" />
                 <CheckBox x:Name="ck_text_find_wrap" x:Uid="ck_text_find_wrap" Content="Wrap around." Margin="0,4" />
+                <CheckBox x:Name="ck_text_find_escs" x:Uid="ck_text_find_escs" Content="Use escape sequences." Margin="0,4" />
                 <Button x:Name="btn_text_find_next" x:Uid="btn_text_find_next" Click="btn_text_find_next_click" Content="Find Next" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
                 <Button x:Name="btn_text_replace" x:Uid="btn_text_replace" Click="btn_text_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
                 <Button x:Name="btn_text_replace_all" x:Uid="btn_text_replace_all" Click="btn_text_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />

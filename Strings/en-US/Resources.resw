@@ -950,4 +950,8 @@
     <value>Arrange</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
+  <data name="ck_text_find_escs.Content" xml:space="preserve">
+    <value>Use escape sequences.</value>
+    <comment>CheckBox</comment>
+  </data>
 </root>

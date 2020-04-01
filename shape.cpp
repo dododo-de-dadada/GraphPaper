@@ -698,20 +698,19 @@ namespace winrt::GraphPaper::implementation
 	// ヌルポインターを返す.
 	wchar_t* wchar_cpy(const wchar_t* const s, const bool exact)
 	{
-		const auto len = wchar_len(s);
-		if (len == 0) {
+		const auto s_len = wchar_len(s);
+		if (s_len == 0) {
 			return nullptr;
 		}
-		const auto k = static_cast<size_t>(len) + 1;
-		auto t = new wchar_t[k];
+		auto t = new wchar_t[static_cast<size_t>(s_len) + 1];
 		if (exact) {
-			wcscpy_s(t, k, s);
+			wcscpy_s(t, static_cast<size_t>(s_len) + 1, s);
 		}
 		else {
 			auto st = 0;
 			uint32_t j = 0;
 			uint32_t n = 0;
-			for (uint32_t i = 0; i < len && s[i] != '\0'; i++) {
+			for (uint32_t i = 0; i < s_len && s[i] != '\0' && j < s_len; i++) {
 				if (st == 0) {
 					if (s[i] == '\\') {
 						st = 1;
@@ -725,16 +724,20 @@ namespace winrt::GraphPaper::implementation
 						t[j++] = '\0';
 						break;
 					}
-					else if (isdigit(s[i])) {
-						n = s[i] - '0';
-						st = 2;
+					else if (s[i] == 'a') {
+						t[j++] = '\a';
+						st = 0;
+					}
+					else if (s[i] == 'b') {
+						t[j++] = '\b';
+						st = 0;
+					}
+					else if (s[i] == 'f') {
+						t[j++] = '\f';
+						st = 0;
 					}
 					else if (s[i] == 'n') {
 						t[j++] = '\n';
-						st = 0;
-					}
-					else if (s[i] == 't') {
-						t[j++] = '\t';
 						st = 0;
 					}
 					else if (s[i] == 'r') {
@@ -744,6 +747,34 @@ namespace winrt::GraphPaper::implementation
 					else if (s[i] == 's') {
 						t[j++] = ' ';
 						st = 0;
+					}
+					else if (s[i] == 't') {
+						t[j++] = '\t';
+						st = 0;
+					}
+					else if (s[i] == 'v') {
+						t[j++] = '\v';
+						st = 0;
+					}
+					else if (s[i] == '\'') {
+						t[j++] = '\'';
+						st = 0;
+					}
+					else if (s[i] == '\?') {
+						t[j++] = '\?';
+						st = 0;
+					}
+					else if (s[i] == '\"') {
+						t[j++] = '\"';
+						st = 0;
+					}
+					else if (s[i] == '\\') {
+						t[j++] = '\\';
+						st = 0;
+					}
+					else if (isdigit(s[i])) {
+						n = s[i] - '0';
+						st = 2;
 					}
 					else if (s[i] == 'x') {
 						st = 4;
@@ -1060,9 +1091,9 @@ namespace winrt::GraphPaper::implementation
 	void write_svg(const D2D1_COLOR_F value, DataWriter const& dt_writer)
 	{
 		char buf[8];
-		const uint32_t vr = static_cast<uint32_t>(std::round(value.r * 255.0)) & 0xff;
-		const uint32_t vb = static_cast<uint32_t>(std::round(value.b * 255.0)) & 0xff;
-		const uint32_t vg = static_cast<uint32_t>(std::round(value.g * 255.0)) & 0xff;
+		const uint32_t vr = static_cast<uint32_t>(std::round(value.r * 255.0)) & 0xFF;
+		const uint32_t vb = static_cast<uint32_t>(std::round(value.b * 255.0)) & 0xFF;
+		const uint32_t vg = static_cast<uint32_t>(std::round(value.g * 255.0)) & 0xFF;
 		sprintf_s(buf, "#%02x%02x%02x", vr, vg, vb);
 		write_svg(buf, dt_writer);
 	}

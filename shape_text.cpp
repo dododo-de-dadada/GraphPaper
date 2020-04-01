@@ -819,7 +819,7 @@ namespace winrt::GraphPaper::implementation
 	// d_pos	終了位置への差分
 	// text	文字列
 	// attr	既定の属性値
-	ShapeText::ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, wchar_t* const text, const ShapeLayout* attr) :
+	ShapeText::ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, wchar_t* const text, const ShapeLayout* attr, const bool no_break) :
 		ShapeRect::ShapeRect(s_pos, d_pos, attr),
 		m_font_color(attr->m_font_color),
 		m_font_family(attr->m_font_family),
@@ -835,6 +835,51 @@ namespace winrt::GraphPaper::implementation
 		m_sel_range()
 	{
 		create_text_layout();
+		if (no_break == false) {
+			return;
+		}
+		auto m = 0;
+		auto n = 0;
+		for (uint32_t i = 0; i < m_dw_line_cnt; i++) {
+			if (m_dw_line_metrics[i].newlineLength > 0) {
+				n++;
+			}
+		}
+		do {
+			auto h = 0.0;
+			auto i = 0;
+			auto j = 0;
+			auto k = 0;
+			auto w = 0.0;
+			while (i < m_dw_line_cnt && j < m_dw_test_cnt) {
+				// 改行ごとの文字位置と高さを得る.
+				auto g = 0.0;
+				while (i < m_dw_line_cnt) {
+					k += m_dw_line_metrics[i].length;
+					g = fmax(g, m_dw_line_metrics[i].height);
+					if (m_dw_line_metrics[i++].newlineLength > 0) {
+						break;
+					}
+				}
+				// 高さに行ごとの高さを加える.
+				h += g;
+				// 改行ごとの幅を求める.
+				auto v = 0.0;
+				while (j < m_dw_test_cnt) {
+					v += m_dw_test_metrics[j].width;
+					if (m_dw_test_metrics[j].textPosition + m_dw_test_metrics[j++].length >= k) {
+						// 位置の計量の文字終了位置が改行ごとの文字位置に達した場合
+						break;
+					}
+				}
+				w = fmax(w, v);
+			}
+			m = m_dw_line_cnt;
+			D2D1_POINT_2F s_pos;
+			get_start_pos(s_pos);
+			pt_add(s_pos, w + m_text_margin.width * 2.0, h + m_text_margin.height * 2.0, s_pos);
+			set_pos(s_pos, ANCH_WHICH::ANCH_SE);
+		} while (m_dw_line_cnt < m && m_dw_line_cnt > n + 1);
 	}
 
 	// 図形をデータライターから読み込む.
