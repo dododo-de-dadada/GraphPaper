@@ -463,6 +463,8 @@ namespace winrt::GraphPaper::implementation
 		void text_align_t_check_menu(const DWRITE_TEXT_ALIGNMENT t_align);
 		// 書体メニューの「段落のそろえ」に印をつける.
 		void text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align);
+		// 書体メニューの「大きさを合わせる」が選択された.
+		void mfi_text_bound_adjust_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行の高さ」>「狭める」が選択された.
 		void mfi_text_line_height_contract_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行の高さ」>「広げる」が選択された.

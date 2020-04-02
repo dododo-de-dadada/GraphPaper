@@ -419,6 +419,37 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr double TEXT_LINE_DELTA = 2;	// 行の高さの変分 (DPIs)
 
+	// 書体メニューの「大きさを合わせる」が選択された.
+	void MainPage::mfi_text_bound_adjust_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		auto flag = false;
+		for (auto s : m_list_shapes) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			else if (s->is_selected() == false) {
+				continue;
+			}
+			else if (typeid(*s) != typeid(ShapeText)) {
+				continue;
+			}
+			auto u = new UndoForm(s, ANCH_WHICH::ANCH_SE);
+			if (static_cast<ShapeText*>(s)->adjust_bound({ m_page_size_max, m_page_size_max })) {
+				s->get_bound(m_page_min, m_page_max);
+				m_stack_undo.push_back(u);
+				flag = true;
+			}
+			else {
+				delete u;
+			}
+		}
+		if (flag) {
+			set_page_panle_size();
+			undo_push_null();
+			page_draw();
+		}
+	}
+
 	// 書体メニューの「行の高さ」>「高さ」が選択された.
 	IAsyncAction MainPage::mfi_text_line_height_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -604,7 +635,6 @@ namespace winrt::GraphPaper::implementation
 
 		const double dpi = m_page_dx.m_logical_dpi;
 		const double g_len = m_sample_layout.m_grid_base + 1.0;
-		//double px;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];

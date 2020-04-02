@@ -1160,6 +1160,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形を破棄する.
 		~ShapeText(void);
+		// 大きさを文字列に合わせる.
+		bool adjust_bound(const D2D1_SIZE_F& max_size = D2D1_SIZE_F{ 0.0F, 0.0F });
 		// テキストレイアウトから計量の配列を得る.
 		void create_test_metrics(void);
 		// テキストレイアウトを破棄して作成する.
@@ -1168,14 +1170,6 @@ namespace winrt::GraphPaper::implementation
 		void create_text_metrics(void);
 		// 文末の空白を取り除く.
 		void delete_bottom_blank(void) noexcept;
-		double determin_min_width(void) {
-			FLOAT w;
-			if (m_dw_text_layout == nullptr
-				|| m_dw_text_layout->DetermineMinWidth(&w) != S_OK) {
-				return 0.0;
-			}
-			return w;
-		}
 		// 表示する.
 		void draw(SHAPE_DX& dx);
 		// 選択された文字範囲を塗る.
@@ -1245,7 +1239,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字範囲に格納する.
 		void set_text_range(const DWRITE_TEXT_RANGE value);
 		// 図形を作成する.
-		ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, wchar_t* const text, const ShapeLayout* attr, const bool no_break = false);
+		ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, wchar_t* const text, const ShapeLayout* attr);
 		// 図形をデータリーダーから読み込む.
 		ShapeText(DataReader const& dt_reader);
 		// データライターに書き込む.

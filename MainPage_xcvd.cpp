@@ -175,24 +175,28 @@ namespace winrt::GraphPaper::implementation
 					auto text{ co_await Clipboard::GetContent().GetTextAsync() };
 					if (text.empty() == false) {
 						// 文字列が空でない場合,
-						const double scale = m_page_layout.m_page_scale;
-
-						const auto g_len = m_page_layout.m_grid_base + 1.0;
-						D2D1_POINT_2F pos{
-							static_cast<FLOAT>(scale * (sb_horz().Value() + scp_page_panel().ActualWidth() * 0.5) - g_len),
-							static_cast<FLOAT>(scale * (sb_vert().Value() + scp_page_panel().ActualHeight() * 0.5) - g_len)
-						};
-						D2D1_POINT_2F diff{
-							static_cast<FLOAT>(2.0 * g_len),
-							static_cast<FLOAT>(2.0 * g_len)
-						};
-						if (m_page_layout.m_grid_snap) {
-							pt_round(pos, g_len, pos);
-						}
-						auto t = new ShapeText(pos, diff, wchar_cpy(text.c_str()), &m_page_layout, true);
+						auto t = new ShapeText(D2D1_POINT_2F{ 0.0F, 0.0F }, D2D1_POINT_2F{ 1.0F, 1.0F }, wchar_cpy(text.c_str()), &m_page_layout);
 #if (_DEBUG)
 						debug_leak_cnt++;
 #endif
+						// 貼り付ける最大の大きさをウィンドウの大きさに制限する.
+						const double scale = m_page_layout.m_page_scale;
+						D2D1_SIZE_F max_size{
+							scp_page_panel().ActualWidth() / scale,
+							scp_page_panel().ActualHeight() / scale
+						};
+						t->adjust_bound(max_size);
+						D2D1_POINT_2F s_pos{
+							static_cast<FLOAT>((sb_horz().Value() + scp_page_panel().ActualWidth() * 0.5) / scale - t->m_diff.x * 0.5),
+							static_cast<FLOAT>((sb_vert().Value() + scp_page_panel().ActualHeight() * 0.5) / scale - t->m_diff.y * 0.5)
+						};
+						pt_add(s_pos, m_page_min, s_pos);
+						if (m_page_layout.m_grid_snap) {
+							const auto g_len = m_page_layout.m_grid_base + 1.0;
+							pt_round(s_pos, g_len, s_pos);
+						}
+						t->set_start_pos(s_pos);
+
 						unselect_all();
 						if (m_summary_visible) {
 							summary_append(t);

@@ -556,6 +556,7 @@
             </muxc:MenuBarItem>
             <!-- 書体メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_font" AccessKey="T" Title="Font">
+                <!-- 字体メニュー -->
                 <MenuFlyoutItem x:Uid="mfi_font_family" Click="mfi_font_family_click_async" Icon="Font" Text="Family..." />
                 <MenuFlyoutItem x:Uid="mfi_font_size" Click="mfi_font_size_click_async" Icon="FontSize" Text="Size..." />
                 <MenuFlyoutItem x:Uid="mfi_font_weight" Click="mfi_font_weight_click_async" Icon="Bold" Text="Weight..." />
@@ -567,6 +568,7 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_italic" x:Uid="rmfi_font_italic" Click="rmfi_font_italic_click" Text="Normal" GroupName="gn_font_style"/>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
+                <!-- 配置メニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_text_align_t" Text="Text Alignment">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left" x:Uid="rmfi_text_align_left" Click="rmfi_text_align_left_click" Text="Left" GroupName="gn_text_align_t"/>
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="rmfi_text_align_right_click" Text="Right" GroupName="gn_text_align_t"/>
@@ -585,6 +587,7 @@
                     <MenuFlyoutItem x:Uid="mfi_text_line_height" Click="mfi_text_line_height_click_async" Text="Height" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_text_margin" Click="mfi_text_margin_click_async" Text="Margin..." />
+                <MenuFlyoutItem x:Uid="mfi_text_bound_adjust" Click="mfi_text_bound_adjust_click" Text="Adjust bounding box" />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="mfi_font_color_click_async" Text="Color..." />
             </muxc:MenuBarItem>
