@@ -102,13 +102,13 @@ namespace winrt::GraphPaper::implementation
 				min_line_cnt++;
 			}
 		}
-		auto break_line_cnt = 0;
+		auto line_cnt = 0U;	// 行数 (改行コードによる改行および文字列が配置される方形の幅による改行をあわせた数)
 		do {
-			auto bound_height = 0.0;
-			auto new_line_pos = 0;
-			auto bound_width = 0.0;
-			auto i = 0;
-			auto j = 0;
+			auto bound_height = 0.0;	// 文字列が配置される方形の高さ
+			auto bound_width = 0.0;	// 文字列が配置される方形の幅
+			auto new_line_pos = 0U;	// 改行コードによって改行された文字位置
+			auto i = 0U;
+			auto j = 0U;
 			while (i < m_dw_line_cnt && j < m_dw_test_cnt) {
 				// 改行の文字位置と行の高さを得る.
 				auto line_height = 0.0;
@@ -140,14 +140,14 @@ namespace winrt::GraphPaper::implementation
 			if (max_size.height > FLT_MIN) {
 				bound_height = fmin(bound_height, max_size.height);
 			}
-			// 行数を強制改行の行数に格納する.
-			break_line_cnt = m_dw_line_cnt;
+			// 行数を保存する.
+			line_cnt = m_dw_line_cnt;
 			D2D1_POINT_2F s_pos;
 			get_start_pos(s_pos);
 			pt_add(s_pos, bound_width, bound_height, s_pos);
 			set_pos(s_pos, ANCH_WHICH::ANCH_SE);
-		} while (m_dw_line_cnt < break_line_cnt && m_dw_line_cnt > min_line_cnt);
-		// 行数が強制改行の数より小さい, かつ最小の行数より大きい場合
+		} while (m_dw_line_cnt < line_cnt && m_dw_line_cnt > min_line_cnt);
+		// 行数が, 保存された行数より小さい, かつ最小の行数より大きい場合
 		return equal(diff, m_diff) == false;
 	}
 

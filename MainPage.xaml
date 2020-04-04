@@ -109,7 +109,9 @@
             <x:String x:Key="data_arrow_filled">
                 M0, 8 L3, 8 L3, 5.48 L16, 8.5 L3, 11.52 L3,9 L0, 9 Z
             </x:String>
+            <!--
             <PathIcon x:Key="icon_dash" Data="{StaticResource data_dash}" Width="16" Height="16" />
+            -->
             <!-- 均等アイコンの描画コマンド -->
             <!--
             <x:String x:Key="data_align_justified">
@@ -228,7 +230,7 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bottom_2" x:Uid="rmfi_text_align_bottom" Click="rmfi_text_align_bottom_click" Text="Bottom" GroupName="gn_text_align_p" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_middle_2" x:Uid="rmfi_text_align_middle" Click="rmfi_text_align_middle_click" Text="Middle" GroupName="gn_text_align_p" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_text_line_height" Text="Line height">
+                <MenuFlyoutSubItem x:Uid="mfsi_text_line_height" Text="Line Height">
                     <MenuFlyoutItem x:Uid="mfi_text_line_height_contract" Click="mfi_text_line_height_contract_click" Text="Condense" />
                     <MenuFlyoutItem x:Uid="mfi_text_line_height_expand" Click="mfi_text_line_height_expand_click" Text="Expand" />
                     <MenuFlyoutSeparator />
@@ -253,8 +255,8 @@
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem x:Uid="mfi_grid_len" Click="mfi_grid_len_click_async" Text="Length..." />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Uid="mfi_grid_gray" Click="mfi_grid_gray_click_async" Text="Gray scale..." />
-                <MenuFlyoutSubItem x:Uid="mfsi_grid_patt" Text="Grid patt">
+                <MenuFlyoutItem x:Uid="mfi_grid_gray" Click="mfi_grid_gray_click_async" Text="Grid Gray Scale..." />
+                <MenuFlyoutSubItem x:Uid="mfsi_grid_patt" Text="Grid Pattern">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_1_2" x:Uid="rmfi_grid_patt_1" Click="rmfi_grid_patt_1_click" Text="No emphasis" GroupName="gn_grid_patt" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_2_2" x:Uid="rmfi_grid_patt_2" Click="rmfi_grid_patt_2_click" Text="Emphasize the 2nd" GroupName="gn_grid_patt" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_3_2" x:Uid="rmfi_grid_patt_3" Click="rmfi_grid_patt_3_click" Text="Emphasize the 2nd and 5th" GroupName="gn_grid_patt" />
@@ -277,7 +279,7 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_point_2" x:Uid="rmfi_len_point" Click="rmfi_len_point_click" Text="Point" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_grid_2" x:Uid="rmfi_len_grid" Click="rmfi_len_grid_click" Text="Per Grid" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color code">
+                <MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color Code">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_dec_2" x:Uid="rmfi_color_dec" Click="rmfi_color_dec_click" Text="Decimal" GroupName="gn_color_code" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_hex_2" x:Uid="rmfi_color_hex" Click="rmfi_color_hex_click" Text="Hexadecimal" GroupName="gn_color_code" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_real_2" x:Uid="rmfi_color_real" Click="rmfi_color_real_click" Text="Real" GroupName="gn_color_code" />
@@ -292,6 +294,9 @@
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
             </MenuFlyout>
+            <!--
+            <PathIcon x:Key="pi_rect" Data="{StaticResource icon_rect}" Width="16" Height="16" />
+            -->
         </ResourceDictionary>
     </Page.Resources>
     <Grid Margin="0,0,0,0">
@@ -386,7 +391,7 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_arrange" Text="Arrange">
                     <MenuFlyoutSubItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_arrange}" Margin="0,0,12,0" />
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_arrange}" />
                     </MenuFlyoutSubItem.Icon>
                     <MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="mfi_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
                         <MenuFlyoutItem.KeyboardAccelerators>
@@ -580,19 +585,19 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bottom" x:Uid="rmfi_text_align_bottom" Click="rmfi_text_align_bottom_click" Text="Bottom" GroupName="gn_text_align_p" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_middle" x:Uid="rmfi_text_align_middle" Click="rmfi_text_align_middle_click" Text="Middle" GroupName="gn_text_align_p" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_text_line_height" Text="Line height">
+                <MenuFlyoutSubItem x:Uid="mfsi_text_line_height" Text="Line Height">
                     <MenuFlyoutItem x:Uid="mfi_text_line_height_contract" Click="mfi_text_line_height_contract_click" Text="Condense" />
                     <MenuFlyoutItem x:Uid="mfi_text_line_height_expand" Click="mfi_text_line_height_expand_click" Text="Expand" />
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem x:Uid="mfi_text_line_height" Click="mfi_text_line_height_click_async" Text="Height" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_text_margin" Click="mfi_text_margin_click_async" Text="Margin..." />
-                <MenuFlyoutItem x:Uid="mfi_text_bound_adjust" Click="mfi_text_bound_adjust_click" Text="Adjust bounding box" />
+                <MenuFlyoutItem x:Uid="mfi_text_bound_adjust" Click="mfi_text_bound_adjust_click" Text="Adjust Bounding Box" />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="mfi_font_color_click_async" Text="Color..." />
             </muxc:MenuBarItem>
             <!-- レイアウトメニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_layout" AccessKey="L" Title="Layout">
+            <muxc:MenuBarItem x:Uid="mbi_layout" AccessKey="O" Title="Layout">
                 <!-- 方眼メニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_grid_show" Text="Show Grid">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_hide" x:Uid="rmfi_grid_show_hide" Click="rmfi_grid_show_hide_click" Text="Hide" GroupName="gn_grid_show"/>
@@ -607,8 +612,8 @@
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem x:Uid="mfi_grid_len" Click="mfi_grid_len_click_async" Text="Length..." />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Uid="mfi_grid_gray" Click="mfi_grid_gray_click_async" Text="Opacity..." />
-                <MenuFlyoutSubItem x:Uid="mfsi_grid_patt" Text="Grid patt">
+                <MenuFlyoutItem x:Uid="mfi_grid_gray" Click="mfi_grid_gray_click_async" Text="Grid Gray Scale..." />
+                <MenuFlyoutSubItem x:Uid="mfsi_grid_patt" Text="Grid Pattern">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_1" x:Uid="rmfi_grid_patt_1" Click="rmfi_grid_patt_1_click" Text="Pattern 1" GroupName="gn_grid_patt" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_2" x:Uid="rmfi_grid_patt_2" Click="rmfi_grid_patt_2_click" Text="Pattern 2" GroupName="gn_grid_patt" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_3" x:Uid="rmfi_grid_patt_3" Click="rmfi_grid_patt_3_click" Text="Pattern 3" GroupName="gn_grid_patt" />
@@ -645,7 +650,7 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_point" x:Uid="rmfi_len_point" Click="rmfi_len_point_click" Text="Point" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_grid" x:Uid="rmfi_len_grid" Click="rmfi_len_grid_click" Text="Per Grid" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color code">
+                <MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color Code">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_dec" x:Uid="rmfi_color_dec" Click="rmfi_color_dec_click" Text="Decimal" GroupName="gn_color_code" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_hex" x:Uid="rmfi_color_hex" Click="rmfi_color_hex_click" Text="Hexadecimal" GroupName="gn_color_code" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_real" x:Uid="rmfi_color_real" Click="rmfi_color_real_click" Text="Real" GroupName="gn_color_code" />
@@ -672,7 +677,7 @@
                 <TextBox x:Name="tx_text_replace_with" x:Uid="tx_text_replace_with" Header="Replace width" Margin="0,4" Width="128" />
                 <CheckBox x:Name="ck_text_find_case" x:Uid="ck_text_find_case" Content="Match case." Margin="0,4" />
                 <CheckBox x:Name="ck_text_find_wrap" x:Uid="ck_text_find_wrap" Content="Wrap around." Margin="0,4" />
-                <CheckBox x:Name="ck_text_find_escs" x:Uid="ck_text_find_escs" Content="Use escape sequences." Margin="0,4" />
+                <!--<CheckBox x:Name="ck_text_find_escs" x:Uid="ck_text_find_escs" Content="Use escape sequences." Margin="0,4" />-->
                 <Button x:Name="btn_text_find_next" x:Uid="btn_text_find_next" Click="btn_text_find_next_click" Content="Find Next" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
                 <Button x:Name="btn_text_replace" x:Uid="btn_text_replace" Click="btn_text_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
                 <Button x:Name="btn_text_replace_all" x:Uid="btn_text_replace_all" Click="btn_text_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
@@ -692,7 +697,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="local:Summary">
                         <StackPanel Orientation="Horizontal">
-                            <PathIcon Data="{x:Bind Data}" Height="32" Width="32" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <PathIcon Data="{x:Bind Data}" Height="24" Width="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             <StackPanel >
                                 <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind Name, Mode=OneWay}"/>
                                 <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Hex, Mode=OneWay}"/>
@@ -722,6 +727,9 @@
                 RelativePanel.AlignBottomWithPanel="True"
                 SizeChanged="scp_page_panel_size_changed"
                 >
+                <ToolTipService.ToolTip>
+                    <ToolTip x:Name="tt_draw"></ToolTip>
+                </ToolTipService.ToolTip>
                 <!--
                 通常は, MenuFlyoutItem でキーボードアクセラレータを指定すべきだが,
                 そうすると SwapChainPanel をクリックしたあとアクセラレーターが機能しなくなる.
@@ -803,27 +811,28 @@
         <ContentDialog x:Name="cd_edit_text" x:Uid="cd_edit_text" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
             <StackPanel>
                 <TextBox x:Name="tx_edit" AcceptsReturn="True" Height="128" HorizontalAlignment="Stretch" PlaceholderText="Text" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-                <CheckBox x:Name="ck_text_ignore_bottom_blank" x:Uid="ck_text_ignore_bottom_blank" Content="Ignore bottom blank line." Margin="4,4" />
+                <!--<CheckBox x:Name="ck_text_ignore_bottom_blank" x:Uid="ck_text_ignore_bottom_blank" Content="Ignore bottom blank line." Margin="4,4" />-->
+                <CheckBox x:Name="ck_text_adjust_bound" x:Uid="ck_text_adjust_bound" Content="Adjust bounding box to text" Margin="4,4" />
             </StackPanel>
         </ContentDialog>
         <!-- 貼り付け確認ダイアログ -->
         <ContentDialog x:Name="cd_conf_paste" x:Uid="cd_conf_paste" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Paste">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
-                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_conf}" Margin="0,0,12,0" />
+                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_conf}" />
                 <TextBlock x:Uid="tk_conf_paste" />
             </StackPanel>
         </ContentDialog>
         <!-- 保存確認ダイアログ -->
         <ContentDialog x:Name="cd_conf_save" x:Uid="cd_conf_save" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Save" SecondaryButtonText="Don't Save">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
-                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_conf}" Margin="0,0,12,0" />
+                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_conf}" />
                 <TextBlock x:Uid="tk_conf_save"/>
             </StackPanel>
         </ContentDialog>
         <!-- メッセージダイアログ -->
         <ContentDialog x:Name="cd_message" x:Uid="cd_message" CloseButtonText="Close" DefaultButton="Close">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
-                <FontIcon x:Name="fi_message" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_alert}" Margin="0,0,12,0" />
+                <FontIcon x:Name="fi_message" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_alert}" />
                 <TextBlock x:Name="tk_message"/>
             </StackPanel>
         </ContentDialog>

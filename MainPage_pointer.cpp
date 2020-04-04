@@ -156,9 +156,12 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 						debug_leak_cnt++;
 #endif
-						if (ck_text_ignore_bottom_blank().IsChecked().GetBoolean()) {
-							s->delete_bottom_blank();
+						if (ck_text_adjust_bound().IsChecked().GetBoolean()) {
+							s->adjust_bound();
 						}
+						//if (ck_text_ignore_bottom_blank().IsChecked().GetBoolean()) {
+						//	s->delete_bottom_blank();
+						//}
 						reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);
 						unselect_all();
 						undo_push_append(s);
@@ -484,9 +487,9 @@ namespace winrt::GraphPaper::implementation
 					// ‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ª}Œ`‚ÌŠO•”‚Å‚È‚¢ê‡,
 					// }Œ`‚ð•ÏŒ`‚µ‚Ä‚¢‚éó‘Ô‚É‘JˆÚ‚·‚é.
 					m_pointer_state = STATE_TRAN::PRESS_FORM;
-					// ƒ|ƒCƒ“ƒ^[‚ÌŒ»ÝˆÊ’u‚ð‘O‰ñˆÊ’u‚ÉŠi”[‚·‚é.
 					m_pointer_pre = m_pointer_cur;
-					undo_push_form(m_pointer_shape, m_pointer_anchor, m_pointer_cur);
+					undo_push_anchor(m_pointer_shape, m_pointer_anchor);
+					m_pointer_shape->set_pos(m_pointer_cur, m_pointer_anchor);
 				}
 				page_draw();
 			}

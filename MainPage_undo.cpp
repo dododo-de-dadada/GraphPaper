@@ -77,7 +77,7 @@ namespace winrt::GraphPaper::implementation
 			u = new UndoSet<UNDO_OP::FILL_COLOR>(dt_reader);
 			break;
 		case UNDO_OP::ANCH_POS:
-			u = new UndoForm(dt_reader);
+			u = new UndoAnchor(dt_reader);
 			break;
 		case UNDO_OP::FONT_COLOR:
 			u = new UndoSet<UNDO_OP::FONT_COLOR>(dt_reader);
@@ -349,6 +349,12 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	// 図形の部位の位置をスタックに保存する.
+	void MainPage::undo_push_anchor(Shape* s, const ANCH_WHICH a)
+	{
+		m_stack_undo.push_back(new UndoAnchor(s, a));
+	}
+
 	// 図形を追加して, その操作をスタックに積む.
 	void MainPage::undo_push_append(Shape* s)
 	{
@@ -368,13 +374,6 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::undo_push_arrange(Shape* s, Shape* t)
 	{
 		m_stack_undo.push_back(new UndoArrange2(s, t));
-	}
-
-	// 図形の頂点や制御点の位置をスタックに保存してから変更する.
-	void MainPage::undo_push_form(Shape* s, const ANCH_WHICH a, const D2D1_POINT_2F a_pos)
-	{
-		m_stack_undo.push_back(new UndoForm(s, a));
-		s->set_pos(a_pos, a);
 	}
 
 	// 図形を挿入して, その操作をスタックに積む.

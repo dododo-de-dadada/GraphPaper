@@ -244,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を実行すると値が変わるか調べる.
-	bool UndoForm::changed(void) const noexcept
+	bool UndoAnchor::changed(void) const noexcept
 	{
 		using winrt::GraphPaper::implementation::equal;
 		D2D1_POINT_2F a_pos;
@@ -254,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 元に戻す操作を実行する.
-	void UndoForm::exec(void)
+	void UndoAnchor::exec(void)
 	{
 		D2D1_POINT_2F a_pos;
 
@@ -264,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作をデータリーダーから読み込む.
-	UndoForm::UndoForm(DataReader const& dt_reader) :
+	UndoAnchor::UndoAnchor(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader))
 	{
 		using winrt::GraphPaper::implementation::read;
@@ -274,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の, 指定された部位の位置を保存する.
-	UndoForm::UndoForm(Shape* s, const ANCH_WHICH a) :
+	UndoAnchor::UndoAnchor(Shape* s, const ANCH_WHICH a) :
 		Undo(s)
 	{
 		m_shape = s;
@@ -283,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに書き込む.
-	void UndoForm::write(DataWriter const& dt_writer)
+	void UndoAnchor::write(DataWriter const& dt_writer)
 	{
 		using winrt::GraphPaper::implementation::write;
 

@@ -433,7 +433,7 @@ namespace winrt::GraphPaper::implementation
 			else if (typeid(*s) != typeid(ShapeText)) {
 				continue;
 			}
-			auto u = new UndoForm(s, ANCH_WHICH::ANCH_SE);
+			auto u = new UndoAnchor(s, ANCH_WHICH::ANCH_SE);
 			if (static_cast<ShapeText*>(s)->adjust_bound({ m_page_size_max, m_page_size_max })) {
 				s->get_bound(m_page_min, m_page_max);
 				m_stack_undo.push_back(u);

@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::UI::Xaml::Markup::XamlReader;
 			using winrt::Windows::UI::Xaml::Controls::PathIcon;
 
-			constexpr auto START_TAG = L"<PathIcon xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"><PathIcon.Data>";
+			constexpr auto START_TAG = L"<PathIcon xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Width=\"24\" Height=\"24\"><PathIcon.Data>";
 			constexpr auto END_TAG = L"</PathIcon.Data></PathIcon>";
 			winrt::hstring xaml = START_TAG + move_and_draw_command + END_TAG;
 			auto icon = unbox_value<PathIcon>(XamlReader::Load(xaml));

@@ -182,8 +182,8 @@ namespace winrt::GraphPaper::implementation
 						// 貼り付ける最大の大きさをウィンドウの大きさに制限する.
 						const double scale = m_page_layout.m_page_scale;
 						D2D1_SIZE_F max_size{
-							scp_page_panel().ActualWidth() / scale,
-							scp_page_panel().ActualHeight() / scale
+							static_cast<FLOAT>(scp_page_panel().ActualWidth() / scale),
+							static_cast<FLOAT>(scp_page_panel().ActualHeight() / scale)
 						};
 						t->adjust_bound(max_size);
 						D2D1_POINT_2F s_pos{

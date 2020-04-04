@@ -165,10 +165,14 @@
     <value>Page Size</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_text_ignore_bottom_blank.Content" xml:space="preserve">
-    <value>Ignore bottom blank line.</value>
+  <data name="ck_text_adjust_bound.Content" xml:space="preserve">
+    <value>大きさを文字列に合わせる</value>
     <comment>CheckBox</comment>
   </data>
+  <!--<data name="ck_text_ignore_bottom_blank.Content" xml:space="preserve">
+    <value>Ignore bottom blank line.</value>
+    <comment>CheckBox</comment>
+  </data>-->
   <data name="ck_text_find_case.Content" xml:space="preserve">
     <value>Match case</value>
     <comment>CheckBox</comment>
@@ -186,7 +190,7 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_color_real.Text" xml:space="preserve">
-    <value>Real number</value>
+    <value>Real Number</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_color_hex.Text" xml:space="preserve">
@@ -214,11 +218,11 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfsi_color_code.Text" xml:space="preserve">
-    <value>Color code</value>
+    <value>Color Code</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_len_unit.Text" xml:space="preserve">
-    <value>Length unit</value>
+    <value>Length Unit</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="str_font_stretch_condensed" xml:space="preserve">
@@ -325,6 +329,10 @@
     <value>Layout</value>
     <comment>MenuBarItem</comment>
   </data>
+  <data name="mbi_misc.Title" xml:space="preserve">
+    <value>&amp;Misc</value>
+    <comment>MenuBarItem</comment>
+  </data>
   <data name="mbi_stroke.Title" xml:space="preserve">
     <value>Stroke</value>
     <comment>MenuBarItem</comment>
@@ -406,7 +414,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_grid_len.Text" xml:space="preserve">
-    <value>Grid Length...</value>
+    <value>Size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_grid_gray.Text" xml:space="preserve">
@@ -426,17 +434,19 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_page_color.Text" xml:space="preserve">
-    <value>Page color...</value>
+    <value>Page Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_page_size.Text" xml:space="preserve">
-    <value>Page size...</value>
+    <value>Page Size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
+  <!--
   <data name="mfi_page_unit.Text" xml:space="preserve">
-    <value>Page unit and color format...</value>
+    <value>Page Unit and Color Format...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
+  -->
   <data name="mfi_xcvd_paste.Text" xml:space="preserve">
     <value>Paste</value>
     <comment>MenuFlyoutItem</comment>
@@ -554,7 +564,7 @@
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_text_line_height.Text" xml:space="preserve">
-    <value>Line height</value>
+    <value>Line Height</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_zoom.Text" xml:space="preserve">
@@ -690,7 +700,7 @@
     <comment>String</comment>
   </data>
   <data name="str_arrow_shift" xml:space="preserve">
-    <value>Length to shift tip</value>
+    <value>Shift</value>
     <comment>String</comment>
   </data>
   <data name="str_arrow_width" xml:space="preserve">
@@ -786,7 +796,7 @@
     <comment>String</comment>
   </data>
   <data name="str_gray_scale" xml:space="preserve">
-    <value>Gray scale</value>
+    <value>Gray Scale</value>
     <comment>String</comment>
   </data>
   <data name="str_page" xml:space="preserve">
@@ -923,15 +933,15 @@
     <comment>TextBlock</comment>
   </data>
   <data name="mfi_layout_delete.Text" xml:space="preserve">
-    <value>Delete saved layout</value>
+    <value>Delete Saved Layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_layout_save.Text" xml:space="preserve">
-    <value>Save layout</value>
+    <value>Save Layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_patt.Text" xml:space="preserve">
-    <value>Grid patt</value>
+    <value>Grid Patten</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="rmfi_grid_patt_1.Text" xml:space="preserve">
@@ -950,8 +960,10 @@
     <value>Arrange</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
+  <!--
   <data name="ck_text_find_escs.Content" xml:space="preserve">
     <value>Use escape sequences.</value>
     <comment>CheckBox</comment>
   </data>
+  -->
 </root>

@@ -1160,7 +1160,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形を破棄する.
 		~ShapeText(void);
-		// 大きさを文字列に合わせる.
+		// 文字列に大きさを合わせる.
 		bool adjust_bound(const D2D1_SIZE_F& max_size = D2D1_SIZE_F{ 0.0F, 0.0F });
 		// テキストレイアウトから計量の配列を得る.
 		void create_test_metrics(void);

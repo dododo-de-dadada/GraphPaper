@@ -185,9 +185,9 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// 図形を変形する操作
+	// 図形の部位の操作
 	//------------------------------
-	struct UndoForm : Undo {
+	struct UndoAnchor : Undo {
 		// 変更される図形の部位
 		ANCH_WHICH m_anchor;
 		// 図形の部位の位置
@@ -198,9 +198,9 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行する.
 		void exec(void);
 		// 操作をデータリーダーから読み込む.
-		UndoForm(DataReader const& dt_reader);
-		// 指定した部位の図形の位置を保存する.
-		UndoForm(Shape* s, const ANCH_WHICH a);
+		UndoAnchor(DataReader const& dt_reader);
+		// 図形の部位を保存する.
+		UndoAnchor(Shape* s, const ANCH_WHICH a);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};
