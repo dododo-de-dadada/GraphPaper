@@ -302,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
-			status_bar_set_grid();
+			stbar_set_grid();
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::GRID_PATT>)) {
 			// ページメニューの「方眼の表示」に印をつける.
@@ -318,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::PAGE_SIZE>)) {
 			// ページの大きさをステータスバーに格納する.
-			status_bar_set_page();
+			stbar_set_page();
 		}
 		else if (u_type == typeid(UndoSet<UNDO_OP::STROKE_STYLE>)) {
 			// 線枠メニューの「種類」に印をつける.

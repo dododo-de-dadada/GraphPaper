@@ -506,7 +506,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// sŠÔ‚ğ“¾‚é.
-	bool ShapeText::get_text_line_height(double& value) const noexcept
+	bool ShapeText::get_text_line(double& value) const noexcept
 	{
 		value = m_text_line;
 		return true;
@@ -823,7 +823,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğsŠÔ‚ÉŠi”[‚·‚é.
-	void ShapeText::set_text_line_height(const double value)
+	void ShapeText::set_text_line(const double value)
 	{
 		if (m_text_line == value) {
 			return;

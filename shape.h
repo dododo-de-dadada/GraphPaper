@@ -126,7 +126,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_LINE,		// 線分
 		SHAPE_QUAD,		// 四辺形
 		SHAPE_RECT,		// 方形
-		SHAPE_RRECT,	// 角丸方形
+		SHAPE_RRCT,	// 角丸方形
 		SHAPE_TEXT,		// 文字列
 		SHAPE_GROUP,	// グループ
 		SHAPE_SCALE		// 目盛り
@@ -432,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列のそろえを得る.
 		virtual bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& /*val*/) const noexcept { return false; }
 		// 行の高さを得る.
-		virtual bool get_text_line_height(double& /*val*/) const noexcept { return false; }
+		virtual bool get_text_line(double& /*val*/) const noexcept { return false; }
 		// 文字列の周囲の余白を得る.
 		virtual bool get_text_margin(D2D1_SIZE_F& /*val*/) const noexcept { return false; }
 		// 文字範囲を得る
@@ -502,7 +502,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字列のそろえに格納する.
 		virtual void set_text_align_t(const DWRITE_TEXT_ALIGNMENT /*val*/) {}
 		// 値を行間に格納する.
-		virtual void set_text_line_height(const double /*val*/) {}
+		virtual void set_text_line(const double /*val*/) {}
 		// 値を文字列の余白に格納する.
 		virtual void set_text_margin(const D2D1_SIZE_F /*val*/) {}
 		// 値を文字範囲に格納する.
@@ -652,7 +652,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体の太さを得る.
 		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept;
 		// 行間を得る.
-		bool get_text_line_height(double& value) const noexcept;
+		bool get_text_line(double& value) const noexcept;
 		// 文字列の周囲の余白を得る.
 		bool get_text_margin(D2D1_SIZE_F& value) const noexcept;
 		// 段落のそろえを得る.
@@ -706,7 +706,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		void set_font_weight(const DWRITE_FONT_WEIGHT value);
 		// 値を行間に格納する.
-		void set_text_line_height(const double value);
+		void set_text_line(const double value);
 		// 値を文字列の余白に格納する.
 		void set_text_margin(const D2D1_SIZE_F value);
 		// 値を段落のそろえに格納する.
@@ -1189,7 +1189,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体の字体を得る.
 		bool get_font_style(DWRITE_FONT_STYLE& value) const noexcept;
 		// 行間を得る.
-		bool get_text_line_height(double& value) const noexcept;
+		bool get_text_line(double& value) const noexcept;
 		// 書体の太さを得る.
 		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept;
 		// 文字列の余白を得る.
@@ -1225,7 +1225,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		void set_font_weight(const DWRITE_FONT_WEIGHT value);
 		// 値を行間に格納する.
-		void set_text_line_height(const double value);
+		void set_text_line(const double value);
 		// 値を文字列の余白に格納する.
 		void set_text_margin(const D2D1_SIZE_F value);
 		// 値を段落のそろえに格納する.

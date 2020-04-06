@@ -29,7 +29,7 @@
 // MainPage_sample.cpp	見本ダイアログの設定, 表示
 // MainPage_scroll.cpp	スクロールバーの設定
 // MainPage_select.cpp	図形の選択
-// MainPage_status.cpp	ステータスバーの設定
+// MainPage_stbar.cpp	ステータスバーの設定
 // MainPage_stroke.cpp	線枠の設定
 // MainPage_summary.cpp	図形一覧パネルの表示, 設定
 // MainPage_text.cpp	文字列の編集と検索/置換
@@ -139,7 +139,7 @@ namespace winrt::GraphPaper::implementation
 		LINE,	// 線分
 		QUAD,	// 四辺形
 		RECT,	// 方形
-		RRECT,	// 角丸方形
+		RRCT,	// 角丸方形
 		TEXT,	// 文字列
 		SCALE	// 目盛り
 	};
@@ -212,10 +212,11 @@ namespace winrt::GraphPaper::implementation
 		wchar_t* m_text_repl = nullptr;	// 検索の置換文字列
 		bool m_text_find_case = false;	// 英文字の区別フラグ
 		bool m_text_find_wrap = false;	// 回り込み検索フラグ
+		bool m_text_adjust = false;	// 文字列に合わせるフラグ
 
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
-		STATUS_BAR m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
+		STATUS_BAR m_stbar = stbar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		DRAW_TOOL m_draw_tool = DRAW_TOOL::SELECT;		// 作図ツール
 		SHAPE_DX m_page_dx;		// ページの描画環境
@@ -466,23 +467,23 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「大きさを合わせる」が選択された.
 		void mfi_text_bound_adjust_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行の高さ」>「狭める」が選択された.
-		void mfi_text_line_height_contract_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_text_line_con_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行の高さ」>「広げる」が選択された.
-		void mfi_text_line_height_expand_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_text_line_exp_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行の高さ」>「高さ」が選択された.
-		IAsyncAction mfi_text_line_height_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction mfi_text_line_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「余白」が選択された.
 		IAsyncAction mfi_text_margin_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」>「中段」が選択された.
-		void rmfi_text_align_middle_click(IInspectable const&, RoutedEventArgs const&);
+		void rmfi_text_align_mid_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
-		void rmfi_text_align_bottom_click(IInspectable const&, RoutedEventArgs const&);
+		void rmfi_text_align_bot_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
 		void rmfi_text_align_top_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「中央」が選択された.
 		void rmfi_text_align_center_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「均等」が選択された.
-		void rmfi_text_align_justified_click(IInspectable const&, RoutedEventArgs const&);
+		void rmfi_text_align_just_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
 		void rmfi_text_align_left_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
@@ -504,9 +505,9 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
 		IAsyncAction mfi_grid_len_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼の大きさ」>「狭める」が選択された.
-		void mfi_grid_len_contract_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_grid_len_con_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼の大きさ」>「広げる」が選択された.
-		void mfi_grid_len_expand_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_grid_len_exp_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の濃さ」が選択された.
 		IAsyncAction mfi_grid_gray_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の形式」>「パターン 1」が選択された.
@@ -652,7 +653,8 @@ namespace winrt::GraphPaper::implementation
 		// 範囲選択を終了する.
 		void pointer_finish_selecting_area(const VirtualKeyModifiers k_mod);
 		// 図形の作成を終了する.
-		void pointer_finish_creating(void);
+		IAsyncAction pointer_finish_creating_text_async(const D2D1_POINT_2F diff);
+		void pointer_finish_creating(const D2D1_POINT_2F& diff);
 		// 図形の移動を終了する.
 		void pointer_finish_moving(void);
 		// 押された図形の編集を終了する.
@@ -721,34 +723,34 @@ namespace winrt::GraphPaper::implementation
 		bool unselect_all(const bool t_range_only = false);
 
 		//-------------------------------
-		// MainPage_status.cpp
+		// MainPage_stbar.cpp
 		// ステータスバーの設定
 		//-------------------------------
 
 		// レイアウトメニューの「ステータスバー」が選択された.
-		void mi_status_bar_click(IInspectable const&, RoutedEventArgs const&);
+		void mi_stbar_click(IInspectable const&, RoutedEventArgs const&);
 		// ステータスバーのメニュー項目に印をつける.
-		void status_bar_check_menu(const STATUS_BAR a);
+		void stbar_check_menu(const STATUS_BAR a);
 		// 列挙型を OR 演算する.
-		static STATUS_BAR status_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
+		static STATUS_BAR stbar_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 		// ステータスバーの状態をデータリーダーから読み込む.
-		void status_bar_read(DataReader const& dt_reader);
+		void stbar_read(DataReader const& dt_reader);
 		// ポインターの位置をステータスバーに格納する.
-		void status_bar_set_curs(void);
+		void stbar_set_curs(void);
 		// 作図ツールをステータスバーに格納する.
-		void status_bar_set_draw(void);
+		void stbar_set_draw(void);
 		// 方眼の大きさをステータスバーに格納する.
-		void status_bar_set_grid(void);
+		void stbar_set_grid(void);
 		// ページの大きさをステータスバーに格納する.
-		void status_bar_set_page(void);
+		void stbar_set_page(void);
 		// 単位をステータスバーに格納する.
-		void status_bar_set_unit(void);
+		void stbar_set_unit(void);
 		// 拡大率をステータスバーに格納する.
-		void status_bar_set_zoom(void);
+		void stbar_set_zoom(void);
 		// ステータスバーの表示を設定する.
-		void status_bar_visibility(void);
+		void stbar_visibility(void);
 		// ステータスバーの状態をデータライターに書き込む.
-		void status_bar_write(DataWriter const& dt_writer);
+		void stbar_write(DataWriter const& dt_writer);
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -835,24 +837,24 @@ namespace winrt::GraphPaper::implementation
 		void btn_text_find_close_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「次を検索」ボタンが押された.
 		void btn_text_find_next_click(IInspectable const&, RoutedEventArgs const&);
-		//　文字列検索パネルの「すべて置換」ボタンが押された.
+		// 文字列検索パネルの「すべて置換」ボタンが押された.
 		void btn_text_replace_all_click(IInspectable const&, RoutedEventArgs const&);
-		//　文字列検索パネルの「置換して次に」ボタンが押された.
+		// 文字列検索パネルの「置換して次に」ボタンが押された.
 		void btn_text_replace_click(IInspectable const&, RoutedEventArgs const&);
-		//　検索の値をデータリーダーから読み込む.
+		// 検索の値をデータリーダーから読み込む.
 		void text_find_read(DataReader const& dt_reader);
 		// 文字列検索パネルから値を格納する.
 		void text_find_set(void);
-		//　	図形リストの中から文字列を検索する.
+		// 図形リストの中から文字列を検索する.
 		//bool text_find_within(void);
-		//　検索の値をデータリーダーに書き込む.
+		// 検索の値をデータリーダーに書き込む.
 		void text_find_write(DataWriter const& dt_writer);
-		//　編集メニューの「文字列の検索/置換」が選択された.
+		// 編集メニューの「文字列の検索/置換」が選択された.
 		void mfi_text_find_click(IInspectable const&, RoutedEventArgs const&);
-		//　検索文字列が変更された.
+		// 検索文字列が変更された.
 		void tx_text_find_what_changed(IInspectable const&, TextChangedEventArgs const&);
 		// 図形が持つ文字列を編集する.
-		void text_edit_shape(ShapeText* s);
+		IAsyncAction text_edit_async(ShapeText* s);
 		// 編集メニューの「文字列の編集」が選択された.
 		void mfi_text_edit_click(IInspectable const&, RoutedEventArgs const&);
 

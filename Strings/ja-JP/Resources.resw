@@ -407,11 +407,11 @@
     <value>太さ...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_grid_contract.Text" xml:space="preserve">
+  <data name="mfi_grid_len_con.Text" xml:space="preserve">
     <value>狭める</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_grid_expand.Text" xml:space="preserve">
+  <data name="mfi_grid_len_exp.Text" xml:space="preserve">
     <value>広げる</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -493,15 +493,15 @@
     <value>リストを表示</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_height.Text" xml:space="preserve">
+  <data name="mfi_text_line.Text" xml:space="preserve">
     <value>高さ...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_height_contract.Text" xml:space="preserve">
+  <data name="mfi_text_line_con.Text" xml:space="preserve">
     <value>狭める</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_height_expand.Text" xml:space="preserve">
+  <data name="mfi_text_line_exp.Text" xml:space="preserve">
     <value>広げる</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -541,7 +541,7 @@
     <value>方眼線の表示</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_grid_size.Text" xml:space="preserve">
+  <data name="mfsi_grid_len.Text" xml:space="preserve">
     <value>方眼の大きさ</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -549,7 +549,7 @@
     <value>最近使ったファイル</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_status_bar.Text" xml:space="preserve">
+  <data name="mfsi_stbar.Text" xml:space="preserve">
     <value>ステータスバー</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -565,7 +565,7 @@
     <value>文字列の整列</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_text_line_height.Text" xml:space="preserve">
+  <data name="mfsi_text_line.Text" xml:space="preserve">
     <value>行の高さ</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -629,7 +629,7 @@
     <value>実線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_bottom.Text" xml:space="preserve">
+  <data name="rmfi_text_align_bot.Text" xml:space="preserve">
     <value>下よせ</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -637,7 +637,7 @@
     <value>中央</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_justified.Text" xml:space="preserve">
+  <data name="rmfi_text_align_just.Text" xml:space="preserve">
     <value>均等</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -645,7 +645,7 @@
     <value>左よせ</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_middle.Text" xml:space="preserve">
+  <data name="rmfi_text_align_mid.Text" xml:space="preserve">
     <value>中段</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -850,27 +850,27 @@
     <value>方眼にそろえる</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_status_curs.Text" xml:space="preserve">
+  <data name="tmfi_stbar_curs.Text" xml:space="preserve">
     <value>カーソルの位置</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_grid.Text" xml:space="preserve">
+  <data name="tmfi_stbar_grid.Text" xml:space="preserve">
     <value>方眼の大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_page.Text" xml:space="preserve">
+  <data name="tmfi_stbar_page.Text" xml:space="preserve">
     <value>ページの大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_tool.Text" xml:space="preserve">
+  <data name="tmfi_stbar_tool.Text" xml:space="preserve">
     <value>ツール</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_unit.Text" xml:space="preserve">
+  <data name="tmfi_stbar_unit.Text" xml:space="preserve">
     <value>単位</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_zoom.Text" xml:space="preserve">
+  <data name="tmfi_stbar_zoom.Text" xml:space="preserve">
     <value>拡大率</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>

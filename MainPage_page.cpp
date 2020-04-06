@@ -83,10 +83,10 @@ namespace winrt::GraphPaper::implementation
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
-		status_bar_set_curs();
-		status_bar_set_grid();
-		status_bar_set_page();
-		status_bar_set_unit();
+		stbar_set_curs();
+		stbar_set_grid();
+		stbar_set_page();
+		stbar_set_unit();
 	}
 
 	// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
@@ -111,7 +111,7 @@ namespace winrt::GraphPaper::implementation
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
-		status_bar_set_page();
+		stbar_set_page();
 	}
 
 	// ページの「ページの単位と色の書式」ダイアログの「適用」ボタンが押された.
@@ -274,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 				// 直線の補助線を表示する.
 				m_page_layout.draw_auxiliary_line(m_page_dx, m_pointer_pressed, m_pointer_cur);
 			}
-			else if (m_draw_tool == DRAW_TOOL::RRECT) {
+			else if (m_draw_tool == DRAW_TOOL::RRCT) {
 				// 角丸方形の場合,
 				// 角丸方形の補助線を表示する.
 				m_page_layout.draw_auxiliary_rrect(m_page_dx, m_pointer_pressed, m_pointer_cur);
@@ -294,7 +294,7 @@ namespace winrt::GraphPaper::implementation
 			// スワップチェーンの内容を画面に表示する.
 			m_page_dx.Present();
 			// ポインターの位置をステータスバーに格納する.
-			status_bar_set_curs();
+			stbar_set_curs();
 		}
 #if defined(_DEBUG)
 		else {

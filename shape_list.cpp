@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 		else if (s_type == SHAPE_RECT) {
 			s = new ShapeRect(dt_reader);
 		}
-		else if (s_type == SHAPE_RRECT) {
+		else if (s_type == SHAPE_RRCT) {
 			s = new ShapeRRect(dt_reader);
 		}
 		else if (s_type == SHAPE_TEXT) {
@@ -425,7 +425,7 @@ namespace winrt::GraphPaper::implementation
 				s_uint = SHAPE_RECT;
 			}
 			else if (s_type == typeid(ShapeRRect)) {
-				s_uint = SHAPE_RRECT;
+				s_uint = SHAPE_RRCT;
 			}
 			else if (s_type == typeid(ShapeScale)) {
 				s_uint = SHAPE_SCALE;

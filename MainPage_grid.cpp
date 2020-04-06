@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼の大きさ」>「狭める」が選択された.
-	void MainPage::mfi_grid_len_contract_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		const double value = (m_page_layout.m_grid_base + 1.0) * 0.5 - 1.0;
 		if (value < 1.0) {
@@ -154,7 +154,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼の大きさ」>「広げる」が選択された.
-	void MainPage::mfi_grid_len_expand_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		const double value = (m_page_layout.m_grid_base + 1.0) * 2.0 - 1.0;
 		if (value > max(m_page_layout.m_page_size.width, m_page_layout.m_page_size.height)) {

@@ -463,7 +463,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (s != nullptr) {
-			text_edit_shape(s);
+			text_edit_async(s);
 		}
 
 	}
@@ -492,13 +492,28 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が持つ文字列を編集する.
 	// s	文字列図形
-	void MainPage::text_edit_shape(ShapeText* s)
+	IAsyncAction MainPage::text_edit_async(ShapeText* s)
 	{
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		static winrt::event_token primary_token;
 		static winrt::event_token closed_token;
 
 		tx_edit().Text(s->m_text == nullptr ? L"" : s->m_text);
 		tx_edit().SelectAll();
+		ck_text_adjust_bound().IsChecked(m_text_adjust);
+		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
+			auto text = wchar_cpy(tx_edit().Text().c_str());
+			undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
+			if (m_text_adjust = ck_text_adjust_bound().IsChecked().GetBoolean()) {
+				undo_push_anchor(s, ANCH_WHICH::ANCH_SE);
+				s->adjust_bound();
+			}
+			// 一連の操作の区切としてヌル操作をスタックに積む.
+			undo_push_null();
+			enable_edit_menu();
+			page_draw();
+		}
+		/*
 		primary_token = cd_edit_text().PrimaryButtonClick(
 			[this, s](auto, auto)
 			{
@@ -508,9 +523,6 @@ namespace winrt::GraphPaper::implementation
 					undo_push_anchor(s, ANCH_WHICH::ANCH_SE);
 					s->adjust_bound();
 				}
-				//if (ck_text_ignore_bottom_blank().IsChecked().GetBoolean()) {
-				//	s->delete_bottom_blank();
-				//}
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
 				// 編集メニュー項目の使用の可否を設定する.
@@ -526,6 +538,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		auto _{ cd_edit_text().ShowAsync() };
+		*/
 	}
 
 	// 検索の値をデータリーダーから読み込む.
@@ -533,8 +546,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		read(m_text_find, dt_reader);
 		read(m_text_repl, dt_reader);
-		m_text_find_case = dt_reader.ReadBoolean();
-		m_text_find_wrap = dt_reader.ReadBoolean();
+		uint16_t bit = dt_reader.ReadUInt16();
+		m_text_adjust = ((bit & 1) != 0);
+		m_text_find_case = ((bit & 2) != 0);
+		m_text_find_wrap = ((bit & 4) != 0);
 	}
 
 	// 文字列検索パネルから値を格納する.
@@ -557,8 +572,17 @@ namespace winrt::GraphPaper::implementation
 	{
 		write(m_text_find, dt_writer);
 		write(m_text_repl, dt_writer);
-		dt_writer.WriteBoolean(m_text_find_case);
-		dt_writer.WriteBoolean(m_text_find_wrap);
+		uint16_t bit = 0;
+		if (m_text_adjust) {
+			bit |= 1;
+		}
+		if (m_text_find_case) {
+			bit |= 2;
+		}
+		if (m_text_find_wrap) {
+			bit |= 4;
+		}
+		dt_writer.WriteUInt16(bit);
 	}
 
 	// 検索文字列が変更された.

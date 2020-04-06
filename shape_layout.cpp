@@ -447,7 +447,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// sŠÔ‚ð“¾‚é.
-	bool ShapeLayout::get_text_line_height(double& value) const noexcept
+	bool ShapeLayout::get_text_line(double& value) const noexcept
 	{
 		value = m_text_line;
 		return true;
@@ -641,7 +641,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ðsŠÔ‚ÉŠi”[‚·‚é.
-	void ShapeLayout::set_text_line_height(const double value)
+	void ShapeLayout::set_text_line(const double value)
 	{
 		m_text_line = value;
 	}
@@ -675,7 +675,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_stroke_patt(m_stroke_patt);
 		s->get_stroke_style(m_stroke_style);
 		s->get_stroke_width(m_stroke_width);
-		s->get_text_line_height(m_text_line);
+		s->get_text_line(m_text_line);
 		s->get_text_align_t(m_text_align_t);
 		s->get_text_align_p(m_text_align_p);
 		s->get_text_margin(m_text_margin);

@@ -140,10 +140,10 @@ namespace winrt::GraphPaper::implementation
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
 			text_find_read(dt_reader);
-			status_bar_read(dt_reader);
+			stbar_read(dt_reader);
 			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
-			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
+			m_stbar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 
 			m_page_layout.read(dt_reader);
 			// 無効なデータを読み込んでアプリが落ちることがないよう, 値を制限する.
@@ -345,10 +345,10 @@ namespace winrt::GraphPaper::implementation
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
 			
 			text_find_write(dt_writer);
-			status_bar_write(dt_writer);
+			stbar_write(dt_writer);
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_code));
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_stbar));
 			m_page_layout.write(dt_writer);
 			if (suspend) {
 				s_list_write<!REDUCE>(m_list_shapes, dt_writer);
@@ -535,7 +535,7 @@ namespace winrt::GraphPaper::implementation
 		font_style_check_menu(m_page_layout.m_font_style);
 		grid_patt_check_menu(m_page_layout.m_grid_patt);
 		grid_show_check_menu(m_page_layout.m_grid_show);
-		status_bar_check_menu(m_status_bar);
+		stbar_check_menu(m_stbar);
 		text_align_t_check_menu(m_page_layout.m_text_align_t);
 		text_align_p_check_menu(m_page_layout.m_text_align_p);
 		tmfi_grid_snap().IsChecked(m_page_layout.m_grid_snap);
@@ -567,13 +567,13 @@ namespace winrt::GraphPaper::implementation
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
 		set_page_panle_size();
 		page_draw();
-		status_bar_set_curs();
-		status_bar_set_draw();
-		status_bar_set_grid();
-		status_bar_set_page();
-		status_bar_set_zoom();
-		status_bar_set_unit();
-		status_bar_visibility();
+		stbar_set_curs();
+		stbar_set_draw();
+		stbar_set_grid();
+		stbar_set_page();
+		stbar_set_zoom();
+		stbar_set_unit();
+		stbar_visibility();
 	}
 
 	// ファイルメニューの「開く」が選択された

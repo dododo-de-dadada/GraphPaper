@@ -527,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 	}
 	void UndoSet<UNDO_OP::TEXT_LINE>::SET(Shape* s, const double& value)
 	{
-		s->set_text_line_height(value);
+		s->set_text_line(value);
 	}
 	void UndoSet<UNDO_OP::TEXT_MARGIN>::SET(Shape* s, const D2D1_SIZE_F& value)
 	{
@@ -637,7 +637,7 @@ namespace winrt::GraphPaper::implementation
 	}
 	bool UndoSet<UNDO_OP::TEXT_LINE>::GET(Shape* s, double& value) noexcept
 	{
-		return s->get_text_line_height(value);
+		return s->get_text_line(value);
 	}
 	bool UndoSet<UNDO_OP::TEXT_MARGIN>::GET(Shape* s, D2D1_SIZE_F& value) noexcept
 	{

@@ -405,11 +405,11 @@
     <value>Weight...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_grid_contract.Text" xml:space="preserve">
+  <data name="mfi_grid_len_con.Text" xml:space="preserve">
     <value>Condense</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_grid_expand.Text" xml:space="preserve">
+  <data name="mfi_grid_len_exp.Text" xml:space="preserve">
     <value>Expand</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -491,15 +491,15 @@
     <value>List Summaries</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_height.Text" xml:space="preserve">
+  <data name="mfi_text_line.Text" xml:space="preserve">
     <value>Height...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_height_contract.Text" xml:space="preserve">
+  <data name="mfi_text_line_con.Text" xml:space="preserve">
     <value>Condense</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_height_expand.Text" xml:space="preserve">
+  <data name="mfi_text_line_exp.Text" xml:space="preserve">
     <value>Expand</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -539,7 +539,7 @@
     <value>Show Grid</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_grid_size.Text" xml:space="preserve">
+  <data name="mfsi_grid_len.Text" xml:space="preserve">
     <value>Size Grid</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -547,7 +547,7 @@
     <value>Recent Files</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_status_bar.Text" xml:space="preserve">
+  <data name="mfsi_stbar.Text" xml:space="preserve">
     <value>Status Bar</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -563,7 +563,7 @@
     <value>Text Alignment</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_text_line_height.Text" xml:space="preserve">
+  <data name="mfsi_text_line.Text" xml:space="preserve">
     <value>Line Height</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -627,7 +627,7 @@
     <value>Solid</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_bottom.Text" xml:space="preserve">
+  <data name="rmfi_text_align_bot.Text" xml:space="preserve">
     <value>Bottom</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -635,7 +635,7 @@
     <value>Center</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_justified.Text" xml:space="preserve">
+  <data name="rmfi_text_align_just.Text" xml:space="preserve">
     <value>Justified</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -643,7 +643,7 @@
     <value>Left</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_text_align_middle.Text" xml:space="preserve">
+  <data name="rmfi_text_align_mid.Text" xml:space="preserve">
     <value>Middle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -856,27 +856,27 @@
     <value>Snap to Grid</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_status_curs.Text" xml:space="preserve">
+  <data name="tmfi_stbar_curs.Text" xml:space="preserve">
     <value>Cursor Position</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_grid.Text" xml:space="preserve">
+  <data name="tmfi_stbar_grid.Text" xml:space="preserve">
     <value>Grid Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_page.Text" xml:space="preserve">
+  <data name="tmfi_stbar_page.Text" xml:space="preserve">
     <value>Page Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_tool.Text" xml:space="preserve">
+  <data name="tmfi_stbar_tool.Text" xml:space="preserve">
     <value>Tool</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_unit.Text" xml:space="preserve">
+  <data name="tmfi_stbar_unit.Text" xml:space="preserve">
     <value>Unit</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_zoom.Text" xml:space="preserve">
+  <data name="tmfi_stbar_zoom.Text" xml:space="preserve">
     <value>Zoom</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>

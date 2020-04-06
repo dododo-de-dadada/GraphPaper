@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_len_unit = LEN_UNIT::PIXEL;
 		m_color_code = COLOR_CODE::DEC;
-		m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
+		m_stbar = stbar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
 	}
 
 	// 保存されたレイアウトデータを読み込む.

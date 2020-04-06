@@ -55,10 +55,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_len_unit = L;
-		status_bar_set_curs();
-		status_bar_set_grid();
-		status_bar_set_page();
-		status_bar_set_unit();
+		stbar_set_curs();
+		stbar_set_grid();
+		stbar_set_page();
+		stbar_set_unit();
 	}
 
 	// その他メニューの「色成分の表記」>「10進数」が選択された.

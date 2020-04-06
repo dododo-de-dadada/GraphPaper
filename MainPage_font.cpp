@@ -451,7 +451,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「行の高さ」>「高さ」が選択された.
-	IAsyncAction MainPage::mfi_text_line_height_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::mfi_text_line_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -467,7 +467,7 @@ namespace winrt::GraphPaper::implementation
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			double sample_value;
-			m_sample_shape->get_text_line_height(sample_value);
+			m_sample_shape->get_text_line(sample_value);
 			undo_push_set<UNDO_OP::TEXT_LINE>(sample_value);
 		}
 		delete m_sample_shape;
@@ -481,7 +481,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「行の高さ」>「狭める」が選択された.
-	void MainPage::mfi_text_line_height_contract_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_text_line_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto value = m_page_layout.m_text_line - TEXT_LINE_DELTA;
 		if (value <= FLT_MIN) {
@@ -493,7 +493,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「行の高さ」>「広げる」が選択された.
-	void MainPage::mfi_text_line_height_expand_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::mfi_text_line_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto value = m_page_layout.m_text_line + TEXT_LINE_DELTA;
 		if (m_page_layout.m_text_line != value) {
@@ -557,7 +557,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
-	void MainPage::rmfi_text_align_bottom_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::rmfi_text_align_bot_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
 	}
@@ -569,7 +569,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「文字列のそろえ」>「均等」が選択された.
-	void MainPage::rmfi_text_align_justified_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::rmfi_text_align_just_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 	}
@@ -581,7 +581,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「段落のそろえ」>「中段」が選択された.
-	void MainPage::rmfi_text_align_middle_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::rmfi_text_align_mid_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
@@ -603,12 +603,12 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align)
 	{
 		rmfi_text_align_top().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bottom().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_middle().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		rmfi_text_align_bot().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_mid().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
 		rmfi_text_align_top_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bottom_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_middle_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		rmfi_text_align_bot_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_mid_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」に印をつける.
@@ -618,12 +618,12 @@ namespace winrt::GraphPaper::implementation
 		rmfi_text_align_left().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_LEADING);
 		rmfi_text_align_right().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_TRAILING);
 		rmfi_text_align_center().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_justified().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		rmfi_text_align_just().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 
 		rmfi_text_align_left_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_LEADING);
 		rmfi_text_align_right_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_TRAILING);
 		rmfi_text_align_center_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_justified_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		rmfi_text_align_just_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -690,7 +690,7 @@ namespace winrt::GraphPaper::implementation
 		const double value = args.NewValue();
 		text_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::TEXT_LINE) {
-			s->set_text_line_height(value * SLIDER_STEP * dpi / 96.0);
+			s->set_text_line(value * SLIDER_STEP * dpi / 96.0);
 		}
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			D2D1_SIZE_F margin;

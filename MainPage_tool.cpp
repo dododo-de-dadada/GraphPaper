@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_draw_tool = DRAW_TOOL::BEZI;
 		// 作図ツールをステータスバーに格納する.
-		status_bar_set_draw();
+		stbar_set_draw();
 		pointer_set();
 	}
 
@@ -23,7 +23,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_draw_tool = DRAW_TOOL::ELLI;
 		// 作図ツールをステータスバーに格納する.
-		status_bar_set_draw();
+		stbar_set_draw();
 		pointer_set();
 	}
 
@@ -32,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_draw_tool = DRAW_TOOL::LINE;
 		// 作図ツールをステータスバーに格納する.
-		status_bar_set_draw();
+		stbar_set_draw();
 		pointer_set();
 	}
 
@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_draw_tool = DRAW_TOOL::QUAD;
 		// 作図ツールをステータスバーに格納する.
-		status_bar_set_draw();
+		stbar_set_draw();
 		pointer_set();
 	}
 
@@ -50,16 +50,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_draw_tool = DRAW_TOOL::RECT;
 		// 作図ツールをステータスバーに格納する.
-		status_bar_set_draw();
+		stbar_set_draw();
 		pointer_set();
 	}
 
 	// 作図メニューの「角丸方形」が選択された.
 	void MainPage::rmfi_tool_rrect_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_draw_tool = DRAW_TOOL::RRECT;
+		m_draw_tool = DRAW_TOOL::RRCT;
 		// 作図ツールをステータスバーに格納する.
-		status_bar_set_draw();
+		stbar_set_draw();
 		pointer_set();
 	}
 
@@ -71,7 +71,7 @@ namespace winrt::GraphPaper::implementation
 		m_pointer_shape = nullptr;
 		m_pointer_anchor = ANCH_WHICH::ANCH_OUTSIDE;
 		// 作図ツールをステータスバーに格納する.
-		status_bar_set_draw();
+		stbar_set_draw();
 		pointer_set();
 	}
 
@@ -80,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_draw_tool = DRAW_TOOL::TEXT;
 		// 作図ツールをステータスバーに格納する.
-		status_bar_set_draw();
+		stbar_set_draw();
 		pointer_set();
 	}
 
@@ -89,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_draw_tool = DRAW_TOOL::SCALE;
 		// 作図ツールをステータスバーに格納する.
-		status_bar_set_draw();
+		stbar_set_draw();
 		pointer_set();
 	}
 
