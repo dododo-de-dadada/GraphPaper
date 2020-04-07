@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 	// ŠÛ‚¢•”ˆÊ‚ğ•\¦‚·‚é.
 	// a_pos	•”ˆÊ‚ÌˆÊ’u
 	// dx		}Œ`‚Ì•`‰æŠÂ‹«
-	void anchor_draw_rounded(const D2D1_POINT_2F& a_pos, SHAPE_DX& dx)
+	void anchor_draw_rounded(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
 	{
 		const FLOAT rad = static_cast<FLOAT>(dx.m_anch_len * 0.5 + 1.0);
 		dx.m_shape_brush->SetColor(dx.m_theme_background);

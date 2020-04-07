@@ -131,6 +131,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
+		tx_edit().Text(L"");
+		ck_text_adjust_bound().IsChecked(m_text_adjust);
 		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
 			auto s = new ShapeText(m_pointer_pressed, diff, text, &m_page_layout);
@@ -160,7 +162,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の作成を終了する.
-	void MainPage::pointer_finish_creating(const D2D1_POINT_2F& diff)
+	void MainPage::pointer_finish_creating(const D2D1_POINT_2F diff)
 	{
 		Shape* s;
 		if (m_draw_tool == DRAW_TOOL::RECT) {
@@ -348,8 +350,6 @@ namespace winrt::GraphPaper::implementation
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 			return;
 		}
-		// スワップチェーンパネル上でのポインターの位置を得て, ページ座標に変換し,
-		// ポインターの現在位置に格納する.
 		pointer_cur_pos(args);
 		pointer_set();
 		stbar_set_curs();

@@ -166,7 +166,7 @@ namespace winrt::GraphPaper::implementation
 	// 部位 (方形) を表示する.
 	void anchor_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx);
 	// 部位 (円) を表示する.
-	void anchor_draw_rounded(const D2D1_POINT_2F& c_pos, SHAPE_DX& dx);
+	void anchor_draw_rounded(const D2D1_POINT_2F c_pos, SHAPE_DX& dx);
 	// 矢じりの寸法が同じか調べる.
 	bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept;
 	// 矢じりの形式が同じか調べる.

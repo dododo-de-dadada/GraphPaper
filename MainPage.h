@@ -654,7 +654,7 @@ namespace winrt::GraphPaper::implementation
 		void pointer_finish_selecting_area(const VirtualKeyModifiers k_mod);
 		// 図形の作成を終了する.
 		IAsyncAction pointer_finish_creating_text_async(const D2D1_POINT_2F diff);
-		void pointer_finish_creating(const D2D1_POINT_2F& diff);
+		void pointer_finish_creating(const D2D1_POINT_2F diff);
 		// 図形の移動を終了する.
 		void pointer_finish_moving(void);
 		// 押された図形の編集を終了する.
