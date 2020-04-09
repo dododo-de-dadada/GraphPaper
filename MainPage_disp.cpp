@@ -19,9 +19,10 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		{
-			std::lock_guard<std::mutex> lock(m_dx_mutex);
+			mutex_wait();
 			m_page_dx.ValidateDevice();
 			m_sample_dx.ValidateDevice();
+			mutex_unlock();
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -41,10 +42,11 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		{
-			std::lock_guard<std::mutex> lock(m_dx_mutex);
+			mutex_wait();
 			const auto dpi = sender.LogicalDpi();
 			m_page_dx.SetDpi(dpi);
 			m_sample_dx.SetDpi(dpi);
+			mutex_unlock();
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -64,10 +66,11 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		{
-			std::lock_guard<std::mutex> lock(m_dx_mutex);
+			mutex_wait();
 			const auto ori = sender.CurrentOrientation();
 			m_page_dx.SetCurrentOrientation(ori);
 			m_sample_dx.SetCurrentOrientation(ori);
+			mutex_unlock();
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

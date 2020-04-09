@@ -270,7 +270,7 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
 		}
 		else if (m_draw_tool == DRAW_TOOL::RRCT) {
-			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")));
+			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrct")));
 		}
 		else if (m_draw_tool == DRAW_TOOL::SCALE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));

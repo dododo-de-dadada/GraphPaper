@@ -131,10 +131,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::Storage::FileAccessMode;
 
+		mutex_wait();
 		auto hr = E_FAIL;
 		winrt::apartment_context context;
-		co_await winrt::resume_background();
 		try {
+			co_await winrt::resume_background();
 			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
@@ -160,6 +161,7 @@ namespace winrt::GraphPaper::implementation
 				co_await winrt::resume_foreground(cd);
 				cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
 				co_await context;
+				mutex_unlock();
 				co_return hr;
 			}
 #endif
@@ -194,6 +196,7 @@ namespace winrt::GraphPaper::implementation
 		// スレッドコンテキストを復元する.
 		co_await context;
 		// 結果を返し終了する.
+		mutex_unlock();
 		co_return hr;
 	}
 
@@ -615,6 +618,7 @@ namespace winrt::GraphPaper::implementation
 			co_await file_read_async(s_file);
 			// ストレージファイルを解放する.
 			s_file = nullptr;
+			file_finish_reading();
 		}
 		o_picker = nullptr;
 		Window::Current().CoreWindow().PointerCursor(p_cur);
@@ -667,12 +671,11 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		auto hr = E_FAIL;
 		auto const p_cur = file_wait_cursor();
 		auto s_file{ co_await file_recent_get_async(item[0].Token) };
 		if (s_file != nullptr) {
 			// 取得できた場合,
-			hr = co_await file_read_async(s_file);
+			co_await file_read_async(s_file);
 			s_file = nullptr;
 			file_finish_reading();
 		}

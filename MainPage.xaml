@@ -109,7 +109,7 @@
                 M1,3 L15,3 L15,13 L1,13 Z
             </x:String>
             <!-- 角丸方形アイコンの描画コマンド -->
-            <x:String x:Key="data_rrect">
+            <x:String x:Key="data_rrct">
                 M5,2 L11,2 A5,5 0 0 1 16,7 L16,9 A5,5, 0 0 1 11,14 L5,14 A5,5 0 0 1 0,9 L0,7 A5,5 0 0 1 5,2 Z
                 M5,3 L11,3 A4,4 0 0 1 15,7 L15,9 A4,4, 0 0 1 11,13 L5,13 A4,4 0 0 1 1,9 L1,7 A4,4 0 0 1 5,3 Z
             </x:String>
@@ -486,7 +486,7 @@
                 </muxc:RadioMenuFlyoutItem>
                 <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_rrect" x:Uid="rmfi_tool_rrect" Click="rmfi_tool_rrect_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
                     <muxc:RadioMenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_rrect}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        <PathIcon Data="{StaticResource data_rrct}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
                 <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_quad" x:Uid="rmfi_tool_quad" Click="rmfi_tool_quad_click" GroupName="gn_tool_type" Text="Quadrangle">

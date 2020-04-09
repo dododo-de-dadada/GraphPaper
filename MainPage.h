@@ -121,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 	// ステータスバーの状態
 	//-------------------------------
 	enum struct STATUS_BAR {
-		GRID = 1,	// 方眼の長さ
+		GRID = 1,	// 方眼の大きさ
 		PAGE = (2 | 4),	// ページの大きさ
 		CURS = (8 | 16),	// カーソルの位置
 		ZOOM = 32,	// 拡大率
@@ -204,7 +204,20 @@ namespace winrt::GraphPaper::implementation
 	// メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
-		std::mutex m_dx_mutex;	// DX のための同期プリミティブ
+		//std::mutex m_dx_mutex;	// DX のための同期プリミティブ
+		std::atomic_bool m_dx_mutex{ false };
+		inline bool mutex_try(void)
+		{
+			return m_dx_mutex.exchange(true, std::memory_order_acq_rel);
+		}
+		inline void mutex_wait(void)
+		{
+			while (m_dx_mutex.exchange(true, std::memory_order_acq_rel));
+		}
+		inline void mutex_unlock(void)
+		{
+			m_dx_mutex.store(false, std::memory_order_release);
+		}
 
 		winrt::hstring m_token_mru;	// 最近使ったファイルのトークン
 
@@ -498,9 +511,9 @@ namespace winrt::GraphPaper::implementation
 		//　方眼の設定
 		//-------------------------------
 
-		// レイアウトメニューの「方眼の形式」に印をつける.
+		// レイアウトメニューの「方眼線の形式」に印をつける.
 		void grid_patt_check_menu(const GRID_PATT g_patt);
-		// レイアウトメニューの「方眼の表示」に印をつける.
+		// レイアウトメニューの「方眼線の表示」に印をつける.
 		void grid_show_check_menu(const GRID_SHOW g_show);
 		// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
 		IAsyncAction mfi_grid_len_click_async(IInspectable const&, RoutedEventArgs const&);
@@ -510,11 +523,11 @@ namespace winrt::GraphPaper::implementation
 		void mfi_grid_len_exp_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の濃さ」が選択された.
 		IAsyncAction mfi_grid_gray_click_async(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「方眼線の形式」>「パターン 1」が選択された.
+		// レイアウトメニューの「方眼線の形式」>「強調なし」が選択された.
 		void rmfi_grid_patt_1_click(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「方眼線の形式」>「パターン 2」が選択された.
+		// レイアウトメニューの「方眼線の形式」>「2番目を強調」が選択された.
 		void rmfi_grid_patt_2_click(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「方眼線の形式」>「パターン 3」が選択された.
+		// レイアウトメニューの「方眼線の形式」>「2番目と5番目を強調」が選択された.
 		void rmfi_grid_patt_3_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の表示」>「最背面」が選択された.
 		void rmfi_grid_show_back_click(IInspectable const&, RoutedEventArgs const&);

@@ -21,7 +21,7 @@ namespace winrt::GraphPaper::implementation
 	// l_unit	長さの単位
 	// value	長さの値
 	// dpi	DPI
-	// g_len	方眼の長さ
+	// g_len	方眼の大きさ
 	// 戻り値	ピクセル単位の値
 	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept
 	{
@@ -196,7 +196,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		std::lock_guard<std::mutex> lock(m_dx_mutex);
+		if (mutex_try()) {
+			return;
+		}
 
 		auto const& dc = m_page_dx.m_d2dContext;
 		// デバイスコンテキストの描画状態を保存ブロックに保持する.
@@ -303,6 +305,7 @@ namespace winrt::GraphPaper::implementation
 			cd_message_show(ICON_ALERT, L"str_err_draw", {});
 		}
 #endif
+		mutex_unlock();
 	}
 
 	// 値をスライダーのヘッダーに格納する.

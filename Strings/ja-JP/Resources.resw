@@ -935,7 +935,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_patt.Text" xml:space="preserve">
-    <value>方眼の形式</value>
+    <value>方眼線の形式</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="rmfi_grid_patt_1.Text" xml:space="preserve">

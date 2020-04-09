@@ -116,6 +116,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::Streams::IRandomAccessStream;
 		using winrt::Windows::Storage::Streams::DataReader;
 
+		mutex_wait();
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// Clipboard::GetContent() は, 
@@ -216,6 +217,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		//スレッドコンテキストを復元する.
 		co_await context;
+		mutex_unlock();
 	}
 
 	// クリップボードにデータが含まれているか調べる.

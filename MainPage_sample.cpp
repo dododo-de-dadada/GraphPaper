@@ -34,8 +34,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		std::lock_guard<std::mutex> lock(m_dx_mutex);
-
+		mutex_wait();
 		auto dc = m_sample_dx.m_d2dContext.get();
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
@@ -56,6 +55,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(dc->EndDraw());
 		dc->RestoreDrawingState(m_sample_dx.m_state_block.get());
 		m_sample_dx.Present();
+		mutex_unlock();
 	}
 
 	// 見本スワップチェーンパネルの大きさが変わった.

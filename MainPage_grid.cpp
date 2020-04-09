@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作
 	// S	スライダー
-	// val	値
+	// value	値
 	template <UNDO_OP U, int S>
 	void MainPage::grid_set_slider_header(double value)
 	{
@@ -80,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// ページメニューの「方眼の表示」に印をつける.
+	// ページメニューの「方眼線の表示」に印をつける.
 	// g_show	方眼線の表示
 	void MainPage::grid_show_check_menu(const GRID_SHOW g_show)
 	{
@@ -93,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
 
-	// ページメニューの「方眼の形式」に印をつける.
+	// ページメニューの「方眼線の形式」に印をつける.
 	// g_show	方眼線の表示
 	void MainPage::grid_patt_check_menu(const GRID_PATT g_patt)
 	{
@@ -200,7 +200,7 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	// ページメニューの「方眼の形式」>「パターン 1」が選択された.
+	// ページメニューの「方眼線の形式」>「強調なし」が選択された.
 	void MainPage::rmfi_grid_patt_1_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_1) {
@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	// ページメニューの「方眼の形式」>「パターン 1」が選択された.
+	// ページメニューの「方眼線の形式」>「2番目を強調」が選択された.
 	void MainPage::rmfi_grid_patt_2_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_2) {
@@ -222,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	// ページメニューの「方眼の形式」>「パターン 3」が選択された.
+	// ページメニューの「方眼線の形式」>「2番目と5番目を強調」が選択された.
 	void MainPage::rmfi_grid_patt_3_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_3) {

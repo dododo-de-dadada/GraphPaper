@@ -24,9 +24,10 @@ namespace winrt::GraphPaper::implementation
 	// アプリケーションがバックグラウンドに移った.
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
-		std::lock_guard<std::mutex> lock(m_dx_mutex);
+		mutex_wait();
 		m_page_dx.Trim();
 		m_sample_dx.Trim();
+		mutex_unlock();
 	}
 
 	// アプリケーションの中断の処理を行う.

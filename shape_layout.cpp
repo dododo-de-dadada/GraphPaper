@@ -376,7 +376,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// •ûŠá‚Ö‚Ì‚»‚ë‚¦‚ğ“¾‚é.
+	// •ûŠá‚É‚»‚ë‚¦‚é‚ğ“¾‚é.
 	bool ShapeLayout::get_grid_snap(bool& value) const noexcept
 	{
 		value = m_grid_snap;
@@ -466,16 +466,13 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::read;
 
 		D2D1_COLOR_F dummy;
-		read(dummy, dt_reader);	// •ûŠá‚ÌF
-		m_grid_base = dt_reader.ReadDouble();	// •ûŠá‚Ì‘å‚«‚³
+		read(dummy, dt_reader);
+		m_grid_base = dt_reader.ReadDouble();
 		m_grid_gray = dt_reader.ReadDouble();
 		read(m_grid_patt, dt_reader);
 		read(m_grid_show, dt_reader);
 		m_grid_snap = dt_reader.ReadBoolean();
 		read(m_page_color, dt_reader);
-		//D2D1_COLOR_F color;
-		//read(color, dt_reader);
-		//set_page_color(color);
 		m_page_scale = dt_reader.ReadDouble();
 		read(m_page_size, dt_reader);
 
@@ -579,7 +576,7 @@ namespace winrt::GraphPaper::implementation
 		m_grid_show = value;
 	}
 
-	// ’l‚ğ•ûŠá‚Ö‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
+	// ’l‚ğ•ûŠá‚É‚»‚ë‚¦‚é‚ÉŠi”[‚·‚é.
 	void ShapeLayout::set_grid_snap(const bool value) noexcept
 	{
 		m_grid_snap = value;

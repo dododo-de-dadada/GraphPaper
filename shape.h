@@ -104,13 +104,14 @@ namespace winrt::GraphPaper::implementation
 		FILLED	// 閉じた矢じり
 	};
 
-	// 方眼の表示
+	// 方眼線の表示
 	enum struct GRID_SHOW {
 		HIDE,	// 表示なし
 		BACK,	// 最背面に表示
 		FRONT	// 最前面に表示
 	};
 
+	// 方眼線の形式
 	enum struct GRID_PATT {
 		PATT_1,
 		PATT_2,
@@ -197,7 +198,7 @@ namespace winrt::GraphPaper::implementation
 	bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept;
 	// 単精度浮動小数が同じか調べる.
 	bool equal(const float a, const float b) noexcept;
-	// 方眼の形式が同じか調べる.
+	// 方眼線の形式が同じか調べる.
 	bool equal(const GRID_PATT a, const GRID_PATT b) noexcept;
 	// 方眼線の表示が同じか調べる.
 	bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept;
@@ -287,9 +288,9 @@ namespace winrt::GraphPaper::implementation
 	void read(DWRITE_TEXT_ALIGNMENT& value, DataReader const& dt_reader);
 	// 文字範囲をデータリーダーから読み込む.
 	void read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader);
-	// 方眼の形式をデータリーダーから読み込む.
+	// 方眼線の形式をデータリーダーから読み込む.
 	void read(GRID_PATT& value, DataReader const& dt_reader);
-	// 方眼の表示をデータリーダーから読み込む.
+	// 方眼線の表示をデータリーダーから読み込む.
 	void read(GRID_SHOW& value, DataReader const& dt_reader);
 	// 破線の配置をデータリーダーから読み込む.
 	void read(STROKE_PATT& value, DataReader const& dt_reader);
@@ -329,9 +330,9 @@ namespace winrt::GraphPaper::implementation
 	void write(const DWRITE_TEXT_ALIGNMENT value, DataWriter const& dt_writer);
 	// 文字列範囲をデータライターに書き込む.
 	void write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer);
-	// 方眼の配置をデータライターに書き込む.
+	// 方眼線の形式をデータライターに書き込む.
 	void write(const GRID_PATT value, DataWriter const& dt_writer);
-	// 方眼の表示をデータライターに書き込む.
+	// 方眼線の表示をデータライターに書き込む.
 	void write(const GRID_SHOW value, DataWriter const& dt_writer);
 	// 破線の配置をデータライターに書き込む.
 	void write(const STROKE_PATT& value, DataWriter const& dt_writer);
@@ -374,69 +375,69 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する
 		virtual void draw(SHAPE_DX& /*dx*/) {}
 		// 矢じりの寸法を得る
-		virtual bool get_arrow_size(ARROW_SIZE& /*val*/) const noexcept { return false; }
+		virtual bool get_arrow_size(ARROW_SIZE& /*value*/) const noexcept { return false; }
 		// 矢じりの形式を得る.
-		virtual bool get_arrow_style(ARROW_STYLE& /*val*/) const noexcept { return false; }
+		virtual bool get_arrow_style(ARROW_STYLE& /*value*/) const noexcept { return false; }
 		// 図形を囲む領域を得る.
 		virtual void get_bound(D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept {}
 		// 角丸半径を得る.
-		virtual bool get_corner_radius(D2D1_POINT_2F& /*val*/) const noexcept { return false; }
+		virtual bool get_corner_radius(D2D1_POINT_2F& /*value*/) const noexcept { return false; }
 		// 塗りつぶし色を得る.
-		virtual bool get_fill_color(D2D1_COLOR_F& /*val*/) const noexcept { return false; }
+		virtual bool get_fill_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
 		// 書体の色を得る.
-		virtual bool get_font_color(D2D1_COLOR_F& /*val*/) const noexcept { return false; }
+		virtual bool get_font_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
 		// 書体名を得る.
-		virtual bool get_font_family(wchar_t*& /*val*/) const noexcept { return false; }
+		virtual bool get_font_family(wchar_t*& /*value*/) const noexcept { return false; }
 		// 書体の大きさを得る.
-		virtual bool get_font_size(double& /*val*/) const noexcept { return false; }
+		virtual bool get_font_size(double& /*value*/) const noexcept { return false; }
 		// 書体の横幅を得る.
-		virtual bool get_font_stretch(DWRITE_FONT_STRETCH& /*val*/) const noexcept { return false; }
+		virtual bool get_font_stretch(DWRITE_FONT_STRETCH& /*value*/) const noexcept { return false; }
 		// 書体の字体を得る.
-		virtual bool get_font_style(DWRITE_FONT_STYLE& /*val*/) const noexcept { return false; }
+		virtual bool get_font_style(DWRITE_FONT_STYLE& /*value*/) const noexcept { return false; }
 		// 書体の太さを得る.
-		virtual bool get_font_weight(DWRITE_FONT_WEIGHT& /*val*/) const noexcept { return false; }
+		virtual bool get_font_weight(DWRITE_FONT_WEIGHT& /*value*/) const noexcept { return false; }
 		// 方眼の基準の大きさを得る.
-		virtual bool get_grid_base(double& /*val*/) const noexcept { return false; }
+		virtual bool get_grid_base(double& /*value*/) const noexcept { return false; }
 		// 方眼の大きさを得る.
-		virtual bool get_grid_gray(double& /*val*/) const noexcept { return false; }
-		// 方眼の形式を得る.
-		virtual bool get_grid_patt(GRID_PATT& /*val*/) const noexcept { return false; }
-		// 方眼の表示を得る.
-		virtual bool get_grid_show(GRID_SHOW& /*val*/) const noexcept { return false; }
-		// 方眼の表示を得る.
-		virtual bool get_grid_snap(bool& /*val*/) const noexcept { return false; }
+		virtual bool get_grid_gray(double& /*value*/) const noexcept { return false; }
+		// 方眼線の形式を得る.
+		virtual bool get_grid_patt(GRID_PATT& /*value*/) const noexcept { return false; }
+		// 方眼線の表示を得る.
+		virtual bool get_grid_show(GRID_SHOW& /*value*/) const noexcept { return false; }
+		// 方眼にそろえるを得る.
+		virtual bool get_grid_snap(bool& /*value*/) const noexcept { return false; }
 		// 図形を囲む領域の左上位置を得る.
-		virtual void get_min_pos(D2D1_POINT_2F& /*val*/) const noexcept {}
+		virtual void get_min_pos(D2D1_POINT_2F& /*value*/) const noexcept {}
 		// ページの色を得る.
-		virtual bool get_page_color(D2D1_COLOR_F& /*val*/) const noexcept { return false; }
+		virtual bool get_page_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
 		// ページの拡大率を得る.
-		virtual bool get_page_scale(double& /*val*/) const noexcept { return false; }
+		virtual bool get_page_scale(double& /*value*/) const noexcept { return false; }
 		// ページの大きさを得る.
-		virtual bool get_page_size(D2D1_SIZE_F& /*val*/) const noexcept { return false; }
+		virtual bool get_page_size(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
 		// 指定された部位の位置を得る.
-		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F&/*val*/) const noexcept {}
+		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F&/*value*/) const noexcept {}
 		// 始点を得る
-		virtual bool get_start_pos(D2D1_POINT_2F& /*val*/) const noexcept { return false; }
+		virtual bool get_start_pos(D2D1_POINT_2F& /*value*/) const noexcept { return false; }
 		// 線枠の色を得る.
-		virtual bool get_stroke_color(D2D1_COLOR_F& /*val*/) const noexcept { return false; }
+		virtual bool get_stroke_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
 		// 破線の配置を得る.
-		virtual bool get_stroke_patt(STROKE_PATT& /*val*/) const noexcept { return false; }
+		virtual bool get_stroke_patt(STROKE_PATT& /*value*/) const noexcept { return false; }
 		// 破線の形式を得る.
-		virtual bool get_stroke_style(D2D1_DASH_STYLE& /*val*/) const noexcept { return false; }
+		virtual bool get_stroke_style(D2D1_DASH_STYLE& /*value*/) const noexcept { return false; }
 		// 書体の太さを得る
-		virtual bool get_stroke_width(double& /*val*/) const noexcept { return false; }
+		virtual bool get_stroke_width(double& /*value*/) const noexcept { return false; }
 		// 文字列を得る.
-		virtual bool get_text(wchar_t*& /*val*/) const noexcept { return false; }
+		virtual bool get_text(wchar_t*& /*value*/) const noexcept { return false; }
 		// 段落のそろえを得る.
-		virtual bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& /*val*/) const noexcept { return false; }
+		virtual bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& /*value*/) const noexcept { return false; }
 		// 文字列のそろえを得る.
-		virtual bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& /*val*/) const noexcept { return false; }
+		virtual bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& /*value*/) const noexcept { return false; }
 		// 行の高さを得る.
-		virtual bool get_text_line(double& /*val*/) const noexcept { return false; }
+		virtual bool get_text_line(double& /*value*/) const noexcept { return false; }
 		// 文字列の周囲の余白を得る.
-		virtual bool get_text_margin(D2D1_SIZE_F& /*val*/) const noexcept { return false; }
+		virtual bool get_text_margin(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
 		// 文字範囲を得る
-		virtual bool get_text_range(DWRITE_TEXT_RANGE& /*val*/) const noexcept { return false; }
+		virtual bool get_text_range(DWRITE_TEXT_RANGE& /*value*/) const noexcept { return false; }
 		// 位置を含むか調べる.
 		virtual ANCH_WHICH hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept { return ANCH_WHICH::ANCH_OUTSIDE; }
 		// 範囲に含まれるか調べる.
@@ -448,67 +449,67 @@ namespace winrt::GraphPaper::implementation
 		// 差分だけ移動する.
 		virtual	void move(const D2D1_POINT_2F /*d*/) {}
 		// 値を矢じりの寸法に格納する.
-		virtual void set_arrow_size(const ARROW_SIZE& /*val*/) {}
+		virtual void set_arrow_size(const ARROW_SIZE& /*value*/) {}
 		// 値を矢じりの形式に格納する.
-		virtual void set_arrow_style(const ARROW_STYLE /*val*/) {}
+		virtual void set_arrow_style(const ARROW_STYLE /*value*/) {}
 		// 値を消去フラグに格納する.
-		virtual void set_delete(const bool /*val*/) noexcept {}
+		virtual void set_delete(const bool /*value*/) noexcept {}
 		// 値を塗りつぶし色に格納する.
-		virtual void set_fill_color(const D2D1_COLOR_F& /*val*/) noexcept {}
+		virtual void set_fill_color(const D2D1_COLOR_F& /*value*/) noexcept {}
 		// 値を書体の色に格納する.
-		virtual void set_font_color(const D2D1_COLOR_F& /*val*/) noexcept {}
+		virtual void set_font_color(const D2D1_COLOR_F& /*value*/) noexcept {}
 		// 値を書体名に格納する.
-		virtual void set_font_family(wchar_t* const /*val*/) {}
+		virtual void set_font_family(wchar_t* const /*value*/) {}
 		// 値を書体の大きさに格納する.
-		virtual void set_font_size(const double /*val*/) {}
+		virtual void set_font_size(const double /*value*/) {}
 		// 値を書体の横幅に格納する.
-		virtual void set_font_stretch(const DWRITE_FONT_STRETCH /*val*/) {}
+		virtual void set_font_stretch(const DWRITE_FONT_STRETCH /*value*/) {}
 		// 値を書体の字体に格納する.
-		virtual void set_font_style(const DWRITE_FONT_STYLE /*val*/) {}
+		virtual void set_font_style(const DWRITE_FONT_STYLE /*value*/) {}
 		// 値を書体の太さに格納する.
-		virtual void set_font_weight(const DWRITE_FONT_WEIGHT /*val*/) {}
+		virtual void set_font_weight(const DWRITE_FONT_WEIGHT /*value*/) {}
 		// 値を方眼の大きさに格納する.
-		virtual void set_grid_base(const double /*val*/) noexcept {}
-		// 値を方眼の濃淡に格納する.
-		virtual void set_grid_gray(const double /*val*/) noexcept {}
-		// 値を方眼の形式に格納する.
-		virtual void set_grid_patt(const GRID_PATT /*val*/) noexcept {}
-		// 値を方眼の表示に格納する.
-		virtual void set_grid_show(const GRID_SHOW /*val*/) noexcept {}
-		// 値を方眼への揃えに格納する.
-		virtual void set_grid_snap(const bool /*val*/) noexcept {}
+		virtual void set_grid_base(const double /*value*/) noexcept {}
+		// 値を方眼線の濃淡に格納する.
+		virtual void set_grid_gray(const double /*value*/) noexcept {}
+		// 値を方眼線の形式に格納する.
+		virtual void set_grid_patt(const GRID_PATT /*value*/) noexcept {}
+		// 値を方眼線の表示に格納する.
+		virtual void set_grid_show(const GRID_SHOW /*value*/) noexcept {}
+		// 値を方眼にそろえるに格納する.
+		virtual void set_grid_snap(const bool /*value*/) noexcept {}
 		// 値をページの色に格納する.
-		virtual void set_page_color(const D2D1_COLOR_F& /*val*/) noexcept {}
+		virtual void set_page_color(const D2D1_COLOR_F& /*value*/) noexcept {}
 		// 値をページの拡大率に格納する.
-		virtual void set_page_scale(const double /*val*/) noexcept {}
+		virtual void set_page_scale(const double /*value*/) noexcept {}
 		// 値をページの大きさに格納する.
-		virtual void set_page_size(const D2D1_SIZE_F /*val*/) noexcept {}
+		virtual void set_page_size(const D2D1_SIZE_F /*value*/) noexcept {}
 		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		virtual void set_pos(const D2D1_POINT_2F /*val*/, const ANCH_WHICH /*a*/) {}
+		virtual void set_pos(const D2D1_POINT_2F /*value*/, const ANCH_WHICH /*a*/) {}
 		// 値を選択フラグに格納する.
-		virtual void set_select(const bool /*val*/) noexcept {}
+		virtual void set_select(const bool /*value*/) noexcept {}
 		// 値を線枠の色に格納する.
-		virtual void set_stroke_color(const D2D1_COLOR_F& /*val*/) noexcept {}
+		virtual void set_stroke_color(const D2D1_COLOR_F& /*value*/) noexcept {}
 		// 値を破線の配置に格納する.
-		virtual void set_stroke_patt(const STROKE_PATT& /*val*/) {}
+		virtual void set_stroke_patt(const STROKE_PATT& /*value*/) {}
 		// 値を線枠の形式に格納する.
-		virtual void set_stroke_style(const D2D1_DASH_STYLE /*val*/) {}
+		virtual void set_stroke_style(const D2D1_DASH_STYLE /*value*/) {}
 		// 値を書体の太さに格納する.
-		virtual void set_stroke_width(const double /*val*/) noexcept {}
+		virtual void set_stroke_width(const double /*value*/) noexcept {}
 		// 値を文字列に格納する.
-		virtual void set_text(wchar_t* const /*val*/) {}
+		virtual void set_text(wchar_t* const /*value*/) {}
 		// 値を段落のそろえに格納する.
-		virtual void set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT /*val*/) {}
+		virtual void set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT /*value*/) {}
 		// 値を文字列のそろえに格納する.
-		virtual void set_text_align_t(const DWRITE_TEXT_ALIGNMENT /*val*/) {}
+		virtual void set_text_align_t(const DWRITE_TEXT_ALIGNMENT /*value*/) {}
 		// 値を行間に格納する.
-		virtual void set_text_line(const double /*val*/) {}
+		virtual void set_text_line(const double /*value*/) {}
 		// 値を文字列の余白に格納する.
-		virtual void set_text_margin(const D2D1_SIZE_F /*val*/) {}
+		virtual void set_text_margin(const D2D1_SIZE_F /*value*/) {}
 		// 値を文字範囲に格納する.
-		virtual void set_text_range(const DWRITE_TEXT_RANGE /*val*/) {}
+		virtual void set_text_range(const DWRITE_TEXT_RANGE /*value*/) {}
 		// 値を始点に格納する. 他の部位の位置も動く.
-		virtual void set_start_pos(const D2D1_POINT_2F /*val*/) {}
+		virtual void set_start_pos(const D2D1_POINT_2F /*value*/) {}
 		// データライターに書き込む.
 		virtual void write(DataWriter const& /*dt_writer*/) const {}
 		// データライターに SVG として書き込む.
@@ -520,7 +521,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形リストに関連した処理
 	//------------------------------
 
-	typedef std::list<struct Shape*>	S_LIST_T;
+	using S_LIST_T = std::list<struct Shape*>;
 	// 最後の図形をリストから得る.
 	Shape* s_list_back(S_LIST_T const& s_list) noexcept;
 	// 図形リストを消去し, 含まれる図形を破棄する.
@@ -585,7 +586,7 @@ namespace winrt::GraphPaper::implementation
 		double m_grid_base = 0.0;	// 方眼の基準の大きさ (を -1 した値)
 		double m_grid_gray = GRID_GRAY;	// 方眼線の濃さ
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼線の表示
-		GRID_PATT m_grid_patt = GRID_PATT::PATT_1;	// 方眼の形式
+		GRID_PATT m_grid_patt = GRID_PATT::PATT_1;	// 方眼線の形式
 		bool m_grid_snap = true;	// 方眼に整列
 
 		// ページの属性
@@ -623,11 +624,11 @@ namespace winrt::GraphPaper::implementation
 		void get_grid_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の大きさを得る.
 		bool get_grid_gray(double& value) const noexcept;
-		// 方眼の形式を得る.
+		// 方眼線の形式を得る.
 		bool get_grid_patt(GRID_PATT& value) const noexcept;
-		// 方眼の表示の状態を得る.
+		// 方眼線の表示の状態を得る.
 		bool get_grid_show(GRID_SHOW& value) const noexcept;
-		// 方眼へのそろえを得る.
+		// 方眼にそろえるを得る.
 		bool get_grid_snap(bool& value) const noexcept;
 		// ページの色を得る.
 		bool get_page_color(D2D1_COLOR_F& value) const noexcept;
@@ -673,13 +674,13 @@ namespace winrt::GraphPaper::implementation
 		void set_to(Shape* s) noexcept;
 		// 値を方眼の基準の大きさに格納する.
 		void set_grid_base(const double value) noexcept;
-		// 値を方眼の濃淡に格納する.
+		// 値を方眼線の濃淡に格納する.
 		void set_grid_gray(const double value) noexcept;
-		// 値を方眼の表示に格納する.
+		// 値を方眼線の形式に格納する.
 		void set_grid_patt(const GRID_PATT value) noexcept;
-		// 値を方眼の表示に格納する.
+		// 値を方眼線の表示に格納する.
 		void set_grid_show(const GRID_SHOW value) noexcept;
-		// 値を方眼へのそろえに格納する.
+		// 値を方眼にそろえるに格納する.
 		void set_grid_snap(const bool value) noexcept;
 		// 値をページの色に格納する.
 		void set_page_color(const D2D1_COLOR_F& value) noexcept;

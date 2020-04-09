@@ -140,13 +140,13 @@ namespace winrt::GraphPaper::implementation
 		return fabs(a - b) <= FLT_EPSILON * fmax(1.0f, fmax(fabs(a), fabs(b)));
 	}
 
-	// 方眼の形式が同じか調べる.
+	// 方眼線の形式が同じか調べる.
 	bool equal(const GRID_PATT a, const GRID_PATT b) noexcept
 	{
 		return a == b;
 	}
 
-	// 方眼の表示が同じか調べる.
+	// 方眼線の表示が同じか調べる.
 	bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept
 	{
 		return a == b;
@@ -673,7 +673,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 方眼の形式をデータリーダーから読み込む.
+	// 方眼線の形式をデータリーダーから読み込む.
 	void read(GRID_PATT& value, DataReader const& dt_reader)
 	{
 		value = static_cast<GRID_PATT>(dt_reader.ReadUInt16());
@@ -683,7 +683,7 @@ namespace winrt::GraphPaper::implementation
 		value = GRID_PATT::PATT_1;
 	}
 
-	// 方眼の表示をデータリーダーから読み込む.
+	// 方眼線の表示をデータリーダーから読み込む.
 	void read(GRID_SHOW& value, DataReader const& dt_reader)
 	{
 		value = static_cast<GRID_SHOW>(dt_reader.ReadUInt16());
@@ -1009,13 +1009,13 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteInt32(value.length);
 	}
 
-	// 方眼の形式をデータライターに書き込む.
+	// 方眼線の形式をデータライターに書き込む.
 	void write(const GRID_PATT value, DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt16(static_cast<uint16_t>(value));
 	}
 
-	// 方眼の表示をデータライターに書き込む.
+	// 方眼線の表示をデータライターに書き込む.
 	void write(const GRID_SHOW value, DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt16(static_cast<uint16_t>(value));

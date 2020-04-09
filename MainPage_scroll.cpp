@@ -42,7 +42,6 @@ namespace winrt::GraphPaper::implementation
 	// ah	実際の高さ
 	void MainPage::scroll_set(const double aw, const double ah)
 	{
-		std::lock_guard<std::mutex> lock(m_dx_mutex);
 		constexpr double SB_SIZE = 16.0;
 		const auto ps = m_page_layout.m_page_scale;	// ページの表示倍率
 		const double vw = aw / ps;	// 見えている部分の幅
@@ -91,7 +90,6 @@ namespace winrt::GraphPaper::implementation
 			//sb_vert().Visibility(COLLAPSED);
 			//sb_horz().Margin({ 0, 0, 0, 0 });
 		//}
-
 	}
 
 	// 図形が表示されるようページをスクロールする.
