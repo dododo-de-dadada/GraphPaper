@@ -609,8 +609,12 @@ namespace winrt::GraphPaper::implementation
 		// ファイル「オープン」ピッカーを取得して開く.
 		auto o_picker{ FileOpenPicker() };
 		o_picker.FileTypeFilter().Append(FT_GPF);
+		// ダブルクリックでファイルが選択された場合,
+		// co_await が終了する前に, PonterReleased と PonterEntered が呼ばれる.
+		// ボタンが押された場合はそれらのハンドラーは呼ばれない.
+		scp_page_panel().PointerReleased();
 		// ピッカーを非同期で表示してストレージファイルを取得する.
-		// （「閉じる」ボタンが押された場合ストレージファイルとして nullptr が返る.）
+		// 「閉じる」ボタンが押された場合ストレージファイルとして nullptr が返る.
 		auto s_file{ co_await o_picker.PickSingleFileAsync() };
 		if (s_file != nullptr) {
 			// ストレージファイルがヌルでない場合、

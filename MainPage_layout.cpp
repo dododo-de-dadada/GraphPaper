@@ -179,7 +179,7 @@ namespace winrt::GraphPaper::implementation
 		try {
 			auto s_file{ co_await local_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 			if (s_file != nullptr) {
-				co_await file_write_layout_async(s_file);
+				co_await file_write_gpf_async(s_file, false, true);
 				s_file = nullptr;
 				mfi_layout_delete().IsEnabled(true);
 			}

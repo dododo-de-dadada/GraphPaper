@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 				// ƒLƒƒƒ“ƒZƒ‹‚Å‚È‚¢ê‡,
 				auto s_file{ co_await cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 				if (s_file != nullptr) {
-					hr = co_await file_write_suspend_async(s_file);
+					hr = co_await file_write_gpf_async(s_file, true, false);
 					s_file = nullptr;
 					undo_clear();
 					s_list_clear(m_list_shapes);

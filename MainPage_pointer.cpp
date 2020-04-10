@@ -297,6 +297,10 @@ namespace winrt::GraphPaper::implementation
 			Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 			return;
 		}
+		if (m_dx_mutex.load()) {
+			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
+			return;
+		}
 		Shape* s;
 		const auto a = s_list_hit_test(m_list_shapes, m_pointer_cur, m_page_dx.m_anch_len, s);
 		if (a == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() == false) {

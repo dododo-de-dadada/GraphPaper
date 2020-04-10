@@ -357,6 +357,11 @@ namespace winrt::GraphPaper::implementation
 			m_click_dist = 6.0 * raw_dpi / log_dpi;
 		}
 
+		{
+			m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::scp_pointer_released });
+			m_token_pointer_entered = scp_page_panel().PointerReleased({ this, &MainPage::scp_pointer_entered });
+		}
+
 		auto _{ mfi_new_click(nullptr, nullptr) };
 	}
 

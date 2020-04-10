@@ -283,6 +283,8 @@ namespace winrt::GraphPaper::implementation
 		winrt::event_token m_token_orientation_changed;	// ディスプレーの方向切り替えハンドラーのトークン
 		winrt::event_token m_token_contents_invalidated;	// ディスプレーの表示内容切り替えハンドラーのトークン
 		winrt::event_token m_token_close_requested;	// アプリケーションを閉じるハンドラーのトークン
+		winrt::event_token m_token_pointer_released;
+		winrt::event_token m_token_pointer_entered;
 
 		//-------------------------------
 		// MainPage.cpp
@@ -395,16 +397,6 @@ namespace winrt::GraphPaper::implementation
 		CoreCursor file_wait_cursor(void) const;
 		// 図形データをストレージファイルに非同期に書き込む.
 		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile const& s_file, const bool suspend = false, const bool layout = false);
-		// 図形データをストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_write_suspend_async(StorageFile const& s_file)
-		{
-			co_return co_await file_write_gpf_async(s_file, true, false);
-		}
-		// 図形データをストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_write_layout_async(StorageFile const& s_file)
-		{
-			co_return co_await file_write_gpf_async(s_file, false, true);
-		}
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
 		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile const& s_file);
 		// ファイルの読み込みが終了した.
