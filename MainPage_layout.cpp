@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 					style = style.BasedOn();
 				}
 				try {
-					while (stack.empty() == false) {
+					while (stack.empty() != true) {
 						// スタックが空でない場合,
 						// スタイルをスタックから取り出す.
 						style = stack.back();
@@ -140,9 +140,9 @@ namespace winrt::GraphPaper::implementation
 			m_page_layout.m_text_line = 0.0F;
 			m_page_layout.m_text_margin = { 4.0F, 4.0F };
 		}
-		m_len_unit = LEN_UNIT::PIXEL;
-		m_color_code = COLOR_CODE::DEC;
-		m_stbar = stbar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
+		len_unit(LEN_UNIT::PIXEL);
+		color_code(COLOR_CODE::DEC);
+		status_bar(stbar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM));
 	}
 
 	// 保存されたレイアウトデータを読み込む.

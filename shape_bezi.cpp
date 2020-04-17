@@ -393,7 +393,7 @@ namespace winrt::GraphPaper::implementation
 			// 方形 br は方形 pr の少なくとも一部と重なる ?
 			else if (br[1].x >= pr[0].x && br[1].y >= pr[0].y
 				&& br[0].x <= pr[1].x && br[0].y <= pr[1].y) {
-				if (bz_dividable(br, br_mid) == false) {
+				if (bz_dividable(br, br_mid) != true) {
 					return true;
 				}
 				bz[4] = (bz[0] + bz[1]) * 0.5;
@@ -406,7 +406,7 @@ namespace winrt::GraphPaper::implementation
 				bz_push(st, bz, 0, 4, 7, 9);
 				bz_push(st, bz, 9, 8, 6, 3);
 			}
-		} while (st.empty() == false);
+		} while (st.empty() != true);
 		return false;
 	}
 	*/
@@ -482,7 +482,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		if (is_selected() == false) {
+		if (is_selected() != true) {
 			return;
 		}
 		D2D1_MATRIX_3X2_F tran;
@@ -772,15 +772,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	ShapeBezi::ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
+	ShapeBezi::ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr) :
 		ShapePoly::ShapePoly(attr)
 	{
 		m_pos = s_pos;
-		m_diff.x = d_pos.x;
+		m_diff.x = diff.x;
 		m_diff.y = 0.0f;
-		m_diff_1.x = -d_pos.x;
-		m_diff_1.y = d_pos.y;
-		m_diff_2.x = d_pos.x;
+		m_diff_1.x = -diff.x;
+		m_diff_1.y = diff.y;
+		m_diff_2.x = diff.x;
 		m_diff_2.y = 0.0f;
 		m_arrow_style = attr->m_arrow_style;
 		m_arrow_size = attr->m_arrow_size;
@@ -887,7 +887,7 @@ namespace winrt::GraphPaper::implementation
 			// 方形 br は方形 pr の少なくとも一部と重なる ?
 			if (pr[1].x >= br[0].x && pr[0].x <= br[1].x
 				&& pr[1].y >= br[0].y && pr[0].y <= br[1].y) {
-				if (bz_dividable(br, br_mid) == false) {
+				if (bz_dividable(br, br_mid) != true) {
 					// 線分 pq は y 軸にほぼ平行 ?
 					if (pr[1].x < pr_next.x) {
 						dist = br_mid.x - p.x;
@@ -1012,7 +1012,7 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 			}
-		} while (st.empty() == false);
+		} while (st.empty() != true);
 		return t_cnt;
 	}
 	*/

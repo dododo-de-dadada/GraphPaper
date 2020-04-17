@@ -152,11 +152,11 @@ namespace winrt::GraphPaper::implementation
 			added_text = r_loader.GetString(desc_key);
 		}
 		catch (winrt::hresult_error const&) {}
-		if (added_text.empty() == false) {
+		if (added_text.empty() != true) {
 			// 追加する文字列が空でない場合,
 			text = text + NL + added_text;
 		}
-		else if (desc_key.empty() == false) {
+		else if (desc_key.empty() != true) {
 			// 説明そのものが空でない場合,
 			text = text + NL + QUOT + desc_key + QUOT;
 		}
@@ -230,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 					// 選択された文字列図形の数をインクリメントする.
 					selected_text_cnt++;
 				}
-				if (prev_selected == false) {
+				if (prev_selected != true) {
 					// ひとつ背面の図形がヌル
 					// またはひとつ背面の図形の選択フラグがない場合,
 					// 選択された図形のランレングスの数をインクリメントする.
@@ -257,12 +257,12 @@ namespace winrt::GraphPaper::implementation
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最前面の図形は選択されいない.
-		const auto enable_forward = (runlength_cnt > 1 || (exists_selected && fore_selected == false));
+		const auto enable_forward = (runlength_cnt > 1 || (exists_selected && fore_selected != true));
 		// 背面に配置可能か調べる.
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最背面の図形は選択されいない.
-		const auto enable_backward = (runlength_cnt > 1 || (exists_selected && back_selected == false));
+		const auto enable_backward = (runlength_cnt > 1 || (exists_selected && back_selected != true));
 
 		mfi_xcvd_cut().IsEnabled(exists_selected);
 		mfi_xcvd_copy().IsEnabled(exists_selected);
@@ -387,7 +387,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 上記以外の場合,
-		if (m_summary_visible) {
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
 			summary_close();
 		}
 		undo_clear();
@@ -457,7 +458,8 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		if (m_summary_visible) {
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
 			// 図形一覧パネルの表示フラグが立っている場合,
 			summary_close();
 		}
@@ -509,13 +511,10 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		{
-			m_page_min.x = 0.0;
-			m_page_min.y = 0.0;
-			m_page_max.x = m_page_layout.m_page_size.width;
-			m_page_max.y = m_page_layout.m_page_size.height;
+			page_min(D2D1_POINT_2F{ 0.0F, 0.0F });
+			page_max(D2D1_POINT_2F{ m_page_layout.m_page_size.width, m_page_layout.m_page_size.height });
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();
 	}
-
 }

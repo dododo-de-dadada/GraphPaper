@@ -12,22 +12,22 @@ namespace winrt::GraphPaper::implementation
 	constexpr ANCH_WHICH ANCH_BEGIN = ANCH_WHICH::ANCH_R_NW;
 	constexpr ANCH_WHICH ANCH_END = ANCH_WHICH::ANCH_R_SE;
 	// s_pos	軸の開始位置
-	// d_pos	軸の終了位置への差分
+	// diff	軸の終了位置への差分
 	// a_size	矢じりの寸法
 	// barbs_pos	返しの位置
 	// tip_pos		先端の位置
-	static bool ln_calc_arrowhead(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs_pos[2], D2D1_POINT_2F& tip_pos) noexcept
+	static bool ln_calc_arrowhead(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs_pos[2], D2D1_POINT_2F& tip_pos) noexcept
 	{
-		const auto d_len = std::sqrt(pt_abs2(d_pos));	// 軸の長さ
+		const auto d_len = std::sqrt(pt_abs2(diff));	// 軸の長さ
 		if (d_len > FLT_MIN) {
 			// 矢じりの先端と返しの位置を計算する.
-			get_arrow_barbs(d_pos, d_len, a_size.m_width, a_size.m_length, barbs_pos);
+			get_arrow_barbs(diff, d_len, a_size.m_width, a_size.m_length, barbs_pos);
 			if (a_size.m_offset >= d_len) {
 				// 矢じりの先端
 				tip_pos = s_pos;
 			}
 			else {
-				pt_scale(d_pos, 1.0 - a_size.m_offset / d_len, s_pos, tip_pos);
+				pt_scale(diff, 1.0 - a_size.m_offset / d_len, s_pos, tip_pos);
 			}
 			pt_add(barbs_pos[0], tip_pos, barbs_pos[0]);
 			pt_add(barbs_pos[1], tip_pos, barbs_pos[1]);
@@ -39,17 +39,17 @@ namespace winrt::GraphPaper::implementation
 	// 矢じりの D2D1 パスジオメトリを作成する
 	// fa	D2D ファクトリー
 	// s_pos	軸の開始位置
-	// d_pos	軸の終了位置への差分
+	// diff	軸の終了位置への差分
 	// style	矢じりの形式
 	// size	矢じりの寸法
 	// geo	作成されたパスジオメトリ
-	static void ln_create_arrow_geometry(ID2D1Factory3* fa, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo)
+	static void ln_create_arrow_geometry(ID2D1Factory3* fa, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo)
 	{
 		D2D1_POINT_2F barbs[2];	// 矢じりの返しの端点
 		D2D1_POINT_2F tip_pos;	// 矢じりの先端点
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (ln_calc_arrowhead(s_pos, d_pos, a_size, barbs, tip_pos)) {
+		if (ln_calc_arrowhead(s_pos, diff, a_size, barbs, tip_pos)) {
 			// ジオメトリパスを作成する.
 			winrt::check_hresult(
 				fa->CreatePathGeometry(geo)
@@ -189,9 +189,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する.
-	void ShapeLine::move(const D2D1_POINT_2F d_pos)
+	void ShapeLine::move(const D2D1_POINT_2F diff)
 	{
-		ShapeStroke::move(d_pos);
+		ShapeStroke::move(diff);
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			ln_create_arrow_geometry(
@@ -248,15 +248,15 @@ namespace winrt::GraphPaper::implementation
 	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
 	void ShapeLine::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
 	{
-		D2D1_POINT_2F d_pos;
+		D2D1_POINT_2F diff;
 
 		if (a == ANCH_END) {
 			pt_sub(value, m_pos, m_diff);
 		}
 		else {
 			if (a == ANCH_BEGIN) {
-				pt_sub(value, m_pos, d_pos);
-				pt_sub(m_diff, d_pos, m_diff);
+				pt_sub(value, m_pos, diff);
+				pt_sub(m_diff, diff, m_diff);
 			}
 			m_pos = value;
 		}
@@ -282,15 +282,15 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// pos	開始位置
-	// d_pos	終了位置への差分
+	// diff	終了位置への差分
 	// attr	既定の属性値
-	ShapeLine::ShapeLine(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
+	ShapeLine::ShapeLine(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr) :
 		ShapeStroke::ShapeStroke(attr),
 		m_arrow_style(attr->m_arrow_style),
 		m_arrow_size(attr->m_arrow_size)
 	{
 		m_pos = s_pos;
-		m_diff = d_pos;
+		m_diff = diff;
 		m_d2d_arrow_geometry = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			ln_create_arrow_geometry(s_d2d_factory, m_pos, m_diff, m_arrow_style,

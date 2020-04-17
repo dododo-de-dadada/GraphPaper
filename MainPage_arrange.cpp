@@ -35,7 +35,7 @@ namespace winrt::GraphPaper::implementation
 				// 図形がない場合
 				return;
 			}
-			if ((*it_src)->is_deleted() == false && (*it_src)->is_selected() == false) {
+			if ((*it_src)->is_deleted() != true && (*it_src)->is_selected() != true) {
 				// 消去フラグがない, かつ選択フラグがない場合,
 				break;
 			}
@@ -59,18 +59,19 @@ namespace winrt::GraphPaper::implementation
 					}
 					return;
 				}
-				if ((*it_src)->is_deleted() == false) {
+				if ((*it_src)->is_deleted() != true) {
 					break;
 				}
 				it_src++;
 			}
-			if ((*it_src)->is_selected() == false) {
+			if ((*it_src)->is_selected() != true) {
 				// 次の図形が選択されてない場合,
 				continue;
 			}
 			auto s = *it_src;
 			auto t = *it_dst;
-			if (m_summary_visible) {
+			if (m_mutex_summary.load(std::memory_order_acquire)) {
+			//if (m_summary_visible) {
 				summary_arrange(s, t);
 			}
 			undo_push_arrange(s, t);
@@ -79,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		/*
 		for (;;) {
-			if ((*it_src)->is_deleted() == false) {
+			if ((*it_src)->is_deleted() != true) {
 				break;
 			}
 			it_src++;
@@ -89,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 			// 交換元反復子が終端でない
 			auto it_dst = it_src++;
 			while (it_src != it_end) {
-				if ((*it_src)->is_deleted() == false) {
+				if ((*it_src)->is_deleted() != true) {
 					break;
 				}
 				it_src++;
@@ -149,7 +150,8 @@ namespace winrt::GraphPaper::implementation
 			uint32_t i = 0;
 			auto s_pos = s_list_front(m_list_shapes);
 			for (auto s : list_selected) {
-				if (m_summary_visible) {
+				if (m_mutex_summary.load(std::memory_order_acquire)) {
+				//if (m_summary_visible) {
 					summary_remove(s);
 					summary_insert(s, i++);
 				}
@@ -159,7 +161,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			for (auto s : list_selected) {
-				if (m_summary_visible) {
+				if (m_mutex_summary.load(std::memory_order_acquire)) {
+				//if (m_summary_visible) {
 					summary_remove(s);
 					summary_append(s);
 				}

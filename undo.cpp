@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::equal;
 		U_TYPE<U>::type value{};
-		return GET(m_shape, value) && equal(value, m_value) == false;
+		return GET(m_shape, value) && equal(value, m_value) != true;
 	}
 
 	// 操作を実行する.
@@ -515,7 +515,7 @@ namespace winrt::GraphPaper::implementation
 		m_insert(false),
 		m_item_pos(static_cast<Shape*>(nullptr))
 	{
-		if (dont_exec == false) {
+		if (dont_exec != true) {
 			exec();
 		}
 	}
@@ -529,7 +529,7 @@ namespace winrt::GraphPaper::implementation
 		m_insert(true),
 		m_item_pos(s_pos)
 	{
-		if (dont_exec == false) {
+		if (dont_exec != true) {
 			exec();
 		}
 	}
@@ -604,7 +604,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作を実行する.
 	void UndoSelect::exec(void)
 	{
-		m_shape->set_select(m_shape->is_selected() == false);
+		m_shape->set_select(m_shape->is_selected() != true);
 	}
 
 	// 操作をデータリーダーから読み込む.

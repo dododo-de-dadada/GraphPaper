@@ -204,21 +204,8 @@ namespace winrt::GraphPaper::implementation
 	// メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
-		//std::mutex m_dx_mutex;	// DX のための同期プリミティブ
-		std::atomic_bool m_dx_mutex{ false };
-		inline bool mutex_try(void)
-		{
-			return m_dx_mutex.exchange(true, std::memory_order_acq_rel);
-		}
-		inline void mutex_wait(void)
-		{
-			while (m_dx_mutex.exchange(true, std::memory_order_acq_rel));
-		}
-		inline void mutex_unlock(void)
-		{
-			m_dx_mutex.store(false, std::memory_order_release);
-		}
-
+		std::mutex m_mutex_page;	// 図形のための排他制御
+		std::atomic_bool m_mutex_summary{ false };	// 一覧のための排他制御
 		winrt::hstring m_token_mru;	// 最近使ったファイルのトークン
 
 		wchar_t* m_text_find = nullptr;	// 検索の検索文字列
@@ -229,9 +216,10 @@ namespace winrt::GraphPaper::implementation
 
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
-		STATUS_BAR m_stbar = stbar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
+		STATUS_BAR m_status_bar = stbar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		DRAW_TOOL m_draw_tool = DRAW_TOOL::SELECT;		// 作図ツール
+
 		SHAPE_DX m_page_dx;		// ページの描画環境
 		ShapeLayout m_page_layout;		// ページのレイアウト
 		D2D1_POINT_2F m_page_min{ 0.0F, 0.0F };		// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
@@ -262,7 +250,6 @@ namespace winrt::GraphPaper::implementation
 		Shape* m_sample_shape = nullptr;	// 見本の図形
 		SAMP_TYPE m_sample_type = SAMP_TYPE::NONE;	// 見本の型
 
-		bool m_summary_visible = false;	// 図形一覧パネルの表示フラグ
 		bool m_window_visible = false;		// ウィンドウが表示されている/表示されてない
 
 		uint64_t m_click_time = 0L;		// クリックの判定時間 (マイクロ秒)
@@ -631,8 +618,20 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction mfi_page_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「ページの大きさ」が選択された
 		void mfi_page_size_click(IInspectable const&, RoutedEventArgs const&);
+		// ページの左上位置と右下位置を設定する.
+		void page_bound(void) noexcept;
+		// ページの左上位置と右下位置を設定する.
+		void page_bound(Shape* s) noexcept { s->get_bound(m_page_min, m_page_max); }
 		// ページと図形を表示する.
 		void page_draw(void);
+		// 値をページの右下位置に格納する.
+		void page_max(const D2D1_POINT_2F p_max) noexcept { m_page_max = p_max; }
+		// ページの右下位置を得る.
+		const D2D1_POINT_2F page_max(void) const noexcept { return m_page_max; }
+		// 値をページの左上位置に格納する.
+		void page_min(const D2D1_POINT_2F p_min) noexcept { m_page_min = p_min; }
+		// ページの左上位置を得る.
+		const D2D1_POINT_2F page_min(void) const noexcept { return m_page_min; }
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void page_set_slider_header(const double value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
@@ -642,7 +641,7 @@ namespace winrt::GraphPaper::implementation
 		// ページのスワップチェーンパネルの寸法が変わった.
 		void scp_page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
 		// ページのスワップチェーンパネルの大きさを設定する.
-		void set_page_panle_size(void);
+		void page_panle_size(void);
 		// ページ寸法ダイアログの「ページの幅」「ページの高さ」テキストボックスの値が変更された.
 		void tx_page_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
 
@@ -651,21 +650,41 @@ namespace winrt::GraphPaper::implementation
 		// ポインターイベントのハンドラー
 		//-------------------------------
 
+		void pointer_anchor(const ANCH_WHICH anchor) noexcept { m_pointer_anchor = anchor; }
 		// コンテキストメニューを表示する.
 		void pointer_context_menu(void);
 		// ポインターの現在位置を得る.
+		const D2D1_POINT_2F& pointer_cur(void) const noexcept { return m_pointer_cur; }
+		// イベント引数からポインターの現在位置を得る.
 		void pointer_cur_pos(PointerRoutedEventArgs const& args);
 		// 範囲選択を終了する.
 		void pointer_finish_selecting_area(const VirtualKeyModifiers k_mod);
-		// 図形の作成を終了する.
+		// 文字列図形の作成を終了する.
 		IAsyncAction pointer_finish_creating_text_async(const D2D1_POINT_2F diff);
+		// 図形の作成を終了する.
 		void pointer_finish_creating(const D2D1_POINT_2F diff);
 		// 図形の移動を終了する.
 		void pointer_finish_moving(void);
 		// 押された図形の編集を終了する.
 		void pointer_finish_forming(void);
+		// ポインターが押された位置を得る.
+		const D2D1_POINT_2F pointer_pressed(void) const noexcept { return m_pointer_pressed; }
 		// 状況に応じた形状のポインターを設定する.
 		void pointer_set(void);
+		// 値をポインターが押された図形に格納する.
+		void pointer_shape(Shape* const s) noexcept { m_pointer_shape = s; }
+		// 値をポインターが押された図形に格納する.
+		void pointer_shape_prev(Shape* prev) noexcept { m_pointer_shape_prev = prev; }
+		// ポインターが押された図形を得る.
+		Shape* pointer_shape_prev(void) const noexcept { return m_pointer_shape_prev; }
+		// 値をポインターが押された図形に格納する.
+		void pointer_shape_summary(Shape* summary) noexcept { m_pointer_shape_summary = summary; }
+		// ポインターが押された図形を得る.
+		Shape* pointer_shape_summary(void) const noexcept { return m_pointer_shape_summary; }
+		// ポインターが押された状態に格納する.
+		void pointer_state(const STATE_TRAN state) noexcept { m_pointer_state = state; }
+		// ポインターが押された状態を得る.
+		const STATE_TRAN pointer_state(void) const noexcept { return m_pointer_state; }
 		// ポインターのボタンが上げられた.
 		void scp_pointer_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがページのスワップチェーンパネルの中に入った.
@@ -732,6 +751,10 @@ namespace winrt::GraphPaper::implementation
 		// ステータスバーの設定
 		//-------------------------------
 
+		// 値をステータスバーの状態に格納する.
+		void status_bar(const STATUS_BAR stbar) noexcept { m_status_bar = stbar; }
+		// ステータスバーの状態を得る.
+		const STATUS_BAR status_bar(void) const noexcept { return m_status_bar; }
 		// レイアウトメニューの「ステータスバー」が選択された.
 		void mi_stbar_click(IInspectable const&, RoutedEventArgs const&);
 		// ステータスバーのメニュー項目に印をつける.
@@ -846,6 +869,10 @@ namespace winrt::GraphPaper::implementation
 		void btn_text_replace_all_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「置換して次に」ボタンが押された.
 		void btn_text_replace_click(IInspectable const&, RoutedEventArgs const&);
+		// 文字列の大きさに合わせるフラグに格納する.
+		void text_adjust(const bool adjust) noexcept { m_text_adjust = adjust; }
+		// 文字列の大きさに合わせるフラグを得る.
+		const bool text_adjust(void) const noexcept { return m_text_adjust; }
 		// 検索の値をデータリーダーから読み込む.
 		void text_find_read(DataReader const& dt_reader);
 		// 文字列検索パネルから値を格納する.
@@ -878,6 +905,10 @@ namespace winrt::GraphPaper::implementation
 		// 作図メニューのハンドラー
 		//-------------------------------
 
+		// 値を作図メニューに格納する.
+		void tool(const DRAW_TOOL tool) noexcept { m_draw_tool = tool; }
+		// 作図メニューを得る.
+		const DRAW_TOOL tool(void) const noexcept { return m_draw_tool; }
 		// 作図メニューの「曲線」が選択された.
 		void rmfi_tool_bezi_click(IInspectable const&, RoutedEventArgs const&);
 		// 作図メニューの「だ円」が選択された.
@@ -925,7 +956,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を挿入して, その操作をスタックに積む.
 		void undo_push_insert(Shape* s, Shape* s_pos);
 		// 図形の位置をスタックに保存してから差分だけ移動する.
-		void undo_push_move(const D2D1_POINT_2F d_pos);
+		void undo_push_move(const D2D1_POINT_2F diff);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void undo_push_null(void);
 		// 図形をグループから削除して, その操作をスタックに積む.
@@ -980,9 +1011,17 @@ namespace winrt::GraphPaper::implementation
 
 		//-----------------------------
 		// MainPage_misc.cpp
-		// 
+		// 色成分の表記, 長さの単位の設定
+		// バージョン情報
 		//-----------------------------
 
+		void color_code(const COLOR_CODE code) noexcept { m_color_code = code; }
+		const COLOR_CODE color_code(void) const noexcept { return m_color_code; }
+
+		// 値を長さの単位に格納する.
+		void len_unit(const LEN_UNIT unit) noexcept { m_len_unit = unit; }
+		// 長さの単位を得る.
+		const LEN_UNIT len_unit(void) const noexcept { return m_len_unit; }
 		// その他メニューの「色成分の表記」に印をつける.
 		void color_code_check_menu(void);
 		// 色成分表記を選択する.
@@ -1015,10 +1054,7 @@ namespace winrt::GraphPaper::implementation
 		void rmfi_len_pixel_click(IInspectable const&, RoutedEventArgs const&);
 		// その他メニューの「長さの単位」>「ポイント」が選択された.
 		void rmfi_len_point_click(IInspectable const&, RoutedEventArgs const&);
-		// UWP のブラシを D2D1_COLOR_F に変換する.
-		//bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept;
-		// UWP の色を D2D1_COLOR_F に変換する.
-		//void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept;
+
 	};
 
 }

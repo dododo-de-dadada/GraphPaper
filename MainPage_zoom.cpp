@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 		for (int i = s; i < e; i++) {
 			if (m_page_layout.m_page_scale <= ZOOM_LEVEL[i]) {
 				m_page_layout.m_page_scale = ZOOM_LEVEL[i + o];
-				set_page_panle_size();
+				page_panle_size();
 				page_draw();
 				stbar_set_zoom();
 				break;
@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 		for (int i = s; i < e; i++) {
 			if (m_page_layout.m_page_scale <= ZOOM_LEVEL[i]) {
 				m_page_layout.m_page_scale = ZOOM_LEVEL[i + o];
-				set_page_panle_size();
+				page_panle_size();
 				page_draw();
 				stbar_set_zoom();
 				break;
@@ -61,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_page_layout.m_page_scale = 1.0;
-		set_page_panle_size();
+		page_panle_size();
 		page_draw();
 		stbar_set_zoom();
 	}

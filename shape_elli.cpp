@@ -30,7 +30,7 @@ namespace winrt::GraphPaper::implementation
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), static_cast<FLOAT>(m_stroke_width), m_d2d_stroke_style.get());
 		}
-		if (is_selected() == false) {
+		if (is_selected() != true) {
 			return;
 		}
 		D2D1_POINT_2F a_pos[4];
@@ -93,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 			// ”¼Œa‚É˜g‚Ì‘¾‚³‚Ì”¼•ª‚ð‰Á‚¦‚½’l‚ðŠOŒa‚ÉŠi”[‚·‚é.
 			D2D1_POINT_2F r_outer;
 			pt_add(rad, s_width * 0.5, r_outer);
-			if (pt_in_elli(t_pos, c_pos, r_outer.x, r_outer.y) == false) {
+			if (pt_in_elli(t_pos, c_pos, r_outer.x, r_outer.y) != true) {
 				// ŠOŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç, 
 				// ANCH_OUTSIDE ‚ð•Ô‚·.
 				return ANCH_WHICH::ANCH_OUTSIDE;
@@ -110,7 +110,7 @@ namespace winrt::GraphPaper::implementation
 			if (r_inner.y <= 0.0f) {
 				return ANCH_WHICH::ANCH_FRAME;
 			}
-			if (pt_in_elli(t_pos, c_pos, r_inner.x, r_inner.y) == false) {
+			if (pt_in_elli(t_pos, c_pos, r_inner.x, r_inner.y) != true) {
 				// “àŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç ANCH_FRAME ‚ð•Ô‚·.
 				return ANCH_WHICH::ANCH_FRAME;
 			}

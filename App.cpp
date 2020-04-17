@@ -64,7 +64,7 @@ void App::OnLaunched(LaunchActivatedEventArgs const& e)
             // final launch steps after the restore is complete
         }
 
-        if (e.PrelaunchActivated() == false)
+        if (e.PrelaunchActivated() != true)
         {
             if (rootFrame.Content() == nullptr)
             {
@@ -81,7 +81,7 @@ void App::OnLaunched(LaunchActivatedEventArgs const& e)
     }
     else
     {
-        if (e.PrelaunchActivated() == false)
+        if (e.PrelaunchActivated() != true)
         {
             if (rootFrame.Content() == nullptr)
             {

@@ -68,10 +68,10 @@ namespace winrt::GraphPaper::implementation
 		const auto g_len = m_sample_layout.m_grid_base + 1.0;
 		// ページの縦横の長さの値をピクセル単位の値に変換する.
 		D2D1_SIZE_F p_size{
-			static_cast<FLOAT>(conv_len_to_val(m_len_unit, pw, dpi, g_len)),
-			static_cast<FLOAT>(conv_len_to_val(m_len_unit, ph, dpi, g_len))
+			static_cast<FLOAT>(conv_len_to_val(len_unit(), pw, dpi, g_len)),
+			static_cast<FLOAT>(conv_len_to_val(len_unit(), ph, dpi, g_len))
 		};
-		if (equal(p_size, m_page_layout.m_page_size) == false) {
+		if (equal(p_size, m_page_layout.m_page_size) != true) {
 			// 変換された値がページの大きさと異なる場合,
 			// 値をページレイアウトに格納して, その操作をスタックに積む.
 			undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_layout, p_size);
@@ -80,8 +80,8 @@ namespace winrt::GraphPaper::implementation
 			// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 			enable_undo_menu();
 		}
-		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
-		set_page_panle_size();
+		page_bound();
+		page_panle_size();
 		page_draw();
 		stbar_set_curs();
 		stbar_set_grid();
@@ -103,13 +103,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		pt_min({ 0.0F, 0.0F }, b_min, m_page_min);
 		pt_max(b_max, p_size, m_page_max);
-		if (equal(m_page_layout.m_page_size, { p_size.x, p_size.y }) == false) {
+		if (equal(m_page_layout.m_page_size, { p_size.x, p_size.y }) != true) {
 			undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_layout, D2D1_SIZE_F{ p_size.x, p_size.y });
 			undo_push_null();
 			enable_undo_menu();
 		}
-		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
-		set_page_panle_size();
+		page_bound();
+		page_panle_size();
 		page_draw();
 		stbar_set_page();
 	}
@@ -145,7 +145,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_layout.get_page_color(sample_value);
 			D2D1_COLOR_F page_value;
 			m_page_layout.get_page_color(page_value);
-			if (equal(page_value, sample_value) == false) {
+			if (equal(page_value, sample_value) != true) {
 				undo_push_set<UNDO_OP::PAGE_COLOR>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
@@ -174,11 +174,11 @@ namespace winrt::GraphPaper::implementation
 		pw = m_sample_layout.m_page_size.width;
 		ph = m_sample_layout.m_page_size.height;
 		wchar_t buf[32];
-		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, pw, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), pw, dpi, g_len, buf);
 		tx_page_width().Text(buf);
-		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, ph, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), ph, dpi, g_len, buf);
 		tx_page_height().Text(buf);
-		conv_val_to_len<WITH_UNIT_NAME>(m_len_unit, m_page_size_max, dpi, g_len, buf);
+		conv_val_to_len<WITH_UNIT_NAME>(len_unit(), m_page_size_max, dpi, g_len, buf);
 		tx_page_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
@@ -188,15 +188,23 @@ namespace winrt::GraphPaper::implementation
 		const auto _ = cd_page_size().ShowAsync();
 	}
 
+	// ページの左上位置と右下位置を設定する.
+	void MainPage::page_bound(void) noexcept
+	{
+		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
+	}
+
 	// ページと図形を表示する.
 	void MainPage::page_draw(void)
 	{
 #if defined(_DEBUG)
-		if (m_page_dx.m_swapChainPanel.IsLoaded() == false) {
+		if (m_page_dx.m_swapChainPanel.IsLoaded() != true) {
 			return;
 		}
 #endif
-		if (mutex_try()) {
+		//m_mutex_page.lock();
+		if (m_mutex_page.try_lock() != true) {
+			// ロックできない場合
 			return;
 		}
 
@@ -245,46 +253,47 @@ namespace winrt::GraphPaper::implementation
 			// 方眼線を表示する.
 			m_page_layout.draw_grid(m_page_dx, { 0.0f, 0.0f });
 		}
-		if (m_pointer_state == STATE_TRAN::PRESS_AREA) {
+		if (pointer_state() == STATE_TRAN::PRESS_AREA) {
+			const auto draw_tool = tool();
 			// 押された状態が範囲を選択している場合,
 			// 補助線の色をブラシに格納する.
 			//D2D1_COLOR_F aux_color;
 			//m_page_layout.get_auxiliary_color(aux_color);
 			//m_page_dx.m_aux_brush->SetColor(aux_color);
-			if (m_draw_tool == DRAW_TOOL::SELECT
-				|| m_draw_tool == DRAW_TOOL::RECT
-				|| m_draw_tool == DRAW_TOOL::TEXT
-				|| m_draw_tool == DRAW_TOOL::SCALE) {
+			if (draw_tool == DRAW_TOOL::SELECT
+				|| draw_tool == DRAW_TOOL::RECT
+				|| draw_tool == DRAW_TOOL::TEXT
+				|| draw_tool == DRAW_TOOL::SCALE) {
 				// 選択ツール
 				// または方形
 				// または文字列の場合,
 				// 方形の補助線を表示する.
-				m_page_layout.draw_auxiliary_rect(m_page_dx, m_pointer_pressed, m_pointer_cur);
+				m_page_layout.draw_auxiliary_rect(m_page_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (m_draw_tool == DRAW_TOOL::BEZI) {
+			else if (draw_tool == DRAW_TOOL::BEZI) {
 				// 曲線の場合,
 				// 曲線の補助線を表示する.
-				m_page_layout.draw_auxiliary_bezi(m_page_dx, m_pointer_pressed, m_pointer_cur);
+				m_page_layout.draw_auxiliary_bezi(m_page_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (m_draw_tool == DRAW_TOOL::ELLI) {
+			else if (draw_tool == DRAW_TOOL::ELLI) {
 				// だ円の場合,
 				// だ円の補助線を表示する.
-				m_page_layout.draw_auxiliary_elli(m_page_dx, m_pointer_pressed, m_pointer_cur);
+				m_page_layout.draw_auxiliary_elli(m_page_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (m_draw_tool == DRAW_TOOL::LINE) {
+			else if (draw_tool == DRAW_TOOL::LINE) {
 				// 直線の場合,
 				// 直線の補助線を表示する.
-				m_page_layout.draw_auxiliary_line(m_page_dx, m_pointer_pressed, m_pointer_cur);
+				m_page_layout.draw_auxiliary_line(m_page_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (m_draw_tool == DRAW_TOOL::RRCT) {
+			else if (draw_tool == DRAW_TOOL::RRCT) {
 				// 角丸方形の場合,
 				// 角丸方形の補助線を表示する.
-				m_page_layout.draw_auxiliary_rrect(m_page_dx, m_pointer_pressed, m_pointer_cur);
+				m_page_layout.draw_auxiliary_rrect(m_page_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (m_draw_tool == DRAW_TOOL::QUAD) {
+			else if (draw_tool == DRAW_TOOL::QUAD) {
 				// 四へん形の場合,
 				// 四へん形の補助線を表示する.
-				m_page_layout.draw_auxiliary_quad(m_page_dx, m_pointer_pressed, m_pointer_cur);
+				m_page_layout.draw_auxiliary_quad(m_page_dx, pointer_pressed(), pointer_cur());
 			}
 		}
 		// 描画を終了する.
@@ -305,7 +314,7 @@ namespace winrt::GraphPaper::implementation
 			cd_message_show(ICON_ALERT, L"str_err_draw", {});
 		}
 #endif
-		mutex_unlock();
+		m_mutex_page.unlock();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -319,21 +328,21 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_code, value, buf);
+				conv_val_to_col(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_code, value, buf);
+				conv_val_to_col(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_code, value, buf);
+				conv_val_to_col(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
@@ -420,7 +429,7 @@ namespace winrt::GraphPaper::implementation
 		const auto w = z.Width;
 		const auto h = z.Height;
 		scroll_set(w, h);
-		if (scp_page_panel().IsLoaded() == false) {
+		if (scp_page_panel().IsLoaded() != true) {
 			return;
 		}
 		m_page_dx.SetLogicalSize2({ w, h });
@@ -428,7 +437,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページの大きさを設定する.
-	void MainPage::set_page_panle_size(void)
+	void MainPage::page_panle_size(void)
 	{
 		const auto w = scp_page_panel().ActualWidth();
 		const auto h = scp_page_panel().ActualHeight();
@@ -447,7 +456,7 @@ namespace winrt::GraphPaper::implementation
 		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &value, buf, 2);
 		if (cnt == 1 && value > 0.0) {
 			// 文字列が数値に変換できた場合,
-			value = conv_len_to_val(m_len_unit, value, dpi, m_sample_layout.m_grid_base + 1.0);
+			value = conv_len_to_val(len_unit(), value, dpi, m_sample_layout.m_grid_base + 1.0);
 		}
 		cd_page_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < m_page_size_max);
 	}

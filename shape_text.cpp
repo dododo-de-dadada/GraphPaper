@@ -78,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 			m_dw_range_metrics = nullptr;
 		}
 		if (m_font_family != nullptr) {
-			if (is_available_font(m_font_family) == false) {
+			if (is_available_font(m_font_family) != true) {
 				// 有効な書体名でない場合,
 				// 配列に含まれていない書体名なので破棄する.
 				delete[] m_font_family;
@@ -148,7 +148,7 @@ namespace winrt::GraphPaper::implementation
 			set_pos(s_pos, ANCH_WHICH::ANCH_SE);
 		} while (m_dw_line_cnt < line_cnt && m_dw_line_cnt > min_line_cnt);
 		// 行数が, 保存された行数より小さい, かつ最小の行数より大きい場合
-		return equal(diff, m_diff) == false;
+		return equal(diff, m_diff) != true;
 	}
 
 	// 計量の配列をテキストレイアウトから得る.
@@ -280,11 +280,11 @@ namespace winrt::GraphPaper::implementation
 				const FLOAT w = static_cast<FLOAT>(max(std::fabs(m_diff.x) - m_text_margin.width * 2.0, 0.0));
 				const FLOAT h = static_cast<FLOAT>(max(std::fabs(m_diff.y) - m_text_margin.height * 2.0, 0.0));
 				bool flag = false;
-				if (equal(w, m_dw_text_layout->GetMaxWidth()) == false) {
+				if (equal(w, m_dw_text_layout->GetMaxWidth()) != true) {
 					m_dw_text_layout->SetMaxWidth(w);
 					flag = true;
 				}
-				if (equal(h, m_dw_text_layout->GetMaxHeight()) == false) {
+				if (equal(h, m_dw_text_layout->GetMaxHeight()) != true) {
 					m_dw_text_layout->SetMaxHeight(h);
 					flag = true;
 				}
@@ -303,7 +303,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		auto i = wcslen(m_text);
 		while (i-- > 0) {
-			if (iswspace(m_text[i]) == false) {
+			if (iswspace(m_text[i]) == 0) {
 				break;
 			}
 			m_text[i] = L'\0';
@@ -430,7 +430,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_sel_range.length > 0 && m_text != nullptr) {
 			m_dw_text_layout->SetDrawingEffect(nullptr, { 0, wchar_len(m_text) });
 		}
-		if (is_selected() == false) {
+		if (is_selected() != true) {
 			return;
 		}
 		draw_frame(dx, t_min);
@@ -571,11 +571,11 @@ namespace winrt::GraphPaper::implementation
 				auto const& lm = m_dw_line_metrics[i];
 				auto const top = static_cast<double>(tm.top) + static_cast<double>(lm.baseline) + m_dw_descent - m_font_size;
 				pt_add(nw_pos, tm.left, top, h_min);
-				if (pt_in_rect(h_min, a_min, a_max) == false) {
+				if (pt_in_rect(h_min, a_min, a_max) != true) {
 					return false;
 				}
 				pt_add(h_min, tm.width, m_font_size, h_max);
-				if (pt_in_rect(h_max, a_min, a_max) == false) {
+				if (pt_in_rect(h_max, a_min, a_max) != true) {
 					return false;
 				}
 			}
@@ -654,7 +654,7 @@ namespace winrt::GraphPaper::implementation
 			winrt::check_hresult(
 				localized_name->FindLocaleName(lang, &index, &exists)
 			);
-			if (exists == false) {
+			if (exists != TRUE) {
 				// 地域名がない場合,
 				// 0 を開始位置に格納する.
 				index = 0;
@@ -875,12 +875,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// pos	開始位置
-	// d_pos	終了位置への差分
+	// s_pos	開始位置
+	// diff	終了位置への差分
 	// text	文字列
 	// attr	既定の属性値
-	ShapeText::ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, wchar_t* const text, const ShapeLayout* attr) :
-		ShapeRect::ShapeRect(s_pos, d_pos, attr),
+	ShapeText::ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, wchar_t* const text, const ShapeLayout* attr) :
+		ShapeRect::ShapeRect(s_pos, diff, attr),
 		m_font_color(attr->m_font_color),
 		m_font_family(attr->m_font_family),
 		m_font_size(attr->m_font_size),

@@ -18,18 +18,18 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// ŠpŠÛ”¼Œa‚ğŒvZ‚·‚é.
-	static void calc_corner_radius(const D2D1_POINT_2F d_pos, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad);
+	static void calc_corner_radius(const D2D1_POINT_2F diff, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad);
 	// ŠpŠÛ”¼Œa‚Ìc‚Ü‚½‚Í‰¡‚Ì¬•ª‚ğŒvZ‚·‚é.
 	static void calc_corner_radius(const FLOAT r_len, const FLOAT d_rad, FLOAT& c_rad);
 
 	// ŠpŠÛ”¼Œa‚ğŒvZ‚·‚é.
-	// d_pos	ŠpŠÛ•ûŒ`‚Ì‘ÎŠpƒxƒNƒgƒ‹
+	// diff	ŠpŠÛ•ûŒ`‚Ì‘ÎŠpƒxƒNƒgƒ‹
 	// d_rad	Šù’è‚ÌŠpŠÛ”¼Œa
 	// c_rad	ŒvZ‚³‚ê‚½ŠpŠÛ”¼Œa
-	static void calc_corner_radius(const D2D1_POINT_2F d_pos, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad)
+	static void calc_corner_radius(const D2D1_POINT_2F diff, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad)
 	{
-		calc_corner_radius(d_pos.x, d_rad.x, c_rad.x);
-		calc_corner_radius(d_pos.y, d_rad.y, c_rad.y);
+		calc_corner_radius(diff.x, d_rad.x, c_rad.x);
+		calc_corner_radius(diff.y, d_rad.y, c_rad.y);
 	}
 
 	// ŠpŠÛ”¼Œa‚Ìc‚Ü‚½‚Í‰¡‚Ì¬•ª‚ğŒvZ‚·‚é.
@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 				anchor_draw_rect(r_pos[i], dx);
 				anchor_draw_rect(r_mid, dx);
 			}
-			//if (flag == false) {
+			//if (flag != true) {
 				D2D1_POINT_2F c_pos;
 				pt_add(r_min, rx, ry, c_pos);
 				anchor_draw_rounded(c_pos, dx);
@@ -248,7 +248,7 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_MIDDLE[i];
 			}
 		}
-		if (flag == false) {
+		if (flag != true) {
 			for (uint32_t i = 0; i < 4; i++) {
 				D2D1_POINT_2F r_cen;	// ŠpŠÛ•”•ª‚Ì’†S“_
 				get_pos(ANCH_ROUND[i], r_cen);
@@ -278,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		r_rad.x = std::abs(m_corner_rad.x);
 		r_rad.y = std::abs(m_corner_rad.y);
-		if (is_opaque(m_stroke_color) == false) {
+		if (is_opaque(m_stroke_color) != true) {
 			return is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_min, r_max, r_rad) ? ANCH_WHICH::ANCH_INSIDE : ANCH_WHICH::ANCH_OUTSIDE;
 		}
 		const double s_width = max(m_stroke_width, a_len);
@@ -286,14 +286,14 @@ namespace winrt::GraphPaper::implementation
 		pt_add(r_min, -s_width * 0.5, r_min);
 		pt_add(r_max, s_width * 0.5, r_max);
 		pt_add(r_rad, s_width * 0.5, r_rad);
-		if (pt_in_rrect(t_pos, r_min, r_max, r_rad) == false) {
+		if (pt_in_rrect(t_pos, r_min, r_max, r_rad) != true) {
 			return ANCH_WHICH::ANCH_OUTSIDE;
 		}
 		// “à‘¤‚ÌŠpŠÛ•ûŒ`‚Ì”»’è
 		pt_add(r_min, s_width, r_min);
 		pt_add(r_max, -s_width, r_max);
 		pt_add(r_rad, -s_width, r_rad);
-		if (pt_in_rrect(t_pos, r_min, r_max, r_rad) == false) {
+		if (pt_in_rrect(t_pos, r_min, r_max, r_rad) != true) {
 			return ANCH_WHICH::ANCH_FRAME;
 		}
 		return is_opaque(m_fill_color) ? ANCH_WHICH::ANCH_INSIDE : ANCH_WHICH::ANCH_OUTSIDE;
@@ -303,35 +303,35 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRRect::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F c_pos;
-		D2D1_POINT_2F d_pos;
+		D2D1_POINT_2F diff;
 		D2D1_POINT_2F rad;
 
 		switch (a) {
 		case ANCH_WHICH::ANCH_R_NW:
 			ShapeRRect::get_pos(a, c_pos);
-			pt_sub(value, c_pos, d_pos);
-			pt_add(m_corner_rad, d_pos, rad);
+			pt_sub(value, c_pos, diff);
+			pt_add(m_corner_rad, diff, rad);
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
 			ShapeRRect::get_pos(a, c_pos);
-			pt_sub(value, c_pos, d_pos);
-			rad.x = m_corner_rad.x - d_pos.x;
-			rad.y = m_corner_rad.y + d_pos.y;
+			pt_sub(value, c_pos, diff);
+			rad.x = m_corner_rad.x - diff.x;
+			rad.y = m_corner_rad.y + diff.y;
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
 			ShapeRRect::get_pos(a, c_pos);
-			pt_sub(value, c_pos, d_pos);
-			rad.x = m_corner_rad.x - d_pos.x;
-			rad.y = m_corner_rad.y - d_pos.y;
+			pt_sub(value, c_pos, diff);
+			rad.x = m_corner_rad.x - diff.x;
+			rad.y = m_corner_rad.y - diff.y;
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
 			ShapeRRect::get_pos(a, c_pos);
-			pt_sub(value, c_pos, d_pos);
-			rad.x = m_corner_rad.x + d_pos.x;
-			rad.y = m_corner_rad.y - d_pos.y;
+			pt_sub(value, c_pos, diff);
+			rad.x = m_corner_rad.x + diff.x;
+			rad.y = m_corner_rad.y - diff.y;
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		default:
@@ -347,8 +347,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚ğì¬‚·‚é.
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
-		ShapeRect::ShapeRect(s_pos, d_pos, attr)
+	// s_pos	ŠJnˆÊ’u
+	// diff	ŠJnˆÊ’u‚©‚ç‚Ì·•ª
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr) :
+		ShapeRect::ShapeRect(s_pos, diff, attr)
 	{
 		calc_corner_radius(m_diff, attr->m_corner_rad, m_corner_rad);
 	}

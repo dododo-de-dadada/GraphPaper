@@ -93,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t i = 0;
 		for (auto it = it_begin; it != it_end; it++) {
 			auto s = *it;
-			if (s->is_deleted() == false) {
+			if (s->is_deleted() != true) {
 				distance = i;
 				return s;
 			}
@@ -304,17 +304,17 @@ namespace winrt::GraphPaper::implementation
 
 	// 選択フラグの立つすべての図形を差分だけ移動する.
 	// s_list	図形リスト
-	// d_pos	移動する差分
-	void s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F d_pos) noexcept
+	// diff	移動する差分
+	void s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F diff) noexcept
 	{
 		for (auto s : s_list) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->is_selected() == false) {
+			if (s->is_selected() != true) {
 				continue;
 			}
-			s->move(d_pos);
+			s->move(diff);
 		}
 	}
 
@@ -376,7 +376,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->is_selected() == false) {
+			if (s->is_selected() != true) {
 				continue;
 			}
 			if constexpr (std::is_same<S, ShapeGroup>::value) {
@@ -455,11 +455,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->is_selected() == false) {
+			if (s->is_selected() != true) {
 				continue;
 			}
 			wchar_t* w;
-			if (s->get_text(w) == false) {
+			if (s->get_text(w) != true) {
 				continue;
 			}
 			if (text.empty()) {

@@ -760,16 +760,18 @@
         </Grid>
         <!-- ページパネル -->
         <RelativePanel x:Name="rp_page" Grid.Row="1" Grid.Column="0" >
+            <!--
+                PointerEntered="scp_pointer_entered"
+                PointerReleased="scp_pointer_released"
+            -->
             <SwapChainPanel
                 x:Name="scp_page_panel"
                 Loaded="scp_page_panel_loaded"
                 KeyboardAcceleratorPlacementMode="Hidden"
                 PointerCanceled="scp_pointer_canceled"
-                PointerEntered="scp_pointer_entered"
                 PointerExited="scp_pointer_exited"
                 PointerMoved="scp_pointer_moved"
                 PointerPressed="scp_pointer_pressed"
-                PointerReleased="scp_pointer_released"
                 PointerWheelChanged="scp_pointer_wheel_changed"                
                 RelativePanel.AlignLeftWithPanel="True"
                 RelativePanel.AlignTopWithPanel="True"

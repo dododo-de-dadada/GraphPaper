@@ -30,7 +30,7 @@ namespace winrt::GraphPaper::implementation
 		// 消去フラグの立つ図形を消去リストに格納する.
 		S_LIST_T list_deleted;
 		for (const auto t : s_list) {
-			if (t->is_deleted() == false) {
+			if (t->is_deleted() != true) {
 				// 消去フラグがない図形は無視する.
 				continue;
 			}
@@ -128,19 +128,21 @@ namespace winrt::GraphPaper::implementation
 		pt_scale(args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / m_page_layout.m_page_scale, p_offs, m_pointer_cur);
 	}
 
+	// 文字列図形の作成を終了する.
 	IAsyncAction MainPage::pointer_finish_creating_text_async(const D2D1_POINT_2F diff)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		tx_edit().Text(L"");
-		ck_text_adjust_bound().IsChecked(m_text_adjust);
+		ck_text_adjust_bound().IsChecked(text_adjust());
 		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
 			auto s = new ShapeText(m_pointer_pressed, diff, text, &m_page_layout);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
-			if (m_text_adjust = ck_text_adjust_bound().IsChecked().GetBoolean()) {
+			text_adjust(ck_text_adjust_bound().IsChecked().GetBoolean());
+			if (text_adjust()) {
 				static_cast<ShapeText*>(s)->adjust_bound();
 			}
 			reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);
@@ -149,9 +151,10 @@ namespace winrt::GraphPaper::implementation
 			undo_push_null();
 			m_pointer_shape_summary = m_pointer_shape_prev = s;
 			enable_edit_menu();
-			s->get_bound(m_page_min, m_page_max);
-			set_page_panle_size();
-			if (m_summary_visible) {
+			page_bound(s);
+			page_panle_size();
+			if (m_mutex_summary.load(std::memory_order_acquire)) {
+			//if (m_summary_visible) {
 				summary_append(s);
 			}
 		}
@@ -165,26 +168,27 @@ namespace winrt::GraphPaper::implementation
 	// 図形の作成を終了する.
 	void MainPage::pointer_finish_creating(const D2D1_POINT_2F diff)
 	{
+		const auto draw_tool = tool();
 		Shape* s;
-		if (m_draw_tool == DRAW_TOOL::RECT) {
+		if (draw_tool == DRAW_TOOL::RECT) {
 			s = new ShapeRect(m_pointer_pressed, diff, &m_page_layout);
 		}
-		else if (m_draw_tool == DRAW_TOOL::RRCT) {
+		else if (draw_tool == DRAW_TOOL::RRCT) {
 			s = new ShapeRRect(m_pointer_pressed, diff, &m_page_layout);
 		}
-		else if (m_draw_tool == DRAW_TOOL::QUAD) {
+		else if (draw_tool == DRAW_TOOL::QUAD) {
 			s = new ShapeQuad(m_pointer_pressed, diff, &m_page_layout);
 		}
-		else if (m_draw_tool == DRAW_TOOL::ELLI) {
+		else if (draw_tool == DRAW_TOOL::ELLI) {
 			s = new ShapeElli(m_pointer_pressed, diff, &m_page_layout);
 		}
-		else if (m_draw_tool == DRAW_TOOL::LINE) {
+		else if (draw_tool == DRAW_TOOL::LINE) {
 			s = new ShapeLine(m_pointer_pressed, diff, &m_page_layout);
 		}
-		else if (m_draw_tool == DRAW_TOOL::BEZI) {
+		else if (draw_tool == DRAW_TOOL::BEZI) {
 			s = new ShapeBezi(m_pointer_pressed, diff, &m_page_layout);
 		}
-		else if (m_draw_tool == DRAW_TOOL::SCALE) {
+		else if (draw_tool == DRAW_TOOL::SCALE) {
 			s = new ShapeScale(m_pointer_pressed, diff, &m_page_layout);
 		}
 		else {
@@ -199,10 +203,11 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		m_pointer_shape_summary = m_pointer_shape_prev = s;
 		enable_edit_menu();
-		s->get_bound(m_page_min, m_page_max);
-		set_page_panle_size();
+		page_bound(s);
+		page_panle_size();
 		page_draw();
-		if (m_summary_visible) {
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
 			summary_append(s);
 		}
 	}
@@ -219,8 +224,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
-		set_page_panle_size();
+		page_bound();
+		page_panle_size();
 	}
 
 	// 図形の移動を終了する.
@@ -233,10 +238,10 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
-				if (s->is_selected() == false) {
+				if (s->is_selected() != true) {
 					continue;
 				}
-				if (flag == false) {
+				if (flag != true) {
 					flag = true;
 					s->get_min_pos(p_min);
 					continue;
@@ -250,9 +255,9 @@ namespace winrt::GraphPaper::implementation
 				// 丸めの前後で生じた差を得る.
 				D2D1_POINT_2F g_pos;
 				pt_round(p_min, m_page_layout.m_grid_base + 1.0, g_pos);
-				D2D1_POINT_2F d_pos;
-				pt_sub(g_pos, p_min, d_pos);
-				s_list_move(m_list_shapes, d_pos);
+				D2D1_POINT_2F diff;
+				pt_sub(g_pos, p_min, diff);
+				s_list_move(m_list_shapes, diff);
 			}
 		}
 		if (undo_pop_if_invalid()) {
@@ -260,8 +265,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
-		set_page_panle_size();
+		page_bound();
+		page_panle_size();
 		enable_edit_menu();
 	}
 
@@ -293,18 +298,21 @@ namespace winrt::GraphPaper::implementation
 	// 状況に応じた形状のカーソルを設定する.
 	void MainPage::pointer_set(void)
 	{
-		if (m_draw_tool != DRAW_TOOL::SELECT) {
+		if (tool() != DRAW_TOOL::SELECT) {
 			Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 			return;
 		}
-		if (m_dx_mutex.load()) {
+		if (m_mutex_page.try_lock() != true) {
+		//if (m_mutex_page.load()) {
+			// ロックできない場合
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 			return;
 		}
 		Shape* s;
 		const auto a = s_list_hit_test(m_list_shapes, m_pointer_cur, m_page_dx.m_anch_len, s);
-		if (a == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() == false) {
+		if (a == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() != true) {
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
+			m_mutex_page.unlock();
 			return;
 		}
 		//if (a != ANCH_WHICH::ANCH_OUTSIDE && s->is_selected()) {
@@ -337,6 +345,7 @@ namespace winrt::GraphPaper::implementation
 			Window::Current().CoreWindow().PointerCursor(CUR_SIZEWE);
 			break;
 		}
+		m_mutex_page.unlock();
 		return;
 		//}
 		//Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
@@ -392,9 +401,9 @@ namespace winrt::GraphPaper::implementation
 		else if (m_pointer_state == STATE_TRAN::CLICK) {
 			// 状態がクリックした状態の場合,
 			// ポインターの現在位置と押された位置の長さを得る.
-			D2D1_POINT_2F d_pos;
-			pt_sub(m_pointer_cur, m_pointer_pressed, d_pos);
-			if (pt_abs2(d_pos) > m_click_dist) {
+			D2D1_POINT_2F diff;
+			pt_sub(m_pointer_cur, m_pointer_pressed, diff);
+			if (pt_abs2(diff) > m_click_dist) {
 				// 長さが閾値を超える場合, 初期状態に戻る.
 				m_pointer_state = STATE_TRAN::BEGIN;
 				pointer_set();
@@ -407,9 +416,9 @@ namespace winrt::GraphPaper::implementation
 		else if (m_pointer_state == STATE_TRAN::PRESS_MOVE) {
 			// 状態が図形を移動している状態の場合,
 			// ポインターの現在位置と前回位置の差分を得る.
-			D2D1_POINT_2F d_pos;
-			pt_sub(m_pointer_cur, m_pointer_pre, d_pos);
-			s_list_move(m_list_shapes, d_pos);
+			D2D1_POINT_2F diff;
+			pt_sub(m_pointer_cur, m_pointer_pre, diff);
+			s_list_move(m_list_shapes, diff);
 			// ポインターの現在位置を前回位置に格納する.
 			m_pointer_pre = m_pointer_cur;
 			page_draw();
@@ -427,11 +436,11 @@ namespace winrt::GraphPaper::implementation
 			// 状態が左ボタンを押している状態,
 			// またはクリック後に左ボタンを押している状態の場合,
 			// ポインターの現在位置と押された位置の長さを得る.
-			D2D1_POINT_2F d_pos;
-			pt_sub(m_pointer_cur, m_pointer_pressed, d_pos);
-			if (pt_abs2(d_pos) > m_click_dist) {
+			D2D1_POINT_2F diff;
+			pt_sub(m_pointer_cur, m_pointer_pressed, diff);
+			if (pt_abs2(diff) > m_click_dist) {
 				// 長さが閾値を超える場合,
-				if (m_draw_tool != DRAW_TOOL::SELECT) {
+				if (tool() != DRAW_TOOL::SELECT) {
 					// 作図ツールが選択ツールでない場合,
 					// 範囲を選択している状態に遷移する.
 					m_pointer_state = STATE_TRAN::PRESS_AREA;
@@ -454,7 +463,7 @@ namespace winrt::GraphPaper::implementation
 					m_pointer_state = STATE_TRAN::PRESS_MOVE;
 					// ポインターの現在位置を前回位置に格納する.
 					m_pointer_pre = m_pointer_cur;
-					undo_push_move(d_pos);
+					undo_push_move(diff);
 				}
 				else if (m_pointer_anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 					// 押された図形の部位が図形の外部でない場合,
@@ -526,7 +535,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_pointer_time = t_stamp;
 		m_pointer_pressed = m_pointer_cur;
-		if (m_draw_tool != DRAW_TOOL::SELECT) {
+		if (tool() != DRAW_TOOL::SELECT) {
 			// 作図ツールが選択ツールでない場合,
 			return;
 		}
@@ -534,7 +543,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_pointer_anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 			// 図形とその部位を得た場合,
 			if (m_pointer_state == STATE_TRAN::PRESS_L
-				|| (m_pointer_state == STATE_TRAN::PRESS_R && m_pointer_shape->is_selected() == false)) {
+				|| (m_pointer_state == STATE_TRAN::PRESS_R && m_pointer_shape->is_selected() != true)) {
 				m_pointer_shape_summary = m_pointer_shape;
 				select_shape(m_pointer_shape, args.KeyModifiers());
 			}
@@ -551,7 +560,7 @@ namespace winrt::GraphPaper::implementation
 			// キー修飾子が None でない場合
 			return;
 		}
-		if (unselect_all() == false) {
+		if (unselect_all() != true) {
 			// 選択が解除された図形がない場合
 			return;
 		}
@@ -608,7 +617,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (m_pointer_state == STATE_TRAN::PRESS_AREA) {
 			// 状態が範囲選択している状態の場合,
-			if (m_draw_tool == DRAW_TOOL::SELECT) {
+			if (tool() == DRAW_TOOL::SELECT) {
 				// 作図ツールが選択ツールの場合,
 				pointer_finish_selecting_area(args.KeyModifiers());
 			}
@@ -620,15 +629,14 @@ namespace winrt::GraphPaper::implementation
 					pt_round(m_pointer_cur, g, m_pointer_cur);
 				}
 				// ポインターの現在の位置と押された位置の差分を求める.
-				D2D1_POINT_2F d_pos;
-				pt_sub(m_pointer_cur, m_pointer_pressed, d_pos);
-				if (fabs(d_pos.x) >= 1.0f || fabs(d_pos.y) >= 1.0f) {
-					if (m_draw_tool == DRAW_TOOL::TEXT) {
-						pointer_finish_creating_text_async(d_pos);
+				D2D1_POINT_2F diff;
+				pt_sub(m_pointer_cur, m_pointer_pressed, diff);
+				if (fabs(diff.x) >= 1.0f || fabs(diff.y) >= 1.0f) {
+					if (tool() == DRAW_TOOL::TEXT) {
+						pointer_finish_creating_text_async(diff);
 						return;
 					}
-					// 図形の作成を終了する.
-					pointer_finish_creating(d_pos);
+					pointer_finish_creating(diff);
 				}
 			}
 		}

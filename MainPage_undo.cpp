@@ -192,7 +192,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		auto flag = false;
 		// 元に戻す操作スタックからヌルで区切られていない (選択などの) 操作を取り除く.
-		while (m_stack_undo.empty() == false) {
+		while (m_stack_undo.empty() != true) {
 			auto u = m_stack_undo.back();
 			if (u == nullptr) {
 				break;
@@ -216,15 +216,16 @@ namespace winrt::GraphPaper::implementation
 			undo_exec(r);
 			flag = true;
 		}
-		if (flag == false) {
+		if (flag != true) {
 			return;
 		}
 		// メニューや表示を更新する.
 		enable_edit_menu();
-		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
-		set_page_panle_size();
+		page_bound();
+		page_panle_size();
 		page_draw();
-		if (m_summary_visible) {
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
 			summary_update();
 		}
 	}
@@ -236,7 +237,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		auto st = 0;
-		while (m_stack_undo.empty() == false) {
+		while (m_stack_undo.empty() != true) {
 			auto u = m_stack_undo.back();
 			if (st == 0) {
 				m_stack_undo.pop_back();
@@ -265,10 +266,11 @@ namespace winrt::GraphPaper::implementation
 			m_stack_rcnt++;
 		}
 		enable_edit_menu();
-		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
-		set_page_panle_size();
+		page_bound();
+		page_panle_size();
 		page_draw();
-		if (m_summary_visible) {
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
 			summary_update();
 		}
 	}
@@ -383,18 +385,18 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の位置をスタックに保存してから差分だけ移動する.
-	// d_pos	移動させる差分
-	void MainPage::undo_push_move(const D2D1_POINT_2F d_pos)
+	// diff	移動させる差分
+	void MainPage::undo_push_move(const D2D1_POINT_2F diff)
 	{
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->is_selected() == false) {
+			if (s->is_selected() != true) {
 				continue;
 			}
 			undo_push_set<UNDO_OP::START_POS>(s);
-			s->move(d_pos);
+			s->move(diff);
 		}
 	}
 
@@ -417,7 +419,7 @@ namespace winrt::GraphPaper::implementation
 			// 終了する.
 			return;
 		}
-		while (m_stack_undo.empty() == false) {
+		while (m_stack_undo.empty() != true) {
 			// 元に戻す操作スタックが空でない場合,
 			// 操作スタックの一番底の操作を取り出す.
 			const auto u = m_stack_undo.front();
@@ -493,7 +495,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::undo_push_set(Shape* s, T const& value)
 	{
 		T t_value;
-		if (UndoAttr<U>::GET(s, t_value) == false || equal(t_value, value)) {
+		if (UndoAttr<U>::GET(s, t_value) != true || equal(t_value, value)) {
 			// 図形がその値を持たない場合, またはすでに同値の場合,
 			// 終了する.
 			return;
@@ -516,13 +518,13 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->is_selected() == false) {
+			if (s->is_selected() != true) {
 				continue;
 			}
 			undo_push_set<U>(s, value);
 			flag = true;
 		}
-		if (flag == false) {
+		if (flag != true) {
 			return;
 		}
 		undo_push_null();
@@ -599,7 +601,7 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		if (flag == false) {
+		if (flag != true) {
 			m_stack_undo.push_back(new UndoAttr<UNDO_OP::TEXT_RANGE>(s, value));
 		}
 

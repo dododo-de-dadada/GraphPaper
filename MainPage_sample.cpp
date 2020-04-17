@@ -30,11 +30,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::sample_draw(void)
 	{
 #if defined(_DEBUG)
-		if (scp_sample_panel().IsLoaded() == false) {
+		if (scp_sample_panel().IsLoaded() != true) {
 			return;
 		}
 #endif
-		mutex_wait();
+		m_mutex_page.lock();
 		auto dc = m_sample_dx.m_d2dContext.get();
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
@@ -55,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(dc->EndDraw());
 		dc->RestoreDrawingState(m_sample_dx.m_state_block.get());
 		m_sample_dx.Present();
-		mutex_unlock();
+		m_mutex_page.unlock();
 	}
 
 	// 見本スワップチェーンパネルの大きさが変わった.
@@ -76,7 +76,7 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(padding),
 				static_cast<FLOAT>(padding)
 			};
-			const D2D1_POINT_2F d_pos = {
+			const D2D1_POINT_2F diff = {
 				static_cast<FLOAT>(w - 2.0 * padding),
 				static_cast<FLOAT>(h - 2.0 * padding)
 			};
@@ -90,13 +90,13 @@ namespace winrt::GraphPaper::implementation
 				else {
 					text = pang.c_str();
 				}
-				m_sample_shape = new ShapeText(s_pos, d_pos, wchar_cpy(text), &m_sample_layout);
+				m_sample_shape = new ShapeText(s_pos, diff, wchar_cpy(text), &m_sample_layout);
 			}
 			else if (m_sample_type == SAMP_TYPE::STROKE) {
-				m_sample_shape = new ShapeLine(s_pos, d_pos, &m_sample_layout);
+				m_sample_shape = new ShapeLine(s_pos, diff, &m_sample_layout);
 			}
 			else if (m_sample_type == SAMP_TYPE::FILL) {
-				m_sample_shape = new ShapeRect(s_pos, d_pos, &m_sample_layout);
+				m_sample_shape = new ShapeRect(s_pos, diff, &m_sample_layout);
 			}
 			else {
 				throw winrt::hresult_not_implemented();

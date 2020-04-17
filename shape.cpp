@@ -352,18 +352,18 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	含む場合 true
 	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width) noexcept
 	{
-		D2D1_POINT_2F d_pos;	// 差分線分のベクトル
-		pt_sub(e_pos, s_pos, d_pos);
-		const double abs = pt_abs2(d_pos);
+		D2D1_POINT_2F diff;	// 差分線分のベクトル
+		pt_sub(e_pos, s_pos, diff);
+		const double abs = pt_abs2(diff);
 		if (abs <= FLT_MIN) {
 			return equal(t_pos, s_pos);
 		}
 		// 線分の法線ベクトルを求める.
 		// 法線ベクトルの長さは, 線の太さの半分とする.
 		// 長さが 0.5 未満の場合は, 0.5 とする.
-		pt_scale(d_pos, max(s_width * 0.5, 0.5) / sqrt(abs), d_pos);
-		const double nx = d_pos.y;
-		const double ny = -d_pos.x;
+		pt_scale(diff, max(s_width * 0.5, 0.5) / sqrt(abs), diff);
+		const double nx = diff.y;
+		const double ny = -diff.x;
 		// 線分の両端から, 法線ベクトルの方向, またはその逆の方向にある点を求める.
 		// 求めた 4 点からなる四辺形が位置を含むか調べる.
 		D2D1_POINT_2F q_pos[4];
@@ -1081,7 +1081,7 @@ namespace winrt::GraphPaper::implementation
 		const uint32_t vg = static_cast<uint32_t>(std::round(value.g * 255.0)) & 0xff;
 		sprintf_s(buf, "%s=\"#%02x%02x%02x\" ", name, vr, vg, vb);
 		write_svg(buf, dt_writer);
-		if (is_opaque(value) == false) {
+		if (is_opaque(value) != true) {
 			std::snprintf(buf, sizeof(buf), "%s-opacity=\"%.3f\" ", name, value.a);
 			write_svg(buf, dt_writer);
 		}

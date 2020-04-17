@@ -31,14 +31,14 @@ namespace winrt::GraphPaper::implementation
 			const double g_len = m_page_layout.m_grid_base + 1.0;
 			wchar_t buf[32];
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(m_len_unit, value * SLIDER_STEP + 1.0, dpi, g_len, buf);
+			conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP + 1.0, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_GRAY) {
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(m_color_code, value, buf);
+				conv_val_to_col(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_gray_scale") + L": " + buf;
 			}
@@ -127,7 +127,7 @@ namespace winrt::GraphPaper::implementation
 
 			m_page_layout.get_grid_base(page_value);
 			m_sample_layout.get_grid_base(sample_value);
-			if (equal(page_value, sample_value) == false) {
+			if (equal(page_value, sample_value) != true) {
 				undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				//undo_push_null();
@@ -187,7 +187,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_layout.get_grid_gray(sample_value);
 			double page_value;
 			m_page_layout.get_grid_gray(page_value);
-			if (equal(page_value, sample_value) == false) {
+			if (equal(page_value, sample_value) != true) {
 				undo_push_set<UNDO_OP::GRID_GRAY>(&m_page_layout, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				//undo_push_null();
@@ -279,20 +279,22 @@ namespace winrt::GraphPaper::implementation
 		if (m_page_layout.m_grid_snap != g_snap) {
 			m_page_layout.m_grid_snap = g_snap;
 		}
-		if (m_page_layout.m_grid_snap == false) {
+		if (m_page_layout.m_grid_snap != true) {
 			return;
 		}
 
 		// 図形リストの各図形について以下を繰り返す.
 		const double g_len = m_page_layout.m_grid_base + 1.0;
 		auto flag = false;
+		D2D1_POINT_2F p_min = page_min();
+		D2D1_POINT_2F p_max = page_max();
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				// 消去フラグが立っている場合,
 				// 以下を無視する.
 				continue;
 			}
-			if (s->is_selected() == false) {
+			if (s->is_selected() != true) {
 				// 選択フラグがない場合,
 				continue;
 			}
@@ -304,21 +306,21 @@ namespace winrt::GraphPaper::implementation
 				// 開始位置と丸めた位置が同じ場合,
 				continue;
 			}
-			if (flag == false) {
+			if (flag != true) {
 				flag = true;
 			}
 			undo_push_set<UNDO_OP::START_POS>(s);
-			D2D1_POINT_2F d_pos;
-			pt_sub(g_pos, s_pos, d_pos);
-			s->move(d_pos);
+			D2D1_POINT_2F diff;
+			pt_sub(g_pos, s_pos, diff);
+			s->move(diff);
 		}
-		if (flag == false) {
+		if (flag != true) {
 			return;
 		}
 		undo_push_null();
 		enable_undo_menu();
-		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
-		set_page_panle_size();
+		page_bound();
+		page_panle_size();
 		page_draw();
 	}
 

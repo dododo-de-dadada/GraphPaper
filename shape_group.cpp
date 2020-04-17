@@ -97,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 		std::list<S_LIST_T::iterator> stack;
 		stack.push_back(m_list_grouped.begin());
 		stack.push_back(m_list_grouped.end());
-		while (stack.empty() == false) {
+		while (stack.empty() != true) {
 			auto j = stack.back();
 			stack.pop_back();
 			auto i = stack.back();
@@ -147,7 +147,7 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeGroup::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
 		for (const auto s : m_list_grouped) {
-			if (s->in_area(a_min, a_max) == false) {
+			if (s->in_area(a_min, a_max) != true) {
 				return false;
 			}
 		}
@@ -168,9 +168,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する
-	void ShapeGroup::move(const D2D1_POINT_2F d_pos)
+	void ShapeGroup::move(const D2D1_POINT_2F diff)
 	{
-		s_list_move(m_list_grouped, d_pos);
+		s_list_move(m_list_grouped, diff);
 	}
 
 	// 値を消去フラグに格納する.
@@ -193,14 +193,14 @@ namespace winrt::GraphPaper::implementation
 	void ShapeGroup::set_start_pos(const D2D1_POINT_2F value)
 	{
 		D2D1_POINT_2F b_min;
-		D2D1_POINT_2F d_pos;
+		D2D1_POINT_2F diff;
 
 		get_min_pos(b_min);
 		if (equal(value, b_min)) {
 			return;
 		}
-		pt_sub(value, b_min, d_pos);
-		move(d_pos);
+		pt_sub(value, b_min, diff);
+		move(diff);
 	}
 
 	// 図形をデータリーダーから作成する.

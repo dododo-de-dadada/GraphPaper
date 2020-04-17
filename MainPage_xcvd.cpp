@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 			// ストリームをデータパッケージに格納する.
 			dt_pkg.RequestedOperation(DataPackageOperation::Copy);
 			dt_pkg.SetData(CF_GPD, winrt::box_value(ra_stream));
-			if (text.empty() == false) {
+			if (text.empty() != true) {
 				// 文字列が空でない場合,
 				// 文字列をデータパッケージに格納する.
 				dt_pkg.SetText(text);
@@ -88,7 +88,8 @@ namespace winrt::GraphPaper::implementation
 		s_list_selected<Shape>(m_list_shapes, list_selected);
 		// 得られたリストの各図形について以下を繰り返す.
 		for (auto s : list_selected) {
-			if (m_summary_visible) {
+			if (m_mutex_summary.load(std::memory_order_acquire)) {
+			//if (m_summary_visible) {
 				// 図形一覧の表示フラグが立っている場合,
 				// 図形を一覧から消去する.
 				summary_remove(s);
@@ -101,8 +102,8 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
-		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
-		set_page_panle_size();
+		page_bound();
+		page_panle_size();
 		page_draw();
 	}
 
@@ -116,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::Streams::IRandomAccessStream;
 		using winrt::Windows::Storage::Streams::DataReader;
 
-		mutex_wait();
+		m_mutex_page.lock();
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// Clipboard::GetContent() は, 
@@ -139,26 +140,27 @@ namespace winrt::GraphPaper::implementation
 				co_await winrt::resume_foreground(cd);
 				if (operation == ra_stream.Size()) {
 					S_LIST_T list_pasted;	// 貼り付けリスト
-					if (s_list_read(list_pasted, dt_reader) == false) {
+					if (s_list_read(list_pasted, dt_reader) != true) {
 
 					}
-					else if (list_pasted.empty() == false) {
+					else if (list_pasted.empty() != true) {
 						// 得られたリストが空でない場合,
 						// 図形リストの中の図形の選択をすべて解除する.
 						unselect_all();
 						// 得られたリストの各図形について以下を繰り返す.
 						for (auto s : list_pasted) {
-							if (m_summary_visible) {
+							if (m_mutex_summary.load(std::memory_order_acquire)) {
+							//if (m_summary_visible) {
 								summary_append(s);
 							}
 							undo_push_append(s);
-							s->get_bound(m_page_min, m_page_max);
+							page_bound(s);
 						}
 						undo_push_null();
 						list_pasted.clear();
 						// 編集メニュー項目の使用の可否を設定する.
 						enable_edit_menu();
-						set_page_panle_size();
+						page_panle_size();
 						page_draw();
 					}
 				}
@@ -174,7 +176,7 @@ namespace winrt::GraphPaper::implementation
 				if (d_result == ContentDialogResult::Primary) {
 					// クリップボードから読み込むためのデータリーダーを得る.
 					auto text{ co_await Clipboard::GetContent().GetTextAsync() };
-					if (text.empty() == false) {
+					if (text.empty() != true) {
 						// 文字列が空でない場合,
 						auto t = new ShapeText(D2D1_POINT_2F{ 0.0F, 0.0F }, D2D1_POINT_2F{ 1.0F, 1.0F }, wchar_cpy(text.c_str()), &m_page_layout);
 #if (_DEBUG)
@@ -199,14 +201,15 @@ namespace winrt::GraphPaper::implementation
 						t->set_start_pos(s_pos);
 
 						unselect_all();
-						if (m_summary_visible) {
+						if (m_mutex_summary.load(std::memory_order_acquire)) {
+						//if (m_summary_visible) {
 							summary_append(t);
 						}
 						undo_push_append(t);
 						undo_push_null();
 						enable_edit_menu();
-						t->get_bound(m_page_min, m_page_max);
-						set_page_panle_size();
+						page_bound(t);
+						page_panle_size();
 						page_draw();
 					}
 				}
@@ -217,7 +220,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		//スレッドコンテキストを復元する.
 		co_await context;
-		mutex_unlock();
+		m_mutex_page.unlock();
 	}
 
 	// クリップボードにデータが含まれているか調べる.

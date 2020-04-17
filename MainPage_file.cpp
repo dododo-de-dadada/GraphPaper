@@ -131,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::Storage::FileAccessMode;
 
-		mutex_wait();
+		m_mutex_page.lock();
 		auto hr = E_FAIL;
 		winrt::apartment_context context;
 		try {
@@ -142,9 +142,9 @@ namespace winrt::GraphPaper::implementation
 
 			text_find_read(dt_reader);
 			stbar_read(dt_reader);
-			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
-			m_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
-			m_stbar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
+			len_unit(static_cast<LEN_UNIT>(dt_reader.ReadUInt32()));
+			color_code(static_cast<COLOR_CODE>(dt_reader.ReadUInt16()));
+			status_bar(static_cast<STATUS_BAR>(dt_reader.ReadUInt16()));
 
 			m_page_layout.read(dt_reader);
 			// 無効なデータを読み込んでアプリが落ちることがないよう, 値を制限する.
@@ -161,7 +161,7 @@ namespace winrt::GraphPaper::implementation
 				co_await winrt::resume_foreground(cd);
 				cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
 				co_await context;
-				mutex_unlock();
+				m_mutex_page.unlock();
 				co_return hr;
 			}
 #endif
@@ -187,7 +187,7 @@ namespace winrt::GraphPaper::implementation
 			co_await winrt::resume_foreground(cd);
 			cd_message_show(ICON_ALERT, ERR_READ, s_file.Path());
 		}
-		else if (suspend == false && layout == false) {
+		else if (suspend != true && layout != true) {
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
 			file_recent_add(s_file);
@@ -196,7 +196,7 @@ namespace winrt::GraphPaper::implementation
 		// スレッドコンテキストを復元する.
 		co_await context;
 		// 結果を返し終了する.
-		mutex_unlock();
+		m_mutex_page.unlock();
 		co_return hr;
 	}
 
@@ -349,9 +349,9 @@ namespace winrt::GraphPaper::implementation
 			
 			text_find_write(dt_writer);
 			stbar_write(dt_writer);
-			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_code));
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_stbar));
+			dt_writer.WriteUInt32(static_cast<uint32_t>(len_unit()));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(color_code()));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(status_bar()));
 			m_page_layout.write(dt_writer);
 			if (suspend) {
 				s_list_write<!REDUCE>(m_list_shapes, dt_writer);
@@ -390,7 +390,7 @@ namespace winrt::GraphPaper::implementation
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
 			cd_message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
 		}
-		else if (suspend == false && layout == false) {
+		else if (suspend != true && layout != true) {
 			// 中断フラグがない場合,
 			// スレッドをメインページの UI スレッドに変える.
 			auto cd = this->Dispatcher();
@@ -485,7 +485,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			write_svg(DOCTYPE, dt_writer);
 			// SVG 開始タグをデータライターに書き込む.
-			file_write_svg_tag(m_page_layout.m_page_size, m_page_layout.m_page_color, m_page_dx.m_logical_dpi, m_len_unit, dt_writer);
+			file_write_svg_tag(m_page_layout.m_page_size, m_page_layout.m_page_color, m_page_dx.m_logical_dpi, len_unit(), dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {
@@ -538,7 +538,7 @@ namespace winrt::GraphPaper::implementation
 		font_style_check_menu(m_page_layout.m_font_style);
 		grid_patt_check_menu(m_page_layout.m_grid_patt);
 		grid_show_check_menu(m_page_layout.m_grid_show);
-		stbar_check_menu(m_stbar);
+		stbar_check_menu(status_bar());
 		text_align_t_check_menu(m_page_layout.m_text_align_t);
 		text_align_p_check_menu(m_page_layout.m_text_align_p);
 		tmfi_grid_snap().IsChecked(m_page_layout.m_grid_snap);
@@ -552,14 +552,15 @@ namespace winrt::GraphPaper::implementation
 			}
 			wchar_t* value;	// 書体名
 			if (s->get_font_family(value)) {
-				if (ShapeText::is_available_font(value) == false) {
+				if (ShapeText::is_available_font(value) != true) {
 					// 「無効な書体が使用されています」メッセージダイアログを表示する.
 					cd_message_show(ICON_ALERT, ERR_FONT, value);
 					break;
 				}
 			}
 		}
-		if (m_summary_visible) {
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
 			if (m_list_shapes.empty()) {
 				summary_close();
 			}
@@ -567,8 +568,8 @@ namespace winrt::GraphPaper::implementation
 				summary_remake();
 			}
 		}
-		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
-		set_page_panle_size();
+		page_bound();
+		page_panle_size();
 		page_draw();
 		stbar_set_curs();
 		stbar_set_draw();
@@ -611,8 +612,9 @@ namespace winrt::GraphPaper::implementation
 		o_picker.FileTypeFilter().Append(FT_GPF);
 		// ダブルクリックでファイルが選択された場合,
 		// co_await が終了する前に, PonterReleased と PonterEntered が呼ばれる.
-		// ボタンが押された場合はそれらのハンドラーは呼ばれない.
-		scp_page_panel().PointerReleased();
+		// これはピッカーが 2 度目の Released を待たずにダブルクリックを成立させているためだと思われる.
+		//scp_page_panel().PointerReleased(m_token_pointer_released);
+		//scp_page_panel().PointerEntered(m_token_pointer_entered);
 		// ピッカーを非同期で表示してストレージファイルを取得する.
 		// 「閉じる」ボタンが押された場合ストレージファイルとして nullptr が返る.
 		auto s_file{ co_await o_picker.PickSingleFileAsync() };
@@ -625,6 +627,8 @@ namespace winrt::GraphPaper::implementation
 			file_finish_reading();
 		}
 		o_picker = nullptr;
+		//m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::scp_pointer_released });
+		//m_token_pointer_entered = scp_page_panel().PointerEntered({ this, &MainPage::scp_pointer_entered });
 		Window::Current().CoreWindow().PointerCursor(p_cur);
 	}
 
@@ -742,7 +746,7 @@ namespace winrt::GraphPaper::implementation
 		// ストレージファイルにヌルを格納する.
 		StorageFile s_file = nullptr;
 		try {
-			if (token.empty() == false) {
+			if (token.empty() != true) {
 				// トークンが空でない場合,
 				// トークンからストレージファイルを得る.
 				auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();

@@ -46,8 +46,10 @@ namespace winrt::GraphPaper::implementation
 		const auto ps = m_page_layout.m_page_scale;	// ページの表示倍率
 		const double vw = aw / ps;	// 見えている部分の幅
 		const double vh = ah / ps;	// 見えている部分の高さ
-		const auto mw = m_page_max.x - static_cast<double>(m_page_min.x) - vw;
-		const auto mh = m_page_max.y - static_cast<double>(m_page_min.y) - vh;
+		const auto p_min = page_min();
+		const auto p_max = page_max();
+		const auto mw = static_cast<double>(p_max.x) - static_cast<double>(p_min.x) - vw;
+		const auto mh = static_cast<double>(p_max.y) - static_cast<double>(p_min.y) - vh;
 		const auto wgt0 = mw > 0.0;
 		const auto hgt0 = mh > 0.0;
 		sb_horz().ViewportSize(vw);

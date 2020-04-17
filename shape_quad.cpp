@@ -132,7 +132,7 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(q_ext[1], vec, q_ext[2]);
 			pt_sub(q_ext[0], vec, q_ext[3]);
 			// 位置が延長した辺に含まれるか調べる.
-			if (pt_in_quad(t_pos, q_ext) == false) {
+			if (pt_in_quad(t_pos, q_ext) != true) {
 				// 含まれないなら継続する.
 				continue;
 			}
@@ -204,7 +204,7 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(m_stroke_width),
 				m_d2d_stroke_style.get());
 		}
-		if (is_selected() == false) {
+		if (is_selected() != true) {
 			return;
 		}
 		anchor_draw_rect(m_pos, dx);
@@ -252,7 +252,7 @@ namespace winrt::GraphPaper::implementation
 			const auto exp = max(max(m_stroke_width, a_len) * 0.5, 0.5);
 			// 各辺の法線ベクトルを得る.
 			D2D1_POINT_2F q_nor[4];
-			if (qd_get_nor(q_pos, q_nor) == false) {
+			if (qd_get_nor(q_pos, q_nor) != true) {
 				// 法線ベクトルがない (すべての頂点が重なっている) なら,
 				// 位置が, 拡張する太さを半径とする円に含まれるか調べる.
 				if (pt_abs2(q_pos[0]) <= exp * exp) {
@@ -322,14 +322,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// s_pos	開始位置
-	// d_pos	終了位置への差分
+	// diff	終了位置への差分
 	// attr	既定の属性値
-	ShapeQuad::ShapeQuad(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
+	ShapeQuad::ShapeQuad(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr) :
 		ShapePoly::ShapePoly(attr)
 	{
-		m_pos.x = static_cast<FLOAT>(s_pos.x + 0.5 * d_pos.x);
+		m_pos.x = static_cast<FLOAT>(s_pos.x + 0.5 * diff.x);
 		m_pos.y = s_pos.y;
-		pt_scale(d_pos, 0.5, m_diff);
+		pt_scale(diff, 0.5, m_diff);
 		m_diff_1.x = -m_diff.x;
 		m_diff_1.y = m_diff.y;
 		m_diff_2.x = m_diff_1.x;

@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 				dx.m_d2dContext->DrawText(D[i % 10], 1u, m_dw_text_format.get(), t_rect, br.get());
 			}
 		}
-		if (is_selected() == false) {
+		if (is_selected() != true) {
 			// 選択フラグがない場合,
 			// 中断する.
 			return;
@@ -180,10 +180,10 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// pos	開始位置
-	// d_pos	終了位置への差分
+	// diff	終了位置への差分
 	// attr	属性値
-	ShapeScale::ShapeScale(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
-		ShapeRect::ShapeRect(s_pos, d_pos, attr),
+	ShapeScale::ShapeScale(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr) :
+		ShapeRect::ShapeRect(s_pos, diff, attr),
 		m_grid_base(attr->m_grid_base)
 	{
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];

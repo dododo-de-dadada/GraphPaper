@@ -37,7 +37,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			const double dpi = m_page_dx.m_logical_dpi;
 			const double g_len = m_page_layout.m_grid_base + 1.0;
-			conv_val_to_len<WITH_UNIT_NAME>(m_len_unit, value * SLIDER_STEP, dpi, g_len, buf, 31);
+			conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf, 31);
 			hdr = hdr + buf;
 		}
 		if constexpr (S == 0) {

@@ -67,9 +67,9 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::rmfi_tool_select_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_draw_tool = DRAW_TOOL::SELECT;
-		m_pointer_state = STATE_TRAN::BEGIN;
-		m_pointer_shape = nullptr;
-		m_pointer_anchor = ANCH_WHICH::ANCH_OUTSIDE;
+		pointer_state(STATE_TRAN::BEGIN);
+		pointer_shape(nullptr);
+		pointer_anchor(ANCH_WHICH::ANCH_OUTSIDE);
 		// 作図ツールをステータスバーに格納する.
 		stbar_set_draw();
 		pointer_set();

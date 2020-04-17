@@ -539,7 +539,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をリストに挿入する.
 	void s_list_insert(S_LIST_T& s_list, Shape* s_ins, const Shape* s_pos) noexcept;
 	// 選択フラグの立つすべての図形を差分だけ移動する.
-	void s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F d_pos) noexcept;
+	void s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F diff) noexcept;
 	// 次の図形をリストから得る.
 	Shape* s_list_next(S_LIST_T const& s_list, const Shape* s) noexcept;
 	// 前の図形をリストから得る.
@@ -760,7 +760,7 @@ namespace winrt::GraphPaper::implementation
 		// 選択フラグを調べる.
 		bool is_selected(void) const noexcept;
 		// 差分だけ移動する
-		void move(const D2D1_POINT_2F d_pos);
+		void move(const D2D1_POINT_2F diff);
 		// 値を消去フラグに格納する.
 		void set_delete(const bool value) noexcept;
 		// 値を選択フラグに格納する.
@@ -821,7 +821,7 @@ namespace winrt::GraphPaper::implementation
 		// 選択フラグを調べる.
 		bool is_selected(void) const noexcept { return m_selected; }
 		// 差分だけ移動する.
-		virtual	void move(const D2D1_POINT_2F d_pos);
+		virtual	void move(const D2D1_POINT_2F diff);
 		// 値を選択フラグに格納する.
 		void set_select(const bool value) noexcept { m_selected = value; }
 		// 値を消去フラグに格納する.
@@ -861,7 +861,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 図形を作成する.
-		ShapeLine(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr);
+		ShapeLine(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr);
 		// 図形をデータリーダーから読み込む.
 		ShapeLine(DataReader const& dt_reader);
 		// 図形を破棄する.
@@ -887,7 +887,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		void set_start_pos(const D2D1_POINT_2F value);
 		// 差分だけ移動する.
-		void move(const D2D1_POINT_2F d_pos);
+		void move(const D2D1_POINT_2F diff);
 		// データリーダーから読み込む.
 		void read(DataReader const& dt_reader);
 		// データライターに書き込む.
@@ -907,7 +907,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 図形を作成する.
-		ShapeRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* s_attr);
+		ShapeRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* s_attr);
 		// 図形をデータリーダーから読み込む.
 		ShapeRect(DataReader const& dt_reader);
 		// 表示する.
@@ -951,7 +951,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 図形を作成する.
-		ShapeScale(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr);
+		ShapeScale(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr);
 		// 図形をデータリーダーから読み込む.
 		ShapeScale(DataReader const& dt_reader);
 		// データライターに書き込む.
@@ -965,8 +965,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct ShapeElli : ShapeRect {
 		// 図形を作成する.
-		ShapeElli(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
-			ShapeRect::ShapeRect(s_pos, d_pos, attr)
+		ShapeElli(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr) :
+			ShapeRect::ShapeRect(s_pos, diff, attr)
 		{}
 		// 図形をデータリーダーから読み込む.
 		ShapeElli(DataReader const& dt_reader) :
@@ -997,7 +997,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 図形を作成する.
-		ShapeRRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr);
+		ShapeRRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr);
 		// 図形をデータリーダーから読み込む.
 		ShapeRRect(DataReader const& dt_reader);
 		// 図形を表示する.
@@ -1042,7 +1042,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を囲む領域を得る.
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 差分だけ移動する.
-		void move(const D2D1_POINT_2F d_pos);
+		void move(const D2D1_POINT_2F diff);
 		// 指定された部位の位置を得る.
 		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept;
 		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
@@ -1076,7 +1076,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を塗りつぶし色に格納する.
 		void set_fill_color(const D2D1_COLOR_F& value) noexcept;
 		// 図形を作成する.
-		ShapeQuad(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr);
+		ShapeQuad(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr);
 		// 図形をデータリーダーから読み込む.
 		ShapeQuad(DataReader const& dt_reader);
 		// データライターに書き込む.
@@ -1122,7 +1122,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		void set_start_pos(const D2D1_POINT_2F value);
 		// 図形を作成する.
-		ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr);
+		ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr);
 		// 図形をデータリーダーから読み込む.
 		ShapeBezi(DataReader const& dt_reader);
 		// データライターに書き込む.
@@ -1240,7 +1240,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字範囲に格納する.
 		void set_text_range(const DWRITE_TEXT_RANGE value);
 		// 図形を作成する.
-		ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, wchar_t* const text, const ShapeLayout* attr);
+		ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, wchar_t* const text, const ShapeLayout* attr);
 		// 図形をデータリーダーから読み込む.
 		ShapeText(DataReader const& dt_reader);
 		// データライターに書き込む.

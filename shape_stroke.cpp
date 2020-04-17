@@ -117,9 +117,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する.
-	void ShapePoly::move(const D2D1_POINT_2F d_pos)
+	void ShapePoly::move(const D2D1_POINT_2F diff)
 	{
-		ShapeStroke::move(d_pos);
+		ShapeStroke::move(diff);
 		create_path_geometry();
 	}
 
@@ -127,33 +127,33 @@ namespace winrt::GraphPaper::implementation
 	void ShapePoly::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F a_pos;
-		D2D1_POINT_2F d_pos;
+		D2D1_POINT_2F diff;
 
 		switch (a) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
 			m_pos = value;
 			break;
 		case ANCH_WHICH::ANCH_R_NW:
-			pt_sub(value, m_pos, d_pos);
+			pt_sub(value, m_pos, diff);
 			m_pos = value;
-			pt_sub(m_diff, d_pos, m_diff);
+			pt_sub(m_diff, diff, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
 			get_pos(ANCH_WHICH::ANCH_R_NE, a_pos);
-			pt_sub(value, a_pos, d_pos);
-			pt_add(m_diff, d_pos, m_diff);
-			pt_sub(m_diff_1, d_pos, m_diff_1);
+			pt_sub(value, a_pos, diff);
+			pt_add(m_diff, diff, m_diff);
+			pt_sub(m_diff_1, diff, m_diff_1);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
 			get_pos(ANCH_WHICH::ANCH_R_SW, a_pos);
-			pt_sub(value, a_pos, d_pos);
-			pt_add(m_diff_1, d_pos, m_diff_1);
-			pt_sub(m_diff_2, d_pos, m_diff_2);
+			pt_sub(value, a_pos, diff);
+			pt_add(m_diff_1, diff, m_diff_1);
+			pt_sub(m_diff_2, diff, m_diff_2);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
 			get_pos(ANCH_WHICH::ANCH_R_SE, a_pos);
-			pt_sub(value, a_pos, d_pos);
-			pt_add(m_diff_2, d_pos, m_diff_2);
+			pt_sub(value, a_pos, diff);
+			pt_add(m_diff_2, diff, m_diff_2);
 			break;
 		default:
 			return;
@@ -280,9 +280,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する.
-	void ShapeStroke::move(const D2D1_POINT_2F d_pos)
+	void ShapeStroke::move(const D2D1_POINT_2F diff)
 	{
-		pt_add(m_pos, d_pos, m_pos);
+		pt_add(m_pos, diff, m_pos);
 	}
 
 	// 始点に値を格納する. 他の部位の位置も動く.

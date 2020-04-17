@@ -29,7 +29,7 @@ namespace winrt::GraphPaper::implementation
 			dx.m_d2dContext->DrawRectangle(
 				rect, dx.m_shape_brush.get(), w, m_d2d_stroke_style.get());
 		}
-		if (is_selected() == false) {
+		if (is_selected() != true) {
 			return;
 		}
 		// 選択フラグが立っている場合,
@@ -87,7 +87,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F r_min;	// 方形の左上点
 		D2D1_POINT_2F r_max;	// 方形の右下点
 		pt_bound(m_pos, r_pos, r_min, r_max);
-		if (is_opaque(m_stroke_color) == false) {
+		if (is_opaque(m_stroke_color) != true) {
 			// 線枠の色が透明な場合,
 			if (is_opaque(m_fill_color)) {
 				// 塗りつぶし色が不透明な場合,
@@ -182,16 +182,16 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRect::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
 	{
 		D2D1_POINT_2F a_pos;
-		D2D1_POINT_2F d_pos;
+		D2D1_POINT_2F diff;
 
 		switch (a) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
 			m_pos = value;
 			break;
 		case ANCH_WHICH::ANCH_NW:
-			pt_sub(value, m_pos, d_pos);
-			pt_add(m_pos, d_pos, m_pos);
-			pt_sub(m_diff, d_pos, m_diff);
+			pt_sub(value, m_pos, diff);
+			pt_add(m_pos, diff, m_pos);
+			pt_sub(m_diff, diff, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_NORTH:
 			m_diff.y -= value.y - m_pos.y;
@@ -201,8 +201,8 @@ namespace winrt::GraphPaper::implementation
 			a_pos.x = m_pos.x + m_diff.x;
 			a_pos.y = m_pos.y;
 			m_pos.y = value.y;
-			pt_sub(value, a_pos, d_pos);
-			pt_add(m_diff, d_pos.x, -d_pos.y, m_diff);
+			pt_sub(value, a_pos, diff);
+			pt_add(m_diff, diff.x, -diff.y, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_WEST:
 			m_diff.x -= value.x - m_pos.x;
@@ -215,8 +215,8 @@ namespace winrt::GraphPaper::implementation
 			a_pos.x = m_pos.x;
 			a_pos.y = m_pos.y + m_diff.y;
 			m_pos.x = value.x;
-			pt_sub(value, a_pos, d_pos);
-			pt_add(m_diff, -d_pos.x, d_pos.y, m_diff);
+			pt_sub(value, a_pos, diff);
+			pt_add(m_diff, -diff.x, diff.y, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_SOUTH:
 			m_diff.y = value.y - m_pos.y;
@@ -228,12 +228,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	ShapeRect::ShapeRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_pos, const ShapeLayout* attr) :
+	ShapeRect::ShapeRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr) :
 		ShapeStroke::ShapeStroke(attr),
 		m_fill_color(attr->m_fill_color)
 	{
 		m_pos = s_pos;
-		m_diff = d_pos;
+		m_diff = diff;
 	}
 
 	// 図形をデータリーダーから読み込む.

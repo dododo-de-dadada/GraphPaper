@@ -23,10 +23,11 @@ namespace winrt::GraphPaper::implementation
 			flag = true;
 			undo_push_select(s);
 		}
-		if (flag == false) {
+		if (flag != true) {
 			return;
 		}
-		if (m_summary_visible) {
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
 			summary_select_all();
 		}
 		// やり直し操作スタックを消去し, 含まれる操作を破棄する.
@@ -46,9 +47,10 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			if (s->in_area(a_min, a_max)) {
-				if (s->is_selected() == false) {
+				if (s->is_selected() != true) {
 					undo_push_select(s);
-					if (m_summary_visible) {
+					if (m_mutex_summary.load(std::memory_order_acquire)) {
+					//if (m_summary_visible) {
 						summary_select(i);
 					}
 					flag = true;
@@ -57,7 +59,8 @@ namespace winrt::GraphPaper::implementation
 			else {
 				if (s->is_selected()) {
 					undo_push_select(s);
-					if (m_summary_visible) {
+					if (m_mutex_summary.load(std::memory_order_acquire)) {
+					//if (m_summary_visible) {
 						summary_unselect(i);
 					}
 					flag = true;
@@ -72,35 +75,37 @@ namespace winrt::GraphPaper::implementation
 	template <VirtualKeyModifiers M, VirtualKey K>
 	void MainPage::select_next_shape(void)
 	{
-		if (m_pointer_shape_summary == nullptr) {
-			auto s_prev = m_pointer_shape_prev;
+		if (pointer_shape_summary() == nullptr) {
+			auto s_prev = pointer_shape_prev();
 			if (s_prev != nullptr && s_prev->is_selected()) {
-				m_pointer_shape_summary = s_prev;
+				pointer_shape_summary(s_prev);
 			}
 			else {
 				if (s_prev == nullptr) {
 					if constexpr (K == VirtualKey::Down) {
-						m_pointer_shape_summary = s_list_front(m_list_shapes);
+						pointer_shape_summary(s_list_front(m_list_shapes));
 					}
 					if constexpr (K == VirtualKey::Up) {
-						m_pointer_shape_summary = s_list_back(m_list_shapes);
+						pointer_shape_summary(s_list_back(m_list_shapes));
 					}
-					m_pointer_shape_prev = m_pointer_shape_summary;
+					pointer_shape_prev(pointer_shape_summary());
 				}
 				else {
-					m_pointer_shape_summary = s_prev;
+					pointer_shape_summary(s_prev);
 				}
-				undo_push_select(m_pointer_shape_summary);
+				undo_push_select(pointer_shape_summary());
 				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
 				if constexpr (K == VirtualKey::Down) {
-					if (m_summary_visible) {
+					if (m_mutex_summary.load(std::memory_order_acquire)) {
+					//if (m_summary_visible) {
 						summary_select_head();
 					}
 				}
 				if constexpr (K == VirtualKey::Up) {
-					if (m_summary_visible) {
+					if (m_mutex_summary.load(std::memory_order_acquire)) {
+					//if (m_summary_visible) {
 						summary_select_tail();
 					}
 				}
@@ -108,30 +113,31 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if constexpr (K == VirtualKey::Down) {
-			auto s = s_list_next(m_list_shapes, m_pointer_shape_summary);
+			auto s = s_list_next(m_list_shapes, pointer_shape_summary());
 			if (s != nullptr) {
-				m_pointer_shape_summary = s;
+				pointer_shape_summary(s);
 				goto SEL;
 			}
 		}
 		if constexpr (K == VirtualKey::Up) {
-			auto s = s_list_prev(m_list_shapes, m_pointer_shape_summary);
+			auto s = s_list_prev(m_list_shapes, pointer_shape_summary());
 			if (s != nullptr) {
-				m_pointer_shape_summary = s;
+				pointer_shape_summary(s);
 				goto SEL;
 			}
 		}
 		return;
 	SEL:
 		if constexpr (M == VirtualKeyModifiers::Shift) {
-			select_range(m_pointer_shape_prev, m_pointer_shape_summary);
+			select_range(pointer_shape_prev(), pointer_shape_summary());
 		}
 		if constexpr (M == VirtualKeyModifiers::None) {
-			m_pointer_shape_prev = m_pointer_shape_summary;
+			pointer_shape_prev(pointer_shape_summary());
 			unselect_all();
-			undo_push_select(m_pointer_shape_summary);
-			if (m_summary_visible) {
-				summary_select(m_pointer_shape_summary);
+			undo_push_select(pointer_shape_summary());
+			if (m_mutex_summary.load(std::memory_order_acquire)) {
+			//if (m_summary_visible) {
+				summary_select(pointer_shape_summary());
 			}
 		}
 		// 編集メニュー項目の使用の可否を設定する.
@@ -176,7 +182,8 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_selected()) {
 					flag = true;
 					undo_push_select(s);
-					if (m_summary_visible) {
+					if (m_mutex_summary.load(std::memory_order_acquire)) {
+					//if (m_summary_visible) {
 						summary_unselect(i);
 					}
 				}
@@ -184,10 +191,11 @@ namespace winrt::GraphPaper::implementation
 				}
 				// no break.
 			case NEXT:
-				if (s->is_selected() == false) {
+				if (s->is_selected() != true) {
 					flag = true;
 					undo_push_select(s);
-					if (m_summary_visible) {
+					if (m_mutex_summary.load(std::memory_order_acquire)) {
+					//if (m_summary_visible) {
 						summary_select(i);
 					}
 				}
@@ -210,7 +218,8 @@ namespace winrt::GraphPaper::implementation
 			undo_push_select(s);
 			enable_edit_menu();
 			page_draw();
-			if (m_summary_visible) {
+			if (m_mutex_summary.load(std::memory_order_acquire)) {
+			//if (m_summary_visible) {
 				if (s->is_selected()) {
 					summary_select(s);
 				}
@@ -218,16 +227,16 @@ namespace winrt::GraphPaper::implementation
 					summary_unselect(s);
 				}
 			}
-			m_pointer_shape_prev = s;
+			pointer_shape_prev(s);
 		}
 		else if (vk == VirtualKeyModifiers::Shift) {
 			// シフトキーが押されている場合
 			// 前回ポインターが押された図形から今回押された図形までの
 			// 範囲にある図形を選択して, そうでない図形を選択しない.
-			if (m_pointer_shape_prev == nullptr) {
-				m_pointer_shape_prev = m_list_shapes.front();
+			if (pointer_shape_prev() == nullptr) {
+				pointer_shape_prev(m_list_shapes.front());
 			}
-			if (select_range(s, m_pointer_shape_prev)) {
+			if (select_range(s, pointer_shape_prev())) {
 				// 編集メニュー項目の使用の可否を設定する.
 				enable_edit_menu();
 				page_draw();
@@ -235,17 +244,18 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// シフトキーもコントロールキーもどちらも押されていない場合
-			if (s->is_selected() == false) {
+			if (s->is_selected() != true) {
 				// 図形の選択フラグがない場合,
 				unselect_all();
 				undo_push_select(s);
 				enable_edit_menu();
 				page_draw();
-				if (m_summary_visible) {
+				if (m_mutex_summary.load(std::memory_order_acquire)) {
+				//if (m_summary_visible) {
 					summary_select(s);
 				}
 			}
-			m_pointer_shape_prev = s;
+			pointer_shape_prev(s);
 		}
 		if (s->is_selected()) {
 			// 押された図形が選択されている場合,
@@ -271,8 +281,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (s->in_area(a_min, a_max)) {
 				undo_push_select(s);
-				if (m_summary_visible) {
-					if (s->is_selected() == false) {
+				if (m_mutex_summary.load(std::memory_order_acquire)) {
+				//if (m_summary_visible) {
+					if (s->is_selected() != true) {
 						summary_select(i);
 					}
 					else {
@@ -298,13 +309,13 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (t_range_only == false && s->is_selected()) {
+			if (t_range_only != true && s->is_selected()) {
 				// 文字範囲のみ解除フラグがない, かつ図形の選択フラグが立っている場合,
 				undo_push_select(s);
 				flag = true;
 			}
 			DWRITE_TEXT_RANGE d_range;
-			if (s->get_text_range(d_range) == false) {
+			if (s->get_text_range(d_range) != true) {
 				// 文字範囲が取得できない
 				// (文字列図形でない) 場合,
 				// 以下を無視する.
@@ -320,7 +331,8 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
 			flag = true;
 		}
-		if (m_summary_visible) {
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
 			summary_unselect_all();
 		}
 		return flag;

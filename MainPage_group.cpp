@@ -23,7 +23,8 @@ namespace winrt::GraphPaper::implementation
 #endif
 		undo_push_append(g);
 		for (const auto s : list_selected) {
-			if (m_summary_visible) {
+			if (m_mutex_summary.load(std::memory_order_acquire)) {
+			//if (m_summary_visible) {
 				summary_remove(s);
 			}
 			// 図形を削除して, その操作をスタックに積む.
@@ -36,7 +37,8 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニュー項目の使用の可否を設定する.
 		enable_edit_menu();
 		page_draw();
-		if (m_summary_visible) {
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
 			summary_append(g);
 		}
 	}
@@ -55,11 +57,12 @@ namespace winrt::GraphPaper::implementation
 		// 得られたリストの各グループ図形について以下を繰り返す.
 		for (auto t : list_group) {
 			uint32_t i = 0;
-			if (m_summary_visible) {
+			if (m_mutex_summary.load(std::memory_order_acquire)) {
+			//if (m_summary_visible) {
 				i = summary_remove(t);
 			}
 			auto g = static_cast<ShapeGroup*>(t);
-			while (g->m_list_grouped.empty() == false) {
+			while (g->m_list_grouped.empty() != true) {
 				// グループ化された図形のリストから最初の図形を得る.
 				auto s = g->m_list_grouped.front();
 				if (s->is_deleted()) {
@@ -67,7 +70,8 @@ namespace winrt::GraphPaper::implementation
 					// 以下を無視する.
 					continue;
 				}
-				if (m_summary_visible) {
+				if (m_mutex_summary.load(std::memory_order_acquire)) {
+				//if (m_summary_visible) {
 					// 図形を一覧に挿入する.
 					summary_insert(s, i++);
 				}

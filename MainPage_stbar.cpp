@@ -151,12 +151,12 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		if (check) {
-			m_stbar = stbar_or(m_stbar, stbar);
+			m_status_bar = stbar_or(m_status_bar, stbar);
 		}
 		else {
-			m_stbar = stbar_and(m_stbar, stbar_not(stbar));
+			m_status_bar = stbar_and(m_status_bar, stbar_not(stbar));
 		}
-		stbar_visiblity(m_stbar != static_cast<STATUS_BAR>(0), sp_stbar());
+		stbar_visiblity(m_status_bar != static_cast<STATUS_BAR>(0), sp_stbar());
 	}
 
 	// ステータスバーのメニュー項目に印をつける.
@@ -185,7 +185,7 @@ namespace winrt::GraphPaper::implementation
 	// ステータスバーの状態をデータリーダーから読み込む.
 	void MainPage::stbar_read(DataReader const& dt_reader)
 	{
-		m_stbar = static_cast<STATUS_BAR>(dt_reader.ReadUInt32());
+		m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt32());
 	}
 
 	// ポインターの位置をステータスバーに格納する.
@@ -213,10 +213,10 @@ namespace winrt::GraphPaper::implementation
 
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, fx, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), fx, dpi, g_len, buf);
 		tk_stbar_pos_x().Text(winrt::hstring{ L"x:" } + buf);
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, fy, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), fy, dpi, g_len, buf);
 		tk_stbar_pos_y().Text(winrt::hstring{ L"y:" } + buf);
 
 swprintf_s(buf, L"%d", static_cast<uint32_t>(m_list_shapes.size()));
@@ -230,7 +230,7 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 		const double dpi = m_page_dx.m_logical_dpi;
 		double g_len = m_page_layout.m_grid_base + 1.0;
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, g_len, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), g_len, dpi, g_len, buf);
 		tk_stbar_grid().Text(winrt::hstring{ L"g:" } +buf);
 	}
 
@@ -241,10 +241,10 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 		const double g_len = m_page_layout.m_grid_base + 1.0;
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, m_page_layout.m_page_size.width, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), m_page_layout.m_page_size.width, dpi, g_len, buf);
 		tk_stbar_width().Text(winrt::hstring{ L"w:" } + buf);
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(m_len_unit, m_page_layout.m_page_size.height, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), m_page_layout.m_page_size.height, dpi, g_len, buf);
 		tk_stbar_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 
@@ -253,32 +253,33 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
+		const auto draw_tool = tool();
 		winrt::hstring data;
-		if (m_draw_tool == DRAW_TOOL::BEZI) {
+		if (draw_tool == DRAW_TOOL::BEZI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));
 		}
-		else if (m_draw_tool == DRAW_TOOL::ELLI) {
+		else if (draw_tool == DRAW_TOOL::ELLI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_elli")));
 		}
-		else if (m_draw_tool == DRAW_TOOL::LINE) {
+		else if (draw_tool == DRAW_TOOL::LINE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 		}
-		else if (m_draw_tool == DRAW_TOOL::QUAD) {
+		else if (draw_tool == DRAW_TOOL::QUAD) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_quad")));
 		}
-		else if (m_draw_tool == DRAW_TOOL::RECT) {
+		else if (draw_tool == DRAW_TOOL::RECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
 		}
-		else if (m_draw_tool == DRAW_TOOL::RRCT) {
+		else if (draw_tool == DRAW_TOOL::RRCT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrct")));
 		}
-		else if (m_draw_tool == DRAW_TOOL::SCALE) {
+		else if (draw_tool == DRAW_TOOL::SCALE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
-		else if (m_draw_tool == DRAW_TOOL::SELECT) {
+		else if (draw_tool == DRAW_TOOL::SELECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_select")));
 		}
-		else if (m_draw_tool == DRAW_TOOL::TEXT) {
+		else if (draw_tool == DRAW_TOOL::TEXT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
 		else {
@@ -293,20 +294,21 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
+		const auto unit = len_unit();
 		winrt::hstring unit_name{};
-		if (m_len_unit == LEN_UNIT::GRID) {
+		if (unit == LEN_UNIT::GRID) {
 			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_grid/Text");
 		}
-		else if (m_len_unit == LEN_UNIT::INCH) {
+		else if (unit == LEN_UNIT::INCH) {
 			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_inch/Text");
 		}
-		else if (m_len_unit == LEN_UNIT::MILLI) {
+		else if (unit == LEN_UNIT::MILLI) {
 			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_milli/Text");
 		}
-		else if (m_len_unit == LEN_UNIT::PIXEL) {
+		else if (unit == LEN_UNIT::PIXEL) {
 			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_pixel/Text");
 		}
-		else if (m_len_unit == LEN_UNIT::POINT) {
+		else if (unit == LEN_UNIT::POINT) {
 			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_point/Text");
 		}
 		else {
@@ -326,26 +328,26 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	// ステータスバーの表示を設定する.
 	void MainPage::stbar_visibility(void)
 	{
-		tk_stbar_pos_x().Visibility(stbar_mask(m_stbar, STATUS_BAR::CURS) ? VISIBLE : COLLAPSED);
-		tk_stbar_pos_y().Visibility(stbar_mask(m_stbar, STATUS_BAR::CURS) ? VISIBLE : COLLAPSED);
-		tk_stbar_grid().Visibility(stbar_mask(m_stbar, STATUS_BAR::GRID) ? VISIBLE : COLLAPSED);
-		tk_stbar_width().Visibility(stbar_mask(m_stbar, STATUS_BAR::PAGE) ? VISIBLE : COLLAPSED);
-		tk_stbar_height().Visibility(stbar_mask(m_stbar, STATUS_BAR::PAGE) ? VISIBLE : COLLAPSED);
-		//sp_stbar_curs().Visibility(stbar_mask(m_stbar, STATUS_BAR::CURS) ? VISIBLE : COLLAPSED);
-		//sp_stbar_grid().Visibility(stbar_mask(m_stbar, STATUS_BAR::GRID) ? VISIBLE : COLLAPSED);
-		//sp_stbar_page().Visibility(stbar_mask(m_stbar, STATUS_BAR::PAGE) ? VISIBLE : COLLAPSED);
-		sp_stbar_tool().Visibility(stbar_mask(m_stbar, STATUS_BAR::DRAW) ? VISIBLE : COLLAPSED);
-		tk_stbar_unit().Visibility(stbar_mask(m_stbar, STATUS_BAR::UNIT) ? VISIBLE : COLLAPSED);
-		tk_stbar_zoom().Visibility(stbar_mask(m_stbar, STATUS_BAR::ZOOM) ? VISIBLE : COLLAPSED);
-		//sp_stbar_unit().Visibility(stbar_mask(m_stbar, STATUS_BAR::UNIT) ? VISIBLE : COLLAPSED);
-		//sp_stbar_zoom().Visibility(stbar_mask(m_stbar, STATUS_BAR::ZOOM) ? VISIBLE : COLLAPSED);
-		sp_stbar().Visibility(m_stbar != static_cast<STATUS_BAR>(0) ? VISIBLE : COLLAPSED);
+		tk_stbar_pos_x().Visibility(stbar_mask(m_status_bar, STATUS_BAR::CURS) ? VISIBLE : COLLAPSED);
+		tk_stbar_pos_y().Visibility(stbar_mask(m_status_bar, STATUS_BAR::CURS) ? VISIBLE : COLLAPSED);
+		tk_stbar_grid().Visibility(stbar_mask(m_status_bar, STATUS_BAR::GRID) ? VISIBLE : COLLAPSED);
+		tk_stbar_width().Visibility(stbar_mask(m_status_bar, STATUS_BAR::PAGE) ? VISIBLE : COLLAPSED);
+		tk_stbar_height().Visibility(stbar_mask(m_status_bar, STATUS_BAR::PAGE) ? VISIBLE : COLLAPSED);
+		//sp_stbar_curs().Visibility(stbar_mask(m_status_bar, STATUS_BAR::CURS) ? VISIBLE : COLLAPSED);
+		//sp_stbar_grid().Visibility(stbar_mask(m_status_bar, STATUS_BAR::GRID) ? VISIBLE : COLLAPSED);
+		//sp_stbar_page().Visibility(stbar_mask(m_status_bar, STATUS_BAR::PAGE) ? VISIBLE : COLLAPSED);
+		sp_stbar_tool().Visibility(stbar_mask(m_status_bar, STATUS_BAR::DRAW) ? VISIBLE : COLLAPSED);
+		tk_stbar_unit().Visibility(stbar_mask(m_status_bar, STATUS_BAR::UNIT) ? VISIBLE : COLLAPSED);
+		tk_stbar_zoom().Visibility(stbar_mask(m_status_bar, STATUS_BAR::ZOOM) ? VISIBLE : COLLAPSED);
+		//sp_stbar_unit().Visibility(stbar_mask(m_status_bar, STATUS_BAR::UNIT) ? VISIBLE : COLLAPSED);
+		//sp_stbar_zoom().Visibility(stbar_mask(m_status_bar, STATUS_BAR::ZOOM) ? VISIBLE : COLLAPSED);
+		sp_stbar().Visibility(m_status_bar != static_cast<STATUS_BAR>(0) ? VISIBLE : COLLAPSED);
 	}
 
 	// ステータスバーの状態をデータライターに書き込む.
 	void MainPage::stbar_write(DataWriter const& dt_writer)
 	{
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stbar));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_status_bar));
 	}
 
 }

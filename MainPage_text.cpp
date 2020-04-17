@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 		stack.push_back(s_list.end());
 		t = static_cast<ShapeText*>(nullptr);
 		uint32_t t_pos = 0;
-		while (stack.empty() == false) {
+		while (stack.empty() != true) {
 			auto j = stack.back();
 			stack.pop_back();
 			auto i = stack.back();
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				DWRITE_TEXT_RANGE t_range;
-				if (s->get_text_range(t_range) == false) {
+				if (s->get_text_range(t_range) != true) {
 					continue;
 				}
 				if (t == nullptr) {
@@ -132,13 +132,13 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		if (f_wrap == false && t != nullptr) {
+		if (f_wrap != true && t != nullptr) {
 			// 回り込み検索がない, かつ文字範囲が選択された図形が見つかった場合,
 			return false;
 		}
 		stack.push_back(s_list.begin());
 		stack.push_back(s_list.end());
-		while (stack.empty() == false) {
+		while (stack.empty() != true) {
 			auto j = stack.back();
 			stack.pop_back();
 			auto i = stack.back();
@@ -190,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 		std::list<S_LIST_T::iterator> stack;
 		stack.push_back(it_beg);
 		stack.push_back(it_end);
-		while (stack.empty() == false) {
+		while (stack.empty() != true) {
 			auto j = stack.back();
 			stack.pop_back();
 			auto i = stack.back();
@@ -208,7 +208,7 @@ namespace winrt::GraphPaper::implementation
 					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
 					continue;
 				}
-				if (s->get_text_range(t_range) == false) {
+				if (s->get_text_range(t_range) != true) {
 					continue;
 				}
 				if (t_range.startPosition > 0 || t_range.length > 0) {
@@ -298,7 +298,7 @@ namespace winrt::GraphPaper::implementation
 		std::list <S_LIST_T::iterator> stack;
 		stack.push_back(m_list_shapes.begin());
 		stack.push_back(m_list_shapes.end());
-		while (stack.empty() == false) {
+		while (stack.empty() != true) {
 			auto j = stack.back();
 			stack.pop_back();
 			auto i = stack.back();
@@ -316,7 +316,7 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				wchar_t* w_text;
-				if (s->get_text(w_text) == false) {
+				if (s->get_text(w_text) != true) {
 					continue;
 				}
 				uint32_t f_pos = 0;
@@ -327,7 +327,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		stack.clear();
-		if (flag == false) {
+		if (flag != true) {
 			// 図形がない場合,
 			// 「文字列は見つかりません」メッセージダイアログを表示する.
 			cd_message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
@@ -339,7 +339,7 @@ namespace winrt::GraphPaper::implementation
 		const auto r_len = wchar_len(m_text_repl);
 		stack.push_back(m_list_shapes.begin());
 		stack.push_back(m_list_shapes.end());
-		while (stack.empty() == false) {
+		while (stack.empty() != true) {
 			auto j = stack.back();
 			stack.pop_back();
 			auto i = stack.back();
@@ -442,9 +442,9 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::mfi_text_edit_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		ShapeText* s = nullptr;
-		if (m_pointer_shape_prev != nullptr && typeid(*m_pointer_shape_prev) == typeid(ShapeText)) {
+		if (pointer_shape_prev() != nullptr && typeid(*pointer_shape_prev()) == typeid(ShapeText)) {
 			// 前回ポインターが押されたのが文字列図形の場合,
-			s = static_cast<ShapeText*>(m_pointer_shape_prev);
+			s = static_cast<ShapeText*>(pointer_shape_prev());
 		}
 		else {
 			// 選択された図形のうち最前面にある文字列図形を得る.
@@ -453,7 +453,7 @@ namespace winrt::GraphPaper::implementation
 				if (t->is_deleted()) {
 					continue;
 				}
-				if (t->is_selected() == false) {
+				if (t->is_selected() != true) {
 					continue;
 				}
 				if (typeid(*t) == typeid(ShapeText)) {
@@ -478,7 +478,8 @@ namespace winrt::GraphPaper::implementation
 			text_find_set();
 			return;
 		}
-		if (m_summary_visible) {
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
 			// 図形一覧パネルが表示されている場合,
 			// 図形一覧パネルを非表示にする.
 			summary_close();
@@ -588,7 +589,7 @@ namespace winrt::GraphPaper::implementation
 	// 検索文字列が変更された.
 	void MainPage::tx_text_find_what_changed(IInspectable const&, TextChangedEventArgs const&)
 	{
-		const auto not_empty = (tx_text_find_what().Text().empty() == false);
+		const auto not_empty = (tx_text_find_what().Text().empty() != true);
 		btn_text_find_next().IsEnabled(not_empty);
 		btn_text_replace().IsEnabled(not_empty);
 		btn_text_replace_all().IsEnabled(not_empty);
