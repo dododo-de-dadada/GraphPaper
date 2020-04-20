@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_grid_length");
-			const double dpi = m_page_dx.m_logical_dpi;
+			const double dpi = page_dpi();
 			const double g_len = m_page_layout.m_grid_base + 1.0;
 			wchar_t buf[32];
 			// ピクセル単位の長さを他の単位の文字列に変換する.
@@ -107,7 +107,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼の大きさ」>「大きさ」が選択された.
-	IAsyncAction MainPage::mfi_grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼の大きさ」>「狭める」が選択された.
-	void MainPage::mfi_grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		const double value = (m_page_layout.m_grid_base + 1.0) * 0.5 - 1.0;
 		if (value < 1.0) {
@@ -154,7 +154,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼の大きさ」>「広げる」が選択された.
-	void MainPage::mfi_grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		const double value = (m_page_layout.m_grid_base + 1.0) * 2.0 - 1.0;
 		if (value > max(m_page_layout.m_page_size.width, m_page_layout.m_page_size.height)) {
@@ -168,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の濃さ」が選択された.
-	IAsyncAction MainPage::mfi_grid_gray_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::grid_gray_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -201,7 +201,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の形式」>「強調なし」が選択された.
-	void MainPage::rmfi_grid_patt_1_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::grid_patt_1_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_1) {
 			return;
@@ -212,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の形式」>「2番目を強調」が選択された.
-	void MainPage::rmfi_grid_patt_2_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::grid_patt_2_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_2) {
 			return;
@@ -223,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の形式」>「2番目と5番目を強調」が選択された.
-	void MainPage::rmfi_grid_patt_3_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::grid_patt_3_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_3) {
 			return;
@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の表示」>「最背面」が選択された.
-	void MainPage::rmfi_grid_show_back_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::grid_show_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_show == GRID_SHOW::BACK) {
 			return;
@@ -245,7 +245,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の表示」>「最前面」が選択された.
-	void MainPage::rmfi_grid_show_front_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::grid_show_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_show == GRID_SHOW::FRONT) {
 			return;
@@ -259,7 +259,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼線の表示」>「隠す」が選択された.
-	void MainPage::rmfi_grid_show_hide_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::grid_show_hide_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_show == GRID_SHOW::HIDE) {
 			return;
@@ -273,7 +273,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「方眼にそろえる」が選択された.
-	void MainPage::tmfi_grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		auto g_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
 		if (m_page_layout.m_grid_snap != g_snap) {

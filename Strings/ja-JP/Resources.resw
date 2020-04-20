@@ -183,39 +183,39 @@
     <value>折り返しあり</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="rmfi_color_cent.Text" xml:space="preserve">
+  <data name="rmfi_color_code_cent.Text" xml:space="preserve">
     <value>パーセント</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_dec.Text" xml:space="preserve">
+  <data name="rmfi_color_code_dec.Text" xml:space="preserve">
     <value>10進数</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_real.Text" xml:space="preserve">
+  <data name="rmfi_color_code_real.Text" xml:space="preserve">
     <value>実数</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_hex.Text" xml:space="preserve">
+  <data name="rmfi_color_code_hex.Text" xml:space="preserve">
     <value>16進数</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_grid.Text" xml:space="preserve">
+  <data name="rmfi_len_unit_grid.Text" xml:space="preserve">
     <value>方眼</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_inch.Text" xml:space="preserve">
+  <data name="rmfi_len_unit_inch.Text" xml:space="preserve">
     <value>インチ</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_milli.Text" xml:space="preserve">
+  <data name="rmfi_len_unit_milli.Text" xml:space="preserve">
     <value>ミリメートル</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_pixel.Text" xml:space="preserve">
+  <data name="rmfi_len_unit_pixel.Text" xml:space="preserve">
     <value>ピクセル</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_point.Text" xml:space="preserve">
+  <data name="rmfi_len_unit_point.Text" xml:space="preserve">
     <value>ポイント</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -585,15 +585,15 @@
     <value>開いた</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_italic.Text" xml:space="preserve">
+  <data name="rmfi_font_style_italic.Text" xml:space="preserve">
     <value>イタリック体</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_normal.Text" xml:space="preserve">
+  <data name="rmfi_font_style_normal.Text" xml:space="preserve">
     <value>標準</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_font_oblique.Text" xml:space="preserve">
+  <data name="rmfi_font_style_oblique.Text" xml:space="preserve">
     <value>斜体</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>

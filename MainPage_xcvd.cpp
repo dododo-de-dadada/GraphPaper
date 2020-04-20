@@ -193,7 +193,7 @@ namespace winrt::GraphPaper::implementation
 							static_cast<FLOAT>((sb_horz().Value() + scp_page_panel().ActualWidth() * 0.5) / scale - t->m_diff.x * 0.5),
 							static_cast<FLOAT>((sb_vert().Value() + scp_page_panel().ActualHeight() * 0.5) / scale - t->m_diff.y * 0.5)
 						};
-						pt_add(s_pos, m_page_min, s_pos);
+						pt_add(s_pos, page_min(), s_pos);
 						if (m_page_layout.m_grid_snap) {
 							const auto g_len = m_page_layout.m_grid_base + 1.0;
 							pt_round(s_pos, g_len, s_pos);

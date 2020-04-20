@@ -100,8 +100,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		// スクロールビューアのビューポートの座標を, 
 		// ページ座標で求める.
-		const double ox = m_page_min.x;
-		const double oy = m_page_min.y;
+		const double ox = page_min().x;
+		const double oy = page_min().y;
 		const double ho = sb_horz().Value();
 		const double vo = sb_vert().Value();
 		const double vw = sb_horz().ViewportSize();

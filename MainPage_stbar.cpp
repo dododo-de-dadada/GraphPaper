@@ -191,7 +191,7 @@ namespace winrt::GraphPaper::implementation
 	// ポインターの位置をステータスバーに格納する.
 	void MainPage::stbar_set_curs(void)
 	{
-		const double dpi = m_page_dx.m_logical_dpi;
+		const double dpi = page_dpi();
 		const auto wp = CoreWindow::GetForCurrentThread().PointerPosition();
 		const auto wb = CoreWindow::GetForCurrentThread().Bounds();
 		const auto tr = scp_page_panel().TransformToVisual(nullptr);
@@ -204,8 +204,8 @@ namespace winrt::GraphPaper::implementation
 		const double wy = wp.Y;
 		const double ty = tp.Y;
 		const double by = wb.Y;
-		const double px = m_page_min.x;
-		const double py = m_page_min.y;
+		const double px = page_min().x;
+		const double py = page_min().y;
 		const double ps = m_page_layout.m_page_scale;
 		const double fx = (wx - bx - tx) / ps + sx + px;
 		const double fy = (wy - by - ty) / ps + sy + py;
@@ -227,7 +227,7 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::stbar_set_grid(void)
 	{
 		wchar_t buf[32];
-		const double dpi = m_page_dx.m_logical_dpi;
+		const double dpi = page_dpi();
 		double g_len = m_page_layout.m_grid_base + 1.0;
 		// ピクセル単位の長さを他の単位の文字列に変換する.
 		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), g_len, dpi, g_len, buf);
@@ -237,7 +237,7 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	// ページの大きさをステータスバーに格納する.
 	void MainPage::stbar_set_page(void)
 	{
-		const double dpi = m_page_dx.m_logical_dpi;
+		const double dpi = page_dpi();
 		const double g_len = m_page_layout.m_grid_base + 1.0;
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
@@ -297,19 +297,19 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 		const auto unit = len_unit();
 		winrt::hstring unit_name{};
 		if (unit == LEN_UNIT::GRID) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_grid/Text");
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_unit_grid/Text");
 		}
 		else if (unit == LEN_UNIT::INCH) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_inch/Text");
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_unit_inch/Text");
 		}
 		else if (unit == LEN_UNIT::MILLI) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_milli/Text");
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_unit_milli/Text");
 		}
 		else if (unit == LEN_UNIT::PIXEL) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_pixel/Text");
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_unit_pixel/Text");
 		}
 		else if (unit == LEN_UNIT::POINT) {
-			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_point/Text");
+			unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_len_unit_point/Text");
 		}
 		else {
 			return;

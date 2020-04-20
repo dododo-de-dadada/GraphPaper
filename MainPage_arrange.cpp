@@ -181,28 +181,28 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::arrange_to<FRONT>(void);
 
 	// 編集メニューの「前面に移動」が選択された.
-	void MainPage::mfi_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::bring_forward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を次または前の図形と入れ替える.
 		arrange_order<FORWARD>();
 	}
 
 	// 編集メニューの「最前面に移動」が選択された.
-	void MainPage::mfi_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を最背面または最前面に移動する.
 		arrange_to<FRONT>();
 	}
 
 	// 編集メニューの「ひとつ背面に移動」が選択された.
-	void MainPage::mfi_send_backward_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::send_backward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を次または前の図形と入れ替える.
 		arrange_order<BACKWARD>();
 	}
 
 	// 編集メニューの「最背面に移動」が選択された.
-	void MainPage::mfi_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を最背面または最前面に移動する.
 		arrange_to<BACK>();

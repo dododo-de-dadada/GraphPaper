@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 編集メニューの「グループ化」が選択された.
-	void MainPage::mfi_group_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::group_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_list_selected <= 1) {
 			return;
@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「グループの解除」が選択された.
-	void MainPage::mfi_ungroup_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::ungroup_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択されたグループ図形のリストを得る.
 		S_LIST_T list_group;

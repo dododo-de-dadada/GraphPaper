@@ -12,6 +12,36 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrowhead";
 	constexpr double SLIDER_STEP = 0.5;
 
+	// 線枠メニューの「矢じりの種類」>「閉じた」が選択された.
+	void MainPage::arrow_filled_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		if (m_page_layout.m_arrow_style == ARROW_STYLE::NONE) {
+			mfi_arrow_size().IsEnabled(true);
+			mfi_arrow_size_2().IsEnabled(true);
+		}
+		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::FILLED);
+	}
+
+	// 線枠メニューの「矢じりの種類」>「なし」が選択された.
+	void MainPage::arrow_none_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		if (m_page_layout.m_arrow_style != ARROW_STYLE::NONE) {
+			mfi_arrow_size().IsEnabled(false);
+			mfi_arrow_size_2().IsEnabled(false);
+		}
+		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::NONE);
+	}
+
+	// 線枠メニューの「矢じりの種類」>「開いた」が選択された.
+	void MainPage::arrow_opened_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		if (m_page_layout.m_arrow_style == ARROW_STYLE::NONE) {
+			mfi_arrow_size().IsEnabled(true);
+			mfi_arrow_size_2().IsEnabled(true);
+		}
+		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::OPENED);
+	}
+
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
 	void MainPage::arrow_set_slider_header(const double value)
@@ -35,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
-			const double dpi = m_page_dx.m_logical_dpi;
+			const double dpi = page_dpi();
 			const double g_len = m_page_layout.m_grid_base + 1.0;
 			conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf, 31);
 			hdr = hdr + buf;
@@ -84,23 +114,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「矢じりの種類」に印をつける.
-	// a_style	矢じりの形式
-	void MainPage::arrow_style_check_menu(const ARROW_STYLE a_style)
-	{
-		rmfi_arrow_none().IsChecked(a_style == ARROW_STYLE::NONE);
-		rmfi_arrow_opened().IsChecked(a_style == ARROW_STYLE::OPENED);
-		rmfi_arrow_filled().IsChecked(a_style == ARROW_STYLE::FILLED);
-		mfi_arrow_size().IsEnabled(a_style != ARROW_STYLE::NONE);
-
-		rmfi_arrow_none_2().IsChecked(a_style == ARROW_STYLE::NONE);
-		rmfi_arrow_opened_2().IsChecked(a_style == ARROW_STYLE::OPENED);
-		rmfi_arrow_filled_2().IsChecked(a_style == ARROW_STYLE::FILLED);
-		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
-	}
-
 	// 線枠メニューの「矢じりの大きさ」が選択された.
-	IAsyncAction MainPage::mfi_arrow_size_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::arrow_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -143,34 +158,19 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	// 線枠メニューの「矢じりの種類」>「閉じた」が選択された.
-	void MainPage::rmfi_arrow_filled_click(IInspectable const&, RoutedEventArgs const&)
+	// 線枠メニューの「矢じりの種類」に印をつける.
+	// a_style	矢じりの形式
+	void MainPage::arrow_style_check_menu(const ARROW_STYLE a_style)
 	{
-		if (m_page_layout.m_arrow_style == ARROW_STYLE::NONE) {
-			mfi_arrow_size().IsEnabled(true);
-			mfi_arrow_size_2().IsEnabled(true);
-		}
-		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::FILLED);
-	}
+		rmfi_arrow_none().IsChecked(a_style == ARROW_STYLE::NONE);
+		rmfi_arrow_opened().IsChecked(a_style == ARROW_STYLE::OPENED);
+		rmfi_arrow_filled().IsChecked(a_style == ARROW_STYLE::FILLED);
+		mfi_arrow_size().IsEnabled(a_style != ARROW_STYLE::NONE);
 
-	// 線枠メニューの「矢じりの種類」>「なし」が選択された.
-	void MainPage::rmfi_arrow_none_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_page_layout.m_arrow_style != ARROW_STYLE::NONE) {
-			mfi_arrow_size().IsEnabled(false);
-			mfi_arrow_size_2().IsEnabled(false);
-		}
-		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::NONE);
-	}
-
-	// 線枠メニューの「矢じりの種類」>「開いた」が選択された.
-	void MainPage::rmfi_arrow_opened_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_page_layout.m_arrow_style == ARROW_STYLE::NONE) {
-			mfi_arrow_size().IsEnabled(true);
-			mfi_arrow_size_2().IsEnabled(true);
-		}
-		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::OPENED);
+		rmfi_arrow_none_2().IsChecked(a_style == ARROW_STYLE::NONE);
+		rmfi_arrow_opened_2().IsChecked(a_style == ARROW_STYLE::OPENED);
+		rmfi_arrow_filled_2().IsChecked(a_style == ARROW_STYLE::FILLED);
+		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
 	}
 
 }

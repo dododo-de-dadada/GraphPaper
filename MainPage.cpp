@@ -350,11 +350,11 @@ namespace winrt::GraphPaper::implementation
 		// クリックの判定時間をシステムから得る.
 		{
 			using winrt::Windows::UI::ViewManagement::UISettings;
-			m_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
+			m_pointer_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
 			// クリックの判定距離を物理 DPI に合わせる.
 			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			m_click_dist = 6.0 * raw_dpi / log_dpi;
+			m_pointer_click_dist = 6.0 * raw_dpi / log_dpi;
 		}
 
 		{
@@ -371,7 +371,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Application;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		if (m_stack_push) {
+		if (undo_pushed()) {
 			// 操作スタックの更新フラグが立っている場合,
 			const auto d_result = co_await cd_conf_save().ShowAsync();
 			if (d_result == ContentDialogResult::None) {
@@ -443,7 +443,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		if (m_stack_push) {
+		if (undo_pushed()) {
 			// 操作スタックの更新フラグが立っている場合,
 			const auto d_result = co_await cd_conf_save().ShowAsync();
 			if (d_result == ContentDialogResult::None) {

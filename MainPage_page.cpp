@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 		tx_page_width().Text(buf);
 		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), ph, dpi, g_len, buf);
 		tx_page_height().Text(buf);
-		conv_val_to_len<WITH_UNIT_NAME>(len_unit(), m_page_size_max, dpi, g_len, buf);
+		conv_val_to_len<WITH_UNIT_NAME>(len_unit(), page_size_max(), dpi, g_len, buf);
 		tx_page_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
@@ -188,10 +188,28 @@ namespace winrt::GraphPaper::implementation
 		const auto _ = cd_page_size().ShowAsync();
 	}
 
+	// 部位の一片の大きさを得る.
+	const double MainPage::page_anch_len(void) const noexcept
+	{
+		return m_page_dx.m_anch_len;
+	}
+
+	// 背景色を得る.
+	const D2D1_COLOR_F& MainPage::page_background(void) const noexcept
+	{
+		return m_page_dx.m_theme_background;
+	}
+
 	// ページの左上位置と右下位置を設定する.
 	void MainPage::page_bound(void) noexcept
 	{
 		s_list_bound(m_list_shapes, m_page_layout.m_page_size, m_page_min, m_page_max);
+	}
+
+	// ページの左上位置と右下位置を設定する.
+	void MainPage::page_bound(Shape* s) noexcept
+	{
+		s->get_bound(m_page_min, m_page_max);
 	}
 
 	// ページと図形を表示する.
@@ -317,6 +335,12 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_page.unlock();
 	}
 
+	// 前景色を得る.
+	const D2D1_COLOR_F& MainPage::page_foreground(void) const noexcept
+	{
+		return m_page_dx.m_theme_foreground;
+	}
+
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S>
 	void MainPage::page_set_slider_header(const double value)
@@ -397,6 +421,12 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 描画環境を解放可能にする.
+	void MainPage::page_trim(void)
+	{
+		m_page_dx.Trim();
+	}
+
 	// ページのスワップチェーンパネルがロードされた.
 #if defined(_DEBUG)
 	void MainPage::scp_page_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
@@ -436,6 +466,36 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
+	// DPI を得る.
+	const double MainPage::page_dpi(void) const noexcept
+	{
+		return m_page_dx.m_logical_dpi;
+	}
+
+	// 値をページの右下位置に格納する.
+	void MainPage::page_max(const D2D1_POINT_2F p_max) noexcept
+	{
+		m_page_max = p_max;
+	}
+
+	// ページの右下位置を得る.
+	const D2D1_POINT_2F MainPage::page_max(void) const noexcept
+	{
+		return m_page_max;
+	}
+
+	// 値をページの左上位置に格納する.
+	void MainPage::page_min(const D2D1_POINT_2F p_min) noexcept
+	{
+		m_page_min = p_min;
+	}
+
+	// ページの左上位置を得る.
+	const D2D1_POINT_2F MainPage::page_min(void) const noexcept
+	{
+		return m_page_min;
+	}
+
 	// ページの大きさを設定する.
 	void MainPage::page_panle_size(void)
 	{
@@ -458,7 +518,7 @@ namespace winrt::GraphPaper::implementation
 			// 文字列が数値に変換できた場合,
 			value = conv_len_to_val(len_unit(), value, dpi, m_sample_layout.m_grid_base + 1.0);
 		}
-		cd_page_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < m_page_size_max);
+		cd_page_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < page_size_max());
 	}
 
 }

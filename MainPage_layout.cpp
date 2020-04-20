@@ -21,6 +21,28 @@ namespace winrt::GraphPaper::implementation
 		return ApplicationData::Current().LocalFolder();
 	}
 
+	// レイアウトメニューの「レイアウトをリセット」が選択された.
+	// レイアウトを保存したファイルがローカルフォルダーにある場合, それを削除する.
+	IAsyncAction MainPage::layout_delete_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		using winrt::Windows::Storage::StorageDeleteOption;
+
+		auto item{ co_await local_folder().TryGetItemAsync(FILE_NAME) };
+		if (item != nullptr) {
+			auto s_file = item.try_as<StorageFile>();
+			if (s_file != nullptr) {
+				try {
+					co_await s_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
+					mfi_layout_delete().IsEnabled(false);
+				}
+				catch (winrt::hresult_error const&) {
+				}
+				s_file = nullptr;
+			}
+			item = nullptr;
+		}
+	}
+
 	// ページレイアウトとその他の属性を初期化する.
 	void MainPage::layout_init(void) noexcept
 	{
@@ -119,19 +141,19 @@ namespace winrt::GraphPaper::implementation
 			m_page_layout.m_arrow_size = ARROW_SIZE();
 			m_page_layout.m_arrow_style = ARROW_STYLE::NONE;
 			m_page_layout.m_corner_rad = { GRIDLEN_PX, GRIDLEN_PX };
-			m_page_layout.set_fill_color(m_page_dx.m_theme_background);
-			m_page_layout.set_font_color(m_page_dx.m_theme_foreground);
+			m_page_layout.set_fill_color(page_background());
+			m_page_layout.set_font_color(page_foreground());
 			m_page_layout.m_grid_base = static_cast<double>(GRIDLEN_PX) - 1.0;
 			m_page_layout.m_grid_gray = GRID_GRAY;
 			m_page_layout.m_grid_patt = GRID_PATT::PATT_1;
 			m_page_layout.m_grid_show = GRID_SHOW::BACK;
 			m_page_layout.m_grid_snap = true;
-			m_page_layout.set_page_color(m_page_dx.m_theme_background);
+			m_page_layout.set_page_color(page_background());
 			m_page_layout.m_page_scale = 1.0;
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_page_layout.m_page_size.width = static_cast<FLOAT>(std::floor(A4_PER_INCH.width * dpi));
 			m_page_layout.m_page_size.height = static_cast<FLOAT>(std::floor(A4_PER_INCH.height * dpi));
-			m_page_layout.set_stroke_color(m_page_dx.m_theme_foreground);
+			m_page_layout.set_stroke_color(page_foreground());
 			m_page_layout.m_stroke_patt = STROKE_PATT();
 			m_page_layout.m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;
 			m_page_layout.m_stroke_width = 1.0F;
@@ -172,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 
 	// レイアウトメニューの「レイアウトを保存」が選択された
 	// ローカルフォルダーにファイルを作成し, レイアウトを保存する.
-	IAsyncAction MainPage::mfi_layout_save_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::layout_save_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::Storage::CreationCollisionOption;
 
@@ -189,28 +211,6 @@ namespace winrt::GraphPaper::implementation
 		//using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
 		//auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
 		//mru_list.Clear();
-	}
-
-	// レイアウトメニューの「レイアウトをリセット」が選択された.
-	// レイアウトを保存したファイルがローカルフォルダーにある場合, それを削除する.
-	IAsyncAction MainPage::mfi_layout_delete_click_async(IInspectable const&, RoutedEventArgs const&)
-	{
-		using winrt::Windows::Storage::StorageDeleteOption;
-
-		auto item{ co_await local_folder().TryGetItemAsync(FILE_NAME) };
-		if (item != nullptr) {
-			auto s_file = item.try_as<StorageFile>();
-			if (s_file != nullptr) {
-				try {
-					co_await s_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
-					mfi_layout_delete().IsEnabled(false);
-				}
-				catch (winrt::hresult_error const&) {
-				}
-				s_file = nullptr;
-			}
-			item = nullptr;
-		}
 	}
 
 }

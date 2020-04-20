@@ -124,7 +124,7 @@ namespace winrt::GraphPaper::implementation
 		// スワップチェーンパネル上でのポインターの位置を得て, 
 		// ページ座標系に変換し, ポインターの現在位置に格納する.
 		D2D1_POINT_2F p_offs;
-		pt_add(m_page_min, sb_horz().Value(), sb_vert().Value(), p_offs);
+		pt_add(page_min(), sb_horz().Value(), sb_vert().Value(), p_offs);
 		pt_scale(args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / m_page_layout.m_page_scale, p_offs, m_pointer_cur);
 	}
 
@@ -309,7 +309,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		Shape* s;
-		const auto a = s_list_hit_test(m_list_shapes, m_pointer_cur, m_page_dx.m_anch_len, s);
+		const auto a = s_list_hit_test(m_list_shapes, m_pointer_cur, page_anch_len(), s);
 		if (a == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() != true) {
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 			m_mutex_page.unlock();
@@ -403,7 +403,7 @@ namespace winrt::GraphPaper::implementation
 			// ポインターの現在位置と押された位置の長さを得る.
 			D2D1_POINT_2F diff;
 			pt_sub(m_pointer_cur, m_pointer_pressed, diff);
-			if (pt_abs2(diff) > m_click_dist) {
+			if (pt_abs2(diff) > m_pointer_click_dist) {
 				// 長さが閾値を超える場合, 初期状態に戻る.
 				m_pointer_state = STATE_TRAN::BEGIN;
 				pointer_set();
@@ -438,7 +438,7 @@ namespace winrt::GraphPaper::implementation
 			// ポインターの現在位置と押された位置の長さを得る.
 			D2D1_POINT_2F diff;
 			pt_sub(m_pointer_cur, m_pointer_pressed, diff);
-			if (pt_abs2(diff) > m_click_dist) {
+			if (pt_abs2(diff) > m_pointer_click_dist) {
 				// 長さが閾値を超える場合,
 				if (tool() != DRAW_TOOL::SELECT) {
 					// 作図ツールが選択ツールでない場合,
@@ -514,7 +514,7 @@ namespace winrt::GraphPaper::implementation
 				switch (m_pointer_state) {
 				case STATE_TRAN::CLICK:
 					// ポインターが押された状態がクリックした状態の場合,
-					if (t_stamp - m_pointer_time <= m_click_time) {
+					if (t_stamp - m_pointer_time <= m_pointer_click_time) {
 						m_pointer_state = STATE_TRAN::CLICK_2;
 					}
 					else {
@@ -539,7 +539,7 @@ namespace winrt::GraphPaper::implementation
 			// 作図ツールが選択ツールでない場合,
 			return;
 		}
-		m_pointer_anchor = s_list_hit_test(m_list_shapes, m_pointer_pressed, m_page_dx.m_anch_len, m_pointer_shape);
+		m_pointer_anchor = s_list_hit_test(m_list_shapes, m_pointer_pressed, page_anch_len(), m_pointer_shape);
 		if (m_pointer_anchor != ANCH_WHICH::ANCH_OUTSIDE) {
 			// 図形とその部位を得た場合,
 			if (m_pointer_state == STATE_TRAN::PRESS_L
@@ -585,7 +585,7 @@ namespace winrt::GraphPaper::implementation
 			// 左ボタンが押された状態の場合,
 			// ボタンが離れた時刻と押された時刻の差分を得る.
 			const auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
-			if (t_stamp - m_pointer_time <= m_click_time) {
+			if (t_stamp - m_pointer_time <= m_pointer_click_time) {
 				// 差分がクリックの判定時間以下の場合,
 				// クリックした状態に遷移する.
 				m_pointer_state = STATE_TRAN::CLICK;
@@ -597,7 +597,7 @@ namespace winrt::GraphPaper::implementation
 			// クリック後に左ボタンが押した状態の場合,
 			// ボタンが離された時刻と押された時刻の差分を得る.
 			const auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
-			if (t_stamp - m_pointer_time <= m_click_time) {
+			if (t_stamp - m_pointer_time <= m_pointer_click_time) {
 				// 差分がクリックの判定時間以下で
 				if (m_pointer_shape != nullptr && typeid(*m_pointer_shape) == typeid(ShapeText)) {
 					// 押された図形が文字列図形の場合, 

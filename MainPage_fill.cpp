@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t TITLE_FILL[] = L"str_fill";
 
 	// 塗りつぶしメニューの「色」が選択された.
-	IAsyncAction MainPage::mfi_fill_color_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::fill_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;

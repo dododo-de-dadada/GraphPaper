@@ -25,7 +25,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
 		m_mutex_page.lock();
-		m_page_dx.Trim();
+		page_trim();
 		m_sample_dx.Trim();
 		m_mutex_page.unlock();
 	}
