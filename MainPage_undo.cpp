@@ -178,14 +178,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-	void MainPage::enable_undo_menu(void)
+	void MainPage::undo_enable_menu(void)
 	{
 		mfi_undo().IsEnabled(m_stack_ucnt > 0);
 		mfi_redo().IsEnabled(m_stack_rcnt > 0);
 	}
 
 	// 編集メニューの「やり直し」が選択された.
-	void MainPage::mfi_redo_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::redo_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_stack_rcnt == 0) {
 			return;
@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「元に戻す」が選択された.
-	void MainPage::mfi_undo_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::undo_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_stack_ucnt == 0) {
 			return;
@@ -307,11 +307,11 @@ namespace winrt::GraphPaper::implementation
 			stbar_set_grid();
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_PATT>)) {
-			// ページメニューの「方眼線の形式」に印をつける.
+			// ページメニューの「方眼の形式」に印をつける.
 			grid_patt_check_menu(m_page_layout.m_grid_patt);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_SHOW>)) {
-			// ページメニューの「方眼線の表示」に印をつける.
+			// ページメニューの「方眼の表示」に印をつける.
 			grid_show_check_menu(m_page_layout.m_grid_show);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::FONT_STYLE>)) {
@@ -386,13 +386,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形の位置をスタックに保存してから差分だけ移動する.
 	// diff	移動させる差分
-	void MainPage::undo_push_move(const D2D1_POINT_2F diff)
+	// all	すべての図形の場合 true, 選択された図形の場合 false
+	void MainPage::undo_push_move(const D2D1_POINT_2F diff, const bool all)
 	{
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->is_selected() != true) {
+			if (all != true && s->is_selected() != true) {
 				continue;
 			}
 			undo_push_set<UNDO_OP::START_POS>(s);

@@ -261,8 +261,8 @@ namespace winrt::GraphPaper::implementation
 			file_finish_reading();
 		}
 		o_picker = nullptr;
-		//m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::scp_pointer_released });
-		//m_token_pointer_entered = scp_page_panel().PointerEntered({ this, &MainPage::scp_pointer_entered });
+		//m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::pointer_released });
+		//m_token_pointer_entered = scp_page_panel().PointerEntered({ this, &MainPage::pointer_entered });
 		Window::Current().CoreWindow().PointerCursor(p_cur);
 	}
 

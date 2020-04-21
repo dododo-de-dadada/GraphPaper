@@ -169,10 +169,6 @@
     <value>大きさを文字列に合わせる</value>
     <comment>CheckBox</comment>
   </data>
-  <!--<data name="ck_text_ignore_bottom_blank.Content" xml:space="preserve">
-    <value>Ignore bottom blank line.</value>
-    <comment>CheckBox</comment>
-  </data>-->
   <data name="ck_text_find_case.Content" xml:space="preserve">
     <value>Match case</value>
     <comment>CheckBox</comment>
@@ -441,12 +437,6 @@
     <value>Page Size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <!--
-  <data name="mfi_page_unit.Text" xml:space="preserve">
-    <value>Page Unit and Color Format...</value>
-    <comment>MenuFlyoutItem</comment>
-  </data>
-  -->
   <data name="mfi_xcvd_paste.Text" xml:space="preserve">
     <value>Paste</value>
     <comment>MenuFlyoutItem</comment>
@@ -933,7 +923,7 @@
     <comment>TextBlock</comment>
   </data>
   <data name="mfi_layout_delete.Text" xml:space="preserve">
-    <value>Delete Saved Layout</value>
+    <value>Delete Layout</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_layout_save.Text" xml:space="preserve">
@@ -960,10 +950,4 @@
     <value>Arrange</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <!--
-  <data name="ck_text_find_escs.Content" xml:space="preserve">
-    <value>Use escape sequences.</value>
-    <comment>CheckBox</comment>
-  </data>
-  -->
 </root>

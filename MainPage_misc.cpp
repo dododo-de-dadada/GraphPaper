@@ -1,7 +1,7 @@
-//-------------------------------
-// MainPage_app.cpp
-// アプリケーションの中断と再開
-//-------------------------------
+//-----------------------------
+// MainPage_misc.cpp
+// 長さの単位, 色成分の表記, ステータスバー, バージョン情報
+//-----------------------------
 #include "pch.h"
 #include "MainPage.h"
 
@@ -22,16 +22,6 @@ namespace winrt::GraphPaper::implementation
 		rmfi_color_code_cent_2().IsChecked(m_color_code == COLOR_CODE::CENT);
 	}
 
-	// 色成分表記を選択する.
-	template <COLOR_CODE C>
-	void MainPage::color_code_click(void)
-	{
-		if (m_color_code == C) {
-			return;
-		}
-		m_color_code = C;
-	}
-
 	// その他メニューの「長さの単位」に印をつける.
 	void MainPage::len_unit_check_menu(void)
 	{
@@ -47,72 +37,93 @@ namespace winrt::GraphPaper::implementation
 		rmfi_len_unit_point_2().IsChecked(m_len_unit == LEN_UNIT::POINT);
 	}
 
-	// 長さの単位を選択する.
-	template <LEN_UNIT L>
-	void MainPage::len_unit_click(void)
+	// その他メニューの「色成分の表記」>「10進数」が選択された.
+	void MainPage::color_code_dec_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_len_unit == L) {
+		m_color_code = COLOR_CODE::DEC;
+	}
+
+	// その他メニューの「色成分の表記」>「16進数」が選択された.
+	void MainPage::color_code_hex_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		m_color_code = COLOR_CODE::HEX;
+	}
+
+	// その他メニューの「色成分の表記」>「実数」が選択された.
+	void MainPage::color_code_real_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		m_color_code = COLOR_CODE::REAL;
+	}
+
+	// その他メニューの「色成分の表記」>「パーセント」が選択された.
+	void MainPage::color_code_cent_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		m_color_code = COLOR_CODE::CENT;
+	}
+
+	// その他メニューの「長さの単位」>「方眼」が選択された.
+	void MainPage::len_unit_grid_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		if (m_len_unit == LEN_UNIT::GRID) {
 			return;
 		}
-		m_len_unit = L;
+		m_len_unit = LEN_UNIT::GRID;
 		stbar_set_curs();
 		stbar_set_grid();
 		stbar_set_page();
 		stbar_set_unit();
 	}
 
-	// その他メニューの「色成分の表記」>「10進数」が選択された.
-	void MainPage::color_code_dec_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		color_code_click<COLOR_CODE::DEC>();
-	}
-
-	// その他メニューの「色成分の表記」>「16進数」が選択された.
-	void MainPage::color_code_hex_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		color_code_click<COLOR_CODE::HEX>();
-	}
-
-	// その他メニューの「色成分の表記」>「実数」が選択された.
-	void MainPage::color_code_real_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		color_code_click<COLOR_CODE::REAL>();
-	}
-
-	// その他メニューの「色成分の表記」>「パーセント」が選択された.
-	void MainPage::color_code_cent_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		color_code_click<COLOR_CODE::CENT>();
-	}
-
-	// その他メニューの「長さの単位」>「方眼」が選択された.
-	void MainPage::len_unit_grid_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		len_unit_click<LEN_UNIT::GRID>();
-	}
-
 	// その他メニューの「長さの単位」>「インチ」が選択された.
 	void MainPage::len_unit_inch_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		len_unit_click<LEN_UNIT::INCH>();
+		if (m_len_unit == LEN_UNIT::INCH) {
+			return;
+		}
+		m_len_unit = LEN_UNIT::INCH;
+		stbar_set_curs();
+		stbar_set_grid();
+		stbar_set_page();
+		stbar_set_unit();
 	}
 
 	// その他メニューの「長さの単位」>「ポイント」が選択された.
 	void MainPage::len_unit_milli_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		len_unit_click<LEN_UNIT::MILLI>();
+		if (m_len_unit == LEN_UNIT::MILLI) {
+			return;
+		}
+		m_len_unit = LEN_UNIT::MILLI;
+		stbar_set_curs();
+		stbar_set_grid();
+		stbar_set_page();
+		stbar_set_unit();
 	}
 
 	// その他メニューの「長さの単位」>「ピクセル」が選択された.
 	void MainPage::len_unit_pixel_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		len_unit_click<LEN_UNIT::PIXEL>();
+		if (m_len_unit == LEN_UNIT::PIXEL) {
+			return;
+		}
+		m_len_unit = LEN_UNIT::PIXEL;
+		stbar_set_curs();
+		stbar_set_grid();
+		stbar_set_page();
+		stbar_set_unit();
 	}
 
 	// その他メニューの「長さの単位」>「ポイント」が選択された.
 	void MainPage::len_unit_point_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		len_unit_click<LEN_UNIT::POINT>();
+		if (m_len_unit == LEN_UNIT::POINT) {
+			return;
+		}
+		m_len_unit = LEN_UNIT::POINT;
+		stbar_set_curs();
+		stbar_set_grid();
+		stbar_set_page();
+		stbar_set_unit();
 	}
 
 }

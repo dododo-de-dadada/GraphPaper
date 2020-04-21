@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_grid.cpp
-// 方眼の設定
+// 方眼
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -80,8 +80,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// ページメニューの「方眼線の表示」に印をつける.
-	// g_show	方眼線の表示
+	// ページメニューの「方眼の表示」に印をつける.
+	// g_show	方眼の表示
 	void MainPage::grid_show_check_menu(const GRID_SHOW g_show)
 	{
 		rmfi_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
@@ -93,8 +93,8 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
 
-	// ページメニューの「方眼線の形式」に印をつける.
-	// g_show	方眼線の表示
+	// ページメニューの「方眼の形式」に印をつける.
+	// g_patt	方眼の形式
 	void MainPage::grid_patt_check_menu(const GRID_PATT g_patt)
 	{
 		rmfi_grid_patt_1().IsChecked(g_patt == GRID_PATT::PATT_1);
@@ -132,7 +132,7 @@ namespace winrt::GraphPaper::implementation
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				//undo_push_null();
 				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-				enable_undo_menu();
+				undo_enable_menu();
 			}
 
 		}
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, value);
-		enable_undo_menu();
+		undo_enable_menu();
 		page_draw();
 	}
 
@@ -163,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_layout, value);
-		enable_undo_menu();
+		undo_enable_menu();
 		page_draw();
 	}
 
@@ -192,7 +192,7 @@ namespace winrt::GraphPaper::implementation
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				//undo_push_null();
 				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-				enable_undo_menu();
+				undo_enable_menu();
 			}
 		}
 		sample_slider_3().Visibility(COLLAPSED);
@@ -200,51 +200,51 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	// ページメニューの「方眼線の形式」>「強調なし」が選択された.
+	// ページメニューの「方眼の形式」>「強調なし」が選択された.
 	void MainPage::grid_patt_1_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_1) {
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_PATT>(&m_page_layout, GRID_PATT::PATT_1);
-		enable_undo_menu();
+		undo_enable_menu();
 		page_draw();
 	}
 
-	// ページメニューの「方眼線の形式」>「2番目を強調」が選択された.
+	// ページメニューの「方眼の形式」>「2番目を強調」が選択された.
 	void MainPage::grid_patt_2_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_2) {
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_PATT>(&m_page_layout, GRID_PATT::PATT_2);
-		enable_undo_menu();
+		undo_enable_menu();
 		page_draw();
 	}
 
-	// ページメニューの「方眼線の形式」>「2番目と5番目を強調」が選択された.
+	// ページメニューの「方眼の形式」>「2番目と5番目を強調」が選択された.
 	void MainPage::grid_patt_3_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_patt == GRID_PATT::PATT_3) {
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_PATT>(&m_page_layout, GRID_PATT::PATT_3);
-		enable_undo_menu();
+		undo_enable_menu();
 		page_draw();
 	}
 
-	// ページメニューの「方眼線の表示」>「最背面」が選択された.
+	// ページメニューの「方眼の表示」>「最背面」が選択された.
 	void MainPage::grid_show_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_show == GRID_SHOW::BACK) {
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_layout, GRID_SHOW::BACK);
-		enable_undo_menu();
+		undo_enable_menu();
 		page_draw();
 	}
 
-	// ページメニューの「方眼線の表示」>「最前面」が選択された.
+	// ページメニューの「方眼の表示」>「最前面」が選択された.
 	void MainPage::grid_show_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_show == GRID_SHOW::FRONT) {
@@ -254,11 +254,11 @@ namespace winrt::GraphPaper::implementation
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		//undo_push_null();
 		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-		enable_undo_menu();
+		undo_enable_menu();
 		page_draw();
 	}
 
-	// ページメニューの「方眼線の表示」>「隠す」が選択された.
+	// ページメニューの「方眼の表示」>「隠す」が選択された.
 	void MainPage::grid_show_hide_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_layout.m_grid_show == GRID_SHOW::HIDE) {
@@ -268,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		//undo_push_null();
 		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-		enable_undo_menu();
+		undo_enable_menu();
 		page_draw();
 	}
 
@@ -318,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		undo_push_null();
-		enable_undo_menu();
+		undo_enable_menu();
 		page_bound();
 		page_panle_size();
 		page_draw();

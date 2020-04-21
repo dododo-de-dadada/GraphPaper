@@ -15,28 +15,31 @@
 //
 // MainPage.cpp	メインページの作成, アプリの終了
 // MainPage_app.cpp	アプリケーションの中断と再開
-// MainPage_arrange.cpp	図形リストの要素の並び替え
-// MainPage_arrow.cpp	矢じりの形式と寸法を設定
+// MainPage_arrange.cpp	図形の並び替え
+// MainPage_arrow.cpp	矢じりの形式と寸法
 // MainPage_disp.cpp	表示デバイスのハンドラー
 // MainPage_file.cpp	ファイルの読み書き
-// MainPage_fill.cpp	塗りつぶしの設定
-// MainPage_font.cpp	書体の設定
-// MainPage_grid.cpp	方眼の設定
-// MainPage_group.cpp	グループ化とグループの解除
-// MainPage_layout.cpp	レイアウトの保存とリセット
+// MainPage_fill.cpp	塗りつぶし
+// MainPage_font.cpp	書体と文字列の配置
+// MainPage_grid.cpp	方眼
+// MainPage_group.cpp	グループ化とその解除
+// MainPage_kybd.cpp	キーボードアクセラレータのハンドラー
+// MainPage_layout.cpp	レイアウトの保存と削除
+// MainPage_misc.cpp	長さの単位, 色成分の表記, ステータスバー, バージョン情報
 // MainPage_page.cpp	ページの設定と表示
 // MainPage_pointer.cpp	ポインターイベントのハンドラー
 // MainPage_sample.cpp	見本ダイアログの設定, 表示
 // MainPage_scroll.cpp	スクロールバーの設定
 // MainPage_select.cpp	図形の選択
 // MainPage_stbar.cpp	ステータスバーの設定
-// MainPage_stroke.cpp	線枠の設定
-// MainPage_summary.cpp	図形一覧パネルの表示, 設定
+// MainPage_stroke.cpp	線枠
+// MainPage_summary.cpp	図形の一覧
 // MainPage_text.cpp	文字列の編集と検索/置換
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
 // MainPage_tool.cpp	作図ツールの設定
 // MainPage_undo.cpp	元に戻すとやり直し
 // MainPage_xcvd.cpp	切り取りとコピー, 貼り付け, 削除
+// MainPage_zoom.cpp
 //------------------------------
 #include <ppltasks.h>
 #include <winrt/Windows.ApplicationModel.ExtendedExecution.h>
@@ -338,7 +341,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_arrow.cpp
-		// 矢じりの形式や寸法を設定する
+		// 矢じりの形式と寸法
 		//-------------------------------
 
 		// 線枠メニューの「矢じりの種類」に印をつける.
@@ -414,7 +417,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_fill.cpp
-		// 塗りつぶしの設定
+		// 塗りつぶし
 		//-------------------------------
 
 		// 塗りつぶしメニューの「色」が選択された.
@@ -426,7 +429,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		//　MainPage_font.cpp
-		//　書体の設定
+		//　書体と文字列の配置
 		//-------------------------------
 
 		// 書体メニューの「字体」に印をつける.
@@ -485,13 +488,13 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_OP U, int S> void text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
-		//　MainPage_grid.cpp
-		//　方眼の設定
+		// MainPage_grid.cpp
+		// 方眼
 		//-------------------------------
 
-		// レイアウトメニューの「方眼線の形式」に印をつける.
+		// レイアウトメニューの「方眼の形式」に印をつける.
 		void grid_patt_check_menu(const GRID_PATT g_patt);
-		// レイアウトメニューの「方眼線の表示」に印をつける.
+		// レイアウトメニューの「方眼の表示」に印をつける.
 		void grid_show_check_menu(const GRID_SHOW g_show);
 		// レイアウトメニューの「方眼の大きさ」>「大きさ」が選択された.
 		IAsyncAction grid_len_click_async(IInspectable const&, RoutedEventArgs const&);
@@ -501,17 +504,17 @@ namespace winrt::GraphPaper::implementation
 		void grid_len_exp_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼線の濃さ」が選択された.
 		IAsyncAction grid_gray_click_async(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「方眼線の形式」>「強調なし」が選択された.
+		// レイアウトメニューの「方眼の形式」>「強調なし」が選択された.
 		void grid_patt_1_click(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「方眼線の形式」>「2番目を強調」が選択された.
+		// レイアウトメニューの「方眼の形式」>「2番目を強調」が選択された.
 		void grid_patt_2_click(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「方眼線の形式」>「2番目と5番目を強調」が選択された.
+		// レイアウトメニューの「方眼の形式」>「2番目と5番目を強調」が選択された.
 		void grid_patt_3_click(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「方眼線の表示」>「最背面」が選択された.
+		// レイアウトメニューの「方眼の表示」>「最背面」が選択された.
 		void grid_show_back_click(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「方眼線の表示」>「最前面」が選択された.
+		// レイアウトメニューの「方眼の表示」>「最前面」が選択された.
 		void grid_show_front_click(IInspectable const&, RoutedEventArgs const&);
-		// レイアウトメニューの「方眼線の表示」>「隠す」が選択された.
+		// レイアウトメニューの「方眼の表示」>「隠す」が選択された.
 		void grid_show_hide_click(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「方眼にそろえる」が選択された.
 		void grid_snap_click(IInspectable const&, RoutedEventArgs const&);
@@ -522,7 +525,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_group.cpp
-		// グループ化, グループを解除する
+		// グループ化とその解除
 		//-------------------------------
 
 		// 「グループ化」が選択された.
@@ -590,7 +593,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_layout.cpp
-		// レイアウトの初期化, 保存と削除
+		// レイアウトの保存と削除
 		//-------------------------------
 
 		// ページレイアウトとその他の属性を初期化する.
@@ -602,19 +605,57 @@ namespace winrt::GraphPaper::implementation
 		// レイアウトメニューの「レイアウトを保存」が選択された.
 		IAsyncAction layout_save_click_async(IInspectable const&, RoutedEventArgs const&);
 
+		//-----------------------------
+		// MainPage_misc.cpp
+		// 長さの単位, 色成分の表記, ステータスバー, バージョン情報
+		//-----------------------------
+
+		// その他メニューの「バージョン情報」が選択された.
+		void about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
+		{
+			// バージョン情報のメッセージダイアログを表示する.
+			cd_message_show(ICON_INFO, L"str_appname", L"str_version");
+		}
+		// 値を色成分の表記に格納する.
+		void color_code(const COLOR_CODE code) noexcept { m_color_code = code; }
+		// 色成分の表記を得る.
+		const COLOR_CODE color_code(void) const noexcept { return m_color_code; }
+		// その他メニューの「色成分の表記」に印をつける.
+		void color_code_check_menu(void);
+		// その他メニューの「色成分の表記」>「10進数」が選択された.
+		void color_code_dec_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「色成分の表記」>「16進数」が選択された.
+		void color_code_hex_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「色成分の表記」>「実数」が選択された.
+		void color_code_real_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「色成分の表記」>「パーセント」が選択された.
+		void color_code_cent_click(IInspectable const&, RoutedEventArgs const&);
+		// 値を長さの単位に格納する.
+		void len_unit(const LEN_UNIT unit) noexcept { m_len_unit = unit; }
+		// 長さの単位を得る.
+		const LEN_UNIT len_unit(void) const noexcept { return m_len_unit; }
+		// その他メニューの「長さの単位」に印をつける.
+		void len_unit_check_menu(void);
+		// その他メニューの「長さの単位」>「インチ」が選択された.
+		void len_unit_inch_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「長さの単位」>「方眼」が選択された.
+		void len_unit_grid_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「長さの単位」>「ポイント」が選択された.
+		void len_unit_milli_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「長さの単位」>「ピクセル」が選択された.
+		void len_unit_pixel_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「長さの単位」>「ポイント」が選択された.
+		void len_unit_point_click(IInspectable const&, RoutedEventArgs const&);
+
 		//-------------------------------
 		//　MainPage_page.cpp
 		//　ページの設定と表示
 		//-------------------------------
 
-		// ページの寸法入力ダイアログの「適用」ボタンが押された.
-		void cd_page_size_pri_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
-		// ページの寸法入力ダイアログの「図形に合わせる」ボタンが押された.
-		void cd_page_size_sec_btn_click(ContentDialog const&, ContentDialogButtonClickEventArgs const&);
 		// レイアウトメニューの「ページの色」が選択された.
-		IAsyncAction mfi_page_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction page_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「ページの大きさ」が選択された
-		void mfi_page_size_click(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction page_size_click(IInspectable const&, RoutedEventArgs const&);
 		// 部位の一片の大きさを得る.
 		const double page_anch_len(void) const noexcept;
 		// 背景色を得る.
@@ -644,13 +685,13 @@ namespace winrt::GraphPaper::implementation
 		// ページの大きさの最大値 (ピクセル) を得る.
 		constexpr float page_size_max(void) const noexcept { return 32767.0F; }
 		// ページのスワップチェーンパネルがロードされた.
-		void scp_page_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
+		void page_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
 		// ページのスワップチェーンパネルの寸法が変わった.
-		void scp_page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
+		void page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
 		// ページのスワップチェーンパネルの大きさを設定する.
 		void page_panle_size(void);
 		// ページ寸法ダイアログの「ページの幅」「ページの高さ」テキストボックスの値が変更された.
-		void tx_page_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
+		void page_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
 		// 描画環境を解放可能にする.
 		void page_trim(void);
 
@@ -695,19 +736,19 @@ namespace winrt::GraphPaper::implementation
 		// ポインターが押された状態を得る.
 		const STATE_TRAN pointer_state(void) const noexcept { return m_pointer_state; }
 		// ポインターのボタンが上げられた.
-		void scp_pointer_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void pointer_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがページのスワップチェーンパネルの中に入った.
-		void scp_pointer_entered(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void pointer_entered(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがページのスワップチェーンパネルから出た.
-		void scp_pointer_exited(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void pointer_exited(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターが動いた.
-		void scp_pointer_moved(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void pointer_moved(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターのボタンが押された.
-		void scp_pointer_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void pointer_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターのボタンが上げられた.
-		void scp_pointer_released(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void pointer_released(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターのホイールボタンが操作された.
-		void scp_pointer_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void pointer_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_sample.cpp
@@ -715,13 +756,13 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 見本ダイアログが開かれた.
-		void cd_sample_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
+		void sample_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
 		// 見本の図形を表示する
 		void sample_draw(void);
 		// 見本のスワップチェーンパネルの大きさが変わった.
-		void scp_sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&);
+		void sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&);
 		//　リストビュー「見本リスト」がロードされた.
-		void lv_sample_list_loaded(IInspectable const&, RoutedEventArgs const& /*e*/);
+		void sample_list_loaded(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -791,7 +832,7 @@ namespace winrt::GraphPaper::implementation
 
 		//------------------------------
 		// MainPage_stroke.cpp
-		// 線枠の設定
+		// 線枠
 		//------------------------------
 
 		// 線枠メニューの「種類」に印をつける.
@@ -819,7 +860,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_summary.cpp
-		// 図形一覧パネルの表示, 設定
+		// 図形の一覧
 		//-------------------------------
 
 		// 図形一覧パネルの「閉じる」ボタンが押された.
@@ -943,11 +984,11 @@ namespace winrt::GraphPaper::implementation
 		//-----------------------------
 
 		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-		void enable_undo_menu(void);
+		void undo_enable_menu(void);
 		// 編集メニューの「やり直し」が選択された.
-		void mfi_redo_click(IInspectable const&, RoutedEventArgs const&);
+		void redo_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「元に戻す」が選択された.
-		void mfi_undo_click(IInspectable const&, RoutedEventArgs const&);
+		void undo_click(IInspectable const&, RoutedEventArgs const&);
 		// 操作スタックを消去し, 含まれる操作を破棄する.
 		void undo_clear(void);
 		// 操作を実行する.
@@ -969,7 +1010,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を挿入して, その操作をスタックに積む.
 		void undo_push_insert(Shape* s, Shape* s_pos);
 		// 図形の位置をスタックに保存してから差分だけ移動する.
-		void undo_push_move(const D2D1_POINT_2F diff);
+		void undo_push_move(const D2D1_POINT_2F diff, const bool all = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void undo_push_null(void);
 		// 図形をグループから削除して, その操作をスタックに積む.
@@ -995,13 +1036,13 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 編集メニューの「コピー」が選択された.
-		IAsyncAction mfi_xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「切り取り」が選択された.
-		IAsyncAction mfi_xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「削除」が選択された.
-		void mfi_xcvd_delete_click(IInspectable const&, RoutedEventArgs const&);
+		void xcvd_delete_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「貼り付け」が選択された.
-		IAsyncAction mfi_xcvd_paste_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction xcvd_paste_click_async(IInspectable const&, RoutedEventArgs const&);
 		// クリップボードにデータが含まれているか調べる.
 		template <size_t Z> bool xcvd_contains(const winrt::hstring(&formats)[Z]) const
 		{
@@ -1021,52 +1062,6 @@ namespace winrt::GraphPaper::implementation
 		void mfi_zoom_out_clicked(IInspectable const&, RoutedEventArgs const&);
 		// レイアウトメニューの「拡大縮小」>「100%に戻す」が選択された.
 		void mfi_zoom_reset_click(IInspectable const&, RoutedEventArgs const&);
-
-		//-----------------------------
-		// MainPage_misc.cpp
-		// 色成分の表記, 長さの単位の設定
-		// バージョン情報
-		//-----------------------------
-
-		void color_code(const COLOR_CODE code) noexcept { m_color_code = code; }
-		const COLOR_CODE color_code(void) const noexcept { return m_color_code; }
-
-		// 値を長さの単位に格納する.
-		void len_unit(const LEN_UNIT unit) noexcept { m_len_unit = unit; }
-		// 長さの単位を得る.
-		const LEN_UNIT len_unit(void) const noexcept { return m_len_unit; }
-		// その他メニューの「色成分の表記」に印をつける.
-		void color_code_check_menu(void);
-		// 色成分表記を選択する.
-		template <COLOR_CODE C> void color_code_click(void);
-		// その他メニューの「長さの単位」に印をつける.
-		void len_unit_check_menu(void);
-		// 長さの単位を選択する.
-		template <LEN_UNIT L> void len_unit_click(void);
-		// その他メニューの「色成分の表記」>「10進数」が選択された.
-		void color_code_dec_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「色成分の表記」>「16進数」が選択された.
-		void color_code_hex_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「色成分の表記」>「実数」が選択された.
-		void color_code_real_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「色成分の表記」>「パーセント」が選択された.
-		void color_code_cent_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「バージョン情報」が選択された.
-		void mfi_about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
-		{
-			// バージョン情報のメッセージダイアログを表示する.
-			cd_message_show(ICON_INFO, L"str_appname", L"str_version");
-		}
-		// その他メニューの「長さの単位」>「インチ」が選択された.
-		void len_unit_inch_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「長さの単位」>「方眼」が選択された.
-		void len_unit_grid_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「長さの単位」>「ポイント」が選択された.
-		void len_unit_milli_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「長さの単位」>「ピクセル」が選択された.
-		void len_unit_pixel_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「長さの単位」>「ポイント」が選択された.
-		void len_unit_point_click(IInspectable const&, RoutedEventArgs const&);
 
 	};
 

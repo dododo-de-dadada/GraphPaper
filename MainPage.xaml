@@ -287,8 +287,8 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_patt_3_2" x:Uid="rmfi_grid_patt_3" Click="grid_patt_3_click" Text="Emphasize the 2nd and 5th" GroupName="gn_grid_patt" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
-                <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click_async" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_page_size" Click="page_size_click" Text="Size..." />
+                <MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click_async" Text="Color..." />
                 <!--<MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_len_unit_click" Text="Unit..." />-->
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_zoom" Text="Zoom">
@@ -374,33 +374,33 @@
             </muxc:MenuBarItem>
             <!-- 編集メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_edit" AccessKey="E" Title="Edit">
-                <MenuFlyoutItem x:Name="mfi_undo" x:Uid="mfi_undo" Click="mfi_undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
+                <MenuFlyoutItem x:Name="mfi_undo" x:Uid="mfi_undo" Click="undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Z" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_redo" x:Uid="mfi_redo" Click="mfi_redo_click" Icon="Redo" IsEnabled="False" Text="Redo" >
+                <MenuFlyoutItem x:Name="mfi_redo" x:Uid="mfi_redo" Click="redo_click" Icon="Redo" IsEnabled="False" Text="Redo" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Y" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_xcvd_cut" x:Uid="mfi_xcvd_cut" Click="mfi_xcvd_cut_click_async" Icon="Cut" IsEnabled="False" Text="Cut" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_cut" x:Uid="mfi_xcvd_cut" Click="xcvd_cut_click_async" Icon="Cut" IsEnabled="False" Text="Cut" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="X" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_xcvd_copy" x:Uid="mfi_xcvd_copy" Click="mfi_xcvd_copy_click_async" Icon="Copy" IsEnabled="False" Text="Copy" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_copy" x:Uid="mfi_xcvd_copy" Click="xcvd_copy_click_async" Icon="Copy" IsEnabled="False" Text="Copy" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="C" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_xcvd_paste" x:Uid="mfi_xcvd_paste" Click="mfi_xcvd_paste_click_async" Icon="Paste" IsEnabled="False" Text="Paste" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_paste" x:Uid="mfi_xcvd_paste" Click="xcvd_paste_click_async" Icon="Paste" IsEnabled="False" Text="Paste" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="V" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_xcvd_delete" x:Uid="mfi_xcvd_delete" Click="mfi_xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_delete" x:Uid="mfi_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Delete" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -670,8 +670,8 @@
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- ページメニュー -->
-                <MenuFlyoutItem x:Uid="mfi_page_size" Click="mfi_page_size_click" Text="Size..." />
-                <MenuFlyoutItem x:Uid="mfi_page_color" Click="mfi_page_color_click_async" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_page_size" Click="page_size_click" Text="Size..." />
+                <MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click_async" Text="Color..." />
                 <!--<MenuFlyoutItem x:Uid="mfi_page_unit" Click="mfi_page_len_unit_click" Text="Unit..." />-->
                 <MenuFlyoutSeparator />
                 <!-- 拡大縮小メニュー -->
@@ -716,7 +716,7 @@
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- バージョン情報メニュー -->
-                <MenuFlyoutItem x:Uid="mfi_about_graph_paper" Click="mfi_about_graph_paper_click" Text="About Graph paper..." />
+                <MenuFlyoutItem x:Uid="mfi_about_graph_paper" Click="about_graph_paper_click" Text="About Graph paper..." />
             </muxc:MenuBarItem>
         </muxc:MenuBar>
         <!-- 文字列検索パネル -->
@@ -761,23 +761,23 @@
         <!-- ページパネル -->
         <RelativePanel x:Name="rp_page" Grid.Row="1" Grid.Column="0" >
             <!--
-                PointerEntered="scp_pointer_entered"
+                PointerEntered="pointer_entered"
                 PointerReleased="scp_pointer_released"
             -->
             <SwapChainPanel
                 x:Name="scp_page_panel"
-                Loaded="scp_page_panel_loaded"
+                Loaded="page_panel_loaded"
                 KeyboardAcceleratorPlacementMode="Hidden"
-                PointerCanceled="scp_pointer_canceled"
-                PointerExited="scp_pointer_exited"
-                PointerMoved="scp_pointer_moved"
-                PointerPressed="scp_pointer_pressed"
-                PointerWheelChanged="scp_pointer_wheel_changed"                
+                PointerCanceled="pointer_canceled"
+                PointerExited="pointer_exited"
+                PointerMoved="pointer_moved"
+                PointerPressed="pointer_pressed"
+                PointerWheelChanged="pointer_wheel_changed"                
                 RelativePanel.AlignLeftWithPanel="True"
                 RelativePanel.AlignTopWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"
                 RelativePanel.AlignBottomWithPanel="True"
-                SizeChanged="scp_page_panel_size_changed"
+                SizeChanged="page_panel_size_changed"
                 >
                 <!--
                 通常は, MenuFlyoutItem でキーボードアクセラレータを指定すべきだが,
@@ -886,10 +886,10 @@
             </StackPanel>
         </ContentDialog>
         <!-- ページの寸法入力ダイアログ -->
-        <ContentDialog x:Name="cd_page_size" x:Uid="cd_page_size" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonClick="cd_page_size_pri_btn_click" PrimaryButtonText="Apply" SecondaryButtonClick="cd_page_size_sec_btn_click" SecondaryButtonText="Adjust to Shapes">
+        <ContentDialog x:Name="cd_page_size" x:Uid="cd_page_size" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
             <StackPanel >
-                <TextBox x:Name="tx_page_width" x:Uid="tx_page_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="tx_page_size_text_changed" />
-                <TextBox x:Name="tx_page_height" x:Uid="tx_page_height" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="tx_page_size_text_changed" />
+                <TextBox x:Name="tx_page_width" x:Uid="tx_page_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="page_size_text_changed" />
+                <TextBox x:Name="tx_page_height" x:Uid="tx_page_height" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="page_size_text_changed" />
                 <TextBox x:Name="tx_page_size_max" x:Uid="tx_page_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum size" IsEnabled="false" />
             </StackPanel>
         </ContentDialog>
@@ -913,7 +913,7 @@
             </StackPanel>
         </ContentDialog>-->
         <!-- 属性入力ダイアログ -->
-        <ContentDialog x:Name="cd_sample" CloseButtonText="Close" DefaultButton="Close" Opened="cd_sample_opened" PrimaryButtonText="Apply" >
+        <ContentDialog x:Name="cd_sample" CloseButtonText="Close" DefaultButton="Close" Opened="sample_opened" PrimaryButtonText="Apply" >
             <RelativePanel>
                 <SwapChainPanel
                     x:Name="scp_sample_panel"
@@ -923,7 +923,7 @@
                     MaxWidth="170"
                     RelativePanel.AlignTopWithPanel="True"
                     RelativePanel.AlignHorizontalCenterWithPanel="True"
-                    SizeChanged="scp_sample_panel_size_changed"
+                    SizeChanged="sample_panel_size_changed"
                     Width="170"
                     />
                 <!-- Height を指定するこれ大事 -->

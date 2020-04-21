@@ -352,13 +352,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ポインターのボタンが上げられた.
-	void MainPage::scp_pointer_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args)
+	void MainPage::pointer_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
-		scp_pointer_released(sender, args);
+		pointer_released(sender, args);
 	}
 
 	// ポインターがページのスワップチェーンパネルの中に入った.
-	void MainPage::scp_pointer_entered(IInspectable const& sender, PointerRoutedEventArgs const& args)
+	void MainPage::pointer_entered(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 		if (sender != scp_page_panel()) {
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
@@ -370,7 +370,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ポインターがページのスワップチェーンパネルから出た.
-	void MainPage::scp_pointer_exited(IInspectable const& sender, PointerRoutedEventArgs const&)
+	void MainPage::pointer_exited(IInspectable const& sender, PointerRoutedEventArgs const&)
 	{
 		if (sender != scp_page_panel()) {
 			return;
@@ -384,7 +384,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ポインターが動いた.
-	void MainPage::scp_pointer_moved(IInspectable const& sender, PointerRoutedEventArgs const& args)
+	void MainPage::pointer_moved(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 		using winrt::Windows::UI::Xaml::Window;
 #if defined(_DEBUG)
@@ -480,7 +480,7 @@ namespace winrt::GraphPaper::implementation
 
 	// ポインターのボタンが押された.
 	// キャプチャの有無にかかわらず, 片方のマウスボタンを押した状態で, もう一方のボタンを押しても, それは通知されない.
-	void MainPage::scp_pointer_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args)
+	void MainPage::pointer_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 		using winrt::Windows::System::VirtualKeyModifiers;
 		using winrt::Windows::UI::Input::PointerPointProperties;
@@ -569,7 +569,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ポインターのボタンが上げられた.
-	void MainPage::scp_pointer_released(IInspectable const& sender, PointerRoutedEventArgs const& args)
+	void MainPage::pointer_released(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 		using winrt::Windows::System::VirtualKeyModifiers;
 #if defined(_DEBUG)
@@ -658,7 +658,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ポインターのホイールボタンが操作された.
-	void MainPage::scp_pointer_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args)
+	void MainPage::pointer_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 		using winrt::Windows::System::VirtualKeyModifiers;
 		using winrt::Windows::UI::Xaml::UIElement;

@@ -65,30 +65,33 @@ namespace winrt::GraphPaper::implementation
 	// value	領域の左上位置
 	void ShapeGroup::get_min_pos(D2D1_POINT_2F& value) const noexcept
 	{
-		auto flag = true;
-		for (const auto s : m_list_grouped) {
+		get_start_pos(value);
+	}
+
+	// 開始位置を得る.
+	// value	開始位置
+	// グループ図形の場合, 開始位置は図形を囲む領域の左上位置.
+	bool ShapeGroup::get_start_pos(D2D1_POINT_2F& value) const noexcept
+	{
+		//if (m_list_grouped.empty()) {
+		//	return false;
+		//}
+		auto flag = false;
+		for (auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (flag == true) {
-				flag = false;
-				s->get_min_pos(value);
-				continue;
+			D2D1_POINT_2F pos;
+			s->get_min_pos(pos);
+			if (flag != true) {
+				value = pos;
+				flag = true;
 			}
-			D2D1_POINT_2F nw_pos;
-			s->get_min_pos(nw_pos);
-			pt_min(nw_pos, value, value);
+			else {
+				pt_min(pos, value, value);
+			}
 		}
-	}
-
-	// 始点を得る
-	bool ShapeGroup::get_start_pos(D2D1_POINT_2F& value) const noexcept
-	{
-		if (m_list_grouped.empty()) {
-			return false;
-		}
-		m_list_grouped.front()->get_start_pos(value);
-		return true;
+		return flag;
 	}
 
 	// 文字列図形を含むか調べる.
@@ -189,14 +192,13 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値を始点に格納する. 他の部位の位置も動く.
+	// 値を開始位置に格納する. 他の部位の位置も動く.
 	void ShapeGroup::set_start_pos(const D2D1_POINT_2F value)
 	{
 		D2D1_POINT_2F b_min;
 		D2D1_POINT_2F diff;
 
-		get_min_pos(b_min);
-		if (equal(value, b_min)) {
+		if (get_start_pos(b_min) != true || equal(value, b_min)) {
 			return;
 		}
 		pt_sub(value, b_min, diff);

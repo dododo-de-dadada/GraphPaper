@@ -104,14 +104,14 @@ namespace winrt::GraphPaper::implementation
 		FILLED	// 閉じた矢じり
 	};
 
-	// 方眼線の表示
+	// 方眼の表示
 	enum struct GRID_SHOW {
 		HIDE,	// 表示なし
 		BACK,	// 最背面に表示
 		FRONT	// 最前面に表示
 	};
 
-	// 方眼線の形式
+	// 方眼の形式
 	enum struct GRID_PATT {
 		PATT_1,
 		PATT_2,
@@ -198,9 +198,9 @@ namespace winrt::GraphPaper::implementation
 	bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept;
 	// 単精度浮動小数が同じか調べる.
 	bool equal(const float a, const float b) noexcept;
-	// 方眼線の形式が同じか調べる.
+	// 方眼の形式が同じか調べる.
 	bool equal(const GRID_PATT a, const GRID_PATT b) noexcept;
-	// 方眼線の表示が同じか調べる.
+	// 方眼の表示が同じか調べる.
 	bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept;
 	// 破線の配置が同じか調べる.
 	bool equal(const STROKE_PATT& a, const STROKE_PATT& b) noexcept;
@@ -288,9 +288,9 @@ namespace winrt::GraphPaper::implementation
 	void read(DWRITE_TEXT_ALIGNMENT& value, DataReader const& dt_reader);
 	// 文字範囲をデータリーダーから読み込む.
 	void read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader);
-	// 方眼線の形式をデータリーダーから読み込む.
+	// 方眼の形式をデータリーダーから読み込む.
 	void read(GRID_PATT& value, DataReader const& dt_reader);
-	// 方眼線の表示をデータリーダーから読み込む.
+	// 方眼の表示をデータリーダーから読み込む.
 	void read(GRID_SHOW& value, DataReader const& dt_reader);
 	// 破線の配置をデータリーダーから読み込む.
 	void read(STROKE_PATT& value, DataReader const& dt_reader);
@@ -330,9 +330,9 @@ namespace winrt::GraphPaper::implementation
 	void write(const DWRITE_TEXT_ALIGNMENT value, DataWriter const& dt_writer);
 	// 文字列範囲をデータライターに書き込む.
 	void write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer);
-	// 方眼線の形式をデータライターに書き込む.
+	// 方眼の形式をデータライターに書き込む.
 	void write(const GRID_PATT value, DataWriter const& dt_writer);
-	// 方眼線の表示をデータライターに書き込む.
+	// 方眼の表示をデータライターに書き込む.
 	void write(const GRID_SHOW value, DataWriter const& dt_writer);
 	// 破線の配置をデータライターに書き込む.
 	void write(const STROKE_PATT& value, DataWriter const& dt_writer);
@@ -400,9 +400,9 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_grid_base(double& /*value*/) const noexcept { return false; }
 		// 方眼の大きさを得る.
 		virtual bool get_grid_gray(double& /*value*/) const noexcept { return false; }
-		// 方眼線の形式を得る.
+		// 方眼の形式を得る.
 		virtual bool get_grid_patt(GRID_PATT& /*value*/) const noexcept { return false; }
-		// 方眼線の表示を得る.
+		// 方眼の表示を得る.
 		virtual bool get_grid_show(GRID_SHOW& /*value*/) const noexcept { return false; }
 		// 方眼にそろえるを得る.
 		virtual bool get_grid_snap(bool& /*value*/) const noexcept { return false; }
@@ -416,7 +416,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_page_size(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
 		// 指定された部位の位置を得る.
 		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F&/*value*/) const noexcept {}
-		// 始点を得る
+		// 開始位置を得る.
 		virtual bool get_start_pos(D2D1_POINT_2F& /*value*/) const noexcept { return false; }
 		// 線枠の色を得る.
 		virtual bool get_stroke_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
@@ -472,9 +472,9 @@ namespace winrt::GraphPaper::implementation
 		virtual void set_grid_base(const double /*value*/) noexcept {}
 		// 値を方眼線の濃淡に格納する.
 		virtual void set_grid_gray(const double /*value*/) noexcept {}
-		// 値を方眼線の形式に格納する.
+		// 値を方眼の形式に格納する.
 		virtual void set_grid_patt(const GRID_PATT /*value*/) noexcept {}
-		// 値を方眼線の表示に格納する.
+		// 値を方眼の表示に格納する.
 		virtual void set_grid_show(const GRID_SHOW /*value*/) noexcept {}
 		// 値を方眼にそろえるに格納する.
 		virtual void set_grid_snap(const bool /*value*/) noexcept {}
@@ -585,8 +585,8 @@ namespace winrt::GraphPaper::implementation
 		// 方眼の属性
 		double m_grid_base = 0.0;	// 方眼の基準の大きさ (を -1 した値)
 		double m_grid_gray = GRID_GRAY;	// 方眼線の濃さ
-		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼線の表示
-		GRID_PATT m_grid_patt = GRID_PATT::PATT_1;	// 方眼線の形式
+		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
+		GRID_PATT m_grid_patt = GRID_PATT::PATT_1;	// 方眼の形式
 		bool m_grid_snap = true;	// 方眼に整列
 
 		// ページの属性
@@ -624,9 +624,9 @@ namespace winrt::GraphPaper::implementation
 		void get_grid_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の大きさを得る.
 		bool get_grid_gray(double& value) const noexcept;
-		// 方眼線の形式を得る.
+		// 方眼の形式を得る.
 		bool get_grid_patt(GRID_PATT& value) const noexcept;
-		// 方眼線の表示の状態を得る.
+		// 方眼の表示の状態を得る.
 		bool get_grid_show(GRID_SHOW& value) const noexcept;
 		// 方眼にそろえるを得る.
 		bool get_grid_snap(bool& value) const noexcept;
@@ -676,9 +676,9 @@ namespace winrt::GraphPaper::implementation
 		void set_grid_base(const double value) noexcept;
 		// 値を方眼線の濃淡に格納する.
 		void set_grid_gray(const double value) noexcept;
-		// 値を方眼線の形式に格納する.
+		// 値を方眼の形式に格納する.
 		void set_grid_patt(const GRID_PATT value) noexcept;
-		// 値を方眼線の表示に格納する.
+		// 値を方眼の表示に格納する.
 		void set_grid_show(const GRID_SHOW value) noexcept;
 		// 値を方眼にそろえるに格納する.
 		void set_grid_snap(const bool value) noexcept;
@@ -747,7 +747,7 @@ namespace winrt::GraphPaper::implementation
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 図形を囲む領域の左上位置を得る.
 		void get_min_pos(D2D1_POINT_2F& value) const noexcept;
-		// 始点を得る
+		// 開始位置を得る.
 		bool get_start_pos(D2D1_POINT_2F& value) const noexcept;
 		// 文字列図形を含むか調べる.
 		bool has_text(void) noexcept;
@@ -802,7 +802,7 @@ namespace winrt::GraphPaper::implementation
 		virtual void get_min_pos(D2D1_POINT_2F& value) const noexcept;
 		// 指定された部位の位置を得る.
 		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& value) const noexcept;
-		// 始点を得る
+		// 開始位置を得る.
 		virtual bool get_start_pos(D2D1_POINT_2F& value) const noexcept;
 		// 線枠の色を得る.
 		bool get_stroke_color(D2D1_COLOR_F& value) const noexcept;

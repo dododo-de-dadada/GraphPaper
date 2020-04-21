@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 編集メニューの「コピー」が選択された.
-	IAsyncAction MainPage::mfi_xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 		using winrt::Windows::ApplicationModel::DataTransfer::DataPackage;
@@ -69,14 +69,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 編集メニューの「切り取る」が選択された.
 	//constexpr uint32_t CUT = 0;
-	IAsyncAction MainPage::mfi_xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		co_await mfi_xcvd_copy_click_async(nullptr, nullptr);
-		mfi_xcvd_delete_click(nullptr, nullptr);
+		co_await xcvd_copy_click_async(nullptr, nullptr);
+		xcvd_delete_click(nullptr, nullptr);
 	}
 
 	// 編集メニューの「削除」が選択された.
-	void MainPage::mfi_xcvd_delete_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::xcvd_delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_list_selected == 0) {
 			// 選択された図形の数が 0 の場合,
@@ -108,7 +108,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「貼り付け」が選択された.
-	IAsyncAction MainPage::mfi_xcvd_paste_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::xcvd_paste_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 		using winrt::Windows::ApplicationModel::DataTransfer::DataPackageView;

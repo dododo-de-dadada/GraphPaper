@@ -362,14 +362,14 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 方眼線の形式を得る.
+	// 方眼の形式を得る.
 	bool ShapeLayout::get_grid_patt(GRID_PATT& value) const noexcept
 	{
 		value = m_grid_patt;
 		return true;
 	}
 
-	// 方眼線の表示を得る.
+	// 方眼の表示を得る.
 	bool ShapeLayout::get_grid_show(GRID_SHOW& value) const noexcept
 	{
 		value = m_grid_show;
@@ -564,13 +564,13 @@ namespace winrt::GraphPaper::implementation
 		m_grid_gray = value;
 	}
 
-	// 値を方眼線の形式に格納する.
+	// 値を方眼の形式に格納する.
 	void ShapeLayout::set_grid_patt(const GRID_PATT value) noexcept
 	{
 		m_grid_patt = value;
 	}
 
-	// 値を方眼線の表示に格納する.
+	// 値を方眼の表示に格納する.
 	void ShapeLayout::set_grid_show(const GRID_SHOW value) noexcept
 	{
 		m_grid_show = value;

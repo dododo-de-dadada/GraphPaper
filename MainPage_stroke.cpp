@@ -1,6 +1,6 @@
 //------------------------------
 // MainPage_stroke.cpp
-// ü˜g‚Ìİ’è
+// ü˜g
 //------------------------------
 #include "pch.h"
 #include "MainPage.h"

@@ -169,12 +169,6 @@
     <value>大きさを文字列に合わせる</value>
     <comment>CheckBox</comment>
   </data>
-  <!--
-  <data name="ck_text_ignore_bottom_blank.Content" xml:space="preserve">
-    <value>文末の空白行を無視する.</value>
-    <comment>CheckBox</comment>
-  </data>
-  -->
   <data name="ck_text_find_case.Content" xml:space="preserve">
     <value>大文字と小文字を区別する</value>
     <comment>CheckBox</comment>
@@ -443,12 +437,6 @@
     <value>ページの大きさ...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <!--
-  <data name="mfi_page_unit.Text" xml:space="preserve">
-    <value>ページの単位と色の書式...</value>
-    <comment>MenuFlyoutItem</comment>
-  </data>
-  -->
   <data name="mfi_xcvd_paste.Text" xml:space="preserve">
     <value>貼り付け</value>
     <comment>MenuFlyoutItem</comment>
@@ -538,7 +526,7 @@
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_grid_show.Text" xml:space="preserve">
-    <value>方眼線の表示</value>
+    <value>方眼の表示</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_grid_len.Text" xml:space="preserve">
@@ -927,7 +915,7 @@
     <comment>TextBlock</comment>
   </data>
   <data name="mfi_layout_delete.Text" xml:space="preserve">
-    <value>保存したレイアウトを削除</value>
+    <value>レイアウトを削除</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_layout_save.Text" xml:space="preserve">
@@ -935,7 +923,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_patt.Text" xml:space="preserve">
-    <value>方眼線の形式</value>
+    <value>方眼の形式</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="rmfi_grid_patt_1.Text" xml:space="preserve">
@@ -954,10 +942,4 @@
     <value>並び替え</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <!--
-  <data name="ck_text_find_escs.Content" xml:space="preserve">
-    <value>特殊文字を使用する.</value>
-    <comment>CheckBox</comment>
-  </data>
-  -->
 </root>

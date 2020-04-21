@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 見本ダイアログが開かれた.
-	void MainPage::cd_sample_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
+	void MainPage::sample_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
 	{
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//　リストビュー「見本リスト」がロードされた.
-	void MainPage::lv_sample_list_loaded(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::sample_list_loaded(IInspectable const&, RoutedEventArgs const&)
 	{
 		const auto item = lv_sample_list().SelectedItem();
 		if (item != nullptr) {
@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 見本スワップチェーンパネルの大きさが変わった.
-	void MainPage::scp_sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_sample_dx.m_dxgi_swap_chain != nullptr) {
 			m_sample_dx.m_dxgi_swap_chain = nullptr;

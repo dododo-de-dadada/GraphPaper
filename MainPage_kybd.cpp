@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_kybd.cpp
-// キーボードアクセラレーターのハンドラー
+// キーボードアクセラレータのハンドラー
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 		if (mfi_xcvd_copy().IsEnabled()) {
 			constexpr uint32_t COPY = 1;
 			auto _{ xcvd_copy_async<COPY>() };
-			//mfi_xcvd_copy_click_async(nullptr, nullptr);
+			//xcvd_copy_click_async(nullptr, nullptr);
 		}
 	}*/
 
@@ -109,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 		if (mfi_xcvd_cut().IsEnabled()) {
 			constexpr uint32_t CUT = 0;
 			auto _{ xcvd_copy_async<CUT>() };
-			//mfi_xcvd_cut_click_async(nullptr, nullptr);
+			//xcvd_cut_click_async(nullptr, nullptr);
 		}
 	}
 	*/
@@ -118,7 +118,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		if (mfi_xcvd_delete().IsEnabled()) {
-			mfi_xcvd_delete_click(nullptr, nullptr);
+			xcvd_delete_click(nullptr, nullptr);
 		}
 	}
 	*/
@@ -163,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_xcvd_paste().IsEnabled()) {
-	// 	mfi_xcvd_paste_click_async(nullptr, nullptr);
+	// 	xcvd_paste_click_async(nullptr, nullptr);
 	// }
 	//}
 
@@ -171,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_redo().IsEnabled()) {
-	// 	mfi_redo_click(nullptr, nullptr);
+	// 	redo_click(nullptr, nullptr);
 	// }
 	//}
 
@@ -227,7 +227,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_undo().IsEnabled()) {
-	// 	mfi_undo_click(nullptr, nullptr);
+	// 	undo_click(nullptr, nullptr);
 	// }
 	//}
 

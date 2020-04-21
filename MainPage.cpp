@@ -174,7 +174,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 
 		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-		enable_undo_menu();
+		undo_enable_menu();
 
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
 		uint32_t selected_cnt = 0;	// 選択された図形の数
@@ -358,8 +358,8 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		{
-			m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::scp_pointer_released });
-			m_token_pointer_entered = scp_page_panel().PointerReleased({ this, &MainPage::scp_pointer_entered });
+			m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::pointer_released });
+			m_token_pointer_entered = scp_page_panel().PointerReleased({ this, &MainPage::pointer_entered });
 		}
 
 		auto _{ mfi_new_click(nullptr, nullptr) };

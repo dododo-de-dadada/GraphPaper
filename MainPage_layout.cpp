@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_layout.cpp
-// レイアウトの保存とリセット
+// レイアウトの保存と削除
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -21,7 +21,7 @@ namespace winrt::GraphPaper::implementation
 		return ApplicationData::Current().LocalFolder();
 	}
 
-	// レイアウトメニューの「レイアウトをリセット」が選択された.
+	// レイアウトメニューの「レイアウトを削除」が選択された.
 	// レイアウトを保存したファイルがローカルフォルダーにある場合, それを削除する.
 	IAsyncAction MainPage::layout_delete_click_async(IInspectable const&, RoutedEventArgs const&)
 	{

@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_font.cpp
-// ‘‘Ì‚Ü‚½‚Í•¶š—ñ‚Ìİ’è
+// ‘‘Ì‚Æ•¶š—ñ‚Ì”z’u
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -146,7 +146,7 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::lv_sample_list_loaded });
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
 		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto)
 			{
@@ -320,7 +320,7 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::lv_sample_list_loaded });
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
 		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto args) {
 				uint32_t i = lv_sample_list().SelectedIndex();
@@ -404,7 +404,7 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::lv_sample_list_loaded });
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
 		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto args) {
 				uint32_t i = lv_sample_list().SelectedIndex();
