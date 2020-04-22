@@ -105,7 +105,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形一覧パネルの「閉じる」ボタンが押された.
-	void MainPage::btn_summary_close_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::summary_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		summary_close();
 		//mfi_summary_click(nullptr, nullptr);
@@ -171,10 +171,10 @@ namespace winrt::GraphPaper::implementation
 		if (t != nullptr) {
 			// 図形が表示されるようページをスクロールする.
 			scroll_to(t);
-			m_page_layout.set_to(t);
+			m_page_sheet.set_to(t);
 		}
 		// 編集メニュー項目の使用の可否を設定する.
-		enable_edit_menu();
+		edit_menu_enable();
 		page_draw();
 	}
 

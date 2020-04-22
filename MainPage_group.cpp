@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_group.cpp
-// グループ化とその解除
+// グループ化とグループの解除
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -35,7 +35,7 @@ namespace winrt::GraphPaper::implementation
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
-		enable_edit_menu();
+		edit_menu_enable();
 		page_draw();
 		if (m_mutex_summary.load(std::memory_order_acquire)) {
 		//if (m_summary_visible) {
@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
-		enable_edit_menu();
+		edit_menu_enable();
 		page_draw();
 	}
 

@@ -45,7 +45,7 @@
 // 		winrt::resume_foreground
 // 		file_recent_add
 // 			file_recent_update_menu
-// mfi_new_click
+// new_click
 // 	cd_conf_save().ShowAsync
 // 	file_save_async
 // 	file_recent_add
@@ -165,18 +165,18 @@ namespace winrt::GraphPaper::implementation
 	// ファイルの読み込みが終了した.
 	void MainPage::file_finish_reading(void)
 	{
-		enable_edit_menu();
+		edit_menu_enable();
 		color_code_check_menu();
-		stroke_style_check_menu(m_page_layout.m_stroke_style);
-		arrow_style_check_menu(m_page_layout.m_arrow_style);
-		font_style_check_menu(m_page_layout.m_font_style);
-		grid_patt_check_menu(m_page_layout.m_grid_patt);
-		grid_show_check_menu(m_page_layout.m_grid_show);
+		stroke_style_check_menu(m_page_sheet.m_stroke_style);
+		arrow_style_check_menu(m_page_sheet.m_arrow_style);
+		font_style_check_menu(m_page_sheet.m_font_style);
+		grid_patt_check_menu(m_page_sheet.m_grid_patt);
+		grid_show_check_menu(m_page_sheet.m_grid_show);
 		stbar_check_menu(status_bar());
-		text_align_t_check_menu(m_page_layout.m_text_align_t);
-		text_align_p_check_menu(m_page_layout.m_text_align_p);
-		tmfi_grid_snap().IsChecked(m_page_layout.m_grid_snap);
-		tmfi_grid_snap_2().IsChecked(m_page_layout.m_grid_snap);
+		text_align_t_check_menu(m_page_sheet.m_text_align_t);
+		text_align_p_check_menu(m_page_sheet.m_text_align_p);
+		tmfi_grid_snap().IsChecked(m_page_sheet.m_grid_snap);
+		tmfi_grid_snap_2().IsChecked(m_page_sheet.m_grid_snap);
 		len_unit_check_menu();
 
 		// 図形リストの各図形について以下を繰り返す.
@@ -269,9 +269,10 @@ namespace winrt::GraphPaper::implementation
 	// ストレージファイルを非同期に読む.
 	// s_file	読み込むストレージファイル
 	// suspend	中断フラグ
+	// sheet	シートのみフラグ
 	// 戻り値	読み込めたら S_OK.
 	// 中断フラグが立っている場合, 操作スタックも保存する.
-	IAsyncOperation<winrt::hresult> MainPage::file_read_async(StorageFile const& s_file, const bool suspend, const bool layout) noexcept
+	IAsyncOperation<winrt::hresult> MainPage::file_read_async(StorageFile const& s_file, const bool suspend, const bool sheet) noexcept
 	{
 		using winrt::Windows::Storage::FileAccessMode;
 
@@ -290,12 +291,12 @@ namespace winrt::GraphPaper::implementation
 			color_code(static_cast<COLOR_CODE>(dt_reader.ReadUInt16()));
 			status_bar(static_cast<STATUS_BAR>(dt_reader.ReadUInt16()));
 
-			m_page_layout.read(dt_reader);
+			m_page_sheet.read(dt_reader);
 			// 無効なデータを読み込んでアプリが落ちることがないよう, 値を制限する.
-			m_page_layout.m_grid_base = max(m_page_layout.m_grid_base, 0.0F);
-			m_page_layout.m_page_scale = min(max(m_page_layout.m_page_scale, SCALE_MIN), SCALE_MAX);
-			m_page_layout.m_page_size.width = max(min(m_page_layout.m_page_size.width, page_size_max()), 1.0F);
-			m_page_layout.m_page_size.height = max(min(m_page_layout.m_page_size.height, page_size_max()), 1.0F);
+			m_page_sheet.m_grid_base = max(m_page_sheet.m_grid_base, 0.0F);
+			m_page_sheet.m_page_scale = min(max(m_page_sheet.m_page_scale, SCALE_MIN), SCALE_MAX);
+			m_page_sheet.m_page_size.width = max(min(m_page_sheet.m_page_size.width, page_size_max()), 1.0F);
+			m_page_sheet.m_page_size.height = max(min(m_page_sheet.m_page_size.height, page_size_max()), 1.0F);
 
 			undo_clear();
 			s_list_clear(m_list_shapes);
@@ -309,8 +310,8 @@ namespace winrt::GraphPaper::implementation
 				co_return hr;
 			}
 #endif
-			if (layout) {
-				// レイアウトフラグが立っている場合,
+			if (sheet) {
+				// シートのみフラグが立っている場合,
 				hr = S_OK;
 			}
 			else if (s_list_read(m_list_shapes, dt_reader)) {
@@ -331,7 +332,7 @@ namespace winrt::GraphPaper::implementation
 			co_await winrt::resume_foreground(cd);
 			cd_message_show(ICON_ALERT, ERR_READ, s_file.Path());
 		}
-		else if (suspend != true && layout != true) {
+		else if (suspend != true && sheet != true) {
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
 			file_recent_add(s_file);
@@ -695,7 +696,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt32(static_cast<uint32_t>(len_unit()));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(color_code()));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(status_bar()));
-			m_page_layout.write(dt_writer);
+			m_page_sheet.write(dt_writer);
 			if (suspend) {
 				s_list_write<!REDUCE>(m_list_shapes, dt_writer);
 				undo_write(dt_writer);
@@ -779,7 +780,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			write_svg(DOCTYPE, dt_writer);
 			// SVG 開始タグをデータライターに書き込む.
-			file_write_svg_tag(m_page_layout.m_page_size, m_page_layout.m_page_color, page_dpi(), len_unit(), dt_writer);
+			file_write_svg_tag(m_page_sheet.m_page_size, m_page_sheet.m_page_color, page_dpi(), len_unit(), dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {

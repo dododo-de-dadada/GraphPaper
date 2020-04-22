@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 					if (flag == true) {
 						// 交換フラグが立っている場合,
 						undo_push_null();
-						enable_edit_menu();
+						edit_menu_enable();
 						page_draw();
 					}
 					return;
@@ -124,7 +124,7 @@ namespace winrt::GraphPaper::implementation
 			// 一連の操作の区切としてヌル操作をスタックに積む.
 			undo_push_null();
 			// 編集メニュー項目の使用の可否を設定する.
-			enable_edit_menu();
+			edit_menu_enable();
 			page_draw();
 		}
 		*/
@@ -172,7 +172,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		list_selected.clear();
 		undo_push_null();
-		enable_edit_menu();
+		edit_menu_enable();
 		page_draw();
 	}
 	constexpr auto BACK = true;

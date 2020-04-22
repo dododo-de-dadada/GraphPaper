@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 編集メニューの「すべて選択」が選択された.
-	void MainPage::mfi_select_all_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::select_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		bool flag = false;
 		for (auto s : m_list_shapes) {
@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 		// やり直し操作スタックを消去し, 含まれる操作を破棄する.
 		//redo_clear();
 		// 編集メニュー項目の使用の可否を設定する.
-		enable_edit_menu();
+		edit_menu_enable();
 		page_draw();
 	}
 
@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				undo_push_select(pointer_shape_summary());
 				// 編集メニュー項目の使用の可否を設定する.
-				enable_edit_menu();
+				edit_menu_enable();
 				page_draw();
 				if constexpr (K == VirtualKey::Down) {
 					if (m_mutex_summary.load(std::memory_order_acquire)) {
@@ -141,7 +141,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 編集メニュー項目の使用の可否を設定する.
-		enable_edit_menu();
+		edit_menu_enable();
 		page_draw();
 	}
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
@@ -210,13 +210,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を選択する.
-	void MainPage::select_shape(Shape* s, const VirtualKeyModifiers vk)
+	void MainPage::select_shape(Shape* s, const VirtualKeyModifiers vk_mod)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ListViewItem;
-		if (vk == VirtualKeyModifiers::Control) {
+		if (vk_mod == VirtualKeyModifiers::Control) {
 			// コントロールキーが押されている場合,
 			undo_push_select(s);
-			enable_edit_menu();
+			edit_menu_enable();
 			page_draw();
 			if (m_mutex_summary.load(std::memory_order_acquire)) {
 			//if (m_summary_visible) {
@@ -229,7 +229,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			pointer_shape_prev(s);
 		}
-		else if (vk == VirtualKeyModifiers::Shift) {
+		else if (vk_mod == VirtualKeyModifiers::Shift) {
 			// シフトキーが押されている場合
 			// 前回ポインターが押された図形から今回押された図形までの
 			// 範囲にある図形を選択して, そうでない図形を選択しない.
@@ -238,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (select_range(s, pointer_shape_prev())) {
 				// 編集メニュー項目の使用の可否を設定する.
-				enable_edit_menu();
+				edit_menu_enable();
 				page_draw();
 			}
 		}
@@ -248,7 +248,7 @@ namespace winrt::GraphPaper::implementation
 				// 図形の選択フラグがない場合,
 				unselect_all();
 				undo_push_select(s);
-				enable_edit_menu();
+				edit_menu_enable();
 				page_draw();
 				if (m_mutex_summary.load(std::memory_order_acquire)) {
 				//if (m_summary_visible) {
@@ -259,12 +259,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (s->is_selected()) {
 			// 押された図形が選択されている場合,
-			m_page_layout.set_to(s);
-			arrow_style_check_menu(m_page_layout.m_arrow_style);
-			font_style_check_menu(m_page_layout.m_font_style);
-			stroke_style_check_menu(m_page_layout.m_stroke_style);
-			text_align_p_check_menu(m_page_layout.m_text_align_p);
-			text_align_t_check_menu(m_page_layout.m_text_align_t);
+			m_page_sheet.set_to(s);
+			arrow_style_check_menu(m_page_sheet.m_arrow_style);
+			font_style_check_menu(m_page_sheet.m_font_style);
+			stroke_style_check_menu(m_page_sheet.m_stroke_style);
+			text_align_p_check_menu(m_page_sheet.m_text_align_p);
+			text_align_t_check_menu(m_page_sheet.m_text_align_t);
 		}
 	}
 

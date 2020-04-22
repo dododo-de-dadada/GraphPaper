@@ -19,7 +19,7 @@ namespace winrt::GraphPaper::implementation
 		Shape* s = nullptr;
 		auto i = dt_reader.ReadUInt32();
 		if (i == INDEX_PAGE) {
-			s = Undo::s_shape_layout;
+			s = Undo::s_shape_sheet;
 		}
 		else if (i == INDEX_NULL) {
 			s = nullptr;
@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	static void undo_write_shape(Shape* s, DataWriter const& dt_writer)
 	{
-		if (s == Undo::s_shape_layout) {
+		if (s == Undo::s_shape_sheet) {
 			dt_writer.WriteUInt32(INDEX_PAGE);
 		}
 		else if (s == nullptr) {
@@ -47,13 +47,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	S_LIST_T* Undo::s_shape_list = nullptr;
-	ShapeLayout* Undo::s_shape_layout = nullptr;
+	ShapeSheet* Undo::s_shape_sheet = nullptr;
 
 	// 操作が参照するための図形リストとページ図形を格納する.
-	void Undo::set(S_LIST_T* s_list, ShapeLayout* s_layout) noexcept
+	void Undo::set(S_LIST_T* s_list, ShapeSheet* s_layout) noexcept
 	{
 		s_shape_list = s_list;
-		s_shape_layout = s_layout;
+		s_shape_sheet = s_layout;
 	}
 
 	// 操作を実行すると値が変わるか調べる.

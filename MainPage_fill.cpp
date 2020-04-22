@@ -17,11 +17,11 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_layout.set_to(&m_page_layout);
-		const double val0 = m_sample_layout.m_fill_color.r * COLOR_MAX;
-		const double val1 = m_sample_layout.m_fill_color.g * COLOR_MAX;
-		const double val2 = m_sample_layout.m_fill_color.b * COLOR_MAX;
-		const double val3 = m_sample_layout.m_fill_color.a * COLOR_MAX;
+		m_sample_sheet.set_to(&m_page_sheet);
+		const double val0 = m_sample_sheet.m_fill_color.r * COLOR_MAX;
+		const double val1 = m_sample_sheet.m_fill_color.g * COLOR_MAX;
+		const double val2 = m_sample_sheet.m_fill_color.b * COLOR_MAX;
+		const double val3 = m_sample_sheet.m_fill_color.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);

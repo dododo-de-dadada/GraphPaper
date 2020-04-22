@@ -87,7 +87,7 @@ namespace winrt::GraphPaper::implementation
 			// または押された部位は外側の場合,
 			// ページコンテキストメニューを表示する.
 			//scp_page_panel().ContextFlyout(nullptr);
-			scp_page_panel().ContextFlyout(m_menu_layout);
+			scp_page_panel().ContextFlyout(m_menu_sheet);
 		}
 		else if (typeid(*m_pointer_shape) == typeid(ShapeGroup)) {
 			// 押された図形がグループの場合,
@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// 押された図形の属性値をページレイアウトに格納する.
-			m_page_layout.set_to(m_pointer_shape);
+			m_page_sheet.set_to(m_pointer_shape);
 			if (m_pointer_anchor == ANCH_WHICH::ANCH_INSIDE) {
 				// 押された図形の部位が内側の場合,
 				// 塗りつぶしコンテキストメニューを表示する.
@@ -125,7 +125,7 @@ namespace winrt::GraphPaper::implementation
 		// ページ座標系に変換し, ポインターの現在位置に格納する.
 		D2D1_POINT_2F p_offs;
 		pt_add(page_min(), sb_horz().Value(), sb_vert().Value(), p_offs);
-		pt_scale(args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / m_page_layout.m_page_scale, p_offs, m_pointer_cur);
+		pt_scale(args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / m_page_sheet.m_page_scale, p_offs, m_pointer_cur);
 	}
 
 	// 文字列図形の作成を終了する.
@@ -137,7 +137,7 @@ namespace winrt::GraphPaper::implementation
 		ck_text_adjust_bound().IsChecked(text_adjust());
 		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
-			auto s = new ShapeText(m_pointer_pressed, diff, text, &m_page_layout);
+			auto s = new ShapeText(m_pointer_pressed, diff, text, &m_page_sheet);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -150,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_append(s);
 			undo_push_null();
 			m_pointer_shape_summary = m_pointer_shape_prev = s;
-			enable_edit_menu();
+			edit_menu_enable();
 			page_bound(s);
 			page_panle_size();
 			if (m_mutex_summary.load(std::memory_order_acquire)) {
@@ -171,25 +171,25 @@ namespace winrt::GraphPaper::implementation
 		const auto draw_tool = tool();
 		Shape* s;
 		if (draw_tool == DRAW_TOOL::RECT) {
-			s = new ShapeRect(m_pointer_pressed, diff, &m_page_layout);
+			s = new ShapeRect(m_pointer_pressed, diff, &m_page_sheet);
 		}
 		else if (draw_tool == DRAW_TOOL::RRCT) {
-			s = new ShapeRRect(m_pointer_pressed, diff, &m_page_layout);
+			s = new ShapeRRect(m_pointer_pressed, diff, &m_page_sheet);
 		}
 		else if (draw_tool == DRAW_TOOL::QUAD) {
-			s = new ShapeQuad(m_pointer_pressed, diff, &m_page_layout);
+			s = new ShapeQuad(m_pointer_pressed, diff, &m_page_sheet);
 		}
 		else if (draw_tool == DRAW_TOOL::ELLI) {
-			s = new ShapeElli(m_pointer_pressed, diff, &m_page_layout);
+			s = new ShapeElli(m_pointer_pressed, diff, &m_page_sheet);
 		}
 		else if (draw_tool == DRAW_TOOL::LINE) {
-			s = new ShapeLine(m_pointer_pressed, diff, &m_page_layout);
+			s = new ShapeLine(m_pointer_pressed, diff, &m_page_sheet);
 		}
 		else if (draw_tool == DRAW_TOOL::BEZI) {
-			s = new ShapeBezi(m_pointer_pressed, diff, &m_page_layout);
+			s = new ShapeBezi(m_pointer_pressed, diff, &m_page_sheet);
 		}
 		else if (draw_tool == DRAW_TOOL::SCALE) {
-			s = new ShapeScale(m_pointer_pressed, diff, &m_page_layout);
+			s = new ShapeScale(m_pointer_pressed, diff, &m_page_sheet);
 		}
 		else {
 			return;
@@ -202,7 +202,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_append(s);
 		undo_push_null();
 		m_pointer_shape_summary = m_pointer_shape_prev = s;
-		enable_edit_menu();
+		edit_menu_enable();
 		page_bound(s);
 		page_panle_size();
 		page_draw();
@@ -215,8 +215,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形の変形を終了する.
 	void MainPage::pointer_finish_forming(void)
 	{
-		if (m_page_layout.m_grid_snap) {
-			pt_round(m_pointer_cur, m_page_layout.m_grid_base + 1.0, m_pointer_cur);
+		if (m_page_sheet.m_grid_snap) {
+			pt_round(m_pointer_cur, m_page_sheet.m_grid_base + 1.0, m_pointer_cur);
 		}
 		m_pointer_shape->set_pos(m_pointer_cur, m_pointer_anchor);
 		if (undo_pop_if_invalid()) {
@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形の移動を終了する.
 	void MainPage::pointer_finish_moving(void)
 	{
-		if (m_page_layout.m_grid_snap) {
+		if (m_page_sheet.m_grid_snap) {
 			D2D1_POINT_2F p_min = {};
 			bool flag = false;
 			for (auto s : m_list_shapes) {
@@ -254,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 				// 得た左上点を方眼の大きさで丸める.
 				// 丸めの前後で生じた差を得る.
 				D2D1_POINT_2F g_pos;
-				pt_round(p_min, m_page_layout.m_grid_base + 1.0, g_pos);
+				pt_round(p_min, m_page_sheet.m_grid_base + 1.0, g_pos);
 				D2D1_POINT_2F diff;
 				pt_sub(g_pos, p_min, diff);
 				s_list_move(m_list_shapes, diff);
@@ -267,7 +267,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		page_bound();
 		page_panle_size();
-		enable_edit_menu();
+		edit_menu_enable();
 	}
 
 	// 範囲選択を終了する.
@@ -290,7 +290,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag == true) {
 			// 編集メニュー項目の使用の可否を設定する.
-			enable_edit_menu();
+			edit_menu_enable();
 		}
 		Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 	}
@@ -564,7 +564,7 @@ namespace winrt::GraphPaper::implementation
 			// 選択が解除された図形がない場合
 			return;
 		}
-		enable_edit_menu();
+		edit_menu_enable();
 		page_draw();
 	}
 
@@ -622,9 +622,9 @@ namespace winrt::GraphPaper::implementation
 				pointer_finish_selecting_area(args.KeyModifiers());
 			}
 			else {
-				if (m_page_layout.m_grid_snap) {
+				if (m_page_sheet.m_grid_snap) {
 					// 方眼に整列の場合, 始点と終点を方眼の大きさで丸める
-					double g = max(m_page_layout.m_grid_base + 1.0, 1.0);
+					double g = max(m_page_sheet.m_grid_base + 1.0, 1.0);
 					pt_round(m_pointer_pressed, g, m_pointer_pressed);
 					pt_round(m_pointer_cur, g, m_pointer_cur);
 				}
@@ -694,10 +694,10 @@ namespace winrt::GraphPaper::implementation
 			double value = stbar.Value();
 			double limit = 0.0;
 			if (delta < 0 && value < (limit = stbar.Maximum())) {
-				value = min(value + 32.0 * m_page_layout.m_page_scale, limit);
+				value = min(value + 32.0 * m_page_sheet.m_page_scale, limit);
 			}
 			else if (delta > 0 && value > (limit = stbar.Minimum())) {
-				value = max(value - 32.0 * m_page_layout.m_page_scale, limit);
+				value = max(value - 32.0 * m_page_sheet.m_page_scale, limit);
 			}
 			else {
 				return;

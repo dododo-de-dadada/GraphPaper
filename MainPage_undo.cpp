@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-	void MainPage::undo_enable_menu(void)
+	void MainPage::undo_menu_enable(void)
 	{
 		mfi_undo().IsEnabled(m_stack_ucnt > 0);
 		mfi_redo().IsEnabled(m_stack_rcnt > 0);
@@ -220,7 +220,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// メニューや表示を更新する.
-		enable_edit_menu();
+		edit_menu_enable();
 		page_bound();
 		page_panle_size();
 		page_draw();
@@ -265,7 +265,7 @@ namespace winrt::GraphPaper::implementation
 			m_stack_ucnt--;
 			m_stack_rcnt++;
 		}
-		enable_edit_menu();
+		edit_menu_enable();
 		page_bound();
 		page_panle_size();
 		page_draw();
@@ -300,7 +300,7 @@ namespace winrt::GraphPaper::implementation
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoAttr<UNDO_OP::ARROW_STYLE>)) {
 			// 線枠メニューの「矢じりの種類」に印をつける.
-			arrow_style_check_menu(m_page_layout.m_arrow_style);
+			arrow_style_check_menu(m_page_sheet.m_arrow_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
@@ -308,15 +308,15 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_PATT>)) {
 			// ページメニューの「方眼の形式」に印をつける.
-			grid_patt_check_menu(m_page_layout.m_grid_patt);
+			grid_patt_check_menu(m_page_sheet.m_grid_patt);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_SHOW>)) {
 			// ページメニューの「方眼の表示」に印をつける.
-			grid_show_check_menu(m_page_layout.m_grid_show);
+			grid_show_check_menu(m_page_sheet.m_grid_show);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
-			font_style_check_menu(m_page_layout.m_font_style);
+			font_style_check_menu(m_page_sheet.m_font_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::PAGE_SIZE>)) {
 			// ページの大きさをステータスバーに格納する.
@@ -324,13 +324,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_STYLE>)) {
 			// 線枠メニューの「種類」に印をつける.
-			stroke_style_check_menu(m_page_layout.m_stroke_style);
+			stroke_style_check_menu(m_page_sheet.m_stroke_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_T>)) {
-			text_align_t_check_menu(m_page_layout.m_text_align_t);
+			text_align_t_check_menu(m_page_sheet.m_text_align_t);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_P>)) {
-			text_align_p_check_menu(m_page_layout.m_text_align_p);
+			text_align_p_check_menu(m_page_sheet.m_text_align_p);
 		}
 	}
 
@@ -513,7 +513,7 @@ namespace winrt::GraphPaper::implementation
 	template<UNDO_OP U, typename T>
 	void MainPage::undo_push_set(T const& value)
 	{
-		m_stack_undo.push_back(new UndoAttr<U>(&m_page_layout, value));
+		m_stack_undo.push_back(new UndoAttr<U>(&m_page_sheet, value));
 		auto flag = false;
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
@@ -530,7 +530,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
-		enable_edit_menu();
+		edit_menu_enable();
 		page_draw();
 	}
 

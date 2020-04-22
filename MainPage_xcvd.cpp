@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.Close();
 		// 出力ストリームを閉じる.
 		out_stream.Close();
-		enable_edit_menu();
+		edit_menu_enable();
 		// スレッドコンテキストを復元する.
 		co_await context;
 	}
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 		list_selected.clear();
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
-		enable_edit_menu();
+		edit_menu_enable();
 		page_bound();
 		page_panle_size();
 		page_draw();
@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 						undo_push_null();
 						list_pasted.clear();
 						// 編集メニュー項目の使用の可否を設定する.
-						enable_edit_menu();
+						edit_menu_enable();
 						page_panle_size();
 						page_draw();
 					}
@@ -178,12 +178,12 @@ namespace winrt::GraphPaper::implementation
 					auto text{ co_await Clipboard::GetContent().GetTextAsync() };
 					if (text.empty() != true) {
 						// 文字列が空でない場合,
-						auto t = new ShapeText(D2D1_POINT_2F{ 0.0F, 0.0F }, D2D1_POINT_2F{ 1.0F, 1.0F }, wchar_cpy(text.c_str()), &m_page_layout);
+						auto t = new ShapeText(D2D1_POINT_2F{ 0.0F, 0.0F }, D2D1_POINT_2F{ 1.0F, 1.0F }, wchar_cpy(text.c_str()), &m_page_sheet);
 #if (_DEBUG)
 						debug_leak_cnt++;
 #endif
 						// 貼り付ける最大の大きさをウィンドウの大きさに制限する.
-						const double scale = m_page_layout.m_page_scale;
+						const double scale = m_page_sheet.m_page_scale;
 						D2D1_SIZE_F max_size{
 							static_cast<FLOAT>(scp_page_panel().ActualWidth() / scale),
 							static_cast<FLOAT>(scp_page_panel().ActualHeight() / scale)
@@ -194,8 +194,8 @@ namespace winrt::GraphPaper::implementation
 							static_cast<FLOAT>((sb_vert().Value() + scp_page_panel().ActualHeight() * 0.5) / scale - t->m_diff.y * 0.5)
 						};
 						pt_add(s_pos, page_min(), s_pos);
-						if (m_page_layout.m_grid_snap) {
-							const auto g_len = m_page_layout.m_grid_base + 1.0;
+						if (m_page_sheet.m_grid_snap) {
+							const auto g_len = m_page_sheet.m_grid_base + 1.0;
 							pt_round(s_pos, g_len, s_pos);
 						}
 						t->set_start_pos(s_pos);
@@ -207,7 +207,7 @@ namespace winrt::GraphPaper::implementation
 						}
 						undo_push_append(t);
 						undo_push_null();
-						enable_edit_menu();
+						edit_menu_enable();
 						page_bound(t);
 						page_panle_size();
 						page_draw();

@@ -1,6 +1,6 @@
 //-----------------------------
 // MainPage_misc.cpp
-// 長さの単位, 色成分の表記, ステータスバー, バージョン情報
+// 長さの単位, 色の表記, ステータスバー, バージョン情報
 //-----------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// その他メニューの「色成分の表記」に印をつける.
+	// その他メニューの「色の表記」に印をつける.
 	void MainPage::color_code_check_menu(void)
 	{
 		rmfi_color_code_dec().IsChecked(m_color_code == COLOR_CODE::DEC);
@@ -37,25 +37,25 @@ namespace winrt::GraphPaper::implementation
 		rmfi_len_unit_point_2().IsChecked(m_len_unit == LEN_UNIT::POINT);
 	}
 
-	// その他メニューの「色成分の表記」>「10進数」が選択された.
+	// その他メニューの「色の表記」>「10進数」が選択された.
 	void MainPage::color_code_dec_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_color_code = COLOR_CODE::DEC;
 	}
 
-	// その他メニューの「色成分の表記」>「16進数」が選択された.
+	// その他メニューの「色の表記」>「16進数」が選択された.
 	void MainPage::color_code_hex_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_color_code = COLOR_CODE::HEX;
 	}
 
-	// その他メニューの「色成分の表記」>「実数」が選択された.
+	// その他メニューの「色の表記」>「実数」が選択された.
 	void MainPage::color_code_real_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_color_code = COLOR_CODE::REAL;
 	}
 
-	// その他メニューの「色成分の表記」>「パーセント」が選択された.
+	// その他メニューの「色の表記」>「パーセント」が選択された.
 	void MainPage::color_code_cent_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_color_code = COLOR_CODE::CENT;

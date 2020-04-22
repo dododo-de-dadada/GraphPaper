@@ -149,7 +149,7 @@
     <ClCompile Include="MainPage_grid.cpp" />
     <ClCompile Include="MainPage_group.cpp" />
     <ClCompile Include="MainPage_kybd.cpp" />
-    <ClCompile Include="MainPage_layout.cpp" />
+    <ClCompile Include="MainPage_sheet.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
     <ClCompile Include="MainPage_page.cpp" />
     <ClCompile Include="MainPage_pointer.cpp" />
@@ -182,7 +182,7 @@
     <ClCompile Include="shape_group.cpp" />
     <ClCompile Include="shape_line.cpp" />
     <ClCompile Include="shape_list.cpp" />
-    <ClCompile Include="shape_layout.cpp" />
+    <ClCompile Include="shape_sheet.cpp" />
     <ClCompile Include="shape_quad.cpp" />
     <ClCompile Include="shape_rect.cpp" />
     <ClCompile Include="shape_rrect.cpp" />

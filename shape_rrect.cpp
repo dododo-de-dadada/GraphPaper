@@ -349,7 +349,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// s_pos	開始位置
 	// diff	開始位置からの差分
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr) :
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
 		ShapeRect::ShapeRect(s_pos, diff, attr)
 	{
 		calc_corner_radius(m_diff, attr->m_corner_rad, m_corner_rad);

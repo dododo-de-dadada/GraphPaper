@@ -54,10 +54,10 @@
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="shape_scale.cpp" />
     <ClCompile Include="MainPage_sample.cpp" />
-    <ClCompile Include="MainPage_layout.cpp" />
-    <ClCompile Include="shape_layout.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
     <ClCompile Include="MainPage_stbar.cpp" />
+    <ClCompile Include="shape_sheet.cpp" />
+    <ClCompile Include="MainPage_sheet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

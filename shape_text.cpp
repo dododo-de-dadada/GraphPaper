@@ -879,7 +879,7 @@ namespace winrt::GraphPaper::implementation
 	// diff	I—¹ˆÊ’u‚Ö‚Ì·•ª
 	// text	•¶Žš—ñ
 	// attr	Šù’è‚Ì‘®«’l
-	ShapeText::ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, wchar_t* const text, const ShapeLayout* attr) :
+	ShapeText::ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, wchar_t* const text, const ShapeSheet* attr) :
 		ShapeRect::ShapeRect(s_pos, diff, attr),
 		m_font_color(attr->m_font_color),
 		m_font_family(attr->m_font_family),

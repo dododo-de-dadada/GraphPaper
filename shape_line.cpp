@@ -284,7 +284,7 @@ namespace winrt::GraphPaper::implementation
 	// pos	開始位置
 	// diff	終了位置への差分
 	// attr	既定の属性値
-	ShapeLine::ShapeLine(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr) :
+	ShapeLine::ShapeLine(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
 		ShapeStroke::ShapeStroke(attr),
 		m_arrow_style(attr->m_arrow_style),
 		m_arrow_size(attr->m_arrow_size)

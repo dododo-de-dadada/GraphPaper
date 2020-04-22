@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_stbar.cpp
-// ステータスバーの設定
+// ステータスバー
 //-------------------------------
 #include "pch.h"
 #include "Summary.h"
@@ -206,10 +206,10 @@ namespace winrt::GraphPaper::implementation
 		const double by = wb.Y;
 		const double px = page_min().x;
 		const double py = page_min().y;
-		const double ps = m_page_layout.m_page_scale;
+		const double ps = m_page_sheet.m_page_scale;
 		const double fx = (wx - bx - tx) / ps + sx + px;
 		const double fy = (wy - by - ty) / ps + sy + py;
-		const double g_len = m_page_layout.m_grid_base + 1.0;
+		const double g_len = m_page_sheet.m_grid_base + 1.0;
 
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
@@ -228,7 +228,7 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	{
 		wchar_t buf[32];
 		const double dpi = page_dpi();
-		double g_len = m_page_layout.m_grid_base + 1.0;
+		double g_len = m_page_sheet.m_grid_base + 1.0;
 		// ピクセル単位の長さを他の単位の文字列に変換する.
 		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), g_len, dpi, g_len, buf);
 		tk_stbar_grid().Text(winrt::hstring{ L"g:" } +buf);
@@ -238,13 +238,13 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::stbar_set_page(void)
 	{
 		const double dpi = page_dpi();
-		const double g_len = m_page_layout.m_grid_base + 1.0;
+		const double g_len = m_page_sheet.m_grid_base + 1.0;
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), m_page_layout.m_page_size.width, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), m_page_sheet.m_page_size.width, dpi, g_len, buf);
 		tk_stbar_width().Text(winrt::hstring{ L"w:" } + buf);
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), m_page_layout.m_page_size.height, dpi, g_len, buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), m_page_sheet.m_page_size.height, dpi, g_len, buf);
 		tk_stbar_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 
@@ -321,7 +321,7 @@ tk_stbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::stbar_set_zoom(void)
 	{
 		wchar_t buf[32];
-		swprintf_s(buf, 31, FMT_ZOOM, m_page_layout.m_page_scale * 100.0);
+		swprintf_s(buf, 31, FMT_ZOOM, m_page_sheet.m_page_scale * 100.0);
 		tk_stbar_zoom().Text(winrt::hstring{ L"z:" } +buf);
 	}
 

@@ -228,7 +228,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚ðì¬‚·‚é.
-	ShapeRect::ShapeRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeLayout* attr) :
+	ShapeRect::ShapeRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
 		ShapeStroke::ShapeStroke(attr),
 		m_fill_color(attr->m_fill_color)
 	{

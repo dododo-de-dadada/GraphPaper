@@ -150,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + N ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_new_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// mfi_new_click(nullptr, nullptr);
+	// new_click(nullptr, nullptr);
 	//}
 
 	// Cntrol + O ‚ª‰Ÿ‚³‚ê‚½.
@@ -195,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_select_all_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_select_all().IsEnabled()) {
-	// 	mfi_select_all_click(nullptr, nullptr);
+	// 	select_all_click(nullptr, nullptr);
 	// }
 	//}
 
@@ -242,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + 0 ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// if (m_page_layout.m_page_scale != 1.0) {
+	// if (m_page_sheet.m_page_scale != 1.0) {
 	// 	mfi_zoom_reset_click(nullptr, nullptr);
 	// }
 	//}

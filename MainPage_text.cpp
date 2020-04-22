@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		undo_push_null();
-		undo_enable_menu();
+		undo_menu_enable();
 		page_draw();
 	}
 
@@ -414,7 +414,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_OP::TEXT_CONTENT>(t, r_text);
 				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 				undo_push_null();
-				undo_enable_menu();
+				undo_menu_enable();
 			}
 		}
 		// 次を検索する.
@@ -511,7 +511,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 一連の操作の区切としてヌル操作をスタックに積む.
 			undo_push_null();
-			enable_edit_menu();
+			edit_menu_enable();
 			page_draw();
 		}
 		/*
@@ -527,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();
 				// 編集メニュー項目の使用の可否を設定する.
-				enable_edit_menu();
+				edit_menu_enable();
 			}
 		);
 		closed_token = cd_edit_text().Closed(

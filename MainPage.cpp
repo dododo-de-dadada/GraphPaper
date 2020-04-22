@@ -169,12 +169,12 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニュー項目の使用の可否を設定する.
 	// 選択の有無や型ごとに図形を数え,
 	// それらによって, メニュー項目の可否を判定する.
-	void MainPage::enable_edit_menu(void)
+	void MainPage::edit_menu_enable(void)
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 
 		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-		undo_enable_menu();
+		undo_menu_enable();
 
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
 		uint32_t selected_cnt = 0;	// 選択された図形の数
@@ -293,7 +293,7 @@ namespace winrt::GraphPaper::implementation
 			m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke")));
 			m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill")));
 			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_font")));
-			m_menu_layout = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_layout")));
+			m_menu_sheet = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet")));
 			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup")));
 		}
 
@@ -340,11 +340,11 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// D2D/DWRITE ファクトリを図形/文字列図形クラスに, 
-		// 図形リストとページレイアウトを操作クラスに格納する.
+		// 図形リストとページシートを操作クラスに格納する.
 		{
 			Shape::s_d2d_factory = m_page_dx.m_d2dFactory.get();
 			Shape::s_dwrite_factory = m_page_dx.m_dwriteFactory.get();
-			Undo::set(&m_list_shapes, &m_page_layout);
+			Undo::set(&m_list_shapes, &m_page_sheet);
 		}
 
 		// クリックの判定時間をシステムから得る.
@@ -362,11 +362,11 @@ namespace winrt::GraphPaper::implementation
 			m_token_pointer_entered = scp_page_panel().PointerReleased({ this, &MainPage::pointer_entered });
 		}
 
-		auto _{ mfi_new_click(nullptr, nullptr) };
+		auto _{ new_click(nullptr, nullptr) };
 	}
 
 	// ファイルメニューの「終了」が選択された
-	IAsyncAction MainPage::mfi_exit_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::exit_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::UI::Xaml::Application;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -405,7 +405,7 @@ namespace winrt::GraphPaper::implementation
 			m_menu_stroke = nullptr;
 			m_menu_fill = nullptr;
 			m_menu_font = nullptr;
-			m_menu_layout = nullptr;
+			m_menu_sheet = nullptr;
 			m_menu_ungroup = nullptr;
 		}
 
@@ -439,7 +439,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ファイルメニューの「新規」が選択された
-	IAsyncAction MainPage::mfi_new_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::new_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
@@ -505,14 +505,14 @@ namespace winrt::GraphPaper::implementation
 			m_sample_dx.m_theme_foreground = m_page_dx.m_theme_foreground;
 		}
 
-		if (co_await layout_load_async() != S_OK) {
+		if (co_await sheet_load_async() != S_OK) {
 			// 読み込みに失敗した場合,
-			layout_init();
+			sheet_init();
 		}
 
 		{
 			page_min(D2D1_POINT_2F{ 0.0F, 0.0F });
-			page_max(D2D1_POINT_2F{ m_page_layout.m_page_size.width, m_page_layout.m_page_size.height });
+			page_max(D2D1_POINT_2F{ m_page_sheet.m_page_size.width, m_page_sheet.m_page_size.height });
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();

@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_zoom.cpp
-// ï\é¶î{ó¶ÇÃê›íË
+// ï\é¶î{ó¶
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -22,8 +22,8 @@ namespace winrt::GraphPaper::implementation
 		const int o = 1;
 
 		for (int i = s; i < e; i++) {
-			if (m_page_layout.m_page_scale <= ZOOM_LEVEL[i]) {
-				m_page_layout.m_page_scale = ZOOM_LEVEL[i + o];
+			if (m_page_sheet.m_page_scale <= ZOOM_LEVEL[i]) {
+				m_page_sheet.m_page_scale = ZOOM_LEVEL[i + o];
 				page_panle_size();
 				page_draw();
 				stbar_set_zoom();
@@ -42,8 +42,8 @@ namespace winrt::GraphPaper::implementation
 		const int o = -1;
 
 		for (int i = s; i < e; i++) {
-			if (m_page_layout.m_page_scale <= ZOOM_LEVEL[i]) {
-				m_page_layout.m_page_scale = ZOOM_LEVEL[i + o];
+			if (m_page_sheet.m_page_scale <= ZOOM_LEVEL[i]) {
+				m_page_sheet.m_page_scale = ZOOM_LEVEL[i + o];
 				page_panle_size();
 				page_draw();
 				stbar_set_zoom();
@@ -57,10 +57,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ToolTipService;
 
-		if (m_page_layout.m_page_scale == 1.0) {
+		if (m_page_sheet.m_page_scale == 1.0) {
 			return;
 		}
-		m_page_layout.m_page_scale = 1.0;
+		m_page_sheet.m_page_scale = 1.0;
 		page_panle_size();
 		page_draw();
 		stbar_set_zoom();

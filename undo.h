@@ -100,8 +100,8 @@ namespace winrt::GraphPaper::implementation
 	struct Undo {
 		// 参照する図形リスト
 		static S_LIST_T* s_shape_list;
-		// 参照するページレイアウト
-		static ShapeLayout* s_shape_layout;
+		// 参照する図形シート
+		static ShapeSheet* s_shape_sheet;
 		// 操作する図形
 		Shape* m_shape;
 
@@ -116,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を参照しているか調べる.
 		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
 		// 参照する図形リストとページ図形を格納する.
-		static void set(S_LIST_T* s_list, ShapeLayout* s_page) noexcept;
+		static void set(S_LIST_T* s_list, ShapeSheet* s_page) noexcept;
 		// 操作する図形を得る.
 		Shape* shape(void) const noexcept { return m_shape; }
 		// 操作を作成する.

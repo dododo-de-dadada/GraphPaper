@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_sample.cpp
-// 見本ダイアログの設定, 表示
+// 見本
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//　リストビュー「見本リスト」がロードされた.
+	//　見本リストビューがロードされた.
 	void MainPage::sample_list_loaded(IInspectable const&, RoutedEventArgs const&)
 	{
 		const auto item = lv_sample_list().SelectedItem();
@@ -26,7 +26,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 見本のページと見本の図形を表示する.
+	// 見本を表示する
 	void MainPage::sample_draw(void)
 	{
 #if defined(_DEBUG)
@@ -38,19 +38,19 @@ namespace winrt::GraphPaper::implementation
 		auto dc = m_sample_dx.m_d2dContext.get();
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
-		dc->Clear(m_sample_layout.m_page_color);
-		auto ox = std::fmod(m_sample_layout.m_page_size.width * 0.5, m_sample_layout.m_grid_base + 1.0);
+		dc->Clear(m_sample_sheet.m_page_color);
+		auto ox = std::fmod(m_sample_sheet.m_page_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0);
 		D2D1_POINT_2F offset;
 		offset.x = static_cast<FLOAT>(ox);
 		offset.y = offset.x;
-		if (m_sample_layout.m_grid_show == GRID_SHOW::BACK) {
-			m_sample_layout.draw_grid(m_sample_dx, offset);
+		if (m_sample_sheet.m_grid_show == GRID_SHOW::BACK) {
+			m_sample_sheet.draw_grid(m_sample_dx, offset);
 		}
 		if (m_sample_shape != nullptr) {
 			m_sample_shape->draw(m_sample_dx);
 		}
-		if (m_sample_layout.m_grid_show == GRID_SHOW::FRONT) {
-			m_sample_layout.draw_grid(m_sample_dx, offset);
+		if (m_sample_sheet.m_grid_show == GRID_SHOW::FRONT) {
+			m_sample_sheet.draw_grid(m_sample_dx, offset);
 		}
 		winrt::check_hresult(dc->EndDraw());
 		dc->RestoreDrawingState(m_sample_dx.m_state_block.get());
@@ -58,17 +58,17 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_page.unlock();
 	}
 
-	// 見本スワップチェーンパネルの大きさが変わった.
+	// 見本のスワップチェーンパネルの大きさが変わった.
 	void MainPage::sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_sample_dx.m_dxgi_swap_chain != nullptr) {
 			m_sample_dx.m_dxgi_swap_chain = nullptr;
 		}
-		m_sample_layout.set_to(&m_page_layout);
+		m_sample_sheet.set_to(&m_page_sheet);
 		const auto w = scp_sample_panel().ActualWidth();
 		const auto h = scp_sample_panel().ActualHeight();
-		m_sample_layout.m_page_size.width = static_cast<FLOAT>(w);
-		m_sample_layout.m_page_size.height = static_cast<FLOAT>(h);
+		m_sample_sheet.m_page_size.width = static_cast<FLOAT>(w);
+		m_sample_sheet.m_page_size.height = static_cast<FLOAT>(h);
 		m_sample_dx.SetSwapChainPanel(scp_sample_panel());
 		if (m_sample_type != SAMP_TYPE::NONE) {
 			const auto padding = w * 0.125;
@@ -90,13 +90,13 @@ namespace winrt::GraphPaper::implementation
 				else {
 					text = pang.c_str();
 				}
-				m_sample_shape = new ShapeText(s_pos, diff, wchar_cpy(text), &m_sample_layout);
+				m_sample_shape = new ShapeText(s_pos, diff, wchar_cpy(text), &m_sample_sheet);
 			}
 			else if (m_sample_type == SAMP_TYPE::STROKE) {
-				m_sample_shape = new ShapeLine(s_pos, diff, &m_sample_layout);
+				m_sample_shape = new ShapeLine(s_pos, diff, &m_sample_sheet);
 			}
 			else if (m_sample_type == SAMP_TYPE::FILL) {
-				m_sample_shape = new ShapeRect(s_pos, diff, &m_sample_layout);
+				m_sample_shape = new ShapeRect(s_pos, diff, &m_sample_sheet);
 			}
 			else {
 				throw winrt::hresult_not_implemented();

@@ -214,7 +214,7 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfsi_color_code.Text" xml:space="preserve">
-    <value>色成分の表記</value>
+    <value>色の表記</value>
     <comment>ComboBox</comment>
   </data>
   <data name="mfsi_len_unit.Text" xml:space="preserve">
@@ -321,8 +321,8 @@
     <value>書体(T)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_layout.Title" xml:space="preserve">
-    <value>レイアウト(O)</value>
+  <data name="mbi_sheet.Title" xml:space="preserve">
+    <value>用紙(H)</value>
     <comment>MenuBarItem</comment>
   </data>
   <data name="mbi_misc.Title" xml:space="preserve">
@@ -337,7 +337,7 @@
     <value>作図(D)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mfi_about_graph_paper.Text" xml:space="preserve">
+  <data name="mfi_about_graph_sheet.Text" xml:space="preserve">
     <value>バージョン情報...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -914,12 +914,12 @@
     <value>クリップボードからテキストを貼り付けますか？</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="mfi_layout_delete.Text" xml:space="preserve">
-    <value>レイアウトを削除</value>
+  <data name="mfi_sheet_reset.Text" xml:space="preserve">
+    <value>用紙をリセット</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_layout_save.Text" xml:space="preserve">
-    <value>レイアウトを保存</value>
+  <data name="mfi_sheet_save.Text" xml:space="preserve">
+    <value>用紙を保存</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_patt.Text" xml:space="preserve">
