@@ -302,8 +302,8 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::UI::Xaml::Application;
 
 			auto const& app{ Application::Current() };
-			m_token_suspending = app.Suspending({ this, &MainPage::app_suspending });
-			m_token_resuming = app.Resuming({ this, &MainPage::app_resuming });
+			m_token_suspending = app.Suspending({ this, &MainPage::app_suspending_async });
+			m_token_resuming = app.Resuming({ this, &MainPage::app_resuming_async });
 			m_token_entered_background = app.EnteredBackground({ this, &MainPage::app_entered_background });
 			m_token_leaving_background = app.LeavingBackground({ this, &MainPage::app_leaving_background });
 		}
@@ -362,11 +362,11 @@ namespace winrt::GraphPaper::implementation
 			m_token_pointer_entered = scp_page_panel().PointerReleased({ this, &MainPage::pointer_entered });
 		}
 
-		auto _{ new_click(nullptr, nullptr) };
+		auto _{ new_click_async(nullptr, nullptr) };
 	}
 
 	// ファイルメニューの「終了」が選択された
-	IAsyncAction MainPage::exit_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::exit_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::UI::Xaml::Application;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -439,7 +439,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ファイルメニューの「新規」が選択された
-	IAsyncAction MainPage::new_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::new_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 

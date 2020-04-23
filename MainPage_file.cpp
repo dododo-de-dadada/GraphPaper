@@ -45,7 +45,7 @@
 // 		winrt::resume_foreground
 // 		file_recent_add
 // 			file_recent_update_menu
-// new_click
+// new_click_async
 // 	cd_conf_save().ShowAsync
 // 	file_save_async
 // 	file_recent_add

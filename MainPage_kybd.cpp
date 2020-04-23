@@ -67,7 +67,7 @@ namespace winrt::GraphPaper::implementation
 		else if (draw_tool == DRAW_TOOL::SCALE) {
 			rmfi_tool_scale().IsChecked(false);
 		}
-		rmfi_tool_select_click(nullptr, nullptr);
+		tool_select_click(nullptr, nullptr);
 	}
 
 	// Cntrol + PgDn ‚ª‰Ÿ‚³‚ê‚½.
@@ -127,7 +127,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ka_edit_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		if (mfi_text_edit().IsEnabled()) {
-			mfi_text_edit_click(nullptr, nullptr);
+			text_edit_click(nullptr, nullptr);
 		}
 	}
 	*/
@@ -135,7 +135,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_text_find_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_text_find().IsEnabled()) {
-	// 	mfi_text_find_click(nullptr, nullptr);
+	// 	text_find_click(nullptr, nullptr);
 	// }
 	//}
 
@@ -150,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + N ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_new_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// new_click(nullptr, nullptr);
+	// new_click_async(nullptr, nullptr);
 	//}
 
 	// Cntrol + O ‚ª‰Ÿ‚³‚ê‚½.

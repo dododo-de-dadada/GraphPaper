@@ -46,7 +46,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ページメニューの「ステータスバー」が選択された.
-	void MainPage::mi_stbar_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::stbar_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		STATUS_BAR stbar;	// ステータスバーの状態
 		bool check;	// チェックマークの有無

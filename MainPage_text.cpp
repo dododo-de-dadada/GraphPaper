@@ -255,14 +255,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列検索パネルの「閉じる」ボタンが押された.
-	void MainPage::btn_text_find_close_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::text_find_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		text_find_set();
 		sp_text_find().Visibility(COLLAPSED);
 	}
 
 	// 文字列検索パネルの「次を検索」ボタンが押された.
-	void MainPage::btn_text_find_next_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::text_find_next_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		text_find_set();
 		ShapeText* t;
@@ -283,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列検索パネルの「すべて置換」ボタンが押された.
-	void MainPage::btn_text_replace_all_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::text_replace_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		text_find_set();
 		// 検索文字列の文字数を得る.
@@ -385,7 +385,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列検索パネルの「置換して次に」ボタンが押された.
-	void MainPage::btn_text_replace_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::text_replace_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		text_find_set();
 		const auto f_len = wchar_len(m_text_find);
@@ -439,7 +439,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「文字列の編集」が選択された.
-	void MainPage::mfi_text_edit_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::text_edit_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		ShapeText* s = nullptr;
 		if (pointer_shape_prev() != nullptr && typeid(*pointer_shape_prev()) == typeid(ShapeText)) {
@@ -469,7 +469,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 編集メニューの「文字列の検索/置換」が選択された.
-	void MainPage::mfi_text_find_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::text_find_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (sp_text_find().Visibility() == VISIBLE) {
 			// 文字列検索パネルが表示されている場合,
@@ -587,7 +587,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 検索文字列が変更された.
-	void MainPage::tx_text_find_what_changed(IInspectable const&, TextChangedEventArgs const&)
+	void MainPage::text_find_what_changed(IInspectable const&, TextChangedEventArgs const&)
 	{
 		const auto not_empty = (tx_text_find_what().Text().empty() != true);
 		btn_text_find_next().IsEnabled(not_empty);

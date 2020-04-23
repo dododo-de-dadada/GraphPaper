@@ -78,56 +78,6 @@ namespace winrt::GraphPaper::implementation
 			// 交換フラグを立てる.
 			flag = true;
 		}
-		/*
-		for (;;) {
-			if ((*it_src)->is_deleted() != true) {
-				break;
-			}
-			it_src++;
-		}
-		for (;;) {
-			// 交換元反復子を交換先反復に格納して, 交換元反復子をインクリメントする.
-			// 交換元反復子が終端でない
-			auto it_dst = it_src++;
-			while (it_src != it_end) {
-				if ((*it_src)->is_deleted() != true) {
-					break;
-				}
-				it_src++;
-			}
-			if (it_src == it_end) {
-				// 交換元の反復子が終端の場合,
-				// 中断する.
-				break;
-			}
-			auto s = *it_src;	// 交換元の図形
-			if (s->is_deleted()) {
-				// 消去フラグが立っている場合,
-				// 交換元の反復子をインクリメントする.
-				// 以下を無視する.
-				it_src++;
-				continue;
-			}
-			// 交換元反復子が指す図形が選択されていて,
-			// 交換先反復子が指す図形が選択されてない場合,
-			// それらの図形を入れ替える.
-			auto t = *it_dst;	// 交換先の図形
-			if (s->is_selected() && !t->is_selected()) {
-				flag = true;
-				if (m_summary_visible) {
-					summary_arrange(s, t);
-				}
-				undo_push_arrange(s, t);
-			}
-		}
-		if (flag == true) {
-			// 一連の操作の区切としてヌル操作をスタックに積む.
-			undo_push_null();
-			// 編集メニュー項目の使用の可否を設定する.
-			edit_menu_enable();
-			page_draw();
-		}
-		*/
 	}
 	using BACKWARD = S_LIST_T::iterator;
 	using FORWARD = S_LIST_T::reverse_iterator;
@@ -151,7 +101,6 @@ namespace winrt::GraphPaper::implementation
 			auto s_pos = s_list_front(m_list_shapes);
 			for (auto s : list_selected) {
 				if (m_mutex_summary.load(std::memory_order_acquire)) {
-				//if (m_summary_visible) {
 					summary_remove(s);
 					summary_insert(s, i++);
 				}
@@ -162,7 +111,6 @@ namespace winrt::GraphPaper::implementation
 		else {
 			for (auto s : list_selected) {
 				if (m_mutex_summary.load(std::memory_order_acquire)) {
-				//if (m_summary_visible) {
 					summary_remove(s);
 					summary_append(s);
 				}

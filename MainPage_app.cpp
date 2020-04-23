@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 	// アプリケーションの中断の処理を行う.
 	// args	中断ハンドラーに渡された引数.
 	// 戻り値	なし
-	IAsyncAction MainPage::app_suspending_async(SuspendingEventArgs const& args)
+	IAsyncAction MainPage::app_suspending_async(IInspectable const&, SuspendingEventArgs const& args)
 	{
 		using concurrency::cancellation_token_source;
 		using winrt::Windows::Foundation::TypedEventHandler;
@@ -140,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 
 	// アプリケーションの再開の処理を行う.
 	// アプリ起動のときは呼ばれない.
-	IAsyncAction MainPage::app_resuming_async(void)
+	IAsyncAction MainPage::app_resuming_async(IInspectable const&, IInspectable const&)
 	{
 		winrt::apartment_context context;
 

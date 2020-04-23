@@ -112,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形一覧パネルがロードされた.
-	void MainPage::lv_summary_loaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
+	void MainPage::summary_loaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
 	{
 		bool s_visible = m_mutex_summary.exchange(false, std::memory_order_acq_rel);
 		//if (m_summary_visible) {
@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形一覧の項目が選択された.
-	void MainPage::lv_summary_selection_changed(IInspectable const&, SelectionChangedEventArgs const& e)
+	void MainPage::summary_selection_changed(IInspectable const&, SelectionChangedEventArgs const& e)
 	{
 		if (m_mutex_summary != true) {
 			return;
@@ -190,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 		//	return;
 		//}
 		if (sp_text_find().Visibility() == VISIBLE) {
-			mfi_text_find_click(nullptr, nullptr);
+			text_find_click(nullptr, nullptr);
 		}
 		auto _{ FindName(L"rp_summary") };
 		rp_summary().Visibility(VISIBLE);

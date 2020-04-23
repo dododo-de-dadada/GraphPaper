@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr double SLIDER_STEP = 0.5;
 
 	// 線枠メニューの「色」が選択された.
-	IAsyncAction MainPage::stroke_color_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::stroke_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「破線の配置」が選択された.
-	IAsyncAction MainPage::mfi_stroke_patt_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::stroke_patt_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -115,7 +115,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「太さ」が選択された.
-	IAsyncAction MainPage::mfi_stroke_width_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::stroke_width_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「一点破線」が選択された.
-	void MainPage::rmfi_stroke_dash_dot_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::stroke_dash_dot_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_sheet.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_patt().IsEnabled(true);
@@ -165,7 +165,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「二点破線」が選択された.
-	void MainPage::rmfi_stroke_dash_dot_dot_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::stroke_dash_dot_dot_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_sheet.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_patt().IsEnabled(true);
@@ -175,7 +175,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「点線」が選択された.
-	void MainPage::rmfi_stroke_dot_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::stroke_dot_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_sheet.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_patt().IsEnabled(true);
@@ -185,7 +185,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「実線」が選択された.
-	void MainPage::rmfi_stroke_solid_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::stroke_solid_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_page_sheet.m_stroke_style != D2D1_DASH_STYLE_SOLID) {
 			mfi_stroke_patt().IsEnabled(false);
