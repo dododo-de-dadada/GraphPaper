@@ -278,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作スタックを消去し, 含まれる操作を破棄する.
 	void MainPage::undo_clear(void)
 	{
-		m_stack_pushed = false;
+		m_stack_updt = false;
 		m_stack_rcnt -= undo_clear_stack(m_stack_redo);
 		m_stack_ucnt -= undo_clear_stack(m_stack_undo);
 #if defined(_DEBUG)
@@ -410,7 +410,7 @@ namespace winrt::GraphPaper::implementation
 		// 元に戻す操作スタックにヌルを積む.
 		m_stack_undo.push_back(nullptr);
 		// 操作スタックの更新フラグを立てる.
-		m_stack_pushed = true;
+		m_stack_updt = true;
 		// 操作の組数をインクリメントする.
 		//m_stack_nset++;
 		m_stack_ucnt++;
@@ -622,9 +622,8 @@ namespace winrt::GraphPaper::implementation
 		while (undo_read_op(u, dt_reader)) {
 			m_stack_undo.push_back(u);
 		}
-		//m_stack_nset = dt_reader.ReadUInt32();
 		m_stack_ucnt = dt_reader.ReadUInt32();
-		m_stack_pushed = dt_reader.ReadBoolean();
+		m_stack_updt = dt_reader.ReadBoolean();
 	}
 
 	// 操作スタックをデータリーダーに書き込む.
@@ -640,7 +639,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::END));
 		dt_writer.WriteUInt32(m_stack_ucnt);
-		dt_writer.WriteBoolean(m_stack_pushed);
+		dt_writer.WriteBoolean(m_stack_updt);
 	}
 
 }

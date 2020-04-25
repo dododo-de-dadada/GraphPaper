@@ -253,7 +253,7 @@ namespace winrt::GraphPaper::implementation
 		U_STACK_T m_stack_redo;		// やり直し操作スタック
 		uint32_t m_stack_ucnt = 0;	// 元に戻す操作スタックに積まれた要素の組数
 		U_STACK_T m_stack_undo;		// 元に戻す操作スタック
-		bool m_stack_pushed = false;	// 操作スタックの更新フラグ (ヌルが積まれたら true)
+		bool m_stack_updt = false;	// 操作スタックの更新フラグ (ヌルが積まれたら true)
 
 		SHAPE_DX m_sample_dx;		// 見本の描画環境
 		ShapeSheet m_sample_sheet;		// 見本用紙
@@ -984,9 +984,9 @@ namespace winrt::GraphPaper::implementation
 		// 無効な操作の組をポップする.
 		bool undo_pop_if_invalid(void);
 		// 操作フラグの更新フラグを得る.
-		const bool undo_pushed(void) const noexcept { return m_stack_pushed; }
+		const bool undo_pushed(void) const noexcept { return m_stack_updt; }
 		// 値を操作フラグの更新フラグに格納する.
-		void undo_pushed(const bool pushed) noexcept { m_stack_pushed = pushed; }
+		void undo_pushed(const bool pushed) noexcept { m_stack_updt = pushed; }
 		// 図形を追加して, その操作をスタックに積む.
 		void undo_push_append(Shape* s);
 		// 図形をグループ図形に追加して, その操作をスタックに積む.

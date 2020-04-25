@@ -5,69 +5,6 @@
 #include "pch.h"
 #include "MainPage.h"
 
-// file_recent_read_async
-// 	file_wait_cursor
-// 	file_recent_get_async
-// 		GetFileAsync
-// 		winrt::resume_foreground
-// 	file_read_async
-// 		winrt::resume_background
-// 		OpenAsync
-// 		winrt::resume_foreground
-// 		file_recent_add
-// 			file_recent_update_menu
-// 	file_finish_reading
-// 	winrt::resume_foreground
-// file_save_as_async
-// 	file_wait_cursor
-// 	file_recent_get_async
-// 		GetFileAsync
-// 		winrt::resume_foreground
-// 	PickSaveFileAsync
-// 	file_write_svg_async
-// 		winrt::resume_background
-// 		OpenAsync
-// 		winrt::resume_foreground
-// 	file_write_gpf_async
-// 		winrt::resume_background
-// 		OpenAsync
-// 		winrt::resume_foreground
-// 		file_recent_add
-// 			file_recent_update_menu
-// file_save_async
-// 	file_recent_get_async
-// 		GetFileAsync
-// 		winrt::resume_foreground
-// 	file_save_as_async
-// 	file_wait_cursor
-// 	file_write_gpf_async
-// 		winrt::resume_background
-// 		winrt::resume_foreground
-// 		file_recent_add
-// 			file_recent_update_menu
-// new_click_async
-// 	cd_conf_save().ShowAsync
-// 	file_save_async
-// 	file_recent_add
-// 		file_recent_update_menu
-// file_open_click_async
-// 	cd_conf_save().ShowAsync
-// 	file_save_async
-// 	file_wait_cursor
-// 	PickSingleFileAsync
-// 	file_read_async
-// 		winrt::resume_background
-// 		OpenAsync
-// 		winrt::resume_foreground
-// 		file_recent_add
-// 			file_recent_update_menu
-// 		file_finish_reading
-// mfi_file_recent_N_click
-// 	file_recent_read_async
-// file_save_as_click
-// 	file_save_as_async
-// file_save_click
-// 	file_save_async
 /*
 ただし、4つのWindowsランタイム非同期操作タイプ（IAsyncXxx）のいずれかを
 co_awaitした場合、C ++ / WinRTはco_awaitの時点で呼び出しコンテキストをキャプチャします。
@@ -258,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 			co_await file_read_async(s_file);
 			// ストレージファイルを解放する.
 			s_file = nullptr;
-			file_finish_reading();
+			//file_finish_reading();
 		}
 		o_picker = nullptr;
 		//m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::pointer_released });
@@ -276,11 +213,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::Storage::FileAccessMode;
 
-		m_mutex_page.lock();
 		auto hr = E_FAIL;
 		winrt::apartment_context context;
+		m_mutex_page.lock();
 		try {
-			co_await winrt::resume_background();
 			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
@@ -292,7 +228,6 @@ namespace winrt::GraphPaper::implementation
 			status_bar(static_cast<STATUS_BAR>(dt_reader.ReadUInt16()));
 
 			m_page_sheet.read(dt_reader);
-			// 無効なデータを読み込んでアプリが落ちることがないよう, 値を制限する.
 			m_page_sheet.m_grid_base = max(m_page_sheet.m_grid_base, 0.0F);
 			m_page_sheet.m_page_scale = min(max(m_page_sheet.m_page_scale, SCALE_MIN), SCALE_MAX);
 			m_page_sheet.m_page_size.width = max(min(m_page_sheet.m_page_size.width, page_size_max()), 1.0F);
@@ -327,6 +262,7 @@ namespace winrt::GraphPaper::implementation
 		catch (winrt::hresult_error const& e) {
 			hr = e.code();
 		}
+		m_mutex_page.unlock();
 		if (hr != S_OK) {
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
@@ -341,7 +277,6 @@ namespace winrt::GraphPaper::implementation
 		// スレッドコンテキストを復元する.
 		co_await context;
 		// 結果を返し終了する.
-		m_mutex_page.unlock();
 		co_return hr;
 	}
 
@@ -355,28 +290,24 @@ namespace winrt::GraphPaper::implementation
 	// ファイルメニューの「最近使ったファイル 2」が選択された
 	void MainPage::file_recent_2_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 最近使ったファイル (1) を読み込む.
 		auto _{ file_recent_read_async(1) };
 	}
 
 	// ファイルメニューの「最近使ったファイル 3」が選択された
 	void MainPage::file_recent_3_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 最近使ったファイル (2) を読み込む.
 		auto _{ file_recent_read_async(2) };
 	}
 
 	// ファイルメニューの「最近使ったファイル 4」が選択された
 	void MainPage::file_recent_4_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 最近使ったファイル (3) を読み込む.
 		auto _{ file_recent_read_async(3) };
 	}
 
 	// ファイルメニューの「最近使ったファイル 5」が選択された
 	void MainPage::file_recent_5_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 最近使ったファイル (4) を読み込む.
 		auto _{ file_recent_read_async(4) };
 	}
 
@@ -486,7 +417,6 @@ namespace winrt::GraphPaper::implementation
 			// 取得できた場合,
 			co_await file_read_async(s_file);
 			s_file = nullptr;
-			file_finish_reading();
 		}
 		else {
 			// 取得できない場合,

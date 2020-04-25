@@ -299,12 +299,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::pointer_set(void)
 	{
 		if (tool() != DRAW_TOOL::SELECT) {
+			// 作図ツールが選択ツールでない場合
 			Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 			return;
 		}
 		if (m_mutex_page.try_lock() != true) {
-		//if (m_mutex_page.load()) {
-			// ロックできない場合
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 			return;
 		}
@@ -312,43 +311,42 @@ namespace winrt::GraphPaper::implementation
 		const auto a = s_list_hit_test(m_list_shapes, m_pointer_cur, page_anch_len(), s);
 		if (a == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() != true) {
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
-			m_mutex_page.unlock();
-			return;
 		}
-		//if (a != ANCH_WHICH::ANCH_OUTSIDE && s->is_selected()) {
-		switch (a) {
-		case ANCH_WHICH::ANCH_R_NW:
-		case ANCH_WHICH::ANCH_R_NE:
-		case ANCH_WHICH::ANCH_R_SE:
-		case ANCH_WHICH::ANCH_R_SW:
-			Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
-			break;
-		case ANCH_WHICH::ANCH_INSIDE:
-		case ANCH_WHICH::ANCH_FRAME:
-		case ANCH_WHICH::ANCH_TEXT:
-			Window::Current().CoreWindow().PointerCursor(CUR_SIZEALL);
-			break;
-		case ANCH_WHICH::ANCH_NE:
-		case ANCH_WHICH::ANCH_SW:
-			Window::Current().CoreWindow().PointerCursor(CUR_SIZENESW);
-			break;
-		case ANCH_WHICH::ANCH_NORTH:
-		case ANCH_WHICH::ANCH_SOUTH:
-			Window::Current().CoreWindow().PointerCursor(CUR_SIZENS);
-			break;
-		case ANCH_WHICH::ANCH_NW:
-		case ANCH_WHICH::ANCH_SE:
-			Window::Current().CoreWindow().PointerCursor(CUR_SIZENWSE);
-			break;
-		case ANCH_WHICH::ANCH_WEST:
-		case ANCH_WHICH::ANCH_EAST:
-			Window::Current().CoreWindow().PointerCursor(CUR_SIZEWE);
-			break;
+		else {
+			switch (a) {
+			case ANCH_WHICH::ANCH_R_NW:
+			case ANCH_WHICH::ANCH_R_NE:
+			case ANCH_WHICH::ANCH_R_SE:
+			case ANCH_WHICH::ANCH_R_SW:
+				Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
+				break;
+			case ANCH_WHICH::ANCH_INSIDE:
+			case ANCH_WHICH::ANCH_FRAME:
+			case ANCH_WHICH::ANCH_TEXT:
+				Window::Current().CoreWindow().PointerCursor(CUR_SIZEALL);
+				break;
+			case ANCH_WHICH::ANCH_NE:
+			case ANCH_WHICH::ANCH_SW:
+				Window::Current().CoreWindow().PointerCursor(CUR_SIZENESW);
+				break;
+			case ANCH_WHICH::ANCH_NORTH:
+			case ANCH_WHICH::ANCH_SOUTH:
+				Window::Current().CoreWindow().PointerCursor(CUR_SIZENS);
+				break;
+			case ANCH_WHICH::ANCH_NW:
+			case ANCH_WHICH::ANCH_SE:
+				Window::Current().CoreWindow().PointerCursor(CUR_SIZENWSE);
+				break;
+			case ANCH_WHICH::ANCH_WEST:
+			case ANCH_WHICH::ANCH_EAST:
+				Window::Current().CoreWindow().PointerCursor(CUR_SIZEWE);
+				break;
+			default:
+				throw winrt::hresult_not_implemented();
+				break;
+			}
 		}
 		m_mutex_page.unlock();
-		return;
-		//}
-		//Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 	}
 
 	// ポインターのボタンが上げられた.
