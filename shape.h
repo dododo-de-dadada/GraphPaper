@@ -522,10 +522,14 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 
 	using S_LIST_T = std::list<struct Shape*>;
+	// 使用可能な書体名か調べる.
+	bool s_list_available_font(const S_LIST_T& s_list, wchar_t*& unavailable_font) noexcept;
 	// 最後の図形をリストから得る.
 	Shape* s_list_back(S_LIST_T const& s_list) noexcept;
 	// 図形リストを消去し, 含まれる図形を破棄する.
 	void s_list_clear(S_LIST_T& s_list) noexcept;
+	// 図形リストの図形を数える
+	void s_list_count(const S_LIST_T& s_list, uint32_t& undeleted_cnt, uint32_t& selected_cnt, uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt, uint32_t& text_cnt, bool& fore_selected, bool& back_selected, bool& prev_selected) noexcept;
 	// 図形のリスト上での位置を得る.
 	uint32_t s_list_distance(S_LIST_T const& s_list, const Shape* s) noexcept;
 	// 最初の図形をリストから得る.
@@ -555,7 +559,7 @@ namespace winrt::GraphPaper::implementation
 	// リストの中の図形の順番を得る.
 	template <typename S, typename T> bool s_list_match(S_LIST_T const& s_list, S s, T& t);
 	// 選択された図形から, それらを全て合わせた文字列を得る.
-	winrt::hstring s_list_text_selected_all(S_LIST_T const& s_list) noexcept;
+	winrt::hstring s_list_selected_all_text(S_LIST_T const& s_list) noexcept;
 
 	//------------------------------
 	// 図形用紙

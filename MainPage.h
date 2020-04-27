@@ -168,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//-------------------------------
-	// 色成分の形式
+	// 色の表記
 	//-------------------------------
 	enum struct COLOR_CODE {
 		DEC,	// 10 進数

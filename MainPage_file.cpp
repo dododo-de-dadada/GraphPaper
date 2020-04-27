@@ -116,19 +116,10 @@ namespace winrt::GraphPaper::implementation
 		tmfi_grid_snap_2().IsChecked(m_page_sheet.m_grid_snap);
 		len_unit_check_menu();
 
-		// 図形リストの各図形について以下を繰り返す.
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			wchar_t* value;	// 書体名
-			if (s->get_font_family(value)) {
-				if (ShapeText::is_available_font(value) != true) {
-					// 「無効な書体が使用されています」メッセージダイアログを表示する.
-					cd_message_show(ICON_ALERT, ERR_FONT, value);
-					break;
-				}
-			}
+		wchar_t* unavailable_font;	// 書体名
+		if (s_list_available_font(m_list_shapes, unavailable_font) != true) {
+			// 「無効な書体が使用されています」メッセージダイアログを表示する.
+			cd_message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
 		if (m_mutex_summary.load(std::memory_order_acquire)) {
 			//if (m_summary_visible) {

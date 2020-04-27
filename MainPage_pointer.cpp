@@ -309,6 +309,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		Shape* s;
 		const auto a = s_list_hit_test(m_list_shapes, m_pointer_cur, page_anch_len(), s);
+		m_mutex_page.unlock();
 		if (a == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() != true) {
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 		}
@@ -346,7 +347,6 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		m_mutex_page.unlock();
 	}
 
 	// ポインターのボタンが上げられた.

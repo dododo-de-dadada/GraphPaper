@@ -39,7 +39,7 @@ namespace winrt::GraphPaper::implementation
 		list_selected.clear();
 		// 書き込んだデータを出力ストリームに格納し, 格納したバイト数を得る.
 		auto n_byte{ co_await dt_writer.StoreAsync() };
-		auto text = s_list_text_selected_all(m_list_shapes);
+		auto text = s_list_selected_all_text(m_list_shapes);
 		// スレッドをメインページの UI スレッドに変える.
 		auto cd = this->Dispatcher();
 		co_await winrt::resume_foreground(cd);

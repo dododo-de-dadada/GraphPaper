@@ -185,60 +185,18 @@ namespace winrt::GraphPaper::implementation
 		bool fore_selected = false;	// 最前面の図形の選択フラグ
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
+		s_list_count(m_list_shapes,
+			undeleted_cnt,
+			selected_cnt,
+			selected_group_cnt,
+			runlength_cnt,
+			selected_text_cnt,
+			text_cnt,
+			fore_selected,
+			back_selected,
+			prev_selected
+		);
 
-		// 図形リストの各図形について以下を繰り返す.
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				// 図形の消去フラグが立っている場合,
-				// 以下を無視する.
-				continue;
-			}
-			// 消去フラグがない図形の数をインクリメントする.
-			undeleted_cnt++;
-			// 図形の動的な型を得る.
-			auto const& s_type = typeid(*s);
-			if (s_type == typeid(ShapeText)) {
-				// 型が文字列図形の場合,
-				// 文字列図形の数をインクリメントする.
-				text_cnt++;
-			}
-			else if (s_type == typeid(ShapeGroup)) {
-				if (static_cast<ShapeGroup*>(s)->has_text()) {
-					// 型が文字列図形の場合,
-					// 文字列図形の数をインクリメントする.
-					text_cnt++;
-				}
-			}
-			// 図形の選択フラグを最前面の図形の選択フラグに格納する.
-			fore_selected = s->is_selected();
-			if (fore_selected) {
-				// 最前面の図形の選択フラグが立っている場合,
-				// 選択された図形の数をインクリメントする.
-				selected_cnt++;
-				if (undeleted_cnt == 1) {
-					// 消去フラグがない図形の数が 1 の場合,
-					// 最背面の図形の選択フラグを立てる.
-					back_selected = true;
-				}
-				if (s_type == typeid(ShapeGroup)) {
-					// 図形の型がグループ図形の場合,
-					// 選択されたグループ図形の数をインクリメントする.
-					selected_group_cnt++;
-				}
-				else if (s_type == typeid(ShapeText)) {
-					// 図形の型が文字列図形の場合,
-					// 選択された文字列図形の数をインクリメントする.
-					selected_text_cnt++;
-				}
-				if (prev_selected != true) {
-					// ひとつ背面の図形がヌル
-					// またはひとつ背面の図形の選択フラグがない場合,
-					// 選択された図形のランレングスの数をインクリメントする.
-					runlength_cnt++;
-				}
-			}
-			prev_selected = fore_selected;
-		}
 		// 消去されていない図形がひとつ以上ある場合.
 		const auto exists_undeleted = (undeleted_cnt > 0);
 		// 選択された図形がひとつ以上ある場合.

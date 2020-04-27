@@ -96,8 +96,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_page_sheet);
-		double pw = m_sample_sheet.m_page_size.width;
-		double ph = m_sample_sheet.m_page_size.height;
+		double pw = m_page_sheet.m_page_size.width;
+		double ph = m_page_sheet.m_page_size.height;
 		const double dpi = m_page_dx.m_logical_dpi;
 		const auto g_len = m_sample_sheet.m_grid_base + 1.0;
 		wchar_t buf[32];
