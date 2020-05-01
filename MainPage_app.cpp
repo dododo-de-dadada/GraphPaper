@@ -109,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			// 「メモリリーク」メッセージダイアログを表示する.
-			cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
+			message_show(ICON_ALERT, L"Memory leak occurs", {});
 		}
 #endif
 		if (hr == S_OK) {

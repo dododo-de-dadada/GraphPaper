@@ -77,6 +77,12 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	// ポインターのボタンが上げられた.
+	void MainPage::pointer_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args)
+	{
+		pointer_released(sender, args);
+	}
+
 	// コンテキストメニューを表示する.
 	void MainPage::pointer_context_menu(void)
 	{
@@ -128,41 +134,30 @@ namespace winrt::GraphPaper::implementation
 		pt_scale(args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / m_page_sheet.m_page_scale, p_offs, m_pointer_cur);
 	}
 
-	// 文字列図形の作成を終了する.
-	IAsyncAction MainPage::pointer_finish_creating_text_async(const D2D1_POINT_2F diff)
+	// ポインターがページのスワップチェーンパネルの中に入った.
+	void MainPage::pointer_entered(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
-		tx_edit().Text(L"");
-		ck_text_adjust_bound().IsChecked(text_adjust());
-		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
-			auto text = wchar_cpy(tx_edit().Text().c_str());
-			auto s = new ShapeText(m_pointer_pressed, diff, text, &m_page_sheet);
-#if defined(_DEBUG)
-			debug_leak_cnt++;
-#endif
-			text_adjust(ck_text_adjust_bound().IsChecked().GetBoolean());
-			if (text_adjust()) {
-				static_cast<ShapeText*>(s)->adjust_bound();
-			}
-			reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);
-			unselect_all();
-			undo_push_append(s);
-			undo_push_null();
-			m_pointer_shape_summary = m_pointer_shape_prev = s;
-			edit_menu_enable();
-			page_bound(s);
-			page_panle_size();
-			if (m_mutex_summary.load(std::memory_order_acquire)) {
-			//if (m_summary_visible) {
-				summary_append(s);
-			}
+		if (sender != scp_page_panel()) {
+			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
+			return;
 		}
-		// 初期状態に戻す.
-		m_pointer_state = STATE_TRAN::BEGIN;
-		m_pointer_shape = nullptr;
-		m_pointer_anchor = ANCH_WHICH::ANCH_OUTSIDE;
-		page_draw();
+		pointer_cur_pos(args);
+		pointer_set();
+		stbar_set_curs();
+	}
+
+	// ポインターがページのスワップチェーンパネルから出た.
+	void MainPage::pointer_exited(IInspectable const& sender, PointerRoutedEventArgs const&)
+	{
+		if (sender != scp_page_panel()) {
+			return;
+		}
+		auto const& c_win = Window::Current().CoreWindow();
+		auto const& cur = c_win.PointerCursor();
+		if (cur.Type() == CUR_ARROW.Type()) {
+			return;
+		}
+		c_win.PointerCursor(CUR_ARROW);
 	}
 
 	// 図形の作成を終了する.
@@ -207,9 +202,46 @@ namespace winrt::GraphPaper::implementation
 		page_panle_size();
 		page_draw();
 		if (m_mutex_summary.load(std::memory_order_acquire)) {
-		//if (m_summary_visible) {
+			//if (m_summary_visible) {
 			summary_append(s);
 		}
+	}
+
+	// 文字列図形の作成を終了する.
+	IAsyncAction MainPage::pointer_finish_creating_text_async(const D2D1_POINT_2F diff)
+	{
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+
+		tx_edit().Text(L"");
+		ck_text_adjust_bound().IsChecked(text_adjust());
+		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
+			auto text = wchar_cpy(tx_edit().Text().c_str());
+			auto s = new ShapeText(m_pointer_pressed, diff, text, &m_page_sheet);
+#if defined(_DEBUG)
+			debug_leak_cnt++;
+#endif
+			text_adjust(ck_text_adjust_bound().IsChecked().GetBoolean());
+			if (text_adjust()) {
+				static_cast<ShapeText*>(s)->adjust_bound();
+			}
+			reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);
+			unselect_all();
+			undo_push_append(s);
+			undo_push_null();
+			m_pointer_shape_summary = m_pointer_shape_prev = s;
+			edit_menu_enable();
+			page_bound(s);
+			page_panle_size();
+			if (m_mutex_summary.load(std::memory_order_acquire)) {
+			//if (m_summary_visible) {
+				summary_append(s);
+			}
+		}
+		// 初期状態に戻す.
+		m_pointer_state = STATE_TRAN::BEGIN;
+		m_pointer_shape = nullptr;
+		m_pointer_anchor = ANCH_WHICH::ANCH_OUTSIDE;
+		page_draw();
 	}
 
 	// 図形の変形を終了する.
@@ -347,38 +379,6 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-	}
-
-	// ポインターのボタンが上げられた.
-	void MainPage::pointer_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args)
-	{
-		pointer_released(sender, args);
-	}
-
-	// ポインターがページのスワップチェーンパネルの中に入った.
-	void MainPage::pointer_entered(IInspectable const& sender, PointerRoutedEventArgs const& args)
-	{
-		if (sender != scp_page_panel()) {
-			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
-			return;
-		}
-		pointer_cur_pos(args);
-		pointer_set();
-		stbar_set_curs();
-	}
-
-	// ポインターがページのスワップチェーンパネルから出た.
-	void MainPage::pointer_exited(IInspectable const& sender, PointerRoutedEventArgs const&)
-	{
-		if (sender != scp_page_panel()) {
-			return;
-		}
-		auto const& c_win = Window::Current().CoreWindow();
-		auto const& cur = c_win.PointerCursor();
-		if (cur.Type() == CUR_ARROW.Type()) {
-			return;
-		}
-		c_win.PointerCursor(CUR_ARROW);
 	}
 
 	// ポインターが動いた.

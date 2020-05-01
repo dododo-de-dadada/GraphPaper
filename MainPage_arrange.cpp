@@ -9,6 +9,14 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using BACKWARD = S_LIST_T::iterator;
+	// 選択された図形を前の図形と入れ替える.
+	template void MainPage::arrange_order<BACKWARD>(void);
+
+	using FORWARD = S_LIST_T::reverse_iterator;
+	// 選択された図形を次の図形と入れ替える.
+	template void MainPage::arrange_order<FORWARD>(void);
+
 	// 選択された図形を次または前の図形と入れ替える.
 	// T	S_LIST_T::iterator の場合は背面の図形と入れ替え, S_LIST_T::reverse_iterator の場合は前面の図形と入れ替える. 
 	template<typename T>
@@ -79,10 +87,6 @@ namespace winrt::GraphPaper::implementation
 			flag = true;
 		}
 	}
-	using BACKWARD = S_LIST_T::iterator;
-	using FORWARD = S_LIST_T::reverse_iterator;
-	template void MainPage::arrange_order<BACKWARD>(void);
-	template void MainPage::arrange_order<FORWARD>(void);
 
 	// 選択された図形を最背面または最前面に移動する.
 	// B	true の場合は最背面, false の場合は最前面に移動
@@ -123,9 +127,13 @@ namespace winrt::GraphPaper::implementation
 		edit_menu_enable();
 		page_draw();
 	}
+
 	constexpr auto BACK = true;
+	// 選択された図形を最背面に移動する.
 	template void MainPage::arrange_to<BACK>(void);
+
 	constexpr auto FRONT = false;
+	// 選択された図形を最前面に移動する.
 	template void MainPage::arrange_to<FRONT>(void);
 
 	// 編集メニューの「前面に移動」が選択された.

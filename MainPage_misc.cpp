@@ -9,6 +9,12 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	// その他メニューの「色の表記」>「パーセント」が選択された.
+	void MainPage::color_code_cent_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		m_color_code = COLOR_CODE::CENT;
+	}
+
 	// その他メニューの「色の表記」に印をつける.
 	void MainPage::color_code_check_menu(void)
 	{
@@ -20,21 +26,6 @@ namespace winrt::GraphPaper::implementation
 		rmfi_color_code_hex_2().IsChecked(m_color_code == COLOR_CODE::HEX);
 		rmfi_color_code_real_2().IsChecked(m_color_code == COLOR_CODE::REAL);
 		rmfi_color_code_cent_2().IsChecked(m_color_code == COLOR_CODE::CENT);
-	}
-
-	// その他メニューの「長さの単位」に印をつける.
-	void MainPage::len_unit_check_menu(void)
-	{
-		rmfi_len_unit_grid().IsChecked(m_len_unit == LEN_UNIT::GRID);
-		rmfi_len_unit_inch().IsChecked(m_len_unit == LEN_UNIT::INCH);
-		rmfi_len_unit_milli().IsChecked(m_len_unit == LEN_UNIT::MILLI);
-		rmfi_len_unit_pixel().IsChecked(m_len_unit == LEN_UNIT::PIXEL);
-		rmfi_len_unit_point().IsChecked(m_len_unit == LEN_UNIT::POINT);
-		rmfi_len_unit_grid_2().IsChecked(m_len_unit == LEN_UNIT::GRID);
-		rmfi_len_unit_inch_2().IsChecked(m_len_unit == LEN_UNIT::INCH);
-		rmfi_len_unit_milli_2().IsChecked(m_len_unit == LEN_UNIT::MILLI);
-		rmfi_len_unit_pixel_2().IsChecked(m_len_unit == LEN_UNIT::PIXEL);
-		rmfi_len_unit_point_2().IsChecked(m_len_unit == LEN_UNIT::POINT);
 	}
 
 	// その他メニューの「色の表記」>「10進数」が選択された.
@@ -55,10 +46,19 @@ namespace winrt::GraphPaper::implementation
 		m_color_code = COLOR_CODE::REAL;
 	}
 
-	// その他メニューの「色の表記」>「パーセント」が選択された.
-	void MainPage::color_code_cent_click(IInspectable const&, RoutedEventArgs const&)
+	// その他メニューの「長さの単位」に印をつける.
+	void MainPage::len_unit_check_menu(void)
 	{
-		m_color_code = COLOR_CODE::CENT;
+		rmfi_len_unit_grid().IsChecked(m_len_unit == LEN_UNIT::GRID);
+		rmfi_len_unit_inch().IsChecked(m_len_unit == LEN_UNIT::INCH);
+		rmfi_len_unit_milli().IsChecked(m_len_unit == LEN_UNIT::MILLI);
+		rmfi_len_unit_pixel().IsChecked(m_len_unit == LEN_UNIT::PIXEL);
+		rmfi_len_unit_point().IsChecked(m_len_unit == LEN_UNIT::POINT);
+		rmfi_len_unit_grid_2().IsChecked(m_len_unit == LEN_UNIT::GRID);
+		rmfi_len_unit_inch_2().IsChecked(m_len_unit == LEN_UNIT::INCH);
+		rmfi_len_unit_milli_2().IsChecked(m_len_unit == LEN_UNIT::MILLI);
+		rmfi_len_unit_pixel_2().IsChecked(m_len_unit == LEN_UNIT::PIXEL);
+		rmfi_len_unit_point_2().IsChecked(m_len_unit == LEN_UNIT::POINT);
 	}
 
 	// その他メニューの「長さの単位」>「方眼」が選択された.

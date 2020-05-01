@@ -45,6 +45,30 @@ namespace winrt::GraphPaper::implementation
 		return std::round(2.0 * ret) * 0.5;
 	}
 
+	// 部位の一片の大きさを得る.
+	const double MainPage::page_anch_len(void) const noexcept
+	{
+		return m_page_dx.m_anch_len;
+	}
+
+	// 背景色を得る.
+	const D2D1_COLOR_F& MainPage::page_background(void) const noexcept
+	{
+		return m_page_dx.m_theme_background;
+	}
+
+	// ページの左上位置と右下位置を設定する.
+	void MainPage::page_bound(Shape* s) noexcept
+	{
+		s->get_bound(m_page_min, m_page_max);
+	}
+
+	// ページの左上位置と右下位置を設定する.
+	void MainPage::page_bound(void) noexcept
+	{
+		s_list_bound(m_list_shapes, m_page_sheet.m_page_size, m_page_min, m_page_max);
+	}
+
 	// 用紙メニューの「ページの色」が選択された.
 	IAsyncAction MainPage::page_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -90,136 +114,10 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	// ページメニューの「大きさ」が選択された
-	IAsyncAction MainPage::page_size_click(IInspectable const&, RoutedEventArgs const&)
+	// DPI を得る.
+	const double MainPage::page_dpi(void) const noexcept
 	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
-		m_sample_sheet.set_to(&m_page_sheet);
-		double pw = m_page_sheet.m_page_size.width;
-		double ph = m_page_sheet.m_page_size.height;
-		const double dpi = m_page_dx.m_logical_dpi;
-		const auto g_len = m_sample_sheet.m_grid_base + 1.0;
-		wchar_t buf[32];
-		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), pw, dpi, g_len, buf);
-		tx_page_width().Text(buf);
-		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), ph, dpi, g_len, buf);
-		tx_page_height().Text(buf);
-		conv_val_to_len<WITH_UNIT_NAME>(len_unit(), page_size_max(), dpi, g_len, buf);
-		tx_page_size_max().Text(buf);
-		// この時点では, テキストボックスに正しい数値を格納しても, 
-		// TextChanged は呼ばれない.
-		// プライマリーボタンは使用可能にしておく.
-		cd_page_size().IsPrimaryButtonEnabled(true);
-		cd_page_size().IsSecondaryButtonEnabled(m_list_shapes.size() > 0);
-		const auto d_result = co_await cd_page_size().ShowAsync();
-		if (d_result == ContentDialogResult::None) {
-			// 「キャンセル」が押された場合,
-			co_return;
-		}
-		else if (d_result == ContentDialogResult::Primary) {
-			constexpr wchar_t INVALID_NUM[] = L"str_err_number";
-
-			// 本来, 無効な数値が入力されている場合, 「適用」ボタンは不可になっているので
-			// 必要ないエラーチェックだが, 念のため.
-			if (swscanf_s(tx_page_width().Text().c_str(), L"%lf", &pw) != 1) {
-				// 「無効な数値です」メッセージダイアログを表示する.
-				cd_message_show(ICON_ALERT, INVALID_NUM, L"tx_page_width/Header");
-				co_return;
-			}
-			if (swscanf_s(tx_page_height().Text().c_str(), L"%lf", &ph) != 1) {
-				// 「無効な数値です」メッセージダイアログを表示する.
-				cd_message_show(ICON_ALERT, INVALID_NUM, L"tx_page_height/Header");
-				co_return;
-			}
-			// ページの縦横の長さの値をピクセル単位の値に変換する.
-			D2D1_SIZE_F p_size{
-				static_cast<FLOAT>(conv_len_to_val(len_unit(), pw, dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_val(len_unit(), ph, dpi, g_len))
-			};
-			if (equal(p_size, m_page_sheet.m_page_size) != true) {
-				// 変換された値がページの大きさと異なる場合,
-				undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_sheet, p_size);
-				undo_push_null();
-				undo_menu_enable();
-			}
-			page_bound();
-			page_panle_size();
-			page_draw();
-			stbar_set_curs();
-			stbar_set_grid();
-			stbar_set_page();
-			stbar_set_unit();
-		}
-		else if (d_result == ContentDialogResult::Secondary) {
-			D2D1_POINT_2F b_min = { FLT_MAX, FLT_MAX };
-			D2D1_POINT_2F b_max = { -FLT_MAX, -FLT_MAX };
-			D2D1_POINT_2F b_size;
-
-			s_list_bound(m_list_shapes, b_min, b_max);
-			pt_sub(b_max, b_min, b_size);
-			if (b_size.x < 1.0F || b_size.y < 1.0F) {
-				co_return;
-			}
-			float dx = 0.0F;
-			float dy = 0.0F;
-			if (b_min.x < 0.0F) {
-				dx = -b_min.x;
-				b_min.x = 0.0F;
-				b_max.x += dx;
-			}
-			if (b_min.y < 0.0F) {
-				dy = -b_min.y;
-				b_min.y = 0.0F;
-				b_max.y += dy;
-			}
-			bool flag = false;
-			if (dx > 0.0F || dy > 0.0F) {
-				constexpr auto ALL = true;
-				undo_push_move({ dx, dy }, ALL);
-				flag = true;
-			}
-			D2D1_POINT_2F p_min = { 0.0F, 0.0F };
-			D2D1_POINT_2F p_max;
-			pt_add(b_max, b_min, p_max);
-			D2D1_SIZE_F p_size = { p_max.x, p_max.y };
-			if (equal(m_page_sheet.m_page_size, p_size) != true) {
-				undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_sheet, p_size);
-				flag = true;
-			}
-			if (flag) {
-				undo_push_null();
-				undo_menu_enable();
-			}
-			page_bound();
-			page_panle_size();
-			page_draw();
-			stbar_set_page();
-		}
-	}
-
-	// 部位の一片の大きさを得る.
-	const double MainPage::page_anch_len(void) const noexcept
-	{
-		return m_page_dx.m_anch_len;
-	}
-
-	// 背景色を得る.
-	const D2D1_COLOR_F& MainPage::page_background(void) const noexcept
-	{
-		return m_page_dx.m_theme_background;
-	}
-
-	// ページの左上位置と右下位置を設定する.
-	void MainPage::page_bound(void) noexcept
-	{
-		s_list_bound(m_list_shapes, m_page_sheet.m_page_size, m_page_min, m_page_max);
-	}
-
-	// ページの左上位置と右下位置を設定する.
-	void MainPage::page_bound(Shape* s) noexcept
-	{
-		s->get_bound(m_page_min, m_page_max);
+		return m_page_dx.m_logical_dpi;
 	}
 
 	// ページを表示する.
@@ -339,7 +237,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			// 結果が S_OK でない場合,
 			// 「描画できません」メッセージダイアログを表示する.
-			cd_message_show(ICON_ALERT, L"str_err_draw", {});
+			message_show(ICON_ALERT, L"str_err_draw", {});
 		}
 #endif
 		m_mutex_page.unlock();
@@ -349,6 +247,78 @@ namespace winrt::GraphPaper::implementation
 	const D2D1_COLOR_F& MainPage::page_foreground(void) const noexcept
 	{
 		return m_page_dx.m_theme_foreground;
+	}
+
+	// 値をページの右下位置に格納する.
+	void MainPage::page_max(const D2D1_POINT_2F p_max) noexcept
+	{
+		m_page_max = p_max;
+	}
+
+	// ページの右下位置を得る.
+	const D2D1_POINT_2F MainPage::page_max(void) const noexcept
+	{
+		return m_page_max;
+	}
+
+	// 値をページの左上位置に格納する.
+	void MainPage::page_min(const D2D1_POINT_2F p_min) noexcept
+	{
+		m_page_min = p_min;
+	}
+
+	// ページの左上位置を得る.
+	const D2D1_POINT_2F MainPage::page_min(void) const noexcept
+	{
+		return m_page_min;
+	}
+
+	// ページのスワップチェーンパネルがロードされた.
+#if defined(_DEBUG)
+	void MainPage::page_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
+#else
+	void MainPage::page_panel_loaded(IInspectable const&, RoutedEventArgs const&)
+#endif
+	{
+#if defined(_DEBUG)
+		if (sender != scp_page_panel()) {
+			return;
+		}
+#endif // _DEBUG
+		m_page_dx.SetSwapChainPanel(scp_page_panel());
+		page_draw();
+	}
+
+	// ページのスワップチェーンパネルの寸法が変わった.
+#if defined(_DEBUG)
+	void MainPage::page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
+#else
+	void MainPage::page_panel_size_changed(IInspectable const&, SizeChangedEventArgs const& args)
+#endif	// _DEBUG
+	{
+#if defined(_DEBUG)
+		if (sender != scp_page_panel()) {
+			return;
+		}
+#endif	// _DEBUG
+		const auto z = args.NewSize();
+		const auto w = z.Width;
+		const auto h = z.Height;
+		scroll_set(w, h);
+		if (scp_page_panel().IsLoaded() != true) {
+			return;
+		}
+		m_page_dx.SetLogicalSize2({ w, h });
+		page_draw();
+	}
+
+	// ページの大きさを設定する.
+	void MainPage::page_panle_size(void)
+	{
+		const auto w = scp_page_panel().ActualWidth();
+		const auto h = scp_page_panel().ActualHeight();
+		scroll_set(w, h);
+		m_page_dx.SetLogicalSize2({ static_cast<float>(w), static_cast<float>(h) });
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -431,88 +401,112 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 描画環境を解放可能にする.
-	void MainPage::page_trim(void)
+	// ページメニューの「大きさ」が選択された
+	IAsyncAction MainPage::page_size_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_page_dx.Trim();
-	}
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-	// ページのスワップチェーンパネルがロードされた.
-#if defined(_DEBUG)
-	void MainPage::page_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
-#else
-	void MainPage::page_panel_loaded(IInspectable const&, RoutedEventArgs const&)
-#endif
-	{
-#if defined(_DEBUG)
-		if (sender != scp_page_panel()) {
-			return;
+		m_sample_sheet.set_to(&m_page_sheet);
+		double pw = m_page_sheet.m_page_size.width;
+		double ph = m_page_sheet.m_page_size.height;
+		const double dpi = m_page_dx.m_logical_dpi;
+		const auto g_len = m_sample_sheet.m_grid_base + 1.0;
+		wchar_t buf[32];
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), pw, dpi, g_len, buf);
+		tx_page_width().Text(buf);
+		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), ph, dpi, g_len, buf);
+		tx_page_height().Text(buf);
+		conv_val_to_len<WITH_UNIT_NAME>(len_unit(), page_size_max(), dpi, g_len, buf);
+		tx_page_size_max().Text(buf);
+		// この時点では, テキストボックスに正しい数値を格納しても, 
+		// TextChanged は呼ばれない.
+		// プライマリーボタンは使用可能にしておく.
+		cd_page_size().IsPrimaryButtonEnabled(true);
+		cd_page_size().IsSecondaryButtonEnabled(m_list_shapes.size() > 0);
+		const auto d_result = co_await cd_page_size().ShowAsync();
+		if (d_result == ContentDialogResult::None) {
+			// 「キャンセル」が押された場合,
+			co_return;
 		}
-#endif // _DEBUG
-		m_page_dx.SetSwapChainPanel(scp_page_panel());
-		page_draw();
-	}
+		else if (d_result == ContentDialogResult::Primary) {
+			constexpr wchar_t INVALID_NUM[] = L"str_err_number";
 
-	// ページのスワップチェーンパネルの寸法が変わった.
-#if defined(_DEBUG)
-	void MainPage::page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
-#else
-	void MainPage::page_panel_size_changed(IInspectable const&, SizeChangedEventArgs const& args)
-#endif	// _DEBUG
-	{
-#if defined(_DEBUG)
-		if (sender != scp_page_panel()) {
-			return;
+			// 本来, 無効な数値が入力されている場合, 「適用」ボタンは不可になっているので
+			// 必要ないエラーチェックだが, 念のため.
+			if (swscanf_s(tx_page_width().Text().c_str(), L"%lf", &pw) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_width/Header");
+				co_return;
+			}
+			if (swscanf_s(tx_page_height().Text().c_str(), L"%lf", &ph) != 1) {
+				// 「無効な数値です」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_height/Header");
+				co_return;
+			}
+			// ページの縦横の長さの値をピクセル単位の値に変換する.
+			D2D1_SIZE_F p_size{
+				static_cast<FLOAT>(conv_len_to_val(len_unit(), pw, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_val(len_unit(), ph, dpi, g_len))
+			};
+			if (equal(p_size, m_page_sheet.m_page_size) != true) {
+				// 変換された値がページの大きさと異なる場合,
+				undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_sheet, p_size);
+				undo_push_null();
+				undo_menu_enable();
+			}
+			page_bound();
+			page_panle_size();
+			page_draw();
+			stbar_set_curs();
+			stbar_set_grid();
+			stbar_set_page();
+			stbar_set_unit();
 		}
-#endif	// _DEBUG
-		const auto z = args.NewSize();
-		const auto w = z.Width;
-		const auto h = z.Height;
-		scroll_set(w, h);
-		if (scp_page_panel().IsLoaded() != true) {
-			return;
+		else if (d_result == ContentDialogResult::Secondary) {
+			D2D1_POINT_2F b_min = { FLT_MAX, FLT_MAX };
+			D2D1_POINT_2F b_max = { -FLT_MAX, -FLT_MAX };
+			D2D1_POINT_2F b_size;
+
+			s_list_bound(m_list_shapes, b_min, b_max);
+			pt_sub(b_max, b_min, b_size);
+			if (b_size.x < 1.0F || b_size.y < 1.0F) {
+				co_return;
+			}
+			float dx = 0.0F;
+			float dy = 0.0F;
+			if (b_min.x < 0.0F) {
+				dx = -b_min.x;
+				b_min.x = 0.0F;
+				b_max.x += dx;
+			}
+			if (b_min.y < 0.0F) {
+				dy = -b_min.y;
+				b_min.y = 0.0F;
+				b_max.y += dy;
+			}
+			bool flag = false;
+			if (dx > 0.0F || dy > 0.0F) {
+				constexpr auto ALL = true;
+				undo_push_move({ dx, dy }, ALL);
+				flag = true;
+			}
+			D2D1_POINT_2F p_min = { 0.0F, 0.0F };
+			D2D1_POINT_2F p_max;
+			pt_add(b_max, b_min, p_max);
+			D2D1_SIZE_F p_size = { p_max.x, p_max.y };
+			if (equal(m_page_sheet.m_page_size, p_size) != true) {
+				undo_push_set<UNDO_OP::PAGE_SIZE>(&m_page_sheet, p_size);
+				flag = true;
+			}
+			if (flag) {
+				undo_push_null();
+				undo_menu_enable();
+			}
+			page_bound();
+			page_panle_size();
+			page_draw();
+			stbar_set_page();
 		}
-		m_page_dx.SetLogicalSize2({ w, h });
-		page_draw();
-	}
-
-	// DPI を得る.
-	const double MainPage::page_dpi(void) const noexcept
-	{
-		return m_page_dx.m_logical_dpi;
-	}
-
-	// 値をページの右下位置に格納する.
-	void MainPage::page_max(const D2D1_POINT_2F p_max) noexcept
-	{
-		m_page_max = p_max;
-	}
-
-	// ページの右下位置を得る.
-	const D2D1_POINT_2F MainPage::page_max(void) const noexcept
-	{
-		return m_page_max;
-	}
-
-	// 値をページの左上位置に格納する.
-	void MainPage::page_min(const D2D1_POINT_2F p_min) noexcept
-	{
-		m_page_min = p_min;
-	}
-
-	// ページの左上位置を得る.
-	const D2D1_POINT_2F MainPage::page_min(void) const noexcept
-	{
-		return m_page_min;
-	}
-
-	// ページの大きさを設定する.
-	void MainPage::page_panle_size(void)
-	{
-		const auto w = scp_page_panel().ActualWidth();
-		const auto h = scp_page_panel().ActualHeight();
-		scroll_set(w, h);
-		m_page_dx.SetLogicalSize2({ static_cast<float>(w), static_cast<float>(h) });
 	}
 
 	// テキストボックス「ページの幅」「ページの高さ」の値が変更された.
@@ -529,6 +523,12 @@ namespace winrt::GraphPaper::implementation
 			value = conv_len_to_val(len_unit(), value, dpi, m_sample_sheet.m_grid_base + 1.0);
 		}
 		cd_page_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < page_size_max());
+	}
+
+	// 描画環境を解放可能にする.
+	void MainPage::page_trim(void)
+	{
+		m_page_dx.Trim();
 	}
 
 }

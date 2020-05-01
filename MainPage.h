@@ -100,8 +100,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto ICON_INFO = L"icon_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"icon_alert";	// 警告アイコンの静的リソースのキー
 
-	constexpr auto GRIDLEN_PX = 48.0f;	// 方眼の大きさの初期値 (ピクセル)
-	constexpr auto PAGE_SIZE = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// A4 サイズの大きさ (インチ)
+	constexpr auto GRIDLEN_PX = 48.0F;	// 方眼の大きさの既定値 (ピクセル)
+	constexpr auto PAGE_SIZE = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// ページ寸法の既定値 (ピクセル)
 	constexpr auto SCALE_MAX = 128.0;	// 表示倍率の最大値
 	constexpr auto SCALE_MIN = 1.0 / 128.0;	// 表示倍率の最小値
 	static const winrt::hstring CF_GPD{ L"graph_paper_data" };	// 図形データのクリップボード書式
@@ -174,7 +174,7 @@ namespace winrt::GraphPaper::implementation
 		DEC,	// 10 進数
 		HEX,	// 16 進数	
 		REAL,	// 実数
-		CENT		// パーセント
+		CENT	// パーセント
 	};
 	// 色成分の値を文字列に変換する.
 	void conv_val_to_col(const COLOR_CODE style, const double value, wchar_t* buf, const size_t b_len);
@@ -272,8 +272,8 @@ namespace winrt::GraphPaper::implementation
 		winrt::event_token m_token_orientation_changed;	// ディスプレーの方向切り替えハンドラーのトークン
 		winrt::event_token m_token_contents_invalidated;	// ディスプレーの表示内容切り替えハンドラーのトークン
 		winrt::event_token m_token_close_requested;	// アプリケーションを閉じるハンドラーのトークン
-		winrt::event_token m_token_pointer_released;
-		winrt::event_token m_token_pointer_entered;
+		//winrt::event_token m_token_pointer_released;
+		//winrt::event_token m_token_pointer_entered;
 
 		//-------------------------------
 		// MainPage.cpp
@@ -281,7 +281,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// メッセージダイアログを表示する.
-		void cd_message_show(winrt::hstring const& glyph_key, winrt::hstring const& message_key, winrt::hstring const& desc_key);
+		void message_show(winrt::hstring const& glyph_key, winrt::hstring const& message_key, winrt::hstring const& desc_key);
 		// 編集メニュー項目の使用の可否を設定する.
 		void edit_menu_enable(void);
 		// メインページを作成する.
@@ -459,19 +459,19 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「余白」が選択された.
 		IAsyncAction text_margin_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」>「中段」が選択された.
-		void text_align_mid_click(IInspectable const&, RoutedEventArgs const&);
+		void text_align_p_mid_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
-		void text_align_bot_click(IInspectable const&, RoutedEventArgs const&);
+		void text_align_p_bot_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
-		void text_align_top_click(IInspectable const&, RoutedEventArgs const&);
+		void text_align_p_top_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「中央」が選択された.
-		void text_align_center_click(IInspectable const&, RoutedEventArgs const&);
+		void text_align_t_center_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「均等」が選択された.
-		void text_align_just_click(IInspectable const&, RoutedEventArgs const&);
+		void text_align_t_just_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
-		void text_align_left_click(IInspectable const&, RoutedEventArgs const&);
+		void text_align_t_left_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
-		void text_align_right_click(IInspectable const&, RoutedEventArgs const&);
+		void text_align_t_right_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void text_set_slider_header(const double value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
@@ -604,7 +604,7 @@ namespace winrt::GraphPaper::implementation
 		void about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 		{
 			// バージョン情報のメッセージダイアログを表示する.
-			cd_message_show(ICON_INFO, L"str_appname", L"str_version");
+			message_show(ICON_INFO, L"str_appname", L"str_version");
 		}
 		// 値を色の表記に格納する.
 		void color_code(const COLOR_CODE code) noexcept { m_color_code = code; }

@@ -279,7 +279,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 検索できない場合,
 		// 「文字列は見つかりません」メッセージダイアログを表示する.
-		cd_message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
+		message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
 	}
 
 	// 文字列検索パネルの「すべて置換」ボタンが押された.
@@ -330,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 		if (flag != true) {
 			// 図形がない場合,
 			// 「文字列は見つかりません」メッセージダイアログを表示する.
-			cd_message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
+			message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
 			return;
 		}
 		// 文字範囲の選択のみを解除する.
@@ -435,7 +435,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// 検索できない, かつ置換もされてない場合,
-		cd_message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
+		message_show(ICON_INFO, NO_FOUND, tx_text_find_what().Text());
 	}
 
 	// 編集メニューの「文字列の編集」が選択された.

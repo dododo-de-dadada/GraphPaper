@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 色成分の値を文字列に変換する.
-	// c_code	色成分の形式
+	// c_code	色の表記
 	// value	色成分の値
 	// buf	文字列の配列
 	// len	文字列の最大長 ('\0' を含む長さ)
@@ -50,15 +50,19 @@ namespace winrt::GraphPaper::implementation
 	void conv_val_to_col(const COLOR_CODE c_code, const double value, wchar_t* buf, const size_t b_len)
 	{
 		if (c_code == COLOR_CODE::DEC) {
+			// 色の表記が 10 進数の場合,
 			swprintf_s(buf, b_len, L"%.0lf", std::round(value));
 		}
 		else if (c_code == COLOR_CODE::HEX) {
+			// 色の表記が 16 進数の場合,
 			swprintf_s(buf, b_len, L"%02X", static_cast<uint32_t>(std::round(value)));
 		}
 		else if (c_code == COLOR_CODE::REAL) {
+			// 色の表記が実数の場合,
 			swprintf_s(buf, b_len, L"%.4lf", value / COLOR_MAX);
 		}
 		else if (c_code == COLOR_CODE::CENT) {
+			// 色の表記がパーセントの場合,
 			swprintf_s(buf, b_len, L"%.1lf%%", value / COLOR_MAX * 100.0);
 		}
 		else {
@@ -123,48 +127,6 @@ namespace winrt::GraphPaper::implementation
 	}
 	template void conv_val_to_len<!WITH_UNIT_NAME>(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 	template void conv_val_to_len<WITH_UNIT_NAME>(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
-
-	// メッセージダイアログを表示する.
-	// glyph_key	フォントアイコンのグリフの静的リソースのキー
-	// message_key	メッセージのアプリケーションリソースのキー
-	// desc_key		説明文のアプリケーションリソースのキー
-	// 戻り値	なし
-	void MainPage::cd_message_show(winrt::hstring const& glyph_key, winrt::hstring const& message_key, winrt::hstring const& desc_key)
-	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialog;
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
-		const wchar_t QUOT[] = L"\"";	// 引用符
-		const wchar_t NL[] = L"\u2028";	// テキストブロック内での改行
-
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
-		winrt::hstring text;
-		try {
-			text = r_loader.GetString(message_key);
-		}
-		catch (winrt::hresult_error const&) {}
-		if (text.empty()) {
-			// 文字列が空の場合,
-			text = message_key;
-		}
-		winrt::hstring added_text;
-		try {
-			added_text = r_loader.GetString(desc_key);
-		}
-		catch (winrt::hresult_error const&) {}
-		if (added_text.empty() != true) {
-			// 追加する文字列が空でない場合,
-			text = text + NL + added_text;
-		}
-		else if (desc_key.empty() != true) {
-			// 説明そのものが空でない場合,
-			text = text + NL + QUOT + desc_key + QUOT;
-		}
-		const auto glyph = Resources().TryLookup(box_value(glyph_key));
-		fi_message().Glyph(glyph != nullptr ? unbox_value<winrt::hstring>(glyph) : glyph_key);
-		tk_message().Text(text);
-		auto _{ cd_message().ShowAsync() };
-	}
 
 	// 編集メニュー項目の使用の可否を設定する.
 	// 選択の有無や型ごとに図形を数え,
@@ -239,6 +201,80 @@ namespace winrt::GraphPaper::implementation
 		m_list_selected = selected_cnt;
 	}
 
+	// ファイルメニューの「終了」が選択された
+	IAsyncAction MainPage::exit_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		using winrt::Windows::UI::Xaml::Application;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+
+		if (undo_pushed()) {
+			// 操作スタックの更新フラグが立っている場合,
+			const auto d_result = co_await cd_conf_save().ShowAsync();
+			if (d_result == ContentDialogResult::None) {
+				// 「キャンセル」が押された場合,
+				co_return;
+			}
+			else if (d_result == ContentDialogResult::Primary) {
+				// 「保存する」が押された場合,
+				if (co_await file_save_async() != S_OK) {
+					// 保存できなかった場合,
+					co_return;
+				}
+			}
+		}
+		// 上記以外の場合,
+		if (m_mutex_summary.load(std::memory_order_acquire)) {
+			//if (m_summary_visible) {
+			summary_close();
+		}
+		undo_clear();
+		s_list_clear(m_list_shapes);
+#if defined(_DEBUG)
+		if (debug_leak_cnt != 0) {
+			message_show(ICON_ALERT, L"Memory leak occurs", {});
+		}
+#endif
+		ShapeText::release_available_fonts();
+
+		// 静的リソースから読み込んだコンテキストメニューを破棄する.
+		{
+			m_menu_stroke = nullptr;
+			m_menu_fill = nullptr;
+			m_menu_font = nullptr;
+			m_menu_sheet = nullptr;
+			m_menu_ungroup = nullptr;
+		}
+
+		// コードビハインドで設定したハンドラーの設定を解除する.
+		{
+			using winrt::Windows::UI::Xaml::Application;
+			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
+
+			auto const& app{ Application::Current() };
+			app.Suspending(m_token_suspending);
+			app.Resuming(m_token_resuming);
+			app.EnteredBackground(m_token_entered_background);
+			app.LeavingBackground(m_token_leaving_background);
+			auto const& thread{ CoreWindow::GetForCurrentThread() };
+			thread.Activated(m_token_activated);
+			thread.VisibilityChanged(m_token_visibility_changed);
+			auto const& disp{ DisplayInformation::GetForCurrentView() };
+			disp.DpiChanged(m_token_dpi_changed);
+			disp.OrientationChanged(m_token_orientation_changed);
+			disp.DisplayContentsInvalidated(m_token_contents_invalidated);
+			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(m_token_close_requested);
+		}
+
+		// 本来なら DirectX をコードビハインドでリリースしたいところだが,
+		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがある.
+		// なので, Trim を呼び出すだけにする.
+		m_page_dx.Trim();
+		m_sample_dx.Trim();
+
+		// アプリケーションを終了する.
+		Application::Current().Exit();
+	}
+
 	// メインページを作成する.
 	MainPage::MainPage(void)
 	{
@@ -308,6 +344,7 @@ namespace winrt::GraphPaper::implementation
 		// クリックの判定時間をシステムから得る.
 		{
 			using winrt::Windows::UI::ViewManagement::UISettings;
+
 			m_pointer_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
 			// クリックの判定距離を物理 DPI に合わせる.
 			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
@@ -315,85 +352,55 @@ namespace winrt::GraphPaper::implementation
 			m_pointer_click_dist = 6.0 * raw_dpi / log_dpi;
 		}
 
-		{
-			m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::pointer_released });
-			m_token_pointer_entered = scp_page_panel().PointerReleased({ this, &MainPage::pointer_entered });
-		}
+		//{
+		//	m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::pointer_released });
+		//	m_token_pointer_entered = scp_page_panel().PointerReleased({ this, &MainPage::pointer_entered });
+		//}
 
 		auto _{ new_click_async(nullptr, nullptr) };
 	}
 
-	// ファイルメニューの「終了」が選択された
-	IAsyncAction MainPage::exit_click_async(IInspectable const&, RoutedEventArgs const&)
+	// メッセージダイアログを表示する.
+	// glyph_key	フォントアイコンのグリフの静的リソースのキー
+	// message_key	メッセージのアプリケーションリソースのキー
+	// desc_key		説明文のアプリケーションリソースのキー
+	// 戻り値	なし
+	void MainPage::message_show(winrt::hstring const& glyph_key, winrt::hstring const& message_key, winrt::hstring const& desc_key)
 	{
-		using winrt::Windows::UI::Xaml::Application;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialog;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
+		const wchar_t QUOT[] = L"\"";	// 引用符
+		const wchar_t NL[] = L"\u2028";	// テキストブロック内での改行
 
-		if (undo_pushed()) {
-			// 操作スタックの更新フラグが立っている場合,
-			const auto d_result = co_await cd_conf_save().ShowAsync();
-			if (d_result == ContentDialogResult::None) {
-				// 「キャンセル」が押された場合,
-				co_return;
-			}
-			else if (d_result == ContentDialogResult::Primary) {
-				// 「保存する」が押された場合,
-				if (co_await file_save_async() != S_OK) {
-					// 保存できなかった場合,
-					co_return;
-				}
-			}
+		auto const& r_loader = ResourceLoader::GetForCurrentView();
+		winrt::hstring text;
+		try {
+			text = r_loader.GetString(message_key);
 		}
-		// 上記以外の場合,
-		if (m_mutex_summary.load(std::memory_order_acquire)) {
-		//if (m_summary_visible) {
-			summary_close();
+		catch (winrt::hresult_error const&) {
 		}
-		undo_clear();
-		s_list_clear(m_list_shapes);
-#if defined(_DEBUG)
-		if (debug_leak_cnt != 0) {
-			cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
+		if (text.empty()) {
+			// 文字列が空の場合,
+			text = message_key;
 		}
-#endif
-		ShapeText::release_available_fonts();
-
-		// 静的リソースから読み込んだコンテキストメニューを破棄する.
-		{
-			m_menu_stroke = nullptr;
-			m_menu_fill = nullptr;
-			m_menu_font = nullptr;
-			m_menu_sheet = nullptr;
-			m_menu_ungroup = nullptr;
+		winrt::hstring added_text;
+		try {
+			added_text = r_loader.GetString(desc_key);
 		}
-
-		// コードビハインドで設定したハンドラーの設定を解除する.
-		{
-			using winrt::Windows::UI::Xaml::Application;
-			auto const& app{ Application::Current() };
-			app.Suspending(m_token_suspending);
-			app.Resuming(m_token_resuming);
-			app.EnteredBackground(m_token_entered_background);
-			app.LeavingBackground(m_token_leaving_background);
-			auto const& thread{ CoreWindow::GetForCurrentThread() };
-			thread.Activated(m_token_activated);
-			thread.VisibilityChanged(m_token_visibility_changed);
-			auto const& disp{ DisplayInformation::GetForCurrentView() };
-			disp.DpiChanged(m_token_dpi_changed);
-			disp.OrientationChanged(m_token_orientation_changed);
-			disp.DisplayContentsInvalidated(m_token_contents_invalidated);
-			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
-			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(m_token_close_requested);
+		catch (winrt::hresult_error const&) {}
+		if (added_text.empty() != true) {
+			// 追加する文字列が空でない場合,
+			text = text + NL + added_text;
 		}
-
-		// 本来なら DirectX をコードビハインドでリリースしたいところだが,
-		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがある.
-		// なので, Trim を呼び出すだけにする.
-		m_page_dx.Trim();
-		m_sample_dx.Trim();
-
-		// アプリケーションを終了する.
-		Application::Current().Exit();
+		else if (desc_key.empty() != true) {
+			// 説明そのものが空でない場合,
+			text = text + NL + QUOT + desc_key + QUOT;
+		}
+		const auto glyph = Resources().TryLookup(box_value(glyph_key));
+		fi_message().Glyph(glyph != nullptr ? unbox_value<winrt::hstring>(glyph) : glyph_key);
+		tk_message().Text(text);
+		auto _{ cd_message().ShowAsync() };
 	}
 
 	// ファイルメニューの「新規」が選択された
@@ -426,7 +433,7 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			// 「メモリリーク」メッセージダイアログを表示する.
-			cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
+			message_show(ICON_ALERT, L"Memory leak occurs", {});
 		}
 #endif
 		ShapeText::release_available_fonts();
@@ -468,6 +475,7 @@ namespace winrt::GraphPaper::implementation
 			sheet_init();
 		}
 
+		// ページの左上位置と右下位置を初期化する.
 		{
 			page_min(D2D1_POINT_2F{ 0.0F, 0.0F });
 			page_max(D2D1_POINT_2F{ m_page_sheet.m_page_size.width, m_page_sheet.m_page_size.height });

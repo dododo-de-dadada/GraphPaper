@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 		wchar_t* unavailable_font;	// 書体名
 		if (s_list_available_font(m_list_shapes, unavailable_font) != true) {
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
-			cd_message_show(ICON_ALERT, ERR_FONT, unavailable_font);
+			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
 		if (m_mutex_summary.load(std::memory_order_acquire)) {
 			//if (m_summary_visible) {
@@ -230,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 			if (debug_leak_cnt != 0) {
 				auto cd = this->Dispatcher();
 				co_await winrt::resume_foreground(cd);
-				cd_message_show(ICON_ALERT, L"Memory leak occurs", {});
+				message_show(ICON_ALERT, L"Memory leak occurs", {});
 				co_await context;
 				m_mutex_page.unlock();
 				co_return hr;
@@ -257,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 		if (hr != S_OK) {
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
-			cd_message_show(ICON_ALERT, ERR_READ, s_file.Path());
+			message_show(ICON_ALERT, ERR_READ, s_file.Path());
 		}
 		else if (suspend != true && sheet != true) {
 			auto cd = this->Dispatcher();
@@ -306,30 +306,22 @@ namespace winrt::GraphPaper::implementation
 	// s_file	ストレージファイル
 	// 戻り値	なし
 	// 最近使ったファイルメニューとウィンドウタイトルも更新される.
-	// ストレージファイルがヌルの場合, 最近使ったファイルはそのままで, 
-	// ウィンドウタイトルに無題が格納される.
+	// ストレージファイルがヌルの場合, ウィンドウタイトルに無題が格納される.
 	void MainPage::file_recent_add(StorageFile const& s_file)
 	{
 		using winrt::Windows::UI::ViewManagement::ApplicationView;
+		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		if (s_file != nullptr) {
-			using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
 			auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
-			//if (mru_list.ContainsItem(m_token_mru)) {
-				//mru_list.Remove(m_token_mru);
-				//mru_list.AddOrReplace(m_token_mru, s_file, s_file.Path());
-			//}
-			//else {
 			m_token_mru = mru_list.Add(s_file, s_file.Path());
-			//}
 			ApplicationView::GetForCurrentView().Title(s_file.Name());
 		}
 		else {
-			using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			ApplicationView::GetForCurrentView().Title(r_loader.GetString(UNTITLED));
 		}
-		// 最近使ったファイルメニュを更新する.
 		file_recent_update_menu();
 	}
 
@@ -381,7 +373,7 @@ namespace winrt::GraphPaper::implementation
 		auto const& mru_entries = mru_list.Entries();
 		if (i >= mru_entries.Size()) {
 			// ファイルの番号が最近使ったファイルの数以上の場合,
-			cd_message_show(ICON_ALERT, ERR_RECENT, to_hstring(i + 1));
+			message_show(ICON_ALERT, ERR_RECENT, to_hstring(i + 1));
 			co_return;
 		}
 		// 最近使ったリストから要素を得る.
@@ -411,7 +403,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// 取得できない場合,
-			cd_message_show(ICON_ALERT, ERR_RECENT, item[0].Metadata);
+			message_show(ICON_ALERT, ERR_RECENT, item[0].Metadata);
 		}
 
 		// ウィンドウのカーソルを復元する.
@@ -562,7 +554,7 @@ namespace winrt::GraphPaper::implementation
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
-			cd_message_show(ICON_ALERT, ERR_WRITE, m_token_mru);
+			message_show(ICON_ALERT, ERR_WRITE, m_token_mru);
 		}
 		// スレッドコンテキストを復元する.
 		//co_await context;
@@ -653,7 +645,7 @@ namespace winrt::GraphPaper::implementation
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
-			cd_message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
+			message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
 		}
 		else if (suspend != true && layout != true) {
 			// 中断フラグがない場合,
@@ -736,7 +728,7 @@ namespace winrt::GraphPaper::implementation
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
-			cd_message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
+			message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;

@@ -27,6 +27,8 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_WEIGHT_BLACK,
 		DWRITE_FONT_WEIGHT_EXTRA_BLACK
 	};
+
+	// 書体の太さの文字列配列
 	constexpr wchar_t* FONT_WEIGHT_NAME[] = {
 		L"str_font_weight_thin",
 		L"str_font_weight_extra_light",
@@ -55,6 +57,8 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STRETCH_EXTRA_EXPANDED,
 		DWRITE_FONT_STRETCH_ULTRA_EXPANDED,
 	};
+
+	// 書体の伸縮の文字列配列
 	constexpr wchar_t* FONT_STRETCH_NAME[] = {
 		L"str_font_stretch_undefined",
 		L"str_font_stretch_ultra_condensed",
@@ -435,6 +439,76 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
+	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
+	void MainPage::text_align_p_bot_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+	}
+
+	// 書体メニューの「段落のそろえ」に印をつける.
+	// p_align	段落のそろえ
+	void MainPage::text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align)
+	{
+		rmfi_text_align_top().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_text_align_bot().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_mid().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+		rmfi_text_align_top_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_text_align_bot_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_mid_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	}
+
+	// 書体メニューの「段落のそろえ」>「中段」が選択された.
+	void MainPage::text_align_p_mid_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	}
+
+	// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
+	void MainPage::text_align_p_top_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+	}
+
+	// 書体メニューの「文字列のそろえ」>「中央」が選択された.
+	void MainPage::text_align_t_center_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_CENTER);
+	}
+
+	// 書体メニューの「文字列のそろえ」に印をつける.
+	// t_align	文字列のそろえ
+	void MainPage::text_align_t_check_menu(const DWRITE_TEXT_ALIGNMENT t_align)
+	{
+		rmfi_text_align_left().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_LEADING);
+		rmfi_text_align_right().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_TRAILING);
+		rmfi_text_align_center().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_CENTER);
+		rmfi_text_align_just().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+
+		rmfi_text_align_left_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_LEADING);
+		rmfi_text_align_right_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_TRAILING);
+		rmfi_text_align_center_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_CENTER);
+		rmfi_text_align_just_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+	}
+
+	// 書体メニューの「文字列のそろえ」>「均等」が選択された.
+	void MainPage::text_align_t_just_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+	}
+
+	// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
+	void MainPage::text_align_t_left_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
+	}
+
+	// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
+	void MainPage::text_align_t_right_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
+	}
+
 	constexpr double TEXT_LINE_DELTA = 2;	// 行の高さの変分 (DPIs)
 
 	// 書体メニューの「大きさを合わせる」が選択された.
@@ -452,7 +526,8 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			auto u = new UndoAnchor(s, ANCH_WHICH::ANCH_SE);
-			if (static_cast<ShapeText*>(s)->adjust_bound({ page_size_max(), page_size_max() })) {
+			const auto size = page_size_max();
+			if (static_cast<ShapeText*>(s)->adjust_bound({ size, size })) {
 				page_bound(s);
 				m_stack_undo.push_back(u);
 				flag = true;
@@ -554,76 +629,6 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
 		page_draw();
-	}
-
-	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
-	void MainPage::text_align_bot_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-	}
-
-	// 書体メニューの「文字列のそろえ」>「中央」が選択された.
-	void MainPage::text_align_center_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_CENTER);
-	}
-
-	// 書体メニューの「文字列のそろえ」>「均等」が選択された.
-	void MainPage::text_align_just_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-	}
-
-	// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
-	void MainPage::text_align_left_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
-	}
-
-	// 書体メニューの「段落のそろえ」>「中段」が選択された.
-	void MainPage::text_align_mid_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	}
-
-	// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
-	void MainPage::text_align_right_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
-	}
-
-	// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
-	void MainPage::text_align_top_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-	}
-
-	// 書体メニューの「段落のそろえ」に印をつける.
-	// p_align	段落のそろえ
-	void MainPage::text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align)
-	{
-		rmfi_text_align_top().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bot().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_mid().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-
-		rmfi_text_align_top_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bot_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_mid_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	}
-
-	// 書体メニューの「文字列のそろえ」に印をつける.
-	// t_align	文字列のそろえ
-	void MainPage::text_align_t_check_menu(const DWRITE_TEXT_ALIGNMENT t_align)
-	{
-		rmfi_text_align_left().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_text_align_right().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_text_align_center().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_just().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-
-		rmfi_text_align_left_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_text_align_right_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_text_align_center_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_just_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 	}
 
 	// 値をスライダーのヘッダーに格納する.
