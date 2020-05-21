@@ -17,6 +17,7 @@
             <x:String x:Key="icon_save_as">&#xE792;</x:String>
             <x:String x:Key="icon_recent">&#xE81C;</x:String>
             <x:String x:Key="icon_close">&#xE894;</x:String>
+            <x:String x:Key="icon_italic">&#xE8DB;</x:String>
             <!-- 左そろえの描画コマンド -->
             <x:String x:Key="data_align_bot">
                 M4,0 L6,0 L6,14 L4,14 Z
@@ -588,7 +589,10 @@
                 <MenuFlyoutItem x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
                 <MenuFlyoutItem x:Uid="mfi_font_weight" Click="font_weight_click_async" Icon="Bold" Text="Weight..." />
                 <MenuFlyoutItem x:Uid="mfi_font_stretch" Click="font_stretch_click_async" Text="Stretch..."/>
-                <MenuFlyoutSubItem x:Uid="mfsi_font_style" Icon="Italic" Text="Style">
+                <MenuFlyoutSubItem x:Uid="mfsi_font_style" Text="Style">
+                    <MenuFlyoutSubItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_italic}" />
+                    </MenuFlyoutSubItem.Icon>
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_normal" x:Uid="rmfi_font_style_normal" Click="font_style_normal_click" Text="Normal" GroupName="gn_font_style"/>
                     <MenuFlyoutSeparator />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_oblique" x:Uid="rmfi_font_style_oblique" Click="font_style_oblique_click" Text="Normal" GroupName="gn_font_style"/>
