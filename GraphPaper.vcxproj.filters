@@ -27,7 +27,6 @@
     <ClCompile Include="MainPage_grid.cpp" />
     <ClCompile Include="MainPage_group.cpp" />
     <ClCompile Include="MainPage_kybd.cpp" />
-    <ClCompile Include="MainPage_page.cpp" />
     <ClCompile Include="MainPage_pointer.cpp" />
     <ClCompile Include="MainPage_scroll.cpp" />
     <ClCompile Include="MainPage_select.cpp" />
@@ -52,12 +51,13 @@
     <ClCompile Include="shape_stroke.cpp" />
     <ClCompile Include="shape_text.cpp" />
     <ClCompile Include="undo.cpp" />
-    <ClCompile Include="shape_scale.cpp" />
+    <ClCompile Include="shape_ruler.cpp" />
     <ClCompile Include="MainPage_sample.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
     <ClCompile Include="MainPage_stbar.cpp" />
     <ClCompile Include="shape_sheet.cpp" />
     <ClCompile Include="MainPage_sheet.cpp" />
+    <ClCompile Include="MainPage_pref.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -66,7 +66,6 @@
     <ClInclude Include="Summary.h" />
     <ClInclude Include="SummaryViewModel.h" />
     <ClInclude Include="undo.h" />
-    <ClInclude Include="shape_rect.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">

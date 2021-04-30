@@ -3,7 +3,7 @@
 // 角丸方形図形
 //------------------------------
 #include "pch.h"
-#include "shape_rect.h"
+#include "shape.h"
 
 using namespace winrt;
 
@@ -93,13 +93,13 @@ namespace winrt::GraphPaper::implementation
 			//if (flag) {
 			// D2D1_POINT_2F c_pos;
 			// pt_add(r_min, rx, ry, c_pos);
-			// anchor_draw_rounded(c_pos, dx);
+			// anchor_draw_ellipse(c_pos, dx);
 			// c_pos.x = r_rec.rect.right - rx;
-			// anchor_draw_rounded(c_pos, dx);
+			// anchor_draw_ellipse(c_pos, dx);
 			// c_pos.y = r_rec.rect.bottom - ry;
-			// anchor_draw_rounded(c_pos, dx);
+			// anchor_draw_ellipse(c_pos, dx);
 			// c_pos.x = r_min.x + rx;
-			// anchor_draw_rounded(c_pos, dx);
+			// anchor_draw_ellipse(c_pos, dx);
 			//}
 			D2D1_POINT_2F r_pos[4];
 			r_pos[0] = r_min;
@@ -120,13 +120,13 @@ namespace winrt::GraphPaper::implementation
 			//if (flag != true) {
 				D2D1_POINT_2F c_pos;
 				pt_add(r_min, rx, ry, c_pos);
-				anchor_draw_rounded(c_pos, dx);
+				anchor_draw_ellipse(c_pos, dx);
 				c_pos.x = r_rec.rect.right - rx;
-				anchor_draw_rounded(c_pos, dx);
+				anchor_draw_ellipse(c_pos, dx);
 				c_pos.y = r_rec.rect.bottom - ry;
-				anchor_draw_rounded(c_pos, dx);
+				anchor_draw_ellipse(c_pos, dx);
 				c_pos.x = r_min.x + rx;
-				anchor_draw_rounded(c_pos, dx);
+				anchor_draw_ellipse(c_pos, dx);
 			//}
 		}
 	}
@@ -138,34 +138,37 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 指定された部位の位置を得る.
-	void ShapeRRect::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept
+	//	部位の位置を得る.
+	//	anch	図形の部位.
+	//	value	得られた位置.
+	//	戻り値	なし
+	void ShapeRRect::get_anch_pos(const ANCH_WHICH anch, D2D1_POINT_2F& value) const noexcept
 	{
-		const double vx = m_diff.x;
-		const double vy = m_diff.y;
-		const double hx = vx * 0.5;
-		const double hy = vy * 0.5;
-		const double rx = fabs(hx) < fabs(m_corner_rad.x) ? hx : m_corner_rad.x;
-		const double ry = fabs(hy) < fabs(m_corner_rad.y) ? hy : m_corner_rad.y;
-		switch (a) {
+		const double dx = m_diff.x;
+		const double dy = m_diff.y;
+		const double mx = dx * 0.5;	// 中点
+		const double my = dy * 0.5;	// 中点
+		const double rx = fabs(mx) < fabs(m_corner_rad.x) ? mx : m_corner_rad.x;	// 角丸
+		const double ry = fabs(my) < fabs(m_corner_rad.y) ? my : m_corner_rad.y;	// 角丸
+		switch (anch) {
 		case ANCH_WHICH::ANCH_R_NW:
 			// 左上の角丸中心点を求める
 			pt_add(m_pos, rx, ry, value);
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
 			// 右上の角丸中心点を求める
-			pt_add(m_pos, vx - rx, ry, value);
+			pt_add(m_pos, dx - rx, ry, value);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
 			// 右下の角丸中心点を求める
-			pt_add(m_pos, vx - rx, vy - ry, value);
+			pt_add(m_pos, dx - rx, dy - ry, value);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
 			// 左下の角丸中心点を求める
-			pt_add(m_pos, rx, vy - ry, value);
+			pt_add(m_pos, rx, dy - ry, value);
 			break;
 		default:
-			ShapeRect::get_pos(a, value);
+			ShapeRect::get_anch_pos(anch, value);
 			break;
 		}
 	}
@@ -226,7 +229,7 @@ namespace winrt::GraphPaper::implementation
 			for (uint32_t i = 0; i < 4; i++) {
 				// 角丸の中心点を得る.
 				D2D1_POINT_2F r_cen;
-				get_pos(ANCH_ROUND[i], r_cen);
+				get_anch_pos(ANCH_ROUND[i], r_cen);
 				// 位置が角丸の部位に含まれるか調べる.
 				if (pt_in_anch(t_pos, r_cen, a_len)) {
 					// 含まれるなら角丸の部位を返す.
@@ -236,14 +239,14 @@ namespace winrt::GraphPaper::implementation
 		}
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F r_pos;	// 方形の頂点
-			get_pos(ANCH_CORNER[i], r_pos);
+			get_anch_pos(ANCH_CORNER[i], r_pos);
 			if (pt_in_anch(t_pos, r_pos, a_len)) {
 				return ANCH_CORNER[i];
 			}
 		}
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F r_pos;	// 方形の辺の中点
-			get_pos(ANCH_MIDDLE[i], r_pos);
+			get_anch_pos(ANCH_MIDDLE[i], r_pos);
 			if (pt_in_anch(t_pos, r_pos, a_len)) {
 				return ANCH_MIDDLE[i];
 			}
@@ -251,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 		if (flag != true) {
 			for (uint32_t i = 0; i < 4; i++) {
 				D2D1_POINT_2F r_cen;	// 角丸部分の中心点
-				get_pos(ANCH_ROUND[i], r_cen);
+				get_anch_pos(ANCH_ROUND[i], r_cen);
 				if (pt_in_anch(t_pos, r_cen, a_len)) {
 					return ANCH_ROUND[i];
 				}
@@ -299,43 +302,45 @@ namespace winrt::GraphPaper::implementation
 		return is_opaque(m_fill_color) ? ANCH_WHICH::ANCH_INSIDE : ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
-	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapeRRect::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
+	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+	//	value	格納する値
+	//	abch	図形の部位
+	void ShapeRRect::set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch)
 	{
 		D2D1_POINT_2F c_pos;
 		D2D1_POINT_2F diff;
 		D2D1_POINT_2F rad;
 
-		switch (a) {
+		switch (anch) {
 		case ANCH_WHICH::ANCH_R_NW:
-			ShapeRRect::get_pos(a, c_pos);
+			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
 			pt_add(m_corner_rad, diff, rad);
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
-			ShapeRRect::get_pos(a, c_pos);
+			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
 			rad.x = m_corner_rad.x - diff.x;
 			rad.y = m_corner_rad.y + diff.y;
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
-			ShapeRRect::get_pos(a, c_pos);
+			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
 			rad.x = m_corner_rad.x - diff.x;
 			rad.y = m_corner_rad.y - diff.y;
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
-			ShapeRRect::get_pos(a, c_pos);
+			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
 			rad.x = m_corner_rad.x + diff.x;
 			rad.y = m_corner_rad.y - diff.y;
 			calc_corner_radius(m_diff, rad, m_corner_rad);
 			break;
 		default:
-			ShapeRect::set_pos(value, a);
+			ShapeRect::set_anch_pos(value, anch);
 			if (m_diff.x * m_corner_rad.x < 0.0f) {
 				m_corner_rad.x = -m_corner_rad.x;
 			}

@@ -24,10 +24,47 @@ namespace winrt::GraphPaper::implementation
 	// アプリケーションがバックグラウンドに移った.
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
-		m_mutex_page.lock();
-		page_trim();
+		m_mutex_shapes.lock();
+		sheet_trim();
 		m_sample_dx.Trim();
-		m_mutex_page.unlock();
+		m_mutex_shapes.unlock();
+	}
+
+	// アプリケーションがバックグラウンドから戻った.
+	void MainPage::app_leaving_background(IInspectable const&/*sender*/, LeavingBackgroundEventArgs const&/*args*/)
+	{
+	}
+
+	// アプリケーションの再開の処理を行う.
+	// アプリ起動のときは呼ばれない.
+	IAsyncAction MainPage::app_resuming_async(IInspectable const&, IInspectable const&)
+	{
+		winrt::apartment_context context;
+
+		ShapeText::set_available_fonts();
+
+		auto hr = E_FAIL;
+		auto item{ co_await cache_folder().TryGetItemAsync(FILE_NAME) };
+		if (item != nullptr) {
+			auto s_file = item.try_as<StorageFile>();
+			if (s_file != nullptr) {
+				// ストレージファイルを非同期に読む.
+				try {
+					hr = co_await file_read_async(s_file, true, false);
+					// スレッドをメインページの UI スレッドに変える.
+					//auto cd = this->Dispatcher();
+					//co_await winrt::resume_foreground(cd);
+					//file_finish_reading();
+				}
+				catch (winrt::hresult_error const& e) {
+					hr = e.code();
+				}
+				s_file = nullptr;
+			}
+			item = nullptr;
+		}
+		// スレッドコンテキストを復元する.
+		co_await context;
 	}
 
 	// アプリケーションの中断の処理を行う.
@@ -114,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		if (hr == S_OK) {
 			if (m_mutex_summary.load(std::memory_order_acquire)) {
-			//if (m_summary_visible) {
+				//if (m_summary_visible) {
 				summary_clear();
 			}
 		}
@@ -131,43 +168,6 @@ namespace winrt::GraphPaper::implementation
 			s_deferral.Complete();
 			s_deferral = nullptr;
 		}
-	}
-
-	// アプリケーションがバックグラウンドから戻った.
-	void MainPage::app_leaving_background(IInspectable const&/*sender*/, LeavingBackgroundEventArgs const&/*args*/)
-	{
-	}
-
-	// アプリケーションの再開の処理を行う.
-	// アプリ起動のときは呼ばれない.
-	IAsyncAction MainPage::app_resuming_async(IInspectable const&, IInspectable const&)
-	{
-		winrt::apartment_context context;
-
-		ShapeText::set_available_fonts();
-
-		auto hr = E_FAIL;
-		auto item{ co_await cache_folder().TryGetItemAsync(FILE_NAME) };
-		if (item != nullptr) {
-			auto s_file = item.try_as<StorageFile>();
-			if (s_file != nullptr) {
-				// ストレージファイルを非同期に読む.
-				try {
-					hr = co_await file_read_async(s_file, true, false);
-					// スレッドをメインページの UI スレッドに変える.
-					//auto cd = this->Dispatcher();
-					//co_await winrt::resume_foreground(cd);
-					//file_finish_reading();
-				}
-				catch (winrt::hresult_error const& e) {
-					hr = e.code();
-				}
-				s_file = nullptr;
-			}
-			item = nullptr;
-		}
-		// スレッドコンテキストを復元する.
-		co_await context;
 	}
 
 }

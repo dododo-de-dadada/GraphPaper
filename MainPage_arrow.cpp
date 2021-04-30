@@ -15,7 +15,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「矢じりの種類」>「閉じた」が選択された.
 	void MainPage::arrow_filled_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_sheet.m_arrow_style == ARROW_STYLE::NONE) {
+		if (m_main_sheet.m_arrow_style == ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(true);
 			mfi_arrow_size_2().IsEnabled(true);
 		}
@@ -25,7 +25,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「矢じりの種類」>「なし」が選択された.
 	void MainPage::arrow_none_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_sheet.m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_main_sheet.m_arrow_style != ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(false);
 			mfi_arrow_size_2().IsEnabled(false);
 		}
@@ -35,16 +35,16 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「矢じりの種類」>「開いた」が選択された.
 	void MainPage::arrow_opened_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_sheet.m_arrow_style == ARROW_STYLE::NONE) {
+		if (m_main_sheet.m_arrow_style == ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(true);
 			mfi_arrow_size_2().IsEnabled(true);
 		}
 		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::OPENED);
 	}
 
-	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S>
-	void MainPage::arrow_set_slider_header(const double value)
+	//	値をスライダーのヘッダーに格納する.
+	//	value	値
+	template <UNDO_OP U, int S> void MainPage::arrow_set_slider_header(const double value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -65,8 +65,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
-			const double dpi = page_dpi();
-			const double g_len = m_page_sheet.m_grid_base + 1.0;
+			const double dpi = sheet_dpi();
+			const double g_len = m_main_sheet.m_grid_base + 1.0;
 			conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf, 31);
 			hdr = hdr + buf;
 		}
@@ -89,8 +89,7 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
-	void MainPage::arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		const auto value = args.NewValue();
 		// 値をスライダーのヘッダーに格納する.
@@ -120,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		const double val0 = m_sample_sheet.m_arrow_size.m_width / SLIDER_STEP;
 		const double val1 = m_sample_sheet.m_arrow_size.m_length / SLIDER_STEP;
 		const double val2 = m_sample_sheet.m_arrow_size.m_offset / SLIDER_STEP;
@@ -155,7 +154,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
-		page_draw();
+		sheet_draw();
 	}
 
 	// 線枠メニューの「矢じりの種類」に印をつける.

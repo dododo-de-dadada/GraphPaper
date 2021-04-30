@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		const double val0 = m_sample_sheet.m_font_color.r * COLOR_MAX;
 		const double val1 = m_sample_sheet.m_font_color.g * COLOR_MAX;
 		const double val2 = m_sample_sheet.m_font_color.b * COLOR_MAX;
@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
 		sample_slider_3().ValueChanged(slider_3_token);
-		page_draw();
+		sheet_draw();
 
 	}
 
@@ -133,7 +133,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::get_available_font(i); i++) {
 			auto item = box_value(winrt::hstring(name));
 			lv_sample_list().Items().Append(item);
@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 			IInspectable item[1];
 			lv_sample_list().Items().GetMany(i, item);
 			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
-			if (wcscmp(name, m_page_sheet.m_font_family) == 0) {
+			if (wcscmp(name, m_main_sheet.m_font_family) == 0) {
 				// 書体名が同じ場合,
 				// その書体をリストビューの選択済み項目に格納する.
 				lv_sample_list().SelectedItem(item[0]);
@@ -179,7 +179,7 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().SelectionChanged(changed_token);
 		lv_sample_list().Visibility(COLLAPSED);
 		lv_sample_list().Items().Clear();
-		page_draw();
+		sheet_draw();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -278,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		const double val0 = m_sample_sheet.m_font_size;
 		sample_slider_0().Value(val0);
 		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
@@ -299,7 +299,7 @@ namespace winrt::GraphPaper::implementation
 		m_sample_shape = nullptr;
 		sample_slider_0().Visibility(COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
-		page_draw();
+		sheet_draw();
 	}
 
 	// 書体メニューの「伸縮」が選択された.
@@ -308,7 +308,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		for (uint32_t i = 0; FONT_STRETCH_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_STRETCH_NAME[i]));
 			lv_sample_list().Items().Append(item);
@@ -316,7 +316,7 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().SelectedIndex(-1);
 		const auto k = lv_sample_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
-			if (FONT_STRETCH[i] == m_page_sheet.m_font_stretch) {
+			if (FONT_STRETCH[i] == m_main_sheet.m_font_stretch) {
 				lv_sample_list().SelectedIndex(i);
 				IInspectable item[1];
 				lv_sample_list().Items().GetMany(i, item);
@@ -352,7 +352,7 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().SelectionChanged(changed_token);
 		lv_sample_list().Visibility(COLLAPSED);
 		lv_sample_list().Items().Clear();
-		page_draw();
+		sheet_draw();
 	}
 
 	// 書体メニューの「字体」に印をつける.
@@ -392,7 +392,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		for (uint32_t i = 0; FONT_WEIGHT_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_WEIGHT_NAME[i]));
 			lv_sample_list().Items().Append(item);
@@ -400,7 +400,7 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().SelectedIndex(-1);
 		const auto k = lv_sample_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
-			if (FONT_WEIGHTS[i] == m_page_sheet.m_font_weight) {
+			if (FONT_WEIGHTS[i] == m_main_sheet.m_font_weight) {
 				lv_sample_list().SelectedIndex(i);
 				IInspectable item[1];
 				lv_sample_list().Items().GetMany(i, item);
@@ -436,7 +436,7 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().SelectionChanged(changed_token);
 		lv_sample_list().Visibility(COLLAPSED);
 		lv_sample_list().Items().Clear();
-		page_draw();
+		sheet_draw();
 	}
 
 	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
@@ -526,9 +526,9 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			auto u = new UndoAnchor(s, ANCH_WHICH::ANCH_SE);
-			const auto size = page_size_max();
+			const auto size = sheet_size_max();
 			if (static_cast<ShapeText*>(s)->adjust_bound({ size, size })) {
-				page_bound(s);
+				sheet_bound(s);
 				m_stack_undo.push_back(u);
 				flag = true;
 			}
@@ -538,8 +538,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag) {
 			undo_push_null();
-			page_panle_size();
-			page_draw();
+			sheet_panle_size();
+			sheet_draw();
 		}
 	}
 
@@ -549,7 +549,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		const double val0 = m_sample_sheet.m_text_line / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		text_set_slider_header<UNDO_OP::TEXT_LINE, 0>(val0);
@@ -570,17 +570,17 @@ namespace winrt::GraphPaper::implementation
 		m_sample_shape = nullptr;
 		sample_slider_0().Visibility(COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
-		page_draw();
+		sheet_draw();
 	}
 
 	// 書体メニューの「行の高さ」>「狭める」が選択された.
 	void MainPage::text_line_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto value = m_page_sheet.m_text_line - TEXT_LINE_DELTA;
+		auto value = m_main_sheet.m_text_line - TEXT_LINE_DELTA;
 		if (value <= FLT_MIN) {
 			value = 0.0f;
 		}
-		if (m_page_sheet.m_text_line != value) {
+		if (m_main_sheet.m_text_line != value) {
 			undo_push_set<UNDO_OP::TEXT_LINE>(value);
 		}
 	}
@@ -588,8 +588,8 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「行の高さ」>「広げる」が選択された.
 	void MainPage::text_line_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto value = m_page_sheet.m_text_line + TEXT_LINE_DELTA;
-		if (m_page_sheet.m_text_line != value) {
+		auto value = m_main_sheet.m_text_line + TEXT_LINE_DELTA;
+		if (m_main_sheet.m_text_line != value) {
 			undo_push_set<UNDO_OP::TEXT_LINE>(value);
 		}
 	}
@@ -600,7 +600,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		const double val0 = m_sample_sheet.m_text_margin.width / SLIDER_STEP;
 		const double val1 = m_sample_sheet.m_text_margin.height / SLIDER_STEP;
 		sample_slider_0().Value(val0);
@@ -628,7 +628,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
-		page_draw();
+		sheet_draw();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -638,7 +638,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		const double dpi = page_dpi();
+		const double dpi = sheet_dpi();
 		const double g_len = m_sample_sheet.m_grid_base + 1.0;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
@@ -690,7 +690,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S>
 	void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		const double dpi = page_dpi();
+		const double dpi = sheet_dpi();
 		Shape* s = m_sample_shape;
 		const double value = args.NewValue();
 		text_set_slider_header<U, S>(value);

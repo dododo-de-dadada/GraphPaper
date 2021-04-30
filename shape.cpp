@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 	// 色の成分が同じか調べる.
 	static bool equal_component(const FLOAT a, const FLOAT b) noexcept;
 
-	// 部位の方形を表示する.
+	// 図形の部位 (方形) を表示する.
 	// a_pos	部位の位置
 	// dx		図形の描画環境
 	void anchor_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
@@ -35,10 +35,10 @@ namespace winrt::GraphPaper::implementation
 		dx.m_d2dContext->FillRectangle(r, dx.m_shape_brush.get());
 	}
 
-	// 丸い部位を表示する.
+	// 図形の部位（円形）を表示する.
 	// a_pos	部位の位置
 	// dx		図形の描画環境
-	void anchor_draw_rounded(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
+	void anchor_draw_ellipse(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
 	{
 		const FLOAT rad = static_cast<FLOAT>(dx.m_anch_len * 0.5 + 1.0);
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
@@ -141,7 +141,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼の形式が同じか調べる.
-	bool equal(const GRID_PATT a, const GRID_PATT b) noexcept
+	bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept
 	{
 		return a == b;
 	}
@@ -673,14 +673,14 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 方眼の形式をデータリーダーから読み込む.
-	void read(GRID_PATT& value, DataReader const& dt_reader)
+	// 方眼の強調をデータリーダーから読み込む.
+	void read(GRID_EMPH& value, DataReader const& dt_reader)
 	{
-		value = static_cast<GRID_PATT>(dt_reader.ReadUInt16());
-		if (value == GRID_PATT::PATT_1 || value == GRID_PATT::PATT_2 || value == GRID_PATT::PATT_3) {
+		value = static_cast<GRID_EMPH>(dt_reader.ReadUInt16());
+		if (value == GRID_EMPH::EMPH_0 || value == GRID_EMPH::EMPH_2 || value == GRID_EMPH::EMPH_3) {
 			return;
 		}
-		value = GRID_PATT::PATT_1;
+		value = GRID_EMPH::EMPH_0;
 	}
 
 	// 方眼の表示をデータリーダーから読み込む.
@@ -693,220 +693,240 @@ namespace winrt::GraphPaper::implementation
 		value = GRID_SHOW::BACK;
 	}
 
-	// 文字列を複製する.
-	// 元の文字列がヌルポインター, または元の文字数が 0 のときは,
-	// ヌルポインターを返す.
-	wchar_t* wchar_cpy(const wchar_t* const s, const bool exact)
+	//	文字列を複製する.
+	//	元の文字列がヌルポインター, または元の文字数が 0 のときは,
+	//	ヌルポインターを返す.
+	wchar_t* wchar_cpy(const wchar_t* const s)
 	{
 		const auto s_len = wchar_len(s);
 		if (s_len == 0) {
 			return nullptr;
 		}
 		auto t = new wchar_t[static_cast<size_t>(s_len) + 1];
-		if (exact) {
-			wcscpy_s(t, static_cast<size_t>(s_len) + 1, s);
+		wcscpy_s(t, static_cast<size_t>(s_len) + 1, s);
+		return t;
+	}
+
+	static bool is_hex(const wchar_t w, uint32_t& x)
+	{
+		if (isdigit(w)) {
+			x = w - '0';
+		}
+		else if (w >= 'a' && w <= 'f') {
+			x = w - 'a' + 10;
+		}
+		else if (w >= 'A' && w <= 'F') {
+			x = w - 'A' + 10;
 		}
 		else {
-			auto st = 0;
-			uint32_t j = 0;
-			uint32_t n = 0;
-			for (uint32_t i = 0; i < s_len && s[i] != '\0' && j < s_len; i++) {
-				if (st == 0) {
-					if (s[i] == '\\') {
-						st = 1;
-					}
-					else {
-						t[j++] = s[i];
-					}
+			return false;
+		}
+		return true;
+	}
+
+	//	文字列を複製する.
+	//	エスケープ文字列は文字コードに変換する.
+	wchar_t* wchar_cpy_esc(const wchar_t* const s)
+	{
+		const auto s_len = wchar_len(s);
+		if (s_len == 0) {
+			return nullptr;
+		}
+		auto t = new wchar_t[static_cast<size_t>(s_len) + 1];
+		auto st = 0;
+		uint32_t j = 0;
+		for (uint32_t i = 0; i < s_len && s[i] != '\0' && j < s_len; i++) {
+			if (st == 0) {
+				if (s[i] == '\\') {
+					st = 1;
 				}
-				else if (st == 1) {
-					if (s[i] == '0') {
-						t[j++] = '\0';
-						break;
-					}
-					else if (s[i] == 'a') {
-						t[j++] = '\a';
-						st = 0;
-					}
-					else if (s[i] == 'b') {
-						t[j++] = '\b';
-						st = 0;
-					}
-					else if (s[i] == 'f') {
-						t[j++] = '\f';
-						st = 0;
-					}
-					else if (s[i] == 'n') {
-						t[j++] = '\n';
-						st = 0;
-					}
-					else if (s[i] == 'r') {
-						t[j++] = '\r';
-						st = 0;
-					}
-					else if (s[i] == 's') {
-						t[j++] = ' ';
-						st = 0;
-					}
-					else if (s[i] == 't') {
-						t[j++] = '\t';
-						st = 0;
-					}
-					else if (s[i] == 'v') {
-						t[j++] = '\v';
-						st = 0;
-					}
-					else if (s[i] == '\'') {
-						t[j++] = '\'';
-						st = 0;
-					}
-					else if (s[i] == '\?') {
-						t[j++] = '\?';
-						st = 0;
-					}
-					else if (s[i] == '\"') {
-						t[j++] = '\"';
-						st = 0;
-					}
-					else if (s[i] == '\\') {
-						t[j++] = '\\';
-						st = 0;
-					}
-					else if (isdigit(s[i])) {
-						n = s[i] - '0';
-						st = 2;
-					}
-					else if (s[i] == 'x') {
-						st = 4;
-					}
-					else if (s[i] == 'u') {
-						st = 6;
-					}
-					else {
-						t[j++] = s[i];
-						st = 0;
-					}
-				}
-				else if (st == 2) {
-					if (isdigit(s[i])) {
-						n = n * 8 + s[i] - '0';
-						st = 3;
-					}
-					else {
-						t[j++] = static_cast<wchar_t>(n);
-						t[j++] = s[i];
-						st = 0;
-					}
-				}
-				else if (st == 3) {
-					if (isdigit(s[i])) {
-						n = n * 8 + s[i] - '0';
-						st = 0;
-					}
-					else {
-						t[j++] = static_cast<wchar_t>(n);
-						t[j++] = s[i];
-						st = 0;
-					}
-				}
-				else if (st == 4) {
-					if (isdigit(s[i])) {
-						n = s[i] - '0';
-						st = 5;
-					}
-					else if (s[i] >= 'a' && s[i] <= 'f') {
-						n = s[i] - 'a' + 10;
-						st = 5;
-					}
-					else if (s[i] >= 'A' && s[i] <= 'F') {
-						n = s[i] - 'A' + 10;
-						st = 5;
-					}
-					else {
-						t[j++] = 'x';
-						t[j++] = s[i];
-						st = 0;
-					}
-				}
-				else if (st == 5) {
-					if (isdigit(s[i])) {
-						t[j++] = static_cast<wchar_t>(n * 16 + s[i] - '0');
-						st = 0;
-					}
-					else if (s[i] >= 'a' && s[i] <= 'f') {
-						t[j++] = static_cast<wchar_t>(n * 16 + s[i] - 'a' + 10);
-						st = 0;
-					}
-					else if (s[i] >= 'A' && s[i] <= 'F') {
-						t[j++] = static_cast<wchar_t>(n * 16 + s[i] - 'A' + 10);
-						st = 0;
-					}
-					else {
-						t[j++] = static_cast<wchar_t>(n);
-						t[j++] = s[i];
-						st = 0;
-					}
-				}
-				else if (st == 6) {
-					if (isdigit(s[i])) {
-						n = s[i] - '0';
-						st = 7;
-					}
-					else if (s[i] >= 'a' && s[i] <= 'f') {
-						n = s[i] - 'a' + 10;
-						st = 7;
-					}
-					else if (s[i] >= 'A' && s[i] <= 'F') {
-						n = s[i] - 'A' + 10;
-						st = 7;
-					}
-					else {
-						t[j++] = 'x';
-						t[j++] = s[i];
-						st = 0;
-					}
-				}
-				else if (st == 7) {
-					if (isdigit(s[i])) {
-						n = n * 16 + s[i] - '0';
-						st = 8;
-					}
-					else if (s[i] >= 'a' && s[i] <= 'f') {
-						n = n * 16 + s[i] - 'a' + 10;
-						st = 8;
-					}
-					else if (s[i] >= 'A' && s[i] <= 'F') {
-						n = n * 16 + s[i] - 'A' + 10;
-						st = 8;
-					}
-					else {
-						t[j++] = static_cast<wchar_t>(n);
-						t[j++] = s[i];
-						st = 0;
-					}
-				}
-				else if (st == 8) {
-					if (isdigit(s[i])) {
-						n = n * 16 + s[i] - '0';
-						st = 5;
-					}
-					else if (s[i] >= 'a' && s[i] <= 'f') {
-						n = n * 16 + s[i] - 'a' + 10;
-						st = 5;
-					}
-					else if (s[i] >= 'A' && s[i] <= 'F') {
-						n = n * 16 + s[i] - 'A' + 10;
-						st = 5;
-					}
-					else {
-						t[j++] = static_cast<wchar_t>(n);
-						t[j++] = s[i];
-						st = 0;
-					}
+				else {
+					t[j++] = s[i];
 				}
 			}
-			t[j] = '\0';
+			else if (st == 1) {
+				// \0-9
+				if (s[i] >= '0' && s[i] <= '8') {
+					t[j] = s[i] - '0';
+					st = 2;
+				}
+				// \x
+				else if (s[i] == 'x') {
+					st = 4;
+				}
+				// \u
+				else if (s[i] == 'u') {
+					st = 6;
+				}
+				// \a
+				else if (s[i] == 'a') {
+					t[j++] = '\a';
+					st = 0;
+				}
+				// \b
+				else if (s[i] == 'b') {
+					t[j++] = '\b';
+					st = 0;
+				}
+				// \f
+				else if (s[i] == 'f') {
+					t[j++] = '\f';
+					st = 0;
+				}
+				// \n
+				else if (s[i] == 'n') {
+					t[j++] = '\n';
+					st = 0;
+				}
+				// \r
+				else if (s[i] == 'r') {
+					t[j++] = '\r';
+					st = 0;
+				}
+				// \s
+				else if (s[i] == 's') {
+					t[j++] = ' ';
+					st = 0;
+				}
+				else if (s[i] == 't') {
+					t[j++] = '\t';
+					st = 0;
+				}
+				else if (s[i] == 'v') {
+					t[j++] = '\v';
+					st = 0;
+				}
+				else {
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 2) {
+				if (s[i] >= '0' && s[i] <= '8') {
+					t[j] = t[j] * 8 + s[i] - '0';
+					st = 3;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 3) {
+				if (s[i] >= '0' && s[i] <= '8') {
+					t[j++] = t[j] * 8 + s[i] - '0';
+					st = 0;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 4) {
+				uint32_t x;
+				if (is_hex(s[i], x)) {
+					t[j] = static_cast<wchar_t>(x);
+					st = 5;
+				}
+				else if (s[i] == '\\') {
+					st = 1;
+				}
+				else {
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 5) {
+				uint32_t x;
+				if (is_hex(s[i], x)) {
+					t[j++] = static_cast<wchar_t>(t[j] * 16 + x);
+					st = 0;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 6) {
+				uint32_t x;
+				if (is_hex(s[i], x)) {
+					t[j] = static_cast<wchar_t>(x);
+					st = 7;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 7) {
+				uint32_t x;
+				if (is_hex(s[i], x)) {
+					t[j] = static_cast<wchar_t>(t[j] * 16 + x);
+					st = 8;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 8) {
+				uint32_t x;
+				if (is_hex(s[i], x)) {
+					t[j] = static_cast<wchar_t>(t[j] * 16 + x);
+					st = 9;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 9) {
+				uint32_t x;
+				if (is_hex(s[i], x)) {
+					t[j++] = static_cast<wchar_t>(t[j] * 16 + x);
+					st = 0;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
 		}
+		t[j] = '\0';
 		return t;
 	}
 
@@ -1010,7 +1030,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼の形式をデータライターに書き込む.
-	void write(const GRID_PATT value, DataWriter const& dt_writer)
+	void write(const GRID_EMPH value, DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt16(static_cast<uint16_t>(value));
 	}

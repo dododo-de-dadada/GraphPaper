@@ -36,36 +36,36 @@ namespace winrt::GraphPaper::implementation
 	// Escape が押された.
 	void MainPage::ka_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		const auto draw_tool = tool();
-		if (draw_tool == DRAW_TOOL::SELECT) {
+		const auto tool = tool_draw();
+		if (tool == TOOL_DRAW::SELECT) {
 			return;
 		}
 		rmfi_tool_select().IsChecked(true);
 		// グループ名を指定していてもコードビハインドからは
 		// 自動でチェックが外れない.
-		if (draw_tool == DRAW_TOOL::BEZI) {
+		if (tool == TOOL_DRAW::BEZI) {
 			rmfi_tool_BEZI().IsChecked(false);
 		}
-		else if (draw_tool == DRAW_TOOL::ELLI) {
+		else if (tool == TOOL_DRAW::ELLI) {
 			rmfi_tool_elli().IsChecked(false);
 		}
-		else if (draw_tool == DRAW_TOOL::LINE) {
+		else if (tool == TOOL_DRAW::LINE) {
 			rmfi_tool_line().IsChecked(false);
 		}
-		else if (draw_tool == DRAW_TOOL::QUAD) {
+		else if (tool == TOOL_DRAW::QUAD) {
 			rmfi_tool_quad().IsChecked(false);
 		}
-		else if (draw_tool == DRAW_TOOL::RECT) {
+		else if (tool == TOOL_DRAW::RECT) {
 			rmfi_tool_rect().IsChecked(false);
 		}
-		else if (draw_tool == DRAW_TOOL::RRCT) {
+		else if (tool == TOOL_DRAW::RRCT) {
 			rmfi_tool_rrect().IsChecked(false);
 		}
-		else if (draw_tool == DRAW_TOOL::TEXT) {
+		else if (tool == TOOL_DRAW::TEXT) {
 			rmfi_tool_text().IsChecked(false);
 		}
-		else if (draw_tool == DRAW_TOOL::SCALE) {
-			rmfi_tool_scale().IsChecked(false);
+		else if (tool == TOOL_DRAW::RULER) {
+			rmfi_tool_ruler().IsChecked(false);
 		}
 		tool_select_click(nullptr, nullptr);
 	}
@@ -74,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_bring_forward().IsEnabled()) {
-	// 	//bring_forward_click(nullptr, nullptr);
+	// 	//arrange_bring_forward_click(nullptr, nullptr);
 	// 	arrange_order<S_LIST_T::reverse_iterator>();
 	// }
 	//}
@@ -86,7 +86,7 @@ namespace winrt::GraphPaper::implementation
 		if (mfi_bring_to_front().IsEnabled()) {
 			constexpr auto FRONT = false;
 			arrange_to<FRONT>();
-			//bring_to_front_click(nullptr, nullptr);
+			//arrange_bring_to_front_click(nullptr, nullptr);
 		}
 	}
 	*/
@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_send_backward().IsEnabled()) {
-	// 	send_backward_click(nullptr, nullptr);
+	// 	arrange_send_backward_click(nullptr, nullptr);
 	// }
 	//}
 
@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_send_to_back().IsEnabled()) {
-	// 	send_to_back_click(nullptr, nullptr);
+	// 	arrange_send_to_back_click(nullptr, nullptr);
 	// }
 	//}
 
@@ -242,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + 0 が押された.
 	//void MainPage::ka_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// if (m_page_sheet.m_page_scale != 1.0) {
+	// if (m_main_sheet.m_sheet_scale != 1.0) {
 	// 	mfi_zoom_reset_click(nullptr, nullptr);
 	// }
 	//}

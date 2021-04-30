@@ -42,12 +42,12 @@ namespace winrt::GraphPaper::implementation
 		FONT_WEIGHT,	// 書体の太さの操作
 		GRID_BASE,	// 方眼の基準の大さの操作
 		GRID_GRAY,	// 方眼線の色の濃さの操作
-		GRID_PATT,	// 方眼の形式の操作
+		GRID_EMPH,	// 方眼の形式の操作
 		GRID_SHOW,	// 方眼の表示方法の操作
 		GROUP,	// 図形をグループに挿入または削除する操作
 		LIST,	// 図形をリストに挿入または削除する操作
-		PAGE_COLOR,	// ページの色の操作
-		PAGE_SIZE,	// ページの寸法の操作
+		SHEET_COLOR,	// 用紙の色の操作
+		SHEET_SIZE,	// 用紙の寸法の操作
 		SELECT,	// 図形の選択を切り替え
 		START_POS,	// 図形の開始位置の操作
 		STROKE_COLOR,	// 線枠の色の操作
@@ -78,11 +78,11 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::FONT_WEIGHT> { using type = DWRITE_FONT_WEIGHT; };
 	template <> struct U_TYPE<UNDO_OP::GRID_BASE> { using type = double; };
 	template <> struct U_TYPE<UNDO_OP::GRID_GRAY> { using type = double; };
-	template <> struct U_TYPE<UNDO_OP::GRID_PATT> { using type = GRID_PATT; };
+	template <> struct U_TYPE<UNDO_OP::GRID_EMPH> { using type = GRID_EMPH; };
 	template <> struct U_TYPE<UNDO_OP::GRID_SHOW> { using type = GRID_SHOW; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_LINE> { using type = double; };
-	template <> struct U_TYPE<UNDO_OP::PAGE_COLOR> { using type = D2D1_COLOR_F; };
-	template <> struct U_TYPE<UNDO_OP::PAGE_SIZE> { using type = D2D1_SIZE_F; };
+	template <> struct U_TYPE<UNDO_OP::SHEET_COLOR> { using type = D2D1_COLOR_F; };
+	template <> struct U_TYPE<UNDO_OP::SHEET_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::START_POS> { using type = D2D1_POINT_2F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_PATT> { using type = STROKE_PATT; };
@@ -115,8 +115,8 @@ namespace winrt::GraphPaper::implementation
 		virtual void read(DataReader const& /*dt_reader*/) {}
 		// 図形を参照しているか調べる.
 		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
-		// 参照する図形リストとページ図形を格納する.
-		static void set(S_LIST_T* s_list, ShapeSheet* s_page) noexcept;
+		// 参照する図形リストと用紙図形を格納する.
+		static void set(S_LIST_T* s_list, ShapeSheet* s_sheet) noexcept;
 		// 操作する図形を得る.
 		Shape* shape(void) const noexcept { return m_shape; }
 		// 操作を作成する.

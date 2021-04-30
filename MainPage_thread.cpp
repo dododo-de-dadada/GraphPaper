@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 			m_window_visible = args.Visible();
 			if (m_window_visible) {
 				pointer_set();
-				page_draw();
+				sheet_draw();
 			}
 		}
 	}

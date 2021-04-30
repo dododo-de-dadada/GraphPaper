@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapePoly::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept
+	void ShapePoly::get_anch_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept
 	{
 		switch (a) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
@@ -123,13 +123,15 @@ namespace winrt::GraphPaper::implementation
 		create_path_geometry();
 	}
 
-	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapePoly::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
+	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+	//	value	格納する値
+	//	abch	図形の部位
+	void ShapePoly::set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch)
 	{
 		D2D1_POINT_2F a_pos;
 		D2D1_POINT_2F diff;
 
-		switch (a) {
+		switch (anch) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
 			m_pos = value;
 			break;
@@ -139,19 +141,19 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(m_diff, diff, m_diff);
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
-			get_pos(ANCH_WHICH::ANCH_R_NE, a_pos);
+			get_anch_pos(ANCH_WHICH::ANCH_R_NE, a_pos);
 			pt_sub(value, a_pos, diff);
 			pt_add(m_diff, diff, m_diff);
 			pt_sub(m_diff_1, diff, m_diff_1);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
-			get_pos(ANCH_WHICH::ANCH_R_SW, a_pos);
+			get_anch_pos(ANCH_WHICH::ANCH_R_SW, a_pos);
 			pt_sub(value, a_pos, diff);
 			pt_add(m_diff_1, diff, m_diff_1);
 			pt_sub(m_diff_2, diff, m_diff_2);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
-			get_pos(ANCH_WHICH::ANCH_R_SE, a_pos);
+			get_anch_pos(ANCH_WHICH::ANCH_R_SE, a_pos);
 			pt_sub(value, a_pos, diff);
 			pt_add(m_diff_2, diff, m_diff_2);
 			break;
@@ -220,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 指定された部位の位置を得る.
 	// 戻り値	つねに true
-	void ShapeStroke::get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& value) const noexcept
+	void ShapeStroke::get_anch_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& value) const noexcept
 	{
 		value = m_pos;
 	}

@@ -14,13 +14,13 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t TITLE_GRID[] = L"str_grid";
 	constexpr double SLIDER_STEP = 0.5;
 
-	// ページメニューの「方眼線の濃さ」が選択された.
+	// 用紙メニューの「方眼線の濃さ」が選択された.
 	IAsyncAction MainPage::grid_gray_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		const double val3 = m_sample_sheet.m_grid_gray * COLOR_MAX;
 		sample_slider_3().Value(val3);
 		grid_set_slider_header<UNDO_OP::GRID_GRAY, 3>(val3);
@@ -32,10 +32,10 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			double sample_value;
 			m_sample_sheet.get_grid_gray(sample_value);
-			double page_value;
-			m_page_sheet.get_grid_gray(page_value);
-			if (equal(page_value, sample_value) != true) {
-				undo_push_set<UNDO_OP::GRID_GRAY>(&m_page_sheet, sample_value);
+			double sheet_value;
+			m_main_sheet.get_grid_gray(sheet_value);
+			if (equal(sheet_value, sample_value) != true) {
+				undo_push_set<UNDO_OP::GRID_GRAY>(&m_main_sheet, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				//undo_push_null();
 				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
@@ -44,16 +44,16 @@ namespace winrt::GraphPaper::implementation
 		}
 		sample_slider_3().Visibility(COLLAPSED);
 		sample_slider_3().ValueChanged(slider_3_token);
-		page_draw();
+		sheet_draw();
 	}
 
-	// ページメニューの「方眼の大きさ」>「大きさ」が選択された.
+	// 用紙メニューの「方眼の大きさ」>「大きさ」が選択された.
 	IAsyncAction MainPage::grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		const double val0 = m_sample_sheet.m_grid_base / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		grid_set_slider_header<UNDO_OP::GRID_BASE, 0>(val0);
@@ -66,10 +66,10 @@ namespace winrt::GraphPaper::implementation
 			double sample_value;
 			double page_value;
 
-			m_page_sheet.get_grid_base(page_value);
+			m_main_sheet.get_grid_base(page_value);
 			m_sample_sheet.get_grid_base(sample_value);
 			if (equal(page_value, sample_value) != true) {
-				undo_push_set<UNDO_OP::GRID_BASE>(&m_page_sheet, sample_value);
+				undo_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, sample_value);
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				//undo_push_null();
 				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
@@ -79,79 +79,79 @@ namespace winrt::GraphPaper::implementation
 		}
 		sample_slider_0().Visibility(COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
-		page_draw();
+		sheet_draw();
 	}
 
-	// ページメニューの「方眼の大きさ」>「狭める」が選択された.
+	// 用紙メニューの「方眼の大きさ」>「狭める」が選択された.
 	void MainPage::grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		const double value = (m_page_sheet.m_grid_base + 1.0) * 0.5 - 1.0;
+		const double value = (m_main_sheet.m_grid_base + 1.0) * 0.5 - 1.0;
 		if (value < 1.0) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_sheet, value);
+		undo_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, value);
 		undo_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
-	// ページメニューの「方眼の大きさ」>「広げる」が選択された.
+	// 用紙メニューの「方眼の大きさ」>「広げる」が選択された.
 	void MainPage::grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		const double value = (m_page_sheet.m_grid_base + 1.0) * 2.0 - 1.0;
-		if (value > max(m_page_sheet.m_page_size.width, m_page_sheet.m_page_size.height)) {
-			// 方眼の一片の長さが, ページの幅か高さの大きいほうの値を超える場合,
+		const double value = (m_main_sheet.m_grid_base + 1.0) * 2.0 - 1.0;
+		if (value > max(m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height)) {
+			// 方眼の一片の長さが, 用紙の幅か高さの大きいほうの値を超える場合,
 			// 中断する.
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_BASE>(&m_page_sheet, value);
+		undo_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, value);
 		undo_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
-	// ページメニューの「方眼の形式」>「強調なし」が選択された.
-	void MainPage::grid_patt_1_click(IInspectable const&, RoutedEventArgs const&)
+	// 用紙メニューの「方眼の強調」>「強調なし」が選択された.
+	void MainPage::grid_emph_1_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_sheet.m_grid_patt == GRID_PATT::PATT_1) {
+		if (m_main_sheet.m_grid_emph == GRID_EMPH::EMPH_0) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_PATT>(&m_page_sheet, GRID_PATT::PATT_1);
+		undo_push_set<UNDO_OP::GRID_EMPH>(&m_main_sheet, GRID_EMPH::EMPH_0);
 		undo_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
-	// ページメニューの「方眼の形式」>「2番目を強調」が選択された.
-	void MainPage::grid_patt_2_click(IInspectable const&, RoutedEventArgs const&)
+	// 用紙メニューの「方眼の強調」>「2番目を強調」が選択された.
+	void MainPage::grid_emph_2_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_sheet.m_grid_patt == GRID_PATT::PATT_2) {
+		if (m_main_sheet.m_grid_emph == GRID_EMPH::EMPH_2) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_PATT>(&m_page_sheet, GRID_PATT::PATT_2);
+		undo_push_set<UNDO_OP::GRID_EMPH>(&m_main_sheet, GRID_EMPH::EMPH_2);
 		undo_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
-	// ページメニューの「方眼の形式」>「2番目と5番目を強調」が選択された.
-	void MainPage::grid_patt_3_click(IInspectable const&, RoutedEventArgs const&)
+	// 用紙メニューの「方眼の強調」>「2番目と5番目を強調」が選択された.
+	void MainPage::grid_emph_3_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_sheet.m_grid_patt == GRID_PATT::PATT_3) {
+		if (m_main_sheet.m_grid_emph == GRID_EMPH::EMPH_3) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_PATT>(&m_page_sheet, GRID_PATT::PATT_3);
+		undo_push_set<UNDO_OP::GRID_EMPH>(&m_main_sheet, GRID_EMPH::EMPH_3);
 		undo_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
-	// ページメニューの「方眼の形式」に印をつける.
-	// g_patt	方眼の形式
-	void MainPage::grid_patt_check_menu(const GRID_PATT g_patt)
+	// 用紙メニューの「方眼の強調」に印をつける.
+	// g_emph	方眼の強調
+	void MainPage::grid_emph_check_menu(const GRID_EMPH g_emph)
 	{
-		rmfi_grid_patt_1().IsChecked(g_patt == GRID_PATT::PATT_1);
-		rmfi_grid_patt_2().IsChecked(g_patt == GRID_PATT::PATT_2);
-		rmfi_grid_patt_3().IsChecked(g_patt == GRID_PATT::PATT_3);
+		rmfi_grid_emph_1().IsChecked(g_emph == GRID_EMPH::EMPH_0);
+		rmfi_grid_emph_2().IsChecked(g_emph == GRID_EMPH::EMPH_2);
+		rmfi_grid_emph_3().IsChecked(g_emph == GRID_EMPH::EMPH_3);
 
-		rmfi_grid_patt_1_2().IsChecked(g_patt == GRID_PATT::PATT_1);
-		rmfi_grid_patt_2_2().IsChecked(g_patt == GRID_PATT::PATT_2);
-		rmfi_grid_patt_3_2().IsChecked(g_patt == GRID_PATT::PATT_3);
+		rmfi_grid_emph_1_2().IsChecked(g_emph == GRID_EMPH::EMPH_0);
+		rmfi_grid_emph_2_2().IsChecked(g_emph == GRID_EMPH::EMPH_2);
+		rmfi_grid_emph_3_2().IsChecked(g_emph == GRID_EMPH::EMPH_3);
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -167,8 +167,8 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_grid_length");
-			const double dpi = page_dpi();
-			const double g_len = m_page_sheet.m_grid_base + 1.0;
+			const double dpi = sheet_dpi();
+			const double g_len = m_main_sheet.m_grid_base + 1.0;
 			wchar_t buf[32];
 			// ピクセル単位の長さを他の単位の文字列に変換する.
 			conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP + 1.0, dpi, g_len, buf);
@@ -220,18 +220,18 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// ページメニューの「方眼の表示」>「最背面」が選択された.
+	// 用紙メニューの「方眼の表示」>「最背面」が選択された.
 	void MainPage::grid_show_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_sheet.m_grid_show == GRID_SHOW::BACK) {
+		if (m_main_sheet.m_grid_show == GRID_SHOW::BACK) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_sheet, GRID_SHOW::BACK);
+		undo_push_set<UNDO_OP::GRID_SHOW>(&m_main_sheet, GRID_SHOW::BACK);
 		undo_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
-	// ページメニューの「方眼の表示」に印をつける.
+	// 用紙メニューの「方眼の表示」に印をつける.
 	// g_show	方眼の表示
 	void MainPage::grid_show_check_menu(const GRID_SHOW g_show)
 	{
@@ -244,50 +244,50 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
 
-	// ページメニューの「方眼の表示」>「最前面」が選択された.
+	// 用紙メニューの「方眼の表示」>「最前面」が選択された.
 	void MainPage::grid_show_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_sheet.m_grid_show == GRID_SHOW::FRONT) {
+		if (m_main_sheet.m_grid_show == GRID_SHOW::FRONT) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_sheet, GRID_SHOW::FRONT);
+		undo_push_set<UNDO_OP::GRID_SHOW>(&m_main_sheet, GRID_SHOW::FRONT);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		//undo_push_null();
 		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		undo_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
-	// ページメニューの「方眼の表示」>「隠す」が選択された.
+	// 用紙メニューの「方眼の表示」>「隠す」が選択された.
 	void MainPage::grid_show_hide_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_page_sheet.m_grid_show == GRID_SHOW::HIDE) {
+		if (m_main_sheet.m_grid_show == GRID_SHOW::HIDE) {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_SHOW>(&m_page_sheet, GRID_SHOW::HIDE);
+		undo_push_set<UNDO_OP::GRID_SHOW>(&m_main_sheet, GRID_SHOW::HIDE);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		//undo_push_null();
 		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		undo_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
-	// ページメニューの「方眼にそろえる」が選択された.
+	// 用紙メニューの「方眼にそろえる」が選択された.
 	void MainPage::grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		auto g_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
-		if (m_page_sheet.m_grid_snap != g_snap) {
-			m_page_sheet.m_grid_snap = g_snap;
+		if (m_main_sheet.m_grid_snap != g_snap) {
+			m_main_sheet.m_grid_snap = g_snap;
 		}
-		if (m_page_sheet.m_grid_snap != true) {
+		if (m_main_sheet.m_grid_snap != true) {
 			return;
 		}
 
 		// 図形リストの各図形について以下を繰り返す.
-		const double g_len = m_page_sheet.m_grid_base + 1.0;
+		const double g_len = m_main_sheet.m_grid_base + 1.0;
 		auto flag = false;
-		D2D1_POINT_2F p_min = page_min();
-		D2D1_POINT_2F p_max = page_max();
+		D2D1_POINT_2F p_min = sheet_min();
+		D2D1_POINT_2F p_max = sheet_max();
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				// 消去フラグが立っている場合,
@@ -319,9 +319,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		undo_menu_enable();
-		page_bound();
-		page_panle_size();
-		page_draw();
+		sheet_bound();
+		sheet_panle_size();
+		sheet_draw();
 	}
 
 }

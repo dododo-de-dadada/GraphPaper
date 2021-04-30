@@ -34,12 +34,12 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		m_mutex_page.lock();
+		m_mutex_shapes.lock();
 		auto dc = m_sample_dx.m_d2dContext.get();
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
-		dc->Clear(m_sample_sheet.m_page_color);
-		auto ox = std::fmod(m_sample_sheet.m_page_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0);
+		dc->Clear(m_sample_sheet.m_sheet_color);
+		auto ox = std::fmod(m_sample_sheet.m_sheet_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0);
 		D2D1_POINT_2F offset;
 		offset.x = static_cast<FLOAT>(ox);
 		offset.y = offset.x;
@@ -55,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(dc->EndDraw());
 		dc->RestoreDrawingState(m_sample_dx.m_state_block.get());
 		m_sample_dx.Present();
-		m_mutex_page.unlock();
+		m_mutex_shapes.unlock();
 	}
 
 	// 見本のスワップチェーンパネルの大きさが変わった.
@@ -64,11 +64,11 @@ namespace winrt::GraphPaper::implementation
 		if (m_sample_dx.m_dxgi_swap_chain != nullptr) {
 			m_sample_dx.m_dxgi_swap_chain = nullptr;
 		}
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		const auto w = scp_sample_panel().ActualWidth();
 		const auto h = scp_sample_panel().ActualHeight();
-		m_sample_sheet.m_page_size.width = static_cast<FLOAT>(w);
-		m_sample_sheet.m_page_size.height = static_cast<FLOAT>(h);
+		m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(w);
+		m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(h);
 		m_sample_dx.SetSwapChainPanel(scp_sample_panel());
 		if (m_sample_type != SAMP_TYPE::NONE) {
 			const auto padding = w * 0.125;

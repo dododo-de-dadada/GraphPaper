@@ -78,8 +78,7 @@ namespace winrt::GraphPaper::implementation
 	// g_len	方眼の大きさ
 	// buf	文字列の配列
 	// b_len	文字列の最大長 ('\0' を含む長さ)
-	template <bool B>
-	void conv_val_to_len(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t *buf, const uint32_t b_len)
+	template <bool B> void conv_val_to_len(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t *buf, const uint32_t b_len)
 	{
 		if (l_unit == LEN_UNIT::PIXEL) {
 			if constexpr (B == WITH_UNIT_NAME) {
@@ -208,7 +207,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		if (undo_pushed()) {
-			// 操作スタックの更新フラグが立っている場合,
+			// アンドゥ操作スタックの更新フラグが立っている場合,
 			const auto d_result = co_await cd_conf_save().ShowAsync();
 			if (d_result == ContentDialogResult::None) {
 				// 「キャンセル」が押された場合,
@@ -268,7 +267,7 @@ namespace winrt::GraphPaper::implementation
 		// 本来なら DirectX をコードビハインドでリリースしたいところだが,
 		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがある.
 		// なので, Trim を呼び出すだけにする.
-		m_page_dx.Trim();
+		m_main_dx.Trim();
 		m_sample_dx.Trim();
 
 		// アプリケーションを終了する.
@@ -334,11 +333,11 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// D2D/DWRITE ファクトリを図形/文字列図形クラスに, 
-		// 図形リストとページシートを操作クラスに格納する.
+		// 図形リストとメイン用紙をアンドゥ操作に格納する.
 		{
-			Shape::s_d2d_factory = m_page_dx.m_d2dFactory.get();
-			Shape::s_dwrite_factory = m_page_dx.m_dwriteFactory.get();
-			Undo::set(&m_list_shapes, &m_page_sheet);
+			Shape::s_d2d_factory = m_main_dx.m_d2dFactory.get();
+			Shape::s_dwrite_factory = m_main_dx.m_dwriteFactory.get();
+			Undo::set(&m_list_shapes, &m_main_sheet);
 		}
 
 		// クリックの判定時間をシステムから得る.
@@ -353,8 +352,8 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		//{
-		//	m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::pointer_released });
-		//	m_token_pointer_entered = scp_page_panel().PointerReleased({ this, &MainPage::pointer_entered });
+		//	m_token_pointer_released = scp_sheet_panel().PointerReleased({ this, &MainPage::pointer_released });
+		//	m_token_pointer_entered = scp_sheet_panel().PointerReleased({ this, &MainPage::pointer_entered });
 		//}
 
 		auto _{ new_click_async(nullptr, nullptr) };
@@ -409,7 +408,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		if (undo_pushed()) {
-			// 操作スタックの更新フラグが立っている場合,
+			// アンドゥ操作スタックの更新フラグが立っている場合,
 			const auto d_result = co_await cd_conf_save().ShowAsync();
 			if (d_result == ContentDialogResult::None) {
 				// 「キャンセル」が押された場合,
@@ -447,40 +446,41 @@ namespace winrt::GraphPaper::implementation
 			auto h_color = Resources().TryLookup(box_value(L"SystemColorHighlightColor"));
 			auto t_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
 			if (h_color != nullptr && t_color != nullptr) {
-				cast_to(unbox_value<Color>(h_color), m_page_dx.m_range_background);
-				cast_to(unbox_value<Color>(t_color), m_page_dx.m_range_foreground);
+				cast_to(unbox_value<Color>(h_color), m_main_dx.m_range_background);
+				cast_to(unbox_value<Color>(t_color), m_main_dx.m_range_foreground);
 			}
 			else {
-				m_page_dx.m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
-				m_page_dx.m_range_foreground = S_WHITE;
+				m_main_dx.m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
+				m_main_dx.m_range_foreground = S_WHITE;
 			}
 			auto const& b_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
 			auto const& f_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
 			if (b_theme != nullptr && f_theme != nullptr) {
-				cast_to(unbox_value<Brush>(b_theme), m_page_dx.m_theme_background);
-				cast_to(unbox_value<Brush>(f_theme), m_page_dx.m_theme_foreground);
+				cast_to(unbox_value<Brush>(b_theme), m_main_dx.m_theme_background);
+				cast_to(unbox_value<Brush>(f_theme), m_main_dx.m_theme_foreground);
 			}
 			else {
-				m_page_dx.m_theme_background = S_WHITE;
-				m_page_dx.m_theme_foreground = S_BLACK;
+				m_main_dx.m_theme_background = S_WHITE;
+				m_main_dx.m_theme_foreground = S_BLACK;
 			}
-			m_sample_dx.m_range_background = m_page_dx.m_range_background;
-			m_sample_dx.m_range_foreground = m_page_dx.m_range_foreground;
-			m_sample_dx.m_theme_background = m_page_dx.m_theme_background;
-			m_sample_dx.m_theme_foreground = m_page_dx.m_theme_foreground;
+			m_sample_dx.m_range_background = m_main_dx.m_range_background;
+			m_sample_dx.m_range_foreground = m_main_dx.m_range_foreground;
+			m_sample_dx.m_theme_background = m_main_dx.m_theme_background;
+			m_sample_dx.m_theme_foreground = m_main_dx.m_theme_foreground;
 		}
 
-		if (co_await sheet_load_async() != S_OK) {
+		if (co_await pref_load_async() != S_OK) {
 			// 読み込みに失敗した場合,
 			sheet_init();
 		}
 
-		// ページの左上位置と右下位置を初期化する.
+		// 用紙の左上位置と右下位置を初期化する.
 		{
-			page_min(D2D1_POINT_2F{ 0.0F, 0.0F });
-			page_max(D2D1_POINT_2F{ m_page_sheet.m_page_size.width, m_page_sheet.m_page_size.height });
+			sheet_min(D2D1_POINT_2F{ 0.0F, 0.0F });
+			sheet_max(D2D1_POINT_2F{ m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height });
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();
 	}
+
 }

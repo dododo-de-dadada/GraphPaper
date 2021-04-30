@@ -46,13 +46,13 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形全体の領域をリストから得る.
 	// s_list	図形リスト
-	// p_size	ページの寸法
+	// s_size	用紙の寸法
 	// b_min	領域の左上位置
 	// b_max	領域の右下位置
-	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F p_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F s_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
 	{
 		b_min = { 0.0F, 0.0F };	// 左上位置
-		b_max = { p_size.width, p_size.height };	// 右下位置
+		b_max = { s_size.width, s_size.height };	// 右下位置
 		for (auto s : s_list) {
 			if (s->is_deleted()) {
 				continue;
@@ -63,7 +63,6 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形全体の領域をリストから得る.
 	// s_list	図形リスト
-	// p_size	ページの寸法
 	// b_min	領域の左上位置
 	// b_max	領域の右下位置
 	void s_list_bound(S_LIST_T const& s_list, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
@@ -224,12 +223,32 @@ namespace winrt::GraphPaper::implementation
 			if (t->is_deleted()) {
 				continue;
 			}
+			//if (!t->is_selected()) {
+			//	continue;
+			//}
 			const auto a = t->hit_test(t_pos, a_len);
 			if (a != ANCH_WHICH::ANCH_OUTSIDE) {
 				s = t;
 				return a;
 			}
 		}
+		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
+		/*
+		for (auto it = s_list.rbegin(); it != s_list.rend(); it++) {
+			auto t = *it;
+			if (t->is_deleted()) {
+				continue;
+			}
+			if (t->is_selected()) {
+				continue;
+			}
+			const auto a = t->hit_test(t_pos, a_len);
+			if (a != ANCH_WHICH::ANCH_OUTSIDE) {
+				s = t;
+				return a;
+			}
+		}
+		*/
 		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
 
@@ -440,8 +459,8 @@ namespace winrt::GraphPaper::implementation
 		else if (s_type == SHAPE_GROUP) {
 			s = new ShapeGroup(dt_reader);
 		}
-		else if (s_type == SHAPE_SCALE) {
-			s = new ShapeScale(dt_reader);
+		else if (s_type == SHAPE_RULER) {
+			s = new ShapeRuler(dt_reader);
 		}
 		else {
 			s = reinterpret_cast<Shape*>(-1);
@@ -560,8 +579,8 @@ namespace winrt::GraphPaper::implementation
 			else if (s_type == typeid(ShapeRRect)) {
 				s_int = SHAPE_RRCT;
 			}
-			else if (s_type == typeid(ShapeScale)) {
-				s_int = SHAPE_SCALE;
+			else if (s_type == typeid(ShapeRuler)) {
+				s_int = SHAPE_RULER;
 			}
 			else if (s_type == typeid(ShapeText)) {
 				s_int = SHAPE_TEXT;

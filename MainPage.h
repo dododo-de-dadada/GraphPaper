@@ -24,11 +24,10 @@
 // MainPage_grid.cpp	方眼
 // MainPage_group.cpp	グループ化とグループの解除
 // MainPage_kybd.cpp	キーボードアクセラレータのハンドラー
-// MainPage_sheet.cpp	用紙の保存と削除
 // MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, バージョン情報
-// MainPage_page.cpp	ページの設定と表示
 // MainPage_pointer.cpp	ポインターイベントのハンドラー
 // MainPage_sample.cpp	見本
+// MainPage_sheet.cpp	用紙の各属性の設定
 // MainPage_scroll.cpp	スクロールバー
 // MainPage_select.cpp	図形の選択
 // MainPage_stbar.cpp	ステータスバー
@@ -101,7 +100,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto ICON_ALERT = L"icon_alert";	// 警告アイコンの静的リソースのキー
 
 	constexpr auto GRIDLEN_PX = 48.0F;	// 方眼の大きさの既定値 (ピクセル)
-	constexpr auto PAGE_SIZE = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// ページ寸法の既定値 (ピクセル)
+	constexpr auto SHEET_SIZE = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
 	constexpr auto SCALE_MAX = 128.0;	// 表示倍率の最大値
 	constexpr auto SCALE_MIN = 1.0 / 128.0;	// 表示倍率の最小値
 	static const winrt::hstring CF_GPD{ L"graph_paper_data" };	// 図形データのクリップボード書式
@@ -125,7 +124,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	enum struct STATUS_BAR {
 		GRID = 1,	// 方眼の大きさ
-		PAGE = (2 | 4),	// ページの大きさ
+		SHEET = (2 | 4),	// 用紙の大きさ
 		CURS = (8 | 16),	// カーソルの位置
 		ZOOM = 32,	// 拡大率
 		DRAW = 64,	// 作図ツール
@@ -135,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// 作図ツール
 	//-------------------------------
-	enum struct DRAW_TOOL {
+	enum struct TOOL_DRAW {
 		SELECT,	// 選択ツール
 		BEZI,	// 曲線
 		ELLI,	// だ円
@@ -144,7 +143,7 @@ namespace winrt::GraphPaper::implementation
 		RECT,	// 方形
 		RRCT,	// 角丸方形
 		TEXT,	// 文字列
-		SCALE	// 目盛り
+		RULER	// 定規
 	};
 
 	//-------------------------------
@@ -207,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 	// メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
-		std::mutex m_mutex_page;	// 図形のための排他制御
+		std::mutex m_mutex_shapes;	// 図形のための排他制御
 		std::atomic_bool m_mutex_summary{ false };	// 一覧のための排他制御
 		winrt::hstring m_token_mru;	// 最近使ったファイルのトークン
 
@@ -221,15 +220,15 @@ namespace winrt::GraphPaper::implementation
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
 		STATUS_BAR m_status_bar = stbar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
-		DRAW_TOOL m_draw_tool = DRAW_TOOL::SELECT;		// 作図ツール
+		TOOL_DRAW m_tool_draw = TOOL_DRAW::SELECT;		// 作図ツール
 
 		uint32_t m_list_selected = 0;		// 選択された図形の数
 		S_LIST_T m_list_shapes;		// 図形リスト
 
-		SHAPE_DX m_page_dx;		// ページの描画環境
-		ShapeSheet m_page_sheet;		// ページ用紙
-		D2D1_POINT_2F m_page_min{ 0.0F, 0.0F };		// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
-		D2D1_POINT_2F m_page_max{ 0.0F, 0.0F };		// ページの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
+		SHAPE_DX m_main_dx;		// メイン用紙の描画環境
+		ShapeSheet m_main_sheet;		// メイン用紙
+		D2D1_POINT_2F m_main_min{ 0.0F, 0.0F };		// メイン用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
+		D2D1_POINT_2F m_main_max{ 0.0F, 0.0F };		// メイン用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
 		D2D1_POINT_2F m_pointer_cur{ 0.0F, 0.0F };		// ポインターの現在位置
 		D2D1_POINT_2F m_pointer_pre{ 0.0F, 0.0F };		// ポインターの前回位置
@@ -255,10 +254,10 @@ namespace winrt::GraphPaper::implementation
 		U_STACK_T m_stack_undo;		// 元に戻す操作スタック
 		bool m_stack_updt = false;	// 操作スタックの更新フラグ (ヌルが積まれたら true)
 
-		SHAPE_DX m_sample_dx;		// 見本の描画環境
+		SHAPE_DX m_sample_dx;		// 見本用紙の描画環境
 		ShapeSheet m_sample_sheet;		// 見本用紙
-		Shape* m_sample_shape = nullptr;	// 見本の図形
-		SAMP_TYPE m_sample_type = SAMP_TYPE::NONE;	// 見本の型
+		Shape* m_sample_shape = nullptr;	// 見本用紙の図形
+		SAMP_TYPE m_sample_type = SAMP_TYPE::NONE;	// 見本用紙の型
 
 		bool m_window_visible = false;		// ウィンドウが表示されている/表示されてない
 
@@ -321,13 +320,13 @@ namespace winrt::GraphPaper::implementation
 		// 選択された図形を最背面または最前面に移動する.
 		template<bool B> void arrange_to(void);
 		// 編集メニューの「前面に移動」が選択された.
-		void bring_forward_click(IInspectable const&, RoutedEventArgs const&);
+		void arrange_bring_forward_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「最前面に移動」が選択された.
-		void bring_to_front_click(IInspectable const&, RoutedEventArgs const&);
+		void arrange_bring_to_front_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「ひとつ背面に移動」が選択された.
-		void send_backward_click(IInspectable const&, RoutedEventArgs const&);
+		void arrange_send_backward_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「最背面に移動」が選択された.
-		void send_to_back_click(IInspectable const&, RoutedEventArgs const&);
+		void arrange_send_to_back_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_arrow.cpp
@@ -482,8 +481,8 @@ namespace winrt::GraphPaper::implementation
 		// 方眼
 		//-------------------------------
 
-		// 用紙メニューの「方眼の形式」に印をつける.
-		void grid_patt_check_menu(const GRID_PATT g_patt);
+		// 用紙メニューの「方眼の強調」に印をつける.
+		void grid_emph_check_menu(const GRID_EMPH g_emph);
 		// 用紙メニューの「方眼の表示」に印をつける.
 		void grid_show_check_menu(const GRID_SHOW g_show);
 		// 用紙メニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -494,12 +493,12 @@ namespace winrt::GraphPaper::implementation
 		void grid_len_exp_click(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼線の濃さ」が選択された.
 		IAsyncAction grid_gray_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の形式」>「強調なし」が選択された.
-		void grid_patt_1_click(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の形式」>「2番目を強調」が選択された.
-		void grid_patt_2_click(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の形式」>「2番目と5番目を強調」が選択された.
-		void grid_patt_3_click(IInspectable const&, RoutedEventArgs const&);
+		// 用紙メニューの「方眼の強調」>「強調なし」が選択された.
+		void grid_emph_1_click(IInspectable const&, RoutedEventArgs const&);
+		// 用紙メニューの「方眼の強調」>「2番目を強調」が選択された.
+		void grid_emph_2_click(IInspectable const&, RoutedEventArgs const&);
+		// 用紙メニューの「方眼の強調」>「2番目と10番目を強調」が選択された.
+		void grid_emph_3_click(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の表示」>「最背面」が選択された.
 		void grid_show_back_click(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の表示」>「最前面」が選択された.
@@ -583,17 +582,65 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_sheet.cpp
-		// 用紙の保存と削除
+		// 用紙の各属性の設定
 		//-------------------------------
 
+		// 用紙メニューの「用紙の色」が選択された.
+		IAsyncAction sheet_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 用紙メニューの「用紙の大きさ」が選択された
+		IAsyncAction sheet_size_click(IInspectable const&, RoutedEventArgs const&);
+		// 部位の一片の大きさを得る.
+		const double sheet_anch_len(void) const noexcept;
+		// 背景色を得る.
+		const D2D1_COLOR_F& sheet_background(void) const noexcept;
+		// 用紙の左上位置と右下位置を設定する.
+		void sheet_bound(void) noexcept;
+		// 用紙の左上位置と右下位置を設定する.
+		void sheet_bound(Shape* s) noexcept;
+		// DPI を得る.
+		const double sheet_dpi(void) const noexcept;
+		// 用紙を表示する.
+		void sheet_draw(void);
+		// 前景色を得る.
+		const D2D1_COLOR_F& sheet_foreground(void) const noexcept;
+		// 値を用紙の右下位置に格納する.
+		void sheet_max(const D2D1_POINT_2F p_max) noexcept;
+		// 用紙の右下位置を得る.
+		const D2D1_POINT_2F sheet_max(void) const noexcept;
+		// 値を用紙の左上位置に格納する.
+		void sheet_min(const D2D1_POINT_2F p_min) noexcept;
+		// 用紙の左上位置を得る.
+		const D2D1_POINT_2F sheet_min(void) const noexcept;
+		// 値をスライダーのヘッダーに格納する.
+		template <UNDO_OP U, int S> void sheet_set_slider_header(const double value);
+		// 値をスライダーのヘッダーと、見本の図形に格納する.
+		template <UNDO_OP U, int S> void sheet_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		// 用紙の大きさの最大値 (ピクセル) を得る.
+		constexpr float sheet_size_max(void) const noexcept { return 32767.0F; }
+		// 用紙のスワップチェーンパネルがロードされた.
+		void sheet_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
+		// 用紙のスワップチェーンパネルの寸法が変わった.
+		void sheet_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
+		// 用紙のスワップチェーンパネルの大きさを設定する.
+		void sheet_panle_size(void);
+		// 用紙寸法ダイアログの「用紙の幅」「用紙の高さ」テキストボックスの値が変更された.
+		void sheet_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
+		// 描画環境を解放可能にする.
+		void sheet_trim(void);
 		// 用紙とその他の属性を初期化する.
 		void sheet_init(void) noexcept;
+
+		//-------------------------------
+		// MainPage_pref.cpp
+		// 設定の保存, 初期化
+		//-------------------------------
+
 		// 保存された用紙とその他の属性を読み込む.
-		IAsyncOperation<winrt::hresult> sheet_load_async(void);
-		// 用紙メニューの「用紙をリセット」が選択された.
-		IAsyncAction sheet_reset_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「用紙を保存」が選択された.
-		IAsyncAction sheet_save_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncOperation<winrt::hresult> pref_load_async(void);
+		// 用紙メニューの「設定をリセット」が選択された.
+		IAsyncAction pref_reset_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 用紙メニューの「設定を保存」が選択された.
+		IAsyncAction pref_save_click_async(IInspectable const&, RoutedEventArgs const&);
 
 		//-----------------------------
 		// MainPage_misc.cpp
@@ -636,54 +683,6 @@ namespace winrt::GraphPaper::implementation
 		void len_unit_pixel_click(IInspectable const&, RoutedEventArgs const&);
 		// その他メニューの「長さの単位」>「ポイント」が選択された.
 		void len_unit_point_click(IInspectable const&, RoutedEventArgs const&);
-
-		//-------------------------------
-		//　MainPage_page.cpp
-		//　ページ
-		//-------------------------------
-
-		// 用紙メニューの「ページの色」が選択された.
-		IAsyncAction page_color_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「ページの大きさ」が選択された
-		IAsyncAction page_size_click(IInspectable const&, RoutedEventArgs const&);
-		// 部位の一片の大きさを得る.
-		const double page_anch_len(void) const noexcept;
-		// 背景色を得る.
-		const D2D1_COLOR_F& page_background(void) const noexcept;
-		// ページの左上位置と右下位置を設定する.
-		void page_bound(void) noexcept;
-		// ページの左上位置と右下位置を設定する.
-		void page_bound(Shape* s) noexcept;
-		// DPI を得る.
-		const double page_dpi(void) const noexcept;
-		// ページを表示する.
-		void page_draw(void);
-		// 前景色を得る.
-		const D2D1_COLOR_F& page_foreground(void) const noexcept;
-		// 値をページの右下位置に格納する.
-		void page_max(const D2D1_POINT_2F p_max) noexcept;
-		// ページの右下位置を得る.
-		const D2D1_POINT_2F page_max(void) const noexcept;
-		// 値をページの左上位置に格納する.
-		void page_min(const D2D1_POINT_2F p_min) noexcept;
-		// ページの左上位置を得る.
-		const D2D1_POINT_2F page_min(void) const noexcept;
-		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void page_set_slider_header(const double value);
-		// 値をスライダーのヘッダーと、見本の図形に格納する.
-		template <UNDO_OP U, int S> void page_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
-		// ページの大きさの最大値 (ピクセル) を得る.
-		constexpr float page_size_max(void) const noexcept { return 32767.0F; }
-		// ページのスワップチェーンパネルがロードされた.
-		void page_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
-		// ページのスワップチェーンパネルの寸法が変わった.
-		void page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
-		// ページのスワップチェーンパネルの大きさを設定する.
-		void page_panle_size(void);
-		// ページ寸法ダイアログの「ページの幅」「ページの高さ」テキストボックスの値が変更された.
-		void page_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
-		// 描画環境を解放可能にする.
-		void page_trim(void);
 
 		//-------------------------------
 		// MainPage_pointer.cpp
@@ -809,8 +808,8 @@ namespace winrt::GraphPaper::implementation
 		void stbar_set_draw(void);
 		// 方眼の大きさをステータスバーに格納する.
 		void stbar_set_grid(void);
-		// ページの大きさをステータスバーに格納する.
-		void stbar_set_page(void);
+		// 用紙の大きさをステータスバーに格納する.
+		void stbar_set_sheet(void);
 		// 単位をステータスバーに格納する.
 		void stbar_set_unit(void);
 		// 拡大率をステータスバーに格納する.
@@ -944,9 +943,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 値を作図メニューに格納する.
-		void tool(const DRAW_TOOL tool) noexcept { m_draw_tool = tool; }
+		void tool_draw(const TOOL_DRAW tool) noexcept { m_tool_draw = tool; }
 		// 作図メニューを得る.
-		const DRAW_TOOL tool(void) const noexcept { return m_draw_tool; }
+		const TOOL_DRAW tool_draw(void) const noexcept { return m_tool_draw; }
 		// 作図メニューの「曲線」が選択された.
 		void tool_bezi_click(IInspectable const&, RoutedEventArgs const&);
 		// 作図メニューの「だ円」が選択された.
@@ -963,8 +962,8 @@ namespace winrt::GraphPaper::implementation
 		void tool_select_click(IInspectable const&, RoutedEventArgs const&);
 		// 作図メニューの「文字列」が選択された.
 		void tool_text_click(IInspectable const&, RoutedEventArgs const&);
-		// 作図メニューの「目盛り」が選択された.
-		void tool_scale_click(IInspectable const&, RoutedEventArgs const&);
+		// 作図メニューの「定規」が選択された.
+		void tool_ruler_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-----------------------------
 		// MainPage_undo.cpp
@@ -985,7 +984,7 @@ namespace winrt::GraphPaper::implementation
 		bool undo_pop_if_invalid(void);
 		// 操作フラグの更新フラグを得る.
 		const bool undo_pushed(void) const noexcept { return m_stack_updt; }
-		// 値を操作フラグの更新フラグに格納する.
+		// 値を操作の更新フラグに格納する.
 		void undo_pushed(const bool pushed) noexcept { m_stack_updt = pushed; }
 		// 図形を追加して, その操作をスタックに積む.
 		void undo_push_append(Shape* s);

@@ -395,7 +395,7 @@ namespace winrt::GraphPaper::implementation
 			m_dxgi_swap_chain->SetRotation(displayRotation)
 		);
 
-		// スワップ チェーンに逆目盛りを設定します
+		// スワップ チェーンに逆拡大率を設定します
 		DXGI_MATRIX_3X2_F inverseScale = { 0 };
 		inverseScale._11 = 1.0f / m_effectiveCompositionScaleX;
 		inverseScale._22 = 1.0f / m_effectiveCompositionScaleY;

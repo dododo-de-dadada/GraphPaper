@@ -36,7 +36,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
-		page_draw();
+		sheet_draw();
 		if (m_mutex_summary.load(std::memory_order_acquire)) {
 		//if (m_summary_visible) {
 			summary_append(g);
@@ -89,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
 }

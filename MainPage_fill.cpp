@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_page_sheet);
+		m_sample_sheet.set_to(&m_main_sheet);
 		const double val0 = m_sample_sheet.m_fill_color.r * COLOR_MAX;
 		const double val1 = m_sample_sheet.m_fill_color.g * COLOR_MAX;
 		const double val2 = m_sample_sheet.m_fill_color.b * COLOR_MAX;
@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
 		sample_slider_3().ValueChanged(slider_3_token);
-		page_draw();
+		sheet_draw();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 2) {
 				color.b = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			if constexpr (U != UNDO_OP::PAGE_COLOR && S == 3) {
+			if constexpr (U != UNDO_OP::SHEET_COLOR && S == 3) {
 				color.a = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			s->set_fill_color(color);

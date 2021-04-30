@@ -274,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
-			page_draw();
+			sheet_draw();
 			return;
 		}
 		// 検索できない場合,
@@ -381,7 +381,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		undo_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
 	// 文字列検索パネルの「置換して次に」ボタンが押された.
@@ -431,7 +431,7 @@ namespace winrt::GraphPaper::implementation
 			flag = true;
 		}
 		if (flag) {
-			page_draw();
+			sheet_draw();
 			return;
 		}
 		// 検索できない, かつ置換もされてない場合,
@@ -512,7 +512,7 @@ namespace winrt::GraphPaper::implementation
 			// 一連の操作の区切としてヌル操作をスタックに積む.
 			undo_push_null();
 			edit_menu_enable();
-			page_draw();
+			sheet_draw();
 		}
 		/*
 		primary_token = cd_edit_text().PrimaryButtonClick(
@@ -535,7 +535,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				cd_edit_text().PrimaryButtonClick(primary_token);
 				cd_edit_text().Closed(closed_token);
-				page_draw();
+				sheet_draw();
 			}
 		);
 		auto _{ cd_edit_text().ShowAsync() };
@@ -559,11 +559,11 @@ namespace winrt::GraphPaper::implementation
 		if (m_text_find != nullptr) {
 			delete[] m_text_find;
 		}
-		m_text_find = wchar_cpy(tx_text_find_what().Text().c_str(), false);
+		m_text_find = wchar_cpy_esc(tx_text_find_what().Text().c_str());
 		if (m_text_repl != nullptr) {
 			delete[] m_text_repl;
 		}
-		m_text_repl = wchar_cpy(tx_text_replace_with().Text().c_str(), false);
+		m_text_repl = wchar_cpy_esc(tx_text_replace_with().Text().c_str());
 		m_text_find_case = ck_text_find_case().IsChecked().GetBoolean();
 		m_text_find_wrap = ck_text_find_wrap().IsChecked().GetBoolean();
 	}

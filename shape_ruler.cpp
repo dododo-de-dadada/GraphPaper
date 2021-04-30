@@ -1,6 +1,6 @@
 //------------------------------
-// Shape_scale.cpp
-// 目盛り
+// shape_ruler.cpp
+// 定規
 //------------------------------
 #include "pch.h"
 #include "shape.h"
@@ -10,13 +10,13 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 図形を破棄する.
-	ShapeScale::~ShapeScale(void)
+	ShapeRuler::~ShapeRuler(void)
 	{
 		m_dw_text_format = nullptr;
 	}
 
 	// 位置を含むか調べる.
-	ANCH_WHICH ShapeScale::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	ANCH_WHICH ShapeRuler::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
 		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// dx	描画環境
-	void ShapeScale::draw(SHAPE_DX& dx)
+	void ShapeRuler::draw(SHAPE_DX& dx)
 	{
 		constexpr wchar_t* D[10] = { L"0", L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9" };
 		auto br = dx.m_shape_brush;
@@ -182,7 +182,7 @@ namespace winrt::GraphPaper::implementation
 	// pos	開始位置
 	// diff	終了位置への差分
 	// attr	属性値
-	ShapeScale::ShapeScale(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
+	ShapeRuler::ShapeRuler(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
 		ShapeRect::ShapeRect(s_pos, diff, attr),
 		m_grid_base(attr->m_grid_base)
 	{
@@ -205,7 +205,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeScale::ShapeScale(DataReader const& dt_reader) :
+	ShapeRuler::ShapeRuler(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader),
 		m_grid_base(dt_reader.ReadDouble())
 	{
@@ -241,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに書き込む.
-	void ShapeScale::write(DataWriter const& dt_writer) const
+	void ShapeRuler::write(DataWriter const& dt_writer) const
 	{
 		using winrt::GraphPaper::implementation::write;
 

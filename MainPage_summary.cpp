@@ -169,13 +169,13 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (t != nullptr) {
-			// 図形が表示されるようページをスクロールする.
+			// 図形が表示されるよう用紙をスクロールする.
 			scroll_to(t);
-			m_page_sheet.set_to(t);
+			m_main_sheet.set_to(t);
 		}
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
 	// 編集メニューの「リストを表示」が選択された.

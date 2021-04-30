@@ -56,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[2].x = a_pos[3].x;
 		a_pos[2].y = a_pos[0].y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anchor_draw_rounded(a_pos[i], dx);
+			anchor_draw_ellipse(a_pos[i], dx);
 		}
 	}
 

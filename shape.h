@@ -11,6 +11,7 @@
 // shape_quad.cpp	四へん形
 // shape.rect.cpp	方形
 // shape_rrect.cpp	角丸方形
+// shape_ruler.cpp	定規
 // shape_stroke.cpp	線枠, 折れ線のひな型
 // shape_text.cpp	文字列図形
 //------------------------------
@@ -31,7 +32,7 @@
 //        +---------------+---------------+
 //        |               |               |
 // +------+------+ +------+------+ +------+------+
-// | ShapeStroke*| | ShapeGroup  | | ShapeSheet |
+// | ShapeStroke*| | ShapeGroup  | | ShapeSheet  |
 // +------+------+ +-------------+ +-------------+
 //        |
 //        +---------------+---------------+
@@ -43,7 +44,7 @@
 //        +---------------+               +---------------+---------------+---------------+
 //        |               |               |               |               |               |
 // +------+------+ +------+------+ +------+------+ +------+------+ +------+------+ +------+------+
-// | ShapeQuad   | | ShapeBezi   | | ShapeElli   | | ShapeRRect  | | ShapeText   | | ShapeScale  |
+// | ShapeQuad   | | ShapeBezi   | | ShapeElli   | | ShapeRRect  | | ShapeText   | | ShapeRuler  |
 // +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+
 
 // SVG のためのテキスト改行コード
@@ -112,10 +113,10 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 方眼の形式
-	enum struct GRID_PATT {
-		PATT_1,
-		PATT_2,
-		PATT_3
+	enum struct GRID_EMPH {
+		EMPH_0,
+		EMPH_2,
+		EMPH_3
 	};
 
 	// 図形の種類
@@ -130,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_RRCT,	// 角丸方形
 		SHAPE_TEXT,		// 文字列
 		SHAPE_GROUP,	// グループ
-		SHAPE_SCALE		// 目盛り
+		SHAPE_RULER		// 定規
 	};
 
 	// 矢じりの寸法
@@ -143,12 +144,6 @@ namespace winrt::GraphPaper::implementation
 	// 破線の配置
 	union STROKE_PATT {
 		float m_[6] = { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F };
-	};
-
-	enum struct WCHAR_CPY {
-		EXACT,
-		ESC_CHR,
-		CHR_ESC
 	};
 
 	// 色成分の最大値
@@ -164,10 +159,10 @@ namespace winrt::GraphPaper::implementation
 	// shape.cpp
 	//------------------------------
 
-	// 部位 (方形) を表示する.
+	// 図形の部位 (方形) を表示する.
 	void anchor_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx);
-	// 部位 (円) を表示する.
-	void anchor_draw_rounded(const D2D1_POINT_2F c_pos, SHAPE_DX& dx);
+	// 図形の部位（円形）を表示する.
+	void anchor_draw_ellipse(const D2D1_POINT_2F c_pos, SHAPE_DX& dx);
 	// 矢じりの寸法が同じか調べる.
 	bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept;
 	// 矢じりの形式が同じか調べる.
@@ -199,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 	// 単精度浮動小数が同じか調べる.
 	bool equal(const float a, const float b) noexcept;
 	// 方眼の形式が同じか調べる.
-	bool equal(const GRID_PATT a, const GRID_PATT b) noexcept;
+	bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept;
 	// 方眼の表示が同じか調べる.
 	bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept;
 	// 破線の配置が同じか調べる.
@@ -289,7 +284,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字範囲をデータリーダーから読み込む.
 	void read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader);
 	// 方眼の形式をデータリーダーから読み込む.
-	void read(GRID_PATT& value, DataReader const& dt_reader);
+	void read(GRID_EMPH& value, DataReader const& dt_reader);
 	// 方眼の表示をデータリーダーから読み込む.
 	void read(GRID_SHOW& value, DataReader const& dt_reader);
 	// 破線の配置をデータリーダーから読み込む.
@@ -299,7 +294,9 @@ namespace winrt::GraphPaper::implementation
 	// 文字列をデータリーダーから読み込む.
 	void read(wchar_t*& value, DataReader const& dt_reader);
 	// 文字列を複製する. 元の文字列がヌルポインター, または元の文字数が 0 のときは, ヌルポインターを返す.
-	wchar_t* wchar_cpy(const wchar_t* const s, const bool exact = true);
+	wchar_t* wchar_cpy(const wchar_t* const s);
+	// 文字列を複製する. エスケープ文字列は文字コードに変換する.
+	wchar_t* wchar_cpy_esc(const wchar_t* const s);
 	// 文字列の長さ. 引数がヌルポインタの場合, 0 を返す.
 	uint32_t wchar_len(const wchar_t* const t) noexcept;
 	// 矢じりの寸法をデータライターに書き込む.
@@ -331,7 +328,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字列範囲をデータライターに書き込む.
 	void write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer);
 	// 方眼の形式をデータライターに書き込む.
-	void write(const GRID_PATT value, DataWriter const& dt_writer);
+	void write(const GRID_EMPH value, DataWriter const& dt_writer);
 	// 方眼の表示をデータライターに書き込む.
 	void write(const GRID_SHOW value, DataWriter const& dt_writer);
 	// 破線の配置をデータライターに書き込む.
@@ -400,22 +397,22 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_grid_base(double& /*value*/) const noexcept { return false; }
 		// 方眼の大きさを得る.
 		virtual bool get_grid_gray(double& /*value*/) const noexcept { return false; }
-		// 方眼の形式を得る.
-		virtual bool get_grid_patt(GRID_PATT& /*value*/) const noexcept { return false; }
+		// 方眼の強調を得る.
+		virtual bool get_grid_emph(GRID_EMPH& /*value*/) const noexcept { return false; }
 		// 方眼の表示を得る.
 		virtual bool get_grid_show(GRID_SHOW& /*value*/) const noexcept { return false; }
 		// 方眼にそろえるを得る.
 		virtual bool get_grid_snap(bool& /*value*/) const noexcept { return false; }
 		// 図形を囲む領域の左上位置を得る.
 		virtual void get_min_pos(D2D1_POINT_2F& /*value*/) const noexcept {}
-		// ページの色を得る.
-		virtual bool get_page_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
-		// ページの拡大率を得る.
-		virtual bool get_page_scale(double& /*value*/) const noexcept { return false; }
-		// ページの大きさを得る.
-		virtual bool get_page_size(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
-		// 指定された部位の位置を得る.
-		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F&/*value*/) const noexcept {}
+		// 用紙の色を得る.
+		virtual bool get_sheet_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
+		// 用紙の拡大率を得る.
+		virtual bool get_sheet_scale(double& /*value*/) const noexcept { return false; }
+		// 用紙の大きさを得る.
+		virtual bool get_sheet_size(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
+		// 部位の位置を得る.
+		virtual	void get_anch_pos(const ANCH_WHICH /*anch*/, D2D1_POINT_2F&/*value*/) const noexcept {}
 		// 開始位置を得る.
 		virtual bool get_start_pos(D2D1_POINT_2F& /*value*/) const noexcept { return false; }
 		// 線枠の色を得る.
@@ -472,20 +469,20 @@ namespace winrt::GraphPaper::implementation
 		virtual void set_grid_base(const double /*value*/) noexcept {}
 		// 値を方眼線の濃淡に格納する.
 		virtual void set_grid_gray(const double /*value*/) noexcept {}
-		// 値を方眼の形式に格納する.
-		virtual void set_grid_patt(const GRID_PATT /*value*/) noexcept {}
+		// 値を方眼の強調に格納する.
+		virtual void set_grid_emph(const GRID_EMPH /*value*/) noexcept {}
 		// 値を方眼の表示に格納する.
 		virtual void set_grid_show(const GRID_SHOW /*value*/) noexcept {}
 		// 値を方眼にそろえるに格納する.
 		virtual void set_grid_snap(const bool /*value*/) noexcept {}
-		// 値をページの色に格納する.
-		virtual void set_page_color(const D2D1_COLOR_F& /*value*/) noexcept {}
-		// 値をページの拡大率に格納する.
-		virtual void set_page_scale(const double /*value*/) noexcept {}
-		// 値をページの大きさに格納する.
-		virtual void set_page_size(const D2D1_SIZE_F /*value*/) noexcept {}
-		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		virtual void set_pos(const D2D1_POINT_2F /*value*/, const ANCH_WHICH /*a*/) {}
+		// 値を用紙の色に格納する.
+		virtual void set_sheet_color(const D2D1_COLOR_F& /*value*/) noexcept {}
+		// 値を用紙の拡大率に格納する.
+		virtual void set_sheet_scale(const double /*value*/) noexcept {}
+		// 値を用紙の大きさに格納する.
+		virtual void set_sheet_size(const D2D1_SIZE_F /*value*/) noexcept {}
+		//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+		virtual void set_anch_pos(const D2D1_POINT_2F /*value*/, const ANCH_WHICH /*anch*/) {}
 		// 値を選択フラグに格納する.
 		virtual void set_select(const bool /*value*/) noexcept {}
 		// 値を線枠の色に格納する.
@@ -562,11 +559,11 @@ namespace winrt::GraphPaper::implementation
 	winrt::hstring s_list_selected_all_text(S_LIST_T const& s_list) noexcept;
 
 	//------------------------------
-	// 図形用紙
+	// 用紙
 	//------------------------------
 	struct ShapeSheet : Shape {
 
-		// 図形の既定の属性
+		// 既定の図形属性
 
 		ARROW_SIZE m_arrow_size{ 7.0f, 16.0f, 0.0f };	// 矢じりの寸法
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じりの形式
@@ -592,14 +589,14 @@ namespace winrt::GraphPaper::implementation
 		double m_grid_base = 0.0;	// 方眼の基準の大きさ (を -1 した値)
 		double m_grid_gray = GRID_GRAY;	// 方眼線の濃さ
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
-		GRID_PATT m_grid_patt = GRID_PATT::PATT_1;	// 方眼の形式
+		GRID_EMPH m_grid_emph = GRID_EMPH::EMPH_0;	// 方眼の強調
 		bool m_grid_snap = true;	// 方眼に整列
 
 		// 用紙の属性
 
-		D2D1_COLOR_F m_page_color = S_WHITE;	// 背景色 (MainPage のコンストラクタで設定)
-		double m_page_scale = 1.0;	// 拡大率
-		D2D1_SIZE_F	m_page_size;	// 大きさ (MainPage のコンストラクタで設定)
+		D2D1_COLOR_F m_sheet_color = S_WHITE;	// 背景色 (MainPage のコンストラクタで設定)
+		double m_sheet_scale = 1.0;	// 拡大率
+		D2D1_SIZE_F	m_sheet_size;	// 大きさ (MainPage のコンストラクタで設定)
 
 		//------------------------------
 		// shape_sheet.cpp
@@ -631,18 +628,18 @@ namespace winrt::GraphPaper::implementation
 		void get_grid_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の大きさを得る.
 		bool get_grid_gray(double& value) const noexcept;
-		// 方眼の形式を得る.
-		bool get_grid_patt(GRID_PATT& value) const noexcept;
+		// 方眼の強調を得る.
+		bool get_grid_emph(GRID_EMPH& value) const noexcept;
 		// 方眼の表示の状態を得る.
 		bool get_grid_show(GRID_SHOW& value) const noexcept;
 		// 方眼にそろえるを得る.
 		bool get_grid_snap(bool& value) const noexcept;
-		// ページの色を得る.
-		bool get_page_color(D2D1_COLOR_F& value) const noexcept;
-		// ページの色を得る.
-		bool get_page_size(D2D1_SIZE_F& value) const noexcept;
-		// ページの拡大率を得る.
-		bool get_page_scale(double& value) const noexcept;
+		// 用紙の色を得る.
+		bool get_sheet_color(D2D1_COLOR_F& value) const noexcept;
+		// 用紙の色を得る.
+		bool get_sheet_size(D2D1_SIZE_F& value) const noexcept;
+		// 用紙の拡大率を得る.
+		bool get_sheet_scale(double& value) const noexcept;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
 		// 塗りつぶし色を得る.
@@ -683,18 +680,18 @@ namespace winrt::GraphPaper::implementation
 		void set_grid_base(const double value) noexcept;
 		// 値を方眼線の濃淡に格納する.
 		void set_grid_gray(const double value) noexcept;
-		// 値を方眼の形式に格納する.
-		void set_grid_patt(const GRID_PATT value) noexcept;
+		// 値を方眼の強調に格納する.
+		void set_grid_emph(const GRID_EMPH value) noexcept;
 		// 値を方眼の表示に格納する.
 		void set_grid_show(const GRID_SHOW value) noexcept;
 		// 値を方眼にそろえるに格納する.
 		void set_grid_snap(const bool value) noexcept;
-		// 値をページの色に格納する.
-		void set_page_color(const D2D1_COLOR_F& value) noexcept;
-		// 値をページの寸法に格納する.
-		void set_page_size(const D2D1_SIZE_F value) noexcept;
-		// 値をページの拡大率に格納する.
-		void set_page_scale(const double value) noexcept;
+		// 値を用紙の色に格納する.
+		void set_sheet_color(const D2D1_COLOR_F& value) noexcept;
+		// 値を用紙の寸法に格納する.
+		void set_sheet_size(const D2D1_SIZE_F value) noexcept;
+		// 値を用紙の拡大率に格納する.
+		void set_sheet_scale(const double value) noexcept;
 		// 値を矢じりの寸法に格納する.
 		void set_arrow_size(const ARROW_SIZE& value);
 		// 値を矢じりの形式に格納する.
@@ -789,7 +786,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_deleted = false;	// 消去フラグ
 		bool m_selected = true;	// 選択フラグ
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
-		D2D1_POINT_2F m_diff{ 0.0f, 0.0f };	// 終了位置への差分
+		D2D1_POINT_2F m_diff{ 0.0f, 0.0f };	// 開始位置と終了位置との差分
 		D2D1_COLOR_F m_stroke_color;	// 線枠の色
 		STROKE_PATT m_stroke_patt{};	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_style;	// 破線の形式
@@ -807,8 +804,8 @@ namespace winrt::GraphPaper::implementation
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 図形を囲む領域の左上位置を得る.
 		virtual void get_min_pos(D2D1_POINT_2F& value) const noexcept;
-		// 指定された部位の位置を得る.
-		virtual	void get_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& value) const noexcept;
+		// 部位の位置を得る.
+		virtual	void get_anch_pos(const ANCH_WHICH /*anch*/, D2D1_POINT_2F& value) const noexcept;
 		// 開始位置を得る.
 		virtual bool get_start_pos(D2D1_POINT_2F& value) const noexcept;
 		// 線枠の色を得る.
@@ -887,10 +884,10 @@ namespace winrt::GraphPaper::implementation
 		void set_arrow_size(const ARROW_SIZE& value);
 		// 値を矢じりの形式に格納する.
 		void set_arrow_style(const ARROW_STYLE value);
-		// 指定された部位の位置を得る.
-		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept;
-		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		void set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a);
+		// 部位の位置を得る.
+		void get_anch_pos(const ANCH_WHICH anch, D2D1_POINT_2F& value) const noexcept;
+		//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+		void set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch);
 		// 値を始点に格納する. 他の部位の位置も動く.
 		void set_start_pos(const D2D1_POINT_2F value);
 		// 差分だけ移動する.
@@ -929,10 +926,10 @@ namespace winrt::GraphPaper::implementation
 		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
 		// 値を塗りつぶしの色に格納する.
 		void set_fill_color(const D2D1_COLOR_F& value) noexcept;
-		// 指定された部位の位置を得る.
-		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept;
-		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		void set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a);
+		// 部位の位置を得る.
+		void get_anch_pos(const ANCH_WHICH anch, D2D1_POINT_2F& value) const noexcept;
+		//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+		void set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG タグとして書き込む.
@@ -940,27 +937,27 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// 目盛り
+	// 定規
 	// 作成したあとで文字列の属性の変更はできない.
 	//------------------------------
-	struct ShapeScale : ShapeRect {
+	struct ShapeRuler : ShapeRect {
 		double m_grid_base;	// 方眼の大きさ (を -1 した値)
 		winrt::com_ptr<IDWriteTextFormat> m_dw_text_format{};	// テキストフォーマット
 
 		//------------------------------
-		// shape_scale.cpp
+		// shape_ruler.cpp
 		//------------------------------
 
 		// 図形を破棄する.
-		~ShapeScale(void);
+		~ShapeRuler(void);
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか調べる.
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 図形を作成する.
-		ShapeScale(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr);
+		ShapeRuler(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr);
 		// 図形をデータリーダーから読み込む.
-		ShapeScale(DataReader const& dt_reader);
+		ShapeRuler(DataReader const& dt_reader);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG タグとして書き込む.
@@ -1013,10 +1010,10 @@ namespace winrt::GraphPaper::implementation
 		ANCH_WHICH hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
-		// 指定された部位の位置を得る.
-		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept;
-		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		void set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a);
+		// 部位の位置を得る.
+		void get_anch_pos(const ANCH_WHICH anch, D2D1_POINT_2F& value) const noexcept;
+		//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+		void set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG タグとして書き込む.
@@ -1050,10 +1047,10 @@ namespace winrt::GraphPaper::implementation
 		void get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 差分だけ移動する.
 		void move(const D2D1_POINT_2F diff);
-		// 指定された部位の位置を得る.
-		void get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept;
-		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		void set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a);
+		// 部位の位置を得る.
+		void get_anch_pos(const ANCH_WHICH anch, D2D1_POINT_2F& value) const noexcept;
+		//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+		void set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch);
 		// 値を始点に格納する. 他の部位の位置も動く.
 		void set_start_pos(const D2D1_POINT_2F value);
 		// データライターに書き込む.
@@ -1168,8 +1165,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形を破棄する.
 		~ShapeText(void);
-		// 文字列に大きさを合わせる.
-		bool adjust_bound(const D2D1_SIZE_F& max_size = D2D1_SIZE_F{ 0.0F, 0.0F });
+		//	大きさを, それが文字列より小さくならないように, 調整する. 
+		bool adjust_bound(const D2D1_SIZE_F& bound = D2D1_SIZE_F{ 0.0F, 0.0F });
 		// テキストレイアウトから計量の配列を得る.
 		void create_test_metrics(void);
 		// テキストレイアウトを破棄して作成する.
@@ -1238,8 +1235,8 @@ namespace winrt::GraphPaper::implementation
 		void set_text_margin(const D2D1_SIZE_F value);
 		// 値を段落のそろえに格納する.
 		void set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value);
-		// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-		void set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a);
+		//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+		void set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch);
 		// 値を文字列に格納する.
 		void set_text(wchar_t* const value);
 		// 値を文字列のそろえに格納する.

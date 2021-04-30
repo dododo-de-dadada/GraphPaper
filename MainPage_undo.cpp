@@ -103,8 +103,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::GRID_GRAY:
 			u = new UndoAttr<UNDO_OP::GRID_GRAY>(dt_reader);
 			break;
-		case UNDO_OP::GRID_PATT:
-			u = new UndoAttr<UNDO_OP::GRID_PATT>(dt_reader);
+		case UNDO_OP::GRID_EMPH:
+			u = new UndoAttr<UNDO_OP::GRID_EMPH>(dt_reader);
 			break;
 		case UNDO_OP::GRID_SHOW:
 			u = new UndoAttr<UNDO_OP::GRID_SHOW>(dt_reader);
@@ -121,11 +121,11 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::TEXT_MARGIN:
 			u = new UndoAttr<UNDO_OP::TEXT_MARGIN>(dt_reader);
 			break;
-		case UNDO_OP::PAGE_COLOR:
-			u = new UndoAttr<UNDO_OP::PAGE_COLOR>(dt_reader);
+		case UNDO_OP::SHEET_COLOR:
+			u = new UndoAttr<UNDO_OP::SHEET_COLOR>(dt_reader);
 			break;
-		case UNDO_OP::PAGE_SIZE:
-			u = new UndoAttr<UNDO_OP::PAGE_SIZE>(dt_reader);
+		case UNDO_OP::SHEET_SIZE:
+			u = new UndoAttr<UNDO_OP::SHEET_SIZE>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_ALIGN_P:
 			u = new UndoAttr<UNDO_OP::TEXT_ALIGN_P>(dt_reader);
@@ -221,9 +221,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		// メニューや表示を更新する.
 		edit_menu_enable();
-		page_bound();
-		page_panle_size();
-		page_draw();
+		sheet_bound();
+		sheet_panle_size();
+		sheet_draw();
 		if (m_mutex_summary.load(std::memory_order_acquire)) {
 		//if (m_summary_visible) {
 			summary_update();
@@ -266,9 +266,9 @@ namespace winrt::GraphPaper::implementation
 			m_stack_rcnt++;
 		}
 		edit_menu_enable();
-		page_bound();
-		page_panle_size();
-		page_draw();
+		sheet_bound();
+		sheet_panle_size();
+		sheet_draw();
 		if (m_mutex_summary.load(std::memory_order_acquire)) {
 		//if (m_summary_visible) {
 			summary_update();
@@ -300,37 +300,37 @@ namespace winrt::GraphPaper::implementation
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoAttr<UNDO_OP::ARROW_STYLE>)) {
 			// 線枠メニューの「矢じりの種類」に印をつける.
-			arrow_style_check_menu(m_page_sheet.m_arrow_style);
+			arrow_style_check_menu(m_main_sheet.m_arrow_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
 			stbar_set_grid();
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_PATT>)) {
-			// ページメニューの「方眼の形式」に印をつける.
-			grid_patt_check_menu(m_page_sheet.m_grid_patt);
+		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_EMPH>)) {
+			// 用紙メニューの「方眼の強調」に印をつける.
+			grid_emph_check_menu(m_main_sheet.m_grid_emph);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_SHOW>)) {
-			// ページメニューの「方眼の表示」に印をつける.
-			grid_show_check_menu(m_page_sheet.m_grid_show);
+			// 用紙メニューの「方眼の表示」に印をつける.
+			grid_show_check_menu(m_main_sheet.m_grid_show);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
-			font_style_check_menu(m_page_sheet.m_font_style);
+			font_style_check_menu(m_main_sheet.m_font_style);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::PAGE_SIZE>)) {
-			// ページの大きさをステータスバーに格納する.
-			stbar_set_page();
+		else if (u_type == typeid(UndoAttr<UNDO_OP::SHEET_SIZE>)) {
+			// 用紙の大きさをステータスバーに格納する.
+			stbar_set_sheet();
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_STYLE>)) {
 			// 線枠メニューの「種類」に印をつける.
-			stroke_style_check_menu(m_page_sheet.m_stroke_style);
+			stroke_style_check_menu(m_main_sheet.m_stroke_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_T>)) {
-			text_align_t_check_menu(m_page_sheet.m_text_align_t);
+			text_align_t_check_menu(m_main_sheet.m_text_align_t);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_P>)) {
-			text_align_p_check_menu(m_page_sheet.m_text_align_p);
+			text_align_p_check_menu(m_main_sheet.m_text_align_p);
 		}
 	}
 
@@ -513,7 +513,7 @@ namespace winrt::GraphPaper::implementation
 	template<UNDO_OP U, typename T>
 	void MainPage::undo_push_set(T const& value)
 	{
-		m_stack_undo.push_back(new UndoAttr<U>(&m_page_sheet, value));
+		m_stack_undo.push_back(new UndoAttr<U>(&m_main_sheet, value));
 		auto flag = false;
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
@@ -531,7 +531,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
 	// 図形の値の保存を実行して, その操作をスタックに積む.
@@ -552,10 +552,10 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::undo_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_BASE>(Shape* s, double const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_GRAY>(Shape* s, double const& value);
-	template void MainPage::undo_push_set<UNDO_OP::GRID_PATT>(Shape* s, GRID_PATT const& value);
+	template void MainPage::undo_push_set<UNDO_OP::GRID_EMPH>(Shape* s, GRID_EMPH const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_SHOW>(Shape* s, GRID_SHOW const& value);
-	template void MainPage::undo_push_set<UNDO_OP::PAGE_COLOR>(Shape* s, D2D1_COLOR_F const& value);
-	template void MainPage::undo_push_set<UNDO_OP::PAGE_SIZE>(Shape* s, D2D1_SIZE_F const& value);
+	template void MainPage::undo_push_set<UNDO_OP::SHEET_COLOR>(Shape* s, D2D1_COLOR_F const& value);
+	template void MainPage::undo_push_set<UNDO_OP::SHEET_SIZE>(Shape* s, D2D1_SIZE_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::START_POS>(Shape* s);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_PATT>(STROKE_PATT const& value);

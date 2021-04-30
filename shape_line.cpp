@@ -141,10 +141,13 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 指定された部位の位置を得る.
-	void ShapeLine::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept
+	//	部位の位置を得る.
+	//	anch	図形の部位.
+	//	value	得られた位置.
+	//	戻り値	なし
+	void ShapeLine::get_anch_pos(const ANCH_WHICH anch, D2D1_POINT_2F& value) const noexcept
 	{
-		if (a == ANCH_END) {
+		if (anch == ANCH_END) {
 			pt_add(m_pos, m_diff, value);
 		}
 		else {
@@ -245,16 +248,18 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapeLine::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
+	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+	//	value	格納する値
+	//	abch	図形の部位
+	void ShapeLine::set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch)
 	{
 		D2D1_POINT_2F diff;
 
-		if (a == ANCH_END) {
+		if (anch == ANCH_END) {
 			pt_sub(value, m_pos, m_diff);
 		}
 		else {
-			if (a == ANCH_BEGIN) {
+			if (anch == ANCH_BEGIN) {
 				pt_sub(value, m_pos, diff);
 				pt_sub(m_diff, diff, m_diff);
 			}

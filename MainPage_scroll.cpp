@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 			sb.Value(min(sv + vs, mx));
 			break;
 		}
-		page_draw();
+		sheet_draw();
 	}
 
 	// スクロールバーの値を設定する.
@@ -43,11 +43,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::scroll_set(const double aw, const double ah)
 	{
 		constexpr double SB_SIZE = 16.0;
-		const auto ps = m_page_sheet.m_page_scale;	// ページの表示倍率
+		const auto ps = m_main_sheet.m_sheet_scale;	// 用紙の表示倍率
 		const double vw = aw / ps;	// 見えている部分の幅
 		const double vh = ah / ps;	// 見えている部分の高さ
-		const auto p_min = page_min();
-		const auto p_max = page_max();
+		const auto p_min = sheet_min();
+		const auto p_max = sheet_max();
 		const auto mw = static_cast<double>(p_max.x) - static_cast<double>(p_min.x) - vw;
 		const auto mh = static_cast<double>(p_max.y) - static_cast<double>(p_min.y) - vh;
 		const auto wgt0 = mw > 0.0;
@@ -94,14 +94,14 @@ namespace winrt::GraphPaper::implementation
 		//}
 	}
 
-	// 図形が表示されるようページをスクロールする.
+	// 図形が表示されるよう用紙をスクロールする.
 	// s	表示される図形
 	bool MainPage::scroll_to(Shape* s)
 	{
 		// スクロールビューアのビューポートの座標を, 
-		// ページ座標で求める.
-		const double ox = page_min().x;
-		const double oy = page_min().y;
+		// 用紙座標で求める.
+		const double ox = sheet_min().x;
+		const double oy = sheet_min().y;
 		const double ho = sb_horz().Value();
 		const double vo = sb_vert().Value();
 		const double vw = sb_horz().ViewportSize();

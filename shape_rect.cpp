@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "shape_rect.h"
+#include "shape.h"
 
 using namespace winrt;
 
@@ -55,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 		// どの頂点が位置を含むか調べる.
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F a_pos;
-			get_pos(ANCH_CORNER[i], a_pos);
+			get_anch_pos(ANCH_CORNER[i], a_pos);
 			if (pt_in_anch(t_pos, a_pos, a_len)) {
 				return ANCH_CORNER[i];
 			}
@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 		// どの中点が位置を含むか調べる.
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F a_pos;
-			get_pos(ANCH_MIDDLE[i], a_pos);
+			get_anch_pos(ANCH_MIDDLE[i], a_pos);
 			if (pt_in_anch(t_pos, a_pos, a_len)) {
 				return ANCH_MIDDLE[i];
 			}
@@ -127,10 +127,13 @@ namespace winrt::GraphPaper::implementation
 		m_fill_color = value;
 	}
 
-	// 指定された部位の位置を得る.
-	void ShapeRect::get_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept
+	//	部位の位置を得る.
+	//	anch	図形の部位.
+	//	value	得られた位置.
+	//	戻り値	なし
+	void ShapeRect::get_anch_pos(const ANCH_WHICH anch, D2D1_POINT_2F& value) const noexcept
 	{
-		switch (a) {
+		switch (anch) {
 		case ANCH_WHICH::ANCH_NORTH:
 			value.x = m_pos.x + m_diff.x * 0.5f;
 			value.y = m_pos.y;
@@ -178,13 +181,15 @@ namespace winrt::GraphPaper::implementation
 		return pt_in_rect(m_pos, a_min, a_max) && pt_in_rect(e_pos, a_min, a_max);
 	}
 
-	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapeRect::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
+	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+	//	value	格納する値
+	//	abch	図形の部位
+	void ShapeRect::set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch)
 	{
 		D2D1_POINT_2F a_pos;
 		D2D1_POINT_2F diff;
 
-		switch (a) {
+		switch (anch) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
 			m_pos = value;
 			break;

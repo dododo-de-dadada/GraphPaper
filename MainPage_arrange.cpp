@@ -9,18 +9,34 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	constexpr auto BACK = true;
 	using BACKWARD = S_LIST_T::iterator;
+	using FORWARD = S_LIST_T::reverse_iterator;
+	constexpr auto FRONT = false;
+
+	// 編集メニューの「前面に移動」が選択された.
+	void MainPage::arrange_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		// 選択された図形を次または前の図形と入れ替える.
+		arrange_order<FORWARD>();
+	}
+
+	// 編集メニューの「最前面に移動」が選択された.
+	void MainPage::arrange_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		// 選択された図形を最背面または最前面に移動する.
+		arrange_to<FRONT>();
+	}
+
 	// 選択された図形を前の図形と入れ替える.
 	template void MainPage::arrange_order<BACKWARD>(void);
 
-	using FORWARD = S_LIST_T::reverse_iterator;
 	// 選択された図形を次の図形と入れ替える.
 	template void MainPage::arrange_order<FORWARD>(void);
 
 	// 選択された図形を次または前の図形と入れ替える.
 	// T	S_LIST_T::iterator の場合は背面の図形と入れ替え, S_LIST_T::reverse_iterator の場合は前面の図形と入れ替える. 
-	template<typename T>
-	void MainPage::arrange_order(void)
+	template<typename T> void MainPage::arrange_order(void)
 	{
 		T it_end;	// 終端
 		T it_src;	// 交換元反復子
@@ -63,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 						// 交換フラグが立っている場合,
 						undo_push_null();
 						edit_menu_enable();
-						page_draw();
+						sheet_draw();
 					}
 					return;
 				}
@@ -88,10 +104,29 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 編集メニューの「ひとつ背面に移動」が選択された.
+	void MainPage::arrange_send_backward_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		// 選択された図形を次または前の図形と入れ替える.
+		arrange_order<BACKWARD>();
+	}
+
+	// 編集メニューの「最背面に移動」が選択された.
+	void MainPage::arrange_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		// 選択された図形を最背面または最前面に移動する.
+		arrange_to<BACK>();
+	}
+
+	// 選択された図形を最背面に移動する.
+	template void MainPage::arrange_to<BACK>(void);
+
+	// 選択された図形を最前面に移動する.
+	template void MainPage::arrange_to<FRONT>(void);
+
 	// 選択された図形を最背面または最前面に移動する.
-	// B	true の場合は最背面, false の場合は最前面に移動
-	template<bool B>
-	void MainPage::arrange_to(void)
+	// T	true の場合は最背面, false の場合は最前面に移動
+	template<bool T> void MainPage::arrange_to(void)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 
@@ -100,7 +135,7 @@ namespace winrt::GraphPaper::implementation
 		if (list_selected.size() == 0) {
 			return;
 		}
-		if constexpr (B) {
+		if constexpr (T) {
 			uint32_t i = 0;
 			auto s_pos = s_list_front(m_list_shapes);
 			for (auto s : list_selected) {
@@ -125,43 +160,7 @@ namespace winrt::GraphPaper::implementation
 		list_selected.clear();
 		undo_push_null();
 		edit_menu_enable();
-		page_draw();
-	}
-
-	constexpr auto BACK = true;
-	// 選択された図形を最背面に移動する.
-	template void MainPage::arrange_to<BACK>(void);
-
-	constexpr auto FRONT = false;
-	// 選択された図形を最前面に移動する.
-	template void MainPage::arrange_to<FRONT>(void);
-
-	// 編集メニューの「前面に移動」が選択された.
-	void MainPage::bring_forward_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		// 選択された図形を次または前の図形と入れ替える.
-		arrange_order<FORWARD>();
-	}
-
-	// 編集メニューの「最前面に移動」が選択された.
-	void MainPage::bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		// 選択された図形を最背面または最前面に移動する.
-		arrange_to<FRONT>();
-	}
-
-	// 編集メニューの「ひとつ背面に移動」が選択された.
-	void MainPage::send_backward_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		// 選択された図形を次または前の図形と入れ替える.
-		arrange_order<BACKWARD>();
-	}
-
-	// 編集メニューの「最背面に移動」が選択された.
-	void MainPage::send_to_back_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		// 選択された図形を最背面または最前面に移動する.
-		arrange_to<BACK>();
+		sheet_draw();
 	}
 
 }

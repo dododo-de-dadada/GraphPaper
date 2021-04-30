@@ -12,11 +12,11 @@ namespace winrt::GraphPaper::implementation
 	static void create_test_metrics(IDWriteTextLayout* t_layout, const DWRITE_TEXT_RANGE t_range, DWRITE_HIT_TEST_METRICS*& t_metrics, UINT32& m_count);
 	// 文字列をデータライターに SVG として書き込む.
 	static void write_svg_text(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer);
-
-	static void get_font_descent(IDWriteTextLayout* text_layout, double& descent);
+	// 書体のディセントをテキストレイアウトから得る.
+	static void get_font_descent(IDWriteTextLayout* t_layout, double& descent);
 
 	// テキストレイアウトからヒットテストのための計量の配列を得る.
-	// t_layout	もとになるテキストレイアウト
+	// t_layout	もとになる文字列レイアウト
 	// t_range	文字列の範囲
 	// t_metrics	得られた計量の配列
 	// m_count	得られ配列の要素数
@@ -37,10 +37,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体のディセントをテキストレイアウトから得る.
-	static void get_font_descent(IDWriteTextLayout* text_layout, double& descent)
+	//	t_layout	文字列レイアウト
+	//	descent	得られたディセント
+	static void get_font_descent(IDWriteTextLayout* t_layout, double& descent)
 	{
 		winrt::com_ptr<IDWriteFontCollection> fonts;
-		text_layout->GetFontCollection(fonts.put());
+		t_layout->GetFontCollection(fonts.put());
 		IDWriteFontFamily* family;
 		fonts->GetFontFamily(0, &family);
 		fonts->Release();
@@ -53,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 		font->GetMetrics(&metrics);
 		//font->Release();
 		font = nullptr;
-		const auto f_size = text_layout->GetFontSize();
+		const auto f_size = t_layout->GetFontSize();
 		descent = f_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
 	}
 
@@ -91,8 +93,10 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 大きさを文字列に合わせる.
-	bool ShapeText::adjust_bound(const D2D1_SIZE_F& max_size)
+	//	大きさを, それが文字列より小さくならないように, 調整する. 
+	//	bound	調整前の大きさ, 調整後の大きさ.
+	//	戻り値	大きさが調整されたならば真.
+	bool ShapeText::adjust_bound(const D2D1_SIZE_F& bound)
 	{
 		auto diff = m_diff;
 		// 改行コードの数を求め, 最小の行数に格納する.
@@ -133,19 +137,19 @@ namespace winrt::GraphPaper::implementation
 				bound_width = fmax(bound_width, line_width);
 			}
 			bound_width += m_text_margin.width * 2.0;
-			if (max_size.width > FLT_MIN) {
-				bound_width = fmin(bound_width, max_size.width);
+			if (bound.width > FLT_MIN) {
+				bound_width = fmin(bound_width, bound.width);
 			}
 			bound_height += m_text_margin.height * 2.0;
-			if (max_size.height > FLT_MIN) {
-				bound_height = fmin(bound_height, max_size.height);
+			if (bound.height > FLT_MIN) {
+				bound_height = fmin(bound_height, bound.height);
 			}
 			// 行数を保存する.
 			line_cnt = m_dw_line_cnt;
 			D2D1_POINT_2F s_pos;
 			get_start_pos(s_pos);
 			pt_add(s_pos, bound_width, bound_height, s_pos);
-			set_pos(s_pos, ANCH_WHICH::ANCH_SE);
+			set_anch_pos(s_pos, ANCH_WHICH::ANCH_SE);
 		} while (m_dw_line_cnt < line_cnt && m_dw_line_cnt > min_line_cnt);
 		// 行数が, 保存された行数より小さい, かつ最小の行数より大きい場合
 		return equal(diff, m_diff) != true;
@@ -405,6 +409,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
+	//	dx	図形の描画環境
+	//	戻り値	なし
 	void ShapeText::draw(SHAPE_DX& dx)
 	{
 		ShapeRect::draw(dx);
@@ -769,10 +775,12 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値を指定した部位の位置に格納する. 他の部位の位置は動かない. 
-	void ShapeText::set_pos(const D2D1_POINT_2F value, const ANCH_WHICH a)
+	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+	//	value	格納する値
+	//	abch	図形の部位
+	void ShapeText::set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch)
 	{
-		ShapeRect::set_pos(value, a);
+		ShapeRect::set_anch_pos(value, anch);
 		create_text_metrics();
 	}
 

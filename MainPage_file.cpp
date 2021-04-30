@@ -104,16 +104,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		edit_menu_enable();
 		color_code_check_menu();
-		stroke_style_check_menu(m_page_sheet.m_stroke_style);
-		arrow_style_check_menu(m_page_sheet.m_arrow_style);
-		font_style_check_menu(m_page_sheet.m_font_style);
-		grid_patt_check_menu(m_page_sheet.m_grid_patt);
-		grid_show_check_menu(m_page_sheet.m_grid_show);
+		stroke_style_check_menu(m_main_sheet.m_stroke_style);
+		arrow_style_check_menu(m_main_sheet.m_arrow_style);
+		font_style_check_menu(m_main_sheet.m_font_style);
+		grid_emph_check_menu(m_main_sheet.m_grid_emph);
+		grid_show_check_menu(m_main_sheet.m_grid_show);
 		stbar_check_menu(status_bar());
-		text_align_t_check_menu(m_page_sheet.m_text_align_t);
-		text_align_p_check_menu(m_page_sheet.m_text_align_p);
-		tmfi_grid_snap().IsChecked(m_page_sheet.m_grid_snap);
-		tmfi_grid_snap_2().IsChecked(m_page_sheet.m_grid_snap);
+		text_align_t_check_menu(m_main_sheet.m_text_align_t);
+		text_align_p_check_menu(m_main_sheet.m_text_align_p);
+		tmfi_grid_snap().IsChecked(m_main_sheet.m_grid_snap);
+		tmfi_grid_snap_2().IsChecked(m_main_sheet.m_grid_snap);
 		len_unit_check_menu();
 
 		wchar_t* unavailable_font;	// 書体名
@@ -130,13 +130,13 @@ namespace winrt::GraphPaper::implementation
 				summary_remake();
 			}
 		}
-		page_bound();
-		page_panle_size();
-		page_draw();
+		sheet_bound();
+		sheet_panle_size();
+		sheet_draw();
 		stbar_set_curs();
 		stbar_set_draw();
 		stbar_set_grid();
-		stbar_set_page();
+		stbar_set_sheet();
 		stbar_set_zoom();
 		stbar_set_unit();
 		stbar_visibility();
@@ -175,8 +175,8 @@ namespace winrt::GraphPaper::implementation
 		// ダブルクリックでファイルが選択された場合,
 		// co_await が終了する前に, PonterReleased と PonterEntered が呼ばれる.
 		// これはピッカーが 2 度目の Released を待たずにダブルクリックを成立させているためだと思われる.
-		//scp_page_panel().PointerReleased(m_token_pointer_released);
-		//scp_page_panel().PointerEntered(m_token_pointer_entered);
+		//scp_sheet_panel().PointerReleased(m_token_pointer_released);
+		//scp_sheet_panel().PointerEntered(m_token_pointer_entered);
 		// ピッカーを非同期で表示してストレージファイルを取得する.
 		// 「閉じる」ボタンが押された場合ストレージファイルとして nullptr が返る.
 		auto s_file{ co_await o_picker.PickSingleFileAsync() };
@@ -189,8 +189,8 @@ namespace winrt::GraphPaper::implementation
 			//file_finish_reading();
 		}
 		o_picker = nullptr;
-		//m_token_pointer_released = scp_page_panel().PointerReleased({ this, &MainPage::pointer_released });
-		//m_token_pointer_entered = scp_page_panel().PointerEntered({ this, &MainPage::pointer_entered });
+		//m_token_pointer_released = scp_sheet_panel().PointerReleased({ this, &MainPage::pointer_released });
+		//m_token_pointer_entered = scp_sheet_panel().PointerEntered({ this, &MainPage::pointer_entered });
 		Window::Current().CoreWindow().PointerCursor(p_cur);
 	}
 
@@ -206,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 
 		auto hr = E_FAIL;
 		winrt::apartment_context context;
-		m_mutex_page.lock();
+		m_mutex_shapes.lock();
 		try {
 			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
@@ -218,11 +218,11 @@ namespace winrt::GraphPaper::implementation
 			color_code(static_cast<COLOR_CODE>(dt_reader.ReadUInt16()));
 			status_bar(static_cast<STATUS_BAR>(dt_reader.ReadUInt16()));
 
-			m_page_sheet.read(dt_reader);
-			m_page_sheet.m_grid_base = max(m_page_sheet.m_grid_base, 0.0F);
-			m_page_sheet.m_page_scale = min(max(m_page_sheet.m_page_scale, SCALE_MIN), SCALE_MAX);
-			m_page_sheet.m_page_size.width = max(min(m_page_sheet.m_page_size.width, page_size_max()), 1.0F);
-			m_page_sheet.m_page_size.height = max(min(m_page_sheet.m_page_size.height, page_size_max()), 1.0F);
+			m_main_sheet.read(dt_reader);
+			m_main_sheet.m_grid_base = max(m_main_sheet.m_grid_base, 0.0F);
+			m_main_sheet.m_sheet_scale = min(max(m_main_sheet.m_sheet_scale, SCALE_MIN), SCALE_MAX);
+			m_main_sheet.m_sheet_size.width = max(min(m_main_sheet.m_sheet_size.width, sheet_size_max()), 1.0F);
+			m_main_sheet.m_sheet_size.height = max(min(m_main_sheet.m_sheet_size.height, sheet_size_max()), 1.0F);
 
 			undo_clear();
 			s_list_clear(m_list_shapes);
@@ -232,7 +232,7 @@ namespace winrt::GraphPaper::implementation
 				co_await winrt::resume_foreground(cd);
 				message_show(ICON_ALERT, L"Memory leak occurs", {});
 				co_await context;
-				m_mutex_page.unlock();
+				m_mutex_shapes.unlock();
 				co_return hr;
 			}
 #endif
@@ -253,7 +253,7 @@ namespace winrt::GraphPaper::implementation
 		catch (winrt::hresult_error const& e) {
 			hr = e.code();
 		}
-		m_mutex_page.unlock();
+		m_mutex_shapes.unlock();
 		if (hr != S_OK) {
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
@@ -609,7 +609,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt32(static_cast<uint32_t>(len_unit()));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(color_code()));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(status_bar()));
-			m_page_sheet.write(dt_writer);
+			m_main_sheet.write(dt_writer);
 			if (suspend) {
 				s_list_write<!REDUCE>(m_list_shapes, dt_writer);
 				undo_write(dt_writer);
@@ -693,7 +693,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			write_svg(DOCTYPE, dt_writer);
 			// SVG 開始タグをデータライターに書き込む.
-			file_write_svg_tag(m_page_sheet.m_page_size, m_page_sheet.m_page_color, page_dpi(), len_unit(), dt_writer);
+			file_write_svg_tag(m_main_sheet.m_sheet_size, m_main_sheet.m_sheet_color, sheet_dpi(), len_unit(), dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {

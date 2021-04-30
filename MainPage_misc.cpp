@@ -70,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 		m_len_unit = LEN_UNIT::GRID;
 		stbar_set_curs();
 		stbar_set_grid();
-		stbar_set_page();
+		stbar_set_sheet();
 		stbar_set_unit();
 	}
 
@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 		m_len_unit = LEN_UNIT::INCH;
 		stbar_set_curs();
 		stbar_set_grid();
-		stbar_set_page();
+		stbar_set_sheet();
 		stbar_set_unit();
 	}
 
@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 		m_len_unit = LEN_UNIT::MILLI;
 		stbar_set_curs();
 		stbar_set_grid();
-		stbar_set_page();
+		stbar_set_sheet();
 		stbar_set_unit();
 	}
 
@@ -109,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 		m_len_unit = LEN_UNIT::PIXEL;
 		stbar_set_curs();
 		stbar_set_grid();
-		stbar_set_page();
+		stbar_set_sheet();
 		stbar_set_unit();
 	}
 
@@ -122,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 		m_len_unit = LEN_UNIT::POINT;
 		stbar_set_curs();
 		stbar_set_grid();
-		stbar_set_page();
+		stbar_set_sheet();
 		stbar_set_unit();
 	}
 

@@ -102,9 +102,9 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
-		page_bound();
-		page_panle_size();
-		page_draw();
+		sheet_bound();
+		sheet_panle_size();
+		sheet_draw();
 	}
 
 	// 編集メニューの「貼り付け」が選択された.
@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::Streams::IRandomAccessStream;
 		using winrt::Windows::Storage::Streams::DataReader;
 
-		m_mutex_page.lock();
+		m_mutex_shapes.lock();
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// Clipboard::GetContent() は, 
@@ -154,14 +154,14 @@ namespace winrt::GraphPaper::implementation
 								summary_append(s);
 							}
 							undo_push_append(s);
-							page_bound(s);
+							sheet_bound(s);
 						}
 						undo_push_null();
 						list_pasted.clear();
 						// 編集メニュー項目の使用の可否を設定する.
 						edit_menu_enable();
-						page_panle_size();
-						page_draw();
+						sheet_panle_size();
+						sheet_draw();
 					}
 				}
 				const auto _{ dt_reader.DetachStream() };
@@ -178,24 +178,24 @@ namespace winrt::GraphPaper::implementation
 					auto text{ co_await Clipboard::GetContent().GetTextAsync() };
 					if (text.empty() != true) {
 						// 文字列が空でない場合,
-						auto t = new ShapeText(D2D1_POINT_2F{ 0.0F, 0.0F }, D2D1_POINT_2F{ 1.0F, 1.0F }, wchar_cpy(text.c_str()), &m_page_sheet);
+						auto t = new ShapeText(D2D1_POINT_2F{ 0.0F, 0.0F }, D2D1_POINT_2F{ 1.0F, 1.0F }, wchar_cpy(text.c_str()), &m_main_sheet);
 #if (_DEBUG)
 						debug_leak_cnt++;
 #endif
 						// 貼り付ける最大の大きさをウィンドウの大きさに制限する.
-						const double scale = m_page_sheet.m_page_scale;
+						const double scale = m_main_sheet.m_sheet_scale;
 						D2D1_SIZE_F max_size{
-							static_cast<FLOAT>(scp_page_panel().ActualWidth() / scale),
-							static_cast<FLOAT>(scp_page_panel().ActualHeight() / scale)
+							static_cast<FLOAT>(scp_sheet_panel().ActualWidth() / scale),
+							static_cast<FLOAT>(scp_sheet_panel().ActualHeight() / scale)
 						};
 						t->adjust_bound(max_size);
 						D2D1_POINT_2F s_pos{
-							static_cast<FLOAT>((sb_horz().Value() + scp_page_panel().ActualWidth() * 0.5) / scale - t->m_diff.x * 0.5),
-							static_cast<FLOAT>((sb_vert().Value() + scp_page_panel().ActualHeight() * 0.5) / scale - t->m_diff.y * 0.5)
+							static_cast<FLOAT>((sb_horz().Value() + scp_sheet_panel().ActualWidth() * 0.5) / scale - t->m_diff.x * 0.5),
+							static_cast<FLOAT>((sb_vert().Value() + scp_sheet_panel().ActualHeight() * 0.5) / scale - t->m_diff.y * 0.5)
 						};
-						pt_add(s_pos, page_min(), s_pos);
-						if (m_page_sheet.m_grid_snap) {
-							const auto g_len = m_page_sheet.m_grid_base + 1.0;
+						pt_add(s_pos, sheet_min(), s_pos);
+						if (m_main_sheet.m_grid_snap) {
+							const auto g_len = m_main_sheet.m_grid_base + 1.0;
 							pt_round(s_pos, g_len, s_pos);
 						}
 						t->set_start_pos(s_pos);
@@ -208,9 +208,9 @@ namespace winrt::GraphPaper::implementation
 						undo_push_append(t);
 						undo_push_null();
 						edit_menu_enable();
-						page_bound(t);
-						page_panle_size();
-						page_draw();
+						sheet_bound(t);
+						sheet_panle_size();
+						sheet_draw();
 					}
 				}
 			}
@@ -220,7 +220,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		//スレッドコンテキストを復元する.
 		co_await context;
-		m_mutex_page.unlock();
+		m_mutex_shapes.unlock();
 	}
 
 	// クリップボードにデータが含まれているか調べる.

@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 		//redo_clear();
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 
 	// 範囲に含まれる図形を選択し, 含まれない図形の選択を解除する.
@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_select(pointer_shape_summary());
 				// 編集メニュー項目の使用の可否を設定する.
 				edit_menu_enable();
-				page_draw();
+				sheet_draw();
 				if constexpr (K == VirtualKey::Down) {
 					if (m_mutex_summary.load(std::memory_order_acquire)) {
 					//if (m_summary_visible) {
@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
-		page_draw();
+		sheet_draw();
 	}
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
@@ -217,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 			// コントロールキーが押されている場合,
 			undo_push_select(s);
 			edit_menu_enable();
-			page_draw();
+			sheet_draw();
 			if (m_mutex_summary.load(std::memory_order_acquire)) {
 			//if (m_summary_visible) {
 				if (s->is_selected()) {
@@ -239,7 +239,7 @@ namespace winrt::GraphPaper::implementation
 			if (select_range(s, pointer_shape_prev())) {
 				// 編集メニュー項目の使用の可否を設定する.
 				edit_menu_enable();
-				page_draw();
+				sheet_draw();
 			}
 		}
 		else {
@@ -249,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				undo_push_select(s);
 				edit_menu_enable();
-				page_draw();
+				sheet_draw();
 				if (m_mutex_summary.load(std::memory_order_acquire)) {
 				//if (m_summary_visible) {
 					summary_select(s);
@@ -259,12 +259,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (s->is_selected()) {
 			// 押された図形が選択されている場合,
-			m_page_sheet.set_to(s);
-			arrow_style_check_menu(m_page_sheet.m_arrow_style);
-			font_style_check_menu(m_page_sheet.m_font_style);
-			stroke_style_check_menu(m_page_sheet.m_stroke_style);
-			text_align_p_check_menu(m_page_sheet.m_text_align_p);
-			text_align_t_check_menu(m_page_sheet.m_text_align_t);
+			m_main_sheet.set_to(s);
+			arrow_style_check_menu(m_main_sheet.m_arrow_style);
+			font_style_check_menu(m_main_sheet.m_font_style);
+			stroke_style_check_menu(m_main_sheet.m_stroke_style);
+			text_align_p_check_menu(m_main_sheet.m_text_align_p);
+			text_align_t_check_menu(m_main_sheet.m_text_align_t);
 		}
 	}
 
