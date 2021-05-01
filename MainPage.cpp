@@ -128,8 +128,7 @@ namespace winrt::GraphPaper::implementation
 	template void conv_val_to_len<WITH_UNIT_NAME>(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
 
 	// 編集メニュー項目の使用の可否を設定する.
-	// 選択の有無や型ごとに図形を数え,
-	// それらによって, メニュー項目の可否を判定する.
+	// 選択の有無やクラスごとに図形を数え, メニュー項目の可否を判定する.
 	void MainPage::edit_menu_enable(void)
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
@@ -207,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		if (undo_pushed()) {
-			// アンドゥ操作スタックの更新フラグが立っている場合,
+			// 操作スタックの更新フラグが立っている場合,
 			const auto d_result = co_await cd_conf_save().ShowAsync();
 			if (d_result == ContentDialogResult::None) {
 				// 「キャンセル」が押された場合,
@@ -265,8 +264,8 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 本来なら DirectX をコードビハインドでリリースしたいところだが,
-		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがある.
-		// なので, Trim を呼び出すだけにする.
+		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがあるため,
+		// Trim を呼び出すだけにする.
 		m_main_dx.Trim();
 		m_sample_dx.Trim();
 
