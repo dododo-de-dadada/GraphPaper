@@ -352,9 +352,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の部位の位置をスタックに保存する.
-	void MainPage::undo_push_anchor(Shape* s, const ANCH_WHICH a)
+	void MainPage::undo_push_anchor(Shape* s, const uint32_t anchor)
 	{
-		m_stack_undo.push_back(new UndoAnchor(s, a));
+		m_stack_undo.push_back(new UndoAnchor(s, anchor));
 	}
 
 	// 図形を追加して, その操作をスタックに積む.

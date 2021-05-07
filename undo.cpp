@@ -87,12 +87,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の, 指定された部位の位置を保存する.
-	UndoAnchor::UndoAnchor(Shape* s, const ANCH_WHICH a) :
+	UndoAnchor::UndoAnchor(Shape* s, const uint32_t anchor) :
 		Undo(s)
 	{
 		m_shape = s;
-		m_anchor = a;
-		s->get_anch_pos(a, m_anchor_pos);
+		m_anchor = anchor;
+		s->get_anch_pos(anchor, m_anchor_pos);
 	}
 
 	// データライターに書き込む.

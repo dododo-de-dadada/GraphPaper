@@ -143,7 +143,8 @@ namespace winrt::GraphPaper::implementation
 		RECT,	// 方形
 		RRCT,	// 角丸方形
 		TEXT,	// 文字列
-		RULER	// 定規
+		RULER,	// 定規
+		POLY	// 多角形
 	};
 
 	//-------------------------------
@@ -233,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_pointer_cur{ 0.0F, 0.0F };		// ポインターの現在位置
 		D2D1_POINT_2F m_pointer_pre{ 0.0F, 0.0F };		// ポインターの前回位置
 		STATE_TRAN m_pointer_state = STATE_TRAN::BEGIN;		// ポインターが押された状態
-		ANCH_WHICH m_pointer_anchor = ANCH_WHICH::ANCH_OUTSIDE;		// ポインターが押された図形の部位
+		uint32_t m_pointer_anchor = ANCH_WHICH::ANCH_OUTSIDE;		// ポインターが押された図形の部位
 		D2D1_POINT_2F m_pointer_pressed{ 0.0F, 0.0F };		// ポインターが押された位置
 		Shape* m_pointer_shape = nullptr;		// ポインターが押された図形
 		Shape* m_pointer_shape_prev = nullptr;		// 前回ポインターが押された図形
@@ -689,7 +690,7 @@ namespace winrt::GraphPaper::implementation
 		// ポインターイベントのハンドラー
 		//-------------------------------
 
-		void pointer_anchor(const ANCH_WHICH anchor) noexcept { m_pointer_anchor = anchor; }
+		void pointer_anchor(const uint32_t anchor) noexcept { m_pointer_anchor = anchor; }
 		// コンテキストメニューを表示する.
 		void pointer_context_menu(void);
 		// ポインターの現在位置を得る.
@@ -952,6 +953,8 @@ namespace winrt::GraphPaper::implementation
 		void tool_elli_click(IInspectable const&, RoutedEventArgs const&);
 		// 作図メニューの「直線」が選択された.
 		void tool_line_click(IInspectable const&, RoutedEventArgs const&);
+		// 作図メニューの「多角形」が選択された.
+		void tool_poly_click(IInspectable const&, RoutedEventArgs const&);
 		// 作図メニューの「四へん形」が選択された.
 		void tool_quad_click(IInspectable const&, RoutedEventArgs const&);
 		// 作図メニューの「方形」が選択された.
@@ -993,7 +996,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を入れ替えて, その操作をスタックに積む.
 		void undo_push_arrange(Shape* s, Shape* t);
 		// 図形の頂点や制御点の位置をスタックに保存する.
-		void undo_push_anchor(Shape*, const ANCH_WHICH a);
+		void undo_push_anchor(Shape*, const uint32_t anchor);
 		// 図形を挿入して, その操作をスタックに積む.
 		void undo_push_insert(Shape* s, Shape* s_pos);
 		// 図形の位置をスタックに保存してから差分だけ移動する.

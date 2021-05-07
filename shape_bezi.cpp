@@ -10,11 +10,11 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 折れ線の頂点の配列
-	constexpr ANCH_WHICH ANCH_BEZI[4]{
-		ANCH_WHICH::ANCH_R_SE,
-		ANCH_WHICH::ANCH_R_SW,
-		ANCH_WHICH::ANCH_R_NE,
-		ANCH_WHICH::ANCH_R_NW
+	constexpr uint32_t ANCH_BEZI[4]{
+		ANCH_WHICH::ANCH_P3,//ANCH_R_SE,
+		ANCH_WHICH::ANCH_P2,//ANCH_R_SW,
+		ANCH_WHICH::ANCH_P1,//ANCH_R_NE
+		ANCH_WHICH::ANCH_P0	//ANCH_WHICH::ANCH_R_NW
 	};
 
 	// セグメントの区切る助変数の値
@@ -442,9 +442,9 @@ namespace winrt::GraphPaper::implementation
 
 		m_poly_geom = nullptr;
 		m_arrow_geom = nullptr;
-		pt_add(m_pos, m_diff, b_seg.point1);
-		pt_add(b_seg.point1, m_diff_1, b_seg.point2);
-		pt_add(b_seg.point2, m_diff_2, b_seg.point3);
+		pt_add(m_pos, m_diff[0], b_seg.point1);
+		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
+		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
 		winrt::check_hresult(
 			s_d2d_factory->CreatePathGeometry(m_poly_geom.put())
 		);
@@ -493,7 +493,7 @@ namespace winrt::GraphPaper::implementation
 
 		anchor_draw_rect(m_pos, dx);
 		s_pos = m_pos;
-		pt_add(s_pos, m_diff, e_pos);
+		pt_add(s_pos, m_diff[0], e_pos);
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
@@ -501,7 +501,7 @@ namespace winrt::GraphPaper::implementation
 		anchor_draw_ellipse(e_pos, dx);
 
 		s_pos = e_pos;
-		pt_add(s_pos, m_diff_1, e_pos);
+		pt_add(s_pos, m_diff[1], e_pos);
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
@@ -509,7 +509,7 @@ namespace winrt::GraphPaper::implementation
 		anchor_draw_ellipse(e_pos, dx);
 
 		s_pos = e_pos;
-		pt_add(s_pos, m_diff_2, e_pos);
+		pt_add(s_pos, m_diff[2], e_pos);
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
@@ -535,15 +535,15 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	調べる位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	ANCH_WHICH ShapeBezi::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,
 		// 調べる位置が原点となるよう平行移動し, 制御点を得る.
 		D2D1_POINT_2F a_pos[4];
 		pt_sub(m_pos, t_pos, a_pos[3]);
-		pt_add(a_pos[3], m_diff, a_pos[2]);
-		pt_add(a_pos[2], m_diff_1, a_pos[1]);
-		pt_add(a_pos[1], m_diff_2, a_pos[0]);
+		pt_add(a_pos[3], m_diff[0], a_pos[2]);
+		pt_add(a_pos[2], m_diff[1], a_pos[1]);
+		pt_add(a_pos[1], m_diff[2], a_pos[0]);
 		// 制御点の各部位について,
 		for (uint32_t i = 0; i < 4; i++) {
 			// 部位が位置を含むか調べる.
@@ -661,9 +661,9 @@ namespace winrt::GraphPaper::implementation
 		const auto h = static_cast<double>(a_max.y) - a_min.y;
 		D2D1_POINT_2F a_pos[4];
 		pt_sub(m_pos, a_min, a_pos[0]);
-		pt_add(a_pos[0], m_diff, a_pos[1]);
-		pt_add(a_pos[1], m_diff_1, a_pos[2]);
-		pt_add(a_pos[2], m_diff_2, a_pos[3]);
+		pt_add(a_pos[0], m_diff[0], a_pos[1]);
+		pt_add(a_pos[1], m_diff[1], a_pos[2]);
+		pt_add(a_pos[2], m_diff[2], a_pos[3]);
 		// 最初の制御点の組をプッシュする.
 		constexpr auto D_MAX = 52;	// 分割する最大回数
 		BZP s_arr[1 + D_MAX * 3] = {};
@@ -773,15 +773,15 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	ShapeBezi::ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
-		ShapePoly::ShapePoly(attr)
+		ShapePoly::ShapePoly(3, attr)
 	{
 		m_pos = s_pos;
-		m_diff.x = diff.x;
-		m_diff.y = 0.0f;
-		m_diff_1.x = -diff.x;
-		m_diff_1.y = diff.y;
-		m_diff_2.x = diff.x;
-		m_diff_2.y = 0.0f;
+		m_diff[0].x = diff.x;
+		m_diff[0].y = 0.0f;
+		m_diff[1].x = -diff.x;
+		m_diff[1].y = diff.y;
+		m_diff[2].x = diff.x;
+		m_diff[2].y = 0.0f;
 		m_arrow_style = attr->m_arrow_style;
 		m_arrow_size = attr->m_arrow_size;
 		create_path_geometry();
@@ -815,9 +815,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write_svg;
 		D2D1_BEZIER_SEGMENT b_seg;
 
-		pt_add(m_pos, m_diff, b_seg.point1);
-		pt_add(b_seg.point1, m_diff_1, b_seg.point2);
-		pt_add(b_seg.point2, m_diff_2, b_seg.point3);
+		pt_add(m_pos, m_diff[0], b_seg.point1);
+		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
+		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
 		write_svg("<path d=\"", dt_writer);
 		write_svg(m_pos, "M", dt_writer);
 		write_svg(b_seg.point1, "C", dt_writer);

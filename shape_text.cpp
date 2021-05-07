@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 	//	戻り値	大きさが調整されたならば真.
 	bool ShapeText::adjust_bound(const D2D1_SIZE_F& bound)
 	{
-		auto diff = m_diff;
+		auto diff = m_diff[0];
 		// 改行コードの数を求め, 最小の行数に格納する.
 		uint32_t min_line_cnt = 1;
 		for (uint32_t i = 0; i < m_dw_line_cnt; i++) {
@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 			set_anch_pos(s_pos, ANCH_WHICH::ANCH_SE);
 		} while (m_dw_line_cnt < line_cnt && m_dw_line_cnt > min_line_cnt);
 		// 行数が, 保存された行数より小さい, かつ最小の行数より大きい場合
-		return equal(diff, m_diff) != true;
+		return equal(diff, m_diff[0]) != true;
 	}
 
 	// 計量の配列をテキストレイアウトから得る.
@@ -236,8 +236,8 @@ namespace winrt::GraphPaper::implementation
 				t_format.put()
 			)
 		);
-		const auto w = static_cast<FLOAT>(max(std::fabsf(m_diff.x) - 2.0 * m_text_margin.width, 0.0));
-		const auto h = static_cast<FLOAT>(max(std::fabsf(m_diff.y) - 2.0 * m_text_margin.height, 0.0));
+		const auto w = static_cast<FLOAT>(max(std::fabsf(m_diff[0].x) - 2.0 * m_text_margin.width, 0.0));
+		const auto h = static_cast<FLOAT>(max(std::fabsf(m_diff[0].y) - 2.0 * m_text_margin.height, 0.0));
 		winrt::check_hresult(
 			s_dwrite_factory->CreateTextLayout(
 				m_text, len, t_format.get(),
@@ -281,8 +281,8 @@ namespace winrt::GraphPaper::implementation
 				create_text_layout();
 			}
 			else {
-				const FLOAT w = static_cast<FLOAT>(max(std::fabs(m_diff.x) - m_text_margin.width * 2.0, 0.0));
-				const FLOAT h = static_cast<FLOAT>(max(std::fabs(m_diff.y) - m_text_margin.height * 2.0, 0.0));
+				const FLOAT w = static_cast<FLOAT>(max(std::fabs(m_diff[0].x) - m_text_margin.width * 2.0, 0.0));
+				const FLOAT h = static_cast<FLOAT>(max(std::fabs(m_diff[0].y) - m_text_margin.height * 2.0, 0.0));
 				bool flag = false;
 				if (equal(w, m_dw_text_layout->GetMaxWidth()) != true) {
 					m_dw_text_layout->SetMaxWidth(w);
@@ -419,10 +419,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		D2D1_POINT_2F t_min;
-		pt_add(m_pos, m_diff, t_min);
+		pt_add(m_pos, m_diff[0], t_min);
 		pt_min(m_pos, t_min, t_min);
-		auto hm = min(m_text_margin.width, fabs(m_diff.x) * 0.5);
-		auto vm = min(m_text_margin.height, fabs(m_diff.y) * 0.5);
+		auto hm = min(m_text_margin.width, fabs(m_diff[0].x) * 0.5);
+		auto vm = min(m_text_margin.height, fabs(m_diff[0].y) * 0.5);
 		pt_add(t_min, hm, vm, t_min);
 //uint32_t line_cnt;
 //m_dw_text_layout->GetLineMetrics(nullptr, 0, &line_cnt);
@@ -536,7 +536,7 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	調べる位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	ANCH_WHICH ShapeText::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = ShapeRect::hit_test_anchor(t_pos, a_len);
 		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
@@ -778,7 +778,7 @@ namespace winrt::GraphPaper::implementation
 	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
 	//	value	格納する値
 	//	abch	図形の部位
-	void ShapeText::set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch)
+	void ShapeText::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
 		ShapeRect::set_anch_pos(value, anch);
 		create_text_metrics();

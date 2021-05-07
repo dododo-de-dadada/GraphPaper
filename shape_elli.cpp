@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 半径を求める.
 		D2D1_POINT_2F rad;
-		pt_scale(m_diff, 0.5, rad);
+		pt_scale(m_diff[0], 0.5, rad);
 		// 中心点を求める.
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
@@ -35,11 +35,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		D2D1_POINT_2F a_pos[4];
 		// 南
-		a_pos[0].x = m_pos.x + m_diff.x * 0.5f;
-		a_pos[0].y = m_pos.y + m_diff.y;
+		a_pos[0].x = m_pos.x + m_diff[0].x * 0.5f;
+		a_pos[0].y = m_pos.y + m_diff[0].y;
 		// 東
-		a_pos[1].x = m_pos.x + m_diff.x;
-		a_pos[1].y = m_pos.y + m_diff.y * 0.5f;
+		a_pos[1].x = m_pos.x + m_diff[0].x;
+		a_pos[1].y = m_pos.y + m_diff[0].y * 0.5f;
 		// 西
 		a_pos[2].x = m_pos.x;
 		a_pos[2].y = a_pos[1].y;
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 			anchor_draw_rect(a_pos[i], dx);
 		}
 		a_pos[0] = m_pos;
-		pt_add(m_pos, m_diff, a_pos[3]);
+		pt_add(m_pos, m_diff[0], a_pos[3]);
 		a_pos[1].x = a_pos[0].x;
 		a_pos[1].y = a_pos[3].y;
 		a_pos[2].x = a_pos[3].x;
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	調べる位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	ANCH_WHICH ShapeElli::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
 		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
@@ -73,7 +73,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 半径を得る.
 		D2D1_POINT_2F rad;
-		pt_scale(m_diff, 0.5, rad);
+		pt_scale(m_diff[0], 0.5, rad);
 		// 中心点を得る.
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
@@ -130,7 +130,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write_svg;
 
 		D2D1_POINT_2F rad;
-		pt_scale(m_diff, 0.5, rad);
+		pt_scale(m_diff[0], 0.5, rad);
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
 		write_svg("<ellipse ", dt_writer);

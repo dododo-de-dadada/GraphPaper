@@ -12,8 +12,8 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_RECT_F rect{
 			m_pos.x,
 			m_pos.y,
-			m_pos.x + m_diff.x,
-			m_pos.y + m_diff.y
+			m_pos.x + m_diff[0].x,
+			m_pos.y + m_diff[0].y
 		};
 		if (is_opaque(m_fill_color)) {
 			// 塗りつぶし色が不透明な場合,
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	ANCH_WHICH ShapeRect::hit_test_anchor(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeRect::hit_test_anchor(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		// どの頂点が位置を含むか調べる.
 		for (uint32_t i = 0; i < 4; i++) {
@@ -75,7 +75,7 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	調べる位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	ANCH_WHICH ShapeRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
 		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 方形の右上点と左下点を求める.
 		D2D1_POINT_2F r_pos;
-		pt_add(m_pos, m_diff, r_pos);
+		pt_add(m_pos, m_diff[0], r_pos);
 		D2D1_POINT_2F r_min;	// 方形の左上点
 		D2D1_POINT_2F r_max;	// 方形の右下点
 		pt_bound(m_pos, r_pos, r_min, r_max);
@@ -131,36 +131,36 @@ namespace winrt::GraphPaper::implementation
 	//	anch	図形の部位.
 	//	value	得られた位置.
 	//	戻り値	なし
-	void ShapeRect::get_anch_pos(const ANCH_WHICH anch, D2D1_POINT_2F& value) const noexcept
+	void ShapeRect::get_anch_pos(const uint32_t anch, D2D1_POINT_2F& value) const noexcept
 	{
 		switch (anch) {
 		case ANCH_WHICH::ANCH_NORTH:
-			value.x = m_pos.x + m_diff.x * 0.5f;
+			value.x = m_pos.x + m_diff[0].x * 0.5f;
 			value.y = m_pos.y;
 			break;
 		case ANCH_WHICH::ANCH_NE:
-			value.x = m_pos.x + m_diff.x;
+			value.x = m_pos.x + m_diff[0].x;
 			value.y = m_pos.y;
 			break;
 		case ANCH_WHICH::ANCH_WEST:
 			value.x = m_pos.x;
-			value.y = m_pos.y + m_diff.y * 0.5f;
+			value.y = m_pos.y + m_diff[0].y * 0.5f;
 			break;
 		case ANCH_WHICH::ANCH_EAST:
-			value.x = m_pos.x + m_diff.x;
-			value.y = m_pos.y + m_diff.y * 0.5f;
+			value.x = m_pos.x + m_diff[0].x;
+			value.y = m_pos.y + m_diff[0].y * 0.5f;
 			break;
 		case ANCH_WHICH::ANCH_SW:
 			value.x = m_pos.x;
-			value.y = m_pos.y + m_diff.y;
+			value.y = m_pos.y + m_diff[0].y;
 			break;
 		case ANCH_WHICH::ANCH_SOUTH:
-			value.x = m_pos.x + m_diff.x * 0.5f;
-			value.y = m_pos.y + m_diff.y;
+			value.x = m_pos.x + m_diff[0].x * 0.5f;
+			value.y = m_pos.y + m_diff[0].y;
 			break;
 		case ANCH_WHICH::ANCH_SE:
-			value.x = m_pos.x + m_diff.x;
-			value.y = m_pos.y + m_diff.y;
+			value.x = m_pos.x + m_diff[0].x;
+			value.y = m_pos.y + m_diff[0].y;
 			break;
 		default:
 			value = m_pos;
@@ -177,14 +177,14 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F e_pos;
 
-		pt_add(m_pos, m_diff, e_pos);
+		pt_add(m_pos, m_diff[0], e_pos);
 		return pt_in_rect(m_pos, a_min, a_max) && pt_in_rect(e_pos, a_min, a_max);
 	}
 
 	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
 	//	value	格納する値
 	//	abch	図形の部位
-	void ShapeRect::set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch)
+	void ShapeRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
 		D2D1_POINT_2F a_pos;
 		D2D1_POINT_2F diff;
@@ -196,49 +196,49 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_WHICH::ANCH_NW:
 			pt_sub(value, m_pos, diff);
 			pt_add(m_pos, diff, m_pos);
-			pt_sub(m_diff, diff, m_diff);
+			pt_sub(m_diff[0], diff, m_diff[0]);
 			break;
 		case ANCH_WHICH::ANCH_NORTH:
-			m_diff.y -= value.y - m_pos.y;
+			m_diff[0].y -= value.y - m_pos.y;
 			m_pos.y = value.y;
 			break;
 		case ANCH_WHICH::ANCH_NE:
-			a_pos.x = m_pos.x + m_diff.x;
+			a_pos.x = m_pos.x + m_diff[0].x;
 			a_pos.y = m_pos.y;
 			m_pos.y = value.y;
 			pt_sub(value, a_pos, diff);
-			pt_add(m_diff, diff.x, -diff.y, m_diff);
+			pt_add(m_diff[0], diff.x, -diff.y, m_diff[0]);
 			break;
 		case ANCH_WHICH::ANCH_WEST:
-			m_diff.x -= value.x - m_pos.x;
+			m_diff[0].x -= value.x - m_pos.x;
 			m_pos.x = value.x;
 			break;
 		case ANCH_WHICH::ANCH_EAST:
-			m_diff.x = value.x - m_pos.x;
+			m_diff[0].x = value.x - m_pos.x;
 			break;
 		case ANCH_WHICH::ANCH_SW:
 			a_pos.x = m_pos.x;
-			a_pos.y = m_pos.y + m_diff.y;
+			a_pos.y = m_pos.y + m_diff[0].y;
 			m_pos.x = value.x;
 			pt_sub(value, a_pos, diff);
-			pt_add(m_diff, -diff.x, diff.y, m_diff);
+			pt_add(m_diff[0], -diff.x, diff.y, m_diff[0]);
 			break;
 		case ANCH_WHICH::ANCH_SOUTH:
-			m_diff.y = value.y - m_pos.y;
+			m_diff[0].y = value.y - m_pos.y;
 			break;
 		case ANCH_WHICH::ANCH_SE:
-			pt_sub(value, m_pos, m_diff);
+			pt_sub(value, m_pos, m_diff[0]);
 			break;
 		}
 	}
 
 	// 図形を作成する.
 	ShapeRect::ShapeRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
-		ShapeStroke::ShapeStroke(attr),
+		ShapeStroke::ShapeStroke(1, attr),
 		m_fill_color(attr->m_fill_color)
 	{
 		m_pos = s_pos;
-		m_diff = diff;
+		m_diff[0] = diff;
 	}
 
 	// 図形をデータリーダーから読み込む.
@@ -266,7 +266,7 @@ namespace winrt::GraphPaper::implementation
 
 		write_svg("<rect ", dt_writer);
 		write_svg(m_pos, "x", "y", dt_writer);
-		write_svg(m_diff, "width", "height", dt_writer);
+		write_svg(m_diff[0], "width", "height", dt_writer);
 		write_svg(m_fill_color, "fill", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
 		write_svg("/>" SVG_NL, dt_writer);

@@ -99,7 +99,12 @@
             <x:String x:Key="data_line">
                 M0,8 L16,8 L16,9 L0,9 Z
             </x:String>
-            <!-- ひし型アイコンの描画コマンド -->
+			<!-- 多角形アイコンの描画コマンド -->
+			<x:String x:Key="data_poly">
+				M8,2 L16,8 L8,14 L0,8 Z
+                M8,3.33333 L14.66666,8 L8,12.66666 L1.33333,8 Z
+			</x:String>
+			<!-- ひし型アイコンの描画コマンド -->
             <x:String x:Key="data_quad">
                 M8,2 L16,8 L8,14 L0,8 Z
                 M8,3.33333 L14.66666,8 L8,12.66666 L1.33333,8 Z
@@ -499,7 +504,14 @@
                         <PathIcon Data="{StaticResource data_elli}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_line" x:Uid="rmfi_tool_line" Click="tool_line_click" GroupName="gn_tool_type" Text="Line" >
+                <!--
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly" x:Uid="rmfi_tool_poly" Click="tool_poly_click" GroupName="gn_tool_type" Text="Polygon">
+					<muxc:RadioMenuFlyoutItem.Icon>
+						<PathIcon Data="{StaticResource data_poly}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+					</muxc:RadioMenuFlyoutItem.Icon>
+				</muxc:RadioMenuFlyoutItem>
+                -->
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_line" x:Uid="rmfi_tool_line" Click="tool_line_click" GroupName="gn_tool_type" Text="Line" >
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_line}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>

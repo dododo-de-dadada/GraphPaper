@@ -35,7 +35,7 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::arrange_order<FORWARD>(void);
 
 	// 選択された図形を次または前の図形と入れ替える.
-	// T	S_LIST_T::iterator の場合は背面の図形と入れ替え, S_LIST_T::reverse_iterator の場合は前面の図形と入れ替える. 
+	// T	T が iterator の場合は背面の図形と入れ替え, reverse_iterator の場合は前面の図形と入れ替える. 
 	template<typename T> void MainPage::arrange_order(void)
 	{
 		T it_end;	// 終端
@@ -125,7 +125,7 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::arrange_to<FRONT>(void);
 
 	// 選択された図形を最背面または最前面に移動する.
-	// T	true の場合は最背面, false の場合は最前面に移動
+	// T	T が true の場合は最背面, false の場合は最前面に移動
 	template<bool T> void MainPage::arrange_to(void)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ItemCollection;

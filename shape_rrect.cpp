@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 角丸方形の中点の配列
-	constexpr ANCH_WHICH ANCH_ROUND[4]{
+	constexpr uint32_t ANCH_ROUND[4]{
 		ANCH_WHICH::ANCH_R_SE,	// 右下角
 		ANCH_WHICH::ANCH_R_NE,	// 右上角
 		ANCH_WHICH::ANCH_R_SW,	// 左下角
@@ -64,11 +64,11 @@ namespace winrt::GraphPaper::implementation
 		auto dc = dx.m_d2dContext;
 
 		D2D1_POINT_2F r_min;
-		pt_add(m_pos, min(m_diff.x, 0.0), min(m_diff.y, 0.0), r_min);
+		pt_add(m_pos, min(m_diff[0].x, 0.0), min(m_diff[0].y, 0.0), r_min);
 		float rx = std::fabsf(m_corner_rad.x);
 		float ry = std::fabsf(m_corner_rad.y);
-		float vx = std::fabsf(m_diff.x);
-		float vy = std::fabsf(m_diff.y);
+		float vx = std::fabsf(m_diff[0].x);
+		float vy = std::fabsf(m_diff[0].y);
 		if (rx > vx * 0.5f) {
 			rx = vx * 0.5f;
 		}
@@ -89,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 		sb->SetColor(m_stroke_color);
 		dc->DrawRoundedRectangle(r_rec, sb, sw, ss);
 		if (is_selected()) {
-			const auto flag = (std::abs(m_diff.x) > FLT_MIN && std::abs(m_diff.y) > FLT_MIN);
+			const auto flag = (std::abs(m_diff[0].x) > FLT_MIN && std::abs(m_diff[0].y) > FLT_MIN);
 			//if (flag) {
 			// D2D1_POINT_2F c_pos;
 			// pt_add(r_min, rx, ry, c_pos);
@@ -142,10 +142,10 @@ namespace winrt::GraphPaper::implementation
 	//	anch	図形の部位.
 	//	value	得られた位置.
 	//	戻り値	なし
-	void ShapeRRect::get_anch_pos(const ANCH_WHICH anch, D2D1_POINT_2F& value) const noexcept
+	void ShapeRRect::get_anch_pos(const uint32_t anch, D2D1_POINT_2F& value) const noexcept
 	{
-		const double dx = m_diff.x;
-		const double dy = m_diff.y;
+		const double dx = m_diff[0].x;
+		const double dy = m_diff[0].y;
 		const double mx = dx * 0.5;	// 中点
 		const double my = dy * 0.5;	// 中点
 		const double rx = fabs(mx) < fabs(m_corner_rad.x) ? mx : m_corner_rad.x;	// 角丸
@@ -222,9 +222,9 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	調べる位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	ANCH_WHICH ShapeRRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		const auto flag = (fabs(m_diff.x) > FLT_MIN&& fabs(m_diff.y) > FLT_MIN);
+		const auto flag = (fabs(m_diff[0].x) > FLT_MIN&& fabs(m_diff[0].y) > FLT_MIN);
 		if (flag) {
 			for (uint32_t i = 0; i < 4; i++) {
 				// 角丸の中心点を得る.
@@ -263,20 +263,20 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F r_min;
 		D2D1_POINT_2F r_max;
 		D2D1_POINT_2F r_rad;
-		if (m_diff.x > 0.0f) {
+		if (m_diff[0].x > 0.0f) {
 			r_min.x = m_pos.x;
-			r_max.x = m_pos.x + m_diff.x;
+			r_max.x = m_pos.x + m_diff[0].x;
 		}
 		else {
-			r_min.x = m_pos.x + m_diff.x;
+			r_min.x = m_pos.x + m_diff[0].x;
 			r_max.x = m_pos.x;
 		}
-		if (m_diff.y > 0.0f) {
+		if (m_diff[0].y > 0.0f) {
 			r_min.y = m_pos.y;
-			r_max.y = m_pos.y + m_diff.y;
+			r_max.y = m_pos.y + m_diff[0].y;
 		}
 		else {
-			r_min.y = m_pos.y + m_diff.y;
+			r_min.y = m_pos.y + m_diff[0].y;
 			r_max.y = m_pos.y;
 		}
 		r_rad.x = std::abs(m_corner_rad.x);
@@ -305,7 +305,7 @@ namespace winrt::GraphPaper::implementation
 	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
 	//	value	格納する値
 	//	abch	図形の部位
-	void ShapeRRect::set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch)
+	void ShapeRRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
 		D2D1_POINT_2F c_pos;
 		D2D1_POINT_2F diff;
@@ -316,35 +316,35 @@ namespace winrt::GraphPaper::implementation
 			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
 			pt_add(m_corner_rad, diff, rad);
-			calc_corner_radius(m_diff, rad, m_corner_rad);
+			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_NE:
 			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
 			rad.x = m_corner_rad.x - diff.x;
 			rad.y = m_corner_rad.y + diff.y;
-			calc_corner_radius(m_diff, rad, m_corner_rad);
+			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_SE:
 			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
 			rad.x = m_corner_rad.x - diff.x;
 			rad.y = m_corner_rad.y - diff.y;
-			calc_corner_radius(m_diff, rad, m_corner_rad);
+			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		case ANCH_WHICH::ANCH_R_SW:
 			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
 			rad.x = m_corner_rad.x + diff.x;
 			rad.y = m_corner_rad.y - diff.y;
-			calc_corner_radius(m_diff, rad, m_corner_rad);
+			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		default:
 			ShapeRect::set_anch_pos(value, anch);
-			if (m_diff.x * m_corner_rad.x < 0.0f) {
+			if (m_diff[0].x * m_corner_rad.x < 0.0f) {
 				m_corner_rad.x = -m_corner_rad.x;
 			}
-			if (m_diff.y * m_corner_rad.y < 0.0f) {
+			if (m_diff[0].y * m_corner_rad.y < 0.0f) {
 				m_corner_rad.y = -m_corner_rad.y;
 			}
 			break;
@@ -357,7 +357,7 @@ namespace winrt::GraphPaper::implementation
 	ShapeRRect::ShapeRRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
 		ShapeRect::ShapeRect(s_pos, diff, attr)
 	{
-		calc_corner_radius(m_diff, attr->m_corner_rad, m_corner_rad);
+		calc_corner_radius(m_diff[0], attr->m_corner_rad, m_corner_rad);
 	}
 
 	// 図形をデータリーダーから読み込む.
@@ -385,7 +385,7 @@ namespace winrt::GraphPaper::implementation
 
 		write_svg("<rect ", dt_writer);
 		write_svg(m_pos, "x", "y", dt_writer);
-		write_svg(m_diff, "width", "height", dt_writer);
+		write_svg(m_diff[0], "width", "height", dt_writer);
 		if (std::round(m_corner_rad.x) != 0.0f && std::round(m_corner_rad.y) != 0.0f) {
 			write_svg(m_corner_rad, "rx", "ry", dt_writer);
 		}

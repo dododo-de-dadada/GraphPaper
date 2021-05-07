@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を含むか調べる.
-	ANCH_WHICH ShapeRuler::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
 		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
@@ -25,9 +25,9 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_stroke_color)) {
 			const double g_len = static_cast<double>(m_grid_base) + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
-			const bool xy = fabs(m_diff.x) >= fabs(m_diff.y);
-			const double diff_x = (xy ? m_diff.x : m_diff.y);
-			const double diff_y = (xy ? m_diff.y : m_diff.x);
+			const bool xy = fabs(m_diff[0].x) >= fabs(m_diff[0].y);
+			const double diff_x = (xy ? m_diff[0].x : m_diff[0].y);
+			const double diff_y = (xy ? m_diff[0].y : m_diff[0].x);
 			const double grad_x = diff_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
 			const uint32_t k = static_cast<uint32_t>(floor(diff_x / grad_x));
@@ -70,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_opaque(m_fill_color)) {
 			D2D1_POINT_2F e_pos;
-			pt_add(m_pos, m_diff, e_pos);
+			pt_add(m_pos, m_diff[0], e_pos);
 			D2D1_POINT_2F r_min, r_max;
 			pt_bound(m_pos, e_pos, r_min, r_max);
 			if (pt_in_rect(t_pos, r_min, r_max)) {
@@ -90,8 +90,8 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_RECT_F rect{
 			m_pos.x,
 			m_pos.y,
-			m_pos.x + m_diff.x,
-			m_pos.y + m_diff.y
+			m_pos.x + m_diff[0].x,
+			m_pos.y + m_diff[0].y
 		};
 		if (is_opaque(m_fill_color)) {
 			// 塗りつぶし色が不透明な場合,
@@ -103,9 +103,9 @@ namespace winrt::GraphPaper::implementation
 			// 線枠の色が不透明な場合,
 			const double g_len = static_cast<double>(m_grid_base) + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
-			const bool xy = fabs(m_diff.x) >= fabs(m_diff.y);
-			const double diff_x = (xy ? m_diff.x : m_diff.y);
-			const double diff_y = (xy ? m_diff.y : m_diff.x);
+			const bool xy = fabs(m_diff[0].x) >= fabs(m_diff[0].y);
+			const double diff_x = (xy ? m_diff[0].x : m_diff[0].y);
+			const double diff_y = (xy ? m_diff[0].y : m_diff[0].x);
 			const double grad_x = diff_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
 			const uint32_t k = static_cast<uint32_t>(floor(diff_x / grad_x));
@@ -120,7 +120,7 @@ namespace winrt::GraphPaper::implementation
 				// 高さが 0 以上の場合下よせ、ない場合上よせを段落のそろえに格納する.
 				// 文字列を配置する方形が小さい (書体の大きさと同じ) ため,
 				// DWRITE_PARAGRAPH_ALIGNMENT は, 逆の効果をもたらす.
-				p_align = (m_diff.y >= 0.0f ? DWRITE_PARAGRAPH_ALIGNMENT_FAR : DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+				p_align = (m_diff[0].y >= 0.0f ? DWRITE_PARAGRAPH_ALIGNMENT_FAR : DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			}
 			else {
 				// 縦のほうが小さい場合,

@@ -190,8 +190,8 @@ namespace winrt::GraphPaper::implementation
 						};
 						t->adjust_bound(max_size);
 						D2D1_POINT_2F s_pos{
-							static_cast<FLOAT>((sb_horz().Value() + scp_sheet_panel().ActualWidth() * 0.5) / scale - t->m_diff.x * 0.5),
-							static_cast<FLOAT>((sb_vert().Value() + scp_sheet_panel().ActualHeight() * 0.5) / scale - t->m_diff.y * 0.5)
+							static_cast<FLOAT>((sb_horz().Value() + scp_sheet_panel().ActualWidth() * 0.5) / scale - t->m_diff[0].x * 0.5),
+							static_cast<FLOAT>((sb_vert().Value() + scp_sheet_panel().ActualHeight() * 0.5) / scale - t->m_diff[0].y * 0.5)
 						};
 						pt_add(s_pos, sheet_min(), s_pos);
 						if (m_main_sheet.m_grid_snap) {

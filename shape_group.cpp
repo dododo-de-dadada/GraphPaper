@@ -129,7 +129,7 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	調べる位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	ANCH_WHICH ShapeGroup::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {

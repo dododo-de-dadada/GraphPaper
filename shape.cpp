@@ -371,7 +371,7 @@ namespace winrt::GraphPaper::implementation
 		pt_add(e_pos, nx, ny, q_pos[1]);
 		pt_add(e_pos, -nx, -ny, q_pos[2]);
 		pt_add(s_pos, -nx, -ny, q_pos[3]);
-		return pt_in_quad(t_pos, q_pos);
+		return pt_in_quad(4, t_pos, q_pos);
 	}
 
 	// 四へん形が位置を含むか調べる.
@@ -379,14 +379,14 @@ namespace winrt::GraphPaper::implementation
 	// q_pos	四辺形の頂点
 	// 戻り値	含む場合 true
 	// 四へん形の各辺と, 指定された点を開始点とする水平線が交差する数を求める.
-	bool pt_in_quad(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F q_pos[]) noexcept
+	bool pt_in_quad(const size_t n, const D2D1_POINT_2F t_pos, const D2D1_POINT_2F q_pos[]) noexcept
 	{
 		D2D1_POINT_2F p_pos;
 		int cnt;
 		int i;
 
 		cnt = 0;
-		for (p_pos = q_pos[3], i = 0; i < 4; p_pos = q_pos[i++]) {
+		for (p_pos = q_pos[3], i = 0; i < n; p_pos = q_pos[i++]) {
 			// 上向きの辺。点Pがy軸方向について、始点と終点の間にある。ただし、終点は含まない。(ルール1)
 			if ((p_pos.y <= t_pos.y && q_pos[i].y > t_pos.y)
 				// 下向きの辺。点Pがy軸方向について、始点と終点の間にある。ただし、始点は含まない。(ルール2)

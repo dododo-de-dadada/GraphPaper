@@ -45,6 +45,15 @@ namespace winrt::GraphPaper::implementation
 		pointer_set();
 	}
 
+	// 作図メニューの「四へん形」が選択された.
+	void MainPage::tool_poly_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		m_tool_draw = TOOL_DRAW::QUAD;
+		// 作図ツールをステータスバーに格納する.
+		stbar_set_draw();
+		pointer_set();
+	}
+
 	// 作図メニューの「方形」が選択された.
 	void MainPage::tool_rect_click(IInspectable const&, RoutedEventArgs const&)
 	{

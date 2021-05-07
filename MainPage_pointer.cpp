@@ -346,6 +346,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			switch (a) {
+			case ANCH_WHICH::ANCH_P0:
+			case ANCH_WHICH::ANCH_P1:
+			case ANCH_WHICH::ANCH_P2:
+			case ANCH_WHICH::ANCH_P3:
+				Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
+				break;
 			case ANCH_WHICH::ANCH_R_NW:
 			case ANCH_WHICH::ANCH_R_NE:
 			case ANCH_WHICH::ANCH_R_SE:

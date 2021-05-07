@@ -9,6 +9,21 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	// 図形の種類
+	// ファイルへの書き込みで使用する.
+	enum SHAPE_TYPE {
+		SHAPE_NULL,		// ヌル
+		SHAPE_BEZI,		// 曲線
+		SHAPE_ELLI,		// だ円
+		SHAPE_LINE,		// 線分
+		SHAPE_QUAD,		// 四辺形
+		SHAPE_RECT,		// 方形
+		SHAPE_RRCT,		// 角丸方形
+		SHAPE_TEXT,		// 文字列
+		SHAPE_GROUP,	// グループ
+		SHAPE_RULER		// 定規
+	};
+
 	// 図形をデータリーダーから読み込む.
 	static Shape* s_list_read_shape(DataReader const& dt_reader);
 	// 次の図形を得る.
@@ -215,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 	// a_len	部位の大きさ
 	// s	位置を含む図形
 	// 戻り値	位置を含む図形の部位
-	ANCH_WHICH s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, const double a_len, Shape*& s) noexcept
+	uint32_t s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, const double a_len, Shape*& s) noexcept
 	{
 		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
 		for (auto it = s_list.rbegin(); it != s_list.rend(); it++) {

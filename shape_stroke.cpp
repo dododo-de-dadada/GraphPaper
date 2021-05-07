@@ -66,50 +66,65 @@ namespace winrt::GraphPaper::implementation
 	// b_max	領域の右下位置.
 	void ShapePoly::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
-		D2D1_POINT_2F e_pos;
-		pt_inc(m_pos, b_min, b_max);
-		pt_add(m_pos, m_diff, e_pos);
+		const size_t n = m_diff.size();
+		D2D1_POINT_2F e_pos = m_pos;
+		pt_inc(e_pos, b_min, b_max);
+		for (size_t i = 0; i < n; i++) {
+			pt_add(e_pos, m_diff[i], e_pos);
+			pt_inc(e_pos, b_min, b_max);
+		}
+		/*
+		pt_add(m_pos, m_diff[0], e_pos);
 		pt_inc(e_pos, b_min, b_max);
 		pt_add(e_pos, m_diff_1, e_pos);
 		pt_inc(e_pos, b_min, b_max);
 		pt_add(e_pos, m_diff_2, e_pos);
 		pt_inc(e_pos, b_min, b_max);
+		*/
 	}
 
 	// 図形を囲む領域の左上位置を得る.
 	// value	領域の左上位置
 	void ShapePoly::get_min_pos(D2D1_POINT_2F& value) const noexcept
 	{
-		D2D1_POINT_2F e_pos;
-		pt_add(m_pos, m_diff, e_pos);
-		pt_min(m_pos, e_pos, value);
-		pt_add(e_pos, m_diff_1, e_pos);
-		pt_min(value, e_pos, value);
+		//D2D1_POINT_2F b_min{ m_pos };
+		//D2D1_POINT_2F b_max{ m_pos };
+		//get_bound(b_min, b_max);
+		//value = b_min;
+		const size_t n = m_diff.size();
+		D2D1_POINT_2F e_pos = m_pos;
+		value = m_pos;
+		for (size_t i = 0; i < n; i++) {
+			pt_add(e_pos, m_diff[i], e_pos);
+			pt_min(value, e_pos, value);
+		}
+		/*
 		pt_add(e_pos, m_diff_2, e_pos);
 		pt_min(value, e_pos, value);
+		*/
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapePoly::get_anch_pos(const ANCH_WHICH a, D2D1_POINT_2F& value) const noexcept
+	void ShapePoly::get_anch_pos(const uint32_t a, D2D1_POINT_2F& value) const noexcept
 	{
 		switch (a) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
 			value = m_pos;
 			break;
-		case ANCH_WHICH::ANCH_R_NW:
+		case ANCH_WHICH::ANCH_P0://ANCH_R_NW:
 			value = m_pos;
 			break;
-		case ANCH_WHICH::ANCH_R_NE:
-			pt_add(m_pos, m_diff, value);
+		case ANCH_WHICH::ANCH_P1://ANCH_R_NE:
+			pt_add(m_pos, m_diff[0], value);
 			break;
-		case ANCH_WHICH::ANCH_R_SW:
-			pt_add(m_pos, m_diff, value);
-			pt_add(value, m_diff_1, value);
+		case ANCH_WHICH::ANCH_P2://ANCH_R_SW:
+			pt_add(m_pos, m_diff[0], value);
+			pt_add(value, m_diff[1], value);
 			break;
-		case ANCH_WHICH::ANCH_R_SE:
-			pt_add(m_pos, m_diff, value);
-			pt_add(value, m_diff_1, value);
-			pt_add(value, m_diff_2, value);
+		case ANCH_WHICH::ANCH_P3://ANCH_R_SE:
+			pt_add(m_pos, m_diff[0], value);
+			pt_add(value, m_diff[1], value);
+			pt_add(value, m_diff[2], value);
 			break;
 		default:
 			return;
@@ -126,36 +141,63 @@ namespace winrt::GraphPaper::implementation
 	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
 	//	value	格納する値
 	//	abch	図形の部位
-	void ShapePoly::set_anch_pos(const D2D1_POINT_2F value, const ANCH_WHICH anch)
+	void ShapePoly::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
 		D2D1_POINT_2F a_pos;
 		D2D1_POINT_2F diff;
 
+		if (anch == ANCH_WHICH::ANCH_OUTSIDE) {
+			m_pos = value;
+		}
+		else if (anch == ANCH_WHICH::ANCH_P0) {
+			pt_sub(value, m_pos, diff);
+			m_pos = value;
+			pt_sub(m_diff[0], diff, m_diff[0]);
+		}
+		else if (anch == ANCH_WHICH::ANCH_P0 + m_diff.size()) {
+			get_anch_pos(anch, a_pos);//ANCH_WHICH::ANCH_R_SE, a_pos);
+			pt_sub(value, a_pos, diff);
+			pt_add(m_diff[m_diff.size() - 1], diff, m_diff[m_diff.size() - 1]);
+		}
+		else if (anch > ANCH_WHICH::ANCH_P0 && anch < ANCH_WHICH::ANCH_P0 + m_diff.size()) {
+			get_anch_pos(anch, a_pos);//ANCH_WHICH::ANCH_R_NE, a_pos);
+			pt_sub(value, a_pos, diff);
+			const uint32_t i = anch - ANCH_WHICH::ANCH_P0;
+			pt_add(m_diff[i - 1], diff, m_diff[i - 1]);
+			pt_sub(m_diff[i], diff, m_diff[i]);
+		}
+		else {
+			return;
+		}
+		create_path_geometry();
+		return;
 		switch (anch) {
 		case ANCH_WHICH::ANCH_OUTSIDE:
 			m_pos = value;
 			break;
-		case ANCH_WHICH::ANCH_R_NW:
+		//case ANCH_WHICH::ANCH_R_NW:
+		case ANCH_WHICH::ANCH_P0:
 			pt_sub(value, m_pos, diff);
 			m_pos = value;
-			pt_sub(m_diff, diff, m_diff);
+			pt_sub(m_diff[0], diff, m_diff[0]);
 			break;
-		case ANCH_WHICH::ANCH_R_NE:
-			get_anch_pos(ANCH_WHICH::ANCH_R_NE, a_pos);
+		//case ANCH_WHICH::ANCH_R_NE:
+		case ANCH_WHICH::ANCH_P1:
+			get_anch_pos(ANCH_WHICH::ANCH_P1, a_pos);//ANCH_WHICH::ANCH_R_NE, a_pos);
 			pt_sub(value, a_pos, diff);
-			pt_add(m_diff, diff, m_diff);
-			pt_sub(m_diff_1, diff, m_diff_1);
+			pt_add(m_diff[0], diff, m_diff[0]);
+			pt_sub(m_diff[1], diff, m_diff[1]);
 			break;
-		case ANCH_WHICH::ANCH_R_SW:
-			get_anch_pos(ANCH_WHICH::ANCH_R_SW, a_pos);
+		case ANCH_WHICH::ANCH_P2://ANCH_R_SW:
+			get_anch_pos(ANCH_WHICH::ANCH_P2, a_pos);//ANCH_WHICH::ANCH_R_SW, a_pos);
 			pt_sub(value, a_pos, diff);
-			pt_add(m_diff_1, diff, m_diff_1);
-			pt_sub(m_diff_2, diff, m_diff_2);
+			pt_add(m_diff[1], diff, m_diff[1]);
+			pt_sub(m_diff[2], diff, m_diff[2]);
 			break;
-		case ANCH_WHICH::ANCH_R_SE:
-			get_anch_pos(ANCH_WHICH::ANCH_R_SE, a_pos);
+		case ANCH_WHICH::ANCH_P3://ANCH_R_SE:
+			get_anch_pos(ANCH_WHICH::ANCH_P3, a_pos);//ANCH_WHICH::ANCH_R_SE, a_pos);
 			pt_sub(value, a_pos, diff);
-			pt_add(m_diff_2, diff, m_diff_2);
+			pt_add(m_diff[2], diff, m_diff[2]);
 			break;
 		default:
 			return;
@@ -171,8 +213,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	ShapePoly::ShapePoly(const ShapeSheet* attr) :
-		ShapeStroke::ShapeStroke(attr)
+	ShapePoly::ShapePoly(const uint32_t n, const ShapeSheet* attr) :
+		ShapeStroke::ShapeStroke(n, attr)
 	{}
 
 	// 図形をデータリーダーから読み込む.
@@ -181,8 +223,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::read;
 
-		read(m_diff_1, dt_reader);
-		read(m_diff_2, dt_reader);
+		read(m_diff[1], dt_reader);
+		read(m_diff[2], dt_reader);
 	}
 
 	// データライターに書き込む.
@@ -191,8 +233,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write;
 
 		ShapeStroke::write(dt_writer);
-		write(m_diff_1, dt_writer);
-		write(m_diff_2, dt_writer);
+		write(m_diff[1], dt_writer);
+		write(m_diff[2], dt_writer);
 	}
 
 	// 図形を破棄する.
@@ -208,7 +250,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		pt_inc(m_pos, b_min, b_max);
 		D2D1_POINT_2F e_pos;
-		pt_add(m_pos, m_diff, e_pos);
+		pt_add(m_pos, m_diff[0], e_pos);
 		pt_inc(e_pos, b_min, b_max);
 	}
 
@@ -216,13 +258,13 @@ namespace winrt::GraphPaper::implementation
 	// value	領域の左上位置
 	void ShapeStroke::get_min_pos(D2D1_POINT_2F& value) const noexcept
 	{
-		value.x = m_diff.x >= 0.0f ? m_pos.x : m_pos.x + m_diff.x;
-		value.y = m_diff.y >= 0.0f ? m_pos.y : m_pos.y + m_diff.y;
+		value.x = m_diff[0].x >= 0.0f ? m_pos.x : m_pos.x + m_diff[0].x;
+		value.y = m_diff[0].y >= 0.0f ? m_pos.y : m_pos.y + m_diff[0].y;
 	}
 
 	// 指定された部位の位置を得る.
 	// 戻り値	つねに true
-	void ShapeStroke::get_anch_pos(const ANCH_WHICH /*a*/, D2D1_POINT_2F& value) const noexcept
+	void ShapeStroke::get_anch_pos(const uint32_t /*a*/, D2D1_POINT_2F& value) const noexcept
 	{
 		value = m_pos;
 	}
@@ -269,7 +311,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 位置を含むか調べる.
 	// 戻り値	つねに ANCH_OUTSIDE
-	ANCH_WHICH ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept
+	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept
 	{
 		return ANCH_WHICH::ANCH_OUTSIDE;
 	}
@@ -359,7 +401,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	ShapeStroke::ShapeStroke(const ShapeSheet* attr) :
+	//	n	差分の個数
+	//	attr	属性値
+	ShapeStroke::ShapeStroke(const uint32_t n, const ShapeSheet* attr) :
+		m_diff(n),
 		m_stroke_color(attr->m_stroke_color),
 		m_stroke_patt(attr->m_stroke_patt),
 		m_stroke_style(attr->m_stroke_style),
@@ -378,7 +423,7 @@ namespace winrt::GraphPaper::implementation
 		set_delete(dt_reader.ReadBoolean());
 		set_select(dt_reader.ReadBoolean());
 		read(m_pos, dt_reader);
-		read(m_diff, dt_reader);
+		read(m_diff[0], dt_reader);
 		read(m_stroke_color, dt_reader);
 		read(m_stroke_patt, dt_reader);
 		read(m_stroke_style, dt_reader);
@@ -394,7 +439,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBoolean(is_deleted());
 		dt_writer.WriteBoolean(is_selected());
 		write(m_pos, dt_writer);
-		write(m_diff, dt_writer);
+		write(m_diff[0], dt_writer);
 		write(m_stroke_color, dt_writer);
 		dt_writer.WriteSingle(m_stroke_patt.m_[0]);
 		dt_writer.WriteSingle(m_stroke_patt.m_[1]);

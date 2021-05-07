@@ -130,7 +130,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct UndoAnchor : Undo {
 		// 操作される部位
-		ANCH_WHICH m_anchor;
+		uint32_t m_anchor;
 		// 部位の位置
 		D2D1_POINT_2F m_anchor_pos;
 
@@ -141,7 +141,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作をデータリーダーから読み込む.
 		UndoAnchor(DataReader const& dt_reader);
 		// 図形の部位を保存する.
-		UndoAnchor(Shape* s, const ANCH_WHICH a);
+		UndoAnchor(Shape* s, const uint32_t anchor);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};
