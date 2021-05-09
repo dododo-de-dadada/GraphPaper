@@ -1,6 +1,6 @@
 //------------------------------
 // shape.h
-// shape.cpp
+// shape.cpp	図形のひな型, その他
 // shape_bezi.cpp	ベジェ曲線
 // shape_dx.cpp	図形の描画環境
 // shape_elli.cpp	だ円
@@ -8,12 +8,13 @@
 // shape_line.cpp	直線
 // shape_list.cpp	図形リスト
 // shape_layout.cpp	レイアウト
-// shape_quad.cpp	四へん形
+// shape_path.cpp	折れ線のひな型
+// shape_poly.cpp	多角形
 // shape.rect.cpp	方形
 // shape_rrect.cpp	角丸方形
 // shape_ruler.cpp	定規
-// shape_stroke.cpp	線枠, 折れ線のひな型
-// shape_text.cpp	文字列図形
+// shape_stroke.cpp	線枠のひな型
+// shape_text.cpp	文字列図
 //------------------------------
 #pragma once
 #include <list>
@@ -38,13 +39,13 @@
 //        +---------------+---------------+
 //        |               |               |
 // +------+------+ +------+------+ +------+------+
-// | ShapePoly*  | | ShapeLine   | | ShapeRect   |
+// | ShapePath*  | | ShapeLine   | | ShapeRect   |
 // +------+------+ +-------------+ +------+------+
 //        |                               |
 //        +---------------+               +---------------+---------------+---------------+
 //        |               |               |               |               |               |
 // +------+------+ +------+------+ +------+------+ +------+------+ +------+------+ +------+------+
-// | ShapeQuad   | | ShapeBezi   | | ShapeElli   | | ShapeRRect  | | ShapeText   | | ShapeRuler  |
+// | ShapePoly   | | ShapeBezi   | | ShapeElli   | | ShapeRRect  | | ShapeText   | | ShapeRuler  |
 // +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+
 
 // SVG のためのテキスト改行コード
@@ -80,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 		ANCH_R_NE,		// 右上の角丸の中心点 (十字カーソル)
 		ANCH_R_SE,		// 右下の角丸の中心点 (十字カーソル)
 		ANCH_R_SW,		// 左下の角丸の中心点 (十字カーソル)
-		ANCH_P0,
+		ANCH_P0,	// 開始点
 		ANCH_P1,
 		ANCH_P2,
 		ANCH_P3,
@@ -141,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr double PT_PER_INCH = 72.0;
 	// 1 インチあたりのミリメートル数
 	constexpr double MM_PER_INCH = 25.4;
-	// 方眼線の濃さ
+	// 方眼の濃さ
 	constexpr float GRID_GRAY = 0.25f;
 
 	//------------------------------
@@ -221,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 	// 線分が位置を含むか, 太さも考慮して調べる.
 	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width) noexcept;
 	// 四へん形が位置を含むか調べる.
-	bool pt_in_quad(const size_t n, const D2D1_POINT_2F t_pos, const D2D1_POINT_2F q_pos[]) noexcept;
+	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t n, const D2D1_POINT_2F q_pos[]) noexcept;
 	// 方形が位置を含むか調べる.
 	bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept;
 	// 指定した位置を含むよう, 方形を拡大する.
@@ -456,7 +457,7 @@ namespace winrt::GraphPaper::implementation
 		virtual void set_font_weight(const DWRITE_FONT_WEIGHT /*value*/) {}
 		// 値を方眼の大きさに格納する.
 		virtual void set_grid_base(const double /*value*/) noexcept {}
-		// 値を方眼線の濃淡に格納する.
+		// 値を方眼の濃淡に格納する.
 		virtual void set_grid_gray(const double /*value*/) noexcept {}
 		// 値を方眼の強調に格納する.
 		virtual void set_grid_emph(const GRID_EMPH /*value*/) noexcept {}
@@ -576,7 +577,7 @@ namespace winrt::GraphPaper::implementation
 		// 方眼の属性
 
 		double m_grid_base = 0.0;	// 方眼の基準の大きさ (を -1 した値)
-		double m_grid_gray = GRID_GRAY;	// 方眼線の濃さ
+		double m_grid_gray = GRID_GRAY;	// 方眼の濃さ
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
 		GRID_EMPH m_grid_emph = GRID_EMPH::EMPH_0;	// 方眼の強調
 		bool m_grid_snap = true;	// 方眼に整列
@@ -603,7 +604,7 @@ namespace winrt::GraphPaper::implementation
 		void draw_auxiliary_quad(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
 		// 角丸方形の補助線を表示する.
 		void draw_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos);
-		// 方眼線を表示する,
+		// 方眼を表示する,
 		void draw_grid(SHAPE_DX const& dx, const D2D1_POINT_2F offset);
 		// 部位の色を得る.
 		//void get_anchor_color(D2D1_COLOR_F& value) const noexcept;
@@ -613,7 +614,7 @@ namespace winrt::GraphPaper::implementation
 		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
 		// 方眼の基準の大きさを得る.
 		bool get_grid_base(double& value) const noexcept;
-		// 方眼線の色を得る.
+		// 方眼の色を得る.
 		void get_grid_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の大きさを得る.
 		bool get_grid_gray(double& value) const noexcept;
@@ -667,7 +668,7 @@ namespace winrt::GraphPaper::implementation
 		void set_to(Shape* s) noexcept;
 		// 値を方眼の基準の大きさに格納する.
 		void set_grid_base(const double value) noexcept;
-		// 値を方眼線の濃淡に格納する.
+		// 値を方眼の濃淡に格納する.
 		void set_grid_gray(const double value) noexcept;
 		// 値を方眼の強調に格納する.
 		void set_grid_emph(const GRID_EMPH value) noexcept;
@@ -1013,24 +1014,24 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 折れ線のひな型
 	//------------------------------
-	struct ShapePoly : ShapeStroke {
+	struct ShapePath : ShapeStroke {
 		//D2D1_POINT_2F m_diff_1{ 0.0f, 0.0f };	// 3 番目の頂点への差分
 		//D2D1_POINT_2F m_diff_2{ 0.0f, 0.0f };	// 4 番目の頂点への差分
 		winrt::com_ptr<ID2D1PathGeometry> m_poly_geom{};	// 四辺形のパスジオメトリ
 
 		//------------------------------
-		// shape_stroke.cpp
+		// shape_path.cpp
 		// 折れ線のひな型
 		//------------------------------
 
 		// パスジオメトリを作成する.
 		virtual void create_path_geometry(void) {}
 		// 図形を作成する.
-		ShapePoly(const uint32_t n, const ShapeSheet* attr);
+		ShapePath(const uint32_t n, const ShapeSheet* attr);
 		// 図形をデータリーダーから読み込む.
-		ShapePoly(DataReader const& dt_reader);
+		ShapePath(DataReader const& dt_reader);
 		// 図形を破棄する.
-		~ShapePoly(void);
+		~ShapePath(void);
 		// 図形を囲む領域の左上位置を得る.
 		void get_min_pos(D2D1_POINT_2F& value) const noexcept;
 		// 図形を囲む領域を得る.
@@ -1050,11 +1051,11 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 四へん形
 	//------------------------------
-	struct ShapeQuad : ShapePoly {
+	struct ShapePoly : ShapePath {
 		D2D1_COLOR_F m_fill_color;
 
 		//------------------------------
-		// shape_quad.cpp
+		// shape_poly.cpp
 		//------------------------------
 
 		// パスジオメトリを作成する.
@@ -1070,9 +1071,9 @@ namespace winrt::GraphPaper::implementation
 		// 値を塗りつぶし色に格納する.
 		void set_fill_color(const D2D1_COLOR_F& value) noexcept;
 		// 図形を作成する.
-		ShapeQuad(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr);
+		ShapePoly(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr);
 		// 図形をデータリーダーから読み込む.
-		ShapeQuad(DataReader const& dt_reader);
+		ShapePoly(DataReader const& dt_reader);
 		// データライターに書き込む.
 		void write(DataWriter const& /*dt_writer*/) const;
 		// データライターに SVG として書き込む.
@@ -1082,7 +1083,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 曲線
 	//------------------------------
-	struct ShapeBezi : ShapePoly {
+	struct ShapeBezi : ShapePath {
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じりの形式
 		ARROW_SIZE m_arrow_size{};	// 矢じりの寸法
 		winrt::com_ptr<ID2D1PathGeometry> m_arrow_geom{};	// 矢じりの D2D パスジオメトリ

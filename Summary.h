@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_line/Text");
 			}
-			else if (t_id == typeid(ShapeQuad)) {
+			else if (t_id == typeid(ShapePoly)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_quad")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_quad/Text");
 			}

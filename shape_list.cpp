@@ -460,7 +460,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeLine(dt_reader);
 		}
 		else if (s_type == SHAPE_QUAD) {
-			s = new ShapeQuad(dt_reader);
+			s = new ShapePoly(dt_reader);
 		}
 		else if (s_type == SHAPE_RECT) {
 			s = new ShapeRect(dt_reader);
@@ -585,7 +585,7 @@ namespace winrt::GraphPaper::implementation
 			else if (s_type == typeid(ShapeLine)) {
 				s_int = SHAPE_LINE;
 			}
-			else if (s_type == typeid(ShapeQuad)) {
+			else if (s_type == typeid(ShapePoly)) {
 				s_int = SHAPE_QUAD;
 			}
 			else if (s_type == typeid(ShapeRect)) {

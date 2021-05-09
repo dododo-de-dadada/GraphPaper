@@ -102,7 +102,10 @@ namespace winrt::GraphPaper::implementation
 		pt_add(r_min, sw * 0.5, r_min);
 		pt_add(r_max, sw * -0.5, r_max);
 		if (pt_in_rect(t_pos, r_min, r_max)) {
-			return is_opaque(m_fill_color) ? ANCH_WHICH::ANCH_INSIDE : ANCH_WHICH::ANCH_OUTSIDE;
+			if (is_opaque(m_fill_color)) {
+				return ANCH_WHICH::ANCH_INSIDE;
+			}
+			return ANCH_WHICH::ANCH_OUTSIDE;
 		}
 		pt_add(r_min, -sw, r_min);
 		pt_add(r_max, sw, r_max);

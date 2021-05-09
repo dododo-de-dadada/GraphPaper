@@ -171,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeRRect(m_pointer_pressed, diff, &m_main_sheet);
 		}
 		else if (tool == TOOL_DRAW::QUAD) {
-			s = new ShapeQuad(m_pointer_pressed, diff, &m_main_sheet);
+			s = new ShapePoly(m_pointer_pressed, diff, &m_main_sheet);
 		}
 		else if (tool == TOOL_DRAW::ELLI) {
 			s = new ShapeElli(m_pointer_pressed, diff, &m_main_sheet);
@@ -339,19 +339,21 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		Shape* s;
-		const auto a = s_list_hit_test(m_list_shapes, m_pointer_cur, sheet_anch_len(), s);
+		const auto anch = s_list_hit_test(m_list_shapes, m_pointer_cur, sheet_anch_len(), s);
 		m_mutex_shapes.unlock();
-		if (a == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() != true) {
+		if (anch == ANCH_WHICH::ANCH_OUTSIDE || s->is_selected() != true) {
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
 		}
 		else {
-			switch (a) {
+			switch (anch) {
+				/*
 			case ANCH_WHICH::ANCH_P0:
 			case ANCH_WHICH::ANCH_P1:
 			case ANCH_WHICH::ANCH_P2:
 			case ANCH_WHICH::ANCH_P3:
 				Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 				break;
+				*/
 			case ANCH_WHICH::ANCH_R_NW:
 			case ANCH_WHICH::ANCH_R_NE:
 			case ANCH_WHICH::ANCH_R_SE:
@@ -380,6 +382,13 @@ namespace winrt::GraphPaper::implementation
 				Window::Current().CoreWindow().PointerCursor(CUR_SIZEWE);
 				break;
 			default:
+				if (typeid(*s) == typeid(ShapePoly)) {
+					const auto n = static_cast<ShapePoly*>(s)->m_diff.size();
+					if (anch >= ANCH_WHICH::ANCH_P0 && anch < ANCH_WHICH::ANCH_P0 + n + 1) {
+						Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
+						break;
+					}
+				}
 				throw winrt::hresult_not_implemented();
 				break;
 			}

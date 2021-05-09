@@ -595,7 +595,7 @@ namespace winrt::GraphPaper::implementation
 				// 制御点と次の制御点を法線にそって正逆の両方向にずらす.
 				// 得られた 4 点を凸包 q に加える.
 				b_vec = b_vec * (s_width / std::sqrt(v));
-				BZP n_vec = { b_vec.y, -b_vec.x };
+				BZP n_vec = { b_vec.y, -b_vec.x };	// 各辺の法線ベクトルの配列
 				BZP q_pos;
 				q_pos = b_pos[i] + n_vec;
 				q_pos.inc(q_min, q_max);
@@ -773,7 +773,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	ShapeBezi::ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
-		ShapePoly::ShapePoly(3, attr)
+		ShapePath::ShapePath(3, attr)
 	{
 		m_pos = s_pos;
 		m_diff[0].x = diff.x;
@@ -789,7 +789,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	ShapeBezi::ShapeBezi(DataReader const& dt_reader) :
-		ShapePoly::ShapePoly(dt_reader)
+		ShapePath::ShapePath(dt_reader)
 	{
 		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
 		m_arrow_size.m_width = dt_reader.ReadSingle();
@@ -802,7 +802,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapeBezi::write(DataWriter const& dt_writer) const
 	{
 		//w.WriteInt32(static_cast<int32_t>(SHAPE_BEZI));
-		ShapePoly::write(dt_writer);
+		ShapePath::write(dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));
 		dt_writer.WriteSingle(m_arrow_size.m_width);
 		dt_writer.WriteSingle(m_arrow_size.m_length);

@@ -492,7 +492,7 @@ namespace winrt::GraphPaper::implementation
 		void grid_len_con_click(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の大きさ」>「広げる」が選択された.
 		void grid_len_exp_click(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼線の濃さ」が選択された.
+		// 用紙メニューの「方眼の濃さ」が選択された.
 		IAsyncAction grid_gray_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の強調」>「強調なし」が選択された.
 		void grid_emph_1_click(IInspectable const&, RoutedEventArgs const&);

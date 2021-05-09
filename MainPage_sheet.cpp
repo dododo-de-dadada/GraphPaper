@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 		dc->Clear(m_main_sheet.m_sheet_color);
 		if (m_main_sheet.m_grid_show == GRID_SHOW::BACK) {
 			// 方眼の表示が最背面に表示の場合,
-			// 方眼線を表示する.
+			// 方眼を表示する.
 			m_main_sheet.draw_grid(m_main_dx, { 0.0f, 0.0f });
 		}
 		// 部位の色をブラシに格納する.
@@ -177,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (m_main_sheet.m_grid_show == GRID_SHOW::FRONT) {
 			// 方眼の表示が最前面に表示の場合,
-			// 方眼線を表示する.
+			// 方眼を表示する.
 			m_main_sheet.draw_grid(m_main_dx, { 0.0f, 0.0f });
 		}
 		if (pointer_state() == STATE_TRAN::PRESS_AREA) {

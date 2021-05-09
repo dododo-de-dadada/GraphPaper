@@ -171,8 +171,6 @@ namespace winrt::GraphPaper::implementation
 	// c_rad	ŠpŠÛ”¼Œa
 	void ShapeSheet::draw_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		//auto br = dx.m_aux_brush.get();
-		//auto ss = dx.m_aux_style.get();
 		auto c_rad = m_corner_rad;
 		const FLOAT sw = static_cast<FLOAT>(1.0 / m_sheet_scale);
 		const double cx = c_pos.x;
@@ -201,17 +199,17 @@ namespace winrt::GraphPaper::implementation
 		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
 
-	// •ûŠáü‚ğ•\¦‚·‚é.
-	//	dx	•`‰æŠÂ‹«
-	//	offset	•ûŠáü‚Ì‚¸‚ç‚µ—Ê
+	// •ûŠá‚ğ•\¦‚·‚é.
+	// dx	•`‰æŠÂ‹«
+	// offset	•ûŠá‚Ì‚¸‚ç‚µ—Ê
 	void ShapeSheet::draw_grid(SHAPE_DX const& dx, const D2D1_POINT_2F offset)
 	{
-		const double pw = m_sheet_size.width;	// —p†‚Ì‘å‚«‚³
-		const double ph = m_sheet_size.height;
+		const double sw = m_sheet_size.width;	// —p†‚Ì•
+		const double sh = m_sheet_size.height;	// —p†‚Ì‚‚³
 		// Šg‘å‚³‚ê‚Ä‚à 1 ƒsƒNƒZƒ‹‚É‚È‚é‚æ‚¤Šg‘å—¦‚Ì‹t”‚ğü˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-		const FLOAT sw = static_cast<FLOAT>(1.0 / m_sheet_scale);	// •ûŠáü‚Ì‘¾‚³
-		D2D1_POINT_2F h_start, h_end;	// ‰¡‚Ì•ûŠáü‚ÌŠJnEI—¹ˆÊ’u
-		D2D1_POINT_2F v_start, v_end;	// c‚Ì•ûŠáü‚ÌŠJnEI—¹ˆÊ’u
+		const FLOAT gw = static_cast<FLOAT>(1.0 / m_sheet_scale);	// •ûŠá‚Ì‘¾‚³
+		D2D1_POINT_2F h_start, h_end;	// ‰¡‚Ì•ûŠá‚ÌŠJnEI—¹ˆÊ’u
+		D2D1_POINT_2F v_start, v_end;	// c‚Ì•ûŠá‚ÌŠJnEI—¹ˆÊ’u
 		auto br = dx.m_shape_brush.get();
 
 		D2D1_COLOR_F grid_color;
@@ -223,33 +221,33 @@ namespace winrt::GraphPaper::implementation
 		h_end.x = m_sheet_size.width;
 		const double g_len = max(m_grid_base + 1.0, 1.0);
 
-		// ‚’¼‚È•ûŠáü‚ğ•\¦‚·‚é.
+		// ‚’¼‚È•ûŠá‚ğ•\¦‚·‚é.
 		float w;
 		double x;
-		for (uint32_t i = 0; (x = g_len * i + offset.x) < pw; i++) {
+		for (uint32_t i = 0; (x = g_len * i + offset.x) < sw; i++) {
 			if (m_grid_emph == GRID_EMPH::EMPH_3 && (i % 10) == 0) {
-				w = 2.0F * sw;
+				w = 2.0F * gw;
 			}
 			else if (m_grid_emph == GRID_EMPH::EMPH_0 || (i % 2) == 0) {
-				w = sw;
+				w = gw;
 			}
 			else {
-				w = 0.5F * sw;
+				w = 0.5F * gw;
 			}
 			v_start.x = v_end.x = static_cast<FLOAT>(x);
 			dx.m_d2dContext->DrawLine(v_start, v_end, br, w, nullptr);
 		}
-		// …•½‚È•ûŠáü‚ğ•\¦‚·‚é.
+		// …•½‚È•ûŠá‚ğ•\¦‚·‚é.
 		double y;
-		for (uint32_t i = 0; (y = g_len * i + offset.y) < ph; i++) {
+		for (uint32_t i = 0; (y = g_len * i + offset.y) < sh; i++) {
 			if (m_grid_emph == GRID_EMPH::EMPH_3 && (i % 10) == 0) {
-				w = 2.0F * sw;
+				w = 2.0F * gw;
 			}
 			else if (m_grid_emph == GRID_EMPH::EMPH_0 || (i % 2) == 0) {
-				w = sw;
+				w = gw;
 			}
 			else {
-				w = 0.5F * sw;
+				w = 0.5F * gw;
 			}
 			h_start.y = h_end.y = static_cast<FLOAT>(y);
 			dx.m_d2dContext->DrawLine(h_start, h_end, br, w, nullptr);
@@ -346,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// •ûŠáü‚Ì”Z’W‚ğ“¾‚é.
+	// •ûŠá‚Ì”Z’W‚ğ“¾‚é.
 	void ShapeSheet::get_grid_color(D2D1_COLOR_F& value) const noexcept
 	{
 		value.r = static_cast<FLOAT>(1.0 - m_grid_gray);
@@ -356,7 +354,7 @@ namespace winrt::GraphPaper::implementation
 		//get_opposite_color(m_sheet_color, m_grid_gray, value);
 	}
 
-	// •ûŠáü‚Ì”Z’W‚ğ“¾‚é.
+	// •ûŠá‚Ì”Z’W‚ğ“¾‚é.
 	bool ShapeSheet::get_grid_gray(double& value) const noexcept
 	{
 		value = m_grid_gray;
@@ -559,7 +557,7 @@ namespace winrt::GraphPaper::implementation
 		m_grid_base = value;
 	}
 
-	// ’l‚ğ•ûŠáü‚Ì”Z’W‚ÉŠi”[‚·‚é.
+	// ’l‚ğ•ûŠá‚Ì”Z’W‚ÉŠi”[‚·‚é.
 	void ShapeSheet::set_grid_gray(const double value) noexcept
 	{
 		m_grid_gray = value;

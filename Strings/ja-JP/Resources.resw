@@ -414,7 +414,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_grid_gray.Text" xml:space="preserve">
-    <value>方眼線の濃さ...</value>
+    <value>方眼の濃さ...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_group.Text" xml:space="preserve">

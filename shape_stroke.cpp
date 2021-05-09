@@ -23,8 +23,8 @@ namespace winrt::GraphPaper::implementation
 			D2D1_DASH_STYLE_CUSTOM,	// dashStyle
 			0.0f
 		};
-		UINT32 d_cnt;
-		const FLOAT* d_arr;
+		UINT32 d_cnt;	// 破線の配置配列の要素数
+		const FLOAT* d_arr;	// 破線の配置配列を指すポインタ
 
 		if (d_style != D2D1_DASH_STYLE_SOLID) {
 			if (d_style == D2D1_DASH_STYLE_DOT) {
@@ -56,188 +56,6 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を破棄する.
-	ShapePoly::~ShapePoly(void)
-	{
-		m_poly_geom = nullptr;
-	}
-
-	// 図形を囲む領域を得る.
-	// b_min	領域の左上位置.
-	// b_max	領域の右下位置.
-	void ShapePoly::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
-	{
-		const size_t n = m_diff.size();
-		D2D1_POINT_2F e_pos = m_pos;
-		pt_inc(e_pos, b_min, b_max);
-		for (size_t i = 0; i < n; i++) {
-			pt_add(e_pos, m_diff[i], e_pos);
-			pt_inc(e_pos, b_min, b_max);
-		}
-		/*
-		pt_add(m_pos, m_diff[0], e_pos);
-		pt_inc(e_pos, b_min, b_max);
-		pt_add(e_pos, m_diff_1, e_pos);
-		pt_inc(e_pos, b_min, b_max);
-		pt_add(e_pos, m_diff_2, e_pos);
-		pt_inc(e_pos, b_min, b_max);
-		*/
-	}
-
-	// 図形を囲む領域の左上位置を得る.
-	// value	領域の左上位置
-	void ShapePoly::get_min_pos(D2D1_POINT_2F& value) const noexcept
-	{
-		//D2D1_POINT_2F b_min{ m_pos };
-		//D2D1_POINT_2F b_max{ m_pos };
-		//get_bound(b_min, b_max);
-		//value = b_min;
-		const size_t n = m_diff.size();
-		D2D1_POINT_2F e_pos = m_pos;
-		value = m_pos;
-		for (size_t i = 0; i < n; i++) {
-			pt_add(e_pos, m_diff[i], e_pos);
-			pt_min(value, e_pos, value);
-		}
-		/*
-		pt_add(e_pos, m_diff_2, e_pos);
-		pt_min(value, e_pos, value);
-		*/
-	}
-
-	// 指定された部位の位置を得る.
-	void ShapePoly::get_anch_pos(const uint32_t a, D2D1_POINT_2F& value) const noexcept
-	{
-		switch (a) {
-		case ANCH_WHICH::ANCH_OUTSIDE:
-			value = m_pos;
-			break;
-		case ANCH_WHICH::ANCH_P0://ANCH_R_NW:
-			value = m_pos;
-			break;
-		case ANCH_WHICH::ANCH_P1://ANCH_R_NE:
-			pt_add(m_pos, m_diff[0], value);
-			break;
-		case ANCH_WHICH::ANCH_P2://ANCH_R_SW:
-			pt_add(m_pos, m_diff[0], value);
-			pt_add(value, m_diff[1], value);
-			break;
-		case ANCH_WHICH::ANCH_P3://ANCH_R_SE:
-			pt_add(m_pos, m_diff[0], value);
-			pt_add(value, m_diff[1], value);
-			pt_add(value, m_diff[2], value);
-			break;
-		default:
-			return;
-		}
-	}
-
-	// 差分だけ移動する.
-	void ShapePoly::move(const D2D1_POINT_2F diff)
-	{
-		ShapeStroke::move(diff);
-		create_path_geometry();
-	}
-
-	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
-	//	value	格納する値
-	//	abch	図形の部位
-	void ShapePoly::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
-	{
-		D2D1_POINT_2F a_pos;
-		D2D1_POINT_2F diff;
-
-		if (anch == ANCH_WHICH::ANCH_OUTSIDE) {
-			m_pos = value;
-		}
-		else if (anch == ANCH_WHICH::ANCH_P0) {
-			pt_sub(value, m_pos, diff);
-			m_pos = value;
-			pt_sub(m_diff[0], diff, m_diff[0]);
-		}
-		else if (anch == ANCH_WHICH::ANCH_P0 + m_diff.size()) {
-			get_anch_pos(anch, a_pos);//ANCH_WHICH::ANCH_R_SE, a_pos);
-			pt_sub(value, a_pos, diff);
-			pt_add(m_diff[m_diff.size() - 1], diff, m_diff[m_diff.size() - 1]);
-		}
-		else if (anch > ANCH_WHICH::ANCH_P0 && anch < ANCH_WHICH::ANCH_P0 + m_diff.size()) {
-			get_anch_pos(anch, a_pos);//ANCH_WHICH::ANCH_R_NE, a_pos);
-			pt_sub(value, a_pos, diff);
-			const uint32_t i = anch - ANCH_WHICH::ANCH_P0;
-			pt_add(m_diff[i - 1], diff, m_diff[i - 1]);
-			pt_sub(m_diff[i], diff, m_diff[i]);
-		}
-		else {
-			return;
-		}
-		create_path_geometry();
-		return;
-		switch (anch) {
-		case ANCH_WHICH::ANCH_OUTSIDE:
-			m_pos = value;
-			break;
-		//case ANCH_WHICH::ANCH_R_NW:
-		case ANCH_WHICH::ANCH_P0:
-			pt_sub(value, m_pos, diff);
-			m_pos = value;
-			pt_sub(m_diff[0], diff, m_diff[0]);
-			break;
-		//case ANCH_WHICH::ANCH_R_NE:
-		case ANCH_WHICH::ANCH_P1:
-			get_anch_pos(ANCH_WHICH::ANCH_P1, a_pos);//ANCH_WHICH::ANCH_R_NE, a_pos);
-			pt_sub(value, a_pos, diff);
-			pt_add(m_diff[0], diff, m_diff[0]);
-			pt_sub(m_diff[1], diff, m_diff[1]);
-			break;
-		case ANCH_WHICH::ANCH_P2://ANCH_R_SW:
-			get_anch_pos(ANCH_WHICH::ANCH_P2, a_pos);//ANCH_WHICH::ANCH_R_SW, a_pos);
-			pt_sub(value, a_pos, diff);
-			pt_add(m_diff[1], diff, m_diff[1]);
-			pt_sub(m_diff[2], diff, m_diff[2]);
-			break;
-		case ANCH_WHICH::ANCH_P3://ANCH_R_SE:
-			get_anch_pos(ANCH_WHICH::ANCH_P3, a_pos);//ANCH_WHICH::ANCH_R_SE, a_pos);
-			pt_sub(value, a_pos, diff);
-			pt_add(m_diff[2], diff, m_diff[2]);
-			break;
-		default:
-			return;
-		}
-		create_path_geometry();
-	}
-
-	// 始点に値を格納する. 他の部位の位置も動く.
-	void ShapePoly::set_start_pos(const D2D1_POINT_2F value)
-	{
-		ShapeStroke::set_start_pos(value);
-		create_path_geometry();
-	}
-
-	// 図形を作成する.
-	ShapePoly::ShapePoly(const uint32_t n, const ShapeSheet* attr) :
-		ShapeStroke::ShapeStroke(n, attr)
-	{}
-
-	// 図形をデータリーダーから読み込む.
-	ShapePoly::ShapePoly(DataReader const& dt_reader) :
-		ShapeStroke::ShapeStroke(dt_reader)
-	{
-		using winrt::GraphPaper::implementation::read;
-
-		read(m_diff[1], dt_reader);
-		read(m_diff[2], dt_reader);
-	}
-
-	// データライターに書き込む.
-	void ShapePoly::write(DataWriter const& dt_writer) const
-	{
-		using winrt::GraphPaper::implementation::write;
-
-		ShapeStroke::write(dt_writer);
-		write(m_diff[1], dt_writer);
-		write(m_diff[2], dt_writer);
-	}
-
-	// 図形を破棄する.
 	ShapeStroke::~ShapeStroke(void)
 	{
 		m_d2d_stroke_style = nullptr;
@@ -263,7 +81,6 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 指定された部位の位置を得る.
-	// 戻り値	つねに true
 	void ShapeStroke::get_anch_pos(const uint32_t /*a*/, D2D1_POINT_2F& value) const noexcept
 	{
 		value = m_pos;

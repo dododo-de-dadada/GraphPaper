@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t TITLE_GRID[] = L"str_grid";
 	constexpr double SLIDER_STEP = 0.5;
 
-	// 用紙メニューの「方眼線の濃さ」が選択された.
+	// 用紙メニューの「方眼の濃さ」が選択された.
 	IAsyncAction MainPage::grid_gray_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;

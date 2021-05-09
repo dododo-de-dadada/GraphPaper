@@ -1,13 +1,13 @@
 //------------------------------
 // shape.cpp
+// 図形のひな型, その他
 //------------------------------
 #include "pch.h"
 #include "shape.h"
 
 namespace winrt::GraphPaper::implementation
 {
-	// 図形が使用する D2D ファクトリへの参照.
-	ID2D1Factory3* Shape::s_d2d_factory = nullptr;
+	ID2D1Factory3* Shape::s_d2d_factory = nullptr;	// D2D1 ファクトリ
 	IDWriteFactory3* Shape::s_dwrite_factory = nullptr;	// DWRITE ファクトリ
 #if defined(_DEBUG)
 	uint32_t debug_leak_cnt = 0;
@@ -17,6 +17,9 @@ namespace winrt::GraphPaper::implementation
 
 	// 色の成分が同じか調べる.
 	static bool equal_component(const FLOAT a, const FLOAT b) noexcept;
+
+	// 文字が 0...9 または A...F, a...f かどうか調べる
+	static bool is_hex(const wchar_t w, uint32_t& x) noexcept;
 
 	// 図形の部位 (方形) を表示する.
 	// a_pos	部位の位置
@@ -366,35 +369,36 @@ namespace winrt::GraphPaper::implementation
 		const double ny = -diff.x;
 		// 線分の両端から, 法線ベクトルの方向, またはその逆の方向にある点を求める.
 		// 求めた 4 点からなる四辺形が位置を含むか調べる.
-		D2D1_POINT_2F q_pos[4];
-		pt_add(s_pos, nx, ny, q_pos[0]);
-		pt_add(e_pos, nx, ny, q_pos[1]);
-		pt_add(e_pos, -nx, -ny, q_pos[2]);
-		pt_add(s_pos, -nx, -ny, q_pos[3]);
-		return pt_in_quad(4, t_pos, q_pos);
+		D2D1_POINT_2F exp_side[4];
+		pt_add(s_pos, nx, ny, exp_side[0]);
+		pt_add(e_pos, nx, ny, exp_side[1]);
+		pt_add(e_pos, -nx, -ny, exp_side[2]);
+		pt_add(s_pos, -nx, -ny, exp_side[3]);
+		return pt_in_poly(t_pos, 4, exp_side);
 	}
 
-	// 四へん形が位置を含むか調べる.
+	// 多角形が位置を含むか調べる.
 	// t_pos	調べる位置
-	// q_pos	四辺形の頂点
+	// n	頂点の数
+	// v_pos	頂点の配列
 	// 戻り値	含む場合 true
-	// 四へん形の各辺と, 指定された点を開始点とする水平線が交差する数を求める.
-	bool pt_in_quad(const size_t n, const D2D1_POINT_2F t_pos, const D2D1_POINT_2F q_pos[]) noexcept
+	// 多角形の各辺と, 指定された点を開始点とする水平線が交差する数を求める.
+	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t n, const D2D1_POINT_2F v_pos[]) noexcept
 	{
 		D2D1_POINT_2F p_pos;
 		int cnt;
 		int i;
 
 		cnt = 0;
-		for (p_pos = q_pos[3], i = 0; i < n; p_pos = q_pos[i++]) {
+		for (p_pos = v_pos[n - 1], i = 0; i < n; p_pos = v_pos[i++]) {
 			// 上向きの辺。点Pがy軸方向について、始点と終点の間にある。ただし、終点は含まない。(ルール1)
-			if ((p_pos.y <= t_pos.y && q_pos[i].y > t_pos.y)
+			if ((p_pos.y <= t_pos.y && v_pos[i].y > t_pos.y)
 				// 下向きの辺。点Pがy軸方向について、始点と終点の間にある。ただし、始点は含まない。(ルール2)
-				|| (p_pos.y > t_pos.y&& q_pos[i].y <= t_pos.y)) {
-				// ルール1,ルール2を確認することで、ルール3も確認できている。
-				// 辺は点pよりも右側にある。ただし、重ならない。(ルール4)
-				// 辺が点pと同じ高さになる位置を特定し、その時のxの値と点pのxの値を比較する。
-				if (t_pos.x < p_pos.x + (t_pos.y - p_pos.y) / (q_pos[i].y - p_pos.y) * (q_pos[i].x - p_pos.x)) {
+				|| (p_pos.y > t_pos.y && v_pos[i].y <= t_pos.y)) {
+				// ルール1, ルール2を確認することで, ルール3も確認できている。
+				// 辺は点 p よりも右側にある. ただし, 重ならない。(ルール4)
+				// 辺が点 p と同じ高さになる位置を特定し, その時のxの値と点pのxの値を比較する。
+				if (t_pos.x < p_pos.x + (t_pos.y - p_pos.y) / (v_pos[i].y - p_pos.y) * (v_pos[i].x - p_pos.x)) {
 					cnt++;
 				}
 			}
@@ -707,7 +711,8 @@ namespace winrt::GraphPaper::implementation
 		return t;
 	}
 
-	static bool is_hex(const wchar_t w, uint32_t& x)
+	// 文字が 0...9 または A...F, a...f かどうか調べる
+	static bool is_hex(const wchar_t w, uint32_t& x) noexcept
 	{
 		if (isdigit(w)) {
 			x = w - '0';
@@ -724,8 +729,8 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	//	文字列を複製する.
-	//	エスケープ文字列は文字コードに変換する.
+	// 文字列を複製する.
+	// エスケープ文字列は文字コードに変換する.
 	wchar_t* wchar_cpy_esc(const wchar_t* const s)
 	{
 		const auto s_len = wchar_len(s);
@@ -1075,8 +1080,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 属性名とシングルバイト文字列をデータライターに SVG として書き込む.
-	// val	シングルバイト文字列
-	// attr	属性
+	// value	シングルバイト文字列
+	// name	属性名
 	void write_svg(const char* value, const char* name, DataWriter const& dt_writer)
 	{
 		char buf[256];

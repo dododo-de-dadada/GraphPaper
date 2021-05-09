@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 		FONT_STRETCH,	// 書体の伸縮の操作
 		FONT_WEIGHT,	// 書体の太さの操作
 		GRID_BASE,	// 方眼の基準の大さの操作
-		GRID_GRAY,	// 方眼線の色の濃さの操作
+		GRID_GRAY,	// 方眼の色の濃さの操作
 		GRID_EMPH,	// 方眼の形式の操作
 		GRID_SHOW,	// 方眼の表示方法の操作
 		GROUP,	// 図形をグループに挿入または削除する操作
