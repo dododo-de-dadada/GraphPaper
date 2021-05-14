@@ -166,7 +166,7 @@
     <comment>ContentDialog</comment>
   </data>
   <data name="ck_text_adjust_bound.Content" xml:space="preserve">
-    <value>大きさを文字列に合わせる</value>
+    <value>枠の大きさを文字列に合わせる</value>
     <comment>CheckBox</comment>
   </data>
   <data name="ck_text_find_case.Content" xml:space="preserve">
@@ -838,27 +838,27 @@
     <value>方眼にそろえる</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_stbar_curs.Text" xml:space="preserve">
+  <data name="tmfi_sbar_curs.Text" xml:space="preserve">
     <value>カーソルの位置</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_grid.Text" xml:space="preserve">
+  <data name="tmfi_sbar_grid.Text" xml:space="preserve">
     <value>方眼の大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_sheet.Text" xml:space="preserve">
+  <data name="tmfi_sbar_sheet.Text" xml:space="preserve">
     <value>用紙の大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_draw.Text" xml:space="preserve">
+  <data name="tmfi_sbar_draw.Text" xml:space="preserve">
     <value>作図ツール</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_unit.Text" xml:space="preserve">
+  <data name="tmfi_sbar_unit.Text" xml:space="preserve">
     <value>単位</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_zoom.Text" xml:space="preserve">
+  <data name="tmfi_sbar_zoom.Text" xml:space="preserve">
     <value>拡大率</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -914,11 +914,11 @@
     <value>クリップボードからテキストを貼り付けますか？</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="mfi_sheet_reset.Text" xml:space="preserve">
-    <value>設定をリセット</value>
+  <data name="mfi_pref_delete.Text" xml:space="preserve">
+    <value>設定を削除</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_sheet_save.Text" xml:space="preserve">
+  <data name="mfi_pref_save.Text" xml:space="preserve">
     <value>設定を保存</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -945,5 +945,9 @@
   <data name="rmfi_tool_text.Text" xml:space="preserve">
     <value>文字列</value>
     <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="mfi_text_bound_adjust.Text" xml:space="preserve">
+    <value>文字列に合わせる</value>
+    <comment>MenuFlyoutItem</comment>
   </data>
 </root>

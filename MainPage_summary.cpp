@@ -108,16 +108,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::summary_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		summary_close();
-		//mfi_summary_click(nullptr, nullptr);
 	}
 
 	// 図形一覧パネルがロードされた.
 	void MainPage::summary_loaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
 	{
-		bool s_visible = m_mutex_summary.exchange(false, std::memory_order_acq_rel);
-		//if (m_summary_visible) {
-		//	m_summary_visible = false;
-		//}
+		// 図形一覧の排他制御を false と入れ替える.
+		bool summary_visible = m_summary_atomic.exchange(false, std::memory_order_acq_rel); // 入れ替え前の排他制御
 		uint32_t i = 0;
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
@@ -129,22 +126,17 @@ namespace winrt::GraphPaper::implementation
 			}
 			i++;
 		}
-		m_mutex_summary.store(s_visible, std::memory_order_release);
-		//if (m_summary_visible != s_visible) {
-		//	m_summary_visible = s_visible;
-		//}
+		// 入れ替え前の排他制御に戻す.
+		m_summary_atomic.store(summary_visible, std::memory_order_release);
 	}
 
 	// 図形一覧の項目が選択された.
 	void MainPage::summary_selection_changed(IInspectable const&, SelectionChangedEventArgs const& e)
 	{
-		if (m_mutex_summary != true) {
+		// 図形一覧の排他制御が false か判定する.
+		if (!m_summary_atomic) {
 			return;
 		}
-		//if (m_summary_visible != true) {
-			// 一覧の表示フラグがなければ中断する.
-		//	return;
-		//}
 #if defined(_DEBUG)
 		if (e.AddedItems().Size() + e.RemovedItems().Size() == 0) {
 			// 選択または非選択された項目がなければ中断する.
@@ -181,354 +173,253 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「リストを表示」が選択された.
 	void MainPage::mfi_summary_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		// 図形一覧の排他制御が true か判定する.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			summary_close();
 			return;
 		}
-		//if (m_summary_visible) {
-		//	summary_close();
-		//	return;
-		//}
 		if (sp_text_find().Visibility() == VISIBLE) {
 			text_find_click(nullptr, nullptr);
 		}
 		auto _{ FindName(L"rp_summary") };
 		rp_summary().Visibility(VISIBLE);
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
+		m_summary_atomic.store(true, std::memory_order_release);
 	}
 
 	// 図形を一覧に追加する.
 	void MainPage::summary_append(Shape* s)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		// 図形一覧の排他制御が true か判定する.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			lv_summary().Items().Append(winrt::make<Summary>(s, Resources()));
+			summary_select_item(lv_summary(), lv_summary().Items().Size() - 1);
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		lv_summary().Items().Append(winrt::make<Summary>(s, Resources()));
-		summary_select_item(lv_summary(), lv_summary().Items().Size() - 1);
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 一覧の中で図形を入れ替える.
 	void MainPage::summary_arrange(Shape* s, Shape* t)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		// 図形一覧の排他制御が true か判定する.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			summary_swap(lv_summary(), s, t, Resources());
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		summary_swap(lv_summary(), s, t, Resources());
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 図形一覧を消去する.
 	void MainPage::summary_clear(void)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		// 図形一覧の排他制御が true か判定する.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			lv_summary().Items().Clear();
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		lv_summary().Items().Clear();
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 図形一覧パネルを閉じて消去する.
 	void MainPage::summary_close(void)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		// 図形一覧の排他制御が true か判定する.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			rp_summary().Visibility(COLLAPSED);
+			lv_summary().Items().Clear();
+			UnloadObject(rp_summary());
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		rp_summary().Visibility(COLLAPSED);
-		lv_summary().Items().Clear();
-		UnloadObject(rp_summary());
 	}
 
 	// 一覧の添え字の位置に図形を挿入する.
 	void MainPage::summary_insert(Shape* s, const uint32_t i)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			lv_summary().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
+			summary_select_item(lv_summary(), i);
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		lv_summary().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
-		summary_select_item(lv_summary(), i);
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 操作を図形一覧に反映する.
 	// この関数は, 操作を実行する前に呼び出す.
 	void MainPage::summary_reflect(const Undo* u)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
-		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		auto const& u_type = typeid(*u);
-		if (u_type == typeid(UndoList)) {
-			auto v = static_cast<const UndoList*>(u);
-			auto s = v->shape();
-			if (v->is_insert()) {
-				if (v->item_pos() != nullptr) {
-					const auto i = summary_distance(lv_summary().Items(), v->item_pos());
-					lv_summary().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			const auto& u_type = typeid(*u);
+			if (u_type == typeid(UndoList)) {
+				auto v = static_cast<const UndoList*>(u);
+				auto s = v->shape();
+				if (v->is_insert()) {
+					if (v->item_pos() != nullptr) {
+						const auto i = summary_distance(lv_summary().Items(), v->item_pos());
+						lv_summary().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
+						summary_select_item(lv_summary(), i);
+					}
+					else {
+						lv_summary().Items().Append(winrt::make<Summary>(s, Resources()));
+						const auto i = lv_summary().Items().Size() - 1;
+						summary_select_item(lv_summary(), i);
+					}
+				}
+				else {
+					auto items = lv_summary().Items();
+					const auto i = summary_distance(items, s);
+					if (i < items.Size()) {
+						items.RemoveAt(i);
+					}
+				}
+				lv_summary().UpdateLayout();
+			}
+			else if (u_type == typeid(UndoArrange2)) {
+				auto v = static_cast<const UndoArrange2*>(u);
+				auto s = v->shape();
+				auto t = v->dest();
+				summary_swap(lv_summary(), s, t, Resources());
+			}
+			else if (u_type == typeid(UndoSelect)) {
+				const auto s = u->shape();
+				const auto i = summary_distance(lv_summary().Items(), s);
+				if (s->is_selected() != true) {
 					summary_select_item(lv_summary(), i);
 				}
 				else {
-					lv_summary().Items().Append(winrt::make<Summary>(s, Resources()));
-					const auto i = lv_summary().Items().Size() - 1;
-					summary_select_item(lv_summary(), i);
+					summary_unselect_item(lv_summary(), i);
 				}
 			}
-			else {
-				auto items = lv_summary().Items();
-				const auto i = summary_distance(items, s);
-				if (i < items.Size()) {
-					items.RemoveAt(i);
-				}
-			}
-			lv_summary().UpdateLayout();
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		else if (u_type == typeid(UndoArrange2)) {
-			auto v = static_cast<const UndoArrange2*>(u);
-			auto s = v->shape();
-			auto t = v->dest();
-			summary_swap(lv_summary(), s, t, Resources());
-		}
-		else if (u_type == typeid(UndoSelect)) {
-			const auto s = u->shape();
-			const auto i = summary_distance(lv_summary().Items(), s);
-			if (s->is_selected() != true) {
-				summary_select_item(lv_summary(), i);
-			}
-			else {
-				summary_unselect_item(lv_summary(), i);
-			}
-		}
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 図形一覧を作成しなおす.
 	void MainPage::summary_remake(void)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
-		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		lv_summary().Items().Clear();
-		uint32_t i = 0;
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				continue;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			lv_summary().Items().Clear();
+			uint32_t i = 0;
+			for (auto s : m_list_shapes) {
+				if (s->is_deleted()) {
+					continue;
+				}
+				lv_summary().Items().Append(winrt::make<Summary>(s, Resources()));
+				if (s->is_selected()) {
+					summary_select_item(lv_summary(), i);
+				}
+				i++;
 			}
-			lv_summary().Items().Append(winrt::make<Summary>(s, Resources()));
-			if (s->is_selected()) {
-				summary_select_item(lv_summary(), i);
-			}
-			i++;
+			lv_summary().UpdateLayout();
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		lv_summary().UpdateLayout();
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 図形を一覧から消去する.
 	uint32_t MainPage::summary_remove(Shape* s)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return 0;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			auto items = lv_summary().Items();
+			const uint32_t i = summary_distance(items, s);
+			if (i < items.Size()) {
+				items.RemoveAt(i);
+			}
+			m_summary_atomic.store(true, std::memory_order_release);
+			return i;
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return 0;
-		//}
-		//m_summary_visible = false;
-		auto items = lv_summary().Items();
-		const auto i = summary_distance(items, s);
-		if (i < items.Size()) {
-			items.RemoveAt(i);
-		}
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
-		return i;
+		return 0;
 	}
 
 	// 一覧の図形を選択する.
 	void MainPage::summary_select(Shape* s)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			summary_select_item(lv_summary(), summary_distance(lv_summary().Items(), s));
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		const auto i = summary_distance(lv_summary().Items(), s);
-		summary_select_item(lv_summary(), i);
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 一覧の項目を選択する.
 	void MainPage::summary_select(uint32_t i)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			summary_select_item(lv_summary(), i);
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		summary_select_item(lv_summary(), i);
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 一覧の項目を全て選択する.
 	void MainPage::summary_select_all(void)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			lv_summary().SelectAll();
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		lv_summary().SelectAll();
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 一覧の最初の項目を選択する.
 	void MainPage::summary_select_head(void)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			summary_select_item(lv_summary(), 0);
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		summary_select_item(lv_summary(), 0);
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 一覧の最後の項目を選択する.
 	void MainPage::summary_select_tail(void)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			summary_select_item(lv_summary(), lv_summary().Items().Size() - 1);
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		summary_select_item(lv_summary(), lv_summary().Items().Size() - 1);
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 一覧の図形を選択解除する.
 	void MainPage::summary_unselect(Shape* s)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			summary_unselect_item(lv_summary(), summary_distance(lv_summary().Items(), s));
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		summary_unselect_item(lv_summary(), summary_distance(lv_summary().Items(), s));
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 一覧の項目を選択解除する.
 	void MainPage::summary_unselect(uint32_t i)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			summary_unselect_item(lv_summary(), i);
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		summary_unselect_item(lv_summary(), i);
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 一覧の項目を全て選択解除する.
 	void MainPage::summary_unselect_all(void)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			lv_summary().SelectedIndex(static_cast<uint32_t>(-1));
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		lv_summary().SelectedIndex(static_cast<uint32_t>(-1));
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 	// 一覧の表示を更新する.
 	void MainPage::summary_update(void)
 	{
-		if (m_mutex_summary.load(std::memory_order_acquire) != true) {
-			return;
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			m_summary_atomic.store(false, std::memory_order_release);
+			lv_summary().UpdateLayout();
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		m_mutex_summary.store(false, std::memory_order_release);
-		//if (m_summary_visible != true) {
-		//	return;
-		//}
-		//m_summary_visible = false;
-		lv_summary().UpdateLayout();
-		m_mutex_summary.store(true, std::memory_order_release);
-		//m_summary_visible = true;
 	}
 
 }

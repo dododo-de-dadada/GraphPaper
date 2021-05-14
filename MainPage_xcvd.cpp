@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::Streams::DataWriter;
 		using winrt::Windows::Storage::Streams::InMemoryRandomAccessStream;
 
-		if (m_list_selected == 0) {
+		if (m_cnt_selected == 0) {
 			// 選択された図形の数が 0 の場合,
 			// 終了する.
 			return;
@@ -78,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「削除」が選択された.
 	void MainPage::xcvd_delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_list_selected == 0) {
+		if (m_cnt_selected == 0) {
 			// 選択された図形の数が 0 の場合,
 			// 終了する.
 			return;
@@ -86,10 +86,10 @@ namespace winrt::GraphPaper::implementation
 		// 選択された図形のリストを得る.
 		S_LIST_T list_selected;
 		s_list_selected<Shape>(m_list_shapes, list_selected);
+		m_dx_mutex.lock();
 		// 得られたリストの各図形について以下を繰り返す.
 		for (auto s : list_selected) {
-			if (m_mutex_summary.load(std::memory_order_acquire)) {
-			//if (m_summary_visible) {
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				// 図形一覧の表示フラグが立っている場合,
 				// 図形を一覧から消去する.
 				summary_remove(s);
@@ -97,9 +97,10 @@ namespace winrt::GraphPaper::implementation
 			// 図形を削除して, その操作をスタックに積む.
 			undo_push_remove(s);
 		}
+		undo_push_null();
+		m_dx_mutex.unlock();
 		// 選択された図形のリストを消去する.
 		list_selected.clear();
-		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
 		sheet_bound();
@@ -117,14 +118,13 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::Streams::IRandomAccessStream;
 		using winrt::Windows::Storage::Streams::DataReader;
 
-		m_mutex_shapes.lock();
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// Clipboard::GetContent() は, 
 		// WinRT originate error 0x80040904
 		// を引き起こすので, try ... catch 文が必要.
 		try {
-			// 図形データがクリップボードに含まれているか調べる.
+			// 図形データがクリップボードに含まれているか判定する.
 			if (xcvd_contains({ CF_GPD })) {
 				// クリップボードから読み込むためのデータリーダーを得る.
 				auto dt_object{ co_await Clipboard::GetContent().GetDataAsync(CF_GPD) };
@@ -144,12 +144,13 @@ namespace winrt::GraphPaper::implementation
 
 					}
 					else if (list_pasted.empty() != true) {
+						m_dx_mutex.lock();
 						// 得られたリストが空でない場合,
 						// 図形リストの中の図形の選択をすべて解除する.
 						unselect_all();
 						// 得られたリストの各図形について以下を繰り返す.
 						for (auto s : list_pasted) {
-							if (m_mutex_summary.load(std::memory_order_acquire)) {
+							if (m_summary_atomic.load(std::memory_order_acquire)) {
 							//if (m_summary_visible) {
 								summary_append(s);
 							}
@@ -157,6 +158,7 @@ namespace winrt::GraphPaper::implementation
 							sheet_bound(s);
 						}
 						undo_push_null();
+						m_dx_mutex.unlock();
 						list_pasted.clear();
 						// 編集メニュー項目の使用の可否を設定する.
 						edit_menu_enable();
@@ -200,17 +202,18 @@ namespace winrt::GraphPaper::implementation
 						}
 						t->set_start_pos(s_pos);
 
+						m_dx_mutex.lock();
 						unselect_all();
-						if (m_mutex_summary.load(std::memory_order_acquire)) {
+						if (m_summary_atomic.load(std::memory_order_acquire)) {
 						//if (m_summary_visible) {
 							summary_append(t);
 						}
 						undo_push_append(t);
 						undo_push_null();
+						m_dx_mutex.unlock();
 						edit_menu_enable();
 						sheet_bound(t);
 						sheet_panle_size();
-						sheet_draw();
 					}
 				}
 			}
@@ -220,7 +223,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		//スレッドコンテキストを復元する.
 		co_await context;
-		m_mutex_shapes.unlock();
 	}
 
 	// クリップボードにデータが含まれているか調べる.

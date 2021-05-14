@@ -53,10 +53,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		for (size_t i = 0; i < m; i++) {
 			if (s_len[i] <= FLT_MIN) {
-				// 辺の長さが 0 ならば,
-				// 辺に隣接する前後の辺の中から
-				// 長さが 0 でない辺を探し,
-				// それらの法線ベクトルを合成し, 
+				// 辺の長さが 0 ならば, 隣接する前後の辺の中から
+				// 長さが 0 でない辺を探し, それらの法線ベクトルを合成し, 
 				// 長さ 0 の辺の法線ベクトルとする.
 				size_t prev;
 				for (size_t j = 1; s_len[prev = ((i - j) % m)] < FLT_MIN; j++);
@@ -66,11 +64,12 @@ namespace winrt::GraphPaper::implementation
 				auto len = sqrt(pt_abs2(n_vec[i]));
 				if (len > FLT_MIN) {
 					pt_scale(n_vec[i], 1.0 / len, n_vec[i]);
-					continue;
 				}
-				// 合成ベクトルがゼロベクトルになるなら,
-				// 直前の法線ベクトルに直交するベクトルを法線ベクトルとする.
-				n_vec[i] = poly_pt_orth(n_vec[prev]);
+				else {
+					// 合成ベクトルがゼロベクトルになるなら,
+					// 前方の隣接する辺の法線ベクトルに直交するベクトルを法線ベクトルとする.
+					n_vec[i] = poly_pt_orth(n_vec[prev]);
+				}
 			}
 		}
 		return true;
@@ -125,8 +124,8 @@ namespace winrt::GraphPaper::implementation
 		for (size_t i = 0, j = m - 1; i < m; j = i++) {
 			// ある頂点に隣接する辺について.
 			// 拡張した辺の端を, 延長した辺の端に格納する.
-			ext_side[0] = exp_side[m * j + 3];
-			ext_side[1] = exp_side[m * j + 2];
+			ext_side[0] = exp_side[4 * j + 3];
+			ext_side[1] = exp_side[4 * j + 2];
 			// 法線ベクトルと直行するベクトルを,
 			// 延長する長さの分だけ倍し,
 			// 平行なベクトルに格納する.
@@ -142,8 +141,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 隣接するもう片方の辺について.
 			// 拡張した辺の端を, 延長した辺の端に格納する.
-			ext_side[2] = exp_side[m * i + 1];
-			ext_side[3] = exp_side[m * i + 0];
+			ext_side[2] = exp_side[4 * i + 1];
+			ext_side[3] = exp_side[4 * i + 0];
 			// 法線ベクトルと直行するベクトル (先ほどとは逆方向) を得て,
 			// 角を延長する長さの分だけ倍し,
 			// 平行なベクトルに格納する.
@@ -162,21 +161,19 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// パスジオメトリを作成する.
-	void ShapePoly::create_path_geometry(void)
+	void ShapePoly::create_path_geometry(ID2D1Factory3* d2d_factory)
 	{
 		const size_t m = m_diff.size() + 1;	// 頂点の数 (差分の数 + 1)
 		std::vector<D2D1_POINT_2F> v_pos(m);	// 頂点の配列
 
-		m_poly_geom = nullptr;
+		m_path_geom = nullptr;
 		v_pos[0] = m_pos;
 		for (size_t i = 1; i < m; i++) {
 			pt_add(v_pos[i - 1], m_diff[i - 1], v_pos[i]);
 		}
 		winrt::com_ptr<ID2D1GeometrySink> sink;
-		winrt::check_hresult(
-			s_d2d_factory->CreatePathGeometry(m_poly_geom.put())
-		);
-		m_poly_geom->Open(sink.put());
+		winrt::check_hresult(d2d_factory->CreatePathGeometry(m_path_geom.put()));
+		m_path_geom->Open(sink.put());
 		sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
 		const auto figure_begin = is_opaque(m_fill_color)
 			? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
@@ -199,12 +196,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (is_opaque(m_fill_color)) {
 			dx.m_shape_brush->SetColor(m_fill_color);
-			dx.m_d2dContext->FillGeometry(m_poly_geom.get(), dx.m_shape_brush.get(), nullptr);
+			dx.m_d2dContext->FillGeometry(m_path_geom.get(), dx.m_shape_brush.get(), nullptr);
 		}
 		if (is_opaque(m_stroke_color)) {
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawGeometry(
-				m_poly_geom.get(),
+				m_path_geom.get(),
 				dx.m_shape_brush.get(),
 				static_cast<FLOAT>(m_stroke_width),
 				m_d2d_stroke_style.get());
@@ -238,63 +235,63 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		const size_t m = m_diff.size() + 1;	// 頂点の数 (差分の数 + 1)
 		constexpr D2D1_POINT_2F PZ{ 0.0f, 0.0f };	// 零点
-		size_t j = static_cast<size_t>(-1);	// 点を含む頂点の添え字
-		size_t k = 0;	// 重複した頂点を除いた頂点の数
+		const size_t m = m_diff.size() + 1;	// 頂点の数 (差分の数 + 1)
 		std::vector<D2D1_POINT_2F> v_pos(m);	// 頂点の配列
+		size_t j = static_cast<size_t>(-1);	// 点を含む頂点の添え字
 		// 調べる位置が原点となるよう平行移動した四へん形の各頂点を得る.
-		pt_sub(m_pos, t_pos, v_pos[k++]);
+		pt_sub(m_pos, t_pos, v_pos[0]);
 		if (pt_in_anch(v_pos[0], a_len)) {
 			j = 0;
 		}
 		for (size_t i = 1; i < m; i++) {
-			pt_add(v_pos[k - 1], m_diff[i - 1], v_pos[k]);
+			pt_add(v_pos[i - 1], m_diff[i - 1], v_pos[i]);
 			if (pt_in_anch(v_pos[i], a_len)) {
 				j = i;
 			}
-			if (pt_abs2(m_diff[i - 1]) > FLT_MIN) {
-				k++;
-			}
 		}
 		if (j != -1) {
-			const auto anch = ANCH_WHICH::ANCH_P0 + j;
+			const auto anch = ANCH_TYPE::ANCH_P0 + j;
 			return static_cast<uint32_t>(anch);
 		}
-		if (is_opaque(m_stroke_color) && k > 0) {
+		if (is_opaque(m_stroke_color)) {
+		//if (is_opaque(m_stroke_color) && k > 0) {
 			// 辺が不透明なら, 線の太さをもとに, 幅をもつ辺を計算する.
 			const auto width = max(max(m_stroke_width, a_len) * 0.5, 0.5);	// 幅
 
 			// 各辺の法線ベクトルを得る.
-			std::vector<D2D1_POINT_2F> n_vec(k);	// 法線ベクトル
-			poly_get_nor(k, v_pos.data(), n_vec.data());
+			//std::vector<D2D1_POINT_2F> n_vec(k);	// 法線ベクトル
+			//poly_get_nor(k, v_pos.data(), n_vec.data());
+			std::vector<D2D1_POINT_2F> n_vec(m);	// 法線ベクトル
+			poly_get_nor(m, v_pos.data(), n_vec.data());
 
 			//	多角形の各辺が位置を含むか調べる.
-			std::vector<D2D1_POINT_2F> q_exp(k * 4);	// 幅をもつ辺
-			if (poly_test_side(PZ, k, v_pos.data(), n_vec.data(), width, q_exp.data())) {
-				// 含むなら ANCH_FRAME を返す.
-				return ANCH_WHICH::ANCH_FRAME;
+			std::vector<D2D1_POINT_2F> q_exp(m * 4);	// 幅をもつ辺
+			if (poly_test_side(PZ, m, v_pos.data(), n_vec.data(), width, q_exp.data())) {
+				// 含むなら ANCH_STROKE を返す.
+				return ANCH_TYPE::ANCH_STROKE;
 			}
 
 			//	多角形の各角が位置を含むか調べる.
 			//	角を超えて延長する長さは辺の太さの 5 倍.
 			//	こうすれば, D2D の描画と一致する.
 			const auto ext_len = m_stroke_width * 5.0;	// 延長する長さ
-			if (poly_test_corner(PZ, k, q_exp.data(), n_vec.data(), ext_len)) {
-				// 含むなら ANCH_FRAME を返す.
-				return ANCH_WHICH::ANCH_FRAME;
+			if (poly_test_corner(PZ, m, q_exp.data(), n_vec.data(), ext_len)) {
+				// 含むなら ANCH_STROKE を返す.
+				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
 		// 辺が不透明, または位置が辺に含まれていないなら,
 		// 塗りつぶし色が不透明か調べる.
 		if (is_opaque(m_fill_color)) {
 			// 不透明なら, 位置が多角形に含まれるか調べる.
-			if (pt_in_poly(PZ, k, v_pos.data())) {
-				// 含まれるなら ANCH_INSIDE を返す.
-				return ANCH_WHICH::ANCH_INSIDE;
+			//if (pt_in_poly(PZ, k, v_pos.data())) {
+			if (pt_in_poly(PZ, m, v_pos.data())) {
+				// 含まれるなら ANCH_FILL を返す.
+				return ANCH_TYPE::ANCH_FILL;
 			}
 		}
-		return ANCH_WHICH::ANCH_OUTSIDE;
+		return ANCH_TYPE::ANCH_SHEET;
 	}
 
 	// 範囲に含まれるか調べる.
@@ -325,7 +322,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_fill_color = value;
-		create_path_geometry();
+		create_path_geometry(s_d2d_factory);
 	}
 
 	// 図形を作成する.
@@ -345,12 +342,7 @@ namespace winrt::GraphPaper::implementation
 m_diff[3].x = 0.0;
 m_diff[3].y = 0.0;
 		m_fill_color = attr->m_fill_color;
-		create_path_geometry();
-		//D2D1_POINT_2F q_pos[4];
-		//q_pos[0] = { 0.0f, 0.0f };
-		//q_pos[1] = m_diff[0];
-		//q_pos[2] = m_diff[1];
-		//q_pos[3] = m_diff[2];
+		create_path_geometry(s_d2d_factory);
 	}
 
 	// 図形をデータリーダーから読み込む.
@@ -361,7 +353,7 @@ m_diff[3].y = 0.0;
 		using winrt::GraphPaper::implementation::read;
 
 		read(m_fill_color, dt_reader);
-		create_path_geometry();
+		create_path_geometry(s_d2d_factory);
 	}
 
 	// データライターに書き込む.
@@ -387,7 +379,7 @@ m_diff[3].y = 0.0;
 		write_svg("Z\" ", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
 		write_svg(m_fill_color, "fill", dt_writer);
-		write_svg("/>" SVG_NL, dt_writer);
+		write_svg("/>" SVG_NEW_LINE, dt_writer);
 	}
 
 }

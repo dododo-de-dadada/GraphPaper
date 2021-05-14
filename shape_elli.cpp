@@ -67,7 +67,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
-		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
+		if (anchor != ANCH_TYPE::ANCH_SHEET) {
 			return anchor;
 		}
 
@@ -95,33 +95,33 @@ namespace winrt::GraphPaper::implementation
 			pt_add(rad, s_width * 0.5, r_outer);
 			if (pt_in_elli(t_pos, c_pos, r_outer.x, r_outer.y) != true) {
 				// ŠOŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç, 
-				// ANCH_OUTSIDE ‚ğ•Ô‚·.
-				return ANCH_WHICH::ANCH_OUTSIDE;
+				// ANCH_SHEET ‚ğ•Ô‚·.
+				return ANCH_TYPE::ANCH_SHEET;
 			}
 			// ˆÊ’u‚ª‚¾‰~‚Ì˜gã‚É‚ ‚é‚©’²‚×‚é.
 			D2D1_POINT_2F r_inner;
 			// ŠOŒa‚©‚ç˜g‚Ì‘¾‚³‚ğˆø‚¢‚½’l‚ğ“àŒa‚ÉŠi”[‚·‚é.
 			pt_add(r_outer, -s_width, r_inner);
 			// “àŒa‚ª•‰”‚È‚ç,
-			// ANCH_FRAME ‚ğ•Ô‚·.
+			// ANCH_STROKE ‚ğ•Ô‚·.
 			if (r_inner.x <= 0.0f) {
-				return ANCH_WHICH::ANCH_FRAME;
+				return ANCH_TYPE::ANCH_STROKE;
 			}
 			if (r_inner.y <= 0.0f) {
-				return ANCH_WHICH::ANCH_FRAME;
+				return ANCH_TYPE::ANCH_STROKE;
 			}
 			if (pt_in_elli(t_pos, c_pos, r_inner.x, r_inner.y) != true) {
-				// “àŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç ANCH_FRAME ‚ğ•Ô‚·.
-				return ANCH_WHICH::ANCH_FRAME;
+				// “àŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç ANCH_STROKE ‚ğ•Ô‚·.
+				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
 			// ˆÊ’u‚ª‚¾‰~‚Ì“à‘¤‚É‚ ‚é‚©’²‚×‚é.
 			if (pt_in_elli(t_pos, c_pos, rad.x, rad.y)) {
-				return ANCH_WHICH::ANCH_INSIDE;
+				return ANCH_TYPE::ANCH_FILL;
 			}
 		}
-		return ANCH_WHICH::ANCH_OUTSIDE;
+		return ANCH_TYPE::ANCH_SHEET;
 	}
 
 	// ƒf[ƒ^ƒ‰ƒCƒ^[‚É SVG ƒ^ƒO‚Æ‚µ‚Ä‘‚«‚Ş.
@@ -139,6 +139,6 @@ namespace winrt::GraphPaper::implementation
 		write_svg(static_cast<double>(rad.y), "ry", dt_writer);
 		write_svg(m_fill_color, "fill", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
-		write_svg("/>" SVG_NL, dt_writer);
+		write_svg("/>" SVG_NEW_LINE, dt_writer);
 	}
 }

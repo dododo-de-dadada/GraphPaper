@@ -12,54 +12,39 @@ namespace winrt::GraphPaper::implementation
 	// 図形を破棄する.
 	ShapePath::~ShapePath(void)
 	{
-		m_poly_geom = nullptr;
+		m_path_geom = nullptr;
 	}
 
-	// 図形を囲む領域を得る.
-	// b_min	領域の左上位置.
-	// b_max	領域の右下位置.
-	void ShapePath::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
+	// 位置を含むか調べる.
+	// t_pos	調べる位置
+	// a_len	部位の大きさ
+	// 戻り値	位置を含む図形の部位
+	uint32_t ShapePath::hit_test_anch(const D2D1_POINT_2F t_pos, const double a_len, const size_t m, D2D1_POINT_2F v_pos[], size_t& k) const noexcept
 	{
-		const size_t n = m_diff.size();	// 差分の数
-		D2D1_POINT_2F e_pos = m_pos;
-		pt_inc(e_pos, b_min, b_max);
-		for (size_t i = 0; i < n; i++) {
-			pt_add(e_pos, m_diff[i], e_pos);
-			pt_inc(e_pos, b_min, b_max);
+		//const size_t m = m_diff.size() + 1;	// 頂点の数 (差分の数 + 1)
+		size_t j = static_cast<size_t>(-1);	// 点を含む頂点の添え字
+		//size_t k = 0;	// 重複した頂点を除いた頂点の数
+		//std::vector<D2D1_POINT_2F> v_pos(m);	// 頂点の配列
+		// 調べる位置が原点となるよう平行移動した四へん形の各頂点を得る.
+		k = 0;
+		pt_sub(m_pos, t_pos, v_pos[k++]);
+		if (pt_in_anch(v_pos[0], a_len)) {
+			j = 0;
 		}
-	}
-
-	// 図形を囲む領域の左上位置を得る.
-	// value	領域の左上位置
-	void ShapePath::get_min_pos(D2D1_POINT_2F& value) const noexcept
-	{
-		const size_t n = m_diff.size();	// 差分の数
-		D2D1_POINT_2F v_pos = m_pos;	// 頂点の位置
-		value = m_pos;
-		for (size_t i = 0; i < n; i++) {
-			pt_add(v_pos, m_diff[i], v_pos);
-			pt_min(value, v_pos, value);
-		}
-	}
-
-	// 指定された部位の位置を得る.
-	// anch	図形の部位
-	// value	部位の位置
-	void ShapePath::get_anch_pos(const uint32_t anch, D2D1_POINT_2F& value) const noexcept
-	{
-		if (anch == ANCH_WHICH::ANCH_OUTSIDE || anch == ANCH_WHICH::ANCH_P0) {
-			// 図形の部位が「外部」または「開始点」ならば, 開始位置を得る.
-			value = m_pos;
-		}
-		else if (anch > ANCH_WHICH::ANCH_P0) {
-			const size_t m = m_diff.size() + 1;		// 頂点の数 (差分の数 + 1)
-			if (anch < ANCH_WHICH::ANCH_P0 + m) {
-				value = m_pos;
-				for (size_t i = 0; i < anch - ANCH_WHICH::ANCH_P0; i++) {
-					pt_add(value, m_diff[i], value);
-				}
+		for (size_t i = 1; i < m; i++) {
+			pt_add(v_pos[k - 1], m_diff[i - 1], v_pos[k]);
+			if (pt_in_anch(v_pos[i], a_len)) {
+				j = i;
+			}
+			if (pt_abs2(m_diff[i - 1]) > FLT_MIN) {
+				k++;
 			}
 		}
+		if (j != -1) {
+			const auto anch = ANCH_TYPE::ANCH_P0 + j;
+			return static_cast<uint32_t>(anch);
+		}
+		return ANCH_TYPE::ANCH_SHEET;
 	}
 
 	// 差分だけ移動する.
@@ -67,36 +52,36 @@ namespace winrt::GraphPaper::implementation
 	void ShapePath::move(const D2D1_POINT_2F diff)
 	{
 		ShapeStroke::move(diff);
-		create_path_geometry();
+		create_path_geometry(s_d2d_factory);
 	}
 
 	// 値を, 部位の位置に格納する. 他の部位の位置は動かない. 
 	// value	格納する値
 	// anch	図形の部位
-	void ShapePath::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	void ShapePath::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
 		D2D1_POINT_2F a_pos;
 		D2D1_POINT_2F diff;
 
-		if (anch == ANCH_WHICH::ANCH_OUTSIDE) {
+		if (anch == ANCH_TYPE::ANCH_SHEET) {
 			m_pos = value;
 		}
-		else if (anch == ANCH_WHICH::ANCH_P0) {
+		else if (anch == ANCH_TYPE::ANCH_P0) {
 			pt_sub(value, m_pos, diff);
 			m_pos = value;
 			pt_sub(m_diff[0], diff, m_diff[0]);
 		}
 		else {
-			const size_t n = m_diff.size();	// 差分の数
-			if (anch == ANCH_WHICH::ANCH_P0 + n) {
+			const size_t diff_cnt = m_diff.size();	// 差分の数
+			if (anch == ANCH_TYPE::ANCH_P0 + diff_cnt) {
 				get_anch_pos(anch, a_pos);
 				pt_sub(value, a_pos, diff);
-				pt_add(m_diff[n - 1], diff, m_diff[n - 1]);
+				pt_add(m_diff[diff_cnt - 1], diff, m_diff[diff_cnt - 1]);
 			}
-			else if (anch > ANCH_WHICH::ANCH_P0 && anch < ANCH_WHICH::ANCH_P0 + n) {
+			else if (anch > ANCH_TYPE::ANCH_P0 && anch < ANCH_TYPE::ANCH_P0 + diff_cnt) {
 				get_anch_pos(anch, a_pos);
 				pt_sub(value, a_pos, diff);
-				const size_t i = anch - ANCH_WHICH::ANCH_P0;
+				const size_t i = anch - ANCH_TYPE::ANCH_P0;
 				pt_add(m_diff[i - 1], diff, m_diff[i - 1]);
 				pt_sub(m_diff[i], diff, m_diff[i]);
 			}
@@ -104,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 		}
-		create_path_geometry();
+		create_path_geometry(s_d2d_factory);
 	}
 
 	// 始点に値を格納する. 他の部位の位置も動く.
@@ -112,34 +97,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapePath::set_start_pos(const D2D1_POINT_2F value)
 	{
 		ShapeStroke::set_start_pos(value);
-		create_path_geometry();
-	}
-
-	// 図形を作成する.
-	// n	角数
-	// attr	属性値
-	ShapePath::ShapePath(const uint32_t n, const ShapeSheet* attr) :
-		ShapeStroke::ShapeStroke(n, attr)
-	{}
-
-	// 図形をデータリーダーから読み込む.
-	ShapePath::ShapePath(DataReader const& dt_reader) :
-		ShapeStroke::ShapeStroke(dt_reader)
-	{
-		using winrt::GraphPaper::implementation::read;
-
-		read(m_diff[1], dt_reader);
-		read(m_diff[2], dt_reader);
-	}
-
-	// データライターに書き込む.
-	void ShapePath::write(DataWriter const& dt_writer) const
-	{
-		using winrt::GraphPaper::implementation::write;
-
-		ShapeStroke::write(dt_writer);
-		write(m_diff[1], dt_writer);
-		write(m_diff[2], dt_writer);
+		create_path_geometry(s_d2d_factory);
 	}
 
 }

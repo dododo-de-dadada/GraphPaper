@@ -135,11 +135,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(t_pos, a_len) != ANCH_WHICH::ANCH_OUTSIDE) {
-				return ANCH_WHICH::ANCH_INSIDE;
+			if (s->hit_test(t_pos, a_len) != ANCH_TYPE::ANCH_SHEET) {
+				return ANCH_TYPE::ANCH_FILL;
 			}
 		}
-		return ANCH_WHICH::ANCH_OUTSIDE;
+		return ANCH_TYPE::ANCH_SHEET;
 	}
 
 	// ”ÍˆÍ‚ÉŠÜ‚Ü‚ê‚é‚©’²‚×‚é.
@@ -223,13 +223,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::write_svg;
 
-		write_svg("<g>" SVG_NL, dt_writer);
+		write_svg("<g>" SVG_NEW_LINE, dt_writer);
 		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
 			s->write_svg(dt_writer);
 		}
-		write_svg("</g>" SVG_NL, dt_writer);
+		write_svg("</g>" SVG_NEW_LINE, dt_writer);
 	}
 }

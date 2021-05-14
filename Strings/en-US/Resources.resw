@@ -166,7 +166,7 @@
     <comment>ContentDialog</comment>
   </data>
   <data name="ck_text_adjust_bound.Content" xml:space="preserve">
-    <value>大きさを文字列に合わせる</value>
+    <value>Adjust bounding box to text</value>
     <comment>CheckBox</comment>
   </data>
   <data name="ck_text_find_case.Content" xml:space="preserve">
@@ -846,27 +846,27 @@
     <value>Snap to Grid</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_stbar_curs.Text" xml:space="preserve">
+  <data name="tmfi_sbar_curs.Text" xml:space="preserve">
     <value>Cursor Position</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_grid.Text" xml:space="preserve">
+  <data name="tmfi_sbar_grid.Text" xml:space="preserve">
     <value>Grid Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_sheet.Text" xml:space="preserve">
+  <data name="tmfi_sbar_sheet.Text" xml:space="preserve">
     <value>Sheet Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_draw.Text" xml:space="preserve">
+  <data name="tmfi_sbar_draw.Text" xml:space="preserve">
     <value>Draw</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_unit.Text" xml:space="preserve">
+  <data name="tmfi_sbar_unit.Text" xml:space="preserve">
     <value>Unit</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_zoom.Text" xml:space="preserve">
+  <data name="tmfi_sbar_zoom.Text" xml:space="preserve">
     <value>Zoom</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -922,12 +922,12 @@
     <value>Paste text from clipboard?</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="mfi_sheet_reset.Text" xml:space="preserve">
-    <value>Reset sheet</value>
+  <data name="mfi_pref_delete.Text" xml:space="preserve">
+    <value>Delete preference</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_sheet_save.Text" xml:space="preserve">
-    <value>Save sheet</value>
+  <data name="mfi_pref_save.Text" xml:space="preserve">
+    <value>Save preference</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_emph.Text" xml:space="preserve">
@@ -949,5 +949,9 @@
   <data name="mfsi_arrange.Text" xml:space="preserve">
     <value>Arrange</value>
     <comment>MenuFlyoutSubItem</comment>
+  </data>
+  <data name="mfi_text_bound_adjust.Text" xml:space="preserve">
+    <value>Adjust to Text</value>
+    <comment>MenuFlyoutItem</comment>
   </data>
 </root>

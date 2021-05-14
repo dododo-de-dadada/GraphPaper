@@ -68,7 +68,7 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_MIDDLE[i];
 			}
 		}
-		return ANCH_WHICH::ANCH_OUTSIDE;
+		return ANCH_TYPE::ANCH_SHEET;
 	}
 
 	// ˆÊ’u‚ðŠÜ‚Þ‚©’²‚×‚é.
@@ -78,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
-		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
+		if (anchor != ANCH_TYPE::ANCH_SHEET) {
 			return anchor;
 		}
 		// •ûŒ`‚Ì‰Eã“_‚Æ¶‰º“_‚ð‹‚ß‚é.
@@ -93,26 +93,26 @@ namespace winrt::GraphPaper::implementation
 				// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚Èê‡,
 				if (pt_in_rect(t_pos, r_min, r_max)) {
 					// ˆÊ’u‚ª•ûŒ`‚É‚Ó‚­‚Ü‚ê‚éê‡,
-					return ANCH_WHICH::ANCH_INSIDE;
+					return ANCH_TYPE::ANCH_FILL;
 				}
 			}
-			return ANCH_WHICH::ANCH_OUTSIDE;
+			return ANCH_TYPE::ANCH_SHEET;
 		}
 		const double sw = max(m_stroke_width, a_len);	// ü˜g‚Ì‘¾‚³
 		pt_add(r_min, sw * 0.5, r_min);
 		pt_add(r_max, sw * -0.5, r_max);
 		if (pt_in_rect(t_pos, r_min, r_max)) {
 			if (is_opaque(m_fill_color)) {
-				return ANCH_WHICH::ANCH_INSIDE;
+				return ANCH_TYPE::ANCH_FILL;
 			}
-			return ANCH_WHICH::ANCH_OUTSIDE;
+			return ANCH_TYPE::ANCH_SHEET;
 		}
 		pt_add(r_min, -sw, r_min);
 		pt_add(r_max, sw, r_max);
 		if (pt_in_rect(t_pos, r_min, r_max)) {
-			return ANCH_WHICH::ANCH_FRAME;
+			return ANCH_TYPE::ANCH_STROKE;
 		}
-		return ANCH_WHICH::ANCH_OUTSIDE;
+		return ANCH_TYPE::ANCH_SHEET;
 	}
 
 	// “h‚è‚Â‚Ô‚µ‚ÌF‚ð“¾‚é.
@@ -137,31 +137,31 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRect::get_anch_pos(const uint32_t anch, D2D1_POINT_2F& value) const noexcept
 	{
 		switch (anch) {
-		case ANCH_WHICH::ANCH_NORTH:
+		case ANCH_TYPE::ANCH_NORTH:
 			value.x = m_pos.x + m_diff[0].x * 0.5f;
 			value.y = m_pos.y;
 			break;
-		case ANCH_WHICH::ANCH_NE:
+		case ANCH_TYPE::ANCH_NE:
 			value.x = m_pos.x + m_diff[0].x;
 			value.y = m_pos.y;
 			break;
-		case ANCH_WHICH::ANCH_WEST:
+		case ANCH_TYPE::ANCH_WEST:
 			value.x = m_pos.x;
 			value.y = m_pos.y + m_diff[0].y * 0.5f;
 			break;
-		case ANCH_WHICH::ANCH_EAST:
+		case ANCH_TYPE::ANCH_EAST:
 			value.x = m_pos.x + m_diff[0].x;
 			value.y = m_pos.y + m_diff[0].y * 0.5f;
 			break;
-		case ANCH_WHICH::ANCH_SW:
+		case ANCH_TYPE::ANCH_SW:
 			value.x = m_pos.x;
 			value.y = m_pos.y + m_diff[0].y;
 			break;
-		case ANCH_WHICH::ANCH_SOUTH:
+		case ANCH_TYPE::ANCH_SOUTH:
 			value.x = m_pos.x + m_diff[0].x * 0.5f;
 			value.y = m_pos.y + m_diff[0].y;
 			break;
-		case ANCH_WHICH::ANCH_SE:
+		case ANCH_TYPE::ANCH_SE:
 			value.x = m_pos.x + m_diff[0].x;
 			value.y = m_pos.y + m_diff[0].y;
 			break;
@@ -187,49 +187,49 @@ namespace winrt::GraphPaper::implementation
 	//	’l‚ð, •”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚Í“®‚©‚È‚¢. 
 	//	value	Ši”[‚·‚é’l
 	//	abch	}Œ`‚Ì•”ˆÊ
-	void ShapeRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	void ShapeRect::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
 		D2D1_POINT_2F a_pos;
 		D2D1_POINT_2F diff;
 
 		switch (anch) {
-		case ANCH_WHICH::ANCH_OUTSIDE:
+		case ANCH_TYPE::ANCH_SHEET:
 			m_pos = value;
 			break;
-		case ANCH_WHICH::ANCH_NW:
+		case ANCH_TYPE::ANCH_NW:
 			pt_sub(value, m_pos, diff);
 			pt_add(m_pos, diff, m_pos);
 			pt_sub(m_diff[0], diff, m_diff[0]);
 			break;
-		case ANCH_WHICH::ANCH_NORTH:
+		case ANCH_TYPE::ANCH_NORTH:
 			m_diff[0].y -= value.y - m_pos.y;
 			m_pos.y = value.y;
 			break;
-		case ANCH_WHICH::ANCH_NE:
+		case ANCH_TYPE::ANCH_NE:
 			a_pos.x = m_pos.x + m_diff[0].x;
 			a_pos.y = m_pos.y;
 			m_pos.y = value.y;
 			pt_sub(value, a_pos, diff);
 			pt_add(m_diff[0], diff.x, -diff.y, m_diff[0]);
 			break;
-		case ANCH_WHICH::ANCH_WEST:
+		case ANCH_TYPE::ANCH_WEST:
 			m_diff[0].x -= value.x - m_pos.x;
 			m_pos.x = value.x;
 			break;
-		case ANCH_WHICH::ANCH_EAST:
+		case ANCH_TYPE::ANCH_EAST:
 			m_diff[0].x = value.x - m_pos.x;
 			break;
-		case ANCH_WHICH::ANCH_SW:
+		case ANCH_TYPE::ANCH_SW:
 			a_pos.x = m_pos.x;
 			a_pos.y = m_pos.y + m_diff[0].y;
 			m_pos.x = value.x;
 			pt_sub(value, a_pos, diff);
 			pt_add(m_diff[0], -diff.x, diff.y, m_diff[0]);
 			break;
-		case ANCH_WHICH::ANCH_SOUTH:
+		case ANCH_TYPE::ANCH_SOUTH:
 			m_diff[0].y = value.y - m_pos.y;
 			break;
-		case ANCH_WHICH::ANCH_SE:
+		case ANCH_TYPE::ANCH_SE:
 			pt_sub(value, m_pos, m_diff[0]);
 			break;
 		}
@@ -272,6 +272,6 @@ namespace winrt::GraphPaper::implementation
 		write_svg(m_diff[0], "width", "height", dt_writer);
 		write_svg(m_fill_color, "fill", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
-		write_svg("/>" SVG_NL, dt_writer);
+		write_svg("/>" SVG_NEW_LINE, dt_writer);
 	}
 }

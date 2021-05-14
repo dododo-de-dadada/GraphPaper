@@ -192,7 +192,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[32];
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value, m_sample_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0, buf, 16);
+			conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value, sample_dx().m_logical_dpi, m_sample_sheet.m_grid_base + 1.0, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
@@ -525,7 +525,7 @@ namespace winrt::GraphPaper::implementation
 			else if (typeid(*s) != typeid(ShapeText)) {
 				continue;
 			}
-			auto u = new UndoAnchor(s, ANCH_WHICH::ANCH_SE);
+			auto u = new UndoAnchor(s, ANCH_TYPE::ANCH_SE);
 			const auto size = sheet_size_max();
 			if (static_cast<ShapeText*>(s)->adjust_bound({ size, size })) {
 				sheet_bound(s);
@@ -638,19 +638,19 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		const double dpi = sheet_dpi();
+		const double dpi = sheet_dx().m_logical_dpi;
 		const double g_len = m_sample_sheet.m_grid_base + 1.0;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+				conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_horzorz") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+				conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_vertert") + L": " + buf;
 			}
 		}
@@ -660,7 +660,7 @@ namespace winrt::GraphPaper::implementation
 				// これをピクセル単位に変換する.
 				wchar_t buf[32];
 				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP * dpi / 96.0, dpi, g_len, buf);
+				conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP * dpi / 96.0, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_height") + L": " + buf;
 			}
 			else {
@@ -690,7 +690,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S>
 	void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		const double dpi = sheet_dpi();
+		const double dpi = sheet_dx().m_logical_dpi;
 		Shape* s = m_sample_shape;
 		const double value = args.NewValue();
 		text_set_slider_header<U, S>(value);

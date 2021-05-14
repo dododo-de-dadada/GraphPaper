@@ -19,7 +19,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto anchor = hit_test_anchor(t_pos, a_len);
-		if (anchor != ANCH_WHICH::ANCH_OUTSIDE) {
+		if (anchor != ANCH_TYPE::ANCH_SHEET) {
 			return anchor;
 		}
 		if (is_opaque(m_stroke_color)) {
@@ -49,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				if (pt_in_line(t_pos, p0, p1, m_stroke_width)) {
-					return ANCH_WHICH::ANCH_FRAME;
+					return ANCH_TYPE::ANCH_STROKE;
 				}
 				// 目盛りの値を表示する.
 				const double x1 = x + f_size * 0.5;
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 				};
 				pt_bound(r_min, r_max, r_min, r_max);
 				if (pt_in_rect(t_pos, r_min, r_max)) {
-					return ANCH_WHICH::ANCH_FRAME;
+					return ANCH_TYPE::ANCH_STROKE;
 				}
 			}
 		}
@@ -74,10 +74,10 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F r_min, r_max;
 			pt_bound(m_pos, e_pos, r_min, r_max);
 			if (pt_in_rect(t_pos, r_min, r_max)) {
-				return ANCH_WHICH::ANCH_INSIDE;
+				return ANCH_TYPE::ANCH_FILL;
 			}
 		}
-		return ANCH_WHICH::ANCH_OUTSIDE;
+		return ANCH_TYPE::ANCH_SHEET;
 	}
 
 	// 図形を表示する.

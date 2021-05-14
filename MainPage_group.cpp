@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「グループ化」が選択された.
 	void MainPage::group_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_list_selected <= 1) {
+		if (m_cnt_selected <= 1) {
 			return;
 		}
 		S_LIST_T list_selected;
@@ -23,8 +23,8 @@ namespace winrt::GraphPaper::implementation
 #endif
 		undo_push_append(g);
 		for (const auto s : list_selected) {
-			if (m_mutex_summary.load(std::memory_order_acquire)) {
-			//if (m_summary_visible) {
+			// 図形一覧の排他制御が true か判定する.
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				summary_remove(s);
 			}
 			// 図形を削除して, その操作をスタックに積む.
@@ -37,8 +37,8 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
 		sheet_draw();
-		if (m_mutex_summary.load(std::memory_order_acquire)) {
-		//if (m_summary_visible) {
+		// 図形一覧の排他制御が true か判定する.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			summary_append(g);
 		}
 	}
@@ -57,8 +57,8 @@ namespace winrt::GraphPaper::implementation
 		// 得られたリストの各グループ図形について以下を繰り返す.
 		for (auto t : list_group) {
 			uint32_t i = 0;
-			if (m_mutex_summary.load(std::memory_order_acquire)) {
-			//if (m_summary_visible) {
+			// 図形一覧の排他制御が true か判定する.
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				i = summary_remove(t);
 			}
 			auto g = static_cast<ShapeGroup*>(t);
@@ -70,8 +70,8 @@ namespace winrt::GraphPaper::implementation
 					// 以下を無視する.
 					continue;
 				}
-				if (m_mutex_summary.load(std::memory_order_acquire)) {
-				//if (m_summary_visible) {
+				// 図形一覧の排他制御が true か判定する.
+				if (m_summary_atomic.load(std::memory_order_acquire)) {
 					// 図形を一覧に挿入する.
 					summary_insert(s, i++);
 				}

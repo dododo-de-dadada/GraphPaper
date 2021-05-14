@@ -241,10 +241,10 @@ namespace winrt::GraphPaper::implementation
 			//if (!t->is_selected()) {
 			//	continue;
 			//}
-			const auto a = t->hit_test(t_pos, a_len);
-			if (a != ANCH_WHICH::ANCH_OUTSIDE) {
+			const auto anch = t->hit_test(t_pos, a_len);
+			if (anch != ANCH_TYPE::ANCH_SHEET) {
 				s = t;
-				return a;
+				return anch;
 			}
 		}
 		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
@@ -258,13 +258,13 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			const auto a = t->hit_test(t_pos, a_len);
-			if (a != ANCH_WHICH::ANCH_OUTSIDE) {
+			if (a != ANCH_TYPE::ANCH_SHEET) {
 				s = t;
 				return a;
 			}
 		}
 		*/
-		return ANCH_WHICH::ANCH_OUTSIDE;
+		return ANCH_TYPE::ANCH_SHEET;
 	}
 
 	// 図形をリストに挿入する.
@@ -282,8 +282,7 @@ namespace winrt::GraphPaper::implementation
 	// s_list	図形リスト
 	// s	探索する値
 	// t	得られた値
-	template <typename S, typename T>
-	bool s_list_match(S_LIST_T const& s_list, S s, T& t)
+	template <typename S, typename T> bool s_list_match(S_LIST_T const& s_list, S s, T& t)
 	{
 		// 一致フラグ
 		bool match = false;

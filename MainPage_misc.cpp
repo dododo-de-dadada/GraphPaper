@@ -68,10 +68,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_len_unit = LEN_UNIT::GRID;
-		stbar_set_curs();
-		stbar_set_grid();
-		stbar_set_sheet();
-		stbar_set_unit();
+		sbar_set_curs();
+		sbar_set_grid();
+		sbar_set_sheet();
+		sbar_set_unit();
 	}
 
 	// その他メニューの「長さの単位」>「インチ」が選択された.
@@ -81,10 +81,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_len_unit = LEN_UNIT::INCH;
-		stbar_set_curs();
-		stbar_set_grid();
-		stbar_set_sheet();
-		stbar_set_unit();
+		sbar_set_curs();
+		sbar_set_grid();
+		sbar_set_sheet();
+		sbar_set_unit();
 	}
 
 	// その他メニューの「長さの単位」>「ポイント」が選択された.
@@ -94,10 +94,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_len_unit = LEN_UNIT::MILLI;
-		stbar_set_curs();
-		stbar_set_grid();
-		stbar_set_sheet();
-		stbar_set_unit();
+		sbar_set_curs();
+		sbar_set_grid();
+		sbar_set_sheet();
+		sbar_set_unit();
 	}
 
 	// その他メニューの「長さの単位」>「ピクセル」が選択された.
@@ -107,10 +107,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_len_unit = LEN_UNIT::PIXEL;
-		stbar_set_curs();
-		stbar_set_grid();
-		stbar_set_sheet();
-		stbar_set_unit();
+		sbar_set_curs();
+		sbar_set_grid();
+		sbar_set_sheet();
+		sbar_set_unit();
 	}
 
 	// その他メニューの「長さの単位」>「ポイント」が選択された.
@@ -120,10 +120,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_len_unit = LEN_UNIT::POINT;
-		stbar_set_curs();
-		stbar_set_grid();
-		stbar_set_sheet();
-		stbar_set_unit();
+		sbar_set_curs();
+		sbar_set_grid();
+		sbar_set_sheet();
+		sbar_set_unit();
 	}
 
 }

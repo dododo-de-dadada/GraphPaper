@@ -45,29 +45,17 @@ namespace winrt::GraphPaper::implementation
 		return std::round(2.0 * ret) * 0.5;
 	}
 
-	// 部位の一片の大きさを得る.
-	const double MainPage::sheet_anch_len(void) const noexcept
-	{
-		return m_main_dx.m_anch_len;
-	}
-
-	// 用紙の背景色を得る.
-	const D2D1_COLOR_F& MainPage::sheet_background(void) const noexcept
-	{
-		return m_main_dx.m_theme_background;
-	}
-
 	//	用紙の左上位置と右下位置を設定する.
 	//	s	用紙
-	void MainPage::sheet_bound(Shape* s) noexcept
+	void MainPage::sheet_bound(Shape* sheet) noexcept
 	{
-		s->get_bound(m_main_min, m_main_max);
+		sheet->get_bound(m_sheet_min, m_sheet_max);
 	}
 
 	// 用紙の左上位置と右下位置を設定する.
 	void MainPage::sheet_bound(void) noexcept
 	{
-		s_list_bound(m_list_shapes, m_main_sheet.m_sheet_size, m_main_min, m_main_max);
+		s_list_bound(m_list_shapes, m_main_sheet.m_sheet_size, m_sheet_min, m_sheet_max);
 	}
 
 	// 用紙メニューの「用紙の色」が選択された.
@@ -115,29 +103,22 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	// DPI を得る.
-	const double MainPage::sheet_dpi(void) const noexcept
-	{
-		return m_main_dx.m_logical_dpi;
-	}
-
 	// 用紙を表示する.
 	void MainPage::sheet_draw(void)
 	{
 #if defined(_DEBUG)
-		if (m_main_dx.m_swapChainPanel.IsLoaded() != true) {
+		if (m_sheet_dx.m_swapChainPanel.IsLoaded() != true) {
 			return;
 		}
 #endif
-		//m_mutex_shapes.lock();
-		if (m_mutex_shapes.try_lock() != true) {
+		if (m_dx_mutex.try_lock() != true) {
 			// ロックできない場合
 			return;
 		}
 
-		auto const& dc = m_main_dx.m_d2dContext;
+		auto const& dc = m_sheet_dx.m_d2dContext;
 		// デバイスコンテキストの描画状態を保存ブロックに保持する.
-		dc->SaveDrawingState(m_main_dx.m_state_block.get());
+		dc->SaveDrawingState(m_sheet_dx.m_state_block.get());
 		// デバイスコンテキストから変換行列を得る.
 		D2D1_MATRIX_3X2_F tran;
 		dc->GetTransform(&tran);
@@ -147,7 +128,7 @@ namespace winrt::GraphPaper::implementation
 		// スクロールの変分に拡大率を掛けた値を
 		// 変換行列の平行移動の成分に格納する.
 		D2D1_POINT_2F t_pos;
-		pt_add(m_main_min, sb_horz().Value(), sb_vert().Value(), t_pos);
+		pt_add(m_sheet_min, sb_horz().Value(), sb_vert().Value(), t_pos);
 		pt_scale(t_pos, scale, t_pos);
 		tran.dx = -t_pos.x;
 		tran.dy = -t_pos.y;
@@ -160,12 +141,12 @@ namespace winrt::GraphPaper::implementation
 		if (m_main_sheet.m_grid_show == GRID_SHOW::BACK) {
 			// 方眼の表示が最背面に表示の場合,
 			// 方眼を表示する.
-			m_main_sheet.draw_grid(m_main_dx, { 0.0f, 0.0f });
+			m_main_sheet.draw_grid(m_sheet_dx, { 0.0f, 0.0f });
 		}
 		// 部位の色をブラシに格納する.
 		//D2D1_COLOR_F anch_color;
 		//m_main_sheet.get_anchor_color(anch_color);
-		//m_main_dx.m_anch_brush->SetColor(anch_color);
+		//m_sheet_dx.m_anch_brush->SetColor(anch_color);
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				// 消去フラグが立っている場合,
@@ -173,63 +154,63 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			// 図形を表示する.
-			s->draw(m_main_dx);
+			s->draw(m_sheet_dx);
 		}
 		if (m_main_sheet.m_grid_show == GRID_SHOW::FRONT) {
 			// 方眼の表示が最前面に表示の場合,
 			// 方眼を表示する.
-			m_main_sheet.draw_grid(m_main_dx, { 0.0f, 0.0f });
+			m_main_sheet.draw_grid(m_sheet_dx, { 0.0f, 0.0f });
 		}
-		if (pointer_state() == STATE_TRAN::PRESS_AREA) {
+		if (pointer_state() == PBTN_STATE::PRESS_AREA) {
 			const auto tool = tool_draw();
 			// 押された状態が範囲を選択している場合,
 			// 補助線の色をブラシに格納する.
 			//D2D1_COLOR_F aux_color;
 			//m_main_sheet.get_auxiliary_color(aux_color);
-			//m_main_dx.m_aux_brush->SetColor(aux_color);
+			//m_sheet_dx.m_aux_brush->SetColor(aux_color);
 			if (tool == TOOL_DRAW::SELECT || tool == TOOL_DRAW::RECT || tool == TOOL_DRAW::TEXT || tool == TOOL_DRAW::RULER) {
 				// 選択ツール
 				// または方形
 				// または文字列の場合,
 				// 方形の補助線を表示する.
-				m_main_sheet.draw_auxiliary_rect(m_main_dx, pointer_pressed(), pointer_cur());
+				m_main_sheet.draw_auxiliary_rect(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
 			else if (tool == TOOL_DRAW::BEZI) {
 				// 曲線の場合,
 				// 曲線の補助線を表示する.
-				m_main_sheet.draw_auxiliary_bezi(m_main_dx, pointer_pressed(), pointer_cur());
+				m_main_sheet.draw_auxiliary_bezi(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
 			else if (tool == TOOL_DRAW::ELLI) {
 				// だ円の場合,
 				// だ円の補助線を表示する.
-				m_main_sheet.draw_auxiliary_elli(m_main_dx, pointer_pressed(), pointer_cur());
+				m_main_sheet.draw_auxiliary_elli(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
 			else if (tool == TOOL_DRAW::LINE) {
 				// 直線の場合,
 				// 直線の補助線を表示する.
-				m_main_sheet.draw_auxiliary_line(m_main_dx, pointer_pressed(), pointer_cur());
+				m_main_sheet.draw_auxiliary_line(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
 			else if (tool == TOOL_DRAW::RRCT) {
 				// 角丸方形の場合,
 				// 角丸方形の補助線を表示する.
-				m_main_sheet.draw_auxiliary_rrect(m_main_dx, pointer_pressed(), pointer_cur());
+				m_main_sheet.draw_auxiliary_rrect(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
 			else if (tool == TOOL_DRAW::QUAD) {
 				// 四へん形の場合,
 				// 四へん形の補助線を表示する.
-				m_main_sheet.draw_auxiliary_quad(m_main_dx, pointer_pressed(), pointer_cur());
+				m_main_sheet.draw_auxiliary_quad(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
 		}
 		// 描画を終了する.
 		HRESULT hr = dc->EndDraw();
 		// 保存された描画環境を元に戻す.
-		dc->RestoreDrawingState(m_main_dx.m_state_block.get());
+		dc->RestoreDrawingState(m_sheet_dx.m_state_block.get());
 		if (hr == S_OK) {
 			// 結果が S_OK の場合,
 			// スワップチェーンの内容を画面に表示する.
-			m_main_dx.Present();
+			m_sheet_dx.Present();
 			// ポインターの位置をステータスバーに格納する.
-			stbar_set_curs();
+			sbar_set_curs();
 		}
 #if defined(_DEBUG)
 		else {
@@ -238,13 +219,13 @@ namespace winrt::GraphPaper::implementation
 			message_show(ICON_ALERT, L"str_err_draw", {});
 		}
 #endif
-		m_mutex_shapes.unlock();
+		m_dx_mutex.unlock();
 	}
 
 	// 前景色を得る.
 	const D2D1_COLOR_F& MainPage::sheet_foreground(void) const noexcept
 	{
-		return m_main_dx.m_theme_foreground;
+		return m_sheet_dx.m_theme_foreground;
 	}
 
 	// 用紙とその他の属性を初期化する.
@@ -345,14 +326,14 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.m_arrow_size = ARROW_SIZE();
 			m_main_sheet.m_arrow_style = ARROW_STYLE::NONE;
 			m_main_sheet.m_corner_rad = { GRIDLEN_PX, GRIDLEN_PX };
-			m_main_sheet.set_fill_color(sheet_background());
+			m_main_sheet.set_fill_color(m_sheet_dx.m_theme_background);
 			m_main_sheet.set_font_color(sheet_foreground());
 			m_main_sheet.m_grid_base = static_cast<double>(GRIDLEN_PX) - 1.0;
 			m_main_sheet.m_grid_gray = GRID_GRAY;
 			m_main_sheet.m_grid_emph = GRID_EMPH::EMPH_0;
 			m_main_sheet.m_grid_show = GRID_SHOW::BACK;
 			m_main_sheet.m_grid_snap = true;
-			m_main_sheet.set_sheet_color(sheet_background());
+			m_main_sheet.set_sheet_color(m_sheet_dx.m_theme_background);
 			m_main_sheet.m_sheet_scale = 1.0;
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_main_sheet.m_sheet_size = SHEET_SIZE;
@@ -367,31 +348,31 @@ namespace winrt::GraphPaper::implementation
 		}
 		len_unit(LEN_UNIT::PIXEL);
 		color_code(COLOR_CODE::DEC);
-		status_bar(stbar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM));
+		status_bar(sbar_or(SBAR_FLAG::CURS, SBAR_FLAG::ZOOM));
 	}
 
 	// 値を用紙の右下位置に格納する.
 	void MainPage::sheet_max(const D2D1_POINT_2F p_max) noexcept
 	{
-		m_main_max = p_max;
+		m_sheet_max = p_max;
 	}
 
 	// 用紙の右下位置を得る.
 	const D2D1_POINT_2F MainPage::sheet_max(void) const noexcept
 	{
-		return m_main_max;
+		return m_sheet_max;
 	}
 
 	// 値を用紙の左上位置に格納する.
 	void MainPage::sheet_min(const D2D1_POINT_2F p_min) noexcept
 	{
-		m_main_min = p_min;
+		m_sheet_min = p_min;
 	}
 
 	// 用紙の左上位置を得る.
 	const D2D1_POINT_2F MainPage::sheet_min(void) const noexcept
 	{
-		return m_main_min;
+		return m_sheet_min;
 	}
 
 	// 用紙のスワップチェーンパネルがロードされた.
@@ -406,7 +387,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif // _DEBUG
-		m_main_dx.SetSwapChainPanel(scp_sheet_panel());
+		m_sheet_dx.SetSwapChainPanel(scp_sheet_panel());
 		sheet_draw();
 	}
 
@@ -429,7 +410,7 @@ namespace winrt::GraphPaper::implementation
 		if (scp_sheet_panel().IsLoaded() != true) {
 			return;
 		}
-		m_main_dx.SetLogicalSize2({ w, h });
+		m_sheet_dx.SetLogicalSize2({ w, h });
 		sheet_draw();
 	}
 
@@ -439,7 +420,7 @@ namespace winrt::GraphPaper::implementation
 		const auto w = scp_sheet_panel().ActualWidth();
 		const auto h = scp_sheet_panel().ActualHeight();
 		scroll_set(w, h);
-		m_main_dx.SetLogicalSize2({ static_cast<float>(w), static_cast<float>(h) });
+		m_sheet_dx.SetLogicalSize2({ static_cast<float>(w), static_cast<float>(h) });
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -523,21 +504,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 用紙メニューの「用紙の大きさ」が選択された
-	IAsyncAction MainPage::sheet_size_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::sheet_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_main_sheet);
 		double pw = m_main_sheet.m_sheet_size.width;
 		double ph = m_main_sheet.m_sheet_size.height;
-		const double dpi = m_main_dx.m_logical_dpi;
+		const double dpi = m_sheet_dx.m_logical_dpi;
 		const auto g_len = m_sample_sheet.m_grid_base + 1.0;
 		wchar_t buf[32];
-		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), pw, dpi, g_len, buf);
+		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), pw, dpi, g_len, buf);
 		tx_sheet_width().Text(buf);
-		conv_val_to_len<!WITH_UNIT_NAME>(len_unit(), ph, dpi, g_len, buf);
+		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), ph, dpi, g_len, buf);
 		tx_sheet_height().Text(buf);
-		conv_val_to_len<WITH_UNIT_NAME>(len_unit(), sheet_size_max(), dpi, g_len, buf);
+		conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), sheet_size_max(), dpi, g_len, buf);
 		tx_sheet_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
@@ -578,10 +559,10 @@ namespace winrt::GraphPaper::implementation
 			sheet_bound();
 			sheet_panle_size();
 			sheet_draw();
-			stbar_set_curs();
-			stbar_set_grid();
-			stbar_set_sheet();
-			stbar_set_unit();
+			sbar_set_curs();
+			sbar_set_grid();
+			sbar_set_sheet();
+			sbar_set_unit();
 		}
 		else if (d_result == ContentDialogResult::Secondary) {
 			D2D1_POINT_2F b_min = { FLT_MAX, FLT_MAX };
@@ -626,14 +607,14 @@ namespace winrt::GraphPaper::implementation
 			sheet_bound();
 			sheet_panle_size();
 			sheet_draw();
-			stbar_set_sheet();
+			sbar_set_sheet();
 		}
 	}
 
 	// テキストボックス「用紙の幅」「用紙の高さ」の値が変更された.
 	void MainPage::sheet_size_text_changed(IInspectable const& sender, TextChangedEventArgs const&)
 	{
-		const double dpi = m_main_dx.m_logical_dpi;
+		const double dpi = m_sheet_dx.m_logical_dpi;
 		double value;
 		wchar_t buf[2];
 		int cnt;
@@ -644,12 +625,6 @@ namespace winrt::GraphPaper::implementation
 			value = conv_len_to_val(len_unit(), value, dpi, m_sample_sheet.m_grid_base + 1.0);
 		}
 		cd_sheet_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < sheet_size_max());
-	}
-
-	// 描画環境を解放可能にする.
-	void MainPage::sheet_trim(void)
-	{
-		m_main_dx.Trim();
 	}
 
 }

@@ -72,7 +72,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F a_pos;
 
 		m_shape->get_anch_pos(m_anchor, a_pos);
-		m_shape->set_anch_pos(m_anchor_pos, m_anchor);
+		m_shape->set_anchor_pos(m_anchor_pos, m_anchor);
 		m_anchor_pos = a_pos;
 	}
 
@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::read;
 
-		m_anchor = static_cast<ANCH_WHICH>(dt_reader.ReadUInt32());
+		m_anchor = static_cast<ANCH_TYPE>(dt_reader.ReadUInt32());
 		read(m_anchor_pos, dt_reader);
 	}
 

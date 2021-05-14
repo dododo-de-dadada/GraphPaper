@@ -478,7 +478,7 @@ namespace winrt::GraphPaper::implementation
 			text_find_set();
 			return;
 		}
-		if (m_mutex_summary.load(std::memory_order_acquire)) {
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
 		//if (m_summary_visible) {
 			// 図形一覧パネルが表示されている場合,
 			// 図形一覧パネルを非表示にする.
@@ -506,7 +506,7 @@ namespace winrt::GraphPaper::implementation
 			auto text = wchar_cpy(tx_edit().Text().c_str());
 			undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
 			if (m_text_adjust = ck_text_adjust_bound().IsChecked().GetBoolean()) {
-				undo_push_anchor(s, ANCH_WHICH::ANCH_SE);
+				undo_push_anchor(s, ANCH_TYPE::ANCH_SE);
 				s->adjust_bound();
 			}
 			// 一連の操作の区切としてヌル操作をスタックに積む.
@@ -521,7 +521,7 @@ namespace winrt::GraphPaper::implementation
 				auto text = wchar_cpy(tx_edit().Text().c_str());
 				undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
 				if (ck_text_adjust_bound().IsChecked().GetBoolean()) {
-					undo_push_anchor(s, ANCH_WHICH::ANCH_SE);
+					undo_push_anchor(s, ANCH_TYPE::ANCH_SE);
 					s->adjust_bound();
 				}
 				// 一連の操作の区切としてヌル操作をスタックに積む.

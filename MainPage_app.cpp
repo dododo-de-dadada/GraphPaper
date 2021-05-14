@@ -12,10 +12,10 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 
 	// アプリケーションデータを保存するフォルダーを得る.
-	static auto cache_folder(void);
+	static auto app_cache_folder(void);
 
 	// アプリケーションデータを保存するフォルダーを得る.
-	static auto cache_folder(void)
+	static auto app_cache_folder(void)
 	{
 		using winrt::Windows::Storage::ApplicationData;
 		return ApplicationData::Current().LocalCacheFolder();
@@ -24,10 +24,10 @@ namespace winrt::GraphPaper::implementation
 	// アプリケーションがバックグラウンドに移った.
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
-		m_mutex_shapes.lock();
-		sheet_trim();
-		m_sample_dx.Trim();
-		m_mutex_shapes.unlock();
+		m_dx_mutex.lock();
+		sheet_dx().Trim();
+		sample_dx().Trim();
+		m_dx_mutex.unlock();
 	}
 
 	// アプリケーションがバックグラウンドから戻った.
@@ -43,21 +43,21 @@ namespace winrt::GraphPaper::implementation
 
 		ShapeText::set_available_fonts();
 
-		auto hr = E_FAIL;
-		auto item{ co_await cache_folder().TryGetItemAsync(FILE_NAME) };
+		auto hres = E_FAIL;
+		auto item{ co_await app_cache_folder().TryGetItemAsync(FILE_NAME) };
 		if (item != nullptr) {
 			auto s_file = item.try_as<StorageFile>();
 			if (s_file != nullptr) {
 				// ストレージファイルを非同期に読む.
 				try {
-					hr = co_await file_read_async(s_file, true, false);
+					hres = co_await file_read_async(s_file, true, false);
 					// スレッドをメインページの UI スレッドに変える.
 					//auto cd = this->Dispatcher();
 					//co_await winrt::resume_foreground(cd);
 					//file_finish_reading();
 				}
 				catch (winrt::hresult_error const& e) {
-					hr = e.code();
+					hres = e.code();
 				}
 				s_file = nullptr;
 			}
@@ -90,8 +90,7 @@ namespace winrt::GraphPaper::implementation
 		e_session.Reason(ExtendedExecutionReason::SavingData);
 		e_session.Description(L"To save data.");
 		// 延長実行セッションが取り消されたときのコルーチンを登録する.
-		// RequestExtensionAsync の中でこのコルーチンは呼び出されるので, 
-		// 上位関数のローカル変数は参照できる (たぶん).
+		// RequestExtensionAsync の中でこのコルーチンは呼び出されるので, 上位関数のローカル変数は参照できる (たぶん).
 		auto handler = [&ct_source, &s_deferral](IInspectable const&, ExtendedExecutionRevokedEventArgs const& args)
 		{
 			using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
@@ -104,8 +103,7 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 			if (s_deferral != nullptr) {
-				// 中断延長を完了し OS に通知しなければ, 
-				// アプリは再び中断延期を要求できない.
+				// 中断延長を完了し OS に通知しなければ, アプリは再び中断延期を要求できない.
 				s_deferral.Complete();
 				s_deferral = nullptr;
 			}
@@ -113,7 +111,7 @@ namespace winrt::GraphPaper::implementation
 		auto s_token = e_session.Revoked(handler);
 
 		// 延長実行セッションを要求し, その結果を得る.
-		auto hr = E_FAIL;
+		auto hres = E_FAIL;
 		switch (co_await e_session.RequestExtensionAsync()) {
 		case ExtendedExecutionResult::Allowed:
 			// 延長実行セッションが許可された場合,
@@ -123,9 +121,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			try {
 				// キャンセルでない場合,
-				auto s_file{ co_await cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
+				auto s_file{ co_await app_cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 				if (s_file != nullptr) {
-					hr = co_await file_write_gpf_async(s_file, true, false);
+					hres = co_await file_write_gpf_async(s_file, true, false);
 					s_file = nullptr;
 					undo_clear();
 					s_list_clear(m_list_shapes);
@@ -133,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			catch (winrt::hresult_error const& e) {
-				hr = e.code();
+				hres = e.code();
 			}
 			break;
 		case ExtendedExecutionResult::Denied:
@@ -146,12 +144,12 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			// 「メモリリーク」メッセージダイアログを表示する.
-			message_show(ICON_ALERT, L"Memory leak occurs", {});
+			message_show(ICON_ALERT, DEBUG_MSG, {});
 		}
 #endif
-		if (hr == S_OK) {
-			if (m_mutex_summary.load(std::memory_order_acquire)) {
-				//if (m_summary_visible) {
+		if (hres == S_OK) {
+			// 図形一覧の排他制御が true か判定する.
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				summary_clear();
 			}
 		}

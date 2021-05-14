@@ -23,7 +23,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 用紙メニューの「設定をリセット」が選択された.
 	// 設定データを保存したファイルがある場合, それを削除する.
-	IAsyncAction MainPage::pref_reset_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::pref_delete_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::Storage::StorageDeleteOption;
 
@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 			if (s_file != nullptr) {
 				try {
 					co_await s_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
-					mfi_sheet_reset().IsEnabled(false);
+					mfi_pref_delete().IsEnabled(false);
 				}
 				catch (winrt::hresult_error const&) {
 				}
@@ -41,6 +41,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			item = nullptr;
 		}
+
 	}
 
 	// 保存された設定データを読み込む.
@@ -48,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	読み込めたら S_OK.
 	IAsyncOperation<winrt::hresult> MainPage::pref_load_async(void)
 	{
-		mfi_sheet_reset().IsEnabled(false);
+		mfi_pref_delete().IsEnabled(false);
 		auto hr = E_FAIL;
 		auto item{ co_await local_folder().TryGetItemAsync(FILE_NAME) };
 		if (item != nullptr) {
@@ -61,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 					hr = e.code();
 				}
 				s_file = nullptr;
-				mfi_sheet_reset().IsEnabled(true);
+				mfi_pref_delete().IsEnabled(true);
 			}
 			item = nullptr;
 		}
@@ -79,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 			if (s_file != nullptr) {
 				co_await file_write_gpf_async(s_file, false, true);
 				s_file = nullptr;
-				mfi_sheet_reset().IsEnabled(true);
+				mfi_pref_delete().IsEnabled(true);
 			}
 		}
 		catch (winrt::hresult_error const&) {

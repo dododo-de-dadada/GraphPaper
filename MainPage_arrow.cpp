@@ -65,9 +65,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
-			const double dpi = sheet_dpi();
+			const double dpi = sheet_dx().m_logical_dpi;
 			const double g_len = m_main_sheet.m_grid_base + 1.0;
-			conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf, 31);
+			conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
 			hdr = hdr + buf;
 		}
 		if constexpr (S == 0) {

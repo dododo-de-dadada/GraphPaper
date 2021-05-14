@@ -6,13 +6,13 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// D2D ストローク特性を作成する.
-	static void create_stroke_style(const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style);
+	static void create_stroke_style(ID2D1Factory3 *d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style);
 
 	// D2D ストローク特性を作成する.
 	// d_style	破線の種類
 	// s_patt	破線の配置配列
 	// s_style	作成されたストローク特性
-	static void create_stroke_style(const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style)
+	static void create_stroke_style(ID2D1Factory3* d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style)
 	{
 		D2D1_STROKE_STYLE_PROPERTIES prop{
 			D2D1_CAP_STYLE_SQUARE,	// startCap
@@ -47,7 +47,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			winrt::check_hresult(
-				Shape::s_d2d_factory->CreateStrokeStyle(prop, d_arr, d_cnt, s_style)
+				d_factory->CreateStrokeStyle(prop, d_arr, d_cnt, s_style)
 			);
 		}
 		else {
@@ -66,24 +66,53 @@ namespace winrt::GraphPaper::implementation
 	// b_max	領域の右下位置
 	void ShapeStroke::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
-		pt_inc(m_pos, b_min, b_max);
-		D2D1_POINT_2F e_pos;
-		pt_add(m_pos, m_diff[0], e_pos);
+		const size_t n = m_diff.size();	// 差分の数
+		D2D1_POINT_2F e_pos = m_pos;
 		pt_inc(e_pos, b_min, b_max);
+		for (size_t i = 0; i < n; i++) {
+			pt_add(e_pos, m_diff[i], e_pos);
+			pt_inc(e_pos, b_min, b_max);
+		}
+
+		//pt_inc(m_pos, b_min, b_max);
+		//D2D1_POINT_2F e_pos;
+		//pt_add(m_pos, m_diff[0], e_pos);
+		//pt_inc(e_pos, b_min, b_max);
 	}
 
 	// 図形を囲む領域の左上位置を得る.
 	// value	領域の左上位置
 	void ShapeStroke::get_min_pos(D2D1_POINT_2F& value) const noexcept
 	{
-		value.x = m_diff[0].x >= 0.0f ? m_pos.x : m_pos.x + m_diff[0].x;
-		value.y = m_diff[0].y >= 0.0f ? m_pos.y : m_pos.y + m_diff[0].y;
+		const size_t n = m_diff.size();	// 差分の数
+		D2D1_POINT_2F v_pos = m_pos;	// 頂点の位置
+		value = m_pos;
+		for (size_t i = 0; i < n; i++) {
+			pt_add(v_pos, m_diff[i], v_pos);
+			pt_min(value, v_pos, value);
+		}
+
+		//value.x = m_diff[0].x >= 0.0f ? m_pos.x : m_pos.x + m_diff[0].x;
+		//value.y = m_diff[0].y >= 0.0f ? m_pos.y : m_pos.y + m_diff[0].y;
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapeStroke::get_anch_pos(const uint32_t /*a*/, D2D1_POINT_2F& value) const noexcept
+	void ShapeStroke::get_anch_pos(const uint32_t anch, D2D1_POINT_2F& value) const noexcept
 	{
-		value = m_pos;
+		if (anch == ANCH_TYPE::ANCH_SHEET || anch == ANCH_TYPE::ANCH_P0) {
+			// 図形の部位が「外部」または「開始点」ならば, 開始位置を得る.
+			value = m_pos;
+		}
+		else if (anch > ANCH_TYPE::ANCH_P0) {
+			const size_t m = m_diff.size() + 1;		// 頂点の数 (差分の数 + 1)
+			if (anch < ANCH_TYPE::ANCH_P0 + m) {
+				value = m_pos;
+				for (size_t i = 0; i < anch - ANCH_TYPE::ANCH_P0; i++) {
+					pt_add(value, m_diff[i], value);
+				}
+			}
+		}
+		//value = m_pos;
 	}
 
 	// 開始位置を得る
@@ -127,10 +156,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を含むか調べる.
-	// 戻り値	つねに ANCH_OUTSIDE
+	// 戻り値	つねに ANCH_SHEET
 	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept
 	{
-		return ANCH_WHICH::ANCH_OUTSIDE;
+		return ANCH_TYPE::ANCH_SHEET;
 	}
 
 	// 範囲に含まれるか調べる.
@@ -186,7 +215,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		write_svg(m_stroke_color, "stroke", dt_writer);
 		write_svg(m_stroke_width, "stroke-width", dt_writer);
-		write_svg(" />" SVG_NL, dt_writer);
+		write_svg(" />" SVG_NEW_LINE, dt_writer);
 	}
 
 	// 値を破線の配置に格納する.
@@ -197,7 +226,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_stroke_patt = value;
 		m_d2d_stroke_style = nullptr;
-		create_stroke_style(m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
+		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
 	}
 
 	// 値を線枠の形式に格納する.
@@ -208,7 +237,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_stroke_style = value;
 		m_d2d_stroke_style = nullptr;
-		create_stroke_style(m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
+		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
 	}
 
 	// 値を線枠の太さに格納する.
@@ -220,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	//	n	差分の個数
 	//	attr	属性値
-	ShapeStroke::ShapeStroke(const uint32_t n, const ShapeSheet* attr) :
+	ShapeStroke::ShapeStroke(const size_t n, const ShapeSheet* attr) :
 		m_diff(n),
 		m_stroke_color(attr->m_stroke_color),
 		m_stroke_patt(attr->m_stroke_patt),
@@ -228,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_width(attr->m_stroke_width),
 		m_d2d_stroke_style(nullptr)
 	{
-		create_stroke_style(m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
+		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
 	}
 
 	// 図形をデータリーダーから読み込む.
@@ -240,12 +269,12 @@ namespace winrt::GraphPaper::implementation
 		set_delete(dt_reader.ReadBoolean());
 		set_select(dt_reader.ReadBoolean());
 		read(m_pos, dt_reader);
-		read(m_diff[0], dt_reader);
+		read(m_diff, dt_reader);
 		read(m_stroke_color, dt_reader);
 		read(m_stroke_patt, dt_reader);
 		read(m_stroke_style, dt_reader);
 		m_stroke_width = dt_reader.ReadDouble();
-		create_stroke_style(m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
+		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
 	}
 
 	// データライターに書き込む.
@@ -256,7 +285,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBoolean(is_deleted());
 		dt_writer.WriteBoolean(is_selected());
 		write(m_pos, dt_writer);
-		write(m_diff[0], dt_writer);
+		write(m_diff, dt_writer);
 		write(m_stroke_color, dt_writer);
 		dt_writer.WriteSingle(m_stroke_patt.m_[0]);
 		dt_writer.WriteSingle(m_stroke_patt.m_[1]);

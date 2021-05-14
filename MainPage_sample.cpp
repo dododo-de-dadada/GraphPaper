@@ -34,14 +34,13 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		m_mutex_shapes.lock();
+		m_dx_mutex.lock();
 		auto dc = m_sample_dx.m_d2dContext.get();
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
 		dc->Clear(m_sample_sheet.m_sheet_color);
-		auto ox = std::fmod(m_sample_sheet.m_sheet_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0);
 		D2D1_POINT_2F offset;
-		offset.x = static_cast<FLOAT>(ox);
+		offset.x = static_cast<FLOAT>(std::fmod(m_sample_sheet.m_sheet_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0));
 		offset.y = offset.x;
 		if (m_sample_sheet.m_grid_show == GRID_SHOW::BACK) {
 			m_sample_sheet.draw_grid(m_sample_dx, offset);
@@ -55,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(dc->EndDraw());
 		dc->RestoreDrawingState(m_sample_dx.m_state_block.get());
 		m_sample_dx.Present();
-		m_mutex_shapes.unlock();
+		m_dx_mutex.unlock();
 	}
 
 	// 見本のスワップチェーンパネルの大きさが変わった.

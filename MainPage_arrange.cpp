@@ -94,8 +94,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			auto s = *it_src;
 			auto t = *it_dst;
-			if (m_mutex_summary.load(std::memory_order_acquire)) {
-			//if (m_summary_visible) {
+			// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				summary_arrange(s, t);
 			}
 			undo_push_arrange(s, t);
@@ -126,7 +126,7 @@ namespace winrt::GraphPaper::implementation
 
 	// ‘I‘ğ‚³‚ê‚½}Œ`‚ğÅ”w–Ê‚Ü‚½‚ÍÅ‘O–Ê‚ÉˆÚ“®‚·‚é.
 	// T	T ‚ª true ‚Ìê‡‚ÍÅ”w–Ê, false ‚Ìê‡‚ÍÅ‘O–Ê‚ÉˆÚ“®
-	template<bool T> void MainPage::arrange_to(void)
+	template<bool B> void MainPage::arrange_to(void)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 
@@ -135,11 +135,12 @@ namespace winrt::GraphPaper::implementation
 		if (list_selected.size() == 0) {
 			return;
 		}
-		if constexpr (T) {
+		if constexpr (B) {
 			uint32_t i = 0;
 			auto s_pos = s_list_front(m_list_shapes);
 			for (auto s : list_selected) {
-				if (m_mutex_summary.load(std::memory_order_acquire)) {
+				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+				if (m_summary_atomic.load(std::memory_order_acquire)) {
 					summary_remove(s);
 					summary_insert(s, i++);
 				}
@@ -149,7 +150,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			for (auto s : list_selected) {
-				if (m_mutex_summary.load(std::memory_order_acquire)) {
+				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+				if (m_summary_atomic.load(std::memory_order_acquire)) {
 					summary_remove(s);
 					summary_append(s);
 				}

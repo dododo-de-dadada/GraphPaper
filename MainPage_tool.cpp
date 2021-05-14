@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = TOOL_DRAW::BEZI;
 		// 作図ツールをステータスバーに格納する.
-		stbar_set_draw();
+		sbar_set_draw();
 		pointer_set();
 	}
 
@@ -23,7 +23,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = TOOL_DRAW::ELLI;
 		// 作図ツールをステータスバーに格納する.
-		stbar_set_draw();
+		sbar_set_draw();
 		pointer_set();
 	}
 
@@ -32,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = TOOL_DRAW::LINE;
 		// 作図ツールをステータスバーに格納する.
-		stbar_set_draw();
+		sbar_set_draw();
 		pointer_set();
 	}
 
@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = TOOL_DRAW::QUAD;
 		// 作図ツールをステータスバーに格納する.
-		stbar_set_draw();
+		sbar_set_draw();
 		pointer_set();
 	}
 
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = TOOL_DRAW::QUAD;
 		// 作図ツールをステータスバーに格納する.
-		stbar_set_draw();
+		sbar_set_draw();
 		pointer_set();
 	}
 
@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = TOOL_DRAW::RECT;
 		// 作図ツールをステータスバーに格納する.
-		stbar_set_draw();
+		sbar_set_draw();
 		pointer_set();
 	}
 
@@ -68,7 +68,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = TOOL_DRAW::RRCT;
 		// 作図ツールをステータスバーに格納する.
-		stbar_set_draw();
+		sbar_set_draw();
 		pointer_set();
 	}
 
@@ -76,11 +76,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::tool_select_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_tool_draw = TOOL_DRAW::SELECT;
-		pointer_state(STATE_TRAN::BEGIN);
+		pointer_state(PBTN_STATE::BEGIN);
 		pointer_shape(nullptr);
-		pointer_anchor(ANCH_WHICH::ANCH_OUTSIDE);
+		pointer_anchor(ANCH_TYPE::ANCH_SHEET);
 		// 作図ツールをステータスバーに格納する.
-		stbar_set_draw();
+		sbar_set_draw();
 		pointer_set();
 	}
 
@@ -89,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = TOOL_DRAW::TEXT;
 		// 作図ツールをステータスバーに格納する.
-		stbar_set_draw();
+		sbar_set_draw();
 		pointer_set();
 	}
 
@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = TOOL_DRAW::RULER;
 		// 作図ツールをステータスバーに格納する.
-		stbar_set_draw();
+		sbar_set_draw();
 		pointer_set();
 	}
 

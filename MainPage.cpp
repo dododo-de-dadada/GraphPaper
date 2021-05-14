@@ -12,8 +12,11 @@ namespace winrt::GraphPaper::implementation
 {
 	// UWP のブラシを D2D1_COLOR_F に変換する.
 	static bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept;
+
 	// UWP の Color を D2D1_COLOR_F に変換する.
 	static void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept;
+
+	constexpr double UWP_COLOR_MAX = 255.0;	// UWP の色成分の最大値
 
 	// UWP のブラシを D2D1_COLOR_F に変換する.
 	static bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept
@@ -25,45 +28,45 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 		const auto color = brush.Color();
-		b.r = static_cast<FLOAT>(static_cast<double>(color.R) / COLOR_MAX);
-		b.g = static_cast<FLOAT>(static_cast<double>(color.G) / COLOR_MAX);
-		b.b = static_cast<FLOAT>(static_cast<double>(color.B) / COLOR_MAX);
-		b.a = static_cast<FLOAT>(static_cast<double>(color.A) / COLOR_MAX);
+		b.r = static_cast<FLOAT>(static_cast<double>(color.R) / UWP_COLOR_MAX);
+		b.g = static_cast<FLOAT>(static_cast<double>(color.G) / UWP_COLOR_MAX);
+		b.b = static_cast<FLOAT>(static_cast<double>(color.B) / UWP_COLOR_MAX);
+		b.a = static_cast<FLOAT>(static_cast<double>(color.A) / UWP_COLOR_MAX);
 		return true;
 	}
 
 	// UWP の Color を D2D1_COLOR_F に変換する.
 	static void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept
 	{
-		b.r = static_cast<FLOAT>(static_cast<double>(a.R) / COLOR_MAX);
-		b.g = static_cast<FLOAT>(static_cast<double>(a.G) / COLOR_MAX);
-		b.b = static_cast<FLOAT>(static_cast<double>(a.B) / COLOR_MAX);
-		b.a = static_cast<FLOAT>(static_cast<double>(a.A) / COLOR_MAX);
+		b.r = static_cast<FLOAT>(static_cast<double>(a.R) / UWP_COLOR_MAX);
+		b.g = static_cast<FLOAT>(static_cast<double>(a.G) / UWP_COLOR_MAX);
+		b.b = static_cast<FLOAT>(static_cast<double>(a.B) / UWP_COLOR_MAX);
+		b.a = static_cast<FLOAT>(static_cast<double>(a.A) / UWP_COLOR_MAX);
 	}
 
-	// 色成分の値を文字列に変換する.
+	// 色成分の値を文字列に変換し, 配列に格納する.
 	// c_code	色の表記
 	// value	色成分の値
-	// buf	文字列の配列
-	// len	文字列の最大長 ('\0' を含む長さ)
+	// t_len	文字列の最大長 ('\0' を含む長さ)
+	// t_buf	文字列の配列 [t_len]
 	// 戻り値	なし
-	void conv_val_to_col(const COLOR_CODE c_code, const double value, wchar_t* buf, const size_t b_len)
+	void conv_val_to_col(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[])
 	{
+		// 色の表記が 10 進数か判定する.
 		if (c_code == COLOR_CODE::DEC) {
-			// 色の表記が 10 進数の場合,
-			swprintf_s(buf, b_len, L"%.0lf", std::round(value));
+			swprintf_s(t_buf, t_len, L"%.0lf", std::round(value));
 		}
+		// 色の表記が 16 進数か判定する.
 		else if (c_code == COLOR_CODE::HEX) {
-			// 色の表記が 16 進数の場合,
-			swprintf_s(buf, b_len, L"%02X", static_cast<uint32_t>(std::round(value)));
+			swprintf_s(t_buf, t_len, L"%02X", static_cast<uint32_t>(std::round(value)));
 		}
+		// 色の表記が実数か判定する.
 		else if (c_code == COLOR_CODE::REAL) {
-			// 色の表記が実数の場合,
-			swprintf_s(buf, b_len, L"%.4lf", value / COLOR_MAX);
+			swprintf_s(t_buf, t_len, L"%.4lf", value / COLOR_MAX);
 		}
+		// 色の表記がパーセントか判定する.
 		else if (c_code == COLOR_CODE::CENT) {
-			// 色の表記がパーセントの場合,
-			swprintf_s(buf, b_len, L"%.1lf%%", value / COLOR_MAX * 100.0);
+			swprintf_s(t_buf, t_len, L"%.1lf%%", value / COLOR_MAX * 100.0);
 		}
 		else {
 			throw hresult_not_implemented();
@@ -72,60 +75,85 @@ namespace winrt::GraphPaper::implementation
 
 	// ピクセル単位の長さを他の単位の文字列に変換する.
 	// B	単位付加フラグ
-	// l_unit	長さの単位
+	// len_unit	長さの単位
 	// value	ピクセル単位の長さ
 	// dpi	DPI
 	// g_len	方眼の大きさ
-	// buf	文字列の配列
-	// b_len	文字列の最大長 ('\0' を含む長さ)
-	template <bool B> void conv_val_to_len(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t *buf, const uint32_t b_len)
+	// t_buf	文字列の配列
+	// t_len	文字列の最大長 ('\0' を含む長さ)
+	template <bool B> void conv_val_to_len(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t *t_buf)
 	{
-		if (l_unit == LEN_UNIT::PIXEL) {
-			if constexpr (B == WITH_UNIT_NAME) {
-				swprintf_s(buf, b_len, FMT_PIXEL_UNIT, value);
+		if (len_unit == LEN_UNIT::PIXEL) {
+			if constexpr (B == UNIT_NAME_VISIBLE) {
+				swprintf_s(t_buf, t_len, FMT_PIXEL_UNIT, value);
 			}
 			else {
-				swprintf_s(buf, b_len, FMT_PIXEL, value);
+				swprintf_s(t_buf, t_len, FMT_PIXEL, value);
 			}
 		}
-		else if (l_unit == LEN_UNIT::INCH) {
-			if constexpr (B == WITH_UNIT_NAME) {
-				swprintf_s(buf, b_len, FMT_INCH_UNIT, value / dpi);
+		else if (len_unit == LEN_UNIT::INCH) {
+			if constexpr (B == UNIT_NAME_VISIBLE) {
+				swprintf_s(t_buf, t_len, FMT_INCH_UNIT, value / dpi);
 			}
 			else {
-				swprintf_s(buf, b_len, FMT_INCH, value / dpi);
+				swprintf_s(t_buf, t_len, FMT_INCH, value / dpi);
 			}
 		}
-		else if (l_unit == LEN_UNIT::MILLI) {
-			if constexpr (B == WITH_UNIT_NAME) {
-				swprintf_s(buf, b_len, FMT_MILLI_UNIT, value * MM_PER_INCH / dpi);
+		else if (len_unit == LEN_UNIT::MILLI) {
+			if constexpr (B == UNIT_NAME_VISIBLE) {
+				swprintf_s(t_buf, t_len, FMT_MILLI_UNIT, value * MM_PER_INCH / dpi);
 			}
 			else {
-				swprintf_s(buf, b_len, FMT_MILLI, value * MM_PER_INCH / dpi);
+				swprintf_s(t_buf, t_len, FMT_MILLI, value * MM_PER_INCH / dpi);
 			}
 		}
-		else if (l_unit == LEN_UNIT::POINT) {
-			if constexpr (B == WITH_UNIT_NAME) {
-				swprintf_s(buf, b_len, FMT_POINT_UNIT, value * PT_PER_INCH / dpi);
+		else if (len_unit == LEN_UNIT::POINT) {
+			if constexpr (B == UNIT_NAME_VISIBLE) {
+				swprintf_s(t_buf, t_len, FMT_POINT_UNIT, value * PT_PER_INCH / dpi);
 			}
 			else {
-				swprintf_s(buf, b_len, FMT_POINT, value * PT_PER_INCH / dpi);
+				swprintf_s(t_buf, t_len, FMT_POINT, value * PT_PER_INCH / dpi);
 			}
 		}
-		else if (l_unit == LEN_UNIT::GRID) {
-			if constexpr (B == WITH_UNIT_NAME) {
-				swprintf_s(buf, b_len, FMT_GRID_UNIT, value / g_len);
+		else if (len_unit == LEN_UNIT::GRID) {
+			if constexpr (B == UNIT_NAME_VISIBLE) {
+				swprintf_s(t_buf, t_len, FMT_GRID_UNIT, value / g_len);
 			}
 			else {
-				swprintf_s(buf, b_len, FMT_GRID, value / g_len);
+				swprintf_s(t_buf, t_len, FMT_GRID, value / g_len);
 			}
 		}
 		else {
 			throw hresult_not_implemented();
 		}
 	}
-	template void conv_val_to_len<!WITH_UNIT_NAME>(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
-	template void conv_val_to_len<WITH_UNIT_NAME>(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len, wchar_t* buf, const uint32_t b_len);
+	template void conv_val_to_len<!UNIT_NAME_VISIBLE>(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf);
+	template void conv_val_to_len<UNIT_NAME_VISIBLE>(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf);
+
+	// 内容が変更されていたなら, 確認ダイアログを表示してその応答を得る.
+	// 戻り値	確認前の処理を続行するなら true を, 応答がキャンセルなら, または内容を保存できなかったなら false を返す.
+	IAsyncOperation<bool> MainPage::ask_for_conf_async(void)
+	{
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+
+		// 操作スタックの更新フラグが立っているか判定する.
+		if (undo_pushed()) {
+			// 確認ダイアログを表示し, 結果を得る.
+			const auto dres = co_await cd_conf_save().ShowAsync();	// ダイアログの結果
+			// ダイアログの結果がキャンセルか判定する.
+			if (dres == ContentDialogResult::None) {
+				co_return false;
+			}
+			// ダイアログの結果が「保存する」か判定する.
+			else if (dres == ContentDialogResult::Primary) {
+				// ファイルに非同期に保存し, 結果が S_OK 以外か判定する.
+				if (co_await file_save_async() != S_OK) {
+					co_return false;
+				}
+			}
+		}
+		co_return true;
+	}
 
 	// 編集メニュー項目の使用の可否を設定する.
 	// 選択の有無やクラスごとに図形を数え, メニュー項目の可否を判定する.
@@ -196,40 +224,26 @@ namespace winrt::GraphPaper::implementation
 		mfi_send_to_back().IsEnabled(enable_backward);
 		mfi_send_backward().IsEnabled(enable_backward);
 		mfi_summary().IsEnabled(exists_undeleted);
-		m_list_selected = selected_cnt;
+		m_cnt_selected = selected_cnt;
 	}
 
 	// ファイルメニューの「終了」が選択された
 	IAsyncAction MainPage::exit_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::UI::Xaml::Application;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		if (undo_pushed()) {
-			// 操作スタックの更新フラグが立っている場合,
-			const auto d_result = co_await cd_conf_save().ShowAsync();
-			if (d_result == ContentDialogResult::None) {
-				// 「キャンセル」が押された場合,
-				co_return;
-			}
-			else if (d_result == ContentDialogResult::Primary) {
-				// 「保存する」が押された場合,
-				if (co_await file_save_async() != S_OK) {
-					// 保存できなかった場合,
-					co_return;
-				}
-			}
+		if ((co_await ask_for_conf_async()) == false) {
+			co_return;
 		}
-		// 上記以外の場合,
-		if (m_mutex_summary.load(std::memory_order_acquire)) {
-			//if (m_summary_visible) {
+		// 図形一覧の排他制御が true か判定する.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			summary_close();
 		}
 		undo_clear();
 		s_list_clear(m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
-			message_show(ICON_ALERT, L"Memory leak occurs", {});
+			message_show(ICON_ALERT, DEBUG_MSG, {});
 		}
 #endif
 		ShapeText::release_available_fonts();
@@ -266,8 +280,8 @@ namespace winrt::GraphPaper::implementation
 		// 本来なら DirectX をコードビハインドでリリースしたいところだが,
 		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがあるため,
 		// Trim を呼び出すだけにする.
-		m_main_dx.Trim();
-		m_sample_dx.Trim();
+		sheet_dx().Trim();
+		sample_dx().Trim();
 
 		// アプリケーションを終了する.
 		Application::Current().Exit();
@@ -331,29 +345,23 @@ namespace winrt::GraphPaper::implementation
 			dp_view.SetAcceptedFormatId(StandardDataFormats::Text());
 		}
 
-		// D2D/DWRITE ファクトリを図形/文字列図形クラスに, 
-		// 図形リストとメイン用紙をアンドゥ操作に格納する.
+		// D2D/DWRITE ファクトリを図形クラスに, 
+		// 図形リストと用紙をアンドゥ操作に格納する.
 		{
-			Shape::s_d2d_factory = m_main_dx.m_d2dFactory.get();
-			Shape::s_dwrite_factory = m_main_dx.m_dwriteFactory.get();
+			Shape::s_d2d_factory = sheet_dx().m_d2dFactory.get();
+			Shape::s_dwrite_factory = sheet_dx().m_dwriteFactory.get();
 			Undo::set(&m_list_shapes, &m_main_sheet);
 		}
 
-		// クリックの判定時間をシステムから得る.
+		// クリックの判定時間と判定距離をシステムから得る.
 		{
 			using winrt::Windows::UI::ViewManagement::UISettings;
 
 			m_pointer_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
-			// クリックの判定距離を物理 DPI に合わせる.
 			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_pointer_click_dist = 6.0 * raw_dpi / log_dpi;
 		}
-
-		//{
-		//	m_token_pointer_released = scp_sheet_panel().PointerReleased({ this, &MainPage::pointer_released });
-		//	m_token_pointer_entered = scp_sheet_panel().PointerReleased({ this, &MainPage::pointer_entered });
-		//}
 
 		auto _{ new_click_async(nullptr, nullptr) };
 	}
@@ -369,7 +377,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
 		const wchar_t QUOT[] = L"\"";	// 引用符
-		const wchar_t NL[] = L"\u2028";	// テキストブロック内での改行
+		const wchar_t NEW_LINE[] = L"\u2028";	// テキストブロック内での改行
 
 		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		winrt::hstring text;
@@ -389,11 +397,11 @@ namespace winrt::GraphPaper::implementation
 		catch (winrt::hresult_error const&) {}
 		if (added_text.empty() != true) {
 			// 追加する文字列が空でない場合,
-			text = text + NL + added_text;
+			text = text + NEW_LINE + added_text;
 		}
 		else if (desc_key.empty() != true) {
 			// 説明そのものが空でない場合,
-			text = text + NL + QUOT + desc_key + QUOT;
+			text = text + NEW_LINE + QUOT + desc_key + QUOT;
 		}
 		const auto glyph = Resources().TryLookup(box_value(glyph_key));
 		fi_message().Glyph(glyph != nullptr ? unbox_value<winrt::hstring>(glyph) : glyph_key);
@@ -404,26 +412,11 @@ namespace winrt::GraphPaper::implementation
 	// ファイルメニューの「新規」が選択された
 	IAsyncAction MainPage::new_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
-		if (undo_pushed()) {
-			// アンドゥ操作スタックの更新フラグが立っている場合,
-			const auto d_result = co_await cd_conf_save().ShowAsync();
-			if (d_result == ContentDialogResult::None) {
-				// 「キャンセル」が押された場合,
-				co_return;
-			}
-			else if (d_result == ContentDialogResult::Primary) {
-				// 「保存する」が押された場合,
-				if (co_await file_save_async() != S_OK) {
-					// 保存できなかった場合,
-					co_return;
-				}
-			}
+		if ((co_await ask_for_conf_async()) == false) {
+			co_return;
 		}
-		if (m_mutex_summary.load(std::memory_order_acquire)) {
-		//if (m_summary_visible) {
-			// 図形一覧パネルの表示フラグが立っている場合,
+		// 図形一覧の排他制御が true か判定する.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			summary_close();
 		}
 		undo_clear();
@@ -431,10 +424,11 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			// 「メモリリーク」メッセージダイアログを表示する.
-			message_show(ICON_ALERT, L"Memory leak occurs", {});
+			message_show(ICON_ALERT, DEBUG_MSG, {});
 		}
 #endif
 		ShapeText::release_available_fonts();
+
 		ShapeText::set_available_fonts();
 
 		// 背景色, 前景色, 文字範囲の背景色, 文字範囲の文字色をリソースから得る.
@@ -442,30 +436,30 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::UI::Color;
 			using winrt::Windows::UI::Xaml::Media::Brush;
 
-			auto h_color = Resources().TryLookup(box_value(L"SystemColorHighlightColor"));
-			auto t_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
-			if (h_color != nullptr && t_color != nullptr) {
-				cast_to(unbox_value<Color>(h_color), m_main_dx.m_range_background);
-				cast_to(unbox_value<Color>(t_color), m_main_dx.m_range_foreground);
+			auto sel_back_color = Resources().TryLookup(box_value(L"SystemColorHighlightColor"));
+			auto sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
+			if (sel_back_color != nullptr && sel_text_color != nullptr) {
+				cast_to(unbox_value<Color>(sel_back_color), sheet_dx().m_range_background);
+				cast_to(unbox_value<Color>(sel_text_color), sheet_dx().m_range_foreground);
 			}
 			else {
-				m_main_dx.m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
-				m_main_dx.m_range_foreground = S_WHITE;
+				sheet_dx().m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
+				sheet_dx().m_range_foreground = S_WHITE;
 			}
-			auto const& b_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
-			auto const& f_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
-			if (b_theme != nullptr && f_theme != nullptr) {
-				cast_to(unbox_value<Brush>(b_theme), m_main_dx.m_theme_background);
-				cast_to(unbox_value<Brush>(f_theme), m_main_dx.m_theme_foreground);
+			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
+			auto const& fore_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
+			if (back_theme != nullptr && fore_theme != nullptr) {
+				cast_to(unbox_value<Brush>(back_theme), sheet_dx().m_theme_background);
+				cast_to(unbox_value<Brush>(fore_theme), sheet_dx().m_theme_foreground);
 			}
 			else {
-				m_main_dx.m_theme_background = S_WHITE;
-				m_main_dx.m_theme_foreground = S_BLACK;
+				sheet_dx().m_theme_background = S_WHITE;
+				sheet_dx().m_theme_foreground = S_BLACK;
 			}
-			m_sample_dx.m_range_background = m_main_dx.m_range_background;
-			m_sample_dx.m_range_foreground = m_main_dx.m_range_foreground;
-			m_sample_dx.m_theme_background = m_main_dx.m_theme_background;
-			m_sample_dx.m_theme_foreground = m_main_dx.m_theme_foreground;
+			sample_dx().m_range_background = sheet_dx().m_range_background;
+			sample_dx().m_range_foreground = sheet_dx().m_range_foreground;
+			sample_dx().m_theme_background = sheet_dx().m_theme_background;
+			sample_dx().m_theme_foreground = sheet_dx().m_theme_foreground;
 		}
 
 		if (co_await pref_load_async() != S_OK) {

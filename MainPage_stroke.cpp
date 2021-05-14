@@ -207,10 +207,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::STROKE_PATT) {
 			wchar_t buf[32];
-			const double dpi = sheet_dpi();
+			const double dpi = sheet_dx().m_logical_dpi;
 			const double g_len = m_main_sheet.m_grid_base + 1.0;
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP * m_sample_sheet.m_stroke_width, dpi, g_len, buf);
+			conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP * m_sample_sheet.m_stroke_width, dpi, g_len, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			if constexpr (S == 0) {
 				hdr = r_loader.GetString(L"str_dash_len") + L": " + buf;
@@ -227,10 +227,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			wchar_t buf[32];
-			const double dpi = sheet_dpi();
+			const double dpi = sheet_dx().m_logical_dpi;
 			const double g_len = m_main_sheet.m_grid_base + 1.0;
 			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<WITH_UNIT_NAME>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+			conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {

@@ -27,9 +27,9 @@ namespace winrt::GraphPaper::implementation
 	void anchor_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
 	{
 		D2D1_POINT_2F r_min;
-		pt_add(a_pos, -0.5 * dx.m_anch_len, r_min);
+		pt_add(a_pos, -0.5 * dx.m_anchor_len, r_min);
 		D2D1_POINT_2F r_max;
-		pt_add(r_min, dx.m_anch_len, r_max);
+		pt_add(r_min, dx.m_anchor_len, r_max);
 		const D2D1_RECT_F r{ r_min.x, r_min.y, r_max.x, r_max.y };
 
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 	// dx		図形の描画環境
 	void anchor_draw_ellipse(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
 	{
-		const FLOAT rad = static_cast<FLOAT>(dx.m_anch_len * 0.5 + 1.0);
+		const FLOAT rad = static_cast<FLOAT>(dx.m_anchor_len * 0.5 + 1.0);
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
 		dx.m_d2dContext->FillEllipse({ a_pos, rad, rad }, dx.m_shape_brush.get());
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
@@ -51,11 +51,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの寸法が同じか調べる.
+	/*
 	bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept
 	{
 		return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) && equal(a.m_offset, b.m_offset);
 	}
-
+	*/
 	// 矢じりの形式が同じか調べる.
 	bool equal(const ARROW_STYLE a, const ARROW_STYLE b) noexcept
 	{
@@ -71,10 +72,7 @@ namespace winrt::GraphPaper::implementation
 	// 色が同じか調べる.
 	bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept
 	{
-		return equal_component(a.a, b.a)
-			&& equal_component(a.r, b.r)
-			&& equal_component(a.g, b.g)
-			&& equal_component(a.b, b.b);
+		return equal_component(a.a, b.a) && equal_component(a.r, b.r) && equal_component(a.g, b.g) && equal_component(a.b, b.b);
 	}
 
 	// 破線の形式が同じか調べる.
@@ -138,10 +136,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 単精度浮動小数が同じか調べる.
+	/*
 	bool equal(const float a, const float b) noexcept
 	{
 		return fabs(a - b) <= FLT_EPSILON * fmax(1.0f, fmax(fabs(a), fabs(b)));
 	}
+	*/
 
 	// 方眼の形式が同じか調べる.
 	bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept
@@ -158,12 +158,7 @@ namespace winrt::GraphPaper::implementation
 	// 破線の配置が同じか調べる.
 	bool equal(const STROKE_PATT& a, const STROKE_PATT& b) noexcept
 	{
-		return equal(a.m_[0], b.m_[0])
-			&& equal(a.m_[1], b.m_[1])
-			&& equal(a.m_[2], b.m_[2])
-			&& equal(a.m_[3], b.m_[3])
-			&& equal(a.m_[4], b.m_[4])
-			&& equal(a.m_[5], b.m_[5]);
+		return equal(a.m_[0], b.m_[0]) && equal(a.m_[1], b.m_[1]) && equal(a.m_[2], b.m_[2]) && equal(a.m_[3], b.m_[3]) && equal(a.m_[4], b.m_[4]) && equal(a.m_[5], b.m_[5]);
 	}
 
 	// 整数が同じか調べる.
@@ -196,7 +191,7 @@ namespace winrt::GraphPaper::implementation
 	// barb_width	矢じりの幅 (返しの両端の長さ)
 	// head_len	矢じりの長さ (先端から返しまでの軸ベクトル上での長さ)
 	// barbs	計算された矢じりの返しの位置 (先端からのオフセット)
-	void get_arrow_barbs(const D2D1_POINT_2F axis, const double axis_len, const double barb_width, const double head_len, D2D1_POINT_2F barbs[]) noexcept
+	void get_arrow_barbs(const D2D1_POINT_2F axis_vec, const double axis_len, const double barb_width, const double head_len, D2D1_POINT_2F barbs[]) noexcept
 	{
 		if (axis_len <= DBL_MIN) {
 			constexpr D2D1_POINT_2F Z = { 0.0f, 0.0f };
@@ -204,11 +199,11 @@ namespace winrt::GraphPaper::implementation
 			barbs[1] = Z;
 		}
 		else {
-			const double hf = barb_width * 0.5;
-			const double sx = axis.x * -head_len;
-			const double sy = axis.x * hf;
-			const double tx = axis.y * -head_len;
-			const double ty = axis.y * hf;
+			const double hf = barb_width * 0.5;	// 矢じりの幅の半分の大きさ
+			const double sx = axis_vec.x * -head_len;	// 矢じり軸ベクトルを矢じりの長さ分反転
+			const double sy = axis_vec.x * hf;
+			const double tx = axis_vec.y * -head_len;
+			const double ty = axis_vec.y * hf;
 			const double ax = 1.0 / axis_len;
 			barbs[0].x = static_cast<FLOAT>((sx - ty) * ax);
 			barbs[0].y = static_cast<FLOAT>((tx + sy) * ax);
@@ -246,7 +241,8 @@ namespace winrt::GraphPaper::implementation
 	// スカラー値を位置に足す
 	void pt_add(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept
 	{
-		pt_add(a, b, b, c);
+		c.x = static_cast<FLOAT>(a.x + b);
+		c.y = static_cast<FLOAT>(a.y + b);
 	}
 
 	// 2 つの値を位置に足す
@@ -259,10 +255,8 @@ namespace winrt::GraphPaper::implementation
 	// 二点間の中点を得る.
 	void pt_avg(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
 	{
-		const double ax = a.x;
-		const double ay = a.y;
-		c.x = static_cast<FLOAT>((ax + b.x) * 0.5);
-		c.y = static_cast<FLOAT>((ay + b.y) * 0.5);
+		c.x = static_cast<FLOAT>((static_cast<double>(a.x) + b.x) * 0.5);
+		c.y = static_cast<FLOAT>((static_cast<double>(a.y) + b.y) * 0.5);
 	}
 
 	// 二点で囲まれた方形を得る.
@@ -289,9 +283,7 @@ namespace winrt::GraphPaper::implementation
 	// 二点の内積を得る.
 	double pt_dot(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept
 	{
-		const double ax = a.x;
-		const double ay = a.y;
-		return ax * b.x + ay * b.y;
+		return static_cast<double>(a.x) * b.x + static_cast<double>(a.y) * b.y;
 	}
 
 	// 部位が原点を含むか調べる
@@ -303,8 +295,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F a_min;	// 部位の位置を中点とする方形の左上点
 		pt_add(a_pos, a_len * -0.5, a_min);
-		return a_min.x <= 0.0f && 0.0f <= a_min.x + a_len
-			&& a_min.y <= 0.0f && 0.0f <= a_min.y + a_len;
+		return a_min.x <= 0.0f && 0.0f <= a_min.x + a_len && a_min.y <= 0.0f && 0.0f <= a_min.y + a_len;
 	}
 
 	// 部位が位置を含むか調べる.
@@ -660,13 +651,11 @@ namespace winrt::GraphPaper::implementation
 	// 文字列をデータリーダーから読み込む.
 	void read(wchar_t*& value, DataReader const& dt_reader)
 	{
-		uint32_t n;	// 文字数
-
-		n = dt_reader.ReadUInt32();
+		const size_t n = dt_reader.ReadUInt32();	// 文字数
 		if (n > 0) {
-			value = new wchar_t[static_cast<size_t>(n) + 1];
+			value = new wchar_t[n + 1];
 			if (value != nullptr) {
-				for (uint32_t i = 0; i < n; i++) {
+				for (size_t i = 0; i < n; i++) {
 					value[i] = dt_reader.ReadUInt16();
 				}
 				value[n] = L'\0';
@@ -674,6 +663,16 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			value = nullptr;
+		}
+	}
+
+	// 位置配列をデータリーダーから読み込む.
+	void read(std::vector<D2D1_POINT_2F>& value, DataReader const& dt_reader)
+	{
+		const size_t n = dt_reader.ReadUInt32();	// 要素数
+		value.resize(n);
+		for (size_t i = 0; i < n; i++) {
+			read(value[i], dt_reader);
 		}
 	}
 
@@ -1068,14 +1067,20 @@ namespace winrt::GraphPaper::implementation
 	{
 		const uint32_t len = wchar_len(value);
 
-		if (len > 0) {
-			dt_writer.WriteUInt32(len);
-			for (uint32_t i = 0; i < len; i++) {
-				dt_writer.WriteUInt16(value[i]);
-			}
+		dt_writer.WriteUInt32(len);
+		for (uint32_t i = 0; i < len; i++) {
+			dt_writer.WriteUInt16(value[i]);
 		}
-		else {
-			dt_writer.WriteUInt32(0);
+	}
+
+	// 位置配列をデータライターに書き込む
+	void write(const std::vector<D2D1_POINT_2F>& value, DataWriter const& dt_writer)
+	{
+		const size_t n = value.size();
+
+		dt_writer.WriteUInt32(static_cast<uint32_t>(n));
+		for (uint32_t i = 0; i < n; i++) {
+			write(value[i], dt_writer);
 		}
 	}
 

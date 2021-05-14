@@ -26,8 +26,8 @@ namespace winrt::GraphPaper::implementation
 		if (flag != true) {
 			return;
 		}
-		if (m_mutex_summary.load(std::memory_order_acquire)) {
-		//if (m_summary_visible) {
+		// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			summary_select_all();
 		}
 		// ‚â‚è’¼‚µ‘€ìƒXƒ^ƒbƒN‚ğÁ‹‚µ, ŠÜ‚Ü‚ê‚é‘€ì‚ğ”jŠü‚·‚é.
@@ -49,8 +49,8 @@ namespace winrt::GraphPaper::implementation
 			if (s->in_area(a_min, a_max)) {
 				if (s->is_selected() != true) {
 					undo_push_select(s);
-					if (m_mutex_summary.load(std::memory_order_acquire)) {
-					//if (m_summary_visible) {
+					// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+					if (m_summary_atomic.load(std::memory_order_acquire)) {
 						summary_select(i);
 					}
 					flag = true;
@@ -59,8 +59,8 @@ namespace winrt::GraphPaper::implementation
 			else {
 				if (s->is_selected()) {
 					undo_push_select(s);
-					if (m_mutex_summary.load(std::memory_order_acquire)) {
-					//if (m_summary_visible) {
+					// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+					if (m_summary_atomic.load(std::memory_order_acquire)) {
 						summary_unselect(i);
 					}
 					flag = true;
@@ -98,14 +98,14 @@ namespace winrt::GraphPaper::implementation
 				edit_menu_enable();
 				sheet_draw();
 				if constexpr (K == VirtualKey::Down) {
-					if (m_mutex_summary.load(std::memory_order_acquire)) {
-					//if (m_summary_visible) {
+					// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+					if (m_summary_atomic.load(std::memory_order_acquire)) {
 						summary_select_head();
 					}
 				}
 				if constexpr (K == VirtualKey::Up) {
-					if (m_mutex_summary.load(std::memory_order_acquire)) {
-					//if (m_summary_visible) {
+					// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+					if (m_summary_atomic.load(std::memory_order_acquire)) {
 						summary_select_tail();
 					}
 				}
@@ -135,8 +135,8 @@ namespace winrt::GraphPaper::implementation
 			pointer_shape_prev(pointer_shape_summary());
 			unselect_all();
 			undo_push_select(pointer_shape_summary());
-			if (m_mutex_summary.load(std::memory_order_acquire)) {
-			//if (m_summary_visible) {
+			// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				summary_select(pointer_shape_summary());
 			}
 		}
@@ -178,24 +178,25 @@ namespace winrt::GraphPaper::implementation
 					st = NEXT;
 				}
 				else {
+					[[fallthrough]];
 			case END:
-				if (s->is_selected()) {
-					flag = true;
-					undo_push_select(s);
-					if (m_mutex_summary.load(std::memory_order_acquire)) {
-					//if (m_summary_visible) {
-						summary_unselect(i);
+					if (s->is_selected()) {
+						flag = true;
+						undo_push_select(s);
+						// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+						if (m_summary_atomic.load(std::memory_order_acquire)) {
+							summary_unselect(i);
+						}
 					}
+					break;
 				}
-				break;
-				}
-				// no break.
+				[[fallthrough]];
 			case NEXT:
 				if (s->is_selected() != true) {
 					flag = true;
 					undo_push_select(s);
-					if (m_mutex_summary.load(std::memory_order_acquire)) {
-					//if (m_summary_visible) {
+					// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+					if (m_summary_atomic.load(std::memory_order_acquire)) {
 						summary_select(i);
 					}
 				}
@@ -218,8 +219,8 @@ namespace winrt::GraphPaper::implementation
 			undo_push_select(s);
 			edit_menu_enable();
 			sheet_draw();
-			if (m_mutex_summary.load(std::memory_order_acquire)) {
-			//if (m_summary_visible) {
+			// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				if (s->is_selected()) {
 					summary_select(s);
 				}
@@ -250,8 +251,8 @@ namespace winrt::GraphPaper::implementation
 				undo_push_select(s);
 				edit_menu_enable();
 				sheet_draw();
-				if (m_mutex_summary.load(std::memory_order_acquire)) {
-				//if (m_summary_visible) {
+				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+				if (m_summary_atomic.load(std::memory_order_acquire)) {
 					summary_select(s);
 				}
 			}
@@ -281,8 +282,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (s->in_area(a_min, a_max)) {
 				undo_push_select(s);
-				if (m_mutex_summary.load(std::memory_order_acquire)) {
-				//if (m_summary_visible) {
+				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+				if (m_summary_atomic.load(std::memory_order_acquire)) {
 					if (s->is_selected() != true) {
 						summary_select(i);
 					}
@@ -331,8 +332,8 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
 			flag = true;
 		}
-		if (m_mutex_summary.load(std::memory_order_acquire)) {
-		//if (m_summary_visible) {
+		// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			summary_unselect_all();
 		}
 		return flag;
