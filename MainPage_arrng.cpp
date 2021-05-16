@@ -1,5 +1,5 @@
 //-------------------------------
-// MainPage_arrange.cpp
+// MainPage_arrng.cpp
 // 図形の並び替え
 //-------------------------------
 #include "pch.h"
@@ -15,28 +15,28 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FRONT = false;
 
 	// 編集メニューの「前面に移動」が選択された.
-	void MainPage::arrange_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::arrng_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を次または前の図形と入れ替える.
-		arrange_order<FORWARD>();
+		arrng_order<FORWARD>();
 	}
 
 	// 編集メニューの「最前面に移動」が選択された.
-	void MainPage::arrange_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::arrng_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を最背面または最前面に移動する.
-		arrange_to<FRONT>();
+		arrng_to<FRONT>();
 	}
 
 	// 選択された図形を前の図形と入れ替える.
-	template void MainPage::arrange_order<BACKWARD>(void);
+	template void MainPage::arrng_order<BACKWARD>(void);
 
 	// 選択された図形を次の図形と入れ替える.
-	template void MainPage::arrange_order<FORWARD>(void);
+	template void MainPage::arrng_order<FORWARD>(void);
 
 	// 選択された図形を次または前の図形と入れ替える.
 	// T	T が iterator の場合は背面の図形と入れ替え, reverse_iterator の場合は前面の図形と入れ替える. 
-	template<typename T> void MainPage::arrange_order(void)
+	template<typename T> void MainPage::arrng_order(void)
 	{
 		T it_end;	// 終端
 		T it_src;	// 交換元反復子
@@ -55,78 +55,78 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 選択されていない図形の中から最初の図形を得る.
 		for (;;) {
+			// 次の図形がないか判定する.
 			if (it_src == it_end) {
-				// 図形がない場合
 				return;
 			}
-			if ((*it_src)->is_deleted() != true && (*it_src)->is_selected() != true) {
-				// 消去フラグがない, かつ選択フラグがない場合,
+			// 消去フラグも選択フラグも立っていないか判定する.
+			if (!(*it_src)->is_deleted() && !(*it_src)->is_selected()) {
 				break;
 			}
 			it_src++;
 		}
-		// 交換フラグを消去する.
-		auto flag = false;
+		auto flag = false;	// 交換フラグ
 		for (;;) {
 			// 交換元反復子を交換先反復子に格納して,
 			// 交換元反復子をインクリメントする.
 			auto it_dst = it_src++;
-			// 次の図形を得る.
+			// 削除されてない次の図形を得る.
 			for (;;) {
+				// 次の図形がないか判定する.
 				if (it_src == it_end) {
-					// 次の図形がない場合,
+					// 交換フラグが立っているか判定する.
 					if (flag == true) {
-						// 交換フラグが立っている場合,
 						undo_push_null();
 						edit_menu_enable();
 						sheet_draw();
 					}
 					return;
 				}
-				if ((*it_src)->is_deleted() != true) {
+				// 交換元の削除フラグが立ってないか判定する.
+				if (!(*it_src)->is_deleted()) {
 					break;
 				}
 				it_src++;
 			}
-			if ((*it_src)->is_selected() != true) {
-				// 次の図形が選択されてない場合,
+			// 次の図形が選択されてない場合,
+			auto s = *it_src;
+			if (s->is_selected() != true) {
 				continue;
 			}
-			auto s = *it_src;
 			auto t = *it_dst;
 			// 図形一覧の排他制御が true か判定する.
 			if (m_summary_atomic.load(std::memory_order_acquire)) {
-				summary_arrange(s, t);
+				summary_arrng(s, t);
 			}
-			undo_push_arrange(s, t);
+			undo_push_arrng(s, t);
 			// 交換フラグを立てる.
 			flag = true;
 		}
 	}
 
 	// 編集メニューの「ひとつ背面に移動」が選択された.
-	void MainPage::arrange_send_backward_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::arrng_send_backward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を次または前の図形と入れ替える.
-		arrange_order<BACKWARD>();
+		arrng_order<BACKWARD>();
 	}
 
 	// 編集メニューの「最背面に移動」が選択された.
-	void MainPage::arrange_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::arrng_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を最背面または最前面に移動する.
-		arrange_to<BACK>();
+		arrng_to<BACK>();
 	}
 
 	// 選択された図形を最背面に移動する.
-	template void MainPage::arrange_to<BACK>(void);
+	template void MainPage::arrng_to<BACK>(void);
 
 	// 選択された図形を最前面に移動する.
-	template void MainPage::arrange_to<FRONT>(void);
+	template void MainPage::arrng_to<FRONT>(void);
 
 	// 選択された図形を最背面または最前面に移動する.
 	// T	T が true の場合は最背面, false の場合は最前面に移動
-	template<bool B> void MainPage::arrange_to(void)
+	template<bool B> void MainPage::arrng_to(void)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 

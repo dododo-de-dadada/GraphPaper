@@ -9,7 +9,7 @@
 ただし、4つのWindowsランタイム非同期操作タイプ（IAsyncXxx）のいずれかを
 co_awaitした場合、C ++ / WinRTはco_awaitの時点で呼び出しコンテキストをキャプチャします。
 また、継続が再開されたときに、そのコンテキストにいることが保証されます。
-C ++ / WinRTは、呼び出し側のコンテキストに既にいるかどうかを確認し、
+C ++ / WinRTは、呼び出し側のコンテキストに既にいるかを確認し、
 そうでない場合は切り替えます。
 */
 
@@ -104,16 +104,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		edit_menu_enable();
 		color_code_check_menu();
-		stroke_style_check_menu(m_main_sheet.m_stroke_style);
-		arrow_style_check_menu(m_main_sheet.m_arrow_style);
-		font_style_check_menu(m_main_sheet.m_font_style);
-		grid_emph_check_menu(m_main_sheet.m_grid_emph);
-		grid_show_check_menu(m_main_sheet.m_grid_show);
+		stroke_style_check_menu(m_sheet_main.m_stroke_style);
+		arrow_style_check_menu(m_sheet_main.m_arrow_style);
+		font_style_check_menu(m_sheet_main.m_font_style);
+		grid_emph_check_menu(m_sheet_main.m_grid_emph);
+		grid_show_check_menu(m_sheet_main.m_grid_show);
 		sbar_check_menu(status_bar());
-		text_align_t_check_menu(m_main_sheet.m_text_align_t);
-		text_align_p_check_menu(m_main_sheet.m_text_align_p);
-		tmfi_grid_snap().IsChecked(m_main_sheet.m_grid_snap);
-		tmfi_grid_snap_2().IsChecked(m_main_sheet.m_grid_snap);
+		text_align_t_check_menu(m_sheet_main.m_text_align_t);
+		text_align_p_check_menu(m_sheet_main.m_text_align_p);
+		tmfi_grid_snap().IsChecked(m_sheet_main.m_grid_snap);
+		tmfi_grid_snap_2().IsChecked(m_sheet_main.m_grid_snap);
 		len_unit_check_menu();
 
 		wchar_t* unavailable_font;	// 書体名
@@ -200,11 +200,11 @@ namespace winrt::GraphPaper::implementation
 			color_code(static_cast<COLOR_CODE>(dt_reader.ReadUInt16()));
 			status_bar(static_cast<SBAR_FLAG>(dt_reader.ReadUInt16()));
 
-			m_main_sheet.read(dt_reader);
-			m_main_sheet.m_grid_base = max(m_main_sheet.m_grid_base, 0.0F);
-			m_main_sheet.m_sheet_scale = min(max(m_main_sheet.m_sheet_scale, SCALE_MIN), SCALE_MAX);
-			m_main_sheet.m_sheet_size.width = max(min(m_main_sheet.m_sheet_size.width, sheet_size_max()), 1.0F);
-			m_main_sheet.m_sheet_size.height = max(min(m_main_sheet.m_sheet_size.height, sheet_size_max()), 1.0F);
+			m_sheet_main.read(dt_reader);
+			m_sheet_main.m_grid_base = max(m_sheet_main.m_grid_base, 0.0F);
+			m_sheet_main.m_sheet_main_scale = min(max(m_sheet_main.m_sheet_main_scale, SCALE_MIN), SCALE_MAX);
+			m_sheet_main.m_sheet_main_size.width = max(min(m_sheet_main.m_sheet_main_size.width, sheet_size_max()), 1.0F);
+			m_sheet_main.m_sheet_main_size.height = max(min(m_sheet_main.m_sheet_main_size.height, sheet_size_max()), 1.0F);
 
 			undo_clear();
 			s_list_clear(m_list_shapes);
@@ -591,7 +591,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt32(static_cast<uint32_t>(len_unit()));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(color_code()));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(status_bar()));
-			m_main_sheet.write(dt_writer);
+			m_sheet_main.write(dt_writer);
 			if (suspend) {
 				s_list_write<!REDUCE>(m_list_shapes, dt_writer);
 				undo_write(dt_writer);
@@ -675,7 +675,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			write_svg(DOCTYPE, dt_writer);
 			// SVG 開始タグをデータライターに書き込む.
-			file_write_svg_tag(m_main_sheet.m_sheet_size, m_main_sheet.m_sheet_color, sheet_dx().m_logical_dpi, len_unit(), dt_writer);
+			file_write_svg_tag(m_sheet_main.m_sheet_main_size, m_sheet_main.m_sheet_main_color, sheet_dx().m_logical_dpi, len_unit(), dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {

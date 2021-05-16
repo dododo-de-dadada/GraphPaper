@@ -15,25 +15,27 @@ namespace winrt::GraphPaper::implementation
 		m_path_geom = nullptr;
 	}
 
-	// 位置を含むか調べる.
-	// t_pos	調べる位置
+	// 位置を, 折れ線の図形の部位が含むか判定する.
+	// t_pos	判定する位置
 	// a_len	部位の大きさ
+	// p_cnt	折れ線の頂点の数
+	// p_pos	折れ線の頂点
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapePath::hit_test_anch(const D2D1_POINT_2F t_pos, const double a_len, const size_t m, D2D1_POINT_2F v_pos[], size_t& k) const noexcept
+	/*
+	uint32_t ShapePath::hit_test_anchor(const D2D1_POINT_2F t_pos, const double a_len, const size_t p_cnt, D2D1_POINT_2F p_pos[], size_t& k) const noexcept
 	{
 		//const size_t m = m_diff.size() + 1;	// 頂点の数 (差分の数 + 1)
 		size_t j = static_cast<size_t>(-1);	// 点を含む頂点の添え字
-		//size_t k = 0;	// 重複した頂点を除いた頂点の数
-		//std::vector<D2D1_POINT_2F> v_pos(m);	// 頂点の配列
-		// 調べる位置が原点となるよう平行移動した四へん形の各頂点を得る.
+
+		// 判定する位置が原点となるよう平行移動した四へん形の各頂点を得る.
 		k = 0;
-		pt_sub(m_pos, t_pos, v_pos[k++]);
-		if (pt_in_anch(v_pos[0], a_len)) {
+		pt_sub(m_pos, t_pos, p_pos[k++]);
+		if (pt_in_anch(p_pos[0], a_len)) {
 			j = 0;
 		}
-		for (size_t i = 1; i < m; i++) {
-			pt_add(v_pos[k - 1], m_diff[i - 1], v_pos[k]);
-			if (pt_in_anch(v_pos[i], a_len)) {
+		for (size_t i = 1; i < p_cnt; i++) {
+			pt_add(p_pos[k - 1], m_diff[i - 1], p_pos[k]);
+			if (pt_in_anch(p_pos[i], a_len)) {
 				j = i;
 			}
 			if (pt_abs2(m_diff[i - 1]) > FLT_MIN) {
@@ -46,6 +48,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		return ANCH_TYPE::ANCH_SHEET;
 	}
+	*/
 
 	// 差分だけ移動する.
 	// diff	差分

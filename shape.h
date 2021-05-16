@@ -148,102 +148,104 @@ namespace winrt::GraphPaper::implementation
 	// shape.cpp
 	//------------------------------
 
-	// 単精度浮動小数が同じか調べる.
-	inline bool equal(const float a, const float b) noexcept { return fabs(a - b) <= FLT_EPSILON * fmax(1.0f, fmax(fabs(a), fabs(b))); }
+	// 単精度浮動小数が同じか判定する.
+	inline bool equal(const float a, const float b) noexcept;
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const double a, const double b) noexcept;
 	// 図形の部位 (方形) を表示する.
 	void anchor_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx);
 	// 図形の部位（円形）を表示する.
 	void anchor_draw_ellipse(const D2D1_POINT_2F c_pos, SHAPE_DX& dx);
-	// 矢じりの寸法が同じか調べる.
-	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept { return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) && equal(a.m_offset, b.m_offset); }
-	// 矢じりの形式が同じか調べる.
-	bool equal(const ARROW_STYLE a, const ARROW_STYLE b) noexcept;
-	// ブール値が同じか調べる.
-	bool equal(const bool a, const bool b) noexcept;
-	// 色が同じか調べる.
-	bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept;
-	// 破線の形式が同じか調べる.
-	bool equal(const D2D1_DASH_STYLE a, const D2D1_DASH_STYLE b) noexcept;
-	// 位置が同じか調べる.
-	bool equal(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept;
-	// 寸法が同じか調べる.
-	bool equal(const D2D1_SIZE_F a, const D2D1_SIZE_F b) noexcept;
-	// 倍精度浮動小数が同じか調べる.
-	bool equal(const double a, const double b) noexcept;
-	// 書体の幅が同じか調べる.
-	bool equal(const DWRITE_FONT_STRETCH a, const DWRITE_FONT_STRETCH b) noexcept;
-	// 書体の字体が同じか調べる.
-	bool equal(const DWRITE_FONT_STYLE a, const DWRITE_FONT_STYLE b) noexcept;
-	// 書体の太さが同じか調べる.
-	bool equal(const DWRITE_FONT_WEIGHT a, const DWRITE_FONT_WEIGHT b) noexcept;
-	// 段落のそろえが同じか調べる.
-	bool equal(const DWRITE_PARAGRAPH_ALIGNMENT a, const DWRITE_PARAGRAPH_ALIGNMENT b) noexcept;
-	// 文字列のそろえが同じか調べる.
-	bool equal(const DWRITE_TEXT_ALIGNMENT a, const DWRITE_TEXT_ALIGNMENT b) noexcept;
-	// 文字範囲が同じか調べる.
-	bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept;
-	// 方眼の形式が同じか調べる.
-	bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept;
-	// 方眼の表示が同じか調べる.
-	bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept;
-	// 破線の配置が同じか調べる.
-	bool equal(const STROKE_PATT& a, const STROKE_PATT& b) noexcept;
-	// 32 ビット整数が同じか調べる.
-	bool equal(const uint32_t a, const uint32_t b) noexcept;
-	// ワイド文字列が同じか調べる.
-	bool equal(const wchar_t* a, const wchar_t* b) noexcept;
-	// winrt 文字列が同じか調べる.
-	bool equal(winrt::hstring const& a, const wchar_t* b) noexcept;
+	// 矢じりの寸法が同じか判定する.
+	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept;
+	// 矢じりの形式が同じか判定する.
+	inline bool equal(const ARROW_STYLE a, const ARROW_STYLE b) noexcept;
+	// ブール値が同じか判定する.
+	inline bool equal(const bool a, const bool b) noexcept;
+	// 色が同じか判定する.
+	inline bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept;
+	// 破線の形式が同じか判定する.
+	inline bool equal(const D2D1_DASH_STYLE a, const D2D1_DASH_STYLE b) noexcept;
+	// 位置が同じか判定する.
+	inline bool equal(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept;
+	// 寸法が同じか判定する.
+	inline bool equal(const D2D1_SIZE_F a, const D2D1_SIZE_F b) noexcept;
+	// 書体の幅が同じか判定する.
+	inline bool equal(const DWRITE_FONT_STRETCH a, const DWRITE_FONT_STRETCH b) noexcept;
+	// 書体の字体が同じか判定する.
+	inline bool equal(const DWRITE_FONT_STYLE a, const DWRITE_FONT_STYLE b) noexcept;
+	// 書体の太さが同じか判定する.
+	inline bool equal(const DWRITE_FONT_WEIGHT a, const DWRITE_FONT_WEIGHT b) noexcept;
+	// 段落のそろえが同じか判定する.
+	inline bool equal(const DWRITE_PARAGRAPH_ALIGNMENT a, const DWRITE_PARAGRAPH_ALIGNMENT b) noexcept;
+	// 文字列のそろえが同じか判定する.
+	inline bool equal(const DWRITE_TEXT_ALIGNMENT a, const DWRITE_TEXT_ALIGNMENT b) noexcept;
+	// 文字範囲が同じか判定する.
+	inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept;
+	// 方眼の形式が同じか判定する.
+	inline bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept;
+	// 方眼の表示が同じか判定する.
+	inline bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept;
+	// 破線の配置が同じか判定する.
+	inline bool equal(const STROKE_PATT& a, const STROKE_PATT& b) noexcept;
+	// 32 ビット整数が同じか判定する.
+	inline bool equal(const uint32_t a, const uint32_t b) noexcept;
+	// ワイド文字列が同じか判定する.
+	inline bool equal(const wchar_t* a, const wchar_t* b) noexcept;
+	// winrt 文字列が同じか判定する.
+	inline bool equal(winrt::hstring const& a, const wchar_t* b) noexcept;
+	// 色の成分が同じか判定する.
+	inline bool equal_color_comp(const FLOAT a, const FLOAT b) noexcept;
 	// 矢じりの軸と寸法をもとに返しの位置を計算する.
 	void get_arrow_barbs(const D2D1_POINT_2F axis_vec, const double axis_len, const double barbWidth, const double barbLen, D2D1_POINT_2F barbs[]) noexcept;
-	// 色が不透明か調べる.
-	bool is_opaque(const D2D1_COLOR_F& color) noexcept;
+	// 色が不透明か判定する.
+	inline bool is_opaque(const D2D1_COLOR_F& color) noexcept;
 	// ベクトルの長さ (の自乗値) を得る
-	double pt_abs2(const D2D1_POINT_2F a) noexcept;
+	inline double pt_abs2(const D2D1_POINT_2F a) noexcept;
 	// 位置に位置を足す
-	void pt_add(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept;
+	inline void pt_add(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept;
 	// 位置にスカラー値を足す
-	void pt_add(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept;
+	inline void pt_add(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept;
 	// 位置にX軸とY軸の値を足す
-	void pt_add(const D2D1_POINT_2F a, const double x, const double y, D2D1_POINT_2F& c) noexcept;
+	inline void pt_add(const D2D1_POINT_2F a, const double x, const double y, D2D1_POINT_2F& c) noexcept;
 	// 二点の中点を得る.
-	void pt_avg(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept;
+	inline void pt_avg(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept;
 	// 二点で囲まれた方形を得る.
 	void pt_bound(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
 	// 二点の内積を得る.
-	double pt_dot(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept;
-	// 部位が原点を含むか調べる.
+	//double pt_dot(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept;
+	// 図形の部位が位置 { 0,0 } を含むか判定する.
 	bool pt_in_anch(const D2D1_POINT_2F a_pos, const double a_len) noexcept;
-	// 部位が位置を含むか調べる.
+	// 図形の部位が位置を含むか判定する.
 	bool pt_in_anch(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos, const double a_len) noexcept;
-	// だ円が位置を含むか調べる.
+	// だ円が位置を含むか判定する.
 	bool pt_in_elli(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept;
-	// 線分が位置を含むか, 太さも考慮して調べる.
+	// 線分が位置を含むか, 太さも考慮して判定する.
 	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width) noexcept;
-	// 四へん形が位置を含むか調べる.
-	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t n, const D2D1_POINT_2F q_pos[]) noexcept;
-	// 方形が位置を含むか調べる.
+	// 多角形が位置を含むか判定する.
+	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t p_cnt, const D2D1_POINT_2F p_pos[]) noexcept;
+	// 方形が位置を含むか判定する.
 	bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept;
 	// 指定した位置を含むよう, 方形を拡大する.
 	void pt_inc(const D2D1_POINT_2F a, D2D1_POINT_2F& r_min, D2D1_POINT_2F& r_max) noexcept;
-	// 二点を比べてそれぞれの大きい値を持つ位置を得る.
-	void pt_max(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& r_min) noexcept;
-	// 二点を比べてそれぞれの小さい値を持つ位置を得る.
-	void pt_min(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& r_min) noexcept;
+	// 二点のそれぞれ大きい値を持つ位置を得る.
+	inline void pt_max(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& r_min) noexcept;
+	// 二点のそれぞれ小さい値を持つ位置を得る.
+	inline void pt_min(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& r_min) noexcept;
 	// 位置をスカラー倍に丸める.
-	void pt_round(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& round) noexcept;
+	inline void pt_round(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& round) noexcept;
 	// 位置にスカラー値を掛け, 別の位置を足す.
-	void pt_scale(const D2D1_POINT_2F a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& scale) noexcept;
+	inline void pt_mul(const D2D1_POINT_2F a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& scale) noexcept;
 	// 位置にスカラー値を掛ける.
-	void pt_scale(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& scale) noexcept;
+	inline void pt_mul(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& scale) noexcept;
 	// 寸法に値を掛ける.
-	void pt_scale(const D2D1_SIZE_F a, const double b, D2D1_SIZE_F& scale) noexcept;
+	inline void pt_mul(const D2D1_SIZE_F a, const double b, D2D1_SIZE_F& scale) noexcept;
 	// 点にスカラー値を掛け, 別の位置を足す.
-	void pt_scale(const Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept;
+	inline void pt_mul(const Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept;
 	// 位置から位置を引く.
-	void pt_sub(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& sub) noexcept;
+	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& sub) noexcept;
 	// 位置から大きさを引く.
-	void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& sub) noexcept;
+	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& sub) noexcept;
 	// 矢じりの寸法を読み込む.
 	void read(ARROW_SIZE& value, DataReader const& dt_reader);
 	// 矢じりの形式をデータリーダーから読み込む.
@@ -428,13 +430,13 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_text_margin(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
 		// 文字範囲を得る
 		virtual bool get_text_range(DWRITE_TEXT_RANGE& /*value*/) const noexcept { return false; }
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept { return ANCH_TYPE::ANCH_SHEET; }
-		// 範囲に含まれるか調べる.
+		// 範囲に含まれるか判定する.
 		virtual bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept { return false; }
-		// 消去フラグを調べる.
+		// 消去フラグを判定する.
 		virtual bool is_deleted(void) const noexcept { return false; }
-		// 選択フラグを調べる.
+		// 選択フラグを判定する.
 		virtual bool is_selected(void) const noexcept { return false; }
 		// 差分だけ移動する.
 		virtual	void move(const D2D1_POINT_2F /*d*/) {}
@@ -512,7 +514,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 
 	using S_LIST_T = std::list<struct Shape*>;
-	// 使用可能な書体名か調べる.
+	// 使用可能な書体名か判定する.
 	bool s_list_available_font(const S_LIST_T& s_list, wchar_t*& unavailable_font) noexcept;
 	// 最後の図形をリストから得る.
 	Shape* s_list_back(S_LIST_T const& s_list) noexcept;
@@ -587,9 +589,9 @@ namespace winrt::GraphPaper::implementation
 
 		// 用紙の属性
 
-		D2D1_COLOR_F m_sheet_color = S_WHITE;	// 背景色 (MainPage のコンストラクタで設定)
-		double m_sheet_scale = 1.0;	// 拡大率
-		D2D1_SIZE_F	m_sheet_size;	// 大きさ (MainPage のコンストラクタで設定)
+		D2D1_COLOR_F m_sheet_main_color = S_WHITE;	// 背景色 (MainPage のコンストラクタで設定)
+		double m_sheet_main_scale = 1.0;	// 拡大率
+		D2D1_SIZE_F	m_sheet_main_size;	// 大きさ (MainPage のコンストラクタで設定)
 
 		//------------------------------
 		// shape_sheet.cpp
@@ -746,15 +748,15 @@ namespace winrt::GraphPaper::implementation
 		void get_min_pos(D2D1_POINT_2F& value) const noexcept;
 		// 開始位置を得る.
 		bool get_start_pos(D2D1_POINT_2F& value) const noexcept;
-		// 文字列図形を含むか調べる.
+		// 文字列図形を含むか判定する.
 		bool has_text(void) noexcept;
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
-		// 範囲に含まれるか調べる.
+		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
-		// 消去フラグを調べる.
+		// 消去フラグを判定する.
 		bool is_deleted(void) const noexcept;
-		// 選択フラグを調べる.
+		// 選択フラグを判定する.
 		bool is_selected(void) const noexcept;
 		// 差分だけ移動する
 		void move(const D2D1_POINT_2F diff);
@@ -810,13 +812,13 @@ namespace winrt::GraphPaper::implementation
 		bool get_stroke_style(D2D1_DASH_STYLE& value) const noexcept;
 		// 線枠の太さを得る.
 		bool get_stroke_width(double& value) const noexcept;
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept;
-		// 範囲に含まれるか調べる.
+		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept;
-		// 消去フラグを調べる.
+		// 消去フラグを判定する.
 		bool is_deleted(void) const noexcept { return m_deleted; }
-		// 選択フラグを調べる.
+		// 選択フラグを判定する.
 		bool is_selected(void) const noexcept { return m_selected; }
 		// 差分だけ移動する.
 		virtual	void move(const D2D1_POINT_2F diff);
@@ -866,9 +868,9 @@ namespace winrt::GraphPaper::implementation
 		~ShapeLine(void);
 		// 表示する.
 		void draw(SHAPE_DX& dx);
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
-		// 範囲に含まれるか調べる.
+		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 矢じりの寸法を得る.
 		bool get_arrow_size(ARROW_SIZE& size) const noexcept;
@@ -910,11 +912,11 @@ namespace winrt::GraphPaper::implementation
 		ShapeRect(DataReader const& dt_reader);
 		// 表示する.
 		void draw(SHAPE_DX& dx);
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
-		// 位置を含むか調べる.
+		// 図形の部位が位置を含むか判定する.
 		uint32_t hit_test_anchor(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
-		// 範囲に含まれるか調べる.
+		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 塗りつぶしの色を得る.
 		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
@@ -946,7 +948,7 @@ namespace winrt::GraphPaper::implementation
 		~ShapeRuler(void);
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 図形を作成する.
 		ShapeRuler(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr);
@@ -977,7 +979,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// データライターに SVG タグとして書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
@@ -1000,7 +1002,7 @@ namespace winrt::GraphPaper::implementation
 		ShapeRRect(DataReader const& dt_reader);
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
@@ -1025,9 +1027,8 @@ namespace winrt::GraphPaper::implementation
 		// 折れ線のひな型
 		//------------------------------
 
-		uint32_t hit_test_anch(const D2D1_POINT_2F t_pos, const double a_len, const size_t m, D2D1_POINT_2F v_pos[], size_t& k) const noexcept;
 		// パスジオメトリを作成する.
-		virtual void create_path_geometry(ID2D1Factory3* /*d2d_factory*/) {}
+		virtual void create_path_geometry(ID2D1Factory3* const/*d_factory*/) {}
 		// 図形を作成する.
 		ShapePath(const size_t n, const ShapeSheet* attr) : ShapeStroke(n, attr) {}
 		// 図形をデータリーダーから読み込む.
@@ -1053,14 +1054,14 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// パスジオメトリを作成する.
-		void create_path_geometry(ID2D1Factory3* d2d_factory);
+		void create_path_geometry(ID2D1Factory3* const d_factory);
 		// 表示する
 		void draw(SHAPE_DX& dx);
 		// 塗りつぶし色を得る.
 		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
-		// 範囲に含まれるか調べる.
+		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 値を塗りつぶし色に格納する.
 		void set_fill_color(const D2D1_COLOR_F& value) noexcept;
@@ -1093,16 +1094,16 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// パスジオメトリを作成する.
-		void create_path_geometry(ID2D1Factory3* d2d_factory);
+		void create_path_geometry(ID2D1Factory3* const d_factory);
 		// 表示する.
 		void draw(SHAPE_DX& dx);
 		// 矢じりの寸法を得る
 		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
 		// 矢じりの形式を得る.
 		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
-		// 範囲に含まれるか調べる.
+		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 値を矢じりの寸法に格納する.
 		void set_arrow_size(const ARROW_SIZE& value);
@@ -1190,11 +1191,11 @@ namespace winrt::GraphPaper::implementation
 		bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& value) const noexcept;
 		// 文字範囲を得る.
 		bool get_text_range(DWRITE_TEXT_RANGE& value) const noexcept;
-		// 位置を含むか調べる.
+		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
-		// 範囲に含まれるか調べる.
+		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
-		// 有効な書体名か調べ, 有効なら, もとの書体名を破棄し, 有効な書体名要素へのポインターと置き換える.
+		// 有効な書体名か判定し, 有効ならもとの書体名を破棄し, 有効な書体名要素へのポインターと置き換える.
 		static bool is_available_font(wchar_t*& font);
 		// 有効な書体名の配列を破棄する.
 		static void release_available_fonts(void);
@@ -1235,5 +1236,269 @@ namespace winrt::GraphPaper::implementation
 		// データライターに SVG タグとして書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
 	};
+
+	// 矢じりの寸法が同じか判定する.
+	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept
+	{
+		return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) && equal(a.m_offset, b.m_offset);
+	}
+
+	// 矢じりの形式が同じか判定する.
+	inline bool equal(const ARROW_STYLE a, const ARROW_STYLE b) noexcept
+	{
+		return a == b;
+	}
+
+	// ブール値が同じか判定する.
+	inline bool equal(const bool a, const bool b) noexcept
+	{
+		return a == b;
+	}
+
+	// 色が同じか判定する.
+	inline bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept
+	{
+		return equal_color_comp(a.a, b.a) && equal_color_comp(a.r, b.r) && equal_color_comp(a.g, b.g) && equal_color_comp(a.b, b.b);
+	}
+
+	// 破線の形式が同じか判定する.
+	inline bool equal(const D2D1_DASH_STYLE a, const D2D1_DASH_STYLE b) noexcept
+	{
+		return a == b;
+	}
+
+	// 位置が同じか判定する.
+	inline bool equal(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept
+	{
+		return equal(a.x, b.x) && equal(a.y, b.y);
+	}
+
+	// 寸法が同じか判定する.
+	inline bool equal(const D2D1_SIZE_F a, const D2D1_SIZE_F b) noexcept
+	{
+		return equal(a.width, b.width) && equal(a.height, b.height);
+	}
+
+	// 倍精度浮動小数が同じか判定する.
+	inline bool equal(const double a, const double b) noexcept
+	{
+		return fabs(a - b) <= FLT_EPSILON * fmax(1.0, fmax(fabs(a), fabs(b)));
+	}
+
+	// 書体の伸縮が同じか判定する.
+	inline bool equal(const DWRITE_FONT_STRETCH a, const DWRITE_FONT_STRETCH b) noexcept
+	{
+		return a == b;
+	}
+
+	// 書体の字体が同じか判定する.
+	inline bool equal(const DWRITE_FONT_STYLE a, const DWRITE_FONT_STYLE b) noexcept
+	{
+		return a == b;
+	}
+
+	// 書体の太さが同じか判定する.
+	inline bool equal(const DWRITE_FONT_WEIGHT a, const DWRITE_FONT_WEIGHT b) noexcept
+	{
+		return a == b;
+	}
+
+	// 段落の整列が同じか判定する.
+	inline bool equal(const DWRITE_PARAGRAPH_ALIGNMENT a, const DWRITE_PARAGRAPH_ALIGNMENT b) noexcept
+	{
+		return a == b;
+	}
+
+	// 文字列の整列が同じか判定する.
+	inline bool equal(const DWRITE_TEXT_ALIGNMENT a, const DWRITE_TEXT_ALIGNMENT b) noexcept
+	{
+		return a == b;
+	}
+
+	// 文字範囲が同じか判定する.
+	inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept
+	{
+		return a.startPosition == b.startPosition && a.length == b.length;
+	}
+
+	// 単精度浮動小数が同じか判定する.
+	inline bool equal(const float a, const float b) noexcept
+	{
+		return fabs(a - b) <= FLT_EPSILON * fmax(1.0f, fmax(fabs(a), fabs(b)));
+	}
+
+	// 方眼の形式が同じか判定する.
+	inline bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept
+	{
+		return a == b;
+	}
+
+	// 方眼の表示が同じか判定する.
+	inline bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept
+	{
+		return a == b;
+	}
+
+	// 破線の配置が同じか判定する.
+	inline bool equal(const STROKE_PATT& a, const STROKE_PATT& b) noexcept
+	{
+		return equal(a.m_[0], b.m_[0]) && equal(a.m_[1], b.m_[1]) && equal(a.m_[2], b.m_[2]) && equal(a.m_[3], b.m_[3]) && equal(a.m_[4], b.m_[4]) && equal(a.m_[5], b.m_[5]);
+	}
+
+	// 整数が同じか判定する.
+	inline bool equal(const uint32_t a, const uint32_t b) noexcept
+	{
+		return a == b;
+	}
+
+	// 文字列が同じか判定する.
+	inline bool equal(const wchar_t* a, const wchar_t* b) noexcept
+	{
+		return a == b || (a != nullptr && b != nullptr && wcscmp(a, b) == 0);
+	}
+
+	// 文字列が同じか判定する.
+	inline bool equal(winrt::hstring const& a, const wchar_t* b) noexcept
+	{
+		return a == (b == nullptr ? L"" : b);
+	}
+
+	// 色の成分が同じか判定する.
+	inline bool equal_color_comp(const FLOAT a, const FLOAT b) noexcept
+	{
+		return fabs(b - a) * 128.0f < 1.0f;
+	}
+
+	// ベクトルの長さ (の自乗値) を得る
+	// a	ベクトル
+	// 戻り値	長さ (の自乗値) 
+	inline double pt_abs2(const D2D1_POINT_2F a) noexcept
+	{
+		const double ax = a.x;
+		const double ay = a.y;
+		return ax * ax + ay * ay;
+	}
+
+	// 位置を位置に足す
+	inline void pt_add(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
+	{
+		c.x = a.x + b.x;
+		c.y = a.y + b.y;
+	}
+
+	// スカラー値を位置に足す
+	inline void pt_add(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept
+	{
+		c.x = static_cast<FLOAT>(a.x + b);
+		c.y = static_cast<FLOAT>(a.y + b);
+	}
+
+	// 2 つの値を位置に足す
+	inline void pt_add(const D2D1_POINT_2F a, const double x, const double y, D2D1_POINT_2F& b) noexcept
+	{
+		b.x = static_cast<FLOAT>(a.x + x);
+		b.y = static_cast<FLOAT>(a.y + y);
+	}
+
+	// 二点間の中点を得る.
+	inline void pt_avg(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
+	{
+		c.x = static_cast<FLOAT>((a.x + b.x) * 0.5);
+		c.y = static_cast<FLOAT>((a.y + b.y) * 0.5);
+	}
+
+	// 二点の位置を比べてそれぞれ大きい値を得る.
+	// a	比べる一方の位置
+	// b	比べるもう一方の位置
+	// c	得られた位置
+	inline void pt_max(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
+	{
+		c.x = a.x > b.x ? a.x : b.x;
+		c.y = a.y > b.y ? a.y : b.y;
+	}
+
+	// 二点の位置を比べてそれぞれ小さい値を得る.
+	// a	比べるられる一方の位置
+	// b	もう一方の位置
+	// c	得られた位置
+	inline void pt_min(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
+	{
+		c.x = a.x < b.x ? a.x : b.x;
+		c.y = a.y < b.y ? a.y : b.y;
+	}
+
+	// 位置をスカラー倍に丸める.
+	// a	丸められる位置
+	// b	丸めるスカラー値
+	// c	得られた位置
+	inline void pt_round(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept
+	{
+		c.x = static_cast<FLOAT>(std::round(a.x / b) * b);
+		c.y = static_cast<FLOAT>(std::round(a.y / b) * b);
+	}
+
+	// 位置にスカラーを掛けて, 位置を加える.
+	// a	掛けられる位置
+	// b	掛けるスカラー値
+	// c	加える位置
+	// d	得られた位置
+	inline void pt_mul(const D2D1_POINT_2F a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
+	{
+		d.x = static_cast<FLOAT>(a.x * b + c.x);
+		d.y = static_cast<FLOAT>(a.y * b + c.y);
+	}
+
+	// 位置にスカラーを掛ける.
+	// a	掛けられる位置
+	// b	掛けるスカラー値
+	// c	得られた位置
+	inline void pt_mul(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept
+	{
+		c.x = static_cast<FLOAT>(a.x * b);
+		c.y = static_cast<FLOAT>(a.y * b);
+	}
+
+	// 寸法にスカラー値を掛ける.
+	// a	掛けられる寸法
+	// b	掛けるスカラー値
+	// c	得られた寸法
+	inline void pt_mul(const D2D1_SIZE_F a, const double b, D2D1_SIZE_F& c) noexcept
+	{
+		c.width = static_cast<FLOAT>(a.width * b);
+		c.height = static_cast<FLOAT>(a.height * b);
+	}
+
+	// 点にスカラーを掛けて, 位置を加える.
+	// a	掛けられる位置
+	// b	掛けるスカラー値
+	// c	加える位置
+	// d	得られた位置
+	inline void pt_mul(const Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
+	{
+		d.x = static_cast<FLOAT>(a.X * b + c.x);
+		d.y = static_cast<FLOAT>(a.Y * b + c.y);
+	}
+
+	// 位置から位置を引く.
+	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
+	{
+		c.x = a.x - b.x;
+		c.y = a.y - b.y;
+	}
+
+	// 位置から大きさを引く.
+	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& c) noexcept
+	{
+		c.x = a.x - b.width;
+		c.y = a.y - b.height;
+	}
+
+	// 色が不透明か判定する.
+	// a	判定する色
+	// 戻り値	不透明の場合 true
+	inline bool is_opaque(const D2D1_COLOR_F& a) noexcept
+	{
+		return (static_cast<uint32_t>(round(a.a * 255.0f)) & 0xff) > 0;
+	}
 
 }

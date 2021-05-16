@@ -938,7 +938,7 @@
     <value>2番目と10番目を強調</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_arrange.Text" xml:space="preserve">
+  <data name="mfsi_arrng.Text" xml:space="preserve">
     <value>並び替え</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>

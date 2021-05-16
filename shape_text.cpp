@@ -541,8 +541,8 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 位置を含むか調べる.
-	// t_pos	調べる位置
+	// 位置を含むか判定する.
+	// t_pos	判定する位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
@@ -551,7 +551,7 @@ namespace winrt::GraphPaper::implementation
 		if (anchor != ANCH_TYPE::ANCH_SHEET) {
 			return anchor;
 		}
-		// 文字列の範囲の左上が原点になるよう, 調べる位置を移動する.
+		// 文字列の範囲の左上が原点になるよう, 判定する位置を移動する.
 		D2D1_POINT_2F nw_pos;
 		ShapeStroke::get_min_pos(nw_pos);
 		pt_sub(t_pos, nw_pos, nw_pos);
@@ -568,7 +568,7 @@ namespace winrt::GraphPaper::implementation
 		return ShapeRect::hit_test(t_pos, a_len);
 	}
 
-	// 範囲に含まれるか調べる.
+	// 範囲に含まれるか判定する.
 	// a_min	範囲の左上位置
 	// a_max	範囲の右下位置
 	// 戻り値	含まれるなら true
@@ -598,7 +598,7 @@ namespace winrt::GraphPaper::implementation
 		return ShapeRect::in_area(a_min, a_max);
 	}
 
-	// 書体名が有効か調べる.
+	// 書体名が有効か判定する.
 	// font	書体名
 	// 戻り値	有効なら true
 	// 有効なら, 引数の書体名を破棄し, 有効な書体名の配列の要素と置き換える.
@@ -700,7 +700,7 @@ namespace winrt::GraphPaper::implementation
 	// 値を書体名に格納する.
 	void ShapeText::set_font_family(wchar_t* const value)
 	{
-		// 値が書体名と同じか調べる.
+		// 値が書体名と同じか判定する.
 		if (equal(m_font_family, value)) {
 			// 同じなら終了する.
 			return;

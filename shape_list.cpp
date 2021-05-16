@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 	// 次の図形とその距離を得る.
 	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept;
 
-	// 使用可能な書体名か調べる.
+	// 使用可能な書体名か判定する.
 	bool s_list_available_font(const S_LIST_T& s_list, wchar_t*& unavailable_font) noexcept
 	{
 		// 図形リストの各図形について以下を繰り返す.
@@ -224,9 +224,9 @@ namespace winrt::GraphPaper::implementation
 		return s_list_next(s_list.begin(), s_list.end(), _);
 	}
 
-	// 図形リストの中から, 位置を含む図形とその部位を調べる.
+	// 図形リストの中から, 位置を含む図形とその部位を判定する.
 	// s_list	図形リスト
-	// t_pos	調べる位置
+	// t_pos	判定する位置
 	// a_len	部位の大きさ
 	// s	位置を含む図形
 	// 戻り値	位置を含む図形の部位

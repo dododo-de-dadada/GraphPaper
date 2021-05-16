@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 				tip_pos = s_pos;
 			}
 			else {
-				pt_scale(diff, 1.0 - a_size.m_offset / d_len, s_pos, tip_pos);
+				pt_mul(diff, 1.0 - a_size.m_offset / d_len, s_pos, tip_pos);
 			}
 			pt_add(barbs_pos[0], tip_pos, barbs_pos[0]);
 			pt_add(barbs_pos[1], tip_pos, barbs_pos[1]);
@@ -37,13 +37,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの D2D1 パスジオメトリを作成する
-	// fa	D2D ファクトリー
+	// d_factory	D2D ファクトリー
 	// s_pos	軸の開始位置
 	// diff	軸の終了位置への差分
 	// style	矢じりの形式
 	// size	矢じりの寸法
 	// geo	作成されたパスジオメトリ
-	static void ln_create_arrow_geometry(ID2D1Factory3* fa, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo)
+	static void ln_create_arrow_geometry(ID2D1Factory3* const d_factory, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo)
 	{
 		D2D1_POINT_2F barbs[2];	// 矢じりの返しの端点
 		D2D1_POINT_2F tip_pos;	// 矢じりの先端点
@@ -51,12 +51,8 @@ namespace winrt::GraphPaper::implementation
 
 		if (ln_calc_arrowhead(s_pos, diff, a_size, barbs, tip_pos)) {
 			// ジオメトリパスを作成する.
-			winrt::check_hresult(
-				fa->CreatePathGeometry(geo)
-			);
-			winrt::check_hresult(
-				(*geo)->Open(sink.put())
-			);
+			winrt::check_hresult(d_factory->CreatePathGeometry(geo));
+			winrt::check_hresult((*geo)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(
 				barbs[0], 
@@ -120,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_selected()) {
 			D2D1_POINT_2F mid;
-			pt_scale(m_diff[0], 0.5, m_pos, mid);
+			pt_mul(m_diff[0], 0.5, m_pos, mid);
 			anchor_draw_rect(m_pos, dx);
 			anchor_draw_rect(mid, dx);
 			anchor_draw_rect(e_pos, dx);
@@ -155,8 +151,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 位置を含むか調べる.
-	// t_pos	調べる位置
+	// 位置を含むか判定する.
+	// t_pos	判定する位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
@@ -175,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 		return ANCH_TYPE::ANCH_SHEET;
 	}
 
-	// 範囲に含まれるか調べる.
+	// 範囲に含まれるか判定する.
 	// a_min	範囲の左上位置
 	// a_max	範囲の右下位置
 	// 戻り値	含まれるなら true

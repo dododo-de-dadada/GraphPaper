@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_main_sheet);
+		m_sample_sheet.set_to(&m_sheet_main);
 		const double val0 = m_sample_sheet.m_fill_color.r * COLOR_MAX;
 		const double val1 = m_sample_sheet.m_fill_color.g * COLOR_MAX;
 		const double val2 = m_sample_sheet.m_fill_color.b * COLOR_MAX;

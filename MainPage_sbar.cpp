@@ -206,10 +206,10 @@ namespace winrt::GraphPaper::implementation
 		const double by = wb.Y;
 		const double px = sheet_min().x;
 		const double py = sheet_min().y;
-		const double ps = m_main_sheet.m_sheet_scale;
+		const double ps = m_sheet_main.m_sheet_main_scale;
 		const double fx = (wx - bx - tx) / ps + sx + px;
 		const double fy = (wy - by - ty) / ps + sy + py;
-		const double g_len = m_main_sheet.m_grid_base + 1.0;
+		const double g_len = m_sheet_main.m_grid_base + 1.0;
 
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
@@ -228,7 +228,7 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	{
 		wchar_t buf[32];
 		const double dpi = sheet_dx().m_logical_dpi;
-		double g_len = m_main_sheet.m_grid_base + 1.0;
+		double g_len = m_sheet_main.m_grid_base + 1.0;
 		// ピクセル単位の長さを他の単位の文字列に変換する.
 		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), g_len, dpi, g_len, buf);
 		tk_sbar_grid().Text(winrt::hstring{ L"g:" } +buf);
@@ -238,13 +238,13 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::sbar_set_sheet(void)
 	{
 		const double dpi = sheet_dx().m_logical_dpi;
-		const double g_len = m_main_sheet.m_grid_base + 1.0;
+		const double g_len = m_sheet_main.m_grid_base + 1.0;
 		wchar_t buf[32];
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), m_main_sheet.m_sheet_size.width, dpi, g_len, buf);
+		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), m_sheet_main.m_sheet_main_size.width, dpi, g_len, buf);
 		tk_sbar_width().Text(winrt::hstring{ L"w:" } + buf);
 		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), m_main_sheet.m_sheet_size.height, dpi, g_len, buf);
+		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), m_sheet_main.m_sheet_main_size.height, dpi, g_len, buf);
 		tk_sbar_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 
@@ -321,7 +321,7 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::sbar_set_zoom(void)
 	{
 		wchar_t buf[32];
-		swprintf_s(buf, 31, FMT_ZOOM, m_main_sheet.m_sheet_scale * 100.0);
+		swprintf_s(buf, 31, FMT_ZOOM, m_sheet_main.m_sheet_main_scale * 100.0);
 		tk_sbar_zoom().Text(winrt::hstring{ L"z:" } +buf);
 	}
 

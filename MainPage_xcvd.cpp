@@ -180,12 +180,12 @@ namespace winrt::GraphPaper::implementation
 					auto text{ co_await Clipboard::GetContent().GetTextAsync() };
 					if (text.empty() != true) {
 						// 文字列が空でない場合,
-						auto t = new ShapeText(D2D1_POINT_2F{ 0.0F, 0.0F }, D2D1_POINT_2F{ 1.0F, 1.0F }, wchar_cpy(text.c_str()), &m_main_sheet);
+						auto t = new ShapeText(D2D1_POINT_2F{ 0.0F, 0.0F }, D2D1_POINT_2F{ 1.0F, 1.0F }, wchar_cpy(text.c_str()), &m_sheet_main);
 #if (_DEBUG)
 						debug_leak_cnt++;
 #endif
 						// 貼り付ける最大の大きさをウィンドウの大きさに制限する.
-						const double scale = m_main_sheet.m_sheet_scale;
+						const double scale = m_sheet_main.m_sheet_main_scale;
 						D2D1_SIZE_F max_size{
 							static_cast<FLOAT>(scp_sheet_panel().ActualWidth() / scale),
 							static_cast<FLOAT>(scp_sheet_panel().ActualHeight() / scale)
@@ -196,8 +196,8 @@ namespace winrt::GraphPaper::implementation
 							static_cast<FLOAT>((sb_vert().Value() + scp_sheet_panel().ActualHeight() * 0.5) / scale - t->m_diff[0].y * 0.5)
 						};
 						pt_add(s_pos, sheet_min(), s_pos);
-						if (m_main_sheet.m_grid_snap) {
-							const auto g_len = m_main_sheet.m_grid_base + 1.0;
+						if (m_sheet_main.m_grid_snap) {
+							const auto g_len = m_sheet_main.m_grid_base + 1.0;
 							pt_round(s_pos, g_len, s_pos);
 						}
 						t->set_start_pos(s_pos);
@@ -225,7 +225,7 @@ namespace winrt::GraphPaper::implementation
 		co_await context;
 	}
 
-	// クリップボードにデータが含まれているか調べる.
+	// クリップボードにデータが含まれているか判定する.
 	bool MainPage::xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const
 	{
 		// DataPackageView::Contains を使用すると, 次の内部エラーが発生する.

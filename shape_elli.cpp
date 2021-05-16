@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 半径を求める.
 		D2D1_POINT_2F rad;
-		pt_scale(m_diff[0], 0.5, rad);
+		pt_mul(m_diff[0], 0.5, rad);
 		// 中心点を求める.
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
@@ -60,8 +60,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 位置を含むか調べる.
-	// t_pos	調べる位置
+	// 位置を含むか判定する.
+	// t_pos	判定する位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
@@ -73,7 +73,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 半径を得る.
 		D2D1_POINT_2F rad;
-		pt_scale(m_diff[0], 0.5, rad);
+		pt_mul(m_diff[0], 0.5, rad);
 		// 中心点を得る.
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
@@ -86,7 +86,7 @@ namespace winrt::GraphPaper::implementation
 			rad.y = fabsf(rad.y);
 		//}
 		if (is_opaque(m_stroke_color)) {
-			// 位置がだ円の外側にあるか調べる.
+			// 位置がだ円の外側にあるか判定する.
 			// 枠の太さが部位の大きさ未満ならば,
 			// 部位の大きさを枠の太さに格納する.
 			const double s_width = max(m_stroke_width, a_len);
@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 				// ANCH_SHEET を返す.
 				return ANCH_TYPE::ANCH_SHEET;
 			}
-			// 位置がだ円の枠上にあるか調べる.
+			// 位置がだ円の枠上にあるか判定する.
 			D2D1_POINT_2F r_inner;
 			// 外径から枠の太さを引いた値を内径に格納する.
 			pt_add(r_outer, -s_width, r_inner);
@@ -116,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (is_opaque(m_fill_color)) {
-			// 位置がだ円の内側にあるか調べる.
+			// だ円に位置が含まれるか判定する.
 			if (pt_in_elli(t_pos, c_pos, rad.x, rad.y)) {
 				return ANCH_TYPE::ANCH_FILL;
 			}
@@ -130,7 +130,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write_svg;
 
 		D2D1_POINT_2F rad;
-		pt_scale(m_diff[0], 0.5, rad);
+		pt_mul(m_diff[0], 0.5, rad);
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
 		write_svg("<ellipse ", dt_writer);

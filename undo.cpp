@@ -56,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 		s_shape_sheet = s_layout;
 	}
 
-	// 操作を実行すると値が変わるか調べる.
+	// 操作を実行すると値が変わるか判定する.
 	bool UndoAnchor::changed(void) const noexcept
 	{
 		using winrt::GraphPaper::implementation::equal;
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 		undo_write_shape(m_dst_shape, dt_writer);
 	}
 
-	// 操作を実行すると値が変わるか調べる.
+	// 操作を実行すると値が変わるか判定する.
 	template <UNDO_OP U>
 	bool UndoAttr<U>::changed(void) const noexcept
 	{

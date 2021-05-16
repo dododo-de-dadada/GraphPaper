@@ -6,13 +6,13 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// D2D ストローク特性を作成する.
-	static void create_stroke_style(ID2D1Factory3 *d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style);
+	static void create_stroke_style(ID2D1Factory3* const d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style);
 
 	// D2D ストローク特性を作成する.
 	// d_style	破線の種類
 	// s_patt	破線の配置配列
 	// s_style	作成されたストローク特性
-	static void create_stroke_style(ID2D1Factory3* d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style)
+	static void create_stroke_style(ID2D1Factory3* const d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style)
 	{
 		D2D1_STROKE_STYLE_PROPERTIES prop{
 			D2D1_CAP_STYLE_SQUARE,	// startCap
@@ -155,14 +155,14 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 位置を含むか調べる.
+	// 位置を含むか判定する.
 	// 戻り値	つねに ANCH_SHEET
 	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept
 	{
 		return ANCH_TYPE::ANCH_SHEET;
 	}
 
-	// 範囲に含まれるか調べる.
+	// 範囲に含まれるか判定する.
 	// 戻り値	つねに false
 	bool ShapeStroke::in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept
 	{

@@ -38,9 +38,9 @@ namespace winrt::GraphPaper::implementation
 		auto dc = m_sample_dx.m_d2dContext.get();
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
-		dc->Clear(m_sample_sheet.m_sheet_color);
+		dc->Clear(m_sample_sheet.m_sheet_main_color);
 		D2D1_POINT_2F offset;
-		offset.x = static_cast<FLOAT>(std::fmod(m_sample_sheet.m_sheet_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0));
+		offset.x = static_cast<FLOAT>(std::fmod(m_sample_sheet.m_sheet_main_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0));
 		offset.y = offset.x;
 		if (m_sample_sheet.m_grid_show == GRID_SHOW::BACK) {
 			m_sample_sheet.draw_grid(m_sample_dx, offset);
@@ -63,11 +63,11 @@ namespace winrt::GraphPaper::implementation
 		if (m_sample_dx.m_dxgi_swap_chain != nullptr) {
 			m_sample_dx.m_dxgi_swap_chain = nullptr;
 		}
-		m_sample_sheet.set_to(&m_main_sheet);
+		m_sample_sheet.set_to(&m_sheet_main);
 		const auto w = scp_sample_panel().ActualWidth();
 		const auto h = scp_sample_panel().ActualHeight();
-		m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(w);
-		m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(h);
+		m_sample_sheet.m_sheet_main_size.width = static_cast<FLOAT>(w);
+		m_sample_sheet.m_sheet_main_size.height = static_cast<FLOAT>(h);
 		m_sample_dx.SetSwapChainPanel(scp_sample_panel());
 		if (m_sample_type != SAMP_TYPE::NONE) {
 			const auto padding = w * 0.125;

@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::scroll_set(const double aw, const double ah)
 	{
 		constexpr double SB_SIZE = 16.0;
-		const auto ps = m_main_sheet.m_sheet_scale;	// 用紙の表示倍率
+		const auto ps = m_sheet_main.m_sheet_main_scale;	// 用紙の表示倍率
 		const double vw = aw / ps;	// 見えている部分の幅
 		const double vh = ah / ps;	// 見えている部分の高さ
 		const auto p_min = sheet_min();
@@ -113,7 +113,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(v_min.x + vw),
 			static_cast<FLOAT>(v_min.y + vh)
 		};
-		// テスト行列の方形が, ビューポートに含まれるか調べ,
+		// テスト行列の方形が, ビューポートに含まれるか判定し,
 		// 含まれる方形がひとつでもあれば false を返す.
 		D2D1_POINT_2F r_min{};
 		D2D1_POINT_2F r_max{};

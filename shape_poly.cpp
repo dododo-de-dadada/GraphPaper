@@ -16,10 +16,10 @@ namespace winrt::GraphPaper::implementation
 	// 直行するベクトルを得る.
 	static D2D1_POINT_2F poly_pt_orth(const D2D1_POINT_2F vec) { return { -vec.y, vec.x }; }
 
-	// 多角形の各辺が位置を含むか調べる.
+	// 多角形の各辺が位置を含むか判定する.
 	static bool poly_test_side(const D2D1_POINT_2F t_pos, const size_t m, const D2D1_POINT_2F q_pos[], const D2D1_POINT_2F n_vec[], const double exp, D2D1_POINT_2F q_exp[]) noexcept;
 
-	// 多角形の各角が位置を含むか調べる.
+	// 多角形の各角が位置を含むか判定する.
 	static bool poly_test_corner(const D2D1_POINT_2F t_pos, const size_t m, const D2D1_POINT_2F exp[], const D2D1_POINT_2F n_vec[], const double ext) noexcept;
 
 	//	多角形の各辺の法線ベクトルを得る.
@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 				q_cnt++;
 			}
 			// 差分と直行するベクトルを正規化して法線ベクトルに格納する.
-			pt_scale(poly_pt_orth(q_sub), 1.0 / s_len[i], n_vec[i]);
+			pt_mul(poly_pt_orth(q_sub), 1.0 / s_len[i], n_vec[i]);
 		}
 		if (q_cnt == 1) {
 			// すべての頂点が重なったなら, false を返す.
@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 				pt_add(n_vec[prev], n_vec[next], n_vec[i]);
 				auto len = sqrt(pt_abs2(n_vec[i]));
 				if (len > FLT_MIN) {
-					pt_scale(n_vec[i], 1.0 / len, n_vec[i]);
+					pt_mul(n_vec[i], 1.0 / len, n_vec[i]);
 				}
 				else {
 					// 合成ベクトルがゼロベクトルになるなら,
@@ -75,21 +75,21 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 多角形の各辺が位置を含むか調べる.
-	// t_pos	調べる位置
-	// m	頂点の数
+	// 多角形の各辺が位置を含むか判定する.
+	// t_pos	判定する位置
+	// v_cnt	頂点の数
 	// v_pos	頂点の配列 [m]
 	// n_vec	各辺の法線ベクトルの配列 [m]
 	// s_width	辺の太さ
 	// exp_side	拡張した辺の配列 [m × 4]
-	static bool poly_test_side(const D2D1_POINT_2F t_pos, const size_t m, const D2D1_POINT_2F v_pos[], const D2D1_POINT_2F n_vec[], const double s_width, D2D1_POINT_2F exp_side[]) noexcept
+	static bool poly_test_side(const D2D1_POINT_2F t_pos, const size_t v_cnt, const D2D1_POINT_2F v_pos[], const D2D1_POINT_2F n_vec[], const double s_width, D2D1_POINT_2F exp_side[]) noexcept
 	{
-		for (size_t i = 0; i < m; i++) {
+		for (size_t i = 0; i < v_cnt; i++) {
 			// 辺の片方の端点を法線ベクトルにそって
 			// 太さの半分だけ移動した位置を
 			// 拡張した辺に格納する.
 			D2D1_POINT_2F nor;
-			pt_scale(n_vec[i], s_width, nor);
+			pt_mul(n_vec[i], s_width, nor);
 			const auto j = i * 4;
 			pt_add(v_pos[i], nor, exp_side[j + 0]);
 			// 逆方向にも移動し, 拡張した辺に格納する.
@@ -97,11 +97,11 @@ namespace winrt::GraphPaper::implementation
 			// 辺のもう一方の端点を法線ベクトルにそって
 			// 太さの半分だけ移動した位置を
 			// 拡張した辺に格納する.
-			const auto k = (i + 1) % m;
+			const auto k = (i + 1) % v_cnt;
 			pt_sub(v_pos[k], nor, exp_side[j + 2]);
 			// 逆方向にも移動し, 拡張した辺に格納する.
 			pt_add(v_pos[k], nor, exp_side[j + 3]);
-			// 位置が拡張した辺に含まれるか調べる.
+			// 位置が拡張した辺に含まれるか判定する.
 			if (pt_in_poly(t_pos, 4, exp_side + j)) {
 				// 含まれるなら true を返す.
 				return true;
@@ -110,18 +110,18 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	//	多角形の各角が位置を含むか調べる.
-	//	t_pos	調べる位置
-	// 	m	辺の数
+	//	多角形の各角が位置を含むか判定する.
+	//	t_pos	判定する位置
+	// 	exp_cnt	辺の数
 	//	exp_side	拡張した辺の配列 [m × 4]
 	//	n_vec	各辺の法線ベクトルの配列 [m]
 	//	ext_len	角を超えて延長する長さ
-	static bool poly_test_corner(const D2D1_POINT_2F t_pos, const size_t m, const D2D1_POINT_2F exp_side[], const D2D1_POINT_2F n_vec[], const double ext_len) noexcept
+	static bool poly_test_corner(const D2D1_POINT_2F t_pos, const size_t exp_cnt, const D2D1_POINT_2F exp_side[], const D2D1_POINT_2F n_vec[], const double ext_len) noexcept
 	{
 		D2D1_POINT_2F ext_side[4];	// 拡張した辺をさらに延長した辺
 		D2D1_POINT_2F p_vec;	// 平行なベクトル
 
-		for (size_t i = 0, j = m - 1; i < m; j = i++) {
+		for (size_t i = 0, j = exp_cnt - 1; i < exp_cnt; j = i++) {
 			// ある頂点に隣接する辺について.
 			// 拡張した辺の端を, 延長した辺の端に格納する.
 			ext_side[0] = exp_side[4 * j + 3];
@@ -129,12 +129,12 @@ namespace winrt::GraphPaper::implementation
 			// 法線ベクトルと直行するベクトルを,
 			// 延長する長さの分だけ倍し,
 			// 平行なベクトルに格納する.
-			pt_scale(poly_pt_orth(n_vec[j]), ext_len, p_vec);
+			pt_mul(poly_pt_orth(n_vec[j]), ext_len, p_vec);
 			// 格納した位置を平行なベクトルに沿って延長し,
 			// 延長した辺のもう一方の端に格納する.
 			pt_sub(ext_side[1], p_vec, ext_side[2]);
 			pt_sub(ext_side[0], p_vec, ext_side[3]);
-			// 位置が延長した辺に含まれるか調べる.
+			// 位置が延長した辺に含まれるか判定する.
 			if (pt_in_poly(t_pos, 4, ext_side) != true) {
 				// 含まれないなら継続する.
 				continue;
@@ -146,12 +146,12 @@ namespace winrt::GraphPaper::implementation
 			// 法線ベクトルと直行するベクトル (先ほどとは逆方向) を得て,
 			// 角を延長する長さの分だけ倍し,
 			// 平行なベクトルに格納する.
-			pt_scale(poly_pt_orth(n_vec[i]), ext_len, p_vec);
+			pt_mul(poly_pt_orth(n_vec[i]), ext_len, p_vec);
 			// 格納した位置を平行なベクトルに沿って延長し,
 			// 延長した辺のもう一方の端に格納する.
 			pt_add(ext_side[3], p_vec, ext_side[0]);
 			pt_add(ext_side[2], p_vec, ext_side[1]);
-			// 位置が延長した辺に含まれるか調べる.
+			// 位置が延長した辺に含まれるか判定する.
 			if (pt_in_poly(t_pos, 4, ext_side)) {
 				// 含まれるなら true を返す.
 				return true;
@@ -161,7 +161,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// パスジオメトリを作成する.
-	void ShapePoly::create_path_geometry(ID2D1Factory3* d2d_factory)
+	void ShapePoly::create_path_geometry(ID2D1Factory3* const d_factory)
 	{
 		const size_t m = m_diff.size() + 1;	// 頂点の数 (差分の数 + 1)
 		std::vector<D2D1_POINT_2F> v_pos(m);	// 頂点の配列
@@ -172,7 +172,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(v_pos[i - 1], m_diff[i - 1], v_pos[i]);
 		}
 		winrt::com_ptr<ID2D1GeometrySink> sink;
-		winrt::check_hresult(d2d_factory->CreatePathGeometry(m_path_geom.put()));
+		winrt::check_hresult(d_factory->CreatePathGeometry(m_path_geom.put()));
 		m_path_geom->Open(sink.put());
 		sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
 		const auto figure_begin = is_opaque(m_fill_color)
@@ -229,8 +229,8 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 位置を含むか調べる.
-	// t_pos	調べる位置
+	// 位置を含むか判定する.
+	// t_pos	判定する位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
@@ -239,7 +239,7 @@ namespace winrt::GraphPaper::implementation
 		const size_t m = m_diff.size() + 1;	// 頂点の数 (差分の数 + 1)
 		std::vector<D2D1_POINT_2F> v_pos(m);	// 頂点の配列
 		size_t j = static_cast<size_t>(-1);	// 点を含む頂点の添え字
-		// 調べる位置が原点となるよう平行移動した四へん形の各頂点を得る.
+		// 判定する位置が原点となるよう平行移動した四へん形の各頂点を得る.
 		pt_sub(m_pos, t_pos, v_pos[0]);
 		if (pt_in_anch(v_pos[0], a_len)) {
 			j = 0;
@@ -255,26 +255,23 @@ namespace winrt::GraphPaper::implementation
 			return static_cast<uint32_t>(anch);
 		}
 		if (is_opaque(m_stroke_color)) {
-		//if (is_opaque(m_stroke_color) && k > 0) {
 			// 辺が不透明なら, 線の太さをもとに, 幅をもつ辺を計算する.
-			const auto width = max(max(m_stroke_width, a_len) * 0.5, 0.5);	// 幅
+			const auto e_width = max(max(m_stroke_width, a_len) * 0.5, 0.5);	// 拡張する幅
 
 			// 各辺の法線ベクトルを得る.
-			//std::vector<D2D1_POINT_2F> n_vec(k);	// 法線ベクトル
-			//poly_get_nor(k, v_pos.data(), n_vec.data());
 			std::vector<D2D1_POINT_2F> n_vec(m);	// 法線ベクトル
 			poly_get_nor(m, v_pos.data(), n_vec.data());
 
-			//	多角形の各辺が位置を含むか調べる.
+			// 多角形の各辺が位置を含むか判定する.
 			std::vector<D2D1_POINT_2F> q_exp(m * 4);	// 幅をもつ辺
-			if (poly_test_side(PZ, m, v_pos.data(), n_vec.data(), width, q_exp.data())) {
+			if (poly_test_side(PZ, m, v_pos.data(), n_vec.data(), e_width, q_exp.data())) {
 				// 含むなら ANCH_STROKE を返す.
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 
-			//	多角形の各角が位置を含むか調べる.
-			//	角を超えて延長する長さは辺の太さの 5 倍.
-			//	こうすれば, D2D の描画と一致する.
+			// 多角形の各角が位置を含むか判定する.
+			// 角を超えて延長する長さは辺の太さの 5 倍.
+			// こうすれば, D2D の描画と一致する.
 			const auto ext_len = m_stroke_width * 5.0;	// 延長する長さ
 			if (poly_test_corner(PZ, m, q_exp.data(), n_vec.data(), ext_len)) {
 				// 含むなら ANCH_STROKE を返す.
@@ -282,10 +279,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 辺が不透明, または位置が辺に含まれていないなら,
-		// 塗りつぶし色が不透明か調べる.
+		// 塗りつぶし色が不透明か判定する.
 		if (is_opaque(m_fill_color)) {
-			// 不透明なら, 位置が多角形に含まれるか調べる.
-			//if (pt_in_poly(PZ, k, v_pos.data())) {
 			if (pt_in_poly(PZ, m, v_pos.data())) {
 				// 含まれるなら ANCH_FILL を返す.
 				return ANCH_TYPE::ANCH_FILL;
@@ -294,7 +289,7 @@ namespace winrt::GraphPaper::implementation
 		return ANCH_TYPE::ANCH_SHEET;
 	}
 
-	// 範囲に含まれるか調べる.
+	// 範囲に含まれるか判定する.
 	// a_min	範囲の左上位置
 	// a_max	範囲の右下位置
 	// 戻り値	含まれるなら true
@@ -334,7 +329,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_pos.x = static_cast<FLOAT>(s_pos.x + 0.5 * diff.x);
 		m_pos.y = s_pos.y;
-		pt_scale(diff, 0.5, m_diff[0]);
+		pt_mul(diff, 0.5, m_diff[0]);
 		m_diff[1].x = -m_diff[0].x;
 		m_diff[1].y = m_diff[0].y;
 		m_diff[2].x = m_diff[1].x;

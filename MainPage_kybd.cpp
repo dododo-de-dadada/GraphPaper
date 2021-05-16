@@ -74,8 +74,8 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_bring_forward().IsEnabled()) {
-	// 	//arrange_bring_forward_click(nullptr, nullptr);
-	// 	arrange_order<S_LIST_T::reverse_iterator>();
+	// 	//arrng_bring_forward_click(nullptr, nullptr);
+	// 	arrng_order<S_LIST_T::reverse_iterator>();
 	// }
 	//}
 
@@ -85,8 +85,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (mfi_bring_to_front().IsEnabled()) {
 			constexpr auto FRONT = false;
-			arrange_to<FRONT>();
-			//arrange_bring_to_front_click(nullptr, nullptr);
+			arrng_to<FRONT>();
+			//arrng_bring_to_front_click(nullptr, nullptr);
 		}
 	}
 	*/
@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_send_backward().IsEnabled()) {
-	// 	arrange_send_backward_click(nullptr, nullptr);
+	// 	arrng_send_backward_click(nullptr, nullptr);
 	// }
 	//}
 
@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::ka_send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (mfi_send_to_back().IsEnabled()) {
-	// 	arrange_send_to_back_click(nullptr, nullptr);
+	// 	arrng_send_to_back_click(nullptr, nullptr);
 	// }
 	//}
 
@@ -242,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + 0 ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// if (m_main_sheet.m_sheet_scale != 1.0) {
+	// if (m_sheet_main.m_sheet_main_scale != 1.0) {
 	// 	mfi_zoom_reset_click(nullptr, nullptr);
 	// }
 	//}

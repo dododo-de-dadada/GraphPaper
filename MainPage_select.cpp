@@ -260,12 +260,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (s->is_selected()) {
 			// ‰Ÿ‚³‚ê‚½}Œ`‚ª‘I‘ğ‚³‚ê‚Ä‚¢‚éê‡,
-			m_main_sheet.set_to(s);
-			arrow_style_check_menu(m_main_sheet.m_arrow_style);
-			font_style_check_menu(m_main_sheet.m_font_style);
-			stroke_style_check_menu(m_main_sheet.m_stroke_style);
-			text_align_p_check_menu(m_main_sheet.m_text_align_p);
-			text_align_t_check_menu(m_main_sheet.m_text_align_t);
+			m_sheet_main.set_to(s);
+			arrow_style_check_menu(m_sheet_main.m_arrow_style);
+			font_style_check_menu(m_sheet_main.m_font_style);
+			stroke_style_check_menu(m_sheet_main.m_stroke_style);
+			text_align_p_check_menu(m_sheet_main.m_text_align_p);
+			text_align_t_check_menu(m_sheet_main.m_text_align_t);
 		}
 	}
 

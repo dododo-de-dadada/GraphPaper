@@ -15,7 +15,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「矢じりの種類」>「閉じた」が選択された.
 	void MainPage::arrow_filled_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_main_sheet.m_arrow_style == ARROW_STYLE::NONE) {
+		if (m_sheet_main.m_arrow_style == ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(true);
 			mfi_arrow_size_2().IsEnabled(true);
 		}
@@ -25,7 +25,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「矢じりの種類」>「なし」が選択された.
 	void MainPage::arrow_none_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_main_sheet.m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_sheet_main.m_arrow_style != ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(false);
 			mfi_arrow_size_2().IsEnabled(false);
 		}
@@ -35,7 +35,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「矢じりの種類」>「開いた」が選択された.
 	void MainPage::arrow_opened_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_main_sheet.m_arrow_style == ARROW_STYLE::NONE) {
+		if (m_sheet_main.m_arrow_style == ARROW_STYLE::NONE) {
 			mfi_arrow_size().IsEnabled(true);
 			mfi_arrow_size_2().IsEnabled(true);
 		}
@@ -66,7 +66,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
 			const double dpi = sheet_dx().m_logical_dpi;
-			const double g_len = m_main_sheet.m_grid_base + 1.0;
+			const double g_len = m_sheet_main.m_grid_base + 1.0;
 			conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
 			hdr = hdr + buf;
 		}
@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_main_sheet);
+		m_sample_sheet.set_to(&m_sheet_main);
 		const double val0 = m_sample_sheet.m_arrow_size.m_width / SLIDER_STEP;
 		const double val1 = m_sample_sheet.m_arrow_size.m_length / SLIDER_STEP;
 		const double val2 = m_sample_sheet.m_arrow_size.m_offset / SLIDER_STEP;

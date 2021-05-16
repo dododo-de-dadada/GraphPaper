@@ -22,8 +22,8 @@ namespace winrt::GraphPaper::implementation
 		const int o = 1;
 
 		for (int i = s; i < e; i++) {
-			if (m_main_sheet.m_sheet_scale <= ZOOM_LEVEL[i]) {
-				m_main_sheet.m_sheet_scale = ZOOM_LEVEL[i + o];
+			if (m_sheet_main.m_sheet_main_scale <= ZOOM_LEVEL[i]) {
+				m_sheet_main.m_sheet_main_scale = ZOOM_LEVEL[i + o];
 				sheet_panle_size();
 				sheet_draw();
 				sbar_set_zoom();
@@ -42,8 +42,8 @@ namespace winrt::GraphPaper::implementation
 		const int o = -1;
 
 		for (int i = s; i < e; i++) {
-			if (m_main_sheet.m_sheet_scale <= ZOOM_LEVEL[i]) {
-				m_main_sheet.m_sheet_scale = ZOOM_LEVEL[i + o];
+			if (m_sheet_main.m_sheet_main_scale <= ZOOM_LEVEL[i]) {
+				m_sheet_main.m_sheet_main_scale = ZOOM_LEVEL[i + o];
 				sheet_panle_size();
 				sheet_draw();
 				sbar_set_zoom();
@@ -57,10 +57,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ToolTipService;
 
-		if (m_main_sheet.m_sheet_scale == 1.0) {
+		if (m_sheet_main.m_sheet_main_scale == 1.0) {
 			return;
 		}
-		m_main_sheet.m_sheet_scale = 1.0;
+		m_sheet_main.m_sheet_main_scale = 1.0;
 		sheet_panle_size();
 		sheet_draw();
 		sbar_set_zoom();

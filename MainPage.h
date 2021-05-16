@@ -16,7 +16,7 @@
 //
 // MainPage.cpp	メインページの作成, アプリの終了
 // MainPage_app.cpp	アプリケーションの中断と再開
-// MainPage_arrange.cpp	図形の並び替え
+// MainPage_arrng.cpp	図形の並び替え
 // MainPage_arrow.cpp	矢じりの形式と寸法
 // MainPage_disp.cpp	表示デバイスのハンドラー
 // MainPage_file.cpp	ファイルの読み書き
@@ -251,7 +251,7 @@ namespace winrt::GraphPaper::implementation
 		// sheet
 
 		SHAPE_DX m_sheet_dx;		// 用紙の描画環境
-		ShapeSheet m_main_sheet;		// 用紙
+		ShapeSheet m_sheet_main;		// 用紙
 		D2D1_POINT_2F m_sheet_min{ 0.0F, 0.0F };		// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
 		D2D1_POINT_2F m_sheet_max{ 0.0F, 0.0F };		// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
@@ -336,22 +336,22 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction app_suspending_async(IInspectable const&, SuspendingEventArgs const& args);
 
 		//-------------------------------
-		// MainPage_arrange.cpp
+		// MainPage_arrng.cpp
 		// 図形の並び替え
 		//-------------------------------
 
 		// 選択された図形を次または前の図形と入れ替える.
-		template<typename T> void arrange_order(void);
+		template<typename T> void arrng_order(void);
 		// 選択された図形を最背面または最前面に移動する.
-		template<bool B> void arrange_to(void);
+		template<bool B> void arrng_to(void);
 		// 編集メニューの「前面に移動」が選択された.
-		void arrange_bring_forward_click(IInspectable const&, RoutedEventArgs const&);
+		void arrng_bring_forward_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「最前面に移動」が選択された.
-		void arrange_bring_to_front_click(IInspectable const&, RoutedEventArgs const&);
+		void arrng_bring_to_front_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「ひとつ背面に移動」が選択された.
-		void arrange_send_backward_click(IInspectable const&, RoutedEventArgs const&);
+		void arrng_send_backward_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「最背面に移動」が選択された.
-		void arrange_send_to_back_click(IInspectable const&, RoutedEventArgs const&);
+		void arrng_send_to_back_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_arrow.cpp
@@ -448,23 +448,23 @@ namespace winrt::GraphPaper::implementation
 
 		// 書体メニューの「字体」に印をつける.
 		void font_style_check_menu(const DWRITE_FONT_STYLE f_style);
-		//　書体メニューの「色」が選択された.
+		// 書体メニューの「色」が選択された.
 		IAsyncAction font_color_click_async(IInspectable const&, RoutedEventArgs const&);
-		//　書体メニューの「書体名」が選択された.
+		// 書体メニューの「書体名」が選択された.
 		IAsyncAction font_family_click_async(IInspectable const&, RoutedEventArgs const&);
-		//　書体メニューの「イタリック体」が選択された.
+		// 書体メニューの「イタリック体」が選択された.
 		void font_style_italic_click(IInspectable const&, RoutedEventArgs const&);
-		//　書体メニューの「標準」が選択された.
+		// 書体メニューの「標準」が選択された.
 		void font_style_normal_click(IInspectable const&, RoutedEventArgs const&);
-		//　書体メニューの「斜体」が選択された.
+		// 書体メニューの「斜体」が選択された.
 		void font_style_oblique_click(IInspectable const&, RoutedEventArgs const&);
-		//　書体メニューの「大きさ」が選択された.
+		// 書体メニューの「大きさ」が選択された.
 		IAsyncAction font_size_click_async(IInspectable const&, RoutedEventArgs const&);
-		//　書体メニューの「伸縮」が選択された.
+		// 書体メニューの「伸縮」が選択された.
 		IAsyncAction font_stretch_click_async(IInspectable const&, RoutedEventArgs const&);
-		//　書体メニューの「太さ」が選択された.
+		// 書体メニューの「太さ」が選択された.
 		IAsyncAction font_weight_click_async(IInspectable const&, RoutedEventArgs const&);
-		//　値をスライダーのヘッダーに格納する.
+		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void font_set_slider_header(const double value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
@@ -884,7 +884,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を一覧に追加する.
 		void summary_append(Shape* s);
 		// 一覧の中で図形を入れ替える.
-		void summary_arrange(Shape* s, Shape* t);
+		void summary_arrng(Shape* s, Shape* t);
 		// 図形一覧を消去する.
 		void summary_clear(void);
 		// 図形一覧パネルを閉じて消去する.
@@ -1014,7 +1014,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をグループ図形に追加して, その操作をスタックに積む.
 		void undo_push_append(ShapeGroup* g, Shape* s);
 		// 図形を入れ替えて, その操作をスタックに積む.
-		void undo_push_arrange(Shape* s, Shape* t);
+		void undo_push_arrng(Shape* s, Shape* t);
 		// 図形の頂点や制御点の位置をスタックに保存する.
 		void undo_push_anchor(Shape*, const uint32_t anchor);
 		// 図形を挿入して, その操作をスタックに積む.
@@ -1053,12 +1053,12 @@ namespace winrt::GraphPaper::implementation
 		void xcvd_delete_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「貼り付け」が選択された.
 		IAsyncAction xcvd_paste_click_async(IInspectable const&, RoutedEventArgs const&);
-		// クリップボードにデータが含まれているか調べる.
+		// クリップボードにデータが含まれているか判定する.
 		template <size_t Z> bool xcvd_contains(const winrt::hstring(&formats)[Z]) const
 		{
 			return xcvd_contains(formats, Z);
 		}
-		// クリップボードにデータが含まれているか調べる.
+		// クリップボードにデータが含まれているか判定する.
 		bool xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const;
 
 		//-------------------------------

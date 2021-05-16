@@ -15,10 +15,10 @@ namespace winrt::GraphPaper::implementation
 		m_dw_text_format = nullptr;
 	}
 
-	// ˆÊ’u‚ðŠÜ‚Þ‚©’²‚×‚é.
+	// ˆÊ’u‚ðŠÜ‚Þ‚©”»’è‚·‚é.
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		const auto anchor = hit_test_anchor(t_pos, a_len);
+		const auto anchor = ShapeRect::hit_test_anchor(t_pos, a_len);
 		if (anchor != ANCH_TYPE::ANCH_SHEET) {
 			return anchor;
 		}

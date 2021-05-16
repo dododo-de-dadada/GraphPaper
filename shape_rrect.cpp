@@ -218,8 +218,8 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 位置を含むか調べる.
-	// t_pos	調べる位置
+	// 位置を含むか判定する.
+	// t_pos	判定する位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
@@ -230,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 				// 角丸の中心点を得る.
 				D2D1_POINT_2F r_cen;
 				get_anch_pos(ANCH_ROUND[i], r_cen);
-				// 位置が角丸の部位に含まれるか調べる.
+				// 角丸の部位に位置が含まれるか判定する.
 				if (pt_in_anch(t_pos, r_cen, a_len)) {
 					// 含まれるなら角丸の部位を返す.
 					return ANCH_ROUND[i];

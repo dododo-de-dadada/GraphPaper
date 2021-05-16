@@ -300,7 +300,7 @@ namespace winrt::GraphPaper::implementation
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoAttr<UNDO_OP::ARROW_STYLE>)) {
 			// 線枠メニューの「矢じりの種類」に印をつける.
-			arrow_style_check_menu(m_main_sheet.m_arrow_style);
+			arrow_style_check_menu(m_sheet_main.m_arrow_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
@@ -308,15 +308,15 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_EMPH>)) {
 			// 用紙メニューの「方眼の強調」に印をつける.
-			grid_emph_check_menu(m_main_sheet.m_grid_emph);
+			grid_emph_check_menu(m_sheet_main.m_grid_emph);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_SHOW>)) {
 			// 用紙メニューの「方眼の表示」に印をつける.
-			grid_show_check_menu(m_main_sheet.m_grid_show);
+			grid_show_check_menu(m_sheet_main.m_grid_show);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
-			font_style_check_menu(m_main_sheet.m_font_style);
+			font_style_check_menu(m_sheet_main.m_font_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::SHEET_SIZE>)) {
 			// 用紙の大きさをステータスバーに格納する.
@@ -324,13 +324,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_STYLE>)) {
 			// 線枠メニューの「種類」に印をつける.
-			stroke_style_check_menu(m_main_sheet.m_stroke_style);
+			stroke_style_check_menu(m_sheet_main.m_stroke_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_T>)) {
-			text_align_t_check_menu(m_main_sheet.m_text_align_t);
+			text_align_t_check_menu(m_sheet_main.m_text_align_t);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_P>)) {
-			text_align_p_check_menu(m_main_sheet.m_text_align_p);
+			text_align_p_check_menu(m_sheet_main.m_text_align_p);
 		}
 	}
 
@@ -373,7 +373,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を入れ替えて, その操作をスタックに積む.
-	void MainPage::undo_push_arrange(Shape* s, Shape* t)
+	void MainPage::undo_push_arrng(Shape* s, Shape* t)
 	{
 		m_stack_undo.push_back(new UndoArrange2(s, t));
 	}
@@ -513,7 +513,7 @@ namespace winrt::GraphPaper::implementation
 	template<UNDO_OP U, typename T>
 	void MainPage::undo_push_set(T const& value)
 	{
-		m_stack_undo.push_back(new UndoAttr<U>(&m_main_sheet, value));
+		m_stack_undo.push_back(new UndoAttr<U>(&m_sheet_main, value));
 		auto flag = false;
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {

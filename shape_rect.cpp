@@ -50,9 +50,10 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 折れ線の図形の部位が位置を含むか判定する.
 	uint32_t ShapeRect::hit_test_anchor(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		// どの頂点が位置を含むか調べる.
+		// どの頂点が位置を含むか判定する.
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F a_pos;
 			get_anch_pos(ANCH_CORNER[i], a_pos);
@@ -60,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_CORNER[i];
 			}
 		}
-		// どの中点が位置を含むか調べる.
+		// どの中点が位置を含むか判定する.
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F a_pos;
 			get_anch_pos(ANCH_MIDDLE[i], a_pos);
@@ -71,8 +72,8 @@ namespace winrt::GraphPaper::implementation
 		return ANCH_TYPE::ANCH_SHEET;
 	}
 
-	// 位置を含むか調べる.
-	// t_pos	調べる位置
+	// 位置を含むか判定する.
+	// t_pos	判定する位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
@@ -171,7 +172,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 範囲に含まれるか調べる.
+	// 範囲に含まれるか判定する.
 	// a_min	範囲の左上位置
 	// a_max	範囲の右下位置
 	// 戻り値	含まれるなら true

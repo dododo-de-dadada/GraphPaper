@@ -12,7 +12,7 @@
             <!-- 情報フォントアイコンのグリフ -->
             <x:String x:Key="icon_info">&#xE946;</x:String>
             <x:String x:Key="icon_alert">&#xEA39;</x:String>
-            <x:String x:Key="icon_arrange">&#xE8CB;</x:String>
+            <x:String x:Key="icon_arrng">&#xE8CB;</x:String>
             <x:String x:Key="icon_conf">&#xE9CE;</x:String>
             <x:String x:Key="icon_save_as">&#xE792;</x:String>
             <x:String x:Key="icon_recent">&#xE81C;</x:String>
@@ -416,26 +416,26 @@
                         <KeyboardAccelerator Key="A" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_arrange" Text="Arrange">
+                <MenuFlyoutSubItem x:Uid="mfsi_arrng" Text="Arrange">
                     <MenuFlyoutSubItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_arrange}" />
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_arrng}" />
                     </MenuFlyoutSubItem.Icon>
-                    <MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="arrange_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
+                    <MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="arrng_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="End" Modifiers="Control" />
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward" Click="arrange_bring_forward_click" IsEnabled="false" Text="Bring Forward">
+                    <MenuFlyoutItem x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward" Click="arrng_bring_forward_click" IsEnabled="false" Text="Bring Forward">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="PageDown" Modifiers="Control" />
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_send_backward" x:Uid="mfi_send_backward" Click="arrange_send_backward_click" IsEnabled="false" Text="Send Backward" >
+                    <MenuFlyoutItem x:Name="mfi_send_backward" x:Uid="mfi_send_backward" Click="arrng_send_backward_click" IsEnabled="false" Text="Send Backward" >
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="PageUp" Modifiers="Control" />
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back" Click="arrange_send_to_back_click" IsEnabled="false" Text="Send to Back">
+                    <MenuFlyoutItem x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back" Click="arrng_send_to_back_click" IsEnabled="false" Text="Send to Back">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="Home" Modifiers="Control" />
                         </MenuFlyoutItem.KeyboardAccelerators>

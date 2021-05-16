@@ -558,7 +558,7 @@ namespace winrt::GraphPaper::implementation
 		UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #if defined(_DEBUG)
 		// コンパイルがデバッグビルドなら,
-		// D3D デバイスを作成できるか調べ, その結果を得る.
+		// D3D デバイスを作成できるか判定し, その結果を得る.
 		// ドライバータイプは D3D_DRIVER_TYPE_NULL を, 
 		// フラグは D3D11_CREATE_DEVICE_DEBUG を,
 		// SDK バージョンは D3D11_SDK_VERSION を,

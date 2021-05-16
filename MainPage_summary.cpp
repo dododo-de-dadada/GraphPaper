@@ -163,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 		if (t != nullptr) {
 			// 図形が表示されるよう用紙をスクロールする.
 			scroll_to(t);
-			m_main_sheet.set_to(t);
+			m_sheet_main.set_to(t);
 		}
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
@@ -199,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧の中で図形を入れ替える.
-	void MainPage::summary_arrange(Shape* s, Shape* t)
+	void MainPage::summary_arrng(Shape* s, Shape* t)
 	{
 		// 図形一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {

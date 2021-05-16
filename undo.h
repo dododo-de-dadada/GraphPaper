@@ -107,13 +107,13 @@ namespace winrt::GraphPaper::implementation
 
 		// 操作を破棄する.
 		virtual ~Undo() {}
-		// 操作を実行すると値が変わるか調べる.
+		// 操作を実行すると値が変わるか判定する.
 		virtual bool changed(void) const noexcept { return false; }
 		// 操作を実行する.
 		virtual void exec(void) {}
 		// 操作をデータライターから読み込む.
 		virtual void read(DataReader const& /*dt_reader*/) {}
-		// 図形を参照しているか調べる.
+		// 図形を参照しているか判定する.
 		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
 		// 参照する図形リストと用紙図形を格納する.
 		static void set(S_LIST_T* s_list, ShapeSheet* s_sheet) noexcept;
@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 		// 部位の位置
 		D2D1_POINT_2F m_anchor_pos;
 
-		// 操作を実行すると値が変わるか調べる.
+		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;
 		// 操作を実行する.
 		void exec(void);
@@ -153,13 +153,13 @@ namespace winrt::GraphPaper::implementation
 		// 入れ替え先の図形
 		Shape* m_dst_shape;
 
-		// 操作を実行すると値が変わるか調べる.
+		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept { return m_shape != m_dst_shape; }
 		// 入れ替える先の図形を得る.
 		Shape* dest(void) const noexcept { return m_dst_shape; }
 		// 操作を実行する.
 		void exec(void);
-		// 図形を参照しているか調べる.
+		// 図形を参照しているか判定する.
 		bool refer_to(const Shape* s) const noexcept { return Undo::refer_to(s) || m_dst_shape == s; };
 		// 図形の順番を入れ替える.
 		UndoArrange2(Shape* s, Shape* t);
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 		U_TYPE<U>::type m_value;
 
 		~UndoAttr() {};
-		// 操作を実行すると値が変わるか調べる.
+		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;
 		// 操作を実行する.
 		void exec(void);
@@ -205,13 +205,13 @@ namespace winrt::GraphPaper::implementation
 		// 操作する位置にある図形
 		Shape* m_item_pos;
 
-		// 操作を実行すると値が変わるか調べる.
+		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept { return true; }
 		// 操作を実行する.
 		void exec(void);
-		// 操作が挿入か調べる.
+		// 操作が挿入か判定する.
 		bool is_insert(void) const noexcept { return m_insert; }
-		// 図形を参照しているか調べる.
+		// 図形を参照しているか判定する.
 		bool refer_to(const Shape* s) const noexcept { return Undo::refer_to(s) || m_item_pos == s; };
 		// 操作する位置にある図形を得る.
 		Shape* item_pos(void) const noexcept { return m_item_pos; }
@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 操作を実行する.
 		void exec(void);
-		// 図形を参照しているか調べる.
+		// 図形を参照しているか判定する.
 		bool refer_to(const Shape* s) const noexcept { return UndoList::refer_to(s) || m_shape_group == s; };
 		// 操作をデータリーダーから読み込む.
 		UndoListGroup(DataReader const& dt_reader);
@@ -250,7 +250,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形の選択を反転する操作
 	//------------------------------
 	struct UndoSelect : Undo {
-		// 操作を実行すると値が変わるか調べる.
+		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept { return true; }
 		// 操作を実行する.
 		void exec(void);

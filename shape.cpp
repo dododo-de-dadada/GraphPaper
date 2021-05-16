@@ -15,10 +15,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t debug_deleted_cnt = 0;
 #endif
 
-	// 色の成分が同じか調べる.
-	static bool equal_component(const FLOAT a, const FLOAT b) noexcept;
-
-	// 文字が 0...9 または A...F, a...f かどうか調べる
+	// 文字が '0'...'9' または 'A'...'F', 'a'...'f' か判定する.
 	static bool is_hex(const wchar_t w, uint32_t& x) noexcept;
 
 	// 図形の部位 (方形) を表示する.
@@ -50,143 +47,8 @@ namespace winrt::GraphPaper::implementation
 		dx.m_d2dContext->FillEllipse({ a_pos, rad - 1.0F, rad - 1.0F }, dx.m_shape_brush.get());
 	}
 
-	// 矢じりの寸法が同じか調べる.
-	/*
-	bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept
-	{
-		return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) && equal(a.m_offset, b.m_offset);
-	}
-	*/
-	// 矢じりの形式が同じか調べる.
-	bool equal(const ARROW_STYLE a, const ARROW_STYLE b) noexcept
-	{
-		return a == b;
-	}
-
-	// ブール値が同じか調べる.
-	bool equal(const bool a, const bool b) noexcept
-	{
-		return a == b;
-	}
-
-	// 色が同じか調べる.
-	bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept
-	{
-		return equal_component(a.a, b.a) && equal_component(a.r, b.r) && equal_component(a.g, b.g) && equal_component(a.b, b.b);
-	}
-
-	// 破線の形式が同じか調べる.
-	bool equal(const D2D1_DASH_STYLE a, const D2D1_DASH_STYLE b) noexcept
-	{
-		return a == b;
-	}
-
-	// 位置が同じか調べる.
-	bool equal(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept
-	{
-		return equal(a.x, b.x) && equal(a.y, b.y);
-	}
-
-	// 寸法が同じか調べる.
-	bool equal(const D2D1_SIZE_F a, const D2D1_SIZE_F b) noexcept
-	{
-		return equal(a.width, b.width) && equal(a.height, b.height);
-	}
-
-	// 倍精度浮動小数が同じか調べる.
-	bool equal(const double a, const double b) noexcept
-	{
-		return fabs(a - b) <= FLT_EPSILON * fmax(1.0, fmax(fabs(a), fabs(b)));
-	}
-
-	// 書体の伸縮が同じか調べる.
-	bool equal(const DWRITE_FONT_STRETCH a, const DWRITE_FONT_STRETCH b) noexcept
-	{
-		return a == b;
-	}
-
-	// 書体の字体が同じか調べる.
-	bool equal(const DWRITE_FONT_STYLE a, const DWRITE_FONT_STYLE b) noexcept
-	{
-		return a == b;
-	}
-
-	// 書体の太さが同じか調べる.
-	bool equal(const DWRITE_FONT_WEIGHT a, const DWRITE_FONT_WEIGHT b) noexcept
-	{
-		return a == b;
-	}
-
-	// 段落の整列が同じか調べる.
-	bool equal(const DWRITE_PARAGRAPH_ALIGNMENT a, const DWRITE_PARAGRAPH_ALIGNMENT b) noexcept
-	{
-		return a == b;
-	}
-
-	// 文字列の整列が同じか調べる.
-	bool equal(const DWRITE_TEXT_ALIGNMENT a, const DWRITE_TEXT_ALIGNMENT b) noexcept
-	{
-		return a == b;
-	}
-
-	// 文字範囲が同じか調べる.
-	bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept
-	{
-		return a.startPosition == b.startPosition && a.length == b.length;
-	}
-
-	// 単精度浮動小数が同じか調べる.
-	/*
-	bool equal(const float a, const float b) noexcept
-	{
-		return fabs(a - b) <= FLT_EPSILON * fmax(1.0f, fmax(fabs(a), fabs(b)));
-	}
-	*/
-
-	// 方眼の形式が同じか調べる.
-	bool equal(const GRID_EMPH a, const GRID_EMPH b) noexcept
-	{
-		return a == b;
-	}
-
-	// 方眼の表示が同じか調べる.
-	bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept
-	{
-		return a == b;
-	}
-
-	// 破線の配置が同じか調べる.
-	bool equal(const STROKE_PATT& a, const STROKE_PATT& b) noexcept
-	{
-		return equal(a.m_[0], b.m_[0]) && equal(a.m_[1], b.m_[1]) && equal(a.m_[2], b.m_[2]) && equal(a.m_[3], b.m_[3]) && equal(a.m_[4], b.m_[4]) && equal(a.m_[5], b.m_[5]);
-	}
-
-	// 整数が同じか調べる.
-	bool equal(const uint32_t a, const uint32_t b) noexcept
-	{
-		return a == b;
-	}
-
-	// 文字列が同じか調べる.
-	bool equal(const wchar_t* a, const wchar_t* b) noexcept
-	{
-		return a == b || (a != nullptr && b != nullptr && wcscmp(a, b) == 0);
-	}
-
-	// 文字列が同じか調べる.
-	bool equal(winrt::hstring const& a, const wchar_t* b) noexcept
-	{
-		return a == (b == nullptr ? L"" : b);
-	}
-
-	// 色の成分が同じか調べる.
-	static bool equal_component(const FLOAT a, const FLOAT b) noexcept
-	{
-		return fabs(b - a) < 1.0f / 128.0f;
-	}
-
 	// 矢じりの軸と寸法をもとに返しの位置を計算する.
-	// axis	矢じりの軸ベクトル.
+	// axis_vec	矢じりの軸ベクトル.
 	// axis_len	軸ベクトルの長さ
 	// barb_width	矢じりの幅 (返しの両端の長さ)
 	// head_len	矢じりの長さ (先端から返しまでの軸ベクトル上での長さ)
@@ -212,53 +74,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 色が不透明か調べる.
-	// a	調べる色
-	// 戻り値	不透明の場合 true
-	bool is_opaque(const D2D1_COLOR_F& a) noexcept
-	{
-		const auto aa = static_cast<uint32_t>(round(a.a * 255.0f)) & 0xff;
-		return aa > 0;
-	}
-
-	// ベクトルの長さ (の自乗値) を得る
-	// a	ベクトル
-	// 戻り値	長さ (の自乗値) 
-	double pt_abs2(const D2D1_POINT_2F a) noexcept
-	{
-		const double ax = a.x;
-		const double ay = a.y;
-		return ax * ax + ay * ay;
-	}
-
-	// 位置を位置に足す
-	void pt_add(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = a.x + b.x;
-		c.y = a.y + b.y;
-	}
-
-	// スカラー値を位置に足す
-	void pt_add(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = static_cast<FLOAT>(a.x + b);
-		c.y = static_cast<FLOAT>(a.y + b);
-	}
-
-	// 2 つの値を位置に足す
-	void pt_add(const D2D1_POINT_2F a, const double x, const double y, D2D1_POINT_2F& b) noexcept
-	{
-		b.x = static_cast<FLOAT>(a.x + x);
-		b.y = static_cast<FLOAT>(a.y + y);
-	}
-
-	// 二点間の中点を得る.
-	void pt_avg(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = static_cast<FLOAT>((static_cast<double>(a.x) + b.x) * 0.5);
-		c.y = static_cast<FLOAT>((static_cast<double>(a.y) + b.y) * 0.5);
-	}
-
 	// 二点で囲まれた方形を得る.
 	void pt_bound(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& r_min, D2D1_POINT_2F& r_max) noexcept
 	{
@@ -281,12 +96,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 二点の内積を得る.
-	double pt_dot(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept
-	{
-		return static_cast<double>(a.x) * b.x + static_cast<double>(a.y) * b.y;
-	}
+	//double pt_dot(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept
+	//{
+	//	return static_cast<double>(a.x) * b.x + static_cast<double>(a.y) * b.y;
+	//}
 
-	// 部位が原点を含むか調べる
+	// 図形の部位が位置 { 0,0 } を含むか判定する.
 	// a_pos	部位の位置
 	// a_len	部位の一辺の長さ.
 	// 戻り値	含む場合 true
@@ -298,8 +113,8 @@ namespace winrt::GraphPaper::implementation
 		return a_min.x <= 0.0f && 0.0f <= a_min.x + a_len && a_min.y <= 0.0f && 0.0f <= a_min.y + a_len;
 	}
 
-	// 部位が位置を含むか調べる.
-	// t_pos	調べる位置
+	// 図形の部位が位置を含むか判定する.
+	// t_pos	判定する位置
 	// a_pos	部位の位置
 	// a_len	部位の一辺の長さ.
 	// 戻り値	含む場合 true
@@ -311,14 +126,14 @@ namespace winrt::GraphPaper::implementation
 		return pt_in_anch(a_tran, a_len);
 	}
 
-	// だ円にが位置を含むか調べる.
-	// t_pos	調べる位置
+	// だ円にが位置を含むか判定する.
+	// t_pos	判定する位置
 	// c_pos	だ円の中心
 	// rad	だ円の径
 	// 戻り値	含む場合 true
 	bool pt_in_elli(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept
 	{
-		// 中心点が原点になるよう調べる位置を移動する.
+		// 中心点が原点になるよう判定する位置を移動する.
 		const double tx = t_pos.x;
 		const double ty = t_pos.y;
 		const double cx = c_pos.x;
@@ -338,8 +153,8 @@ namespace winrt::GraphPaper::implementation
 		return px * px + py * py <= 1.0;
 	}
 
-	// 線分が位置を含むか, 太さも考慮して調べる.
-	// t_pos	調べる位置
+	// 線分が位置を含むか, 太さも考慮して判定する.
+	// t_pos	判定する位置
 	// s_pos	線分の始端
 	// e_pos	線分の終端
 	// s_width	線分の太さ
@@ -355,11 +170,11 @@ namespace winrt::GraphPaper::implementation
 		// 線分の法線ベクトルを求める.
 		// 法線ベクトルの長さは, 線の太さの半分とする.
 		// 長さが 0.5 未満の場合は, 0.5 とする.
-		pt_scale(diff, max(s_width * 0.5, 0.5) / sqrt(abs), diff);
+		pt_mul(diff, max(s_width * 0.5, 0.5) / sqrt(abs), diff);
 		const double nx = diff.y;
 		const double ny = -diff.x;
 		// 線分の両端から, 法線ベクトルの方向, またはその逆の方向にある点を求める.
-		// 求めた 4 点からなる四辺形が位置を含むか調べる.
+		// 求めた 4 点からなる四辺形が位置を含むか判定する.
 		D2D1_POINT_2F exp_side[4];
 		pt_add(s_pos, nx, ny, exp_side[0]);
 		pt_add(e_pos, nx, ny, exp_side[1]);
@@ -368,8 +183,8 @@ namespace winrt::GraphPaper::implementation
 		return pt_in_poly(t_pos, 4, exp_side);
 	}
 
-	// 多角形が位置を含むか調べる.
-	// t_pos	調べる位置
+	// 多角形が位置を含むか判定する.
+	// t_pos	判定する位置
 	// n	頂点の数
 	// v_pos	頂点の配列
 	// 戻り値	含む場合 true
@@ -397,8 +212,8 @@ namespace winrt::GraphPaper::implementation
 		return static_cast<bool>(cnt & 1);
 	}
 
-	// 方形が位置を含むか調べる.
-	// t_pos	調べる位置
+	// 方形が位置を含むか判定する.
+	// t_pos	判定する位置
 	// r_min	方形のいずれかの頂点
 	// r_max	方形のもう一方の頂点
 	// 戻り値	含む場合 true
@@ -447,92 +262,6 @@ namespace winrt::GraphPaper::implementation
 		if (a.y > r_max.y) {
 			r_max.y = a.y;
 		}
-	}
-
-	// 二点の位置を比べてそれぞれ大きい値を得る.
-	// a	比べる一方の位置
-	// b	比べるもう一方の位置
-	// c	得られた位置
-	void pt_max(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = a.x > b.x ? a.x : b.x;
-		c.y = a.y > b.y ? a.y : b.y;
-	}
-
-	// 二点の位置を比べてそれぞれ小さい値を得る.
-	// a	比べるられる一方の位置
-	// b	もう一方の位置
-	// c	得られた位置
-	void pt_min(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = a.x < b.x ? a.x : b.x;
-		c.y = a.y < b.y ? a.y : b.y;
-	}
-
-	// 位置をスカラー倍に丸める.
-	// a	丸められる位置
-	// b	丸めるスカラー値
-	// c	得られた位置
-	void pt_round(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = static_cast<FLOAT>(std::round(a.x / b) * b);
-		c.y = static_cast<FLOAT>(std::round(a.y / b) * b);
-	}
-
-	// 位置にスカラーを掛けて, 位置を加える.
-	// a	掛けられる位置
-	// b	掛けるスカラー値
-	// c	加える位置
-	// d	得られた位置
-	void pt_scale(const D2D1_POINT_2F a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
-	{
-		d.x = static_cast<FLOAT>(a.x * b + c.x);
-		d.y = static_cast<FLOAT>(a.y * b + c.y);
-	}
-
-	// 位置にスカラーを掛ける.
-	// a	掛けられる位置
-	// b	掛けるスカラー値
-	// c	得られた位置
-	void pt_scale(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = static_cast<FLOAT>(a.x * b);
-		c.y = static_cast<FLOAT>(a.y * b);
-	}
-
-	// 寸法にスカラー値を掛ける.
-	// a	掛けられる寸法
-	// b	掛けるスカラー値
-	// c	得られた寸法
-	void pt_scale(const D2D1_SIZE_F a, const double b, D2D1_SIZE_F& c) noexcept
-	{
-		c.width = static_cast<FLOAT>(a.width * b);
-		c.height = static_cast<FLOAT>(a.height * b);
-	}
-
-	// 点にスカラーを掛けて, 位置を加える.
-	// a	掛けられる位置
-	// b	掛けるスカラー値
-	// c	加える位置
-	// d	得られた位置
-	void pt_scale(const Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
-	{
-		d.x = static_cast<FLOAT>(a.X * b + c.x);
-		d.y = static_cast<FLOAT>(a.Y * b + c.y);
-	}
-
-	// 位置から位置を引く.
-	void pt_sub(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = a.x - b.x;
-		c.y = a.y - b.y;
-	}
-
-	// 位置から大きさを引く.
-	void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = a.x - b.width;
-		c.y = a.y - b.height;
 	}
 
 	// 矢じりの寸法をデータリーダーから読み込む.
@@ -710,7 +439,7 @@ namespace winrt::GraphPaper::implementation
 		return t;
 	}
 
-	// 文字が 0...9 または A...F, a...f かどうか調べる
+	// 文字が 0...9 または A...F, a...f か判定する
 	static bool is_hex(const wchar_t w, uint32_t& x) noexcept
 	{
 		if (isdigit(w)) {

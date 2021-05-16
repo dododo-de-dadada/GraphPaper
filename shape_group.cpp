@@ -94,7 +94,7 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
-	// 文字列図形を含むか調べる.
+	// 文字列図形を含むか判定する.
 	bool ShapeGroup::has_text(void) noexcept
 	{
 		std::list<S_LIST_T::iterator> stack;
@@ -125,8 +125,8 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 位置を含むか調べる.
-	// t_pos	調べる位置
+	// 位置を含むか判定する.
+	// t_pos	判定する位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 		return ANCH_TYPE::ANCH_SHEET;
 	}
 
-	// 範囲に含まれるか調べる.
+	// 範囲に含まれるか判定する.
 	// a_min	範囲の左上位置
 	// a_max	範囲の右下位置
 	// 戻り値	含まれるなら true
@@ -157,16 +157,16 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 消去フラグを調べる.
+	// 消去フラグを判定する.
 	bool ShapeGroup::is_deleted(void) const noexcept
 	{
 		return m_list_grouped.size() == 0 || m_list_grouped.back()->is_deleted();
 	}
 
-	// 選択フラグを調べる.
+	// 選択フラグを判定する.
 	bool ShapeGroup::is_selected(void) const noexcept
 	{
-		// グループに含まれる図形が選択されてるか調べる.
+		// グループに含まれる図形が選択されてるか判定する.
 		return m_list_grouped.size() > 0 && m_list_grouped.back()->is_selected();
 	}
 

@@ -293,7 +293,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		// ‚ ‚ç‚©‚¶‚ßŒŸõ•¶š—ñ‚ğŠÜ‚Ş•¶š—ñ}Œ`‚ª‚ ‚é‚©’²‚×‚é.
+		// ‚ ‚ç‚©‚¶‚ßŒŸõ•¶š—ñ‚ğŠÜ‚Ş•¶š—ñ}Œ`‚ª‚ ‚é‚©”»’è‚·‚é.
 		auto flag = false;
 		std::list <S_LIST_T::iterator> stack;
 		stack.push_back(m_list_shapes.begin());

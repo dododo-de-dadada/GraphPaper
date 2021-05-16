@@ -199,12 +199,12 @@ namespace winrt::GraphPaper::implementation
 		const auto exists_selected_2 = (selected_cnt > 1);
 		// 選択されたグループ図形がひとつ以上ある場合.
 		const auto exists_selected_group = (selected_group_cnt > 0);
-		// 前面に配置可能か調べる.
+		// 前面に配置可能か判定する.
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最前面の図形は選択されいない.
 		const auto enable_forward = (runlength_cnt > 1 || (exists_selected && fore_selected != true));
-		// 背面に配置可能か調べる.
+		// 背面に配置可能か判定する.
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最背面の図形は選択されいない.
@@ -350,7 +350,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			Shape::s_d2d_factory = sheet_dx().m_d2dFactory.get();
 			Shape::s_dwrite_factory = sheet_dx().m_dwriteFactory.get();
-			Undo::set(&m_list_shapes, &m_main_sheet);
+			Undo::set(&m_list_shapes, &m_sheet_main);
 		}
 
 		// クリックの判定時間と判定距離をシステムから得る.
@@ -470,7 +470,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙の左上位置と右下位置を初期化する.
 		{
 			sheet_min(D2D1_POINT_2F{ 0.0F, 0.0F });
-			sheet_max(D2D1_POINT_2F{ m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height });
+			sheet_max(D2D1_POINT_2F{ m_sheet_main.m_sheet_main_size.width, m_sheet_main.m_sheet_main_size.height });
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();
