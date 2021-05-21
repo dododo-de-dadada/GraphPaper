@@ -130,15 +130,15 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 
-		S_LIST_T list_selected;
-		s_list_selected<Shape>(m_list_shapes, list_selected);
-		if (list_selected.size() == 0) {
+		S_LIST_T s_list;
+		s_list_selected<Shape>(m_list_shapes, s_list);
+		if (s_list.size() == 0) {
 			return;
 		}
 		if constexpr (B) {
 			uint32_t i = 0;
 			auto s = s_list_front(m_list_shapes);
-			for (auto t : list_selected) {
+			for (auto t : s_list) {
 				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
 				if (m_summary_atomic.load(std::memory_order_acquire)) {
 					summary_remove(t);
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			for (auto s : list_selected) {
+			for (auto s : s_list) {
 				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
 				if (m_summary_atomic.load(std::memory_order_acquire)) {
 					summary_remove(s);
@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_insert(s, nullptr);
 			}
 		}
-		list_selected.clear();
+		s_list.clear();
 		undo_push_null();
 		edit_menu_enable();
 		sheet_draw();

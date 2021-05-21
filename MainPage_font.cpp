@@ -46,16 +46,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 書体の伸縮の配列
 	constexpr std::underlying_type_t<DWRITE_FONT_STRETCH> FONT_STRETCH[] = {
-		DWRITE_FONT_STRETCH_UNDEFINED,
-		DWRITE_FONT_STRETCH_ULTRA_CONDENSED,
-		DWRITE_FONT_STRETCH_EXTRA_CONDENSED,
-		DWRITE_FONT_STRETCH_CONDENSED,
-		DWRITE_FONT_STRETCH_SEMI_CONDENSED,
-		DWRITE_FONT_STRETCH_NORMAL,
-		DWRITE_FONT_STRETCH_SEMI_EXPANDED,
-		DWRITE_FONT_STRETCH_EXPANDED,
-		DWRITE_FONT_STRETCH_EXTRA_EXPANDED,
-		DWRITE_FONT_STRETCH_ULTRA_EXPANDED,
+		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_UNDEFINED,
+		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED,
+		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED,
+		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED,
+		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_CONDENSED,
+		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
+		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_EXPANDED,
+		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXPANDED,
+		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_EXPANDED,
+		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED,
 	};
 
 	// 書体の伸縮の文字列配列
@@ -82,10 +82,12 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		const double val0 = m_sample_sheet.m_font_color.r * COLOR_MAX;
-		const double val1 = m_sample_sheet.m_font_color.g * COLOR_MAX;
-		const double val2 = m_sample_sheet.m_font_color.b * COLOR_MAX;
-		const double val3 = m_sample_sheet.m_font_color.a * COLOR_MAX;
+		D2D1_COLOR_F f_color;
+		m_sample_sheet.get_font_color(f_color);
+		const double val0 = f_color.r * COLOR_MAX;
+		const double val1 = f_color.g * COLOR_MAX;
+		const double val2 = f_color.b * COLOR_MAX;
+		const double val3 = f_color.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -142,7 +144,9 @@ namespace winrt::GraphPaper::implementation
 			IInspectable item[1];
 			lv_sample_list().Items().GetMany(i, item);
 			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
-			if (wcscmp(name, m_sheet_main.m_font_family) == 0) {
+			wchar_t* f_family;
+			m_sheet_main.get_font_family(f_family);
+			if (wcscmp(name, f_family) == 0) {
 				// 書体名が同じ場合,
 				// その書体をリストビューの選択済み項目に格納する.
 				lv_sample_list().SelectedItem(item[0]);
@@ -191,7 +195,9 @@ namespace winrt::GraphPaper::implementation
 
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value, sample_dx().m_logical_dpi, m_sample_sheet.m_grid_base + 1.0, buf);
+			double g_base;
+			m_sample_sheet.get_grid_base(g_base);
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value, sample_dx().m_logical_dpi, g_base + 1.0, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
@@ -278,7 +284,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		const double val0 = m_sample_sheet.m_font_size;
+		double val0;
+		m_sample_sheet.get_font_size(val0);
 		sample_slider_0().Value(val0);
 		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -315,7 +322,9 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().SelectedIndex(-1);
 		const auto k = lv_sample_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
-			if (FONT_STRETCH[i] == m_sheet_main.m_font_stretch) {
+			DWRITE_FONT_STRETCH f_stretch;
+			m_sheet_main.get_font_stretch(f_stretch);
+			if (FONT_STRETCH[i] == f_stretch) {
 				lv_sample_list().SelectedIndex(i);
 				IInspectable item[1];
 				lv_sample_list().Items().GetMany(i, item);
@@ -399,7 +408,9 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().SelectedIndex(-1);
 		const auto k = lv_sample_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
-			if (FONT_WEIGHTS[i] == m_sheet_main.m_font_weight) {
+			DWRITE_FONT_WEIGHT f_weight;
+			m_sheet_main.get_font_weight(f_weight);
+			if (FONT_WEIGHTS[i] == f_weight) {
 				lv_sample_list().SelectedIndex(i);
 				IInspectable item[1];
 				lv_sample_list().Items().GetMany(i, item);
@@ -549,7 +560,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		const double val0 = m_sample_sheet.m_text_line / SLIDER_STEP;
+		double t_line;
+		m_sample_sheet.get_text_line(t_line);
+		const double val0 = t_line / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		text_set_slider_header<UNDO_OP::TEXT_LINE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -575,11 +588,13 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「行の高さ」>「狭める」が選択された.
 	void MainPage::text_line_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto value = m_sheet_main.m_text_line - TEXT_LINE_DELTA;
+		double t_line;
+		m_sheet_main.get_text_line(t_line);
+		auto value = t_line - TEXT_LINE_DELTA;
 		if (value <= FLT_MIN) {
 			value = 0.0f;
 		}
-		if (m_sheet_main.m_text_line != value) {
+		if (t_line != value) {
 			undo_push_set<UNDO_OP::TEXT_LINE>(value);
 		}
 	}
@@ -587,8 +602,10 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「行の高さ」>「広げる」が選択された.
 	void MainPage::text_line_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto value = m_sheet_main.m_text_line + TEXT_LINE_DELTA;
-		if (m_sheet_main.m_text_line != value) {
+		double t_line;
+		m_sheet_main.get_text_line(t_line);
+		auto value = t_line + TEXT_LINE_DELTA;
+		if (t_line != value) {
 			undo_push_set<UNDO_OP::TEXT_LINE>(value);
 		}
 	}
@@ -600,8 +617,10 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		const double val0 = m_sample_sheet.m_text_margin.width / SLIDER_STEP;
-		const double val1 = m_sample_sheet.m_text_margin.height / SLIDER_STEP;
+		D2D1_SIZE_F t_margin;
+		m_sample_sheet.get_text_margin(t_margin);
+		const double val0 = t_margin.width / SLIDER_STEP;
+		const double val1 = t_margin.height / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 0>(val0);
@@ -638,7 +657,9 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring hdr;
 
 		const double dpi = sheet_dx().m_logical_dpi;
-		const double g_len = m_sample_sheet.m_grid_base + 1.0;
+		double g_base;
+		m_sample_sheet.get_grid_base(g_base);
+		const double g_len = g_base + 1.0;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];

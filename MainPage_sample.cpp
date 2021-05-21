@@ -38,17 +38,21 @@ namespace winrt::GraphPaper::implementation
 		auto dc = m_sample_dx.m_d2dContext.get();
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
-		dc->Clear(m_sample_sheet.m_sheet_main_color);
+		dc->Clear(m_sample_sheet.m_sheet_color);
 		D2D1_POINT_2F offset;
-		offset.x = static_cast<FLOAT>(std::fmod(m_sample_sheet.m_sheet_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0));
+		double g_base;
+		m_sample_sheet.get_grid_base(g_base);
+		offset.x = static_cast<FLOAT>(std::fmod(m_sample_sheet.m_sheet_size.width * 0.5, g_base + 1.0));
 		offset.y = offset.x;
-		if (m_sample_sheet.m_grid_show == GRID_SHOW::BACK) {
+		GRID_SHOW g_show;
+		m_sample_sheet.get_grid_show(g_show);
+		if (equal(g_show, GRID_SHOW::BACK)) {
 			m_sample_sheet.draw_grid(m_sample_dx, offset);
 		}
 		if (m_sample_shape != nullptr) {
 			m_sample_shape->draw(m_sample_dx);
 		}
-		if (m_sample_sheet.m_grid_show == GRID_SHOW::FRONT) {
+		if (equal(g_show, GRID_SHOW::FRONT)) {
 			m_sample_sheet.draw_grid(m_sample_dx, offset);
 		}
 		winrt::check_hresult(dc->EndDraw());

@@ -185,7 +185,7 @@ namespace winrt::GraphPaper::implementation
 						debug_leak_cnt++;
 #endif
 						// 貼り付ける最大の大きさをウィンドウの大きさに制限する.
-						const double scale = m_sheet_main.m_sheet_main_scale;
+						const double scale = m_sheet_main.m_sheet_scale;
 						D2D1_SIZE_F max_size{
 							static_cast<FLOAT>(scp_sheet_panel().ActualWidth() / scale),
 							static_cast<FLOAT>(scp_sheet_panel().ActualHeight() / scale)
@@ -197,7 +197,9 @@ namespace winrt::GraphPaper::implementation
 						};
 						pt_add(s_pos, sheet_min(), s_pos);
 						if (m_sheet_main.m_grid_snap) {
-							const auto g_len = m_sheet_main.m_grid_base + 1.0;
+							double g_base;
+							m_sheet_main.get_grid_base(g_base);
+							const auto g_len = g_base + 1.0;
 							pt_round(s_pos, g_len, s_pos);
 						}
 						t->set_start_pos(s_pos);

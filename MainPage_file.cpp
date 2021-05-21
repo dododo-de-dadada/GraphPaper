@@ -104,20 +104,36 @@ namespace winrt::GraphPaper::implementation
 	{
 		edit_menu_enable();
 		color_code_check_menu();
-		stroke_style_check_menu(m_sheet_main.m_stroke_style);
-		arrow_style_check_menu(m_sheet_main.m_arrow_style);
-		font_style_check_menu(m_sheet_main.m_font_style);
-		grid_emph_check_menu(m_sheet_main.m_grid_emph);
-		grid_show_check_menu(m_sheet_main.m_grid_show);
+		D2D1_DASH_STYLE s_style;
+		m_sheet_main.get_stroke_style(s_style);
+		stroke_style_check_menu(s_style);
+		ARROW_STYLE a_style;
+		m_sheet_main.get_arrow_style(a_style);
+		arrow_style_check_menu(a_style);
+		DWRITE_FONT_STYLE f_style;
+		m_sheet_main.get_font_style(f_style);
+		font_style_check_menu(f_style);
+		GRID_EMPH g_emph;
+		m_sheet_main.get_grid_emph(g_emph);
+		grid_emph_check_menu(g_emph);
+		GRID_SHOW g_show;
+		m_sheet_main.get_grid_show(g_show);
+		grid_show_check_menu(g_show);
 		sbar_check_menu(status_bar());
-		text_align_t_check_menu(m_sheet_main.m_text_align_t);
-		text_align_p_check_menu(m_sheet_main.m_text_align_p);
-		tmfi_grid_snap().IsChecked(m_sheet_main.m_grid_snap);
-		tmfi_grid_snap_2().IsChecked(m_sheet_main.m_grid_snap);
+		DWRITE_TEXT_ALIGNMENT t_align_t;
+		m_sheet_main.get_text_align_t(t_align_t);
+		text_align_t_check_menu(t_align_t);
+		DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
+		m_sheet_main.get_text_align_p(t_align_p);
+		text_align_p_check_menu(t_align_p);
+		bool g_snap;
+		m_sheet_main.get_grid_snap(g_snap);
+		tmfi_grid_snap().IsChecked(g_snap);
+		tmfi_grid_snap_2().IsChecked(g_snap);
 		len_unit_check_menu();
 
 		wchar_t* unavailable_font;	// 書体名
-		if (s_list_available_font(m_list_shapes, unavailable_font) != true) {
+		if (s_list_test_font(m_list_shapes, unavailable_font) != true) {
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
@@ -202,8 +218,10 @@ namespace winrt::GraphPaper::implementation
 			status_bar(static_cast<SBAR_FLAG>(dt_reader.ReadUInt16()));
 
 			m_sheet_main.read(dt_reader);
-			m_sheet_main.m_grid_base = max(m_sheet_main.m_grid_base, 0.0F);
-			m_sheet_main.m_sheet_main_scale = min(max(m_sheet_main.m_sheet_main_scale, SCALE_MIN), SCALE_MAX);
+			double g_base;
+			m_sheet_main.get_grid_base(g_base);
+			m_sheet_main.set_grid_base(max(g_base, 0.0F));
+			m_sheet_main.m_sheet_scale = min(max(m_sheet_main.m_sheet_scale, SCALE_MIN), SCALE_MAX);
 			m_sheet_main.m_sheet_size.width = max(min(m_sheet_main.m_sheet_size.width, sheet_size_max()), 1.0F);
 			m_sheet_main.m_sheet_size.height = max(min(m_sheet_main.m_sheet_size.height, sheet_size_max()), 1.0F);
 
@@ -670,7 +688,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			write_svg(DOCTYPE, dt_writer);
 			// SVG 開始タグをデータライターに書き込む.
-			file_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_main_color, sheet_dx().m_logical_dpi, len_unit(), dt_writer);
+			file_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, sheet_dx().m_logical_dpi, len_unit(), dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {

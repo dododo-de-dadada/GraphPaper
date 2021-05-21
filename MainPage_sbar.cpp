@@ -206,10 +206,12 @@ namespace winrt::GraphPaper::implementation
 		const double by = wb.Y;
 		const double px = sheet_min().x;
 		const double py = sheet_min().y;
-		const double ps = m_sheet_main.m_sheet_main_scale;
+		const double ps = m_sheet_main.m_sheet_scale;
 		const double fx = (wx - bx - tx) / ps + sx + px;
 		const double fy = (wy - by - ty) / ps + sy + py;
-		const double g_len = m_sheet_main.m_grid_base + 1.0;
+		double g_base;
+		m_sheet_main.get_grid_base(g_base);
+		const double g_len = g_base + 1.0;
 
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), fx, dpi, g_len, buf);
@@ -226,7 +228,9 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	{
 		wchar_t buf[32];
 		const double dpi = sheet_dx().m_logical_dpi;
-		double g_len = m_sheet_main.m_grid_base + 1.0;
+		double g_base;
+		m_sheet_main.get_grid_base(g_base);
+		const double g_len = g_base + 1.0;
 		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), g_len, dpi, g_len, buf);
 		tk_sbar_grid().Text(winrt::hstring{ L"g:" } +buf);
 	}
@@ -235,7 +239,9 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::sbar_set_sheet(void)
 	{
 		const double dpi = sheet_dx().m_logical_dpi;
-		const double g_len = m_sheet_main.m_grid_base + 1.0;
+		double g_base;
+		m_sheet_main.get_grid_base(g_base);
+		const double g_len = g_base + 1.0;
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), m_sheet_main.m_sheet_size.width, dpi, g_len, buf);
 		tk_sbar_width().Text(winrt::hstring{ L"w:" } + buf);
@@ -259,13 +265,13 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 		else if (t_draw == TOOL_DRAW::LINE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 		}
-		else if (t_draw == TOOL_DRAW::QUAD) {
+		else if (t_draw == TOOL_DRAW::POLY) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_pent")));
 		}
 		else if (t_draw == TOOL_DRAW::RECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
 		}
-		else if (t_draw == TOOL_DRAW::RRCT) {
+		else if (t_draw == TOOL_DRAW::RRECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrct")));
 		}
 		else if (t_draw == TOOL_DRAW::RULER) {
@@ -316,7 +322,7 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::sbar_set_zoom(void)
 	{
 		wchar_t buf[32];
-		swprintf_s(buf, 31, FMT_ZOOM, m_sheet_main.m_sheet_main_scale * 100.0);
+		swprintf_s(buf, 31, FMT_ZOOM, m_sheet_main.m_sheet_scale * 100.0);
 		tk_sbar_zoom().Text(winrt::hstring{ L"z:" } +buf);
 	}
 

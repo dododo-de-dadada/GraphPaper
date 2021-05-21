@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 	// 添え字をデータリーダーから読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader)
 	{
-		Shape* s = nullptr;
+		Shape* s = static_cast<Shape*>(nullptr);
 		auto i = dt_reader.ReadUInt32();
 		if (i == INDEX_SHEET) {
 			s = Undo::s_shape_sheet;
@@ -485,7 +485,7 @@ namespace winrt::GraphPaper::implementation
 			if (it_del != s_shape_list->end()) {
 				s_shape_list->erase(it_del);
 			}
-			auto it_ins{ std::find(s_shape_list->begin(), s_shape_list->end(), m_item_pos) };
+			auto it_ins{ std::find(s_shape_list->begin(), s_shape_list->end(), m_shape_at) };
 			s_shape_list->insert(it_ins, m_shape);
 			m_shape->set_delete(false);
 		}
@@ -493,7 +493,7 @@ namespace winrt::GraphPaper::implementation
 			m_shape->set_delete(true);
 			auto it_del{ std::find(s_shape_list->begin(), s_shape_list->end(), m_shape) };
 			auto it_pos{ s_shape_list->erase(it_del) };
-			m_item_pos = (it_pos == s_shape_list->end() ? nullptr : *it_pos);
+			m_shape_at = (it_pos == s_shape_list->end() ? nullptr : *it_pos);
 			s_shape_list->push_front(m_shape);
 		}
 		m_insert = !m_insert;
@@ -504,7 +504,7 @@ namespace winrt::GraphPaper::implementation
 		Undo(undo_read_shape(dt_reader))
 	{
 		m_insert = dt_reader.ReadBoolean();
-		m_item_pos = undo_read_shape(dt_reader);
+		m_shape_at = undo_read_shape(dt_reader);
 	}
 
 	// 図形をリストから取り除く.
@@ -513,7 +513,7 @@ namespace winrt::GraphPaper::implementation
 	UndoList::UndoList(Shape* const s, const bool dont_exec) :
 		Undo(s),
 		m_insert(false),
-		m_item_pos(static_cast<Shape*>(nullptr))
+		m_shape_at(static_cast<Shape*>(nullptr))
 	{
 		if (dont_exec != true) {
 			exec();
@@ -527,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 	UndoList::UndoList(Shape* const s, Shape* const s_pos, const bool dont_exec) :
 		Undo(s),
 		m_insert(true),
-		m_item_pos(s_pos)
+		m_shape_at(s_pos)
 	{
 		if (dont_exec != true) {
 			exec();
@@ -540,7 +540,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::LIST));
 		undo_write_shape(m_shape, dt_writer);
 		dt_writer.WriteBoolean(m_insert);
-		undo_write_shape(m_item_pos, dt_writer);
+		undo_write_shape(m_shape_at, dt_writer);
 	}
 
 	// 操作を実行する.
@@ -552,7 +552,7 @@ namespace winrt::GraphPaper::implementation
 				s_shape_list->erase(it_del);
 			}
 			S_LIST_T& list_grouped = m_shape_group->m_list_grouped;
-			auto it_ins{ std::find(list_grouped.begin(), list_grouped.end(), m_item_pos) };
+			auto it_ins{ std::find(list_grouped.begin(), list_grouped.end(), m_shape_at) };
 			list_grouped.insert(it_ins, m_shape);
 			m_shape->set_delete(false);
 		}
@@ -561,7 +561,7 @@ namespace winrt::GraphPaper::implementation
 			S_LIST_T& list_grouped = m_shape_group->m_list_grouped;
 			auto it_del{ std::find(list_grouped.begin(), list_grouped.end(), m_shape) };
 			auto it_pos{ list_grouped.erase(it_del) };
-			m_item_pos = (it_pos == list_grouped.end() ? nullptr : *it_pos);
+			m_shape_at = (it_pos == list_grouped.end() ? nullptr : *it_pos);
 			s_shape_list->push_front(m_shape);
 		}
 		m_insert = !m_insert;
@@ -597,7 +597,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::GROUP));
 		undo_write_shape(m_shape, dt_writer);
 		dt_writer.WriteBoolean(m_insert);
-		undo_write_shape(m_item_pos, dt_writer);
+		undo_write_shape(m_shape_at, dt_writer);
 		undo_write_shape(m_shape_group, dt_writer);
 	}
 

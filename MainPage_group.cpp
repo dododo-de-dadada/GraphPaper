@@ -15,14 +15,14 @@ namespace winrt::GraphPaper::implementation
 		if (m_cnt_selected <= 1) {
 			return;
 		}
-		S_LIST_T list_selected;
-		s_list_selected<Shape>(m_list_shapes, list_selected);
+		S_LIST_T s_list;
+		s_list_selected<Shape>(m_list_shapes, s_list);
 		ShapeGroup* g = new ShapeGroup();
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
 		undo_push_append(g);
-		for (const auto s : list_selected) {
+		for (const auto s : s_list) {
 			// 図形一覧の排他制御が true か判定する.
 			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				summary_remove(s);
@@ -47,15 +47,15 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ungroup_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択されたグループ図形のリストを得る.
-		S_LIST_T list_group;
-		s_list_selected<ShapeGroup>(m_list_shapes, list_group);
-		if (list_group.empty()) {
+		S_LIST_T g_list;
+		s_list_selected<ShapeGroup>(m_list_shapes, g_list);
+		if (g_list.empty()) {
 			// 得られたリストが空の場合,
 			// 終了する.
 			return;
 		}
 		// 得られたリストの各グループ図形について以下を繰り返す.
-		for (auto t : list_group) {
+		for (auto t : g_list) {
 			uint32_t i = 0;
 			// 図形一覧の排他制御が true か判定する.
 			if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形を削除して, その操作をスタックに積む.
 			undo_push_remove(g);
 		}
-		list_group.clear();
+		g_list.clear();
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.

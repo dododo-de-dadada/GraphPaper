@@ -129,7 +129,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙座標系に変換し, ポインターの現在位置に格納する.
 		D2D1_POINT_2F p_offs;
 		pt_add(sheet_min(), sb_horz().Value(), sb_vert().Value(), p_offs);
-		pt_mul(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_sheet_main.m_sheet_main_scale, p_offs, m_pointer_cur);
+		pt_mul(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_sheet_main.m_sheet_scale, p_offs, m_pointer_cur);
 	}
 
 	// ポインターが用紙のスワップチェーンパネルの中に入った.
@@ -166,10 +166,10 @@ namespace winrt::GraphPaper::implementation
 		if (tool == TOOL_DRAW::RECT) {
 			s = new ShapeRect(m_pointer_pressed, diff, &m_sheet_main);
 		}
-		else if (tool == TOOL_DRAW::RRCT) {
+		else if (tool == TOOL_DRAW::RRECT) {
 			s = new ShapeRRect(m_pointer_pressed, diff, &m_sheet_main);
 		}
-		else if (tool == TOOL_DRAW::QUAD) {
+		else if (tool == TOOL_DRAW::POLY) {
 			s = new ShapePoly(m_pointer_pressed, diff, &m_sheet_main, tool_poly());
 		}
 		else if (tool == TOOL_DRAW::ELLI) {
@@ -245,8 +245,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形の変形を終了する.
 	void MainPage::pointer_finish_forming(void)
 	{
-		if (m_sheet_main.m_grid_snap) {
-			pt_round(m_pointer_cur, m_sheet_main.m_grid_base + 1.0, m_pointer_cur);
+		bool g_snap;
+		m_sheet_main.get_grid_snap(g_snap);
+		if (g_snap) {
+			double g_base;
+			m_sheet_main.get_grid_base(g_base);
+			pt_round(m_pointer_cur, g_base + 1.0, m_pointer_cur);
 		}
 		m_pointer_shape->set_anchor_pos(m_pointer_cur, m_pointer_anchor);
 		if (undo_pop_if_invalid()) {
@@ -261,7 +265,9 @@ namespace winrt::GraphPaper::implementation
 	// 図形の移動を終了する.
 	void MainPage::pointer_finish_moving(void)
 	{
-		if (m_sheet_main.m_grid_snap) {
+		bool g_snap;
+		m_sheet_main.get_grid_snap(g_snap);
+		if (g_snap) {
 			D2D1_POINT_2F b_nw{};
 			D2D1_POINT_2F b_se{};
 			bool flag = false;
@@ -281,7 +287,9 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			if (flag) {
-				const double g_len = m_sheet_main.m_grid_base + 1.0;
+				double g_base;
+				m_sheet_main.get_grid_base(g_base);
+				const double g_len = g_base + 1.0;
 				D2D1_POINT_2F b_ne{ b_se.x, b_nw.y };
 				D2D1_POINT_2F b_sw{ b_nw.x, b_se.y };
 
@@ -668,12 +676,16 @@ namespace winrt::GraphPaper::implementation
 				pointer_finish_selecting_area(args.KeyModifiers());
 			}
 			else {
-				if (m_sheet_main.m_grid_snap) {
+				bool g_snap;
+				m_sheet_main.get_grid_snap(g_snap);
+				if (g_snap) {
 					// 方眼に整列の場合, 始点と終点を方眼の大きさで丸める
 					if (args.KeyModifiers() != VirtualKeyModifiers::Shift) {
-						double g = max(m_sheet_main.m_grid_base + 1.0, 1.0);
-						pt_round(m_pointer_pressed, g, m_pointer_pressed);
-						pt_round(m_pointer_cur, g, m_pointer_cur);
+						double g_base;
+						m_sheet_main.get_grid_base(g_base);
+						const double g_len = max(g_base + 1.0, 1.0);
+						pt_round(m_pointer_pressed, g_len, m_pointer_pressed);
+						pt_round(m_pointer_cur, g_len, m_pointer_cur);
 					}
 				}
 				// ポインターの現在の位置と押された位置の差分を求める.
@@ -742,10 +754,10 @@ namespace winrt::GraphPaper::implementation
 			double value = stbar.Value();
 			double limit = 0.0;
 			if (delta < 0 && value < (limit = stbar.Maximum())) {
-				value = min(value + 32.0 * m_sheet_main.m_sheet_main_scale, limit);
+				value = min(value + 32.0 * m_sheet_main.m_sheet_scale, limit);
 			}
 			else if (delta > 0 && value > (limit = stbar.Minimum())) {
-				value = max(value - 32.0 * m_sheet_main.m_sheet_main_scale, limit);
+				value = max(value - 32.0 * m_sheet_main.m_sheet_scale, limit);
 			}
 			else {
 				return;

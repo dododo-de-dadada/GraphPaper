@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_LINE,		// 線分
 		SHAPE_POLY,		// 四辺形
 		SHAPE_RECT,		// 方形
-		SHAPE_RRCT,		// 角丸方形
+		SHAPE_RRECT,		// 角丸方形
 		SHAPE_TEXT,		// 文字列
 		SHAPE_GROUP,	// グループ
 		SHAPE_RULER		// 定規
@@ -31,8 +31,8 @@ namespace winrt::GraphPaper::implementation
 	// 次の図形とその距離を得る.
 	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept;
 
-	// 使用可能な書体名か判定する.
-	bool s_list_available_font(const S_LIST_T& s_list, wchar_t*& unavailable_font) noexcept
+	// 使用可能な書体名か判定し, 使用できない書体があったならばそれを得る.
+	bool s_list_test_font(const S_LIST_T& s_list, wchar_t*& unavailable_font) noexcept
 	{
 		// 図形リストの各図形について以下を繰り返す.
 		for (auto s : s_list) {
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 最後の図形をリストから得る.
+	// 最後の図形を得る.
 	// s_list	図形リスト
 	// 戻り値	得られた図形
 	Shape* s_list_back(S_LIST_T const& s_list) noexcept
@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 		return s_list_next(s_list.rbegin(), s_list.rend(), _);
 	}
 
-	// 図形全体の領域をリストから得る.
+	// 図形と用紙を囲む領域を得る.
 	// s_list	図形リスト
 	// s_size	用紙の寸法
 	// b_min	領域の左上位置
@@ -76,7 +76,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形全体の領域をリストから得る.
+	// 図形を囲む領域を得る.
 	// s_list	図形リスト
 	// b_min	領域の左上位置
 	// b_max	領域の右下位置
@@ -105,7 +105,7 @@ namespace winrt::GraphPaper::implementation
 		s_list.clear();
 	}
 
-	// 図形リストの図形を数える
+	// 図形を種類別に数える.
 	// undeleted_cnt	消去フラグがない図形の数
 	// selected_cnt	選択された図形の数
 	// selected_group_cnt	選択されたグループ図形の数
@@ -194,12 +194,12 @@ namespace winrt::GraphPaper::implementation
 
 	}
 
-	// 図形のリスト上での順番を得る.
+	// 先頭から図形まで数える.
 	// s_list	図形リスト
 	// s	図形
 	// 戻り値	図形の順番
 	// 消去フラグが立っている図形は順番に入れない.
-	uint32_t s_list_distance(S_LIST_T const& s_list, const Shape* s) noexcept
+	uint32_t s_list_count(S_LIST_T const& s_list, const Shape* s) noexcept
 	{
 		uint32_t i = 0;
 		for (auto t : s_list) {
@@ -214,7 +214,7 @@ namespace winrt::GraphPaper::implementation
 		return i;
 	}
 
-	// 最初の図形をリストから得る.
+	// 最初の図形を得る.
 	// s_list	図形リスト
 	// 戻り値	最初の図形
 	// 消去フラグが立っている図形は勘定されない.
@@ -224,7 +224,7 @@ namespace winrt::GraphPaper::implementation
 		return s_list_next(s_list.begin(), s_list.end(), _);
 	}
 
-	// 図形リストの中から, 位置を含む図形とその部位を判定する.
+	// 位置を含む図形とその部位を判定する.
 	// s_list	図形リスト
 	// t_pos	判定する位置
 	// a_len	部位の大きさ
@@ -267,13 +267,13 @@ namespace winrt::GraphPaper::implementation
 		return ANCH_TYPE::ANCH_SHEET;
 	}
 
-	// 図形をリストに挿入する.
+	// 図形を挿入する.
 	// s_list	図形リスト
 	// s	挿入する図形
-	// s_pos	挿入する位置にある図形
-	void s_list_insert(S_LIST_T& s_list, Shape* s, const Shape* s_pos) noexcept
+	// s_at	挿入する位置にある図形
+	void s_list_insert(S_LIST_T& s_list, Shape* const s_ins, const Shape* s_at) noexcept
 	{
-		s_list.insert(std::find(s_list.begin(), s_list.end(), s_pos), s);
+		s_list.insert(std::find(s_list.begin(), s_list.end(), s_at), s_ins);
 	}
 
 	// リストの中の図形の順番を得る.
@@ -284,19 +284,15 @@ namespace winrt::GraphPaper::implementation
 	// t	得られた値
 	template <typename S, typename T> bool s_list_match(S_LIST_T const& s_list, S s, T& t)
 	{
-		// 一致フラグ
-		bool match = false;
-		// 探索する順に図形を数える計数.
-		uint32_t j = 0;
-		// スタックカウンタ.
-		uint32_t k = 0;
-		// リストを深さ優先で探索するためのスタック
-		std::list<S_LIST_T::const_iterator> stack;
+		bool match = false;	// 一致フラグ
+		uint32_t j = 0;	// 探索する順に図形を数える係数.
+		uint32_t stack_cnt = 0;	// スタックカウンタ.
+		std::list<S_LIST_T::const_iterator> stack;	// リストを深さ優先で探索するためのスタック
 		// 図形リストの開始と終端をスタックにプッシュする.
 		stack.push_back(s_list.begin());
 		stack.push_back(s_list.end());
-		k++;
-		while (k-- != 0) {
+		stack_cnt++;
+		while (stack_cnt-- != 0) {
 			// スタックカウンタが 0 でないかぎり以下を繰り返す.
 			// 反復子と終端をスタックからポップする.
 			auto it_end = stack.back();
@@ -340,11 +336,11 @@ namespace winrt::GraphPaper::implementation
 					// 反復子の繰り返しを中断する.
 					stack.push_back(it);
 					stack.push_back(it_end);
-					k++;
+					stack_cnt++;
 					auto& grp_list = static_cast<ShapeGroup*>(r)->m_list_grouped;
 					stack.push_back(grp_list.begin());
 					stack.push_back(grp_list.end());
-					k++;
+					stack_cnt++;
 					break;
 				}
 			}
@@ -371,22 +367,21 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 次の図形をリストから得る.
+	// 図形のその次の図形をリストから得る.
 	// s_list	図形リスト
-	// s	直前の図形
-	// 戻り値	得られた図形
+	// s	図形
+	// 戻り値	その次の図形
 	Shape* s_list_next(S_LIST_T const& s_list, const Shape* s) noexcept
 	{
 		return s_list_next(s_list.begin(), s_list.end(), s);
 	}
 
-	// 次の図形をリストから得る.
+	// 図形の, その次の図形をリストから得る.
 	// it_begin	リストの始端
 	// it_end	リストの終端
-	// s	直前の図形
-	// 戻り値	次の図形, ヌルならば次の図形はない.
-	template <typename T>
-	static Shape* s_list_next(T const& it_begin, T const& it_end, const Shape* s) noexcept
+	// s	図形
+	// 戻り値	その次の図形. ヌルならば次の図形はない.
+	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, const Shape* s) noexcept
 	{
 		auto it{ std::find(it_begin, it_end, s) };
 		if (it != it_end) {
@@ -398,10 +393,10 @@ namespace winrt::GraphPaper::implementation
 	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::iterator const& it_begin, S_LIST_T::iterator const& it_end, const Shape* s) noexcept;
 	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::reverse_iterator const& it_rbegin, S_LIST_T::reverse_iterator const& it_rend, const Shape* s) noexcept;
 
-	// 次の図形とその長さをリストから得る.
+	// 図形のその次の図形と, その間隔をリストから得る.
 	// it_begin	リストの始端
 	// it_end	リストの終端
-	// distance	次の図形との長さ
+	// distance	次の図形との間隔
 	// 戻り値	次の図形, ヌルならば次の図形はない.
 	template <typename T>
 	static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept
@@ -464,7 +459,7 @@ namespace winrt::GraphPaper::implementation
 		else if (s_type == SHAPE_TYPE::SHAPE_RECT) {
 			s = new ShapeRect(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_RRCT) {
+		else if (s_type == SHAPE_TYPE::SHAPE_RRECT) {
 			s = new ShapeRRect(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_TEXT) {
@@ -489,10 +484,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をリストから削除し, 削除した図形の次の図形を得る.
 	// s_list	図形リスト.
-	// s	削除する図形.
-	// s_pos	図形を削除した位置.
-	// 図形を削除した位置とは, 削除された図形の次の位置にあった図形へのポインター.
-	// 削除された図形がリスト末尾にあったときはヌルポインターとなる.
+	// s	図形.
+	// 戻り値	図形の次にあった図形. 図形がリスト末尾にあったときはヌルポインター.
 	Shape* s_list_remove(S_LIST_T& s_list, const Shape* s) noexcept
 	{
 		auto it{ std::find(s_list.begin(), s_list.end(), s) };
@@ -506,8 +499,8 @@ namespace winrt::GraphPaper::implementation
 		return static_cast<Shape*>(nullptr);
 	}
 
-	// 選択された図形から, それらを全て合わせた文字列を得る.
-	winrt::hstring s_list_selected_all_text(S_LIST_T const& s_list) noexcept
+	// 選択された文字列図形から, それらを改行で連結した文字列を得る.
+	winrt::hstring s_list_selected_all_text(const S_LIST_T& s_list) noexcept
 	{
 		winrt::hstring text;
 		for (auto s : s_list) {
@@ -535,8 +528,7 @@ namespace winrt::GraphPaper::implementation
 	// S	図形の型. Shape ならすべての種類, ShapeGroup ならグループ図形のみ.
 	// s_list	図形リスト
 	// t_list	得られたリスト
-	template <typename S>
-	void s_list_selected(S_LIST_T const& s_list, S_LIST_T& t_list) noexcept
+	template <typename S> void s_list_selected(const S_LIST_T& s_list, S_LIST_T& t_list) noexcept
 	{
 		for (auto s : s_list) {
 			if (s->is_deleted()) {
@@ -591,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 				s_int = SHAPE_RECT;
 			}
 			else if (s_type == typeid(ShapeRRect)) {
-				s_int = SHAPE_RRCT;
+				s_int = SHAPE_RRECT;
 			}
 			else if (s_type == typeid(ShapeRuler)) {
 				s_int = SHAPE_RULER;

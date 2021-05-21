@@ -52,13 +52,13 @@ namespace winrt::GraphPaper::implementation
 		else if (t_draw == TOOL_DRAW::LINE) {
 			rmfi_tool_draw_line().IsChecked(false);
 		}
-		else if (t_draw == TOOL_DRAW::QUAD) {
+		else if (t_draw == TOOL_DRAW::POLY) {
 			rmfi_tool_draw_poly().IsChecked(false);
 		}
 		else if (t_draw == TOOL_DRAW::RECT) {
 			rmfi_tool_draw_rect().IsChecked(false);
 		}
-		else if (t_draw == TOOL_DRAW::RRCT) {
+		else if (t_draw == TOOL_DRAW::RRECT) {
 			rmfi_tool_draw_rrct().IsChecked(false);
 		}
 		else if (t_draw == TOOL_DRAW::TEXT) {
@@ -242,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + 0 ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// if (m_sheet_main.m_sheet_main_scale != 1.0) {
+	// if (m_sheet_main.m_sheet_scale != 1.0) {
 	// 	mfi_zoom_reset_click(nullptr, nullptr);
 	// }
 	//}

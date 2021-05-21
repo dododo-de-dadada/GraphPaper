@@ -247,9 +247,8 @@ namespace winrt::GraphPaper::implementation
 		// 属性値がなんであれ, DWRITE_FONT_STRETCH_NORMAL でテキストフォーマットは作成する.
 		winrt::check_hresult(
 			d_factory->CreateTextFormat(m_font_family, static_cast<IDWriteFontCollection*>(nullptr),
-				m_font_weight, m_font_style, DWRITE_FONT_STRETCH_NORMAL, static_cast<FLOAT>(m_font_size), locale_name,
-				t_format.put()
-			)
+				m_font_weight, m_font_style, DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
+				static_cast<FLOAT>(m_font_size), locale_name, t_format.put())
 		);
 		const auto text_w = static_cast<FLOAT>(max(std::fabsf(m_diff[0].x) - 2.0 * m_text_margin.width, 0.0));
 		const auto text_h = static_cast<FLOAT>(max(std::fabsf(m_diff[0].y) - 2.0 * m_text_margin.height, 0.0));

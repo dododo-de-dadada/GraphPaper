@@ -140,9 +140,9 @@ namespace winrt::GraphPaper::implementation
 		BEZI,	// 曲線
 		ELLI,	// だ円
 		LINE,	// 線分
-		QUAD,	// 四辺形
+		POLY,	// 多角形
 		RECT,	// 方形
-		RRCT,	// 角丸方形
+		RRECT,	// 角丸方形
 		TEXT,	// 文字列
 		RULER,	// 定規
 	};

@@ -32,13 +32,13 @@ namespace winrt::GraphPaper::implementation
 		else if (m_tool_draw == TOOL_DRAW::LINE) {
 			rmfi_tool_draw_line().IsChecked(true);
 		}
-		else if (m_tool_draw == TOOL_DRAW::QUAD) {
+		else if (m_tool_draw == TOOL_DRAW::POLY) {
 			rmfi_tool_draw_poly().IsChecked(true);
 		}
 		else if (m_tool_draw == TOOL_DRAW::RECT) {
 			rmfi_tool_draw_rect().IsChecked(true);
 		}
-		else if (m_tool_draw == TOOL_DRAW::RRCT) {
+		else if (m_tool_draw == TOOL_DRAW::RRECT) {
 			rmfi_tool_draw_rrct().IsChecked(true);
 		}
 		else if (m_tool_draw == TOOL_DRAW::RULER) {
@@ -89,10 +89,10 @@ namespace winrt::GraphPaper::implementation
 			m_tool_draw = TOOL_DRAW::RECT;
 		}
 		else if (sender == rmfi_tool_draw_rrct()) {
-			m_tool_draw = TOOL_DRAW::RRCT;
+			m_tool_draw = TOOL_DRAW::RRECT;
 		}
 		else if (sender == rmfi_tool_draw_poly()) {
-			m_tool_draw = TOOL_DRAW::QUAD;
+			m_tool_draw = TOOL_DRAW::POLY;
 		}
 		else if (sender == rmfi_tool_draw_elli()) {
 			m_tool_draw = TOOL_DRAW::ELLI;
@@ -150,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 			rmfi_tool_draw_poly().IsChecked(true);
-			m_tool_draw = TOOL_DRAW::QUAD;
+			m_tool_draw = TOOL_DRAW::POLY;
 		}
 		sbar_set_draw();
 		pointer_set();

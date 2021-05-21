@@ -254,8 +254,8 @@ namespace winrt::GraphPaper::implementation
 				auto v = static_cast<const UndoList*>(u);
 				auto s = v->shape();
 				if (v->is_insert()) {
-					if (v->item_pos() != nullptr) {
-						const auto i = summary_distance(lv_summary().Items(), v->item_pos());
+					if (v->shape_at() != nullptr) {
+						const auto i = summary_distance(lv_summary().Items(), v->shape_at());
 						lv_summary().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
 						summary_select_item(lv_summary(), i);
 					}

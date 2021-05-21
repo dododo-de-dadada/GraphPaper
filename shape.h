@@ -532,43 +532,62 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 
 	using S_LIST_T = std::list<struct Shape*>;
-	// 使用可能な書体名か判定する.
-	bool s_list_available_font(const S_LIST_T& s_list, wchar_t*& unavailable_font) noexcept;
-	// 最後の図形をリストから得る.
+
+	// 使用可能な書体名か判定し, 使用できない書体があったならばそれを得る.
+	bool s_list_test_font(const S_LIST_T& s_list, wchar_t*& unavailable_font) noexcept;
+
+	// 最後の図形を得る.
 	Shape* s_list_back(S_LIST_T const& s_list) noexcept;
+
 	// 図形リストを消去し, 含まれる図形を破棄する.
 	void s_list_clear(S_LIST_T& s_list) noexcept;
-	// 図形リストの図形を数える
+
+	// 図形を種類別に数える.
 	void s_list_count(const S_LIST_T& s_list, uint32_t& undeleted_cnt, uint32_t& selected_cnt, uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt, uint32_t& text_cnt, bool& fore_selected, bool& back_selected, bool& prev_selected) noexcept;
-	// 図形のリスト上での位置を得る.
-	uint32_t s_list_distance(S_LIST_T const& s_list, const Shape* s) noexcept;
+
+	// 先頭から図形まで数える.
+	uint32_t s_list_count(S_LIST_T const& s_list, const Shape* s) noexcept;
+
 	// 最初の図形をリストから得る.
 	Shape* s_list_front(S_LIST_T const& s_list) noexcept;
-	// 図形全体の領域をリストから得る.
-	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F p_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
-	// 図形全体の領域をリストから得る.
+
+	// 図形と用紙を囲む領域を得る.
+	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F sheet_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
+
+	// 図形を囲む領域をリストから得る.
 	void s_list_bound(S_LIST_T const& s_list, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
-	// 位置を含む図形とその部位をリストから得る.
+
+	// 位置を含む図形とその部位を得る.
 	uint32_t s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, const double a_len, Shape*& s) noexcept;
-	// 図形をリストに挿入する.
-	void s_list_insert(S_LIST_T& s_list, Shape* s_ins, const Shape* s_pos) noexcept;
-	// 選択フラグの立つすべての図形を差分だけ移動する.
+
+	// 図形を挿入する.
+	void s_list_insert(S_LIST_T& s_list, Shape* const s_ins, const Shape* s_at) noexcept;
+
+	// 選択された図形を差分だけ移動する.
 	void s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F diff) noexcept;
-	// 次の図形をリストから得る.
+
+	// 図形のその次の図形を得る.
 	Shape* s_list_next(S_LIST_T const& s_list, const Shape* s) noexcept;
-	// 前の図形をリストから得る.
+
+	// 図形のその前の図形を得る.
 	Shape* s_list_prev(S_LIST_T const& s_list, const Shape* s) noexcept;
+
 	// 図形リストをデータリーダーから読み込む.
 	bool s_list_read(S_LIST_T& s_list, DataReader const& dt_reader);
+
 	// 図形をリストから削除し, 削除した図形の次の図形を得る.
 	Shape* s_list_remove(S_LIST_T& s_list, const Shape* s) noexcept;
+
 	// 選択された図形のリストを得る.
-	template <typename S> void s_list_selected(S_LIST_T const& s_list, S_LIST_T& sel_list) noexcept;
+	template <typename S> void s_list_selected(S_LIST_T const& s_list, S_LIST_T& t_list) noexcept;
+
 	// 図形リストをデータライターに書き込む. REDUCE 場合の消去フラグの立つ図形は無視する.
 	template <bool REDUCE> void s_list_write(const S_LIST_T& s_list, DataWriter const& dt_writer);
+
 	// リストの中の図形の順番を得る.
 	template <typename S, typename T> bool s_list_match(S_LIST_T const& s_list, S s, T& t);
-	// 選択された図形から, それらを全て合わせた文字列を得る.
+
+	// 選択された文字列図形から, それらを改行で連結した文字列を得る.
 	winrt::hstring s_list_selected_all_text(S_LIST_T const& s_list) noexcept;
 
 	//------------------------------
@@ -577,15 +596,14 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeSheet : Shape {
 
 		// 既定の図形属性
-
 		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEF };	// 矢じりの寸法
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じりの形式
-		D2D1_POINT_2F m_corner_rad{ 0.0f, 0.0f };	// 角丸半径
+		D2D1_POINT_2F m_corner_rad;	// 角丸半径
 		D2D1_COLOR_F m_fill_color{ S_WHITE };	// 塗りつぶしの色
 		D2D1_COLOR_F m_font_color{ S_BLACK };	// 書体の色 (MainPage のコンストラクタで設定)
 		wchar_t* m_font_family = nullptr;	// 書体名
 		double m_font_size = FONT_SIZE_DEF;	// 書体の大きさ
-		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH_UNDEFINED;	// 書体の伸縮
+		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色 (MainPage のコンストラクタで設定)
@@ -598,17 +616,15 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_text_margin{ TEXT_MARGIN_DEF };	// 文字列の左右と上下の余白
 
 		// 方眼の属性
-
-		double m_grid_base = 0.0;	// 方眼の基準の大きさ (を -1 した値)
 		double m_grid_gray = GRID_GRAY_DEF;	// 方眼の濃さ
+		double m_grid_base = 0.0;	// 方眼の基準の大きさ (を -1 した値)
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
 		GRID_EMPH m_grid_emph{ GRID_EMPH_0 };	// 方眼の強調
 		bool m_grid_snap = true;	// 方眼に整列
 
 		// 用紙の属性
-
-		D2D1_COLOR_F m_sheet_main_color{ S_WHITE };	// 背景色 (MainPage のコンストラクタで設定)
-		double m_sheet_main_scale = 1.0;	// 拡大率
+		D2D1_COLOR_F m_sheet_color{ S_WHITE };	// 背景色 (MainPage のコンストラクタで設定)
+		double m_sheet_scale = 1.0;	// 拡大率
 		D2D1_SIZE_F	m_sheet_size;	// 大きさ (MainPage のコンストラクタで設定)
 
 		//------------------------------
@@ -691,6 +707,8 @@ namespace winrt::GraphPaper::implementation
 		void read(DataReader const& dt_reader);
 		// 図形の属性値を格納する.
 		void set_to(Shape* s) noexcept;
+		// 角丸半径を得る.
+		void set_corner_radius(const D2D1_POINT_2F& value) noexcept;
 		// 値を方眼の基準の大きさに格納する.
 		void set_grid_base(const double value) noexcept;
 		// 値を方眼の濃淡に格納する.
@@ -1153,13 +1171,13 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_font_color{ S_BLACK };	// 書体の色
 		wchar_t* m_font_family = nullptr;	// 書体名
 		double m_font_size = FONT_SIZE_DEF;	// 書体の大きさ
-		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH_UNDEFINED;	// 書体の伸縮
-		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
-		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
-		double m_text_line = 0.0;	// 行間 (DIPs 96dpi固定)
+		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮
+		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
+		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		wchar_t* m_text = nullptr;	// 文字列
-		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落そろえ
-		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字揃え
+		double m_text_line = 0.0;	// 行間 (DIPs 96dpi固定)
+		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落そろえ
+		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字揃え
 		D2D1_SIZE_F m_text_margin{ TEXT_MARGIN_DEF };	// 文字列のまわりの上下と左右の余白
 
 		winrt::com_ptr<IDWriteTextLayout> m_dw_layout{};	// 文字列を表示するためのレイアウト

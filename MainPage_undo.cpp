@@ -300,7 +300,9 @@ namespace winrt::GraphPaper::implementation
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoAttr<UNDO_OP::ARROW_STYLE>)) {
 			// 線枠メニューの「矢じりの種類」に印をつける.
-			arrow_style_check_menu(m_sheet_main.m_arrow_style);
+			ARROW_STYLE a_style;
+			m_sheet_main.get_arrow_style(a_style);
+			arrow_style_check_menu(a_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
@@ -308,29 +310,39 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_EMPH>)) {
 			// 用紙メニューの「方眼の強調」に印をつける.
-			grid_emph_check_menu(m_sheet_main.m_grid_emph);
+			GRID_EMPH g_emph;
+			m_sheet_main.get_grid_emph(g_emph);
+			grid_emph_check_menu(g_emph);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_SHOW>)) {
-			// 用紙メニューの「方眼の表示」に印をつける.
-			grid_show_check_menu(m_sheet_main.m_grid_show);
+			GRID_SHOW g_show;
+			m_sheet_main.get_grid_show(g_show);
+			grid_show_check_menu(g_show);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
-			font_style_check_menu(m_sheet_main.m_font_style);
+			DWRITE_FONT_STYLE f_style;
+			m_sheet_main.get_font_style(f_style);
+			font_style_check_menu(f_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::SHEET_SIZE>)) {
 			// 用紙の大きさをステータスバーに格納する.
 			sbar_set_sheet();
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_STYLE>)) {
-			// 線枠メニューの「種類」に印をつける.
-			stroke_style_check_menu(m_sheet_main.m_stroke_style);
+			D2D1_DASH_STYLE s_style;
+			m_sheet_main.get_stroke_style(s_style);
+			stroke_style_check_menu(s_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_T>)) {
+			DWRITE_TEXT_ALIGNMENT t_align_t;
+			m_sheet_main.get_text_align_t(t_align_t);
 			text_align_t_check_menu(m_sheet_main.m_text_align_t);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_P>)) {
-			text_align_p_check_menu(m_sheet_main.m_text_align_p);
+			DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
+			m_sheet_main.get_text_align_p(t_align_p);
+			text_align_p_check_menu(t_align_p);
 		}
 	}
 

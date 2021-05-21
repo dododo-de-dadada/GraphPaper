@@ -19,10 +19,12 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		const double val0 = m_sample_sheet.m_stroke_color.r * COLOR_MAX;
-		const double val1 = m_sample_sheet.m_stroke_color.g * COLOR_MAX;
-		const double val2 = m_sample_sheet.m_stroke_color.b * COLOR_MAX;
-		const double val3 = m_sample_sheet.m_stroke_color.a * COLOR_MAX;
+		D2D1_COLOR_F s_color;
+		m_sample_sheet.get_stroke_color(s_color);
+		const double val0 = s_color.r * COLOR_MAX;
+		const double val1 = s_color.g * COLOR_MAX;
+		const double val2 = s_color.b * COLOR_MAX;
+		const double val3 = s_color.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -70,18 +72,22 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		const double val0 = m_sheet_main.m_stroke_patt.m_[0] / SLIDER_STEP;
-		const double val1 = m_sheet_main.m_stroke_patt.m_[1] / SLIDER_STEP;
-		const double val2 = m_sheet_main.m_stroke_patt.m_[2] / SLIDER_STEP;
-		const double val3 = m_sheet_main.m_stroke_patt.m_[3] / SLIDER_STEP;
+		STROKE_PATT s_patt;
+		m_sheet_main.get_stroke_patt(s_patt);
+		const double val0 = s_patt.m_[0] / SLIDER_STEP;
+		const double val1 = s_patt.m_[1] / SLIDER_STEP;
+		const double val2 = s_patt.m_[2] / SLIDER_STEP;
+		const double val3 = s_patt.m_[3] / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
 		sample_slider_3().Value(val3);
-		sample_slider_0().Visibility(m_sheet_main.m_stroke_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
-		sample_slider_1().Visibility(m_sheet_main.m_stroke_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
-		sample_slider_2().Visibility(m_sheet_main.m_stroke_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
-		sample_slider_3().Visibility(m_sheet_main.m_stroke_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
+		D2D1_DASH_STYLE s_style;
+		m_sheet_main.get_stroke_style(s_style);
+		sample_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
+		sample_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
+		sample_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
+		sample_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
 		stroke_set_slider_header<UNDO_OP::STROKE_PATT, 0>(val0);
 		stroke_set_slider_header<UNDO_OP::STROKE_PATT, 1>(val1);
 		stroke_set_slider_header<UNDO_OP::STROKE_PATT, 2>(val2);
@@ -121,7 +127,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		const double val0 = m_sample_sheet.m_stroke_width / SLIDER_STEP;
+		double s_width;
+		m_sample_sheet.get_stroke_width(s_width);
+		const double val0 = s_width / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_0().Visibility(VISIBLE);
 		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
@@ -144,49 +152,7 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	/*
-	// 線枠メニューの「破線」が選択された.
-	void MainPage::stroke_dash_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_sheet_main.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
-			mfi_stroke_patt().IsEnabled(true);
-			mfi_stroke_patt_2().IsEnabled(true);
-		}
-		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH);
-	}
-
-	// 線枠メニューの「一点破線」が選択された.
-	void MainPage::stroke_dash_dot_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_sheet_main.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
-			mfi_stroke_patt().IsEnabled(true);
-			mfi_stroke_patt_2().IsEnabled(true);
-		}
-		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH_DOT);
-	}
-
-	// 線枠メニューの「二点破線」が選択された.
-	void MainPage::stroke_dash_dot_dot_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_sheet_main.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
-			mfi_stroke_patt().IsEnabled(true);
-			mfi_stroke_patt_2().IsEnabled(true);
-		}
-		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DASH_DOT_DOT);
-	}
-
-	// 線枠メニューの「点線」が選択された.
-	void MainPage::stroke_dot_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_sheet_main.m_stroke_style == D2D1_DASH_STYLE_SOLID) {
-			mfi_stroke_patt().IsEnabled(true);
-			mfi_stroke_patt_2().IsEnabled(true);
-		}
-		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DOT);
-	}
-	*/
-
-	// 線枠メニューの「実線」が選択された.
+	// 線枠メニューの「種類」のサブ項目が選択された.
 	void MainPage::stroke_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_DASH_STYLE d_style;
@@ -208,8 +174,10 @@ namespace winrt::GraphPaper::implementation
 		else {
 			return;
 		}
-		mfi_stroke_patt().IsEnabled(m_sheet_main.m_stroke_style == D2D1_DASH_STYLE_SOLID);
-		mfi_stroke_patt_2().IsEnabled(m_sheet_main.m_stroke_style == D2D1_DASH_STYLE_SOLID);
+		D2D1_DASH_STYLE s_style;
+		m_sheet_main.get_stroke_style(s_style);
+		mfi_stroke_patt().IsEnabled(s_style == D2D1_DASH_STYLE_SOLID);
+		mfi_stroke_patt_2().IsEnabled(s_style == D2D1_DASH_STYLE_SOLID);
 		undo_push_set<UNDO_OP::STROKE_STYLE>(d_style);
 	}
 
@@ -226,8 +194,12 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::STROKE_PATT) {
 			wchar_t buf[32];
 			const double dpi = sheet_dx().m_logical_dpi;
-			const double g_len = m_sheet_main.m_grid_base + 1.0;
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * m_sample_sheet.m_stroke_width, dpi, g_len, buf);
+			double g_base;
+			m_sheet_main.get_grid_base(g_base);
+			const double g_len = g_base + 1.0;
+			double s_width;
+			m_sample_sheet.get_stroke_width(s_width);
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * s_width, dpi, g_len, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			if constexpr (S == 0) {
 				hdr = r_loader.GetString(L"str_dash_len") + L": " + buf;
@@ -245,7 +217,9 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			wchar_t buf[32];
 			const double dpi = sheet_dx().m_logical_dpi;
-			const double g_len = m_sheet_main.m_grid_base + 1.0;
+			double g_base;
+			m_sheet_main.get_grid_base(g_base);
+			const double g_len = g_base + 1.0;
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}

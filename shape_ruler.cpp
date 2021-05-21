@@ -23,7 +23,7 @@ namespace winrt::GraphPaper::implementation
 			return anchor;
 		}
 		if (is_opaque(m_stroke_color)) {
-			const double g_len = static_cast<double>(m_grid_base) + 1.0;
+			const double g_len = m_grid_base + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
 			const bool xy = fabs(m_diff[0].x) >= fabs(m_diff[0].y);
 			const double diff_x = (xy ? m_diff[0].x : m_diff[0].y);
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_opaque(m_stroke_color)) {
 			// ê¸ògÇÃêFÇ™ïsìßñæÇ»èÍçá,
-			const double g_len = static_cast<double>(m_grid_base) + 1.0;
+			const double g_len = m_grid_base + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
 			const bool xy = fabs(m_diff[0].x) >= fabs(m_diff[0].y);
 			const double diff_x = (xy ? m_diff[0].x : m_diff[0].y);
@@ -195,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 				static_cast<IDWriteFontCollection*>(nullptr),
 				attr->m_font_weight,
 				attr->m_font_style,
-				DWRITE_FONT_STRETCH_NORMAL,
+				DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
 				static_cast<FLOAT>(f_size),
 				locale_name,
 				m_dw_text_format.put()
@@ -230,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 				static_cast<IDWriteFontCollection*>(nullptr),
 				f_weight,
 				f_style,
-				DWRITE_FONT_STRETCH_NORMAL,
+				DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
 				static_cast<FLOAT>(size),
 				locale_name,
 				m_dw_text_format.put()

@@ -261,11 +261,21 @@ namespace winrt::GraphPaper::implementation
 		if (s->is_selected()) {
 			// âüÇ≥ÇÍÇΩê}å`Ç™ëIëÇ≥ÇÍÇƒÇ¢ÇÈèÍçá,
 			m_sheet_main.set_to(s);
-			arrow_style_check_menu(m_sheet_main.m_arrow_style);
-			font_style_check_menu(m_sheet_main.m_font_style);
-			stroke_style_check_menu(m_sheet_main.m_stroke_style);
-			text_align_p_check_menu(m_sheet_main.m_text_align_p);
-			text_align_t_check_menu(m_sheet_main.m_text_align_t);
+			ARROW_STYLE a_style;
+			m_sheet_main.get_arrow_style(a_style);
+			arrow_style_check_menu(a_style);
+			DWRITE_FONT_STYLE f_style;
+			m_sheet_main.get_font_style(f_style);
+			font_style_check_menu(f_style);
+			D2D1_DASH_STYLE s_style;
+			m_sheet_main.get_stroke_style(s_style);
+			stroke_style_check_menu(s_style);
+			DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
+			m_sheet_main.get_text_align_p(t_align_p);
+			text_align_p_check_menu(t_align_p);
+			DWRITE_TEXT_ALIGNMENT t_align_t;
+			m_sheet_main.get_text_align_t(t_align_t);
+			text_align_t_check_menu(t_align_t);
 		}
 	}
 

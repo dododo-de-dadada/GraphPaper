@@ -65,9 +65,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		const double val0 = m_sample_sheet.m_sheet_main_color.r * COLOR_MAX;
-		const double val1 = m_sample_sheet.m_sheet_main_color.g * COLOR_MAX;
-		const double val2 = m_sample_sheet.m_sheet_main_color.b * COLOR_MAX;
+		const double val0 = m_sample_sheet.m_sheet_color.r * COLOR_MAX;
+		const double val1 = m_sample_sheet.m_sheet_color.g * COLOR_MAX;
+		const double val2 = m_sample_sheet.m_sheet_color.b * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_MATRIX_3X2_F tran;
 		dc->GetTransform(&tran);
 		// 拡大率を変換行列の拡大縮小の成分に格納する.
-		const auto scale = max(m_sheet_main.m_sheet_main_scale, 0.0);
+		const auto scale = max(m_sheet_main.m_sheet_scale, 0.0);
 		tran.m11 = tran.m22 = static_cast<FLOAT>(scale);
 		// スクロールの変分に拡大率を掛けた値を
 		// 変換行列の平行移動の成分に格納する.
@@ -137,8 +137,10 @@ namespace winrt::GraphPaper::implementation
 		// 描画を開始する.
 		dc->BeginDraw();
 		// 用紙色で塗りつぶす.
-		dc->Clear(m_sheet_main.m_sheet_main_color);
-		if (m_sheet_main.m_grid_show == GRID_SHOW::BACK) {
+		dc->Clear(m_sheet_main.m_sheet_color);
+		GRID_SHOW g_show;
+		m_sample_sheet.get_grid_show(g_show);
+		if (equal(g_show, GRID_SHOW::BACK)) {
 			// 方眼の表示が最背面に表示の場合,
 			// 方眼を表示する.
 			m_sheet_main.draw_grid(m_sheet_dx, { 0.0f, 0.0f });
@@ -156,7 +158,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形を表示する.
 			s->draw(m_sheet_dx);
 		}
-		if (m_sheet_main.m_grid_show == GRID_SHOW::FRONT) {
+		if (equal(g_show, GRID_SHOW::FRONT)) {
 			// 方眼の表示が最前面に表示の場合,
 			// 方眼を表示する.
 			m_sheet_main.draw_grid(m_sheet_dx, { 0.0f, 0.0f });
@@ -175,10 +177,10 @@ namespace winrt::GraphPaper::implementation
 			else if (t_draw == TOOL_DRAW::LINE) {
 				m_sheet_main.draw_auxiliary_line(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (t_draw == TOOL_DRAW::RRCT) {
+			else if (t_draw == TOOL_DRAW::RRECT) {
 				m_sheet_main.draw_auxiliary_rrect(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (t_draw == TOOL_DRAW::QUAD) {
+			else if (t_draw == TOOL_DRAW::POLY) {
 				m_sheet_main.draw_auxiliary_poly(m_sheet_dx, pointer_pressed(), pointer_cur(), tool_poly());
 			}
 		}
@@ -223,11 +225,11 @@ namespace winrt::GraphPaper::implementation
 
 			// リソースの取得に失敗した場合に備えて,
 			// 固定の既定値を書体属性に格納する.
-			m_sheet_main.m_font_family = wchar_cpy(L"Segoe UI");
-			m_sheet_main.m_font_size = 14.0;
-			m_sheet_main.m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;
-			m_sheet_main.m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;
-			m_sheet_main.m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;
+			m_sheet_main.set_font_family(wchar_cpy(L"Segoe UI"));
+			m_sheet_main.set_font_size(FONT_SIZE_DEF);
+			m_sheet_main.set_font_stretch(DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL);
+			m_sheet_main.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
+			m_sheet_main.set_font_weight(DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL);
 			// BodyTextBlockStyle をリソースディクショナリから得る.
 			auto resource = Resources().TryLookup(box_value(L"BodyTextBlockStyle"));
 			if (resource != nullptr) {
@@ -257,7 +259,7 @@ namespace winrt::GraphPaper::implementation
 								// プロパティーが FontFamily の場合,
 								// セッターの値から, 書体名を得る.
 								auto value = unbox_value<FontFamily>(setter.Value());
-								m_sheet_main.m_font_family = wchar_cpy(value.Source().c_str());
+								m_sheet_main.set_font_family(wchar_cpy(value.Source().c_str()));
 							}
 							else if (prop == TextBlock::FontSizeProperty()) {
 								// プロパティーが FontSize の場合,
@@ -269,19 +271,19 @@ namespace winrt::GraphPaper::implementation
 								// プロパティーが FontStretch の場合,
 								// セッターの値から, 書体の伸縮を得る.
 								auto value = unbox_value<int32_t>(setter.Value());
-								m_sheet_main.m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(value);
+								m_sheet_main.set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(value));
 							}
 							else if (prop == TextBlock::FontStyleProperty()) {
 								// プロパティーが FontStyle の場合,
 								// セッターの値から, 字体を得る.
 								auto value = unbox_value<int32_t>(setter.Value());
-								m_sheet_main.m_font_style = static_cast<DWRITE_FONT_STYLE>(value);
+								m_sheet_main.set_font_style(static_cast<DWRITE_FONT_STYLE>(value));
 							}
 							else if (prop == TextBlock::FontWeightProperty()) {
 								// プロパティーが FontWeight の場合,
 								// セッターの値から, 書体の太さを得る.
 								auto value = unbox_value<int32_t>(setter.Value());
-								m_sheet_main.m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(value);
+								m_sheet_main.set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(value));
 								//Determine the type of a boxed value
 								//auto prop = setter.Value().try_as<winrt::Windows::Foundation::IPropertyValue>();
 								//if (prop.Type() == winrt::Windows::Foundation::PropertyType::Inspectable) {
@@ -304,28 +306,28 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		{
-			m_sheet_main.m_arrow_size = ARROW_SIZE();
-			m_sheet_main.m_arrow_style = ARROW_STYLE::NONE;
-			m_sheet_main.m_corner_rad = { GRID_LEN_DEF, GRID_LEN_DEF };
+			m_sheet_main.set_arrow_size(ARROW_SIZE_DEF);
+			m_sheet_main.set_arrow_style(ARROW_STYLE::NONE);
+			m_sheet_main.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEF, GRID_LEN_DEF });
 			m_sheet_main.set_fill_color(m_sheet_dx.m_theme_background);
 			m_sheet_main.set_font_color(sheet_foreground());
-			m_sheet_main.m_grid_base = static_cast<double>(GRID_LEN_DEF) - 1.0;
-			m_sheet_main.m_grid_gray = GRID_GRAY_DEF;
-			m_sheet_main.m_grid_emph = GRID_EMPH{ 0, 0 };
-			m_sheet_main.m_grid_show = GRID_SHOW::BACK;
-			m_sheet_main.m_grid_snap = true;
+			m_sheet_main.set_grid_base(static_cast<double>(GRID_LEN_DEF) - 1.0);
+			m_sheet_main.set_grid_gray(GRID_GRAY_DEF);
+			m_sheet_main.set_grid_emph(GRID_EMPH_0);
+			m_sheet_main.set_grid_show(GRID_SHOW::BACK);
+			m_sheet_main.set_grid_snap(true);
 			m_sheet_main.set_sheet_color(m_sheet_dx.m_theme_background);
-			m_sheet_main.m_sheet_main_scale = 1.0;
+			m_sheet_main.set_sheet_scale(1.0);
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_sheet_main.m_sheet_size = SHEET_SIZE_DEF;
 			m_sheet_main.set_stroke_color(sheet_foreground());
-			m_sheet_main.m_stroke_patt = STROKE_PATT();
-			m_sheet_main.m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;
-			m_sheet_main.m_stroke_width = 1.0F;
-			m_sheet_main.m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
-			m_sheet_main.m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
-			m_sheet_main.m_text_line = 0.0F;
-			m_sheet_main.m_text_margin = { 4.0F, 4.0F };
+			m_sheet_main.set_stroke_patt(STROKE_PATT_DEF);
+			m_sheet_main.set_stroke_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+			m_sheet_main.set_stroke_width(1.0);
+			m_sheet_main.set_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+			m_sheet_main.set_text_align_t(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+			m_sheet_main.set_text_line(0.0);
+			m_sheet_main.set_text_margin(TEXT_MARGIN_DEF);
 		}
 		len_unit(LEN_UNIT::PIXEL);
 		color_code(COLOR_CODE::DEC);
@@ -493,7 +495,9 @@ namespace winrt::GraphPaper::implementation
 		double pw = m_sheet_main.m_sheet_size.width;
 		double ph = m_sheet_main.m_sheet_size.height;
 		const double dpi = m_sheet_dx.m_logical_dpi;
-		const auto g_len = m_sample_sheet.m_grid_base + 1.0;
+		double g_base;
+		m_sheet_main.get_grid_base(g_base);
+		const auto g_len = g_base + 1.0;
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), pw, dpi, g_len, buf);
 		tx_sheet_width().Text(buf);
@@ -603,7 +607,9 @@ namespace winrt::GraphPaper::implementation
 		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &value, buf, 2);
 		if (cnt == 1 && value > 0.0) {
 			// 文字列が数値に変換できた場合,
-			value = conv_len_to_val(len_unit(), value, dpi, m_sample_sheet.m_grid_base + 1.0);
+			double g_base;
+			m_sheet_main.get_grid_base(g_base);
+			value = conv_len_to_val(len_unit(), value, dpi, g_base + 1.0);
 		}
 		cd_sheet_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < sheet_size_max());
 	}

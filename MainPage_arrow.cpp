@@ -12,18 +12,6 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrowhead";
 	constexpr double SLIDER_STEP = 0.5;
 
-	// 線枠メニューの「矢じりの種類」>「閉じた」が選択された.
-	/*
-	void MainPage::arrow_filled_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_sheet_main.m_arrow_style == ARROW_STYLE::NONE) {
-			mfi_arrow_size().IsEnabled(true);
-			mfi_arrow_size_2().IsEnabled(true);
-		}
-		undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE::FILLED);
-	}
-	*/
-
 	// 線枠メニューの「矢じりの種類」のサブ項目が選択された.
 	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
@@ -40,8 +28,8 @@ namespace winrt::GraphPaper::implementation
 		else {
 			return;
 		}
-		mfi_arrow_size().IsEnabled(m_sheet_main.m_arrow_style == ARROW_STYLE::NONE);
-		mfi_arrow_size_2().IsEnabled(m_sheet_main.m_arrow_style == ARROW_STYLE::NONE);
+		mfi_arrow_size().IsEnabled(a_style != ARROW_STYLE::NONE);
+		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
 		undo_push_set<UNDO_OP::ARROW_STYLE>(a_style);
 	}
 
@@ -80,7 +68,9 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
 			const double dpi = sheet_dx().m_logical_dpi;
-			const double g_len = m_sheet_main.m_grid_base + 1.0;
+			double g_base;
+			m_sheet_main.get_grid_base(g_base);
+			const double g_len = g_base + 1.0;
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
 			hdr = hdr + buf;
 		}
@@ -134,9 +124,11 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		const double val0 = m_sample_sheet.m_arrow_size.m_width / SLIDER_STEP;
-		const double val1 = m_sample_sheet.m_arrow_size.m_length / SLIDER_STEP;
-		const double val2 = m_sample_sheet.m_arrow_size.m_offset / SLIDER_STEP;
+		ARROW_SIZE a_size;
+		m_sample_sheet.get_arrow_size(a_size);
+		const double val0 = a_size.m_width / SLIDER_STEP;
+		const double val1 = a_size.m_length / SLIDER_STEP;
+		const double val2 = a_size.m_offset / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);

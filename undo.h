@@ -2,8 +2,6 @@
 //------------------------------
 // undo.h
 //
-// undo.cpp
-//
 // 元に戻す / やり直し操作
 // 図形の追加や削除, 変更は, 「操作」を通じて行われる.
 //------------------------------
@@ -129,10 +127,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形の部位の操作
 	//------------------------------
 	struct UndoAnchor : Undo {
-		// 操作される部位
-		uint32_t m_anchor;
-		// 部位の位置
-		D2D1_POINT_2F m_anchor_pos;
+		uint32_t m_anchor;	// 操作される図形の部位
+		D2D1_POINT_2F m_anchor_pos;	// 変更前の, 図形の部位の位置
 
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;
@@ -150,8 +146,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形の順番を入れ替える操作
 	//------------------------------
 	struct UndoArrange2 : Undo {
-		// 入れ替え先の図形
-		Shape* m_dst_shape;
+		Shape* m_dst_shape;	// 入れ替え先の図形
 
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept { return m_shape != m_dst_shape; }
@@ -174,8 +169,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	template <UNDO_OP U>
 	struct UndoAttr : Undo, U_TYPE<U> {
-		// 変更される前の値
-		U_TYPE<U>::type m_value;
+		U_TYPE<U>::type m_value;	// // 変更される前の値
 
 		~UndoAttr() {};
 		// 操作を実行すると値が変わるか判定する.
@@ -200,10 +194,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形をリストに挿入または削除する操作.
 	//------------------------------
 	struct UndoList : Undo {
-		// 挿入フラグ
-		bool m_insert;
-		// 操作する位置にある図形
-		Shape* m_item_pos;
+		bool m_insert;	// 挿入フラグ
+		Shape* m_shape_at;	// 変更前に, 操作される位置にあった図形
 
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept { return true; }
@@ -212,9 +204,9 @@ namespace winrt::GraphPaper::implementation
 		// 操作が挿入か判定する.
 		bool is_insert(void) const noexcept { return m_insert; }
 		// 図形を参照しているか判定する.
-		bool refer_to(const Shape* s) const noexcept { return Undo::refer_to(s) || m_item_pos == s; };
-		// 操作する位置にある図形を得る.
-		Shape* const item_pos(void) const noexcept { return m_item_pos; }
+		bool refer_to(const Shape* s) const noexcept { return Undo::refer_to(s) || m_shape_at == s; };
+		// 操作される位置にあった図形を得る.
+		Shape* const shape_at(void) const noexcept { return m_shape_at; }
 		// 操作をデータリーダーから読み込む.
 		UndoList(DataReader const& dt_reader);
 		// 図形をリストから取り除く.
