@@ -100,8 +100,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto ICON_INFO = L"icon_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"icon_alert";	// 警告アイコンの静的リソースのキー
 
-	constexpr auto GRIDLEN_PX = 48.0F;	// 方眼の大きさの既定値 (ピクセル)
-	constexpr auto SHEET_SIZE = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
+	constexpr auto GRID_LEN_DEF = 48.0F;	// 方眼の大きさの既定値 (ピクセル)
+	constexpr auto SHEET_SIZE_DEF = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
 	constexpr auto SCALE_MAX = 128.0;	// 表示倍率の最大値
 	constexpr auto SCALE_MIN = 1.0 / 128.0;	// 表示倍率の最小値
 	static const winrt::hstring CF_GPD{ L"graph_paper_data" };	// 図形データのクリップボード書式
@@ -145,7 +145,6 @@ namespace winrt::GraphPaper::implementation
 		RRCT,	// 角丸方形
 		TEXT,	// 文字列
 		RULER,	// 定規
-		POLY	// 多角形
 	};
 
 	//-------------------------------
@@ -158,14 +157,16 @@ namespace winrt::GraphPaper::implementation
 		POINT,	// ポイント
 		GRID	// 方眼 (グリッド)
 	};
-	constexpr bool UNIT_NAME_VISIBLE = true;	// 単位名の表示フラグ
-	// ピクセル単位の長さを他の単位の文字列に変換する.
-	template <bool B> void conv_val_to_len(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf);
-	// ピクセル単位の長さを他の単位の文字列に変換する.
-	template <bool B, size_t Z> void conv_val_to_len(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, wchar_t(&t_buf)[Z])
+	constexpr bool LEN_UNIT_SHOW = true;	// 単位名の表示
+	constexpr bool LEN_UNIT_HIDE = true;	// 単位名の非表示
+
+	// 長さを文字列に変換する.
+	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf);
+
+	// 長さを文字列に変換する.
+	template <bool B, size_t Z> void conv_len_to_str(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, wchar_t(&t_buf)[Z])
 	{
-		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<B>(len_unit, value, dpi, g_len, Z, t_buf);
+		conv_len_to_str<B>(len_unit, value, dpi, g_len, Z, t_buf);
 	}
 
 	//-------------------------------
@@ -178,14 +179,13 @@ namespace winrt::GraphPaper::implementation
 		CENT	// パーセント
 	};
 
-	// 色成分の値を文字列に変換し, 配列に格納する.
-	void conv_val_to_col(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]);
+	// 色成分を文字列に変換する.
+	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]);
 
-	// 色成分の値を文字列に変換し, 配列に格納する.
-	template <size_t Z> void conv_val_to_col(const COLOR_CODE c_code, const double value, wchar_t(&t_buf)[Z])
+	// 色成分を文字列に変換する.
+	template <size_t Z> void conv_col_to_str(const COLOR_CODE c_code, const double value, wchar_t(&t_buf)[Z])
 	{
-		// 色成分の値を文字列に変換する.
-		conv_val_to_col(c_code, value, Z, t_buf);
+		conv_col_to_str(c_code, value, Z, t_buf);
 	}
 
 	//-------------------------------
@@ -196,6 +196,7 @@ namespace winrt::GraphPaper::implementation
 		STROKE,	// 線枠
 		FILL,	// 塗りつぶし
 		FONT,	// 書体
+		MISC	// その他
 	};
 
 	//-------------------------------
@@ -234,6 +235,7 @@ namespace winrt::GraphPaper::implementation
 		// tool
 
 		TOOL_DRAW m_tool_draw = TOOL_DRAW::SELECT;		// 作図ツール
+		TOOL_POLY m_tool_poly{ TOOL_POLY_DEF };	// 多角形のツール
 
 		// main
 
@@ -360,12 +362,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 線枠メニューの「矢じりの種類」に印をつける.
 		void arrow_style_check_menu(const ARROW_STYLE a_style);
-		// 線枠メニューの「矢じりの種類」>「閉じた」が選択された.
-		void arrow_filled_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「矢じりの種類」>「なし」が選択された.
-		void arrow_none_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「矢じりの種類」>「開いた」が選択された.
-		void arrow_opened_click(IInspectable const&, RoutedEventArgs const&);
+		// 線枠メニューの「矢じりの種類」が選択された.
+		void arrow_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「矢じりの大きさ」が選択された.
 		IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
@@ -412,16 +410,8 @@ namespace winrt::GraphPaper::implementation
 		void file_save_click(IInspectable const&, RoutedEventArgs const&);
 		// 最近使ったファイルを非同期に読む.
 		IAsyncAction file_recent_read_async(const uint32_t i);
-		// ファイルメニューの「最近使ったファイル 1」が選択された
-		void file_recent_1_click(IInspectable const&, RoutedEventArgs const&);
-		// ファイルメニューの「最近使ったファイル 2」が選択された
-		void file_recent_2_click(IInspectable const&, RoutedEventArgs const&);
-		// ファイルメニューの「最近使ったファイル 3」が選択された
-		void file_recent_3_click(IInspectable const&, RoutedEventArgs const&);
-		// ファイルメニューの「最近使ったファイル 4」が選択された
-		void file_recent_4_click(IInspectable const&, RoutedEventArgs const&);
-		// ファイルメニューの「最近使ったファイル 5」が選択された
-		void file_recent_5_click(IInspectable const&, RoutedEventArgs const&);
+		// ファイルメニューの「最近使ったファイル 」のサブ項目が選択された
+		void file_recent_click(IInspectable const&, RoutedEventArgs const&);
 		// 最近使ったファイルにストレージファイルを追加する.
 		void file_recent_add(StorageFile const& s_file);
 		// 最近使ったファイルのトークンからストレージファイルを得る.
@@ -473,7 +463,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「段落のそろえ」に印をつける.
 		void text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align);
 		// 書体メニューの「大きさを合わせる」が選択された.
-		void text_bound_adjust_click(IInspectable const&, RoutedEventArgs const&);
+		void text_bbox_adjust_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行の高さ」>「狭める」が選択された.
 		void text_line_con_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行の高さ」>「広げる」が選択された.
@@ -507,7 +497,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 用紙メニューの「方眼の強調」に印をつける.
-		void grid_emph_check_menu(const GRID_EMPH g_emph);
+		void grid_emph_check_menu(const GRID_EMPH& g_emph);
 		// 用紙メニューの「方眼の表示」に印をつける.
 		void grid_show_check_menu(const GRID_SHOW g_show);
 		// 用紙メニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -518,18 +508,10 @@ namespace winrt::GraphPaper::implementation
 		void grid_len_exp_click(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の濃さ」が選択された.
 		IAsyncAction grid_gray_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の強調」>「強調なし」が選択された.
-		void grid_emph_1_click(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の強調」>「2番目を強調」が選択された.
-		void grid_emph_2_click(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の強調」>「2番目と10番目を強調」が選択された.
-		void grid_emph_3_click(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の表示」>「最背面」が選択された.
-		void grid_show_back_click(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の表示」>「最前面」が選択された.
-		void grid_show_front_click(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の表示」>「隠す」が選択された.
-		void grid_show_hide_click(IInspectable const&, RoutedEventArgs const&);
+		// 用紙メニューの「方眼の強調」が選択された.
+		void grid_emph_click(IInspectable const& sender, RoutedEventArgs const&);
+		// 用紙メニューの「方眼の表示」が選択された.
+		void grid_show_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 用紙メニューの「方眼にそろえる」が選択された.
 		void grid_snap_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーと図形に格納する.
@@ -614,10 +596,10 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction sheet_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「用紙の大きさ」が選択された
 		IAsyncAction sheet_size_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙の左上位置と右下位置を設定する.
-		void sheet_bound(void) noexcept;
-		// 用紙の左上位置と右下位置を設定する.
-		void sheet_bound(Shape* s) noexcept;
+		// 用紙の左上位置と右下位置を更新する.
+		void sheet_update_bbox(void) noexcept;
+		// 図形をもとに用紙の左上位置と右下位置を更新する.
+		void sheet_update_bbox(const Shape* s) noexcept;
 		// 用紙を表示する.
 		void sheet_draw(void);
 		// 前景色を得る.
@@ -667,10 +649,30 @@ namespace winrt::GraphPaper::implementation
 		//-----------------------------
 
 		// その他メニューの「バージョン情報」が選択された.
-		void about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
+		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 		{
+			//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+			tb_version().Visibility(VISIBLE);
+			const auto def_btn = cd_sample().DefaultButton();
+			const auto pri_text = cd_sample().PrimaryButtonText();
+			const auto close_text = cd_sample().CloseButtonText();
+			cd_sample().PrimaryButtonText(L"");
+			cd_sample().CloseButtonText(L"OK");
+			cd_sample().Title(box_value(L"GraphPaper"));
+			m_sample_type = SAMP_TYPE::MISC;
+			co_await cd_sample().ShowAsync();
+			cd_sample().PrimaryButtonText(pri_text);
+			cd_sample().CloseButtonText(close_text);
+			cd_sample().DefaultButton(def_btn);
+			tb_version().Visibility(COLLAPSED);
+			delete m_sample_shape;
+#if defined(_DEBUG)
+			debug_leak_cnt--;
+#endif
+			m_sample_shape = nullptr;
 			// バージョン情報のメッセージダイアログを表示する.
-			message_show(ICON_INFO, L"str_appname", L"str_version");
+			//message_show(ICON_INFO, L"str_appname", L"str_version");
 		}
 		// 値を色の表記に格納する.
 		void color_code(const COLOR_CODE code) noexcept { m_color_code = code; }
@@ -678,30 +680,16 @@ namespace winrt::GraphPaper::implementation
 		const COLOR_CODE color_code(void) const noexcept { return m_color_code; }
 		// その他メニューの「色の表記」に印をつける.
 		void color_code_check_menu(void);
-		// その他メニューの「色の表記」>「10進数」が選択された.
-		void color_code_dec_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「色の表記」>「16進数」が選択された.
-		void color_code_hex_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「色の表記」>「実数」が選択された.
-		void color_code_real_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「色の表記」>「パーセント」が選択された.
-		void color_code_cent_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「色の表記」のサブ項目が選択された.
+		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値を長さの単位に格納する.
 		void len_unit(const LEN_UNIT value) noexcept { m_len_unit = value; }
 		// 長さの単位を得る.
 		const LEN_UNIT len_unit(void) const noexcept { return m_len_unit; }
 		// その他メニューの「長さの単位」に印をつける.
 		void len_unit_check_menu(void);
-		// その他メニューの「長さの単位」>「インチ」が選択された.
-		void len_unit_inch_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「長さの単位」>「方眼」が選択された.
-		void len_unit_grid_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「長さの単位」>「ポイント」が選択された.
-		void len_unit_milli_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「長さの単位」>「ピクセル」が選択された.
-		void len_unit_pixel_click(IInspectable const&, RoutedEventArgs const&);
-		// その他メニューの「長さの単位」>「ポイント」が選択された.
-		void len_unit_point_click(IInspectable const&, RoutedEventArgs const&);
+		// その他メニューの「長さの単位」のサブ項目が選択された.
+		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_pointer.cpp
@@ -733,11 +721,11 @@ namespace winrt::GraphPaper::implementation
 		// 値をポインターが押された図形に格納する.
 		void pointer_shape(Shape* const s) noexcept { m_pointer_shape = s; }
 		// 値をポインターが押された図形に格納する.
-		void pointer_shape_prev(Shape* prev) noexcept { m_pointer_shape_prev = prev; }
+		void pointer_shape_prev(Shape* const prev) noexcept { m_pointer_shape_prev = prev; }
 		// ポインターが押された図形を得る.
 		Shape* pointer_shape_prev(void) const noexcept { return m_pointer_shape_prev; }
 		// 値をポインターが押された図形に格納する.
-		void pointer_shape_summary(Shape* summary) noexcept { m_pointer_shape_summary = summary; }
+		void pointer_shape_summary(Shape* const summary) noexcept { m_pointer_shape_summary = summary; }
 		// ポインターが押された図形を得る.
 		Shape* pointer_shape_summary(void) const noexcept { return m_pointer_shape_summary; }
 		// ポインターが押された状態に格納する.
@@ -784,7 +772,7 @@ namespace winrt::GraphPaper::implementation
 		// スクロールバーの値を設定する.
 		void scroll_set(const double aw, const double ah);
 		// 図形が表示されるようパネルをスクロールする.
-		bool scroll_to(Shape* s);
+		bool scroll_to(const Shape* s);
 
 		//-------------------------------
 		// MainPage_select.cpp
@@ -800,7 +788,7 @@ namespace winrt::GraphPaper::implementation
 		// 指定した範囲にある図形を選択して, そうでない図形は選択しない.
 		bool select_range(Shape* const s_from, Shape* const s_to);
 		// 図形を選択する.
-		void select_shape(Shape* s, const VirtualKeyModifiers vk);
+		void select_shape(Shape* const s, const VirtualKeyModifiers vk);
 		// 領域に含まれる図形の選択を反転する.
 		bool toggle_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max);
 		// すべての図形の選択を解除する.
@@ -849,16 +837,8 @@ namespace winrt::GraphPaper::implementation
 		void stroke_style_check_menu(const D2D1_DASH_STYLE d_style);
 		// 線枠メニューの「色」が選択された.
 		IAsyncAction stroke_color_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「種類」>「破線」が選択された.
-		void stroke_dash_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「種類」>「一点破線」が選択された.
-		void stroke_dash_dot_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「種類」>「二点破線」が選択された.
-		void stroke_dash_dot_dot_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「種類」>「点線」が選択された.
-		void stroke_dot_click(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「種類」>「実線」が選択された.
-		void stroke_solid_click(IInspectable const&, RoutedEventArgs const&);
+		// 線枠メニューの「種類」のサブ項目が選択された.
+		void stroke_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「破線の配列」が選択された.
 		IAsyncAction stroke_patt_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「太さ」が選択された.
@@ -879,28 +859,28 @@ namespace winrt::GraphPaper::implementation
 		void summary_selection_changed(IInspectable const& sender, SelectionChangedEventArgs const& e);
 		// 図形一覧がロードされた.
 		void summary_loaded(IInspectable const& sender, RoutedEventArgs const& e);
-		// 編集メニューの「リストを表示」が選択された.
+		// 編集メニューの「リストの表示」が選択された.
 		void mfi_summary_click(IInspectable const&, RoutedEventArgs const&);
 		// 図形を一覧に追加する.
-		void summary_append(Shape* s);
+		void summary_append(Shape* const s);
 		// 一覧の中で図形を入れ替える.
-		void summary_arrng(Shape* s, Shape* t);
+		void summary_arrng(Shape* const s, Shape* const t);
 		// 図形一覧を消去する.
 		void summary_clear(void);
 		// 図形一覧パネルを閉じて消去する.
 		void summary_close(void);
 		// 図形を一覧に挿入する.
-		void summary_insert(Shape* s, const uint32_t i);
+		void summary_insert(Shape* const s, const uint32_t i);
 		// 操作を図形一覧に反映する.
 		void summary_reflect(const Undo* u);
 		// 図形一覧を作成しなおす.
 		void summary_remake(void);
 		// 図形を一覧から消去する.
-		uint32_t summary_remove(Shape* s);
+		uint32_t summary_remove(Shape* const s);
 		// 一覧の項目を選択する.
 		void summary_select(uint32_t i);
 		// 一覧の図形を選択する.
-		void summary_select(Shape* s);
+		void summary_select(Shape* const s);
 		// 一覧の項目を全て選択する.
 		void summary_select_all(void);
 		// 一覧の最初の項目を選択する.
@@ -910,7 +890,7 @@ namespace winrt::GraphPaper::implementation
 		// 一覧の項目を選択解除する.
 		void summary_unselect(uint32_t i);
 		// 一覧の図形を選択解除する.
-		void summary_unselect(Shape* s);
+		void summary_unselect(Shape* const s);
 		// 一覧の項目を全て選択解除する.
 		void summary_unselect_all(void);
 		// 一覧の表示を更新する.
@@ -963,30 +943,16 @@ namespace winrt::GraphPaper::implementation
 		// 作図ツール
 		//-------------------------------
 
-		// 値を作図メニューに格納する.
-		void tool_draw(const TOOL_DRAW tool) noexcept { m_tool_draw = tool; }
+		// 作図メニューの項目が選択された.
+		void tool_draw_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 作図メニューを得る.
 		const TOOL_DRAW tool_draw(void) const noexcept { return m_tool_draw; }
-		// 作図メニューの「曲線」が選択された.
-		void tool_bezi_click(IInspectable const&, RoutedEventArgs const&);
-		// 作図メニューの「だ円」が選択された.
-		void tool_elli_click(IInspectable const&, RoutedEventArgs const&);
-		// 作図メニューの「直線」が選択された.
-		void tool_line_click(IInspectable const&, RoutedEventArgs const&);
-		// 作図メニューの「多角形」が選択された.
-		void tool_poly_click(IInspectable const&, RoutedEventArgs const&);
-		// 作図メニューの「四へん形」が選択された.
-		void tool_quad_click(IInspectable const&, RoutedEventArgs const&);
-		// 作図メニューの「方形」が選択された.
-		void tool_rect_click(IInspectable const&, RoutedEventArgs const&);
-		// 作図メニューの「角丸方形」が選択された.
-		void tool_rrect_click(IInspectable const&, RoutedEventArgs const&);
-		// 作図メニューの「図形を選択」が選択された.
-		void tool_select_click(IInspectable const&, RoutedEventArgs const&);
-		// 作図メニューの「文字列」が選択された.
-		void tool_text_click(IInspectable const&, RoutedEventArgs const&);
-		// 作図メニューの「定規」が選択された.
-		void tool_ruler_click(IInspectable const&, RoutedEventArgs const&);
+		// 多角形のツールを得る.
+		const TOOL_POLY& tool_poly(void) const noexcept { return m_tool_poly; }
+		// 作図メニューの状態を読み込む.
+		void tool_read(DataReader const& dt_reader);
+		// 作図メニューの状態を書き込む.
+		void tool_write(DataWriter const& dt_writer);
 
 		//-----------------------------
 		// MainPage_undo.cpp
@@ -1010,31 +976,31 @@ namespace winrt::GraphPaper::implementation
 		// 値を操作スタックの更新フラグに格納する.
 		void undo_pushed(const bool pushed) noexcept { m_stack_updt = pushed; }
 		// 図形を追加して, その操作をスタックに積む.
-		void undo_push_append(Shape* s);
+		void undo_push_append(Shape* const s);
 		// 図形をグループ図形に追加して, その操作をスタックに積む.
-		void undo_push_append(ShapeGroup* g, Shape* s);
+		void undo_push_append(ShapeGroup* const g, Shape* const s);
 		// 図形を入れ替えて, その操作をスタックに積む.
-		void undo_push_arrng(Shape* s, Shape* t);
+		void undo_push_arrng(Shape* const s, Shape* const t);
 		// 図形の頂点や制御点の位置をスタックに保存する.
-		void undo_push_anchor(Shape*, const uint32_t anchor);
+		void undo_push_anchor(Shape* const s, const uint32_t anchor);
 		// 図形を挿入して, その操作をスタックに積む.
-		void undo_push_insert(Shape* s, Shape* s_pos);
+		void undo_push_insert(Shape* const s, Shape* const s_pos);
 		// 図形の位置をスタックに保存してから差分だけ移動する.
 		void undo_push_move(const D2D1_POINT_2F diff, const bool all = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void undo_push_null(void);
 		// 図形をグループから削除して, その操作をスタックに積む.
-		void undo_push_remove(Shape* g, Shape* s);
+		void undo_push_remove(Shape* const g, Shape* const s);
 		// 図形を削除して, その操作をスタックに積む.
-		void undo_push_remove(Shape* s);
+		void undo_push_remove(Shape* const s);
 		// 図形の選択を反転して, その操作をスタックに積む.
-		void undo_push_select(Shape* s);
+		void undo_push_select(Shape* const s);
 		// 値を図形へ格納して, その操作をスタックに積む.
-		template <UNDO_OP U, typename T> void undo_push_set(Shape* s, T const& value);
+		template <UNDO_OP U, typename T> void undo_push_set(Shape* const s, T const& value);
 		// 値を選択された図形に格納して, その操作をスタックに積む.
 		template <UNDO_OP U, typename T> void undo_push_set(T const& value);
 		// 図形の値をスタックに保存する.
-		template <UNDO_OP U> void undo_push_set(Shape* s);
+		template <UNDO_OP U> void undo_push_set(Shape* const s);
 		// 操作スタックをデータリーダーから読み込む.
 		void undo_read(DataReader const& dt_reader);
 		// 操作スタックをデータリーダーに書き込む.

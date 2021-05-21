@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		const double value = (m_sheet_main.m_grid_base + 1.0) * 2.0 - 1.0;
-		if (value > max(m_sheet_main.m_sheet_main_size.width, m_sheet_main.m_sheet_main_size.height)) {
+		if (value > max(m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height)) {
 			// 方眼の一片の長さが, 用紙の幅か高さの大きいほうの値を超える場合,
 			// 中断する.
 			return;
@@ -108,17 +108,30 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	// 用紙メニューの「方眼の強調」>「強調なし」が選択された.
-	void MainPage::grid_emph_1_click(IInspectable const&, RoutedEventArgs const&)
+	// 用紙メニューの「方眼の強調」が選択された.
+	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (m_sheet_main.m_grid_emph == GRID_EMPH::EMPH_0) {
+		GRID_EMPH g_emph;
+		if (sender == rmfi_grid_emph_1() || sender == rmfi_grid_emph_1_2()) {
+			g_emph = GRID_EMPH_0;
+		}
+		else if (sender == rmfi_grid_emph_2() || sender == rmfi_grid_emph_2_2()) {
+			g_emph = GRID_EMPH_2;
+		}
+		else if (sender == rmfi_grid_emph_3() || sender == rmfi_grid_emph_3_2()) {
+			g_emph = GRID_EMPH_3;
+		}
+		else {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_EMPH>(&m_sheet_main, GRID_EMPH::EMPH_0);
+		if (equal(m_sheet_main.m_grid_emph, g_emph)) {
+			return;
+		}
+		undo_push_set<UNDO_OP::GRID_EMPH>(&m_sheet_main, g_emph);
 		undo_menu_enable();
 		sheet_draw();
 	}
-
+	/*
 	// 用紙メニューの「方眼の強調」>「2番目を強調」が選択された.
 	void MainPage::grid_emph_2_click(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -140,18 +153,18 @@ namespace winrt::GraphPaper::implementation
 		undo_menu_enable();
 		sheet_draw();
 	}
-
+	*/
 	// 用紙メニューの「方眼の強調」に印をつける.
 	// g_emph	方眼の強調
-	void MainPage::grid_emph_check_menu(const GRID_EMPH g_emph)
+	void MainPage::grid_emph_check_menu(const GRID_EMPH& g_emph)
 	{
-		rmfi_grid_emph_1().IsChecked(g_emph == GRID_EMPH::EMPH_0);
-		rmfi_grid_emph_2().IsChecked(g_emph == GRID_EMPH::EMPH_2);
-		rmfi_grid_emph_3().IsChecked(g_emph == GRID_EMPH::EMPH_3);
+		rmfi_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
 
-		rmfi_grid_emph_1_2().IsChecked(g_emph == GRID_EMPH::EMPH_0);
-		rmfi_grid_emph_2_2().IsChecked(g_emph == GRID_EMPH::EMPH_2);
-		rmfi_grid_emph_3_2().IsChecked(g_emph == GRID_EMPH::EMPH_3);
+		rmfi_grid_emph_1_2().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_2_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_3_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -170,15 +183,14 @@ namespace winrt::GraphPaper::implementation
 			const double dpi = sheet_dx().m_logical_dpi;
 			const double g_len = m_sheet_main.m_grid_base + 1.0;
 			wchar_t buf[32];
-			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP + 1.0, dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP + 1.0, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_GRAY) {
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_gray_scale") + L": " + buf;
 			}
@@ -205,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S>
 	void MainPage::grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		Shape* s = &m_sample_sheet;
+		Shape* const s = &m_sample_sheet;
 		const double value = args.NewValue();
 
 		grid_set_slider_header<U, S>(value);
@@ -221,12 +233,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 用紙メニューの「方眼の表示」>「最背面」が選択された.
-	void MainPage::grid_show_back_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::grid_show_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (m_sheet_main.m_grid_show == GRID_SHOW::BACK) {
+		GRID_SHOW g_show;
+		if (sender == rmfi_grid_show_back() || sender == rmfi_grid_show_back_2()) {
+			g_show = GRID_SHOW::BACK;
+		}
+		else if (sender == rmfi_grid_show_front() || sender == rmfi_grid_show_front_2()) {
+			g_show = GRID_SHOW::FRONT;
+		}
+		else if (sender == rmfi_grid_show_hide() || sender == rmfi_grid_show_hide_2()) {
+			g_show = GRID_SHOW::HIDE;
+		}
+		else {
 			return;
 		}
-		undo_push_set<UNDO_OP::GRID_SHOW>(&m_sheet_main, GRID_SHOW::BACK);
+		if (m_sheet_main.m_grid_show == g_show) {
+			return;
+		}
+		undo_push_set<UNDO_OP::GRID_SHOW>(&m_sheet_main, g_show);
 		undo_menu_enable();
 		sheet_draw();
 	}
@@ -245,32 +270,30 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 用紙メニューの「方眼の表示」>「最前面」が選択された.
+	/*
 	void MainPage::grid_show_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_sheet_main.m_grid_show == GRID_SHOW::FRONT) {
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_sheet_main, GRID_SHOW::FRONT);
-		// 一連の操作の区切としてヌル操作をスタックに積む.
-		//undo_push_null();
-		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		undo_menu_enable();
 		sheet_draw();
 	}
+	*/
 
 	// 用紙メニューの「方眼の表示」>「隠す」が選択された.
+	/*
 	void MainPage::grid_show_hide_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		if (m_sheet_main.m_grid_show == GRID_SHOW::HIDE) {
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_SHOW>(&m_sheet_main, GRID_SHOW::HIDE);
-		// 一連の操作の区切としてヌル操作をスタックに積む.
-		//undo_push_null();
-		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 		undo_menu_enable();
 		sheet_draw();
 	}
+	*/
 
 	// 用紙メニューの「方眼にそろえる」が選択された.
 	void MainPage::grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
@@ -298,6 +321,55 @@ namespace winrt::GraphPaper::implementation
 				// 選択フラグがない場合,
 				continue;
 			}
+			{
+				D2D1_POINT_2F b_nw;
+				D2D1_POINT_2F b_se;
+				s->get_bound({ FLT_MAX, FLT_MAX }, { -FLT_MAX, -FLT_MAX }, b_nw, b_se);
+				D2D1_POINT_2F b_ne{ b_se.x, b_nw.y };
+				D2D1_POINT_2F b_sw{ b_nw.x, b_se.y };
+
+				D2D1_POINT_2F g_nw;
+				D2D1_POINT_2F g_se;
+				D2D1_POINT_2F g_ne;
+				D2D1_POINT_2F g_sw;
+				pt_round(b_nw, g_len, g_nw);
+				pt_round(b_se, g_len, g_se);
+				pt_round(b_ne, g_len, g_ne);
+				pt_round(b_sw, g_len, g_sw);
+
+				D2D1_POINT_2F d_nw;
+				D2D1_POINT_2F d_se;
+				D2D1_POINT_2F d_ne;
+				D2D1_POINT_2F d_sw;
+				pt_sub(g_nw, b_nw, d_nw);
+				pt_sub(g_se, b_se, d_se);
+				pt_sub(g_ne, b_ne, d_ne);
+				pt_sub(g_sw, b_sw, d_sw);
+
+				double a_nw = pt_abs2(d_nw);
+				double a_se = pt_abs2(d_se);
+				double a_ne = pt_abs2(d_ne);
+				double a_sw = pt_abs2(d_sw);
+				D2D1_POINT_2F diff;
+				if (a_se <= a_nw && a_se <= a_ne && a_nw <= a_sw) {
+					diff = d_se;
+				}
+				else if (a_ne <= a_nw && a_ne <= a_se && a_nw <= a_sw) {
+					diff = d_ne;
+				}
+				else if (a_sw <= a_nw && a_sw <= a_se && a_sw <= a_ne) {
+					diff = d_sw;
+				}
+				else {
+					diff = d_nw;
+				}
+				if (flag != true) {
+					flag = true;
+				}
+				undo_push_set<UNDO_OP::START_POS>(s);
+				s->move(diff);
+			}
+			/*
 			D2D1_POINT_2F s_pos;
 			s->get_min_pos(s_pos);
 			D2D1_POINT_2F g_pos;
@@ -313,13 +385,14 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F diff;
 			pt_sub(g_pos, s_pos, diff);
 			s->move(diff);
+			*/
 		}
 		if (flag != true) {
 			return;
 		}
 		undo_push_null();
 		undo_menu_enable();
-		sheet_bound();
+		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
 	}

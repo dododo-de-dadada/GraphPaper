@@ -501,13 +501,13 @@ namespace winrt::GraphPaper::implementation
 
 		tx_edit().Text(s->m_text == nullptr ? L"" : s->m_text);
 		tx_edit().SelectAll();
-		ck_text_adjust_bound().IsChecked(m_text_adjust);
+		ck_text_adjust_bbox().IsChecked(m_text_adjust);
 		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
 			undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
-			if (m_text_adjust = ck_text_adjust_bound().IsChecked().GetBoolean()) {
+			if (m_text_adjust = ck_text_adjust_bbox().IsChecked().GetBoolean()) {
 				undo_push_anchor(s, ANCH_TYPE::ANCH_SE);
-				s->adjust_bound();
+				s->adjust_bbox();
 			}
 			// 一連の操作の区切としてヌル操作をスタックに積む.
 			undo_push_null();
@@ -520,9 +520,9 @@ namespace winrt::GraphPaper::implementation
 			{
 				auto text = wchar_cpy(tx_edit().Text().c_str());
 				undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
-				if (ck_text_adjust_bound().IsChecked().GetBoolean()) {
+				if (ck_text_adjust_bbox().IsChecked().GetBoolean()) {
 					undo_push_anchor(s, ANCH_TYPE::ANCH_SE);
-					s->adjust_bound();
+					s->adjust_bbox();
 				}
 				// 一連の操作の区切としてヌル操作をスタックに積む.
 				undo_push_null();

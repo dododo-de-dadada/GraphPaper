@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include <windows.h>
 #include <unknwn.h>
 #include <restrictederrorinfo.h>

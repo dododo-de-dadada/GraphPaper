@@ -45,17 +45,17 @@ namespace winrt::GraphPaper::implementation
 		return std::round(2.0 * ret) * 0.5;
 	}
 
-	//	用紙の左上位置と右下位置を設定する.
-	//	s	用紙
-	void MainPage::sheet_bound(Shape* sheet) noexcept
+	// 図形が含まれるよう用紙の左上位置と右下位置を更新する.
+	// s	図形
+	void MainPage::sheet_update_bbox(const Shape* s) noexcept
 	{
-		sheet->get_bound(m_sheet_min, m_sheet_max);
+		s->get_bound(m_sheet_min, m_sheet_max, m_sheet_min, m_sheet_max);
 	}
 
 	// 用紙の左上位置と右下位置を設定する.
-	void MainPage::sheet_bound(void) noexcept
+	void MainPage::sheet_update_bbox(void) noexcept
 	{
-		s_list_bound(m_list_shapes, m_sheet_main.m_sheet_main_size, m_sheet_min, m_sheet_max);
+		s_list_bound(m_list_shapes, m_sheet_main.m_sheet_size, m_sheet_min, m_sheet_max);
 	}
 
 	// 用紙メニューの「用紙の色」が選択された.
@@ -162,43 +162,24 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.draw_grid(m_sheet_dx, { 0.0f, 0.0f });
 		}
 		if (pointer_state() == PBTN_STATE::PRESS_AREA) {
-			const auto tool = tool_draw();
-			// 押された状態が範囲を選択している場合,
-			// 補助線の色をブラシに格納する.
-			//D2D1_COLOR_F aux_color;
-			//m_sheet_main.get_auxiliary_color(aux_color);
-			//m_sheet_dx.m_aux_brush->SetColor(aux_color);
-			if (tool == TOOL_DRAW::SELECT || tool == TOOL_DRAW::RECT || tool == TOOL_DRAW::TEXT || tool == TOOL_DRAW::RULER) {
-				// 選択ツール
-				// または方形
-				// または文字列の場合,
-				// 方形の補助線を表示する.
+			const auto t_draw = tool_draw();
+			if (t_draw == TOOL_DRAW::SELECT || t_draw == TOOL_DRAW::RECT || t_draw == TOOL_DRAW::TEXT || t_draw == TOOL_DRAW::RULER) {
 				m_sheet_main.draw_auxiliary_rect(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (tool == TOOL_DRAW::BEZI) {
-				// 曲線の場合,
-				// 曲線の補助線を表示する.
+			else if (t_draw == TOOL_DRAW::BEZI) {
 				m_sheet_main.draw_auxiliary_bezi(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (tool == TOOL_DRAW::ELLI) {
-				// だ円の場合,
-				// だ円の補助線を表示する.
+			else if (t_draw == TOOL_DRAW::ELLI) {
 				m_sheet_main.draw_auxiliary_elli(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (tool == TOOL_DRAW::LINE) {
-				// 直線の場合,
-				// 直線の補助線を表示する.
+			else if (t_draw == TOOL_DRAW::LINE) {
 				m_sheet_main.draw_auxiliary_line(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (tool == TOOL_DRAW::RRCT) {
-				// 角丸方形の場合,
-				// 角丸方形の補助線を表示する.
+			else if (t_draw == TOOL_DRAW::RRCT) {
 				m_sheet_main.draw_auxiliary_rrect(m_sheet_dx, pointer_pressed(), pointer_cur());
 			}
-			else if (tool == TOOL_DRAW::QUAD) {
-				// 四へん形の場合,
-				// 四へん形の補助線を表示する.
-				m_sheet_main.draw_auxiliary_quad(m_sheet_dx, pointer_pressed(), pointer_cur());
+			else if (t_draw == TOOL_DRAW::QUAD) {
+				m_sheet_main.draw_auxiliary_poly(m_sheet_dx, pointer_pressed(), pointer_cur(), tool_poly());
 			}
 		}
 		// 描画を終了する.
@@ -325,18 +306,18 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_sheet_main.m_arrow_size = ARROW_SIZE();
 			m_sheet_main.m_arrow_style = ARROW_STYLE::NONE;
-			m_sheet_main.m_corner_rad = { GRIDLEN_PX, GRIDLEN_PX };
+			m_sheet_main.m_corner_rad = { GRID_LEN_DEF, GRID_LEN_DEF };
 			m_sheet_main.set_fill_color(m_sheet_dx.m_theme_background);
 			m_sheet_main.set_font_color(sheet_foreground());
-			m_sheet_main.m_grid_base = static_cast<double>(GRIDLEN_PX) - 1.0;
-			m_sheet_main.m_grid_gray = GRID_GRAY;
-			m_sheet_main.m_grid_emph = GRID_EMPH::EMPH_0;
+			m_sheet_main.m_grid_base = static_cast<double>(GRID_LEN_DEF) - 1.0;
+			m_sheet_main.m_grid_gray = GRID_GRAY_DEF;
+			m_sheet_main.m_grid_emph = GRID_EMPH{ 0, 0 };
 			m_sheet_main.m_grid_show = GRID_SHOW::BACK;
 			m_sheet_main.m_grid_snap = true;
 			m_sheet_main.set_sheet_color(m_sheet_dx.m_theme_background);
 			m_sheet_main.m_sheet_main_scale = 1.0;
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			m_sheet_main.m_sheet_main_size = SHEET_SIZE;
+			m_sheet_main.m_sheet_size = SHEET_SIZE_DEF;
 			m_sheet_main.set_stroke_color(sheet_foreground());
 			m_sheet_main.m_stroke_patt = STROKE_PATT();
 			m_sheet_main.m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;
@@ -434,21 +415,21 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
@@ -509,16 +490,16 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		double pw = m_sheet_main.m_sheet_main_size.width;
-		double ph = m_sheet_main.m_sheet_main_size.height;
+		double pw = m_sheet_main.m_sheet_size.width;
+		double ph = m_sheet_main.m_sheet_size.height;
 		const double dpi = m_sheet_dx.m_logical_dpi;
 		const auto g_len = m_sample_sheet.m_grid_base + 1.0;
 		wchar_t buf[32];
-		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), pw, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), pw, dpi, g_len, buf);
 		tx_sheet_width().Text(buf);
-		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), ph, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), ph, dpi, g_len, buf);
 		tx_sheet_height().Text(buf);
-		conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), sheet_size_max(), dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), sheet_size_max(), dpi, g_len, buf);
 		tx_sheet_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
@@ -550,13 +531,13 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(conv_len_to_val(len_unit(), pw, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_val(len_unit(), ph, dpi, g_len))
 			};
-			if (equal(p_size, m_sheet_main.m_sheet_main_size) != true) {
+			if (equal(p_size, m_sheet_main.m_sheet_size) != true) {
 				// 変換された値が用紙の大きさと異なる場合,
 				undo_push_set<UNDO_OP::SHEET_SIZE>(&m_sheet_main, p_size);
 				undo_push_null();
 				undo_menu_enable();
 			}
-			sheet_bound();
+			sheet_update_bbox();
 			sheet_panle_size();
 			sheet_draw();
 			sbar_set_curs();
@@ -596,7 +577,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F p_max;
 			pt_add(b_max, b_min, p_max);
 			D2D1_SIZE_F p_size = { p_max.x, p_max.y };
-			if (equal(m_sheet_main.m_sheet_main_size, p_size) != true) {
+			if (equal(m_sheet_main.m_sheet_size, p_size) != true) {
 				undo_push_set<UNDO_OP::SHEET_SIZE>(&m_sheet_main, p_size);
 				flag = true;
 			}
@@ -604,7 +585,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_null();
 				undo_menu_enable();
 			}
-			sheet_bound();
+			sheet_update_bbox();
 			sheet_panle_size();
 			sheet_draw();
 			sbar_set_sheet();

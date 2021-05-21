@@ -191,8 +191,7 @@ namespace winrt::GraphPaper::implementation
 
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[32];
-			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value, sample_dx().m_logical_dpi, m_sample_sheet.m_grid_base + 1.0, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value, sample_dx().m_logical_dpi, m_sample_sheet.m_grid_base + 1.0, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
@@ -200,25 +199,25 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
 			}
 		}
@@ -244,7 +243,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S>
 	void MainPage::font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		Shape* s = m_sample_shape;
+		Shape* const s = m_sample_shape;
 		const auto value = args.NewValue();
 		font_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
@@ -512,7 +511,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr double TEXT_LINE_DELTA = 2;	// 行の高さの変分 (DPIs)
 
 	// 書体メニューの「大きさを合わせる」が選択された.
-	void MainPage::text_bound_adjust_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::text_bbox_adjust_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto flag = false;
 		for (auto s : m_list_shapes) {
@@ -527,8 +526,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			auto u = new UndoAnchor(s, ANCH_TYPE::ANCH_SE);
 			const auto size = sheet_size_max();
-			if (static_cast<ShapeText*>(s)->adjust_bound({ size, size })) {
-				sheet_bound(s);
+			if (static_cast<ShapeText*>(s)->adjust_bbox({ size, size })) {
+				sheet_update_bbox(s);
 				m_stack_undo.push_back(u);
 				flag = true;
 			}
@@ -643,14 +642,12 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
-				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_horzorz") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
-				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_vertert") + L": " + buf;
 			}
 		}
@@ -659,8 +656,7 @@ namespace winrt::GraphPaper::implementation
 				// 行の高さの単位は DIPs (96dpi 固定) なので,
 				// これをピクセル単位に変換する.
 				wchar_t buf[32];
-				// ピクセル単位の長さを他の単位の文字列に変換する.
-				conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP * dpi / 96.0, dpi, g_len, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * dpi / 96.0, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_height") + L": " + buf;
 			}
 			else {
@@ -691,7 +687,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		const double dpi = sheet_dx().m_logical_dpi;
-		Shape* s = m_sample_shape;
+		Shape* const s = m_sample_shape;
 		const double value = args.NewValue();
 		text_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::TEXT_LINE) {

@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ê}å`ÇëIëÇ∑ÇÈ.
-	void MainPage::select_shape(Shape* s, const VirtualKeyModifiers vk_mod)
+	void MainPage::select_shape(Shape* const s, const VirtualKeyModifiers vk_mod)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ListViewItem;
 		if (vk_mod == VirtualKeyModifiers::Control) {

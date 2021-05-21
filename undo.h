@@ -141,7 +141,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作をデータリーダーから読み込む.
 		UndoAnchor(DataReader const& dt_reader);
 		// 図形の部位を保存する.
-		UndoAnchor(Shape* s, const uint32_t anchor);
+		UndoAnchor(Shape* const s, const uint32_t anchor);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};
@@ -156,13 +156,13 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept { return m_shape != m_dst_shape; }
 		// 入れ替える先の図形を得る.
-		Shape* dest(void) const noexcept { return m_dst_shape; }
+		Shape* const dest(void) const noexcept { return m_dst_shape; }
 		// 操作を実行する.
 		void exec(void);
 		// 図形を参照しているか判定する.
 		bool refer_to(const Shape* s) const noexcept { return Undo::refer_to(s) || m_dst_shape == s; };
 		// 図形の順番を入れ替える.
-		UndoArrange2(Shape* s, Shape* t);
+		UndoArrange2(Shape* const s, Shape* const t);
 		// 操作をデータリーダーから読み込む.
 		UndoArrange2(DataReader const& dt_reader);
 		// データライターに書き込む.
@@ -183,9 +183,9 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行する.
 		void exec(void);
 		// 値を図形から得る.
-		static bool GET(Shape* s, U_TYPE<U>::type& value) noexcept;
+		static bool GET(const Shape* s, U_TYPE<U>::type& value) noexcept;
 		// 値を図形に格納する.
-		static void SET(Shape* s, const U_TYPE<U>::type& value);
+		static void SET(Shape* const s, const U_TYPE<U>::type& value);
 		// データリーダーから操作を読み込んで作成する.
 		UndoAttr(DataReader const& dt_reader);
 		// 図形の値を保存する.
@@ -214,13 +214,13 @@ namespace winrt::GraphPaper::implementation
 		// 図形を参照しているか判定する.
 		bool refer_to(const Shape* s) const noexcept { return Undo::refer_to(s) || m_item_pos == s; };
 		// 操作する位置にある図形を得る.
-		Shape* item_pos(void) const noexcept { return m_item_pos; }
+		Shape* const item_pos(void) const noexcept { return m_item_pos; }
 		// 操作をデータリーダーから読み込む.
 		UndoList(DataReader const& dt_reader);
 		// 図形をリストから取り除く.
-		UndoList(Shape* s, const bool dont_exec = false);
+		UndoList(Shape* const s, const bool dont_exec = false);
 		// 図形をリストに挿入する.
-		UndoList(Shape* s, Shape* s_pos, const bool dont_exec = false);
+		UndoList(Shape* const s, Shape* const s_pos, const bool dont_exec = false);
 		// 操作をデータライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};
@@ -239,9 +239,9 @@ namespace winrt::GraphPaper::implementation
 		// 操作をデータリーダーから読み込む.
 		UndoListGroup(DataReader const& dt_reader);
 		// 図形をグループから削除する.
-		UndoListGroup(ShapeGroup* g, Shape* s);
+		UndoListGroup(ShapeGroup* const g, Shape* const s);
 		// 図形をグループに追加する.
-		UndoListGroup(ShapeGroup* g, Shape* s, Shape* s_pos);
+		UndoListGroup(ShapeGroup* const g, Shape* const s, Shape* const s_pos);
 		// 操作をデータライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};
@@ -257,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作をデータリーダーから読み込む.
 		UndoSelect(DataReader const& dt_reader);
 		// 図形の選択を反転する.
-		UndoSelect(Shape* s);
+		UndoSelect(Shape* const s);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};

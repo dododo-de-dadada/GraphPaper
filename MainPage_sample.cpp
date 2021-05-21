@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 		dc->BeginDraw();
 		dc->Clear(m_sample_sheet.m_sheet_main_color);
 		D2D1_POINT_2F offset;
-		offset.x = static_cast<FLOAT>(std::fmod(m_sample_sheet.m_sheet_main_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0));
+		offset.x = static_cast<FLOAT>(std::fmod(m_sample_sheet.m_sheet_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0));
 		offset.y = offset.x;
 		if (m_sample_sheet.m_grid_show == GRID_SHOW::BACK) {
 			m_sample_sheet.draw_grid(m_sample_dx, offset);
@@ -66,21 +66,16 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_to(&m_sheet_main);
 		const auto w = scp_sample_panel().ActualWidth();
 		const auto h = scp_sample_panel().ActualHeight();
-		m_sample_sheet.m_sheet_main_size.width = static_cast<FLOAT>(w);
-		m_sample_sheet.m_sheet_main_size.height = static_cast<FLOAT>(h);
+		m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(w);
+		m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(h);
 		m_sample_dx.SetSwapChainPanel(scp_sample_panel());
 		if (m_sample_type != SAMP_TYPE::NONE) {
-			const auto padding = w * 0.125;
-			const D2D1_POINT_2F s_pos = {
-				static_cast<FLOAT>(padding),
-				static_cast<FLOAT>(padding)
-			};
-			const D2D1_POINT_2F diff = {
-				static_cast<FLOAT>(w - 2.0 * padding),
-				static_cast<FLOAT>(h - 2.0 * padding)
-			};
 			if (m_sample_type == SAMP_TYPE::FONT) {
 				using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+				const auto pad_w = w * 0.125;
+				const auto pad_h = h * 0.25;
+				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad_w), static_cast<FLOAT>(pad_h) };
+				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad_w), static_cast<FLOAT>(w - 2.0 * pad_h) };
 				const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 				const wchar_t* text = nullptr;
 				if (pang.empty()) {
@@ -92,10 +87,33 @@ namespace winrt::GraphPaper::implementation
 				m_sample_shape = new ShapeText(s_pos, diff, wchar_cpy(text), &m_sample_sheet);
 			}
 			else if (m_sample_type == SAMP_TYPE::STROKE) {
+				const auto pad = w * 0.125;
+				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
+				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
 				m_sample_shape = new ShapeLine(s_pos, diff, &m_sample_sheet);
 			}
 			else if (m_sample_type == SAMP_TYPE::FILL) {
+				const auto pad = w * 0.125;
+				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
+				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
 				m_sample_shape = new ShapeRect(s_pos, diff, &m_sample_sheet);
+			}
+			else if (m_sample_type == SAMP_TYPE::MISC) {
+				constexpr uint32_t misc_min = 3;
+				constexpr uint32_t misc_max = 64;
+				static uint32_t misc_cnt = misc_min;
+				const auto pad = w * 0.125;
+				const D2D1_POINT_2F samp_diff{ static_cast<FLOAT>(w - 3.0 * pad), static_cast<FLOAT>(h - 3.0 * pad) };
+				const D2D1_POINT_2F rect_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
+				const D2D1_POINT_2F poly_pos{ static_cast<FLOAT>(pad + pad), static_cast<FLOAT>(pad + pad) };
+				auto* const samp_rect = new ShapeRect(rect_pos, samp_diff, &m_sample_sheet);
+				TOOL_POLY poly_tool{ misc_cnt >= misc_max ? misc_min : misc_cnt++, true, true, true, true };
+				auto* const samp_elli = new ShapePoly(poly_pos, samp_diff, &m_sample_sheet, poly_tool);
+				ShapeGroup* const g = new ShapeGroup();
+				m_sample_shape = g;
+				g->m_list_grouped.push_back(samp_rect);
+				g->m_list_grouped.push_back(samp_elli);
+				m_sample_shape->set_select(false);
 			}
 			else {
 				throw winrt::hresult_not_implemented();

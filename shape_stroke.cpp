@@ -62,22 +62,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を囲む領域を得る.
-	// b_min	領域の左上位置
-	// b_max	領域の右下位置
-	void ShapeStroke::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
+	// a_min	元の領域の左上位置.
+	// a_man	元の領域の右下位置.
+	// b_min	得られた領域の左上位置.
+	// b_max	得られた領域の右下位置.
+	void ShapeStroke::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
-		const size_t n = m_diff.size();	// 差分の数
+		const size_t d_cnt = m_diff.size();	// 差分の数
 		D2D1_POINT_2F e_pos = m_pos;
+		b_min = a_min;
+		b_max = a_max;
 		pt_inc(e_pos, b_min, b_max);
-		for (size_t i = 0; i < n; i++) {
+		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(e_pos, m_diff[i], e_pos);
 			pt_inc(e_pos, b_min, b_max);
 		}
-
-		//pt_inc(m_pos, b_min, b_max);
-		//D2D1_POINT_2F e_pos;
-		//pt_add(m_pos, m_diff[0], e_pos);
-		//pt_inc(e_pos, b_min, b_max);
 	}
 
 	// 図形を囲む領域の左上位置を得る.

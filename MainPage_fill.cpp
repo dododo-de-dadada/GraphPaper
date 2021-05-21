@@ -72,25 +72,25 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::FILL_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S>
 	void MainPage::fill_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		Shape* s = m_sample_shape;
+		Shape* const s = m_sample_shape;
 		const double value = args.NewValue();
 		fill_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::FILL_COLOR) {

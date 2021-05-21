@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_BEZI,		// 曲線
 		SHAPE_ELLI,		// だ円
 		SHAPE_LINE,		// 線分
-		SHAPE_QUAD,		// 四辺形
+		SHAPE_POLY,		// 四辺形
 		SHAPE_RECT,		// 方形
 		SHAPE_RRCT,		// 角丸方形
 		SHAPE_TEXT,		// 文字列
@@ -72,7 +72,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->get_bound(b_min, b_max);
+			s->get_bound(b_min, b_max, b_min, b_max);
 		}
 	}
 
@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->get_bound(b_min, b_max);
+			s->get_bound(b_min, b_max, b_min, b_max);
 		}
 	}
 
@@ -352,8 +352,8 @@ namespace winrt::GraphPaper::implementation
 		stack.clear();
 		return match;
 	}
-	template bool winrt::GraphPaper::implementation::s_list_match<Shape*, uint32_t>(S_LIST_T const& s_list, Shape* s, uint32_t& t);
-	template bool winrt::GraphPaper::implementation::s_list_match<uint32_t, Shape*>(S_LIST_T const& s_list, uint32_t s, Shape*& t);
+	template bool winrt::GraphPaper::implementation::s_list_match<Shape* const, uint32_t>(S_LIST_T const& s_list, Shape* const s, uint32_t& t);
+	template bool winrt::GraphPaper::implementation::s_list_match<const uint32_t, Shape*>(S_LIST_T const& s_list, const uint32_t s, Shape*& t);
 
 	// 選択フラグの立つすべての図形を差分だけ移動する.
 	// s_list	図形リスト
@@ -447,33 +447,33 @@ namespace winrt::GraphPaper::implementation
 		}
 		Shape* s = nullptr;
 		auto s_type = dt_reader.ReadUInt32();
-		if (s_type == SHAPE_NULL) {
+		if (s_type == SHAPE_TYPE::SHAPE_NULL) {
 		}
-		else if (s_type == SHAPE_BEZI) {
+		else if (s_type == SHAPE_TYPE::SHAPE_BEZI) {
 			s = new ShapeBezi(dt_reader);
 		}
-		else if (s_type == SHAPE_ELLI) {
+		else if (s_type == SHAPE_TYPE::SHAPE_ELLI) {
 			s = new ShapeElli(dt_reader);
 		}
-		else if (s_type == SHAPE_LINE) {
+		else if (s_type == SHAPE_TYPE::SHAPE_LINE) {
 			s = new ShapeLine(dt_reader);
 		}
-		else if (s_type == SHAPE_QUAD) {
+		else if (s_type == SHAPE_TYPE::SHAPE_POLY) {
 			s = new ShapePoly(dt_reader);
 		}
-		else if (s_type == SHAPE_RECT) {
+		else if (s_type == SHAPE_TYPE::SHAPE_RECT) {
 			s = new ShapeRect(dt_reader);
 		}
-		else if (s_type == SHAPE_RRCT) {
+		else if (s_type == SHAPE_TYPE::SHAPE_RRCT) {
 			s = new ShapeRRect(dt_reader);
 		}
-		else if (s_type == SHAPE_TEXT) {
+		else if (s_type == SHAPE_TYPE::SHAPE_TEXT) {
 			s = new ShapeText(dt_reader);
 		}
-		else if (s_type == SHAPE_GROUP) {
+		else if (s_type == SHAPE_TYPE::SHAPE_GROUP) {
 			s = new ShapeGroup(dt_reader);
 		}
-		else if (s_type == SHAPE_RULER) {
+		else if (s_type == SHAPE_TYPE::SHAPE_RULER) {
 			s = new ShapeRuler(dt_reader);
 		}
 		else {
@@ -585,7 +585,7 @@ namespace winrt::GraphPaper::implementation
 				s_int = SHAPE_LINE;
 			}
 			else if (s_type == typeid(ShapePoly)) {
-				s_int = SHAPE_QUAD;
+				s_int = SHAPE_POLY;
 			}
 			else if (s_type == typeid(ShapeRect)) {
 				s_int = SHAPE_RECT;

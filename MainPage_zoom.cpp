@@ -35,8 +35,6 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「拡大縮小」>「縮小」が選択された.
 	void MainPage::mfi_zoom_out_clicked(IInspectable const&, RoutedEventArgs const&)
 	{
-		//using winrt::Windows::UI::Xaml::Controls::ToolTipService;
-
 		const int s = 1;
 		const int e = sizeof(ZOOM_LEVEL) / sizeof(ZOOM_LEVEL[0]);
 		const int o = -1;

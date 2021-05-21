@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				s->draw(sc);
-				s->get_bound(b_min, b_max);
+				s->get_bound(b_min, b_max, b_min, b_max);
 			}
 			const D2D1_RECT_F r{
 				b_min.x, b_min.y,
@@ -49,15 +49,19 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を囲む領域を得る.
-	// b_min	領域の左上位置.
-	// b_max	領域の右下位置.
-	void ShapeGroup::get_bound(D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
+	// a_min	元の領域の左上位置.
+	// a_man	元の領域の右下位置.
+	// b_min	得られた領域の左上位置.
+	// b_max	得られた領域の右下位置.
+	void ShapeGroup::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
+		b_min = a_min;
+		b_max = a_max;
 		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->get_bound(b_min, b_max);
+			s->get_bound(b_min, b_max, b_min, b_max);
 		}
 	}
 

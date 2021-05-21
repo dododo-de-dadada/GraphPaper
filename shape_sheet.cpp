@@ -1,3 +1,4 @@
+//#include <numbers>
 #include "pch.h"
 #include "shape.h"
 
@@ -54,6 +55,7 @@ namespace winrt::GraphPaper::implementation
 	*/
 
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
+	// dx	図形の描画環境
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_bezi(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
@@ -85,6 +87,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// だ円の補助線を表示する.
+	// dx	図形の描画環境
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_elli(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
@@ -107,6 +110,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 直線の補助線を表示する.
+	// dx	図形の描画環境
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_line(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
@@ -123,6 +127,7 @@ namespace winrt::GraphPaper::implementation
 	// ひし形の補助線を表示する.
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
+	/*
 	void ShapeSheet::draw_auxiliary_quad(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		//auto br = dx.m_aux_brush.get();
@@ -147,22 +152,46 @@ namespace winrt::GraphPaper::implementation
 		dx.m_d2dContext->DrawLine(q_pos[2], q_pos[3], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		dx.m_d2dContext->DrawLine(q_pos[3], q_pos[0], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 	}
+	*/
+
+	// 多角形の補助線を表示する.
+	// dx	図形の描画環境
+	// p_pos	ポインターが押された位置
+	// c_pos	ポインターの現在位置
+	// t_poly	多角形の作図ツール
+	void ShapeSheet::draw_auxiliary_poly(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos, const TOOL_POLY& t_poly)
+	{
+		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_main_scale);	// 線の太さ
+		std::vector<D2D1_POINT_2F> v_pos(t_poly.m_vertex_cnt);	// 頂点の配列
+
+		D2D1_POINT_2F diff;
+		pt_sub(c_pos, p_pos, diff);
+		ShapePoly::create_poly_by_bbox(p_pos, diff, t_poly.m_vertex_cnt, t_poly.m_vertex_up, t_poly.m_regular, t_poly.m_clockwise, v_pos.data());
+		const auto i_start = (t_poly.m_closed ? t_poly.m_vertex_cnt - 1 : 0);
+		const auto j_start = (t_poly.m_closed ? 0 : 1);
+		for (size_t i = i_start, j = j_start; j < t_poly.m_vertex_cnt; i = j++) {
+			dx.m_shape_brush->SetColor(dx.m_theme_background);
+			dx.m_d2dContext->DrawLine(v_pos[i], v_pos[j], dx.m_shape_brush.get(), s_width, nullptr);
+			dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+			dx.m_d2dContext->DrawLine(v_pos[i], v_pos[j], dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
+		}
+	}
 
 	// 方形の補助線を表示する.
+	// dx	図形の描画環境
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_rect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		//auto br = dx.m_aux_brush.get();
-		//auto ss = dx.m_aux_style.get();
-		const FLOAT sw = static_cast<FLOAT>(1.0 / m_sheet_main_scale);
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_main_scale);
 		const D2D1_RECT_F rc = {
 			p_pos.x, p_pos.y, c_pos.x, c_pos.y
 		};
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
-		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), s_width, nullptr);
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
-		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
 
 	// 角丸方形の補助線を表示する.
@@ -171,14 +200,14 @@ namespace winrt::GraphPaper::implementation
 	// c_rad	角丸半径
 	void ShapeSheet::draw_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		auto c_rad = m_corner_rad;
-		const FLOAT sw = static_cast<FLOAT>(1.0 / m_sheet_main_scale);
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_main_scale);
 		const double cx = c_pos.x;
 		const double cy = c_pos.y;
 		const double px = p_pos.x;
 		const double py = p_pos.y;
 		const double qx = cx - px;
 		const double qy = cy - py;
+		auto c_rad = m_corner_rad;
 		double rx = c_rad.x;
 		double ry = c_rad.y;
 
@@ -194,63 +223,63 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(ry)
 		};
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
-		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), s_width, nullptr);
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
-		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
 
 	// 方眼を表示する.
 	// dx	描画環境
-	// offset	方眼のずらし量
-	void ShapeSheet::draw_grid(SHAPE_DX const& dx, const D2D1_POINT_2F offset)
+	// g_offset	方眼のずらし量
+	void ShapeSheet::draw_grid(SHAPE_DX const& dx, const D2D1_POINT_2F g_offset)
 	{
-		const double sw = m_sheet_main_size.width;	// 用紙の幅
-		const double sh = m_sheet_main_size.height;	// 用紙の高さ
+		const double sheet_w = m_sheet_size.width;	// 用紙の幅
+		const double sheet_h = m_sheet_size.height;	// 用紙の高さ
 		// 拡大されても 1 ピクセルになるよう拡大率の逆数を線枠の太さに格納する.
-		const FLOAT gw = static_cast<FLOAT>(1.0 / m_sheet_main_scale);	// 方眼の太さ
+		const FLOAT grid_w = static_cast<FLOAT>(1.0 / m_sheet_main_scale);	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
-		auto br = dx.m_shape_brush.get();
+		auto const& brush = dx.m_shape_brush.get();
 
 		D2D1_COLOR_F grid_color;
 		get_grid_color(grid_color);
-		br->SetColor(grid_color);
+		brush->SetColor(grid_color);
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
-		v_end.y = m_sheet_main_size.height;
-		h_end.x = m_sheet_main_size.width;
-		const double g_len = max(m_grid_base + 1.0, 1.0);
+		v_end.y = m_sheet_size.height;
+		h_end.x = m_sheet_size.width;
+		const double grid_len = max(m_grid_base + 1.0, 1.0);
 
 		// 垂直な方眼を表示する.
 		float w;
 		double x;
-		for (uint32_t i = 0; (x = g_len * i + offset.x) < sw; i++) {
-			if (m_grid_emph == GRID_EMPH::EMPH_3 && (i % 10) == 0) {
-				w = 2.0F * gw;
+		for (uint32_t i = 0; (x = grid_len * i + g_offset.x) < sheet_w; i++) {
+			if (m_grid_emph.m_gauge_2 != 0 && (i % m_grid_emph.m_gauge_2) == 0) {
+				w = 2.0F * grid_w;
 			}
-			else if (m_grid_emph == GRID_EMPH::EMPH_0 || (i % 2) == 0) {
-				w = gw;
+			else if (m_grid_emph.m_gauge_1 != 0 && (i % m_grid_emph.m_gauge_1) == 0) {
+				w = grid_w;
 			}
 			else {
-				w = 0.5F * gw;
+				w = 0.5F * grid_w;
 			}
 			v_start.x = v_end.x = static_cast<FLOAT>(x);
-			dx.m_d2dContext->DrawLine(v_start, v_end, br, w, nullptr);
+			dx.m_d2dContext->DrawLine(v_start, v_end, brush, w, nullptr);
 		}
 		// 水平な方眼を表示する.
 		double y;
-		for (uint32_t i = 0; (y = g_len * i + offset.y) < sh; i++) {
-			if (m_grid_emph == GRID_EMPH::EMPH_3 && (i % 10) == 0) {
-				w = 2.0F * gw;
+		for (uint32_t i = 0; (y = grid_len * i + g_offset.y) < sheet_h; i++) {
+			if (m_grid_emph.m_gauge_2 != 0 && (i % m_grid_emph.m_gauge_2) == 0) {
+				w = 2.0F * grid_w;
 			}
-			else if (m_grid_emph == GRID_EMPH::EMPH_0 || (i % 2) == 0) {
-				w = gw;
+			else if (m_grid_emph.m_gauge_1 != 0 && (i % m_grid_emph.m_gauge_1) == 0) {
+				w = grid_w;
 			}
 			else {
-				w = 0.5F * gw;
+				w = 0.5F * grid_w;
 			}
 			h_start.y = h_end.y = static_cast<FLOAT>(y);
-			dx.m_d2dContext->DrawLine(h_start, h_end, br, w, nullptr);
+			dx.m_d2dContext->DrawLine(h_start, h_end, brush, w, nullptr);
 		}
 
 	}
@@ -361,7 +390,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 方眼の形式を得る.
+	// 方眼の強調を得る.
 	bool ShapeSheet::get_grid_emph(GRID_EMPH& value) const noexcept
 	{
 		value = m_grid_emph;
@@ -399,7 +428,7 @@ namespace winrt::GraphPaper::implementation
 	// 用紙の寸法を得る.
 	bool ShapeSheet::get_sheet_size(D2D1_SIZE_F& value) const noexcept
 	{
-		value = m_sheet_main_size;
+		value = m_sheet_size;
 		return true;
 	}
 
@@ -473,7 +502,7 @@ namespace winrt::GraphPaper::implementation
 		m_grid_snap = dt_reader.ReadBoolean();
 		read(m_sheet_main_color, dt_reader);
 		m_sheet_main_scale = dt_reader.ReadDouble();
-		read(m_sheet_main_size, dt_reader);
+		read(m_sheet_size, dt_reader);
 
 		read(m_arrow_size, dt_reader);	// 矢じりの寸法
 		read(m_arrow_style, dt_reader);	// 矢じりの形式
@@ -564,7 +593,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を方眼の強調に格納する.
-	void ShapeSheet::set_grid_emph(const GRID_EMPH value) noexcept
+	void ShapeSheet::set_grid_emph(const GRID_EMPH& value) noexcept
 	{
 		m_grid_emph = value;
 	}
@@ -597,7 +626,7 @@ namespace winrt::GraphPaper::implementation
 	// 値を用紙の寸法に格納する.
 	void ShapeSheet::set_sheet_size(const D2D1_SIZE_F value) noexcept
 	{
-		m_sheet_main_size = value;
+		m_sheet_size = value;
 	}
 
 	// 線枠の色に格納する.
@@ -691,7 +720,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBoolean(m_grid_snap);
 		write(m_sheet_main_color, dt_writer);
 		dt_writer.WriteDouble(m_sheet_main_scale);
-		write(m_sheet_main_size, dt_writer);
+		write(m_sheet_size, dt_writer);
 
 		write(m_arrow_size, dt_writer);	// 矢じりの寸法
 		write(m_arrow_style, dt_writer);	// 矢じりの形式

@@ -36,38 +36,38 @@ namespace winrt::GraphPaper::implementation
 	// Escape が押された.
 	void MainPage::ka_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		const auto tool = tool_draw();
-		if (tool == TOOL_DRAW::SELECT) {
+		const auto t_draw = tool_draw();
+		if (t_draw == TOOL_DRAW::SELECT) {
 			return;
 		}
 		rmfi_tool_select().IsChecked(true);
 		// グループ名を指定していてもコードビハインドからは
 		// 自動でチェックが外れない.
-		if (tool == TOOL_DRAW::BEZI) {
-			rmfi_tool_BEZI().IsChecked(false);
+		if (t_draw == TOOL_DRAW::BEZI) {
+			rmfi_tool_draw_bezi().IsChecked(false);
 		}
-		else if (tool == TOOL_DRAW::ELLI) {
-			rmfi_tool_elli().IsChecked(false);
+		else if (t_draw == TOOL_DRAW::ELLI) {
+			rmfi_tool_draw_elli().IsChecked(false);
 		}
-		else if (tool == TOOL_DRAW::LINE) {
-			rmfi_tool_line().IsChecked(false);
+		else if (t_draw == TOOL_DRAW::LINE) {
+			rmfi_tool_draw_line().IsChecked(false);
 		}
-		else if (tool == TOOL_DRAW::QUAD) {
-			rmfi_tool_quad().IsChecked(false);
+		else if (t_draw == TOOL_DRAW::QUAD) {
+			rmfi_tool_draw_poly().IsChecked(false);
 		}
-		else if (tool == TOOL_DRAW::RECT) {
-			rmfi_tool_rect().IsChecked(false);
+		else if (t_draw == TOOL_DRAW::RECT) {
+			rmfi_tool_draw_rect().IsChecked(false);
 		}
-		else if (tool == TOOL_DRAW::RRCT) {
-			rmfi_tool_rrect().IsChecked(false);
+		else if (t_draw == TOOL_DRAW::RRCT) {
+			rmfi_tool_draw_rrct().IsChecked(false);
 		}
-		else if (tool == TOOL_DRAW::TEXT) {
-			rmfi_tool_text().IsChecked(false);
+		else if (t_draw == TOOL_DRAW::TEXT) {
+			rmfi_tool_draw_text().IsChecked(false);
 		}
-		else if (tool == TOOL_DRAW::RULER) {
-			rmfi_tool_ruler().IsChecked(false);
+		else if (t_draw == TOOL_DRAW::RULER) {
+			rmfi_tool_draw_ruler().IsChecked(false);
 		}
-		tool_select_click(nullptr, nullptr);
+		tool_draw_click(rmfi_tool_select(), nullptr);
 	}
 
 	// Cntrol + PgDn が押された.

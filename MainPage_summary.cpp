@@ -18,9 +18,9 @@ namespace winrt::GraphPaper::implementation
 	// 一覧の要素を選択する.
 	static void summary_select_item(ListView const& view, const uint32_t i);
 	// 図形を一覧の要素から得る.
-	static Shape* summary_shape(IInspectable const& item) noexcept;
+	static Shape* const summary_shape(IInspectable const& item) noexcept;
 	// 一覧に含まれる図形を入れ替える.
-	static void summary_swap(ListView const& view, Shape* s, Shape* t, ResourceDictionary const& r);
+	static void summary_swap(ListView const& view, Shape* const s, Shape* const t, ResourceDictionary const& r);
 	// 一覧の要素の選択を解除する.
 	static void summary_unselect_item(ListView const& view, const uint32_t i);
 
@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を一覧の要素から得る.
-	static Shape* summary_shape(IInspectable const& item) noexcept
+	static Shape* const summary_shape(IInspectable const& item) noexcept
 	{
 		// try_as は例外を投げない.
 		const auto s = item.try_as<Summary>();
@@ -67,7 +67,7 @@ namespace winrt::GraphPaper::implementation
 	// s	入れ替える図形
 	// t	もう一方の入れ替える図形
 	// r	リソースディレクトリ
-	static void summary_swap(ListView const& view, Shape* s, Shape* t, ResourceDictionary const& r)
+	static void summary_swap(ListView const& view, Shape* const s, Shape* const t, ResourceDictionary const& r)
 	{
 		auto const& items = view.Items();
 		const auto i = summary_distance(items, s);
@@ -155,12 +155,12 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < e.AddedItems().Size(); i++) {
 			IInspectable item[1];
 			e.AddedItems().GetMany(i, item);
-			auto s = summary_shape(item[0]);
+			auto const s = summary_shape(item[0]);
 			if (s != nullptr && s->is_selected() != true) {
 				undo_push_select(t = s);
 			}
 		}
-		if (t != nullptr) {
+		if (t != static_cast<const Shape*>(nullptr)) {
 			// 図形が表示されるよう用紙をスクロールする.
 			scroll_to(t);
 			m_sheet_main.set_to(t);
@@ -187,7 +187,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を一覧に追加する.
-	void MainPage::summary_append(Shape* s)
+	void MainPage::summary_append(Shape* const s)
 	{
 		// 図形一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -199,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧の中で図形を入れ替える.
-	void MainPage::summary_arrng(Shape* s, Shape* t)
+	void MainPage::summary_arrng(Shape* const s, Shape* const t)
 	{
 		// 図形一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -233,7 +233,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧の添え字の位置に図形を挿入する.
-	void MainPage::summary_insert(Shape* s, const uint32_t i)
+	void MainPage::summary_insert(Shape* const s, const uint32_t i)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
@@ -317,7 +317,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を一覧から消去する.
-	uint32_t MainPage::summary_remove(Shape* s)
+	uint32_t MainPage::summary_remove(Shape* const s)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
@@ -333,7 +333,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧の図形を選択する.
-	void MainPage::summary_select(Shape* s)
+	void MainPage::summary_select(Shape* const s)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
@@ -383,7 +383,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧の図形を選択解除する.
-	void MainPage::summary_unselect(Shape* s)
+	void MainPage::summary_unselect(Shape* const s)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);

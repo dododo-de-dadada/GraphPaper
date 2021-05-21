@@ -144,6 +144,7 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
+	/*
 	// 線枠メニューの「破線」が選択された.
 	void MainPage::stroke_dash_click(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -183,20 +184,37 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_DOT);
 	}
+	*/
 
 	// 線枠メニューの「実線」が選択された.
-	void MainPage::stroke_solid_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::stroke_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (m_sheet_main.m_stroke_style != D2D1_DASH_STYLE_SOLID) {
-			mfi_stroke_patt().IsEnabled(false);
-			mfi_stroke_patt_2().IsEnabled(false);
+		D2D1_DASH_STYLE d_style;
+		if (sender == rmfi_stroke_style_solid() || sender == rmfi_stroke_style_solid_2()) {
+			d_style = D2D1_DASH_STYLE_SOLID;
 		}
-		undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE_SOLID);
+		else if (sender == rmfi_stroke_style_dash() || sender == rmfi_stroke_style_dash_2()) {
+			d_style = D2D1_DASH_STYLE_DASH;
+		}
+		else if (sender == rmfi_stroke_style_dot() || sender == rmfi_stroke_style_dot_2()) {
+			d_style = D2D1_DASH_STYLE_DOT;
+		}
+		else if (sender == rmfi_stroke_style_dash_dot() || sender == rmfi_stroke_style_dash_dot_2()) {
+			d_style = D2D1_DASH_STYLE_DASH_DOT;
+		}
+		else if (sender == rmfi_stroke_style_dash_dot_dot() || sender == rmfi_stroke_style_dash_dot_dot_2()) {
+			d_style = D2D1_DASH_STYLE_DASH_DOT_DOT;
+		}
+		else {
+			return;
+		}
+		mfi_stroke_patt().IsEnabled(m_sheet_main.m_stroke_style == D2D1_DASH_STYLE_SOLID);
+		mfi_stroke_patt_2().IsEnabled(m_sheet_main.m_stroke_style == D2D1_DASH_STYLE_SOLID);
+		undo_push_set<UNDO_OP::STROKE_STYLE>(d_style);
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S>
-	void MainPage::stroke_set_slider_header(const double value)
+	template <UNDO_OP U, int S> void MainPage::stroke_set_slider_header(const double value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -209,8 +227,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			const double dpi = sheet_dx().m_logical_dpi;
 			const double g_len = m_sheet_main.m_grid_base + 1.0;
-			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP * m_sample_sheet.m_stroke_width, dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * m_sample_sheet.m_stroke_width, dpi, g_len, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			if constexpr (S == 0) {
 				hdr = r_loader.GetString(L"str_dash_len") + L": " + buf;
@@ -229,36 +246,35 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			const double dpi = sheet_dx().m_logical_dpi;
 			const double g_len = m_sheet_main.m_grid_base + 1.0;
-			// ピクセル単位の長さを他の単位の文字列に変換する.
-			conv_val_to_len<UNIT_NAME_VISIBLE>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_val_to_col(color_code(), value, buf);
+				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
 				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
@@ -334,18 +350,18 @@ namespace winrt::GraphPaper::implementation
 	// d_style	破線の種別
 	void MainPage::stroke_style_check_menu(const D2D1_DASH_STYLE d_style)
 	{
-		rmfi_stroke_solid().IsChecked(d_style == D2D1_DASH_STYLE_SOLID);
-		rmfi_stroke_dash().IsChecked(d_style == D2D1_DASH_STYLE_DASH);
-		rmfi_stroke_dot().IsChecked(d_style == D2D1_DASH_STYLE_DOT);
-		rmfi_stroke_dash_dot().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT);
-		rmfi_stroke_dash_dot_dot().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT_DOT);
+		rmfi_stroke_style_solid().IsChecked(d_style == D2D1_DASH_STYLE_SOLID);
+		rmfi_stroke_style_dash().IsChecked(d_style == D2D1_DASH_STYLE_DASH);
+		rmfi_stroke_style_dot().IsChecked(d_style == D2D1_DASH_STYLE_DOT);
+		rmfi_stroke_style_dash_dot().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT);
+		rmfi_stroke_style_dash_dot_dot().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT_DOT);
 		mfi_stroke_patt().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
 
-		rmfi_stroke_solid_2().IsChecked(d_style == D2D1_DASH_STYLE_SOLID);
-		rmfi_stroke_dash_2().IsChecked(d_style == D2D1_DASH_STYLE_DASH);
-		rmfi_stroke_dot_2().IsChecked(d_style == D2D1_DASH_STYLE_DOT);
-		rmfi_stroke_dash_dot_2().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT);
-		rmfi_stroke_dash_dot_dot_2().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT_DOT);
+		rmfi_stroke_style_solid_2().IsChecked(d_style == D2D1_DASH_STYLE_SOLID);
+		rmfi_stroke_style_dash_2().IsChecked(d_style == D2D1_DASH_STYLE_DASH);
+		rmfi_stroke_style_dot_2().IsChecked(d_style == D2D1_DASH_STYLE_DOT);
+		rmfi_stroke_style_dash_dot_2().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT);
+		rmfi_stroke_style_dash_dot_dot_2().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT_DOT);
 		mfi_stroke_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
 	}
 

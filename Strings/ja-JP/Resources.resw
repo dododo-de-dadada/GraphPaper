@@ -165,7 +165,7 @@
     <value>用紙の大きさ</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_text_adjust_bound.Content" xml:space="preserve">
+  <data name="ck_text_adjust_bbox.Content" xml:space="preserve">
     <value>枠の大きさを文字列に合わせる</value>
     <comment>CheckBox</comment>
   </data>
@@ -333,12 +333,12 @@
     <value>ストローク(S)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_draw.Title" xml:space="preserve">
+  <data name="mbi_tool_draw.Title" xml:space="preserve">
     <value>作図(D)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mfi_about_graph_sheet.Text" xml:space="preserve">
-    <value>バージョン情報...</value>
+  <data name="mfi_about_this.Text" xml:space="preserve">
+    <value>Graph Paper について</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_arrow_size.Text" xml:space="preserve">
@@ -478,7 +478,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_summary.Text" xml:space="preserve">
-    <value>リストを表示</value>
+    <value>図形リスト</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_text_line.Text" xml:space="preserve">
@@ -561,15 +561,15 @@
     <value>ズーム</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="rmfi_arrow_filled.Text" xml:space="preserve">
+  <data name="rmfi_arrow_style_filled.Text" xml:space="preserve">
     <value>閉じた</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_arrow_none.Text" xml:space="preserve">
+  <data name="rmfi_arrow_style_none.Text" xml:space="preserve">
     <value>なし</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_arrow_opened.Text" xml:space="preserve">
+  <data name="rmfi_arrow_style_opened.Text" xml:space="preserve">
     <value>開いた</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -597,23 +597,23 @@
     <value>隠す</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash.Text" xml:space="preserve">
+  <data name="rmfi_stroke_style_dash.Text" xml:space="preserve">
     <value>破線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_dot.Text" xml:space="preserve">
+  <data name="rmfi_stroke_style_dash_dot.Text" xml:space="preserve">
     <value>一点破線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_dot_dot.Text" xml:space="preserve">
+  <data name="rmfi_stroke_style_dash_dot_dot.Text" xml:space="preserve">
     <value>二点破線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dot.Text" xml:space="preserve">
+  <data name="rmfi_stroke_style_dot.Text" xml:space="preserve">
     <value>点線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_solid.Text" xml:space="preserve">
+  <data name="rmfi_stroke_style_solid.Text" xml:space="preserve">
     <value>実線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -645,31 +645,31 @@
     <value>上よせ</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_BEZI.Text" xml:space="preserve">
+  <data name="rmfi_tool_draw_bezi.Text" xml:space="preserve">
     <value>曲線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_elli.Text" xml:space="preserve">
+  <data name="rmfi_tool_draw_elli.Text" xml:space="preserve">
     <value>だ円形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_line.Text" xml:space="preserve">
+  <data name="rmfi_tool_draw_line.Text" xml:space="preserve">
     <value>直線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_quad.Text" xml:space="preserve">
-    <value>四へん形</value>
+  <data name="rmfi_tool_draw_poly.Text" xml:space="preserve">
+    <value>多角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_rect.Text" xml:space="preserve">
+  <data name="rmfi_tool_draw_rect.Text" xml:space="preserve">
     <value>方形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_rrect.Text" xml:space="preserve">
+  <data name="rmfi_tool_draw_rrct.Text" xml:space="preserve">
     <value>角丸方形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_ruler.Text" xml:space="preserve">
+  <data name="rmfi_tool_draw_ruler.Text" xml:space="preserve">
     <value>定規</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -822,10 +822,6 @@
     <value>無題</value>
     <comment>String</comment>
   </data>
-  <data name="str_version" xml:space="preserve">
-    <value>バージョン 0.0.1</value>
-    <comment>String</comment>
-  </data>
   <data name="tk_conf_save.Text" xml:space="preserve">
     <value>変更を保存しますか？</value>
     <comment>TextBlock</comment>
@@ -942,12 +938,56 @@
     <value>並び替え</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="rmfi_tool_text.Text" xml:space="preserve">
+  <data name="rmfi_tool_draw_text.Text" xml:space="preserve">
     <value>文字列</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_bound_adjust.Text" xml:space="preserve">
+  <data name="mfi_text_bbox_adjust.Text" xml:space="preserve">
     <value>文字列に合わせる</value>
     <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_tool_poly_deca.Text" xml:space="preserve">
+    <value>10-十角形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_tool_poly_hept.Text" xml:space="preserve">
+    <value>7-七角形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_tool_poly_hexa.Text" xml:space="preserve">
+    <value>6-六角形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_tool_poly_nona.Text" xml:space="preserve">
+    <value>9-九角形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_tool_poly_octa.Text" xml:space="preserve">
+    <value>8-八角形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_tool_poly_pent.Text" xml:space="preserve">
+    <value>5-五角形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_tool_poly_quad.Text" xml:space="preserve">
+    <value>4-四辺形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_tool_poly_tri.Text" xml:space="preserve">
+    <value>3-三角形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="mfsi_tool_poly_type.Text" xml:space="preserve">
+    <value>多角形の種類</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="tmfi_tool_poly_reguler.Text" xml:space="preserve">
+    <value>正多角形で作図</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="tb_version.Text" xml:space="preserve">
+    <value>バージョン 0.0.2</value>
+    <comment>TextBlock</comment>
   </data>
 </root>

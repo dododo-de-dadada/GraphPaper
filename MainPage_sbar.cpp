@@ -212,11 +212,9 @@ namespace winrt::GraphPaper::implementation
 		const double g_len = m_sheet_main.m_grid_base + 1.0;
 
 		wchar_t buf[32];
-		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), fx, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), fx, dpi, g_len, buf);
 		tk_sbar_pos_x().Text(winrt::hstring{ L"x:" } + buf);
-		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), fy, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), fy, dpi, g_len, buf);
 		tk_sbar_pos_y().Text(winrt::hstring{ L"y:" } + buf);
 
 swprintf_s(buf, L"%d", static_cast<uint32_t>(m_list_shapes.size()));
@@ -229,8 +227,7 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 		wchar_t buf[32];
 		const double dpi = sheet_dx().m_logical_dpi;
 		double g_len = m_sheet_main.m_grid_base + 1.0;
-		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), g_len, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), g_len, dpi, g_len, buf);
 		tk_sbar_grid().Text(winrt::hstring{ L"g:" } +buf);
 	}
 
@@ -240,11 +237,9 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 		const double dpi = sheet_dx().m_logical_dpi;
 		const double g_len = m_sheet_main.m_grid_base + 1.0;
 		wchar_t buf[32];
-		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), m_sheet_main.m_sheet_main_size.width, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), m_sheet_main.m_sheet_size.width, dpi, g_len, buf);
 		tk_sbar_width().Text(winrt::hstring{ L"w:" } + buf);
-		// ピクセル単位の長さを他の単位の文字列に変換する.
-		conv_val_to_len<!UNIT_NAME_VISIBLE>(len_unit(), m_sheet_main.m_sheet_main_size.height, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), m_sheet_main.m_sheet_size.height, dpi, g_len, buf);
 		tk_sbar_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 
@@ -253,33 +248,33 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
-		const auto tool = tool_draw();
+		const auto t_draw = tool_draw();
 		winrt::hstring data;
-		if (tool == TOOL_DRAW::BEZI) {
+		if (t_draw == TOOL_DRAW::BEZI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));
 		}
-		else if (tool == TOOL_DRAW::ELLI) {
+		else if (t_draw == TOOL_DRAW::ELLI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_elli")));
 		}
-		else if (tool == TOOL_DRAW::LINE) {
+		else if (t_draw == TOOL_DRAW::LINE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 		}
-		else if (tool == TOOL_DRAW::QUAD) {
-			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_quad")));
+		else if (t_draw == TOOL_DRAW::QUAD) {
+			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_pent")));
 		}
-		else if (tool == TOOL_DRAW::RECT) {
+		else if (t_draw == TOOL_DRAW::RECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
 		}
-		else if (tool == TOOL_DRAW::RRCT) {
+		else if (t_draw == TOOL_DRAW::RRCT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrct")));
 		}
-		else if (tool == TOOL_DRAW::RULER) {
+		else if (t_draw == TOOL_DRAW::RULER) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
-		else if (tool == TOOL_DRAW::SELECT) {
+		else if (t_draw == TOOL_DRAW::SELECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_select")));
 		}
-		else if (tool == TOOL_DRAW::TEXT) {
+		else if (t_draw == TOOL_DRAW::TEXT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
 		else {

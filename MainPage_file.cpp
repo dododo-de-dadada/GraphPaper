@@ -130,7 +130,7 @@ namespace winrt::GraphPaper::implementation
 				summary_remake();
 			}
 		}
-		sheet_bound();
+		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
 		sbar_set_curs();
@@ -194,6 +194,7 @@ namespace winrt::GraphPaper::implementation
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
+			tool_read(dt_reader);
 			text_find_read(dt_reader);
 			sbar_read(dt_reader);
 			len_unit(static_cast<LEN_UNIT>(dt_reader.ReadUInt32()));
@@ -203,8 +204,8 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.read(dt_reader);
 			m_sheet_main.m_grid_base = max(m_sheet_main.m_grid_base, 0.0F);
 			m_sheet_main.m_sheet_main_scale = min(max(m_sheet_main.m_sheet_main_scale, SCALE_MIN), SCALE_MAX);
-			m_sheet_main.m_sheet_main_size.width = max(min(m_sheet_main.m_sheet_main_size.width, sheet_size_max()), 1.0F);
-			m_sheet_main.m_sheet_main_size.height = max(min(m_sheet_main.m_sheet_main_size.height, sheet_size_max()), 1.0F);
+			m_sheet_main.m_sheet_size.width = max(min(m_sheet_main.m_sheet_size.width, sheet_size_max()), 1.0F);
+			m_sheet_main.m_sheet_size.height = max(min(m_sheet_main.m_sheet_size.height, sheet_size_max()), 1.0F);
 
 			undo_clear();
 			s_list_clear(m_list_shapes);
@@ -253,35 +254,29 @@ namespace winrt::GraphPaper::implementation
 		co_return hres;
 	}
 
-	// ファイルメニューの「最近使ったファイル 1」が選択された
-	void MainPage::file_recent_1_click(IInspectable const&, RoutedEventArgs const&)
+	// ファイルメニューの「最近使ったファイル」のサブ項目が選択された
+	void MainPage::file_recent_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		// 最近使ったファイル (0) を読み込む.
-		auto _{ file_recent_read_async(0) };
-	}
-
-	// ファイルメニューの「最近使ったファイル 2」が選択された
-	void MainPage::file_recent_2_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		auto _{ file_recent_read_async(1) };
-	}
-
-	// ファイルメニューの「最近使ったファイル 3」が選択された
-	void MainPage::file_recent_3_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		auto _{ file_recent_read_async(2) };
-	}
-
-	// ファイルメニューの「最近使ったファイル 4」が選択された
-	void MainPage::file_recent_4_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		auto _{ file_recent_read_async(3) };
-	}
-
-	// ファイルメニューの「最近使ったファイル 5」が選択された
-	void MainPage::file_recent_5_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		auto _{ file_recent_read_async(4) };
+		uint32_t n;
+		if (sender == mfi_file_recent_1()) {
+			n = 0;
+		}
+		else if (sender == mfi_file_recent_2()) {
+			n = 1;
+		}
+		else if (sender == mfi_file_recent_3()) {
+			n = 2;
+		}
+		else if (sender == mfi_file_recent_4()) {
+			n = 3;
+		}
+		else if (sender == mfi_file_recent_5()) {
+			n = 4;
+		}
+		else {
+			return;
+		}
+		auto _{ file_recent_read_async(n) };
 	}
 
 	// ストレージファイルを最近使ったファイルに登録する.
@@ -675,7 +670,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			write_svg(DOCTYPE, dt_writer);
 			// SVG 開始タグをデータライターに書き込む.
-			file_write_svg_tag(m_sheet_main.m_sheet_main_size, m_sheet_main.m_sheet_main_color, sheet_dx().m_logical_dpi, len_unit(), dt_writer);
+			file_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_main_color, sheet_dx().m_logical_dpi, len_unit(), dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {

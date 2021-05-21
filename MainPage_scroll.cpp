@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が表示されるよう用紙をスクロールする.
 	// s	表示される図形
-	bool MainPage::scroll_to(Shape* s)
+	bool MainPage::scroll_to(const Shape* s)
 	{
 		// スクロールビューアのビューポートの座標を, 用紙座標で求める.
 		const double ox = sheet_min().x;	// 原点 x
@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F r_max{};
 		DWRITE_TEXT_RANGE t_range;
 		if (s->get_text_range(t_range) && t_range.length > 0) {
-			const auto s_text = static_cast<ShapeText*>(s);
+			const auto s_text = static_cast<const ShapeText*>(s);
 			const auto cnt = s_text->m_dw_selected_cnt;
 			const auto mtx = s_text->m_dw_selected_metrics;
 			D2D1_POINT_2F t_pos;
@@ -139,9 +139,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->in_area(v_min, v_max)) {
 				return false;
 			}
-			s->get_min_pos(r_min);
-			r_max = r_min;
-			s->get_bound(r_min, r_max);
+			s->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, r_min, r_max);
 		}
 
 		// 最初の方形の水平位置と垂直位置について, ビューポートの範囲外の場合, スクロールする.

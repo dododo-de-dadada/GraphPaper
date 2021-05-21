@@ -11,15 +11,18 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// UWP のブラシを D2D1_COLOR_F に変換する.
-	static bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept;
+	static bool conv_uwp_to_dx(const Brush& a, D2D1_COLOR_F& b) noexcept;
 
-	// UWP の Color を D2D1_COLOR_F に変換する.
-	static void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept;
+	// UWP の色を D2D1_COLOR_F に変換する.
+	static void conv_uwp_to_dx(const Color& a, D2D1_COLOR_F& b) noexcept;
+
+	// 色成分を文字列に変換する.
+	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]);
 
 	constexpr double UWP_COLOR_MAX = 255.0;	// UWP の色成分の最大値
 
 	// UWP のブラシを D2D1_COLOR_F に変換する.
-	static bool cast_to(const Brush& a, D2D1_COLOR_F& b) noexcept
+	static bool conv_uwp_to_dx(const Brush& a, D2D1_COLOR_F& b) noexcept
 	{
 		using winrt::Windows::UI::Xaml::Media::SolidColorBrush;
 
@@ -35,8 +38,8 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// UWP の Color を D2D1_COLOR_F に変換する.
-	static void cast_to(const Color& a, D2D1_COLOR_F& b) noexcept
+	// UWP の色を D2D1_COLOR_F に変換する.
+	static void conv_uwp_to_dx(const Color& a, D2D1_COLOR_F& b) noexcept
 	{
 		b.r = static_cast<FLOAT>(static_cast<double>(a.R) / UWP_COLOR_MAX);
 		b.g = static_cast<FLOAT>(static_cast<double>(a.G) / UWP_COLOR_MAX);
@@ -44,13 +47,13 @@ namespace winrt::GraphPaper::implementation
 		b.a = static_cast<FLOAT>(static_cast<double>(a.A) / UWP_COLOR_MAX);
 	}
 
-	// 色成分の値を文字列に変換し, 配列に格納する.
+	// 色成分を文字列に変換する.
 	// c_code	色の表記
 	// value	色成分の値
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列 [t_len]
 	// 戻り値	なし
-	void conv_val_to_col(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[])
+	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[])
 	{
 		// 色の表記が 10 進数か判定する.
 		if (c_code == COLOR_CODE::DEC) {
@@ -73,7 +76,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// ピクセル単位の長さを他の単位の文字列に変換する.
+	// 長さを文字列に変換する.
 	// B	単位付加フラグ
 	// len_unit	長さの単位
 	// value	ピクセル単位の長さ
@@ -81,10 +84,10 @@ namespace winrt::GraphPaper::implementation
 	// g_len	方眼の大きさ
 	// t_buf	文字列の配列
 	// t_len	文字列の最大長 ('\0' を含む長さ)
-	template <bool B> void conv_val_to_len(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t *t_buf)
+	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t *t_buf)
 	{
 		if (len_unit == LEN_UNIT::PIXEL) {
-			if constexpr (B == UNIT_NAME_VISIBLE) {
+			if constexpr (B == LEN_UNIT_SHOW) {
 				swprintf_s(t_buf, t_len, FMT_PIXEL_UNIT, value);
 			}
 			else {
@@ -92,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (len_unit == LEN_UNIT::INCH) {
-			if constexpr (B == UNIT_NAME_VISIBLE) {
+			if constexpr (B == LEN_UNIT_SHOW) {
 				swprintf_s(t_buf, t_len, FMT_INCH_UNIT, value / dpi);
 			}
 			else {
@@ -100,7 +103,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (len_unit == LEN_UNIT::MILLI) {
-			if constexpr (B == UNIT_NAME_VISIBLE) {
+			if constexpr (B == LEN_UNIT_SHOW) {
 				swprintf_s(t_buf, t_len, FMT_MILLI_UNIT, value * MM_PER_INCH / dpi);
 			}
 			else {
@@ -108,7 +111,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (len_unit == LEN_UNIT::POINT) {
-			if constexpr (B == UNIT_NAME_VISIBLE) {
+			if constexpr (B == LEN_UNIT_SHOW) {
 				swprintf_s(t_buf, t_len, FMT_POINT_UNIT, value * PT_PER_INCH / dpi);
 			}
 			else {
@@ -116,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (len_unit == LEN_UNIT::GRID) {
-			if constexpr (B == UNIT_NAME_VISIBLE) {
+			if constexpr (B == LEN_UNIT_SHOW) {
 				swprintf_s(t_buf, t_len, FMT_GRID_UNIT, value / g_len);
 			}
 			else {
@@ -127,8 +130,12 @@ namespace winrt::GraphPaper::implementation
 			throw hresult_not_implemented();
 		}
 	}
-	template void conv_val_to_len<!UNIT_NAME_VISIBLE>(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf);
-	template void conv_val_to_len<UNIT_NAME_VISIBLE>(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf);
+
+	// 長さを文字列に変換する (単位なし).
+	template void conv_len_to_str<LEN_UNIT_HIDE>(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf);
+
+	// 長さを文字列に変換する (単位つき).
+	template void conv_len_to_str<LEN_UNIT_SHOW>(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf);
 
 	// 内容が変更されていたなら, 確認ダイアログを表示してその応答を得る.
 	// 戻り値	確認前の処理を続行するなら true を, 応答がキャンセルなら, または内容を保存できなかったなら false を返す.
@@ -439,8 +446,8 @@ namespace winrt::GraphPaper::implementation
 			auto sel_back_color = Resources().TryLookup(box_value(L"SystemColorHighlightColor"));
 			auto sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
 			if (sel_back_color != nullptr && sel_text_color != nullptr) {
-				cast_to(unbox_value<Color>(sel_back_color), sheet_dx().m_range_background);
-				cast_to(unbox_value<Color>(sel_text_color), sheet_dx().m_range_foreground);
+				conv_uwp_to_dx(unbox_value<Color>(sel_back_color), sheet_dx().m_range_background);
+				conv_uwp_to_dx(unbox_value<Color>(sel_text_color), sheet_dx().m_range_foreground);
 			}
 			else {
 				sheet_dx().m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
@@ -449,8 +456,8 @@ namespace winrt::GraphPaper::implementation
 			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
 			auto const& fore_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
 			if (back_theme != nullptr && fore_theme != nullptr) {
-				cast_to(unbox_value<Brush>(back_theme), sheet_dx().m_theme_background);
-				cast_to(unbox_value<Brush>(fore_theme), sheet_dx().m_theme_foreground);
+				conv_uwp_to_dx(unbox_value<Brush>(back_theme), sheet_dx().m_theme_background);
+				conv_uwp_to_dx(unbox_value<Brush>(fore_theme), sheet_dx().m_theme_foreground);
 			}
 			else {
 				sheet_dx().m_theme_background = S_WHITE;
@@ -470,7 +477,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙の左上位置と右下位置を初期化する.
 		{
 			sheet_min(D2D1_POINT_2F{ 0.0F, 0.0F });
-			sheet_max(D2D1_POINT_2F{ m_sheet_main.m_sheet_main_size.width, m_sheet_main.m_sheet_main_size.height });
+			sheet_max(D2D1_POINT_2F{ m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height });
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();

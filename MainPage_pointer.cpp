@@ -170,7 +170,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeRRect(m_pointer_pressed, diff, &m_sheet_main);
 		}
 		else if (tool == TOOL_DRAW::QUAD) {
-			s = new ShapePoly(m_pointer_pressed, diff, &m_sheet_main);
+			s = new ShapePoly(m_pointer_pressed, diff, &m_sheet_main, tool_poly());
 		}
 		else if (tool == TOOL_DRAW::ELLI) {
 			s = new ShapeElli(m_pointer_pressed, diff, &m_sheet_main);
@@ -196,7 +196,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		m_pointer_shape_summary = m_pointer_shape_prev = s;
 		edit_menu_enable();
-		sheet_bound(s);
+		sheet_update_bbox(s);
 		sheet_panle_size();
 		sheet_draw();
 		// 図形一覧の排他制御が true か判定する.
@@ -211,16 +211,16 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		tx_edit().Text(L"");
-		ck_text_adjust_bound().IsChecked(text_adjust());
+		ck_text_adjust_bbox().IsChecked(text_adjust());
 		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
 			auto s = new ShapeText(m_pointer_pressed, diff, text, &m_sheet_main);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
-			text_adjust(ck_text_adjust_bound().IsChecked().GetBoolean());
+			text_adjust(ck_text_adjust_bbox().IsChecked().GetBoolean());
 			if (text_adjust()) {
-				static_cast<ShapeText*>(s)->adjust_bound();
+				static_cast<ShapeText*>(s)->adjust_bbox();
 			}
 			reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);
 			unselect_all();
@@ -228,7 +228,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_null();
 			m_pointer_shape_summary = m_pointer_shape_prev = s;
 			edit_menu_enable();
-			sheet_bound(s);
+			sheet_update_bbox(s);
 			sheet_panle_size();
 			// 図形一覧の排他制御が true か判定する.
 			if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -254,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		sheet_bound();
+		sheet_update_bbox();
 		sheet_panle_size();
 	}
 
@@ -262,7 +262,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::pointer_finish_moving(void)
 	{
 		if (m_sheet_main.m_grid_snap) {
-			D2D1_POINT_2F p_min = {};
+			D2D1_POINT_2F b_nw{};
+			D2D1_POINT_2F b_se{};
 			bool flag = false;
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {
@@ -271,22 +272,57 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_selected() != true) {
 					continue;
 				}
-				if (flag != true) {
+				if (!flag) {
 					flag = true;
-					s->get_min_pos(p_min);
-					continue;
+					s->get_bound({ FLT_MAX, FLT_MAX }, { -FLT_MAX, -FLT_MAX }, b_nw, b_se);
 				}
-				D2D1_POINT_2F nw_pos;
-				s->get_min_pos(nw_pos);
-				pt_min(nw_pos, p_min, p_min);
+				else {
+					s->get_bound(b_nw, b_se, b_nw, b_se);
+				}
 			}
 			if (flag) {
-				// 得た左上点を方眼の大きさで丸める.
-				// 丸めの前後で生じた差を得る.
-				D2D1_POINT_2F g_pos;
-				pt_round(p_min, m_sheet_main.m_grid_base + 1.0, g_pos);
+				const double g_len = m_sheet_main.m_grid_base + 1.0;
+				D2D1_POINT_2F b_ne{ b_se.x, b_nw.y };
+				D2D1_POINT_2F b_sw{ b_nw.x, b_se.y };
+
+				D2D1_POINT_2F g_nw;
+				D2D1_POINT_2F g_se;
+				D2D1_POINT_2F g_ne;
+				D2D1_POINT_2F g_sw;
+				pt_round(b_nw, g_len, g_nw);
+				pt_round(b_se, g_len, g_se);
+				pt_round(b_ne, g_len, g_ne);
+				pt_round(b_sw, g_len, g_sw);
+
+				D2D1_POINT_2F d_nw;
+				D2D1_POINT_2F d_se;
+				D2D1_POINT_2F d_ne;
+				D2D1_POINT_2F d_sw;
+				pt_sub(g_nw, b_nw, d_nw);
+				pt_sub(g_se, b_se, d_se);
+				pt_sub(g_ne, b_ne, d_ne);
+				pt_sub(g_sw, b_sw, d_sw);
+
+				double a_nw = pt_abs2(d_nw);
+				double a_se = pt_abs2(d_se);
+				double a_ne = pt_abs2(d_ne);
+				double a_sw = pt_abs2(d_sw);
 				D2D1_POINT_2F diff;
-				pt_sub(g_pos, p_min, diff);
+				if (a_se <= a_nw && a_se <= a_ne && a_nw <= a_sw) {
+					diff = d_se;
+				}
+				else if (a_ne <= a_nw && a_ne <= a_se && a_nw <= a_sw) {
+					diff = d_ne;
+				}
+				else if (a_sw <= a_nw && a_sw <= a_se && a_sw <= a_ne) {
+					diff = d_sw;
+				}
+				else {
+					diff = d_nw;
+				}
+				if (flag != true) {
+					flag = true;
+				}
 				s_list_move(m_list_shapes, diff);
 			}
 		}
@@ -295,7 +331,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		sheet_bound();
+		sheet_update_bbox();
 		sheet_panle_size();
 		edit_menu_enable();
 	}
@@ -340,8 +376,11 @@ namespace winrt::GraphPaper::implementation
 		Shape* s;
 		const auto anch = s_list_hit_test(m_list_shapes, m_pointer_cur, sheet_dx().m_anchor_len, s);
 		m_dx_mutex.unlock();
-		if (anch == ANCH_TYPE::ANCH_SHEET || s->is_selected() != true) {
+		if (anch == ANCH_TYPE::ANCH_SHEET) {
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
+		}
+		else if (m_cnt_selected > 1) {
+			Window::Current().CoreWindow().PointerCursor(CUR_SIZE_ALL);
 		}
 		else {
 			switch (anch) {
@@ -375,8 +414,9 @@ namespace winrt::GraphPaper::implementation
 			default:
 				// 図形のクラスが, 多角形または曲線であるか判定する.
 				if (typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi)) {
-					const auto n = static_cast<ShapePath*>(s)->m_diff.size();
-					if (anch >= ANCH_TYPE::ANCH_P0 && anch < ANCH_TYPE::ANCH_P0 + n + 1) {
+					// 図形の部位が, 頂点の数を超えないか判定する.
+					const auto d_cnt = static_cast<ShapePath*>(s)->m_diff.size();
+					if (anch >= ANCH_TYPE::ANCH_P0 && anch < ANCH_TYPE::ANCH_P0 + d_cnt + 1) {
 						Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 						break;
 					}
@@ -630,9 +670,11 @@ namespace winrt::GraphPaper::implementation
 			else {
 				if (m_sheet_main.m_grid_snap) {
 					// 方眼に整列の場合, 始点と終点を方眼の大きさで丸める
-					double g = max(m_sheet_main.m_grid_base + 1.0, 1.0);
-					pt_round(m_pointer_pressed, g, m_pointer_pressed);
-					pt_round(m_pointer_cur, g, m_pointer_cur);
+					if (args.KeyModifiers() != VirtualKeyModifiers::Shift) {
+						double g = max(m_sheet_main.m_grid_base + 1.0, 1.0);
+						pt_round(m_pointer_pressed, g, m_pointer_pressed);
+						pt_round(m_pointer_cur, g, m_pointer_cur);
+					}
 				}
 				// ポインターの現在の位置と押された位置の差分を求める.
 				D2D1_POINT_2F diff;

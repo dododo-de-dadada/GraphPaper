@@ -371,6 +371,16 @@ namespace winrt::GraphPaper::implementation
 		value.m_[5] = dt_reader.ReadSingle();
 	}
 
+	// 多角形のツールをデータリーダーから読み込む.
+	void read(TOOL_POLY& value, DataReader const& dt_reader)
+	{
+		value.m_vertex_cnt = dt_reader.ReadUInt32();
+		value.m_regular = dt_reader.ReadBoolean();
+		value.m_vertex_up = dt_reader.ReadBoolean();
+		value.m_closed = dt_reader.ReadBoolean();
+		value.m_clockwise = dt_reader.ReadBoolean();
+	}
+
 	// 32 ビット整数をデータリーダーから読み込む.
 	void read(uint32_t& value, DataReader const& dt_reader)
 	{
@@ -408,11 +418,12 @@ namespace winrt::GraphPaper::implementation
 	// 方眼の強調をデータリーダーから読み込む.
 	void read(GRID_EMPH& value, DataReader const& dt_reader)
 	{
-		value = static_cast<GRID_EMPH>(dt_reader.ReadUInt16());
-		if (value == GRID_EMPH::EMPH_0 || value == GRID_EMPH::EMPH_2 || value == GRID_EMPH::EMPH_3) {
+		value.m_gauge_1 = dt_reader.ReadUInt16();
+		value.m_gauge_2 = dt_reader.ReadUInt16();
+		if (equal(value, GRID_EMPH_0) || equal(value, GRID_EMPH_2) || equal(value, GRID_EMPH_3)) {
 			return;
 		}
-		value = GRID_EMPH::EMPH_0;
+		value = GRID_EMPH_0;
 	}
 
 	// 方眼の表示をデータリーダーから読み込む.
@@ -765,7 +776,8 @@ namespace winrt::GraphPaper::implementation
 	// 方眼の形式をデータライターに書き込む.
 	void write(const GRID_EMPH value, DataWriter const& dt_writer)
 	{
-		dt_writer.WriteUInt16(static_cast<uint16_t>(value));
+		dt_writer.WriteUInt16(value.m_gauge_1);
+		dt_writer.WriteUInt16(value.m_gauge_2);
 	}
 
 	// 方眼の表示をデータライターに書き込む.
@@ -783,6 +795,16 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(value.m_[3]);
 		dt_writer.WriteSingle(value.m_[4]);
 		dt_writer.WriteSingle(value.m_[5]);
+	}
+
+	// 多角形のツールをデータライターに書き込む.
+	void write(const TOOL_POLY& value, DataWriter const& dt_writer)
+	{
+		dt_writer.WriteUInt32(static_cast<uint32_t>(value.m_vertex_cnt));
+		dt_writer.WriteBoolean(value.m_regular);
+		dt_writer.WriteBoolean(value.m_vertex_up);
+		dt_writer.WriteBoolean(value.m_closed);
+		dt_writer.WriteBoolean(value.m_clockwise);
 	}
 
 	// 32 ビット整数をデータライターに書き込む.

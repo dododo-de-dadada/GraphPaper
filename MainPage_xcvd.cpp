@@ -103,7 +103,7 @@ namespace winrt::GraphPaper::implementation
 		list_selected.clear();
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
-		sheet_bound();
+		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
 	}
@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 								summary_append(s);
 							}
 							undo_push_append(s);
-							sheet_bound(s);
+							sheet_update_bbox(s);
 						}
 						undo_push_null();
 						m_dx_mutex.unlock();
@@ -190,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 							static_cast<FLOAT>(scp_sheet_panel().ActualWidth() / scale),
 							static_cast<FLOAT>(scp_sheet_panel().ActualHeight() / scale)
 						};
-						t->adjust_bound(max_size);
+						t->adjust_bbox(max_size);
 						D2D1_POINT_2F s_pos{
 							static_cast<FLOAT>((sb_horz().Value() + scp_sheet_panel().ActualWidth() * 0.5) / scale - t->m_diff[0].x * 0.5),
 							static_cast<FLOAT>((sb_vert().Value() + scp_sheet_panel().ActualHeight() * 0.5) / scale - t->m_diff[0].y * 0.5)
@@ -212,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 						undo_push_null();
 						m_dx_mutex.unlock();
 						edit_menu_enable();
-						sheet_bound(t);
+						sheet_update_bbox(t);
 						sheet_panle_size();
 					}
 				}

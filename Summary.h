@@ -23,7 +23,7 @@ namespace winrt::GraphPaper::implementation
 		// s	表示する図形.
 		// r	メインページのリソースディクショナリ.
 		// 図形の名前と, パスアイコンの移動と描画のコマンド文字列を設定する.
-		Summary(Shape* s, ResourceDictionary const& r) :
+		Summary(Shape* const s, ResourceDictionary const& r) :
 			m_shape(s)
 		{
 			using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
@@ -31,11 +31,11 @@ namespace winrt::GraphPaper::implementation
 			auto const& t_id = typeid(*s);
 			if (t_id == typeid(ShapeBezi)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_bezi")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_BEZI/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_bezi/Text");
 			}
 			else if (t_id == typeid(ShapeElli)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_elli")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_elli/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_elli/Text");
 			}
 			else if (t_id == typeid(ShapeGroup)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_group")));
@@ -43,27 +43,27 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (t_id == typeid(ShapeLine)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_line/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_line/Text");
 			}
 			else if (t_id == typeid(ShapePoly)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_quad")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_quad/Text");
+				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_pent")));
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_poly/Text");
 			}
 			else if (t_id == typeid(ShapeRect)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rect")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_rect/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_rect/Text");
 			}
 			else if (t_id == typeid(ShapeRRect)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rrct")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_rrect/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_rrct/Text");
 			}
 			else if (t_id == typeid(ShapeRuler)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ruler")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_ruler/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_ruler/Text");
 			}
 			else if (t_id == typeid(ShapeText)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_text/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_text/Text");
 			}
 			else {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_select")));
@@ -71,7 +71,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 
-		Shape* get_shape(void) const noexcept
+		Shape* const get_shape(void) const noexcept
 		{
 			return m_shape;
 		}

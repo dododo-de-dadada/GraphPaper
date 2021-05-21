@@ -11,7 +11,7 @@ namespace winrt::GraphPaper::implementation
 	// 添え字をデータリーダーから読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader);
 	// 図形をデータライターに書き込む.
-	static void undo_write_shape(Shape* s, DataWriter const& dt_writer);
+	static void undo_write_shape(const Shape* s, DataWriter const& dt_writer);
 
 	// 添え字をデータリーダーから読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader)
@@ -25,13 +25,13 @@ namespace winrt::GraphPaper::implementation
 			s = nullptr;
 		}
 		else {
-			s_list_match<uint32_t, Shape*>(*Undo::s_shape_list, i, s);
+			s_list_match<const uint32_t, Shape*>(*Undo::s_shape_list, i, s);
 		}
 		return s;
 	}
 
 	// 図形をデータライターに書き込む.
-	static void undo_write_shape(Shape* s, DataWriter const& dt_writer)
+	static void undo_write_shape(Shape* const s, DataWriter const& dt_writer)
 	{
 		if (s == Undo::s_shape_sheet) {
 			dt_writer.WriteUInt32(INDEX_SHEET);
@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			uint32_t i = 0;
-			s_list_match<Shape*, uint32_t>(*Undo::s_shape_list, s, i);
+			s_list_match<Shape* const, uint32_t>(*Undo::s_shape_list, s, i);
 			dt_writer.WriteUInt32(i);
 		}
 	}
@@ -87,7 +87,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の, 指定された部位の位置を保存する.
-	UndoAnchor::UndoAnchor(Shape* s, const uint32_t anchor) :
+	UndoAnchor::UndoAnchor(Shape* const s, const uint32_t anchor) :
 		Undo(s)
 	{
 		m_shape = s;
@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を作成する.
-	UndoArrange2::UndoArrange2(Shape* s, Shape* t) :
+	UndoArrange2::UndoArrange2(Shape* const s, Shape* const t) :
 		Undo(s)
 	{
 		m_dst_shape = t;
@@ -248,221 +248,221 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形の属性値に値を格納する.
 	template <UNDO_OP U>
-	void UndoAttr<U>::SET(Shape* s, const U_TYPE<U>::type& value)
+	void UndoAttr<U>::SET(Shape* const s, const U_TYPE<U>::type& value)
 	{
 		throw winrt::hresult_not_implemented();
 	}
-	void UndoAttr<UNDO_OP::ARROW_SIZE>::SET(Shape* s, const ARROW_SIZE& value)
+	void UndoAttr<UNDO_OP::ARROW_SIZE>::SET(Shape* const s, const ARROW_SIZE& value)
 	{
 		s->set_arrow_size(value);
 	}
-	void UndoAttr<UNDO_OP::ARROW_STYLE>::SET(Shape* s, const ARROW_STYLE& value)
+	void UndoAttr<UNDO_OP::ARROW_STYLE>::SET(Shape* const s, const ARROW_STYLE& value)
 	{
 		s->set_arrow_style(value);
 	}
-	void UndoAttr<UNDO_OP::FILL_COLOR>::SET(Shape* s, const D2D1_COLOR_F& value)
+	void UndoAttr<UNDO_OP::FILL_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
 	{
 		s->set_fill_color(value);
 	}
-	void UndoAttr<UNDO_OP::FONT_COLOR>::SET(Shape* s, const D2D1_COLOR_F& value)
+	void UndoAttr<UNDO_OP::FONT_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
 	{
 		s->set_font_color(value);
 	}
-	void UndoAttr<UNDO_OP::FONT_FAMILY>::SET(Shape* s, wchar_t* const& value)
+	void UndoAttr<UNDO_OP::FONT_FAMILY>::SET(Shape* const s, wchar_t* const& value)
 	{
 		s->set_font_family(value);
 	}
-	void UndoAttr<UNDO_OP::FONT_SIZE>::SET(Shape* s, const double& value)
+	void UndoAttr<UNDO_OP::FONT_SIZE>::SET(Shape* const s, const double& value)
 	{
 		s->set_font_size(value);
 	}
-	void UndoAttr<UNDO_OP::FONT_STRETCH>::SET(Shape* s, const DWRITE_FONT_STRETCH& value)
+	void UndoAttr<UNDO_OP::FONT_STRETCH>::SET(Shape* const s, const DWRITE_FONT_STRETCH& value)
 	{
 		s->set_font_stretch(value);
 	}
-	void UndoAttr<UNDO_OP::FONT_STYLE>::SET(Shape* s, const DWRITE_FONT_STYLE& value)
+	void UndoAttr<UNDO_OP::FONT_STYLE>::SET(Shape* const s, const DWRITE_FONT_STYLE& value)
 	{
 		s->set_font_style(value);
 	}
-	void UndoAttr<UNDO_OP::FONT_WEIGHT>::SET(Shape* s, const DWRITE_FONT_WEIGHT& value)
+	void UndoAttr<UNDO_OP::FONT_WEIGHT>::SET(Shape* const s, const DWRITE_FONT_WEIGHT& value)
 	{
 		s->set_font_weight(value);
 	}
-	void UndoAttr<UNDO_OP::GRID_BASE>::SET(Shape* s, const double& value)
+	void UndoAttr<UNDO_OP::GRID_BASE>::SET(Shape* const s, const double& value)
 	{
 		s->set_grid_base(value);
 	}
-	void UndoAttr<UNDO_OP::GRID_GRAY>::SET(Shape* s, const double& value)
+	void UndoAttr<UNDO_OP::GRID_GRAY>::SET(Shape* const s, const double& value)
 	{
 		s->set_grid_gray(value);
 	}
-	void UndoAttr<UNDO_OP::GRID_EMPH>::SET(Shape* s, const GRID_EMPH& value)
+	void UndoAttr<UNDO_OP::GRID_EMPH>::SET(Shape* const s, const GRID_EMPH& value)
 	{
 		s->set_grid_emph(value);
 	}
-	void UndoAttr<UNDO_OP::GRID_SHOW>::SET(Shape* s, const GRID_SHOW& value)
+	void UndoAttr<UNDO_OP::GRID_SHOW>::SET(Shape* const s, const GRID_SHOW& value)
 	{
 		s->set_grid_show(value);
 	}
-	void UndoAttr<UNDO_OP::TEXT_LINE>::SET(Shape* s, const double& value)
+	void UndoAttr<UNDO_OP::TEXT_LINE>::SET(Shape* const s, const double& value)
 	{
 		s->set_text_line(value);
 	}
-	void UndoAttr<UNDO_OP::TEXT_MARGIN>::SET(Shape* s, const D2D1_SIZE_F& value)
+	void UndoAttr<UNDO_OP::TEXT_MARGIN>::SET(Shape* const s, const D2D1_SIZE_F& value)
 	{
 		s->set_text_margin(value);
 	}
-	void UndoAttr<UNDO_OP::SHEET_COLOR>::SET(Shape* s, const D2D1_COLOR_F& value)
+	void UndoAttr<UNDO_OP::SHEET_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
 	{
 		s->set_sheet_color(value);
 	}
-	void UndoAttr<UNDO_OP::SHEET_SIZE>::SET(Shape* s, const D2D1_SIZE_F& value)
+	void UndoAttr<UNDO_OP::SHEET_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& value)
 	{
 		s->set_sheet_size(value);
 	}
-	void UndoAttr<UNDO_OP::TEXT_ALIGN_P>::SET(Shape* s, const DWRITE_PARAGRAPH_ALIGNMENT& value)
+	void UndoAttr<UNDO_OP::TEXT_ALIGN_P>::SET(Shape* const s, const DWRITE_PARAGRAPH_ALIGNMENT& value)
 	{
 		s->set_text_align_p(value);
 	}
-	void UndoAttr<UNDO_OP::START_POS>::SET(Shape* s, const D2D1_POINT_2F& value)
+	void UndoAttr<UNDO_OP::START_POS>::SET(Shape* const s, const D2D1_POINT_2F& value)
 	{
 		s->set_start_pos(value);
 	}
-	void UndoAttr<UNDO_OP::STROKE_COLOR>::SET(Shape* s, const D2D1_COLOR_F& value)
+	void UndoAttr<UNDO_OP::STROKE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
 	{
 		s->set_stroke_color(value);
 	}
-	void UndoAttr<UNDO_OP::STROKE_PATT>::SET(Shape* s, const STROKE_PATT& value)
+	void UndoAttr<UNDO_OP::STROKE_PATT>::SET(Shape* const s, const STROKE_PATT& value)
 	{
 		s->set_stroke_patt(value);
 	}
-	void UndoAttr<UNDO_OP::STROKE_STYLE>::SET(Shape* s, const D2D1_DASH_STYLE& value)
+	void UndoAttr<UNDO_OP::STROKE_STYLE>::SET(Shape* const s, const D2D1_DASH_STYLE& value)
 	{
 		s->set_stroke_style(value);
 	}
-	void UndoAttr<UNDO_OP::STROKE_WIDTH>::SET(Shape* s, const double& value)
+	void UndoAttr<UNDO_OP::STROKE_WIDTH>::SET(Shape* const s, const double& value)
 	{
 		s->set_stroke_width(value);
 	}
-	void UndoAttr<UNDO_OP::TEXT_CONTENT>::SET(Shape* s, wchar_t* const& value)
+	void UndoAttr<UNDO_OP::TEXT_CONTENT>::SET(Shape* const s, wchar_t* const& value)
 	{
 		s->set_text(value);
 	}
-	void UndoAttr<UNDO_OP::TEXT_ALIGN_T>::SET(Shape* s, const DWRITE_TEXT_ALIGNMENT& value)
+	void UndoAttr<UNDO_OP::TEXT_ALIGN_T>::SET(Shape* const s, const DWRITE_TEXT_ALIGNMENT& value)
 	{
 		s->set_text_align_t(value);
 	}
-	void UndoAttr<UNDO_OP::TEXT_RANGE>::SET(Shape* s, const DWRITE_TEXT_RANGE& value)
+	void UndoAttr<UNDO_OP::TEXT_RANGE>::SET(Shape* const s, const DWRITE_TEXT_RANGE& value)
 	{
 		s->set_text_range(value);
 	}
 
 	template <UNDO_OP U>
-	bool UndoAttr<U>::GET(Shape* s, U_TYPE<U>::type& value) noexcept
+	bool UndoAttr<U>::GET(const Shape* s, U_TYPE<U>::type& value) noexcept
 	{
 		return false;
 	}
-	bool UndoAttr<UNDO_OP::ARROW_SIZE>::GET(Shape* s, ARROW_SIZE& value) noexcept
+	bool UndoAttr<UNDO_OP::ARROW_SIZE>::GET(const Shape* s, ARROW_SIZE& value) noexcept
 	{
 		return s->get_arrow_size(value);
 	}
-	bool UndoAttr<UNDO_OP::ARROW_STYLE>::GET(Shape* s, ARROW_STYLE& value) noexcept
+	bool UndoAttr<UNDO_OP::ARROW_STYLE>::GET(const Shape* s, ARROW_STYLE& value) noexcept
 	{
 		return s->get_arrow_style(value);
 	}
-	bool UndoAttr<UNDO_OP::FILL_COLOR>::GET(Shape* s, D2D1_COLOR_F& value) noexcept
+	bool UndoAttr<UNDO_OP::FILL_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
 	{
 		return s->get_fill_color(value);
 	}
-	bool UndoAttr<UNDO_OP::FONT_COLOR>::GET(Shape* s, D2D1_COLOR_F& value) noexcept
+	bool UndoAttr<UNDO_OP::FONT_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
 	{
 		return s->get_font_color(value);
 	}
-	bool UndoAttr<UNDO_OP::FONT_FAMILY>::GET(Shape* s, wchar_t*& value) noexcept
+	bool UndoAttr<UNDO_OP::FONT_FAMILY>::GET(const Shape* s, wchar_t*& value) noexcept
 	{
 		return s->get_font_family(value);
 	}
-	bool UndoAttr<UNDO_OP::FONT_SIZE>::GET(Shape* s, double& value) noexcept
+	bool UndoAttr<UNDO_OP::FONT_SIZE>::GET(const Shape* s, double& value) noexcept
 	{
 		return s->get_font_size(value);
 	}
-	bool UndoAttr<UNDO_OP::FONT_STRETCH>::GET(Shape* s, DWRITE_FONT_STRETCH& value) noexcept
+	bool UndoAttr<UNDO_OP::FONT_STRETCH>::GET(const Shape* s, DWRITE_FONT_STRETCH& value) noexcept
 	{
 		return s->get_font_stretch(value);
 	}
-	bool UndoAttr<UNDO_OP::FONT_STYLE>::GET(Shape* s, DWRITE_FONT_STYLE& value) noexcept
+	bool UndoAttr<UNDO_OP::FONT_STYLE>::GET(const Shape* s, DWRITE_FONT_STYLE& value) noexcept
 	{
 		return s->get_font_style(value);
 	}
-	bool UndoAttr<UNDO_OP::FONT_WEIGHT>::GET(Shape* s, DWRITE_FONT_WEIGHT& value) noexcept
+	bool UndoAttr<UNDO_OP::FONT_WEIGHT>::GET(const Shape* s, DWRITE_FONT_WEIGHT& value) noexcept
 	{
 		return s->get_font_weight(value);
 	}
-	bool UndoAttr<UNDO_OP::GRID_BASE>::GET(Shape* s, double& value) noexcept
+	bool UndoAttr<UNDO_OP::GRID_BASE>::GET(const Shape* s, double& value) noexcept
 	{
 		return s->get_grid_base(value);
 	}
-	bool UndoAttr<UNDO_OP::GRID_GRAY>::GET(Shape* s, double& value) noexcept
+	bool UndoAttr<UNDO_OP::GRID_GRAY>::GET(const Shape* s, double& value) noexcept
 	{
 		return s->get_grid_gray(value);
 	}
-	bool UndoAttr<UNDO_OP::GRID_EMPH>::GET(Shape* s, GRID_EMPH& value) noexcept
+	bool UndoAttr<UNDO_OP::GRID_EMPH>::GET(const Shape* s, GRID_EMPH& value) noexcept
 	{
 		return s->get_grid_emph(value);
 	}
-	bool UndoAttr<UNDO_OP::GRID_SHOW>::GET(Shape* s, GRID_SHOW& value) noexcept
+	bool UndoAttr<UNDO_OP::GRID_SHOW>::GET(const Shape* s, GRID_SHOW& value) noexcept
 	{
 		return s->get_grid_show(value);
 	}
-	bool UndoAttr<UNDO_OP::TEXT_LINE>::GET(Shape* s, double& value) noexcept
+	bool UndoAttr<UNDO_OP::TEXT_LINE>::GET(const Shape* s, double& value) noexcept
 	{
 		return s->get_text_line(value);
 	}
-	bool UndoAttr<UNDO_OP::TEXT_MARGIN>::GET(Shape* s, D2D1_SIZE_F& value) noexcept
+	bool UndoAttr<UNDO_OP::TEXT_MARGIN>::GET(const Shape* s, D2D1_SIZE_F& value) noexcept
 	{
 		return s->get_text_margin(value);
 	}
-	bool UndoAttr<UNDO_OP::SHEET_COLOR>::GET(Shape* s, D2D1_COLOR_F& value) noexcept
+	bool UndoAttr<UNDO_OP::SHEET_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
 	{
 		return s->get_sheet_color(value);
 	}
-	bool UndoAttr<UNDO_OP::SHEET_SIZE>::GET(Shape* s, D2D1_SIZE_F& value) noexcept
+	bool UndoAttr<UNDO_OP::SHEET_SIZE>::GET(const Shape* s, D2D1_SIZE_F& value) noexcept
 	{
 		return s->get_sheet_size(value);
 	}
-	bool UndoAttr<UNDO_OP::TEXT_ALIGN_P>::GET(Shape* s, DWRITE_PARAGRAPH_ALIGNMENT& value) noexcept
+	bool UndoAttr<UNDO_OP::TEXT_ALIGN_P>::GET(const Shape* s, DWRITE_PARAGRAPH_ALIGNMENT& value) noexcept
 	{
 		return s->get_text_align_p(value);
 	}
-	bool UndoAttr<UNDO_OP::START_POS>::GET(Shape* s, D2D1_POINT_2F& value) noexcept
+	bool UndoAttr<UNDO_OP::START_POS>::GET(const Shape* s, D2D1_POINT_2F& value) noexcept
 	{
 		return s->get_start_pos(value);
 	}
-	bool UndoAttr<UNDO_OP::STROKE_COLOR>::GET(Shape* s, D2D1_COLOR_F& value) noexcept
+	bool UndoAttr<UNDO_OP::STROKE_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
 	{
 		return s->get_stroke_color(value);
 	}
-	bool UndoAttr<UNDO_OP::STROKE_PATT>::GET(Shape* s, STROKE_PATT& value) noexcept
+	bool UndoAttr<UNDO_OP::STROKE_PATT>::GET(const Shape* s, STROKE_PATT& value) noexcept
 	{
 		return s->get_stroke_patt(value);
 	}
-	bool UndoAttr<UNDO_OP::STROKE_STYLE>::GET(Shape* s, D2D1_DASH_STYLE& value) noexcept
+	bool UndoAttr<UNDO_OP::STROKE_STYLE>::GET(const Shape* s, D2D1_DASH_STYLE& value) noexcept
 	{
 		return s->get_stroke_style(value);
 	}
-	bool UndoAttr<UNDO_OP::STROKE_WIDTH>::GET(Shape* s, double& value) noexcept
+	bool UndoAttr<UNDO_OP::STROKE_WIDTH>::GET(const Shape* s, double& value) noexcept
 	{
 		return s->get_stroke_width(value);
 	}
-	bool UndoAttr<UNDO_OP::TEXT_CONTENT>::GET(Shape* s, wchar_t*& value) noexcept
+	bool UndoAttr<UNDO_OP::TEXT_CONTENT>::GET(const Shape* s, wchar_t*& value) noexcept
 	{
 		return s->get_text(value);
 	}
-	bool UndoAttr<UNDO_OP::TEXT_ALIGN_T>::GET(Shape* s, DWRITE_TEXT_ALIGNMENT& value) noexcept
+	bool UndoAttr<UNDO_OP::TEXT_ALIGN_T>::GET(const Shape* s, DWRITE_TEXT_ALIGNMENT& value) noexcept
 	{
 		return s->get_text_align_t(value);
 	}
-	bool UndoAttr<UNDO_OP::TEXT_RANGE>::GET(Shape* s, DWRITE_TEXT_RANGE& value) noexcept
+	bool UndoAttr<UNDO_OP::TEXT_RANGE>::GET(const Shape* s, DWRITE_TEXT_RANGE& value) noexcept
 	{
 		return s->get_text_range(value);
 	}
@@ -510,7 +510,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をリストから取り除く.
 	// s	取り除く図形
 	// dont	初期化のみで操作を実行しない.
-	UndoList::UndoList(Shape* s, const bool dont_exec) :
+	UndoList::UndoList(Shape* const s, const bool dont_exec) :
 		Undo(s),
 		m_insert(false),
 		m_item_pos(static_cast<Shape*>(nullptr))
@@ -524,7 +524,7 @@ namespace winrt::GraphPaper::implementation
 	// s	挿入する図形
 	// s_pos	挿入する位置
 	// dont	初期化のみで操作を実行しない.
-	UndoList::UndoList(Shape* s, Shape* s_pos, const bool dont_exec) :
+	UndoList::UndoList(Shape* const s, Shape* const s_pos, const bool dont_exec) :
 		Undo(s),
 		m_insert(true),
 		m_item_pos(s_pos)
@@ -575,7 +575,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をグループから取り除く.
 	// s	取り除く図形
-	UndoListGroup::UndoListGroup(ShapeGroup* g, Shape* s) :
+	UndoListGroup::UndoListGroup(ShapeGroup* const g, Shape* const s) :
 		UndoList(s, true),
 		m_shape_group(g)
 	{
@@ -584,7 +584,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をグループに追加する.
 	// s	取り除く図形
-	UndoListGroup::UndoListGroup(ShapeGroup* g, Shape* s, Shape* s_pos) :
+	UndoListGroup::UndoListGroup(ShapeGroup* const g, Shape* const s, Shape* const s_pos) :
 		UndoList(s, s_pos, true),
 		m_shape_group(g)
 	{
@@ -613,7 +613,7 @@ namespace winrt::GraphPaper::implementation
 	{}
 
 	// 図形の選択を反転する.
-	UndoSelect::UndoSelect(Shape* s) :
+	UndoSelect::UndoSelect(Shape* const s) :
 		Undo(s)
 	{
 		exec();

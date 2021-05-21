@@ -9,117 +9,95 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// その他メニューの「色の表記」>「パーセント」が選択された.
-	void MainPage::color_code_cent_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		m_color_code = COLOR_CODE::CENT;
-	}
-
 	// その他メニューの「色の表記」に印をつける.
 	void MainPage::color_code_check_menu(void)
 	{
-		rmfi_color_code_dec().IsChecked(m_color_code == COLOR_CODE::DEC);
-		rmfi_color_code_hex().IsChecked(m_color_code == COLOR_CODE::HEX);
-		rmfi_color_code_real().IsChecked(m_color_code == COLOR_CODE::REAL);
-		rmfi_color_code_cent().IsChecked(m_color_code == COLOR_CODE::CENT);
-		rmfi_color_code_dec_2().IsChecked(m_color_code == COLOR_CODE::DEC);
-		rmfi_color_code_hex_2().IsChecked(m_color_code == COLOR_CODE::HEX);
-		rmfi_color_code_real_2().IsChecked(m_color_code == COLOR_CODE::REAL);
-		rmfi_color_code_cent_2().IsChecked(m_color_code == COLOR_CODE::CENT);
+		if (m_color_code == COLOR_CODE::DEC) {
+			rmfi_color_code_dec().IsChecked(true);
+			rmfi_color_code_dec_2().IsChecked(true);
+		}
+		else if (m_color_code == COLOR_CODE::HEX) {
+			rmfi_color_code_hex().IsChecked(true);
+			rmfi_color_code_hex_2().IsChecked(true);
+		}
+		else if (m_color_code == COLOR_CODE::REAL) {
+			rmfi_color_code_real().IsChecked(true);
+			rmfi_color_code_real_2().IsChecked(true);
+		}
+		else if (m_color_code == COLOR_CODE::CENT) {
+			rmfi_color_code_cent().IsChecked(true);
+			rmfi_color_code_cent_2().IsChecked(true);
+		}
 	}
 
-	// その他メニューの「色の表記」>「10進数」が選択された.
-	void MainPage::color_code_dec_click(IInspectable const&, RoutedEventArgs const&)
+	// その他メニューの「色の表記」のサブ項目が選択された.
+	void MainPage::color_code_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		m_color_code = COLOR_CODE::DEC;
-	}
-
-	// その他メニューの「色の表記」>「16進数」が選択された.
-	void MainPage::color_code_hex_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		m_color_code = COLOR_CODE::HEX;
-	}
-
-	// その他メニューの「色の表記」>「実数」が選択された.
-	void MainPage::color_code_real_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		m_color_code = COLOR_CODE::REAL;
+		if (sender == rmfi_color_code_cent() || sender == rmfi_color_code_cent_2()) {
+			m_color_code = COLOR_CODE::CENT;
+		}
+		else if (sender == rmfi_color_code_dec() || sender == rmfi_color_code_dec_2()) {
+			m_color_code = COLOR_CODE::DEC;
+		}
+		else if (sender == rmfi_color_code_hex() || sender == rmfi_color_code_hex_2()) {
+			m_color_code = COLOR_CODE::HEX;
+		}
+		else if (sender == rmfi_color_code_real() || sender == rmfi_color_code_real_2()) {
+			m_color_code = COLOR_CODE::REAL;
+		}
 	}
 
 	// その他メニューの「長さの単位」に印をつける.
 	void MainPage::len_unit_check_menu(void)
 	{
-		rmfi_len_unit_grid().IsChecked(m_len_unit == LEN_UNIT::GRID);
-		rmfi_len_unit_inch().IsChecked(m_len_unit == LEN_UNIT::INCH);
-		rmfi_len_unit_milli().IsChecked(m_len_unit == LEN_UNIT::MILLI);
-		rmfi_len_unit_pixel().IsChecked(m_len_unit == LEN_UNIT::PIXEL);
-		rmfi_len_unit_point().IsChecked(m_len_unit == LEN_UNIT::POINT);
-		rmfi_len_unit_grid_2().IsChecked(m_len_unit == LEN_UNIT::GRID);
-		rmfi_len_unit_inch_2().IsChecked(m_len_unit == LEN_UNIT::INCH);
-		rmfi_len_unit_milli_2().IsChecked(m_len_unit == LEN_UNIT::MILLI);
-		rmfi_len_unit_pixel_2().IsChecked(m_len_unit == LEN_UNIT::PIXEL);
-		rmfi_len_unit_point_2().IsChecked(m_len_unit == LEN_UNIT::POINT);
-	}
-
-	// その他メニューの「長さの単位」>「方眼」が選択された.
-	void MainPage::len_unit_grid_click(IInspectable const&, RoutedEventArgs const&)
-	{
 		if (m_len_unit == LEN_UNIT::GRID) {
-			return;
+			rmfi_len_unit_grid().IsChecked(true);
+			rmfi_len_unit_grid_2().IsChecked(true);
 		}
-		m_len_unit = LEN_UNIT::GRID;
-		sbar_set_curs();
-		sbar_set_grid();
-		sbar_set_sheet();
-		sbar_set_unit();
+		else if (m_len_unit == LEN_UNIT::INCH) {
+			rmfi_len_unit_inch().IsChecked(true);
+			rmfi_len_unit_inch_2().IsChecked(true);
+		}
+		else if (m_len_unit == LEN_UNIT::MILLI) {
+			rmfi_len_unit_milli().IsChecked(true);
+			rmfi_len_unit_milli_2().IsChecked(true);
+		}
+		else if (m_len_unit == LEN_UNIT::PIXEL) {
+			rmfi_len_unit_pixel().IsChecked(true);
+			rmfi_len_unit_pixel_2().IsChecked(true);
+		}
+		else if (m_len_unit == LEN_UNIT::POINT) {
+			rmfi_len_unit_point().IsChecked(true);
+			rmfi_len_unit_point_2().IsChecked(true);
+		}
 	}
 
-	// その他メニューの「長さの単位」>「インチ」が選択された.
-	void MainPage::len_unit_inch_click(IInspectable const&, RoutedEventArgs const&)
+	// その他メニューの「長さの単位」のサブ項目が選択された.
+	void MainPage::len_unit_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (m_len_unit == LEN_UNIT::INCH) {
+		LEN_UNIT l_unit;
+		if (sender == rmfi_len_unit_grid() || sender == rmfi_len_unit_grid_2()) {
+			l_unit = LEN_UNIT::GRID;
+		}
+		else if (sender == rmfi_len_unit_inch() || sender == rmfi_len_unit_inch_2()) {
+			l_unit = LEN_UNIT::INCH;
+		}
+		else if (sender == rmfi_len_unit_milli() || sender == rmfi_len_unit_milli_2()) {
+			l_unit = LEN_UNIT::MILLI;
+		}
+		else if (sender == rmfi_len_unit_pixel() || sender == rmfi_len_unit_pixel_2()) {
+			l_unit = LEN_UNIT::PIXEL;
+		}
+		else if (sender == rmfi_len_unit_point() || sender == rmfi_len_unit_point_2()) {
+			l_unit = LEN_UNIT::POINT;
+		}
+		else {
 			return;
 		}
-		m_len_unit = LEN_UNIT::INCH;
-		sbar_set_curs();
-		sbar_set_grid();
-		sbar_set_sheet();
-		sbar_set_unit();
-	}
-
-	// その他メニューの「長さの単位」>「ポイント」が選択された.
-	void MainPage::len_unit_milli_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_len_unit == LEN_UNIT::MILLI) {
+		if (m_len_unit == l_unit) {
 			return;
 		}
-		m_len_unit = LEN_UNIT::MILLI;
-		sbar_set_curs();
-		sbar_set_grid();
-		sbar_set_sheet();
-		sbar_set_unit();
-	}
-
-	// その他メニューの「長さの単位」>「ピクセル」が選択された.
-	void MainPage::len_unit_pixel_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_len_unit == LEN_UNIT::PIXEL) {
-			return;
-		}
-		m_len_unit = LEN_UNIT::PIXEL;
-		sbar_set_curs();
-		sbar_set_grid();
-		sbar_set_sheet();
-		sbar_set_unit();
-	}
-
-	// その他メニューの「長さの単位」>「ポイント」が選択された.
-	void MainPage::len_unit_point_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_len_unit == LEN_UNIT::POINT) {
-			return;
-		}
-		m_len_unit = LEN_UNIT::POINT;
+		m_len_unit = l_unit;
 		sbar_set_curs();
 		sbar_set_grid();
 		sbar_set_sheet();

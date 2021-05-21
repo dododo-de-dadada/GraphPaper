@@ -137,15 +137,15 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (B) {
 			uint32_t i = 0;
-			auto s_pos = s_list_front(m_list_shapes);
-			for (auto s : list_selected) {
+			auto s = s_list_front(m_list_shapes);
+			for (auto t : list_selected) {
 				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
 				if (m_summary_atomic.load(std::memory_order_acquire)) {
-					summary_remove(s);
-					summary_insert(s, i++);
+					summary_remove(t);
+					summary_insert(t, i++);
 				}
-				undo_push_remove(s);
-				undo_push_insert(s, s_pos);
+				undo_push_remove(t);
+				undo_push_insert(t, s);
 			}
 		}
 		else {
