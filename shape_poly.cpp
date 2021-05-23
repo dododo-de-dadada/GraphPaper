@@ -13,6 +13,9 @@ namespace winrt::GraphPaper::implementation
 	// 多角形の辺の法線ベクトルを得る.
 	static bool poly_get_nvec(const size_t m, const D2D1_POINT_2F v_pos[], D2D1_POINT_2F n_vec[]) noexcept;
 
+	// 折れ線の矢じりの位置を得る
+
+
 	// 直行するベクトルを得る.
 	static D2D1_POINT_2F poly_pt_orth(const D2D1_POINT_2F vec) { return { -vec.y, vec.x }; }
 
@@ -22,11 +25,49 @@ namespace winrt::GraphPaper::implementation
 	// 多角形の角が位置を含むか判定する.
 	static bool poly_test_corner(const D2D1_POINT_2F t_pos, const size_t exp_cnt, const bool exp_end, const D2D1_POINT_2F exp_side[], const D2D1_POINT_2F n_vec[], const double ext_len) noexcept;
 
-	//	多角形の各辺の法線ベクトルを得る.
-	//	v_cnt	頂点の数
-	//	v_pos	頂点の配列 [v_cnt]
-	//	n_vec	各辺の法線ベクトルの配列 [v_cnt]
-	//	戻り値	法線ベクトルを得たなら true, すべての頂点が重なっていたなら false
+	static bool poly_get_arrow_barbs(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROWHEAD_SIZE& a_size, D2D1_POINT_2F& h_tip, D2D1_POINT_2F h_barbs[]) noexcept
+	{
+		double b_offset = a_size.m_offset;	// 矢じり先端のオフセット
+		for (size_t i = v_cnt - 1; i > 0; i--) {
+			D2D1_POINT_2F a_vec;
+			pt_sub(v_pos[i], v_pos[i - 1], a_vec);
+			// 差分から矢軸とその長さを求める.
+			// 矢軸の長さがほぼゼロか判定する.
+			//const auto a_vec = m_diff[i - 1];	// 矢軸のベクトル	
+			const auto a_len = sqrt(pt_abs2(a_vec));	// 矢軸の長さ
+			if (a_len < FLT_MIN) {
+				continue;
+			}
+
+			// 矢軸の長さが矢じり先端のオフセットより短いか判定する.
+			if (a_len < b_offset) {
+				// 次の差分があるか判定する.
+				if (i > 1) {
+					// オフセットを矢軸の長さだけ短くする.
+					b_offset -= a_len;
+					continue;
+				}
+				b_offset = a_len;
+			}
+
+			// 矢じりの返しの位置を求める.
+			const auto a_end = v_pos[i - 1];		// 矢軸の終端
+			const auto b_len = a_size.m_length;	// 矢じりの長さ
+			const auto b_width = a_size.m_width;	// 矢じりの幅
+			get_arrow_barbs(a_vec, a_len, b_width, b_len, h_barbs);
+			pt_mul(a_vec, 1.0 - b_offset / a_len, a_end, h_tip);
+			pt_add(h_barbs[0], h_tip, h_barbs[0]);
+			pt_add(h_barbs[1], h_tip, h_barbs[1]);
+			return true;
+		}
+		return false;
+	}
+
+	// 多角形の各辺の法線ベクトルを得る.
+	// v_cnt	頂点の数
+	// v_pos	頂点の配列 [v_cnt]
+	// n_vec	各辺の法線ベクトルの配列 [v_cnt]
+	// 戻り値	法線ベクトルを得たなら true, すべての頂点が重なっていたなら false
 	static bool poly_get_nvec(const size_t v_cnt, const D2D1_POINT_2F v_pos[], D2D1_POINT_2F n_vec[]) noexcept
 	{
 		// 多角形の各辺の長さと法線ベクトル, 
@@ -170,46 +211,60 @@ namespace winrt::GraphPaper::implementation
 		if (v_cnt == 0) {
 			return;
 		}
-		// 原点を中心とする正円をもとに, 多角形の頂点と, その大きさを求める.
-		D2D1_POINT_2F v_min{ 0.0, 0.0 };
-		D2D1_POINT_2F v_max{ 0.0, 0.0 };
-		D2D1_POINT_2F v_diff;
-		const double s = v_up ? (M_PI / 2.0) : (M_PI / 2.0 + M_PI / v_cnt);
+
+		// 原点を中心とする半径 1 の円をもとに正多角形を作成する.
+		D2D1_POINT_2F v_min{ 0.0, 0.0 };	// 多角形を囲む領域の左上点
+		D2D1_POINT_2F v_max{ 0.0, 0.0 };	// 多角形を囲む領域の右下点
+		const double s = v_up ? (M_PI / 2.0) : (M_PI / 2.0 + M_PI / v_cnt);	// 始点の角度
+		const double pi2 = v_clock ? -2 * M_PI : 2 * M_PI;	// 回す全周
 		for (uint32_t i = 0; i < v_cnt; i++) {
-			const double t = 2.0 * M_PI / v_cnt * i;
-			const double r = v_clock ? s - t : s + t;
-			v_pos[i].x = static_cast<FLOAT>(cos(r));
-			v_pos[i].y = static_cast<FLOAT>(-sin(r));
+			const double t = s + pi2 * i / v_cnt;	// i 番目の頂点の角度
+			v_pos[i].x = static_cast<FLOAT>(cos(t));
+			v_pos[i].y = static_cast<FLOAT>(-sin(t));
 			pt_inc(v_pos[i], v_min, v_max);
 		}
+		D2D1_POINT_2F v_diff;
 		pt_sub(v_max, v_min, v_diff);
 
-		if (pt_abs2(v_diff) > FLT_MIN) {
-			const double scale_x = v_reg ? fmin(b_diff.x, b_diff.y) / fmax(v_diff.x, v_diff.y) : b_diff.x / v_diff.x;
-			const double scale_y = v_reg ? fmin(b_diff.x, b_diff.y) / fmax(v_diff.x, v_diff.y) : b_diff.y / v_diff.y;
-			for (uint32_t i = 0; i < v_cnt; i++) {
-				pt_sub(v_pos[i], v_min, v_pos[i]);
-				v_pos[i].x = static_cast<FLOAT>(v_pos[i].x * scale_x);
-				v_pos[i].y = static_cast<FLOAT>(v_pos[i].y * scale_y);
-				pt_add(v_pos[i], b_pos, v_pos[i]);
-			}
+		// 正多角形を領域の大きさに合わせる.
+		const double rate_x = v_reg ? fmin(b_diff.x, b_diff.y) / fmax(v_diff.x, v_diff.y) : b_diff.x / v_diff.x;
+		const double rate_y = v_reg ? rate_x : b_diff.y / v_diff.y;
+		for (uint32_t i = 0; i < v_cnt; i++) {
+			pt_sub(v_pos[i], v_min, v_pos[i]);
+			v_pos[i].x = static_cast<FLOAT>(v_pos[i].x * rate_x);
+			v_pos[i].y = static_cast<FLOAT>(v_pos[i].y * rate_y);
+			pt_add(v_pos[i], b_pos, v_pos[i]);
 		}
 	}
 
 	// パスジオメトリを作成する.
+	// d_factory DX ファクトリ
 	void ShapePoly::create_path_geometry(ID2D1Factory3* const d_factory)
 	{
-		const size_t v_cnt = m_diff.size() + 1;	// 頂点の数 (差分の数 + 1)
-		std::vector<D2D1_POINT_2F> v_pos(v_cnt);	// 頂点の配列
+		if (m_d2d_path_geom != nullptr) {
+			m_d2d_path_geom = nullptr;
+		}
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 
-		m_path_geom = nullptr;
+		const auto d_cnt = m_diff.size();	// 差分の数
+		if (d_cnt < 1) {
+			return;
+		}
+
+		// 開始位置と, 差分の配列をもとに, 頂点を求める.
+		const size_t v_cnt = d_cnt + 1;	// 頂点の数 (差分の数 + 1)
+		std::vector<D2D1_POINT_2F> v_pos(v_cnt);	// 頂点の配列
 		v_pos[0] = m_pos;
 		for (size_t i = 1; i < v_cnt; i++) {
 			pt_add(v_pos[i - 1], m_diff[i - 1], v_pos[i]);
 		}
+
+		// 折れ線のパスジオメトリを作成する.
 		winrt::com_ptr<ID2D1GeometrySink> sink;
-		winrt::check_hresult(d_factory->CreatePathGeometry(m_path_geom.put()));
-		m_path_geom->Open(sink.put());
+		winrt::check_hresult(d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
+		winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
 		sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
 		const auto figure_begin = is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
 		sink->BeginFigure(v_pos[0], figure_begin);
@@ -220,8 +275,78 @@ namespace winrt::GraphPaper::implementation
 		// パスに始点を加えないと, LINE_JOINT がへんなことになる.
 		//sink->AddLine(v_pos[0]);
 		sink->EndFigure(m_end_closed ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-		sink->Close();
+		winrt::check_hresult(sink->Close());
 		sink = nullptr;
+
+		// 矢じりの形式がなしか判定する.
+		const auto a_style = m_arrow_style;
+		if (a_style == ARROWHEAD_STYLE::NONE) {
+			return;
+		}
+
+		// 矢じりの位置を求める.
+		D2D1_POINT_2F h_tip;
+		D2D1_POINT_2F h_barbs[2];
+		if (poly_get_arrow_barbs(v_cnt, v_pos.data(), m_arrow_size, h_tip, h_barbs)) {
+			// 矢じりのパスジオメトリを作成する.
+			winrt::check_hresult(d_factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
+			winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
+			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+			sink->BeginFigure(h_barbs[0], a_style == ARROWHEAD_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+			sink->AddLine(h_tip);
+			sink->AddLine(h_barbs[1]);
+			sink->EndFigure(a_style == ARROWHEAD_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+			winrt::check_hresult(sink->Close());
+			sink = nullptr;
+		}
+		return;
+		/*
+		double b_offset = m_arrow_size.m_offset;	// 矢じり先端のオフセット
+		for (size_t i = d_cnt; i > 0; i--) {
+
+			// 差分から矢軸とその長さを求める.
+			// 矢軸の長さがほぼゼロか判定する.
+			const auto a_vec = m_diff[i - 1];	// 矢軸のベクトル	
+			const auto a_len = sqrt(pt_abs2(a_vec));	// 矢軸の長さ
+			if (a_len < FLT_MIN) {
+				continue;
+			}
+
+			// 矢軸の長さが矢じり先端のオフセットより短いか判定する.
+			if (a_len < b_offset) {
+				// 次の差分があるか判定する.
+				if (i > 1) {
+					// オフセットを矢軸の長さだけ短くする.
+					b_offset -= a_len;
+					continue;
+				}
+				b_offset = a_len;
+			}
+
+			// 矢じりの返しの位置を求める.
+			const auto a_end = v_pos[i - 1];		// 矢軸の終端
+			const auto b_len = m_arrow_size.m_length;	// 矢じりの長さ
+			const auto b_width = m_arrow_size.m_width;	// 矢じりの幅
+			D2D1_POINT_2F barbs[2];	// 矢じりの返しの位置
+			get_arrow_barbs(a_vec, a_len, b_width, b_len, barbs);
+			D2D1_POINT_2F a_tip;	// 矢じりの先端
+			pt_mul(a_vec, 1.0 - b_offset / a_len, a_end, a_tip);
+			pt_add(barbs[0], a_tip, barbs[0]);
+			pt_add(barbs[1], a_tip, barbs[1]);
+
+			// 矢じりのパスジオメトリを作成する.
+			winrt::check_hresult(d_factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
+			winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
+			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+			sink->BeginFigure(barbs[0], a_style == ARROWHEAD_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+			sink->AddLine(a_tip);
+			sink->AddLine(barbs[1]);
+			sink->EndFigure(a_style == ARROWHEAD_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+			winrt::check_hresult(sink->Close());
+			sink = nullptr;
+			break;
+		}
+		*/
 	}
 
 	// 図形を表示する.
@@ -229,26 +354,36 @@ namespace winrt::GraphPaper::implementation
 	void ShapePoly::draw(SHAPE_DX& dx)
 	{
 		if (is_opaque(m_fill_color)) {
-			dx.m_shape_brush->SetColor(m_fill_color);
-			dx.m_d2dContext->FillGeometry(m_path_geom.get(), dx.m_shape_brush.get(), nullptr);
+			const auto p_geom = m_d2d_path_geom.get();
+			if (p_geom != nullptr) {
+				dx.m_shape_brush->SetColor(m_fill_color);
+				dx.m_d2dContext->FillGeometry(p_geom, dx.m_shape_brush.get(), nullptr);
+			}
 		}
 		if (is_opaque(m_stroke_color)) {
-			dx.m_shape_brush->SetColor(m_stroke_color);
-			dx.m_d2dContext->DrawGeometry(
-				m_path_geom.get(),
-				dx.m_shape_brush.get(),
-				static_cast<FLOAT>(m_stroke_width),
-				m_d2d_stroke_style.get());
+			const auto p_geom = m_d2d_path_geom.get();
+			const auto s_width = static_cast<FLOAT>(m_stroke_width);
+			const auto s_brush = dx.m_shape_brush.get();
+			s_brush->SetColor(m_stroke_color);
+			dx.m_d2dContext->DrawGeometry(p_geom, s_brush, s_width, m_d2d_stroke_style.get());
+			if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
+				const auto a_geom = m_d2d_arrow_geom.get();
+				if (a_geom != nullptr) {
+					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
+					if (m_arrow_style != ARROWHEAD_STYLE::FILLED) {
+						dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, nullptr);
+					}
+				}
+			}
 		}
-		if (is_selected() != true) {
-			return;
-		}
-		D2D1_POINT_2F a_pos { m_pos };	// 図形の部位の位置
-		anchor_draw_rect(a_pos, dx);
-		const size_t d_cnt = m_diff.size();	// 差分の数
-		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(a_pos, m_diff[i], a_pos);
+		if (is_selected()) {
+			D2D1_POINT_2F a_pos{ m_pos };	// 図形の部位の位置
 			anchor_draw_rect(a_pos, dx);
+			const size_t d_cnt = m_diff.size();	// 差分の数
+			for (size_t i = 0; i < d_cnt; i++) {
+				pt_add(a_pos, m_diff[i], a_pos);
+				anchor_draw_rect(a_pos, dx);
+			}
 		}
 	}
 
@@ -297,7 +432,6 @@ namespace winrt::GraphPaper::implementation
 			// 多角形の各辺が位置を含むか判定する.
 			std::vector<D2D1_POINT_2F> q_exp(v_cnt * 4);	// 幅をもつ辺
 			if (poly_test_side(PZ, v_cnt, m_end_closed, v_pos.data(), n_vec.data(), e_width, q_exp.data())) {
-				// 含むなら ANCH_STROKE を返す.
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 
@@ -353,21 +487,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// s_pos	開始位置
-	// diff	終了位置への差分
-	// attr	属性値
+	// b_pos	囲む領域の始点
+	// b_diff	囲む領域の終点への差分
+	// s_attr	属性
 	// v_cnt	頂点の数
 	// v_reg	正多角形に作図するか判定
 	// v_up	頂点を上に作図するか判定
 	// v_end	辺を閉じて作図するか判定
-	ShapePoly::ShapePoly(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr, const TOOL_POLY& t_poly) :
-		ShapePath::ShapePath(t_poly.m_vertex_cnt - 1, attr),
+	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr, const TOOL_POLY& t_poly) :
+		ShapePath::ShapePath(t_poly.m_vertex_cnt - 1, s_attr),
 		m_end_closed(t_poly.m_closed),
-		m_fill_color(attr->m_fill_color)
+		m_fill_color(s_attr->m_fill_color)
 	{
 		std::vector<D2D1_POINT_2F> v_pos(t_poly.m_vertex_cnt);	// 頂点の配列
-		create_poly_by_bbox(s_pos, diff, t_poly.m_vertex_cnt, t_poly.m_vertex_up, t_poly.m_regular, t_poly.m_clockwise, v_pos.data());
-
+		create_poly_by_bbox(b_pos, b_diff, t_poly.m_vertex_cnt, t_poly.m_vertex_up, t_poly.m_regular, t_poly.m_clockwise, v_pos.data());
 		m_pos = v_pos[0];
 		for (size_t i = 1; i < t_poly.m_vertex_cnt; i++) {
 			pt_sub(v_pos[i], v_pos[i - 1], m_diff[i - 1]);
@@ -403,14 +536,43 @@ namespace winrt::GraphPaper::implementation
 
 		write_svg("<path d=\"", dt_writer);
 		write_svg(m_pos, "M", dt_writer);
-		const size_t d_cnt = m_diff.size();	// 差分の数
+		const auto d_cnt = m_diff.size();	// 差分の数
+		const auto v_cnt = d_cnt + 1;
+		std::vector<D2D1_POINT_2F> v_pos(v_cnt);
+		v_pos[0] = m_pos;
 		for (size_t i = 0; i < d_cnt; i++) {
 			write_svg(m_diff[i], "l", dt_writer);
+			pt_add(v_pos[i], m_diff[i], v_pos[i + 1]);
 		}
-		write_svg("Z\" ", dt_writer);
+		if (m_end_closed) {
+			write_svg("Z", dt_writer);
+		}
+		write_svg("\" ", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
 		write_svg(m_fill_color, "fill", dt_writer);
 		write_svg("/>" SVG_NEW_LINE, dt_writer);
+		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
+			D2D1_POINT_2F h_tip;
+			D2D1_POINT_2F h_barbs[2];
+			if (poly_get_arrow_barbs(v_cnt, v_pos.data(), m_arrow_size, h_tip, h_barbs)) {
+				write_svg("<path d=\"", dt_writer);
+				write_svg(h_barbs[0], "M", dt_writer);
+				write_svg(h_tip, "L", dt_writer);
+				write_svg(h_barbs[1], "L", dt_writer);
+				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
+					write_svg("Z", dt_writer);
+				}
+				write_svg("\" ", dt_writer);
+				ShapeStroke::write_svg(dt_writer);
+				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
+					write_svg(m_stroke_color, "fill", dt_writer);
+				}
+				else {
+					write_svg("fill=\"transparent\" ", dt_writer);
+				}
+				write_svg("/>" SVG_NEW_LINE, dt_writer);
+			}
+		}
 	}
 
 }

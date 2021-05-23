@@ -28,8 +28,8 @@ namespace winrt::GraphPaper::implementation
 		END = -1,	// 操作スタックの終端 (ファイルの読み書きで使用)
 		NULLPTR = 0,	// 操作の区切り (ファイルの読み書きで使用)
 		ARRANGE,	// 図形の順番の入れ替え
-		ARROW_SIZE,	// 矢じりの大きさの操作
-		ARROW_STYLE,	// 矢じりの形式の操作
+		ARROWHEAD_SIZE,	// 矢じりの大きさの操作
+		ARROWHEAD_STYLE,	// 矢じりの形式の操作
 		FILL_COLOR,	// 塗りつぶしの色の操作
 		ANCH_POS,	// 図形の部位の位置の操作
 		FONT_COLOR,	// 書体の色の操作
@@ -65,8 +65,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	template <UNDO_OP U>
 	struct U_TYPE { using type = int; };
-	template <> struct U_TYPE<UNDO_OP::ARROW_SIZE> { using type = ARROW_SIZE; };
-	template <> struct U_TYPE<UNDO_OP::ARROW_STYLE> { using type = ARROW_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::ARROWHEAD_SIZE> { using type = ARROWHEAD_SIZE; };
+	template <> struct U_TYPE<UNDO_OP::ARROWHEAD_STYLE> { using type = ARROWHEAD_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::FILL_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::FONT_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::FONT_FAMILY> { using type = wchar_t*; };

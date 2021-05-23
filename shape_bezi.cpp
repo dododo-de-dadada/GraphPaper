@@ -58,10 +58,10 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 曲線端の矢じりの両端点を求める.
-	static bool bz_calc_arrowhead(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
+	static bool bz_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROWHEAD_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
 
 	// 曲線のジオメトリシンクに矢じりを追加する.
-	static void bz_create_arrow_geometry(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
+	static void bz_create_arrow_geometry(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROWHEAD_STYLE a_style, const ARROWHEAD_SIZE a_size, ID2D1PathGeometry** a_geo);
 
 	// 曲線上の助変数をもとに微分値を求める.
 	static double bz_deriv_by_param(const BZP b_pos[4], const double t) noexcept;
@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 	// b_seg	曲線の制御点
 	// a_size	矢じりの寸法
 	// barbs[3]	計算された両端点と先端点
-	static bool bz_calc_arrowhead(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept
+	static bool bz_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROWHEAD_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept
 	{
 		BZP seg[3]{};
 		BZP b_pos[4]{};
@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 			// 助変数をもとに曲線の接線ベクトルを得る.
 			BZP t_vec;
 			bz_tvec_by_param(b_pos, t, t_vec);
-			// 接線ベクトルを軸とする矢じりの返しの位置を計算する
+			// 矢じりの返しの位置を計算する
 			get_arrow_barbs(-t_vec, sqrt(t_vec * t_vec), a_size.m_width, a_size.m_length, barbs);
 			// 助変数で曲線上の位置を得る.
 			BZP t_pos;	// 終点を原点とする, 矢じりの先端の位置
@@ -141,21 +141,24 @@ namespace winrt::GraphPaper::implementation
 	// a_style	矢じりの種別
 	// a_size	矢じりの寸法
 	// a_geo	矢じりが追加されたジオメトリ
-	static void bz_create_arrow_geometry(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo)
+	static void bz_create_arrow_geometry(
+		ID2D1Factory3* const d_factory,
+		const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROWHEAD_STYLE a_style, const ARROWHEAD_SIZE a_size, 
+		ID2D1PathGeometry** a_geo)
 	{
 		D2D1_POINT_2F barbs[3];	// 矢じりの返しの端点	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (bz_calc_arrowhead(b_pos, b_seg, a_size, barbs)) {
+		if (bz_calc_arrow(b_pos, b_seg, a_size, barbs)) {
 			// ジオメトリシンクに追加する.
 			winrt::check_hresult(d_factory->CreatePathGeometry(a_geo));
 			winrt::check_hresult((*a_geo)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
-			sink->BeginFigure(barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN_HOLLOW);
+			sink->BeginFigure(barbs[0], a_style == ARROWHEAD_STYLE::FILLED ? D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN_HOLLOW);
 			sink->AddLine(barbs[2]);
 			sink->AddLine(barbs[1]);
-			sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END_OPEN);
-			sink->Close();
+			sink->EndFigure(a_style == ARROWHEAD_STYLE::FILLED ? D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END_OPEN);
+			winrt::check_hresult(sink->Close());
 			sink = nullptr;
 		}
 	}
@@ -511,22 +514,22 @@ namespace winrt::GraphPaper::implementation
 		D2D1_BEZIER_SEGMENT b_seg;
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		m_path_geom = nullptr;
-		m_arrow_geom = nullptr;
+		m_d2d_path_geom = nullptr;
+		m_d2d_arrow_geom = nullptr;
 		pt_add(m_pos, m_diff[0], b_seg.point1);
 		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
 		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
-		winrt::check_hresult(d_factory->CreatePathGeometry(m_path_geom.put()));
-		m_path_geom->Open(sink.put());
+		winrt::check_hresult(d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
+		m_d2d_path_geom->Open(sink.put());
 		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 		sink->BeginFigure(m_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 		sink->AddBezier(b_seg);
 		sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-		if (m_arrow_style != ARROW_STYLE::NONE) {
-			bz_create_arrow_geometry(d_factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_arrow_geom.put());
-		}
-		sink->Close();
+		winrt::check_hresult(sink->Close());
 		sink = nullptr;
+		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
+			bz_create_arrow_geometry(d_factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+		}
 	}
 
 	// 図形を表示する.
@@ -540,14 +543,23 @@ namespace winrt::GraphPaper::implementation
 			auto sb = dx.m_shape_brush.get();
 			auto ss = m_d2d_stroke_style.get();
 			dx.m_shape_brush->SetColor(m_stroke_color);
-			dx.m_d2dContext->DrawGeometry(m_path_geom.get(), sb, sw, ss);
-			if (m_arrow_style != ARROW_STYLE::NONE) {
-				auto geo = m_arrow_geom.get();
+			dx.m_d2dContext->DrawGeometry(m_d2d_path_geom.get(), sb, sw, ss);
+			if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
+				const auto a_geom = m_d2d_arrow_geom.get();
+				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
+					dx.m_d2dContext->FillGeometry(a_geom, sb, nullptr);
+				}
+				dx.m_d2dContext->DrawGeometry(a_geom, sb, sw, nullptr);
+			}
+			/*
+			if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
+				auto geo = m_d2d_arrow_geom.get();
 				dx.m_d2dContext->DrawGeometry(geo, sb, sw, nullptr);
-				if (m_arrow_style == ARROW_STYLE::FILLED) {
+				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
 					dx.m_d2dContext->FillGeometry(geo, sb, nullptr);
 				}
 			}
+			*/
 		}
 		if (is_selected() != true) {
 			return;
@@ -585,18 +597,18 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの寸法を得る.
-	bool ShapeBezi::get_arrow_size(ARROW_SIZE& value) const noexcept
-	{
-		value = m_arrow_size;
-		return true;
-	}
+	//bool ShapeBezi::get_arrow_size(ARROWHEAD_SIZE& value) const noexcept
+	//{
+	//	value = m_arrow_size;
+	//	return true;
+	//}
 
 	// 矢じりの形式を得る.
-	bool ShapeBezi::get_arrow_style(ARROW_STYLE& value) const noexcept
-	{
-		value = m_arrow_style;
-		return true;
-	}
+	//bool ShapeBezi::get_arrow_style(ARROWHEAD_STYLE& value) const noexcept
+	//{
+	//	value = m_arrow_style;
+	//	return true;
+	//}
 
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
@@ -843,45 +855,46 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの寸法に格納する.
-	void ShapeBezi::set_arrow_size(const ARROW_SIZE& value)
-	{
-		if (equal(m_arrow_size, value)) {
-			return;
-		}
-		m_arrow_size = value;
-		create_path_geometry(s_d2d_factory);
-	}
+	//void ShapeBezi::set_arrow_size(const ARROWHEAD_SIZE& value)
+	//{
+	//	if (equal(m_arrow_size, value)) {
+	//		return;
+	//	}
+	//	m_arrow_size = value;
+	//	create_path_geometry(s_d2d_factory);
+	//}
 
 	// 矢じりの形式に格納する.
-	void ShapeBezi::set_arrow_style(const ARROW_STYLE value)
-	{
-		if (m_arrow_style == value) {
-			return;
-		}
-		m_arrow_style = value;
-		create_path_geometry(s_d2d_factory);
-	}
+	//void ShapeBezi::set_arrow_style(const ARROWHEAD_STYLE value)
+	//{
+	//	if (m_arrow_style == value) {
+	//		return;
+	//	}
+	//	m_arrow_style = value;
+	//	create_path_geometry(s_d2d_factory);
+	//}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	void ShapeBezi::set_start_pos(const D2D1_POINT_2F value)
-	{
-		ShapeStroke::set_start_pos(value);
-		create_path_geometry(s_d2d_factory);
-	}
+	//void ShapeBezi::set_start_pos(const D2D1_POINT_2F value)
+	//{
+	//	ShapeStroke::set_start_pos(value);
+	//	create_path_geometry(s_d2d_factory);
+	//}
 
 	// 図形を作成する.
-	ShapeBezi::ShapeBezi(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
-		ShapePath::ShapePath(3, attr)
+	// b_pos	囲む領域の始点
+	// b_diff	囲む領域の終点への差分
+	// s_attr	属性
+	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
+		ShapePath::ShapePath(3, s_attr)
 	{
-		m_pos = s_pos;
-		m_diff[0].x = diff.x;
+		m_pos = b_pos;
+		m_diff[0].x = b_diff.x;
 		m_diff[0].y = 0.0f;
-		m_diff[1].x = -diff.x;
-		m_diff[1].y = diff.y;
-		m_diff[2].x = diff.x;
+		m_diff[1].x = -b_diff.x;
+		m_diff[1].y = b_diff.y;
+		m_diff[2].x = b_diff.x;
 		m_diff[2].y = 0.0f;
-		m_arrow_style = attr->m_arrow_style;
-		m_arrow_size = attr->m_arrow_size;
 		create_path_geometry(s_d2d_factory);
 	}
 
@@ -889,23 +902,22 @@ namespace winrt::GraphPaper::implementation
 	ShapeBezi::ShapeBezi(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
 	{
-		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
-		m_arrow_size.m_width = dt_reader.ReadSingle();
-		m_arrow_size.m_length = dt_reader.ReadSingle();
-		m_arrow_size.m_offset = dt_reader.ReadSingle();
+	//	m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());
+	//	m_arrow_size.m_width = dt_reader.ReadSingle();
+	//	m_arrow_size.m_length = dt_reader.ReadSingle();
+	//	m_arrow_size.m_offset = dt_reader.ReadSingle();
 		create_path_geometry(s_d2d_factory);
 	}
 
 	// データライターに書き込む.
-	void ShapeBezi::write(DataWriter const& dt_writer) const
-	{
-		//w.WriteInt32(static_cast<int32_t>(SHAPE_BEZI));
-		ShapePath::write(dt_writer);
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));
-		dt_writer.WriteSingle(m_arrow_size.m_width);
-		dt_writer.WriteSingle(m_arrow_size.m_length);
-		dt_writer.WriteSingle(m_arrow_size.m_offset);
-	}
+	//void ShapeBezi::write(DataWriter const& dt_writer) const
+	//{
+	//	ShapePath::write(dt_writer);
+	//	dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));
+	//	dt_writer.WriteSingle(m_arrow_size.m_width);
+	//	dt_writer.WriteSingle(m_arrow_size.m_length);
+	//	dt_writer.WriteSingle(m_arrow_size.m_offset);
+	//}
 
 	// データライターに SVG タグとして書き込む.
 	void ShapeBezi::write_svg(DataWriter const& dt_writer) const
@@ -925,9 +937,9 @@ namespace winrt::GraphPaper::implementation
 		write_svg("none", "fill", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
 		write_svg("/>" SVG_NEW_LINE, dt_writer);
-		if (m_arrow_style != ARROW_STYLE::NONE) {
+		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
-			bz_calc_arrowhead(m_pos, b_seg, m_arrow_size, barbs);
+			bz_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
 			ShapeStroke::write_svg(barbs, barbs[2], m_arrow_style, dt_writer);
 		}
 	}

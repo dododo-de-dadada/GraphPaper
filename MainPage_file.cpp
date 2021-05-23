@@ -107,7 +107,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_DASH_STYLE s_style;
 		m_sheet_main.get_stroke_style(s_style);
 		stroke_style_check_menu(s_style);
-		ARROW_STYLE a_style;
+		ARROWHEAD_STYLE a_style;
 		m_sheet_main.get_arrow_style(a_style);
 		arrow_style_check_menu(a_style);
 		DWRITE_FONT_STYLE f_style;
@@ -215,7 +215,7 @@ namespace winrt::GraphPaper::implementation
 			sbar_read(dt_reader);
 			len_unit(static_cast<LEN_UNIT>(dt_reader.ReadUInt32()));
 			color_code(static_cast<COLOR_CODE>(dt_reader.ReadUInt16()));
-			status_bar(static_cast<SBAR_FLAG>(dt_reader.ReadUInt16()));
+			//status_bar(static_cast<SBAR_FLAG>(dt_reader.ReadUInt16()));
 
 			m_sheet_main.read(dt_reader);
 			double g_base;
@@ -599,11 +599,12 @@ namespace winrt::GraphPaper::implementation
 			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::ReadWrite) };
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
 
+			tool_write(dt_writer);
 			text_find_write(dt_writer);
 			sbar_write(dt_writer);
 			dt_writer.WriteUInt32(static_cast<uint32_t>(len_unit()));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(color_code()));
-			dt_writer.WriteUInt16(static_cast<uint16_t>(status_bar()));
+			//dt_writer.WriteUInt16(static_cast<uint16_t>(status_bar()));
 			m_sheet_main.write(dt_writer);
 			if (suspend) {
 				s_list_write<!REDUCE>(m_list_shapes, dt_writer);

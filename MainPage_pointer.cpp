@@ -421,7 +421,9 @@ namespace winrt::GraphPaper::implementation
 				break;
 			default:
 				// 図形のクラスが, 多角形または曲線であるか判定する.
-				if (typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi)) {
+				if (typeid(*s) == typeid(ShapeLine) ||
+					typeid(*s) == typeid(ShapePoly) ||
+					typeid(*s) == typeid(ShapeBezi)) {
 					// 図形の部位が, 頂点の数を超えないか判定する.
 					const auto d_cnt = static_cast<ShapePath*>(s)->m_diff.size();
 					if (anch >= ANCH_TYPE::ANCH_P0 && anch < ANCH_TYPE::ANCH_P0 + d_cnt + 1) {

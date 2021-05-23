@@ -79,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 
 		// XAML コントロール
 
-		SwapChainPanel m_swapChainPanel;	// パネルへの保持された参照
+		SwapChainPanel m_swapChainPanel{};	// パネルへの保持された参照
 
 		// デバイス属性
 

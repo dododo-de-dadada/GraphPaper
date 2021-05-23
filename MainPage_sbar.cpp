@@ -186,6 +186,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::sbar_read(DataReader const& dt_reader)
 	{
 		m_status_bar = static_cast<SBAR_FLAG>(dt_reader.ReadUInt32());
+		status_bar(m_status_bar);
 	}
 
 	// ポインターの位置をステータスバーに格納する.

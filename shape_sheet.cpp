@@ -291,14 +291,14 @@ namespace winrt::GraphPaper::implementation
 	//}
 
 	// 矢じりの寸法を得る.
-	bool ShapeSheet::get_arrow_size(ARROW_SIZE& value) const noexcept
+	bool ShapeSheet::get_arrow_size(ARROWHEAD_SIZE& value) const noexcept
 	{
 		value = m_arrow_size;
 		return true;
 	}
 
 	// 矢じりの形式を得る.
-	bool ShapeSheet::get_arrow_style(ARROW_STYLE& value) const noexcept
+	bool ShapeSheet::get_arrow_style(ARROWHEAD_STYLE& value) const noexcept
 	{
 		value = m_arrow_style;
 		return true;
@@ -527,13 +527,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を矢じりの寸法に格納する.
-	void ShapeSheet::set_arrow_size(const ARROW_SIZE& value)
+	void ShapeSheet::set_arrow_size(const ARROWHEAD_SIZE& value)
 	{
 		m_arrow_size = value;
 	}
 
 	// 値を矢じりの形式に格納する.
-	void ShapeSheet::set_arrow_style(const ARROW_STYLE value)
+	void ShapeSheet::set_arrow_style(const ARROWHEAD_STYLE value)
 	{
 		m_arrow_style = value;
 	}

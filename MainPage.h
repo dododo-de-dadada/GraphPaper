@@ -100,7 +100,6 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto ICON_INFO = L"icon_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"icon_alert";	// 警告アイコンの静的リソースのキー
 
-	constexpr auto GRID_LEN_DEF = 48.0F;	// 方眼の大きさの既定値 (ピクセル)
 	constexpr auto SHEET_SIZE_DEF = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
 	constexpr auto SCALE_MAX = 128.0;	// 表示倍率の最大値
 	constexpr auto SCALE_MIN = 1.0 / 128.0;	// 表示倍率の最小値
@@ -361,7 +360,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 線枠メニューの「矢じりの種類」に印をつける.
-		void arrow_style_check_menu(const ARROW_STYLE a_style);
+		void arrow_style_check_menu(const ARROWHEAD_STYLE h_style);
 		// 線枠メニューの「矢じりの種類」が選択された.
 		void arrow_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「矢じりの大きさ」が選択された.

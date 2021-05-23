@@ -306,12 +306,12 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		{
-			m_sheet_main.set_arrow_size(ARROW_SIZE_DEF);
-			m_sheet_main.set_arrow_style(ARROW_STYLE::NONE);
+			m_sheet_main.set_arrow_size(ARROWHEAD_SIZE_DEF);
+			m_sheet_main.set_arrow_style(ARROWHEAD_STYLE::NONE);
 			m_sheet_main.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEF, GRID_LEN_DEF });
 			m_sheet_main.set_fill_color(m_sheet_dx.m_theme_background);
 			m_sheet_main.set_font_color(sheet_foreground());
-			m_sheet_main.set_grid_base(static_cast<double>(GRID_LEN_DEF) - 1.0);
+			m_sheet_main.set_grid_base(GRID_LEN_DEF - 1.0);
 			m_sheet_main.set_grid_gray(GRID_GRAY_DEF);
 			m_sheet_main.set_grid_emph(GRID_EMPH_0);
 			m_sheet_main.set_grid_show(GRID_SHOW::BACK);

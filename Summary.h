@@ -55,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (t_id == typeid(ShapeRRect)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rrct")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_rrct/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_rrect/Text");
 			}
 			else if (t_id == typeid(ShapeRuler)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ruler")));

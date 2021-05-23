@@ -179,22 +179,22 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// pos	開始位置
-	// diff	終了位置への差分
-	// attr	属性値
-	ShapeRuler::ShapeRuler(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
-		ShapeRect::ShapeRect(s_pos, diff, attr),
-		m_grid_base(attr->m_grid_base)
+	// b_pos	囲む領域の始点
+	// b_diff	囲む領域の終点への差分
+	// s_attr	属性
+	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
+		ShapeRect::ShapeRect(b_pos, b_diff, s_attr),
+		m_grid_base(s_attr->m_grid_base)
 	{
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-		auto f_size = min(attr->m_font_size, attr->m_grid_base + 1.0);
+		auto f_size = min(s_attr->m_font_size, s_attr->m_grid_base + 1.0);
 		winrt::check_hresult(
 			Shape::s_dwrite_factory->CreateTextFormat(
-				attr->m_font_family,
+				s_attr->m_font_family,
 				static_cast<IDWriteFontCollection*>(nullptr),
-				attr->m_font_weight,
-				attr->m_font_style,
+				s_attr->m_font_weight,
+				s_attr->m_font_style,
 				DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
 				static_cast<FLOAT>(f_size),
 				locale_name,

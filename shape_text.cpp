@@ -894,23 +894,23 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// s_pos	開始位置
-	// diff	終了位置への差分
+	// b_pos	囲む領域の始点
+	// b_diff	囲む領域の終点への差分
 	// text	文字列
-	// attr	既定の属性値
-	ShapeText::ShapeText(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, wchar_t* const text, const ShapeSheet* attr) :
-		ShapeRect::ShapeRect(s_pos, diff, attr),
-		m_font_color(attr->m_font_color),
-		m_font_family(attr->m_font_family),
-		m_font_size(attr->m_font_size),
-		m_font_stretch(attr->m_font_stretch),
-		m_font_style(attr->m_font_style),
-		m_font_weight(attr->m_font_weight),
-		m_text_line(attr->m_text_line),
-		m_text_margin(attr->m_text_margin),
+	// s_attr	属性
+	ShapeText::ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, wchar_t* const text, const ShapeSheet* s_attr) :
+		ShapeRect::ShapeRect(b_pos, b_diff, s_attr),
+		m_font_color(s_attr->m_font_color),
+		m_font_family(s_attr->m_font_family),
+		m_font_size(s_attr->m_font_size),
+		m_font_stretch(s_attr->m_font_stretch),
+		m_font_style(s_attr->m_font_style),
+		m_font_weight(s_attr->m_font_weight),
+		m_text_line(s_attr->m_text_line),
+		m_text_margin(s_attr->m_text_margin),
 		m_text(text),
-		m_text_align_t(attr->m_text_align_t),
-		m_text_align_p(attr->m_text_align_p),
+		m_text_align_t(s_attr->m_text_align_t),
+		m_text_align_p(s_attr->m_text_align_p),
 		m_select_range()
 	{
 		create_text_layout(s_dwrite_factory);

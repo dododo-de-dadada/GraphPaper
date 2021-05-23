@@ -665,7 +665,7 @@
     <value>Rectangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_draw_rrct.Text" xml:space="preserve">
+  <data name="rmfi_tool_draw_rrect.Text" xml:space="preserve">
     <value>Rounded Rect</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -681,7 +681,7 @@
     <value>Text</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_arrowhead" xml:space="preserve">
+  <data name="str_arrow" xml:space="preserve">
     <value>Arrowhead</value>
     <comment>String</comment>
   </data>
@@ -689,8 +689,8 @@
     <value>Length</value>
     <comment>String</comment>
   </data>
-  <data name="str_arrow_shift" xml:space="preserve">
-    <value>Shift</value>
+  <data name="str_arrow_offset" xml:space="preserve">
+    <value>Tip Offset</value>
     <comment>String</comment>
   </data>
   <data name="str_arrow_width" xml:space="preserve">
@@ -952,6 +952,10 @@
   </data>
   <data name="rmfi_tool_poly_deca.Text" xml:space="preserve">
     <value>Decagon</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_tool_poly_line.Text" xml:space="preserve">
+    <value>Line</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_hept.Text" xml:space="preserve">

@@ -451,14 +451,14 @@
                         <PathIcon Data="{StaticResource data_rect}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_rrct" x:Uid="rmfi_tool_draw_rrct" Click="tool_draw_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_rrect" x:Uid="rmfi_tool_draw_rrect" Click="tool_draw_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_rrct}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_poly" x:Uid="rmfi_tool_draw_poly" Click="tool_draw_click" GroupName="gn_tool_type" Text="Quadrangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_hexa}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+						<PathIcon Data="{StaticResource data_tri}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_elli" x:Uid="rmfi_tool_draw_elli" Click="tool_draw_click" GroupName="gn_tool_type" Text="Ellipse">
@@ -488,8 +488,9 @@
                 </muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
 				<MenuFlyoutSubItem x:Uid="mfsi_tool_poly_type" Text="Type of Polygon">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_tri" x:Uid="rmfi_tool_poly_tri" Click="tool_draw_click" GroupName="gn_poly_type" Text="3-Triangle" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_quad" x:Uid="rmfi_tool_poly_quad" Click="tool_draw_click" IsChecked="True" GroupName="gn_poly_type" Text="4-Quadrilateral" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_line" x:Uid="rmfi_tool_poly_line" Click="tool_draw_click" GroupName="gn_poly_type" Text="2-Line" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_tri" x:Uid="rmfi_tool_poly_tri" Click="tool_draw_click" IsChecked="True" GroupName="gn_poly_type" Text="3-Triangle" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_quad" x:Uid="rmfi_tool_poly_quad" Click="tool_draw_click" GroupName="gn_poly_type" Text="4-Quadrilateral" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_pent" x:Uid="rmfi_tool_poly_pent" Click="tool_draw_click" GroupName="gn_poly_type" Text="5-Pentagon" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_hexa" x:Uid="rmfi_tool_poly_hexa" Click="tool_draw_click" GroupName="gn_poly_type" Text="6-Hexagon" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_hept" x:Uid="rmfi_tool_poly_hept" Click="tool_draw_click" GroupName="gn_poly_type" Text="7-Heptagon" />

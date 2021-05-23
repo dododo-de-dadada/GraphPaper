@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 			rmfi_tool_draw_rect().IsChecked(false);
 		}
 		else if (t_draw == TOOL_DRAW::RRECT) {
-			rmfi_tool_draw_rrct().IsChecked(false);
+			rmfi_tool_draw_rrect().IsChecked(false);
 		}
 		else if (t_draw == TOOL_DRAW::TEXT) {
 			rmfi_tool_draw_text().IsChecked(false);

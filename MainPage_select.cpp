@@ -261,7 +261,7 @@ namespace winrt::GraphPaper::implementation
 		if (s->is_selected()) {
 			// ‰Ÿ‚³‚ê‚½}Œ`‚ª‘I‘ğ‚³‚ê‚Ä‚¢‚éê‡,
 			m_sheet_main.set_to(s);
-			ARROW_STYLE a_style;
+			ARROWHEAD_STYLE a_style;
 			m_sheet_main.get_arrow_style(a_style);
 			arrow_style_check_menu(a_style);
 			DWRITE_FONT_STYLE f_style;

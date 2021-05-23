@@ -39,7 +39,7 @@ namespace winrt::GraphPaper::implementation
 			rmfi_tool_draw_rect().IsChecked(true);
 		}
 		else if (m_tool_draw == TOOL_DRAW::RRECT) {
-			rmfi_tool_draw_rrct().IsChecked(true);
+			rmfi_tool_draw_rrect().IsChecked(true);
 		}
 		else if (m_tool_draw == TOOL_DRAW::RULER) {
 			rmfi_tool_draw_ruler().IsChecked(true);
@@ -47,7 +47,10 @@ namespace winrt::GraphPaper::implementation
 		else if (m_tool_draw == TOOL_DRAW::TEXT) {
 			rmfi_tool_draw_text().IsChecked(true);
 		}
-		if (m_tool_poly.m_vertex_cnt == 3) {
+		if (m_tool_poly.m_vertex_cnt == 2) {
+			rmfi_tool_poly_line().IsChecked(true);
+		}
+		else if (m_tool_poly.m_vertex_cnt == 3) {
 			rmfi_tool_poly_tri().IsChecked(true);
 		}
 		else if (m_tool_poly.m_vertex_cnt == 4) {
@@ -88,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_tool_draw_rect()) {
 			m_tool_draw = TOOL_DRAW::RECT;
 		}
-		else if (sender == rmfi_tool_draw_rrct()) {
+		else if (sender == rmfi_tool_draw_rrect()) {
 			m_tool_draw = TOOL_DRAW::RRECT;
 		}
 		else if (sender == rmfi_tool_draw_poly()) {
@@ -110,7 +113,10 @@ namespace winrt::GraphPaper::implementation
 			m_tool_draw = TOOL_DRAW::RULER;
 		}
 		else {
-			if (sender == rmfi_tool_poly_tri()) {
+			if (sender == rmfi_tool_poly_line()) {
+				m_tool_poly.m_vertex_cnt = 2;
+			}
+			else if (sender == rmfi_tool_poly_tri()) {
 				m_tool_poly.m_vertex_cnt = 3;
 			}
 			else if (sender == rmfi_tool_poly_quad()) {

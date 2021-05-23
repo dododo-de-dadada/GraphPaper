@@ -47,30 +47,30 @@ namespace winrt::GraphPaper::implementation
 		dx.m_d2dContext->FillEllipse({ a_pos, rad - 1.0F, rad - 1.0F }, dx.m_shape_brush.get());
 	}
 
-	// 矢じりの軸と寸法をもとに返しの位置を計算する.
-	// axis_vec	矢じりの軸ベクトル.
-	// axis_len	軸ベクトルの長さ
-	// barb_width	矢じりの幅 (返しの両端の長さ)
-	// head_len	矢じりの長さ (先端から返しまでの軸ベクトル上での長さ)
-	// barbs	計算された矢じりの返しの位置 (先端からのオフセット)
-	void get_arrow_barbs(const D2D1_POINT_2F axis_vec, const double axis_len, const double barb_width, const double head_len, D2D1_POINT_2F barbs[]) noexcept
+	// 矢じりの返しの位置を求める.
+	// a_vec	矢軸ベクトル.
+	// a_len	矢軸ベクトルの長さ
+	// h_width	矢じりの幅 (返しの間の長さ)
+	// h_len	矢じりの長さ (先端から返しまでの軸ベクトル上での長さ)
+	// b_vec[2]	計算された矢じりの返しの位置 (先端からのオフセット)
+	void get_arrow_barbs(const D2D1_POINT_2F a_vec, const double a_len, const double h_width, const double h_len, D2D1_POINT_2F b_vec[]) noexcept
 	{
-		if (axis_len <= DBL_MIN) {
-			constexpr D2D1_POINT_2F Z = { 0.0f, 0.0f };
-			barbs[0] = Z;
-			barbs[1] = Z;
+		if (a_len <= DBL_MIN) {
+			constexpr D2D1_POINT_2F Z{ 0.0f, 0.0f };
+			b_vec[0] = Z;
+			b_vec[1] = Z;
 		}
 		else {
-			const double hf = barb_width * 0.5;	// 矢じりの幅の半分の大きさ
-			const double sx = axis_vec.x * -head_len;	// 矢じり軸ベクトルを矢じりの長さ分反転
-			const double sy = axis_vec.x * hf;
-			const double tx = axis_vec.y * -head_len;
-			const double ty = axis_vec.y * hf;
-			const double ax = 1.0 / axis_len;
-			barbs[0].x = static_cast<FLOAT>((sx - ty) * ax);
-			barbs[0].y = static_cast<FLOAT>((tx + sy) * ax);
-			barbs[1].x = static_cast<FLOAT>((sx + ty) * ax);
-			barbs[1].y = static_cast<FLOAT>((tx - sy) * ax);
+			const double hf = h_width * 0.5;	// 矢じりの幅の半分の大きさ
+			const double sx = a_vec.x * -h_len;	// 矢軸ベクトルを矢じりの長さ分反転
+			const double sy = a_vec.x * hf;
+			const double tx = a_vec.y * -h_len;
+			const double ty = a_vec.y * hf;
+			const double ax = 1.0 / a_len;
+			b_vec[0].x = static_cast<FLOAT>((sx - ty) * ax);
+			b_vec[0].y = static_cast<FLOAT>((tx + sy) * ax);
+			b_vec[1].x = static_cast<FLOAT>((sx + ty) * ax);
+			b_vec[1].y = static_cast<FLOAT>((tx - sy) * ax);
 		}
 	}
 
@@ -185,31 +185,31 @@ namespace winrt::GraphPaper::implementation
 
 	// 多角形が位置を含むか判定する.
 	// t_pos	判定する位置
-	// n	頂点の数
-	// v_pos	頂点の配列
+	// v_cnt	頂点の数
+	// v_pos	頂点の配列 [v_cnt]
 	// 戻り値	含む場合 true
 	// 多角形の各辺と, 指定された点を開始点とする水平線が交差する数を求める.
-	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t n, const D2D1_POINT_2F v_pos[]) noexcept
+	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t v_cnt, const D2D1_POINT_2F v_pos[]) noexcept
 	{
 		D2D1_POINT_2F p_pos;
-		int cnt;
+		int i_cnt;	// 交点の数
 		int i;
 
-		cnt = 0;
-		for (p_pos = v_pos[n - 1], i = 0; i < n; p_pos = v_pos[i++]) {
-			// 上向きの辺。点Pがy軸方向について、始点と終点の間にある。ただし、終点は含まない。(ルール1)
+		i_cnt = 0;
+		for (p_pos = v_pos[v_cnt - 1], i = 0; i < v_cnt; p_pos = v_pos[i++]) {
+			// ルール 1. 上向きの辺. 点が y 軸方向について、始点と終点の間にある (ただし、終点は含まない).
+			// ルール 2. 下向きの辺. 点が y 軸方向について、始点と終点の間にある (ただし、始点は含まない).
 			if ((p_pos.y <= t_pos.y && v_pos[i].y > t_pos.y)
-				// 下向きの辺。点Pがy軸方向について、始点と終点の間にある。ただし、始点は含まない。(ルール2)
 				|| (p_pos.y > t_pos.y && v_pos[i].y <= t_pos.y)) {
-				// ルール1, ルール2を確認することで, ルール3も確認できている。
-				// 辺は点 p よりも右側にある. ただし, 重ならない。(ルール4)
-				// 辺が点 p と同じ高さになる位置を特定し, その時のxの値と点pのxの値を比較する。
+				// ルール 3. 点を通る水平線が辺と重なる (ルール 1, ルール 2 を確認することで, ルール 3 も確認できている).
+				// ルール 4. 辺は点よりも右側にある. ただし, 重ならない.
+				// 辺が点と同じ高さになる位置を特定し, その時のxの値と点のxの値を比較する.
 				if (t_pos.x < p_pos.x + (t_pos.y - p_pos.y) / (v_pos[i].y - p_pos.y) * (v_pos[i].x - p_pos.x)) {
-					cnt++;
+					i_cnt++;
 				}
 			}
 		}
-		return static_cast<bool>(cnt & 1);
+		return static_cast<bool>(i_cnt & 1);
 	}
 
 	// 方形が位置を含むか判定する.
@@ -240,8 +240,7 @@ namespace winrt::GraphPaper::implementation
 			min_y = r_max.y;
 			max_y = r_min.y;
 		}
-		return min_x <= t_pos.x && t_pos.x <= max_x
-			&& min_y <= t_pos.y && t_pos.y <= max_y;
+		return min_x <= t_pos.x && t_pos.x <= max_x && min_y <= t_pos.y && t_pos.y <= max_y;
 	}
 
 	// 指定した位置を含むよう, 方形を拡大する.
@@ -265,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの寸法をデータリーダーから読み込む.
-	void read(ARROW_SIZE& value, DataReader const& dt_reader)
+	void read(ARROWHEAD_SIZE& value, DataReader const& dt_reader)
 	{
 		value.m_width = dt_reader.ReadSingle();
 		value.m_length = dt_reader.ReadSingle();
@@ -273,9 +272,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの形式をデータリーダーから読み込む.
-	void read(ARROW_STYLE& value, DataReader const& dt_reader)
+	void read(ARROWHEAD_STYLE& value, DataReader const& dt_reader)
 	{
-		value = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
+		value = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());
 	}
 
 	// ブール値をデータリーダーから読み込む.
@@ -682,7 +681,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの寸法をデータライターに書き込む.
-	void write(const ARROW_SIZE& value, DataWriter const& dt_writer)
+	void write(const ARROWHEAD_SIZE& value, DataWriter const& dt_writer)
 	{
 		dt_writer.WriteSingle(value.m_width);
 		dt_writer.WriteSingle(value.m_length);
@@ -690,7 +689,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの形状をデータライターに書き込む.
-	void write(const ARROW_STYLE value, DataWriter const& dt_writer)
+	void write(const ARROWHEAD_STYLE value, DataWriter const& dt_writer)
 	{
 		write(static_cast<uint32_t>(value), dt_writer);
 	}

@@ -19,6 +19,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 角丸半径を計算する.
 	static void calc_corner_radius(const D2D1_POINT_2F diff, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad);
+
 	// 角丸半径の縦または横の成分を計算する.
 	static void calc_corner_radius(const FLOAT r_len, const FLOAT d_rad, FLOAT& c_rad);
 
@@ -39,9 +40,8 @@ namespace winrt::GraphPaper::implementation
 	static void calc_corner_radius(const FLOAT r_len, const FLOAT d_rad, FLOAT& c_rad)
 	{
 		const double r = r_len * 0.5;
+		// もとの角丸半径が方形の大きさの半分を超えないようにする.
 		if (fabs(d_rad) > fabs(r)) {
-			// もとの角丸半径が方形の大きさの半分を超えるなら,
-			// 大きさの半分を得られた角丸半径に格納する.
 			c_rad = static_cast<FLOAT>(r);
 		}
 		else if (r_len * d_rad < 0.0f) {
@@ -358,12 +358,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// s_pos	開始位置
-	// diff	開始位置からの差分
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
-		ShapeRect::ShapeRect(s_pos, diff, attr)
+	// b_pos	囲む領域の始点
+	// b_diff	囲む領域の終点への差分
+	// s_attr	属性
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
+		ShapeRect::ShapeRect(b_pos, b_diff, s_attr)
 	{
-		calc_corner_radius(m_diff[0], attr->m_corner_rad, m_corner_rad);
+		calc_corner_radius(m_diff[0], s_attr->m_corner_rad, m_corner_rad);
 	}
 
 	// 図形をデータリーダーから読み込む.

@@ -67,11 +67,11 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::ARRANGE:
 			u = new UndoArrange2(dt_reader);
 			break;
-		case UNDO_OP::ARROW_SIZE:
-			u = new UndoAttr<UNDO_OP::ARROW_SIZE>(dt_reader);
+		case UNDO_OP::ARROWHEAD_SIZE:
+			u = new UndoAttr<UNDO_OP::ARROWHEAD_SIZE>(dt_reader);
 			break;
-		case UNDO_OP::ARROW_STYLE:
-			u = new UndoAttr<UNDO_OP::ARROW_STYLE>(dt_reader);
+		case UNDO_OP::ARROWHEAD_STYLE:
+			u = new UndoAttr<UNDO_OP::ARROWHEAD_STYLE>(dt_reader);
 			break;
 		case UNDO_OP::FILL_COLOR:
 			u = new UndoAttr<UNDO_OP::FILL_COLOR>(dt_reader);
@@ -298,9 +298,9 @@ namespace winrt::GraphPaper::implementation
 		summary_reflect(u);
 		u->exec();
 		auto const& u_type = typeid(*u);
-		if (u_type == typeid(UndoAttr<UNDO_OP::ARROW_STYLE>)) {
+		if (u_type == typeid(UndoAttr<UNDO_OP::ARROWHEAD_STYLE>)) {
 			// 線枠メニューの「矢じりの種類」に印をつける.
-			ARROW_STYLE a_style;
+			ARROWHEAD_STYLE a_style;
 			m_sheet_main.get_arrow_style(a_style);
 			arrow_style_check_menu(a_style);
 		}
@@ -551,8 +551,8 @@ namespace winrt::GraphPaper::implementation
 		m_stack_undo.push_back(new UndoAttr<U>(s));
 	}
 
-	template void MainPage::undo_push_set<UNDO_OP::ARROW_SIZE>(ARROW_SIZE const& value);
-	template void MainPage::undo_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE const& value);
+	template void MainPage::undo_push_set<UNDO_OP::ARROWHEAD_SIZE>(ARROWHEAD_SIZE const& value);
+	template void MainPage::undo_push_set<UNDO_OP::ARROWHEAD_STYLE>(ARROWHEAD_STYLE const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FILL_COLOR>(D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FONT_COLOR>(D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FONT_FAMILY>(wchar_t* const& value);

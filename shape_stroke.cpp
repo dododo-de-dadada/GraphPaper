@@ -191,7 +191,7 @@ namespace winrt::GraphPaper::implementation
 	// tip_pos	矢じりの先端の位置
 	// a_style	矢じりの形状
 	// dt_writer	データライター
-	void ShapeStroke::write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, const ARROW_STYLE a_style, DataWriter const& dt_writer) const
+	void ShapeStroke::write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, const ARROWHEAD_STYLE a_style, DataWriter const& dt_writer) const
 	{
 		using  winrt::GraphPaper::implementation::write_svg;
 
@@ -206,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 		write_svg(barbs[1].x, dt_writer);
 		write_svg(barbs[1].y, dt_writer);
 		write_svg("\" ", dt_writer);
-		if (a_style == ARROW_STYLE::FILLED) {
+		if (a_style == ARROWHEAD_STYLE::FILLED) {
 			write_svg(m_stroke_color, "fill", dt_writer);
 		}
 		else {
@@ -246,14 +246,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	//	n	差分の個数
-	//	attr	属性値
-	ShapeStroke::ShapeStroke(const size_t n, const ShapeSheet* attr) :
-		m_diff(n),
-		m_stroke_color(attr->m_stroke_color),
-		m_stroke_patt(attr->m_stroke_patt),
-		m_stroke_style(attr->m_stroke_style),
-		m_stroke_width(attr->m_stroke_width),
+	// d_cnt	差分の個数
+	// s_attr	属性値
+	ShapeStroke::ShapeStroke(const size_t d_cnt, const ShapeSheet* s_attr) :
+		m_diff(d_cnt),
+		m_stroke_color(s_attr->m_stroke_color),
+		m_stroke_patt(s_attr->m_stroke_patt),
+		m_stroke_style(s_attr->m_stroke_style),
+		m_stroke_width(s_attr->m_stroke_width),
 		m_d2d_stroke_style(nullptr)
 	{
 		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());

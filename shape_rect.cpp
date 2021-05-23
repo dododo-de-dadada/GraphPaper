@@ -237,12 +237,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	ShapeRect::ShapeRect(const D2D1_POINT_2F s_pos, const D2D1_POINT_2F diff, const ShapeSheet* attr) :
-		ShapeStroke::ShapeStroke(1, attr),
-		m_fill_color(attr->m_fill_color)
+	// b_pos	囲む領域の始点
+	// b_diff	囲む領域の終点への差分
+	// s_sttr	属性
+	ShapeRect::ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
+		ShapeStroke::ShapeStroke(1, s_attr),
+		m_fill_color(s_attr->m_fill_color)
 	{
-		m_pos = s_pos;
-		m_diff[0] = diff;
+		m_pos = b_pos;
+		m_diff[0] = b_diff;
 	}
 
 	// 図形をデータリーダーから読み込む.
