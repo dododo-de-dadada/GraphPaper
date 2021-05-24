@@ -818,6 +818,8 @@ namespace winrt::GraphPaper::implementation
 		STROKE_PATT m_stroke_patt{ STROKE_PATT_DEF };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		double m_stroke_width = 1.0;	// 線枠の太さ
+		D2D1_LINE_JOIN m_stroke_line_join = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
+		double m_stroke_mitter_limit = 10.0;
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
 
 		//------------------------------

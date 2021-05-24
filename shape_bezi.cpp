@@ -72,8 +72,8 @@ namespace winrt::GraphPaper::implementation
 	// 点と直線の間の最短距離を求める.
 	//static double bz_shortest_dist(const BZP& p, const double a, const double b, const double c, const double d) noexcept;
 
-	// 点 { 0, 0 } が凸包に含まれるか判定する.
-	static bool bz_in_convex(const size_t c_cnt, const BZP c_pos[]) noexcept;
+	// 点が凸包に含まれるか判定する.
+	static bool bz_in_convex(const double tx, const double ty, const size_t c_cnt, const BZP c_pos[]) noexcept;
 
 	// 曲線上の長さをもとに助変数を求める.
 	static double bz_param_by_len(const BZP b_pos[4], const double b_len) noexcept;
@@ -271,10 +271,8 @@ namespace winrt::GraphPaper::implementation
 	// c_cnt	凸包の頂点の数
 	// c_pos	凸包の頂点の配列
 	// 戻り値	含まれるなら true を, 含まれないなら false を返す.
-	static bool bz_in_convex(const size_t c_cnt, const BZP c_pos[]) noexcept
+	static bool bz_in_convex(const double tx, const double ty, const size_t c_cnt, const BZP c_pos[]) noexcept
 	{
-		constexpr double tx = 0.0;
-		constexpr double ty = 0.0;
 		int k = 0;	// 点をとおる水平線が凸包の辺と交差する回数.
 		for (size_t i = c_cnt - 1, j = 0; j < c_cnt; i = j++) {
 			// ルール 1. 上向きの辺. 点が垂直方向について, 辺の始点と終点の間にある. ただし、終点は含まない.
@@ -617,23 +615,25 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto e_width = max(max(m_stroke_width, a_len) * 0.5, 0.5);	// 線枠の太さの半分の値
-
+		D2D1_POINT_2F tp;
+		pt_sub(t_pos, m_pos, tp);
 		// 判定する位置によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
 		D2D1_POINT_2F c_pos[4];
-		pt_sub(m_pos, t_pos, c_pos[0]);
+		c_pos[0].x = c_pos[0].y = 0.0;
+		//pt_sub(m_pos, t_pos, c_pos[0]);
 		pt_add(c_pos[0], m_diff[0], c_pos[1]);
 		pt_add(c_pos[1], m_diff[1], c_pos[2]);
 		pt_add(c_pos[2], m_diff[2], c_pos[3]);
-		if (pt_in_anch(c_pos[3], a_len)) {
+		if (pt_in_anch(tp, c_pos[3], a_len)) {
 			return ANCH_TYPE::ANCH_P0 + 3;
 		}
-		if (pt_in_anch(c_pos[2], a_len)) {
+		if (pt_in_anch(tp, c_pos[2], a_len)) {
 			return ANCH_TYPE::ANCH_P0 + 2;
 		}
-		if (pt_in_anch(c_pos[1], a_len)) {
+		if (pt_in_anch(tp, c_pos[1], a_len)) {
 			return ANCH_TYPE::ANCH_P0 + 1;
 		}
-		if (pt_in_anch(c_pos[0], a_len)) {
+		if (pt_in_anch(tp, c_pos[0], a_len)) {
 			return ANCH_TYPE::ANCH_P0 + 0;
 		}
 		// 最初の制御点の組をプッシュする.
@@ -710,8 +710,8 @@ namespace winrt::GraphPaper::implementation
 			uint32_t c1_cnt;
 			BZP c1_pos[3 * 4];
 			bz_get_convex((d_cnt - 1) * 4, e_pos, c1_cnt, c1_pos);
-			// 点 { 0, 0 } が凸包 c1 に含まれないか判定する.
-			if (!bz_in_convex(c1_cnt, c1_pos)) {
+			// 点が凸包 c1 に含まれないか判定する.
+			if (!bz_in_convex(tp.x, tp.y, c1_cnt, c1_pos)) {
 				// これ以上この制御点の組を分割する必要はない.
 				// スタックに残った他の制御点の組を試す.
 				continue;

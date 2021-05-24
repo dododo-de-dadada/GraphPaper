@@ -463,14 +463,17 @@ namespace winrt::GraphPaper::implementation
 		const size_t v_cnt = m_diff.size() + 1;	// 頂点の数 (差分の数 + 1)
 		std::vector<D2D1_POINT_2F> v_pos(v_cnt);	// 頂点の配列
 		size_t j = static_cast<size_t>(-1);	// 点を含む頂点の添え字
-		// 判定する位置が原点となるよう, 平行移動した多角形の頂点を得る.
-		pt_sub(m_pos, t_pos, v_pos[0]);
-		if (pt_in_anch(v_pos[0], a_len)) {
+		// 
+		D2D1_POINT_2F tp;
+		pt_sub(t_pos, m_pos, tp);
+		v_pos[0].x = 0.0;
+		v_pos[0].y = 0.0;
+		if (pt_in_anch(tp, v_pos[0], a_len)) {
 			j = 0;
 		}
 		for (size_t i = 1; i < v_cnt; i++) {
 			pt_add(v_pos[i - 1], m_diff[i - 1], v_pos[i]);
-			if (pt_in_anch(v_pos[i], a_len)) {
+			if (pt_in_anch(tp, v_pos[i], a_len)) {
 				j = i;
 			}
 		}
@@ -488,7 +491,7 @@ namespace winrt::GraphPaper::implementation
 
 			// 多角形の各辺が位置を含むか判定する.
 			std::vector<D2D1_POINT_2F> q_exp(v_cnt * 4);	// 幅をもつ辺
-			if (poly_test_side(PZ, v_cnt, m_end_closed, v_pos.data(), n_vec.data(), e_width, q_exp.data())) {
+			if (poly_test_side(tp, v_cnt, m_end_closed, v_pos.data(), n_vec.data(), e_width, q_exp.data())) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 
@@ -496,7 +499,7 @@ namespace winrt::GraphPaper::implementation
 			// 角を超えて延長する長さは線の太さの 5 倍.
 			// こうすれば, D2D の描画と一致する.
 //			const auto ext_len = m_stroke_width * 5.0;	// 角を超えて延長する長さ
-//			if (poly_test_corner(PZ, v_cnt, m_end_closed, q_exp.data(), n_vec.data(), ext_len)) {
+//			if (poly_test_corner(tp, v_cnt, m_end_closed, q_exp.data(), n_vec.data(), ext_len)) {
 //				// 含むなら ANCH_STROKE を返す.
 //				return ANCH_TYPE::ANCH_STROKE;
 //			}
@@ -504,7 +507,7 @@ namespace winrt::GraphPaper::implementation
 		// 辺が不透明, または位置が辺に含まれていないなら,
 		// 塗りつぶし色が不透明か判定する.
 		if (is_opaque(m_fill_color)) {
-			if (pt_in_poly(PZ, v_cnt, v_pos.data())) {
+			if (pt_in_poly(tp, v_cnt, v_pos.data())) {
 				// 含まれるなら ANCH_FILL を返す.
 				return ANCH_TYPE::ANCH_FILL;
 			}
