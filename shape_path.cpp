@@ -87,7 +87,8 @@ namespace winrt::GraphPaper::implementation
 		if (anch == ANCH_TYPE::ANCH_P0) {
 			D2D1_POINT_2F diff;
 			pt_sub(value, m_pos, diff);
-			m_pos = value;
+			pt_round(diff, PT_ROUND, diff);
+			pt_add(m_pos, diff, m_pos);
 			pt_sub(m_diff[0], diff, m_diff[0]);
 		}
 		else {
@@ -95,6 +96,7 @@ namespace winrt::GraphPaper::implementation
 			get_anch_pos(anch, a_pos);
 			D2D1_POINT_2F diff;
 			pt_sub(value, a_pos, diff);
+			pt_round(diff, PT_ROUND, diff);
 			const size_t i = anch - ANCH_TYPE::ANCH_P0;
 			pt_add(m_diff[i - 1], diff, m_diff[i - 1]);
 			// 図形の部位が終点以外か判定する.

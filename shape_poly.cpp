@@ -122,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 	// v_end	辺が閉じているか判定
 	// v_pos	頂点の配列 [v_cnt]
 	// n_vec	各辺の法線ベクトルの配列 [v_cnt]
-	// s_width	辺の太さ
+	// s_width	辺の太さの半分の値
 	// exp_side	拡張した辺の配列 [v_cnt × 4]
 	static bool poly_test_side(const D2D1_POINT_2F t_pos, const size_t v_cnt, const bool v_end, const D2D1_POINT_2F v_pos[], const D2D1_POINT_2F n_vec[], const double s_width, D2D1_POINT_2F exp_side[]) noexcept
 	{
@@ -144,6 +144,16 @@ namespace winrt::GraphPaper::implementation
 				return true;
 			}
 		}
+		D2D1_POINT_2F bev_pos[4];
+		for (uint32_t i = (v_end ? v_cnt - 1 : 0), j = (v_end ? 0 : 1); j < v_cnt; i = j++) {
+			bev_pos[0] = exp_side[i * 4 + 3];
+			bev_pos[1] = exp_side[j * 4 + 0];
+			bev_pos[2] = exp_side[j * 4 + 1];
+			bev_pos[3] = exp_side[i * 4 + 2];
+			if (pt_in_poly(t_pos, 4, bev_pos)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -155,6 +165,50 @@ namespace winrt::GraphPaper::implementation
 	// n_vec	各辺の法線ベクトルの配列 [exp_cnt]
 	// ext_len	角を超えて延長する長さ
 	static bool poly_test_corner(const D2D1_POINT_2F t_pos, const size_t exp_cnt, const bool exp_end, const D2D1_POINT_2F exp_side[], const D2D1_POINT_2F n_vec[], const double ext_len) noexcept
+	{
+		D2D1_POINT_2F ext_side[4];	// 拡張した辺をさらに延長した辺
+		D2D1_POINT_2F ext_vec;	// 拡張した辺に平行なベクトル
+
+		for (size_t i = (exp_end ? 0 : 1), j = (exp_end ? exp_cnt - 1 : 0); i < exp_cnt; j = i++) {
+			// ある頂点に隣接する辺について.
+			// 拡張した辺の一方の端を, 延長した辺に格納する.
+			ext_side[0] = exp_side[4 * j + 3];
+			ext_side[1] = exp_side[4 * j + 2];
+			// 法線ベクトルと直行するベクトルを,
+			// 延長する長さの分だけ倍し,
+			// 平行なベクトルに格納する.
+			pt_mul(poly_pt_orth(n_vec[j]), ext_len, ext_vec);
+			// 格納した位置を平行なベクトルに沿って延長し,
+			// 延長した辺に格納する.
+			pt_sub(ext_side[1], ext_vec, ext_side[2]);
+			pt_sub(ext_side[0], ext_vec, ext_side[3]);
+			// 位置が延長した辺に含まれるか判定する.
+			if (pt_in_poly(t_pos, 4, ext_side) != true) {
+				// 含まれないなら継続する.
+				continue;
+			}
+			// 隣接するもう片方の辺について.
+			// 拡張した辺の端を, 延長した辺の端に格納する.
+			ext_side[2] = exp_side[4 * i + 1];
+			ext_side[3] = exp_side[4 * i + 0];
+			// 法線ベクトルと直行するベクトル (先ほどとは逆方向) を得て,
+			// 角を延長する長さの分だけ倍し,
+			// 平行なベクトルに格納する.
+			pt_mul(poly_pt_orth(n_vec[i]), ext_len, ext_vec);
+			// 格納した位置を平行なベクトルに沿って延長し,
+			// 延長した辺のもう一方の端に格納する.
+			pt_add(ext_side[3], ext_vec, ext_side[0]);
+			pt_add(ext_side[2], ext_vec, ext_side[1]);
+			// 位置が延長した辺に含まれるか判定する.
+			if (pt_in_poly(t_pos, 4, ext_side)) {
+				// 含まれるなら true を返す.
+				return true;
+			}
+		}
+		return false;
+	}
+
+	static bool poly_test_corner2(const D2D1_POINT_2F t_pos, const size_t exp_cnt, const bool exp_end, const D2D1_POINT_2F exp_side[], const D2D1_POINT_2F n_vec[], const double ext_len) noexcept
 	{
 		D2D1_POINT_2F ext_side[4];	// 拡張した辺をさらに延長した辺
 		D2D1_POINT_2F ext_vec;	// 拡張した辺に平行なベクトル
@@ -231,8 +285,8 @@ namespace winrt::GraphPaper::implementation
 		const double rate_y = v_reg ? rate_x : b_diff.y / v_diff.y;
 		for (uint32_t i = 0; i < v_cnt; i++) {
 			pt_sub(v_pos[i], v_min, v_pos[i]);
-			v_pos[i].x = static_cast<FLOAT>(v_pos[i].x * rate_x);
-			v_pos[i].y = static_cast<FLOAT>(v_pos[i].y * rate_y);
+			v_pos[i].x = static_cast<FLOAT>(roundl(v_pos[i].x * rate_x));
+			v_pos[i].y = static_cast<FLOAT>(roundl(v_pos[i].y * rate_y));
 			pt_add(v_pos[i], b_pos, v_pos[i]);
 		}
 	}
@@ -273,7 +327,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		// Shape 上で始点と終点を重ねたとき,
 		// パスに始点を加えないと, LINE_JOINT がへんなことになる.
-		//sink->AddLine(v_pos[0]);
+		//if (m_end_closed) {
+		//	sink->AddLine(v_pos[0]);
+		//}
 		sink->EndFigure(m_end_closed ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
@@ -364,14 +420,15 @@ namespace winrt::GraphPaper::implementation
 			const auto p_geom = m_d2d_path_geom.get();
 			const auto s_width = static_cast<FLOAT>(m_stroke_width);
 			const auto s_brush = dx.m_shape_brush.get();
+			const auto s_style = m_d2d_stroke_style.get();
 			s_brush->SetColor(m_stroke_color);
-			dx.m_d2dContext->DrawGeometry(p_geom, s_brush, s_width, m_d2d_stroke_style.get());
+			dx.m_d2dContext->DrawGeometry(p_geom, s_brush, s_width, s_style);
 			if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
 				if (a_geom != nullptr) {
 					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
 					if (m_arrow_style != ARROWHEAD_STYLE::FILLED) {
-						dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, nullptr);
+						dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, s_style);
 					}
 				}
 			}
@@ -438,11 +495,11 @@ namespace winrt::GraphPaper::implementation
 			// 多角形の角が位置を含むか判定する.
 			// 角を超えて延長する長さは線の太さの 5 倍.
 			// こうすれば, D2D の描画と一致する.
-			const auto ext_len = m_stroke_width * 5.0;	// 角を超えて延長する長さ
-			if (poly_test_corner(PZ, v_cnt, m_end_closed, q_exp.data(), n_vec.data(), ext_len)) {
-				// 含むなら ANCH_STROKE を返す.
-				return ANCH_TYPE::ANCH_STROKE;
-			}
+//			const auto ext_len = m_stroke_width * 5.0;	// 角を超えて延長する長さ
+//			if (poly_test_corner(PZ, v_cnt, m_end_closed, q_exp.data(), n_vec.data(), ext_len)) {
+//				// 含むなら ANCH_STROKE を返す.
+//				return ANCH_TYPE::ANCH_STROKE;
+//			}
 		}
 		// 辺が不透明, または位置が辺に含まれていないなら,
 		// 塗りつぶし色が不透明か判定する.

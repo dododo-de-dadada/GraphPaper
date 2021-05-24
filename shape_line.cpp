@@ -92,10 +92,10 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			const auto a_geom = m_d2d_arrow_geom.get();
 			if (a_geom != nullptr) {
-				dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, nullptr);
 				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
 					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
 				}
+				dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, s_style);
 			}
 		}
 		if (is_selected()) {
@@ -225,17 +225,19 @@ namespace winrt::GraphPaper::implementation
 	//	abch	ê}å`ÇÃïîà 
 	void ShapeLine::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anchor)
 	{
-		D2D1_POINT_2F diff;
-
 		if (anchor == ANCH_END) {
-			pt_sub(value, m_pos, m_diff[0]);
+			D2D1_POINT_2F diff;
+			pt_sub(value, m_pos, diff);
+			pt_round(diff, PT_ROUND, m_diff[0]);
 		}
 		else if (anchor == ANCH_BEGIN || anchor == ANCH_STROKE) {
+			D2D1_POINT_2F diff;
+			pt_sub(value, m_pos, diff);
+			pt_round(diff, PT_ROUND, diff);
 			if (anchor == ANCH_BEGIN) {
-				pt_sub(value, m_pos, diff);
 				pt_sub(m_diff[0], diff, m_diff[0]);
 			}
-			m_pos = value;
+			pt_add(m_pos, diff,  m_pos);
 		}
 		else {
 			throw hresult_not_implemented();

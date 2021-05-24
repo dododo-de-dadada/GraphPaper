@@ -63,6 +63,7 @@ namespace winrt::GraphPaper::implementation
 	extern uint32_t debug_leak_cnt;
 	constexpr wchar_t DEBUG_MSG[] = L"Memory leak occurs";
 #endif
+	constexpr double PT_ROUND = 1.0 / 16.0;
 
 	// アンカー (図形の部位) の種類
 	// 折れ線の頂点をあらわすため, enum struct でなく enum を用いる.

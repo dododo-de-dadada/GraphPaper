@@ -34,12 +34,12 @@ namespace winrt::GraphPaper::implementation
 	// •â•ü‚Ì”jü‚Ì”z’u‚Ì—v‘f”
 	constexpr UINT32 AUX_DASHES_CONT = sizeof(AUX_DASHES) / sizeof(AUX_DASHES[0]);
 	// •â•ü‚Ìü‚Ì“Á«
-	constexpr D2D1_STROKE_STYLE_PROPERTIES1 AUX_STYLE = {
+	constexpr D2D1_STROKE_STYLE_PROPERTIES1 AUX_STYLE {
 		D2D1_CAP_STYLE_FLAT,	// startCap
 		D2D1_CAP_STYLE_FLAT,	// endCap
 		D2D1_CAP_STYLE_ROUND,	// dashCap
-		D2D1_LINE_JOIN_MITER,	// lineJoin
-		10.0f,	// miterLimit
+		D2D1_LINE_JOIN_MITER_OR_BEVEL,	// lineJoin
+		1.0f,	// miterLimit
 		D2D1_DASH_STYLE_CUSTOM,	// dashStyle
 		0.0f,	// dashOffset
 		D2D1_STROKE_TRANSFORM_TYPE_NORMAL

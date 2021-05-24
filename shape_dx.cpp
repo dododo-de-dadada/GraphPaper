@@ -690,7 +690,7 @@ namespace winrt::GraphPaper::implementation
 		);
 		m_aux_style = nullptr;
 		winrt::check_hresult(
-			m_d2dFactory->CreateStrokeStyle(&AUX_STYLE, AUX_DASHES, AUX_DASHES_CONT, m_aux_style.put())
+			m_d2dFactory->CreateStrokeStyle(AUX_STYLE, AUX_DASHES, AUX_DASHES_CONT, m_aux_style.put())
 		);
 		m_state_block = nullptr;
 		winrt::check_hresult(

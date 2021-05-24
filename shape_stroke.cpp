@@ -14,19 +14,22 @@ namespace winrt::GraphPaper::implementation
 	// s_style	作成されたストローク特性
 	static void create_stroke_style(ID2D1Factory3* const d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style)
 	{
-		D2D1_STROKE_STYLE_PROPERTIES prop{
-			D2D1_CAP_STYLE_SQUARE,	// startCap
-			D2D1_CAP_STYLE_SQUARE,	// endCap
-			D2D1_CAP_STYLE_FLAT,	// dashCap
-			D2D1_LINE_JOIN_MITER,	// lineJoin
-			1.0f,					// miterLimit
-			D2D1_DASH_STYLE_CUSTOM,	// dashStyle
-			0.0f
-		};
 		UINT32 d_cnt;	// 破線の配置配列の要素数
 		const FLOAT* d_arr;	// 破線の配置配列を指すポインタ
 
 		if (d_style != D2D1_DASH_STYLE_SOLID) {
+			D2D1_STROKE_STYLE_PROPERTIES prop{
+				//D2D1_CAP_STYLE_SQUARE,	// startCap
+				//D2D1_CAP_STYLE_SQUARE,	// endCap
+				D2D1_CAP_STYLE_FLAT,	// startCap
+				D2D1_CAP_STYLE_FLAT,	// endCap
+				D2D1_CAP_STYLE_FLAT,	// dashCap
+				//D2D1_LINE_JOIN_MITER,	// lineJoin. SVG
+				D2D1_LINE_JOIN_BEVEL,	// lineJoin. SVG
+				1.0f,					// miterLimit
+				D2D1_DASH_STYLE_CUSTOM,	// dashStyle
+				0.0f
+			};
 			if (d_style == D2D1_DASH_STYLE_DOT) {
 				d_arr = s_patt.m_ + 2;
 				d_cnt = 2;
@@ -51,7 +54,20 @@ namespace winrt::GraphPaper::implementation
 			);
 		}
 		else {
-			*s_style = nullptr;
+//			*s_style = nullptr;
+			D2D1_STROKE_STYLE_PROPERTIES prop{
+				D2D1_CAP_STYLE_FLAT,	// startCap
+				D2D1_CAP_STYLE_FLAT,	// endCap
+				D2D1_CAP_STYLE_FLAT,	// dashCap
+				//D2D1_LINE_JOIN_MITER_OR_BEVEL,	// lineJoin
+				D2D1_LINE_JOIN_BEVEL,	// lineJoin
+				10.0f,					// miterLimit
+				D2D1_DASH_STYLE_SOLID,	// dashStyle
+				0.0f
+			};
+			winrt::check_hresult(
+				d_factory->CreateStrokeStyle(prop, nullptr, 0, s_style)
+			);
 		}
 	}
 
@@ -172,6 +188,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapeStroke::move(const D2D1_POINT_2F diff)
 	{
 		pt_add(m_pos, diff, m_pos);
+		pt_round(m_pos, 0.125, m_pos);
 	}
 
 	// 始点に値を格納する. 他の部位の位置も動く.
@@ -304,6 +321,7 @@ namespace winrt::GraphPaper::implementation
 		write_svg(m_stroke_color, "stroke", dt_writer);
 		write_svg(m_stroke_style, m_stroke_patt, m_stroke_width, dt_writer);
 		write_svg(m_stroke_width, "stroke-width", dt_writer);
+		write_svg("stroke-linejoin=\"miter\" stroke-miterlimit=\"1\" ", dt_writer);
 	}
 
 }

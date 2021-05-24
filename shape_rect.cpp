@@ -190,48 +190,85 @@ namespace winrt::GraphPaper::implementation
 	//	abch	ê}å`ÇÃïîà 
 	void ShapeRect::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
-		D2D1_POINT_2F a_pos;
-		D2D1_POINT_2F diff;
+		//D2D1_POINT_2F a_pos;
 
 		switch (anch) {
 		case ANCH_TYPE::ANCH_SHEET:
-			m_pos = value;
+			{
+			D2D1_POINT_2F diff;
+			pt_sub(value, m_pos, diff);
+			pt_round(diff, PT_ROUND, diff);
+			pt_add(m_pos, diff, m_pos);
+			}
 			break;
 		case ANCH_TYPE::ANCH_NW:
+			{
+			D2D1_POINT_2F diff;
 			pt_sub(value, m_pos, diff);
+			pt_round(diff, PT_ROUND, diff);
 			pt_add(m_pos, diff, m_pos);
 			pt_sub(m_diff[0], diff, m_diff[0]);
+			}
 			break;
 		case ANCH_TYPE::ANCH_NORTH:
-			m_diff[0].y -= value.y - m_pos.y;
-			m_pos.y = value.y;
+			{
+			double diff_y = value.y - m_pos.y;
+			diff_y = static_cast<FLOAT>(std::round(diff_y / PT_ROUND) * PT_ROUND);
+			m_diff[0].y -= diff_y;
+			m_pos.y += diff_y;
+			}
 			break;
 		case ANCH_TYPE::ANCH_NE:
-			a_pos.x = m_pos.x + m_diff[0].x;
-			a_pos.y = m_pos.y;
-			m_pos.y = value.y;
+			{
+			D2D1_POINT_2F a_pos;
+			get_anch_pos(ANCH_TYPE::ANCH_NE, a_pos);
+			D2D1_POINT_2F diff;
 			pt_sub(value, a_pos, diff);
+			pt_round(diff, PT_ROUND, diff);
+			m_pos.y += diff.y;
 			pt_add(m_diff[0], diff.x, -diff.y, m_diff[0]);
+			}
 			break;
 		case ANCH_TYPE::ANCH_WEST:
-			m_diff[0].x -= value.x - m_pos.x;
-			m_pos.x = value.x;
+			{
+			double diff_x = value.x - m_pos.x;
+			diff_x = static_cast<FLOAT>(std::round(diff_x / PT_ROUND) * PT_ROUND);
+			m_diff[0].x -= diff_x;
+			m_pos.x += diff_x;
+			}
 			break;
 		case ANCH_TYPE::ANCH_EAST:
-			m_diff[0].x = value.x - m_pos.x;
+			{
+			double diff_x = value.x - m_pos.x;
+			diff_x = static_cast<FLOAT>(std::round(diff_x / PT_ROUND) * PT_ROUND);
+			m_diff[0].x = diff_x;
+
+			}
 			break;
 		case ANCH_TYPE::ANCH_SW:
-			a_pos.x = m_pos.x;
-			a_pos.y = m_pos.y + m_diff[0].y;
-			m_pos.x = value.x;
+			{
+			D2D1_POINT_2F a_pos;
+			get_anch_pos(ANCH_TYPE::ANCH_SW, a_pos);
+			D2D1_POINT_2F diff;
 			pt_sub(value, a_pos, diff);
+			m_pos.x += diff.x;
 			pt_add(m_diff[0], -diff.x, diff.y, m_diff[0]);
+			}
 			break;
 		case ANCH_TYPE::ANCH_SOUTH:
-			m_diff[0].y = value.y - m_pos.y;
+			{
+			double diff_y = value.y - m_pos.y;
+			diff_y = static_cast<FLOAT>(std::round(diff_y / PT_ROUND) * PT_ROUND);
+			m_diff[0].y = diff_y;
+			}
 			break;
 		case ANCH_TYPE::ANCH_SE:
-			pt_sub(value, m_pos, m_diff[0]);
+			{
+			D2D1_POINT_2F diff;
+			pt_sub(value, m_pos, diff);
+			pt_round(diff, PT_ROUND, diff);
+			m_diff[0] = diff;
+			}
 			break;
 		}
 	}
