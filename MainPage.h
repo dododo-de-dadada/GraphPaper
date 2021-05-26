@@ -24,6 +24,7 @@
 // MainPage_font.cpp	書体と文字列の配置
 // MainPage_grid.cpp	方眼
 // MainPage_group.cpp	グループ化とグループの解除
+// NainPage_join.cpp	線分の繋がり
 // MainPage_kybd.cpp	キーボードアクセラレータのハンドラー
 // MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, バージョン情報
 // MainPage_pointer.cpp	ポインターイベントのハンドラー
@@ -335,6 +336,9 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction app_resuming_async(IInspectable const&, IInspectable const&);
 		// アプリケーションが中断された.
 		IAsyncAction app_suspending_async(IInspectable const&, SuspendingEventArgs const& args);
+
+		void join_style_check_menu(const D2D1_LINE_JOIN j_style);
+		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_arrng.cpp
@@ -833,13 +837,13 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 線枠メニューの「種類」に印をつける.
-		void stroke_style_check_menu(const D2D1_DASH_STYLE d_style);
+		void stroke_dash_style_check_menu(const D2D1_DASH_STYLE d_style);
 		// 線枠メニューの「色」が選択された.
 		IAsyncAction stroke_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「種類」のサブ項目が選択された.
-		void stroke_style_click(IInspectable const& sender, RoutedEventArgs const&);
+		void stroke_dash_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「破線の配列」が選択された.
-		IAsyncAction stroke_patt_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction stroke_dash_patt_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「太さ」が選択された.
 		IAsyncAction stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.

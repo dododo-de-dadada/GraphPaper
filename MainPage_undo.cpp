@@ -139,11 +139,17 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::STROKE_COLOR:
 			u = new UndoAttr<UNDO_OP::STROKE_COLOR>(dt_reader);
 			break;
-		case UNDO_OP::STROKE_PATT:
-			u = new UndoAttr<UNDO_OP::STROKE_PATT>(dt_reader);
+		case UNDO_OP::STROKE_DASH_PATT:
+			u = new UndoAttr<UNDO_OP::STROKE_DASH_PATT>(dt_reader);
 			break;
-		case UNDO_OP::STROKE_STYLE:
-			u = new UndoAttr<UNDO_OP::STROKE_STYLE>(dt_reader);
+		case UNDO_OP::STROKE_DASH_STYLE:
+			u = new UndoAttr<UNDO_OP::STROKE_DASH_STYLE>(dt_reader);
+			break;
+		case UNDO_OP::STROKE_JOIN_LIMIT:
+			u = new UndoAttr<UNDO_OP::STROKE_JOIN_LIMIT>(dt_reader);
+			break;
+		case UNDO_OP::STROKE_JOIN_STYLE:
+			u = new UndoAttr<UNDO_OP::STROKE_JOIN_STYLE>(dt_reader);
 			break;
 		case UNDO_OP::STROKE_WIDTH:
 			u = new UndoAttr<UNDO_OP::STROKE_WIDTH>(dt_reader);
@@ -329,15 +335,20 @@ namespace winrt::GraphPaper::implementation
 			// 用紙の大きさをステータスバーに格納する.
 			sbar_set_sheet();
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_STYLE>)) {
+		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_DASH_STYLE>)) {
 			D2D1_DASH_STYLE s_style;
-			m_sheet_main.get_stroke_style(s_style);
-			stroke_style_check_menu(s_style);
+			m_sheet_main.get_stroke_dash_style(s_style);
+			stroke_dash_style_check_menu(s_style);
+		}
+		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_JOIN_STYLE>)) {
+			D2D1_LINE_JOIN j_style;
+			m_sheet_main.get_stroke_join_style(j_style);
+			join_style_check_menu(j_style);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT t_align_t;
 			m_sheet_main.get_text_align_t(t_align_t);
-			text_align_t_check_menu(m_sheet_main.m_text_align_t);
+			text_align_t_check_menu(t_align_t);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_P>)) {
 			DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
@@ -566,8 +577,10 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::undo_push_set<UNDO_OP::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::START_POS>(Shape* const s);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
-	template void MainPage::undo_push_set<UNDO_OP::STROKE_PATT>(STROKE_PATT const& value);
-	template void MainPage::undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE const& value);
+	template void MainPage::undo_push_set<UNDO_OP::STROKE_DASH_PATT>(STROKE_DASH_PATT const& value);
+	template void MainPage::undo_push_set<UNDO_OP::STROKE_DASH_STYLE>(D2D1_DASH_STYLE const& value);
+	template void MainPage::undo_push_set<UNDO_OP::STROKE_JOIN_LIMIT>(float const& value);
+	template void MainPage::undo_push_set<UNDO_OP::STROKE_JOIN_STYLE>(D2D1_LINE_JOIN const& value);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_WIDTH>(float const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& value);

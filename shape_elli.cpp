@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_stroke_color)) {
 			// ˜gü‚ÌF‚ª•s“§–¾‚Èê‡,
 			dx.m_shape_brush->SetColor(m_stroke_color);
-			dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), m_stroke_width, m_d2d_stroke_style.get());
+			dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), m_stroke_width, m_d2d_stroke_dash_style.get());
 		}
 		if (is_selected() != true) {
 			return;

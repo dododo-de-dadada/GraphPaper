@@ -268,8 +268,8 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.get_font_style(f_style);
 			font_style_check_menu(f_style);
 			D2D1_DASH_STYLE s_style;
-			m_sheet_main.get_stroke_style(s_style);
-			stroke_style_check_menu(s_style);
+			m_sheet_main.get_stroke_dash_style(s_style);
+			stroke_dash_style_check_menu(s_style);
 			DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
 			m_sheet_main.get_text_align_p(t_align_p);
 			text_align_p_check_menu(t_align_p);

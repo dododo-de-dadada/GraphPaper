@@ -105,8 +105,8 @@ namespace winrt::GraphPaper::implementation
 		edit_menu_enable();
 		color_code_check_menu();
 		D2D1_DASH_STYLE s_style;
-		m_sheet_main.get_stroke_style(s_style);
-		stroke_style_check_menu(s_style);
+		m_sheet_main.get_stroke_dash_style(s_style);
+		stroke_dash_style_check_menu(s_style);
 		ARROWHEAD_STYLE a_style;
 		m_sheet_main.get_arrow_style(a_style);
 		arrow_style_check_menu(a_style);

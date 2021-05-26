@@ -336,7 +336,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置をデータリーダーから読み込む.
-	void read(STROKE_PATT& value, DataReader const& dt_reader)
+	void read(STROKE_DASH_PATT& value, DataReader const& dt_reader)
 	{
 		value.m_[0] = dt_reader.ReadSingle();
 		value.m_[1] = dt_reader.ReadSingle();
@@ -686,7 +686,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の配置をデータライターに書き込む.
-	void write(const STROKE_PATT& value, DataWriter const& dt_writer)
+	void write(const STROKE_DASH_PATT& value, DataWriter const& dt_writer)
 	{
 		dt_writer.WriteSingle(value.m_[0]);
 		dt_writer.WriteSingle(value.m_[1]);

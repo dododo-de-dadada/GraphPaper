@@ -469,7 +469,7 @@
     <value>Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_stroke_patt.Text" xml:space="preserve">
+  <data name="mfi_stroke_dash_patt.Text" xml:space="preserve">
     <value>Dash Pattern...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -541,7 +541,7 @@
     <value>Status Bar</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_stroke_style.Text" xml:space="preserve">
+  <data name="mfsi_stroke_dash_style.Text" xml:space="preserve">
     <value>Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -597,23 +597,23 @@
     <value>Hide</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_style_dash.Text" xml:space="preserve">
+  <data name="rmfi_stroke_dash_style_dash.Text" xml:space="preserve">
     <value>Dash</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_style_dash_dot.Text" xml:space="preserve">
+  <data name="rmfi_stroke_dash_style_dash_dot.Text" xml:space="preserve">
     <value>Dash Dot</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_style_dash_dot_dot.Text" xml:space="preserve">
+  <data name="rmfi_stroke_dash_style_dash_dot_dot.Text" xml:space="preserve">
     <value>Dash Dot Dot</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_style_dot.Text" xml:space="preserve">
+  <data name="rmfi_stroke_dash_style_dot.Text" xml:space="preserve">
     <value>Dot</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_style_solid.Text" xml:space="preserve">
+  <data name="rmfi_stroke_dash_style_solid.Text" xml:space="preserve">
     <value>Solid</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>

@@ -66,14 +66,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「破線の配置」が選択された.
-	IAsyncAction MainPage::stroke_patt_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::stroke_dash_patt_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		STROKE_PATT s_patt;
-		m_sheet_main.get_stroke_patt(s_patt);
+		STROKE_DASH_PATT s_patt;
+		m_sheet_main.get_stroke_dash_patt(s_patt);
 		const float val0 = s_patt.m_[0] / SLIDER_STEP;
 		const float val1 = s_patt.m_[1] / SLIDER_STEP;
 		const float val2 = s_patt.m_[2] / SLIDER_STEP;
@@ -83,26 +83,26 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_2().Value(val2);
 		sample_slider_3().Value(val3);
 		D2D1_DASH_STYLE s_style;
-		m_sheet_main.get_stroke_style(s_style);
+		m_sheet_main.get_stroke_dash_style(s_style);
 		sample_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
 		sample_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
 		sample_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
 		sample_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
-		stroke_set_slider_header<UNDO_OP::STROKE_PATT, 0>(val0);
-		stroke_set_slider_header<UNDO_OP::STROKE_PATT, 1>(val1);
-		stroke_set_slider_header<UNDO_OP::STROKE_PATT, 2>(val2);
-		stroke_set_slider_header<UNDO_OP::STROKE_PATT, 3>(val3);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATT, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATT, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATT, 2> });
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_PATT, 3> });
+		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 0>(val0);
+		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 1>(val1);
+		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 2>(val2);
+		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 3>(val3);
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 3> });
 		m_sample_type = SAMP_TYPE::STROKE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			STROKE_PATT sample_value;
-			m_sample_shape->get_stroke_patt(sample_value);
-			undo_push_set<UNDO_OP::STROKE_PATT>(sample_value);
+			STROKE_DASH_PATT sample_value;
+			m_sample_shape->get_stroke_dash_patt(sample_value);
+			undo_push_set<UNDO_OP::STROKE_DASH_PATT>(sample_value);
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -153,32 +153,32 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「種類」のサブ項目が選択された.
-	void MainPage::stroke_style_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::stroke_dash_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_DASH_STYLE d_style;
-		if (sender == rmfi_stroke_style_solid() || sender == rmfi_stroke_style_solid_2()) {
+		if (sender == rmfi_stroke_dash_style_solid() || sender == rmfi_stroke_dash_style_solid_2()) {
 			d_style = D2D1_DASH_STYLE_SOLID;
 		}
-		else if (sender == rmfi_stroke_style_dash() || sender == rmfi_stroke_style_dash_2()) {
+		else if (sender == rmfi_stroke_dash_style_dash() || sender == rmfi_stroke_dash_style_dash_2()) {
 			d_style = D2D1_DASH_STYLE_DASH;
 		}
-		else if (sender == rmfi_stroke_style_dot() || sender == rmfi_stroke_style_dot_2()) {
+		else if (sender == rmfi_stroke_dash_style_dot() || sender == rmfi_stroke_dash_style_dot_2()) {
 			d_style = D2D1_DASH_STYLE_DOT;
 		}
-		else if (sender == rmfi_stroke_style_dash_dot() || sender == rmfi_stroke_style_dash_dot_2()) {
+		else if (sender == rmfi_stroke_dash_style_dash_dot() || sender == rmfi_stroke_dash_style_dash_dot_2()) {
 			d_style = D2D1_DASH_STYLE_DASH_DOT;
 		}
-		else if (sender == rmfi_stroke_style_dash_dot_dot() || sender == rmfi_stroke_style_dash_dot_dot_2()) {
+		else if (sender == rmfi_stroke_dash_style_dash_dot_dot() || sender == rmfi_stroke_dash_style_dash_dot_dot_2()) {
 			d_style = D2D1_DASH_STYLE_DASH_DOT_DOT;
 		}
 		else {
 			return;
 		}
 		D2D1_DASH_STYLE s_style;
-		m_sheet_main.get_stroke_style(s_style);
-		mfi_stroke_patt().IsEnabled(s_style == D2D1_DASH_STYLE_SOLID);
-		mfi_stroke_patt_2().IsEnabled(s_style == D2D1_DASH_STYLE_SOLID);
-		undo_push_set<UNDO_OP::STROKE_STYLE>(d_style);
+		m_sheet_main.get_stroke_dash_style(s_style);
+		mfi_stroke_dash_patt().IsEnabled(s_style == D2D1_DASH_STYLE_SOLID);
+		mfi_stroke_dash_patt_2().IsEnabled(s_style == D2D1_DASH_STYLE_SOLID);
+		undo_push_set<UNDO_OP::STROKE_DASH_STYLE>(d_style);
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -191,7 +191,7 @@ namespace winrt::GraphPaper::implementation
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_stroke_width");
 		}
-		if constexpr (U == UNDO_OP::STROKE_PATT) {
+		if constexpr (U == UNDO_OP::STROKE_DASH_PATT) {
 			wchar_t buf[32];
 			const double dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
@@ -277,9 +277,15 @@ namespace winrt::GraphPaper::implementation
 		Shape* s = m_sample_shape;
 		const float value = static_cast<float>(args.NewValue());
 		stroke_set_slider_header<U, S>(value);
-		if constexpr (U == UNDO_OP::STROKE_PATT) {
-			STROKE_PATT patt;
-			s->get_stroke_patt(patt);
+		if constexpr (U == UNDO_OP::STROKE_JOIN_STYLE) {
+			s->set_stroke_join_style(value);
+		}
+		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
+			s->set_stroke_join_limit(value);
+		}
+		if constexpr (U == UNDO_OP::STROKE_DASH_PATT) {
+			STROKE_DASH_PATT patt;
+			s->get_stroke_dash_patt(patt);
 			if constexpr (S == 0) {
 				patt.m_[0] = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
@@ -292,7 +298,7 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 3) {
 				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
-			s->set_stroke_patt(patt);
+			s->set_stroke_dash_patt(patt);
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			s->set_stroke_width(value * SLIDER_STEP);
@@ -321,21 +327,34 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠メニューの「形式」に印をつける.
 	// d_style	破線の種別
-	void MainPage::stroke_style_check_menu(const D2D1_DASH_STYLE d_style)
+	void MainPage::stroke_dash_style_check_menu(const D2D1_DASH_STYLE d_style)
 	{
-		rmfi_stroke_style_solid().IsChecked(d_style == D2D1_DASH_STYLE_SOLID);
-		rmfi_stroke_style_dash().IsChecked(d_style == D2D1_DASH_STYLE_DASH);
-		rmfi_stroke_style_dot().IsChecked(d_style == D2D1_DASH_STYLE_DOT);
-		rmfi_stroke_style_dash_dot().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT);
-		rmfi_stroke_style_dash_dot_dot().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT_DOT);
-		mfi_stroke_patt().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
-
-		rmfi_stroke_style_solid_2().IsChecked(d_style == D2D1_DASH_STYLE_SOLID);
-		rmfi_stroke_style_dash_2().IsChecked(d_style == D2D1_DASH_STYLE_DASH);
-		rmfi_stroke_style_dot_2().IsChecked(d_style == D2D1_DASH_STYLE_DOT);
-		rmfi_stroke_style_dash_dot_2().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT);
-		rmfi_stroke_style_dash_dot_dot_2().IsChecked(d_style == D2D1_DASH_STYLE_DASH_DOT_DOT);
-		mfi_stroke_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
+		if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
+			rmfi_stroke_dash_style_solid().IsChecked(true);
+			rmfi_stroke_dash_style_solid_2().IsChecked(true);
+			mfi_stroke_dash_patt().IsEnabled(true);
+			mfi_stroke_dash_patt_2().IsEnabled(true);
+		}
+		else {
+			if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
+				rmfi_stroke_dash_style_dash().IsChecked(true);
+				rmfi_stroke_dash_style_dash_2().IsChecked(true);
+			}
+			else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
+				rmfi_stroke_dash_style_dot().IsChecked(true);
+				rmfi_stroke_dash_style_dot_2().IsChecked(true);
+			}
+			else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
+				rmfi_stroke_dash_style_dash_dot().IsChecked(true);
+				rmfi_stroke_dash_style_dash_dot_2().IsChecked(true);
+			}
+			else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
+				rmfi_stroke_dash_style_dash_dot_dot().IsChecked(true);
+				rmfi_stroke_dash_style_dash_dot_dot_2().IsChecked(true);
+			}
+			mfi_stroke_dash_patt().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
+			mfi_stroke_dash_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
+		}
 	}
 
 }

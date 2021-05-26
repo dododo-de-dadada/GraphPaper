@@ -469,7 +469,7 @@
     <value>色...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_stroke_patt.Text" xml:space="preserve">
+  <data name="mfi_stroke_dash_patt.Text" xml:space="preserve">
     <value>破線の配置...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -541,7 +541,7 @@
     <value>ステータスバー</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_stroke_style.Text" xml:space="preserve">
+  <data name="mfsi_stroke_dash_style.Text" xml:space="preserve">
     <value>種類</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -597,23 +597,23 @@
     <value>隠す</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_style_dash.Text" xml:space="preserve">
+  <data name="rmfi_stroke_dash_style_dash.Text" xml:space="preserve">
     <value>破線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_style_dash_dot.Text" xml:space="preserve">
+  <data name="rmfi_stroke_dash_style_dash_dot.Text" xml:space="preserve">
     <value>一点破線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_style_dash_dot_dot.Text" xml:space="preserve">
+  <data name="rmfi_stroke_dash_style_dash_dot_dot.Text" xml:space="preserve">
     <value>二点破線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_style_dot.Text" xml:space="preserve">
+  <data name="rmfi_stroke_dash_style_dot.Text" xml:space="preserve">
     <value>点線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_style_solid.Text" xml:space="preserve">
+  <data name="rmfi_stroke_dash_style_solid.Text" xml:space="preserve">
     <value>実線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>

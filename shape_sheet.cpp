@@ -440,17 +440,31 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// ”jü‚Ì”z’u‚ğ“¾‚é.
-	bool ShapeSheet::get_stroke_patt(STROKE_PATT& value) const noexcept
+	// ü˜g‚Ìƒ}ƒCƒ^[§ŒÀ‚Ì”ä—¦‚ğ“¾‚é.
+	bool ShapeSheet::get_stroke_join_limit(float& value) const noexcept
 	{
-		value = m_stroke_patt;
+		value = m_stroke_join_limit;
+		return true;
+	}
+
+	// ü˜g‚Ì˜AŒ‹‚ğ“¾‚é.
+	bool ShapeSheet::get_stroke_join_style(D2D1_LINE_JOIN& value) const noexcept
+	{
+		value = m_stroke_join_style;
+		return true;
+	}
+
+	// ”jü‚Ì”z’u‚ğ“¾‚é.
+	bool ShapeSheet::get_stroke_dash_patt(STROKE_DASH_PATT& value) const noexcept
+	{
+		value = m_stroke_dash_patt;
 		return true;
 	}
 
 	// ü˜g‚ÌŒ`®‚ğ“¾‚é.
-	bool ShapeSheet::get_stroke_style(D2D1_DASH_STYLE& value) const noexcept
+	bool ShapeSheet::get_stroke_dash_style(D2D1_DASH_STYLE& value) const noexcept
 	{
-		value = m_stroke_style;
+		value = m_stroke_dash_style;
 		return true;
 	}
 
@@ -511,8 +525,8 @@ namespace winrt::GraphPaper::implementation
 		read(m_stroke_color, dt_reader);	// üE˜g‚ÌF
 		m_stroke_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());	// Šp‚ÌŒ`ó
 		m_stroke_join_limit = dt_reader.ReadSingle();	// Šp‚Ìƒ}ƒCƒ^[§ŒÀ
-		read(m_stroke_patt, dt_reader);	// ”jü‚Ì”z’u
-		m_stroke_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());	// ”jü‚ÌŒ`®
+		read(m_stroke_dash_patt, dt_reader);	// ”jü‚Ì”z’u
+		m_stroke_dash_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());	// ”jü‚ÌŒ`®
 		m_stroke_width = dt_reader.ReadSingle();	// üE˜g‚Ì‘¾‚³
 		read(m_fill_color, dt_reader);	// “h‚è‚Â‚Ô‚µ‚ÌF
 		read(m_font_color, dt_reader);	// ‘‘Ì‚ÌF
@@ -643,16 +657,28 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_color = value;
 	}
 
-	// ”jü‚Ì”z’u‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_patt(const STROKE_PATT& value)
+	// ü˜g‚Ìƒ}ƒCƒ^[§ŒÀ‚Ì”ä—¦‚ÉŠi”[‚·‚é.
+	void ShapeSheet::set_stroke_join_limit(const float& value)
 	{
-		m_stroke_patt = value;
+		m_stroke_join_limit = value;
+	}
+
+	// ü˜g‚Ì˜AŒ‹‚ÉŠi”[‚·‚é.
+	void ShapeSheet::set_stroke_join_style(const D2D1_LINE_JOIN& value)
+	{
+		m_stroke_join_style = value;
+	}
+
+	// ”jü‚Ì”z’u‚ÉŠi”[‚·‚é.
+	void ShapeSheet::set_stroke_dash_patt(const STROKE_DASH_PATT& value)
+	{
+		m_stroke_dash_patt = value;
 	}
 
 	// ü˜g‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_style(const D2D1_DASH_STYLE value)
+	void ShapeSheet::set_stroke_dash_style(const D2D1_DASH_STYLE value)
 	{
-		m_stroke_style = value;
+		m_stroke_dash_style = value;
 	}
 
 	// ü˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
@@ -705,8 +731,10 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_snap(m_grid_snap);
 		s->get_sheet_color(m_sheet_color);
 		s->get_stroke_color(m_stroke_color);
-		s->get_stroke_patt(m_stroke_patt);
-		s->get_stroke_style(m_stroke_style);
+		s->get_stroke_join_limit(m_stroke_join_limit);
+		s->get_stroke_join_style(m_stroke_join_style);
+		s->get_stroke_dash_patt(m_stroke_dash_patt);
+		s->get_stroke_dash_style(m_stroke_dash_style);
 		s->get_stroke_width(m_stroke_width);
 		s->get_text_line(m_text_line);
 		s->get_text_align_t(m_text_align_t);
@@ -736,8 +764,8 @@ namespace winrt::GraphPaper::implementation
 		write(m_stroke_color, dt_writer);	// ü˜g‚ÌF
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_join_style));	// Šp‚ÌŒ`ó
 		dt_writer.WriteSingle(m_stroke_join_limit);	// Šp‚Ìƒ}ƒCƒ^[§ŒÀ
-		write(m_stroke_patt, dt_writer);	// ”jü‚Ì”z’u
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_style));	// ü˜g‚ÌŒ`®
+		write(m_stroke_dash_patt, dt_writer);	// ”jü‚Ì”z’u
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash_style));	// ü˜g‚ÌŒ`®
 		dt_writer.WriteSingle(m_stroke_width);	// ü˜g‚Ì‘¾‚³
 		write(m_fill_color, dt_writer);	// “h‚è‚Â‚Ô‚µ‚ÌF
 		write(m_font_color, dt_writer);	// ‘‘Ì‚ÌF

@@ -321,8 +321,10 @@ namespace winrt::GraphPaper::implementation
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_sheet_main.m_sheet_size = SHEET_SIZE_DEF;
 			m_sheet_main.set_stroke_color(sheet_foreground());
-			m_sheet_main.set_stroke_patt(STROKE_PATT_DEF);
-			m_sheet_main.set_stroke_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+			m_sheet_main.set_stroke_join_limit(MITER_LIMIT_DEF);
+			m_sheet_main.set_stroke_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+			m_sheet_main.set_stroke_dash_patt(STROKE_DASH_PATT_DEF);
+			m_sheet_main.set_stroke_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 			m_sheet_main.set_stroke_width(1.0);
 			m_sheet_main.set_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			m_sheet_main.set_text_align_t(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);

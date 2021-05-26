@@ -556,7 +556,7 @@ namespace winrt::GraphPaper::implementation
 			const auto p_geom = m_d2d_path_geom.get();
 			const auto s_width = m_stroke_width;
 			const auto s_brush = dx.m_shape_brush.get();
-			const auto s_style = m_d2d_stroke_style.get();
+			const auto s_style = m_d2d_stroke_dash_style.get();
 			s_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawGeometry(p_geom, s_brush, s_width, s_style);
 			if (m_arrow_style != ARROWHEAD_STYLE::NONE) {

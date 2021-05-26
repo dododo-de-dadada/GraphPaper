@@ -134,36 +134,42 @@
             <x:String x:Key="file_app_data">app_data</x:String>
             <!-- 線枠コンテキストメニュー -->
             <MenuFlyout x:Key="mf_stroke">
-                <MenuFlyoutSubItem x:Uid="mfsi_stroke_style" Text="Style">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_style_solid_2" x:Uid="rmfi_stroke_style_solid" Click="stroke_style_click" IsChecked="True" Text="Solid" GroupName="gn_stroke_style">
+                <MenuFlyoutSubItem x:Uid="mfsi_stroke_dash_style" Text="Style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_solid_2" x:Uid="rmfi_stroke_dash_style_solid" Click="stroke_dash_style_click" IsChecked="True" Text="Solid" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_line}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
 					<MenuFlyoutSeparator />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_style_dash_2" x:Uid="rmfi_stroke_style_dash" Click="stroke_style_click" Text="Dash" GroupName="gn_stroke_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_dash_2" x:Uid="rmfi_stroke_dash_style_dash" Click="stroke_dash_style_click" Text="Dash" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_dash}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_style_dot_2" x:Uid="rmfi_stroke_style_dot" Click="stroke_style_click" Text="Dot" GroupName="gn_stroke_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_dot_2" x:Uid="rmfi_stroke_dash_style_dot" Click="stroke_dash_style_click" Text="Dot" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_dot}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_style_dash_dot_2" x:Uid="rmfi_stroke_style_dash_dot" Click="stroke_style_click" Text="Dash Dot" GroupName="gn_stroke_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_dash_dot_2" x:Uid="rmfi_stroke_dash_style_dash_dot" Click="stroke_dash_style_click" Text="Dash Dot" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_dash_dot}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_style_dash_dot_dot_2" x:Uid="rmfi_stroke_style_dash_dot_dot" Click="stroke_style_click" Text="Dash Dot Dot" GroupName="gn_stroke_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_dash_dot_dot_2" x:Uid="rmfi_stroke_dash_style_dash_dot_dot" Click="stroke_dash_style_click" Text="Dash Dot Dot" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_dash_dot_dot}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Name="mfi_stroke_patt_2" x:Uid="mfi_stroke_patt" Click="stroke_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
+                <MenuFlyoutItem x:Name="mfi_stroke_dash_patt_2" x:Uid="mfi_stroke_dash_patt" Click="stroke_dash_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
                 <MenuFlyoutItem x:Uid="mfi_stroke_width" Click="stroke_width_click_async" Text="Width..." />
+                <MenuFlyoutSeparator />
+                <MenuFlyoutSubItem Text="Line Join Style ">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_round_2" x:Uid="rmfi_join_round" Click="join_style_click" Text="Rounded" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_bevel_2" x:Uid="rmfi_join_bevel" Click="join_style_click" Text="Beveled" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_miter_2" x:Uid="rmfi_join_miter" Click="join_style_click" IsChecked="true" Text="Shape" />
+                </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- 矢じりメニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
@@ -506,36 +512,41 @@
 			</muxc:MenuBarItem>
             <!-- 線枠メニュー -->
             <muxc:MenuBarItem x:Name="mbi_stroke" x:Uid="mbi_stroke" AccessKey="S" Title="Stroke">
-                <MenuFlyoutSubItem x:Uid="mfsi_stroke_style" Text="Style">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_style_solid" x:Uid="rmfi_stroke_style_solid" Click="stroke_style_click" IsChecked="True" Text="Solid" GroupName="gn_stroke_style">
+                <MenuFlyoutSubItem x:Uid="mfsi_stroke_dash_style" Text="Style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_solid" x:Uid="rmfi_stroke_dash_style_solid" Click="stroke_dash_style_click" IsChecked="True" Text="Solid" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_line}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
                     <MenuFlyoutSeparator />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_style_dash" x:Uid="rmfi_stroke_style_dash" Click="stroke_style_click" Text="Dash" GroupName="gn_stroke_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_dash" x:Uid="rmfi_stroke_dash_style_dash" Click="stroke_dash_style_click" Text="Dash" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_dash}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_style_dot" x:Uid="rmfi_stroke_style_dot" Click="stroke_style_click" Text="Dot" GroupName="gn_stroke_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_dot" x:Uid="rmfi_stroke_dash_style_dot" Click="stroke_dash_style_click" Text="Dot" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_dot}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_style_dash_dot" x:Uid="rmfi_stroke_style_dash_dot" Click="stroke_style_click" Text="Dash Dot" GroupName="gn_stroke_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_dash_dot" x:Uid="rmfi_stroke_dash_style_dash_dot" Click="stroke_dash_style_click" Text="Dash Dot" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_dash_dot}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_style_dash_dot_dot" x:Uid="rmfi_stroke_style_dash_dot_dot" Click="stroke_style_click" Text="Dash Dot Dot" GroupName="gn_stroke_style">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_dash_dot_dot" x:Uid="rmfi_stroke_dash_style_dash_dot_dot" Click="stroke_dash_style_click" Text="Dash Dot Dot" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_dash_dot_dot}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Name="mfi_stroke_patt" x:Uid="mfi_stroke_patt" Click="stroke_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
+                <MenuFlyoutItem x:Name="mfi_stroke_dash_patt" x:Uid="mfi_stroke_dash_patt" Click="stroke_dash_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
                 <MenuFlyoutItem x:Name="mfi_stroke_width" x:Uid="mfi_stroke_width" Click="stroke_width_click_async" Text="Width..." />
+                <MenuFlyoutSubItem Text="Line Join Style ">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_round" x:Uid="rmfi_join_round" Click="join_style_click" Text="Rounded" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_bevel" x:Uid="rmfi_join_bevel" Click="join_style_click" Text="Beveled" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_miter" x:Uid="rmfi_join_miter" Click="join_style_click" IsChecked="true" Text="Shape" />
+                </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- 矢じりメニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">

@@ -147,6 +147,7 @@
     <ClCompile Include="MainPage_font.cpp" />
     <ClCompile Include="MainPage_grid.cpp" />
     <ClCompile Include="MainPage_group.cpp" />
+    <ClCompile Include="MainPage_join.cpp" />
     <ClCompile Include="MainPage_kybd.cpp" />
     <ClCompile Include="MainPage_pref.cpp" />
     <ClCompile Include="MainPage_sheet.cpp" />

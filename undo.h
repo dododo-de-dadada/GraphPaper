@@ -49,8 +49,10 @@ namespace winrt::GraphPaper::implementation
 		SELECT,	// 図形の選択を切り替え
 		START_POS,	// 図形の開始位置の操作
 		STROKE_COLOR,	// 線枠の色の操作
-		STROKE_PATT,	// 破線の配置の操作
-		STROKE_STYLE,	// 線枠の形式の操作
+		STROKE_DASH_PATT,	// 破線の配置の操作
+		STROKE_DASH_STYLE,	// 破線の形式の操作
+		STROKE_JOIN_LIMIT,	// 破線の配置の操作
+		STROKE_JOIN_STYLE,	// 破線の形式の操作
 		STROKE_WIDTH,	// 線枠の太さの操作
 		TEXT_CONTENT,	// 文字列の操作
 		TEXT_ALIGN_P,	// 段落の整列の操作
@@ -82,8 +84,10 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::SHEET_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::START_POS> { using type = D2D1_POINT_2F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_PATT> { using type = STROKE_PATT; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_STYLE> { using type = D2D1_DASH_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_DASH_PATT> { using type = STROKE_DASH_PATT; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_DASH_STYLE> { using type = D2D1_DASH_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_JOIN_LIMIT> { using type = float; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_JOIN_STYLE> { using type = D2D1_LINE_JOIN; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_WIDTH> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_CONTENT> { using type = wchar_t*; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_P> { using type = DWRITE_PARAGRAPH_ALIGNMENT; };

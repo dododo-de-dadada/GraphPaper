@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 			const auto w = m_stroke_width;
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawRectangle(
-				rect, dx.m_shape_brush.get(), w, m_d2d_stroke_style.get());
+				rect, dx.m_shape_brush.get(), w, m_d2d_stroke_dash_style.get());
 		}
 		if (is_selected() != true) {
 			return;
