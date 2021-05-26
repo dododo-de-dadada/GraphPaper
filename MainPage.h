@@ -101,8 +101,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto ICON_ALERT = L"icon_alert";	// 警告アイコンの静的リソースのキー
 
 	constexpr auto SHEET_SIZE_DEF = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
-	constexpr auto SCALE_MAX = 128.0;	// 表示倍率の最大値
-	constexpr auto SCALE_MIN = 1.0 / 128.0;	// 表示倍率の最小値
+	constexpr auto SCALE_MAX = 128.0f;	// 表示倍率の最大値
+	constexpr auto SCALE_MIN = 1.0f / 128.0f;	// 表示倍率の最小値
 	static const winrt::hstring CF_GPD{ L"graph_paper_data" };	// 図形データのクリップボード書式
 
 	//-------------------------------
@@ -366,7 +366,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「矢じりの大きさ」が選択された.
 		IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void arrow_set_slider_header(const double value);
+		template <UNDO_OP U, int S> void arrow_set_slider_header(const float value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
@@ -428,7 +428,7 @@ namespace winrt::GraphPaper::implementation
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void fill_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void fill_set_slider_header(const double value);
+		template <UNDO_OP U, int S> void fill_set_slider_header(const float value);
 
 		//-------------------------------
 		//　MainPage_font.cpp
@@ -454,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「太さ」が選択された.
 		IAsyncAction font_weight_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void font_set_slider_header(const double value);
+		template <UNDO_OP U, int S> void font_set_slider_header(const float value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」に印をつける.
@@ -486,7 +486,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
 		void text_align_t_right_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void text_set_slider_header(const double value);
+		template <UNDO_OP U, int S> void text_set_slider_header(const float value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
@@ -514,7 +514,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙メニューの「方眼にそろえる」が選択された.
 		void grid_snap_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_OP U, int S> void grid_set_slider_header(const double value);
+		template <UNDO_OP U, int S> void grid_set_slider_header(const float value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
@@ -612,7 +612,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙の左上位置を得る.
 		const D2D1_POINT_2F sheet_min(void) const noexcept;
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void sheet_set_slider_header(const double value);
+		template <UNDO_OP U, int S> void sheet_set_slider_header(const float value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void sheet_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 用紙の大きさの最大値 (ピクセル) を得る.
@@ -843,7 +843,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「太さ」が選択された.
 		IAsyncAction stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template<UNDO_OP U, int S> void stroke_set_slider_header(const double value);
+		template<UNDO_OP U, int S> void stroke_set_slider_header(const float value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template<UNDO_OP U, int S> void stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 

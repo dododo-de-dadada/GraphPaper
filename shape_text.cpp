@@ -15,11 +15,11 @@ namespace winrt::GraphPaper::implementation
 	// テキストレイアウトから, ヒットテストのための計量の配列を得る.
 	static void tx_create_test_metrics(IDWriteTextLayout* text_layout, const DWRITE_TEXT_RANGE text_range, DWRITE_HIT_TEST_METRICS*& test_metrics, UINT32& test_count);
 	// テキストレイアウトから, 計量の配列を得る.
-	static void tx_create_text_metrics(IDWriteTextLayout* text_layout, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_metrics, UINT32& line_cnt, DWRITE_LINE_METRICS*& line_metrics, UINT32& range_cnt, DWRITE_HIT_TEST_METRICS*& range_metrics, double& descent, const DWRITE_TEXT_RANGE& sel_range);
+	static void tx_create_text_metrics(IDWriteTextLayout* text_layout, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_metrics, UINT32& line_cnt, DWRITE_LINE_METRICS*& line_metrics, UINT32& range_cnt, DWRITE_HIT_TEST_METRICS*& range_metrics, float& descent, const DWRITE_TEXT_RANGE& sel_range);
 	// 文字列をデータライターに SVG として書き込む.
 	static void tx_write_svg(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer);
 	// 書体のディセントをテキストレイアウトから得る.
-	static void tx_get_font_descent(IDWriteTextLayout* text_layout, double& descent);
+	static void tx_get_font_descent(IDWriteTextLayout* text_layout, float& descent);
 
 	// ヒットテストのための計量の配列をテキストレイアウトから得る.
 	// text_layout	文字列レイアウト
@@ -61,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 		UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_metrics,
 		UINT32& line_cnt, DWRITE_LINE_METRICS*& line_metrics,
 		UINT32& range_cnt, DWRITE_HIT_TEST_METRICS*& range_metrics,
-		double& font_descent,
+		float& font_descent,
 		const DWRITE_TEXT_RANGE& sel_range)
 	{
 		//using winrt::GraphPaper::implementation::create_test_metrics;
@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 			delete[] range_metrics;
 			range_metrics = nullptr;
 		}
-		font_descent = 0.0;
+		font_descent = 0.0f;
 		if (text_layout != nullptr) {
 			tx_create_test_metrics(text_layout, { 0, text_len }, test_metrics, test_cnt);
 
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体のディセントをテキストレイアウトから得る.
 	//	text_layout	文字列レイアウト
 	//	descent	得られたディセント
-	static void tx_get_font_descent(IDWriteTextLayout* text_layout, double& font_descent)
+	static void tx_get_font_descent(IDWriteTextLayout* text_layout, float& font_descent)
 	{
 		winrt::com_ptr<IDWriteFontCollection> fonts;
 		text_layout->GetFontCollection(fonts.put());
@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 		font->GetMetrics(&metrics);
 		font = nullptr;
 		const auto font_size = text_layout->GetFontSize();
-		font_descent = font_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
+		font_descent = static_cast<float>(static_cast<double>(font_size) * metrics.descent / metrics.designUnitsPerEm);
 	}
 
 	// 図形を破棄する.
@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 			delete[] m_dw_line_metrics;
 			m_dw_line_metrics = nullptr;
 		}
-		m_dw_descent = 0.0;
+		m_dw_descent = 0.0f;
 		m_dw_selected_cnt = 0;
 		if (m_dw_selected_metrics != nullptr) {
 			delete[] m_dw_selected_metrics;
@@ -248,7 +248,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(
 			d_factory->CreateTextFormat(m_font_family, static_cast<IDWriteFontCollection*>(nullptr),
 				m_font_weight, m_font_style, DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
-				static_cast<FLOAT>(m_font_size), locale_name, t_format.put())
+				m_font_size, locale_name, t_format.put())
 		);
 		const auto text_w = static_cast<FLOAT>(max(std::fabsf(m_diff[0].x) - 2.0 * m_text_margin.width, 0.0));
 		const auto text_h = static_cast<FLOAT>(max(std::fabsf(m_diff[0].y) - 2.0 * m_text_margin.height, 0.0));
@@ -259,8 +259,8 @@ namespace winrt::GraphPaper::implementation
 			DWRITE_LINE_SPACING spacing;
 			if (m_text_line > FLT_MIN) {
 				spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-				spacing.height = static_cast<FLOAT>(m_text_line);
-				spacing.baseline = static_cast<FLOAT>(m_text_line - m_dw_descent);
+				spacing.height = m_text_line;
+				spacing.baseline = m_text_line - m_dw_descent;
 			}
 			else {
 				spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
@@ -338,13 +338,13 @@ namespace winrt::GraphPaper::implementation
 					rect.left = t_min.x + rm.left;
 					rect.top = static_cast<FLOAT>(t_min.y + tm.top + lm.baseline + m_dw_descent - m_font_size);
 					if (rm.width <= FLT_MIN) {
-						const auto sp = max(lm.trailingWhitespaceLength * m_font_size * 0.25, 1.0);
-						rect.right = rect.left + static_cast<FLOAT>(sp);
+						const float sp_len = max(lm.trailingWhitespaceLength * m_font_size * 0.25f, 1.0f);
+						rect.right = rect.left + sp_len;
 					}
 					else {
 						rect.right = rect.left + rm.width;
 					}
-					rect.bottom = static_cast<FLOAT>(rect.top + m_font_size);
+					rect.bottom = rect.top + m_font_size;
 					dx.m_shape_brush->SetColor(dx.m_range_foreground);
 					dc->DrawRectangle(rect, dx.m_shape_brush.get(), 2.0, nullptr);
 					dx.m_shape_brush->SetColor(dx.m_range_background);
@@ -393,7 +393,7 @@ namespace winrt::GraphPaper::implementation
 			p[0].x = t_min.x + tm.left;
 			p[0].y = static_cast<FLOAT>(t_min.y + tm.top + lm.baseline + m_dw_descent - m_font_size);
 			p[2].x = p[0].x + tm.width;
-			p[2].y = static_cast<FLOAT>(p[0].y + m_font_size);
+			p[2].y = p[0].y + m_font_size;
 			p[1].x = p[2].x;
 			p[1].y = p[0].y;
 			p[3].x = p[0].x;
@@ -471,7 +471,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体の大きさを得る.
-	bool ShapeText::get_font_size(double& value) const noexcept
+	bool ShapeText::get_font_size(float& value) const noexcept
 	{
 		value = m_font_size;
 		return true;
@@ -520,7 +520,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 行間を得る.
-	bool ShapeText::get_text_line(double& value) const noexcept
+	bool ShapeText::get_text_line(float& value) const noexcept
 	{
 		value = m_text_line;
 		return true;
@@ -558,8 +558,8 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 			auto const& tm = m_dw_test_metrics[i];
 			auto const& lm = m_dw_line_metrics[i];
-			D2D1_POINT_2F r_max{ tm.left + tm.width, static_cast<FLOAT>(tm.top + lm.baseline + m_dw_descent) };
-			D2D1_POINT_2F r_min{ tm.left, static_cast<FLOAT>(r_max.y - m_font_size) };
+			D2D1_POINT_2F r_max{ tm.left + tm.width, tm.top + lm.baseline + m_dw_descent };
+			D2D1_POINT_2F r_min{ tm.left, r_max.y - m_font_size };
 			if (pt_in_rect(p_min, r_min, r_max)) {
 				return ANCH_TYPE::ANCH_TEXT;
 			}
@@ -583,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 			for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 				auto const& tm = m_dw_test_metrics[i];
 				auto const& lm = m_dw_line_metrics[i];
-				auto const top = static_cast<double>(tm.top) + static_cast<double>(lm.baseline) + m_dw_descent - m_font_size;
+				auto const top = tm.top + lm.baseline + m_dw_descent - m_font_size;
 				pt_add(p_min, tm.left, top, h_min);
 				if (pt_in_rect(h_min, a_min, a_max) != true) {
 					return false;
@@ -718,16 +718,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を書体の大きさに格納する.
-	void ShapeText::set_font_size(const double value)
+	void ShapeText::set_font_size(const float value)
 	{
 		if (equal(m_font_size, value)) {
 			return;
 		}
 		m_font_size = value;
 		if (m_dw_layout.get() != nullptr) {
-			const FLOAT z = static_cast<FLOAT>(value);
+			//const FLOAT z = value;
 			const uint32_t text_len = wchar_len(m_text);
-			m_dw_layout->SetFontSize(z, { 0, text_len });
+			m_dw_layout->SetFontSize(value, { 0, text_len });
 			tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
 		}
 		else {
@@ -842,7 +842,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を行間に格納する.
-	void ShapeText::set_text_line(const double value)
+	void ShapeText::set_text_line(const float value)
 	{
 		if (m_text_line == value) {
 			return;
@@ -852,10 +852,10 @@ namespace winrt::GraphPaper::implementation
 			winrt::com_ptr<IDWriteTextLayout3> t3;
 			if (m_dw_layout.try_as(t3)) {
 				DWRITE_LINE_SPACING l_spacing;
-				if (m_text_line > 0.0) {
+				if (m_text_line > 0.0f) {
 					l_spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-					l_spacing.height = static_cast<FLOAT>(m_text_line);
-					l_spacing.baseline = static_cast<FLOAT>(m_text_line - m_dw_descent);
+					l_spacing.height = m_text_line;
+					l_spacing.baseline = m_text_line - m_dw_descent;
 				}
 				else {
 					l_spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
@@ -925,14 +925,14 @@ namespace winrt::GraphPaper::implementation
 		read(m_font_color, dt_reader);
 		read(m_font_family, dt_reader);
 		is_available_font(m_font_family);
-		m_font_size = dt_reader.ReadDouble();
+		m_font_size = dt_reader.ReadSingle();
 		m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());
 		m_font_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());
 		m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());
 		read(m_text, dt_reader);
 		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
-		m_text_line = dt_reader.ReadDouble();
+		m_text_line = dt_reader.ReadSingle();
 		read(m_text_margin, dt_reader);
 		create_text_layout(s_dwrite_factory);
 	}
@@ -946,14 +946,14 @@ namespace winrt::GraphPaper::implementation
 
 		write(m_font_color, dt_writer);
 		write(m_font_family, dt_writer);
-		dt_writer.WriteDouble(m_font_size);
+		dt_writer.WriteSingle(m_font_size);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_stretch));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_style));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));
 		write(m_text, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
-		dt_writer.WriteDouble(m_text_line);
+		dt_writer.WriteSingle(m_text_line);
 		write(m_text_margin, dt_writer);
 	}
 
@@ -1024,12 +1024,12 @@ namespace winrt::GraphPaper::implementation
 			const auto& tm = m_dw_test_metrics[i];
 			const wchar_t* t = m_text + tm.textPosition;
 			const uint32_t t_len = tm.length;
-			const double px = static_cast<double>(nw_pos.x);
-			const double qx = static_cast<double>(tm.left);
-			const double py = static_cast<double>(nw_pos.y);
-			const double qy = static_cast<double>(tm.top);
+			const auto px = static_cast<double>(nw_pos.x);
+			const auto qx = static_cast<double>(tm.left);
+			const auto py = static_cast<double>(nw_pos.y);
+			const auto qy = static_cast<double>(tm.top);
 			// 文字列を表示する垂直なずらし位置を求める.
-			const double dy = m_dw_line_metrics[i].baseline;
+			const auto dy = static_cast<double>(m_dw_line_metrics[i].baseline);
 			// 文字列を書き込む.
 			tx_write_svg(t, t_len, px + qx, py + qy, dy, dt_writer);
 		}

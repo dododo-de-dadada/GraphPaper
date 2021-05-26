@@ -11,7 +11,7 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::Foundation::IInspectable;
 
-	constexpr double SLIDER_STEP = 0.5;
+	constexpr float SLIDER_STEP = 0.5f;
 
 	// 書体の太さの配列
 	constexpr std::underlying_type_t<DWRITE_FONT_WEIGHT> FONT_WEIGHTS[] = {
@@ -84,10 +84,10 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_to(&m_sheet_main);
 		D2D1_COLOR_F f_color;
 		m_sample_sheet.get_font_color(f_color);
-		const double val0 = f_color.r * COLOR_MAX;
-		const double val1 = f_color.g * COLOR_MAX;
-		const double val2 = f_color.b * COLOR_MAX;
-		const double val3 = f_color.a * COLOR_MAX;
+		const float val0 = f_color.r * COLOR_MAX;
+		const float val1 = f_color.g * COLOR_MAX;
+		const float val2 = f_color.b * COLOR_MAX;
+		const float val3 = f_color.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -187,17 +187,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S>
-	void MainPage::font_set_slider_header(const double value)
+	template <UNDO_OP U, int S> void MainPage::font_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[32];
-			double g_base;
+			float g_base;
 			m_sample_sheet.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value, sample_dx().m_logical_dpi, g_base + 1.0, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value, m_sample_dx.m_logical_dpi, g_base + 1.0, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
@@ -246,11 +245,10 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
-	void MainPage::font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* const s = m_sample_shape;
-		const auto value = args.NewValue();
+		const auto value = static_cast<float>(args.NewValue());
 		font_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			s->set_font_size(value);
@@ -284,7 +282,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		double val0;
+		float val0;
 		m_sample_sheet.get_font_size(val0);
 		sample_slider_0().Value(val0);
 		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
@@ -294,7 +292,7 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			double sample_value;
+			float sample_value;
 			m_sample_shape->get_font_size(sample_value);
 			undo_push_set<UNDO_OP::FONT_SIZE>(sample_value);
 		}
@@ -519,7 +517,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	}
 
-	constexpr double TEXT_LINE_DELTA = 2;	// 行の高さの変分 (DPIs)
+	constexpr float TEXT_LINE_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
 
 	// 書体メニューの「大きさを合わせる」が選択された.
 	void MainPage::text_bbox_adjust_click(IInspectable const&, RoutedEventArgs const&)
@@ -560,9 +558,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		double t_line;
+		float t_line;
 		m_sample_sheet.get_text_line(t_line);
-		const double val0 = t_line / SLIDER_STEP;
+		const float val0 = t_line / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		text_set_slider_header<UNDO_OP::TEXT_LINE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -571,7 +569,7 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			double sample_value;
+			float sample_value;
 			m_sample_shape->get_text_line(sample_value);
 			undo_push_set<UNDO_OP::TEXT_LINE>(sample_value);
 		}
@@ -588,9 +586,9 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「行の高さ」>「狭める」が選択された.
 	void MainPage::text_line_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		double t_line;
+		float t_line;
 		m_sheet_main.get_text_line(t_line);
-		auto value = t_line - TEXT_LINE_DELTA;
+		float value = t_line - TEXT_LINE_DELTA;
 		if (value <= FLT_MIN) {
 			value = 0.0f;
 		}
@@ -602,9 +600,9 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「行の高さ」>「広げる」が選択された.
 	void MainPage::text_line_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		double t_line;
+		float t_line;
 		m_sheet_main.get_text_line(t_line);
-		auto value = t_line + TEXT_LINE_DELTA;
+		float value = t_line + TEXT_LINE_DELTA;
 		if (t_line != value) {
 			undo_push_set<UNDO_OP::TEXT_LINE>(value);
 		}
@@ -619,8 +617,8 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_to(&m_sheet_main);
 		D2D1_SIZE_F t_margin;
 		m_sample_sheet.get_text_margin(t_margin);
-		const double val0 = t_margin.width / SLIDER_STEP;
-		const double val1 = t_margin.height / SLIDER_STEP;
+		const float val0 = t_margin.width / SLIDER_STEP;
+		const float val1 = t_margin.height / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 0>(val0);
@@ -650,14 +648,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S>
-	void MainPage::text_set_slider_header(const double value)
+	template <UNDO_OP U, int S> void MainPage::text_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		const double dpi = sheet_dx().m_logical_dpi;
-		double g_base;
+		const double dpi = m_sheet_dx.m_logical_dpi;
+		float g_base;
 		m_sample_sheet.get_grid_base(g_base);
 		const double g_len = g_base + 1.0;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
@@ -704,15 +701,14 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
-	void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		const double dpi = sheet_dx().m_logical_dpi;
+		const auto dpi = m_sheet_dx.m_logical_dpi;
 		Shape* const s = m_sample_shape;
-		const double value = args.NewValue();
+		const float value = static_cast<float>(args.NewValue());
 		text_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::TEXT_LINE) {
-			s->set_text_line(value * SLIDER_STEP * dpi / 96.0);
+			s->set_text_line(value * SLIDER_STEP * dpi / 96.0f);
 		}
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			D2D1_SIZE_F margin;

@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow";
-	constexpr double SLIDER_STEP = 0.5;
+	constexpr float SLIDER_STEP = 0.5f;
 
 	// 線枠メニューの「矢じりの種類」のサブ項目が選択された.
 	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
@@ -46,7 +46,7 @@ namespace winrt::GraphPaper::implementation
 	*/
 	//	値をスライダーのヘッダーに格納する.
 	//	value	値
-	template <UNDO_OP U, int S> void MainPage::arrow_set_slider_header(const double value)
+	template <UNDO_OP U, int S> void MainPage::arrow_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -67,8 +67,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::ARROWHEAD_SIZE) {
 			wchar_t buf[32];
-			const double dpi = sheet_dx().m_logical_dpi;
-			double g_base;
+			const double dpi = m_sheet_dx.m_logical_dpi;
+			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			const double g_len = g_base + 1.0;
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	なし
 	template <UNDO_OP U, int S> void MainPage::arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		const auto value = args.NewValue();
+		const auto value = static_cast<float>(args.NewValue());
 		// 値をスライダーのヘッダーに格納する.
 		arrow_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::ARROWHEAD_SIZE) {
@@ -126,9 +126,9 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_to(&m_sheet_main);
 		ARROWHEAD_SIZE a_size;
 		m_sample_sheet.get_arrow_size(a_size);
-		const double val0 = a_size.m_width / SLIDER_STEP;
-		const double val1 = a_size.m_length / SLIDER_STEP;
-		const double val2 = a_size.m_offset / SLIDER_STEP;
+		const float val0 = a_size.m_width / SLIDER_STEP;
+		const float val1 = a_size.m_length / SLIDER_STEP;
+		const float val2 = a_size.m_offset / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);

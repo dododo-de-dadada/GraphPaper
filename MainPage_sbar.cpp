@@ -192,7 +192,7 @@ namespace winrt::GraphPaper::implementation
 	// ポインターの位置をステータスバーに格納する.
 	void MainPage::sbar_set_curs(void)
 	{
-		const double dpi = sheet_dx().m_logical_dpi;
+		const double dpi = m_sheet_dx.m_logical_dpi;
 		const auto wp = CoreWindow::GetForCurrentThread().PointerPosition();
 		const auto wb = CoreWindow::GetForCurrentThread().Bounds();
 		const auto tr = scp_sheet_panel().TransformToVisual(nullptr);
@@ -210,7 +210,7 @@ namespace winrt::GraphPaper::implementation
 		const double ps = m_sheet_main.m_sheet_scale;
 		const double fx = (wx - bx - tx) / ps + sx + px;
 		const double fy = (wy - by - ty) / ps + sy + py;
-		double g_base;
+		float g_base;
 		m_sheet_main.get_grid_base(g_base);
 		const double g_len = g_base + 1.0;
 
@@ -228,8 +228,8 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::sbar_set_grid(void)
 	{
 		wchar_t buf[32];
-		const double dpi = sheet_dx().m_logical_dpi;
-		double g_base;
+		const double dpi = m_sheet_dx.m_logical_dpi;
+		float g_base;
 		m_sheet_main.get_grid_base(g_base);
 		const double g_len = g_base + 1.0;
 		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), g_len, dpi, g_len, buf);
@@ -239,8 +239,8 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	// 用紙の大きさをステータスバーに格納する.
 	void MainPage::sbar_set_sheet(void)
 	{
-		const double dpi = sheet_dx().m_logical_dpi;
-		double g_base;
+		const double dpi = m_sheet_dx.m_logical_dpi;
+		float g_base;
 		m_sheet_main.get_grid_base(g_base);
 		const double g_len = g_base + 1.0;
 		wchar_t buf[32];

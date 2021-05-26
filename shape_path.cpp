@@ -147,9 +147,7 @@ namespace winrt::GraphPaper::implementation
 		ShapeStroke::ShapeStroke(dt_reader)
 	{
 		m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());
-		m_arrow_size.m_width = dt_reader.ReadSingle();
-		m_arrow_size.m_length = dt_reader.ReadSingle();
-		m_arrow_size.m_offset = dt_reader.ReadSingle();
+		read(m_arrow_size, dt_reader);
 		// コンストラクタの中での (デストラクタの中でも) 仮想関数は無意味.
 		//create_path_geometry(s_d2d_factory);
 	}
@@ -157,11 +155,11 @@ namespace winrt::GraphPaper::implementation
 	// データライターに書き込む.
 	void ShapePath::write(DataWriter const& dt_writer) const
 	{
+		using winrt::GraphPaper::implementation::write;
+
 		ShapeStroke::write(dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));
-		dt_writer.WriteSingle(m_arrow_size.m_width);
-		dt_writer.WriteSingle(m_arrow_size.m_length);
-		dt_writer.WriteSingle(m_arrow_size.m_offset);
+		write(m_arrow_size, dt_writer);
 	}
 
 }

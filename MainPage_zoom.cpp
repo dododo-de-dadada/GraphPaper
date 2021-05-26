@@ -10,8 +10,8 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 表示倍率の配列
-	constexpr double ZOOM_LEVEL[] = {
-		0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0
+	constexpr float ZOOM_LEVEL[] = {
+		0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f
 	};
 
 	// 用紙メニューの「拡大縮小」>「拡大」が選択された.

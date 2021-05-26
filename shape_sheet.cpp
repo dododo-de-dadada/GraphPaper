@@ -62,28 +62,30 @@ namespace winrt::GraphPaper::implementation
 	{
 		//ID2D1SolidColorBrush* br = dx.m_aux_brush.get();
 		//ID2D1StrokeStyle* ss = dx.m_aux_style.get();
-		const FLOAT sw = static_cast<FLOAT>(1.0 / m_sheet_scale);
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
+		const auto s_brush = dx.m_shape_brush.get();
+		const auto a_style = dx.m_aux_style.get();
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
 
 		e_pos.x = c_pos.x;
 		e_pos.y = p_pos.y;
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
-		dx.m_d2dContext->DrawLine(p_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_d2dContext->DrawLine(p_pos, e_pos, s_brush, s_width, nullptr);
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
-		dx.m_d2dContext->DrawLine(p_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawLine(p_pos, e_pos, s_brush, s_width, a_style);
 		s_pos = e_pos;
 		e_pos.x = p_pos.x;
 		e_pos.y = c_pos.y;
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_d2dContext->DrawLine(s_pos, e_pos, s_brush, s_width, nullptr);
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawLine(s_pos, e_pos, s_brush, s_width, a_style);
 		s_pos = e_pos;
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
-		dx.m_d2dContext->DrawLine(s_pos, c_pos, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_d2dContext->DrawLine(s_pos, c_pos, s_brush, s_width, nullptr);
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
-		dx.m_d2dContext->DrawLine(s_pos, c_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawLine(s_pos, c_pos, s_brush, s_width, a_style);
 	}
 
 	// ‚¾‰~‚Ì•â•ü‚ğ•\¦‚·‚é.
@@ -94,19 +96,19 @@ namespace winrt::GraphPaper::implementation
 	{
 		//auto br = dx.m_aux_brush.get();
 		//auto ss = dx.m_aux_style.get();
-		const FLOAT sw = static_cast<FLOAT>(1.0 / m_sheet_scale);
-		D2D1_POINT_2F r;	// •ûŒ`
-		D2D1_ELLIPSE e;		// ‚¾‰~
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
+		D2D1_POINT_2F rect;	// •ûŒ`
+		D2D1_ELLIPSE elli;		// ‚¾‰~
 
-		pt_sub(c_pos, p_pos, r);
-		pt_mul(r, 0.5, r);
-		pt_add(p_pos, r, e.point);
-		e.radiusX = r.x;
-		e.radiusY = r.y;
+		pt_sub(c_pos, p_pos, rect);
+		pt_mul(rect, 0.5, rect);
+		pt_add(p_pos, rect, elli.point);
+		elli.radiusX = rect.x;
+		elli.radiusY = rect.y;
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
-		dx.m_d2dContext->DrawEllipse(e, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), s_width, nullptr);
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
-		dx.m_d2dContext->DrawEllipse(e, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
 
 	// ’¼ü‚Ì•â•ü‚ğ•\¦‚·‚é.
@@ -117,11 +119,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		//auto br = dx.m_aux_brush.get();
 		//auto ss = dx.m_aux_style.get();
-		const FLOAT sw = static_cast<FLOAT>(1.0 / m_sheet_scale);
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
 		dx.m_shape_brush->SetColor(dx.m_theme_background);
-		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), sw, nullptr);
+		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), s_width, nullptr);
 		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
-		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
 
 	// ‚Ğ‚µŒ`‚Ì•â•ü‚ğ•\¦‚·‚é.
@@ -339,7 +341,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ‘‘Ì‚Ì‘å‚«‚³‚ğ“¾‚é.
-	bool ShapeSheet::get_font_size(double& value) const noexcept
+	bool ShapeSheet::get_font_size(float& value) const noexcept
 	{
 		value = m_font_size;
 		return true;
@@ -367,7 +369,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// •ûŠá‚ÌŠî€‚Ì‘å‚«‚³‚ğ“¾‚é.
-	bool ShapeSheet::get_grid_base(double& value) const noexcept
+	bool ShapeSheet::get_grid_base(float& value) const noexcept
 	{
 		value = m_grid_base;
 		return true;
@@ -376,15 +378,14 @@ namespace winrt::GraphPaper::implementation
 	// •ûŠá‚Ì”Z’W‚ğ“¾‚é.
 	void ShapeSheet::get_grid_color(D2D1_COLOR_F& value) const noexcept
 	{
-		value.r = static_cast<FLOAT>(1.0 - m_grid_gray);
+		value.r = 1.0f - m_grid_gray;
 		value.g = value.r;
 		value.b = value.r;
 		value.a = 0.875F;
-		//get_opposite_color(m_sheet_color, m_grid_gray, value);
 	}
 
 	// •ûŠá‚Ì”Z’W‚ğ“¾‚é.
-	bool ShapeSheet::get_grid_gray(double& value) const noexcept
+	bool ShapeSheet::get_grid_gray(float& value) const noexcept
 	{
 		value = m_grid_gray;
 		return true;
@@ -419,7 +420,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// —p†‚ÌŠg‘å—¦‚ğ“¾‚é.
-	bool ShapeSheet::get_sheet_scale(double& value) const noexcept
+	bool ShapeSheet::get_sheet_scale(float& value) const noexcept
 	{
 		value = m_sheet_scale;
 		return true;
@@ -454,7 +455,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ü˜g‚Ì‘¾‚³‚ğ“¾‚é.
-	bool ShapeSheet::get_stroke_width(double& value) const noexcept
+	bool ShapeSheet::get_stroke_width(float& value) const noexcept
 	{
 		value = m_stroke_width;
 		return true;
@@ -475,7 +476,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// sŠÔ‚ğ“¾‚é.
-	bool ShapeSheet::get_text_line(double& value) const noexcept
+	bool ShapeSheet::get_text_line(float& value) const noexcept
 	{
 		value = m_text_line;
 		return true;
@@ -495,32 +496,34 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_COLOR_F dummy;
 		read(dummy, dt_reader);
-		m_grid_base = dt_reader.ReadDouble();
-		m_grid_gray = dt_reader.ReadDouble();
+		m_grid_base = dt_reader.ReadSingle();
+		m_grid_gray = dt_reader.ReadSingle();
 		read(m_grid_emph, dt_reader);
-		read(m_grid_show, dt_reader);
+		m_grid_show = static_cast<GRID_SHOW>(dt_reader.ReadUInt32());
 		m_grid_snap = dt_reader.ReadBoolean();
 		read(m_sheet_color, dt_reader);
-		m_sheet_scale = dt_reader.ReadDouble();
+		m_sheet_scale = dt_reader.ReadSingle();
 		read(m_sheet_size, dt_reader);
 
 		read(m_arrow_size, dt_reader);	// –î‚¶‚è‚Ì¡–@
-		read(m_arrow_style, dt_reader);	// –î‚¶‚è‚ÌŒ`®
+		m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());	// –î‚¶‚è‚ÌŒ`®
 		read(m_corner_rad, dt_reader);	// ŠpŠÛ”¼Œa
 		read(m_stroke_color, dt_reader);	// üE˜g‚ÌF
+		m_stroke_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());	// Šp‚ÌŒ`ó
+		m_stroke_join_limit = dt_reader.ReadSingle();	// Šp‚Ìƒ}ƒCƒ^[§ŒÀ
 		read(m_stroke_patt, dt_reader);	// ”jü‚Ì”z’u
-		read(m_stroke_style, dt_reader);	// ”jü‚ÌŒ`®
-		read(m_stroke_width, dt_reader);	// üE˜g‚Ì‘¾‚³
+		m_stroke_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());	// ”jü‚ÌŒ`®
+		m_stroke_width = dt_reader.ReadSingle();	// üE˜g‚Ì‘¾‚³
 		read(m_fill_color, dt_reader);	// “h‚è‚Â‚Ô‚µ‚ÌF
 		read(m_font_color, dt_reader);	// ‘‘Ì‚ÌF
 		read(m_font_family, dt_reader);	// ‘‘Ì–¼
-		read(m_font_size, dt_reader);	// ‘‘Ì‚Ì‘å‚«‚³
-		read(m_font_stretch, dt_reader);	// ‘‘Ì‚ÌLk
-		read(m_font_style, dt_reader);	// ‘‘Ì‚Ìš‘Ì
-		read(m_font_weight, dt_reader);	// ‘‘Ì‚Ì‘¾‚³
-		read(m_text_align_p, dt_reader);	// ’i—‚Ì‚»‚ë‚¦
-		read(m_text_align_t, dt_reader);	// •¶š—ñ‚Ì‚»‚ë‚¦
-		read(m_text_line, dt_reader);	// sŠÔ
+		m_font_size = dt_reader.ReadSingle();	// ‘‘Ì‚Ì‘å‚«‚³
+		m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());	// ‘‘Ì‚ÌLk
+		m_font_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());	// ‘‘Ì‚Ìš‘Ì
+		m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());	// ‘‘Ì‚Ì‘¾‚³
+		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());	// ’i—‚Ì‚»‚ë‚¦
+		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());	// •¶š—ñ‚Ì‚»‚ë‚¦
+		m_text_line = dt_reader.ReadSingle();	// sŠÔ
 		read(m_text_margin, dt_reader);	// •¶š—ñ‚Ì—]”’
 
 		ShapeText::is_available_font(m_font_family);
@@ -562,7 +565,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ‘‘Ì‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_font_size(const double value)
+	void ShapeSheet::set_font_size(const float value)
 	{
 		m_font_size = value;
 	}
@@ -586,13 +589,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ•ûŠá‚ÌŠî€‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_grid_base(const double value) noexcept
+	void ShapeSheet::set_grid_base(const float value) noexcept
 	{
 		m_grid_base = value;
 	}
 
 	// ’l‚ğ•ûŠá‚Ì”Z’W‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_grid_gray(const double value) noexcept
+	void ShapeSheet::set_grid_gray(const float value) noexcept
 	{
 		m_grid_gray = value;
 	}
@@ -623,7 +626,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ—p†‚ÌŠg‘å—¦‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_sheet_scale(const double value) noexcept
+	void ShapeSheet::set_sheet_scale(const float value) noexcept
 	{
 		m_sheet_scale = value;
 	}
@@ -653,7 +656,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ü˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_width(const double value) noexcept
+	void ShapeSheet::set_stroke_width(const float value) noexcept
 	{
 		m_stroke_width = value;
 	}
@@ -671,7 +674,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğsŠÔ‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_text_line(const double value)
+	void ShapeSheet::set_text_line(const float value)
 	{
 		m_text_line = value;
 	}
@@ -718,32 +721,34 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_COLOR_F dummy;
 		write(dummy, dt_writer);
-		dt_writer.WriteDouble(m_grid_base);
-		dt_writer.WriteDouble(m_grid_gray);
+		dt_writer.WriteSingle(m_grid_base);
+		dt_writer.WriteSingle(m_grid_gray);
 		write(m_grid_emph, dt_writer);
-		write(m_grid_show, dt_writer);
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_grid_show));
 		dt_writer.WriteBoolean(m_grid_snap);
 		write(m_sheet_color, dt_writer);
-		dt_writer.WriteDouble(m_sheet_scale);
+		dt_writer.WriteSingle(m_sheet_scale);
 		write(m_sheet_size, dt_writer);
 
 		write(m_arrow_size, dt_writer);	// –î‚¶‚è‚Ì¡–@
-		write(m_arrow_style, dt_writer);	// –î‚¶‚è‚ÌŒ`®
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));	// –î‚¶‚è‚ÌŒ`®
 		write(m_corner_rad, dt_writer);	// ŠpŠÛ”¼Œa
 		write(m_stroke_color, dt_writer);	// ü˜g‚ÌF
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_join_style));	// Šp‚ÌŒ`ó
+		dt_writer.WriteSingle(m_stroke_join_limit);	// Šp‚Ìƒ}ƒCƒ^[§ŒÀ
 		write(m_stroke_patt, dt_writer);	// ”jü‚Ì”z’u
-		write(m_stroke_style, dt_writer);	// ü˜g‚ÌŒ`®
-		write(m_stroke_width, dt_writer);	// ü˜g‚Ì‘¾‚³
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_style));	// ü˜g‚ÌŒ`®
+		dt_writer.WriteSingle(m_stroke_width);	// ü˜g‚Ì‘¾‚³
 		write(m_fill_color, dt_writer);	// “h‚è‚Â‚Ô‚µ‚ÌF
 		write(m_font_color, dt_writer);	// ‘‘Ì‚ÌF
 		write(m_font_family, dt_writer);	// ‘‘Ì–¼
-		write(m_font_size, dt_writer);	// ‘‘Ì‚Ì‘å‚«‚³
-		write(m_font_stretch, dt_writer);	// ‘‘Ì‚ÌLk
-		write(m_font_style, dt_writer);	// ‘‘Ì‚Ìš‘Ì
-		write(m_font_weight, dt_writer);	// ‘‘Ì‚Ì‘¾‚³
-		write(m_text_align_p, dt_writer);	// ’i—‚Ì‚»‚ë‚¦
-		write(m_text_align_t, dt_writer);	// •¶š—ñ‚Ì‚»‚ë‚¦
-		write(m_text_line, dt_writer);	// sŠÔ
+		dt_writer.WriteSingle(m_font_size);	// ‘‘Ì‚Ì‘å‚«‚³
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_stretch));	// ‘‘Ì‚ÌLk
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_style));	// ‘‘Ì‚Ìš‘Ì
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));	// ‘‘Ì‚Ì‘¾‚³
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));	// ’i—‚Ì‚»‚ë‚¦
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));	// •¶š—ñ‚Ì‚»‚ë‚¦
+		dt_writer.WriteSingle(m_text_line);	// sŠÔ
 		write(m_text_margin, dt_writer);	// •¶š—ñ‚Ì—]”’
 
 	}

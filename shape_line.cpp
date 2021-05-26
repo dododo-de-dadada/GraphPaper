@@ -87,7 +87,7 @@ namespace winrt::GraphPaper::implementation
 		dx.m_shape_brush->SetColor(m_stroke_color);
 		const auto s_brush = dx.m_shape_brush.get();
 		const auto s_style = m_d2d_stroke_style.get();
-		const auto s_width = static_cast<FLOAT>(m_stroke_width);
+		const auto s_width = m_stroke_width;
 		dx.m_d2dContext->DrawLine(m_pos, e_pos, s_brush, s_width, s_style);
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			const auto a_geom = m_d2d_arrow_geom.get();
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 		if (pt_in_anch(t_pos, m_pos, a_len)) {
 			return ANCH_BEGIN;
 		}
-		if (pt_in_line(t_pos, m_pos, e_pos, max(m_stroke_width, a_len))) {
+		if (pt_in_line(t_pos, m_pos, e_pos, max(static_cast<double>(m_stroke_width), a_len))) {
 			return ANCH_TYPE::ANCH_STROKE;
 		}
 		return ANCH_TYPE::ANCH_SHEET;
@@ -184,10 +184,10 @@ namespace winrt::GraphPaper::implementation
 	// データライターから読み込む.
 	void ShapeLine::read(DataReader const& dt_reader)
 	{
-		m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadInt32());
-		m_arrow_size.m_width = dt_reader.ReadSingle();
-		m_arrow_size.m_length = dt_reader.ReadSingle();
-		m_arrow_size.m_offset = dt_reader.ReadSingle();
+		using winrt::GraphPaper::implementation::read;
+
+		m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());
+		read(m_arrow_size, dt_reader);
 		m_d2d_arrow_geom = nullptr;
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			ln_create_arrow_geom(s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
@@ -280,10 +280,10 @@ namespace winrt::GraphPaper::implementation
 	ShapeLine::ShapeLine(DataReader const& dt_reader) :
 		ShapeStroke::ShapeStroke(dt_reader)
 	{
+		using winrt::GraphPaper::implementation::read;
+
 		m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadInt32());
-		m_arrow_size.m_width = dt_reader.ReadSingle();
-		m_arrow_size.m_length = dt_reader.ReadSingle();
-		m_arrow_size.m_offset = dt_reader.ReadSingle();
+		read(m_arrow_size, dt_reader);
 		m_d2d_arrow_geom = nullptr;
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			ln_create_arrow_geom(s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
@@ -293,11 +293,11 @@ namespace winrt::GraphPaper::implementation
 	// データライターに書き込む.
 	void ShapeLine::write(DataWriter const& dt_writer) const
 	{
+		using winrt::GraphPaper::implementation::write;
+
 		ShapeStroke::write(dt_writer);
 		dt_writer.WriteInt32(static_cast<int32_t>(m_arrow_style));
-		dt_writer.WriteSingle(m_arrow_size.m_width);
-		dt_writer.WriteSingle(m_arrow_size.m_length);
-		dt_writer.WriteSingle(m_arrow_size.m_offset);
+		write(m_arrow_size, dt_writer);
 	}
 
 	// データライターに SVG タグとして書き込む.

@@ -20,10 +20,10 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_to(&m_sheet_main);
 		D2D1_COLOR_F f_color;
 		m_sample_sheet.get_fill_color(f_color);
-		const double val0 = f_color.r * COLOR_MAX;
-		const double val1 = f_color.g * COLOR_MAX;
-		const double val2 = f_color.b * COLOR_MAX;
-		const double val3 = f_color.a * COLOR_MAX;
+		const float val0 = f_color.r * COLOR_MAX;
+		const float val1 = f_color.g * COLOR_MAX;
+		const float val2 = f_color.b * COLOR_MAX;
+		const float val3 = f_color.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -65,8 +65,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S>
-	void MainPage::fill_set_slider_header(const double value)
+	template <UNDO_OP U, int S> void MainPage::fill_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -120,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::fill_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* const s = m_sample_shape;
-		const double value = args.NewValue();
+		const float value = static_cast<float>(args.NewValue());
 		fill_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::FILL_COLOR) {
 			D2D1_COLOR_F color;

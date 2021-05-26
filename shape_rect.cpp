@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_stroke_color)) {
 			// ê¸ògÇÃêFÇ™ïsìßñæÇ»èÍçá,
 			// ï˚å`ÇÃògÇï\é¶Ç∑ÇÈ.
-			const auto w = static_cast<FLOAT>(m_stroke_width);
+			const auto w = m_stroke_width;
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawRectangle(
 				rect, dx.m_shape_brush.get(), w, m_d2d_stroke_style.get());
@@ -99,7 +99,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			return ANCH_TYPE::ANCH_SHEET;
 		}
-		const double sw = max(m_stroke_width, a_len);	// ê¸ògÇÃëæÇ≥
+		const double sw = max(static_cast<double>(m_stroke_width), a_len);	// ê¸ògÇÃëæÇ≥
 		pt_add(r_min, sw * 0.5, r_min);
 		pt_add(r_max, sw * -0.5, r_max);
 		if (pt_in_rect(t_pos, r_min, r_max)) {
@@ -212,10 +212,9 @@ namespace winrt::GraphPaper::implementation
 			break;
 		case ANCH_TYPE::ANCH_NORTH:
 			{
-			double diff_y = value.y - m_pos.y;
-			diff_y = static_cast<FLOAT>(std::round(diff_y / PT_ROUND) * PT_ROUND);
-			m_diff[0].y -= diff_y;
-			m_pos.y += diff_y;
+			const double diff_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
+			m_diff[0].y = static_cast<FLOAT>(m_diff[0].y - diff_y);
+			m_pos.y = static_cast<FLOAT>(m_pos.y + diff_y);
 			}
 			break;
 		case ANCH_TYPE::ANCH_NE:
@@ -231,17 +230,15 @@ namespace winrt::GraphPaper::implementation
 			break;
 		case ANCH_TYPE::ANCH_WEST:
 			{
-			double diff_x = value.x - m_pos.x;
-			diff_x = static_cast<FLOAT>(std::round(diff_x / PT_ROUND) * PT_ROUND);
-			m_diff[0].x -= diff_x;
-			m_pos.x += diff_x;
+			const double diff_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
+			m_diff[0].x = static_cast<FLOAT>(m_diff[0].x - diff_x);
+			m_pos.x = static_cast<FLOAT>(m_pos.x + diff_x);
 			}
 			break;
 		case ANCH_TYPE::ANCH_EAST:
 			{
-			double diff_x = value.x - m_pos.x;
-			diff_x = static_cast<FLOAT>(std::round(diff_x / PT_ROUND) * PT_ROUND);
-			m_diff[0].x = diff_x;
+			const double diff_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
+			m_diff[0].x = static_cast<FLOAT>(diff_x);
 
 			}
 			break;
@@ -257,9 +254,8 @@ namespace winrt::GraphPaper::implementation
 			break;
 		case ANCH_TYPE::ANCH_SOUTH:
 			{
-			double diff_y = value.y - m_pos.y;
-			diff_y = static_cast<FLOAT>(std::round(diff_y / PT_ROUND) * PT_ROUND);
-			m_diff[0].y = diff_y;
+			const double diff_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
+			m_diff[0].y = static_cast<FLOAT>(diff_y);
 			}
 			break;
 		case ANCH_TYPE::ANCH_SE:

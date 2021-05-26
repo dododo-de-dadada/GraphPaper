@@ -188,7 +188,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-		auto f_size = min(s_attr->m_font_size, s_attr->m_grid_base + 1.0);
+		const float font_size = min(s_attr->m_font_size, s_attr->m_grid_base + 1.0f);
 		winrt::check_hresult(
 			Shape::s_dwrite_factory->CreateTextFormat(
 				s_attr->m_font_family,
@@ -196,7 +196,7 @@ namespace winrt::GraphPaper::implementation
 				s_attr->m_font_weight,
 				s_attr->m_font_style,
 				DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
-				static_cast<FLOAT>(f_size),
+				font_size,
 				locale_name,
 				m_dw_text_format.put()
 			)
@@ -207,23 +207,22 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータリーダーから読み込む.
 	ShapeRuler::ShapeRuler(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader),
-		m_grid_base(dt_reader.ReadDouble())
+		m_grid_base(dt_reader.ReadSingle())
 	{
 		// 書体名
 		wchar_t* f_family;
 		read(f_family, dt_reader);
 		// 書体の大きさ
-		auto f_size = dt_reader.ReadDouble();
+		const auto f_size = dt_reader.ReadSingle();
 		// 字体
 		DWRITE_FONT_STYLE f_style;
-		read(f_style, dt_reader);
+		f_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());
 		// 書体の太さ
 		DWRITE_FONT_WEIGHT f_weight;
-		read(f_weight, dt_reader);
+		f_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());
 
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-		auto size = min(f_size, m_grid_base + 1.0);
 		winrt::check_hresult(
 			Shape::s_dwrite_factory->CreateTextFormat(
 				f_family,
@@ -231,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 				f_weight,
 				f_style,
 				DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
-				static_cast<FLOAT>(size),
+				min(f_size, m_grid_base + 1.0f),
 				locale_name,
 				m_dw_text_format.put()
 			)
@@ -246,19 +245,19 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::write;
 
 		ShapeRect::write(dt_writer);
-		dt_writer.WriteDouble(m_grid_base);
+		dt_writer.WriteSingle(m_grid_base);
 		// 書体名
-		auto n_size = m_dw_text_format->GetFontFamilyNameLength() + 1;
-		wchar_t* f_name = new wchar_t[n_size];
-		m_dw_text_format->GetFontFamilyName(f_name, n_size);
+		auto name_len = m_dw_text_format->GetFontFamilyNameLength() + 1;
+		wchar_t* const f_name = new wchar_t[name_len];
+		m_dw_text_format->GetFontFamilyName(f_name, name_len);
 		write(f_name, dt_writer);
 		delete[] f_name;
 		// 書体の大きさ
-		dt_writer.WriteDouble(m_dw_text_format->GetFontSize());
+		dt_writer.WriteSingle(m_dw_text_format->GetFontSize());
 		// 字体
-		write(m_dw_text_format->GetFontStyle(), dt_writer);
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dw_text_format->GetFontStyle()));
 		// 書体の太さ
-		write(m_dw_text_format->GetFontWeight(), dt_writer);
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dw_text_format->GetFontWeight()));
 	}
 
 }

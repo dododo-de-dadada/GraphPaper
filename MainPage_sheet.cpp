@@ -65,9 +65,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		const double val0 = m_sample_sheet.m_sheet_color.r * COLOR_MAX;
-		const double val1 = m_sample_sheet.m_sheet_color.g * COLOR_MAX;
-		const double val2 = m_sample_sheet.m_sheet_color.b * COLOR_MAX;
+		const float val0 = m_sample_sheet.m_sheet_color.r * COLOR_MAX;
+		const float val1 = m_sample_sheet.m_sheet_color.g * COLOR_MAX;
+		const float val2 = m_sample_sheet.m_sheet_color.b * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -123,13 +123,13 @@ namespace winrt::GraphPaper::implementation
 		D2D1_MATRIX_3X2_F tran;
 		dc->GetTransform(&tran);
 		// 拡大率を変換行列の拡大縮小の成分に格納する.
-		const auto scale = max(m_sheet_main.m_sheet_scale, 0.0);
-		tran.m11 = tran.m22 = static_cast<FLOAT>(scale);
+		const auto sheet_scale = max(m_sheet_main.m_sheet_scale, 0.0f);
+		tran.m11 = tran.m22 = sheet_scale;
 		// スクロールの変分に拡大率を掛けた値を
 		// 変換行列の平行移動の成分に格納する.
 		D2D1_POINT_2F t_pos;
 		pt_add(m_sheet_min, sb_horz().Value(), sb_vert().Value(), t_pos);
-		pt_mul(t_pos, scale, t_pos);
+		pt_mul(t_pos, sheet_scale, t_pos);
 		tran.dx = -t_pos.x;
 		tran.dy = -t_pos.y;
 		// 変換行列をデバイスコンテキストに格納する.
@@ -264,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 							else if (prop == TextBlock::FontSizeProperty()) {
 								// プロパティーが FontSize の場合,
 								// セッターの値から, 書体の大きさを得る.
-								auto value = unbox_value<double>(setter.Value());
+								const auto value = unbox_value<float>(setter.Value());
 								m_sheet_main.m_font_size = value;
 							}
 							else if (prop == TextBlock::FontStretchProperty()) {
@@ -407,8 +407,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S>
-	void MainPage::sheet_set_slider_header(const double value)
+	template <UNDO_OP U, int S> void MainPage::sheet_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
@@ -455,11 +454,10 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
-	void MainPage::sheet_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::sheet_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = &m_sample_sheet;
-		const auto value = args.NewValue();
+		const auto value = static_cast<float>(args.NewValue());
 		sheet_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			s->set_grid_base(value);
@@ -495,7 +493,7 @@ namespace winrt::GraphPaper::implementation
 		double pw = m_sheet_main.m_sheet_size.width;
 		double ph = m_sheet_main.m_sheet_size.height;
 		const double dpi = m_sheet_dx.m_logical_dpi;
-		double g_base;
+		float g_base;
 		m_sheet_main.get_grid_base(g_base);
 		const auto g_len = g_base + 1.0;
 		wchar_t buf[32];
@@ -607,7 +605,7 @@ namespace winrt::GraphPaper::implementation
 		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &value, buf, 2);
 		if (cnt == 1 && value > 0.0) {
 			// 文字列が数値に変換できた場合,
-			double g_base;
+			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			value = conv_len_to_val(len_unit(), value, dpi, g_base + 1.0);
 		}

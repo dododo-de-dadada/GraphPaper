@@ -506,13 +506,12 @@ namespace winrt::GraphPaper::implementation
 	// –ß‚è’l	‚È‚µ
 	template <UNDO_OP U, typename T> void MainPage::undo_push_set(Shape* const s, T const& value)
 	{
+		// }Œ`‚ª‚»‚Ì’l‚ğ‚½‚È‚¢ê‡, ‚Ü‚½‚Í‚·‚Å‚É“¯’l‚Ìê‡,
 		T t_value;
 		if (UndoAttr<U>::GET(s, t_value) != true || equal(t_value, value)) {
-			// }Œ`‚ª‚»‚Ì’l‚ğ‚½‚È‚¢ê‡, ‚Ü‚½‚Í‚·‚Å‚É“¯’l‚Ìê‡,
 			// I—¹‚·‚é.
 			return;
 		}
-		// 
 		m_stack_undo.push_back(new UndoAttr<U>(s, value));
 	}
 
@@ -521,8 +520,7 @@ namespace winrt::GraphPaper::implementation
 	// T	Ši”[‚·‚éŒ^.
 	// value	Ši”[‚·‚é’l
 	// Ši”[‚·‚éŒ^ T ‚Í–¾¦‚µ‚È‚­‚Ä‚àˆø”‚ÌŒ^‚©‚ç„’è‚Å‚«‚é
-	template<UNDO_OP U, typename T>
-	void MainPage::undo_push_set(T const& value)
+	template<UNDO_OP U, typename T> void MainPage::undo_push_set(T const& value)
 	{
 		m_stack_undo.push_back(new UndoAttr<U>(&m_sheet_main, value));
 		auto flag = false;
@@ -556,12 +554,12 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::undo_push_set<UNDO_OP::FILL_COLOR>(D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FONT_COLOR>(D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FONT_FAMILY>(wchar_t* const& value);
-	template void MainPage::undo_push_set<UNDO_OP::FONT_SIZE>(double const& value);
+	template void MainPage::undo_push_set<UNDO_OP::FONT_SIZE>(float const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FONT_STRETCH>(DWRITE_FONT_STRETCH const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE const& value);
 	template void MainPage::undo_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& value);
-	template void MainPage::undo_push_set<UNDO_OP::GRID_BASE>(Shape* const s, double const& value);
-	template void MainPage::undo_push_set<UNDO_OP::GRID_GRAY>(Shape* const s, double const& value);
+	template void MainPage::undo_push_set<UNDO_OP::GRID_BASE>(Shape* const s, float const& value);
+	template void MainPage::undo_push_set<UNDO_OP::GRID_GRAY>(Shape* const s, float const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_EMPH>(Shape* const s, GRID_EMPH const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_SHOW>(Shape* const s, GRID_SHOW const& value);
 	template void MainPage::undo_push_set<UNDO_OP::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& value);
@@ -570,11 +568,11 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_PATT>(STROKE_PATT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::STROKE_STYLE>(D2D1_DASH_STYLE const& value);
-	template void MainPage::undo_push_set<UNDO_OP::STROKE_WIDTH>(double const& value);
+	template void MainPage::undo_push_set<UNDO_OP::STROKE_WIDTH>(float const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_CONTENT>(Shape* const s, wchar_t* const& value);
-	template void MainPage::undo_push_set<UNDO_OP::TEXT_LINE>(double const& value);
+	template void MainPage::undo_push_set<UNDO_OP::TEXT_LINE>(float const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_MARGIN>(D2D1_SIZE_F const& value);
 
 	// •¶š”ÍˆÍ‚Ì’l‚ğ}Œ`‚ÉŠi”[‚µ‚Ä, ‚»‚Ì‘€ì‚ğƒXƒ^ƒbƒN‚ÉÏ‚Ş.

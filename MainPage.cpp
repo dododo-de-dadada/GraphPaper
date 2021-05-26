@@ -287,8 +287,8 @@ namespace winrt::GraphPaper::implementation
 		// 本来なら DirectX をコードビハインドでリリースしたいところだが,
 		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがあるため,
 		// Trim を呼び出すだけにする.
-		sheet_dx().Trim();
-		sample_dx().Trim();
+		m_sheet_dx.Trim();
+		m_sample_dx.Trim();
 
 		// アプリケーションを終了する.
 		Application::Current().Exit();
@@ -355,8 +355,8 @@ namespace winrt::GraphPaper::implementation
 		// D2D/DWRITE ファクトリを図形クラスに, 
 		// 図形リストと用紙をアンドゥ操作に格納する.
 		{
-			Shape::s_d2d_factory = sheet_dx().m_d2dFactory.get();
-			Shape::s_dwrite_factory = sheet_dx().m_dwriteFactory.get();
+			Shape::s_d2d_factory = m_sheet_dx.m_d2dFactory.get();
+			Shape::s_dwrite_factory = m_sheet_dx.m_dwriteFactory.get();
 			Undo::set(&m_list_shapes, &m_sheet_main);
 		}
 
@@ -498,27 +498,27 @@ namespace winrt::GraphPaper::implementation
 			auto sel_back_color = Resources().TryLookup(box_value(L"SystemColorHighlightColor"));
 			auto sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
 			if (sel_back_color != nullptr && sel_text_color != nullptr) {
-				conv_uwp_to_dx(unbox_value<Color>(sel_back_color), sheet_dx().m_range_background);
-				conv_uwp_to_dx(unbox_value<Color>(sel_text_color), sheet_dx().m_range_foreground);
+				conv_uwp_to_dx(unbox_value<Color>(sel_back_color), m_sheet_dx.m_range_background);
+				conv_uwp_to_dx(unbox_value<Color>(sel_text_color), m_sheet_dx.m_range_foreground);
 			}
 			else {
-				sheet_dx().m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
-				sheet_dx().m_range_foreground = S_WHITE;
+				m_sheet_dx.m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
+				m_sheet_dx.m_range_foreground = S_WHITE;
 			}
 			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
 			auto const& fore_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
 			if (back_theme != nullptr && fore_theme != nullptr) {
-				conv_uwp_to_dx(unbox_value<Brush>(back_theme), sheet_dx().m_theme_background);
-				conv_uwp_to_dx(unbox_value<Brush>(fore_theme), sheet_dx().m_theme_foreground);
+				conv_uwp_to_dx(unbox_value<Brush>(back_theme), m_sheet_dx.m_theme_background);
+				conv_uwp_to_dx(unbox_value<Brush>(fore_theme), m_sheet_dx.m_theme_foreground);
 			}
 			else {
-				sheet_dx().m_theme_background = S_WHITE;
-				sheet_dx().m_theme_foreground = S_BLACK;
+				m_sheet_dx.m_theme_background = S_WHITE;
+				m_sheet_dx.m_theme_foreground = S_BLACK;
 			}
-			sample_dx().m_range_background = sheet_dx().m_range_background;
-			sample_dx().m_range_foreground = sheet_dx().m_range_foreground;
-			sample_dx().m_theme_background = sheet_dx().m_theme_background;
-			sample_dx().m_theme_foreground = sheet_dx().m_theme_foreground;
+			m_sample_dx.m_range_background = m_sheet_dx.m_range_background;
+			m_sample_dx.m_range_foreground = m_sheet_dx.m_range_foreground;
+			m_sample_dx.m_theme_background = m_sheet_dx.m_theme_background;
+			m_sample_dx.m_theme_foreground = m_sheet_dx.m_theme_foreground;
 		}
 
 		if (co_await pref_load_async() != S_OK) {

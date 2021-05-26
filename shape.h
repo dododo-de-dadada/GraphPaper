@@ -147,14 +147,14 @@ namespace winrt::GraphPaper::implementation
 		float m_[6];
 	};
 
-	constexpr double COLOR_MAX = 255.0;	// 色成分の最大値
+	constexpr float COLOR_MAX = 255.0f;	// 色成分の最大値
 	constexpr double PT_PER_INCH = 72.0;	// 1 インチあたりのポイント数
 	constexpr double MM_PER_INCH = 25.4;	// 1 インチあたりのミリメートル数
 	constexpr float GRID_GRAY_DEF = 0.25f;	// 方眼の濃さ
 	constexpr STROKE_PATT STROKE_PATT_DEF{ { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F } };
 	constexpr ARROWHEAD_SIZE ARROWHEAD_SIZE_DEF{ 7.0, 16.0, 0.0 };
 	constexpr TOOL_POLY TOOL_POLY_DEF{ 3, true, true, true, true };
-	constexpr double FONT_SIZE_DEF = 12.0 * 96.0 / 72.0;
+	constexpr float FONT_SIZE_DEF = static_cast<float>(12.0 * 96.0 / 72.0);
 	constexpr D2D1_SIZE_F TEXT_MARGIN_DEF{ FONT_SIZE_DEF / 4.0, FONT_SIZE_DEF / 4.0 };
 	constexpr float GRID_LEN_DEF = 48.0f;
 
@@ -170,40 +170,22 @@ namespace winrt::GraphPaper::implementation
 	void anchor_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx);
 	// 図形の部位（円形）を表示する.
 	void anchor_draw_ellipse(const D2D1_POINT_2F c_pos, SHAPE_DX& dx);
+	// 同値か判定する.
+	template<typename T> inline bool equal(const T a, const T b) noexcept { return a == b; };
 	// 矢じりの寸法が同じか判定する.
 	inline bool equal(const ARROWHEAD_SIZE& a, const ARROWHEAD_SIZE& b) noexcept;
-	// 矢じりの形式が同じか判定する.
-	inline bool equal(const ARROWHEAD_STYLE a, const ARROWHEAD_STYLE b) noexcept;
-	// ブール値が同じか判定する.
-	inline bool equal(const bool a, const bool b) noexcept;
 	// 色が同じか判定する.
 	inline bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept;
-	// 破線の形式が同じか判定する.
-	inline bool equal(const D2D1_DASH_STYLE a, const D2D1_DASH_STYLE b) noexcept;
 	// 位置が同じか判定する.
 	inline bool equal(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept;
 	// 寸法が同じか判定する.
 	inline bool equal(const D2D1_SIZE_F a, const D2D1_SIZE_F b) noexcept;
-	// 書体の幅が同じか判定する.
-	inline bool equal(const DWRITE_FONT_STRETCH a, const DWRITE_FONT_STRETCH b) noexcept;
-	// 書体の字体が同じか判定する.
-	inline bool equal(const DWRITE_FONT_STYLE a, const DWRITE_FONT_STYLE b) noexcept;
-	// 書体の太さが同じか判定する.
-	inline bool equal(const DWRITE_FONT_WEIGHT a, const DWRITE_FONT_WEIGHT b) noexcept;
-	// 段落のそろえが同じか判定する.
-	inline bool equal(const DWRITE_PARAGRAPH_ALIGNMENT a, const DWRITE_PARAGRAPH_ALIGNMENT b) noexcept;
-	// 文字列のそろえが同じか判定する.
-	inline bool equal(const DWRITE_TEXT_ALIGNMENT a, const DWRITE_TEXT_ALIGNMENT b) noexcept;
 	// 文字範囲が同じか判定する.
 	inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept;
 	// 方眼の強調が同じか判定する.
 	inline bool equal(const GRID_EMPH& a, const GRID_EMPH& b) noexcept;
-	// 方眼の表示が同じか判定する.
-	inline bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept;
 	// 破線の配置が同じか判定する.
 	inline bool equal(const STROKE_PATT& a, const STROKE_PATT& b) noexcept;
-	// 32 ビット整数が同じか判定する.
-	inline bool equal(const uint32_t a, const uint32_t b) noexcept;
 	// ワイド文字列が同じか判定する.
 	inline bool equal(const wchar_t* a, const wchar_t* b) noexcept;
 	// winrt 文字列が同じか判定する.
@@ -260,42 +242,20 @@ namespace winrt::GraphPaper::implementation
 	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& sub) noexcept;
 	// 矢じりの寸法を読み込む.
 	void read(ARROWHEAD_SIZE& value, DataReader const& dt_reader);
-	// 矢じりの形式をデータリーダーから読み込む.
-	void read(ARROWHEAD_STYLE& value, DataReader const& dt_reader);
-	// ブール値をデータリーダーから読み込む.
-	void read(bool& value, DataReader const& dt_reader);
-	// 倍精度浮動小数をデータリーダーから読み込む.
-	void read(double& value, DataReader const& dt_reader);
 	// 色をデータリーダーから読み込む.
 	void read(D2D1_COLOR_F& value, DataReader const& dt_reader);
-	// 破線の形式をデータリーダーから読み込む.
-	void read(D2D1_DASH_STYLE& value, DataReader const& dt_reader);
 	// 位置をデータリーダーから読み込む.
 	void read(D2D1_POINT_2F& value, DataReader const& dt_reader);
 	// 寸法をデータリーダーから読み込む.
 	void read(D2D1_SIZE_F& value, DataReader const& dt_reader);
-	// 書体の字体をデータリーダーから読み込む.
-	void read(DWRITE_FONT_STYLE& value, DataReader const& dt_reader);
-	// 書体の太さをデータリーダーから読み込む.
-	void read(DWRITE_FONT_WEIGHT& value, DataReader const& dt_reader);
-	// 書体の伸縮をデータリーダーから読み込む.
-	void read(DWRITE_FONT_STRETCH& value, DataReader const& dt_reader);
-	// 段落のそろえをデータリーダーから読み込む.
-	void read(DWRITE_PARAGRAPH_ALIGNMENT& value, DataReader const& dt_reader);
-	// 文字列のそろえをデータリーダーから読み込む.
-	void read(DWRITE_TEXT_ALIGNMENT& value, DataReader const& dt_reader);
 	// 文字範囲をデータリーダーから読み込む.
 	void read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader);
 	// 方眼の形式をデータリーダーから読み込む.
 	void read(GRID_EMPH& value, DataReader const& dt_reader);
-	// 方眼の表示をデータリーダーから読み込む.
-	void read(GRID_SHOW& value, DataReader const& dt_reader);
 	// 破線の配置をデータリーダーから読み込む.
 	void read(STROKE_PATT& value, DataReader const& dt_reader);
 	// 多角形のツールをデータリーダーから読み込む.
 	void read(TOOL_POLY& value, DataReader const& dt_reader);
-	// 32 ビット整数をデータリーダーから読み込む.
-	void read(uint32_t& value, DataReader const& dt_reader);
 	// 文字列をデータリーダーから読み込む.
 	void read(wchar_t*& value, DataReader const& dt_reader);
 	// 位置配列をデータリーダーから読み込む.
@@ -308,46 +268,30 @@ namespace winrt::GraphPaper::implementation
 	uint32_t wchar_len(const wchar_t* const t) noexcept;
 	// 矢じりの寸法をデータライターに書き込む.
 	void write(const ARROWHEAD_SIZE& value, DataWriter const& dt_writer);
-	// 矢じりの形式をデータライターに書き込む.
-	void write(const ARROWHEAD_STYLE value, DataWriter const& dt_writer);
-	// ブール値をデータライターに書き込む.
-	void write(const bool value, DataWriter const& dt_writer);
 	// 色をデータライターに書き込む.
 	void write(const D2D1_COLOR_F& value, DataWriter const& dt_writer);
-	// 破線の形式をデータライターに書き込む.
-	void write(const D2D1_DASH_STYLE value, DataWriter const& dt_writer);
 	// 位置をデータライターに書き込む.
 	void write(const D2D1_POINT_2F value, DataWriter const& dt_writer);
 	// 寸法をデータライターに書き込む.
 	void write(const D2D1_SIZE_F value, DataWriter const& dt_writer);
-	// 倍精度浮動小数をデータライターに書き込む.
-	void write(const double value, DataWriter const& dt_writer);
-	// 書体の字体をデータライターに書き込む.
-	void write(const DWRITE_FONT_STYLE value, DataWriter const& dt_writer);
-	// 書体の伸縮をデータライターに書き込む.
-	void write(const DWRITE_FONT_STRETCH value, DataWriter const& dt_writer);
-	// 書体の太さをデータライターに書き込む.
-	void write(const DWRITE_FONT_WEIGHT value, DataWriter const& dt_writer);
-	// 段落のそろえをデータライターに書き込む.
-	void write(const DWRITE_PARAGRAPH_ALIGNMENT value, DataWriter const& dt_writer);
-	// 文字列のそろえをデータライターに書き込む.
-	void write(const DWRITE_TEXT_ALIGNMENT value, DataWriter const& dt_writer);
 	// 文字列範囲をデータライターに書き込む.
 	void write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer);
 	// 方眼の形式をデータライターに書き込む.
 	void write(const GRID_EMPH value, DataWriter const& dt_writer);
-	// 方眼の表示をデータライターに書き込む.
-	void write(const GRID_SHOW value, DataWriter const& dt_writer);
 	// 破線の配置をデータライターに書き込む.
 	void write(const STROKE_PATT& value, DataWriter const& dt_writer);
 	// 多角形のツールをデータライターに書き込む.
 	void write(const TOOL_POLY& value, DataWriter const& dt_writer);
-	// 32 ビット整数をデータライターに書き込む.
-	void write(const uint32_t value, DataWriter const& dt_writer);
 	// 文字列をデータライターに書き込む.
 	void write(const wchar_t* value, DataWriter const& dt_writer);
 	// 位置配列をデータリーダーに書き込む.
 	void write(const std::vector<D2D1_POINT_2F>& value, DataWriter const& dt_writer);
+
+	//------------------------------
+	// shape_svg.cpp
+	// SVG ファイルへの出力
+	//------------------------------
+
 	// シングルバイト文字列をデータライターに SVG として書き込む.
 	void write_svg(const char* value, DataWriter const& dt_writer);
 	// マルチバイト文字列をデータライターに SVG として書き込む.
@@ -399,7 +343,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体名を得る.
 		virtual bool get_font_family(wchar_t*& /*value*/) const noexcept { return false; }
 		// 書体の大きさを得る.
-		virtual bool get_font_size(double& /*value*/) const noexcept { return false; }
+		virtual bool get_font_size(float& /*value*/) const noexcept { return false; }
 		// 書体の横幅を得る.
 		virtual bool get_font_stretch(DWRITE_FONT_STRETCH& /*value*/) const noexcept { return false; }
 		// 書体の字体を得る.
@@ -407,9 +351,9 @@ namespace winrt::GraphPaper::implementation
 		// 書体の太さを得る.
 		virtual bool get_font_weight(DWRITE_FONT_WEIGHT& /*value*/) const noexcept { return false; }
 		// 方眼の基準の大きさを得る.
-		virtual bool get_grid_base(double& /*value*/) const noexcept { return false; }
+		virtual bool get_grid_base(float& /*value*/) const noexcept { return false; }
 		// 方眼の大きさを得る.
-		virtual bool get_grid_gray(double& /*value*/) const noexcept { return false; }
+		virtual bool get_grid_gray(float& /*value*/) const noexcept { return false; }
 		// 方眼を強調を得る.
 		virtual bool get_grid_emph(GRID_EMPH& /*value*/) const noexcept { return false; }
 		// 方眼の表示を得る.
@@ -421,7 +365,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙の色を得る.
 		virtual bool get_sheet_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
 		// 用紙の拡大率を得る.
-		virtual bool get_sheet_scale(double& /*value*/) const noexcept { return false; }
+		virtual bool get_sheet_scale(float& /*value*/) const noexcept { return false; }
 		// 用紙の大きさを得る.
 		virtual bool get_sheet_size(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
 		// 開始位置を得る.
@@ -433,7 +377,7 @@ namespace winrt::GraphPaper::implementation
 		// 破線の形式を得る.
 		virtual bool get_stroke_style(D2D1_DASH_STYLE& /*value*/) const noexcept { return false; }
 		// 書体の太さを得る
-		virtual bool get_stroke_width(double& /*value*/) const noexcept { return false; }
+		virtual bool get_stroke_width(float& /*value*/) const noexcept { return false; }
 		// 文字列を得る.
 		virtual bool get_text(wchar_t*& /*value*/) const noexcept { return false; }
 		// 段落のそろえを得る.
@@ -441,7 +385,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列のそろえを得る.
 		virtual bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& /*value*/) const noexcept { return false; }
 		// 行の高さを得る.
-		virtual bool get_text_line(double& /*value*/) const noexcept { return false; }
+		virtual bool get_text_line(float& /*value*/) const noexcept { return false; }
 		// 文字列の周囲の余白を得る.
 		virtual bool get_text_margin(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
 		// 文字範囲を得る
@@ -469,7 +413,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体名に格納する.
 		virtual void set_font_family(wchar_t* const /*value*/) {}
 		// 値を書体の大きさに格納する.
-		virtual void set_font_size(const double /*value*/) {}
+		virtual void set_font_size(const float /*value*/) {}
 		// 値を書体の横幅に格納する.
 		virtual void set_font_stretch(const DWRITE_FONT_STRETCH /*value*/) {}
 		// 値を書体の字体に格納する.
@@ -477,9 +421,9 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		virtual void set_font_weight(const DWRITE_FONT_WEIGHT /*value*/) {}
 		// 値を方眼の大きさに格納する.
-		virtual void set_grid_base(const double /*value*/) noexcept {}
+		virtual void set_grid_base(const float /*value*/) noexcept {}
 		// 値を方眼の濃淡に格納する.
-		virtual void set_grid_gray(const double /*value*/) noexcept {}
+		virtual void set_grid_gray(const float /*value*/) noexcept {}
 		// 値を方眼の強調に格納する.
 		virtual void set_grid_emph(const GRID_EMPH& /*value*/) noexcept {}
 		// 値を方眼の表示に格納する.
@@ -489,7 +433,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を用紙の色に格納する.
 		virtual void set_sheet_color(const D2D1_COLOR_F& /*value*/) noexcept {}
 		// 値を用紙の拡大率に格納する.
-		virtual void set_sheet_scale(const double /*value*/) noexcept {}
+		virtual void set_sheet_scale(const float /*value*/) noexcept {}
 		// 値を用紙の大きさに格納する.
 		virtual void set_sheet_size(const D2D1_SIZE_F /*value*/) noexcept {}
 		//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
@@ -503,7 +447,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線枠の形式に格納する.
 		virtual void set_stroke_style(const D2D1_DASH_STYLE /*value*/) {}
 		// 値を書体の太さに格納する.
-		virtual void set_stroke_width(const double /*value*/) noexcept {}
+		virtual void set_stroke_width(const float /*value*/) noexcept {}
 		// 値を文字列に格納する.
 		virtual void set_text(wchar_t* const /*value*/) {}
 		// 値を段落のそろえに格納する.
@@ -511,7 +455,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字列のそろえに格納する.
 		virtual void set_text_align_t(const DWRITE_TEXT_ALIGNMENT /*value*/) {}
 		// 値を行間に格納する.
-		virtual void set_text_line(const double /*value*/) {}
+		virtual void set_text_line(const float /*value*/) {}
 		// 値を文字列の余白に格納する.
 		virtual void set_text_margin(const D2D1_SIZE_F /*value*/) {}
 		// 値を文字範囲に格納する.
@@ -600,29 +544,31 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_fill_color{ S_WHITE };	// 塗りつぶしの色
 		D2D1_COLOR_F m_font_color{ S_BLACK };	// 書体の色 (MainPage のコンストラクタで設定)
 		wchar_t* m_font_family = nullptr;	// 書体名
-		double m_font_size = FONT_SIZE_DEF;	// 書体の大きさ
+		float m_font_size = FONT_SIZE_DEF;	// 書体の大きさ
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色 (MainPage のコンストラクタで設定)
+		D2D1_LINE_JOIN m_stroke_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 角の形状
+		float m_stroke_join_limit = 10.0f;	// 角のマイター制限
 		STROKE_PATT m_stroke_patt{ STROKE_PATT_DEF };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		double m_stroke_width = 1.0;	// 線枠の太さ
-		double m_text_line = 0.0;	// 行間 (DIPs 96dpi固定)
+		float m_stroke_width = 1.0;	// 線枠の太さ
+		float m_text_line = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
 		D2D1_SIZE_F m_text_margin{ TEXT_MARGIN_DEF };	// 文字列の左右と上下の余白
 
 		// 方眼の属性
-		double m_grid_gray = GRID_GRAY_DEF;	// 方眼の濃さ
-		double m_grid_base = GRID_LEN_DEF - 1.0f;	// 方眼の基準の大きさ (を -1 した値)
+		float m_grid_gray = GRID_GRAY_DEF;	// 方眼の濃さ
+		float m_grid_base = GRID_LEN_DEF - 1.0f;	// 方眼の基準の大きさ (を -1 した値)
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
 		GRID_EMPH m_grid_emph{ GRID_EMPH_0 };	// 方眼の強調
 		bool m_grid_snap = true;	// 方眼に整列
 
 		// 用紙の属性
 		D2D1_COLOR_F m_sheet_color{ S_WHITE };	// 背景色 (MainPage のコンストラクタで設定)
-		double m_sheet_scale = 1.0;	// 拡大率
+		float m_sheet_scale = 1.0f;	// 拡大率
 		D2D1_SIZE_F	m_sheet_size;	// 大きさ (MainPage のコンストラクタで設定)
 
 		//------------------------------
@@ -648,11 +594,11 @@ namespace winrt::GraphPaper::implementation
 		// 矢じりの形式を得る.
 		bool get_arrow_style(ARROWHEAD_STYLE& value) const noexcept;
 		// 方眼の基準の大きさを得る.
-		bool get_grid_base(double& value) const noexcept;
+		bool get_grid_base(float& value) const noexcept;
 		// 方眼の色を得る.
 		void get_grid_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の大きさを得る.
-		bool get_grid_gray(double& value) const noexcept;
+		bool get_grid_gray(float& value) const noexcept;
 		// 方眼の強調を得る.
 		bool get_grid_emph(GRID_EMPH& value) const noexcept;
 		// 方眼の表示の状態を得る.
@@ -664,7 +610,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙の色を得る.
 		bool get_sheet_size(D2D1_SIZE_F& value) const noexcept;
 		// 用紙の拡大率を得る.
-		bool get_sheet_scale(double& value) const noexcept;
+		bool get_sheet_scale(float& value) const noexcept;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
 		// 塗りつぶし色を得る.
@@ -674,7 +620,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体名を得る.
 		bool get_font_family(wchar_t*& value) const noexcept;
 		// 書体の大きさを得る.
-		bool get_font_size(double& value) const noexcept;
+		bool get_font_size(float& value) const noexcept;
 		// 書体の横幅を得る.
 		bool get_font_stretch(DWRITE_FONT_STRETCH& value) const noexcept;
 		// 書体の字体を得る.
@@ -682,7 +628,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体の太さを得る.
 		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept;
 		// 行間を得る.
-		bool get_text_line(double& value) const noexcept;
+		bool get_text_line(float& value) const noexcept;
 		// 文字列の周囲の余白を得る.
 		bool get_text_margin(D2D1_SIZE_F& value) const noexcept;
 		// 段落のそろえを得る.
@@ -694,7 +640,7 @@ namespace winrt::GraphPaper::implementation
 		// 破線の形式を得る.
 		bool get_stroke_style(D2D1_DASH_STYLE& value) const noexcept;
 		// 書体の太さを得る
-		bool get_stroke_width(double& value) const noexcept;
+		bool get_stroke_width(float& value) const noexcept;
 		// 文字列のそろえを得る.
 		bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& value) const noexcept;
 		// データリーダーから読み込む.
@@ -704,9 +650,9 @@ namespace winrt::GraphPaper::implementation
 		// 角丸半径を得る.
 		void set_corner_radius(const D2D1_POINT_2F& value) noexcept;
 		// 値を方眼の基準の大きさに格納する.
-		void set_grid_base(const double value) noexcept;
+		void set_grid_base(const float value) noexcept;
 		// 値を方眼の濃淡に格納する.
-		void set_grid_gray(const double value) noexcept;
+		void set_grid_gray(const float value) noexcept;
 		// 値を方眼の強調に格納する.
 		void set_grid_emph(const GRID_EMPH& value) noexcept;
 		// 値を方眼の表示に格納する.
@@ -718,7 +664,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を用紙の寸法に格納する.
 		void set_sheet_size(const D2D1_SIZE_F value) noexcept;
 		// 値を用紙の拡大率に格納する.
-		void set_sheet_scale(const double value) noexcept;
+		void set_sheet_scale(const float value) noexcept;
 		// 値を矢じりの寸法に格納する.
 		void set_arrow_size(const ARROWHEAD_SIZE& value);
 		// 値を矢じりの形式に格納する.
@@ -730,7 +676,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体名に格納する.
 		void set_font_family(wchar_t* const value);
 		// 書体の大きさに格納する.
-		void set_font_size(const double value);
+		void set_font_size(const float value);
 		// 値を書体の伸縮に格納する.
 		void set_font_stretch(const DWRITE_FONT_STRETCH value);
 		// 値を書体の字体に格納する.
@@ -738,7 +684,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		void set_font_weight(const DWRITE_FONT_WEIGHT value);
 		// 値を行間に格納する.
-		void set_text_line(const double value);
+		void set_text_line(const float value);
 		// 値を文字列の余白に格納する.
 		void set_text_margin(const D2D1_SIZE_F value);
 		// 値を段落のそろえに格納する.
@@ -750,7 +696,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線枠の形式に格納する.
 		void set_stroke_style(const D2D1_DASH_STYLE value);
 		// 値を書体の太さに格納する.
-		void set_stroke_width(const double value) noexcept;
+		void set_stroke_width(const float value) noexcept;
 		// 値を文字列のそろえに格納する.
 		void set_text_align_t(const DWRITE_TEXT_ALIGNMENT value);
 		// データリーダーに書き込む.
@@ -815,11 +761,11 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_diff;	// 次の位置への差分
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色
+		D2D1_LINE_JOIN m_stroke_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 角の形状
+		float m_stroke_join_limit = 10.0f;		// 角のマイター制限
 		STROKE_PATT m_stroke_patt{ STROKE_PATT_DEF };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		double m_stroke_width = 1.0;	// 線枠の太さ
-		D2D1_LINE_JOIN m_stroke_line_join = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
-		double m_stroke_miter_limit = 10.0;
+		float m_stroke_width = 1.0f;	// 線枠の太さ
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
 
 		//------------------------------
@@ -844,7 +790,7 @@ namespace winrt::GraphPaper::implementation
 		// 破線の形式を得る.
 		bool get_stroke_style(D2D1_DASH_STYLE& value) const noexcept;
 		// 線枠の太さを得る.
-		bool get_stroke_width(double& value) const noexcept;
+		bool get_stroke_width(float& value) const noexcept;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept;
 		// 範囲に含まれるか判定する.
@@ -868,7 +814,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線枠の形式に格納する.
 		void set_stroke_style(const D2D1_DASH_STYLE value);
 		// 値を線枠の太さに格納する.
-		void set_stroke_width(const double width) noexcept;
+		void set_stroke_width(const float value) noexcept;
 		// 図形を作成する.
 		ShapeStroke(const size_t d_cnt, const ShapeSheet* s_attr);
 		// 図形をデータリーダーから読み込む.
@@ -970,7 +916,7 @@ namespace winrt::GraphPaper::implementation
 	// 作成したあとで文字列の属性の変更はできない.
 	//------------------------------
 	struct ShapeRuler : ShapeRect {
-		double m_grid_base = GRID_LEN_DEF - 1.0;	// 方眼の大きさ (を -1 した値)
+		float m_grid_base = GRID_LEN_DEF - 1.0f;	// 方眼の大きさ (を -1 した値)
 		winrt::com_ptr<IDWriteTextFormat> m_dw_text_format{};	// テキストフォーマット
 
 		//------------------------------
@@ -1159,18 +1105,18 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_TEXT_RANGE m_select_range{ 0, 0 };	// 選択範囲
 		D2D1_COLOR_F m_font_color{ S_BLACK };	// 書体の色
 		wchar_t* m_font_family = nullptr;	// 書体名
-		double m_font_size = FONT_SIZE_DEF;	// 書体の大きさ
+		float m_font_size = FONT_SIZE_DEF;	// 書体の大きさ
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		wchar_t* m_text = nullptr;	// 文字列
-		double m_text_line = 0.0;	// 行間 (DIPs 96dpi固定)
+		float m_text_line = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落そろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字揃え
 		D2D1_SIZE_F m_text_margin{ TEXT_MARGIN_DEF };	// 文字列のまわりの上下と左右の余白
 
 		winrt::com_ptr<IDWriteTextLayout> m_dw_layout{};	// 文字列を表示するためのレイアウト
-		double m_dw_descent = 0.0f;	// ディセント
+		float m_dw_descent = 0.0f;	// ディセント
 		UINT32 m_dw_line_cnt = 0;	// 行の計量の要素数
 		DWRITE_LINE_METRICS* m_dw_line_metrics = nullptr;	// 行の計量
 		UINT32 m_dw_selected_cnt = 0;	// 選択範囲の計量の要素数
@@ -1201,13 +1147,13 @@ namespace winrt::GraphPaper::implementation
 		// 書体名を得る.
 		bool get_font_family(wchar_t*& value) const noexcept;
 		// 書体の大きさを得る.
-		bool get_font_size(double& value) const noexcept;
+		bool get_font_size(float& value) const noexcept;
 		// 書体の伸縮を得る.
 		bool get_font_stretch(DWRITE_FONT_STRETCH& value) const noexcept;
 		// 書体の字体を得る.
 		bool get_font_style(DWRITE_FONT_STYLE& value) const noexcept;
 		// 行間を得る.
-		bool get_text_line(double& value) const noexcept;
+		bool get_text_line(float& value) const noexcept;
 		// 書体の太さを得る.
 		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept;
 		// 文字列の余白を得る.
@@ -1235,7 +1181,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体名に格納する.
 		void set_font_family(wchar_t* const value);
 		// 値を書体の大きさに格納する.
-		void set_font_size(const double value);
+		void set_font_size(const float value);
 		// 値を書体の伸縮に格納する.
 		void set_font_stretch(const DWRITE_FONT_STRETCH value);
 		// 値を書体の字体に格納する.
@@ -1243,7 +1189,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		void set_font_weight(const DWRITE_FONT_WEIGHT value);
 		// 値を行間に格納する.
-		void set_text_line(const double value);
+		void set_text_line(const float value);
 		// 値を文字列の余白に格納する.
 		void set_text_margin(const D2D1_SIZE_F value);
 		// 値を段落のそろえに格納する.
@@ -1272,28 +1218,10 @@ namespace winrt::GraphPaper::implementation
 		return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) && equal(a.m_offset, b.m_offset);
 	}
 
-	// 矢じりの形式が同じか判定する.
-	inline bool equal(const ARROWHEAD_STYLE a, const ARROWHEAD_STYLE b) noexcept
-	{
-		return a == b;
-	}
-
-	// ブール値が同じか判定する.
-	inline bool equal(const bool a, const bool b) noexcept
-	{
-		return a == b;
-	}
-
 	// 色が同じか判定する.
 	inline bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept
 	{
 		return equal_color_comp(a.a, b.a) && equal_color_comp(a.r, b.r) && equal_color_comp(a.g, b.g) && equal_color_comp(a.b, b.b);
-	}
-
-	// 破線の形式が同じか判定する.
-	inline bool equal(const D2D1_DASH_STYLE a, const D2D1_DASH_STYLE b) noexcept
-	{
-		return a == b;
 	}
 
 	// 位置が同じか判定する.
@@ -1314,36 +1242,6 @@ namespace winrt::GraphPaper::implementation
 		return fabs(a - b) <= FLT_EPSILON * fmax(1.0, fmax(fabs(a), fabs(b)));
 	}
 
-	// 書体の伸縮が同じか判定する.
-	inline bool equal(const DWRITE_FONT_STRETCH a, const DWRITE_FONT_STRETCH b) noexcept
-	{
-		return a == b;
-	}
-
-	// 書体の字体が同じか判定する.
-	inline bool equal(const DWRITE_FONT_STYLE a, const DWRITE_FONT_STYLE b) noexcept
-	{
-		return a == b;
-	}
-
-	// 書体の太さが同じか判定する.
-	inline bool equal(const DWRITE_FONT_WEIGHT a, const DWRITE_FONT_WEIGHT b) noexcept
-	{
-		return a == b;
-	}
-
-	// 段落の整列が同じか判定する.
-	inline bool equal(const DWRITE_PARAGRAPH_ALIGNMENT a, const DWRITE_PARAGRAPH_ALIGNMENT b) noexcept
-	{
-		return a == b;
-	}
-
-	// 文字列の整列が同じか判定する.
-	inline bool equal(const DWRITE_TEXT_ALIGNMENT a, const DWRITE_TEXT_ALIGNMENT b) noexcept
-	{
-		return a == b;
-	}
-
 	// 文字範囲が同じか判定する.
 	inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept
 	{
@@ -1362,22 +1260,10 @@ namespace winrt::GraphPaper::implementation
 		return a.m_gauge_1 == b.m_gauge_1 && a.m_gauge_2 == b.m_gauge_2;
 	}
 
-	// 方眼の表示が同じか判定する.
-	inline bool equal(const GRID_SHOW a, const GRID_SHOW b) noexcept
-	{
-		return a == b;
-	}
-
 	// 破線の配置が同じか判定する.
 	inline bool equal(const STROKE_PATT& a, const STROKE_PATT& b) noexcept
 	{
 		return equal(a.m_[0], b.m_[0]) && equal(a.m_[1], b.m_[1]) && equal(a.m_[2], b.m_[2]) && equal(a.m_[3], b.m_[3]) && equal(a.m_[4], b.m_[4]) && equal(a.m_[5], b.m_[5]);
-	}
-
-	// 整数が同じか判定する.
-	inline bool equal(const uint32_t a, const uint32_t b) noexcept
-	{
-		return a == b;
 	}
 
 	// 文字列が同じか判定する.

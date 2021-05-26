@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		auto sb = dx.m_shape_brush.get();
 		auto ss = m_d2d_stroke_style.get();
-		auto sw = static_cast<FLOAT>(m_stroke_width);
+		auto sw = m_stroke_width;
 		auto dc = dx.m_d2dContext;
 
 		D2D1_POINT_2F r_min;
@@ -287,7 +287,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			return ANCH_TYPE::ANCH_SHEET;
 		}
-		const double s_width = max(m_stroke_width, a_len);
+		const double s_width = max(static_cast<double>(m_stroke_width), a_len);
 		// ŠO‘¤‚ÌŠpŠÛ•ûŒ`‚Ì”»’è
 		pt_add(r_min, -s_width * 0.5, r_min);
 		pt_add(r_max, s_width * 0.5, r_max);

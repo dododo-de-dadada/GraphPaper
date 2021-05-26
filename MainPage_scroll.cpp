@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::scroll_set(const double aw, const double ah)
 	{
 		constexpr double SB_SIZE = 16.0;
-		const auto ps = m_sheet_main.m_sheet_scale;	// 用紙の表示倍率
+		const double ps = m_sheet_main.m_sheet_scale;	// 用紙の表示倍率
 		const double vw = aw / ps;	// 見えている部分の幅
 		const double vh = ah / ps;	// 見えている部分の高さ
 		const auto p_min = sheet_min();

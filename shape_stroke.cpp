@@ -6,25 +6,24 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// D2D ストローク特性を作成する.
-	static void create_stroke_style(ID2D1Factory3* const d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style);
+	static void create_stroke_style(ID2D1Factory3* const d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, const D2D1_LINE_JOIN line_join, const double miter_limit, ID2D1StrokeStyle** s_style);
 
 	// D2D ストローク特性を作成する.
 	// d_style	破線の種類
 	// s_patt	破線の配置配列
 	// s_style	作成されたストローク特性
-	static void create_stroke_style(ID2D1Factory3* const d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, ID2D1StrokeStyle** s_style)
+	// j_style	角の形状
+	// j_limit	角のマイター制限
+	static void create_stroke_style(ID2D1Factory3* const d_factory, const D2D1_DASH_STYLE d_style, const STROKE_PATT& s_patt, const D2D1_LINE_JOIN j_style, const double j_limit, ID2D1StrokeStyle** s_style)
 	{
 		UINT32 d_cnt;	// 破線の配置配列の要素数
 		const FLOAT* d_arr;	// 破線の配置配列を指すポインタ
 
 		if (d_style != D2D1_DASH_STYLE_SOLID) {
 			D2D1_STROKE_STYLE_PROPERTIES prop{
-				//D2D1_CAP_STYLE_SQUARE,	// startCap
-				//D2D1_CAP_STYLE_SQUARE,	// endCap
 				D2D1_CAP_STYLE_FLAT,	// startCap
 				D2D1_CAP_STYLE_FLAT,	// endCap
 				D2D1_CAP_STYLE_FLAT,	// dashCap
-				//D2D1_LINE_JOIN_MITER,	// lineJoin. SVG
 				D2D1_LINE_JOIN_BEVEL,	// lineJoin. SVG
 				1.0f,					// miterLimit
 				D2D1_DASH_STYLE_CUSTOM,	// dashStyle
@@ -54,16 +53,14 @@ namespace winrt::GraphPaper::implementation
 			);
 		}
 		else {
-//			*s_style = nullptr;
 			D2D1_STROKE_STYLE_PROPERTIES prop{
 				D2D1_CAP_STYLE_FLAT,	// startCap
 				D2D1_CAP_STYLE_FLAT,	// endCap
 				D2D1_CAP_STYLE_FLAT,	// dashCap
-				//D2D1_LINE_JOIN_MITER_OR_BEVEL,	// lineJoin
-				D2D1_LINE_JOIN_BEVEL,	// lineJoin
-				10.0f,					// miterLimit
-				D2D1_DASH_STYLE_SOLID,	// dashStyle
-				0.0f
+				j_style,	// lineJoin
+				static_cast<FLOAT>(j_limit),	// miterLimit
+				d_style,	// dashStyle
+				0.0f	// dashOffset
 			};
 			winrt::check_hresult(
 				d_factory->CreateStrokeStyle(prop, nullptr, 0, s_style)
@@ -164,7 +161,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠の太さを得る.
 	// 戻り値	つねに true
-	bool ShapeStroke::get_stroke_width(double& value) const noexcept
+	bool ShapeStroke::get_stroke_width(float& value) const noexcept
 	{
 		value = m_stroke_width;
 		return true;
@@ -242,22 +239,22 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_stroke_patt = value;
 		m_d2d_stroke_style = nullptr;
-		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
+		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
 	}
 
 	// 値を線枠の形式に格納する.
 	void ShapeStroke::set_stroke_style(const D2D1_DASH_STYLE value)
 	{
-		if (equal(m_stroke_style, value)) {
+		if (m_stroke_style == value) {
 			return;
 		}
 		m_stroke_style = value;
 		m_d2d_stroke_style = nullptr;
-		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
+		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
 	}
 
 	// 値を線枠の太さに格納する.
-	void ShapeStroke::set_stroke_width(const double value) noexcept
+	void ShapeStroke::set_stroke_width(const float value) noexcept
 	{
 		m_stroke_width = value;
 	}
@@ -273,7 +270,7 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_width(s_attr->m_stroke_width),
 		m_d2d_stroke_style(nullptr)
 	{
-		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
+		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
 	}
 
 	// 図形をデータリーダーから読み込む.
@@ -287,10 +284,12 @@ namespace winrt::GraphPaper::implementation
 		read(m_pos, dt_reader);
 		read(m_diff, dt_reader);
 		read(m_stroke_color, dt_reader);
+		m_stroke_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());
+		m_stroke_join_limit = dt_reader.ReadSingle();
 		read(m_stroke_patt, dt_reader);
-		read(m_stroke_style, dt_reader);
-		m_stroke_width = dt_reader.ReadDouble();
-		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_d2d_stroke_style.put());
+		m_stroke_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());
+		m_stroke_width = dt_reader.ReadSingle();
+		create_stroke_style(s_d2d_factory, m_stroke_style, m_stroke_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
 	}
 
 	// データライターに書き込む.
@@ -303,14 +302,16 @@ namespace winrt::GraphPaper::implementation
 		write(m_pos, dt_writer);
 		write(m_diff, dt_writer);
 		write(m_stroke_color, dt_writer);
+		dt_writer.WriteUInt32(m_stroke_join_style);
+		dt_writer.WriteSingle(m_stroke_join_limit);
 		dt_writer.WriteSingle(m_stroke_patt.m_[0]);
 		dt_writer.WriteSingle(m_stroke_patt.m_[1]);
 		dt_writer.WriteSingle(m_stroke_patt.m_[2]);
 		dt_writer.WriteSingle(m_stroke_patt.m_[3]);
 		dt_writer.WriteSingle(m_stroke_patt.m_[4]);
 		dt_writer.WriteSingle(m_stroke_patt.m_[5]);
-		dt_writer.WriteInt32(static_cast<int32_t>(m_stroke_style));
-		dt_writer.WriteDouble(m_stroke_width);
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_style));
+		dt_writer.WriteSingle(m_stroke_width);
 	}
 
 	// データライターに SVG タグとして書き込む.

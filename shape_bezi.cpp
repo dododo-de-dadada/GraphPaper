@@ -537,7 +537,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F e_pos;
 
 		if (is_opaque(m_stroke_color)) {
-			const auto s_width = static_cast<FLOAT>(m_stroke_width);
+			const auto s_width = m_stroke_width;
 			const auto s_brush = dx.m_shape_brush.get();
 			const auto s_style = m_d2d_stroke_style.get();
 			dx.m_shape_brush->SetColor(m_stroke_color);
@@ -594,27 +594,13 @@ namespace winrt::GraphPaper::implementation
 		anchor_draw_rect(e_pos, dx);
 	}
 
-	// 矢じりの寸法を得る.
-	//bool ShapeBezi::get_arrow_size(ARROWHEAD_SIZE& value) const noexcept
-	//{
-	//	value = m_arrow_size;
-	//	return true;
-	//}
-
-	// 矢じりの形式を得る.
-	//bool ShapeBezi::get_arrow_style(ARROWHEAD_STYLE& value) const noexcept
-	//{
-	//	value = m_arrow_style;
-	//	return true;
-	//}
-
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
 	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		const auto e_width = max(max(m_stroke_width, a_len) * 0.5, 0.5);	// 線枠の太さの半分の値
+		const auto e_width = max(max(static_cast<double>(m_stroke_width), a_len) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
 		pt_sub(t_pos, m_pos, tp);
 		// 判定する位置によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
@@ -854,33 +840,6 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 矢じりの寸法に格納する.
-	//void ShapeBezi::set_arrow_size(const ARROWHEAD_SIZE& value)
-	//{
-	//	if (equal(m_arrow_size, value)) {
-	//		return;
-	//	}
-	//	m_arrow_size = value;
-	//	create_path_geometry(s_d2d_factory);
-	//}
-
-	// 矢じりの形式に格納する.
-	//void ShapeBezi::set_arrow_style(const ARROWHEAD_STYLE value)
-	//{
-	//	if (m_arrow_style == value) {
-	//		return;
-	//	}
-	//	m_arrow_style = value;
-	//	create_path_geometry(s_d2d_factory);
-	//}
-
-	// 値を始点に格納する. 他の部位の位置も動く.
-	//void ShapeBezi::set_start_pos(const D2D1_POINT_2F value)
-	//{
-	//	ShapeStroke::set_start_pos(value);
-	//	create_path_geometry(s_d2d_factory);
-	//}
-
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_diff	囲む領域の終点への差分
@@ -902,22 +861,8 @@ namespace winrt::GraphPaper::implementation
 	ShapeBezi::ShapeBezi(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
 	{
-	//	m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());
-	//	m_arrow_size.m_width = dt_reader.ReadSingle();
-	//	m_arrow_size.m_length = dt_reader.ReadSingle();
-	//	m_arrow_size.m_offset = dt_reader.ReadSingle();
 		create_path_geometry(s_d2d_factory);
 	}
-
-	// データライターに書き込む.
-	//void ShapeBezi::write(DataWriter const& dt_writer) const
-	//{
-	//	ShapePath::write(dt_writer);
-	//	dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));
-	//	dt_writer.WriteSingle(m_arrow_size.m_width);
-	//	dt_writer.WriteSingle(m_arrow_size.m_length);
-	//	dt_writer.WriteSingle(m_arrow_size.m_offset);
-	//}
 
 	// データライターに SVG タグとして書き込む.
 	void ShapeBezi::write_svg(DataWriter const& dt_writer) const

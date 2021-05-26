@@ -188,6 +188,7 @@
     <ClCompile Include="shape_rrect.cpp" />
     <ClCompile Include="shape_ruler.cpp" />
     <ClCompile Include="shape_stroke.cpp" />
+    <ClCompile Include="shape_svg.cpp" />
     <ClCompile Include="shape_text.cpp" />
     <ClCompile Include="undo.cpp" />
   </ItemGroup>

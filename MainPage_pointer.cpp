@@ -248,7 +248,7 @@ namespace winrt::GraphPaper::implementation
 		bool g_snap;
 		m_sheet_main.get_grid_snap(g_snap);
 		if (g_snap) {
-			double g_base;
+			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			pt_round(m_pointer_cur, g_base + 1.0, m_pointer_cur);
 		}
@@ -287,7 +287,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			if (flag) {
-				double g_base;
+				float g_base;
 				m_sheet_main.get_grid_base(g_base);
 				const double g_len = g_base + 1.0;
 				D2D1_POINT_2F b_ne{ b_se.x, b_nw.y };
@@ -382,7 +382,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		Shape* s;
-		const auto anch = s_list_hit_test(m_list_shapes, m_pointer_cur, sheet_dx().m_anchor_len, s);
+		const auto anch = s_list_hit_test(m_list_shapes, m_pointer_cur, m_sheet_dx.m_anchor_len, s);
 		m_dx_mutex.unlock();
 		if (anch == ANCH_TYPE::ANCH_SHEET) {
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
@@ -595,7 +595,7 @@ namespace winrt::GraphPaper::implementation
 			// 作図ツールが選択ツールでない場合,
 			return;
 		}
-		m_pointer_anchor = s_list_hit_test(m_list_shapes, m_pointer_pressed, sheet_dx().m_anchor_len, m_pointer_shape);
+		m_pointer_anchor = s_list_hit_test(m_list_shapes, m_pointer_pressed, m_sheet_dx.m_anchor_len, m_pointer_shape);
 		if (m_pointer_anchor != ANCH_TYPE::ANCH_SHEET) {
 			// 図形とその部位を得た場合,
 			if (m_pointer_state == PBTN_STATE::PRESS_LBTN
@@ -683,7 +683,7 @@ namespace winrt::GraphPaper::implementation
 				if (g_snap) {
 					// 方眼に整列の場合, 始点と終点を方眼の大きさで丸める
 					if (args.KeyModifiers() != VirtualKeyModifiers::Shift) {
-						double g_base;
+						float g_base;
 						m_sheet_main.get_grid_base(g_base);
 						const double g_len = max(g_base + 1.0, 1.0);
 						pt_round(m_pointer_pressed, g_len, m_pointer_pressed);

@@ -218,7 +218,7 @@ namespace winrt::GraphPaper::implementation
 			//status_bar(static_cast<SBAR_FLAG>(dt_reader.ReadUInt16()));
 
 			m_sheet_main.read(dt_reader);
-			double g_base;
+			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			m_sheet_main.set_grid_base(max(g_base, 0.0F));
 			m_sheet_main.m_sheet_scale = min(max(m_sheet_main.m_sheet_scale, SCALE_MIN), SCALE_MAX);
@@ -689,7 +689,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			write_svg(DOCTYPE, dt_writer);
 			// SVG 開始タグをデータライターに書き込む.
-			file_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, sheet_dx().m_logical_dpi, len_unit(), dt_writer);
+			file_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, m_sheet_dx.m_logical_dpi, len_unit(), dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {

@@ -301,18 +301,6 @@ namespace winrt::GraphPaper::implementation
 		value.m_offset = dt_reader.ReadSingle();
 	}
 
-	// 矢じりの形式をデータリーダーから読み込む.
-	void read(ARROWHEAD_STYLE& value, DataReader const& dt_reader)
-	{
-		value = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());
-	}
-
-	// ブール値をデータリーダーから読み込む.
-	void read(bool& value, DataReader const& dt_reader)
-	{
-		value = dt_reader.ReadBoolean();
-	}
-
 	// 色をデータリーダーから読み込む.
 	void read(D2D1_COLOR_F& value, DataReader const& dt_reader)
 	{
@@ -324,12 +312,6 @@ namespace winrt::GraphPaper::implementation
 		value.r = min(max(value.r, 0.0F), 1.0F);
 		value.g = min(max(value.g, 0.0F), 1.0F);
 		value.b = min(max(value.b, 0.0F), 1.0F);
-	}
-
-	// 線枠の形式をデータリーダーから読み込む.
-	void read(D2D1_DASH_STYLE& value, DataReader const& dt_reader)
-	{
-		value = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());
 	}
 
 	// 位置をデータリーダーから読み込む.
@@ -344,42 +326,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		value.width = dt_reader.ReadSingle();
 		value.height = dt_reader.ReadSingle();
-	}
-
-	// 倍精度浮動少数をデータリーダーから読み込む.
-	void read(double& value, DataReader const& dt_reader)
-	{
-		value = dt_reader.ReadDouble();
-	}
-
-	// 書体の伸縮をデータリーダーから読み込む.
-	void read(DWRITE_FONT_STRETCH& value, DataReader const& dt_reader)
-	{
-		value = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());
-	}
-
-	// 書体の字体をデータリーダーから読み込む.
-	void read(DWRITE_FONT_STYLE& value, DataReader const& dt_reader)
-	{
-		value = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());
-	}
-
-	// 書体の太さをデータリーダーから読み込む.
-	void read(DWRITE_FONT_WEIGHT& value, DataReader const& dt_reader)
-	{
-		value = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());
-	}
-
-	// 段落の整列をデータリーダーから読み込む.
-	void read(DWRITE_PARAGRAPH_ALIGNMENT& value, DataReader const& dt_reader)
-	{
-		value = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
-	}
-
-	// 文字列の整列をデータリーダーから読み込む.
-	void read(DWRITE_TEXT_ALIGNMENT& value, DataReader const& dt_reader)
-	{
-		value = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
 	}
 
 	// 文字列範囲をデータリーダーから読み込む.
@@ -410,12 +356,6 @@ namespace winrt::GraphPaper::implementation
 		value.m_clockwise = dt_reader.ReadBoolean();
 	}
 
-	// 32 ビット整数をデータリーダーから読み込む.
-	void read(uint32_t& value, DataReader const& dt_reader)
-	{
-		value = dt_reader.ReadUInt32();
-	}
-
 	// 文字列をデータリーダーから読み込む.
 	void read(wchar_t*& value, DataReader const& dt_reader)
 	{
@@ -437,9 +377,9 @@ namespace winrt::GraphPaper::implementation
 	// 位置配列をデータリーダーから読み込む.
 	void read(std::vector<D2D1_POINT_2F>& value, DataReader const& dt_reader)
 	{
-		const size_t n = dt_reader.ReadUInt32();	// 要素数
-		value.resize(n);
-		for (size_t i = 0; i < n; i++) {
+		const size_t cnt = dt_reader.ReadUInt32();	// 要素数
+		value.resize(cnt);
+		for (size_t i = 0; i < cnt; i++) {
 			read(value[i], dt_reader);
 		}
 	}
@@ -453,16 +393,6 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		value = GRID_EMPH_0;
-	}
-
-	// 方眼の表示をデータリーダーから読み込む.
-	void read(GRID_SHOW& value, DataReader const& dt_reader)
-	{
-		value = static_cast<GRID_SHOW>(dt_reader.ReadUInt16());
-		if (value == GRID_SHOW::BACK || value == GRID_SHOW::FRONT || value == GRID_SHOW::HIDE) {
-			return;
-		}
-		value = GRID_SHOW::BACK;
 	}
 
 	//	文字列を複製する.
@@ -718,18 +648,6 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(value.m_offset);
 	}
 
-	// 矢じりの形状をデータライターに書き込む.
-	void write(const ARROWHEAD_STYLE value, DataWriter const& dt_writer)
-	{
-		write(static_cast<uint32_t>(value), dt_writer);
-	}
-
-	// ブール値をデータライターに書き込む.
-	void write(const bool value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteBoolean(value);
-	}
-
 	// 色をデータライターに書き込む.
 	void write(const D2D1_COLOR_F& value, DataWriter const& dt_writer)
 	{
@@ -737,12 +655,6 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(value.r);
 		dt_writer.WriteSingle(value.g);
 		dt_writer.WriteSingle(value.b);
-	}
-
-	// 破線の形状をデータライターに書き込む.
-	void write(const D2D1_DASH_STYLE value, DataWriter const& dt_writer)
-	{
-		write(static_cast<uint32_t>(value), dt_writer);
 	}
 
 	// 位置をデータライターに書き込む.
@@ -759,42 +671,6 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(value.height);
 	}
 
-	// 倍精度浮動小数をデータライターに書き込む.
-	void write(const double value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteDouble(value);
-	}
-
-	// 書体の伸縮をデータライターに書き込む.
-	void write(const DWRITE_FONT_STRETCH value, DataWriter const& dt_writer)
-	{
-		write(static_cast<uint32_t>(value), dt_writer);
-	}
-
-	// 書体の形状をデータライターに書き込む.
-	void write(const DWRITE_FONT_STYLE value, DataWriter const& dt_writer)
-	{
-		write(static_cast<uint32_t>(value), dt_writer);
-	}
-
-	// 書体の太さをデータライターに書き込む.
-	void write(const DWRITE_FONT_WEIGHT value, DataWriter const& dt_writer)
-	{
-		write(static_cast<uint32_t>(value), dt_writer);
-	}
-
-	// 段落の整列をデータライターに書き込む.
-	void write(const DWRITE_PARAGRAPH_ALIGNMENT value, DataWriter const& dt_writer)
-	{
-		write(static_cast<uint32_t>(value), dt_writer);
-	}
-
-	// 文字列の整列をデータライターに書き込む.
-	void write(const DWRITE_TEXT_ALIGNMENT value, DataWriter const& dt_writer)
-	{
-		write(static_cast<uint32_t>(value), dt_writer);
-	}
-
 	// 文字列範囲をデータライターに書き込む.
 	void write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer)
 	{
@@ -807,12 +683,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_writer.WriteUInt16(value.m_gauge_1);
 		dt_writer.WriteUInt16(value.m_gauge_2);
-	}
-
-	// 方眼の表示をデータライターに書き込む.
-	void write(const GRID_SHOW value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteUInt16(static_cast<uint16_t>(value));
 	}
 
 	// 破線の配置をデータライターに書き込む.
@@ -836,12 +706,6 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBoolean(value.m_clockwise);
 	}
 
-	// 32 ビット整数をデータライターに書き込む.
-	void write(const uint32_t value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteUInt32(static_cast<uint32_t>(value));
-	}
-
 	// 文字列をデータライターに書き込む
 	void write(const wchar_t* value, DataWriter const& dt_writer)
 	{
@@ -861,137 +725,6 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(n));
 		for (uint32_t i = 0; i < n; i++) {
 			write(value[i], dt_writer);
-		}
-	}
-
-	// 属性名とシングルバイト文字列をデータライターに SVG として書き込む.
-	// value	シングルバイト文字列
-	// name	属性名
-	void write_svg(const char* value, const char* name, DataWriter const& dt_writer)
-	{
-		char buf[256];
-		std::snprintf(buf, sizeof(buf), "%s=\"%s\" ", name, value);
-		write_svg(buf, dt_writer);
-	}
-
-	// シングルバイト文字列をデータライターに SVG として書き込む.
-	void write_svg(const char* value, DataWriter const& dt_writer)
-	{
-		for (uint32_t i = 0; value[i] != '\0'; i++) {
-			dt_writer.WriteByte(value[i]);
-		}
-	}
-
-	// 属性名と色をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_COLOR_F value, const char* name, DataWriter const& dt_writer)
-	{
-		char buf[256];
-		const uint32_t vr = static_cast<uint32_t>(std::round(value.r * 255.0)) & 0xff;
-		const uint32_t vb = static_cast<uint32_t>(std::round(value.b * 255.0)) & 0xff;
-		const uint32_t vg = static_cast<uint32_t>(std::round(value.g * 255.0)) & 0xff;
-		sprintf_s(buf, "%s=\"#%02x%02x%02x\" ", name, vr, vg, vb);
-		write_svg(buf, dt_writer);
-		if (is_opaque(value) != true) {
-			std::snprintf(buf, sizeof(buf), "%s-opacity=\"%.3f\" ", name, value.a);
-			write_svg(buf, dt_writer);
-		}
-	}
-
-	// 色をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_COLOR_F value, DataWriter const& dt_writer)
-	{
-		char buf[8];
-		const uint32_t vr = static_cast<uint32_t>(std::round(value.r * 255.0)) & 0xFF;
-		const uint32_t vb = static_cast<uint32_t>(std::round(value.b * 255.0)) & 0xFF;
-		const uint32_t vg = static_cast<uint32_t>(std::round(value.g * 255.0)) & 0xFF;
-		sprintf_s(buf, "#%02x%02x%02x", vr, vg, vb);
-		write_svg(buf, dt_writer);
-	}
-
-	// 破線の形式と配置をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_DASH_STYLE style, const STROKE_PATT& patt, const double width, DataWriter const& dt_writer)
-	{
-		if (width <= FLT_MIN) {
-			return;
-		}
-		const double a[]{
-			patt.m_[0] * width,
-			patt.m_[1] * width,
-			patt.m_[2] * width,
-			patt.m_[3] * width
-		};
-		char buf[256];
-		if (style == D2D1_DASH_STYLE_DASH) {
-			sprintf_s(buf, "stroke-dasharray=\"%.0f %.0f\" ", a[0], a[1]);
-		}
-		else if (style == D2D1_DASH_STYLE_DOT) {
-			snprintf(buf, sizeof(buf), "stroke-dasharray=\"%.0f %.0f\" ", a[2], a[3]);
-		}
-		else if (style == D2D1_DASH_STYLE_DASH_DOT) {
-			snprintf(buf, sizeof(buf), "stroke-dasharray=\"%.0f %.0f %.0f %.0f\" ", a[0], a[1], a[2], a[3]);
-		}
-		else if (style == D2D1_DASH_STYLE_DASH_DOT_DOT) {
-			snprintf(buf, sizeof(buf), "stroke-dasharray=\"%.0f %.0f %.0f %.0f %.0f %.0f\" ", a[0], a[1], a[2], a[3], a[2], a[3]);
-		}
-		else {
-			return;
-		}
-		write_svg(buf, dt_writer);
-	}
-
-	// 命令と位置をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_POINT_2F value, const char* cmd, DataWriter const& dt_writer)
-	{
-		char buf[256];
-		sprintf_s(buf, "%s%f %f ", cmd, value.x, value.y);
-		write_svg(buf, dt_writer);
-	}
-
-	// 属性名と位置をデータライターに SVG として書き込む.
-	void write_svg(const D2D1_POINT_2F value, const char* name_x, const char* name_y, DataWriter const& dt_writer)
-	{
-		char buf[256];
-		sprintf_s(buf, "%s=\"%f\" %s=\"%f\" ", name_x, value.x, name_y, value.y);
-		write_svg(buf, dt_writer);
-	}
-
-	// 属性名と浮動小数値をデータライターに SVG として書き込む
-	void write_svg(const double value, const char* name, DataWriter const& dt_writer)
-	{
-		char buf[256];
-		sprintf_s(buf, "%s=\"%f\" ", name, value);
-		write_svg(buf, dt_writer);
-	}
-
-	// 浮動小数をデータライターに書き込む
-	void write_svg(const float value, DataWriter const& dt_writer)
-	{
-		char buf[256];
-		sprintf_s(buf, "%f ", value);
-		write_svg(buf, dt_writer);
-	}
-
-	// 属性名と 32 ビット正整数をデータライターに SVG として書き込む
-	void write_svg(const uint32_t value, const char* name, DataWriter const& dt_writer)
-	{
-		char buf[256];
-		sprintf_s(buf, "%s=\"%u\" ", name, value);
-		write_svg(buf, dt_writer);
-	}
-
-	// マルチバイト文字列をデータライターに SVG として書き込む.
-	// val	マルチバイト文字列
-	// v_len	文字列の文字数
-	// dt_writer	データライター
-	void write_svg(const wchar_t* value, const uint32_t v_len, DataWriter const& dt_writer)
-	{
-		if (v_len > 0) {
-			const auto s_len = WideCharToMultiByte(CP_UTF8, 0, value, v_len, (char*)NULL, 0, NULL, NULL);
-			auto s = new char[static_cast<size_t>(s_len) + 1];
-			WideCharToMultiByte(CP_UTF8, 0, value, v_len, static_cast<LPSTR>(s), s_len, NULL, NULL);
-			s[s_len] = '\0';
-			write_svg(s, dt_writer);
-			delete[] s;
 		}
 	}
 

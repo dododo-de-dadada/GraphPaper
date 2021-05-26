@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 		dc->BeginDraw();
 		dc->Clear(m_sample_sheet.m_sheet_color);
 		D2D1_POINT_2F offset;
-		double g_base;
+		float g_base;
 		m_sample_sheet.get_grid_base(g_base);
 		offset.x = static_cast<FLOAT>(std::fmod(m_sample_sheet.m_sheet_size.width * 0.5, g_base + 1.0));
 		offset.y = offset.x;

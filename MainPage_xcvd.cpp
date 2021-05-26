@@ -197,7 +197,7 @@ namespace winrt::GraphPaper::implementation
 						};
 						pt_add(s_pos, sheet_min(), s_pos);
 						if (m_sheet_main.m_grid_snap) {
-							double g_base;
+							float g_base;
 							m_sheet_main.get_grid_base(g_base);
 							const auto g_len = g_base + 1.0;
 							pt_round(s_pos, g_len, s_pos);

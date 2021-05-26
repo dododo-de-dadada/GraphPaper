@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr wchar_t TITLE_STROKE[] = L"str_stroke";
-	constexpr double SLIDER_STEP = 0.5;
+	constexpr float SLIDER_STEP = 0.5f;
 
 	// 線枠メニューの「色」が選択された.
 	IAsyncAction MainPage::stroke_color_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -21,10 +21,10 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_to(&m_sheet_main);
 		D2D1_COLOR_F s_color;
 		m_sample_sheet.get_stroke_color(s_color);
-		const double val0 = s_color.r * COLOR_MAX;
-		const double val1 = s_color.g * COLOR_MAX;
-		const double val2 = s_color.b * COLOR_MAX;
-		const double val3 = s_color.a * COLOR_MAX;
+		const float val0 = s_color.r * COLOR_MAX;
+		const float val1 = s_color.g * COLOR_MAX;
+		const float val2 = s_color.b * COLOR_MAX;
+		const float val3 = s_color.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -74,10 +74,10 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_to(&m_sheet_main);
 		STROKE_PATT s_patt;
 		m_sheet_main.get_stroke_patt(s_patt);
-		const double val0 = s_patt.m_[0] / SLIDER_STEP;
-		const double val1 = s_patt.m_[1] / SLIDER_STEP;
-		const double val2 = s_patt.m_[2] / SLIDER_STEP;
-		const double val3 = s_patt.m_[3] / SLIDER_STEP;
+		const float val0 = s_patt.m_[0] / SLIDER_STEP;
+		const float val1 = s_patt.m_[1] / SLIDER_STEP;
+		const float val2 = s_patt.m_[2] / SLIDER_STEP;
+		const float val3 = s_patt.m_[3] / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -127,9 +127,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		double s_width;
+		float s_width;
 		m_sample_sheet.get_stroke_width(s_width);
-		const double val0 = s_width / SLIDER_STEP;
+		const float val0 = s_width / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_0().Visibility(VISIBLE);
 		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
@@ -138,7 +138,7 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			double sample_value;
+			float sample_value;
 			m_sample_shape->get_stroke_width(sample_value);
 			undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_value);
 		}
@@ -182,7 +182,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::stroke_set_slider_header(const double value)
+	template <UNDO_OP U, int S> void MainPage::stroke_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -193,11 +193,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::STROKE_PATT) {
 			wchar_t buf[32];
-			const double dpi = sheet_dx().m_logical_dpi;
-			double g_base;
+			const double dpi = m_sheet_dx.m_logical_dpi;
+			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			const double g_len = g_base + 1.0;
-			double s_width;
+			float s_width;
 			m_sample_sheet.get_stroke_width(s_width);
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * s_width, dpi, g_len, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
@@ -216,8 +216,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			wchar_t buf[32];
-			const double dpi = sheet_dx().m_logical_dpi;
-			double g_base;
+			const double dpi = m_sheet_dx.m_logical_dpi;
+			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			const double g_len = g_base + 1.0;
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
@@ -272,11 +272,10 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
-	void MainPage::stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = m_sample_shape;
-		const double value = args.NewValue();
+		const float value = static_cast<float>(args.NewValue());
 		stroke_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::STROKE_PATT) {
 			STROKE_PATT patt;

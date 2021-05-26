@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 
 	constexpr wchar_t TITLE_GRID[] = L"str_grid";
-	constexpr double SLIDER_STEP = 0.5;
+	constexpr float SLIDER_STEP = 0.5f;
 
 	// 用紙メニューの「方眼の濃さ」が選択された.
 	IAsyncAction MainPage::grid_gray_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -21,9 +21,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		double g_gray;
+		float g_gray;
 		m_sample_sheet.get_grid_gray(g_gray);
-		const double val3 = g_gray * COLOR_MAX;
+		const float val3 = g_gray * COLOR_MAX;
 		sample_slider_3().Value(val3);
 		grid_set_slider_header<UNDO_OP::GRID_GRAY, 3>(val3);
 		sample_slider_3().Visibility(VISIBLE);
@@ -32,9 +32,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			double sample_value;
+			float sample_value;
 			m_sample_sheet.get_grid_gray(sample_value);
-			double sheet_value;
+			float sheet_value;
 			m_sheet_main.get_grid_gray(sheet_value);
 			if (equal(sheet_value, sample_value) != true) {
 				undo_push_set<UNDO_OP::GRID_GRAY>(&m_sheet_main, sample_value);
@@ -56,9 +56,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		double g_base;
+		float g_base;
 		m_sample_sheet.get_grid_base(g_base);
-		const double val0 = g_base / SLIDER_STEP;
+		const float val0 = g_base / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		grid_set_slider_header<UNDO_OP::GRID_BASE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);
@@ -67,8 +67,8 @@ namespace winrt::GraphPaper::implementation
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			double sample_value;
-			double sheet_value;
+			float sample_value;
+			float sheet_value;
 
 			m_sheet_main.get_grid_base(sheet_value);
 			m_sample_sheet.get_grid_base(sample_value);
@@ -89,10 +89,10 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「方眼の大きさ」>「狭める」が選択された.
 	void MainPage::grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		double g_base;
+		float g_base;
 		m_sheet_main.get_grid_base(g_base);
-		const double value = (g_base + 1.0) * 0.5 - 1.0;
-		if (value < 1.0) {
+		const float value = (g_base + 1.0f) * 0.5f - 1.0f;
+		if (value < 1.0f) {
 			return;
 		}
 		undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
@@ -103,9 +103,9 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「方眼の大きさ」>「広げる」が選択された.
 	void MainPage::grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		double g_base;
+		float g_base;
 		m_sheet_main.get_grid_base(g_base);
-		const double value = (g_base + 1.0) * 2.0 - 1.0;
+		const float value = (g_base + 1.0f) * 2.0f - 1.0f;
 		if (value > max(m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height)) {
 			// 方眼の一片の長さが, 用紙の幅か高さの大きいほうの値を超える場合,
 			// 中断する.
@@ -159,8 +159,7 @@ namespace winrt::GraphPaper::implementation
 	// U	操作
 	// S	スライダー
 	// value	値
-	template <UNDO_OP U, int S>
-	void MainPage::grid_set_slider_header(double value)
+	template <UNDO_OP U, int S> void MainPage::grid_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
@@ -168,10 +167,10 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_grid_length");
-			const double dpi = sheet_dx().m_logical_dpi;
-			double g_base;
+			const float dpi = m_sheet_dx.m_logical_dpi;
+			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			const double g_len = g_base + 1.0;
+			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP + 1.0, dpi, g_len, buf);
 			hdr = hdr + L": " + buf;
@@ -204,11 +203,10 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
-	void MainPage::grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* const s = &m_sample_sheet;
-		const double value = args.NewValue();
+		const float value = static_cast<float>(args.NewValue());
 
 		grid_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::GRID_BASE) {
@@ -275,7 +273,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 図形リストの各図形について以下を繰り返す.
-		double g_base;
+		float g_base;
 		m_sheet_main.get_grid_base(g_base);
 		const double g_len = g_base + 1.0;
 		auto flag = false;
