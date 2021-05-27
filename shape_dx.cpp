@@ -388,7 +388,7 @@ namespace winrt::GraphPaper::implementation
 			break;
 
 		default:
-			throw winrt::hresult_not_implemented();
+			throw winrt::hresult_invalid_argument();
 		}
 
 		winrt::check_hresult(

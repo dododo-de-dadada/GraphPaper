@@ -72,7 +72,7 @@ namespace winrt::GraphPaper::implementation
 			swprintf_s(t_buf, t_len, L"%.1lf%%", value / COLOR_MAX * 100.0);
 		}
 		else {
-			throw hresult_not_implemented();
+			throw winrt::hresult_invalid_argument();
 		}
 	}
 
@@ -127,7 +127,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			throw hresult_not_implemented();
+			throw winrt::hresult_invalid_argument();
 		}
 	}
 
@@ -230,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_bring_to_front().IsEnabled(enable_forward);
 		mfi_send_to_back().IsEnabled(enable_backward);
 		mfi_send_backward().IsEnabled(enable_backward);
-		mfi_summary().IsEnabled(exists_undeleted);
+		mfi_smry().IsEnabled(exists_undeleted);
 		m_cnt_selected = selected_cnt;
 	}
 
@@ -243,8 +243,8 @@ namespace winrt::GraphPaper::implementation
 			co_return;
 		}
 		// 図形一覧の排他制御が true か判定する.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
-			summary_close();
+		if (m_smry_atomic.load(std::memory_order_acquire)) {
+			smry_close();
 		}
 		undo_clear();
 		s_list_clear(m_list_shapes);
@@ -475,8 +475,8 @@ namespace winrt::GraphPaper::implementation
 			co_return;
 		}
 		// 図形一覧の排他制御が true か判定する.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
-			summary_close();
+		if (m_smry_atomic.load(std::memory_order_acquire)) {
+			smry_close();
 		}
 		undo_clear();
 		s_list_clear(m_list_shapes);

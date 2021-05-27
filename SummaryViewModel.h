@@ -15,7 +15,7 @@ namespace winrt::GraphPaper::implementation
 			return m_summaries;
 		}
 	private:
-		GraphPaper::Summary m_summary{ nullptr };
+		GraphPaper::Summary m_smry{ nullptr };
 		Windows::Foundation::Collections::IObservableVector<GraphPaper::Summary> m_summaries;
 	};
 }

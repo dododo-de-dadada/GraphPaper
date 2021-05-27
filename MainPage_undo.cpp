@@ -164,7 +164,7 @@ namespace winrt::GraphPaper::implementation
 			u = new UndoAttr<UNDO_OP::TEXT_RANGE>(dt_reader);
 			break;
 		default:
-			throw winrt::hresult_not_implemented();
+			throw winrt::hresult_invalid_argument();
 			break;
 		}
 		return true;
@@ -230,9 +230,9 @@ namespace winrt::GraphPaper::implementation
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
-		//if (m_summary_visible) {
-			summary_update();
+		if (m_smry_atomic.load(std::memory_order_acquire)) {
+		//if (m_smry_visible) {
+			smry_update();
 		}
 	}
 
@@ -275,9 +275,9 @@ namespace winrt::GraphPaper::implementation
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
-		//if (m_summary_visible) {
-			summary_update();
+		if (m_smry_atomic.load(std::memory_order_acquire)) {
+		//if (m_smry_visible) {
+			smry_update();
 		}
 	}
 
@@ -301,7 +301,7 @@ namespace winrt::GraphPaper::implementation
 	// ‘€ì‚ðŽÀs‚·‚é.
 	void MainPage::undo_exec(Undo* u)
 	{
-		summary_reflect(u);
+		smry_reflect(u);
 		u->exec();
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoAttr<UNDO_OP::ARROWHEAD_STYLE>)) {

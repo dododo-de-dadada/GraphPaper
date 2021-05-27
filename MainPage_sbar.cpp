@@ -267,7 +267,7 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 		}
 		else if (t_draw == TOOL_DRAW::POLY) {
-			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_pent")));
+			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_tri")));
 		}
 		else if (t_draw == TOOL_DRAW::RECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
@@ -285,7 +285,7 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
 		else {
-			throw winrt::hresult_not_implemented();
+			throw winrt::hresult_invalid_argument();
 		}
 		pi_draw().Data(nullptr);
 		pi_draw().Data(Summary::Data(data));

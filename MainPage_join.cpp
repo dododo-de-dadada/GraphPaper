@@ -43,4 +43,8 @@ namespace winrt::GraphPaper::implementation
 		undo_push_set<UNDO_OP::STROKE_JOIN_STYLE>(new_value);
 	}
 
+	IAsyncAction MainPage::join_limit_click_async(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		co_return;
+	}
 }

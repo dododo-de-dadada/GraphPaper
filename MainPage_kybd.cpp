@@ -218,8 +218,8 @@ namespace winrt::GraphPaper::implementation
 	// Cntrol + L ‚ª‰Ÿ‚³‚ê‚½.
 	//void MainPage::ka_summaty_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// if (mfi_summary().IsEnabled()) {
-	// 	mfi_summary_click(nullptr, nullptr);
+	// if (mfi_smry().IsEnabled()) {
+	// 	mfi_smry_click(nullptr, nullptr);
 	// }
 	//}
 

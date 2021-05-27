@@ -20,12 +20,12 @@ namespace winrt::GraphPaper::implementation
 		const FLOAT* d_arr;	// 破線の配置配列を指すポインタ
 
 		if (d_style != D2D1_DASH_STYLE_SOLID) {
-			D2D1_STROKE_STYLE_PROPERTIES prop{
+			const D2D1_STROKE_STYLE_PROPERTIES prop{
 				D2D1_CAP_STYLE_FLAT,	// startCap
 				D2D1_CAP_STYLE_FLAT,	// endCap
 				D2D1_CAP_STYLE_FLAT,	// dashCap
-				D2D1_LINE_JOIN_BEVEL,	// lineJoin. SVG
-				1.0f,					// miterLimit
+				j_style,	// lineJoin
+				static_cast<FLOAT>(j_limit),	// miterLimit
 				D2D1_DASH_STYLE_CUSTOM,	// dashStyle
 				0.0f
 			};
@@ -53,7 +53,7 @@ namespace winrt::GraphPaper::implementation
 			);
 		}
 		else {
-			D2D1_STROKE_STYLE_PROPERTIES prop{
+			const D2D1_STROKE_STYLE_PROPERTIES prop{
 				D2D1_CAP_STYLE_FLAT,	// startCap
 				D2D1_CAP_STYLE_FLAT,	// endCap
 				D2D1_CAP_STYLE_FLAT,	// dashCap
@@ -298,10 +298,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// d_cnt	差分の個数
+	// d_cnt	差分の個数 (最大値は MAX_GON - 1)
 	// s_attr	属性値
 	ShapeStroke::ShapeStroke(const size_t d_cnt, const ShapeSheet* s_attr) :
-		m_diff(d_cnt),
+		m_diff(d_cnt <= MAX_GON - 1 ? d_cnt : MAX_GON - 1),
 		m_stroke_color(s_attr->m_stroke_color),
 		m_stroke_dash_patt(s_attr->m_stroke_dash_patt),
 		m_stroke_dash_style(s_attr->m_stroke_dash_style),

@@ -158,6 +158,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr float FONT_SIZE_DEF = static_cast<float>(12.0 * 96.0 / 72.0);
 	constexpr D2D1_SIZE_F TEXT_MARGIN_DEF{ FONT_SIZE_DEF / 4.0, FONT_SIZE_DEF / 4.0 };
 	constexpr float GRID_LEN_DEF = 48.0f;
+	constexpr size_t MAX_GON = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 
 	//------------------------------
 	// shape.cpp
@@ -549,20 +550,25 @@ namespace winrt::GraphPaper::implementation
 		// 既定の図形属性
 		ARROWHEAD_SIZE m_arrow_size{ ARROWHEAD_SIZE_DEF };	// 矢じりの寸法
 		ARROWHEAD_STYLE m_arrow_style = ARROWHEAD_STYLE::NONE;	// 矢じりの形式
+
 		D2D1_POINT_2F m_corner_rad{ GRID_LEN_DEF, GRID_LEN_DEF };	// 角丸半径
+
 		D2D1_COLOR_F m_fill_color{ S_WHITE };	// 塗りつぶしの色
+
 		D2D1_COLOR_F m_font_color{ S_BLACK };	// 書体の色 (MainPage のコンストラクタで設定)
 		wchar_t* m_font_family = nullptr;	// 書体名
 		float m_font_size = FONT_SIZE_DEF;	// 書体の大きさ
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
+
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色 (MainPage のコンストラクタで設定)
 		float m_stroke_join_limit = MITER_LIMIT_DEF;	// 線枠の連結のマイター制限
 		D2D1_LINE_JOIN m_stroke_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線枠の連結
 		STROKE_DASH_PATT m_stroke_dash_patt{ STROKE_DASH_PATT_DEF };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_stroke_width = 1.0;	// 線枠の太さ
+
 		float m_text_line = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
@@ -1340,27 +1346,27 @@ namespace winrt::GraphPaper::implementation
 		b.y = static_cast<FLOAT>(a.y + y);
 	}
 
-	// 二点間の中点を得る.
+	// 二点間の中点を求める.
 	inline void pt_avg(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
 	{
 		c.x = static_cast<FLOAT>((a.x + b.x) * 0.5);
 		c.y = static_cast<FLOAT>((a.y + b.y) * 0.5);
 	}
 
-	// 二点の位置を比べてそれぞれ大きい値を得る.
-	// a	比べる一方の位置
-	// b	比べるもう一方の位置
-	// c	得られた位置
+	// 二点の位置を比べてそれぞれ大きい値を求める.
+	// a	一方の位置
+	// b	もう一方の位置
+	// c	結果
 	inline void pt_max(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
 	{
 		c.x = a.x > b.x ? a.x : b.x;
 		c.y = a.y > b.y ? a.y : b.y;
 	}
 
-	// 二点の位置を比べてそれぞれ小さい値を得る.
-	// a	比べるられる一方の位置
+	// 二点の位置を比べてそれぞれ小さい値を求める.
+	// a	一方の位置
 	// b	もう一方の位置
-	// c	得られた位置
+	// c	結果
 	inline void pt_min(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
 	{
 		c.x = a.x < b.x ? a.x : b.x;
@@ -1368,9 +1374,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置をスカラー倍に丸める.
-	// a	丸められる位置
-	// b	丸めるスカラー値
-	// c	得られた位置
+	// a	位置
+	// b	スカラー値
+	// c	結果
 	inline void pt_round(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept
 	{
 		c.x = static_cast<FLOAT>(std::round(a.x / b) * b);
@@ -1378,10 +1384,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置にスカラーを掛けて, 位置を加える.
-	// a	掛けられる位置
-	// b	掛けるスカラー値
+	// a	位置
+	// b	スカラー値
 	// c	加える位置
-	// d	得られた位置
+	// d	結果
 	inline void pt_mul(const D2D1_POINT_2F a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
 	{
 		d.x = static_cast<FLOAT>(a.x * b + c.x);
@@ -1389,9 +1395,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置にスカラーを掛ける.
-	// a	掛けられる位置
-	// b	掛けるスカラー値
-	// c	得られた位置
+	// a	位置
+	// b	スカラー値
+	// c	結果
 	inline void pt_mul(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept
 	{
 		c.x = static_cast<FLOAT>(a.x * b);
@@ -1399,9 +1405,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 寸法にスカラー値を掛ける.
-	// a	掛けられる寸法
-	// b	掛けるスカラー値
-	// c	得られた寸法
+	// a	寸法
+	// b	スカラー値
+	// c	結果
 	inline void pt_mul(const D2D1_SIZE_F a, const double b, D2D1_SIZE_F& c) noexcept
 	{
 		c.width = static_cast<FLOAT>(a.width * b);
@@ -1409,10 +1415,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 点にスカラーを掛けて, 位置を加える.
-	// a	掛けられる位置
-	// b	掛けるスカラー値
+	// a	位置
+	// b	スカラー値
 	// c	加える位置
-	// d	得られた位置
+	// d	結果
 	inline void pt_mul(const Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
 	{
 		d.x = static_cast<FLOAT>(a.X * b + c.x);
@@ -1434,8 +1440,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 色が不透明か判定する.
-	// a	判定する色
-	// 戻り値	不透明の場合 true
+	// a	色
+	// 戻り値	不透明ならば true, 透明ならば false.
 	inline bool is_opaque(const D2D1_COLOR_F& a) noexcept
 	{
 		return (static_cast<uint32_t>(round(a.a * 255.0f)) & 0xff) > 0;

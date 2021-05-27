@@ -477,7 +477,7 @@
     <value>太さ...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_summary.Text" xml:space="preserve">
+  <data name="mfi_smry.Text" xml:space="preserve">
     <value>図形リスト</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -886,7 +886,7 @@
     <value>閉じる</value>
     <comment>Button</comment>
   </data>
-  <data name="btn_summary_close.Content" xml:space="preserve">
+  <data name="btn_smry_close.Content" xml:space="preserve">
     <value>閉じる</value>
     <comment>Button</comment>
   </data>

@@ -194,14 +194,14 @@ namespace winrt::GraphPaper::implementation
 		unselect_all();
 		undo_push_append(s);
 		undo_push_null();
-		m_pointer_shape_summary = m_pointer_shape_prev = s;
+		m_pointer_shape_smry = m_pointer_shape_prev = s;
 		edit_menu_enable();
 		sheet_update_bbox(s);
 		sheet_panle_size();
 		sheet_draw();
 		// 図形一覧の排他制御が true か判定する.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
-			summary_append(s);
+		if (m_smry_atomic.load(std::memory_order_acquire)) {
+			smry_append(s);
 		}
 	}
 
@@ -226,13 +226,13 @@ namespace winrt::GraphPaper::implementation
 			unselect_all();
 			undo_push_append(s);
 			undo_push_null();
-			m_pointer_shape_summary = m_pointer_shape_prev = s;
+			m_pointer_shape_smry = m_pointer_shape_prev = s;
 			edit_menu_enable();
 			sheet_update_bbox(s);
 			sheet_panle_size();
 			// 図形一覧の排他制御が true か判定する.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
-				summary_append(s);
+			if (m_smry_atomic.load(std::memory_order_acquire)) {
+				smry_append(s);
 			}
 		}
 		// 初期状態に戻す.
@@ -431,7 +431,7 @@ namespace winrt::GraphPaper::implementation
 						break;
 					}
 				}
-				throw winrt::hresult_not_implemented();
+				throw winrt::hresult_invalid_argument();
 				break;
 			}
 		}
@@ -600,7 +600,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形とその部位を得た場合,
 			if (m_pointer_state == PBTN_STATE::PRESS_LBTN
 				|| (m_pointer_state == PBTN_STATE::PRESS_RBTN && m_pointer_shape->is_selected() != true)) {
-				m_pointer_shape_summary = m_pointer_shape;
+				m_pointer_shape_smry = m_pointer_shape;
 				select_shape(m_pointer_shape, args.KeyModifiers());
 			}
 			return;
@@ -610,7 +610,7 @@ namespace winrt::GraphPaper::implementation
 		m_pointer_anchor = ANCH_TYPE::ANCH_SHEET;
 		m_pointer_shape = nullptr;
 		m_pointer_shape_prev = nullptr;
-		m_pointer_shape_summary = nullptr;
+		m_pointer_shape_smry = nullptr;
 		// キー修飾子をハンドラーの引数から得る.
 		if (args.KeyModifiers() != VirtualKeyModifiers::None) {
 			// キー修飾子が None でない場合

@@ -138,12 +138,12 @@ namespace winrt::GraphPaper::implementation
 			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
 		// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
+		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			if (m_list_shapes.empty()) {
-				summary_close();
+				smry_close();
 			}
 			else {
-				summary_remake();
+				smry_remake();
 			}
 		}
 		sheet_update_bbox();

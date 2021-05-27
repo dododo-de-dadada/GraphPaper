@@ -88,15 +88,17 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F diff;
 			pt_sub(value, m_pos, diff);
 			pt_round(diff, PT_ROUND, diff);
+
 			pt_add(m_pos, diff, m_pos);
 			pt_sub(m_diff[0], diff, m_diff[0]);
 		}
 		else {
-			D2D1_POINT_2F a_pos;
-			get_anch_pos(anch, a_pos);
+			D2D1_POINT_2F anch_pos;
+			get_anch_pos(anch, anch_pos);
 			D2D1_POINT_2F diff;
-			pt_sub(value, a_pos, diff);
+			pt_sub(value, anch_pos, diff);
 			pt_round(diff, PT_ROUND, diff);
+
 			const size_t i = anch - ANCH_TYPE::ANCH_P0;
 			pt_add(m_diff[i - 1], diff, m_diff[i - 1]);
 			// ê}å`ÇÃïîà Ç™èIì_à»äOÇ©îªíËÇ∑ÇÈ.
@@ -129,7 +131,8 @@ namespace winrt::GraphPaper::implementation
 	// value	äiî[Ç∑ÇÈíl
 	void ShapePath::set_start_pos(const D2D1_POINT_2F value)
 	{
-		ShapeStroke::set_start_pos(value);
+		//ShapeStroke::set_start_pos(value);
+		set_anchor_pos(value, ANCH_TYPE::ANCH_P0);
 		create_path_geometry(s_d2d_factory);
 	}
 

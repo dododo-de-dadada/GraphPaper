@@ -95,8 +95,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			auto t = *it_dst;
 			// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
-				summary_arrng(s, t);
+			if (m_smry_atomic.load(std::memory_order_acquire)) {
+				smry_arrng(s, t);
 			}
 			undo_push_arrng(s, t);
 			// ŒğŠ·ƒtƒ‰ƒO‚ğ—§‚Ä‚é.
@@ -140,9 +140,9 @@ namespace winrt::GraphPaper::implementation
 			auto s = s_list_front(m_list_shapes);
 			for (auto t : s_list) {
 				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-				if (m_summary_atomic.load(std::memory_order_acquire)) {
-					summary_remove(t);
-					summary_insert(t, i++);
+				if (m_smry_atomic.load(std::memory_order_acquire)) {
+					smry_remove(t);
+					smry_insert(t, i++);
 				}
 				undo_push_remove(t);
 				undo_push_insert(t, s);
@@ -151,9 +151,9 @@ namespace winrt::GraphPaper::implementation
 		else {
 			for (auto s : s_list) {
 				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-				if (m_summary_atomic.load(std::memory_order_acquire)) {
-					summary_remove(s);
-					summary_append(s);
+				if (m_smry_atomic.load(std::memory_order_acquire)) {
+					smry_remove(s);
+					smry_append(s);
 				}
 				undo_push_remove(s);
 				undo_push_insert(s, nullptr);

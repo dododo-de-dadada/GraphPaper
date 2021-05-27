@@ -24,8 +24,8 @@ namespace winrt::GraphPaper::implementation
 		undo_push_append(g);
 		for (const auto s : s_list) {
 			// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
-				summary_remove(s);
+			if (m_smry_atomic.load(std::memory_order_acquire)) {
+				smry_remove(s);
 			}
 			// }Œ`‚ğíœ‚µ‚Ä, ‚»‚Ì‘€ì‚ğƒXƒ^ƒbƒN‚ÉÏ‚Ş.
 			undo_push_remove(s);
@@ -38,8 +38,8 @@ namespace winrt::GraphPaper::implementation
 		edit_menu_enable();
 		sheet_draw();
 		// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
-			summary_append(g);
+		if (m_smry_atomic.load(std::memory_order_acquire)) {
+			smry_append(g);
 		}
 	}
 
@@ -58,8 +58,8 @@ namespace winrt::GraphPaper::implementation
 		for (auto t : g_list) {
 			uint32_t i = 0;
 			// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
-				i = summary_remove(t);
+			if (m_smry_atomic.load(std::memory_order_acquire)) {
+				i = smry_remove(t);
 			}
 			auto g = static_cast<ShapeGroup*>(t);
 			while (g->m_list_grouped.empty() != true) {
@@ -71,9 +71,9 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-				if (m_summary_atomic.load(std::memory_order_acquire)) {
+				if (m_smry_atomic.load(std::memory_order_acquire)) {
 					// }Œ`‚ğˆê——‚É‘}“ü‚·‚é.
-					summary_insert(s, i++);
+					smry_insert(s, i++);
 				}
 				// }Œ`‚ğƒOƒ‹[ƒv‚©‚çíœ‚µ‚Ä, ‚»‚Ì‘€ì‚ğƒXƒ^ƒbƒN‚ÉÏ‚Ş.
 				undo_push_remove(g, s);

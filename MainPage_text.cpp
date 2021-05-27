@@ -478,11 +478,11 @@ namespace winrt::GraphPaper::implementation
 			text_find_set();
 			return;
 		}
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
-		//if (m_summary_visible) {
+		if (m_smry_atomic.load(std::memory_order_acquire)) {
+		//if (m_smry_visible) {
 			// 図形一覧パネルが表示されている場合,
 			// 図形一覧パネルを非表示にする.
-			summary_close();
+			smry_close();
 		}
 		tx_text_find_what().Text({ m_text_find == nullptr ? L"" : m_text_find });
 		tx_text_replace_with().Text({ m_text_repl == nullptr ? L"" : m_text_repl });

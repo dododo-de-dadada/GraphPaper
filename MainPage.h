@@ -34,7 +34,7 @@
 // MainPage_select.cpp	図形の選択
 // MainPage_stbar.cpp	ステータスバー
 // MainPage_stroke.cpp	線枠
-// MainPage_summary.cpp	図形の一覧
+// MainPage_smry.cpp	図形の一覧
 // MainPage_text.cpp	文字列の編集と検索/置換
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
 // MainPage_tool.cpp	作図ツール
@@ -212,8 +212,10 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
 		std::mutex m_dx_mutex;	// 描画環境の排他制御
-		std::atomic_bool m_summary_atomic{ false };	// 図形一覧の排他制御
 		winrt::hstring m_file_token_mru;	// 最近使ったファイルのトークン
+
+		bool m_smry_descend = true;
+		std::atomic_bool m_smry_atomic{ false };	// 図形一覧の排他制御
 
 		// text
 
@@ -232,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 
 		SBAR_FLAG m_status_bar = sbar_or(SBAR_FLAG::CURS, SBAR_FLAG::ZOOM);	// ステータスバーの状態
 
-		// tool
+		// drawing tool
 
 		TOOL_DRAW m_tool_draw = TOOL_DRAW::SELECT;		// 作図ツール
 		TOOL_POLY m_tool_poly{ TOOL_POLY_DEF };	// 多角形のツール
@@ -266,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_pointer_pressed{ 0.0F, 0.0F };		// ポインターが押された位置
 		Shape* m_pointer_shape = nullptr;		// ポインターが押された図形
 		Shape* m_pointer_shape_prev = nullptr;		// 前回ポインターが押された図形
-		Shape* m_pointer_shape_summary = nullptr;		// 一覧でポインターが押された図形
+		Shape* m_pointer_shape_smry = nullptr;		// 一覧でポインターが押された図形
 		uint64_t m_pointer_time = 0ULL;		// ポインターが押された時刻
 		uint64_t m_pointer_click_time = 0ULL;		// クリックの判定時間 (マイクロ秒)
 		double m_pointer_click_dist = 6.0;		// クリックの判定距離 (DIPs)
@@ -337,6 +339,12 @@ namespace winrt::GraphPaper::implementation
 		// アプリケーションが中断された.
 		IAsyncAction app_suspending_async(IInspectable const&, SuspendingEventArgs const& args);
 
+		//-------------------------------
+		// MainPage_join.cpp
+		// 線の連結
+		//-------------------------------
+
+		IAsyncAction join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
 		void join_style_check_menu(const D2D1_LINE_JOIN j_style);
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
 
@@ -728,9 +736,9 @@ namespace winrt::GraphPaper::implementation
 		// ポインターが押された図形を得る.
 		Shape* pointer_shape_prev(void) const noexcept { return m_pointer_shape_prev; }
 		// 値をポインターが押された図形に格納する.
-		void pointer_shape_summary(Shape* const summary) noexcept { m_pointer_shape_summary = summary; }
+		void pointer_shape_smry(Shape* const smry) noexcept { m_pointer_shape_smry = smry; }
 		// ポインターが押された図形を得る.
-		Shape* pointer_shape_summary(void) const noexcept { return m_pointer_shape_summary; }
+		Shape* pointer_shape_smry(void) const noexcept { return m_pointer_shape_smry; }
 		// ポインターが押された状態に格納する.
 		void pointer_state(const PBTN_STATE state) noexcept { m_pointer_state = state; }
 		// ポインターが押された状態を得る.
@@ -852,52 +860,52 @@ namespace winrt::GraphPaper::implementation
 		template<UNDO_OP U, int S> void stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
-		// MainPage_summary.cpp
+		// MainPage_smry.cpp
 		// 図形の一覧
 		//-------------------------------
 
 		// 図形一覧の「閉じる」ボタンが押された.
-		void summary_close_click(IInspectable const&, RoutedEventArgs const&);
+		void smry_close_click(IInspectable const&, RoutedEventArgs const&);
 		// 図形一覧の項目が選択された.
-		void summary_selection_changed(IInspectable const& sender, SelectionChangedEventArgs const& e);
+		void smry_selection_changed(IInspectable const& sender, SelectionChangedEventArgs const& e);
 		// 図形一覧がロードされた.
-		void summary_loaded(IInspectable const& sender, RoutedEventArgs const& e);
+		void smry_loaded(IInspectable const& sender, RoutedEventArgs const& e);
 		// 編集メニューの「リストの表示」が選択された.
-		void mfi_summary_click(IInspectable const&, RoutedEventArgs const&);
+		void mfi_smry_click(IInspectable const&, RoutedEventArgs const&);
 		// 図形を一覧に追加する.
-		void summary_append(Shape* const s);
+		void smry_append(Shape* const s);
 		// 一覧の中で図形を入れ替える.
-		void summary_arrng(Shape* const s, Shape* const t);
+		void smry_arrng(Shape* const s, Shape* const t);
 		// 図形一覧を消去する.
-		void summary_clear(void);
+		void smry_clear(void);
 		// 図形一覧パネルを閉じて消去する.
-		void summary_close(void);
+		void smry_close(void);
 		// 図形を一覧に挿入する.
-		void summary_insert(Shape* const s, const uint32_t i);
+		void smry_insert(Shape* const s, const uint32_t i);
 		// 操作を図形一覧に反映する.
-		void summary_reflect(const Undo* u);
+		void smry_reflect(const Undo* u);
 		// 図形一覧を作成しなおす.
-		void summary_remake(void);
+		void smry_remake(void);
 		// 図形を一覧から消去する.
-		uint32_t summary_remove(Shape* const s);
+		uint32_t smry_remove(Shape* const s);
 		// 一覧の項目を選択する.
-		void summary_select(uint32_t i);
+		void smry_select(uint32_t i);
 		// 一覧の図形を選択する.
-		void summary_select(Shape* const s);
+		void smry_select(Shape* const s);
 		// 一覧の項目を全て選択する.
-		void summary_select_all(void);
+		void smry_select_all(void);
 		// 一覧の最初の項目を選択する.
-		void summary_select_head(void);
+		void smry_select_head(void);
 		// 一覧の最後の項目を選択する.
-		void summary_select_tail(void);
+		void smry_select_tail(void);
 		// 一覧の項目を選択解除する.
-		void summary_unselect(uint32_t i);
+		void smry_unselect(uint32_t i);
 		// 一覧の図形を選択解除する.
-		void summary_unselect(Shape* const s);
+		void smry_unselect(Shape* const s);
 		// 一覧の項目を全て選択解除する.
-		void summary_unselect_all(void);
+		void smry_unselect_all(void);
 		// 一覧の表示を更新する.
-		void summary_update(void);
+		void smry_update(void);
 
 		//-------------------------------
 		// MainPage_text.cpp

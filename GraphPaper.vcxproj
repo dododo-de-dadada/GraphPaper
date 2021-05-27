@@ -158,7 +158,7 @@
     <ClCompile Include="MainPage_select.cpp" />
     <ClCompile Include="MainPage_sbar.cpp" />
     <ClCompile Include="MainPage_stroke.cpp" />
-    <ClCompile Include="MainPage_summary.cpp" />
+    <ClCompile Include="MainPage_smry.cpp" />
     <ClCompile Include="MainPage_text.cpp" />
     <ClCompile Include="MainPage_thread.cpp" />
     <ClCompile Include="MainPage_tool.cpp" />

@@ -240,7 +240,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(m_pos, diff,  m_pos);
 		}
 		else {
-			throw hresult_not_implemented();
+			throw winrt::hresult_invalid_argument();
 		}
 		m_d2d_arrow_geom = nullptr;
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {

@@ -120,7 +120,7 @@ namespace winrt::GraphPaper::implementation
 				m_sample_shape->set_select(false);
 			}
 			else {
-				throw winrt::hresult_not_implemented();
+				throw winrt::hresult_invalid_argument();
 			}
 #if defined(_DEBUG)
 			debug_leak_cnt++;

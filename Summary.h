@@ -46,7 +46,7 @@ namespace winrt::GraphPaper::implementation
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_line/Text");
 			}
 			else if (t_id == typeid(ShapePoly)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_pent")));
+				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_tri")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_poly/Text");
 			}
 			else if (t_id == typeid(ShapeRect)) {

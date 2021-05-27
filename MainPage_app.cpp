@@ -149,8 +149,8 @@ namespace winrt::GraphPaper::implementation
 #endif
 		if (hres == S_OK) {
 			// 図形一覧の排他制御が true か判定する.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
-				summary_clear();
+			if (m_smry_atomic.load(std::memory_order_acquire)) {
+				smry_clear();
 			}
 		}
 		// スレッドコンテキストを復元する.
