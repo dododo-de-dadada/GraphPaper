@@ -196,6 +196,7 @@ namespace winrt::GraphPaper::implementation
 		STROKE,	// 線枠
 		FILL,	// 塗りつぶし
 		FONT,	// 書体
+		JOIN,	// 線の連結
 		MISC	// その他
 	};
 
@@ -237,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 		// drawing tool
 
 		TOOL_DRAW m_tool_draw = TOOL_DRAW::SELECT;		// 作図ツール
-		TOOL_POLY m_tool_poly{ TOOL_POLY_DEF };	// 多角形のツール
+		TOOL_POLY m_tool_poly{ TOOL_POLY_DEF };	// 多角形の作図ツール
 
 		// main
 
@@ -263,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_POINT_2F m_pointer_cur{ 0.0F, 0.0F };		// ポインターの現在位置
 		D2D1_POINT_2F m_pointer_pre{ 0.0F, 0.0F };		// ポインターの前回位置
-		PBTN_STATE m_pointer_state = PBTN_STATE::BEGIN;		// ポインターが押された状態
+		PBTN_STATE m_pointer_state = PBTN_STATE::BEGIN;		// ポインターの押された状態
 		uint32_t m_pointer_anchor = ANCH_TYPE::ANCH_SHEET;		// ポインターが押された図形の部位
 		D2D1_POINT_2F m_pointer_pressed{ 0.0F, 0.0F };		// ポインターが押された位置
 		Shape* m_pointer_shape = nullptr;		// ポインターが押された図形
@@ -347,6 +348,8 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
 		void join_style_check_menu(const D2D1_LINE_JOIN j_style);
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
+		template <UNDO_OP U, int S> void join_set_slider_header(const float value);
+		template <UNDO_OP U, int S> void join_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_arrng.cpp
@@ -739,9 +742,9 @@ namespace winrt::GraphPaper::implementation
 		void pointer_shape_smry(Shape* const smry) noexcept { m_pointer_shape_smry = smry; }
 		// ポインターが押された図形を得る.
 		Shape* pointer_shape_smry(void) const noexcept { return m_pointer_shape_smry; }
-		// ポインターが押された状態に格納する.
+		// ポインターの押された状態に格納する.
 		void pointer_state(const PBTN_STATE state) noexcept { m_pointer_state = state; }
-		// ポインターが押された状態を得る.
+		// ポインターの押された状態を得る.
 		const PBTN_STATE pointer_state(void) const noexcept { return m_pointer_state; }
 		// ポインターのボタンが上げられた.
 		void pointer_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
@@ -889,7 +892,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を一覧から消去する.
 		uint32_t smry_remove(Shape* const s);
 		// 一覧の項目を選択する.
-		void smry_select(uint32_t i);
+		//void smry_select(uint32_t i);
 		// 一覧の図形を選択する.
 		void smry_select(Shape* const s);
 		// 一覧の項目を全て選択する.
@@ -899,7 +902,7 @@ namespace winrt::GraphPaper::implementation
 		// 一覧の最後の項目を選択する.
 		void smry_select_tail(void);
 		// 一覧の項目を選択解除する.
-		void smry_unselect(uint32_t i);
+		//void smry_unselect(uint32_t i);
 		// 一覧の図形を選択解除する.
 		void smry_unselect(Shape* const s);
 		// 一覧の項目を全て選択解除する.
@@ -956,9 +959,9 @@ namespace winrt::GraphPaper::implementation
 
 		// 作図メニューの項目が選択された.
 		void tool_draw_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 作図メニューを得る.
+		// 作図ツールを得る.
 		const TOOL_DRAW tool_draw(void) const noexcept { return m_tool_draw; }
-		// 多角形のツールを得る.
+		// 多角形の作図ツールを得る.
 		const TOOL_POLY& tool_poly(void) const noexcept { return m_tool_poly; }
 		// 作図メニューの状態を読み込む.
 		void tool_read(DataReader const& dt_reader);
@@ -1009,7 +1012,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を図形へ格納して, その操作をスタックに積む.
 		template <UNDO_OP U, typename T> void undo_push_set(Shape* const s, T const& value);
 		// 値を選択された図形に格納して, その操作をスタックに積む.
-		template <UNDO_OP U, typename T> void undo_push_set(T const& value);
+		template <UNDO_OP U, typename T> bool undo_push_set(T const& value);
 		// 図形の値をスタックに保存する.
 		template <UNDO_OP U> void undo_push_set(Shape* const s);
 		// 操作スタックをデータリーダーから読み込む.

@@ -324,7 +324,7 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	{
 		wchar_t buf[32];
 		swprintf_s(buf, 31, FMT_ZOOM, m_sheet_main.m_sheet_scale * 100.0);
-		tk_sbar_zoom().Text(winrt::hstring{ L"z:" } +buf);
+		tk_sbar_zoom().Text(winrt::hstring{ L"z:" } + buf);
 	}
 
 	// ステータスバーの表示を設定する.

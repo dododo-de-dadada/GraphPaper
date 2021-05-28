@@ -200,13 +200,11 @@ namespace winrt::GraphPaper::implementation
 	void ShapeGroup::set_start_pos(const D2D1_POINT_2F value)
 	{
 		D2D1_POINT_2F b_min;
-		D2D1_POINT_2F diff;
-
-		if (get_start_pos(b_min) != true || equal(value, b_min)) {
-			return;
+		if (get_start_pos(b_min) && !equal(value, b_min)) {
+			D2D1_POINT_2F diff;
+			pt_sub(value, b_min, diff);
+			move(diff);
 		}
-		pt_sub(value, b_min, diff);
-		move(diff);
 	}
 
 	// 図形をデータリーダーから作成する.

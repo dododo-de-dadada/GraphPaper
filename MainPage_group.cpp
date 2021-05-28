@@ -21,6 +21,7 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
+		unselect_all();
 		undo_push_append(g);
 		for (const auto s : s_list) {
 			// 図形一覧の排他制御が true か判定する.
@@ -32,6 +33,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形をグループ図形に追加して, その操作をスタックに積む.
 			undo_push_append(g, s);
 		}
+		undo_push_select(g);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
@@ -54,6 +56,7 @@ namespace winrt::GraphPaper::implementation
 			// 終了する.
 			return;
 		}
+		unselect_all();
 		// 得られたリストの各グループ図形について以下を繰り返す.
 		for (auto t : g_list) {
 			uint32_t i = 0;

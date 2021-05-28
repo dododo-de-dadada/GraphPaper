@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::select_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max)
 	{
 		bool flag = false;
-		uint32_t i = 0u;
+		//uint32_t i = 0u;
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
@@ -51,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 					undo_push_select(s);
 					// 図形一覧の排他制御が true か判定する.
 					if (m_smry_atomic.load(std::memory_order_acquire)) {
-						smry_select(i);
+						smry_select(s);
 					}
 					flag = true;
 				}
@@ -61,19 +61,18 @@ namespace winrt::GraphPaper::implementation
 					undo_push_select(s);
 					// 図形一覧の排他制御が true か判定する.
 					if (m_smry_atomic.load(std::memory_order_acquire)) {
-						smry_unselect(i);
+						smry_unselect(s);
 					}
 					flag = true;
 				}
 			}
-			i++;
+			//i++;
 		}
 		return flag;
 	}
 
 	// 次の図形を選択する.
-	template <VirtualKeyModifiers M, VirtualKey K>
-	void MainPage::select_next_shape(void)
+	template <VirtualKeyModifiers M, VirtualKey K> void MainPage::select_next_shape(void)
 	{
 		if (pointer_shape_smry() == nullptr) {
 			auto s_prev = pointer_shape_prev();
@@ -185,7 +184,7 @@ namespace winrt::GraphPaper::implementation
 						undo_push_select(s);
 						// 図形一覧の排他制御が true か判定する.
 						if (m_smry_atomic.load(std::memory_order_acquire)) {
-							smry_unselect(i);
+							smry_unselect(s);
 						}
 					}
 					break;
@@ -197,7 +196,7 @@ namespace winrt::GraphPaper::implementation
 					undo_push_select(s);
 					// 図形一覧の排他制御が true か判定する.
 					if (m_smry_atomic.load(std::memory_order_acquire)) {
-						smry_select(i);
+						smry_select(s);
 					}
 				}
 				if (s == s_end) {
@@ -243,10 +242,10 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
+		// シフトキーもコントロールキーもどちらも押されていない場合
 		else {
-			// シフトキーもコントロールキーもどちらも押されていない場合
-			if (s->is_selected() != true) {
-				// 図形の選択フラグがない場合,
+			// 図形の選択フラグがないか判定する.
+			if (!s->is_selected()) {
 				unselect_all();
 				undo_push_select(s);
 				edit_menu_enable();
@@ -285,7 +284,7 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::toggle_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max)
 	{
 		auto flag = false;
-		uint32_t i = 0;
+		//uint32_t i = 0;
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
@@ -295,15 +294,15 @@ namespace winrt::GraphPaper::implementation
 				// 図形一覧の排他制御が true か判定する.
 				if (m_smry_atomic.load(std::memory_order_acquire)) {
 					if (s->is_selected() != true) {
-						smry_select(i);
+						smry_select(s);
 					}
 					else {
-						smry_unselect(i);
+						smry_unselect(s);
 					}
 				}
 				flag = true;
 			}
-			i++;
+			//i++;
 		}
 		return flag;
 	}

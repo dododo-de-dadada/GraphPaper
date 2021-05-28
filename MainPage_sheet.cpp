@@ -92,6 +92,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_OP::SHEET_COLOR>(&m_sheet_main, sample_value);
 				undo_push_null();
 				undo_menu_enable();
+				sheet_draw();
 			}
 		}
 		sample_slider_0().Visibility(COLLAPSED);
@@ -100,7 +101,6 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
-		sheet_draw();
 	}
 
 	// 用紙を表示する.
@@ -535,19 +535,19 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(conv_len_to_val(len_unit(), pw, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_val(len_unit(), ph, dpi, g_len))
 			};
-			if (equal(p_size, m_sheet_main.m_sheet_size) != true) {
+			if (!equal(p_size, m_sheet_main.m_sheet_size)) {
 				// 変換された値が用紙の大きさと異なる場合,
 				undo_push_set<UNDO_OP::SHEET_SIZE>(&m_sheet_main, p_size);
 				undo_push_null();
 				undo_menu_enable();
+				sheet_update_bbox();
+				sheet_panle_size();
+				sheet_draw();
+				sbar_set_curs();
+				sbar_set_grid();
+				sbar_set_sheet();
+				sbar_set_unit();
 			}
-			sheet_update_bbox();
-			sheet_panle_size();
-			sheet_draw();
-			sbar_set_curs();
-			sbar_set_grid();
-			sbar_set_sheet();
-			sbar_set_unit();
 		}
 		else if (d_result == ContentDialogResult::Secondary) {
 			D2D1_POINT_2F b_min = { FLT_MAX, FLT_MAX };

@@ -30,7 +30,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		mfi_arrow_size().IsEnabled(a_style != ARROWHEAD_STYLE::NONE);
 		mfi_arrow_size_2().IsEnabled(a_style != ARROWHEAD_STYLE::NONE);
-		undo_push_set<UNDO_OP::ARROWHEAD_STYLE>(a_style);
+		if (undo_push_set<UNDO_OP::ARROWHEAD_STYLE>(a_style)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 線枠メニューの「矢じりの種類」>「開いた」が選択された.
@@ -147,7 +151,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			ARROWHEAD_SIZE sample_value;
 			m_sample_shape->get_arrow_size(sample_value);
-			undo_push_set<UNDO_OP::ARROWHEAD_SIZE>(sample_value);
+			if (undo_push_set<UNDO_OP::ARROWHEAD_SIZE>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)

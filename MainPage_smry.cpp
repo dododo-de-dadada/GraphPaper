@@ -202,11 +202,15 @@ namespace winrt::GraphPaper::implementation
 			m_smry_atomic.store(false, std::memory_order_release);
 			if (m_smry_descend) {
 				lv_smry().Items().InsertAt(0, winrt::make<Summary>(s, Resources()));
-				smry_select_item(lv_smry(), 0);
+				if (s->is_selected()) {
+					smry_select_item(lv_smry(), 0);
+				}
 			}
 			else {
 				lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
-				smry_select_item(lv_smry(), lv_smry().Items().Size() - 1);
+				if (s->is_selected()) {
+					smry_select_item(lv_smry(), lv_smry().Items().Size() - 1);
+				}
 			}
 			m_smry_atomic.store(true, std::memory_order_release);
 		}
@@ -254,11 +258,21 @@ namespace winrt::GraphPaper::implementation
 			if (m_smry_descend) {
 				const uint32_t j = lv_smry().Items().Size() - i;
 				lv_smry().Items().InsertAt(j, winrt::make<Summary>(s, Resources()));
-				smry_select_item(lv_smry(), j);
+				if (s->is_selected()) {
+					smry_select_item(lv_smry(), j);
+				}
+				else {
+					smry_unselect_item(lv_smry(), j);
+				}
 			}
 			else {
 				lv_smry().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
-				smry_select_item(lv_smry(), i);
+				if (s->is_selected()) {
+					smry_select_item(lv_smry(), i);
+				}
+				else {
+					smry_unselect_item(lv_smry(), i);
+				}
 			}
 			m_smry_atomic.store(true, std::memory_order_release);
 		}
@@ -276,20 +290,34 @@ namespace winrt::GraphPaper::implementation
 				auto s = v->shape();
 				if (v->is_insert()) {
 					if (v->shape_at() != nullptr) {
-						const auto i = smry_distance(lv_smry().Items(), v->shape_at());
+						auto i = smry_distance(lv_smry().Items(), v->shape_at());
+						if (m_smry_descend) {
+							i++;
+						}
 						lv_smry().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
-						smry_select_item(lv_smry(), i);
+						if (s->is_selected()) {
+							smry_select_item(lv_smry(), i);
+						}
 					}
 					else {
-						lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
-						const auto i = lv_smry().Items().Size() - 1;
-						smry_select_item(lv_smry(), i);
+						if (m_smry_descend) {
+							lv_smry().Items().InsertAt(0, winrt::make<Summary>(s, Resources()));
+							if (s->is_selected()) {
+								smry_select_item(lv_smry(), 0);
+							}
+						}
+						else {
+							lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
+							const auto i = lv_smry().Items().Size() - 1;
+							smry_select_item(lv_smry(), i);
+						}
 					}
 				}
 				else {
 					auto items = lv_smry().Items();
 					const auto i = smry_distance(items, s);
 					if (i < items.Size()) {
+						//smry_unselect_item(lv_smry(), i);	// リムーブする前に選択を外さないとシステムが勝手に他の項目を選択する.
 						items.RemoveAt(i);
 					}
 				}
@@ -345,6 +373,7 @@ namespace winrt::GraphPaper::implementation
 			auto items = lv_smry().Items();
 			const uint32_t i = smry_distance(items, s);
 			if (i < items.Size()) {
+				smry_unselect_item(lv_smry(), i);	// リムーブする前に選択を外さないとシステムが勝手に他の項目を選択する.
 				items.RemoveAt(i);
 			}
 			m_smry_atomic.store(true, std::memory_order_release);
@@ -364,14 +393,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧の項目を選択する.
-	void MainPage::smry_select(uint32_t i)
-	{
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-			m_smry_atomic.store(false, std::memory_order_release);
-			smry_select_item(lv_smry(), i);
-			m_smry_atomic.store(true, std::memory_order_release);
-		}
-	}
+	//void MainPage::smry_select(uint32_t i)
+	//{
+	//	if (m_smry_atomic.load(std::memory_order_acquire)) {
+	//		m_smry_atomic.store(false, std::memory_order_release);
+	//		smry_select_item(lv_smry(), i);
+	//		m_smry_atomic.store(true, std::memory_order_release);
+	//	}
+	//}
 
 	// 一覧の項目を全て選択する.
 	void MainPage::smry_select_all(void)
@@ -388,7 +417,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			m_smry_atomic.store(false, std::memory_order_release);
-			smry_select_item(lv_smry(), 0);
+			if (m_smry_descend) {
+				smry_select_item(lv_smry(), lv_smry().Items().Size() - 1);
+			}
+			else {
+				smry_select_item(lv_smry(), 0);
+			}
 			m_smry_atomic.store(true, std::memory_order_release);
 		}
 	}
@@ -398,7 +432,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			m_smry_atomic.store(false, std::memory_order_release);
-			smry_select_item(lv_smry(), lv_smry().Items().Size() - 1);
+			if (m_smry_descend) {
+				smry_select_item(lv_smry(), 0);
+			}
+			else {
+				smry_select_item(lv_smry(), lv_smry().Items().Size() - 1);
+			}
 			m_smry_atomic.store(true, std::memory_order_release);
 		}
 	}
@@ -414,14 +453,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧の項目を選択解除する.
-	void MainPage::smry_unselect(uint32_t i)
-	{
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-			m_smry_atomic.store(false, std::memory_order_release);
-			smry_unselect_item(lv_smry(), i);
-			m_smry_atomic.store(true, std::memory_order_release);
-		}
-	}
+	//void MainPage::smry_unselect(uint32_t i)
+	//{
+	//	if (m_smry_atomic.load(std::memory_order_acquire)) {
+	//		m_smry_atomic.store(false, std::memory_order_release);
+	//		smry_unselect_item(lv_smry(), i);
+	//		m_smry_atomic.store(true, std::memory_order_release);
+	//	}
+	//}
 
 	// 一覧の項目を全て選択解除する.
 	void MainPage::smry_unselect_all(void)

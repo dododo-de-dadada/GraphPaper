@@ -46,7 +46,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			m_sample_shape->get_fill_color(sample_value);
-			undo_push_set<UNDO_OP::FILL_COLOR>(sample_value);
+			if (undo_push_set<UNDO_OP::FILL_COLOR>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)

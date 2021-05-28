@@ -102,6 +102,17 @@ namespace winrt::GraphPaper::implementation
 				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
 				m_sample_shape = new ShapeRect(s_pos, diff, &m_sample_sheet);
 			}
+			else if (m_sample_type == SAMP_TYPE::JOIN) {
+				const auto pad = w * 0.125;
+				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
+				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
+				TOOL_POLY tool_poly { 3, true, true, false, true };
+				m_sample_shape = new ShapePoly(s_pos, diff, &m_sample_sheet, tool_poly);
+				const double offset = h / 16.0;
+				m_sample_shape->set_anchor_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 - offset) }, ANCH_TYPE::ANCH_P0);
+				m_sample_shape->set_anchor_pos(D2D1_POINT_2F{ static_cast<FLOAT>(w * 0.25),  static_cast<FLOAT>(h * 0.5) }, ANCH_TYPE::ANCH_P0 + 1);
+				m_sample_shape->set_anchor_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 + offset) }, ANCH_TYPE::ANCH_P0 + 2);
+			}
 			else if (m_sample_type == SAMP_TYPE::MISC) {
 				constexpr uint32_t misc_min = 3;
 				constexpr uint32_t misc_max = 64;
@@ -110,13 +121,13 @@ namespace winrt::GraphPaper::implementation
 				const D2D1_POINT_2F samp_diff{ static_cast<FLOAT>(w - 3.0 * pad), static_cast<FLOAT>(h - 3.0 * pad) };
 				const D2D1_POINT_2F rect_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
 				const D2D1_POINT_2F poly_pos{ static_cast<FLOAT>(pad + pad), static_cast<FLOAT>(pad + pad) };
-				auto* const samp_rect = new ShapeRect(rect_pos, samp_diff, &m_sample_sheet);
+				auto const samp_rect = new ShapeRect(rect_pos, samp_diff, &m_sample_sheet);
 				TOOL_POLY poly_tool{ misc_cnt >= misc_max ? misc_min : misc_cnt++, true, true, true, true };
-				auto* const samp_elli = new ShapePoly(poly_pos, samp_diff, &m_sample_sheet, poly_tool);
+				auto const samp_poly = new ShapePoly(poly_pos, samp_diff, &m_sample_sheet, poly_tool);
 				ShapeGroup* const g = new ShapeGroup();
 				m_sample_shape = g;
 				g->m_list_grouped.push_back(samp_rect);
-				g->m_list_grouped.push_back(samp_elli);
+				g->m_list_grouped.push_back(samp_poly);
 				m_sample_shape->set_select(false);
 			}
 			else {

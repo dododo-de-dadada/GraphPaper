@@ -110,7 +110,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			m_sample_shape->get_font_color(sample_value);
-			undo_push_set<UNDO_OP::FONT_COLOR>(sample_value);
+			if (undo_push_set<UNDO_OP::FONT_COLOR>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -172,7 +176,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			wchar_t* sample_value;
 			m_sample_shape->get_font_family(sample_value);
-			undo_push_set<UNDO_OP::FONT_FAMILY>(sample_value);
+			if (undo_push_set<UNDO_OP::FONT_FAMILY>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -294,7 +302,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_shape->get_font_size(sample_value);
-			undo_push_set<UNDO_OP::FONT_SIZE>(sample_value);
+			if (undo_push_set<UNDO_OP::FONT_SIZE>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -347,7 +359,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_STRETCH sample_value;
 			m_sample_shape->get_font_stretch(sample_value);
-			undo_push_set<UNDO_OP::FONT_STRETCH>(sample_value);
+			if (undo_push_set<UNDO_OP::FONT_STRETCH>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -377,19 +393,31 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「イタリック体」が選択された.
 	void MainPage::font_style_italic_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC);
+		if (undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 書体メニューの「標準」が選択された.
 	void MainPage::font_style_normal_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL);
+		if (undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 書体メニューの「斜体」が選択された.
 	void MainPage::font_style_oblique_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE);
+		if (undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 書体メニューの「太さ」が選択された.
@@ -433,7 +461,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_WEIGHT sample_value;
 			m_sample_shape->get_font_weight(sample_value);
-			undo_push_set<UNDO_OP::FONT_WEIGHT>(sample_value);
+			if (undo_push_set<UNDO_OP::FONT_WEIGHT>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -450,7 +482,11 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
 	void MainPage::text_align_p_bot_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		if (undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_FAR)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 書体メニューの「段落のそろえ」に印をつける.
@@ -469,19 +505,31 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「段落のそろえ」>「中段」が選択された.
 	void MainPage::text_align_p_mid_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		if (undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_CENTER)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
 	void MainPage::text_align_p_top_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		if (undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT_NEAR)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 書体メニューの「文字列のそろえ」>「中央」が選択された.
 	void MainPage::text_align_t_center_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_CENTER);
+		if (undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_CENTER)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 書体メニューの「文字列のそろえ」に印をつける.
@@ -502,19 +550,31 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「文字列のそろえ」>「均等」が選択された.
 	void MainPage::text_align_t_just_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		if (undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_JUSTIFIED)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
 	void MainPage::text_align_t_left_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING);
+		if (undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_LEADING)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
 	void MainPage::text_align_t_right_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING);
+		if (undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT_TRAILING)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	constexpr float TEXT_LINE_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
@@ -571,7 +631,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_shape->get_text_line(sample_value);
-			undo_push_set<UNDO_OP::TEXT_LINE>(sample_value);
+			if (undo_push_set<UNDO_OP::TEXT_LINE>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -593,7 +657,11 @@ namespace winrt::GraphPaper::implementation
 			value = 0.0f;
 		}
 		if (t_line != value) {
-			undo_push_set<UNDO_OP::TEXT_LINE>(value);
+			if (undo_push_set<UNDO_OP::TEXT_LINE>(value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 	}
 
@@ -604,7 +672,11 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_main.get_text_line(t_line);
 		float value = t_line + TEXT_LINE_DELTA;
 		if (t_line != value) {
-			undo_push_set<UNDO_OP::TEXT_LINE>(value);
+			if (undo_push_set<UNDO_OP::TEXT_LINE>(value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 	}
 
@@ -633,7 +705,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_SIZE_F sample_value;
 			m_sample_shape->get_text_margin(sample_value);
-			undo_push_set<UNDO_OP::TEXT_MARGIN>(sample_value);
+			if (undo_push_set<UNDO_OP::TEXT_MARGIN>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)

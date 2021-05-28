@@ -492,7 +492,7 @@ namespace winrt::GraphPaper::implementation
 	// 行間を得る.
 	bool ShapeSheet::get_text_line(float& value) const noexcept
 	{
-		value = m_text_line;
+		value = m_text_line_h;
 		return true;
 	}
 
@@ -537,7 +537,7 @@ namespace winrt::GraphPaper::implementation
 		m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());	// 書体の太さ
 		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());	// 段落のそろえ
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());	// 文字列のそろえ
-		m_text_line = dt_reader.ReadSingle();	// 行間
+		m_text_line_h = dt_reader.ReadSingle();	// 行間
 		read(m_text_margin, dt_reader);	// 文字列の余白
 
 		ShapeText::is_available_font(m_font_family);
@@ -702,7 +702,7 @@ namespace winrt::GraphPaper::implementation
 	// 値を行間に格納する.
 	void ShapeSheet::set_text_line(const float value)
 	{
-		m_text_line = value;
+		m_text_line_h = value;
 	}
 
 	// 値を文字列の余白に格納する.
@@ -736,7 +736,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_stroke_dash_patt(m_stroke_dash_patt);
 		s->get_stroke_dash_style(m_stroke_dash_style);
 		s->get_stroke_width(m_stroke_width);
-		s->get_text_line(m_text_line);
+		s->get_text_line(m_text_line_h);
 		s->get_text_align_t(m_text_align_t);
 		s->get_text_align_p(m_text_align_p);
 		s->get_text_margin(m_text_margin);
@@ -776,7 +776,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));	// 書体の太さ
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));	// 段落のそろえ
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));	// 文字列のそろえ
-		dt_writer.WriteSingle(m_text_line);	// 行間
+		dt_writer.WriteSingle(m_text_line_h);	// 行間
 		write(m_text_margin, dt_writer);	// 文字列の余白
 
 	}

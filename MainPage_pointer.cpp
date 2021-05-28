@@ -193,6 +193,7 @@ namespace winrt::GraphPaper::implementation
 		reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);
 		unselect_all();
 		undo_push_append(s);
+		undo_push_select(s);
 		undo_push_null();
 		m_pointer_shape_smry = m_pointer_shape_prev = s;
 		edit_menu_enable();
@@ -202,6 +203,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形一覧の排他制御が true か判定する.
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			smry_append(s);
+			smry_select(s);
 		}
 	}
 
@@ -225,6 +227,7 @@ namespace winrt::GraphPaper::implementation
 			reduce_list(m_list_shapes, m_stack_undo, m_stack_redo);
 			unselect_all();
 			undo_push_append(s);
+			undo_push_select(s);
 			undo_push_null();
 			m_pointer_shape_smry = m_pointer_shape_prev = s;
 			edit_menu_enable();
@@ -233,9 +236,10 @@ namespace winrt::GraphPaper::implementation
 			// 図形一覧の排他制御が true か判定する.
 			if (m_smry_atomic.load(std::memory_order_acquire)) {
 				smry_append(s);
+				smry_select(s);
 			}
 		}
-		// 初期状態に戻す.
+		// ポインターの押された状態を初期状態に戻す.
 		m_pointer_state = PBTN_STATE::BEGIN;
 		m_pointer_shape = nullptr;
 		m_pointer_anchor = ANCH_TYPE::ANCH_SHEET;
@@ -421,9 +425,8 @@ namespace winrt::GraphPaper::implementation
 				break;
 			default:
 				// 図形のクラスが, 多角形または曲線であるか判定する.
-				if (typeid(*s) == typeid(ShapeLine) ||
-					typeid(*s) == typeid(ShapePoly) ||
-					typeid(*s) == typeid(ShapeBezi)) {
+				if (s != nullptr &&
+					(typeid(*s) == typeid(ShapeLine) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
 					// 図形の部位が, 頂点の数を超えないか判定する.
 					const auto d_cnt = static_cast<ShapePath*>(s)->m_diff.size();
 					if (anch >= ANCH_TYPE::ANCH_P0 && anch < ANCH_TYPE::ANCH_P0 + d_cnt + 1) {
@@ -448,12 +451,12 @@ namespace winrt::GraphPaper::implementation
 #endif
 		pointer_cur_pos(args);
 		sbar_set_curs();
+		// ポインターの押された状態が初期状態か判定する.
 		if (m_pointer_state == PBTN_STATE::BEGIN) {
-			// 状態が初期状態の場合,
 			pointer_set();
 		}
+		// ポインターの押された状態がクリックした状態か判定する.
 		else if (m_pointer_state == PBTN_STATE::CLICK) {
-			// 状態がクリックした状態の場合,
 			// ポインターの現在位置と押された位置の長さを得る.
 			D2D1_POINT_2F diff;
 			pt_sub(m_pointer_cur, m_pointer_pressed, diff);
@@ -463,12 +466,12 @@ namespace winrt::GraphPaper::implementation
 				pointer_set();
 			}
 		}
+		// ポインターの押された状態が範囲を選択している状態か判定する.
 		else if (m_pointer_state == PBTN_STATE::PRESS_AREA) {
-			// 状態が範囲を選択している状態の場合,
 			sheet_draw();
 		}
+		// ポインターの押された状態が図形を移動している状態か判定する.
 		else if (m_pointer_state == PBTN_STATE::PRESS_MOVE) {
-			// 状態が図形を移動している状態の場合,
 			// ポインターの現在位置と前回位置の差分を得る.
 			D2D1_POINT_2F diff;
 			pt_sub(m_pointer_cur, m_pointer_pre, diff);
@@ -477,49 +480,45 @@ namespace winrt::GraphPaper::implementation
 			m_pointer_pre = m_pointer_cur;
 			sheet_draw();
 		}
+		// ポインターの押された状態が図形を変形している状態か判定する.
 		else if (m_pointer_state == PBTN_STATE::PRESS_FORM) {
-			// 状態が図形を変形している状態の場合,
-			// ポインターの現在位置を押された図形の部位の位置に格納する.
+			// ポインターの現在位置を, ポインターが押された図形の, 部位の位置に格納する.
 			m_pointer_shape->set_anchor_pos(m_pointer_cur, m_pointer_anchor);
 			// ポインターの現在位置を前回位置に格納する.
 			m_pointer_pre = m_pointer_cur;
 			sheet_draw();
 		}
+		// ポインターの押された状態が左ボタンを押している状態, またはクリック後に左ボタンを押した状態か判定する.
 		else if (m_pointer_state == PBTN_STATE::PRESS_LBTN || m_pointer_state == PBTN_STATE::CLICK_LBTN) {
-			// 状態が左ボタンを押している状態,
-			// またはクリック後に左ボタンを押している状態の場合,
-			// ポインターの現在位置と押された位置の長さを得る.
+			// ポインターの現在位置と押された位置との差分を得る.
 			D2D1_POINT_2F diff;
 			pt_sub(m_pointer_cur, m_pointer_pressed, diff);
+			// 差分の長さがクリックの判定距離を超えるか判定する.
 			if (pt_abs2(diff) > m_pointer_click_dist) {
-				// 長さが閾値を超える場合,
+				// 作図ツールが選択ツールでないか判定する.
 				if (tool_draw() != TOOL_DRAW::SELECT) {
-					// 作図ツールが選択ツールでない場合,
 					// 範囲を選択している状態に遷移する.
 					m_pointer_state = PBTN_STATE::PRESS_AREA;
 				}
+				// 押された図形がヌルか判定する.
 				else if (m_pointer_shape == nullptr) {
-					// 押された図形がない場合,
 					// 範囲を選択している状態に遷移する.
 					m_pointer_state = PBTN_STATE::PRESS_AREA;
 					// 十字カーソルをカーソルに設定する.
 					Window::Current().CoreWindow().PointerCursor(CUR_CROSS);
 				}
-				else if (m_cnt_selected > 1
-					|| m_pointer_anchor == ANCH_TYPE::ANCH_STROKE
-					|| m_pointer_anchor == ANCH_TYPE::ANCH_FILL
-					|| m_pointer_anchor == ANCH_TYPE::ANCH_TEXT) {
-					// 選択された図形の数が 1 を超える
-					// または押された図形の部位が線枠
-					// または押された図形の部位が内側
-					// または押された図形の部位が文字列
+				// 選択された図形の数が 1 を超える,
+				// または押された図形の部位が線枠, 内側, 文字列かを判定する.
+				else if (m_cnt_selected > 1 ||
+					m_pointer_anchor == ANCH_TYPE::ANCH_STROKE || m_pointer_anchor == ANCH_TYPE::ANCH_FILL || m_pointer_anchor == ANCH_TYPE::ANCH_TEXT) {
+					// 状態を図形を移動している状態に遷移する.
 					m_pointer_state = PBTN_STATE::PRESS_MOVE;
 					// ポインターの現在位置を前回位置に格納する.
 					m_pointer_pre = m_pointer_cur;
 					undo_push_move(diff);
 				}
+				// ポインターが押された図形の部位が図形の外部でないか判定する
 				else if (m_pointer_anchor != ANCH_TYPE::ANCH_SHEET) {
-					// 押された図形の部位が図形の外部でない場合,
 					// 図形を変形している状態に遷移する.
 					m_pointer_state = PBTN_STATE::PRESS_FORM;
 					m_pointer_pre = m_pointer_cur;
@@ -544,38 +543,40 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		auto const& scp = sender.as<SwapChainPanel>();
+		auto const& panel = sender.as<SwapChainPanel>();
 		// ポインターのキャプチャを始める.
-		scp.CapturePointer(args.Pointer());
+		panel.CapturePointer(args.Pointer());
 		// ポインターのイベント発生時間を得る.
-		auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
+		auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
 		pointer_cur_pos(args);
 		// ポインターのプロパティーを得る.
-		auto const& p_prop = args.GetCurrentPoint(scp).Properties();
-		switch (args.GetCurrentPoint(scp).PointerDevice().PointerDeviceType()) {
+		auto const& p_prop = args.GetCurrentPoint(panel).Properties();
+		// ポインターのデバイスタイプを判定する.
+		switch (args.GetCurrentPoint(panel).PointerDevice().PointerDeviceType()) {
+		// デバイスタイプがマウスの場合
 		case PointerDeviceType::Mouse:
-			// ポインターのデバイスタイプがマウスの場合
+			// プロパティーが右ボタン押下か判定する.
 			if (p_prop.IsRightButtonPressed()) {
-				// プロパティーが右ボタン押下の場合,
 				m_pointer_state = PBTN_STATE::PRESS_RBTN;
 			}
+			// プロパティーが左ボタン押下か判定する.
 			else if (p_prop.IsLeftButtonPressed()) {
 				[[fallthrough]];
-				// プロパティーが左ボタン押下の場合,
+		// デバイスタイプがペンまたはタッチの場合
 		case PointerDeviceType::Pen:
 		case PointerDeviceType::Touch:
-			// ポインターのデバイスタイプがペンまたはタッチの場合
+				// ポインターの押された状態を判定する.
 				switch (m_pointer_state) {
+				// 押された状態がクリックした状態の場合
 				case PBTN_STATE::CLICK:
-					// ポインターが押された状態がクリックした状態の場合,
 					if (t_stamp - m_pointer_time <= m_pointer_click_time) {
 						m_pointer_state = PBTN_STATE::CLICK_LBTN;
 					}
 					else {
 						[[fallthrough]];
+				// 押された状態が初期状態の場合
 				case PBTN_STATE::BEGIN:
 				default:
-						// ポインターが押された状態がクリックした状態の場合,
 						m_pointer_state = PBTN_STATE::PRESS_LBTN;
 					}
 				}
@@ -583,21 +584,20 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				[[fallthrough]];
+		// デバイスタイプがそれ以外の場合
 		default:
-				// ポインターのデバイスタイプがそれ以外の場合
 				m_pointer_state = PBTN_STATE::BEGIN;
 				return;
 			}
 		}
 		m_pointer_time = t_stamp;
 		m_pointer_pressed = m_pointer_cur;
+		// 作図ツールが選択ツールでないか判定する.
 		if (tool_draw() != TOOL_DRAW::SELECT) {
-			// 作図ツールが選択ツールでない場合,
 			return;
 		}
 		m_pointer_anchor = s_list_hit_test(m_list_shapes, m_pointer_pressed, m_sheet_dx.m_anchor_len, m_pointer_shape);
 		if (m_pointer_anchor != ANCH_TYPE::ANCH_SHEET) {
-			// 図形とその部位を得た場合,
 			if (m_pointer_state == PBTN_STATE::PRESS_LBTN
 				|| (m_pointer_state == PBTN_STATE::PRESS_RBTN && m_pointer_shape->is_selected() != true)) {
 				m_pointer_shape_smry = m_pointer_shape;
@@ -616,8 +616,8 @@ namespace winrt::GraphPaper::implementation
 			// キー修飾子が None でない場合
 			return;
 		}
-		if (unselect_all() != true) {
-			// 選択が解除された図形がない場合
+		// 選択が解除された図形がない場合
+		if (!unselect_all()) {
 			return;
 		}
 		edit_menu_enable();
@@ -633,30 +633,30 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		auto const& scp = sender.as<SwapChainPanel>();
+		auto const& panel = sender.as<SwapChainPanel>();
 		// ポインターの追跡を停止する.
-		scp.ReleasePointerCaptures();
+		panel.ReleasePointerCaptures();
 		pointer_cur_pos(args);
+		// 左ボタンが押された状態か判定する.
 		if (m_pointer_state == PBTN_STATE::PRESS_LBTN) {
-			// 左ボタンが押された状態の場合,
 			// ボタンが離れた時刻と押された時刻の差分を得る.
-			const auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
+			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
+			// 差分がクリックの判定時間以下か判定する.
 			if (t_stamp - m_pointer_time <= m_pointer_click_time) {
-				// 差分がクリックの判定時間以下の場合,
 				// クリックした状態に遷移する.
 				m_pointer_state = PBTN_STATE::CLICK;
 				pointer_set();
 				return;
 			}
 		}
+		// クリック後に左ボタンが押した状態か判定する.
 		else if (m_pointer_state == PBTN_STATE::CLICK_LBTN) {
-			// クリック後に左ボタンが押した状態の場合,
 			// ボタンが離された時刻と押された時刻の差分を得る.
-			const auto t_stamp = args.GetCurrentPoint(scp).Timestamp();
+			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
+			// 差分がクリックの判定時間以下か判定する.
 			if (t_stamp - m_pointer_time <= m_pointer_click_time) {
-				// 差分がクリックの判定時間以下で
+				// 押された図形が文字列図形か判定する. 
 				if (m_pointer_shape != nullptr && typeid(*m_pointer_shape) == typeid(ShapeText)) {
-					// 押された図形が文字列図形の場合, 
 					text_edit_async(static_cast<ShapeText*>(m_pointer_shape));
 				}
 			}

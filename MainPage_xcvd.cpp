@@ -87,7 +87,6 @@ namespace winrt::GraphPaper::implementation
 		S_LIST_T list_selected;
 		s_list_selected<Shape>(m_list_shapes, list_selected);
 		m_dx_mutex.lock();
-		// 得られたリストの各図形について以下を繰り返す.
 		for (auto s : list_selected) {
 			if (m_smry_atomic.load(std::memory_order_acquire)) {
 				// 図形一覧の表示フラグが立っている場合,
@@ -99,8 +98,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_null();
 		m_dx_mutex.unlock();
+
 		// 選択された図形のリストを消去する.
-		list_selected.clear();
+		//list_selected.clear();
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
 		sheet_update_bbox();
@@ -206,13 +206,14 @@ namespace winrt::GraphPaper::implementation
 
 						m_dx_mutex.lock();
 						unselect_all();
-						if (m_smry_atomic.load(std::memory_order_acquire)) {
-						//if (m_smry_visible) {
-							smry_append(t);
-						}
 						undo_push_append(t);
+						undo_push_select(t);
 						undo_push_null();
 						m_dx_mutex.unlock();
+						if (m_smry_atomic.load(std::memory_order_acquire)) {
+							smry_append(t);
+							smry_select(t);
+						}
 						edit_menu_enable();
 						sheet_update_bbox(t);
 						sheet_panle_size();

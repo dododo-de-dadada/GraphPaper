@@ -36,17 +36,14 @@ namespace winrt::GraphPaper::implementation
 			m_sample_sheet.get_grid_gray(sample_value);
 			float sheet_value;
 			m_sheet_main.get_grid_gray(sheet_value);
-			if (equal(sheet_value, sample_value) != true) {
+			if (!equal(sheet_value, sample_value)) {
 				undo_push_set<UNDO_OP::GRID_GRAY>(&m_sheet_main, sample_value);
-				// 一連の操作の区切としてヌル操作をスタックに積む.
-				//undo_push_null();
-				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 				undo_menu_enable();
+				sheet_draw();
 			}
 		}
 		sample_slider_3().Visibility(COLLAPSED);
 		sample_slider_3().ValueChanged(slider_3_token);
-		sheet_draw();
 	}
 
 	// 用紙メニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -72,18 +69,16 @@ namespace winrt::GraphPaper::implementation
 
 			m_sheet_main.get_grid_base(sheet_value);
 			m_sample_sheet.get_grid_base(sample_value);
-			if (equal(sheet_value, sample_value) != true) {
+			if (!equal(sheet_value, sample_value)) {
 				undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, sample_value);
-				// 一連の操作の区切としてヌル操作をスタックに積む.
-				//undo_push_null();
-				// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
 				undo_menu_enable();
+				edit_menu_enable();
+				sheet_draw();
 			}
 
 		}
 		sample_slider_0().Visibility(COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
-		sheet_draw();
 	}
 
 	// 用紙メニューの「方眼の大きさ」>「狭める」が選択された.
@@ -92,12 +87,11 @@ namespace winrt::GraphPaper::implementation
 		float g_base;
 		m_sheet_main.get_grid_base(g_base);
 		const float value = (g_base + 1.0f) * 0.5f - 1.0f;
-		if (value < 1.0f) {
-			return;
+		if (value >= 1.0f) {
+			undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
+			undo_menu_enable();
+			sheet_draw();
 		}
-		undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
-		undo_menu_enable();
-		sheet_draw();
 	}
 
 	// 用紙メニューの「方眼の大きさ」>「広げる」が選択された.
@@ -106,14 +100,11 @@ namespace winrt::GraphPaper::implementation
 		float g_base;
 		m_sheet_main.get_grid_base(g_base);
 		const float value = (g_base + 1.0f) * 2.0f - 1.0f;
-		if (value > max(m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height)) {
-			// 方眼の一片の長さが, 用紙の幅か高さの大きいほうの値を超える場合,
-			// 中断する.
-			return;
+		if (value <= max(m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height)) {
+			undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
+			undo_menu_enable();
+			sheet_draw();
 		}
-		undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
-		undo_menu_enable();
-		sheet_draw();
 	}
 
 	// 用紙メニューの「方眼の強調」が選択された.
@@ -134,12 +125,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		GRID_EMPH g_emph;
 		m_sheet_main.get_grid_emph(g_emph);
-		if (equal(g_emph, value)) {
-			return;
+		if (!equal(g_emph, value)) {
+			undo_push_set<UNDO_OP::GRID_EMPH>(&m_sheet_main, value);
+			undo_menu_enable();
+			sheet_draw();
 		}
-		undo_push_set<UNDO_OP::GRID_EMPH>(&m_sheet_main, value);
-		undo_menu_enable();
-		sheet_draw();
 	}
 
 	// 用紙メニューの「方眼の強調」に印をつける.
@@ -238,12 +228,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		GRID_SHOW g_show;
 		m_sheet_main.get_grid_show(g_show);
-		if (g_show == value) {
-			return;
+		if (g_show != value) {
+			undo_push_set<UNDO_OP::GRID_SHOW>(&m_sheet_main, value);
+			undo_menu_enable();
+			sheet_draw();
 		}
-		undo_push_set<UNDO_OP::GRID_SHOW>(&m_sheet_main, value);
-		undo_menu_enable();
-		sheet_draw();
 	}
 
 	// 用紙メニューの「方眼の表示」に印をつける.
@@ -355,14 +344,13 @@ namespace winrt::GraphPaper::implementation
 			s->move(diff);
 			*/
 		}
-		if (flag != true) {
-			return;
+		if (flag) {
+			undo_push_null();
+			undo_menu_enable();
+			sheet_update_bbox();
+			sheet_panle_size();
+			sheet_draw();
 		}
-		undo_push_null();
-		undo_menu_enable();
-		sheet_update_bbox();
-		sheet_panle_size();
-		sheet_draw();
 	}
 
 }

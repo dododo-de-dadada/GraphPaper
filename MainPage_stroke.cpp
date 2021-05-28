@@ -47,7 +47,12 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			m_sample_shape->get_stroke_color(sample_value);
-			undo_push_set<UNDO_OP::STROKE_COLOR>(sample_value);
+			if (undo_push_set<UNDO_OP::STROKE_COLOR>(sample_value)) {
+				undo_push_null();
+				undo_menu_enable();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -102,7 +107,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			STROKE_DASH_PATT sample_value;
 			m_sample_shape->get_stroke_dash_patt(sample_value);
-			undo_push_set<UNDO_OP::STROKE_DASH_PATT>(sample_value);
+			if (undo_push_set<UNDO_OP::STROKE_DASH_PATT>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -140,7 +149,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_shape->get_stroke_width(sample_value);
-			undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_value);
+			if (undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_value)) {
+				undo_push_null();
+				edit_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)
@@ -178,7 +191,11 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_main.get_stroke_dash_style(s_style);
 		mfi_stroke_dash_patt().IsEnabled(s_style == D2D1_DASH_STYLE_SOLID);
 		mfi_stroke_dash_patt_2().IsEnabled(s_style == D2D1_DASH_STYLE_SOLID);
-		undo_push_set<UNDO_OP::STROKE_DASH_STYLE>(d_style);
+		if (undo_push_set<UNDO_OP::STROKE_DASH_STYLE>(d_style)) {
+			undo_push_null();
+			edit_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	// 値をスライダーのヘッダーに格納する.

@@ -483,8 +483,9 @@ namespace winrt::GraphPaper::implementation
 			if (*it == nullptr) {
 				// スタックトップの操作がヌルの場合,
 				// 反復子を次に進める.
-				it++;
+				//it++;
 			}
+else {
 			// 中断フラグを消去する.
 			bool suspended = false;
 			// 反復子の操作が図形の選択操作の場合, 以下を繰り返す.
@@ -506,6 +507,7 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 		}
+}
 		// 図形の選択を反転して, その操作をスタックに積む.
 		m_stack_undo.push_back(new UndoSelect(s));
 	}
@@ -531,7 +533,7 @@ namespace winrt::GraphPaper::implementation
 	// T	格納する型.
 	// value	格納する値
 	// 格納する型 T は明示しなくても引数の型から推定できる
-	template<UNDO_OP U, typename T> void MainPage::undo_push_set(T const& value)
+	template<UNDO_OP U, typename T> bool MainPage::undo_push_set(T const& value)
 	{
 		m_stack_undo.push_back(new UndoAttr<U>(&m_sheet_main, value));
 		auto flag = false;
@@ -545,13 +547,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<U>(s, value);
 			flag = true;
 		}
-		if (flag != true) {
-			return;
-		}
-		undo_push_null();
-		// 編集メニュー項目の使用の可否を設定する.
-		edit_menu_enable();
-		sheet_draw();
+		return flag;
 	}
 
 	// 図形の値の保存を実行して, その操作をスタックに積む.
@@ -560,15 +556,15 @@ namespace winrt::GraphPaper::implementation
 		m_stack_undo.push_back(new UndoAttr<U>(s));
 	}
 
-	template void MainPage::undo_push_set<UNDO_OP::ARROWHEAD_SIZE>(ARROWHEAD_SIZE const& value);
-	template void MainPage::undo_push_set<UNDO_OP::ARROWHEAD_STYLE>(ARROWHEAD_STYLE const& value);
-	template void MainPage::undo_push_set<UNDO_OP::FILL_COLOR>(D2D1_COLOR_F const& value);
-	template void MainPage::undo_push_set<UNDO_OP::FONT_COLOR>(D2D1_COLOR_F const& value);
-	template void MainPage::undo_push_set<UNDO_OP::FONT_FAMILY>(wchar_t* const& value);
-	template void MainPage::undo_push_set<UNDO_OP::FONT_SIZE>(float const& value);
-	template void MainPage::undo_push_set<UNDO_OP::FONT_STRETCH>(DWRITE_FONT_STRETCH const& value);
-	template void MainPage::undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE const& value);
-	template void MainPage::undo_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::ARROWHEAD_SIZE>(ARROWHEAD_SIZE const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::ARROWHEAD_STYLE>(ARROWHEAD_STYLE const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::FILL_COLOR>(D2D1_COLOR_F const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::FONT_COLOR>(D2D1_COLOR_F const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::FONT_FAMILY>(wchar_t* const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::FONT_SIZE>(float const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::FONT_STRETCH>(DWRITE_FONT_STRETCH const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_BASE>(Shape* const s, float const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_GRAY>(Shape* const s, float const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_EMPH>(Shape* const s, GRID_EMPH const& value);
@@ -576,17 +572,17 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::undo_push_set<UNDO_OP::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::START_POS>(Shape* const s);
-	template void MainPage::undo_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
-	template void MainPage::undo_push_set<UNDO_OP::STROKE_DASH_PATT>(STROKE_DASH_PATT const& value);
-	template void MainPage::undo_push_set<UNDO_OP::STROKE_DASH_STYLE>(D2D1_DASH_STYLE const& value);
-	template void MainPage::undo_push_set<UNDO_OP::STROKE_JOIN_LIMIT>(float const& value);
-	template void MainPage::undo_push_set<UNDO_OP::STROKE_JOIN_STYLE>(D2D1_LINE_JOIN const& value);
-	template void MainPage::undo_push_set<UNDO_OP::STROKE_WIDTH>(float const& value);
-	template void MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& value);
-	template void MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_DASH_PATT>(STROKE_DASH_PATT const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_DASH_STYLE>(D2D1_DASH_STYLE const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_JOIN_LIMIT>(float const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_JOIN_STYLE>(D2D1_LINE_JOIN const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_WIDTH>(float const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_CONTENT>(Shape* const s, wchar_t* const& value);
-	template void MainPage::undo_push_set<UNDO_OP::TEXT_LINE>(float const& value);
-	template void MainPage::undo_push_set<UNDO_OP::TEXT_MARGIN>(D2D1_SIZE_F const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::TEXT_LINE>(float const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::TEXT_MARGIN>(D2D1_SIZE_F const& value);
 
 	// 文字範囲の値を図形に格納して, その操作をスタックに積む.
 	// スタックの一番上の操作の組の中に、すでに文字範囲の操作が積まれている場合,
@@ -595,8 +591,7 @@ namespace winrt::GraphPaper::implementation
 	// s	操作する図形
 	// value	文字範囲の値
 	// 戻り値	なし
-	template<>
-	void MainPage::undo_push_set<UNDO_OP::TEXT_RANGE, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& value)
+	template<> void MainPage::undo_push_set<UNDO_OP::TEXT_RANGE, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& value)
 	{
 		auto flag = false;
 		// 元に戻す操作スタックの各操作について

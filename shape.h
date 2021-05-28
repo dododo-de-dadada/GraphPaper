@@ -405,7 +405,7 @@ namespace winrt::GraphPaper::implementation
 		// 選択フラグを判定する.
 		virtual bool is_selected(void) const noexcept { return false; }
 		// 差分だけ移動する.
-		virtual	void move(const D2D1_POINT_2F /*d*/) {}
+		virtual	void move(const D2D1_POINT_2F /*value*/) {}
 		// 値を矢じりの寸法に格納する.
 		virtual void set_arrow_size(const ARROWHEAD_SIZE& /*value*/) {}
 		// 値を矢じりの形式に格納する.
@@ -563,13 +563,13 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色 (MainPage のコンストラクタで設定)
-		float m_stroke_join_limit = MITER_LIMIT_DEF;	// 線枠の連結のマイター制限
-		D2D1_LINE_JOIN m_stroke_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線枠の連結
 		STROKE_DASH_PATT m_stroke_dash_patt{ STROKE_DASH_PATT_DEF };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
+		float m_stroke_join_limit = MITER_LIMIT_DEF;	// 線枠の連結のマイター制限の比率
+		D2D1_LINE_JOIN m_stroke_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線枠の連結
 		float m_stroke_width = 1.0;	// 線枠の太さ
 
-		float m_text_line = 0.0f;	// 行間 (DIPs 96dpi固定)
+		float m_text_line_h = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
 		D2D1_SIZE_F m_text_margin{ TEXT_MARGIN_DEF };	// 文字列の左右と上下の余白
@@ -760,7 +760,7 @@ namespace winrt::GraphPaper::implementation
 		// 選択フラグを判定する.
 		bool is_selected(void) const noexcept;
 		// 差分だけ移動する
-		void move(const D2D1_POINT_2F diff);
+		void move(const D2D1_POINT_2F value);
 		// 値を消去フラグに格納する.
 		void set_delete(const bool value) noexcept;
 		// 値を選択フラグに格納する.
@@ -780,15 +780,17 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct ShapeStroke : Shape {
 		bool m_deleted = false;	// 消去フラグ
-		bool m_selected = true;	// 選択フラグ
+		bool m_selected = false;	// 選択フラグ
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_diff;	// 次の位置への差分
+
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色
-		float m_stroke_join_limit = MITER_LIMIT_DEF;		// 線枠の連結のマイター制限
+		float m_stroke_join_limit = MITER_LIMIT_DEF;		// 線枠の連結のマイター制限の比率
 		D2D1_LINE_JOIN m_stroke_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線枠の連結
 		STROKE_DASH_PATT m_stroke_dash_patt{ STROKE_DASH_PATT_DEF };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_stroke_width = 1.0f;	// 線枠の太さ
+
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_dash_style{};	// D2D ストロークスタイル
 
 		//------------------------------
@@ -827,7 +829,7 @@ namespace winrt::GraphPaper::implementation
 		// 選択フラグを判定する.
 		bool is_selected(void) const noexcept { return m_selected; }
 		// 差分だけ移動する.
-		virtual	void move(const D2D1_POINT_2F diff);
+		virtual	void move(const D2D1_POINT_2F value);
 		// 値を選択フラグに格納する.
 		void set_select(const bool value) noexcept { m_selected = value; }
 		// 値を消去フラグに格納する.
@@ -897,7 +899,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		void set_start_pos(const D2D1_POINT_2F value);
 		// 差分だけ移動する.
-		void move(const D2D1_POINT_2F diff);
+		void move(const D2D1_POINT_2F value);
 		// データリーダーから読み込む.
 		void read(DataReader const& dt_reader);
 		// データライターに書き込む.
@@ -1053,7 +1055,7 @@ namespace winrt::GraphPaper::implementation
 		// 矢じりの形式を得る.
 		bool get_arrow_style(ARROWHEAD_STYLE& value) const noexcept;
 		// 差分だけ移動する.
-		void move(const D2D1_POINT_2F diff);
+		void move(const D2D1_POINT_2F value);
 		//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
 		void set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch);
 		// 値を矢じりの寸法に格納する.
@@ -1141,7 +1143,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		wchar_t* m_text = nullptr;	// 文字列
-		float m_text_line = 0.0f;	// 行間 (DIPs 96dpi固定)
+		float m_text_line_h = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落そろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字揃え
 		D2D1_SIZE_F m_text_margin{ TEXT_MARGIN_DEF };	// 文字列のまわりの上下と左右の余白

@@ -802,7 +802,15 @@
     <value>太さ</value>
     <comment>String</comment>
   </data>
-  <data name="str_text_mar_horzorz" xml:space="preserve">
+	<data name="str_stroke_join" xml:space="preserve">
+    <value>線のつなぎ</value>
+    <comment>String</comment>
+  </data>
+	<data name="str_stroke_join_limit" xml:space="preserve">
+    <value>マイター制限</value>
+    <comment>String</comment>
+  </data>
+	<data name="str_text_mar_horzorz" xml:space="preserve">
     <value>左右の余白</value>
     <comment>String</comment>
   </data>

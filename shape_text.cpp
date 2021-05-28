@@ -257,10 +257,10 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<IDWriteTextLayout3> t3;
 		if (m_dw_layout.try_as(t3)) {
 			DWRITE_LINE_SPACING spacing;
-			if (m_text_line > FLT_MIN) {
+			if (m_text_line_h > FLT_MIN) {
 				spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-				spacing.height = m_text_line;
-				spacing.baseline = m_text_line - m_dw_descent;
+				spacing.height = m_text_line_h;
+				spacing.baseline = m_text_line_h - m_dw_descent;
 			}
 			else {
 				spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
@@ -522,7 +522,7 @@ namespace winrt::GraphPaper::implementation
 	// çsä‘ÇìæÇÈ.
 	bool ShapeText::get_text_line(float& value) const noexcept
 	{
-		value = m_text_line;
+		value = m_text_line_h;
 		return true;
 	}
 
@@ -844,18 +844,18 @@ namespace winrt::GraphPaper::implementation
 	// ílÇçsä‘Ç…äiî[Ç∑ÇÈ.
 	void ShapeText::set_text_line(const float value)
 	{
-		if (m_text_line == value) {
+		if (m_text_line_h == value) {
 			return;
 		}
-		m_text_line = value;
+		m_text_line_h = value;
 		if (m_dw_layout.get() != nullptr) {
 			winrt::com_ptr<IDWriteTextLayout3> t3;
 			if (m_dw_layout.try_as(t3)) {
 				DWRITE_LINE_SPACING l_spacing;
-				if (m_text_line > 0.0f) {
+				if (m_text_line_h > 0.0f) {
 					l_spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-					l_spacing.height = m_text_line;
-					l_spacing.baseline = m_text_line - m_dw_descent;
+					l_spacing.height = m_text_line_h;
+					l_spacing.baseline = m_text_line_h - m_dw_descent;
 				}
 				else {
 					l_spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
@@ -906,7 +906,7 @@ namespace winrt::GraphPaper::implementation
 		m_font_stretch(s_attr->m_font_stretch),
 		m_font_style(s_attr->m_font_style),
 		m_font_weight(s_attr->m_font_weight),
-		m_text_line(s_attr->m_text_line),
+		m_text_line_h(s_attr->m_text_line_h),
 		m_text_margin(s_attr->m_text_margin),
 		m_text(text),
 		m_text_align_t(s_attr->m_text_align_t),
@@ -932,7 +932,7 @@ namespace winrt::GraphPaper::implementation
 		read(m_text, dt_reader);
 		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
-		m_text_line = dt_reader.ReadSingle();
+		m_text_line_h = dt_reader.ReadSingle();
 		read(m_text_margin, dt_reader);
 		create_text_layout(s_dwrite_factory);
 	}
@@ -953,7 +953,7 @@ namespace winrt::GraphPaper::implementation
 		write(m_text, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
-		dt_writer.WriteSingle(m_text_line);
+		dt_writer.WriteSingle(m_text_line_h);
 		write(m_text_margin, dt_writer);
 	}
 

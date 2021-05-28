@@ -19,14 +19,14 @@ namespace winrt::GraphPaper::implementation
 		UINT32 d_cnt;	// 破線の配置配列の要素数
 		const FLOAT* d_arr;	// 破線の配置配列を指すポインタ
 
-		if (d_style != D2D1_DASH_STYLE_SOLID) {
+		if (d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
 			const D2D1_STROKE_STYLE_PROPERTIES prop{
-				D2D1_CAP_STYLE_FLAT,	// startCap
-				D2D1_CAP_STYLE_FLAT,	// endCap
-				D2D1_CAP_STYLE_FLAT,	// dashCap
+				D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// startCap
+				D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// endCap
+				D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// dashCap
 				j_style,	// lineJoin
 				static_cast<FLOAT>(j_limit),	// miterLimit
-				D2D1_DASH_STYLE_CUSTOM,	// dashStyle
+				D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM,	// dashStyle
 				0.0f
 			};
 			if (d_style == D2D1_DASH_STYLE_DOT) {
@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 				D2D1_CAP_STYLE_FLAT,	// dashCap
 				j_style,	// lineJoin
 				static_cast<FLOAT>(j_limit),	// miterLimit
-				d_style,	// dashStyle
+				D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
 				0.0f	// dashOffset
 			};
 			winrt::check_hresult(
@@ -200,14 +200,17 @@ namespace winrt::GraphPaper::implementation
 	// 差分だけ移動する.
 	void ShapeStroke::move(const D2D1_POINT_2F diff)
 	{
-		pt_add(m_pos, diff, m_pos);
-		pt_round(m_pos, 0.125, m_pos);
+		D2D1_POINT_2F s_pos;
+		pt_add(m_pos, diff, s_pos);
+		set_start_pos(s_pos);
 	}
 
 	// 始点に値を格納する. 他の部位の位置も動く.
 	void ShapeStroke::set_start_pos(const D2D1_POINT_2F value)
 	{
-		m_pos = value;
+		D2D1_POINT_2F s_pos;
+		pt_round(value, PT_ROUND, s_pos);
+		m_pos = s_pos;
 	}
 
 	// 線枠の色に格納する.

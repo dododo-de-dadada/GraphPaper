@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// ê}å`ÇÃïîà Ç™énì_Ç©îªíËÇ∑ÇÈ.
-		if (anch == ANCH_TYPE::ANCH_P0) {
+		else if (anch == ANCH_TYPE::ANCH_P0) {
 			D2D1_POINT_2F diff;
 			pt_sub(value, m_pos, diff);
 			pt_round(diff, PT_ROUND, diff);
@@ -131,8 +131,7 @@ namespace winrt::GraphPaper::implementation
 	// value	äiî[Ç∑ÇÈíl
 	void ShapePath::set_start_pos(const D2D1_POINT_2F value)
 	{
-		//ShapeStroke::set_start_pos(value);
-		set_anchor_pos(value, ANCH_TYPE::ANCH_P0);
+		ShapeStroke::set_start_pos(value);
 		create_path_geometry(s_d2d_factory);
 	}
 
