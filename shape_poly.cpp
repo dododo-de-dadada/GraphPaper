@@ -74,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 		// 重複しない頂点の数を求める.
 		//std::vector<double> side_len(v_cnt);	// 各辺の長さ
 		//const auto s_len = reinterpret_cast<double*>(side_len.data());
-		double s_len[MAX_GON];	// 各辺の長さ
+		double s_len[N_GON_MAX];	// 各辺の長さ
 		int q_cnt = 1;
 		for (size_t i = 0; i < v_cnt; i++) {
 			// 次の頂点との差分を求める.
@@ -134,15 +134,17 @@ namespace winrt::GraphPaper::implementation
 	static bool poly_test_join_bevel(const D2D1_POINT_2F& t_pos, const size_t v_cnt, const bool v_end, const D2D1_POINT_2F v_pos[], const double e_width, const D2D1_POINT_2F exp_side[][4]) noexcept
 	{
 		for (size_t i = (v_end ? v_cnt - 1 : 0), j = (v_end ? 0 : 1); j < v_cnt; i = j++) {
+			/*
 			if (equal(v_pos[i], v_pos[j])) {
+				if (i == v_cnt - 1 || j == v_cnt - 1) {
+					continue;
+				}
 				D2D1_POINT_2F bev_pos[4];
 				const D2D1_POINT_2F v_min{ static_cast<FLOAT>(v_pos[i].x - e_width), static_cast<FLOAT>(v_pos[i].y - e_width) };
 				const D2D1_POINT_2F v_max{ static_cast<FLOAT>(v_pos[i].x + e_width), static_cast<FLOAT>(v_pos[i].y + e_width) };
-				//pt_add(v_pos[i], -e_width, -e_width, v_min);
-				//pt_add(v_pos[i], e_width, e_width, v_max);
-				if (!pt_in_rect(t_pos, v_min, v_max)) {
-					continue;
-				}
+				//if (!pt_in_rect(t_pos, v_min, v_max)) {
+				//	continue;
+				//}
 				// 拡張した辺を, その辺に平行な方向に延長する.
 				const D2D1_POINT_2F exp_para{ (exp_side[i][1].y - exp_side[i][0].y) * 0.5f, -(exp_side[i][1].x - exp_side[i][0].x) * 0.5f };
 				//pt_sub(exp_side[i][1], exp_side[i][0], exp_diff);
@@ -155,12 +157,12 @@ namespace winrt::GraphPaper::implementation
 				if (pt_in_poly(t_pos, 4, bev_pos)) {
 					return true;
 				}
+				continue;
 			}
-			else {
-				const D2D1_POINT_2F bev_pos[4]{ exp_side[i][3], exp_side[j][0], exp_side[j][1], exp_side[i][2] };
-				if (pt_in_poly(t_pos, 4, bev_pos)) {
-					return true;
-				}
+			*/
+			const D2D1_POINT_2F bev_pos[4]{ exp_side[i][3], exp_side[j][0], exp_side[j][1], exp_side[i][2] };
+			if (pt_in_poly(t_pos, 4, bev_pos)) {
+				return true;
 			}
 		}
 		return false;
@@ -193,33 +195,6 @@ namespace winrt::GraphPaper::implementation
 				return true;
 			}
 		}
-		/*
-		D2D1_POINT_2F bev_pos[4];
-		for (size_t i = (v_end ? v_cnt - 1 : 0), j = (v_end ? 0 : 1); j < v_cnt; i = j++) {
-			if (equal(v_pos[i], v_pos[j])) {
-				// 拡張した辺を, その辺に平行な方向に延長する.
-				const D2D1_POINT_2F exp_para{ (exp_side[i][1].y - exp_side[i][0].y) * 0.5f, -(exp_side[i][1].x - exp_side[i][0].x) * 0.5f };
-				//pt_sub(exp_side[i][1], exp_side[i][0], exp_diff);
-				//pt_orth(exp_diff. exp_orth);
-				//pt_mul(exp_orth, 0.5, exp_para);
-				pt_sub(exp_side[i][0], exp_para, bev_pos[0]);
-				pt_sub(exp_side[i][1], exp_para, bev_pos[1]);
-				pt_add(exp_side[i][2], exp_para, bev_pos[2]);
-				pt_add(exp_side[i][3], exp_para, bev_pos[3]);
-				if (pt_in_poly(t_pos, 4, bev_pos)) {
-					return true;
-				}
-				continue;
-			}
-			bev_pos[0] = exp_side[i][3];
-			bev_pos[1] = exp_side[j][0];
-			bev_pos[2] = exp_side[j][1];
-			bev_pos[3] = exp_side[i][2];
-			if (pt_in_poly(t_pos, 4, bev_pos)) {
-				return true;
-			}
-		}
-		*/
 		return false;
 	}
 
@@ -301,12 +276,12 @@ namespace winrt::GraphPaper::implementation
 			// j2 j3 に直行するベクトルを求め, これをもとに j0 と j1 とする.
 			// i0 と i3 が同じ座標 (つまり頂点 v[i] と v[i+1] が同じ) 場合も, 
 			// 同様に求め, これらを i3 と i2 とする.
-			D2D1_POINT_2F j0;
-			pt_sub(exp_side[j][2], exp_side[j][3], j0);
-			pt_add(exp_side[j][3], poly_pt_orth(j0), j0);
-			D2D1_POINT_2F i3;
-			pt_sub(exp_side[i][1], exp_side[i][0], i3);
-			pt_sub(exp_side[i][0], poly_pt_orth(i3), i3);
+//			D2D1_POINT_2F j0;
+//			pt_sub(exp_side[j][2], exp_side[j][3], j0);
+//			pt_add(exp_side[j][3], poly_pt_orth(j0), j0);
+//			D2D1_POINT_2F i3;
+//			pt_sub(exp_side[i][1], exp_side[i][0], i3);
+//			pt_sub(exp_side[i][0], poly_pt_orth(i3), i3);
 			// 線分 j0 j3 と i0 i3 (これを仮に 0..3 側と呼ぶ) との交点を求める.
 			// 0..3 側に交点がないならば, 次の辺の組を試す.
 			// 0..3 側に交点があって線分 j0 j3 と i0 i3 の外側ならば, c[4] { 交点, j3, v[i], i0 } が試すべき角の部分. 
@@ -314,20 +289,20 @@ namespace winrt::GraphPaper::implementation
 			// 1..2 側に交点がない, または, 交点があっても線分 j1..2 と i1..2 の外側でないならば, 次の辺の組を試す.
 			// 1..2 側に交点があって線分 j1 j2 と i1 i2 の外側ならば, c[4] { 交点, j2, v[i], i1 } が試すべき角の部分.
 			double s, t;	// 交点の助変数
-			if (!poly_intersection(j0, exp_side[j][3], exp_side[i][0], i3, s, t, c_pos[0])) {
-			//if (!poly_intersection(exp_side[j][0], exp_side[j][3], exp_side[i][0], exp_side[i][3], s, t, c_pos[0])) {
+//			if (!poly_intersection(j0, exp_side[j][3], exp_side[i][0], i3, s, t, c_pos[0])) {
+			if (!poly_intersection(exp_side[j][0], exp_side[j][3], exp_side[i][0], exp_side[i][3], s, t, c_pos[0])) {
 				continue;
 			}
 			// 線分の内側で交差するか判定する.
 			if (s < 1.0 || t > 0.0) {
-				D2D1_POINT_2F j1;
-				pt_sub(exp_side[j][3], exp_side[j][2], j1);
-				pt_sub(exp_side[j][2], poly_pt_orth(j1), j1);
-				D2D1_POINT_2F i2;
-				pt_sub(exp_side[i][0], exp_side[i][1], i2);
-				pt_add(exp_side[i][1], poly_pt_orth(i2), i2);
-				if (!poly_intersection(j1, exp_side[j][2], exp_side[i][1], i2, s, t, c_pos[0])) {
-				//if (!poly_intersection(exp_side[j][1], exp_side[j][2], exp_side[i][1], exp_side[i][2], s, t, c_pos[0])) {
+//				D2D1_POINT_2F j1;
+//				pt_sub(exp_side[j][3], exp_side[j][2], j1);
+//				pt_sub(exp_side[j][2], poly_pt_orth(j1), j1);
+//				D2D1_POINT_2F i2;
+//				pt_sub(exp_side[i][0], exp_side[i][1], i2);
+//				pt_add(exp_side[i][1], poly_pt_orth(i2), i2);
+//				if (!poly_intersection(j1, exp_side[j][2], exp_side[i][1], i2, s, t, c_pos[0])) {
+				if (!poly_intersection(exp_side[j][1], exp_side[j][2], exp_side[i][1], exp_side[i][2], s, t, c_pos[0])) {
 					continue;
 				}
 				if (s < 1.0 || t > 0.0) {
@@ -494,7 +469,7 @@ namespace winrt::GraphPaper::implementation
 		const size_t v_cnt = d_cnt + 1;	// 頂点の数 (差分の数 + 1)
 		//std::vector<D2D1_POINT_2F> vert_pos(v_cnt);	// 頂点の配列
 		//const auto v_pos = reinterpret_cast<D2D1_POINT_2F*>(vert_pos.data());
-		D2D1_POINT_2F v_pos[MAX_GON];
+		D2D1_POINT_2F v_pos[N_GON_MAX];
 		v_pos[0] = m_pos;
 		for (size_t i = 1; i < v_cnt; i++) {
 			pt_add(v_pos[i - 1], m_diff[i - 1], v_pos[i]);
@@ -642,7 +617,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		//std::vector<D2D1_POINT_2F> nor_vec(v_cnt);	// 法線ベクトル
 		//const auto n_vec = reinterpret_cast<D2D1_POINT_2F*>(nor_vec.data());
-		D2D1_POINT_2F n_vec[MAX_GON];
+		D2D1_POINT_2F n_vec[N_GON_MAX];
 		//if (!poly_get_nvec(v_cnt, v_pos, n_vec.data())) {
 		if (!poly_get_nvec(v_cnt, v_pos, n_vec)) {
 			D2D1_POINT_2F diff;
@@ -652,7 +627,7 @@ namespace winrt::GraphPaper::implementation
 
 		//std::vector<D2D1_POINT_2F> exp_side(v_cnt * 4);	// 幅をもつ辺
 		//const auto e_side = reinterpret_cast<D2D1_POINT_2F(*)[4]>(exp_side.data());
-		D2D1_POINT_2F e_side[MAX_GON][4];
+		D2D1_POINT_2F e_side[N_GON_MAX][4];
 		if (poly_test_side(t_pos, v_cnt, v_closed, v_pos, n_vec, e_width, e_side)) {
 			return true;
 		}
@@ -676,17 +651,234 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	// t_pos	調べる位置
+	// d_cnt	差分ベクトルの数
+	// diff	差分ベクトル
+	// a_len	図形の部位の大きさ
+	// s_opa	線が不透明か判定
+	// s_width	線の太さ
+	// s_closed	線が閉じているか判定
+	// s_join	線のつながり
+	// s_limit	マイター制限
+	// f_opa	塗りつぶしが不透明か判定
+	static uint32_t bar(
+		const D2D1_POINT_2F t_pos,
+		const size_t d_cnt,
+		const D2D1_POINT_2F diff[],
+		const double a_len,
+		const bool s_opa,
+		const double s_width,
+		const bool s_closed,
+		const D2D1_LINE_JOIN s_join,
+		const double s_limit,
+		const bool f_opa)
+	{
+		// 始点は { 0, 0 }
+		D2D1_POINT_2F v_pos[N_GON_MAX]{ { 0.0f, 0.0f }, };	// 頂点の位置
+		// 各頂点の位置と辺の長さを求める.
+		double s_len[N_GON_MAX];	// 辺の長さ
+		size_t s_cnt = 0;	// 長さのある辺の数
+		size_t k = -1;
+		for (size_t i = 0; i < d_cnt; i++) {
+			// 調べる位置が, 頂点の部位に含まれるか判定する.
+			if (pt_in_anch(t_pos, v_pos[i], a_len)) {
+				k = i;
+			}
+			// 差分から辺の長さを求める.
+			s_len[i] = sqrt(pt_abs2(diff[i]));
+			// 辺の長さがあるか判定する.
+			if (s_len[i] > FLT_MIN) {
+				s_cnt++;
+			}
+			// 頂点に差分から, 次の頂点を求める.
+			pt_add(v_pos[i], diff[i], v_pos[i + 1]);
+		}
+		// 調べる位置が, 終点の部位に含まれるか判定する.
+		if (pt_in_anch(t_pos, v_pos[d_cnt], a_len)) {
+			k = d_cnt;
+		}
+		// 調べる位置が頂点の部位に含まれたか判定する.
+		if (k != -1) {
+			return ANCH_TYPE::ANCH_P0 + static_cast<uint32_t>(k);
+		}
+		// 線が不透明か判定する.
+		if (s_opa) {
+			// 線の太さの半分の幅を求め, 拡張する幅に格納する.
+			const auto e_width = max(max(static_cast<double>(s_width), a_len) * 0.5, 0.5);	// 拡張する幅
+			// 長さのある辺がないか判定する.
+			if (s_cnt == 0) {
+				// 調べる位置が, 拡張する幅を半径とする円に含まれるか判定する.
+				if (pt_abs2(t_pos) <= e_width * e_width) {
+					return ANCH_TYPE::ANCH_STROKE;
+				}
+				return ANCH_TYPE::ANCH_SHEET;
+			}
+			// 辺が閉じているか判定する.
+			if (s_closed) {
+				// 終点への逆ベクトルを, 最後の辺の長さとする.
+				s_len[d_cnt] = sqrt(pt_abs2(v_pos[d_cnt]));
+			}
+			D2D1_POINT_2F e_side[N_GON_MAX][4];	// 拡張された辺
+			for (size_t i = 0; i < d_cnt; i++) {
+				// 辺 i の長さがないか判定する.
+				if (s_len[i] <= FLT_MIN) {
+					// 点 i から降順に, 長さのある辺 p を見つける.
+					size_t p = -1;
+					for (size_t h = i; h > 0; h--) {
+						if (s_len[h - 1] > FLT_MIN) {
+							p = h - 1;
+							break;
+						}
+					}
+					// 辺 p が見つかったか判定する.
+					D2D1_POINT_2F p_diff;	// 直前の辺ベクトル
+					if (p != -1) {
+						p_diff = diff[p];
+					}
+					// 見つからなかったならば,
+					// 辺が閉じている, かつ最後の辺に長さがあるか判定する.
+					else if (s_closed && s_len[d_cnt] > FLT_MIN) {
+						// 最後の頂点の反対ベクトルを求め, 直前の辺ベクトルとする.
+						p_diff = D2D1_POINT_2F{ -v_pos[d_cnt].x, -v_pos[d_cnt].y };
+					}
+					else {
+						e_side[i][0] = e_side[i][1] =
+							e_side[i][2] = e_side[i][3] = D2D1_POINT_2F{ 0.0f, 0.0f };
+						continue;
+					}
+					// 点 i から昇順に, 長さのある辺 n を見つける.
+					size_t n = -1;
+					for (size_t j = i + 1; j < d_cnt; j++) {
+						if (s_len[j] > FLT_MIN) {
+							n = j;
+							break;
+						}
+					}
+					// 辺 n が見つかったか判定する.
+					D2D1_POINT_2F n_diff;	// 直後の辺ベクトル
+					if (n != -1) {
+						n_diff = diff[n];
+					}
+					// 見つからなかったならば,
+					// 辺が閉じている, かつ最後の辺に長さがあるか判定する.
+					else if (s_closed && s_len[d_cnt] > FLT_MIN) {
+						// 最後の頂点の反対ベクトルを求め, 直後の辺ベクトルとする.
+						n_diff = D2D1_POINT_2F{ -v_pos[d_cnt].x, -v_pos[d_cnt].y };
+					}
+					else {
+						e_side[i][0] = e_side[i][1] =
+							e_side[i][2] = e_side[i][3] = D2D1_POINT_2F{ 0.0f, 0.0f };
+						continue;
+					}
+					// 直前と直後の辺ベクトルを加え, 合成ベクトル c を求める.
+					D2D1_POINT_2F c_vec;
+					pt_add(p_diff, n_diff, c_vec);
+					// 合成ベクトルの長さがないか判定する.
+					double c_abs = pt_abs2(c_vec);
+					if (c_abs <= FLT_MIN) {
+						// 直前の辺ベクトルを合成ベクトルとする.
+						c_vec = p_diff;
+						c_abs = pt_abs2(c_vec);
+					}
+					// 合成ベクトルに直交するベクトルを求める.
+					// 両ベクトルとも長さは, 拡張する幅とする.
+					pt_mul(c_vec, e_width / sqrt(c_abs), c_vec);
+					const D2D1_POINT_2F o_vec{ c_vec.y, -c_vec.x };
+					// 頂点 i を直交ベクトルに沿って四方に拡張し, 拡張された辺 i に格納する.
+					pt_add(v_pos[i], -c_vec.x - o_vec.x, -c_vec.y - o_vec.y, e_side[i][0]);
+					pt_add(v_pos[i], -c_vec.x + o_vec.x, -c_vec.y + o_vec.y, e_side[i][1]);
+					pt_add(v_pos[i], c_vec.x + o_vec.x, c_vec.y + o_vec.y, e_side[i][2]);
+					pt_add(v_pos[i], c_vec.x - o_vec.x, c_vec.y - o_vec.y, e_side[i][3]);
+				}
+				else {
+					// 辺ベクトルに直交するベクトルを求める.
+					// 直交ベクトルの長さは, 拡張する幅とする.
+					D2D1_POINT_2F d_vec;
+					pt_mul(diff[i], e_width / s_len[i], d_vec);
+					const D2D1_POINT_2F o_vec{ d_vec.y, -d_vec.x };
+					// 頂点 i と i+1 を直交ベクトルに沿って正逆に拡張し, 拡張された辺 i に格納する.
+					pt_sub(v_pos[i], o_vec, e_side[i][0]);
+					pt_add(v_pos[i], o_vec, e_side[i][1]);
+					pt_add(v_pos[i + 1], o_vec, e_side[i][2]);
+					pt_sub(v_pos[i + 1], o_vec, e_side[i][3]);
+				}
+				// 調べる位置が, 拡張された辺 i に含まれるか判定する.
+				if (pt_in_poly(t_pos, 4, e_side[i])) {
+					return ANCH_TYPE::ANCH_STROKE;
+				}
+			}
+			// 辺が閉じているか判定する.
+			if (s_closed) {
+				// 最後の辺の長さがあるか判定する.
+				if (s_len[d_cnt] > FLT_MIN) {
+					D2D1_POINT_2F d_vec;
+					pt_mul(v_pos[d_cnt], -e_width / s_len[d_cnt], d_vec);
+					const D2D1_POINT_2F o_vec{ d_vec.y, -d_vec.x };
+					pt_sub(v_pos[d_cnt], o_vec, e_side[d_cnt][0]);
+					pt_add(v_pos[d_cnt], o_vec, e_side[d_cnt][1]);
+					pt_add(D2D1_POINT_2F{ 0.0f, 0.0f }, o_vec, e_side[d_cnt][2]);
+					pt_sub(D2D1_POINT_2F{ 0.0f, 0.0f }, o_vec, e_side[d_cnt][3]);
+					if (pt_in_poly(t_pos, 4, e_side[d_cnt])) {
+						return ANCH_TYPE::ANCH_STROKE;
+					}
+				}
+				else {
+					e_side[d_cnt][0] = e_side[d_cnt][1] =
+						e_side[d_cnt][2] = e_side[d_cnt][3] = D2D1_POINT_2F{ 0.0f, 0.0f };
+				}
+			}
+			if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+				if (poly_test_join_round(t_pos, d_cnt + 1, v_pos, e_width)) {
+					return ANCH_TYPE::ANCH_STROKE;
+				}
+			}
+			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
+				if (poly_test_join_bevel(t_pos, d_cnt + 1, s_closed, v_pos, e_width, e_side)) {
+					return ANCH_TYPE::ANCH_STROKE;
+				}
+			}
+			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER
+				|| s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+				//if (poly_test_join_miter2(tp, v_cnt, m_end_closed, q_exp.data(), n_vec.data(), e_width * m_stroke_join_limit)) {
+				if (poly_test_join_miter(t_pos, d_cnt + 1, s_closed, v_pos, e_width, e_side, s_limit, s_join)) {
+					return ANCH_TYPE::ANCH_STROKE;
+				}
+			}
+		}
+		if (f_opa) {
+			if (pt_in_poly(t_pos, d_cnt + 1, v_pos)) {
+				return ANCH_TYPE::ANCH_FILL;
+			}
+		}
+		return ANCH_TYPE::ANCH_SHEET;
+	}
+
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
+		uint32_t anch;
+		D2D1_POINT_2F t_p;
+		//const auto e_width = max(max(static_cast<double>(m_stroke_width), a_len) * 0.5, 0.5);	// 拡張する幅
+		//D2D1_POINT_2F e_side[N_GON_MAX][4];
+		pt_sub(t_pos, m_pos, t_p);
+		return bar(
+			t_p,
+			m_diff.size(), m_diff.data(), a_len,
+			is_opaque(m_stroke_color),
+			m_stroke_width,
+			m_end_closed,
+			m_stroke_join_style,
+			m_stroke_join_limit,
+			is_opaque(m_fill_color)
+		);
 		constexpr D2D1_POINT_2F PZ{ 0.0f, 0.0f };	// 零点
 		const size_t v_cnt = m_diff.size() + 1;	// 頂点の数 (差分の数 + 1)
 		//std::vector<D2D1_POINT_2F> vert_pos(v_cnt);	// 頂点の配列
 		//const auto v_pos = reinterpret_cast<D2D1_POINT_2F*>(vert_pos.data());
-		D2D1_POINT_2F v_pos[MAX_GON];	// 頂点の配列
+		D2D1_POINT_2F v_pos[N_GON_MAX];	// 頂点の配列
 		size_t j = static_cast<size_t>(-1);	// 点を含む頂点の添え字
 		// 
 		D2D1_POINT_2F tp;
@@ -844,7 +1036,7 @@ namespace winrt::GraphPaper::implementation
 		const auto v_cnt = d_cnt + 1;
 		//std::vector<D2D1_POINT_2F> vert_pos(v_cnt);
 		//const auto v_pos = reinterpret_cast<D2D1_POINT_2F*>(vert_pos.data());
-		D2D1_POINT_2F v_pos[MAX_GON];
+		D2D1_POINT_2F v_pos[N_GON_MAX];
 
 		v_pos[0] = m_pos;
 		for (size_t i = 0; i < d_cnt; i++) {

@@ -346,6 +346,36 @@ namespace winrt::GraphPaper::implementation
 	// d_style	îjê¸ÇÃéÌï 
 	void MainPage::stroke_dash_style_check_menu(const D2D1_DASH_STYLE d_style)
 	{
+		if (rmfi_stroke_dash_style_solid().IsChecked()) {
+			rmfi_stroke_dash_style_solid().IsChecked(false);
+		}
+		if (rmfi_stroke_dash_style_solid_2().IsChecked()) {
+			rmfi_stroke_dash_style_solid_2().IsChecked(false);
+		}
+		if (rmfi_stroke_dash_style_dash().IsChecked()) {
+			rmfi_stroke_dash_style_dash().IsChecked(false);
+		}
+		if (rmfi_stroke_dash_style_dash_2().IsChecked()) {
+			rmfi_stroke_dash_style_dash_2().IsChecked(false);
+		}
+		if (rmfi_stroke_dash_style_dash_dot().IsChecked()) {
+			rmfi_stroke_dash_style_dash_dot().IsChecked(false);
+		}
+		if (rmfi_stroke_dash_style_dash_dot_2().IsChecked()) {
+			rmfi_stroke_dash_style_dash_dot_2().IsChecked(false);
+		}
+		if (rmfi_stroke_dash_style_dash_dot_dot().IsChecked()) {
+			rmfi_stroke_dash_style_dash_dot_dot().IsChecked(false);
+		}
+		if (rmfi_stroke_dash_style_dash_dot_dot_2().IsChecked()) {
+			rmfi_stroke_dash_style_dash_dot_dot_2().IsChecked(false);
+		}
+		if (rmfi_stroke_dash_style_dot().IsChecked()) {
+			rmfi_stroke_dash_style_dot().IsChecked(false);
+		}
+		if (rmfi_stroke_dash_style_dot_2().IsChecked()) {
+			rmfi_stroke_dash_style_dot_2().IsChecked(false);
+		}
 		if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
 			rmfi_stroke_dash_style_solid().IsChecked(true);
 			rmfi_stroke_dash_style_solid_2().IsChecked(true);

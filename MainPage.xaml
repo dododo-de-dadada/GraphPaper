@@ -168,8 +168,9 @@
                 <MenuFlyoutSubItem Text="Line Join Style ">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_round_2" x:Uid="rmfi_join_round" Click="join_style_click" GroupName="gn_join_style_2" Text="Rounded" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_bevel_2" x:Uid="rmfi_join_bevel" Click="join_style_click" GroupName="gn_join_style_2" Text="Beveled" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_miter_2" x:Uid="rmfi_join_miter" Click="join_style_click" GroupName="gn_join_style_2" IsChecked="true" Text="Shape" />
-					<MenuFlyoutSeparator />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_miter_2" x:Uid="rmfi_join_miter" Click="join_style_click" GroupName="gn_join_style_2" IsChecked="true" Text="Miter" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_m_or_b_2" x:Uid="rmfi_join_m_or_b" Click="join_style_click" GroupName="gn_join_style_2" Text="Miter or Bevel" />
+                    <MenuFlyoutSeparator />
 					<MenuFlyoutItem x:Name="rmfi_join_limit_2" x:Uid="rmfi_join_limit" Click="join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
@@ -548,7 +549,8 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_round" x:Uid="rmfi_join_round" Click="join_style_click" GroupName="gn_join_style" Text="Rounded" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_bevel" x:Uid="rmfi_join_bevel" Click="join_style_click" GroupName="gn_join_style" Text="Beveled" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_miter" x:Uid="rmfi_join_miter" Click="join_style_click" GroupName="gn_join_style" IsChecked="true" Text="Shape" />
-					<MenuFlyoutSeparator />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_m_or_b" x:Uid="rmfi_join_m_or_b" Click="join_style_click" GroupName="gn_join_style" Text="Miter or Bevel" />
+                    <MenuFlyoutSeparator />
 					<MenuFlyoutItem x:Name="rmfi_join_limit" x:Uid="rmfi_join_limit" Click="join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />

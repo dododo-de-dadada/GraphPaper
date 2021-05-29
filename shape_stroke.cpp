@@ -301,10 +301,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// d_cnt	差分の個数 (最大値は MAX_GON - 1)
+	// d_cnt	差分の個数 (最大値は N_GON_MAX - 1)
 	// s_attr	属性値
 	ShapeStroke::ShapeStroke(const size_t d_cnt, const ShapeSheet* s_attr) :
-		m_diff(d_cnt <= MAX_GON - 1 ? d_cnt : MAX_GON - 1),
+		m_diff(d_cnt <= N_GON_MAX - 1 ? d_cnt : N_GON_MAX - 1),
 		m_stroke_color(s_attr->m_stroke_color),
 		m_stroke_dash_patt(s_attr->m_stroke_dash_patt),
 		m_stroke_dash_style(s_attr->m_stroke_dash_style),

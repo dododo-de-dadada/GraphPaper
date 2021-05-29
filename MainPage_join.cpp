@@ -9,6 +9,31 @@ namespace winrt::GraphPaper::implementation
 	// j_style	破線の種別
 	void MainPage::join_style_check_menu(const D2D1_LINE_JOIN j_style)
 	{
+		// コードビハインドではグループ名による切り替えが効かない？
+		if (rmfi_join_bevel().IsChecked()) {
+			rmfi_join_bevel().IsChecked(false);
+		}
+		if (rmfi_join_bevel_2().IsChecked()) {
+			rmfi_join_bevel_2().IsChecked(false);
+		}
+		if (rmfi_join_miter().IsChecked()) {
+			rmfi_join_miter().IsChecked(false);
+		}
+		if (rmfi_join_miter_2().IsChecked()) {
+			rmfi_join_miter_2().IsChecked(false);
+		}
+		if (rmfi_join_m_or_b().IsChecked()) {
+			rmfi_join_m_or_b().IsChecked(false);
+		}
+		if (rmfi_join_m_or_b_2().IsChecked()) {
+			rmfi_join_m_or_b_2().IsChecked(false);
+		}
+		if (rmfi_join_round().IsChecked()) {
+			rmfi_join_round().IsChecked(false);
+		}
+		if (rmfi_join_round_2().IsChecked()) {
+			rmfi_join_round_2().IsChecked(false);
+		}
 		if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
 			rmfi_join_bevel().IsChecked(true);
 			rmfi_join_bevel_2().IsChecked(true);
@@ -16,6 +41,10 @@ namespace winrt::GraphPaper::implementation
 		else if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
 			rmfi_join_miter().IsChecked(true);
 			rmfi_join_miter_2().IsChecked(true);
+		}
+		else if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+			rmfi_join_m_or_b().IsChecked(true);
+			rmfi_join_m_or_b_2().IsChecked(true);
 		}
 		else if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 			rmfi_join_round().IsChecked(true);
@@ -31,6 +60,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (sender == rmfi_join_miter() || sender == rmfi_join_miter_2()) {
 			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
+		}
+		else if (sender == rmfi_join_m_or_b() || sender == rmfi_join_m_or_b_2()) {
+			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;
 		}
 		else if (sender == rmfi_join_round() || sender == rmfi_join_round_2()) {
 			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND;

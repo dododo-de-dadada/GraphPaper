@@ -158,7 +158,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr float FONT_SIZE_DEF = static_cast<float>(12.0 * 96.0 / 72.0);
 	constexpr D2D1_SIZE_F TEXT_MARGIN_DEF{ FONT_SIZE_DEF / 4.0, FONT_SIZE_DEF / 4.0 };
 	constexpr float GRID_LEN_DEF = 48.0f;
-	constexpr size_t MAX_GON = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
+	constexpr size_t N_GON_MAX = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 
 	//------------------------------
 	// shape.cpp
@@ -1446,7 +1446,8 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	不透明ならば true, 透明ならば false.
 	inline bool is_opaque(const D2D1_COLOR_F& a) noexcept
 	{
-		return (static_cast<uint32_t>(round(a.a * 255.0f)) & 0xff) > 0;
+		const uint32_t aa = static_cast<uint32_t>(round(a.a * 255.0f));
+		return (aa & 0xff) > 0;
 	}
 
 }

@@ -30,8 +30,6 @@ namespace winrt::GraphPaper::implementation
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			smry_select_all();
 		}
-		// やり直し操作スタックを消去し, 含まれる操作を破棄する.
-		//redo_clear();
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
 		sheet_draw();
@@ -269,6 +267,9 @@ namespace winrt::GraphPaper::implementation
 			D2D1_DASH_STYLE s_style;
 			m_sheet_main.get_stroke_dash_style(s_style);
 			stroke_dash_style_check_menu(s_style);
+			D2D1_LINE_JOIN j_style;
+			m_sheet_main.get_stroke_join_style(j_style);
+			join_style_check_menu(j_style);
 			DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
 			m_sheet_main.get_text_align_p(t_align_p);
 			text_align_p_check_menu(t_align_p);
