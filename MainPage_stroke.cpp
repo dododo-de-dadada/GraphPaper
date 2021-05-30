@@ -294,12 +294,6 @@ namespace winrt::GraphPaper::implementation
 		Shape* s = m_sample_shape;
 		const float value = static_cast<float>(args.NewValue());
 		stroke_set_slider_header<U, S>(value);
-		if constexpr (U == UNDO_OP::STROKE_JOIN_STYLE) {
-			s->set_stroke_join_style(value);
-		}
-		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
-			s->set_stroke_join_limit(value);
-		}
 		if constexpr (U == UNDO_OP::STROKE_DASH_PATT) {
 			STROKE_DASH_PATT patt;
 			s->get_stroke_dash_patt(patt);
@@ -316,6 +310,9 @@ namespace winrt::GraphPaper::implementation
 				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(value * SLIDER_STEP);
 			}
 			s->set_stroke_dash_patt(patt);
+		}
+		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
+			s->set_stroke_join_limit(value);
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			s->set_stroke_width(value * SLIDER_STEP);

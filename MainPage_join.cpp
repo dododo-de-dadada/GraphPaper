@@ -5,9 +5,83 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 線枠メニューの「形式」に印をつける.
-	// j_style	破線の種別
-	void MainPage::join_style_check_menu(const D2D1_LINE_JOIN j_style)
+	// 線枠メニューの「単点の形式」に印をつける.
+	// s_cap	線の単点
+	void MainPage::cap_style_check_menu(const D2D1_CAP_STYLE s_cap)
+	{
+		// コードビハインドではグループ名による切り替えが効かない？
+		if (rmfi_cap_flat().IsChecked()) {
+			rmfi_cap_flat().IsChecked(false);
+		}
+		if (rmfi_cap_flat_2().IsChecked()) {
+			rmfi_cap_flat_2().IsChecked(false);
+		}
+		if (rmfi_cap_square().IsChecked()) {
+			rmfi_cap_square().IsChecked(false);
+		}
+		if (rmfi_cap_square_2().IsChecked()) {
+			rmfi_cap_square_2().IsChecked(false);
+		}
+		if (rmfi_cap_round().IsChecked()) {
+			rmfi_cap_round().IsChecked(false);
+		}
+		if (rmfi_cap_round_2().IsChecked()) {
+			rmfi_cap_round_2().IsChecked(false);
+		}
+		if (rmfi_cap_triangle().IsChecked()) {
+			rmfi_cap_triangle().IsChecked(false);
+		}
+		if (rmfi_cap_triangle_2().IsChecked()) {
+			rmfi_cap_triangle_2().IsChecked(false);
+		}
+		if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
+			rmfi_join_bevel().IsChecked(true);
+			rmfi_join_bevel_2().IsChecked(true);
+		}
+		else if (s_cap == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
+			rmfi_join_miter().IsChecked(true);
+			rmfi_join_miter_2().IsChecked(true);
+		}
+		else if (s_cap == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+			rmfi_join_m_or_b().IsChecked(true);
+			rmfi_join_m_or_b_2().IsChecked(true);
+		}
+		else if (s_cap == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+			rmfi_join_round().IsChecked(true);
+			rmfi_join_round_2().IsChecked(true);
+		}
+	}
+
+	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		D2D1_CAP_STYLE new_value;
+		if (sender == rmfi_cap_flat() || sender == rmfi_cap_flat_2()) {
+			new_value = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;
+		}
+		else if (sender == rmfi_cap_square() || sender == rmfi_cap_square_2()) {
+			new_value = D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE;
+		}
+		else if (sender == rmfi_cap_round() || sender == rmfi_cap_round_2()) {
+			new_value = D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND;
+		}
+		else if (sender == rmfi_cap_triangle() || sender == rmfi_cap_triangle_2()) {
+			new_value = D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE;
+		}
+		else {
+			return;
+		}
+		D2D1_CAP_STYLE old_value;
+		m_sheet_main.get_stroke_cap_line(old_value);
+		if (undo_push_set<UNDO_OP::STROKE_CAP_LINE>(new_value)) {
+			undo_push_null();
+			undo_menu_enable();
+			sheet_draw();
+		}
+	}
+
+	// 線枠メニューの「つながり」に印をつける.
+	// s_join	線のつながり
+	void MainPage::join_style_check_menu(const D2D1_LINE_JOIN s_join)
 	{
 		// コードビハインドではグループ名による切り替えが効かない？
 		if (rmfi_join_bevel().IsChecked()) {
@@ -34,19 +108,19 @@ namespace winrt::GraphPaper::implementation
 		if (rmfi_join_round_2().IsChecked()) {
 			rmfi_join_round_2().IsChecked(false);
 		}
-		if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
+		if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
 			rmfi_join_bevel().IsChecked(true);
 			rmfi_join_bevel_2().IsChecked(true);
 		}
-		else if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
+		else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
 			rmfi_join_miter().IsChecked(true);
 			rmfi_join_miter_2().IsChecked(true);
 		}
-		else if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+		else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
 			rmfi_join_m_or_b().IsChecked(true);
 			rmfi_join_m_or_b_2().IsChecked(true);
 		}
-		else if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+		else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 			rmfi_join_round().IsChecked(true);
 			rmfi_join_round_2().IsChecked(true);
 		}
@@ -72,7 +146,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		D2D1_LINE_JOIN old_value;
 		m_sheet_main.get_stroke_join_style(old_value);
-		undo_push_set<UNDO_OP::STROKE_JOIN_STYLE>(new_value);
+		if (undo_push_set<UNDO_OP::STROKE_JOIN_STYLE>(new_value)) {
+			undo_push_null();
+			undo_menu_enable();
+			sheet_draw();
+		}
 	}
 
 	constexpr float SLIDER_STEP = 0.5f;
@@ -155,8 +233,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_shape->get_stroke_join_limit(sample_value);
-			undo_push_set<UNDO_OP::STROKE_JOIN_LIMIT>(sample_value);
-			sheet_draw();
+			if (undo_push_set<UNDO_OP::STROKE_JOIN_LIMIT>(sample_value)) {
+				undo_push_null();
+				undo_menu_enable();
+				sheet_draw();
+			}
 		}
 		delete m_sample_shape;
 #if defined(_DEBUG)

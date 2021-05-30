@@ -196,7 +196,7 @@ namespace winrt::GraphPaper::implementation
 		STROKE,	// 線枠
 		FILL,	// 塗りつぶし
 		FONT,	// 書体
-		JOIN,	// 線の連結
+		JOIN,	// 線のつながり
 		MISC	// その他
 	};
 
@@ -342,11 +342,13 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_join.cpp
-		// 線の連結
+		// 線のつながり
 		//-------------------------------
 
+		void cap_style_check_menu(const D2D1_CAP_STYLE s_cap);
+		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		IAsyncAction join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
-		void join_style_check_menu(const D2D1_LINE_JOIN j_style);
+		void join_style_check_menu(const D2D1_LINE_JOIN s_join);
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		template <UNDO_OP U, int S> void join_set_slider_header(const float value);
 		template <UNDO_OP U, int S> void join_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args);

@@ -164,8 +164,13 @@
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Name="mfi_stroke_dash_patt_2" x:Uid="mfi_stroke_dash_patt" Click="stroke_dash_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
                 <MenuFlyoutItem x:Uid="mfi_stroke_width" Click="stroke_width_click_async" Text="Width..." />
-                <MenuFlyoutSeparator />
-                <MenuFlyoutSubItem Text="Line Join Style ">
+                <MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_flat_2" x:Uid="rmfi_cap_flat" Click="cap_style_click" GroupName="gn_cap_style_2" IsChecked="true" Text="Flat" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_square_2" x:Uid="rmfi_cap_square" Click="cap_style_click" GroupName="gn_cap_style_2" Text="Square" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_round_2" x:Uid="rmfi_cap_round" Click="cap_style_click" GroupName="gn_cap_style_2" Text="Round" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_triangle_2" x:Uid="rmfi_cap_triangle" Click="cap_style_click" GroupName="gn_cap_style_2" Text="Triangle" />
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSubItem x:Uid="mfs_join_style" Text="Join Style ">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_round_2" x:Uid="rmfi_join_round" Click="join_style_click" GroupName="gn_join_style_2" Text="Rounded" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_bevel_2" x:Uid="rmfi_join_bevel" Click="join_style_click" GroupName="gn_join_style_2" Text="Beveled" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_miter_2" x:Uid="rmfi_join_miter" Click="join_style_click" GroupName="gn_join_style_2" IsChecked="true" Text="Miter" />
@@ -545,7 +550,13 @@
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Name="mfi_stroke_dash_patt" x:Uid="mfi_stroke_dash_patt" Click="stroke_dash_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
                 <MenuFlyoutItem x:Name="mfi_stroke_width" x:Uid="mfi_stroke_width" Click="stroke_width_click_async" Text="Width..." />
-                <MenuFlyoutSubItem Text="Line Join Style ">
+                <MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_flat" x:Uid="rmfi_cap_flat" Click="cap_style_click" GroupName="gn_cap_style" IsChecked="true" Text="Flat" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_square" x:Uid="rmfi_cap_square" Click="cap_style_click" GroupName="gn_cap_style" Text="Square" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_round" x:Uid="rmfi_cap_round" Click="cap_style_click" GroupName="gn_cap_style" Text="Round" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_triangle" x:Uid="rmfi_cap_triangle" Click="cap_style_click" GroupName="gn_cap_style" Text="Triangle" />
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSubItem x:Uid="mfs_join_style" Text="Join Style ">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_round" x:Uid="rmfi_join_round" Click="join_style_click" GroupName="gn_join_style" Text="Rounded" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_bevel" x:Uid="rmfi_join_bevel" Click="join_style_click" GroupName="gn_join_style" Text="Beveled" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_miter" x:Uid="rmfi_join_miter" Click="join_style_click" GroupName="gn_join_style" IsChecked="true" Text="Shape" />

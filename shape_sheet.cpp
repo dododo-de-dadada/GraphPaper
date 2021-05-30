@@ -433,6 +433,20 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
+	// ü‚Ì’[“_‚ð“¾‚é.
+	bool ShapeSheet::get_stroke_cap_dash(D2D1_CAP_STYLE& value) const noexcept
+	{
+		value = m_stroke_cap_dash;
+		return true;
+	}
+
+	// ü‚Ì’[“_‚ð“¾‚é.
+	bool ShapeSheet::get_stroke_cap_line(D2D1_CAP_STYLE& value) const noexcept
+	{
+		value = m_stroke_cap_line;
+		return true;
+	}
+
 	// ü˜g‚ÌF‚ð“¾‚é.
 	bool ShapeSheet::get_stroke_color(D2D1_COLOR_F& value) const noexcept
 	{
@@ -447,7 +461,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// ü˜g‚Ì˜AŒ‹‚ð“¾‚é.
+	// ü‚Ì‚Â‚È‚ª‚è‚ð“¾‚é.
 	bool ShapeSheet::get_stroke_join_style(D2D1_LINE_JOIN& value) const noexcept
 	{
 		value = m_stroke_join_style;
@@ -657,13 +671,25 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_color = value;
 	}
 
-	// ü˜g‚Ìƒ}ƒCƒ^[§ŒÀ‚Ì”ä—¦‚ÉŠi”[‚·‚é.
+	// ü‚Ì’[“_‚ÉŠi”[‚·‚é.
+	void ShapeSheet::set_stroke_cap_dash(const D2D1_CAP_STYLE& value)
+	{
+		m_stroke_cap_dash = value;
+	}
+
+	// ü‚Ì’[“_‚ÉŠi”[‚·‚é.
+	void ShapeSheet::set_stroke_cap_line(const D2D1_CAP_STYLE& value)
+	{
+		m_stroke_cap_line = value;
+	}
+
+	// ü‚Ìƒ}ƒCƒ^[§ŒÀ‚Ì”ä—¦‚ÉŠi”[‚·‚é.
 	void ShapeSheet::set_stroke_join_limit(const float& value)
 	{
 		m_stroke_join_limit = value;
 	}
 
-	// ü˜g‚Ì˜AŒ‹‚ÉŠi”[‚·‚é.
+	// ü‚Ì‚Â‚È‚ª‚è‚ÉŠi”[‚·‚é.
 	void ShapeSheet::set_stroke_join_style(const D2D1_LINE_JOIN& value)
 	{
 		m_stroke_join_style = value;
@@ -729,6 +755,8 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_emph(m_grid_emph);
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
+		s->get_stroke_cap_dash(m_stroke_cap_dash);
+		s->get_stroke_cap_line(m_stroke_cap_line);
 		s->get_sheet_color(m_sheet_color);
 		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_join_limit(m_stroke_join_limit);

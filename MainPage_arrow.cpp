@@ -37,17 +37,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「矢じりの種類」>「開いた」が選択された.
-	/*
-	void MainPage::arrow_opened_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (m_sheet_main.m_arrow_style == ARROWHEAD_STYLE::NONE) {
-			mfi_arrow_size().IsEnabled(true);
-			mfi_arrow_size_2().IsEnabled(true);
-		}
-		undo_push_set<UNDO_OP::ARROWHEAD_STYLE>(ARROWHEAD_STYLE::OPENED);
-	}
-	*/
 	//	値をスライダーのヘッダーに格納する.
 	//	value	値
 	template <UNDO_OP U, int S> void MainPage::arrow_set_slider_header(const float value)

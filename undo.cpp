@@ -199,6 +199,8 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::SHEET_SIZE>::UndoAttr(Shape* s, const D2D1_SIZE_F& value);
 	template UndoAttr<UNDO_OP::TEXT_ALIGN_P>::UndoAttr(Shape* s, const DWRITE_PARAGRAPH_ALIGNMENT& value);
 	template UndoAttr<UNDO_OP::START_POS>::UndoAttr(Shape* s, const D2D1_POINT_2F& value);
+	template UndoAttr<UNDO_OP::STROKE_CAP_DASH>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
+	template UndoAttr<UNDO_OP::STROKE_CAP_LINE>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
 	template UndoAttr<UNDO_OP::STROKE_COLOR>::UndoAttr(Shape* s, const D2D1_COLOR_F& value);
 	template UndoAttr<UNDO_OP::STROKE_DASH_PATT>::UndoAttr(Shape* s, const STROKE_DASH_PATT& value);
 	template UndoAttr<UNDO_OP::STROKE_DASH_STYLE>::UndoAttr(Shape* s, const D2D1_DASH_STYLE& value);
@@ -223,6 +225,8 @@ namespace winrt::GraphPaper::implementation
 			m_value = dt_reader.ReadSingle();
 		}
 		else if constexpr (U == UNDO_OP::ARROWHEAD_STYLE
+			|| U == UNDO_OP::STROKE_CAP_DASH
+			|| U == UNDO_OP::STROKE_CAP_LINE
 			|| U == UNDO_OP::STROKE_DASH_STYLE
 			|| U == UNDO_OP::STROKE_JOIN_STYLE
 			|| U == UNDO_OP::FONT_STRETCH
@@ -251,20 +255,22 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::GRID_GRAY>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::GRID_EMPH>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::GRID_SHOW>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::TEXT_LINE>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::TEXT_MARGIN>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::SHEET_COLOR>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::SHEET_SIZE>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::TEXT_ALIGN_P>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::START_POS>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::STROKE_CAP_DASH>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::STROKE_CAP_LINE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::STROKE_COLOR>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::STROKE_DASH_PATT>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::STROKE_DASH_STYLE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::STROKE_JOIN_LIMIT>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::STROKE_JOIN_STYLE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::STROKE_WIDTH>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::TEXT_CONTENT>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::TEXT_ALIGN_T>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::TEXT_ALIGN_P>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::TEXT_CONTENT>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::TEXT_LINE>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::TEXT_MARGIN>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::TEXT_RANGE>::UndoAttr(DataReader const& dt_reader);
 
 	// }Œ`‚Ì‘®«’l‚É’l‚ðŠi”[‚·‚é.
@@ -338,16 +344,6 @@ namespace winrt::GraphPaper::implementation
 		s->set_grid_show(value);
 	}
 
-	void UndoAttr<UNDO_OP::TEXT_LINE>::SET(Shape* const s, const float& value)
-	{
-		s->set_text_line(value);
-	}
-
-	void UndoAttr<UNDO_OP::TEXT_MARGIN>::SET(Shape* const s, const D2D1_SIZE_F& value)
-	{
-		s->set_text_margin(value);
-	}
-
 	void UndoAttr<UNDO_OP::SHEET_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
 	{
 		s->set_sheet_color(value);
@@ -356,11 +352,6 @@ namespace winrt::GraphPaper::implementation
 	void UndoAttr<UNDO_OP::SHEET_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& value)
 	{
 		s->set_sheet_size(value);
-	}
-
-	void UndoAttr<UNDO_OP::TEXT_ALIGN_P>::SET(Shape* const s, const DWRITE_PARAGRAPH_ALIGNMENT& value)
-	{
-		s->set_text_align_p(value);
 	}
 
 	void UndoAttr<UNDO_OP::START_POS>::SET(Shape* const s, const D2D1_POINT_2F& value)
@@ -373,14 +364,14 @@ namespace winrt::GraphPaper::implementation
 		s->set_stroke_color(value);
 	}
 
-	void UndoAttr<UNDO_OP::STROKE_JOIN_STYLE>::SET(Shape* const s, const D2D1_LINE_JOIN& value)
+	void UndoAttr<UNDO_OP::STROKE_CAP_DASH>::SET(Shape* const s, const D2D1_CAP_STYLE& value)
 	{
-		s->set_stroke_join_style(value);
+		s->set_stroke_cap_dash(value);
 	}
 
-	void UndoAttr<UNDO_OP::STROKE_JOIN_LIMIT>::SET(Shape* const s, const float& value)
+	void UndoAttr<UNDO_OP::STROKE_CAP_LINE>::SET(Shape* const s, const D2D1_CAP_STYLE& value)
 	{
-		s->set_stroke_join_limit(value);
+		s->set_stroke_cap_line(value);
 	}
 
 	void UndoAttr<UNDO_OP::STROKE_DASH_PATT>::SET(Shape* const s, const STROKE_DASH_PATT& value)
@@ -393,9 +384,29 @@ namespace winrt::GraphPaper::implementation
 		s->set_stroke_dash_style(value);
 	}
 
+	void UndoAttr<UNDO_OP::STROKE_JOIN_LIMIT>::SET(Shape* const s, const float& value)
+	{
+		s->set_stroke_join_limit(value);
+	}
+
+	void UndoAttr<UNDO_OP::STROKE_JOIN_STYLE>::SET(Shape* const s, const D2D1_LINE_JOIN& value)
+	{
+		s->set_stroke_join_style(value);
+	}
+
 	void UndoAttr<UNDO_OP::STROKE_WIDTH>::SET(Shape* const s, const float& value)
 	{
 		s->set_stroke_width(value);
+	}
+
+	void UndoAttr<UNDO_OP::TEXT_ALIGN_P>::SET(Shape* const s, const DWRITE_PARAGRAPH_ALIGNMENT& value)
+	{
+		s->set_text_align_p(value);
+	}
+
+	void UndoAttr<UNDO_OP::TEXT_ALIGN_T>::SET(Shape* const s, const DWRITE_TEXT_ALIGNMENT& value)
+	{
+		s->set_text_align_t(value);
 	}
 
 	void UndoAttr<UNDO_OP::TEXT_CONTENT>::SET(Shape* const s, wchar_t* const& value)
@@ -403,9 +414,14 @@ namespace winrt::GraphPaper::implementation
 		s->set_text(value);
 	}
 
-	void UndoAttr<UNDO_OP::TEXT_ALIGN_T>::SET(Shape* const s, const DWRITE_TEXT_ALIGNMENT& value)
+	void UndoAttr<UNDO_OP::TEXT_LINE>::SET(Shape* const s, const float& value)
 	{
-		s->set_text_align_t(value);
+		s->set_text_line(value);
+	}
+
+	void UndoAttr<UNDO_OP::TEXT_MARGIN>::SET(Shape* const s, const D2D1_SIZE_F& value)
+	{
+		s->set_text_margin(value);
 	}
 
 	void UndoAttr<UNDO_OP::TEXT_RANGE>::SET(Shape* const s, const DWRITE_TEXT_RANGE& value)
@@ -483,16 +499,6 @@ namespace winrt::GraphPaper::implementation
 		return s->get_grid_show(value);
 	}
 
-	bool UndoAttr<UNDO_OP::TEXT_LINE>::GET(const Shape* s, float& value) noexcept
-	{
-		return s->get_text_line(value);
-	}
-
-	bool UndoAttr<UNDO_OP::TEXT_MARGIN>::GET(const Shape* s, D2D1_SIZE_F& value) noexcept
-	{
-		return s->get_text_margin(value);
-	}
-
 	bool UndoAttr<UNDO_OP::SHEET_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
 	{
 		return s->get_sheet_color(value);
@@ -503,29 +509,24 @@ namespace winrt::GraphPaper::implementation
 		return s->get_sheet_size(value);
 	}
 
-	bool UndoAttr<UNDO_OP::TEXT_ALIGN_P>::GET(const Shape* s, DWRITE_PARAGRAPH_ALIGNMENT& value) noexcept
-	{
-		return s->get_text_align_p(value);
-	}
-
 	bool UndoAttr<UNDO_OP::START_POS>::GET(const Shape* s, D2D1_POINT_2F& value) noexcept
 	{
 		return s->get_start_pos(value);
 	}
 
+	bool UndoAttr<UNDO_OP::STROKE_CAP_DASH>::GET(const Shape* s, D2D1_CAP_STYLE& value) noexcept
+	{
+		return s->get_stroke_cap_dash(value);
+	}
+
+	bool UndoAttr<UNDO_OP::STROKE_CAP_LINE>::GET(const Shape* s, D2D1_CAP_STYLE& value) noexcept
+	{
+		return s->get_stroke_cap_line(value);
+	}
+
 	bool UndoAttr<UNDO_OP::STROKE_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
 	{
 		return s->get_stroke_color(value);
-	}
-
-	bool UndoAttr<UNDO_OP::STROKE_JOIN_LIMIT>::GET(const Shape* s, float& value) noexcept
-	{
-		return s->get_stroke_join_limit(value);
-	}
-
-	bool UndoAttr<UNDO_OP::STROKE_JOIN_STYLE>::GET(const Shape* s, D2D1_LINE_JOIN& value) noexcept
-	{
-		return s->get_stroke_join_style(value);
 	}
 
 	bool UndoAttr<UNDO_OP::STROKE_DASH_PATT>::GET(const Shape* s, STROKE_DASH_PATT& value) noexcept
@@ -538,9 +539,29 @@ namespace winrt::GraphPaper::implementation
 		return s->get_stroke_dash_style(value);
 	}
 
+	bool UndoAttr<UNDO_OP::STROKE_JOIN_LIMIT>::GET(const Shape* s, float& value) noexcept
+	{
+		return s->get_stroke_join_limit(value);
+	}
+
+	bool UndoAttr<UNDO_OP::STROKE_JOIN_STYLE>::GET(const Shape* s, D2D1_LINE_JOIN& value) noexcept
+	{
+		return s->get_stroke_join_style(value);
+	}
+
 	bool UndoAttr<UNDO_OP::STROKE_WIDTH>::GET(const Shape* s, float& value) noexcept
 	{
 		return s->get_stroke_width(value);
+	}
+
+	bool UndoAttr<UNDO_OP::TEXT_ALIGN_P>::GET(const Shape* s, DWRITE_PARAGRAPH_ALIGNMENT& value) noexcept
+	{
+		return s->get_text_align_p(value);
+	}
+
+	bool UndoAttr<UNDO_OP::TEXT_ALIGN_T>::GET(const Shape* s, DWRITE_TEXT_ALIGNMENT& value) noexcept
+	{
+		return s->get_text_align_t(value);
 	}
 
 	bool UndoAttr<UNDO_OP::TEXT_CONTENT>::GET(const Shape* s, wchar_t*& value) noexcept
@@ -548,9 +569,14 @@ namespace winrt::GraphPaper::implementation
 		return s->get_text(value);
 	}
 
-	bool UndoAttr<UNDO_OP::TEXT_ALIGN_T>::GET(const Shape* s, DWRITE_TEXT_ALIGNMENT& value) noexcept
+	bool UndoAttr<UNDO_OP::TEXT_LINE>::GET(const Shape* s, float& value) noexcept
 	{
-		return s->get_text_align_t(value);
+		return s->get_text_line(value);
+	}
+
+	bool UndoAttr<UNDO_OP::TEXT_MARGIN>::GET(const Shape* s, D2D1_SIZE_F& value) noexcept
+	{
+		return s->get_text_margin(value);
 	}
 
 	bool UndoAttr<UNDO_OP::TEXT_RANGE>::GET(const Shape* s, DWRITE_TEXT_RANGE& value) noexcept
@@ -573,6 +599,8 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(m_value);
 		}
 		else if constexpr (U == UNDO_OP::ARROWHEAD_STYLE
+			|| U == UNDO_OP::STROKE_CAP_DASH
+			|| U == UNDO_OP::STROKE_CAP_LINE
 			|| U == UNDO_OP::STROKE_DASH_STYLE
 			|| U == UNDO_OP::STROKE_JOIN_STYLE
 			|| U == UNDO_OP::FONT_STRETCH

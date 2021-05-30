@@ -136,6 +136,12 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::START_POS:
 			u = new UndoAttr<UNDO_OP::START_POS>(dt_reader);
 			break;
+		case UNDO_OP::STROKE_CAP_DASH:
+			u = new UndoAttr<UNDO_OP::STROKE_CAP_DASH>(dt_reader);
+			break;
+		case UNDO_OP::STROKE_CAP_LINE:
+			u = new UndoAttr<UNDO_OP::STROKE_CAP_LINE>(dt_reader);
+			break;
 		case UNDO_OP::STROKE_COLOR:
 			u = new UndoAttr<UNDO_OP::STROKE_COLOR>(dt_reader);
 			break;
@@ -306,9 +312,9 @@ namespace winrt::GraphPaper::implementation
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoAttr<UNDO_OP::ARROWHEAD_STYLE>)) {
 			// 線枠メニューの「矢じりの種類」に印をつける.
-			ARROWHEAD_STYLE a_style;
-			m_sheet_main.get_arrow_style(a_style);
-			arrow_style_check_menu(a_style);
+			ARROWHEAD_STYLE value;
+			m_sheet_main.get_arrow_style(value);
+			arrow_style_check_menu(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
@@ -316,44 +322,54 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_EMPH>)) {
 			// 用紙メニューの「方眼の強調」に印をつける.
-			GRID_EMPH g_emph;
-			m_sheet_main.get_grid_emph(g_emph);
-			grid_emph_check_menu(g_emph);
+			GRID_EMPH value;
+			m_sheet_main.get_grid_emph(value);
+			grid_emph_check_menu(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_SHOW>)) {
-			GRID_SHOW g_show;
-			m_sheet_main.get_grid_show(g_show);
-			grid_show_check_menu(g_show);
+			GRID_SHOW value;
+			m_sheet_main.get_grid_show(value);
+			grid_show_check_menu(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
-			DWRITE_FONT_STYLE f_style;
-			m_sheet_main.get_font_style(f_style);
-			font_style_check_menu(f_style);
+			DWRITE_FONT_STYLE value;
+			m_sheet_main.get_font_style(value);
+			font_style_check_menu(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::SHEET_SIZE>)) {
 			// 用紙の大きさをステータスバーに格納する.
 			sbar_set_sheet();
 		}
+		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP_DASH>)) {
+			D2D1_CAP_STYLE value;
+			m_sheet_main.get_stroke_cap_dash(value);
+			cap_style_check_menu(value);
+		}
+		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP_LINE>)) {
+			D2D1_CAP_STYLE value;
+			m_sheet_main.get_stroke_cap_line(value);
+			cap_style_check_menu(value);
+		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_DASH_STYLE>)) {
-			D2D1_DASH_STYLE s_style;
-			m_sheet_main.get_stroke_dash_style(s_style);
-			stroke_dash_style_check_menu(s_style);
+			D2D1_DASH_STYLE value;
+			m_sheet_main.get_stroke_dash_style(value);
+			stroke_dash_style_check_menu(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_JOIN_STYLE>)) {
-			D2D1_LINE_JOIN j_style;
-			m_sheet_main.get_stroke_join_style(j_style);
-			join_style_check_menu(j_style);
+			D2D1_LINE_JOIN value;
+			m_sheet_main.get_stroke_join_style(value);
+			join_style_check_menu(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_T>)) {
-			DWRITE_TEXT_ALIGNMENT t_align_t;
-			m_sheet_main.get_text_align_t(t_align_t);
-			text_align_t_check_menu(t_align_t);
+			DWRITE_TEXT_ALIGNMENT value;
+			m_sheet_main.get_text_align_t(value);
+			text_align_t_check_menu(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_P>)) {
-			DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
-			m_sheet_main.get_text_align_p(t_align_p);
-			text_align_p_check_menu(t_align_p);
+			DWRITE_PARAGRAPH_ALIGNMENT value;
+			m_sheet_main.get_text_align_p(value);
+			text_align_p_check_menu(value);
 		}
 	}
 
@@ -572,6 +588,8 @@ else {
 	template void MainPage::undo_push_set<UNDO_OP::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::START_POS>(Shape* const s);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_CAP_DASH>(D2D1_CAP_STYLE const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_CAP_LINE>(D2D1_CAP_STYLE const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::STROKE_DASH_PATT>(STROKE_DASH_PATT const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::STROKE_DASH_STYLE>(D2D1_DASH_STYLE const& value);
