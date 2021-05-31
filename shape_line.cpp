@@ -141,6 +141,10 @@ namespace winrt::GraphPaper::implementation
 	// ñﬂÇËíl	à íuÇä‹Çﬁê}å`ÇÃïîà 
 	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
+		D2D1_POINT_2F u_pos;
+		pt_sub(t_pos, m_pos, u_pos);
+		return ShapeStroke::hit_test(u_pos, a_len, 1, m_diff.data(), false, false);
+		/*
 		D2D1_POINT_2F e_pos;
 		pt_add(m_pos, m_diff[0], e_pos);
 		if (pt_in_anch(t_pos, e_pos, a_len)) {
@@ -153,6 +157,7 @@ namespace winrt::GraphPaper::implementation
 			return ANCH_TYPE::ANCH_STROKE;
 		}
 		return ANCH_TYPE::ANCH_SHEET;
+		*/
 	}
 
 	// îÕàÕÇ…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.

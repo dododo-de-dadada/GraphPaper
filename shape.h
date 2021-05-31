@@ -847,6 +847,8 @@ namespace winrt::GraphPaper::implementation
 		// ü˜g‚Ì‘¾‚³‚ğ“¾‚é.
 		bool get_stroke_width(float& value) const noexcept;
 		// ˆÊ’u‚ğŠÜ‚Ş‚©”»’è‚·‚é.
+		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len, const size_t d_cnt, const D2D1_POINT_2F diff[], const bool s_close, const bool f_opa) const noexcept;
+		// ˆÊ’u‚ğŠÜ‚Ş‚©”»’è‚·‚é.
 		uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept;
 		// ”ÍˆÍ‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept;
