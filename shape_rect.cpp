@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <corecrt_math.h>
 #include "shape.h"
 
 using namespace winrt;
@@ -32,22 +33,22 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected() != true) {
 			return;
 		}
-// 選択フラグが立っている場合,
-// 部位を表示する.
-D2D1_POINT_2F r_pos[4];	// 方形の頂点
-r_pos[0] = m_pos;
-r_pos[1].y = rect.top;
-r_pos[1].x = rect.right;
-r_pos[2].x = rect.right;
-r_pos[2].y = rect.bottom;
-r_pos[3].y = rect.bottom;
-r_pos[3].x = rect.left;
-for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-	anchor_draw_rect(r_pos[i], dx);
-	D2D1_POINT_2F r_mid;	// 方形の辺の中点
-	pt_avg(r_pos[j], r_pos[i], r_mid);
-	anchor_draw_rect(r_mid, dx);
-}
+		// 選択フラグが立っている場合,
+		// 部位を表示する.
+		D2D1_POINT_2F r_pos[4];	// 方形の頂点
+		r_pos[0] = m_pos;
+		r_pos[1].y = rect.top;
+		r_pos[1].x = rect.right;
+		r_pos[2].x = rect.right;
+		r_pos[2].y = rect.bottom;
+		r_pos[3].y = rect.bottom;
+		r_pos[3].x = rect.left;
+		for (uint32_t i = 0, j = 3; i < 4; j = i++) {
+			anchor_draw_rect(r_pos[i], dx);
+			D2D1_POINT_2F r_mid;	// 方形の辺の中点
+			pt_avg(r_pos[j], r_pos[i], r_mid);
+			anchor_draw_rect(r_mid, dx);
+		}
 	}
 
 	// 折れ線の図形の部位が位置を含むか判定する.
@@ -78,135 +79,114 @@ for (uint32_t i = 0, j = 3; i < 4; j = i++) {
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		D2D1_POINT_2F u_pos;
-		pt_sub(t_pos, m_pos, u_pos);
-		D2D1_POINT_2F v_pos[4]{ { 0.0f, 0.0f}, };
-		v_pos[1].x = m_diff[0].x;
-		v_pos[1].y = 0.0f;
-		v_pos[2] = m_diff[0];
-		v_pos[3].x = 0.0f;
-		v_pos[3].y = m_diff[0].y;
-		if (pt_in_anch(u_pos, v_pos[2], a_len)) {
+		// 方形の各頂点を求め, 判定する位置がそれぞれの部位に含まれるか判定する.
+		D2D1_POINT_2F v_pos[4]{ m_pos, };
+		v_pos[2].x = m_pos.x + m_diff[0].x;
+		v_pos[2].y = m_pos.y + m_diff[0].y;
+		if (pt_in_anch(t_pos, v_pos[2], a_len)) {
 			return ANCH_TYPE::ANCH_SE;
 		}
-		else if (pt_in_anch(u_pos, v_pos[3], a_len)) {
+		v_pos[3].x = m_pos.x;
+		v_pos[3].y = m_pos.y + m_diff[0].y;
+		if (pt_in_anch(t_pos, v_pos[3], a_len)) {
 			return ANCH_TYPE::ANCH_SW;
 		}
-		else if (pt_in_anch(u_pos, v_pos[1], a_len)) {
+		v_pos[1].x = m_pos.x + m_diff[0].x;
+		v_pos[1].y = m_pos.y;
+		if (pt_in_anch(t_pos, v_pos[1], a_len)) {
 			return ANCH_TYPE::ANCH_NE;
 		}
-		else if (pt_in_anch(u_pos, a_len)) {
+		if (pt_in_anch(t_pos, v_pos[0], a_len)) {
 			return ANCH_TYPE::ANCH_NW;
 		}
+
+		// 各辺の中点を求め, 判定する位置がそれぞれの部位に含まれるか判定する.
 		D2D1_POINT_2F s_pos;
 		pt_avg(v_pos[2], v_pos[3], s_pos);
-		if (pt_in_anch(u_pos, s_pos, a_len)) {
+		if (pt_in_anch(t_pos, s_pos, a_len)) {
 			return ANCH_TYPE::ANCH_SOUTH;
 		}
 		D2D1_POINT_2F e_pos;
 		pt_avg(v_pos[1], v_pos[2], e_pos);
-		if (pt_in_anch(u_pos, e_pos, a_len)) {
+		if (pt_in_anch(t_pos, e_pos, a_len)) {
 			return ANCH_TYPE::ANCH_EAST;
 		}
 		D2D1_POINT_2F w_pos;
-		pt_mul(v_pos[3], 0.5, w_pos);
-		if (pt_in_anch(u_pos, w_pos, a_len)) {
-			return ANCH_TYPE::ANCH_EAST;
+		pt_avg(v_pos[0], v_pos[3], w_pos);
+		if (pt_in_anch(t_pos, w_pos, a_len)) {
+			return ANCH_TYPE::ANCH_WEST;
 		}
 		D2D1_POINT_2F n_pos;
-		pt_mul(v_pos[1], 0.5, n_pos);
-		if (pt_in_anch(u_pos, n_pos, a_len)) {
-			return ANCH_TYPE::ANCH_EAST;
+		pt_avg(v_pos[0], v_pos[1], n_pos);
+		if (pt_in_anch(t_pos, n_pos, a_len)) {
+			return ANCH_TYPE::ANCH_NORTH;
 		}
 
-		const D2D1_POINT_2F o_min{ -m_stroke_width * 0.5, -m_stroke_width * 0.5 };
-		const D2D1_POINT_2F o_max{ m_diff[0].x + m_stroke_width * 0.5, m_diff[0].y + m_stroke_width * 0.5 };
-		if (!pt_in_rect(u_pos, o_min, o_max)) {
+		D2D1_POINT_2F r_min;
+		D2D1_POINT_2F r_max;
+		pt_bound(v_pos[0], v_pos[2], r_min, r_max);
+		D2D1_POINT_2F o_min;
+		D2D1_POINT_2F o_max;
+		const double e_width = m_stroke_width * 0.5;
+		pt_add(r_min, -e_width, -e_width, o_min);
+		pt_add(r_max, e_width, e_width, o_max);
+		if (!pt_in_rect(t_pos, o_min, o_max)) {
 			return ANCH_TYPE::ANCH_SHEET;
 		}
-		const bool in_fill = pt_in_rect(u_pos, v_pos[0], v_pos[2]);
 		if (is_opaque(m_stroke_color)) {
-			if (in_fill) {
-				const D2D1_POINT_2F i_min{ o_min.x + m_stroke_width,  o_min.y + m_stroke_width };
-				const D2D1_POINT_2F i_max{ o_max.x - m_stroke_width,  o_max.y - m_stroke_width };
-				if (!pt_in_rect(u_pos, i_min, i_max)) {
+			D2D1_POINT_2F i_min;
+			D2D1_POINT_2F i_max;
+			pt_add(o_min, m_stroke_width, m_stroke_width, i_min);
+			pt_add(o_max, -m_stroke_width, -m_stroke_width, i_max);
+			if (i_max.x <= i_min.x || i_max.y <= i_min.y ||
+				!pt_in_rect(t_pos, i_min, i_max)) {
+				if (r_min.x <= t_pos.x && t_pos.x <= r_max.x ||
+					r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
-			}
-			else {
-				if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-					if (pt_in_elli(u_pos, v_pos[0], m_stroke_width * 0.5, m_stroke_width * 0.5) ||
-						pt_in_elli(u_pos, v_pos[1], m_stroke_width * 0.5, m_stroke_width * 0.5) ||
-						pt_in_elli(u_pos, v_pos[2], m_stroke_width * 0.5, m_stroke_width * 0.5) ||
-						pt_in_elli(u_pos, v_pos[3], m_stroke_width * 0.5, m_stroke_width * 0.5)) {
+				else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+					if (pt_in_elli(t_pos, v_pos[0], e_width, e_width) ||
+						pt_in_elli(t_pos, v_pos[1], e_width, e_width) ||
+						pt_in_elli(t_pos, v_pos[2], e_width, e_width) ||
+						pt_in_elli(t_pos, v_pos[3], e_width, e_width)) {
 						return ANCH_TYPE::ANCH_STROKE;
 					}
 				}
-				else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
-					const auto a = static_cast<FLOAT>(m_stroke_width * 0.5);
-					const D2D1_POINT_2F q_pos[4] {
-						D2D1_POINT_2F{ 0.0f, -a }, D2D1_POINT_2F{ a, 0.0f }, D2D1_POINT_2F{ 0.0f, a }, D2D1_POINT_2F{ -a, 0.0f }
+				else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
+					(m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
+						m_stroke_join_limit <= M_SQRT2)) {
+					const auto e_width = static_cast<FLOAT>(m_stroke_width * 0.5);
+					const D2D1_POINT_2F q_pos[4]{
+						D2D1_POINT_2F{ 0.0f, -e_width },
+						D2D1_POINT_2F{ e_width, 0.0f },
+						D2D1_POINT_2F{ 0.0f, e_width },
+						D2D1_POINT_2F{ -e_width, 0.0f }
 					};
-					if (pt_in_poly(u_pos, 4, q_pos) ||
-						pt_in_poly(D2D1_POINT_2F{ u_pos.x - v_pos[1].x, u_pos.y - v_pos[1].y }, 4, q_pos) ||
-						pt_in_poly(D2D1_POINT_2F{ u_pos.x - v_pos[2].x, u_pos.y - v_pos[2].y }, 4, q_pos) ||
-						pt_in_poly(D2D1_POINT_2F{ u_pos.x - v_pos[3].x, u_pos.y - v_pos[3].y }, 4, q_pos)) {
+					if (pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[0].x, t_pos.y - v_pos[0].y }, 4, q_pos) ||
+						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[1].x, t_pos.y - v_pos[1].y }, 4, q_pos) ||
+						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[2].x, t_pos.y - v_pos[2].y }, 4, q_pos) ||
+						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[3].x, t_pos.y - v_pos[3].y }, 4, q_pos)) {
 						return ANCH_TYPE::ANCH_STROKE;
 					}
 				}
-				else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
+				else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
+					(m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
+						m_stroke_join_limit > M_SQRT2)) {
 					const auto a = static_cast<FLOAT>(m_stroke_width * M_SQRT2 * 0.5 * m_stroke_join_limit);
 					const D2D1_POINT_2F q_pos[4]{
 						D2D1_POINT_2F{ 0.0f, -a }, D2D1_POINT_2F{ a, 0.0f }, D2D1_POINT_2F{ 0.0f, a }, D2D1_POINT_2F{ -a, 0.0f }
 					};
-					if (pt_in_poly(u_pos, 4, q_pos) ||
-						pt_in_poly(D2D1_POINT_2F{ u_pos.x - v_pos[1].x, u_pos.y - v_pos[1].y }, 4, q_pos) ||
-						pt_in_poly(D2D1_POINT_2F{ u_pos.x - v_pos[2].x, u_pos.y - v_pos[2].y }, 4, q_pos) ||
-						pt_in_poly(D2D1_POINT_2F{ u_pos.x - v_pos[3].x, u_pos.y - v_pos[3].y }, 4, q_pos)) {
+					if (pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[0].x, t_pos.y - v_pos[0].y }, 4, q_pos) ||
+						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[1].x, t_pos.y - v_pos[1].y }, 4, q_pos) ||
+						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[2].x, t_pos.y - v_pos[2].y }, 4, q_pos) ||
+						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[3].x, t_pos.y - v_pos[3].y }, 4, q_pos)) {
 						return ANCH_TYPE::ANCH_STROKE;
 					}
 				}
 			}
 		}
-		if (is_opaque(m_fill_color) && in_fill) {
+		if (is_opaque(m_fill_color) && pt_in_rect(t_pos, r_min, r_max)) {
 			return ANCH_TYPE::ANCH_FILL;
-		}
-		return ANCH_TYPE::ANCH_SHEET;
-
-		const auto anchor = hit_test_anchor(t_pos, a_len);
-		if (anchor != ANCH_TYPE::ANCH_SHEET) {
-			return anchor;
-		}
-		// 方形の右上点と左下点を求める.
-		D2D1_POINT_2F r_pos;
-		pt_add(m_pos, m_diff[0], r_pos);
-		D2D1_POINT_2F r_min;	// 方形の左上点
-		D2D1_POINT_2F r_max;	// 方形の右下点
-		pt_bound(m_pos, r_pos, r_min, r_max);
-		if (is_opaque(m_stroke_color) != true) {
-			// 線枠の色が透明な場合,
-			if (is_opaque(m_fill_color)) {
-				// 塗りつぶし色が不透明な場合,
-				if (pt_in_rect(t_pos, r_min, r_max)) {
-					// 位置が方形にふくまれる場合,
-					return ANCH_TYPE::ANCH_FILL;
-				}
-			}
-			return ANCH_TYPE::ANCH_SHEET;
-		}
-		const double sw = max(static_cast<double>(m_stroke_width), a_len);	// 線枠の太さ
-		pt_add(r_min, sw * 0.5, r_min);
-		pt_add(r_max, sw * -0.5, r_max);
-		if (pt_in_rect(t_pos, r_min, r_max)) {
-			if (is_opaque(m_fill_color)) {
-				return ANCH_TYPE::ANCH_FILL;
-			}
-			return ANCH_TYPE::ANCH_SHEET;
-		}
-		pt_add(r_min, -sw, r_min);
-		pt_add(r_max, sw, r_max);
-		if (pt_in_rect(t_pos, r_min, r_max)) {
-			return ANCH_TYPE::ANCH_STROKE;
 		}
 		return ANCH_TYPE::ANCH_SHEET;
 	}

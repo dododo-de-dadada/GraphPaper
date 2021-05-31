@@ -133,7 +133,13 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	含む場合 true
 	bool pt_in_elli(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept
 	{
+		const double dx = static_cast<double>(t_pos.x) - static_cast<double>(c_pos.x);
+		const double dy = static_cast<double>(t_pos.y) - static_cast<double>(c_pos.y);
+		const double rxrx = rad_x * rad_x;
+		const double ryry = rad_y * rad_y;
+		return dx * dx * ryry + dy * dy * rxrx <= rxrx * ryry;
 		// 中心点が原点になるよう判定する位置を移動する.
+		/*
 		const double tx = t_pos.x;
 		const double ty = t_pos.y;
 		const double cx = c_pos.x;
@@ -151,6 +157,7 @@ namespace winrt::GraphPaper::implementation
 		px /= rx;
 		py /= ry;
 		return px * px + py * py <= 1.0;
+		*/
 	}
 
 	// 線分が位置を含むか, 太さも考慮して判定する.
