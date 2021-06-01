@@ -402,16 +402,16 @@ namespace winrt::GraphPaper::implementation
 			dc->DrawRectangle({ p[0].x, p[0].y, p[2].x, p[2].y }, dx.m_shape_brush.get(), s_width, nullptr);
 			dx.m_shape_brush->SetColor(dx.m_range_background);
 			s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].x, mod));
-			winrt::com_ptr<ID2D1StrokeStyle> ss;
-			fa->CreateStrokeStyle(&s_prop, d_arr, d_cnt, ss.put());
-			dc->DrawLine(p[0], p[1], dx.m_shape_brush.get(), s_width, ss.get());
-			dc->DrawLine(p[3], p[2], dx.m_shape_brush.get(), s_width, ss.get());
-			ss = nullptr;
+			winrt::com_ptr<ID2D1StrokeStyle> s_style;
+			fa->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
+			dc->DrawLine(p[0], p[1], dx.m_shape_brush.get(), s_width, s_style.get());
+			dc->DrawLine(p[3], p[2], dx.m_shape_brush.get(), s_width, s_style.get());
+			s_style = nullptr;
 			s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].y, mod));
-			fa->CreateStrokeStyle(&s_prop, d_arr, d_cnt, ss.put());
-			dc->DrawLine(p[1], p[2], dx.m_shape_brush.get(), s_width, ss.get());
-			dc->DrawLine(p[0], p[3], dx.m_shape_brush.get(), s_width, ss.get());
-			ss = nullptr;
+			fa->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
+			dc->DrawLine(p[1], p[2], dx.m_shape_brush.get(), s_width, s_style.get());
+			dc->DrawLine(p[0], p[3], dx.m_shape_brush.get(), s_width, s_style.get());
+			s_style = nullptr;
 		}
 
 	}

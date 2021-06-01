@@ -199,8 +199,8 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::SHEET_SIZE>::UndoAttr(Shape* s, const D2D1_SIZE_F& value);
 	template UndoAttr<UNDO_OP::TEXT_ALIGN_P>::UndoAttr(Shape* s, const DWRITE_PARAGRAPH_ALIGNMENT& value);
 	template UndoAttr<UNDO_OP::START_POS>::UndoAttr(Shape* s, const D2D1_POINT_2F& value);
-	template UndoAttr<UNDO_OP::STROKE_CAP_DASH>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
-	template UndoAttr<UNDO_OP::STROKE_CAP_LINE>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
+	template UndoAttr<UNDO_OP::STROKE_DASH_CAP>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
+	template UndoAttr<UNDO_OP::STROKE_CAP_STYLE>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
 	template UndoAttr<UNDO_OP::STROKE_COLOR>::UndoAttr(Shape* s, const D2D1_COLOR_F& value);
 	template UndoAttr<UNDO_OP::STROKE_DASH_PATT>::UndoAttr(Shape* s, const STROKE_DASH_PATT& value);
 	template UndoAttr<UNDO_OP::STROKE_DASH_STYLE>::UndoAttr(Shape* s, const D2D1_DASH_STYLE& value);
@@ -225,8 +225,8 @@ namespace winrt::GraphPaper::implementation
 			m_value = dt_reader.ReadSingle();
 		}
 		else if constexpr (U == UNDO_OP::ARROWHEAD_STYLE
-			|| U == UNDO_OP::STROKE_CAP_DASH
-			|| U == UNDO_OP::STROKE_CAP_LINE
+			|| U == UNDO_OP::STROKE_DASH_CAP
+			|| U == UNDO_OP::STROKE_CAP_STYLE
 			|| U == UNDO_OP::STROKE_DASH_STYLE
 			|| U == UNDO_OP::STROKE_JOIN_STYLE
 			|| U == UNDO_OP::FONT_STRETCH
@@ -258,8 +258,8 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::SHEET_COLOR>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::SHEET_SIZE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::START_POS>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::STROKE_CAP_DASH>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::STROKE_CAP_LINE>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::STROKE_DASH_CAP>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::STROKE_CAP_STYLE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::STROKE_COLOR>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::STROKE_DASH_PATT>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::STROKE_DASH_STYLE>::UndoAttr(DataReader const& dt_reader);
@@ -359,19 +359,19 @@ namespace winrt::GraphPaper::implementation
 		s->set_start_pos(value);
 	}
 
+	void UndoAttr<UNDO_OP::STROKE_CAP_STYLE>::SET(Shape* const s, const D2D1_CAP_STYLE& value)
+	{
+		s->set_stroke_cap_style(value);
+	}
+
 	void UndoAttr<UNDO_OP::STROKE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
 	{
 		s->set_stroke_color(value);
 	}
 
-	void UndoAttr<UNDO_OP::STROKE_CAP_DASH>::SET(Shape* const s, const D2D1_CAP_STYLE& value)
+	void UndoAttr<UNDO_OP::STROKE_DASH_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& value)
 	{
-		s->set_stroke_cap_dash(value);
-	}
-
-	void UndoAttr<UNDO_OP::STROKE_CAP_LINE>::SET(Shape* const s, const D2D1_CAP_STYLE& value)
-	{
-		s->set_stroke_cap_line(value);
+		s->set_stroke_dash_cap(value);
 	}
 
 	void UndoAttr<UNDO_OP::STROKE_DASH_PATT>::SET(Shape* const s, const STROKE_DASH_PATT& value)
@@ -514,19 +514,19 @@ namespace winrt::GraphPaper::implementation
 		return s->get_start_pos(value);
 	}
 
-	bool UndoAttr<UNDO_OP::STROKE_CAP_DASH>::GET(const Shape* s, D2D1_CAP_STYLE& value) noexcept
+	bool UndoAttr<UNDO_OP::STROKE_CAP_STYLE>::GET(const Shape* s, D2D1_CAP_STYLE& value) noexcept
 	{
-		return s->get_stroke_cap_dash(value);
-	}
-
-	bool UndoAttr<UNDO_OP::STROKE_CAP_LINE>::GET(const Shape* s, D2D1_CAP_STYLE& value) noexcept
-	{
-		return s->get_stroke_cap_line(value);
+		return s->get_stroke_cap_style(value);
 	}
 
 	bool UndoAttr<UNDO_OP::STROKE_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
 	{
 		return s->get_stroke_color(value);
+	}
+
+	bool UndoAttr<UNDO_OP::STROKE_DASH_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& value) noexcept
+	{
+		return s->get_stroke_dash_cap(value);
 	}
 
 	bool UndoAttr<UNDO_OP::STROKE_DASH_PATT>::GET(const Shape* s, STROKE_DASH_PATT& value) noexcept
@@ -599,8 +599,8 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(m_value);
 		}
 		else if constexpr (U == UNDO_OP::ARROWHEAD_STYLE
-			|| U == UNDO_OP::STROKE_CAP_DASH
-			|| U == UNDO_OP::STROKE_CAP_LINE
+			|| U == UNDO_OP::STROKE_DASH_CAP
+			|| U == UNDO_OP::STROKE_CAP_STYLE
 			|| U == UNDO_OP::STROKE_DASH_STYLE
 			|| U == UNDO_OP::STROKE_JOIN_STYLE
 			|| U == UNDO_OP::FONT_STRETCH

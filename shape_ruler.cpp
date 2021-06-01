@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
 					xy ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
-				if (pt_in_line(t_pos, p0, p1, m_stroke_width)) {
+				if (pt_in_line(t_pos, p0, p1, max(static_cast<double>(m_stroke_width), a_len), m_stroke_cap_style)) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
 				// –Ú·‚è‚Ì’l‚ğ•\¦‚·‚é.

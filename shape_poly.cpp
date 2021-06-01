@@ -23,16 +23,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		const double ax = a.x;
 		const double ay = a.y;
-		const double bx = b.x;
-		const double by = b.y;
+		//const double bx = b.x;
+		//const double by = b.y;
 		const double cx = c.x;
 		const double cy = c.y;
-		const double dx = d.x;
-		const double dy = d.y;
-		const double ab_x = bx - ax;
-		const double ab_y = by - ay;
-		const double cd_x = dx - cx;
-		const double cd_y = dy - cy;
+		//const double dx = d.x;
+		//const double dy = d.y;
+		const double ab_x = static_cast<double>(b.x) - ax;
+		const double ab_y = static_cast<double>(b.y) - ay;
+		const double cd_x = static_cast<double>(d.x) - cx;
+		const double cd_y = static_cast<double>(d.y) - cy;
 		const double ac_x = cx - ax;
 		const double ac_y = cy - ay;
 		const double r = ab_x * cd_y - ab_y * cd_x;
@@ -55,19 +55,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置が, 線分の端点 (円形) に含まれるか判定する.
-	// t_pos	線分の始点を原点とした, 判定する位置.
+	// t_pos	線分の始点を原点とする, 判定する位置.
 	// v_end	線分の終点
 	// 戻り値	含まれるなら true
 	static bool stroke_test_cap_round(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F v_end, const double e_width)
 	{
+		return pt_in_circle(t_pos, e_width) || pt_in_circle(t_pos, v_end, e_width);
 		// 調べる位置が, 最初の頂点を中心とし, 拡張する幅を半径とする, 円に含まれるか判定する.
-		if (pt_abs2(t_pos) <= e_width * e_width) {
-			return true;
-		}
+		//if (pt_abs2(t_pos) <= e_width * e_width) {
+		//	return true;
+		//}
 		// 調べる位置が, 最後の頂点を中心とし, 拡張する幅を半径とする, 円に含まれるか判定する.
-		D2D1_POINT_2F u_pos;
-		pt_sub(t_pos, v_end, u_pos);
-		return pt_abs2(u_pos) <= e_width * e_width;
+		//D2D1_POINT_2F u_pos;
+		//pt_sub(t_pos, v_end, u_pos);
+		//return pt_abs2(u_pos) <= e_width * e_width;
 	}
 
 	static bool stroke_test_cap_square(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F v_end, const size_t d_cnt, const D2D1_POINT_2F diff[], const double s_len[], const double e_width)
@@ -297,11 +298,14 @@ namespace winrt::GraphPaper::implementation
 	static bool stroke_test_join_round(const D2D1_POINT_2F& t_pos, const size_t v_cnt, const D2D1_POINT_2F v_pos[], const double exp_width)
 	{
 		for (size_t i = 0; i < v_cnt; i++) {
-			D2D1_POINT_2F d_vec;
-			pt_sub(t_pos, v_pos[i], d_vec);
-			if (pt_abs2(d_vec) <= exp_width * exp_width) {
+			if (pt_in_circle(t_pos, v_pos[i], exp_width)) {
 				return true;
 			}
+			//D2D1_POINT_2F d_vec;
+			//pt_sub(t_pos, v_pos[i], d_vec);
+			//if (pt_abs2(d_vec) <= exp_width * exp_width) {
+			//	return true;
+			//}
 		}
 		return false;
 	}
@@ -365,7 +369,8 @@ namespace winrt::GraphPaper::implementation
 			// 全ての辺の長さがゼロか判定する.
 			if (nz_cnt == 0) {
 				// ゼロならば, 判定する位置が, 拡張する幅を半径とする円に含まれるか判定する.
-				if (pt_abs2(t_pos) <= e_width * e_width) {
+				if (pt_in_circle(t_pos, e_width)) {
+				//if (pt_abs2(t_pos) <= e_width * e_width) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
 				return ANCH_TYPE::ANCH_SHEET;
@@ -457,10 +462,14 @@ namespace winrt::GraphPaper::implementation
 					pt_mul(c_vec, e_width / sqrt(c_abs), c_vec);
 					const D2D1_POINT_2F o_vec{ c_vec.y, -c_vec.x };
 					// 頂点 i を直交ベクトルに沿って四方に拡張し, 拡張された辺 i に格納する.
-					pt_add(v_pos[i], -c_vec.x - o_vec.x, -c_vec.y - o_vec.y, e_side[e_cnt][0]);
-					pt_add(v_pos[i], -c_vec.x + o_vec.x, -c_vec.y + o_vec.y, e_side[e_cnt][1]);
-					pt_add(v_pos[i], c_vec.x + o_vec.x, c_vec.y + o_vec.y, e_side[e_cnt][2]);
-					pt_add(v_pos[i], c_vec.x - o_vec.x, c_vec.y - o_vec.y, e_side[e_cnt][3]);
+					const double cx = c_vec.x;
+					const double cy = c_vec.y;
+					const double ox = o_vec.x;
+					const double oy = o_vec.y;
+					pt_add(v_pos[i], -cx - ox, -cy - oy, e_side[e_cnt][0]);
+					pt_add(v_pos[i], -cx + ox, -cy + oy, e_side[e_cnt][1]);
+					pt_add(v_pos[i], cx + ox, cy + oy, e_side[e_cnt][2]);
+					pt_add(v_pos[i], cx - ox, cy - oy, e_side[e_cnt][3]);
 					e_side[e_cnt][4] = v_pos[i];
 				}
 				else {
@@ -750,7 +759,7 @@ namespace winrt::GraphPaper::implementation
 				if (a_geom != nullptr) {
 					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
 					if (m_arrow_style != ARROWHEAD_STYLE::FILLED) {
-						dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, s_style);
+						dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, nullptr);
 					}
 				}
 			}
@@ -790,7 +799,7 @@ namespace winrt::GraphPaper::implementation
 			is_opaque(m_stroke_color),
 			m_stroke_width,
 			m_end_closed,
-			m_stroke_cap_line,
+			m_stroke_cap_style,
 			m_stroke_join_style,
 			m_stroke_join_limit,
 			is_opaque(m_fill_color)

@@ -165,29 +165,89 @@ namespace winrt::GraphPaper::implementation
 	// s_pos	線分の始端
 	// e_pos	線分の終端
 	// s_width	線分の太さ
+	// s_cap	線の端点
 	// 戻り値	含む場合 true
-	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width) noexcept
+	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const D2D1_CAP_STYLE s_cap) noexcept
 	{
-		D2D1_POINT_2F diff;	// 差分線分のベクトル
-		pt_sub(e_pos, s_pos, diff);
-		const double abs = pt_abs2(diff);
-		if (abs <= FLT_MIN) {
-			return equal(t_pos, s_pos);
-		}
+		//D2D1_POINT_2F diff;	// 差分線分のベクトル
+		//pt_sub(e_pos, s_pos, diff);
+		//const double abs2 = pt_abs2(diff);
+		//if (abs2 <= FLT_MIN) {
+		//	return equal(t_pos, s_pos);
+		//}
 		// 線分の法線ベクトルを求める.
 		// 法線ベクトルの長さは, 線の太さの半分とする.
 		// 長さが 0.5 未満の場合は, 0.5 とする.
-		pt_mul(diff, max(s_width * 0.5, 0.5) / sqrt(abs), diff);
-		const double nx = diff.y;
-		const double ny = -diff.x;
+		const double e_width = max(s_width * 0.5, 0.5);
+		//pt_mul(diff, e_width / sqrt(abs2), diff);
+		//const double dx = diff.x;
+		//const double dy = diff.y;
+		//const double ox = dy;
+		//const double oy = -dx;
 		// 線分の両端から, 法線ベクトルの方向, またはその逆の方向にある点を求める.
 		// 求めた 4 点からなる四辺形が位置を含むか判定する.
-		D2D1_POINT_2F exp_side[4];
-		pt_add(s_pos, nx, ny, exp_side[0]);
-		pt_add(e_pos, nx, ny, exp_side[1]);
-		pt_add(e_pos, -nx, -ny, exp_side[2]);
-		pt_add(s_pos, -nx, -ny, exp_side[3]);
-		return pt_in_poly(t_pos, 4, exp_side);
+		if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+			D2D1_POINT_2F diff;	// 差分線分のベクトル
+			pt_sub(e_pos, s_pos, diff);
+			const double abs2 = pt_abs2(diff);
+			pt_mul(
+				abs2 > FLT_MIN ? diff : D2D1_POINT_2F { 0.0f, static_cast<FLOAT>(e_width) },
+				abs2 > FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
+				diff);
+			const double dx = diff.x;
+			const double dy = diff.y;
+			const double ox = dy;
+			const double oy = -dx;
+			D2D1_POINT_2F e_side[4];
+			pt_add(s_pos, -dx + ox, -dy + oy, e_side[0]);
+			pt_add(s_pos, -dx - ox, -dy - oy, e_side[1]);
+			pt_add(e_pos, dx - ox, dy - oy, e_side[2]);
+			pt_add(e_pos, dx + ox, dy + oy, e_side[3]);
+			return pt_in_poly(t_pos, 4, e_side);
+		}
+		else if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+			D2D1_POINT_2F diff;	// 差分線分のベクトル
+			pt_sub(e_pos, s_pos, diff);
+			const double abs2 = pt_abs2(diff);
+			pt_mul(
+				abs2 > FLT_MIN ? diff : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
+				abs2 > FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
+				diff);
+			const double dx = diff.x;
+			const double dy = diff.y;
+			const double ox = dy;
+			const double oy = -dx;
+			D2D1_POINT_2F e_side[6];
+			pt_add(s_pos, ox, oy, e_side[0]);
+			pt_add(s_pos, -dx, -dy, e_side[1]);
+			pt_add(s_pos, -ox, -oy, e_side[2]);
+			pt_add(e_pos, -ox, -oy, e_side[3]);
+			pt_add(e_pos, dx, dy, e_side[4]);
+			pt_add(e_pos, ox, oy, e_side[5]);
+			return pt_in_poly(t_pos, 6, e_side);
+		}
+		else {
+			if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
+				if (pt_in_circle(t_pos, s_pos, e_width) || pt_in_circle(t_pos, e_pos, e_width)) {
+					return true;
+				}
+			}
+			D2D1_POINT_2F diff;	// 差分ベクトル
+			pt_sub(e_pos, s_pos, diff);
+			const double abs2 = pt_abs2(diff);
+			if (abs2 > FLT_MIN) {
+				pt_mul(diff, e_width / sqrt(abs2), diff);
+				const double ox = diff.y;
+				const double oy = -diff.x;
+				D2D1_POINT_2F e_side[4];
+				pt_add(s_pos, ox, oy, e_side[0]);
+				pt_add(s_pos, -ox, -oy, e_side[1]);
+				pt_add(e_pos, -ox, -oy, e_side[2]);
+				pt_add(e_pos, ox, oy, e_side[3]);
+				return pt_in_poly(t_pos, 4, e_side);
+			}
+		}
+		return false;
 	}
 
 	// 多角形が位置を含むか判定する.

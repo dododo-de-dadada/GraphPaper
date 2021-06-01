@@ -320,9 +320,9 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.set_sheet_scale(1.0);
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_sheet_main.m_sheet_size = SHEET_SIZE_DEF;
+			m_sheet_main.set_stroke_cap_style(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_sheet_main.set_stroke_color(sheet_foreground());
-			m_sheet_main.set_stroke_cap_line(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
-			m_sheet_main.set_stroke_cap_dash(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
+			m_sheet_main.set_stroke_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_sheet_main.set_stroke_dash_patt(STROKE_DASH_PATT_DEF);
 			m_sheet_main.set_stroke_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 			m_sheet_main.set_stroke_join_limit(MITER_LIMIT_DEF);
@@ -494,18 +494,16 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_to(&m_sheet_main);
-		double pw = m_sheet_main.m_sheet_size.width;
-		double ph = m_sheet_main.m_sheet_size.height;
-		const double dpi = m_sheet_dx.m_logical_dpi;
+		//double pw = m_sheet_main.m_sheet_size.width;
+		//double ph = m_sheet_main.m_sheet_size.height;
 		float g_base;
 		m_sheet_main.get_grid_base(g_base);
-		const auto g_len = g_base + 1.0;
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), pw, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), m_sheet_main.m_sheet_size.width, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_width().Text(buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), ph, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), m_sheet_main.m_sheet_size.height, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_height().Text(buf);
-		conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), sheet_size_max(), dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), sheet_size_max(), m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
@@ -522,20 +520,21 @@ namespace winrt::GraphPaper::implementation
 
 			// 本来, 無効な数値が入力されている場合, 「適用」ボタンは不可になっているので
 			// 必要ないエラーチェックだが, 念のため.
-			if (swscanf_s(tx_sheet_width().Text().c_str(), L"%lf", &pw) != 1) {
+			if (swscanf_s(tx_sheet_width().Text().c_str(), L"%f", &m_sheet_main.m_sheet_size.width) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
 				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_width/Header");
 				co_return;
 			}
-			if (swscanf_s(tx_sheet_height().Text().c_str(), L"%lf", &ph) != 1) {
+			if (swscanf_s(tx_sheet_height().Text().c_str(), L"%f", &m_sheet_main.m_sheet_size.height) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
 				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_height/Header");
 				co_return;
 			}
 			// 用紙の縦横の長さの値をピクセル単位の値に変換する.
+			const float g_len = g_base + 1.0f;
 			D2D1_SIZE_F p_size{
-				static_cast<FLOAT>(conv_len_to_val(len_unit(), pw, dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_val(len_unit(), ph, dpi, g_len))
+				static_cast<FLOAT>(conv_len_to_val(len_unit(), m_sheet_main.m_sheet_size.width, m_sheet_dx.m_logical_dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_val(len_unit(), m_sheet_main.m_sheet_size.height, m_sheet_dx.m_logical_dpi, g_len))
 			};
 			if (!equal(p_size, m_sheet_main.m_sheet_size)) {
 				// 変換された値が用紙の大きさと異なる場合,

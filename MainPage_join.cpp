@@ -71,8 +71,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		D2D1_CAP_STYLE old_value;
-		m_sheet_main.get_stroke_cap_line(old_value);
-		if (undo_push_set<UNDO_OP::STROKE_CAP_LINE>(new_value)) {
+		m_sheet_main.get_stroke_cap_style(old_value);
+		if (undo_push_set<UNDO_OP::STROKE_CAP_STYLE>(new_value)) {
 			undo_push_null();
 			undo_menu_enable();
 			sheet_draw();
@@ -163,18 +163,18 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			swprintf_s(buf, LEN, L"%.1f", value * SLIDER_STEP + 1.0F);
+			const float limit = value * SLIDER_STEP + 1.0f;
+			swprintf_s(buf, LEN, L"%.1f", limit);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_stroke_join_limit") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
-			const double dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			const double g_len = g_base + 1.0;
+			const float g_len = g_base + 1.0f;
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_len, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_stroke_width") + L": " + buf;
 		}

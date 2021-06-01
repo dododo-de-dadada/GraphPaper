@@ -676,8 +676,8 @@ namespace winrt::GraphPaper::implementation
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// スレッドをバックグラウンドに変える.
-		co_await winrt::resume_background();
 		try {
+			co_await winrt::resume_background();
 			// ファイル更新の遅延を設定する.
 			CachedFileManager::DeferUpdates(s_file);
 			// ストレージファイルを開いてランダムアクセスストリームを得る.

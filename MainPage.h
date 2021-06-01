@@ -87,17 +87,17 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto COLLAPSED = Visibility::Collapsed;	// 非表示
 
 	// 書式変換
-	constexpr auto FMT_INCH = L"%.3lf";	// インチ単位の書式
-	constexpr auto FMT_INCH_UNIT = L"%.3lf in";	// インチ単位の書式
-	constexpr auto FMT_MILLI = L"%.3lf";	// ミリメートル単位の書式
-	constexpr auto FMT_MILLI_UNIT = L"%.3lf mm";	// ミリメートル単位の書式
-	constexpr auto FMT_POINT = L"%.2lf";	// ポイント単位の書式
-	constexpr auto FMT_POINT_UNIT = L"%.2lf pt";	// ポイント単位の書式
-	constexpr auto FMT_PIXEL = L"%.1lf";	// ピクセル単位の書式
-	constexpr auto FMT_PIXEL_UNIT = L"%.1lf px";	// ピクセル単位の書式
-	constexpr auto FMT_ZOOM = L"%.lf%%";	// 倍率の書式
-	constexpr auto FMT_GRID = L"%.3lf";	// グリッド単位の書式
-	constexpr auto FMT_GRID_UNIT = L"%.3lf gr";	// グリッド単位の書式
+	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
+	constexpr auto FMT_INCH_UNIT = L"%.3f in";	// インチ単位の書式
+	constexpr auto FMT_MILLI = L"%.3f";	// ミリメートル単位の書式
+	constexpr auto FMT_MILLI_UNIT = L"%.3f mm";	// ミリメートル単位の書式
+	constexpr auto FMT_POINT = L"%.2f";	// ポイント単位の書式
+	constexpr auto FMT_POINT_UNIT = L"%.2f pt";	// ポイント単位の書式
+	constexpr auto FMT_PIXEL = L"%.1f";	// ピクセル単位の書式
+	constexpr auto FMT_PIXEL_UNIT = L"%.1f px";	// ピクセル単位の書式
+	constexpr auto FMT_ZOOM = L"%.f%%";	// 倍率の書式
+	constexpr auto FMT_GRID = L"%.3f";	// グリッド単位の書式
+	constexpr auto FMT_GRID_UNIT = L"%.3f gr";	// グリッド単位の書式
 	constexpr auto ICON_INFO = L"icon_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"icon_alert";	// 警告アイコンの静的リソースのキー
 
@@ -161,10 +161,10 @@ namespace winrt::GraphPaper::implementation
 	constexpr bool LEN_UNIT_HIDE = true;	// 単位名の非表示
 
 	// 長さを文字列に変換する.
-	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, const uint32_t t_len, wchar_t* t_buf);
+	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf);
 
 	// 長さを文字列に変換する.
-	template <bool B, size_t Z> void conv_len_to_str(const LEN_UNIT len_unit, const double value, const double dpi, const double g_len, wchar_t(&t_buf)[Z])
+	template <bool B, size_t Z> void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, wchar_t(&t_buf)[Z])
 	{
 		conv_len_to_str<B>(len_unit, value, dpi, g_len, Z, t_buf);
 	}

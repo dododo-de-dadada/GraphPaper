@@ -75,7 +75,9 @@ namespace winrt::GraphPaper::implementation
 	// ê}å`Çîjä¸Ç∑ÇÈ
 	ShapeLine::~ShapeLine(void)
 	{
-		m_d2d_arrow_geom = nullptr;
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 	}
 
 	// ê}å`Çï\é¶Ç∑ÇÈ.
@@ -95,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
 					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
 				}
-				dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, s_style);
+				dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, nullptr);
 			}
 		}
 		if (is_selected()) {
@@ -141,10 +143,9 @@ namespace winrt::GraphPaper::implementation
 	// ñﬂÇËíl	à íuÇä‹Çﬁê}å`ÇÃïîà 
 	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		D2D1_POINT_2F u_pos;
-		pt_sub(t_pos, m_pos, u_pos);
-		return ShapeStroke::hit_test(u_pos, a_len, 1, m_diff.data(), false, false);
-		/*
+		//D2D1_POINT_2F u_pos;
+		//pt_sub(t_pos, m_pos, u_pos);
+		//return ShapeStroke::hit_test(u_pos, a_len, 1, m_diff.data(), false, false);
 		D2D1_POINT_2F e_pos;
 		pt_add(m_pos, m_diff[0], e_pos);
 		if (pt_in_anch(t_pos, e_pos, a_len)) {
@@ -153,11 +154,10 @@ namespace winrt::GraphPaper::implementation
 		if (pt_in_anch(t_pos, m_pos, a_len)) {
 			return ANCH_BEGIN;
 		}
-		if (pt_in_line(t_pos, m_pos, e_pos, max(static_cast<double>(m_stroke_width), a_len))) {
+		if (pt_in_line(t_pos, m_pos, e_pos, max(static_cast<double>(m_stroke_width), a_len), m_stroke_cap_style)) {
 			return ANCH_TYPE::ANCH_STROKE;
 		}
 		return ANCH_TYPE::ANCH_SHEET;
-		*/
 	}
 
 	// îÕàÕÇ…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
@@ -180,7 +180,9 @@ namespace winrt::GraphPaper::implementation
 	void ShapeLine::move(const D2D1_POINT_2F diff)
 	{
 		ShapeStroke::move(diff);
-		m_d2d_arrow_geom = nullptr;
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			ln_create_arrow_geom(s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
@@ -193,7 +195,9 @@ namespace winrt::GraphPaper::implementation
 
 		m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());
 		read(m_arrow_size, dt_reader);
-		m_d2d_arrow_geom = nullptr;
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			ln_create_arrow_geom(s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
@@ -206,7 +210,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_arrow_size = value;
-		m_d2d_arrow_geom = nullptr;
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			ln_create_arrow_geom(s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
@@ -219,7 +225,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_arrow_style = value;
-		m_d2d_arrow_geom = nullptr;
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 		if (value != ARROWHEAD_STYLE::NONE) {
 			ln_create_arrow_geom(s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
@@ -247,7 +255,9 @@ namespace winrt::GraphPaper::implementation
 		else {
 			throw winrt::hresult_invalid_argument();
 		}
-		m_d2d_arrow_geom = nullptr;
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			ln_create_arrow_geom(s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
@@ -257,7 +267,9 @@ namespace winrt::GraphPaper::implementation
 	void ShapeLine::set_start_pos(const D2D1_POINT_2F value)
 	{
 		ShapeStroke::set_start_pos(value);
-		m_d2d_arrow_geom = nullptr;
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			ln_create_arrow_geom(s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
@@ -274,7 +286,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_pos = b_pos;
 		m_diff[0] = b_diff;
-		m_d2d_arrow_geom = nullptr;
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			ln_create_arrow_geom(s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
@@ -289,7 +303,9 @@ namespace winrt::GraphPaper::implementation
 
 		m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadInt32());
 		read(m_arrow_size, dt_reader);
-		m_d2d_arrow_geom = nullptr;
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			ln_create_arrow_geom(s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}

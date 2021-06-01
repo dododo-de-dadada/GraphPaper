@@ -192,7 +192,6 @@ namespace winrt::GraphPaper::implementation
 	// ポインターの位置をステータスバーに格納する.
 	void MainPage::sbar_set_curs(void)
 	{
-		const double dpi = m_sheet_dx.m_logical_dpi;
 		const auto wp = CoreWindow::GetForCurrentThread().PointerPosition();
 		const auto wb = CoreWindow::GetForCurrentThread().Bounds();
 		const auto tr = scp_sheet_panel().TransformToVisual(nullptr);
@@ -208,16 +207,14 @@ namespace winrt::GraphPaper::implementation
 		const double px = sheet_min().x;
 		const double py = sheet_min().y;
 		const double ps = m_sheet_main.m_sheet_scale;
-		const double fx = (wx - bx - tx) / ps + sx + px;
-		const double fy = (wy - by - ty) / ps + sy + py;
+		const float fx = static_cast<FLOAT>((wx - bx - tx) / ps + sx + px);
+		const float fy = static_cast<FLOAT>((wy - by - ty) / ps + sy + py);
 		float g_base;
 		m_sheet_main.get_grid_base(g_base);
-		const double g_len = g_base + 1.0;
-
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), fx, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), fx, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tk_sbar_pos_x().Text(winrt::hstring{ L"x:" } + buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), fy, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), fy, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tk_sbar_pos_y().Text(winrt::hstring{ L"y:" } + buf);
 
 swprintf_s(buf, L"%d", static_cast<uint32_t>(m_list_shapes.size()));
@@ -228,25 +225,21 @@ tk_sbar_cnt().Text(winrt::hstring{ L"c:" } + buf);
 	void MainPage::sbar_set_grid(void)
 	{
 		wchar_t buf[32];
-		const double dpi = m_sheet_dx.m_logical_dpi;
 		float g_base;
 		m_sheet_main.get_grid_base(g_base);
-		const double g_len = g_base + 1.0;
-		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), g_len, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), g_base + 1.0f, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tk_sbar_grid().Text(winrt::hstring{ L"g:" } +buf);
 	}
 
 	// 用紙の大きさをステータスバーに格納する.
 	void MainPage::sbar_set_sheet(void)
 	{
-		const double dpi = m_sheet_dx.m_logical_dpi;
 		float g_base;
 		m_sheet_main.get_grid_base(g_base);
-		const double g_len = g_base + 1.0;
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), m_sheet_main.m_sheet_size.width, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), m_sheet_main.m_sheet_size.width, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tk_sbar_width().Text(winrt::hstring{ L"w:" } + buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), m_sheet_main.m_sheet_size.height, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), m_sheet_main.m_sheet_size.height, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tk_sbar_height().Text(winrt::hstring{ L"h:" } + buf);
 	}
 

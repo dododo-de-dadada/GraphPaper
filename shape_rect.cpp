@@ -154,13 +154,13 @@ namespace winrt::GraphPaper::implementation
 				}
 				else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
 					(m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
-						m_stroke_join_limit <= M_SQRT2)) {
-					const auto e_width = static_cast<FLOAT>(m_stroke_width * 0.5);
+						m_stroke_join_limit < M_SQRT2)) {
+					//const auto e_width = static_cast<FLOAT>(m_stroke_width * 0.5);
 					const D2D1_POINT_2F q_pos[4]{
-						D2D1_POINT_2F{ 0.0f, -e_width },
-						D2D1_POINT_2F{ e_width, 0.0f },
-						D2D1_POINT_2F{ 0.0f, e_width },
-						D2D1_POINT_2F{ -e_width, 0.0f }
+						D2D1_POINT_2F{ 0.0f, -static_cast<FLOAT>(e_width) },
+						D2D1_POINT_2F{ static_cast<FLOAT>(e_width), 0.0f },
+						D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
+						D2D1_POINT_2F{ -static_cast<FLOAT>(e_width), 0.0f }
 					};
 					if (pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[0].x, t_pos.y - v_pos[0].y }, 4, q_pos) ||
 						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[1].x, t_pos.y - v_pos[1].y }, 4, q_pos) ||
@@ -171,10 +171,10 @@ namespace winrt::GraphPaper::implementation
 				}
 				else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 					(m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
-						m_stroke_join_limit > M_SQRT2)) {
-					const auto a = static_cast<FLOAT>(m_stroke_width * M_SQRT2 * 0.5 * m_stroke_join_limit);
+						m_stroke_join_limit >= M_SQRT2)) {
+					const auto limit = static_cast<FLOAT>(m_stroke_width * M_SQRT2 * 0.5 * m_stroke_join_limit);
 					const D2D1_POINT_2F q_pos[4]{
-						D2D1_POINT_2F{ 0.0f, -a }, D2D1_POINT_2F{ a, 0.0f }, D2D1_POINT_2F{ 0.0f, a }, D2D1_POINT_2F{ -a, 0.0f }
+						D2D1_POINT_2F{ 0.0f, -limit }, D2D1_POINT_2F{ limit, 0.0f }, D2D1_POINT_2F{ 0.0f, limit }, D2D1_POINT_2F{ -limit, 0.0f }
 					};
 					if (pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[0].x, t_pos.y - v_pos[0].y }, 4, q_pos) ||
 						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[1].x, t_pos.y - v_pos[1].y }, 4, q_pos) ||

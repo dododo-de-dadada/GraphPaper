@@ -210,13 +210,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::STROKE_DASH_PATT) {
 			wchar_t buf[32];
-			const double dpi = m_sheet_dx.m_logical_dpi;
+			//const double dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			const double g_len = g_base + 1.0;
+			//const double g_len = g_base + 1.0f;
 			float s_width;
 			m_sample_sheet.get_stroke_width(s_width);
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * s_width, dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * s_width, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			if constexpr (S == 0) {
 				hdr = r_loader.GetString(L"str_dash_len") + L": " + buf;
@@ -233,11 +233,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			wchar_t buf[32];
-			const double dpi = m_sheet_dx.m_logical_dpi;
+			//const double dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			const double g_len = g_base + 1.0;
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+			//const double g_len = g_base + 1.0;
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 			hdr = hdr + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {

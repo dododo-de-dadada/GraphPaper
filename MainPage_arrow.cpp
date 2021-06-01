@@ -60,11 +60,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::ARROWHEAD_SIZE) {
 			wchar_t buf[32];
-			const double dpi = m_sheet_dx.m_logical_dpi;
+			//const double dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			const double g_len = g_base + 1.0;
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+			//const double g_len = g_base + 1.0;
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 			hdr = hdr + buf;
 		}
 		if constexpr (S == 0) {

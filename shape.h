@@ -212,12 +212,16 @@ namespace winrt::GraphPaper::implementation
 	void pt_bound(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
 	// 図形の部位が位置 { 0,0 } を含むか判定する.
 	bool pt_in_anch(const D2D1_POINT_2F a_pos, const double a_len) noexcept;
-	// 図形の部位が位置を含むか判定する.
+	// 位置が図形の部位に含まれるか判定する.
 	bool pt_in_anch(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos, const double a_len) noexcept;
-	// だ円が位置を含むか判定する.
+	// 位置がだ円に含まれるか判定する.
 	bool pt_in_elli(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept;
+	// 位置が円に含まれるか判定する.
+	inline bool pt_in_circle(const D2D1_POINT_2F t_pos, const double rad) noexcept;
+	// 位置が円に含まれるか判定する.
+	inline bool pt_in_circle(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad) noexcept;
 	// 線分が位置を含むか, 太さも考慮して判定する.
-	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width) noexcept;
+	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const D2D1_CAP_STYLE s_cap) noexcept;
 	// 多角形が位置を含むか判定する.
 	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t p_cnt, const D2D1_POINT_2F p_pos[]) noexcept;
 	// 方形が位置を含むか判定する.
@@ -375,11 +379,11 @@ namespace winrt::GraphPaper::implementation
 		// 開始位置を得る.
 		virtual bool get_start_pos(D2D1_POINT_2F& /*value*/) const noexcept { return false; }
 		// 線の端点を得る.
-		virtual bool get_stroke_cap_dash(D2D1_CAP_STYLE& /*value*/) const noexcept { return false; }
-		// 線の端点を得る.
-		virtual bool get_stroke_cap_line(D2D1_CAP_STYLE& /*value*/) const noexcept { return false; }
+		virtual bool get_stroke_cap_style(D2D1_CAP_STYLE& /*value*/) const noexcept { return false; }
 		// 線枠の色を得る.
 		virtual bool get_stroke_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
+		// 破線の端点を得る.
+		virtual bool get_stroke_dash_cap(D2D1_CAP_STYLE& /*value*/) const noexcept { return false; }
 		// 破線の配置を得る.
 		virtual bool get_stroke_dash_patt(STROKE_DASH_PATT& /*value*/) const noexcept { return false; }
 		// 破線の形式を得る.
@@ -452,12 +456,12 @@ namespace winrt::GraphPaper::implementation
 		virtual void set_anchor_pos(const D2D1_POINT_2F /*value*/, const uint32_t /*anch*/) {}
 		// 値を選択フラグに格納する.
 		virtual void set_select(const bool /*value*/) noexcept {}
+		// 値を線の端点に格納する.
+		virtual void set_stroke_cap_style(const D2D1_CAP_STYLE& /*value*/) {}
 		// 値を線枠の色に格納する.
 		virtual void set_stroke_color(const D2D1_COLOR_F& /*value*/) noexcept {}
 		// 値を破線の端点に格納する.
-		virtual void set_stroke_cap_dash(const D2D1_CAP_STYLE& /*value*/) {}
-		// 値を線の端点に格納する.
-		virtual void set_stroke_cap_line(const D2D1_CAP_STYLE& /*value*/) {}
+		virtual void set_stroke_dash_cap(const D2D1_CAP_STYLE& /*value*/) {}
 		// 値を破線の配置に格納する.
 		virtual void set_stroke_dash_patt(const STROKE_DASH_PATT& /*value*/) {}
 		// 値を線枠の形式に格納する.
@@ -572,9 +576,9 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 
-		D2D1_CAP_STYLE m_stroke_cap_dash = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端点
-		D2D1_CAP_STYLE m_stroke_cap_line = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 線の端点
+		D2D1_CAP_STYLE m_stroke_cap_style = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 線の端点
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色 (MainPage のコンストラクタで設定)
+		D2D1_CAP_STYLE m_stroke_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端点
 		STROKE_DASH_PATT m_stroke_dash_patt{ STROKE_DASH_PATT_DEF };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_stroke_join_limit = MITER_LIMIT_DEF;	// 線のつながりのマイター制限の比率
@@ -596,7 +600,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙の属性
 		D2D1_COLOR_F m_sheet_color{ S_WHITE };	// 背景色 (MainPage のコンストラクタで設定)
 		float m_sheet_scale = 1.0f;	// 拡大率
-		D2D1_SIZE_F	m_sheet_size;	// 大きさ (MainPage のコンストラクタで設定)
+		D2D1_SIZE_F	m_sheet_size{ 0.0f, 0.0f };	// 大きさ (MainPage のコンストラクタで設定)
 
 		//------------------------------
 		// shape_sheet.cpp
@@ -661,11 +665,11 @@ namespace winrt::GraphPaper::implementation
 		// 段落のそろえを得る.
 		bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& value) const noexcept;
 		// 線の端点を得る.
-		bool get_stroke_cap_dash(D2D1_CAP_STYLE& value) const noexcept;
-		// 線の端点を得る.
-		bool get_stroke_cap_line(D2D1_CAP_STYLE& value) const noexcept;
+		bool get_stroke_cap_style(D2D1_CAP_STYLE& value) const noexcept;
 		// 線枠の色を得る.
 		bool get_stroke_color(D2D1_COLOR_F& value) const noexcept;
+		// 線の端点を得る.
+		bool get_stroke_dash_cap(D2D1_CAP_STYLE& value) const noexcept;
 		// 破線の配置を得る.
 		bool get_stroke_dash_patt(STROKE_DASH_PATT& value) const noexcept;
 		// 破線の形式を得る.
@@ -724,20 +728,20 @@ namespace winrt::GraphPaper::implementation
 		void set_text_margin(const D2D1_SIZE_F value);
 		// 値を段落のそろえに格納する.
 		void set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value);
+		// 値を線の端点に格納する.
+		void set_stroke_cap_style(const D2D1_CAP_STYLE& value);
 		// 値を線枠の色に格納する.
 		void set_stroke_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を破線の端点に格納する.
-		void set_stroke_cap_dash(const D2D1_CAP_STYLE& value);
-		// 値を線の端点に格納する.
-		void set_stroke_cap_line(const D2D1_CAP_STYLE& value);
-		// 値をマイター制限の比率に格納する.
-		void set_stroke_join_limit(const float& value);
-		// 値を線のつながりに格納する.
-		void set_stroke_join_style(const D2D1_LINE_JOIN& value);
+		void set_stroke_dash_cap(const D2D1_CAP_STYLE& value);
 		// 値を破線の配置に格納する.
 		void set_stroke_dash_patt(const STROKE_DASH_PATT& value);
 		// 値を線枠の形式に格納する.
 		void set_stroke_dash_style(const D2D1_DASH_STYLE value);
+		// 値をマイター制限の比率に格納する.
+		void set_stroke_join_limit(const float& value);
+		// 値を線のつながりに格納する.
+		void set_stroke_join_style(const D2D1_LINE_JOIN& value);
 		// 値を書体の太さに格納する.
 		void set_stroke_width(const float value) noexcept;
 		// 値を文字列のそろえに格納する.
@@ -804,13 +808,13 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_diff;	// 次の位置への差分
 
-		D2D1_CAP_STYLE m_stroke_cap_dash = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端点
-		D2D1_CAP_STYLE m_stroke_cap_line = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 線の端点
+		D2D1_CAP_STYLE m_stroke_cap_style = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 線の端点
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色
-		float m_stroke_join_limit = MITER_LIMIT_DEF;		// 線のつながりのマイター制限の比率
-		D2D1_LINE_JOIN m_stroke_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線のつながり
+		D2D1_CAP_STYLE m_stroke_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端点
 		STROKE_DASH_PATT m_stroke_dash_patt{ STROKE_DASH_PATT_DEF };	// 破線の配置
 		D2D1_DASH_STYLE m_stroke_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
+		float m_stroke_join_limit = MITER_LIMIT_DEF;		// 線のつながりのマイター制限の比率
+		D2D1_LINE_JOIN m_stroke_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線のつながり
 		float m_stroke_width = 1.0f;	// 線枠の太さ
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_dash_style{};	// D2D ストロークスタイル
@@ -830,12 +834,12 @@ namespace winrt::GraphPaper::implementation
 		virtual	void get_anch_pos(const uint32_t /*anch*/, D2D1_POINT_2F& value) const noexcept;
 		// 開始位置を得る.
 		virtual bool get_start_pos(D2D1_POINT_2F& value) const noexcept;
+		// 線の端点を得る.
+		bool get_stroke_cap_style(D2D1_CAP_STYLE& value) const noexcept;
 		// 線枠の色を得る.
 		bool get_stroke_color(D2D1_COLOR_F& value) const noexcept;
 		// 線の端点を得る.
-		bool get_stroke_cap_dash(D2D1_CAP_STYLE& value) const noexcept;
-		// 線の端点を得る.
-		bool get_stroke_cap_line(D2D1_CAP_STYLE& value) const noexcept;
+		bool get_stroke_dash_cap(D2D1_CAP_STYLE& value) const noexcept;
 		// 破線の配置を得る.
 		bool get_stroke_dash_patt(STROKE_DASH_PATT& value) const noexcept;
 		// 破線の形式を得る.
@@ -864,12 +868,12 @@ namespace winrt::GraphPaper::implementation
 		void set_delete(const bool value) noexcept { m_deleted = value; }
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual void set_start_pos(const D2D1_POINT_2F value);
+		// 値を線の端点に格納する.
+		void set_stroke_cap_style(const D2D1_CAP_STYLE& value);
 		// 値を線枠の色に格納する.
 		void set_stroke_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を破線の端点に格納する.
-		void set_stroke_cap_dash(const D2D1_CAP_STYLE& value);
-		// 値を線の端点に格納する.
-		void set_stroke_cap_line(const D2D1_CAP_STYLE& value);
+		void set_stroke_dash_cap(const D2D1_CAP_STYLE& value);
 		// 値を破線の配置に格納する.
 		void set_stroke_dash_patt(const STROKE_DASH_PATT& value);
 		// 値を線枠の形式に格納する.
@@ -1067,6 +1071,7 @@ namespace winrt::GraphPaper::implementation
 		ARROWHEAD_STYLE m_arrow_style{ ARROWHEAD_STYLE::NONE };	// 矢じりの形式
 		ARROWHEAD_SIZE m_arrow_size{ ARROWHEAD_SIZE_DEF };	// 矢じりの寸法
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_arrow_geom{};	// 矢じりの D2D パスジオメトリ
+
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_path_geom{};	// 折れ線の D2D パスジオメトリ
 
 		//------------------------------
@@ -1385,6 +1390,22 @@ namespace winrt::GraphPaper::implementation
 	{
 		c.x = static_cast<FLOAT>((a.x + b.x) * 0.5);
 		c.y = static_cast<FLOAT>((a.y + b.y) * 0.5);
+	}
+
+	// 位置が円に含まれるか判定する.
+	inline bool pt_in_circle(const D2D1_POINT_2F a, const D2D1_POINT_2F c, const double r) noexcept
+	{
+		const double dx = static_cast<double>(a.x) - static_cast<double>(c.x);
+		const double dy = static_cast<double>(a.y) - static_cast<double>(c.y);
+		return dx * dx + dy * dy <= r * r;
+	}
+
+	// 位置が円に含まれるか判定する.
+	inline bool pt_in_circle(const D2D1_POINT_2F a, const double r) noexcept
+	{
+		const double dx = a.x;
+		const double dy = a.y;
+		return dx * dx + dy * dy <= r * r;
 	}
 
 	// 二点の位置を比べてそれぞれ大きい値を求める.

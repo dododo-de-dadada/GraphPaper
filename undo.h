@@ -48,9 +48,9 @@ namespace winrt::GraphPaper::implementation
 		SHEET_SIZE,	// 用紙の寸法の操作
 		SELECT,	// 図形の選択を切り替え
 		START_POS,	// 図形の開始位置の操作
-		STROKE_CAP_DASH,	// 破線の端点の操作
-		STROKE_CAP_LINE,	// 線の端点の操作
+		STROKE_CAP_STYLE,	// 線の端点の操作
 		STROKE_COLOR,	// 線枠の色の操作
+		STROKE_DASH_CAP,	// 破線の端点の操作
 		STROKE_DASH_PATT,	// 破線の配置の操作
 		STROKE_DASH_STYLE,	// 破線の形式の操作
 		STROKE_JOIN_LIMIT,	// 線のマイター制限の操作
@@ -85,9 +85,9 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::SHEET_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::SHEET_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::START_POS> { using type = D2D1_POINT_2F; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_CAP_DASH> { using type = D2D1_CAP_STYLE; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_CAP_LINE> { using type = D2D1_CAP_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_CAP_STYLE> { using type = D2D1_CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_DASH_CAP> { using type = D2D1_CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_DASH_PATT> { using type = STROKE_DASH_PATT; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_DASH_STYLE> { using type = D2D1_DASH_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_JOIN_LIMIT> { using type = float; };

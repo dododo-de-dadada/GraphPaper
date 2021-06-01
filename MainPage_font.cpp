@@ -204,7 +204,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			float g_base;
 			m_sample_sheet.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value, m_sample_dx.m_logical_dpi, g_base + 1.0, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value, m_sample_dx.m_logical_dpi, g_base + 1.0f, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			hdr = r_loader.GetString(L"str_size") + L": " + buf;
 		}
@@ -729,10 +729,10 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring hdr;
 
-		const double dpi = m_sheet_dx.m_logical_dpi;
+		const float dpi = m_sheet_dx.m_logical_dpi;
 		float g_base;
 		m_sample_sheet.get_grid_base(g_base);
-		const double g_len = g_base + 1.0;
+		const float g_len = g_base + 1.0f;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
@@ -750,7 +750,7 @@ namespace winrt::GraphPaper::implementation
 				// 行の高さの単位は DIPs (96dpi 固定) なので,
 				// これをピクセル単位に変換する.
 				wchar_t buf[32];
-				conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * dpi / 96.0, dpi, g_len, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * dpi / 96.0f, dpi, g_len, buf);
 				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_height") + L": " + buf;
 			}
 			else {

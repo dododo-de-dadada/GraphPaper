@@ -136,14 +136,14 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::START_POS:
 			u = new UndoAttr<UNDO_OP::START_POS>(dt_reader);
 			break;
-		case UNDO_OP::STROKE_CAP_DASH:
-			u = new UndoAttr<UNDO_OP::STROKE_CAP_DASH>(dt_reader);
-			break;
-		case UNDO_OP::STROKE_CAP_LINE:
-			u = new UndoAttr<UNDO_OP::STROKE_CAP_LINE>(dt_reader);
+		case UNDO_OP::STROKE_CAP_STYLE:
+			u = new UndoAttr<UNDO_OP::STROKE_CAP_STYLE>(dt_reader);
 			break;
 		case UNDO_OP::STROKE_COLOR:
 			u = new UndoAttr<UNDO_OP::STROKE_COLOR>(dt_reader);
+			break;
+		case UNDO_OP::STROKE_DASH_CAP:
+			u = new UndoAttr<UNDO_OP::STROKE_DASH_CAP>(dt_reader);
 			break;
 		case UNDO_OP::STROKE_DASH_PATT:
 			u = new UndoAttr<UNDO_OP::STROKE_DASH_PATT>(dt_reader);
@@ -341,14 +341,14 @@ namespace winrt::GraphPaper::implementation
 			// 用紙の大きさをステータスバーに格納する.
 			sbar_set_sheet();
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP_DASH>)) {
+		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP_STYLE>)) {
 			D2D1_CAP_STYLE value;
-			m_sheet_main.get_stroke_cap_dash(value);
+			m_sheet_main.get_stroke_cap_style(value);
 			cap_style_check_menu(value);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP_LINE>)) {
+		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_DASH_CAP>)) {
 			D2D1_CAP_STYLE value;
-			m_sheet_main.get_stroke_cap_line(value);
+			m_sheet_main.get_stroke_dash_cap(value);
 			cap_style_check_menu(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_DASH_STYLE>)) {
@@ -588,9 +588,9 @@ else {
 	template void MainPage::undo_push_set<UNDO_OP::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::START_POS>(Shape* const s);
-	template bool MainPage::undo_push_set<UNDO_OP::STROKE_CAP_DASH>(D2D1_CAP_STYLE const& value);
-	template bool MainPage::undo_push_set<UNDO_OP::STROKE_CAP_LINE>(D2D1_CAP_STYLE const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_CAP_STYLE>(D2D1_CAP_STYLE const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_DASH_CAP>(D2D1_CAP_STYLE const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::STROKE_DASH_PATT>(STROKE_DASH_PATT const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::STROKE_DASH_STYLE>(D2D1_DASH_STYLE const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::STROKE_JOIN_LIMIT>(float const& value);

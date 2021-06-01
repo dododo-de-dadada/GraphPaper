@@ -512,8 +512,12 @@ namespace winrt::GraphPaper::implementation
 		D2D1_BEZIER_SEGMENT b_seg;
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		m_d2d_path_geom = nullptr;
-		m_d2d_arrow_geom = nullptr;
+		if (m_d2d_path_geom != nullptr) {
+			m_d2d_path_geom = nullptr;
+		}
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
 		pt_add(m_pos, m_diff[0], b_seg.point1);
 		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
 		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
@@ -547,17 +551,8 @@ namespace winrt::GraphPaper::implementation
 				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
 					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
 				}
-				dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, s_style);
+				dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, nullptr);
 			}
-			/*
-			if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
-				auto geo = m_d2d_arrow_geom.get();
-				dx.m_d2dContext->DrawGeometry(geo, sb, sw, nullptr);
-				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
-					dx.m_d2dContext->FillGeometry(geo, sb, nullptr);
-				}
-			}
-			*/
 		}
 		if (is_selected() != true) {
 			return;
