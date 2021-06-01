@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRRect::draw(SHAPE_DX& dx)
 	{
 		auto sb = dx.m_shape_brush.get();
-		auto ss = m_d2d_stroke_dash_style.get();
+		auto ss = m_d2d_stroke_style.get();
 		auto sw = m_stroke_width;
 		auto dc = dx.m_d2dContext;
 

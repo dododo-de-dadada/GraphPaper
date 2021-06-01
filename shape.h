@@ -817,7 +817,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_LINE_JOIN m_stroke_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線のつながり
 		float m_stroke_width = 1.0f;	// 線枠の太さ
 
-		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_dash_style{};	// D2D ストロークスタイル
+		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
+		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_style{};	// 矢じりの D2D ストロークスタイル
 
 		//------------------------------
 		// shape_stroke.cpp
