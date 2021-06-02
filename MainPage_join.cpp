@@ -7,7 +7,7 @@ namespace winrt::GraphPaper::implementation
 {
 	// 線枠メニューの「単点の形式」に印をつける.
 	// s_cap	線の単点
-	void MainPage::cap_style_check_menu(const D2D1_CAP_STYLE s_cap)
+	void MainPage::cap_style_check_menu(const CAP_STYLE& s_cap)
 	{
 		// コードビハインドではグループ名による切り替えが効かない？
 		if (rmfi_cap_flat().IsChecked()) {
@@ -34,43 +34,43 @@ namespace winrt::GraphPaper::implementation
 		if (rmfi_cap_triangle_2().IsChecked()) {
 			rmfi_cap_triangle_2().IsChecked(false);
 		}
-		if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT) {
-			rmfi_join_bevel().IsChecked(true);
-			rmfi_join_bevel_2().IsChecked(true);
+		if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
+			rmfi_cap_flat().IsChecked(true);
+			rmfi_cap_flat_2().IsChecked(true);
 		}
-		else if (s_cap == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
-			rmfi_join_miter().IsChecked(true);
-			rmfi_join_miter_2().IsChecked(true);
+		else if (equal(s_cap, CAP_STYLE { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+			rmfi_cap_square().IsChecked(true);
+			rmfi_cap_square_2().IsChecked(true);
 		}
-		else if (s_cap == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-			rmfi_join_m_or_b().IsChecked(true);
-			rmfi_join_m_or_b_2().IsChecked(true);
+		else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+			rmfi_cap_round().IsChecked(true);
+			rmfi_cap_round_2().IsChecked(true);
 		}
-		else if (s_cap == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-			rmfi_join_round().IsChecked(true);
-			rmfi_join_round_2().IsChecked(true);
+		else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+			rmfi_cap_triangle().IsChecked(true);
+			rmfi_cap_triangle_2().IsChecked(true);
 		}
 	}
 
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		D2D1_CAP_STYLE new_value;
+		CAP_STYLE new_value;
 		if (sender == rmfi_cap_flat() || sender == rmfi_cap_flat_2()) {
-			new_value = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;
+			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };
 		}
 		else if (sender == rmfi_cap_square() || sender == rmfi_cap_square_2()) {
-			new_value = D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE;
+			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE };
 		}
 		else if (sender == rmfi_cap_round() || sender == rmfi_cap_round_2()) {
-			new_value = D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND;
+			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND };
 		}
 		else if (sender == rmfi_cap_triangle() || sender == rmfi_cap_triangle_2()) {
-			new_value = D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE;
+			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE };
 		}
 		else {
 			return;
 		}
-		D2D1_CAP_STYLE old_value;
+		CAP_STYLE old_value;
 		m_sheet_main.get_stroke_cap_style(old_value);
 		if (undo_push_set<UNDO_OP::STROKE_CAP_STYLE>(new_value)) {
 			undo_push_null();

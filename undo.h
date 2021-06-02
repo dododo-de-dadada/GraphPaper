@@ -85,7 +85,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::SHEET_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::SHEET_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::START_POS> { using type = D2D1_POINT_2F; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_CAP_STYLE> { using type = D2D1_CAP_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_CAP_STYLE> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_DASH_CAP> { using type = D2D1_CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_DASH_PATT> { using type = STROKE_DASH_PATT; };

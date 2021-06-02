@@ -201,9 +201,13 @@ namespace winrt::GraphPaper::implementation
 
 	// ìhÇËÇ¬Ç‘ÇµÇÃêFÇ…äiî[Ç∑ÇÈ.
 	// val	äiî[Ç∑ÇÈíl.
-	void ShapeRect::set_fill_color(const D2D1_COLOR_F& value) noexcept
+	bool ShapeRect::set_fill_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_fill_color = value;
+		if (!equal(m_fill_color, value)) {
+			m_fill_color = value;
+			return true;
+		}
+		return false;
 	}
 
 	//	ïîà ÇÃà íuÇìæÇÈ.
@@ -260,10 +264,10 @@ namespace winrt::GraphPaper::implementation
 		return pt_in_rect(m_pos, a_min, a_max) && pt_in_rect(e_pos, a_min, a_max);
 	}
 
-	//	ílÇ, ïîà ÇÃà íuÇ…äiî[Ç∑ÇÈ. ëºÇÃïîà ÇÃà íuÇÕìÆÇ©Ç»Ç¢. 
+	//	ílÇ, ïîà ÇÃà íuÇ…äiî[Ç∑ÇÈ. ëºÇÃïîà ÇÃà íuÇ‡ìÆÇ≠.
 	//	value	äiî[Ç∑ÇÈíl
 	//	abch	ê}å`ÇÃïîà 
-	void ShapeRect::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	bool ShapeRect::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
 		//D2D1_POINT_2F a_pos;
 
@@ -273,6 +277,9 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F diff;
 			pt_sub(value, m_pos, diff);
 			pt_round(diff, PT_ROUND, diff);
+			if (pt_abs2(diff) < FLT_MIN) {
+				return false;
+			}
 			pt_add(m_pos, diff, m_pos);
 			}
 			break;
@@ -281,6 +288,9 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F diff;
 			pt_sub(value, m_pos, diff);
 			pt_round(diff, PT_ROUND, diff);
+			if (pt_abs2(diff) < FLT_MIN) {
+				return false;
+			}
 			pt_add(m_pos, diff, m_pos);
 			pt_sub(m_diff[0], diff, m_diff[0]);
 			}
@@ -288,6 +298,9 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_NORTH:
 			{
 			const double diff_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
+			if (fabs(diff_y) < FLT_MIN) {
+				return false;
+			}
 			m_diff[0].y = static_cast<FLOAT>(m_diff[0].y - diff_y);
 			m_pos.y = static_cast<FLOAT>(m_pos.y + diff_y);
 			}
@@ -299,6 +312,9 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F diff;
 			pt_sub(value, a_pos, diff);
 			pt_round(diff, PT_ROUND, diff);
+			if (pt_abs2(diff) < FLT_MIN) {
+				return false;
+			}
 			m_pos.y += diff.y;
 			pt_add(m_diff[0], diff.x, -diff.y, m_diff[0]);
 			}
@@ -306,6 +322,9 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_WEST:
 			{
 			const double diff_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
+			if (fabs(diff_x) < FLT_MIN) {
+				return false;
+			}
 			m_diff[0].x = static_cast<FLOAT>(m_diff[0].x - diff_x);
 			m_pos.x = static_cast<FLOAT>(m_pos.x + diff_x);
 			}
@@ -313,8 +332,10 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_EAST:
 			{
 			const double diff_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
+			if (fabs(diff_x) < FLT_MIN) {
+				return false;
+			}
 			m_diff[0].x = static_cast<FLOAT>(diff_x);
-
 			}
 			break;
 		case ANCH_TYPE::ANCH_SW:
@@ -323,6 +344,10 @@ namespace winrt::GraphPaper::implementation
 			get_anch_pos(ANCH_TYPE::ANCH_SW, a_pos);
 			D2D1_POINT_2F diff;
 			pt_sub(value, a_pos, diff);
+			pt_round(diff, PT_ROUND, diff);
+			if (pt_abs2(diff) < FLT_MIN) {
+				return false;
+			}
 			m_pos.x += diff.x;
 			pt_add(m_diff[0], -diff.x, diff.y, m_diff[0]);
 			}
@@ -330,6 +355,9 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_SOUTH:
 			{
 			const double diff_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
+			if (fabs(diff_y) < FLT_MIN) {
+				return false;
+			}
 			m_diff[0].y = static_cast<FLOAT>(diff_y);
 			}
 			break;
@@ -338,10 +366,16 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F diff;
 			pt_sub(value, m_pos, diff);
 			pt_round(diff, PT_ROUND, diff);
+			if (pt_abs2(diff) < FLT_MIN) {
+				return false;
+			}
 			m_diff[0] = diff;
 			}
 			break;
+		default:
+			return false;
 		}
+		return true;
 	}
 
 	// ê}å`ÇçÏê¨Ç∑ÇÈ.

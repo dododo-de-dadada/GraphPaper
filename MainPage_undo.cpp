@@ -342,14 +342,14 @@ namespace winrt::GraphPaper::implementation
 			sbar_set_sheet();
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP_STYLE>)) {
-			D2D1_CAP_STYLE value;
+			CAP_STYLE value;
 			m_sheet_main.get_stroke_cap_style(value);
 			cap_style_check_menu(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_DASH_CAP>)) {
 			D2D1_CAP_STYLE value;
 			m_sheet_main.get_stroke_dash_cap(value);
-			cap_style_check_menu(value);
+			//cap_style_check_menu(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_DASH_STYLE>)) {
 			D2D1_DASH_STYLE value;
@@ -588,7 +588,7 @@ else {
 	template void MainPage::undo_push_set<UNDO_OP::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::START_POS>(Shape* const s);
-	template bool MainPage::undo_push_set<UNDO_OP::STROKE_CAP_STYLE>(D2D1_CAP_STYLE const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::STROKE_CAP_STYLE>(CAP_STYLE const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::STROKE_DASH_CAP>(D2D1_CAP_STYLE const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::STROKE_DASH_PATT>(STROKE_DASH_PATT const& value);

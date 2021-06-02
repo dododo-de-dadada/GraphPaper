@@ -320,7 +320,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.set_sheet_scale(1.0);
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_sheet_main.m_sheet_size = SHEET_SIZE_DEF;
-			m_sheet_main.set_stroke_cap_style(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
+			m_sheet_main.set_stroke_cap_style(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
 			m_sheet_main.set_stroke_color(sheet_foreground());
 			m_sheet_main.set_stroke_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_sheet_main.set_stroke_dash_patt(STROKE_DASH_PATT_DEF);

@@ -165,28 +165,12 @@ namespace winrt::GraphPaper::implementation
 	// s_pos	線分の始端
 	// e_pos	線分の終端
 	// s_width	線分の太さ
-	// s_cap	線の端点
+	// s_cap	線分の端点
 	// 戻り値	含む場合 true
-	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const D2D1_CAP_STYLE s_cap) noexcept
+	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const CAP_STYLE& s_cap) noexcept
 	{
-		//D2D1_POINT_2F diff;	// 差分線分のベクトル
-		//pt_sub(e_pos, s_pos, diff);
-		//const double abs2 = pt_abs2(diff);
-		//if (abs2 <= FLT_MIN) {
-		//	return equal(t_pos, s_pos);
-		//}
-		// 線分の法線ベクトルを求める.
-		// 法線ベクトルの長さは, 線の太さの半分とする.
-		// 長さが 0.5 未満の場合は, 0.5 とする.
 		const double e_width = max(s_width * 0.5, 0.5);
-		//pt_mul(diff, e_width / sqrt(abs2), diff);
-		//const double dx = diff.x;
-		//const double dy = diff.y;
-		//const double ox = dy;
-		//const double oy = -dx;
-		// 線分の両端から, 法線ベクトルの方向, またはその逆の方向にある点を求める.
-		// 求めた 4 点からなる四辺形が位置を含むか判定する.
-		if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+		if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
 			D2D1_POINT_2F diff;	// 差分線分のベクトル
 			pt_sub(e_pos, s_pos, diff);
 			const double abs2 = pt_abs2(diff);
@@ -205,7 +189,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(e_pos, dx + ox, dy + oy, e_side[3]);
 			return pt_in_poly(t_pos, 4, e_side);
 		}
-		else if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+		else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
 			D2D1_POINT_2F diff;	// 差分線分のベクトル
 			pt_sub(e_pos, s_pos, diff);
 			const double abs2 = pt_abs2(diff);
@@ -227,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 			return pt_in_poly(t_pos, 6, e_side);
 		}
 		else {
-			if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
+			if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
 				if (pt_in_circle(t_pos, s_pos, e_width) || pt_in_circle(t_pos, e_pos, e_width)) {
 					return true;
 				}
@@ -366,6 +350,13 @@ namespace winrt::GraphPaper::implementation
 		value.m_width = dt_reader.ReadSingle();
 		value.m_length = dt_reader.ReadSingle();
 		value.m_offset = dt_reader.ReadSingle();
+	}
+
+	// 矢じりの寸法をデータリーダーから読み込む.
+	void read(CAP_STYLE& value, DataReader const& dt_reader)
+	{
+		value.m_start = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
+		value.m_end = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
 	}
 
 	// 色をデータリーダーから読み込む.
@@ -713,6 +704,13 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(value.m_width);
 		dt_writer.WriteSingle(value.m_length);
 		dt_writer.WriteSingle(value.m_offset);
+	}
+
+	// 線分の端点をデータライターに書き込む.
+	void write(const CAP_STYLE& value, DataWriter const& dt_writer)
+	{
+		dt_writer.WriteUInt32(static_cast<uint32_t>(value.m_start));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(value.m_end));
 	}
 
 	// 色をデータライターに書き込む.

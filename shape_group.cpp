@@ -175,36 +175,46 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する
-	void ShapeGroup::move(const D2D1_POINT_2F diff)
+	bool ShapeGroup::move(const D2D1_POINT_2F diff)
 	{
-		s_list_move(m_list_grouped, diff);
+		return s_list_move(m_list_grouped, diff);
 	}
 
 	// 値を消去フラグに格納する.
-	void ShapeGroup::set_delete(const bool value) noexcept
+	bool ShapeGroup::set_delete(const bool value) noexcept
 	{
+		bool flag = false;
 		for (const auto s : m_list_grouped) {
-			s->set_delete(value);
+			if (s->set_delete(value) && !flag) {
+				flag = true;
+			}
 		}
+		return flag;
 	}
 
 	// 値を選択フラグに格納する.
-	void ShapeGroup::set_select(const bool value) noexcept
+	bool ShapeGroup::set_select(const bool value) noexcept
 	{
+		bool flaged = false;
 		for (const auto s : m_list_grouped) {
-			s->set_select(value);
+			if (s->set_select(value) && !flaged) {
+				flaged = true;
+			}
 		}
+		return flaged;
 	}
 
 	// 値を開始位置に格納する. 他の部位の位置も動く.
-	void ShapeGroup::set_start_pos(const D2D1_POINT_2F value)
+	bool ShapeGroup::set_start_pos(const D2D1_POINT_2F value)
 	{
 		D2D1_POINT_2F b_min;
 		if (get_start_pos(b_min) && !equal(value, b_min)) {
 			D2D1_POINT_2F diff;
 			pt_sub(value, b_min, diff);
 			move(diff);
+			return true;
 		}
+		return false;
 	}
 
 	// 図形をデータリーダーから作成する.

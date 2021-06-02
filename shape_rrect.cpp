@@ -308,10 +308,10 @@ namespace winrt::GraphPaper::implementation
 		return ANCH_TYPE::ANCH_SHEET;
 	}
 
-	//	値を, 部位の位置に格納する. 他の部位の位置は動かない. 
+	//	値を, 部位の位置に格納する. 他の部位の位置も動く.
 	//	value	格納する値
 	//	abch	図形の部位
-	void ShapeRRect::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	bool ShapeRRect::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
 		D2D1_POINT_2F c_pos;
 		D2D1_POINT_2F diff;
@@ -321,12 +321,18 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_R_NW:
 			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
+			if (pt_abs2(diff) < FLT_MIN) {
+				return false;
+			}
 			pt_add(m_corner_rad, diff, rad);
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		case ANCH_TYPE::ANCH_R_NE:
 			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
+			if (pt_abs2(diff) < FLT_MIN) {
+				return false;
+			}
 			rad.x = m_corner_rad.x - diff.x;
 			rad.y = m_corner_rad.y + diff.y;
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
@@ -334,6 +340,9 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_R_SE:
 			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
+			if (pt_abs2(diff) < FLT_MIN) {
+				return false;
+			}
 			rad.x = m_corner_rad.x - diff.x;
 			rad.y = m_corner_rad.y - diff.y;
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
@@ -341,6 +350,9 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_R_SW:
 			ShapeRRect::get_anch_pos(anch, c_pos);
 			pt_sub(value, c_pos, diff);
+			if (pt_abs2(diff) < FLT_MIN) {
+				return false;
+			}
 			rad.x = m_corner_rad.x + diff.x;
 			rad.y = m_corner_rad.y - diff.y;
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
@@ -355,6 +367,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			break;
 		}
+		return true;
 	}
 
 	// 図形を作成する.

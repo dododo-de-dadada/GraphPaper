@@ -329,7 +329,7 @@ namespace winrt::GraphPaper::implementation
 		const bool s_opa,
 		const double s_width,
 		const bool s_closed,
-		const D2D1_CAP_STYLE s_cap,
+		const CAP_STYLE& s_cap,
 		const D2D1_LINE_JOIN s_join,
 		const double s_limit,
 		const bool f_opa)
@@ -381,19 +381,19 @@ namespace winrt::GraphPaper::implementation
 				s_len[d_cnt] = sqrt(pt_abs2(v_pos[d_cnt]));
 			}
 			// •Â‚¶‚Ä‚È‚¢‚È‚ç, ü‚Ì’[“_‚ª‰~Œ`‚©”»’è‚·‚é.
-			else if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
+			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
 				if (stroke_test_cap_round(t_pos, v_pos[d_cnt], e_width)) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
 			}
 			// •Â‚¶‚Ä‚È‚¢‚È‚ç, ü‚Ì’[“_‚ª³•ûŒ`‚©”»’è‚·‚é.
-			else if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
 				if (stroke_test_cap_square(t_pos, v_pos[d_cnt], d_cnt, diff, s_len, e_width)) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
 			}
 			// •Â‚¶‚Ä‚È‚¢‚È‚ç, ü‚Ì’[“_‚ªŽOŠpŒ`‚©”»’è‚·‚é.
-			else if (s_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
 				if (stroke_test_cap_triangle(t_pos, v_pos[d_cnt], d_cnt, diff, s_len, e_width)) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
@@ -827,14 +827,23 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// “h‚è‚Â‚Ô‚µ‚ÌF‚ÉŠi”[‚·‚é.
-	void ShapePoly::set_fill_color(const D2D1_COLOR_F& value) noexcept
+	bool ShapePoly::set_arrow_style(const ARROWHEAD_STYLE value)
 	{
-		if (equal(m_fill_color, value)) {
-			return;
+		if (!m_end_closed) {
+			return ShapePath::set_arrow_style(value);
 		}
-		m_fill_color = value;
-		create_path_geometry(s_d2d_factory);
+		return false;
+	}
+
+	// “h‚è‚Â‚Ô‚µ‚ÌF‚ÉŠi”[‚·‚é.
+	bool ShapePoly::set_fill_color(const D2D1_COLOR_F& value) noexcept
+	{
+		if (!equal(m_fill_color, value)) {
+			m_fill_color = value;
+			create_path_geometry(s_d2d_factory);
+			return true;
+		}
+		return false;
 	}
 
 	// }Œ`‚ðì¬‚·‚é.
@@ -846,7 +855,7 @@ namespace winrt::GraphPaper::implementation
 	// v_up	’¸“_‚ðã‚Éì}‚·‚é‚©”»’è
 	// v_end	•Ó‚ð•Â‚¶‚Äì}‚·‚é‚©”»’è
 	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr, const TOOL_POLY& t_poly) :
-		ShapePath::ShapePath(t_poly.m_vertex_cnt - 1, s_attr),
+		ShapePath::ShapePath(t_poly.m_vertex_cnt - 1, s_attr, t_poly.m_closed),
 		m_end_closed(t_poly.m_closed),
 		m_fill_color(s_attr->m_fill_color)
 	{

@@ -354,8 +354,9 @@ namespace winrt::GraphPaper::implementation
 	// 選択フラグの立つすべての図形を差分だけ移動する.
 	// s_list	図形リスト
 	// diff	移動する差分
-	void s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F diff) noexcept
+	bool s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F diff) noexcept
 	{
+		bool flag = false;
 		for (auto s : s_list) {
 			if (s->is_deleted()) {
 				continue;
@@ -363,8 +364,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_selected() != true) {
 				continue;
 			}
-			s->move(diff);
+			if (s->move(diff) && !flag) {
+				flag = true;
+			}
 		}
+		return flag;
 	}
 
 	// 図形のその次の図形をリストから得る.

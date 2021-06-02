@@ -840,7 +840,7 @@ namespace winrt::GraphPaper::implementation
 	// b_diff	ˆÍ‚Ş—Ìˆæ‚ÌI“_‚Ö‚Ì·•ª
 	// s_attr	‘®«
 	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
-		ShapePath::ShapePath(3, s_attr)
+		ShapePath::ShapePath(3, s_attr, false)
 	{
 		m_pos = b_pos;
 		m_diff[0].x = b_diff.x;
@@ -880,7 +880,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bz_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			ShapeStroke::write_svg(barbs, barbs[2], m_arrow_style, dt_writer);
+			ShapeLine::write_svg(barbs, barbs[2], dt_writer);
 		}
 	}
 

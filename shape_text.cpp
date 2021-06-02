@@ -691,206 +691,222 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ílÇèëëÃÇÃêFÇ…äiî[Ç∑ÇÈ.
-	void ShapeText::set_font_color(const D2D1_COLOR_F& value) noexcept
+	bool ShapeText::set_font_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_font_color = value;
+		if (!equal(m_font_color, value)) {
+			m_font_color = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ílÇèëëÃñºÇ…äiî[Ç∑ÇÈ.
-	void ShapeText::set_font_family(wchar_t* const value)
+	bool ShapeText::set_font_family(wchar_t* const value)
 	{
 		// ílÇ™èëëÃñºÇ∆ìØÇ∂Ç©îªíËÇ∑ÇÈ.
-		if (equal(m_font_family, value)) {
-			// ìØÇ∂Ç»ÇÁèIóπÇ∑ÇÈ.
-			return;
+		if (!equal(m_font_family, value)) {
+			m_font_family = value;
+			if (m_dw_layout.get() != nullptr) {
+				const uint32_t text_len = wchar_len(m_text);
+				const DWRITE_TEXT_RANGE t_range{ 0, text_len };
+				m_dw_layout->SetFontFamilyName(m_font_family, t_range);
+				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+			}
+			else {
+				create_text_layout(s_dwrite_factory);
+			}
+			return true;
 		}
-		m_font_family = value;
-		if (m_dw_layout.get() != nullptr) {
-			const uint32_t text_len = wchar_len(m_text);
-			const DWRITE_TEXT_RANGE t_range{ 0, text_len };
-			m_dw_layout->SetFontFamilyName(m_font_family, t_range);
-			tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
-		}
-		else {
-			create_text_layout(s_dwrite_factory);
-		}
-
+		return false;
 	}
 
 	// ílÇèëëÃÇÃëÂÇ´Ç≥Ç…äiî[Ç∑ÇÈ.
-	void ShapeText::set_font_size(const float value)
+	bool ShapeText::set_font_size(const float value)
 	{
-		if (equal(m_font_size, value)) {
-			return;
+		if (m_font_size != value) {
+			m_font_size = value;
+			if (m_dw_layout.get() != nullptr) {
+				//const FLOAT z = value;
+				const uint32_t text_len = wchar_len(m_text);
+				m_dw_layout->SetFontSize(value, { 0, text_len });
+				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+			}
+			else {
+				create_text_layout(s_dwrite_factory);
+			}
+			return true;
 		}
-		m_font_size = value;
-		if (m_dw_layout.get() != nullptr) {
-			//const FLOAT z = value;
-			const uint32_t text_len = wchar_len(m_text);
-			m_dw_layout->SetFontSize(value, { 0, text_len });
-			tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
-		}
-		else {
-			create_text_layout(s_dwrite_factory);
-		}
+		return false;
 	}
 
 	// ílÇèëëÃÇÃâ°ïùÇ…äiî[Ç∑ÇÈ.
-	void ShapeText::set_font_stretch(const DWRITE_FONT_STRETCH value)
+	bool ShapeText::set_font_stretch(const DWRITE_FONT_STRETCH value)
 	{
-		if (m_font_stretch == value) {
-			return;
+		if (m_font_stretch != value) {
+			m_font_stretch = value;
+			if (m_dw_layout.get() != nullptr) {
+				const uint32_t text_len = wchar_len(m_text);
+				m_dw_layout->SetFontStretch(value, { 0, text_len });
+				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+			}
+			else {
+				create_text_layout(s_dwrite_factory);
+			}
+			return true;
 		}
-		m_font_stretch = value;
-		if (m_dw_layout.get() != nullptr) {
-			const uint32_t text_len = wchar_len(m_text);
-			m_dw_layout->SetFontStretch(value, { 0, text_len });
-			tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
-		}
-		else {
-			create_text_layout(s_dwrite_factory);
-		}
+		return false;
 	}
 
 	// ílÇèëëÃÇÃéöëÃÇ…äiî[Ç∑ÇÈ.
-	void ShapeText::set_font_style(const DWRITE_FONT_STYLE value)
+	bool ShapeText::set_font_style(const DWRITE_FONT_STYLE value)
 	{
-		if (m_font_style == value) {
-			return;
+		if (m_font_style != value) {
+			m_font_style = value;
+			if (m_dw_layout.get() != nullptr) {
+				const uint32_t text_len = wchar_len(m_text);
+				m_dw_layout->SetFontStyle(value, { 0, text_len });
+				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+			}
+			else {
+				create_text_layout(s_dwrite_factory);
+			}
+			return true;
 		}
-		m_font_style = value;
-		if (m_dw_layout.get() != nullptr) {
-			const uint32_t text_len = wchar_len(m_text);
-			m_dw_layout->SetFontStyle(value, { 0, text_len });
-			tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
-		}
-		else {
-			create_text_layout(s_dwrite_factory);
-		}
+		return false;
 	}
 
 	// ílÇèëëÃÇÃëæÇ≥Ç…äiî[Ç∑ÇÈ.
-	void ShapeText::set_font_weight(const DWRITE_FONT_WEIGHT value)
+	bool ShapeText::set_font_weight(const DWRITE_FONT_WEIGHT value)
 	{
-		if (m_font_weight == value) {
-			return;
+		if (m_font_weight != value) {
+			m_font_weight = value;
+			if (m_dw_layout.get() != nullptr) {
+				const uint32_t text_len = wchar_len(m_text);
+				m_dw_layout->SetFontWeight(value, { 0, text_len });
+				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+			}
+			else {
+				create_text_layout(s_dwrite_factory);
+			}
+			return true;
 		}
-		m_font_weight = value;
-		if (m_dw_layout.get() != nullptr) {
-			const uint32_t text_len = wchar_len(m_text);
-			m_dw_layout->SetFontWeight(value, { 0, text_len });
-			tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
-		}
-		else {
-			create_text_layout(s_dwrite_factory);
-		}
+		return false;
 	}
 
-	//	ílÇ, ïîà ÇÃà íuÇ…äiî[Ç∑ÇÈ. ëºÇÃïîà ÇÃà íuÇÕìÆÇ©Ç»Ç¢. 
+	//	ílÇ, ïîà ÇÃà íuÇ…äiî[Ç∑ÇÈ. ëºÇÃïîà ÇÃà íuÇ‡ìÆÇ≠.
 	//	value	äiî[Ç∑ÇÈíl
 	//	abch	ê}å`ÇÃïîà 
-	void ShapeText::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	bool ShapeText::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
-		ShapeRect::set_anchor_pos(value, anch);
-		create_text_metrics(s_dwrite_factory);
+		if (ShapeRect::set_anchor_pos(value, anch)) {
+			create_text_metrics(s_dwrite_factory);
+			return true;
+		}
+		return false;
 	}
 
 	// ílÇï∂éöóÒÇ…äiî[Ç∑ÇÈ.
-	void ShapeText::set_text(wchar_t* const value)
+	bool ShapeText::set_text(wchar_t* const value)
 	{
-		if (equal(m_text, value)) {
-			return;
+		if (!equal(m_text, value)) {
+			m_text = value;
+			m_select_range.startPosition = 0;
+			m_select_range.length = 0;
+			create_text_layout(s_dwrite_factory);
+			return true;
 		}
-		m_text = value;
-		m_select_range.startPosition = 0;
-		m_select_range.length = 0;
-		create_text_layout(s_dwrite_factory);
+		return false;
 	}
 
 	// ílÇíióéÇÃÇªÇÎÇ¶Ç…äiî[Ç∑ÇÈ.
-	void ShapeText::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value)
+	bool ShapeText::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value)
 	{
-		if (m_text_align_p == value) {
-			return;
+		if (m_text_align_p != value) {
+			m_text_align_p = value;
+			if (m_dw_layout.get() != nullptr) {
+				m_dw_layout->SetParagraphAlignment(value);
+				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+			}
+			else {
+				create_text_layout(s_dwrite_factory);
+			}
+			return true;
 		}
-		m_text_align_p = value;
-		if (m_dw_layout.get() != nullptr) {
-			m_dw_layout->SetParagraphAlignment(value);
-			tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
-		}
-		else {
-			create_text_layout(s_dwrite_factory);
-		}
+		return false;
 	}
 
 	// ílÇï∂éöóÒÇÃÇªÇÎÇ¶Ç…äiî[Ç∑ÇÈ.
-	void ShapeText::set_text_align_t(const DWRITE_TEXT_ALIGNMENT value)
+	bool ShapeText::set_text_align_t(const DWRITE_TEXT_ALIGNMENT value)
 	{
-		if (m_text_align_t == value) {
-			return;
-		}
-		m_text_align_t = value;
-		if (m_text != nullptr && m_text[0] != L'\0') {
-			if (m_dw_layout.get() == nullptr) {
-				create_text_layout(s_dwrite_factory);
+		if (m_text_align_t != value) {
+			m_text_align_t = value;
+			if (m_text != nullptr && m_text[0] != L'\0') {
+				if (m_dw_layout.get() == nullptr) {
+					create_text_layout(s_dwrite_factory);
+				}
+				else {
+					m_dw_layout->SetTextAlignment(value);
+					tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+				}
 			}
-			else {
-				m_dw_layout->SetTextAlignment(value);
-				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
-			}
+			return true;
 		}
+		return false;
 	}
 
 	// ílÇçsä‘Ç…äiî[Ç∑ÇÈ.
-	void ShapeText::set_text_line(const float value)
+	bool ShapeText::set_text_line(const float value)
 	{
-		if (m_text_line_h == value) {
-			return;
-		}
-		m_text_line_h = value;
-		if (m_dw_layout.get() != nullptr) {
-			winrt::com_ptr<IDWriteTextLayout3> t3;
-			if (m_dw_layout.try_as(t3)) {
-				DWRITE_LINE_SPACING l_spacing;
-				if (m_text_line_h > 0.0f) {
-					l_spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-					l_spacing.height = m_text_line_h;
-					l_spacing.baseline = m_text_line_h - m_dw_descent;
+		if (!equal(m_text_line_h, value)) {
+			m_text_line_h = value;
+			if (m_dw_layout.get() != nullptr) {
+				winrt::com_ptr<IDWriteTextLayout3> t3;
+				if (m_dw_layout.try_as(t3)) {
+					DWRITE_LINE_SPACING l_spacing;
+					if (m_text_line_h > 0.0f) {
+						l_spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
+						l_spacing.height = m_text_line_h;
+						l_spacing.baseline = m_text_line_h - m_dw_descent;
+					}
+					else {
+						l_spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
+						l_spacing.height = 0.0f;
+						l_spacing.baseline = 0.0f;
+					}
+					l_spacing.leadingBefore = 0.0f;
+					l_spacing.fontLineGapUsage = DWRITE_FONT_LINE_GAP_USAGE_DEFAULT;
+					t3->SetLineSpacing(&l_spacing);
 				}
-				else {
-					l_spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
-					l_spacing.height = 0.0f;
-					l_spacing.baseline = 0.0f;
-				}
-				l_spacing.leadingBefore = 0.0f;
-				l_spacing.fontLineGapUsage = DWRITE_FONT_LINE_GAP_USAGE_DEFAULT;
-				t3->SetLineSpacing(&l_spacing);
+				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
 			}
-			tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+			else {
+				create_text_layout(s_dwrite_factory);
+			}
+			return true;
 		}
-		else {
-			create_text_layout(s_dwrite_factory);
-		}
+		return false;
 	}
 
 	// ílÇï∂éöóÒÇÃó]îíÇ…äiî[Ç∑ÇÈ.
-	void ShapeText::set_text_margin(const D2D1_SIZE_F value)
+	bool ShapeText::set_text_margin(const D2D1_SIZE_F value)
 	{
-		if (equal(m_text_margin, value)) {
-			return;
+		if (!equal(m_text_margin, value)) {
+			m_text_margin = value;
+			create_text_metrics(s_dwrite_factory);
+			return true;
 		}
-		m_text_margin = value;
-		create_text_metrics(s_dwrite_factory);
+		return false;
 	}
 
 	// ílÇï∂éöîÕàÕÇ…äiî[Ç∑ÇÈ.
-	void ShapeText::set_text_range(const DWRITE_TEXT_RANGE value)
+	bool ShapeText::set_text_range(const DWRITE_TEXT_RANGE value)
 	{
-		if (equal(m_select_range, value)) {
-			return;
+		if (!equal(m_select_range, value)) {
+			m_select_range = value;
+			tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+			return true;
 		}
-		m_select_range = value;
-		tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+		return false;
 	}
 
 	// ê}å`ÇçÏê¨Ç∑ÇÈ.

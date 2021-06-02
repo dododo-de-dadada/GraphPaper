@@ -434,7 +434,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ü‚Ì’[“_‚ğ“¾‚é.
-	bool ShapeSheet::get_stroke_cap_style(D2D1_CAP_STYLE& value) const noexcept
+	bool ShapeSheet::get_stroke_cap_style(CAP_STYLE& value) const noexcept
 	{
 		value = m_stroke_cap_style;
 		return true;
@@ -536,7 +536,7 @@ namespace winrt::GraphPaper::implementation
 		read(m_arrow_size, dt_reader);	// –î‚¶‚è‚Ì¡–@
 		m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());	// –î‚¶‚è‚ÌŒ`®
 		read(m_corner_rad, dt_reader);	// ŠpŠÛ”¼Œa
-		m_stroke_cap_style = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());	// ü‚Ì’[“_
+		read(m_stroke_cap_style, dt_reader);	// ü•ª‚Ì’[“_
 		read(m_stroke_color, dt_reader);	// üE˜g‚ÌF
 		m_stroke_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());	// ”jü‚Ì’[“_
 		read(m_stroke_dash_patt, dt_reader);	// ”jü‚Ì”z’u
@@ -560,183 +560,303 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ–î‚¶‚è‚Ì¡–@‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_arrow_size(const ARROWHEAD_SIZE& value)
+	bool ShapeSheet::set_arrow_size(const ARROWHEAD_SIZE& value)
 	{
-		m_arrow_size = value;
+		if (!equal(m_arrow_size, value)) {
+			m_arrow_size = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ–î‚¶‚è‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_arrow_style(const ARROWHEAD_STYLE value)
+	bool ShapeSheet::set_arrow_style(const ARROWHEAD_STYLE value)
 	{
-		m_arrow_style = value;
+		if (m_arrow_style != value) {
+			m_arrow_style = value;
+			return true;
+		}
+		return false;
 	}
 
-	void ShapeSheet::set_corner_radius(const D2D1_POINT_2F& value) noexcept
+	bool ShapeSheet::set_corner_radius(const D2D1_POINT_2F& value) noexcept
 	{
-		m_corner_rad = value;
+		if (!equal(m_corner_rad, value)) {
+			m_corner_rad = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ“h‚è‚Â‚Ô‚µ‚ÌF‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_fill_color(const D2D1_COLOR_F& value) noexcept
+	bool ShapeSheet::set_fill_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_fill_color = value;
+		if (!equal(m_fill_color, value)) {
+			m_fill_color = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ‘‘Ì‚ÌF‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_font_color(const D2D1_COLOR_F& value) noexcept
+	bool ShapeSheet::set_font_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_font_color = value;
+		if (!equal(m_font_color, value)) {
+			m_font_color = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ‘‘Ì–¼‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_font_family(wchar_t* const value)
+	bool ShapeSheet::set_font_family(wchar_t* const value)
 	{
-		m_font_family = value;
+		if (!equal(m_font_family, value)) {
+			m_font_family = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ‘‘Ì‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_font_size(const float value)
+	bool ShapeSheet::set_font_size(const float value)
 	{
-		m_font_size = value;
+		if (m_font_size != value) {
+			m_font_size = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ‘‘Ì‚ÌLk‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_font_stretch(const DWRITE_FONT_STRETCH value)
+	bool ShapeSheet::set_font_stretch(const DWRITE_FONT_STRETCH value)
 	{
-		m_font_stretch = value;
+		if (m_font_stretch != value) {
+			m_font_stretch = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ‘‘Ì‚Ìš‘Ì‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_font_style(const DWRITE_FONT_STYLE value)
+	bool ShapeSheet::set_font_style(const DWRITE_FONT_STYLE value)
 	{
-		m_font_style = value;
+		if (m_font_style != value) {
+			m_font_style = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ‘‘Ì‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_font_weight(const DWRITE_FONT_WEIGHT value)
+	bool ShapeSheet::set_font_weight(const DWRITE_FONT_WEIGHT value)
 	{
-		m_font_weight = value;
+		if (m_font_weight != value) {
+			m_font_weight = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ•ûŠá‚ÌŠî€‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_grid_base(const float value) noexcept
+	bool ShapeSheet::set_grid_base(const float value) noexcept
 	{
-		m_grid_base = value;
+		if (m_grid_base != value) {
+			m_grid_base = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ•ûŠá‚Ì”Z’W‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_grid_gray(const float value) noexcept
+	bool ShapeSheet::set_grid_gray(const float value) noexcept
 	{
-		m_grid_gray = value;
+		if (m_grid_gray != value) {
+			m_grid_gray = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ•ûŠá‚Ì‹­’²‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_grid_emph(const GRID_EMPH& value) noexcept
+	bool ShapeSheet::set_grid_emph(const GRID_EMPH& value) noexcept
 	{
-		m_grid_emph = value;
+		if (!equal(m_grid_emph, value)) {
+			m_grid_emph = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ•ûŠá‚Ì•\¦‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_grid_show(const GRID_SHOW value) noexcept
+	bool ShapeSheet::set_grid_show(const GRID_SHOW value) noexcept
 	{
-		m_grid_show = value;
+		if (m_grid_show != value) {
+			m_grid_show = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ•ûŠá‚É‚»‚ë‚¦‚é‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_grid_snap(const bool value) noexcept
+	bool ShapeSheet::set_grid_snap(const bool value) noexcept
 	{
-		m_grid_snap = value;
+		if (m_grid_snap != value) {
+			m_grid_snap = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ, —p†, •ûŠá, •â•ü‚ÌŠeF‚ÉŠi”[‚·‚é
-	void ShapeSheet::set_sheet_color(const D2D1_COLOR_F& value) noexcept
+	bool ShapeSheet::set_sheet_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_sheet_color = value;
-		m_sheet_color.a = 1.0F;
+		if (!equal(m_sheet_color, value)) {
+			m_sheet_color = value;
+			m_sheet_color.a = 1.0f;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ—p†‚ÌŠg‘å—¦‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_sheet_scale(const float value) noexcept
+	bool ShapeSheet::set_sheet_scale(const float value) noexcept
 	{
-		m_sheet_scale = value;
+		if (m_sheet_scale != value) {
+			m_sheet_scale = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ—p†‚Ì¡–@‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_sheet_size(const D2D1_SIZE_F value) noexcept
+	bool ShapeSheet::set_sheet_size(const D2D1_SIZE_F value) noexcept
 	{
-		m_sheet_size = value;
+		if (!equal(m_sheet_size, value)) {
+			m_sheet_size = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ü‚Ì’[“_‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_cap_style(const D2D1_CAP_STYLE& value)
+	bool ShapeSheet::set_stroke_cap_style(const CAP_STYLE& value)
 	{
-		m_stroke_cap_style = value;
+		if (!equal(m_stroke_cap_style, value)) {
+			m_stroke_cap_style = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ü˜g‚ÌF‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_color(const D2D1_COLOR_F& value) noexcept
+	bool ShapeSheet::set_stroke_color(const D2D1_COLOR_F& value) noexcept
 	{
-		m_stroke_color = value;
+		if (!equal(m_stroke_color, value)) {
+			m_stroke_color = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ü‚Ì’[“_‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_dash_cap(const D2D1_CAP_STYLE& value)
+	bool ShapeSheet::set_stroke_dash_cap(const D2D1_CAP_STYLE& value)
 	{
-		m_stroke_dash_cap = value;
+		if (m_stroke_dash_cap != value) {
+			m_stroke_dash_cap = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ”jü‚Ì”z’u‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_dash_patt(const STROKE_DASH_PATT& value)
+	bool ShapeSheet::set_stroke_dash_patt(const STROKE_DASH_PATT& value)
 	{
-		m_stroke_dash_patt = value;
+		if (!equal(m_stroke_dash_patt, value)) {
+			m_stroke_dash_patt = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ü˜g‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_dash_style(const D2D1_DASH_STYLE value)
+	bool ShapeSheet::set_stroke_dash_style(const D2D1_DASH_STYLE value)
 	{
-		m_stroke_dash_style = value;
+		if (m_stroke_dash_style != value) {
+			m_stroke_dash_style = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ü‚Ìƒ}ƒCƒ^[§ŒÀ‚Ì”ä—¦‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_join_limit(const float& value)
+	bool ShapeSheet::set_stroke_join_limit(const float& value)
 	{
-		m_stroke_join_limit = value;
+		if (!equal(m_stroke_join_limit, value)) {
+			m_stroke_join_limit = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ü‚Ì‚Â‚È‚ª‚è‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_join_style(const D2D1_LINE_JOIN& value)
+	bool ShapeSheet::set_stroke_join_style(const D2D1_LINE_JOIN& value)
 	{
-		m_stroke_join_style = value;
+		if (m_stroke_join_style != value) {
+			m_stroke_join_style = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ü˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_stroke_width(const float value) noexcept
+	bool ShapeSheet::set_stroke_width(const float value) noexcept
 	{
-		m_stroke_width = value;
+		if (!equal(m_stroke_width, value)) {
+			m_stroke_width = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ’i—‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value)
+	bool ShapeSheet::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value)
 	{
-		m_text_align_p = value;
+		if (!equal(m_text_align_p, value)) {
+			m_text_align_p = value;
+			return true;
+		}
+		return false;
 	}
 
 	// •¶š—ñ‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_text_align_t(const DWRITE_TEXT_ALIGNMENT value)
+	bool ShapeSheet::set_text_align_t(const DWRITE_TEXT_ALIGNMENT value)
 	{
-		m_text_align_t = value;
+		if (!equal(m_text_align_t, value)) {
+			m_text_align_t = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğsŠÔ‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_text_line(const float value)
+	bool ShapeSheet::set_text_line(const float value)
 	{
-		m_text_line_h = value;
+		if (!equal(m_text_line_h, value)) {
+			m_text_line_h = value;
+			return true;
+		}
+		return false;
 	}
 
 	// ’l‚ğ•¶š—ñ‚Ì—]”’‚ÉŠi”[‚·‚é.
-	void ShapeSheet::set_text_margin(const D2D1_SIZE_F value)
+	bool ShapeSheet::set_text_margin(const D2D1_SIZE_F value)
 	{
-		m_text_margin = value;
+		if (!equal(m_text_margin, value)) {
+			m_text_margin = value;
+			return true;
+		}
+		return false;
 	}
 
 	// }Œ`‚Ì‘®«’l‚ğŠi”[‚·‚é.
@@ -757,8 +877,8 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_emph(m_grid_emph);
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
-		s->get_stroke_cap_style(m_stroke_cap_style);
 		s->get_sheet_color(m_sheet_color);
+		s->get_stroke_cap_style(m_stroke_cap_style);
 		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_dash_cap(m_stroke_dash_cap);
 		s->get_stroke_dash_patt(m_stroke_dash_patt);
@@ -791,9 +911,9 @@ namespace winrt::GraphPaper::implementation
 		write(m_arrow_size, dt_writer);	// –î‚¶‚è‚Ì¡–@
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));	// –î‚¶‚è‚ÌŒ`®
 		write(m_corner_rad, dt_writer);	// ŠpŠÛ”¼Œa
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_cap_style));
+		write(m_stroke_cap_style, dt_writer);	// ü•ª‚Ì’[“_
 		write(m_stroke_color, dt_writer);	// ü˜g‚ÌF
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash_cap));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash_cap));	// ”jü‚Ì’[“_
 		write(m_stroke_dash_patt, dt_writer);	// ”jü‚Ì”z’u
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash_style));	// ü˜g‚ÌŒ`®
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_join_style));	// Šp‚ÌŒ`ó

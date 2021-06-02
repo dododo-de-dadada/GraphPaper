@@ -199,9 +199,9 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::SHEET_SIZE>::UndoAttr(Shape* s, const D2D1_SIZE_F& value);
 	template UndoAttr<UNDO_OP::TEXT_ALIGN_P>::UndoAttr(Shape* s, const DWRITE_PARAGRAPH_ALIGNMENT& value);
 	template UndoAttr<UNDO_OP::START_POS>::UndoAttr(Shape* s, const D2D1_POINT_2F& value);
-	template UndoAttr<UNDO_OP::STROKE_DASH_CAP>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
-	template UndoAttr<UNDO_OP::STROKE_CAP_STYLE>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
+	template UndoAttr<UNDO_OP::STROKE_CAP_STYLE>::UndoAttr(Shape* s, const CAP_STYLE& value);
 	template UndoAttr<UNDO_OP::STROKE_COLOR>::UndoAttr(Shape* s, const D2D1_COLOR_F& value);
+	template UndoAttr<UNDO_OP::STROKE_DASH_CAP>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
 	template UndoAttr<UNDO_OP::STROKE_DASH_PATT>::UndoAttr(Shape* s, const STROKE_DASH_PATT& value);
 	template UndoAttr<UNDO_OP::STROKE_DASH_STYLE>::UndoAttr(Shape* s, const D2D1_DASH_STYLE& value);
 	template UndoAttr<UNDO_OP::STROKE_JOIN_LIMIT>::UndoAttr(Shape* s, const float& value);
@@ -226,7 +226,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if constexpr (U == UNDO_OP::ARROWHEAD_STYLE
 			|| U == UNDO_OP::STROKE_DASH_CAP
-			|| U == UNDO_OP::STROKE_CAP_STYLE
 			|| U == UNDO_OP::STROKE_DASH_STYLE
 			|| U == UNDO_OP::STROKE_JOIN_STYLE
 			|| U == UNDO_OP::FONT_STRETCH
@@ -359,7 +358,7 @@ namespace winrt::GraphPaper::implementation
 		s->set_start_pos(value);
 	}
 
-	void UndoAttr<UNDO_OP::STROKE_CAP_STYLE>::SET(Shape* const s, const D2D1_CAP_STYLE& value)
+	void UndoAttr<UNDO_OP::STROKE_CAP_STYLE>::SET(Shape* const s, const CAP_STYLE& value)
 	{
 		s->set_stroke_cap_style(value);
 	}
@@ -514,7 +513,7 @@ namespace winrt::GraphPaper::implementation
 		return s->get_start_pos(value);
 	}
 
-	bool UndoAttr<UNDO_OP::STROKE_CAP_STYLE>::GET(const Shape* s, D2D1_CAP_STYLE& value) noexcept
+	bool UndoAttr<UNDO_OP::STROKE_CAP_STYLE>::GET(const Shape* s, CAP_STYLE& value) noexcept
 	{
 		return s->get_stroke_cap_style(value);
 	}
@@ -600,7 +599,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if constexpr (U == UNDO_OP::ARROWHEAD_STYLE
 			|| U == UNDO_OP::STROKE_DASH_CAP
-			|| U == UNDO_OP::STROKE_CAP_STYLE
 			|| U == UNDO_OP::STROKE_DASH_STYLE
 			|| U == UNDO_OP::STROKE_JOIN_STYLE
 			|| U == UNDO_OP::FONT_STRETCH
@@ -743,7 +741,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作を実行する.
 	void UndoSelect::exec(void)
 	{
-		m_shape->set_select(m_shape->is_selected() != true);
+		m_shape->set_select(!m_shape->is_selected());
 	}
 
 	// 操作をデータリーダーから読み込む.
