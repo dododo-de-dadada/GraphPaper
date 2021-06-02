@@ -62,11 +62,10 @@ namespace winrt::GraphPaper::implementation
 
 	// ˆÊ’u‚ğŠÜ‚Ş‚©”»’è‚·‚é.
 	// t_pos	”»’è‚·‚éˆÊ’u
-	// a_len	•”ˆÊ‚Ì‘å‚«‚³
 	// –ß‚è’l	ˆÊ’u‚ğŠÜ‚Ş}Œ`‚Ì•”ˆÊ
-	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto anchor = hit_test_anchor(t_pos, a_len);
+		const auto anchor = hit_test_anchor(t_pos);
 		if (anchor != ANCH_TYPE::ANCH_SHEET) {
 			return anchor;
 		}
@@ -89,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 			// ˆÊ’u‚ª‚¾‰~‚ÌŠO‘¤‚É‚ ‚é‚©”»’è‚·‚é.
 			// ˜g‚Ì‘¾‚³‚ª•”ˆÊ‚Ì‘å‚«‚³–¢–‚È‚ç‚Î,
 			// •”ˆÊ‚Ì‘å‚«‚³‚ğ˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-			const double s_width = max(static_cast<double>(m_stroke_width), a_len);
+			const double s_width = max(static_cast<double>(m_stroke_width), Shape::s_anch_len);
 			// ”¼Œa‚É˜g‚Ì‘¾‚³‚Ì”¼•ª‚ğ‰Á‚¦‚½’l‚ğŠOŒa‚ÉŠi”[‚·‚é.
 			D2D1_POINT_2F r_outer;
 			pt_add(rad, s_width * 0.5, r_outer);

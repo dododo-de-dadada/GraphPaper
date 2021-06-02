@@ -227,10 +227,9 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含む図形とその部位を判定する.
 	// s_list	図形リスト
 	// t_pos	判定する位置
-	// a_len	部位の大きさ
 	// s	位置を含む図形
 	// 戻り値	位置を含む図形の部位
-	uint32_t s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, const double a_len, Shape*& s) noexcept
+	uint32_t s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, Shape*& s) noexcept
 	{
 		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
 		for (auto it = s_list.rbegin(); it != s_list.rend(); it++) {
@@ -241,7 +240,7 @@ namespace winrt::GraphPaper::implementation
 			//if (!t->is_selected()) {
 			//	continue;
 			//}
-			const auto anch = t->hit_test(t_pos, a_len);
+			const auto anch = t->hit_test(t_pos);
 			if (anch != ANCH_TYPE::ANCH_SHEET) {
 				s = t;
 				return anch;
@@ -556,8 +555,7 @@ namespace winrt::GraphPaper::implementation
 	// REDUCE	消去フラグが立っている図形を除く.
 	// s_list	書き込む図形リスト
 	// dt_writer	データライター
-	template<bool REDUCE>
-	void s_list_write(S_LIST_T const& s_list, DataWriter const& dt_writer)
+	template<bool REDUCE> void s_list_write(S_LIST_T const& s_list, DataWriter const& dt_writer)
 	{
 		for (const auto s : s_list) {
 			if constexpr (REDUCE) {

@@ -591,11 +591,10 @@ namespace winrt::GraphPaper::implementation
 
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
-	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
-	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto e_width = max(max(static_cast<double>(m_stroke_width), a_len) * 0.5, 0.5);	// 線枠の太さの半分の値
+		const auto e_width = max(max(static_cast<double>(m_stroke_width), Shape::s_anch_len) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
 		pt_sub(t_pos, m_pos, tp);
 		// 判定する位置によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
@@ -605,16 +604,16 @@ namespace winrt::GraphPaper::implementation
 		pt_add(c_pos[0], m_diff[0], c_pos[1]);
 		pt_add(c_pos[1], m_diff[1], c_pos[2]);
 		pt_add(c_pos[2], m_diff[2], c_pos[3]);
-		if (pt_in_anch(tp, c_pos[3], a_len)) {
+		if (pt_in_anch(tp, c_pos[3])) {
 			return ANCH_TYPE::ANCH_P0 + 3;
 		}
-		if (pt_in_anch(tp, c_pos[2], a_len)) {
+		if (pt_in_anch(tp, c_pos[2])) {
 			return ANCH_TYPE::ANCH_P0 + 2;
 		}
-		if (pt_in_anch(tp, c_pos[1], a_len)) {
+		if (pt_in_anch(tp, c_pos[1])) {
 			return ANCH_TYPE::ANCH_P0 + 1;
 		}
-		if (pt_in_anch(tp, c_pos[0], a_len)) {
+		if (pt_in_anch(tp, c_pos[0])) {
 			return ANCH_TYPE::ANCH_P0 + 0;
 		}
 		// 最初の制御点の組をプッシュする.
@@ -849,14 +848,14 @@ namespace winrt::GraphPaper::implementation
 		m_diff[1].y = b_diff.y;
 		m_diff[2].x = b_diff.x;
 		m_diff[2].y = 0.0f;
-		create_path_geometry(s_d2d_factory);
+		create_path_geometry(Shape::s_d2d_factory);
 	}
 
 	// 図形をデータリーダーから読み込む.
 	ShapeBezi::ShapeBezi(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
 	{
-		create_path_geometry(s_d2d_factory);
+		create_path_geometry(Shape::s_d2d_factory);
 	}
 
 	// データライターに SVG タグとして書き込む.

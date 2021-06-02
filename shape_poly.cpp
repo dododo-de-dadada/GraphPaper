@@ -314,7 +314,6 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	判定する位置 (線分の始点を原点とする)
 	// d_cnt	辺ベクトルの数
 	// diff	辺ベクトル (頂点の間の差分)
-	// a_len	図形の部位の大きさ
 	// s_opa	線が不透明か判定
 	// s_width	線の太さ
 	// s_closed	線が閉じているか判定
@@ -325,7 +324,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F t_pos,
 		const size_t d_cnt,
 		const D2D1_POINT_2F diff[],
-		const double a_len,
+		const bool t_anch,
 		const bool s_opa,
 		const double s_width,
 		const bool s_closed,
@@ -342,7 +341,7 @@ namespace winrt::GraphPaper::implementation
 		size_t k = static_cast<size_t>(-1);	// 見つかった頂点
 		for (size_t i = 0; i < d_cnt; i++) {
 			// 判定する位置が, 頂点の部位に含まれるか判定する.
-			if (a_len > 0 && pt_in_anch(t_pos, v_pos[i], a_len)) {
+			if (t_anch && pt_in_anch(t_pos, v_pos[i])) {
 				k = i;
 			}
 			// 辺の長さを求める.
@@ -355,7 +354,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(v_pos[i], diff[i], v_pos[i + 1]);
 		}
 		// 判定する位置が, 終点の部位に含まれるか判定する.
-		if (pt_in_anch(t_pos, v_pos[d_cnt], a_len)) {
+		if (pt_in_anch(t_pos, v_pos[d_cnt])) {
 			k = d_cnt;
 		}
 		// 頂点が見つかったか判定する.
@@ -365,7 +364,7 @@ namespace winrt::GraphPaper::implementation
 		// 線が不透明か判定する.
 		if (s_opa) {
 			// 不透明ならば, 線の太さの半分の幅を求め, 拡張する幅に格納する.
-			const auto e_width = max(max(static_cast<double>(s_width), a_len) * 0.5, 0.5);	// 拡張する幅
+			const auto e_width = max(max(static_cast<double>(s_width), Shape::s_anch_len) * 0.5, 0.5);	// 拡張する幅
 			// 全ての辺の長さがゼロか判定する.
 			if (nz_cnt == 0) {
 				// ゼロならば, 判定する位置が, 拡張する幅を半径とする円に含まれるか判定する.
@@ -786,16 +785,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
-	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		D2D1_POINT_2F t_vec;
 		pt_sub(t_pos, m_pos, t_vec);
 		return stroke_hit_test(
 			t_vec,
-			m_diff.size(), m_diff.data(),
-			a_len,
+			m_diff.size(),
+			m_diff.data(),
+			true,
 			is_opaque(m_stroke_color),
 			m_stroke_width,
 			m_end_closed,
@@ -840,7 +839,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (!equal(m_fill_color, value)) {
 			m_fill_color = value;
-			create_path_geometry(s_d2d_factory);
+			create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
 		return false;
@@ -867,7 +866,7 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(v_pos[i], v_pos[i - 1], m_diff[i - 1]);
 		}
 		vert_pos.clear();
-		create_path_geometry(s_d2d_factory);
+		create_path_geometry(Shape::s_d2d_factory);
 	}
 
 	// 図形をデータリーダーから読み込む.
@@ -875,20 +874,17 @@ namespace winrt::GraphPaper::implementation
 	ShapePoly::ShapePoly(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
 	{
-		using winrt::GraphPaper::implementation::read;
 		m_end_closed = dt_reader.ReadBoolean();
-		read(m_fill_color, dt_reader);
-		create_path_geometry(s_d2d_factory);
+		dt_read(m_fill_color, dt_reader);
+		create_path_geometry(Shape::s_d2d_factory);
 	}
 
 	// データライターに書き込む.
 	void ShapePoly::write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write;
-
 		ShapePath::write(dt_writer);
 		dt_writer.WriteBoolean(m_end_closed);
-		write(m_fill_color, dt_writer);
+		dt_write(m_fill_color, dt_writer);
 	}
 
 	// データライターに SVG タグとして書き込む.

@@ -645,8 +645,6 @@ else {
 	// 操作スタックをデータリーダーから読み込む.
 	void MainPage::undo_read(DataReader const& dt_reader)
 	{
-		using winrt::GraphPaper::implementation::read;
-
 		Undo* r;
 		while (undo_read_op(r, dt_reader)) {
 			m_stack_redo.push_back(r);

@@ -131,15 +131,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
-	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(t_pos, a_len) != ANCH_TYPE::ANCH_SHEET) {
+			if (s->hit_test(t_pos) != ANCH_TYPE::ANCH_SHEET) {
 				return ANCH_TYPE::ANCH_FILL;
 			}
 		}

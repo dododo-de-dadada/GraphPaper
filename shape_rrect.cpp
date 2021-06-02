@@ -220,9 +220,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
-	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const auto flag = (fabs(m_diff[0].x) > FLT_MIN&& fabs(m_diff[0].y) > FLT_MIN);
 		if (flag) {
@@ -231,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F r_cen;
 				get_anch_pos(ANCH_ROUND[i], r_cen);
 				// 角丸の部位に位置が含まれるか判定する.
-				if (pt_in_anch(t_pos, r_cen, a_len)) {
+				if (pt_in_anch(t_pos, r_cen)) {
 					// 含まれるなら角丸の部位を返す.
 					return ANCH_ROUND[i];
 				}
@@ -240,14 +239,14 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F r_pos;	// 方形の頂点
 			get_anch_pos(ANCH_CORNER[i], r_pos);
-			if (pt_in_anch(t_pos, r_pos, a_len)) {
+			if (pt_in_anch(t_pos, r_pos)) {
 				return ANCH_CORNER[i];
 			}
 		}
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F r_pos;	// 方形の辺の中点
 			get_anch_pos(ANCH_MIDDLE[i], r_pos);
-			if (pt_in_anch(t_pos, r_pos, a_len)) {
+			if (pt_in_anch(t_pos, r_pos)) {
 				return ANCH_MIDDLE[i];
 			}
 		}
@@ -255,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 			for (uint32_t i = 0; i < 4; i++) {
 				D2D1_POINT_2F r_cen;	// 角丸部分の中心点
 				get_anch_pos(ANCH_ROUND[i], r_cen);
-				if (pt_in_anch(t_pos, r_cen, a_len)) {
+				if (pt_in_anch(t_pos, r_cen)) {
 					return ANCH_ROUND[i];
 				}
 			}
@@ -287,7 +286,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			return ANCH_TYPE::ANCH_SHEET;
 		}
-		const double s_width = max(static_cast<double>(m_stroke_width), a_len);
+		const double s_width = max(static_cast<double>(m_stroke_width), Shape::s_anch_len);
 		// 外側の角丸方形の判定
 		pt_add(r_min, -s_width * 0.5, r_min);
 		pt_add(r_max, s_width * 0.5, r_max);
@@ -384,18 +383,14 @@ namespace winrt::GraphPaper::implementation
 	ShapeRRect::ShapeRRect(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader)
 	{
-		using winrt::GraphPaper::implementation::read;
-
-		read(m_corner_rad, dt_reader);
+		dt_read(m_corner_rad, dt_reader);
 	}
 
 	// データライターに書き込む.
 	void ShapeRRect::write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write;
-
 		ShapeRect::write(dt_writer);
-		write(m_corner_rad, dt_writer);
+		dt_write(m_corner_rad, dt_writer);
 	}
 
 	// データライターに SVG タグとして書き込む.

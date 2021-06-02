@@ -208,7 +208,7 @@ namespace winrt::GraphPaper::implementation
 	// 色の成分が同じか判定する.
 	inline bool equal_color_comp(const FLOAT a, const FLOAT b) noexcept;
 	// 矢じりの返しの位置を求める.
-	void get_arrow_barbs(const D2D1_POINT_2F a_vec, const double a_len, const double h_width, const double h_len, D2D1_POINT_2F b_vec[]) noexcept;
+	void get_arrow_barbs(const D2D1_POINT_2F a_vec, const double a_len, const double h_width, const double h_len, D2D1_POINT_2F barbs[]) noexcept;
 	// 色が不透明か判定する.
 	inline bool is_opaque(const D2D1_COLOR_F& color) noexcept;
 	// ベクトルの長さ (の自乗値) を得る
@@ -224,9 +224,9 @@ namespace winrt::GraphPaper::implementation
 	// 二点で囲まれた方形を得る.
 	void pt_bound(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
 	// 図形の部位が位置 { 0,0 } を含むか判定する.
-	bool pt_in_anch(const D2D1_POINT_2F a_pos, const double a_len) noexcept;
+	bool pt_in_anch(const D2D1_POINT_2F a_pos) noexcept;
 	// 位置が図形の部位に含まれるか判定する.
-	bool pt_in_anch(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos, const double a_len) noexcept;
+	bool pt_in_anch(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept;
 	// 位置がだ円に含まれるか判定する.
 	bool pt_in_elli(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept;
 	// 位置が円に含まれるか判定する.
@@ -262,27 +262,27 @@ namespace winrt::GraphPaper::implementation
 	// 位置から大きさを引く.
 	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& sub) noexcept;
 	// 矢じりの寸法を読み込む.
-	void read(ARROWHEAD_SIZE& value, DataReader const& dt_reader);
+	void dt_read(ARROWHEAD_SIZE& value, DataReader const& dt_reader);
 	// 線分の端点を読み込む.
-	void read(CAP_STYLE& value, DataReader const& dt_reader);
+	void dt_read(CAP_STYLE& value, DataReader const& dt_reader);
 	// 色をデータリーダーから読み込む.
-	void read(D2D1_COLOR_F& value, DataReader const& dt_reader);
+	void dt_read(D2D1_COLOR_F& value, DataReader const& dt_reader);
 	// 位置をデータリーダーから読み込む.
-	void read(D2D1_POINT_2F& value, DataReader const& dt_reader);
+	void dt_read(D2D1_POINT_2F& value, DataReader const& dt_reader);
 	// 寸法をデータリーダーから読み込む.
-	void read(D2D1_SIZE_F& value, DataReader const& dt_reader);
+	void dt_read(D2D1_SIZE_F& value, DataReader const& dt_reader);
 	// 文字範囲をデータリーダーから読み込む.
-	void read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader);
+	void dt_read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader);
 	// 方眼の形式をデータリーダーから読み込む.
-	void read(GRID_EMPH& value, DataReader const& dt_reader);
+	void dt_read(GRID_EMPH& value, DataReader const& dt_reader);
 	// 破線の配置をデータリーダーから読み込む.
-	void read(STROKE_DASH_PATT& value, DataReader const& dt_reader);
+	void dt_read(STROKE_DASH_PATT& value, DataReader const& dt_reader);
 	// 多角形のツールをデータリーダーから読み込む.
-	void read(TOOL_POLY& value, DataReader const& dt_reader);
+	void dt_read(TOOL_POLY& value, DataReader const& dt_reader);
 	// 文字列をデータリーダーから読み込む.
-	void read(wchar_t*& value, DataReader const& dt_reader);
+	void dt_read(wchar_t*& value, DataReader const& dt_reader);
 	// 位置配列をデータリーダーから読み込む.
-	void read(std::vector<D2D1_POINT_2F>& value, DataReader const& dt_reader);
+	void dt_read(std::vector<D2D1_POINT_2F>& value, DataReader const& dt_reader);
 	// 文字列を複製する. 元の文字列がヌルポインター, または元の文字数が 0 のときは, ヌルポインターを返す.
 	wchar_t* wchar_cpy(const wchar_t* const s);
 	// 文字列を複製する. エスケープ文字列は文字コードに変換する.
@@ -290,27 +290,27 @@ namespace winrt::GraphPaper::implementation
 	// 文字列の長さ. 引数がヌルポインタの場合, 0 を返す.
 	uint32_t wchar_len(const wchar_t* const t) noexcept;
 	// 矢じりの寸法をデータライターに書き込む.
-	void write(const ARROWHEAD_SIZE& value, DataWriter const& dt_writer);
+	void dt_write(const ARROWHEAD_SIZE& value, DataWriter const& dt_writer);
 	// 線分の端点をデータライターに書き込む.
-	void write(const CAP_STYLE& value, DataWriter const& dt_writer);
+	void dt_write(const CAP_STYLE& value, DataWriter const& dt_writer);
 	// 色をデータライターに書き込む.
-	void write(const D2D1_COLOR_F& value, DataWriter const& dt_writer);
+	void dt_write(const D2D1_COLOR_F& value, DataWriter const& dt_writer);
 	// 位置をデータライターに書き込む.
-	void write(const D2D1_POINT_2F value, DataWriter const& dt_writer);
+	void dt_write(const D2D1_POINT_2F value, DataWriter const& dt_writer);
 	// 寸法をデータライターに書き込む.
-	void write(const D2D1_SIZE_F value, DataWriter const& dt_writer);
+	void dt_write(const D2D1_SIZE_F value, DataWriter const& dt_writer);
 	// 文字列範囲をデータライターに書き込む.
-	void write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer);
+	void dt_write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer);
 	// 方眼の形式をデータライターに書き込む.
-	void write(const GRID_EMPH value, DataWriter const& dt_writer);
+	void dt_write(const GRID_EMPH value, DataWriter const& dt_writer);
 	// 破線の配置をデータライターに書き込む.
-	void write(const STROKE_DASH_PATT& value, DataWriter const& dt_writer);
+	void dt_write(const STROKE_DASH_PATT& value, DataWriter const& dt_writer);
 	// 多角形のツールをデータライターに書き込む.
-	void write(const TOOL_POLY& value, DataWriter const& dt_writer);
+	void dt_write(const TOOL_POLY& value, DataWriter const& dt_writer);
 	// 文字列をデータライターに書き込む.
-	void write(const wchar_t* value, DataWriter const& dt_writer);
+	void dt_write(const wchar_t* value, DataWriter const& dt_writer);
 	// 位置配列をデータリーダーに書き込む.
-	void write(const std::vector<D2D1_POINT_2F>& value, DataWriter const& dt_writer);
+	void dt_write(const std::vector<D2D1_POINT_2F>& value, DataWriter const& dt_writer);
 
 	//------------------------------
 	// shape_svg.cpp
@@ -346,6 +346,11 @@ namespace winrt::GraphPaper::implementation
 		static ID2D1Factory3* s_d2d_factory;
 		// DWRITE ファクトリのキャッシュ
 		static IDWriteFactory3* s_dwrite_factory;
+		// 図形の部位の色
+		static D2D1_COLOR_F s_anch_color;
+		// 図形の部位の大きさ
+		static float s_anch_len;
+
 
 		// 図形を破棄する.
 		virtual ~Shape() {}
@@ -424,7 +429,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字範囲を得る
 		virtual bool get_text_range(DWRITE_TEXT_RANGE& /*value*/) const noexcept { return false; }
 		// 位置を含むか判定する.
-		virtual uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept { return ANCH_TYPE::ANCH_SHEET; }
+		virtual uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept { return ANCH_TYPE::ANCH_SHEET; }
 		// 範囲に含まれるか判定する.
 		virtual bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept { return false; }
 		// 消去フラグを判定する.
@@ -543,7 +548,7 @@ namespace winrt::GraphPaper::implementation
 	void s_list_bound(S_LIST_T const& s_list, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
 
 	// 位置を含む図形とその部位を得る.
-	uint32_t s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, const double a_len, Shape*& s) noexcept;
+	uint32_t s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, Shape*& s) noexcept;
 
 	// 図形を挿入する.
 	void s_list_insert(S_LIST_T& s_list, Shape* const s_ins, const Shape* s_at) noexcept;
@@ -795,7 +800,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列図形を含むか判定する.
 		bool has_text(void) noexcept;
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 消去フラグを判定する.
@@ -871,9 +876,9 @@ namespace winrt::GraphPaper::implementation
 		// 線枠の太さを得る.
 		bool get_stroke_width(float& value) const noexcept;
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len, const size_t d_cnt, const D2D1_POINT_2F diff[], const bool s_close, const bool f_opa) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos, const size_t d_cnt, const D2D1_POINT_2F diff[], const bool s_close, const bool f_opa) const noexcept;
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept;
 		// 消去フラグを判定する.
@@ -947,7 +952,7 @@ namespace winrt::GraphPaper::implementation
 		// 表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 矢じりの寸法を得る.
@@ -966,8 +971,6 @@ namespace winrt::GraphPaper::implementation
 		bool set_start_pos(const D2D1_POINT_2F value);
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F value);
-		// データリーダーから読み込む.
-		//void read(DataReader const& dt_reader);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG タグとして書き込む.
@@ -996,9 +999,9 @@ namespace winrt::GraphPaper::implementation
 		// 表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 図形の部位が位置を含むか判定する.
-		uint32_t hit_test_anchor(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		uint32_t hit_test_anchor(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 塗りつぶしの色を得る.
@@ -1032,7 +1035,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 図形を作成する.
 		ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr);
 		// 図形をデータリーダーから読み込む.
@@ -1063,7 +1066,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// データライターに SVG タグとして書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
 	};
@@ -1086,7 +1089,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
 		// 部位の位置を得る.
@@ -1113,9 +1116,9 @@ namespace winrt::GraphPaper::implementation
 		// パスジオメトリを作成する.
 		virtual void create_path_geometry(ID2D1Factory3* const/*d_factory*/) {}
 		// 図形を作成する.
-		ShapePath(const size_t d_cnt, const ShapeSheet* attr, const bool closed);
+		ShapePath(const size_t d_cnt, const ShapeSheet* s_attr, const bool s_closed) : ShapeLine::ShapeLine(d_cnt, s_attr, s_closed), m_d2d_path_geom(nullptr) {}
 		// 図形をデータリーダーから読み込む.
-		ShapePath(DataReader const& dt_reader);
+		ShapePath(DataReader const& dt_reader) : ShapeLine::ShapeLine(dt_reader), m_d2d_path_geom(nullptr) {}
 		// 図形を破棄する.
 		//~ShapePath(void);
 		// 矢じりの寸法を得る
@@ -1156,7 +1159,7 @@ namespace winrt::GraphPaper::implementation
 		// 塗りつぶし色を得る.
 		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 値を矢じりの形式に格納する.
@@ -1188,7 +1191,7 @@ namespace winrt::GraphPaper::implementation
 		// 表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 図形を作成する.
@@ -1270,7 +1273,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字範囲を得る.
 		bool get_text_range(DWRITE_TEXT_RANGE& value) const noexcept;
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept;
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 有効な書体名か判定し, 有効ならもとの書体名を破棄し, 有効な書体名要素へのポインターと置き換える.

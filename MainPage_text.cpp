@@ -545,8 +545,8 @@ namespace winrt::GraphPaper::implementation
 	// 検索の値をデータリーダーから読み込む.
 	void MainPage::text_find_read(DataReader const& dt_reader)
 	{
-		read(m_text_find, dt_reader);
-		read(m_text_repl, dt_reader);
+		dt_read(m_text_find, dt_reader);
+		dt_read(m_text_repl, dt_reader);
 		uint16_t bit = dt_reader.ReadUInt16();
 		m_text_adjust = ((bit & 1) != 0);
 		m_text_find_case = ((bit & 2) != 0);
@@ -571,8 +571,8 @@ namespace winrt::GraphPaper::implementation
 	// 検索の値をデータリーダーに書き込む.
 	void MainPage::text_find_write(DataWriter const& dt_writer)
 	{
-		write(m_text_find, dt_writer);
-		write(m_text_repl, dt_writer);
+		dt_write(m_text_find, dt_writer);
+		dt_write(m_text_repl, dt_writer);
 		uint16_t bit = 0;
 		if (m_text_adjust) {
 			bit |= 1;

@@ -80,10 +80,8 @@ namespace winrt::GraphPaper::implementation
 	UndoAnchor::UndoAnchor(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader))
 	{
-		using winrt::GraphPaper::implementation::read;
-
 		m_anchor = static_cast<ANCH_TYPE>(dt_reader.ReadUInt32());
-		read(m_anchor_pos, dt_reader);
+		dt_read(m_anchor_pos, dt_reader);
 	}
 
 	// 図形の, 指定された部位の位置を保存する.
@@ -98,12 +96,10 @@ namespace winrt::GraphPaper::implementation
 	// データライターに書き込む.
 	void UndoAnchor::write(DataWriter const& dt_writer)
 	{
-		using winrt::GraphPaper::implementation::write;
-
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::ANCH_POS));
 		undo_write_shape(m_shape, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_anchor));
-		write(m_anchor_pos, dt_writer);
+		dt_write(m_anchor_pos, dt_writer);
 	}
 
 	// 操作を実行する.
@@ -214,8 +210,6 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U> UndoAttr<U>::UndoAttr(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader))
 	{
-		using winrt::GraphPaper::implementation::read;
-
 		if constexpr (U == UNDO_OP::FONT_SIZE
 			|| U == UNDO_OP::STROKE_JOIN_LIMIT
 			|| U == UNDO_OP::STROKE_WIDTH
@@ -237,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
 		else {
-			read(m_value, dt_reader);
+			dt_read(m_value, dt_reader);
 		}
 	}
 
@@ -586,7 +580,6 @@ namespace winrt::GraphPaper::implementation
 	// データライターに書き込む.
 	template <UNDO_OP U> void UndoAttr<U>::write(DataWriter const& dt_writer)
 	{
-		using winrt::GraphPaper::implementation::write;
 		dt_writer.WriteUInt32(static_cast<uint32_t>(U));
 		undo_write_shape(m_shape, dt_writer);
 		if constexpr (U == UNDO_OP::FONT_SIZE 
@@ -610,7 +603,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_value));
 		}
 		else {
-			write(m_value, dt_writer);
+			dt_write(m_value, dt_writer);
 		}
 	}
 

@@ -52,13 +52,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 折れ線の図形の部位が位置を含むか判定する.
-	uint32_t ShapeRect::hit_test_anchor(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeRect::hit_test_anchor(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		// どの頂点が位置を含むか判定する.
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F a_pos;
 			get_anch_pos(ANCH_CORNER[i], a_pos);
-			if (pt_in_anch(t_pos, a_pos, a_len)) {
+			if (pt_in_anch(t_pos, a_pos)) {
 				return ANCH_CORNER[i];
 			}
 		}
@@ -66,7 +66,7 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F a_pos;
 			get_anch_pos(ANCH_MIDDLE[i], a_pos);
-			if (pt_in_anch(t_pos, a_pos, a_len)) {
+			if (pt_in_anch(t_pos, a_pos)) {
 				return ANCH_MIDDLE[i];
 			}
 		}
@@ -75,50 +75,49 @@ namespace winrt::GraphPaper::implementation
 
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
-	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		// 方形の各頂点を求め, 判定する位置がそれぞれの部位に含まれるか判定する.
 		D2D1_POINT_2F v_pos[4]{ m_pos, };
 		v_pos[2].x = m_pos.x + m_diff[0].x;
 		v_pos[2].y = m_pos.y + m_diff[0].y;
-		if (pt_in_anch(t_pos, v_pos[2], a_len)) {
+		if (pt_in_anch(t_pos, v_pos[2])) {
 			return ANCH_TYPE::ANCH_SE;
 		}
 		v_pos[3].x = m_pos.x;
 		v_pos[3].y = m_pos.y + m_diff[0].y;
-		if (pt_in_anch(t_pos, v_pos[3], a_len)) {
+		if (pt_in_anch(t_pos, v_pos[3])) {
 			return ANCH_TYPE::ANCH_SW;
 		}
 		v_pos[1].x = m_pos.x + m_diff[0].x;
 		v_pos[1].y = m_pos.y;
-		if (pt_in_anch(t_pos, v_pos[1], a_len)) {
+		if (pt_in_anch(t_pos, v_pos[1])) {
 			return ANCH_TYPE::ANCH_NE;
 		}
-		if (pt_in_anch(t_pos, v_pos[0], a_len)) {
+		if (pt_in_anch(t_pos, v_pos[0])) {
 			return ANCH_TYPE::ANCH_NW;
 		}
 
 		// 各辺の中点を求め, 判定する位置がそれぞれの部位に含まれるか判定する.
 		D2D1_POINT_2F s_pos;
 		pt_avg(v_pos[2], v_pos[3], s_pos);
-		if (pt_in_anch(t_pos, s_pos, a_len)) {
+		if (pt_in_anch(t_pos, s_pos)) {
 			return ANCH_TYPE::ANCH_SOUTH;
 		}
 		D2D1_POINT_2F e_pos;
 		pt_avg(v_pos[1], v_pos[2], e_pos);
-		if (pt_in_anch(t_pos, e_pos, a_len)) {
+		if (pt_in_anch(t_pos, e_pos)) {
 			return ANCH_TYPE::ANCH_EAST;
 		}
 		D2D1_POINT_2F w_pos;
 		pt_avg(v_pos[0], v_pos[3], w_pos);
-		if (pt_in_anch(t_pos, w_pos, a_len)) {
+		if (pt_in_anch(t_pos, w_pos)) {
 			return ANCH_TYPE::ANCH_WEST;
 		}
 		D2D1_POINT_2F n_pos;
 		pt_avg(v_pos[0], v_pos[1], n_pos);
-		if (pt_in_anch(t_pos, n_pos, a_len)) {
+		if (pt_in_anch(t_pos, n_pos)) {
 			return ANCH_TYPE::ANCH_NORTH;
 		}
 
@@ -394,18 +393,14 @@ namespace winrt::GraphPaper::implementation
 	ShapeRect::ShapeRect(DataReader const& dt_reader) :
 		ShapeStroke::ShapeStroke(dt_reader)
 	{
-		using winrt::GraphPaper::implementation::read;
-
-		read(m_fill_color, dt_reader);
+		dt_read(m_fill_color, dt_reader);
 	}
 
 	// データライターに書き込む.
 	void ShapeRect::write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write;
-
 		ShapeStroke::write(dt_writer);
-		write(m_fill_color, dt_writer);
+		dt_write(m_fill_color, dt_writer);
 	}
 
 	// データライターに SVG タグとして書き込む.

@@ -114,7 +114,6 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形表示用の D2D オブジェクト
 
-		double m_anchor_len = 6.0;	// 部位の方形の大きさ
 		winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
 		D2D1_COLOR_F m_range_background = RNG_BACK;	// 文字範囲の背景色
 		D2D1_COLOR_F m_range_foreground = RNG_TEXT;	// 文字範囲の文字色

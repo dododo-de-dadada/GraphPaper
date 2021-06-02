@@ -386,7 +386,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		Shape* s;
-		const auto anch = s_list_hit_test(m_list_shapes, m_pointer_cur, m_sheet_dx.m_anchor_len, s);
+		const auto anch = s_list_hit_test(m_list_shapes, m_pointer_cur, s);
 		m_dx_mutex.unlock();
 		if (anch == ANCH_TYPE::ANCH_SHEET) {
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
@@ -596,7 +596,7 @@ namespace winrt::GraphPaper::implementation
 		if (tool_draw() != TOOL_DRAW::SELECT) {
 			return;
 		}
-		m_pointer_anchor = s_list_hit_test(m_list_shapes, m_pointer_pressed, m_sheet_dx.m_anchor_len, m_pointer_shape);
+		m_pointer_anchor = s_list_hit_test(m_list_shapes, m_pointer_pressed, m_pointer_shape);
 		if (m_pointer_anchor != ANCH_TYPE::ANCH_SHEET) {
 			if (m_pointer_state == PBTN_STATE::PRESS_LBTN
 				|| (m_pointer_state == PBTN_STATE::PRESS_RBTN && m_pointer_shape->is_selected() != true)) {

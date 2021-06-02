@@ -16,9 +16,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を含むか判定する.
-	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto anchor = ShapeRect::hit_test_anchor(t_pos, a_len);
+		const auto anchor = ShapeRect::hit_test_anchor(t_pos);
 		if (anchor != ANCH_TYPE::ANCH_SHEET) {
 			return anchor;
 		}
@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
 					xy ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
-				if (pt_in_line(t_pos, p0, p1, max(static_cast<double>(m_stroke_width), a_len), m_stroke_cap_style)) {
+				if (pt_in_line(t_pos, p0, p1, max(static_cast<double>(m_stroke_width), Shape::s_anch_len), m_stroke_cap_style)) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
 				// 目盛りの値を表示する.
@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 書体名
 		wchar_t* f_family;
-		read(f_family, dt_reader);
+		dt_read(f_family, dt_reader);
 		// 書体の大きさ
 		const auto f_size = dt_reader.ReadSingle();
 		// 字体
@@ -242,15 +242,13 @@ namespace winrt::GraphPaper::implementation
 	// データライターに書き込む.
 	void ShapeRuler::write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write;
-
 		ShapeRect::write(dt_writer);
 		dt_writer.WriteSingle(m_grid_base);
 		// 書体名
 		auto name_len = m_dw_text_format->GetFontFamilyNameLength() + 1;
 		wchar_t* const f_name = new wchar_t[name_len];
 		m_dw_text_format->GetFontFamilyName(f_name, name_len);
-		write(f_name, dt_writer);
+		dt_write(f_name, dt_writer);
 		delete[] f_name;
 		// 書体の大きさ
 		dt_writer.WriteSingle(m_dw_text_format->GetFontSize());

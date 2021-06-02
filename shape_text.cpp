@@ -542,11 +542,10 @@ namespace winrt::GraphPaper::implementation
 
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
-	// a_len	部位の大きさ
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto anchor = ShapeRect::hit_test_anchor(t_pos, a_len);
+		const auto anchor = ShapeRect::hit_test_anchor(t_pos);
 		if (anchor != ANCH_TYPE::ANCH_SHEET) {
 			return anchor;
 		}
@@ -564,7 +563,7 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_TYPE::ANCH_TEXT;
 			}
 		}
-		return ShapeRect::hit_test(t_pos, a_len);
+		return ShapeRect::hit_test(t_pos);
 	}
 
 	// 範囲に含まれるか判定する.
@@ -936,41 +935,36 @@ namespace winrt::GraphPaper::implementation
 	ShapeText::ShapeText(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader)
 	{
-		using winrt::GraphPaper::implementation::read;
-
-		read(m_font_color, dt_reader);
-		read(m_font_family, dt_reader);
+		dt_read(m_font_color, dt_reader);
+		dt_read(m_font_family, dt_reader);
 		is_available_font(m_font_family);
 		m_font_size = dt_reader.ReadSingle();
 		m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());
 		m_font_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());
 		m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());
-		read(m_text, dt_reader);
+		dt_read(m_text, dt_reader);
 		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_line_h = dt_reader.ReadSingle();
-		read(m_text_margin, dt_reader);
+		dt_read(m_text_margin, dt_reader);
 		create_text_layout(s_dwrite_factory);
 	}
 
 	// データライターに書き込む.
 	void ShapeText::write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write;
-
 		ShapeRect::write(dt_writer);
-
-		write(m_font_color, dt_writer);
-		write(m_font_family, dt_writer);
+		dt_write(m_font_color, dt_writer);
+		dt_write(m_font_family, dt_writer);
 		dt_writer.WriteSingle(m_font_size);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_stretch));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_style));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));
-		write(m_text, dt_writer);
+		dt_write(m_text, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
 		dt_writer.WriteSingle(m_text_line_h);
-		write(m_text_margin, dt_writer);
+		dt_write(m_text_margin, dt_writer);
 	}
 
 	// データライターに SVG タグとして書き込む.

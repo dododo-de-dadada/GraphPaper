@@ -520,33 +520,31 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから読み込む.
 	void ShapeSheet::read(DataReader const& dt_reader)
 	{
-		using winrt::GraphPaper::implementation::read;
-
 		D2D1_COLOR_F dummy;
-		read(dummy, dt_reader);
+		dt_read(dummy, dt_reader);
 		m_grid_base = dt_reader.ReadSingle();
 		m_grid_gray = dt_reader.ReadSingle();
-		read(m_grid_emph, dt_reader);
+		dt_read(m_grid_emph, dt_reader);
 		m_grid_show = static_cast<GRID_SHOW>(dt_reader.ReadUInt32());
 		m_grid_snap = dt_reader.ReadBoolean();
-		read(m_sheet_color, dt_reader);
+		dt_read(m_sheet_color, dt_reader);
 		m_sheet_scale = dt_reader.ReadSingle();
-		read(m_sheet_size, dt_reader);
+		dt_read(m_sheet_size, dt_reader);
 
-		read(m_arrow_size, dt_reader);	// 矢じりの寸法
+		dt_read(m_arrow_size, dt_reader);	// 矢じりの寸法
 		m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());	// 矢じりの形式
-		read(m_corner_rad, dt_reader);	// 角丸半径
-		read(m_stroke_cap_style, dt_reader);	// 線分の端点
-		read(m_stroke_color, dt_reader);	// 線・枠の色
+		dt_read(m_corner_rad, dt_reader);	// 角丸半径
+		dt_read(m_stroke_cap_style, dt_reader);	// 線分の端点
+		dt_read(m_stroke_color, dt_reader);	// 線・枠の色
 		m_stroke_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());	// 破線の端点
-		read(m_stroke_dash_patt, dt_reader);	// 破線の配置
+		dt_read(m_stroke_dash_patt, dt_reader);	// 破線の配置
 		m_stroke_dash_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());	// 破線の形式
 		m_stroke_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());	// 線のつながりの形状
 		m_stroke_join_limit = dt_reader.ReadSingle();	// 線のつながりのマイター制限
 		m_stroke_width = dt_reader.ReadSingle();	// 線・枠の太さ
-		read(m_fill_color, dt_reader);	// 塗りつぶしの色
-		read(m_font_color, dt_reader);	// 書体の色
-		read(m_font_family, dt_reader);	// 書体名
+		dt_read(m_fill_color, dt_reader);	// 塗りつぶしの色
+		dt_read(m_font_color, dt_reader);	// 書体の色
+		dt_read(m_font_family, dt_reader);	// 書体名
 		m_font_size = dt_reader.ReadSingle();	// 書体の大きさ
 		m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());	// 書体の伸縮
 		m_font_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());	// 書体の字体
@@ -554,7 +552,7 @@ namespace winrt::GraphPaper::implementation
 		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());	// 段落のそろえ
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());	// 文字列のそろえ
 		m_text_line_h = dt_reader.ReadSingle();	// 行間
-		read(m_text_margin, dt_reader);	// 文字列の余白
+		dt_read(m_text_margin, dt_reader);	// 文字列の余白
 
 		ShapeText::is_available_font(m_font_family);
 	}
@@ -895,33 +893,31 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーに書き込む.
 	void ShapeSheet::write(DataWriter const& dt_writer)
 	{
-		using winrt::GraphPaper::implementation::write;
-
 		D2D1_COLOR_F dummy;
-		write(dummy, dt_writer);
+		dt_write(dummy, dt_writer);
 		dt_writer.WriteSingle(m_grid_base);
 		dt_writer.WriteSingle(m_grid_gray);
-		write(m_grid_emph, dt_writer);
+		dt_write(m_grid_emph, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_grid_show));
 		dt_writer.WriteBoolean(m_grid_snap);
-		write(m_sheet_color, dt_writer);
+		dt_write(m_sheet_color, dt_writer);
 		dt_writer.WriteSingle(m_sheet_scale);
-		write(m_sheet_size, dt_writer);
+		dt_write(m_sheet_size, dt_writer);
 
-		write(m_arrow_size, dt_writer);	// 矢じりの寸法
+		dt_write(m_arrow_size, dt_writer);	// 矢じりの寸法
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));	// 矢じりの形式
-		write(m_corner_rad, dt_writer);	// 角丸半径
-		write(m_stroke_cap_style, dt_writer);	// 線分の端点
-		write(m_stroke_color, dt_writer);	// 線枠の色
+		dt_write(m_corner_rad, dt_writer);	// 角丸半径
+		dt_write(m_stroke_cap_style, dt_writer);	// 線分の端点
+		dt_write(m_stroke_color, dt_writer);	// 線枠の色
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash_cap));	// 破線の端点
-		write(m_stroke_dash_patt, dt_writer);	// 破線の配置
+		dt_write(m_stroke_dash_patt, dt_writer);	// 破線の配置
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash_style));	// 線枠の形式
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_join_style));	// 角の形状
 		dt_writer.WriteSingle(m_stroke_join_limit);	// 角のマイター制限
 		dt_writer.WriteSingle(m_stroke_width);	// 線枠の太さ
-		write(m_fill_color, dt_writer);	// 塗りつぶしの色
-		write(m_font_color, dt_writer);	// 書体の色
-		write(m_font_family, dt_writer);	// 書体名
+		dt_write(m_fill_color, dt_writer);	// 塗りつぶしの色
+		dt_write(m_font_color, dt_writer);	// 書体の色
+		dt_write(m_font_family, dt_writer);	// 書体名
 		dt_writer.WriteSingle(m_font_size);	// 書体の大きさ
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_stretch));	// 書体の伸縮
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_style));	// 書体の字体
@@ -929,7 +925,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));	// 段落のそろえ
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));	// 文字列のそろえ
 		dt_writer.WriteSingle(m_text_line_h);	// 行間
-		write(m_text_margin, dt_writer);	// 文字列の余白
+		dt_write(m_text_margin, dt_writer);	// 文字列の余白
 
 	}
 

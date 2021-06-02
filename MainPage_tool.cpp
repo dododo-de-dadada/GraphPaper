@@ -12,13 +12,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::tool_write(DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_tool_draw));
-		write(m_tool_poly, dt_writer);
+		dt_write(m_tool_poly, dt_writer);
 	}
 
 	void MainPage::tool_read(DataReader const& dt_reader)
 	{
 		m_tool_draw = static_cast<TOOL_DRAW>(dt_reader.ReadUInt32());
-		read(m_tool_poly, dt_reader);
+		dt_read(m_tool_poly, dt_reader);
 
 		if (m_tool_draw == TOOL_DRAW::SELECT) {
 			rmfi_tool_select().IsChecked(true);
