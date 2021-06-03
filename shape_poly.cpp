@@ -537,9 +537,9 @@ namespace winrt::GraphPaper::implementation
 	// 直行するベクトルを得る.
 	//static D2D1_POINT_2F poly_pt_orth(const D2D1_POINT_2F vec) { return { -vec.y, vec.x }; }
 
-	static bool poly_get_arrow_barbs(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROWHEAD_SIZE& a_size, D2D1_POINT_2F& h_tip, D2D1_POINT_2F h_barbs[]) noexcept
+	static bool poly_get_arrow_barbs(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROW_SIZE& a_size, D2D1_POINT_2F& h_tip, D2D1_POINT_2F h_barbs[]) noexcept
 	{
-		double b_offset = a_size.m_offset;	// 矢じり先端のオフセット
+		double b_offset = a_size.m_offset;	// 矢じるし先端のオフセット
 		for (size_t i = v_cnt - 1; i > 0; i--) {
 			D2D1_POINT_2F a_vec;
 			pt_sub(v_pos[i], v_pos[i - 1], a_vec);
@@ -551,7 +551,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 
-			// 矢軸の長さが矢じり先端のオフセットより短いか判定する.
+			// 矢軸の長さが矢じるし先端のオフセットより短いか判定する.
 			if (a_len < b_offset) {
 				// 次の差分があるか判定する.
 				if (i > 1) {
@@ -562,10 +562,10 @@ namespace winrt::GraphPaper::implementation
 				b_offset = a_len;
 			}
 
-			// 矢じりの返しの位置を求める.
+			// 矢じるしの返しの位置を求める.
 			const auto a_end = v_pos[i - 1];		// 矢軸の終端
-			const auto b_len = a_size.m_length;	// 矢じりの長さ
-			const auto b_width = a_size.m_width;	// 矢じりの幅
+			const auto b_len = a_size.m_length;	// 矢じるしの長さ
+			const auto b_width = a_size.m_width;	// 矢じるしの幅
 			get_arrow_barbs(a_vec, a_len, b_width, b_len, h_barbs);
 			pt_mul(a_vec, 1.0 - b_offset / a_len, a_end, h_tip);
 			pt_add(h_barbs[0], h_tip, h_barbs[0]);
@@ -711,24 +711,24 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
 
-		// 矢じりの形式がなしか判定する.
+		// 矢じるしの形式がなしか判定する.
 		const auto a_style = m_arrow_style;
-		if (a_style == ARROWHEAD_STYLE::NONE) {
+		if (a_style == ARROW_STYLE::NONE) {
 			return;
 		}
 
-		// 矢じりの位置を求める.
+		// 矢じるしの位置を求める.
 		D2D1_POINT_2F h_tip;
 		D2D1_POINT_2F h_barbs[2];
 		if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
-			// 矢じりのパスジオメトリを作成する.
+			// 矢じるしのパスジオメトリを作成する.
 			winrt::check_hresult(d_factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
 			winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-			sink->BeginFigure(h_barbs[0], a_style == ARROWHEAD_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+			sink->BeginFigure(h_barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 			sink->AddLine(h_tip);
 			sink->AddLine(h_barbs[1]);
-			sink->EndFigure(a_style == ARROWHEAD_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+			sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 			winrt::check_hresult(sink->Close());
 			sink = nullptr;
 		}
@@ -753,11 +753,11 @@ namespace winrt::GraphPaper::implementation
 			const auto s_style = m_d2d_stroke_style.get();
 			s_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawGeometry(p_geom, s_brush, s_width, s_style);
-			if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
+			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
 				if (a_geom != nullptr) {
 					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
-					if (m_arrow_style != ARROWHEAD_STYLE::FILLED) {
+					if (m_arrow_style != ARROW_STYLE::FILLED) {
 						dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
 					}
 				}
@@ -826,7 +826,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	bool ShapePoly::set_arrow_style(const ARROWHEAD_STYLE value)
+	bool ShapePoly::set_arrow_style(const ARROW_STYLE value)
 	{
 		if (!m_end_closed) {
 			return ShapePath::set_arrow_style(value);
@@ -912,7 +912,7 @@ namespace winrt::GraphPaper::implementation
 		ShapeStroke::write_svg(dt_writer);
 		write_svg(m_fill_color, "fill", dt_writer);
 		write_svg("/>" SVG_NEW_LINE, dt_writer);
-		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
+		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F h_tip;
 			D2D1_POINT_2F h_barbs[2];
 			if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
@@ -920,12 +920,12 @@ namespace winrt::GraphPaper::implementation
 				write_svg(h_barbs[0], "M", dt_writer);
 				write_svg(h_tip, "L", dt_writer);
 				write_svg(h_barbs[1], "L", dt_writer);
-				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
+				if (m_arrow_style == ARROW_STYLE::FILLED) {
 					write_svg("Z", dt_writer);
 				}
 				write_svg("\" ", dt_writer);
 				ShapeStroke::write_svg(dt_writer);
-				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
+				if (m_arrow_style == ARROW_STYLE::FILLED) {
 					write_svg(m_stroke_color, "fill", dt_writer);
 				}
 				else {

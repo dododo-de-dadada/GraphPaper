@@ -20,7 +20,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float g_gray;
 		m_sample_sheet.get_grid_gray(g_gray);
 		const float val3 = g_gray * COLOR_MAX;
@@ -52,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float g_base;
 		m_sample_sheet.get_grid_base(g_base);
 		const float val0 = g_base / SLIDER_STEP;
@@ -152,18 +152,18 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S> void MainPage::grid_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring hdr;
+		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_grid_length");
+			text = r_loader.GetString(L"str_grid_length");
 			const float dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP + 1.0f, dpi, g_len, buf);
-			hdr = hdr + L": " + buf;
+			text = text + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_GRAY) {
 			if constexpr (S == 3) {
@@ -171,20 +171,20 @@ namespace winrt::GraphPaper::implementation
 				// êFê¨ï™ÇÃílÇï∂éöóÒÇ…ïœä∑Ç∑ÇÈ.
 				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_gray_scale") + L": " + buf;
+				text = r_loader.GetString(L"str_gray_scale") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(text));
 		}
 		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(text));
 		}
 		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(hdr));
+			sample_slider_2().Header(box_value(text));
 		}
 		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(hdr));
+			sample_slider_3().Header(box_value(text));
 		}
 	}
 

@@ -84,9 +84,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (sender == rmfi_tool_select()) {
 			m_tool_draw = TOOL_DRAW::SELECT;
-			pointer_state(PBTN_STATE::BEGIN);
-			pointer_shape(nullptr);
-			pointer_anchor(ANCH_TYPE::ANCH_SHEET);
+			event_state(PBTN_STATE::BEGIN);
+			event_shape(nullptr);
+			event_anch_pressed(ANCH_TYPE::ANCH_SHEET);
 		}
 		else if (sender == rmfi_tool_draw_rect()) {
 			m_tool_draw = TOOL_DRAW::RECT;
@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 			m_tool_draw = TOOL_DRAW::POLY;
 		}
 		sbar_set_draw();
-		pointer_set();
+		event_curs_style();
 	}
 
 }

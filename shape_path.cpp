@@ -32,8 +32,8 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 矢じりの形式に格納する.
-	bool ShapePath::set_arrow_size(const ARROWHEAD_SIZE& value)
+	// 矢じるしの形式に格納する.
+	bool ShapePath::set_arrow_size(const ARROW_SIZE& value)
 	{
 		if (!equal(m_arrow_size, value)) {
 			m_arrow_size = value;
@@ -43,8 +43,8 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 矢じりの形式に格納する.
-	bool ShapePath::set_arrow_style(const ARROWHEAD_STYLE value)
+	// 矢じるしの形式に格納する.
+	bool ShapePath::set_arrow_style(const ARROW_STYLE value)
 	{
 		if (m_arrow_style != value) {
 			m_arrow_style = value;
@@ -76,7 +76,7 @@ namespace winrt::GraphPaper::implementation
 	//ShapePath::ShapePath(DataReader const& dt_reader) :
 	//	ShapeLineA::ShapeLineA(dt_reader)
 	//{
-		//m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());
+		//m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
 		//dt_read(m_arrow_size, dt_reader);
 		// コンストラクタの中での (デストラクタの中でも) 仮想関数は無意味.
 		//create_path_geometry(Shape::s_d2d_factory);

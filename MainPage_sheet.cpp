@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		const float val0 = m_sample_sheet.m_sheet_color.r * COLOR_MAX;
 		const float val1 = m_sample_sheet.m_sheet_color.g * COLOR_MAX;
 		const float val2 = m_sample_sheet.m_sheet_color.b * COLOR_MAX;
@@ -163,25 +163,25 @@ namespace winrt::GraphPaper::implementation
 			// 方眼を表示する.
 			m_sheet_main.draw_grid(m_sheet_dx, { 0.0f, 0.0f });
 		}
-		if (pointer_state() == PBTN_STATE::PRESS_AREA) {
+		if (event_state() == PBTN_STATE::PRESS_AREA) {
 			const auto t_draw = tool_draw();
 			if (t_draw == TOOL_DRAW::SELECT || t_draw == TOOL_DRAW::RECT || t_draw == TOOL_DRAW::TEXT || t_draw == TOOL_DRAW::RULER) {
-				m_sheet_main.draw_auxiliary_rect(m_sheet_dx, pointer_pressed(), pointer_cur());
+				m_sheet_main.draw_auxiliary_rect(m_sheet_dx, event_pos_pressed(), event_pos_curr());
 			}
 			else if (t_draw == TOOL_DRAW::BEZI) {
-				m_sheet_main.draw_auxiliary_bezi(m_sheet_dx, pointer_pressed(), pointer_cur());
+				m_sheet_main.draw_auxiliary_bezi(m_sheet_dx, event_pos_pressed(), event_pos_curr());
 			}
 			else if (t_draw == TOOL_DRAW::ELLI) {
-				m_sheet_main.draw_auxiliary_elli(m_sheet_dx, pointer_pressed(), pointer_cur());
+				m_sheet_main.draw_auxiliary_elli(m_sheet_dx, event_pos_pressed(), event_pos_curr());
 			}
 			else if (t_draw == TOOL_DRAW::LINE) {
-				m_sheet_main.draw_auxiliary_line(m_sheet_dx, pointer_pressed(), pointer_cur());
+				m_sheet_main.draw_auxiliary_line(m_sheet_dx, event_pos_pressed(), event_pos_curr());
 			}
 			else if (t_draw == TOOL_DRAW::RRECT) {
-				m_sheet_main.draw_auxiliary_rrect(m_sheet_dx, pointer_pressed(), pointer_cur());
+				m_sheet_main.draw_auxiliary_rrect(m_sheet_dx, event_pos_pressed(), event_pos_curr());
 			}
 			else if (t_draw == TOOL_DRAW::POLY) {
-				m_sheet_main.draw_auxiliary_poly(m_sheet_dx, pointer_pressed(), pointer_cur(), tool_poly());
+				m_sheet_main.draw_auxiliary_poly(m_sheet_dx, event_pos_pressed(), event_pos_curr(), tool_poly());
 			}
 		}
 		// 描画を終了する.
@@ -208,7 +208,7 @@ namespace winrt::GraphPaper::implementation
 	// 前景色を得る.
 	const D2D1_COLOR_F& MainPage::sheet_foreground(void) const noexcept
 	{
-		return m_sheet_dx.m_theme_foreground;
+		return Shape::m_theme_foreground;
 	}
 
 	// 用紙とその他の属性を初期化する.
@@ -306,22 +306,22 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		{
-			m_sheet_main.set_arrow_size(ARROWHEAD_SIZE_DEF);
-			m_sheet_main.set_arrow_style(ARROWHEAD_STYLE::NONE);
+			m_sheet_main.set_arrow_size(ARROW_SIZE_DEF);
+			m_sheet_main.set_arrow_style(ARROW_STYLE::NONE);
 			m_sheet_main.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEF, GRID_LEN_DEF });
-			m_sheet_main.set_fill_color(m_sheet_dx.m_theme_background);
-			m_sheet_main.set_font_color(sheet_foreground());
+			m_sheet_main.set_fill_color(Shape::m_theme_background);
+			m_sheet_main.set_font_color(Shape::m_theme_foreground);
 			m_sheet_main.set_grid_base(GRID_LEN_DEF - 1.0);
 			m_sheet_main.set_grid_gray(GRID_GRAY_DEF);
 			m_sheet_main.set_grid_emph(GRID_EMPH_0);
 			m_sheet_main.set_grid_show(GRID_SHOW::BACK);
 			m_sheet_main.set_grid_snap(true);
-			m_sheet_main.set_sheet_color(m_sheet_dx.m_theme_background);
+			m_sheet_main.set_sheet_color(Shape::m_theme_background);
 			m_sheet_main.set_sheet_scale(1.0);
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_sheet_main.m_sheet_size = SHEET_SIZE_DEF;
 			m_sheet_main.set_stroke_cap_style(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
-			m_sheet_main.set_stroke_color(sheet_foreground());
+			m_sheet_main.set_stroke_color(Shape::m_theme_foreground);
 			m_sheet_main.set_stroke_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_sheet_main.set_stroke_dash_patt(STROKE_DASH_PATT_DEF);
 			m_sheet_main.set_stroke_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
@@ -415,41 +415,41 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
-		winrt::hstring hdr;
+		winrt::hstring text;
 		if constexpr (U == UNDO_OP::SHEET_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
+				text = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
+				text = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
+				text = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(text));
 		}
 		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(text));
 		}
 		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(hdr));
+			sample_slider_2().Header(box_value(text));
 		}
 		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(hdr));
+			sample_slider_3().Header(box_value(text));
 		}
 	}
 
@@ -493,7 +493,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		//double pw = m_sheet_main.m_sheet_size.width;
 		//double ph = m_sheet_main.m_sheet_size.height;
 		float g_base;

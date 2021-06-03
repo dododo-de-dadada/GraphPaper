@@ -30,7 +30,7 @@ namespace winrt::GraphPaper::implementation
 		if (sender == CoreWindow::GetForCurrentThread()) {
 			m_window_visible = args.Visible();
 			if (m_window_visible) {
-				pointer_set();
+				event_curs_style();
 				sheet_draw();
 			}
 		}

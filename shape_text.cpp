@@ -345,15 +345,15 @@ namespace winrt::GraphPaper::implementation
 						rect.right = rect.left + rm.width;
 					}
 					rect.bottom = rect.top + m_font_size;
-					dx.m_shape_brush->SetColor(dx.m_range_foreground);
+					dx.m_shape_brush->SetColor(Shape::m_range_foreground);
 					dc->DrawRectangle(rect, dx.m_shape_brush.get(), 2.0, nullptr);
-					dx.m_shape_brush->SetColor(dx.m_range_background);
+					dx.m_shape_brush->SetColor(Shape::m_range_background);
 					dc->FillRectangle(rect, dx.m_shape_brush.get());
 					break;
 				}
 			}
 		}
-		dx.m_range_brush->SetColor(dx.m_range_foreground);
+		dx.m_range_brush->SetColor(Shape::m_range_foreground);
 		m_dw_layout->SetDrawingEffect(dx.m_range_brush.get(), m_select_range);
 	}
 
@@ -398,9 +398,9 @@ namespace winrt::GraphPaper::implementation
 			p[1].y = p[0].y;
 			p[3].x = p[0].x;
 			p[3].y = p[2].y;
-			dx.m_shape_brush->SetColor(dx.m_range_foreground);
+			dx.m_shape_brush->SetColor(Shape::m_range_foreground);
 			dc->DrawRectangle({ p[0].x, p[0].y, p[2].x, p[2].y }, dx.m_shape_brush.get(), s_width, nullptr);
-			dx.m_shape_brush->SetColor(dx.m_range_background);
+			dx.m_shape_brush->SetColor(Shape::m_range_background);
 			s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].x, mod));
 			winrt::com_ptr<ID2D1StrokeStyle> s_style;
 			fa->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());

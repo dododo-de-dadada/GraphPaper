@@ -176,8 +176,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		UndoAttr<U>::SET(m_shape, value);
 	}
-	template UndoAttr<UNDO_OP::ARROWHEAD_SIZE>::UndoAttr(Shape* s, const ARROWHEAD_SIZE& value);
-	template UndoAttr<UNDO_OP::ARROWHEAD_STYLE>::UndoAttr(Shape* s, const ARROWHEAD_STYLE& value);
+	template UndoAttr<UNDO_OP::ARROW_SIZE>::UndoAttr(Shape* s, const ARROW_SIZE& value);
+	template UndoAttr<UNDO_OP::ARROW_STYLE>::UndoAttr(Shape* s, const ARROW_STYLE& value);
 	template UndoAttr<UNDO_OP::FILL_COLOR>::UndoAttr(Shape* s, const D2D1_COLOR_F& value);
 	template UndoAttr<UNDO_OP::FONT_COLOR>::UndoAttr(Shape* s, const D2D1_COLOR_F& value);
 	template UndoAttr<UNDO_OP::FONT_FAMILY>::UndoAttr(Shape* s, wchar_t* const& value);
@@ -218,7 +218,7 @@ namespace winrt::GraphPaper::implementation
 			|| U == UNDO_OP::TEXT_LINE) {
 			m_value = dt_reader.ReadSingle();
 		}
-		else if constexpr (U == UNDO_OP::ARROWHEAD_STYLE
+		else if constexpr (U == UNDO_OP::ARROW_STYLE
 			|| U == UNDO_OP::STROKE_DASH_CAP
 			|| U == UNDO_OP::STROKE_DASH_STYLE
 			|| U == UNDO_OP::STROKE_JOIN_STYLE
@@ -235,8 +235,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	template UndoAttr<UNDO_OP::ARROWHEAD_SIZE>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::ARROWHEAD_STYLE>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::ARROW_SIZE>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::ARROW_STYLE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::FILL_COLOR>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::FONT_COLOR>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::FONT_FAMILY>::UndoAttr(DataReader const& dt_reader);
@@ -272,12 +272,12 @@ namespace winrt::GraphPaper::implementation
 		throw winrt::hresult_not_implemented();
 	}
 
-	void UndoAttr<UNDO_OP::ARROWHEAD_SIZE>::SET(Shape* const s, const ARROWHEAD_SIZE& value)
+	void UndoAttr<UNDO_OP::ARROW_SIZE>::SET(Shape* const s, const ARROW_SIZE& value)
 	{
 		s->set_arrow_size(value);
 	}
 
-	void UndoAttr<UNDO_OP::ARROWHEAD_STYLE>::SET(Shape* const s, const ARROWHEAD_STYLE& value)
+	void UndoAttr<UNDO_OP::ARROW_STYLE>::SET(Shape* const s, const ARROW_STYLE& value)
 	{
 		s->set_arrow_style(value);
 	}
@@ -427,12 +427,12 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	bool UndoAttr<UNDO_OP::ARROWHEAD_SIZE>::GET(const Shape* s, ARROWHEAD_SIZE& value) noexcept
+	bool UndoAttr<UNDO_OP::ARROW_SIZE>::GET(const Shape* s, ARROW_SIZE& value) noexcept
 	{
 		return s->get_arrow_size(value);
 	}
 
-	bool UndoAttr<UNDO_OP::ARROWHEAD_STYLE>::GET(const Shape* s, ARROWHEAD_STYLE& value) noexcept
+	bool UndoAttr<UNDO_OP::ARROW_STYLE>::GET(const Shape* s, ARROW_STYLE& value) noexcept
 	{
 		return s->get_arrow_style(value);
 	}
@@ -590,7 +590,7 @@ namespace winrt::GraphPaper::implementation
 			|| U == UNDO_OP::TEXT_LINE) {
 			dt_writer.WriteSingle(m_value);
 		}
-		else if constexpr (U == UNDO_OP::ARROWHEAD_STYLE
+		else if constexpr (U == UNDO_OP::ARROW_STYLE
 			|| U == UNDO_OP::STROKE_DASH_CAP
 			|| U == UNDO_OP::STROKE_DASH_STYLE
 			|| U == UNDO_OP::STROKE_JOIN_STYLE

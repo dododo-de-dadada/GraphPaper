@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		D2D1_COLOR_F f_color;
 		m_sample_sheet.get_font_color(f_color);
 		const float val0 = f_color.r * COLOR_MAX;
@@ -139,37 +139,37 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::get_available_font(i); i++) {
 			auto item = box_value(winrt::hstring(name));
-			lv_sample_list().Items().Append(item);
+			lv_sample_lview().Items().Append(item);
 		}
-		for (uint32_t i = 0; i < lv_sample_list().Items().Size(); i++) {
+		for (uint32_t i = 0; i < lv_sample_lview().Items().Size(); i++) {
 			IInspectable item[1];
-			lv_sample_list().Items().GetMany(i, item);
+			lv_sample_lview().Items().GetMany(i, item);
 			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
 			wchar_t* f_family;
 			m_sheet_main.get_font_family(f_family);
 			if (wcscmp(name, f_family) == 0) {
 				// 書体名が同じ場合,
 				// その書体をリストビューの選択済み項目に格納する.
-				lv_sample_list().SelectedItem(item[0]);
-				lv_sample_list().ScrollIntoView(item[0]);
+				lv_sample_lview().SelectedItem(item[0]);
+				lv_sample_lview().ScrollIntoView(item[0]);
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
-		const auto changed_token = lv_sample_list().SelectionChanged(
+		const auto loaded_token = lv_sample_lview().Loaded({ this, &MainPage::sample_lview_loaded });
+		const auto changed_token = lv_sample_lview().SelectionChanged(
 			[this](auto, auto)
 			{
-				auto i = lv_sample_list().SelectedIndex();
+				auto i = lv_sample_lview().SelectedIndex();
 				m_sample_shape->set_font_family(ShapeText::get_available_font(i));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
 			}
 		);
-		lv_sample_list().Visibility(VISIBLE);
+		lv_sample_lview().Visibility(VISIBLE);
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -187,10 +187,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		lv_sample_list().Loaded(loaded_token);
-		lv_sample_list().SelectionChanged(changed_token);
-		lv_sample_list().Visibility(COLLAPSED);
-		lv_sample_list().Items().Clear();
+		lv_sample_lview().Loaded(loaded_token);
+		lv_sample_lview().SelectionChanged(changed_token);
+		lv_sample_lview().Visibility(COLLAPSED);
+		lv_sample_lview().Items().Clear();
 		sheet_draw();
 	}
 
@@ -198,7 +198,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S> void MainPage::font_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring hdr;
+		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[32];
@@ -206,45 +206,45 @@ namespace winrt::GraphPaper::implementation
 			m_sample_sheet.get_grid_base(g_base);
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value, m_sample_dx.m_logical_dpi, g_base + 1.0f, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_size") + L": " + buf;
+			text = r_loader.GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::FONT_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(text));
 		}
 		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(text));
 		}
 		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(hdr));
+			sample_slider_2().Header(box_value(text));
 		}
 		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(hdr));
+			sample_slider_3().Header(box_value(text));
 		}
 	}
 
@@ -289,7 +289,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float val0;
 		m_sample_sheet.get_font_size(val0);
 		sample_slider_0().Value(val0);
@@ -324,35 +324,35 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		for (uint32_t i = 0; FONT_STRETCH_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_STRETCH_NAME[i]));
-			lv_sample_list().Items().Append(item);
+			lv_sample_lview().Items().Append(item);
 		}
-		lv_sample_list().SelectedIndex(-1);
-		const auto k = lv_sample_list().Items().Size();
+		lv_sample_lview().SelectedIndex(-1);
+		const auto k = lv_sample_lview().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
 			DWRITE_FONT_STRETCH f_stretch;
 			m_sheet_main.get_font_stretch(f_stretch);
 			if (FONT_STRETCH[i] == f_stretch) {
-				lv_sample_list().SelectedIndex(i);
+				lv_sample_lview().SelectedIndex(i);
 				IInspectable item[1];
-				lv_sample_list().Items().GetMany(i, item);
-				lv_sample_list().ScrollIntoView(item[0]);
+				lv_sample_lview().Items().GetMany(i, item);
+				lv_sample_lview().ScrollIntoView(item[0]);
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
-		const auto changed_token = lv_sample_list().SelectionChanged(
+		const auto loaded_token = lv_sample_lview().Loaded({ this, &MainPage::sample_lview_loaded });
+		const auto changed_token = lv_sample_lview().SelectionChanged(
 			[this](auto, auto args) {
-				uint32_t i = lv_sample_list().SelectedIndex();
+				uint32_t i = lv_sample_lview().SelectedIndex();
 				m_sample_shape->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
 			}
 		);
-		lv_sample_list().Visibility(VISIBLE);
+		lv_sample_lview().Visibility(VISIBLE);
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -370,10 +370,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		lv_sample_list().Loaded(loaded_token);
-		lv_sample_list().SelectionChanged(changed_token);
-		lv_sample_list().Visibility(COLLAPSED);
-		lv_sample_list().Items().Clear();
+		lv_sample_lview().Loaded(loaded_token);
+		lv_sample_lview().SelectionChanged(changed_token);
+		lv_sample_lview().Visibility(COLLAPSED);
+		lv_sample_lview().Items().Clear();
 		sheet_draw();
 	}
 
@@ -426,35 +426,35 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		for (uint32_t i = 0; FONT_WEIGHT_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_WEIGHT_NAME[i]));
-			lv_sample_list().Items().Append(item);
+			lv_sample_lview().Items().Append(item);
 		}
-		lv_sample_list().SelectedIndex(-1);
-		const auto k = lv_sample_list().Items().Size();
+		lv_sample_lview().SelectedIndex(-1);
+		const auto k = lv_sample_lview().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
 			DWRITE_FONT_WEIGHT f_weight;
 			m_sheet_main.get_font_weight(f_weight);
 			if (FONT_WEIGHTS[i] == f_weight) {
-				lv_sample_list().SelectedIndex(i);
+				lv_sample_lview().SelectedIndex(i);
 				IInspectable item[1];
-				lv_sample_list().Items().GetMany(i, item);
-				lv_sample_list().ScrollIntoView(item[0]);
+				lv_sample_lview().Items().GetMany(i, item);
+				lv_sample_lview().ScrollIntoView(item[0]);
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
-		const auto changed_token = lv_sample_list().SelectionChanged(
+		const auto loaded_token = lv_sample_lview().Loaded({ this, &MainPage::sample_lview_loaded });
+		const auto changed_token = lv_sample_lview().SelectionChanged(
 			[this](auto, auto args) {
-				uint32_t i = lv_sample_list().SelectedIndex();
+				uint32_t i = lv_sample_lview().SelectedIndex();
 				m_sample_shape->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
 			}
 		);
-		lv_sample_list().Visibility(VISIBLE);
+		lv_sample_lview().Visibility(VISIBLE);
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FONT)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -472,10 +472,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		lv_sample_list().Loaded(loaded_token);
-		lv_sample_list().SelectionChanged(changed_token);
-		lv_sample_list().Visibility(COLLAPSED);
-		lv_sample_list().Items().Clear();
+		lv_sample_lview().Loaded(loaded_token);
+		lv_sample_lview().SelectionChanged(changed_token);
+		lv_sample_lview().Visibility(COLLAPSED);
+		lv_sample_lview().Items().Clear();
 		sheet_draw();
 	}
 
@@ -617,7 +617,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float t_line;
 		m_sample_sheet.get_text_line(t_line);
 		const float val0 = t_line / SLIDER_STEP;
@@ -686,7 +686,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		D2D1_SIZE_F t_margin;
 		m_sample_sheet.get_text_margin(t_margin);
 		const float val0 = t_margin.width / SLIDER_STEP;
@@ -727,7 +727,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S> void MainPage::text_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring hdr;
+		winrt::hstring text;
 
 		const float dpi = m_sheet_dx.m_logical_dpi;
 		float g_base;
@@ -737,12 +737,12 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_horzorz") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_horzorz") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_vertert") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_text_mar_vertert") + L": " + buf;
 			}
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE) {
@@ -751,24 +751,24 @@ namespace winrt::GraphPaper::implementation
 				// これをピクセル単位に変換する.
 				wchar_t buf[32];
 				conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * dpi / 96.0f, dpi, g_len, buf);
-				hdr = ResourceLoader::GetForCurrentView().GetString(L"str_height") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_height") + L": " + buf;
 			}
 			else {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_height") + L": " + r_loader.GetString(L"str_def_val");
+				text = r_loader.GetString(L"str_height") + L": " + r_loader.GetString(L"str_def_val");
 			}
 		}
 		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(text));
 		}
 		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(text));
 		}
 		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(hdr));
+			sample_slider_2().Header(box_value(text));
 		}
 		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(hdr));
+			sample_slider_3().Header(box_value(text));
 		}
 	}
 

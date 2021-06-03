@@ -148,11 +148,11 @@
     <ClCompile Include="MainPage_grid.cpp" />
     <ClCompile Include="MainPage_group.cpp" />
     <ClCompile Include="MainPage_join.cpp" />
-    <ClCompile Include="MainPage_kybd.cpp" />
+    <ClCompile Include="MainPage_kacc.cpp" />
     <ClCompile Include="MainPage_pref.cpp" />
     <ClCompile Include="MainPage_sheet.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
-    <ClCompile Include="MainPage_pointer.cpp" />
+    <ClCompile Include="MainPage_event.cpp" />
     <ClCompile Include="MainPage_sample.cpp" />
     <ClCompile Include="MainPage_scroll.cpp" />
     <ClCompile Include="MainPage_select.cpp" />
@@ -221,7 +221,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.210505.3\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.210505.3\build\native\Microsoft.Windows.CppWinRT.targets')" />
-    <Import Project="packages\Microsoft.UI.Xaml.2.6.0-prerelease.210217002\build\native\Microsoft.UI.Xaml.targets" Condition="Exists('packages\Microsoft.UI.Xaml.2.6.0-prerelease.210217002\build\native\Microsoft.UI.Xaml.targets')" />
+    <Import Project="packages\Microsoft.UI.Xaml.2.6.0-prerelease.210227001\build\native\Microsoft.UI.Xaml.targets" Condition="Exists('packages\Microsoft.UI.Xaml.2.6.0-prerelease.210227001\build\native\Microsoft.UI.Xaml.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -229,6 +229,6 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.210505.3\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.210505.3\build\native\Microsoft.Windows.CppWinRT.props'))" />
     <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.210505.3\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.210505.3\build\native\Microsoft.Windows.CppWinRT.targets'))" />
-    <Error Condition="!Exists('packages\Microsoft.UI.Xaml.2.6.0-prerelease.210217002\build\native\Microsoft.UI.Xaml.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.UI.Xaml.2.6.0-prerelease.210217002\build\native\Microsoft.UI.Xaml.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.UI.Xaml.2.6.0-prerelease.210227001\build\native\Microsoft.UI.Xaml.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.UI.Xaml.2.6.0-prerelease.210227001\build\native\Microsoft.UI.Xaml.targets'))" />
   </Target>
 </Project>

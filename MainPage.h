@@ -17,17 +17,17 @@
 // MainPage.cpp	メインページの作成, アプリの終了
 // MainPage_app.cpp	アプリケーションの中断と再開
 // MainPage_arrng.cpp	図形の並び替え
-// MainPage_arrow.cpp	矢じりの形式と寸法
+// MainPage_arrow.cpp	矢じるしの形式と寸法
 // MainPage_disp.cpp	表示デバイスのハンドラー
+// MainPage_event.cpp	ポインターイベントのハンドラー
 // MainPage_file.cpp	ファイルの読み書き
 // MainPage_fill.cpp	塗りつぶし
 // MainPage_font.cpp	書体と文字列の配置
 // MainPage_grid.cpp	方眼
 // MainPage_group.cpp	グループ化とグループの解除
-// NainPage_join.cpp	線分の繋がり
-// MainPage_kybd.cpp	キーボードアクセラレータのハンドラー
+// NainPage_join.cpp	線分のつながり
+// MainPage_kacc.cpp	キーボードアクセラレータのハンドラー
 // MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, バージョン情報
-// MainPage_pointer.cpp	ポインターイベントのハンドラー
 // MainPage_sample.cpp	見本
 // MainPage_sheet.cpp	用紙の各属性の設定
 // MainPage_scroll.cpp	スクロールバー
@@ -158,7 +158,7 @@ namespace winrt::GraphPaper::implementation
 		GRID	// 方眼 (グリッド)
 	};
 	constexpr bool LEN_UNIT_SHOW = true;	// 単位名の表示
-	constexpr bool LEN_UNIT_HIDE = true;	// 単位名の非表示
+	constexpr bool LEN_UNIT_HIDE = false;	// 単位名の非表示
 
 	// 長さを文字列に変換する.
 	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf);
@@ -256,38 +256,38 @@ namespace winrt::GraphPaper::implementation
 		// sheet
 
 		SHAPE_DX m_sheet_dx;		// 用紙の描画環境
-		ShapeSheet m_sheet_main;		// 用紙
+		ShapeSheet m_sheet_main;		// メインの用紙
 		D2D1_POINT_2F m_sheet_min{ 0.0F, 0.0F };		// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
 		D2D1_POINT_2F m_sheet_max{ 0.0F, 0.0F };		// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
-		// ponter
+		// event
 
-		D2D1_POINT_2F m_pointer_cur{ 0.0F, 0.0F };		// ポインターの現在位置
-		D2D1_POINT_2F m_pointer_pre{ 0.0F, 0.0F };		// ポインターの前回位置
-		PBTN_STATE m_pointer_state = PBTN_STATE::BEGIN;		// ポインターの押された状態
-		uint32_t m_pointer_anchor = ANCH_TYPE::ANCH_SHEET;		// ポインターが押された図形の部位
-		D2D1_POINT_2F m_pointer_pressed{ 0.0F, 0.0F };		// ポインターが押された位置
-		Shape* m_pointer_shape = nullptr;		// ポインターが押された図形
-		Shape* m_pointer_shape_prev = nullptr;		// 前回ポインターが押された図形
-		Shape* m_pointer_shape_smry = nullptr;		// 一覧でポインターが押された図形
-		uint64_t m_pointer_time = 0ULL;		// ポインターが押された時刻
-		uint64_t m_pointer_click_time = 0ULL;		// クリックの判定時間 (マイクロ秒)
-		double m_pointer_click_dist = 6.0;		// クリックの判定距離 (DIPs)
+		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };		// ポインターの現在位置
+		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };		// ポインターの前回位置
+		PBTN_STATE m_event_state = PBTN_STATE::BEGIN;		// ポインターの押された状態
+		uint32_t m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;		// ポインターが押された図形の部位
+		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };		// ポインターが押された位置
+		Shape* m_event_shape_pressed = nullptr;		// ポインターが押された図形
+		Shape* m_event_shape_prev = nullptr;		// 前回ポインターが押された図形
+		Shape* m_event_shape_smry = nullptr;		// 一覧でポインターが押された図形
+		uint64_t m_event_time_pressed = 0ULL;		// ポインターが押された時刻
+		uint64_t m_event_click_time = 0ULL;		// クリックの判定時間 (マイクロ秒)
+		double m_event_click_dist = 6.0;		// クリックの判定距離 (DIPs)
 
 		// undo stack
 
-		uint32_t m_stack_rcnt = 0;	// やり直し操作スタックに積まれた要素の組数
+		uint32_t m_stack_rcnt = 0;	// やり直し操作スタックに積まれた組数
 		UNDO_STACK m_stack_redo;		// やり直し操作スタック
-		uint32_t m_stack_ucnt = 0;	// 元に戻す操作スタックに積まれた要素の組数
+		uint32_t m_stack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
 		UNDO_STACK m_stack_undo;		// 元に戻す操作スタック
-		bool m_stack_updt = false;	// 操作スタックの更新フラグ (ヌルが積まれたら true)
+		bool m_stack_updt = false;	// 操作スタックにひと組以上積まれた判定.
 
 		// sample
 
-		SHAPE_DX m_sample_dx;		// 見本用紙の描画環境
-		ShapeSheet m_sample_sheet;		// 見本用紙
-		Shape* m_sample_shape = nullptr;	// 見本用紙の図形
-		SAMP_TYPE m_sample_type = SAMP_TYPE::NONE;	// 見本用紙の型
+		SHAPE_DX m_sample_dx;		// 見本の描画環境
+		ShapeSheet m_sample_sheet;		// 見本の用紙
+		Shape* m_sample_shape = nullptr;	// 見本の図形
+		SAMP_TYPE m_sample_type = SAMP_TYPE::NONE;	// 見本の型
 
 		bool m_window_visible = false;		// ウィンドウの表示フラグ
 
@@ -342,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_join.cpp
-		// 線のつながり
+		// 線分のつながりと端点
 		//-------------------------------
 
 		void cap_style_check_menu(const CAP_STYLE& s_cap);
@@ -373,14 +373,14 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_arrow.cpp
-		// 矢じりの形式と寸法
+		// 矢じるしの形式と寸法
 		//-------------------------------
 
-		// 線枠メニューの「矢じりの種類」に印をつける.
-		void arrow_style_check_menu(const ARROWHEAD_STYLE h_style);
-		// 線枠メニューの「矢じりの種類」が選択された.
+		// 線枠メニューの「矢じるしの種類」に印をつける.
+		void arrow_style_check_menu(const ARROW_STYLE h_style);
+		// 線枠メニューの「矢じるしの種類」が選択された.
 		void arrow_style_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 線枠メニューの「矢じりの大きさ」が選択された.
+		// 線枠メニューの「矢じるしの大きさ」が選択された.
 		IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void arrow_set_slider_header(const float value);
@@ -551,57 +551,57 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		//　Shft + 下矢印キーが押された.
-		void ka_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Shift + 上矢印キーが押された.
-		void ka_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　下矢印キーが押された.
-		void ka_select_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_select_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　上矢印キーが押された.
-		void ka_select_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_select_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Escape が押された.
-		void ka_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void kacc_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + PgDn が押された.
-		//void ka_bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_bring_forward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + End が押された.
-		//void ka_bring_to_front_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_bring_to_front_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + C が押された.
-		//void ka_copy_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_copy_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + X が押された.
-		//void ka_cut_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_cut_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Delete が押された.
-		//void ka_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_delete_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + E が押された.
-		//void ka_edit_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_edit_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + F が押された.
-		//void ka_text_find_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_text_find_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + G が押された.
-		//void ka_group_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_group_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + N が押された.
-		//void ka_new_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_new_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + O が押された.
-		//void ka_open_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_open_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + V が押された.
-		//void ka_paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_paste_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + Y が押された.
-		//void ka_redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_redo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + Shift + S が押された.
-		//void ka_save_as_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_save_as_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + S が押された.
-		//void ka_save_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_save_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + A が押された.
-		//void ka_select_all_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_select_all_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + PgUp が押された.
-		//void ka_send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_send_backward_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + Home が押された.
-		//void ka_send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_send_to_back_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + L が押された.
-		//void ka_summaty_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_summaty_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + Z が押された.
-		//void ka_undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_undo_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + U が押された.
-		//void ka_ungroup_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_ungroup_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + 0 が押された.
-		//void ka_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_sheet.cpp
@@ -712,56 +712,56 @@ namespace winrt::GraphPaper::implementation
 		// ポインターイベントのハンドラー
 		//-------------------------------
 
-		// ポインターが押された図形の部位
-		void pointer_anchor(const uint32_t anchor) noexcept { m_pointer_anchor = anchor; }
+		// ポインターが押された図形の部位に格納する.
+		void event_anch_pressed(const uint32_t anchor) noexcept { m_event_anch_pressed = anchor; }
 		// コンテキストメニューを表示する.
-		void pointer_context_menu(void);
+		void event_context_menu(void);
 		// ポインターの現在位置を得る.
-		const D2D1_POINT_2F& pointer_cur(void) const noexcept { return m_pointer_cur; }
+		const D2D1_POINT_2F& event_pos_curr(void) const noexcept { return m_event_pos_curr; }
 		// イベント引数からポインターの現在位置を得る.
-		void pointer_cur_pos(PointerRoutedEventArgs const& args);
+		void event_pos_args(PointerRoutedEventArgs const& args);
 		// 範囲選択を終了する.
-		void pointer_finish_selecting_area(const VirtualKeyModifiers k_mod);
+		void event_finish_selecting_area(const VirtualKeyModifiers k_mod);
 		// 文字列図形の作成を終了する.
-		IAsyncAction pointer_finish_creating_text_async(const D2D1_POINT_2F diff);
+		IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F diff);
 		// 図形の作成を終了する.
-		void pointer_finish_creating(const D2D1_POINT_2F diff);
+		void event_finish_creating(const D2D1_POINT_2F diff);
 		// 図形の移動を終了する.
-		void pointer_finish_moving(void);
+		void event_finish_moving(void);
 		// 押された図形の編集を終了する.
-		void pointer_finish_forming(void);
+		void event_finish_forming(void);
 		// ポインターが押された位置を得る.
-		const D2D1_POINT_2F pointer_pressed(void) const noexcept { return m_pointer_pressed; }
+		const D2D1_POINT_2F event_pos_pressed(void) const noexcept { return m_event_pos_pressed; }
 		// 状況に応じた形状のポインターを設定する.
-		void pointer_set(void);
+		void event_curs_style(void);
 		// 値をポインターが押された図形に格納する.
-		void pointer_shape(Shape* const s) noexcept { m_pointer_shape = s; }
+		void event_shape(Shape* const s) noexcept { m_event_shape_pressed = s; }
 		// 値をポインターが押された図形に格納する.
-		void pointer_shape_prev(Shape* const prev) noexcept { m_pointer_shape_prev = prev; }
+		void event_shape_prev(Shape* const prev) noexcept { m_event_shape_prev = prev; }
 		// ポインターが押された図形を得る.
-		Shape* pointer_shape_prev(void) const noexcept { return m_pointer_shape_prev; }
+		Shape* event_shape_prev(void) const noexcept { return m_event_shape_prev; }
 		// 値をポインターが押された図形に格納する.
-		void pointer_shape_smry(Shape* const smry) noexcept { m_pointer_shape_smry = smry; }
+		void event_shape_smry(Shape* const smry) noexcept { m_event_shape_smry = smry; }
 		// ポインターが押された図形を得る.
-		Shape* pointer_shape_smry(void) const noexcept { return m_pointer_shape_smry; }
+		Shape* event_shape_smry(void) const noexcept { return m_event_shape_smry; }
 		// ポインターの押された状態に格納する.
-		void pointer_state(const PBTN_STATE state) noexcept { m_pointer_state = state; }
+		void event_state(const PBTN_STATE state) noexcept { m_event_state = state; }
 		// ポインターの押された状態を得る.
-		const PBTN_STATE pointer_state(void) const noexcept { return m_pointer_state; }
+		const PBTN_STATE event_state(void) const noexcept { return m_event_state; }
 		// ポインターのボタンが上げられた.
-		void pointer_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void event_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがページのスワップチェーンパネルの中に入った.
-		void pointer_entered(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void event_entered(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがページのスワップチェーンパネルから出た.
-		void pointer_exited(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void event_exited(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターが動いた.
-		void pointer_moved(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void event_moved(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターのボタンが押された.
-		void pointer_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void event_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターのボタンが上げられた.
-		void pointer_released(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void event_released(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターのホイールボタンが操作された.
-		void pointer_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_sample.cpp
@@ -776,7 +776,7 @@ namespace winrt::GraphPaper::implementation
 		// 見本のスワップチェーンパネルの大きさが変わった.
 		void sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&);
 		//　リストビュー「見本リスト」がロードされた.
-		void sample_list_loaded(IInspectable const&, RoutedEventArgs const&);
+		void sample_lview_loaded(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_scroll.cpp

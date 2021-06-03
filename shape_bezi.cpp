@@ -57,11 +57,11 @@ namespace winrt::GraphPaper::implementation
 		inline double opro(const BZP& q) const noexcept { return x * q.y - y * q.x; }
 	};
 
-	// 曲線端の矢じりの両端点を求める.
-	static bool bz_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROWHEAD_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
+	// 曲線端の矢じるしの両端点を求める.
+	static bool bz_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
 
-	// 曲線のジオメトリシンクに矢じりを追加する.
-	static void bz_create_arrow_geometry(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROWHEAD_STYLE a_style, const ARROWHEAD_SIZE a_size, ID2D1PathGeometry** a_geo);
+	// 曲線のジオメトリシンクに矢じるしを追加する.
+	static void bz_create_arrow_geometry(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
 
 	// 曲線上の助変数をもとに微分値を求める.
 	static double bz_deriv_by_param(const BZP b_pos[4], const double t) noexcept;
@@ -90,12 +90,12 @@ namespace winrt::GraphPaper::implementation
 	// 曲線上の助変数をもとに接線ベクトルを求める.
 	static void bz_tvec_by_param(const BZP b_pos[4], const double t, BZP& t_vec) noexcept;
 
-	// 矢じりの両端点を計算する.
+	// 矢じるしの両端点を計算する.
 	// b_start	曲線の開始位置
 	// b_seg	曲線の制御点
-	// a_size	矢じりの寸法
+	// a_size	矢じるしの寸法
 	// barbs[3]	計算された両端点と先端点
-	static bool bz_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROWHEAD_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept
+	static bool bz_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept
 	{
 		BZP seg[3]{};
 		BZP b_pos[4]{};
@@ -111,18 +111,18 @@ namespace winrt::GraphPaper::implementation
 		b_pos[0] = seg[2] - b_start;
 		auto b_len = bz_len_by_param(b_pos, 0.0, 1.0, SIMPSON_N);
 		if (b_len > FLT_MIN) {
-			// 矢じりの先端のオフセット, または曲線の長さ, 
+			// 矢じるしの先端のオフセット, または曲線の長さ, 
 			// どちらか短い方で, 助変数を求める.
 			const auto t = bz_param_by_len(b_pos, min(b_len, a_size.m_offset));
 			// 助変数をもとに曲線の接線ベクトルを得る.
 			BZP t_vec;
 			bz_tvec_by_param(b_pos, t, t_vec);
-			// 矢じりの返しの位置を計算する
+			// 矢じるしの返しの位置を計算する
 			get_arrow_barbs(-t_vec, sqrt(t_vec * t_vec), a_size.m_width, a_size.m_length, barbs);
 			// 助変数で曲線上の位置を得る.
-			BZP t_pos;	// 終点を原点とする, 矢じりの先端の位置
+			BZP t_pos;	// 終点を原点とする, 矢じるしの先端の位置
 			bz_point_by_param(b_pos, t, t_pos);
-			// 曲線上の位置を矢じりの先端とし, 返しの位置も並行移動する.
+			// 曲線上の位置を矢じるしの先端とし, 返しの位置も並行移動する.
 			pt_add(barbs[0], t_pos.x, t_pos.y, barbs[0]);
 			pt_add(barbs[1], t_pos.x, t_pos.y, barbs[1]);
 			barbs[2] = t_pos;
@@ -134,19 +134,19 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 曲線のジオメトリシンクに矢じりを追加する
+	// 曲線のジオメトリシンクに矢じるしを追加する
 	// d_factory	D2D ファクトリ
 	// b_pos	曲線の開始位置
 	// b_seg	曲線の制御点
-	// a_style	矢じりの種別
-	// a_size	矢じりの寸法
-	// a_geo	矢じりが追加されたジオメトリ
+	// a_style	矢じるしの種別
+	// a_size	矢じるしの寸法
+	// a_geo	矢じるしが追加されたジオメトリ
 	static void bz_create_arrow_geometry(
 		ID2D1Factory3* const d_factory,
-		const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROWHEAD_STYLE a_style, const ARROWHEAD_SIZE a_size, 
+		const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, 
 		ID2D1PathGeometry** a_geo)
 	{
-		D2D1_POINT_2F barbs[3];	// 矢じりの返しの端点	
+		D2D1_POINT_2F barbs[3];	// 矢じるしの返しの端点	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
 		if (bz_calc_arrow(b_pos, b_seg, a_size, barbs)) {
@@ -154,10 +154,10 @@ namespace winrt::GraphPaper::implementation
 			winrt::check_hresult(d_factory->CreatePathGeometry(a_geo));
 			winrt::check_hresult((*a_geo)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
-			sink->BeginFigure(barbs[0], a_style == ARROWHEAD_STYLE::FILLED ? D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN_HOLLOW);
+			sink->BeginFigure(barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN_HOLLOW);
 			sink->AddLine(barbs[2]);
 			sink->AddLine(barbs[1]);
-			sink->EndFigure(a_style == ARROWHEAD_STYLE::FILLED ? D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END_OPEN);
+			sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END_OPEN);
 			winrt::check_hresult(sink->Close());
 			sink = nullptr;
 		}
@@ -529,7 +529,7 @@ namespace winrt::GraphPaper::implementation
 		sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
-		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
+		if (m_arrow_style != ARROW_STYLE::NONE) {
 			bz_create_arrow_geometry(d_factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
 	}
@@ -546,9 +546,9 @@ namespace winrt::GraphPaper::implementation
 			const auto s_style = m_d2d_stroke_style.get();
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawGeometry(m_d2d_path_geom.get(), s_brush, s_width, s_style);
-			if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
+			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
-				if (m_arrow_style == ARROWHEAD_STYLE::FILLED) {
+				if (m_arrow_style == ARROW_STYLE::FILLED) {
 					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
 				}
 				dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
@@ -566,25 +566,25 @@ namespace winrt::GraphPaper::implementation
 		anchor_draw_rect(m_pos, dx);
 		s_pos = m_pos;
 		pt_add(s_pos, m_diff[0], e_pos);
-		dx.m_shape_brush->SetColor(dx.m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		anchor_draw_ellipse(e_pos, dx);
 
 		s_pos = e_pos;
 		pt_add(s_pos, m_diff[1], e_pos);
-		dx.m_shape_brush->SetColor(dx.m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		anchor_draw_ellipse(e_pos, dx);
 
 		s_pos = e_pos;
 		pt_add(s_pos, m_diff[2], e_pos);
-		dx.m_shape_brush->SetColor(dx.m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		anchor_draw_rect(e_pos, dx);
 	}
@@ -876,7 +876,7 @@ namespace winrt::GraphPaper::implementation
 		write_svg("none", "fill", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
 		write_svg("/>" SVG_NEW_LINE, dt_writer);
-		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
+		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bz_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
 			ShapeLineA::write_svg(barbs, barbs[2], dt_writer);

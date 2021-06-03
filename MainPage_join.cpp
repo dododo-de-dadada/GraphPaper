@@ -158,7 +158,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S> void MainPage::join_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring hdr;
+		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
 			constexpr size_t LEN = 32;
@@ -166,7 +166,7 @@ namespace winrt::GraphPaper::implementation
 			const float limit = value * SLIDER_STEP + 1.0f;
 			swprintf_s(buf, LEN, L"%.1f", limit);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_stroke_join_limit") + L": " + buf;
+			text = r_loader.GetString(L"str_stroke_join_limit") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			float g_base;
@@ -176,13 +176,13 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[LEN + 1];
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_len, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_stroke_width") + L": " + buf;
+			text = r_loader.GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(text));
 		}
 		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(text));
 		}
 	}
 
@@ -212,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float s_limit;
 		m_sample_sheet.get_stroke_join_limit(s_limit);
 		const float val0 = (s_limit - 1.0F) / SLIDER_STEP;

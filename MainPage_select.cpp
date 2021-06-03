@@ -72,25 +72,25 @@ namespace winrt::GraphPaper::implementation
 	// 次の図形を選択する.
 	template <VirtualKeyModifiers M, VirtualKey K> void MainPage::select_next_shape(void)
 	{
-		if (pointer_shape_smry() == nullptr) {
-			auto s_prev = pointer_shape_prev();
+		if (event_shape_smry() == nullptr) {
+			auto s_prev = event_shape_prev();
 			if (s_prev != nullptr && s_prev->is_selected()) {
-				pointer_shape_smry(s_prev);
+				event_shape_smry(s_prev);
 			}
 			else {
 				if (s_prev == nullptr) {
 					if constexpr (K == VirtualKey::Down) {
-						pointer_shape_smry(slist_front(m_list_shapes));
+						event_shape_smry(slist_front(m_list_shapes));
 					}
 					if constexpr (K == VirtualKey::Up) {
-						pointer_shape_smry(slist_back(m_list_shapes));
+						event_shape_smry(slist_back(m_list_shapes));
 					}
-					pointer_shape_prev(pointer_shape_smry());
+					event_shape_prev(event_shape_smry());
 				}
 				else {
-					pointer_shape_smry(s_prev);
+					event_shape_smry(s_prev);
 				}
-				undo_push_select(pointer_shape_smry());
+				undo_push_select(event_shape_smry());
 				// 編集メニュー項目の使用の可否を設定する.
 				edit_menu_enable();
 				sheet_draw();
@@ -110,31 +110,31 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if constexpr (K == VirtualKey::Down) {
-			auto s = slist_next(m_list_shapes, pointer_shape_smry());
+			auto s = slist_next(m_list_shapes, event_shape_smry());
 			if (s != nullptr) {
-				pointer_shape_smry(s);
+				event_shape_smry(s);
 				goto SEL;
 			}
 		}
 		if constexpr (K == VirtualKey::Up) {
-			auto s = slist_prev(m_list_shapes, pointer_shape_smry());
+			auto s = slist_prev(m_list_shapes, event_shape_smry());
 			if (s != nullptr) {
-				pointer_shape_smry(s);
+				event_shape_smry(s);
 				goto SEL;
 			}
 		}
 		return;
 	SEL:
 		if constexpr (M == VirtualKeyModifiers::Shift) {
-			select_range(pointer_shape_prev(), pointer_shape_smry());
+			select_range(event_shape_prev(), event_shape_smry());
 		}
 		if constexpr (M == VirtualKeyModifiers::None) {
-			pointer_shape_prev(pointer_shape_smry());
+			event_shape_prev(event_shape_smry());
 			unselect_all();
-			undo_push_select(pointer_shape_smry());
+			undo_push_select(event_shape_smry());
 			// 図形一覧の排他制御が true か判定する.
 			if (m_smry_atomic.load(std::memory_order_acquire)) {
-				smry_select(pointer_shape_smry());
+				smry_select(event_shape_smry());
 			}
 		}
 		// 編集メニュー項目の使用の可否を設定する.
@@ -225,16 +225,16 @@ namespace winrt::GraphPaper::implementation
 					smry_unselect(s);
 				}
 			}
-			pointer_shape_prev(s);
+			event_shape_prev(s);
 		}
 		else if (vk_mod == VirtualKeyModifiers::Shift) {
 			// シフトキーが押されている場合
 			// 前回ポインターが押された図形から今回押された図形までの
 			// 範囲にある図形を選択して, そうでない図形を選択しない.
-			if (pointer_shape_prev() == nullptr) {
-				pointer_shape_prev(m_list_shapes.front());
+			if (event_shape_prev() == nullptr) {
+				event_shape_prev(m_list_shapes.front());
 			}
-			if (select_range(s, pointer_shape_prev())) {
+			if (select_range(s, event_shape_prev())) {
 				// 編集メニュー項目の使用の可否を設定する.
 				edit_menu_enable();
 				sheet_draw();
@@ -253,12 +253,12 @@ namespace winrt::GraphPaper::implementation
 					smry_select(s);
 				}
 			}
-			pointer_shape_prev(s);
+			event_shape_prev(s);
 		}
 		if (s->is_selected()) {
 			// 押された図形が選択されている場合,
-			m_sheet_main.set_to(s);
-			ARROWHEAD_STYLE a_style;
+			m_sheet_main.set_attr_to(s);
+			ARROW_STYLE a_style;
 			m_sheet_main.get_arrow_style(a_style);
 			arrow_style_check_menu(a_style);
 			DWRITE_FONT_STYLE f_style;

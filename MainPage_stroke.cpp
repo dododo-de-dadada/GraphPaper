@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		D2D1_COLOR_F s_color;
 		m_sample_sheet.get_stroke_color(s_color);
 		const float val0 = s_color.r * COLOR_MAX;
@@ -76,38 +76,48 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		STROKE_DASH_PATT s_patt;
 		m_sheet_main.get_stroke_dash_patt(s_patt);
 		const float val0 = s_patt.m_[0] / SLIDER_STEP;
 		const float val1 = s_patt.m_[1] / SLIDER_STEP;
 		const float val2 = s_patt.m_[2] / SLIDER_STEP;
 		const float val3 = s_patt.m_[3] / SLIDER_STEP;
+		float s_width;
+		m_sheet_main.get_stroke_width(s_width);
+		const float val4 = s_width / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
 		sample_slider_3().Value(val3);
+		sample_slider_4().Value(val4);
 		D2D1_DASH_STYLE s_style;
 		m_sheet_main.get_stroke_dash_style(s_style);
 		sample_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
 		sample_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
 		sample_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
 		sample_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
+		sample_slider_4().Visibility(VISIBLE);
 		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 0>(val0);
 		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 1>(val1);
 		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 2>(val2);
 		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 3>(val3);
+		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 4>(val4);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 3> });
+		const auto slider_4_token = sample_slider_4().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 4> });
 		m_sample_type = SAMP_TYPE::STROKE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			STROKE_DASH_PATT sample_value;
-			m_sample_shape->get_stroke_dash_patt(sample_value);
-			if (undo_push_set<UNDO_OP::STROKE_DASH_PATT>(sample_value)) {
+			STROKE_DASH_PATT sample_patt;
+			float sample_width;
+			m_sample_shape->get_stroke_dash_patt(sample_patt);
+			m_sample_shape->get_stroke_width(sample_width);
+			if (undo_push_set<UNDO_OP::STROKE_DASH_PATT>(sample_patt) ||
+				undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
 				undo_push_null();
 				edit_menu_enable();
 				sheet_draw();
@@ -122,10 +132,12 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(COLLAPSED);
 		sample_slider_2().Visibility(COLLAPSED);
 		sample_slider_3().Visibility(COLLAPSED);
+		sample_slider_4().Visibility(COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
 		sample_slider_3().ValueChanged(slider_3_token);
+		sample_slider_4().ValueChanged(slider_4_token);
 		sheet_draw();
 	}
 
@@ -135,7 +147,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float s_width;
 		m_sample_sheet.get_stroke_width(s_width);
 		const float val0 = s_width / SLIDER_STEP;
@@ -202,43 +214,41 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S> void MainPage::stroke_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring hdr;
+		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			hdr = r_loader.GetString(L"str_stroke_width");
+			text = r_loader.GetString(L"str_stroke_width");
 		}
 		if constexpr (U == UNDO_OP::STROKE_DASH_PATT) {
 			wchar_t buf[32];
-			//const double dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			//const double g_len = g_base + 1.0f;
-			float s_width;
-			m_sample_sheet.get_stroke_width(s_width);
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP * s_width, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+			//float s_width;
+			//m_sample_sheet.get_stroke_width(s_width);
+			conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
 			if constexpr (S == 0) {
-				hdr = r_loader.GetString(L"str_dash_len") + L": " + buf;
+				text = r_loader.GetString(L"str_dash_len") + L": " + buf + L"\u00D7";
 			}
 			if constexpr (S == 1) {
-				hdr = r_loader.GetString(L"str_dash_gap") + L": " + buf;
+				text = r_loader.GetString(L"str_dash_gap") + L": " + buf + L"\u00D7";
 			}
 			if constexpr (S == 2) {
-				hdr = r_loader.GetString(L"str_dot_len") + L": " + buf;
+				text = r_loader.GetString(L"str_dot_len") + L": " + buf + L"\u00D7";
 			}
 			if constexpr (S == 3) {
-				hdr = r_loader.GetString(L"str_dot_gap") + L": " + buf;
+				text = r_loader.GetString(L"str_dot_gap") + L": " + buf + L"\u00D7";
 			}
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			wchar_t buf[32];
-			//const double dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			//const double g_len = g_base + 1.0;
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-			hdr = hdr + L": " + buf;
+			auto const& r_loader = ResourceLoader::GetForCurrentView();
+			text = r_loader.GetString(L"str_stroke_width");
+			text = text + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			if constexpr (S == 0) {
@@ -246,41 +256,44 @@ namespace winrt::GraphPaper::implementation
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_col_r") + L": " + buf;
+				text = r_loader.GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_col_g") + L": " + buf;
+				text = r_loader.GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_col_b") + L": " + buf;
+				text = r_loader.GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_opacity") + L": " + buf;
+				text = r_loader.GetString(L"str_opacity") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(text));
 		}
 		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(text));
 		}
 		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(hdr));
+			sample_slider_2().Header(box_value(text));
 		}
 		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(hdr));
+			sample_slider_3().Header(box_value(text));
+		}
+		if constexpr (S == 4) {
+			sample_slider_4().Header(box_value(text));
 		}
 	}
 
@@ -295,21 +308,35 @@ namespace winrt::GraphPaper::implementation
 		const float value = static_cast<float>(args.NewValue());
 		stroke_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::STROKE_DASH_PATT) {
-			STROKE_DASH_PATT patt;
-			s->get_stroke_dash_patt(patt);
 			if constexpr (S == 0) {
+				STROKE_DASH_PATT patt;
+				s->get_stroke_dash_patt(patt);
 				patt.m_[0] = static_cast<FLOAT>(value * SLIDER_STEP);
+				s->set_stroke_dash_patt(patt);
 			}
 			if constexpr (S == 1) {
+				STROKE_DASH_PATT patt;
+				s->get_stroke_dash_patt(patt);
 				patt.m_[1] = static_cast<FLOAT>(value * SLIDER_STEP);
+				s->set_stroke_dash_patt(patt);
 			}
 			if constexpr (S == 2) {
+				STROKE_DASH_PATT patt;
+				s->get_stroke_dash_patt(patt);
 				patt.m_[2] = patt.m_[4] = static_cast<FLOAT>(value * SLIDER_STEP);
+				s->set_stroke_dash_patt(patt);
 			}
 			if constexpr (S == 3) {
+				STROKE_DASH_PATT patt;
+				s->get_stroke_dash_patt(patt);
 				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(value * SLIDER_STEP);
+				s->set_stroke_dash_patt(patt);
 			}
-			s->set_stroke_dash_patt(patt);
+			//if constexpr (S == 4) {
+			//	float s_width;
+			//	s_width = static_cast<FLOAT>(value * SLIDER_STEP);
+			//	s->set_stroke_width(s_width);
+			//}
 		}
 		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
 			s->set_stroke_join_limit(value);

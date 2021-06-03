@@ -9,8 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// 「文字列が見つかりません」メッセージのリソースキー
-	constexpr wchar_t NO_FOUND[] = L"str_err_found";
+	constexpr wchar_t NO_FOUND[] = L"str_err_found";	// 「文字列が見つかりません」メッセージのリソースキー
 
 	// 文字列を検索して見つかった位置を得る.
 	static bool text_find(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept;
@@ -32,31 +31,27 @@ namespace winrt::GraphPaper::implementation
 	// f_pos	見つかった位置
 	static bool text_find(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept
 	{
-		if (w_text == nullptr
-			|| f_text == nullptr
-			|| f_len > w_len || f_len == 0) {
-			// 検索される文字列がヌル, 
-			// または検索文字列がヌル, 
-			// または文字数が検索文字列の文字数より小さい,
-			// または検索文字列の文字数が 0 の場合
-			// false を返す.
-			return false;
-		}
-		if (f_case) {
-			// 英文字の区別フラグが立っている場合,
-			for (uint32_t i = 0; i <= w_len - f_len; i++) {
-				if (wcsncmp(w_text + i, f_text, f_len) == 0) {
-					f_pos = i;
-					return true;
+		// 検索される文字列がヌルでない, かつ検索文字列がヌルでない, 
+		// かつ検索文字列の文字数が 0 より大きく検索される文字列の文字数以下か判定する.
+		if (w_text != nullptr && f_text != nullptr &&
+			f_len > 0 && f_len <= w_len) {
+			// 英文字の区別フラグが立っているか判定する.
+			if (f_case) {
+				// フラグが立っているなら,
+				for (uint32_t i = 0; i <= w_len - f_len; i++) {
+					if (wcsncmp(w_text + i, f_text, f_len) == 0) {
+						f_pos = i;
+						return true;
+					}
 				}
 			}
-		}
-		else {
-			// 英文字の区別フラグがない場合,
-			for (uint32_t i = 0; i <= w_len - f_len; i++) {
-				if (_wcsnicmp(w_text + i, f_text, f_len) == 0) {
-					f_pos = i;
-					return true;
+			else {
+				// フラグがないなら,
+				for (uint32_t i = 0; i <= w_len - f_len; i++) {
+					if (_wcsnicmp(w_text + i, f_text, f_len) == 0) {
+						f_pos = i;
+						return true;
+					}
 				}
 			}
 		}
@@ -132,8 +127,8 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
+		// 回り込み検索がない, かつ文字範囲が選択された図形が見つかったか判定する.
 		if (f_wrap != true && t != nullptr) {
-			// 回り込み検索がない, かつ文字範囲が選択された図形が見つかった場合,
 			return false;
 		}
 		stack.push_back(slist.begin());
@@ -442,9 +437,9 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_edit_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		ShapeText* s = nullptr;
-		if (pointer_shape_prev() != nullptr && typeid(*pointer_shape_prev()) == typeid(ShapeText)) {
+		if (event_shape_prev() != nullptr && typeid(*event_shape_prev()) == typeid(ShapeText)) {
 			// 前回ポインターが押されたのが文字列図形の場合,
-			s = static_cast<ShapeText*>(pointer_shape_prev());
+			s = static_cast<ShapeText*>(event_shape_prev());
 		}
 		else {
 			// 選択された図形のうち最前面にある文字列図形を得る.
@@ -466,29 +461,6 @@ namespace winrt::GraphPaper::implementation
 			text_edit_async(s);
 		}
 
-	}
-
-	// 編集メニューの「文字列の検索/置換」が選択された.
-	void MainPage::text_find_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		if (sp_text_find().Visibility() == VISIBLE) {
-			// 文字列検索パネルが表示されている場合,
-			// 文字列検索パネルを非表示にする.
-			sp_text_find().Visibility(COLLAPSED);
-			text_find_set();
-			return;
-		}
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-		//if (m_smry_visible) {
-			// 図形一覧パネルが表示されている場合,
-			// 図形一覧パネルを非表示にする.
-			smry_close();
-		}
-		tx_text_find_what().Text({ m_text_find == nullptr ? L"" : m_text_find });
-		tx_text_replace_with().Text({ m_text_repl == nullptr ? L"" : m_text_repl });
-		ck_text_find_case().IsChecked(m_text_find_case);
-		ck_text_find_wrap().IsChecked(m_text_find_wrap);
-		sp_text_find().Visibility(VISIBLE);
 	}
 
 	// 図形が持つ文字列を編集する.
@@ -514,32 +486,25 @@ namespace winrt::GraphPaper::implementation
 			edit_menu_enable();
 			sheet_draw();
 		}
-		/*
-		primary_token = cd_edit_text().PrimaryButtonClick(
-			[this, s](auto, auto)
-			{
-				auto text = wchar_cpy(tx_edit().Text().c_str());
-				undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
-				if (ck_text_adjust_bbox().IsChecked().GetBoolean()) {
-					undo_push_anchor(s, ANCH_TYPE::ANCH_SE);
-					s->adjust_bbox();
-				}
-				// 一連の操作の区切としてヌル操作をスタックに積む.
-				undo_push_null();
-				// 編集メニュー項目の使用の可否を設定する.
-				edit_menu_enable();
-			}
-		);
-		closed_token = cd_edit_text().Closed(
-			[this](auto, auto)
-			{
-				cd_edit_text().PrimaryButtonClick(primary_token);
-				cd_edit_text().Closed(closed_token);
-				sheet_draw();
-			}
-		);
-		auto _{ cd_edit_text().ShowAsync() };
-		*/
+	}
+
+	// 編集メニューの「文字列の検索/置換」が選択された.
+	void MainPage::text_find_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		// 文字列検索パネルが表示されているか判定する.
+		if (sp_text_find().Visibility() == VISIBLE) {
+			sp_text_find().Visibility(COLLAPSED);
+			text_find_set();
+			return;
+		}
+		if (m_smry_atomic.load(std::memory_order_acquire)) {
+			smry_close();
+		}
+		tx_text_find_what().Text({ m_text_find == nullptr ? L"" : m_text_find });
+		tx_text_replace_with().Text({ m_text_repl == nullptr ? L"" : m_text_repl });
+		ck_text_find_case().IsChecked(m_text_find_case);
+		ck_text_find_wrap().IsChecked(m_text_find_wrap);
+		sp_text_find().Visibility(VISIBLE);
 	}
 
 	// 検索の値をデータリーダーから読み込む.

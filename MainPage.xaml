@@ -133,7 +133,7 @@
             <!-- アプリケーションデータを格納するファイル名 -->
             <x:String x:Key="file_app_data">app_data</x:String>
             <!-- 線枠コンテキストメニュー -->
-            <MenuFlyout x:Key="mf_stroke">
+			<MenuFlyout x:Key="mf_stroke">
                 <MenuFlyoutSubItem x:Uid="mfsi_stroke_dash_style" Text="Style">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_solid_2" x:Uid="rmfi_stroke_dash_style_solid" Click="stroke_dash_style_click" IsChecked="True" Text="Solid" GroupName="gn_stroke_dash_style_2">
                         <muxc:RadioMenuFlyoutItem.Icon>
@@ -179,7 +179,7 @@
 					<MenuFlyoutItem x:Name="rmfi_join_limit_2" x:Uid="rmfi_join_limit" Click="join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
-                <!-- 矢じりメニュー -->
+                <!-- 矢じるしメニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_arrow_style_none_2" x:Uid="rmfi_arrow_style_none" Click="arrow_style_click" IsChecked="True" Text="None" GroupName="gn_arrow_style_2">
                         <muxc:RadioMenuFlyoutItem.Icon>
@@ -315,9 +315,9 @@
         <!-- メインメニュー -->
         <muxc:MenuBar Grid.Row="0" Grid.ColumnSpan="2" Background="{ThemeResource SystemBaseLowColor}">
             <!-- ファイルメニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_file" AccessKey="F" Title="File">
-                <MenuFlyoutItem x:Name="mfi_new" x:Uid="mfi_new" Click="new_click_async" Icon="Page2" Text="New" >
-                    <MenuFlyoutItem.KeyboardAccelerators>
+			<muxc:MenuBarItem x:Uid="mbi_file" AccessKey="F" Title="File" >
+				<MenuFlyoutItem x:Name="mfi_new" x:Uid="mfi_new" Click="new_click_async" Icon="Page2" Text="New" >
+					<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="N" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
@@ -565,7 +565,7 @@
 					<MenuFlyoutItem x:Name="rmfi_join_limit" x:Uid="rmfi_join_limit" Click="join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
-                <!-- 矢じりメニュー -->
+                <!-- 矢じるしメニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_arrow_style_none" x:Uid="rmfi_arrow_style_none" Click="arrow_style_click" IsChecked="True" Text="None" GroupName="gn_arrow_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
@@ -733,15 +733,15 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Button Click="smry_close_click" Grid.Row="0" Background="White" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" />
+            <Button Click="smry_close_click" Grid.Row="0" Background="{ThemeResource ButtonBackgroundThemeBrush}" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" />
             <ListView x:Name="lv_smry" Grid.Row="1" IsItemClickEnabled="False" Loaded="smry_loaded" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >
                 <!--<ListView x:Name="lv_smry" IsItemClickEnabled="False" Loaded="smry_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True"  RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_smry_close" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >-->
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="local:Summary">
                         <StackPanel Orientation="Horizontal">
-                            <PathIcon Data="{x:Bind Data}" Height="24" Width="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            <StackPanel >
-                                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind Name, Mode=OneWay}"/>
+                            <PathIcon Data="{x:Bind Data}" Height="16" Width="16" HorizontalAlignment="Center" Margin="8,4,8,4" VerticalAlignment="Center" />
+                            <StackPanel>
+								<TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Name, Mode=OneWay}"/>
                                 <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Hex, Mode=OneWay}"/>
                             </StackPanel>
                         </StackPanel>
@@ -756,13 +756,13 @@
                 x:Name="scp_sheet_panel"
                 Loaded="sheet_panel_loaded"
                 KeyboardAcceleratorPlacementMode="Hidden"
-                PointerCanceled="pointer_canceled"
-                PointerEntered="pointer_entered"
-                PointerExited="pointer_exited"
-                PointerMoved="pointer_moved"
-                PointerPressed="pointer_pressed"
-                PointerReleased="pointer_released"
-                PointerWheelChanged="pointer_wheel_changed"                
+                PointerCanceled="event_canceled"
+                PointerEntered="event_entered"
+                PointerExited="event_exited"
+                PointerMoved="event_moved"
+                PointerPressed="event_pressed"
+                PointerReleased="event_released"
+                PointerWheelChanged="event_wheel_changed"                
                 RelativePanel.AlignLeftWithPanel="True"
                 RelativePanel.AlignTopWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"
@@ -779,34 +779,34 @@
                 されてしまう。つまり, メンバ変数にアクセスできない。
                 -->
                 <SwapChainPanel.KeyboardAccelerators>
-                    <KeyboardAccelerator Invoked="ka_range_next_invoked" Key="Down" Modifiers="Shift" />
-                    <KeyboardAccelerator Invoked="ka_range_prev_invoked" Key="Up" Modifiers="Shift" />
-                    <KeyboardAccelerator Invoked="ka_tool_select_invoked" Key="Escape" />
-                    <KeyboardAccelerator Invoked="ka_select_prev_invoked" Key="Up" />
-                    <KeyboardAccelerator Invoked="ka_select_next_invoked" Key="Down" />
+                    <KeyboardAccelerator Invoked="kacc_range_next_invoked" Key="Down" Modifiers="Shift" />
+                    <KeyboardAccelerator Invoked="kacc_range_prev_invoked" Key="Up" Modifiers="Shift" />
+                    <KeyboardAccelerator Invoked="kacc_tool_select_invoked" Key="Escape" />
+                    <KeyboardAccelerator Invoked="kacc_select_prev_invoked" Key="Up" />
+                    <KeyboardAccelerator Invoked="kacc_select_next_invoked" Key="Down" />
                     <!--
-                    <KeyboardAccelerator Invoked="ka_select_all_invoked" Key="A" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_copy_invoked" Key="C" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_delete_invoked" Key="Delete" />
-                    <KeyboardAccelerator Invoked="ka_edit_text_invoked" Key="E" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_bring_to_front_invoked" Key="End" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_bring_forward_invoked" Key="PageDown" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_text_find_invoked" Key="F" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_group_invoked" Key="G" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_send_to_back_invoked" Key="Home" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_send_backward_invoked" Key="PageUp" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_summaty_invoked" Key="L" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_new_invoked" Key="N" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_zoom_reset_invoked" Key="Number0" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_zoom_reset_invoked" Key="NumberPad0" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_open_invoked" Key="O" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_save_invoked" Key="S" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_save_as_invoked" Key="S" Modifiers="Control,Shift" />
-                    <KeyboardAccelerator Invoked="ka_ungroup_invoked" Key="U" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_paste_invoked" Key="V" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_cut_invoked" Key="X" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_redo_invoked" Key="Y" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="ka_undo_invoked" Key="Z" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_select_all_invoked" Key="A" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_copy_invoked" Key="C" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_delete_invoked" Key="Delete" />
+                    <KeyboardAccelerator Invoked="kacc_edit_text_invoked" Key="E" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_bring_to_front_invoked" Key="End" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_bring_forward_invoked" Key="PageDown" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_text_find_invoked" Key="F" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_group_invoked" Key="G" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_send_to_back_invoked" Key="Home" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_send_backward_invoked" Key="PageUp" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_summaty_invoked" Key="L" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_new_invoked" Key="N" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_zoom_reset_invoked" Key="Number0" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_zoom_reset_invoked" Key="NumberPad0" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_open_invoked" Key="O" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_save_invoked" Key="S" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_save_as_invoked" Key="S" Modifiers="Control,Shift" />
+                    <KeyboardAccelerator Invoked="kacc_ungroup_invoked" Key="U" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_paste_invoked" Key="V" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_cut_invoked" Key="X" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_redo_invoked" Key="Y" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_undo_invoked" Key="Z" Modifiers="Control" />
                     -->
                 </SwapChainPanel.KeyboardAccelerators>
             </SwapChainPanel>
@@ -895,11 +895,12 @@
                     Width="170"
                     />
                 <!-- Height を指定するこれ大事 -->
-                <ListView x:Name="lv_sample_list" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
+                <ListView x:Name="lv_sample_lview" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
                 <Slider x:Name="sample_slider_0" x:Uid = "sample_slider_0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="sample_slider_1" x:Uid = "sample_slider_1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="sample_slider_2" x:Uid = "sample_slider_2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-                <Slider x:Name="sample_slider_3" x:Uid = "sample_slider_3" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider x:Name="sample_slider_3" x:Uid = "sample_slider_3" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider x:Name="sample_slider_4" x:Uid = "sample_slider_4" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_3" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
 				<TextBlock x:Name="tb_version" x:Uid="tb_version" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Visibility="Collapsed" />
 			</RelativePanel>
         </ContentDialog>

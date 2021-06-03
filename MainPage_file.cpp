@@ -107,7 +107,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_DASH_STYLE s_style;
 		m_sheet_main.get_stroke_dash_style(s_style);
 		stroke_dash_style_check_menu(s_style);
-		ARROWHEAD_STYLE a_style;
+		ARROW_STYLE a_style;
 		m_sheet_main.get_arrow_style(a_style);
 		arrow_style_check_menu(a_style);
 		DWRITE_FONT_STYLE f_style;
@@ -174,8 +174,8 @@ namespace winrt::GraphPaper::implementation
 		// ダブルクリックでファイルが選択された場合,
 		// co_await が終了する前に, PonterReleased と PonterEntered が呼ばれる.
 		// これはピッカーが 2 度目の Released を待たずにダブルクリックを成立させているためだと思われる.
-		//scp_sheet_panel().PointerReleased(m_token_pointer_released);
-		//scp_sheet_panel().PointerEntered(m_token_pointer_entered);
+		//scp_sheet_panel().PointerReleased(m_token_event_released);
+		//scp_sheet_panel().PointerEntered(m_token_event_entered);
 
 		// ピッカーを非同期で表示してストレージファイルを取得する.
 		// ストレージファイルがヌルポインターか判定する.

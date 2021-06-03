@@ -70,21 +70,21 @@ namespace winrt::GraphPaper::implementation
 
 		e_pos.x = c_pos.x;
 		e_pos.y = p_pos.y;
-		dx.m_shape_brush->SetColor(dx.m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_theme_background);
 		dx.m_d2dContext->DrawLine(p_pos, e_pos, s_brush, s_width, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 		dx.m_d2dContext->DrawLine(p_pos, e_pos, s_brush, s_width, a_style);
 		s_pos = e_pos;
 		e_pos.x = p_pos.x;
 		e_pos.y = c_pos.y;
-		dx.m_shape_brush->SetColor(dx.m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, s_brush, s_width, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, s_brush, s_width, a_style);
 		s_pos = e_pos;
-		dx.m_shape_brush->SetColor(dx.m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_theme_background);
 		dx.m_d2dContext->DrawLine(s_pos, c_pos, s_brush, s_width, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, c_pos, s_brush, s_width, a_style);
 	}
 
@@ -105,9 +105,9 @@ namespace winrt::GraphPaper::implementation
 		pt_add(p_pos, rect, elli.point);
 		elli.radiusX = rect.x;
 		elli.radiusY = rect.y;
-		dx.m_shape_brush->SetColor(dx.m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_theme_background);
 		dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), s_width, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 		dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
 
@@ -120,9 +120,9 @@ namespace winrt::GraphPaper::implementation
 		//auto br = dx.m_aux_brush.get();
 		//auto ss = dx.m_aux_style.get();
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
-		dx.m_shape_brush->SetColor(dx.m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_theme_background);
 		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), s_width, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
 
@@ -173,9 +173,9 @@ namespace winrt::GraphPaper::implementation
 		const auto i_start = (t_poly.m_closed ? t_poly.m_vertex_cnt - 1 : 0);
 		const auto j_start = (t_poly.m_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < t_poly.m_vertex_cnt; i = j++) {
-			dx.m_shape_brush->SetColor(dx.m_theme_background);
+			dx.m_shape_brush->SetColor(Shape::m_theme_background);
 			dx.m_d2dContext->DrawLine(v_pos[i], v_pos[j], dx.m_shape_brush.get(), s_width, nullptr);
-			dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+			dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 			dx.m_d2dContext->DrawLine(v_pos[i], v_pos[j], dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 		}
 	}
@@ -190,9 +190,9 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_RECT_F rc = {
 			p_pos.x, p_pos.y, c_pos.x, c_pos.y
 		};
-		dx.m_shape_brush->SetColor(dx.m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_theme_background);
 		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), s_width, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
 
@@ -224,9 +224,9 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(rx),
 			static_cast<FLOAT>(ry)
 		};
-		dx.m_shape_brush->SetColor(dx.m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_theme_background);
 		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), s_width, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
 		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
 
@@ -292,15 +292,15 @@ namespace winrt::GraphPaper::implementation
 	//	get_opposite_color(m_sheet_color, ANCH_OPAC, value);
 	//}
 
-	// 矢じりの寸法を得る.
-	bool ShapeSheet::get_arrow_size(ARROWHEAD_SIZE& value) const noexcept
+	// 矢じるしの寸法を得る.
+	bool ShapeSheet::get_arrow_size(ARROW_SIZE& value) const noexcept
 	{
 		value = m_arrow_size;
 		return true;
 	}
 
-	// 矢じりの形式を得る.
-	bool ShapeSheet::get_arrow_style(ARROWHEAD_STYLE& value) const noexcept
+	// 矢じるしの形式を得る.
+	bool ShapeSheet::get_arrow_style(ARROW_STYLE& value) const noexcept
 	{
 		value = m_arrow_style;
 		return true;
@@ -531,8 +531,8 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_scale = dt_reader.ReadSingle();
 		dt_read(m_sheet_size, dt_reader);
 
-		dt_read(m_arrow_size, dt_reader);	// 矢じりの寸法
-		m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());	// 矢じりの形式
+		dt_read(m_arrow_size, dt_reader);	// 矢じるしの寸法
+		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());	// 矢じるしの形式
 		dt_read(m_corner_rad, dt_reader);	// 角丸半径
 		dt_read(m_stroke_cap_style, dt_reader);	// 線分の端点
 		dt_read(m_stroke_color, dt_reader);	// 線・枠の色
@@ -557,8 +557,8 @@ namespace winrt::GraphPaper::implementation
 		ShapeText::is_available_font(m_font_family);
 	}
 
-	// 値を矢じりの寸法に格納する.
-	bool ShapeSheet::set_arrow_size(const ARROWHEAD_SIZE& value)
+	// 値を矢じるしの寸法に格納する.
+	bool ShapeSheet::set_arrow_size(const ARROW_SIZE& value)
 	{
 		if (!equal(m_arrow_size, value)) {
 			m_arrow_size = value;
@@ -567,8 +567,8 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を矢じりの形式に格納する.
-	bool ShapeSheet::set_arrow_style(const ARROWHEAD_STYLE value)
+	// 値を矢じるしの形式に格納する.
+	bool ShapeSheet::set_arrow_style(const ARROW_STYLE value)
 	{
 		if (m_arrow_style != value) {
 			m_arrow_style = value;
@@ -858,7 +858,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の属性値を格納する.
-	void ShapeSheet::set_to(Shape* s) noexcept
+	void ShapeSheet::set_attr_to(Shape* s) noexcept
 	{
 		s->get_arrow_size(m_arrow_size);
 		s->get_arrow_style(m_arrow_style);
@@ -904,8 +904,8 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_sheet_scale);
 		dt_write(m_sheet_size, dt_writer);
 
-		dt_write(m_arrow_size, dt_writer);	// 矢じりの寸法
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));	// 矢じりの形式
+		dt_write(m_arrow_size, dt_writer);	// 矢じるしの寸法
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));	// 矢じるしの形式
 		dt_write(m_corner_rad, dt_writer);	// 角丸半径
 		dt_write(m_stroke_cap_style, dt_writer);	// 線分の端点
 		dt_write(m_stroke_color, dt_writer);	// 線枠の色

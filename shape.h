@@ -110,11 +110,11 @@ namespace winrt::GraphPaper::implementation
 		ANCH_TYPE::ANCH_NW
 	};
 
-	// 矢じりの形式
-	enum struct ARROWHEAD_STYLE {
+	// 矢じるしの形式
+	enum struct ARROW_STYLE {
 		NONE,	// なし
-		OPENED,	// 開いた矢じり
-		FILLED	// 閉じた矢じり
+		OPENED,	// 開いた矢じるし
+		FILLED	// 閉じた矢じるし
 	};
 
 	// 方眼の表示
@@ -124,8 +124,8 @@ namespace winrt::GraphPaper::implementation
 		FRONT	// 最前面に表示
 	};
 
-	// 矢じりの寸法
-	struct ARROWHEAD_SIZE {
+	// 矢じるしの寸法
+	struct ARROW_SIZE {
 		float m_width;		// 返しの幅
 		float m_length;		// 先端から付け根までの長さ
 		float m_offset;		// 先端のオフセット
@@ -167,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr float GRID_GRAY_DEF = 0.25f;	// 方眼の濃さ
 	constexpr float MITER_LIMIT_DEF = 10.0f;	// マイター制限の比率
 	constexpr STROKE_DASH_PATT STROKE_DASH_PATT_DEF{ { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F } };
-	constexpr ARROWHEAD_SIZE ARROWHEAD_SIZE_DEF{ 7.0, 16.0, 0.0 };
+	constexpr ARROW_SIZE ARROW_SIZE_DEF{ 7.0, 16.0, 0.0 };
 	constexpr TOOL_POLY TOOL_POLY_DEF{ 3, true, true, true, true };
 	constexpr float FONT_SIZE_DEF = static_cast<float>(12.0 * 96.0 / 72.0);
 	constexpr D2D1_SIZE_F TEXT_MARGIN_DEF{ FONT_SIZE_DEF / 4.0, FONT_SIZE_DEF / 4.0 };
@@ -188,8 +188,8 @@ namespace winrt::GraphPaper::implementation
 	void anchor_draw_ellipse(const D2D1_POINT_2F c_pos, SHAPE_DX& dx);
 	// 同値か判定する.
 	template<typename T> inline bool equal(const T a, const T b) noexcept { return a == b; };
-	// 矢じりの寸法が同じか判定する.
-	inline bool equal(const ARROWHEAD_SIZE& a, const ARROWHEAD_SIZE& b) noexcept;
+	// 矢じるしの寸法が同じか判定する.
+	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept;
 	// 線の単点が同じか判定する.
 	inline bool equal(const CAP_STYLE& a, const CAP_STYLE& b) noexcept;
 	// 色が同じか判定する.
@@ -210,7 +210,7 @@ namespace winrt::GraphPaper::implementation
 	inline bool equal(winrt::hstring const& a, const wchar_t* b) noexcept;
 	// 色の成分が同じか判定する.
 	inline bool equal_color_comp(const FLOAT a, const FLOAT b) noexcept;
-	// 矢じりの返しの位置を求める.
+	// 矢じるしの返しの位置を求める.
 	void get_arrow_barbs(const D2D1_POINT_2F a_vec, const double a_len, const double h_width, const double h_len, D2D1_POINT_2F barbs[]) noexcept;
 	// 色が不透明か判定する.
 	inline bool is_opaque(const D2D1_COLOR_F& color) noexcept;
@@ -262,8 +262,8 @@ namespace winrt::GraphPaper::implementation
 	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& sub) noexcept;
 	// 位置から大きさを引く.
 	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& sub) noexcept;
-	// 矢じりの寸法を読み込む.
-	void dt_read(ARROWHEAD_SIZE& value, DataReader const& dt_reader);
+	// 矢じるしの寸法を読み込む.
+	void dt_read(ARROW_SIZE& value, DataReader const& dt_reader);
 	// 線分の端点を読み込む.
 	void dt_read(CAP_STYLE& value, DataReader const& dt_reader);
 	// 色をデータリーダーから読み込む.
@@ -290,8 +290,8 @@ namespace winrt::GraphPaper::implementation
 	wchar_t* wchar_cpy_esc(const wchar_t* const s);
 	// 文字列の長さ. 引数がヌルポインタの場合, 0 を返す.
 	uint32_t wchar_len(const wchar_t* const t) noexcept;
-	// 矢じりの寸法をデータライターに書き込む.
-	void dt_write(const ARROWHEAD_SIZE& value, DataWriter const& dt_writer);
+	// 矢じるしの寸法をデータライターに書き込む.
+	void dt_write(const ARROW_SIZE& value, DataWriter const& dt_writer);
 	// 線分の端点をデータライターに書き込む.
 	void dt_write(const CAP_STYLE& value, DataWriter const& dt_writer);
 	// 色をデータライターに書き込む.
@@ -418,6 +418,14 @@ namespace winrt::GraphPaper::implementation
 		static D2D1_COLOR_F s_anch_color;
 		// 図形の部位の大きさ
 		static float s_anch_len;
+		//static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
+		static D2D1_COLOR_F m_range_background;	// 文字範囲の背景色
+		static D2D1_COLOR_F m_range_foreground;	// 文字範囲の文字色
+		static D2D1_COLOR_F m_theme_background;	// 前景色
+		static D2D1_COLOR_F m_theme_foreground;	// 背景色
+		//static winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush;	// 文字範囲の文字色ブラシ
+		//static winrt::com_ptr<ID2D1SolidColorBrush> m_shape_brush;	// 図形の色ブラシ
+		//static winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック
 
 
 		// 図形を破棄する.
@@ -426,10 +434,10 @@ namespace winrt::GraphPaper::implementation
 		virtual void draw(SHAPE_DX& /*dx*/) {}
 		// 部位の位置を得る.
 		virtual	void get_anch_pos(const uint32_t /*anch*/, D2D1_POINT_2F&/*value*/) const noexcept {}
-		// 矢じりの寸法を得る
-		virtual bool get_arrow_size(ARROWHEAD_SIZE& /*value*/) const noexcept { return false; }
-		// 矢じりの形式を得る.
-		virtual bool get_arrow_style(ARROWHEAD_STYLE& /*value*/) const noexcept { return false; }
+		// 矢じるしの寸法を得る
+		virtual bool get_arrow_size(ARROW_SIZE& /*value*/) const noexcept { return false; }
+		// 矢じるしの形式を得る.
+		virtual bool get_arrow_style(ARROW_STYLE& /*value*/) const noexcept { return false; }
 		// 図形を囲む領域を得る.
 		virtual void get_bound(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/, D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept {}
 		// 角丸半径を得る.
@@ -506,10 +514,10 @@ namespace winrt::GraphPaper::implementation
 		virtual bool is_selected(void) const noexcept { return false; }
 		// 差分だけ移動する.
 		virtual	bool move(const D2D1_POINT_2F /*value*/) { return false; }
-		// 値を矢じりの寸法に格納する.
-		virtual bool set_arrow_size(const ARROWHEAD_SIZE& /*value*/) { return false; }
-		// 値を矢じりの形式に格納する.
-		virtual bool set_arrow_style(const ARROWHEAD_STYLE /*value*/) { return false; }
+		// 値を矢じるしの寸法に格納する.
+		virtual bool set_arrow_size(const ARROW_SIZE& /*value*/) { return false; }
+		// 値を矢じるしの形式に格納する.
+		virtual bool set_arrow_style(const ARROW_STYLE /*value*/) { return false; }
 		// 値を角丸半径に格納する.
 		virtual bool set_corner_radius(const D2D1_POINT_2F& /*alue*/) noexcept { return false; }
 		// 値を消去フラグに格納する.
@@ -590,8 +598,8 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeSheet : Shape {
 
 		// 既定の図形属性
-		ARROWHEAD_SIZE m_arrow_size{ ARROWHEAD_SIZE_DEF };	// 矢じりの寸法
-		ARROWHEAD_STYLE m_arrow_style = ARROWHEAD_STYLE::NONE;	// 矢じりの形式
+		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEF };	// 矢じるしの寸法
+		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
 		D2D1_POINT_2F m_corner_rad{ GRID_LEN_DEF, GRID_LEN_DEF };	// 角丸半径
 		D2D1_COLOR_F m_fill_color{ S_WHITE };	// 塗りつぶしの色
 		D2D1_COLOR_F m_font_color{ S_BLACK };	// 書体の色 (MainPage のコンストラクタで設定)
@@ -644,10 +652,10 @@ namespace winrt::GraphPaper::implementation
 		void draw_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
 		// 方眼を表示する,
 		void draw_grid(SHAPE_DX const& dx, const D2D1_POINT_2F offset);
-		// 矢じりの寸法を得る.
-		bool get_arrow_size(ARROWHEAD_SIZE& value) const noexcept;
-		// 矢じりの形式を得る.
-		bool get_arrow_style(ARROWHEAD_STYLE& value) const noexcept;
+		// 矢じるしの寸法を得る.
+		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
+		// 矢じるしの形式を得る.
+		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
 		// 方眼の基準の大きさを得る.
 		bool get_grid_base(float& value) const noexcept;
 		// 方眼の色を得る.
@@ -709,7 +717,7 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから読み込む.
 		void read(DataReader const& dt_reader);
 		// 図形の属性値を格納する.
-		void set_to(Shape* s) noexcept;
+		void set_attr_to(Shape* s) noexcept;
 		// 値を角丸半径に格納する.
 		bool set_corner_radius(const D2D1_POINT_2F& value) noexcept;
 		// 値を方眼の基準の大きさに格納する.
@@ -728,10 +736,10 @@ namespace winrt::GraphPaper::implementation
 		bool set_sheet_scale(const float value) noexcept;
 		// 値を用紙の寸法に格納する.
 		bool set_sheet_size(const D2D1_SIZE_F value) noexcept;
-		// 値を矢じりの寸法に格納する.
-		bool set_arrow_size(const ARROWHEAD_SIZE& value);
-		// 値を矢じりの形式に格納する.
-		bool set_arrow_style(const ARROWHEAD_STYLE value);
+		// 値を矢じるしの寸法に格納する.
+		bool set_arrow_size(const ARROW_SIZE& value);
+		// 値を矢じるしの形式に格納する.
+		bool set_arrow_style(const ARROW_STYLE value);
 		// 値を塗りつぶし色に格納する.
 		bool set_fill_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を書体の色に格納する.
@@ -914,8 +922,8 @@ namespace winrt::GraphPaper::implementation
 		ShapeStroke(DataReader const& dt_reader);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
-		// 矢じりをデータライターに SVG タグとして書き込む.
-		void write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, const ARROWHEAD_STYLE h_style, DataWriter const& dt_writer) const;
+		// 矢じるしをデータライターに SVG タグとして書き込む.
+		void write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, const ARROW_STYLE h_style, DataWriter const& dt_writer) const;
 		// データライターに SVG タグとして書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
 	};
@@ -924,10 +932,10 @@ namespace winrt::GraphPaper::implementation
 	// 矢印つき直線
 	//------------------------------
 	struct ShapeLineA : ShapeStroke {
-		ARROWHEAD_STYLE m_arrow_style = ARROWHEAD_STYLE::NONE;	// 矢じりの形式
-		ARROWHEAD_SIZE m_arrow_size{ ARROWHEAD_SIZE_DEF };	// 矢じりの寸法
-		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_style{ nullptr };	// 矢じりの D2D ストロークスタイル
-		winrt::com_ptr<ID2D1PathGeometry> m_d2d_arrow_geom{ nullptr };	// 矢じりの D2D パスジオメトリ
+		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
+		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEF };	// 矢じるしの寸法
+		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_style{ nullptr };	// 矢じるしの D2D ストロークスタイル
+		winrt::com_ptr<ID2D1PathGeometry> m_d2d_arrow_geom{ nullptr };	// 矢じるしの D2D パスジオメトリ
 
 		//------------------------------
 		// shape_line.cpp
@@ -936,7 +944,7 @@ namespace winrt::GraphPaper::implementation
 		// コンストラクタ
 		ShapeLineA(const size_t d_cnt, const ShapeSheet* s_attr, const bool a_none = false) :
 			ShapeStroke(d_cnt, s_attr),
-			m_arrow_style(a_none ? ARROWHEAD_STYLE::NONE : s_attr->m_arrow_style),
+			m_arrow_style(a_none ? ARROW_STYLE::NONE : s_attr->m_arrow_style),
 			m_arrow_size(s_attr->m_arrow_size),
 			m_d2d_arrow_geom(nullptr),
 			m_d2d_arrow_style(nullptr)
@@ -953,14 +961,14 @@ namespace winrt::GraphPaper::implementation
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
-		// 矢じりの寸法を得る.
-		bool get_arrow_size(ARROWHEAD_SIZE& size) const noexcept;
-		// 矢じりの形式を得る.
-		bool get_arrow_style(ARROWHEAD_STYLE& value) const noexcept;
-		// 値を矢じりの寸法に格納する.
-		bool set_arrow_size(const ARROWHEAD_SIZE& value);
-		// 値を矢じりの形式に格納する.
-		bool set_arrow_style(const ARROWHEAD_STYLE value);
+		// 矢じるしの寸法を得る.
+		bool get_arrow_size(ARROW_SIZE& size) const noexcept;
+		// 矢じるしの形式を得る.
+		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
+		// 値を矢じるしの寸法に格納する.
+		bool set_arrow_size(const ARROW_SIZE& value);
+		// 値を矢じるしの形式に格納する.
+		bool set_arrow_style(const ARROW_STYLE value);
 		//	値を, 部位の位置に格納する. 
 		bool set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch);
 		// 値を始点に格納する.
@@ -1123,10 +1131,10 @@ namespace winrt::GraphPaper::implementation
 		bool move(const D2D1_POINT_2F value);
 		// 値を, 部位の位置に格納する.
 		bool set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch);
-		// 値を矢じりの寸法に格納する.
-		bool set_arrow_size(const ARROWHEAD_SIZE& value);
-		// 値を矢じりの形式に格納する.
-		bool set_arrow_style(const ARROWHEAD_STYLE value);
+		// 値を矢じるしの寸法に格納する.
+		bool set_arrow_size(const ARROW_SIZE& value);
+		// 値を矢じるしの形式に格納する.
+		bool set_arrow_style(const ARROW_STYLE value);
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_start_pos(const D2D1_POINT_2F value);
 		// データライターに書き込む.
@@ -1156,8 +1164,8 @@ namespace winrt::GraphPaper::implementation
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
-		// 値を矢じりの形式に格納する.
-		bool set_arrow_style(const ARROWHEAD_STYLE value);
+		// 値を矢じるしの形式に格納する.
+		bool set_arrow_style(const ARROW_STYLE value);
 		// 値を塗りつぶし色に格納する.
 		bool set_fill_color(const D2D1_COLOR_F& value) noexcept;
 		// 図形を作成する.
@@ -1312,8 +1320,8 @@ namespace winrt::GraphPaper::implementation
 		void write_svg(DataWriter const& dt_writer) const;
 	};
 
-	// 矢じりの寸法が同じか判定する.
-	inline bool equal(const ARROWHEAD_SIZE& a, const ARROWHEAD_SIZE& b) noexcept
+	// 矢じるしの寸法が同じか判定する.
+	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept
 	{
 		return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) && equal(a.m_offset, b.m_offset);
 	}

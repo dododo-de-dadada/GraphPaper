@@ -18,11 +18,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//　見本リストビューがロードされた.
-	void MainPage::sample_list_loaded(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::sample_lview_loaded(IInspectable const&, RoutedEventArgs const&)
 	{
-		const auto item = lv_sample_list().SelectedItem();
+		const auto item = lv_sample_lview().SelectedItem();
 		if (item != nullptr) {
-			lv_sample_list().ScrollIntoView(item);
+			lv_sample_lview().ScrollIntoView(item);
 		}
 	}
 
@@ -67,7 +67,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_sample_dx.m_dxgi_swap_chain != nullptr) {
 			m_sample_dx.m_dxgi_swap_chain = nullptr;
 		}
-		m_sample_sheet.set_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		const auto w = scp_sample_panel().ActualWidth();
 		const auto h = scp_sample_panel().ActualHeight();
 		m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(w);

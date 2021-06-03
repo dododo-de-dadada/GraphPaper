@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_arrow.cpp
-// 矢じりの形式と寸法
+// 矢じるしの形式と寸法
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -12,25 +12,25 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow";
 	constexpr float SLIDER_STEP = 0.5f;
 
-	// 線枠メニューの「矢じりの種類」のサブ項目が選択された.
+	// 線枠メニューの「矢じるしの種類」のサブ項目が選択された.
 	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		ARROWHEAD_STYLE a_style;
+		ARROW_STYLE a_style;
 		if (sender == rmfi_arrow_style_none()) {
-			a_style = ARROWHEAD_STYLE::NONE;
+			a_style = ARROW_STYLE::NONE;
 		}
 		else if (sender == rmfi_arrow_style_opened()) {
-			a_style = ARROWHEAD_STYLE::OPENED;
+			a_style = ARROW_STYLE::OPENED;
 		}
 		else if (sender == rmfi_arrow_style_filled()) {
-			a_style = ARROWHEAD_STYLE::FILLED;
+			a_style = ARROW_STYLE::FILLED;
 		}
 		else {
 			return;
 		}
-		mfi_arrow_size().IsEnabled(a_style != ARROWHEAD_STYLE::NONE);
-		mfi_arrow_size_2().IsEnabled(a_style != ARROWHEAD_STYLE::NONE);
-		if (undo_push_set<UNDO_OP::ARROWHEAD_STYLE>(a_style)) {
+		mfi_arrow_size().IsEnabled(a_style != ARROW_STYLE::NONE);
+		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
+		if (undo_push_set<UNDO_OP::ARROW_STYLE>(a_style)) {
 			undo_push_null();
 			edit_menu_enable();
 			sheet_draw();
@@ -42,42 +42,42 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S> void MainPage::arrow_set_slider_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring hdr;
+		winrt::hstring text;
 
-		if constexpr (U == UNDO_OP::ARROWHEAD_SIZE) {
+		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			if constexpr (S == 0) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_arrow_width") + L": ";
+				text = r_loader.GetString(L"str_arrow_width") + L": ";
 			}
 			if constexpr (S == 1) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_arrow_length") + L": ";
+				text = r_loader.GetString(L"str_arrow_length") + L": ";
 			}
 			if constexpr (S == 2) {
 				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				hdr = r_loader.GetString(L"str_arrow_offset") + L": ";
+				text = r_loader.GetString(L"str_arrow_offset") + L": ";
 			}
 		}
-		if constexpr (U == UNDO_OP::ARROWHEAD_SIZE) {
+		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
 			//const double dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			//const double g_len = g_base + 1.0;
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-			hdr = hdr + buf;
+			text = text + buf;
 		}
 		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(hdr));
+			sample_slider_0().Header(box_value(text));
 		}
 		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(hdr));
+			sample_slider_1().Header(box_value(text));
 		}
 		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(hdr));
+			sample_slider_2().Header(box_value(text));
 		}
 		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(hdr));
+			sample_slider_3().Header(box_value(text));
 		}
 	}
 
@@ -91,8 +91,8 @@ namespace winrt::GraphPaper::implementation
 		const auto value = static_cast<float>(args.NewValue());
 		// 値をスライダーのヘッダーに格納する.
 		arrow_set_slider_header<U, S>(value);
-		if constexpr (U == UNDO_OP::ARROWHEAD_SIZE) {
-			ARROWHEAD_SIZE a_size;
+		if constexpr (U == UNDO_OP::ARROW_SIZE) {
+			ARROW_SIZE a_size;
 			m_sample_shape->get_arrow_size(a_size);
 			if constexpr (S == 0) {
 				a_size.m_width = static_cast<FLOAT>(value * SLIDER_STEP);
@@ -110,14 +110,14 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「矢じりの大きさ」が選択された.
+	// 線枠メニューの「矢じるしの大きさ」が選択された.
 	IAsyncAction MainPage::arrow_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		m_sample_sheet.set_to(&m_sheet_main);
-		ARROWHEAD_SIZE a_size;
+		m_sample_sheet.set_attr_to(&m_sheet_main);
+		ARROW_SIZE a_size;
 		m_sample_sheet.get_arrow_size(a_size);
 		const float val0 = a_size.m_width / SLIDER_STEP;
 		const float val1 = a_size.m_length / SLIDER_STEP;
@@ -125,22 +125,22 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
-		arrow_set_slider_header<UNDO_OP::ARROWHEAD_SIZE, 0>(val0);
-		arrow_set_slider_header<UNDO_OP::ARROWHEAD_SIZE, 1>(val1);
-		arrow_set_slider_header<UNDO_OP::ARROWHEAD_SIZE, 2>(val2);
+		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 0>(val0);
+		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 1>(val1);
+		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 2>(val2);
 		sample_slider_0().Visibility(VISIBLE);
 		sample_slider_1().Visibility(VISIBLE);
 		sample_slider_2().Visibility(VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROWHEAD_SIZE, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROWHEAD_SIZE, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROWHEAD_SIZE, 2> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 2> });
 		m_sample_type = SAMP_TYPE::STROKE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			ARROWHEAD_SIZE sample_value;
+			ARROW_SIZE sample_value;
 			m_sample_shape->get_arrow_size(sample_value);
-			if (undo_push_set<UNDO_OP::ARROWHEAD_SIZE>(sample_value)) {
+			if (undo_push_set<UNDO_OP::ARROW_SIZE>(sample_value)) {
 				undo_push_null();
 				edit_menu_enable();
 				sheet_draw();
@@ -160,19 +160,19 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	// 線枠メニューの「矢じりの種類」に印をつける.
-	// a_style	矢じりの形式
-	void MainPage::arrow_style_check_menu(const ARROWHEAD_STYLE a_style)
+	// 線枠メニューの「矢じるしの種類」に印をつける.
+	// a_style	矢じるしの形式
+	void MainPage::arrow_style_check_menu(const ARROW_STYLE a_style)
 	{
-		rmfi_arrow_style_none().IsChecked(a_style == ARROWHEAD_STYLE::NONE);
-		rmfi_arrow_style_opened().IsChecked(a_style == ARROWHEAD_STYLE::OPENED);
-		rmfi_arrow_style_filled().IsChecked(a_style == ARROWHEAD_STYLE::FILLED);
-		mfi_arrow_size().IsEnabled(a_style != ARROWHEAD_STYLE::NONE);
+		rmfi_arrow_style_none().IsChecked(a_style == ARROW_STYLE::NONE);
+		rmfi_arrow_style_opened().IsChecked(a_style == ARROW_STYLE::OPENED);
+		rmfi_arrow_style_filled().IsChecked(a_style == ARROW_STYLE::FILLED);
+		mfi_arrow_size().IsEnabled(a_style != ARROW_STYLE::NONE);
 
-		rmfi_arrow_style_none_2().IsChecked(a_style == ARROWHEAD_STYLE::NONE);
-		rmfi_arrow_style_opened_2().IsChecked(a_style == ARROWHEAD_STYLE::OPENED);
-		rmfi_arrow_style_filled_2().IsChecked(a_style == ARROWHEAD_STYLE::FILLED);
-		mfi_arrow_size_2().IsEnabled(a_style != ARROWHEAD_STYLE::NONE);
+		rmfi_arrow_style_none_2().IsChecked(a_style == ARROW_STYLE::NONE);
+		rmfi_arrow_style_opened_2().IsChecked(a_style == ARROW_STYLE::OPENED);
+		rmfi_arrow_style_filled_2().IsChecked(a_style == ARROW_STYLE::FILLED);
+		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
 	}
 
 }

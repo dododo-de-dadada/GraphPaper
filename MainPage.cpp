@@ -364,10 +364,10 @@ namespace winrt::GraphPaper::implementation
 		{
 			using winrt::Windows::UI::ViewManagement::UISettings;
 
-			m_pointer_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
+			m_event_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
 			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			m_pointer_click_dist = 6.0 * raw_dpi / log_dpi;
+			m_event_click_dist = 6.0 * raw_dpi / log_dpi;
 		}
 
 		/*{
@@ -498,27 +498,29 @@ namespace winrt::GraphPaper::implementation
 			auto sel_back_color = Resources().TryLookup(box_value(L"SystemColorHighlightColor"));
 			auto sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
 			if (sel_back_color != nullptr && sel_text_color != nullptr) {
-				conv_uwp_to_dx(unbox_value<Color>(sel_back_color), m_sheet_dx.m_range_background);
-				conv_uwp_to_dx(unbox_value<Color>(sel_text_color), m_sheet_dx.m_range_foreground);
+				conv_uwp_to_dx(unbox_value<Color>(sel_back_color), Shape::m_range_background);
+				conv_uwp_to_dx(unbox_value<Color>(sel_text_color), Shape::m_range_foreground);
 			}
 			else {
-				m_sheet_dx.m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
-				m_sheet_dx.m_range_foreground = S_WHITE;
+				Shape::m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
+				Shape::m_range_foreground = S_WHITE;
 			}
 			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
 			auto const& fore_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
 			if (back_theme != nullptr && fore_theme != nullptr) {
-				conv_uwp_to_dx(unbox_value<Brush>(back_theme), m_sheet_dx.m_theme_background);
-				conv_uwp_to_dx(unbox_value<Brush>(fore_theme), m_sheet_dx.m_theme_foreground);
+				conv_uwp_to_dx(unbox_value<Brush>(back_theme), Shape::m_theme_background);
+				conv_uwp_to_dx(unbox_value<Brush>(fore_theme), Shape::m_theme_foreground);
 			}
 			else {
-				m_sheet_dx.m_theme_background = S_WHITE;
-				m_sheet_dx.m_theme_foreground = S_BLACK;
+				Shape::m_theme_background = S_WHITE;
+				Shape::m_theme_foreground = S_BLACK;
 			}
-			m_sample_dx.m_range_background = m_sheet_dx.m_range_background;
-			m_sample_dx.m_range_foreground = m_sheet_dx.m_range_foreground;
-			m_sample_dx.m_theme_background = m_sheet_dx.m_theme_background;
-			m_sample_dx.m_theme_foreground = m_sheet_dx.m_theme_foreground;
+			/*
+			Shape::m_range_background = Shape::m_range_background;
+			Shape::m_range_foreground = Shape::m_range_foreground;
+			Shape::m_theme_background = m_sheet_dx.m_theme_background;
+			Shape::m_theme_foreground = m_sheet_dx.m_theme_foreground;
+			*/
 		}
 
 		if (co_await pref_load_async() != S_OK) {

@@ -113,15 +113,10 @@ namespace winrt::GraphPaper::implementation
 		IDeviceNotify* m_deviceNotify = nullptr;
 
 		// 図形表示用の D2D オブジェクト
-
+		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック
 		winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
-		D2D1_COLOR_F m_range_background = RNG_BACK;	// 文字範囲の背景色
-		D2D1_COLOR_F m_range_foreground = RNG_TEXT;	// 文字範囲の文字色
-		D2D1_COLOR_F m_theme_background = S_WHITE;	// 前景色
-		D2D1_COLOR_F m_theme_foreground = S_BLACK;	// 背景色
 		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush;	// 文字範囲の文字色ブラシ
 		winrt::com_ptr<ID2D1SolidColorBrush> m_shape_brush;	// 図形の色ブラシ
-		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック
 
 		// 描画環境を破棄する.
 		void Release(void)
