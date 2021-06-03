@@ -75,7 +75,7 @@ namespace winrt::GraphPaper::implementation
 	//{
 	// if (mfi_bring_forward().IsEnabled()) {
 	// 	//arrng_bring_forward_click(nullptr, nullptr);
-	// 	arrng_order<S_LIST_T::reverse_iterator>();
+	// 	arrng_order<SHAPE_LIST::reverse_iterator>();
 	// }
 	//}
 

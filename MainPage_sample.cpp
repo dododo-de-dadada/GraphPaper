@@ -94,7 +94,7 @@ namespace winrt::GraphPaper::implementation
 				const auto pad = w * 0.125;
 				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
 				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
-				m_sample_shape = new ShapeLine(s_pos, diff, &m_sample_sheet);
+				m_sample_shape = new ShapeLineA(s_pos, diff, &m_sample_sheet);
 			}
 			else if (m_sample_type == SAMP_TYPE::FILL) {
 				const auto pad = w * 0.125;

@@ -39,7 +39,7 @@
 //        +-------------------------------+
 //        |                               |
 // +------+------+                        |
-// | ShapeLine   |                        |
+// | ShapeLineA  |                        |
 // +------+------+                        |
 //        |                               |
 // +------+------+                 +------+------+
@@ -68,6 +68,9 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t DEBUG_MSG[] = L"Memory leak occurs";
 #endif
 	constexpr double PT_ROUND = 1.0 / 16.0;
+
+	// 前方宣言
+	struct Shape;
 
 	// アンカー (図形の部位) の種類
 	// 折れ線の頂点をあらわすため, enum struct でなく enum を用いる.
@@ -223,14 +226,12 @@ namespace winrt::GraphPaper::implementation
 	inline void pt_avg(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept;
 	// 二点で囲まれた方形を得る.
 	void pt_bound(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
-	// 図形の部位が位置 { 0,0 } を含むか判定する.
-	bool pt_in_anch(const D2D1_POINT_2F a_pos) noexcept;
 	// 位置が図形の部位に含まれるか判定する.
-	bool pt_in_anch(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept;
+	inline bool pt_in_anch(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept;
 	// 位置がだ円に含まれるか判定する.
 	bool pt_in_elli(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept;
 	// 位置が円に含まれるか判定する.
-	inline bool pt_in_circle(const D2D1_POINT_2F t_pos, const double rad) noexcept;
+	inline bool pt_in_circle(const D2D1_POINT_2F t_vec, const double rad) noexcept;
 	// 位置が円に含まれるか判定する.
 	inline bool pt_in_circle(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad) noexcept;
 	// 線分が位置を含むか, 太さも考慮して判定する.
@@ -340,7 +341,74 @@ namespace winrt::GraphPaper::implementation
 	// 破線の形式と配置をデータライターに SVG として書き込む.
 	void write_svg(const D2D1_DASH_STYLE style, const STROKE_DASH_PATT& patt, const double width, DataWriter const& dt_writer);
 
+	//------------------------------
+	// shape_list.cpp
+	// 図形リストに関連した処理
+	//------------------------------
+
+	using SHAPE_LIST = std::list<struct Shape*>;
+
+	// 利用可能な書体名か判定し, 利用できない書体があったならばそれを得る.
+	bool slist_test_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept;
+
+	// 最後の図形を得る.
+	Shape* slist_back(SHAPE_LIST const& slist) noexcept;
+
+	// 図形リストを消去し, 含まれる図形を破棄する.
+	void slist_clear(SHAPE_LIST& slist) noexcept;
+
+	// 図形を種類別に数える.
+	void slist_count(const SHAPE_LIST& slist, uint32_t& undeleted_cnt, uint32_t& selected_cnt, uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt, uint32_t& text_cnt, bool& fore_selected, bool& back_selected, bool& prev_selected) noexcept;
+
+	// 先頭から図形まで数える.
+	uint32_t slist_count(SHAPE_LIST const& slist, const Shape* s) noexcept;
+
+	// 最初の図形をリストから得る.
+	Shape* slist_front(SHAPE_LIST const& slist) noexcept;
+
+	// 図形と用紙を囲む領域を得る.
+	void slist_bound(SHAPE_LIST const& slist, const D2D1_SIZE_F sheet_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
+
+	// 図形を囲む領域をリストから得る.
+	void slist_bound(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
+
+	// 位置を含む図形とその部位を得る.
+	uint32_t slist_hit_test(SHAPE_LIST const& slist, const D2D1_POINT_2F t_pos, Shape*& s) noexcept;
+
+	// 図形を挿入する.
+	void slist_insert(SHAPE_LIST& slist, Shape* const s_ins, const Shape* s_at) noexcept;
+
+	// 選択された図形を差分だけ移動する.
+	bool slist_move(SHAPE_LIST const& slist, const D2D1_POINT_2F diff) noexcept;
+
+	// 図形のその次の図形を得る.
+	Shape* slist_next(SHAPE_LIST const& slist, const Shape* s) noexcept;
+
+	// 図形のその前の図形を得る.
+	Shape* slist_prev(SHAPE_LIST const& slist, const Shape* s) noexcept;
+
+	// 図形リストをデータリーダーから読み込む.
+	bool slist_read(SHAPE_LIST& slist, DataReader const& dt_reader);
+
+	// 図形をリストから削除し, 削除した図形の次の図形を得る.
+	Shape* slist_remove(SHAPE_LIST& slist, const Shape* s) noexcept;
+
+	// 選択された図形のリストを得る.
+	template <typename S> void slist_selected(SHAPE_LIST const& slist, SHAPE_LIST& t_list) noexcept;
+
+	// 図形リストをデータライターに書き込む. REDUCE 場合の消去フラグの立つ図形は無視する.
+	template <bool REDUCE> void slist_write(const SHAPE_LIST& slist, DataWriter const& dt_writer);
+
+	// リストの中の図形の順番を得る.
+	template <typename S, typename T> bool slist_match(SHAPE_LIST const& slist, S s, T& t);
+
+	// 選択された文字列図形から, それらを改行で連結した文字列を得る.
+	winrt::hstring slist_selected_all_text(SHAPE_LIST const& slist) noexcept;
+
+
+	//------------------------------
 	// 図形のひな型
+	//------------------------------
 	struct Shape {
 		// D2D ファクトリのキャッシュ
 		static ID2D1Factory3* s_d2d_factory;
@@ -353,7 +421,7 @@ namespace winrt::GraphPaper::implementation
 
 
 		// 図形を破棄する.
-		virtual ~Shape() {}
+		virtual ~Shape(void) {}
 		// 図形を表示する
 		virtual void draw(SHAPE_DX& /*dx*/) {}
 		// 部位の位置を得る.
@@ -517,70 +585,6 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// shape_list.cpp
-	// 図形リストに関連した処理
-	//------------------------------
-
-	using S_LIST_T = std::list<struct Shape*>;
-
-	// 使用可能な書体名か判定し, 使用できない書体があったならばそれを得る.
-	bool s_list_test_font(const S_LIST_T& s_list, wchar_t*& unavailable_font) noexcept;
-
-	// 最後の図形を得る.
-	Shape* s_list_back(S_LIST_T const& s_list) noexcept;
-
-	// 図形リストを消去し, 含まれる図形を破棄する.
-	void s_list_clear(S_LIST_T& s_list) noexcept;
-
-	// 図形を種類別に数える.
-	void s_list_count(const S_LIST_T& s_list, uint32_t& undeleted_cnt, uint32_t& selected_cnt, uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt, uint32_t& text_cnt, bool& fore_selected, bool& back_selected, bool& prev_selected) noexcept;
-
-	// 先頭から図形まで数える.
-	uint32_t s_list_count(S_LIST_T const& s_list, const Shape* s) noexcept;
-
-	// 最初の図形をリストから得る.
-	Shape* s_list_front(S_LIST_T const& s_list) noexcept;
-
-	// 図形と用紙を囲む領域を得る.
-	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F sheet_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
-
-	// 図形を囲む領域をリストから得る.
-	void s_list_bound(S_LIST_T const& s_list, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
-
-	// 位置を含む図形とその部位を得る.
-	uint32_t s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, Shape*& s) noexcept;
-
-	// 図形を挿入する.
-	void s_list_insert(S_LIST_T& s_list, Shape* const s_ins, const Shape* s_at) noexcept;
-
-	// 選択された図形を差分だけ移動する.
-	bool s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F diff) noexcept;
-
-	// 図形のその次の図形を得る.
-	Shape* s_list_next(S_LIST_T const& s_list, const Shape* s) noexcept;
-
-	// 図形のその前の図形を得る.
-	Shape* s_list_prev(S_LIST_T const& s_list, const Shape* s) noexcept;
-
-	// 図形リストをデータリーダーから読み込む.
-	bool s_list_read(S_LIST_T& s_list, DataReader const& dt_reader);
-
-	// 図形をリストから削除し, 削除した図形の次の図形を得る.
-	Shape* s_list_remove(S_LIST_T& s_list, const Shape* s) noexcept;
-
-	// 選択された図形のリストを得る.
-	template <typename S> void s_list_selected(S_LIST_T const& s_list, S_LIST_T& t_list) noexcept;
-
-	// 図形リストをデータライターに書き込む. REDUCE 場合の消去フラグの立つ図形は無視する.
-	template <bool REDUCE> void s_list_write(const S_LIST_T& s_list, DataWriter const& dt_writer);
-
-	// リストの中の図形の順番を得る.
-	template <typename S, typename T> bool s_list_match(S_LIST_T const& s_list, S s, T& t);
-
-	// 選択された文字列図形から, それらを改行で連結した文字列を得る.
-	winrt::hstring s_list_selected_all_text(S_LIST_T const& s_list) noexcept;
-
-	//------------------------------
 	// 用紙
 	//------------------------------
 	struct ShapeSheet : Shape {
@@ -588,18 +592,14 @@ namespace winrt::GraphPaper::implementation
 		// 既定の図形属性
 		ARROWHEAD_SIZE m_arrow_size{ ARROWHEAD_SIZE_DEF };	// 矢じりの寸法
 		ARROWHEAD_STYLE m_arrow_style = ARROWHEAD_STYLE::NONE;	// 矢じりの形式
-
 		D2D1_POINT_2F m_corner_rad{ GRID_LEN_DEF, GRID_LEN_DEF };	// 角丸半径
-
 		D2D1_COLOR_F m_fill_color{ S_WHITE };	// 塗りつぶしの色
-
 		D2D1_COLOR_F m_font_color{ S_BLACK };	// 書体の色 (MainPage のコンストラクタで設定)
 		wchar_t* m_font_family = nullptr;	// 書体名
 		float m_font_size = FONT_SIZE_DEF;	// 書体の大きさ
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
-
 		CAP_STYLE m_stroke_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 線分の端点
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色 (MainPage のコンストラクタで設定)
 		D2D1_CAP_STYLE m_stroke_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端点
@@ -778,7 +778,7 @@ namespace winrt::GraphPaper::implementation
 	// グループ図形
 	//------------------------------
 	struct ShapeGroup : Shape {
-		S_LIST_T m_list_grouped;	// グループ化された図形のリスト
+		SHAPE_LIST m_list_grouped;	// グループ化された図形のリスト
 
 		// 図形を作成する.
 		ShapeGroup(void) {};
@@ -827,11 +827,10 @@ namespace winrt::GraphPaper::implementation
 	// 線枠のひな型
 	//------------------------------
 	struct ShapeStroke : Shape {
-		bool m_deleted = false;	// 消去フラグ
-		bool m_selected = false;	// 選択フラグ
+		bool m_flag_delete = false;	// 消去フラグ
+		bool m_flag_select = false;	// 選択フラグ
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_diff;	// 次の位置への差分
-
 		CAP_STYLE m_stroke_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 線分の端点
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色
 		D2D1_CAP_STYLE m_stroke_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端点
@@ -842,7 +841,6 @@ namespace winrt::GraphPaper::implementation
 		float m_stroke_width = 1.0f;	// 線枠の太さ
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
-		//winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_style{};	// 矢じりの D2D ストロークスタイル
 
 		//------------------------------
 		// shape_stroke.cpp
@@ -850,7 +848,6 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形を破棄する.
 		~ShapeStroke(void);
-
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 図形を囲む領域の左上位置を得る.
@@ -882,15 +879,15 @@ namespace winrt::GraphPaper::implementation
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept;
 		// 消去フラグを判定する.
-		bool is_deleted(void) const noexcept { return m_deleted; }
+		bool is_deleted(void) const noexcept { return m_flag_delete; }
 		// 選択フラグを判定する.
-		bool is_selected(void) const noexcept { return m_selected; }
+		bool is_selected(void) const noexcept { return m_flag_select; }
 		// 差分だけ移動する.
 		virtual	bool move(const D2D1_POINT_2F value);
 		// 値を選択フラグに格納する.
-		bool set_select(const bool value) noexcept { if (m_selected != value) { m_selected = value; return true; } return false; }
+		bool set_select(const bool value) noexcept { if (m_flag_select != value) { m_flag_select = value; return true; } return false; }
 		// 値を消去フラグに格納する.
-		bool set_delete(const bool value) noexcept { if (m_deleted != value) { m_deleted = value;  return true; } return false; }
+		bool set_delete(const bool value) noexcept { if (m_flag_delete != value) { m_flag_delete = value;  return true; } return false; }
 		// 値を, 部位の位置に格納する.
 		bool set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch);
 		// 値を始点に格納する. 他の部位の位置も動く.
@@ -924,9 +921,9 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// 直線
+	// 矢印つき直線
 	//------------------------------
-	struct ShapeLine : ShapeStroke {
+	struct ShapeLineA : ShapeStroke {
 		ARROWHEAD_STYLE m_arrow_style = ARROWHEAD_STYLE::NONE;	// 矢じりの形式
 		ARROWHEAD_SIZE m_arrow_size{ ARROWHEAD_SIZE_DEF };	// 矢じりの寸法
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_style{ nullptr };	// 矢じりの D2D ストロークスタイル
@@ -936,19 +933,20 @@ namespace winrt::GraphPaper::implementation
 		// shape_line.cpp
 		//------------------------------
 
-		ShapeLine(const size_t d_cnt, const ShapeSheet* s_attr, const bool closed = false) :
+		// コンストラクタ
+		ShapeLineA(const size_t d_cnt, const ShapeSheet* s_attr, const bool a_none = false) :
 			ShapeStroke(d_cnt, s_attr),
-			m_arrow_style(!closed ? s_attr->m_arrow_style : ARROWHEAD_STYLE::NONE),
+			m_arrow_style(a_none ? ARROWHEAD_STYLE::NONE : s_attr->m_arrow_style),
 			m_arrow_size(s_attr->m_arrow_size),
 			m_d2d_arrow_geom(nullptr),
 			m_d2d_arrow_style(nullptr)
 		{}
 		// 図形を作成する.
-		ShapeLine(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr);
+		ShapeLineA(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr);
 		// 図形をデータリーダーから読み込む.
-		ShapeLine(DataReader const& dt_reader);
+		ShapeLineA(DataReader const& dt_reader);
 		// 図形を破棄する.
-		~ShapeLine(void);
+		~ShapeLineA(void);
 		// 表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか判定する.
@@ -963,8 +961,6 @@ namespace winrt::GraphPaper::implementation
 		bool set_arrow_size(const ARROWHEAD_SIZE& value);
 		// 値を矢じりの形式に格納する.
 		bool set_arrow_style(const ARROWHEAD_STYLE value);
-		// 部位の位置を得る.
-		//void get_anch_pos(const uint32_t anch, D2D1_POINT_2F& value) const noexcept;
 		//	値を, 部位の位置に格納する. 
 		bool set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch);
 		// 値を始点に格納する.
@@ -986,7 +982,7 @@ namespace winrt::GraphPaper::implementation
 	// 方形
 	//------------------------------
 	struct ShapeRect : ShapeStroke {
-		D2D1_COLOR_F m_fill_color{ S_WHITE };		// 塗りつぶし
+		D2D1_COLOR_F m_fill_color{ S_WHITE };		// 塗りつぶし色
 
 		//------------------------------
 		// shape_rect.cpp
@@ -1051,8 +1047,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct ShapeElli : ShapeRect {
 		// 図形を作成する.
-		ShapeElli(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* attr) :
-			ShapeRect::ShapeRect(b_pos, b_diff, attr)
+		ShapeElli(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
+			ShapeRect::ShapeRect(b_pos, b_diff, s_attr)
 		{}
 		// 図形をデータリーダーから読み込む.
 		ShapeElli(DataReader const& dt_reader) :
@@ -1105,7 +1101,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 折れ線のひな型
 	//------------------------------
-	struct ShapePath : ShapeLine {
+	struct ShapePath : ShapeLineA {
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_path_geom{};	// 折れ線の D2D パスジオメトリ
 
 		//------------------------------
@@ -1116,15 +1112,13 @@ namespace winrt::GraphPaper::implementation
 		// パスジオメトリを作成する.
 		virtual void create_path_geometry(ID2D1Factory3* const/*d_factory*/) {}
 		// 図形を作成する.
-		ShapePath(const size_t d_cnt, const ShapeSheet* s_attr, const bool s_closed) : ShapeLine::ShapeLine(d_cnt, s_attr, s_closed), m_d2d_path_geom(nullptr) {}
+		ShapePath(const size_t d_cnt, const ShapeSheet* s_attr, const bool s_closed) :
+			ShapeLineA::ShapeLineA(d_cnt, s_attr, s_closed), m_d2d_path_geom(nullptr) {}
 		// 図形をデータリーダーから読み込む.
-		ShapePath(DataReader const& dt_reader) : ShapeLine::ShapeLine(dt_reader), m_d2d_path_geom(nullptr) {}
+		ShapePath(DataReader const& dt_reader) :
+			ShapeLineA::ShapeLineA(dt_reader), m_d2d_path_geom(nullptr) {}
 		// 図形を破棄する.
-		//~ShapePath(void);
-		// 矢じりの寸法を得る
-		//bool get_arrow_size(ARROWHEAD_SIZE& value) const noexcept;
-		// 矢じりの形式を得る.
-		//bool get_arrow_style(ARROWHEAD_STYLE& value) const noexcept;
+		~ShapePath(void) { if (m_d2d_path_geom != nullptr) m_d2d_path_geom = nullptr; }
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F value);
 		// 値を, 部位の位置に格納する.
@@ -1434,19 +1428,28 @@ namespace winrt::GraphPaper::implementation
 		c.y = static_cast<FLOAT>((a.y + b.y) * 0.5);
 	}
 
-	// 位置が円に含まれるか判定する.
-	inline bool pt_in_circle(const D2D1_POINT_2F a, const D2D1_POINT_2F c, const double r) noexcept
+	// 図形の部位が位置を含むか判定する.
+	inline bool pt_in_anch(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept
 	{
-		const double dx = static_cast<double>(a.x) - static_cast<double>(c.x);
-		const double dy = static_cast<double>(a.y) - static_cast<double>(c.y);
+		const double a = Shape::s_anch_len * 0.5;
+		const double dx = t_pos.x - a_pos.x;
+		const double dy = t_pos.y - a_pos.y;
+		return -a <= dx && dx <= a && -a <= dy && dy <= a;
+	}
+
+	// 位置が円に含まれるか判定する.
+	inline bool pt_in_circle(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double r) noexcept
+	{
+		const double dx = static_cast<double>(t_pos.x) - static_cast<double>(c_pos.x);
+		const double dy = static_cast<double>(t_pos.y) - static_cast<double>(c_pos.y);
 		return dx * dx + dy * dy <= r * r;
 	}
 
 	// 位置が円に含まれるか判定する.
-	inline bool pt_in_circle(const D2D1_POINT_2F a, const double r) noexcept
+	inline bool pt_in_circle(const D2D1_POINT_2F t_vec, const double r) noexcept
 	{
-		const double dx = a.x;
-		const double dy = a.y;
+		const double dx = t_vec.x;
+		const double dy = t_vec.y;
 		return dx * dx + dy * dy <= r * r;
 	}
 
@@ -1546,12 +1549,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 色が不透明か判定する.
-	// a	色
+	// value	色
 	// 戻り値	不透明ならば true, 透明ならば false.
-	inline bool is_opaque(const D2D1_COLOR_F& a) noexcept
+	inline bool is_opaque(const D2D1_COLOR_F& value) noexcept
 	{
-		const uint32_t aa = static_cast<uint32_t>(round(a.a * 255.0f));
-		return (aa & 0xff) > 0;
+		const uint32_t a = static_cast<uint32_t>(round(value.a * 255.0f));
+		return (a & 0xff) > 0;
 	}
 
 }

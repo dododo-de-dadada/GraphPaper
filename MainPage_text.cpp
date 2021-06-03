@@ -15,11 +15,11 @@ namespace winrt::GraphPaper::implementation
 	// 文字列を検索して見つかった位置を得る.
 	static bool text_find(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept;
 	// 図形リストの中から文字列を検索し, それまで文字範囲が選択されていた図形, 新たに文字列が見つかった図形とその文字範囲を得る.
-	static bool text_find(S_LIST_T& s_list, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s, DWRITE_TEXT_RANGE& s_range);
+	static bool text_find(SHAPE_LIST& slist, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s, DWRITE_TEXT_RANGE& s_range);
 	// 文字列の一部を置換する.
 	static wchar_t* text_replace(wchar_t const* w_text, const uint32_t w_pos, const uint32_t w_len, wchar_t const* r_text, const uint32_t r_len) noexcept;
 	// 文字範囲が選択された図形と文字範囲を見つける.
-	static ShapeText* text_find_range_selected(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, DWRITE_TEXT_RANGE& t_range);
+	static ShapeText* text_find_range_selected(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, DWRITE_TEXT_RANGE& t_range);
 
 	// 文字列を検索して見つかった位置を得る.
 	// w_text	検索される文字列
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形リストの中から文字列を検索し, それまで文字範囲が選択されていた図形, 新たに文字列が見つかった図形とその文字範囲を得る.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// f_text	検索文字列
 	// f_len	検索文字列の文字数
 	// f_case	英文字の区別フラグ
@@ -72,15 +72,15 @@ namespace winrt::GraphPaper::implementation
 	// t	それまで文字範囲が選択されていた図形
 	// s_found	新たに文字列が見つかった図形
 	// s_range	新たに文字列が見つかった図形の文字範囲
-	static bool text_find(S_LIST_T& s_list, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s_found, DWRITE_TEXT_RANGE& s_range)
+	static bool text_find(SHAPE_LIST& slist, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s_found, DWRITE_TEXT_RANGE& s_range)
 	{
 		const auto f_len = wchar_len(f_text);
 		if (f_len == 0) {
 			return false;
 		}
-		std::list<S_LIST_T::iterator> stack;
-		stack.push_back(s_list.begin());
-		stack.push_back(s_list.end());
+		std::list<SHAPE_LIST::iterator> stack;
+		stack.push_back(slist.begin());
+		stack.push_back(slist.end());
 		t = static_cast<ShapeText*>(nullptr);
 		uint32_t t_pos = 0;
 		while (stack.empty() != true) {
@@ -136,8 +136,8 @@ namespace winrt::GraphPaper::implementation
 			// 回り込み検索がない, かつ文字範囲が選択された図形が見つかった場合,
 			return false;
 		}
-		stack.push_back(s_list.begin());
-		stack.push_back(s_list.end());
+		stack.push_back(slist.begin());
+		stack.push_back(slist.end());
 		while (stack.empty() != true) {
 			auto j = stack.back();
 			stack.pop_back();
@@ -185,9 +185,9 @@ namespace winrt::GraphPaper::implementation
 	// 文字範囲が選択された図形と文字範囲を見つける.
 	// t_range	見つかった文字範囲
 	// 戻り値	見つかった図形
-	static ShapeText* text_find_range_selected(S_LIST_T::iterator const& it_beg, S_LIST_T::iterator const& it_end, DWRITE_TEXT_RANGE& t_range)
+	static ShapeText* text_find_range_selected(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, DWRITE_TEXT_RANGE& t_range)
 	{
-		std::list<S_LIST_T::iterator> stack;
+		std::list<SHAPE_LIST::iterator> stack;
 		stack.push_back(it_beg);
 		stack.push_back(it_end);
 		while (stack.empty() != true) {
@@ -295,7 +295,7 @@ namespace winrt::GraphPaper::implementation
 
 		// あらかじめ検索文字列を含む文字列図形があるか判定する.
 		auto flag = false;
-		std::list <S_LIST_T::iterator> stack;
+		std::list <SHAPE_LIST::iterator> stack;
 		stack.push_back(m_list_shapes.begin());
 		stack.push_back(m_list_shapes.end());
 		while (stack.empty() != true) {

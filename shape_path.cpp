@@ -69,12 +69,12 @@ namespace winrt::GraphPaper::implementation
 	// d_cnt	差分の数
 	// s_attr	属性
 	//ShapePath::ShapePath(const size_t d_cnt, const ShapeSheet* s_attr, const bool closed) :
-	//	ShapeLine::ShapeLine(d_cnt, s_attr, closed)
+	//	ShapeLineA::ShapeLineA(d_cnt, s_attr, closed)
 	//{}
 
 	// 図形をデータリーダーから読み込む.
 	//ShapePath::ShapePath(DataReader const& dt_reader) :
-	//	ShapeLine::ShapeLine(dt_reader)
+	//	ShapeLineA::ShapeLineA(dt_reader)
 	//{
 		//m_arrow_style = static_cast<ARROWHEAD_STYLE>(dt_reader.ReadUInt32());
 		//dt_read(m_arrow_size, dt_reader);
@@ -85,7 +85,7 @@ namespace winrt::GraphPaper::implementation
 	// データライターに書き込む.
 	void ShapePath::write(DataWriter const& dt_writer) const
 	{
-		ShapeLine::write(dt_writer);
+		ShapeLineA::write(dt_writer);
 	}
 
 }

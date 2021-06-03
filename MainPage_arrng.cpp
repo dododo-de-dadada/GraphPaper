@@ -10,8 +10,8 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr auto BACK = true;
-	using BACKWARD = S_LIST_T::iterator;
-	using FORWARD = S_LIST_T::reverse_iterator;
+	using BACKWARD = SHAPE_LIST::iterator;
+	using FORWARD = SHAPE_LIST::reverse_iterator;
 	constexpr auto FRONT = false;
 
 	// 編集メニューの「前面に移動」が選択された.
@@ -130,15 +130,15 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 
-		S_LIST_T s_list;
-		s_list_selected<Shape>(m_list_shapes, s_list);
-		if (s_list.size() == 0) {
+		SHAPE_LIST slist;
+		slist_selected<Shape>(m_list_shapes, slist);
+		if (slist.size() == 0) {
 			return;
 		}
 		if constexpr (B) {
 			uint32_t i = 0;
-			auto s = s_list_front(m_list_shapes);
-			for (auto t : s_list) {
+			auto s = slist_front(m_list_shapes);
+			for (auto t : slist) {
 				// 図形一覧の排他制御が true か判定する.
 				if (m_smry_atomic.load(std::memory_order_acquire)) {
 					smry_remove(t);
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			for (auto s : s_list) {
+			for (auto s : slist) {
 				// 図形一覧の排他制御が true か判定する.
 				if (m_smry_atomic.load(std::memory_order_acquire)) {
 					smry_remove(s);
@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_insert(s, nullptr);
 			}
 		}
-		s_list.clear();
+		slist.clear();
 		undo_push_null();
 		edit_menu_enable();
 		sheet_draw();

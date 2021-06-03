@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 矢じりの先端と返しの位置を求める.
-	static bool calc_arrowhead(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROWHEAD_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
+	static bool get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROWHEAD_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
 	// 矢じりの D2D ストローク特性を作成する.
 	static void create_arrow_style(ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, const D2D1_LINE_JOIN s_join_style, const double s_join_limit, ID2D1StrokeStyle** s_arrow_style);
 
@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 	// a_size	矢じりの寸法
 	// barbs	返しの位置
 	// tip		先端の位置
-	static bool calc_arrowhead(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROWHEAD_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept
+	static bool get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROWHEAD_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept
 	{
 		const auto a_len = std::sqrt(pt_abs2(a_vec));	// 矢軸の長さ
 		if (a_len > FLT_MIN) {
@@ -70,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F tip_pos;	// 矢じりの先端点
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (calc_arrowhead(s_pos, diff, a_size, barbs, tip_pos)) {
+		if (get_arrow_pos(s_pos, diff, a_size, barbs, tip_pos)) {
 			// ジオメトリパスを作成する.
 			winrt::check_hresult(d_factory->CreatePathGeometry(geo));
 			winrt::check_hresult((*geo)->Open(sink.put()));
@@ -94,7 +94,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を破棄する
-	ShapeLine::~ShapeLine(void)
+	ShapeLineA::~ShapeLineA(void)
 	{
 		if (m_d2d_arrow_geom != nullptr) {
 			m_d2d_arrow_geom = nullptr;
@@ -109,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 	// tip_pos	矢じりの先端の位置
 	// a_style	矢じりの形状
 	// dt_writer	データライター
-	void ShapeLine::write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const
+	void ShapeLineA::write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const
 	{
 		using winrt::GraphPaper::implementation::write_svg;
 
@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapeLine::draw(SHAPE_DX& dx)
+	void ShapeLineA::draw(SHAPE_DX& dx)
 	{
 		D2D1_POINT_2F e_pos;
 		pt_add(m_pos, m_diff[0], e_pos);
@@ -188,14 +188,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの寸法を得る.
-	bool ShapeLine::get_arrow_size(ARROWHEAD_SIZE& value) const noexcept
+	bool ShapeLineA::get_arrow_size(ARROWHEAD_SIZE& value) const noexcept
 	{
 		value = m_arrow_size;
 		return true;
 	}
 
 	// 矢じりの形式を得る.
-	bool ShapeLine::get_arrow_style(ARROWHEAD_STYLE& value) const noexcept
+	bool ShapeLineA::get_arrow_style(ARROWHEAD_STYLE& value) const noexcept
 	{
 		value = m_arrow_style;
 		return true;
@@ -204,7 +204,7 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeLineA::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		D2D1_POINT_2F e_pos;
 		pt_add(m_pos, m_diff[0], e_pos);
@@ -226,7 +226,7 @@ namespace winrt::GraphPaper::implementation
 	// a_max	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeLine::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
+	bool ShapeLineA::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
 		D2D1_POINT_2F e_pos;
 
@@ -238,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する.
-	bool ShapeLine::move(const D2D1_POINT_2F diff)
+	bool ShapeLineA::move(const D2D1_POINT_2F diff)
 	{
 		if (ShapeStroke::move(diff)) {
 			if (m_d2d_arrow_geom != nullptr) {
@@ -253,7 +253,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分の端点に格納する.
-	bool ShapeLine::set_stroke_cap_style(const CAP_STYLE& value)
+	bool ShapeLineA::set_stroke_cap_style(const CAP_STYLE& value)
 	{
 		if (ShapeStroke::set_stroke_cap_style(value)) {
 			if (m_d2d_arrow_style != nullptr) {
@@ -268,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をマイター制限の比率に格納する.
-	bool ShapeLine::set_stroke_join_limit(const float& value)
+	bool ShapeLineA::set_stroke_join_limit(const float& value)
 	{
 		if (ShapeStroke::set_stroke_join_limit(value)) {
 			if (m_d2d_arrow_style != nullptr) {
@@ -283,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線のつながりに格納する.
-	bool ShapeLine::set_stroke_join_style(const D2D1_LINE_JOIN& value)
+	bool ShapeLineA::set_stroke_join_style(const D2D1_LINE_JOIN& value)
 	{
 		if (ShapeStroke::set_stroke_join_style(value)) {
 			if (m_d2d_arrow_style != nullptr) {
@@ -298,7 +298,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を矢じりの寸法に格納する.
-	bool ShapeLine::set_arrow_size(const ARROWHEAD_SIZE& value)
+	bool ShapeLineA::set_arrow_size(const ARROWHEAD_SIZE& value)
 	{
 		if (!equal(m_arrow_size, value)) {
 			m_arrow_size = value;
@@ -314,7 +314,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を矢じりの形式に格納する.
-	bool ShapeLine::set_arrow_style(const ARROWHEAD_STYLE value)
+	bool ShapeLineA::set_arrow_style(const ARROWHEAD_STYLE value)
 	{
 		if (m_arrow_style != value) {
 			m_arrow_style = value;
@@ -343,7 +343,7 @@ namespace winrt::GraphPaper::implementation
 	// 値を, 部位の位置に格納する. 他の部位の位置は動かない. 
 	// value	格納する値
 	// anchor	図形の部位
-	bool ShapeLine::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anchor)
+	bool ShapeLineA::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anchor)
 	{
 		if (ShapeStroke::set_anchor_pos(value, anchor)) {
 			if (m_d2d_arrow_geom != nullptr) {
@@ -358,7 +358,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	bool ShapeLine::set_start_pos(const D2D1_POINT_2F value)
+	bool ShapeLineA::set_start_pos(const D2D1_POINT_2F value)
 	{
 		if (ShapeStroke::set_start_pos(value)) {
 			if (m_d2d_arrow_geom != nullptr) {
@@ -376,7 +376,7 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	囲む領域の始点
 	// b_diff	囲む領域の終点への差分
 	// s_attr	既定の属性値
-	ShapeLine::ShapeLine(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
+	ShapeLineA::ShapeLineA(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
 		ShapeStroke::ShapeStroke(1, s_attr),
 		m_arrow_style(s_attr->m_arrow_style),
 		m_arrow_size(s_attr->m_arrow_size),
@@ -393,7 +393,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	読み込むデータリーダー
-	ShapeLine::ShapeLine(DataReader const& dt_reader) :
+	ShapeLineA::ShapeLineA(DataReader const& dt_reader) :
 		ShapeStroke::ShapeStroke(dt_reader),
 		m_d2d_arrow_style(nullptr),
 		m_d2d_arrow_geom(nullptr)
@@ -407,7 +407,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに書き込む.
-	void ShapeLine::write(DataWriter const& dt_writer) const
+	void ShapeLineA::write(DataWriter const& dt_writer) const
 	{
 		ShapeStroke::write(dt_writer);
 		dt_writer.WriteInt32(static_cast<int32_t>(m_arrow_style));
@@ -415,7 +415,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeLine::write_svg(DataWriter const& dt_writer) const
+	void ShapeLineA::write_svg(DataWriter const& dt_writer) const
 	{
 		using winrt::GraphPaper::implementation::write_svg;
 		D2D1_POINT_2F e_pos;
@@ -429,8 +429,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			D2D1_POINT_2F barbs[2];
 			D2D1_POINT_2F tip_pos;
-			if (calc_arrowhead(m_pos, m_diff[0], m_arrow_size, barbs, tip_pos)) {
-				ShapeLine::write_svg(barbs, tip_pos, dt_writer);
+			if (get_arrow_pos(m_pos, m_diff[0], m_arrow_size, barbs, tip_pos)) {
+				ShapeLineA::write_svg(barbs, tip_pos, dt_writer);
 			}
 		}
 	}

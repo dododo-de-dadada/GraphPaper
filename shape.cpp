@@ -97,35 +97,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 二点の内積を得る.
-	//double pt_dot(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept
-	//{
-	//	return static_cast<double>(a.x) * b.x + static_cast<double>(a.y) * b.y;
-	//}
-
-	// 図形の部位が位置 { 0,0 } を含むか判定する.
-	// a_pos	部位の位置
-	// 戻り値	含む場合 true
-	// アンカー長さは 0 より大でなければならない.
-	bool pt_in_anch(const D2D1_POINT_2F a_pos) noexcept
-	{
-		D2D1_POINT_2F a_min;	// 部位の位置を中点とする方形の左上点
-		pt_add(a_pos, Shape::s_anch_len * -0.5, a_min);
-		return a_min.x <= 0.0f && 0.0f <= a_min.x + Shape::s_anch_len && a_min.y <= 0.0f && 0.0f <= a_min.y + Shape::s_anch_len;
-	}
-
-	// 図形の部位が位置を含むか判定する.
-	// t_pos	判定する位置
-	// a_pos	部位の位置
-	// 戻り値	含む場合 true
-	// アンカー長さは 0 より大でなければならない.
-	bool pt_in_anch(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept
-	{
-		D2D1_POINT_2F ta;
-		pt_sub(a_pos, t_pos, ta);
-		return pt_in_anch(ta);
-	}
-
 	// だ円にが位置を含むか判定する.
 	// t_pos	判定する位置
 	// c_pos	だ円の中心

@@ -879,7 +879,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROWHEAD_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bz_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			ShapeLine::write_svg(barbs, barbs[2], dt_writer);
+			ShapeLineA::write_svg(barbs, barbs[2], dt_writer);
 		}
 	}
 

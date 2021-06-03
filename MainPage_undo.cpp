@@ -25,7 +25,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr uint32_t U_MAX_CNT = 32;
 
 	// 操作スタックを消去し, 含まれる操作を破棄する.
-	static uint32_t undo_clear_stack(U_STACK_T& u_stack);
+	static uint32_t undo_clear_stack(UNDO_STACK& u_stack);
 	// 操作をデータリーダーから読み込む.
 	static bool undo_read_op(Undo*& u, DataReader const& dt_reader);
 	// 操作をデータリーダーに書き込む.
@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作スタックを消去し, 含まれる操作を破棄する.
 	// u_stack	操作スタック
 	// 戻り値	消去した操作の組数
-	static uint32_t undo_clear_stack(U_STACK_T& u_stack)
+	static uint32_t undo_clear_stack(UNDO_STACK& u_stack)
 	{
 		uint32_t n = 0;
 		for (auto u : u_stack) {

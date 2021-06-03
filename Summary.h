@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_group")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_grouped");
 			}
-			else if (t_id == typeid(ShapeLine)) {
+			else if (t_id == typeid(ShapeLineA)) {
 				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_draw_line/Text");
 			}

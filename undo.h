@@ -19,7 +19,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 操作スタック
 	//------------------------------
-	using U_STACK_T = std::list<struct Undo*>;	// 操作スタック
+	using UNDO_STACK = std::list<struct Undo*>;	// 操作スタック
 
 	//------------------------------
 	// 操作
@@ -105,7 +105,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct Undo {
 		// 参照する図形リスト
-		static S_LIST_T* s_shape_list;
+		static SHAPE_LIST* s_shape_list;
 		// 参照する図形シート
 		static ShapeSheet* s_shape_sheet;
 		// 操作する図形
@@ -122,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を参照しているか判定する.
 		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
 		// 参照する図形リストと用紙図形を格納する.
-		static void set(S_LIST_T* s_list, ShapeSheet* s_sheet) noexcept;
+		static void set(SHAPE_LIST* slist, ShapeSheet* s_sheet) noexcept;
 		// 操作する図形を得る.
 		Shape* shape(void) const noexcept { return m_shape; }
 		// 操作を作成する.

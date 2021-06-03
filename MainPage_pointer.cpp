@@ -20,16 +20,16 @@ namespace winrt::GraphPaper::implementation
 	static auto const& CUR_SIZE_WE = CoreCursor(CoreCursorType::SizeWestEast, 0);	// 左右カーソル
 
 	// 消去フラグの立つ図形をリストから削除する.
-	static void reduce_list(S_LIST_T& s_list, U_STACK_T const& u_stack, U_STACK_T const& r_stack);
+	static void reduce_list(SHAPE_LIST& slist, UNDO_STACK const& u_stack, UNDO_STACK const& r_stack);
 	// 図形が操作スタックに含まれるか判定する.
-	static bool refer_ro(U_STACK_T const& u_stack, Shape* const s) noexcept;
+	static bool refer_ro(UNDO_STACK const& u_stack, Shape* const s) noexcept;
 
 	// 消去フラグの立つ図形をリストから削除する.
-	static void reduce_list(S_LIST_T& s_list, U_STACK_T const& u_stack, U_STACK_T const& r_stack)
+	static void reduce_list(SHAPE_LIST& slist, UNDO_STACK const& u_stack, UNDO_STACK const& r_stack)
 	{
 		// 消去フラグの立つ図形を消去リストに格納する.
-		S_LIST_T list_deleted;
-		for (const auto t : s_list) {
+		SHAPE_LIST list_deleted;
+		for (const auto t : slist) {
 			if (t->is_deleted() != true) {
 				// 消去フラグがない図形は無視する.
 				continue;
@@ -46,10 +46,10 @@ namespace winrt::GraphPaper::implementation
 			list_deleted.push_back(t);
 		}
 		// 消去リストに含まれる図形をリストから取り除き, 解放する.
-		auto it_begin = s_list.begin();
+		auto it_begin = slist.begin();
 		for (const auto s : list_deleted) {
-			auto it = std::find(it_begin, s_list.end(), s);
-			it_begin = s_list.erase(it);
+			auto it = std::find(it_begin, slist.end(), s);
+			it_begin = slist.erase(it);
 			delete s;
 #if defined(_DEBUG)
 			debug_leak_cnt--;
@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 	// u_stack	操作スタック
 	// s	図形
 	// 戻り値	参照する場合 true.
-	static bool refer_ro(U_STACK_T const& u_stack, Shape* const s) noexcept
+	static bool refer_ro(UNDO_STACK const& u_stack, Shape* const s) noexcept
 	{
 		for (const auto u : u_stack) {
 			if (u == nullptr) {
@@ -176,7 +176,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeElli(m_pointer_pressed, diff, &m_sheet_main);
 		}
 		else if (tool == TOOL_DRAW::LINE) {
-			s = new ShapeLine(m_pointer_pressed, diff, &m_sheet_main);
+			s = new ShapeLineA(m_pointer_pressed, diff, &m_sheet_main);
 		}
 		else if (tool == TOOL_DRAW::BEZI) {
 			s = new ShapeBezi(m_pointer_pressed, diff, &m_sheet_main);
@@ -335,7 +335,7 @@ namespace winrt::GraphPaper::implementation
 				if (flag != true) {
 					flag = true;
 				}
-				s_list_move(m_list_shapes, diff);
+				slist_move(m_list_shapes, diff);
 			}
 		}
 		if (undo_pop_if_invalid()) {
@@ -386,7 +386,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		Shape* s;
-		const auto anch = s_list_hit_test(m_list_shapes, m_pointer_cur, s);
+		const auto anch = slist_hit_test(m_list_shapes, m_pointer_cur, s);
 		m_dx_mutex.unlock();
 		if (anch == ANCH_TYPE::ANCH_SHEET) {
 			Window::Current().CoreWindow().PointerCursor(CUR_ARROW);
@@ -426,7 +426,7 @@ namespace winrt::GraphPaper::implementation
 			default:
 				// 図形のクラスが, 多角形または曲線であるか判定する.
 				if (s != nullptr &&
-					(typeid(*s) == typeid(ShapeLine) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
+					(typeid(*s) == typeid(ShapeLineA) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
 					// 図形の部位が, 頂点の数を超えないか判定する.
 					const auto d_cnt = static_cast<ShapePath*>(s)->m_diff.size();
 					if (anch >= ANCH_TYPE::ANCH_P0 && anch < ANCH_TYPE::ANCH_P0 + d_cnt + 1) {
@@ -475,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 			// ポインターの現在位置と前回位置の差分を得る.
 			D2D1_POINT_2F diff;
 			pt_sub(m_pointer_cur, m_pointer_pre, diff);
-			s_list_move(m_list_shapes, diff);
+			slist_move(m_list_shapes, diff);
 			// ポインターの現在位置を前回位置に格納する.
 			m_pointer_pre = m_pointer_cur;
 			sheet_draw();
@@ -596,7 +596,7 @@ namespace winrt::GraphPaper::implementation
 		if (tool_draw() != TOOL_DRAW::SELECT) {
 			return;
 		}
-		m_pointer_anchor = s_list_hit_test(m_list_shapes, m_pointer_pressed, m_pointer_shape);
+		m_pointer_anchor = slist_hit_test(m_list_shapes, m_pointer_pressed, m_pointer_shape);
 		if (m_pointer_anchor != ANCH_TYPE::ANCH_SHEET) {
 			if (m_pointer_state == PBTN_STATE::PRESS_LBTN
 				|| (m_pointer_state == PBTN_STATE::PRESS_RBTN && m_pointer_shape->is_selected() != true)) {

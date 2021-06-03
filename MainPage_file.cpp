@@ -133,7 +133,7 @@ namespace winrt::GraphPaper::implementation
 		len_unit_check_menu();
 
 		wchar_t* unavailable_font;	// 書体名
-		if (s_list_test_font(m_list_shapes, unavailable_font) != true) {
+		if (slist_test_font(m_list_shapes, unavailable_font) != true) {
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
@@ -226,7 +226,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.m_sheet_size.height = max(min(m_sheet_main.m_sheet_size.height, sheet_size_max()), 1.0F);
 
 			undo_clear();
-			s_list_clear(m_list_shapes);
+			slist_clear(m_list_shapes);
 #if defined(_DEBUG)
 			if (debug_leak_cnt != 0) {
 				auto cd = this->Dispatcher();
@@ -241,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 				// シートのみフラグが立っている場合,
 				hres = S_OK;
 			}
-			else if (s_list_read(m_list_shapes, dt_reader)) {
+			else if (slist_read(m_list_shapes, dt_reader)) {
 				if (suspend) {
 					// 中断フラグが立っている場合,
 					undo_read(dt_reader);
@@ -607,13 +607,13 @@ namespace winrt::GraphPaper::implementation
 			//dt_writer.WriteUInt16(static_cast<uint16_t>(status_bar()));
 			m_sheet_main.write(dt_writer);
 			if (suspend) {
-				s_list_write<!REDUCE>(m_list_shapes, dt_writer);
+				slist_write<!REDUCE>(m_list_shapes, dt_writer);
 				undo_write(dt_writer);
 			}
 			else if (layout) {
 			}
 			else {
-				s_list_write<REDUCE>(m_list_shapes, dt_writer);
+				slist_write<REDUCE>(m_list_shapes, dt_writer);
 			}
 			ra_stream.Size(ra_stream.Position());
 			co_await dt_writer.StoreAsync();

@@ -12,37 +12,37 @@ namespace winrt::GraphPaper::implementation
 	// 図形の種類
 	// ファイルへの書き込みで使用する.
 	enum SHAPE_TYPE {
-		SHAPE_NULL,		// ヌル
-		SHAPE_BEZI,		// 曲線
-		SHAPE_ELLI,		// だ円
-		SHAPE_LINE,		// 線分
-		SHAPE_POLY,		// 四辺形
-		SHAPE_RECT,		// 方形
-		SHAPE_RRECT,		// 角丸方形
-		SHAPE_TEXT,		// 文字列
+		SHAPE_NULL,	// ヌル
+		SHAPE_BEZI,	// 曲線
+		SHAPE_ELLI,	// だ円
+		SHAPE_LINE,	// 線分
+		SHAPE_POLY,	// 多角形
+		SHAPE_RECT,	// 方形
+		SHAPE_RRECT,	// 角丸方形
+		SHAPE_TEXT,	// 文字列
 		SHAPE_GROUP,	// グループ
 		SHAPE_RULER		// 定規
 	};
 
 	// 図形をデータリーダーから読み込む.
-	static Shape* s_list_read_shape(DataReader const& dt_reader);
+	static Shape* slist_read_shape(DataReader const& dt_reader);
 	// 次の図形を得る.
-	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, const Shape* s) noexcept;
+	template <typename T> static Shape* slist_next(T const& it_begin, T const& it_end, const Shape* s) noexcept;
 	// 次の図形とその距離を得る.
-	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept;
+	template <typename T> static Shape* slist_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept;
 
-	// 使用可能な書体名か判定し, 使用できない書体があったならばそれを得る.
-	bool s_list_test_font(const S_LIST_T& s_list, wchar_t*& unavailable_font) noexcept
+	// 利用可能な書体名か判定し, 利用できない書体があったならばそれを得る.
+	bool slist_test_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept
 	{
 		// 図形リストの各図形について以下を繰り返す.
-		for (auto s : s_list) {
+		for (auto s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			wchar_t* value;	// 書体名
-			if (s->get_font_family(value)) {
-				if (ShapeText::is_available_font(value) != true) {
-					unavailable_font = value;
+			wchar_t* name;	// 書体名
+			if (s->get_font_family(name)) {
+				if (ShapeText::is_available_font(name) != true) {
+					unavailable_font = name;
 					return false;
 				}
 			}
@@ -51,24 +51,24 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 最後の図形を得る.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// 戻り値	得られた図形
-	Shape* s_list_back(S_LIST_T const& s_list) noexcept
+	Shape* slist_back(SHAPE_LIST const& slist) noexcept
 	{
 		uint32_t _;
-		return s_list_next(s_list.rbegin(), s_list.rend(), _);
+		return slist_next(slist.rbegin(), slist.rend(), _);
 	}
 
 	// 図形と用紙を囲む領域を得る.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// s_size	用紙の寸法
 	// b_min	領域の左上位置
 	// b_max	領域の右下位置
-	void s_list_bound(S_LIST_T const& s_list, const D2D1_SIZE_F s_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	void slist_bound(SHAPE_LIST const& slist, const D2D1_SIZE_F s_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
 	{
 		b_min = { 0.0F, 0.0F };	// 左上位置
 		b_max = { s_size.width, s_size.height };	// 右下位置
-		for (auto s : s_list) {
+		for (auto s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -77,14 +77,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を囲む領域を得る.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// b_min	領域の左上位置
 	// b_max	領域の右下位置
-	void s_list_bound(S_LIST_T const& s_list, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	void slist_bound(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
 	{
 		b_min = { FLT_MAX, FLT_MAX };	// 左上位置
 		b_max = { -FLT_MAX, -FLT_MAX };	// 右下位置
-		for (auto s : s_list) {
+		for (auto s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -93,16 +93,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形リストを消去し, 含まれる図形を破棄する.
-	// s_list	図形リスト
-	void s_list_clear(S_LIST_T& s_list) noexcept
+	// slist	図形リスト
+	void slist_clear(SHAPE_LIST& slist) noexcept
 	{
-		for (auto s : s_list) {
+		for (auto s : slist) {
 			delete s;
 #if defined(_DEBUG)
 			debug_leak_cnt--;
 #endif
 		}
-		s_list.clear();
+		slist.clear();
 	}
 
 	// 図形を種類別に数える.
@@ -115,8 +115,8 @@ namespace winrt::GraphPaper::implementation
 	// fore_selected	最前面の図形の選択フラグ
 	// back_selected	最背面の図形の選択フラグ
 	// prev_selected	ひとつ背面の図形の選択フラグ
-	void s_list_count(
-		const S_LIST_T& s_list,
+	void slist_count(
+		const SHAPE_LIST& slist,
 		uint32_t& undeleted_cnt,
 		uint32_t& selected_cnt,
 		uint32_t& selected_group_cnt,
@@ -139,7 +139,7 @@ namespace winrt::GraphPaper::implementation
 		prev_selected = false;	// ひとつ背面の図形の選択フラグ
 
 		// 図形リストの各図形について以下を繰り返す.
-		for (auto s : s_list) {
+		for (auto s : slist) {
 			if (s->is_deleted()) {
 				// 図形の消去フラグが立っている場合,
 				// 以下を無視する.
@@ -195,14 +195,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 先頭から図形まで数える.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// s	図形
 	// 戻り値	図形の順番
 	// 消去フラグが立っている図形は順番に入れない.
-	uint32_t s_list_count(S_LIST_T const& s_list, const Shape* s) noexcept
+	uint32_t slist_count(SHAPE_LIST const& slist, const Shape* s) noexcept
 	{
 		uint32_t i = 0;
-		for (auto t : s_list) {
+		for (auto t : slist) {
 			if (t->is_deleted()) {
 				continue;
 			}
@@ -215,24 +215,24 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 最初の図形を得る.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// 戻り値	最初の図形
 	// 消去フラグが立っている図形は勘定されない.
-	Shape* s_list_front(S_LIST_T const& s_list) noexcept
+	Shape* slist_front(SHAPE_LIST const& slist) noexcept
 	{
 		uint32_t _;
-		return s_list_next(s_list.begin(), s_list.end(), _);
+		return slist_next(slist.begin(), slist.end(), _);
 	}
 
 	// 位置を含む図形とその部位を判定する.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// t_pos	判定する位置
 	// s	位置を含む図形
 	// 戻り値	位置を含む図形の部位
-	uint32_t s_list_hit_test(S_LIST_T const& s_list, const D2D1_POINT_2F t_pos, Shape*& s) noexcept
+	uint32_t slist_hit_test(SHAPE_LIST const& slist, const D2D1_POINT_2F t_pos, Shape*& s) noexcept
 	{
 		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
-		for (auto it = s_list.rbegin(); it != s_list.rend(); it++) {
+		for (auto it = slist.rbegin(); it != slist.rend(); it++) {
 			auto t = *it;
 			if (t->is_deleted()) {
 				continue;
@@ -248,7 +248,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
 		/*
-		for (auto it = s_list.rbegin(); it != s_list.rend(); it++) {
+		for (auto it = slist.rbegin(); it != slist.rend(); it++) {
 			auto t = *it;
 			if (t->is_deleted()) {
 				continue;
@@ -267,29 +267,29 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を挿入する.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// s	挿入する図形
 	// s_at	挿入する位置にある図形
-	void s_list_insert(S_LIST_T& s_list, Shape* const s_ins, const Shape* s_at) noexcept
+	void slist_insert(SHAPE_LIST& slist, Shape* const s_ins, const Shape* s_at) noexcept
 	{
-		s_list.insert(std::find(s_list.begin(), s_list.end(), s_at), s_ins);
+		slist.insert(std::find(slist.begin(), slist.end(), s_at), s_ins);
 	}
 
 	// リストの中の図形の順番を得る.
 	// S	探索する型
 	// T	得られた型
-	// s_list	図形リスト
+	// slist	図形リスト
 	// s	探索する値
 	// t	得られた値
-	template <typename S, typename T> bool s_list_match(S_LIST_T const& s_list, S s, T& t)
+	template <typename S, typename T> bool slist_match(SHAPE_LIST const& slist, S s, T& t)
 	{
 		bool match = false;	// 一致フラグ
 		uint32_t j = 0;	// 探索する順に図形を数える係数.
 		uint32_t stack_cnt = 0;	// スタックカウンタ.
-		std::list<S_LIST_T::const_iterator> stack;	// リストを深さ優先で探索するためのスタック
+		std::list<SHAPE_LIST::const_iterator> stack;	// リストを深さ優先で探索するためのスタック
 		// 図形リストの開始と終端をスタックにプッシュする.
-		stack.push_back(s_list.begin());
-		stack.push_back(s_list.end());
+		stack.push_back(slist.begin());
+		stack.push_back(slist.end());
 		stack_cnt++;
 		while (stack_cnt-- != 0) {
 			// スタックカウンタが 0 でないかぎり以下を繰り返す.
@@ -347,16 +347,16 @@ namespace winrt::GraphPaper::implementation
 		stack.clear();
 		return match;
 	}
-	template bool winrt::GraphPaper::implementation::s_list_match<Shape* const, uint32_t>(S_LIST_T const& s_list, Shape* const s, uint32_t& t);
-	template bool winrt::GraphPaper::implementation::s_list_match<const uint32_t, Shape*>(S_LIST_T const& s_list, const uint32_t s, Shape*& t);
+	template bool winrt::GraphPaper::implementation::slist_match<Shape* const, uint32_t>(SHAPE_LIST const& slist, Shape* const s, uint32_t& t);
+	template bool winrt::GraphPaper::implementation::slist_match<const uint32_t, Shape*>(SHAPE_LIST const& slist, const uint32_t s, Shape*& t);
 
 	// 選択フラグの立つすべての図形を差分だけ移動する.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// diff	移動する差分
-	bool s_list_move(S_LIST_T const& s_list, const D2D1_POINT_2F diff) noexcept
+	bool slist_move(SHAPE_LIST const& slist, const D2D1_POINT_2F diff) noexcept
 	{
 		bool flag = false;
-		for (auto s : s_list) {
+		for (auto s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -371,12 +371,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形のその次の図形をリストから得る.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// s	図形
 	// 戻り値	その次の図形
-	Shape* s_list_next(S_LIST_T const& s_list, const Shape* s) noexcept
+	Shape* slist_next(SHAPE_LIST const& slist, const Shape* s) noexcept
 	{
-		return s_list_next(s_list.begin(), s_list.end(), s);
+		return slist_next(slist.begin(), slist.end(), s);
 	}
 
 	// 図形の, その次の図形をリストから得る.
@@ -384,17 +384,17 @@ namespace winrt::GraphPaper::implementation
 	// it_end	リストの終端
 	// s	図形
 	// 戻り値	その次の図形. ヌルならば次の図形はない.
-	template <typename T> static Shape* s_list_next(T const& it_begin, T const& it_end, const Shape* s) noexcept
+	template <typename T> static Shape* slist_next(T const& it_begin, T const& it_end, const Shape* s) noexcept
 	{
 		auto it{ std::find(it_begin, it_end, s) };
 		if (it != it_end) {
 			uint32_t _;
-			return s_list_next(++it, it_end, _);
+			return slist_next(++it, it_end, _);
 		}
 		return static_cast<Shape*>(nullptr);
 	}
-	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::iterator const& it_begin, S_LIST_T::iterator const& it_end, const Shape* s) noexcept;
-	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::reverse_iterator const& it_rbegin, S_LIST_T::reverse_iterator const& it_rend, const Shape* s) noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::iterator const& it_begin, SHAPE_LIST::iterator const& it_end, const Shape* s) noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::reverse_iterator const& it_rbegin, SHAPE_LIST::reverse_iterator const& it_rend, const Shape* s) noexcept;
 
 	// 図形のその次の図形と, その間隔をリストから得る.
 	// it_begin	リストの始端
@@ -402,7 +402,7 @@ namespace winrt::GraphPaper::implementation
 	// distance	次の図形との間隔
 	// 戻り値	次の図形, ヌルならば次の図形はない.
 	template <typename T>
-	static Shape* s_list_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept
+	static Shape* slist_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept
 	{
 		uint32_t i = 0;
 		for (auto it = it_begin; it != it_end; it++) {
@@ -415,30 +415,30 @@ namespace winrt::GraphPaper::implementation
 		}
 		return static_cast<Shape*>(nullptr);
 	}
-	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::iterator const& it_begin, S_LIST_T::iterator const& it_end, uint32_t& distance) noexcept;
-	template Shape* winrt::GraphPaper::implementation::s_list_next(S_LIST_T::reverse_iterator const& it_rbegin, S_LIST_T::reverse_iterator const& it_rend, uint32_t& distance) noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::iterator const& it_begin, SHAPE_LIST::iterator const& it_end, uint32_t& distance) noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::reverse_iterator const& it_rbegin, SHAPE_LIST::reverse_iterator const& it_rend, uint32_t& distance) noexcept;
 
 	// 前の図形をリストから得る.
-	Shape* s_list_prev(S_LIST_T const& s_list, const Shape* s) noexcept
+	Shape* slist_prev(SHAPE_LIST const& slist, const Shape* s) noexcept
 	{
-		return s_list_next(s_list.rbegin(), s_list.rend(), s);
+		return slist_next(slist.rbegin(), slist.rend(), s);
 	}
 
 	// 図形リストをデータリーダーから読み込む.
-	bool s_list_read(S_LIST_T& s_list, DataReader const& dt_reader)
+	bool slist_read(SHAPE_LIST& slist, DataReader const& dt_reader)
 	{
 		Shape* s;
-		while ((s = s_list_read_shape(dt_reader)) != static_cast<Shape*>(nullptr)) {
+		while ((s = slist_read_shape(dt_reader)) != static_cast<Shape*>(nullptr)) {
 			if (s == reinterpret_cast<Shape*>(-1)) {
 				return false;
 			}
-			s_list.push_back(s);
+			slist.push_back(s);
 		}
 		return true;
 	}
 
 	// データリーダーから図形を作成する.
-	static Shape* s_list_read_shape(DataReader const& dt_reader)
+	static Shape* slist_read_shape(DataReader const& dt_reader)
 	{
 		if (dt_reader.UnconsumedBufferLength() < sizeof(uint32_t)) {
 			return nullptr;
@@ -454,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeElli(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_LINE) {
-			s = new ShapeLine(dt_reader);
+			s = new ShapeLineA(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_POLY) {
 			s = new ShapePoly(dt_reader);
@@ -486,16 +486,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をリストから削除し, 削除した図形の次の図形を得る.
-	// s_list	図形リスト.
+	// slist	図形リスト.
 	// s	図形.
 	// 戻り値	図形の次にあった図形. 図形がリスト末尾にあったときはヌルポインター.
-	Shape* s_list_remove(S_LIST_T& s_list, const Shape* s) noexcept
+	Shape* slist_remove(SHAPE_LIST& slist, const Shape* s) noexcept
 	{
-		auto it{ std::find(s_list.begin(), s_list.end(), s) };
-		if (it != s_list.end()) {
+		auto it{ std::find(slist.begin(), slist.end(), s) };
+		if (it != slist.end()) {
 			(*it)->set_delete(true);
 			auto it_next = std::next(it, 1);
-			if (it_next != s_list.end()) {
+			if (it_next != slist.end()) {
 				return *it_next;
 			}
 		}
@@ -503,10 +503,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 選択された文字列図形から, それらを改行で連結した文字列を得る.
-	winrt::hstring s_list_selected_all_text(const S_LIST_T& s_list) noexcept
+	winrt::hstring slist_selected_all_text(const SHAPE_LIST& slist) noexcept
 	{
 		winrt::hstring text;
-		for (auto s : s_list) {
+		for (auto s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -529,11 +529,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 選択された図形のリストを得る.
 	// S	図形の型. Shape ならすべての種類, ShapeGroup ならグループ図形のみ.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// t_list	得られたリスト
-	template <typename S> void s_list_selected(const S_LIST_T& s_list, S_LIST_T& t_list) noexcept
+	template <typename S> void slist_selected(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept
 	{
-		for (auto s : s_list) {
+		for (auto s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -548,16 +548,16 @@ namespace winrt::GraphPaper::implementation
 			t_list.push_back(s);
 		}
 	}
-	template void s_list_selected<Shape>(const S_LIST_T& s_list, S_LIST_T& t_list) noexcept;
-	template void s_list_selected<ShapeGroup>(const S_LIST_T& s_list, S_LIST_T& t_list) noexcept;
+	template void slist_selected<Shape>(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept;
+	template void slist_selected<ShapeGroup>(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept;
 
 	// 図形リストをデータライターに書き込む.
 	// REDUCE	消去フラグが立っている図形を除く.
-	// s_list	書き込む図形リスト
+	// slist	書き込む図形リスト
 	// dt_writer	データライター
-	template<bool REDUCE> void s_list_write(S_LIST_T const& s_list, DataWriter const& dt_writer)
+	template<bool REDUCE> void slist_write(SHAPE_LIST const& slist, DataWriter const& dt_writer)
 	{
-		for (const auto s : s_list) {
+		for (const auto s : slist) {
 			if constexpr (REDUCE) {
 				if (s->is_deleted()) {
 					continue;
@@ -575,7 +575,7 @@ namespace winrt::GraphPaper::implementation
 			else if (s_type == typeid(ShapeGroup)) {
 				s_int = SHAPE_GROUP;
 			}
-			else if (s_type == typeid(ShapeLine)) {
+			else if (s_type == typeid(ShapeLineA)) {
 				s_int = SHAPE_LINE;
 			}
 			else if (s_type == typeid(ShapePoly)) {
@@ -604,7 +604,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(SHAPE_NULL));
 	}
 	constexpr auto REDUCE = true;
-	template void s_list_write<!REDUCE>(S_LIST_T const& s_list, DataWriter const& dt_writer);
-	template void s_list_write<REDUCE>(S_LIST_T const& s_list, DataWriter const& dt_writer);
+	template void slist_write<!REDUCE>(SHAPE_LIST const& slist, DataWriter const& dt_writer);
+	template void slist_write<REDUCE>(SHAPE_LIST const& slist, DataWriter const& dt_writer);
 
 }

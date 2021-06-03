@@ -15,15 +15,15 @@ namespace winrt::GraphPaper::implementation
 		if (m_cnt_selected <= 1) {
 			return;
 		}
-		S_LIST_T s_list;
-		s_list_selected<Shape>(m_list_shapes, s_list);
+		SHAPE_LIST slist;
+		slist_selected<Shape>(m_list_shapes, slist);
 		ShapeGroup* g = new ShapeGroup();
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
 		unselect_all();
 		undo_push_append(g);
-		for (const auto s : s_list) {
+		for (const auto s : slist) {
 			// 図形一覧の排他制御が true か判定する.
 			if (m_smry_atomic.load(std::memory_order_acquire)) {
 				smry_remove(s);
@@ -49,8 +49,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ungroup_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択されたグループ図形のリストを得る.
-		S_LIST_T g_list;
-		s_list_selected<ShapeGroup>(m_list_shapes, g_list);
+		SHAPE_LIST g_list;
+		slist_selected<ShapeGroup>(m_list_shapes, g_list);
 		if (g_list.empty()) {
 			// 得られたリストが空の場合,
 			// 終了する.

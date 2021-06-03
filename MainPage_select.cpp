@@ -80,10 +80,10 @@ namespace winrt::GraphPaper::implementation
 			else {
 				if (s_prev == nullptr) {
 					if constexpr (K == VirtualKey::Down) {
-						pointer_shape_smry(s_list_front(m_list_shapes));
+						pointer_shape_smry(slist_front(m_list_shapes));
 					}
 					if constexpr (K == VirtualKey::Up) {
-						pointer_shape_smry(s_list_back(m_list_shapes));
+						pointer_shape_smry(slist_back(m_list_shapes));
 					}
 					pointer_shape_prev(pointer_shape_smry());
 				}
@@ -110,14 +110,14 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if constexpr (K == VirtualKey::Down) {
-			auto s = s_list_next(m_list_shapes, pointer_shape_smry());
+			auto s = slist_next(m_list_shapes, pointer_shape_smry());
 			if (s != nullptr) {
 				pointer_shape_smry(s);
 				goto SEL;
 			}
 		}
 		if constexpr (K == VirtualKey::Up) {
-			auto s = s_list_prev(m_list_shapes, pointer_shape_smry());
+			auto s = slist_prev(m_list_shapes, pointer_shape_smry());
 			if (s != nullptr) {
 				pointer_shape_smry(s);
 				goto SEL;

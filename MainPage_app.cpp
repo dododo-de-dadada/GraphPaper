@@ -126,7 +126,7 @@ namespace winrt::GraphPaper::implementation
 					hres = co_await file_write_gpf_async(s_file, true, false);
 					s_file = nullptr;
 					undo_clear();
-					s_list_clear(m_list_shapes);
+					slist_clear(m_list_shapes);
 					ShapeText::release_available_fonts();
 				}
 			}

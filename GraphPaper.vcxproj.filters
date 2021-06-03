@@ -44,7 +44,7 @@
     <ClCompile Include="shape_elli.cpp" />
     <ClCompile Include="shape_group.cpp" />
     <ClCompile Include="shape_line.cpp" />
-    <ClCompile Include="shape_list.cpp" />
+    <ClCompile Include="shape_slist.cpp" />
     <ClCompile Include="shape_poly.cpp" />
     <ClCompile Include="shape_rect.cpp" />
     <ClCompile Include="shape_rrect.cpp" />

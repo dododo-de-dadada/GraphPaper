@@ -10,7 +10,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を破棄する.
 	ShapeGroup::~ShapeGroup(void)
 	{
-		s_list_clear(m_list_grouped);
+		slist_clear(m_list_grouped);
 	}
 
 	// 図形を表示する.
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字列図形を含むか判定する.
 	bool ShapeGroup::has_text(void) noexcept
 	{
-		std::list<S_LIST_T::iterator> stack;
+		std::list<SHAPE_LIST::iterator> stack;
 		stack.push_back(m_list_grouped.begin());
 		stack.push_back(m_list_grouped.end());
 		while (stack.empty() != true) {
@@ -176,7 +176,7 @@ namespace winrt::GraphPaper::implementation
 	// 差分だけ移動する
 	bool ShapeGroup::move(const D2D1_POINT_2F diff)
 	{
-		return s_list_move(m_list_grouped, diff);
+		return slist_move(m_list_grouped, diff);
 	}
 
 	// 値を消去フラグに格納する.
@@ -219,14 +219,14 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータリーダーから作成する.
 	ShapeGroup::ShapeGroup(DataReader const& dt_reader)
 	{
-		s_list_read(m_list_grouped, dt_reader);
+		slist_read(m_list_grouped, dt_reader);
 	}
 
 	// データライターに書き込む.
 	void ShapeGroup::write(DataWriter const& dt_writer) const
 	{
 		constexpr bool REDUCED = true;
-		s_list_write<!REDUCED>(m_list_grouped, dt_writer);
+		slist_write<!REDUCED>(m_list_grouped, dt_writer);
 	}
 
 	// データライターに SVG として書き込む.

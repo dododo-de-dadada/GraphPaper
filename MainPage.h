@@ -249,9 +249,9 @@ namespace winrt::GraphPaper::implementation
 		MenuFlyout m_menu_sheet = nullptr;	// 用紙コンテキストメニュー
 		MenuFlyout m_menu_ungroup = nullptr;	// グループ解除コンテキストメニュー
 
-		// s_list
+		// slist
 
-		S_LIST_T m_list_shapes;		// 図形リスト
+		SHAPE_LIST m_list_shapes;		// 図形リスト
 
 		// sheet
 
@@ -277,9 +277,9 @@ namespace winrt::GraphPaper::implementation
 		// undo stack
 
 		uint32_t m_stack_rcnt = 0;	// やり直し操作スタックに積まれた要素の組数
-		U_STACK_T m_stack_redo;		// やり直し操作スタック
+		UNDO_STACK m_stack_redo;		// やり直し操作スタック
 		uint32_t m_stack_ucnt = 0;	// 元に戻す操作スタックに積まれた要素の組数
-		U_STACK_T m_stack_undo;		// 元に戻す操作スタック
+		UNDO_STACK m_stack_undo;		// 元に戻す操作スタック
 		bool m_stack_updt = false;	// 操作スタックの更新フラグ (ヌルが積まれたら true)
 
 		// sample

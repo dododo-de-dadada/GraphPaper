@@ -24,8 +24,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// 選択された図形のリストを得る.
-		S_LIST_T list_selected;
-		s_list_selected<Shape>(m_list_shapes, list_selected);
+		SHAPE_LIST list_selected;
+		slist_selected<Shape>(m_list_shapes, list_selected);
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// 出力ストリームを作成して, データライターを得る.
@@ -34,12 +34,12 @@ namespace winrt::GraphPaper::implementation
 		auto dt_writer{ DataWriter(out_stream) };
 		// 選択された図形のリストをデータライターに書き込む.
 		constexpr bool REDUCED = true;
-		s_list_write<REDUCED>(list_selected, dt_writer);
+		slist_write<REDUCED>(list_selected, dt_writer);
 		// 書き込んだらリストは破棄する.
 		list_selected.clear();
 		// 書き込んだデータを出力ストリームに格納し, 格納したバイト数を得る.
 		auto n_byte{ co_await dt_writer.StoreAsync() };
-		auto text = s_list_selected_all_text(m_list_shapes);
+		auto text = slist_selected_all_text(m_list_shapes);
 		// スレッドをメインページの UI スレッドに変える.
 		auto cd = this->Dispatcher();
 		co_await winrt::resume_foreground(cd);
@@ -84,8 +84,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// 選択された図形のリストを得る.
-		S_LIST_T list_selected;
-		s_list_selected<Shape>(m_list_shapes, list_selected);
+		SHAPE_LIST list_selected;
+		slist_selected<Shape>(m_list_shapes, list_selected);
 		m_dx_mutex.lock();
 		for (auto s : list_selected) {
 			if (m_smry_atomic.load(std::memory_order_acquire)) {
@@ -139,8 +139,8 @@ namespace winrt::GraphPaper::implementation
 				auto cd = this->Dispatcher();
 				co_await winrt::resume_foreground(cd);
 				if (operation == ra_stream.Size()) {
-					S_LIST_T list_pasted;	// 貼り付けリスト
-					if (s_list_read(list_pasted, dt_reader) != true) {
+					SHAPE_LIST list_pasted;	// 貼り付けリスト
+					if (slist_read(list_pasted, dt_reader) != true) {
 
 					}
 					else if (list_pasted.empty() != true) {

@@ -180,7 +180,7 @@ namespace winrt::GraphPaper::implementation
 		bool fore_selected = false;	// 最前面の図形の選択フラグ
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
-		s_list_count(m_list_shapes,
+		slist_count(m_list_shapes,
 			undeleted_cnt,
 			selected_cnt,
 			selected_group_cnt,
@@ -247,7 +247,7 @@ namespace winrt::GraphPaper::implementation
 			smry_close();
 		}
 		undo_clear();
-		s_list_clear(m_list_shapes);
+		slist_clear(m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			message_show(ICON_ALERT, DEBUG_MSG, {});
@@ -479,7 +479,7 @@ namespace winrt::GraphPaper::implementation
 			smry_close();
 		}
 		undo_clear();
-		s_list_clear(m_list_shapes);
+		slist_clear(m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			// 「メモリリーク」メッセージダイアログを表示する.
