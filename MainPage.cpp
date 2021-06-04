@@ -370,58 +370,6 @@ namespace winrt::GraphPaper::implementation
 			m_event_click_dist = 6.0 * raw_dpi / log_dpi;
 		}
 
-		/*{
-			if (rmfi_tool_select().IsChecked()) {
-				m_tool_draw = DRAW_TOOL::SELECT;
-			}
-			else if (rmfi_tool_draw_rect().IsChecked()) {
-				m_tool_draw = DRAW_TOOL::RECT;
-			}
-			else if (rmfi_tool_draw_rrect().IsChecked()) {
-				m_tool_draw = DRAW_TOOL::RRECT;
-			}
-			else if (rmfi_tool_draw_poly().IsChecked()) {
-				m_tool_draw = DRAW_TOOL::POLY;
-			}
-			else if (rmfi_tool_draw_elli().IsChecked()) {
-				m_tool_draw = DRAW_TOOL::ELLI;
-			}
-			else if (rmfi_tool_draw_line().IsChecked()) {
-				m_tool_draw = DRAW_TOOL::LINE;
-			}
-			else if (rmfi_tool_draw_bezi().IsChecked()) {
-				m_tool_draw = DRAW_TOOL::BEZI;
-			}
-			if (rmfi_tool_poly_tri().IsChecked()) {
-				m_tool_poly.m_vertex_cnt = 3;
-			}
-			else if (rmfi_tool_poly_quad().IsChecked()) {
-				m_tool_poly.m_vertex_cnt = 4;
-			}
-			else if (rmfi_tool_poly_pent().IsChecked()) {
-				m_tool_poly.m_vertex_cnt = 5;
-			}
-			else if (rmfi_tool_poly_hexa().IsChecked()) {
-				m_tool_poly.m_vertex_cnt = 6;
-			}
-			else if (rmfi_tool_poly_hept().IsChecked()) {
-				m_tool_poly.m_vertex_cnt = 7;
-			}
-			else if (rmfi_tool_poly_octa().IsChecked()) {
-				m_tool_poly.m_vertex_cnt = 8;
-			}
-			else if (rmfi_tool_poly_nona().IsChecked()) {
-				m_tool_poly.m_vertex_cnt = 9;
-			}
-			else if (rmfi_tool_poly_deca().IsChecked()) {
-				m_tool_poly.m_vertex_cnt = 10;
-			}
-			m_tool_poly.m_regular = tmfi_tool_poly_regular().IsChecked();
-			m_tool_poly.m_vertex_up = tmfi_tool_poly_vertex_up().IsChecked();
-			m_tool_poly.m_closed = tmfi_tool_poly_closed().IsChecked();
-			m_tool_poly.m_clockwise = tmfi_tool_poly_clockwise().IsChecked();
-		}
-		*/
 		auto _{ new_click_async(nullptr, nullptr) };
 	}
 

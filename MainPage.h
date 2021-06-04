@@ -170,7 +170,7 @@ namespace winrt::GraphPaper::implementation
 		conv_len_to_str<B>(len_unit, value, dpi, g_len, Z, t_buf);
 	}
 
-	template <typename T, T C> void radio_menu_item_set_value(const T value, const RadioMenuFlyoutItem& item);
+	template <typename T, T C> constexpr void radio_menu_item_set_value(const T value, const RadioMenuFlyoutItem& item);
 
 	//-------------------------------
 	// 色の表記
@@ -711,7 +711,7 @@ namespace winrt::GraphPaper::implementation
 		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
-		// MainPage_pointer.cpp
+		// MainPage_event.cpp
 		// ポインターイベントのハンドラー
 		//-------------------------------
 
@@ -965,6 +965,7 @@ namespace winrt::GraphPaper::implementation
 		// 作図メニューの項目が選択された.
 		void tool_draw_click(IInspectable const& sender, RoutedEventArgs const&);
 		void tool_draw(const DRAW_TOOL value);
+		void tool_poly(const uint32_t value);
 		// 作図ツールを得る.
 		const DRAW_TOOL tool_draw(void) const noexcept { return m_tool_draw; }
 		// 多角形の作図ツールを得る.

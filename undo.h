@@ -67,8 +67,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 操作から値の型を得るテンプレート
 	//------------------------------
-	template <UNDO_OP U>
-	struct U_TYPE { using type = int; };
+	template <UNDO_OP U> struct U_TYPE { using type = int; };
 	template <> struct U_TYPE<UNDO_OP::ARROW_SIZE> { using type = ARROW_SIZE; };
 	template <> struct U_TYPE<UNDO_OP::ARROW_STYLE> { using type = ARROW_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::FILL_COLOR> { using type = D2D1_COLOR_F; };
