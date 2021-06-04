@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 用紙メニューの「方眼の強調」に印をつける.
 	// g_emph	方眼の強調
-	void MainPage::grid_emph_check_menu(const GRID_EMPH& g_emph)
+	void MainPage::grid_emph_is_checked(const GRID_EMPH& g_emph)
 	{
 		rmfi_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
 		rmfi_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
@@ -233,7 +233,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 用紙メニューの「方眼の表示」に印をつける.
 	// g_show	方眼の表示
-	void MainPage::grid_show_check_menu(const GRID_SHOW g_show)
+	void MainPage::grid_show_is_checked(const GRID_SHOW g_show)
 	{
 		rmfi_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
 		rmfi_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);

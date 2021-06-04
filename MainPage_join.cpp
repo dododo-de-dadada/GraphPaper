@@ -7,7 +7,7 @@ namespace winrt::GraphPaper::implementation
 {
 	// 線枠メニューの「単点の形式」に印をつける.
 	// s_cap	線の単点
-	void MainPage::cap_style_check_menu(const CAP_STYLE& s_cap)
+	void MainPage::cap_style_is_checked(const CAP_STYLE& s_cap)
 	{
 		// コードビハインドではグループ名による切り替えが効かない？
 		if (rmfi_cap_flat().IsChecked()) {
@@ -81,49 +81,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠メニューの「つながり」に印をつける.
 	// s_join	線のつながり
-	void MainPage::join_style_check_menu(const D2D1_LINE_JOIN s_join)
+	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN s_join)
 	{
-		// コードビハインドではグループ名による切り替えが効かない？
-		if (rmfi_join_bevel().IsChecked()) {
-			rmfi_join_bevel().IsChecked(false);
-		}
-		if (rmfi_join_bevel_2().IsChecked()) {
-			rmfi_join_bevel_2().IsChecked(false);
-		}
-		if (rmfi_join_miter().IsChecked()) {
-			rmfi_join_miter().IsChecked(false);
-		}
-		if (rmfi_join_miter_2().IsChecked()) {
-			rmfi_join_miter_2().IsChecked(false);
-		}
-		if (rmfi_join_m_or_b().IsChecked()) {
-			rmfi_join_m_or_b().IsChecked(false);
-		}
-		if (rmfi_join_m_or_b_2().IsChecked()) {
-			rmfi_join_m_or_b_2().IsChecked(false);
-		}
-		if (rmfi_join_round().IsChecked()) {
-			rmfi_join_round().IsChecked(false);
-		}
-		if (rmfi_join_round_2().IsChecked()) {
-			rmfi_join_round_2().IsChecked(false);
-		}
-		if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
-			rmfi_join_bevel().IsChecked(true);
-			rmfi_join_bevel_2().IsChecked(true);
-		}
-		else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
-			rmfi_join_miter().IsChecked(true);
-			rmfi_join_miter_2().IsChecked(true);
-		}
-		else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-			rmfi_join_m_or_b().IsChecked(true);
-			rmfi_join_m_or_b_2().IsChecked(true);
-		}
-		else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-			rmfi_join_round().IsChecked(true);
-			rmfi_join_round_2().IsChecked(true);
-		}
+		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL>(s_join, rmfi_join_bevel());
+		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL>(s_join, rmfi_join_bevel_2());
+		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER>(s_join, rmfi_join_miter());
+		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER>(s_join, rmfi_join_miter_2());
+		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL>(s_join, rmfi_join_m_or_b());
+		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL>(s_join, rmfi_join_m_or_b_2());
+		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND>(s_join, rmfi_join_round());
+		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND>(s_join, rmfi_join_round_2());
 	}
 
 	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)

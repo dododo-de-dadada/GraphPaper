@@ -154,7 +154,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ステータスバーのメニュー項目に印をつける.
-	void MainPage::stbar_check_menu(const STBAR_FLAG st_bar)
+	void MainPage::stbar_is_checked(const STBAR_FLAG st_bar)
 	{
 		tmfi_stbar_curs().IsChecked(stbar_mask(st_bar, STBAR_FLAG::CURS));
 		tmfi_stbar_grid().IsChecked(stbar_mask(st_bar, STBAR_FLAG::GRID));

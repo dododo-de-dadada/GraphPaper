@@ -311,64 +311,20 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠メニューの「形式」に印をつける.
 	// d_style	破線の種別
-	void MainPage::stroke_dash_style_check_menu(const D2D1_DASH_STYLE d_style)
+	void MainPage::stroke_dash_style_is_checked(const D2D1_DASH_STYLE d_style)
 	{
-		if (rmfi_stroke_dash_style_solid().IsChecked()) {
-			rmfi_stroke_dash_style_solid().IsChecked(false);
-		}
-		if (rmfi_stroke_dash_style_solid_2().IsChecked()) {
-			rmfi_stroke_dash_style_solid_2().IsChecked(false);
-		}
-		if (rmfi_stroke_dash_style_dash().IsChecked()) {
-			rmfi_stroke_dash_style_dash().IsChecked(false);
-		}
-		if (rmfi_stroke_dash_style_dash_2().IsChecked()) {
-			rmfi_stroke_dash_style_dash_2().IsChecked(false);
-		}
-		if (rmfi_stroke_dash_style_dash_dot().IsChecked()) {
-			rmfi_stroke_dash_style_dash_dot().IsChecked(false);
-		}
-		if (rmfi_stroke_dash_style_dash_dot_2().IsChecked()) {
-			rmfi_stroke_dash_style_dash_dot_2().IsChecked(false);
-		}
-		if (rmfi_stroke_dash_style_dash_dot_dot().IsChecked()) {
-			rmfi_stroke_dash_style_dash_dot_dot().IsChecked(false);
-		}
-		if (rmfi_stroke_dash_style_dash_dot_dot_2().IsChecked()) {
-			rmfi_stroke_dash_style_dash_dot_dot_2().IsChecked(false);
-		}
-		if (rmfi_stroke_dash_style_dot().IsChecked()) {
-			rmfi_stroke_dash_style_dot().IsChecked(false);
-		}
-		if (rmfi_stroke_dash_style_dot_2().IsChecked()) {
-			rmfi_stroke_dash_style_dot_2().IsChecked(false);
-		}
-		if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
-			rmfi_stroke_dash_style_solid().IsChecked(true);
-			rmfi_stroke_dash_style_solid_2().IsChecked(true);
-			mfi_stroke_dash_patt().IsEnabled(true);
-			mfi_stroke_dash_patt_2().IsEnabled(true);
-		}
-		else {
-			if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
-				rmfi_stroke_dash_style_dash().IsChecked(true);
-				rmfi_stroke_dash_style_dash_2().IsChecked(true);
-			}
-			else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
-				rmfi_stroke_dash_style_dot().IsChecked(true);
-				rmfi_stroke_dash_style_dot_2().IsChecked(true);
-			}
-			else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
-				rmfi_stroke_dash_style_dash_dot().IsChecked(true);
-				rmfi_stroke_dash_style_dash_dot_2().IsChecked(true);
-			}
-			else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
-				rmfi_stroke_dash_style_dash_dot_dot().IsChecked(true);
-				rmfi_stroke_dash_style_dash_dot_dot_2().IsChecked(true);
-			}
-			mfi_stroke_dash_patt().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
-			mfi_stroke_dash_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
-		}
+		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID>(d_style, rmfi_stroke_dash_style_solid());
+		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID>(d_style, rmfi_stroke_dash_style_solid_2());
+		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH>(d_style, rmfi_stroke_dash_style_dash());
+		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH>(d_style, rmfi_stroke_dash_style_dash_2());
+		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT>(d_style, rmfi_stroke_dash_style_dash_dot());
+		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT>(d_style, rmfi_stroke_dash_style_dash_dot_2());
+		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT>(d_style, rmfi_stroke_dash_style_dash_dot_dot());
+		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT>(d_style, rmfi_stroke_dash_style_dash_dot_dot_2());
+		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT>(d_style, rmfi_stroke_dash_style_dot());
+		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT>(d_style, rmfi_stroke_dash_style_dot_2());
+		mfi_stroke_dash_patt().IsEnabled(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		mfi_stroke_dash_patt_2().IsEnabled(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 	}
 
 }

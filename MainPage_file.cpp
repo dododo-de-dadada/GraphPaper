@@ -103,34 +103,36 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::file_finish_reading(void)
 	{
 		edit_menu_enable();
-		color_code_check_menu();
+		tool_draw_is_checked(m_tool_draw);
+		tool_poly_is_checked(m_tool_poly);
+		color_code_is_checked(m_color_code);
 		D2D1_DASH_STYLE s_style;
 		m_sheet_main.get_stroke_dash_style(s_style);
-		stroke_dash_style_check_menu(s_style);
+		stroke_dash_style_is_checked(s_style);
 		ARROW_STYLE a_style;
 		m_sheet_main.get_arrow_style(a_style);
-		arrow_style_check_menu(a_style);
+		arrow_style_is_checked(a_style);
 		DWRITE_FONT_STYLE f_style;
 		m_sheet_main.get_font_style(f_style);
-		font_style_check_menu(f_style);
+		font_style_is_checked(f_style);
 		GRID_EMPH g_emph;
 		m_sheet_main.get_grid_emph(g_emph);
-		grid_emph_check_menu(g_emph);
+		grid_emph_is_checked(g_emph);
 		GRID_SHOW g_show;
 		m_sheet_main.get_grid_show(g_show);
-		grid_show_check_menu(g_show);
-		stbar_check_menu(status_bar());
+		grid_show_is_checked(g_show);
+		stbar_is_checked(status_bar());
 		DWRITE_TEXT_ALIGNMENT t_align_t;
 		m_sheet_main.get_text_align_t(t_align_t);
-		text_align_t_check_menu(t_align_t);
+		text_align_t_is_checked(t_align_t);
 		DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
 		m_sheet_main.get_text_align_p(t_align_p);
-		text_align_p_check_menu(t_align_p);
+		text_align_p_is_checked(t_align_p);
 		bool g_snap;
 		m_sheet_main.get_grid_snap(g_snap);
 		tmfi_grid_snap().IsChecked(g_snap);
 		tmfi_grid_snap_2().IsChecked(g_snap);
-		len_unit_check_menu();
+		len_unit_is_checked(m_len_unit);
 
 		wchar_t* unavailable_font;	// èëëÃñº
 		if (slist_test_font(m_list_shapes, unavailable_font) != true) {

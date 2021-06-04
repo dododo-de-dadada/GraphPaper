@@ -174,27 +174,27 @@ namespace winrt::GraphPaper::implementation
 	// ê}å`ÇÃçÏê¨ÇèIóπÇ∑ÇÈ.
 	void MainPage::event_finish_creating(const D2D1_POINT_2F diff)
 	{
-		const auto tool = tool_draw();
+		const auto t_draw = tool_draw();
 		Shape* s;
-		if (tool == DRAW_TOOL::RECT) {
+		if (t_draw == DRAW_TOOL::RECT) {
 			s = new ShapeRect(m_event_pos_pressed, diff, &m_sheet_main);
 		}
-		else if (tool == DRAW_TOOL::RRECT) {
+		else if (t_draw == DRAW_TOOL::RRECT) {
 			s = new ShapeRRect(m_event_pos_pressed, diff, &m_sheet_main);
 		}
-		else if (tool == DRAW_TOOL::POLY) {
+		else if (t_draw == DRAW_TOOL::POLY) {
 			s = new ShapePoly(m_event_pos_pressed, diff, &m_sheet_main, tool_poly());
 		}
-		else if (tool == DRAW_TOOL::ELLI) {
+		else if (t_draw == DRAW_TOOL::ELLI) {
 			s = new ShapeElli(m_event_pos_pressed, diff, &m_sheet_main);
 		}
-		else if (tool == DRAW_TOOL::LINE) {
+		else if (t_draw == DRAW_TOOL::LINE) {
 			s = new ShapeLineA(m_event_pos_pressed, diff, &m_sheet_main);
 		}
-		else if (tool == DRAW_TOOL::BEZI) {
+		else if (t_draw == DRAW_TOOL::BEZI) {
 			s = new ShapeBezi(m_event_pos_pressed, diff, &m_sheet_main);
 		}
-		else if (tool == DRAW_TOOL::RULER) {
+		else if (t_draw == DRAW_TOOL::RULER) {
 			s = new ShapeRuler(m_event_pos_pressed, diff, &m_sheet_main);
 		}
 		else {

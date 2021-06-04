@@ -18,6 +18,7 @@ namespace winrt::GraphPaper::implementation
 	static auto local_folder(void)
 	{
 		using winrt::Windows::Storage::ApplicationData;
+
 		return ApplicationData::Current().LocalFolder();
 	}
 
@@ -41,7 +42,6 @@ namespace winrt::GraphPaper::implementation
 			}
 			item = nullptr;
 		}
-
 	}
 
 	// •Û‘¶‚³‚ê‚½İ’èƒf[ƒ^‚ğ“Ç‚İ‚Ş.

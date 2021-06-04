@@ -170,7 +170,18 @@ namespace winrt::GraphPaper::implementation
 		conv_len_to_str<B>(len_unit, value, dpi, g_len, Z, t_buf);
 	}
 
-	template <typename T, T C> constexpr void radio_menu_item_set_value(const T value, const RadioMenuFlyoutItem& item);
+	template <typename T, T C> constexpr void radio_menu_item_set_value(const T value, const RadioMenuFlyoutItem& item)
+	{
+		if (item.IsChecked()) {
+			if (value != C) {
+				item.IsChecked(false);
+			}
+		}
+		else if (value == C) {
+			item.IsChecked(true);
+		}
+	}
+
 
 	//-------------------------------
 	// 色の表記
@@ -348,10 +359,10 @@ namespace winrt::GraphPaper::implementation
 		// 線分のつながりと端点
 		//-------------------------------
 
-		void cap_style_check_menu(const CAP_STYLE& s_cap);
+		void cap_style_is_checked(const CAP_STYLE& s_cap);
 		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		IAsyncAction join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
-		void join_style_check_menu(const D2D1_LINE_JOIN s_join);
+		void join_style_is_checked(const D2D1_LINE_JOIN s_join);
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		template <UNDO_OP U, int S> void join_set_slider_header(const float value);
 		template <UNDO_OP U, int S> void join_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
@@ -380,7 +391,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 線枠メニューの「矢じるしの種類」に印をつける.
-		void arrow_style_check_menu(const ARROW_STYLE h_style);
+		void arrow_style_is_checked(const ARROW_STYLE h_style);
 		// 線枠メニューの「矢じるしの種類」が選択された.
 		void arrow_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「矢じるしの大きさ」が選択された.
@@ -456,7 +467,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 書体メニューの「字体」に印をつける.
-		void font_style_check_menu(const DWRITE_FONT_STYLE f_style);
+		void font_style_is_checked(const DWRITE_FONT_STYLE f_style);
 		// 書体メニューの「色」が選択された.
 		IAsyncAction font_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「書体名」が選択された.
@@ -478,9 +489,9 @@ namespace winrt::GraphPaper::implementation
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」に印をつける.
-		void text_align_t_check_menu(const DWRITE_TEXT_ALIGNMENT t_align);
+		void text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT t_align);
 		// 書体メニューの「段落のそろえ」に印をつける.
-		void text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align);
+		void text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT p_align);
 		// 書体メニューの「大きさを合わせる」が選択された.
 		void text_bbox_adjust_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行の高さ」>「狭める」が選択された.
@@ -516,9 +527,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 用紙メニューの「方眼の強調」に印をつける.
-		void grid_emph_check_menu(const GRID_EMPH& g_emph);
+		void grid_emph_is_checked(const GRID_EMPH& g_emph);
 		// 用紙メニューの「方眼の表示」に印をつける.
-		void grid_show_check_menu(const GRID_SHOW g_show);
+		void grid_show_is_checked(const GRID_SHOW g_show);
 		// 用紙メニューの「方眼の大きさ」>「大きさ」が選択された.
 		IAsyncAction grid_len_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の大きさ」>「狭める」が選択された.
@@ -698,7 +709,7 @@ namespace winrt::GraphPaper::implementation
 		// 色の表記を得る.
 		const COLOR_CODE color_code(void) const noexcept { return m_color_code; }
 		// その他メニューの「色の表記」に印をつける.
-		void color_code_check_menu(void);
+		void color_code_is_checked(const COLOR_CODE c_code);
 		// その他メニューの「色の表記」のサブ項目が選択された.
 		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値を長さの単位に格納する.
@@ -706,7 +717,7 @@ namespace winrt::GraphPaper::implementation
 		// 長さの単位を得る.
 		const LEN_UNIT len_unit(void) const noexcept { return m_len_unit; }
 		// その他メニューの「長さの単位」に印をつける.
-		void len_unit_check_menu(void);
+		void len_unit_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.
 		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
 
@@ -825,7 +836,7 @@ namespace winrt::GraphPaper::implementation
 		// その他メニューの「ステータスバー」が選択された.
 		void stbar_click(IInspectable const&, RoutedEventArgs const&);
 		// ステータスバーのメニュー項目に印をつける.
-		void stbar_check_menu(const STBAR_FLAG a);
+		void stbar_is_checked(const STBAR_FLAG a);
 		// 列挙型を OR 演算する.
 		static STBAR_FLAG stbar_or(const STBAR_FLAG a, const STBAR_FLAG b) noexcept;
 		// ステータスバーの状態をデータリーダーから読み込む.
@@ -853,7 +864,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 線枠メニューの「種類」に印をつける.
-		void stroke_dash_style_check_menu(const D2D1_DASH_STYLE d_style);
+		void stroke_dash_style_is_checked(const D2D1_DASH_STYLE d_style);
 		// 線枠メニューの「色」が選択された.
 		IAsyncAction stroke_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「種類」のサブ項目が選択された.
@@ -964,15 +975,19 @@ namespace winrt::GraphPaper::implementation
 
 		// 作図メニューの項目が選択された.
 		void tool_draw_click(IInspectable const& sender, RoutedEventArgs const&);
-		void tool_draw(const DRAW_TOOL value);
-		void tool_poly(const uint32_t value);
+		// 作図メニューのチェックマークをつける.
+		void tool_draw_is_checked(const DRAW_TOOL value);
+		// 作図メニューの多角形ツールのチェックマークをつける.
+		void tool_poly_is_checked(const uint32_t value);
+		// 作図メニューの多角形ツールのチェックマークをつける.
+		void tool_poly_is_checked(const POLY_TOOL& value);
 		// 作図ツールを得る.
 		const DRAW_TOOL tool_draw(void) const noexcept { return m_tool_draw; }
 		// 多角形の作図ツールを得る.
 		const POLY_TOOL& tool_poly(void) const noexcept { return m_tool_poly; }
-		// 作図メニューの状態を読み込む.
+		// 作図ツールの状態を読み込む.
 		void tool_read(DataReader const& dt_reader);
-		// 作図メニューの状態を書き込む.
+		// 作図ツールの状態を書き込む.
 		void tool_write(DataWriter const& dt_writer);
 
 		//-----------------------------

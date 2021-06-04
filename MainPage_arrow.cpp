@@ -157,7 +157,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠メニューの「矢じるしの種類」に印をつける.
 	// a_style	矢じるしの形式
-	void MainPage::arrow_style_check_menu(const ARROW_STYLE a_style)
+	void MainPage::arrow_style_is_checked(const ARROW_STYLE a_style)
 	{
 		rmfi_arrow_style_none().IsChecked(a_style == ARROW_STYLE::NONE);
 		rmfi_arrow_style_opened().IsChecked(a_style == ARROW_STYLE::OPENED);

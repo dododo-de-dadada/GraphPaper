@@ -314,7 +314,7 @@ namespace winrt::GraphPaper::implementation
 			// 線枠メニューの「矢じるしの種類」に印をつける.
 			ARROW_STYLE value;
 			m_sheet_main.get_arrow_style(value);
-			arrow_style_check_menu(value);
+			arrow_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
@@ -324,18 +324,18 @@ namespace winrt::GraphPaper::implementation
 			// 用紙メニューの「方眼の強調」に印をつける.
 			GRID_EMPH value;
 			m_sheet_main.get_grid_emph(value);
-			grid_emph_check_menu(value);
+			grid_emph_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_SHOW>)) {
 			GRID_SHOW value;
 			m_sheet_main.get_grid_show(value);
-			grid_show_check_menu(value);
+			grid_show_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
 			DWRITE_FONT_STYLE value;
 			m_sheet_main.get_font_style(value);
-			font_style_check_menu(value);
+			font_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::SHEET_SIZE>)) {
 			// 用紙の大きさをステータスバーに格納する.
@@ -344,32 +344,32 @@ namespace winrt::GraphPaper::implementation
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP_STYLE>)) {
 			CAP_STYLE value;
 			m_sheet_main.get_stroke_cap_style(value);
-			cap_style_check_menu(value);
+			cap_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_DASH_CAP>)) {
 			D2D1_CAP_STYLE value;
 			m_sheet_main.get_stroke_dash_cap(value);
-			//cap_style_check_menu(value);
+			//cap_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_DASH_STYLE>)) {
 			D2D1_DASH_STYLE value;
 			m_sheet_main.get_stroke_dash_style(value);
-			stroke_dash_style_check_menu(value);
+			stroke_dash_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_JOIN_STYLE>)) {
 			D2D1_LINE_JOIN value;
 			m_sheet_main.get_stroke_join_style(value);
-			join_style_check_menu(value);
+			join_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT value;
 			m_sheet_main.get_text_align_t(value);
-			text_align_t_check_menu(value);
+			text_align_t_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_P>)) {
 			DWRITE_PARAGRAPH_ALIGNMENT value;
 			m_sheet_main.get_text_align_p(value);
-			text_align_p_check_menu(value);
+			text_align_p_is_checked(value);
 		}
 	}
 

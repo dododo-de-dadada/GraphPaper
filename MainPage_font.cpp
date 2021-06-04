@@ -378,7 +378,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 書体メニューの「字体」に印をつける.
 	// f_style	書体の字体
-	void MainPage::font_style_check_menu(const DWRITE_FONT_STYLE f_style)
+	void MainPage::font_style_is_checked(const DWRITE_FONT_STYLE f_style)
 	{
 		rmfi_font_style_italic().IsChecked(f_style == DWRITE_FONT_STYLE_ITALIC);
 		rmfi_font_style_normal().IsChecked(f_style == DWRITE_FONT_STYLE_NORMAL);
@@ -490,15 +490,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 書体メニューの「段落のそろえ」に印をつける.
 	// p_align	段落のそろえ
-	void MainPage::text_align_p_check_menu(const DWRITE_PARAGRAPH_ALIGNMENT p_align)
+	void MainPage::text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT p_align)
 	{
-		rmfi_text_align_top().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bot().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_mid().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-
-		rmfi_text_align_top_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bot_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_mid_2().IsChecked(p_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR>(p_align, rmfi_text_align_top());
+		radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR>(p_align, rmfi_text_align_top_2());
+		radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR>(p_align, rmfi_text_align_bot());
+		radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR>(p_align, rmfi_text_align_bot_2());
+		radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER>(p_align, rmfi_text_align_mid());
+		radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER>(p_align, rmfi_text_align_mid_2());
 	}
 
 	// 書体メニューの「段落のそろえ」>「中段」が選択された.
@@ -533,17 +532,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 書体メニューの「文字列のそろえ」に印をつける.
 	// t_align	文字列のそろえ
-	void MainPage::text_align_t_check_menu(const DWRITE_TEXT_ALIGNMENT t_align)
+	void MainPage::text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT t_align)
 	{
-		rmfi_text_align_left().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_text_align_right().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_text_align_center().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_just().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-
-		rmfi_text_align_left_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_text_align_right_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_text_align_center_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_just_2().IsChecked(t_align == DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING>(t_align, rmfi_text_align_left());
+		radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING>(t_align, rmfi_text_align_left_2());
+		radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING>(t_align, rmfi_text_align_right());
+		radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING>(t_align, rmfi_text_align_right_2());
+		radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER>(t_align, rmfi_text_align_center());
+		radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER>(t_align, rmfi_text_align_center_2());
+		radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED>(t_align, rmfi_text_align_just());
+		radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED>(t_align, rmfi_text_align_just_2());
 	}
 
 	// 書体メニューの「文字列のそろえ」>「均等」が選択された.
