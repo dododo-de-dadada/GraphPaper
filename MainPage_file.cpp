@@ -48,10 +48,10 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t UNTITLED[] = L"str_untitled";	// 無題のリソース名
 
 	// SVG 開始タグをデータライターに書き込む.
-	static void file_write_svg_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer);
+	static void file_svg_write_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer);
 
 	// SVG 開始タグをデータライターに書き込む.
-	static void file_write_svg_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer)
+	static void file_svg_write_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer)
 	{
 		constexpr char SVG_TAG[] = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" ";
 		constexpr char* SVG_UNIT_PX = "px";
@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 		constexpr char* SVG_UNIT_PT = "pt";
 
 		// SVG タグの開始を書き込む.
-		write_svg(SVG_TAG, dt_writer);
+		svg_write(SVG_TAG, dt_writer);
 		// 単位付きで幅と高さの属性を書き込む.
 		char buf[256];
 		double w, h;
@@ -86,17 +86,17 @@ namespace winrt::GraphPaper::implementation
 			u = SVG_UNIT_PX;
 		}
 		sprintf_s(buf, "width=\"%lf%s\" height=\"%lf%s\" ", w, u, h, u);
-		write_svg(buf, dt_writer);
+		svg_write(buf, dt_writer);
 		// ピクセル単位の幅と高さを viewBox 属性として書き込む.
-		write_svg("viewBox=\"0 0 ", dt_writer);
-		write_svg(size.width, dt_writer);
-		write_svg(size.height, dt_writer);
-		write_svg("\" ", dt_writer);
+		svg_write("viewBox=\"0 0 ", dt_writer);
+		svg_write(size.width, dt_writer);
+		svg_write(size.height, dt_writer);
+		svg_write("\" ", dt_writer);
 		// 背景色をスタイル属性として書き込む.
-		write_svg("style=\"background-color:", dt_writer);
-		write_svg(color, dt_writer);
+		svg_write("style=\"background-color:", dt_writer);
+		svg_write(color, dt_writer);
 		// svg 開始タグの終了を書き込む.
-		write_svg("\" >" SVG_NEW_LINE, dt_writer);
+		svg_write("\" >" SVG_NEW_LINE, dt_writer);
 	}
 
 	// ファイルの読み込みが終了した.
@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 		GRID_SHOW g_show;
 		m_sheet_main.get_grid_show(g_show);
 		grid_show_check_menu(g_show);
-		sbar_check_menu(status_bar());
+		stbar_check_menu(status_bar());
 		DWRITE_TEXT_ALIGNMENT t_align_t;
 		m_sheet_main.get_text_align_t(t_align_t);
 		text_align_t_check_menu(t_align_t);
@@ -149,13 +149,13 @@ namespace winrt::GraphPaper::implementation
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
-		sbar_set_curs();
-		sbar_set_draw();
-		sbar_set_grid();
-		sbar_set_sheet();
-		sbar_set_zoom();
-		sbar_set_unit();
-		sbar_visibility();
+		stbar_set_curs();
+		stbar_set_draw();
+		stbar_set_grid();
+		stbar_set_sheet();
+		stbar_set_zoom();
+		stbar_set_unit();
+		stbar_visibility();
 	}
 
 	// ファイルメニューの「開く」が選択された
@@ -212,16 +212,16 @@ namespace winrt::GraphPaper::implementation
 
 			tool_read(dt_reader);
 			text_find_read(dt_reader);
-			sbar_read(dt_reader);
+			stbar_read(dt_reader);
 			len_unit(static_cast<LEN_UNIT>(dt_reader.ReadUInt32()));
 			color_code(static_cast<COLOR_CODE>(dt_reader.ReadUInt16()));
-			//status_bar(static_cast<SBAR_FLAG>(dt_reader.ReadUInt16()));
+			//status_bar(static_cast<STBAR_FLAG>(dt_reader.ReadUInt16()));
 
 			m_sheet_main.read(dt_reader);
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			m_sheet_main.set_grid_base(max(g_base, 0.0F));
-			m_sheet_main.m_sheet_scale = min(max(m_sheet_main.m_sheet_scale, SCALE_MIN), SCALE_MAX);
+			m_sheet_main.m_sheet_scale = min(max(m_sheet_main.m_sheet_scale, 0.25f), 4.0f);
 			m_sheet_main.m_sheet_size.width = max(min(m_sheet_main.m_sheet_size.width, sheet_size_max()), 1.0F);
 			m_sheet_main.m_sheet_size.height = max(min(m_sheet_main.m_sheet_size.height, sheet_size_max()), 1.0F);
 
@@ -309,13 +309,11 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		if (s_file != nullptr) {
-			auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
-			m_file_token_mru = mru_list.Add(s_file, s_file.Path());
+			m_file_token_mru = StorageApplicationPermissions::MostRecentlyUsedList().Add(s_file, s_file.Path());
 			ApplicationView::GetForCurrentView().Title(s_file.Name());
 		}
 		else {
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			ApplicationView::GetForCurrentView().Title(r_loader.GetString(UNTITLED));
+			ApplicationView::GetForCurrentView().Title(ResourceLoader::GetForCurrentView().GetString(UNTITLED));
 		}
 		file_recent_update_menu();
 	}
@@ -488,7 +486,7 @@ namespace winrt::GraphPaper::implementation
 				// ファイルタイプが SVG か判定する.
 				if (s_file.FileType() == FT_SVG) {
 					// 図形データを SVG としてストレージファイルに非同期に書き込み, 結果を得る.
-					hres = co_await file_write_svg_async(s_file);
+					hres = co_await file_svg_write_async(s_file);
 				}
 				else {
 					// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
@@ -601,7 +599,7 @@ namespace winrt::GraphPaper::implementation
 
 			tool_write(dt_writer);
 			text_find_write(dt_writer);
-			sbar_write(dt_writer);
+			stbar_write(dt_writer);
 			dt_writer.WriteUInt32(static_cast<uint32_t>(len_unit()));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(color_code()));
 			//dt_writer.WriteUInt16(static_cast<uint16_t>(status_bar()));
@@ -663,12 +661,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形データを SVG としてストレージファイルに非同期に書き込む.
 	// file	書き込み先のファイル
 	// 戻り値	書き込めた場合 S_OK
-	IAsyncOperation<winrt::hresult> MainPage::file_write_svg_async(StorageFile const& s_file)
+	IAsyncOperation<winrt::hresult> MainPage::file_svg_write_async(StorageFile const& s_file)
 	{
 		using winrt::Windows::Storage::CachedFileManager;
 		using winrt::Windows::Storage::FileAccessMode;
 		using winrt::Windows::Storage::Provider::FileUpdateStatus;
-		using winrt::GraphPaper::implementation::write_svg;
+		using winrt::GraphPaper::implementation::svg_write;
 		constexpr char XML_DEC[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" SVG_NEW_LINE;
 		constexpr char DOCTYPE[] = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" SVG_NEW_LINE;
 
@@ -685,11 +683,11 @@ namespace winrt::GraphPaper::implementation
 			// ランダムアクセスストリームの先頭からデータライターを作成する.
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
 			// XML 宣言を書き込む.
-			write_svg(XML_DEC, dt_writer);
+			svg_write(XML_DEC, dt_writer);
 			// DOCTYPE を書き込む.
-			write_svg(DOCTYPE, dt_writer);
+			svg_write(DOCTYPE, dt_writer);
 			// SVG 開始タグをデータライターに書き込む.
-			file_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, m_sheet_dx.m_logical_dpi, len_unit(), dt_writer);
+			file_svg_write_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, m_sheet_dx.m_logical_dpi, len_unit(), dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {
@@ -697,10 +695,10 @@ namespace winrt::GraphPaper::implementation
 					// 以下を無視する.
 					continue;
 				}
-				s->write_svg(dt_writer);
+				s->svg_write(dt_writer);
 			}
 			// SVG 終了タグを書き込む.
-			write_svg("</svg>" SVG_NEW_LINE, dt_writer);
+			svg_write("</svg>" SVG_NEW_LINE, dt_writer);
 			// ストリームの現在位置をストリームの大きさに格納する.
 			ra_stream.Size(ra_stream.Position());
 			// バッファ内のデータをストリームに出力する.

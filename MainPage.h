@@ -50,6 +50,7 @@
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Microsoft::UI::Xaml::Controls::RadioMenuFlyoutItem;
 	using winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::SuspendingEventArgs;
@@ -88,28 +89,28 @@ namespace winrt::GraphPaper::implementation
 
 	// 書式変換
 	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
-	constexpr auto FMT_INCH_UNIT = L"%.3f in";	// インチ単位の書式
+	constexpr auto FMT_INCH_UNIT = L"%.3f \u33CC";	// インチ単位の書式
 	constexpr auto FMT_MILLI = L"%.3f";	// ミリメートル単位の書式
-	constexpr auto FMT_MILLI_UNIT = L"%.3f mm";	// ミリメートル単位の書式
+	constexpr auto FMT_MILLI_UNIT = L"%.3f \u339C";	// ミリメートル単位の書式
 	constexpr auto FMT_POINT = L"%.2f";	// ポイント単位の書式
 	constexpr auto FMT_POINT_UNIT = L"%.2f pt";	// ポイント単位の書式
 	constexpr auto FMT_PIXEL = L"%.1f";	// ピクセル単位の書式
 	constexpr auto FMT_PIXEL_UNIT = L"%.1f px";	// ピクセル単位の書式
 	constexpr auto FMT_ZOOM = L"%.f%%";	// 倍率の書式
 	constexpr auto FMT_GRID = L"%.3f";	// グリッド単位の書式
-	constexpr auto FMT_GRID_UNIT = L"%.3f gr";	// グリッド単位の書式
+	constexpr auto FMT_GRID_UNIT = L"%.3f gd";	// グリッド単位の書式
 	constexpr auto ICON_INFO = L"icon_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"icon_alert";	// 警告アイコンの静的リソースのキー
 
 	constexpr auto SHEET_SIZE_DEF = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
-	constexpr auto SCALE_MAX = 128.0f;	// 表示倍率の最大値
-	constexpr auto SCALE_MIN = 1.0f / 128.0f;	// 表示倍率の最小値
+	//constexpr auto SCALE_MAX = 128.0f;	// 表示倍率の最大値
+	//constexpr auto SCALE_MIN = 1.0f / 128.0f;	// 表示倍率の最小値
 	static const winrt::hstring CF_GPD{ L"graph_paper_data" };	// 図形データのクリップボード書式
 
 	//-------------------------------
 	// ポインターボタンの状態
 	//-------------------------------
-	enum struct PBTN_STATE {
+	enum struct EVENT_STATE {
 		BEGIN,	// 初期状態
 		PRESS_LBTN,	// 左ボタンを押している状態
 		PRESS_RBTN,	// 右ボタンを押している状態
@@ -123,19 +124,19 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// ステータスバーの状態
 	//-------------------------------
-	enum struct SBAR_FLAG {
+	enum struct STBAR_FLAG {
 		GRID = 1,	// 方眼の大きさ
 		SHEET = (2 | 4),	// 用紙の大きさ
 		CURS = (8 | 16),	// カーソルの位置
 		ZOOM = 32,	// 拡大率
 		DRAW = 64,	// 作図ツール
-		UNIT = 128	// 長さの単位
+		UNIT = 128	// 単位名
 	};
 
 	//-------------------------------
 	// 作図ツール
 	//-------------------------------
-	enum struct TOOL_DRAW {
+	enum struct DRAW_TOOL {
 		SELECT,	// 選択ツール
 		BEZI,	// 曲線
 		ELLI,	// だ円
@@ -168,6 +169,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		conv_len_to_str<B>(len_unit, value, dpi, g_len, Z, t_buf);
 	}
+
+	template <typename T, T C> void radio_menu_item_set_value(const T value, const RadioMenuFlyoutItem& item);
 
 	//-------------------------------
 	// 色の表記
@@ -231,14 +234,14 @@ namespace winrt::GraphPaper::implementation
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
 
-		// sbar
+		// stbar
 
-		SBAR_FLAG m_status_bar = sbar_or(SBAR_FLAG::CURS, SBAR_FLAG::ZOOM);	// ステータスバーの状態
+		STBAR_FLAG m_status_bar = stbar_or(STBAR_FLAG::CURS, STBAR_FLAG::ZOOM);	// ステータスバーの状態
 
 		// drawing tool
 
-		TOOL_DRAW m_tool_draw = TOOL_DRAW::SELECT;		// 作図ツール
-		TOOL_POLY m_tool_poly{ TOOL_POLY_DEF };	// 多角形の作図ツール
+		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
+		POLY_TOOL m_tool_poly{ POLY_TOOL_DEF };	// 多角形の作図ツール
 
 		// main
 
@@ -264,7 +267,7 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };		// ポインターの現在位置
 		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };		// ポインターの前回位置
-		PBTN_STATE m_event_state = PBTN_STATE::BEGIN;		// ポインターの押された状態
+		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;		// ポインターの押された状態
 		uint32_t m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;		// ポインターが押された図形の部位
 		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };		// ポインターが押された位置
 		Shape* m_event_shape_pressed = nullptr;		// ポインターが押された図形
@@ -415,7 +418,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形データをストレージファイルに非同期に書き込む.
 		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile const& s_file, const bool suspend = false, const bool layout = false);
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile const& s_file);
+		IAsyncOperation<winrt::hresult> file_svg_write_async(StorageFile const& s_file);
 		// ファイルの読み込みが終了した.
 		void file_finish_reading(void);
 		// ファイルメニューの「開く」が選択された
@@ -745,9 +748,9 @@ namespace winrt::GraphPaper::implementation
 		// ポインターが押された図形を得る.
 		Shape* event_shape_smry(void) const noexcept { return m_event_shape_smry; }
 		// ポインターの押された状態に格納する.
-		void event_state(const PBTN_STATE state) noexcept { m_event_state = state; }
+		void event_state(const EVENT_STATE state) noexcept { m_event_state = state; }
 		// ポインターの押された状態を得る.
-		const PBTN_STATE event_state(void) const noexcept { return m_event_state; }
+		const EVENT_STATE event_state(void) const noexcept { return m_event_state; }
 		// ポインターのボタンが上げられた.
 		void event_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがページのスワップチェーンパネルの中に入った.
@@ -816,33 +819,33 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 値をステータスバーの状態に格納する.
-		void status_bar(const SBAR_FLAG stbar) noexcept { m_status_bar = stbar; }
+		void status_bar(const STBAR_FLAG flag) noexcept { m_status_bar = flag; }
 		// ステータスバーの状態を得る.
-		const SBAR_FLAG status_bar(void) const noexcept { return m_status_bar; }
+		const STBAR_FLAG status_bar(void) const noexcept { return m_status_bar; }
 		// その他メニューの「ステータスバー」が選択された.
-		void sbar_click(IInspectable const&, RoutedEventArgs const&);
+		void stbar_click(IInspectable const&, RoutedEventArgs const&);
 		// ステータスバーのメニュー項目に印をつける.
-		void sbar_check_menu(const SBAR_FLAG a);
+		void stbar_check_menu(const STBAR_FLAG a);
 		// 列挙型を OR 演算する.
-		static SBAR_FLAG sbar_or(const SBAR_FLAG a, const SBAR_FLAG b) noexcept;
+		static STBAR_FLAG stbar_or(const STBAR_FLAG a, const STBAR_FLAG b) noexcept;
 		// ステータスバーの状態をデータリーダーから読み込む.
-		void sbar_read(DataReader const& dt_reader);
+		void stbar_read(DataReader const& dt_reader);
 		// ポインターの位置をステータスバーに格納する.
-		void sbar_set_curs(void);
+		void stbar_set_curs(void);
 		// 作図ツールをステータスバーに格納する.
-		void sbar_set_draw(void);
+		void stbar_set_draw(void);
 		// 方眼の大きさをステータスバーに格納する.
-		void sbar_set_grid(void);
+		void stbar_set_grid(void);
 		// 用紙の大きさをステータスバーに格納する.
-		void sbar_set_sheet(void);
+		void stbar_set_sheet(void);
 		// 単位をステータスバーに格納する.
-		void sbar_set_unit(void);
+		void stbar_set_unit(void);
 		// 拡大率をステータスバーに格納する.
-		void sbar_set_zoom(void);
+		void stbar_set_zoom(void);
 		// ステータスバーの表示を設定する.
-		void sbar_visibility(void);
+		void stbar_visibility(void);
 		// ステータスバーの状態をデータライターに書き込む.
-		void sbar_write(DataWriter const& dt_writer);
+		void stbar_write(DataWriter const& dt_writer);
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -961,10 +964,11 @@ namespace winrt::GraphPaper::implementation
 
 		// 作図メニューの項目が選択された.
 		void tool_draw_click(IInspectable const& sender, RoutedEventArgs const&);
+		void tool_draw(const DRAW_TOOL value);
 		// 作図ツールを得る.
-		const TOOL_DRAW tool_draw(void) const noexcept { return m_tool_draw; }
+		const DRAW_TOOL tool_draw(void) const noexcept { return m_tool_draw; }
 		// 多角形の作図ツールを得る.
-		const TOOL_POLY& tool_poly(void) const noexcept { return m_tool_poly; }
+		const POLY_TOOL& tool_poly(void) const noexcept { return m_tool_poly; }
 		// 作図メニューの状態を読み込む.
 		void tool_read(DataReader const& dt_reader);
 		// 作図メニューの状態を書き込む.
@@ -1049,12 +1053,13 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 用紙メニューの「拡大縮小」>「拡大」が選択された.
-		void mfi_zoom_in_clicked(IInspectable const&, RoutedEventArgs const&);
+		//void mfi_zoom_in_clicked(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「拡大縮小」>「縮小」が選択された.
-		void mfi_zoom_out_clicked(IInspectable const&, RoutedEventArgs const&);
+		//void mfi_zoom_out_clicked(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「拡大縮小」>「100%に戻す」が選択された.
-		void mfi_zoom_reset_click(IInspectable const&, RoutedEventArgs const&);
+		//void mfi_zoom_100_click(IInspectable const&, RoutedEventArgs const&);
 
+		void mfi_zoom_click(IInspectable const& sender, RoutedEventArgs const&);
 	};
 
 }

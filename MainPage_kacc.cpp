@@ -37,34 +37,34 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::kacc_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
 		const auto t_draw = tool_draw();
-		if (t_draw == TOOL_DRAW::SELECT) {
+		if (t_draw == DRAW_TOOL::SELECT) {
 			return;
 		}
 		rmfi_tool_select().IsChecked(true);
 		// グループ名を指定していてもコードビハインドからは
 		// 自動でチェックが外れない.
-		if (t_draw == TOOL_DRAW::BEZI) {
+		if (t_draw == DRAW_TOOL::BEZI) {
 			rmfi_tool_draw_bezi().IsChecked(false);
 		}
-		else if (t_draw == TOOL_DRAW::ELLI) {
+		else if (t_draw == DRAW_TOOL::ELLI) {
 			rmfi_tool_draw_elli().IsChecked(false);
 		}
-		else if (t_draw == TOOL_DRAW::LINE) {
+		else if (t_draw == DRAW_TOOL::LINE) {
 			rmfi_tool_draw_line().IsChecked(false);
 		}
-		else if (t_draw == TOOL_DRAW::POLY) {
+		else if (t_draw == DRAW_TOOL::POLY) {
 			rmfi_tool_draw_poly().IsChecked(false);
 		}
-		else if (t_draw == TOOL_DRAW::RECT) {
+		else if (t_draw == DRAW_TOOL::RECT) {
 			rmfi_tool_draw_rect().IsChecked(false);
 		}
-		else if (t_draw == TOOL_DRAW::RRECT) {
+		else if (t_draw == DRAW_TOOL::RRECT) {
 			rmfi_tool_draw_rrect().IsChecked(false);
 		}
-		else if (t_draw == TOOL_DRAW::TEXT) {
+		else if (t_draw == DRAW_TOOL::TEXT) {
 			rmfi_tool_draw_text().IsChecked(false);
 		}
-		else if (t_draw == TOOL_DRAW::RULER) {
+		else if (t_draw == DRAW_TOOL::RULER) {
 			rmfi_tool_draw_ruler().IsChecked(false);
 		}
 		tool_draw_click(rmfi_tool_select(), nullptr);
@@ -243,7 +243,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::kacc_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (m_sheet_main.m_sheet_scale != 1.0) {
-	// 	mfi_zoom_reset_click(nullptr, nullptr);
+	// 	mfi_zoom_100_click(nullptr, nullptr);
 	// }
 	//}
 

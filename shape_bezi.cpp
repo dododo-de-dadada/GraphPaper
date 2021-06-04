@@ -859,27 +859,27 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeBezi::write_svg(DataWriter const& dt_writer) const
+	void ShapeBezi::svg_write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write_svg;
+		using winrt::GraphPaper::implementation::svg_write;
 		D2D1_BEZIER_SEGMENT b_seg;
 
 		pt_add(m_pos, m_diff[0], b_seg.point1);
 		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
 		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
-		write_svg("<path d=\"", dt_writer);
-		write_svg(m_pos, "M", dt_writer);
-		write_svg(b_seg.point1, "C", dt_writer);
-		write_svg(b_seg.point2, ",", dt_writer);
-		write_svg(b_seg.point3, ",", dt_writer);
-		write_svg("\" ", dt_writer);
-		write_svg("none", "fill", dt_writer);
-		ShapeStroke::write_svg(dt_writer);
-		write_svg("/>" SVG_NEW_LINE, dt_writer);
+		svg_write("<path d=\"", dt_writer);
+		svg_write(m_pos, "M", dt_writer);
+		svg_write(b_seg.point1, "C", dt_writer);
+		svg_write(b_seg.point2, ",", dt_writer);
+		svg_write(b_seg.point3, ",", dt_writer);
+		svg_write("\" ", dt_writer);
+		svg_write("none", "fill", dt_writer);
+		ShapeStroke::svg_write(dt_writer);
+		svg_write("/>" SVG_NEW_LINE, dt_writer);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bz_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			ShapeLineA::write_svg(barbs, barbs[2], dt_writer);
+			ShapeLineA::svg_write(barbs, barbs[2], dt_writer);
 		}
 	}
 

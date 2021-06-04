@@ -78,26 +78,22 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_col_r") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_col_g") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_col_b") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_opacity") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {

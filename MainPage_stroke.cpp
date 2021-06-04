@@ -216,69 +216,26 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
 
-		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			text = r_loader.GetString(L"str_stroke_width");
-		}
 		if constexpr (U == UNDO_OP::STROKE_DASH_PATT) {
+			constexpr wchar_t* R[]{ L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap" };
 			wchar_t buf[32];
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			//float s_width;
-			//m_sample_sheet.get_stroke_width(s_width);
-			conv_len_to_str<LEN_UNIT_HIDE>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			if constexpr (S == 0) {
-				text = r_loader.GetString(L"str_dash_len") + L": " + buf + L"\u00D7";
-			}
-			if constexpr (S == 1) {
-				text = r_loader.GetString(L"str_dash_gap") + L": " + buf + L"\u00D7";
-			}
-			if constexpr (S == 2) {
-				text = r_loader.GetString(L"str_dot_len") + L": " + buf + L"\u00D7";
-			}
-			if constexpr (S == 3) {
-				text = r_loader.GetString(L"str_dot_gap") + L": " + buf + L"\u00D7";
-			}
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+			text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			wchar_t buf[32];
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			text = r_loader.GetString(L"str_stroke_width");
-			text = text + L": " + buf;
+			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
-			if constexpr (S == 0) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_col_r") + L": " + buf;
-			}
-			if constexpr (S == 1) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_col_g") + L": " + buf;
-			}
-			if constexpr (S == 2) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_col_b") + L": " + buf;
-			}
-			if constexpr (S == 3) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_opacity") + L": " + buf;
-			}
+			constexpr wchar_t* R[]{ L"str_col_r", L"str_col_g", L"str_col_b", L"str_opacity" };
+			wchar_t buf[32];
+			conv_col_to_str(color_code(), value, buf);
+			text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
 		}
 		if constexpr (S == 0) {
 			sample_slider_0().Header(box_value(text));
@@ -308,35 +265,21 @@ namespace winrt::GraphPaper::implementation
 		const float value = static_cast<float>(args.NewValue());
 		stroke_set_slider_header<U, S>(value);
 		if constexpr (U == UNDO_OP::STROKE_DASH_PATT) {
+			STROKE_DASH_PATT patt;
+			s->get_stroke_dash_patt(patt);
 			if constexpr (S == 0) {
-				STROKE_DASH_PATT patt;
-				s->get_stroke_dash_patt(patt);
 				patt.m_[0] = static_cast<FLOAT>(value * SLIDER_STEP);
-				s->set_stroke_dash_patt(patt);
 			}
 			if constexpr (S == 1) {
-				STROKE_DASH_PATT patt;
-				s->get_stroke_dash_patt(patt);
 				patt.m_[1] = static_cast<FLOAT>(value * SLIDER_STEP);
-				s->set_stroke_dash_patt(patt);
 			}
 			if constexpr (S == 2) {
-				STROKE_DASH_PATT patt;
-				s->get_stroke_dash_patt(patt);
 				patt.m_[2] = patt.m_[4] = static_cast<FLOAT>(value * SLIDER_STEP);
-				s->set_stroke_dash_patt(patt);
 			}
 			if constexpr (S == 3) {
-				STROKE_DASH_PATT patt;
-				s->get_stroke_dash_patt(patt);
 				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(value * SLIDER_STEP);
-				s->set_stroke_dash_patt(patt);
 			}
-			//if constexpr (S == 4) {
-			//	float s_width;
-			//	s_width = static_cast<FLOAT>(value * SLIDER_STEP);
-			//	s->set_stroke_width(s_width);
-			//}
+			s->set_stroke_dash_patt(patt);
 		}
 		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
 			s->set_stroke_join_limit(value);

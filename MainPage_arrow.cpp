@@ -46,24 +46,19 @@ namespace winrt::GraphPaper::implementation
 
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			if constexpr (S == 0) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_arrow_width") + L": ";
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_width") + L": ";
 			}
 			if constexpr (S == 1) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_arrow_length") + L": ";
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_length") + L": ";
 			}
 			if constexpr (S == 2) {
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_arrow_offset") + L": ";
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_offset") + L": ";
 			}
 		}
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
-			//const double dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			//const double g_len = g_base + 1.0;
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 			text = text + buf;
 		}

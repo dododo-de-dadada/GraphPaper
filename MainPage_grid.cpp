@@ -155,23 +155,19 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::GRID_BASE) {
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			text = r_loader.GetString(L"str_grid_length");
-			const float dpi = m_sheet_dx.m_logical_dpi;
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
 			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP + 1.0f, dpi, g_len, buf);
-			text = text + L": " + buf;
+			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP + 1.0f, m_sheet_dx.m_logical_dpi, g_len, buf);
+			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_GRAY) {
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// êFê¨ï™ÇÃílÇï∂éöóÒÇ…ïœä∑Ç∑ÇÈ.
 				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_gray_scale") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_gray_scale") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {

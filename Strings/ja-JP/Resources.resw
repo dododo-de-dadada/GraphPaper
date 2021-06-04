@@ -513,7 +513,7 @@
     <value>縮小</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_zoom_reset.Text" xml:space="preserve">
+  <data name="mfi_zoom_100.Text" xml:space="preserve">
     <value>100%</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -682,7 +682,7 @@
     <comment>String</comment>
   </data>
   <data name="str_arrow_length" xml:space="preserve">
-    <value>長さ</value>
+    <value>矢じりの長さ</value>
     <comment>String</comment>
   </data>
   <data name="str_arrow_offset" xml:space="preserve">
@@ -690,7 +690,7 @@
     <comment>String</comment>
   </data>
   <data name="str_arrow_width" xml:space="preserve">
-    <value>幅</value>
+    <value>返しの幅</value>
     <comment>String</comment>
   </data>
   <data name="str_col_b" xml:space="preserve">
@@ -706,7 +706,7 @@
     <comment>String</comment>
   </data>
   <data name="str_dash_gap" xml:space="preserve">
-    <value>破線の間隔</value>
+    <value>破線の隙間</value>
     <comment>String</comment>
   </data>
   <data name="str_dash_len" xml:space="preserve">
@@ -842,27 +842,27 @@
     <value>方眼にそろえる</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_sbar_curs.Text" xml:space="preserve">
+  <data name="tmfi_stbar_curs.Text" xml:space="preserve">
     <value>カーソルの位置</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_sbar_grid.Text" xml:space="preserve">
+  <data name="tmfi_stbar_grid.Text" xml:space="preserve">
     <value>方眼の大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_sbar_sheet.Text" xml:space="preserve">
+  <data name="tmfi_stbar_sheet.Text" xml:space="preserve">
     <value>用紙の大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_sbar_draw.Text" xml:space="preserve">
+  <data name="tmfi_stbar_draw.Text" xml:space="preserve">
     <value>作図ツール</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_sbar_unit.Text" xml:space="preserve">
-    <value>単位</value>
+  <data name="tmfi_stbar_unit.Text" xml:space="preserve">
+    <value>単位名</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_sbar_zoom.Text" xml:space="preserve">
+  <data name="tmfi_stbar_zoom.Text" xml:space="preserve">
     <value>拡大率</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>

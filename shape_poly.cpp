@@ -853,7 +853,7 @@ namespace winrt::GraphPaper::implementation
 	// v_reg	正多角形に作図するか判定
 	// v_up	頂点を上に作図するか判定
 	// v_end	辺を閉じて作図するか判定
-	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr, const TOOL_POLY& t_poly) :
+	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr, const POLY_TOOL& t_poly) :
 		ShapePath::ShapePath(t_poly.m_vertex_cnt - 1, s_attr, t_poly.m_closed),
 		m_end_closed(t_poly.m_closed),
 		m_fill_color(s_attr->m_fill_color)
@@ -888,12 +888,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapePoly::write_svg(DataWriter const& dt_writer) const
+	void ShapePoly::svg_write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write_svg;
+		using winrt::GraphPaper::implementation::svg_write;
 
-		write_svg("<path d=\"", dt_writer);
-		write_svg(m_pos, "M", dt_writer);
+		svg_write("<path d=\"", dt_writer);
+		svg_write(m_pos, "M", dt_writer);
 		const auto d_cnt = m_diff.size();	// 差分の数
 		const auto v_cnt = d_cnt + 1;
 		//std::vector<D2D1_POINT_2F> vert_pos(v_cnt);
@@ -902,36 +902,36 @@ namespace winrt::GraphPaper::implementation
 
 		v_pos[0] = m_pos;
 		for (size_t i = 0; i < d_cnt; i++) {
-			write_svg(m_diff[i], "l", dt_writer);
+			svg_write(m_diff[i], "l", dt_writer);
 			pt_add(v_pos[i], m_diff[i], v_pos[i + 1]);
 		}
 		if (m_end_closed) {
-			write_svg("Z", dt_writer);
+			svg_write("Z", dt_writer);
 		}
-		write_svg("\" ", dt_writer);
-		ShapeStroke::write_svg(dt_writer);
-		write_svg(m_fill_color, "fill", dt_writer);
-		write_svg("/>" SVG_NEW_LINE, dt_writer);
+		svg_write("\" ", dt_writer);
+		ShapeStroke::svg_write(dt_writer);
+		svg_write(m_fill_color, "fill", dt_writer);
+		svg_write("/>" SVG_NEW_LINE, dt_writer);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F h_tip;
 			D2D1_POINT_2F h_barbs[2];
 			if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
-				write_svg("<path d=\"", dt_writer);
-				write_svg(h_barbs[0], "M", dt_writer);
-				write_svg(h_tip, "L", dt_writer);
-				write_svg(h_barbs[1], "L", dt_writer);
+				svg_write("<path d=\"", dt_writer);
+				svg_write(h_barbs[0], "M", dt_writer);
+				svg_write(h_tip, "L", dt_writer);
+				svg_write(h_barbs[1], "L", dt_writer);
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
-					write_svg("Z", dt_writer);
+					svg_write("Z", dt_writer);
 				}
-				write_svg("\" ", dt_writer);
-				ShapeStroke::write_svg(dt_writer);
+				svg_write("\" ", dt_writer);
+				ShapeStroke::svg_write(dt_writer);
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
-					write_svg(m_stroke_color, "fill", dt_writer);
+					svg_write(m_stroke_color, "fill", dt_writer);
 				}
 				else {
-					write_svg("fill=\"transparent\" ", dt_writer);
+					svg_write("fill=\"transparent\" ", dt_writer);
 				}
-				write_svg("/>" SVG_NEW_LINE, dt_writer);
+				svg_write("/>" SVG_NEW_LINE, dt_writer);
 			}
 		}
 	}

@@ -360,7 +360,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 多角形のツールをデータリーダーから読み込む.
-	void dt_read(TOOL_POLY& value, DataReader const& dt_reader)
+	void dt_read(POLY_TOOL& value, DataReader const& dt_reader)
 	{
 		value.m_vertex_cnt = dt_reader.ReadUInt32();
 		value.m_regular = dt_reader.ReadBoolean();
@@ -717,7 +717,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 多角形のツールをデータライターに書き込む.
-	void dt_write(const TOOL_POLY& value, DataWriter const& dt_writer)
+	void dt_write(const POLY_TOOL& value, DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(value.m_vertex_cnt));
 		dt_writer.WriteBoolean(value.m_regular);

@@ -318,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
-			sbar_set_grid();
+			stbar_set_grid();
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_EMPH>)) {
 			// 用紙メニューの「方眼の強調」に印をつける.
@@ -339,7 +339,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::SHEET_SIZE>)) {
 			// 用紙の大きさをステータスバーに格納する.
-			sbar_set_sheet();
+			stbar_set_sheet();
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP_STYLE>)) {
 			CAP_STYLE value;

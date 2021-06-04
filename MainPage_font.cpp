@@ -205,8 +205,7 @@ namespace winrt::GraphPaper::implementation
 			float g_base;
 			m_sample_sheet.get_grid_base(g_base);
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value, m_sample_dx.m_logical_dpi, g_base + 1.0f, buf);
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			text = r_loader.GetString(L"str_size") + L": " + buf;
+			text = ResourceLoader::GetForCurrentView().GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::FONT_COLOR) {
 			if constexpr (S == 0) {

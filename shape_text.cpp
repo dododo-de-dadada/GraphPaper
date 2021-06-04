@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	// テキストレイアウトから, 計量の配列を得る.
 	static void tx_create_text_metrics(IDWriteTextLayout* text_layout, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_metrics, UINT32& line_cnt, DWRITE_LINE_METRICS*& line_metrics, UINT32& range_cnt, DWRITE_HIT_TEST_METRICS*& range_metrics, float& descent, const DWRITE_TEXT_RANGE& sel_range);
 	// 文字列をデータライターに SVG として書き込む.
-	static void tx_write_svg(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer);
+	static void tx_svg_write(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer);
 	// 書体のディセントをテキストレイアウトから得る.
 	static void tx_get_font_descent(IDWriteTextLayout* text_layout, float& descent);
 
@@ -99,8 +99,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体のディセントをテキストレイアウトから得る.
-	//	text_layout	文字列レイアウト
-	//	descent	得られたディセント
+	// text_layout	文字列レイアウト
+	// descent	得られたディセント
 	static void tx_get_font_descent(IDWriteTextLayout* text_layout, float& font_descent)
 	{
 		winrt::com_ptr<IDWriteFontCollection> fonts;
@@ -140,12 +140,14 @@ namespace winrt::GraphPaper::implementation
 			delete[] m_dw_selected_metrics;
 			m_dw_selected_metrics = nullptr;
 		}
+		// 書体名がヌルでないか判定する.
 		if (m_font_family != nullptr) {
-			if (is_available_font(m_font_family) != true) {
-				// 有効な書体名でない場合,
-				// 配列に含まれていない書体名なので破棄する.
+			// 書体名が有効でないか判定する.
+			if (!is_available_font(m_font_family)) {
+				// 有効でないならば, 書体名配列に含まれてない名前なのでここで破棄する.
 				delete[] m_font_family;
 			}
+			// ヌルを書体名に格納する.
 			m_font_family = nullptr;
 		}
 		if (m_text != nullptr) {
@@ -968,9 +970,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeText::write_svg(DataWriter const& dt_writer) const
+	void ShapeText::svg_write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write_svg;
+		using winrt::GraphPaper::implementation::svg_write;
 
 		static constexpr char* SVG_STYLE[] = {
 			"normal", "oblique", "italic"
@@ -1004,29 +1006,29 @@ namespace winrt::GraphPaper::implementation
 		const double descent = m_font_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
 
 		if (is_opaque(m_fill_color) || is_opaque(m_stroke_color)) {
-			ShapeRect::write_svg(dt_writer);
+			ShapeRect::svg_write(dt_writer);
 		}
 		// 文字列全体の属性を指定するための g タグを開始する.
-		write_svg("<g ", dt_writer);
+		svg_write("<g ", dt_writer);
 		// 書体の色を書き込む.
-		write_svg(m_font_color, "fill", dt_writer);
+		svg_write(m_font_color, "fill", dt_writer);
 		// 書体名を書き込む.
-		write_svg("font-family=\"", dt_writer);
-		write_svg(m_font_family, wchar_len(m_font_family), dt_writer);
-		write_svg("\" ", dt_writer);
+		svg_write("font-family=\"", dt_writer);
+		svg_write(m_font_family, wchar_len(m_font_family), dt_writer);
+		svg_write("\" ", dt_writer);
 		// 書体の大きさを書き込む.
-		write_svg(m_font_size, "font-size", dt_writer);
+		svg_write(m_font_size, "font-size", dt_writer);
 		// 書体の伸縮を書き込む.
 		const auto stretch = static_cast<int32_t>(m_font_stretch);
-		write_svg(SVG_STRETCH[stretch], "font-stretch", dt_writer);
+		svg_write(SVG_STRETCH[stretch], "font-stretch", dt_writer);
 		// 書体の形式を書き込む.
 		const auto style = static_cast<int32_t>(m_font_style);
-		write_svg(SVG_STYLE[style], "font-style", dt_writer);
+		svg_write(SVG_STYLE[style], "font-style", dt_writer);
 		// 書体の太さを書き込む.
 		const auto weight = static_cast<uint32_t>(m_font_weight);
-		write_svg(weight, "font-weight", dt_writer);
-		write_svg("none", "stroke", dt_writer);
-		write_svg(">" SVG_NEW_LINE, dt_writer);
+		svg_write(weight, "font-weight", dt_writer);
+		svg_write("none", "stroke", dt_writer);
+		svg_write(">" SVG_NEW_LINE, dt_writer);
 		// 書体を表示する左上位置に余白を加える.
 		D2D1_POINT_2F nw_pos;
 		pt_add(m_pos, m_text_margin.width, m_text_margin.height, nw_pos);
@@ -1041,9 +1043,9 @@ namespace winrt::GraphPaper::implementation
 			// 文字列を表示する垂直なずらし位置を求める.
 			const auto dy = static_cast<double>(m_dw_line_metrics[i].baseline);
 			// 文字列を書き込む.
-			tx_write_svg(t, t_len, px + qx, py + qy, dy, dt_writer);
+			tx_svg_write(t, t_len, px + qx, py + qy, dy, dt_writer);
 		}
-		write_svg("</g>" SVG_NEW_LINE, dt_writer);
+		svg_write("</g>" SVG_NEW_LINE, dt_writer);
 	}
 
 	// 文字列をデータライターに SVG として書き込む.
@@ -1053,14 +1055,14 @@ namespace winrt::GraphPaper::implementation
 	// dy	垂直なずらし量
 	// dt_writer	データライター
 	// 戻り値	なし
-	static void tx_write_svg(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer)
+	static void tx_svg_write(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer)
 	{
-		write_svg("<text ", dt_writer);
-		write_svg(x, "x", dt_writer);
-		write_svg(y, "y", dt_writer);
-		write_svg(dy, "dy", dt_writer);
-		//write_svg("text-before-edge", "alignment-baseline", dt_writer);
-		write_svg(">", dt_writer);
+		svg_write("<text ", dt_writer);
+		svg_write(x, "x", dt_writer);
+		svg_write(y, "y", dt_writer);
+		svg_write(dy, "dy", dt_writer);
+		//svg_write("text-before-edge", "alignment-baseline", dt_writer);
+		svg_write(">", dt_writer);
 		uint32_t k = 0;
 		for (uint32_t i = k; i < t_len; i++) {
 			const auto c = t[i];
@@ -1084,15 +1086,15 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			if (i > k) {
-				write_svg(t + k, i - k, dt_writer);
+				svg_write(t + k, i - k, dt_writer);
 			}
-			write_svg(ent, dt_writer);
+			svg_write(ent, dt_writer);
 			k = i + 1;
 		}
 		if (t_len > k) {
-			write_svg(t + k, t_len - k, dt_writer);
+			svg_write(t + k, t_len - k, dt_writer);
 		}
-		write_svg("</text>" SVG_NEW_LINE, dt_writer);
+		svg_write("</text>" SVG_NEW_LINE, dt_writer);
 	}
 
 }

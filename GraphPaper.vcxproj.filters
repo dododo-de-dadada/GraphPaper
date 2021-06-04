@@ -54,7 +54,7 @@
     <ClCompile Include="shape_ruler.cpp" />
     <ClCompile Include="MainPage_sample.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
-    <ClCompile Include="MainPage_sbar.cpp" />
+    <ClCompile Include="MainPage_stbar.cpp" />
     <ClCompile Include="shape_sheet.cpp" />
     <ClCompile Include="MainPage_sheet.cpp" />
     <ClCompile Include="MainPage_pref.cpp" />

@@ -165,8 +165,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[LEN + 1];
 			const float limit = value * SLIDER_STEP + 1.0f;
 			swprintf_s(buf, LEN, L"%.1f", limit);
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			text = r_loader.GetString(L"str_stroke_join_limit") + L": " + buf;
+			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_join_limit") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			float g_base;
@@ -175,8 +174,7 @@ namespace winrt::GraphPaper::implementation
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
 			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_len, buf);
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			text = r_loader.GetString(L"str_stroke_width") + L": " + buf;
+			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (S == 0) {
 			sample_slider_0().Header(box_value(text));

@@ -98,10 +98,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_len_unit = l_unit;
-		sbar_set_curs();
-		sbar_set_grid();
-		sbar_set_sheet();
-		sbar_set_unit();
+		stbar_set_curs();
+		stbar_set_grid();
+		stbar_set_sheet();
+		stbar_set_unit();
 	}
 
 }

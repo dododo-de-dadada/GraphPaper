@@ -98,7 +98,7 @@
 				M4.777776 2.000000 l-3.222223 5.928203 l3.222223 5.928203 l6.444446 0.000000 l3.222223 -5.928203 l-3.222223 -5.928203 Z
 			</x:String>
 			<!-- 角丸方形アイコンの描画コマンド -->
-            <x:String x:Key="data_rrct">
+            <x:String x:Key="data_rrect">
                 M5,2 L11,2 A5,5 0 0 1 16,7 L16,9 A5,5, 0 0 1 11,14 L5,14 A5,5 0 0 1 0,9 L0,7 A5,5 0 0 1 5,2 Z
                 M5,3 L11,3 A4,4 0 0 1 15,7 L15,9 A4,4, 0 0 1 11,13 L5,13 A4,4 0 0 1 1,9 L1,7 A4,4 0 0 1 5,3 Z
             </x:String>
@@ -273,11 +273,21 @@
                 <MenuFlyoutItem x:Uid="mfi_sheet_color" Click="sheet_color_click_async" Text="Color..." />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_zoom" Text="Zoom">
+                    <!--
                     <MenuFlyoutItem x:Uid="mfi_zoom_in" Click="mfi_zoom_in_clicked" Icon="ZoomIn" Text="In" />
                     <MenuFlyoutItem x:Uid="mfi_zoom_out" Click="mfi_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Uid="mfi_zoom_reset" Click="mfi_zoom_reset_click" KeyboardAcceleratorTextOverride="Ctrl+0" Icon="Zoom" Text="Reset" />
-                </MenuFlyoutSubItem>
+                    -->
+					<!-- 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f -->
+					<MenuFlyoutItem x:Name="mfi_zoom_025_2" Click="mfi_zoom_click" Icon="ZoomOut" Text="25%" />
+					<MenuFlyoutItem x:Name="mfi_zoom_050_2" Click="mfi_zoom_click" Icon="ZoomOut" Text="50%" />
+					<MenuFlyoutItem x:Name="mfi_zoom_075_2" Click="mfi_zoom_click" Icon="ZoomOut" Text="75%" />
+					<MenuFlyoutItem x:Name="mfi_zoom_100_2" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+1" Icon="Zoom" Text="100%" />
+					<MenuFlyoutItem x:Name="mfi_zoom_150_2" Click="mfi_zoom_click" Icon="ZoomIn" Text="150%" />
+					<MenuFlyoutItem x:Name="mfi_zoom_200_2" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+2" Icon="ZoomIn" Text="200%" />
+					<MenuFlyoutItem x:Name="mfi_zoom_300_2" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+3" Icon="ZoomIn" Text="300%" />
+					<MenuFlyoutItem x:Name="mfi_zoom_400_2" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+4" Icon="ZoomIn" Text="400%" />
+				</MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_pixel_2" x:Uid="rmfi_len_unit_pixel" Click="len_unit_click" Text="Pixel" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_inch_2" x:Uid="rmfi_len_unit_inch" Click="len_unit_click" Text="Inch" />
@@ -467,7 +477,7 @@
                 </muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_rrect" x:Uid="rmfi_tool_draw_rrect" Click="tool_draw_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
                     <muxc:RadioMenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_rrct}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        <PathIcon Data="{StaticResource data_rrect}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_poly" x:Uid="rmfi_tool_draw_poly" Click="tool_draw_click" GroupName="gn_tool_type" Text="Quadrangle">
@@ -668,16 +678,51 @@
                 <MenuFlyoutSeparator />
                 <!-- 拡大縮小メニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_zoom" Text="Zoom">
+                    <!--
                     <MenuFlyoutItem x:Uid="mfi_zoom_in" Click="mfi_zoom_in_clicked" Icon="ZoomIn" Text="In" />
                     <MenuFlyoutItem x:Uid="mfi_zoom_out" Click="mfi_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Uid="mfi_zoom_reset" Click="mfi_zoom_reset_click" Icon="Zoom" Text="Reset">
+                    <MenuFlyoutItem x:Uid="mfi_zoom_100" Click="mfi_zoom_100_click" Icon="Zoom" Text="Reset">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="Number0" Modifiers="Control"/>
                             <KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
-                </MenuFlyoutSubItem>
+                    -->
+					<MenuFlyoutItem x:Name="mfi_zoom_025" Click="mfi_zoom_click" Icon="ZoomOut" Text="25%" />
+					<MenuFlyoutItem x:Name="mfi_zoom_050" Click="mfi_zoom_click" Icon="ZoomOut" Text="50%">
+						<MenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
+						</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem>
+					<MenuFlyoutItem x:Name="mfi_zoom_075" Click="mfi_zoom_click" Icon="ZoomOut" Text="75%" />
+					<MenuFlyoutItem x:Name="mfi_zoom_100" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+1" Icon="Zoom" Text="100%">
+					    <MenuFlyoutItem.KeyboardAccelerators>
+						    <KeyboardAccelerator Key="Number1" Modifiers="Control"/>
+						    <KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
+					    </MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem>
+					<MenuFlyoutItem x:Name="mfi_zoom_150" Click="mfi_zoom_click" Icon="ZoomIn" Text="150%" />
+					<MenuFlyoutItem x:Name="mfi_zoom_200" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+2" Icon="ZoomIn" Text="200%">
+						<MenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
+						</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem>
+					<MenuFlyoutItem x:Name="mfi_zoom_300" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+3" Icon="ZoomIn" Text="300%">
+						<MenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
+						</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem>
+					<MenuFlyoutItem x:Name="mfi_zoom_400" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+4" Icon="ZoomIn" Text="400%" >
+						<MenuFlyoutItem.KeyboardAccelerators>
+							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
+							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
+						</MenuFlyoutItem.KeyboardAccelerators>
+					</MenuFlyoutItem>
+				</MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- 設定メニュー -->
 				<MenuFlyoutItem x:Uid="mfi_pref_save" Click="pref_save_click_async" Text="Save preference" />
@@ -699,12 +744,12 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_cent" x:Uid="rmfi_color_code_cent" Click="color_code_click" Text="Percent" GroupName="gn_color_code" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_stbar" Text="Status Bar">
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_draw" x:Uid="tmfi_sbar_draw" Click="sbar_click" Text="Draw" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_unit" x:Uid="tmfi_sbar_unit" Click="sbar_click" Text="Unit" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_curs" x:Uid="tmfi_sbar_curs" Click="sbar_click" Text="Cursor Position" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_grid" x:Uid="tmfi_sbar_grid" Click="sbar_click" Text="Grid Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_sheet" x:Uid="tmfi_sbar_sheet" Click="sbar_click" Text="Sheet Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_zoom" x:Uid="tmfi_sbar_zoom" Click="sbar_click" Text="Scale" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_draw" x:Uid="tmfi_stbar_draw" Click="stbar_click" Text="Draw Tool" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_unit" x:Uid="tmfi_stbar_unit" Click="stbar_click" Text="Unit Name" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_curs" x:Uid="tmfi_stbar_curs" Click="stbar_click" Text="Cursor Pos" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_grid" x:Uid="tmfi_stbar_grid" Click="stbar_click" Text="Grid Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_sheet" x:Uid="tmfi_stbar_sheet" Click="stbar_click" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_zoom" x:Uid="tmfi_stbar_zoom" Click="stbar_click" Text="Scale" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- バージョン情報メニュー -->
@@ -818,30 +863,30 @@
             <!-- ステータスバーコンテキストメニュー -->
             <StackPanel.ContextFlyout>
                 <MenuFlyout>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_draw_2" x:Uid="tmfi_sbar_draw" Click="sbar_click" Text="Draw" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_unit_2" x:Uid="tmfi_sbar_unit" Click="sbar_click" Text="Unit" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_curs_2" x:Uid="tmfi_sbar_curs" Click="sbar_click" Text="Cursor Position" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_grid_2" x:Uid="tmfi_sbar_grid" Click="sbar_click" Text="Grid Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_sheet_2" x:Uid="tmfi_sbar_sheet" Click="sbar_click" Text="Sheet Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_sbar_zoom_2" x:Uid="tmfi_sbar_zoom" Click="sbar_click" Text="Scale" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_draw_2" x:Uid="tmfi_stbar_draw" Click="stbar_click" Text="Draw Tool" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_unit_2" x:Uid="tmfi_stbar_unit" Click="stbar_click" Text="Unit Name" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_curs_2" x:Uid="tmfi_stbar_curs" Click="stbar_click" Text="Cursor Pos" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_grid_2" x:Uid="tmfi_stbar_grid" Click="stbar_click" Text="Grid Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_sheet_2" x:Uid="tmfi_stbar_sheet" Click="stbar_click" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_zoom_2" x:Uid="tmfi_stbar_zoom" Click="stbar_click" Text="Scale" />
                 </MenuFlyout>
             </StackPanel.ContextFlyout>
-            <StackPanel x:Name="sp_sbar_draw" Margin="0,0,4,0" Orientation="Horizontal">
-                <TextBlock Margin="0,0,0,0" Text="d:"/>
+            <StackPanel x:Name="sp_stbar_draw" Margin="0,0,8,0" Orientation="Horizontal">
+                <TextBlock Margin="0,0,0,0" Text="D:"/>
                 <PathIcon x:Name="pi_draw" Data="M0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16">
                     <PathIcon.RenderTransform>
                         <ScaleTransform CenterX="8" CenterY="8" ScaleX="0.75" ScaleY="0.75" />
                     </PathIcon.RenderTransform>
                 </PathIcon>
             </StackPanel>
-            <TextBlock x:Name="tk_sbar_unit" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_sbar_pos_x" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_sbar_pos_y" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_sbar_grid" Margin="0,0,4,0"  Text="0" />
-            <TextBlock x:Name="tk_sbar_width" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_sbar_height" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_sbar_zoom" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_sbar_cnt" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_stbar_unit" Margin="0,0,8,0" Text="0"/>
+            <TextBlock x:Name="tk_stbar_pos_x" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_stbar_pos_y" Margin="0,0,8,0" Text="0"/>
+            <TextBlock x:Name="tk_stbar_grid" Margin="0,0,8,0"  Text="0" />
+            <TextBlock x:Name="tk_stbar_width" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_stbar_height" Margin="0,0,8,0" Text="0"/>
+            <TextBlock x:Name="tk_stbar_zoom" Margin="0,0,8,0" Text="0"/>
+            <!--<TextBlock x:Name="tk_stbar_cnt" Margin="0,0,4,0" Text="0"/> -->
         </StackPanel>
         <!-- 文字列入力ダイアログ -->
         <ContentDialog x:Name="cd_edit_text" x:Uid="cd_edit_text" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">

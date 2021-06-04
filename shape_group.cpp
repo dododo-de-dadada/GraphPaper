@@ -230,17 +230,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG として書き込む.
-	void ShapeGroup::write_svg(DataWriter const& dt_writer) const
+	void ShapeGroup::svg_write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write_svg;
+		using winrt::GraphPaper::implementation::svg_write;
 
-		write_svg("<g>" SVG_NEW_LINE, dt_writer);
+		svg_write("<g>" SVG_NEW_LINE, dt_writer);
 		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->write_svg(dt_writer);
+			s->svg_write(dt_writer);
 		}
-		write_svg("</g>" SVG_NEW_LINE, dt_writer);
+		svg_write("</g>" SVG_NEW_LINE, dt_writer);
 	}
 }

@@ -7,7 +7,7 @@ namespace winrt::GraphPaper::implementation
 {
 
 	// D2D ストローク特性を作成する.
-	static void create_stroke_style(ID2D1Factory3* const d_factory, const CAP_STYLE& s_cap_style, const D2D1_CAP_STYLE s_dash_cap, const D2D1_DASH_STYLE s_dash_style, const STROKE_DASH_PATT& s_dash_patt, const D2D1_LINE_JOIN s_join_style, const double s_join_limit, ID2D1StrokeStyle** s_stroke_style);
+	static void create_stroke_style(ID2D1Factory3* const d_factory, const CAP_STYLE& s_cap_style, const D2D1_CAP_STYLE s_dash_cap, const D2D1_DASH_STYLE s_dash_style, const STROKE_DASH_PATT& s_dash_patt, const D2D1_LINE_JOIN s_join_style, const float s_join_limit, const float m_stroke_width, ID2D1StrokeStyle** s_stroke_style);
 
 	// D2D ストローク特性を作成する.
 	// s_cap_style	線の端点
@@ -16,6 +16,7 @@ namespace winrt::GraphPaper::implementation
 	// s_dash_patt	破線の配置配列
 	// s_join_style	線のつながり
 	// s_join_limit	マイター制限
+	// s_width	線の太さ
 	// s_style	作成されたストローク特性
 	static void create_stroke_style(
 		ID2D1Factory3* const d_factory,
@@ -24,37 +25,60 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_DASH_STYLE s_dash_style,
 		const STROKE_DASH_PATT& s_dash_patt,
 		const D2D1_LINE_JOIN s_join_style,
-		const double s_join_limit,
+		const float s_join_limit,
+		const float s_width,
 		ID2D1StrokeStyle** s_stroke_style
 	)
 	{
 		UINT32 d_cnt;	// 破線の配置配列の要素数
-		const FLOAT* d_arr;	// 破線の配置配列を指すポインタ
+		FLOAT d_arr[6];	// 破線の配置配列
+		FLOAT *d_ptr;
 		D2D1_DASH_STYLE d_style;
 
+		if (s_width <= FLT_MIN) {
+			return;
+		}
 		if (s_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
-			d_arr = s_dash_patt.m_ + 2;
+			d_arr[0] = s_dash_patt.m_[2] / s_width;
+			d_arr[1] = s_dash_patt.m_[3] / s_width;
+			d_ptr = d_arr;
+			//d_arr = s_dash_patt.m_ + 2;
 			d_cnt = 2;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 		}
 		else if (s_dash_style == D2D1_DASH_STYLE_DASH) {
-			d_arr = s_dash_patt.m_;
+			d_arr[0] = s_dash_patt.m_[0] / s_width;
+			d_arr[1] = s_dash_patt.m_[1] / s_width;
+			d_ptr = d_arr;
+			//d_arr = s_dash_patt.m_;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 			d_cnt = 2;
 		}
 		else if (s_dash_style == D2D1_DASH_STYLE_DASH_DOT) {
-			d_arr = s_dash_patt.m_;
+			d_arr[0] = s_dash_patt.m_[0] / s_width;
+			d_arr[1] = s_dash_patt.m_[1] / s_width;
+			d_arr[2] = s_dash_patt.m_[2] / s_width;
+			d_arr[3] = s_dash_patt.m_[3] / s_width;
+			d_ptr = d_arr;
+			//d_arr = s_dash_patt.m_;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 			d_cnt = 4;
 		}
 		else if (s_dash_style == D2D1_DASH_STYLE_DASH_DOT_DOT) {
-			d_arr = s_dash_patt.m_;
+			d_arr[0] = s_dash_patt.m_[0] / s_width;
+			d_arr[1] = s_dash_patt.m_[1] / s_width;
+			d_arr[2] = s_dash_patt.m_[2] / s_width;
+			d_arr[3] = s_dash_patt.m_[3] / s_width;
+			d_arr[4] = s_dash_patt.m_[4] / s_width;
+			d_arr[5] = s_dash_patt.m_[5] / s_width;
+			d_ptr = d_arr;
+			//d_arr = s_dash_patt.m_;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 			d_cnt = 6;
 		}
 		else {
-			d_arr = nullptr;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;
+			d_ptr = nullptr;
 			d_cnt = 0;
 		}
 		const D2D1_STROKE_STYLE_PROPERTIES s_prop{
@@ -62,11 +86,11 @@ namespace winrt::GraphPaper::implementation
 			s_cap_style.m_end,	// endCap
 			s_dash_cap,	// dashCap
 			s_join_style,	// lineJoin
-			static_cast<FLOAT>(s_join_limit),	// miterLimit
+			s_join_limit,	// miterLimit
 			d_style,	// dashStyle
 			0.0f,
 		};
-		winrt::check_hresult(d_factory->CreateStrokeStyle(s_prop, d_arr, d_cnt, s_stroke_style));
+		winrt::check_hresult(d_factory->CreateStrokeStyle(s_prop, d_ptr, d_cnt, s_stroke_style));
 	}
 
 	// 図形を破棄する.
@@ -287,7 +311,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -301,7 +325,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -315,7 +339,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -329,7 +353,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -343,7 +367,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -357,7 +381,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -368,6 +392,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (!equal(m_stroke_width, value)) {
 			m_stroke_width = value;
+			if (m_stroke_dash_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
+				if (m_d2d_stroke_style != nullptr) {
+					m_d2d_stroke_style = nullptr;
+				}
+				create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			}
 			return true;
 		}
 		return false;
@@ -388,7 +418,7 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_width(s_attr->m_stroke_width),
 		m_d2d_stroke_style(nullptr)
 	{
-		create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
+		create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 	}
 
 	// 図形をデータリーダーから読み込む.
@@ -407,7 +437,7 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_join_limit = dt_reader.ReadSingle();
 		m_stroke_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());
 		m_stroke_width = dt_reader.ReadSingle();
-		create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_d2d_stroke_style.put());
+		create_stroke_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_dash_cap, m_stroke_dash_style, m_stroke_dash_patt, m_stroke_join_style, m_stroke_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 	}
 
 	// データライターに書き込む.
@@ -433,35 +463,35 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeStroke::write_svg(DataWriter const& dt_writer) const
+	void ShapeStroke::svg_write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write_svg;
+		using winrt::GraphPaper::implementation::svg_write;
 
-		write_svg(m_stroke_color, "stroke", dt_writer);
-		write_svg(m_stroke_dash_style, m_stroke_dash_patt, m_stroke_width, dt_writer);
-		write_svg(m_stroke_width, "stroke-width", dt_writer);
+		svg_write(m_stroke_color, "stroke", dt_writer);
+		svg_write(m_stroke_dash_style, m_stroke_dash_patt, m_stroke_width, dt_writer);
+		svg_write(m_stroke_width, "stroke-width", dt_writer);
 		if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
-			write_svg("stroke-linecap=\"butt\" ", dt_writer);
+			svg_write("stroke-linecap=\"butt\" ", dt_writer);
 		}
 		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
-			write_svg("stroke-linecap=\"round\" ", dt_writer);
+			svg_write("stroke-linecap=\"round\" ", dt_writer);
 		}
 		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
-			write_svg("stroke-linecap=\"square\" ", dt_writer);
+			svg_write("stroke-linecap=\"square\" ", dt_writer);
 		}
 		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
-			//write_svg("stroke-linecap=\"???\" ", dt_writer);
+			//svg_write("stroke-linecap=\"???\" ", dt_writer);
 		}
 		if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
-			write_svg("stroke-linejoin=\"bevel\" ", dt_writer);
+			svg_write("stroke-linejoin=\"bevel\" ", dt_writer);
 		}
 		else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 			m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-			write_svg("stroke-linejoin=\"miter\" ", dt_writer);
-			write_svg(m_stroke_join_limit, "stroke-miterlimit", dt_writer);
+			svg_write("stroke-linejoin=\"miter\" ", dt_writer);
+			svg_write(m_stroke_join_limit, "stroke-miterlimit", dt_writer);
 		}
 		else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-			write_svg("stroke-linejoin=\"round\" ", dt_writer);
+			svg_write("stroke-linejoin=\"round\" ", dt_writer);
 		}
 	}
 

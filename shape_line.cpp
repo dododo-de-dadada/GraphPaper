@@ -109,53 +109,53 @@ namespace winrt::GraphPaper::implementation
 	// tip_pos	矢じるしの先端の位置
 	// a_style	矢じるしの形状
 	// dt_writer	データライター
-	void ShapeLineA::write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const
+	void ShapeLineA::svg_write(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write_svg;
+		using winrt::GraphPaper::implementation::svg_write;
 
-		write_svg("<path d=\"", dt_writer);
-		write_svg("M", dt_writer);
-		write_svg(barbs[0].x, dt_writer);
-		write_svg(barbs[0].y, dt_writer);
-		write_svg("L", dt_writer);
-		write_svg(tip_pos.x, dt_writer);
-		write_svg(tip_pos.y, dt_writer);
-		write_svg("L", dt_writer);
-		write_svg(barbs[1].x, dt_writer);
-		write_svg(barbs[1].y, dt_writer);
-		write_svg("\" ", dt_writer);
+		svg_write("<path d=\"", dt_writer);
+		svg_write("M", dt_writer);
+		svg_write(barbs[0].x, dt_writer);
+		svg_write(barbs[0].y, dt_writer);
+		svg_write("L", dt_writer);
+		svg_write(tip_pos.x, dt_writer);
+		svg_write(tip_pos.y, dt_writer);
+		svg_write("L", dt_writer);
+		svg_write(barbs[1].x, dt_writer);
+		svg_write(barbs[1].y, dt_writer);
+		svg_write("\" ", dt_writer);
 		if (m_arrow_style == ARROW_STYLE::FILLED) {
-			write_svg(m_stroke_color, "fill", dt_writer);
+			svg_write(m_stroke_color, "fill", dt_writer);
 		}
 		else {
-			write_svg("fill=\"none\" ", dt_writer);
+			svg_write("fill=\"none\" ", dt_writer);
 		}
-		write_svg(m_stroke_color, "stroke", dt_writer);
-		write_svg(m_stroke_width, "stroke-width", dt_writer);
+		svg_write(m_stroke_color, "stroke", dt_writer);
+		svg_write(m_stroke_width, "stroke-width", dt_writer);
 		if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
-			write_svg("stroke-linecap=\"butt\" ", dt_writer);
+			svg_write("stroke-linecap=\"butt\" ", dt_writer);
 		}
 		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
-			write_svg("stroke-linecap=\"round\" ", dt_writer);
+			svg_write("stroke-linecap=\"round\" ", dt_writer);
 		}
 		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
-			write_svg("stroke-linecap=\"square\" ", dt_writer);
+			svg_write("stroke-linecap=\"square\" ", dt_writer);
 		}
 		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
-			//write_svg("stroke-linecap=\"square\" ", dt_writer);
+			//svg_write("stroke-linecap=\"square\" ", dt_writer);
 		}
 		if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
-			write_svg("stroke-linejoin=\"bevel\" ", dt_writer);
+			svg_write("stroke-linejoin=\"bevel\" ", dt_writer);
 		}
 		else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 			m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-			write_svg("stroke-linejoin=\"miter\" ", dt_writer);
-			write_svg(m_stroke_join_limit, "stroke-miterlimit", dt_writer);
+			svg_write("stroke-linejoin=\"miter\" ", dt_writer);
+			svg_write(m_stroke_join_limit, "stroke-miterlimit", dt_writer);
 		}
 		else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-			write_svg("stroke-linejoin=\"round\" ", dt_writer);
+			svg_write("stroke-linejoin=\"round\" ", dt_writer);
 		}
-		write_svg(" />" SVG_NEW_LINE, dt_writer);
+		svg_write(" />" SVG_NEW_LINE, dt_writer);
 	}
 
 	// 図形を表示する.
@@ -415,22 +415,22 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeLineA::write_svg(DataWriter const& dt_writer) const
+	void ShapeLineA::svg_write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write_svg;
+		using winrt::GraphPaper::implementation::svg_write;
 		D2D1_POINT_2F e_pos;
 
 		pt_add(m_pos, m_diff[0], e_pos);
-		write_svg("<line ", dt_writer);
-		write_svg(m_pos, "x1", "y1", dt_writer);
-		write_svg(e_pos, "x2", "y2", dt_writer);
-		ShapeStroke::write_svg(dt_writer);
-		write_svg("/>" SVG_NEW_LINE, dt_writer);
+		svg_write("<line ", dt_writer);
+		svg_write(m_pos, "x1", "y1", dt_writer);
+		svg_write(e_pos, "x2", "y2", dt_writer);
+		ShapeStroke::svg_write(dt_writer);
+		svg_write("/>" SVG_NEW_LINE, dt_writer);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[2];
 			D2D1_POINT_2F tip_pos;
 			if (get_arrow_pos(m_pos, m_diff[0], m_arrow_size, barbs, tip_pos)) {
-				ShapeLineA::write_svg(barbs, tip_pos, dt_writer);
+				ShapeLineA::svg_write(barbs, tip_pos, dt_writer);
 			}
 		}
 	}

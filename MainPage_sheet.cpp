@@ -163,24 +163,24 @@ namespace winrt::GraphPaper::implementation
 			// 方眼を表示する.
 			m_sheet_main.draw_grid(m_sheet_dx, { 0.0f, 0.0f });
 		}
-		if (event_state() == PBTN_STATE::PRESS_AREA) {
+		if (event_state() == EVENT_STATE::PRESS_AREA) {
 			const auto t_draw = tool_draw();
-			if (t_draw == TOOL_DRAW::SELECT || t_draw == TOOL_DRAW::RECT || t_draw == TOOL_DRAW::TEXT || t_draw == TOOL_DRAW::RULER) {
+			if (t_draw == DRAW_TOOL::SELECT || t_draw == DRAW_TOOL::RECT || t_draw == DRAW_TOOL::TEXT || t_draw == DRAW_TOOL::RULER) {
 				m_sheet_main.draw_auxiliary_rect(m_sheet_dx, event_pos_pressed(), event_pos_curr());
 			}
-			else if (t_draw == TOOL_DRAW::BEZI) {
+			else if (t_draw == DRAW_TOOL::BEZI) {
 				m_sheet_main.draw_auxiliary_bezi(m_sheet_dx, event_pos_pressed(), event_pos_curr());
 			}
-			else if (t_draw == TOOL_DRAW::ELLI) {
+			else if (t_draw == DRAW_TOOL::ELLI) {
 				m_sheet_main.draw_auxiliary_elli(m_sheet_dx, event_pos_pressed(), event_pos_curr());
 			}
-			else if (t_draw == TOOL_DRAW::LINE) {
+			else if (t_draw == DRAW_TOOL::LINE) {
 				m_sheet_main.draw_auxiliary_line(m_sheet_dx, event_pos_pressed(), event_pos_curr());
 			}
-			else if (t_draw == TOOL_DRAW::RRECT) {
+			else if (t_draw == DRAW_TOOL::RRECT) {
 				m_sheet_main.draw_auxiliary_rrect(m_sheet_dx, event_pos_pressed(), event_pos_curr());
 			}
-			else if (t_draw == TOOL_DRAW::POLY) {
+			else if (t_draw == DRAW_TOOL::POLY) {
 				m_sheet_main.draw_auxiliary_poly(m_sheet_dx, event_pos_pressed(), event_pos_curr(), tool_poly());
 			}
 		}
@@ -193,7 +193,7 @@ namespace winrt::GraphPaper::implementation
 			// スワップチェーンの内容を画面に表示する.
 			m_sheet_dx.Present();
 			// ポインターの位置をステータスバーに格納する.
-			sbar_set_curs();
+			stbar_set_curs();
 		}
 #if defined(_DEBUG)
 		else {
@@ -335,7 +335,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		len_unit(LEN_UNIT::PIXEL);
 		color_code(COLOR_CODE::DEC);
-		status_bar(sbar_or(SBAR_FLAG::CURS, SBAR_FLAG::ZOOM));
+		status_bar(stbar_or(STBAR_FLAG::CURS, STBAR_FLAG::ZOOM));
 	}
 
 	// 値を用紙の右下位置に格納する.
@@ -421,22 +421,19 @@ namespace winrt::GraphPaper::implementation
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_col_r") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_col_g") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(color_code(), value, buf);
-				auto const& r_loader = ResourceLoader::GetForCurrentView();
-				text = r_loader.GetString(L"str_col_b") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {
@@ -544,10 +541,10 @@ namespace winrt::GraphPaper::implementation
 				sheet_update_bbox();
 				sheet_panle_size();
 				sheet_draw();
-				sbar_set_curs();
-				sbar_set_grid();
-				sbar_set_sheet();
-				sbar_set_unit();
+				stbar_set_curs();
+				stbar_set_grid();
+				stbar_set_sheet();
+				stbar_set_unit();
 			}
 		}
 		else if (d_result == ContentDialogResult::Secondary) {
@@ -593,7 +590,7 @@ namespace winrt::GraphPaper::implementation
 			sheet_update_bbox();
 			sheet_panle_size();
 			sheet_draw();
-			sbar_set_sheet();
+			stbar_set_sheet();
 		}
 	}
 

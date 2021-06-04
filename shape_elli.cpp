@@ -124,20 +124,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeElli::write_svg(DataWriter const& dt_writer) const
+	void ShapeElli::svg_write(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::write_svg;
+		using winrt::GraphPaper::implementation::svg_write;
 
 		D2D1_POINT_2F rad;
 		pt_mul(m_diff[0], 0.5, rad);
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
-		write_svg("<ellipse ", dt_writer);
-		write_svg(c_pos, "cx", "cy", dt_writer);
-		write_svg(static_cast<double>(rad.x), "rx", dt_writer);
-		write_svg(static_cast<double>(rad.y), "ry", dt_writer);
-		write_svg(m_fill_color, "fill", dt_writer);
-		ShapeStroke::write_svg(dt_writer);
-		write_svg("/>" SVG_NEW_LINE, dt_writer);
+		svg_write("<ellipse ", dt_writer);
+		svg_write(c_pos, "cx", "cy", dt_writer);
+		svg_write(static_cast<double>(rad.x), "rx", dt_writer);
+		svg_write(static_cast<double>(rad.y), "ry", dt_writer);
+		svg_write(m_fill_color, "fill", dt_writer);
+		ShapeStroke::svg_write(dt_writer);
+		svg_write("/>" SVG_NEW_LINE, dt_writer);
 	}
 }

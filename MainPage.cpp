@@ -372,25 +372,25 @@ namespace winrt::GraphPaper::implementation
 
 		/*{
 			if (rmfi_tool_select().IsChecked()) {
-				m_tool_draw = TOOL_DRAW::SELECT;
+				m_tool_draw = DRAW_TOOL::SELECT;
 			}
 			else if (rmfi_tool_draw_rect().IsChecked()) {
-				m_tool_draw = TOOL_DRAW::RECT;
+				m_tool_draw = DRAW_TOOL::RECT;
 			}
 			else if (rmfi_tool_draw_rrect().IsChecked()) {
-				m_tool_draw = TOOL_DRAW::RRECT;
+				m_tool_draw = DRAW_TOOL::RRECT;
 			}
 			else if (rmfi_tool_draw_poly().IsChecked()) {
-				m_tool_draw = TOOL_DRAW::POLY;
+				m_tool_draw = DRAW_TOOL::POLY;
 			}
 			else if (rmfi_tool_draw_elli().IsChecked()) {
-				m_tool_draw = TOOL_DRAW::ELLI;
+				m_tool_draw = DRAW_TOOL::ELLI;
 			}
 			else if (rmfi_tool_draw_line().IsChecked()) {
-				m_tool_draw = TOOL_DRAW::LINE;
+				m_tool_draw = DRAW_TOOL::LINE;
 			}
 			else if (rmfi_tool_draw_bezi().IsChecked()) {
-				m_tool_draw = TOOL_DRAW::BEZI;
+				m_tool_draw = DRAW_TOOL::BEZI;
 			}
 			if (rmfi_tool_poly_tri().IsChecked()) {
 				m_tool_poly.m_vertex_cnt = 3;

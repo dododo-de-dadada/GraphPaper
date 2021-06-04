@@ -208,7 +208,8 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::TEXT_RANGE>::UndoAttr(Shape* s, const DWRITE_TEXT_RANGE& value);
 
 	template <UNDO_OP U> UndoAttr<U>::UndoAttr(DataReader const& dt_reader) :
-		Undo(undo_read_shape(dt_reader))
+		Undo(undo_read_shape(dt_reader)),
+		m_value()
 	{
 		if constexpr (U == UNDO_OP::FONT_SIZE
 			|| U == UNDO_OP::STROKE_JOIN_LIMIT

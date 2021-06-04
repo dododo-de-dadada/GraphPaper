@@ -161,7 +161,7 @@ namespace winrt::GraphPaper::implementation
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	// t_poly	多角形の作図ツール
-	void ShapeSheet::draw_auxiliary_poly(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos, const TOOL_POLY& t_poly)
+	void ShapeSheet::draw_auxiliary_poly(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos, const POLY_TOOL& t_poly)
 	{
 		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
