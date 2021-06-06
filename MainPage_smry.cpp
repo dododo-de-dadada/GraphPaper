@@ -171,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 		if (t != static_cast<const Shape*>(nullptr)) {
 			// 図形が表示されるよう用紙をスクロールする.
 			scroll_to(t);
-			m_sheet_main.set_attr_to(t);
+			sheet_set_attr_to(t);
 		}
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_enable();
@@ -186,8 +186,8 @@ namespace winrt::GraphPaper::implementation
 			smry_close();
 			return;
 		}
-		if (sp_text_find().Visibility() == VISIBLE) {
-			text_find_click(nullptr, nullptr);
+		if (sp_find_text().Visibility() == VISIBLE) {
+			find_text_click(nullptr, nullptr);
 		}
 		auto _{ FindName(L"rp_smry") };
 		rp_smry().Visibility(VISIBLE);

@@ -115,8 +115,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::LIST:
 			u = new UndoList(dt_reader);
 			break;
-		case UNDO_OP::TEXT_LINE:
-			u = new UndoAttr<UNDO_OP::TEXT_LINE>(dt_reader);
+		case UNDO_OP::TEXT_LINE_H:
+			u = new UndoAttr<UNDO_OP::TEXT_LINE_H>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_MARGIN:
 			u = new UndoAttr<UNDO_OP::TEXT_MARGIN>(dt_reader);
@@ -599,7 +599,7 @@ else {
 	template bool MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::TEXT_CONTENT>(Shape* const s, wchar_t* const& value);
-	template bool MainPage::undo_push_set<UNDO_OP::TEXT_LINE>(float const& value);
+	template bool MainPage::undo_push_set<UNDO_OP::TEXT_LINE_H>(float const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::TEXT_MARGIN>(D2D1_SIZE_F const& value);
 
 	// 文字範囲の値を図形に格納して, その操作をスタックに積む.

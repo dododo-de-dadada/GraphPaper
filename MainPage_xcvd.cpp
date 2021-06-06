@@ -190,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 							static_cast<FLOAT>(scp_sheet_panel().ActualWidth() / scale),
 							static_cast<FLOAT>(scp_sheet_panel().ActualHeight() / scale)
 						};
-						t->adjust_bbox(max_size);
+						t->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 1.0f);
 						D2D1_POINT_2F s_pos{
 							static_cast<FLOAT>((sb_horz().Value() + scp_sheet_panel().ActualWidth() * 0.5) / scale - t->m_diff[0].x * 0.5),
 							static_cast<FLOAT>((sb_vert().Value() + scp_sheet_panel().ActualHeight() * 0.5) / scale - t->m_diff[0].y * 0.5)

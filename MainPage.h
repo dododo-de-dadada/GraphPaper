@@ -70,6 +70,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
+	using winrt::Windows::UI::Xaml::Controls::MenuFlyoutItem;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs;
@@ -170,15 +171,27 @@ namespace winrt::GraphPaper::implementation
 		conv_len_to_str<B>(len_unit, value, dpi, g_len, Z, t_buf);
 	}
 
-	template <typename T, T C> constexpr void radio_menu_item_set_value(const T value, const RadioMenuFlyoutItem& item)
+	inline void radio_menu_item_is_checked(const bool b, const RadioMenuFlyoutItem& item)
 	{
 		if (item.IsChecked()) {
-			if (value != C) {
+			if (!b) {
 				item.IsChecked(false);
 			}
 		}
-		else if (value == C) {
+		else if (b) {
 			item.IsChecked(true);
+		}
+	}
+
+	inline void menu_item_is_enabled(const bool b, const MenuFlyoutItem& item)
+	{
+		if (item.IsEnabled()) {
+			if (!b) {
+				item.IsEnabled(false);
+			}
+		}
+		else if (b) {
+			item.IsEnabled(true);
 		}
 	}
 
@@ -234,11 +247,11 @@ namespace winrt::GraphPaper::implementation
 
 		// text
 
-		wchar_t* m_text_find = nullptr;	// 検索の検索文字列
-		wchar_t* m_text_repl = nullptr;	// 検索の置換文字列
-		bool m_text_find_case = false;	// 英文字の区別フラグ
-		bool m_text_find_wrap = false;	// 回り込み検索フラグ
-		bool m_text_adjust = false;	// 文字列に合わせるフラグ
+		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
+		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
+		bool m_find_text_case = false;	// 英文字の区別フラグ
+		bool m_find_text_wrap = false;	// 回り込み検索フラグ
+		bool m_edit_text_frame = false;	// 枠の大きさを合わせるフラグ
 
 		// misc
 
@@ -463,7 +476,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		//　MainPage_font.cpp
-		//　書体と文字列の配置
+		//　書体
 		//-------------------------------
 
 		// 書体メニューの「字体」に印をつける.
@@ -488,34 +501,44 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_OP U, int S> void font_set_slider_header(const float value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+
+		//-------------------------------
+		//　MainPage_text.cpp
+		//　文字列の配置
+		//-------------------------------
+
 		// 書体メニューの「文字列のそろえ」に印をつける.
 		void text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT t_align);
 		// 書体メニューの「段落のそろえ」に印をつける.
 		void text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT p_align);
-		// 書体メニューの「大きさを合わせる」が選択された.
-		void text_bbox_adjust_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「行の高さ」>「狭める」が選択された.
-		void text_line_con_click(IInspectable const&, RoutedEventArgs const&);
+		// 書体メニューの「枠の大きさを合わせる」が選択された.
+		void text_frame_click(IInspectable const&, RoutedEventArgs const&);
+		// 書体メニューの「行間」>「狭める」または「広げる」が選択された.
+		void text_line_sp_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 書体メニューの「行の高さ」>「広げる」が選択された.
-		void text_line_exp_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「行の高さ」>「高さ」が選択された.
-		IAsyncAction text_line_click_async(IInspectable const&, RoutedEventArgs const&);
+		//void text_line_exp_click(IInspectable const&, RoutedEventArgs const&);
+		// 書体メニューの「行間」>「行間...」が選択された.
+		IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「余白」が選択された.
 		IAsyncAction text_margin_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 書体メニューの「段落のそろえ」が選択された.
+		void text_align_p_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」>「中段」が選択された.
-		void text_align_p_mid_click(IInspectable const&, RoutedEventArgs const&);
+		//void text_align_p_mid_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
-		void text_align_p_bot_click(IInspectable const&, RoutedEventArgs const&);
+		//void text_align_p_bot_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
-		void text_align_p_top_click(IInspectable const&, RoutedEventArgs const&);
+		//void text_align_p_top_click(IInspectable const&, RoutedEventArgs const&);
+		// 書体メニューの「文字列のそろえ」が選択された.
+		void text_align_t_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「中央」が選択された.
-		void text_align_t_center_click(IInspectable const&, RoutedEventArgs const&);
+		//void text_align_t_center_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「均等」が選択された.
-		void text_align_t_just_click(IInspectable const&, RoutedEventArgs const&);
+		//void text_align_t_just_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
-		void text_align_t_left_click(IInspectable const&, RoutedEventArgs const&);
+		//void text_align_t_left_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
-		void text_align_t_right_click(IInspectable const&, RoutedEventArgs const&);
+		//void text_align_t_right_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void text_set_slider_header(const float value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
@@ -587,7 +610,7 @@ namespace winrt::GraphPaper::implementation
 		//　Cntrol + E が押された.
 		//void kacc_edit_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + F が押された.
-		//void kacc_text_find_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//void kacc_find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + G が押された.
 		//void kacc_group_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Cntrol + N が押された.
@@ -660,6 +683,8 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_DX& sheet_dx(void) noexcept { return m_sheet_dx; }
 		// 用紙とその他の属性を初期化する.
 		void sheet_init(void) noexcept;
+		// 図形の属性を用紙に格納する.
+		void sheet_set_attr_to(const Shape* s) noexcept;
 
 		//-------------------------------
 		// MainPage_pref.cpp
@@ -932,31 +957,31 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 文字列検索パネルの「閉じる」ボタンが押された.
-		void text_find_close_click(IInspectable const&, RoutedEventArgs const&);
+		void find_text_close_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「次を検索」ボタンが押された.
-		void text_find_next_click(IInspectable const&, RoutedEventArgs const&);
+		void find_text_next_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「すべて置換」ボタンが押された.
-		void text_replace_all_click(IInspectable const&, RoutedEventArgs const&);
+		void find_replace_all_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「置換して次に」ボタンが押された.
-		void text_replace_click(IInspectable const&, RoutedEventArgs const&);
-		// 文字列の大きさに合わせるフラグに格納する.
-		void text_adjust(const bool adjust) noexcept { m_text_adjust = adjust; }
-		// 文字列の大きさに合わせるフラグを得る.
-		const bool text_adjust(void) const noexcept { return m_text_adjust; }
+		void find_replace_click(IInspectable const&, RoutedEventArgs const&);
 		// 検索の値をデータリーダーから読み込む.
-		void text_find_read(DataReader const& dt_reader);
+		void find_text_read(DataReader const& dt_reader);
 		// 文字列検索パネルから値を格納する.
-		void text_find_set(void);
+		void find_text_set(void);
 		// 検索の値をデータリーダーに書き込む.
-		void text_find_write(DataWriter const& dt_writer);
+		void find_text_write(DataWriter const& dt_writer);
 		// 編集メニューの「文字列の検索/置換」が選択された.
-		void text_find_click(IInspectable const&, RoutedEventArgs const&);
+		void find_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 検索文字列が変更された.
-		void text_find_what_changed(IInspectable const&, TextChangedEventArgs const&);
+		void find_text_what_changed(IInspectable const&, TextChangedEventArgs const&);
 		// 図形が持つ文字列を編集する.
-		IAsyncAction text_edit_async(ShapeText* s);
+		IAsyncAction edit_text_async(ShapeText* s);
 		// 編集メニューの「文字列の編集」が選択された.
-		void text_edit_click(IInspectable const&, RoutedEventArgs const&);
+		void edit_text_click(IInspectable const&, RoutedEventArgs const&);
+		// 枠の大きさを合わせるフラグに格納する.
+		void edit_text_frame(const bool adjust) noexcept { m_edit_text_frame = adjust; }
+		// 枠の大きさを合わせるフラグを得る.
+		const bool edit_text_frame(void) const noexcept { return m_edit_text_frame; }
 
 		//-------------------------------
 		// MainPage_thread.cpp

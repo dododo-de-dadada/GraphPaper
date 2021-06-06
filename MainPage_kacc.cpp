@@ -38,6 +38,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto t_draw = tool_draw();
 		if (t_draw == DRAW_TOOL::SELECT) {
+			unselect_all();
+			sheet_draw();
 			return;
 		}
 		rmfi_tool_select().IsChecked(true);
@@ -126,16 +128,16 @@ namespace winrt::GraphPaper::implementation
 	/*
 	void MainPage::kacc_edit_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		if (mfi_text_edit().IsEnabled()) {
-			text_edit_click(nullptr, nullptr);
+		if (mfi_edit_text().IsEnabled()) {
+			edit_text_click(nullptr, nullptr);
 		}
 	}
 	*/
 	// Cntrol + F ‚ª‰Ÿ‚³‚ê‚½.
-	//void MainPage::kacc_text_find_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	//void MainPage::kacc_find_text_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
-	// if (mfi_text_find().IsEnabled()) {
-	// 	text_find_click(nullptr, nullptr);
+	// if (mfi_find_text().IsEnabled()) {
+	// 	find_text_click(nullptr, nullptr);
 	// }
 	//}
 

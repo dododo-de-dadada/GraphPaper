@@ -1,5 +1,5 @@
 //-------------------------------
-// MainPage_pointer.cpp
+// MainPage_event.cpp
 // ポインターのイベントハンドラー
 //-------------------------------
 #include "pch.h"
@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// 押された図形の属性値を用紙に格納する.
-			m_sheet_main.set_attr_to(m_event_shape_pressed);
+			sheet_set_attr_to(m_event_shape_pressed);
 			// 押された図形の部位が内側か判定する.
 			if (m_event_anch_pressed == ANCH_TYPE::ANCH_FILL) {
 				scp_sheet_panel().ContextFlyout(m_menu_fill);
@@ -226,16 +226,16 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		tx_edit().Text(L"");
-		ck_text_adjust_bbox().IsChecked(text_adjust());
+		ck_edit_text_frame().IsChecked(edit_text_frame());
 		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
 			auto s = new ShapeText(m_event_pos_pressed, diff, text, &m_sheet_main);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
-			text_adjust(ck_text_adjust_bbox().IsChecked().GetBoolean());
-			if (text_adjust()) {
-				static_cast<ShapeText*>(s)->adjust_bbox();
+			edit_text_frame(ck_edit_text_frame().IsChecked().GetBoolean());
+			if (edit_text_frame()) {
+				static_cast<ShapeText*>(s)->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 			}
 			event_reduce_slist(m_list_shapes, m_stack_undo, m_stack_redo);
 			unselect_all();
@@ -670,7 +670,7 @@ namespace winrt::GraphPaper::implementation
 			if (t_stamp - m_event_time_pressed <= m_event_click_time) {
 				// 押された図形が文字列図形か判定する. 
 				if (m_event_shape_pressed != nullptr && typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
-					text_edit_async(static_cast<ShapeText*>(m_event_shape_pressed));
+					edit_text_async(static_cast<ShapeText*>(m_event_shape_pressed));
 				}
 			}
 		}

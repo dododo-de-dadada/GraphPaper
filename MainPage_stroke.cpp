@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr wchar_t TITLE_STROKE[] = L"str_stroke";
+	constexpr wchar_t DLG_TITLE[] = L"str_stroke";
 	constexpr float SLIDER_STEP = 0.5f;
 
 	// 線枠メニューの「色」が選択された.
@@ -19,12 +19,12 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		D2D1_COLOR_F s_color;
-		m_sample_sheet.get_stroke_color(s_color);
-		const float val0 = s_color.r * COLOR_MAX;
-		const float val1 = s_color.g * COLOR_MAX;
-		const float val2 = s_color.b * COLOR_MAX;
-		const float val3 = s_color.a * COLOR_MAX;
+		D2D1_COLOR_F value;
+		m_sample_sheet.get_stroke_color(value);
+		const float val0 = value.r * COLOR_MAX;
+		const float val1 = value.g * COLOR_MAX;
+		const float val2 = value.b * COLOR_MAX;
+		const float val3 = value.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 3> });
 		m_sample_type = SAMP_TYPE::STROKE;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
@@ -77,12 +77,12 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		STROKE_DASH_PATT s_patt;
-		m_sheet_main.get_stroke_dash_patt(s_patt);
-		const float val0 = s_patt.m_[0] / SLIDER_STEP;
-		const float val1 = s_patt.m_[1] / SLIDER_STEP;
-		const float val2 = s_patt.m_[2] / SLIDER_STEP;
-		const float val3 = s_patt.m_[3] / SLIDER_STEP;
+		STROKE_DASH_PATT value;
+		m_sheet_main.get_stroke_dash_patt(value);
+		const float val0 = value.m_[0] / SLIDER_STEP;
+		const float val1 = value.m_[1] / SLIDER_STEP;
+		const float val2 = value.m_[2] / SLIDER_STEP;
+		const float val3 = value.m_[3] / SLIDER_STEP;
 		float s_width;
 		m_sheet_main.get_stroke_width(s_width);
 		const float val4 = s_width / SLIDER_STEP;
@@ -109,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 3> });
 		const auto slider_4_token = sample_slider_4().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 4> });
 		m_sample_type = SAMP_TYPE::STROKE;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			STROKE_DASH_PATT sample_patt;
@@ -148,15 +148,15 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		float s_width;
-		m_sample_sheet.get_stroke_width(s_width);
-		const float val0 = s_width / SLIDER_STEP;
+		float value;
+		m_sample_sheet.get_stroke_width(value);
+		const float val0 = value / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_0().Visibility(VISIBLE);
 		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0> });
 		m_sample_type = SAMP_TYPE::STROKE;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_STROKE)));
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
@@ -313,18 +313,28 @@ namespace winrt::GraphPaper::implementation
 	// d_style	破線の種別
 	void MainPage::stroke_dash_style_is_checked(const D2D1_DASH_STYLE d_style)
 	{
-		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID>(d_style, rmfi_stroke_dash_style_solid());
-		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID>(d_style, rmfi_stroke_dash_style_solid_2());
-		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH>(d_style, rmfi_stroke_dash_style_dash());
-		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH>(d_style, rmfi_stroke_dash_style_dash_2());
-		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT>(d_style, rmfi_stroke_dash_style_dash_dot());
-		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT>(d_style, rmfi_stroke_dash_style_dash_dot_2());
-		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT>(d_style, rmfi_stroke_dash_style_dash_dot_dot());
-		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT>(d_style, rmfi_stroke_dash_style_dash_dot_dot_2());
-		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT>(d_style, rmfi_stroke_dash_style_dot());
-		radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT>(d_style, rmfi_stroke_dash_style_dot_2());
-		mfi_stroke_dash_patt().IsEnabled(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-		mfi_stroke_dash_patt_2().IsEnabled(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, rmfi_stroke_dash_style_solid());
+		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, rmfi_stroke_dash_style_solid_2());
+		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH, rmfi_stroke_dash_style_dash());
+		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH, rmfi_stroke_dash_style_dash_2());
+		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT, rmfi_stroke_dash_style_dash_dot());
+		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT, rmfi_stroke_dash_style_dash_dot_2());
+		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT, rmfi_stroke_dash_style_dash_dot_dot());
+		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT, rmfi_stroke_dash_style_dash_dot_dot_2());
+		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT, rmfi_stroke_dash_style_dot());
+		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT, rmfi_stroke_dash_style_dot_2());
+		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID>(d_style, rmfi_stroke_dash_style_solid());
+		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID>(d_style, rmfi_stroke_dash_style_solid_2());
+		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH>(d_style, rmfi_stroke_dash_style_dash());
+		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH>(d_style, rmfi_stroke_dash_style_dash_2());
+		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT>(d_style, rmfi_stroke_dash_style_dash_dot());
+		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT>(d_style, rmfi_stroke_dash_style_dash_dot_2());
+		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT>(d_style, rmfi_stroke_dash_style_dash_dot_dot());
+		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT>(d_style, rmfi_stroke_dash_style_dash_dot_dot_2());
+		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT>(d_style, rmfi_stroke_dash_style_dot());
+		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT>(d_style, rmfi_stroke_dash_style_dot_2());
+		menu_item_is_enabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, mfi_stroke_dash_patt());
+		menu_item_is_enabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, mfi_stroke_dash_patt_2());
 	}
 
 }

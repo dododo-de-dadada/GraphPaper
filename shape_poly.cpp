@@ -854,8 +854,8 @@ namespace winrt::GraphPaper::implementation
 	// v_up	’¸“_‚ðã‚Éì}‚·‚é‚©”»’è
 	// v_end	•Ó‚ð•Â‚¶‚Äì}‚·‚é‚©”»’è
 	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr, const POLY_TOOL& t_poly) :
-		ShapePath::ShapePath(t_poly.m_vertex_cnt - 1, s_attr, t_poly.m_closed),
-		m_end_closed(t_poly.m_closed),
+		ShapePath::ShapePath(t_poly.m_vertex_cnt - 1, s_attr, t_poly.m_end_closed),
+		m_end_closed(t_poly.m_end_closed),
 		m_fill_color(s_attr->m_fill_color)
 	{
 		std::vector<D2D1_POINT_2F> vert_pos(t_poly.m_vertex_cnt);	// ’¸“_‚Ì”z—ñ

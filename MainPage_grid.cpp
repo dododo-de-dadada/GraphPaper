@@ -21,9 +21,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		float g_gray;
-		m_sample_sheet.get_grid_gray(g_gray);
-		const float val3 = g_gray * COLOR_MAX;
+		float value;
+		m_sample_sheet.get_grid_gray(value);
+		const float val3 = value * COLOR_MAX;
 		sample_slider_3().Value(val3);
 		grid_set_slider_header<UNDO_OP::GRID_GRAY, 3>(val3);
 		sample_slider_3().Visibility(VISIBLE);
@@ -53,9 +53,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		float g_base;
-		m_sample_sheet.get_grid_base(g_base);
-		const float val0 = g_base / SLIDER_STEP;
+		float value;
+		m_sample_sheet.get_grid_base(value);
+		const float val0 = value / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		grid_set_slider_header<UNDO_OP::GRID_BASE, 0>(val0);
 		sample_slider_0().Visibility(VISIBLE);

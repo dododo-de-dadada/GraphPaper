@@ -220,29 +220,24 @@
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_text_align_t" Text="Text Alignment">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left_2" x:Uid="rmfi_text_align_left" Click="text_align_t_left_click" IsChecked="True" Text="Left" GroupName="gn_text_align_t_2">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left_2" x:Uid="rmfi_text_align_left" Click="text_align_t_click" IsChecked="True" Text="Left" GroupName="gn_text_align_t_2">
                     </muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right_2" x:Uid="rmfi_text_align_right" Click="text_align_t_right_click" Text="Right" GroupName="gn_text_align_t_2">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right_2" x:Uid="rmfi_text_align_right" Click="text_align_t_click" Text="Right" GroupName="gn_text_align_t_2">
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center_2" x:Uid="rmfi_text_align_center" Click="text_align_t_center_click" Text="Center" GroupName="gn_text_align_t_2">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center_2" x:Uid="rmfi_text_align_center" Click="text_align_t_click" Text="Center" GroupName="gn_text_align_t_2">
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just_2" x:Uid="rmfi_text_align_just" Click="text_align_t_just_click" Text="Justified" GroupName="gn_text_align_t_2">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just_2" x:Uid="rmfi_text_align_just" Click="text_align_t_click" Text="Justified" GroupName="gn_text_align_t_2">
 					</muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_text_align_p" Text="Paragraph Alignment">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top_2" x:Uid="rmfi_text_align_top" Click="text_align_p_top_click" IsChecked="True" Text="Top" GroupName="gn_text_align_p_2">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top_2" x:Uid="rmfi_text_align_top" Click="text_align_p_click" IsChecked="True" Text="Top" GroupName="gn_text_align_p_2">
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot_2" x:Uid="rmfi_text_align_bot" Click="text_align_p_bot_click" Text="Bottom" GroupName="gn_text_align_p_2">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot_2" x:Uid="rmfi_text_align_bot" Click="text_align_p_click" Text="Bottom" GroupName="gn_text_align_p_2">
 					</muxc:RadioMenuFlyoutItem>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid_2" x:Uid="rmfi_text_align_mid" Click="text_align_p_mid_click" Text="Middle" GroupName="gn_text_align_p_2">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid_2" x:Uid="rmfi_text_align_mid" Click="text_align_p_click" Text="Middle" GroupName="gn_text_align_p_2">
 					</muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_text_line" Text="Line Height">
-                    <MenuFlyoutItem x:Uid="mfi_text_line_con" Click="text_line_con_click" Text="Condense" />
-                    <MenuFlyoutItem x:Uid="mfi_text_line_exp" Click="text_line_exp_click" Text="Expand" />
-                    <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Uid="mfi_text_line" Click="text_line_click_async" Text="Height" />
-                </MenuFlyoutSubItem>
+                <MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
                 <MenuFlyoutItem x:Uid="mfi_text_margin" Click="text_margin_click_async" Text="Margin..." />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Text="Color..." />
@@ -451,12 +446,12 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_text_edit" x:Uid="mfi_text_edit" Click="text_edit_click" Icon="Edit" Text="Edit Text" >
+                <MenuFlyoutItem x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="edit_text_click" Icon="Edit" Text="Edit Text" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="E" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_text_find" x:Uid="mfi_text_find" Click="text_find_click" Icon="Find" Text="Find/Replace Text">
+                <MenuFlyoutItem x:Name="mfi_find_text" x:Uid="mfi_find_text" Click="find_text_click" Icon="Find" Text="Find/Replace Text">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -621,31 +616,26 @@
                 <MenuFlyoutSeparator />
                 <!-- 配置メニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_text_align_t" Text="Text Alignment">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left" x:Uid="rmfi_text_align_left" Click="text_align_t_left_click" IsChecked="True" Text="Left" GroupName="gn_text_align_t">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left" x:Uid="rmfi_text_align_left" Click="text_align_t_click" IsChecked="True" Text="Left" GroupName="gn_text_align_t">
                     </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="text_align_t_right_click" Text="Right" GroupName="gn_text_align_t">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="text_align_t_click" Text="Right" GroupName="gn_text_align_t">
 					</muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="text_align_t_center_click" Text="Center" GroupName="gn_text_align_t">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="text_align_t_click" Text="Center" GroupName="gn_text_align_t">
 					</muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just" x:Uid="rmfi_text_align_just" Click="text_align_t_just_click" Text="Justified" GroupName="gn_text_align_t">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just" x:Uid="rmfi_text_align_just" Click="text_align_t_click" Text="Justified" GroupName="gn_text_align_t">
 					</muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_text_align_p" Text="Paragraph Alignment">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="text_align_p_top_click" IsChecked="True" Text="Top" GroupName="gn_text_align_p">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="text_align_p_click" IsChecked="True" Text="Top" GroupName="gn_text_align_p">
 					</muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot" x:Uid="rmfi_text_align_bot" Click="text_align_p_bot_click" Text="Bottom" GroupName="gn_text_align_p">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot" x:Uid="rmfi_text_align_bot" Click="text_align_p_click" Text="Bottom" GroupName="gn_text_align_p">
 					</muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid" x:Uid="rmfi_text_align_mid" Click="text_align_p_mid_click" Text="Middle" GroupName="gn_text_align_p" >
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid" x:Uid="rmfi_text_align_mid" Click="text_align_p_click" Text="Middle" GroupName="gn_text_align_p" >
 					</muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_text_line" Text="Line Height">
-                    <MenuFlyoutItem x:Uid="mfi_text_line_con" Click="text_line_con_click" Text="Condense" />
-                    <MenuFlyoutItem x:Uid="mfi_text_line_exp" Click="text_line_exp_click" Text="Expand" />
-                    <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:Uid="mfi_text_line" Click="text_line_click_async" Text="Height" />
-                </MenuFlyoutSubItem>
+                <MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
                 <MenuFlyoutItem x:Uid="mfi_text_margin" Click="text_margin_click_async" Text="Margin..." />
-                <MenuFlyoutItem x:Uid="mfi_text_bbox_adjust" Click="text_bbox_adjust_click" Text="Adjust Bounding Box" />
+                <MenuFlyoutItem x:Uid="mfi_text_frame" Click="text_frame_click" Text="Fit Frame Size to" />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Text="Color..." />
             </muxc:MenuBarItem>
@@ -757,18 +747,18 @@
             </muxc:MenuBarItem>
         </muxc:MenuBar>
         <!-- 文字列検索パネル -->
-        <StackPanel x:Name="sp_text_find" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
-            <Button Click="text_find_close_click" Background="White" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
+        <StackPanel x:Name="sp_find_text" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
+            <Button Click="find_text_close_click" Background="White" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
             <StackPanel Padding="8,8,8,8">
-                <TextBox x:Name="tx_text_find_what" x:Uid="tx_text_find_what" Header="Find what" Margin="0,4" TextChanged="text_find_what_changed" Width="128" />
-                <TextBox x:Name="tx_text_replace_with" x:Uid="tx_text_replace_with" Header="Replace width" Margin="0,4" Width="128" />
-                <CheckBox x:Name="ck_text_find_case" x:Uid="ck_text_find_case" Content="Match case." Margin="0,4" />
-                <CheckBox x:Name="ck_text_find_wrap" x:Uid="ck_text_find_wrap" Content="Wrap around." Margin="0,4" />
-                <!--<CheckBox x:Name="ck_text_find_escs" x:Uid="ck_text_find_escs" Content="Use escape sequences." Margin="0,4" />-->
-                <Button x:Name="btn_text_find_next" x:Uid="btn_text_find_next" Click="text_find_next_click" Content="Find Next" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
-                <Button x:Name="btn_text_replace" x:Uid="btn_text_replace" Click="text_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
-                <Button x:Name="btn_text_replace_all" x:Uid="btn_text_replace_all" Click="text_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
-                <Button x:Uid="btn_text_find_close" Click="text_find_close_click" Content="Close" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
+                <TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what" Header="Find what" Margin="0,4" TextChanged="find_text_what_changed" Width="128" />
+                <TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" Header="Replace width" Margin="0,4" Width="128" />
+                <CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case" Content="Match case." Margin="0,4" />
+                <CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap" Content="Wrap around." Margin="0,4" />
+                <!--<CheckBox x:Name="ck_find_text_escs" x:Uid="ck_find_text_escs" Content="Use escape sequences." Margin="0,4" />-->
+                <Button x:Name="btn_find_text_next" x:Uid="btn_find_text_next" Click="find_text_next_click" Content="Find Next" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
+                <Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="find_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
+                <Button x:Name="btn_find_replace_all" x:Uid="btn_find_replace_all" Click="find_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
+                <Button x:Uid="btn_find_text_close" Click="find_text_close_click" Content="Close" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
             </StackPanel>
         </StackPanel>
         <!-- 図形一覧パネル -->
@@ -836,7 +826,7 @@
                     <KeyboardAccelerator Invoked="kacc_edit_text_invoked" Key="E" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="kacc_bring_to_front_invoked" Key="End" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="kacc_bring_forward_invoked" Key="PageDown" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_text_find_invoked" Key="F" Modifiers="Control" />
+                    <KeyboardAccelerator Invoked="kacc_find_text_invoked" Key="F" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="kacc_group_invoked" Key="G" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="kacc_send_to_back_invoked" Key="Home" Modifiers="Control" />
                     <KeyboardAccelerator Invoked="kacc_send_backward_invoked" Key="PageUp" Modifiers="Control" />
@@ -892,7 +882,7 @@
         <ContentDialog x:Name="cd_edit_text" x:Uid="cd_edit_text" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
             <StackPanel>
                 <TextBox x:Name="tx_edit" AcceptsReturn="True" Height="128" HorizontalAlignment="Stretch" PlaceholderText="Text" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-                <CheckBox x:Name="ck_text_adjust_bbox" x:Uid="ck_text_adjust_bbox" Content="Adjust bounding box to text" Margin="4,4" />
+                <CheckBox x:Name="ck_edit_text_frame" x:Uid="ck_edit_text_frame" Content="Fit Frame Size to Text" Margin="4,4" />
             </StackPanel>
         </ContentDialog>
         <!-- 貼り付け確認ダイアログ -->

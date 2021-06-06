@@ -18,12 +18,12 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		D2D1_COLOR_F f_color;
-		m_sample_sheet.get_fill_color(f_color);
-		const float val0 = f_color.r * COLOR_MAX;
-		const float val1 = f_color.g * COLOR_MAX;
-		const float val2 = f_color.b * COLOR_MAX;
-		const float val3 = f_color.a * COLOR_MAX;
+		D2D1_COLOR_F value;
+		m_sample_sheet.get_fill_color(value);
+		const float val0 = value.r * COLOR_MAX;
+		const float val1 = value.g * COLOR_MAX;
+		const float val2 = value.b * COLOR_MAX;
+		const float val3 = value.a * COLOR_MAX;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);

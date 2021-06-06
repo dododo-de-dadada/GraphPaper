@@ -117,15 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="btn_text_find_next.Content" xml:space="preserve">
+  <data name="btn_find_text_next.Content" xml:space="preserve">
     <value>Find Next</value>
     <comment>Button</comment>
   </data>
-  <data name="btn_text_replace.Content" xml:space="preserve">
+  <data name="btn_find_replace.Content" xml:space="preserve">
     <value>Replace</value>
     <comment>Button</comment>
   </data>
-  <data name="btn_text_replace_all.Content" xml:space="preserve">
+  <data name="btn_find_replace_all.Content" xml:space="preserve">
     <value>Replace All</value>
     <comment>Buttom</comment>
   </data>
@@ -165,15 +165,15 @@
     <value>Sheet Size</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_text_adjust_bbox.Content" xml:space="preserve">
-    <value>Adjust bounding box to text</value>
+  <data name="ck_edit_text_frame.Content" xml:space="preserve">
+    <value>Fit Frame Size to Text</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="ck_text_find_case.Content" xml:space="preserve">
+  <data name="ck_find_text_case.Content" xml:space="preserve">
     <value>Match case</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="ck_text_find_wrap.Content" xml:space="preserve">
+  <data name="ck_find_text_wrap.Content" xml:space="preserve">
     <value>Wrap around</value>
     <comment>CheckBox</comment>
   </data>
@@ -365,7 +365,7 @@
     <value>Delete</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_edit.Text" xml:space="preserve">
+  <data name="mfi_edit_text.Text" xml:space="preserve">
     <value>Edit Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -377,7 +377,7 @@
     <value>Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_find.Text" xml:space="preserve">
+  <data name="mfi_find_text.Text" xml:space="preserve">
     <value>Find/Replace Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -481,15 +481,15 @@
     <value>Summary List</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line.Text" xml:space="preserve">
-    <value>Height...</value>
+  <data name="mfi_text_line_sp.Text" xml:space="preserve">
+    <value>Line Space...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_con.Text" xml:space="preserve">
+  <data name="mfi_text_line_sp_con.Text" xml:space="preserve">
     <value>Condense</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_exp.Text" xml:space="preserve">
+  <data name="mfi_text_line_sp_exp.Text" xml:space="preserve">
     <value>Expand</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -553,8 +553,8 @@
     <value>Text Alignment</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_text_line.Text" xml:space="preserve">
-    <value>Line Height</value>
+  <data name="mfsi_text_line_sp.Text" xml:space="preserve">
+    <value>Line Space</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_zoom.Text" xml:space="preserve">
@@ -810,15 +810,15 @@
     <value>Width</value>
     <comment>String</comment>
   </data>
-	<data name="str_stroke_join" xml:space="preserve">
+  <data name="str_stroke_join" xml:space="preserve">
     <value>Line Join</value>
     <comment>String</comment>
   </data>
-	<data name="str_stroke_join_limit" xml:space="preserve">
+  <data name="str_stroke_join_limit" xml:space="preserve">
     <value>Miter Limit</value>
     <comment>String</comment>
   </data>
-	<data name="str_text_mar_horzorz" xml:space="preserve">
+  <data name="str_text_mar_horzorz" xml:space="preserve">
     <value>Left and Right Margin</value>
     <comment>String</comment>
   </data>
@@ -874,7 +874,7 @@
     <value>Zoom</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tx_text_find_what.Header" xml:space="preserve">
+  <data name="tx_find_text_what.Header" xml:space="preserve">
     <value>Find what</value>
     <comment>TextBox</comment>
   </data>
@@ -886,7 +886,7 @@
     <value>Width</value>
     <comment>TextBox</comment>
   </data>
-  <data name="tx_text_replace_with.Header" xml:space="preserve">
+  <data name="tx_find_replace_with.Header" xml:space="preserve">
     <value>Replace width</value>
     <comment>TextBox</comment>
   </data>
@@ -898,7 +898,7 @@
     <value>GrapPaper</value>
     <comment>String</comment>
   </data>
-  <data name="btn_text_find_close.Content" xml:space="preserve">
+  <data name="btn_find_text_close.Content" xml:space="preserve">
     <value>Close</value>
     <comment>Button</comment>
   </data>
@@ -954,8 +954,8 @@
     <value>Arrange</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_text_bbox_adjust.Text" xml:space="preserve">
-    <value>Adjust to Text</value>
+  <data name="mfi_text_frame.Text" xml:space="preserve">
+    <value>Fit Frame Size to</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_deca.Text" xml:space="preserve">
@@ -1005,5 +1005,17 @@
   <data name="tb_version.Text" xml:space="preserve">
     <value>Version 0.0.2</value>
     <comment>TextBlock</comment>
+  </data>
+  <data name="str_text" xml:space="preserve">
+    <value>Text</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_line_join" xml:space="preserve">
+    <value>Line Join</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_line_sp" xml:space="preserve">
+    <value>Line Space</value>
+    <comment>String</comment>
   </data>
 </root>

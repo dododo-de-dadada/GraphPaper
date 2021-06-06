@@ -25,29 +25,47 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::tool_draw_is_checked(const DRAW_TOOL value)
 	{
-		radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::SELECT>(value, rmfi_tool_select());
-		radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RECT>(value, rmfi_tool_draw_rect());
-		radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RRECT>(value, rmfi_tool_draw_rrect());
-		radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::POLY>(value, rmfi_tool_draw_poly());
-		radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::ELLI>(value, rmfi_tool_draw_elli());
-		radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::LINE>(value, rmfi_tool_draw_line());
-		radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::BEZI>(value, rmfi_tool_draw_bezi());
-		radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::TEXT>(value, rmfi_tool_draw_text());
-		radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RULER>(value, rmfi_tool_draw_ruler());
+		radio_menu_item_is_checked(value == DRAW_TOOL::SELECT, rmfi_tool_select());
+		radio_menu_item_is_checked(value == DRAW_TOOL::RECT, rmfi_tool_draw_rect());
+		radio_menu_item_is_checked(value == DRAW_TOOL::RRECT, rmfi_tool_draw_rrect());
+		radio_menu_item_is_checked(value == DRAW_TOOL::POLY, rmfi_tool_draw_poly());
+		radio_menu_item_is_checked(value == DRAW_TOOL::ELLI, rmfi_tool_draw_elli());
+		radio_menu_item_is_checked(value == DRAW_TOOL::LINE, rmfi_tool_draw_line());
+		radio_menu_item_is_checked(value == DRAW_TOOL::BEZI, rmfi_tool_draw_bezi());
+		radio_menu_item_is_checked(value == DRAW_TOOL::TEXT, rmfi_tool_draw_text());
+		radio_menu_item_is_checked(value == DRAW_TOOL::RULER, rmfi_tool_draw_ruler());
+		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::SELECT>(value, rmfi_tool_select());
+		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RECT>(value, rmfi_tool_draw_rect());
+		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RRECT>(value, rmfi_tool_draw_rrect());
+		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::POLY>(value, rmfi_tool_draw_poly());
+		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::ELLI>(value, rmfi_tool_draw_elli());
+		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::LINE>(value, rmfi_tool_draw_line());
+		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::BEZI>(value, rmfi_tool_draw_bezi());
+		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::TEXT>(value, rmfi_tool_draw_text());
+		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RULER>(value, rmfi_tool_draw_ruler());
 	}
 
 	// 多角形ツールのメニューのチェックをつける.
 	void MainPage::tool_poly_is_checked(const uint32_t value)
 	{
-		radio_menu_item_set_value<uint32_t, 2>(value, rmfi_tool_poly_line());
-		radio_menu_item_set_value<uint32_t, 3>(value, rmfi_tool_poly_tri());
-		radio_menu_item_set_value<uint32_t, 4>(value, rmfi_tool_poly_quad());
-		radio_menu_item_set_value<uint32_t, 5>(value, rmfi_tool_poly_pent());
-		radio_menu_item_set_value<uint32_t, 6>(value, rmfi_tool_poly_hexa());
-		radio_menu_item_set_value<uint32_t, 7>(value, rmfi_tool_poly_hept());
-		radio_menu_item_set_value<uint32_t, 8>(value, rmfi_tool_poly_octa());
-		radio_menu_item_set_value<uint32_t, 9>(value, rmfi_tool_poly_nona());
-		radio_menu_item_set_value<uint32_t, 10>(value, rmfi_tool_poly_deca());
+		radio_menu_item_is_checked(value == 2, rmfi_tool_poly_line());
+		radio_menu_item_is_checked(value == 3, rmfi_tool_poly_tri());
+		radio_menu_item_is_checked(value == 4, rmfi_tool_poly_quad());
+		radio_menu_item_is_checked(value == 5, rmfi_tool_poly_pent());
+		radio_menu_item_is_checked(value == 6, rmfi_tool_poly_hexa());
+		radio_menu_item_is_checked(value == 7, rmfi_tool_poly_hept());
+		radio_menu_item_is_checked(value == 8, rmfi_tool_poly_octa());
+		radio_menu_item_is_checked(value == 9, rmfi_tool_poly_nona());
+		radio_menu_item_is_checked(value == 10, rmfi_tool_poly_deca());
+		//radio_menu_item_set_value<uint32_t, 2>(value, rmfi_tool_poly_line());
+		//radio_menu_item_set_value<uint32_t, 3>(value, rmfi_tool_poly_tri());
+		//radio_menu_item_set_value<uint32_t, 4>(value, rmfi_tool_poly_quad());
+		//radio_menu_item_set_value<uint32_t, 5>(value, rmfi_tool_poly_pent());
+		//radio_menu_item_set_value<uint32_t, 6>(value, rmfi_tool_poly_hexa());
+		//radio_menu_item_set_value<uint32_t, 7>(value, rmfi_tool_poly_hept());
+		//radio_menu_item_set_value<uint32_t, 8>(value, rmfi_tool_poly_octa());
+		//radio_menu_item_set_value<uint32_t, 9>(value, rmfi_tool_poly_nona());
+		//radio_menu_item_set_value<uint32_t, 10>(value, rmfi_tool_poly_deca());
 	}
 
 	// 多角形ツールのメニューのチェックをつける.
@@ -56,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 		tool_poly_is_checked(value.m_vertex_cnt);
 		tmfi_tool_poly_regular().IsChecked(value.m_regular);
 		tmfi_tool_poly_vertex_up().IsChecked(value.m_vertex_up);
-		tmfi_tool_poly_closed().IsChecked(value.m_closed);
+		tmfi_tool_poly_closed().IsChecked(value.m_end_closed);
 		tmfi_tool_poly_clockwise().IsChecked(value.m_clockwise);
 	}
 
@@ -122,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 				tool_poly_is_checked(m_tool_poly.m_vertex_cnt = 10);
 			}
 			else if (sender == tmfi_tool_poly_closed()) {
-				m_tool_poly.m_closed = !m_tool_poly.m_closed;
+				m_tool_poly.m_end_closed = !m_tool_poly.m_end_closed;
 			}
 			else if (sender == tmfi_tool_poly_regular()) {
 				m_tool_poly.m_regular = !m_tool_poly.m_regular;

@@ -9,6 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+
 	// 見本ダイアログが開かれた.
 	void MainPage::sample_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
 	{

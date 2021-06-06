@@ -71,6 +71,10 @@ namespace winrt::GraphPaper::implementation
 
 	// 前方宣言
 	struct Shape;
+	struct ShapeLineA;
+	struct ShapePath;
+	struct ShapeRect;
+	struct ShapeStroke;
 
 	// アンカー (図形の部位) の種類
 	// 折れ線の頂点をあらわすため, enum struct でなく enum を用いる.
@@ -143,7 +147,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t m_vertex_cnt;	// 多角形の頂点の数
 		bool m_regular;	// 正多角形で作図するか判定
 		bool m_vertex_up;	// 頂点を上に作図するか判定
-		bool m_closed;	// 辺を閉じて作図するか判定
+		bool m_end_closed;	// 辺を閉じて作図するか判定
 		bool m_clockwise;	// 頂点を時計回りに作図するか判定する.
 	};
 
@@ -498,8 +502,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& /*value*/) const noexcept { return false; }
 		// 文字列のそろえを得る.
 		virtual bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& /*value*/) const noexcept { return false; }
-		// 行の高さを得る.
-		virtual bool get_text_line(float& /*value*/) const noexcept { return false; }
+		// 行間を得る.
+		virtual bool get_text_line_sp(float& /*value*/) const noexcept { return false; }
 		// 文字列の周囲の余白を得る.
 		virtual bool get_text_margin(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
 		// 文字範囲を得る
@@ -579,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字列のそろえに格納する.
 		virtual bool set_text_align_t(const DWRITE_TEXT_ALIGNMENT /*value*/) { return false; }
 		// 値を行間に格納する.
-		virtual bool set_text_line(const float /*value*/) { return false; }
+		virtual bool set_text_line_sp(const float /*value*/) { return false; }
 		// 値を文字列の余白に格納する.
 		virtual bool set_text_margin(const D2D1_SIZE_F /*value*/) { return false; }
 		// 値を文字範囲に格納する.
@@ -617,7 +621,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_LINE_JOIN m_stroke_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線枠のつながり
 		float m_stroke_width = 1.0;	// 線枠の太さ
 
-		float m_text_line_h = 0.0f;	// 行間 (DIPs 96dpi固定)
+		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
 		D2D1_SIZE_F m_text_margin{ TEXT_MARGIN_DEF };	// 文字列の左右と上下の余白
@@ -691,7 +695,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体の太さを得る.
 		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept;
 		// 行間を得る.
-		bool get_text_line(float& value) const noexcept;
+		bool get_text_line_sp(float& value) const noexcept;
 		// 文字列の周囲の余白を得る.
 		bool get_text_margin(D2D1_SIZE_F& value) const noexcept;
 		// 段落のそろえを得る.
@@ -717,7 +721,7 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから読み込む.
 		void read(DataReader const& dt_reader);
 		// 図形の属性値を格納する.
-		void set_attr_to(Shape* s) noexcept;
+		void set_attr_to(const Shape* s) noexcept;
 		// 値を角丸半径に格納する.
 		bool set_corner_radius(const D2D1_POINT_2F& value) noexcept;
 		// 値を方眼の基準の大きさに格納する.
@@ -755,7 +759,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		bool set_font_weight(const DWRITE_FONT_WEIGHT value);
 		// 値を行間に格納する.
-		bool set_text_line(const float value);
+		bool set_text_line_sp(const float value);
 		// 値を文字列の余白に格納する.
 		bool set_text_margin(const D2D1_SIZE_F value);
 		// 値を段落のそろえに格納する.
@@ -881,8 +885,6 @@ namespace winrt::GraphPaper::implementation
 		// 線枠の太さを得る.
 		bool get_stroke_width(float& value) const noexcept;
 		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos, const size_t d_cnt, const D2D1_POINT_2F diff[], const bool s_close, const bool f_opa) const noexcept;
-		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept;
@@ -922,8 +924,6 @@ namespace winrt::GraphPaper::implementation
 		ShapeStroke(DataReader const& dt_reader);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
-		// 矢じるしをデータライターに SVG タグとして書き込む.
-		void svg_write(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, const ARROW_STYLE h_style, DataWriter const& dt_writer) const;
 		// データライターに SVG タグとして書き込む.
 		void svg_write(DataWriter const& dt_writer) const;
 	};
@@ -1218,7 +1218,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		wchar_t* m_text = nullptr;	// 文字列
-		float m_text_line_h = 0.0f;	// 行間 (DIPs 96dpi固定)
+		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落そろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字揃え
 		D2D1_SIZE_F m_text_margin{ TEXT_MARGIN_DEF };	// 文字列のまわりの上下と左右の余白
@@ -1234,8 +1234,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形を破棄する.
 		~ShapeText(void);
-		// 領域の大きさを, それが文字列より小さくならないように, 調整する. 
-		bool adjust_bbox(const D2D1_SIZE_F& bound = D2D1_SIZE_F{ 0.0F, 0.0F });
+		// 枠の大きさを文字列に合わせる.
+		bool adjust_bbox(const float g_len);
 		// テキストレイアウトを破棄して作成する.
 		void create_text_layout(IDWriteFactory3* d_factory);
 		// 計量を破棄して作成する.
@@ -1261,7 +1261,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体の字体を得る.
 		bool get_font_style(DWRITE_FONT_STYLE& value) const noexcept;
 		// 行間を得る.
-		bool get_text_line(float& value) const noexcept;
+		bool get_text_line_sp(float& value) const noexcept;
 		// 書体の太さを得る.
 		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept;
 		// 文字列の余白を得る.
@@ -1297,7 +1297,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		bool set_font_weight(const DWRITE_FONT_WEIGHT value);
 		// 値を行間に格納する.
-		bool set_text_line(const float value);
+		bool set_text_line_sp(const float value);
 		// 値を文字列の余白に格納する.
 		bool set_text_margin(const D2D1_SIZE_F value);
 		// 値を段落のそろえに格納する.

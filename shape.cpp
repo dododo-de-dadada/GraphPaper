@@ -365,7 +365,7 @@ namespace winrt::GraphPaper::implementation
 		value.m_vertex_cnt = dt_reader.ReadUInt32();
 		value.m_regular = dt_reader.ReadBoolean();
 		value.m_vertex_up = dt_reader.ReadBoolean();
-		value.m_closed = dt_reader.ReadBoolean();
+		value.m_end_closed = dt_reader.ReadBoolean();
 		value.m_clockwise = dt_reader.ReadBoolean();
 	}
 
@@ -722,7 +722,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(value.m_vertex_cnt));
 		dt_writer.WriteBoolean(value.m_regular);
 		dt_writer.WriteBoolean(value.m_vertex_up);
-		dt_writer.WriteBoolean(value.m_closed);
+		dt_writer.WriteBoolean(value.m_end_closed);
 		dt_writer.WriteBoolean(value.m_clockwise);
 	}
 

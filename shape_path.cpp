@@ -65,23 +65,6 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 図形を作成する.
-	// d_cnt	差分の数
-	// s_attr	属性
-	//ShapePath::ShapePath(const size_t d_cnt, const ShapeSheet* s_attr, const bool closed) :
-	//	ShapeLineA::ShapeLineA(d_cnt, s_attr, closed)
-	//{}
-
-	// 図形をデータリーダーから読み込む.
-	//ShapePath::ShapePath(DataReader const& dt_reader) :
-	//	ShapeLineA::ShapeLineA(dt_reader)
-	//{
-		//m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
-		//dt_read(m_arrow_size, dt_reader);
-		// コンストラクタの中での (デストラクタの中でも) 仮想関数は無意味.
-		//create_path_geometry(Shape::s_d2d_factory);
-	//}
-
 	// データライターに書き込む.
 	void ShapePath::write(DataWriter const& dt_writer) const
 	{

@@ -189,7 +189,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::GRID_GRAY>::UndoAttr(Shape* s, const float& value);
 	template UndoAttr<UNDO_OP::GRID_EMPH>::UndoAttr(Shape* s, const GRID_EMPH& value);
 	template UndoAttr<UNDO_OP::GRID_SHOW>::UndoAttr(Shape* s, const GRID_SHOW& value);
-	template UndoAttr<UNDO_OP::TEXT_LINE>::UndoAttr(Shape* s, const float& value);
+	template UndoAttr<UNDO_OP::TEXT_LINE_H>::UndoAttr(Shape* s, const float& value);
 	template UndoAttr<UNDO_OP::TEXT_MARGIN>::UndoAttr(Shape* s, const D2D1_SIZE_F& value);
 	template UndoAttr<UNDO_OP::SHEET_COLOR>::UndoAttr(Shape* s, const D2D1_COLOR_F& value);
 	template UndoAttr<UNDO_OP::SHEET_SIZE>::UndoAttr(Shape* s, const D2D1_SIZE_F& value);
@@ -216,7 +216,7 @@ namespace winrt::GraphPaper::implementation
 			|| U == UNDO_OP::STROKE_WIDTH
 			|| U == UNDO_OP::GRID_GRAY
 			|| U == UNDO_OP::GRID_BASE
-			|| U == UNDO_OP::TEXT_LINE) {
+			|| U == UNDO_OP::TEXT_LINE_H) {
 			m_value = dt_reader.ReadSingle();
 		}
 		else if constexpr (U == UNDO_OP::ARROW_STYLE
@@ -263,7 +263,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::TEXT_ALIGN_T>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::TEXT_ALIGN_P>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::TEXT_CONTENT>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::TEXT_LINE>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::TEXT_LINE_H>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::TEXT_MARGIN>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::TEXT_RANGE>::UndoAttr(DataReader const& dt_reader);
 
@@ -408,9 +408,9 @@ namespace winrt::GraphPaper::implementation
 		s->set_text(value);
 	}
 
-	void UndoAttr<UNDO_OP::TEXT_LINE>::SET(Shape* const s, const float& value)
+	void UndoAttr<UNDO_OP::TEXT_LINE_H>::SET(Shape* const s, const float& value)
 	{
-		s->set_text_line(value);
+		s->set_text_line_sp(value);
 	}
 
 	void UndoAttr<UNDO_OP::TEXT_MARGIN>::SET(Shape* const s, const D2D1_SIZE_F& value)
@@ -563,9 +563,9 @@ namespace winrt::GraphPaper::implementation
 		return s->get_text(value);
 	}
 
-	bool UndoAttr<UNDO_OP::TEXT_LINE>::GET(const Shape* s, float& value) noexcept
+	bool UndoAttr<UNDO_OP::TEXT_LINE_H>::GET(const Shape* s, float& value) noexcept
 	{
-		return s->get_text_line(value);
+		return s->get_text_line_sp(value);
 	}
 
 	bool UndoAttr<UNDO_OP::TEXT_MARGIN>::GET(const Shape* s, D2D1_SIZE_F& value) noexcept
@@ -588,7 +588,7 @@ namespace winrt::GraphPaper::implementation
 			|| U == UNDO_OP::STROKE_WIDTH
 			|| U == UNDO_OP::GRID_GRAY 
 			|| U == UNDO_OP::GRID_BASE
-			|| U == UNDO_OP::TEXT_LINE) {
+			|| U == UNDO_OP::TEXT_LINE_H) {
 			dt_writer.WriteSingle(m_value);
 		}
 		else if constexpr (U == UNDO_OP::ARROW_STYLE

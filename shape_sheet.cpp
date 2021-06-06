@@ -170,8 +170,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F diff;
 		pt_sub(c_pos, p_pos, diff);
 		ShapePoly::create_poly_by_bbox(p_pos, diff, t_poly.m_vertex_cnt, t_poly.m_vertex_up, t_poly.m_regular, t_poly.m_clockwise, v_pos.data());
-		const auto i_start = (t_poly.m_closed ? t_poly.m_vertex_cnt - 1 : 0);
-		const auto j_start = (t_poly.m_closed ? 0 : 1);
+		const auto i_start = (t_poly.m_end_closed ? t_poly.m_vertex_cnt - 1 : 0);
+		const auto j_start = (t_poly.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < t_poly.m_vertex_cnt; i = j++) {
 			dx.m_shape_brush->SetColor(Shape::m_theme_background);
 			dx.m_d2dContext->DrawLine(v_pos[i], v_pos[j], dx.m_shape_brush.get(), s_width, nullptr);
@@ -504,9 +504,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 行間を得る.
-	bool ShapeSheet::get_text_line(float& value) const noexcept
+	bool ShapeSheet::get_text_line_sp(float& value) const noexcept
 	{
-		value = m_text_line_h;
+		value = m_text_line_sp;
 		return true;
 	}
 
@@ -551,7 +551,7 @@ namespace winrt::GraphPaper::implementation
 		m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());	// 書体の太さ
 		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());	// 段落のそろえ
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());	// 文字列のそろえ
-		m_text_line_h = dt_reader.ReadSingle();	// 行間
+		m_text_line_sp = dt_reader.ReadSingle();	// 行間
 		dt_read(m_text_margin, dt_reader);	// 文字列の余白
 
 		ShapeText::is_available_font(m_font_family);
@@ -838,10 +838,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を行間に格納する.
-	bool ShapeSheet::set_text_line(const float value)
+	bool ShapeSheet::set_text_line_sp(const float value)
 	{
-		if (!equal(m_text_line_h, value)) {
-			m_text_line_h = value;
+		if (!equal(m_text_line_sp, value)) {
+			m_text_line_sp = value;
 			return true;
 		}
 		return false;
@@ -858,7 +858,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の属性値を格納する.
-	void ShapeSheet::set_attr_to(Shape* s) noexcept
+	void ShapeSheet::set_attr_to(const Shape* s) noexcept
 	{
 		s->get_arrow_size(m_arrow_size);
 		s->get_arrow_style(m_arrow_style);
@@ -884,7 +884,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_stroke_join_limit(m_stroke_join_limit);
 		s->get_stroke_join_style(m_stroke_join_style);
 		s->get_stroke_width(m_stroke_width);
-		s->get_text_line(m_text_line_h);
+		s->get_text_line_sp(m_text_line_sp);
 		s->get_text_align_t(m_text_align_t);
 		s->get_text_align_p(m_text_align_p);
 		s->get_text_margin(m_text_margin);
@@ -924,7 +924,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));	// 書体の太さ
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));	// 段落のそろえ
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));	// 文字列のそろえ
-		dt_writer.WriteSingle(m_text_line_h);	// 行間
+		dt_writer.WriteSingle(m_text_line_sp);	// 行間
 		dt_write(m_text_margin, dt_writer);	// 文字列の余白
 
 	}

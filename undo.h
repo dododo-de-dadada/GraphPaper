@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 		TEXT_CONTENT,	// 文字列の操作
 		TEXT_ALIGN_P,	// 段落の整列の操作
 		TEXT_ALIGN_T,	// 文字列の整列の操作
-		TEXT_LINE,	// 行間の操作
+		TEXT_LINE_H,	// 行間の操作
 		TEXT_MARGIN,	// 文字列の余白の操作
 		TEXT_RANGE,	// 文字範囲の操作
 	};
@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::TEXT_CONTENT> { using type = wchar_t*; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_P> { using type = DWRITE_PARAGRAPH_ALIGNMENT; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_T> { using type = DWRITE_TEXT_ALIGNMENT; };
-	template <> struct U_TYPE<UNDO_OP::TEXT_LINE> { using type = float; };
+	template <> struct U_TYPE<UNDO_OP::TEXT_LINE_H> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_MARGIN> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
 

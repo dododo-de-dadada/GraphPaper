@@ -106,33 +106,37 @@ namespace winrt::GraphPaper::implementation
 		tool_draw_is_checked(m_tool_draw);
 		tool_poly_is_checked(m_tool_poly);
 		color_code_is_checked(m_color_code);
-		D2D1_DASH_STYLE s_style;
-		m_sheet_main.get_stroke_dash_style(s_style);
-		stroke_dash_style_is_checked(s_style);
+		stbar_is_checked(status_bar());
+		len_unit_is_checked(m_len_unit);
+
 		ARROW_STYLE a_style;
 		m_sheet_main.get_arrow_style(a_style);
 		arrow_style_is_checked(a_style);
 		DWRITE_FONT_STYLE f_style;
 		m_sheet_main.get_font_style(f_style);
 		font_style_is_checked(f_style);
-		GRID_EMPH g_emph;
-		m_sheet_main.get_grid_emph(g_emph);
-		grid_emph_is_checked(g_emph);
-		GRID_SHOW g_show;
-		m_sheet_main.get_grid_show(g_show);
-		grid_show_is_checked(g_show);
-		stbar_is_checked(status_bar());
+		D2D1_DASH_STYLE s_style;
+		m_sheet_main.get_stroke_dash_style(s_style);
+		stroke_dash_style_is_checked(s_style);
+		D2D1_LINE_JOIN j_style;
+		m_sheet_main.get_stroke_join_style(j_style);
+		join_style_is_checked(j_style);
 		DWRITE_TEXT_ALIGNMENT t_align_t;
 		m_sheet_main.get_text_align_t(t_align_t);
 		text_align_t_is_checked(t_align_t);
 		DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
 		m_sheet_main.get_text_align_p(t_align_p);
 		text_align_p_is_checked(t_align_p);
+		GRID_EMPH g_emph;
+		m_sheet_main.get_grid_emph(g_emph);
+		grid_emph_is_checked(g_emph);
+		GRID_SHOW g_show;
+		m_sheet_main.get_grid_show(g_show);
+		grid_show_is_checked(g_show);
 		bool g_snap;
 		m_sheet_main.get_grid_snap(g_snap);
 		tmfi_grid_snap().IsChecked(g_snap);
 		tmfi_grid_snap_2().IsChecked(g_snap);
-		len_unit_is_checked(m_len_unit);
 
 		wchar_t* unavailable_font;	// èëëÃñº
 		if (slist_test_font(m_list_shapes, unavailable_font) != true) {
@@ -213,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
 			tool_read(dt_reader);
-			text_find_read(dt_reader);
+			find_text_read(dt_reader);
 			stbar_read(dt_reader);
 			len_unit(static_cast<LEN_UNIT>(dt_reader.ReadUInt32()));
 			color_code(static_cast<COLOR_CODE>(dt_reader.ReadUInt16()));
@@ -600,7 +604,7 @@ namespace winrt::GraphPaper::implementation
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
 
 			tool_write(dt_writer);
-			text_find_write(dt_writer);
+			find_text_write(dt_writer);
 			stbar_write(dt_writer);
 			dt_writer.WriteUInt32(static_cast<uint32_t>(len_unit()));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(color_code()));

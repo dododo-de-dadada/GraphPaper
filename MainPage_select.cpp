@@ -257,25 +257,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (s->is_selected()) {
 			// âüÇ≥ÇÍÇΩê}å`Ç™ëIëÇ≥ÇÍÇƒÇ¢ÇÈèÍçá,
-			m_sheet_main.set_attr_to(s);
-			ARROW_STYLE a_style;
-			m_sheet_main.get_arrow_style(a_style);
-			arrow_style_is_checked(a_style);
-			DWRITE_FONT_STYLE f_style;
-			m_sheet_main.get_font_style(f_style);
-			font_style_is_checked(f_style);
-			D2D1_DASH_STYLE s_style;
-			m_sheet_main.get_stroke_dash_style(s_style);
-			stroke_dash_style_is_checked(s_style);
-			D2D1_LINE_JOIN j_style;
-			m_sheet_main.get_stroke_join_style(j_style);
-			join_style_is_checked(j_style);
-			DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
-			m_sheet_main.get_text_align_p(t_align_p);
-			text_align_p_is_checked(t_align_p);
-			DWRITE_TEXT_ALIGNMENT t_align_t;
-			m_sheet_main.get_text_align_t(t_align_t);
-			text_align_t_is_checked(t_align_t);
+			sheet_set_attr_to(s);
 		}
 	}
 

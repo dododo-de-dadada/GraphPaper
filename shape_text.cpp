@@ -156,66 +156,30 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	//	大きさを, それが文字列より小さくならないように, 調整する. 
-	//	bound	調整前の大きさ, 調整後の大きさ.
-	//	戻り値	大きさが調整されたならば真.
-	bool ShapeText::adjust_bbox(const D2D1_SIZE_F& bound)
+	// 枠の大きさを文字列に合わせる.
+	// g_len	方眼の大きさ (1 以上ならば方眼の大きさにも合わせる)
+	// 戻り値	大きさが調整されたならば真.
+	bool ShapeText::adjust_bbox(const float g_len)
 	{
-		auto diff = m_diff[0];
-		// 改行コードの数を求め, 最小の行数に格納する.
-		uint32_t min_line_cnt = 1;
-		for (uint32_t i = 0; i < m_dw_line_cnt; i++) {
-			if (m_dw_line_metrics[i].newlineLength > 0) {
-				min_line_cnt++;
-			}
+		const float sp = m_text_margin.width * 2.0f;
+		D2D1_POINT_2F t_box{ 0.0f, 0.0f };
+		for (size_t i = 0; i < m_dw_test_cnt; i++) {
+			t_box.x = fmax(t_box.x, m_dw_test_metrics[i].width);
+			t_box.y += m_dw_test_metrics[i].height;
 		}
-		auto line_cnt = 0U;	// 行数 (改行コードによる改行および文字列が配置される方形の幅による改行をあわせた数)
-		do {
-			auto bound_height = 0.0;	// 文字列が配置される方形の高さ
-			auto bound_width = 0.0;	// 文字列が配置される方形の幅
-			auto new_line_pos = 0U;	// 改行コードによって改行された文字位置
-			auto i = 0U;
-			auto j = 0U;
-			while (i < m_dw_line_cnt && j < m_dw_test_cnt) {
-				// 改行の文字位置と行の高さを得る.
-				auto line_height = 0.0;
-				while (i < m_dw_line_cnt) {
-					new_line_pos += m_dw_line_metrics[i].length;
-					line_height = fmax(line_height, m_dw_line_metrics[i].height);
-					if (m_dw_line_metrics[i++].newlineLength > 0) {
-						break;
-					}
-				}
-				// 高さに行ごとの高さを加える.
-				bound_height += line_height;
-				// 行ごとの幅を求める.
-				auto line_width = 0.0;
-				while (j < m_dw_test_cnt) {
-					line_width += m_dw_test_metrics[j].width;
-					if (m_dw_test_metrics[j].textPosition + m_dw_test_metrics[j++].length >= new_line_pos) {
-						// 位置の計量ごとの終了位置が改行の文字位置に達した場合
-						break;
-					}
-				}
-				bound_width = fmax(bound_width, line_width);
-			}
-			bound_width += m_text_margin.width * 2.0;
-			if (bound.width > FLT_MIN) {
-				bound_width = fmin(bound_width, bound.width);
-			}
-			bound_height += m_text_margin.height * 2.0;
-			if (bound.height > FLT_MIN) {
-				bound_height = fmin(bound_height, bound.height);
-			}
-			// 行数を保存する.
-			line_cnt = m_dw_line_cnt;
-			D2D1_POINT_2F s_pos;
-			get_start_pos(s_pos);
-			pt_add(s_pos, bound_width, bound_height, s_pos);
-			set_anchor_pos(s_pos, ANCH_TYPE::ANCH_SE);
-		} while (m_dw_line_cnt < line_cnt && m_dw_line_cnt > min_line_cnt);
-		// 行数が, 保存された行数より小さい, かつ最小の行数より大きい場合
-		return equal(diff, m_diff[0]) != true;
+		pt_add(t_box, sp, sp, t_box);
+		if (g_len >= 1.0f) {
+			const float g = fmax(g_len, 1.0f);
+			t_box.x = floor((t_box.x + g - 1.0f) / g) * g;
+			t_box.y = floor((t_box.y + g - 1.0f) / g) * g;
+		}
+		if (!equal(t_box, m_diff[0])) {
+			D2D1_POINT_2F se;
+			pt_add(m_pos, t_box, se);
+			set_anchor_pos(se, ANCH_TYPE::ANCH_SE);
+			return true;
+		}
+		return false;
 	}
 
 	// テキストレイアウトを破棄して作成する.
@@ -259,10 +223,10 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<IDWriteTextLayout3> t3;
 		if (m_dw_layout.try_as(t3)) {
 			DWRITE_LINE_SPACING spacing;
-			if (m_text_line_h > FLT_MIN) {
+			if (m_text_line_sp > FLT_MIN) {
 				spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-				spacing.height = m_text_line_h;
-				spacing.baseline = m_text_line_h - m_dw_descent;
+				spacing.height = m_font_size + m_text_line_sp;
+				spacing.baseline = m_font_size + m_text_line_sp - m_dw_descent;
 			}
 			else {
 				spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
@@ -282,6 +246,7 @@ namespace winrt::GraphPaper::implementation
 		m_dw_layout->GetLineMetrics(nullptr, 0, &m_dw_line_cnt);
 		m_dw_line_metrics = new DWRITE_LINE_METRICS[m_dw_line_cnt];
 		m_dw_layout->GetLineMetrics(m_dw_line_metrics, m_dw_line_cnt, &m_dw_line_cnt);
+		m_text_line_sp = m_dw_line_metrics[0].height - m_font_size;
 		tx_create_test_metrics(m_dw_layout.get(), m_select_range, m_dw_selected_metrics, m_dw_selected_cnt);
 	}
 
@@ -522,9 +487,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 行間を得る.
-	bool ShapeText::get_text_line(float& value) const noexcept
+	bool ShapeText::get_text_line_sp(float& value) const noexcept
 	{
-		value = m_text_line_h;
+		value = m_text_line_sp;
 		return true;
 	}
 
@@ -856,18 +821,18 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を行間に格納する.
-	bool ShapeText::set_text_line(const float value)
+	bool ShapeText::set_text_line_sp(const float value)
 	{
-		if (!equal(m_text_line_h, value)) {
-			m_text_line_h = value;
+		if (!equal(m_text_line_sp, value)) {
+			m_text_line_sp = value;
 			if (m_dw_layout.get() != nullptr) {
 				winrt::com_ptr<IDWriteTextLayout3> t3;
 				if (m_dw_layout.try_as(t3)) {
 					DWRITE_LINE_SPACING l_spacing;
-					if (m_text_line_h > 0.0f) {
+					if (m_text_line_sp > 0.0f) {
 						l_spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-						l_spacing.height = m_text_line_h;
-						l_spacing.baseline = m_text_line_h - m_dw_descent;
+						l_spacing.height = m_font_size + m_text_line_sp;
+						l_spacing.baseline = m_font_size + m_text_line_sp - m_dw_descent;
 					}
 					else {
 						l_spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
@@ -923,7 +888,7 @@ namespace winrt::GraphPaper::implementation
 		m_font_stretch(s_attr->m_font_stretch),
 		m_font_style(s_attr->m_font_style),
 		m_font_weight(s_attr->m_font_weight),
-		m_text_line_h(s_attr->m_text_line_h),
+		m_text_line_sp(s_attr->m_text_line_sp),
 		m_text_margin(s_attr->m_text_margin),
 		m_text(text),
 		m_text_align_t(s_attr->m_text_align_t),
@@ -947,7 +912,7 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_text, dt_reader);
 		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
-		m_text_line_h = dt_reader.ReadSingle();
+		m_text_line_sp = dt_reader.ReadSingle();
 		dt_read(m_text_margin, dt_reader);
 		create_text_layout(s_dwrite_factory);
 	}
@@ -965,7 +930,7 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_text, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
-		dt_writer.WriteSingle(m_text_line_h);
+		dt_writer.WriteSingle(m_text_line_sp);
 		dt_write(m_text_margin, dt_writer);
 	}
 

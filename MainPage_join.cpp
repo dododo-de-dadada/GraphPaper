@@ -5,6 +5,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	constexpr wchar_t DLG_TITLE[] = L"str_line_join";
+
 	// 線枠メニューの「単点の形式」に印をつける.
 	// s_cap	線の単点
 	void MainPage::cap_style_is_checked(const CAP_STYLE& s_cap)
@@ -81,16 +83,23 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠メニューの「つながり」に印をつける.
 	// s_join	線のつながり
-	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN s_join)
+	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN value)
 	{
-		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL>(s_join, rmfi_join_bevel());
-		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL>(s_join, rmfi_join_bevel_2());
-		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER>(s_join, rmfi_join_miter());
-		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER>(s_join, rmfi_join_miter_2());
-		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL>(s_join, rmfi_join_m_or_b());
-		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL>(s_join, rmfi_join_m_or_b_2());
-		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND>(s_join, rmfi_join_round());
-		radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND>(s_join, rmfi_join_round_2());
+		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, rmfi_join_bevel());
+		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, rmfi_join_bevel_2());
+		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER, rmfi_join_miter());
+		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER, rmfi_join_miter_2());
+		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL, rmfi_join_m_or_b());
+		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL, rmfi_join_m_or_b_2());
+		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND, rmfi_join_round());
+		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND, rmfi_join_round_2());
+		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL>(s_join, rmfi_join_bevel_2());
+		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER>(s_join, rmfi_join_miter());
+		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER>(s_join, rmfi_join_miter_2());
+		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL>(s_join, rmfi_join_m_or_b());
+		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL>(s_join, rmfi_join_m_or_b_2());
+		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND>(s_join, rmfi_join_round());
+		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND>(s_join, rmfi_join_round_2());
 	}
 
 	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)
@@ -178,9 +187,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		float s_limit;
-		m_sample_sheet.get_stroke_join_limit(s_limit);
-		const float val0 = (s_limit - 1.0F) / SLIDER_STEP;
+		float value;
+		m_sample_sheet.get_stroke_join_limit(value);
+		const float val0 = (value - 1.0F) / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_0().Visibility(VISIBLE);
 		float s_width;
@@ -193,12 +202,15 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_set_slider<UNDO_OP::STROKE_JOIN_LIMIT, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_set_slider<UNDO_OP::STROKE_WIDTH, 1> });
 		m_sample_type = SAMP_TYPE::JOIN;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_strole_join")));
+		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_line_join")));
 		const auto d_result = co_await cd_sample().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			float sample_value;
-			m_sample_shape->get_stroke_join_limit(sample_value);
-			if (undo_push_set<UNDO_OP::STROKE_JOIN_LIMIT>(sample_value)) {
+			float sample_limit;
+			float sample_width;
+			m_sample_shape->get_stroke_join_limit(sample_limit);
+			m_sample_shape->get_stroke_width(sample_width);
+			if (undo_push_set<UNDO_OP::STROKE_JOIN_LIMIT>(sample_limit) ||
+				undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
 				undo_push_null();
 				undo_menu_enable();
 				sheet_draw();
