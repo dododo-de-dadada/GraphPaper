@@ -606,7 +606,10 @@ namespace winrt::GraphPaper::implementation
 		// ‚»‚Ì‘¼‚Í 0 ‚Ü‚½‚Í nullptr ‚ðŽw’è‚·‚é.
 		winrt::com_ptr<ID3D11Device> device;
 		winrt::com_ptr<ID3D11DeviceContext> context;
-		auto hr = D3D11CreateDevice(
+#if not defined(_DEBUG)
+		HRESULT
+#endif
+		hr = D3D11CreateDevice(
 			nullptr,
 			D3D_DRIVER_TYPE_HARDWARE,
 			0,
