@@ -9,49 +9,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠メニューの「単点の形式」に印をつける.
 	// s_cap	線の単点
-	void MainPage::cap_style_is_checked(const CAP_STYLE& s_cap)
+	void MainPage::cap_style_is_checked(const CAP_STYLE& value)
 	{
-		// コードビハインドではグループ名による切り替えが効かない？
-		if (rmfi_cap_flat().IsChecked()) {
-			rmfi_cap_flat().IsChecked(false);
-		}
-		if (rmfi_cap_flat_2().IsChecked()) {
-			rmfi_cap_flat_2().IsChecked(false);
-		}
-		if (rmfi_cap_square().IsChecked()) {
-			rmfi_cap_square().IsChecked(false);
-		}
-		if (rmfi_cap_square_2().IsChecked()) {
-			rmfi_cap_square_2().IsChecked(false);
-		}
-		if (rmfi_cap_round().IsChecked()) {
-			rmfi_cap_round().IsChecked(false);
-		}
-		if (rmfi_cap_round_2().IsChecked()) {
-			rmfi_cap_round_2().IsChecked(false);
-		}
-		if (rmfi_cap_triangle().IsChecked()) {
-			rmfi_cap_triangle().IsChecked(false);
-		}
-		if (rmfi_cap_triangle_2().IsChecked()) {
-			rmfi_cap_triangle_2().IsChecked(false);
-		}
-		if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
-			rmfi_cap_flat().IsChecked(true);
-			rmfi_cap_flat_2().IsChecked(true);
-		}
-		else if (equal(s_cap, CAP_STYLE { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
-			rmfi_cap_square().IsChecked(true);
-			rmfi_cap_square_2().IsChecked(true);
-		}
-		else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
-			rmfi_cap_round().IsChecked(true);
-			rmfi_cap_round_2().IsChecked(true);
-		}
-		else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
-			rmfi_cap_triangle().IsChecked(true);
-			rmfi_cap_triangle_2().IsChecked(true);
-		}
+		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }), rmfi_cap_flat());
+		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }), rmfi_cap_flat_2());
+		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }), rmfi_cap_square());
+		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }), rmfi_cap_square_2());
+		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }), rmfi_cap_round());
+		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }), rmfi_cap_round_2());
+		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }), rmfi_cap_triangle());
+		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }), rmfi_cap_triangle_2());
 	}
 
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
@@ -85,14 +52,14 @@ namespace winrt::GraphPaper::implementation
 	// s_join	線のつながり
 	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN value)
 	{
-		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, rmfi_join_bevel());
-		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, rmfi_join_bevel_2());
-		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER, rmfi_join_miter());
-		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER, rmfi_join_miter_2());
-		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL, rmfi_join_m_or_b());
-		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL, rmfi_join_m_or_b_2());
-		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND, rmfi_join_round());
-		radio_menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND, rmfi_join_round_2());
+		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, rmfi_join_bevel());
+		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, rmfi_join_bevel_2());
+		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER, rmfi_join_miter());
+		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER, rmfi_join_miter_2());
+		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL, rmfi_join_m_or_b());
+		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL, rmfi_join_m_or_b_2());
+		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND, rmfi_join_round());
+		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND, rmfi_join_round_2());
 		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL>(s_join, rmfi_join_bevel_2());
 		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER>(s_join, rmfi_join_miter());
 		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER>(s_join, rmfi_join_miter_2());
@@ -191,12 +158,12 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.get_stroke_join_limit(value);
 		const float val0 = (value - 1.0F) / SLIDER_STEP;
 		sample_slider_0().Value(val0);
-		sample_slider_0().Visibility(VISIBLE);
+		sample_slider_0().Visibility(UI_VISIBLE);
 		float s_width;
 		m_sample_sheet.get_stroke_width(s_width);
 		const float val1 = s_width / SLIDER_STEP;
 		sample_slider_1().Value(val1);
-		sample_slider_1().Visibility(VISIBLE);
+		sample_slider_1().Visibility(UI_VISIBLE);
 		join_set_slider_header<UNDO_OP::STROKE_JOIN_LIMIT, 0>(val0);
 		join_set_slider_header<UNDO_OP::STROKE_WIDTH, 1>(val1);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_set_slider<UNDO_OP::STROKE_JOIN_LIMIT, 0> });
@@ -221,9 +188,9 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		sample_slider_0().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
-		sample_slider_1().Visibility(COLLAPSED);
+		sample_slider_1().Visibility(UI_COLLAPSED);
 		sample_slider_1().ValueChanged(slider_1_token);
 		co_return;
 	}

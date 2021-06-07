@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 			smry_select_all();
 		}
 		// 編集メニュー項目の使用の可否を設定する.
-		edit_menu_enable();
+		edit_menu_is_enabled();
 		sheet_draw();
 	}
 
@@ -92,7 +92,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				undo_push_select(event_shape_smry());
 				// 編集メニュー項目の使用の可否を設定する.
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 				if constexpr (K == VirtualKey::Down) {
 					// 図形一覧の排他制御が true か判定する.
@@ -138,7 +138,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 編集メニュー項目の使用の可否を設定する.
-		edit_menu_enable();
+		edit_menu_is_enabled();
 		sheet_draw();
 	}
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
@@ -214,7 +214,7 @@ namespace winrt::GraphPaper::implementation
 		if (vk_mod == VirtualKeyModifiers::Control) {
 			// コントロールキーが押されている場合,
 			undo_push_select(s);
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_draw();
 			// 図形一覧の排他制御が true か判定する.
 			if (m_smry_atomic.load(std::memory_order_acquire)) {
@@ -236,7 +236,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (select_range(s, event_shape_prev())) {
 				// 編集メニュー項目の使用の可否を設定する.
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -246,7 +246,7 @@ namespace winrt::GraphPaper::implementation
 			if (!s->is_selected()) {
 				unselect_all();
 				undo_push_select(s);
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 				// 図形一覧の排他制御が true か判定する.
 				if (m_smry_atomic.load(std::memory_order_acquire)) {
@@ -257,7 +257,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (s->is_selected()) {
 			// 押された図形が選択されている場合,
-			sheet_set_attr_to(s);
+			m_sheet_main.set_attr_to(s);
+			sheet_attr_is_checked();
 		}
 	}
 

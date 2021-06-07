@@ -468,14 +468,14 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 線枠のマイター制限の比率を得る.
+	// 線分のつなぎのマイター制限を得る.
 	bool ShapeSheet::get_stroke_join_limit(float& value) const noexcept
 	{
 		value = m_stroke_join_limit;
 		return true;
 	}
 
-	// 線のつながりを得る.
+	// 線分のつなぎを得る.
 	bool ShapeSheet::get_stroke_join_style(D2D1_LINE_JOIN& value) const noexcept
 	{
 		value = m_stroke_join_style;
@@ -737,7 +737,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 線の端点に格納する.
+	// 値を線分の端点に格納する.
 	bool ShapeSheet::set_stroke_cap_style(const CAP_STYLE& value)
 	{
 		if (!equal(m_stroke_cap_style, value)) {
@@ -787,7 +787,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 線のマイター制限の比率に格納する.
+	// 値を線分のつなぎのマイター制限に格納する.
 	bool ShapeSheet::set_stroke_join_limit(const float& value)
 	{
 		if (!equal(m_stroke_join_limit, value)) {
@@ -797,7 +797,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 線のつながりに格納する.
+	// 値を線分のつなぎに格納する.
 	bool ShapeSheet::set_stroke_join_style(const D2D1_LINE_JOIN& value)
 	{
 		if (m_stroke_join_style != value) {
@@ -857,7 +857,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 図形の属性値を格納する.
+	// 図形の属性値を用紙に格納する.
 	void ShapeSheet::set_attr_to(const Shape* s) noexcept
 	{
 		s->get_arrow_size(m_arrow_size);
@@ -912,8 +912,8 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash_cap));	// 破線の端点
 		dt_write(m_stroke_dash_patt, dt_writer);	// 破線の配置
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash_style));	// 線枠の形式
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_join_style));	// 角の形状
-		dt_writer.WriteSingle(m_stroke_join_limit);	// 角のマイター制限
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_join_style));	// 線分のつなぎ
+		dt_writer.WriteSingle(m_stroke_join_limit);	// 線分のマイター制限
 		dt_writer.WriteSingle(m_stroke_width);	// 線枠の太さ
 		dt_write(m_fill_color, dt_writer);	// 塗りつぶしの色
 		dt_write(m_font_color, dt_writer);	// 書体の色

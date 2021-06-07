@@ -164,7 +164,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 編集メニュー項目の使用の可否を設定する.
 	// 選択の有無やクラスごとに図形を数え, メニュー項目の可否を判定する.
-	void MainPage::edit_menu_enable(void)
+	void MainPage::edit_menu_is_enabled(void)
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 
@@ -226,6 +226,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_ungroup().IsEnabled(exists_selected_group);
 		mfi_edit_text().IsEnabled(exists_selected_text);
 		mfi_find_text().IsEnabled(exists_text);
+		mfi_edit_text_frame().IsEnabled(exists_text);
 		mfi_bring_forward().IsEnabled(enable_forward);
 		mfi_bring_to_front().IsEnabled(enable_forward);
 		mfi_send_to_back().IsEnabled(enable_backward);

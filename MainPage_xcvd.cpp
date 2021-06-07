@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.Close();
 		// 出力ストリームを閉じる.
 		out_stream.Close();
-		edit_menu_enable();
+		edit_menu_is_enabled();
 		// スレッドコンテキストを復元する.
 		co_await context;
 	}
@@ -102,7 +102,7 @@ namespace winrt::GraphPaper::implementation
 		// 選択された図形のリストを消去する.
 		//list_selected.clear();
 		// 編集メニュー項目の使用の可否を設定する.
-		edit_menu_enable();
+		edit_menu_is_enabled();
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
@@ -126,32 +126,30 @@ namespace winrt::GraphPaper::implementation
 		try {
 			// 図形データがクリップボードに含まれているか判定する.
 			if (xcvd_contains({ CF_GPD })) {
-				// クリップボードから読み込むためのデータリーダーを得る.
+				// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.
 				auto dt_object{ co_await Clipboard::GetContent().GetDataAsync(CF_GPD) };
 				auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
 				auto in_stream{ ra_stream.GetInputStreamAt(0) };
 				auto dt_reader{ DataReader(in_stream) };
 				auto dt_size = static_cast<UINT32>(ra_stream.Size());
 				auto operation{ co_await dt_reader.LoadAsync(dt_size) };
-				// 図形のためのメモリの確保が別スレッドで行われた場合,
-				// D2DERR_WRONG_STATE を引き起こすことがある.
+				// 図形のためのメモリの確保が別スレッドで行われた場合, D2DERR_WRONG_STATE を引き起こすことがある.
 				// 図形を貼り付ける前に, スレッドをメインページの UI スレッドに変える.
 				auto cd = this->Dispatcher();
 				co_await winrt::resume_foreground(cd);
+				// データリーダーに読み込めたか判定する.
 				if (operation == ra_stream.Size()) {
-					SHAPE_LIST list_pasted;	// 貼り付けリスト
-					if (slist_read(list_pasted, dt_reader) != true) {
+					SHAPE_LIST slist_pasted;	// 貼り付けリスト
 
-					}
-					else if (list_pasted.empty() != true) {
+					// 貼り付けリストをデータリーダーから読み込み, それが空でないか判定する.
+					if (slist_read(slist_pasted, dt_reader) && !slist_pasted.empty()) {
 						m_dx_mutex.lock();
 						// 得られたリストが空でない場合,
 						// 図形リストの中の図形の選択をすべて解除する.
 						unselect_all();
 						// 得られたリストの各図形について以下を繰り返す.
-						for (auto s : list_pasted) {
+						for (auto s : slist_pasted) {
 							if (m_smry_atomic.load(std::memory_order_acquire)) {
-							//if (m_smry_visible) {
 								smry_append(s);
 							}
 							undo_push_append(s);
@@ -159,11 +157,14 @@ namespace winrt::GraphPaper::implementation
 						}
 						undo_push_null();
 						m_dx_mutex.unlock();
-						list_pasted.clear();
+						slist_pasted.clear();
 						// 編集メニュー項目の使用の可否を設定する.
-						edit_menu_enable();
+						edit_menu_is_enabled();
 						sheet_panle_size();
 						sheet_draw();
+					}
+					else {
+						message_show(ICON_ALERT, L"str_err_paste", L"");
 					}
 				}
 				const auto _{ dt_reader.DetachStream() };
@@ -171,38 +172,46 @@ namespace winrt::GraphPaper::implementation
 				dt_reader.Close();
 				in_stream.Close();
 			}
+			// クリップボードにテキストが含まれているか判定する.
 			else if (xcvd_contains({ StandardDataFormats::Text() })) {
-				// クリップボードの中身がテキストの場合,
 				using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 				const auto d_result = co_await cd_conf_paste().ShowAsync();
 				if (d_result == ContentDialogResult::Primary) {
+
 					// クリップボードから読み込むためのデータリーダーを得る.
 					auto text{ co_await Clipboard::GetContent().GetTextAsync() };
-					if (text.empty() != true) {
-						// 文字列が空でない場合,
-						auto t = new ShapeText(D2D1_POINT_2F{ 0.0F, 0.0F }, D2D1_POINT_2F{ 1.0F, 1.0F }, wchar_cpy(text.c_str()), &m_sheet_main);
+
+					// 文字列が空でないか判定する.
+					if (!text.empty()) {
+
+						// パネルの大きさで文字列図形を作成する,.
+						const float scale = m_sheet_main.m_sheet_scale;
+						const float act_w = static_cast<float>(scp_sheet_panel().ActualWidth());
+						const float act_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+						auto t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ act_w / scale, act_h / scale }, wchar_cpy(text.c_str()), &m_sheet_main);
 #if (_DEBUG)
 						debug_leak_cnt++;
 #endif
-						// 貼り付ける最大の大きさをウィンドウの大きさに制限する.
-						const double scale = m_sheet_main.m_sheet_scale;
-						D2D1_SIZE_F max_size{
-							static_cast<FLOAT>(scp_sheet_panel().ActualWidth() / scale),
-							static_cast<FLOAT>(scp_sheet_panel().ActualHeight() / scale)
+
+						// 枠の大きさを文字列に合わせる.
+						t->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
+						// パネルの中央になるよう左上位置を求める.
+						D2D1_POINT_2F s_min{
+							static_cast<FLOAT>((sb_horz().Value() + act_w * 0.5) / scale - t->m_diff[0].x * 0.5),
+							static_cast<FLOAT>((sb_vert().Value() + act_h * 0.5) / scale - t->m_diff[0].y * 0.5)
 						};
-						t->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 1.0f);
-						D2D1_POINT_2F s_pos{
-							static_cast<FLOAT>((sb_horz().Value() + scp_sheet_panel().ActualWidth() * 0.5) / scale - t->m_diff[0].x * 0.5),
-							static_cast<FLOAT>((sb_vert().Value() + scp_sheet_panel().ActualHeight() * 0.5) / scale - t->m_diff[0].y * 0.5)
-						};
-						pt_add(s_pos, sheet_min(), s_pos);
+						pt_add(s_min, sheet_min(), s_min);
+
+						// 方眼に整列フラグが立っているか判定する.
 						if (m_sheet_main.m_grid_snap) {
 							float g_base;
 							m_sheet_main.get_grid_base(g_base);
 							const auto g_len = g_base + 1.0;
-							pt_round(s_pos, g_len, s_pos);
+							pt_round(s_min, g_len, s_min);
 						}
-						t->set_start_pos(s_pos);
+
+						// 求めた左上位置に移動する.
+						t->set_start_pos(s_min);
 
 						m_dx_mutex.lock();
 						unselect_all();
@@ -214,9 +223,13 @@ namespace winrt::GraphPaper::implementation
 							smry_append(t);
 							smry_select(t);
 						}
-						edit_menu_enable();
+						edit_menu_is_enabled();
 						sheet_update_bbox(t);
 						sheet_panle_size();
+						sheet_draw();
+					}
+					else {
+						message_show(ICON_ALERT, L"str_err_paste", L"");
 					}
 				}
 			}

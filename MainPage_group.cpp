@@ -37,7 +37,7 @@ namespace winrt::GraphPaper::implementation
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
-		edit_menu_enable();
+		edit_menu_is_enabled();
 		sheet_draw();
 		// 図形一覧の排他制御が true か判定する.
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
@@ -91,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
 		// 編集メニュー項目の使用の可否を設定する.
-		edit_menu_enable();
+		edit_menu_is_enabled();
 		sheet_draw();
 	}
 

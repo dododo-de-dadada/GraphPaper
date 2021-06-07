@@ -105,7 +105,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// コンテキストメニューを表示する.
-	void MainPage::event_context_menu(void)
+	void MainPage::event_show_context_menu(void)
 	{
 		// コンテキストメニューを解放する.
 		scp_sheet_panel().ContextFlyout(nullptr);
@@ -119,7 +119,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// 押された図形の属性値を用紙に格納する.
-			sheet_set_attr_to(m_event_shape_pressed);
+			m_sheet_main.set_attr_to(m_event_shape_pressed);
+			sheet_attr_is_checked();
 			// 押された図形の部位が内側か判定する.
 			if (m_event_anch_pressed == ANCH_TYPE::ANCH_FILL) {
 				scp_sheet_panel().ContextFlyout(m_menu_fill);
@@ -209,7 +210,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_select(s);
 		undo_push_null();
 		m_event_shape_smry = m_event_shape_prev = s;
-		edit_menu_enable();
+		edit_menu_is_enabled();
 		sheet_update_bbox(s);
 		sheet_panle_size();
 		sheet_draw();
@@ -226,15 +227,15 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		tx_edit().Text(L"");
-		ck_edit_text_frame().IsChecked(edit_text_frame());
+		ck_edit_text_frame().IsChecked(m_edit_text_frame);
 		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
 			auto s = new ShapeText(m_event_pos_pressed, diff, text, &m_sheet_main);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
-			edit_text_frame(ck_edit_text_frame().IsChecked().GetBoolean());
-			if (edit_text_frame()) {
+			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
+			if (m_edit_text_frame) {
 				static_cast<ShapeText*>(s)->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 			}
 			event_reduce_slist(m_list_shapes, m_stack_undo, m_stack_redo);
@@ -243,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_select(s);
 			undo_push_null();
 			m_event_shape_smry = m_event_shape_prev = s;
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_update_bbox(s);
 			sheet_panle_size();
 			// 図形一覧の排他制御が true か判定する.
@@ -358,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		sheet_update_bbox();
 		sheet_panle_size();
-		edit_menu_enable();
+		edit_menu_is_enabled();
 	}
 
 	// 範囲選択を終了する.
@@ -381,7 +382,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag == true) {
 			// 編集メニュー項目の使用の可否を設定する.
-			edit_menu_enable();
+			edit_menu_is_enabled();
 		}
 		Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 	}
@@ -634,7 +635,7 @@ namespace winrt::GraphPaper::implementation
 		if (!unselect_all()) {
 			return;
 		}
-		edit_menu_enable();
+		edit_menu_is_enabled();
 		sheet_draw();
 	}
 
@@ -715,7 +716,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (m_event_state == EVENT_STATE::PRESS_RBTN) {
 			// 状態が右ボタンを押した状態の場合
-			event_context_menu();
+			event_show_context_menu();
 		}
 		else if (m_event_state == EVENT_STATE::BEGIN) {
 			// 状態が初期状態の場合,

@@ -25,14 +25,14 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_stroke_color)) {
 			const double g_len = m_grid_base + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
-			const bool xy = fabs(m_diff[0].x) >= fabs(m_diff[0].y);
-			const double diff_x = (xy ? m_diff[0].x : m_diff[0].y);
-			const double diff_y = (xy ? m_diff[0].y : m_diff[0].x);
+			const bool x_ge_y = fabs(m_diff[0].x) >= fabs(m_diff[0].y);
+			const double diff_x = (x_ge_y ? m_diff[0].x : m_diff[0].y);
+			const double diff_y = (x_ge_y ? m_diff[0].y : m_diff[0].x);
 			const double grad_x = diff_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
 			const uint32_t k = static_cast<uint32_t>(floor(diff_x / grad_x));
-			const double x0 = (xy ? m_pos.x : m_pos.y);
-			const double y0 = static_cast<double>(xy ? m_pos.y : m_pos.x) + diff_y;
+			const double x0 = (x_ge_y ? m_pos.x : m_pos.y);
+			const double y0 = static_cast<double>(x_ge_y ? m_pos.y : m_pos.x) + diff_y;
 			const double y1 = y0 - (diff_y >= 0.0 ? grad_y : -grad_y);
 			const double y1_5 = y0 - 0.625 * (diff_y >= 0.0 ? grad_y : -grad_y);
 			const double y2 = y1 - (diff_y >= 0.0 ? f_size : -f_size);
@@ -40,14 +40,18 @@ namespace winrt::GraphPaper::implementation
 				// ï˚ä·ÇÃëÂÇ´Ç≥Ç≤Ç∆Ç…ñ⁄ê∑ÇËÇï\é¶Ç∑ÇÈ.
 				const double x = x0 + i * grad_x;
 				D2D1_POINT_2F p0{
-					xy ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
-					xy ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
+					x_ge_y ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
+					x_ge_y ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
 				};
 				const auto y = ((i % 5) == 0 ? y1 : y1_5);
 				D2D1_POINT_2F p1{
-					xy ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
-					xy ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
+					x_ge_y ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
+					x_ge_y ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
+				if (x_ge_y) {
+					D2D1_POINT_2F p_min;
+					D2D1_POINT_2F p_max;
+				}
 				if (pt_in_line(t_pos, p0, p1, max(static_cast<double>(m_stroke_width), Shape::s_anch_len), m_stroke_cap_style)) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
@@ -55,12 +59,12 @@ namespace winrt::GraphPaper::implementation
 				const double x1 = x + f_size * 0.5;
 				const double x2 = x1 - f_size;
 				D2D1_POINT_2F r_min = {
-					xy ? static_cast<FLOAT>(x2) : static_cast<FLOAT>(y2),
-					xy ? static_cast<FLOAT>(y2) : static_cast<FLOAT>(x2)
+					x_ge_y ? static_cast<FLOAT>(x2) : static_cast<FLOAT>(y2),
+					x_ge_y ? static_cast<FLOAT>(y2) : static_cast<FLOAT>(x2)
 				};
 				D2D1_POINT_2F r_max = {
-					xy ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
-					xy ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
+					x_ge_y ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
+					x_ge_y ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
 				};
 				pt_bound(r_min, r_max, r_min, r_max);
 				if (pt_in_rect(t_pos, r_min, r_max)) {

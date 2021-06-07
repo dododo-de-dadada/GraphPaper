@@ -267,7 +267,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値をマイター制限の比率に格納する.
+	// 値を線分のつなぎのマイター制限に格納する.
 	bool ShapeLineA::set_stroke_join_limit(const float& value)
 	{
 		if (ShapeStroke::set_stroke_join_limit(value)) {
@@ -282,7 +282,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を線のつながりに格納する.
+	// 値を線分のつなぎに格納する.
 	bool ShapeLineA::set_stroke_join_style(const D2D1_LINE_JOIN& value)
 	{
 		if (ShapeStroke::set_stroke_join_style(value)) {

@@ -16,12 +16,12 @@ namespace winrt::GraphPaper::implementation
 	// p_align	段落のそろえ
 	void MainPage::text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT value)
 	{
-		radio_menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR, rmfi_text_align_top());
-		radio_menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR, rmfi_text_align_top_2());
-		radio_menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR, rmfi_text_align_bot());
-		radio_menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR, rmfi_text_align_bot_2());
-		radio_menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER, rmfi_text_align_mid());
-		radio_menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER, rmfi_text_align_mid_2());
+		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR, rmfi_text_align_top());
+		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR, rmfi_text_align_top_2());
+		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR, rmfi_text_align_bot());
+		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR, rmfi_text_align_bot_2());
+		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER, rmfi_text_align_mid());
+		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER, rmfi_text_align_mid_2());
 		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR>(p_align, rmfi_text_align_top());
 		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR>(p_align, rmfi_text_align_top_2());
 		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR>(p_align, rmfi_text_align_bot());
@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (undo_push_set<UNDO_OP::TEXT_ALIGN_P>(value)) {
 			undo_push_null();
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -74,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (undo_push_set<UNDO_OP::TEXT_ALIGN_T>(value)) {
 			undo_push_null();
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -83,14 +83,14 @@ namespace winrt::GraphPaper::implementation
 	// t_align	文字列のそろえ
 	void MainPage::text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT value)
 	{
-		radio_menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING, rmfi_text_align_left());
-		radio_menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING, rmfi_text_align_left_2());
-		radio_menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING, rmfi_text_align_right());
-		radio_menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING, rmfi_text_align_right_2());
-		radio_menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER, rmfi_text_align_center());
-		radio_menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER, rmfi_text_align_center_2());
-		radio_menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED, rmfi_text_align_just());
-		radio_menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED, rmfi_text_align_just_2());
+		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING, rmfi_text_align_left());
+		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING, rmfi_text_align_left_2());
+		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING, rmfi_text_align_right());
+		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING, rmfi_text_align_right_2());
+		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER, rmfi_text_align_center());
+		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER, rmfi_text_align_center_2());
+		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED, rmfi_text_align_just());
+		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED, rmfi_text_align_just_2());
 		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING>(t_align, rmfi_text_align_left());
 		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING>(t_align, rmfi_text_align_left_2());
 		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING>(t_align, rmfi_text_align_right());
@@ -103,8 +103,8 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr float TEXT_LINE_H_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
 
-	// 書体メニューの「枠の大きさを合わせる」が選択された.
-	void MainPage::text_frame_click(IInspectable const&, RoutedEventArgs const&)
+	// 編集メニューの「枠の大きさを合わせる」が選択された.
+	void MainPage::edit_text_frame_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto flag = false;
 		for (auto s : m_list_shapes) {
@@ -147,7 +147,7 @@ namespace winrt::GraphPaper::implementation
 		const float val0 = value / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		text_set_slider_header<UNDO_OP::TEXT_LINE_H, 0>(val0);
-		sample_slider_0().Visibility(VISIBLE);
+		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_LINE_H, 0> });
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
@@ -157,7 +157,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_text_line_sp(sample_value);
 			if (undo_push_set<UNDO_OP::TEXT_LINE_H>(sample_value)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -166,7 +166,7 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		sample_slider_0().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sheet_draw();
 	}
@@ -185,7 +185,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (undo_push_set<UNDO_OP::TEXT_LINE_H>(value)) {
 			undo_push_null();
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -205,8 +205,8 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Value(val1);
 		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 0>(val0);
 		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 1>(val1);
-		sample_slider_0().Visibility(VISIBLE);
-		sample_slider_1().Visibility(VISIBLE);
+		sample_slider_0().Visibility(UI_VISIBLE);
+		sample_slider_1().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_MARGIN, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_MARGIN, 1> });
 		m_sample_type = SAMP_TYPE::FONT;
@@ -217,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_text_margin(sample_value);
 			if (undo_push_set<UNDO_OP::TEXT_MARGIN>(sample_value)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -226,8 +226,8 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		sample_slider_0().Visibility(COLLAPSED);
-		sample_slider_1().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
+		sample_slider_1().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
 		sheet_draw();

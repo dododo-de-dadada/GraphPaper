@@ -167,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 線枠のマイター制限の比率を得る.
+	// 線分のつなぎのマイター制限を得る.
 	// 戻り値	つねに true
 	bool ShapeStroke::get_stroke_join_limit(float& value) const noexcept
 	{
@@ -175,7 +175,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 線のつながりを得る.
+	// 線分のつなぎを得る.
 	// 戻り値	つねに true
 	bool ShapeStroke::get_stroke_join_style(D2D1_LINE_JOIN& value) const noexcept
 	{
@@ -359,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値をマイター制限の比率に格納する.
+	// 値を線分のつなぎのマイター制限に格納する.
 	bool ShapeStroke::set_stroke_join_limit(const float& value)
 	{
 		if (!equal(m_stroke_join_limit, value)) {
@@ -373,7 +373,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を線のつながりに格納する.
+	// 値を線分のつなぎに格納する.
 	bool ShapeStroke::set_stroke_join_style(const D2D1_LINE_JOIN& value)
 	{
 		if (m_stroke_join_style != value) {

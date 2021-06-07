@@ -26,7 +26,7 @@ namespace winrt::GraphPaper::implementation
 		const float val3 = value * COLOR_MAX;
 		sample_slider_3().Value(val3);
 		grid_set_slider_header<UNDO_OP::GRID_GRAY, 3>(val3);
-		sample_slider_3().Visibility(VISIBLE);
+		sample_slider_3().Visibility(UI_VISIBLE);
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_GRAY, 3> });
 		m_sample_type = SAMP_TYPE::NONE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		sample_slider_3().Visibility(COLLAPSED);
+		sample_slider_3().Visibility(UI_COLLAPSED);
 		sample_slider_3().ValueChanged(slider_3_token);
 	}
 
@@ -58,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 		const float val0 = value / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		grid_set_slider_header<UNDO_OP::GRID_BASE, 0>(val0);
-		sample_slider_0().Visibility(VISIBLE);
+		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_BASE, 0> });
 		m_sample_type = SAMP_TYPE::NONE;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
@@ -72,12 +72,12 @@ namespace winrt::GraphPaper::implementation
 			if (!equal(sheet_value, sample_value)) {
 				undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, sample_value);
 				undo_menu_enable();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 
 		}
-		sample_slider_0().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 	}
 

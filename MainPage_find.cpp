@@ -269,7 +269,7 @@ namespace winrt::GraphPaper::implementation
 				s->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 			}
 			undo_push_null();
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -464,8 +464,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::find_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 文字列検索パネルが表示されているか判定する.
-		if (sp_find_text().Visibility() == VISIBLE) {
-			sp_find_text().Visibility(COLLAPSED);
+		if (sp_find_text().Visibility() == UI_VISIBLE) {
+			sp_find_text().Visibility(UI_COLLAPSED);
 			find_text_set();
 			return;
 		}
@@ -476,14 +476,14 @@ namespace winrt::GraphPaper::implementation
 		tx_find_replace_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });
 		ck_find_text_case().IsChecked(m_find_text_case);
 		ck_find_text_wrap().IsChecked(m_find_text_wrap);
-		sp_find_text().Visibility(VISIBLE);
+		sp_find_text().Visibility(UI_VISIBLE);
 	}
 
 	// 文字列検索パネルの「閉じる」ボタンが押された.
 	void MainPage::find_text_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		find_text_set();
-		sp_find_text().Visibility(COLLAPSED);
+		sp_find_text().Visibility(UI_COLLAPSED);
 	}
 
 	// 文字列検索パネルの「次を検索」ボタンが押された.

@@ -9,17 +9,44 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	// その他メニューの「バージョン情報」が選択された.
+	IAsyncAction MainPage::about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		tb_version().Visibility(UI_VISIBLE);
+		const auto def_btn = cd_sample().DefaultButton();
+		const auto pri_text = cd_sample().PrimaryButtonText();
+		const auto close_text = cd_sample().CloseButtonText();
+		cd_sample().PrimaryButtonText(L"");
+		cd_sample().CloseButtonText(L"OK");
+		cd_sample().Title(box_value(L"GraphPaper"));
+		m_sample_type = SAMP_TYPE::MISC;
+		co_await cd_sample().ShowAsync();
+		cd_sample().PrimaryButtonText(pri_text);
+		cd_sample().CloseButtonText(close_text);
+		cd_sample().DefaultButton(def_btn);
+		tb_version().Visibility(UI_COLLAPSED);
+		delete m_sample_shape;
+#if defined(_DEBUG)
+		debug_leak_cnt--;
+#endif
+		m_sample_shape = nullptr;
+		// バージョン情報のメッセージダイアログを表示する.
+		//message_show(ICON_INFO, L"str_appname", L"str_version");
+	}
+
 	// その他メニューの「色の表記」に印をつける.
 	void MainPage::color_code_is_checked(const COLOR_CODE value)
 	{
-		radio_menu_item_is_checked(value == COLOR_CODE::DEC, rmfi_color_code_dec());
-		radio_menu_item_is_checked(value == COLOR_CODE::DEC, rmfi_color_code_dec_2());
-		radio_menu_item_is_checked(value == COLOR_CODE::HEX, rmfi_color_code_hex());
-		radio_menu_item_is_checked(value == COLOR_CODE::HEX, rmfi_color_code_hex_2());
-		radio_menu_item_is_checked(value == COLOR_CODE::REAL, rmfi_color_code_real());
-		radio_menu_item_is_checked(value == COLOR_CODE::REAL, rmfi_color_code_real_2());
-		radio_menu_item_is_checked(value == COLOR_CODE::CENT, rmfi_color_code_cent());
-		radio_menu_item_is_checked(value == COLOR_CODE::CENT, rmfi_color_code_cent_2());
+		menu_item_is_checked(value == COLOR_CODE::DEC, rmfi_color_code_dec());
+		menu_item_is_checked(value == COLOR_CODE::DEC, rmfi_color_code_dec_2());
+		menu_item_is_checked(value == COLOR_CODE::HEX, rmfi_color_code_hex());
+		menu_item_is_checked(value == COLOR_CODE::HEX, rmfi_color_code_hex_2());
+		menu_item_is_checked(value == COLOR_CODE::REAL, rmfi_color_code_real());
+		menu_item_is_checked(value == COLOR_CODE::REAL, rmfi_color_code_real_2());
+		menu_item_is_checked(value == COLOR_CODE::CENT, rmfi_color_code_cent());
+		menu_item_is_checked(value == COLOR_CODE::CENT, rmfi_color_code_cent_2());
 		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::DEC>(c_code, rmfi_color_code_dec());
 		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::DEC>(c_code, rmfi_color_code_dec_2());
 		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::HEX>(c_code, rmfi_color_code_hex());
@@ -50,16 +77,16 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「長さの単位」に印をつける.
 	void MainPage::len_unit_is_checked(const LEN_UNIT value)
 	{
-		radio_menu_item_is_checked(value == LEN_UNIT::GRID, rmfi_len_unit_grid());
-		radio_menu_item_is_checked(value == LEN_UNIT::GRID, rmfi_len_unit_grid_2());
-		radio_menu_item_is_checked(value == LEN_UNIT::INCH, rmfi_len_unit_inch());
-		radio_menu_item_is_checked(value == LEN_UNIT::INCH, rmfi_len_unit_inch_2());
-		radio_menu_item_is_checked(value == LEN_UNIT::MILLI, rmfi_len_unit_milli());
-		radio_menu_item_is_checked(value == LEN_UNIT::MILLI, rmfi_len_unit_milli_2());
-		radio_menu_item_is_checked(value == LEN_UNIT::PIXEL, rmfi_len_unit_pixel());
-		radio_menu_item_is_checked(value == LEN_UNIT::PIXEL, rmfi_len_unit_pixel_2());
-		radio_menu_item_is_checked(value == LEN_UNIT::POINT, rmfi_len_unit_point());
-		radio_menu_item_is_checked(value == LEN_UNIT::POINT, rmfi_len_unit_point_2());
+		menu_item_is_checked(value == LEN_UNIT::GRID, rmfi_len_unit_grid());
+		menu_item_is_checked(value == LEN_UNIT::GRID, rmfi_len_unit_grid_2());
+		menu_item_is_checked(value == LEN_UNIT::INCH, rmfi_len_unit_inch());
+		menu_item_is_checked(value == LEN_UNIT::INCH, rmfi_len_unit_inch_2());
+		menu_item_is_checked(value == LEN_UNIT::MILLI, rmfi_len_unit_milli());
+		menu_item_is_checked(value == LEN_UNIT::MILLI, rmfi_len_unit_milli_2());
+		menu_item_is_checked(value == LEN_UNIT::PIXEL, rmfi_len_unit_pixel());
+		menu_item_is_checked(value == LEN_UNIT::PIXEL, rmfi_len_unit_pixel_2());
+		menu_item_is_checked(value == LEN_UNIT::POINT, rmfi_len_unit_point());
+		menu_item_is_checked(value == LEN_UNIT::POINT, rmfi_len_unit_point_2());
 		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::GRID>(l_unit, rmfi_len_unit_grid());
 		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::GRID>(l_unit, rmfi_len_unit_grid_2());
 		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::INCH>(l_unit, rmfi_len_unit_inch());

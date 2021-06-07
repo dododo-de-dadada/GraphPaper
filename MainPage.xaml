@@ -10,7 +10,7 @@
     <!-- x:Name はコードビハインドのためのオブジェクトをつくる. x:Uid はリソースの参照をつくる. -->
     <Page.Resources>
         <ResourceDictionary>
-            <!-- 情報フォントアイコンのグリフ -->
+            <!-- フォントアイコンのグリフ -->
             <x:String x:Key="icon_info">&#xE946;</x:String>
             <x:String x:Key="icon_alert">&#xEA39;</x:String>
             <x:String x:Key="icon_arrng">&#xE8CB;</x:String>
@@ -19,6 +19,8 @@
             <x:String x:Key="icon_recent">&#xE81C;</x:String>
             <x:String x:Key="icon_close">&#xE894;</x:String>
             <x:String x:Key="icon_italic">&#xE8DB;</x:String>
+			<x:String x:Key="icon_ibeam">&#xE933;</x:String>
+			<x:String x:Key="icon_fit_page">&#xE9A6;</x:String>
             <!-- 曲線アイコンの描画コマンド -->
             <x:String x:Key="data_bezi">
                 M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841 L15.310918,7.967942 C8.311178,14.40621 8.311178,0.405251 -0.032292,7.249824 Z
@@ -134,6 +136,7 @@
             <x:String x:Key="file_app_data">app_data</x:String>
             <!-- 線枠コンテキストメニュー -->
 			<MenuFlyout x:Key="mf_stroke">
+                <!-- 線枠の種類 -->
                 <MenuFlyoutSubItem x:Uid="mfsi_stroke_dash_style" Text="Style">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_solid_2" x:Uid="rmfi_stroke_dash_style_solid" Click="stroke_dash_style_click" IsChecked="True" Text="Solid" GroupName="gn_stroke_dash_style_2">
                         <muxc:RadioMenuFlyoutItem.Icon>
@@ -162,14 +165,17 @@
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
+                <!-- 破線の配置 -->
                 <MenuFlyoutItem x:Name="mfi_stroke_dash_patt_2" x:Uid="mfi_stroke_dash_patt" Click="stroke_dash_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
-                <MenuFlyoutItem x:Uid="mfi_stroke_width" Click="stroke_width_click_async" Text="Width..." />
+				<!-- 線枠の太さ -->
+				<MenuFlyoutItem x:Uid="mfi_stroke_width" Click="stroke_width_click_async" Text="Width..." />
                 <MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_flat_2" x:Uid="rmfi_cap_flat" Click="cap_style_click" GroupName="gn_cap_style_2" IsChecked="true" Text="Flat" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_square_2" x:Uid="rmfi_cap_square" Click="cap_style_click" GroupName="gn_cap_style_2" Text="Square" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_round_2" x:Uid="rmfi_cap_round" Click="cap_style_click" GroupName="gn_cap_style_2" Text="Round" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_triangle_2" x:Uid="rmfi_cap_triangle" Click="cap_style_click" GroupName="gn_cap_style_2" Text="Triangle" />
                 </MenuFlyoutSubItem>
+                <!-- 線分のつなぎ -->
                 <MenuFlyoutSubItem x:Uid="mfs_join_style" Text="Join Style ">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_round_2" x:Uid="rmfi_join_round" Click="join_style_click" GroupName="gn_join_style_2" Text="Rounded" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_bevel_2" x:Uid="rmfi_join_bevel" Click="join_style_click" GroupName="gn_join_style_2" Text="Beveled" />
@@ -179,7 +185,7 @@
 					<MenuFlyoutItem x:Name="rmfi_join_limit_2" x:Uid="rmfi_join_limit" Click="join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
-                <!-- 矢じるしメニュー -->
+                <!-- 矢じるし -->
                 <MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_arrow_style_none_2" x:Uid="rmfi_arrow_style_none" Click="arrow_style_click" IsChecked="True" Text="None" GroupName="gn_arrow_style_2">
                         <muxc:RadioMenuFlyoutItem.Icon>
@@ -208,7 +214,22 @@
             </MenuFlyout>
             <!-- 書体コンテキストメニュー -->
             <MenuFlyout x:Key="mf_font">
-                <MenuFlyoutItem x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
+                <!--文字列の編集 -->
+				<MenuFlyoutItem x:Uid="mfi_edit_text" Click="edit_text_click" KeyboardAcceleratorTextOverride="Ctrl+E" Text="Edit Text" >
+					<MenuFlyoutItem.Icon>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_ibeam}"/>
+					</MenuFlyoutItem.Icon>
+				</MenuFlyoutItem>
+				<!--文字列の検索と置換 -->
+				<MenuFlyoutItem x:Uid="mfi_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text" />
+				<MenuFlyoutItem x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Text="Fit Frame Size to" >
+					<MenuFlyoutItem.Icon>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_fit_page}"/>
+					</MenuFlyoutItem.Icon>
+				</MenuFlyoutItem>
+				<MenuFlyoutSeparator />
+                <!-- 書体の種類 -->
+				<MenuFlyoutItem x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
                 <MenuFlyoutItem x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
                 <MenuFlyoutItem x:Uid="mfi_font_weight" Click="font_weight_click_async" Icon="Bold" Text="Weight..." />
                 <MenuFlyoutItem x:Uid="mfi_font_stretch" Click="font_stretch_click_async" Text="Stretch..."/>
@@ -446,7 +467,10 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="edit_text_click" Icon="Edit" Text="Edit Text" >
+				<MenuFlyoutItem x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="edit_text_click" Text="Edit Text" >
+					<MenuFlyoutItem.Icon>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_ibeam}"/>
+					</MenuFlyoutItem.Icon>
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="E" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -456,7 +480,12 @@
                         <KeyboardAccelerator Key="F" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-            </muxc:MenuBarItem>
+				<MenuFlyoutItem x:Name="mfi_edit_text_frame" x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Text="Fit Frame Size to" >
+					<MenuFlyoutItem.Icon>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_fit_page}"/>
+					</MenuFlyoutItem.Icon>
+				</MenuFlyoutItem>
+			</muxc:MenuBarItem>
             <!-- 作図ツールメニュー -->
             <muxc:MenuBarItem x:Uid="mbi_tool_draw" AccessKey="D" Title="Draw">
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_select" x:Uid="rmfi_tool_select" Click="tool_draw_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Select">
@@ -635,7 +664,6 @@
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
                 <MenuFlyoutItem x:Uid="mfi_text_margin" Click="text_margin_click_async" Text="Margin..." />
-                <MenuFlyoutItem x:Uid="mfi_text_frame" Click="text_frame_click" Text="Fit Frame Size to" />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Text="Color..." />
             </muxc:MenuBarItem>
@@ -694,19 +722,19 @@
 					    </MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					<MenuFlyoutItem x:Name="mfi_zoom_150" Click="mfi_zoom_click" Icon="ZoomIn" Text="150%" />
-					<MenuFlyoutItem x:Name="mfi_zoom_200" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+2" Icon="ZoomIn" Text="200%">
+					<MenuFlyoutItem x:Name="mfi_zoom_200" Click="mfi_zoom_click" Icon="ZoomIn" Text="200%">
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
-					<MenuFlyoutItem x:Name="mfi_zoom_300" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+3" Icon="ZoomIn" Text="300%">
+					<MenuFlyoutItem x:Name="mfi_zoom_300" Click="mfi_zoom_click" Icon="ZoomIn" Text="300%">
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
-					<MenuFlyoutItem x:Name="mfi_zoom_400" Click="mfi_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+4" Icon="ZoomIn" Text="400%" >
+					<MenuFlyoutItem x:Name="mfi_zoom_400" Click="mfi_zoom_click" Icon="ZoomIn" Text="400%" >
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>

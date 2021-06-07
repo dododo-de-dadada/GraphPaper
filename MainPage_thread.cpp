@@ -28,8 +28,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::thread_visibility_changed(CoreWindow const& sender, VisibilityChangedEventArgs const& args)
 	{
 		if (sender == CoreWindow::GetForCurrentThread()) {
-			m_window_visible = args.Visible();
-			if (m_window_visible) {
+			m_thread_win_visible = args.Visible();
+			if (m_thread_win_visible) {
 				event_curs_style();
 				sheet_draw();
 			}

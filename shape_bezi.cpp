@@ -66,6 +66,9 @@ namespace winrt::GraphPaper::implementation
 	// 曲線上の助変数をもとに微分値を求める.
 	static double bz_deriv_by_param(const BZP b_pos[4], const double t) noexcept;
 
+	// 位置を曲線の端点が含むか判定する.
+	template<D2D1_CAP_STYLE S> static bool bz_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F diff[3], const double e_width);
+
 	// 点の配列をもとにそれらをすべて含む凸包を求める.
 	static void bz_get_convex(const uint32_t e_cnt, const BZP e_pos[], uint32_t& c_cnt, BZP c_pos[]);
 
@@ -589,6 +592,86 @@ namespace winrt::GraphPaper::implementation
 		anchor_draw_rect(e_pos, dx);
 	}
 
+	// 位置を曲線の端点が含むか判定する.
+	template<D2D1_CAP_STYLE S> static bool bz_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F diff[3], const double e_width)
+	{
+		size_t i;
+		for (i = 0; i < 3; i++) {
+			const double abs2 = pt_abs2(diff[i]);
+			if (abs2 > FLT_MIN) {
+				D2D1_POINT_2F e_vec;
+				pt_mul(diff[i], -e_width / sqrt(abs2), e_vec);
+				D2D1_POINT_2F e_nor{ e_vec.y, -e_vec.x };
+				D2D1_POINT_2F e_pos[4];
+				pt_add(c_pos[i], e_nor, e_pos[0]);
+				pt_sub(c_pos[i], e_nor, e_pos[1]);
+				if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+					pt_add(e_pos[1], e_vec, e_pos[2]);
+					pt_add(e_pos[0], e_vec, e_pos[3]);
+					if (pt_in_poly(t_pos, 4, e_pos)) {
+						return true;
+					}
+				}
+				else if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+					pt_add(c_pos[i], e_vec, e_pos[2]);
+					if (pt_in_poly(t_pos, 3, e_pos)) {
+						return true;
+					}
+				}
+				break;
+			}
+		}
+		if (i == 3) {
+			D2D1_POINT_2F e_pos[4];
+			if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+				pt_add(c_pos[0], -e_width, -e_width, e_pos[0]);
+				pt_add(c_pos[0], e_width, -e_width, e_pos[1]);
+				pt_add(c_pos[0], e_width, e_width, e_pos[2]);
+				pt_add(c_pos[0], -e_width, e_width, e_pos[3]);
+				if (pt_in_poly(t_pos, 4, e_pos)) {
+					return true;
+				}
+			}
+			else if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+				pt_add(c_pos[0], 0.0, -e_width, e_pos[0]);
+				pt_add(c_pos[0], -e_width, 0.0, e_pos[1]);
+				pt_add(c_pos[0], 0.0, e_width, e_pos[2]);
+				pt_add(c_pos[0], e_width, 0.0, e_pos[3]);
+				if (pt_in_poly(t_pos, 4, e_pos)) {
+					return true;
+				}
+			}
+		}
+		else {
+			for (size_t i = 3; i > 0; i--) {
+				const double abs2 = pt_abs2(diff[i - 1]);
+				if (abs2 > FLT_MIN) {
+					D2D1_POINT_2F e_vec;
+					pt_mul(diff[i - 1], e_width / sqrt(abs2), e_vec);
+					D2D1_POINT_2F e_nor{ e_vec.y, -e_vec.x };
+					D2D1_POINT_2F e_pos[4];
+					pt_add(c_pos[i], e_nor, e_pos[0]);
+					pt_sub(c_pos[i], e_nor, e_pos[1]);
+					if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
+						pt_add(e_pos[1], e_vec, e_pos[2]);
+						pt_add(e_pos[0], e_vec, e_pos[3]);
+						if (pt_in_poly(t_pos, 4, e_pos)) {
+							return true;
+						}
+					}
+					else if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+						pt_add(c_pos[i], e_vec, e_pos[2]);
+						if (pt_in_poly(t_pos, 3, e_pos)) {
+							return true;
+						}
+					}
+					break;
+				}
+			}
+		}
+		return false;
+	}
+
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
@@ -615,6 +698,24 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (pt_in_anch(tp, c_pos[0])) {
 			return ANCH_TYPE::ANCH_P0 + 0;
+		}
+		if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+			if (pt_in_circle(tp, e_width)) {
+				return ANCH_TYPE::ANCH_STROKE;
+			}
+			if (pt_in_circle(tp, c_pos[3], e_width)) {
+				return ANCH_TYPE::ANCH_STROKE;
+			}
+		}
+		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, c_pos, m_diff.data(), e_width)) {
+				return ANCH_TYPE::ANCH_STROKE;
+			}
+		}
+		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, c_pos, m_diff.data(), e_width)) {
+				return ANCH_TYPE::ANCH_STROKE;
+			}
 		}
 		// 最初の制御点の組をプッシュする.
 		// ４つの点のうち端点は, 次につまれる組と共有するので, 1 + 3 * D_MAX 個の配列を確保する.

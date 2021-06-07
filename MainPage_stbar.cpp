@@ -40,8 +40,8 @@ namespace winrt::GraphPaper::implementation
 	// ステータスバーの項目の表示を設定する.
 	static void stbar_visiblity(const bool check, FrameworkElement const& f_elem) noexcept
 	{
-		if (f_elem.Visibility() == (check ? COLLAPSED : VISIBLE)) {
-			f_elem.Visibility(check ? VISIBLE : COLLAPSED);
+		if (f_elem.Visibility() == (check ? UI_COLLAPSED : UI_VISIBLE)) {
+			f_elem.Visibility(check ? UI_VISIBLE : UI_COLLAPSED);
 		}
 	}
 
@@ -321,20 +321,20 @@ namespace winrt::GraphPaper::implementation
 	// ステータスバーの表示を設定する.
 	void MainPage::stbar_visibility(void)
 	{
-		tk_stbar_pos_x().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::CURS) ? VISIBLE : COLLAPSED);
-		tk_stbar_pos_y().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::CURS) ? VISIBLE : COLLAPSED);
-		tk_stbar_grid().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::GRID) ? VISIBLE : COLLAPSED);
-		tk_stbar_width().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::SHEET) ? VISIBLE : COLLAPSED);
-		tk_stbar_height().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::SHEET) ? VISIBLE : COLLAPSED);
-		//sp_stbar_curs().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::CURS) ? VISIBLE : COLLAPSED);
-		//sp_stbar_grid().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::GRID) ? VISIBLE : COLLAPSED);
-		//sp_stbar_sheet().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::SHEET) ? VISIBLE : COLLAPSED);
-		sp_stbar_draw().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::DRAW) ? VISIBLE : COLLAPSED);
-		tk_stbar_unit().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::UNIT) ? VISIBLE : COLLAPSED);
-		tk_stbar_zoom().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::ZOOM) ? VISIBLE : COLLAPSED);
-		//sp_stbar_unit().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::UNIT) ? VISIBLE : COLLAPSED);
-		//sp_stbar_zoom().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::ZOOM) ? VISIBLE : COLLAPSED);
-		sp_stbar().Visibility(m_status_bar != static_cast<STBAR_FLAG>(0) ? VISIBLE : COLLAPSED);
+		tk_stbar_pos_x().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::CURS) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_stbar_pos_y().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::CURS) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_stbar_grid().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::GRID) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_stbar_width().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_stbar_height().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
+		//sp_stbar_curs().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::CURS) ? UI_VISIBLE : UI_COLLAPSED);
+		//sp_stbar_grid().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::GRID) ? UI_VISIBLE : UI_COLLAPSED);
+		//sp_stbar_sheet().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
+		sp_stbar_draw().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::DRAW) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_stbar_unit().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::UNIT) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_stbar_zoom().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::ZOOM) ? UI_VISIBLE : UI_COLLAPSED);
+		//sp_stbar_unit().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::UNIT) ? UI_VISIBLE : UI_COLLAPSED);
+		//sp_stbar_zoom().Visibility(stbar_mask(m_status_bar, STBAR_FLAG::ZOOM) ? UI_VISIBLE : UI_COLLAPSED);
+		sp_stbar().Visibility(m_status_bar != static_cast<STBAR_FLAG>(0) ? UI_VISIBLE : UI_COLLAPSED);
 	}
 
 	// ステータスバーの状態をデータライターに書き込む.

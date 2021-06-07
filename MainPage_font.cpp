@@ -96,10 +96,10 @@ namespace winrt::GraphPaper::implementation
 		font_set_slider_header<UNDO_OP::FONT_COLOR, 1>(val1);
 		font_set_slider_header<UNDO_OP::FONT_COLOR, 2>(val2);
 		font_set_slider_header<UNDO_OP::FONT_COLOR, 3>(val3);
-		sample_slider_0().Visibility(VISIBLE);
-		sample_slider_1().Visibility(VISIBLE);
-		sample_slider_2().Visibility(VISIBLE);
-		sample_slider_3().Visibility(VISIBLE);
+		sample_slider_0().Visibility(UI_VISIBLE);
+		sample_slider_1().Visibility(UI_VISIBLE);
+		sample_slider_2().Visibility(UI_VISIBLE);
+		sample_slider_3().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 2> });
@@ -112,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_font_color(sample_value);
 			if (undo_push_set<UNDO_OP::FONT_COLOR>(sample_value)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -121,10 +121,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		sample_slider_0().Visibility(COLLAPSED);
-		sample_slider_1().Visibility(COLLAPSED);
-		sample_slider_2().Visibility(COLLAPSED);
-		sample_slider_3().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
+		sample_slider_1().Visibility(UI_COLLAPSED);
+		sample_slider_2().Visibility(UI_COLLAPSED);
+		sample_slider_3().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
@@ -169,7 +169,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		);
-		lv_sample_lview().Visibility(VISIBLE);
+		lv_sample_lview().Visibility(UI_VISIBLE);
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_font_family(sample_value);
 			if (undo_push_set<UNDO_OP::FONT_FAMILY>(sample_value)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -189,7 +189,7 @@ namespace winrt::GraphPaper::implementation
 		m_sample_shape = nullptr;
 		lv_sample_lview().Loaded(loaded_token);
 		lv_sample_lview().SelectionChanged(changed_token);
-		lv_sample_lview().Visibility(COLLAPSED);
+		lv_sample_lview().Visibility(UI_COLLAPSED);
 		lv_sample_lview().Items().Clear();
 		sheet_draw();
 	}
@@ -294,7 +294,7 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.get_font_size(val0);
 		sample_slider_0().Value(val0);
 		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
-		sample_slider_0().Visibility(VISIBLE);
+		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_SIZE, 0> });
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
@@ -304,7 +304,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_font_size(sample_value);
 			if (undo_push_set<UNDO_OP::FONT_SIZE>(sample_value)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -313,7 +313,7 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		sample_slider_0().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sheet_draw();
 	}
@@ -352,7 +352,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		);
-		lv_sample_lview().Visibility(VISIBLE);
+		lv_sample_lview().Visibility(UI_VISIBLE);
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -361,7 +361,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_font_stretch(sample_value);
 			if (undo_push_set<UNDO_OP::FONT_STRETCH>(sample_value)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -372,7 +372,7 @@ namespace winrt::GraphPaper::implementation
 		m_sample_shape = nullptr;
 		lv_sample_lview().Loaded(loaded_token);
 		lv_sample_lview().SelectionChanged(changed_token);
-		lv_sample_lview().Visibility(COLLAPSED);
+		lv_sample_lview().Visibility(UI_COLLAPSED);
 		lv_sample_lview().Items().Clear();
 		sheet_draw();
 	}
@@ -395,7 +395,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
 			undo_push_null();
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -405,7 +405,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
 			undo_push_null();
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -415,7 +415,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
 			undo_push_null();
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -454,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		);
-		lv_sample_lview().Visibility(VISIBLE);
+		lv_sample_lview().Visibility(UI_VISIBLE);
 		m_sample_type = SAMP_TYPE::FONT;
 		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample().ShowAsync();
@@ -463,7 +463,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_font_weight(sample_value);
 			if (undo_push_set<UNDO_OP::FONT_WEIGHT>(sample_value)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -474,7 +474,7 @@ namespace winrt::GraphPaper::implementation
 		m_sample_shape = nullptr;
 		lv_sample_lview().Loaded(loaded_token);
 		lv_sample_lview().SelectionChanged(changed_token);
-		lv_sample_lview().Visibility(COLLAPSED);
+		lv_sample_lview().Visibility(UI_COLLAPSED);
 		lv_sample_lview().Items().Clear();
 		sheet_draw();
 	}

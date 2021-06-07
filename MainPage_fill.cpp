@@ -32,10 +32,10 @@ namespace winrt::GraphPaper::implementation
 		fill_set_slider_header<UNDO_OP::FILL_COLOR, 1>(val1);
 		fill_set_slider_header<UNDO_OP::FILL_COLOR, 2>(val2);
 		fill_set_slider_header<UNDO_OP::FILL_COLOR, 3>(val3);
-		sample_slider_0().Visibility(VISIBLE);
-		sample_slider_1().Visibility(VISIBLE);
-		sample_slider_2().Visibility(VISIBLE);
-		sample_slider_3().Visibility(VISIBLE);
+		sample_slider_0().Visibility(UI_VISIBLE);
+		sample_slider_1().Visibility(UI_VISIBLE);
+		sample_slider_2().Visibility(UI_VISIBLE);
+		sample_slider_3().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 2> });
@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_fill_color(sample_value);
 			if (undo_push_set<UNDO_OP::FILL_COLOR>(sample_value)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -57,10 +57,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		sample_slider_0().Visibility(COLLAPSED);
-		sample_slider_1().Visibility(COLLAPSED);
-		sample_slider_2().Visibility(COLLAPSED);
-		sample_slider_3().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
+		sample_slider_1().Visibility(UI_COLLAPSED);
+		sample_slider_2().Visibility(UI_COLLAPSED);
+		sample_slider_3().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);

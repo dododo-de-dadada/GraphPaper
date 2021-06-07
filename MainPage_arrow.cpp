@@ -32,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
 		if (undo_push_set<UNDO_OP::ARROW_STYLE>(a_style)) {
 			undo_push_null();
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -123,9 +123,9 @@ namespace winrt::GraphPaper::implementation
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 0>(val0);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 1>(val1);
 		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 2>(val2);
-		sample_slider_0().Visibility(VISIBLE);
-		sample_slider_1().Visibility(VISIBLE);
-		sample_slider_2().Visibility(VISIBLE);
+		sample_slider_0().Visibility(UI_VISIBLE);
+		sample_slider_1().Visibility(UI_VISIBLE);
+		sample_slider_2().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 2> });
@@ -137,7 +137,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_arrow_size(sample_value);
 			if (undo_push_set<UNDO_OP::ARROW_SIZE>(sample_value)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -146,9 +146,9 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		sample_slider_0().Visibility(COLLAPSED);
-		sample_slider_1().Visibility(COLLAPSED);
-		sample_slider_2().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
+		sample_slider_1().Visibility(UI_COLLAPSED);
+		sample_slider_2().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);

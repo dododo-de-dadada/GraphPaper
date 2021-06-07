@@ -102,41 +102,13 @@ namespace winrt::GraphPaper::implementation
 	// ファイルの読み込みが終了した.
 	void MainPage::file_finish_reading(void)
 	{
-		edit_menu_enable();
+		edit_menu_is_enabled();
 		tool_draw_is_checked(m_tool_draw);
 		tool_poly_is_checked(m_tool_poly);
 		color_code_is_checked(m_color_code);
 		stbar_is_checked(status_bar());
 		len_unit_is_checked(m_len_unit);
-
-		ARROW_STYLE a_style;
-		m_sheet_main.get_arrow_style(a_style);
-		arrow_style_is_checked(a_style);
-		DWRITE_FONT_STYLE f_style;
-		m_sheet_main.get_font_style(f_style);
-		font_style_is_checked(f_style);
-		D2D1_DASH_STYLE s_style;
-		m_sheet_main.get_stroke_dash_style(s_style);
-		stroke_dash_style_is_checked(s_style);
-		D2D1_LINE_JOIN j_style;
-		m_sheet_main.get_stroke_join_style(j_style);
-		join_style_is_checked(j_style);
-		DWRITE_TEXT_ALIGNMENT t_align_t;
-		m_sheet_main.get_text_align_t(t_align_t);
-		text_align_t_is_checked(t_align_t);
-		DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
-		m_sheet_main.get_text_align_p(t_align_p);
-		text_align_p_is_checked(t_align_p);
-		GRID_EMPH g_emph;
-		m_sheet_main.get_grid_emph(g_emph);
-		grid_emph_is_checked(g_emph);
-		GRID_SHOW g_show;
-		m_sheet_main.get_grid_show(g_show);
-		grid_show_is_checked(g_show);
-		bool g_snap;
-		m_sheet_main.get_grid_snap(g_snap);
-		tmfi_grid_snap().IsChecked(g_snap);
-		tmfi_grid_snap_2().IsChecked(g_snap);
+		sheet_attr_is_checked();
 
 		wchar_t* unavailable_font;	// 書体名
 		if (slist_test_font(m_list_shapes, unavailable_font) != true) {

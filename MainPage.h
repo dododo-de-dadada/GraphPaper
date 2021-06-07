@@ -84,11 +84,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::System::VirtualKey;
 	using winrt::Windows::System::VirtualKeyModifiers;
 
-	// UI 要素の表示の状態
-	constexpr auto VISIBLE = Visibility::Visible;	// 表示	
-	constexpr auto COLLAPSED = Visibility::Collapsed;	// 非表示
+	static const winrt::hstring CF_GPD{ L"graph_paper_data" };	// 図形データのクリップボード書式
 
-	// 書式変換
 	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
 	constexpr auto FMT_INCH_UNIT = L"%.3f \u33CC";	// インチ単位の書式
 	constexpr auto FMT_MILLI = L"%.3f";	// ミリメートル単位の書式
@@ -102,11 +99,9 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_GRID_UNIT = L"%.3f gd";	// グリッド単位の書式
 	constexpr auto ICON_INFO = L"icon_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"icon_alert";	// 警告アイコンの静的リソースのキー
-
 	constexpr auto SHEET_SIZE_DEF = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
-	//constexpr auto SCALE_MAX = 128.0f;	// 表示倍率の最大値
-	//constexpr auto SCALE_MIN = 1.0f / 128.0f;	// 表示倍率の最小値
-	static const winrt::hstring CF_GPD{ L"graph_paper_data" };	// 図形データのクリップボード書式
+	constexpr auto UI_VISIBLE = Visibility::Visible;	// 表示	
+	constexpr auto UI_COLLAPSED = Visibility::Collapsed;	// 非表示
 
 	//-------------------------------
 	// ポインターボタンの状態
@@ -171,31 +166,6 @@ namespace winrt::GraphPaper::implementation
 		conv_len_to_str<B>(len_unit, value, dpi, g_len, Z, t_buf);
 	}
 
-	inline void radio_menu_item_is_checked(const bool b, const RadioMenuFlyoutItem& item)
-	{
-		if (item.IsChecked()) {
-			if (!b) {
-				item.IsChecked(false);
-			}
-		}
-		else if (b) {
-			item.IsChecked(true);
-		}
-	}
-
-	inline void menu_item_is_enabled(const bool b, const MenuFlyoutItem& item)
-	{
-		if (item.IsEnabled()) {
-			if (!b) {
-				item.IsEnabled(false);
-			}
-		}
-		else if (b) {
-			item.IsEnabled(true);
-		}
-	}
-
-
 	//-------------------------------
 	// 色の表記
 	//-------------------------------
@@ -236,39 +206,65 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//-------------------------------
+	// メニュー項目
+	//-------------------------------
+
+	// メニュー項目に印をつける.
+	inline void menu_item_is_checked(const bool b, const RadioMenuFlyoutItem& item)
+	{
+		if (item.IsChecked()) {
+			if (!b) {
+				item.IsChecked(false);
+			}
+		}
+		else if (b) {
+			item.IsChecked(true);
+		}
+	}
+
+	// メニュー項目に印をつける.
+	inline void menu_item_is_enabled(const bool b, const MenuFlyoutItem& item)
+	{
+		if (item.IsEnabled()) {
+			if (!b) {
+				item.IsEnabled(false);
+			}
+		}
+		else if (b) {
+			item.IsEnabled(true);
+		}
+	}
+
+	//-------------------------------
 	// メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
 		std::mutex m_dx_mutex;	// 描画環境の排他制御
 		winrt::hstring m_file_token_mru;	// 最近使ったファイルのトークン
 
+		// 図形一覧
 		bool m_smry_descend = true;
 		std::atomic_bool m_smry_atomic{ false };	// 図形一覧の排他制御
 
-		// text
-
+		// 文字列の編集, 検索と置換
 		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
 		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
 		bool m_find_text_case = false;	// 英文字の区別フラグ
 		bool m_find_text_wrap = false;	// 回り込み検索フラグ
 		bool m_edit_text_frame = false;	// 枠の大きさを合わせるフラグ
 
-		// misc
-
+		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
 
-		// stbar
-
+		// ステータスバー
 		STBAR_FLAG m_status_bar = stbar_or(STBAR_FLAG::CURS, STBAR_FLAG::ZOOM);	// ステータスバーの状態
 
-		// drawing tool
-
+		// 作図ツール
 		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
 		POLY_TOOL m_tool_poly{ POLY_TOOL_DEF };	// 多角形の作図ツール
 
-		// main
-
+		// メーニュー関連
 		uint32_t m_cnt_selected = 0;		// 選択された図形の数
 		MenuFlyout m_menu_stroke = nullptr;	// 線枠コンテキストメニュー
 		MenuFlyout m_menu_fill = nullptr;	// 塗りつぶしコンテキストメニュー
@@ -276,19 +272,16 @@ namespace winrt::GraphPaper::implementation
 		MenuFlyout m_menu_sheet = nullptr;	// 用紙コンテキストメニュー
 		MenuFlyout m_menu_ungroup = nullptr;	// グループ解除コンテキストメニュー
 
-		// slist
-
+		// 図形リスト
 		SHAPE_LIST m_list_shapes;		// 図形リスト
 
-		// sheet
-
+		// メイン用紙
 		SHAPE_DX m_sheet_dx;		// 用紙の描画環境
 		ShapeSheet m_sheet_main;		// メインの用紙
 		D2D1_POINT_2F m_sheet_min{ 0.0F, 0.0F };		// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
 		D2D1_POINT_2F m_sheet_max{ 0.0F, 0.0F };		// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
-		// event
-
+		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };		// ポインターの現在位置
 		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };		// ポインターの前回位置
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;		// ポインターの押された状態
@@ -301,23 +294,20 @@ namespace winrt::GraphPaper::implementation
 		uint64_t m_event_click_time = 0ULL;		// クリックの判定時間 (マイクロ秒)
 		double m_event_click_dist = 6.0;		// クリックの判定距離 (DIPs)
 
-		// undo stack
-
+		// 元に戻す・やり直し操作
 		uint32_t m_stack_rcnt = 0;	// やり直し操作スタックに積まれた組数
 		UNDO_STACK m_stack_redo;		// やり直し操作スタック
 		uint32_t m_stack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
 		UNDO_STACK m_stack_undo;		// 元に戻す操作スタック
 		bool m_stack_updt = false;	// 操作スタックにひと組以上積まれた判定.
 
-		// sample
-
+		// 見本用紙
 		SHAPE_DX m_sample_dx;		// 見本の描画環境
 		ShapeSheet m_sample_sheet;		// 見本の用紙
 		Shape* m_sample_shape = nullptr;	// 見本の図形
 		SAMP_TYPE m_sample_type = SAMP_TYPE::NONE;	// 見本の型
 
-		bool m_window_visible = false;		// ウィンドウの表示フラグ
-
+		bool m_thread_win_visible = false;		// ウィンドウの表示フラグ
 		winrt::event_token m_token_suspending;	// アプリケーションの中断ハンドラーのトークン
 		winrt::event_token m_token_resuming;	// アプリケーションの再開ハンドラーのトークン
 		winrt::event_token m_token_entered_background;		// アプリケーションのバックグランド切り替えハンドラーのトークン
@@ -337,7 +327,7 @@ namespace winrt::GraphPaper::implementation
 		// 内容が変更されていたなら, 確認ダイアログを表示してその応答を得る.
 		IAsyncOperation<bool> ask_for_conf_async(void);
 		// 編集メニュー項目の使用の可否を設定する.
-		void edit_menu_enable(void);
+		void edit_menu_is_enabled(void);
 		// ファイルメニューの「終了」が選択された
 		IAsyncAction exit_click_async(IInspectable const&, RoutedEventArgs const&);
 		// メインページを作成する.
@@ -372,12 +362,19 @@ namespace winrt::GraphPaper::implementation
 		// 線分のつながりと端点
 		//-------------------------------
 
+		// 線枠メニューの「端点の形式」に印をつける.
 		void cap_style_is_checked(const CAP_STYLE& s_cap);
+		// 線枠メニューの「端点の形式」が選択された.
 		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
+		// 線枠メニューの「つながりの形式」>「マイター制限」が選択された.
 		IAsyncAction join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 線枠メニューの「つながりの形式」に印をつける.
 		void join_style_is_checked(const D2D1_LINE_JOIN s_join);
+		// 線枠メニューの「つながりの形式」が選択された.
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
+		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void join_set_slider_header(const float value);
+		// 値をスライダーのヘッダーと、見本の図形に格納する.
 		template <UNDO_OP U, int S> void join_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 
 		//-------------------------------
@@ -512,33 +509,15 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「段落のそろえ」に印をつける.
 		void text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT p_align);
 		// 書体メニューの「枠の大きさを合わせる」が選択された.
-		void text_frame_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「行間」>「狭める」または「広げる」が選択された.
-		void text_line_sp_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 書体メニューの「行の高さ」>「広げる」が選択された.
-		//void text_line_exp_click(IInspectable const&, RoutedEventArgs const&);
+		void edit_text_frame_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行間」>「行間...」が選択された.
 		IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「余白」が選択された.
 		IAsyncAction text_margin_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」が選択された.
 		void text_align_p_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 書体メニューの「段落のそろえ」>「中段」が選択された.
-		//void text_align_p_mid_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「段落のそろえ」>「下よせ」が選択された.
-		//void text_align_p_bot_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「段落のそろえ」>「上よせ」が選択された.
-		//void text_align_p_top_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」が選択された.
 		void text_align_t_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 書体メニューの「文字列のそろえ」>「中央」が選択された.
-		//void text_align_t_center_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「文字列のそろえ」>「均等」が選択された.
-		//void text_align_t_just_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「文字列のそろえ」>「左よせ」が選択された.
-		//void text_align_t_left_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「文字列のそろえ」>「右よせ」が選択された.
-		//void text_align_t_right_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void text_set_slider_header(const float value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
@@ -684,7 +663,9 @@ namespace winrt::GraphPaper::implementation
 		// 用紙とその他の属性を初期化する.
 		void sheet_init(void) noexcept;
 		// 図形の属性を用紙に格納する.
-		void sheet_set_attr_to(const Shape* s) noexcept;
+		//void sheet_set_attr_to(const Shape* s) noexcept;
+		// 図形の属性関連に印をつける.
+		void sheet_attr_is_checked(void) noexcept;
 
 		//-------------------------------
 		// MainPage_pref.cpp
@@ -703,32 +684,7 @@ namespace winrt::GraphPaper::implementation
 		// 長さの単位, 色の表記, ステータスバー, バージョン情報
 		//-----------------------------
 
-		// その他メニューの「バージョン情報」が選択された.
-		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
-		{
-			//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
-			tb_version().Visibility(VISIBLE);
-			const auto def_btn = cd_sample().DefaultButton();
-			const auto pri_text = cd_sample().PrimaryButtonText();
-			const auto close_text = cd_sample().CloseButtonText();
-			cd_sample().PrimaryButtonText(L"");
-			cd_sample().CloseButtonText(L"OK");
-			cd_sample().Title(box_value(L"GraphPaper"));
-			m_sample_type = SAMP_TYPE::MISC;
-			co_await cd_sample().ShowAsync();
-			cd_sample().PrimaryButtonText(pri_text);
-			cd_sample().CloseButtonText(close_text);
-			cd_sample().DefaultButton(def_btn);
-			tb_version().Visibility(COLLAPSED);
-			delete m_sample_shape;
-#if defined(_DEBUG)
-			debug_leak_cnt--;
-#endif
-			m_sample_shape = nullptr;
-			// バージョン情報のメッセージダイアログを表示する.
-			//message_show(ICON_INFO, L"str_appname", L"str_version");
-		}
+		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
 		// 値を色の表記に格納する.
 		void color_code(const COLOR_CODE code) noexcept { m_color_code = code; }
 		// 色の表記を得る.
@@ -754,7 +710,7 @@ namespace winrt::GraphPaper::implementation
 		// ポインターが押された図形の部位に格納する.
 		void event_anch_pressed(const uint32_t anchor) noexcept { m_event_anch_pressed = anchor; }
 		// コンテキストメニューを表示する.
-		void event_context_menu(void);
+		void event_show_context_menu(void);
 		// ポインターの現在位置を得る.
 		const D2D1_POINT_2F& event_pos_curr(void) const noexcept { return m_event_pos_curr; }
 		// イベント引数からポインターの現在位置を得る.
@@ -860,7 +816,7 @@ namespace winrt::GraphPaper::implementation
 		const STBAR_FLAG status_bar(void) const noexcept { return m_status_bar; }
 		// その他メニューの「ステータスバー」が選択された.
 		void stbar_click(IInspectable const&, RoutedEventArgs const&);
-		// ステータスバーのメニュー項目に印をつける.
+		// その他メニューの「ステータスバー」に印をつける.
 		void stbar_is_checked(const STBAR_FLAG a);
 		// 列挙型を OR 演算する.
 		static STBAR_FLAG stbar_or(const STBAR_FLAG a, const STBAR_FLAG b) noexcept;
@@ -952,10 +908,14 @@ namespace winrt::GraphPaper::implementation
 		void smry_update(void);
 
 		//-------------------------------
-		// MainPage_text.cpp
-		// 文字列の編集と検索/置換
+		// MainPage_find.cpp
+		// 文字列の編集と, 検索/置換
 		//-------------------------------
 
+		// 図形が持つ文字列を編集する.
+		IAsyncAction edit_text_async(ShapeText* s);
+		// 編集メニューの「文字列の編集」が選択された.
+		void edit_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「閉じる」ボタンが押された.
 		void find_text_close_click(IInspectable const&, RoutedEventArgs const&);
 		//　文字列検索パネルの「次を検索」ボタンが押された.
@@ -974,14 +934,6 @@ namespace winrt::GraphPaper::implementation
 		void find_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 検索文字列が変更された.
 		void find_text_what_changed(IInspectable const&, TextChangedEventArgs const&);
-		// 図形が持つ文字列を編集する.
-		IAsyncAction edit_text_async(ShapeText* s);
-		// 編集メニューの「文字列の編集」が選択された.
-		void edit_text_click(IInspectable const&, RoutedEventArgs const&);
-		// 枠の大きさを合わせるフラグに格納する.
-		void edit_text_frame(const bool adjust) noexcept { m_edit_text_frame = adjust; }
-		// 枠の大きさを合わせるフラグを得る.
-		const bool edit_text_frame(void) const noexcept { return m_edit_text_frame; }
 
 		//-------------------------------
 		// MainPage_thread.cpp
@@ -1000,11 +952,11 @@ namespace winrt::GraphPaper::implementation
 
 		// 作図メニューの項目が選択された.
 		void tool_draw_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 作図メニューのチェックマークをつける.
+		// 作図メニューに印をつける.
 		void tool_draw_is_checked(const DRAW_TOOL value);
-		// 作図メニューの多角形ツールのチェックマークをつける.
+		// 作図メニューの「多角形ツール」に印をつける.
 		void tool_poly_is_checked(const uint32_t value);
-		// 作図メニューの多角形ツールのチェックマークをつける.
+		// 作図メニューの「多角形ツール」に印をつける.
 		void tool_poly_is_checked(const POLY_TOOL& value);
 		// 作図ツールを得る.
 		const DRAW_TOOL tool_draw(void) const noexcept { return m_tool_draw; }

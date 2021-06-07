@@ -954,7 +954,7 @@
     <value>Arrange</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_text_frame.Text" xml:space="preserve">
+  <data name="mfi_edit_text_frame.Text" xml:space="preserve">
     <value>Fit Frame Size to</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -1016,6 +1016,10 @@
   </data>
   <data name="str_line_sp" xml:space="preserve">
     <value>Line Space</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_err_paste" xml:space="preserve">
+    <value>Failed to paste the data.</value>
     <comment>String</comment>
   </data>
 </root>

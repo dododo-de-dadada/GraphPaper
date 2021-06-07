@@ -33,10 +33,10 @@ namespace winrt::GraphPaper::implementation
 		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 1>(val1);
 		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 2>(val2);
 		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 3>(val3);
-		sample_slider_0().Visibility(VISIBLE);
-		sample_slider_1().Visibility(VISIBLE);
-		sample_slider_2().Visibility(VISIBLE);
-		sample_slider_3().Visibility(VISIBLE);
+		sample_slider_0().Visibility(UI_VISIBLE);
+		sample_slider_1().Visibility(UI_VISIBLE);
+		sample_slider_2().Visibility(UI_VISIBLE);
+		sample_slider_3().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 2> });
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 			if (undo_push_set<UNDO_OP::STROKE_COLOR>(sample_value)) {
 				undo_push_null();
 				undo_menu_enable();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -59,10 +59,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		sample_slider_0().Visibility(COLLAPSED);
-		sample_slider_1().Visibility(COLLAPSED);
-		sample_slider_2().Visibility(COLLAPSED);
-		sample_slider_3().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
+		sample_slider_1().Visibility(UI_COLLAPSED);
+		sample_slider_2().Visibility(UI_COLLAPSED);
+		sample_slider_3().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
@@ -93,11 +93,11 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_4().Value(val4);
 		D2D1_DASH_STYLE s_style;
 		m_sheet_main.get_stroke_dash_style(s_style);
-		sample_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
-		sample_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? VISIBLE : COLLAPSED);
-		sample_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
-		sample_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? VISIBLE : COLLAPSED);
-		sample_slider_4().Visibility(VISIBLE);
+		sample_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? UI_VISIBLE : UI_COLLAPSED);
+		sample_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? UI_VISIBLE : UI_COLLAPSED);
+		sample_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
+		sample_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
+		sample_slider_4().Visibility(UI_VISIBLE);
 		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 0>(val0);
 		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 1>(val1);
 		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 2>(val2);
@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 			if (undo_push_set<UNDO_OP::STROKE_DASH_PATT>(sample_patt) ||
 				undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -128,11 +128,11 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		sample_slider_0().Visibility(COLLAPSED);
-		sample_slider_1().Visibility(COLLAPSED);
-		sample_slider_2().Visibility(COLLAPSED);
-		sample_slider_3().Visibility(COLLAPSED);
-		sample_slider_4().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
+		sample_slider_1().Visibility(UI_COLLAPSED);
+		sample_slider_2().Visibility(UI_COLLAPSED);
+		sample_slider_3().Visibility(UI_COLLAPSED);
+		sample_slider_4().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.get_stroke_width(value);
 		const float val0 = value / SLIDER_STEP;
 		sample_slider_0().Value(val0);
-		sample_slider_0().Visibility(VISIBLE);
+		sample_slider_0().Visibility(UI_VISIBLE);
 		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0> });
 		m_sample_type = SAMP_TYPE::STROKE;
@@ -163,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_stroke_width(sample_value);
 			if (undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_value)) {
 				undo_push_null();
-				edit_menu_enable();
+				edit_menu_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -172,7 +172,7 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		sample_slider_0().Visibility(COLLAPSED);
+		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sheet_draw();
 	}
@@ -205,7 +205,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_stroke_dash_patt_2().IsEnabled(s_style == D2D1_DASH_STYLE_SOLID);
 		if (undo_push_set<UNDO_OP::STROKE_DASH_STYLE>(d_style)) {
 			undo_push_null();
-			edit_menu_enable();
+			edit_menu_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -313,16 +313,16 @@ namespace winrt::GraphPaper::implementation
 	// d_style	îjê¸ÇÃéÌï 
 	void MainPage::stroke_dash_style_is_checked(const D2D1_DASH_STYLE d_style)
 	{
-		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, rmfi_stroke_dash_style_solid());
-		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, rmfi_stroke_dash_style_solid_2());
-		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH, rmfi_stroke_dash_style_dash());
-		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH, rmfi_stroke_dash_style_dash_2());
-		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT, rmfi_stroke_dash_style_dash_dot());
-		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT, rmfi_stroke_dash_style_dash_dot_2());
-		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT, rmfi_stroke_dash_style_dash_dot_dot());
-		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT, rmfi_stroke_dash_style_dash_dot_dot_2());
-		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT, rmfi_stroke_dash_style_dot());
-		radio_menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT, rmfi_stroke_dash_style_dot_2());
+		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, rmfi_stroke_dash_style_solid());
+		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, rmfi_stroke_dash_style_solid_2());
+		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH, rmfi_stroke_dash_style_dash());
+		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH, rmfi_stroke_dash_style_dash_2());
+		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT, rmfi_stroke_dash_style_dash_dot());
+		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT, rmfi_stroke_dash_style_dash_dot_2());
+		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT, rmfi_stroke_dash_style_dash_dot_dot());
+		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT, rmfi_stroke_dash_style_dash_dot_dot_2());
+		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT, rmfi_stroke_dash_style_dot());
+		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT, rmfi_stroke_dash_style_dot_2());
 		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID>(d_style, rmfi_stroke_dash_style_solid());
 		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID>(d_style, rmfi_stroke_dash_style_solid_2());
 		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH>(d_style, rmfi_stroke_dash_style_dash());

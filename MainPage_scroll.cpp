@@ -54,11 +54,11 @@ namespace winrt::GraphPaper::implementation
 		const auto hgt0 = mh > 0.0;
 		sb_horz().ViewportSize(vw);
 		sb_horz().Maximum(wgt0 ? (hgt0 ? mw + SB_SIZE : mw) : 0.0);
-		sb_horz().Visibility(wgt0 ? VISIBLE : COLLAPSED);
+		sb_horz().Visibility(wgt0 ? UI_VISIBLE : UI_COLLAPSED);
 		sb_horz().Margin({ 0, 0, hgt0 ? SB_SIZE : 0.0, 0 });
 		sb_vert().ViewportSize(vh);
 		sb_vert().Maximum(hgt0 ? (wgt0 ? mh + SB_SIZE : mh) : 0.0);
-		sb_vert().Visibility(hgt0 ? VISIBLE : COLLAPSED);
+		sb_vert().Visibility(hgt0 ? UI_VISIBLE : UI_COLLAPSED);
 		sb_vert().Margin({ 0, 0, 0, wgt0 ? SB_SIZE : 0.0 });
 		//sb_horz().ViewportSize(vw);
 		//if (pw > vw) {
@@ -68,12 +68,12 @@ namespace winrt::GraphPaper::implementation
 			//else {
 			// sb_horz().Maximum(pw - vw);
 			//}
-			//sb_horz().Visibility(VISIBLE);
+			//sb_horz().Visibility(UI_VISIBLE);
 			//sb_vert().Margin({ 0, 0, 0, SB_SIZE });
 		//}
 		//else {
 			//sb_horz().Maximum(0.0);
-			//sb_horz().Visibility(COLLAPSED);
+			//sb_horz().Visibility(UI_COLLAPSED);
 			//sb_vert().Margin({ 0, 0, 0, 0 });
 		//}
 		//sb_vert().ViewportSize(vh);
@@ -84,12 +84,12 @@ namespace winrt::GraphPaper::implementation
 			//else {
 			// sb_vert().Maximum(ph - vh);
 			//}
-			//sb_vert().Visibility(VISIBLE);
+			//sb_vert().Visibility(UI_VISIBLE);
 			//sb_horz().Margin({ 0, 0, SB_SIZE, 0 });
 		//}
 		//else {
 			//sb_vert().Maximum(0.0);
-			//sb_vert().Visibility(COLLAPSED);
+			//sb_vert().Visibility(UI_COLLAPSED);
 			//sb_horz().Margin({ 0, 0, 0, 0 });
 		//}
 	}
