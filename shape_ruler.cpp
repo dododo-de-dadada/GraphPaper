@@ -49,11 +49,20 @@ namespace winrt::GraphPaper::implementation
 					x_ge_y ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				if (x_ge_y) {
-					D2D1_POINT_2F p_min;
-					D2D1_POINT_2F p_max;
+					const float a_len = s_anch_len * 0.5f;
+					const D2D1_POINT_2F p_min{ p0.x - a_len, min(p0.y, p1.y) };
+					const D2D1_POINT_2F p_max{ p0.x + a_len, max(p0.y, p1.y) };
+					if (pt_in_rect(t_pos, p_min, p_max)) {
+						return ANCH_TYPE::ANCH_STROKE;
+					}
 				}
-				if (pt_in_line(t_pos, p0, p1, max(static_cast<double>(m_stroke_width), Shape::s_anch_len), m_stroke_cap_style)) {
-					return ANCH_TYPE::ANCH_STROKE;
+				else {
+					const float a_len = s_anch_len * 0.5f;
+					const D2D1_POINT_2F p_min{ min(p0.x, p1.x), p0.y - a_len };
+					const D2D1_POINT_2F p_max{ max(p0.x, p1.x), p0.y + a_len };
+					if (pt_in_rect(t_pos, p_min, p_max)) {
+						return ANCH_TYPE::ANCH_STROKE;
+					}
 				}
 				// ñ⁄ê∑ÇËÇÃílÇï\é¶Ç∑ÇÈ.
 				const double x1 = x + f_size * 0.5;

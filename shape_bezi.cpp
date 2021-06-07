@@ -643,15 +643,15 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			for (size_t i = 3; i > 0; i--) {
-				const double abs2 = pt_abs2(diff[i - 1]);
+			for (size_t j = 3; j > 0; j--) {
+				const double abs2 = pt_abs2(diff[j - 1]);
 				if (abs2 > FLT_MIN) {
 					D2D1_POINT_2F e_vec;
-					pt_mul(diff[i - 1], e_width / sqrt(abs2), e_vec);
+					pt_mul(diff[j - 1], e_width / sqrt(abs2), e_vec);
 					D2D1_POINT_2F e_nor{ e_vec.y, -e_vec.x };
 					D2D1_POINT_2F e_pos[4];
-					pt_add(c_pos[i], e_nor, e_pos[0]);
-					pt_sub(c_pos[i], e_nor, e_pos[1]);
+					pt_add(c_pos[j], e_nor, e_pos[0]);
+					pt_sub(c_pos[j], e_nor, e_pos[1]);
 					if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
 						pt_add(e_pos[1], e_vec, e_pos[2]);
 						pt_add(e_pos[0], e_vec, e_pos[3]);
@@ -660,7 +660,7 @@ namespace winrt::GraphPaper::implementation
 						}
 					}
 					else if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
-						pt_add(c_pos[i], e_vec, e_pos[2]);
+						pt_add(c_pos[j], e_vec, e_pos[2]);
 						if (pt_in_poly(t_pos, 3, e_pos)) {
 							return true;
 						}

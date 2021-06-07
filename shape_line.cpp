@@ -93,6 +93,80 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 線分が位置を含むか, 太さも考慮して判定する.
+	// t_pos	判定する位置
+	// s_pos	線分の始端
+	// e_pos	線分の終端
+	// s_width	線分の太さ
+	// s_cap	線分の端点
+	// 戻り値	含む場合 true
+	static bool line_hit_test(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const CAP_STYLE& s_cap) noexcept
+	{
+		const double e_width = max(s_width * 0.5, 0.5);
+		if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+			D2D1_POINT_2F diff;	// 差分線分のベクトル
+			pt_sub(e_pos, s_pos, diff);
+			const double abs2 = pt_abs2(diff);
+			pt_mul(
+				abs2 > FLT_MIN ? diff : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
+				abs2 > FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
+				diff);
+			const double dx = diff.x;
+			const double dy = diff.y;
+			const double ox = dy;
+			const double oy = -dx;
+			D2D1_POINT_2F e_side[4];
+			pt_add(s_pos, -dx + ox, -dy + oy, e_side[0]);
+			pt_add(s_pos, -dx - ox, -dy - oy, e_side[1]);
+			pt_add(e_pos, dx - ox, dy - oy, e_side[2]);
+			pt_add(e_pos, dx + ox, dy + oy, e_side[3]);
+			return pt_in_poly(t_pos, 4, e_side);
+		}
+		else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+			D2D1_POINT_2F diff;	// 差分線分のベクトル
+			pt_sub(e_pos, s_pos, diff);
+			const double abs2 = pt_abs2(diff);
+			pt_mul(
+				abs2 > FLT_MIN ? diff : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
+				abs2 > FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
+				diff);
+			const double dx = diff.x;
+			const double dy = diff.y;
+			const double ox = dy;
+			const double oy = -dx;
+			D2D1_POINT_2F e_side[6];
+			pt_add(s_pos, ox, oy, e_side[0]);
+			pt_add(s_pos, -dx, -dy, e_side[1]);
+			pt_add(s_pos, -ox, -oy, e_side[2]);
+			pt_add(e_pos, -ox, -oy, e_side[3]);
+			pt_add(e_pos, dx, dy, e_side[4]);
+			pt_add(e_pos, ox, oy, e_side[5]);
+			return pt_in_poly(t_pos, 6, e_side);
+		}
+		else {
+			if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+				if (pt_in_circle(t_pos, s_pos, e_width) || pt_in_circle(t_pos, e_pos, e_width)) {
+					return true;
+				}
+			}
+			D2D1_POINT_2F diff;	// 差分ベクトル
+			pt_sub(e_pos, s_pos, diff);
+			const double abs2 = pt_abs2(diff);
+			if (abs2 > FLT_MIN) {
+				pt_mul(diff, e_width / sqrt(abs2), diff);
+				const double ox = diff.y;
+				const double oy = -diff.x;
+				D2D1_POINT_2F e_side[4];
+				pt_add(s_pos, ox, oy, e_side[0]);
+				pt_add(s_pos, -ox, -oy, e_side[1]);
+				pt_add(e_pos, -ox, -oy, e_side[2]);
+				pt_add(e_pos, ox, oy, e_side[3]);
+				return pt_in_poly(t_pos, 4, e_side);
+			}
+		}
+		return false;
+	}
+
 	// 図形を破棄する
 	ShapeLineA::~ShapeLineA(void)
 	{
@@ -215,7 +289,7 @@ namespace winrt::GraphPaper::implementation
 			return ANCH_TYPE::ANCH_P0;
 		}
 		const float s_width = static_cast<float>(max(static_cast<double>(m_stroke_width), Shape::s_anch_len));
-		if (pt_in_line(t_pos, m_pos, e_pos, s_width, m_stroke_cap_style)) {
+		if (line_hit_test(t_pos, m_pos, e_pos, s_width, m_stroke_cap_style)) {
 			return ANCH_TYPE::ANCH_STROKE;
 		}
 		return ANCH_TYPE::ANCH_SHEET;

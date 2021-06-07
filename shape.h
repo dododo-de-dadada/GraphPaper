@@ -238,8 +238,6 @@ namespace winrt::GraphPaper::implementation
 	inline bool pt_in_circle(const D2D1_POINT_2F t_vec, const double rad) noexcept;
 	// 位置が円に含まれるか判定する.
 	inline bool pt_in_circle(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad) noexcept;
-	// 線分が位置を含むか, 太さも考慮して判定する.
-	bool pt_in_line(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const CAP_STYLE& s_cap) noexcept;
 	// 多角形が位置を含むか判定する.
 	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t p_cnt, const D2D1_POINT_2F p_pos[]) noexcept;
 	// 方形が位置を含むか判定する.
