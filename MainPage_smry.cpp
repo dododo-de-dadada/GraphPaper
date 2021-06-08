@@ -143,6 +143,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif	
+
 		// ”ñ‘I‘ğ‚³‚ê‚½€–Ú‚ª‚ ‚ê‚Î, ‘I‘ğ‚ğ‚Í‚¸‚·B
 		for (uint32_t i = 0; i < e.RemovedItems().Size(); i++) {
 			IInspectable item[1];
@@ -163,7 +164,7 @@ namespace winrt::GraphPaper::implementation
 			auto const s = smry_shape(item[0]);
 			if (s != nullptr && s->is_selected() != true) {
 				undo_push_select(t = s);
-				m_event_shape_smry = s;
+				//m_event_shape_smry = s;
 			}
 		}
 		if (t != static_cast<const Shape*>(nullptr)) {
@@ -420,8 +421,14 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	void MainPage::smry_item_click(IInspectable const&, ItemClickEventArgs const&)
+	void MainPage::smry_item_click(IInspectable const&, ItemClickEventArgs const& args)
 	{
-
+		//if (m_smry_atomic.load(std::memory_order_acquire)) {
+			//m_smry_atomic.store(false, std::memory_order_release);
+			const auto item = args.ClickedItem();
+			const auto smry = item.try_as<Summary>();
+			m_event_shape_prev =
+				m_event_shape_pressed = smry->get_shape();
+		//}
 	}
 }

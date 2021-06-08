@@ -75,6 +75,7 @@ namespace winrt::GraphPaper::implementation
 		//if (m_smry_atomic.load(std::memory_order_acquire)) {
 		//	return;
 		//}
+		/*
 		if (m_event_shape_smry == nullptr) {
 			auto s_prev = event_shape_prev();
 			if (s_prev != nullptr && s_prev->is_selected()) {
@@ -112,34 +113,48 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 		}
+		*/
+		Shape* s = static_cast<Shape*>(nullptr);
 		if constexpr (K == VirtualKey::Down) {
-			Shape* s = static_cast<Shape*>(nullptr);
-			s = slist_next(m_list_shapes, m_event_shape_smry);
+			if (m_event_shape_prev == nullptr) {
+				s = slist_front(m_list_shapes);
+				m_event_shape_pressed = s;
+			}
+			else {
+				s = slist_next(m_list_shapes, m_event_shape_prev);
+			}
 			if (s != nullptr) {
-				m_event_shape_smry = s;
+				//m_event_shape_smry = s;
 				goto SEL;
 			}
 		}
 		if constexpr (K == VirtualKey::Up) {
-			Shape* s = static_cast<Shape*>(nullptr);
-			s = slist_prev(m_list_shapes, m_event_shape_smry);
+			if (m_event_shape_prev == nullptr) {
+				s = slist_back(m_list_shapes);
+				m_event_shape_pressed = s;
+			}
+			else {
+				s = slist_prev(m_list_shapes, m_event_shape_prev);
+			}
 			if (s != nullptr) {
-				m_event_shape_smry = s;
+				//m_event_shape_smry = s;
 				goto SEL;
 			}
 		}
 		return;
 	SEL:
 		if constexpr (M == VirtualKeyModifiers::Shift) {
-			select_range(event_shape_prev(), m_event_shape_smry);
+			select_range(m_event_shape_pressed, s);
+			m_event_shape_prev = s;
 		}
 		if constexpr (M == VirtualKeyModifiers::None) {
-			m_event_shape_prev = m_event_shape_smry;
+			m_event_shape_pressed =
+			m_event_shape_prev = s;
 			unselect_all();
-			undo_push_select(m_event_shape_smry);
+			undo_push_select(s);
 			// 図形一覧の排他制御が true か判定する.
 			if (m_smry_atomic.load(std::memory_order_acquire)) {
-				smry_select(m_event_shape_smry);
+				smry_select(s);
 			}
 		}
 		// 編集メニュー項目の使用の可否を設定する.

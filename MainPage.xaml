@@ -797,9 +797,13 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Button Click="smry_close_click" Grid.Row="0" Background="{ThemeResource ButtonBackgroundThemeBrush}" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" />
-			<ListView x:Name="lv_smry" Grid.Row="1" IsItemClickEnabled="False" Loaded="smry_loaded" SelectionChanged="smry_selection_changed" SelectionMode="Multiple" >
+			<ListView x:Name="lv_smry" Grid.Row="1" IsItemClickEnabled="True" ItemClick="smry_item_click" Loaded="smry_loaded" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >
 			<!--<ListView x:Name="lv_smry" Grid.Row="1" IsItemClickEnabled="False" Loaded="smry_loaded" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >-->
 			<!--<ListView x:Name="lv_smry" IsItemClickEnabled="False" Loaded="smry_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True"  RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_smry_close" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >-->
+                <ListView.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="Up" />
+                    <KeyboardAccelerator Key="Down"/>
+                </ListView.KeyboardAccelerators>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="local:Summary">
                         <StackPanel Orientation="Horizontal">
