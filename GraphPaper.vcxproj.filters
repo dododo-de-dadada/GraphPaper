@@ -17,7 +17,7 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="MainPage.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
-    <ClCompile Include="MainPage_app.cpp" />
+    <ClCompile Include="MainPage_appl.cpp" />
     <ClCompile Include="MainPage_arrng.cpp" />
     <ClCompile Include="MainPage_arrow.cpp" />
     <ClCompile Include="MainPage_disp.cpp" />
@@ -54,7 +54,7 @@
     <ClCompile Include="shape_ruler.cpp" />
     <ClCompile Include="MainPage_sample.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
-    <ClCompile Include="MainPage_stbar.cpp" />
+    <ClCompile Include="MainPage_status.cpp" />
     <ClCompile Include="shape_sheet.cpp" />
     <ClCompile Include="MainPage_sheet.cpp" />
     <ClCompile Include="MainPage_pref.cpp" />

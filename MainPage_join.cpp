@@ -11,14 +11,14 @@ namespace winrt::GraphPaper::implementation
 	// s_cap	ê¸ÇÃíPì_
 	void MainPage::cap_style_is_checked(const CAP_STYLE& value)
 	{
-		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }), rmfi_cap_flat());
-		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }), rmfi_cap_flat_2());
-		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }), rmfi_cap_square());
-		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }), rmfi_cap_square_2());
-		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }), rmfi_cap_round());
-		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }), rmfi_cap_round_2());
-		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }), rmfi_cap_triangle());
-		menu_item_is_checked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }), rmfi_cap_triangle_2());
+		rmfi_cap_flat().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
+		rmfi_cap_flat_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
+		rmfi_cap_square().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
+		rmfi_cap_square_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
+		rmfi_cap_round().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
+		rmfi_cap_round_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
+		rmfi_cap_triangle().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
+		rmfi_cap_triangle_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
 	}
 
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
@@ -52,14 +52,14 @@ namespace winrt::GraphPaper::implementation
 	// s_join	ê¸ÇÃÇ¬Ç»Ç™ÇË
 	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN value)
 	{
-		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, rmfi_join_bevel());
-		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, rmfi_join_bevel_2());
-		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER, rmfi_join_miter());
-		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER, rmfi_join_miter_2());
-		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL, rmfi_join_m_or_b());
-		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL, rmfi_join_m_or_b_2());
-		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND, rmfi_join_round());
-		menu_item_is_checked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND, rmfi_join_round_2());
+		rmfi_join_bevel().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
+		rmfi_join_bevel_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
+		rmfi_join_miter().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		rmfi_join_miter_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		rmfi_join_m_or_b().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_join_m_or_b_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_join_round().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
+		rmfi_join_round_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
 		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL>(s_join, rmfi_join_bevel_2());
 		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER>(s_join, rmfi_join_miter());
 		//radio_menu_item_set_value< D2D1_LINE_JOIN, D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER>(s_join, rmfi_join_miter_2());
@@ -116,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 			const float g_len = g_base + 1.0f;
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (S == 0) {

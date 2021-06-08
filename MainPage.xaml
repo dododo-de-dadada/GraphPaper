@@ -133,7 +133,7 @@
                 M0, 8 L3, 8 L3, 5.48 L16, 8.5 L3, 11.52 L3,9 L0, 9 Z
             </x:String>
             <!-- アプリケーションデータを格納するファイル名 -->
-            <x:String x:Key="file_app_data">app_data</x:String>
+            <x:String x:Key="file_appl_data">appl_data</x:String>
             <!-- 線枠コンテキストメニュー -->
 			<MenuFlyout x:Key="mf_stroke">
                 <!-- 線枠の種類 -->
@@ -762,12 +762,12 @@
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_cent" x:Uid="rmfi_color_code_cent" Click="color_code_click" Text="Percent" GroupName="gn_color_code" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_stbar" Text="Status Bar">
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_draw" x:Uid="tmfi_stbar_draw" Click="stbar_click" Text="Draw Tool" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_unit" x:Uid="tmfi_stbar_unit" Click="stbar_click" Text="Unit Name" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_curs" x:Uid="tmfi_stbar_curs" Click="stbar_click" Text="Cursor Pos" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_grid" x:Uid="tmfi_stbar_grid" Click="stbar_click" Text="Grid Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_sheet" x:Uid="tmfi_stbar_sheet" Click="stbar_click" Text="Sheet Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_zoom" x:Uid="tmfi_stbar_zoom" Click="stbar_click" Text="Scale" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_draw" x:Uid="tmfi_stbar_draw" Click="status_bar_click" Text="Draw Tool" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_unit" x:Uid="tmfi_stbar_unit" Click="status_bar_click" Text="Unit Name" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_curs" x:Uid="tmfi_stbar_curs" Click="status_bar_click" Text="Cursor Pos" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_grid" x:Uid="tmfi_stbar_grid" Click="status_bar_click" Text="Grid Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_sheet" x:Uid="tmfi_stbar_sheet" Click="status_bar_click" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_zoom" x:Uid="tmfi_stbar_zoom" Click="status_bar_click" Text="Scale" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- バージョン情報メニュー -->
@@ -797,8 +797,9 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Button Click="smry_close_click" Grid.Row="0" Background="{ThemeResource ButtonBackgroundThemeBrush}" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" />
-            <ListView x:Name="lv_smry" Grid.Row="1" IsItemClickEnabled="False" Loaded="smry_loaded" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >
-                <!--<ListView x:Name="lv_smry" IsItemClickEnabled="False" Loaded="smry_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True"  RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_smry_close" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >-->
+			<ListView x:Name="lv_smry" Grid.Row="1" IsItemClickEnabled="False" Loaded="smry_loaded" SelectionChanged="smry_selection_changed" SelectionMode="Multiple" >
+			<!--<ListView x:Name="lv_smry" Grid.Row="1" IsItemClickEnabled="False" Loaded="smry_loaded" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >-->
+			<!--<ListView x:Name="lv_smry" IsItemClickEnabled="False" Loaded="smry_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True"  RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_smry_close" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >-->
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="local:Summary">
                         <StackPanel Orientation="Horizontal">
@@ -881,12 +882,12 @@
             <!-- ステータスバーコンテキストメニュー -->
             <StackPanel.ContextFlyout>
                 <MenuFlyout>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_draw_2" x:Uid="tmfi_stbar_draw" Click="stbar_click" Text="Draw Tool" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_unit_2" x:Uid="tmfi_stbar_unit" Click="stbar_click" Text="Unit Name" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_curs_2" x:Uid="tmfi_stbar_curs" Click="stbar_click" Text="Cursor Pos" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_grid_2" x:Uid="tmfi_stbar_grid" Click="stbar_click" Text="Grid Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_sheet_2" x:Uid="tmfi_stbar_sheet" Click="stbar_click" Text="Sheet Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_zoom_2" x:Uid="tmfi_stbar_zoom" Click="stbar_click" Text="Scale" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_draw_2" x:Uid="tmfi_stbar_draw" Click="status_bar_click" Text="Draw Tool" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_unit_2" x:Uid="tmfi_stbar_unit" Click="status_bar_click" Text="Unit Name" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_curs_2" x:Uid="tmfi_stbar_curs" Click="status_bar_click" Text="Cursor Pos" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_grid_2" x:Uid="tmfi_stbar_grid" Click="status_bar_click" Text="Grid Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_sheet_2" x:Uid="tmfi_stbar_sheet" Click="status_bar_click" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_stbar_zoom_2" x:Uid="tmfi_stbar_zoom" Click="status_bar_click" Text="Scale" />
                 </MenuFlyout>
             </StackPanel.ContextFlyout>
             <StackPanel x:Name="sp_stbar_draw" Margin="0,0,8,0" Orientation="Horizontal">

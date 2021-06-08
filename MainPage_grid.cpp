@@ -159,14 +159,14 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.get_grid_base(g_base);
 			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP + 1.0f, m_sheet_dx.m_logical_dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP + 1.0f, m_sheet_dx.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_GRAY) {
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_col_to_str(color_code(), value, buf);
+				conv_col_to_str(m_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_gray_scale") + L": " + buf;
 			}
 		}
@@ -262,8 +262,8 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_main.get_grid_base(g_base);
 		const double g_len = g_base + 1.0;
 		auto flag = false;
-		D2D1_POINT_2F p_min = sheet_min();
-		D2D1_POINT_2F p_max = sheet_max();
+		D2D1_POINT_2F p_min = m_sheet_min;
+		D2D1_POINT_2F p_max = m_sheet_max;
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
 				// 消去フラグが立っている場合,
@@ -322,23 +322,6 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_OP::START_POS>(s);
 				s->move(diff);
 			}
-			/*
-			D2D1_POINT_2F s_pos;
-			s->get_min_pos(s_pos);
-			D2D1_POINT_2F g_pos;
-			pt_round(s_pos, g_len, g_pos);
-			if (equal(g_pos, s_pos)) {
-				// 開始位置と丸めた位置が同じ場合,
-				continue;
-			}
-			if (flag != true) {
-				flag = true;
-			}
-			undo_push_set<UNDO_OP::START_POS>(s);
-			D2D1_POINT_2F diff;
-			pt_sub(g_pos, s_pos, diff);
-			s->move(diff);
-			*/
 		}
 		if (flag) {
 			undo_push_null();

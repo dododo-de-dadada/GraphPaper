@@ -25,15 +25,15 @@ namespace winrt::GraphPaper::implementation
 
 	void MainPage::tool_draw_is_checked(const DRAW_TOOL value)
 	{
-		menu_item_is_checked(value == DRAW_TOOL::SELECT, rmfi_tool_select());
-		menu_item_is_checked(value == DRAW_TOOL::RECT, rmfi_tool_draw_rect());
-		menu_item_is_checked(value == DRAW_TOOL::RRECT, rmfi_tool_draw_rrect());
-		menu_item_is_checked(value == DRAW_TOOL::POLY, rmfi_tool_draw_poly());
-		menu_item_is_checked(value == DRAW_TOOL::ELLI, rmfi_tool_draw_elli());
-		menu_item_is_checked(value == DRAW_TOOL::LINE, rmfi_tool_draw_line());
-		menu_item_is_checked(value == DRAW_TOOL::BEZI, rmfi_tool_draw_bezi());
-		menu_item_is_checked(value == DRAW_TOOL::TEXT, rmfi_tool_draw_text());
-		menu_item_is_checked(value == DRAW_TOOL::RULER, rmfi_tool_draw_ruler());
+		rmfi_tool_select().IsChecked(value == DRAW_TOOL::SELECT);
+		rmfi_tool_draw_rect().IsChecked(value == DRAW_TOOL::RECT);
+		rmfi_tool_draw_rrect().IsChecked(value == DRAW_TOOL::RRECT);
+		rmfi_tool_draw_poly().IsChecked(value == DRAW_TOOL::POLY);
+		rmfi_tool_draw_elli().IsChecked(value == DRAW_TOOL::ELLI);
+		rmfi_tool_draw_line().IsChecked(value == DRAW_TOOL::LINE);
+		rmfi_tool_draw_bezi().IsChecked(value == DRAW_TOOL::BEZI);
+		rmfi_tool_draw_text().IsChecked(value == DRAW_TOOL::TEXT);
+		rmfi_tool_draw_ruler().IsChecked(value == DRAW_TOOL::RULER);
 		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::SELECT>(value, rmfi_tool_select());
 		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RECT>(value, rmfi_tool_draw_rect());
 		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RRECT>(value, rmfi_tool_draw_rrect());
@@ -48,15 +48,15 @@ namespace winrt::GraphPaper::implementation
 	// 多角形ツールのメニューのチェックをつける.
 	void MainPage::tool_poly_is_checked(const uint32_t value)
 	{
-		menu_item_is_checked(value == 2, rmfi_tool_poly_line());
-		menu_item_is_checked(value == 3, rmfi_tool_poly_tri());
-		menu_item_is_checked(value == 4, rmfi_tool_poly_quad());
-		menu_item_is_checked(value == 5, rmfi_tool_poly_pent());
-		menu_item_is_checked(value == 6, rmfi_tool_poly_hexa());
-		menu_item_is_checked(value == 7, rmfi_tool_poly_hept());
-		menu_item_is_checked(value == 8, rmfi_tool_poly_octa());
-		menu_item_is_checked(value == 9, rmfi_tool_poly_nona());
-		menu_item_is_checked(value == 10, rmfi_tool_poly_deca());
+		rmfi_tool_poly_line().IsChecked(value == 2);
+		rmfi_tool_poly_tri().IsChecked(value == 3);
+		rmfi_tool_poly_quad().IsChecked(value == 4);
+		rmfi_tool_poly_pent().IsChecked(value == 5);
+		rmfi_tool_poly_hexa().IsChecked(value == 6);
+		rmfi_tool_poly_hept().IsChecked(value == 7);
+		rmfi_tool_poly_octa().IsChecked(value == 8);
+		rmfi_tool_poly_nona().IsChecked(value == 9);
+		rmfi_tool_poly_deca().IsChecked(value == 10);
 		//radio_menu_item_set_value<uint32_t, 2>(value, rmfi_tool_poly_line());
 		//radio_menu_item_set_value<uint32_t, 3>(value, rmfi_tool_poly_tri());
 		//radio_menu_item_set_value<uint32_t, 4>(value, rmfi_tool_poly_quad());
@@ -156,7 +156,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			tool_draw_is_checked(m_tool_draw = DRAW_TOOL::POLY);
 		}
-		stbar_set_draw();
+		status_bar_set_draw();
 		event_curs_style();
 	}
 

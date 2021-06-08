@@ -15,13 +15,14 @@
 // MainPage.h
 //
 // MainPage.cpp	メインページの作成, アプリの終了
-// MainPage_app.cpp	アプリケーションの中断と再開
+// MainPage_appl.cpp	アプリケーションの中断と再開
 // MainPage_arrng.cpp	図形の並び替え
 // MainPage_arrow.cpp	矢じるしの形式と寸法
 // MainPage_disp.cpp	表示デバイスのハンドラー
 // MainPage_event.cpp	ポインターイベントのハンドラー
 // MainPage_file.cpp	ファイルの読み書き
 // MainPage_fill.cpp	塗りつぶし
+// MainPage_find.cpp	文字列の編集, 検索と置換
 // MainPage_font.cpp	書体と文字列の配置
 // MainPage_grid.cpp	方眼
 // MainPage_group.cpp	グループ化とグループの解除
@@ -29,12 +30,12 @@
 // MainPage_kacc.cpp	キーボードアクセラレータのハンドラー
 // MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, バージョン情報
 // MainPage_sample.cpp	見本
-// MainPage_sheet.cpp	用紙の各属性の設定
 // MainPage_scroll.cpp	スクロールバー
 // MainPage_select.cpp	図形の選択
-// MainPage_stbar.cpp	ステータスバー
-// MainPage_stroke.cpp	線枠
+// MainPage_sheet.cpp	用紙の各属性の設定
 // MainPage_smry.cpp	図形の一覧
+// MainPage_status.cpp	ステータスバー
+// MainPage_stroke.cpp	線枠
 // MainPage_text.cpp	文字列の編集と検索/置換
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
 // MainPage_tool.cpp	作図ツール
@@ -50,6 +51,7 @@
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
 	using winrt::Microsoft::UI::Xaml::Controls::RadioMenuFlyoutItem;
 	using winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
@@ -84,7 +86,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::System::VirtualKey;
 	using winrt::Windows::System::VirtualKeyModifiers;
 
-	static const winrt::hstring CF_GPD{ L"graph_paper_data" };	// 図形データのクリップボード書式
+	static const winrt::hstring CBF_GPD{ L"graph_paper_data" };	// 図形データのクリップボード書式
 
 	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
 	constexpr auto FMT_INCH_UNIT = L"%.3f \u33CC";	// インチ単位の書式
@@ -120,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// ステータスバーの状態
 	//-------------------------------
-	enum struct STBAR_FLAG {
+	enum struct STATUS_BAR {
 		GRID = 1,	// 方眼の大きさ
 		SHEET = (2 | 4),	// 用紙の大きさ
 		CURS = (8 | 16),	// カーソルの位置
@@ -206,36 +208,6 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//-------------------------------
-	// メニュー項目
-	//-------------------------------
-
-	// メニュー項目に印をつける.
-	inline void menu_item_is_checked(const bool b, const RadioMenuFlyoutItem& item)
-	{
-		if (item.IsChecked()) {
-			if (!b) {
-				item.IsChecked(false);
-			}
-		}
-		else if (b) {
-			item.IsChecked(true);
-		}
-	}
-
-	// メニュー項目に印をつける.
-	inline void menu_item_is_enabled(const bool b, const MenuFlyoutItem& item)
-	{
-		if (item.IsEnabled()) {
-			if (!b) {
-				item.IsEnabled(false);
-			}
-		}
-		else if (b) {
-			item.IsEnabled(true);
-		}
-	}
-
-	//-------------------------------
 	// メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
@@ -243,7 +215,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring m_file_token_mru;	// 最近使ったファイルのトークン
 
 		// 図形一覧
-		bool m_smry_descend = true;
+		//bool m_smry_descend = true;
 		std::atomic_bool m_smry_atomic{ false };	// 図形一覧の排他制御
 
 		// 文字列の編集, 検索と置換
@@ -258,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
 
 		// ステータスバー
-		STBAR_FLAG m_status_bar = stbar_or(STBAR_FLAG::CURS, STBAR_FLAG::ZOOM);	// ステータスバーの状態
+		STATUS_BAR m_status_bar = status_bar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		// 作図ツール
 		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
@@ -307,7 +279,10 @@ namespace winrt::GraphPaper::implementation
 		Shape* m_sample_shape = nullptr;	// 見本の図形
 		SAMP_TYPE m_sample_type = SAMP_TYPE::NONE;	// 見本の型
 
+		// スレッド
+		bool m_thread_activated = false;
 		bool m_thread_win_visible = false;		// ウィンドウの表示フラグ
+
 		winrt::event_token m_token_suspending;	// アプリケーションの中断ハンドラーのトークン
 		winrt::event_token m_token_resuming;	// アプリケーションの再開ハンドラーのトークン
 		winrt::event_token m_token_entered_background;		// アプリケーションのバックグランド切り替えハンドラーのトークン
@@ -349,13 +324,13 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// アプリケーションがバックグラウンドに移った.
-		void app_entered_background(IInspectable const& sender, EnteredBackgroundEventArgs const& args);
+		void appl_entered_background(IInspectable const& sender, EnteredBackgroundEventArgs const& args);
 		// アプリケーションがバックグラウンドに移った.
-		void app_leaving_background(IInspectable const& sender, LeavingBackgroundEventArgs const& args);
+		void appl_leaving_background(IInspectable const& sender, LeavingBackgroundEventArgs const& args);
 		// アプリケーションが再開された.
-		IAsyncAction app_resuming_async(IInspectable const&, IInspectable const&);
+		IAsyncAction appl_resuming_async(IInspectable const&, IInspectable const&);
 		// アプリケーションが中断された.
-		IAsyncAction app_suspending_async(IInspectable const&, SuspendingEventArgs const& args);
+		IAsyncAction appl_suspending_async(IInspectable const&, SuspendingEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_join.cpp
@@ -401,7 +376,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 線枠メニューの「矢じるしの種類」に印をつける.
-		void arrow_style_is_checked(const ARROW_STYLE h_style);
+		void arrow_style_is_checked(const ARROW_STYLE value);
 		// 線枠メニューの「矢じるしの種類」が選択された.
 		void arrow_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「矢じるしの大きさ」が選択された.
@@ -636,14 +611,6 @@ namespace winrt::GraphPaper::implementation
 		void sheet_draw(void);
 		// 前景色を得る.
 		const D2D1_COLOR_F& sheet_foreground(void) const noexcept;
-		// 値を用紙の右下位置に格納する.
-		void sheet_max(const D2D1_POINT_2F p_max) noexcept;
-		// 用紙の右下位置を得る.
-		const D2D1_POINT_2F sheet_max(void) const noexcept;
-		// 値を用紙の左上位置に格納する.
-		void sheet_min(const D2D1_POINT_2F p_min) noexcept;
-		// 用紙の左上位置を得る.
-		const D2D1_POINT_2F sheet_min(void) const noexcept;
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void sheet_set_slider_header(const float value);
 		// 値をスライダーのヘッダーと、見本の図形に格納する.
@@ -658,8 +625,6 @@ namespace winrt::GraphPaper::implementation
 		void sheet_panle_size(void);
 		// 用紙寸法ダイアログの「用紙の幅」「用紙の高さ」テキストボックスの値が変更された.
 		void sheet_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
-		// 用紙の描画環境を得る
-		SHAPE_DX& sheet_dx(void) noexcept { return m_sheet_dx; }
 		// 用紙とその他の属性を初期化する.
 		void sheet_init(void) noexcept;
 		// 図形の属性を用紙に格納する.
@@ -686,17 +651,17 @@ namespace winrt::GraphPaper::implementation
 
 		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
 		// 値を色の表記に格納する.
-		void color_code(const COLOR_CODE code) noexcept { m_color_code = code; }
+		//void color_code(const COLOR_CODE code) noexcept { m_color_code = code; }
 		// 色の表記を得る.
-		const COLOR_CODE color_code(void) const noexcept { return m_color_code; }
+		//const COLOR_CODE color_code(void) const noexcept { return m_color_code; }
 		// その他メニューの「色の表記」に印をつける.
 		void color_code_is_checked(const COLOR_CODE c_code);
 		// その他メニューの「色の表記」のサブ項目が選択された.
 		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値を長さの単位に格納する.
-		void len_unit(const LEN_UNIT value) noexcept { m_len_unit = value; }
+		//void len_unit(const LEN_UNIT value) noexcept { m_len_unit = value; }
 		// 長さの単位を得る.
-		const LEN_UNIT len_unit(void) const noexcept { return m_len_unit; }
+		//const LEN_UNIT len_unit(void) const noexcept { return m_len_unit; }
 		// その他メニューの「長さの単位」に印をつける.
 		void len_unit_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.
@@ -736,9 +701,9 @@ namespace winrt::GraphPaper::implementation
 		// ポインターが押された図形を得る.
 		Shape* event_shape_prev(void) const noexcept { return m_event_shape_prev; }
 		// 値をポインターが押された図形に格納する.
-		void event_shape_smry(Shape* const smry) noexcept { m_event_shape_smry = smry; }
+		//void event_shape_smry(Shape* const smry) noexcept { m_event_shape_smry = smry; }
 		// ポインターが押された図形を得る.
-		Shape* event_shape_smry(void) const noexcept { return m_event_shape_smry; }
+		//Shape* event_shape_smry(void) const noexcept { return m_event_shape_smry; }
 		// ポインターの押された状態に格納する.
 		void event_state(const EVENT_STATE state) noexcept { m_event_state = state; }
 		// ポインターの押された状態を得る.
@@ -806,38 +771,34 @@ namespace winrt::GraphPaper::implementation
 		bool unselect_all(const bool t_range_only = false);
 
 		//-------------------------------
-		// MainPage_stbar.cpp
+		// MainPage_status.cpp
 		// ステータスバー
 		//-------------------------------
 
-		// 値をステータスバーの状態に格納する.
-		void status_bar(const STBAR_FLAG flag) noexcept { m_status_bar = flag; }
-		// ステータスバーの状態を得る.
-		const STBAR_FLAG status_bar(void) const noexcept { return m_status_bar; }
 		// その他メニューの「ステータスバー」が選択された.
-		void stbar_click(IInspectable const&, RoutedEventArgs const&);
+		void status_bar_click(IInspectable const&, RoutedEventArgs const&);
 		// その他メニューの「ステータスバー」に印をつける.
-		void stbar_is_checked(const STBAR_FLAG a);
+		void status_bar_is_checked(const STATUS_BAR a);
 		// 列挙型を OR 演算する.
-		static STBAR_FLAG stbar_or(const STBAR_FLAG a, const STBAR_FLAG b) noexcept;
+		static STATUS_BAR status_bar_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 		// ステータスバーの状態をデータリーダーから読み込む.
-		void stbar_read(DataReader const& dt_reader);
+		void status_bar_read(DataReader const& dt_reader);
 		// ポインターの位置をステータスバーに格納する.
-		void stbar_set_curs(void);
+		void status_bar_set_curs(void);
 		// 作図ツールをステータスバーに格納する.
-		void stbar_set_draw(void);
+		void status_bar_set_draw(void);
 		// 方眼の大きさをステータスバーに格納する.
-		void stbar_set_grid(void);
+		void status_bar_set_grid(void);
 		// 用紙の大きさをステータスバーに格納する.
-		void stbar_set_sheet(void);
+		void status_bar_set_sheet(void);
 		// 単位をステータスバーに格納する.
-		void stbar_set_unit(void);
+		void status_bar_set_unit(void);
 		// 拡大率をステータスバーに格納する.
-		void stbar_set_zoom(void);
+		void status_bar_set_zoom(void);
 		// ステータスバーの表示を設定する.
-		void stbar_visibility(void);
+		void status_bar_visibility(void);
 		// ステータスバーの状態をデータライターに書き込む.
-		void stbar_write(DataWriter const& dt_writer);
+		void status_bar_write(DataWriter const& dt_writer);
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -906,6 +867,8 @@ namespace winrt::GraphPaper::implementation
 		void smry_unselect_all(void);
 		// 一覧の表示を更新する.
 		void smry_update(void);
+
+		void smry_item_click(IInspectable const&, ItemClickEventArgs const&);
 
 		//-------------------------------
 		// MainPage_find.cpp

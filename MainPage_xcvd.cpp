@@ -49,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 			auto dt_pkg{ DataPackage() };
 			// ストリームをデータパッケージに格納する.
 			dt_pkg.RequestedOperation(DataPackageOperation::Copy);
-			dt_pkg.SetData(CF_GPD, winrt::box_value(ra_stream));
+			dt_pkg.SetData(CBF_GPD, winrt::box_value(ra_stream));
 			if (text.empty() != true) {
 				// 文字列が空でない場合,
 				// 文字列をデータパッケージに格納する.
@@ -125,14 +125,14 @@ namespace winrt::GraphPaper::implementation
 		// を引き起こすので, try ... catch 文が必要.
 		try {
 			// 図形データがクリップボードに含まれているか判定する.
-			if (xcvd_contains({ CF_GPD })) {
+			if (xcvd_contains({ CBF_GPD })) {
 				// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.
-				auto dt_object{ co_await Clipboard::GetContent().GetDataAsync(CF_GPD) };
+				auto dt_object{ co_await Clipboard::GetContent().GetDataAsync(CBF_GPD) };
 				auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
 				auto in_stream{ ra_stream.GetInputStreamAt(0) };
 				auto dt_reader{ DataReader(in_stream) };
-				auto dt_size = static_cast<UINT32>(ra_stream.Size());
-				auto operation{ co_await dt_reader.LoadAsync(dt_size) };
+				auto ra_size = static_cast<UINT32>(ra_stream.Size());
+				auto operation{ co_await dt_reader.LoadAsync(ra_size) };
 				// 図形のためのメモリの確保が別スレッドで行われた場合, D2DERR_WRONG_STATE を引き起こすことがある.
 				// 図形を貼り付ける前に, スレッドをメインページの UI スレッドに変える.
 				auto cd = this->Dispatcher();
@@ -200,7 +200,7 @@ namespace winrt::GraphPaper::implementation
 							static_cast<FLOAT>((sb_horz().Value() + act_w * 0.5) / scale - t->m_diff[0].x * 0.5),
 							static_cast<FLOAT>((sb_vert().Value() + act_h * 0.5) / scale - t->m_diff[0].y * 0.5)
 						};
-						pt_add(s_min, sheet_min(), s_min);
+						pt_add(s_min, m_sheet_min, s_min);
 
 						// 方眼に整列フラグが立っているか判定する.
 						if (m_sheet_main.m_grid_snap) {

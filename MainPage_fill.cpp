@@ -77,22 +77,22 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::FILL_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
-				conv_col_to_str(color_code(), value, buf);
+				conv_col_to_str(m_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
-				conv_col_to_str(color_code(), value, buf);
+				conv_col_to_str(m_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
-				conv_col_to_str(color_code(), value, buf);
+				conv_col_to_str(m_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
-				conv_col_to_str(color_code(), value, buf);
+				conv_col_to_str(m_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
 			}
 		}

@@ -1,5 +1,5 @@
 //-------------------------------
-// MainPage_app.cpp
+// MainPage_appl.cpp
 // アプリケーションの中断と再開
 //-------------------------------
 #include "pch.h"
@@ -12,17 +12,17 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 
 	// アプリケーションデータを保存するフォルダーを得る.
-	static auto app_cache_folder(void);
+	static auto appl_cache_folder(void);
 
 	// アプリケーションデータを保存するフォルダーを得る.
-	static auto app_cache_folder(void)
+	static auto appl_cache_folder(void)
 	{
 		using winrt::Windows::Storage::ApplicationData;
 		return ApplicationData::Current().LocalCacheFolder();
 	}
 
 	// アプリケーションがバックグラウンドに移った.
-	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
+	void MainPage::appl_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
 		m_dx_mutex.lock();
 		m_sheet_dx.Trim();
@@ -31,20 +31,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// アプリケーションがバックグラウンドから戻った.
-	void MainPage::app_leaving_background(IInspectable const&/*sender*/, LeavingBackgroundEventArgs const&/*args*/)
+	void MainPage::appl_leaving_background(IInspectable const&/*sender*/, LeavingBackgroundEventArgs const&/*args*/)
 	{
 	}
 
 	// アプリケーションの再開の処理を行う.
 	// アプリ起動のときは呼ばれない.
-	IAsyncAction MainPage::app_resuming_async(IInspectable const&, IInspectable const&)
+	IAsyncAction MainPage::appl_resuming_async(IInspectable const&, IInspectable const&)
 	{
 		winrt::apartment_context context;
 
 		ShapeText::set_available_fonts();
 
 		auto hres = E_FAIL;
-		auto item{ co_await app_cache_folder().TryGetItemAsync(FILE_NAME) };
+		auto item{ co_await appl_cache_folder().TryGetItemAsync(FILE_NAME) };
 		if (item != nullptr) {
 			auto s_file = item.try_as<StorageFile>();
 			if (s_file != nullptr) {
@@ -70,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 	// アプリケーションの中断の処理を行う.
 	// args	中断ハンドラーに渡された引数.
 	// 戻り値	なし
-	IAsyncAction MainPage::app_suspending_async(IInspectable const&, SuspendingEventArgs const& args)
+	IAsyncAction MainPage::appl_suspending_async(IInspectable const&, SuspendingEventArgs const& args)
 	{
 		using concurrency::cancellation_token_source;
 		using winrt::Windows::Foundation::TypedEventHandler;
@@ -121,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			try {
 				// キャンセルでない場合,
-				auto s_file{ co_await app_cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
+				auto s_file{ co_await appl_cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 				if (s_file != nullptr) {
 					hres = co_await file_write_gpf_async(s_file, true, false);
 					s_file = nullptr;

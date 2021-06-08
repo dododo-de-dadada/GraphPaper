@@ -219,7 +219,7 @@ namespace winrt::GraphPaper::implementation
 
 		mfi_xcvd_cut().IsEnabled(exists_selected);
 		mfi_xcvd_copy().IsEnabled(exists_selected);
-		mfi_xcvd_paste().IsEnabled(xcvd_contains({ CF_GPD, StandardDataFormats::Text() }));
+		mfi_xcvd_paste().IsEnabled(xcvd_contains({ CBF_GPD, StandardDataFormats::Text() }));
 		mfi_xcvd_delete().IsEnabled(exists_selected);
 		mfi_select_all().IsEnabled(exists_unselected);
 		mfi_group().IsEnabled(exists_selected_2);
@@ -301,25 +301,15 @@ namespace winrt::GraphPaper::implementation
 		// お約束.
 		InitializeComponent();
 
-		// コンテキストメニューを静的リソースから読み込む.
-		// ポップアップは静的なリソースとして定義して、複数の要素で使用することができる.
-		{
-			m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke")));
-			m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill")));
-			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_font")));
-			m_menu_sheet = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet")));
-			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup")));
-		}
-
 		// アプリケーションの中断・継続などのイベントハンドラーを設定する.
 		{
 			using winrt::Windows::UI::Xaml::Application;
 
 			auto const& app{ Application::Current() };
-			m_token_suspending = app.Suspending({ this, &MainPage::app_suspending_async });
-			m_token_resuming = app.Resuming({ this, &MainPage::app_resuming_async });
-			m_token_entered_background = app.EnteredBackground({ this, &MainPage::app_entered_background });
-			m_token_leaving_background = app.LeavingBackground({ this, &MainPage::app_leaving_background });
+			m_token_suspending = app.Suspending({ this, &MainPage::appl_suspending_async });
+			m_token_resuming = app.Resuming({ this, &MainPage::appl_resuming_async });
+			m_token_entered_background = app.EnteredBackground({ this, &MainPage::appl_entered_background });
+			m_token_leaving_background = app.LeavingBackground({ this, &MainPage::appl_leaving_background });
 		}
 
 		// ウィンドウの表示が変わったときのイベントハンドラーを設定する.
@@ -343,16 +333,6 @@ namespace winrt::GraphPaper::implementation
 			m_token_close_requested = SystemNavigationManagerPreview::GetForCurrentView().CloseRequested({ this, &MainPage::navi_close_requested });
 		}
 
-		// クリップボードに受け入れ可能なフォーマットを設定する.
-		{
-			using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
-			using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
-
-			auto const& dp_view = Clipboard::GetContent();
-			dp_view.SetAcceptedFormatId(CF_GPD);
-			dp_view.SetAcceptedFormatId(StandardDataFormats::Text());
-		}
-
 		// D2D/DWRITE ファクトリを図形クラスに, 
 		// 図形リストと用紙をアンドゥ操作に格納する.
 		{
@@ -369,6 +349,16 @@ namespace winrt::GraphPaper::implementation
 			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_event_click_dist = 6.0 * raw_dpi / log_dpi;
+		}
+
+		// コンテキストメニューを静的リソースから読み込む.
+		// ポップアップは静的なリソースとして定義して、複数の要素で使用することができる.
+		{
+			m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke")));
+			m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill")));
+			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_font")));
+			m_menu_sheet = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet")));
+			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup")));
 		}
 
 		auto _{ new_click_async(nullptr, nullptr) };
@@ -475,12 +465,15 @@ namespace winrt::GraphPaper::implementation
 		if (co_await pref_load_async() != S_OK) {
 			// 読み込みに失敗した場合,
 			sheet_init();
+			m_len_unit = LEN_UNIT::PIXEL;
+			m_color_code = COLOR_CODE::DEC;
+			m_status_bar = status_bar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
 		}
 
 		// 用紙の左上位置と右下位置を初期化する.
 		{
-			sheet_min(D2D1_POINT_2F{ 0.0F, 0.0F });
-			sheet_max(D2D1_POINT_2F{ m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height });
+			m_sheet_min = D2D1_POINT_2F{ 0.0F, 0.0F };
+			m_sheet_max = D2D1_POINT_2F{ m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height };
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();

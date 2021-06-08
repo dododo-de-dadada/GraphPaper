@@ -16,12 +16,12 @@ namespace winrt::GraphPaper::implementation
 	// p_align	’i—Ž‚Ì‚»‚ë‚¦
 	void MainPage::text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT value)
 	{
-		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR, rmfi_text_align_top());
-		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR, rmfi_text_align_top_2());
-		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR, rmfi_text_align_bot());
-		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR, rmfi_text_align_bot_2());
-		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER, rmfi_text_align_mid());
-		menu_item_is_checked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER, rmfi_text_align_mid_2());
+		rmfi_text_align_top().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_text_align_top_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_text_align_bot().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_bot_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_mid().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		rmfi_text_align_mid_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR>(p_align, rmfi_text_align_top());
 		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR>(p_align, rmfi_text_align_top_2());
 		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR>(p_align, rmfi_text_align_bot());
@@ -83,14 +83,14 @@ namespace winrt::GraphPaper::implementation
 	// t_align	•¶Žš—ñ‚Ì‚»‚ë‚¦
 	void MainPage::text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT value)
 	{
-		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING, rmfi_text_align_left());
-		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING, rmfi_text_align_left_2());
-		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING, rmfi_text_align_right());
-		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING, rmfi_text_align_right_2());
-		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER, rmfi_text_align_center());
-		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER, rmfi_text_align_center_2());
-		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED, rmfi_text_align_just());
-		menu_item_is_checked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED, rmfi_text_align_just_2());
+		rmfi_text_align_left().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+		rmfi_text_align_left_2().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+		rmfi_text_align_right().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
+		rmfi_text_align_right_2().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
+		rmfi_text_align_center().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		rmfi_text_align_center_2().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		rmfi_text_align_just().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		rmfi_text_align_just_2().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING>(t_align, rmfi_text_align_left());
 		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING>(t_align, rmfi_text_align_left_2());
 		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING>(t_align, rmfi_text_align_right());
@@ -246,14 +246,14 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			constexpr wchar_t* HEADER[] = { L"str_text_mar_horzorz", L"str_text_mar_vertert" };
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE_H) {
 			constexpr wchar_t HEADER[] = L"str_line_sp";
 			if (value > FLT_MIN) {
 				wchar_t buf[32];
-				conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, dpi, g_len, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, dpi, g_len, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(HEADER) + L": " + buf;
 			}
 			else {

@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.m_sheet_scale = scale;
 			sheet_panle_size();
 			sheet_draw();
-			stbar_set_zoom();
+			status_bar_set_zoom();
 		}
 	}
 	/*
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 				m_sheet_main.m_sheet_scale = ZOOM_LEVEL[i + o];
 				sheet_panle_size();
 				sheet_draw();
-				stbar_set_zoom();
+				status_bar_set_zoom();
 				break;
 			}
 		}
@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 				m_sheet_main.m_sheet_scale = ZOOM_LEVEL[i + o];
 				sheet_panle_size();
 				sheet_draw();
-				stbar_set_zoom();
+				status_bar_set_zoom();
 				break;
 			}
 		}
@@ -99,7 +99,7 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_main.m_sheet_scale = 1.0;
 		sheet_panle_size();
 		sheet_draw();
-		stbar_set_zoom();
+		status_bar_set_zoom();
 	}
 	*/
 

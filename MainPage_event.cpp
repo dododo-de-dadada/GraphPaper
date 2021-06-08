@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 		// スワップチェーンパネル上でのポインターの位置を得て, 
 		// 用紙座標系に変換し, ポインターの現在位置に格納する.
 		D2D1_POINT_2F p_offs;
-		pt_add(sheet_min(), sb_horz().Value(), sb_vert().Value(), p_offs);
+		pt_add(m_sheet_min, sb_horz().Value(), sb_vert().Value(), p_offs);
 		pt_mul(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_sheet_main.m_sheet_scale, p_offs, m_event_pos_curr);
 	}
 
@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		event_pos_args(args);
 		event_curs_style();
-		stbar_set_curs();
+		status_bar_set_curs();
 	}
 
 	// ポインターが用紙のスワップチェーンパネルから出た.
@@ -464,7 +464,7 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		event_pos_args(args);
-		stbar_set_curs();
+		status_bar_set_curs();
 		// ポインターの押された状態が, 初期状態か判定する.
 		if (m_event_state == EVENT_STATE::BEGIN) {
 			event_curs_style();
@@ -757,14 +757,14 @@ namespace winrt::GraphPaper::implementation
 			}
 			sheet_panle_size();
 			sheet_draw();
-			stbar_set_zoom();
+			status_bar_set_zoom();
 		}
 		else if (args.KeyModifiers() == VirtualKeyModifiers::Shift) {
 			// 横スクロール.
 			const int32_t delta = args.GetCurrentPoint(scp_sheet_panel()).Properties().MouseWheelDelta();
 			if (event_scroll_by_wheel_delta(sb_horz(), delta, m_sheet_main.m_sheet_scale)) {
 				sheet_draw();
-				stbar_set_curs();
+				status_bar_set_curs();
 			}
 		}
 		else if (args.KeyModifiers() == VirtualKeyModifiers::None) {
@@ -772,7 +772,7 @@ namespace winrt::GraphPaper::implementation
 			const int32_t delta = args.GetCurrentPoint(scp_sheet_panel()).Properties().MouseWheelDelta();
 			if (event_scroll_by_wheel_delta(sb_vert(), delta, m_sheet_main.m_sheet_scale)) {
 				sheet_draw();
-				stbar_set_curs();
+				status_bar_set_curs();
 			}
 		}
 	}

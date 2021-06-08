@@ -5,6 +5,9 @@
 #include "pch.h"
 #include "MainPage.h"
 
+// まず, thread_visibility_changed が呼ばれ, つぎに thread_activated
+
+
 using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
@@ -16,11 +19,29 @@ namespace winrt::GraphPaper::implementation
 
 		// 背後にあるウィンドウが直接クリックされた場合のみ PointerActivated,
 		// それ以外の場合はすべて CodeActivated になる.
-		const auto as = args.WindowActivationState();
-		if (as == CoreWindowActivationState::PointerActivated
-			|| as == CoreWindowActivationState::CodeActivated) {
+		const auto a_state = args.WindowActivationState();
+		if (a_state == CoreWindowActivationState::PointerActivated) {
 		}
-		else if (as == CoreWindowActivationState::Deactivated) {
+		else if (a_state == CoreWindowActivationState::CodeActivated) {
+			if (!m_thread_activated) {
+				m_thread_activated = true;
+
+				// クリップボードに受け入れ可能なフォーマットを設定する.
+				// クリップボードは, バックグラウンドではからはアクセスできない.
+				// デバッグなしで実行したとき, MainPage のコンストラクタで Clipboard::GetContent を呼ぶと, 
+				// アプリケーションの起動に失敗する.
+				using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
+				using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
+
+				auto const& dp_view = Clipboard::GetContent();
+				dp_view.SetAcceptedFormatId(CBF_GPD);
+				dp_view.SetAcceptedFormatId(StandardDataFormats::Text());
+				if (dp_view.Contains(StandardDataFormats::Text())) {
+					mfi_xcvd_paste().IsEnabled(true);
+				}
+			}
+		}
+		else if (a_state == CoreWindowActivationState::Deactivated) {
 		}
 	}
 

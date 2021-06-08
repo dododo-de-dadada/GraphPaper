@@ -120,17 +120,9 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (m_smry_descend) {
-				lv_smry().Items().InsertAt(0, winrt::make<Summary>(s, Resources()));
-				if (s->is_selected()) {
-					smry_select_item(lv_smry(), 0);
-				}
-			}
-			else {
-				lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
-				if (s->is_selected()) {
-					smry_select_item(lv_smry(), i);
-				}
+			lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
+			if (s->is_selected()) {
+				smry_select_item(lv_smry(), i);
 			}
 			i++;
 		}
@@ -151,14 +143,19 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif	
+		// 非選択された項目があれば, 選択をはずす。
 		for (uint32_t i = 0; i < e.RemovedItems().Size(); i++) {
 			IInspectable item[1];
 			e.RemovedItems().GetMany(i, item);
 			auto s = smry_shape(item[0]);
 			if (s != nullptr && s->is_selected()) {
 				undo_push_select(s);
+				//if (m_event_shape_smry == s) {
+				//	m_event_shape_smry = nullptr;
+				//}
 			}
 		}
+		// 選択された項目があれば, 選択をつける.
 		auto t = static_cast<Shape*>(nullptr);
 		for (uint32_t i = 0; i < e.AddedItems().Size(); i++) {
 			IInspectable item[1];
@@ -166,6 +163,7 @@ namespace winrt::GraphPaper::implementation
 			auto const s = smry_shape(item[0]);
 			if (s != nullptr && s->is_selected() != true) {
 				undo_push_select(t = s);
+				m_event_shape_smry = s;
 			}
 		}
 		if (t != static_cast<const Shape*>(nullptr)) {
@@ -201,17 +199,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形一覧の排他制御が true か判定する.
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			m_smry_atomic.store(false, std::memory_order_release);
-			if (m_smry_descend) {
-				lv_smry().Items().InsertAt(0, winrt::make<Summary>(s, Resources()));
-				if (s->is_selected()) {
-					smry_select_item(lv_smry(), 0);
-				}
-			}
-			else {
-				lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
-				if (s->is_selected()) {
-					smry_select_item(lv_smry(), lv_smry().Items().Size() - 1);
-				}
+			lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
+			if (s->is_selected()) {
+				smry_select_item(lv_smry(), lv_smry().Items().Size() - 1);
 			}
 			m_smry_atomic.store(true, std::memory_order_release);
 		}
@@ -256,24 +246,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			m_smry_atomic.store(false, std::memory_order_release);
-			if (m_smry_descend) {
-				const uint32_t j = lv_smry().Items().Size() - i;
-				lv_smry().Items().InsertAt(j, winrt::make<Summary>(s, Resources()));
-				if (s->is_selected()) {
-					smry_select_item(lv_smry(), j);
-				}
-				else {
-					smry_unselect_item(lv_smry(), j);
-				}
+			lv_smry().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
+			if (s->is_selected()) {
+				smry_select_item(lv_smry(), i);
 			}
 			else {
-				lv_smry().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
-				if (s->is_selected()) {
-					smry_select_item(lv_smry(), i);
-				}
-				else {
-					smry_unselect_item(lv_smry(), i);
-				}
+				smry_unselect_item(lv_smry(), i);
 			}
 			m_smry_atomic.store(true, std::memory_order_release);
 		}
@@ -292,26 +270,15 @@ namespace winrt::GraphPaper::implementation
 				if (v->is_insert()) {
 					if (v->shape_at() != nullptr) {
 						auto i = smry_distance(lv_smry().Items(), v->shape_at());
-						if (m_smry_descend) {
-							i++;
-						}
 						lv_smry().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
 						if (s->is_selected()) {
 							smry_select_item(lv_smry(), i);
 						}
 					}
 					else {
-						if (m_smry_descend) {
-							lv_smry().Items().InsertAt(0, winrt::make<Summary>(s, Resources()));
-							if (s->is_selected()) {
-								smry_select_item(lv_smry(), 0);
-							}
-						}
-						else {
-							lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
-							const auto i = lv_smry().Items().Size() - 1;
-							smry_select_item(lv_smry(), i);
-						}
+						lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
+						const auto i = lv_smry().Items().Size() - 1;
+						smry_select_item(lv_smry(), i);
 					}
 				}
 				else {
@@ -393,16 +360,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 一覧の項目を選択する.
-	//void MainPage::smry_select(uint32_t i)
-	//{
-	//	if (m_smry_atomic.load(std::memory_order_acquire)) {
-	//		m_smry_atomic.store(false, std::memory_order_release);
-	//		smry_select_item(lv_smry(), i);
-	//		m_smry_atomic.store(true, std::memory_order_release);
-	//	}
-	//}
-
 	// 一覧の項目を全て選択する.
 	void MainPage::smry_select_all(void)
 	{
@@ -418,12 +375,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			m_smry_atomic.store(false, std::memory_order_release);
-			if (m_smry_descend) {
-				smry_select_item(lv_smry(), lv_smry().Items().Size() - 1);
-			}
-			else {
-				smry_select_item(lv_smry(), 0);
-			}
+			smry_select_item(lv_smry(), 0);
 			m_smry_atomic.store(true, std::memory_order_release);
 		}
 	}
@@ -433,12 +385,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			m_smry_atomic.store(false, std::memory_order_release);
-			if (m_smry_descend) {
-				smry_select_item(lv_smry(), 0);
-			}
-			else {
-				smry_select_item(lv_smry(), lv_smry().Items().Size() - 1);
-			}
+			smry_select_item(lv_smry(), lv_smry().Items().Size() - 1);
 			m_smry_atomic.store(true, std::memory_order_release);
 		}
 	}
@@ -452,16 +399,6 @@ namespace winrt::GraphPaper::implementation
 			m_smry_atomic.store(true, std::memory_order_release);
 		}
 	}
-
-	// 一覧の項目を選択解除する.
-	//void MainPage::smry_unselect(uint32_t i)
-	//{
-	//	if (m_smry_atomic.load(std::memory_order_acquire)) {
-	//		m_smry_atomic.store(false, std::memory_order_release);
-	//		smry_unselect_item(lv_smry(), i);
-	//		m_smry_atomic.store(true, std::memory_order_release);
-	//	}
-	//}
 
 	// 一覧の項目を全て選択解除する.
 	void MainPage::smry_unselect_all(void)
@@ -483,4 +420,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	void MainPage::smry_item_click(IInspectable const&, ItemClickEventArgs const&)
+	{
+
+	}
 }

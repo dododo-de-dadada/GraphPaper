@@ -36,7 +36,7 @@ IgnorableNamespaces="uap mp rescap"
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
-    </Application>
+		</Application>
   </Applications>
   <Capabilities>
     <Capability Name="internetClient" />

@@ -221,20 +221,20 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			wchar_t buf[32];
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			constexpr wchar_t* R[]{ L"str_col_r", L"str_col_g", L"str_col_b", L"str_opacity" };
 			wchar_t buf[32];
-			conv_col_to_str(color_code(), value, buf);
+			conv_col_to_str(m_color_code, value, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
 		}
 		if constexpr (S == 0) {
@@ -313,16 +313,19 @@ namespace winrt::GraphPaper::implementation
 	// d_style	îjê¸ÇÃéÌï 
 	void MainPage::stroke_dash_style_is_checked(const D2D1_DASH_STYLE d_style)
 	{
-		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, rmfi_stroke_dash_style_solid());
-		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, rmfi_stroke_dash_style_solid_2());
-		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH, rmfi_stroke_dash_style_dash());
-		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH, rmfi_stroke_dash_style_dash_2());
-		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT, rmfi_stroke_dash_style_dash_dot());
-		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT, rmfi_stroke_dash_style_dash_dot_2());
-		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT, rmfi_stroke_dash_style_dash_dot_dot());
-		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT, rmfi_stroke_dash_style_dash_dot_dot_2());
-		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT, rmfi_stroke_dash_style_dot());
-		menu_item_is_checked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT, rmfi_stroke_dash_style_dot_2());
+		rmfi_stroke_dash_style_solid().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		rmfi_stroke_dash_style_solid_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		rmfi_stroke_dash_style_dash().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
+		rmfi_stroke_dash_style_dash_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
+		rmfi_stroke_dash_style_dash_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
+		rmfi_stroke_dash_style_dash_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
+		rmfi_stroke_dash_style_dash_dot_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
+		rmfi_stroke_dash_style_dash_dot_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
+		rmfi_stroke_dash_style_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
+		rmfi_stroke_dash_style_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
+
+		mfi_stroke_dash_patt().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		mfi_stroke_dash_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID>(d_style, rmfi_stroke_dash_style_solid());
 		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID>(d_style, rmfi_stroke_dash_style_solid_2());
 		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH>(d_style, rmfi_stroke_dash_style_dash());
@@ -333,8 +336,6 @@ namespace winrt::GraphPaper::implementation
 		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT>(d_style, rmfi_stroke_dash_style_dash_dot_dot_2());
 		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT>(d_style, rmfi_stroke_dash_style_dot());
 		//radio_menu_item_set_value<D2D1_DASH_STYLE, D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT>(d_style, rmfi_stroke_dash_style_dot_2());
-		menu_item_is_enabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, mfi_stroke_dash_patt());
-		menu_item_is_enabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, mfi_stroke_dash_patt_2());
 	}
 
 }

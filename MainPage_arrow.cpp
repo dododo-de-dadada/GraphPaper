@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(len_unit(), value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 			text = text + buf;
 		}
 		if constexpr (S == 0) {
@@ -157,17 +157,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠メニューの「矢じるしの種類」に印をつける.
 	// a_style	矢じるしの形式
-	void MainPage::arrow_style_is_checked(const ARROW_STYLE a_style)
+	void MainPage::arrow_style_is_checked(const ARROW_STYLE value)
 	{
-		rmfi_arrow_style_none().IsChecked(a_style == ARROW_STYLE::NONE);
-		rmfi_arrow_style_opened().IsChecked(a_style == ARROW_STYLE::OPENED);
-		rmfi_arrow_style_filled().IsChecked(a_style == ARROW_STYLE::FILLED);
-		mfi_arrow_size().IsEnabled(a_style != ARROW_STYLE::NONE);
-
-		rmfi_arrow_style_none_2().IsChecked(a_style == ARROW_STYLE::NONE);
-		rmfi_arrow_style_opened_2().IsChecked(a_style == ARROW_STYLE::OPENED);
-		rmfi_arrow_style_filled_2().IsChecked(a_style == ARROW_STYLE::FILLED);
-		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
+		rmfi_arrow_style_none().IsChecked(value == ARROW_STYLE::NONE);
+		rmfi_arrow_style_none_2().IsChecked(value == ARROW_STYLE::NONE);
+		rmfi_arrow_style_opened().IsChecked(value == ARROW_STYLE::OPENED);
+		rmfi_arrow_style_opened_2().IsChecked(value == ARROW_STYLE::OPENED);
+		rmfi_arrow_style_filled().IsChecked(value == ARROW_STYLE::FILLED);
+		rmfi_arrow_style_filled_2().IsChecked(value == ARROW_STYLE::FILLED);
+		mfi_arrow_size().IsEnabled(value != ARROW_STYLE::NONE);
+		mfi_arrow_size_2().IsEnabled(value != ARROW_STYLE::NONE);
 	}
 
 }

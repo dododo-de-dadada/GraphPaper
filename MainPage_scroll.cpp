@@ -43,13 +43,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::scroll_set(const double aw, const double ah)
 	{
 		constexpr double SB_SIZE = 16.0;
-		const double ps = m_sheet_main.m_sheet_scale;	// 用紙の表示倍率
-		const double vw = aw / ps;	// 見えている部分の幅
-		const double vh = ah / ps;	// 見えている部分の高さ
-		const auto p_min = sheet_min();
-		const auto p_max = sheet_max();
-		const auto mw = static_cast<double>(p_max.x) - static_cast<double>(p_min.x) - vw;
-		const auto mh = static_cast<double>(p_max.y) - static_cast<double>(p_min.y) - vh;
+		const double ss = m_sheet_main.m_sheet_scale;	// 用紙の表示倍率
+		const double vw = aw / ss;	// 見えている部分の幅
+		const double vh = ah / ss;	// 見えている部分の高さ
+		const auto s_min = m_sheet_min;
+		const auto s_max = m_sheet_max;
+		const auto mw = static_cast<double>(s_max.x) - static_cast<double>(s_min.x) - vw;
+		const auto mh = static_cast<double>(s_max.y) - static_cast<double>(s_min.y) - vh;
 		const auto wgt0 = mw > 0.0;
 		const auto hgt0 = mh > 0.0;
 		sb_horz().ViewportSize(vw);
@@ -99,8 +99,8 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::scroll_to(const Shape* s)
 	{
 		// スクロールビューアのビューポートの座標を, 用紙座標で求める.
-		const double ox = sheet_min().x;	// 原点 x
-		const double oy = sheet_min().y;	// 原点 y
+		const double ox = m_sheet_min.x;	// 原点 x
+		const double oy = m_sheet_min.y;	// 原点 y
 		const double ho = sb_horz().Value();	// 横のスクロール値
 		const double vo = sb_vert().Value();	// 縦のスクロール値
 		const double vw = sb_horz().ViewportSize();	// 用紙の幅
