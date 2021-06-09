@@ -374,7 +374,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_fill_color.Text" xml:space="preserve">
-    <value>Color...</value>
+    <value>Fill Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_find_text.Text" xml:space="preserve">
@@ -466,7 +466,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_stroke_color.Text" xml:space="preserve">
-    <value>Color...</value>
+    <value>Stroke Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_stroke_dash_patt.Text" xml:space="preserve">
@@ -505,15 +505,15 @@
     <value>Ungroup</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_zoom_in.Text" xml:space="preserve">
+  <data name="mfi_sheet_zoom_in.Text" xml:space="preserve">
     <value>In</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_zoom_out.Text" xml:space="preserve">
+  <data name="mfi_sheet_zoom_out.Text" xml:space="preserve">
     <value>Out</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_zoom_100.Text" xml:space="preserve">
+  <data name="mfi_sheet_zoom_100.Text" xml:space="preserve">
     <value>100%</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -557,7 +557,7 @@
     <value>Line Space</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_zoom.Text" xml:space="preserve">
+  <data name="mfsi_sheet_zoom.Text" xml:space="preserve">
     <value>Zoom</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -850,27 +850,27 @@
     <value>Snap to Grid</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_stbar_curs.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_curs.Text" xml:space="preserve">
     <value>Cursor Position</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_grid.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_grid.Text" xml:space="preserve">
     <value>Grid Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_sheet.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_sheet.Text" xml:space="preserve">
     <value>Sheet Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_draw.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_draw.Text" xml:space="preserve">
     <value>Draw Tool</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_unit.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_unit.Text" xml:space="preserve">
     <value>Unit Name</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_stbar_zoom.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_zoom.Text" xml:space="preserve">
     <value>Zoom</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>

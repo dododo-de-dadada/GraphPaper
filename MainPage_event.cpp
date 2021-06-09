@@ -117,6 +117,9 @@ namespace winrt::GraphPaper::implementation
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeGroup)) {
 			scp_sheet_panel().ContextFlyout(m_menu_ungroup);
 		}
+		else if (typeid(*m_event_shape_pressed) == typeid(ShapeRuler)) {
+			scp_sheet_panel().ContextFlyout(m_menu_ruler);
+		}
 		else {
 			// 押された図形の属性値を用紙に格納する.
 			m_sheet_main.set_attr_to(m_event_shape_pressed);
@@ -612,10 +615,12 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_event_anch_pressed = slist_hit_test(m_list_shapes, m_event_pos_pressed, m_event_shape_pressed);
+		// 押された図形の部位が, 外側でないか判定する.
 		if (m_event_anch_pressed != ANCH_TYPE::ANCH_SHEET) {
-			if (m_event_state == EVENT_STATE::PRESS_LBTN
-				|| (m_event_state == EVENT_STATE::PRESS_RBTN && m_event_shape_pressed->is_selected() != true)) {
-				m_event_shape_smry = m_event_shape_pressed;
+			// 状態が左ボタンが押された状態, または右ボタンが押されていてかつ押された図形が選択されてないか判定す.
+			if (m_event_state == EVENT_STATE::PRESS_LBTN ||
+				(m_event_state == EVENT_STATE::PRESS_RBTN && !m_event_shape_pressed->is_selected())) {
+				//m_event_shape_smry = m_event_shape_pressed;
 				select_shape(m_event_shape_pressed, args.KeyModifiers());
 			}
 			return;
@@ -652,7 +657,7 @@ namespace winrt::GraphPaper::implementation
 		auto const& panel = sender.as<SwapChainPanel>();
 		panel.ReleasePointerCaptures();
 		event_pos_args(args);
-		// 左ボタンが押された状態か判定する.
+		// 状態が, 左ボタンが押された状態か判定する.
 		if (m_event_state == EVENT_STATE::PRESS_LBTN) {
 			// ボタンが離れた時刻と押された時刻の差が, クリックの判定時間以下か判定する.
 			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
@@ -663,44 +668,42 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 		}
-		// クリック後に左ボタンが押した状態か判定する.
+		// 状態が, クリック後に左ボタンが押した状態か判定する.
 		else if (m_event_state == EVENT_STATE::CLICK_LBTN) {
 			// ボタンが離された時刻と押された時刻の差分を得る.
 			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
-			// 差分がクリックの判定時間以下か判定する.
-			if (t_stamp - m_event_time_pressed <= m_event_click_time) {
-				// 押された図形が文字列図形か判定する. 
-				if (m_event_shape_pressed != nullptr && typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
-					edit_text_async(static_cast<ShapeText*>(m_event_shape_pressed));
-				}
+			// 差分がクリックの判定時間以下, かつ押された図形が文字列図形か判定する.
+			if (t_stamp - m_event_time_pressed <= m_event_click_time &&
+				m_event_shape_pressed != nullptr && typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
+				edit_text_async(static_cast<ShapeText*>(m_event_shape_pressed));
 			}
 		}
-		// 状態が図形を移動している状態か判定する.
+		// 状態が, 図形を移動している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_MOVE) {
 			event_finish_moving();
 		}
-		// 状態が図形を変形している状態か判定する.
+		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_FORM) {
 			event_finish_forming();
 		}
-		// 状態が範囲選択している状態か判定する.
+		// 状態が, 範囲選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			// 作図ツールが選択ツールか判定する.
 			if (tool_draw() == DRAW_TOOL::SELECT) {
 				event_finish_selecting_area(args.KeyModifiers());
 			}
 			else {
+				// 選択以外の作図ツールが選択されているならば,
+				// 方眼にそろえるか, かつシフトキーが押されていないか判定する.
 				bool g_snap;
 				m_sheet_main.get_grid_snap(g_snap);
-				if (g_snap) {
-					// 方眼に整列の場合, 始点と終点を方眼の大きさで丸める
-					if (args.KeyModifiers() != VirtualKeyModifiers::Shift) {
-						float g_base;
-						m_sheet_main.get_grid_base(g_base);
-						const double g_len = max(g_base + 1.0, 1.0);
-						pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
-						pt_round(m_event_pos_curr, g_len, m_event_pos_curr);
-					}
+				if (g_snap && args.KeyModifiers() != VirtualKeyModifiers::Shift) {
+					// 始点と終点を方眼の大きさで丸める.
+					float g_base;
+					m_sheet_main.get_grid_base(g_base);
+					const double g_len = max(g_base + 1.0, 1.0);
+					pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
+					pt_round(m_event_pos_curr, g_len, m_event_pos_curr);
 				}
 				// ポインターの現在の位置と押された位置の差分を求める.
 				D2D1_POINT_2F diff;
@@ -714,12 +717,12 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
+		// 状態が, 右ボタンを押した状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_RBTN) {
-			// 状態が右ボタンを押した状態の場合
 			event_show_context_menu();
 		}
+		// 状態が, 初期状態か判定する.
 		else if (m_event_state == EVENT_STATE::BEGIN) {
-			// 状態が初期状態の場合,
 			// 本来は初期状態でこのハンドラーが呼び出されるはずはないが,
 			// コンテンツダイアログを終了したとき呼び出されてしまう.
 			return;
@@ -746,19 +749,9 @@ namespace winrt::GraphPaper::implementation
 		// コントロールキーが押されてるか判定する.
 		if (args.KeyModifiers() == VirtualKeyModifiers::Control) {
 			const int32_t delta = args.GetCurrentPoint(scp_sheet_panel()).Properties().MouseWheelDelta();
-			if (delta > 0 && m_sheet_main.m_sheet_scale < 4.f / 1.1f - FLT_MIN) {
-				m_sheet_main.m_sheet_scale *= 1.1f;
-			}
-			else if (delta < 0 && m_sheet_main.m_sheet_scale > 0.25f * 1.1f + FLT_MIN) {
-				m_sheet_main.m_sheet_scale /= 1.1f;
-			}
-			else {
-				return;
-			}
-			sheet_panle_size();
-			sheet_draw();
-			status_bar_set_zoom();
+			sheet_zoom_delta(delta);
 		}
+		// シフトキーが押されてるか判定する.
 		else if (args.KeyModifiers() == VirtualKeyModifiers::Shift) {
 			// 横スクロール.
 			const int32_t delta = args.GetCurrentPoint(scp_sheet_panel()).Properties().MouseWheelDelta();
@@ -767,6 +760,7 @@ namespace winrt::GraphPaper::implementation
 				status_bar_set_curs();
 			}
 		}
+		// 何も押されてないか判定する.
 		else if (args.KeyModifiers() == VirtualKeyModifiers::None) {
 			// 縦スクロール.
 			const int32_t delta = args.GetCurrentPoint(scp_sheet_panel()).Properties().MouseWheelDelta();

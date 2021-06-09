@@ -245,7 +245,7 @@ namespace winrt::GraphPaper::implementation
 	//void MainPage::kacc_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	//{
 	// if (m_sheet_main.m_sheet_scale != 1.0) {
-	// 	mfi_zoom_100_click(nullptr, nullptr);
+	// 	mfi_sheet_zoom_100_click(nullptr, nullptr);
 	// }
 	//}
 

@@ -109,6 +109,7 @@
     <ClInclude Include="MainPage.h">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="shape.h" />
     <ClInclude Include="shape_dx.h" />
     <ClInclude Include="Summary.h" />
@@ -218,6 +219,9 @@
     <PRIResource Include="Strings\ja-JP\Resources.resw">
       <SubType>Designer</SubType>
     </PRIResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GraphPaper.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

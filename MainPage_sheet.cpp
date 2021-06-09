@@ -618,4 +618,69 @@ namespace winrt::GraphPaper::implementation
 		cd_sheet_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < sheet_size_max());
 	}
 
+	// 用紙メニューの「表示倍率」が選択された.
+	void MainPage::sheet_zoom_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		float scale;
+		if (sender == mfi_sheet_zoom_100() ||
+			sender == mfi_sheet_zoom_100_2()) {
+			scale = 1.0f;
+		}
+		else if (sender == mfi_sheet_zoom_150() ||
+			sender == mfi_sheet_zoom_150_2()) {
+			scale = 1.5f;
+		}
+		else if (sender == mfi_sheet_zoom_200() ||
+			sender == mfi_sheet_zoom_200_2()) {
+			scale = 2.0f;
+		}
+		else if (sender == mfi_sheet_zoom_300() ||
+			sender == mfi_sheet_zoom_300_2()) {
+			scale = 3.0f;
+		}
+		else if (sender == mfi_sheet_zoom_400() ||
+			sender == mfi_sheet_zoom_400_2()) {
+			scale = 4.0f;
+		}
+		else if (sender == mfi_sheet_zoom_075() ||
+			sender == mfi_sheet_zoom_075_2()) {
+			scale = 0.75f;
+		}
+		else if (sender == mfi_sheet_zoom_050() ||
+			sender == mfi_sheet_zoom_050_2()) {
+			scale = 0.5f;
+		}
+		else if (sender == mfi_sheet_zoom_025() ||
+			sender == mfi_sheet_zoom_025_2()) {
+			scale = 0.25f;
+		}
+		else {
+			return;
+		}
+		if (scale != m_sheet_main.m_sheet_scale) {
+			m_sheet_main.m_sheet_scale = scale;
+			sheet_panle_size();
+			sheet_draw();
+			status_bar_set_zoom();
+		}
+	}
+
+	// 表示を拡大または縮小する.
+	void MainPage::sheet_zoom_delta(const int32_t delta) noexcept
+	{
+		if (delta > 0 &&
+			m_sheet_main.m_sheet_scale < 4.f / 1.1f - FLT_MIN) {
+			m_sheet_main.m_sheet_scale *= 1.1f;
+		}
+		else if (delta < 0 &&
+			m_sheet_main.m_sheet_scale > 0.25f * 1.1f + FLT_MIN) {
+			m_sheet_main.m_sheet_scale /= 1.1f;
+		}
+		else {
+			return;
+		}
+		sheet_panle_size();
+		sheet_draw();
+		status_bar_set_zoom();
+	}
 }

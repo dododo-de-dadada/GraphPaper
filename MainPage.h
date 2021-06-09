@@ -238,11 +238,12 @@ namespace winrt::GraphPaper::implementation
 
 		// メーニュー関連
 		uint32_t m_cnt_selected = 0;		// 選択された図形の数
-		MenuFlyout m_menu_stroke = nullptr;	// 線枠コンテキストメニュー
-		MenuFlyout m_menu_fill = nullptr;	// 塗りつぶしコンテキストメニュー
-		MenuFlyout m_menu_font = nullptr;	// 書体コンテキストメニュー
-		MenuFlyout m_menu_sheet = nullptr;	// 用紙コンテキストメニュー
-		MenuFlyout m_menu_ungroup = nullptr;	// グループ解除コンテキストメニュー
+		MenuFlyout m_menu_stroke{ nullptr };	// 線枠コンテキストメニュー
+		MenuFlyout m_menu_fill{ nullptr };	// 塗りつぶしコンテキストメニュー
+		MenuFlyout m_menu_font{ nullptr };	// 書体コンテキストメニュー
+		MenuFlyout m_menu_sheet{ nullptr };	// 用紙コンテキストメニュー
+		MenuFlyout m_menu_ungroup{ nullptr };	// グループ解除コンテキストメニュー
+		MenuFlyout m_menu_ruler{ nullptr };	// 定規コンテキストメニュー
 
 		// 図形リスト
 		SHAPE_LIST m_list_shapes;		// 図形リスト
@@ -631,6 +632,10 @@ namespace winrt::GraphPaper::implementation
 		//void sheet_set_attr_to(const Shape* s) noexcept;
 		// 図形の属性関連に印をつける.
 		void sheet_attr_is_checked(void) noexcept;
+		// 用紙メニューの「表示倍率」が選択された.
+		void sheet_zoom_click(IInspectable const& sender, RoutedEventArgs const&);
+		// 表示を拡大または縮小する.
+		void sheet_zoom_delta(const int32_t delta) noexcept;
 
 		//-------------------------------
 		// MainPage_pref.cpp
@@ -1009,13 +1014,12 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 用紙メニューの「拡大縮小」>「拡大」が選択された.
-		//void mfi_zoom_in_clicked(IInspectable const&, RoutedEventArgs const&);
+		//void mfi_sheet_zoom_in_clicked(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「拡大縮小」>「縮小」が選択された.
-		//void mfi_zoom_out_clicked(IInspectable const&, RoutedEventArgs const&);
+		//void mfi_sheet_zoom_out_clicked(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「拡大縮小」>「100%に戻す」が選択された.
-		//void mfi_zoom_100_click(IInspectable const&, RoutedEventArgs const&);
+		//void mfi_sheet_zoom_100_click(IInspectable const&, RoutedEventArgs const&);
 
-		void mfi_zoom_click(IInspectable const& sender, RoutedEventArgs const&);
 	};
 
 }

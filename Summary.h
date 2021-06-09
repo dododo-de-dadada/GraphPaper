@@ -103,7 +103,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 16 進文字列を得る.
-		auto Hex()
+		auto Hexa()
 		{
 			wchar_t buf[64];
 			swprintf_s(buf, L"%p", m_shape);
@@ -115,12 +115,12 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 16 進文字列に値を格納する.
-		void Hex(winrt::hstring const& value)
+		void Hexa(winrt::hstring const& value)
 		{
-			if (Hex() == value) {
+			if (Hexa() == value) {
 				return;
 			}
-			m_changed(*this, Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"Hex" });
+			m_changed(*this, Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"Hexa" });
 		}
 
 		// 名前を得る.

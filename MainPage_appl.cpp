@@ -17,8 +17,7 @@ namespace winrt::GraphPaper::implementation
 	// アプリケーションデータを保存するフォルダーを得る.
 	static auto appl_cache_folder(void)
 	{
-		using winrt::Windows::Storage::ApplicationData;
-		return ApplicationData::Current().LocalCacheFolder();
+		return winrt::Windows::Storage::ApplicationData::Current().LocalCacheFolder();
 	}
 
 	// アプリケーションがバックグラウンドに移った.

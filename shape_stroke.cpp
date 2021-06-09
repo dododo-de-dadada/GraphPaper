@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	// s_dash_cap	破線の端点
 	// s_dash_style	破線の種類
 	// s_dash_patt	破線の配置配列
-	// s_join_style	線のつながり
+	// s_join_style	線のつなぎ
 	// s_join_limit	マイター制限
 	// s_width	線の太さ
 	// s_style	作成されたストローク特性
@@ -106,7 +106,12 @@ namespace winrt::GraphPaper::implementation
 	// a_man	元の領域の右下位置.
 	// b_min	得られた領域の左上位置.
 	// b_max	得られた領域の右下位置.
-	void ShapeStroke::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
+	void ShapeStroke::get_bound(
+		const D2D1_POINT_2F a_min,
+		const D2D1_POINT_2F a_max,
+		D2D1_POINT_2F& b_min,
+		D2D1_POINT_2F& b_max
+	) const noexcept
 	{
 		const size_t d_cnt = m_diff.size();	// 差分の数
 		D2D1_POINT_2F e_pos = m_pos;

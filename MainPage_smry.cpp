@@ -13,6 +13,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 	using winrt::Windows::UI::Xaml::Controls::ListView;
 
+	// 図形リストをもとにリストビューを作成する.
+	static void smry_add_items(ListView const& l_view, const SHAPE_LIST& slist, const ResourceDictionary& r_dict);
 	// 図形の間隔を一覧から得る.
 	static uint32_t smry_distance(ItemCollection const& items, const Shape* s);
 	// 一覧の要素を選択する.
@@ -23,6 +25,22 @@ namespace winrt::GraphPaper::implementation
 	static void smry_swap(ListView const& view, Shape* const s, Shape* const t, ResourceDictionary const& r);
 	// 一覧の要素の選択を解除する.
 	static void smry_unselect_item(ListView const& view, const uint32_t i);
+
+	// 図形リストをもとにリストビューを作成する.
+	static void smry_add_items(ListView const& l_view, const SHAPE_LIST& slist, const ResourceDictionary& r_dict)
+	{
+		uint32_t i = 0;
+		for (auto s : slist) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			l_view.Items().Append(winrt::make<Summary>(s, r_dict));
+			if (s->is_selected()) {
+				smry_select_item(l_view, i);
+			}
+			i++;
+		}
+	}
 
 	// 図形の間隔を一覧から得る.
 	static uint32_t smry_distance(ItemCollection const& items, const Shape* s)
@@ -47,9 +65,9 @@ namespace winrt::GraphPaper::implementation
 		// try_as は例外を投げない.
 		const auto s = item.try_as<Summary>();
 		if (s != nullptr) {
-			return reinterpret_cast<Shape*>(s->get_shape());
+			return s->get_shape();
 		}
-		return nullptr;
+		return static_cast<Shape*>(nullptr);
 	}
 
 	// 一覧の要素を選択する.
@@ -63,43 +81,40 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧に含まれる図形を入れ替える.
-	// view	リストビュー
+	// l_view	リストビュー
 	// s	入れ替える図形
 	// t	もう一方の入れ替える図形
-	// r	リソースディレクトリ
-	static void smry_swap(ListView const& view, Shape* const s, Shape* const t, ResourceDictionary const& r)
+	// r_dict	リソースディレクトリ
+	static void smry_swap(ListView const& l_view, Shape* const s, Shape* const t, ResourceDictionary const& r_dict)
 	{
-		auto const& items = view.Items();
+		auto const& items = l_view.Items();
 		const auto i = smry_distance(items, s);
 		const auto j = smry_distance(items, t);
-		const auto p = s->is_selected();
-		const auto q = t->is_selected();
-		auto t_item = winrt::make<Summary>(t, r);
-		auto s_item = winrt::make<Summary>(s, r);
+		const auto t_item{ winrt::make<Summary>(t, r_dict) };
+		const auto s_item{ winrt::make<Summary>(s, r_dict) };
 		items.SetAt(i, t_item);
 		items.SetAt(j, s_item);
-		if (p) {
-			smry_select_item(view, j);
+		if (s->is_selected()) {
+			smry_select_item(l_view, j);
 		}
-		if (q) {
-			smry_select_item(view, i);
+		if (t->is_selected()) {
+			smry_select_item(l_view, i);
 		}
 	}
 
 	// 一覧の要素の選択を解除する.
-	static void smry_unselect_item(ListView const& view, const uint32_t i)
+	static void smry_unselect_item(ListView const& l_view, const uint32_t i)
 	{
-		IInspectable t_item[1];
-		view.Items().GetMany(i, t_item);
-		const auto t = smry_shape(t_item[0]);
-		const auto k = view.SelectedItems().Size();
+		IInspectable s_item[1];
+		l_view.Items().GetMany(i, s_item);
+		const auto s = smry_shape(s_item[0]);
+		const auto k = l_view.SelectedItems().Size();
 		for (uint32_t j = 0; j < k; j++) {
-			IInspectable s_item[1];
-			view.SelectedItems().GetMany(j, s_item);
-			const auto s = smry_shape(s_item[0]);
-			if (s == t) {
-				view.SelectedItems().RemoveAt(j);
-				break;
+			IInspectable t_item[1];
+			l_view.SelectedItems().GetMany(j, t_item);
+			if (smry_shape(t_item[0]) == s) {
+				l_view.SelectedItems().RemoveAt(j);
+				return;
 			}
 		}
 	}
@@ -115,18 +130,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 図形一覧の排他制御を false と入れ替える.
 		bool smry_visible = m_smry_atomic.exchange(false, std::memory_order_acq_rel); // 入れ替え前の排他制御
-		uint32_t i = 0;
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
-			if (s->is_selected()) {
-				smry_select_item(lv_smry(), i);
-			}
-			i++;
-		}
-		// 入れ替え前の排他制御に戻す.
+		smry_add_items(lv_smry(), m_list_shapes, Resources());
 		m_smry_atomic.store(smry_visible, std::memory_order_release);
 	}
 
@@ -148,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < e.RemovedItems().Size(); i++) {
 			IInspectable item[1];
 			e.RemovedItems().GetMany(i, item);
-			auto s = smry_shape(item[0]);
+			const auto s = smry_shape(item[0]);
 			if (s != nullptr && s->is_selected()) {
 				undo_push_select(s);
 				//if (m_event_shape_smry == s) {
@@ -161,8 +165,8 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < e.AddedItems().Size(); i++) {
 			IInspectable item[1];
 			e.AddedItems().GetMany(i, item);
-			auto const s = smry_shape(item[0]);
-			if (s != nullptr && s->is_selected() != true) {
+			const auto s = smry_shape(item[0]);
+			if (s != nullptr && !s->is_selected()) {
 				undo_push_select(t = s);
 				//m_event_shape_smry = s;
 			}
@@ -318,17 +322,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			m_smry_atomic.store(false, std::memory_order_release);
 			lv_smry().Items().Clear();
-			uint32_t i = 0;
-			for (auto s : m_list_shapes) {
-				if (s->is_deleted()) {
-					continue;
-				}
-				lv_smry().Items().Append(winrt::make<Summary>(s, Resources()));
-				if (s->is_selected()) {
-					smry_select_item(lv_smry(), i);
-				}
-				i++;
-			}
+			smry_add_items(lv_smry(), m_list_shapes, Resources());
 			lv_smry().UpdateLayout();
 			m_smry_atomic.store(true, std::memory_order_release);
 		}

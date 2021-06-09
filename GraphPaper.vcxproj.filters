@@ -70,6 +70,7 @@
     <ClInclude Include="Summary.h" />
     <ClInclude Include="SummaryViewModel.h" />
     <ClInclude Include="undo.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
@@ -112,5 +113,8 @@
   <ItemGroup>
     <PRIResource Include="Strings\en-US\Resources.resw" />
     <PRIResource Include="Strings\ja-JP\Resources.resw" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GraphPaper.rc" />
   </ItemGroup>
 </Project>

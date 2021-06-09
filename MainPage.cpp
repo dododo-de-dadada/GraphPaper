@@ -262,7 +262,7 @@ namespace winrt::GraphPaper::implementation
 			m_menu_fill = nullptr;
 			m_menu_font = nullptr;
 			m_menu_sheet = nullptr;
-			m_menu_ungroup = nullptr;
+			m_menu_ruler = nullptr;
 		}
 
 		// コードビハインドで設定したハンドラーの設定を解除する.
@@ -359,6 +359,7 @@ namespace winrt::GraphPaper::implementation
 			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_font")));
 			m_menu_sheet = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet")));
 			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup")));
+			m_menu_ruler = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ruler")));
 		}
 
 		auto _{ new_click_async(nullptr, nullptr) };
