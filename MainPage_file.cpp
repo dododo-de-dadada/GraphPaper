@@ -359,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作スタックの更新フラグが立っているか判定する.
 		if (undo_pushed()) {
 			// 確認ダイアログを表示し, 結果を得る.
-			const auto dres = co_await cd_conf_save().ShowAsync();
+			const auto dres = co_await cd_conf_save_dialog().ShowAsync();
 			// ダイアログの結果がキャンセルか判定する.
 			if (dres == ContentDialogResult::None) {
 				co_return;

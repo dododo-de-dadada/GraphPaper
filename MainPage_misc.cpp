@@ -15,17 +15,17 @@ namespace winrt::GraphPaper::implementation
 		//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		tb_version().Visibility(UI_VISIBLE);
-		const auto def_btn = cd_sample().DefaultButton();
-		const auto pri_text = cd_sample().PrimaryButtonText();
-		const auto close_text = cd_sample().CloseButtonText();
-		cd_sample().PrimaryButtonText(L"");
-		cd_sample().CloseButtonText(L"OK");
-		cd_sample().Title(box_value(L"GraphPaper"));
+		const auto def_btn = cd_sample_dialog().DefaultButton();
+		const auto pri_text = cd_sample_dialog().PrimaryButtonText();
+		const auto close_text = cd_sample_dialog().CloseButtonText();
+		cd_sample_dialog().PrimaryButtonText(L"");
+		cd_sample_dialog().CloseButtonText(L"OK");
+		cd_sample_dialog().Title(box_value(L"GraphPaper"));
 		m_sample_type = SAMP_TYPE::MISC;
-		co_await cd_sample().ShowAsync();
-		cd_sample().PrimaryButtonText(pri_text);
-		cd_sample().CloseButtonText(close_text);
-		cd_sample().DefaultButton(def_btn);
+		co_await cd_sample_dialog().ShowAsync();
+		cd_sample_dialog().PrimaryButtonText(pri_text);
+		cd_sample_dialog().CloseButtonText(close_text);
+		cd_sample_dialog().DefaultButton(def_btn);
 		tb_version().Visibility(UI_COLLAPSED);
 		delete m_sample_shape;
 #if defined(_DEBUG)

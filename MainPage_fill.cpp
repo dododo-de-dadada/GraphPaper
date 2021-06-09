@@ -41,8 +41,8 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 3> });
 		m_sample_type = SAMP_TYPE::FILL;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FILL)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FILL)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			m_sample_shape->get_fill_color(sample_value);

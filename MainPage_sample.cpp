@@ -119,17 +119,23 @@ namespace winrt::GraphPaper::implementation
 				constexpr uint32_t misc_max = 64;
 				static uint32_t misc_cnt = misc_min;
 				const auto pad = w * 0.125;
-				const D2D1_POINT_2F samp_diff{ static_cast<FLOAT>(w - 3.0 * pad), static_cast<FLOAT>(h - 3.0 * pad) };
+				//const D2D1_POINT_2F samp_diff{ static_cast<FLOAT>(w - 3.0 * pad), static_cast<FLOAT>(h - 3.0 * pad) };
+				const D2D1_POINT_2F samp_diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
 				const D2D1_POINT_2F rect_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
-				const D2D1_POINT_2F poly_pos{ static_cast<FLOAT>(pad + pad), static_cast<FLOAT>(pad + pad) };
-				auto const samp_rect = new ShapeRect(rect_pos, samp_diff, &m_sample_sheet);
+				//const D2D1_POINT_2F poly_pos{ static_cast<FLOAT>(pad + pad), static_cast<FLOAT>(pad + pad) };
+				//auto const samp_rect = new ShapeRect(rect_pos, samp_diff, &m_sample_sheet);
 				POLY_TOOL poly_tool{ misc_cnt >= misc_max ? misc_min : misc_cnt++, true, true, true, true };
-				auto const samp_poly = new ShapePoly(poly_pos, samp_diff, &m_sample_sheet, poly_tool);
-				ShapeGroup* const g = new ShapeGroup();
-				m_sample_shape = g;
-				g->m_list_grouped.push_back(samp_rect);
-				g->m_list_grouped.push_back(samp_poly);
-				m_sample_shape->set_select(false);
+				//auto const samp_poly = new ShapePoly(poly_pos, samp_diff, &m_sample_sheet, poly_tool);
+				auto const samp_poly = new ShapePoly(rect_pos, samp_diff, &m_sample_sheet, poly_tool);
+				//ShapeGroup* const g = new ShapeGroup();
+				//m_sample_shape = g;
+				m_sample_shape = samp_poly;
+				//g->m_list_grouped.push_back(samp_rect);
+				//g->m_list_grouped.push_back(samp_poly);
+				//m_sample_shape->set_select(false);
+#if defined(_DEBUG)
+				//debug_leak_cnt += 2;
+#endif
 			}
 			else {
 				throw winrt::hresult_invalid_argument();

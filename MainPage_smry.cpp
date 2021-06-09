@@ -190,11 +190,11 @@ namespace winrt::GraphPaper::implementation
 			smry_close();
 			return;
 		}
-		if (sp_find_text().Visibility() == UI_VISIBLE) {
+		if (sp_find_text_panel().Visibility() == UI_VISIBLE) {
 			find_text_click(nullptr, nullptr);
 		}
-		auto _{ FindName(L"rp_smry") };
-		rp_smry().Visibility(UI_VISIBLE);
+		auto _{ FindName(L"gd_smry_panel") };
+		gd_smry_panel().Visibility(UI_VISIBLE);
 		m_smry_atomic.store(true, std::memory_order_release);
 	}
 
@@ -240,9 +240,9 @@ namespace winrt::GraphPaper::implementation
 		// ê}å`àÍóóÇÃîrëºêßå‰Ç™ true Ç©îªíËÇ∑ÇÈ.
 		if (m_smry_atomic.load(std::memory_order_acquire)) {
 			m_smry_atomic.store(false, std::memory_order_release);
-			rp_smry().Visibility(UI_COLLAPSED);
+			gd_smry_panel().Visibility(UI_COLLAPSED);
 			lv_smry().Items().Clear();
-			UnloadObject(rp_smry());
+			UnloadObject(gd_smry_panel());
 		}
 	}
 

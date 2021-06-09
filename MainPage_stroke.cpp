@@ -42,8 +42,8 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 3> });
 		m_sample_type = SAMP_TYPE::STROKE;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			m_sample_shape->get_stroke_color(sample_value);
@@ -109,8 +109,8 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 3> });
 		const auto slider_4_token = sample_slider_4().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 4> });
 		m_sample_type = SAMP_TYPE::STROKE;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			STROKE_DASH_PATT sample_patt;
 			float sample_width;
@@ -156,8 +156,8 @@ namespace winrt::GraphPaper::implementation
 		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0> });
 		m_sample_type = SAMP_TYPE::STROKE;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_shape->get_stroke_width(sample_value);

@@ -114,8 +114,8 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::sheet_set_slider<UNDO_OP::SHEET_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::sheet_set_slider<UNDO_OP::SHEET_COLOR, 2> });
 		m_sample_type = SAMP_TYPE::NONE;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(SHEET_TITLE)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(SHEET_TITLE)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			m_sample_sheet.get_sheet_color(sample_value);
@@ -511,9 +511,9 @@ namespace winrt::GraphPaper::implementation
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
-		cd_sheet_size().IsPrimaryButtonEnabled(true);
-		cd_sheet_size().IsSecondaryButtonEnabled(m_list_shapes.size() > 0);
-		const auto d_result = co_await cd_sheet_size().ShowAsync();
+		cd_sheet_size_dialog().IsPrimaryButtonEnabled(true);
+		cd_sheet_size_dialog().IsSecondaryButtonEnabled(m_list_shapes.size() > 0);
+		const auto d_result = co_await cd_sheet_size_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::None) {
 			// 「キャンセル」が押された場合,
 			co_return;
@@ -615,7 +615,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.get_grid_base(g_base);
 			value = conv_len_to_val(m_len_unit, value, dpi, g_base + 1.0);
 		}
-		cd_sheet_size().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < sheet_size_max());
+		cd_sheet_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < sheet_size_max());
 	}
 
 	// 用紙メニューの「表示倍率」が選択された.

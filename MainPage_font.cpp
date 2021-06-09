@@ -105,8 +105,8 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 3> });
 		m_sample_type = SAMP_TYPE::FONT;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			m_sample_shape->get_font_color(sample_value);
@@ -171,8 +171,8 @@ namespace winrt::GraphPaper::implementation
 		);
 		lv_sample_lview().Visibility(UI_VISIBLE);
 		m_sample_type = SAMP_TYPE::FONT;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			wchar_t* sample_value;
 			m_sample_shape->get_font_family(sample_value);
@@ -297,8 +297,8 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_SIZE, 0> });
 		m_sample_type = SAMP_TYPE::FONT;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_shape->get_font_size(sample_value);
@@ -354,8 +354,8 @@ namespace winrt::GraphPaper::implementation
 		);
 		lv_sample_lview().Visibility(UI_VISIBLE);
 		m_sample_type = SAMP_TYPE::FONT;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_STRETCH sample_value;
 			m_sample_shape->get_font_stretch(sample_value);
@@ -456,8 +456,8 @@ namespace winrt::GraphPaper::implementation
 		);
 		lv_sample_lview().Visibility(UI_VISIBLE);
 		m_sample_type = SAMP_TYPE::FONT;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_WEIGHT sample_value;
 			m_sample_shape->get_font_weight(sample_value);

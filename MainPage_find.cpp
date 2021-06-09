@@ -260,7 +260,7 @@ namespace winrt::GraphPaper::implementation
 		tx_edit().Text(s->m_text == nullptr ? L"" : s->m_text);
 		tx_edit().SelectAll();
 		ck_edit_text_frame().IsChecked(m_edit_text_frame);
-		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
+		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
 			undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
 			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
@@ -464,8 +464,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::find_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 文字列検索パネルが表示されているか判定する.
-		if (sp_find_text().Visibility() == UI_VISIBLE) {
-			sp_find_text().Visibility(UI_COLLAPSED);
+		if (sp_find_text_panel().Visibility() == UI_VISIBLE) {
+			sp_find_text_panel().Visibility(UI_COLLAPSED);
 			find_text_set();
 			return;
 		}
@@ -476,14 +476,14 @@ namespace winrt::GraphPaper::implementation
 		tx_find_replace_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });
 		ck_find_text_case().IsChecked(m_find_text_case);
 		ck_find_text_wrap().IsChecked(m_find_text_wrap);
-		sp_find_text().Visibility(UI_VISIBLE);
+		sp_find_text_panel().Visibility(UI_VISIBLE);
 	}
 
 	// 文字列検索パネルの「閉じる」ボタンが押された.
 	void MainPage::find_text_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		find_text_set();
-		sp_find_text().Visibility(UI_COLLAPSED);
+		sp_find_text_panel().Visibility(UI_COLLAPSED);
 	}
 
 	// 文字列検索パネルの「次を検索」ボタンが押された.

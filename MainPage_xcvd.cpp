@@ -175,7 +175,7 @@ namespace winrt::GraphPaper::implementation
 			// クリップボードにテキストが含まれているか判定する.
 			else if (xcvd_contains({ StandardDataFormats::Text() })) {
 				using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-				const auto d_result = co_await cd_conf_paste().ShowAsync();
+				const auto d_result = co_await cd_conf_paste_dialog().ShowAsync();
 				if (d_result == ContentDialogResult::Primary) {
 
 					// クリップボードから読み込むためのデータリーダーを得る.

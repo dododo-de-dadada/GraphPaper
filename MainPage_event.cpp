@@ -111,14 +111,14 @@ namespace winrt::GraphPaper::implementation
 		scp_sheet_panel().ContextFlyout(nullptr);
 		// ‰Ÿ‚³‚ê‚½}Œ`‚ªƒkƒ‹, ‚Ü‚½‚Í‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ªŠO‘¤‚©”»’è‚·‚é.
 		if (m_event_shape_pressed == nullptr || m_event_anch_pressed == ANCH_TYPE::ANCH_SHEET) {
-			scp_sheet_panel().ContextFlyout(m_menu_sheet);
+			scp_sheet_panel().ContextFlyout(m_sheet_menu);
 		}
 		// ‰Ÿ‚³‚ê‚½}Œ`‚ªƒOƒ‹[ƒv}Œ`‚©”»’è‚·‚é.
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeGroup)) {
 			scp_sheet_panel().ContextFlyout(m_menu_ungroup);
 		}
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeRuler)) {
-			scp_sheet_panel().ContextFlyout(m_menu_ruler);
+			scp_sheet_panel().ContextFlyout(m_ruler_menu);
 		}
 		else {
 			// ‰Ÿ‚³‚ê‚½}Œ`‚Ì‘®«’l‚ğ—p†‚ÉŠi”[‚·‚é.
@@ -126,15 +126,15 @@ namespace winrt::GraphPaper::implementation
 			sheet_attr_is_checked();
 			// ‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ª“à‘¤‚©”»’è‚·‚é.
 			if (m_event_anch_pressed == ANCH_TYPE::ANCH_FILL) {
-				scp_sheet_panel().ContextFlyout(m_menu_fill);
+				scp_sheet_panel().ContextFlyout(m_fill_menu);
 			}
 			// ‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ª•¶š—ñ‚©”»’è‚·‚é.
 			else if (m_event_anch_pressed == ANCH_TYPE::ANCH_TEXT) {
-				scp_sheet_panel().ContextFlyout(m_menu_font);
+				scp_sheet_panel().ContextFlyout(m_font_menu);
 			}
 			// ‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ªü˜g‚©”»’è‚·‚é.
 			else if (m_event_anch_pressed == ANCH_TYPE::ANCH_STROKE) {
-				scp_sheet_panel().ContextFlyout(m_menu_stroke);
+				scp_sheet_panel().ContextFlyout(m_stroke_menu);
 			}
 		}
 	}
@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 
 		tx_edit().Text(L"");
 		ck_edit_text_frame().IsChecked(m_edit_text_frame);
-		if (co_await cd_edit_text().ShowAsync() == ContentDialogResult::Primary) {
+		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
 			auto s = new ShapeText(m_event_pos_pressed, diff, text, &m_sheet_main);
 #if defined(_DEBUG)

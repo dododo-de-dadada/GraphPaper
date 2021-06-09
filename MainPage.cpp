@@ -146,7 +146,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作スタックの更新フラグが立っているか判定する.
 		if (undo_pushed()) {
 			// 確認ダイアログを表示し, 結果を得る.
-			const auto dres = co_await cd_conf_save().ShowAsync();	// ダイアログの結果
+			const auto dres = co_await cd_conf_save_dialog().ShowAsync();	// ダイアログの結果
 			// ダイアログの結果がキャンセルか判定する.
 			if (dres == ContentDialogResult::None) {
 				co_return false;
@@ -258,11 +258,11 @@ namespace winrt::GraphPaper::implementation
 
 		// 静的リソースから読み込んだコンテキストメニューを破棄する.
 		{
-			m_menu_stroke = nullptr;
-			m_menu_fill = nullptr;
-			m_menu_font = nullptr;
-			m_menu_sheet = nullptr;
-			m_menu_ruler = nullptr;
+			m_stroke_menu = nullptr;
+			m_fill_menu = nullptr;
+			m_font_menu = nullptr;
+			m_sheet_menu = nullptr;
+			m_ruler_menu = nullptr;
 		}
 
 		// コードビハインドで設定したハンドラーの設定を解除する.
@@ -354,12 +354,12 @@ namespace winrt::GraphPaper::implementation
 		// コンテキストメニューを静的リソースから読み込む.
 		// ポップアップは静的なリソースとして定義して、複数の要素で使用することができる.
 		{
-			m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke")));
-			m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill")));
-			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_font")));
-			m_menu_sheet = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet")));
-			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup")));
-			m_menu_ruler = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ruler")));
+			m_stroke_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke_menu")));
+			m_fill_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill_menu")));
+			m_font_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_menu_front")));
+			m_sheet_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet_menu")));
+			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_menu_ungroup")));
+			m_ruler_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ruler_menu")));
 		}
 
 		auto _{ new_click_async(nullptr, nullptr) };
@@ -405,7 +405,7 @@ namespace winrt::GraphPaper::implementation
 		const auto glyph = Resources().TryLookup(box_value(glyph_key));
 		fi_message().Glyph(glyph != nullptr ? unbox_value<winrt::hstring>(glyph) : glyph_key);
 		tk_message().Text(text);
-		auto _{ cd_message().ShowAsync() };
+		auto _{ cd_message_dialog().ShowAsync() };
 	}
 
 	// ファイルメニューの「新規」が選択された

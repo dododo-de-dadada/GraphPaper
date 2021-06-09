@@ -118,14 +118,14 @@ namespace winrt::GraphPaper::implementation
 			check = tmfi_status_bar_draw().IsChecked();
 			tmfi_status_bar_draw_2().IsChecked(check);
 			status_bar_set_draw();
-			stbar_visiblity(check, sp_status_bar_draw());
+			stbar_visiblity(check, sp_status_bar_panel_draw());
 		}
 		else if (sender == tmfi_status_bar_draw_2()) {
 			stbar = STATUS_BAR::DRAW;
 			check = tmfi_status_bar_draw_2().IsChecked();
 			tmfi_status_bar_draw().IsChecked(check);
 			status_bar_set_draw();
-			stbar_visiblity(check, sp_status_bar_draw());
+			stbar_visiblity(check, sp_status_bar_panel_draw());
 		}
 		else if (sender == tmfi_status_bar_unit()) {
 			stbar = STATUS_BAR::UNIT;
@@ -150,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			m_status_bar = stbar_and(m_status_bar, stbar_not(stbar));
 		}
-		stbar_visiblity(m_status_bar != static_cast<STATUS_BAR>(0), sp_status_bar());
+		stbar_visiblity(m_status_bar != static_cast<STATUS_BAR>(0), sp_status_bar_panel());
 	}
 
 	// ステータスバーのメニュー項目に印をつける.
@@ -325,15 +325,15 @@ namespace winrt::GraphPaper::implementation
 		tk_status_bar_grid().Visibility(stbar_mask(m_status_bar, STATUS_BAR::GRID) ? UI_VISIBLE : UI_COLLAPSED);
 		tk_status_bar_width().Visibility(stbar_mask(m_status_bar, STATUS_BAR::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
 		tk_status_bar_height().Visibility(stbar_mask(m_status_bar, STATUS_BAR::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
-		//sp_status_bar_curs().Visibility(stbar_mask(m_status_bar, STATUS_BAR::CURS) ? UI_VISIBLE : UI_COLLAPSED);
-		//sp_status_bar_grid().Visibility(stbar_mask(m_status_bar, STATUS_BAR::GRID) ? UI_VISIBLE : UI_COLLAPSED);
-		//sp_status_bar_sheet().Visibility(stbar_mask(m_status_bar, STATUS_BAR::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
-		sp_status_bar_draw().Visibility(stbar_mask(m_status_bar, STATUS_BAR::DRAW) ? UI_VISIBLE : UI_COLLAPSED);
+		//sp_status_bar_panel_curs().Visibility(stbar_mask(m_status_bar, STATUS_BAR::CURS) ? UI_VISIBLE : UI_COLLAPSED);
+		//sp_status_bar_panel_grid().Visibility(stbar_mask(m_status_bar, STATUS_BAR::GRID) ? UI_VISIBLE : UI_COLLAPSED);
+		//sp_status_bar_panel_sheet().Visibility(stbar_mask(m_status_bar, STATUS_BAR::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
+		sp_status_bar_panel_draw().Visibility(stbar_mask(m_status_bar, STATUS_BAR::DRAW) ? UI_VISIBLE : UI_COLLAPSED);
 		tk_status_bar_unit().Visibility(stbar_mask(m_status_bar, STATUS_BAR::UNIT) ? UI_VISIBLE : UI_COLLAPSED);
 		tk_status_bar_zoom().Visibility(stbar_mask(m_status_bar, STATUS_BAR::ZOOM) ? UI_VISIBLE : UI_COLLAPSED);
-		//sp_status_bar_unit().Visibility(stbar_mask(m_status_bar, STATUS_BAR::UNIT) ? UI_VISIBLE : UI_COLLAPSED);
-		//sp_status_bar_zoom().Visibility(stbar_mask(m_status_bar, STATUS_BAR::ZOOM) ? UI_VISIBLE : UI_COLLAPSED);
-		sp_status_bar().Visibility(m_status_bar != static_cast<STATUS_BAR>(0) ? UI_VISIBLE : UI_COLLAPSED);
+		//sp_status_bar_panel_unit().Visibility(stbar_mask(m_status_bar, STATUS_BAR::UNIT) ? UI_VISIBLE : UI_COLLAPSED);
+		//sp_status_bar_panel_zoom().Visibility(stbar_mask(m_status_bar, STATUS_BAR::ZOOM) ? UI_VISIBLE : UI_COLLAPSED);
+		sp_status_bar_panel().Visibility(m_status_bar != static_cast<STATUS_BAR>(0) ? UI_VISIBLE : UI_COLLAPSED);
 	}
 
 	// ステータスバーの状態をデータライターに書き込む.

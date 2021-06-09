@@ -130,8 +130,8 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 2> });
 		m_sample_type = SAMP_TYPE::STROKE;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			ARROW_SIZE sample_value;
 			m_sample_shape->get_arrow_size(sample_value);

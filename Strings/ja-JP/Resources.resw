@@ -129,39 +129,39 @@
     <value>すべて置換</value>
     <comment>Buttom</comment>
   </data>
-  <data name="cd_conf_save.CloseButtonText" xml:space="preserve">
+  <data name="cd_conf_save_dialog.CloseButtonText" xml:space="preserve">
     <value>キャンセル</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_conf_save.PrimaryButtonText" xml:space="preserve">
+  <data name="cd_conf_save_dialog.PrimaryButtonText" xml:space="preserve">
     <value>保存する</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_conf_save.SecondaryButtonText" xml:space="preserve">
+  <data name="cd_conf_save_dialog.SecondaryButtonText" xml:space="preserve">
     <value>保存しない</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_edit_text.CloseButtonText" xml:space="preserve">
+  <data name="cd_edit_text_dialog.CloseButtonText" xml:space="preserve">
     <value>キャンセル</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_edit_text.PrimaryButtonText" xml:space="preserve">
+  <data name="cd_edit_text_dialog.PrimaryButtonText" xml:space="preserve">
     <value>Ok</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_sheet_size.CloseButtonText" xml:space="preserve">
+  <data name="cd_sheet_size_dialog.CloseButtonText" xml:space="preserve">
     <value>閉じる</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_sheet_size.PrimaryButtonText" xml:space="preserve">
+  <data name="cd_sheet_size_dialog.PrimaryButtonText" xml:space="preserve">
     <value>適用する</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_sheet_size.SecondaryButtonText" xml:space="preserve">
+  <data name="cd_sheet_size_dialog.SecondaryButtonText" xml:space="preserve">
     <value>図形に合わせる</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_sheet_size.Title" xml:space="preserve">
+  <data name="cd_sheet_size_dialog.Title" xml:space="preserve">
     <value>用紙の大きさ</value>
     <comment>ContentDialog</comment>
   </data>
@@ -305,35 +305,35 @@
     <value>超ごく細</value>
     <comment>ListViewItem</comment>
   </data>
-  <data name="mbi_edit.Title" xml:space="preserve">
+  <data name="mbi_menu_edit.Title" xml:space="preserve">
     <value>編集(E)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_file.Title" xml:space="preserve">
+  <data name="mbi_menu_file.Title" xml:space="preserve">
     <value>ファイル(F)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_fill.Title" xml:space="preserve">
+  <data name="mbi_fill_menu.Title" xml:space="preserve">
     <value>塗りつぶし(L)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_font.Title" xml:space="preserve">
+  <data name="mbi_font_menu.Title" xml:space="preserve">
     <value>書体(T)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_sheet.Title" xml:space="preserve">
+  <data name="mbi_men_sheet.Title" xml:space="preserve">
     <value>用紙(H)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_misc.Title" xml:space="preserve">
+  <data name="mbi_misc_menu.Title" xml:space="preserve">
     <value>その他(M)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_stroke.Title" xml:space="preserve">
+  <data name="mbi_stroke_menu.Title" xml:space="preserve">
     <value>ストローク(S)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_tool_draw.Title" xml:space="preserve">
+  <data name="mbi_menu_tool_draw.Title" xml:space="preserve">
     <value>作図(D)</value>
     <comment>MenuBarItem</comment>
   </data>
@@ -882,7 +882,7 @@
     <value>置換後の文字列</value>
     <comment>TextBox</comment>
   </data>
-  <data name="cd_message.CloseButtonText" xml:space="preserve">
+  <data name="cd_message_dialog.CloseButtonText" xml:space="preserve">
     <value>閉じる</value>
     <comment>ContentDialog</comment>
   </data>
@@ -906,11 +906,11 @@
     <value>描画できません.</value>
     <comment>String</comment>
   </data>
-  <data name="cd_conf_paste.CloseButtonText" xml:space="preserve">
+  <data name="cd_conf_paste_dialog.CloseButtonText" xml:space="preserve">
     <value>キャンセル</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="cd_conf_paste.PrimaryButtonText" xml:space="preserve">
+  <data name="cd_conf_paste_dialog.PrimaryButtonText" xml:space="preserve">
     <value>図形として貼り付け</value>
     <comment>ContentDialog</comment>
   </data>

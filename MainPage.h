@@ -238,12 +238,12 @@ namespace winrt::GraphPaper::implementation
 
 		// メーニュー関連
 		uint32_t m_cnt_selected = 0;		// 選択された図形の数
-		MenuFlyout m_menu_stroke{ nullptr };	// 線枠コンテキストメニュー
-		MenuFlyout m_menu_fill{ nullptr };	// 塗りつぶしコンテキストメニュー
-		MenuFlyout m_menu_font{ nullptr };	// 書体コンテキストメニュー
-		MenuFlyout m_menu_sheet{ nullptr };	// 用紙コンテキストメニュー
+		MenuFlyout m_stroke_menu{ nullptr };	// 線枠コンテキストメニュー
+		MenuFlyout m_fill_menu{ nullptr };	// 塗りつぶしコンテキストメニュー
+		MenuFlyout m_font_menu{ nullptr };	// 書体コンテキストメニュー
+		MenuFlyout m_sheet_menu{ nullptr };	// 用紙コンテキストメニュー
 		MenuFlyout m_menu_ungroup{ nullptr };	// グループ解除コンテキストメニュー
-		MenuFlyout m_menu_ruler{ nullptr };	// 定規コンテキストメニュー
+		MenuFlyout m_ruler_menu{ nullptr };	// 定規コンテキストメニュー
 
 		// 図形リスト
 		SHAPE_LIST m_list_shapes;		// 図形リスト

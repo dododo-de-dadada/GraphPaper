@@ -135,12 +135,12 @@
             <!-- アプリケーションデータを格納するファイル名 -->
             <x:String x:Key="file_appl_data">appl_data</x:String>
             <!-- 定規コンテキストメニュー -->
-			<MenuFlyout x:Key="mf_ruler">
+			<MenuFlyout x:Key="mf_ruler_menu">
 				<MenuFlyoutItem x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
 				<MenuFlyoutItem x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
 			</MenuFlyout>
 			<!-- 線枠コンテキストメニュー -->
-			<MenuFlyout x:Key="mf_stroke">
+			<MenuFlyout x:Key="mf_stroke_menu">
                 <!-- 線枠の種類 -->
                 <MenuFlyoutSubItem x:Uid="mfsi_stroke_dash_style" Text="Style">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_solid_2" x:Uid="rmfi_stroke_dash_style_solid" Click="stroke_dash_style_click" IsChecked="True" Text="Solid" GroupName="gn_stroke_dash_style_2">
@@ -214,11 +214,11 @@
                 <MenuFlyoutItem x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
             </MenuFlyout>
             <!-- 塗りつぶしコンテキストメニュー -->
-            <MenuFlyout x:Key="mf_fill">
+            <MenuFlyout x:Key="mf_fill_menu">
                 <MenuFlyoutItem x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
             </MenuFlyout>
             <!-- 書体コンテキストメニュー -->
-            <MenuFlyout x:Key="mf_font">
+            <MenuFlyout x:Key="mf_menu_front">
                 <!--文字列の編集 -->
 				<MenuFlyoutItem x:Uid="mfi_edit_text" Click="edit_text_click" KeyboardAcceleratorTextOverride="Ctrl+E" Text="Edit Text" >
 					<MenuFlyoutItem.Icon>
@@ -262,7 +262,7 @@
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Color..." />
             </MenuFlyout>
             <!-- 用紙コンテキストメニュー -->
-            <MenuFlyout x:Key="mf_sheet">
+            <MenuFlyout x:Key="mf_sheet_menu">
                 <MenuFlyoutSubItem x:Uid="mfsi_grid_show" Text="Show Grid">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_hide_2" x:Uid="rmfi_grid_show_hide" Click="grid_show_click" Text="Hide" GroupName="gn_grid_show_2"/>
                     <MenuFlyoutSeparator />
@@ -311,7 +311,7 @@
                 </MenuFlyoutSubItem>
             </MenuFlyout>
             <!-- グループコンテキストメニュー -->
-            <MenuFlyout x:Key="mf_ungroup">
+            <MenuFlyout x:Key="mf_menu_ungroup">
                 <MenuFlyoutItem x:Name="mfi_ungroup_2" x:Uid="mfi_ungroup" Click="ungroup_click" KeyboardAcceleratorTextOverride="Ctrl+U" Text="Ungroup" >
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_ungroup}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16"  />
@@ -333,7 +333,7 @@
         <!-- メインメニュー -->
         <muxc:MenuBar Grid.Row="0" Grid.ColumnSpan="2" Background="{ThemeResource SystemBaseLowColor}">
             <!-- ファイルメニュー -->
-			<muxc:MenuBarItem x:Uid="mbi_file" AccessKey="F" Title="File" >
+			<muxc:MenuBarItem x:Uid="mbi_menu_file" AccessKey="F" Title="File" >
 				<MenuFlyoutItem x:Name="mfi_new" x:Uid="mfi_new" Click="new_click_async" Icon="Page2" Text="New" >
 					<MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="N" Modifiers="Control" />
@@ -372,7 +372,7 @@
                 <MenuFlyoutItem x:Name="mfi_exit" x:Uid="mfi_exit" Click="exit_click_async" Icon="Cancel" Text="Exit" />
             </muxc:MenuBarItem>
             <!-- 編集メニュー -->
-			<muxc:MenuBarItem x:Uid="mbi_edit" AccessKey="E" Title="Edit">
+			<muxc:MenuBarItem x:Uid="mbi_menu_edit" AccessKey="E" Title="Edit">
                 <MenuFlyoutItem x:Name="mfi_undo" x:Uid="mfi_undo" Click="undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Z" Modifiers="Control" />
@@ -479,7 +479,7 @@
 				</MenuFlyoutItem>
 			</muxc:MenuBarItem>
             <!-- 作図ツールメニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_tool_draw" AccessKey="D" Title="Draw">
+            <muxc:MenuBarItem x:Uid="mbi_menu_tool_draw" AccessKey="D" Title="Draw">
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_select" x:Uid="rmfi_tool_select" Click="tool_draw_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Select">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_select}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
@@ -545,8 +545,8 @@
 				</MenuFlyoutSubItem>
 			</muxc:MenuBarItem>
             <!-- 線枠メニュー -->
-			<muxc:MenuBarItem x:Uid="mbi_stroke" AccessKey="S" Title="Stroke">
-			<!--<muxc:MenuBarItem x:Name="mbi_stroke" x:Uid="mbi_stroke" AccessKey="S" Title="Stroke">-->
+			<muxc:MenuBarItem x:Uid="mbi_stroke_menu" AccessKey="S" Title="Stroke">
+			<!--<muxc:MenuBarItem x:Name="mbi_stroke_menu" x:Uid="mbi_stroke_menu" AccessKey="S" Title="Stroke">-->
                 <MenuFlyoutSubItem x:Uid="mfsi_stroke_dash_style" Text="Style">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_dash_style_solid" x:Uid="rmfi_stroke_dash_style_solid" Click="stroke_dash_style_click" IsChecked="True" Text="Solid" GroupName="gn_stroke_dash_style">
                         <muxc:RadioMenuFlyoutItem.Icon>
@@ -616,11 +616,11 @@
                 <MenuFlyoutItem x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
             </muxc:MenuBarItem>
             <!-- 塗りつぶしメニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_fill" AccessKey="L" Title="Fill">
+            <muxc:MenuBarItem x:Uid="mbi_fill_menu" AccessKey="L" Title="Fill">
                 <MenuFlyoutItem x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
             </muxc:MenuBarItem>
             <!-- 書体メニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_font" AccessKey="T" Title="Font">
+            <muxc:MenuBarItem x:Uid="mbi_font_menu" AccessKey="T" Title="Font">
                 <!-- 字体メニュー -->
                 <MenuFlyoutItem x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
                 <MenuFlyoutItem x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
@@ -654,7 +654,7 @@
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Color..." />
             </muxc:MenuBarItem>
             <!-- 用紙メニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_sheet" AccessKey="H" Title="Sheet">
+            <muxc:MenuBarItem x:Uid="mbi_men_sheet" AccessKey="H" Title="Sheet">
                 <!-- 方眼メニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_grid_show" Text="Show Grid">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_hide" x:Uid="rmfi_grid_show_hide" Click="grid_show_click" Text="Hide" GroupName="gn_grid_show"/>
@@ -731,7 +731,7 @@
 				<MenuFlyoutItem x:Name="mfi_pref_delete" x:Uid="mfi_pref_delete" Click="pref_delete_click_async" Text="Delete preference" />
             </muxc:MenuBarItem>
             <!-- その他メニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_misc" AccessKey="M" Title="Misc">
+            <muxc:MenuBarItem x:Uid="mbi_misc_menu" AccessKey="M" Title="Misc">
                 <MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_pixel" x:Uid="rmfi_len_unit_pixel" Click="len_unit_click" Text="Pixel" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_inch" x:Uid="rmfi_len_unit_inch" Click="len_unit_click" Text="Inch" />
@@ -759,7 +759,7 @@
             </muxc:MenuBarItem>
         </muxc:MenuBar>
         <!-- 文字列検索パネル -->
-        <StackPanel x:Name="sp_find_text" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
+        <StackPanel x:Name="sp_find_text_panel" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
             <Button Click="find_text_close_click" Background="White" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
             <StackPanel Padding="8,8,8,8">
                 <TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what"   Header="Find what"  Margin="0,4"    TextChanged="find_text_what_changed"    Width="128" />
@@ -774,7 +774,7 @@
             </StackPanel>
         </StackPanel>
         <!-- 図形一覧パネル -->
-		<Grid x:Name="rp_smry" x:Load="false" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" >
+		<Grid x:Name="gd_smry_panel" x:Load="false" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" >
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="*"/>
@@ -807,7 +807,7 @@
 
 		<!--</Grid>-->
         <!-- 用紙パネル -->
-        <RelativePanel x:Name="rp_sheet" Grid.Row="1" Grid.Column="0" >
+        <RelativePanel Grid.Row="1" Grid.Column="0" >
             <SwapChainPanel
                 x:Name="scp_sheet_panel"
                 Loaded="sheet_panel_loaded"
@@ -874,7 +874,7 @@
             <ScrollBar x:Name="sb_vert" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,0,16" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="true" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />
         </RelativePanel>
         <!-- ステータスバー -->
-        <StackPanel x:Name="sp_status_bar" Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
+        <StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
             <!-- ステータスバーコンテキストメニュー -->
             <StackPanel.ContextFlyout>
                 <MenuFlyout>
@@ -886,7 +886,7 @@
                     <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_zoom_2"   x:Uid="tmfi_status_bar_zoom"  Click="status_bar_click"    Text="Scale" />
                 </MenuFlyout>
             </StackPanel.ContextFlyout>
-            <StackPanel x:Name="sp_status_bar_draw" Margin="0,0,8,0"    Orientation="Horizontal">
+            <StackPanel x:Name="sp_status_bar_panel_draw" Margin="0,0,8,0"    Orientation="Horizontal">
                 <TextBlock  Margin="0,0,0,0"    Text="D:"/>
 				<PathIcon   x:Name="pi_draw"    Data="M0,0"  Height="16" HorizontalAlignment="Center"    VerticalAlignment="Center"  Width="16">
                     <PathIcon.RenderTransform>
@@ -904,35 +904,35 @@
             <!--<TextBlock x:Name="tk_status_bar_cnt" Margin="0,0,4,0" Text="0"/> -->
         </StackPanel>
         <!-- 文字列入力ダイアログ -->
-        <ContentDialog x:Name="cd_edit_text" x:Uid="cd_edit_text" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
+        <ContentDialog x:Name="cd_edit_text_dialog" x:Uid="cd_edit_text_dialog" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
             <StackPanel>
                 <TextBox x:Name="tx_edit" AcceptsReturn="True" Height="128" HorizontalAlignment="Stretch" PlaceholderText="Text" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
                 <CheckBox x:Name="ck_edit_text_frame" x:Uid="ck_edit_text_frame" Content="Fit Frame Size to Text" Margin="4,4" />
             </StackPanel>
         </ContentDialog>
         <!-- 貼り付け確認ダイアログ -->
-        <ContentDialog x:Name="cd_conf_paste" x:Uid="cd_conf_paste" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Paste">
+        <ContentDialog x:Name="cd_conf_paste_dialog" x:Uid="cd_conf_paste_dialog" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Paste">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
                 <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_conf}" />
                 <TextBlock x:Uid="tk_conf_paste" />
             </StackPanel>
         </ContentDialog>
         <!-- 保存確認ダイアログ -->
-        <ContentDialog x:Name="cd_conf_save" x:Uid="cd_conf_save" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Save" SecondaryButtonText="Don't Save">
+        <ContentDialog x:Name="cd_conf_save_dialog" x:Uid="cd_conf_save_dialog" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Save" SecondaryButtonText="Don't Save">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
                 <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_conf}" Margin="0,0,16,0" />
                 <TextBlock x:Uid="tk_conf_save"/>
             </StackPanel>
         </ContentDialog>
         <!-- メッセージダイアログ -->
-        <ContentDialog x:Name="cd_message" x:Uid="cd_message" CloseButtonText="Close" DefaultButton="Close">
+        <ContentDialog x:Name="cd_message_dialog" x:Uid="cd_message_dialog" CloseButtonText="Close" DefaultButton="Close">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
                 <FontIcon x:Name="fi_message" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_alert}" Margin="0,0,16,0"/>
                 <TextBlock x:Name="tk_message"/>
             </StackPanel>
         </ContentDialog>
         <!-- 用紙の大きさ入力ダイアログ -->
-        <ContentDialog x:Name="cd_sheet_size" x:Uid="cd_sheet_size" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
+        <ContentDialog x:Name="cd_sheet_size_dialog" x:Uid="cd_sheet_size_dialog" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
             <StackPanel >
                 <TextBox x:Name="tx_sheet_width" x:Uid="tx_sheet_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="sheet_size_text_changed" />
                 <TextBox x:Name="tx_sheet_height" x:Uid="tx_sheet_height" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="sheet_size_text_changed" />
@@ -940,7 +940,7 @@
             </StackPanel>
         </ContentDialog>
         <!-- 属性入力ダイアログ -->
-        <ContentDialog x:Name="cd_sample" CloseButtonText="Close" DefaultButton="Close" Opened="sample_opened" PrimaryButtonText="Apply" >
+        <ContentDialog x:Name="cd_sample_dialog" CloseButtonText="Close" DefaultButton="Close" Opened="sample_opened" PrimaryButtonText="Apply" >
             <RelativePanel>
                 <SwapChainPanel
                     x:Name="scp_sample_panel"

@@ -29,8 +29,8 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_3().Visibility(UI_VISIBLE);
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_GRAY, 3> });
 		m_sample_type = SAMP_TYPE::NONE;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_sheet.get_grid_gray(sample_value);
@@ -61,8 +61,8 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_BASE, 0> });
 		m_sample_type = SAMP_TYPE::NONE;
-		cd_sample().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
-		const auto d_result = co_await cd_sample().ShowAsync();
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			float sheet_value;
