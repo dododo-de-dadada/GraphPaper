@@ -21,7 +21,7 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().PrimaryButtonText(L"");
 		cd_sample_dialog().CloseButtonText(L"OK");
 		cd_sample_dialog().Title(box_value(L"GraphPaper"));
-		m_sample_type = SAMP_TYPE::MISC;
+		m_sample_type = SAMPLE_TYPE::MISC;
 		co_await cd_sample_dialog().ShowAsync();
 		cd_sample_dialog().PrimaryButtonText(pri_text);
 		cd_sample_dialog().CloseButtonText(close_text);

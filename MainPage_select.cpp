@@ -27,8 +27,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// 図形一覧の排他制御が true か判定する.
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-			smry_select_all();
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			summary_select_all();
 		}
 		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_is_enabled();
@@ -48,8 +48,8 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_selected() != true) {
 					undo_push_select(s);
 					// 図形一覧の排他制御が true か判定する.
-					if (m_smry_atomic.load(std::memory_order_acquire)) {
-						smry_select(s);
+					if (m_summary_atomic.load(std::memory_order_acquire)) {
+						summary_select(s);
 					}
 					flag = true;
 				}
@@ -58,8 +58,8 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_selected()) {
 					undo_push_select(s);
 					// 図形一覧の排他制御が true か判定する.
-					if (m_smry_atomic.load(std::memory_order_acquire)) {
-						smry_unselect(s);
+					if (m_summary_atomic.load(std::memory_order_acquire)) {
+						summary_unselect(s);
 					}
 					flag = true;
 				}
@@ -72,48 +72,6 @@ namespace winrt::GraphPaper::implementation
 	// 次の図形を選択する.
 	template <VirtualKeyModifiers M, VirtualKey K> void MainPage::select_next_shape(void)
 	{
-		//if (m_smry_atomic.load(std::memory_order_acquire)) {
-		//	return;
-		//}
-		/*
-		if (m_event_shape_smry == nullptr) {
-			auto s_prev = event_shape_prev();
-			if (s_prev != nullptr && s_prev->is_selected()) {
-				m_event_shape_smry = s_prev;
-			}
-			else {
-				if (s_prev == nullptr) {
-					if constexpr (K == VirtualKey::Down) {
-						m_event_shape_smry = slist_front(m_list_shapes);
-					}
-					if constexpr (K == VirtualKey::Up) {
-						m_event_shape_smry = slist_back(m_list_shapes);
-					}
-					m_event_shape_prev = m_event_shape_smry;
-				}
-				else {
-					m_event_shape_smry = s_prev;
-				}
-				undo_push_select(m_event_shape_smry);
-				// 編集メニュー項目の使用の可否を設定する.
-				edit_menu_is_enabled();
-				sheet_draw();
-				if constexpr (K == VirtualKey::Down) {
-					// 図形一覧の排他制御が true か判定する.
-					if (m_smry_atomic.load(std::memory_order_acquire)) {
-						smry_select_head();
-					}
-				}
-				if constexpr (K == VirtualKey::Up) {
-					// 図形一覧の排他制御が true か判定する.
-					if (m_smry_atomic.load(std::memory_order_acquire)) {
-						smry_select_tail();
-					}
-				}
-				return;
-			}
-		}
-		*/
 		Shape* s = static_cast<Shape*>(nullptr);
 		if constexpr (K == VirtualKey::Down) {
 			if (m_event_shape_prev == nullptr) {
@@ -124,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 				s = slist_next(m_list_shapes, m_event_shape_prev);
 			}
 			if (s != nullptr) {
-				//m_event_shape_smry = s;
+				//m_event_shape_summary = s;
 				goto SEL;
 			}
 		}
@@ -137,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 				s = slist_prev(m_list_shapes, m_event_shape_prev);
 			}
 			if (s != nullptr) {
-				//m_event_shape_smry = s;
+				//m_event_shape_summary = s;
 				goto SEL;
 			}
 		}
@@ -153,8 +111,8 @@ namespace winrt::GraphPaper::implementation
 			unselect_all();
 			undo_push_select(s);
 			// 図形一覧の排他制御が true か判定する.
-			if (m_smry_atomic.load(std::memory_order_acquire)) {
-				smry_select(s);
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
+				summary_select(s);
 			}
 		}
 		// 編集メニュー項目の使用の可否を設定する.
@@ -201,8 +159,8 @@ namespace winrt::GraphPaper::implementation
 						flag = true;
 						undo_push_select(s);
 						// 図形一覧の排他制御が true か判定する.
-						if (m_smry_atomic.load(std::memory_order_acquire)) {
-							smry_unselect(s);
+						if (m_summary_atomic.load(std::memory_order_acquire)) {
+							summary_unselect(s);
 						}
 					}
 					break;
@@ -213,8 +171,8 @@ namespace winrt::GraphPaper::implementation
 					flag = true;
 					undo_push_select(s);
 					// 図形一覧の排他制御が true か判定する.
-					if (m_smry_atomic.load(std::memory_order_acquire)) {
-						smry_select(s);
+					if (m_summary_atomic.load(std::memory_order_acquire)) {
+						summary_select(s);
 					}
 				}
 				if (s == s_end) {
@@ -228,27 +186,28 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を選択する.
-	void MainPage::select_shape(Shape* const s, const VirtualKeyModifiers vk_mod)
+	void MainPage::select_shape(Shape* const s, const VirtualKeyModifiers k_mod)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ListViewItem;
-		if (vk_mod == VirtualKeyModifiers::Control) {
-			// コントロールキーが押されている場合,
+
+		// コントロールキーが押されているか判定する.
+		if (k_mod == VirtualKeyModifiers::Control) {
 			undo_push_select(s);
 			edit_menu_is_enabled();
 			sheet_draw();
 			// 図形一覧の排他制御が true か判定する.
-			if (m_smry_atomic.load(std::memory_order_acquire)) {
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				if (s->is_selected()) {
-					smry_select(s);
+					summary_select(s);
 				}
 				else {
-					smry_unselect(s);
+					summary_unselect(s);
 				}
 			}
 			m_event_shape_prev = s;
 		}
-		else if (vk_mod == VirtualKeyModifiers::Shift) {
-			// シフトキーが押されている場合
+		// シフトキーが押されているか判定する.
+		else if (k_mod == VirtualKeyModifiers::Shift) {
 			// 前回ポインターが押された図形から今回押された図形までの
 			// 範囲にある図形を選択して, そうでない図形を選択しない.
 			if (m_event_shape_prev == nullptr) {
@@ -260,17 +219,17 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		// シフトキーもコントロールキーもどちらも押されていない場合
 		else {
-			// 図形の選択フラグがないか判定する.
+			// シフトキーもコントロールキーも押されてないならば,
+			// 図形の選択フラグが立ってないか判定する.
 			if (!s->is_selected()) {
 				unselect_all();
 				undo_push_select(s);
 				edit_menu_is_enabled();
 				sheet_draw();
 				// 図形一覧の排他制御が true か判定する.
-				if (m_smry_atomic.load(std::memory_order_acquire)) {
-					smry_select(s);
+				if (m_summary_atomic.load(std::memory_order_acquire)) {
+					summary_select(s);
 				}
 			}
 			m_event_shape_prev = s;
@@ -296,12 +255,12 @@ namespace winrt::GraphPaper::implementation
 			if (s->in_area(a_min, a_max)) {
 				undo_push_select(s);
 				// 図形一覧の排他制御が true か判定する.
-				if (m_smry_atomic.load(std::memory_order_acquire)) {
+				if (m_summary_atomic.load(std::memory_order_acquire)) {
 					if (s->is_selected() != true) {
-						smry_select(s);
+						summary_select(s);
 					}
 					else {
-						smry_unselect(s);
+						summary_unselect(s);
 					}
 				}
 				flag = true;
@@ -346,10 +305,34 @@ namespace winrt::GraphPaper::implementation
 			flag = true;
 		}
 		// 図形一覧の排他制御が true か判定する.
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-			smry_unselect_all();
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			summary_unselect_all();
 		}
 		return flag;
+	}
+
+	// Shift + 下矢印キーが押された.
+	void MainPage::kacc_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	{
+		select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Down>();
+	}
+
+	// Shift + 上矢印キーが押された.
+	void MainPage::kacc_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	{
+		select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Up>();
+	}
+
+	// 下矢印キーが押された.
+	void MainPage::kacc_select_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	{
+		select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
+	}
+
+	// 上矢印キーが押された.
+	void MainPage::kacc_select_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	{
+		select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
 	}
 
 }

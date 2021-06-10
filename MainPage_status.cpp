@@ -240,7 +240,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
-		const auto t_draw = tool_draw();
+		const auto t_draw = m_tool_draw;
 		winrt::hstring data;
 		if (t_draw == DRAW_TOOL::BEZI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));

@@ -74,8 +74,8 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(w);
 		m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(h);
 		m_sample_dx.SetSwapChainPanel(scp_sample_panel());
-		if (m_sample_type != SAMP_TYPE::NONE) {
-			if (m_sample_type == SAMP_TYPE::FONT) {
+		if (m_sample_type != SAMPLE_TYPE::NONE) {
+			if (m_sample_type == SAMPLE_TYPE::FONT) {
 				using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 				const auto pad_w = w * 0.125;
 				const auto pad_h = h * 0.25;
@@ -91,19 +91,19 @@ namespace winrt::GraphPaper::implementation
 				}
 				m_sample_shape = new ShapeText(s_pos, diff, wchar_cpy(text), &m_sample_sheet);
 			}
-			else if (m_sample_type == SAMP_TYPE::STROKE) {
+			else if (m_sample_type == SAMPLE_TYPE::STROKE) {
 				const auto pad = w * 0.125;
 				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
 				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
 				m_sample_shape = new ShapeLineA(s_pos, diff, &m_sample_sheet);
 			}
-			else if (m_sample_type == SAMP_TYPE::FILL) {
+			else if (m_sample_type == SAMPLE_TYPE::FILL) {
 				const auto pad = w * 0.125;
 				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
 				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
 				m_sample_shape = new ShapeRect(s_pos, diff, &m_sample_sheet);
 			}
-			else if (m_sample_type == SAMP_TYPE::JOIN) {
+			else if (m_sample_type == SAMPLE_TYPE::JOIN) {
 				const auto pad = w * 0.125;
 				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
 				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
@@ -114,7 +114,7 @@ namespace winrt::GraphPaper::implementation
 				m_sample_shape->set_anchor_pos(D2D1_POINT_2F{ static_cast<FLOAT>(w * 0.25),  static_cast<FLOAT>(h * 0.5) }, ANCH_TYPE::ANCH_P0 + 1);
 				m_sample_shape->set_anchor_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 + offset) }, ANCH_TYPE::ANCH_P0 + 2);
 			}
-			else if (m_sample_type == SAMP_TYPE::MISC) {
+			else if (m_sample_type == SAMPLE_TYPE::MISC) {
 				constexpr uint32_t misc_min = 3;
 				constexpr uint32_t misc_max = 64;
 				static uint32_t misc_cnt = misc_min;

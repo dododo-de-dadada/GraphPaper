@@ -236,9 +236,9 @@ namespace winrt::GraphPaper::implementation
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-		//if (m_smry_visible) {
-			smry_update();
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
+			summary_update();
 		}
 	}
 
@@ -281,9 +281,9 @@ namespace winrt::GraphPaper::implementation
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-		//if (m_smry_visible) {
-			smry_update();
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+		//if (m_summary_visible) {
+			summary_update();
 		}
 	}
 
@@ -307,7 +307,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作を実行する.
 	void MainPage::undo_exec(Undo* u)
 	{
-		smry_reflect(u);
+		summary_reflect(u);
 		u->exec();
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoAttr<UNDO_OP::ARROW_STYLE>)) {
@@ -412,7 +412,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を入れ替えて, その操作をスタックに積む.
-	void MainPage::undo_push_arrng(Shape* s, Shape* t)
+	void MainPage::undo_push_arrange(Shape* s, Shape* t)
 	{
 		m_stack_undo.push_back(new UndoArrange2(s, t));
 	}

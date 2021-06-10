@@ -116,12 +116,12 @@ namespace winrt::GraphPaper::implementation
 			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
 		// 図形一覧の排他制御が true か判定する.
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			if (m_list_shapes.empty()) {
-				smry_close();
+				summary_close();
 			}
 			else {
-				smry_remake();
+				summary_remake();
 			}
 		}
 		sheet_update_bbox();
@@ -357,7 +357,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		/*
 		// 操作スタックの更新フラグが立っているか判定する.
-		if (undo_pushed()) {
+		if (m_stack_updt) {
 			// 確認ダイアログを表示し, 結果を得る.
 			const auto dres = co_await cd_conf_save_dialog().ShowAsync();
 			// ダイアログの結果がキャンセルか判定する.
@@ -629,7 +629,7 @@ namespace winrt::GraphPaper::implementation
 			// ここでエラーが出る.
 			file_recent_add(s_file);
 			// false を操作スタックの更新フラグに格納する.
-			undo_pushed(false);
+			m_stack_updt = false;
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;

@@ -382,7 +382,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_font_color.Text" xml:space="preserve">
-    <value>Color...</value>
+    <value>Font Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_font_family.Text" xml:space="preserve">
@@ -477,8 +477,8 @@
     <value>Width...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_smry.Text" xml:space="preserve">
-    <value>Summary List</value>
+  <data name="mfi_summary_list.Text" xml:space="preserve">
+    <value>List Summary</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_text_line_sp.Text" xml:space="preserve">
@@ -902,7 +902,7 @@
     <value>Close</value>
     <comment>Button</comment>
   </data>
-  <data name="btn_smry_close.Content" xml:space="preserve">
+  <data name="btn_summary_close.Content" xml:space="preserve">
     <value>Close</value>
     <comment>Button</comment>
   </data>
@@ -950,7 +950,7 @@
     <value>Emphasize the 2nd and 10th</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_arrng.Text" xml:space="preserve">
+  <data name="mfsi_arrange.Text" xml:space="preserve">
     <value>Arrange</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>

@@ -224,7 +224,7 @@ namespace winrt::GraphPaper::implementation
 		return slist_next(slist.begin(), slist.end(), _);
 	}
 
-	// 位置を含む図形とその部位を判定する.
+	// 位置を含む図形とその部位を得る.
 	// slist	図形リスト
 	// t_pos	判定する位置
 	// s	位置を含む図形
@@ -233,7 +233,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
 		for (auto it = slist.rbegin(); it != slist.rend(); it++) {
-			auto t = *it;
+			const auto t = *it;
 			if (t->is_deleted()) {
 				continue;
 			}
@@ -246,23 +246,6 @@ namespace winrt::GraphPaper::implementation
 				return anch;
 			}
 		}
-		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
-		/*
-		for (auto it = slist.rbegin(); it != slist.rend(); it++) {
-			auto t = *it;
-			if (t->is_deleted()) {
-				continue;
-			}
-			if (t->is_selected()) {
-				continue;
-			}
-			const auto a = t->hit_test(t_pos, a_len);
-			if (a != ANCH_TYPE::ANCH_SHEET) {
-				s = t;
-				return a;
-			}
-		}
-		*/
 		return ANCH_TYPE::ANCH_SHEET;
 	}
 

@@ -104,7 +104,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 3> });
-		m_sample_type = SAMP_TYPE::FONT;
+		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -170,7 +170,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_sample_lview().Visibility(UI_VISIBLE);
-		m_sample_type = SAMP_TYPE::FONT;
+		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -296,7 +296,7 @@ namespace winrt::GraphPaper::implementation
 		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_SIZE, 0> });
-		m_sample_type = SAMP_TYPE::FONT;
+		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -353,7 +353,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_sample_lview().Visibility(UI_VISIBLE);
-		m_sample_type = SAMP_TYPE::FONT;
+		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -455,7 +455,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_sample_lview().Visibility(UI_VISIBLE);
-		m_sample_type = SAMP_TYPE::FONT;
+		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

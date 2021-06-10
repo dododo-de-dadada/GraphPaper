@@ -11,7 +11,7 @@ namespace winrt::GraphPaper::implementation
 {
 	// 再描画が必要になった
 	// sender	イベントが発生した表示デバイス
-	void MainPage::disp_contents_invalidated(DisplayInformation const& sender, IInspectable const&)
+	void MainPage::display_contents_invalidated(DisplayInformation const& sender, IInspectable const&)
 	{
 #if defined(_DEBUG)
 		if (sender != DisplayInformation::GetForCurrentView()) {
@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 表示デバイスの DPI が変わった
 	// sender	イベントが発生した表示デバイス
-	void MainPage::disp_dpi_changed(DisplayInformation const& sender, IInspectable const&)
+	void MainPage::display_dpi_changed(DisplayInformation const& sender, IInspectable const&)
 	{
 #if defined(_DEBUG)
 		if (sender == DisplayInformation::GetForCurrentView()) {
@@ -58,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 表示デバイスの向きが変わった
 	// sender	イベントが発生した表示デバイス
-	void MainPage::disp_orientation_changed(DisplayInformation const& sender, IInspectable const&)
+	void MainPage::display_orientation_changed(DisplayInformation const& sender, IInspectable const&)
 	{
 #if defined(_DEBUG)
 		if (sender != DisplayInformation::GetForCurrentView()) {

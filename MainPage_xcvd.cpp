@@ -88,10 +88,10 @@ namespace winrt::GraphPaper::implementation
 		slist_selected<Shape>(m_list_shapes, list_selected);
 		m_dx_mutex.lock();
 		for (auto s : list_selected) {
-			if (m_smry_atomic.load(std::memory_order_acquire)) {
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				// 図形一覧の表示フラグが立っている場合,
 				// 図形を一覧から消去する.
-				smry_remove(s);
+				summary_remove(s);
 			}
 			// 図形を削除して, その操作をスタックに積む.
 			undo_push_remove(s);
@@ -149,8 +149,8 @@ namespace winrt::GraphPaper::implementation
 						unselect_all();
 						// 得られたリストの各図形について以下を繰り返す.
 						for (auto s : slist_pasted) {
-							if (m_smry_atomic.load(std::memory_order_acquire)) {
-								smry_append(s);
+							if (m_summary_atomic.load(std::memory_order_acquire)) {
+								summary_append(s);
 							}
 							undo_push_append(s);
 							sheet_update_bbox(s);
@@ -219,9 +219,9 @@ namespace winrt::GraphPaper::implementation
 						undo_push_select(t);
 						undo_push_null();
 						m_dx_mutex.unlock();
-						if (m_smry_atomic.load(std::memory_order_acquire)) {
-							smry_append(t);
-							smry_select(t);
+						if (m_summary_atomic.load(std::memory_order_acquire)) {
+							summary_append(t);
+							summary_select(t);
 						}
 						edit_menu_is_enabled();
 						sheet_update_bbox(t);

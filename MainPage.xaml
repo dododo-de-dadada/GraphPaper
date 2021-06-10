@@ -13,44 +13,45 @@
             <!-- フォントアイコンのグリフ -->
             <x:String x:Key="icon_info">&#xE946;</x:String>
             <x:String x:Key="icon_alert">&#xEA39;</x:String>
-            <x:String x:Key="icon_arrng">&#xE8CB;</x:String>
+            <x:String x:Key="icon_arrange">&#xE8CB;</x:String>
             <x:String x:Key="icon_conf">&#xE9CE;</x:String>
             <x:String x:Key="icon_save_as">&#xE792;</x:String>
             <x:String x:Key="icon_recent">&#xE81C;</x:String>
             <x:String x:Key="icon_close">&#xE894;</x:String>
             <x:String x:Key="icon_italic">&#xE8DB;</x:String>
 			<x:String x:Key="icon_ibeam">&#xE933;</x:String>
-			<x:String x:Key="icon_fit_page">&#xE9A6;</x:String>
-            <!-- 曲線アイコンの描画コマンド -->
+			<FontIcon x:Key="ic_fit_page" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE9A6;"/>
+			<FontIcon x:Key="ic_fit_page_2" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE9A6;"/>
+			<!-- 曲線アイコンの描画コマンド -->
             <x:String x:Key="data_bezi">
                 M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841 L15.310918,7.967942 C8.311178,14.40621 8.311178,0.405251 -0.032292,7.249824 Z
             </x:String>
             <!-- 破線アイコンの描画コマンド -->
             <x:String x:Key="data_dash">
-                M0,8 L3,8 L3,9 L0,9 Z
-                M6,8 L10,8 L10,9 L6,9 Z
-                M13,8 L16,8 L16,9 L13,9 Z
+				M0,8 L3,8 L3,9.5 L0,9.5 Z
+                M6,8 L10,8 L10,9.5 L6,9.5 Z
+                M13,8 L16,8 L16,9.5 L13,9.5 Z
             </x:String>
             <!-- 点線アイコンの描画コマンド -->
             <x:String x:Key="data_dot">
-                M0, 8 L0.5, 8 L0.5, 9 L0, 9 Z
-                M3.5, 8 L4.5, 8 L4.5, 9 L3.5, 9 Z
-                M7.5, 8 L8.5, 8 L8.5, 9 L7.5, 9 Z
-                M11.5, 8 L12.5, 8 L12.5, 9 L11.5, 9 Z
-                M15.5, 8 L16, 8 L16, 9 L15.5, 9 Z
+				M   0, 8 L 1.8, 8 L 1.8, 9.5 L   0, 9.5 Z
+                M 3.5, 8 L 5.3, 8 L 5.3, 9.5 L 3.5, 9.5 Z
+                M 7.1, 8 L 8.9, 8 L 8.9, 9.5 L 7.1, 9.5 Z
+                M10.7, 8 L12.4, 8 L12.4, 9.5 L10.7, 9.5 Z
+                M14.2, 8 L16.0, 8 L16.0, 9.5 L14.2, 9.5 Z
             </x:String>
             <!-- 一点破線アイコンの描画コマンド -->
             <x:String x:Key="data_dash_dot">
-                M0.5, 8 L4.5, 8 L4.5, 9 L0.5, 9 Z
-                M7.5, 8 L8.5, 8 L8.5, 9 L7.5, 9 Z
-                M11.5, 8 L15.5, 8 L15.5, 9 L11.5, 9 Z
+                M 0.5, 8 L 4.5, 8 L 4.5, 9.5 L 0.5, 9.5 Z
+                M 7.5, 8 L 8.5, 8 L 8.5, 9.5 L 7.5, 9.5 Z
+                M11.5, 8 L15.5, 8 L15.5, 9.5 L11.5, 9.5 Z
             </x:String>
             <!-- 二点破線アイコンの描画コマンド -->
             <x:String x:Key="data_dash_dot_dot">
-                M0, 8 L2.5, 8 L2.5, 9 L0, 9 Z
-                M5.5, 8 L6.5, 8 L6.5, 9 L5.5, 9 Z
-                M9.5, 8 L10.5, 8 L10.5, 9 L9.5, 9 Z
-                M13.5, 8 L16, 8 L16, 9 L13.5, 9 Z
+                M   0, 8 L 2.5, 8 L 2.5, 9.5 L   0, 9.5 Z
+                M 5.5, 8 L 6.5, 8 L 6.5, 9.5 L 5.5, 9.5 Z
+                M 9.5, 8 L10.5, 8 L10.5, 9.5 L 9.5, 9.5 Z
+                M13.5, 8 L16.0, 8 L16.0, 9.5 L13.5, 9.5 Z
             </x:String>
             <!-- だ円アイコンの描画コマンド -->
             <x:String x:Key="data_elli">
@@ -227,12 +228,7 @@
 				</MenuFlyoutItem>
 				<!--文字列の検索と置換 -->
 				<MenuFlyoutItem x:Uid="mfi_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text" />
-				<MenuFlyoutItem x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Text="Fit Frame Size to" >
-					<MenuFlyoutItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_fit_page}"/>
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-				<MenuFlyoutSeparator />
+				<MenuFlyoutItem x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Icon="{StaticResource ic_fit_page_2}" Text="Fit Frame Size to" />
                 <!-- 書体の種類 -->
 				<MenuFlyoutItem x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
                 <MenuFlyoutItem x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
@@ -259,7 +255,7 @@
                 <MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
                 <MenuFlyoutItem x:Uid="mfi_text_margin" Click="text_margin_click_async" Text="Margin..." />
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Font Color..." />
             </MenuFlyout>
             <!-- 用紙コンテキストメニュー -->
             <MenuFlyout x:Key="mf_sheet_menu">
@@ -269,7 +265,7 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_back_2" x:Uid="rmfi_grid_show_back" Click="grid_show_click" IsChecked="True" Text="Back" GroupName="gn_grid_show_2"/>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_front_2" x:Uid="rmfi_grid_show_front" Click="grid_show_click" Text="Front" GroupName="gn_grid_show_2"/>
                 </MenuFlyoutSubItem>
-                <ToggleMenuFlyoutItem x:Name="tmfi_grid_snap_2" x:Uid="tmfi_grid_snap" Click="grid_snap_click"  Text="Snap to Grid" />
+                <ToggleMenuFlyoutItem x:Name="tmfi_grid_snap_2" x:Uid="tmfi_grid_snap" Click="grid_snap_click" Text="Snap to Grid" />
                 <MenuFlyoutSubItem x:Uid="mfsi_grid_len" Text="Size Grid">
                     <MenuFlyoutItem x:Uid="mfi_grid_len_con" Click="grid_len_con_click" Text="Condense" />
                     <MenuFlyoutItem x:Uid="mfi_grid_len_exp" Click="grid_len_exp_click" Text="Expand" />
@@ -283,8 +279,8 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_3_2" x:Uid="rmfi_grid_emph_3" Click="grid_emph_click" Text="Emphasize the 2nd and 5th" GroupName="gn_grid_emph_2" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Uid="mfi_sheet_size" Click="sheet_size_click_async" Text="Size..." />
-                <MenuFlyoutItem x:Uid="mfi_sheet_color" Click="sheet_color_click_async" Text="Color..." />
+				<MenuFlyoutItem x:Uid="mfi_sheet_size" Click="sheet_size_click_async" Text="Sheet Size..." />
+                <MenuFlyoutItem x:Uid="mfi_sheet_color" Click="sheet_color_click_async" Text="Sheet Color..." />
                 <MenuFlyoutSubItem x:Uid="mfsi_sheet_zoom" Text="Zoom">
 					<MenuFlyoutItem x:Name="mfi_sheet_zoom_025_2" Click="sheet_zoom_click" Icon="ZoomOut" Text="25%" />
 					<MenuFlyoutItem x:Name="mfi_sheet_zoom_050_2" Click="sheet_zoom_click" Icon="ZoomOut" KeyboardAcceleratorTextOverride="Ctrl+0" Text="50%" />
@@ -314,7 +310,7 @@
             <MenuFlyout x:Key="mf_menu_ungroup">
                 <MenuFlyoutItem x:Name="mfi_ungroup_2" x:Uid="mfi_ungroup" Click="ungroup_click" KeyboardAcceleratorTextOverride="Ctrl+U" Text="Ungroup" >
                     <MenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_ungroup}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16"  />
+                        <PathIcon Data="{StaticResource data_ungroup}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
             </MenuFlyout>
@@ -331,7 +327,7 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <!-- メインメニュー -->
-        <muxc:MenuBar Grid.Row="0" Grid.ColumnSpan="2" Background="{ThemeResource SystemBaseLowColor}">
+        <muxc:MenuBar Grid.Row="0" Grid.ColumnSpan="2" Background="{ThemeResource AppBarBackgroundThemeBrush}">
             <!-- ファイルメニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_menu_file" AccessKey="F" Title="File" >
 				<MenuFlyoutItem x:Name="mfi_new" x:Uid="mfi_new" Click="new_click_async" Icon="Page2" Text="New" >
@@ -401,7 +397,8 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="mfi_xcvd_delete" x:Uid="mfi_xcvd_delete" Click="xcvd_delete_click" Icon="Delete" IsEnabled="False" Text="Delete" >
                     <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="Delete" />
+						<KeyboardAccelerator Key="D" Modifiers="Control" />
+						<KeyboardAccelerator Key="Delete" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
@@ -410,26 +407,26 @@
                         <KeyboardAccelerator Key="A" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_arrng" Text="Arrange">
+                <MenuFlyoutSubItem x:Uid="mfsi_arrange" Text="Arrange">
                     <MenuFlyoutSubItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_arrng}" />
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_arrange}" />
                     </MenuFlyoutSubItem.Icon>
-                    <MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="arrng_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
+                    <MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="arrange_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="End" Modifiers="Control" />
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward" Click="arrng_bring_forward_click" IsEnabled="false" Text="Bring Forward">
+                    <MenuFlyoutItem x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward" Click="arrange_bring_forward_click" IsEnabled="false" Text="Bring Forward">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="PageDown" Modifiers="Control" />
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_send_backward" x:Uid="mfi_send_backward" Click="arrng_send_backward_click" IsEnabled="false" Text="Send Backward" >
+                    <MenuFlyoutItem x:Name="mfi_send_backward" x:Uid="mfi_send_backward" Click="arrange_send_backward_click" IsEnabled="false" Text="Send Backward" >
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="PageUp" Modifiers="Control" />
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back" Click="arrng_send_to_back_click" IsEnabled="false" Text="Send to Back">
+                    <MenuFlyoutItem x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back" Click="arrange_send_to_back_click" IsEnabled="false" Text="Send to Back">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="Home" Modifiers="Control" />
                         </MenuFlyoutItem.KeyboardAccelerators>
@@ -446,14 +443,14 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="mfi_ungroup" x:Uid="mfi_ungroup" Click="ungroup_click" IsEnabled="false" Text="Ungroup" >
                     <MenuFlyoutItem.Icon>
-                        <PathIcon  Data="{StaticResource data_ungroup}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16"  />
+                        <PathIcon  Data="{StaticResource data_ungroup}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </MenuFlyoutItem.Icon>
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="U" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_smry" x:Uid="mfi_smry" Click="mfi_smry_click" Icon="List" IsEnabled="false" Text="Summary List" >
+                <MenuFlyoutItem x:Name="mfi_summary_list" x:Uid="mfi_summary_list" Click="summary_list_click" Icon="List" IsEnabled="false" Text="List Summary" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="L" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -472,16 +469,15 @@
                         <KeyboardAccelerator Key="F" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-				<MenuFlyoutItem x:Name="mfi_edit_text_frame" x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Text="Fit Frame Size to" >
-					<MenuFlyoutItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_fit_page}"/>
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
+				<MenuFlyoutItem x:Name="mfi_edit_text_frame" x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Icon="{StaticResource ic_fit_page}" Text="Fit Frame Size to" />
 			</muxc:MenuBarItem>
             <!-- 作図ツールメニュー -->
             <muxc:MenuBarItem x:Uid="mbi_menu_tool_draw" AccessKey="D" Title="Draw">
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_select" x:Uid="rmfi_tool_select" Click="tool_draw_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Select">
-                    <muxc:RadioMenuFlyoutItem.Icon>
+					<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+						<KeyboardAccelerator Key="Escape" />
+					</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					<muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_select}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
@@ -627,9 +623,9 @@
                 <MenuFlyoutItem x:Uid="mfi_font_weight" Click="font_weight_click_async" Icon="Bold" Text="Weight..." />
                 <MenuFlyoutItem x:Uid="mfi_font_stretch" Click="font_stretch_click_async" Text="Stretch..."/>
                 <MenuFlyoutSubItem x:Uid="mfsi_font_style" Text="Style">
-                    <MenuFlyoutSubItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_italic}" />
-                    </MenuFlyoutSubItem.Icon>
+					<MenuFlyoutSubItem.Icon>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_italic}" />
+					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_normal" x:Uid="rmfi_font_style_normal" Click="font_style_normal_click" IsChecked="True" Text="Normal" GroupName="gn_font_style"/>
                     <MenuFlyoutSeparator />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_oblique" x:Uid="rmfi_font_style_oblique" Click="font_style_oblique_click" Text="Normal" GroupName="gn_font_style"/>
@@ -651,7 +647,7 @@
                 <MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
                 <MenuFlyoutItem x:Uid="mfi_text_margin" Click="text_margin_click_async" Text="Margin..." />
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Color..." />
+                <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Font Color..." />
             </muxc:MenuBarItem>
             <!-- 用紙メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_men_sheet" AccessKey="H" Title="Sheet">
@@ -662,7 +658,7 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_back" x:Uid="rmfi_grid_show_back" Click="grid_show_click" IsChecked="True" Text="Back" GroupName="gn_grid_show"/>
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_front" x:Uid="rmfi_grid_show_front" Click="grid_show_click" Text="Front" GroupName="gn_grid_show"/>
                 </MenuFlyoutSubItem>
-                <ToggleMenuFlyoutItem x:Name="tmfi_grid_snap" x:Uid="tmfi_grid_snap" Click="grid_snap_click"  Text="Snap to Grid" />
+                <ToggleMenuFlyoutItem x:Name="tmfi_grid_snap" x:Uid="tmfi_grid_snap" Click="grid_snap_click" Text="Snap to Grid" />
                 <MenuFlyoutSubItem x:Uid="mfsi_grid_len" Text="Size Grid">
                     <MenuFlyoutItem x:Uid="mfi_grid_len_con" Click="grid_len_con_click" Text="Condense" />
                     <MenuFlyoutItem x:Uid="mfi_grid_len_exp" Click="grid_len_exp_click" Text="Expand" />
@@ -677,8 +673,8 @@
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- 用紙メニュー -->
-                <MenuFlyoutItem x:Uid="mfi_sheet_size" Click="sheet_size_click_async" Text="Size..." />
-                <MenuFlyoutItem x:Uid="mfi_sheet_color" Click="sheet_color_click_async" Text="Color..." />
+				<MenuFlyoutItem x:Uid="mfi_sheet_size" Click="sheet_size_click_async" Text="Sheet Size..." />
+                <MenuFlyoutItem x:Uid="mfi_sheet_color" Click="sheet_color_click_async" Text="Sheet Color..." />
                 <MenuFlyoutSubItem x:Uid="mfsi_sheet_zoom" Text="Zoom">
                     <!--
                     <MenuFlyoutItem x:Uid="mfi_sheet_zoom_in" Click="mfi_sheet_zoom_in_clicked" Icon="ZoomIn" Text="In" />
@@ -762,29 +758,29 @@
         <StackPanel x:Name="sp_find_text_panel" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
             <Button Click="find_text_close_click" Background="White" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
             <StackPanel Padding="8,8,8,8">
-                <TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what"   Header="Find what"  Margin="0,4"    TextChanged="find_text_what_changed"    Width="128" />
-                <TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with"    Header="Replace width"  Margin="0,4"    Width="128" />
-                <CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case"   Content="Match case."   Margin="0,4" />
-                <CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap"   Content="Wrap around."  Margin="0,4" />
+                <TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what" Header="Find what" Margin="0,4" TextChanged="find_text_what_changed" Width="128" />
+                <TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" Header="Replace width" Margin="0,4" Width="128" />
+                <CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case" Content="Match case." Margin="0,4" />
+                <CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap" Content="Wrap around." Margin="0,4" />
                 <!--<CheckBox x:Name="ck_find_text_escs" x:Uid="ck_find_text_escs" Content="Use escape sequences." Margin="0,4" />-->
-                <Button x:Name="btn_find_text_next" x:Uid="btn_find_text_next"  Click="find_text_next_click"    Content="Find Next" HorizontalAlignment="Stretch"   Margin="0,4"    VerticalAlignment="Bottom" />
-                <Button x:Name="btn_find_replace"   x:Uid="btn_find_replace"    Click="find_replace_click"  Content="Replace"   HorizontalAlignment="Stretch"   Margin="0,4"    VerticalAlignment="Bottom" />
-                <Button x:Name="btn_find_replace_all"   x:Uid="btn_find_replace_all"    Click="find_replace_all_click"  Content="Replace All"   HorizontalAlignment="Stretch"   Margin="0,4"    VerticalAlignment="Bottom" />
-                <Button x:Uid="btn_find_text_close" Click="find_text_close_click"   Content="Close" HorizontalAlignment="Stretch"   VerticalAlignment="Bottom" />
+                <Button x:Name="btn_find_text_next" x:Uid="btn_find_text_next" Click="find_text_next_click" Content="Find Next" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
+                <Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="find_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
+                <Button x:Name="btn_find_replace_all" x:Uid="btn_find_replace_all" Click="find_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
+                <Button x:Uid="btn_find_text_close" Click="find_text_close_click" Content="Close" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
             </StackPanel>
         </StackPanel>
         <!-- 図形一覧パネル -->
-		<Grid x:Name="gd_smry_panel" x:Load="false" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" >
+		<Grid x:Name="gd_summary_panel" x:Load="false" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" >
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="*"/>
 				<RowDefinition Height="Auto"/>
 			</Grid.RowDefinitions>
-			<Button x:Name="btn_smry_close" x:Uid="btn_smry_close" Click="smry_close_click" Content="Close" Grid.Row="2" HorizontalAlignment="Stretch" Margin="12,12,12,12" />
-			<Button Click="smry_close_click" Background="{ThemeResource ButtonBackgroundThemeBrush}" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" Grid.Row="0" HorizontalAlignment="Right" />
-			<ListView x:Name="lv_smry" Grid.Row="1" IsItemClickEnabled="True" ItemClick="smry_item_click" Loaded="smry_loaded" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >
-				<!--<ListView x:Name="lv_smry" Grid.Row="1" IsItemClickEnabled="False" Loaded="smry_loaded" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >-->
-				<!--<ListView x:Name="lv_smry" IsItemClickEnabled="False" Loaded="smry_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True"  RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_smry_close" SelectionChanged="smry_selection_changed" SelectionMode="Extended" >-->
+			<Button x:Name="btn_summary_close" x:Uid="btn_summary_close" Click="summary_close_click" Content="Close" Grid.Row="2" HorizontalAlignment="Stretch" Margin="12,12,12,12" />
+			<Button Click="summary_close_click" Background="{ThemeResource ButtonBackgroundThemeBrush}" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" Grid.Row="0" HorizontalAlignment="Right" />
+			<ListView x:Name="lv_summary" Grid.Row="1" IsItemClickEnabled="True" ItemClick="summary_item_click" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >
+				<!--<ListView x:Name="lv_summary" Grid.Row="1" IsItemClickEnabled="False" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
+				<!--<ListView x:Name="lv_summary" IsItemClickEnabled="False" Loaded="summary_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_summary_close" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
 				<ListView.Header>
 					<TextBlock x:Name="tb_list_view_header" HorizontalAlignment="Center" Text="Back"/>
 				</ListView.Header>
@@ -818,7 +814,7 @@
                 PointerMoved="event_moved"
                 PointerPressed="event_pressed"
                 PointerReleased="event_released"
-                PointerWheelChanged="event_wheel_changed"                
+                PointerWheelChanged="event_wheel_changed"
                 RelativePanel.AlignLeftWithPanel="True"
                 RelativePanel.AlignTopWithPanel="True"
                 RelativePanel.AlignRightWithPanel="True"
@@ -840,7 +836,7 @@
                     <KeyboardAccelerator Invoked="kacc_range_prev_invoked" Key="Up" Modifiers="Shift" />
                     -->
                     <KeyboardAccelerator Invoked="kacc_tool_select_invoked" Key="Escape" />
-                <!--
+					<!--
                     <KeyboardAccelerator Invoked="kacc_select_prev_invoked" Key="Up" />
                     <KeyboardAccelerator Invoked="kacc_select_next_invoked" Key="Down" />
                     -->
@@ -874,21 +870,21 @@
             <ScrollBar x:Name="sb_vert" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,0,16" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="true" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />
         </RelativePanel>
         <!-- ステータスバー -->
-        <StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
+        <StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
             <!-- ステータスバーコンテキストメニュー -->
             <StackPanel.ContextFlyout>
                 <MenuFlyout>
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_draw_2"   x:Uid="tmfi_status_bar_draw"  Click="status_bar_click"    Text="Draw Tool" />
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_unit_2"   x:Uid="tmfi_status_bar_unit"  Click="status_bar_click"    Text="Unit Name" />
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_curs_2"   x:Uid="tmfi_status_bar_curs"  Click="status_bar_click"    Text="Cursor Pos" />
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_grid_2"   x:Uid="tmfi_status_bar_grid"  Click="status_bar_click"    Text="Grid Size" />
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_sheet_2"  x:Uid="tmfi_status_bar_sheet" Click="status_bar_click"    Text="Sheet Size" />
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_zoom_2"   x:Uid="tmfi_status_bar_zoom"  Click="status_bar_click"    Text="Scale" />
+                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_draw_2" x:Uid="tmfi_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
+                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_unit_2" x:Uid="tmfi_status_bar_unit" Click="status_bar_click" Text="Unit Name" />
+                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_curs_2" x:Uid="tmfi_status_bar_curs" Click="status_bar_click" Text="Cursor Pos" />
+                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_grid_2" x:Uid="tmfi_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
+                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_sheet_2" x:Uid="tmfi_status_bar_sheet" Click="status_bar_click" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_zoom_2" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
                 </MenuFlyout>
             </StackPanel.ContextFlyout>
-            <StackPanel x:Name="sp_status_bar_panel_draw" Margin="0,0,8,0"    Orientation="Horizontal">
-                <TextBlock  Margin="0,0,0,0"    Text="D:"/>
-				<PathIcon   x:Name="pi_draw"    Data="M0,0"  Height="16" HorizontalAlignment="Center"    VerticalAlignment="Center"  Width="16">
+            <StackPanel x:Name="sp_status_bar_panel_draw" Margin="0,0,8,0" Orientation="Horizontal">
+                <TextBlock  Margin="0,0,0,0" Text="D:"/>
+				<PathIcon   x:Name="pi_draw" Data="M0,0" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16">
                     <PathIcon.RenderTransform>
 						<ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
                     </PathIcon.RenderTransform>
@@ -944,7 +940,7 @@
             <RelativePanel>
                 <SwapChainPanel
                     x:Name="scp_sample_panel"
-                    BorderBrush="LightGray" BorderThickness="1" CornerRadius="1" Padding="1"
+                    BorderBrush="{ThemeResource ButtonBackgroundThemeBrush}" BorderThickness="1" CornerRadius="1" Padding="1"
                     Height="170"
                     Margin="0,0,0,8"
                     MaxHeight="170"

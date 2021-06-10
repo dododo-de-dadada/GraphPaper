@@ -423,8 +423,8 @@ namespace winrt::GraphPaper::implementation
 		//static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
 		static D2D1_COLOR_F m_range_background;	// 文字範囲の背景色
 		static D2D1_COLOR_F m_range_foreground;	// 文字範囲の文字色
-		static D2D1_COLOR_F m_theme_background;	// 前景色
-		static D2D1_COLOR_F m_theme_foreground;	// 背景色
+		static D2D1_COLOR_F m_default_background;	// 前景色
+		static D2D1_COLOR_F m_default_foreground;	// 背景色
 		//static winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush;	// 文字範囲の文字色ブラシ
 		//static winrt::com_ptr<ID2D1SolidColorBrush> m_shape_brush;	// 図形の色ブラシ
 		//static winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック

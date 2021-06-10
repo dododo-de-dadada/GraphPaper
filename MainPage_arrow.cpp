@@ -16,13 +16,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		ARROW_STYLE a_style;
-		if (sender == rmfi_arrow_style_none()) {
+		if (sender == rmfi_arrow_style_none() || sender == rmfi_arrow_style_none_2()) {
 			a_style = ARROW_STYLE::NONE;
 		}
-		else if (sender == rmfi_arrow_style_opened()) {
+		else if (sender == rmfi_arrow_style_opened() || sender == rmfi_arrow_style_opened_2()) {
 			a_style = ARROW_STYLE::OPENED;
 		}
-		else if (sender == rmfi_arrow_style_filled()) {
+		else if (sender == rmfi_arrow_style_filled() || sender == rmfi_arrow_style_filled_2()) {
 			a_style = ARROW_STYLE::FILLED;
 		}
 		else {
@@ -129,7 +129,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 2> });
-		m_sample_type = SAMP_TYPE::STROKE;
+		m_sample_type = SAMPLE_TYPE::STROKE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

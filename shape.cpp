@@ -18,8 +18,8 @@ namespace winrt::GraphPaper::implementation
 	float Shape::s_anch_len = 6.0f;
 	D2D1_COLOR_F Shape::m_range_background = RNG_BACK;	// •¶Žš”ÍˆÍ‚Ì”wŒiF
 	D2D1_COLOR_F Shape::m_range_foreground = RNG_TEXT;	// •¶Žš”ÍˆÍ‚Ì•¶ŽšF
-	D2D1_COLOR_F Shape::m_theme_background = S_WHITE;	// ‘OŒiF (ƒAƒ“ƒJ[‚Ì”wŒiF)
-	D2D1_COLOR_F Shape::m_theme_foreground = S_BLACK;	// ”wŒiF (ƒAƒ“ƒJ[‚Ì‘OŒiF)
+	D2D1_COLOR_F Shape::m_default_background = S_WHITE;	// ‘OŒiF (ƒAƒ“ƒJ[‚Ì”wŒiF)
+	D2D1_COLOR_F Shape::m_default_foreground = S_BLACK;	// ”wŒiF (ƒAƒ“ƒJ[‚Ì‘OŒiF)
 
 	// •¶Žš‚ª '0'...'9' ‚Ü‚½‚Í 'A'...'F', 'a'...'f' ‚©”»’è‚·‚é.
 	static bool is_hex(const wchar_t w, uint32_t& x) noexcept;
@@ -35,9 +35,9 @@ namespace winrt::GraphPaper::implementation
 		pt_add(r_min, Shape::s_anch_len, r_max);
 		const D2D1_RECT_F r{ r_min.x, r_min.y, r_max.x, r_max.y };
 
-		dx.m_shape_brush->SetColor(Shape::m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_default_background);
 		dx.m_d2dContext->DrawRectangle(r, dx.m_shape_brush.get(), 2.0, nullptr);
-		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
 		dx.m_d2dContext->FillRectangle(r, dx.m_shape_brush.get());
 	}
 
@@ -47,9 +47,9 @@ namespace winrt::GraphPaper::implementation
 	void anchor_draw_ellipse(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
 	{
 		const FLOAT rad = static_cast<FLOAT>(Shape::s_anch_len * 0.5 + 1.0);
-		dx.m_shape_brush->SetColor(Shape::m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_default_background);
 		dx.m_d2dContext->FillEllipse({ a_pos, rad, rad }, dx.m_shape_brush.get());
-		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
 		dx.m_d2dContext->FillEllipse({ a_pos, rad - 1.0F, rad - 1.0F }, dx.m_shape_brush.get());
 	}
 

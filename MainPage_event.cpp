@@ -115,7 +115,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 押された図形がグループ図形か判定する.
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeGroup)) {
-			scp_sheet_panel().ContextFlyout(m_menu_ungroup);
+			scp_sheet_panel().ContextFlyout(m_ungroup_menu);
 		}
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeRuler)) {
 			scp_sheet_panel().ContextFlyout(m_ruler_menu);
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形の作成を終了する.
 	void MainPage::event_finish_creating(const D2D1_POINT_2F diff)
 	{
-		const auto t_draw = tool_draw();
+		const auto t_draw = m_tool_draw;
 		Shape* s;
 		if (t_draw == DRAW_TOOL::RECT) {
 			s = new ShapeRect(m_event_pos_pressed, diff, &m_sheet_main);
@@ -187,7 +187,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeRRect(m_event_pos_pressed, diff, &m_sheet_main);
 		}
 		else if (t_draw == DRAW_TOOL::POLY) {
-			s = new ShapePoly(m_event_pos_pressed, diff, &m_sheet_main, tool_poly());
+			s = new ShapePoly(m_event_pos_pressed, diff, &m_sheet_main, m_tool_poly);
 		}
 		else if (t_draw == DRAW_TOOL::ELLI) {
 			s = new ShapeElli(m_event_pos_pressed, diff, &m_sheet_main);
@@ -212,15 +212,16 @@ namespace winrt::GraphPaper::implementation
 		undo_push_append(s);
 		undo_push_select(s);
 		undo_push_null();
-		m_event_shape_smry = m_event_shape_prev = s;
+		//m_event_shape_summary = 
+		m_event_shape_prev = s;
 		edit_menu_is_enabled();
 		sheet_update_bbox(s);
 		sheet_panle_size();
 		sheet_draw();
 		// 図形一覧の排他制御が true か判定する.
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-			smry_append(s);
-			smry_select(s);
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			summary_append(s);
+			summary_select(s);
 		}
 	}
 
@@ -246,14 +247,15 @@ namespace winrt::GraphPaper::implementation
 			undo_push_append(s);
 			undo_push_select(s);
 			undo_push_null();
-			m_event_shape_smry = m_event_shape_prev = s;
+			//m_event_shape_summary =
+			m_event_shape_prev = s;
 			edit_menu_is_enabled();
 			sheet_update_bbox(s);
 			sheet_panle_size();
 			// 図形一覧の排他制御が true か判定する.
-			if (m_smry_atomic.load(std::memory_order_acquire)) {
-				smry_append(s);
-				smry_select(s);
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
+				summary_append(s);
+				summary_select(s);
 			}
 		}
 		// ポインターの押された状態を初期状態に戻す.
@@ -394,7 +396,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_curs_style(void)
 	{
 		// 作図ツールが選択ツールでないか判定する.
-		if (tool_draw() != DRAW_TOOL::SELECT) {
+		if (m_tool_draw != DRAW_TOOL::SELECT) {
 			Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 			return;
 		}
@@ -514,7 +516,7 @@ namespace winrt::GraphPaper::implementation
 			// 差分の長さがクリックの判定距離を超えるか判定する.
 			if (pt_abs2(diff) > m_event_click_dist) {
 				// 作図ツールが選択ツールでないか判定する.
-				if (tool_draw() != DRAW_TOOL::SELECT) {
+				if (m_tool_draw != DRAW_TOOL::SELECT) {
 					// 範囲を選択している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_AREA;
 				}
@@ -585,14 +587,14 @@ namespace winrt::GraphPaper::implementation
 		case PointerDeviceType::Touch:
 				// ポインターの押された状態を判定する.
 				switch (m_event_state) {
-				// 押された状態がクリックした状態の場合
+				// 状態がクリックした状態の場合
 				case EVENT_STATE::CLICK:
 					if (t_stamp - m_event_time_pressed <= m_event_click_time) {
 						m_event_state = EVENT_STATE::CLICK_LBTN;
 					}
 					else {
 						[[fallthrough]];
-				// 押された状態が初期状態の場合
+				// 状態が初期状態の場合
 				case EVENT_STATE::BEGIN:
 				default:
 						m_event_state = EVENT_STATE::PRESS_LBTN;
@@ -611,7 +613,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_time_pressed = t_stamp;
 		m_event_pos_pressed = m_event_pos_curr;
 		// 作図ツールが選択ツールでないか判定する.
-		if (tool_draw() != DRAW_TOOL::SELECT) {
+		if (m_tool_draw != DRAW_TOOL::SELECT) {
 			return;
 		}
 		m_event_anch_pressed = slist_hit_test(m_list_shapes, m_event_pos_pressed, m_event_shape_pressed);
@@ -620,28 +622,18 @@ namespace winrt::GraphPaper::implementation
 			// 状態が左ボタンが押された状態, または右ボタンが押されていてかつ押された図形が選択されてないか判定す.
 			if (m_event_state == EVENT_STATE::PRESS_LBTN ||
 				(m_event_state == EVENT_STATE::PRESS_RBTN && !m_event_shape_pressed->is_selected())) {
-				//m_event_shape_smry = m_event_shape_pressed;
 				select_shape(m_event_shape_pressed, args.KeyModifiers());
 			}
 			return;
 		}
-		// ヌルを, ポインターが押された図形と前回ポインターが押された図形, 一覧でポインターが押された図形に格納する.
-		// ANCH_SHEET をポインターが押された部位に格納する.
 		m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;
 		m_event_shape_pressed = nullptr;
 		m_event_shape_prev = nullptr;
-		m_event_shape_smry = nullptr;
-		// キー修飾子をハンドラーの引数から得る.
-		if (args.KeyModifiers() != VirtualKeyModifiers::None) {
-			// キー修飾子が None でない場合
-			return;
+		// 修飾キーが押されていないならば, すべての図形の選択を解除し, 解除された図形があるか判定する.
+		if (args.KeyModifiers() == VirtualKeyModifiers::None && unselect_all()) {
+			edit_menu_is_enabled();
+			sheet_draw();
 		}
-		// 選択が解除された図形がない場合
-		if (!unselect_all()) {
-			return;
-		}
-		edit_menu_is_enabled();
-		sheet_draw();
 	}
 
 	// ポインターのボタンが上げられた.
@@ -689,7 +681,7 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 範囲選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			// 作図ツールが選択ツールか判定する.
-			if (tool_draw() == DRAW_TOOL::SELECT) {
+			if (m_tool_draw == DRAW_TOOL::SELECT) {
 				event_finish_selecting_area(args.KeyModifiers());
 			}
 			else {
@@ -709,7 +701,7 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F diff;
 				pt_sub(m_event_pos_curr, m_event_pos_pressed, diff);
 				if (fabs(diff.x) >= 1.0f || fabs(diff.y) >= 1.0f) {
-					if (tool_draw() == DRAW_TOOL::TEXT) {
+					if (m_tool_draw == DRAW_TOOL::TEXT) {
 						event_finish_creating_text_async(diff);
 						return;
 					}

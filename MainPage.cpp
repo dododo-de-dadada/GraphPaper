@@ -144,15 +144,15 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		// 操作スタックの更新フラグが立っているか判定する.
-		if (undo_pushed()) {
+		if (m_stack_updt) {
 			// 確認ダイアログを表示し, 結果を得る.
-			const auto dres = co_await cd_conf_save_dialog().ShowAsync();	// ダイアログの結果
+			const auto d_res = co_await cd_conf_save_dialog().ShowAsync();	// ダイアログの結果
 			// ダイアログの結果がキャンセルか判定する.
-			if (dres == ContentDialogResult::None) {
+			if (d_res == ContentDialogResult::None) {
 				co_return false;
 			}
 			// ダイアログの結果が「保存する」か判定する.
-			else if (dres == ContentDialogResult::Primary) {
+			else if (d_res == ContentDialogResult::Primary) {
 				// ファイルに非同期に保存し, 結果が S_OK 以外か判定する.
 				if (co_await file_save_async() != S_OK) {
 					co_return false;
@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_bring_to_front().IsEnabled(enable_forward);
 		mfi_send_to_back().IsEnabled(enable_backward);
 		mfi_send_backward().IsEnabled(enable_backward);
-		mfi_smry().IsEnabled(exists_undeleted);
+		mfi_summary_list().IsEnabled(exists_undeleted);
 		m_cnt_selected = selected_cnt;
 	}
 
@@ -244,8 +244,8 @@ namespace winrt::GraphPaper::implementation
 			co_return;
 		}
 		// 図形一覧の排他制御が true か判定する.
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-			smry_close();
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			summary_close();
 		}
 		undo_clear();
 		slist_clear(m_list_shapes);
@@ -322,9 +322,9 @@ namespace winrt::GraphPaper::implementation
 		// ディスプレイの状態が変わったときのイベントハンドラーを設定する.
 		{
 			auto const& disp{ DisplayInformation::GetForCurrentView() };
-			m_token_dpi_changed = disp.DpiChanged({ this, &MainPage::disp_dpi_changed });
-			m_token_orientation_changed = disp.OrientationChanged({ this, &MainPage::disp_orientation_changed });
-			m_token_contents_invalidated = disp.DisplayContentsInvalidated({ this, &MainPage::disp_contents_invalidated });
+			m_token_dpi_changed = disp.DpiChanged({ this, &MainPage::display_dpi_changed });
+			m_token_orientation_changed = disp.OrientationChanged({ this, &MainPage::display_orientation_changed });
+			m_token_contents_invalidated = disp.DisplayContentsInvalidated({ this, &MainPage::display_contents_invalidated });
 		}
 
 		// アプリケーションを閉じる前の確認のハンドラーを設定する.
@@ -358,7 +358,7 @@ namespace winrt::GraphPaper::implementation
 			m_fill_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill_menu")));
 			m_font_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_menu_front")));
 			m_sheet_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet_menu")));
-			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_menu_ungroup")));
+			m_ungroup_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_menu_ungroup")));
 			m_ruler_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ruler_menu")));
 		}
 
@@ -415,8 +415,8 @@ namespace winrt::GraphPaper::implementation
 			co_return;
 		}
 		// 図形一覧の排他制御が true か判定する.
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-			smry_close();
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			summary_close();
 		}
 		undo_clear();
 		slist_clear(m_list_shapes);
@@ -435,31 +435,32 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::UI::Color;
 			using winrt::Windows::UI::Xaml::Media::Brush;
 
-			auto sel_back_color = Resources().TryLookup(box_value(L"SystemColorHighlightColor"));
+			auto sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
 			auto sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
 			if (sel_back_color != nullptr && sel_text_color != nullptr) {
 				conv_uwp_to_dx(unbox_value<Color>(sel_back_color), Shape::m_range_background);
 				conv_uwp_to_dx(unbox_value<Color>(sel_text_color), Shape::m_range_foreground);
 			}
 			else {
-				Shape::m_range_background = { 0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f };
+				Shape::m_range_background = { 0.0f, 0x00 / COLOR_MAX, 0x78 / COLOR_MAX, 0xD4 / COLOR_MAX };
 				Shape::m_range_foreground = S_WHITE;
 			}
+			/*
 			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
 			auto const& fore_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
 			if (back_theme != nullptr && fore_theme != nullptr) {
-				conv_uwp_to_dx(unbox_value<Brush>(back_theme), Shape::m_theme_background);
-				conv_uwp_to_dx(unbox_value<Brush>(fore_theme), Shape::m_theme_foreground);
+				conv_uwp_to_dx(unbox_value<Brush>(back_theme), Shape::m_default_background);
+				conv_uwp_to_dx(unbox_value<Brush>(fore_theme), Shape::m_default_foreground);
 			}
-			else {
-				Shape::m_theme_background = S_WHITE;
-				Shape::m_theme_foreground = S_BLACK;
-			}
+			else {*/
+				Shape::m_default_background = S_WHITE;
+				Shape::m_default_foreground = S_BLACK;
+			//}
 			/*
 			Shape::m_range_background = Shape::m_range_background;
 			Shape::m_range_foreground = Shape::m_range_foreground;
-			Shape::m_theme_background = m_sheet_dx.m_theme_background;
-			Shape::m_theme_foreground = m_sheet_dx.m_theme_foreground;
+			Shape::m_default_background = m_sheet_dx.m_default_background;
+			Shape::m_default_foreground = m_sheet_dx.m_default_foreground;
 			*/
 		}
 

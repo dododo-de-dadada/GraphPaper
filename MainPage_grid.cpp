@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 		grid_set_slider_header<UNDO_OP::GRID_GRAY, 3>(val3);
 		sample_slider_3().Visibility(UI_VISIBLE);
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_GRAY, 3> });
-		m_sample_type = SAMP_TYPE::NONE;
+		m_sample_type = SAMPLE_TYPE::NONE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 		grid_set_slider_header<UNDO_OP::GRID_BASE, 0>(val0);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_BASE, 0> });
-		m_sample_type = SAMP_TYPE::NONE;
+		m_sample_type = SAMPLE_TYPE::NONE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

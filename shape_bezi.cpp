@@ -569,25 +569,25 @@ namespace winrt::GraphPaper::implementation
 		anchor_draw_rect(m_pos, dx);
 		s_pos = m_pos;
 		pt_add(s_pos, m_diff[0], e_pos);
-		dx.m_shape_brush->SetColor(Shape::m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_default_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		anchor_draw_ellipse(e_pos, dx);
 
 		s_pos = e_pos;
 		pt_add(s_pos, m_diff[1], e_pos);
-		dx.m_shape_brush->SetColor(Shape::m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_default_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		anchor_draw_ellipse(e_pos, dx);
 
 		s_pos = e_pos;
 		pt_add(s_pos, m_diff[2], e_pos);
-		dx.m_shape_brush->SetColor(Shape::m_theme_background);
+		dx.m_shape_brush->SetColor(Shape::m_default_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(Shape::m_theme_foreground);
+		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
 		anchor_draw_rect(e_pos, dx);
 	}

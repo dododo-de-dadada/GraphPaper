@@ -277,10 +277,10 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「文字列の編集」が選択された.
 	void MainPage::edit_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		ShapeText* s = nullptr;
-		if (event_shape_prev() != nullptr && typeid(*event_shape_prev()) == typeid(ShapeText)) {
+		ShapeText* s = static_cast<ShapeText*>(nullptr);
+		if (m_event_shape_prev != nullptr && typeid(*m_event_shape_prev) == typeid(ShapeText)) {
 			// 前回ポインターが押されたのが文字列図形の場合,
-			s = static_cast<ShapeText*>(event_shape_prev());
+			s = static_cast<ShapeText*>(m_event_shape_prev);
 		}
 		else {
 			// 選択された図形のうち最前面にある文字列図形を得る.
@@ -469,8 +469,8 @@ namespace winrt::GraphPaper::implementation
 			find_text_set();
 			return;
 		}
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-			smry_close();
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			summary_close();
 		}
 		tx_find_text_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
 		tx_find_replace_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });

@@ -168,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 		join_set_slider_header<UNDO_OP::STROKE_WIDTH, 1>(val1);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_set_slider<UNDO_OP::STROKE_JOIN_LIMIT, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_set_slider<UNDO_OP::STROKE_WIDTH, 1> });
-		m_sample_type = SAMP_TYPE::JOIN;
+		m_sample_type = SAMPLE_TYPE::JOIN;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_line_join")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

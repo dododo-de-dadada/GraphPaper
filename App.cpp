@@ -13,10 +13,10 @@ using namespace Windows::UI::Xaml::Navigation;
 using namespace GraphPaper;
 using namespace GraphPaper::implementation;
 
-/// <smry>
+/// <summary>
 /// Initializes the singleton application object.  This is the first line of authored code
 /// executed, and as such is the logical equivalent of main() or WinMain().
-/// </smry>
+/// </summary>
 App::App()
 {
     InitializeComponent();
@@ -34,10 +34,10 @@ App::App()
 #endif
 }
 
-/// <smry>
+/// <summary>
 /// Invoked when the application is launched normally by the end user.  Other entry points
 /// will be used such as when the application is launched to open a specific file.
-/// </smry>
+/// </summary>
 /// <param name="e">Details about the launch request and process.</param>
 void App::OnLaunched(LaunchActivatedEventArgs const& e)
 {
@@ -96,11 +96,11 @@ void App::OnLaunched(LaunchActivatedEventArgs const& e)
     }
 }
 
-/// <smry>
+/// <summary>
 /// Invoked when application execution is being suspended.  Application state is saved
 /// without knowing whether the application will be terminated or resumed with the contents
 /// of memory still intact.
-/// </smry>
+/// </summary>
 /// <param name="sender">The source of the suspend request.</param>
 /// <param name="e">Details about the suspend request.</param>
 void App::OnSuspending([[maybe_unused]] IInspectable const& sender, [[maybe_unused]] SuspendingEventArgs const& e)
@@ -108,9 +108,9 @@ void App::OnSuspending([[maybe_unused]] IInspectable const& sender, [[maybe_unus
     // Save application state and stop any background activity
 }
 
-/// <smry>
+/// <summary>
 /// Invoked when Navigation to a certain page fails
-/// </smry>
+/// </summary>
 /// <param name="sender">The Frame which failed navigation</param>
 /// <param name="e">Details about the navigation failure</param>
 void App::OnNavigationFailed(IInspectable const&, NavigationFailedEventArgs const& e)

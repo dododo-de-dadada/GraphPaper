@@ -23,6 +23,7 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_tool_poly, dt_reader);
 	}
 
+	// 作図ツールのメニューに印をつける.
 	void MainPage::tool_draw_is_checked(const DRAW_TOOL value)
 	{
 		rmfi_tool_select().IsChecked(value == DRAW_TOOL::SELECT);
@@ -34,15 +35,6 @@ namespace winrt::GraphPaper::implementation
 		rmfi_tool_draw_bezi().IsChecked(value == DRAW_TOOL::BEZI);
 		rmfi_tool_draw_text().IsChecked(value == DRAW_TOOL::TEXT);
 		rmfi_tool_draw_ruler().IsChecked(value == DRAW_TOOL::RULER);
-		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::SELECT>(value, rmfi_tool_select());
-		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RECT>(value, rmfi_tool_draw_rect());
-		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RRECT>(value, rmfi_tool_draw_rrect());
-		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::POLY>(value, rmfi_tool_draw_poly());
-		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::ELLI>(value, rmfi_tool_draw_elli());
-		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::LINE>(value, rmfi_tool_draw_line());
-		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::BEZI>(value, rmfi_tool_draw_bezi());
-		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::TEXT>(value, rmfi_tool_draw_text());
-		//radio_menu_item_set_value<DRAW_TOOL, DRAW_TOOL::RULER>(value, rmfi_tool_draw_ruler());
 	}
 
 	// 多角形ツールのメニューのチェックをつける.
@@ -57,15 +49,6 @@ namespace winrt::GraphPaper::implementation
 		rmfi_tool_poly_octa().IsChecked(value == 8);
 		rmfi_tool_poly_nona().IsChecked(value == 9);
 		rmfi_tool_poly_deca().IsChecked(value == 10);
-		//radio_menu_item_set_value<uint32_t, 2>(value, rmfi_tool_poly_line());
-		//radio_menu_item_set_value<uint32_t, 3>(value, rmfi_tool_poly_tri());
-		//radio_menu_item_set_value<uint32_t, 4>(value, rmfi_tool_poly_quad());
-		//radio_menu_item_set_value<uint32_t, 5>(value, rmfi_tool_poly_pent());
-		//radio_menu_item_set_value<uint32_t, 6>(value, rmfi_tool_poly_hexa());
-		//radio_menu_item_set_value<uint32_t, 7>(value, rmfi_tool_poly_hept());
-		//radio_menu_item_set_value<uint32_t, 8>(value, rmfi_tool_poly_octa());
-		//radio_menu_item_set_value<uint32_t, 9>(value, rmfi_tool_poly_nona());
-		//radio_menu_item_set_value<uint32_t, 10>(value, rmfi_tool_poly_deca());
 	}
 
 	// 多角形ツールのメニューのチェックをつける.
@@ -78,14 +61,14 @@ namespace winrt::GraphPaper::implementation
 		tmfi_tool_poly_clockwise().IsChecked(value.m_clockwise);
 	}
 
-	// 作図メニューが選択された.
+	// 作図ツールのメニューが選択された.
 	void MainPage::tool_draw_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (sender == rmfi_tool_select()) {
 			tool_draw_is_checked(m_tool_draw = DRAW_TOOL::SELECT);
-			event_state(EVENT_STATE::BEGIN);
-			event_shape(nullptr);
-			event_anch_pressed(ANCH_TYPE::ANCH_SHEET);
+			m_event_state = EVENT_STATE::BEGIN;
+			m_event_shape_pressed = nullptr;
+			m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;
 		}
 		else if (sender == rmfi_tool_draw_rect()) {
 			tool_draw_is_checked(m_tool_draw = DRAW_TOOL::RECT);
@@ -160,4 +143,15 @@ namespace winrt::GraphPaper::implementation
 		event_curs_style();
 	}
 
+	// Escape が押された.
+	void MainPage::kacc_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	{
+		if (m_tool_draw == DRAW_TOOL::SELECT) {
+			unselect_all();
+			sheet_draw();
+		}
+		else {
+			tool_draw_click(rmfi_tool_select(), nullptr);
+		}
+	}
 }

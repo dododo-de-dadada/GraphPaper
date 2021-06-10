@@ -24,36 +24,34 @@ namespace winrt::GraphPaper::implementation
 		unselect_all();
 		undo_push_append(g);
 		for (const auto s : slist) {
-			// 図形一覧の排他制御が true か判定する.
-			if (m_smry_atomic.load(std::memory_order_acquire)) {
-				smry_remove(s);
+			// 図形の消去フラグが立っているか判定する.
+			if (s->is_deleted()) {
+				continue;
 			}
-			// 図形を削除して, その操作をスタックに積む.
+			// 図形一覧の排他制御が true か判定する.
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
+				summary_remove(s);
+			}
 			undo_push_remove(s);
-			// 図形をグループ図形に追加して, その操作をスタックに積む.
 			undo_push_append(g, s);
 		}
 		undo_push_select(g);
-		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_is_enabled();
 		sheet_draw();
 		// 図形一覧の排他制御が true か判定する.
-		if (m_smry_atomic.load(std::memory_order_acquire)) {
-			smry_append(g);
+		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			summary_append(g);
 		}
 	}
 
 	// 編集メニューの「グループの解除」が選択された.
 	void MainPage::ungroup_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 選択されたグループ図形のリストを得る.
+		// 選択されたグループ図形のリストを得て, リストが空か判定する.
 		SHAPE_LIST g_list;
 		slist_selected<ShapeGroup>(m_list_shapes, g_list);
 		if (g_list.empty()) {
-			// 得られたリストが空の場合,
-			// 終了する.
 			return;
 		}
 		unselect_all();
@@ -61,36 +59,29 @@ namespace winrt::GraphPaper::implementation
 		for (auto t : g_list) {
 			uint32_t i = 0;
 			// 図形一覧の排他制御が true か判定する.
-			if (m_smry_atomic.load(std::memory_order_acquire)) {
-				i = smry_remove(t);
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
+				i = summary_remove(t);
 			}
 			auto g = static_cast<ShapeGroup*>(t);
 			while (g->m_list_grouped.empty() != true) {
 				// グループ化された図形のリストから最初の図形を得る.
 				auto s = g->m_list_grouped.front();
+				// 図形の消去フラグが立っているか判定する.
 				if (s->is_deleted()) {
-					// 図形の消去フラグが立っている場合,
-					// 以下を無視する.
 					continue;
 				}
 				// 図形一覧の排他制御が true か判定する.
-				if (m_smry_atomic.load(std::memory_order_acquire)) {
-					// 図形を一覧に挿入する.
-					smry_insert(s, i++);
+				if (m_summary_atomic.load(std::memory_order_acquire)) {
+					summary_insert(s, i++);
 				}
-				// 図形をグループから削除して, その操作をスタックに積む.
 				undo_push_remove(g, s);
-				// 図形を図形の直前に挿入する.
 				undo_push_insert(s, g);
 				//t = s;
 			}
-			// 図形を削除して, その操作をスタックに積む.
 			undo_push_remove(g);
 		}
 		g_list.clear();
-		// 一連の操作の区切としてヌル操作をスタックに積む.
 		undo_push_null();
-		// 編集メニュー項目の使用の可否を設定する.
 		edit_menu_is_enabled();
 		sheet_draw();
 	}

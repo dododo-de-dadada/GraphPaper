@@ -113,7 +113,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::sheet_set_slider<UNDO_OP::SHEET_COLOR, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::sheet_set_slider<UNDO_OP::SHEET_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::sheet_set_slider<UNDO_OP::SHEET_COLOR, 2> });
-		m_sample_type = SAMP_TYPE::NONE;
+		m_sample_type = SAMPLE_TYPE::NONE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(SHEET_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -196,25 +196,25 @@ namespace winrt::GraphPaper::implementation
 			// 方眼を表示する.
 			m_sheet_main.draw_grid(m_sheet_dx, { 0.0f, 0.0f });
 		}
-		if (event_state() == EVENT_STATE::PRESS_AREA) {
-			const auto t_draw = tool_draw();
+		if (m_event_state == EVENT_STATE::PRESS_AREA) {
+			const auto t_draw = m_tool_draw;
 			if (t_draw == DRAW_TOOL::SELECT || t_draw == DRAW_TOOL::RECT || t_draw == DRAW_TOOL::TEXT || t_draw == DRAW_TOOL::RULER) {
-				m_sheet_main.draw_auxiliary_rect(m_sheet_dx, event_pos_pressed(), event_pos_curr());
+				m_sheet_main.draw_auxiliary_rect(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAW_TOOL::BEZI) {
-				m_sheet_main.draw_auxiliary_bezi(m_sheet_dx, event_pos_pressed(), event_pos_curr());
+				m_sheet_main.draw_auxiliary_bezi(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAW_TOOL::ELLI) {
-				m_sheet_main.draw_auxiliary_elli(m_sheet_dx, event_pos_pressed(), event_pos_curr());
+				m_sheet_main.draw_auxiliary_elli(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAW_TOOL::LINE) {
-				m_sheet_main.draw_auxiliary_line(m_sheet_dx, event_pos_pressed(), event_pos_curr());
+				m_sheet_main.draw_auxiliary_line(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAW_TOOL::RRECT) {
-				m_sheet_main.draw_auxiliary_rrect(m_sheet_dx, event_pos_pressed(), event_pos_curr());
+				m_sheet_main.draw_auxiliary_rrect(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAW_TOOL::POLY) {
-				m_sheet_main.draw_auxiliary_poly(m_sheet_dx, event_pos_pressed(), event_pos_curr(), tool_poly());
+				m_sheet_main.draw_auxiliary_poly(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr, m_tool_poly);
 			}
 		}
 		// 描画を終了する.
@@ -241,10 +241,10 @@ namespace winrt::GraphPaper::implementation
 	// 前景色を得る.
 	const D2D1_COLOR_F& MainPage::sheet_foreground(void) const noexcept
 	{
-		return Shape::m_theme_foreground;
+		return Shape::m_default_foreground;
 	}
 
-	// 用紙とその他の属性を初期化する.
+	// 用紙の属性を初期化する.
 	void MainPage::sheet_init(void) noexcept
 	{
 		// 書体の属性を初期化する.
@@ -342,19 +342,19 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.set_arrow_size(ARROW_SIZE_DEF);
 			m_sheet_main.set_arrow_style(ARROW_STYLE::NONE);
 			m_sheet_main.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEF, GRID_LEN_DEF });
-			m_sheet_main.set_fill_color(Shape::m_theme_background);
-			m_sheet_main.set_font_color(Shape::m_theme_foreground);
+			m_sheet_main.set_fill_color(Shape::m_default_background);
+			m_sheet_main.set_font_color(Shape::m_default_foreground);
 			m_sheet_main.set_grid_base(GRID_LEN_DEF - 1.0);
 			m_sheet_main.set_grid_gray(GRID_GRAY_DEF);
 			m_sheet_main.set_grid_emph(GRID_EMPH_0);
 			m_sheet_main.set_grid_show(GRID_SHOW::BACK);
 			m_sheet_main.set_grid_snap(true);
-			m_sheet_main.set_sheet_color(Shape::m_theme_background);
+			m_sheet_main.set_sheet_color(Shape::m_default_background);
 			m_sheet_main.set_sheet_scale(1.0);
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_sheet_main.m_sheet_size = SHEET_SIZE_DEF;
 			m_sheet_main.set_stroke_cap_style(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
-			m_sheet_main.set_stroke_color(Shape::m_theme_foreground);
+			m_sheet_main.set_stroke_color(Shape::m_default_foreground);
 			m_sheet_main.set_stroke_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_sheet_main.set_stroke_dash_patt(STROKE_DASH_PATT_DEF);
 			m_sheet_main.set_stroke_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
