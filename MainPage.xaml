@@ -20,8 +20,7 @@
             <x:String x:Key="icon_close">&#xE894;</x:String>
             <x:String x:Key="icon_italic">&#xE8DB;</x:String>
 			<x:String x:Key="icon_ibeam">&#xE933;</x:String>
-			<FontIcon x:Key="ic_fit_page" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE9A6;"/>
-			<FontIcon x:Key="ic_fit_page_2" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE9A6;"/>
+            <x:String x:Key="icon_fit_page">&#xE9A6;</x:String>
 			<!-- 曲線アイコンの描画コマンド -->
             <x:String x:Key="data_bezi">
                 M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841 L15.310918,7.967942 C8.311178,14.40621 8.311178,0.405251 -0.032292,7.249824 Z
@@ -228,7 +227,11 @@
 				</MenuFlyoutItem>
 				<!--文字列の検索と置換 -->
 				<MenuFlyoutItem x:Uid="mfi_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text" />
-				<MenuFlyoutItem x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Icon="{StaticResource ic_fit_page_2}" Text="Fit Frame Size to" />
+                <MenuFlyoutItem x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Text="Fit Frame Size to" >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_fit_page}"/>
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
                 <!-- 書体の種類 -->
 				<MenuFlyoutItem x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
                 <MenuFlyoutItem x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
@@ -469,8 +472,12 @@
                         <KeyboardAccelerator Key="F" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-				<MenuFlyoutItem x:Name="mfi_edit_text_frame" x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Icon="{StaticResource ic_fit_page}" Text="Fit Frame Size to" />
-			</muxc:MenuBarItem>
+                <MenuFlyoutItem x:Name="mfi_edit_text_frame" x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Text="Fit Frame Size to" >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_fit_page}"/>
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+            </muxc:MenuBarItem>
             <!-- 作図ツールメニュー -->
             <muxc:MenuBarItem x:Uid="mbi_menu_tool_draw" AccessKey="D" Title="Draw">
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_select" x:Uid="rmfi_tool_select" Click="tool_draw_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Select">

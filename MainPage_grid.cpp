@@ -72,7 +72,7 @@ namespace winrt::GraphPaper::implementation
 			if (!equal(sheet_value, sample_value)) {
 				undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, sample_value);
 				undo_menu_enable();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 

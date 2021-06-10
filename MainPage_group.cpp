@@ -37,7 +37,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		undo_push_select(g);
 		undo_push_null();
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		sheet_draw();
 		// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		g_list.clear();
 		undo_push_null();
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		sheet_draw();
 	}
 

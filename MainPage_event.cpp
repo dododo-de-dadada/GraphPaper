@@ -214,7 +214,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		//m_event_shape_summary = 
 		m_event_shape_prev = s;
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		sheet_update_bbox(s);
 		sheet_panle_size();
 		sheet_draw();
@@ -249,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_null();
 			//m_event_shape_summary =
 			m_event_shape_prev = s;
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_update_bbox(s);
 			sheet_panle_size();
 			// 図形一覧の排他制御が true か判定する.
@@ -364,7 +364,7 @@ namespace winrt::GraphPaper::implementation
 		undo_push_null();
 		sheet_update_bbox();
 		sheet_panle_size();
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 	}
 
 	// 範囲選択を終了する.
@@ -387,7 +387,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag == true) {
 			// 編集メニュー項目の使用の可否を設定する.
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 		}
 		Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 	}
@@ -631,7 +631,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_shape_prev = nullptr;
 		// 修飾キーが押されていないならば, すべての図形の選択を解除し, 解除された図形があるか判定する.
 		if (args.KeyModifiers() == VirtualKeyModifiers::None && unselect_all()) {
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}

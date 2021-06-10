@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_xcvd.cpp
-// 切り取りとコピー, 貼り付け, 削除
+// 切り取りとコピー, 文字列の編集など
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.Close();
 		// 出力ストリームを閉じる.
 		out_stream.Close();
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		// スレッドコンテキストを復元する.
 		co_await context;
 	}
@@ -101,8 +101,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 選択された図形のリストを消去する.
 		//list_selected.clear();
-		// 編集メニュー項目の使用の可否を設定する.
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
@@ -158,8 +157,7 @@ namespace winrt::GraphPaper::implementation
 						undo_push_null();
 						m_dx_mutex.unlock();
 						slist_pasted.clear();
-						// 編集メニュー項目の使用の可否を設定する.
-						edit_menu_is_enabled();
+						xcvd_is_enabled();
 						sheet_panle_size();
 						sheet_draw();
 					}
@@ -223,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 							summary_append(t);
 							summary_select(t);
 						}
-						edit_menu_is_enabled();
+						xcvd_is_enabled();
 						sheet_update_bbox(t);
 						sheet_panle_size();
 						sheet_draw();
@@ -259,6 +257,79 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		return false;
+	}
+
+	// 編集メニューを使用可能にする.
+	// 選択の有無やクラスごとに図形を数え, メニュー項目の可否を判定する.
+	void MainPage::xcvd_is_enabled(void)
+	{
+		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
+
+		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
+		undo_menu_enable();
+
+		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
+		uint32_t selected_cnt = 0;	// 選択された図形の数
+		uint32_t selected_group_cnt = 0;	// 選択されたグループ図形の数
+		uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
+		uint32_t selected_text_cnt = 0;	// 選択された文字列図形の数
+		uint32_t text_cnt = 0;	// 文字列図形の数
+		bool fore_selected = false;	// 最前面の図形の選択フラグ
+		bool back_selected = false;	// 最背面の図形の選択フラグ
+		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
+		slist_count(m_list_shapes,
+			undeleted_cnt,
+			selected_cnt,
+			selected_group_cnt,
+			runlength_cnt,
+			selected_text_cnt,
+			text_cnt,
+			fore_selected,
+			back_selected,
+			prev_selected
+		);
+
+		// 消去されていない図形がひとつ以上ある場合.
+		const auto exists_undeleted = (undeleted_cnt > 0);
+		// 選択された図形がひとつ以上ある場合.
+		const auto exists_selected = (selected_cnt > 0);
+		// 選択された文字列図形がひとつ以上ある場合.
+		const auto exists_selected_text = (selected_text_cnt > 0);
+		// 文字列図形がひとつ以上ある場合.
+		const auto exists_text = (text_cnt > 0);
+		// 選択されてない図形がひとつ以上ある場合.
+		const auto exists_unselected = (selected_cnt < undeleted_cnt);
+		// 選択された図形がふたつ以上ある場合.
+		const auto exists_selected_2 = (selected_cnt > 1);
+		// 選択されたグループ図形がひとつ以上ある場合.
+		const auto exists_selected_group = (selected_group_cnt > 0);
+		// 前面に配置可能か判定する.
+		// 1. 複数のランレングスがある.
+		// 2. または, 少なくとも 1 つは選択された図形があり, 
+		//    かつ最前面の図形は選択されいない.
+		const auto enable_forward = (runlength_cnt > 1 || (exists_selected && fore_selected != true));
+		// 背面に配置可能か判定する.
+		// 1. 複数のランレングスがある.
+		// 2. または, 少なくとも 1 つは選択された図形があり, 
+		//    かつ最背面の図形は選択されいない.
+		const auto enable_backward = (runlength_cnt > 1 || (exists_selected && back_selected != true));
+
+		mfi_xcvd_cut().IsEnabled(exists_selected);
+		mfi_xcvd_copy().IsEnabled(exists_selected);
+		mfi_xcvd_paste().IsEnabled(xcvd_contains({ CBF_GPD, StandardDataFormats::Text() }));
+		mfi_xcvd_delete().IsEnabled(exists_selected);
+		mfi_select_all().IsEnabled(exists_unselected);
+		mfi_group().IsEnabled(exists_selected_2);
+		mfi_ungroup().IsEnabled(exists_selected_group);
+		mfi_edit_text().IsEnabled(exists_selected_text);
+		mfi_find_text().IsEnabled(exists_text);
+		mfi_edit_text_frame().IsEnabled(exists_selected_text);
+		mfi_bring_forward().IsEnabled(enable_forward);
+		mfi_bring_to_front().IsEnabled(enable_forward);
+		mfi_send_to_back().IsEnabled(enable_backward);
+		mfi_send_backward().IsEnabled(enable_backward);
+		mfi_summary_list().IsEnabled(exists_undeleted);
+		m_cnt_selected = selected_cnt;
 	}
 
 }

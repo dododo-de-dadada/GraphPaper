@@ -39,7 +39,7 @@
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
 // MainPage_tool.cpp	作図ツール
 // MainPage_undo.cpp	元に戻すとやり直し
-// MainPage_xcvd.cpp	切り取りとコピー, 貼り付け, 削除
+// MainPage_xcvd.cpp	切り取りとコピー, 文字列の編集など
 //------------------------------
 #include <ppltasks.h>
 #include <winrt/Windows.ApplicationModel.ExtendedExecution.h>
@@ -300,8 +300,6 @@ namespace winrt::GraphPaper::implementation
 
 		// 内容が変更されていたなら, 確認ダイアログを表示してその応答を得る.
 		IAsyncOperation<bool> ask_for_conf_async(void);
-		// 編集メニュー項目の使用の可否を設定する.
-		void edit_menu_is_enabled(void);
 		// ファイルメニューの「終了」が選択された
 		IAsyncAction exit_click_async(IInspectable const&, RoutedEventArgs const&);
 		// メインページを作成する.
@@ -951,24 +949,26 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_xcvd.cpp
-		// 切り取りとコピー, 貼り付け, 削除
+		// 切り取りとコピー, 文字列の編集など
 		//-------------------------------
 
+		// クリップボードにデータが含まれているか判定する.
+		bool xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const;
+		// クリップボードにデータが含まれているか判定する.
+		template <size_t Z> bool xcvd_contains(const winrt::hstring(&formats)[Z]) const
+		{
+			return xcvd_contains(formats, Z);
+		}
 		// 編集メニューの「コピー」が選択された.
 		IAsyncAction xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「切り取り」が選択された.
 		IAsyncAction xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「削除」が選択された.
 		void xcvd_delete_click(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューを使用可能にする.
+		void xcvd_is_enabled(void);
 		// 編集メニューの「貼り付け」が選択された.
 		IAsyncAction xcvd_paste_click_async(IInspectable const&, RoutedEventArgs const&);
-		// クリップボードにデータが含まれているか判定する.
-		template <size_t Z> bool xcvd_contains(const winrt::hstring(&formats)[Z]) const
-		{
-			return xcvd_contains(formats, Z);
-		}
-		// クリップボードにデータが含まれているか判定する.
-		bool xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const;
 
 		//-------------------------------
 		// MainPage_zoom.cpp

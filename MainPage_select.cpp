@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 			summary_select_all();
 		}
 		// 編集メニュー項目の使用の可否を設定する.
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		sheet_draw();
 	}
 
@@ -116,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 編集メニュー項目の使用の可否を設定する.
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		sheet_draw();
 	}
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
@@ -193,7 +193,7 @@ namespace winrt::GraphPaper::implementation
 		// コントロールキーが押されているか判定する.
 		if (k_mod == VirtualKeyModifiers::Control) {
 			undo_push_select(s);
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 			// 図形一覧の排他制御が true か判定する.
 			if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -215,7 +215,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (select_range(s, m_event_shape_prev)) {
 				// 編集メニュー項目の使用の可否を設定する.
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -225,7 +225,7 @@ namespace winrt::GraphPaper::implementation
 			if (!s->is_selected()) {
 				unselect_all();
 				undo_push_select(s);
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 				// 図形一覧の排他制御が true か判定する.
 				if (m_summary_atomic.load(std::memory_order_acquire)) {

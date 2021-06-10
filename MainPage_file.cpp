@@ -102,7 +102,7 @@ namespace winrt::GraphPaper::implementation
 	// ファイルの読み込みが終了した.
 	void MainPage::file_finish_reading(void)
 	{
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		tool_draw_is_checked(m_tool_draw);
 		tool_poly_is_checked(m_tool_poly);
 		color_code_is_checked(m_color_code);
@@ -141,7 +141,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::Storage::Pickers::FileOpenPicker;
 
-		if ((co_await ask_for_conf_async()) == false) {
+		if (m_stack_updt && !co_await ask_for_conf_async()) {
 			co_return;
 		}
 		// 待機カーソルを表示, 表示する前のカーソルを得る.
@@ -352,7 +352,7 @@ namespace winrt::GraphPaper::implementation
 		AccessListEntry item[1];
 		mru_entries.GetMany(i, item);
 
-		if ((co_await ask_for_conf_async()) == false) {
+		if (m_stack_updt && !co_await ask_for_conf_async()) {
 			co_return;
 		}
 		/*

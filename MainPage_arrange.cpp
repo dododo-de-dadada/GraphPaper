@@ -77,7 +77,7 @@ namespace winrt::GraphPaper::implementation
 					// ŒðŠ·ƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚é‚©”»’è‚·‚é.
 					if (flag == true) {
 						undo_push_null();
-						edit_menu_is_enabled();
+						xcvd_is_enabled();
 						sheet_draw();
 					}
 					return;
@@ -161,7 +161,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		slist.clear();
 		undo_push_null();
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		sheet_draw();
 	}
 

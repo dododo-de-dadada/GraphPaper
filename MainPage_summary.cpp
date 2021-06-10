@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 			sheet_attr_is_checked();
 		}
 		// 編集メニュー項目の使用の可否を設定する.
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		sheet_draw();
 	}
 

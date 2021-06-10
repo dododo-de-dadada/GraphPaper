@@ -137,102 +137,26 @@ namespace winrt::GraphPaper::implementation
 	// 長さを文字列に変換する (単位つき).
 	template void conv_len_to_str<LEN_UNIT_SHOW>(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf);
 
-	// 内容が変更されていたなら, 確認ダイアログを表示してその応答を得る.
+	// 確認ダイアログを表示してその応答を得る.
 	// 戻り値	確認前の処理を続行するなら true を, 応答がキャンセルなら, または内容を保存できなかったなら false を返す.
 	IAsyncOperation<bool> MainPage::ask_for_conf_async(void)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		// 操作スタックの更新フラグが立っているか判定する.
-		if (m_stack_updt) {
-			// 確認ダイアログを表示し, 結果を得る.
-			const auto d_res = co_await cd_conf_save_dialog().ShowAsync();	// ダイアログの結果
-			// ダイアログの結果がキャンセルか判定する.
-			if (d_res == ContentDialogResult::None) {
+		// 確認ダイアログを表示し, 結果を得る.
+		const auto d_res = co_await cd_conf_save_dialog().ShowAsync();	// ダイアログの結果
+		// ダイアログの結果がキャンセルか判定する.
+		if (d_res == ContentDialogResult::None) {
+			co_return false;
+		}
+		// ダイアログの結果が「保存する」か判定する.
+		else if (d_res == ContentDialogResult::Primary) {
+			// ファイルに非同期に保存し, 結果が S_OK 以外か判定する.
+			if (co_await file_save_async() != S_OK) {
 				co_return false;
-			}
-			// ダイアログの結果が「保存する」か判定する.
-			else if (d_res == ContentDialogResult::Primary) {
-				// ファイルに非同期に保存し, 結果が S_OK 以外か判定する.
-				if (co_await file_save_async() != S_OK) {
-					co_return false;
-				}
 			}
 		}
 		co_return true;
-	}
-
-	// 編集メニュー項目の使用の可否を設定する.
-	// 選択の有無やクラスごとに図形を数え, メニュー項目の可否を判定する.
-	void MainPage::edit_menu_is_enabled(void)
-	{
-		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
-
-		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-		undo_menu_enable();
-
-		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
-		uint32_t selected_cnt = 0;	// 選択された図形の数
-		uint32_t selected_group_cnt = 0;	// 選択されたグループ図形の数
-		uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
-		uint32_t selected_text_cnt = 0;	// 選択された文字列図形の数
-		uint32_t text_cnt = 0;	// 文字列図形の数
-		bool fore_selected = false;	// 最前面の図形の選択フラグ
-		bool back_selected = false;	// 最背面の図形の選択フラグ
-		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
-		slist_count(m_list_shapes,
-			undeleted_cnt,
-			selected_cnt,
-			selected_group_cnt,
-			runlength_cnt,
-			selected_text_cnt,
-			text_cnt,
-			fore_selected,
-			back_selected,
-			prev_selected
-		);
-
-		// 消去されていない図形がひとつ以上ある場合.
-		const auto exists_undeleted = (undeleted_cnt > 0);
-		// 選択された図形がひとつ以上ある場合.
-		const auto exists_selected = (selected_cnt > 0);
-		// 選択された文字列図形がひとつ以上ある場合.
-		const auto exists_selected_text = (selected_text_cnt > 0);
-		// 文字列図形がひとつ以上ある場合.
-		const auto exists_text = (text_cnt > 0);
-		// 選択されてない図形がひとつ以上ある場合.
-		const auto exists_unselected = (selected_cnt < undeleted_cnt);
-		// 選択された図形がふたつ以上ある場合.
-		const auto exists_selected_2 = (selected_cnt > 1);
-		// 選択されたグループ図形がひとつ以上ある場合.
-		const auto exists_selected_group = (selected_group_cnt > 0);
-		// 前面に配置可能か判定する.
-		// 1. 複数のランレングスがある.
-		// 2. または, 少なくとも 1 つは選択された図形があり, 
-		//    かつ最前面の図形は選択されいない.
-		const auto enable_forward = (runlength_cnt > 1 || (exists_selected && fore_selected != true));
-		// 背面に配置可能か判定する.
-		// 1. 複数のランレングスがある.
-		// 2. または, 少なくとも 1 つは選択された図形があり, 
-		//    かつ最背面の図形は選択されいない.
-		const auto enable_backward = (runlength_cnt > 1 || (exists_selected && back_selected != true));
-
-		mfi_xcvd_cut().IsEnabled(exists_selected);
-		mfi_xcvd_copy().IsEnabled(exists_selected);
-		mfi_xcvd_paste().IsEnabled(xcvd_contains({ CBF_GPD, StandardDataFormats::Text() }));
-		mfi_xcvd_delete().IsEnabled(exists_selected);
-		mfi_select_all().IsEnabled(exists_unselected);
-		mfi_group().IsEnabled(exists_selected_2);
-		mfi_ungroup().IsEnabled(exists_selected_group);
-		mfi_edit_text().IsEnabled(exists_selected_text);
-		mfi_find_text().IsEnabled(exists_text);
-		mfi_edit_text_frame().IsEnabled(exists_text);
-		mfi_bring_forward().IsEnabled(enable_forward);
-		mfi_bring_to_front().IsEnabled(enable_forward);
-		mfi_send_to_back().IsEnabled(enable_backward);
-		mfi_send_backward().IsEnabled(enable_backward);
-		mfi_summary_list().IsEnabled(exists_undeleted);
-		m_cnt_selected = selected_cnt;
 	}
 
 	// ファイルメニューの「終了」が選択された
@@ -240,7 +164,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Application;
 
-		if ((co_await ask_for_conf_async()) == false) {
+		if (m_stack_updt && !co_await ask_for_conf_async()) {
 			co_return;
 		}
 		// 図形一覧の排他制御が true か判定する.
@@ -411,7 +335,7 @@ namespace winrt::GraphPaper::implementation
 	// ファイルメニューの「新規」が選択された
 	IAsyncAction MainPage::new_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		if ((co_await ask_for_conf_async()) == false) {
+		if (m_stack_updt && !co_await ask_for_conf_async()) {
 			co_return;
 		}
 		// 図形一覧の排他制御が true か判定する.

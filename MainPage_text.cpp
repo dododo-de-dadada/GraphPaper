@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t DLG_TITLE[] = L"str_text";
 
 	// 書体メニューの「段落のそろえ」に印をつける.
-	// p_align	段落のそろえ
+	// value	段落のそろえ
 	void MainPage::text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT value)
 	{
 		rmfi_text_align_top().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
@@ -22,12 +22,6 @@ namespace winrt::GraphPaper::implementation
 		rmfi_text_align_bot_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
 		rmfi_text_align_mid().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 		rmfi_text_align_mid_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR>(p_align, rmfi_text_align_top());
-		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR>(p_align, rmfi_text_align_top_2());
-		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR>(p_align, rmfi_text_align_bot());
-		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR>(p_align, rmfi_text_align_bot_2());
-		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER>(p_align, rmfi_text_align_mid());
-		//radio_menu_item_set_value< DWRITE_PARAGRAPH_ALIGNMENT, DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER>(p_align, rmfi_text_align_mid_2());
 	}
 
 	// 書体メニューの「段落のそろえ」が選択された.
@@ -48,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (undo_push_set<UNDO_OP::TEXT_ALIGN_P>(value)) {
 			undo_push_null();
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -74,7 +68,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (undo_push_set<UNDO_OP::TEXT_ALIGN_T>(value)) {
 			undo_push_null();
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -157,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_text_line_sp(sample_value);
 			if (undo_push_set<UNDO_OP::TEXT_LINE_H>(sample_value)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -185,7 +179,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (undo_push_set<UNDO_OP::TEXT_LINE_H>(value)) {
 			undo_push_null();
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -217,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_text_margin(sample_value);
 			if (undo_push_set<UNDO_OP::TEXT_MARGIN>(sample_value)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}

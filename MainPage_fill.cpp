@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_fill_color(sample_value);
 			if (undo_push_set<UNDO_OP::FILL_COLOR>(sample_value)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}

@@ -112,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_font_color(sample_value);
 			if (undo_push_set<UNDO_OP::FONT_COLOR>(sample_value)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_font_family(sample_value);
 			if (undo_push_set<UNDO_OP::FONT_FAMILY>(sample_value)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -304,7 +304,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_font_size(sample_value);
 			if (undo_push_set<UNDO_OP::FONT_SIZE>(sample_value)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -361,7 +361,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_font_stretch(sample_value);
 			if (undo_push_set<UNDO_OP::FONT_STRETCH>(sample_value)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -395,7 +395,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
 			undo_push_null();
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -405,7 +405,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
 			undo_push_null();
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -415,7 +415,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
 			undo_push_null();
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -463,7 +463,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_font_weight(sample_value);
 			if (undo_push_set<UNDO_OP::FONT_WEIGHT>(sample_value)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}

@@ -32,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
 		if (undo_push_set<UNDO_OP::ARROW_STYLE>(a_style)) {
 			undo_push_null();
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}
@@ -137,7 +137,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_arrow_size(sample_value);
 			if (undo_push_set<UNDO_OP::ARROW_SIZE>(sample_value)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}

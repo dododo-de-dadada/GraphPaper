@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 			if (undo_push_set<UNDO_OP::STROKE_COLOR>(sample_value)) {
 				undo_push_null();
 				undo_menu_enable();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 			if (undo_push_set<UNDO_OP::STROKE_DASH_PATT>(sample_patt) ||
 				undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -163,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_stroke_width(sample_value);
 			if (undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_value)) {
 				undo_push_null();
-				edit_menu_is_enabled();
+				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
@@ -205,7 +205,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_stroke_dash_patt_2().IsEnabled(s_style == D2D1_DASH_STYLE_SOLID);
 		if (undo_push_set<UNDO_OP::STROKE_DASH_STYLE>(d_style)) {
 			undo_push_null();
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}

@@ -269,7 +269,7 @@ namespace winrt::GraphPaper::implementation
 				s->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 			}
 			undo_push_null();
-			edit_menu_is_enabled();
+			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}

@@ -232,7 +232,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// メニューや表示を更新する.
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
@@ -277,7 +277,7 @@ namespace winrt::GraphPaper::implementation
 			m_stack_ucnt--;
 			m_stack_rcnt++;
 		}
-		edit_menu_is_enabled();
+		xcvd_is_enabled();
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
