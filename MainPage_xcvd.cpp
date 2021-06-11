@@ -209,8 +209,10 @@ namespace winrt::GraphPaper::implementation
 						}
 
 						// ‹‚ß‚½¶ãˆÊ’u‚ÉˆÚ“®‚·‚é.
+						if (m_tool_vert) {
+							slist_neighbor(m_list_shapes, s_min, Shape::s_anch_len, s_min);
+						}
 						t->set_start_pos(s_min);
-
 						m_dx_mutex.lock();
 						unselect_all();
 						undo_push_append(t);

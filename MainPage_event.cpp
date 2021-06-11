@@ -238,10 +238,10 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
-			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
 			if (m_edit_text_frame) {
-				static_cast<ShapeText*>(s)->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
+				s->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 			}
+			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
 			event_reduce_slist(m_list_shapes, m_stack_undo, m_stack_redo);
 			unselect_all();
 			undo_push_append(s);
@@ -275,6 +275,9 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.get_grid_base(g_base);
 			pt_round(m_event_pos_curr, g_base + 1.0, m_event_pos_curr);
 		}
+		if (m_tool_vert) {
+			slist_neighbor(m_list_shapes, m_event_pos_curr, Shape::s_anch_len, m_event_pos_curr);
+		}
 		m_event_shape_pressed->set_anchor_pos(m_event_pos_curr, m_event_anch_pressed);
 		if (undo_pop_if_invalid()) {
 			return;
@@ -293,23 +296,7 @@ namespace winrt::GraphPaper::implementation
 		if (g_snap) {
 			D2D1_POINT_2F b_nw{};
 			D2D1_POINT_2F b_se{};
-			bool flag = false;
-			for (auto s : m_list_shapes) {
-				if (s->is_deleted()) {
-					continue;
-				}
-				if (s->is_selected() != true) {
-					continue;
-				}
-				if (!flag) {
-					flag = true;
-					s->get_bound({ FLT_MAX, FLT_MAX }, { -FLT_MAX, -FLT_MAX }, b_nw, b_se);
-				}
-				else {
-					s->get_bound(b_nw, b_se, b_nw, b_se);
-				}
-			}
-			if (flag) {
+			if (slist_bound_selected(m_list_shapes, b_nw, b_se)) {
 				float g_base;
 				m_sheet_main.get_grid_base(g_base);
 				const double g_len = g_base + 1.0;
@@ -351,10 +338,14 @@ namespace winrt::GraphPaper::implementation
 				else {
 					diff = d_nw;
 				}
-				if (flag != true) {
-					flag = true;
-				}
 				slist_move(m_list_shapes, diff);
+			}
+		}
+		if (m_tool_vert) {
+			D2D1_POINT_2F b_nw{};
+			D2D1_POINT_2F b_se{};
+			if (slist_bound_selected(m_list_shapes, b_nw, b_se)) {
+				
 			}
 		}
 		if (undo_pop_if_invalid()) {
@@ -696,6 +687,10 @@ namespace winrt::GraphPaper::implementation
 					const double g_len = max(g_base + 1.0, 1.0);
 					pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
 					pt_round(m_event_pos_curr, g_len, m_event_pos_curr);
+				}
+				if (m_tool_vert) {
+					slist_neighbor(m_list_shapes, m_event_pos_pressed, Shape::s_anch_len, m_event_pos_pressed);
+					slist_neighbor(m_list_shapes, m_event_pos_curr, Shape::s_anch_len, m_event_pos_curr);
 				}
 				// ポインターの現在の位置と押された位置の差分を求める.
 				D2D1_POINT_2F diff;

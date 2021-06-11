@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 	// 用紙の左上位置と右下位置を設定する.
 	void MainPage::sheet_update_bbox(void) noexcept
 	{
-		slist_bound(m_list_shapes, m_sheet_main.m_sheet_size, m_sheet_min, m_sheet_max);
+		slist_bound_sheet(m_list_shapes, m_sheet_main.m_sheet_size, m_sheet_min, m_sheet_max);
 	}
 
 	// 用紙メニューの「用紙の色」が選択された.
@@ -558,7 +558,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F b_max = { -FLT_MAX, -FLT_MAX };
 			D2D1_POINT_2F b_size;
 
-			slist_bound(m_list_shapes, b_min, b_max);
+			slist_bound_all(m_list_shapes, b_min, b_max);
 			pt_sub(b_max, b_min, b_size);
 			if (b_size.x < 1.0F || b_size.y < 1.0F) {
 				co_return;

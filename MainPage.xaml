@@ -16,7 +16,7 @@
             <x:String x:Key="icon_arrange">&#xE8CB;</x:String>
             <x:String x:Key="icon_conf">&#xE9CE;</x:String>
             <x:String x:Key="icon_save_as">&#xE792;</x:String>
-            <x:String x:Key="icon_recent">&#xE81C;</x:String>
+			<x:String x:Key="icon_recent">&#xE823;</x:String>
             <x:String x:Key="icon_close">&#xE894;</x:String>
             <x:String x:Key="icon_italic">&#xE8DB;</x:String>
 			<x:String x:Key="icon_ibeam">&#xE933;</x:String>
@@ -478,7 +478,7 @@
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
             </muxc:MenuBarItem>
-            <!-- 作図ツールメニュー -->
+            <!-- 作図メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_menu_tool_draw" AccessKey="D" Title="Draw">
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_select" x:Uid="rmfi_tool_select" Click="tool_draw_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Select">
 					<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
@@ -530,6 +530,7 @@
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
+				<ToggleMenuFlyoutItem x:Name="tmfi_tool_snap_vert" x:Uid="tmfi_tool_snap_vert" Click="tool_snap_vert_click" Text="Snap to Vertex" />
 				<MenuFlyoutSubItem x:Uid="mfsi_tool_poly_type" Text="Type of Polygon">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_line" x:Uid="rmfi_tool_poly_line" Click="tool_draw_click" GroupName="gn_poly_type" Text="2-Line" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_tri" x:Uid="rmfi_tool_poly_tri" Click="tool_draw_click" IsChecked="True" GroupName="gn_poly_type" Text="3-Triangle" />

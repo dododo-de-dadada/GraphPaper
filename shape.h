@@ -369,10 +369,13 @@ namespace winrt::GraphPaper::implementation
 	Shape* slist_front(SHAPE_LIST const& slist) noexcept;
 
 	// 図形と用紙を囲む領域を得る.
-	void slist_bound(SHAPE_LIST const& slist, const D2D1_SIZE_F sheet_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
+	void slist_bound_sheet(SHAPE_LIST const& slist, const D2D1_SIZE_F sheet_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
 
 	// 図形を囲む領域をリストから得る.
-	void slist_bound(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
+	void slist_bound_all(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
+
+	// 図形を囲む領域をリストから得る.
+	bool slist_bound_selected(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
 
 	// 位置を含む図形とその部位を得る.
 	uint32_t slist_hit_test(SHAPE_LIST const& slist, const D2D1_POINT_2F t_pos, Shape*& s) noexcept;
@@ -407,6 +410,7 @@ namespace winrt::GraphPaper::implementation
 	// 選択された文字列図形から, それらを改行で連結した文字列を得る.
 	winrt::hstring slist_selected_all_text(SHAPE_LIST const& slist) noexcept;
 
+	void slist_neighbor(SHAPE_LIST const& slist, const D2D1_POINT_2F& n_pos, const float dist, D2D1_POINT_2F& value) noexcept;
 
 	//------------------------------
 	// 図形のひな型
@@ -470,6 +474,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_grid_snap(bool& /*value*/) const noexcept { return false; }
 		// 図形を囲む領域の左上位置を得る.
 		virtual void get_min_pos(D2D1_POINT_2F& /*value*/) const noexcept {}
+		virtual bool get_neighbor(const D2D1_POINT_2F /*pos*/, float& /*dist*/, D2D1_POINT_2F& /*value*/) const noexcept { return false; }
 		// 用紙の色を得る.
 		virtual bool get_sheet_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
 		// 用紙の拡大率を得る.
@@ -855,6 +860,31 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 		// shape_stroke.cpp
 		//------------------------------
+
+		bool get_neighbor(const D2D1_POINT_2F a_pos, float& d2, D2D1_POINT_2F& value) const noexcept
+		{
+			bool flag = false;
+			D2D1_POINT_2F sub;
+			pt_sub(m_pos, a_pos, sub);
+			float abs2 = static_cast<float>(pt_abs2(sub));
+			if (abs2 < d2) {
+				d2 = abs2;
+				value = m_pos;
+				flag = true;
+			}
+			D2D1_POINT_2F b_pos{ m_pos };
+			for (auto diff : m_diff) {
+				pt_add(b_pos, diff, b_pos);
+				pt_sub(b_pos, a_pos, sub);
+				abs2 = static_cast<float>(pt_abs2(sub));
+				if (abs2 < d2) {
+					d2 = abs2;
+					value = b_pos;
+					flag = true;
+				}
+			}
+			return flag;
+		}
 
 		// 図形を破棄する.
 		~ShapeStroke(void);

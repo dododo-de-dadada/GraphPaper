@@ -34,8 +34,7 @@ namespace winrt::GraphPaper::implementation
 	// 利用可能な書体名か判定し, 利用できない書体があったならばそれを得る.
 	bool slist_test_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept
 	{
-		// 図形リストの各図形について以下を繰り返す.
-		for (auto s : slist) {
+		for (const auto s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -64,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 	// s_size	用紙の寸法
 	// b_min	領域の左上位置
 	// b_max	領域の右下位置
-	void slist_bound(SHAPE_LIST const& slist, const D2D1_SIZE_F s_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	void slist_bound_sheet(SHAPE_LIST const& slist, const D2D1_SIZE_F s_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
 	{
 		b_min = { 0.0F, 0.0F };	// 左上位置
 		b_max = { s_size.width, s_size.height };	// 右下位置
@@ -80,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 	// slist	図形リスト
 	// b_min	領域の左上位置
 	// b_max	領域の右下位置
-	void slist_bound(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	void slist_bound_all(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
 	{
 		b_min = { FLT_MAX, FLT_MAX };	// 左上位置
 		b_max = { -FLT_MAX, -FLT_MAX };	// 右下位置
@@ -90,6 +89,30 @@ namespace winrt::GraphPaper::implementation
 			}
 			s->get_bound(b_min, b_max, b_min, b_max);
 		}
+	}
+
+	// 図形を囲む領域を得る.
+	// slist	図形リスト
+	// b_min	領域の左上位置
+	// b_max	領域の右下位置
+	bool slist_bound_selected(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	{
+		bool flag = false;
+		b_min = D2D1_POINT_2F{ FLT_MAX, FLT_MAX };	// 左上位置
+		b_max = D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX };	// 右下位置
+		for (auto s : slist) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			if (!s->is_selected()) {
+				continue;
+			}
+			s->get_bound(b_min, b_max, b_min, b_max);
+			if (!flag) {
+				flag = true;
+			}
+		}
+		return flag;
 	}
 
 	// 図形リストを消去し, 含まれる図形を破棄する.
@@ -589,5 +612,16 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto REDUCE = true;
 	template void slist_write<!REDUCE>(SHAPE_LIST const& slist, DataWriter const& dt_writer);
 	template void slist_write<REDUCE>(SHAPE_LIST const& slist, DataWriter const& dt_writer);
+
+	void slist_neighbor(SHAPE_LIST const& slist, const D2D1_POINT_2F& n_pos, const float dist, D2D1_POINT_2F& value) noexcept
+	{
+		float d2 = dist * dist;
+		for (const auto s : slist) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			s->get_neighbor(n_pos, d2, value);
+		}
+	}
 
 }

@@ -232,6 +232,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 作図ツール
 		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
+		bool m_tool_vert = true;	// 頂点ツール
 		POLY_TOOL m_tool_poly{ POLY_TOOL_DEF };	// 多角形の作図ツール
 
 		uint32_t m_cnt_selected = 0;		// 選択された図形の数
@@ -898,6 +899,11 @@ namespace winrt::GraphPaper::implementation
 		void tool_write(DataWriter const& dt_writer);
 		//　Escape が押された.
 		void kacc_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+
+		void tool_snap_vert_click(IInspectable const&, RoutedEventArgs const&) noexcept
+		{
+			m_tool_vert = tmfi_tool_snap_vert().IsChecked();
+		}
 
 		//-----------------------------
 		// MainPage_undo.cpp
