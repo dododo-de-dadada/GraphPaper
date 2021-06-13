@@ -10,10 +10,10 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// ·•ª‚¾‚¯ˆÚ“®‚·‚é.
-	// diff	·•ª
-	bool ShapePath::move(const D2D1_POINT_2F diff)
+	// d_vec	·•ª
+	bool ShapePath::move(const D2D1_POINT_2F d_vec)
 	{
-		if (ShapeStroke::move(diff)) {
+		if (ShapeStroke::move(d_vec)) {
 			create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
@@ -23,9 +23,9 @@ namespace winrt::GraphPaper::implementation
 	// ’l‚ğ, •”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚Í“®‚©‚È‚¢. 
 	// value	Ši”[‚·‚é’l
 	// anch	}Œ`‚Ì•”ˆÊ
-	bool ShapePath::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	bool ShapePath::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
-		if (ShapeStroke::set_anchor_pos(value, anch)) {
+		if (ShapeStroke::set_anch_pos(value, anch)) {
 			create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}

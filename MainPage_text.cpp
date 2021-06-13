@@ -9,19 +9,40 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr float SLIDER_STEP = 0.5f;
 	constexpr wchar_t DLG_TITLE[] = L"str_text";
+	constexpr float SLIDER_STEP = 0.5f;
+	constexpr float TEXT_LINE_H_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
 
-	// 書体メニューの「段落のそろえ」に印をつける.
-	// value	段落のそろえ
-	void MainPage::text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT value)
+	// 編集メニューの「枠の大きさを合わせる」が選択された.
+	void MainPage::edit_text_frame_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		rmfi_text_align_top().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_top_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bot().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_bot_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_mid().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-		rmfi_text_align_mid_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		auto flag = false;
+		for (auto s : m_list_shapes) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			else if (s->is_selected() != true) {
+				continue;
+			}
+			else if (typeid(*s) != typeid(ShapeText)) {
+				continue;
+			}
+			auto u = new UndoAnchor(s, ANCH_TYPE::ANCH_SE);
+			if (static_cast<ShapeText*>(s)->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f)) {
+				m_stack_undo.push_back(u);
+				if (!flag) {
+					flag = true;
+				}
+			}
+			else {
+				delete u;
+			}
+		}
+		if (flag) {
+			undo_push_null();
+			sheet_panle_size();
+			sheet_draw();
+		}
 	}
 
 	// 書体メニューの「段落のそろえ」が選択された.
@@ -45,6 +66,18 @@ namespace winrt::GraphPaper::implementation
 			xcvd_is_enabled();
 			sheet_draw();
 		}
+	}
+
+	// 書体メニューの「段落のそろえ」に印をつける.
+	// value	段落のそろえ
+	void MainPage::text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT value)
+	{
+		rmfi_text_align_top().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_text_align_top_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_text_align_bot().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_bot_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_mid().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		rmfi_text_align_mid_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」が選択された.
@@ -85,48 +118,7 @@ namespace winrt::GraphPaper::implementation
 		rmfi_text_align_center_2().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
 		rmfi_text_align_just().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 		rmfi_text_align_just_2().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING>(t_align, rmfi_text_align_left());
-		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING>(t_align, rmfi_text_align_left_2());
-		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING>(t_align, rmfi_text_align_right());
-		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING>(t_align, rmfi_text_align_right_2());
-		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER>(t_align, rmfi_text_align_center());
-		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER>(t_align, rmfi_text_align_center_2());
-		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED>(t_align, rmfi_text_align_just());
-		//radio_menu_item_set_value< DWRITE_TEXT_ALIGNMENT, DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED>(t_align, rmfi_text_align_just_2());
-	}
 
-	constexpr float TEXT_LINE_H_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
-
-	// 編集メニューの「枠の大きさを合わせる」が選択された.
-	void MainPage::edit_text_frame_click(IInspectable const&, RoutedEventArgs const&)
-	{
-		auto flag = false;
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			else if (s->is_selected() != true) {
-				continue;
-			}
-			else if (typeid(*s) != typeid(ShapeText)) {
-				continue;
-			}
-			auto u = new UndoAnchor(s, ANCH_TYPE::ANCH_SE);
-			if (static_cast<ShapeText*>(s)->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f)) {
-				m_stack_undo.push_back(u);
-				if (!flag) {
-					flag = true;
-				}
-			}
-			else {
-				delete u;
-			}
-		}
-		if (flag) {
-			undo_push_null();
-			sheet_panle_size();
-			sheet_draw();
-		}
 	}
 
 	// 書体メニューの「行間」>「行間...」が選択された.

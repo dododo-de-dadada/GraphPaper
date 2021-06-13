@@ -215,7 +215,7 @@
   </data>
   <data name="mfsi_color_code.Text" xml:space="preserve">
     <value>色の表記</value>
-    <comment>ComboBox</comment>
+    <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_len_unit.Text" xml:space="preserve">
     <value>長さの単位</value>
@@ -478,7 +478,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_summary_list.Text" xml:space="preserve">
-    <value>リストを表示</value>
+    <value>一覧を表示</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_text_line_sp.Text" xml:space="preserve">
@@ -839,7 +839,7 @@
     <comment>TextBox</comment>
   </data>
   <data name="tmfi_grid_snap.Text" xml:space="preserve">
-    <value>方眼にそろえる</value>
+    <value>方眼に合わせる</value>
     <comment>TextBlock</comment>
   </data>
   <data name="tmfi_status_bar_curs.Text" xml:space="preserve">
@@ -996,7 +996,7 @@
   </data>
   <data name="tmfi_tool_poly_reguler.Text" xml:space="preserve">
     <value>正多角形で作図</value>
-    <comment>RadioMenuFlyoutItem</comment>
+    <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="tb_version.Text" xml:space="preserve">
     <value>バージョン 0.0.2</value>
@@ -1007,7 +1007,7 @@
     <comment>String</comment>
   </data>
   <data name="str_line_join" xml:space="preserve">
-    <value>線分のつながり</value>
+    <value>線分のつなぎ</value>
     <comment>String</comment>
   </data>
   <data name="str_line_sp" xml:space="preserve">
@@ -1017,5 +1017,37 @@
   <data name="str_err_paste" xml:space="preserve">
     <value>データを貼り付けできません.</value>
     <comment>String</comment>
+  </data>
+  <data name="rmfi_join_bevel.Text" xml:space="preserve">
+    <value>面取り</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="mfi_join_limit.Text" xml:space="preserve">
+    <value>額ぶちの制限...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_join_miter.Text" xml:space="preserve">
+    <value>額ぶち</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_join_m_or_b.Text" xml:space="preserve">
+    <value>額ぶち|面取り</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_join_round.Text" xml:space="preserve">
+    <value>丸い</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="mfs_cap_style.Text" xml:space="preserve">
+    <value>端点の種類</value>
+    <comment>MenuFlyoutSubItem</comment>
+  </data>
+  <data name="mfs_join_style.Text" xml:space="preserve">
+    <value>つなぎの種類</value>
+    <comment>MenuFlyoutSubItem</comment>
+  </data>
+  <data name="tmfi_tool_vert_snap.Text" xml:space="preserve">
+    <value>頂点に合わせる</value>
+    <comment>ToggleMenuFlyoutItem</comment>
   </data>
 </root>

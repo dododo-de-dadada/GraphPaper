@@ -18,24 +18,24 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含むか判定する.
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto anchor = ShapeRect::hit_test_anchor(t_pos);
-		if (anchor != ANCH_TYPE::ANCH_SHEET) {
-			return anchor;
+		const auto anch = ShapeRect::hit_test_anch(t_pos);
+		if (anch != ANCH_TYPE::ANCH_SHEET) {
+			return anch;
 		}
 		if (is_opaque(m_stroke_color)) {
 			const double g_len = m_grid_base + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
 			const bool x_ge_y = fabs(m_diff[0].x) >= fabs(m_diff[0].y);
-			const double diff_x = (x_ge_y ? m_diff[0].x : m_diff[0].y);
-			const double diff_y = (x_ge_y ? m_diff[0].y : m_diff[0].x);
-			const double grad_x = diff_x >= 0.0 ? g_len : -g_len;
+			const double vec_x = (x_ge_y ? m_diff[0].x : m_diff[0].y);
+			const double vec_y = (x_ge_y ? m_diff[0].y : m_diff[0].x);
+			const double grad_x = vec_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
-			const uint32_t k = static_cast<uint32_t>(floor(diff_x / grad_x));
+			const uint32_t k = static_cast<uint32_t>(floor(vec_x / grad_x));
 			const double x0 = (x_ge_y ? m_pos.x : m_pos.y);
-			const double y0 = static_cast<double>(x_ge_y ? m_pos.y : m_pos.x) + diff_y;
-			const double y1 = y0 - (diff_y >= 0.0 ? grad_y : -grad_y);
-			const double y1_5 = y0 - 0.625 * (diff_y >= 0.0 ? grad_y : -grad_y);
-			const double y2 = y1 - (diff_y >= 0.0 ? f_size : -f_size);
+			const double y0 = static_cast<double>(x_ge_y ? m_pos.y : m_pos.x) + vec_y;
+			const double y1 = y0 - (vec_y >= 0.0 ? grad_y : -grad_y);
+			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? grad_y : -grad_y);
+			const double y2 = y1 - (vec_y >= 0.0 ? f_size : -f_size);
 			for (uint32_t i = 0; i <= k; i++) {
 				// 方眼の大きさごとに目盛りを表示する.
 				const double x = x0 + i * grad_x;
@@ -117,16 +117,16 @@ namespace winrt::GraphPaper::implementation
 			const double g_len = m_grid_base + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
 			const bool xy = fabs(m_diff[0].x) >= fabs(m_diff[0].y);
-			const double diff_x = (xy ? m_diff[0].x : m_diff[0].y);
-			const double diff_y = (xy ? m_diff[0].y : m_diff[0].x);
-			const double grad_x = diff_x >= 0.0 ? g_len : -g_len;
+			const double vec_x = (xy ? m_diff[0].x : m_diff[0].y);
+			const double vec_y = (xy ? m_diff[0].y : m_diff[0].x);
+			const double grad_x = vec_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
-			const uint32_t k = static_cast<uint32_t>(floor(diff_x / grad_x));
+			const uint32_t k = static_cast<uint32_t>(floor(vec_x / grad_x));
 			const double x0 = (xy ? m_pos.x : m_pos.y);
-			const double y0 = static_cast<double>(xy ? m_pos.y : m_pos.x) + diff_y;
-			const double y1 = y0 - (diff_y >= 0.0 ? grad_y : -grad_y);
-			const double y1_5 = y0 - 0.625 * (diff_y >= 0.0 ? grad_y : -grad_y);
-			const double y2 = y1 - (diff_y >= 0.0 ? f_size : -f_size);
+			const double y0 = static_cast<double>(xy ? m_pos.y : m_pos.x) + vec_y;
+			const double y1 = y0 - (vec_y >= 0.0 ? grad_y : -grad_y);
+			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? grad_y : -grad_y);
+			const double y2 = y1 - (vec_y >= 0.0 ? f_size : -f_size);
 			DWRITE_PARAGRAPH_ALIGNMENT p_align;
 			if (xy) {
 				// 横のほうが大きい場合,
@@ -184,19 +184,19 @@ namespace winrt::GraphPaper::implementation
 		r_pos[3].y = rect.bottom;
 		r_pos[3].x = rect.left;
 		for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-			anchor_draw_rect(r_pos[i], dx);
+			anch_draw_rect(r_pos[i], dx);
 			D2D1_POINT_2F r_mid;	// 方形の辺の中点
 			pt_avg(r_pos[j], r_pos[i], r_mid);
-			anchor_draw_rect(r_mid, dx);
+			anch_draw_rect(r_mid, dx);
 		}
 	}
 
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
-	// b_diff	囲む領域の終点への差分
+	// b_vec	囲む領域の終点への差分
 	// s_attr	属性
-	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
-		ShapeRect::ShapeRect(b_pos, b_diff, s_attr),
+	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr) :
+		ShapeRect::ShapeRect(b_pos, b_vec, s_attr),
 		m_grid_base(s_attr->m_grid_base)
 	{
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
@@ -217,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 		m_dw_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
 	}
 
-	// 図形をデータリーダーから読み込む.
+	// データリーダーから図形を読み込む.
 	ShapeRuler::ShapeRuler(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader),
 		m_grid_base(dt_reader.ReadSingle())

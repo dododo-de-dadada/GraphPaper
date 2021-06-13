@@ -67,7 +67,7 @@ namespace winrt::GraphPaper::implementation
 	static double bz_deriv_by_param(const BZP b_pos[4], const double t) noexcept;
 
 	// 位置を曲線の端点が含むか判定する.
-	template<D2D1_CAP_STYLE S> static bool bz_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F diff[3], const double e_width);
+	template<D2D1_CAP_STYLE S> static bool bz_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F d_vec[3], const double e_width);
 
 	// 点の配列をもとにそれらをすべて含む凸包を求める.
 	static void bz_get_convex(const uint32_t e_cnt, const BZP e_pos[], uint32_t& c_cnt, BZP c_pos[]);
@@ -389,7 +389,7 @@ namespace winrt::GraphPaper::implementation
 	// t_max	区間の終端
 	static double bz_len_by_param(const BZP b_pos[4], const double t_min, const double t_max, const uint32_t sim_n) noexcept
 	{
-		double t_diff;
+		double t_vec;
 		uint32_t n;
 		double h;
 		double a, b;
@@ -400,14 +400,14 @@ namespace winrt::GraphPaper::implementation
 		/* 範囲の上限下限は正順か判定する. */
 		/* 正順 ? */
 		if (bz_test_param(t_min, t_max)) {
-			/* 範囲上限 t_max -範囲下限 t_min を差分 t_diff に格納する. */
-			t_diff = t_max - t_min;
-			/* 区間の分割数 sim_n と t_diff を乗算する. */
+			/* 範囲上限 t_max -範囲下限 t_min を差分 t_vec に格納する. */
+			t_vec = t_max - t_min;
+			/* 区間の分割数 sim_n と t_vec を乗算する. */
 			/* その結果を切り上げて整数値する. */
 			/* 整数値を区間の半数 n に格納する. */
-			n = (int)std::ceil(t_diff * (double)sim_n);
-			/* t_diff÷2n を階差 h に格納する. */
-			h = t_diff / (2.0 * n);
+			n = (int)std::ceil(t_vec * (double)sim_n);
+			/* t_vec÷2n を階差 h に格納する. */
+			h = t_vec / (2.0 * n);
 			/* 0 を奇数番目の部分区間の合計値 a に格納する. */
 			a = 0.0;
 			/* 0 を偶数番目の部分区間の合計値 b に格納する. */
@@ -566,14 +566,14 @@ namespace winrt::GraphPaper::implementation
 		//auto sb = dx.m_anch_brush.get();
 		//auto ss = dx.m_aux_style.get();
 
-		anchor_draw_rect(m_pos, dx);
+		anch_draw_rect(m_pos, dx);
 		s_pos = m_pos;
 		pt_add(s_pos, m_diff[0], e_pos);
 		dx.m_shape_brush->SetColor(Shape::m_default_background);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
-		anchor_draw_ellipse(e_pos, dx);
+		anch_draw_ellipse(e_pos, dx);
 
 		s_pos = e_pos;
 		pt_add(s_pos, m_diff[1], e_pos);
@@ -581,7 +581,7 @@ namespace winrt::GraphPaper::implementation
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
-		anchor_draw_ellipse(e_pos, dx);
+		anch_draw_ellipse(e_pos, dx);
 
 		s_pos = e_pos;
 		pt_add(s_pos, m_diff[2], e_pos);
@@ -589,18 +589,18 @@ namespace winrt::GraphPaper::implementation
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
 		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
-		anchor_draw_rect(e_pos, dx);
+		anch_draw_rect(e_pos, dx);
 	}
 
 	// 位置を曲線の端点が含むか判定する.
-	template<D2D1_CAP_STYLE S> static bool bz_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F diff[3], const double e_width)
+	template<D2D1_CAP_STYLE S> static bool bz_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F d_vec[3], const double e_width)
 	{
 		size_t i;
 		for (i = 0; i < 3; i++) {
-			const double abs2 = pt_abs2(diff[i]);
+			const double abs2 = pt_abs2(d_vec[i]);
 			if (abs2 > FLT_MIN) {
 				D2D1_POINT_2F e_vec;
-				pt_mul(diff[i], -e_width / sqrt(abs2), e_vec);
+				pt_mul(d_vec[i], -e_width / sqrt(abs2), e_vec);
 				D2D1_POINT_2F e_nor{ e_vec.y, -e_vec.x };
 				D2D1_POINT_2F e_pos[4];
 				pt_add(c_pos[i], e_nor, e_pos[0]);
@@ -644,10 +644,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			for (size_t j = 3; j > 0; j--) {
-				const double abs2 = pt_abs2(diff[j - 1]);
+				const double abs2 = pt_abs2(d_vec[j - 1]);
 				if (abs2 > FLT_MIN) {
 					D2D1_POINT_2F e_vec;
-					pt_mul(diff[j - 1], e_width / sqrt(abs2), e_vec);
+					pt_mul(d_vec[j - 1], e_width / sqrt(abs2), e_vec);
 					D2D1_POINT_2F e_nor{ e_vec.y, -e_vec.x };
 					D2D1_POINT_2F e_pos[4];
 					pt_add(c_pos[j], e_nor, e_pos[0]);
@@ -937,50 +937,50 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
-	// b_diff	囲む領域の終点への差分
+	// b_vec	囲む領域の終点への差分
 	// s_attr	属性
-	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
+	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr) :
 		ShapePath::ShapePath(3, s_attr, false)
 	{
 		m_pos = b_pos;
-		m_diff[0].x = b_diff.x;
+		m_diff[0].x = b_vec.x;
 		m_diff[0].y = 0.0f;
-		m_diff[1].x = -b_diff.x;
-		m_diff[1].y = b_diff.y;
-		m_diff[2].x = b_diff.x;
+		m_diff[1].x = -b_vec.x;
+		m_diff[1].y = b_vec.y;
+		m_diff[2].x = b_vec.x;
 		m_diff[2].y = 0.0f;
 		create_path_geometry(Shape::s_d2d_factory);
 	}
 
-	// 図形をデータリーダーから読み込む.
+	// データリーダーから図形を読み込む.
 	ShapeBezi::ShapeBezi(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
 	{
 		create_path_geometry(Shape::s_d2d_factory);
 	}
 
-	// データライターに SVG タグとして書き込む.
-	void ShapeBezi::svg_write(DataWriter const& dt_writer) const
+	// データライターに SVG として書き込む.
+	void ShapeBezi::dt_write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::svg_write;
+		using winrt::GraphPaper::implementation::dt_write_svg;
 		D2D1_BEZIER_SEGMENT b_seg;
 
 		pt_add(m_pos, m_diff[0], b_seg.point1);
 		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
 		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
-		svg_write("<path d=\"", dt_writer);
-		svg_write(m_pos, "M", dt_writer);
-		svg_write(b_seg.point1, "C", dt_writer);
-		svg_write(b_seg.point2, ",", dt_writer);
-		svg_write(b_seg.point3, ",", dt_writer);
-		svg_write("\" ", dt_writer);
-		svg_write("none", "fill", dt_writer);
-		ShapeStroke::svg_write(dt_writer);
-		svg_write("/>" SVG_NEW_LINE, dt_writer);
+		dt_write_svg("<path d=\"", dt_writer);
+		dt_write_svg(m_pos, "M", dt_writer);
+		dt_write_svg(b_seg.point1, "C", dt_writer);
+		dt_write_svg(b_seg.point2, ",", dt_writer);
+		dt_write_svg(b_seg.point3, ",", dt_writer);
+		dt_write_svg("\" ", dt_writer);
+		dt_write_svg("none", "fill", dt_writer);
+		ShapeStroke::dt_write_svg(dt_writer);
+		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bz_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			ShapeLineA::svg_write(barbs, barbs[2], dt_writer);
+			ShapeLineA::dt_write_svg(barbs, barbs[2], dt_writer);
 		}
 	}
 

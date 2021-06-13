@@ -72,7 +72,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
 				if (m_summary_atomic.load(std::memory_order_acquire)) {
-					summary_insert(s, i++);
+					summary_insert_at(s, i++);
 				}
 				undo_push_remove(g, s);
 				undo_push_insert(s, g);

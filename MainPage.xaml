@@ -11,16 +11,16 @@
     <Page.Resources>
         <ResourceDictionary>
             <!-- フォントアイコンのグリフ -->
-            <x:String x:Key="icon_info">&#xE946;</x:String>
-            <x:String x:Key="icon_alert">&#xEA39;</x:String>
-            <x:String x:Key="icon_arrange">&#xE8CB;</x:String>
-            <x:String x:Key="icon_conf">&#xE9CE;</x:String>
-            <x:String x:Key="icon_save_as">&#xE792;</x:String>
-			<x:String x:Key="icon_recent">&#xE823;</x:String>
-            <x:String x:Key="icon_close">&#xE894;</x:String>
-            <x:String x:Key="icon_italic">&#xE8DB;</x:String>
-			<x:String x:Key="icon_ibeam">&#xE933;</x:String>
-            <x:String x:Key="icon_fit_page">&#xE9A6;</x:String>
+            <x:String x:Key="glyph_info">&#xE946;</x:String>
+            <x:String x:Key="glyph_alert">&#xEA39;</x:String>
+            <x:String x:Key="glyph_arrange">&#xE8CB;</x:String>
+            <x:String x:Key="glyph_conf">&#xE9CE;</x:String>
+            <x:String x:Key="glyph_save_as">&#xE792;</x:String>
+			<x:String x:Key="glyph_recent">&#xE823;</x:String>
+            <x:String x:Key="glyph_close">&#xE894;</x:String>
+            <x:String x:Key="glyph_italic">&#xE8DB;</x:String>
+			<x:String x:Key="glyph_ibeam">&#xE933;</x:String>
+            <x:String x:Key="glyph_fit_page">&#xE9A6;</x:String>
 			<!-- 曲線アイコンの描画コマンド -->
             <x:String x:Key="data_bezi">
                 M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841 L15.310918,7.967942 C8.311178,14.40621 8.311178,0.405251 -0.032292,7.249824 Z
@@ -133,7 +133,7 @@
                 M0, 8 L3, 8 L3, 5.48 L16, 8.5 L3, 11.52 L3,9 L0, 9 Z
             </x:String>
             <!-- アプリケーションデータを格納するファイル名 -->
-            <x:String x:Key="file_appl_data">appl_data</x:String>
+            <x:String x:Key="file_app_data">app_data</x:String>
             <!-- 定規コンテキストメニュー -->
 			<MenuFlyout x:Key="mf_ruler_menu">
 				<MenuFlyoutItem x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
@@ -187,7 +187,7 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_miter_2" x:Uid="rmfi_join_miter" Click="join_style_click" GroupName="gn_join_style_2" IsChecked="true" Text="Miter" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_m_or_b_2" x:Uid="rmfi_join_m_or_b" Click="join_style_click" GroupName="gn_join_style_2" Text="Miter or Bevel" />
                     <MenuFlyoutSeparator />
-					<MenuFlyoutItem x:Name="rmfi_join_limit_2" x:Uid="rmfi_join_limit" Click="join_limit_click_async" Text="Miter Limit..." />
+					<MenuFlyoutItem x:Name="mfi_join_limit_2" x:Uid="mfi_join_limit" Click="join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- 矢じるし -->
@@ -222,14 +222,14 @@
                 <!--文字列の編集 -->
 				<MenuFlyoutItem x:Uid="mfi_edit_text" Click="edit_text_click" KeyboardAcceleratorTextOverride="Ctrl+E" Text="Edit Text" >
 					<MenuFlyoutItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_ibeam}"/>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_ibeam}"/>
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
 				<!--文字列の検索と置換 -->
 				<MenuFlyoutItem x:Uid="mfi_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text" />
                 <MenuFlyoutItem x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Text="Fit Frame Size to" >
                     <MenuFlyoutItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_fit_page}"/>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_fit_page}"/>
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <!-- 書体の種類 -->
@@ -350,7 +350,7 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="mfi_file_save_as" x:Uid="mfi_file_save_as" Click="file_save_as_click" Text="Save As..." >
                     <MenuFlyoutItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_save_as}" />
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_save_as}" />
                     </MenuFlyoutItem.Icon>
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
@@ -359,7 +359,7 @@
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_file_recent" Text="Recent Files">
                     <MenuFlyoutSubItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_recent}" />
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_recent}" />
                     </MenuFlyoutSubItem.Icon>
                     <MenuFlyoutItem x:Name="mfi_file_recent_1" Click="file_recent_click" Text="1" />
                     <MenuFlyoutItem x:Name="mfi_file_recent_2" Click="file_recent_click" Text="2" />
@@ -412,7 +412,7 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_arrange" Text="Arrange">
                     <MenuFlyoutSubItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_arrange}" />
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_arrange}" />
                     </MenuFlyoutSubItem.Icon>
                     <MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="arrange_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
                         <MenuFlyoutItem.KeyboardAccelerators>
@@ -461,7 +461,7 @@
                 <MenuFlyoutSeparator />
 				<MenuFlyoutItem x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="edit_text_click" Text="Edit Text" >
 					<MenuFlyoutItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_ibeam}"/>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_ibeam}"/>
 					</MenuFlyoutItem.Icon>
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="E" Modifiers="Control" />
@@ -474,7 +474,7 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="mfi_edit_text_frame" x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Text="Fit Frame Size to" >
                     <MenuFlyoutItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_fit_page}"/>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_fit_page}"/>
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
             </muxc:MenuBarItem>
@@ -530,7 +530,6 @@
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
-				<ToggleMenuFlyoutItem x:Name="tmfi_tool_snap_vert" x:Uid="tmfi_tool_snap_vert" Click="tool_snap_vert_click" Text="Snap to Vertex" />
 				<MenuFlyoutSubItem x:Uid="mfsi_tool_poly_type" Text="Type of Polygon">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_line" x:Uid="rmfi_tool_poly_line" Click="tool_draw_click" GroupName="gn_poly_type" Text="2-Line" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_tri" x:Uid="rmfi_tool_poly_tri" Click="tool_draw_click" IsChecked="True" GroupName="gn_poly_type" Text="3-Triangle" />
@@ -547,7 +546,8 @@
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_closed" x:Uid="tmfi_tool_poly_closed" Click="tool_draw_click" IsChecked="true" Text="Closed" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_clockwise" x:Uid="tmfi_tool_poly_clockwise" Click="tool_draw_click" IsChecked="true" Text="Clockwise" />
 				</MenuFlyoutSubItem>
-			</muxc:MenuBarItem>
+                <ToggleMenuFlyoutItem x:Name="tmfi_tool_vert_snap" x:Uid="tmfi_tool_vert_snap" Click="tool_vert_snap_click" IsChecked="true" Text="Snap to Vertex" />
+            </muxc:MenuBarItem>
             <!-- 線枠メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_stroke_menu" AccessKey="S" Title="Stroke">
 			<!--<muxc:MenuBarItem x:Name="mbi_stroke_menu" x:Uid="mbi_stroke_menu" AccessKey="S" Title="Stroke">-->
@@ -593,7 +593,7 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_miter" x:Uid="rmfi_join_miter" Click="join_style_click" GroupName="gn_join_style" IsChecked="true" Text="Shape" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_m_or_b" x:Uid="rmfi_join_m_or_b" Click="join_style_click" GroupName="gn_join_style" Text="Miter or Bevel" />
                     <MenuFlyoutSeparator />
-					<MenuFlyoutItem x:Name="rmfi_join_limit" x:Uid="rmfi_join_limit" Click="join_limit_click_async" Text="Miter Limit..." />
+					<MenuFlyoutItem x:Name="mfi_join_limit" x:Uid="mfi_join_limit" Click="join_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <!-- 矢じるしメニュー -->
@@ -632,7 +632,7 @@
                 <MenuFlyoutItem x:Uid="mfi_font_stretch" Click="font_stretch_click_async" Text="Stretch..."/>
                 <MenuFlyoutSubItem x:Uid="mfsi_font_style" Text="Style">
 					<MenuFlyoutSubItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_italic}" />
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_italic}" />
 					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_normal" x:Uid="rmfi_font_style_normal" Click="font_style_normal_click" IsChecked="True" Text="Normal" GroupName="gn_font_style"/>
                     <MenuFlyoutSeparator />
@@ -764,7 +764,7 @@
         </muxc:MenuBar>
         <!-- 文字列検索パネル -->
         <StackPanel x:Name="sp_find_text_panel" Grid.Row="1" Grid.Column="1" Orientation="Vertical" Visibility="Collapsed">
-            <Button Click="find_text_close_click" Background="White" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
+            <Button Click="find_text_close_click" Background="White" Content="{StaticResource glyph_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Top" />
             <StackPanel Padding="8,8,8,8">
                 <TextBox x:Name="tx_find_text_what" x:Uid="tx_find_text_what" Header="Find what" Margin="0,4" TextChanged="find_text_what_changed" Width="128" />
                 <TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" Header="Replace width" Margin="0,4" Width="128" />
@@ -785,15 +785,15 @@
 				<RowDefinition Height="Auto"/>
 			</Grid.RowDefinitions>
 			<Button x:Name="btn_summary_close" x:Uid="btn_summary_close" Click="summary_close_click" Content="Close" Grid.Row="2" HorizontalAlignment="Stretch" Margin="12,12,12,12" />
-			<Button Click="summary_close_click" Background="{ThemeResource ButtonBackgroundThemeBrush}" Content="{StaticResource icon_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" Grid.Row="0" HorizontalAlignment="Right" />
-			<ListView x:Name="lv_summary" Grid.Row="1" IsItemClickEnabled="True" ItemClick="summary_item_click" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >
-				<!--<ListView x:Name="lv_summary" Grid.Row="1" IsItemClickEnabled="False" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
-				<!--<ListView x:Name="lv_summary" IsItemClickEnabled="False" Loaded="summary_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_summary_close" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
+			<Button Click="summary_close_click" Background="{ThemeResource ButtonBackgroundThemeBrush}" Content="{StaticResource glyph_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" Grid.Row="0" HorizontalAlignment="Right" />
+			<ListView x:Name="lv_summary_list" Grid.Row="1" IsItemClickEnabled="True" ItemClick="summary_item_click" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >
+				<!--<ListView x:Name="lv_summary_list" Grid.Row="1" IsItemClickEnabled="False" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
+				<!--<ListView x:Name="lv_summary_list" IsItemClickEnabled="False" Loaded="summary_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_summary_close" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
 				<ListView.Header>
-					<TextBlock x:Name="tb_list_view_header" HorizontalAlignment="Center" Text="Back"/>
+					<TextBlock x:Name="tb_summary_list_header" HorizontalAlignment="Center" Text="Back"/>
 				</ListView.Header>
 				<ListView.Footer>
-					<TextBlock x:Name="tb_list_view_footer" HorizontalAlignment="Center" Text="Front"/>
+					<TextBlock x:Name="tb_summary_list_footer" HorizontalAlignment="Center" Text="Front"/>
 				</ListView.Footer>
 				<ItemsControl.ItemTemplate>
 					<DataTemplate x:DataType="local:Summary">
@@ -917,21 +917,21 @@
         <!-- 貼り付け確認ダイアログ -->
         <ContentDialog x:Name="cd_conf_paste_dialog" x:Uid="cd_conf_paste_dialog" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Paste">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
-                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_conf}" />
+                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_conf}" />
                 <TextBlock x:Uid="tk_conf_paste" />
             </StackPanel>
         </ContentDialog>
         <!-- 保存確認ダイアログ -->
         <ContentDialog x:Name="cd_conf_save_dialog" x:Uid="cd_conf_save_dialog" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Save" SecondaryButtonText="Don't Save">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
-                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_conf}" Margin="0,0,16,0" />
+                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_conf}" Margin="0,0,16,0" />
                 <TextBlock x:Uid="tk_conf_save"/>
             </StackPanel>
         </ContentDialog>
         <!-- メッセージダイアログ -->
         <ContentDialog x:Name="cd_message_dialog" x:Uid="cd_message_dialog" CloseButtonText="Close" DefaultButton="Close">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
-                <FontIcon x:Name="fi_message" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource icon_alert}" Margin="0,0,16,0"/>
+                <FontIcon x:Name="fi_message" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_alert}" Margin="0,0,16,0"/>
                 <TextBlock x:Name="tk_message"/>
             </StackPanel>
         </ContentDialog>
@@ -959,7 +959,7 @@
                     Width="170"
                     />
                 <!-- Height を指定するこれ大事 -->
-                <ListView x:Name="lv_sample_lview" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
+                <ListView x:Name="lv_sample_list" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
                 <Slider x:Name="sample_slider_0" x:Uid = "sample_slider_0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="sample_slider_1" x:Uid = "sample_slider_1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
                 <Slider x:Name="sample_slider_2" x:Uid = "sample_slider_2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />

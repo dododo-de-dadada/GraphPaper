@@ -44,15 +44,15 @@ namespace winrt::GraphPaper::implementation
 		r_pos[3].y = rect.bottom;
 		r_pos[3].x = rect.left;
 		for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-			anchor_draw_rect(r_pos[i], dx);
+			anch_draw_rect(r_pos[i], dx);
 			D2D1_POINT_2F r_mid;	// 方形の辺の中点
 			pt_avg(r_pos[j], r_pos[i], r_mid);
-			anchor_draw_rect(r_mid, dx);
+			anch_draw_rect(r_mid, dx);
 		}
 	}
 
 	// 折れ線の図形の部位が位置を含むか判定する.
-	uint32_t ShapeRect::hit_test_anchor(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeRect::hit_test_anch(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		// どの頂点が位置を含むか判定する.
 		for (uint32_t i = 0; i < 4; i++) {
@@ -266,109 +266,109 @@ namespace winrt::GraphPaper::implementation
 	//	値を, 部位の位置に格納する. 他の部位の位置も動く.
 	//	value	格納する値
 	//	abch	図形の部位
-	bool ShapeRect::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	bool ShapeRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
 		//D2D1_POINT_2F a_pos;
 
 		switch (anch) {
 		case ANCH_TYPE::ANCH_SHEET:
 			{
-			D2D1_POINT_2F diff;
-			pt_sub(value, m_pos, diff);
-			pt_round(diff, PT_ROUND, diff);
-			if (pt_abs2(diff) < FLT_MIN) {
+			D2D1_POINT_2F vec;
+			pt_sub(value, m_pos, vec);
+			pt_round(vec, PT_ROUND, vec);
+			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
 			}
-			pt_add(m_pos, diff, m_pos);
+			pt_add(m_pos, vec, m_pos);
 			}
 			break;
 		case ANCH_TYPE::ANCH_NW:
 			{
-			D2D1_POINT_2F diff;
-			pt_sub(value, m_pos, diff);
-			pt_round(diff, PT_ROUND, diff);
-			if (pt_abs2(diff) < FLT_MIN) {
+			D2D1_POINT_2F vec;
+			pt_sub(value, m_pos, vec);
+			pt_round(vec, PT_ROUND, vec);
+			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
 			}
-			pt_add(m_pos, diff, m_pos);
-			pt_sub(m_diff[0], diff, m_diff[0]);
+			pt_add(m_pos, vec, m_pos);
+			pt_sub(m_diff[0], vec, m_diff[0]);
 			}
 			break;
 		case ANCH_TYPE::ANCH_NORTH:
 			{
-			const double diff_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
-			if (fabs(diff_y) < FLT_MIN) {
+			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
+			if (fabs(vec_y) < FLT_MIN) {
 				return false;
 			}
-			m_diff[0].y = static_cast<FLOAT>(m_diff[0].y - diff_y);
-			m_pos.y = static_cast<FLOAT>(m_pos.y + diff_y);
+			m_diff[0].y = static_cast<FLOAT>(m_diff[0].y - vec_y);
+			m_pos.y = static_cast<FLOAT>(m_pos.y + vec_y);
 			}
 			break;
 		case ANCH_TYPE::ANCH_NE:
 			{
 			D2D1_POINT_2F a_pos;
 			get_anch_pos(ANCH_TYPE::ANCH_NE, a_pos);
-			D2D1_POINT_2F diff;
-			pt_sub(value, a_pos, diff);
-			pt_round(diff, PT_ROUND, diff);
-			if (pt_abs2(diff) < FLT_MIN) {
+			D2D1_POINT_2F vec;
+			pt_sub(value, a_pos, vec);
+			pt_round(vec, PT_ROUND, vec);
+			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
 			}
-			m_pos.y += diff.y;
-			pt_add(m_diff[0], diff.x, -diff.y, m_diff[0]);
+			m_pos.y += vec.y;
+			pt_add(m_diff[0], vec.x, -vec.y, m_diff[0]);
 			}
 			break;
 		case ANCH_TYPE::ANCH_WEST:
 			{
-			const double diff_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
-			if (fabs(diff_x) < FLT_MIN) {
+			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
+			if (fabs(vec_x) < FLT_MIN) {
 				return false;
 			}
-			m_diff[0].x = static_cast<FLOAT>(m_diff[0].x - diff_x);
-			m_pos.x = static_cast<FLOAT>(m_pos.x + diff_x);
+			m_diff[0].x = static_cast<FLOAT>(m_diff[0].x - vec_x);
+			m_pos.x = static_cast<FLOAT>(m_pos.x + vec_x);
 			}
 			break;
 		case ANCH_TYPE::ANCH_EAST:
 			{
-			const double diff_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
-			if (fabs(diff_x) < FLT_MIN) {
+			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
+			if (fabs(vec_x) < FLT_MIN) {
 				return false;
 			}
-			m_diff[0].x = static_cast<FLOAT>(diff_x);
+			m_diff[0].x = static_cast<FLOAT>(vec_x);
 			}
 			break;
 		case ANCH_TYPE::ANCH_SW:
 			{
 			D2D1_POINT_2F a_pos;
 			get_anch_pos(ANCH_TYPE::ANCH_SW, a_pos);
-			D2D1_POINT_2F diff;
-			pt_sub(value, a_pos, diff);
-			pt_round(diff, PT_ROUND, diff);
-			if (pt_abs2(diff) < FLT_MIN) {
+			D2D1_POINT_2F vec;
+			pt_sub(value, a_pos, vec);
+			pt_round(vec, PT_ROUND, vec);
+			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
 			}
-			m_pos.x += diff.x;
-			pt_add(m_diff[0], -diff.x, diff.y, m_diff[0]);
+			m_pos.x += vec.x;
+			pt_add(m_diff[0], -vec.x, vec.y, m_diff[0]);
 			}
 			break;
 		case ANCH_TYPE::ANCH_SOUTH:
 			{
-			const double diff_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
-			if (fabs(diff_y) < FLT_MIN) {
+			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
+			if (fabs(vec_y) < FLT_MIN) {
 				return false;
 			}
-			m_diff[0].y = static_cast<FLOAT>(diff_y);
+			m_diff[0].y = static_cast<FLOAT>(vec_y);
 			}
 			break;
 		case ANCH_TYPE::ANCH_SE:
 			{
-			D2D1_POINT_2F diff;
-			pt_sub(value, m_pos, diff);
-			pt_round(diff, PT_ROUND, diff);
-			if (pt_abs2(diff) < FLT_MIN) {
+			D2D1_POINT_2F vec;
+			pt_sub(value, m_pos, vec);
+			pt_round(vec, PT_ROUND, vec);
+			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
 			}
-			m_diff[0] = diff;
+			m_diff[0] = vec;
 			}
 			break;
 		default:
@@ -379,17 +379,17 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
-	// b_diff	囲む領域の終点への差分
+	// b_vec	囲む領域の終点への差分
 	// s_sttr	属性
-	ShapeRect::ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
+	ShapeRect::ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr) :
 		ShapeStroke::ShapeStroke(1, s_attr),
 		m_fill_color(s_attr->m_fill_color)
 	{
 		m_pos = b_pos;
-		m_diff[0] = b_diff;
+		m_diff[0] = b_vec;
 	}
 
-	// 図形をデータリーダーから読み込む.
+	// データリーダーから図形を読み込む.
 	ShapeRect::ShapeRect(DataReader const& dt_reader) :
 		ShapeStroke::ShapeStroke(dt_reader)
 	{
@@ -403,16 +403,48 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_fill_color, dt_writer);
 	}
 
-	// データライターに SVG タグとして書き込む.
-	void ShapeRect::svg_write(DataWriter const& dt_writer) const
+	// 近傍の頂点を得る.
+	bool ShapeRect::get_neighbor(const D2D1_POINT_2F a_pos, float& dd, D2D1_POINT_2F& value) const noexcept
 	{
-		using winrt::GraphPaper::implementation::svg_write;
+		bool flag = false;
+		D2D1_POINT_2F v_pos[4];
+		const size_t v_cnt = get_verts(v_pos);
+		for (size_t i = 0; i < v_cnt; i++) {
+			D2D1_POINT_2F vec;
+			pt_sub(v_pos[i], a_pos, vec);
+			const float abs2 = static_cast<float>(pt_abs2(vec));
+			if (abs2 < dd) {
+				dd = abs2;
+				value = v_pos[i];
+				flag = true;
+			}
+		}
+		return flag;
+	}
 
-		svg_write("<rect ", dt_writer);
-		svg_write(m_pos, "x", "y", dt_writer);
-		svg_write(m_diff[0], "width", "height", dt_writer);
-		svg_write(m_fill_color, "fill", dt_writer);
-		ShapeStroke::svg_write(dt_writer);
-		svg_write("/>" SVG_NEW_LINE, dt_writer);
+	// 頂点を得る.
+	size_t ShapeRect::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
+	{
+		v_pos[0] = m_pos;
+		v_pos[1].x = m_pos.x + m_diff[0].x;
+		v_pos[1].y = m_pos.y;
+		v_pos[2].x = v_pos[1].x;
+		v_pos[2].y = m_pos.y + m_diff[0].y;
+		v_pos[3].x = m_pos.x;
+		v_pos[3].y = v_pos[2].y;
+		return 4;
+	}
+
+	// データライターに SVG タグとして書き込む.
+	void ShapeRect::dt_write_svg(DataWriter const& dt_writer) const
+	{
+		using winrt::GraphPaper::implementation::dt_write_svg;
+
+		dt_write_svg("<rect ", dt_writer);
+		dt_write_svg(m_pos, "x", "y", dt_writer);
+		dt_write_svg(m_diff[0], "width", "height", dt_writer);
+		dt_write_svg(m_fill_color, "fill", dt_writer);
+		ShapeStroke::dt_write_svg(dt_writer);
+		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 	}
 }

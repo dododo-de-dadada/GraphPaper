@@ -12,10 +12,10 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 
 	// 設定データを保存するフォルダーを得る.
-	static auto local_folder(void);
+	static auto pref_local_folder(void);
 
 	// 設定データを保存するフォルダーを得る.
-	static auto local_folder(void)
+	static auto pref_local_folder(void)
 	{
 		using winrt::Windows::Storage::ApplicationData;
 
@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::Storage::StorageDeleteOption;
 
-		auto item{ co_await local_folder().TryGetItemAsync(FILE_NAME) };
+		auto item{ co_await pref_local_folder().TryGetItemAsync(FILE_NAME) };
 		if (item != nullptr) {
 			auto s_file = item.try_as<StorageFile>();
 			if (s_file != nullptr) {
@@ -51,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		mfi_pref_delete().IsEnabled(false);
 		auto hr = E_FAIL;
-		auto item{ co_await local_folder().TryGetItemAsync(FILE_NAME) };
+		auto item{ co_await pref_local_folder().TryGetItemAsync(FILE_NAME) };
 		if (item != nullptr) {
 			auto s_file = item.try_as<StorageFile>();
 			if (s_file != nullptr) {
@@ -76,7 +76,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::CreationCollisionOption;
 
 		try {
-			auto s_file{ co_await local_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
+			auto s_file{ co_await pref_local_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 			if (s_file != nullptr) {
 				co_await file_write_gpf_async(s_file, false, true);
 				s_file = nullptr;

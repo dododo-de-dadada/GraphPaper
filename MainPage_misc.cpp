@@ -36,27 +36,6 @@ namespace winrt::GraphPaper::implementation
 		//message_show(ICON_INFO, L"str_appname", L"str_version");
 	}
 
-	// その他メニューの「色の表記」に印をつける.
-	void MainPage::color_code_is_checked(const COLOR_CODE value)
-	{
-		rmfi_color_code_dec().IsChecked(value == COLOR_CODE::DEC);
-		rmfi_color_code_dec_2().IsChecked(value == COLOR_CODE::DEC);
-		rmfi_color_code_hex().IsChecked(value == COLOR_CODE::HEX);
-		rmfi_color_code_hex_2().IsChecked(value == COLOR_CODE::HEX);
-		rmfi_color_code_real().IsChecked(value == COLOR_CODE::REAL);
-		rmfi_color_code_real_2().IsChecked(value == COLOR_CODE::REAL);
-		rmfi_color_code_cent().IsChecked(value == COLOR_CODE::CENT);
-		rmfi_color_code_cent_2().IsChecked(value == COLOR_CODE::CENT);
-		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::DEC>(c_code, rmfi_color_code_dec());
-		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::DEC>(c_code, rmfi_color_code_dec_2());
-		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::HEX>(c_code, rmfi_color_code_hex());
-		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::HEX>(c_code, rmfi_color_code_hex_2());
-		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::REAL>(c_code, rmfi_color_code_real());
-		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::REAL>(c_code, rmfi_color_code_real_2());
-		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::CENT>(c_code, rmfi_color_code_cent());
-		//radio_menu_item_set_value<COLOR_CODE, COLOR_CODE::CENT>(c_code, rmfi_color_code_cent_2());
-	}
-
 	// その他メニューの「色の表記」のサブ項目が選択された.
 	void MainPage::color_code_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
@@ -74,29 +53,17 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// その他メニューの「長さの単位」に印をつける.
-	void MainPage::len_unit_is_checked(const LEN_UNIT value)
+	// その他メニューの「色の表記」に印をつける.
+	void MainPage::color_code_is_checked(const COLOR_CODE value)
 	{
-		rmfi_len_unit_grid().IsChecked(value == LEN_UNIT::GRID);
-		rmfi_len_unit_grid_2().IsChecked(value == LEN_UNIT::GRID);
-		rmfi_len_unit_inch().IsChecked(value == LEN_UNIT::INCH);
-		rmfi_len_unit_inch_2().IsChecked(value == LEN_UNIT::INCH);
-		rmfi_len_unit_milli().IsChecked(value == LEN_UNIT::MILLI);
-		rmfi_len_unit_milli_2().IsChecked(value == LEN_UNIT::MILLI);
-		rmfi_len_unit_pixel().IsChecked(value == LEN_UNIT::PIXEL);
-		rmfi_len_unit_pixel_2().IsChecked(value == LEN_UNIT::PIXEL);
-		rmfi_len_unit_point().IsChecked(value == LEN_UNIT::POINT);
-		rmfi_len_unit_point_2().IsChecked(value == LEN_UNIT::POINT);
-		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::GRID>(l_unit, rmfi_len_unit_grid());
-		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::GRID>(l_unit, rmfi_len_unit_grid_2());
-		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::INCH>(l_unit, rmfi_len_unit_inch());
-		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::INCH>(l_unit, rmfi_len_unit_inch_2());
-		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::MILLI>(l_unit, rmfi_len_unit_milli());
-		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::MILLI>(l_unit, rmfi_len_unit_milli_2());
-		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::PIXEL>(l_unit, rmfi_len_unit_pixel());
-		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::PIXEL>(l_unit, rmfi_len_unit_pixel_2());
-		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::POINT>(l_unit, rmfi_len_unit_point());
-		//radio_menu_item_set_value<LEN_UNIT, LEN_UNIT::POINT>(l_unit, rmfi_len_unit_point_2());
+		rmfi_color_code_dec().IsChecked(value == COLOR_CODE::DEC);
+		rmfi_color_code_dec_2().IsChecked(value == COLOR_CODE::DEC);
+		rmfi_color_code_hex().IsChecked(value == COLOR_CODE::HEX);
+		rmfi_color_code_hex_2().IsChecked(value == COLOR_CODE::HEX);
+		rmfi_color_code_real().IsChecked(value == COLOR_CODE::REAL);
+		rmfi_color_code_real_2().IsChecked(value == COLOR_CODE::REAL);
+		rmfi_color_code_cent().IsChecked(value == COLOR_CODE::CENT);
+		rmfi_color_code_cent_2().IsChecked(value == COLOR_CODE::CENT);
 	}
 
 	// その他メニューの「長さの単位」のサブ項目が選択された.
@@ -129,6 +96,21 @@ namespace winrt::GraphPaper::implementation
 		status_bar_set_grid();
 		status_bar_set_sheet();
 		status_bar_set_unit();
+	}
+
+	// その他メニューの「長さの単位」に印をつける.
+	void MainPage::len_unit_is_checked(const LEN_UNIT value)
+	{
+		rmfi_len_unit_grid().IsChecked(value == LEN_UNIT::GRID);
+		rmfi_len_unit_grid_2().IsChecked(value == LEN_UNIT::GRID);
+		rmfi_len_unit_inch().IsChecked(value == LEN_UNIT::INCH);
+		rmfi_len_unit_inch_2().IsChecked(value == LEN_UNIT::INCH);
+		rmfi_len_unit_milli().IsChecked(value == LEN_UNIT::MILLI);
+		rmfi_len_unit_milli_2().IsChecked(value == LEN_UNIT::MILLI);
+		rmfi_len_unit_pixel().IsChecked(value == LEN_UNIT::PIXEL);
+		rmfi_len_unit_pixel_2().IsChecked(value == LEN_UNIT::PIXEL);
+		rmfi_len_unit_point().IsChecked(value == LEN_UNIT::POINT);
+		rmfi_len_unit_point_2().IsChecked(value == LEN_UNIT::POINT);
 	}
 
 }

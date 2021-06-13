@@ -9,40 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Foundation::IInspectable;
-
-	constexpr float SLIDER_STEP = 0.5f;
-
-	// 書体の太さの配列
-	constexpr std::underlying_type_t<DWRITE_FONT_WEIGHT> FONT_WEIGHTS[] = {
-		DWRITE_FONT_WEIGHT_THIN,
-		DWRITE_FONT_WEIGHT_EXTRA_LIGHT,
-		DWRITE_FONT_WEIGHT_LIGHT,
-		DWRITE_FONT_WEIGHT_SEMI_LIGHT,
-		DWRITE_FONT_WEIGHT_NORMAL,
-		DWRITE_FONT_WEIGHT_MEDIUM,
-		DWRITE_FONT_WEIGHT_DEMI_BOLD,
-		DWRITE_FONT_WEIGHT_BOLD,
-		DWRITE_FONT_WEIGHT_EXTRA_BOLD,
-		DWRITE_FONT_WEIGHT_BLACK,
-		DWRITE_FONT_WEIGHT_EXTRA_BLACK
-	};
-
-	// 書体の太さの文字列配列
-	constexpr wchar_t* FONT_WEIGHT_NAME[] = {
-		L"str_font_weight_thin",
-		L"str_font_weight_extra_light",
-		L"str_font_weight_light",
-		L"str_font_weight_semi_light",
-		L"str_font_weight_normal",
-		L"str_font_weight_medium",
-		L"str_font_weight_demi_bold",
-		L"str_font_weight_bold",
-		L"str_font_weight_extra_bold",
-		L"str_font_weight_black",
-		L"str_font_weight_extra_black",
-		nullptr
-	};
+	constexpr wchar_t DLG_TITLE[] = L"str_font";
 
 	// 書体の伸縮の配列
 	constexpr std::underlying_type_t<DWRITE_FONT_STRETCH> FONT_STRETCH[] = {
@@ -73,7 +40,38 @@ namespace winrt::GraphPaper::implementation
 		nullptr
 	};
 
-	constexpr wchar_t DLG_TITLE[] = L"str_font";
+	// 書体の太さの文字列配列
+	constexpr wchar_t* FONT_WEIGHT_NAME[] = {
+		L"str_font_weight_thin",
+		L"str_font_weight_extra_light",
+		L"str_font_weight_light",
+		L"str_font_weight_semi_light",
+		L"str_font_weight_normal",
+		L"str_font_weight_medium",
+		L"str_font_weight_demi_bold",
+		L"str_font_weight_bold",
+		L"str_font_weight_extra_bold",
+		L"str_font_weight_black",
+		L"str_font_weight_extra_black",
+		nullptr
+	};
+
+	// 書体の太さの配列
+	constexpr std::underlying_type_t<DWRITE_FONT_WEIGHT> FONT_WEIGHTS[] = {
+		DWRITE_FONT_WEIGHT_THIN,
+		DWRITE_FONT_WEIGHT_EXTRA_LIGHT,
+		DWRITE_FONT_WEIGHT_LIGHT,
+		DWRITE_FONT_WEIGHT_SEMI_LIGHT,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_WEIGHT_MEDIUM,
+		DWRITE_FONT_WEIGHT_DEMI_BOLD,
+		DWRITE_FONT_WEIGHT_BOLD,
+		DWRITE_FONT_WEIGHT_EXTRA_BOLD,
+		DWRITE_FONT_WEIGHT_BLACK,
+		DWRITE_FONT_WEIGHT_EXTRA_BLACK
+	};
+
+	constexpr float SLIDER_STEP = 0.5f;
 
 	// 書体メニューの「色」が選択された.
 	IAsyncAction MainPage::font_color_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -142,34 +140,34 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::get_available_font(i); i++) {
 			auto item = box_value(winrt::hstring(name));
-			lv_sample_lview().Items().Append(item);
+			lv_sample_list().Items().Append(item);
 		}
-		for (uint32_t i = 0; i < lv_sample_lview().Items().Size(); i++) {
+		for (uint32_t i = 0; i < lv_sample_list().Items().Size(); i++) {
 			IInspectable item[1];
-			lv_sample_lview().Items().GetMany(i, item);
+			lv_sample_list().Items().GetMany(i, item);
 			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
 			wchar_t* f_family;
 			m_sheet_main.get_font_family(f_family);
 			if (wcscmp(name, f_family) == 0) {
 				// 書体名が同じ場合,
 				// その書体をリストビューの選択済み項目に格納する.
-				lv_sample_lview().SelectedItem(item[0]);
-				lv_sample_lview().ScrollIntoView(item[0]);
+				lv_sample_list().SelectedItem(item[0]);
+				lv_sample_list().ScrollIntoView(item[0]);
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_lview().Loaded({ this, &MainPage::sample_lview_loaded });
-		const auto changed_token = lv_sample_lview().SelectionChanged(
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
+		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto)
 			{
-				auto i = lv_sample_lview().SelectedIndex();
+				auto i = lv_sample_list().SelectedIndex();
 				m_sample_shape->set_font_family(ShapeText::get_available_font(i));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
 			}
 		);
-		lv_sample_lview().Visibility(UI_VISIBLE);
+		lv_sample_list().Visibility(UI_VISIBLE);
 		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -187,10 +185,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		lv_sample_lview().Loaded(loaded_token);
-		lv_sample_lview().SelectionChanged(changed_token);
-		lv_sample_lview().Visibility(UI_COLLAPSED);
-		lv_sample_lview().Items().Clear();
+		lv_sample_list().Loaded(loaded_token);
+		lv_sample_list().SelectionChanged(changed_token);
+		lv_sample_list().Visibility(UI_COLLAPSED);
+		lv_sample_list().Items().Clear();
 		sheet_draw();
 	}
 
@@ -327,32 +325,32 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		for (uint32_t i = 0; FONT_STRETCH_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_STRETCH_NAME[i]));
-			lv_sample_lview().Items().Append(item);
+			lv_sample_list().Items().Append(item);
 		}
-		lv_sample_lview().SelectedIndex(-1);
-		const auto k = lv_sample_lview().Items().Size();
+		lv_sample_list().SelectedIndex(-1);
+		const auto k = lv_sample_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
 			DWRITE_FONT_STRETCH f_stretch;
 			m_sheet_main.get_font_stretch(f_stretch);
 			if (FONT_STRETCH[i] == f_stretch) {
-				lv_sample_lview().SelectedIndex(i);
+				lv_sample_list().SelectedIndex(i);
 				IInspectable item[1];
-				lv_sample_lview().Items().GetMany(i, item);
-				lv_sample_lview().ScrollIntoView(item[0]);
+				lv_sample_list().Items().GetMany(i, item);
+				lv_sample_list().ScrollIntoView(item[0]);
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_lview().Loaded({ this, &MainPage::sample_lview_loaded });
-		const auto changed_token = lv_sample_lview().SelectionChanged(
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
+		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto args) {
-				uint32_t i = lv_sample_lview().SelectedIndex();
+				uint32_t i = lv_sample_list().SelectedIndex();
 				m_sample_shape->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
 			}
 		);
-		lv_sample_lview().Visibility(UI_VISIBLE);
+		lv_sample_list().Visibility(UI_VISIBLE);
 		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -370,10 +368,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		lv_sample_lview().Loaded(loaded_token);
-		lv_sample_lview().SelectionChanged(changed_token);
-		lv_sample_lview().Visibility(UI_COLLAPSED);
-		lv_sample_lview().Items().Clear();
+		lv_sample_list().Loaded(loaded_token);
+		lv_sample_list().SelectionChanged(changed_token);
+		lv_sample_list().Visibility(UI_COLLAPSED);
+		lv_sample_list().Items().Clear();
 		sheet_draw();
 	}
 
@@ -429,32 +427,32 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		for (uint32_t i = 0; FONT_WEIGHT_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_WEIGHT_NAME[i]));
-			lv_sample_lview().Items().Append(item);
+			lv_sample_list().Items().Append(item);
 		}
-		lv_sample_lview().SelectedIndex(-1);
-		const auto k = lv_sample_lview().Items().Size();
+		lv_sample_list().SelectedIndex(-1);
+		const auto k = lv_sample_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
 			DWRITE_FONT_WEIGHT f_weight;
 			m_sheet_main.get_font_weight(f_weight);
 			if (FONT_WEIGHTS[i] == f_weight) {
-				lv_sample_lview().SelectedIndex(i);
+				lv_sample_list().SelectedIndex(i);
 				IInspectable item[1];
-				lv_sample_lview().Items().GetMany(i, item);
-				lv_sample_lview().ScrollIntoView(item[0]);
+				lv_sample_list().Items().GetMany(i, item);
+				lv_sample_list().ScrollIntoView(item[0]);
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_lview().Loaded({ this, &MainPage::sample_lview_loaded });
-		const auto changed_token = lv_sample_lview().SelectionChanged(
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
+		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto args) {
-				uint32_t i = lv_sample_lview().SelectedIndex();
+				uint32_t i = lv_sample_list().SelectedIndex();
 				m_sample_shape->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
 			}
 		);
-		lv_sample_lview().Visibility(UI_VISIBLE);
+		lv_sample_list().Visibility(UI_VISIBLE);
 		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -472,10 +470,10 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt--;
 #endif
 		m_sample_shape = nullptr;
-		lv_sample_lview().Loaded(loaded_token);
-		lv_sample_lview().SelectionChanged(changed_token);
-		lv_sample_lview().Visibility(UI_COLLAPSED);
-		lv_sample_lview().Items().Clear();
+		lv_sample_list().Loaded(loaded_token);
+		lv_sample_list().SelectionChanged(changed_token);
+		lv_sample_list().Visibility(UI_COLLAPSED);
+		lv_sample_list().Items().Clear();
 		sheet_draw();
 	}
 

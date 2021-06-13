@@ -9,30 +9,30 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr auto BACK = true;
-	using BACKWARD = SHAPE_LIST::iterator;
-	using FORWARD = SHAPE_LIST::reverse_iterator;
-	constexpr auto FRONT = false;
+	constexpr auto SEND_TO_BACK = true;
+	using SEND_BACKWARD = SHAPE_LIST::iterator;
+	using BRING_FORWARD = SHAPE_LIST::reverse_iterator;
+	constexpr auto BRING_TO_FRONT = false;
 
 	// 編集メニューの「前面に移動」が選択された.
 	void MainPage::arrange_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を次または前の図形と入れ替える.
-		arrange_order<FORWARD>();
+		arrange_order<BRING_FORWARD>();
 	}
 
 	// 編集メニューの「最前面に移動」が選択された.
 	void MainPage::arrange_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を最背面または最前面に移動する.
-		arrange_to<FRONT>();
+		arrange_to<BRING_TO_FRONT>();
 	}
 
-	// 選択された図形を前の図形と入れ替える.
-	template void MainPage::arrange_order<BACKWARD>(void);
-
 	// 選択された図形を次の図形と入れ替える.
-	template void MainPage::arrange_order<FORWARD>(void);
+	template void MainPage::arrange_order<BRING_FORWARD>(void);
+
+	// 選択された図形を前の図形と入れ替える.
+	template void MainPage::arrange_order<SEND_BACKWARD>(void);
 
 	// 選択された図形を次または前の図形と入れ替える.
 	// T	T が iterator の場合は背面の図形と入れ替え, reverse_iterator の場合は前面の図形と入れ替える. 
@@ -40,12 +40,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		T it_end;	// 終端
 		T it_src;	// 交換元反復子
-		if constexpr (std::is_same<T, FORWARD>::value) {
+		if constexpr (std::is_same<T, BRING_FORWARD>::value) {
 			it_end = m_list_shapes.rend();
 			it_src = m_list_shapes.rbegin();
 		}
 		else {
-			if constexpr (std::is_same<T, BACKWARD>::value) {
+			if constexpr (std::is_same<T, SEND_BACKWARD>::value) {
 				it_end = m_list_shapes.end();
 				it_src = m_list_shapes.begin();
 			}
@@ -108,24 +108,18 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::arrange_send_backward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を次または前の図形と入れ替える.
-		arrange_order<BACKWARD>();
+		arrange_order<SEND_BACKWARD>();
 	}
 
 	// 編集メニューの「最背面に移動」が選択された.
 	void MainPage::arrange_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を最背面または最前面に移動する.
-		arrange_to<BACK>();
+		arrange_to<SEND_TO_BACK>();
 	}
 
-	// 選択された図形を最背面に移動する.
-	template void MainPage::arrange_to<BACK>(void);
-
-	// 選択された図形を最前面に移動する.
-	template void MainPage::arrange_to<FRONT>(void);
-
 	// 選択された図形を最背面または最前面に移動する.
-	// T	T が true の場合は最背面, false の場合は最前面に移動
+	// B	B が true の場合は最背面, false の場合は最前面に移動
 	template<bool B> void MainPage::arrange_to(void)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
@@ -142,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 				// 図形一覧の排他制御が true か判定する.
 				if (m_summary_atomic.load(std::memory_order_acquire)) {
 					summary_remove(t);
-					summary_insert(t, i++);
+					summary_insert_at(t, i++);
 				}
 				undo_push_remove(t);
 				undo_push_insert(t, s);
@@ -164,5 +158,11 @@ namespace winrt::GraphPaper::implementation
 		xcvd_is_enabled();
 		sheet_draw();
 	}
+
+	// 選択された図形を最前面に移動する.
+	template void MainPage::arrange_to<BRING_TO_FRONT>(void);
+
+	// 選択された図形を最背面に移動する.
+	template void MainPage::arrange_to<SEND_TO_BACK>(void);
 
 }

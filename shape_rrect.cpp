@@ -18,19 +18,19 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 角丸半径を計算する.
-	static void calc_corner_radius(const D2D1_POINT_2F diff, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad);
+	static void calc_corner_radius(const D2D1_POINT_2F d_vec, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad);
 
 	// 角丸半径の縦または横の成分を計算する.
 	static void calc_corner_radius(const FLOAT r_len, const FLOAT d_rad, FLOAT& c_rad);
 
 	// 角丸半径を計算する.
-	// diff	角丸方形の対角ベクトル
+	// d_vec	角丸方形の対角ベクトル
 	// d_rad	既定の角丸半径
 	// c_rad	計算された角丸半径
-	static void calc_corner_radius(const D2D1_POINT_2F diff, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad)
+	static void calc_corner_radius(const D2D1_POINT_2F d_vec, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad)
 	{
-		calc_corner_radius(diff.x, d_rad.x, c_rad.x);
-		calc_corner_radius(diff.y, d_rad.y, c_rad.y);
+		calc_corner_radius(d_vec.x, d_rad.x, c_rad.x);
+		calc_corner_radius(d_vec.y, d_rad.y, c_rad.y);
 	}
 
 	// 角丸半径の縦または横の成分を計算する.
@@ -93,13 +93,13 @@ namespace winrt::GraphPaper::implementation
 			//if (flag) {
 			// D2D1_POINT_2F c_pos;
 			// pt_add(r_min, rx, ry, c_pos);
-			// anchor_draw_ellipse(c_pos, dx);
+			// anch_draw_ellipse(c_pos, dx);
 			// c_pos.x = r_rec.rect.right - rx;
-			// anchor_draw_ellipse(c_pos, dx);
+			// anch_draw_ellipse(c_pos, dx);
 			// c_pos.y = r_rec.rect.bottom - ry;
-			// anchor_draw_ellipse(c_pos, dx);
+			// anch_draw_ellipse(c_pos, dx);
 			// c_pos.x = r_min.x + rx;
-			// anchor_draw_ellipse(c_pos, dx);
+			// anch_draw_ellipse(c_pos, dx);
 			//}
 			D2D1_POINT_2F r_pos[4];
 			r_pos[0] = r_min;
@@ -114,19 +114,19 @@ namespace winrt::GraphPaper::implementation
 				// 方形の頂点のアンカーを表示する.
 				// 辺の中点を求め, そのアンカーを表示する.
 				pt_avg(r_pos[j], r_pos[i], r_mid);
-				anchor_draw_rect(r_pos[i], dx);
-				anchor_draw_rect(r_mid, dx);
+				anch_draw_rect(r_pos[i], dx);
+				anch_draw_rect(r_mid, dx);
 			}
 			//if (flag != true) {
 				D2D1_POINT_2F c_pos;
 				pt_add(r_min, rx, ry, c_pos);
-				anchor_draw_ellipse(c_pos, dx);
+				anch_draw_ellipse(c_pos, dx);
 				c_pos.x = r_rec.rect.right - rx;
-				anchor_draw_ellipse(c_pos, dx);
+				anch_draw_ellipse(c_pos, dx);
 				c_pos.y = r_rec.rect.bottom - ry;
-				anchor_draw_ellipse(c_pos, dx);
+				anch_draw_ellipse(c_pos, dx);
 				c_pos.x = r_min.x + rx;
-				anchor_draw_ellipse(c_pos, dx);
+				anch_draw_ellipse(c_pos, dx);
 			//}
 		}
 	}
@@ -310,54 +310,54 @@ namespace winrt::GraphPaper::implementation
 	//	値を, 部位の位置に格納する. 他の部位の位置も動く.
 	//	value	格納する値
 	//	abch	図形の部位
-	bool ShapeRRect::set_anchor_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	bool ShapeRRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
 	{
 		D2D1_POINT_2F c_pos;
-		D2D1_POINT_2F diff;
+		D2D1_POINT_2F vec;
 		D2D1_POINT_2F rad;
 
 		switch (anch) {
 		case ANCH_TYPE::ANCH_R_NW:
 			ShapeRRect::get_anch_pos(anch, c_pos);
-			pt_sub(value, c_pos, diff);
-			if (pt_abs2(diff) < FLT_MIN) {
+			pt_sub(value, c_pos, vec);
+			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
 			}
-			pt_add(m_corner_rad, diff, rad);
+			pt_add(m_corner_rad, vec, rad);
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		case ANCH_TYPE::ANCH_R_NE:
 			ShapeRRect::get_anch_pos(anch, c_pos);
-			pt_sub(value, c_pos, diff);
-			if (pt_abs2(diff) < FLT_MIN) {
+			pt_sub(value, c_pos, vec);
+			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
 			}
-			rad.x = m_corner_rad.x - diff.x;
-			rad.y = m_corner_rad.y + diff.y;
+			rad.x = m_corner_rad.x - vec.x;
+			rad.y = m_corner_rad.y + vec.y;
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		case ANCH_TYPE::ANCH_R_SE:
 			ShapeRRect::get_anch_pos(anch, c_pos);
-			pt_sub(value, c_pos, diff);
-			if (pt_abs2(diff) < FLT_MIN) {
+			pt_sub(value, c_pos, vec);
+			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
 			}
-			rad.x = m_corner_rad.x - diff.x;
-			rad.y = m_corner_rad.y - diff.y;
+			rad.x = m_corner_rad.x - vec.x;
+			rad.y = m_corner_rad.y - vec.y;
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		case ANCH_TYPE::ANCH_R_SW:
 			ShapeRRect::get_anch_pos(anch, c_pos);
-			pt_sub(value, c_pos, diff);
-			if (pt_abs2(diff) < FLT_MIN) {
+			pt_sub(value, c_pos, vec);
+			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
 			}
-			rad.x = m_corner_rad.x + diff.x;
-			rad.y = m_corner_rad.y - diff.y;
+			rad.x = m_corner_rad.x + vec.x;
+			rad.y = m_corner_rad.y - vec.y;
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		default:
-			ShapeRect::set_anchor_pos(value, anch);
+			ShapeRect::set_anch_pos(value, anch);
 			if (m_diff[0].x * m_corner_rad.x < 0.0f) {
 				m_corner_rad.x = -m_corner_rad.x;
 			}
@@ -371,15 +371,15 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
-	// b_diff	囲む領域の終点への差分
+	// b_vec	囲む領域の終点への差分
 	// s_attr	属性
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_diff, const ShapeSheet* s_attr) :
-		ShapeRect::ShapeRect(b_pos, b_diff, s_attr)
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr) :
+		ShapeRect::ShapeRect(b_pos, b_vec, s_attr)
 	{
 		calc_corner_radius(m_diff[0], s_attr->m_corner_rad, m_corner_rad);
 	}
 
-	// 図形をデータリーダーから読み込む.
+	// データリーダーから図形を読み込む.
 	ShapeRRect::ShapeRRect(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader)
 	{
@@ -394,18 +394,18 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeRRect::svg_write(DataWriter const& dt_writer) const
+	void ShapeRRect::dt_write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::svg_write;
+		using winrt::GraphPaper::implementation::dt_write_svg;
 
-		svg_write("<rect ", dt_writer);
-		svg_write(m_pos, "x", "y", dt_writer);
-		svg_write(m_diff[0], "width", "height", dt_writer);
+		dt_write_svg("<rect ", dt_writer);
+		dt_write_svg(m_pos, "x", "y", dt_writer);
+		dt_write_svg(m_diff[0], "width", "height", dt_writer);
 		if (std::round(m_corner_rad.x) != 0.0f && std::round(m_corner_rad.y) != 0.0f) {
-			svg_write(m_corner_rad, "rx", "ry", dt_writer);
+			dt_write_svg(m_corner_rad, "rx", "ry", dt_writer);
 		}
-		svg_write(m_fill_color, "fill", dt_writer);
-		ShapeStroke::svg_write(dt_writer);
-		svg_write("/>", dt_writer);
+		dt_write_svg(m_fill_color, "fill", dt_writer);
+		ShapeStroke::dt_write_svg(dt_writer);
+		dt_write_svg("/>", dt_writer);
 	}
 }

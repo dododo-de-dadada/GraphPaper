@@ -9,24 +9,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-
-	// 見本ダイアログが開かれた.
-	void MainPage::sample_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
-	{
-		if (scp_sample_panel().IsLoaded()) {
-			sample_draw();
-		}
-	}
-
-	//　見本リストビューがロードされた.
-	void MainPage::sample_lview_loaded(IInspectable const&, RoutedEventArgs const&)
-	{
-		const auto item = lv_sample_lview().SelectedItem();
-		if (item != nullptr) {
-			lv_sample_lview().ScrollIntoView(item);
-		}
-	}
-
 	// 見本を表示する
 	void MainPage::sample_draw(void)
 	{
@@ -62,6 +44,23 @@ namespace winrt::GraphPaper::implementation
 		m_dx_mutex.unlock();
 	}
 
+	//　見本リストビューがロードされた.
+	void MainPage::sample_list_loaded(IInspectable const&, RoutedEventArgs const&)
+	{
+		const auto item = lv_sample_list().SelectedItem();
+		if (item != nullptr) {
+			lv_sample_list().ScrollIntoView(item);
+		}
+	}
+
+	// 見本ダイアログが開かれた.
+	void MainPage::sample_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
+	{
+		if (scp_sample_panel().IsLoaded()) {
+			sample_draw();
+		}
+	}
+
 	// 見本のスワップチェーンパネルの大きさが変わった.
 	void MainPage::sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -79,8 +78,8 @@ namespace winrt::GraphPaper::implementation
 				using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 				const auto pad_w = w * 0.125;
 				const auto pad_h = h * 0.25;
-				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad_w), static_cast<FLOAT>(pad_h) };
-				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad_w), static_cast<FLOAT>(w - 2.0 * pad_h) };
+				const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(pad_w), static_cast<FLOAT>(pad_h) };
+				const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(w - 2.0 * pad_w), static_cast<FLOAT>(w - 2.0 * pad_h) };
 				const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 				const wchar_t* text = nullptr;
 				if (pang.empty()) {
@@ -89,53 +88,46 @@ namespace winrt::GraphPaper::implementation
 				else {
 					text = pang.c_str();
 				}
-				m_sample_shape = new ShapeText(s_pos, diff, wchar_cpy(text), &m_sample_sheet);
+				m_sample_shape = new ShapeText(b_pos, b_vec, wchar_cpy(text), &m_sample_sheet);
 			}
 			else if (m_sample_type == SAMPLE_TYPE::STROKE) {
 				const auto pad = w * 0.125;
-				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
-				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
-				m_sample_shape = new ShapeLineA(s_pos, diff, &m_sample_sheet);
+				const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
+				const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
+				m_sample_shape = new ShapeLineA(b_pos, b_vec, &m_sample_sheet);
 			}
 			else if (m_sample_type == SAMPLE_TYPE::FILL) {
 				const auto pad = w * 0.125;
-				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
-				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
-				m_sample_shape = new ShapeRect(s_pos, diff, &m_sample_sheet);
+				const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
+				const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
+				m_sample_shape = new ShapeRect(b_pos, b_vec, &m_sample_sheet);
 			}
 			else if (m_sample_type == SAMPLE_TYPE::JOIN) {
 				const auto pad = w * 0.125;
-				const D2D1_POINT_2F s_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
-				const D2D1_POINT_2F diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
+				const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
+				const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
 				POLY_TOOL tool_poly { 3, true, true, false, true };
-				m_sample_shape = new ShapePoly(s_pos, diff, &m_sample_sheet, tool_poly);
+				m_sample_shape = new ShapePoly(b_pos, b_vec, &m_sample_sheet, tool_poly);
 				const double offset = h / 16.0;
-				m_sample_shape->set_anchor_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 - offset) }, ANCH_TYPE::ANCH_P0);
-				m_sample_shape->set_anchor_pos(D2D1_POINT_2F{ static_cast<FLOAT>(w * 0.25),  static_cast<FLOAT>(h * 0.5) }, ANCH_TYPE::ANCH_P0 + 1);
-				m_sample_shape->set_anchor_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 + offset) }, ANCH_TYPE::ANCH_P0 + 2);
+				m_sample_shape->set_anch_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 - offset) }, ANCH_TYPE::ANCH_P0);
+				m_sample_shape->set_anch_pos(D2D1_POINT_2F{ static_cast<FLOAT>(w * 0.25),  static_cast<FLOAT>(h * 0.5) }, ANCH_TYPE::ANCH_P0 + 1);
+				m_sample_shape->set_anch_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 + offset) }, ANCH_TYPE::ANCH_P0 + 2);
 			}
 			else if (m_sample_type == SAMPLE_TYPE::MISC) {
 				constexpr uint32_t misc_min = 3;
-				constexpr uint32_t misc_max = 64;
+				constexpr uint32_t misc_max = 12;
 				static uint32_t misc_cnt = misc_min;
 				const auto pad = w * 0.125;
-				//const D2D1_POINT_2F samp_diff{ static_cast<FLOAT>(w - 3.0 * pad), static_cast<FLOAT>(h - 3.0 * pad) };
-				const D2D1_POINT_2F samp_diff{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
-				const D2D1_POINT_2F rect_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
-				//const D2D1_POINT_2F poly_pos{ static_cast<FLOAT>(pad + pad), static_cast<FLOAT>(pad + pad) };
-				//auto const samp_rect = new ShapeRect(rect_pos, samp_diff, &m_sample_sheet);
-				POLY_TOOL poly_tool{ misc_cnt >= misc_max ? misc_min : misc_cnt++, true, true, true, true };
-				//auto const samp_poly = new ShapePoly(poly_pos, samp_diff, &m_sample_sheet, poly_tool);
-				auto const samp_poly = new ShapePoly(rect_pos, samp_diff, &m_sample_sheet, poly_tool);
-				//ShapeGroup* const g = new ShapeGroup();
-				//m_sample_shape = g;
-				m_sample_shape = samp_poly;
-				//g->m_list_grouped.push_back(samp_rect);
-				//g->m_list_grouped.push_back(samp_poly);
-				//m_sample_shape->set_select(false);
-#if defined(_DEBUG)
-				//debug_leak_cnt += 2;
-#endif
+				const D2D1_POINT_2F samp_vec{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
+				POLY_TOOL poly_tool{ m_tool_poly };
+				poly_tool.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
+				m_sample_shape = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, samp_vec, &m_sample_sheet, poly_tool);
+				D2D1_POINT_2F b_min;
+				D2D1_POINT_2F b_max;
+				D2D1_POINT_2F b_vec;
+				m_sample_shape->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, b_min, b_max);
+				pt_sub(b_max, b_min, b_vec);
+				m_sample_shape->move(D2D1_POINT_2F{ static_cast<FLOAT>((w - b_vec.x) * 0.5), static_cast<FLOAT>((h - b_vec.y) * 0.5) });
 			}
 			else {
 				throw winrt::hresult_invalid_argument();

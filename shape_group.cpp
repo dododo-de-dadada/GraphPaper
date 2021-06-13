@@ -174,9 +174,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する
-	bool ShapeGroup::move(const D2D1_POINT_2F diff)
+	// d_vec	差分ベクトル
+	bool ShapeGroup::move(const D2D1_POINT_2F d_vec)
 	{
-		return slist_move(m_list_grouped, diff);
+		return slist_move(m_list_grouped, d_vec);
 	}
 
 	// 値を消去フラグに格納する.
@@ -208,15 +209,15 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F b_min;
 		if (get_start_pos(b_min) && !equal(value, b_min)) {
-			D2D1_POINT_2F diff;
-			pt_sub(value, b_min, diff);
-			move(diff);
+			D2D1_POINT_2F d_vec;
+			pt_sub(value, b_min, d_vec);
+			move(d_vec);
 			return true;
 		}
 		return false;
 	}
 
-	// 図形をデータリーダーから作成する.
+	// データリーダーから図形を作成する.
 	ShapeGroup::ShapeGroup(DataReader const& dt_reader)
 	{
 		slist_read(m_list_grouped, dt_reader);
@@ -230,17 +231,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG として書き込む.
-	void ShapeGroup::svg_write(DataWriter const& dt_writer) const
+	void ShapeGroup::dt_write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::svg_write;
+		using winrt::GraphPaper::implementation::dt_write_svg;
 
-		svg_write("<g>" SVG_NEW_LINE, dt_writer);
+		dt_write_svg("<g>" SVG_NEW_LINE, dt_writer);
 		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->svg_write(dt_writer);
+			s->dt_write_svg(dt_writer);
 		}
-		svg_write("</g>" SVG_NEW_LINE, dt_writer);
+		dt_write_svg("</g>" SVG_NEW_LINE, dt_writer);
 	}
 }

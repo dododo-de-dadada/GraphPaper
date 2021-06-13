@@ -15,7 +15,7 @@
 // MainPage.h
 //
 // MainPage.cpp	メインページの作成, アプリの終了
-// MainPage_appl.cpp	アプリケーションの中断と再開
+// MainPage_app.cpp	アプリケーションの中断と再開
 // MainPage_arrange.cpp	図形の並び替え
 // MainPage_arrow.cpp	矢じるしの形式と寸法
 // MainPage_display.cpp	表示デバイスのハンドラー
@@ -26,7 +26,7 @@
 // MainPage_font.cpp	書体と文字列の配置
 // MainPage_grid.cpp	方眼
 // MainPage_group.cpp	グループ化とグループの解除
-// NainPage_join.cpp	線分のつながり
+// NainPage_join.cpp	線分のつなぎ
 // MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, バージョン情報
 // MainPage_sample.cpp	見本
 // MainPage_scroll.cpp	スクロールバー
@@ -97,8 +97,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_ZOOM = L"%.f%%";	// 倍率の書式
 	constexpr auto FMT_GRID = L"%.3f";	// グリッド単位の書式
 	constexpr auto FMT_GRID_UNIT = L"%.3f gd";	// グリッド単位の書式
-	constexpr auto ICON_INFO = L"icon_info";	// 情報アイコンの静的リソースのキー
-	constexpr auto ICON_ALERT = L"icon_alert";	// 警告アイコンの静的リソースのキー
+	constexpr auto ICON_INFO = L"glyph_info";	// 情報アイコンの静的リソースのキー
+	constexpr auto ICON_ALERT = L"glyph_alert";	// 警告アイコンの静的リソースのキー
 	constexpr auto SHEET_SIZE_DEF = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
 	constexpr auto UI_VISIBLE = Visibility::Visible;	// 表示	
 	constexpr auto UI_COLLAPSED = Visibility::Collapsed;	// 非表示
@@ -193,7 +193,7 @@ namespace winrt::GraphPaper::implementation
 		STROKE,	// 線枠
 		FILL,	// 塗りつぶし
 		FONT,	// 書体
-		JOIN,	// 線のつながり
+		JOIN,	// 線のつなぎ
 		MISC	// その他
 	};
 
@@ -232,8 +232,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 作図ツール
 		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
-		bool m_tool_vert = true;	// 頂点ツール
-		POLY_TOOL m_tool_poly{ POLY_TOOL_DEF };	// 多角形の作図ツール
+		bool m_tool_vert_snap = true;	// 頂点に合わせる
+		POLY_TOOL m_tool_poly{ DEF_POLY_TOOL };	// 多角形の作図ツール
 
 		uint32_t m_cnt_selected = 0;		// 選択された図形の数
 
@@ -322,28 +322,28 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// アプリケーションがバックグラウンドに移った.
-		void appl_entered_background(IInspectable const& sender, EnteredBackgroundEventArgs const& args);
+		void app_entered_background(IInspectable const& sender, EnteredBackgroundEventArgs const& args);
 		// アプリケーションがバックグラウンドに移った.
-		void appl_leaving_background(IInspectable const& sender, LeavingBackgroundEventArgs const& args);
+		void app_leaving_background(IInspectable const& sender, LeavingBackgroundEventArgs const& args);
 		// アプリケーションが再開された.
-		IAsyncAction appl_resuming_async(IInspectable const&, IInspectable const&);
+		IAsyncAction app_resuming_async(IInspectable const&, IInspectable const&);
 		// アプリケーションが中断された.
-		IAsyncAction appl_suspending_async(IInspectable const&, SuspendingEventArgs const& args);
+		IAsyncAction app_suspending_async(IInspectable const&, SuspendingEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_join.cpp
-		// 線分のつながりと端点
+		// 線分のつなぎと端点
 		//-------------------------------
 
-		// 線枠メニューの「端点の形式」に印をつける.
+		// 線枠メニューの「端点の種類」に印をつける.
 		void cap_style_is_checked(const CAP_STYLE& s_cap);
-		// 線枠メニューの「端点の形式」が選択された.
+		// 線枠メニューの「端点の種類」が選択された.
 		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 線枠メニューの「つながりの形式」>「マイター制限」が選択された.
+		// 線枠メニューの「つなぎの種類」>「額ぶちの制限」が選択された.
 		IAsyncAction join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「つながりの形式」に印をつける.
+		// 線枠メニューの「つなぎの種類」に印をつける.
 		void join_style_is_checked(const D2D1_LINE_JOIN s_join);
-		// 線枠メニューの「つながりの形式」が選択された.
+		// 線枠メニューの「つなぎの形式」が選択された.
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void join_set_slider_header(const float value);
@@ -412,7 +412,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形データをストレージファイルに非同期に書き込む.
 		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile const& s_file, const bool suspend = false, const bool layout = false);
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_svg_write_async(StorageFile const& s_file);
+		IAsyncOperation<winrt::hresult> file_dt_write_svg_async(StorageFile const& s_file);
 		// ファイルの読み込みが終了した.
 		void file_finish_reading(void);
 		// ファイルメニューの「開く」が選択された
@@ -517,7 +517,7 @@ namespace winrt::GraphPaper::implementation
 		void grid_emph_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の表示」が選択された.
 		void grid_show_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 用紙メニューの「方眼にそろえる」が選択された.
+		// 用紙メニューの「方眼に合わせる」が選択された.
 		void grid_snap_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーと図形に格納する.
 		template <UNDO_OP U, int S> void grid_set_slider_header(const float value);
@@ -656,34 +656,34 @@ namespace winrt::GraphPaper::implementation
 		// ポインターイベントのハンドラー
 		//-------------------------------
 
-		// コンテキストメニューを表示する.
-		void event_show_context_menu(void);
-		// イベント引数からポインターの現在位置を得る.
-		void event_pos_args(PointerRoutedEventArgs const& args);
-		// 範囲選択を終了する.
-		void event_finish_selecting_area(const VirtualKeyModifiers k_mod);
-		// 文字列図形の作成を終了する.
-		IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F diff);
-		// 図形の作成を終了する.
-		void event_finish_creating(const D2D1_POINT_2F diff);
-		// 図形の移動を終了する.
-		void event_finish_moving(void);
-		// 押された図形の編集を終了する.
-		void event_finish_forming(void);
-		// 状況に応じた形状のポインターを設定する.
-		void event_curs_style(void);
 		// ポインターのボタンが上げられた.
 		void event_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		// 状況に応じた形状のポインターを設定する.
+		void event_set_cursor(void);
 		// ポインターがページのスワップチェーンパネルの中に入った.
 		void event_entered(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがページのスワップチェーンパネルから出た.
 		void event_exited(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		// 図形の作成を終了する.
+		void event_finish_creating(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec);
+		// 文字列図形の作成を終了する.
+		IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec);
+		// 押された図形の編集を終了する.
+		void event_finish_forming(void);
+		// 図形の移動を終了する.
+		void event_finish_moving(void);
+		// 範囲選択を終了する.
+		void event_finish_selecting_area(const VirtualKeyModifiers k_mod);
 		// ポインターが動いた.
 		void event_moved(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		// イベント引数からポインターの現在位置を得る.
+		void event_get_position(PointerRoutedEventArgs const& args);
 		// ポインターのボタンが押された.
 		void event_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターのボタンが上げられた.
 		void event_released(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		// コンテキストメニューを表示する.
+		void event_show_context_menu(void);
 		// ポインターのホイールボタンが操作された.
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
 
@@ -700,7 +700,7 @@ namespace winrt::GraphPaper::implementation
 		// 見本のスワップチェーンパネルの大きさが変わった.
 		void sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&);
 		//　リストビュー「見本リスト」がロードされた.
-		void sample_lview_loaded(IInspectable const&, RoutedEventArgs const&);
+		void sample_list_loaded(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -753,8 +753,6 @@ namespace winrt::GraphPaper::implementation
 		void status_bar_is_checked(const STATUS_BAR a);
 		// 列挙型を OR 演算する.
 		static STATUS_BAR status_bar_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
-		// ステータスバーの状態をデータリーダーから読み込む.
-		void status_bar_read(DataReader const& dt_reader);
 		// ポインターの位置をステータスバーに格納する.
 		void status_bar_set_curs(void);
 		// 作図ツールをステータスバーに格納する.
@@ -769,8 +767,8 @@ namespace winrt::GraphPaper::implementation
 		void status_bar_set_zoom(void);
 		// ステータスバーの表示を設定する.
 		void status_bar_visibility(void);
-		// ステータスバーの状態をデータライターに書き込む.
-		void status_bar_write(DataWriter const& dt_writer);
+		// データライターにステータスバーの状態を書き込む.
+		//void status_bar_write(DataWriter const& dt_writer);
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -794,35 +792,33 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_summary.cpp
-		// 図形の一覧
+		// 一覧
 		//-------------------------------
 
-		// 図形一覧の「閉じる」ボタンが押された.
-		void summary_close_click(IInspectable const&, RoutedEventArgs const&);
-		// 図形一覧の項目が選択された.
-		void summary_selection_changed(IInspectable const& sender, SelectionChangedEventArgs const& e);
-		// 図形一覧がロードされた.
-		void summary_loaded(IInspectable const& sender, RoutedEventArgs const& e);
-		// 編集メニューの「リストの表示」が選択された.
-		void summary_list_click(IInspectable const&, RoutedEventArgs const&);
 		// 図形を一覧に追加する.
 		void summary_append(Shape* const s);
 		// 一覧の中で図形を入れ替える.
 		void summary_arrange(Shape* const s, Shape* const t);
-		// 図形一覧を消去する.
+		// 一覧を消去する.
 		void summary_clear(void);
-		// 図形一覧パネルを閉じて消去する.
-		void summary_close(void);
-		// 図形を一覧に挿入する.
-		void summary_insert(Shape* const s, const uint32_t i);
-		// 操作を図形一覧に反映する.
+		// 一覧パネルを閉じて消去する.
+		//void summary_close(void);
+		// 一覧の「閉じる」ボタンが押された.
+		void summary_close_click(IInspectable const&, RoutedEventArgs const&);
+		// 一覧に図形を挿入する.
+		void summary_insert_at(Shape* const s, const uint32_t i);
+		// 一覧の項目が選択された.
+		void summary_item_click(IInspectable const&, ItemClickEventArgs const&);
+		// 編集メニューの「リストの表示」が選択された.
+		void summary_list_click(IInspectable const&, RoutedEventArgs const&);
+		// 一覧がロードされた.
+		void summary_loaded(IInspectable const& sender, RoutedEventArgs const& e);
+		// 操作を一覧に反映する.
 		void summary_reflect(const Undo* u);
-		// 図形一覧を作成しなおす.
+		// 一覧を作成しなおす.
 		void summary_remake(void);
-		// 図形を一覧から消去する.
+		// 一覧から図形を消去する.
 		uint32_t summary_remove(Shape* const s);
-		// 一覧の項目を選択する.
-		//void summary_select(uint32_t i);
 		// 一覧の図形を選択する.
 		void summary_select(Shape* const s);
 		// 一覧の項目を全て選択する.
@@ -831,16 +827,14 @@ namespace winrt::GraphPaper::implementation
 		void summary_select_head(void);
 		// 一覧の最後の項目を選択する.
 		void summary_select_tail(void);
-		// 一覧の項目を選択解除する.
-		//void summary_unselect(uint32_t i);
+		// 一覧の項目が選択された.
+		void summary_selection_changed(IInspectable const& sender, SelectionChangedEventArgs const& e);
 		// 一覧の図形を選択解除する.
 		void summary_unselect(Shape* const s);
 		// 一覧の項目を全て選択解除する.
 		void summary_unselect_all(void);
 		// 一覧の表示を更新する.
 		void summary_update(void);
-
-		void summary_item_click(IInspectable const&, ItemClickEventArgs const&);
 
 		//-------------------------------
 		// MainPage_find.cpp
@@ -859,7 +853,7 @@ namespace winrt::GraphPaper::implementation
 		void find_replace_all_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「置換して次に」ボタンが押された.
 		void find_replace_click(IInspectable const&, RoutedEventArgs const&);
-		// 検索の値をデータリーダーから読み込む.
+		// データリーダーから検索の値を読み込む.
 		void find_text_read(DataReader const& dt_reader);
 		// 文字列検索パネルから値を格納する.
 		void find_text_set(void);
@@ -890,19 +884,21 @@ namespace winrt::GraphPaper::implementation
 		// 作図メニューに印をつける.
 		void tool_draw_is_checked(const DRAW_TOOL value);
 		// 作図メニューの「多角形ツール」に印をつける.
-		void tool_poly_is_checked(const uint32_t value);
+		void tool_poly_n_is_checked(const uint32_t value);
 		// 作図メニューの「多角形ツール」に印をつける.
 		void tool_poly_is_checked(const POLY_TOOL& value);
+		// 作図メニューの「頂点に合わせる」に印をつける.
+		void tool_vert_snap_is_checked(const bool value);
 		// 作図ツールの状態を読み込む.
 		void tool_read(DataReader const& dt_reader);
 		// 作図ツールの状態を書き込む.
 		void tool_write(DataWriter const& dt_writer);
 		//　Escape が押された.
 		void kacc_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-
-		void tool_snap_vert_click(IInspectable const&, RoutedEventArgs const&) noexcept
+		// 作図ツールの「頂点に合わせる」が選択された.
+		void tool_vert_snap_click(IInspectable const&, RoutedEventArgs const&) noexcept
 		{
-			m_tool_vert = tmfi_tool_snap_vert().IsChecked();
+			m_tool_vert_snap = tmfi_tool_vert_snap().IsChecked();
 		}
 
 		//-----------------------------
@@ -929,11 +925,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形を入れ替えて, その操作をスタックに積む.
 		void undo_push_arrange(Shape* const s, Shape* const t);
 		// 図形の頂点や制御点の位置をスタックに保存する.
-		void undo_push_anchor(Shape* const s, const uint32_t anchor);
+		void undo_push_anch(Shape* const s, const uint32_t anch);
 		// 図形を挿入して, その操作をスタックに積む.
 		void undo_push_insert(Shape* const s, Shape* const s_pos);
 		// 図形の位置をスタックに保存してから差分だけ移動する.
-		void undo_push_move(const D2D1_POINT_2F diff, const bool all = false);
+		void undo_push_move(const D2D1_POINT_2F d_vec, const bool all = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void undo_push_null(void);
 		// 図形をグループから削除して, その操作をスタックに積む.
@@ -948,9 +944,9 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_OP U, typename T> bool undo_push_set(T const& value);
 		// 図形の値をスタックに保存する.
 		template <UNDO_OP U> void undo_push_set(Shape* const s);
-		// 操作スタックをデータリーダーから読み込む.
+		// データリーダーから操作スタックを読み込む.
 		void undo_read(DataReader const& dt_reader);
-		// 操作スタックをデータリーダーに書き込む.
+		// データリーダーに操作スタックを書き込む.
 		void undo_write(DataWriter const& dt_writer);
 
 		//-------------------------------

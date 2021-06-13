@@ -139,7 +139,7 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MainPage_appl.cpp" />
+    <ClCompile Include="MainPage_app.cpp" />
     <ClCompile Include="MainPage_arrange.cpp" />
     <ClCompile Include="MainPage_arrow.cpp" />
     <ClCompile Include="MainPage_display.cpp" />
@@ -176,7 +176,9 @@
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="shape.cpp" />
+    <ClCompile Include="shape_anch.cpp" />
     <ClCompile Include="shape_bezi.cpp" />
+    <ClCompile Include="shape_dt.cpp" />
     <ClCompile Include="shape_dx.cpp" />
     <ClCompile Include="shape_elli.cpp" />
     <ClCompile Include="shape_group.cpp" />
@@ -189,7 +191,6 @@
     <ClCompile Include="shape_rrect.cpp" />
     <ClCompile Include="shape_ruler.cpp" />
     <ClCompile Include="shape_stroke.cpp" />
-    <ClCompile Include="shape_svg.cpp" />
     <ClCompile Include="shape_text.cpp" />
     <ClCompile Include="undo.cpp" />
   </ItemGroup>

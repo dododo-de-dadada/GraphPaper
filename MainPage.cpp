@@ -169,7 +169,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 図形一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
-			summary_close();
+			summary_close_click(nullptr, nullptr);
 		}
 		undo_clear();
 		slist_clear(m_list_shapes);
@@ -230,10 +230,10 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::UI::Xaml::Application;
 
 			auto const& app{ Application::Current() };
-			m_token_suspending = app.Suspending({ this, &MainPage::appl_suspending_async });
-			m_token_resuming = app.Resuming({ this, &MainPage::appl_resuming_async });
-			m_token_entered_background = app.EnteredBackground({ this, &MainPage::appl_entered_background });
-			m_token_leaving_background = app.LeavingBackground({ this, &MainPage::appl_leaving_background });
+			m_token_suspending = app.Suspending({ this, &MainPage::app_suspending_async });
+			m_token_resuming = app.Resuming({ this, &MainPage::app_resuming_async });
+			m_token_entered_background = app.EnteredBackground({ this, &MainPage::app_entered_background });
+			m_token_leaving_background = app.LeavingBackground({ this, &MainPage::app_leaving_background });
 		}
 
 		// ウィンドウの表示が変わったときのイベントハンドラーを設定する.
@@ -340,7 +340,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 図形一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
-			summary_close();
+			summary_close_click(nullptr, nullptr);
 		}
 		undo_clear();
 		slist_clear(m_list_shapes);

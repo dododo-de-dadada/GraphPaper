@@ -11,7 +11,7 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::UI::Xaml::Controls::TextBox;
 
-	constexpr wchar_t SHEET_TITLE[] = L"str_sheet";	// 用紙の表題
+	constexpr wchar_t DLG_TITLE[] = L"str_sheet";	// 用紙の表題
 
 	// 長さををピクセル単位の値に変換する.
 	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept;
@@ -78,19 +78,6 @@ namespace winrt::GraphPaper::implementation
 		tmfi_grid_snap_2().IsChecked(g_snap);
 	}
 
-	// 図形が含まれるよう用紙の左上位置と右下位置を更新する.
-	// s	図形
-	void MainPage::sheet_update_bbox(const Shape* s) noexcept
-	{
-		s->get_bound(m_sheet_min, m_sheet_max, m_sheet_min, m_sheet_max);
-	}
-
-	// 用紙の左上位置と右下位置を設定する.
-	void MainPage::sheet_update_bbox(void) noexcept
-	{
-		slist_bound_sheet(m_list_shapes, m_sheet_main.m_sheet_size, m_sheet_min, m_sheet_max);
-	}
-
 	// 用紙メニューの「用紙の色」が選択された.
 	IAsyncAction MainPage::sheet_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -114,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::sheet_set_slider<UNDO_OP::SHEET_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::sheet_set_slider<UNDO_OP::SHEET_COLOR, 2> });
 		m_sample_type = SAMPLE_TYPE::NONE;
-		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(SHEET_TITLE)));
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
@@ -180,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 部位の色をブラシに格納する.
 		//D2D1_COLOR_F anch_color;
-		//m_sheet_main.get_anchor_color(anch_color);
+		//m_sheet_main.get_anch_color(anch_color);
 		//m_sheet_dx.m_anch_brush->SetColor(anch_color);
 		for (auto s : m_list_shapes) {
 			if (s->is_deleted()) {
@@ -259,7 +246,7 @@ namespace winrt::GraphPaper::implementation
 			// リソースの取得に失敗した場合に備えて,
 			// 固定の既定値を書体属性に格納する.
 			m_sheet_main.set_font_family(wchar_cpy(L"Segoe UI"));
-			m_sheet_main.set_font_size(FONT_SIZE_DEF);
+			m_sheet_main.set_font_size(DEF_FONT_SIZE);
 			m_sheet_main.set_font_stretch(DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL);
 			m_sheet_main.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
 			m_sheet_main.set_font_weight(DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL);
@@ -339,13 +326,13 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		{
-			m_sheet_main.set_arrow_size(ARROW_SIZE_DEF);
+			m_sheet_main.set_arrow_size(DEF_ARROW_SIZE);
 			m_sheet_main.set_arrow_style(ARROW_STYLE::NONE);
-			m_sheet_main.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEF, GRID_LEN_DEF });
+			m_sheet_main.set_corner_radius(D2D1_POINT_2F{ DEF_GRID_LEN, DEF_GRID_LEN });
 			m_sheet_main.set_fill_color(Shape::m_default_background);
 			m_sheet_main.set_font_color(Shape::m_default_foreground);
-			m_sheet_main.set_grid_base(GRID_LEN_DEF - 1.0);
-			m_sheet_main.set_grid_gray(GRID_GRAY_DEF);
+			m_sheet_main.set_grid_base(DEF_GRID_LEN - 1.0);
+			m_sheet_main.set_grid_gray(DEF_GRID_GRAY);
 			m_sheet_main.set_grid_emph(GRID_EMPH_0);
 			m_sheet_main.set_grid_show(GRID_SHOW::BACK);
 			m_sheet_main.set_grid_snap(true);
@@ -356,15 +343,15 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.set_stroke_cap_style(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
 			m_sheet_main.set_stroke_color(Shape::m_default_foreground);
 			m_sheet_main.set_stroke_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
-			m_sheet_main.set_stroke_dash_patt(STROKE_DASH_PATT_DEF);
+			m_sheet_main.set_stroke_dash_patt(DEF_STROKE_DASH_PATT);
 			m_sheet_main.set_stroke_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-			m_sheet_main.set_stroke_join_limit(MITER_LIMIT_DEF);
+			m_sheet_main.set_stroke_join_limit(DEF_MITER_LIMIT);
 			m_sheet_main.set_stroke_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
 			m_sheet_main.set_stroke_width(1.0);
 			m_sheet_main.set_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			m_sheet_main.set_text_align_t(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 			m_sheet_main.set_text_line_sp(0.0);
-			m_sheet_main.set_text_margin(TEXT_MARGIN_DEF);
+			m_sheet_main.set_text_margin(DEF_TEXT_MARGIN);
 		}
 	}
 
@@ -616,6 +603,19 @@ namespace winrt::GraphPaper::implementation
 			value = conv_len_to_val(m_len_unit, value, dpi, g_base + 1.0);
 		}
 		cd_sheet_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < sheet_size_max());
+	}
+
+	// 図形が含まれるよう用紙の左上位置と右下位置を更新する.
+	// s	図形
+	void MainPage::sheet_update_bbox(const Shape* s) noexcept
+	{
+		s->get_bound(m_sheet_min, m_sheet_max, m_sheet_min, m_sheet_max);
+	}
+
+	// 用紙の左上位置と右下位置を設定する.
+	void MainPage::sheet_update_bbox(void) noexcept
+	{
+		slist_bound_sheet(m_list_shapes, m_sheet_main.m_sheet_size, m_sheet_min, m_sheet_max);
 	}
 
 	// 用紙メニューの「表示倍率」が選択された.

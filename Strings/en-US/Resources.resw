@@ -1000,7 +1000,7 @@
   </data>
   <data name="tmfi_tool_poly_reguler.Text" xml:space="preserve">
     <value>Draw with Reguler</value>
-    <comment>RadioMenuFlyoutItem</comment>
+    <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="tb_version.Text" xml:space="preserve">
     <value>Version 0.0.2</value>
@@ -1021,5 +1021,37 @@
   <data name="str_err_paste" xml:space="preserve">
     <value>Failed to paste the data.</value>
     <comment>String</comment>
+  </data>
+  <data name="rmfi_join_bevel.Text" xml:space="preserve">
+    <value>Bevel</value>
+    <comment>RadioMenyFlyoutItem</comment>
+  </data>
+  <data name="mfi_join_limit.Text" xml:space="preserve">
+    <value>Miter Limit...</value>
+    <comment>MenyFlyoutItem</comment>
+  </data>
+  <data name="rmfi_join_miter.Text" xml:space="preserve">
+    <value>Miter</value>
+    <comment>RadioMenyFlyoutItem</comment>
+  </data>
+  <data name="rmfi_join_m_or_b.Text" xml:space="preserve">
+    <value>Miter or Bevel</value>
+    <comment>RadioMenyFlyoutItem</comment>
+  </data>
+  <data name="rmfi_join_round.Text" xml:space="preserve">
+    <value>Round</value>
+    <comment>RadioMenyFlyoutItem</comment>
+  </data>
+  <data name="mfs_cap_style.Text" xml:space="preserve">
+    <value>Cap Style</value>
+    <comment>MenuFlyoutSubItem</comment>
+  </data>
+  <data name="mfs_join_style.Text" xml:space="preserve">
+    <value>Join Style</value>
+    <comment>MenuFlyoutSubItem</comment>
+  </data>
+  <data name="tmfi_tool_vert_snap.Text" xml:space="preserve">
+    <value>Snap to Vertex</value>
+    <comment>ToggleMenuFlyoutItem</comment>
   </data>
 </root>

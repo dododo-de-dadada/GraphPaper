@@ -9,6 +9,30 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	// Shift + 下矢印キーが押された.
+	void MainPage::kacc_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	{
+		select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Down>();
+	}
+
+	// Shift + 上矢印キーが押された.
+	void MainPage::kacc_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	{
+		select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Up>();
+	}
+
+	// 下矢印キーが押された.
+	void MainPage::kacc_select_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	{
+		select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
+	}
+
+	// 上矢印キーが押された.
+	void MainPage::kacc_select_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	{
+		select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
+	}
+
 	// 編集メニューの「すべて選択」が選択された.
 	void MainPage::select_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -282,22 +306,19 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (t_range_only != true && s->is_selected()) {
-				// 文字範囲のみ解除フラグがない, かつ図形の選択フラグが立っている場合,
+			// 文字範囲のみ解除フラグがない, かつ図形が選択されているか判定する.
+			if (!t_range_only && s->is_selected()) {
 				undo_push_select(s);
 				flag = true;
 			}
+			// 文字範囲が取得できない (文字列図形でない場合も含む) か判定する.
 			DWRITE_TEXT_RANGE d_range;
-			if (s->get_text_range(d_range) != true) {
-				// 文字範囲が取得できない
-				// (文字列図形でない) 場合,
-				// 以下を無視する.
+			if (!s->get_text_range(d_range)) {
 				continue;
 			}
+			// 得た文字範囲が { 0, 0 } か判定する.
 			const DWRITE_TEXT_RANGE s_range = DWRITE_TEXT_RANGE{ 0, 0 };
 			if (equal(s_range, d_range)) {
-				// 得た文字範囲が { 0, 0 } の場合,
-				// 以下を無視する.
 				continue;
 			}
 			// { 0, 0 } を図形に格納して, その操作をスタックに積む.
@@ -309,30 +330,6 @@ namespace winrt::GraphPaper::implementation
 			summary_unselect_all();
 		}
 		return flag;
-	}
-
-	// Shift + 下矢印キーが押された.
-	void MainPage::kacc_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-	{
-		select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Down>();
-	}
-
-	// Shift + 上矢印キーが押された.
-	void MainPage::kacc_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-	{
-		select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Up>();
-	}
-
-	// 下矢印キーが押された.
-	void MainPage::kacc_select_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-	{
-		select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
-	}
-
-	// 上矢印キーが押された.
-	void MainPage::kacc_select_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-	{
-		select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
 	}
 
 }

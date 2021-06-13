@@ -1,5 +1,5 @@
 //------------------------------
-// Shape_list.cpp
+// shape_slist.cpp
 // 図形リスト
 //------------------------------
 #include "pch.h"
@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_RULER		// 定規
 	};
 
-	// 図形をデータリーダーから読み込む.
+	// データリーダーから図形を読み込む.
 	static Shape* slist_read_shape(DataReader const& dt_reader);
 	// 次の図形を得る.
 	template <typename T> static Shape* slist_next(T const& it_begin, T const& it_end, const Shape* s) noexcept;
@@ -358,8 +358,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 選択フラグの立つすべての図形を差分だけ移動する.
 	// slist	図形リスト
-	// diff	移動する差分
-	bool slist_move(SHAPE_LIST const& slist, const D2D1_POINT_2F diff) noexcept
+	// d_vec	移動する差分
+	bool slist_move(SHAPE_LIST const& slist, const D2D1_POINT_2F d_vec) noexcept
 	{
 		bool flag = false;
 		for (auto s : slist) {
@@ -369,7 +369,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_selected() != true) {
 				continue;
 			}
-			if (s->move(diff) && !flag) {
+			if (s->move(d_vec) && !flag) {
 				flag = true;
 			}
 		}
@@ -430,7 +430,7 @@ namespace winrt::GraphPaper::implementation
 		return slist_next(slist.rbegin(), slist.rend(), s);
 	}
 
-	// 図形リストをデータリーダーから読み込む.
+	// データリーダーから図形リストを読み込む.
 	bool slist_read(SHAPE_LIST& slist, DataReader const& dt_reader)
 	{
 		Shape* s;
@@ -443,7 +443,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// データリーダーから図形を作成する.
+	// データリーダーから図形を読み込む.
 	static Shape* slist_read_shape(DataReader const& dt_reader)
 	{
 		if (dt_reader.UnconsumedBufferLength() < sizeof(uint32_t)) {
@@ -613,15 +613,27 @@ namespace winrt::GraphPaper::implementation
 	template void slist_write<!REDUCE>(SHAPE_LIST const& slist, DataWriter const& dt_writer);
 	template void slist_write<REDUCE>(SHAPE_LIST const& slist, DataWriter const& dt_writer);
 
-	void slist_neighbor(SHAPE_LIST const& slist, const D2D1_POINT_2F& n_pos, const float dist, D2D1_POINT_2F& value) noexcept
+	// 選択されてない図形から, 指定した位置に最も近い頂点を得る.
+	// slist	図形リスト
+	// n_pos	位置
+	// limit	距離の制限
+	// value	最も近い頂点
+	bool slist_neighbor(const SHAPE_LIST& slist, const D2D1_POINT_2F& n_pos, const float limit, D2D1_POINT_2F& value) noexcept
 	{
-		float d2 = dist * dist;
+		bool flag = false;
+		float dd = limit * limit;
 		for (const auto s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->get_neighbor(n_pos, d2, value);
+			if (s->is_selected()) {
+				continue;
+			}
+			if (s->get_neighbor(n_pos, dd, value) && !flag) {
+				flag = true;
+			}
 		}
+		return flag;
 	}
 
 }

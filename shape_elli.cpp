@@ -47,7 +47,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[3].x = a_pos[0].x;
 		a_pos[3].y = m_pos.y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anchor_draw_rect(a_pos[i], dx);
+			anch_draw_rect(a_pos[i], dx);
 		}
 		a_pos[0] = m_pos;
 		pt_add(m_pos, m_diff[0], a_pos[3]);
@@ -56,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[2].x = a_pos[3].x;
 		a_pos[2].y = a_pos[0].y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anchor_draw_ellipse(a_pos[i], dx);
+			anch_draw_ellipse(a_pos[i], dx);
 		}
 	}
 
@@ -65,9 +65,9 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto anchor = hit_test_anchor(t_pos);
-		if (anchor != ANCH_TYPE::ANCH_SHEET) {
-			return anchor;
+		const auto anch = hit_test_anch(t_pos);
+		if (anch != ANCH_TYPE::ANCH_SHEET) {
+			return anch;
 		}
 
 		// 半径を得る.
@@ -124,20 +124,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeElli::svg_write(DataWriter const& dt_writer) const
+	void ShapeElli::dt_write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::svg_write;
+		using winrt::GraphPaper::implementation::dt_write_svg;
 
 		D2D1_POINT_2F rad;
 		pt_mul(m_diff[0], 0.5, rad);
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
-		svg_write("<ellipse ", dt_writer);
-		svg_write(c_pos, "cx", "cy", dt_writer);
-		svg_write(static_cast<double>(rad.x), "rx", dt_writer);
-		svg_write(static_cast<double>(rad.y), "ry", dt_writer);
-		svg_write(m_fill_color, "fill", dt_writer);
-		ShapeStroke::svg_write(dt_writer);
-		svg_write("/>" SVG_NEW_LINE, dt_writer);
+		dt_write_svg("<ellipse ", dt_writer);
+		dt_write_svg(c_pos, "cx", "cy", dt_writer);
+		dt_write_svg(static_cast<double>(rad.x), "rx", dt_writer);
+		dt_write_svg(static_cast<double>(rad.y), "ry", dt_writer);
+		dt_write_svg(m_fill_color, "fill", dt_writer);
+		ShapeStroke::dt_write_svg(dt_writer);
+		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 	}
 }

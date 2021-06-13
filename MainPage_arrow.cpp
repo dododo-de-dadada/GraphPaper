@@ -9,33 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow";
 	constexpr float SLIDER_STEP = 0.5f;
-
-	// 線枠メニューの「矢じるしの種類」のサブ項目が選択された.
-	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
-	{
-		ARROW_STYLE a_style;
-		if (sender == rmfi_arrow_style_none() || sender == rmfi_arrow_style_none_2()) {
-			a_style = ARROW_STYLE::NONE;
-		}
-		else if (sender == rmfi_arrow_style_opened() || sender == rmfi_arrow_style_opened_2()) {
-			a_style = ARROW_STYLE::OPENED;
-		}
-		else if (sender == rmfi_arrow_style_filled() || sender == rmfi_arrow_style_filled_2()) {
-			a_style = ARROW_STYLE::FILLED;
-		}
-		else {
-			return;
-		}
-		mfi_arrow_size().IsEnabled(a_style != ARROW_STYLE::NONE);
-		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
-		if (undo_push_set<UNDO_OP::ARROW_STYLE>(a_style)) {
-			undo_push_null();
-			xcvd_is_enabled();
-			sheet_draw();
-		}
-	}
+	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow";
 
 	//	値をスライダーのヘッダーに格納する.
 	//	value	値
@@ -153,6 +128,31 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
 		sheet_draw();
+	}
+
+	// 線枠メニューの「矢じるしの種類」のサブ項目が選択された.
+	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		ARROW_STYLE a_style;
+		if (sender == rmfi_arrow_style_none() || sender == rmfi_arrow_style_none_2()) {
+			a_style = ARROW_STYLE::NONE;
+		}
+		else if (sender == rmfi_arrow_style_opened() || sender == rmfi_arrow_style_opened_2()) {
+			a_style = ARROW_STYLE::OPENED;
+		}
+		else if (sender == rmfi_arrow_style_filled() || sender == rmfi_arrow_style_filled_2()) {
+			a_style = ARROW_STYLE::FILLED;
+		}
+		else {
+			return;
+		}
+		mfi_arrow_size().IsEnabled(a_style != ARROW_STYLE::NONE);
+		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
+		if (undo_push_set<UNDO_OP::ARROW_STYLE>(a_style)) {
+			undo_push_null();
+			xcvd_is_enabled();
+			sheet_draw();
+		}
 	}
 
 	// 線枠メニューの「矢じるしの種類」に印をつける.

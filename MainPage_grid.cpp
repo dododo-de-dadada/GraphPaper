@@ -11,8 +11,46 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 
-	constexpr wchar_t TITLE_GRID[] = L"str_grid";
 	constexpr float SLIDER_STEP = 0.5f;
+	constexpr wchar_t TITLE_GRID[] = L"str_grid";
+
+	// 用紙メニューの「方眼の強調」が選択された.
+	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		GRID_EMPH value;
+		if (sender == rmfi_grid_emph_1() || sender == rmfi_grid_emph_1_2()) {
+			value = GRID_EMPH_0;
+		}
+		else if (sender == rmfi_grid_emph_2() || sender == rmfi_grid_emph_2_2()) {
+			value = GRID_EMPH_2;
+		}
+		else if (sender == rmfi_grid_emph_3() || sender == rmfi_grid_emph_3_2()) {
+			value = GRID_EMPH_3;
+		}
+		else {
+			return;
+		}
+		GRID_EMPH g_emph;
+		m_sheet_main.get_grid_emph(g_emph);
+		if (!equal(g_emph, value)) {
+			undo_push_set<UNDO_OP::GRID_EMPH>(&m_sheet_main, value);
+			undo_menu_enable();
+			sheet_draw();
+		}
+	}
+
+	// 用紙メニューの「方眼の強調」に印をつける.
+	// g_emph	方眼の強調
+	void MainPage::grid_emph_is_checked(const GRID_EMPH& g_emph)
+	{
+		rmfi_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
+
+		rmfi_grid_emph_1_2().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_2_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
+		rmfi_grid_emph_3_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
+	}
 
 	// 用紙メニューの「方眼の濃さ」が選択された.
 	IAsyncAction MainPage::grid_gray_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -105,44 +143,6 @@ namespace winrt::GraphPaper::implementation
 			undo_menu_enable();
 			sheet_draw();
 		}
-	}
-
-	// 用紙メニューの「方眼の強調」が選択された.
-	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
-	{
-		GRID_EMPH value;
-		if (sender == rmfi_grid_emph_1() || sender == rmfi_grid_emph_1_2()) {
-			value = GRID_EMPH_0;
-		}
-		else if (sender == rmfi_grid_emph_2() || sender == rmfi_grid_emph_2_2()) {
-			value = GRID_EMPH_2;
-		}
-		else if (sender == rmfi_grid_emph_3() || sender == rmfi_grid_emph_3_2()) {
-			value = GRID_EMPH_3;
-		}
-		else {
-			return;
-		}
-		GRID_EMPH g_emph;
-		m_sheet_main.get_grid_emph(g_emph);
-		if (!equal(g_emph, value)) {
-			undo_push_set<UNDO_OP::GRID_EMPH>(&m_sheet_main, value);
-			undo_menu_enable();
-			sheet_draw();
-		}
-	}
-
-	// 用紙メニューの「方眼の強調」に印をつける.
-	// g_emph	方眼の強調
-	void MainPage::grid_emph_is_checked(const GRID_EMPH& g_emph)
-	{
-		rmfi_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
-		rmfi_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
-		rmfi_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
-
-		rmfi_grid_emph_1_2().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
-		rmfi_grid_emph_2_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
-		rmfi_grid_emph_3_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -244,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
 
-	// 用紙メニューの「方眼にそろえる」が選択された.
+	// 用紙メニューの「方眼に合わせる」が選択された.
 	void MainPage::grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		auto value = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
@@ -303,24 +303,24 @@ namespace winrt::GraphPaper::implementation
 				double a_se = pt_abs2(d_se);
 				double a_ne = pt_abs2(d_ne);
 				double a_sw = pt_abs2(d_sw);
-				D2D1_POINT_2F diff;
+				D2D1_POINT_2F d_vec;
 				if (a_se <= a_nw && a_se <= a_ne && a_nw <= a_sw) {
-					diff = d_se;
+					d_vec = d_se;
 				}
 				else if (a_ne <= a_nw && a_ne <= a_se && a_nw <= a_sw) {
-					diff = d_ne;
+					d_vec = d_ne;
 				}
 				else if (a_sw <= a_nw && a_sw <= a_se && a_sw <= a_ne) {
-					diff = d_sw;
+					d_vec = d_sw;
 				}
 				else {
-					diff = d_nw;
+					d_vec = d_nw;
 				}
 				if (flag != true) {
 					flag = true;
 				}
 				undo_push_set<UNDO_OP::START_POS>(s);
-				s->move(diff);
+				s->move(d_vec);
 			}
 		}
 		if (flag) {

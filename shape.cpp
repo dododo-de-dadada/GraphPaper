@@ -8,9 +8,9 @@
 namespace winrt::GraphPaper::implementation
 {
 #if defined(_DEBUG)
+	uint32_t debug_deleted_cnt = 0;
 	uint32_t debug_leak_cnt = 0;
 	uint32_t debug_shape_cnt = 0;
-	uint32_t debug_deleted_cnt = 0;
 #endif
 
 	ID2D1Factory3* Shape::s_d2d_factory = nullptr;	// D2D1 ファクトリ
@@ -23,35 +23,6 @@ namespace winrt::GraphPaper::implementation
 
 	// 文字が '0'...'9' または 'A'...'F', 'a'...'f' か判定する.
 	static bool is_hex(const wchar_t w, uint32_t& x) noexcept;
-
-	// 図形の部位 (方形) を表示する.
-	// a_pos	部位の位置
-	// dx		図形の描画環境
-	void anchor_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
-	{
-		D2D1_POINT_2F r_min;
-		pt_add(a_pos, -0.5 * Shape::s_anch_len, r_min);
-		D2D1_POINT_2F r_max;
-		pt_add(r_min, Shape::s_anch_len, r_max);
-		const D2D1_RECT_F r{ r_min.x, r_min.y, r_max.x, r_max.y };
-
-		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawRectangle(r, dx.m_shape_brush.get(), 2.0, nullptr);
-		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->FillRectangle(r, dx.m_shape_brush.get());
-	}
-
-	// 図形の部位（円形）を表示する.
-	// a_pos	部位の位置
-	// dx		図形の描画環境
-	void anchor_draw_ellipse(const D2D1_POINT_2F a_pos, SHAPE_DX& dx)
-	{
-		const FLOAT rad = static_cast<FLOAT>(Shape::s_anch_len * 0.5 + 1.0);
-		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->FillEllipse({ a_pos, rad, rad }, dx.m_shape_brush.get());
-		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->FillEllipse({ a_pos, rad - 1.0F, rad - 1.0F }, dx.m_shape_brush.get());
-	}
 
 	// 矢じるしの返しの位置を求める.
 	// a_vec	矢軸ベクトル.
@@ -223,115 +194,6 @@ namespace winrt::GraphPaper::implementation
 		if (a.y > r_max.y) {
 			r_max.y = a.y;
 		}
-	}
-
-	// 矢じるしの寸法をデータリーダーから読み込む.
-	void dt_read(ARROW_SIZE& value, DataReader const& dt_reader)
-	{
-		value.m_width = dt_reader.ReadSingle();
-		value.m_length = dt_reader.ReadSingle();
-		value.m_offset = dt_reader.ReadSingle();
-	}
-
-	// 矢じるしの寸法をデータリーダーから読み込む.
-	void dt_read(CAP_STYLE& value, DataReader const& dt_reader)
-	{
-		value.m_start = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
-		value.m_end = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
-	}
-
-	// 色をデータリーダーから読み込む.
-	void dt_read(D2D1_COLOR_F& value, DataReader const& dt_reader)
-	{
-		value.a = dt_reader.ReadSingle();
-		value.r = dt_reader.ReadSingle();
-		value.g = dt_reader.ReadSingle();
-		value.b = dt_reader.ReadSingle();
-		value.a = min(max(value.a, 0.0F), 1.0F);
-		value.r = min(max(value.r, 0.0F), 1.0F);
-		value.g = min(max(value.g, 0.0F), 1.0F);
-		value.b = min(max(value.b, 0.0F), 1.0F);
-	}
-
-	// 位置をデータリーダーから読み込む.
-	void dt_read(D2D1_POINT_2F& value, DataReader const& dt_reader)
-	{
-		value.x = dt_reader.ReadSingle();
-		value.y = dt_reader.ReadSingle();
-	}
-
-	// 寸法をデータリーダーから読み込む.
-	void dt_read(D2D1_SIZE_F& value, DataReader const& dt_reader)
-	{
-		value.width = dt_reader.ReadSingle();
-		value.height = dt_reader.ReadSingle();
-	}
-
-	// 文字列範囲をデータリーダーから読み込む.
-	void dt_read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader)
-	{
-		value.startPosition = dt_reader.ReadUInt32();
-		value.length = dt_reader.ReadUInt32();
-	}
-
-	// 破線の配置をデータリーダーから読み込む.
-	void dt_read(STROKE_DASH_PATT& value, DataReader const& dt_reader)
-	{
-		value.m_[0] = dt_reader.ReadSingle();
-		value.m_[1] = dt_reader.ReadSingle();
-		value.m_[2] = dt_reader.ReadSingle();
-		value.m_[3] = dt_reader.ReadSingle();
-		value.m_[4] = dt_reader.ReadSingle();
-		value.m_[5] = dt_reader.ReadSingle();
-	}
-
-	// 多角形のツールをデータリーダーから読み込む.
-	void dt_read(POLY_TOOL& value, DataReader const& dt_reader)
-	{
-		value.m_vertex_cnt = dt_reader.ReadUInt32();
-		value.m_regular = dt_reader.ReadBoolean();
-		value.m_vertex_up = dt_reader.ReadBoolean();
-		value.m_end_closed = dt_reader.ReadBoolean();
-		value.m_clockwise = dt_reader.ReadBoolean();
-	}
-
-	// 文字列をデータリーダーから読み込む.
-	void dt_read(wchar_t*& value, DataReader const& dt_reader)
-	{
-		const size_t n = dt_reader.ReadUInt32();	// 文字数
-		if (n > 0) {
-			value = new wchar_t[n + 1];
-			if (value != nullptr) {
-				for (size_t i = 0; i < n; i++) {
-					value[i] = dt_reader.ReadUInt16();
-				}
-				value[n] = L'\0';
-			}
-		}
-		else {
-			value = nullptr;
-		}
-	}
-
-	// 位置配列をデータリーダーから読み込む.
-	void dt_read(std::vector<D2D1_POINT_2F>& value, DataReader const& dt_reader)
-	{
-		const size_t v_cnt = dt_reader.ReadUInt32();	// 要素数
-		value.resize(v_cnt);
-		for (size_t i = 0; i < v_cnt; i++) {
-			dt_read(value[i], dt_reader);
-		}
-	}
-
-	// 方眼の強調をデータリーダーから読み込む.
-	void dt_read(GRID_EMPH& value, DataReader const& dt_reader)
-	{
-		value.m_gauge_1 = dt_reader.ReadUInt16();
-		value.m_gauge_2 = dt_reader.ReadUInt16();
-		if (equal(value, GRID_EMPH_0) || equal(value, GRID_EMPH_2) || equal(value, GRID_EMPH_3)) {
-			return;
-		}
-		value = GRID_EMPH_0;
 	}
 
 	//	文字列を複製する.
@@ -577,101 +439,6 @@ namespace winrt::GraphPaper::implementation
 	uint32_t wchar_len(const wchar_t* const t) noexcept
 	{
 		return (t == nullptr || t[0] == '\0') ? 0 : static_cast<uint32_t>(wcslen(t));
-	}
-
-	// 矢じるしの寸法をデータライターに書き込む.
-	void dt_write(const ARROW_SIZE& value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteSingle(value.m_width);
-		dt_writer.WriteSingle(value.m_length);
-		dt_writer.WriteSingle(value.m_offset);
-	}
-
-	// 線分の端点をデータライターに書き込む.
-	void dt_write(const CAP_STYLE& value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteUInt32(static_cast<uint32_t>(value.m_start));
-		dt_writer.WriteUInt32(static_cast<uint32_t>(value.m_end));
-	}
-
-	// 色をデータライターに書き込む.
-	void dt_write(const D2D1_COLOR_F& value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteSingle(value.a);
-		dt_writer.WriteSingle(value.r);
-		dt_writer.WriteSingle(value.g);
-		dt_writer.WriteSingle(value.b);
-	}
-
-	// 位置をデータライターに書き込む.
-	void dt_write(const D2D1_POINT_2F value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteSingle(value.x);
-		dt_writer.WriteSingle(value.y);
-	}
-
-	// 寸法をデータライターに書き込む.
-	void dt_write(const D2D1_SIZE_F value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteSingle(value.width);
-		dt_writer.WriteSingle(value.height);
-	}
-
-	// 文字列範囲をデータライターに書き込む.
-	void dt_write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteInt32(value.startPosition);
-		dt_writer.WriteInt32(value.length);
-	}
-
-	// 方眼の形式をデータライターに書き込む.
-	void dt_write(const GRID_EMPH value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteUInt16(value.m_gauge_1);
-		dt_writer.WriteUInt16(value.m_gauge_2);
-	}
-
-	// 破線の配置をデータライターに書き込む.
-	void dt_write(const STROKE_DASH_PATT& value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteSingle(value.m_[0]);
-		dt_writer.WriteSingle(value.m_[1]);
-		dt_writer.WriteSingle(value.m_[2]);
-		dt_writer.WriteSingle(value.m_[3]);
-		dt_writer.WriteSingle(value.m_[4]);
-		dt_writer.WriteSingle(value.m_[5]);
-	}
-
-	// 多角形のツールをデータライターに書き込む.
-	void dt_write(const POLY_TOOL& value, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteUInt32(static_cast<uint32_t>(value.m_vertex_cnt));
-		dt_writer.WriteBoolean(value.m_regular);
-		dt_writer.WriteBoolean(value.m_vertex_up);
-		dt_writer.WriteBoolean(value.m_end_closed);
-		dt_writer.WriteBoolean(value.m_clockwise);
-	}
-
-	// 文字列をデータライターに書き込む
-	void dt_write(const wchar_t* value, DataWriter const& dt_writer)
-	{
-		const uint32_t len = wchar_len(value);
-
-		dt_writer.WriteUInt32(len);
-		for (uint32_t i = 0; i < len; i++) {
-			dt_writer.WriteUInt16(value[i]);
-		}
-	}
-
-	// 位置配列をデータライターに書き込む
-	void dt_write(const std::vector<D2D1_POINT_2F>& value, DataWriter const& dt_writer)
-	{
-		const size_t n = value.size();
-
-		dt_writer.WriteUInt32(static_cast<uint32_t>(n));
-		for (uint32_t i = 0; i < n; i++) {
-			dt_write(value[i], dt_writer);
-		}
 	}
 
 }

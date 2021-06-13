@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr wchar_t NO_FOUND[] = L"str_err_found";	// 「文字列が見つかりません」メッセージのリソースキー
+	constexpr wchar_t NOT_FOUND[] = L"str_err_found";	// 「文字列が見つかりません」メッセージのリソースキー
 
 	// 文字列の一部を置換する.
 	static wchar_t* find_replace(wchar_t const* w_text, const uint32_t w_pos, const uint32_t w_len, wchar_t const* r_text, const uint32_t r_len) noexcept;
@@ -265,7 +265,7 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
 			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
 			if (m_edit_text_frame) {
-				undo_push_anchor(s, ANCH_TYPE::ANCH_SE);
+				undo_push_anch(s, ANCH_TYPE::ANCH_SE);
 				s->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 			}
 			undo_push_null();
@@ -352,7 +352,7 @@ namespace winrt::GraphPaper::implementation
 		if (flag != true) {
 			// 図形がない場合,
 			// 「文字列は見つかりません」メッセージダイアログを表示する.
-			message_show(ICON_INFO, NO_FOUND, tx_find_text_what().Text());
+			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
 			return;
 		}
 		// 文字範囲の選択のみを解除する.
@@ -457,7 +457,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// 検索できない, かつ置換もされてない場合,
-		message_show(ICON_INFO, NO_FOUND, tx_find_text_what().Text());
+		message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
 	}
 
 	// 編集メニューの「文字列の検索/置換」が選択された.
@@ -470,7 +470,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
-			summary_close();
+			summary_close_click(nullptr, nullptr);
 		}
 		tx_find_text_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
 		tx_find_replace_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });
@@ -504,10 +504,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 検索できない場合,
 		// 「文字列は見つかりません」メッセージダイアログを表示する.
-		message_show(ICON_INFO, NO_FOUND, tx_find_text_what().Text());
+		message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
 	}
 
-	// 検索の値をデータリーダーから読み込む.
+	// データリーダーから検索の値を読み込む.
 	void MainPage::find_text_read(DataReader const& dt_reader)
 	{
 		dt_read(m_find_text, dt_reader);

@@ -167,9 +167,9 @@ namespace winrt::GraphPaper::implementation
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
 		std::vector<D2D1_POINT_2F> v_pos(t_poly.m_vertex_cnt);	// 頂点の配列
 
-		D2D1_POINT_2F diff;
-		pt_sub(c_pos, p_pos, diff);
-		ShapePoly::create_poly_by_bbox(p_pos, diff, t_poly.m_vertex_cnt, t_poly.m_vertex_up, t_poly.m_regular, t_poly.m_clockwise, v_pos.data());
+		D2D1_POINT_2F p_vec;
+		pt_sub(c_pos, p_pos, p_vec);
+		ShapePoly::create_poly_by_bbox(p_pos, p_vec, t_poly.m_vertex_cnt, t_poly.m_vertex_up, t_poly.m_regular, t_poly.m_clockwise, v_pos.data());
 		const auto i_start = (t_poly.m_end_closed ? t_poly.m_vertex_cnt - 1 : 0);
 		const auto j_start = (t_poly.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < t_poly.m_vertex_cnt; i = j++) {
@@ -287,7 +287,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 部位の色を得る.
-	//void ShapeSheet::get_anchor_color(D2D1_COLOR_F& value) const noexcept
+	//void ShapeSheet::get_anch_color(D2D1_COLOR_F& value) const noexcept
 	//{
 	//	get_opposite_color(m_sheet_color, ANCH_OPAC, value);
 	//}
@@ -405,7 +405,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 方眼にそろえるを得る.
+	// 方眼に合わせるを得る.
 	bool ShapeSheet::get_grid_snap(bool& value) const noexcept
 	{
 		value = m_grid_snap;
@@ -539,8 +539,8 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());	// 破線の端点
 		dt_read(m_stroke_dash_patt, dt_reader);	// 破線の配置
 		m_stroke_dash_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());	// 破線の形式
-		m_stroke_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());	// 線のつながりの形状
-		m_stroke_join_limit = dt_reader.ReadSingle();	// 線のつながりのマイター制限
+		m_stroke_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());	// 線のつなぎの形状
+		m_stroke_join_limit = dt_reader.ReadSingle();	// 線のつなぎのマイター制限
 		m_stroke_width = dt_reader.ReadSingle();	// 線・枠の太さ
 		dt_read(m_fill_color, dt_reader);	// 塗りつぶしの色
 		dt_read(m_font_color, dt_reader);	// 書体の色
@@ -696,7 +696,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を方眼にそろえるに格納する.
+	// 値を方眼に合わせるに格納する.
 	bool ShapeSheet::set_grid_snap(const bool value) noexcept
 	{
 		if (m_grid_snap != value) {
