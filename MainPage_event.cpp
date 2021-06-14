@@ -26,9 +26,9 @@ namespace winrt::GraphPaper::implementation
 	static void event_reduce_slist(SHAPE_LIST& slist, UNDO_STACK const& u_stack, UNDO_STACK const& r_stack) noexcept;
 	// マウスホイールの値でスクロールする.
 	static bool event_scroll_by_wheel_delta(const ScrollBar& sb, const int32_t delta, const float scale);
-	// 最も近い方眼への差分を求める.
+	// 選択された図形に最も近い方眼を見つけ, 図形と方眼との差分を求める.
 	static bool event_snap_to_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_vec) noexcept;
-	// 最も近い頂点への差分を求める.
+	// 選択された図形の各頂点と, 非選択の図形の各頂点の中から, 最も近い頂点の組みを求め, その差分を得る.
 	static bool event_snap_to_vert(const SHAPE_LIST& slist, const float d_limit, D2D1_POINT_2F& v_vec) noexcept;
 
 	// 操作スタックが図形を参照するか判定する.
@@ -58,9 +58,9 @@ namespace winrt::GraphPaper::implementation
 		// 消去フラグの立つ図形を消去リストに格納する.
 		SHAPE_LIST list_del;
 		for (const auto t : slist) {
-			// 図形の消去フラグがないか判定する.
-			// 図形が元に戻す操作スタックに含まれる判定する.
-			// 図形がやり直し操作スタックに含まれる判定する.
+			// 図形の消去フラグがない,
+			// または図形が元に戻す操作スタックに含まれる,
+			// または図形がやり直し操作スタックに含まれる,　か判定する.
 			if (!t->is_deleted() ||
 				event_if_shape_on_stack(u_stack, t) ||
 				event_if_shape_on_stack(r_stack, t)) {
@@ -102,7 +102,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 最も近い方眼との差分を求める.
+	// 選択された図形に最も近い方眼を見つけ, 図形と方眼との差分を求める.
 	static bool event_snap_to_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_vec) noexcept
 	{
 		D2D1_POINT_2F b_nw{};
@@ -150,7 +150,10 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 最も近い頂点への差分を求める.
+	// 選択された図形と, 非選択の図形の中から, 最も近い頂点間の差分を求める.
+	// s_list	図形リスト
+	// d_limit	制限距離 (これ以上離れた頂点は対象としない)
+	// v_vec	最も近い頂点間の差分
 	static bool event_snap_to_vert(const SHAPE_LIST& slist, const float d_limit, D2D1_POINT_2F& v_vec) noexcept
 	{
 		float dd = d_limit * d_limit;
@@ -302,87 +305,72 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	// 図形の変形を終了する.
+	// 押された図形の変形を終了する.
 	void MainPage::event_finish_forming(void)
 	{
-		if (m_tool_vert_snap && m_sheet_main.m_grid_snap) {
-			D2D1_POINT_2F v_pos;
-			D2D1_POINT_2F v_vec;
-			if (slist_neighbor(m_list_shapes, m_event_pos_curr, 2.0f * Shape::s_anch_len, v_pos)) {
-				pt_sub(v_pos, m_event_pos_curr, v_vec);
-			}
-			else {
-				v_vec.x = v_vec.y = sqrt(FLT_MAX);
-			}
+		if (m_sheet_main.m_grid_snap && m_tool_vert_snap) {
 			D2D1_POINT_2F g_pos;
-			D2D1_POINT_2F g_vec;
 			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0, g_pos);
-			pt_sub(g_pos, m_event_pos_curr, g_vec);
-
-			if (pt_abs2(v_vec) <= pt_abs2(g_vec)) {
-				m_event_pos_curr = v_pos;
+			D2D1_POINT_2F v_pos;
+			if (slist_neighbor(m_list_shapes, m_event_pos_curr, 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale, v_pos)) {
+				D2D1_POINT_2F g_vec;
+				D2D1_POINT_2F v_vec;
+				pt_sub(g_pos, m_event_pos_curr, g_vec);
+				pt_sub(v_pos, m_event_pos_curr, v_vec);
+				if (pt_abs2(v_vec) < pt_abs2(g_vec)) {
+					g_pos = v_pos;
+				}
 			}
-			else {
-				m_event_pos_curr = g_pos;
-			}
+			m_event_pos_curr = g_pos;
 		}
 		else if (m_sheet_main.m_grid_snap) {
 			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0f, m_event_pos_curr);
 		}
 		else if (m_tool_vert_snap) {
-			slist_neighbor(m_list_shapes, m_event_pos_curr, 2.0f * Shape::s_anch_len, m_event_pos_curr);
+			slist_neighbor(m_list_shapes, m_event_pos_curr, 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale, m_event_pos_curr);
 		}
 		m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed);
-		if (undo_pop_if_invalid()) {
-			return;
+		if (!undo_pop_if_invalid()) {
+			undo_push_null();
+			sheet_update_bbox();
+			sheet_panle_size();
 		}
-
-		// 一連の操作の区切としてヌル操作をスタックに積む.
-		undo_push_null();
-		sheet_update_bbox();
-		sheet_panle_size();
 	}
 
-	// 図形の移動を終了する.
+	// 選択された図形の移動を終了する.
 	void MainPage::event_finish_moving(void)
 	{
-		D2D1_POINT_2F g_vec{};	// 方眼との差分
-		if (m_sheet_main.m_grid_snap) {
-			// 方眼に合わせたときの差分を求め, 求まったか判定する.
-			const float g_len = m_sheet_main.m_grid_base + 1.0f;
-			if (event_snap_to_grid(m_list_shapes, g_len, g_vec)) {
-				// 頂点に合わせるか判定する.
-				if (!m_tool_vert_snap) {
-					slist_move(m_list_shapes, g_vec);
+		// 方眼に合わせる, かつ頂点に合わせるか判定する.
+		if (m_sheet_main.m_grid_snap && m_tool_vert_snap) {
+			D2D1_POINT_2F g_vec{};	// 方眼への差分
+			if (event_snap_to_grid(m_list_shapes, m_sheet_main.m_grid_base + 1.0f, g_vec)) {
+				D2D1_POINT_2F v_vec{};	// 頂点への差分
+				if (event_snap_to_vert(m_list_shapes, 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale, v_vec) && pt_abs2(v_vec) < pt_abs2(g_vec)) {
+					g_vec = v_vec;
 				}
-			}
-			else {
-				// 差分が求まらなかったならば, FLT_MAX の平方根
-				g_vec.x = g_vec.y = sqrt(FLT_MAX);
+				slist_move(m_list_shapes, g_vec);
 			}
 		}
-		// 頂点に合わせるか判定する.
-		if (m_tool_vert_snap) {
-			D2D1_POINT_2F v_vec;	// 頂点との差分
-			if (event_snap_to_vert(m_list_shapes, 2.0f * Shape::s_anch_len, v_vec)) {
-				// 方眼に合わせる, かつ方眼との差分が頂点との差分より近いか判定する.
-				if (m_sheet_main.m_grid_snap && pt_abs2(g_vec) < pt_abs2(v_vec)) {
-					slist_move(m_list_shapes, g_vec);
-				}
-				else {
-					// 方眼に合わせない, または頂点との差分が方眼との差分より近いならば,
-					slist_move(m_list_shapes, v_vec);
-				}
+		// 方眼に合わせるか, かつ頂点に合わせないか判定する.
+		else if (m_sheet_main.m_grid_snap) {
+			D2D1_POINT_2F g_vec{};	// 方眼との差分
+			if (event_snap_to_grid(m_list_shapes, m_sheet_main.m_grid_base + 1.0f, g_vec)) {
+				slist_move(m_list_shapes, g_vec);
+			}
+		} 
+		// 方眼に合わせない, かつ頂点に合わせるか判定する.
+		else if (m_tool_vert_snap) {
+			D2D1_POINT_2F v_vec{};	// 頂点との差分
+			if (event_snap_to_vert(m_list_shapes, 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale, v_vec)) {
+				slist_move(m_list_shapes, v_vec);
 			}
 		}
-		if (undo_pop_if_invalid()) {
-			return;
+		if (!undo_pop_if_invalid()) {
+			undo_push_null();
+			sheet_update_bbox();
+			sheet_panle_size();
+			xcvd_is_enabled();
 		}
-		// 一連の操作の区切としてヌル操作をスタックに積む.
-		undo_push_null();
-		sheet_update_bbox();
-		sheet_panle_size();
-		xcvd_is_enabled();
 	}
 
 	// 範囲選択を終了する.
@@ -390,22 +378,23 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Window;
 
-		auto flag = false;
+		// 修飾キーがコントロールか判定する.
 		if (k_mod == VirtualKeyModifiers::Control) {
 			D2D1_POINT_2F a_min;
 			D2D1_POINT_2F a_max;
 			pt_bound(m_event_pos_pressed, m_event_pos_curr, a_min, a_max);
-			flag = toggle_area(a_min, a_max);
+			if (toggle_area(a_min, a_max)) {
+				xcvd_is_enabled();
+			}
 		}
+		// 修飾キーが押されてないか判定する.
 		else if (k_mod == VirtualKeyModifiers::None) {
 			D2D1_POINT_2F a_min;
 			D2D1_POINT_2F a_max;
 			pt_bound(m_event_pos_pressed, m_event_pos_curr, a_min, a_max);
-			flag = select_area(a_min, a_max);
-		}
-		if (flag == true) {
-			// 編集メニュー項目の使用の可否を設定する.
-			xcvd_is_enabled();
+			if (select_area(a_min, a_max)) {
+				xcvd_is_enabled();
+			}
 		}
 		Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 	}
@@ -415,9 +404,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		// スワップチェーンパネル上でのポインターの位置を得て, 
 		// 用紙座標系に変換し, ポインターの現在位置に格納する.
-		D2D1_POINT_2F p_offs;
-		pt_add(m_sheet_min, sb_horz().Value(), sb_vert().Value(), p_offs);
-		pt_mul(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_sheet_main.m_sheet_scale, p_offs, m_event_pos_curr);
+		D2D1_POINT_2F sheet_pos;
+		pt_add(m_sheet_min, sb_horz().Value(), sb_vert().Value(), sheet_pos);
+		pt_mul(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_sheet_main.m_sheet_scale, sheet_pos, m_event_pos_curr);
 	}
 
 	// ポインターが動いた.
@@ -578,9 +567,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_event_anch_pressed = slist_hit_test(m_list_shapes, m_event_pos_pressed, m_event_shape_pressed);
-		// 押された図形の部位が, 外側でないか判定する.
+		// 部位が, 外側でないか判定する.
 		if (m_event_anch_pressed != ANCH_TYPE::ANCH_SHEET) {
-			// 状態が左ボタンが押された状態, または右ボタンが押されていてかつ押された図形が選択されてないか判定す.
+			// 状態が左ボタンが押された状態, または, 右ボタンが押されていてかつ押された図形が選択されてないか判定する.
 			if (m_event_state == EVENT_STATE::PRESS_LBTN ||
 				(m_event_state == EVENT_STATE::PRESS_RBTN && !m_event_shape_pressed->is_selected())) {
 				select_shape(m_event_shape_pressed, args.KeyModifiers());
@@ -649,58 +638,81 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				// 選択以外の作図ツールが選択されているならば,
 				// 方眼に合わせるか, かつシフトキーが押されていないか判定する.
-				bool g_snap;
-				m_sheet_main.get_grid_snap(g_snap);
-				if (g_snap && m_tool_vert_snap) {
-					const float d_limit = 2.0f * Shape::s_anch_len;
-					D2D1_POINT_2F v_pos;
-					D2D1_POINT_2F v_vec;
-					if (slist_neighbor(m_list_shapes, m_event_pos_pressed, d_limit, v_pos)) {
-						pt_sub(v_pos, m_event_pos_pressed, v_vec);
-					}
-					else {
-						v_vec.x = v_vec.y = sqrt(FLT_MAX);
-					}
+				if (m_sheet_main.m_grid_snap && m_tool_vert_snap) {
+					/*
 					D2D1_POINT_2F g_pos;
-					D2D1_POINT_2F g_vec;
-					float g_base;
-					m_sheet_main.get_grid_base(g_base);
-					const double g_len = max(g_base + 1.0, 1.0);
+					const double g_len = max(m_sheet_main.m_grid_base + 1.0, 1.0);
 					pt_round(m_event_pos_pressed, g_len, g_pos);
-					pt_sub(g_pos, m_event_pos_pressed, g_vec);
-
-					if (pt_abs2(v_vec) <= pt_abs2(g_vec)) {
-						m_event_pos_pressed = v_pos;
+					const float d_limit = 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale;
+					D2D1_POINT_2F v_pos;
+					if (slist_neighbor(m_list_shapes, m_event_pos_pressed, d_limit, v_pos)) {
+						D2D1_POINT_2F g_vec;
+						pt_sub(g_pos, m_event_pos_pressed, g_vec);
+						D2D1_POINT_2F v_vec;
+						pt_sub(v_pos, m_event_pos_pressed, v_vec);
+						if (pt_abs2(v_vec) < pt_abs2(g_vec)) {
+							g_pos = v_pos;
+						}
 					}
-					else {
-						m_event_pos_pressed = g_pos;
-					}
-
-					if (slist_neighbor(m_list_shapes, m_event_pos_curr, d_limit, v_pos)) {
-						pt_sub(v_pos, m_event_pos_curr, v_vec);
-					}
-					else {
-						v_vec.x = v_vec.y = sqrt(FLT_MAX);
-					}
+					m_event_pos_pressed = g_pos;
 
 					pt_round(m_event_pos_curr, g_len, g_pos);
-					pt_sub(g_pos, m_event_pos_curr, g_vec);
+					if (slist_neighbor(m_list_shapes, m_event_pos_curr, d_limit, v_pos)) {
+						D2D1_POINT_2F g_vec;
+						pt_sub(g_pos, m_event_pos_curr, g_vec);
+						D2D1_POINT_2F v_vec;
+						pt_sub(v_pos, m_event_pos_curr, v_vec);
+						if (pt_abs2(v_vec) < pt_abs2(g_vec)) {
+							g_pos = v_pos;
+						}
+					}
+					m_event_pos_curr = g_pos;
 
-					if (pt_abs2(v_vec) <= pt_abs2(g_vec)) {
-						m_event_pos_curr = v_pos;
+					if (m_tool_draw == DRAW_TOOL::ELLI ||
+						m_tool_draw == DRAW_TOOL::RECT ||
+						m_tool_draw == DRAW_TOOL::RRECT ||
+						m_tool_draw == DRAW_TOOL::RULER ||
+						m_tool_draw == DRAW_TOOL::TEXT) {
+
+
 					}
-					else {
-						m_event_pos_curr = g_pos;
+					*/
+					const float d_limit = 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale;
+					const double g_len = max(m_sheet_main.m_grid_base + 1.0, 1.0);
+					D2D1_POINT_2F g_pos[2];
+					D2D1_POINT_2F g_sub[2];
+					float g_abs[4];
+					D2D1_POINT_2F b_pos[4]{
+						m_event_pos_pressed,
+						{ m_event_pos_curr.x, m_event_pos_pressed.y },
+						m_event_pos_curr,
+						{ m_event_pos_pressed.x, m_event_pos_curr.y },
+					};
+					D2D1_POINT_2F v_pos[4];
+					D2D1_POINT_2F v_sub[4];
+					float v_abs[4];
+					for (size_t i = 0; i < 4; i++) {
+						pt_round(b_pos[i], g_len, g_pos[i]);
+						pt_sub(g_pos[i], b_pos[i], g_sub[i]);
+						g_abs[i] = pt_abs2(g_sub[i]);
+						if (slist_neighbor(m_list_shapes, b_pos[i], d_limit, v_pos[i])) {
+							pt_sub(v_pos[i], b_pos[i], v_sub[i]);
+							v_abs[i] = pt_abs2(v_sub[i]);
+						}
+						else {
+							v_abs[i] = FLT_MAX;
+						}
 					}
+					if (v_abs[0] < v_abs[1] && v_abs[0] < v_abs[2] && v_abs[0] < v_abs[2])
 				}
-				else if (g_snap) {
+				else if (m_sheet_main.m_grid_snap) {
 					// 始点と終点を方眼の大きさで丸める.
 					const double g_len = max(m_sheet_main.m_grid_base + 1.0, 1.0);
 					pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
 					pt_round(m_event_pos_curr, g_len, m_event_pos_curr);
 				}
 				else if (m_tool_vert_snap) {
-					const float d_limit = 2.0f * Shape::s_anch_len;
+					const float d_limit = 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale;
 					slist_neighbor(m_list_shapes, m_event_pos_pressed, d_limit, m_event_pos_pressed);
 					slist_neighbor(m_list_shapes, m_event_pos_curr, d_limit, m_event_pos_curr);
 				}
@@ -740,63 +752,63 @@ namespace winrt::GraphPaper::implementation
 		// 作図ツールが選択ツールでないか判定する.
 		if (m_tool_draw != DRAW_TOOL::SELECT) {
 			Window::Current().CoreWindow().PointerCursor(CC_CROSS);
-			return;
 		}
-		if (!m_dx_mutex.try_lock()) {
+		else if (!m_dx_mutex.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CC_ARROW);
-			return;
-		}
-		Shape* s;
-		const auto anch = slist_hit_test(m_list_shapes, m_event_pos_curr, s);
-		m_dx_mutex.unlock();
-		if (anch == ANCH_TYPE::ANCH_SHEET) {
-			Window::Current().CoreWindow().PointerCursor(CC_ARROW);
-		}
-		else if (m_cnt_selected > 1) {
-			Window::Current().CoreWindow().PointerCursor(CC_SIZE_ALL);
 		}
 		else {
-			switch (anch) {
-			case ANCH_TYPE::ANCH_R_NW:
-			case ANCH_TYPE::ANCH_R_NE:
-			case ANCH_TYPE::ANCH_R_SE:
-			case ANCH_TYPE::ANCH_R_SW:
-				Window::Current().CoreWindow().PointerCursor(CC_CROSS);
-				break;
-			case ANCH_TYPE::ANCH_FILL:
-			case ANCH_TYPE::ANCH_STROKE:
-			case ANCH_TYPE::ANCH_TEXT:
+			Shape* s;
+			const auto anch = slist_hit_test(m_list_shapes, m_event_pos_curr, s);
+			m_dx_mutex.unlock();
+			if (anch == ANCH_TYPE::ANCH_SHEET) {
+				Window::Current().CoreWindow().PointerCursor(CC_ARROW);
+			}
+			else if (m_cnt_selected > 1) {
 				Window::Current().CoreWindow().PointerCursor(CC_SIZE_ALL);
-				break;
-			case ANCH_TYPE::ANCH_NE:
-			case ANCH_TYPE::ANCH_SW:
-				Window::Current().CoreWindow().PointerCursor(CC_SIZE_NESW);
-				break;
-			case ANCH_TYPE::ANCH_NORTH:
-			case ANCH_TYPE::ANCH_SOUTH:
-				Window::Current().CoreWindow().PointerCursor(CC_SIZE_NS);
-				break;
-			case ANCH_TYPE::ANCH_NW:
-			case ANCH_TYPE::ANCH_SE:
-				Window::Current().CoreWindow().PointerCursor(CC_SIZE_NWSE);
-				break;
-			case ANCH_TYPE::ANCH_WEST:
-			case ANCH_TYPE::ANCH_EAST:
-				Window::Current().CoreWindow().PointerCursor(CC_SIZE_WE);
-				break;
-			default:
-				// 図形のクラスが, 多角形または曲線であるか判定する.
-				if (s != nullptr &&
-					(typeid(*s) == typeid(ShapeLineA) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
-					// 図形の部位が, 頂点の数を超えないか判定する.
-					const auto d_cnt = static_cast<ShapePath*>(s)->m_diff.size();
-					if (anch >= ANCH_TYPE::ANCH_P0 && anch < ANCH_TYPE::ANCH_P0 + d_cnt + 1) {
-						Window::Current().CoreWindow().PointerCursor(CC_CROSS);
-						break;
+			}
+			else {
+				switch (anch) {
+				case ANCH_TYPE::ANCH_R_NW:
+				case ANCH_TYPE::ANCH_R_NE:
+				case ANCH_TYPE::ANCH_R_SE:
+				case ANCH_TYPE::ANCH_R_SW:
+					Window::Current().CoreWindow().PointerCursor(CC_CROSS);
+					break;
+				case ANCH_TYPE::ANCH_FILL:
+				case ANCH_TYPE::ANCH_STROKE:
+				case ANCH_TYPE::ANCH_TEXT:
+					Window::Current().CoreWindow().PointerCursor(CC_SIZE_ALL);
+					break;
+				case ANCH_TYPE::ANCH_NE:
+				case ANCH_TYPE::ANCH_SW:
+					Window::Current().CoreWindow().PointerCursor(CC_SIZE_NESW);
+					break;
+				case ANCH_TYPE::ANCH_NORTH:
+				case ANCH_TYPE::ANCH_SOUTH:
+					Window::Current().CoreWindow().PointerCursor(CC_SIZE_NS);
+					break;
+				case ANCH_TYPE::ANCH_NW:
+				case ANCH_TYPE::ANCH_SE:
+					Window::Current().CoreWindow().PointerCursor(CC_SIZE_NWSE);
+					break;
+				case ANCH_TYPE::ANCH_WEST:
+				case ANCH_TYPE::ANCH_EAST:
+					Window::Current().CoreWindow().PointerCursor(CC_SIZE_WE);
+					break;
+				default:
+					// 図形のクラスが, 多角形または曲線であるか判定する.
+					if (s != nullptr &&
+						(typeid(*s) == typeid(ShapeLineA) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
+						// 図形の部位が, 頂点の数を超えないか判定する.
+						const auto d_cnt = static_cast<ShapePath*>(s)->m_diff.size();
+						if (anch >= ANCH_TYPE::ANCH_P0 && anch < ANCH_TYPE::ANCH_P0 + d_cnt + 1) {
+							Window::Current().CoreWindow().PointerCursor(CC_CROSS);
+							break;
+						}
 					}
+					throw winrt::hresult_invalid_argument();
+					break;
 				}
-				throw winrt::hresult_invalid_argument();
-				break;
 			}
 		}
 	}
@@ -808,15 +820,21 @@ namespace winrt::GraphPaper::implementation
 		scp_sheet_panel().ContextFlyout(nullptr);
 		// 押された図形がヌル, または押された図形の部位が外側か判定する.
 		if (m_event_shape_pressed == nullptr || m_event_anch_pressed == ANCH_TYPE::ANCH_SHEET) {
-			scp_sheet_panel().ContextFlyout(m_sheet_menu);
+			if (m_sheet_menu != nullptr) {
+				scp_sheet_panel().ContextFlyout(m_sheet_menu);
+			}
 		}
 		// 押された図形がグループか判定する.
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeGroup)) {
-			scp_sheet_panel().ContextFlyout(m_ungroup_menu);
+			if (m_ungroup_menu != nullptr) {
+				scp_sheet_panel().ContextFlyout(m_ungroup_menu);
+			}
 		}
 		// 押された図形が定規か判定する.
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeRuler)) {
-			scp_sheet_panel().ContextFlyout(m_ruler_menu);
+			if (m_ruler_menu != nullptr) {
+				scp_sheet_panel().ContextFlyout(m_ruler_menu);
+			}
 		}
 		else {
 			// 押された図形の属性値を用紙に格納する.
@@ -824,15 +842,21 @@ namespace winrt::GraphPaper::implementation
 			sheet_attr_is_checked();
 			// 押された図形の部位が内側か判定する.
 			if (m_event_anch_pressed == ANCH_TYPE::ANCH_FILL) {
-				scp_sheet_panel().ContextFlyout(m_fill_menu);
+				if (m_fill_menu != nullptr) {
+					scp_sheet_panel().ContextFlyout(m_fill_menu);
+				}
 			}
 			// 押された図形の部位が文字列か判定する.
 			else if (m_event_anch_pressed == ANCH_TYPE::ANCH_TEXT) {
-				scp_sheet_panel().ContextFlyout(m_font_menu);
+				if (m_font_menu != nullptr) {
+					scp_sheet_panel().ContextFlyout(m_font_menu);
+				}
 			}
 			// 押された図形の部位が線枠か判定する.
 			else if (m_event_anch_pressed == ANCH_TYPE::ANCH_STROKE) {
-				scp_sheet_panel().ContextFlyout(m_stroke_menu);
+				if (m_stroke_menu != nullptr) {
+					scp_sheet_panel().ContextFlyout(m_stroke_menu);
+				}
 			}
 		}
 	}
@@ -851,6 +875,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		// コントロールキーが押されてるか判定する.
 		if (args.KeyModifiers() == VirtualKeyModifiers::Control) {
+			// 拡大縮小
 			const int32_t delta = args.GetCurrentPoint(scp_sheet_panel()).Properties().MouseWheelDelta();
 			sheet_zoom_delta(delta);
 		}

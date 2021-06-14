@@ -151,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 		// 待機カーソルを表示, 表示する前のカーソルを得る.
 		auto const& prev_cur = file_wait_cursor();
 		// ファイル「オープン」ピッカーを取得して開く.
-		auto o_picker{ FileOpenPicker() };
+		auto o_picker{FileOpenPicker()};
 		o_picker.FileTypeFilter().Append(FT_GPF);
 		// ダブルクリックでファイルが選択された場合,
 		// co_await が終了する前に, PonterReleased と PonterEntered が呼ばれる.
@@ -243,7 +243,7 @@ namespace winrt::GraphPaper::implementation
 			co_await winrt::resume_foreground(cd);
 			message_show(ICON_ALERT, ERR_READ, s_file.Path());
 		}
-		else if (suspend != true && sheet != true) {
+		else if (!suspend && !sheet) {
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
 			file_recent_add(s_file);

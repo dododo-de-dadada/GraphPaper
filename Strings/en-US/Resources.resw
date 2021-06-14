@@ -1054,4 +1054,20 @@
     <value>Snap to Vertex</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
+  <data name="rmfi_cap_flat.Text" xml:space="preserve">
+    <value>Flat</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_cap_round.Text" xml:space="preserve">
+    <value>Round</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_cap_square.Text" xml:space="preserve">
+    <value>Square</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_cap_triangle.Text" xml:space="preserve">
+    <value>Triangle</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
 </root>

@@ -64,6 +64,9 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::NULLPTR:
 			u = nullptr;
 			break;
+		case UNDO_OP::ANCH_POS:
+			u = new UndoAnchor(dt_reader);
+			break;
 		case UNDO_OP::ARRANGE:
 			u = new UndoArrange2(dt_reader);
 			break;
@@ -75,9 +78,6 @@ namespace winrt::GraphPaper::implementation
 			break;
 		case UNDO_OP::FILL_COLOR:
 			u = new UndoAttr<UNDO_OP::FILL_COLOR>(dt_reader);
-			break;
-		case UNDO_OP::ANCH_POS:
-			u = new UndoAnchor(dt_reader);
 			break;
 		case UNDO_OP::FONT_COLOR:
 			u = new UndoAttr<UNDO_OP::FONT_COLOR>(dt_reader);
@@ -115,23 +115,14 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::LIST:
 			u = new UndoList(dt_reader);
 			break;
-		case UNDO_OP::TEXT_LINE_H:
-			u = new UndoAttr<UNDO_OP::TEXT_LINE_H>(dt_reader);
-			break;
-		case UNDO_OP::TEXT_MARGIN:
-			u = new UndoAttr<UNDO_OP::TEXT_MARGIN>(dt_reader);
+		case UNDO_OP::SELECT:
+			u = new UndoSelect(dt_reader);
 			break;
 		case UNDO_OP::SHEET_COLOR:
 			u = new UndoAttr<UNDO_OP::SHEET_COLOR>(dt_reader);
 			break;
 		case UNDO_OP::SHEET_SIZE:
 			u = new UndoAttr<UNDO_OP::SHEET_SIZE>(dt_reader);
-			break;
-		case UNDO_OP::TEXT_ALIGN_P:
-			u = new UndoAttr<UNDO_OP::TEXT_ALIGN_P>(dt_reader);
-			break;
-		case UNDO_OP::SELECT:
-			u = new UndoSelect(dt_reader);
 			break;
 		case UNDO_OP::START_POS:
 			u = new UndoAttr<UNDO_OP::START_POS>(dt_reader);
@@ -160,11 +151,20 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::STROKE_WIDTH:
 			u = new UndoAttr<UNDO_OP::STROKE_WIDTH>(dt_reader);
 			break;
-		case UNDO_OP::TEXT_CONTENT:
-			u = new UndoAttr<UNDO_OP::TEXT_CONTENT>(dt_reader);
+		case UNDO_OP::TEXT_ALIGN_P:
+			u = new UndoAttr<UNDO_OP::TEXT_ALIGN_P>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_ALIGN_T:
 			u = new UndoAttr<UNDO_OP::TEXT_ALIGN_T>(dt_reader);
+			break;
+		case UNDO_OP::TEXT_CONTENT:
+			u = new UndoAttr<UNDO_OP::TEXT_CONTENT>(dt_reader);
+			break;
+		case UNDO_OP::TEXT_LINE_H:
+			u = new UndoAttr<UNDO_OP::TEXT_LINE_H>(dt_reader);
+			break;
+		case UNDO_OP::TEXT_MARGIN:
+			u = new UndoAttr<UNDO_OP::TEXT_MARGIN>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_RANGE:
 			u = new UndoAttr<UNDO_OP::TEXT_RANGE>(dt_reader);
@@ -245,7 +245,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_stack_rcnt == 0 && m_stack_ucnt == 0) {
 			return;
 		}
-		winrt::Windows::UI::Xaml::Controls::ContentDialog dialog;
+		using winrt::Windows::UI::Xaml::Controls::ContentDialog;
+		ContentDialog dialog;
 		dialog.Title(box_value(L"Undo is not empty."));
 		dialog.CloseButtonText(L"Close");
 		auto _{ dialog.ShowAsync() };

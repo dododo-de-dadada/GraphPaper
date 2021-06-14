@@ -280,9 +280,9 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_stroke_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke_menu")));
 			m_fill_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill_menu")));
-			m_font_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_menu_front")));
+			m_font_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_front_menu")));
 			m_sheet_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet_menu")));
-			m_ungroup_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_menu_ungroup")));
+			m_ungroup_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup_menu")));
 			m_ruler_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ruler_menu")));
 		}
 

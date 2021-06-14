@@ -1050,4 +1050,20 @@
     <value>頂点に合わせる</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
+  <data name="rmfi_cap_flat.Text" xml:space="preserve">
+    <value>平面</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_cap_round.Text" xml:space="preserve">
+    <value>円形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_cap_square.Text" xml:space="preserve">
+    <value>正方形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_cap_triangle.Text" xml:space="preserve">
+    <value>三角形</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
 </root>

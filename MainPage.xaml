@@ -218,7 +218,7 @@
                 <MenuFlyoutItem x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
             </MenuFlyout>
             <!-- 書体コンテキストメニュー -->
-            <MenuFlyout x:Key="mf_menu_front">
+            <MenuFlyout x:Key="mf_front_menu">
                 <!--文字列の編集 -->
 				<MenuFlyoutItem x:Uid="mfi_edit_text" Click="edit_text_click" KeyboardAcceleratorTextOverride="Ctrl+E" Text="Edit Text" >
 					<MenuFlyoutItem.Icon>
@@ -310,7 +310,7 @@
                 </MenuFlyoutSubItem>
             </MenuFlyout>
             <!-- グループコンテキストメニュー -->
-            <MenuFlyout x:Key="mf_menu_ungroup">
+            <MenuFlyout x:Key="mf_ungroup_menu">
                 <MenuFlyoutItem x:Name="mfi_ungroup_2" x:Uid="mfi_ungroup" Click="ungroup_click" KeyboardAcceleratorTextOverride="Ctrl+U" Text="Ungroup" >
                     <MenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_ungroup}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
