@@ -231,6 +231,7 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 		D2D1_POINT_2F v_pos[MAX_N_GON];
+
 		size_t v_cnt = 0;
 		if (m_tool_vert_snap) {
 			v_cnt = s->get_verts(v_pos);
