@@ -238,7 +238,6 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
 		rmfi_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);
 		rmfi_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
-
 		rmfi_grid_show_back_2().IsChecked(g_show == GRID_SHOW::BACK);
 		rmfi_grid_show_front_2().IsChecked(g_show == GRID_SHOW::FRONT);
 		rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
@@ -247,89 +246,7 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「方眼に合わせる」が選択された.
 	void MainPage::grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		auto value = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
-		bool g_snap;
-		m_sheet_main.get_grid_snap(g_snap);
-		if (g_snap != value) {
-			m_sheet_main.set_grid_snap(value);
-		}
-		if (!g_snap) {
-			return;
-		}
-
-		// 図形リストの各図形について以下を繰り返す.
-		float g_base;
-		m_sheet_main.get_grid_base(g_base);
-		const double g_len = g_base + 1.0;
-		auto flag = false;
-		D2D1_POINT_2F p_min = m_sheet_min;
-		D2D1_POINT_2F p_max = m_sheet_max;
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				// 消去フラグが立っている場合,
-				// 以下を無視する.
-				continue;
-			}
-			if (s->is_selected() != true) {
-				// 選択フラグがない場合,
-				continue;
-			}
-			{
-				D2D1_POINT_2F b_nw;
-				D2D1_POINT_2F b_se;
-				s->get_bound({ FLT_MAX, FLT_MAX }, { -FLT_MAX, -FLT_MAX }, b_nw, b_se);
-				D2D1_POINT_2F b_ne{ b_se.x, b_nw.y };
-				D2D1_POINT_2F b_sw{ b_nw.x, b_se.y };
-
-				D2D1_POINT_2F g_nw;
-				D2D1_POINT_2F g_se;
-				D2D1_POINT_2F g_ne;
-				D2D1_POINT_2F g_sw;
-				pt_round(b_nw, g_len, g_nw);
-				pt_round(b_se, g_len, g_se);
-				pt_round(b_ne, g_len, g_ne);
-				pt_round(b_sw, g_len, g_sw);
-
-				D2D1_POINT_2F d_nw;
-				D2D1_POINT_2F d_se;
-				D2D1_POINT_2F d_ne;
-				D2D1_POINT_2F d_sw;
-				pt_sub(g_nw, b_nw, d_nw);
-				pt_sub(g_se, b_se, d_se);
-				pt_sub(g_ne, b_ne, d_ne);
-				pt_sub(g_sw, b_sw, d_sw);
-
-				double a_nw = pt_abs2(d_nw);
-				double a_se = pt_abs2(d_se);
-				double a_ne = pt_abs2(d_ne);
-				double a_sw = pt_abs2(d_sw);
-				D2D1_POINT_2F d_vec;
-				if (a_se <= a_nw && a_se <= a_ne && a_nw <= a_sw) {
-					d_vec = d_se;
-				}
-				else if (a_ne <= a_nw && a_ne <= a_se && a_nw <= a_sw) {
-					d_vec = d_ne;
-				}
-				else if (a_sw <= a_nw && a_sw <= a_se && a_sw <= a_ne) {
-					d_vec = d_sw;
-				}
-				else {
-					d_vec = d_nw;
-				}
-				if (flag != true) {
-					flag = true;
-				}
-				undo_push_set<UNDO_OP::START_POS>(s);
-				s->move(d_vec);
-			}
-		}
-		if (flag) {
-			undo_push_null();
-			undo_menu_enable();
-			sheet_update_bbox();
-			sheet_panle_size();
-			sheet_draw();
-		}
+		m_sheet_main.m_grid_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
 	}
 
 }

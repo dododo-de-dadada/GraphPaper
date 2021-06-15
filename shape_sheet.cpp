@@ -165,11 +165,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		// •\¦”{—¦‚É‚©‚©‚í‚ç‚¸Œ©‚½–Ú‚Ì‘¾‚³‚ğ•Ï‚¦‚È‚¢‚½‚ß, ‚»‚Ì‹t”‚ğü‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// ü‚Ì‘¾‚³
-		std::vector<D2D1_POINT_2F> v_pos(t_poly.m_vertex_cnt);	// ’¸“_‚Ì”z—ñ
+		D2D1_POINT_2F v_pos[MAX_N_GON];	// ’¸“_‚Ì”z—ñ
 
 		D2D1_POINT_2F p_vec;
 		pt_sub(c_pos, p_pos, p_vec);
-		ShapePoly::create_poly_by_bbox(p_pos, p_vec, t_poly.m_vertex_cnt, t_poly.m_vertex_up, t_poly.m_regular, t_poly.m_clockwise, v_pos.data());
+		D2D1_POINT_2F v_vec;
+		ShapePoly::create_poly_by_bbox(p_pos, p_vec, t_poly, v_pos, v_vec);
 		const auto i_start = (t_poly.m_end_closed ? t_poly.m_vertex_cnt - 1 : 0);
 		const auto j_start = (t_poly.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < t_poly.m_vertex_cnt; i = j++) {

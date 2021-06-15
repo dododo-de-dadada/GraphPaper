@@ -1183,7 +1183,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 境界方形をみたす多角形を作成する.
-		static void create_poly_by_bbox(const D2D1_POINT_2F b_min, const D2D1_POINT_2F b_max, const size_t v_cnt, const bool v_up, const bool v_reg, const bool v_clock, D2D1_POINT_2F v_pos[]) noexcept;
+		static void create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_TOOL& p_tool, D2D1_POINT_2F v_pos[], D2D1_POINT_2F& v_vec) noexcept;
 		// パスジオメトリを作成する.
 		void create_path_geometry(ID2D1Factory3* const d_factory);
 		// 表示する

@@ -633,11 +633,15 @@ namespace winrt::GraphPaper::implementation
 	// v_reg	正多角形を作成するか判定
 	// v_clock	時計周りで作成するか判定
 	// v_pos	頂点の配列 [v_cnt]
-	void ShapePoly::create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const size_t v_cnt, const bool v_up, const bool v_reg, const bool v_clock, D2D1_POINT_2F v_pos[]) noexcept
+	void ShapePoly::create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_TOOL& p_tool, D2D1_POINT_2F v_pos[], D2D1_POINT_2F& v_vec) noexcept
 	{
+		const auto v_cnt = p_tool.m_vertex_cnt;
 		if (v_cnt == 0) {
 			return;
 		}
+		const auto v_up = p_tool.m_vertex_up;
+		const auto v_reg = p_tool.m_regular;
+		const auto v_clock = p_tool.m_clockwise;
 
 		// 原点を中心とする半径 1 の円をもとに正多角形を作成する.
 		D2D1_POINT_2F v_min{ 0.0, 0.0 };	// 多角形を囲む領域の左上点
@@ -650,12 +654,13 @@ namespace winrt::GraphPaper::implementation
 			v_pos[i].y = static_cast<FLOAT>(-sin(t));
 			pt_inc(v_pos[i], v_min, v_max);
 		}
-		D2D1_POINT_2F v_vec;
-		pt_sub(v_max, v_min, v_vec);
 
 		// 正多角形を領域の大きさに合わせる.
+		pt_sub(v_max, v_min, v_vec);
 		const double rate_x = v_reg ? fmin(b_vec.x, b_vec.y) / fmax(v_vec.x, v_vec.y) : b_vec.x / v_vec.x;
 		const double rate_y = v_reg ? rate_x : b_vec.y / v_vec.y;
+		v_vec.x = static_cast<FLOAT>(roundl(v_vec.x * rate_x));
+		v_vec.y = static_cast<FLOAT>(roundl(v_vec.y * rate_y));
 		for (uint32_t i = 0; i < v_cnt; i++) {
 			pt_sub(v_pos[i], v_min, v_pos[i]);
 			v_pos[i].x = static_cast<FLOAT>(roundl(v_pos[i].x * rate_x));
@@ -853,7 +858,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		std::vector<D2D1_POINT_2F> vert_pos(t_poly.m_vertex_cnt);	// 頂点の配列
 		const auto v_pos = reinterpret_cast<D2D1_POINT_2F*>(vert_pos.data());
-		create_poly_by_bbox(b_pos, b_vec, t_poly.m_vertex_cnt, t_poly.m_vertex_up, t_poly.m_regular, t_poly.m_clockwise, v_pos);
+		D2D1_POINT_2F v_vec;
+		create_poly_by_bbox(b_pos, b_vec, t_poly, v_pos, v_vec);
 		m_pos = v_pos[0];
 		for (size_t i = 1; i < t_poly.m_vertex_cnt; i++) {
 			pt_sub(v_pos[i], v_pos[i - 1], m_diff[i - 1]);
