@@ -298,7 +298,7 @@ namespace winrt::GraphPaper::implementation
 						D2D1_POINT_2F g_pos{};
 						if (m_sheet_main.m_grid_snap) {
 							// ¶ãˆÊ’u‚ğ•ûŠá‚Ì‘å‚«‚³‚ÅŠÛ‚ß‚é.
-							pt_round(s_min, m_sheet_main.m_grid_base + 1.0f, g_pos);
+							pt_round(s_min, m_sheet_main.m_grid_base + 1.0, g_pos);
 							if (!m_tool_vert_snap) {
 								s_min = g_pos;
 							}

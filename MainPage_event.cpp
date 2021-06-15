@@ -230,15 +230,6 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
-		D2D1_POINT_2F v_pos[MAX_N_GON];
-
-		size_t v_cnt = 0;
-		if (m_tool_vert_snap) {
-			v_cnt = s->get_verts(v_pos);
-		}
-		if (m_sheet_main.m_grid_snap) {
-			s->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, v_pos[v_cnt++])
-		}
 		event_reduce_slist(m_list_shapes, m_stack_undo, m_stack_redo);
 		undo_push_append(s);
 		undo_push_select(s);
@@ -313,7 +304,7 @@ namespace winrt::GraphPaper::implementation
 			m_event_pos_curr = g_pos;
 		}
 		else if (m_sheet_main.m_grid_snap) {
-			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0f, m_event_pos_curr);
+			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0, m_event_pos_curr);
 		}
 		else if (m_tool_vert_snap) {
 			slist_neighbor(m_list_shapes, m_event_pos_curr, 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale, m_event_pos_curr);
@@ -647,7 +638,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			p_pos.x = v_pos[3].x;
 		}
-		if (g_abs[0] <= v_abs[0] && g_abs[0] <= v_abs[1]) {
+		if (g_snap && g_abs[0] <= v_abs[0] && g_abs[0] <= v_abs[1]) {
 			p_pos.y = g_pos[0].y;
 		}
 		else if (v_abs[0] <= g_abs[0] && v_abs[0] <= v_abs[1]) {
