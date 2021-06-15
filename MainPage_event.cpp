@@ -586,6 +586,106 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 頂点に合わせるよう, 押された位置と離された位置を調整する.
+	// slist	図形リスト
+	// box_type	
+	static void event_released_snap_to_vertex(const SHAPE_LIST& slist, const bool box_type, const float d_limit, const bool g_snap, const double g_len, D2D1_POINT_2F& p_pos, D2D1_POINT_2F& r_pos)
+	{
+		// 四隅の位置を得る.
+		D2D1_POINT_2F b_pos[4]{
+			p_pos, { r_pos.x, p_pos.y }, r_pos, { p_pos.x, r_pos.y },
+		};
+		// 左上位置に最も近い頂点とその距離を得る.
+		double v_abs[4];
+		D2D1_POINT_2F v_pos[4];
+		if (slist_neighbor(slist, b_pos[0], d_limit, v_pos[0])) {
+			D2D1_POINT_2F v_sub;
+			pt_sub(v_pos[0], b_pos[0], v_sub);
+			v_abs[0] = pt_abs2(v_sub);
+		}
+		else {
+			v_abs[0] = FLT_MAX;
+		}
+		if (box_type && slist_neighbor(slist, b_pos[1], d_limit, v_pos[1])) {
+			D2D1_POINT_2F v_sub;
+			pt_sub(v_pos[1], b_pos[1], v_sub);
+			v_abs[1] = pt_abs2(v_sub);
+		}
+		else {
+			v_abs[1] = FLT_MAX;
+		}
+		if (slist_neighbor(slist, b_pos[2], d_limit, v_pos[2])) {
+			D2D1_POINT_2F v_sub;
+			pt_sub(v_pos[2], b_pos[2], v_sub);
+			v_abs[2] = pt_abs2(v_sub);
+		}
+		else {
+			v_abs[2] = FLT_MAX;
+		}
+		if (box_type && slist_neighbor(slist, b_pos[3], d_limit, v_pos[3])) {
+			D2D1_POINT_2F v_sub;
+			pt_sub(v_pos[3], b_pos[3], v_sub);
+			v_abs[3] = pt_abs2(v_sub);
+		}
+		else {
+			v_abs[3] = FLT_MAX;
+		}
+		double g_abs[2];
+		D2D1_POINT_2F g_pos[2];
+		if (g_snap) {
+			D2D1_POINT_2F g_sub[2];
+			pt_round(p_pos, g_len, g_pos[0]);
+			pt_round(r_pos, g_len, g_pos[1]);
+			pt_sub(g_pos[0], p_pos, g_sub[0]);
+			pt_sub(g_pos[1], r_pos, g_sub[1]);
+			g_abs[0] = pt_abs2(g_sub[0]);
+			g_abs[1] = pt_abs2(g_sub[1]);
+		}
+		else {
+			g_pos[0] = p_pos;
+			g_pos[1] = r_pos;
+			g_abs[0] = FLT_MAX;
+			g_abs[1] = FLT_MAX;
+		}
+		if (g_abs[0] <= v_abs[0] && g_abs[0] <= v_abs[3]) {
+			p_pos.x = g_pos[0].x;
+		}
+		else if (v_abs[0] <= g_abs[0] && v_abs[0] <= v_abs[3]) {
+			p_pos.x = v_pos[0].x;
+		}
+		else {
+			p_pos.x = v_pos[3].x;
+		}
+		if (g_abs[0] <= v_abs[0] && g_abs[0] <= v_abs[1]) {
+			p_pos.y = g_pos[0].y;
+		}
+		else if (v_abs[0] <= g_abs[0] && v_abs[0] <= v_abs[1]) {
+			p_pos.y = v_pos[0].y;
+		}
+		else {
+			p_pos.y = v_pos[1].y;
+		}
+		if (g_abs[1] <= v_abs[2] && g_abs[1] <= v_abs[1]) {
+			r_pos.x = g_pos[1].x;
+		}
+		else if (v_abs[2] <= g_abs[1] && v_abs[2] <= v_abs[1]) {
+			r_pos.x = v_pos[2].x;
+		}
+		else {
+			r_pos.x = v_pos[1].x;
+		}
+		if (g_abs[1] <= v_abs[2] && g_abs[1] <= v_abs[3]) {
+			r_pos.y = g_pos[1].y;
+		}
+		else if (v_abs[2] <= g_abs[1] && v_abs[2] <= v_abs[3]) {
+			r_pos.y = v_pos[2].y;
+		}
+		else {
+			r_pos.y = v_pos[3].y;
+		}
+
+	}
+
 	// ポインターのボタンが上げられた.
 	void MainPage::event_released(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
@@ -638,83 +738,22 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				// 選択以外の作図ツールが選択されているならば,
 				// 方眼に合わせるか, かつシフトキーが押されていないか判定する.
-				if (m_sheet_main.m_grid_snap && m_tool_vert_snap) {
-					/*
-					D2D1_POINT_2F g_pos;
-					const double g_len = max(m_sheet_main.m_grid_base + 1.0, 1.0);
-					pt_round(m_event_pos_pressed, g_len, g_pos);
-					const float d_limit = 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale;
-					D2D1_POINT_2F v_pos;
-					if (slist_neighbor(m_list_shapes, m_event_pos_pressed, d_limit, v_pos)) {
-						D2D1_POINT_2F g_vec;
-						pt_sub(g_pos, m_event_pos_pressed, g_vec);
-						D2D1_POINT_2F v_vec;
-						pt_sub(v_pos, m_event_pos_pressed, v_vec);
-						if (pt_abs2(v_vec) < pt_abs2(g_vec)) {
-							g_pos = v_pos;
-						}
-					}
-					m_event_pos_pressed = g_pos;
-
-					pt_round(m_event_pos_curr, g_len, g_pos);
-					if (slist_neighbor(m_list_shapes, m_event_pos_curr, d_limit, v_pos)) {
-						D2D1_POINT_2F g_vec;
-						pt_sub(g_pos, m_event_pos_curr, g_vec);
-						D2D1_POINT_2F v_vec;
-						pt_sub(v_pos, m_event_pos_curr, v_vec);
-						if (pt_abs2(v_vec) < pt_abs2(g_vec)) {
-							g_pos = v_pos;
-						}
-					}
-					m_event_pos_curr = g_pos;
-
-					if (m_tool_draw == DRAW_TOOL::ELLI ||
+				if (m_tool_vert_snap) {
+					const bool box_type = (
+						m_tool_draw == DRAW_TOOL::ELLI ||
 						m_tool_draw == DRAW_TOOL::RECT ||
 						m_tool_draw == DRAW_TOOL::RRECT ||
 						m_tool_draw == DRAW_TOOL::RULER ||
-						m_tool_draw == DRAW_TOOL::TEXT) {
-
-
-					}
-					*/
-					const float d_limit = 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale;
+						m_tool_draw == DRAW_TOOL::TEXT);
+					const float d_lim = 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale;
 					const double g_len = max(m_sheet_main.m_grid_base + 1.0, 1.0);
-					D2D1_POINT_2F g_pos[2];
-					D2D1_POINT_2F g_sub[2];
-					float g_abs[4];
-					D2D1_POINT_2F b_pos[4]{
-						m_event_pos_pressed,
-						{ m_event_pos_curr.x, m_event_pos_pressed.y },
-						m_event_pos_curr,
-						{ m_event_pos_pressed.x, m_event_pos_curr.y },
-					};
-					D2D1_POINT_2F v_pos[4];
-					D2D1_POINT_2F v_sub[4];
-					float v_abs[4];
-					for (size_t i = 0; i < 4; i++) {
-						pt_round(b_pos[i], g_len, g_pos[i]);
-						pt_sub(g_pos[i], b_pos[i], g_sub[i]);
-						g_abs[i] = pt_abs2(g_sub[i]);
-						if (slist_neighbor(m_list_shapes, b_pos[i], d_limit, v_pos[i])) {
-							pt_sub(v_pos[i], b_pos[i], v_sub[i]);
-							v_abs[i] = pt_abs2(v_sub[i]);
-						}
-						else {
-							v_abs[i] = FLT_MAX;
-						}
-					}
-					if (v_abs[0] < v_abs[1] && v_abs[0] < v_abs[2] && v_abs[0] < v_abs[2])
+					event_released_snap_to_vertex(m_list_shapes, box_type, d_lim, m_sheet_main.m_grid_snap, g_len, m_event_pos_pressed, m_event_pos_curr);
 				}
 				else if (m_sheet_main.m_grid_snap) {
-					// 始点と終点を方眼の大きさで丸める.
+					// 押された位置よ離された位置を方眼の大きさで丸める.
 					const double g_len = max(m_sheet_main.m_grid_base + 1.0, 1.0);
 					pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
 					pt_round(m_event_pos_curr, g_len, m_event_pos_curr);
-				}
-				else if (m_tool_vert_snap) {
-					const float d_limit = 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale;
-					slist_neighbor(m_list_shapes, m_event_pos_pressed, d_limit, m_event_pos_pressed);
-					slist_neighbor(m_list_shapes, m_event_pos_curr, d_limit, m_event_pos_curr);
 				}
 
 				// ポインターの現在位置と押された位置の差分を求める.
