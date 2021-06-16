@@ -299,15 +299,15 @@ namespace winrt::GraphPaper::implementation
 						if (m_sheet_main.m_grid_snap) {
 							// ¶ãˆÊ’u‚ğ•ûŠá‚Ì‘å‚«‚³‚ÅŠÛ‚ß‚é.
 							pt_round(s_min, m_sheet_main.m_grid_base + 1.0, g_pos);
-							if (!m_tool_vert_snap) {
+							if (m_limit_align_vert <= FLT_MIN) {
 								s_min = g_pos;
 							}
 						}
 
 						// ’¸“_‚É‡‚í‚¹‚é‚©”»’è‚·‚é.
-						if (m_tool_vert_snap) {
+						if (m_limit_align_vert > FLT_MIN) {
 							D2D1_POINT_2F v_pos;
-							if (slist_neighbor(m_list_shapes, s_min, Shape::s_anch_len, v_pos)) {
+							if (slist_neighbor(m_list_shapes, s_min, m_limit_align_vert / m_sheet_main.m_sheet_scale, v_pos)) {
 								D2D1_POINT_2F v_vec;
 								pt_sub(v_pos, s_min, v_vec);
 								D2D1_POINT_2F g_vec;

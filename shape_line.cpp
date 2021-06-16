@@ -417,9 +417,10 @@ namespace winrt::GraphPaper::implementation
 	// ’l‚ğ, •”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚Í“®‚©‚È‚¢. 
 	// value	Ši”[‚·‚é’l
 	// anch	}Œ`‚Ì•”ˆÊ
-	bool ShapeLineA::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	// limit	
+	bool ShapeLineA::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
-		if (ShapeStroke::set_anch_pos(value, anch)) {
+		if (ShapeStroke::set_anch_pos(value, anch, dist)) {
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}

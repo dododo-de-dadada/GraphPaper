@@ -266,20 +266,19 @@ namespace winrt::GraphPaper::implementation
 	//	ílÇ, ïîà ÇÃà íuÇ…äiî[Ç∑ÇÈ. ëºÇÃïîà ÇÃà íuÇ‡ìÆÇ≠.
 	//	value	äiî[Ç∑ÇÈíl
 	//	abch	ê}å`ÇÃïîà 
-	bool ShapeRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	bool ShapeRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
-		//D2D1_POINT_2F a_pos;
-
+		bool flag = false;
 		switch (anch) {
 		case ANCH_TYPE::ANCH_SHEET:
 			{
 			D2D1_POINT_2F vec;
 			pt_sub(value, m_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
-			if (pt_abs2(vec) < FLT_MIN) {
-				return false;
+			if (pt_abs2(vec) > FLT_MIN) {
+				pt_add(m_pos, vec, m_pos);
+				flag = true;
 			}
-			pt_add(m_pos, vec, m_pos);
 			}
 			break;
 		case ANCH_TYPE::ANCH_NW:
@@ -287,94 +286,110 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F vec;
 			pt_sub(value, m_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
-			if (pt_abs2(vec) < FLT_MIN) {
-				return false;
+			if (pt_abs2(vec) > FLT_MIN) {
+				pt_add(m_pos, vec, m_pos);
+				pt_sub(m_diff[0], vec, m_diff[0]);
+				flag = true;
 			}
-			pt_add(m_pos, vec, m_pos);
-			pt_sub(m_diff[0], vec, m_diff[0]);
-			}
-			break;
-		case ANCH_TYPE::ANCH_NORTH:
-			{
-			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
-			if (fabs(vec_y) < FLT_MIN) {
-				return false;
-			}
-			m_diff[0].y = static_cast<FLOAT>(m_diff[0].y - vec_y);
-			m_pos.y = static_cast<FLOAT>(m_pos.y + vec_y);
 			}
 			break;
+		case ANCH_TYPE::ANCH_SE:
+		{
+			D2D1_POINT_2F vec;
+			pt_sub(value, m_pos, vec);
+			pt_round(vec, PT_ROUND, vec);
+			if (pt_abs2(vec) > FLT_MIN) {
+				m_diff[0] = vec;
+				flag = true;
+			}
+		}
+		break;
 		case ANCH_TYPE::ANCH_NE:
-			{
+		{
 			D2D1_POINT_2F a_pos;
 			get_anch_pos(ANCH_TYPE::ANCH_NE, a_pos);
 			D2D1_POINT_2F vec;
 			pt_sub(value, a_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
-			if (pt_abs2(vec) < FLT_MIN) {
-				return false;
+			if (pt_abs2(vec) > FLT_MIN) {
+				m_pos.y += vec.y;
+				pt_add(m_diff[0], vec.x, -vec.y, m_diff[0]);
+				flag = true;
 			}
-			m_pos.y += vec.y;
-			pt_add(m_diff[0], vec.x, -vec.y, m_diff[0]);
-			}
-			break;
-		case ANCH_TYPE::ANCH_WEST:
-			{
-			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
-			if (fabs(vec_x) < FLT_MIN) {
-				return false;
-			}
-			m_diff[0].x = static_cast<FLOAT>(m_diff[0].x - vec_x);
-			m_pos.x = static_cast<FLOAT>(m_pos.x + vec_x);
-			}
-			break;
-		case ANCH_TYPE::ANCH_EAST:
-			{
-			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
-			if (fabs(vec_x) < FLT_MIN) {
-				return false;
-			}
-			m_diff[0].x = static_cast<FLOAT>(vec_x);
-			}
-			break;
+		}
+		break;
 		case ANCH_TYPE::ANCH_SW:
-			{
+		{
 			D2D1_POINT_2F a_pos;
 			get_anch_pos(ANCH_TYPE::ANCH_SW, a_pos);
 			D2D1_POINT_2F vec;
 			pt_sub(value, a_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
-			if (pt_abs2(vec) < FLT_MIN) {
-				return false;
+			if (pt_abs2(vec) > FLT_MIN) {
+				m_pos.x += vec.x;
+				pt_add(m_diff[0], -vec.x, vec.y, m_diff[0]);
+				flag = true;
 			}
-			m_pos.x += vec.x;
-			pt_add(m_diff[0], -vec.x, vec.y, m_diff[0]);
+		}
+		break;
+		case ANCH_TYPE::ANCH_WEST:
+		{
+			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
+			if (abs(vec_x) > FLT_MIN) {
+				m_diff[0].x = static_cast<FLOAT>(m_diff[0].x - vec_x);
+				m_pos.x = static_cast<FLOAT>(m_pos.x + vec_x);
+				flag = true;
 			}
-			break;
-		case ANCH_TYPE::ANCH_SOUTH:
-			{
+		}
+		break;
+		case ANCH_TYPE::ANCH_EAST:
+		{
+			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
+			if (abs(vec_x) > FLT_MIN) {
+				m_diff[0].x = static_cast<FLOAT>(vec_x);
+				flag = true;
+			}
+		}
+		break;
+		case ANCH_TYPE::ANCH_NORTH:
+		{
 			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
-			if (fabs(vec_y) < FLT_MIN) {
-				return false;
+			if (fabs(vec_y) > FLT_MIN) {
+				m_diff[0].y = static_cast<FLOAT>(m_diff[0].y - vec_y);
+				m_pos.y = static_cast<FLOAT>(m_pos.y + vec_y);
+				flag = true;
 			}
-			m_diff[0].y = static_cast<FLOAT>(vec_y);
+		}
+		break;
+		case ANCH_TYPE::ANCH_SOUTH:
+		{
+			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
+			if (abs(vec_y) > FLT_MIN) {
+				m_diff[0].y = static_cast<FLOAT>(vec_y);
+				flag = true;
 			}
-			break;
-		case ANCH_TYPE::ANCH_SE:
-			{
-			D2D1_POINT_2F vec;
-			pt_sub(value, m_pos, vec);
-			pt_round(vec, PT_ROUND, vec);
-			if (pt_abs2(vec) < FLT_MIN) {
-				return false;
-			}
-			m_diff[0] = vec;
-			}
-			break;
+		}
+		break;
 		default:
 			return false;
 		}
-		return true;
+		if (dist > FLT_MIN) {
+			if (m_diff[0].x < dist) {
+				if (anch == ANCH_TYPE::ANCH_NE) {
+					m_pos.x += m_diff[0].x;
+				}
+				m_diff[0].x = 0.0f;
+				flag = true;
+			}
+			if (m_diff[0].y < dist) {
+				if (anch == ANCH_TYPE::ANCH_NE) {
+					m_pos.y += m_diff[0].y;
+				}
+				m_diff[0].y = 0.0f;
+				flag = true;
+			}
+		}
+		return flag;
 	}
 
 	// ê}å`ÇçÏê¨Ç∑ÇÈ.

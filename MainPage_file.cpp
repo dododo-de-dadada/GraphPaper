@@ -106,7 +106,7 @@ namespace winrt::GraphPaper::implementation
 
 		tool_draw_is_checked(m_tool_draw);
 		tool_poly_is_checked(m_tool_poly);
-		tool_vert_snap_is_checked(m_tool_vert_snap);
+		//tool_vert_snap_is_checked(m_tool_vert_snap);
 
 		color_code_is_checked(m_color_code);
 		status_bar_is_checked(m_status_bar);

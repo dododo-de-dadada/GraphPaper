@@ -274,39 +274,56 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ð, •”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚Í“®‚©‚È‚¢. 
-	bool ShapeStroke::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	bool ShapeStroke::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
-		// }Œ`‚Ì•”ˆÊ‚ª’¸“_ˆÈŠO‚©”»’è‚·‚é.
+		bool flag = false;
+		// }Œ`‚Ì•”ˆÊ‚ª’¸“_‚©”»’è‚·‚é.
 		const size_t d_cnt = m_diff.size();	// ·•ª‚Ì”
 		if (anch >= ANCH_TYPE::ANCH_P0 && anch <= ANCH_TYPE::ANCH_P0 + d_cnt) {
-			// }Œ`‚Ì•”ˆÊ‚ªŽn“_‚©”»’è‚·‚é.
-			if (anch == ANCH_TYPE::ANCH_P0) {
-				D2D1_POINT_2F vec;
-				pt_sub(value, m_pos, vec);
-				pt_round(vec, PT_ROUND, vec);
-				if (pt_abs2(vec) >= FLT_MIN) {
-					pt_add(m_pos, vec, m_pos);
-					pt_sub(m_diff[0], vec, m_diff[0]);
-					return true;
-				}
-			}
-			else {
-				D2D1_POINT_2F a_pos;
-				get_anch_pos(anch, a_pos);
-				D2D1_POINT_2F vec;
-				pt_sub(value, a_pos, vec);
-				pt_round(vec, PT_ROUND, vec);
-				if (pt_abs2(vec) >= FLT_MIN) {
-					const size_t i = anch - ANCH_TYPE::ANCH_P0;
+			D2D1_POINT_2F a_pos;
+			get_anch_pos(anch, a_pos);
+			D2D1_POINT_2F vec;
+			pt_sub(value, a_pos, vec);
+			pt_round(vec, PT_ROUND, vec);
+			const size_t i = anch - ANCH_TYPE::ANCH_P0;
+			if (pt_abs2(vec) >= FLT_MIN) {
+				if (i > 0) {
 					pt_add(m_diff[i - 1], vec, m_diff[i - 1]);
-					if (anch != ANCH_TYPE::ANCH_P0 + d_cnt) {
-						pt_sub(m_diff[i], vec, m_diff[i]);
+				}
+				else {
+					pt_add(m_pos, vec, m_pos);
+				}
+				if (i < d_cnt) {
+					pt_sub(m_diff[i], vec, m_diff[i]);
+				}
+				flag = true;
+			}
+			if (dist > FLT_MIN) {
+				D2D1_POINT_2F v_pos[MAX_N_GON];
+				const auto v_cnt = get_verts(v_pos);
+				for (size_t j = 0; j < v_cnt; j++) {
+					if (j == i) {
+						continue;
 					}
-					return true;
+					D2D1_POINT_2F v_vec;
+					pt_sub(v_pos[j], v_pos[i], v_vec);
+					if (pt_abs2(v_vec) < dist * dist) {
+						if (i > 0) {
+							pt_add(m_diff[i - 1], v_vec, m_diff[i - 1]);
+						}
+						else {
+							pt_add(m_pos, v_vec, m_pos);
+						}
+						if (i < d_cnt) {
+							pt_sub(m_diff[i], v_vec, m_diff[i]);
+						}
+						flag = true;
+						break;
+					}
 				}
 			}
 		}
-		return false;
+		return flag;
 	}
 
 	// ’l‚ðü•ª‚Ì’[“_‚ÉŠi”[‚·‚é.

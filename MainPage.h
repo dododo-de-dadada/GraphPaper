@@ -230,7 +230,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 作図ツール
 		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
-		bool m_tool_vert_snap = true;	// 頂点に合わせる
+		float m_limit_align_vert = 2.0f * Shape::s_anch_len;	// 頂点同士を合わせる距離
 		POLY_TOOL m_tool_poly{ DEF_POLY_TOOL };	// 多角形の作図ツール
 
 		uint32_t m_cnt_selected = 0;		// 選択された図形の数
@@ -896,7 +896,7 @@ namespace winrt::GraphPaper::implementation
 		// 作図ツールの「頂点に合わせる」が選択された.
 		void tool_vert_snap_click(IInspectable const&, RoutedEventArgs const&) noexcept
 		{
-			m_tool_vert_snap = tmfi_tool_vert_snap().IsChecked();
+			//m_tool_vert_snap = tmfi_tool_vert_snap().IsChecked();
 		}
 
 		//-----------------------------

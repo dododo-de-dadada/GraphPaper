@@ -572,7 +572,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を用紙の大きさに格納する.
 		virtual bool set_sheet_size(const D2D1_SIZE_F /*value*/) noexcept { return false; }
 		// 値を, 部位の位置に格納する.
-		virtual bool set_anch_pos(const D2D1_POINT_2F /*value*/, const uint32_t /*anch*/) { return false; }
+		virtual bool set_anch_pos(const D2D1_POINT_2F /*value*/, const uint32_t /*anch*/, const float /*dist = 0.0f*/) { return false; }
 		// 値を選択フラグに格納する.
 		virtual bool set_select(const bool /*value*/) noexcept { return false; }
 		// 値を線分の端点に格納する.
@@ -922,7 +922,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を消去フラグに格納する.
 		bool set_delete(const bool value) noexcept { if (m_flag_delete != value) { m_flag_delete = value;  return true; } return false; }
 		// 値を, 部位の位置に格納する.
-		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch);
+		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist = 0.0f);
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual bool set_start_pos(const D2D1_POINT_2F value);
 		// 値を線分の端点に格納する.
@@ -993,7 +993,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を矢じるしの形式に格納する.
 		bool set_arrow_style(const ARROW_STYLE value);
 		//	値を, 部位の位置に格納する. 
-		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch);
+		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist = 0.0f);
 		// 値を始点に格納する.
 		bool set_start_pos(const D2D1_POINT_2F value);
 		// 差分だけ移動する.
@@ -1045,7 +1045,7 @@ namespace winrt::GraphPaper::implementation
 		// 部位の位置を得る.
 		void get_anch_pos(const uint32_t anch, D2D1_POINT_2F& value) const noexcept;
 		//	値を, 部位の位置に格納する.
-		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch);
+		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist = 0.0f);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
@@ -1129,7 +1129,7 @@ namespace winrt::GraphPaper::implementation
 		// 部位の位置を得る.
 		void get_anch_pos(const uint32_t anch, D2D1_POINT_2F& value) const noexcept;
 		//	値を, 部位の位置に格納する.
-		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch);
+		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist = 0.0f);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
@@ -1160,7 +1160,7 @@ namespace winrt::GraphPaper::implementation
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F value);
 		// 値を, 部位の位置に格納する.
-		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch);
+		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist = 0.0f);
 		// 値を矢じるしの寸法に格納する.
 		bool set_arrow_size(const ARROW_SIZE& value);
 		// 値を矢じるしの形式に格納する.
@@ -1333,7 +1333,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を段落のそろえに格納する.
 		bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value);
 		// 値を, 部位の位置に格納する.
-		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch);
+		bool set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist = 0.0f);
 		// 値を文字列に格納する.
 		bool set_text(wchar_t* const value);
 		// 値を文字列のそろえに格納する.

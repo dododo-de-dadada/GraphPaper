@@ -310,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 	//	’l‚ğ, •”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚à“®‚­.
 	//	value	Ši”[‚·‚é’l
 	//	abch	}Œ`‚Ì•”ˆÊ
-	bool ShapeRRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	bool ShapeRRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
 		D2D1_POINT_2F c_pos;
 		D2D1_POINT_2F vec;
@@ -357,7 +357,7 @@ namespace winrt::GraphPaper::implementation
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		default:
-			ShapeRect::set_anch_pos(value, anch);
+			ShapeRect::set_anch_pos(value, anch, dist);
 			if (m_diff[0].x * m_corner_rad.x < 0.0f) {
 				m_corner_rad.x = -m_corner_rad.x;
 			}
@@ -365,6 +365,9 @@ namespace winrt::GraphPaper::implementation
 				m_corner_rad.y = -m_corner_rad.y;
 			}
 			break;
+		}
+		if (pt_abs2(m_corner_rad) < dist * dist) {
+			m_corner_rad.x = m_corner_rad.y = 0.0f;
 		}
 		return true;
 	}

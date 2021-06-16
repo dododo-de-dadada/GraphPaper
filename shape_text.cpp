@@ -176,7 +176,7 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(t_box, m_diff[0])) {
 			D2D1_POINT_2F se;
 			pt_add(m_pos, t_box, se);
-			set_anch_pos(se, ANCH_TYPE::ANCH_SE);
+			set_anch_pos(se, ANCH_TYPE::ANCH_SE, 0.0f);
 			return true;
 		}
 		return false;
@@ -762,9 +762,9 @@ namespace winrt::GraphPaper::implementation
 	//	’l‚ğ, •”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚à“®‚­.
 	//	value	Ši”[‚·‚é’l
 	//	abch	}Œ`‚Ì•”ˆÊ
-	bool ShapeText::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch)
+	bool ShapeText::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
-		if (ShapeRect::set_anch_pos(value, anch)) {
+		if (ShapeRect::set_anch_pos(value, anch, dist)) {
 			create_text_metrics(s_dwrite_factory);
 			return true;
 		}

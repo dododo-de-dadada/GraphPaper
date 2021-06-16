@@ -288,7 +288,7 @@ namespace winrt::GraphPaper::implementation
 	// 押された図形の変形を終了する.
 	void MainPage::event_finish_forming(void)
 	{
-		if (m_sheet_main.m_grid_snap && m_tool_vert_snap) {
+		if (m_sheet_main.m_grid_snap && m_limit_align_vert >= FLT_MIN) {
 			D2D1_POINT_2F g_pos;
 			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0, g_pos);
 			D2D1_POINT_2F v_pos;
@@ -306,10 +306,10 @@ namespace winrt::GraphPaper::implementation
 		else if (m_sheet_main.m_grid_snap) {
 			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0, m_event_pos_curr);
 		}
-		else if (m_tool_vert_snap) {
-			slist_neighbor(m_list_shapes, m_event_pos_curr, 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale, m_event_pos_curr);
+		else if (m_limit_align_vert >= FLT_MIN) {
+			slist_neighbor(m_list_shapes, m_event_pos_curr, m_limit_align_vert / m_sheet_main.m_sheet_scale, m_event_pos_curr);
 		}
-		m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed);
+		m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, m_limit_align_vert);
 		if (!undo_pop_if_invalid()) {
 			undo_push_null();
 			sheet_update_bbox();
@@ -321,11 +321,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_finish_moving(void)
 	{
 		// 方眼に合わせる, かつ頂点に合わせるか判定する.
-		if (m_sheet_main.m_grid_snap && m_tool_vert_snap) {
+		if (m_sheet_main.m_grid_snap && m_limit_align_vert >= FLT_MIN) {
 			D2D1_POINT_2F g_vec{};	// 方眼への差分
 			if (event_snap_to_grid(m_list_shapes, m_sheet_main.m_grid_base + 1.0f, g_vec)) {
 				D2D1_POINT_2F v_vec{};	// 頂点への差分
-				if (event_snap_to_vert(m_list_shapes, 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale, v_vec) && pt_abs2(v_vec) < pt_abs2(g_vec)) {
+				if (event_snap_to_vert(m_list_shapes, m_limit_align_vert / m_sheet_main.m_sheet_scale, v_vec) && pt_abs2(v_vec) < pt_abs2(g_vec)) {
 					g_vec = v_vec;
 				}
 				slist_move(m_list_shapes, g_vec);
@@ -339,9 +339,9 @@ namespace winrt::GraphPaper::implementation
 			}
 		} 
 		// 方眼に合わせない, かつ頂点に合わせるか判定する.
-		else if (m_tool_vert_snap) {
+		else if (m_limit_align_vert > FLT_MIN) {
 			D2D1_POINT_2F v_vec{};	// 頂点との差分
-			if (event_snap_to_vert(m_list_shapes, 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale, v_vec)) {
+			if (event_snap_to_vert(m_list_shapes, m_limit_align_vert / m_sheet_main.m_sheet_scale, v_vec)) {
 				slist_move(m_list_shapes, v_vec);
 			}
 		}
@@ -433,7 +433,7 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_FORM) {
 			// ポインターの現在位置を, ポインターが押された図形の, 部位の位置に格納する.
-			m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed);
+			m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, 0.0f);
 			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
 			sheet_draw();
@@ -475,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 					m_event_state = EVENT_STATE::PRESS_FORM;
 					m_event_pos_prev = m_event_pos_curr;
 					undo_push_anch(m_event_shape_pressed, m_event_anch_pressed);
-					m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed);
+					m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, 0.0f);
 				}
 				sheet_draw();
 			}
@@ -720,7 +720,7 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				// 選択以外の作図ツールが選択されているならば,
 				// 方眼に合わせるか, かつシフトキーが押されていないか判定する.
-				if (m_tool_vert_snap) {
+				if (m_limit_align_vert > FLT_MIN) {
 					const bool box_type = (
 						m_tool_draw == DRAW_TOOL::ELLI ||
 						m_tool_draw == DRAW_TOOL::POLY ||
@@ -735,7 +735,7 @@ namespace winrt::GraphPaper::implementation
 					//	ShapePoly::create_poly_by_bbox(m_event_pos_pressed, v_vec, m_tool_poly, v_pos, v_vec);
 					//	pt_add(m_event_pos_pressed, v_vec, m_event_pos_curr);
 					//}
-					const float d_lim = 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale;
+					const float d_lim = m_limit_align_vert / m_sheet_main.m_sheet_scale;
 					const double g_len = max(m_sheet_main.m_grid_base + 1.0, 1.0);
 					event_released_snap_to_vertex(m_list_shapes, box_type, d_lim, m_sheet_main.m_grid_snap, g_len, m_event_pos_pressed, m_event_pos_curr);
 				}
