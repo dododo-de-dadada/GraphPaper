@@ -1046,9 +1046,9 @@
     <value>つなぎの種類</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="tmfi_tool_vert_snap.Text" xml:space="preserve">
-    <value>頂点に合わせる</value>
-    <comment>ToggleMenuFlyoutItem</comment>
+  <data name="mfi_tool_vert_snap.Text" xml:space="preserve">
+    <value>頂点に合わせる...</value>
+    <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_cap_flat.Text" xml:space="preserve">
     <value>平面</value>

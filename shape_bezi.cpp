@@ -61,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 	static bool bz_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
 
 	// 曲線のジオメトリシンクに矢じるしを追加する.
-	static void bz_create_arrow_geometry(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
+	static void bz_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
 
 	// 曲線上の助変数をもとに微分値を求める.
 	static double bz_deriv_by_param(const BZP b_pos[4], const double t) noexcept;
@@ -144,18 +144,18 @@ namespace winrt::GraphPaper::implementation
 	// a_style	矢じるしの種別
 	// a_size	矢じるしの寸法
 	// a_geo	矢じるしが追加されたジオメトリ
-	static void bz_create_arrow_geometry(
+	static void bz_create_arrow_geom(
 		ID2D1Factory3* const d_factory,
 		const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, 
-		ID2D1PathGeometry** a_geo)
+		ID2D1PathGeometry** a_geom)
 	{
 		D2D1_POINT_2F barbs[3];	// 矢じるしの返しの端点	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
 		if (bz_calc_arrow(b_pos, b_seg, a_size, barbs)) {
 			// ジオメトリシンクに追加する.
-			winrt::check_hresult(d_factory->CreatePathGeometry(a_geo));
-			winrt::check_hresult((*a_geo)->Open(sink.put()));
+			winrt::check_hresult(d_factory->CreatePathGeometry(a_geom));
+			winrt::check_hresult((*a_geom)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN_HOLLOW);
 			sink->AddLine(barbs[2]);
@@ -533,7 +533,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			bz_create_arrow_geometry(d_factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+			bz_create_arrow_geom(d_factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
 	}
 

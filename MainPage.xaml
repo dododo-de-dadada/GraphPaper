@@ -546,7 +546,7 @@
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_closed" x:Uid="tmfi_tool_poly_closed" Click="tool_draw_click" IsChecked="true" Text="Closed" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_clockwise" x:Uid="tmfi_tool_poly_clockwise" Click="tool_draw_click" IsChecked="true" Text="Clockwise" />
 				</MenuFlyoutSubItem>
-                <ToggleMenuFlyoutItem x:Name="tmfi_tool_vert_snap" x:Uid="tmfi_tool_vert_snap" Click="tool_vert_snap_click" IsChecked="true" Text="Snap to Vertex" />
+                <MenuFlyoutItem x:Name="mfi_tool_vert_snap" x:Uid="mfi_tool_vert_snap" Click="tool_vert_snap_click" IsChecked="true" Text="Snap to Vertex..." />
             </muxc:MenuBarItem>
             <!-- 線枠メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_stroke_menu" AccessKey="S" Title="Stroke">
@@ -882,12 +882,12 @@
             <!-- ステータスバーコンテキストメニュー -->
             <StackPanel.ContextFlyout>
                 <MenuFlyout>
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_draw_2" x:Uid="tmfi_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_unit_2" x:Uid="tmfi_status_bar_unit" Click="status_bar_click" Text="Unit Name" />
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_curs_2" x:Uid="tmfi_status_bar_curs" Click="status_bar_click" Text="Cursor Pos" />
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_grid_2" x:Uid="tmfi_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_sheet_2" x:Uid="tmfi_status_bar_sheet" Click="status_bar_click" Text="Sheet Size" />
-                    <ToggleMenuFlyoutItem   x:Name="tmfi_status_bar_zoom_2" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_draw_2" x:Uid="tmfi_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_unit_2" x:Uid="tmfi_status_bar_unit" Click="status_bar_click" Text="Unit Name" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_curs_2" x:Uid="tmfi_status_bar_curs" Click="status_bar_click" Text="Cursor Pos" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_grid_2" x:Uid="tmfi_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_sheet_2" x:Uid="tmfi_status_bar_sheet" Click="status_bar_click" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom_2" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
                 </MenuFlyout>
             </StackPanel.ContextFlyout>
             <StackPanel x:Name="sp_status_bar_panel_draw" Margin="0,0,8,0" Orientation="Horizontal">
@@ -941,6 +941,11 @@
                 <TextBox x:Name="tx_sheet_width" x:Uid="tx_sheet_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="sheet_size_text_changed" />
                 <TextBox x:Name="tx_sheet_height" x:Uid="tx_sheet_height" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="sheet_size_text_changed" />
                 <TextBox x:Name="tx_sheet_size_max" x:Uid="tx_sheet_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum size" IsEnabled="false" />
+            </StackPanel>
+        </ContentDialog>
+        <ContentDialog x:Name="cd_tool_vert_snap" x:Uid="cd_tool_vert_snap" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" >
+            <StackPanel>
+                <Slider x:Name="sd_tool_vert_snap" x:Uid="sd_tool_vert_snap" Maximum="255" Minimum="0" StepFrequency="1" Header="Limit Distance"/>
             </StackPanel>
         </ContentDialog>
         <!-- 属性入力ダイアログ -->

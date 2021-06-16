@@ -1050,9 +1050,9 @@
     <value>Join Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="tmfi_tool_vert_snap.Text" xml:space="preserve">
-    <value>Snap to Vertex</value>
-    <comment>ToggleMenuFlyoutItem</comment>
+  <data name="mfi_tool_vert_snap.Text" xml:space="preserve">
+    <value>Snap to Vertex...</value>
+    <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_cap_flat.Text" xml:space="preserve">
     <value>Flat</value>

@@ -128,10 +128,10 @@ namespace winrt::GraphPaper::implementation
 		tmfi_tool_poly_clockwise().IsChecked(value.m_clockwise);
 	}
 
-	void MainPage::tool_vert_snap_is_checked(const bool value)
-	{
-		tmfi_tool_vert_snap().IsChecked(value);
-	}
+	//void MainPage::tool_vert_snap_is_checked(const bool value)
+	//{
+		//tmfi_tool_vert_snap().IsChecked(value);
+	//}
 
 	// 多角形ツールのメニューのチェックをつける.
 	void MainPage::tool_poly_n_is_checked(const uint32_t value)
