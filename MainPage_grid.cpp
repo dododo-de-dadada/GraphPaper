@@ -159,14 +159,14 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.get_grid_base(g_base);
 			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP + 1.0f, m_sheet_dx.m_logical_dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value * SLIDER_STEP + 1.0f, m_sheet_dx.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_GRAY) {
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// êFê¨ï™ÇÃílÇï∂éöóÒÇ…ïœä∑Ç∑ÇÈ.
-				conv_col_to_str(m_color_code, value, buf);
+				conv_col_to_str(m_misc_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_gray_scale") + L": " + buf;
 			}
 		}

@@ -27,7 +27,7 @@
 // MainPage_grid.cpp	方眼
 // MainPage_group.cpp	グループ化とグループの解除
 // NainPage_join.cpp	線分のつなぎ
-// MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, バージョン情報
+// MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, 頂点を重ねる
 // MainPage_sample.cpp	見本
 // MainPage_scroll.cpp	スクロールバー
 // MainPage_select.cpp	図形の選択
@@ -224,19 +224,18 @@ namespace winrt::GraphPaper::implementation
 		bool m_find_text_wrap = false;	// 回り込み検索するか
 
 		// その他
-		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
-		float m_pile_up_vert = DEF_PILE_UP_VERT;	// 頂点を重ねる閾値
-		STATUS_BAR m_status_bar = status_bar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
+		LEN_UNIT m_misc_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
+		COLOR_CODE m_misc_color_code = COLOR_CODE::DEC;	// 色成分の書式
+		float m_misc_pile_up = DEF_PILE_UP_VERT;	// 頂点を重ねる閾値
+		STATUS_BAR m_misc_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		// 作図ツール
 		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
 		POLY_TOOL m_tool_poly{ DEF_POLY_TOOL };	// 多角形の作図ツール
 
-		uint32_t m_cnt_selected = 0;		// 選択された図形の数
-
 		// 図形リスト
 		SHAPE_LIST m_list_shapes;		// 図形リスト
+		uint32_t m_list_sel_cnt = 0;		// 選択された図形の数
 
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };		// ポインターの現在位置
@@ -246,7 +245,6 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };		// ポインターが押された位置
 		Shape* m_event_shape_pressed = nullptr;		// ポインターが押された図形
 		Shape* m_event_shape_prev = nullptr;		// 前回ポインターが押された図形
-		//Shape* m_event_shape_summary = nullptr;		// 図形の一覧でポインターが押された図形
 		uint64_t m_event_time_pressed = 0ULL;		// ポインターが押された時刻
 		uint64_t m_event_click_time = 0ULL;		// クリックの判定時間 (マイクロ秒)
 		double m_event_click_dist = 6.0;		// クリックの判定距離 (DIPs)
@@ -274,13 +272,15 @@ namespace winrt::GraphPaper::implementation
 		bool m_thread_activated = false;
 		bool m_thread_win_visible = false;		// ウィンドウの表示フラグ
 
-		MenuFlyout m_stroke_menu{ nullptr };	// 線枠コンテキストメニュー
-		MenuFlyout m_fill_menu{ nullptr };	// 塗りつぶしコンテキストメニュー
-		MenuFlyout m_font_menu{ nullptr };	// 書体コンテキストメニュー
-		MenuFlyout m_sheet_menu{ nullptr };	// 用紙コンテキストメニュー
-		MenuFlyout m_ungroup_menu{ nullptr };	// グループ解除コンテキストメニュー
-		MenuFlyout m_ruler_menu{ nullptr };	// 定規コンテキストメニュー
+		// コンテキストメニュー
+		MenuFlyout m_menu_stroke{ nullptr };	// 線枠コンテキストメニュー
+		MenuFlyout m_menu_fill{ nullptr };	// 塗りつぶしコンテキストメニュー
+		MenuFlyout m_menu_font{ nullptr };	// 書体コンテキストメニュー
+		MenuFlyout m_menu_sheet{ nullptr };	// 用紙コンテキストメニュー
+		MenuFlyout m_menu_ungroup{ nullptr };	// グループ解除コンテキストメニュー
+		MenuFlyout m_menu_ruler{ nullptr };	// 定規コンテキストメニュー
 
+		// ハンドラートークン
 		winrt::event_token m_token_suspending;	// アプリケーションの中断ハンドラーのトークン
 		winrt::event_token m_token_resuming;	// アプリケーションの再開ハンドラーのトークン
 		winrt::event_token m_token_entered_background;		// アプリケーションのバックグランド切り替えハンドラーのトークン
@@ -627,19 +627,19 @@ namespace winrt::GraphPaper::implementation
 
 		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
 		// その他メニューの「色の表記」に印をつける.
-		void color_code_is_checked(const COLOR_CODE c_code);
+		void misc_color_is_checked(const COLOR_CODE c_code);
 		// その他メニューの「色の表記」のサブ項目が選択された.
-		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
+		void misc_color_click(IInspectable const& sender, RoutedEventArgs const&);
 		// その他メニューの「頂点を重ねる...」が選択された.
-		IAsyncAction pile_up_vert_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
+		IAsyncAction misc_pile_up_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 値をスライダーのヘッダーに格納する.
-		void pile_up_vert_set_header(const float value) noexcept;
+		void misc_pile_up_set_header(const float value) noexcept;
 		// スライダーの値が変更された.
-		void pile_up_vert_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept;
+		void misc_pile_up_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept;
 		// その他メニューの「長さの単位」に印をつける.
-		void len_unit_is_checked(const LEN_UNIT l_unit);
+		void misc_len_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.
-		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
+		void misc_len_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_pref.cpp
@@ -760,19 +760,19 @@ namespace winrt::GraphPaper::implementation
 		// その他メニューの「ステータスバー」に印をつける.
 		void status_bar_is_checked(const STATUS_BAR a);
 		// 列挙型を OR 演算する.
-		static STATUS_BAR status_bar_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
+		static STATUS_BAR status_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 		// ポインターの位置をステータスバーに格納する.
-		void status_bar_set_curs(void);
+		void status_set_curs(void);
 		// 作図ツールをステータスバーに格納する.
-		void status_bar_set_draw(void);
+		void status_set_draw(void);
 		// 方眼の大きさをステータスバーに格納する.
-		void status_bar_set_grid(void);
+		void status_set_grid(void);
 		// 用紙の大きさをステータスバーに格納する.
-		void status_bar_set_sheet(void);
+		void status_set_sheet(void);
 		// 単位をステータスバーに格納する.
-		void status_bar_set_unit(void);
+		void status_set_unit(void);
 		// 拡大率をステータスバーに格納する.
-		void status_bar_set_zoom(void);
+		void status_set_zoom(void);
 		// ステータスバーの表示を設定する.
 		void status_bar_visibility(void);
 

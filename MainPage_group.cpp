@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「グループ化」が選択された.
 	void MainPage::group_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_cnt_selected <= 1) {
+		if (m_list_sel_cnt <= 1) {
 			return;
 		}
 		SHAPE_LIST slist;

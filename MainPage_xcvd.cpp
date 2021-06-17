@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::Streams::DataWriter;
 		using winrt::Windows::Storage::Streams::InMemoryRandomAccessStream;
 
-		if (m_cnt_selected == 0) {
+		if (m_list_sel_cnt == 0) {
 			// 選択された図形の数が 0 の場合,
 			// 終了する.
 			return;
@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「削除」が選択された.
 	void MainPage::xcvd_delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_cnt_selected == 0) {
+		if (m_list_sel_cnt == 0) {
 			// 選択された図形の数が 0 の場合,
 			// 終了する.
 			return;
@@ -198,7 +198,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_send_to_back().IsEnabled(enable_backward);
 		mfi_send_backward().IsEnabled(enable_backward);
 		mfi_summary_list().IsEnabled(exists_undeleted);
-		m_cnt_selected = selected_cnt;
+		m_list_sel_cnt = selected_cnt;
 	}
 
 	// 編集メニューの「貼り付け」が選択された.
@@ -299,15 +299,15 @@ namespace winrt::GraphPaper::implementation
 						if (m_sheet_main.m_grid_snap) {
 							// 左上位置を方眼の大きさで丸める.
 							pt_round(s_min, m_sheet_main.m_grid_base + 1.0, g_pos);
-							if (m_pile_up_vert <= FLT_MIN) {
+							if (m_misc_pile_up <= FLT_MIN) {
 								s_min = g_pos;
 							}
 						}
 
 						// 頂点を重ねる閾値がゼロより大きいか判定する.
-						if (m_pile_up_vert > FLT_MIN) {
+						if (m_misc_pile_up > FLT_MIN) {
 							D2D1_POINT_2F v_pos;
-							if (slist_neighbor(m_list_shapes, s_min, m_pile_up_vert / m_sheet_main.m_sheet_scale, v_pos)) {
+							if (slist_neighbor(m_list_shapes, s_min, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_pos)) {
 								D2D1_POINT_2F v_vec;
 								pt_sub(v_pos, s_min, v_vec);
 								D2D1_POINT_2F g_vec;

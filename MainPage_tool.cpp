@@ -99,7 +99,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			tool_draw_is_checked(m_tool_draw = DRAW_TOOL::POLY);
 		}
-		status_bar_set_draw();
+		status_set_draw();
 		event_set_cursor();
 	}
 
@@ -146,7 +146,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = static_cast<DRAW_TOOL>(dt_reader.ReadUInt32());
 		dt_read(m_tool_poly, dt_reader);
-		//m_pile_up_vert = dt_reader.ReadSingle();
 	}
 
 	// ì}ƒc[ƒ‹‚Ìó‘Ô‚ğ‘‚«‚Ş.
@@ -154,7 +153,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_tool_draw));
 		dt_write(m_tool_poly, dt_writer);
-		//dt_writer.WriteSingle(m_pile_up_vert);
 	}
 
 }

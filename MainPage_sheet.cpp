@@ -213,7 +213,7 @@ namespace winrt::GraphPaper::implementation
 			// スワップチェーンの内容を画面に表示する.
 			m_sheet_dx.Present();
 			// ポインターの位置をステータスバーに格納する.
-			status_bar_set_curs();
+			status_set_curs();
 		}
 #if defined(_DEBUG)
 		else {
@@ -413,19 +413,19 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
+				conv_col_to_str(m_misc_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
+				conv_col_to_str(m_misc_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
+				conv_col_to_str(m_misc_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
 			}
 		}
@@ -489,11 +489,11 @@ namespace winrt::GraphPaper::implementation
 		float g_base;
 		m_sheet_main.get_grid_base(g_base);
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_sheet_main.m_sheet_size.width, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_sheet_main.m_sheet_size.width, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_width().Text(buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_sheet_main.m_sheet_size.height, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_sheet_main.m_sheet_size.height, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_height().Text(buf);
-		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, sheet_size_max(), m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, sheet_size_max(), m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, 
 		// TextChanged は呼ばれない.
@@ -523,8 +523,8 @@ namespace winrt::GraphPaper::implementation
 			// 用紙の縦横の長さの値をピクセル単位の値に変換する.
 			const float g_len = g_base + 1.0f;
 			D2D1_SIZE_F p_size{
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_sheet_main.m_sheet_size.width, m_sheet_dx.m_logical_dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_sheet_main.m_sheet_size.height, m_sheet_dx.m_logical_dpi, g_len))
+				static_cast<FLOAT>(conv_len_to_val(m_misc_len_unit, m_sheet_main.m_sheet_size.width, m_sheet_dx.m_logical_dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_val(m_misc_len_unit, m_sheet_main.m_sheet_size.height, m_sheet_dx.m_logical_dpi, g_len))
 			};
 			if (!equal(p_size, m_sheet_main.m_sheet_size)) {
 				// 変換された値が用紙の大きさと異なる場合,
@@ -534,10 +534,10 @@ namespace winrt::GraphPaper::implementation
 				sheet_update_bbox();
 				sheet_panle_size();
 				sheet_draw();
-				status_bar_set_curs();
-				status_bar_set_grid();
-				status_bar_set_sheet();
-				status_bar_set_unit();
+				status_set_curs();
+				status_set_grid();
+				status_set_sheet();
+				status_set_unit();
 			}
 		}
 		else if (d_result == ContentDialogResult::Secondary) {
@@ -583,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 			sheet_update_bbox();
 			sheet_panle_size();
 			sheet_draw();
-			status_bar_set_sheet();
+			status_set_sheet();
 		}
 	}
 
@@ -600,7 +600,7 @@ namespace winrt::GraphPaper::implementation
 			// 文字列が数値に変換できた場合,
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			value = conv_len_to_val(m_len_unit, value, dpi, g_base + 1.0);
+			value = conv_len_to_val(m_misc_len_unit, value, dpi, g_base + 1.0);
 		}
 		cd_sheet_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < sheet_size_max());
 	}
@@ -661,7 +661,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.m_sheet_scale = scale;
 			sheet_panle_size();
 			sheet_draw();
-			status_bar_set_zoom();
+			status_set_zoom();
 		}
 	}
 
@@ -681,6 +681,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		sheet_panle_size();
 		sheet_draw();
-		status_bar_set_zoom();
+		status_set_zoom();
 	}
 }

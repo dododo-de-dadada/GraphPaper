@@ -177,47 +177,47 @@
     <value>Wrap around</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="rmfi_color_code_cent.Text" xml:space="preserve">
+  <data name="rmfi_misc_color_cent.Text" xml:space="preserve">
     <value>Percent</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_dec.Text" xml:space="preserve">
+  <data name="rmfi_misc_color_dec.Text" xml:space="preserve">
     <value>Decimal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_real.Text" xml:space="preserve">
+  <data name="rmfi_misc_color_real.Text" xml:space="preserve">
     <value>Real Number</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_color_code_hex.Text" xml:space="preserve">
+  <data name="rmfi_misc_color_hex.Text" xml:space="preserve">
     <value>Hexdecimal</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_unit_grid.Text" xml:space="preserve">
+  <data name="rmfi_misc_len_grid.Text" xml:space="preserve">
     <value>Grid</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_unit_inch.Text" xml:space="preserve">
+  <data name="rmfi_misc_len_inch.Text" xml:space="preserve">
     <value>Inch</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_unit_milli.Text" xml:space="preserve">
+  <data name="rmfi_misc_len_milli.Text" xml:space="preserve">
     <value>Millimeter</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_unit_pixel.Text" xml:space="preserve">
+  <data name="rmfi_misc_len_pixel.Text" xml:space="preserve">
     <value>Pixel</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_len_unit_point.Text" xml:space="preserve">
+  <data name="rmfi_misc_len_point.Text" xml:space="preserve">
     <value>Point</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_color_code.Text" xml:space="preserve">
+  <data name="mfsi_misc_color_code.Text" xml:space="preserve">
     <value>Color Code</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_len_unit.Text" xml:space="preserve">
+  <data name="mfsi_misc_len_unit.Text" xml:space="preserve">
     <value>Length Unit</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -537,7 +537,7 @@
     <value>Recent Files</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_stbar.Text" xml:space="preserve">
+  <data name="mfsi_misc_status_bar.Text" xml:space="preserve">
     <value>Status Bar</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -850,27 +850,27 @@
     <value>Snap to Grid</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_status_bar_curs.Text" xml:space="preserve">
+  <data name="tmfi_misc_status_curs.Text" xml:space="preserve">
     <value>Cursor Position</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_bar_grid.Text" xml:space="preserve">
+  <data name="tmfi_misc_status_grid.Text" xml:space="preserve">
     <value>Grid Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_bar_sheet.Text" xml:space="preserve">
+  <data name="tmfi_misc_status_sheet.Text" xml:space="preserve">
     <value>Sheet Size</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_bar_draw.Text" xml:space="preserve">
+  <data name="tmfi_misc_status_draw.Text" xml:space="preserve">
     <value>Draw Tool</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_bar_unit.Text" xml:space="preserve">
+  <data name="tmfi_misc_status_unit.Text" xml:space="preserve">
     <value>Unit Name</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_status_bar_zoom.Text" xml:space="preserve">
+  <data name="tmfi_misc_status_zoom.Text" xml:space="preserve">
     <value>Zoom</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -1050,7 +1050,7 @@
     <value>Join Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_pile_up_vert.Text" xml:space="preserve">
+  <data name="mfi_misc_pile_up.Text" xml:space="preserve">
     <value>Pile-up Vertex...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -1070,7 +1070,7 @@
     <value>Triangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_pile_up_vert" xml:space="preserve">
+  <data name="str_misc_pile_up" xml:space="preserve">
     <value>Thresholds</value>
     <comment>String</comment>
   </data>

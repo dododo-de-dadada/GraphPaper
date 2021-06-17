@@ -295,18 +295,18 @@
 					<MenuFlyoutItem x:Name="mfi_sheet_zoom_400_2" Click="sheet_zoom_click" Icon="ZoomIn" KeyboardAcceleratorTextOverride="Ctrl+4" Text="400%" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_pixel_2" x:Uid="rmfi_len_unit_pixel" Click="len_unit_click" Text="Pixel" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_inch_2" x:Uid="rmfi_len_unit_inch" Click="len_unit_click" Text="Inch" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_milli_2" x:Uid="rmfi_len_unit_milli" Click="len_unit_click" Text="Millimeter" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_point_2" x:Uid="rmfi_len_unit_point" Click="len_unit_click" Text="Point" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_grid_2" x:Uid="rmfi_len_unit_grid" Click="len_unit_click" Text="Per Grid" />
+				<MenuFlyoutSubItem x:Uid="mfsi_misc_len_unit" Text="Length unit">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_pixel_2" x:Uid="rmfi_misc_len_pixel" Click="misc_len_click" Text="Pixel" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_inch_2" x:Uid="rmfi_misc_len_inch" Click="misc_len_click" Text="Inch" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_milli_2" x:Uid="rmfi_misc_len_milli" Click="misc_len_click" Text="Millimeter" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_point_2" x:Uid="rmfi_misc_len_point" Click="misc_len_click" Text="Point" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_grid_2" x:Uid="rmfi_misc_len_grid" Click="misc_len_click" Text="Per Grid" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color Code">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_dec_2" x:Uid="rmfi_color_code_dec" Click="color_code_click" IsChecked="True" Text="Decimal" GroupName="gn_color_code_2" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_hex_2" x:Uid="rmfi_color_code_hex" Click="color_code_click" Text="Hexadecimal" GroupName="gn_color_code_2" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_real_2" x:Uid="rmfi_color_code_real" Click="color_code_click" Text="Real" GroupName="gn_color_code_2" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_cent_2" x:Uid="rmfi_color_code_cent" Click="color_code_click" Text="Point" GroupName="gn_color_code_2" />
+                <MenuFlyoutSubItem x:Uid="mfsi_misc_color_code" Text="Color Code">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_dec_2" x:Uid="rmfi_misc_color_dec" Click="misc_color_click" IsChecked="True" Text="Decimal" GroupName="gn_misc_color_2" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_hex_2" x:Uid="rmfi_misc_color_hex" Click="misc_color_click" Text="Hexadecimal" GroupName="gn_misc_color_2" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_real_2" x:Uid="rmfi_misc_color_real" Click="misc_color_click" Text="Real" GroupName="gn_misc_color_2" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_cent_2" x:Uid="rmfi_misc_color_cent" Click="misc_color_click" Text="Point" GroupName="gn_misc_color_2" />
                 </MenuFlyoutSubItem>
             </MenuFlyout>
             <!-- グループコンテキストメニュー -->
@@ -735,28 +735,28 @@
             </muxc:MenuBarItem>
             <!-- その他メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_misc_menu" AccessKey="M" Title="Misc">
-                <MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_pixel" x:Uid="rmfi_len_unit_pixel" Click="len_unit_click" Text="Pixel" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_inch" x:Uid="rmfi_len_unit_inch" Click="len_unit_click" Text="Inch" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_milli" x:Uid="rmfi_len_unit_milli" Click="len_unit_click" Text="Millimeter" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_point" x:Uid="rmfi_len_unit_point" Click="len_unit_click" Text="Point" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_grid" x:Uid="rmfi_len_unit_grid" Click="len_unit_click" Text="Per Grid" />
+                <MenuFlyoutSubItem x:Uid="mfsi_misc_len_unit" Text="Length unit">
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_pixel" x:Uid="rmfi_misc_len_pixel" Click="misc_len_click" Text="Pixel" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_inch" x:Uid="rmfi_misc_len_inch" Click="misc_len_click" Text="Inch" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_milli" x:Uid="rmfi_misc_len_milli" Click="misc_len_click" Text="Millimeter" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_point" x:Uid="rmfi_misc_len_point" Click="misc_len_click" Text="Point" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_grid" x:Uid="rmfi_misc_len_grid" Click="misc_len_click" Text="Per Grid" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color Code">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_dec" x:Uid="rmfi_color_code_dec" Click="color_code_click" IsChecked="True" Text="Decimal" GroupName="gn_color_code" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_hex" x:Uid="rmfi_color_code_hex" Click="color_code_click" Text="Hexadecimal" GroupName="gn_color_code" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_real" x:Uid="rmfi_color_code_real" Click="color_code_click" Text="Real" GroupName="gn_color_code" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_cent" x:Uid="rmfi_color_code_cent" Click="color_code_click" Text="Percent" GroupName="gn_color_code" />
+                <MenuFlyoutSubItem x:Uid="mfsi_misc_color_code" Text="Color Code">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_dec" x:Uid="rmfi_misc_color_dec" Click="misc_color_click" IsChecked="True" Text="Decimal" GroupName="gn_misc_color_code" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_hex" x:Uid="rmfi_misc_color_hex" Click="misc_color_click" Text="Hexadecimal" GroupName="gn_misc_color_code" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_real" x:Uid="rmfi_misc_color_real" Click="misc_color_click" Text="Real" GroupName="gn_misc_color_code" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_cent" x:Uid="rmfi_misc_color_cent" Click="misc_color_click" Text="Percent" GroupName="gn_misc_color_code" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSubItem x:Uid="mfsi_stbar" Text="Status Bar">
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_draw" x:Uid="tmfi_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_unit" x:Uid="tmfi_status_bar_unit" Click="status_bar_click" Text="Unit Name" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_curs" x:Uid="tmfi_status_bar_curs" Click="status_bar_click" Text="Cursor Pos" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_grid" x:Uid="tmfi_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_sheet" x:Uid="tmfi_status_bar_sheet" Click="status_bar_click" Text="Sheet Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
+                <MenuFlyoutSubItem x:Uid="mfsi_misc_status_bar" Text="Status Bar">
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_draw" x:Uid="tmfi_misc_status_draw" Click="status_bar_click" Text="Draw Tool" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_unit" x:Uid="tmfi_misc_status_unit" Click="status_bar_click" Text="Unit Name" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_curs" x:Uid="tmfi_misc_status_curs" Click="status_bar_click" Text="Cursor Pos" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_grid" x:Uid="tmfi_misc_status_grid" Click="status_bar_click" Text="Grid Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_sheet" x:Uid="tmfi_misc_status_sheet" Click="status_bar_click" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_zoom" x:Uid="tmfi_misc_status_zoom" Click="status_bar_click" Text="Scale" />
                 </MenuFlyoutSubItem>
-				<MenuFlyoutItem x:Name="mfi_pile_up_vert" x:Uid="mfi_pile_up_vert" Click="pile_up_vert_click_async" Text="Pile-up Vertex..." />
+				<MenuFlyoutItem x:Name="mfi_misc_pile_up" x:Uid="mfi_misc_pile_up" Click="misc_pile_up_click_async" Text="Pile-up Vertex..." />
 				<MenuFlyoutSeparator />
                 <!-- バージョン情報メニュー -->
                 <MenuFlyoutItem x:Uid="mfi_about_this" Click="about_graph_paper_click" Text="About GraphPaper" />
@@ -878,19 +878,19 @@
             <ScrollBar x:Name="sb_vert" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,0,16" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="true" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />
         </RelativePanel>
         <!-- ステータスバー -->
-        <StackPanel x:Name="sp_status_bar_panel" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
+        <StackPanel x:Name="sp_misc_status_bar_panel" Background="{ThemeResource AppBarBackgroundThemeBrush}" Grid.Row="2" Orientation="Horizontal" Padding="8,0,8,0" >
             <!-- ステータスバーコンテキストメニュー -->
             <StackPanel.ContextFlyout>
                 <MenuFlyout>
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_draw_2" x:Uid="tmfi_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_unit_2" x:Uid="tmfi_status_bar_unit" Click="status_bar_click" Text="Unit Name" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_curs_2" x:Uid="tmfi_status_bar_curs" Click="status_bar_click" Text="Cursor Pos" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_grid_2" x:Uid="tmfi_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_sheet_2" x:Uid="tmfi_status_bar_sheet" Click="status_bar_click" Text="Sheet Size" />
-                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom_2" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_draw_2" x:Uid="tmfi_misc_status_draw" Click="status_bar_click" Text="Draw Tool" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_unit_2" x:Uid="tmfi_misc_status_unit" Click="status_bar_click" Text="Unit Name" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_curs_2" x:Uid="tmfi_misc_status_curs" Click="status_bar_click" Text="Cursor Pos" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_grid_2" x:Uid="tmfi_misc_status_grid" Click="status_bar_click" Text="Grid Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_sheet_2" x:Uid="tmfi_misc_status_sheet" Click="status_bar_click" Text="Sheet Size" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_zoom_2" x:Uid="tmfi_misc_status_zoom" Click="status_bar_click" Text="Scale" />
                 </MenuFlyout>
             </StackPanel.ContextFlyout>
-            <StackPanel x:Name="sp_status_bar_panel_draw" Margin="0,0,8,0" Orientation="Horizontal">
+            <StackPanel x:Name="sp_misc_status_bar_panel_draw" Margin="0,0,8,0" Orientation="Horizontal">
                 <TextBlock  Margin="0,0,0,0" Text="D:"/>
 				<PathIcon   x:Name="pi_draw" Data="M0,0" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16">
                     <PathIcon.RenderTransform>
@@ -898,14 +898,14 @@
                     </PathIcon.RenderTransform>
                 </PathIcon>
             </StackPanel>
-            <TextBlock x:Name="tk_status_bar_unit" Margin="0,0,8,0" Text="0"/>
-            <TextBlock x:Name="tk_status_bar_pos_x" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_status_bar_pos_y" Margin="0,0,8,0" Text="0"/>
-            <TextBlock x:Name="tk_status_bar_grid" Margin="0,0,8,0" Text="0" />
-            <TextBlock x:Name="tk_status_bar_width" Margin="0,0,4,0" Text="0"/>
-            <TextBlock x:Name="tk_status_bar_height" Margin="0,0,8,0" Text="0"/>
-            <TextBlock x:Name="tk_status_bar_zoom" Margin="0,0,8,0" Text="0"/>
-            <!--<TextBlock x:Name="tk_status_bar_cnt" Margin="0,0,4,0" Text="0"/> -->
+            <TextBlock x:Name="tk_misc_status_unit" Margin="0,0,8,0" Text="0"/>
+            <TextBlock x:Name="tk_misc_status_bar_pos_x" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_misc_status_bar_pos_y" Margin="0,0,8,0" Text="0"/>
+            <TextBlock x:Name="tk_misc_status_grid" Margin="0,0,8,0" Text="0" />
+            <TextBlock x:Name="tk_misc_status_bar_width" Margin="0,0,4,0" Text="0"/>
+            <TextBlock x:Name="tk_misc_status_bar_height" Margin="0,0,8,0" Text="0"/>
+            <TextBlock x:Name="tk_misc_status_zoom" Margin="0,0,8,0" Text="0"/>
+            <!--<TextBlock x:Name="tk_misc_status_bar_cnt" Margin="0,0,4,0" Text="0"/> -->
         </StackPanel>
         <!-- 文字列入力ダイアログ -->
         <ContentDialog x:Name="cd_edit_text_dialog" x:Uid="cd_edit_text_dialog" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
@@ -943,9 +943,9 @@
                 <TextBox x:Name="tx_sheet_size_max" x:Uid="tx_sheet_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum size" IsEnabled="false" />
             </StackPanel>
         </ContentDialog>
-        <ContentDialog x:Name="cd_pile_up_vert" x:Uid="cd_pile_up_vert" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" >
+        <ContentDialog x:Name="cd_misc_pile_up" x:Uid="cd_misc_pile_up" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" >
             <StackPanel>
-				<Slider x:Name="sd_pile_up_vert" x:Uid="sd_pile_up_vert" Maximum="255" Minimum="0" StepFrequency="1" Header="Thresholds" ValueChanged="pile_up_vert_value_changed"/>
+				<Slider x:Name="sd_misc_pile_up" x:Uid="sd_misc_pile_up" Maximum="255" Minimum="0" StepFrequency="1" Header="Thresholds" ValueChanged="misc_pile_up_value_changed"/>
             </StackPanel>
         </ContentDialog>
         <!-- 属性入力ダイアログ -->

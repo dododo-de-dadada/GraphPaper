@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 			const float g_len = g_base + 1.0f;
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (S == 0) {

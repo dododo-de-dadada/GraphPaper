@@ -109,9 +109,9 @@ namespace winrt::GraphPaper::implementation
 				POLY_TOOL tool_poly { 3, true, true, false, true };
 				m_sample_shape = new ShapePoly(b_pos, b_vec, &m_sample_sheet, tool_poly);
 				const double offset = h / 16.0;
-				m_sample_shape->set_anch_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 - offset) }, ANCH_TYPE::ANCH_P0, m_pile_up_vert);
-				m_sample_shape->set_anch_pos(D2D1_POINT_2F{ static_cast<FLOAT>(w * 0.25),  static_cast<FLOAT>(h * 0.5) }, ANCH_TYPE::ANCH_P0 + 1, m_pile_up_vert);
-				m_sample_shape->set_anch_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 + offset) }, ANCH_TYPE::ANCH_P0 + 2, m_pile_up_vert);
+				m_sample_shape->set_anch_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 - offset) }, ANCH_TYPE::ANCH_P0, m_misc_pile_up);
+				m_sample_shape->set_anch_pos(D2D1_POINT_2F{ static_cast<FLOAT>(w * 0.25),  static_cast<FLOAT>(h * 0.5) }, ANCH_TYPE::ANCH_P0 + 1, m_misc_pile_up);
+				m_sample_shape->set_anch_pos(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 + offset) }, ANCH_TYPE::ANCH_P0 + 2, m_misc_pile_up);
 			}
 			else if (m_sample_type == SAMPLE_TYPE::MISC) {
 				constexpr uint32_t misc_min = 3;

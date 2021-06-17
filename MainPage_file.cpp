@@ -106,9 +106,9 @@ namespace winrt::GraphPaper::implementation
 
 		tool_draw_is_checked(m_tool_draw);
 		tool_poly_is_checked(m_tool_poly);
-		color_code_is_checked(m_color_code);
-		status_bar_is_checked(m_status_bar);
-		len_unit_is_checked(m_len_unit);
+		misc_color_is_checked(m_misc_color_code);
+		status_bar_is_checked(m_misc_status_bar);
+		misc_len_is_checked(m_misc_len_unit);
 
 		sheet_attr_is_checked();
 
@@ -129,12 +129,12 @@ namespace winrt::GraphPaper::implementation
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
-		status_bar_set_curs();
-		status_bar_set_draw();
-		status_bar_set_grid();
-		status_bar_set_sheet();
-		status_bar_set_zoom();
-		status_bar_set_unit();
+		status_set_curs();
+		status_set_draw();
+		status_set_grid();
+		status_set_sheet();
+		status_set_zoom();
+		status_set_unit();
 		status_bar_visibility();
 	}
 
@@ -193,11 +193,11 @@ namespace winrt::GraphPaper::implementation
 
 			tool_read(dt_reader);
 			find_text_read(dt_reader);
-			//m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt32());
-			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
-			m_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
-			m_pile_up_vert = dt_reader.ReadSingle();
-			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
+			//m_misc_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt32());
+			m_misc_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
+			m_misc_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
+			m_misc_pile_up = dt_reader.ReadSingle();
+			m_misc_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 
 			m_sheet_main.read(dt_reader);
 			float g_base;
@@ -574,7 +574,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			dt_write_svg(DOCTYPE, dt_writer);
 			// データライターに SVG 開始タグを書き込む.
-			file_dt_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, m_sheet_dx.m_logical_dpi, m_len_unit, dt_writer);
+			file_dt_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, m_sheet_dx.m_logical_dpi, m_misc_len_unit, dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {
@@ -653,11 +653,11 @@ namespace winrt::GraphPaper::implementation
 
 			tool_write(dt_writer);
 			find_text_write(dt_writer);
-			//dt_writer.WriteUInt32(static_cast<uint32_t>(m_status_bar));
-			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_code));
-			dt_writer.WriteSingle(m_pile_up_vert);
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
+			//dt_writer.WriteUInt32(static_cast<uint32_t>(m_misc_status_bar));
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_misc_len_unit));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_color_code));
+			dt_writer.WriteSingle(m_misc_pile_up);
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_status_bar));
 			m_sheet_main.write(dt_writer);
 			if (suspend) {
 				slist_write<!REDUCE>(m_list_shapes, dt_writer);

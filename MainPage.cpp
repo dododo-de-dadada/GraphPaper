@@ -182,11 +182,11 @@ namespace winrt::GraphPaper::implementation
 
 		// 静的リソースから読み込んだコンテキストメニューを破棄する.
 		{
-			m_stroke_menu = nullptr;
-			m_fill_menu = nullptr;
-			m_font_menu = nullptr;
-			m_sheet_menu = nullptr;
-			m_ruler_menu = nullptr;
+			m_menu_stroke = nullptr;
+			m_menu_fill = nullptr;
+			m_menu_font = nullptr;
+			m_menu_sheet = nullptr;
+			m_menu_ruler = nullptr;
 		}
 
 		// コードビハインドで設定したハンドラーの設定を解除する.
@@ -278,12 +278,12 @@ namespace winrt::GraphPaper::implementation
 		// コンテキストメニューを静的リソースから読み込む.
 		// ポップアップは静的なリソースとして定義して、複数の要素で使用することができる.
 		{
-			m_stroke_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke_menu")));
-			m_fill_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill_menu")));
-			m_font_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_front_menu")));
-			m_sheet_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet_menu")));
-			m_ungroup_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup_menu")));
-			m_ruler_menu = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ruler_menu")));
+			m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke_menu")));
+			m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill_menu")));
+			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_front_menu")));
+			m_menu_sheet = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet_menu")));
+			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup_menu")));
+			m_menu_ruler = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ruler_menu")));
 		}
 
 		auto _{ new_click_async(nullptr, nullptr) };
@@ -391,10 +391,10 @@ namespace winrt::GraphPaper::implementation
 		if (co_await pref_load_async() != S_OK) {
 			// 読み込みに失敗した場合,
 			sheet_init();
-			m_len_unit = LEN_UNIT::PIXEL;
-			m_color_code = COLOR_CODE::DEC;
-			m_pile_up_vert = DEF_PILE_UP_VERT;
-			m_status_bar = status_bar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
+			m_misc_len_unit = LEN_UNIT::PIXEL;
+			m_misc_color_code = COLOR_CODE::DEC;
+			m_misc_pile_up = DEF_PILE_UP_VERT;
+			m_misc_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
 		}
 
 		// 用紙の左上位置と右下位置を初期化する.
