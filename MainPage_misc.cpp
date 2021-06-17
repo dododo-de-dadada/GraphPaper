@@ -113,4 +113,34 @@ namespace winrt::GraphPaper::implementation
 		rmfi_len_unit_point_2().IsChecked(value == LEN_UNIT::POINT);
 	}
 
+	// その他メニューの「頂点を重ねる...」が選択された.
+	IAsyncAction MainPage::pile_up_vert_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
+	{
+		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+
+		pile_up_vert_set_header(m_pile_up_vert);
+		sd_pile_up_vert().Value(static_cast<double>(m_pile_up_vert));
+		const auto d_result{ co_await cd_pile_up_vert().ShowAsync() };
+		if (d_result == ContentDialogResult::Primary) {
+			m_pile_up_vert = static_cast<float>(sd_pile_up_vert().Value());
+		}
+	}
+
+	void MainPage::pile_up_vert_set_header(const float value) noexcept
+	{
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		wchar_t buf[32];
+		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_pile_up_vert") + L": " + buf;
+		sd_pile_up_vert().Header(box_value(text));
+	}
+
+	// スライダーの値が変更された.
+	void MainPage::pile_up_vert_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept
+	{
+		pile_up_vert_set_header(static_cast<float>(args.NewValue()));
+	}
+
+
 }

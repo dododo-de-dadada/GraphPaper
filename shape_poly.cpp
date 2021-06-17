@@ -58,18 +58,10 @@ namespace winrt::GraphPaper::implementation
 	// t_vec	線分の始点を原点とする, 判定する位置.
 	// v_end	線分の終点
 	// 戻り値	含まれるなら true
-	static bool stroke_test_cap_round(const D2D1_POINT_2F t_vec, const D2D1_POINT_2F v_end, const double e_width)
-	{
-		return pt_in_circle(t_vec, e_width) || pt_in_circle(t_vec, v_end, e_width);
-		// 調べる位置が, 最初の頂点を中心とし, 拡張する幅を半径とする, 円に含まれるか判定する.
-		//if (pt_abs2(t_vec) <= e_width * e_width) {
-		//	return true;
-		//}
-		// 調べる位置が, 最後の頂点を中心とし, 拡張する幅を半径とする, 円に含まれるか判定する.
-		//D2D1_POINT_2F u_vec;
-		//pt_sub(t_vec, v_end, u_vec);
-		//return pt_abs2(u_vec) <= e_width * e_width;
-	}
+	//static bool stroke_test_cap_round(const D2D1_POINT_2F t_vec, const D2D1_POINT_2F v_end, const double e_width)
+	//{
+	//	return pt_in_circle(t_vec, e_width) || pt_in_circle(t_vec, v_end, e_width);
+	//}
 
 	static bool stroke_test_cap_square(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F v_end, const size_t d_cnt, const D2D1_POINT_2F d_vec[], const double s_len[], const double e_width)
 	{
@@ -156,14 +148,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		// { 0, 1 }, { 1, 2 }, { v_cnt-2, v_cnt-1 }
 		for (size_t i = 1; i < v_cnt; i++) {
-			//for (size_t i = (v_close ? v_cnt - 1 : 0), j = (v_close ? 0 : 1); j < v_cnt; i = j++) {
-				//const D2D1_POINT_2F bev_pos[4]{ e_side[i][3], e_side[j][0], e_side[j][1], e_side[i][2] };
 			const D2D1_POINT_2F bev_pos[4]{ e_side[i - 1][3], e_side[i][0], e_side[i][1], e_side[i - 1][2] };
 			if (pt_in_poly(t_pos, 4, bev_pos)) {
 				return true;
 			}
 		}
-		// { v_cnt-1, 0 }
 		if (v_close) {
 			const D2D1_POINT_2F bev_pos[4]{ e_side[v_cnt - 1][3], e_side[0][0], e_side[0][1], e_side[v_cnt - 1][2] };
 		}
@@ -374,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 閉じてないなら, 線の端点が円形か判定する.
 			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
-				if (stroke_test_cap_round(t_vec, v_pos[d_cnt], e_width)) {
+				if (pt_in_circle(t_vec, e_width) || pt_in_circle(t_vec, v_pos[d_cnt], e_width)) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
 			}
@@ -395,7 +384,7 @@ namespace winrt::GraphPaper::implementation
 			for (size_t i = 0; i < d_cnt; i++) {
 				// 辺 i の長さがないか判定する.
 				if (s_len[i] <= FLT_MIN) {
-					// 点 i から降順に, 長さのある辺 p を見つける.
+					// 点 i から降順に, 長さのある辺を見つける.
 					size_t p = static_cast<size_t>(-1);
 					for (size_t h = i; h > 0; h--) {
 						if (s_len[h - 1] > FLT_MIN) {
@@ -403,13 +392,14 @@ namespace winrt::GraphPaper::implementation
 							break;
 						}
 					}
-					// 辺 p が見つかったか判定する.
+					// 降順の辺が見つかったか判定する.
 					D2D1_POINT_2F p_vec;	// 直前の辺ベクトル
 					if (p != static_cast<size_t>(-1)) {
+						// 見つかった辺を直前の辺ベクトルに格納する.
 						p_vec = d_vec[p];
 					}
 					// 見つからなかったならば,
-					// 辺が閉じている, かつ最後の辺に長さがあるか判定する.
+					// 辺が閉じている, かつ最後の辺の長さがゼロでないか判定する.
 					else if (s_closed && s_len[d_cnt] > FLT_MIN) {
 						// 最後の頂点の反対ベクトルを求め, 直前の辺ベクトルとする.
 						p_vec = D2D1_POINT_2F{ -v_pos[d_cnt].x, -v_pos[d_cnt].y };
@@ -417,7 +407,7 @@ namespace winrt::GraphPaper::implementation
 					else {
 						continue;
 					}
-					// 点 i から昇順に, 長さのある辺 n を見つける.
+					// 点 i から昇順に, 長さのある辺を見つける.
 					size_t n = static_cast<size_t>(-1);
 					for (size_t j = i + 1; j < d_cnt; j++) {
 						if (s_len[j] > FLT_MIN) {
@@ -425,9 +415,10 @@ namespace winrt::GraphPaper::implementation
 							break;
 						}
 					}
-					// 辺 n が見つかったか判定する.
+					// 昇順の辺が見つかったか判定する.
 					D2D1_POINT_2F n_vec;	// 直後の辺ベクトル
 					if (n != -1) {
+						// 見つかった辺を直後の辺ベクトルに格納する.
 						n_vec = d_vec[n];
 					}
 					// 見つからなかったならば,
@@ -439,7 +430,7 @@ namespace winrt::GraphPaper::implementation
 					else {
 						continue;
 					}
-					// 直前と直後の辺ベクトルを加え, 合成ベクトル c を求める.
+					// 直前と直後の辺ベクトルを加え, 合成ベクトルを求める.
 					D2D1_POINT_2F c_vec;
 					pt_add(p_vec, n_vec, c_vec);
 					// 合成ベクトルの長さがないか判定する.
@@ -449,7 +440,7 @@ namespace winrt::GraphPaper::implementation
 						c_vec = p_vec;
 						c_abs = pt_abs2(c_vec);
 					}
-					// 合成ベクトルに直交するベクトルを求める.
+					// 合成ベクトルの直交ベクトルを求める.
 					// 両ベクトルとも長さは, 拡張する幅とする.
 					pt_mul(c_vec, e_width / sqrt(c_abs), c_vec);
 					const D2D1_POINT_2F o_vec{ c_vec.y, -c_vec.x };
@@ -477,29 +468,27 @@ namespace winrt::GraphPaper::implementation
 					pt_sub(v_pos[i + 1], o_vec, e_side[e_cnt][3]);
 					e_side[e_cnt][4] = v_pos[i];
 				}
-				// 調べる位置が, 拡張された辺 i に含まれるか判定する.
+				// 調べる位置が, 拡張された辺に含まれるか判定する.
 				if (pt_in_poly(t_vec, 4, e_side[e_cnt++])) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
 			}
-			// 辺が閉じているか判定する.
-			if (s_closed) {
-				// 最後の辺の長さがあるか判定する.
-				if (s_len[d_cnt] > FLT_MIN) {
-					// 最後の辺の位置を反転させ, 拡張する幅の長さに合わせ, 辺ベクトルを求める.
-					// 辺ベクトルに直交するベクトルを求める.
-					// 始点と終点を直交ベクトルに沿って正逆に拡張し, 拡張された辺 i に格納する.
-					D2D1_POINT_2F s_vec;
-					pt_mul(v_pos[d_cnt], -e_width / s_len[d_cnt], s_vec);
-					const D2D1_POINT_2F o_vec{ s_vec.y, -s_vec.x };
-					pt_sub(v_pos[d_cnt], o_vec, e_side[e_cnt][0]);
-					pt_add(v_pos[d_cnt], o_vec, e_side[e_cnt][1]);
-					e_side[e_cnt][2] = o_vec; // v0 + o_vec
-					pt_neg(o_vec, e_side[e_cnt][3]); // v0 - o_vec
-					e_side[e_cnt][4] = v_pos[d_cnt];
-					if (pt_in_poly(t_vec, 4, e_side[e_cnt++])) {
-						return ANCH_TYPE::ANCH_STROKE;
-					}
+			// 辺が閉じているか, 閉じた辺に長さがあるか判定する.
+			if (s_closed && s_len[d_cnt] > FLT_MIN) {
+				// 最後の辺の位置を反転させ, 拡張する幅の長さに合わせ, 辺ベクトルを求める.
+				// 辺ベクトルに直交するベクトルを求める.
+				// 始点と終点を直交ベクトルに沿って正逆に拡張し, 拡張された辺に格納する.
+				D2D1_POINT_2F s_vec;
+				pt_mul(v_pos[d_cnt], -e_width / s_len[d_cnt], s_vec);
+				const D2D1_POINT_2F o_vec{ s_vec.y, -s_vec.x };
+				pt_sub(v_pos[d_cnt], o_vec, e_side[e_cnt][0]);
+				pt_add(v_pos[d_cnt], o_vec, e_side[e_cnt][1]);
+				e_side[e_cnt][2] = o_vec; // v0 + o_vec
+				pt_neg(o_vec, e_side[e_cnt][3]); // v0 - o_vec
+				e_side[e_cnt][4] = v_pos[d_cnt];
+				// 判定する位置が拡張された辺に含まれるか判定する.
+				if (pt_in_poly(t_vec, 4, e_side[e_cnt++])) {
+					return ANCH_TYPE::ANCH_STROKE;
 				}
 			}
 			if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
@@ -895,8 +884,6 @@ namespace winrt::GraphPaper::implementation
 		dt_write_svg(m_pos, "M", dt_writer);
 		const auto d_cnt = m_diff.size();	// 差分の数
 		const auto v_cnt = d_cnt + 1;
-		//std::vector<D2D1_POINT_2F> vert_pos(v_cnt);
-		//const auto v_pos = reinterpret_cast<D2D1_POINT_2F*>(vert_pos.data());
 		D2D1_POINT_2F v_pos[MAX_N_GON];
 
 		v_pos[0] = m_pos;

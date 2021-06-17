@@ -1050,8 +1050,8 @@
     <value>Join Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_tool_vert_snap.Text" xml:space="preserve">
-    <value>Snap to Vertex...</value>
+  <data name="mfi_pile_up_vert.Text" xml:space="preserve">
+    <value>Pile-up Vertex...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_cap_flat.Text" xml:space="preserve">
@@ -1069,5 +1069,9 @@
   <data name="rmfi_cap_triangle.Text" xml:space="preserve">
     <value>Triangle</value>
     <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="str_pile_up_vert" xml:space="preserve">
+    <value>Thresholds</value>
+    <comment>String</comment>
   </data>
 </root>

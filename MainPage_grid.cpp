@@ -63,9 +63,9 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.get_grid_gray(value);
 		const float val3 = value * COLOR_MAX;
 		sample_slider_3().Value(val3);
-		grid_set_slider_header<UNDO_OP::GRID_GRAY, 3>(val3);
+		grid_slider_set_header<UNDO_OP::GRID_GRAY, 3>(val3);
 		sample_slider_3().Visibility(UI_VISIBLE);
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_set_slider< UNDO_OP::GRID_GRAY, 3> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_GRAY, 3> });
 		m_sample_type = SAMPLE_TYPE::NONE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -95,9 +95,9 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.get_grid_base(value);
 		const float val0 = value / SLIDER_STEP;
 		sample_slider_0().Value(val0);
-		grid_set_slider_header<UNDO_OP::GRID_BASE, 0>(val0);
+		grid_slider_set_header<UNDO_OP::GRID_BASE, 0>(val0);
 		sample_slider_0().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_set_slider<UNDO_OP::GRID_BASE, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_slider_value_changed<UNDO_OP::GRID_BASE, 0> });
 		m_sample_type = SAMPLE_TYPE::NONE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 	// U	操作
 	// S	スライダー
 	// value	値
-	template <UNDO_OP U, int S> void MainPage::grid_set_slider_header(const float value)
+	template <UNDO_OP U, int S> void MainPage::grid_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
@@ -184,17 +184,17 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// スライダーの値が変更された.
 	// U	操作の種類
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* const s = &m_sample_sheet;
 		const float value = static_cast<float>(args.NewValue());
 
-		grid_set_slider_header<U, S>(value);
+		grid_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			s->set_grid_base(value * SLIDER_STEP);
 		}

@@ -67,10 +67,10 @@ namespace winrt::GraphPaper::implementation
 		const float val1 = s_width / SLIDER_STEP;
 		sample_slider_1().Value(val1);
 		sample_slider_1().Visibility(UI_VISIBLE);
-		join_set_slider_header<UNDO_OP::STROKE_JOIN_LIMIT, 0>(val0);
-		join_set_slider_header<UNDO_OP::STROKE_WIDTH, 1>(val1);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_set_slider<UNDO_OP::STROKE_JOIN_LIMIT, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_set_slider<UNDO_OP::STROKE_WIDTH, 1> });
+		join_slider_set_header<UNDO_OP::STROKE_JOIN_LIMIT, 0>(val0);
+		join_slider_set_header<UNDO_OP::STROKE_WIDTH, 1>(val1);
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::STROKE_JOIN_LIMIT, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::STROKE_WIDTH, 1> });
 		m_sample_type = SAMPLE_TYPE::JOIN;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_line_join")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -99,7 +99,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::join_set_slider_header(const float value)
+	template <UNDO_OP U, int S> void MainPage::join_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
@@ -128,16 +128,16 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// スライダーの値が変更された.
 	// U	操作の種類
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::join_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::join_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* sample = m_sample_shape;
 		const float value = static_cast<float>(args.NewValue());
-		join_set_slider_header<U, S>(value);
+		join_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
 			sample->set_stroke_join_limit(value * SLIDER_STEP + 1.0f);
 		}

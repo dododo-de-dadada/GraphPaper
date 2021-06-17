@@ -393,6 +393,7 @@ namespace winrt::GraphPaper::implementation
 			sheet_init();
 			m_len_unit = LEN_UNIT::PIXEL;
 			m_color_code = COLOR_CODE::DEC;
+			m_pile_up_vert = DEF_PILE_UP_VERT;
 			m_status_bar = status_bar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
 		}
 

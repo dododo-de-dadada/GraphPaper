@@ -132,9 +132,9 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.get_text_line_sp(value);
 		const float val0 = value / SLIDER_STEP;
 		sample_slider_0().Value(val0);
-		text_set_slider_header<UNDO_OP::TEXT_LINE_H, 0>(val0);
+		text_slider_set_header<UNDO_OP::TEXT_LINE_H, 0>(val0);
 		sample_slider_0().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_LINE_H, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_LINE_H, 0> });
 		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -189,12 +189,12 @@ namespace winrt::GraphPaper::implementation
 		const float val1 = t_margin.height / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
-		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 0>(val0);
-		text_set_slider_header<UNDO_OP::TEXT_MARGIN, 1>(val1);
+		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 0>(val0);
+		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 1>(val1);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_MARGIN, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::text_set_slider<UNDO_OP::TEXT_MARGIN, 1> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_MARGIN, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_MARGIN, 1> });
 		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -220,26 +220,26 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::text_set_slider_header(const float value)
+	template <UNDO_OP U, int S> void MainPage::text_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
 
-		const float dpi = m_sheet_dx.m_logical_dpi;
-		float g_base;
-		m_sample_sheet.get_grid_base(g_base);
-		const float g_len = g_base + 1.0f;
+		//const float dpi = m_sheet_dx.m_logical_dpi;
+		//float g_base;
+		//m_sample_sheet.get_grid_base(g_base);
+		//const float g_len = g_base + 1.0f;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			constexpr wchar_t* HEADER[] = { L"str_text_mar_horzorz", L"str_text_mar_vertert" };
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE_H) {
 			constexpr wchar_t HEADER[] = L"str_line_sp";
 			if (value > FLT_MIN) {
 				wchar_t buf[32];
-				conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, dpi, g_len, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(HEADER) + L": " + buf;
 			}
 			else {
@@ -261,21 +261,21 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// スライダーの値が変更された.
 	// U	操作の種類
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::text_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::TEXT_LINE_H) {
 			const float value = static_cast<float>(args.NewValue());
-			text_set_slider_header<U, S>(value);
+			text_slider_set_header<U, S>(value);
 			m_sample_shape->set_text_line_sp(value * SLIDER_STEP);
 		}
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			const float value = static_cast<float>(args.NewValue());
-			text_set_slider_header<U, S>(value);
+			text_slider_set_header<U, S>(value);
 			D2D1_SIZE_F margin;
 			m_sample_shape->get_text_margin(margin);
 			if constexpr (S == 0) {

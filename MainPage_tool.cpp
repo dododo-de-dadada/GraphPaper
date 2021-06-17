@@ -99,7 +99,6 @@ namespace winrt::GraphPaper::implementation
 			}
 			tool_draw_is_checked(m_tool_draw = DRAW_TOOL::POLY);
 		}
-		//tmfi_tool_vert_snap().IsChecked(m_tool_vert_snap);
 		status_bar_set_draw();
 		event_set_cursor();
 	}
@@ -128,11 +127,6 @@ namespace winrt::GraphPaper::implementation
 		tmfi_tool_poly_clockwise().IsChecked(value.m_clockwise);
 	}
 
-	//void MainPage::tool_vert_snap_is_checked(const bool value)
-	//{
-		//tmfi_tool_vert_snap().IsChecked(value);
-	//}
-
 	// 多角形ツールのメニューのチェックをつける.
 	void MainPage::tool_poly_n_is_checked(const uint32_t value)
 	{
@@ -152,7 +146,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_tool_draw = static_cast<DRAW_TOOL>(dt_reader.ReadUInt32());
 		dt_read(m_tool_poly, dt_reader);
-		m_limit_align_vert = dt_reader.ReadSingle();
+		//m_pile_up_vert = dt_reader.ReadSingle();
 	}
 
 	// 作図ツールの状態を書き込む.
@@ -160,7 +154,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_tool_draw));
 		dt_write(m_tool_poly, dt_writer);
-		dt_writer.WriteSingle(m_limit_align_vert);
+		//dt_writer.WriteSingle(m_pile_up_vert);
 	}
 
 }

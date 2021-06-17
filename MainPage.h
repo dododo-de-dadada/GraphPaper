@@ -99,7 +99,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_GRID_UNIT = L"%.3f gd";	// グリッド単位の書式
 	constexpr auto ICON_INFO = L"glyph_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"glyph_alert";	// 警告アイコンの静的リソースのキー
-	constexpr auto SHEET_SIZE_DEF = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
+	constexpr auto DEF_PILE_UP_VERT = 2.0f * 6.0f;	// 頂点を重ねる閾値の既定値
+	constexpr auto DEF_SHEET_SIZE = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
 	constexpr auto UI_VISIBLE = Visibility::Visible;	// 表示	
 	constexpr auto UI_COLLAPSED = Visibility::Collapsed;	// 非表示
 
@@ -212,25 +213,24 @@ namespace winrt::GraphPaper::implementation
 		std::mutex m_dx_mutex;	// 描画環境の排他制御
 		winrt::hstring m_file_token_mru;	// 最近使ったファイルのトークン
 
-		// 図形の一覧
-		//bool m_summary_descend = true;
-		std::atomic_bool m_summary_atomic{ false };	// 図形の一覧の排他制御
+		// 一覧
+		std::atomic_bool m_summary_atomic{ false };	// 一覧の排他制御
 
 		// 文字列の編集, 検索と置換
+		bool m_edit_text_frame = false;	// 枠の大きさを合わせるか
 		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
 		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
 		bool m_find_text_case = false;	// 英文字の区別するか
 		bool m_find_text_wrap = false;	// 回り込み検索するか
-		bool m_edit_text_frame = false;	// 枠の大きさを合わせるか
 
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
+		float m_pile_up_vert = DEF_PILE_UP_VERT;	// 頂点を重ねる閾値
 		STATUS_BAR m_status_bar = status_bar_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		// 作図ツール
 		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
-		float m_limit_align_vert = 2.0f * Shape::s_anch_len;	// 頂点同士を合わせる距離
 		POLY_TOOL m_tool_poly{ DEF_POLY_TOOL };	// 多角形の作図ツール
 
 		uint32_t m_cnt_selected = 0;		// 選択された図形の数
@@ -344,9 +344,9 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「つなぎの形式」が選択された.
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void join_set_slider_header(const float value);
-		// 値をスライダーのヘッダーと、見本の図形に格納する.
-		template <UNDO_OP U, int S> void join_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
+		template <UNDO_OP U, int S> void join_slider_set_header(const float value);
+		// スライダーの値が変更された.
+		template <UNDO_OP U, int S> void join_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_arrange.cpp
@@ -378,9 +378,9 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「矢じるしの大きさ」が選択された.
 		IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void arrow_set_slider_header(const float value);
-		// 値をスライダーのヘッダーと、見本の図形に格納する.
-		template <UNDO_OP U, int S> void arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		template <UNDO_OP U, int S> void arrow_slider_set_header(const float value);
+		// スライダーの値が変更された.
+		template <UNDO_OP U, int S> void arrow_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_disp.cpp
@@ -473,10 +473,10 @@ namespace winrt::GraphPaper::implementation
 
 		// 塗りつぶしメニューの「色」が選択された.
 		IAsyncAction fill_color_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 値をスライダーのヘッダーと、見本の図形に格納する.
-		template <UNDO_OP U, int S> void fill_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		// スライダーの値が変更された.
+		template <UNDO_OP U, int S> void fill_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void fill_set_slider_header(const float value);
+		template <UNDO_OP U, int S> void fill_slider_set_header(const float value);
 
 		//-------------------------------
 		// MainPage_find.cpp
@@ -530,9 +530,9 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「太さ」が選択された.
 		IAsyncAction font_weight_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void font_set_slider_header(const float value);
-		// 値をスライダーのヘッダーと、見本の図形に格納する.
-		template <UNDO_OP U, int S> void font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		template <UNDO_OP U, int S> void font_slider_set_header(const float value);
+		// スライダーの値が変更された.
+		template <UNDO_OP U, int S> void font_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_grid.cpp
@@ -558,9 +558,9 @@ namespace winrt::GraphPaper::implementation
 		// 用紙メニューの「方眼に合わせる」が選択された.
 		void grid_snap_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーと図形に格納する.
-		template <UNDO_OP U, int S> void grid_set_slider_header(const float value);
-		// 値をスライダーのヘッダーと、見本の図形に格納する.
-		template <UNDO_OP U, int S> void grid_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		template <UNDO_OP U, int S> void grid_slider_set_header(const float value);
+		// スライダーの値が変更された.
+		template <UNDO_OP U, int S> void grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_group.cpp
@@ -630,6 +630,12 @@ namespace winrt::GraphPaper::implementation
 		void color_code_is_checked(const COLOR_CODE c_code);
 		// その他メニューの「色の表記」のサブ項目が選択された.
 		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
+		// その他メニューの「頂点を重ねる...」が選択された.
+		IAsyncAction pile_up_vert_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
+		// 値をスライダーのヘッダーに格納する.
+		void pile_up_vert_set_header(const float value) noexcept;
+		// スライダーの値が変更された.
+		void pile_up_vert_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept;
 		// その他メニューの「長さの単位」に印をつける.
 		void len_unit_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.
@@ -720,9 +726,9 @@ namespace winrt::GraphPaper::implementation
 		// 前景色を得る.
 		const D2D1_COLOR_F& sheet_foreground(void) const noexcept;
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void sheet_set_slider_header(const float value);
-		// 値をスライダーのヘッダーと、見本の図形に格納する.
-		template <UNDO_OP U, int S> void sheet_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		template <UNDO_OP U, int S> void sheet_slider_set_header(const float value);
+		// スライダーの値が変更された.
+		template <UNDO_OP U, int S> void sheet_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 用紙の大きさの最大値 (ピクセル) を得る.
 		constexpr float sheet_size_max(void) const noexcept { return 32767.0F; }
 		// 用紙のスワップチェーンパネルがロードされた.
@@ -769,8 +775,6 @@ namespace winrt::GraphPaper::implementation
 		void status_bar_set_zoom(void);
 		// ステータスバーの表示を設定する.
 		void status_bar_visibility(void);
-		// データライターにステータスバーの状態を書き込む.
-		//void status_bar_write(DataWriter const& dt_writer);
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -788,9 +792,9 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「太さ」が選択された.
 		IAsyncAction stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template<UNDO_OP U, int S> void stroke_set_slider_header(const float value);
-		// 値をスライダーのヘッダーと、見本の図形に格納する.
-		template<UNDO_OP U, int S> void stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		template<UNDO_OP U, int S> void stroke_slider_set_header(const float value);
+		// スライダーの値が変更された.
+		template<UNDO_OP U, int S> void stroke_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_summary.cpp
@@ -858,9 +862,9 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「文字列のそろえ」が選択された.
 		void text_align_t_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void text_set_slider_header(const float value);
-		// 値をスライダーのヘッダーと、見本の図形に格納する.
-		template <UNDO_OP U, int S> void text_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		template <UNDO_OP U, int S> void text_slider_set_header(const float value);
+		// スライダーの値が変更された.
+		template <UNDO_OP U, int S> void text_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_thread.cpp
@@ -885,19 +889,12 @@ namespace winrt::GraphPaper::implementation
 		void tool_poly_n_is_checked(const uint32_t value);
 		// 作図メニューの「多角形ツール」に印をつける.
 		void tool_poly_is_checked(const POLY_TOOL& value);
-		// 作図メニューの「頂点に合わせる」に印をつける.
-		void tool_vert_snap_is_checked(const bool value);
 		// 作図ツールの状態を読み込む.
 		void tool_read(DataReader const& dt_reader);
 		// 作図ツールの状態を書き込む.
 		void tool_write(DataWriter const& dt_writer);
 		//　Escape が押された.
 		void kacc_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
-		// 作図ツールの「頂点に合わせる」が選択された.
-		void tool_vert_snap_click(IInspectable const&, RoutedEventArgs const&) noexcept
-		{
-			//m_tool_vert_snap = tmfi_tool_vert_snap().IsChecked();
-		}
 
 		//-----------------------------
 		// MainPage_undo.cpp

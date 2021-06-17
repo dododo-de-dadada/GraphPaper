@@ -1046,8 +1046,8 @@
     <value>つなぎの種類</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_tool_vert_snap.Text" xml:space="preserve">
-    <value>頂点に合わせる...</value>
+  <data name="mfi_pile_up_vert.Text" xml:space="preserve">
+    <value>頂点を重ねる...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_cap_flat.Text" xml:space="preserve">
@@ -1065,5 +1065,9 @@
   <data name="rmfi_cap_triangle.Text" xml:space="preserve">
     <value>三角形</value>
     <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="str_pile_up_vert" xml:space="preserve">
+    <value>しきい値</value>
+    <comment>String</comment>
   </data>
 </root>

@@ -90,18 +90,18 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
 		sample_slider_3().Value(val3);
-		font_set_slider_header<UNDO_OP::FONT_COLOR, 0>(val0);
-		font_set_slider_header<UNDO_OP::FONT_COLOR, 1>(val1);
-		font_set_slider_header<UNDO_OP::FONT_COLOR, 2>(val2);
-		font_set_slider_header<UNDO_OP::FONT_COLOR, 3>(val3);
+		font_slider_set_header<UNDO_OP::FONT_COLOR, 0>(val0);
+		font_slider_set_header<UNDO_OP::FONT_COLOR, 1>(val1);
+		font_slider_set_header<UNDO_OP::FONT_COLOR, 2>(val2);
+		font_slider_set_header<UNDO_OP::FONT_COLOR, 3>(val3);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
 		sample_slider_3().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 2> });
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_COLOR, 3> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 3> });
 		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -193,7 +193,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::font_set_slider_header(const float value)
+	template <UNDO_OP U, int S> void MainPage::font_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
@@ -246,16 +246,16 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// スライダーの値が変更された.
 	// U	操作の種類
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::font_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::font_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* const s = m_sample_shape;
 		const auto value = static_cast<float>(args.NewValue());
-		font_set_slider_header<U, S>(value);
+		font_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			s->set_font_size(value);
 		}
@@ -291,9 +291,9 @@ namespace winrt::GraphPaper::implementation
 		float val0;
 		m_sample_sheet.get_font_size(val0);
 		sample_slider_0().Value(val0);
-		font_set_slider_header<UNDO_OP::FONT_SIZE, 0>(val0);
+		font_slider_set_header<UNDO_OP::FONT_SIZE, 0>(val0);
 		sample_slider_0().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_set_slider<UNDO_OP::FONT_SIZE, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_SIZE, 0> });
 		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();

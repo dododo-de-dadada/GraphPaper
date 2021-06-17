@@ -16,38 +16,37 @@ namespace winrt::GraphPaper::implementation
 			m_pos.x + m_diff[0].x,
 			m_pos.y + m_diff[0].y
 		};
+		// 塗りつぶし色が不透明か判定する.
 		if (is_opaque(m_fill_color)) {
-			// 塗りつぶし色が不透明な場合,
 			// 方形を塗りつぶす.
 			dx.m_shape_brush->SetColor(m_fill_color);
 			dx.m_d2dContext->FillRectangle(&rect, dx.m_shape_brush.get());
 		}
+		// 線枠の色が不透明か判定する.
 		if (is_opaque(m_stroke_color)) {
-			// 線枠の色が不透明な場合,
 			// 方形の枠を表示する.
 			const auto w = m_stroke_width;
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawRectangle(
 				rect, dx.m_shape_brush.get(), w, m_d2d_stroke_style.get());
 		}
-		if (is_selected() != true) {
-			return;
-		}
-		// 選択フラグが立っている場合,
-		// 部位を表示する.
-		D2D1_POINT_2F r_pos[4];	// 方形の頂点
-		r_pos[0] = m_pos;
-		r_pos[1].y = rect.top;
-		r_pos[1].x = rect.right;
-		r_pos[2].x = rect.right;
-		r_pos[2].y = rect.bottom;
-		r_pos[3].y = rect.bottom;
-		r_pos[3].x = rect.left;
-		for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-			anch_draw_rect(r_pos[i], dx);
-			D2D1_POINT_2F r_mid;	// 方形の辺の中点
-			pt_avg(r_pos[j], r_pos[i], r_mid);
-			anch_draw_rect(r_mid, dx);
+		// この図形が選択されてるか判定する.
+		if (is_selected()) {
+			// 部位を表示する.
+			D2D1_POINT_2F r_pos[4];	// 方形の頂点
+			r_pos[0] = m_pos;
+			r_pos[1].y = rect.top;
+			r_pos[1].x = rect.right;
+			r_pos[2].x = rect.right;
+			r_pos[2].y = rect.bottom;
+			r_pos[3].y = rect.bottom;
+			r_pos[3].x = rect.left;
+			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
+				anch_draw_rect(r_pos[i], dx);
+				D2D1_POINT_2F r_mid;	// 方形の辺の中点
+				pt_avg(r_pos[j], r_pos[i], r_mid);
+				anch_draw_rect(r_mid, dx);
+			}
 		}
 	}
 

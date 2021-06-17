@@ -29,18 +29,18 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
 		sample_slider_3().Value(val3);
-		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 0>(val0);
-		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 1>(val1);
-		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 2>(val2);
-		stroke_set_slider_header<UNDO_OP::STROKE_COLOR, 3>(val3);
+		stroke_slider_set_header<UNDO_OP::STROKE_COLOR, 0>(val0);
+		stroke_slider_set_header<UNDO_OP::STROKE_COLOR, 1>(val1);
+		stroke_slider_set_header<UNDO_OP::STROKE_COLOR, 2>(val2);
+		stroke_slider_set_header<UNDO_OP::STROKE_COLOR, 3>(val3);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
 		sample_slider_3().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 2> });
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_COLOR, 3> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 3> });
 		m_sample_type = SAMPLE_TYPE::STROKE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -98,16 +98,16 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
 		sample_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
 		sample_slider_4().Visibility(UI_VISIBLE);
-		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 0>(val0);
-		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 1>(val1);
-		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 2>(val2);
-		stroke_set_slider_header<UNDO_OP::STROKE_DASH_PATT, 3>(val3);
-		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 4>(val4);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 2> });
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_DASH_PATT, 3> });
-		const auto slider_4_token = sample_slider_4().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 4> });
+		stroke_slider_set_header<UNDO_OP::STROKE_DASH_PATT, 0>(val0);
+		stroke_slider_set_header<UNDO_OP::STROKE_DASH_PATT, 1>(val1);
+		stroke_slider_set_header<UNDO_OP::STROKE_DASH_PATT, 2>(val2);
+		stroke_slider_set_header<UNDO_OP::STROKE_DASH_PATT, 3>(val3);
+		stroke_slider_set_header<UNDO_OP::STROKE_WIDTH, 4>(val4);
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_DASH_PATT, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_DASH_PATT, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_DASH_PATT, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_DASH_PATT, 3> });
+		const auto slider_4_token = sample_slider_4().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_WIDTH, 4> });
 		m_sample_type = SAMPLE_TYPE::STROKE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -194,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::stroke_set_slider_header(const float value)
+	template <UNDO_OP U, int S> void MainPage::stroke_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
@@ -237,16 +237,16 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// スライダーの値が変更された.
 	// U	操作の種類
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::stroke_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::stroke_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = m_sample_shape;
 		const float value = static_cast<float>(args.NewValue());
-		stroke_set_slider_header<U, S>(value);
+		stroke_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::STROKE_DASH_PATT) {
 			STROKE_DASH_PATT patt;
 			s->get_stroke_dash_patt(patt);
@@ -304,8 +304,8 @@ namespace winrt::GraphPaper::implementation
 		const float val0 = value / SLIDER_STEP;
 		sample_slider_0().Value(val0);
 		sample_slider_0().Visibility(UI_VISIBLE);
-		stroke_set_slider_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_set_slider<UNDO_OP::STROKE_WIDTH, 0> });
+		stroke_slider_set_header<UNDO_OP::STROKE_WIDTH, 0>(val0);
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_WIDTH, 0> });
 		m_sample_type = SAMPLE_TYPE::STROKE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();

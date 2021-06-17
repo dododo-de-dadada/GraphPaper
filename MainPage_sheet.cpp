@@ -91,15 +91,15 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
-		sheet_set_slider_header<UNDO_OP::SHEET_COLOR, 0>(val0);
-		sheet_set_slider_header<UNDO_OP::SHEET_COLOR, 1>(val1);
-		sheet_set_slider_header<UNDO_OP::SHEET_COLOR, 2>(val2);
+		sheet_slider_set_header<UNDO_OP::SHEET_COLOR, 0>(val0);
+		sheet_slider_set_header<UNDO_OP::SHEET_COLOR, 1>(val1);
+		sheet_slider_set_header<UNDO_OP::SHEET_COLOR, 2>(val2);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::sheet_set_slider<UNDO_OP::SHEET_COLOR, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::sheet_set_slider<UNDO_OP::SHEET_COLOR, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::sheet_set_slider<UNDO_OP::SHEET_COLOR, 2> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 2> });
 		m_sample_type = SAMPLE_TYPE::NONE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -339,7 +339,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.set_sheet_color(Shape::m_default_background);
 			m_sheet_main.set_sheet_scale(1.0);
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			m_sheet_main.m_sheet_size = SHEET_SIZE_DEF;
+			m_sheet_main.m_sheet_size = DEF_SHEET_SIZE;
 			m_sheet_main.set_stroke_cap_style(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
 			m_sheet_main.set_stroke_color(Shape::m_default_foreground);
 			m_sheet_main.set_stroke_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
@@ -404,7 +404,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::sheet_set_slider_header(const float value)
+	template <UNDO_OP U, int S> void MainPage::sheet_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
@@ -443,16 +443,16 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// スライダーの値が変更された.
 	// U	操作の種類
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::sheet_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::sheet_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* s = &m_sample_sheet;
 		const auto value = static_cast<float>(args.NewValue());
-		sheet_set_slider_header<U, S>(value);
+		sheet_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			s->set_grid_base(value);
 		}

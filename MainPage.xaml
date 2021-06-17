@@ -531,9 +531,9 @@
                 </muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
 				<MenuFlyoutSubItem x:Uid="mfsi_tool_poly_type" Text="Type of Polygon">
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_line" x:Uid="rmfi_tool_poly_line" Click="tool_draw_click" GroupName="gn_poly_type" Text="2-Line" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_tri" x:Uid="rmfi_tool_poly_tri" Click="tool_draw_click" IsChecked="True" GroupName="gn_poly_type" Text="3-Triangle" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_quad" x:Uid="rmfi_tool_poly_quad" Click="tool_draw_click" GroupName="gn_poly_type" Text="4-Quadrilateral" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_line" x:Uid="rmfi_tool_poly_line" Click="tool_draw_click" GroupName="gn_poly_type" Text="2-Line" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_tri" x:Uid="rmfi_tool_poly_tri" Click="tool_draw_click" IsChecked="True" GroupName="gn_poly_type" Text="3-Triangle" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_quad" x:Uid="rmfi_tool_poly_quad" Click="tool_draw_click" GroupName="gn_poly_type" Text="4-Quadrilateral" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_pent" x:Uid="rmfi_tool_poly_pent" Click="tool_draw_click" GroupName="gn_poly_type" Text="5-Pentagon" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_hexa" x:Uid="rmfi_tool_poly_hexa" Click="tool_draw_click" GroupName="gn_poly_type" Text="6-Hexagon" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_hept" x:Uid="rmfi_tool_poly_hept" Click="tool_draw_click" GroupName="gn_poly_type" Text="7-Heptagon" />
@@ -546,8 +546,7 @@
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_closed" x:Uid="tmfi_tool_poly_closed" Click="tool_draw_click" IsChecked="true" Text="Closed" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_clockwise" x:Uid="tmfi_tool_poly_clockwise" Click="tool_draw_click" IsChecked="true" Text="Clockwise" />
 				</MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Name="mfi_tool_vert_snap" x:Uid="mfi_tool_vert_snap" Click="tool_vert_snap_click" IsChecked="true" Text="Snap to Vertex..." />
-            </muxc:MenuBarItem>
+			</muxc:MenuBarItem>
             <!-- 線枠メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_stroke_menu" AccessKey="S" Title="Stroke">
 			<!--<muxc:MenuBarItem x:Name="mbi_stroke_menu" x:Uid="mbi_stroke_menu" AccessKey="S" Title="Stroke">-->
@@ -757,7 +756,8 @@
                     <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_sheet" x:Uid="tmfi_status_bar_sheet" Click="status_bar_click" Text="Sheet Size" />
                     <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutSeparator />
+				<MenuFlyoutItem x:Name="mfi_pile_up_vert" x:Uid="mfi_pile_up_vert" Click="pile_up_vert_click_async" Text="Pile-up Vertex..." />
+				<MenuFlyoutSeparator />
                 <!-- バージョン情報メニュー -->
                 <MenuFlyoutItem x:Uid="mfi_about_this" Click="about_graph_paper_click" Text="About GraphPaper" />
             </muxc:MenuBarItem>
@@ -943,9 +943,9 @@
                 <TextBox x:Name="tx_sheet_size_max" x:Uid="tx_sheet_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum size" IsEnabled="false" />
             </StackPanel>
         </ContentDialog>
-        <ContentDialog x:Name="cd_tool_vert_snap" x:Uid="cd_tool_vert_snap" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" >
+        <ContentDialog x:Name="cd_pile_up_vert" x:Uid="cd_pile_up_vert" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" >
             <StackPanel>
-                <Slider x:Name="sd_tool_vert_snap" x:Uid="sd_tool_vert_snap" Maximum="255" Minimum="0" StepFrequency="1" Header="Limit Distance"/>
+				<Slider x:Name="sd_pile_up_vert" x:Uid="sd_pile_up_vert" Maximum="255" Minimum="0" StepFrequency="1" Header="Thresholds" ValueChanged="pile_up_vert_value_changed"/>
             </StackPanel>
         </ContentDialog>
         <!-- 属性入力ダイアログ -->

@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 
 	//	値をスライダーのヘッダーに格納する.
 	//	value	値
-	template <UNDO_OP U, int S> void MainPage::arrow_set_slider_header(const float value)
+	template <UNDO_OP U, int S> void MainPage::arrow_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
@@ -51,16 +51,16 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// スライダーの値が変更された.
 	// U	操作の種類
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::arrow_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::arrow_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		const auto value = static_cast<float>(args.NewValue());
 		// 値をスライダーのヘッダーに格納する.
-		arrow_set_slider_header<U, S>(value);
+		arrow_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			ARROW_SIZE a_size;
 			m_sample_shape->get_arrow_size(a_size);
@@ -95,15 +95,15 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(val0);
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
-		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 0>(val0);
-		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 1>(val1);
-		arrow_set_slider_header<UNDO_OP::ARROW_SIZE, 2>(val2);
+		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 0>(val0);
+		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 1>(val1);
+		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 2>(val2);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_set_slider< UNDO_OP::ARROW_SIZE, 2> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 2> });
 		m_sample_type = SAMPLE_TYPE::STROKE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();

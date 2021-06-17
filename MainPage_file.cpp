@@ -106,8 +106,6 @@ namespace winrt::GraphPaper::implementation
 
 		tool_draw_is_checked(m_tool_draw);
 		tool_poly_is_checked(m_tool_poly);
-		//tool_vert_snap_is_checked(m_tool_vert_snap);
-
 		color_code_is_checked(m_color_code);
 		status_bar_is_checked(m_status_bar);
 		len_unit_is_checked(m_len_unit);
@@ -198,6 +196,7 @@ namespace winrt::GraphPaper::implementation
 			//m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt32());
 			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
+			m_pile_up_vert = dt_reader.ReadSingle();
 			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 
 			m_sheet_main.read(dt_reader);
@@ -657,6 +656,7 @@ namespace winrt::GraphPaper::implementation
 			//dt_writer.WriteUInt32(static_cast<uint32_t>(m_status_bar));
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_code));
+			dt_writer.WriteSingle(m_pile_up_vert);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
 			m_sheet_main.write(dt_writer);
 			if (suspend) {

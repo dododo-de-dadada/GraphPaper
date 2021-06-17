@@ -28,18 +28,18 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Value(val1);
 		sample_slider_2().Value(val2);
 		sample_slider_3().Value(val3);
-		fill_set_slider_header<UNDO_OP::FILL_COLOR, 0>(val0);
-		fill_set_slider_header<UNDO_OP::FILL_COLOR, 1>(val1);
-		fill_set_slider_header<UNDO_OP::FILL_COLOR, 2>(val2);
-		fill_set_slider_header<UNDO_OP::FILL_COLOR, 3>(val3);
+		fill_slider_set_header<UNDO_OP::FILL_COLOR, 0>(val0);
+		fill_slider_set_header<UNDO_OP::FILL_COLOR, 1>(val1);
+		fill_slider_set_header<UNDO_OP::FILL_COLOR, 2>(val2);
+		fill_slider_set_header<UNDO_OP::FILL_COLOR, 3>(val3);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
 		sample_slider_3().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 2> });
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::fill_set_slider<UNDO_OP::FILL_COLOR, 3> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::fill_slider_value_changed<UNDO_OP::FILL_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::fill_slider_value_changed<UNDO_OP::FILL_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::fill_slider_value_changed<UNDO_OP::FILL_COLOR, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::fill_slider_value_changed<UNDO_OP::FILL_COLOR, 3> });
 		m_sample_type = SAMPLE_TYPE::FILL;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FILL)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -69,7 +69,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::fill_set_slider_header(const float value)
+	template <UNDO_OP U, int S> void MainPage::fill_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
@@ -110,17 +110,17 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 値をスライダーのヘッダーと、見本の図形に格納する.
+	// スライダーの値が変更された.
 	// U	操作の種類
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	template <UNDO_OP U, int S>
-	void MainPage::fill_set_slider(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::fill_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		Shape* const s = m_sample_shape;
 		const float value = static_cast<float>(args.NewValue());
-		fill_set_slider_header<U, S>(value);
+		fill_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::FILL_COLOR) {
 			D2D1_COLOR_F color;
 			s->get_fill_color(color);

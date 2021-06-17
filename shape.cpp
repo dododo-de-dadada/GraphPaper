@@ -20,7 +20,6 @@ namespace winrt::GraphPaper::implementation
 	D2D1_COLOR_F Shape::m_range_foreground = RNG_TEXT;	// 文字範囲の文字色
 	D2D1_COLOR_F Shape::m_default_background = S_WHITE;	// 前景色 (アンカーの背景色)
 	D2D1_COLOR_F Shape::m_default_foreground = S_BLACK;	// 背景色 (アンカーの前景色)
-	static float m_limit_align_vert = 2.0f * 6.0f;	// 頂点同士を合わせる距離
 
 	// 文字が '0'...'9' または 'A'...'F', 'a'...'f' か判定する.
 	static bool is_hex(const wchar_t w, uint32_t& x) noexcept;
