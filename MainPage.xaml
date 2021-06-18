@@ -943,9 +943,10 @@
                 <TextBox x:Name="tx_sheet_size_max" x:Uid="tx_sheet_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum size" IsEnabled="false" />
             </StackPanel>
         </ContentDialog>
+        <!-- 頂点を重ねる閾値 -->
         <ContentDialog x:Name="cd_misc_pile_up" x:Uid="cd_misc_pile_up" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" >
             <StackPanel>
-				<Slider x:Name="sd_misc_pile_up" x:Uid="sd_misc_pile_up" Maximum="255" Minimum="0" StepFrequency="1" Header="Thresholds" ValueChanged="misc_pile_up_value_changed"/>
+				<Slider x:Name="sd_misc_pile_up" x:Uid="sd_misc_pile_up" Maximum="127.5" Minimum="0" SnapsTo="Ticks" TickFrequency="0.5" Header="Thresholds" ValueChanged="misc_pile_up_value_changed"/>
             </StackPanel>
         </ContentDialog>
         <!-- 属性入力ダイアログ -->

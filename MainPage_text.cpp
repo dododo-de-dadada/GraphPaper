@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr wchar_t DLG_TITLE[] = L"str_text";
-	constexpr float SLIDER_STEP = 0.5f;
+	//constexpr float SLIDER_STEP = 0.5f;
 	constexpr float TEXT_LINE_H_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
 
 	// 編集メニューの「枠の大きさを合わせる」が選択された.
@@ -126,13 +126,17 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float value;
 		m_sample_sheet.get_text_line_sp(value);
-		const float val0 = value / SLIDER_STEP;
-		sample_slider_0().Value(val0);
-		text_slider_set_header<UNDO_OP::TEXT_LINE_H, 0>(val0);
+
+		sample_slider_0().Maximum(127.5);
+		sample_slider_0().TickFrequency(0.5);
+		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_0().Value(value);
+		text_slider_set_header<UNDO_OP::TEXT_LINE_H, 0>(value);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_LINE_H, 0> });
 		m_sample_type = SAMPLE_TYPE::FONT;
@@ -181,16 +185,24 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		D2D1_SIZE_F t_margin;
 		m_sample_sheet.get_text_margin(t_margin);
-		const float val0 = t_margin.width / SLIDER_STEP;
-		const float val1 = t_margin.height / SLIDER_STEP;
-		sample_slider_0().Value(val0);
-		sample_slider_1().Value(val1);
-		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 0>(val0);
-		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 1>(val1);
+
+		sample_slider_0().Maximum(127.5);
+		sample_slider_0().TickFrequency(0.5);
+		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_0().Value(t_margin.width);
+		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 0>(t_margin.width);
+
+		sample_slider_1().Maximum(127.5);
+		sample_slider_1().TickFrequency(0.5);
+		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_1().Value(t_margin.height);
+		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 1>(t_margin.height);
+
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_MARGIN, 0> });
@@ -223,23 +235,19 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S> void MainPage::text_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring text;
 
-		//const float dpi = m_sheet_dx.m_logical_dpi;
-		//float g_base;
-		//m_sample_sheet.get_grid_base(g_base);
-		//const float g_len = g_base + 1.0f;
+		winrt::hstring text;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			constexpr wchar_t* HEADER[] = { L"str_text_mar_horzorz", L"str_text_mar_vertert" };
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE_H) {
-			constexpr wchar_t HEADER[] = L"str_line_sp";
+			constexpr wchar_t HEADER[] = L"str_text_line_sp";
 			if (value > FLT_MIN) {
 				wchar_t buf[32];
-				conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(HEADER) + L": " + buf;
 			}
 			else {
@@ -271,7 +279,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::TEXT_LINE_H) {
 			const float value = static_cast<float>(args.NewValue());
 			text_slider_set_header<U, S>(value);
-			m_sample_shape->set_text_line_sp(value * SLIDER_STEP);
+			m_sample_shape->set_text_line_sp(value);
 		}
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			const float value = static_cast<float>(args.NewValue());
@@ -279,10 +287,10 @@ namespace winrt::GraphPaper::implementation
 			D2D1_SIZE_F margin;
 			m_sample_shape->get_text_margin(margin);
 			if constexpr (S == 0) {
-				margin.width = static_cast<FLOAT>(value * SLIDER_STEP);
+				margin.width = static_cast<FLOAT>(value);
 			}
 			if constexpr (S == 1) {
-				margin.height = static_cast<FLOAT>(value * SLIDER_STEP);
+				margin.height = static_cast<FLOAT>(value);
 			}
 			m_sample_shape->set_text_margin(margin);
 		}

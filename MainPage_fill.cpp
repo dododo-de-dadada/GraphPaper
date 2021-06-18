@@ -16,6 +16,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		D2D1_COLOR_F value;
@@ -24,13 +25,25 @@ namespace winrt::GraphPaper::implementation
 		const float val1 = value.g * COLOR_MAX;
 		const float val2 = value.b * COLOR_MAX;
 		const float val3 = value.a * COLOR_MAX;
+		sample_slider_0().Maximum(255.0);
+		sample_slider_0().TickFrequency(1.0);
+		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(val0);
-		sample_slider_1().Value(val1);
-		sample_slider_2().Value(val2);
-		sample_slider_3().Value(val3);
 		fill_slider_set_header<UNDO_OP::FILL_COLOR, 0>(val0);
+		sample_slider_1().Maximum(255.0);
+		sample_slider_1().TickFrequency(1.0);
+		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_1().Value(val1);
 		fill_slider_set_header<UNDO_OP::FILL_COLOR, 1>(val1);
+		sample_slider_2().Maximum(255.0);
+		sample_slider_2().TickFrequency(1.0);
+		sample_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_2().Value(val2);
 		fill_slider_set_header<UNDO_OP::FILL_COLOR, 2>(val2);
+		sample_slider_3().Maximum(255.0);
+		sample_slider_3().TickFrequency(1.0);
+		sample_slider_3().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_3().Value(val3);
 		fill_slider_set_header<UNDO_OP::FILL_COLOR, 3>(val3);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);

@@ -11,7 +11,7 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 
-	constexpr float SLIDER_STEP = 0.5f;
+	//constexpr float SLIDER_STEP = 0.5f;
 	constexpr wchar_t TITLE_GRID[] = L"str_grid";
 
 	// 用紙メニューの「方眼の強調」が選択された.
@@ -57,13 +57,19 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		float value;
-		m_sample_sheet.get_grid_gray(value);
-		const float val3 = value * COLOR_MAX;
-		sample_slider_3().Value(val3);
-		grid_slider_set_header<UNDO_OP::GRID_GRAY, 3>(val3);
+		float g_gray;
+		m_sample_sheet.get_grid_gray(g_gray);
+		g_gray *= COLOR_MAX;
+
+		sample_slider_3().Maximum(255.0);
+		sample_slider_3().TickFrequency(1.0);
+		sample_slider_3().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_3().Value(g_gray);
+		grid_slider_set_header<UNDO_OP::GRID_GRAY, 3>(g_gray);
+
 		sample_slider_3().Visibility(UI_VISIBLE);
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_GRAY, 3> });
 		m_sample_type = SAMPLE_TYPE::NONE;
@@ -89,13 +95,17 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		float value;
-		m_sample_sheet.get_grid_base(value);
-		const float val0 = value / SLIDER_STEP;
-		sample_slider_0().Value(val0);
-		grid_slider_set_header<UNDO_OP::GRID_BASE, 0>(val0);
+		float g_base;
+		m_sample_sheet.get_grid_base(g_base);
+
+		sample_slider_0().Maximum(127.5);
+		sample_slider_0().TickFrequency(0.5);
+		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_0().Value(g_base);
+		grid_slider_set_header<UNDO_OP::GRID_BASE, 0>(g_base);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_slider_value_changed<UNDO_OP::GRID_BASE, 0> });
 		m_sample_type = SAMPLE_TYPE::NONE;
@@ -159,7 +169,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.get_grid_base(g_base);
 			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value * SLIDER_STEP + 1.0f, m_sheet_dx.m_logical_dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/ + 1.0f, m_sheet_dx.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_GRAY) {
@@ -196,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 
 		grid_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::GRID_BASE) {
-			s->set_grid_base(value * SLIDER_STEP);
+			s->set_grid_base(value/* * SLIDER_STEP*/);
 		}
 		if constexpr (U == UNDO_OP::GRID_GRAY) {
 			s->set_grid_gray(value / COLOR_MAX);

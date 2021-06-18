@@ -6,7 +6,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr wchar_t DLG_TITLE[] = L"str_line_join";
-	constexpr float SLIDER_STEP = 0.5f;
+	//constexpr float SLIDER_STEP = 0.5f;
 
 	// 線枠メニューの「端点の種類」が選択された.
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
@@ -55,20 +55,29 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		float value;
-		m_sample_sheet.get_stroke_join_limit(value);
-		const float val0 = (value - 1.0F) / SLIDER_STEP;
-		sample_slider_0().Value(val0);
+
+		float j_limit;
+		m_sample_sheet.get_stroke_join_limit(j_limit);
+		j_limit -= 1.0f;
+		sample_slider_0().Maximum(127.5);
+		sample_slider_0().TickFrequency(0.5);
+		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_0().Value(j_limit);
 		sample_slider_0().Visibility(UI_VISIBLE);
+		join_slider_set_header<UNDO_OP::STROKE_JOIN_LIMIT, 0>(j_limit);
+
 		float s_width;
 		m_sample_sheet.get_stroke_width(s_width);
-		const float val1 = s_width / SLIDER_STEP;
-		sample_slider_1().Value(val1);
+		sample_slider_1().Maximum(127.5);
+		sample_slider_1().TickFrequency(0.5);
+		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_1().Value(s_width);
 		sample_slider_1().Visibility(UI_VISIBLE);
-		join_slider_set_header<UNDO_OP::STROKE_JOIN_LIMIT, 0>(val0);
-		join_slider_set_header<UNDO_OP::STROKE_WIDTH, 1>(val1);
+		join_slider_set_header<UNDO_OP::STROKE_WIDTH, 1>(s_width);
+
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::STROKE_JOIN_LIMIT, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::STROKE_WIDTH, 1> });
 		m_sample_type = SAMPLE_TYPE::JOIN;
@@ -107,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			const float limit = value * SLIDER_STEP + 1.0f;
+			const float limit = value/* * SLIDER_STEP*/ + 1.0f;
 			swprintf_s(buf, LEN, L"%.1f", limit);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_join_limit") + L": " + buf;
 		}
@@ -117,7 +126,7 @@ namespace winrt::GraphPaper::implementation
 			const float g_len = g_base + 1.0f;
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (S == 0) {
@@ -139,10 +148,10 @@ namespace winrt::GraphPaper::implementation
 		const float value = static_cast<float>(args.NewValue());
 		join_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
-			sample->set_stroke_join_limit(value * SLIDER_STEP + 1.0f);
+			sample->set_stroke_join_limit(value/* * SLIDER_STEP*/ + 1.0f);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH) {
-			sample->set_stroke_width(value * SLIDER_STEP);
+			sample->set_stroke_width(value/* * SLIDER_STEP*/);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

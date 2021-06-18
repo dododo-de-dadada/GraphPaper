@@ -71,29 +71,44 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_WEIGHT_EXTRA_BLACK
 	};
 
-	constexpr float SLIDER_STEP = 0.5f;
+	//constexpr float SLIDER_STEP = 0.5f;
 
 	// 書体メニューの「色」が選択された.
 	IAsyncAction MainPage::font_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		D2D1_COLOR_F value;
-		m_sample_sheet.get_font_color(value);
-		const float val0 = value.r * COLOR_MAX;
-		const float val1 = value.g * COLOR_MAX;
-		const float val2 = value.b * COLOR_MAX;
-		const float val3 = value.a * COLOR_MAX;
+
+		D2D1_COLOR_F f_color;
+		m_sample_sheet.get_font_color(f_color);
+		const float val0 = f_color.r * COLOR_MAX;
+		const float val1 = f_color.g * COLOR_MAX;
+		const float val2 = f_color.b * COLOR_MAX;
+		const float val3 = f_color.a * COLOR_MAX;
+		sample_slider_0().Maximum(255.0);
+		sample_slider_0().TickFrequency(1.0);
+		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(val0);
-		sample_slider_1().Value(val1);
-		sample_slider_2().Value(val2);
-		sample_slider_3().Value(val3);
 		font_slider_set_header<UNDO_OP::FONT_COLOR, 0>(val0);
+		sample_slider_1().Maximum(255.0);
+		sample_slider_1().TickFrequency(1.0);
+		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_1().Value(val1);
 		font_slider_set_header<UNDO_OP::FONT_COLOR, 1>(val1);
+		sample_slider_2().Maximum(255.0);
+		sample_slider_2().TickFrequency(1.0);
+		sample_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_2().Value(val2);
 		font_slider_set_header<UNDO_OP::FONT_COLOR, 2>(val2);
+		sample_slider_3().Maximum(255.0);
+		sample_slider_3().TickFrequency(1.0);
+		sample_slider_3().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_3().Value(val3);
 		font_slider_set_header<UNDO_OP::FONT_COLOR, 3>(val3);
+
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
@@ -286,12 +301,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		float val0;
-		m_sample_sheet.get_font_size(val0);
-		sample_slider_0().Value(val0);
-		font_slider_set_header<UNDO_OP::FONT_SIZE, 0>(val0);
+		float f_size;
+		m_sample_sheet.get_font_size(f_size);
+		sample_slider_0().Maximum(127.5);
+		sample_slider_0().TickFrequency(0.5);
+		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_0().Value(f_size);
+		font_slider_set_header<UNDO_OP::FONT_SIZE, 0>(f_size);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_SIZE, 0> });
 		m_sample_type = SAMPLE_TYPE::FONT;

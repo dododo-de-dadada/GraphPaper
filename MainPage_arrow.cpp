@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr float SLIDER_STEP = 0.5f;
+	//constexpr float SLIDER_STEP = 0.5f;
 	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow";
 
 	//	値をスライダーのヘッダーに格納する.
@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value * SLIDER_STEP, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 			text = text + buf;
 		}
 		if constexpr (S == 0) {
@@ -65,13 +65,13 @@ namespace winrt::GraphPaper::implementation
 			ARROW_SIZE a_size;
 			m_sample_shape->get_arrow_size(a_size);
 			if constexpr (S == 0) {
-				a_size.m_width = static_cast<FLOAT>(value * SLIDER_STEP);
+				a_size.m_width = static_cast<FLOAT>(value);// * SLIDER_STEP);
 			}
 			if constexpr (S == 1) {
-				a_size.m_length = static_cast<FLOAT>(value * SLIDER_STEP);
+				a_size.m_length = static_cast<FLOAT>(value);// * SLIDER_STEP);
 			}
 			if constexpr (S == 2) {
-				a_size.m_offset = static_cast<FLOAT>(value * SLIDER_STEP);
+				a_size.m_offset = static_cast<FLOAT>(value);// * SLIDER_STEP);
 			}
 			m_sample_shape->set_arrow_size(a_size);
 		}
@@ -85,19 +85,28 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
+
 		ARROW_SIZE a_size;
 		m_sample_sheet.get_arrow_size(a_size);
-		const float val0 = a_size.m_width / SLIDER_STEP;
-		const float val1 = a_size.m_length / SLIDER_STEP;
-		const float val2 = a_size.m_offset / SLIDER_STEP;
-		sample_slider_0().Value(val0);
-		sample_slider_1().Value(val1);
-		sample_slider_2().Value(val2);
-		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 0>(val0);
-		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 1>(val1);
-		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 2>(val2);
+		sample_slider_0().Maximum(127.5);
+		sample_slider_0().TickFrequency(0.5);
+		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_0().Value(a_size.m_width);
+		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 0>(a_size.m_width);
+		sample_slider_1().Maximum(127.5);
+		sample_slider_1().TickFrequency(0.5);
+		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_1().Value(a_size.m_length);
+		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 1>(a_size.m_length);
+		sample_slider_2().Maximum(127.5);
+		sample_slider_2().TickFrequency(0.5);
+		sample_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_2().Value(a_size.m_offset);
+		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 2>(a_size.m_offset);
+
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
