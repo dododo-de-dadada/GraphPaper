@@ -26,10 +26,10 @@ namespace winrt::GraphPaper::implementation
 	static void event_reduce_slist(SHAPE_LIST& slist, UNDO_STACK const& u_stack, UNDO_STACK const& r_stack) noexcept;
 	// マウスホイールの値でスクロールする.
 	static bool event_scroll_by_wheel_delta(const ScrollBar& sb, const int32_t delta, const float scale);
-	// 選択された図形に最も近い方眼を見つけ, 図形と方眼との差分を求める.
-	static bool event_snap_to_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_vec) noexcept;
-	// 選択された図形の各頂点と, 非選択の図形の各頂点の中から, 最も近い頂点の組みを求め, その差分を得る.
-	static bool event_snap_to_vert(const SHAPE_LIST& slist, const float d_limit, D2D1_POINT_2F& v_vec) noexcept;
+	// 選択された図形の頂点に最も近い方眼を見つけ, 頂点と方眼との差分を求める.
+	static bool event_get_vec_nearby_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_vec) noexcept;
+	// 非選択の図形の頂点の中から, 選択された図形の頂点に最も近い頂点を見つけ, ２点間の差分を求める.
+	static bool event_get_vec_nearby_vert(const SHAPE_LIST& slist, const float d_limit, D2D1_POINT_2F& v_vec) noexcept;
 
 	// 操作スタックが図形を参照するか判定する.
 	// u_stack	操作スタック
@@ -103,7 +103,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 選択された図形に最も近い方眼を見つけ, 図形と方眼との差分を求める.
-	static bool event_snap_to_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_vec) noexcept
+	// slist	図形リスト
+	// g_len	方眼の大きさ
+	// g_vec	図形と方眼との差分
+	static bool event_get_vec_nearby_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_vec) noexcept
 	{
 		D2D1_POINT_2F v_pos[2 + MAX_N_GON];
 		D2D1_POINT_2F g_pos;
@@ -122,7 +125,7 @@ namespace winrt::GraphPaper::implementation
 				if (g_abs < d_min) {
 					g_vec = g_sub;
 					d_min = g_abs;
-					if (g_abs <= FLT_MIN) {
+					if (g_abs < FLT_MIN) {
 						return true;
 					}
 				}
@@ -131,11 +134,12 @@ namespace winrt::GraphPaper::implementation
 		return d_min < FLT_MAX;
 	}
 
-	// 選択された図形と, 非選択の図形の中から, 最も近い頂点間の差分を求める.
+	// 非選択の図形の頂点の中から, 選択された図形の頂点に最も近い頂点を見つけ, ２点間の差分を求める.
 	// s_list	図形リスト
 	// d_limit	制限距離 (これ以上離れた頂点は対象としない)
 	// v_vec	最も近い頂点間の差分
-	static bool event_snap_to_vert(const SHAPE_LIST& slist, const float d_limit, D2D1_POINT_2F& v_vec) noexcept
+	// 戻り値	見つかったなら true
+	static bool event_get_vec_nearby_vert(const SHAPE_LIST& slist, const float d_limit, D2D1_POINT_2F& v_vec) noexcept
 	{
 		float dd = d_limit * d_limit;
 		bool flag = false;
@@ -288,28 +292,33 @@ namespace winrt::GraphPaper::implementation
 	// 押された図形の変形を終了する.
 	void MainPage::event_finish_forming(void)
 	{
-		if (m_sheet_main.m_grid_snap && m_misc_pile_up >= FLT_MIN) {
+		const auto g_snap = m_sheet_main.m_grid_snap;
+		if (g_snap && m_misc_pile_up >= FLT_MIN) {
+			// 現在の位置と, それを方眼の大きさに丸めた位置と間の距離を求める.
+			const auto s_scale = m_sheet_main.m_sheet_scale;
 			D2D1_POINT_2F g_pos;
+			D2D1_POINT_2F g_vec;
 			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0, g_pos);
-			D2D1_POINT_2F v_pos;
-			if (slist_neighbor(m_list_shapes, m_event_pos_curr, 2.0f * Shape::s_anch_len / m_sheet_main.m_sheet_scale, v_pos)) {
-				D2D1_POINT_2F g_vec;
-				D2D1_POINT_2F v_vec;
+			pt_sub(g_pos, m_event_pos_curr, g_vec);
+			float g_len = min(static_cast<float>(sqrt(pt_abs2(g_vec))), m_misc_pile_up) / s_scale;
+			if (slist_neighbor(m_list_shapes, m_event_pos_curr, g_len, g_pos)) {
+				// 方眼との距離より近い頂点が見つかったなら, その距離に入れ替える.
 				pt_sub(g_pos, m_event_pos_curr, g_vec);
-				pt_sub(v_pos, m_event_pos_curr, v_vec);
-				if (pt_abs2(v_vec) < pt_abs2(g_vec)) {
-					g_pos = v_pos;
-				}
+				g_len = static_cast<float>(sqrt(pt_abs2(g_vec))) / s_scale;
 			}
-			m_event_pos_curr = g_pos;
+			// 頂点の位置を変更してみて, 近傍の頂点によって位置が変わらなかったか判定する.
+			if (!m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, g_len)) {
+				m_event_shape_pressed->set_anch_pos(g_pos, m_event_anch_pressed, 0.0f);
+			}
 		}
-		else if (m_sheet_main.m_grid_snap) {
+		else if (g_snap) {
 			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0, m_event_pos_curr);
+			m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, 0.0f);
 		}
 		else if (m_misc_pile_up >= FLT_MIN) {
 			slist_neighbor(m_list_shapes, m_event_pos_curr, m_misc_pile_up / m_sheet_main.m_sheet_scale, m_event_pos_curr);
+			m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, m_misc_pile_up / m_sheet_main.m_sheet_scale);
 		}
-		m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, m_misc_pile_up);
 		if (!undo_pop_if_invalid()) {
 			undo_push_null();
 			sheet_update_bbox();
@@ -323,9 +332,9 @@ namespace winrt::GraphPaper::implementation
 		// 方眼に合わせる, かつ頂点に合わせるか判定する.
 		if (m_sheet_main.m_grid_snap && m_misc_pile_up >= FLT_MIN) {
 			D2D1_POINT_2F g_vec{};	// 方眼への差分
-			if (event_snap_to_grid(m_list_shapes, m_sheet_main.m_grid_base + 1.0f, g_vec)) {
+			if (event_get_vec_nearby_grid(m_list_shapes, m_sheet_main.m_grid_base + 1.0f, g_vec)) {
 				D2D1_POINT_2F v_vec{};	// 頂点への差分
-				if (event_snap_to_vert(m_list_shapes, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_vec) && pt_abs2(v_vec) < pt_abs2(g_vec)) {
+				if (event_get_vec_nearby_vert(m_list_shapes, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_vec) && pt_abs2(v_vec) < pt_abs2(g_vec)) {
 					g_vec = v_vec;
 				}
 				slist_move(m_list_shapes, g_vec);
@@ -334,14 +343,14 @@ namespace winrt::GraphPaper::implementation
 		// 方眼に合わせる, かつ頂点に合わせないを判定する.
 		else if (m_sheet_main.m_grid_snap) {
 			D2D1_POINT_2F g_vec{};	// 方眼との差分
-			if (event_snap_to_grid(m_list_shapes, m_sheet_main.m_grid_base + 1.0f, g_vec)) {
+			if (event_get_vec_nearby_grid(m_list_shapes, m_sheet_main.m_grid_base + 1.0f, g_vec)) {
 				slist_move(m_list_shapes, g_vec);
 			}
 		} 
 		// 方眼に合わせない, かつ頂点に合わせるか判定する.
-		else if (m_misc_pile_up > FLT_MIN) {
+		else if (m_misc_pile_up >= FLT_MIN) {
 			D2D1_POINT_2F v_vec{};	// 頂点との差分
-			if (event_snap_to_vert(m_list_shapes, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_vec)) {
+			if (event_get_vec_nearby_vert(m_list_shapes, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_vec)) {
 				slist_move(m_list_shapes, v_vec);
 			}
 		}
@@ -720,7 +729,7 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				// 選択以外の作図ツールが選択されているならば,
 				// 方眼に合わせるか, かつシフトキーが押されていないか判定する.
-				if (m_misc_pile_up > FLT_MIN) {
+				if (m_misc_pile_up >= FLT_MIN) {
 					const bool box_type = (
 						m_tool_draw == DRAW_TOOL::ELLI ||
 						m_tool_draw == DRAW_TOOL::POLY ||

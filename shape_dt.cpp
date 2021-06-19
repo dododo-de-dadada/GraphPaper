@@ -258,7 +258,7 @@ namespace winrt::GraphPaper::implementation
 	// データライターに SVG として破線の形式と配置を書き込む.
 	void dt_write_svg(const D2D1_DASH_STYLE style, const STROKE_DASH_PATT& patt, const double width, DataWriter const& dt_writer)
 	{
-		if (width <= FLT_MIN) {
+		if (width < FLT_MIN) {
 			return;
 		}
 		const double a[]{

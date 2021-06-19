@@ -36,15 +36,15 @@ namespace winrt::GraphPaper::implementation
 		const double ac_x = cx - ax;
 		const double ac_y = cy - ay;
 		const double r = ab_x * cd_y - ab_y * cd_x;
-		if (fabs(r) <= FLT_MIN) {
+		if (fabs(r) < FLT_MIN) {
 			return false;
 		}
 		const double sr = cd_y * ac_x - cd_x * ac_y;
-		if (fabs(sr) <= FLT_MIN) {
+		if (fabs(sr) < FLT_MIN) {
 			return false;
 		}
 		const double tr = ab_y * ac_x - ab_x * ac_y;
-		if (fabs(tr) <= FLT_MIN) {
+		if (fabs(tr) < FLT_MIN) {
 			return false;
 		}
 		s = sr / r;
@@ -66,7 +66,7 @@ namespace winrt::GraphPaper::implementation
 	static bool stroke_test_cap_square(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F v_end, const size_t d_cnt, const D2D1_POINT_2F d_vec[], const double s_len[], const double e_width)
 	{
 		for (size_t i = 0; i < d_cnt; i++) {
-			if (s_len[i] > FLT_MIN) {
+			if (s_len[i] >= FLT_MIN) {
 				D2D1_POINT_2F s_vec;	// 辺ベクトル
 				pt_mul(d_vec[i], -e_width / s_len[i], s_vec);
 				const D2D1_POINT_2F o_vec{ s_vec.y, -s_vec.x };
@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F u_pos;
 		pt_sub(t_pos, v_end, u_pos);
 		for (size_t i = d_cnt; i > 0; i--) {
-			if (s_len[i - 1] > FLT_MIN) {
+			if (s_len[i - 1] >= FLT_MIN) {
 				D2D1_POINT_2F s_vec;	// 辺ベクトル
 				pt_mul(d_vec[i - 1], e_width / s_len[i - 1], s_vec);
 				const D2D1_POINT_2F o_vec{ s_vec.y, -s_vec.x };
@@ -105,7 +105,7 @@ namespace winrt::GraphPaper::implementation
 	static bool stroke_test_cap_triangle(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F v_end, const size_t d_cnt, const D2D1_POINT_2F d_vec[], const double s_len[], const double e_width)
 	{
 		for (size_t i = 0; i < d_cnt; i++) {
-			if (s_len[i] > FLT_MIN) {
+			if (s_len[i] >= FLT_MIN) {
 				D2D1_POINT_2F s_vec;
 				pt_mul(d_vec[i], -e_width / s_len[i], s_vec);
 				const D2D1_POINT_2F o_vec{ s_vec.y, -s_vec.x };
@@ -122,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F u_pos;
 		pt_sub(t_pos, v_end, u_pos);
 		for (size_t i = d_cnt; i > 0; i--) {
-			if (s_len[i - 1] > FLT_MIN) {
+			if (s_len[i - 1] >= FLT_MIN) {
 				D2D1_POINT_2F s_vec;
 				pt_mul(d_vec[i - 1], e_width / s_len[i - 1], s_vec);
 				const D2D1_POINT_2F o_vec{ s_vec.y, -s_vec.x };
@@ -330,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 			// 辺の長さを求める.
 			s_len[i] = sqrt(pt_abs2(d_vec[i]));
 			// 辺の長さがあるか判定する.
-			if (s_len[i] > FLT_MIN) {
+			if (s_len[i] >= FLT_MIN) {
 				nz_cnt++;
 			}
 			// 頂点に辺ベクトルを加え, 次の頂点を求める.
@@ -383,11 +383,11 @@ namespace winrt::GraphPaper::implementation
 			size_t e_cnt = 0;
 			for (size_t i = 0; i < d_cnt; i++) {
 				// 辺 i の長さがないか判定する.
-				if (s_len[i] <= FLT_MIN) {
+				if (s_len[i] < FLT_MIN) {
 					// 点 i から降順に, 長さのある辺を見つける.
 					size_t p = static_cast<size_t>(-1);
 					for (size_t h = i; h > 0; h--) {
-						if (s_len[h - 1] > FLT_MIN) {
+						if (s_len[h - 1] >= FLT_MIN) {
 							p = h - 1;
 							break;
 						}
@@ -400,7 +400,7 @@ namespace winrt::GraphPaper::implementation
 					}
 					// 見つからなかったならば,
 					// 辺が閉じている, かつ最後の辺の長さがゼロでないか判定する.
-					else if (s_closed && s_len[d_cnt] > FLT_MIN) {
+					else if (s_closed && s_len[d_cnt] >= FLT_MIN) {
 						// 最後の頂点の反対ベクトルを求め, 直前の辺ベクトルとする.
 						p_vec = D2D1_POINT_2F{ -v_pos[d_cnt].x, -v_pos[d_cnt].y };
 					}
@@ -410,7 +410,7 @@ namespace winrt::GraphPaper::implementation
 					// 点 i から昇順に, 長さのある辺を見つける.
 					size_t n = static_cast<size_t>(-1);
 					for (size_t j = i + 1; j < d_cnt; j++) {
-						if (s_len[j] > FLT_MIN) {
+						if (s_len[j] >= FLT_MIN) {
 							n = j;
 							break;
 						}
@@ -423,7 +423,7 @@ namespace winrt::GraphPaper::implementation
 					}
 					// 見つからなかったならば,
 					// 辺が閉じている, かつ最後の辺に長さがあるか判定する.
-					else if (s_closed && s_len[d_cnt] > FLT_MIN) {
+					else if (s_closed && s_len[d_cnt] >= FLT_MIN) {
 						// 最後の頂点の反対ベクトルを求め, 直後の辺ベクトルとする.
 						n_vec = D2D1_POINT_2F{ -v_pos[d_cnt].x, -v_pos[d_cnt].y };
 					}
@@ -435,7 +435,7 @@ namespace winrt::GraphPaper::implementation
 					pt_add(p_vec, n_vec, c_vec);
 					// 合成ベクトルの長さがないか判定する.
 					double c_abs = pt_abs2(c_vec);
-					if (c_abs <= FLT_MIN) {
+					if (c_abs < FLT_MIN) {
 						// 直前の辺ベクトルを合成ベクトルとする.
 						c_vec = p_vec;
 						c_abs = pt_abs2(c_vec);
@@ -474,7 +474,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			// 辺が閉じているか, 閉じた辺に長さがあるか判定する.
-			if (s_closed && s_len[d_cnt] > FLT_MIN) {
+			if (s_closed && s_len[d_cnt] >= FLT_MIN) {
 				// 最後の辺の位置を反転させ, 拡張する幅の長さに合わせ, 辺ベクトルを求める.
 				// 辺ベクトルに直交するベクトルを求める.
 				// 始点と終点を直交ベクトルに沿って正逆に拡張し, 拡張された辺に格納する.
@@ -577,7 +577,7 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(v_pos[(i + 1) % v_cnt], v_pos[i], q_sub);
 			// 差分の長さを求める.
 			s_len[i] = sqrt(pt_abs2(q_sub));
-			if (s_len[i] > FLT_MIN) {
+			if (s_len[i] >= FLT_MIN) {
 				// 差分の長さが 0 より大きいなら, 
 				// 重複しない頂点の数をインクリメントする.
 				q_cnt++;
@@ -590,17 +590,17 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 		for (size_t i = 0; i < v_cnt; i++) {
-			if (s_len[i] <= FLT_MIN) {
+			if (s_len[i] < FLT_MIN) {
 				// 辺の長さがほぼ 0 ならば, 隣接する前後の辺の中から
 				// 長さが 0 でない辺を探し, それらの法線ベクトルを合成し, 
 				// 長さ 0 の辺の法線ベクトルとする.
 				size_t prev;
-				for (size_t j = 1; s_len[prev = ((i - j) % v_cnt)] <= FLT_MIN; j++);
+				for (size_t j = 1; s_len[prev = ((i - j) % v_cnt)] < FLT_MIN; j++);
 				size_t next;
-				for (size_t j = 1; s_len[next = ((i + j) % v_cnt)] <= FLT_MIN; j++);
+				for (size_t j = 1; s_len[next = ((i + j) % v_cnt)] < FLT_MIN; j++);
 				pt_add(n_vec[prev], n_vec[next], n_vec[i]);
 				auto len = sqrt(pt_abs2(n_vec[i]));
-				if (len > FLT_MIN) {
+				if (len >= FLT_MIN) {
 					pt_mul(n_vec[i], 1.0 / len, n_vec[i]);
 				}
 				else {

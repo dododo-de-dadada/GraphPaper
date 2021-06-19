@@ -49,8 +49,8 @@
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
 	using winrt::Microsoft::UI::Xaml::Controls::RadioMenuFlyoutItem;
+	using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
 	using winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::SuspendingEventArgs;
@@ -223,20 +223,6 @@ namespace winrt::GraphPaper::implementation
 		bool m_find_text_case = false;	// 英文字の区別するか
 		bool m_find_text_wrap = false;	// 回り込み検索するか
 
-		// その他
-		LEN_UNIT m_misc_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COLOR_CODE m_misc_color_code = COLOR_CODE::DEC;	// 色成分の書式
-		float m_misc_pile_up = DEF_PILE_UP_VERT;	// 頂点を重ねる閾値
-		STATUS_BAR m_misc_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
-
-		// 作図ツール
-		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
-		POLY_TOOL m_tool_poly{ DEF_POLY_TOOL };	// 多角形の作図ツール
-
-		// 図形リスト
-		SHAPE_LIST m_list_shapes;		// 図形リスト
-		uint32_t m_list_sel_cnt = 0;		// 選択された図形の数
-
 		// ポインターイベント
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };		// ポインターの現在位置
 		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };		// ポインターの前回位置
@@ -248,6 +234,20 @@ namespace winrt::GraphPaper::implementation
 		uint64_t m_event_time_pressed = 0ULL;		// ポインターが押された時刻
 		uint64_t m_event_click_time = 0ULL;		// クリックの判定時間 (マイクロ秒)
 		double m_event_click_dist = 6.0;		// クリックの判定距離 (DIPs)
+
+		// 作図ツール
+		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
+		POLY_TOOL m_tool_poly{ DEF_POLY_TOOL };	// 多角形の作図ツール
+
+		// 図形リスト
+		SHAPE_LIST m_list_shapes;		// 図形リスト
+		uint32_t m_list_sel_cnt = 0;		// 選択された図形の数
+
+		// その他
+		LEN_UNIT m_misc_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
+		COLOR_CODE m_misc_color_code = COLOR_CODE::DEC;	// 色成分の書式
+		float m_misc_pile_up = DEF_PILE_UP_VERT;	// 頂点を重ねる閾値
+		STATUS_BAR m_misc_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		// 見本用紙
 		SHAPE_DX m_sample_dx;		// 見本の描画環境
@@ -781,12 +781,12 @@ namespace winrt::GraphPaper::implementation
 		// 線枠
 		//------------------------------
 
-		// 線枠メニューの「種類」に印をつける.
-		void stroke_dash_style_is_checked(const D2D1_DASH_STYLE d_style);
 		// 線枠メニューの「色」が選択された.
 		IAsyncAction stroke_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「種類」のサブ項目が選択された.
 		void stroke_dash_style_click(IInspectable const& sender, RoutedEventArgs const&);
+		// 線枠メニューの「種類」に印をつける.
+		void stroke_dash_style_is_checked(const D2D1_DASH_STYLE d_style);
 		// 線枠メニューの「破線の配列」が選択された.
 		IAsyncAction stroke_dash_patt_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「太さ」が選択された.

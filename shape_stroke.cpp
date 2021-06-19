@@ -5,29 +5,28 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-
 	// D2D ストローク特性を作成する.
 	static void create_stroke_style(ID2D1Factory3* const d_factory, const CAP_STYLE& s_cap_style, const D2D1_CAP_STYLE s_dash_cap, const D2D1_DASH_STYLE s_dash_style, const STROKE_DASH_PATT& s_dash_patt, const D2D1_LINE_JOIN s_join_style, const float s_join_limit, const float m_stroke_width, ID2D1StrokeStyle** s_stroke_style);
 
 	// D2D ストローク特性を作成する.
-	// s_cap_style	線の端点
-	// s_dash_cap	破線の端点
-	// s_dash_style	破線の種類
-	// s_dash_patt	破線の配置配列
-	// s_join_style	線のつなぎ
-	// s_join_limit	マイター制限
-	// s_width	線の太さ
-	// s_style	作成されたストローク特性
+	// cap_style	線の端点
+	// dash_cap	破線の端点
+	// dash_style	破線の種類
+	// dash_patt	破線の配置配列
+	// join_style	線のつなぎ
+	// join_limit	マイター制限
+	// width	線の太さ
+	// style	作成されたストローク特性
 	static void create_stroke_style(
 		ID2D1Factory3* const d_factory,
-		const CAP_STYLE& s_cap_style,
-		const D2D1_CAP_STYLE s_dash_cap,
-		const D2D1_DASH_STYLE s_dash_style,
-		const STROKE_DASH_PATT& s_dash_patt,
-		const D2D1_LINE_JOIN s_join_style,
-		const float s_join_limit,
-		const float s_width,
-		ID2D1StrokeStyle** s_stroke_style
+		const CAP_STYLE& cap_style,
+		const D2D1_CAP_STYLE dash_cap,
+		const D2D1_DASH_STYLE dash_style,
+		const STROKE_DASH_PATT& dash_patt,
+		const D2D1_LINE_JOIN join_style,
+		const float join_limit,
+		const float width,
+		ID2D1StrokeStyle** stroke_style
 	)
 	{
 		UINT32 d_cnt;	// 破線の配置配列の要素数
@@ -35,44 +34,41 @@ namespace winrt::GraphPaper::implementation
 		FLOAT *d_ptr;
 		D2D1_DASH_STYLE d_style;
 
-		if (s_width <= FLT_MIN) {
+		// 太さがゼロか判定する.
+		if (width < FLT_MIN) {
 			return;
 		}
-		if (s_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
-			d_arr[0] = s_dash_patt.m_[2] / s_width;
-			d_arr[1] = s_dash_patt.m_[3] / s_width;
+		if (dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
+			d_arr[0] = dash_patt.m_[2] / width;
+			d_arr[1] = dash_patt.m_[3] / width;
 			d_ptr = d_arr;
-			//d_arr = s_dash_patt.m_ + 2;
 			d_cnt = 2;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 		}
-		else if (s_dash_style == D2D1_DASH_STYLE_DASH) {
-			d_arr[0] = s_dash_patt.m_[0] / s_width;
-			d_arr[1] = s_dash_patt.m_[1] / s_width;
+		else if (dash_style == D2D1_DASH_STYLE_DASH) {
+			d_arr[0] = dash_patt.m_[0] / width;
+			d_arr[1] = dash_patt.m_[1] / width;
 			d_ptr = d_arr;
-			//d_arr = s_dash_patt.m_;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 			d_cnt = 2;
 		}
-		else if (s_dash_style == D2D1_DASH_STYLE_DASH_DOT) {
-			d_arr[0] = s_dash_patt.m_[0] / s_width;
-			d_arr[1] = s_dash_patt.m_[1] / s_width;
-			d_arr[2] = s_dash_patt.m_[2] / s_width;
-			d_arr[3] = s_dash_patt.m_[3] / s_width;
+		else if (dash_style == D2D1_DASH_STYLE_DASH_DOT) {
+			d_arr[0] = dash_patt.m_[0] / width;
+			d_arr[1] = dash_patt.m_[1] / width;
+			d_arr[2] = dash_patt.m_[2] / width;
+			d_arr[3] = dash_patt.m_[3] / width;
 			d_ptr = d_arr;
-			//d_arr = s_dash_patt.m_;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 			d_cnt = 4;
 		}
-		else if (s_dash_style == D2D1_DASH_STYLE_DASH_DOT_DOT) {
-			d_arr[0] = s_dash_patt.m_[0] / s_width;
-			d_arr[1] = s_dash_patt.m_[1] / s_width;
-			d_arr[2] = s_dash_patt.m_[2] / s_width;
-			d_arr[3] = s_dash_patt.m_[3] / s_width;
-			d_arr[4] = s_dash_patt.m_[4] / s_width;
-			d_arr[5] = s_dash_patt.m_[5] / s_width;
+		else if (dash_style == D2D1_DASH_STYLE_DASH_DOT_DOT) {
+			d_arr[0] = dash_patt.m_[0] / width;
+			d_arr[1] = dash_patt.m_[1] / width;
+			d_arr[2] = dash_patt.m_[2] / width;
+			d_arr[3] = dash_patt.m_[3] / width;
+			d_arr[4] = dash_patt.m_[4] / width;
+			d_arr[5] = dash_patt.m_[5] / width;
 			d_ptr = d_arr;
-			//d_arr = s_dash_patt.m_;
 			d_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM;
 			d_cnt = 6;
 		}
@@ -82,15 +78,15 @@ namespace winrt::GraphPaper::implementation
 			d_cnt = 0;
 		}
 		const D2D1_STROKE_STYLE_PROPERTIES s_prop{
-			s_cap_style.m_start,	// startCap
-			s_cap_style.m_end,	// endCap
-			s_dash_cap,	// dashCap
-			s_join_style,	// lineJoin
-			s_join_limit,	// miterLimit
+			cap_style.m_start,	// startCap
+			cap_style.m_end,	// endCap
+			dash_cap,	// dashCap
+			join_style,	// lineJoin
+			join_limit,	// miterLimit
 			d_style,	// dashStyle
 			0.0f,
 		};
-		winrt::check_hresult(d_factory->CreateStrokeStyle(s_prop, d_ptr, d_cnt, s_stroke_style));
+		winrt::check_hresult(d_factory->CreateStrokeStyle(s_prop, d_ptr, d_cnt, stroke_style));
 	}
 
 	// 図形を破棄する.
@@ -104,8 +100,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形を囲む領域を得る.
 	// a_min	元の領域の左上位置.
 	// a_man	元の領域の右下位置.
-	// b_min	得られた領域の左上位置.
-	// b_max	得られた領域の右下位置.
+	// b_min	囲む領域の左上位置.
+	// b_max	囲む領域の右下位置.
 	void ShapeStroke::get_bound(
 		const D2D1_POINT_2F a_min,
 		const D2D1_POINT_2F a_max,
@@ -145,15 +141,14 @@ namespace winrt::GraphPaper::implementation
 			value = m_pos;
 		}
 		else if (anch > ANCH_TYPE::ANCH_P0) {
-			const size_t m = m_diff.size() + 1;		// 頂点の数 (差分の数 + 1)
-			if (anch < ANCH_TYPE::ANCH_P0 + m) {
+			const size_t a_cnt = anch - ANCH_TYPE::ANCH_P0;
+			if (a_cnt < m_diff.size() + 1) {
 				value = m_pos;
-				for (size_t i = 0; i < anch - ANCH_TYPE::ANCH_P0; i++) {
+				for (size_t i = 0; i < a_cnt; i++) {
 					pt_add(value, m_diff[i], value);
 				}
 			}
 		}
-		//value = m_pos;
 	}
 
 	// 開始位置を得る
@@ -277,49 +272,69 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeStroke::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
 		bool flag = false;
-		// 図形の部位が頂点か判定する.
+		// 変更する頂点がどの頂点か判定する.
 		const size_t d_cnt = m_diff.size();	// 差分の数
 		if (anch >= ANCH_TYPE::ANCH_P0 && anch <= ANCH_TYPE::ANCH_P0 + d_cnt) {
-			D2D1_POINT_2F a_pos;
-			get_anch_pos(anch, a_pos);
+			D2D1_POINT_2F v_pos[MAX_N_GON];	// 頂点の位置
+			const size_t a_cnt = anch - ANCH_TYPE::ANCH_P0;	// 変更する頂点
+			// 最初の頂点から変更する頂点までの, 各頂点の位置を得る.
+			v_pos[0] = m_pos;
+			for (size_t i = 0; i < a_cnt; i++) {
+				pt_add(v_pos[i], m_diff[i], v_pos[i + 1]);
+			}
+			// 値から変更前の位置を引き, 変更する差分を得る.
 			D2D1_POINT_2F vec;
-			pt_sub(value, a_pos, vec);
+			pt_sub(value, v_pos[a_cnt], vec);
 			pt_round(vec, PT_ROUND, vec);
-			const size_t i = anch - ANCH_TYPE::ANCH_P0;
+			// 差分の長さがゼロより大きいか判定する.
 			if (pt_abs2(vec) >= FLT_MIN) {
-				if (i > 0) {
-					pt_add(m_diff[i - 1], vec, m_diff[i - 1]);
+				// 変更するのが最初の頂点じゃないか判定する.
+				if (a_cnt > 0) {
+					// 頂点の直前の差分に変更分を加える.
+					pt_add(m_diff[a_cnt - 1], vec, m_diff[a_cnt - 1]);
 				}
 				else {
+					// 最初の頂点の位置に変更分を加える.
 					pt_add(m_pos, vec, m_pos);
 				}
-				if (i < d_cnt) {
-					pt_sub(m_diff[i], vec, m_diff[i]);
+				// 変更するのが最後の頂点じゃないか判定する.
+				if (a_cnt < d_cnt) {
+					// 次の頂点が動かないように,
+					// 頂点の直後の差分から変更分を引く.
+					pt_sub(m_diff[a_cnt], vec, m_diff[a_cnt]);
 				}
 				flag = true;
 			}
-			if (dist > FLT_MIN) {
-				D2D1_POINT_2F v_pos[MAX_N_GON];
-				const auto v_cnt = get_verts(v_pos);
-				for (size_t j = 0; j < v_cnt; j++) {
-					if (j == i) {
+			// 制限距離がゼロでないか判定する.
+			if (dist >= FLT_MIN) {
+				// 残りの頂点の位置を得る.
+				for (size_t i = a_cnt; i < d_cnt; i++) {
+					pt_add(v_pos[i], m_diff[i], v_pos[i + 1]);
+				}
+				for (size_t i = 0; i < d_cnt + 1; i++) {
+					// 頂点が変更する頂点か判定汁.
+					if (i == a_cnt) {
 						continue;
 					}
+					// 頂点と変更する頂点との距離が制限距離以上か判定する.
 					D2D1_POINT_2F v_vec;
-					pt_sub(v_pos[j], v_pos[i], v_vec);
-					if (pt_abs2(v_vec) < dist * dist) {
-						if (i > 0) {
-							pt_add(m_diff[i - 1], v_vec, m_diff[i - 1]);
-						}
-						else {
-							pt_add(m_pos, v_vec, m_pos);
-						}
-						if (i < d_cnt) {
-							pt_sub(m_diff[i], v_vec, m_diff[i]);
-						}
-						flag = true;
-						break;
+					pt_sub(v_pos[i], v_pos[a_cnt], v_vec);
+					if (pt_abs2(v_vec) >= dist * dist) {
+						continue;
 					}
+					// 変更するのが最初の頂点でないか判定する.
+					if (a_cnt > 0) {
+						pt_add(m_diff[a_cnt - 1], v_vec, m_diff[a_cnt - 1]);
+					}
+					else {
+						pt_add(m_pos, v_vec, m_pos);
+					}
+					// 変更するのが最後の頂点でないか判定する.
+					if (a_cnt < d_cnt) {
+						pt_sub(m_diff[a_cnt], v_vec, m_diff[a_cnt]);
+					}
+					flag = true;
+					break;
 				}
 			}
 		}

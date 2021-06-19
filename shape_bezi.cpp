@@ -113,7 +113,7 @@ namespace winrt::GraphPaper::implementation
 		b_pos[1] = seg[1] - b_start;
 		b_pos[0] = seg[2] - b_start;
 		auto b_len = bz_len_by_param(b_pos, 0.0, 1.0, SIMPSON_N);
-		if (b_len > FLT_MIN) {
+		if (b_len >= FLT_MIN) {
 			// 矢じるしの先端のオフセット, または曲線の長さ, 
 			// どちらか短い方で, 助変数を求める.
 			const auto t = bz_param_by_len(b_pos, min(b_len, a_size.m_offset));
@@ -598,7 +598,7 @@ namespace winrt::GraphPaper::implementation
 		size_t i;
 		for (i = 0; i < 3; i++) {
 			const double abs2 = pt_abs2(d_vec[i]);
-			if (abs2 > FLT_MIN) {
+			if (abs2 >= FLT_MIN) {
 				D2D1_POINT_2F e_vec;
 				pt_mul(d_vec[i], -e_width / sqrt(abs2), e_vec);
 				D2D1_POINT_2F e_nor{ e_vec.y, -e_vec.x };
@@ -645,7 +645,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			for (size_t j = 3; j > 0; j--) {
 				const double abs2 = pt_abs2(d_vec[j - 1]);
-				if (abs2 > FLT_MIN) {
+				if (abs2 >= FLT_MIN) {
 					D2D1_POINT_2F e_vec;
 					pt_mul(d_vec[j - 1], e_width / sqrt(abs2), e_vec);
 					D2D1_POINT_2F e_nor{ e_vec.y, -e_vec.x };

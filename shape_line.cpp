@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 	static bool get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept
 	{
 		const auto a_len = std::sqrt(pt_abs2(a_vec));	// 矢軸の長さ
-		if (a_len > FLT_MIN) {
+		if (a_len >= FLT_MIN) {
 			get_arrow_barbs(a_vec, a_len, a_size.m_width, a_size.m_length, barbs);
 			if (a_size.m_offset >= a_len) {
 				// 矢じるしの先端
@@ -108,8 +108,8 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(e_pos, s_pos, d_vec);
 			const double abs2 = pt_abs2(d_vec);
 			pt_mul(
-				abs2 > FLT_MIN ? d_vec : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
-				abs2 > FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
+				abs2 >= FLT_MIN ? d_vec : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
+				abs2 >= FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
 				d_vec);
 			const double dx = d_vec.x;
 			const double dy = d_vec.y;
@@ -127,8 +127,8 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(e_pos, s_pos, d_vec);
 			const double abs2 = pt_abs2(d_vec);
 			pt_mul(
-				abs2 > FLT_MIN ? d_vec : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
-				abs2 > FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
+				abs2 >= FLT_MIN ? d_vec : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
+				abs2 >= FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
 				d_vec);
 			const double dx = d_vec.x;
 			const double dy = d_vec.y;
@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F d_vec;	// 差分ベクトル
 			pt_sub(e_pos, s_pos, d_vec);
 			const double abs2 = pt_abs2(d_vec);
-			if (abs2 > FLT_MIN) {
+			if (abs2 >= FLT_MIN) {
 				pt_mul(d_vec, e_width / sqrt(abs2), d_vec);
 				const double ox = d_vec.y;
 				const double oy = -d_vec.x;

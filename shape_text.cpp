@@ -223,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<IDWriteTextLayout3> t3;
 		if (m_dw_layout.try_as(t3)) {
 			DWRITE_LINE_SPACING spacing;
-			if (m_text_line_sp > FLT_MIN) {
+			if (m_text_line_sp >= FLT_MIN) {
 				spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
 				spacing.height = m_font_size + m_text_line_sp;
 				spacing.baseline = m_font_size + m_text_line_sp - m_dw_descent;
@@ -304,7 +304,7 @@ namespace winrt::GraphPaper::implementation
 					D2D1_RECT_F rect;
 					rect.left = t_min.x + rm.left;
 					rect.top = static_cast<FLOAT>(t_min.y + tm.top + lm.baseline + m_dw_descent - m_font_size);
-					if (rm.width <= FLT_MIN) {
+					if (rm.width < FLT_MIN) {
 						const float sp_len = max(lm.trailingWhitespaceLength * m_font_size * 0.25f, 1.0f);
 						rect.right = rect.left + sp_len;
 					}

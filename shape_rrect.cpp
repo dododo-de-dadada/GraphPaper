@@ -89,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 		sb->SetColor(m_stroke_color);
 		dc->DrawRoundedRectangle(r_rec, sb, sw, ss);
 		if (is_selected()) {
-			const auto flag = (std::abs(m_diff[0].x) > FLT_MIN && std::abs(m_diff[0].y) > FLT_MIN);
+			const auto flag = (std::abs(m_diff[0].x) >= FLT_MIN && std::abs(m_diff[0].y) >= FLT_MIN);
 			//if (flag) {
 			// D2D1_POINT_2F c_pos;
 			// pt_add(r_min, rx, ry, c_pos);
@@ -223,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto flag = (fabs(m_diff[0].x) > FLT_MIN&& fabs(m_diff[0].y) > FLT_MIN);
+		const auto flag = (fabs(m_diff[0].x) >= FLT_MIN && fabs(m_diff[0].y) >= FLT_MIN);
 		if (flag) {
 			for (uint32_t i = 0; i < 4; i++) {
 				// 角丸の中心点を得る.

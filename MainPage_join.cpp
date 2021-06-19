@@ -6,7 +6,6 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr wchar_t DLG_TITLE[] = L"str_line_join";
-	//constexpr float SLIDER_STEP = 0.5f;
 
 	// 線枠メニューの「端点の種類」が選択された.
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)

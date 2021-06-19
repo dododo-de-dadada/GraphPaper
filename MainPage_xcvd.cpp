@@ -299,13 +299,13 @@ namespace winrt::GraphPaper::implementation
 						if (m_sheet_main.m_grid_snap) {
 							// 左上位置を方眼の大きさで丸める.
 							pt_round(s_min, m_sheet_main.m_grid_base + 1.0, g_pos);
-							if (m_misc_pile_up <= FLT_MIN) {
+							if (m_misc_pile_up < FLT_MIN) {
 								s_min = g_pos;
 							}
 						}
 
 						// 頂点を重ねる閾値がゼロより大きいか判定する.
-						if (m_misc_pile_up > FLT_MIN) {
+						if (m_misc_pile_up >= FLT_MIN) {
 							D2D1_POINT_2F v_pos;
 							if (slist_neighbor(m_list_shapes, s_min, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_pos)) {
 								D2D1_POINT_2F v_vec;

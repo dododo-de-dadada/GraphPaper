@@ -274,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F vec;
 			pt_sub(value, m_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
-			if (pt_abs2(vec) > FLT_MIN) {
+			if (pt_abs2(vec) >= FLT_MIN) {
 				pt_add(m_pos, vec, m_pos);
 				flag = true;
 			}
@@ -285,7 +285,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F vec;
 			pt_sub(value, m_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
-			if (pt_abs2(vec) > FLT_MIN) {
+			if (pt_abs2(vec) >= FLT_MIN) {
 				pt_add(m_pos, vec, m_pos);
 				pt_sub(m_diff[0], vec, m_diff[0]);
 				flag = true;
@@ -297,7 +297,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F vec;
 			pt_sub(value, m_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
-			if (pt_abs2(vec) > FLT_MIN) {
+			if (pt_abs2(vec) >= FLT_MIN) {
 				m_diff[0] = vec;
 				flag = true;
 			}
@@ -310,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F vec;
 			pt_sub(value, a_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
-			if (pt_abs2(vec) > FLT_MIN) {
+			if (pt_abs2(vec) >= FLT_MIN) {
 				m_pos.y += vec.y;
 				pt_add(m_diff[0], vec.x, -vec.y, m_diff[0]);
 				flag = true;
@@ -324,7 +324,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F vec;
 			pt_sub(value, a_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
-			if (pt_abs2(vec) > FLT_MIN) {
+			if (pt_abs2(vec) >= FLT_MIN) {
 				m_pos.x += vec.x;
 				pt_add(m_diff[0], -vec.x, vec.y, m_diff[0]);
 				flag = true;
@@ -334,7 +334,7 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_WEST:
 		{
 			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
-			if (abs(vec_x) > FLT_MIN) {
+			if (abs(vec_x) >= FLT_MIN) {
 				m_diff[0].x = static_cast<FLOAT>(m_diff[0].x - vec_x);
 				m_pos.x = static_cast<FLOAT>(m_pos.x + vec_x);
 				flag = true;
@@ -344,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_EAST:
 		{
 			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
-			if (abs(vec_x) > FLT_MIN) {
+			if (abs(vec_x) >= FLT_MIN) {
 				m_diff[0].x = static_cast<FLOAT>(vec_x);
 				flag = true;
 			}
@@ -353,7 +353,7 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_NORTH:
 		{
 			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
-			if (fabs(vec_y) > FLT_MIN) {
+			if (fabs(vec_y) >= FLT_MIN) {
 				m_diff[0].y = static_cast<FLOAT>(m_diff[0].y - vec_y);
 				m_pos.y = static_cast<FLOAT>(m_pos.y + vec_y);
 				flag = true;
@@ -363,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_SOUTH:
 		{
 			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
-			if (abs(vec_y) > FLT_MIN) {
+			if (abs(vec_y) >= FLT_MIN) {
 				m_diff[0].y = static_cast<FLOAT>(vec_y);
 				flag = true;
 			}
@@ -372,7 +372,7 @@ namespace winrt::GraphPaper::implementation
 		default:
 			return false;
 		}
-		if (dist > FLT_MIN) {
+		if (dist >= FLT_MIN) {
 			if (m_diff[0].x < dist) {
 				if (anch == ANCH_TYPE::ANCH_NE) {
 					m_pos.x += m_diff[0].x;

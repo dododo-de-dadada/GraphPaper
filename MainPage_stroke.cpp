@@ -10,7 +10,6 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr wchar_t DLG_TITLE[] = L"str_stroke";
-	//constexpr float SLIDER_STEP = 0.5f;
 
 	// 線枠メニューの「ストロークの色...」が選択された.
 	IAsyncAction MainPage::stroke_color_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -22,6 +21,7 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		D2D1_COLOR_F s_color;
 		m_sample_sheet.get_stroke_color(s_color);
+
 		const float val0 = s_color.r * COLOR_MAX;
 		const float val1 = s_color.g * COLOR_MAX;
 		const float val2 = s_color.b * COLOR_MAX;
@@ -32,21 +32,25 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(val0);
 		stroke_slider_set_header<UNDO_OP::STROKE_COLOR, 0>(val0);
+
 		sample_slider_1().Maximum(255.0);
 		sample_slider_1().TickFrequency(1.0);
 		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_1().Value(val1);
 		stroke_slider_set_header<UNDO_OP::STROKE_COLOR, 1>(val1);
+
 		sample_slider_2().Maximum(255.0);
 		sample_slider_2().TickFrequency(1.0);
 		sample_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_2().Value(val2);
 		stroke_slider_set_header<UNDO_OP::STROKE_COLOR, 2>(val2);
+
 		sample_slider_3().Maximum(255.0);
 		sample_slider_3().TickFrequency(1.0);
 		sample_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_3().Value(val3);
 		stroke_slider_set_header<UNDO_OP::STROKE_COLOR, 3>(val3);
+
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
