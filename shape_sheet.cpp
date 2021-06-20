@@ -435,9 +435,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線の端点を得る.
-	bool ShapeSheet::get_stroke_cap_style(CAP_STYLE& value) const noexcept
+	bool ShapeSheet::get_cap_style(CAP_STYLE& value) const noexcept
 	{
-		value = m_stroke_cap_style;
+		value = m_cap_style;
 		return true;
 	}
 
@@ -449,37 +449,37 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の端点を得る.
-	bool ShapeSheet::get_stroke_dash_cap(D2D1_CAP_STYLE& value) const noexcept
+	bool ShapeSheet::get_dash_cap(D2D1_CAP_STYLE& value) const noexcept
 	{
-		value = m_stroke_dash_cap;
+		value = m_dash_cap;
 		return true;
 	}
 
-	// 破線の配置を得る.
-	bool ShapeSheet::get_stroke_dash_patt(STROKE_DASH_PATT& value) const noexcept
+	// 破線の様式を得る.
+	bool ShapeSheet::get_dash_patt(DASH_PATT& value) const noexcept
 	{
-		value = m_stroke_dash_patt;
+		value = m_dash_patt;
 		return true;
 	}
 
 	// 線枠の形式を得る.
-	bool ShapeSheet::get_stroke_dash_style(D2D1_DASH_STYLE& value) const noexcept
+	bool ShapeSheet::get_dash_style(D2D1_DASH_STYLE& value) const noexcept
 	{
-		value = m_stroke_dash_style;
+		value = m_dash_style;
 		return true;
 	}
 
 	// 線分のつなぎのマイター制限を得る.
-	bool ShapeSheet::get_stroke_join_limit(float& value) const noexcept
+	bool ShapeSheet::get_join_limit(float& value) const noexcept
 	{
-		value = m_stroke_join_limit;
+		value = m_join_limit;
 		return true;
 	}
 
 	// 線分のつなぎを得る.
-	bool ShapeSheet::get_stroke_join_style(D2D1_LINE_JOIN& value) const noexcept
+	bool ShapeSheet::get_join_style(D2D1_LINE_JOIN& value) const noexcept
 	{
-		value = m_stroke_join_style;
+		value = m_join_style;
 		return true;
 	}
 
@@ -535,13 +535,13 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_arrow_size, dt_reader);	// 矢じるしの寸法
 		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());	// 矢じるしの形式
 		dt_read(m_corner_rad, dt_reader);	// 角丸半径
-		dt_read(m_stroke_cap_style, dt_reader);	// 線分の端点
+		dt_read(m_cap_style, dt_reader);	// 線分の端点
 		dt_read(m_stroke_color, dt_reader);	// 線・枠の色
-		m_stroke_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());	// 破線の端点
-		dt_read(m_stroke_dash_patt, dt_reader);	// 破線の配置
-		m_stroke_dash_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());	// 破線の形式
-		m_stroke_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());	// 線のつなぎの形状
-		m_stroke_join_limit = dt_reader.ReadSingle();	// 線のつなぎのマイター制限
+		m_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());	// 破線の端点
+		dt_read(m_dash_patt, dt_reader);	// 破線の様式
+		m_dash_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());	// 破線の形式
+		m_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());	// 線のつなぎの形状
+		m_join_limit = dt_reader.ReadSingle();	// 線のつなぎのマイター制限
 		m_stroke_width = dt_reader.ReadSingle();	// 線・枠の太さ
 		dt_read(m_fill_color, dt_reader);	// 塗りつぶしの色
 		dt_read(m_font_color, dt_reader);	// 書体の色
@@ -739,10 +739,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分の端点に格納する.
-	bool ShapeSheet::set_stroke_cap_style(const CAP_STYLE& value)
+	bool ShapeSheet::set_cap_style(const CAP_STYLE& value)
 	{
-		if (!equal(m_stroke_cap_style, value)) {
-			m_stroke_cap_style = value;
+		if (!equal(m_cap_style, value)) {
+			m_cap_style = value;
 			return true;
 		}
 		return false;
@@ -759,50 +759,50 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線の端点に格納する.
-	bool ShapeSheet::set_stroke_dash_cap(const D2D1_CAP_STYLE& value)
+	bool ShapeSheet::set_dash_cap(const D2D1_CAP_STYLE& value)
 	{
-		if (m_stroke_dash_cap != value) {
-			m_stroke_dash_cap = value;
+		if (m_dash_cap != value) {
+			m_dash_cap = value;
 			return true;
 		}
 		return false;
 	}
 
-	// 破線の配置に格納する.
-	bool ShapeSheet::set_stroke_dash_patt(const STROKE_DASH_PATT& value)
+	// 破線の様式に格納する.
+	bool ShapeSheet::set_dash_patt(const DASH_PATT& value)
 	{
-		if (!equal(m_stroke_dash_patt, value)) {
-			m_stroke_dash_patt = value;
+		if (!equal(m_dash_patt, value)) {
+			m_dash_patt = value;
 			return true;
 		}
 		return false;
 	}
 
 	// 線枠の形式に格納する.
-	bool ShapeSheet::set_stroke_dash_style(const D2D1_DASH_STYLE value)
+	bool ShapeSheet::set_dash_style(const D2D1_DASH_STYLE value)
 	{
-		if (m_stroke_dash_style != value) {
-			m_stroke_dash_style = value;
+		if (m_dash_style != value) {
+			m_dash_style = value;
 			return true;
 		}
 		return false;
 	}
 
 	// 値を線分のつなぎのマイター制限に格納する.
-	bool ShapeSheet::set_stroke_join_limit(const float& value)
+	bool ShapeSheet::set_join_limit(const float& value)
 	{
-		if (!equal(m_stroke_join_limit, value)) {
-			m_stroke_join_limit = value;
+		if (!equal(m_join_limit, value)) {
+			m_join_limit = value;
 			return true;
 		}
 		return false;
 	}
 
 	// 値を線分のつなぎに格納する.
-	bool ShapeSheet::set_stroke_join_style(const D2D1_LINE_JOIN& value)
+	bool ShapeSheet::set_join_style(const D2D1_LINE_JOIN& value)
 	{
-		if (m_stroke_join_style != value) {
-			m_stroke_join_style = value;
+		if (m_join_style != value) {
+			m_join_style = value;
 			return true;
 		}
 		return false;
@@ -877,13 +877,13 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
 		s->get_sheet_color(m_sheet_color);
-		s->get_stroke_cap_style(m_stroke_cap_style);
+		s->get_cap_style(m_cap_style);
 		s->get_stroke_color(m_stroke_color);
-		s->get_stroke_dash_cap(m_stroke_dash_cap);
-		s->get_stroke_dash_patt(m_stroke_dash_patt);
-		s->get_stroke_dash_style(m_stroke_dash_style);
-		s->get_stroke_join_limit(m_stroke_join_limit);
-		s->get_stroke_join_style(m_stroke_join_style);
+		s->get_dash_cap(m_dash_cap);
+		s->get_dash_patt(m_dash_patt);
+		s->get_dash_style(m_dash_style);
+		s->get_join_limit(m_join_limit);
+		s->get_join_style(m_join_style);
 		s->get_stroke_width(m_stroke_width);
 		s->get_text_line_sp(m_text_line_sp);
 		s->get_text_align_t(m_text_align_t);
@@ -908,13 +908,13 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_arrow_size, dt_writer);	// 矢じるしの寸法
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));	// 矢じるしの形式
 		dt_write(m_corner_rad, dt_writer);	// 角丸半径
-		dt_write(m_stroke_cap_style, dt_writer);	// 線分の端点
+		dt_write(m_cap_style, dt_writer);	// 線分の端点
 		dt_write(m_stroke_color, dt_writer);	// 線枠の色
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash_cap));	// 破線の端点
-		dt_write(m_stroke_dash_patt, dt_writer);	// 破線の配置
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_dash_style));	// 線枠の形式
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_stroke_join_style));	// 線分のつなぎ
-		dt_writer.WriteSingle(m_stroke_join_limit);	// 線分のマイター制限
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_cap));	// 破線の端点
+		dt_write(m_dash_patt, dt_writer);	// 破線の様式
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_style));	// 線枠の形式
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_join_style));	// 線分のつなぎ
+		dt_writer.WriteSingle(m_join_limit);	// 線分のマイター制限
 		dt_writer.WriteSingle(m_stroke_width);	// 線枠の太さ
 		dt_write(m_fill_color, dt_writer);	// 塗りつぶしの色
 		dt_write(m_font_color, dt_writer);	// 書体の色

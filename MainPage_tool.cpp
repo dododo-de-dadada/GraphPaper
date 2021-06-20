@@ -142,17 +142,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 作図ツールの状態を読み込む.
-	void MainPage::tool_read(DataReader const& dt_reader)
-	{
-		m_tool_draw = static_cast<DRAW_TOOL>(dt_reader.ReadUInt32());
-		dt_read(m_tool_poly, dt_reader);
-	}
+	//void MainPage::tool_read(DataReader const& dt_reader)
+	//{
+	//	m_tool_draw = static_cast<DRAW_TOOL>(dt_reader.ReadUInt32());
+	//	dt_read(m_tool_poly, dt_reader);
+	//}
 
 	// 作図ツールの状態を書き込む.
-	void MainPage::tool_write(DataWriter const& dt_writer)
-	{
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_tool_draw));
-		dt_write(m_tool_poly, dt_writer);
-	}
+	//void MainPage::tool_write(DataWriter const& dt_writer)
+	//{
+	//	dt_writer.WriteUInt32(static_cast<uint32_t>(m_tool_draw));
+	//	dt_write(m_tool_poly, dt_writer);
+	//}
 
 }

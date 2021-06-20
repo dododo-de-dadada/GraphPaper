@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 			const auto cnt = s_text->m_dw_selected_cnt;
 			const auto mtx = s_text->m_dw_selected_metrics;
 			D2D1_POINT_2F t_pos;
-			s->get_start_pos(t_pos);
+			s->get_pos_start(t_pos);
 			for (auto i = cnt; i > 0; i--) {
 				r_min.x = t_pos.x + mtx[i - 1].left;
 				r_min.y = t_pos.y + mtx[i - 1].top;

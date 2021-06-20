@@ -496,11 +496,11 @@ namespace winrt::GraphPaper::implementation
 		// 文字列検索パネルの「置換して次に」ボタンが押された.
 		void find_replace_click(IInspectable const&, RoutedEventArgs const&);
 		// データリーダーから検索の値を読み込む.
-		void find_text_read(DataReader const& dt_reader);
+		//void find_text_read(DataReader const& dt_reader);
 		// 文字列検索パネルから値を格納する.
 		void find_text_set(void);
 		// 検索の値をデータリーダーに書き込む.
-		void find_text_write(DataWriter const& dt_writer);
+		//void find_text_write(DataWriter const& dt_writer);
 		// 編集メニューの「文字列の検索/置換」が選択された.
 		void find_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 検索文字列が変更された.
@@ -777,18 +777,28 @@ namespace winrt::GraphPaper::implementation
 		void status_bar_visibility(void);
 
 		//------------------------------
+		// MainPage_dash.cpp
+		// 破線
+		//------------------------------
+
+		// 線枠メニューの「種類」のサブ項目が選択された.
+		void dash_style_click(IInspectable const& sender, RoutedEventArgs const&);
+		// 線枠メニューの「種類」に印をつける.
+		void dash_style_is_checked(const D2D1_DASH_STYLE d_style);
+		// 線枠メニューの「破線の配列」が選択された.
+		IAsyncAction dash_patt_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 値をスライダーのヘッダーに格納する.
+		template<UNDO_OP U, int S> void dash_slider_set_header(const float value);
+		// スライダーの値が変更された.
+		template<UNDO_OP U, int S> void dash_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+
+		//------------------------------
 		// MainPage_stroke.cpp
-		// 線枠
+		// 線枠の色, 太さ
 		//------------------------------
 
 		// 線枠メニューの「色」が選択された.
 		IAsyncAction stroke_color_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「種類」のサブ項目が選択された.
-		void stroke_dash_style_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 線枠メニューの「種類」に印をつける.
-		void stroke_dash_style_is_checked(const D2D1_DASH_STYLE d_style);
-		// 線枠メニューの「破線の配列」が選択された.
-		IAsyncAction stroke_dash_patt_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「太さ」が選択された.
 		IAsyncAction stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
@@ -890,9 +900,9 @@ namespace winrt::GraphPaper::implementation
 		// 作図メニューの「多角形ツール」に印をつける.
 		void tool_poly_is_checked(const POLY_TOOL& value);
 		// 作図ツールの状態を読み込む.
-		void tool_read(DataReader const& dt_reader);
+		//void tool_read(DataReader const& dt_reader);
 		// 作図ツールの状態を書き込む.
-		void tool_write(DataWriter const& dt_writer);
+		//void tool_write(DataWriter const& dt_writer);
 		//　Escape が押された.
 		void kacc_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 

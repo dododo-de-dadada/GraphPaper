@@ -469,8 +469,8 @@
     <value>ストロークの色...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_stroke_dash_patt.Text" xml:space="preserve">
-    <value>破線の配置...</value>
+  <data name="mfi_dash_patt.Text" xml:space="preserve">
+    <value>破線の様式...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_stroke_width.Text" xml:space="preserve">
@@ -541,7 +541,7 @@
     <value>ステータスバー</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_stroke_dash_style.Text" xml:space="preserve">
+  <data name="mfsi_dash_style.Text" xml:space="preserve">
     <value>種類</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -597,23 +597,23 @@
     <value>隠す</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_style_dash.Text" xml:space="preserve">
+  <data name="rmfi_dash_style_dash.Text" xml:space="preserve">
     <value>破線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_style_dash_dot.Text" xml:space="preserve">
+  <data name="rmfi_dash_style_dash_dot.Text" xml:space="preserve">
     <value>一点破線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_style_dash_dot_dot.Text" xml:space="preserve">
+  <data name="rmfi_dash_style_dash_dot_dot.Text" xml:space="preserve">
     <value>二点破線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_style_dot.Text" xml:space="preserve">
+  <data name="rmfi_dash_style_dot.Text" xml:space="preserve">
     <value>点線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_style_solid.Text" xml:space="preserve">
+  <data name="rmfi_dash_style_solid.Text" xml:space="preserve">
     <value>実線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -677,8 +677,8 @@
     <value>図形を選択</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_arrow" xml:space="preserve">
-    <value>矢じるし</value>
+  <data name="str_arrow_size" xml:space="preserve">
+    <value>矢じるしの寸法</value>
     <comment>String</comment>
   </data>
   <data name="str_arrow_length" xml:space="preserve">
@@ -794,19 +794,23 @@
     <value>大きさ</value>
     <comment>String</comment>
   </data>
-  <data name="str_stroke" xml:space="preserve">
-    <value>ストローク</value>
+  <data name="str_stroke_color" xml:space="preserve">
+    <value>ストロークの色</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_dash_patt" xml:space="preserve">
+    <value>破線の様式</value>
     <comment>String</comment>
   </data>
   <data name="str_stroke_width" xml:space="preserve">
-    <value>太さ</value>
+    <value>ストロークの太さ</value>
     <comment>String</comment>
   </data>
-  <data name="str_stroke_join" xml:space="preserve">
+  <data name="str_join" xml:space="preserve">
     <value>線のつなぎ</value>
     <comment>String</comment>
   </data>
-  <data name="str_stroke_join_limit" xml:space="preserve">
+  <data name="str_join_limit" xml:space="preserve">
     <value>マイター制限</value>
     <comment>String</comment>
   </data>

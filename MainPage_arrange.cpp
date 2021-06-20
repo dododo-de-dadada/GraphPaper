@@ -60,7 +60,8 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 			// 消去フラグも選択フラグも立っていないか判定する.
-			if (!(*it_src)->is_deleted() && !(*it_src)->is_selected()) {
+			const auto s = *it_src;
+			if (!s->is_deleted() && !s->is_selected()) {
 				break;
 			}
 			it_src++;
@@ -75,7 +76,7 @@ namespace winrt::GraphPaper::implementation
 				// 次の図形がないか判定する.
 				if (it_src == it_end) {
 					// 交換フラグが立っているか判定する.
-					if (flag == true) {
+					if (flag) {
 						undo_push_null();
 						xcvd_is_enabled();
 						sheet_draw();
@@ -89,11 +90,11 @@ namespace winrt::GraphPaper::implementation
 				it_src++;
 			}
 			// 次の図形が選択されてない場合,
-			auto s = *it_src;
+			const auto s = *it_src;
 			if (s->is_selected() != true) {
 				continue;
 			}
-			auto t = *it_dst;
+			const auto t = *it_dst;
 			// 図形一覧の排他制御が true か判定する.
 			if (m_summary_atomic.load(std::memory_order_acquire)) {
 				summary_arrange(s, t);

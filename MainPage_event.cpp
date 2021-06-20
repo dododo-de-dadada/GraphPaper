@@ -307,17 +307,17 @@ namespace winrt::GraphPaper::implementation
 				g_len = static_cast<float>(sqrt(pt_abs2(g_vec))) / s_scale;
 			}
 			// 頂点の位置を変更してみて, 近傍の頂点によって位置が変わらなかったか判定する.
-			if (!m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, g_len)) {
-				m_event_shape_pressed->set_anch_pos(g_pos, m_event_anch_pressed, 0.0f);
+			if (!m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, g_len)) {
+				m_event_shape_pressed->set_pos_anch(g_pos, m_event_anch_pressed, 0.0f);
 			}
 		}
 		else if (g_snap) {
 			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0, m_event_pos_curr);
-			m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, 0.0f);
+			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f);
 		}
 		else if (m_misc_pile_up >= FLT_MIN) {
 			slist_neighbor(m_list_shapes, m_event_pos_curr, m_misc_pile_up / m_sheet_main.m_sheet_scale, m_event_pos_curr);
-			m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, m_misc_pile_up / m_sheet_main.m_sheet_scale);
+			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, m_misc_pile_up / m_sheet_main.m_sheet_scale);
 		}
 		if (!undo_pop_if_invalid()) {
 			undo_push_null();
@@ -442,7 +442,7 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_FORM) {
 			// ポインターの現在位置を, ポインターが押された図形の, 部位の位置に格納する.
-			m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, 0.0f);
+			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f);
 			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
 			sheet_draw();
@@ -484,7 +484,7 @@ namespace winrt::GraphPaper::implementation
 					m_event_state = EVENT_STATE::PRESS_FORM;
 					m_event_pos_prev = m_event_pos_curr;
 					undo_push_anch(m_event_shape_pressed, m_event_anch_pressed);
-					m_event_shape_pressed->set_anch_pos(m_event_pos_curr, m_event_anch_pressed, 0.0f);
+					m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f);
 				}
 				sheet_draw();
 			}

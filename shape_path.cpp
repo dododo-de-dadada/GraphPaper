@@ -24,9 +24,9 @@ namespace winrt::GraphPaper::implementation
 	// value	Ši”[‚·‚é’l
 	// anch	}Œ`‚Ì•”ˆÊ
 	// dist	’¸“_‚Ì‹——£
-	bool ShapePath::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
+	bool ShapePath::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
-		if (ShapeStroke::set_anch_pos(value, anch, dist)) {
+		if (ShapeStroke::set_pos_anch(value, anch, dist)) {
 			create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
@@ -57,9 +57,9 @@ namespace winrt::GraphPaper::implementation
 
 	// n“_‚É’l‚ğŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚à“®‚­.
 	// value	Ši”[‚·‚é’l
-	bool ShapePath::set_start_pos(const D2D1_POINT_2F value)
+	bool ShapePath::set_pos_start(const D2D1_POINT_2F value)
 	{
-		if (ShapeStroke::set_start_pos(value)) {
+		if (ShapeStroke::set_pos_start(value)) {
 			create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}

@@ -176,7 +176,7 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(t_box, m_diff[0])) {
 			D2D1_POINT_2F se;
 			pt_add(m_pos, t_box, se);
-			set_anch_pos(se, ANCH_TYPE::ANCH_SE, 0.0f);
+			set_pos_anch(se, ANCH_TYPE::ANCH_SE, 0.0f);
 			return true;
 		}
 		return false;
@@ -466,7 +466,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列を得る.
-	bool ShapeText::get_text(wchar_t*& value) const noexcept
+	bool ShapeText::get_text_content(wchar_t*& value) const noexcept
 	{
 		value = m_text;
 		return true;
@@ -518,7 +518,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 文字列の範囲の左上が原点になるよう, 判定する位置を移動する.
 		D2D1_POINT_2F p_min;
-		ShapeStroke::get_min_pos(p_min);
+		ShapeStroke::get_pos_min(p_min);
 		pt_sub(t_pos, p_min, p_min);
 		pt_sub(p_min, m_text_margin, p_min);
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
@@ -545,7 +545,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F h_max;
 
 		if (m_dw_test_cnt > 0) {
-			ShapeStroke::get_min_pos(p_min);
+			ShapeStroke::get_pos_min(p_min);
 			for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 				auto const& tm = m_dw_test_metrics[i];
 				auto const& lm = m_dw_line_metrics[i];
@@ -762,9 +762,9 @@ namespace winrt::GraphPaper::implementation
 	//	値を, 部位の位置に格納する. 他の部位の位置も動く.
 	//	value	格納する値
 	//	abch	図形の部位
-	bool ShapeText::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
+	bool ShapeText::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
-		if (ShapeRect::set_anch_pos(value, anch, dist)) {
+		if (ShapeRect::set_pos_anch(value, anch, dist)) {
 			create_text_metrics(s_dwrite_factory);
 			return true;
 		}
@@ -772,7 +772,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を文字列に格納する.
-	bool ShapeText::set_text(wchar_t* const value)
+	bool ShapeText::set_text_content(wchar_t* const value)
 	{
 		if (!equal(m_text, value)) {
 			m_text = value;
@@ -935,10 +935,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeText::dt_write_svg(DataWriter const& dt_writer) const
+	void ShapeText::write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::dt_write_svg;
-
 		static constexpr char* SVG_STYLE[] = {
 			"normal", "oblique", "italic"
 		};
@@ -971,7 +969,7 @@ namespace winrt::GraphPaper::implementation
 		const double descent = m_font_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
 
 		if (is_opaque(m_fill_color) || is_opaque(m_stroke_color)) {
-			ShapeRect::dt_write_svg(dt_writer);
+			ShapeRect::write_svg(dt_writer);
 		}
 		// 文字列全体の属性を指定するための g タグを開始する.
 		dt_write_svg("<g ", dt_writer);

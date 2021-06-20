@@ -56,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 		// どの頂点が位置を含むか判定する.
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F a_pos;
-			get_anch_pos(ANCH_CORNER[i], a_pos);
+			get_pos_anch(ANCH_CORNER[i], a_pos);
 			if (pt_in_anch(t_pos, a_pos)) {
 				return ANCH_CORNER[i];
 			}
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 		// どの中点が位置を含むか判定する.
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F a_pos;
-			get_anch_pos(ANCH_MIDDLE[i], a_pos);
+			get_pos_anch(ANCH_MIDDLE[i], a_pos);
 			if (pt_in_anch(t_pos, a_pos)) {
 				return ANCH_MIDDLE[i];
 			}
@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 					r_min.y <= t_pos.y && t_pos.y <= r_max.y) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
-				else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 					if (pt_in_elli(t_pos, v_pos[0], e_width, e_width) ||
 						pt_in_elli(t_pos, v_pos[1], e_width, e_width) ||
 						pt_in_elli(t_pos, v_pos[2], e_width, e_width) ||
@@ -150,9 +150,9 @@ namespace winrt::GraphPaper::implementation
 						return ANCH_TYPE::ANCH_STROKE;
 					}
 				}
-				else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
-					(m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
-						m_stroke_join_limit < M_SQRT2)) {
+				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
+					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
+						m_join_limit < M_SQRT2)) {
 					//const auto e_width = static_cast<FLOAT>(m_stroke_width * 0.5);
 					const D2D1_POINT_2F q_pos[4]{
 						D2D1_POINT_2F{ 0.0f, -static_cast<FLOAT>(e_width) },
@@ -167,10 +167,10 @@ namespace winrt::GraphPaper::implementation
 						return ANCH_TYPE::ANCH_STROKE;
 					}
 				}
-				else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
-					(m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
-						m_stroke_join_limit >= M_SQRT2)) {
-					const auto limit = static_cast<FLOAT>(m_stroke_width * M_SQRT2 * 0.5 * m_stroke_join_limit);
+				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
+					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL &&
+						m_join_limit >= M_SQRT2)) {
+					const auto limit = static_cast<FLOAT>(m_stroke_width * M_SQRT2 * 0.5 * m_join_limit);
 					const D2D1_POINT_2F q_pos[4]{
 						D2D1_POINT_2F{ 0.0f, -limit }, D2D1_POINT_2F{ limit, 0.0f }, D2D1_POINT_2F{ 0.0f, limit }, D2D1_POINT_2F{ -limit, 0.0f }
 					};
@@ -212,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 	//	anch	図形の部位.
 	//	value	得られた位置.
 	//	戻り値	なし
-	void ShapeRect::get_anch_pos(const uint32_t anch, D2D1_POINT_2F& value) const noexcept
+	void ShapeRect::get_pos_anch(const uint32_t anch, D2D1_POINT_2F& value) const noexcept
 	{
 		switch (anch) {
 		case ANCH_TYPE::ANCH_NORTH:
@@ -265,7 +265,7 @@ namespace winrt::GraphPaper::implementation
 	//	値を, 部位の位置に格納する. 他の部位の位置も動く.
 	//	value	格納する値
 	//	abch	図形の部位
-	bool ShapeRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
+	bool ShapeRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
 		bool flag = false;
 		switch (anch) {
@@ -306,7 +306,7 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_NE:
 		{
 			D2D1_POINT_2F a_pos;
-			get_anch_pos(ANCH_TYPE::ANCH_NE, a_pos);
+			get_pos_anch(ANCH_TYPE::ANCH_NE, a_pos);
 			D2D1_POINT_2F vec;
 			pt_sub(value, a_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
@@ -320,7 +320,7 @@ namespace winrt::GraphPaper::implementation
 		case ANCH_TYPE::ANCH_SW:
 		{
 			D2D1_POINT_2F a_pos;
-			get_anch_pos(ANCH_TYPE::ANCH_SW, a_pos);
+			get_pos_anch(ANCH_TYPE::ANCH_SW, a_pos);
 			D2D1_POINT_2F vec;
 			pt_sub(value, a_pos, vec);
 			pt_round(vec, PT_ROUND, vec);
@@ -450,15 +450,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeRect::dt_write_svg(DataWriter const& dt_writer) const
+	void ShapeRect::write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::dt_write_svg;
-
 		dt_write_svg("<rect ", dt_writer);
 		dt_write_svg(m_pos, "x", "y", dt_writer);
 		dt_write_svg(m_diff[0], "width", "height", dt_writer);
 		dt_write_svg(m_fill_color, "fill", dt_writer);
-		ShapeStroke::dt_write_svg(dt_writer);
+		ShapeStroke::write_svg(dt_writer);
 		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 	}
 }

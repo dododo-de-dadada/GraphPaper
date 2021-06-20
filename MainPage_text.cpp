@@ -10,8 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	constexpr wchar_t DLG_TITLE[] = L"str_text";
-	//constexpr float SLIDER_STEP = 0.5f;
-	constexpr float TEXT_LINE_H_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
+	constexpr float TEXT_LINE_SP_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
 
 	// 編集メニューの「枠の大きさを合わせる」が選択された.
 	void MainPage::edit_text_frame_click(IInspectable const&, RoutedEventArgs const&)
@@ -136,16 +135,16 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().TickFrequency(0.5);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(value);
-		text_slider_set_header<UNDO_OP::TEXT_LINE_H, 0>(value);
+		text_slider_set_header<UNDO_OP::TEXT_LINE_SP, 0>(value);
 		sample_slider_0().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_LINE_H, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_LINE_SP, 0> });
 		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_shape->get_text_line_sp(sample_value);
-			if (undo_push_set<UNDO_OP::TEXT_LINE_H>(sample_value)) {
+			if (undo_push_set<UNDO_OP::TEXT_LINE_SP>(sample_value)) {
 				undo_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
@@ -173,7 +172,7 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == mfi_text_line_sp_exp() || sender == mfi_text_line_sp_exp_2()) {
 			value = value + m_sheet_main.m_font_size;
 		}
-		if (undo_push_set<UNDO_OP::TEXT_LINE_H>(value)) {
+		if (undo_push_set<UNDO_OP::TEXT_LINE_SP>(value)) {
 			undo_push_null();
 			xcvd_is_enabled();
 			sheet_draw();
@@ -243,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
-		if constexpr (U == UNDO_OP::TEXT_LINE_H) {
+		if constexpr (U == UNDO_OP::TEXT_LINE_SP) {
 			constexpr wchar_t HEADER[] = L"str_text_line_sp";
 			if (value >= FLT_MIN) {
 				wchar_t buf[32];
@@ -276,7 +275,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	なし
 	template <UNDO_OP U, int S> void MainPage::text_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_OP::TEXT_LINE_H) {
+		if constexpr (U == UNDO_OP::TEXT_LINE_SP) {
 			const float value = static_cast<float>(args.NewValue());
 			text_slider_set_header<U, S>(value);
 			m_sample_shape->set_text_line_sp(value);

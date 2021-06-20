@@ -183,10 +183,8 @@ namespace winrt::GraphPaper::implementation
 	// tip_pos	矢じるしの先端の位置
 	// a_style	矢じるしの形状
 	// dt_writer	データライター
-	void ShapeLineA::dt_write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const
+	void ShapeLineA::write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::dt_write_svg;
-
 		dt_write_svg("<path d=\"", dt_writer);
 		dt_write_svg("M", dt_writer);
 		dt_write_svg(barbs[0].x, dt_writer);
@@ -206,27 +204,27 @@ namespace winrt::GraphPaper::implementation
 		}
 		dt_write_svg(m_stroke_color, "stroke", dt_writer);
 		dt_write_svg(m_stroke_width, "stroke-width", dt_writer);
-		if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
+		if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
 			dt_write_svg("stroke-linecap=\"butt\" ", dt_writer);
 		}
-		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+		else if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
 			dt_write_svg("stroke-linecap=\"round\" ", dt_writer);
 		}
-		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+		else if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
 			dt_write_svg("stroke-linecap=\"square\" ", dt_writer);
 		}
-		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+		else if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
 			//dt_write_svg("stroke-linecap=\"square\" ", dt_writer);
 		}
-		if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
+		if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
 			dt_write_svg("stroke-linejoin=\"bevel\" ", dt_writer);
 		}
-		else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
-			m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+		else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
+			m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
 			dt_write_svg("stroke-linejoin=\"miter\" ", dt_writer);
-			dt_write_svg(m_stroke_join_limit, "stroke-miterlimit", dt_writer);
+			dt_write_svg(m_join_limit, "stroke-miterlimit", dt_writer);
 		}
-		else if (m_stroke_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+		else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 			dt_write_svg("stroke-linejoin=\"round\" ", dt_writer);
 		}
 		dt_write_svg(" />" SVG_NEW_LINE, dt_writer);
@@ -289,7 +287,7 @@ namespace winrt::GraphPaper::implementation
 			return ANCH_TYPE::ANCH_P0;
 		}
 		const float s_width = static_cast<float>(max(static_cast<double>(m_stroke_width), Shape::s_anch_len));
-		if (line_hit_test(t_pos, m_pos, e_pos, s_width, m_stroke_cap_style)) {
+		if (line_hit_test(t_pos, m_pos, e_pos, s_width, m_cap_style)) {
 			return ANCH_TYPE::ANCH_STROKE;
 		}
 		return ANCH_TYPE::ANCH_SHEET;
@@ -327,14 +325,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分の端点に格納する.
-	bool ShapeLineA::set_stroke_cap_style(const CAP_STYLE& value)
+	bool ShapeLineA::set_cap_style(const CAP_STYLE& value)
 	{
-		if (ShapeStroke::set_stroke_cap_style(value)) {
+		if (ShapeStroke::set_cap_style(value)) {
 			if (m_d2d_arrow_style != nullptr) {
 				m_d2d_arrow_style = nullptr;
 			}
 			if (m_arrow_style != ARROW_STYLE::NONE) {
-				create_arrow_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_join_style, m_stroke_join_limit, m_d2d_arrow_style.put());
+				create_arrow_style(Shape::s_d2d_factory, m_cap_style, m_join_style, m_join_limit, m_d2d_arrow_style.put());
 			}
 			return true;
 		}
@@ -342,14 +340,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分のつなぎのマイター制限に格納する.
-	bool ShapeLineA::set_stroke_join_limit(const float& value)
+	bool ShapeLineA::set_join_limit(const float& value)
 	{
-		if (ShapeStroke::set_stroke_join_limit(value)) {
+		if (ShapeStroke::set_join_limit(value)) {
 			if (m_d2d_arrow_style != nullptr) {
 				m_d2d_arrow_style = nullptr;
 			}
 			if (m_arrow_style != ARROW_STYLE::NONE) {
-				create_arrow_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_join_style, m_stroke_join_limit, m_d2d_arrow_style.put());
+				create_arrow_style(Shape::s_d2d_factory, m_cap_style, m_join_style, m_join_limit, m_d2d_arrow_style.put());
 			}
 			return true;
 		}
@@ -357,14 +355,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分のつなぎに格納する.
-	bool ShapeLineA::set_stroke_join_style(const D2D1_LINE_JOIN& value)
+	bool ShapeLineA::set_join_style(const D2D1_LINE_JOIN& value)
 	{
-		if (ShapeStroke::set_stroke_join_style(value)) {
+		if (ShapeStroke::set_join_style(value)) {
 			if (m_d2d_arrow_style != nullptr) {
 				m_d2d_arrow_style = nullptr;
 			}
 			if (m_arrow_style != ARROW_STYLE::NONE) {
-				create_arrow_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_join_style, m_stroke_join_limit, m_d2d_arrow_style.put());
+				create_arrow_style(Shape::s_d2d_factory, m_cap_style, m_join_style, m_join_limit, m_d2d_arrow_style.put());
 			}
 			return true;
 		}
@@ -406,7 +404,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 				if (m_d2d_arrow_style == nullptr) {
-					create_arrow_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_join_style, m_stroke_join_limit, m_d2d_arrow_style.put());
+					create_arrow_style(Shape::s_d2d_factory, m_cap_style, m_join_style, m_join_limit, m_d2d_arrow_style.put());
 				}
 			}
 			return true;
@@ -418,9 +416,9 @@ namespace winrt::GraphPaper::implementation
 	// value	格納する値
 	// anch	図形の部位
 	// limit	
-	bool ShapeLineA::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
+	bool ShapeLineA::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
-		if (ShapeStroke::set_anch_pos(value, anch, dist)) {
+		if (ShapeStroke::set_pos_anch(value, anch, dist)) {
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}
@@ -433,9 +431,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	bool ShapeLineA::set_start_pos(const D2D1_POINT_2F value)
+	bool ShapeLineA::set_pos_start(const D2D1_POINT_2F value)
 	{
-		if (ShapeStroke::set_start_pos(value)) {
+		if (ShapeStroke::set_pos_start(value)) {
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}
@@ -461,7 +459,7 @@ namespace winrt::GraphPaper::implementation
 		m_pos = b_pos;
 		m_diff[0] = b_vec;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			create_arrow_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_join_style, m_stroke_join_limit, m_d2d_arrow_style.put());
+			create_arrow_style(Shape::s_d2d_factory, m_cap_style, m_join_style, m_join_limit, m_d2d_arrow_style.put());
 			create_arrow_geom(Shape::s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
 	}
@@ -477,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_arrow_size, dt_reader);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			create_arrow_geom(Shape::s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
-			create_arrow_style(Shape::s_d2d_factory, m_stroke_cap_style, m_stroke_join_style, m_stroke_join_limit, m_d2d_arrow_style.put());
+			create_arrow_style(Shape::s_d2d_factory, m_cap_style, m_join_style, m_join_limit, m_d2d_arrow_style.put());
 		}
 	}
 
@@ -490,22 +488,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeLineA::dt_write_svg(DataWriter const& dt_writer) const
+	void ShapeLineA::write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::dt_write_svg;
 		D2D1_POINT_2F e_pos;
 
 		pt_add(m_pos, m_diff[0], e_pos);
 		dt_write_svg("<line ", dt_writer);
 		dt_write_svg(m_pos, "x1", "y1", dt_writer);
 		dt_write_svg(e_pos, "x2", "y2", dt_writer);
-		ShapeStroke::dt_write_svg(dt_writer);
+		ShapeStroke::write_svg(dt_writer);
 		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[2];
 			D2D1_POINT_2F tip_pos;
 			if (get_arrow_pos(m_pos, m_diff[0], m_arrow_size, barbs, tip_pos)) {
-				ShapeLineA::dt_write_svg(barbs, tip_pos, dt_writer);
+				ShapeLineA::write_svg(barbs, tip_pos, dt_writer);
 			}
 		}
 	}

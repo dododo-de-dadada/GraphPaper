@@ -27,9 +27,9 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから図形を読み込む.
 	static Shape* slist_read_shape(DataReader const& dt_reader);
 	// 次の図形を得る.
-	template <typename T> static Shape* slist_next(T const& it_begin, T const& it_end, const Shape* s) noexcept;
+	template <typename T> static Shape* slist_next(T const& it_beg, T const& it_end, const Shape* s) noexcept;
 	// 次の図形とその距離を得る.
-	template <typename T> static Shape* slist_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept;
+	template <typename T> static Shape* slist_next(T const& it_beg, T const& it_end, uint32_t& distance) noexcept;
 
 	// 利用可能な書体名か判定し, 利用できない書体があったならばそれを得る.
 	bool slist_test_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept
@@ -386,32 +386,32 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の, その次の図形をリストから得る.
-	// it_begin	リストの始端
+	// it_beg	リストの始端
 	// it_end	リストの終端
 	// s	図形
 	// 戻り値	その次の図形. ヌルならば次の図形はない.
-	template <typename T> static Shape* slist_next(T const& it_begin, T const& it_end, const Shape* s) noexcept
+	template <typename T> static Shape* slist_next(T const& it_beg, T const& it_end, const Shape* s) noexcept
 	{
-		auto it{ std::find(it_begin, it_end, s) };
+		auto it{ std::find(it_beg, it_end, s) };
 		if (it != it_end) {
 			uint32_t _;
 			return slist_next(++it, it_end, _);
 		}
 		return static_cast<Shape*>(nullptr);
 	}
-	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::iterator const& it_begin, SHAPE_LIST::iterator const& it_end, const Shape* s) noexcept;
-	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::reverse_iterator const& it_rbegin, SHAPE_LIST::reverse_iterator const& it_rend, const Shape* s) noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, const Shape* s) noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend, const Shape* s) noexcept;
 
 	// 図形のその次の図形と, その間隔をリストから得る.
-	// it_begin	リストの始端
+	// it_beg	リストの始端
 	// it_end	リストの終端
 	// distance	次の図形との間隔
 	// 戻り値	次の図形, ヌルならば次の図形はない.
 	template <typename T>
-	static Shape* slist_next(T const& it_begin, T const& it_end, uint32_t& distance) noexcept
+	static Shape* slist_next(T const& it_beg, T const& it_end, uint32_t& distance) noexcept
 	{
 		uint32_t i = 0;
-		for (auto it = it_begin; it != it_end; it++) {
+		for (auto it = it_beg; it != it_end; it++) {
 			auto s = *it;
 			if (s->is_deleted() != true) {
 				distance = i;
@@ -421,8 +421,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		return static_cast<Shape*>(nullptr);
 	}
-	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::iterator const& it_begin, SHAPE_LIST::iterator const& it_end, uint32_t& distance) noexcept;
-	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::reverse_iterator const& it_rbegin, SHAPE_LIST::reverse_iterator const& it_rend, uint32_t& distance) noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, uint32_t& distance) noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend, uint32_t& distance) noexcept;
 
 	// 前の図形をリストから得る.
 	Shape* slist_prev(SHAPE_LIST const& slist, const Shape* s) noexcept
@@ -520,7 +520,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			wchar_t* w;
-			if (s->get_text(w) != true) {
+			if (s->get_text_content(w) != true) {
 				continue;
 			}
 			if (text.empty()) {

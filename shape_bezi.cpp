@@ -699,7 +699,7 @@ namespace winrt::GraphPaper::implementation
 		if (pt_in_anch(tp, c_pos[0])) {
 			return ANCH_TYPE::ANCH_P0 + 0;
 		}
-		if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+		if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
 			if (pt_in_circle(tp, e_width)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
@@ -707,12 +707,12 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
-		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+		else if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
 			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, c_pos, m_diff.data(), e_width)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
-		else if (equal(m_stroke_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+		else if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
 			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, c_pos, m_diff.data(), e_width)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
@@ -960,9 +960,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG として書き込む.
-	void ShapeBezi::dt_write_svg(DataWriter const& dt_writer) const
+	void ShapeBezi::write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::dt_write_svg;
 		D2D1_BEZIER_SEGMENT b_seg;
 
 		pt_add(m_pos, m_diff[0], b_seg.point1);
@@ -975,12 +974,12 @@ namespace winrt::GraphPaper::implementation
 		dt_write_svg(b_seg.point3, ",", dt_writer);
 		dt_write_svg("\" ", dt_writer);
 		dt_write_svg("none", "fill", dt_writer);
-		ShapeStroke::dt_write_svg(dt_writer);
+		ShapeStroke::write_svg(dt_writer);
 		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bz_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			ShapeLineA::dt_write_svg(barbs, barbs[2], dt_writer);
+			ShapeLineA::write_svg(barbs, barbs[2], dt_writer);
 		}
 	}
 

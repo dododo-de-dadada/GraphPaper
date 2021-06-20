@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 	//	anch	図形の部位.
 	//	value	得られた位置.
 	//	戻り値	なし
-	void ShapeRRect::get_anch_pos(const uint32_t anch, D2D1_POINT_2F& value) const noexcept
+	void ShapeRRect::get_pos_anch(const uint32_t anch, D2D1_POINT_2F& value) const noexcept
 	{
 		const double dx = m_diff[0].x;
 		const double dy = m_diff[0].y;
@@ -168,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(m_pos, rx, dy - ry, value);
 			break;
 		default:
-			ShapeRect::get_anch_pos(anch, value);
+			ShapeRect::get_pos_anch(anch, value);
 			break;
 		}
 	}
@@ -228,7 +228,7 @@ namespace winrt::GraphPaper::implementation
 			for (uint32_t i = 0; i < 4; i++) {
 				// 角丸の中心点を得る.
 				D2D1_POINT_2F r_cen;
-				get_anch_pos(ANCH_ROUND[i], r_cen);
+				get_pos_anch(ANCH_ROUND[i], r_cen);
 				// 角丸の部位に位置が含まれるか判定する.
 				if (pt_in_anch(t_pos, r_cen)) {
 					// 含まれるなら角丸の部位を返す.
@@ -238,14 +238,14 @@ namespace winrt::GraphPaper::implementation
 		}
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F r_pos;	// 方形の頂点
-			get_anch_pos(ANCH_CORNER[i], r_pos);
+			get_pos_anch(ANCH_CORNER[i], r_pos);
 			if (pt_in_anch(t_pos, r_pos)) {
 				return ANCH_CORNER[i];
 			}
 		}
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F r_pos;	// 方形の辺の中点
-			get_anch_pos(ANCH_MIDDLE[i], r_pos);
+			get_pos_anch(ANCH_MIDDLE[i], r_pos);
 			if (pt_in_anch(t_pos, r_pos)) {
 				return ANCH_MIDDLE[i];
 			}
@@ -253,7 +253,7 @@ namespace winrt::GraphPaper::implementation
 		if (flag != true) {
 			for (uint32_t i = 0; i < 4; i++) {
 				D2D1_POINT_2F r_cen;	// 角丸部分の中心点
-				get_anch_pos(ANCH_ROUND[i], r_cen);
+				get_pos_anch(ANCH_ROUND[i], r_cen);
 				if (pt_in_anch(t_pos, r_cen)) {
 					return ANCH_ROUND[i];
 				}
@@ -310,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 	//	値を, 部位の位置に格納する. 他の部位の位置も動く.
 	//	value	格納する値
 	//	abch	図形の部位
-	bool ShapeRRect::set_anch_pos(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
+	bool ShapeRRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
 		D2D1_POINT_2F c_pos;
 		D2D1_POINT_2F vec;
@@ -318,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 
 		switch (anch) {
 		case ANCH_TYPE::ANCH_R_NW:
-			ShapeRRect::get_anch_pos(anch, c_pos);
+			ShapeRRect::get_pos_anch(anch, c_pos);
 			pt_sub(value, c_pos, vec);
 			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
@@ -327,7 +327,7 @@ namespace winrt::GraphPaper::implementation
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		case ANCH_TYPE::ANCH_R_NE:
-			ShapeRRect::get_anch_pos(anch, c_pos);
+			ShapeRRect::get_pos_anch(anch, c_pos);
 			pt_sub(value, c_pos, vec);
 			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
@@ -337,7 +337,7 @@ namespace winrt::GraphPaper::implementation
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		case ANCH_TYPE::ANCH_R_SE:
-			ShapeRRect::get_anch_pos(anch, c_pos);
+			ShapeRRect::get_pos_anch(anch, c_pos);
 			pt_sub(value, c_pos, vec);
 			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
@@ -347,7 +347,7 @@ namespace winrt::GraphPaper::implementation
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		case ANCH_TYPE::ANCH_R_SW:
-			ShapeRRect::get_anch_pos(anch, c_pos);
+			ShapeRRect::get_pos_anch(anch, c_pos);
 			pt_sub(value, c_pos, vec);
 			if (pt_abs2(vec) < FLT_MIN) {
 				return false;
@@ -357,7 +357,7 @@ namespace winrt::GraphPaper::implementation
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		default:
-			ShapeRect::set_anch_pos(value, anch, dist);
+			ShapeRect::set_pos_anch(value, anch, dist);
 			if (m_diff[0].x * m_corner_rad.x < 0.0f) {
 				m_corner_rad.x = -m_corner_rad.x;
 			}
@@ -397,10 +397,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeRRect::dt_write_svg(DataWriter const& dt_writer) const
+	void ShapeRRect::write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::dt_write_svg;
-
 		dt_write_svg("<rect ", dt_writer);
 		dt_write_svg(m_pos, "x", "y", dt_writer);
 		dt_write_svg(m_diff[0], "width", "height", dt_writer);
@@ -408,7 +406,7 @@ namespace winrt::GraphPaper::implementation
 			dt_write_svg(m_corner_rad, "rx", "ry", dt_writer);
 		}
 		dt_write_svg(m_fill_color, "fill", dt_writer);
-		ShapeStroke::dt_write_svg(dt_writer);
+		ShapeStroke::write_svg(dt_writer);
 		dt_write_svg("/>", dt_writer);
 	}
 }

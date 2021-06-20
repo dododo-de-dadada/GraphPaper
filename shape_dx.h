@@ -29,9 +29,9 @@ namespace winrt::GraphPaper::implementation
 	constexpr D2D1_COLOR_F S_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };
 	// 補助線の不透明度
 	constexpr float AUX_OPAC = 0.975f;
-	// 補助線の破線の配置
+	// 補助線の破線の様式
 	constexpr FLOAT AUX_DASHES[] = { 4.0f, 4.0f };
-	// 補助線の破線の配置の要素数
+	// 補助線の破線の様式の要素数
 	constexpr UINT32 AUX_DASHES_CONT = sizeof(AUX_DASHES) / sizeof(AUX_DASHES[0]);
 	// 補助線の線の特性
 	constexpr D2D1_STROKE_STYLE_PROPERTIES1 AUX_STYLE {

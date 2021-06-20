@@ -30,8 +30,11 @@ namespace winrt::GraphPaper::implementation
 		ARRANGE,	// 図形の順番の入れ替え
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
+		CAP_STYLE,	// 線の端点の操作
+		DASH_CAP,	// 破線の端点の操作
+		DASH_PATT,	// 破線の様式の操作
+		DASH_STYLE,	// 破線の形式の操作
 		FILL_COLOR,	// 塗りつぶしの色の操作
-		ANCH_POS,	// 図形の部位の位置の操作
 		FONT_COLOR,	// 書体の色の操作
 		FONT_FAMILY,	// 書体名の操作
 		FONT_SIZE,	// 書体の大きさの操作
@@ -43,23 +46,20 @@ namespace winrt::GraphPaper::implementation
 		GRID_EMPH,	// 方眼の形式の操作
 		GRID_SHOW,	// 方眼の表示方法の操作
 		GROUP,	// 図形をグループに挿入または削除する操作
+		JOIN_LIMIT,	// 線のマイター制限の操作
+		JOIN_STYLE,	// 破のつなぎの操作
 		LIST,	// 図形をリストに挿入または削除する操作
+		POS_ANCH,	// 図形の部位の位置の操作
+		POS_START,	// 図形の開始位置の操作
+		SELECT,	// 図形の選択を切り替え
 		SHEET_COLOR,	// 用紙の色の操作
 		SHEET_SIZE,	// 用紙の寸法の操作
-		SELECT,	// 図形の選択を切り替え
-		START_POS,	// 図形の開始位置の操作
-		STROKE_CAP_STYLE,	// 線の端点の操作
 		STROKE_COLOR,	// 線枠の色の操作
-		STROKE_DASH_CAP,	// 破線の端点の操作
-		STROKE_DASH_PATT,	// 破線の配置の操作
-		STROKE_DASH_STYLE,	// 破線の形式の操作
-		STROKE_JOIN_LIMIT,	// 線のマイター制限の操作
-		STROKE_JOIN_STYLE,	// 破のつなぎの操作
 		STROKE_WIDTH,	// 線枠の太さの操作
 		TEXT_CONTENT,	// 文字列の操作
 		TEXT_ALIGN_P,	// 段落の整列の操作
 		TEXT_ALIGN_T,	// 文字列の整列の操作
-		TEXT_LINE_H,	// 行間の操作
+		TEXT_LINE_SP,	// 行間の操作
 		TEXT_MARGIN,	// 文字列の余白の操作
 		TEXT_RANGE,	// 文字範囲の操作
 	};
@@ -70,6 +70,10 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U> struct U_TYPE { using type = int; };
 	template <> struct U_TYPE<UNDO_OP::ARROW_SIZE> { using type = ARROW_SIZE; };
 	template <> struct U_TYPE<UNDO_OP::ARROW_STYLE> { using type = ARROW_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::CAP_STYLE> { using type = CAP_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::DASH_CAP> { using type = D2D1_CAP_STYLE; };
+	template <> struct U_TYPE<UNDO_OP::DASH_PATT> { using type = DASH_PATT; };
+	template <> struct U_TYPE<UNDO_OP::DASH_STYLE> { using type = D2D1_DASH_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::FILL_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::FONT_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::FONT_FAMILY> { using type = wchar_t*; };
@@ -81,21 +85,18 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::GRID_GRAY> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::GRID_EMPH> { using type = GRID_EMPH; };
 	template <> struct U_TYPE<UNDO_OP::GRID_SHOW> { using type = GRID_SHOW; };
+	template <> struct U_TYPE<UNDO_OP::JOIN_LIMIT> { using type = float; };
+	template <> struct U_TYPE<UNDO_OP::JOIN_STYLE> { using type = D2D1_LINE_JOIN; };
+	//template <> struct U_TYPE<UNDO_OP::POS_ANCH> { using type = D2D1_POINT_2F; };
+	template <> struct U_TYPE<UNDO_OP::POS_START> { using type = D2D1_POINT_2F; };
 	template <> struct U_TYPE<UNDO_OP::SHEET_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::SHEET_SIZE> { using type = D2D1_SIZE_F; };
-	template <> struct U_TYPE<UNDO_OP::START_POS> { using type = D2D1_POINT_2F; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_CAP_STYLE> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_DASH_CAP> { using type = D2D1_CAP_STYLE; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_DASH_PATT> { using type = STROKE_DASH_PATT; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_DASH_STYLE> { using type = D2D1_DASH_STYLE; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_JOIN_LIMIT> { using type = float; };
-	template <> struct U_TYPE<UNDO_OP::STROKE_JOIN_STYLE> { using type = D2D1_LINE_JOIN; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_WIDTH> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_CONTENT> { using type = wchar_t*; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_P> { using type = DWRITE_PARAGRAPH_ALIGNMENT; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_T> { using type = DWRITE_TEXT_ALIGNMENT; };
-	template <> struct U_TYPE<UNDO_OP::TEXT_LINE_H> { using type = float; };
+	template <> struct U_TYPE<UNDO_OP::TEXT_LINE_SP> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_MARGIN> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
 

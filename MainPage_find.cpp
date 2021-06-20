@@ -338,7 +338,7 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				wchar_t* w_text;
-				if (s->get_text(w_text) != true) {
+				if (s->get_text_content(w_text) != true) {
 					continue;
 				}
 				uint32_t f_pos = 0;
@@ -416,7 +416,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		bool flag = false;	// 一致または置換フラグ.
-		DWRITE_TEXT_RANGE t_range;
+		DWRITE_TEXT_RANGE t_range;	// 文字列範囲
 		auto t = find_text_range_selected(m_list_shapes.begin(), m_list_shapes.end(), t_range);
 		if (t != nullptr) {
 			// 図形が見つかった場合,
@@ -443,9 +443,9 @@ namespace winrt::GraphPaper::implementation
 		Shape* s;
 		DWRITE_TEXT_RANGE s_range;
 		if (find_text(m_list_shapes, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
-			// 検索できた場合,
+			// 検索できたならば,
+			// 文字範囲が選択された図形があり, それが次の図形と異なるか判定する.
 			if (t != nullptr && s != t) {
-				// 文字範囲が選択された図形があり, それが次の図形と異なる場合,
 				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
 			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
@@ -454,10 +454,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag) {
 			sheet_draw();
-			return;
 		}
-		// 検索できない, かつ置換もされてない場合,
-		message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
+		else {
+			// 検索できない, かつ置換もされてない場合,
+			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
+		}
 	}
 
 	// 編集メニューの「文字列の検索/置換」が選択された.
@@ -467,16 +468,17 @@ namespace winrt::GraphPaper::implementation
 		if (sp_find_text_panel().Visibility() == UI_VISIBLE) {
 			sp_find_text_panel().Visibility(UI_COLLAPSED);
 			find_text_set();
-			return;
 		}
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
-			summary_close_click(nullptr, nullptr);
+		else {
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
+				summary_close_click(nullptr, nullptr);
+			}
+			tx_find_text_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
+			tx_find_replace_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });
+			ck_find_text_case().IsChecked(m_find_text_case);
+			ck_find_text_wrap().IsChecked(m_find_text_wrap);
+			sp_find_text_panel().Visibility(UI_VISIBLE);
 		}
-		tx_find_text_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
-		tx_find_replace_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });
-		ck_find_text_case().IsChecked(m_find_text_case);
-		ck_find_text_wrap().IsChecked(m_find_text_wrap);
-		sp_find_text_panel().Visibility(UI_VISIBLE);
 	}
 
 	// 文字列検索パネルの「閉じる」ボタンが押された.
@@ -500,23 +502,24 @@ namespace winrt::GraphPaper::implementation
 			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			sheet_draw();
-			return;
 		}
-		// 検索できない場合,
-		// 「文字列は見つかりません」メッセージダイアログを表示する.
-		message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
+		else {
+			// 検索できない場合,
+			// 「文字列は見つかりません」メッセージダイアログを表示する.
+			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
+		}
 	}
 
 	// データリーダーから検索の値を読み込む.
-	void MainPage::find_text_read(DataReader const& dt_reader)
-	{
-		dt_read(m_find_text, dt_reader);
-		dt_read(m_find_repl, dt_reader);
-		uint16_t bit = dt_reader.ReadUInt16();
-		m_edit_text_frame = ((bit & 1) != 0);
-		m_find_text_case = ((bit & 2) != 0);
-		m_find_text_wrap = ((bit & 4) != 0);
-	}
+	//void MainPage::find_text_read(DataReader const& dt_reader)
+	//{
+	//	dt_read(m_find_text, dt_reader);
+	//	dt_read(m_find_repl, dt_reader);
+	//	uint16_t bit = dt_reader.ReadUInt16();
+	//	m_edit_text_frame = ((bit & 1) != 0);
+	//	m_find_text_case = ((bit & 2) != 0);
+	//	m_find_text_wrap = ((bit & 4) != 0);
+	//}
 
 	// 文字列検索パネルから値を格納する.
 	void MainPage::find_text_set(void)
@@ -543,21 +546,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 検索の値をデータリーダーに書き込む.
-	void MainPage::find_text_write(DataWriter const& dt_writer)
-	{
-		dt_write(m_find_text, dt_writer);
-		dt_write(m_find_repl, dt_writer);
-		uint16_t bit = 0;
-		if (m_edit_text_frame) {
-			bit |= 1;
-		}
-		if (m_find_text_case) {
-			bit |= 2;
-		}
-		if (m_find_text_wrap) {
-			bit |= 4;
-		}
-		dt_writer.WriteUInt16(bit);
-	}
+	//void MainPage::find_text_write(DataWriter const& dt_writer)
+	//{
+	//	dt_write(m_find_text, dt_writer);
+	//	dt_write(m_find_repl, dt_writer);
+	//	uint16_t bit = 0;
+	//	if (m_edit_text_frame) {
+	//		bit |= 1;
+	//	}
+	//	if (m_find_text_case) {
+	//		bit |= 2;
+	//	}
+	//	if (m_find_text_wrap) {
+	//		bit |= 4;
+	//	}
+	//	dt_writer.WriteUInt16(bit);
+	//}
 
 }

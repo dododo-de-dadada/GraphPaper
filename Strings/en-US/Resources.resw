@@ -469,7 +469,7 @@
     <value>Stroke Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_stroke_dash_patt.Text" xml:space="preserve">
+  <data name="mfi_dash_patt.Text" xml:space="preserve">
     <value>Dash Pattern...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -541,7 +541,7 @@
     <value>Status Bar</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_stroke_dash_style.Text" xml:space="preserve">
+  <data name="mfsi_dash_style.Text" xml:space="preserve">
     <value>Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -597,23 +597,23 @@
     <value>Hide</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_style_dash.Text" xml:space="preserve">
+  <data name="rmfi_dash_style_dash.Text" xml:space="preserve">
     <value>Dash</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_style_dash_dot.Text" xml:space="preserve">
+  <data name="rmfi_dash_style_dash_dot.Text" xml:space="preserve">
     <value>Dash Dot</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_style_dash_dot_dot.Text" xml:space="preserve">
+  <data name="rmfi_dash_style_dash_dot_dot.Text" xml:space="preserve">
     <value>Dash Dot Dot</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_style_dot.Text" xml:space="preserve">
+  <data name="rmfi_dash_style_dot.Text" xml:space="preserve">
     <value>Dot</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_stroke_dash_style_solid.Text" xml:space="preserve">
+  <data name="rmfi_dash_style_solid.Text" xml:space="preserve">
     <value>Solid</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -681,8 +681,8 @@
     <value>Text</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_arrow" xml:space="preserve">
-    <value>Arrowhead</value>
+  <data name="str_arrow_size" xml:space="preserve">
+    <value>Arrow Mark Size</value>
     <comment>String</comment>
   </data>
   <data name="str_arrow_length" xml:space="preserve">
@@ -802,19 +802,23 @@
     <value>Size</value>
     <comment>String</comment>
   </data>
-  <data name="str_stroke" xml:space="preserve">
-    <value>Stroke</value>
+  <data name="str_stroke_color" xml:space="preserve">
+    <value>Stroke Color</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_dash_patt" xml:space="preserve">
+    <value>Dash Pattern</value>
     <comment>String</comment>
   </data>
   <data name="str_stroke_width" xml:space="preserve">
-    <value>Width</value>
+    <value>Stroke Width</value>
     <comment>String</comment>
   </data>
-  <data name="str_stroke_join" xml:space="preserve">
+  <data name="str_join" xml:space="preserve">
     <value>Line Join</value>
     <comment>String</comment>
   </data>
-  <data name="str_stroke_join_limit" xml:space="preserve">
+  <data name="str_join_limit" xml:space="preserve">
     <value>Miter Limit</value>
     <comment>String</comment>
   </data>

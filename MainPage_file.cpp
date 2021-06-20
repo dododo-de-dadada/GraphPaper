@@ -117,15 +117,22 @@ namespace winrt::GraphPaper::implementation
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
+
 		// 図形一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			if (m_list_shapes.empty()) {
 				summary_close_click(nullptr, nullptr);
 			}
-			else {
+			else if (lv_summary_list() != nullptr) {
 				summary_remake();
 			}
+			else {
+				// リソースから図形の一覧パネルを見つける.
+				auto _{ FindName(L"gd_summary_panel") };
+				gd_summary_panel().Visibility(UI_VISIBLE);
+			}
 		}
+
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
@@ -191,18 +198,28 @@ namespace winrt::GraphPaper::implementation
 			const auto ra_size = static_cast<uint32_t>(ra_stream.Size());
 			co_await dt_reader.LoadAsync(ra_size);
 
-			tool_read(dt_reader);
-			find_text_read(dt_reader);
-			//m_misc_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt32());
+			//tool_read(dt_reader);
+			m_tool_draw = static_cast<DRAW_TOOL>(dt_reader.ReadUInt32());
+			dt_read(m_tool_poly, dt_reader);
+			//find_text_read(dt_reader);
+			dt_read(m_find_text, dt_reader);
+			dt_read(m_find_repl, dt_reader);
+			uint16_t bit = dt_reader.ReadUInt16();
+			m_edit_text_frame = ((bit & 1) != 0);
+			m_find_text_case = ((bit & 2) != 0);
+			m_find_text_wrap = ((bit & 4) != 0);
+
 			m_misc_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_misc_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
 			m_misc_pile_up = dt_reader.ReadSingle();
 			m_misc_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 
+			const auto s_atom = dt_reader.ReadBoolean();
+			m_summary_atomic.store(s_atom, std::memory_order_release);
+
 			m_sheet_main.read(dt_reader);
-			float g_base;
-			m_sheet_main.get_grid_base(g_base);
-			m_sheet_main.set_grid_base(max(g_base, 0.0F));
+
+			m_sheet_main.m_grid_base = max(m_sheet_main.m_grid_base, 0.0f);
 			m_sheet_main.m_sheet_scale = min(max(m_sheet_main.m_sheet_scale, 0.25f), 4.0f);
 			m_sheet_main.m_sheet_size.width = max(min(m_sheet_main.m_sheet_size.width, sheet_size_max()), 1.0F);
 			m_sheet_main.m_sheet_size.height = max(min(m_sheet_main.m_sheet_size.height, sheet_size_max()), 1.0F);
@@ -224,8 +241,8 @@ namespace winrt::GraphPaper::implementation
 				hres = S_OK;
 			}
 			else if (slist_read(m_list_shapes, dt_reader)) {
+				// 中断フラグが立ってるか判定する.
 				if (suspend) {
-					// 中断フラグが立っている場合,
 					undo_read(dt_reader);
 				}
 				hres = S_OK;
@@ -553,10 +570,9 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::CachedFileManager;
 		using winrt::Windows::Storage::FileAccessMode;
 		using winrt::Windows::Storage::Provider::FileUpdateStatus;
-		using winrt::GraphPaper::implementation::dt_write_svg;
+
 		constexpr char XML_DEC[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" SVG_NEW_LINE;
 		constexpr char DOCTYPE[] = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" SVG_NEW_LINE;
-
 		auto hres = E_FAIL;
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		winrt::apartment_context context;
@@ -582,7 +598,7 @@ namespace winrt::GraphPaper::implementation
 					// 以下を無視する.
 					continue;
 				}
-				s->dt_write_svg(dt_writer);
+				s->write_svg(dt_writer);
 			}
 			// SVG 終了タグを書き込む.
 			dt_write_svg("</svg>" SVG_NEW_LINE, dt_writer);
@@ -651,13 +667,30 @@ namespace winrt::GraphPaper::implementation
 			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::ReadWrite) };
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
 
-			tool_write(dt_writer);
-			find_text_write(dt_writer);
-			//dt_writer.WriteUInt32(static_cast<uint32_t>(m_misc_status_bar));
+			//tool_write(dt_writer);
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_tool_draw));
+			dt_write(m_tool_poly, dt_writer);
+			//find_text_write(dt_writer);
+			dt_write(m_find_text, dt_writer);
+			dt_write(m_find_repl, dt_writer);
+			uint16_t f_bit = 0;
+			if (m_edit_text_frame) {
+				f_bit |= 1;
+			}
+			if (m_find_text_case) {
+				f_bit |= 2;
+			}
+			if (m_find_text_wrap) {
+				f_bit |= 4;
+			}
+			dt_writer.WriteUInt16(f_bit);
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_misc_len_unit));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_color_code));
 			dt_writer.WriteSingle(m_misc_pile_up);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_status_bar));
+			
+			dt_writer.WriteBoolean(m_summary_atomic.load(std::memory_order_acquire));
+
 			m_sheet_main.write(dt_writer);
 			if (suspend) {
 				slist_write<!REDUCE>(m_list_shapes, dt_writer);

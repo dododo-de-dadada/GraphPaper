@@ -142,6 +142,7 @@
     <ClCompile Include="MainPage_app.cpp" />
     <ClCompile Include="MainPage_arrange.cpp" />
     <ClCompile Include="MainPage_arrow.cpp" />
+    <ClCompile Include="MainPage_dash.cpp" />
     <ClCompile Include="MainPage_display.cpp" />
     <ClCompile Include="MainPage_file.cpp" />
     <ClCompile Include="MainPage_fill.cpp" />

@@ -323,7 +323,7 @@ namespace winrt::GraphPaper::implementation
 								s_min = g_pos;
 							}
 						}
-						t->set_start_pos(s_min);
+						t->set_pos_start(s_min);
 						m_dx_mutex.lock();
 						undo_push_append(t);
 						undo_push_select(t);

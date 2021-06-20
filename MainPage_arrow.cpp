@@ -9,8 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//constexpr float SLIDER_STEP = 0.5f;
-	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow";
+	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow_size";
 
 	//	値をスライダーのヘッダーに格納する.
 	//	value	値
@@ -20,21 +19,27 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
-			if constexpr (S == 0) {
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_width") + L": ";
-			}
-			if constexpr (S == 1) {
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_length") + L": ";
-			}
-			if constexpr (S == 2) {
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_offset") + L": ";
-			}
+			constexpr wchar_t* HEADER[] = {
+				L"str_arrow_width",
+				L"str_arrow_length",
+				L"str_arrow_offset"
+			};
+			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": ";
+			//if constexpr (S == 0) {
+			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_width") + L": ";
+			//}
+			//if constexpr (S == 1) {
+			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_length") + L": ";
+			//}
+			//if constexpr (S == 2) {
+			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_offset") + L": ";
+			//}
 		}
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
 			float g_base;
 			m_sheet_main.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
 			text = text + buf;
 		}
 		if constexpr (S == 0) {
@@ -65,13 +70,13 @@ namespace winrt::GraphPaper::implementation
 			ARROW_SIZE a_size;
 			m_sample_shape->get_arrow_size(a_size);
 			if constexpr (S == 0) {
-				a_size.m_width = static_cast<FLOAT>(value);// * SLIDER_STEP);
-			}
+				a_size.m_width = static_cast<FLOAT>(value);
+				}
 			if constexpr (S == 1) {
-				a_size.m_length = static_cast<FLOAT>(value);// * SLIDER_STEP);
+				a_size.m_length = static_cast<FLOAT>(value);
 			}
 			if constexpr (S == 2) {
-				a_size.m_offset = static_cast<FLOAT>(value);// * SLIDER_STEP);
+				a_size.m_offset = static_cast<FLOAT>(value);
 			}
 			m_sample_shape->set_arrow_size(a_size);
 		}

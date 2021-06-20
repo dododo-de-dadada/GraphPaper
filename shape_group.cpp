@@ -67,15 +67,15 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を囲む領域の左上位置を得る.
 	// value	領域の左上位置
-	void ShapeGroup::get_min_pos(D2D1_POINT_2F& value) const noexcept
+	void ShapeGroup::get_pos_min(D2D1_POINT_2F& value) const noexcept
 	{
-		get_start_pos(value);
+		get_pos_start(value);
 	}
 
 	// 開始位置を得る.
 	// value	開始位置
 	// グループ図形の場合, 開始位置は図形を囲む領域の左上位置.
-	bool ShapeGroup::get_start_pos(D2D1_POINT_2F& value) const noexcept
+	bool ShapeGroup::get_pos_start(D2D1_POINT_2F& value) const noexcept
 	{
 		//if (m_list_grouped.empty()) {
 		//	return false;
@@ -86,7 +86,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			D2D1_POINT_2F pos;
-			s->get_min_pos(pos);
+			s->get_pos_min(pos);
 			if (flag != true) {
 				value = pos;
 				flag = true;
@@ -205,10 +205,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を開始位置に格納する. 他の部位の位置も動く.
-	bool ShapeGroup::set_start_pos(const D2D1_POINT_2F value)
+	bool ShapeGroup::set_pos_start(const D2D1_POINT_2F value)
 	{
 		D2D1_POINT_2F b_min;
-		if (get_start_pos(b_min) && !equal(value, b_min)) {
+		if (get_pos_start(b_min) && !equal(value, b_min)) {
 			D2D1_POINT_2F d_vec;
 			pt_sub(value, b_min, d_vec);
 			move(d_vec);
@@ -231,16 +231,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG として書き込む.
-	void ShapeGroup::dt_write_svg(DataWriter const& dt_writer) const
+	void ShapeGroup::write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::dt_write_svg;
-
 		dt_write_svg("<g>" SVG_NEW_LINE, dt_writer);
 		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->dt_write_svg(dt_writer);
+			s->write_svg(dt_writer);
 		}
 		dt_write_svg("</g>" SVG_NEW_LINE, dt_writer);
 	}

@@ -27,8 +27,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		CAP_STYLE old_value;
-		m_sheet_main.get_stroke_cap_style(old_value);
-		if (undo_push_set<UNDO_OP::STROKE_CAP_STYLE>(new_value)) {
+		m_sheet_main.get_cap_style(old_value);
+		if (undo_push_set<UNDO_OP::CAP_STYLE>(new_value)) {
 			undo_push_null();
 			undo_menu_enable();
 			sheet_draw();
@@ -59,14 +59,14 @@ namespace winrt::GraphPaper::implementation
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 
 		float j_limit;
-		m_sample_sheet.get_stroke_join_limit(j_limit);
+		m_sample_sheet.get_join_limit(j_limit);
 		j_limit -= 1.0f;
 		sample_slider_0().Maximum(127.5);
 		sample_slider_0().TickFrequency(0.5);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(j_limit);
 		sample_slider_0().Visibility(UI_VISIBLE);
-		join_slider_set_header<UNDO_OP::STROKE_JOIN_LIMIT, 0>(j_limit);
+		join_slider_set_header<UNDO_OP::JOIN_LIMIT, 0>(j_limit);
 
 		float s_width;
 		m_sample_sheet.get_stroke_width(s_width);
@@ -77,7 +77,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(UI_VISIBLE);
 		join_slider_set_header<UNDO_OP::STROKE_WIDTH, 1>(s_width);
 
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::STROKE_JOIN_LIMIT, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::JOIN_LIMIT, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::STROKE_WIDTH, 1> });
 		m_sample_type = SAMPLE_TYPE::JOIN;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_line_join")));
@@ -85,9 +85,9 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_limit;
 			float sample_width;
-			m_sample_shape->get_stroke_join_limit(sample_limit);
+			m_sample_shape->get_join_limit(sample_limit);
 			m_sample_shape->get_stroke_width(sample_width);
-			if (undo_push_set<UNDO_OP::STROKE_JOIN_LIMIT>(sample_limit) ||
+			if (undo_push_set<UNDO_OP::JOIN_LIMIT>(sample_limit) ||
 				undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
 				undo_push_null();
 				undo_menu_enable();
@@ -112,12 +112,12 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
 
-		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
+		if constexpr (U == UNDO_OP::JOIN_LIMIT) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
 			const float limit = value/* * SLIDER_STEP*/ + 1.0f;
 			swprintf_s(buf, LEN, L"%.1f", limit);
-			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_join_limit") + L": " + buf;
+			text = ResourceLoader::GetForCurrentView().GetString(L"str_join_limit") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			float g_base;
@@ -146,8 +146,8 @@ namespace winrt::GraphPaper::implementation
 		Shape* sample = m_sample_shape;
 		const float value = static_cast<float>(args.NewValue());
 		join_slider_set_header<U, S>(value);
-		if constexpr (U == UNDO_OP::STROKE_JOIN_LIMIT) {
-			sample->set_stroke_join_limit(value/* * SLIDER_STEP*/ + 1.0f);
+		if constexpr (U == UNDO_OP::JOIN_LIMIT) {
+			sample->set_join_limit(value/* * SLIDER_STEP*/ + 1.0f);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			sample->set_stroke_width(value/* * SLIDER_STEP*/);
@@ -185,8 +185,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		D2D1_LINE_JOIN old_value;
-		m_sheet_main.get_stroke_join_style(old_value);
-		if (undo_push_set<UNDO_OP::STROKE_JOIN_STYLE>(new_value)) {
+		m_sheet_main.get_join_style(old_value);
+		if (undo_push_set<UNDO_OP::JOIN_STYLE>(new_value)) {
 			undo_push_null();
 			undo_menu_enable();
 			sheet_draw();

@@ -785,9 +785,9 @@ namespace winrt::GraphPaper::implementation
 			is_opaque(m_stroke_color),
 			m_stroke_width,
 			m_end_closed,
-			m_stroke_cap_style,
-			m_stroke_join_style,
-			m_stroke_join_limit,
+			m_cap_style,
+			m_join_style,
+			m_join_limit,
 			is_opaque(m_fill_color)
 		);
 	}
@@ -876,10 +876,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapePoly::dt_write_svg(DataWriter const& dt_writer) const
+	void ShapePoly::write_svg(DataWriter const& dt_writer) const
 	{
-		using winrt::GraphPaper::implementation::dt_write_svg;
-
 		dt_write_svg("<path d=\"", dt_writer);
 		dt_write_svg(m_pos, "M", dt_writer);
 		const auto d_cnt = m_diff.size();	// 差分の数
@@ -895,7 +893,7 @@ namespace winrt::GraphPaper::implementation
 			dt_write_svg("Z", dt_writer);
 		}
 		dt_write_svg("\" ", dt_writer);
-		ShapeStroke::dt_write_svg(dt_writer);
+		ShapeStroke::write_svg(dt_writer);
 		dt_write_svg(m_fill_color, "fill", dt_writer);
 		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
@@ -910,7 +908,7 @@ namespace winrt::GraphPaper::implementation
 					dt_write_svg("Z", dt_writer);
 				}
 				dt_write_svg("\" ", dt_writer);
-				ShapeStroke::dt_write_svg(dt_writer);
+				ShapeStroke::write_svg(dt_writer);
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
 					dt_write_svg(m_stroke_color, "fill", dt_writer);
 				}

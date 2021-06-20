@@ -26,15 +26,20 @@ namespace winrt::GraphPaper::implementation
 	// 図形の一覧の要素の選択を解除する.
 	static void summary_unselect_at(ListView const& view, const uint32_t i);
 
-	// 図形リストをもとに図形の一覧を作成する.
+	// 図形リストをもとに一覧を作成する.
+	// l_view	リストビュー
+	// slist	図形リスト
+	// r_dict	リソースディレクトリ
 	static void summary_create(ListView const& l_view, const SHAPE_LIST& slist, const ResourceDictionary& r_dict)
 	{
-		uint32_t i = 0;
-		for (auto s : slist) {
+		uint32_t i = 0;	// 要素の添え字
+		for (const auto s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
+			// リストビューの末尾に要素を追加する.
 			l_view.Items().Append(winrt::make<Summary>(s, r_dict));
+			// 図形が選択されているか判定する.
 			if (s->is_selected()) {
 				summary_select_at(l_view, i);
 			}
@@ -69,7 +74,8 @@ namespace winrt::GraphPaper::implementation
 		view.ScrollIntoView(item[0]);
 	}
 
-	// 図形の一覧の要素から図形を得る.
+	// 一覧の要素から図形を得る.
+	// item	要素
 	static Shape* const summary_shape(IInspectable const& item) noexcept
 	{
 		// try_as は例外を投げない.
@@ -103,6 +109,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の一覧の要素の選択を解除する.
+	// l_view	リストビュー
+	// i	図形の添え字
 	static void summary_unselect_at(ListView const& l_view, const uint32_t i)
 	{
 		IInspectable s_item[1];
@@ -114,17 +122,19 @@ namespace winrt::GraphPaper::implementation
 			l_view.SelectedItems().GetMany(j, t_item);
 			if (summary_shape(t_item[0]) == s) {
 				l_view.SelectedItems().RemoveAt(j);
-				return;
+				break;
 			}
 		}
 	}
 
-	// 図形を一覧に追加する.
+	// 一覧の末尾に図形を追加する.
+	// s	図形
 	void MainPage::summary_append(Shape* const s)
 	{
 		// 図形の一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
+			// 一覧の末尾に要素を追加する.
 			lv_summary_list().Items().Append(winrt::make<Summary>(s, Resources()));
 			if (s->is_selected()) {
 				summary_select_at(lv_summary_list(), lv_summary_list().Items().Size() - 1);
@@ -133,57 +143,65 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 一覧の中で図形を入れ替える.
+	// 図形の一覧の中で図形を入れ替える.
+	// s	入れ替える図形
+	// t	もう一方の図形
 	void MainPage::summary_arrange(Shape* const s, Shape* const t)
 	{
-		// 図形一覧の排他制御が true か判定する.
+		// 図形の一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
+
 			summary_swap(lv_summary_list(), s, t, Resources());
 			m_summary_atomic.store(true, std::memory_order_release);
 		}
 	}
 
-	// 一覧を消去する.
+	// 図形の一覧を消去する.
 	void MainPage::summary_clear(void)
 	{
-		// 図形一覧の排他制御が true か判定する.
+		// 図形の一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
+
 			lv_summary_list().Items().Clear();
 			m_summary_atomic.store(true, std::memory_order_release);
 		}
 	}
 
-	// 一覧パネルの「閉じる」ボタンが押された.
+	// 図形の一覧パネルの「閉じる」ボタンが押された.
 	void MainPage::summary_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 図形一覧の排他制御が true か判定する.
+		// 図形の一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
+
 			gd_summary_panel().Visibility(UI_COLLAPSED);
 			lv_summary_list().Items().Clear();
 			UnloadObject(gd_summary_panel());
 		}
 	}
 
-	// 一覧の添え字の位置に図形を挿入する.
+	// 図形の一覧の添え字の位置に図形を挿入する.
+	// s	図形
+	// i	添え字
 	void MainPage::summary_insert_at(Shape* const s, const uint32_t i)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
-			lv_summary_list().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
+			const auto& list = lv_summary_list();
+			list.Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
 			if (s->is_selected()) {
-				summary_select_at(lv_summary_list(), i);
+				summary_select_at(list, i);
 			}
 			else {
-				summary_unselect_at(lv_summary_list(), i);
+				summary_unselect_at(list, i);
 			}
 			m_summary_atomic.store(true, std::memory_order_release);
 		}
 	}
 
-	// 一覧の項目が選択された.
+	// 図形の一覧の項目が選択された.
 	void MainPage::summary_item_click(IInspectable const&, ItemClickEventArgs const& args)
 	{
 		const auto item = args.ClickedItem();
@@ -195,29 +213,33 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「一覧を表示」が選択された.
 	void MainPage::summary_list_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 図形一覧の排他制御が true か判定する.
+		// 図形の一覧の排他制御が true か判定する.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
+			// 図形の一覧を閉じる.
 			summary_close_click(nullptr, nullptr);
 			return;
 		}
+		// 検索パネルが表示されてるか判定する.
 		if (sp_find_text_panel().Visibility() == UI_VISIBLE) {
+			// 検索パネルを非表示にする.
 			find_text_click(nullptr, nullptr);
 		}
+		// リソースから図形の一覧パネルを見つける.
 		auto _{ FindName(L"gd_summary_panel") };
 		gd_summary_panel().Visibility(UI_VISIBLE);
 		m_summary_atomic.store(true, std::memory_order_release);
 	}
 
-	// 一覧がロードされた.
+	// 図形の一覧がロードされた.
 	void MainPage::summary_loaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
 	{
-		// 図形一覧の排他制御を false と入れ替える.
+		// 図形の一覧の排他制御を false と入れ替える.
 		bool summary_visible = m_summary_atomic.exchange(false, std::memory_order_acq_rel); // 入れ替え前の排他制御
 		summary_create(lv_summary_list(), m_list_shapes, Resources());
 		m_summary_atomic.store(summary_visible, std::memory_order_release);
 	}
 
-	// 操作を図形一覧に反映する.
+	// 操作を図形の一覧に反映する.
 	// この関数は, 操作を実行する前に呼び出す.
 	void MainPage::summary_reflect(const Undo* u)
 	{
@@ -225,37 +247,37 @@ namespace winrt::GraphPaper::implementation
 			m_summary_atomic.store(false, std::memory_order_release);
 			const auto& u_type = typeid(*u);
 			if (u_type == typeid(UndoList)) {
-				auto v = static_cast<const UndoList*>(u);
-				auto s = v->shape();
+				const auto v = static_cast<const UndoList*>(u);
+				const auto& list = lv_summary_list();
 				if (v->is_insert()) {
 					if (v->shape_at() != nullptr) {
-						auto i = summary_distance(lv_summary_list().Items(), v->shape_at());
-						lv_summary_list().Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
+						const auto s = v->shape();
+						auto i = summary_distance(list.Items(), v->shape_at());
+						list.Items().InsertAt(i, winrt::make<Summary>(s, Resources()));
 						if (s->is_selected()) {
-							summary_select_at(lv_summary_list(), i);
+							summary_select_at(list, i);
 						}
 					}
 					else {
-						lv_summary_list().Items().Append(winrt::make<Summary>(s, Resources()));
-						const auto i = lv_summary_list().Items().Size() - 1;
-						summary_select_at(lv_summary_list(), i);
+						const auto s = v->shape();
+						list.Items().Append(winrt::make<Summary>(s, Resources()));
+						const auto i = list.Items().Size() - 1;
+						summary_select_at(list, i);
 					}
 				}
 				else {
-					auto items = lv_summary_list().Items();
+					const auto& items = list.Items();
+					const auto s = v->shape();
 					const auto i = summary_distance(items, s);
 					if (i < items.Size()) {
-						//summary_unselect_at(lv_summary_list(), i);	// リムーブする前に選択を外さないとシステムが勝手に他の項目を選択する.
 						items.RemoveAt(i);
 					}
 				}
-				lv_summary_list().UpdateLayout();
+				list.UpdateLayout();
 			}
 			else if (u_type == typeid(UndoArrange2)) {
-				auto v = static_cast<const UndoArrange2*>(u);
-				auto s = v->shape();
-				auto t = v->dest();
-				summary_swap(lv_summary_list(), s, t, Resources());
+				const auto v = static_cast<const UndoArrange2*>(u);
+				summary_swap(lv_summary_list(), v->shape(), v->dest(), Resources());
 			}
 			else if (u_type == typeid(UndoSelect)) {
 				const auto s = u->shape();
@@ -271,14 +293,15 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形一覧を作成しなおす.
+	// 図形の一覧を作成しなおす.
 	void MainPage::summary_remake(void)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
-			lv_summary_list().Items().Clear();
-			summary_create(lv_summary_list(), m_list_shapes, Resources());
-			lv_summary_list().UpdateLayout();
+			const auto& list = lv_summary_list();
+			list.Items().Clear();
+			summary_create(list, m_list_shapes, Resources());
+			list.UpdateLayout();
 			m_summary_atomic.store(true, std::memory_order_release);
 		}
 	}
@@ -288,10 +311,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			m_summary_atomic.store(false, std::memory_order_release);
-			auto items = lv_summary_list().Items();
+			const auto& list = lv_summary_list();
+			const auto& items = list.Items();
 			const uint32_t i = summary_distance(items, s);
 			if (i < items.Size()) {
-				summary_unselect_at(lv_summary_list(), i);	// リムーブする前に選択を外さないとシステムが勝手に他の項目を選択する.
+				summary_unselect_at(list, i);	// リムーブする前に選択を外さないとシステムが勝手に他の項目を選択する.
 				items.RemoveAt(i);
 			}
 			m_summary_atomic.store(true, std::memory_order_release);
@@ -310,7 +334,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 一覧の項目を全て選択する.
+	// 図形の一覧の項目を全て選択する.
 	void MainPage::summary_select_all(void)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -320,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 一覧の最初の項目を選択する.
+	// 図形の一覧の最初の項目を選択する.
 	void MainPage::summary_select_head(void)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -330,7 +354,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 一覧の最後の項目を選択する.
+	// 図形の一覧の最後の項目を選択する.
 	void MainPage::summary_select_tail(void)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -340,10 +364,10 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 一覧の項目が選択された.
+	// 図形の一覧の項目が選択された.
 	void MainPage::summary_selection_changed(IInspectable const&, SelectionChangedEventArgs const& e)
 	{
-		// 図形一覧の排他制御が false か判定する.
+		// 図形の一覧の排他制御が false か判定する.
 		if (!m_summary_atomic) {
 			return;
 		}
@@ -361,11 +385,9 @@ namespace winrt::GraphPaper::implementation
 			const auto s = summary_shape(item[0]);
 			if (s != nullptr && s->is_selected()) {
 				undo_push_select(s);
-				//if (m_event_shape_summary == s) {
-				//	m_event_shape_summary = nullptr;
-				//}
 			}
 		}
+
 		// 選択された項目があれば, 選択をつける.
 		auto t = static_cast<Shape*>(nullptr);
 		for (uint32_t i = 0; i < e.AddedItems().Size(); i++) {
@@ -374,15 +396,17 @@ namespace winrt::GraphPaper::implementation
 			const auto s = summary_shape(item[0]);
 			if (s != nullptr && !s->is_selected()) {
 				undo_push_select(t = s);
-				//m_event_shape_summary = s;
 			}
 		}
+
+		// 選択された図形があるか判定する.
 		if (t != static_cast<const Shape*>(nullptr)) {
 			// 図形が表示されるよう用紙をスクロールする.
 			scroll_to(t);
 			m_sheet_main.set_attr_to(t);
 			sheet_attr_is_checked();
 		}
+
 		// 編集メニュー項目の使用の可否を設定する.
 		xcvd_is_enabled();
 		sheet_draw();
@@ -398,7 +422,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 一覧の項目を全て選択解除する.
+	// 図形の一覧の項目を全て選択解除する.
 	void MainPage::summary_unselect_all(void)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -408,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 一覧の表示を更新する.
+	// 図形の一覧の表示を更新する.
 	void MainPage::summary_update(void)
 	{
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
