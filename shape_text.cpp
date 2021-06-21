@@ -26,11 +26,7 @@ namespace winrt::GraphPaper::implementation
 	// text_range	文字列の範囲
 	// test_metrics	ヒットテストのための計量
 	// test_count	計量の要素数
-	static void tx_create_test_metrics(
-		IDWriteTextLayout* text_layout,
-		const DWRITE_TEXT_RANGE text_range,
-		DWRITE_HIT_TEST_METRICS*& test_metrics,
-		UINT32& test_count)
+	static void tx_create_test_metrics(IDWriteTextLayout* text_layout, const DWRITE_TEXT_RANGE text_range, DWRITE_HIT_TEST_METRICS*& test_metrics, UINT32& test_count)
 	{
 		const uint32_t pos = text_range.startPosition;
 		const uint32_t len = text_range.length;
@@ -96,6 +92,55 @@ namespace winrt::GraphPaper::implementation
 				tx_create_test_metrics(text_layout, sel_range, range_metrics, range_cnt);
 			}
 		}
+	}
+
+	// 文字列をデータライターに SVG として書き込む.
+	// t	文字列
+	// t_len	文字数
+	// x, y	位置
+	// dy	垂直なずらし量
+	// dt_writer	データライター
+	// 戻り値	なし
+	static void tx_dt_write_svg(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer)
+	{
+		dt_write_svg("<text ", dt_writer);
+		dt_write_svg(x, "x", dt_writer);
+		dt_write_svg(y, "y", dt_writer);
+		dt_write_svg(dy, "dy", dt_writer);
+		//dt_write_svg("text-before-edge", "alignment-baseline", dt_writer);
+		dt_write_svg(">", dt_writer);
+		uint32_t k = 0;
+		for (uint32_t i = k; i < t_len; i++) {
+			const auto c = t[i];
+			char* ent;
+			if (c == L'<') {
+				ent = "&lt;";
+			}
+			else if (c == L'>') {
+				ent = "&gt;";
+			}
+			else if (c == L'&') {
+				ent = "&amp;";
+			}
+			//else if (c == L'"') {
+			// ent = "&quot;";
+			//}
+			//else if (c == L'\'') {
+			// ent = "&apos;";
+			//}
+			else {
+				continue;
+			}
+			if (i > k) {
+				dt_write_svg(t + k, i - k, dt_writer);
+			}
+			dt_write_svg(ent, dt_writer);
+			k = i + 1;
+		}
+		if (t_len > k) {
+			dt_write_svg(t + k, t_len - k, dt_writer);
+		}
+		dt_write_svg("</text>" SVG_NEW_LINE, dt_writer);
 	}
 
 	// 書体のディセントをテキストレイアウトから得る.
@@ -290,6 +335,40 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 図形を表示する.
+	//	dx	図形の描画環境
+	//	戻り値	なし
+	void ShapeText::draw(SHAPE_DX& dx)
+	{
+		ShapeRect::draw(dx);
+		if (m_dw_layout == nullptr) {
+			// || m_text == nullptr || m_text[0] == '\0') {
+			return;
+		}
+		D2D1_POINT_2F t_min;
+		pt_add(m_pos, m_diff[0], t_min);
+		pt_min(m_pos, t_min, t_min);
+		auto hm = min(m_text_margin.width, fabs(m_diff[0].x) * 0.5);
+		auto vm = min(m_text_margin.height, fabs(m_diff[0].y) * 0.5);
+		pt_add(t_min, hm, vm, t_min);
+		//uint32_t line_cnt;
+		//m_dw_layout->GetLineMetrics(nullptr, 0, &line_cnt);
+		//auto l_met = new DWRITE_LINE_METRICS[line_cnt];
+		//m_dw_layout->GetLineMetrics(l_met, line_cnt, &line_cnt);
+		if (m_select_range.length > 0 && m_text != nullptr) {
+			fill_range(dx, t_min);
+		}
+		dx.m_shape_brush->SetColor(m_font_color);
+		dx.m_d2dContext->DrawTextLayout(t_min, m_dw_layout.get(), dx.m_shape_brush.get());
+		if (m_select_range.length > 0 && m_text != nullptr) {
+			m_dw_layout->SetDrawingEffect(nullptr, { 0, wchar_len(m_text) });
+		}
+		if (is_selected() != true) {
+			return;
+		}
+		draw_frame(dx, t_min);
+	}
+
 	void ShapeText::fill_range(SHAPE_DX& dx, const D2D1_POINT_2F t_min)
 	{
 		const auto rc = m_dw_selected_cnt;
@@ -381,40 +460,6 @@ namespace winrt::GraphPaper::implementation
 			s_style = nullptr;
 		}
 
-	}
-
-	// 図形を表示する.
-	//	dx	図形の描画環境
-	//	戻り値	なし
-	void ShapeText::draw(SHAPE_DX& dx)
-	{
-		ShapeRect::draw(dx);
-		if (m_dw_layout == nullptr) {
-			// || m_text == nullptr || m_text[0] == '\0') {
-			return;
-		}
-		D2D1_POINT_2F t_min;
-		pt_add(m_pos, m_diff[0], t_min);
-		pt_min(m_pos, t_min, t_min);
-		auto hm = min(m_text_margin.width, fabs(m_diff[0].x) * 0.5);
-		auto vm = min(m_text_margin.height, fabs(m_diff[0].y) * 0.5);
-		pt_add(t_min, hm, vm, t_min);
-//uint32_t line_cnt;
-//m_dw_layout->GetLineMetrics(nullptr, 0, &line_cnt);
-//auto l_met = new DWRITE_LINE_METRICS[line_cnt];
-//m_dw_layout->GetLineMetrics(l_met, line_cnt, &line_cnt);
-		if (m_select_range.length > 0 && m_text != nullptr) {
-			fill_range(dx, t_min);
-		}
-		dx.m_shape_brush->SetColor(m_font_color);
-		dx.m_d2dContext->DrawTextLayout(t_min, m_dw_layout.get(), dx.m_shape_brush.get());
-		if (m_select_range.length > 0 && m_text != nullptr) {
-			m_dw_layout->SetDrawingEffect(nullptr, { 0, wchar_len(m_text) });
-		}
-		if (is_selected() != true) {
-			return;
-		}
-		draw_frame(dx, t_min);
 	}
 
 	// 要素を有効な書体名から得る.
@@ -1009,55 +1054,6 @@ namespace winrt::GraphPaper::implementation
 			tx_dt_write_svg(t, t_len, px + qx, py + qy, dy, dt_writer);
 		}
 		dt_write_svg("</g>" SVG_NEW_LINE, dt_writer);
-	}
-
-	// 文字列をデータライターに SVG として書き込む.
-	// t	文字列
-	// t_len	文字数
-	// x, y	位置
-	// dy	垂直なずらし量
-	// dt_writer	データライター
-	// 戻り値	なし
-	static void tx_dt_write_svg(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer)
-	{
-		dt_write_svg("<text ", dt_writer);
-		dt_write_svg(x, "x", dt_writer);
-		dt_write_svg(y, "y", dt_writer);
-		dt_write_svg(dy, "dy", dt_writer);
-		//dt_write_svg("text-before-edge", "alignment-baseline", dt_writer);
-		dt_write_svg(">", dt_writer);
-		uint32_t k = 0;
-		for (uint32_t i = k; i < t_len; i++) {
-			const auto c = t[i];
-			char* ent;
-			if (c == L'<') {
-				ent = "&lt;";
-			}
-			else if (c == L'>') {
-				ent = "&gt;";
-			}
-			else if (c == L'&') {
-				ent = "&amp;";
-			}
-			//else if (c == L'"') {
-			// ent = "&quot;";
-			//}
-			//else if (c == L'\'') {
-			// ent = "&apos;";
-			//}
-			else {
-				continue;
-			}
-			if (i > k) {
-				dt_write_svg(t + k, i - k, dt_writer);
-			}
-			dt_write_svg(ent, dt_writer);
-			k = i + 1;
-		}
-		if (t_len > k) {
-			dt_write_svg(t + k, t_len - k, dt_writer);
-		}
-		dt_write_svg("</text>" SVG_NEW_LINE, dt_writer);
 	}
 
 }

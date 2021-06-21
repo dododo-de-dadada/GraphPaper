@@ -118,7 +118,7 @@ namespace winrt::GraphPaper::implementation
 			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
 
-		// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
+		// ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			if (m_list_shapes.empty()) {
 				summary_close_click(nullptr, nullptr);
@@ -193,6 +193,12 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		m_dx_mutex.lock();
 		try {
+			if (m_summary_atomic.load(std::memory_order_acquire)) {
+				summary_close_click(nullptr, nullptr);
+			}
+			undo_clear();
+			slist_clear(m_list_shapes);
+
 			const auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
 			const auto ra_size = static_cast<uint32_t>(ra_stream.Size());
@@ -204,10 +210,10 @@ namespace winrt::GraphPaper::implementation
 			//find_text_read(dt_reader);
 			dt_read(m_find_text, dt_reader);
 			dt_read(m_find_repl, dt_reader);
-			uint16_t bit = dt_reader.ReadUInt16();
-			m_edit_text_frame = ((bit & 1) != 0);
-			m_find_text_case = ((bit & 2) != 0);
-			m_find_text_wrap = ((bit & 4) != 0);
+			uint16_t f_bit = dt_reader.ReadUInt16();
+			m_edit_text_frame = ((f_bit & 1) != 0);
+			m_find_text_case = ((f_bit & 2) != 0);
+			m_find_text_wrap = ((f_bit & 4) != 0);
 
 			m_misc_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_misc_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
@@ -224,8 +230,6 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.m_sheet_size.width = max(min(m_sheet_main.m_sheet_size.width, sheet_size_max()), 1.0F);
 			m_sheet_main.m_sheet_size.height = max(min(m_sheet_main.m_sheet_size.height, sheet_size_max()), 1.0F);
 
-			undo_clear();
-			slist_clear(m_list_shapes);
 #if defined(_DEBUG)
 			if (debug_leak_cnt != 0) {
 				auto cd = this->Dispatcher();

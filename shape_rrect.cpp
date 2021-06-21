@@ -366,7 +366,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			break;
 		}
-		if (pt_abs2(m_corner_rad) < dist * dist) {
+		const double d = static_cast<double>(dist);
+		if (pt_abs2(m_corner_rad) < d * d) {
 			m_corner_rad.x = m_corner_rad.y = 0.0f;
 		}
 		return true;

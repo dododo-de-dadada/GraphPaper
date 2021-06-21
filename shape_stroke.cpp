@@ -312,24 +312,25 @@ namespace winrt::GraphPaper::implementation
 					pt_add(v_pos[i], m_diff[i], v_pos[i + 1]);
 				}
 				for (size_t i = 0; i < d_cnt + 1; i++) {
-					// 頂点が変更する頂点か判定汁.
+					// 頂点が変更する頂点か判定する.
 					if (i == a_cnt) {
 						continue;
 					}
 					// 頂点と変更する頂点との距離が制限距離以上か判定する.
 					D2D1_POINT_2F v_vec;
 					pt_sub(v_pos[i], v_pos[a_cnt], v_vec);
-					if (pt_abs2(v_vec) >= static_cast<double>(dist * dist)) {
+					const double d = static_cast<double>(dist);
+					if (pt_abs2(v_vec) >= d * d) {
 						continue;
 					}
-					// 変更するのが最初の頂点でないか判定する.
+					// 変更するのが最初の頂点以外か判定する.
 					if (a_cnt > 0) {
 						pt_add(m_diff[a_cnt - 1], v_vec, m_diff[a_cnt - 1]);
 					}
 					else {
 						pt_add(m_pos, v_vec, m_pos);
 					}
-					// 変更するのが最後の頂点でないか判定する.
+					// 変更するのが最後の頂点以外か判定する.
 					if (a_cnt < d_cnt) {
 						pt_sub(m_diff[a_cnt], v_vec, m_diff[a_cnt]);
 					}
@@ -370,6 +371,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を破線の様式に格納する.
+	// value	格納する値
 	bool ShapeStroke::set_dash_patt(const DASH_PATT& value)
 	{
 		if (!equal(m_dash_patt, value)) {
@@ -384,6 +386,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線枠の形式に格納する.
+	// value	格納する値
 	bool ShapeStroke::set_dash_style(const D2D1_DASH_STYLE value)
 	{
 		if (m_dash_style != value) {
@@ -398,6 +401,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分のつなぎのマイター制限に格納する.
+	// value	格納する値
 	bool ShapeStroke::set_join_limit(const float& value)
 	{
 		if (!equal(m_join_limit, value)) {
@@ -412,6 +416,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分のつなぎに格納する.
+	// value	格納する値
 	bool ShapeStroke::set_join_style(const D2D1_LINE_JOIN& value)
 	{
 		if (m_join_style != value) {
@@ -426,6 +431,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線枠の太さに格納する.
+	// value	格納する値
 	bool ShapeStroke::set_stroke_width(const float value) noexcept
 	{
 		if (!equal(m_stroke_width, value)) {
@@ -459,12 +465,21 @@ namespace winrt::GraphPaper::implementation
 		create_stroke_style(Shape::s_d2d_factory, m_cap_style, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 	}
 
+	/*
+	static D2D1_POINT_2F dt_read_pos(DataReader const& dt_reader)
+	{
+		D2D1_POINT_2F pos;
+		dt_read(pos, dt_reader);
+		return pos;
+	}
+	*/
+
 	// データリーダーから図形を読み込む.
 	ShapeStroke::ShapeStroke(DataReader const& dt_reader) :
 		m_d2d_stroke_style(nullptr)
 	{
-		set_delete(dt_reader.ReadBoolean());
-		set_select(dt_reader.ReadBoolean());
+		m_flag_delete = dt_reader.ReadBoolean();
+		m_flag_select = dt_reader.ReadBoolean();
 		dt_read(m_pos, dt_reader);
 		dt_read(m_diff, dt_reader);
 		dt_read(m_cap_style, dt_reader);
@@ -481,8 +496,8 @@ namespace winrt::GraphPaper::implementation
 	// データライターに書き込む.
 	void ShapeStroke::write(DataWriter const& dt_writer) const
 	{
-		dt_writer.WriteBoolean(is_deleted());
-		dt_writer.WriteBoolean(is_selected());
+		dt_writer.WriteBoolean(m_flag_delete);
+		dt_writer.WriteBoolean(m_flag_select);
 		dt_write(m_pos, dt_writer);
 		dt_write(m_diff, dt_writer);
 		dt_write(m_cap_style, dt_writer);
@@ -531,6 +546,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 頂点を得る.
 	size_t ShapeStroke::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
 	{
 		v_pos[0] = m_pos;
@@ -542,25 +558,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 近傍の頂点を得る.
-	bool ShapeStroke::get_neighbor(const D2D1_POINT_2F a_pos, float& dd, D2D1_POINT_2F& value) const noexcept
+	bool ShapeStroke::get_neighbor(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& value) const noexcept
 	{
 		bool flag = false;
 		D2D1_POINT_2F vec;
-		pt_sub(m_pos, a_pos, vec);
+		pt_sub(m_pos, pos, vec);
 		float abs2 = static_cast<float>(pt_abs2(vec));
 		if (abs2 < dd) {
 			dd = abs2;
 			value = m_pos;
 			flag = true;
 		}
-		D2D1_POINT_2F b_pos{ m_pos };
-		for (auto d_vec : m_diff) {
-			pt_add(b_pos, d_vec, b_pos);
-			pt_sub(b_pos, a_pos, vec);
+		D2D1_POINT_2F v_pos{ m_pos };
+		for (const auto d_vec : m_diff) {
+			pt_add(v_pos, d_vec, v_pos);
+			pt_sub(v_pos, pos, vec);
 			abs2 = static_cast<float>(pt_abs2(vec));
 			if (abs2 < dd) {
 				dd = abs2;
-				value = b_pos;
+				value = v_pos;
 				flag = true;
 			}
 		}
