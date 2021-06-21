@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_shape->get_stroke_color(sample_value);
 			if (undo_push_set<UNDO_OP::STROKE_COLOR>(sample_value)) {
 				undo_push_null();
-				undo_menu_enable();
+				undo_is_enable();
 				xcvd_is_enabled();
 				sheet_draw();
 			}

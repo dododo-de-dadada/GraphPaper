@@ -912,7 +912,7 @@ namespace winrt::GraphPaper::implementation
 		//-----------------------------
 
 		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-		void undo_menu_enable(void);
+		void undo_is_enable(void);
 		// 編集メニューの「やり直し」が選択された.
 		void redo_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「元に戻す」が選択された.

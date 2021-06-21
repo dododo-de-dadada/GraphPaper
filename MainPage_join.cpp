@@ -30,7 +30,7 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_main.get_cap_style(old_value);
 		if (undo_push_set<UNDO_OP::CAP_STYLE>(new_value)) {
 			undo_push_null();
-			undo_menu_enable();
+			undo_is_enable();
 			sheet_draw();
 		}
 	}
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 			if (undo_push_set<UNDO_OP::JOIN_LIMIT>(sample_limit) ||
 				undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
 				undo_push_null();
-				undo_menu_enable();
+				undo_is_enable();
 				sheet_draw();
 			}
 		}
@@ -188,7 +188,7 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_main.get_join_style(old_value);
 		if (undo_push_set<UNDO_OP::JOIN_STYLE>(new_value)) {
 			undo_push_null();
-			undo_menu_enable();
+			undo_is_enable();
 			sheet_draw();
 		}
 	}

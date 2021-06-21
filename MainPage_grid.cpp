@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_main.get_grid_emph(g_emph);
 		if (!equal(g_emph, value)) {
 			undo_push_set<UNDO_OP::GRID_EMPH>(&m_sheet_main, value);
-			undo_menu_enable();
+			undo_is_enable();
 			sheet_draw();
 		}
 	}
@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.get_grid_gray(sheet_value);
 			if (!equal(sheet_value, sample_value)) {
 				undo_push_set<UNDO_OP::GRID_GRAY>(&m_sheet_main, sample_value);
-				undo_menu_enable();
+				undo_is_enable();
 				sheet_draw();
 			}
 		}
@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_sheet.get_grid_base(sample_value);
 			if (!equal(sheet_value, sample_value)) {
 				undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, sample_value);
-				undo_menu_enable();
+				undo_is_enable();
 				xcvd_is_enabled();
 				sheet_draw();
 			}
@@ -137,7 +137,7 @@ namespace winrt::GraphPaper::implementation
 		const float value = (g_base + 1.0f) * 0.5f - 1.0f;
 		if (value >= 1.0f) {
 			undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
-			undo_menu_enable();
+			undo_is_enable();
 			sheet_draw();
 		}
 	}
@@ -150,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 		const float value = (g_base + 1.0f) * 2.0f - 1.0f;
 		if (value <= max(m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height)) {
 			undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
-			undo_menu_enable();
+			undo_is_enable();
 			sheet_draw();
 		}
 	}
@@ -236,7 +236,7 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_main.get_grid_show(g_show);
 		if (g_show != value) {
 			undo_push_set<UNDO_OP::GRID_SHOW>(&m_sheet_main, value);
-			undo_menu_enable();
+			undo_is_enable();
 			sheet_draw();
 		}
 	}

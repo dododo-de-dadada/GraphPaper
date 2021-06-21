@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 			if (equal(sheet_value, sample_value) != true) {
 				undo_push_set<UNDO_OP::SHEET_COLOR>(&m_sheet_main, sample_value);
 				undo_push_null();
-				undo_menu_enable();
+				undo_is_enable();
 				sheet_draw();
 			}
 		}
@@ -542,7 +542,7 @@ namespace winrt::GraphPaper::implementation
 				// •ÏŠ·‚³‚ê‚½’l‚ª—p†‚Ì‘å‚«‚³‚ÆˆÙ‚È‚éê‡,
 				undo_push_set<UNDO_OP::SHEET_SIZE>(&m_sheet_main, p_size);
 				undo_push_null();
-				undo_menu_enable();
+				undo_is_enable();
 				sheet_update_bbox();
 				sheet_panle_size();
 				sheet_draw();
@@ -590,7 +590,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (flag) {
 				undo_push_null();
-				undo_menu_enable();
+				undo_is_enable();
 			}
 			sheet_update_bbox();
 			sheet_panle_size();

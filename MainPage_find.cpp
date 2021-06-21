@@ -402,7 +402,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		undo_push_null();
-		undo_menu_enable();
+		undo_is_enable();
 		sheet_draw();
 	}
 
@@ -436,7 +436,7 @@ namespace winrt::GraphPaper::implementation
 				undo_push_set<UNDO_OP::TEXT_CONTENT>(t, r_text);
 				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 				undo_push_null();
-				undo_menu_enable();
+				undo_is_enable();
 			}
 		}
 		// Ÿ‚ğŒŸõ‚·‚é.

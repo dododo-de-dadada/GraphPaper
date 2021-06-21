@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 
 		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-		undo_menu_enable();
+		undo_is_enable();
 
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
 		uint32_t selected_cnt = 0;	// 選択された図形の数

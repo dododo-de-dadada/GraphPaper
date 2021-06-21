@@ -299,6 +299,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を実行する.
+	// u	操作
 	void MainPage::undo_exec(Undo* u)
 	{
 		summary_reflect(u);
@@ -368,7 +369,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-	void MainPage::undo_menu_enable(void)
+	void MainPage::undo_is_enable(void)
 	{
 		mfi_undo().IsEnabled(m_stack_ucnt > 0);
 		mfi_redo().IsEnabled(m_stack_rcnt > 0);
@@ -398,6 +399,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を追加して, その操作をスタックに積む.
+	// s	追加する図形
 	void MainPage::undo_push_append(Shape* s)
 	{
 		m_stack_undo.push_back(new UndoAppend(s));
@@ -452,37 +454,35 @@ namespace winrt::GraphPaper::implementation
 		// 操作スタックの更新フラグを立てる.
 		m_stack_updt = true;
 		// 操作の組数をインクリメントする.
-		//m_stack_nset++;
 		m_stack_ucnt++;
+		// 操作の組数が最大の組数以下か判定する.
 		if (m_stack_ucnt <= MAX_UCNT) {
-		//if (m_stack_nset <= MAX_UCNT) {
-			// 操作の組数が最大の組数以下の場合,
-			// 終了する.
 			return;
 		}
+		// 元に戻す操作スタックが空でないか判定する.
 		while (m_stack_undo.empty() != true) {
-			// 元に戻す操作スタックが空でない場合,
 			// 操作スタックの一番底の操作を取り出す.
 			const auto u = m_stack_undo.front();
 			m_stack_undo.pop_front();
+			// 操作がヌルか判定する.
 			if (u == nullptr) {
-				// 操作がヌルの場合,
-				// 中断する.
 				break;
 			}
 		}
 		// 操作の組数を 1 減じる.
-		//m_stack_nset--;
 		m_stack_ucnt--;
 	}
 
 	// 図形をグループから削除して, その操作をスタックに積む.
+	// g	グループ図形
+	// s	削除する図形
 	void MainPage::undo_push_remove(Shape* g, Shape* s)
 	{
 		m_stack_undo.push_back(new UndoRemoveG(g, s));
 	}
 
 	// 図形を削除して, その操作をスタックに積む.
+	// s	削除する図形
 	void MainPage::undo_push_remove(Shape* s)
 	{
 		m_stack_undo.push_back(new UndoRemove(s));
@@ -490,6 +490,24 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形の選択を反転して, その操作をスタックに積む.
 	// s	選択を反転させる図形.
+	void MainPage::undo_push_select(Shape* s)
+	{
+		const auto it_end = m_stack_undo.rend();
+		Undo* u;
+		for (auto it = m_stack_undo.rbegin(); it != it_end && (u = *it) != nullptr && typeid(*u) == typeid(UndoSelect); it++) {
+			if (u->shape() == s) {
+				// 操作の図形が指定された図形と一致した場合,
+				// 操作スタックを介せずに図形の選択を反転させ, 
+				// 操作をスタックから取り除き, 終了する.
+				s->set_select(!s->is_selected());
+				m_stack_undo.remove(u);
+				return;
+			}
+		}
+		// 図形の選択を反転して, その操作をスタックに積む.
+		m_stack_undo.push_back(new UndoSelect(s));
+	}
+	/*
 	void MainPage::undo_push_select(Shape* s)
 	{
 		auto it_end = m_stack_undo.rend();
@@ -502,32 +520,33 @@ namespace winrt::GraphPaper::implementation
 				// 反復子を次に進める.
 				//it++;
 			}
-else {
-			// 中断フラグを消去する.
-			bool suspended = false;
-			// 反復子の操作が図形の選択操作の場合, 以下を繰り返す.
-			while (it != it_end && *it != nullptr && typeid(**it) == typeid(UndoSelect)) {
-				if ((*it)->shape() == s) {
-					// 操作の図形が指定された図形と一致した場合,
-					// フラグを立てて中断する.
-					suspended = true;
-					break;
+			else {
+				// 反復子の操作が図形の選択操作の場合, 以下を繰り返す.
+				bool flag = false;
+				Undo* u;
+				while (it != it_end && (u = *it) != nullptr && typeid(*u) == typeid(UndoSelect)) {
+					if (u->shape() == s) {
+						// 操作の図形が指定された図形と一致した場合,
+						// フラグを立てて中断する.
+						flag = true;
+						break;
+					}
+					it++;
 				}
-				it++;
-			}
-			if (suspended) {
-				// 中断フラグが立っている場合, 
-				// 操作スタックを介せずに図形の選択を反転させ, 
-				// 操作をスタックから取り除き, 終了する.
-				s->set_select(!s->is_selected());
-				m_stack_undo.remove(*it);
-				return;
+				// 処理が中断されたか判定する.
+				if (flag) {
+					// 操作スタックを介せずに図形の選択を反転させ, 
+					// 操作をスタックから取り除き, 終了する.
+					s->set_select(!s->is_selected());
+					m_stack_undo.remove(*it);
+					return;
+				}
 			}
 		}
-}
 		// 図形の選択を反転して, その操作をスタックに積む.
 		m_stack_undo.push_back(new UndoSelect(s));
 	}
+	*/
 
 	// 値を図形へ格納して, その操作をスタックに積む.
 	// ただし, 図形がその値を持たない場合, またはすでに同値の場合は何もしない.
@@ -549,9 +568,10 @@ else {
 	// U	操作の種類.
 	// T	格納する型.
 	// value	格納する値
-	// 格納する型 T は明示しなくても引数の型から推定できる
+	// 戻り値	格納される前の値と異なっており, 値が格納されたら true.
 	template<UNDO_OP U, typename T> bool MainPage::undo_push_set(T const& value)
 	{
+		// 格納する型 T は明示しなくても引数の型から推定できる
 		m_stack_undo.push_back(new UndoAttr<U>(&m_sheet_main, value));
 		auto flag = false;
 		for (auto s : m_list_shapes) {
@@ -568,6 +588,8 @@ else {
 	}
 
 	// 図形の値の保存を実行して, その操作をスタックに積む.
+	// s	値を保存する図形
+	// 戻り値	なし
 	template <UNDO_OP U> void MainPage::undo_push_set(Shape* const s)
 	{
 		m_stack_undo.push_back(new UndoAttr<U>(s));
@@ -587,8 +609,8 @@ else {
 	template bool MainPage::undo_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_BASE>(Shape* const s, float const& value);
-	template void MainPage::undo_push_set<UNDO_OP::GRID_GRAY>(Shape* const s, float const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_EMPH>(Shape* const s, GRID_EMPH const& value);
+	template void MainPage::undo_push_set<UNDO_OP::GRID_GRAY>(Shape* const s, float const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_SHOW>(Shape* const s, GRID_SHOW const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::JOIN_LIMIT>(float const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::JOIN_STYLE>(D2D1_LINE_JOIN const& value);
@@ -644,6 +666,8 @@ else {
 	}
 
 	// データリーダーから操作スタックを読み込む.
+	// dt_reader	データリーダー
+	// 戻り値	なし
 	void MainPage::undo_read(DataReader const& dt_reader)
 	{
 		Undo* r;
@@ -659,7 +683,8 @@ else {
 		m_stack_updt = dt_reader.ReadBoolean();
 	}
 
-	// 操作スタックをデータリーダーに書き込む.
+	// 操作スタックをデータライターに書き込む.
+	// dt_writer	データライター
 	void MainPage::undo_write(DataWriter const& dt_writer)
 	{
 		for (const auto& r : m_stack_redo) {
