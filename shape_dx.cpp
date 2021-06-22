@@ -33,32 +33,32 @@ namespace DisplayMetrics
 // 画面の回転の計算に使用する定数。
 namespace ScreenRotation
 {
-	// 0 度 Z 回転
-	static const XMFLOAT4X4 Rotation0(
+	static const XMFLOAT4X4 Rotation0	// 0 度 Z 回転
+	(
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
 
-	// 90 度 Z 回転
-	static const XMFLOAT4X4 Rotation90(
+	static const XMFLOAT4X4 Rotation90	// 90 度 Z 回転
+	(
 		0.0f, 1.0f, 0.0f, 0.0f,
 		-1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
 
-	// 180 度 Z 回転
-	static const XMFLOAT4X4 Rotation180(
+	static const XMFLOAT4X4 Rotation180	// 180 度 Z 回転
+	(
 		-1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, -1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	);
 
-	// 270 度 Z 回転
-	static const XMFLOAT4X4 Rotation270(
+	static const XMFLOAT4X4 Rotation270	// 270 度 Z 回転
+	(
 		0.0f, -1.0f, 0.0f, 0.0f,
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
@@ -157,9 +157,9 @@ namespace winrt::GraphPaper::implementation
 			const float width = ConvertDipsToPixels(m_logical_width, m_logical_dpi);
 			const float height = ConvertDipsToPixels(m_logical_height, m_logical_dpi);
 
+			// 変換された幅と高さがしきい値を超えるか判定する.
 			if (max(width, height) > DisplayMetrics::WidthThreshold&& min(width, height) > DisplayMetrics::HeightThreshold)
 			{
-				// 変換された幅と高さがしきい値を超えるなら,
 				// 有効な DPI と有効な合成倍率を 1/2 する.
 				m_effectiveDpi *= 0.5f;
 				m_effectiveCompositionScaleX *= 0.5f;

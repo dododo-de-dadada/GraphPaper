@@ -76,14 +76,8 @@ namespace winrt::GraphPaper::implementation
 		// ’†S“_‚ğ“¾‚é.
 		D2D1_POINT_2F c_pos;
 		pt_add(m_pos, rad, c_pos);
-		// ‰¡‚ÌŒa‚ª•‰”‚È‚ç‚Î³”‚É‚·‚é.
-		//if (rad.x < 0.0F) {
-			rad.x = fabsf(rad.x);
-		//}
-		// c‚ÌŒa‚ª•‰”‚È‚ç‚Î³”‚É‚·‚é.
-		//if (rad.y < 0.0F) {
-			rad.y = fabsf(rad.y);
-		//}
+		rad.x = fabsf(rad.x);
+		rad.y = fabsf(rad.y);
 		if (is_opaque(m_stroke_color)) {
 			// ˆÊ’u‚ª‚¾‰~‚ÌŠO‘¤‚É‚ ‚é‚©”»’è‚·‚é.
 			// ˜g‚Ì‘¾‚³‚ª•”ˆÊ‚Ì‘å‚«‚³–¢–‚È‚ç‚Î,
@@ -109,8 +103,8 @@ namespace winrt::GraphPaper::implementation
 			if (r_inner.y <= 0.0f) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
-			if (pt_in_elli(t_pos, c_pos, r_inner.x, r_inner.y) != true) {
-				// “àŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç ANCH_STROKE ‚ğ•Ô‚·.
+			// “àŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚©”»’è‚·‚é.
+			if (!pt_in_elli(t_pos, c_pos, r_inner.x, r_inner.y)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}

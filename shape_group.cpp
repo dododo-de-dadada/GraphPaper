@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapeGroup::draw(SHAPE_DX& sc)
+	void ShapeGroup::draw(SHAPE_DX& dx)
 	{
 		if (is_selected()) {
 			// 選択フラグが立っている場合,
@@ -22,28 +22,24 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F b_max{ -FLT_MAX, -FLT_MAX };
 			// グループ化された各図形について以下を繰り返す.
 			for (const auto s : m_list_grouped) {
+				// 消去フラグが立っているか判定する.
 				if (s->is_deleted()) {
-					// 消去フラグが立っている場合,
-					// 無視する.
 					continue;
 				}
-				s->draw(sc);
+				s->draw(dx);
 				s->get_bound(b_min, b_max, b_min, b_max);
 			}
-			const D2D1_RECT_F r{
-				b_min.x, b_min.y,
-				b_max.x, b_max.y
-			};
-			auto br = sc.m_shape_brush.get();
-			auto ss = sc.m_aux_style.get();
-			sc.m_d2dContext->DrawRectangle(r, br, 1.0f, ss);
+			const D2D1_RECT_F rect{ b_min.x, b_min.y, b_max.x, b_max.y };
+			const auto brush = dx.m_shape_brush.get();
+			const auto s_style = dx.m_aux_style.get();
+			dx.m_d2dContext->DrawRectangle(rect, brush, 1.0f, s_style);
 		}
 		else {
 			for (const auto s : m_list_grouped) {
 				if (s->is_deleted()) {
 					continue;
 				}
-				s->draw(sc);
+				s->draw(dx);
 			}
 		}
 	}
@@ -81,13 +77,13 @@ namespace winrt::GraphPaper::implementation
 		//	return false;
 		//}
 		auto flag = false;
-		for (auto s : m_list_grouped) {
+		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
 			D2D1_POINT_2F pos;
 			s->get_pos_min(pos);
-			if (flag != true) {
+			if (!flag) {
 				value = pos;
 				flag = true;
 			}
@@ -104,7 +100,7 @@ namespace winrt::GraphPaper::implementation
 		std::list<SHAPE_LIST::iterator> stack;
 		stack.push_back(m_list_grouped.begin());
 		stack.push_back(m_list_grouped.end());
-		while (stack.empty() != true) {
+		while (!stack.empty()) {
 			auto j = stack.back();
 			stack.pop_back();
 			auto i = stack.back();
@@ -192,18 +188,6 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
-	// 値を選択フラグに格納する.
-	bool ShapeGroup::set_select(const bool value) noexcept
-	{
-		bool flaged = false;
-		for (const auto s : m_list_grouped) {
-			if (s->set_select(value) && !flaged) {
-				flaged = true;
-			}
-		}
-		return flaged;
-	}
-
 	// 値を開始位置に格納する. 他の部位の位置も動く.
 	bool ShapeGroup::set_pos_start(const D2D1_POINT_2F value)
 	{
@@ -215,6 +199,18 @@ namespace winrt::GraphPaper::implementation
 			return true;
 		}
 		return false;
+	}
+
+	// 値を選択フラグに格納する.
+	bool ShapeGroup::set_select(const bool value) noexcept
+	{
+		bool flaged = false;
+		for (const auto s : m_list_grouped) {
+			if (s->set_select(value) && !flaged) {
+				flaged = true;
+			}
+		}
+		return flaged;
 	}
 
 	// データリーダーから図形を作成する.
