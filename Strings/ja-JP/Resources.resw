@@ -1043,7 +1043,7 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfs_cap_style.Text" xml:space="preserve">
-    <value>端点の種類</value>
+    <value>端の種類</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfs_join_style.Text" xml:space="preserve">

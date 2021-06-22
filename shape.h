@@ -278,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 
 	// データリーダーから矢じるしの寸法を読み込む.
 	void dt_read(ARROW_SIZE& value, DataReader const& dt_reader);
-	// データリーダーから端点の形式を読み込む.
+	// データリーダーから端の形式を読み込む.
 	void dt_read(CAP_STYLE& value, DataReader const& dt_reader);
 	// データリーダーから色を読み込む.
 	void dt_read(D2D1_COLOR_F& value, DataReader const& dt_reader);
@@ -301,7 +301,7 @@ namespace winrt::GraphPaper::implementation
 
 	// データライターに矢じるしの寸法を書き込む.
 	void dt_write(const ARROW_SIZE& value, DataWriter const& dt_writer);
-	// データライターに端点の形式を書き込む.
+	// データライターに端の形式を書き込む.
 	void dt_write(const CAP_STYLE& value, DataWriter const& dt_writer);
 	// データライターに色を書き込む.
 	void dt_write(const D2D1_COLOR_F& value, DataWriter const& dt_writer);
@@ -449,11 +449,11 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_arrow_style(ARROW_STYLE& /*value*/) const noexcept { return false; }
 		// 図形を囲む領域を得る.
 		virtual void get_bound(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/, D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept {}
-		// 線の端点を得る.
+		// 端の形式を得る.
 		virtual bool get_cap_style(CAP_STYLE& /*value*/) const noexcept { return false; }
 		// 角丸半径を得る.
 		virtual bool get_corner_radius(D2D1_POINT_2F& /*value*/) const noexcept { return false; }
-		// 破線の端点を得る.
+		// 破線の端の形式を得る.
 		virtual bool get_dash_cap(D2D1_CAP_STYLE& /*value*/) const noexcept { return false; }
 		// 破線の様式を得る.
 		virtual bool get_dash_patt(DASH_PATT& /*value*/) const noexcept { return false; }
@@ -533,11 +533,11 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_arrow_size(const ARROW_SIZE& /*value*/) { return false; }
 		// 値を矢じるしの形式に格納する.
 		virtual bool set_arrow_style(const ARROW_STYLE /*value*/) { return false; }
-		// 値を線分の端点に格納する.
+		// 値を端の形式に格納する.
 		virtual bool set_cap_style(const CAP_STYLE& /*value*/) { return false; }
 		// 値を角丸半径に格納する.
 		virtual bool set_corner_radius(const D2D1_POINT_2F& /*alue*/) noexcept { return false; }
-		// 値を破線の端点に格納する.
+		// 値を破線の端の形式に格納する.
 		virtual bool set_dash_cap(const D2D1_CAP_STYLE& /*value*/) { return false; }
 		// 値を破線の様式に格納する.
 		virtual bool set_dash_patt(const DASH_PATT& /*value*/) { return false; }
@@ -631,8 +631,8 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 
 		// 線枠
-		CAP_STYLE m_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端点の形式
-		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端点
+		CAP_STYLE m_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
+		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DEF_DASH_PATT };	// 破線の様式
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_join_limit = DEF_MITER_LIMIT;	// 線のつなぎのマイター制限
@@ -680,11 +680,11 @@ namespace winrt::GraphPaper::implementation
 		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
 		// 矢じるしの形式を得る.
 		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
-		// 線の端点を得る.
+		// 端の形式を得る.
 		bool get_cap_style(CAP_STYLE& value) const noexcept;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
-		// 線の端点を得る.
+		// 破線の端の形式を得る.
 		bool get_dash_cap(D2D1_CAP_STYLE& value) const noexcept;
 		// 破線の様式を得る.
 		bool get_dash_patt(DASH_PATT& value) const noexcept;
@@ -746,11 +746,11 @@ namespace winrt::GraphPaper::implementation
 		bool set_arrow_style(const ARROW_STYLE value);
 		// 図形の属性値を格納する.
 		void set_attr_to(const Shape* s) noexcept;
-		// 値を線分の端点に格納する.
+		// 値を端の形式に格納する.
 		bool set_cap_style(const CAP_STYLE& value);
 		// 値を角丸半径に格納する.
 		bool set_corner_radius(const D2D1_POINT_2F& value) noexcept;
-		// 値を破線の端点に格納する.
+		// 値を破線の端の形式に格納する.
 		bool set_dash_cap(const D2D1_CAP_STYLE& value);
 		// 値を破線の様式に格納する.
 		bool set_dash_patt(const DASH_PATT& value);
@@ -863,9 +863,9 @@ namespace winrt::GraphPaper::implementation
 		bool m_flag_select = false;	// 選択フラグ
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_diff;	// 次の位置への差分
-		CAP_STYLE m_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 線分の端点
+		CAP_STYLE m_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色
-		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端点
+		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DEF_DASH_PATT };	// 破線の様式
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_join_limit = DEF_MITER_LIMIT;		// 線のつなぎのマイター制限の比率
@@ -882,9 +882,9 @@ namespace winrt::GraphPaper::implementation
 		~ShapeStroke(void);
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
-		// 線の端点を得る.
+		// 端の形式を得る.
 		bool get_cap_style(CAP_STYLE& value) const noexcept;
-		// 線の端点を得る.
+		// 破線の端の形式を得る.
 		bool get_dash_cap(D2D1_CAP_STYLE& value) const noexcept;
 		// 破線の様式を得る.
 		bool get_dash_patt(DASH_PATT& value) const noexcept;
@@ -918,9 +918,9 @@ namespace winrt::GraphPaper::implementation
 		bool is_selected(void) const noexcept { return m_flag_select; }
 		// 差分だけ移動する.
 		virtual	bool move(const D2D1_POINT_2F value);
-		// 値を線分の端点に格納する.
+		// 値を端の形式に格納する.
 		bool set_cap_style(const CAP_STYLE& value);
-		// 値を破線の端点に格納する.
+		// 値を破線の端の形式に格納する.
 		bool set_dash_cap(const D2D1_CAP_STYLE& value);
 		// 値を破線の様式に格納する.
 		bool set_dash_patt(const DASH_PATT& value);
@@ -1005,7 +1005,7 @@ namespace winrt::GraphPaper::implementation
 		void write_svg(DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
 		void write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
-		// 値を線分の端点に格納する.
+		// 値を端の形式に格納する.
 		bool set_cap_style(const CAP_STYLE& value);
 		// 値を線分のつなぎのマイター制限に格納する.
 		bool set_join_limit(const float& value);
@@ -1357,7 +1357,7 @@ namespace winrt::GraphPaper::implementation
 		return equal(a.m_width, b.m_width) && equal(a.m_length, b.m_length) && equal(a.m_offset, b.m_offset);
 	}
 
-	// 線の端点が同じか判定する.
+	// 端の形式が同じか判定する.
 	inline bool equal(const CAP_STYLE& a, const CAP_STYLE& b) noexcept
 	{
 		return a.m_start == b.m_start && a.m_end == b.m_end;

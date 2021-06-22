@@ -434,7 +434,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 線の端点を得る.
+	// 端の形式を得る.
 	bool ShapeSheet::get_cap_style(CAP_STYLE& value) const noexcept
 	{
 		value = m_cap_style;
@@ -448,7 +448,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 破線の端点を得る.
+	// 破線の端の形式を得る.
 	bool ShapeSheet::get_dash_cap(D2D1_CAP_STYLE& value) const noexcept
 	{
 		value = m_dash_cap;
@@ -535,9 +535,9 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_arrow_size, dt_reader);	// 矢じるしの寸法
 		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());	// 矢じるしの形式
 		dt_read(m_corner_rad, dt_reader);	// 角丸半径
-		dt_read(m_cap_style, dt_reader);	// 線分の端点
+		dt_read(m_cap_style, dt_reader);	// 端の形式
 		dt_read(m_stroke_color, dt_reader);	// 線・枠の色
-		m_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());	// 破線の端点
+		m_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());	// 破線の端の形式
 		dt_read(m_dash_patt, dt_reader);	// 破線の様式
 		m_dash_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());	// 破線の形式
 		m_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());	// 線のつなぎの形状
@@ -738,7 +738,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を線分の端点に格納する.
+	// 値を端の形式に格納する.
 	bool ShapeSheet::set_cap_style(const CAP_STYLE& value)
 	{
 		if (!equal(m_cap_style, value)) {
@@ -758,7 +758,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 線の端点に格納する.
+	// 破線の端の形式に格納する.
 	bool ShapeSheet::set_dash_cap(const D2D1_CAP_STYLE& value)
 	{
 		if (m_dash_cap != value) {
@@ -908,9 +908,9 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_arrow_size, dt_writer);	// 矢じるしの寸法
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));	// 矢じるしの形式
 		dt_write(m_corner_rad, dt_writer);	// 角丸半径
-		dt_write(m_cap_style, dt_writer);	// 線分の端点
+		dt_write(m_cap_style, dt_writer);	// 端の形式
 		dt_write(m_stroke_color, dt_writer);	// 線枠の色
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_cap));	// 破線の端点
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_cap));	// 破線の端の形式
 		dt_write(m_dash_patt, dt_writer);	// 破線の様式
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_style));	// 線枠の形式
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_join_style));	// 線分のつなぎ

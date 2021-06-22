@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 位置が, 線分の端点 (円形) に含まれるか判定する.
+	// 位置が, 線分の端 (円形) に含まれるか判定する.
 	// t_vec	線分の始点を原点とする, 判定する位置.
 	// v_end	線分の終点
 	// 戻り値	含まれるなら true
@@ -361,19 +361,19 @@ namespace winrt::GraphPaper::implementation
 				// 閉じているなら, 始点は { 0, 0 } なので終点へのベクトルを, そのまま最後の辺の長さとする.
 				s_len[d_cnt] = sqrt(pt_abs2(v_pos[d_cnt]));
 			}
-			// 閉じてないなら, 線の端点が円形か判定する.
+			// 閉じてないなら, 端の形式が円形か判定する.
 			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
 				if (pt_in_circle(t_vec, e_width) || pt_in_circle(t_vec, v_pos[d_cnt], e_width)) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
 			}
-			// 閉じてないなら, 線の端点が正方形か判定する.
+			// 閉じてないなら, 端の形式が正方形か判定する.
 			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
 				if (stroke_test_cap_square(t_vec, v_pos[d_cnt], d_cnt, d_vec, s_len, e_width)) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
 			}
-			// 閉じてないなら, 線の端点が三角形か判定する.
+			// 閉じてないなら, 端の形式が三角形か判定する.
 			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
 				if (stroke_test_cap_triangle(t_vec, v_pos[d_cnt], d_cnt, d_vec, s_len, e_width)) {
 					return ANCH_TYPE::ANCH_STROKE;

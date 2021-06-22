@@ -369,40 +369,6 @@ namespace winrt::GraphPaper::implementation
 		draw_frame(dx, t_min);
 	}
 
-	void ShapeText::fill_range(SHAPE_DX& dx, const D2D1_POINT_2F t_min)
-	{
-		const auto rc = m_dw_selected_cnt;
-		const auto dc = dx.m_d2dContext.get();
-		const auto tc = m_dw_test_cnt;
-		for (uint32_t i = 0; i < rc; i++) {
-			const auto& rm = m_dw_selected_metrics[i];
-			for (uint32_t j = 0; j < tc; j++) {
-				const auto& tm = m_dw_test_metrics[j];
-				const auto& lm = m_dw_line_metrics[j];
-				if (tm.textPosition <= rm.textPosition && rm.textPosition + rm.length <= tm.textPosition + tm.length) {
-					D2D1_RECT_F rect;
-					rect.left = t_min.x + rm.left;
-					rect.top = static_cast<FLOAT>(t_min.y + tm.top + lm.baseline + m_dw_descent - m_font_size);
-					if (rm.width < FLT_MIN) {
-						const float sp_len = max(lm.trailingWhitespaceLength * m_font_size * 0.25f, 1.0f);
-						rect.right = rect.left + sp_len;
-					}
-					else {
-						rect.right = rect.left + rm.width;
-					}
-					rect.bottom = rect.top + m_font_size;
-					dx.m_shape_brush->SetColor(Shape::m_range_foreground);
-					dc->DrawRectangle(rect, dx.m_shape_brush.get(), 2.0, nullptr);
-					dx.m_shape_brush->SetColor(Shape::m_range_background);
-					dc->FillRectangle(rect, dx.m_shape_brush.get());
-					break;
-				}
-			}
-		}
-		dx.m_range_brush->SetColor(Shape::m_range_foreground);
-		m_dw_layout->SetDrawingEffect(dx.m_range_brush.get(), m_select_range);
-	}
-
 	// 文字列の枠を表示する.
 	void ShapeText::draw_frame(SHAPE_DX& dx, const D2D1_POINT_2F t_min)
 	{
@@ -462,6 +428,40 @@ namespace winrt::GraphPaper::implementation
 
 	}
 
+	void ShapeText::fill_range(SHAPE_DX& dx, const D2D1_POINT_2F t_min)
+	{
+		const auto rc = m_dw_selected_cnt;
+		const auto dc = dx.m_d2dContext.get();
+		const auto tc = m_dw_test_cnt;
+		for (uint32_t i = 0; i < rc; i++) {
+			const auto& rm = m_dw_selected_metrics[i];
+			for (uint32_t j = 0; j < tc; j++) {
+				const auto& tm = m_dw_test_metrics[j];
+				const auto& lm = m_dw_line_metrics[j];
+				if (tm.textPosition <= rm.textPosition && rm.textPosition + rm.length <= tm.textPosition + tm.length) {
+					D2D1_RECT_F rect;
+					rect.left = t_min.x + rm.left;
+					rect.top = static_cast<FLOAT>(t_min.y + tm.top + lm.baseline + m_dw_descent - m_font_size);
+					if (rm.width < FLT_MIN) {
+						const float sp_len = max(lm.trailingWhitespaceLength * m_font_size * 0.25f, 1.0f);
+						rect.right = rect.left + sp_len;
+					}
+					else {
+						rect.right = rect.left + rm.width;
+					}
+					rect.bottom = rect.top + m_font_size;
+					dx.m_shape_brush->SetColor(Shape::m_range_foreground);
+					dc->DrawRectangle(rect, dx.m_shape_brush.get(), 2.0, nullptr);
+					dx.m_shape_brush->SetColor(Shape::m_range_background);
+					dc->FillRectangle(rect, dx.m_shape_brush.get());
+					break;
+				}
+			}
+		}
+		dx.m_range_brush->SetColor(Shape::m_range_foreground);
+		m_dw_layout->SetDrawingEffect(dx.m_range_brush.get(), m_select_range);
+	}
+
 	// 要素を有効な書体名から得る.
 	wchar_t* ShapeText::get_available_font(const uint32_t i)
 	{
@@ -510,13 +510,6 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 文字列を得る.
-	bool ShapeText::get_text_content(wchar_t*& value) const noexcept
-	{
-		value = m_text;
-		return true;
-	}
-
 	// 段落のそろえを得る.
 	bool ShapeText::get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& value) const noexcept
 	{
@@ -528,6 +521,13 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeText::get_text_align_t(DWRITE_TEXT_ALIGNMENT& value) const noexcept
 	{
 		value = m_text_align_t;
+		return true;
+	}
+
+	// 文字列を得る.
+	bool ShapeText::get_text_content(wchar_t*& value) const noexcept
+	{
+		value = m_text;
 		return true;
 	}
 

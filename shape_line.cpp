@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 	// s_pos	線分の始端
 	// e_pos	線分の終端
 	// s_width	線分の太さ
-	// s_cap	線分の端点
+	// s_cap	線分の端の形式
 	// 戻り値	含む場合 true
 	static bool line_hit_test(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const CAP_STYLE& s_cap) noexcept
 	{
@@ -324,7 +324,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を線分の端点に格納する.
+	// 値を端の形式に格納する.
 	bool ShapeLineA::set_cap_style(const CAP_STYLE& value)
 	{
 		if (ShapeStroke::set_cap_style(value)) {

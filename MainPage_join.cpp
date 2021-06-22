@@ -7,7 +7,7 @@ namespace winrt::GraphPaper::implementation
 {
 	constexpr wchar_t DLG_TITLE[] = L"str_line_join";
 
-	// 線枠メニューの「端点の種類」が選択された.
+	// 線枠メニューの「端の種類」が選択された.
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		CAP_STYLE new_value;
@@ -35,8 +35,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「端点の種類」に印をつける.
-	// s_cap	線の単点
+	// 線枠メニューの「端の種類」に印をつける.
+	// s_cap	端の形式
 	void MainPage::cap_style_is_checked(const CAP_STYLE& value)
 	{
 		rmfi_cap_flat().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));

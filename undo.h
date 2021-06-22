@@ -30,8 +30,8 @@ namespace winrt::GraphPaper::implementation
 		ARRANGE,	// 図形の順番の入れ替え
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
-		CAP_STYLE,	// 線の端点の操作
-		DASH_CAP,	// 破線の端点の操作
+		CAP_STYLE,	// 端の形式の操作
+		DASH_CAP,	// 破線の端の形式の操作
 		DASH_PATT,	// 破線の様式の操作
 		DASH_STYLE,	// 破線の形式の操作
 		FILL_COLOR,	// 塗りつぶしの色の操作

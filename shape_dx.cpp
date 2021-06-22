@@ -185,34 +185,34 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto P = DisplayOrientations::Portrait;
 		constexpr auto LF = DisplayOrientations::LandscapeFlipped;
 		constexpr auto PF = DisplayOrientations::PortraitFlipped;
+		// 既定がヨコ向きかつ現在がヨコ向き, または既定がタテ向きかつ現在がタテ向きか判定する.
 		if ((m_nativeOrientation == L && m_currentOrientation == L)
 			|| (m_nativeOrientation == P && m_currentOrientation == P)) {
-			// 既定が横かつ現在が横, または既定が縦かつ現在が横なら,
 			// DXGI_MODE_ROTATION_IDENTITY. 
 			displayRotation = DXGI_MODE_ROTATION_IDENTITY;
 		}
+		// 既定がヨコ向きかつ現在がタテ向き, または既定がタテ向きかつ現在が反ヨコ向きか判定する.
 		else if ((m_nativeOrientation == L && m_currentOrientation == P)
 			|| (m_nativeOrientation == P && m_currentOrientation == LF)) {
-			// 既定が横かつ現在が縦, または既定が縦かつ現在が反横なら,
 			// DXGI_MODE_ROTATION_ROTATE270.
 			displayRotation = DXGI_MODE_ROTATION_ROTATE270;
 		}
+		// 既定がヨコ向きかつ現在が反ヨコ向き, または既定がタテ向きかつ現在が反タテ向きか判定する.
 		else if ((m_nativeOrientation == L && m_currentOrientation == LF)
 			|| (m_nativeOrientation == P && m_currentOrientation == PF)) {
-			// 既定が横かつ現在が反横, または既定が縦かつ現在が反縦なら,
 			// DXGI_MODE_ROTATION_ROTATE180.
 			displayRotation = DXGI_MODE_ROTATION_ROTATE180;
 		}
+		// 既定がヨコ向きかつ現在が反タテ向き, または既定がタテ向きかつ現在がヨコ向きか判定する.
 		else if ((m_nativeOrientation == L && m_currentOrientation == PF)
 			|| (m_nativeOrientation == P && m_currentOrientation == L)) {
-			// 既定が横かつ現在が反縦, または既定が縦かつ現在が横なら,
 			// DXGI_MODE_ROTATION_ROTATE90.
 			displayRotation = DXGI_MODE_ROTATION_ROTATE90;
 		}
 
+		// 表示デバイスの回転が 90° または 270° か判定する.
 		if (displayRotation == DXGI_MODE_ROTATION_ROTATE90
 			|| displayRotation == DXGI_MODE_ROTATION_ROTATE270) {
-			// 表示デバイスの回転が DXGI_MODE_ROTATION_ROTATE90 または DXGI_MODE_ROTATION_ROTATE270
 			// ならば, 出力領域の幅と高さを入れ替えて, D3D ターゲットの幅と高さに格納する.
 			m_d3d_target_width = m_output_height;
 			m_d3d_target_height = m_output_width;
@@ -223,14 +223,12 @@ namespace winrt::GraphPaper::implementation
 			m_d3d_target_height = m_output_height;
 		}
 
+		// DXGI スワップチェーンが初期化されているか判定する.
 		if (m_dxgi_swap_chain != nullptr) {
-			// DXGI スワップチェーンが初期化されているなら,
-			// DXGI スワップチェーンのバッファサイズを変更し, 
-			// その結果を得る.
+			// DXGI スワップチェーンのバッファサイズを変更し, その結果を得る.
 			// バッファの大きさには D3D ターゲットの幅と高さを,
 			// バッファの数には 2 (ダブル バッファー) を, 
-			// フォーマットには DXGI_FORMAT_B8G8R8A8_UNORM を
-			// 指定する.
+			// フォーマットには DXGI_FORMAT_B8G8R8A8_UNORM を指定する.
 			HRESULT hr = m_dxgi_swap_chain->ResizeBuffers(
 				2,
 				lround(m_d3d_target_width),
@@ -239,11 +237,9 @@ namespace winrt::GraphPaper::implementation
 				0
 			);
 
+			// 結果が DXGI_ERROR_DEVICE_REMOVED または DXGI_ERROR_DEVICE_RESET か判定する.
 			if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
-				// 結果が DXGI_ERROR_DEVICE_REMOVED
-				// または DXGI_ERROR_DEVICE_RESET ならば, 
-				// すべてのデバイス リソースを再作成し、
-				// 現在の状態に再設定する.
+				// すべてのデバイス リソースを再作成し, 現在の状態に再設定する.
 				HandleDeviceLost();
 				return;
 			}
@@ -252,7 +248,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			// それ以外の場合は、既存の Direct3D デバイスと同じアダプターを使用して、新規作成します。
+			// それ以外の場合は、既存の Direct3D デバイスと同じアダプターを使用して、新規作成する.
 			DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { 0 };
 			// DXGI スワップチェーンの詳細を初期化する.
 			// 幅には D3D ターゲットの幅,
@@ -283,8 +279,8 @@ namespace winrt::GraphPaper::implementation
 			//else {
 			swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
 			//}
+			// D3D ドライバーが D3D_DRIVER_TYPE_HARDWARE か判定する.
 			if (m_d3d_driver_type == D3D_DRIVER_TYPE_HARDWARE) {
-				// D3D ドライバーが D3D_DRIVER_TYPE_HARDWARE ならば,
 				// 切り替え効果に DXGI_SWAP_EFFECT_FLIP_DISCARD を格納する.
 				// この効果を指定すると, Present1 呼び出し後に残ったバッファは破棄される.
 				// 破棄されてないバッファが残っている場合, ハードウェアドライバーはこれを表示してしまう.
@@ -298,24 +294,17 @@ namespace winrt::GraphPaper::implementation
 				swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	// すべての Windows ストア アプリは、_FLIP_ SwapEffects を使用する必要があります。
 			}
 
-			// このシーケンスは、上の Direct3D デバイスを作成する際に使用された DXGI ファクトリを取得します。
+			// このシーケンスは、上の Direct3D デバイスを作成する際に使用された DXGI ファクトリを取得する.
 			winrt::com_ptr<IDXGIDevice3> dxgiDevice;
-			winrt::check_hresult(
-				m_d3dDevice.try_as(dxgiDevice)
-			);
+			winrt::check_hresult(m_d3dDevice.try_as(dxgiDevice));
 
 			winrt::com_ptr<IDXGIAdapter> dxgiAdapter;
-			winrt::check_hresult(
-				dxgiDevice->GetAdapter(dxgiAdapter.put())
-			);
+			winrt::check_hresult(dxgiDevice->GetAdapter(dxgiAdapter.put()));
 
 			winrt::com_ptr<IDXGIFactory4> dxgiFactory;
-			winrt::check_hresult(
-				dxgiAdapter->GetParent(_uuidof(&dxgiFactory), dxgiFactory.put_void())
-			);
+			winrt::check_hresult(dxgiAdapter->GetParent(_uuidof(&dxgiFactory), dxgiFactory.put_void()));
 
-			// XAML 相互運用機能の使用時に、
-			// 合成用にスワップ チェーンを作成する必要があります。
+			// XAML 相互運用機能の使用時に, 合成用にスワップ チェーンを作成する必要あり.
 			winrt::com_ptr<IDXGISwapChain1> swapChain;
 			winrt::check_hresult(
 				dxgiFactory->CreateSwapChainForComposition(
@@ -326,31 +315,23 @@ namespace winrt::GraphPaper::implementation
 				)
 			);
 
-			winrt::check_hresult(
-				swapChain.try_as(m_dxgi_swap_chain)
-			);
+			winrt::check_hresult(swapChain.try_as(m_dxgi_swap_chain));
 
-			// スワップ チェーンと SwapChainPanel を関連付けます
-			// UI の変更は、UI スレッドにディスパッチして戻す必要があります.
+			// スワップ チェーンと SwapChainPanel を関連付ける.
+			// UI の変更は、UI スレッドにディスパッチして戻す必要あり.
 			const auto _ = m_swapChainPanel.Dispatcher().RunAsync(
 				CoreDispatcherPriority::High,
 				[=]()
 				{
-					// SwapChainPanel のネイティブ インターフェイスに戻す
+					// SwapChainPanel のネイティブ インターフェイスに戻す.
 					winrt::com_ptr<ISwapChainPanelNative> scpNative{ nullptr };
-					winrt::check_hresult(
-						winrt::get_unknown(m_swapChainPanel)->QueryInterface(__uuidof(scpNative), scpNative.put_void())
-					);
-					winrt::check_hresult(
-						scpNative->SetSwapChain(m_dxgi_swap_chain.get())
-					);
+					winrt::check_hresult(winrt::get_unknown(m_swapChainPanel)->QueryInterface(__uuidof(scpNative), scpNative.put_void()));
+					winrt::check_hresult(scpNative->SetSwapChain(m_dxgi_swap_chain.get()));
 				}
 			);
 			// DXGI が 1 度に複数のフレームをキュー処理していないことを確認します。これにより、遅延が減少し、
 			// アプリケーションが各 VSync の後でのみレンダリングすることが保証され、消費電力が最小限に抑えられます。
-			winrt::check_hresult(
-				dxgiDevice->SetMaximumFrameLatency(1)
-			);
+			winrt::check_hresult(dxgiDevice->SetMaximumFrameLatency(1));
 		}
 
 		// スワップ チェーンの適切な方向を設定し、回転されたスワップ チェーンにレンダリングするための 2D および
@@ -391,22 +372,15 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_invalid_argument();
 		}
 
-		winrt::check_hresult(
-			m_dxgi_swap_chain->SetRotation(displayRotation)
-		);
+		winrt::check_hresult(m_dxgi_swap_chain->SetRotation(displayRotation));
 
 		// スワップ チェーンに逆拡大率を設定します
 		DXGI_MATRIX_3X2_F inverseScale = { 0 };
 		inverseScale._11 = 1.0f / m_effectiveCompositionScaleX;
 		inverseScale._22 = 1.0f / m_effectiveCompositionScaleY;
 		winrt::com_ptr<IDXGISwapChain2> spSwapChain2;
-		winrt::check_hresult(
-			m_dxgi_swap_chain.try_as(spSwapChain2)//As<IDXGISwapChain2>(&spSwapChain2)
-		);
-
-		winrt::check_hresult(
-			spSwapChain2->SetMatrixTransform(&inverseScale)
-		);
+		winrt::check_hresult(m_dxgi_swap_chain.try_as(spSwapChain2));//As<IDXGISwapChain2>(&spSwapChain2));		
+		winrt::check_hresult(spSwapChain2->SetMatrixTransform(&inverseScale));
 
 		// スワップ チェーンのバック バッファーのレンダリング ターゲット ビューを作成します。
 		winrt::com_ptr<ID3D11Texture2D1> backBuffer;
@@ -461,7 +435,7 @@ namespace winrt::GraphPaper::implementation
 	// スワップチェーンの内容を画面に表示する.
 	void SHAPE_DX::Present()
 	{
-		DXGI_PRESENT_PARAMETERS param = { 0 };
+		DXGI_PRESENT_PARAMETERS param{ 0 };
 		HRESULT hr = m_dxgi_swap_chain->Present1(1, 0, &param);
 		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
 			HandleDeviceLost();
@@ -646,18 +620,12 @@ namespace winrt::GraphPaper::implementation
 			);
 			m_d3d_driver_type = D3D_DRIVER_TYPE_WARP;
 		}
-		winrt::check_hresult(
-			device.try_as(m_d3dDevice)
-		);
-		winrt::check_hresult(
-			context.try_as(m_d3dContext)
-		);
+		winrt::check_hresult(device.try_as(m_d3dDevice));
+		winrt::check_hresult(context.try_as(m_d3dContext));
 
 		// D3D デバイスを DXGI デバイスに格納する.
 		winrt::com_ptr<IDXGIDevice3> dxgiDevice;
-		winrt::check_hresult(
-			m_d3dDevice.try_as(dxgiDevice)
-		);
+		winrt::check_hresult(m_d3dDevice.try_as(dxgiDevice));
 		// DXGI デバイスをもとに D2D デバイスを作成する.
 		m_d2dDevice = nullptr;
 		winrt::check_hresult(

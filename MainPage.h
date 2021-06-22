@@ -330,12 +330,12 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_join.cpp
-		// 線分のつなぎと端点
+		// 線分のつなぎと端
 		//-------------------------------
 
-		// 線枠メニューの「端点の種類」に印をつける.
+		// 線枠メニューの「端の種類」に印をつける.
 		void cap_style_is_checked(const CAP_STYLE& s_cap);
-		// 線枠メニューの「端点の種類」が選択された.
+		// 線枠メニューの「端の種類」が選択された.
 		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「つなぎの種類」>「額ぶちの制限」が選択された.
 		IAsyncAction join_limit_click_async(IInspectable const&, RoutedEventArgs const&);

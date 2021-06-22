@@ -23,18 +23,12 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::SwapChainPanel;
 	using winrt::Windows::Graphics::Display::DisplayOrientations;
 
-	// 白
-	constexpr D2D1_COLOR_F S_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };
-	// 黒
-	constexpr D2D1_COLOR_F S_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };
-	// 補助線の不透明度
-	constexpr float AUX_OPAC = 0.975f;
-	// 補助線の破線の様式
-	constexpr FLOAT AUX_DASHES[] = { 4.0f, 4.0f };
-	// 補助線の破線の様式の要素数
-	constexpr UINT32 AUX_DASHES_CONT = sizeof(AUX_DASHES) / sizeof(AUX_DASHES[0]);
-	// 補助線の線の特性
-	constexpr D2D1_STROKE_STYLE_PROPERTIES1 AUX_STYLE {
+	
+	constexpr FLOAT AUX_DASHES[] = { 4.0f, 4.0f };	// 補助線の破線の様式
+	constexpr UINT32 AUX_DASHES_CONT = sizeof(AUX_DASHES) / sizeof(AUX_DASHES[0]);	// 補助線の破線の様式の要素数
+	constexpr float AUX_OPAC = 0.975f;	// 補助線の不透明度
+	constexpr D2D1_STROKE_STYLE_PROPERTIES1 AUX_STYLE	// 補助線の線の特性
+	{
 		D2D1_CAP_STYLE_FLAT,	// startCap
 		D2D1_CAP_STYLE_FLAT,	// endCap
 		D2D1_CAP_STYLE_ROUND,	// dashCap
@@ -43,11 +37,11 @@ namespace winrt::GraphPaper::implementation
 		D2D1_DASH_STYLE_CUSTOM,	// dashStyle
 		0.0f,	// dashOffset
 		D2D1_STROKE_TRANSFORM_TYPE_NORMAL
-	};
-	// 文字範囲の背景色
-	constexpr D2D1_COLOR_F RNG_BACK = { 0.0f, 2.0f / 3.0f, 1.0f, 1.0f };
-	// 文字範囲の文字色
-	constexpr D2D1_COLOR_F RNG_TEXT = { 1.0f, 1.0f, 1.0f, 1.0f };
+	}; 
+	constexpr D2D1_COLOR_F RNG_BACK = { 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// 文字範囲の背景色 SystemAccentColor
+	constexpr D2D1_COLOR_F RNG_TEXT = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
+	constexpr D2D1_COLOR_F S_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
+	constexpr D2D1_COLOR_F S_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
 
 	// SHAPE_DX を所有しているアプリケーションが、デバイスが失われたときまたは作成されたときに通知を受けるためのインターフェイスを提供する.
 	interface IDeviceNotify {
