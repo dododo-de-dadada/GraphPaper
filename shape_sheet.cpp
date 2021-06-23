@@ -7,13 +7,12 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 指定した色と不透明度から反対色を得る.
-	//static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept;
+	static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept;
 
 	// 指定した色と不透明度から反対色を得る.
 	// src	指定した色
 	// opa	指定した不透明度
 	// dst	反対色
-	/*
 	static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept
 	{
 		const auto R = src.r;
@@ -52,7 +51,6 @@ namespace winrt::GraphPaper::implementation
 		dst.b = (src.g <= 0.5f ? 1.0f : 0.0f);
 		dst.a = static_cast<FLOAT>(opa);
 	}
-	*/
 
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
 	// dx	図形の描画環境
@@ -125,36 +123,6 @@ namespace winrt::GraphPaper::implementation
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
 		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
-
-	// ひし形の補助線を表示する.
-	// p_pos	ポインターが押された位置
-	// c_pos	ポインターの現在位置
-	/*
-	void ShapeSheet::draw_auxiliary_quad(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
-	{
-		//auto br = dx.m_aux_brush.get();
-		//auto ss = dx.m_aux_style.get();
-		const FLOAT sw = static_cast<FLOAT>(1.0 / m_sheet_scale);
-		D2D1_POINT_2F m_pos;
-		D2D1_POINT_2F q_pos[4];
-
-		pt_avg(p_pos, c_pos, m_pos);
-		q_pos[0] = { m_pos.x, p_pos.y };
-		q_pos[1] = { c_pos.x, m_pos.y };
-		q_pos[2] = { m_pos.x, c_pos.y };
-		q_pos[3] = { p_pos.x, m_pos.y };
-		dx.m_shape_brush->SetColor(dx.m_default_background);
-		dx.m_d2dContext->DrawLine(q_pos[0], q_pos[1], dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_d2dContext->DrawLine(q_pos[1], q_pos[2], dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_d2dContext->DrawLine(q_pos[2], q_pos[3], dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_d2dContext->DrawLine(q_pos[3], q_pos[0], dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(dx.m_default_foreground);
-		dx.m_d2dContext->DrawLine(q_pos[0], q_pos[1], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
-		dx.m_d2dContext->DrawLine(q_pos[1], q_pos[2], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
-		dx.m_d2dContext->DrawLine(q_pos[2], q_pos[3], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
-		dx.m_d2dContext->DrawLine(q_pos[3], q_pos[0], dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
-	}
-	*/
 
 	// 多角形の補助線を表示する.
 	// dx	図形の描画環境
@@ -244,8 +212,16 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
 		auto const& brush = dx.m_shape_brush.get();
 
+		const auto max_val = max(m_sheet_color.r, max(m_sheet_color.g, m_sheet_color.b));
+		const auto min_val = min(m_sheet_color.r, min(m_sheet_color.g, m_sheet_color.b));
+		const auto sum_val = max_val + min_val;
+
 		D2D1_COLOR_F grid_color;
-		get_grid_color(grid_color);
+		get_opposite_color(m_sheet_color, m_grid_gray, grid_color);
+		//grid_color.r = 1.0f - m_sheet_color.r;
+		//grid_color.g = 1.0f - m_sheet_color.g;
+		//grid_color.b = 1.0f - m_sheet_color.b;
+		//grid_color.a = m_grid_gray;
 		brush->SetColor(grid_color);
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
@@ -287,12 +263,6 @@ namespace winrt::GraphPaper::implementation
 
 	}
 
-	// 部位の色を得る.
-	//void ShapeSheet::get_anch_color(D2D1_COLOR_F& value) const noexcept
-	//{
-	//	get_opposite_color(m_sheet_color, ANCH_OPAC, value);
-	//}
-
 	// 矢じるしの寸法を得る.
 	bool ShapeSheet::get_arrow_size(ARROW_SIZE& value) const noexcept
 	{
@@ -306,12 +276,6 @@ namespace winrt::GraphPaper::implementation
 		value = m_arrow_style;
 		return true;
 	}
-
-	// 補助線の色を得る.
-	//void ShapeSheet::get_auxiliary_color(D2D1_COLOR_F& value) const noexcept
-	//{
-	//	get_opposite_color(m_sheet_color, AUX_OPAC, value);
-	//}
 
 	// 角丸半径を得る.
 	bool ShapeSheet::get_corner_radius(D2D1_POINT_2F& value) const noexcept
@@ -377,6 +341,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方眼の濃淡を得る.
+	/*
 	void ShapeSheet::get_grid_color(D2D1_COLOR_F& value) const noexcept
 	{
 		value.r = 1.0f - m_grid_gray;
@@ -384,6 +349,7 @@ namespace winrt::GraphPaper::implementation
 		value.b = value.r;
 		value.a = 0.875F;
 	}
+	*/
 
 	// 方眼の濃淡を得る.
 	bool ShapeSheet::get_grid_gray(float& value) const noexcept

@@ -707,7 +707,7 @@ namespace winrt::GraphPaper::implementation
 		// •ûŠá‚ÌŠî€‚Ì‘å‚«‚³‚ğ“¾‚é.
 		bool get_grid_base(float& value) const noexcept;
 		// •ûŠá‚ÌF‚ğ“¾‚é.
-		void get_grid_color(D2D1_COLOR_F& value) const noexcept;
+		//void get_grid_color(D2D1_COLOR_F& value) const noexcept;
 		// •ûŠá‚Ì‘å‚«‚³‚ğ“¾‚é.
 		bool get_grid_gray(float& value) const noexcept;
 		// •ûŠá‚Ì‹­’²‚ğ“¾‚é.
