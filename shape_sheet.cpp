@@ -15,6 +15,12 @@ namespace winrt::GraphPaper::implementation
 	// dst	”½‘ÎF
 	static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept
 	{
+		dst.r = (src.r <= 0.5f ? 1.0f : 0.0f);
+		dst.g = (src.g <= 0.5f ? 1.0f : 0.0f);
+		dst.b = (src.b <= 0.5f ? 1.0f : 0.0f);
+		dst.a = static_cast<FLOAT>(opa);
+		return;
+
 		const auto R = src.r;
 		const auto G = src.g;
 		const auto B = src.b;
@@ -46,10 +52,6 @@ namespace winrt::GraphPaper::implementation
 		dst.a = opa;
 		return;
 
-		dst.r = (src.g <= 0.5f ? 1.0f : 0.0f);
-		dst.g = (src.g <= 0.5f ? 1.0f : 0.0f);
-		dst.b = (src.g <= 0.5f ? 1.0f : 0.0f);
-		dst.a = static_cast<FLOAT>(opa);
 	}
 
 	// ‹Èü‚Ì•â•ü(§Œä“_‚ğŒ‹‚ÔÜ‚êü)‚ğ•\¦‚·‚é.
