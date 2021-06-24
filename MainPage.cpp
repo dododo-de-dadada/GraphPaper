@@ -11,18 +11,17 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// UWP のブラシを D2D1_COLOR_F に変換する.
-	static bool conv_uwp_to_dx(const Brush& a, D2D1_COLOR_F& b) noexcept;
+	//static bool conv_uwp_to_color(const Brush& a, D2D1_COLOR_F& b) noexcept;
 
 	// UWP の色を D2D1_COLOR_F に変換する.
-	static void conv_uwp_to_dx(const Color& a, D2D1_COLOR_F& b) noexcept;
+	//void conv_uwp_to_color(const Color& a, D2D1_COLOR_F& b) noexcept;
 
 	// 色成分を文字列に変換する.
 	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]);
 
-	constexpr double UWP_COLOR_MAX = 255.0;	// UWP の色成分の最大値
-
 	// UWP のブラシを D2D1_COLOR_F に変換する.
-	static bool conv_uwp_to_dx(const Brush& a, D2D1_COLOR_F& b) noexcept
+	/*
+	static bool conv_uwp_to_color(const Brush& a, D2D1_COLOR_F& b) noexcept
 	{
 		using winrt::Windows::UI::Xaml::Media::SolidColorBrush;
 
@@ -31,21 +30,10 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 		const auto color = brush.Color();
-		b.r = static_cast<FLOAT>(static_cast<double>(color.R) / UWP_COLOR_MAX);
-		b.g = static_cast<FLOAT>(static_cast<double>(color.G) / UWP_COLOR_MAX);
-		b.b = static_cast<FLOAT>(static_cast<double>(color.B) / UWP_COLOR_MAX);
-		b.a = static_cast<FLOAT>(static_cast<double>(color.A) / UWP_COLOR_MAX);
+		conv_uwp_to_color(color, b);
 		return true;
 	}
-
-	// UWP の色を D2D1_COLOR_F に変換する.
-	static void conv_uwp_to_dx(const Color& a, D2D1_COLOR_F& b) noexcept
-	{
-		b.r = static_cast<FLOAT>(static_cast<double>(a.R) / UWP_COLOR_MAX);
-		b.g = static_cast<FLOAT>(static_cast<double>(a.G) / UWP_COLOR_MAX);
-		b.b = static_cast<FLOAT>(static_cast<double>(a.B) / UWP_COLOR_MAX);
-		b.a = static_cast<FLOAT>(static_cast<double>(a.A) / UWP_COLOR_MAX);
-	}
+	*/
 
 	// 色成分を文字列に変換する.
 	// c_code	色の表記
@@ -359,11 +347,11 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::UI::Color;
 			using winrt::Windows::UI::Xaml::Media::Brush;
 
-			auto sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
-			auto sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
+			const auto sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
+			const auto sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
 			if (sel_back_color != nullptr && sel_text_color != nullptr) {
-				conv_uwp_to_dx(unbox_value<Color>(sel_back_color), Shape::m_range_background);
-				conv_uwp_to_dx(unbox_value<Color>(sel_text_color), Shape::m_range_foreground);
+				conv_uwp_to_color(unbox_value<Color>(sel_back_color), Shape::m_range_background);
+				conv_uwp_to_color(unbox_value<Color>(sel_text_color), Shape::m_range_foreground);
 			}
 			else {
 				Shape::m_range_background = { 0.0f, 0x00 / COLOR_MAX, 0x78 / COLOR_MAX, 0xD4 / COLOR_MAX };
@@ -373,8 +361,8 @@ namespace winrt::GraphPaper::implementation
 			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
 			auto const& fore_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
 			if (back_theme != nullptr && fore_theme != nullptr) {
-				conv_uwp_to_dx(unbox_value<Brush>(back_theme), Shape::m_default_background);
-				conv_uwp_to_dx(unbox_value<Brush>(fore_theme), Shape::m_default_foreground);
+				conv_uwp_to_color(unbox_value<Brush>(back_theme), Shape::m_default_background);
+				conv_uwp_to_color(unbox_value<Brush>(fore_theme), Shape::m_default_foreground);
 			}
 			else {*/
 				Shape::m_default_background = S_WHITE;

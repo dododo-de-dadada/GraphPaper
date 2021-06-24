@@ -174,7 +174,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr double MM_PER_INCH = 25.4;	// 1 インチあたりのミリメートル数
 	constexpr ARROW_SIZE DEF_ARROW_SIZE{ 7.0, 16.0, 0.0 };
 	constexpr float DEF_FONT_SIZE = static_cast<float>(12.0 * 96.0 / 72.0);
-	constexpr D2D1_COLOR_F DEF_GRID_COLOR{ RNG_BACK.r,  RNG_BACK.g, RNG_BACK.b, 0.5f };	// 方眼の色
+	constexpr D2D1_COLOR_F DEF_GRID_COLOR{ ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 0.5f };	// 方眼の色
 	constexpr float DEF_GRID_LEN = 48.0f;
 	constexpr float DEF_MITER_LIMIT = 10.0f;	// マイター制限の比率
 	constexpr POLY_TOOL DEF_POLY_TOOL{ 3, true, true, true, true };
@@ -647,7 +647,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_text_margin{ DEF_TEXT_MARGIN };	// 文字列の左右と上下の余白
 
 		// 方眼
-		D2D1_COLOR_F m_grid_color{ DEF_GRID_COLOR };	// 方眼の色
+		D2D1_COLOR_F m_grid_color{ ACCENT_COLOR };	// 方眼の色
 		float m_grid_base = DEF_GRID_LEN - 1.0f;	// 方眼の基準の大きさ (を -1 した値)
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
 		GRID_EMPH m_grid_emph{ GRID_EMPH_0 };	// 方眼の強調

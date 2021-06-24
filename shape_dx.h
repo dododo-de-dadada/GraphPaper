@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 		0.0f,	// dashOffset
 		D2D1_STROKE_TRANSFORM_TYPE_NORMAL
 	}; 
-	constexpr D2D1_COLOR_F RNG_BACK = { 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// •¶š”ÍˆÍ‚Ì”wŒiF SystemAccentColor
+	constexpr D2D1_COLOR_F ACCENT_COLOR = { 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// •¶š”ÍˆÍ‚Ì”wŒiF SystemAccentColor
 	constexpr D2D1_COLOR_F RNG_TEXT = { 1.0f, 1.0f, 1.0f, 1.0f };	// •¶š”ÍˆÍ‚Ì•¶šF
 	constexpr D2D1_COLOR_F S_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// •
 	constexpr D2D1_COLOR_F S_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// ”’

@@ -338,13 +338,23 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		{
+			const auto accent_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
+			D2D1_COLOR_F grid_color;
+			if (accent_color != nullptr) {
+				const auto uwp_color = unbox_value<Color>(accent_color);
+				conv_uwp_to_color(unbox_value<Color>(accent_color), grid_color);
+				grid_color.a = 0.5f;
+			}
+			else {
+				grid_color = DEF_GRID_COLOR;
+			}
 			m_sheet_main.set_arrow_size(DEF_ARROW_SIZE);
 			m_sheet_main.set_arrow_style(ARROW_STYLE::NONE);
 			m_sheet_main.set_corner_radius(D2D1_POINT_2F{ DEF_GRID_LEN, DEF_GRID_LEN });
 			m_sheet_main.set_fill_color(Shape::m_default_background);
 			m_sheet_main.set_font_color(Shape::m_default_foreground);
 			m_sheet_main.set_grid_base(DEF_GRID_LEN - 1.0);
-			m_sheet_main.set_grid_color(DEF_GRID_COLOR);
+			m_sheet_main.set_grid_color(grid_color);
 			m_sheet_main.set_grid_emph(GRID_EMPH_0);
 			m_sheet_main.set_grid_show(GRID_SHOW::BACK);
 			m_sheet_main.set_grid_snap(true);

@@ -123,6 +123,17 @@ namespace winrt::GraphPaper::implementation
 		conv_col_to_str(c_code, value, Z, t_buf);
 	}
 
+	constexpr double UWP_COLOR_MAX = 255.0;	// UWP の色成分の最大値
+
+	// UWP の色を D2D1_COLOR_F に変換する.
+	inline void conv_uwp_to_color(const Color& a, D2D1_COLOR_F& b) noexcept
+	{
+		b.r = static_cast<FLOAT>(static_cast<double>(a.R) / UWP_COLOR_MAX);
+		b.g = static_cast<FLOAT>(static_cast<double>(a.G) / UWP_COLOR_MAX);
+		b.b = static_cast<FLOAT>(static_cast<double>(a.B) / UWP_COLOR_MAX);
+		b.a = static_cast<FLOAT>(static_cast<double>(a.A) / UWP_COLOR_MAX);
+	}
+
 	//-------------------------------
 	// 作図ツール
 	//-------------------------------
