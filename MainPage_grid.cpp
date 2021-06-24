@@ -52,41 +52,65 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_emph_3_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
 	}
 
-	// 用紙メニューの「方眼の濃さ」が選択された.
-	IAsyncAction MainPage::grid_gray_click_async(IInspectable const&, RoutedEventArgs const&)
+	// 用紙メニューの「方眼の色」が選択された.
+	IAsyncAction MainPage::grid_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		float g_gray;
-		m_sample_sheet.get_grid_gray(g_gray);
-		g_gray *= COLOR_MAX;
+		const auto val0 = m_sample_sheet.m_grid_color.r * COLOR_MAX;
+		const auto val1 = m_sample_sheet.m_grid_color.g * COLOR_MAX;
+		const auto val2 = m_sample_sheet.m_grid_color.b * COLOR_MAX;
+		const auto val3 = m_sample_sheet.m_grid_color.a * COLOR_MAX;
 
+		sample_slider_0().Maximum(255.0);
+		sample_slider_0().TickFrequency(1.0);
+		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_0().Value(val0);
+		grid_slider_set_header<UNDO_OP::GRID_COLOR, 0>(val0);
+		sample_slider_1().Maximum(255.0);
+		sample_slider_1().TickFrequency(1.0);
+		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_1().Value(val1);
+		grid_slider_set_header<UNDO_OP::GRID_COLOR, 1>(val1);
+		sample_slider_2().Maximum(255.0);
+		sample_slider_2().TickFrequency(1.0);
+		sample_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_2().Value(val2);
+		grid_slider_set_header<UNDO_OP::GRID_COLOR, 2>(val2);
 		sample_slider_3().Maximum(255.0);
 		sample_slider_3().TickFrequency(1.0);
 		sample_slider_3().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_3().Value(g_gray);
-		grid_slider_set_header<UNDO_OP::GRID_GRAY, 3>(g_gray);
+		sample_slider_3().Value(val3);
+		grid_slider_set_header<UNDO_OP::GRID_COLOR, 3>(val3);
 
+		sample_slider_0().Visibility(UI_VISIBLE);
+		sample_slider_1().Visibility(UI_VISIBLE);
+		sample_slider_2().Visibility(UI_VISIBLE);
 		sample_slider_3().Visibility(UI_VISIBLE);
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_GRAY, 3> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_COLOR, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_COLOR, 3> });
 		m_sample_type = SAMPLE_TYPE::NONE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			float sample_value;
-			m_sample_sheet.get_grid_gray(sample_value);
-			float sheet_value;
-			m_sheet_main.get_grid_gray(sheet_value);
-			if (!equal(sheet_value, sample_value)) {
-				undo_push_set<UNDO_OP::GRID_GRAY>(&m_sheet_main, sample_value);
+			if (!equal(m_sheet_main.m_grid_color, m_sample_sheet.m_grid_color)) {
+				undo_push_set<UNDO_OP::GRID_COLOR>(&m_sheet_main, m_sample_sheet.m_grid_color);
 				undo_is_enable();
 				sheet_draw();
 			}
 		}
+		sample_slider_0().Visibility(UI_COLLAPSED);
+		sample_slider_1().Visibility(UI_COLLAPSED);
+		sample_slider_2().Visibility(UI_COLLAPSED);
 		sample_slider_3().Visibility(UI_COLLAPSED);
+		sample_slider_0().ValueChanged(slider_0_token);
+		sample_slider_1().ValueChanged(slider_1_token);
+		sample_slider_2().ValueChanged(slider_2_token);
 		sample_slider_3().ValueChanged(slider_3_token);
 	}
 
@@ -97,12 +121,14 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float g_base;
 		m_sample_sheet.get_grid_base(g_base);
 
-		sample_slider_0().Maximum(127.5);
-		sample_slider_0().TickFrequency(0.5);
+		sample_slider_0().Maximum(MAX_VALUE);
+		sample_slider_0().TickFrequency(TICK_FREQ);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(g_base);
 		grid_slider_set_header<UNDO_OP::GRID_BASE, 0>(g_base);
@@ -172,12 +198,30 @@ namespace winrt::GraphPaper::implementation
 			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/ + 1.0f, m_sheet_dx.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
 		}
-		if constexpr (U == UNDO_OP::GRID_GRAY) {
+		if constexpr (U == UNDO_OP::GRID_COLOR) {
+			if constexpr (S == 0) {
+				wchar_t buf[32];
+				// 色成分の値を文字列に変換する.
+				conv_col_to_str(m_misc_color_code, value, buf);
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_r") + L": " + buf;
+			}
+			if constexpr (S == 1) {
+				wchar_t buf[32];
+				// 色成分の値を文字列に変換する.
+				conv_col_to_str(m_misc_color_code, value, buf);
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " + buf;
+			}
+			if constexpr (S == 2) {
+				wchar_t buf[32];
+				// 色成分の値を文字列に変換する.
+				conv_col_to_str(m_misc_color_code, value, buf);
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " + buf;
+			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
 				conv_col_to_str(m_misc_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_gray_scale") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
 			}
 		}
 		if constexpr (S == 0) {
@@ -201,15 +245,29 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	なし
 	template <UNDO_OP U, int S> void MainPage::grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		Shape* const s = &m_sample_sheet;
-		const float value = static_cast<float>(args.NewValue());
-
-		grid_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::GRID_BASE) {
-			s->set_grid_base(value/* * SLIDER_STEP*/);
+			const float value = static_cast<float>(args.NewValue());
+			grid_slider_set_header<U, S>(value);
+			m_sample_sheet.set_grid_base(value/* * SLIDER_STEP*/);
 		}
-		if constexpr (U == UNDO_OP::GRID_GRAY) {
-			s->set_grid_gray(value / COLOR_MAX);
+		else if constexpr (U == UNDO_OP::GRID_COLOR) {
+			const float value = static_cast<float>(args.NewValue());
+			grid_slider_set_header<U, S>(value);
+			D2D1_COLOR_F g_color;
+			m_sample_sheet.get_grid_color(g_color);
+			if constexpr (S == 0) {
+				g_color.r = value / COLOR_MAX;
+			}
+			else if constexpr (S == 1) {
+				g_color.g = value / COLOR_MAX;
+			}
+			else if constexpr (S == 2) {
+				g_color.b = value / COLOR_MAX;
+			}
+			else if constexpr (S == 3) {
+				g_color.a = value / COLOR_MAX;
+			}
+			m_sample_sheet.set_grid_color(g_color);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

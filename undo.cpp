@@ -207,7 +207,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::FONT_STYLE>::UndoAttr(Shape* s, const DWRITE_FONT_STYLE& value);
 	template UndoAttr<UNDO_OP::FONT_WEIGHT>::UndoAttr(Shape* s, const DWRITE_FONT_WEIGHT& value);
 	template UndoAttr<UNDO_OP::GRID_BASE>::UndoAttr(Shape* s, const float& value);
-	template UndoAttr<UNDO_OP::GRID_GRAY>::UndoAttr(Shape* s, const float& value);
+	template UndoAttr<UNDO_OP::GRID_COLOR>::UndoAttr(Shape* s, const D2D1_COLOR_F& value);
 	template UndoAttr<UNDO_OP::GRID_EMPH>::UndoAttr(Shape* s, const GRID_EMPH& value);
 	template UndoAttr<UNDO_OP::GRID_SHOW>::UndoAttr(Shape* s, const GRID_SHOW& value);
 	template UndoAttr<UNDO_OP::JOIN_LIMIT>::UndoAttr(Shape* s, const float& value);
@@ -231,7 +231,6 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::FONT_SIZE
 			|| U == UNDO_OP::JOIN_LIMIT
 			|| U == UNDO_OP::STROKE_WIDTH
-			|| U == UNDO_OP::GRID_GRAY
 			|| U == UNDO_OP::GRID_BASE
 			|| U == UNDO_OP::TEXT_LINE_SP) {
 			m_value = dt_reader.ReadSingle();
@@ -267,7 +266,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::FONT_STYLE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::FONT_WEIGHT>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::GRID_BASE>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::GRID_GRAY>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::GRID_COLOR>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::GRID_EMPH>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::GRID_SHOW>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::JOIN_LIMIT>::UndoAttr(DataReader const& dt_reader);
@@ -340,9 +339,9 @@ namespace winrt::GraphPaper::implementation
 		s->set_grid_base(value);
 	}
 
-	void UndoAttr<UNDO_OP::GRID_GRAY>::SET(Shape* const s, const float& value)
+	void UndoAttr<UNDO_OP::GRID_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
 	{
-		s->set_grid_gray(value);
+		s->set_grid_color(value);
 	}
 
 	void UndoAttr<UNDO_OP::GRID_EMPH>::SET(Shape* const s, const GRID_EMPH& value)
@@ -495,9 +494,9 @@ namespace winrt::GraphPaper::implementation
 		return s->get_grid_base(value);
 	}
 
-	bool UndoAttr<UNDO_OP::GRID_GRAY>::GET(const Shape* s, float& value) noexcept
+	bool UndoAttr<UNDO_OP::GRID_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
 	{
-		return s->get_grid_gray(value);
+		return s->get_grid_color(value);
 	}
 
 	bool UndoAttr<UNDO_OP::GRID_EMPH>::GET(const Shape* s, GRID_EMPH& value) noexcept
@@ -603,7 +602,6 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::FONT_SIZE 
 			|| U == UNDO_OP::JOIN_LIMIT
 			|| U == UNDO_OP::STROKE_WIDTH
-			|| U == UNDO_OP::GRID_GRAY 
 			|| U == UNDO_OP::GRID_BASE
 			|| U == UNDO_OP::TEXT_LINE_SP) {
 			dt_writer.WriteSingle(m_value);

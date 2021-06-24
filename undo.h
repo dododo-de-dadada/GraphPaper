@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 		FONT_STRETCH,	// 書体の伸縮の操作
 		FONT_WEIGHT,	// 書体の太さの操作
 		GRID_BASE,	// 方眼の基準の大さの操作
-		GRID_GRAY,	// 方眼の色の濃さの操作
+		GRID_COLOR,	// 方眼の色の操作
 		GRID_EMPH,	// 方眼の形式の操作
 		GRID_SHOW,	// 方眼の表示方法の操作
 		GROUP,	// 図形をグループに挿入または削除する操作
@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::FONT_STYLE> { using type = DWRITE_FONT_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::FONT_WEIGHT> { using type = DWRITE_FONT_WEIGHT; };
 	template <> struct U_TYPE<UNDO_OP::GRID_BASE> { using type = float; };
-	template <> struct U_TYPE<UNDO_OP::GRID_GRAY> { using type = float; };
+	template <> struct U_TYPE<UNDO_OP::GRID_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::GRID_EMPH> { using type = GRID_EMPH; };
 	template <> struct U_TYPE<UNDO_OP::GRID_SHOW> { using type = GRID_SHOW; };
 	template <> struct U_TYPE<UNDO_OP::JOIN_LIMIT> { using type = float; };

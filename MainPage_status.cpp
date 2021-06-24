@@ -49,11 +49,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::status_bar_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
-		STATUS_BAR stbar;	// ステータスバーの状態
+		STATUS_BAR s_bar;	// ステータスバーの状態
 		bool check;
 
 		if (sender == tmfi_misc_status_curs()) {
-			stbar = STATUS_BAR::CURS;
+			s_bar = STATUS_BAR::CURS;
 			check = tmfi_misc_status_curs().IsChecked();
 			tmfi_misc_status_curs_2().IsChecked(tmfi_misc_status_curs().IsChecked());
 			status_set_curs();
@@ -61,8 +61,7 @@ namespace winrt::GraphPaper::implementation
 			status_visiblity(check, tk_misc_status_bar_pos_y());
 		}
 		else if (sender == tmfi_misc_status_curs_2()) {
-			stbar = STATUS_BAR::CURS;
-			//const ToggleMenuFlyoutItem& m_item = unbox_value<ToggleMenuFlyoutItem>(sender);
+			s_bar = STATUS_BAR::CURS;
 			check = tmfi_misc_status_curs_2().IsChecked();
 			tmfi_misc_status_curs().IsChecked(check);
 			status_set_curs();
@@ -70,21 +69,21 @@ namespace winrt::GraphPaper::implementation
 			status_visiblity(check, tk_misc_status_bar_pos_y());
 		}
 		else if (sender == tmfi_misc_status_grid()) {
-			stbar = STATUS_BAR::GRID;
+			s_bar = STATUS_BAR::GRID;
 			check = tmfi_misc_status_grid().IsChecked();
 			tmfi_misc_status_grid_2().IsChecked(check);
 			status_set_grid();
 			status_visiblity(check, tk_misc_status_grid());
 		}
 		else if (sender == tmfi_misc_status_grid_2()) {
-			stbar = STATUS_BAR::GRID;
+			s_bar = STATUS_BAR::GRID;
 			check = tmfi_misc_status_grid_2().IsChecked();
 			tmfi_misc_status_grid().IsChecked(check);
 			status_set_grid();
 			status_visiblity(check, tk_misc_status_grid());
 		}
 		else if (sender == tmfi_misc_status_sheet()) {
-			stbar = STATUS_BAR::SHEET;
+			s_bar = STATUS_BAR::SHEET;
 			check = tmfi_misc_status_sheet().IsChecked();
 			tmfi_misc_status_sheet_2().IsChecked(check);
 			status_set_sheet();
@@ -92,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 			status_visiblity(check, tk_misc_status_bar_height());
 		}
 		else if (sender == tmfi_misc_status_sheet_2()) {
-			stbar = STATUS_BAR::SHEET;
+			s_bar = STATUS_BAR::SHEET;
 			check = tmfi_misc_status_sheet_2().IsChecked();
 			tmfi_misc_status_sheet().IsChecked(check);
 			status_set_sheet();
@@ -100,42 +99,42 @@ namespace winrt::GraphPaper::implementation
 			status_visiblity(check, tk_misc_status_bar_height());
 		}
 		else if (sender == tmfi_misc_status_zoom()) {
-			stbar = STATUS_BAR::ZOOM;
+			s_bar = STATUS_BAR::ZOOM;
 			check = tmfi_misc_status_zoom().IsChecked();
 			tmfi_misc_status_zoom_2().IsChecked(check);
 			status_set_zoom();
 			status_visiblity(check, tk_misc_status_zoom());
 		}
 		else if (sender == tmfi_misc_status_zoom_2()) {
-			stbar = STATUS_BAR::ZOOM;
+			s_bar = STATUS_BAR::ZOOM;
 			check = tmfi_misc_status_zoom_2().IsChecked();
 			tmfi_misc_status_zoom().IsChecked(check);
 			status_set_zoom();
 			status_visiblity(check, tk_misc_status_zoom());
 		}
 		else if (sender == tmfi_misc_status_draw()) {
-			stbar = STATUS_BAR::DRAW;
+			s_bar = STATUS_BAR::DRAW;
 			check = tmfi_misc_status_draw().IsChecked();
 			tmfi_misc_status_draw_2().IsChecked(check);
 			status_set_draw();
 			status_visiblity(check, sp_misc_status_bar_panel_draw());
 		}
 		else if (sender == tmfi_misc_status_draw_2()) {
-			stbar = STATUS_BAR::DRAW;
+			s_bar = STATUS_BAR::DRAW;
 			check = tmfi_misc_status_draw_2().IsChecked();
 			tmfi_misc_status_draw().IsChecked(check);
 			status_set_draw();
 			status_visiblity(check, sp_misc_status_bar_panel_draw());
 		}
 		else if (sender == tmfi_misc_status_unit()) {
-			stbar = STATUS_BAR::UNIT;
+			s_bar = STATUS_BAR::UNIT;
 			check = tmfi_misc_status_unit().IsChecked();
 			tmfi_misc_status_unit_2().IsChecked(check);
 			status_set_unit();
 			status_visiblity(check, tk_misc_status_unit());
 		}
 		else if (sender == tmfi_misc_status_unit_2()) {
-			stbar = STATUS_BAR::UNIT;
+			s_bar = STATUS_BAR::UNIT;
 			check = tmfi_misc_status_unit_2().IsChecked();
 			tmfi_misc_status_unit().IsChecked(check);
 			status_set_unit();
@@ -145,29 +144,30 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		if (check) {
-			m_misc_status_bar = status_or(m_misc_status_bar, stbar);
+			m_misc_status_bar = status_or(m_misc_status_bar, s_bar);
 		}
 		else {
-			m_misc_status_bar = status_and(m_misc_status_bar, status_not(stbar));
+			m_misc_status_bar = status_and(m_misc_status_bar, status_not(s_bar));
 		}
 		status_visiblity(m_misc_status_bar != static_cast<STATUS_BAR>(0), sp_misc_status_bar_panel());
 	}
 
 	// ステータスバーのメニュー項目に印をつける.
-	void MainPage::status_bar_is_checked(const STATUS_BAR st_bar)
+	// s_bar	ステータスバーの状態
+	void MainPage::status_bar_is_checked(const STATUS_BAR s_bar)
 	{
-		tmfi_misc_status_curs().IsChecked(status_mask(st_bar, STATUS_BAR::CURS));
-		tmfi_misc_status_grid().IsChecked(status_mask(st_bar, STATUS_BAR::GRID));
-		tmfi_misc_status_sheet().IsChecked(status_mask(st_bar, STATUS_BAR::SHEET));
-		tmfi_misc_status_draw().IsChecked(status_mask(st_bar, STATUS_BAR::DRAW));
-		tmfi_misc_status_unit().IsChecked(status_mask(st_bar, STATUS_BAR::UNIT));
-		tmfi_misc_status_zoom().IsChecked(status_mask(st_bar, STATUS_BAR::ZOOM));
-		tmfi_misc_status_curs_2().IsChecked(status_mask(st_bar, STATUS_BAR::CURS));
-		tmfi_misc_status_grid_2().IsChecked(status_mask(st_bar, STATUS_BAR::GRID));
-		tmfi_misc_status_sheet_2().IsChecked(status_mask(st_bar, STATUS_BAR::SHEET));
-		tmfi_misc_status_draw_2().IsChecked(status_mask(st_bar, STATUS_BAR::DRAW));
-		tmfi_misc_status_unit_2().IsChecked(status_mask(st_bar, STATUS_BAR::UNIT));
-		tmfi_misc_status_zoom_2().IsChecked(status_mask(st_bar, STATUS_BAR::ZOOM));
+		tmfi_misc_status_curs().IsChecked(status_mask(s_bar, STATUS_BAR::CURS));
+		tmfi_misc_status_grid().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
+		tmfi_misc_status_sheet().IsChecked(status_mask(s_bar, STATUS_BAR::SHEET));
+		tmfi_misc_status_draw().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
+		tmfi_misc_status_unit().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
+		tmfi_misc_status_zoom().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
+		tmfi_misc_status_curs_2().IsChecked(status_mask(s_bar, STATUS_BAR::CURS));
+		tmfi_misc_status_grid_2().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
+		tmfi_misc_status_sheet_2().IsChecked(status_mask(s_bar, STATUS_BAR::SHEET));
+		tmfi_misc_status_draw_2().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
+		tmfi_misc_status_unit_2().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
+		tmfi_misc_status_zoom_2().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
 	}
 
 	// 列挙型を OR 演算する.
@@ -196,15 +196,13 @@ namespace winrt::GraphPaper::implementation
 		const double ps = m_sheet_main.m_sheet_scale;
 		const float fx = static_cast<FLOAT>((wx - bx - tx) / ps + sx + px);
 		const float fy = static_cast<FLOAT>((wy - by - ty) / ps + sy + py);
-		float g_base;
-		m_sheet_main.get_grid_base(g_base);
-		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, fx, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-		tk_misc_status_bar_pos_x().Text(winrt::hstring{ L"X:" } + buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, fy, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-		tk_misc_status_bar_pos_y().Text(winrt::hstring{ L"Y:" } + buf);
-//swprintf_s(buf, L"%d", static_cast<uint32_t>(m_list_shapes.size()));
-//tk_misc_status_bar_cnt().Text(winrt::hstring{ L"c:" } + buf);
+		const float g_len = m_sheet_main.m_grid_base + 1.0f;
+		wchar_t buf_x[32];
+		wchar_t buf_y[32];
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, fx, m_sheet_dx.m_logical_dpi, g_len, buf_x);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, fy, m_sheet_dx.m_logical_dpi, g_len, buf_y);
+		tk_misc_status_bar_pos_x().Text(winrt::hstring{ L"X:" } + buf_x);
+		tk_misc_status_bar_pos_y().Text(winrt::hstring{ L"Y:" } + buf_y);
 	}
 
 	// 作図ツールをステータスバーに格納する.
@@ -212,33 +210,32 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
-		const auto t_draw = m_tool_draw;
 		winrt::hstring data;
-		if (t_draw == DRAW_TOOL::BEZI) {
+		if (m_tool_draw == DRAW_TOOL::BEZI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));
 		}
-		else if (t_draw == DRAW_TOOL::ELLI) {
+		else if (m_tool_draw == DRAW_TOOL::ELLI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_elli")));
 		}
-		else if (t_draw == DRAW_TOOL::LINE) {
+		else if (m_tool_draw == DRAW_TOOL::LINE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 		}
-		else if (t_draw == DRAW_TOOL::POLY) {
+		else if (m_tool_draw == DRAW_TOOL::POLY) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_tri")));
 		}
-		else if (t_draw == DRAW_TOOL::RECT) {
+		else if (m_tool_draw == DRAW_TOOL::RECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
 		}
-		else if (t_draw == DRAW_TOOL::RRECT) {
+		else if (m_tool_draw == DRAW_TOOL::RRECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")));
 		}
-		else if (t_draw == DRAW_TOOL::RULER) {
+		else if (m_tool_draw == DRAW_TOOL::RULER) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_ruler")));
 		}
-		else if (t_draw == DRAW_TOOL::SELECT) {
+		else if (m_tool_draw == DRAW_TOOL::SELECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_select")));
 		}
-		else if (t_draw == DRAW_TOOL::TEXT) {
+		else if (m_tool_draw == DRAW_TOOL::TEXT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
 		else {
@@ -251,56 +248,44 @@ namespace winrt::GraphPaper::implementation
 	// 方眼の大きさをステータスバーに格納する.
 	void MainPage::status_set_grid(void)
 	{
+		const float g_len = m_sheet_main.m_grid_base + 1.0f;
 		wchar_t buf[32];
-		float g_base;
-		m_sheet_main.get_grid_base(g_base);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, g_base + 1.0f, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, g_len, m_sheet_dx.m_logical_dpi, g_len, buf);
 		tk_misc_status_grid().Text(winrt::hstring{ L"G:" } +buf);
 	}
 
 	// 用紙の大きさをステータスバーに格納する.
 	void MainPage::status_set_sheet(void)
 	{
-		float g_base;
-		m_sheet_main.get_grid_base(g_base);
-		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_sheet_main.m_sheet_size.width, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-		tk_misc_status_bar_width().Text(winrt::hstring{ L"W:" } + buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_sheet_main.m_sheet_size.height, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-		tk_misc_status_bar_height().Text(winrt::hstring{ L"H:" } + buf);
+		const float g_len = m_sheet_main.m_grid_base + 1.0f;
+		wchar_t buf_w[32];
+		wchar_t buf_h[32];
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_sheet_main.m_sheet_size.width, m_sheet_dx.m_logical_dpi, g_len, buf_w);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_sheet_main.m_sheet_size.height, m_sheet_dx.m_logical_dpi, g_len, buf_h);
+		tk_misc_status_bar_width().Text(winrt::hstring{ L"W:" } + buf_w);
+		tk_misc_status_bar_height().Text(winrt::hstring{ L"H:" } + buf_h);
 	}
 
 	// 単位をステータスバーに格納する.
 	void MainPage::status_set_unit(void)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
-		const auto unit = m_misc_len_unit;
-		winrt::hstring unit_name{};
-		if (unit == LEN_UNIT::GRID) {
-			//unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_misc_len_grid/Text");
-			unit_name = L"g";
+		if (m_misc_len_unit == LEN_UNIT::GRID) {
+			tk_misc_status_unit().Text(L"U:grid");
 		}
-		else if (unit == LEN_UNIT::INCH) {
-			//unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_misc_len_inch/Text");
-			unit_name = L"\u33CC";
+		else if (m_misc_len_unit == LEN_UNIT::INCH) {
+			tk_misc_status_unit().Text(L"U:\u33CC");
 		}
-		else if (unit == LEN_UNIT::MILLI) {
-			//unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_misc_len_milli/Text");
-			unit_name = L"\u339C";
+		else if (m_misc_len_unit == LEN_UNIT::MILLI) {
+			tk_misc_status_unit().Text(L"U:\u339C");
 		}
-		else if (unit == LEN_UNIT::PIXEL) {
-			//unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_misc_len_pixel/Text");
-			unit_name = L"px";
+		else if (m_misc_len_unit == LEN_UNIT::PIXEL) {
+			tk_misc_status_unit().Text(L"U:px");
 		}
-		else if (unit == LEN_UNIT::POINT) {
-			//unit_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_misc_len_point/Text");
-			unit_name = L"pt";
+		else if (m_misc_len_unit == LEN_UNIT::POINT) {
+			tk_misc_status_unit().Text(L"U:pt");
 		}
-		else {
-			return;
-		}
-		tk_misc_status_unit().Text(winrt::hstring{ L"U:" } + unit_name);
 	}
 
 	// 拡大率をステータスバーに格納する.

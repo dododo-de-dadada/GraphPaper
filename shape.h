@@ -174,7 +174,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr double MM_PER_INCH = 25.4;	// 1 インチあたりのミリメートル数
 	constexpr ARROW_SIZE DEF_ARROW_SIZE{ 7.0, 16.0, 0.0 };
 	constexpr float DEF_FONT_SIZE = static_cast<float>(12.0 * 96.0 / 72.0);
-	constexpr float DEF_GRID_GRAY = 0.25f;	// 方眼の濃さ
+	constexpr D2D1_COLOR_F DEF_GRID_COLOR{ RNG_BACK.r,  RNG_BACK.g, RNG_BACK.b, 0.5f };	// 方眼の色
 	constexpr float DEF_GRID_LEN = 48.0f;
 	constexpr float DEF_MITER_LIMIT = 10.0f;	// マイター制限の比率
 	constexpr POLY_TOOL DEF_POLY_TOOL{ 3, true, true, true, true };
@@ -475,8 +475,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_font_weight(DWRITE_FONT_WEIGHT& /*value*/) const noexcept { return false; }
 		// 方眼の基準の大きさを得る.
 		virtual bool get_grid_base(float& /*value*/) const noexcept { return false; }
-		// 方眼の大きさを得る.
-		virtual bool get_grid_gray(float& /*value*/) const noexcept { return false; }
+		// 方眼の色を得る.
+		virtual bool get_grid_color(D2D1_COLOR_F& /*value*/) const noexcept { return false; }
 		// 方眼を強調を得る.
 		virtual bool get_grid_emph(GRID_EMPH& /*value*/) const noexcept { return false; }
 		// 方眼の表示を得る.
@@ -561,8 +561,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_font_weight(const DWRITE_FONT_WEIGHT /*value*/) { return false; }
 		// 値を方眼の大きさに格納する.
 		virtual bool set_grid_base(const float /*value*/) noexcept { return false; }
-		// 値を方眼の濃淡に格納する.
-		virtual bool set_grid_gray(const float /*value*/) noexcept { return false; }
+		// 値を方眼の色に格納する.
+		virtual bool set_grid_color(const D2D1_COLOR_F& /*value*/) noexcept { return false; }
 		// 値を方眼の強調に格納する.
 		virtual bool set_grid_emph(const GRID_EMPH& /*value*/) noexcept { return false; }
 		// 値を方眼の表示に格納する.
@@ -647,7 +647,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_text_margin{ DEF_TEXT_MARGIN };	// 文字列の左右と上下の余白
 
 		// 方眼
-		float m_grid_gray = DEF_GRID_GRAY;	// 方眼の濃さ
+		D2D1_COLOR_F m_grid_color{ DEF_GRID_COLOR };	// 方眼の色
 		float m_grid_base = DEF_GRID_LEN - 1.0f;	// 方眼の基準の大きさ (を -1 した値)
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
 		GRID_EMPH m_grid_emph{ GRID_EMPH_0 };	// 方眼の強調
@@ -707,9 +707,7 @@ namespace winrt::GraphPaper::implementation
 		// 方眼の基準の大きさを得る.
 		bool get_grid_base(float& value) const noexcept;
 		// 方眼の色を得る.
-		//void get_grid_color(D2D1_COLOR_F& value) const noexcept;
-		// 方眼の大きさを得る.
-		bool get_grid_gray(float& value) const noexcept;
+		bool get_grid_color(D2D1_COLOR_F& value) const noexcept;
 		// 方眼の強調を得る.
 		bool get_grid_emph(GRID_EMPH& value) const noexcept;
 		// 方眼の表示の状態を得る.
@@ -772,8 +770,8 @@ namespace winrt::GraphPaper::implementation
 		bool set_font_weight(const DWRITE_FONT_WEIGHT value);
 		// 値を方眼の基準の大きさに格納する.
 		bool set_grid_base(const float value) noexcept;
-		// 値を方眼の濃淡に格納する.
-		bool set_grid_gray(const float value) noexcept;
+		// 値を方眼の色に格納する.
+		bool set_grid_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を方眼の強調に格納する.
 		bool set_grid_emph(const GRID_EMPH& value) noexcept;
 		// 値を方眼の表示に格納する.

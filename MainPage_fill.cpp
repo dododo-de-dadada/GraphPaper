@@ -91,17 +91,17 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				conv_col_to_str(m_misc_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				conv_col_to_str(m_misc_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				conv_col_to_str(m_misc_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
@@ -128,31 +128,29 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
-	void MainPage::fill_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::fill_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		Shape* const s = m_sample_shape;
-		const float value = static_cast<float>(args.NewValue());
-		fill_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::FILL_COLOR) {
-			D2D1_COLOR_F color;
-			s->get_fill_color(color);
+			const float value = static_cast<float>(args.NewValue());
+			fill_slider_set_header<U, S>(value);
+			D2D1_COLOR_F f_color;
+			m_sample_shape->get_fill_color(f_color);
 			if constexpr (S == 0) {
-				color.r = static_cast<FLOAT>(value / COLOR_MAX);
+				f_color.r = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 1) {
-				color.g = static_cast<FLOAT>(value / COLOR_MAX);
+				f_color.g = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 2) {
-				color.b = static_cast<FLOAT>(value / COLOR_MAX);
+				f_color.b = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (U != UNDO_OP::SHEET_COLOR && S == 3) {
-				color.a = static_cast<FLOAT>(value / COLOR_MAX);
+				f_color.a = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			s->set_fill_color(color);
-		}
-		if (scp_sample_panel().IsLoaded()) {
-			sample_draw();
+			m_sample_shape->set_fill_color(f_color);
+			if (scp_sample_panel().IsLoaded()) {
+				sample_draw();
+			}
 		}
 	}
 

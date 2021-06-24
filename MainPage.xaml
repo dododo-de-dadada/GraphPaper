@@ -275,7 +275,7 @@
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem x:Uid="mfi_grid_len" Click="grid_len_click_async" Text="Length..." />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Uid="mfi_grid_gray" Click="grid_gray_click_async" Text="Grid Gray Scale..." />
+                <MenuFlyoutItem x:Uid="mfi_grid_color" Click="grid_color_click_async" Text="Grid Color..." />
 				<MenuFlyoutSubItem x:Uid="mfsi_grid_emph" Text="Grid Emphasis">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_1_2" x:Uid="rmfi_grid_emph_1" Click="grid_emph_click" IsChecked="True" Text="No emphasis" GroupName="gn_grid_emph_2" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_2_2" x:Uid="rmfi_grid_emph_2" Click="grid_emph_click" Text="Emphasize the 2nd" GroupName="gn_grid_emph_2" />
@@ -672,7 +672,7 @@
                     <MenuFlyoutSeparator />
                     <MenuFlyoutItem x:Uid="mfi_grid_len" Click="grid_len_click_async" Text="Length..." />
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Uid="mfi_grid_gray" Click="grid_gray_click_async" Text="Grid Gray Scale..." />
+                <MenuFlyoutItem x:Uid="mfi_grid_color" Click="grid_color_click_async" Text="Grid Color..." />
 				<MenuFlyoutSubItem x:Uid="mfsi_grid_emph" Text="Grid Emphasis">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_1" x:Uid="rmfi_grid_emph_1" Click="grid_emph_click" IsChecked="True" Text="Pattern 1" GroupName="gn_grid_emph" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_2" x:Uid="rmfi_grid_emph_2" Click="grid_emph_click" Text="Pattern 2" GroupName="gn_grid_emph" />

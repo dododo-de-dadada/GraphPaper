@@ -100,8 +100,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::GRID_BASE:
 			u = new UndoAttr<UNDO_OP::GRID_BASE>(dt_reader);
 			break;
-		case UNDO_OP::GRID_GRAY:
-			u = new UndoAttr<UNDO_OP::GRID_GRAY>(dt_reader);
+		case UNDO_OP::GRID_COLOR:
+			u = new UndoAttr<UNDO_OP::GRID_COLOR>(dt_reader);
 			break;
 		case UNDO_OP::GRID_EMPH:
 			u = new UndoAttr<UNDO_OP::GRID_EMPH>(dt_reader);
@@ -610,7 +610,7 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::undo_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_BASE>(Shape* const s, float const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_EMPH>(Shape* const s, GRID_EMPH const& value);
-	template void MainPage::undo_push_set<UNDO_OP::GRID_GRAY>(Shape* const s, float const& value);
+	template void MainPage::undo_push_set<UNDO_OP::GRID_COLOR>(Shape* const s, D2D1_COLOR_F const& value);
 	template void MainPage::undo_push_set<UNDO_OP::GRID_SHOW>(Shape* const s, GRID_SHOW const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::JOIN_LIMIT>(float const& value);
 	template bool MainPage::undo_push_set<UNDO_OP::JOIN_STYLE>(D2D1_LINE_JOIN const& value);

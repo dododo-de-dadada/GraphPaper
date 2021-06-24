@@ -413,8 +413,8 @@
     <value>大きさ...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_grid_gray.Text" xml:space="preserve">
-    <value>方眼の濃さ...</value>
+  <data name="mfi_grid_color.Text" xml:space="preserve">
+    <value>方眼の色...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_group.Text" xml:space="preserve">
@@ -693,15 +693,15 @@
     <value>返しの幅</value>
     <comment>String</comment>
   </data>
-  <data name="str_col_b" xml:space="preserve">
+  <data name="str_color_b" xml:space="preserve">
     <value>B</value>
     <comment>String</comment>
   </data>
-  <data name="str_col_g" xml:space="preserve">
+  <data name="str_color_g" xml:space="preserve">
     <value>G</value>
     <comment>String</comment>
   </data>
-  <data name="str_col_r" xml:space="preserve">
+  <data name="str_color_r" xml:space="preserve">
     <value>R</value>
     <comment>String</comment>
   </data>

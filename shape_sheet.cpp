@@ -15,6 +15,24 @@ namespace winrt::GraphPaper::implementation
 	// dst	”½‘ÎF
 	static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept
 	{
+		dst.r = 1.0 - src.r;
+		dst.g = 1.0 - src.g;
+		dst.b = 1.0 - src.b;
+		dst.a = opa;
+		const D3DCOLORVALUE cmp{
+			dst.r * opa + src.r * (1.0 - opa),
+			dst.g * opa + src.g * (1.0 - opa),
+			dst.b * opa + src.b * (1.0 - opa),
+			1.0f
+		};
+		const auto gray_src = src.r * 0.3f + src.g * 0.59f + src.b * 0.11f;
+		const auto gray_dst = cmp.r * 0.3f + cmp.g * 0.59f + cmp.b * 0.11f;
+		if (abs(gray_src - gray_dst) < 0.5f) {
+			dst.r = dst.g = dst.b = gray_src < 0.5f ? 1.0 : 0.0f;
+			dst.a = opa;
+		}
+		return;
+
 		dst.r = (src.r <= 0.5f ? 1.0f : 0.0f);
 		dst.g = (src.g <= 0.5f ? 1.0f : 0.0f);
 		dst.b = (src.b <= 0.5f ? 1.0f : 0.0f);
@@ -218,13 +236,7 @@ namespace winrt::GraphPaper::implementation
 		const auto min_val = min(m_sheet_color.r, min(m_sheet_color.g, m_sheet_color.b));
 		const auto sum_val = max_val + min_val;
 
-		D2D1_COLOR_F grid_color;
-		get_opposite_color(m_sheet_color, m_grid_gray, grid_color);
-		//grid_color.r = 1.0f - m_sheet_color.r;
-		//grid_color.g = 1.0f - m_sheet_color.g;
-		//grid_color.b = 1.0f - m_sheet_color.b;
-		//grid_color.a = m_grid_gray;
-		brush->SetColor(grid_color);
+		brush->SetColor(m_grid_color);
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
 		v_end.y = m_sheet_size.height;
@@ -342,21 +354,10 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// •ûŠá‚Ì”Z’W‚ğ“¾‚é.
-	/*
-	void ShapeSheet::get_grid_color(D2D1_COLOR_F& value) const noexcept
+	// •ûŠá‚ÌF‚ğ“¾‚é.
+	bool ShapeSheet::get_grid_color(D2D1_COLOR_F& value) const noexcept
 	{
-		value.r = 1.0f - m_grid_gray;
-		value.g = value.r;
-		value.b = value.r;
-		value.a = 0.875F;
-	}
-	*/
-
-	// •ûŠá‚Ì”Z’W‚ğ“¾‚é.
-	bool ShapeSheet::get_grid_gray(float& value) const noexcept
-	{
-		value = m_grid_gray;
+		value = m_grid_color;
 		return true;
 	}
 
@@ -492,7 +493,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F dummy;
 		dt_read(dummy, dt_reader);
 		m_grid_base = dt_reader.ReadSingle();
-		m_grid_gray = dt_reader.ReadSingle();
+		dt_read(m_grid_color, dt_reader);
 		dt_read(m_grid_emph, dt_reader);
 		m_grid_show = static_cast<GRID_SHOW>(dt_reader.ReadUInt32());
 		m_grid_snap = dt_reader.ReadBoolean();
@@ -636,10 +637,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ•ûŠá‚Ì”Z’W‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_grid_gray(const float value) noexcept
+	bool ShapeSheet::set_grid_color(const D2D1_COLOR_F& value) noexcept
 	{
-		if (m_grid_gray != value) {
-			m_grid_gray = value;
+		if (!equal(m_grid_color, value)) {
+			m_grid_color = value;
 			return true;
 		}
 		return false;
@@ -840,7 +841,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_font_style(m_font_style);
 		s->get_font_weight(m_font_weight);
 		s->get_grid_base(m_grid_base);
-		s->get_grid_gray(m_grid_gray);
+		s->get_grid_color(m_grid_color);
 		s->get_grid_emph(m_grid_emph);
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
@@ -865,7 +866,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F dummy;
 		dt_write(dummy, dt_writer);
 		dt_writer.WriteSingle(m_grid_base);
-		dt_writer.WriteSingle(m_grid_gray);
+		dt_write(m_grid_color, dt_writer);
 		dt_write(m_grid_emph, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_grid_show));
 		dt_writer.WriteBoolean(m_grid_snap);

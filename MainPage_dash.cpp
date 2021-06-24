@@ -18,35 +18,38 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-
 		DASH_PATT d_patt;
 		m_sheet_main.get_dash_patt(d_patt);
-		sample_slider_0().Maximum(127.5);
-		sample_slider_0().TickFrequency(0.5);
+
+		sample_slider_0().Maximum(MAX_VALUE);
+		sample_slider_0().TickFrequency(TICK_FREQ);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(d_patt.m_[0]);
 		dash_slider_set_header<UNDO_OP::DASH_PATT, 0>(d_patt.m_[0]);
-		sample_slider_1().Maximum(127.5);
-		sample_slider_1().TickFrequency(0.5);
+		sample_slider_1().Maximum(MAX_VALUE);
+		sample_slider_1().TickFrequency(TICK_FREQ);
 		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_1().Value(d_patt.m_[1]);
 		dash_slider_set_header<UNDO_OP::DASH_PATT, 1>(d_patt.m_[1]);
-		sample_slider_2().Maximum(127.5);
-		sample_slider_2().TickFrequency(0.5);
+		sample_slider_2().Maximum(MAX_VALUE);
+		sample_slider_2().TickFrequency(TICK_FREQ);
 		sample_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_2().Value(d_patt.m_[2]);
 		dash_slider_set_header<UNDO_OP::DASH_PATT, 2>(d_patt.m_[2]);
-		sample_slider_3().Maximum(127.5);
-		sample_slider_3().TickFrequency(0.5);
+		sample_slider_3().Maximum(MAX_VALUE);
+		sample_slider_3().TickFrequency(TICK_FREQ);
 		sample_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_3().Value(d_patt.m_[3]);
 		dash_slider_set_header<UNDO_OP::DASH_PATT, 3>(d_patt.m_[3]);
 
 		float s_width;
 		m_sheet_main.get_stroke_width(s_width);
-		sample_slider_4().Maximum(127.5);
-		sample_slider_4().TickFrequency(0.5);
+
+		sample_slider_4().Maximum(MAX_VALUE);
+		sample_slider_4().TickFrequency(TICK_FREQ);
 		sample_slider_4().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_4().Value(s_width);
 		dash_slider_set_header<UNDO_OP::STROKE_WIDTH, 4>(s_width);
@@ -150,36 +153,29 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S> void MainPage::dash_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::DASH_PATT) {
 			constexpr wchar_t* R[]{ L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap" };
 			wchar_t buf[32];
-			float g_base;
-			m_sheet_main.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-			text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, m_sheet_main.m_grid_base + 1.0f, buf);
+			const auto text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
+			if constexpr (S == 0) {
+				sample_slider_0().Header(box_value(text));
+			}
+			if constexpr (S == 1) {
+				sample_slider_1().Header(box_value(text));
+			}
+			if constexpr (S == 2) {
+				sample_slider_2().Header(box_value(text));
+			}
+			if constexpr (S == 3) {
+				sample_slider_3().Header(box_value(text));
+			}
 		}
-		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
+		if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
 			wchar_t buf[32];
-			float g_base;
-			m_sheet_main.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
-		}
-		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(text));
-		}
-		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(text));
-		}
-		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(text));
-		}
-		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(text));
-		}
-		if constexpr (S == 4) {
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, m_sheet_main.m_grid_base + 1.0f, buf);
+			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 			sample_slider_4().Header(box_value(text));
 		}
 	}
@@ -191,28 +187,32 @@ namespace winrt::GraphPaper::implementation
 	// –ß‚è’l	‚È‚µ
 	template <UNDO_OP U, int S> void MainPage::dash_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		Shape* s = m_sample_shape;
-		const float value = static_cast<float>(args.NewValue());
-		dash_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::DASH_PATT) {
+			const float value = static_cast<float>(args.NewValue());
 			DASH_PATT patt;
-			s->get_dash_patt(patt);
+			m_sample_shape->get_dash_patt(patt);
 			if constexpr (S == 0) {
-				patt.m_[0] = static_cast<FLOAT>(value);// * SLIDER_STEP);
+				dash_slider_set_header<U, S>(value);
+				patt.m_[0] = static_cast<FLOAT>(value);
 			}
-			if constexpr (S == 1) {
-				patt.m_[1] = static_cast<FLOAT>(value);// * SLIDER_STEP);
+			else if constexpr (S == 1) {
+				dash_slider_set_header<U, S>(value);
+				patt.m_[1] = static_cast<FLOAT>(value);
 			}
-			if constexpr (S == 2) {
-				patt.m_[2] = patt.m_[4] = static_cast<FLOAT>(value);// * SLIDER_STEP);
+			else if constexpr (S == 2) {
+				dash_slider_set_header<U, S>(value);
+				patt.m_[2] = patt.m_[4] = static_cast<FLOAT>(value);
 			}
-			if constexpr (S == 3) {
-				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(value);// * SLIDER_STEP);
+			else if constexpr (S == 3) {
+				dash_slider_set_header<U, S>(value);
+				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(value);
 			}
-			s->set_dash_patt(patt);
+			m_sample_shape->set_dash_patt(patt);
 		}
-		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
-			s->set_stroke_width(value);// * SLIDER_STEP);
+		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
+			const float value = static_cast<float>(args.NewValue());
+			dash_slider_set_header<U, S>(value);
+			m_sample_shape->set_stroke_width(value);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

@@ -221,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::FONT_COLOR) {
-			constexpr wchar_t* HEADER[]{ L"str_col_r", L"str_col_g",L"str_col_b", L"str_opacity" };
+			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
 			//if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
@@ -232,13 +232,13 @@ namespace winrt::GraphPaper::implementation
 			//	wchar_t buf[32];
 			//	// 色成分の値を文字列に変換する.
 			//	conv_col_to_str(m_misc_color_code, value, buf);
-			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
+			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " + buf;
 			//}
 			//if constexpr (S == 2) {
 			//	wchar_t buf[32];
 			//	// 色成分の値を文字列に変換する.
 			//	conv_col_to_str(m_misc_color_code, value, buf);
-			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
+			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " + buf;
 			//}
 			//if constexpr (S == 3) {
 			//	wchar_t buf[32];
@@ -268,28 +268,34 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	なし
 	template <UNDO_OP U, int S> void MainPage::font_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		Shape* const s = m_sample_shape;
-		const auto value = static_cast<float>(args.NewValue());
-		font_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
-			s->set_font_size(value);
-		}
-		if constexpr (U == UNDO_OP::FONT_COLOR) {
-			D2D1_COLOR_F color;
-			s->get_font_color(color);
 			if constexpr (S == 0) {
-				color.r = static_cast<FLOAT>(value / COLOR_MAX);
+				const auto value = static_cast<float>(args.NewValue());
+				font_slider_set_header<U, S>(value);
+				m_sample_shape->set_font_size(value);
 			}
-			if constexpr (S == 1) {
-				color.g = static_cast<FLOAT>(value / COLOR_MAX);
+		}
+		else if constexpr (U == UNDO_OP::FONT_COLOR) {
+			const auto value = static_cast<float>(args.NewValue());
+			D2D1_COLOR_F f_color;
+			m_sample_shape->get_font_color(f_color);
+			if constexpr (S == 0) {
+				font_slider_set_header<U, S>(value);
+				f_color.r = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			if constexpr (S == 2) {
-				color.b = static_cast<FLOAT>(value / COLOR_MAX);
+			else if constexpr (S == 1) {
+				font_slider_set_header<U, S>(value);
+				f_color.g = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			if constexpr (S == 3) {
-				color.a = static_cast<FLOAT>(value / COLOR_MAX);
+			else if constexpr (S == 2) {
+				font_slider_set_header<U, S>(value);
+				f_color.b = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			s->set_font_color(color);
+			else if constexpr (S == 3) {
+				font_slider_set_header<U, S>(value);
+				f_color.a = static_cast<FLOAT>(value / COLOR_MAX);
+			}
+			m_sample_shape->set_font_color(f_color);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -303,11 +309,14 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float f_size;
 		m_sample_sheet.get_font_size(f_size);
-		sample_slider_0().Maximum(127.5);
-		sample_slider_0().TickFrequency(0.5);
+
+		sample_slider_0().Maximum(MAX_VALUE);
+		sample_slider_0().TickFrequency(TICK_FREQ);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(f_size);
 		font_slider_set_header<UNDO_OP::FONT_SIZE, 0>(f_size);

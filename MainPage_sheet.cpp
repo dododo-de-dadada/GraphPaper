@@ -344,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.set_fill_color(Shape::m_default_background);
 			m_sheet_main.set_font_color(Shape::m_default_foreground);
 			m_sheet_main.set_grid_base(DEF_GRID_LEN - 1.0);
-			m_sheet_main.set_grid_gray(DEF_GRID_GRAY);
+			m_sheet_main.set_grid_color(DEF_GRID_COLOR);
 			m_sheet_main.set_grid_emph(GRID_EMPH_0);
 			m_sheet_main.set_grid_show(GRID_SHOW::BACK);
 			m_sheet_main.set_grid_snap(true);
@@ -413,81 +413,6 @@ namespace winrt::GraphPaper::implementation
 		const auto h = scp_sheet_panel().ActualHeight();
 		scroll_set(w, h);
 		m_sheet_dx.SetLogicalSize2({ static_cast<float>(w), static_cast<float>(h) });
-	}
-
-	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::sheet_slider_set_header(const float value)
-	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
-		winrt::hstring text;
-		if constexpr (U == UNDO_OP::SHEET_COLOR) {
-			if constexpr (S == 0) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_misc_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_r") + L": " + buf;
-			}
-			if constexpr (S == 1) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_misc_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_g") + L": " + buf;
-			}
-			if constexpr (S == 2) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_misc_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_col_b") + L": " + buf;
-			}
-		}
-		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(text));
-		}
-		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(text));
-		}
-		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(text));
-		}
-		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(text));
-		}
-	}
-
-	// スライダーの値が変更された.
-	// U	操作の種類
-	// S	スライダーの番号
-	// args	ValueChanged で渡された引数
-	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::sheet_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
-	{
-		Shape* s = &m_sample_sheet;
-		const auto value = static_cast<float>(args.NewValue());
-		sheet_slider_set_header<U, S>(value);
-		if constexpr (U == UNDO_OP::GRID_BASE) {
-			s->set_grid_base(value);
-		}
-		if constexpr (U == UNDO_OP::GRID_GRAY) {
-			s->set_grid_gray(value / COLOR_MAX);
-		}
-		if constexpr (U == UNDO_OP::SHEET_COLOR) {
-			D2D1_COLOR_F color;
-			s->get_sheet_color(color);
-			if constexpr (S == 0) {
-				color.r = static_cast<FLOAT>(value / COLOR_MAX);
-			}
-			if constexpr (S == 1) {
-				color.g = static_cast<FLOAT>(value / COLOR_MAX);
-			}
-			if constexpr (S == 2) {
-				color.b = static_cast<FLOAT>(value / COLOR_MAX);
-			}
-			s->set_sheet_color(color);
-		}
-		if (scp_sample_panel().IsLoaded()) {
-			sample_draw();
-		}
 	}
 
 	// 用紙メニューの「用紙の大きさ」が選択された
@@ -615,6 +540,74 @@ namespace winrt::GraphPaper::implementation
 			value = conv_len_to_val(m_misc_len_unit, value, dpi, g_base + 1.0);
 		}
 		cd_sheet_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < sheet_size_max());
+	}
+
+	// 値をスライダーのヘッダーに格納する.
+	template <UNDO_OP U, int S> void MainPage::sheet_slider_set_header(const float value)
+	{
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
+		winrt::hstring text;
+		if constexpr (U == UNDO_OP::SHEET_COLOR) {
+			if constexpr (S == 0) {
+				wchar_t buf[32];
+				// 色成分の値を文字列に変換する.
+				conv_col_to_str(m_misc_color_code, value, buf);
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_r") + L": " + buf;
+			}
+			if constexpr (S == 1) {
+				wchar_t buf[32];
+				// 色成分の値を文字列に変換する.
+				conv_col_to_str(m_misc_color_code, value, buf);
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " + buf;
+			}
+			if constexpr (S == 2) {
+				wchar_t buf[32];
+				// 色成分の値を文字列に変換する.
+				conv_col_to_str(m_misc_color_code, value, buf);
+				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " + buf;
+			}
+		}
+		if constexpr (S == 0) {
+			sample_slider_0().Header(box_value(text));
+		}
+		if constexpr (S == 1) {
+			sample_slider_1().Header(box_value(text));
+		}
+		if constexpr (S == 2) {
+			sample_slider_2().Header(box_value(text));
+		}
+		if constexpr (S == 3) {
+			sample_slider_3().Header(box_value(text));
+		}
+	}
+
+	// スライダーの値が変更された.
+	// U	操作の種類
+	// S	スライダーの番号
+	// args	ValueChanged で渡された引数
+	// 戻り値	なし
+	template <UNDO_OP U, int S> void MainPage::sheet_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	{
+		if constexpr (U == UNDO_OP::SHEET_COLOR) {
+			const auto value = static_cast<float>(args.NewValue());
+			sheet_slider_set_header<U, S>(value);
+			D2D1_COLOR_F s_color;
+			m_sample_sheet.get_sheet_color(s_color);
+			if constexpr (S == 0) {
+				s_color.r = static_cast<FLOAT>(value / COLOR_MAX);
+			}
+			if constexpr (S == 1) {
+				s_color.g = static_cast<FLOAT>(value / COLOR_MAX);
+			}
+			if constexpr (S == 2) {
+				s_color.b = static_cast<FLOAT>(value / COLOR_MAX);
+			}
+			m_sample_sheet.set_sheet_color(s_color);
+		}
+		if (scp_sample_panel().IsLoaded()) {
+			sample_draw();
+		}
 	}
 
 	// 図形が含まれるよう用紙の左上位置と右下位置を更新する.

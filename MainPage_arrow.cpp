@@ -16,7 +16,6 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U, int S> void MainPage::arrow_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			constexpr wchar_t* HEADER[] = {
@@ -24,35 +23,21 @@ namespace winrt::GraphPaper::implementation
 				L"str_arrow_length",
 				L"str_arrow_offset"
 			};
-			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": ";
-			//if constexpr (S == 0) {
-			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_width") + L": ";
-			//}
-			//if constexpr (S == 1) {
-			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_length") + L": ";
-			//}
-			//if constexpr (S == 2) {
-			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_arrow_offset") + L": ";
-			//}
-		}
-		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			wchar_t buf[32];
-			float g_base;
-			m_sheet_main.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
-			text = text + buf;
-		}
-		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(text));
-		}
-		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(text));
-		}
-		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(text));
-		}
-		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(text));
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sheet_main.m_grid_base + 1.0f, buf);
+			const auto text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
+			if constexpr (S == 0) {
+				sample_slider_0().Header(box_value(text));
+			}
+			if constexpr (S == 1) {
+				sample_slider_1().Header(box_value(text));
+			}
+			if constexpr (S == 2) {
+				sample_slider_2().Header(box_value(text));
+			}
+			if constexpr (S == 3) {
+				sample_slider_3().Header(box_value(text));
+			}
 		}
 	}
 
@@ -63,19 +48,21 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	なし
 	template <UNDO_OP U, int S> void MainPage::arrow_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		const auto value = static_cast<float>(args.NewValue());
 		// 値をスライダーのヘッダーに格納する.
-		arrow_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
+			const auto value = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
 			m_sample_shape->get_arrow_size(a_size);
 			if constexpr (S == 0) {
+				arrow_slider_set_header<U, S>(value);
 				a_size.m_width = static_cast<FLOAT>(value);
-				}
-			if constexpr (S == 1) {
+			}
+			else if constexpr (S == 1) {
+				arrow_slider_set_header<U, S>(value);
 				a_size.m_length = static_cast<FLOAT>(value);
 			}
-			if constexpr (S == 2) {
+			else if constexpr (S == 2) {
+				arrow_slider_set_header<U, S>(value);
 				a_size.m_offset = static_cast<FLOAT>(value);
 			}
 			m_sample_shape->set_arrow_size(a_size);
@@ -92,22 +79,25 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
 
+		m_sample_sheet.set_attr_to(&m_sheet_main);
 		ARROW_SIZE a_size;
 		m_sample_sheet.get_arrow_size(a_size);
-		sample_slider_0().Maximum(127.5);
-		sample_slider_0().TickFrequency(0.5);
+
+		sample_slider_0().Maximum(MAX_VALUE);
+		sample_slider_0().TickFrequency(TICK_FREQ);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(a_size.m_width);
 		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 0>(a_size.m_width);
-		sample_slider_1().Maximum(127.5);
-		sample_slider_1().TickFrequency(0.5);
+		sample_slider_1().Maximum(MAX_VALUE);
+		sample_slider_1().TickFrequency(TICK_FREQ);
 		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_1().Value(a_size.m_length);
 		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 1>(a_size.m_length);
-		sample_slider_2().Maximum(127.5);
-		sample_slider_2().TickFrequency(0.5);
+		sample_slider_2().Maximum(MAX_VALUE);
+		sample_slider_2().TickFrequency(TICK_FREQ);
 		sample_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_2().Value(a_size.m_offset);
 		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 2>(a_size.m_offset);

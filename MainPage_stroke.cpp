@@ -100,7 +100,7 @@ namespace winrt::GraphPaper::implementation
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
-			constexpr wchar_t* R[]{ L"str_col_r", L"str_col_g", L"str_col_b", L"str_opacity" };
+			constexpr wchar_t* R[]{ L"str_color_r", L"str_color_g", L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_misc_color_code, value, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
@@ -129,28 +129,34 @@ namespace winrt::GraphPaper::implementation
 	// –ß‚è’l	‚È‚µ
 	template <UNDO_OP U, int S> void MainPage::stroke_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		Shape* s = m_sample_shape;
-		const float value = static_cast<float>(args.NewValue());
-		stroke_slider_set_header<U, S>(value);
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
-			s->set_stroke_width(value);
+			const float value = static_cast<float>(args.NewValue());
+			if constexpr (S == 0) {
+				stroke_slider_set_header<U, S>(value);
+				m_sample_shape->set_stroke_width(value);
+			}
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
+			const float value = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F color;
-			s->get_stroke_color(color);
+			m_sample_shape->get_stroke_color(color);
 			if constexpr (S == 0) {
+				stroke_slider_set_header<U, S>(value);
 				color.r = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 1) {
+				stroke_slider_set_header<U, S>(value);
 				color.g = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 2) {
+				stroke_slider_set_header<U, S>(value);
 				color.b = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			if constexpr (S == 3) {
+				stroke_slider_set_header<U, S>(value);
 				color.a = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			s->set_stroke_color(color);
+			m_sample_shape->set_stroke_color(color);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -164,11 +170,14 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float s_width;
 		m_sample_sheet.get_stroke_width(s_width);
-		sample_slider_0().Maximum(127.5);
-		sample_slider_0().TickFrequency(0.5);
+
+		sample_slider_0().Maximum(MAX_VALUE);
+		sample_slider_0().TickFrequency(TICK_FREQ);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(s_width);
 		stroke_slider_set_header<UNDO_OP::STROKE_WIDTH, 0>(s_width);

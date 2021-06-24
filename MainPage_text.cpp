@@ -127,16 +127,19 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		float value;
 		m_sample_sheet.get_text_line_sp(value);
 
-		sample_slider_0().Maximum(127.5);
-		sample_slider_0().TickFrequency(0.5);
+		sample_slider_0().Maximum(MAX_VALUE);
+		sample_slider_0().TickFrequency(TICK_FREQ);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(value);
 		text_slider_set_header<UNDO_OP::TEXT_LINE_SP, 0>(value);
 		sample_slider_0().Visibility(UI_VISIBLE);
+
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_LINE_SP, 0> });
 		m_sample_type = SAMPLE_TYPE::FONT;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
@@ -186,18 +189,20 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
+		constexpr auto MAX_VALUE = 127.5;
+		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		D2D1_SIZE_F t_margin;
 		m_sample_sheet.get_text_margin(t_margin);
 
-		sample_slider_0().Maximum(127.5);
-		sample_slider_0().TickFrequency(0.5);
+		sample_slider_0().Maximum(MAX_VALUE);
+		sample_slider_0().TickFrequency(TICK_FREQ);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(t_margin.width);
 		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 0>(t_margin.width);
 
-		sample_slider_1().Maximum(127.5);
-		sample_slider_1().TickFrequency(0.5);
+		sample_slider_1().Maximum(MAX_VALUE);
+		sample_slider_1().TickFrequency(TICK_FREQ);
 		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_1().Value(t_margin.height);
 		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 1>(t_margin.height);
