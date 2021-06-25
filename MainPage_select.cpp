@@ -45,16 +45,15 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			flag = true;
-			undo_push_select(s);
+			ustack_push_select(s);
 		}
 		if (flag != true) {
 			return;
 		}
-		// 図形一覧の排他制御が true か判定する.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
+		// 一覧が表示されてるか判定する.
+		if (summary_is_visible()) {
 			summary_select_all();
 		}
-		// 編集メニュー項目の使用の可否を設定する.
 		xcvd_is_enabled();
 		sheet_draw();
 	}
@@ -70,9 +69,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (s->in_area(a_min, a_max)) {
 				if (s->is_selected() != true) {
-					undo_push_select(s);
-					// 図形一覧の排他制御が true か判定する.
-					if (m_summary_atomic.load(std::memory_order_acquire)) {
+					ustack_push_select(s);
+					// 一覧が表示されてるか判定する.
+					if (summary_is_visible()) {
 						summary_select(s);
 					}
 					flag = true;
@@ -80,9 +79,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				if (s->is_selected()) {
-					undo_push_select(s);
-					// 図形一覧の排他制御が true か判定する.
-					if (m_summary_atomic.load(std::memory_order_acquire)) {
+					ustack_push_select(s);
+					// 一覧が表示されてるか判定する.
+					if (summary_is_visible()) {
 						summary_unselect(s);
 					}
 					flag = true;
@@ -133,9 +132,9 @@ namespace winrt::GraphPaper::implementation
 			m_event_shape_pressed =
 			m_event_shape_prev = s;
 			unselect_all();
-			undo_push_select(s);
-			// 図形一覧の排他制御が true か判定する.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
+			ustack_push_select(s);
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
 				summary_select(s);
 			}
 		}
@@ -181,9 +180,9 @@ namespace winrt::GraphPaper::implementation
 			case END:
 					if (s->is_selected()) {
 						flag = true;
-						undo_push_select(s);
-						// 図形一覧の排他制御が true か判定する.
-						if (m_summary_atomic.load(std::memory_order_acquire)) {
+						ustack_push_select(s);
+						// 一覧が表示されてるか判定する.
+						if (summary_is_visible()) {
 							summary_unselect(s);
 						}
 					}
@@ -193,9 +192,9 @@ namespace winrt::GraphPaper::implementation
 			case NEXT:
 				if (s->is_selected() != true) {
 					flag = true;
-					undo_push_select(s);
-					// 図形一覧の排他制御が true か判定する.
-					if (m_summary_atomic.load(std::memory_order_acquire)) {
+					ustack_push_select(s);
+					// 一覧が表示されてるか判定する.
+					if (summary_is_visible()) {
 						summary_select(s);
 					}
 				}
@@ -216,11 +215,11 @@ namespace winrt::GraphPaper::implementation
 
 		// コントロールキーが押されているか判定する.
 		if (k_mod == VirtualKeyModifiers::Control) {
-			undo_push_select(s);
+			ustack_push_select(s);
 			xcvd_is_enabled();
 			sheet_draw();
-			// 図形一覧の排他制御が true か判定する.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
 				if (s->is_selected()) {
 					summary_select(s);
 				}
@@ -238,7 +237,6 @@ namespace winrt::GraphPaper::implementation
 				m_event_shape_prev = m_list_shapes.front();
 			}
 			if (select_range(s, m_event_shape_prev)) {
-				// 編集メニュー項目の使用の可否を設定する.
 				xcvd_is_enabled();
 				sheet_draw();
 			}
@@ -248,11 +246,11 @@ namespace winrt::GraphPaper::implementation
 			// 図形の選択フラグが立ってないか判定する.
 			if (!s->is_selected()) {
 				unselect_all();
-				undo_push_select(s);
+				ustack_push_select(s);
 				xcvd_is_enabled();
 				sheet_draw();
-				// 図形一覧の排他制御が true か判定する.
-				if (m_summary_atomic.load(std::memory_order_acquire)) {
+				// 一覧が表示されてるか判定する.
+				if (summary_is_visible()) {
 					summary_select(s);
 				}
 			}
@@ -277,9 +275,9 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			if (s->in_area(a_min, a_max)) {
-				undo_push_select(s);
-				// 図形一覧の排他制御が true か判定する.
-				if (m_summary_atomic.load(std::memory_order_acquire)) {
+				ustack_push_select(s);
+				// 一覧が表示されてるか判定する.
+				if (summary_is_visible()) {
 					if (s->is_selected() != true) {
 						summary_select(s);
 					}
@@ -308,7 +306,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 文字範囲のみ解除フラグがない, かつ図形が選択されているか判定する.
 			if (!t_range_only && s->is_selected()) {
-				undo_push_select(s);
+				ustack_push_select(s);
 				flag = true;
 			}
 			// 文字範囲が取得できない (文字列図形でない場合も含む) か判定する.
@@ -322,11 +320,11 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			// { 0, 0 } を図形に格納して, その操作をスタックに積む.
-			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
+			ustack_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
 			flag = true;
 		}
-		// 図形一覧の排他制御が true か判定する.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
+		// 一覧が表示されてるか判定する.
+		if (summary_is_visible()) {
 			summary_unselect_all();
 		}
 		return flag;

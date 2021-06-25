@@ -33,8 +33,8 @@ namespace winrt::GraphPaper::implementation
 		GRID_EMPH g_emph;
 		m_sheet_main.get_grid_emph(g_emph);
 		if (!equal(g_emph, value)) {
-			undo_push_set<UNDO_OP::GRID_EMPH>(&m_sheet_main, value);
-			undo_is_enable();
+			ustack_push_set<UNDO_OP::GRID_EMPH>(&m_sheet_main, value);
+			ustack_is_enable();
 			sheet_draw();
 		}
 	}
@@ -99,8 +99,8 @@ namespace winrt::GraphPaper::implementation
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			if (!equal(m_sheet_main.m_grid_color, m_sample_sheet.m_grid_color)) {
-				undo_push_set<UNDO_OP::GRID_COLOR>(&m_sheet_main, m_sample_sheet.m_grid_color);
-				undo_is_enable();
+				ustack_push_set<UNDO_OP::GRID_COLOR>(&m_sheet_main, m_sample_sheet.m_grid_color);
+				ustack_is_enable();
 				sheet_draw();
 			}
 		}
@@ -144,8 +144,8 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.get_grid_base(sheet_value);
 			m_sample_sheet.get_grid_base(sample_value);
 			if (!equal(sheet_value, sample_value)) {
-				undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, sample_value);
-				undo_is_enable();
+				ustack_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, sample_value);
+				ustack_is_enable();
 				xcvd_is_enabled();
 				sheet_draw();
 			}
@@ -162,8 +162,8 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_main.get_grid_base(g_base);
 		const float value = (g_base + 1.0f) * 0.5f - 1.0f;
 		if (value >= 1.0f) {
-			undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
-			undo_is_enable();
+			ustack_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
+			ustack_is_enable();
 			sheet_draw();
 		}
 	}
@@ -175,8 +175,8 @@ namespace winrt::GraphPaper::implementation
 		m_sheet_main.get_grid_base(g_base);
 		const float value = (g_base + 1.0f) * 2.0f - 1.0f;
 		if (value <= max(m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height)) {
-			undo_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
-			undo_is_enable();
+			ustack_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
+			ustack_is_enable();
 			sheet_draw();
 		}
 	}
@@ -293,8 +293,8 @@ namespace winrt::GraphPaper::implementation
 		GRID_SHOW g_show;
 		m_sheet_main.get_grid_show(g_show);
 		if (g_show != value) {
-			undo_push_set<UNDO_OP::GRID_SHOW>(&m_sheet_main, value);
-			undo_is_enable();
+			ustack_push_set<UNDO_OP::GRID_SHOW>(&m_sheet_main, value);
+			ustack_is_enable();
 			sheet_draw();
 		}
 	}

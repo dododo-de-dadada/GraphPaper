@@ -63,9 +63,9 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			m_sample_shape->get_stroke_color(sample_value);
-			if (undo_push_set<UNDO_OP::STROKE_COLOR>(sample_value)) {
-				undo_push_null();
-				undo_is_enable();
+			if (ustack_push_set<UNDO_OP::STROKE_COLOR>(sample_value)) {
+				ustack_push_null();
+				ustack_is_enable();
 				xcvd_is_enabled();
 				sheet_draw();
 			}
@@ -189,8 +189,8 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_shape->get_stroke_width(sample_value);
-			if (undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_value)) {
-				undo_push_null();
+			if (ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_value)) {
+				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
 			}

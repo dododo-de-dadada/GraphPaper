@@ -262,13 +262,13 @@ namespace winrt::GraphPaper::implementation
 		ck_edit_text_frame().IsChecked(m_edit_text_frame);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
-			undo_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
+			ustack_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
 			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
 			if (m_edit_text_frame) {
-				undo_push_anch(s, ANCH_TYPE::ANCH_SE);
+				ustack_push_anch(s, ANCH_TYPE::ANCH_SE);
 				s->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 			}
-			undo_push_null();
+			ustack_push_null();
 			xcvd_is_enabled();
 			sheet_draw();
 		}
@@ -397,12 +397,12 @@ namespace winrt::GraphPaper::implementation
 					w_pos += r_len;
 				}
 				if (flag) {
-					undo_push_set<UNDO_OP::TEXT_CONTENT>(t, w_text);
+					ustack_push_set<UNDO_OP::TEXT_CONTENT>(t, w_text);
 				}
 			}
 		}
-		undo_push_null();
-		undo_is_enable();
+		ustack_push_null();
+		ustack_is_enable();
 		sheet_draw();
 	}
 
@@ -433,10 +433,10 @@ namespace winrt::GraphPaper::implementation
 				// ˆê’v‚µ‚½ê‡
 				const auto r_len = wchar_len(m_find_repl);
 				const auto r_text = find_replace(t->m_text, w_pos, f_len, m_find_repl, r_len);
-				undo_push_set<UNDO_OP::TEXT_CONTENT>(t, r_text);
-				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
-				undo_push_null();
-				undo_is_enable();
+				ustack_push_set<UNDO_OP::TEXT_CONTENT>(t, r_text);
+				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
+				ustack_push_null();
+				ustack_is_enable();
 			}
 		}
 		// Ÿ‚ğŒŸõ‚·‚é.
@@ -446,9 +446,9 @@ namespace winrt::GraphPaper::implementation
 			// ŒŸõ‚Å‚«‚½‚È‚ç‚Î,
 			// •¶š”ÍˆÍ‚ª‘I‘ğ‚³‚ê‚½}Œ`‚ª‚ ‚è, ‚»‚ê‚ªŸ‚Ì}Œ`‚ÆˆÙ‚È‚é‚©”»’è‚·‚é.
 			if (t != nullptr && s != t) {
-				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
+			ustack_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			flag = true;
 		}
@@ -470,7 +470,8 @@ namespace winrt::GraphPaper::implementation
 			find_text_set();
 		}
 		else {
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
+			// ˆê——‚ª•\¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
+			if (summary_is_visible()) {
 				summary_close_click(nullptr, nullptr);
 			}
 			tx_find_text_what().Text({ m_find_text == nullptr ? L"" : m_find_text });
@@ -497,9 +498,9 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_TEXT_RANGE s_range;
 		if (find_text(m_list_shapes, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			if (t != nullptr && s != t) {
-				undo_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			undo_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
+			ustack_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			sheet_draw();
 		}

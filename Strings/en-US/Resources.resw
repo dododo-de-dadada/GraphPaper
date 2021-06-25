@@ -485,16 +485,8 @@
     <value>Line Space...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_sp_con.Text" xml:space="preserve">
-    <value>Condense</value>
-    <comment>MenuFlyoutItem</comment>
-  </data>
-  <data name="mfi_text_line_sp_exp.Text" xml:space="preserve">
-    <value>Expand</value>
-    <comment>MenuFlyoutItem</comment>
-  </data>
-  <data name="mfi_text_margin.Text" xml:space="preserve">
-    <value>Margins...</value>
+  <data name="mfi_text_padding.Text" xml:space="preserve">
+    <value>Padding...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_undo.Text" xml:space="preserve">
@@ -822,12 +814,16 @@
     <value>Miter Limit</value>
     <comment>String</comment>
   </data>
-  <data name="str_text_mar_horzorz" xml:space="preserve">
-    <value>Left and Right Margin</value>
+  <data name="str_text_padding" xml:space="preserve">
+    <value>Padding</value>
     <comment>String</comment>
   </data>
-  <data name="str_text_mar_vertert" xml:space="preserve">
-    <value>Top and Bottom Margin</value>
+  <data name="str_text_pad_horzorz" xml:space="preserve">
+    <value>Left and Right Padding</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_text_pad_vertert" xml:space="preserve">
+    <value>Top and Bottom Padding</value>
     <comment>String</comment>
   </data>
   <data name="str_err_font" xml:space="preserve">
@@ -998,21 +994,13 @@
     <value>Triangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_tool_poly_type.Text" xml:space="preserve">
-    <value>Type of Polygon</value>
+  <data name="mfsi_tool_poly_draw.Text" xml:space="preserve">
+    <value>Drawing Polygon</value>
     <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  <data name="tmfi_tool_poly_reguler.Text" xml:space="preserve">
-    <value>Draw with Reguler</value>
-    <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="tb_version.Text" xml:space="preserve">
     <value>Version 0.0.2</value>
     <comment>TextBlock</comment>
-  </data>
-  <data name="str_text" xml:space="preserve">
-    <value>Text</value>
-    <comment>String</comment>
   </data>
   <data name="str_line_join" xml:space="preserve">
     <value>Line Join</value>
@@ -1077,5 +1065,21 @@
   <data name="str_misc_pile_up" xml:space="preserve">
     <value>Thresholds</value>
     <comment>String</comment>
+  </data>
+  <data name="tmfi_tool_poly_clockwise.Text" xml:space="preserve">
+    <value>Clockwise</value>
+    <comment>ToggleMenuFlyoutItem</comment>
+  </data>
+  <data name="tmfi_tool_poly_end_close.Text" xml:space="preserve">
+    <value>End Close</value>
+    <comment>ToggleMenuFlyoutItem</comment>
+  </data>
+  <data name="tmfi_tool_poly_regular.Text" xml:space="preserve">
+    <value>Regular Polygon</value>
+    <comment>ToggleMenuFlyoutItem</comment>
+  </data>
+  <data name="tmfi_tool_poly_vertex_up.Text" xml:space="preserve">
+    <value>Vertex Up</value>
+    <comment>ToggleMenuFlyoutItem</comment>
   </data>
 </root>

@@ -28,9 +28,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		CAP_STYLE old_value;
 		m_sheet_main.get_cap_style(old_value);
-		if (undo_push_set<UNDO_OP::CAP_STYLE>(new_value)) {
-			undo_push_null();
-			undo_is_enable();
+		if (ustack_push_set<UNDO_OP::CAP_STYLE>(new_value)) {
+			ustack_push_null();
+			ustack_is_enable();
 			sheet_draw();
 		}
 	}
@@ -90,10 +90,10 @@ namespace winrt::GraphPaper::implementation
 			float sample_width;
 			m_sample_shape->get_join_limit(sample_limit);
 			m_sample_shape->get_stroke_width(sample_width);
-			if (undo_push_set<UNDO_OP::JOIN_LIMIT>(sample_limit) ||
-				undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
-				undo_push_null();
-				undo_is_enable();
+			if (ustack_push_set<UNDO_OP::JOIN_LIMIT>(sample_limit) ||
+				ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
+				ustack_push_null();
+				ustack_is_enable();
 				sheet_draw();
 			}
 		}
@@ -181,9 +181,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		D2D1_LINE_JOIN old_value;
 		m_sheet_main.get_join_style(old_value);
-		if (undo_push_set<UNDO_OP::JOIN_STYLE>(new_value)) {
-			undo_push_null();
-			undo_is_enable();
+		if (ustack_push_set<UNDO_OP::JOIN_STYLE>(new_value)) {
+			ustack_push_null();
+			ustack_is_enable();
 			sheet_draw();
 		}
 	}

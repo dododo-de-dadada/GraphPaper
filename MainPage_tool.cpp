@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 			else if (sender == rmfi_tool_poly_deca()) {
 				tool_poly_n_is_checked(m_tool_poly.m_vertex_cnt = 10);
 			}
-			else if (sender == tmfi_tool_poly_closed()) {
+			else if (sender == tmfi_tool_poly_end_close()) {
 				m_tool_poly.m_end_closed = !m_tool_poly.m_end_closed;
 			}
 			else if (sender == tmfi_tool_poly_regular()) {
@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 		tool_poly_n_is_checked(value.m_vertex_cnt);
 		tmfi_tool_poly_regular().IsChecked(value.m_regular);
 		tmfi_tool_poly_vertex_up().IsChecked(value.m_vertex_up);
-		tmfi_tool_poly_closed().IsChecked(value.m_end_closed);
+		tmfi_tool_poly_end_close().IsChecked(value.m_end_closed);
 		tmfi_tool_poly_clockwise().IsChecked(value.m_clockwise);
 	}
 

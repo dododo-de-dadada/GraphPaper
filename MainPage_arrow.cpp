@@ -114,8 +114,8 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			ARROW_SIZE sample_value;
 			m_sample_shape->get_arrow_size(sample_value);
-			if (undo_push_set<UNDO_OP::ARROW_SIZE>(sample_value)) {
-				undo_push_null();
+			if (ustack_push_set<UNDO_OP::ARROW_SIZE>(sample_value)) {
+				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
 			}
@@ -152,8 +152,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		mfi_arrow_size().IsEnabled(a_style != ARROW_STYLE::NONE);
 		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
-		if (undo_push_set<UNDO_OP::ARROW_STYLE>(a_style)) {
-			undo_push_null();
+		if (ustack_push_set<UNDO_OP::ARROW_STYLE>(a_style)) {
+			ustack_push_null();
 			xcvd_is_enabled();
 			sheet_draw();
 		}

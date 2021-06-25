@@ -514,7 +514,7 @@ namespace winrt::GraphPaper::implementation
 		// 行間を得る.
 		virtual bool get_text_line_sp(float& /*value*/) const noexcept { return false; }
 		// 文字列の周囲の余白を得る.
-		virtual bool get_text_margin(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
+		virtual bool get_text_padding(D2D1_SIZE_F& /*value*/) const noexcept { return false; }
 		// 文字範囲を得る
 		virtual bool get_text_range(DWRITE_TEXT_RANGE& /*value*/) const noexcept { return false; }
 		// 頂点を得る.
@@ -598,7 +598,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を行間に格納する.
 		virtual bool set_text_line_sp(const float /*value*/) { return false; }
 		// 値を文字列の余白に格納する.
-		virtual bool set_text_margin(const D2D1_SIZE_F /*value*/) { return false; }
+		virtual bool set_text_padding(const D2D1_SIZE_F /*value*/) { return false; }
 		// 値を文字範囲に格納する.
 		virtual bool set_text_range(const DWRITE_TEXT_RANGE /*value*/) { return false; }
 		// データライターに書き込む.
@@ -644,7 +644,7 @@ namespace winrt::GraphPaper::implementation
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
-		D2D1_SIZE_F m_text_margin{ DEF_TEXT_MARGIN };	// 文字列の左右と上下の余白
+		D2D1_SIZE_F m_text_padding{ DEF_TEXT_MARGIN };	// 文字列の左右と上下の余白
 
 		// 方眼
 		D2D1_COLOR_F m_grid_color{ ACCENT_COLOR };	// 方眼の色
@@ -735,7 +735,7 @@ namespace winrt::GraphPaper::implementation
 		// 行間を得る.
 		bool get_text_line_sp(float& value) const noexcept;
 		// 文字列の周囲の余白を得る.
-		bool get_text_margin(D2D1_SIZE_F& value) const noexcept;
+		bool get_text_padding(D2D1_SIZE_F& value) const noexcept;
 		// データリーダーから読み込む.
 		void read(DataReader const& dt_reader);
 		// 値を矢じるしの寸法に格納する.
@@ -799,7 +799,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を行間に格納する.
 		bool set_text_line_sp(const float value);
 		// 値を文字列の余白に格納する.
-		bool set_text_margin(const D2D1_SIZE_F value);
+		bool set_text_padding(const D2D1_SIZE_F value);
 		// データリーダーに書き込む.
 		void write(DataWriter const& dt_writer);
 	};
@@ -1250,7 +1250,7 @@ namespace winrt::GraphPaper::implementation
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落そろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字揃え
-		D2D1_SIZE_F m_text_margin{ DEF_TEXT_MARGIN };	// 文字列のまわりの上下と左右の余白
+		D2D1_SIZE_F m_text_padding{ DEF_TEXT_MARGIN };	// 文字列のまわりの上下と左右の余白
 
 		winrt::com_ptr<IDWriteTextLayout> m_dw_layout{};	// 文字列を表示するためのレイアウト
 		float m_dw_descent = 0.0f;	// ディセント
@@ -1300,7 +1300,7 @@ namespace winrt::GraphPaper::implementation
 		// 行間を得る.
 		bool get_text_line_sp(float& value) const noexcept;
 		// 文字列の余白を得る.
-		bool get_text_margin(D2D1_SIZE_F& value) const noexcept;
+		bool get_text_padding(D2D1_SIZE_F& value) const noexcept;
 		// 文字範囲を得る.
 		bool get_text_range(DWRITE_TEXT_RANGE& value) const noexcept;
 		// 位置を含むか判定する.
@@ -1336,7 +1336,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を行間に格納する.
 		bool set_text_line_sp(const float value);
 		// 値を文字列の余白に格納する.
-		bool set_text_margin(const D2D1_SIZE_F value);
+		bool set_text_padding(const D2D1_SIZE_F value);
 		// 値を文字範囲に格納する.
 		bool set_text_range(const DWRITE_TEXT_RANGE value);
 		// 図形を作成する.

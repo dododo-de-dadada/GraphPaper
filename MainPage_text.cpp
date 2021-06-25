@@ -9,7 +9,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr wchar_t DLG_TITLE[] = L"str_text";
 	constexpr float TEXT_LINE_SP_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
 
 	// 編集メニューの「枠の大きさを合わせる」が選択された.
@@ -28,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			auto u = new UndoAnchor(s, ANCH_TYPE::ANCH_SE);
 			if (static_cast<ShapeText*>(s)->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f)) {
-				m_stack_undo.push_back(u);
+				m_ustack_undo.push_back(u);
 				if (!flag) {
 					flag = true;
 				}
@@ -38,7 +37,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (flag) {
-			undo_push_null();
+			ustack_push_null();
 			sheet_panle_size();
 			sheet_draw();
 		}
@@ -60,8 +59,8 @@ namespace winrt::GraphPaper::implementation
 		else {
 			return;
 		}
-		if (undo_push_set<UNDO_OP::TEXT_ALIGN_P>(value)) {
-			undo_push_null();
+		if (ustack_push_set<UNDO_OP::TEXT_ALIGN_P>(value)) {
+			ustack_push_null();
 			xcvd_is_enabled();
 			sheet_draw();
 		}
@@ -98,8 +97,8 @@ namespace winrt::GraphPaper::implementation
 		else {
 			return;
 		}
-		if (undo_push_set<UNDO_OP::TEXT_ALIGN_T>(value)) {
-			undo_push_null();
+		if (ustack_push_set<UNDO_OP::TEXT_ALIGN_T>(value)) {
+			ustack_push_null();
 			xcvd_is_enabled();
 			sheet_draw();
 		}
@@ -142,13 +141,13 @@ namespace winrt::GraphPaper::implementation
 
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_LINE_SP, 0> });
 		m_sample_type = SAMPLE_TYPE::FONT;
-		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_line_sp")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_shape->get_text_line_sp(sample_value);
-			if (undo_push_set<UNDO_OP::TEXT_LINE_SP>(sample_value)) {
-				undo_push_null();
+			if (ustack_push_set<UNDO_OP::TEXT_LINE_SP>(sample_value)) {
+				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
 			}
@@ -175,15 +174,15 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == mfi_text_line_sp_exp() || sender == mfi_text_line_sp_exp_2()) {
 			value = value + m_sheet_main.m_font_size;
 		}
-		if (undo_push_set<UNDO_OP::TEXT_LINE_SP>(value)) {
-			undo_push_null();
+		if (ustack_push_set<UNDO_OP::TEXT_LINE_SP>(value)) {
+			ustack_push_null();
 			xcvd_is_enabled();
 			sheet_draw();
 		}
 	}
 	*/
 	// 書体メニューの「余白」が選択された.
-	IAsyncAction MainPage::text_margin_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::text_padding_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -192,33 +191,33 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		D2D1_SIZE_F t_margin;
-		m_sample_sheet.get_text_margin(t_margin);
+		D2D1_SIZE_F padding;
+		m_sample_sheet.get_text_padding(padding);
 
 		sample_slider_0().Maximum(MAX_VALUE);
 		sample_slider_0().TickFrequency(TICK_FREQ);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_0().Value(t_margin.width);
-		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 0>(t_margin.width);
+		sample_slider_0().Value(padding.width);
+		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 0>(padding.width);
 
 		sample_slider_1().Maximum(MAX_VALUE);
 		sample_slider_1().TickFrequency(TICK_FREQ);
 		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_1().Value(t_margin.height);
-		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 1>(t_margin.height);
+		sample_slider_1().Value(padding.height);
+		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 1>(padding.height);
 
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_MARGIN, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_MARGIN, 1> });
 		m_sample_type = SAMPLE_TYPE::FONT;
-		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_padding")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_SIZE_F sample_value;
-			m_sample_shape->get_text_margin(sample_value);
-			if (undo_push_set<UNDO_OP::TEXT_MARGIN>(sample_value)) {
-				undo_push_null();
+			m_sample_shape->get_text_padding(sample_value);
+			if (ustack_push_set<UNDO_OP::TEXT_MARGIN>(sample_value)) {
+				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
 			}
@@ -242,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 
 		winrt::hstring text;
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
-			constexpr wchar_t* HEADER[] = { L"str_text_mar_horzorz", L"str_text_mar_vertert" };
+			constexpr wchar_t* HEADER[] = { L"str_text_pad_horzorz", L"str_text_pad_vertert" };
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
@@ -288,15 +287,15 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			const float value = static_cast<float>(args.NewValue());
 			text_slider_set_header<U, S>(value);
-			D2D1_SIZE_F margin;
-			m_sample_shape->get_text_margin(margin);
+			D2D1_SIZE_F padding;
+			m_sample_shape->get_text_padding(padding);
 			if constexpr (S == 0) {
-				margin.width = static_cast<FLOAT>(value);
+				padding.width = static_cast<FLOAT>(value);
 			}
 			if constexpr (S == 1) {
-				margin.height = static_cast<FLOAT>(value);
+				padding.height = static_cast<FLOAT>(value);
 			}
-			m_sample_shape->set_text_margin(margin);
+			m_sample_shape->set_text_padding(padding);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

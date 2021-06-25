@@ -59,8 +59,8 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			m_sample_shape->get_fill_color(sample_value);
-			if (undo_push_set<UNDO_OP::FILL_COLOR>(sample_value)) {
-				undo_push_null();
+			if (ustack_push_set<UNDO_OP::FILL_COLOR>(sample_value)) {
+				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
 			}

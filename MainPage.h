@@ -38,7 +38,7 @@
 // MainPage_text.cpp	文字列の編集と検索/置換
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
 // MainPage_tool.cpp	作図ツール
-// MainPage_undo.cpp	元に戻すとやり直し
+// MainPage_ustack.cpp	元に戻すとやり直し操作
 // MainPage_xcvd.cpp	切り取りとコピー, 文字列の編集など
 //------------------------------
 #include <ppltasks.h>
@@ -273,11 +273,11 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_sheet_max{ 0.0F, 0.0F };		// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
 		// 元に戻す・やり直し操作
-		uint32_t m_stack_rcnt = 0;	// やり直し操作スタックに積まれた組数
-		UNDO_STACK m_stack_redo;		// やり直し操作スタック
-		uint32_t m_stack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
-		UNDO_STACK m_stack_undo;		// 元に戻す操作スタック
-		bool m_stack_updt = false;	// 操作スタックにひと組以上積まれた判定.
+		uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数
+		UNDO_STACK m_ustack_redo;		// やり直し操作スタック
+		uint32_t m_ustack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
+		UNDO_STACK m_ustack_undo;		// 元に戻す操作スタック
+		bool m_ustack_updt = false;	// スタックに操作の組が積まれているか判定
 
 		// スレッド
 		bool m_thread_activated = false;
@@ -308,7 +308,7 @@ namespace winrt::GraphPaper::implementation
 		// メインページの作成, アプリの終了
 		//-------------------------------
 
-		// 内容が変更されていたなら, 確認ダイアログを表示してその応答を得る.
+		// 確認ダイアログを表示してその応答を得る.
 		IAsyncOperation<bool> ask_for_conf_async(void);
 		// ファイルメニューの「終了」が選択された
 		IAsyncAction exit_click_async(IInspectable const&, RoutedEventArgs const&);
@@ -834,6 +834,10 @@ namespace winrt::GraphPaper::implementation
 		void summary_close_click(IInspectable const&, RoutedEventArgs const&);
 		// 一覧に図形を挿入する.
 		void summary_insert_at(Shape* const s, const uint32_t i);
+		// 一覧が表示されてるか判定する.
+		bool summary_is_visible(void) {
+			return m_summary_atomic.load(std::memory_order_acquire);
+		}
 		// 一覧の項目が選択された.
 		void summary_item_click(IInspectable const&, ItemClickEventArgs const&);
 		// 編集メニューの「リストの表示」が選択された.
@@ -874,10 +878,10 @@ namespace winrt::GraphPaper::implementation
 		void text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT value);
 		// 書体メニューの「枠の大きさを合わせる」が選択された.
 		void edit_text_frame_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「行間」>「行間...」が選択された.
+		// 書体メニューの「行間...」が選択された.
 		IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「余白」が選択された.
-		IAsyncAction text_margin_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 書体メニューの「余白...」が選択された.
+		IAsyncAction text_padding_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」が選択された.
 		void text_align_p_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」が選択された.
@@ -918,52 +922,52 @@ namespace winrt::GraphPaper::implementation
 		void kacc_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//-----------------------------
-		// MainPage_undo.cpp
-		// 元に戻すとやり直し
+		// MainPage_ustack.cpp
+		// 元に戻すとやり直し操作
 		//-----------------------------
 
-		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-		void undo_is_enable(void);
+		// 元に戻す/やり直しメニューの可否を設定する.
+		void ustack_is_enable(void);
 		// 編集メニューの「やり直し」が選択された.
-		void redo_click(IInspectable const&, RoutedEventArgs const&);
+		void ustack_redo_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「元に戻す」が選択された.
-		void undo_click(IInspectable const&, RoutedEventArgs const&);
+		void ustack_undo_click(IInspectable const&, RoutedEventArgs const&);
 		// 操作スタックを消去し, 含まれる操作を破棄する.
-		void undo_clear(void);
+		void ustack_clear(void);
 		// 操作を実行する.
-		void undo_exec(Undo* u);
+		void ustack_exec(Undo* u);
 		// 無効な操作の組をポップする.
-		bool undo_pop_if_invalid(void);
+		bool ustack_pop_if_invalid(void);
 		// 図形を追加して, その操作をスタックに積む.
-		void undo_push_append(Shape* const s);
+		void ustack_push_append(Shape* const s);
 		// 図形をグループ図形に追加して, その操作をスタックに積む.
-		void undo_push_append(ShapeGroup* const g, Shape* const s);
+		void ustack_push_append(ShapeGroup* const g, Shape* const s);
 		// 図形を入れ替えて, その操作をスタックに積む.
-		void undo_push_arrange(Shape* const s, Shape* const t);
+		void ustack_push_arrange(Shape* const s, Shape* const t);
 		// 図形の頂点や制御点の位置をスタックに保存する.
-		void undo_push_anch(Shape* const s, const uint32_t anch);
+		void ustack_push_anch(Shape* const s, const uint32_t anch);
 		// 図形を挿入して, その操作をスタックに積む.
-		void undo_push_insert(Shape* const s, Shape* const s_pos);
+		void ustack_push_insert(Shape* const s, Shape* const s_pos);
 		// 図形の位置をスタックに保存してから差分だけ移動する.
-		void undo_push_move(const D2D1_POINT_2F d_vec, const bool all = false);
+		void ustack_push_move(const D2D1_POINT_2F d_vec, const bool all = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
-		void undo_push_null(void);
+		void ustack_push_null(void);
 		// 図形をグループから削除して, その操作をスタックに積む.
-		void undo_push_remove(Shape* const g, Shape* const s);
+		void ustack_push_remove(Shape* const g, Shape* const s);
 		// 図形を削除して, その操作をスタックに積む.
-		void undo_push_remove(Shape* const s);
+		void ustack_push_remove(Shape* const s);
 		// 図形の選択を反転して, その操作をスタックに積む.
-		void undo_push_select(Shape* const s);
+		void ustack_push_select(Shape* const s);
 		// 値を図形へ格納して, その操作をスタックに積む.
-		template <UNDO_OP U, typename T> void undo_push_set(Shape* const s, T const& value);
+		template <UNDO_OP U, typename T> void ustack_push_set(Shape* const s, T const& value);
 		// 値を選択された図形に格納して, その操作をスタックに積む.
-		template <UNDO_OP U, typename T> bool undo_push_set(T const& value);
+		template <UNDO_OP U, typename T> bool ustack_push_set(T const& value);
 		// 図形の値をスタックに保存する.
-		template <UNDO_OP U> void undo_push_set(Shape* const s);
+		template <UNDO_OP U> void ustack_push_set(Shape* const s);
 		// データリーダーから操作スタックを読み込む.
-		void undo_read(DataReader const& dt_reader);
+		void ustack_read(DataReader const& dt_reader);
 		// データリーダーに操作スタックを書き込む.
-		void undo_write(DataWriter const& dt_writer);
+		void ustack_write(DataWriter const& dt_writer);
 
 		//-------------------------------
 		// MainPage_xcvd.cpp
@@ -983,7 +987,7 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「削除」が選択された.
 		void xcvd_delete_click(IInspectable const&, RoutedEventArgs const&);
-		// 編集メニューを使用可能にする.
+		// 編集メニューの可否を設定する.
 		void xcvd_is_enabled(void);
 		// 編集メニューの「貼り付け」が選択された.
 		IAsyncAction xcvd_paste_click_async(IInspectable const&, RoutedEventArgs const&);

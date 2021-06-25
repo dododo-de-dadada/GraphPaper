@@ -118,8 +118,8 @@ namespace winrt::GraphPaper::implementation
 			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
 
-		// 一覧の排他制御が true か判定する.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
+		// 一覧が表示されてるか判定する.
+		if (summary_is_visible()) {
 			if (m_list_shapes.empty()) {
 				summary_close_click(nullptr, nullptr);
 			}
@@ -150,7 +150,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::Storage::Pickers::FileOpenPicker;
 
-		if (m_stack_updt && !co_await ask_for_conf_async()) {
+		// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
+		if (m_ustack_updt && !co_await ask_for_conf_async()) {
 			co_return;
 		}
 		// 待機カーソルを表示, 表示する前のカーソルを得る.
@@ -193,10 +194,11 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		m_dx_mutex.lock();
 		try {
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
 				summary_close_click(nullptr, nullptr);
 			}
-			undo_clear();
+			ustack_clear();
 			slist_clear(m_list_shapes);
 
 			const auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
@@ -247,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 			else if (slist_read(m_list_shapes, dt_reader)) {
 				// 中断フラグが立ってるか判定する.
 				if (suspend) {
-					undo_read(dt_reader);
+					ustack_read(dt_reader);
 				}
 				hres = S_OK;
 			}
@@ -376,36 +378,19 @@ namespace winrt::GraphPaper::implementation
 		AccessListEntry item[1];
 		mru_entries.GetMany(i, item);
 
-		if (m_stack_updt && !co_await ask_for_conf_async()) {
+		// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
+		if (m_ustack_updt && !co_await ask_for_conf_async()) {
 			co_return;
 		}
-		/*
-		// 操作スタックの更新フラグが立っているか判定する.
-		if (m_stack_updt) {
-			// 確認ダイアログを表示し, 結果を得る.
-			const auto dres = co_await cd_conf_save_dialog().ShowAsync();
-			// ダイアログの結果がキャンセルか判定する.
-			if (dres == ContentDialogResult::None) {
-				co_return;
-			}
-			// ダイアログの結果が「保存する」か判定する.
-			else if (dres == ContentDialogResult::Primary) {
-				// ファイルに非同期に保存し, 結果が S_OK 以外か判定する.
-				if (co_await file_save_async() != S_OK) {
-					co_return;
-				}
-			}
-		}
-		*/
 		auto const prev_cur = file_wait_cursor();
 		auto s_file{ co_await file_recent_get_async(item[0].Token) };
+		// ストレージファイルが得られたか判定する.
 		if (s_file != nullptr) {
-			// 取得できた場合,
 			co_await file_read_async(s_file);
 			s_file = nullptr;
 		}
 		else {
-			// 取得できない場合,
+			// 取得できないならば,
 			message_show(ICON_ALERT, ERR_RECENT, item[0].Metadata);
 		}
 
@@ -552,8 +537,6 @@ namespace winrt::GraphPaper::implementation
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, ERR_WRITE, m_file_token_mru);
 		}
-		// スレッドコンテキストを復元する.
-		//co_await context;
 		// ウィンドウのカーソルを復元する.
 		Window::Current().CoreWindow().PointerCursor(prev_cur);
 		// 結果を返し終了する.
@@ -612,7 +595,7 @@ namespace winrt::GraphPaper::implementation
 			co_await dt_writer.StoreAsync();
 			// ストリームをフラッシュする.
 			co_await ra_stream.FlushAsync();
-			// 遅延させたファイル更新を完了する.
+			// 遅延させたファイル更新を完了し, 結果を判定する.
 			auto fu_status{ co_await CachedFileManager::CompleteUpdatesAsync(s_file) };
 			if (fu_status == FileUpdateStatus::Complete) {
 				// 完了した場合, S_OK を結果に格納する.
@@ -692,13 +675,12 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_color_code));
 			dt_writer.WriteSingle(m_misc_pile_up);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_status_bar));
-			
-			dt_writer.WriteBoolean(m_summary_atomic.load(std::memory_order_acquire));
+			dt_writer.WriteBoolean(summary_is_visible());
 
 			m_sheet_main.write(dt_writer);
 			if (suspend) {
 				slist_write<!REDUCE>(m_list_shapes, dt_writer);
-				undo_write(dt_writer);
+				ustack_write(dt_writer);
 			}
 			else if (layout) {
 			}
@@ -742,7 +724,7 @@ namespace winrt::GraphPaper::implementation
 			// ここでエラーが出る.
 			file_recent_add(s_file);
 			// false を操作スタックの更新フラグに格納する.
-			m_stack_updt = false;
+			m_ustack_updt = false;
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;

@@ -22,25 +22,25 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 		unselect_all();
-		undo_push_append(g);
+		ustack_push_append(g);
 		for (const auto s : slist) {
 			// 図形の消去フラグが立っているか判定する.
 			if (s->is_deleted()) {
 				continue;
 			}
-			// 図形一覧の排他制御が true か判定する.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
 				summary_remove(s);
 			}
-			undo_push_remove(s);
-			undo_push_append(g, s);
+			ustack_push_remove(s);
+			ustack_push_append(g, s);
 		}
-		undo_push_select(g);
-		undo_push_null();
+		ustack_push_select(g);
+		ustack_push_null();
 		xcvd_is_enabled();
 		sheet_draw();
-		// 図形一覧の排他制御が true か判定する.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
+		// 一覧が表示されてるか判定する.
+		if (summary_is_visible()) {
 			summary_append(g);
 		}
 	}
@@ -58,8 +58,8 @@ namespace winrt::GraphPaper::implementation
 		// 得られたリストの各グループ図形について以下を繰り返す.
 		for (auto t : g_list) {
 			uint32_t i = 0;
-			// 図形一覧の排他制御が true か判定する.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
 				i = summary_remove(t);
 			}
 			auto g = static_cast<ShapeGroup*>(t);
@@ -70,18 +70,18 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
-				// 図形一覧の排他制御が true か判定する.
-				if (m_summary_atomic.load(std::memory_order_acquire)) {
+				// 一覧が表示されてるか判定する.
+				if (summary_is_visible()) {
 					summary_insert_at(s, i++);
 				}
-				undo_push_remove(g, s);
-				undo_push_insert(s, g);
+				ustack_push_remove(g, s);
+				ustack_push_insert(s, g);
 				//t = s;
 			}
-			undo_push_remove(g);
+			ustack_push_remove(g);
 		}
 		g_list.clear();
-		undo_push_null();
+		ustack_push_null();
 		xcvd_is_enabled();
 		sheet_draw();
 	}

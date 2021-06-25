@@ -7,17 +7,18 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 指定した色と不透明度から反対色を得る.
-	static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept;
+	//static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept;
 
 	// 指定した色と不透明度から反対色を得る.
 	// src	指定した色
 	// opa	指定した不透明度
 	// dst	反対色
+	/*
 	static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept
 	{
-		dst.r = 1.0 - src.r;
-		dst.g = 1.0 - src.g;
-		dst.b = 1.0 - src.b;
+		dst.r = 1.0f - src.r;
+		dst.g = 1.0f - src.g;
+		dst.b = 1.0f - src.b;
 		dst.a = opa;
 		const D3DCOLORVALUE cmp{
 			dst.r * opa + src.r * (1.0 - opa),
@@ -71,6 +72,7 @@ namespace winrt::GraphPaper::implementation
 		return;
 
 	}
+	*/
 
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
 	// dx	図形の描画環境
@@ -481,9 +483,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列の余白を得る.
-	bool ShapeSheet::get_text_margin(D2D1_SIZE_F& value) const noexcept
+	bool ShapeSheet::get_text_padding(D2D1_SIZE_F& value) const noexcept
 	{
-		value = m_text_margin;
+		value = m_text_padding;
 		return true;
 	}
 
@@ -522,7 +524,7 @@ namespace winrt::GraphPaper::implementation
 		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());	// 段落のそろえ
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());	// 文字列のそろえ
 		m_text_line_sp = dt_reader.ReadSingle();	// 行間
-		dt_read(m_text_margin, dt_reader);	// 文字列の余白
+		dt_read(m_text_padding, dt_reader);	// 文字列の余白
 
 		ShapeText::is_available_font(m_font_family);
 	}
@@ -818,10 +820,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を文字列の余白に格納する.
-	bool ShapeSheet::set_text_margin(const D2D1_SIZE_F value)
+	bool ShapeSheet::set_text_padding(const D2D1_SIZE_F value)
 	{
-		if (!equal(m_text_margin, value)) {
-			m_text_margin = value;
+		if (!equal(m_text_padding, value)) {
+			m_text_padding = value;
 			return true;
 		}
 		return false;
@@ -857,7 +859,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_text_line_sp(m_text_line_sp);
 		s->get_text_align_t(m_text_align_t);
 		s->get_text_align_p(m_text_align_p);
-		s->get_text_margin(m_text_margin);
+		s->get_text_padding(m_text_padding);
 	}
 
 	// データリーダーに書き込む.
@@ -895,7 +897,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));	// 段落のそろえ
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));	// 文字列のそろえ
 		dt_writer.WriteSingle(m_text_line_sp);	// 行間
-		dt_write(m_text_margin, dt_writer);	// 文字列の余白
+		dt_write(m_text_padding, dt_writer);	// 文字列の余白
 
 	}
 

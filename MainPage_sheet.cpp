@@ -121,9 +121,9 @@ namespace winrt::GraphPaper::implementation
 			D2D1_COLOR_F sheet_value;
 			m_sheet_main.get_sheet_color(sheet_value);
 			if (equal(sheet_value, sample_value) != true) {
-				undo_push_set<UNDO_OP::SHEET_COLOR>(&m_sheet_main, sample_value);
-				undo_push_null();
-				undo_is_enable();
+				ustack_push_set<UNDO_OP::SHEET_COLOR>(&m_sheet_main, sample_value);
+				ustack_push_null();
+				ustack_is_enable();
 				sheet_draw();
 			}
 		}
@@ -373,7 +373,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.set_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			m_sheet_main.set_text_align_t(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 			m_sheet_main.set_text_line_sp(0.0);
-			m_sheet_main.set_text_margin(DEF_TEXT_MARGIN);
+			m_sheet_main.set_text_padding(DEF_TEXT_MARGIN);
 		}
 	}
 
@@ -475,9 +475,9 @@ namespace winrt::GraphPaper::implementation
 			};
 			if (!equal(p_size, m_sheet_main.m_sheet_size)) {
 				// ïœä∑Ç≥ÇÍÇΩílÇ™ópéÜÇÃëÂÇ´Ç≥Ç∆àŸÇ»ÇÈèÍçá,
-				undo_push_set<UNDO_OP::SHEET_SIZE>(&m_sheet_main, p_size);
-				undo_push_null();
-				undo_is_enable();
+				ustack_push_set<UNDO_OP::SHEET_SIZE>(&m_sheet_main, p_size);
+				ustack_push_null();
+				ustack_is_enable();
 				sheet_update_bbox();
 				sheet_panle_size();
 				sheet_draw();
@@ -512,7 +512,7 @@ namespace winrt::GraphPaper::implementation
 			bool flag = false;
 			if (dx > 0.0F || dy > 0.0F) {
 				constexpr auto ALL = true;
-				undo_push_move({ dx, dy }, ALL);
+				ustack_push_move({ dx, dy }, ALL);
 				flag = true;
 			}
 			D2D1_POINT_2F p_min = { 0.0F, 0.0F };
@@ -520,12 +520,12 @@ namespace winrt::GraphPaper::implementation
 			pt_add(b_max, b_min, p_max);
 			D2D1_SIZE_F p_size = { p_max.x, p_max.y };
 			if (equal(m_sheet_main.m_sheet_size, p_size) != true) {
-				undo_push_set<UNDO_OP::SHEET_SIZE>(&m_sheet_main, p_size);
+				ustack_push_set<UNDO_OP::SHEET_SIZE>(&m_sheet_main, p_size);
 				flag = true;
 			}
 			if (flag) {
-				undo_push_null();
-				undo_is_enable();
+				ustack_push_null();
+				ustack_is_enable();
 			}
 			sheet_update_bbox();
 			sheet_panle_size();

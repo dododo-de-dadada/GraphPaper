@@ -124,7 +124,7 @@ namespace winrt::GraphPaper::implementation
 				if (s_file != nullptr) {
 					hres = co_await file_write_gpf_async(s_file, true, false);
 					s_file = nullptr;
-					undo_clear();
+					ustack_clear();
 					slist_clear(m_list_shapes);
 					ShapeText::release_available_fonts();
 				}
@@ -147,8 +147,8 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		if (hres == S_OK) {
-			// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
+			// ˆê——‚ª•\¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
+			if (summary_is_visible()) {
 				summary_clear();
 			}
 		}

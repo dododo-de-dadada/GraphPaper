@@ -485,15 +485,7 @@
     <value>行間...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_line_sp_con.Text" xml:space="preserve">
-    <value>狭める</value>
-    <comment>MenuFlyoutItem</comment>
-  </data>
-  <data name="mfi_text_line_sp_exp.Text" xml:space="preserve">
-    <value>広げる</value>
-    <comment>MenuFlyoutItem</comment>
-  </data>
-  <data name="mfi_text_margin.Text" xml:space="preserve">
+  <data name="mfi_text_padding.Text" xml:space="preserve">
     <value>余白...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -814,11 +806,15 @@
     <value>マイター制限</value>
     <comment>String</comment>
   </data>
-  <data name="str_text_mar_horzorz" xml:space="preserve">
+  <data name="str_text_padding" xml:space="preserve">
+    <value>余白</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_text_pad_horzorz" xml:space="preserve">
     <value>左右の余白</value>
     <comment>String</comment>
   </data>
-  <data name="str_text_mar_vertert" xml:space="preserve">
+  <data name="str_text_pad_vertert" xml:space="preserve">
     <value>上下の余白</value>
     <comment>String</comment>
   </data>
@@ -959,56 +955,48 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_deca.Text" xml:space="preserve">
-    <value>10-十角形</value>
+    <value>10:十角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_line.Text" xml:space="preserve">
-    <value>2-直線</value>
+    <value>2:直線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_hept.Text" xml:space="preserve">
-    <value>7-七角形</value>
+    <value>7:七角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_hexa.Text" xml:space="preserve">
-    <value>6-六角形</value>
+    <value>6:六角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_nona.Text" xml:space="preserve">
-    <value>9-九角形</value>
+    <value>9:九角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_octa.Text" xml:space="preserve">
-    <value>8-八角形</value>
+    <value>8:八角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_pent.Text" xml:space="preserve">
-    <value>5-五角形</value>
+    <value>5:五角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_quad.Text" xml:space="preserve">
-    <value>4-四辺形</value>
+    <value>4:四辺形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_poly_tri.Text" xml:space="preserve">
-    <value>3-三角形</value>
+    <value>3:三角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_tool_poly_type.Text" xml:space="preserve">
-    <value>多角形の種類</value>
+  <data name="mfsi_tool_poly_draw.Text" xml:space="preserve">
+    <value>多角形の作図</value>
     <comment>RadioMenuFlyoutItem</comment>
-  </data>
-  <data name="tmfi_tool_poly_reguler.Text" xml:space="preserve">
-    <value>正多角形で作図</value>
-    <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="tb_version.Text" xml:space="preserve">
     <value>バージョン 0.0.2</value>
     <comment>TextBlock</comment>
-  </data>
-  <data name="str_text" xml:space="preserve">
-    <value>文字列</value>
-    <comment>String</comment>
   </data>
   <data name="str_line_join" xml:space="preserve">
     <value>線分のつなぎ</value>
@@ -1073,5 +1061,21 @@
   <data name="str_misc_pile_up" xml:space="preserve">
     <value>しきい値</value>
     <comment>String</comment>
+  </data>
+  <data name="tmfi_tool_poly_clockwise.Text" xml:space="preserve">
+    <value>時計回り</value>
+    <comment>ToggleMenuFlyoutItem</comment>
+  </data>
+  <data name="tmfi_tool_poly_end_close.Text" xml:space="preserve">
+    <value>終端を閉じる</value>
+    <comment>ToggleMenuFlyoutItem</comment>
+  </data>
+  <data name="tmfi_tool_poly_regular.Text" xml:space="preserve">
+    <value>正多角形</value>
+    <comment>ToggleMenuFlyoutItem</comment>
+  </data>
+  <data name="tmfi_tool_poly_vertex_up.Text" xml:space="preserve">
+    <value>頂点を上に</value>
+    <comment>ToggleMenuFlyoutItem</comment>
   </data>
 </root>

@@ -77,7 +77,7 @@ namespace winrt::GraphPaper::implementation
 				if (it_src == it_end) {
 					// 交換フラグが立っているか判定する.
 					if (flag) {
-						undo_push_null();
+						ustack_push_null();
 						xcvd_is_enabled();
 						sheet_draw();
 					}
@@ -95,11 +95,11 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			const auto t = *it_dst;
-			// 図形一覧の排他制御が true か判定する.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
 				summary_arrange(s, t);
 			}
-			undo_push_arrange(s, t);
+			ustack_push_arrange(s, t);
 			// 交換フラグを立てる.
 			flag = true;
 		}
@@ -134,28 +134,28 @@ namespace winrt::GraphPaper::implementation
 			uint32_t i = 0;
 			auto s = slist_front(m_list_shapes);
 			for (auto t : slist) {
-				// 図形一覧の排他制御が true か判定する.
-				if (m_summary_atomic.load(std::memory_order_acquire)) {
+				// 一覧が表示されてるか判定する.
+				if (summary_is_visible()) {
 					summary_remove(t);
 					summary_insert_at(t, i++);
 				}
-				undo_push_remove(t);
-				undo_push_insert(t, s);
+				ustack_push_remove(t);
+				ustack_push_insert(t, s);
 			}
 		}
 		else {
 			for (auto s : slist) {
-				// 図形一覧の排他制御が true か判定する.
-				if (m_summary_atomic.load(std::memory_order_acquire)) {
+				// 一覧が表示されてるか判定する.
+				if (summary_is_visible()) {
 					summary_remove(s);
 					summary_append(s);
 				}
-				undo_push_remove(s);
-				undo_push_insert(s, nullptr);
+				ustack_push_remove(s);
+				ustack_push_insert(s, nullptr);
 			}
 		}
 		slist.clear();
-		undo_push_null();
+		ustack_push_null();
 		xcvd_is_enabled();
 		sheet_draw();
 	}

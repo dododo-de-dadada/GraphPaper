@@ -74,9 +74,9 @@ namespace winrt::GraphPaper::implementation
 			float sample_width;
 			m_sample_shape->get_dash_patt(sample_patt);
 			m_sample_shape->get_stroke_width(sample_width);
-			if (undo_push_set<UNDO_OP::DASH_PATT>(sample_patt) ||
-				undo_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
-				undo_push_null();
+			if (ustack_push_set<UNDO_OP::DASH_PATT>(sample_patt) ||
+				ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
+				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
 			}
@@ -123,8 +123,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		mfi_dash_patt().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
 		mfi_dash_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
-		if (undo_push_set<UNDO_OP::DASH_STYLE>(d_style)) {
-			undo_push_null();
+		if (ustack_push_set<UNDO_OP::DASH_STYLE>(d_style)) {
+			ustack_push_null();
 			xcvd_is_enabled();
 			sheet_draw();
 		}

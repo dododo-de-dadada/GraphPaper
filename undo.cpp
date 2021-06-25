@@ -431,7 +431,7 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoAttr<UNDO_OP::TEXT_MARGIN>::SET(Shape* const s, const D2D1_SIZE_F& value)
 	{
-		s->set_text_margin(value);
+		s->set_text_padding(value);
 	}
 
 	void UndoAttr<UNDO_OP::TEXT_RANGE>::SET(Shape* const s, const DWRITE_TEXT_RANGE& value)
@@ -586,7 +586,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoAttr<UNDO_OP::TEXT_MARGIN>::GET(const Shape* s, D2D1_SIZE_F& value) noexcept
 	{
-		return s->get_text_margin(value);
+		return s->get_text_padding(value);
 	}
 
 	bool UndoAttr<UNDO_OP::TEXT_RANGE>::GET(const Shape* s, DWRITE_TEXT_RANGE& value) noexcept

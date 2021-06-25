@@ -74,40 +74,45 @@ namespace winrt::GraphPaper::implementation
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t *t_buf)
 	{
+		// 長さの単位がピクセルか判定する.
 		if (len_unit == LEN_UNIT::PIXEL) {
-			if constexpr (B == LEN_UNIT_SHOW) {
+			if constexpr (B) {
 				swprintf_s(t_buf, t_len, FMT_PIXEL_UNIT, value);
 			}
 			else {
 				swprintf_s(t_buf, t_len, FMT_PIXEL, value);
 			}
 		}
+		// 長さの単位がインチか判定する.
 		else if (len_unit == LEN_UNIT::INCH) {
-			if constexpr (B == LEN_UNIT_SHOW) {
+			if constexpr (B) {
 				swprintf_s(t_buf, t_len, FMT_INCH_UNIT, value / dpi);
 			}
 			else {
 				swprintf_s(t_buf, t_len, FMT_INCH, value / dpi);
 			}
 		}
+		// 長さの単位がミリメートルか判定する.
 		else if (len_unit == LEN_UNIT::MILLI) {
-			if constexpr (B == LEN_UNIT_SHOW) {
+			if constexpr (B) {
 				swprintf_s(t_buf, t_len, FMT_MILLI_UNIT, value * MM_PER_INCH / dpi);
 			}
 			else {
 				swprintf_s(t_buf, t_len, FMT_MILLI, value * MM_PER_INCH / dpi);
 			}
 		}
+		// 長さの単位がポイントか判定する.
 		else if (len_unit == LEN_UNIT::POINT) {
-			if constexpr (B == LEN_UNIT_SHOW) {
+			if constexpr (B) {
 				swprintf_s(t_buf, t_len, FMT_POINT_UNIT, value * PT_PER_INCH / dpi);
 			}
 			else {
 				swprintf_s(t_buf, t_len, FMT_POINT, value * PT_PER_INCH / dpi);
 			}
 		}
+		// 長さの単位が方眼か判定する.
 		else if (len_unit == LEN_UNIT::GRID) {
-			if constexpr (B == LEN_UNIT_SHOW) {
+			if constexpr (B) {
 				swprintf_s(t_buf, t_len, FMT_GRID_UNIT, value / g_len);
 			}
 			else {
@@ -126,18 +131,18 @@ namespace winrt::GraphPaper::implementation
 	template void conv_len_to_str<LEN_UNIT_SHOW>(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf);
 
 	// 確認ダイアログを表示してその応答を得る.
-	// 戻り値	確認前の処理を続行するなら true を, 応答がキャンセルなら, または内容を保存できなかったなら false を返す.
+	// 戻り値	「保存する」または「保存しない」が押されたなら true を, 応答がキャンセルなら, または内容を保存できなかったなら false を返す.
 	IAsyncOperation<bool> MainPage::ask_for_conf_async(void)
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		// 確認ダイアログを表示し, 結果を得る.
-		const auto d_res = co_await cd_conf_save_dialog().ShowAsync();	// ダイアログの結果
-		// ダイアログの結果がキャンセルか判定する.
+		// 確認ダイアログを表示し, 応答を得る.
+		const auto d_res = co_await cd_conf_save_dialog().ShowAsync();
+		// 応答が「キャンセル」か判定する.
 		if (d_res == ContentDialogResult::None) {
 			co_return false;
 		}
-		// ダイアログの結果が「保存する」か判定する.
+		// 応答が「保存する」か判定する.
 		else if (d_res == ContentDialogResult::Primary) {
 			// ファイルに非同期に保存し, 結果が S_OK 以外か判定する.
 			if (co_await file_save_async() != S_OK) {
@@ -152,14 +157,15 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Application;
 
-		if (m_stack_updt && !co_await ask_for_conf_async()) {
+		// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
+		if (m_ustack_updt && !co_await ask_for_conf_async()) {
 			co_return;
 		}
-		// 図形一覧の排他制御が true か判定する.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
+		// 一覧が表示されてるか判定する.
+		if (summary_is_visible()) {
 			summary_close_click(nullptr, nullptr);
 		}
-		undo_clear();
+		ustack_clear();
 		slist_clear(m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
@@ -323,14 +329,15 @@ namespace winrt::GraphPaper::implementation
 	// ファイルメニューの「新規」が選択された
 	IAsyncAction MainPage::new_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_stack_updt && !co_await ask_for_conf_async()) {
+		// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
+		if (m_ustack_updt && !co_await ask_for_conf_async()) {
 			co_return;
 		}
-		// 図形一覧の排他制御が true か判定する.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
+		// 一覧が表示されてるか判定する.
+		if (summary_is_visible()) {
 			summary_close_click(nullptr, nullptr);
 		}
-		undo_clear();
+		ustack_clear();
 		slist_clear(m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {

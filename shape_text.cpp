@@ -206,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	大きさが調整されたならば真.
 	bool ShapeText::adjust_bbox(const float g_len)
 	{
-		const float sp = m_text_margin.width * 2.0f;
+		const float sp = m_text_padding.width * 2.0f;
 		D2D1_POINT_2F t_box{ 0.0f, 0.0f };
 		for (size_t i = 0; i < m_dw_test_cnt; i++) {
 			t_box.x = fmax(t_box.x, m_dw_test_metrics[i].width);
@@ -261,8 +261,8 @@ namespace winrt::GraphPaper::implementation
 				m_font_weight, m_font_style, DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
 				m_font_size, locale_name, t_format.put())
 		);
-		const auto text_w = static_cast<FLOAT>(max(std::fabsf(m_diff[0].x) - 2.0 * m_text_margin.width, 0.0));
-		const auto text_h = static_cast<FLOAT>(max(std::fabsf(m_diff[0].y) - 2.0 * m_text_margin.height, 0.0));
+		const auto text_w = static_cast<FLOAT>(max(std::fabsf(m_diff[0].x) - 2.0 * m_text_padding.width, 0.0));
+		const auto text_h = static_cast<FLOAT>(max(std::fabsf(m_diff[0].y) - 2.0 * m_text_padding.height, 0.0));
 		winrt::check_hresult(d_factory->CreateTextLayout(m_text, text_len, t_format.get(), text_w, text_h, m_dw_layout.put()));
 		t_format = nullptr;
 		winrt::com_ptr<IDWriteTextLayout3> t3;
@@ -303,15 +303,15 @@ namespace winrt::GraphPaper::implementation
 				create_text_layout(d_factory);
 			}
 			else {
-				const FLOAT margin_w = static_cast<FLOAT>(max(std::fabs(m_diff[0].x) - m_text_margin.width * 2.0, 0.0));
-				const FLOAT margin_h = static_cast<FLOAT>(max(std::fabs(m_diff[0].y) - m_text_margin.height * 2.0, 0.0));
+				const FLOAT pad_w = static_cast<FLOAT>(max(std::fabs(m_diff[0].x) - m_text_padding.width * 2.0, 0.0));
+				const FLOAT pad_h = static_cast<FLOAT>(max(std::fabs(m_diff[0].y) - m_text_padding.height * 2.0, 0.0));
 				bool flag = false;
-				if (equal(margin_w, m_dw_layout->GetMaxWidth()) != true) {
-					m_dw_layout->SetMaxWidth(margin_w);
+				if (equal(pad_w, m_dw_layout->GetMaxWidth()) != true) {
+					m_dw_layout->SetMaxWidth(pad_w);
 					flag = true;
 				}
-				if (equal(margin_h, m_dw_layout->GetMaxHeight()) != true) {
-					m_dw_layout->SetMaxHeight(margin_h);
+				if (equal(pad_h, m_dw_layout->GetMaxHeight()) != true) {
+					m_dw_layout->SetMaxHeight(pad_h);
 					flag = true;
 				}
 				if (flag) {
@@ -348,8 +348,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F t_min;
 		pt_add(m_pos, m_diff[0], t_min);
 		pt_min(m_pos, t_min, t_min);
-		auto hm = min(m_text_margin.width, fabs(m_diff[0].x) * 0.5);
-		auto vm = min(m_text_margin.height, fabs(m_diff[0].y) * 0.5);
+		auto hm = min(m_text_padding.width, fabs(m_diff[0].x) * 0.5);
+		auto vm = min(m_text_padding.height, fabs(m_diff[0].y) * 0.5);
 		pt_add(t_min, hm, vm, t_min);
 		//uint32_t line_cnt;
 		//m_dw_layout->GetLineMetrics(nullptr, 0, &line_cnt);
@@ -539,9 +539,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 文字列の余白を得る.
-	bool ShapeText::get_text_margin(D2D1_SIZE_F& value) const noexcept
+	bool ShapeText::get_text_padding(D2D1_SIZE_F& value) const noexcept
 	{
-		value = m_text_margin;
+		value = m_text_padding;
 		return true;
 	}
 
@@ -565,7 +565,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F p_min;
 		ShapeStroke::get_pos_min(p_min);
 		pt_sub(t_pos, p_min, p_min);
-		pt_sub(p_min, m_text_margin, p_min);
+		pt_sub(p_min, m_text_padding, p_min);
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 			auto const& tm = m_dw_test_metrics[i];
 			auto const& lm = m_dw_line_metrics[i];
@@ -899,10 +899,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を文字列の余白に格納する.
-	bool ShapeText::set_text_margin(const D2D1_SIZE_F value)
+	bool ShapeText::set_text_padding(const D2D1_SIZE_F value)
 	{
-		if (!equal(m_text_margin, value)) {
-			m_text_margin = value;
+		if (!equal(m_text_padding, value)) {
+			m_text_padding = value;
 			create_text_metrics(s_dwrite_factory);
 			return true;
 		}
@@ -934,7 +934,7 @@ namespace winrt::GraphPaper::implementation
 		m_font_style(s_attr->m_font_style),
 		m_font_weight(s_attr->m_font_weight),
 		m_text_line_sp(s_attr->m_text_line_sp),
-		m_text_margin(s_attr->m_text_margin),
+		m_text_padding(s_attr->m_text_padding),
 		m_text(text),
 		m_text_align_t(s_attr->m_text_align_t),
 		m_text_align_p(s_attr->m_text_align_p),
@@ -958,7 +958,7 @@ namespace winrt::GraphPaper::implementation
 		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_line_sp = dt_reader.ReadSingle();
-		dt_read(m_text_margin, dt_reader);
+		dt_read(m_text_padding, dt_reader);
 		create_text_layout(s_dwrite_factory);
 	}
 
@@ -976,7 +976,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
 		dt_writer.WriteSingle(m_text_line_sp);
-		dt_write(m_text_margin, dt_writer);
+		dt_write(m_text_padding, dt_writer);
 	}
 
 	// データライターに SVG タグとして書き込む.
@@ -1039,7 +1039,7 @@ namespace winrt::GraphPaper::implementation
 		dt_write_svg(">" SVG_NEW_LINE, dt_writer);
 		// 書体を表示する左上位置に余白を加える.
 		D2D1_POINT_2F nw_pos;
-		pt_add(m_pos, m_text_margin.width, m_text_margin.height, nw_pos);
+		pt_add(m_pos, m_text_padding.width, m_text_padding.height, nw_pos);
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 			const auto& tm = m_dw_test_metrics[i];
 			const wchar_t* t = m_text + tm.textPosition;

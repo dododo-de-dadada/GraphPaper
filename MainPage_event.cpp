@@ -234,17 +234,17 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
-		event_reduce_slist(m_list_shapes, m_stack_undo, m_stack_redo);
-		undo_push_append(s);
-		undo_push_select(s);
-		undo_push_null();
+		event_reduce_slist(m_list_shapes, m_ustack_undo, m_ustack_redo);
+		ustack_push_append(s);
+		ustack_push_select(s);
+		ustack_push_null();
 		m_event_shape_prev = s;
 		xcvd_is_enabled();
 		sheet_update_bbox(s);
 		sheet_panle_size();
 		sheet_draw();
-		// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-		if (m_summary_atomic.load(std::memory_order_acquire)) {
+		// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
+		if (summary_is_visible()) {
 			summary_append(s);
 			summary_select(s);
 		}
@@ -267,17 +267,17 @@ namespace winrt::GraphPaper::implementation
 				s->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 			}
 			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
-			event_reduce_slist(m_list_shapes, m_stack_undo, m_stack_redo);
+			event_reduce_slist(m_list_shapes, m_ustack_undo, m_ustack_redo);
 			//unselect_all();
-			undo_push_append(s);
-			undo_push_select(s);
-			undo_push_null();
+			ustack_push_append(s);
+			ustack_push_select(s);
+			ustack_push_null();
 			m_event_shape_prev = s;
 			xcvd_is_enabled();
 			sheet_update_bbox(s);
 			sheet_panle_size();
-			// }Œ`ˆê——‚Ì”r‘¼§Œä‚ª true ‚©”»’è‚·‚é.
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
+			// ˆê——‚ª•\Ž¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
+			if (summary_is_visible()) {
 				summary_append(s);
 				summary_select(s);
 			}
@@ -319,8 +319,8 @@ namespace winrt::GraphPaper::implementation
 			slist_neighbor(m_list_shapes, m_event_pos_curr, m_misc_pile_up / m_sheet_main.m_sheet_scale, m_event_pos_curr);
 			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, m_misc_pile_up / m_sheet_main.m_sheet_scale);
 		}
-		if (!undo_pop_if_invalid()) {
-			undo_push_null();
+		if (!ustack_pop_if_invalid()) {
+			ustack_push_null();
 			sheet_update_bbox();
 			sheet_panle_size();
 		}
@@ -354,8 +354,8 @@ namespace winrt::GraphPaper::implementation
 				slist_move(m_list_shapes, v_vec);
 			}
 		}
-		if (!undo_pop_if_invalid()) {
-			undo_push_null();
+		if (!ustack_pop_if_invalid()) {
+			ustack_push_null();
 			sheet_update_bbox();
 			sheet_panle_size();
 			xcvd_is_enabled();
@@ -476,14 +476,14 @@ namespace winrt::GraphPaper::implementation
 					m_event_state = EVENT_STATE::PRESS_MOVE;
 					// ƒ|ƒCƒ“ƒ^[‚ÌŒ»ÝˆÊ’u‚ð‘O‰ñˆÊ’u‚ÉŠi”[‚·‚é.
 					m_event_pos_prev = m_event_pos_curr;
-					undo_push_move(vec);
+					ustack_push_move(vec);
 				}
 				// ƒ|ƒCƒ“ƒ^[‚ª‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ª}Œ`‚ÌŠO•”‚Å‚È‚¢‚©”»’è‚·‚é
 				else if (m_event_anch_pressed != ANCH_TYPE::ANCH_SHEET) {
 					// }Œ`‚ð•ÏŒ`‚µ‚Ä‚¢‚éó‘Ô‚É‘JˆÚ‚·‚é.
 					m_event_state = EVENT_STATE::PRESS_FORM;
 					m_event_pos_prev = m_event_pos_curr;
-					undo_push_anch(m_event_shape_pressed, m_event_anch_pressed);
+					ustack_push_anch(m_event_shape_pressed, m_event_anch_pressed);
 					m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f);
 				}
 				sheet_draw();

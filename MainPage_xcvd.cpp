@@ -108,15 +108,14 @@ namespace winrt::GraphPaper::implementation
 		slist_selected<Shape>(m_list_shapes, list_selected);
 		m_dx_mutex.lock();
 		for (auto s : list_selected) {
-			if (m_summary_atomic.load(std::memory_order_acquire)) {
-				// 図形一覧の表示フラグが立っている場合,
-				// 図形を一覧から消去する.
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
 				summary_remove(s);
 			}
 			// 図形を削除して, その操作をスタックに積む.
-			undo_push_remove(s);
+			ustack_push_remove(s);
 		}
-		undo_push_null();
+		ustack_push_null();
 		m_dx_mutex.unlock();
 
 		// 選択された図形のリストを消去する.
@@ -127,14 +126,13 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	// 編集メニューを使用可能にする.
+	// 編集メニューの可否を設定する.
 	// 選択の有無やクラスごとに図形を数え, メニュー項目の可否を判定する.
 	void MainPage::xcvd_is_enabled(void)
 	{
 		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 
-		// 元に戻す/やり直しメニュー項目の使用の可否を設定する.
-		undo_is_enable();
+		ustack_is_enable();
 
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
 		uint32_t selected_cnt = 0;	// 選択された図形の数
@@ -242,13 +240,14 @@ namespace winrt::GraphPaper::implementation
 						unselect_all();
 						// 得られたリストの各図形について以下を繰り返す.
 						for (auto s : slist_pasted) {
-							if (m_summary_atomic.load(std::memory_order_acquire)) {
+							// 一覧が表示されてるか判定する.
+							if (summary_is_visible()) {
 								summary_append(s);
 							}
-							undo_push_append(s);
+							ustack_push_append(s);
 							sheet_update_bbox(s);
 						}
-						undo_push_null();
+						ustack_push_null();
 						m_dx_mutex.unlock();
 						slist_pasted.clear();
 						xcvd_is_enabled();
@@ -325,11 +324,12 @@ namespace winrt::GraphPaper::implementation
 						}
 						t->set_pos_start(s_min);
 						m_dx_mutex.lock();
-						undo_push_append(t);
-						undo_push_select(t);
-						undo_push_null();
+						ustack_push_append(t);
+						ustack_push_select(t);
+						ustack_push_null();
 						m_dx_mutex.unlock();
-						if (m_summary_atomic.load(std::memory_order_acquire)) {
+						// 一覧が表示されてるか判定する.
+						if (summary_is_visible()) {
 							summary_append(t);
 							summary_select(t);
 						}

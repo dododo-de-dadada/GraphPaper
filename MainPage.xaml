@@ -90,15 +90,19 @@
                 M1,3 L15,3 L15,13 L1,13 Z
             </x:String>
 			<!-- 五角形アイコンの描画コマンド -->
+			<!--
 			<x:String x:Key="data_pent">
 				M8.000000 0.000000 l-8.000000 5.812340 l3.055728 9.404563 l9.888543 0.000000 l3.055729 -9.404563 Z
 				M8.000000 1.236068 l-6.824533 4.958297 l2.606731 8.236068 l8.435559 0.000000 l2.606731 -8.236068 Z
 			</x:String>
-			<!-- 五角形アイコンの描画コマンド -->
+            -->
+			<!-- 六角形アイコンの描画コマンド -->
+            <!--
 			<x:String x:Key="data_hexa">
 				M4.000000 1.000000 l-4.000000 6.928203 l4.000000 6.928203 l8.000000 0.000000 l4.000000 -6.928203 l-4.000000 -6.928203 Z
 				M4.777776 2.000000 l-3.222223 5.928203 l3.222223 5.928203 l6.444446 0.000000 l3.222223 -5.928203 l-3.222223 -5.928203 Z
 			</x:String>
+            -->
 			<!-- 角丸方形アイコンの描画コマンド -->
             <x:String x:Key="data_rrect">
                 M5,2 L11,2 A5,5 0 0 1 16,7 L16,9 A5,5, 0 0 1 11,14 L5,14 A5,5 0 0 1 0,9 L0,7 A5,5 0 0 1 5,2 Z
@@ -133,7 +137,9 @@
                 M0, 8 L3, 8 L3, 5.48 L16, 8.5 L3, 11.52 L3,9 L0, 9 Z
             </x:String>
             <!-- アプリケーションデータを格納するファイル名 -->
+            <!--
             <x:String x:Key="file_app_data">app_data</x:String>
+            -->
             <!-- 定規コンテキストメニュー -->
 			<MenuFlyout x:Key="mf_ruler_menu">
 				<MenuFlyoutItem x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
@@ -256,7 +262,7 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid_2" x:Uid="rmfi_text_align_mid" Click="text_align_p_click" Text="Middle" GroupName="gn_text_align_p_2" />
 				</MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
-                <MenuFlyoutItem x:Uid="mfi_text_margin" Click="text_margin_click_async" Text="Margin..." />
+                <MenuFlyoutItem x:Uid="mfi_text_padding" Click="text_padding_click_async" Text="Margin..." />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Font Color..." />
             </MenuFlyout>
@@ -372,12 +378,12 @@
             </muxc:MenuBarItem>
             <!-- 編集メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_menu_edit" AccessKey="E" Title="Edit">
-                <MenuFlyoutItem x:Name="mfi_undo" x:Uid="mfi_undo" Click="undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
+                <MenuFlyoutItem x:Name="mfi_undo" x:Uid="mfi_undo" Click="ustack_undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Z" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_redo" x:Uid="mfi_redo" Click="redo_click" Icon="Redo" IsEnabled="False" Text="Redo" >
+                <MenuFlyoutItem x:Name="mfi_redo" x:Uid="mfi_redo" Click="ustack_redo_click" Icon="Redo" IsEnabled="False" Text="Redo" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="Y" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -530,7 +536,7 @@
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutSubItem x:Uid="mfsi_tool_poly_type" Text="Type of Polygon">
+				<MenuFlyoutSubItem x:Uid="mfsi_tool_poly_draw" Text="Drawing Polygon">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_line" x:Uid="rmfi_tool_poly_line" Click="tool_draw_click" GroupName="gn_poly_type" Text="2-Line" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_tri" x:Uid="rmfi_tool_poly_tri" Click="tool_draw_click" IsChecked="True" GroupName="gn_poly_type" Text="3-Triangle" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_quad" x:Uid="rmfi_tool_poly_quad" Click="tool_draw_click" GroupName="gn_poly_type" Text="4-Quadrilateral" />
@@ -543,7 +549,7 @@
 					<MenuFlyoutSeparator />
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_regular" x:Uid="tmfi_tool_poly_regular" Click="tool_draw_click" IsChecked="true" Text="Reguler Polygon" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_vertex_up" x:Uid="tmfi_tool_poly_vertex_up" Click="tool_draw_click" IsChecked="true" Text="Vertex Up" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_closed" x:Uid="tmfi_tool_poly_closed" Click="tool_draw_click" IsChecked="true" Text="Closed" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_end_close" x:Uid="tmfi_tool_poly_end_close" Click="tool_draw_click" IsChecked="true" Text="End Close" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_clockwise" x:Uid="tmfi_tool_poly_clockwise" Click="tool_draw_click" IsChecked="true" Text="Clockwise" />
 				</MenuFlyoutSubItem>
 			</muxc:MenuBarItem>
@@ -652,7 +658,7 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid" x:Uid="rmfi_text_align_mid" Click="text_align_p_click" Text="Middle" GroupName="gn_text_align_p" />
 				</MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
-                <MenuFlyoutItem x:Uid="mfi_text_margin" Click="text_margin_click_async" Text="Margin..." />
+                <MenuFlyoutItem x:Uid="mfi_text_padding" Click="text_padding_click_async" Text="Margin..." />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Font Color..." />
             </muxc:MenuBarItem>
