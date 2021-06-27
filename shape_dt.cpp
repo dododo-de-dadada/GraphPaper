@@ -49,6 +49,13 @@ namespace winrt::GraphPaper::implementation
 		value.height = dt_reader.ReadSingle();
 	}
 
+	// データリーダーから寸法を読み込む.
+	void dt_read(D2D1_SIZE_U& value, DataReader const& dt_reader)
+	{
+		value.width = dt_reader.ReadUInt32();
+		value.height = dt_reader.ReadUInt32();
+	}
+
 	// データリーダーから破線の様式を読み込む.
 	void dt_read(DASH_PATT& value, DataReader const& dt_reader)
 	{
@@ -152,6 +159,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_writer.WriteSingle(value.width);
 		dt_writer.WriteSingle(value.height);
+	}
+
+	// データライターに寸法を書き込む.
+	void dt_write(const D2D1_SIZE_U value, DataWriter const& dt_writer)
+	{
+		dt_writer.WriteUInt32(value.width);
+		dt_writer.WriteUInt32(value.height);
 	}
 
 	// データライターに破線の様式を書き込む.

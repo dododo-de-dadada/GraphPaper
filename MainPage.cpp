@@ -254,6 +254,7 @@ namespace winrt::GraphPaper::implementation
 		// D2D/DWRITE ファクトリを図形クラスに, 
 		// 図形リストと用紙をアンドゥ操作に格納する.
 		{
+			Shape::s_dx = &m_sheet_dx;
 			Shape::s_d2d_factory = m_sheet_dx.m_d2dFactory.get();
 			Shape::s_dwrite_factory = m_sheet_dx.m_dwriteFactory.get();
 			Undo::set(&m_list_shapes, &m_sheet_main);

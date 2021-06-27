@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// クリップボードにデータが含まれているか判定する.
-	bool MainPage::xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const
+	size_t MainPage::xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const
 	{
 		// DataPackageView::Contains を使用すると, 次の内部エラーが発生する.
 		// WinRT originate error - 0x8004006A : '指定された形式が DataPackage に含まれていません。
@@ -22,11 +22,11 @@ namespace winrt::GraphPaper::implementation
 		for (auto const& a_format : a_formats) {
 			for (size_t i = 0; i < f_cnt; i++) {
 				if (a_format == formats[i]) {
-					return true;
+					return i;
 				}
 			}
 		}
-		return false;
+		return static_cast<size_t>(-1);
 	}
 
 	// 編集メニューの「コピー」が選択された.
@@ -183,7 +183,7 @@ namespace winrt::GraphPaper::implementation
 
 		mfi_xcvd_cut().IsEnabled(exists_selected);
 		mfi_xcvd_copy().IsEnabled(exists_selected);
-		mfi_xcvd_paste().IsEnabled(xcvd_contains({ CBF_GPD, StandardDataFormats::Text() }));
+		mfi_xcvd_paste().IsEnabled(xcvd_contains({ CBF_GPD, StandardDataFormats::Text(), StandardDataFormats::Bitmap() }) != static_cast<size_t>(-1));
 		mfi_xcvd_delete().IsEnabled(exists_selected);
 		mfi_select_all().IsEnabled(exists_unselected);
 		mfi_group().IsEnabled(exists_selected_2);
@@ -216,7 +216,8 @@ namespace winrt::GraphPaper::implementation
 		// を引き起こすので, try ... catch 文が必要.
 		try {
 			// 図形データがクリップボードに含まれているか判定する.
-			if (xcvd_contains({ CBF_GPD })) {
+			const auto i = xcvd_contains({ CBF_GPD, StandardDataFormats::Text(), StandardDataFormats::Bitmap() });
+			if (i == 0) {
 				// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.
 				auto dt_object{ co_await Clipboard::GetContent().GetDataAsync(CBF_GPD) };
 				auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
@@ -264,7 +265,7 @@ namespace winrt::GraphPaper::implementation
 				in_stream.Close();
 			}
 			// クリップボードにテキストが含まれているか判定する.
-			else if (xcvd_contains({ StandardDataFormats::Text() })) {
+			else if (i == 1) {
 				using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 				const auto d_result = co_await cd_conf_paste_dialog().ShowAsync();
 				if (d_result == ContentDialogResult::Primary) {
@@ -341,6 +342,39 @@ namespace winrt::GraphPaper::implementation
 					else {
 						message_show(ICON_ALERT, L"str_err_paste", L"");
 					}
+				}
+			}
+			else if (i == 2) {
+				auto bitmap = co_await Clipboard::GetContent().GetBitmapAsync();
+				auto bn_stream{ co_await bitmap.OpenReadAsync() };
+				//auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(bitmap) };
+				auto in_stream{ bn_stream.GetInputStreamAt(0) };
+				auto dt_reader{ DataReader(in_stream) };
+				auto ra_size = static_cast<UINT32>(bn_stream.Size());
+				auto operation{ co_await dt_reader.LoadAsync(ra_size) };
+				if (operation == ra_size) {
+					const float scale = m_sheet_main.m_sheet_scale;
+					const float act_w = static_cast<float>(scp_sheet_panel().ActualWidth());
+					const float act_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+					const D2D1_POINT_2F c_pos{
+						static_cast<FLOAT>((sb_horz().Value() + act_w * 0.5) / scale),
+						static_cast<FLOAT>((sb_vert().Value() + act_h * 0.5) / scale)
+					};
+					ShapeBitmap* b = new ShapeBitmap(c_pos, dt_reader);
+					m_dx_mutex.lock();
+					ustack_push_append(b);
+					ustack_push_select(b);
+					ustack_push_null();
+					m_dx_mutex.unlock();
+					// 一覧が表示されてるか判定する.
+					if (summary_is_visible()) {
+						summary_append(b);
+						summary_select(b);
+					}
+					xcvd_is_enabled();
+					sheet_update_bbox(b);
+					sheet_panle_size();
+					sheet_draw();
 				}
 			}
 		}

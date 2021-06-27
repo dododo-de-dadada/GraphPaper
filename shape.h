@@ -33,11 +33,11 @@
 // | Shape*      |
 // +------+------+
 //        |
-//        +---------------+---------------+
-//        |               |               |
-// +------+------+ +------+------+ +------+------+
-// | ShapeStroke*| | ShapeGroup  | | ShapeSheet  |
-// +------+------+ +-------------+ +-------------+
+//        +---------------+---------------+---------------+
+//        |               |               |               |
+// +------+------+ +------+------+ +------+------+ +------+------+
+// | ShapeStroke*| | ShapeBitmap | | ShapeGroup  | | ShapeSheet  |
+// +------+------+ +-------------+ +-------------+ +-------------+
 //        |
 //        +-------------------------------+
 //        |                               |
@@ -286,6 +286,8 @@ namespace winrt::GraphPaper::implementation
 	void dt_read(D2D1_POINT_2F& value, DataReader const& dt_reader);
 	// データリーダーから寸法を読み込む.
 	void dt_read(D2D1_SIZE_F& value, DataReader const& dt_reader);
+	// データリーダーから寸法を読み込む.
+	void dt_read(D2D1_SIZE_U& value, DataReader const& dt_reader);
 	// データリーダーから文字範囲を読み込む.
 	void dt_read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader);
 	// データリーダーから方眼の形式を読み込む.
@@ -309,6 +311,8 @@ namespace winrt::GraphPaper::implementation
 	void dt_write(const D2D1_POINT_2F value, DataWriter const& dt_writer);
 	// データライターに寸法を書き込む.
 	void dt_write(const D2D1_SIZE_F value, DataWriter const& dt_writer);
+	// データライターに寸法を書き込む.
+	void dt_write(const D2D1_SIZE_U value, DataWriter const& dt_writer);
 	// データライターに文字列範囲を書き込む.
 	void dt_write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer);
 	// データライターに方眼の形式を書き込む.
@@ -428,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形のひな型
 	//------------------------------
 	struct Shape {
-		
+		static SHAPE_DX* s_dx;
 		static ID2D1Factory3* s_d2d_factory;	// D2D ファクトリのキャッシュ
 		static IDWriteFactory3* s_dwrite_factory;	// DWRITE ファクトリのキャッシュ
 		static D2D1_COLOR_F s_anch_color;	// 図形の部位の色
@@ -605,6 +609,50 @@ namespace winrt::GraphPaper::implementation
 		virtual void write(DataWriter const& /*dt_writer*/) const {}
 		// データライターに SVG として書き込む.
 		virtual void write_svg(DataWriter const& /*dt_writer*/) const {}
+	};
+
+	struct ShapeBitmap : Shape {
+		bool m_is_deleted = false;	// 消去されたか判定
+		bool m_is_selected = false;	// 選択されたか判定
+		D2D1_POINT_2F m_pos;
+		D2D1_SIZE_F m_size;
+		D2D1_RECT_F m_buf_rect;
+		D2D1_SIZE_U m_buf_size;
+		uint8_t* m_buf;
+		winrt::com_ptr<ID2D1Bitmap1> m_dx_bitmap{ nullptr };
+
+		~ShapeBitmap(void);
+		// 図形を表示する.
+		void draw(SHAPE_DX& dx);
+		// 図形を囲む領域を得る.
+		void get_bound(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/, D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept;
+		// 部位の位置を得る.
+		void get_pos_anch(const uint32_t /*anch*/, D2D1_POINT_2F&/*value*/) const noexcept;
+		// 図形を囲む領域の左上位置を得る.
+		void get_pos_min(D2D1_POINT_2F& /*value*/) const noexcept;
+		// 開始位置を得る.
+		bool get_pos_start(D2D1_POINT_2F& /*value*/) const noexcept;
+		// 位置を含むか判定する.
+		uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept;
+		// 範囲に含まれるか判定する.
+		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept { return false; }
+		// 消去フラグを判定する.
+		bool is_deleted(void) const noexcept { return m_is_deleted; }
+		// 選択フラグを判定する.
+		bool is_selected(void) const noexcept { return m_is_selected; }
+		// 差分だけ移動する.
+		bool move(const D2D1_POINT_2F value);
+		// 値を消去フラグに格納する.
+		bool set_delete(const bool value) noexcept;
+		// 値を, 部位の位置に格納する.
+		bool set_pos_anch(const D2D1_POINT_2F /*value*/, const uint32_t /*anch*/, const float /*dist = 0.0f*/);
+		// 値を始点に格納する. 他の部位の位置も動く.
+		bool set_pos_start(const D2D1_POINT_2F /*value*/);
+		// 値を選択フラグに格納する.
+		bool set_select(const bool /*value*/) noexcept;
+		ShapeBitmap(const D2D1_POINT_2F c_pos, DataReader const& dt_reader);
+		ShapeBitmap(DataReader const& dt_reader);
+		void write(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -857,8 +905,8 @@ namespace winrt::GraphPaper::implementation
 	// 線枠のひな型
 	//------------------------------
 	struct ShapeStroke : Shape {
-		bool m_flag_delete = false;	// 消去フラグ
-		bool m_flag_select = false;	// 選択フラグ
+		bool m_is_deleted = false;	// 消去されたか判定
+		bool m_is_selected = false;	// 選択されたか判定
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_diff;	// 次の位置への差分
 		CAP_STYLE m_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
@@ -911,9 +959,9 @@ namespace winrt::GraphPaper::implementation
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept;
 		// 消去フラグを判定する.
-		bool is_deleted(void) const noexcept { return m_flag_delete; }
+		bool is_deleted(void) const noexcept { return m_is_deleted; }
 		// 選択フラグを判定する.
-		bool is_selected(void) const noexcept { return m_flag_select; }
+		bool is_selected(void) const noexcept { return m_is_selected; }
 		// 差分だけ移動する.
 		virtual	bool move(const D2D1_POINT_2F value);
 		// 値を端の形式に格納する.
@@ -925,7 +973,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線枠の形式に格納する.
 		bool set_dash_style(const D2D1_DASH_STYLE value);
 		// 値を消去フラグに格納する.
-		bool set_delete(const bool value) noexcept { if (m_flag_delete != value) { m_flag_delete = value;  return true; } return false; }
+		bool set_delete(const bool value) noexcept { if (m_is_deleted != value) { m_is_deleted = value;  return true; } return false; }
 		// 値を線分のつなぎのマイター制限に格納する.
 		bool set_join_limit(const float& value);
 		// 値を線分のつなぎに格納する.
@@ -935,7 +983,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F value);
 		// 値を選択フラグに格納する.
-		bool set_select(const bool value) noexcept { if (m_flag_select != value) { m_flag_select = value; return true; } return false; }
+		bool set_select(const bool value) noexcept { if (m_is_selected != value) { m_is_selected = value; return true; } return false; }
 		// 値を線枠の色に格納する.
 		bool set_stroke_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を線枠の太さに格納する.

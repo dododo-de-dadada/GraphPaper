@@ -511,8 +511,8 @@ namespace winrt::GraphPaper::implementation
 	ShapeStroke::ShapeStroke(DataReader const& dt_reader) :
 		m_d2d_stroke_style(nullptr)
 	{
-		m_flag_delete = dt_reader.ReadBoolean();
-		m_flag_select = dt_reader.ReadBoolean();
+		m_is_deleted = dt_reader.ReadBoolean();
+		m_is_selected = dt_reader.ReadBoolean();
 		dt_read(m_pos, dt_reader);
 		dt_read(m_diff, dt_reader);
 		dt_read(m_cap_style, dt_reader);
@@ -529,8 +529,8 @@ namespace winrt::GraphPaper::implementation
 	// データライターに書き込む.
 	void ShapeStroke::write(DataWriter const& dt_writer) const
 	{
-		dt_writer.WriteBoolean(m_flag_delete);
-		dt_writer.WriteBoolean(m_flag_select);
+		dt_writer.WriteBoolean(m_is_deleted);
+		dt_writer.WriteBoolean(m_is_selected);
 		dt_write(m_pos, dt_writer);
 		dt_write(m_diff, dt_writer);
 		dt_write(m_cap_style, dt_writer);

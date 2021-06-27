@@ -14,14 +14,15 @@ namespace winrt::GraphPaper::implementation
 	enum SHAPE_TYPE {
 		SHAPE_NULL,	// ヌル
 		SHAPE_BEZI,	// 曲線
+		SHAPE_BITM,	// 画像
 		SHAPE_ELLI,	// だ円
+		SHAPE_GROUP,	// グループ
 		SHAPE_LINE,	// 線分
 		SHAPE_POLY,	// 多角形
 		SHAPE_RECT,	// 方形
 		SHAPE_RRECT,	// 角丸方形
-		SHAPE_TEXT,	// 文字列
-		SHAPE_GROUP,	// グループ
-		SHAPE_RULER		// 定規
+		SHAPE_RULER,	// 定規
+		SHAPE_TEXT	// 文字列
 	};
 
 	// データリーダーから図形を読み込む.
@@ -456,6 +457,9 @@ namespace winrt::GraphPaper::implementation
 		else if (s_type == SHAPE_TYPE::SHAPE_BEZI) {
 			s = new ShapeBezi(dt_reader);
 		}
+		else if (s_type == SHAPE_TYPE::SHAPE_BITM) {
+			s = new ShapeBitmap(dt_reader);
+		}
 		else if (s_type == SHAPE_TYPE::SHAPE_ELLI) {
 			s = new ShapeElli(dt_reader);
 		}
@@ -574,6 +578,9 @@ namespace winrt::GraphPaper::implementation
 			uint32_t s_int;
 			if (s_type == typeid(ShapeBezi)) {
 				s_int = SHAPE_BEZI;
+			}
+			else if (s_type == typeid(ShapeBitmap)) {
+				s_int = SHAPE_BITM;
 			}
 			else if (s_type == typeid(ShapeElli)) {
 				s_int = SHAPE_ELLI;

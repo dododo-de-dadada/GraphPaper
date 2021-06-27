@@ -975,9 +975,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// クリップボードにデータが含まれているか判定する.
-		bool xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const;
+		size_t xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const;
 		// クリップボードにデータが含まれているか判定する.
-		template <size_t Z> bool xcvd_contains(const winrt::hstring(&formats)[Z]) const
+		template <size_t Z> size_t xcvd_contains(const winrt::hstring(&formats)[Z]) const
 		{
 			return xcvd_contains(formats, Z);
 		}
