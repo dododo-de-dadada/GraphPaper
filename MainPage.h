@@ -975,12 +975,12 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// クリップボードにデータが含まれているか判定する.
-		size_t xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const;
+		//size_t xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const;
 		// クリップボードにデータが含まれているか判定する.
-		template <size_t Z> size_t xcvd_contains(const winrt::hstring(&formats)[Z]) const
-		{
-			return xcvd_contains(formats, Z);
-		}
+		//template <size_t Z> size_t xcvd_contains(const winrt::hstring(&formats)[Z]) const
+		//{
+		//	return xcvd_contains(formats, Z);
+		//}
 		// 編集メニューの「コピー」が選択された.
 		IAsyncAction xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「切り取り」が選択された.

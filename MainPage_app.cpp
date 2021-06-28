@@ -32,8 +32,8 @@ namespace winrt::GraphPaper::implementation
 	// アプリケーションがバックグラウンドから戻った.
 	void MainPage::app_leaving_background(IInspectable const&/*sender*/, LeavingBackgroundEventArgs const&/*args*/)
 	{
-		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
-		mfi_xcvd_paste().IsEnabled(xcvd_contains({ CBF_GPD, StandardDataFormats::Text(), StandardDataFormats::Bitmap() }) != static_cast<size_t>(-1));
+		//using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
+		//mfi_xcvd_paste().IsEnabled(xcvd_contains({ CBF_GPD, StandardDataFormats::Text(), StandardDataFormats::Bitmap() }) != static_cast<size_t>(-1));
 	}
 
 	// アプリケーションの再開の処理を行う.

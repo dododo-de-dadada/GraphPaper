@@ -337,9 +337,9 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_TYPE::ANCH_WEST;
 			}
 		}
-		pt_bound(v_pos[0], v_pos[1], v_pos[0], v_pos[1]);
-		if (v_pos[0].x <= t_pos.x && t_pos.x <= v_pos[1].x &&
-			v_pos[0].y <= t_pos.y && t_pos.y <= v_pos[1].y) {
+		pt_bound(v_pos[0], v_pos[2], v_pos[0], v_pos[2]);
+		if (v_pos[0].x <= t_pos.x && t_pos.x <= v_pos[2].x &&
+			v_pos[0].y <= t_pos.y && t_pos.y <= v_pos[2].y) {
 			return ANCH_TYPE::ANCH_FILL;
 		}
 		return ANCH_TYPE::ANCH_SHEET;

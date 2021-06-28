@@ -10,6 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// クリップボードにデータが含まれているか判定する.
+	/*
 	size_t MainPage::xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const
 	{
 		// DataPackageView::Contains を使用すると, 次の内部エラーが発生する.
@@ -28,6 +29,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		return static_cast<size_t>(-1);
 	}
+	*/
 
 	// 編集メニューの「コピー」が選択された.
 	IAsyncAction MainPage::xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -130,6 +132,7 @@ namespace winrt::GraphPaper::implementation
 	// 選択の有無やクラスごとに図形を数え, メニュー項目の可否を判定する.
 	void MainPage::xcvd_is_enabled(void)
 	{
+		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 
 		ustack_is_enable();
@@ -183,7 +186,9 @@ namespace winrt::GraphPaper::implementation
 
 		mfi_xcvd_cut().IsEnabled(exists_selected);
 		mfi_xcvd_copy().IsEnabled(exists_selected);
-		mfi_xcvd_paste().IsEnabled(xcvd_contains({ CBF_GPD, StandardDataFormats::Text(), StandardDataFormats::Bitmap() }) != static_cast<size_t>(-1));
+		const auto& dp_view = Clipboard::GetContent();
+		mfi_xcvd_paste().IsEnabled(dp_view.Contains(CBF_GPD) ||
+			dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
 		mfi_xcvd_delete().IsEnabled(exists_selected);
 		mfi_select_all().IsEnabled(exists_unselected);
 		mfi_group().IsEnabled(exists_selected_2);
@@ -216,8 +221,8 @@ namespace winrt::GraphPaper::implementation
 		// を引き起こすので, try ... catch 文が必要.
 		try {
 			// 図形データがクリップボードに含まれているか判定する.
-			const auto i = xcvd_contains({ CBF_GPD, StandardDataFormats::Text(), StandardDataFormats::Bitmap() });
-			if (i == 0) {
+			const auto& dp_view = Clipboard::GetContent();
+			if (dp_view.Contains(CBF_GPD)) {
 				// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.
 				auto dt_object{ co_await Clipboard::GetContent().GetDataAsync(CBF_GPD) };
 				auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
@@ -265,7 +270,7 @@ namespace winrt::GraphPaper::implementation
 				in_stream.Close();
 			}
 			// クリップボードにテキストが含まれているか判定する.
-			else if (i == 1) {
+			else if (dp_view.Contains(StandardDataFormats::Text())) {
 				using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 				//const auto d_result = co_await cd_conf_paste_dialog().ShowAsync();
 				//if (d_result == ContentDialogResult::Primary) {
@@ -344,7 +349,7 @@ namespace winrt::GraphPaper::implementation
 					}
 				//}
 			}
-			else if (i == 2) {
+			else if (dp_view.Contains(StandardDataFormats::Bitmap())) {
 				auto bitmap = co_await Clipboard::GetContent().GetBitmapAsync();
 				auto bn_stream{ co_await bitmap.OpenReadAsync() };
 				//auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(bitmap) };

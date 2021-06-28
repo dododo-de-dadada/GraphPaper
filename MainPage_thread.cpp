@@ -33,10 +33,13 @@ namespace winrt::GraphPaper::implementation
 				using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 				using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 
-				auto const& dp_view = Clipboard::GetContent();
+				const auto& dp_view = Clipboard::GetContent();
 				dp_view.SetAcceptedFormatId(CBF_GPD);
 				dp_view.SetAcceptedFormatId(StandardDataFormats::Text());
-				if (dp_view.Contains(StandardDataFormats::Text())) {
+				dp_view.SetAcceptedFormatId(StandardDataFormats::Bitmap());
+				if (dp_view.Contains(CBF_GPD) ||
+					dp_view.Contains(StandardDataFormats::Text()) ||
+					dp_view.Contains(StandardDataFormats::Bitmap())) {
 					mfi_xcvd_paste().IsEnabled(true);
 				}
 			}
