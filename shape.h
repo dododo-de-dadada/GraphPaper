@@ -618,6 +618,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_size;
 		D2D1_RECT_F m_buf_rect;
 		D2D1_SIZE_U m_buf_size;
+		float m_scale_x = 1.0;
+		float m_scale_y = 1.0;
 		uint8_t* m_buf;
 		winrt::com_ptr<ID2D1Bitmap1> m_dx_bitmap{ nullptr };
 
@@ -626,12 +628,16 @@ namespace winrt::GraphPaper::implementation
 		void draw(SHAPE_DX& dx);
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/, D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept;
+		// 近傍の頂点を得る.
+		bool get_neighbor(const D2D1_POINT_2F /*pos*/, float& /*dd*/, D2D1_POINT_2F& /*value*/) const noexcept;
 		// 部位の位置を得る.
 		void get_pos_anch(const uint32_t /*anch*/, D2D1_POINT_2F&/*value*/) const noexcept;
 		// 図形を囲む領域の左上位置を得る.
 		void get_pos_min(D2D1_POINT_2F& /*value*/) const noexcept;
 		// 開始位置を得る.
 		bool get_pos_start(D2D1_POINT_2F& /*value*/) const noexcept;
+		// 頂点を得る.
+		size_t get_verts(D2D1_POINT_2F /*v_pos*/[]) const noexcept;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept;
 		// 範囲に含まれるか判定する.

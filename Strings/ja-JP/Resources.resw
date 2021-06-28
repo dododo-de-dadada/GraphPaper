@@ -914,10 +914,12 @@
     <value>図形として貼り付け</value>
     <comment>ContentDialog</comment>
   </data>
+  <!--
   <data name="tk_conf_paste.Text" xml:space="preserve">
     <value>クリップボードからテキストを貼り付けますか？</value>
     <comment>TextBlock</comment>
   </data>
+  -->
   <data name="mfi_pref_delete.Text" xml:space="preserve">
     <value>設定を削除</value>
     <comment>MenuFlyoutItem</comment>

@@ -294,11 +294,13 @@ namespace winrt::GraphPaper::implementation
 			break;
 		case ANCH_TYPE::ANCH_SE:
 		{
+			D2D1_POINT_2F pos;
 			D2D1_POINT_2F vec;
-			pt_sub(value, m_pos, vec);
+			pt_add(m_pos, m_diff[0], pos);
+			pt_sub(value, pos, vec);
 			pt_round(vec, PT_ROUND, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
-				m_diff[0] = vec;
+				pt_add(m_diff[0], vec, m_diff[0]);
 				flag = true;
 			}
 		}

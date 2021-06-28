@@ -921,12 +921,14 @@
             </StackPanel>
         </ContentDialog>
         <!-- 貼り付け確認ダイアログ -->
+        <!--
         <ContentDialog x:Name="cd_conf_paste_dialog" x:Uid="cd_conf_paste_dialog" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Paste">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
                 <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_conf}" />
                 <TextBlock x:Uid="tk_conf_paste" />
             </StackPanel>
         </ContentDialog>
+        -->
         <!-- 保存確認ダイアログ -->
         <ContentDialog x:Name="cd_conf_save_dialog" x:Uid="cd_conf_save_dialog" CloseButtonText="Cancel" DefaultButton="Close" PrimaryButtonText="Save" SecondaryButtonText="Don't Save">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >

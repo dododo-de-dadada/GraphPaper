@@ -167,18 +167,27 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 		}
-		D2D1_RECT_F dest{
-			m_pos.x, m_pos.y,
-			m_pos.x + m_size.width, m_pos.y + m_size.height
+		D2D1_RECT_F dest_rect{
+			m_pos.x,
+			m_pos.y,
+			m_pos.x + m_size.width,
+			m_pos.y + m_size.height
 		};
-		dx.m_d2dContext->DrawBitmap(m_dx_bitmap.get(), dest, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_buf_rect);
+		dx.m_d2dContext->DrawBitmap(m_dx_bitmap.get(), dest_rect, 1.0f, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_buf_rect);
+
 		if (is_selected()) {
+			dx.m_shape_brush->SetColor(Shape::m_default_background);
+			dx.m_d2dContext->DrawRectangle(dest_rect, dx.m_shape_brush.get(), 1.0f, nullptr);
+			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
+			dx.m_d2dContext->DrawRectangle(dest_rect, dx.m_shape_brush.get(), 1.0f, dx.m_aux_style.get());
+
 			D2D1_POINT_2F v_pos[4]{
 				m_pos,
 				{ m_pos.x + m_size.width, m_pos.y },
 				{ m_pos.x + m_size.width, m_pos.y + m_size.height },
 				{ m_pos.x, m_pos.y + m_size.height },
 			};
+
 			anch_draw_rect(v_pos[0], dx);
 			anch_draw_rect(v_pos[1], dx);
 			anch_draw_rect(v_pos[2], dx);
@@ -189,33 +198,68 @@ namespace winrt::GraphPaper::implementation
 	// 部位の位置を得る.
 	void ShapeBitmap::get_pos_anch(const uint32_t anch, D2D1_POINT_2F& value) const noexcept
 	{
-		if (anch == ANCH_TYPE::ANCH_P0) {
+		if (anch == ANCH_TYPE::ANCH_NW) {
 			value = m_pos;
 		}
-		else if (anch == ANCH_TYPE::ANCH_P0 + 1) {
+		else if (anch == ANCH_TYPE::ANCH_NORTH) {
+			value.x = m_pos.x + m_size.width * 0.5f;
+			value.y = m_pos.y;
+		}
+		else if (anch == ANCH_TYPE::ANCH_NE) {
 			value.x = m_pos.x + m_size.width;
 			value.y = m_pos.y;
 		}
-		else if (anch == ANCH_TYPE::ANCH_P0 + 2) {
+		else if (anch == ANCH_TYPE::ANCH_EAST) {
+			value.x = m_pos.x + m_size.width;
+			value.y = m_pos.y + m_size.height * 0.5f;
+		}
+		else if (anch == ANCH_TYPE::ANCH_SE) {
 			value.x = m_pos.x + m_size.width;
 			value.y = m_pos.y + m_size.height;
 		}
-		else if (anch == ANCH_TYPE::ANCH_P0 + 3) {
+		else if (anch == ANCH_TYPE::ANCH_SOUTH) {
+			value.x = m_pos.x + m_size.width * 0.5f;
+			value.y = m_pos.y + m_size.height;
+		}
+		else if (anch == ANCH_TYPE::ANCH_SW) {
 			value.x = m_pos.x;
 			value.y = m_pos.y + m_size.height;
+		}
+		else if (anch == ANCH_TYPE::ANCH_WEST) {
+			value.x = m_pos.x;
+			value.y = m_pos.y + m_size.height * 0.5f;
 		}
 	}
 
 	// 図形を囲む領域を得る.
 	void ShapeBitmap::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
-		D2D1_POINT_2F v_pos[2]{
+		D2D1_POINT_2F b_pos[2]{
 			m_pos,
 			{ m_pos.x + m_size.width, m_pos.y + m_size.height }
 		};
-		pt_bound(v_pos[0], v_pos[1], v_pos[0], v_pos[1]);
-		pt_min(a_min, v_pos[0], b_min);
-		pt_max(a_max, v_pos[1], b_max);
+		pt_bound(b_pos[0], b_pos[1], b_pos[0], b_pos[1]);
+		pt_min(a_min, b_pos[0], b_min);
+		pt_max(a_max, b_pos[1], b_max);
+	}
+
+	// 近傍の頂点を得る.
+	bool ShapeBitmap::get_neighbor(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& value) const noexcept
+	{
+		bool flag = false;
+		D2D1_POINT_2F v_pos[4];
+		get_verts(v_pos);
+		for (size_t i = 0; i < 4; i++) {
+			D2D1_POINT_2F v_vec;
+			pt_sub(pos, v_pos[i], v_vec);
+			const float v_dd = pt_abs2(v_vec);
+			if (v_dd < dd) {
+				dd = v_dd;
+				value = v_pos[i];
+				flag = true;
+			}
+		}
+		return flag;
 	}
 
 	// 図形を囲む領域の左上位置を得る.
@@ -235,14 +279,20 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
+	// 頂点を得る.
+	size_t ShapeBitmap::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
+	{
+		v_pos[0] = m_pos;
+		v_pos[1] = D2D1_POINT_2F{ m_pos.x + m_size.width, m_pos.y };
+		v_pos[2] = D2D1_POINT_2F{ m_pos.x + m_size.width, m_pos.y + m_size.height };
+		v_pos[3] = D2D1_POINT_2F{ m_pos.x, m_pos.y + m_size.height };
+		return 4;
+	}
+
 	uint32_t ShapeBitmap::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		D2D1_POINT_2F v_pos[4]{
-			{ m_pos.x, m_pos.y },
-			{ m_pos.x + m_size.width, m_pos.y },
-			{ m_pos.x + m_size.width, m_pos.y + m_size.height },
-			{ m_pos.x, m_pos.y + m_size.height }
-		};
+		D2D1_POINT_2F v_pos[4];
+		get_verts(v_pos);
 		if (pt_in_anch(t_pos, v_pos[0])) {
 			return ANCH_TYPE::ANCH_NW;
 		}
@@ -265,9 +315,31 @@ namespace winrt::GraphPaper::implementation
 			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
 				return ANCH_TYPE::ANCH_NORTH;
 			}
+			e_pos[0].x = v_pos[1].x - e_width;
+			e_pos[0].y = v_pos[1].y;
+			e_pos[1].x = v_pos[2].x + e_width;
+			e_pos[1].y = v_pos[2].y;
+			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
+				return ANCH_TYPE::ANCH_EAST;
+			}
+			e_pos[0].x = v_pos[3].x;
+			e_pos[0].y = v_pos[3].y - e_width;
+			e_pos[1].x = v_pos[2].x;
+			e_pos[1].y = v_pos[2].y + e_width;
+			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
+				return ANCH_TYPE::ANCH_SOUTH;
+			}
+			e_pos[0].x = v_pos[0].x - e_width;
+			e_pos[0].y = v_pos[0].y;
+			e_pos[1].x = v_pos[3].x + e_width;
+			e_pos[1].y = v_pos[3].y;
+			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
+				return ANCH_TYPE::ANCH_WEST;
+			}
 		}
-		if (m_pos.x <= t_pos.x && t_pos.x <= m_pos.x + m_size.width &&
-			m_pos.y <= t_pos.y && t_pos.y <= m_pos.y + m_size.height) {
+		pt_bound(v_pos[0], v_pos[1], v_pos[0], v_pos[1]);
+		if (v_pos[0].x <= t_pos.x && t_pos.x <= v_pos[1].x &&
+			v_pos[0].y <= t_pos.y && t_pos.y <= v_pos[1].y) {
 			return ANCH_TYPE::ANCH_FILL;
 		}
 		return ANCH_TYPE::ANCH_SHEET;
@@ -287,46 +359,124 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
+	static void neighbor(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& q)
+	{
+		D2D1_POINT_2F ap;
+		D2D1_POINT_2F ab;
+		pt_sub(p, a, ap);
+		pt_sub(b, a, ab);
+		const float ap_ab = ap.x * ab.x + ap.y * ab.y;
+		const float ab_ab = ab.x * ab.x + ab.y * ab.y;
+		pt_mul(ab, ap_ab / ab_ab, ab);
+		pt_add(a, ab, q);
+	}
+
 	// 値を, 部位の位置に格納する.
 	bool ShapeBitmap::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
 	{
+		bool flag = false;
 		if (anch == ANCH_TYPE::ANCH_NW) {
-			m_size.width = m_size.width - (value.x - m_pos.x);
-			m_size.height = m_size.height - (value.y - m_pos.y);
-			m_pos = value;
+			//D2D1_POINT_2F v_pos[2]{
+			//	m_pos,
+			//	{ m_pos.x + m_size.width, m_pos.y + m_size.height }
+			//};
+			//D2D1_POINT_2F val;
+			//neighbor(value, v_pos[0], v_pos[1], val);
+			//D2D1_POINT_2F v_vec;
+			//pt_sub(val, v_pos[0], v_vec);
+			D2D1_POINT_2F v_vec;
+			pt_sub(value, m_pos, v_vec);
+			if (pt_abs2(v_vec) >= FLT_MIN) {
+				if (v_vec.x * m_size.height)
+				m_size.width = m_size.width - v_vec.x;
+				m_size.height = m_size.height - v_vec.y;
+				//m_pos = val;
+				m_pos = value;
+				m_scale_x = m_size.width / (m_buf_rect.right - m_buf_rect.left);
+				m_scale_y = m_size.height / (m_buf_rect.bottom - m_buf_rect.top);
+				flag = true;
+			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_NORTH) {
-			if (m_size.width >= FLT_MIN) {
-				const auto s = m_buf_size.width / m_size.width;
-				m_buf_rect.top = max((value.y - m_pos.y) * s, 0.0f);
-				m_size.height = m_size.height - (value.y - m_pos.y);
+			float vy = (value.y - m_pos.y) / m_scale_y;
+			if (fabs(vy) >= FLT_MIN) {
+				m_buf_rect.top = max(m_buf_rect.top + vy, 0.0f);
+				m_size.height = (m_buf_rect.bottom - m_buf_rect.top) * m_scale_y;
 				m_pos.y = value.y;
+				flag = true;
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_NE) {
-			m_size.width = value.x - m_pos.x;
-			m_size.height = m_pos.y + m_size.height - value.y;
-			m_pos.y = value.y;
+			//D2D1_POINT_2F v_pos[2]{
+			//	{ m_pos.x + m_size.width, m_pos.y },
+			//	{ m_pos.x, m_pos.y + m_size.height }
+			//};
+			//D2D1_POINT_2F val;
+			//neighbor(value, v_pos[0], v_pos[1], val);
+			//D2D1_POINT_2F v_vec;
+			//pt_sub(val, v_pos[0], v_vec);
+			D2D1_POINT_2F v_vec;
+			pt_sub(value, D2D1_POINT_2F{ m_pos.x + m_size.width, m_pos.y }, v_vec);
+			if (pt_abs2(v_vec) >= FLT_MIN) {
+				m_size.width = value.x - m_pos.x;
+				m_size.height = m_pos.y + m_size.height - value.y;
+				m_pos.y = value.y;
+				m_scale_x = m_size.width / (m_buf_rect.right - m_buf_rect.left);
+				m_scale_y = m_size.height / (m_buf_rect.bottom - m_buf_rect.top);
+				flag = true;
+			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_EAST) {
-			m_buf_rect.right = max(value.y - m_pos.y, 0,0f);
+			float vx = (value.x - (m_pos.x + m_size.width)) / m_scale_x;
+			if (fabs(vx) >= FLT_MIN) {
+				m_buf_rect.right = min(m_buf_rect.right + vx, m_buf_size.width);
+				m_size.width = (m_buf_rect.right - m_buf_rect.left) * m_scale_x;
+				m_pos.x = value.x - m_size.width;
+				flag = true;
+			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SE) {
-			m_size.width = value.x - m_pos.x;
-			m_size.height = value.y - m_pos.y;
+			D2D1_POINT_2F v_vec;
+			pt_sub(value, D2D1_POINT_2F{ m_pos.x + m_size.width, m_pos.y + m_size.height }, v_vec);
+			if (pt_abs2(v_vec) >= FLT_MIN) {
+				m_size.width = value.x - m_pos.x;
+				m_size.height = value.y - m_pos.y;
+				m_scale_x = m_size.width / (m_buf_rect.right - m_buf_rect.left);
+				m_scale_y = m_size.height / (m_buf_rect.bottom - m_buf_rect.top);
+				flag = true;
+			}
+		}
+		else if (anch == ANCH_TYPE::ANCH_SOUTH) {
+			float vy = (value.y - (m_pos.y + m_size.height)) / m_scale_y;
+			if (fabs(vy) >= FLT_MIN) {
+				m_buf_rect.bottom = min(m_buf_rect.bottom + vy, m_buf_size.height);
+				m_size.height = (m_buf_rect.bottom - m_buf_rect.top) * m_scale_y;
+				m_pos.y = value.y - m_size.height;
+				flag = true;
+			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SW) {
-			m_size.width = m_pos.x + m_size.width - value.x;
-			m_size.height = value.y - m_pos.y;
-			m_pos.x = value.x;
+			D2D1_POINT_2F v_vec;
+			pt_sub(value, D2D1_POINT_2F{ m_pos.x, m_pos.y + m_size.height }, v_vec);
+			if (pt_abs2(v_vec) >= FLT_MIN) {
+				m_size.width = m_pos.x + m_size.width - value.x;
+				m_size.height = value.y - m_pos.y;
+				m_pos.x = value.x;
+				m_scale_x = m_size.width / (m_buf_rect.right - m_buf_rect.left);
+				m_scale_y = m_size.height / (m_buf_rect.bottom - m_buf_rect.top);
+				flag = true;
+			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_WEST) {
-
+			float vx = (value.x - m_pos.x) / m_scale_x;
+			if (fabs(vx) >= FLT_MIN) {
+				m_buf_rect.left = max(m_buf_rect.left + (value.x - m_pos.x) / m_scale_x, 0.0f);
+				m_size.width = (m_buf_rect.right - m_buf_rect.left) * m_scale_x;
+				m_pos.x = value.x;
+				flag = true;
+			}
 		}
-		else {
-			return false;
-		}
-		return true;
+		return flag;
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.

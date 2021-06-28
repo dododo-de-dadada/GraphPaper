@@ -508,39 +508,38 @@ namespace winrt::GraphPaper::implementation
 				dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
 			}
 		}
-		if (is_selected() != true) {
-			return;
+		if (is_selected()) {
+			D2D1_MATRIX_3X2_F tran;
+			dx.m_d2dContext->GetTransform(&tran);
+			const auto sw = static_cast<FLOAT>(1.0 / tran.m11);
+			//auto sb = dx.m_anch_brush.get();
+			//auto ss = dx.m_aux_style.get();
+
+			anch_draw_rect(m_pos, dx);
+			s_pos = m_pos;
+			pt_add(s_pos, m_diff[0], e_pos);
+			dx.m_shape_brush->SetColor(Shape::m_default_background);
+			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
+			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
+			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+			anch_draw_ellipse(e_pos, dx);
+
+			s_pos = e_pos;
+			pt_add(s_pos, m_diff[1], e_pos);
+			dx.m_shape_brush->SetColor(Shape::m_default_background);
+			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
+			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
+			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+			anch_draw_ellipse(e_pos, dx);
+
+			s_pos = e_pos;
+			pt_add(s_pos, m_diff[2], e_pos);
+			dx.m_shape_brush->SetColor(Shape::m_default_background);
+			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
+			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
+			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+			anch_draw_rect(e_pos, dx);
 		}
-		D2D1_MATRIX_3X2_F tran;
-		dx.m_d2dContext->GetTransform(&tran);
-		const auto sw = static_cast<FLOAT>(1.0 / tran.m11);
-		//auto sb = dx.m_anch_brush.get();
-		//auto ss = dx.m_aux_style.get();
-
-		anch_draw_rect(m_pos, dx);
-		s_pos = m_pos;
-		pt_add(s_pos, m_diff[0], e_pos);
-		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
-		anch_draw_ellipse(e_pos, dx);
-
-		s_pos = e_pos;
-		pt_add(s_pos, m_diff[1], e_pos);
-		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
-		anch_draw_ellipse(e_pos, dx);
-
-		s_pos = e_pos;
-		pt_add(s_pos, m_diff[2], e_pos);
-		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
-		anch_draw_rect(e_pos, dx);
 	}
 
 	// ˆÊ’u‚ðŠÜ‚Þ‚©”»’è‚·‚é.

@@ -267,8 +267,8 @@ namespace winrt::GraphPaper::implementation
 			// クリップボードにテキストが含まれているか判定する.
 			else if (i == 1) {
 				using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-				const auto d_result = co_await cd_conf_paste_dialog().ShowAsync();
-				if (d_result == ContentDialogResult::Primary) {
+				//const auto d_result = co_await cd_conf_paste_dialog().ShowAsync();
+				//if (d_result == ContentDialogResult::Primary) {
 
 					// クリップボードから読み込むためのデータリーダーを得る.
 					auto text{ co_await Clipboard::GetContent().GetTextAsync() };
@@ -342,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 					else {
 						message_show(ICON_ALERT, L"str_err_paste", L"");
 					}
-				}
+				//}
 			}
 			else if (i == 2) {
 				auto bitmap = co_await Clipboard::GetContent().GetBitmapAsync();
@@ -353,6 +353,7 @@ namespace winrt::GraphPaper::implementation
 				auto ra_size = static_cast<UINT32>(bn_stream.Size());
 				auto operation{ co_await dt_reader.LoadAsync(ra_size) };
 				if (operation == ra_size) {
+					// 用紙の表示された部分の中心の位置を求める.
 					const float scale = m_sheet_main.m_sheet_scale;
 					const float act_w = static_cast<float>(scp_sheet_panel().ActualWidth());
 					const float act_h = static_cast<float>(scp_sheet_panel().ActualHeight());

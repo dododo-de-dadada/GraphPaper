@@ -306,7 +306,7 @@ namespace winrt::GraphPaper::implementation
 				pt_sub(g_pos, m_event_pos_curr, g_vec);
 				g_len = static_cast<float>(sqrt(pt_abs2(g_vec))) / s_scale;
 			}
-			// 頂点の位置を変更してみて, 近傍の頂点によって位置が変わらなかったか判定する.
+			// 近傍の頂点によって位置が変わらなかったか判定する.
 			if (!m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, g_len)) {
 				m_event_shape_pressed->set_pos_anch(g_pos, m_event_anch_pressed, 0.0f);
 			}

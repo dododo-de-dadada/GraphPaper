@@ -922,10 +922,6 @@
     <value>Paste as shape</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="tk_conf_paste.Text" xml:space="preserve">
-    <value>Paste text from clipboard?</value>
-    <comment>TextBlock</comment>
-  </data>
   <data name="mfi_pref_delete.Text" xml:space="preserve">
     <value>Delete preference</value>
     <comment>MenuFlyoutItem</comment>
