@@ -5,132 +5,203 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	static void read_bitmap(DataReader const& dt_reader, D2D1_SIZE_U& b_size, uint8_t** buf)
+#define NIBBLE_HI(b)	((b >> 4) & 0x0f)
+#define NIBBLE_LO(b)	(b & 0x0f)
+
+	static void bitmap_read(DataReader const& dt_reader, D2D1_SIZE_U& b_size, uint8_t** buf)
 	{
 		using winrt::Windows::Storage::Streams::ByteOrder;
 
 		// 2 バイトを読み込み, それが 'BM' か判定する.
-		const char id_b = dt_reader.ReadByte();
-		const char id_m = dt_reader.ReadByte();
-		if (id_b == 'B' && id_m == 'M') {
+		const char bf_type1 = dt_reader.ReadByte();
+		const char bf_type2 = dt_reader.ReadByte();
+		if (bf_type1 == 'B' && bf_type2 == 'M') {
 			// データリーダーのバイトオーダーを得る.
 			const auto b_order = dt_reader.ByteOrder();
 			// バイトオーダーがリトルエンディアン以外か判定する.
 			if (b_order != ByteOrder::LittleEndian) {
 				dt_reader.ByteOrder(ByteOrder::LittleEndian);
 			}
-			uint32_t file_size = dt_reader.ReadUInt32();
-			uint16_t reserve_0 = dt_reader.ReadUInt16();
-			uint16_t reserve_1 = dt_reader.ReadUInt16();
-			uint32_t data_offset = dt_reader.ReadUInt32();
-			uint32_t header_len = dt_reader.ReadUInt32();
-			uint32_t bitmap_w = 0;
-			uint32_t bitmap_h = 0;
-			uint16_t bit_per_pixel = 0;
-			uint32_t image_size = 0;
-			uint32_t comp_type = 0;
-			uint32_t color_used = 0;
+			uint32_t bf_size = dt_reader.ReadUInt32();	// ファイル全体のサイズ.
+			uint16_t bf_reserved_0 = dt_reader.ReadUInt16();
+			uint16_t bf_reserved_1 = dt_reader.ReadUInt16();
+			uint32_t bf_offset = dt_reader.ReadUInt32();	// イメージデータまでのオフセット
+			uint32_t bi_size = dt_reader.ReadUInt32();	// BITMAOINFOHEADER または BITMAPCOREHEADER のサイズ
+			uint32_t bi_width = 0;
+			uint32_t bi_height = 0;
+			uint16_t bi_bit_cnt = 0;
+			uint32_t bi_compress = 0;
+			uint32_t bi_size_img = 0;
+			uint32_t bi_color_used = 0;
 			uint8_t pallete[256][4];
-			if (header_len == 0x28) {
-				bitmap_w = dt_reader.ReadUInt32();
-				bitmap_h = dt_reader.ReadUInt32();
-				uint16_t plane_cnt = dt_reader.ReadUInt16();
-				bit_per_pixel = dt_reader.ReadUInt16();
-				comp_type = dt_reader.ReadUInt32();
-				image_size = dt_reader.ReadUInt32();
-				uint32_t res_w = dt_reader.ReadUInt32();
-				uint32_t res_h = dt_reader.ReadUInt32();
-				color_used = dt_reader.ReadUInt32();
-				uint32_t color_important = dt_reader.ReadUInt32();
-				for (size_t i = 0; i < color_used; i++) {
-					pallete[i][0] = dt_reader.ReadByte();
-					pallete[i][1] = dt_reader.ReadByte();
-					pallete[i][2] = dt_reader.ReadByte();
-					pallete[i][3] = dt_reader.ReadByte();
-				}
-			}
-			else if (header_len == 0x0c) {
-				bitmap_w = dt_reader.ReadUInt16();
-				bitmap_h = dt_reader.ReadUInt16();
-				uint16_t plane_cnt = dt_reader.ReadUInt16();
-				bit_per_pixel = dt_reader.ReadUInt16();
-				comp_type = 0;
-				image_size = 0;	// 非圧縮の場合はゼロ.
-				if (0 < bit_per_pixel && bit_per_pixel <= 8) {
-					color_used = (1 << bit_per_pixel);
-					for (size_t i = 0; i < color_used; i++) {
-						pallete[i][0] = dt_reader.ReadByte();
-						pallete[i][1] = dt_reader.ReadByte();
-						pallete[i][2] = dt_reader.ReadByte();
-						pallete[i][3] = 0xff;
+			// BITMAOINFOHEADER か判定する.
+			if (bi_size == 0x28) {
+				bi_width = dt_reader.ReadUInt32();
+				bi_height = dt_reader.ReadUInt32();
+				uint16_t bi_planes = dt_reader.ReadUInt16();	// プレーンの数. かならず 1
+				bi_bit_cnt = dt_reader.ReadUInt16();
+				bi_compress = dt_reader.ReadUInt32();	// 圧縮タイプ. (0=BI_RGB, 1=BI_RLE8, 2=BI_RLE4, 3=BI_BITFIELDS)
+				bi_size_img = dt_reader.ReadUInt32();
+				uint32_t x_px_per_meter = dt_reader.ReadUInt32();	// 96dpiのとき 3780. ふつうはゼロ.
+				uint32_t y_px_per_meter = dt_reader.ReadUInt32();
+				bi_color_used = dt_reader.ReadUInt32();
+				uint32_t bi_color_important = dt_reader.ReadUInt32();
+				if (bi_color_used == 0) {
+					if (0 < bi_bit_cnt && bi_bit_cnt <= 8) {
+						bi_color_used = (1 << bi_bit_cnt);
 					}
 				}
+				for (size_t i = 0; i < bi_color_used; i++) {
+					pallete[i][0] = dt_reader.ReadByte();	// B
+					pallete[i][1] = dt_reader.ReadByte();	// G
+					pallete[i][2] = dt_reader.ReadByte();	// R
+					pallete[i][3] = dt_reader.ReadByte();	// A
+				}
 			}
-			const auto row_len = 4 * bitmap_w;
-			const auto buf_len = row_len * bitmap_h;
+			// BITMAPCOREHEADER か判定する.
+			else if (bi_size == 0x0c) {
+				bi_width = dt_reader.ReadUInt16();
+				bi_height = dt_reader.ReadUInt16();
+				uint16_t bi_planes = dt_reader.ReadUInt16();	// プレーンの数. かならず 1
+				bi_bit_cnt = dt_reader.ReadUInt16();
+				bi_compress = 0;
+				bi_size_img = 0;	// 非圧縮の場合はゼロ.
+				if (0 < bi_bit_cnt && bi_bit_cnt <= 8) {
+					bi_color_used = (1 << bi_bit_cnt);
+				}
+				for (size_t i = 0; i < bi_color_used; i++) {
+					pallete[i][0] = dt_reader.ReadByte();	// B
+					pallete[i][1] = dt_reader.ReadByte();	// G
+					pallete[i][2] = dt_reader.ReadByte();	// R
+				}
+			}
+			const size_t row_len = 4 * bi_width;;
+			const auto buf_len = row_len * bi_height;
 			uint8_t* const buf_ptr = new uint8_t[buf_len];
 			*buf = buf_ptr;
-			if (comp_type == 0)	// BI_RGB, no pixel array compression used
+			if (bi_compress == BI_RGB || bi_compress == BI_BITFIELDS)	// BI_RGB, no pixel array compression used
 			{
 				std::vector<uint8_t> line_buf(row_len);
-				for (size_t i = 1; i <= bitmap_h; i++) {
+				for (size_t i = 1; i <= bi_height; i++) {
 					dt_reader.ReadBytes(line_buf);
 					memcpy(buf_ptr + buf_len - row_len * i, line_buf.data(), row_len);
 				}
 			}
-			else if (image_size > 0) {
+			else if ((bi_compress == BI_RLE8 || bi_compress == BI_RLE4) && bi_size_img > 0) {
 				size_t j = 0;
-				size_t x = 0;
 				size_t s = 0;
-				for (size_t i = 0; i < image_size; i++) {
-					const auto b = dt_reader.ReadByte();
+				for (size_t i = 0; i < bi_size_img; i += 2) {
+					const auto b0 = dt_reader.ReadByte();
+					const auto b1 = dt_reader.ReadByte();
 					if (s == 0) {
-						if (b == 0) {
-							s = static_cast<size_t>(-1);
+						if (b0 == 0) {
+							if (b1 == 0) {
+								j = (j / row_len + 1) * row_len;
+							}
+							else if (b1 == 1) {
+								break;
+							}
+							else if (b1 == 2) {
+								s = 1;
+							}
+							else {
+								s = b1;
+							}
 						}
 						else {
-							s = b;
+							for (size_t k = 0; k < b0; k++) { 
+								if (bi_compress == BI_RLE8 && j + 4 <= buf_len) {
+									buf_ptr[j + 0] = pallete[b1][0];
+									buf_ptr[j + 1] = pallete[b1][1];
+									buf_ptr[j + 2] = pallete[b1][2];
+									buf_ptr[j + 3] = pallete[b1][3];	// 0
+									j += 4;
+								}
+								else if (bi_compress == BI_RLE4 && j + 8 <= buf_len) {
+									const auto nh = NIBBLE_HI(b1);
+									const auto nl = NIBBLE_LO(b1);
+									buf_ptr[j + 0] = pallete[nh][0];
+									buf_ptr[j + 1] = pallete[nh][1];
+									buf_ptr[j + 2] = pallete[nh][2];
+									buf_ptr[j + 3] = pallete[nh][3];	// 0
+									buf_ptr[j + 4] = pallete[nl][0];
+									buf_ptr[j + 5] = pallete[nl][1];
+									buf_ptr[j + 6] = pallete[nl][2];
+									buf_ptr[j + 7] = pallete[nl][3];	// 0
+									j += 8;
+								}
+							}
 						}
 					}
-					else if (s == static_cast<size_t>(-1)) {
-						if (b == 0) {
-							j = (j / row_len + 1) * row_len;
-							s = 0;
-						}
-						else if (b == 1) {
-							break;
-						}
-						else if (b == 2) {
-							s = static_cast<size_t>(-2);
-						}
-						else if (b >= 3) {
-							s = 512 + b - 3;
-						}
-					}
-					else if (s == static_cast<size_t>(-2)) {
-						x = b;
-						s = static_cast<size_t>(-3);
-					}
-					else if (s == static_cast<size_t>(-3)) {
-						j = b * row_len + x;
+					else if (s == 1) {
+						j = b0 * row_len + b1;
 						s = 0;
 					}
-					else if (s > 512) {
-						for (size_t k = 0; k < s && j < buf_len; k++, j += 4) {
-							buf_ptr[j] = b;
+					else if (s == 3) {
+						if (bi_compress == BI_RLE8 && j + 4 <= buf_len) {
+							buf_ptr[j + 0] = pallete[b0][0];
+							buf_ptr[j + 1] = pallete[b0][1];
+							buf_ptr[j + 2] = pallete[b0][2];
+							buf_ptr[j + 3] = pallete[b0][3];
+							j += 4;
+						}
+						else if (bi_compress == BI_RLE4 && j + 8 <= buf_len) {
+							const auto nh = NIBBLE_HI(b0);
+							const auto nl = NIBBLE_LO(b0);
+							buf_ptr[j + 0] = pallete[nh][0];
+							buf_ptr[j + 1] = pallete[nh][1];
+							buf_ptr[j + 2] = pallete[nh][2];
+							buf_ptr[j + 3] = pallete[nh][3];
+							buf_ptr[j + 4] = pallete[nl][0];
+							buf_ptr[j + 5] = pallete[nl][1];
+							buf_ptr[j + 6] = pallete[nl][2];
+							buf_ptr[j + 7] = pallete[nl][3];
+							j += 8;
 						}
 						s = 0;
 					}
 					else {
-						for (size_t k = 0; k < s && j < buf_len; k++, j += 4) {
-							buf_ptr[j] = b;
+						if (bi_compress == BI_RLE8 && j + 8 <= buf_len) {
+							buf_ptr[j + 0] = pallete[b0][0];
+							buf_ptr[j + 1] = pallete[b0][1];
+							buf_ptr[j + 2] = pallete[b0][2];
+							buf_ptr[j + 3] = pallete[b0][3];
+							buf_ptr[j + 4] = pallete[b1][0];
+							buf_ptr[j + 5] = pallete[b1][1];
+							buf_ptr[j + 6] = pallete[b1][2];
+							buf_ptr[j + 7] = pallete[b1][3];
+							j += 8;
+							s -= 2;
 						}
-						s = 0;
+						else if (bi_compress == BI_RLE4 && j + 16 <= buf_len) {
+							const auto b0_nh = NIBBLE_HI(b0);
+							const auto b0_nl = NIBBLE_LO(b0);
+							const auto b1_nh = NIBBLE_HI(b1);
+							const auto b1_nl = NIBBLE_LO(b1);
+							buf_ptr[j + 0] = pallete[b0_nh][0];
+							buf_ptr[j + 1] = pallete[b0_nh][1];
+							buf_ptr[j + 2] = pallete[b0_nh][2];
+							buf_ptr[j + 3] = pallete[b0_nh][3];
+							buf_ptr[j + 4] = pallete[b0_nl][0];
+							buf_ptr[j + 5] = pallete[b0_nl][1];
+							buf_ptr[j + 6] = pallete[b0_nl][2];
+							buf_ptr[j + 7] = pallete[b0_nl][3];
+							buf_ptr[j + 8] = pallete[b1_nh][0];
+							buf_ptr[j + 9] = pallete[b1_nh][1];
+							buf_ptr[j + 10] = pallete[b1_nh][2];
+							buf_ptr[j + 11] = pallete[b1_nh][3];
+							buf_ptr[j + 12] = pallete[b1_nl][0];
+							buf_ptr[j + 13] = pallete[b1_nl][1];
+							buf_ptr[j + 14] = pallete[b1_nl][2];
+							buf_ptr[j + 15] = pallete[b1_nl][3];
+							j += 16;
+							s -= 4;
+						}
 					}
 				}
 			}
-			b_size.width = bitmap_w;
-			b_size.height = bitmap_h;
+			b_size.width = bi_width;
+			b_size.height = bi_height;
 			// バイトオーダーがリトルエンディアン以外か判定する.
 			if (b_order != ByteOrder::LittleEndian) {
 				// バイトオーダーを元に戻す.
@@ -157,9 +228,9 @@ namespace winrt::GraphPaper::implementation
 				D2D1::BitmapProperties1(
 					D2D1_BITMAP_OPTIONS_NONE,
 					//D2D1_BITMAP_OPTIONS_NONE | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-					D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
-					dx.m_logical_dpi,
-					dx.m_logical_dpi
+					D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+					//96.0f,
+					//96.0f
 				)
 			};
 			dx.m_d2dContext->CreateBitmap(m_buf_size, static_cast<void*>(m_buf), 4 * m_buf_size.width, b_prop, m_dx_bitmap.put());
@@ -361,14 +432,23 @@ namespace winrt::GraphPaper::implementation
 
 	static void neighbor(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& q)
 	{
-		D2D1_POINT_2F ap;
-		D2D1_POINT_2F ab;
-		pt_sub(p, a, ap);
-		pt_sub(b, a, ab);
-		const float ap_ab = ap.x * ab.x + ap.y * ab.y;
-		const float ab_ab = ab.x * ab.x + ab.y * ab.y;
-		pt_mul(ab, ap_ab / ab_ab, ab);
-		pt_add(a, ab, q);
+		if (a.x == b.x) {
+			q.x = a.x;
+			q.y = p.y;
+		}
+		else if (a.y == b.y) {
+			q.x = p.x;
+			q.y = a.y;
+		}
+		else {
+			D2D1_POINT_2F ap;
+			D2D1_POINT_2F ab;
+			pt_sub(p, a, ap);
+			pt_sub(b, a, ab);
+			const double ap_ab = ap.x * ab.x + ap.y * ab.y;
+			const double ab_ab = ab.x * ab.x + ab.y * ab.y;
+			pt_mul(ab, ap_ab / ab_ab, a, q);
+		}
 	}
 
 	// 値を, 部位の位置に格納する.
@@ -376,24 +456,26 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool flag = false;
 		if (anch == ANCH_TYPE::ANCH_NW) {
-			//D2D1_POINT_2F v_pos[2]{
-			//	m_pos,
-			//	{ m_pos.x + m_size.width, m_pos.y + m_size.height }
-			//};
-			//D2D1_POINT_2F val;
-			//neighbor(value, v_pos[0], v_pos[1], val);
-			//D2D1_POINT_2F v_vec;
-			//pt_sub(val, v_pos[0], v_vec);
+			const float size_w = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
+			const float size_h = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
+			D2D1_POINT_2F v_pos[2]{
+				m_pos,
+				{ m_pos.x + size_w, m_pos.y + size_h }
+			};
+			D2D1_POINT_2F val;
+			neighbor(value, v_pos[0], v_pos[1], val);
 			D2D1_POINT_2F v_vec;
-			pt_sub(value, m_pos, v_vec);
+			pt_sub(val, v_pos[0], v_vec);
+			//D2D1_POINT_2F v_vec;
+			//pt_sub(value, m_pos, v_vec);
 			if (pt_abs2(v_vec) >= FLT_MIN) {
 				if (v_vec.x * m_size.height)
 				m_size.width = m_size.width - v_vec.x;
 				m_size.height = m_size.height - v_vec.y;
-				//m_pos = val;
-				m_pos = value;
-				m_scale_x = m_size.width / (m_buf_rect.right - m_buf_rect.left);
-				m_scale_y = m_size.height / (m_buf_rect.bottom - m_buf_rect.top);
+				m_pos = val;
+				//m_pos = value;
+				m_scale_x = m_size.width / size_w;
+				m_scale_y = m_size.height / size_h;
 				flag = true;
 			}
 		}
@@ -407,22 +489,30 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_NE) {
-			//D2D1_POINT_2F v_pos[2]{
-			//	{ m_pos.x + m_size.width, m_pos.y },
-			//	{ m_pos.x, m_pos.y + m_size.height }
-			//};
-			//D2D1_POINT_2F val;
-			//neighbor(value, v_pos[0], v_pos[1], val);
-			//D2D1_POINT_2F v_vec;
-			//pt_sub(val, v_pos[0], v_vec);
+			const float size_w = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
+			const float size_h = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
+			D2D1_POINT_2F v_pos[2]{
+				{ m_pos.x + size_w, m_pos.y },
+				{ m_pos.x, m_pos.y + size_h }
+			};
+			D2D1_POINT_2F val;
+			if (false) {
+				neighbor(value, v_pos[0], v_pos[1], val);
+			}
+			else {
+				val = value;
+			}
 			D2D1_POINT_2F v_vec;
-			pt_sub(value, D2D1_POINT_2F{ m_pos.x + m_size.width, m_pos.y }, v_vec);
+			pt_sub(val, v_pos[0], v_vec);
 			if (pt_abs2(v_vec) >= FLT_MIN) {
-				m_size.width = value.x - m_pos.x;
-				m_size.height = m_pos.y + m_size.height - value.y;
-				m_pos.y = value.y;
-				m_scale_x = m_size.width / (m_buf_rect.right - m_buf_rect.left);
-				m_scale_y = m_size.height / (m_buf_rect.bottom - m_buf_rect.top);
+				m_size.width = val.x - m_pos.x;
+				m_size.height = m_pos.y + m_size.height - val.y;
+				m_pos.y = val.y;
+				//m_size.width = value.x - m_pos.x;
+				//m_size.height = m_pos.y + m_size.height - value.y;
+				//m_pos.y = value.y;
+				m_scale_x = m_size.width / size_w;
+				m_scale_y = m_size.height / size_h;
 				flag = true;
 			}
 		}
@@ -436,13 +526,21 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SE) {
+			const float size_w = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
+			const float size_h = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
+			D2D1_POINT_2F v_pos[2]{
+				{ m_pos.x + size_w, m_pos.y + size_h },
+				m_pos
+			};
+			D2D1_POINT_2F val;
+			neighbor(value, v_pos[0], v_pos[1], val);
 			D2D1_POINT_2F v_vec;
-			pt_sub(value, D2D1_POINT_2F{ m_pos.x + m_size.width, m_pos.y + m_size.height }, v_vec);
+			pt_sub(val, v_pos[0], v_vec);
 			if (pt_abs2(v_vec) >= FLT_MIN) {
-				m_size.width = value.x - m_pos.x;
-				m_size.height = value.y - m_pos.y;
-				m_scale_x = m_size.width / (m_buf_rect.right - m_buf_rect.left);
-				m_scale_y = m_size.height / (m_buf_rect.bottom - m_buf_rect.top);
+				m_size.width = val.x - m_pos.x;
+				m_size.height = val.y - m_pos.y;
+				m_scale_x = m_size.width / size_w;
+				m_scale_y = m_size.height / size_h;
 				flag = true;
 			}
 		}
@@ -456,14 +554,22 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SW) {
+			const float size_w = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
+			const float size_h = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
+			D2D1_POINT_2F v_pos[2]{
+				{ m_pos.x, m_pos.y + size_h },
+				{ m_pos.x + size_w, m_pos.y }
+			};
+			D2D1_POINT_2F val;
+			neighbor(value, v_pos[0], v_pos[1], val); 
 			D2D1_POINT_2F v_vec;
-			pt_sub(value, D2D1_POINT_2F{ m_pos.x, m_pos.y + m_size.height }, v_vec);
+			pt_sub(val, v_pos[0], v_vec);
 			if (pt_abs2(v_vec) >= FLT_MIN) {
-				m_size.width = m_pos.x + m_size.width - value.x;
-				m_size.height = value.y - m_pos.y;
-				m_pos.x = value.x;
-				m_scale_x = m_size.width / (m_buf_rect.right - m_buf_rect.left);
-				m_scale_y = m_size.height / (m_buf_rect.bottom - m_buf_rect.top);
+				m_size.width = m_pos.x + m_size.width - val.x;
+				m_size.height = val.y - m_pos.y;
+				m_pos.x = val.x;
+				m_scale_x = m_size.width / size_w;
+				m_scale_y = m_size.height / size_h;
 				flag = true;
 			}
 		}
@@ -495,14 +601,14 @@ namespace winrt::GraphPaper::implementation
 
 	ShapeBitmap::ShapeBitmap(const D2D1_POINT_2F c_pos, DataReader const& dt_reader)
 	{
-		read_bitmap(dt_reader, m_buf_size, &m_buf);
+		bitmap_read(dt_reader, m_buf_size, &m_buf);
 
 		m_buf_rect.left = 0;
 		m_buf_rect.top = 0;
-		m_buf_rect.right = m_buf_size.width;
-		m_buf_rect.bottom = m_buf_size.height;
-		m_size.width = m_buf_size.width;
-		m_size.height = m_buf_size.height;
+		m_buf_rect.right = static_cast<FLOAT>(m_buf_size.width);
+		m_buf_rect.bottom = static_cast<FLOAT>(m_buf_size.height);
+		m_size.width = static_cast<FLOAT>(m_buf_size.width);
+		m_size.height = static_cast<FLOAT>(m_buf_size.height);
 		m_pos.x = c_pos.x - m_size.width * 0.5;
 		m_pos.y = c_pos.y - m_size.height * 0.5;
 	}
