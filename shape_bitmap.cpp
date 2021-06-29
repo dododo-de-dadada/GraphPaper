@@ -456,130 +456,146 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool flag = false;
 		if (anch == ANCH_TYPE::ANCH_NW) {
-			const float size_w = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
-			const float size_h = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
+			const float bw = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
+			const float bh = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
 			D2D1_POINT_2F v_pos[2]{
 				m_pos,
-				{ m_pos.x + size_w, m_pos.y + size_h }
+				{ m_pos.x + bw, m_pos.y + bh }
 			};
 			D2D1_POINT_2F val;
 			neighbor(value, v_pos[0], v_pos[1], val);
 			D2D1_POINT_2F v_vec;
 			pt_sub(val, v_pos[0], v_vec);
-			//D2D1_POINT_2F v_vec;
-			//pt_sub(value, m_pos, v_vec);
 			if (pt_abs2(v_vec) >= FLT_MIN) {
-				if (v_vec.x * m_size.height)
-				m_size.width = m_size.width - v_vec.x;
-				m_size.height = m_size.height - v_vec.y;
-				m_pos = val;
-				//m_pos = value;
-				m_scale_x = m_size.width / size_w;
-				m_scale_y = m_size.height / size_h;
-				flag = true;
+				const float sw = m_size.width - v_vec.x;
+				const float sh = m_size.height - v_vec.y;
+				if (sw >= 1.0f && sh >= 1.0f) {
+					m_size.width = sw;
+					m_size.height = sh;
+					m_pos = val;
+					m_scale_x = sw / bw;
+					m_scale_y = sh / bh;
+					flag = true;
+				}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_NORTH) {
 			float vy = (value.y - m_pos.y) / m_scale_y;
 			if (fabs(vy) >= FLT_MIN) {
-				m_buf_rect.top = max(m_buf_rect.top + vy, 0.0f);
-				m_size.height = (m_buf_rect.bottom - m_buf_rect.top) * m_scale_y;
-				m_pos.y = value.y;
-				flag = true;
+				const float sh = (m_buf_rect.bottom - m_buf_rect.top) * m_scale_y;
+				//if (sh >= 1.0f) {
+					m_buf_rect.top = max(m_buf_rect.top + vy, 0.0f);
+					m_size.height = sh;
+					m_pos.y = value.y;
+					flag = true;
+				//}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_NE) {
-			const float size_w = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
-			const float size_h = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
+			const float bw = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
+			const float bh = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
 			D2D1_POINT_2F v_pos[2]{
-				{ m_pos.x + size_w, m_pos.y },
-				{ m_pos.x, m_pos.y + size_h }
-			};
-			D2D1_POINT_2F val;
-			if (false) {
-				neighbor(value, v_pos[0], v_pos[1], val);
-			}
-			else {
-				val = value;
-			}
-			D2D1_POINT_2F v_vec;
-			pt_sub(val, v_pos[0], v_vec);
-			if (pt_abs2(v_vec) >= FLT_MIN) {
-				m_size.width = val.x - m_pos.x;
-				m_size.height = m_pos.y + m_size.height - val.y;
-				m_pos.y = val.y;
-				//m_size.width = value.x - m_pos.x;
-				//m_size.height = m_pos.y + m_size.height - value.y;
-				//m_pos.y = value.y;
-				m_scale_x = m_size.width / size_w;
-				m_scale_y = m_size.height / size_h;
-				flag = true;
-			}
-		}
-		else if (anch == ANCH_TYPE::ANCH_EAST) {
-			float vx = (value.x - (m_pos.x + m_size.width)) / m_scale_x;
-			if (fabs(vx) >= FLT_MIN) {
-				m_buf_rect.right = min(m_buf_rect.right + vx, m_buf_size.width);
-				m_size.width = (m_buf_rect.right - m_buf_rect.left) * m_scale_x;
-				m_pos.x = value.x - m_size.width;
-				flag = true;
-			}
-		}
-		else if (anch == ANCH_TYPE::ANCH_SE) {
-			const float size_w = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
-			const float size_h = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
-			D2D1_POINT_2F v_pos[2]{
-				{ m_pos.x + size_w, m_pos.y + size_h },
-				m_pos
+				{ m_pos.x + m_size.width, m_pos.y },
+				{ m_pos.x + m_size.width - bw, m_pos.y + bh }
 			};
 			D2D1_POINT_2F val;
 			neighbor(value, v_pos[0], v_pos[1], val);
 			D2D1_POINT_2F v_vec;
 			pt_sub(val, v_pos[0], v_vec);
 			if (pt_abs2(v_vec) >= FLT_MIN) {
-				m_size.width = val.x - m_pos.x;
-				m_size.height = val.y - m_pos.y;
-				m_scale_x = m_size.width / size_w;
-				m_scale_y = m_size.height / size_h;
-				flag = true;
+				const float sw = val.x - m_pos.x;
+				const float sh = m_pos.y + m_size.height - val.y;
+				if (sw >= 1.0f && sh >= 1.0f) {
+					m_size.width = sw;
+					m_size.height = sh;
+					m_pos.y = val.y;
+					m_scale_x = sw / bw;
+					m_scale_y = sh / bh;
+					flag = true;
+				}
+			}
+		}
+		else if (anch == ANCH_TYPE::ANCH_EAST) {
+			float vx = (value.x - (m_pos.x + m_size.width)) / m_scale_x;
+			if (fabs(vx) >= FLT_MIN) {
+				const float sw = (m_buf_rect.right - m_buf_rect.left) * m_scale_x;
+				//if (sw >= 1.0f) {
+					m_buf_rect.right = min(m_buf_rect.right + vx, m_buf_size.width);
+					m_size.width = sw;
+					m_pos.x = value.x - sw;
+					flag = true;
+				//}
+			}
+		}
+		else if (anch == ANCH_TYPE::ANCH_SE) {
+			const float bw = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
+			const float bh = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
+			D2D1_POINT_2F v_pos[2]{
+				{ m_pos.x + m_size.width, m_pos.y + m_size.height },
+				{ m_pos.x + m_size.width - bw, m_pos.y + m_size.height - bh }
+			};
+			D2D1_POINT_2F val;
+			neighbor(value, v_pos[0], v_pos[1], val);
+			D2D1_POINT_2F v_vec;
+			pt_sub(val, v_pos[0], v_vec);
+			if (pt_abs2(v_vec) >= FLT_MIN) {
+				const float sw = val.x - m_pos.x;
+				const float sh = val.y - m_pos.y;
+				if (sw >= 1.0f && sh >= 1.0f) {
+					m_size.width = sw;
+					m_size.height = sh;
+					m_scale_x = sw / bw;
+					m_scale_y = sh / bh;
+					flag = true;
+				}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SOUTH) {
 			float vy = (value.y - (m_pos.y + m_size.height)) / m_scale_y;
 			if (fabs(vy) >= FLT_MIN) {
-				m_buf_rect.bottom = min(m_buf_rect.bottom + vy, m_buf_size.height);
-				m_size.height = (m_buf_rect.bottom - m_buf_rect.top) * m_scale_y;
-				m_pos.y = value.y - m_size.height;
-				flag = true;
+				const float sh = (m_buf_rect.bottom - m_buf_rect.top) * m_scale_y;
+				//if (sh >= 1.0f) {
+					m_buf_rect.bottom = min(m_buf_rect.bottom + vy, m_buf_size.height);
+					m_size.height = sh;
+					m_pos.y = value.y - sh;
+					flag = true;
+				//}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SW) {
-			const float size_w = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
-			const float size_h = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
+			const float bw = (m_buf_rect.right == m_buf_rect.left ? m_buf_size.width : (m_buf_rect.right - m_buf_rect.left));
+			const float bh = (m_buf_rect.bottom == m_buf_rect.top ? m_buf_size.height : (m_buf_rect.bottom - m_buf_rect.top));
 			D2D1_POINT_2F v_pos[2]{
-				{ m_pos.x, m_pos.y + size_h },
-				{ m_pos.x + size_w, m_pos.y }
+				{ m_pos.x, m_pos.y + m_size.height },
+				{ m_pos.x + bw, m_pos.y + m_size.height - bh }
 			};
 			D2D1_POINT_2F val;
 			neighbor(value, v_pos[0], v_pos[1], val); 
 			D2D1_POINT_2F v_vec;
 			pt_sub(val, v_pos[0], v_vec);
 			if (pt_abs2(v_vec) >= FLT_MIN) {
-				m_size.width = m_pos.x + m_size.width - val.x;
-				m_size.height = val.y - m_pos.y;
-				m_pos.x = val.x;
-				m_scale_x = m_size.width / size_w;
-				m_scale_y = m_size.height / size_h;
-				flag = true;
+				const float sw = m_pos.x + m_size.width - val.x;
+				const float sh = val.y - m_pos.y;
+				if (sw >= 1.0f && sh >= 1.0f) {
+					m_size.width = sw;
+					m_size.height = sh;
+					m_pos.x = val.x;
+					m_scale_x = sw / bw;
+					m_scale_y = sh / bh;
+					flag = true;
+				}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_WEST) {
 			float vx = (value.x - m_pos.x) / m_scale_x;
 			if (fabs(vx) >= FLT_MIN) {
-				m_buf_rect.left = max(m_buf_rect.left + (value.x - m_pos.x) / m_scale_x, 0.0f);
-				m_size.width = (m_buf_rect.right - m_buf_rect.left) * m_scale_x;
-				m_pos.x = value.x;
-				flag = true;
+				const float sw = (m_buf_rect.right - m_buf_rect.left) * m_scale_x;
+				//if (sw >= 1.0f) {
+					m_buf_rect.left = max(m_buf_rect.left + (value.x - m_pos.x) / m_scale_x, 0.0f);
+					m_size.width = sw;
+					m_pos.x = value.x;
+					flag = true;
+				//}
 			}
 		}
 		return flag;
