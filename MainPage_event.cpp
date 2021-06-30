@@ -156,7 +156,7 @@ namespace winrt::GraphPaper::implementation
 					if (t->is_deleted() || t->is_selected()) {
 						continue;
 					}
-					if (t->get_neighbor(v_pos[i], dd, n_pos)) {
+					if (t->get_pos_nearest(v_pos[i], dd, n_pos)) {
 						w_pos = v_pos[i];
 						flag = true;
 					}

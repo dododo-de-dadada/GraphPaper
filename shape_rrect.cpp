@@ -307,10 +307,11 @@ namespace winrt::GraphPaper::implementation
 		return ANCH_TYPE::ANCH_SHEET;
 	}
 
-	//	値を, 部位の位置に格納する. 他の部位の位置も動く.
-	//	value	格納する値
-	//	abch	図形の部位
-	bool ShapeRRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
+	// 値を, 部位の位置に格納する. 他の部位の位置も動く.
+	// value	値
+	// anch	図形の部位
+	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
+	bool ShapeRRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit)
 	{
 		D2D1_POINT_2F c_pos;
 		D2D1_POINT_2F vec;
@@ -357,7 +358,7 @@ namespace winrt::GraphPaper::implementation
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		default:
-			ShapeRect::set_pos_anch(value, anch, dist);
+			ShapeRect::set_pos_anch(value, anch, limit);
 			if (m_diff[0].x * m_corner_rad.x < 0.0f) {
 				m_corner_rad.x = -m_corner_rad.x;
 			}
@@ -366,7 +367,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			break;
 		}
-		const double d = static_cast<double>(dist);
+		const double d = static_cast<double>(limit);
 		if (pt_abs2(m_corner_rad) < d * d) {
 			m_corner_rad.x = m_corner_rad.y = 0.0f;
 		}

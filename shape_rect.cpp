@@ -262,10 +262,11 @@ namespace winrt::GraphPaper::implementation
 		return pt_in_rect(m_pos, a_min, a_max) && pt_in_rect(e_pos, a_min, a_max);
 	}
 
-	//	’l‚ð, •”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚à“®‚­.
-	//	value	Ši”[‚·‚é’l
-	//	abch	}Œ`‚Ì•”ˆÊ
-	bool ShapeRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
+	// ’l‚ð, •”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚à“®‚­.
+	// value	’l
+	// anch	}Œ`‚Ì•”ˆÊ
+	// limit	ŒÀŠE‹——£ (‘¼‚Ì’¸“_‚Æ‚Ì‹——£‚ª‚±‚Ì’l–¢–ž‚É‚È‚é‚È‚ç, ‚»‚Ì’¸“_‚ÉˆÊ’u‚É‡‚í‚¹‚é)
+	bool ShapeRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit)
 	{
 		bool flag = false;
 		switch (anch) {
@@ -374,15 +375,15 @@ namespace winrt::GraphPaper::implementation
 		default:
 			return false;
 		}
-		if (dist >= FLT_MIN) {
-			if (m_diff[0].x < dist) {
+		if (limit >= FLT_MIN) {
+			if (m_diff[0].x < limit) {
 				if (anch == ANCH_TYPE::ANCH_NE) {
 					m_pos.x += m_diff[0].x;
 				}
 				m_diff[0].x = 0.0f;
 				flag = true;
 			}
-			if (m_diff[0].y < dist) {
+			if (m_diff[0].y < limit) {
 				if (anch == ANCH_TYPE::ANCH_NE) {
 					m_pos.y += m_diff[0].y;
 				}
@@ -420,7 +421,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ‹ß–T‚Ì’¸“_‚ð“¾‚é.
-	bool ShapeRect::get_neighbor(const D2D1_POINT_2F a_pos, float& dd, D2D1_POINT_2F& value) const noexcept
+	bool ShapeRect::get_pos_nearest(const D2D1_POINT_2F a_pos, float& dd, D2D1_POINT_2F& value) const noexcept
 	{
 		bool flag = false;
 		D2D1_POINT_2F v_pos[4];

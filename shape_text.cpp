@@ -804,12 +804,13 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	//	値を, 部位の位置に格納する. 他の部位の位置も動く.
-	//	value	格納する値
-	//	abch	図形の部位
-	bool ShapeText::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
+	// 値を, 部位の位置に格納する.
+	// value	値
+	// anch	図形の部位
+	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
+	bool ShapeText::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit)
 	{
-		if (ShapeRect::set_pos_anch(value, anch, dist)) {
+		if (ShapeRect::set_pos_anch(value, anch, limit)) {
 			create_text_metrics(s_dwrite_factory);
 			return true;
 		}

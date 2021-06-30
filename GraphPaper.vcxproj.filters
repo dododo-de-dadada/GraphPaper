@@ -63,6 +63,7 @@
     <ClCompile Include="shape_dt.cpp" />
     <ClCompile Include="MainPage_dash.cpp" />
     <ClCompile Include="shape_bitmap.cpp" />
+    <ClCompile Include="MainPage_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

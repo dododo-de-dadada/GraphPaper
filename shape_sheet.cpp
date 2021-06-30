@@ -293,6 +293,20 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
+	// ‰æ‘œ‚Ìc‰¡”ä‚ÌˆÛ‚ğ“¾‚é.
+	bool ShapeSheet::get_bm_keep_aspect(bool& value) const noexcept
+	{
+		value = m_bm_keep_aspect;
+		return true;
+	}
+
+	// ‰æ‘œ‚Ì•s“§–¾“x‚ğ“¾‚é.
+	bool ShapeSheet::get_bm_opacity(float& value) const noexcept
+	{
+		value = m_bm_opac;
+		return true;
+	}
+
 	// ŠpŠÛ”¼Œa‚ğ“¾‚é.
 	bool ShapeSheet::get_corner_radius(D2D1_POINT_2F& value) const noexcept
 	{
@@ -542,8 +556,22 @@ namespace winrt::GraphPaper::implementation
 	// ’l‚ğ–î‚¶‚é‚µ‚ÌŒ`®‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_arrow_style(const ARROW_STYLE value)
 	{
-		if (m_arrow_style != value) {
-			m_arrow_style = value;
+		const auto old_value = m_arrow_style;
+		return (m_arrow_style = value) != old_value;
+	}
+
+	// ’l‚ğ‰æ‘œ‚Ìc‰¡”ä‚ÌˆÛ‚ÉŠi”[‚·‚é.
+	bool ShapeSheet::set_bm_keep_aspect(const bool value) noexcept
+	{
+		const auto old_value = m_bm_keep_aspect;
+		return (m_bm_keep_aspect = value) != old_value;
+	}
+
+	// ’l‚ğ‰æ‘œ‚Ì•s“§–¾“x‚ÉŠi”[‚·‚é.
+	bool ShapeSheet::set_bm_opacity(const float value) noexcept
+	{
+		if (!equal(m_bm_opac, value)) {
+			m_bm_opac = value;
 			return true;
 		}
 		return false;
@@ -601,37 +629,28 @@ namespace winrt::GraphPaper::implementation
 	// ’l‚ğ‘‘Ì‚ÌLk‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_font_stretch(const DWRITE_FONT_STRETCH value)
 	{
-		if (m_font_stretch != value) {
-			m_font_stretch = value;
-			return true;
-		}
-		return false;
+		const auto old_value = m_font_stretch;
+		return (m_font_stretch = value) != old_value;
 	}
 
 	// ‘‘Ì‚Ìš‘Ì‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_font_style(const DWRITE_FONT_STYLE value)
 	{
-		if (m_font_style != value) {
-			m_font_style = value;
-			return true;
-		}
-		return false;
+		const auto old_value = m_font_style;
+		return (m_font_style = value) != old_value;
 	}
 
 	// ’l‚ğ‘‘Ì‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_font_weight(const DWRITE_FONT_WEIGHT value)
 	{
-		if (m_font_weight != value) {
-			m_font_weight = value;
-			return true;
-		}
-		return false;
+		const auto old_value = m_font_weight;
+		return (m_font_weight = value) != old_value;
 	}
 
 	// ’l‚ğ•ûŠá‚ÌŠî€‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_grid_base(const float value) noexcept
 	{
-		if (m_grid_base != value) {
+		if (!equal(m_grid_base, value)) {
 			m_grid_base = value;
 			return true;
 		}
@@ -661,21 +680,15 @@ namespace winrt::GraphPaper::implementation
 	// ’l‚ğ•ûŠá‚Ì•\¦‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_grid_show(const GRID_SHOW value) noexcept
 	{
-		if (m_grid_show != value) {
-			m_grid_show = value;
-			return true;
-		}
-		return false;
+		const auto old_value = m_grid_show;
+		return (m_grid_show = value) != old_value;
 	}
 
 	// ’l‚ğ•ûŠá‚É‡‚í‚¹‚é‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_grid_snap(const bool value) noexcept
 	{
-		if (m_grid_snap != value) {
-			m_grid_snap = value;
-			return true;
-		}
-		return false;
+		const auto old_value = m_grid_snap;
+		return (m_grid_snap = value) != old_value;
 	}
 
 	// ’l‚ğ, —p†, •ûŠá, •â•ü‚ÌŠeF‚ÉŠi”[‚·‚é
@@ -692,7 +705,7 @@ namespace winrt::GraphPaper::implementation
 	// ’l‚ğ—p†‚ÌŠg‘å—¦‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_sheet_scale(const float value) noexcept
 	{
-		if (m_sheet_scale != value) {
+		if (!equal(m_sheet_scale,value)) {
 			m_sheet_scale = value;
 			return true;
 		}
@@ -732,11 +745,8 @@ namespace winrt::GraphPaper::implementation
 	// ”jü‚Ì’[‚ÌŒ`®‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_dash_cap(const D2D1_CAP_STYLE& value)
 	{
-		if (m_dash_cap != value) {
-			m_dash_cap = value;
-			return true;
-		}
-		return false;
+		const auto old_value = m_dash_cap;
+		return (m_dash_cap = value) != old_value;
 	}
 
 	// ”jü‚Ì—l®‚ÉŠi”[‚·‚é.
@@ -752,11 +762,8 @@ namespace winrt::GraphPaper::implementation
 	// ü˜g‚ÌŒ`®‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_dash_style(const D2D1_DASH_STYLE value)
 	{
-		if (m_dash_style != value) {
-			m_dash_style = value;
-			return true;
-		}
-		return false;
+		const auto old_value = m_dash_style;
+		return (m_dash_style = value) != old_value;
 	}
 
 	// ’l‚ğü•ª‚Ì‚Â‚È‚¬‚Ìƒ}ƒCƒ^[§ŒÀ‚ÉŠi”[‚·‚é.
@@ -772,11 +779,8 @@ namespace winrt::GraphPaper::implementation
 	// ’l‚ğü•ª‚Ì‚Â‚È‚¬‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_join_style(const D2D1_LINE_JOIN& value)
 	{
-		if (m_join_style != value) {
-			m_join_style = value;
-			return true;
-		}
-		return false;
+		const auto old_value = m_join_style;
+		return (m_join_style = value) != old_value;
 	}
 
 	// ü˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
@@ -792,21 +796,15 @@ namespace winrt::GraphPaper::implementation
 	// ’l‚ğ’i—‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value)
 	{
-		if (!equal(m_text_align_p, value)) {
-			m_text_align_p = value;
-			return true;
-		}
-		return false;
+		const auto old_value = m_text_align_p;
+		return (m_text_align_p = value) != old_value;
 	}
 
 	// •¶š—ñ‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_text_align_t(const DWRITE_TEXT_ALIGNMENT value)
 	{
-		if (!equal(m_text_align_t, value)) {
-			m_text_align_t = value;
-			return true;
-		}
-		return false;
+		const auto old_value = m_text_align_t;
+		return (m_text_align_t = value) != old_value;
 	}
 
 	// ’l‚ğsŠÔ‚ÉŠi”[‚·‚é.

@@ -143,6 +143,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
 		uint32_t selected_text_cnt = 0;	// 選択された文字列図形の数
 		uint32_t text_cnt = 0;	// 文字列図形の数
+		uint32_t selected_image_cnt = 0;	// 選択された画像図形の数
 		bool fore_selected = false;	// 最前面の図形の選択フラグ
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
@@ -154,6 +155,7 @@ namespace winrt::GraphPaper::implementation
 			runlength_cnt,
 			selected_text_cnt,
 			text_cnt,
+			selected_image_cnt,
 			fore_selected,
 			back_selected,
 			prev_selected
@@ -167,6 +169,8 @@ namespace winrt::GraphPaper::implementation
 		const auto exists_selected_text = (selected_text_cnt > 0);
 		// 文字列図形がひとつ以上ある場合.
 		const auto exists_text = (text_cnt > 0);
+		// 選択された文字列図形がひとつ以上ある場合.
+		const auto exists_selected_image = (selected_image_cnt > 0);
 		// 選択されてない図形がひとつ以上ある場合.
 		const auto exists_unselected = (selected_cnt < undeleted_cnt);
 		// 選択された図形がふたつ以上ある場合.
@@ -187,8 +191,10 @@ namespace winrt::GraphPaper::implementation
 		mfi_xcvd_cut().IsEnabled(exists_selected);
 		mfi_xcvd_copy().IsEnabled(exists_selected);
 		const auto& dp_view = Clipboard::GetContent();
-		mfi_xcvd_paste().IsEnabled(dp_view.Contains(CBF_GPD) ||
-			dp_view.Contains(StandardDataFormats::Text()) || dp_view.Contains(StandardDataFormats::Bitmap()));
+		mfi_xcvd_paste().IsEnabled(
+			dp_view.Contains(CBF_GPD) ||
+			dp_view.Contains(StandardDataFormats::Text()) ||
+			dp_view.Contains(StandardDataFormats::Bitmap()));
 		mfi_xcvd_delete().IsEnabled(exists_selected);
 		mfi_select_all().IsEnabled(exists_unselected);
 		mfi_group().IsEnabled(exists_selected_2);

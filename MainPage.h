@@ -632,7 +632,18 @@ namespace winrt::GraphPaper::implementation
 		//void kacc_zoom_reset_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//-----------------------------
+		// MainPage_image.cpp
+		// 画像
+		//-----------------------------
+
+		// 画像メニューの「縦横比を変えない」が選択された.
+		void image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept;
+		// 画像メニューの「不透明度...」が選択された.
+		IAsyncAction image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
+
+		//-----------------------------
 		// MainPage_misc.cpp
+		// その他
 		// 長さの単位, 色の表記, ステータスバー, バージョン情報
 		//-----------------------------
 

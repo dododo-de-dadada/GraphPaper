@@ -323,7 +323,12 @@
                     </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
             </MenuFlyout>
-        </ResourceDictionary>
+			<!-- 画像コンテキストメニュー -->
+			<MenuFlyout x:Key="mf_image_menu">
+				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect_2" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" Text="Keep Aspect Ratio" />
+				<MenuFlyoutItem x:Name="mfi_image_opac_2" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
+			</MenuFlyout>
+		</ResourceDictionary>
     </Page.Resources>
     <Grid Margin="0,0,0,0">
         <Grid.RowDefinitions>
@@ -739,7 +744,12 @@
 				<MenuFlyoutItem x:Uid="mfi_pref_save" Click="pref_save_click_async" Text="Save preference" />
 				<MenuFlyoutItem x:Name="mfi_pref_delete" x:Uid="mfi_pref_delete" Click="pref_delete_click_async" Text="Delete preference" />
             </muxc:MenuBarItem>
-            <!-- その他メニュー -->
+			<!-- 画像メニュー -->
+			<muxc:MenuBarItem x:Uid="mbi_image_menu" AccessKey="I" Title="Image">
+				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" Text="Keep Aspect Ratio" />
+				<MenuFlyoutItem x:Name="mfi_image_opac" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
+			</muxc:MenuBarItem>
+			<!-- その他メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_misc_menu" AccessKey="M" Title="Misc">
                 <MenuFlyoutSubItem x:Uid="mfsi_misc_len_unit" Text="Length unit">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_pixel" x:Uid="rmfi_misc_len_pixel" Click="misc_len_click" Text="Pixel" />

@@ -412,13 +412,13 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を, 部位の位置に格納する. 他の部位の位置は動かない. 
-	// value	格納する値
+	// 値を, 部位の位置に格納する. 
+	// value	値
 	// anch	図形の部位
-	// limit	
-	bool ShapeLineA::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
+	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
+	bool ShapeLineA::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit)
 	{
-		if (ShapeStroke::set_pos_anch(value, anch, dist)) {
+		if (ShapeStroke::set_pos_anch(value, anch, limit)) {
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}

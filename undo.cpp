@@ -8,10 +8,30 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto INDEX_NULL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
 	constexpr auto INDEX_SHEET = static_cast<uint32_t>(-1);	// 用紙図形の添え字
 
+	// 部位の位置を得る.
+	static D2D1_POINT_2F undo_get_pos_anch(const Shape* s, const uint32_t anch) noexcept;
+	// データリーダーから位置を読み込む.
+	static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader);
 	// データリーダーから添え字を読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader);
 	// 図形をデータライターに書き込む.
 	static void undo_write_shape(const Shape* s, DataWriter const& dt_writer);
+
+	// 部位の位置を得る.
+	static D2D1_POINT_2F undo_get_pos_anch(const Shape* s, const uint32_t anch) noexcept
+	{
+		D2D1_POINT_2F pos;
+		s->get_pos_anch(anch, pos);
+		return pos;
+	}
+
+	// データリーダーから位置を読み込む.
+	static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader)
+	{
+		D2D1_POINT_2F pos;
+		dt_read(pos, dt_reader);
+		return pos;
+	}
 
 	// データリーダーから添え字を読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader)
@@ -75,38 +95,19 @@ namespace winrt::GraphPaper::implementation
 		m_anch_pos = a_pos;
 	}
 
-	static D2D1_POINT_2F dt_read_pos(DataReader const& dt_reader)
-	{
-		D2D1_POINT_2F pos;
-		dt_read(pos, dt_reader);
-		return pos;
-	}
-
-	static D2D1_POINT_2F s_get_pos_anch(const Shape* s, const uint32_t anch)
-	{
-		D2D1_POINT_2F pos;
-		s->get_pos_anch(anch, pos);
-		return pos;
-	}
-
 	// データリーダーから操作を読み込む.
 	UndoAnchor::UndoAnchor(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_anch(static_cast<ANCH_TYPE>(dt_reader.ReadUInt32())),
-		m_anch_pos(dt_read_pos(dt_reader))
-	{
-		//m_anch = static_cast<ANCH_TYPE>(dt_reader.ReadUInt32());
-		//dt_read(m_anch_pos, dt_reader);
-	}
+		m_anch_pos(undo_read_pos(dt_reader))
+	{}
 
 	// 図形の, 指定された部位の位置を保存する.
 	UndoAnchor::UndoAnchor(Shape* const s, const uint32_t anch) :
 		Undo(s),
 		m_anch(anch),
-		m_anch_pos(s_get_pos_anch(s, anch))
-	{
-		//s->get_pos_anch(anch, m_anch_pos);
-	}
+		m_anch_pos(undo_get_pos_anch(s, anch))
+	{}
 
 	// データライターに書き込む.
 	void UndoAnchor::write(DataWriter const& dt_writer)
@@ -195,6 +196,8 @@ namespace winrt::GraphPaper::implementation
 	}
 	template UndoAttr<UNDO_OP::ARROW_SIZE>::UndoAttr(Shape* s, const ARROW_SIZE& value);
 	template UndoAttr<UNDO_OP::ARROW_STYLE>::UndoAttr(Shape* s, const ARROW_STYLE& value);
+	template UndoAttr<UNDO_OP::BM_KEEP>::UndoAttr(Shape* s, const bool& value);
+	template UndoAttr<UNDO_OP::BM_OPAC>::UndoAttr(Shape* s, const float& value);
 	template UndoAttr<UNDO_OP::CAP_STYLE>::UndoAttr(Shape* s, const CAP_STYLE& value);
 	template UndoAttr<UNDO_OP::DASH_CAP>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
 	template UndoAttr<UNDO_OP::DASH_PATT>::UndoAttr(Shape* s, const DASH_PATT& value);
@@ -228,24 +231,30 @@ namespace winrt::GraphPaper::implementation
 		Undo(undo_read_shape(dt_reader)),
 		m_value()
 	{
-		if constexpr (U == UNDO_OP::FONT_SIZE
-			|| U == UNDO_OP::JOIN_LIMIT
-			|| U == UNDO_OP::STROKE_WIDTH
-			|| U == UNDO_OP::GRID_BASE
-			|| U == UNDO_OP::TEXT_LINE_SP) {
+		if constexpr (
+			U == UNDO_OP::BM_OPAC ||
+			U == UNDO_OP::FONT_SIZE ||
+			U == UNDO_OP::GRID_BASE ||
+			U == UNDO_OP::JOIN_LIMIT ||
+			U == UNDO_OP::STROKE_WIDTH ||
+			U == UNDO_OP::TEXT_LINE_SP) {
 			m_value = dt_reader.ReadSingle();
 		}
-		else if constexpr (U == UNDO_OP::ARROW_STYLE
-			|| U == UNDO_OP::DASH_CAP
-			|| U == UNDO_OP::DASH_STYLE
-			|| U == UNDO_OP::JOIN_STYLE
-			|| U == UNDO_OP::FONT_STRETCH
-			|| U == UNDO_OP::FONT_STYLE
-			|| U == UNDO_OP::FONT_WEIGHT
-			|| U == UNDO_OP::GRID_SHOW
-			|| U == UNDO_OP::TEXT_ALIGN_P
-			|| U == UNDO_OP::TEXT_ALIGN_T) {
+		else if constexpr (
+			U == UNDO_OP::ARROW_STYLE ||
+			U == UNDO_OP::DASH_CAP ||
+			U == UNDO_OP::DASH_STYLE ||
+			U == UNDO_OP::JOIN_STYLE ||
+			U == UNDO_OP::FONT_STRETCH ||
+			U == UNDO_OP::FONT_STYLE ||
+			U == UNDO_OP::FONT_WEIGHT ||
+			U == UNDO_OP::GRID_SHOW ||
+			U == UNDO_OP::TEXT_ALIGN_P ||
+			U == UNDO_OP::TEXT_ALIGN_T) {
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
+		}
+		else if constexpr (U == UNDO_OP::BM_KEEP) {
+			m_value = dt_reader.ReadBoolean();
 		}
 		else {
 			dt_read(m_value, dt_reader);
@@ -254,6 +263,8 @@ namespace winrt::GraphPaper::implementation
 
 	template UndoAttr<UNDO_OP::ARROW_SIZE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::ARROW_STYLE>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::BM_KEEP>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::BM_OPAC>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::CAP_STYLE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::DASH_CAP>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::DASH_PATT>::UndoAttr(DataReader const& dt_reader);
@@ -297,6 +308,16 @@ namespace winrt::GraphPaper::implementation
 	void UndoAttr<UNDO_OP::ARROW_STYLE>::SET(Shape* const s, const ARROW_STYLE& value)
 	{
 		s->set_arrow_style(value);
+	}
+
+	void UndoAttr<UNDO_OP::BM_KEEP>::SET(Shape* const s, const bool& value)
+	{
+		s->set_bm_keep_aspect(value);
+	}
+
+	void UndoAttr<UNDO_OP::BM_OPAC>::SET(Shape* const s, const float& value)
+	{
+		s->set_bm_opacity(value);
 	}
 
 	void UndoAttr<UNDO_OP::FILL_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
@@ -454,6 +475,16 @@ namespace winrt::GraphPaper::implementation
 		return s->get_arrow_style(value);
 	}
 
+	bool UndoAttr<UNDO_OP::BM_KEEP>::GET(const Shape* s, bool& value) noexcept
+	{
+		return s->get_bm_keep_aspect(value);
+	}
+
+	bool UndoAttr<UNDO_OP::BM_OPAC>::GET(const Shape* s, float& value) noexcept
+	{
+		return s->get_bm_opacity(value);
+	}
+
 	bool UndoAttr<UNDO_OP::FILL_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
 	{
 		return s->get_fill_color(value);
@@ -599,24 +630,32 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(U));
 		undo_write_shape(m_shape, dt_writer);
-		if constexpr (U == UNDO_OP::FONT_SIZE 
-			|| U == UNDO_OP::JOIN_LIMIT
-			|| U == UNDO_OP::STROKE_WIDTH
-			|| U == UNDO_OP::GRID_BASE
-			|| U == UNDO_OP::TEXT_LINE_SP) {
+		if constexpr (
+			U == UNDO_OP::BM_OPAC ||
+			U == UNDO_OP::FONT_SIZE ||
+			U == UNDO_OP::GRID_BASE ||
+			U == UNDO_OP::JOIN_LIMIT ||
+			U == UNDO_OP::STROKE_WIDTH ||
+			U == UNDO_OP::TEXT_LINE_SP
+			) {
 			dt_writer.WriteSingle(m_value);
 		}
-		else if constexpr (U == UNDO_OP::ARROW_STYLE
-			|| U == UNDO_OP::DASH_CAP
-			|| U == UNDO_OP::DASH_STYLE
-			|| U == UNDO_OP::JOIN_STYLE
-			|| U == UNDO_OP::FONT_STRETCH
-			|| U == UNDO_OP::FONT_STYLE
-			|| U == UNDO_OP::FONT_WEIGHT
-			|| U == UNDO_OP::GRID_SHOW
-			|| U == UNDO_OP::TEXT_ALIGN_P
-			|| U == UNDO_OP::TEXT_ALIGN_T) {
+		else if constexpr (
+			U == UNDO_OP::ARROW_STYLE ||
+			U == UNDO_OP::DASH_CAP ||
+			U == UNDO_OP::DASH_STYLE ||
+			U == UNDO_OP::FONT_STRETCH ||
+			U == UNDO_OP::FONT_STYLE ||
+			U == UNDO_OP::FONT_WEIGHT ||
+			U == UNDO_OP::GRID_SHOW ||
+			U == UNDO_OP::JOIN_STYLE ||
+			U == UNDO_OP::TEXT_ALIGN_P ||
+			U == UNDO_OP::TEXT_ALIGN_T
+			) {
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_value));
+		}
+		else if constexpr (U == UNDO_OP::BM_KEEP) {
+			dt_writer.WriteBoolean(m_value);
 		}
 		else {
 			dt_write(m_value, dt_writer);

@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	enum SHAPE_TYPE {
 		SHAPE_NULL,	// ヌル
 		SHAPE_BEZI,	// 曲線
-		SHAPE_BITM,	// 画像
+		SHAPE_IMAGE,	// 画像
 		SHAPE_ELLI,	// だ円
 		SHAPE_GROUP,	// グループ
 		SHAPE_LINE,	// 線分
@@ -135,6 +135,7 @@ namespace winrt::GraphPaper::implementation
 	// selected_group_cnt	選択されたグループ図形の数
 	// runlength_cnt	選択された図形のランレングスの数
 	// selected_text_cnt	選択された文字列図形の数
+	// selected_image_cnt	選択された画像図形の数
 	// text_cnt	文字列図形の数
 	// fore_selected	最前面の図形の選択フラグ
 	// back_selected	最背面の図形の選択フラグ
@@ -147,6 +148,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t& runlength_cnt,
 		uint32_t& selected_text_cnt,
 		uint32_t& text_cnt,
+		uint32_t& selected_image_cnt,
 		bool& fore_selected,
 		bool& back_selected,
 		bool& prev_selected
@@ -157,6 +159,7 @@ namespace winrt::GraphPaper::implementation
 		selected_group_cnt = 0;	// 選択されたグループ図形の数
 		runlength_cnt = 0;	// 選択された図形のランレングスの数
 		selected_text_cnt = 0;	// 選択された文字列図形の数
+		selected_image_cnt = 0;
 		text_cnt = 0;	// 文字列図形の数
 		fore_selected = false;	// 最前面の図形の選択フラグ
 		back_selected = false;	// 最背面の図形の選択フラグ
@@ -164,8 +167,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形リストの各図形について以下を繰り返す.
 		for (auto s : slist) {
+			// 図形の消去フラグを判定する.
 			if (s->is_deleted()) {
-				// 図形の消去フラグが立っている場合,
 				// 以下を無視する.
 				continue;
 			}
@@ -196,7 +199,11 @@ namespace winrt::GraphPaper::implementation
 					// 最背面の図形の選択フラグを立てる.
 					back_selected = true;
 				}
-				if (s_type == typeid(ShapeGroup)) {
+				// 図形の型が画像か判定する.,
+				if (s_type == typeid(ShapeBitmap)) {
+					selected_image_cnt++;
+				}
+				else if (s_type == typeid(ShapeGroup)) {
 					// 図形の型がグループ図形の場合,
 					// 選択されたグループ図形の数をインクリメントする.
 					selected_group_cnt++;
@@ -457,7 +464,7 @@ namespace winrt::GraphPaper::implementation
 		else if (s_type == SHAPE_TYPE::SHAPE_BEZI) {
 			s = new ShapeBezi(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_BITM) {
+		else if (s_type == SHAPE_TYPE::SHAPE_IMAGE) {
 			s = new ShapeBitmap(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_ELLI) {
@@ -580,7 +587,7 @@ namespace winrt::GraphPaper::implementation
 				s_int = SHAPE_BEZI;
 			}
 			else if (s_type == typeid(ShapeBitmap)) {
-				s_int = SHAPE_BITM;
+				s_int = SHAPE_IMAGE;
 			}
 			else if (s_type == typeid(ShapeElli)) {
 				s_int = SHAPE_ELLI;
@@ -636,7 +643,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_selected()) {
 				continue;
 			}
-			if (s->get_neighbor(n_pos, dd, value) && !flag) {
+			if (s->get_pos_nearest(n_pos, dd, value) && !flag) {
 				flag = true;
 			}
 		}

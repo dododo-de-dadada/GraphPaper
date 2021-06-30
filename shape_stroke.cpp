@@ -165,7 +165,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 近傍の頂点を得る.
-	bool ShapeStroke::get_neighbor(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& value) const noexcept
+	bool ShapeStroke::get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& value) const noexcept
 	{
 		bool flag = false;
 		D2D1_POINT_2F vec;
@@ -367,8 +367,11 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を, 部位の位置に格納する. 他の部位の位置は動かない. 
-	bool ShapeStroke::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float dist)
+	// 値を, 部位の位置に格納する.
+	// value	値
+	// anch	図形の部位
+	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
+	bool ShapeStroke::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit)
 	{
 		bool flag = false;
 		// 変更する頂点がどの頂点か判定する.
@@ -404,8 +407,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				flag = true;
 			}
-			// 制限距離がゼロでないか判定する.
-			if (dist >= FLT_MIN) {
+			// 限界距離がゼロでないか判定する.
+			if (limit >= FLT_MIN) {
 				// 残りの頂点の位置を得る.
 				for (size_t i = a_cnt; i < d_cnt; i++) {
 					pt_add(v_pos[i], m_diff[i], v_pos[i + 1]);
@@ -415,10 +418,10 @@ namespace winrt::GraphPaper::implementation
 					if (i == a_cnt) {
 						continue;
 					}
-					// 頂点と変更する頂点との距離が制限距離以上か判定する.
+					// 頂点と変更する頂点との距離が限界距離以上か判定する.
 					D2D1_POINT_2F v_vec;
 					pt_sub(v_pos[i], v_pos[a_cnt], v_vec);
-					const double d = static_cast<double>(dist);
+					const double d = static_cast<double>(limit);
 					if (pt_abs2(v_vec) >= d * d) {
 						continue;
 					}
