@@ -292,11 +292,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 画像の縦横比の維持を得る.
-	bool ShapeBitmap::get_bm_keep_aspect(bool& value) const noexcept
-	{
-		value = m_bm_keep_aspect;
-		return true;
-	}
+	//bool ShapeBitmap::get_bm_keep_aspect(bool& value) const noexcept
+	//{
+	//	value = m_bm_keep_aspect;
+	//	return true;
+	//}
 
 	// 画像の不透明度を得る.
 	bool ShapeBitmap::get_bm_opacity(float& value) const noexcept
@@ -427,11 +427,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を画像の縦横比の維持に格納する.
-	bool ShapeBitmap::set_bm_keep_aspect(const bool value) noexcept
-	{
-		const auto old_value = m_bm_keep_aspect;
-		return (m_bm_keep_aspect = value) != old_value;
-	}
+	//bool ShapeBitmap::set_bm_keep_aspect(const bool value) noexcept
+	//{
+	//	const auto old_value = m_bm_keep_aspect;
+	//	return (m_bm_keep_aspect = value) != old_value;
+	//}
+	bool ShapeBitmap::s_bm_keep_aspect = true;
 
 	// 値を画像の不透明度に格納する.
 	bool ShapeBitmap::set_bm_opacity(const float value) noexcept
@@ -484,7 +485,7 @@ namespace winrt::GraphPaper::implementation
 				const float bm_h = m_bm_rect.bottom - m_bm_rect.top;	// 表示されている画像の高さ (原寸)
 				const D2D1_POINT_2F s_pos{ m_pos };	// 始点 (図形の頂点)
 				D2D1_POINT_2F pos;
-				if (m_bm_keep_aspect) {
+				if (s_bm_keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x + bm_w, s_pos.y + bm_h };	// 終点 (始点と対角にある画像上の点)
 					neighbor(value, s_pos, e_pos, pos);
 				}
@@ -526,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 				const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
 				const D2D1_POINT_2F s_pos{ m_pos.x + m_view_size.width, m_pos.y };
 				D2D1_POINT_2F pos;
-				if (m_bm_keep_aspect) {
+				if (s_bm_keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x - bm_w, s_pos.y + bm_h };
 					neighbor(value, s_pos, e_pos, pos);
 				}
@@ -565,7 +566,7 @@ namespace winrt::GraphPaper::implementation
 				const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
 				const D2D1_POINT_2F s_pos{ m_pos.x + m_view_size.width, m_pos.y + m_view_size.height };
 				D2D1_POINT_2F pos;
-				if (m_bm_keep_aspect) {
+				if (s_bm_keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x - bm_w, s_pos.y - bm_h };
 					neighbor(value, s_pos, e_pos, pos);
 				}
@@ -603,7 +604,7 @@ namespace winrt::GraphPaper::implementation
 				const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
 				const D2D1_POINT_2F s_pos{ m_pos.x, m_pos.y + m_view_size.height };
 				D2D1_POINT_2F pos;
-				if (m_bm_keep_aspect) {
+				if (s_bm_keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x + bm_w, s_pos.y - bm_h };
 					neighbor(value, s_pos, e_pos, pos);
 				}

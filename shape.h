@@ -541,9 +541,9 @@ namespace winrt::GraphPaper::implementation
 		// 値を矢じるしの形式に格納する.
 		virtual bool set_arrow_style(const ARROW_STYLE /*value*/) { return false; }
 		// 画像の縦横比の維持を得る.
-		virtual bool set_bm_keep_aspect(const bool /*value*/) const noexcept { return false; }
+		virtual bool set_bm_keep_aspect(const bool /*value*/) noexcept { return false; }
 		// 画像の不透明度を得る.
-		virtual bool set_bm_opacity(const float /*value*/) const noexcept { return false; }
+		virtual bool set_bm_opacity(const float /*value*/) noexcept { return false; }
 		// 値を端の形式に格納する.
 		virtual bool set_cap_style(const CAP_STYLE& /*value*/) { return false; }
 		// 値を角丸半径に格納する.
@@ -622,6 +622,7 @@ namespace winrt::GraphPaper::implementation
 	// 画像
 	//------------------------------
 	struct ShapeBitmap : Shape {
+		static bool s_bm_keep_aspect;	// 縦横の比率を変えないか判定.
 		bool m_is_deleted = false;	// 消去されたか判定
 		bool m_is_selected = false;	// 選択されたか判定
 		D2D1_POINT_2F m_pos;	// 始点の位置
@@ -630,7 +631,6 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_U m_bm_size;	// ビットマップの原寸
 		uint8_t* m_bm_data;	// ビットマップのデータ
 		float m_bm_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
-		bool m_bm_keep_aspect = true;	// 縦横の比率を変えないか判定.
 		D2D1_SIZE_F m_ratio;	// 表示寸法と原寸の比率
 		winrt::com_ptr<ID2D1Bitmap1> m_dx_bitmap{ nullptr };
 

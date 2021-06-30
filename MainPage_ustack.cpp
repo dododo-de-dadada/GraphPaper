@@ -574,10 +574,7 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_undo.push_back(new UndoAttr<U>(&m_sheet_main, value));
 		auto flag = false;
 		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			if (s->is_selected() != true) {
+			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
 			ustack_push_set<U>(s, value);
@@ -596,6 +593,8 @@ namespace winrt::GraphPaper::implementation
 
 	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_SIZE>(ARROW_SIZE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE const& value);
+	template bool MainPage::ustack_push_set<UNDO_OP::BM_KEEP>(bool const& value);
+	template bool MainPage::ustack_push_set<UNDO_OP::BM_OPAC>(float const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::CAP_STYLE>(CAP_STYLE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::DASH_CAP>(D2D1_CAP_STYLE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::DASH_PATT>(DASH_PATT const& value);
