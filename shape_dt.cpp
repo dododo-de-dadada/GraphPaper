@@ -43,6 +43,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから寸法を読み込む.
+	void dt_read(D2D1_RECT_F& value, DataReader const& dt_reader)
+	{
+		value.left = dt_reader.ReadSingle();
+		value.top = dt_reader.ReadSingle();
+		value.right = dt_reader.ReadSingle();
+		value.bottom = dt_reader.ReadSingle();
+	}
+
+	// データリーダーから寸法を読み込む.
 	void dt_read(D2D1_SIZE_F& value, DataReader const& dt_reader)
 	{
 		value.width = dt_reader.ReadSingle();
@@ -152,6 +161,15 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_writer.WriteSingle(value.x);
 		dt_writer.WriteSingle(value.y);
+	}
+
+	// データライターに方形を書き込む.
+	void dt_write(const D2D1_RECT_F value, DataWriter const& dt_writer)
+	{
+		dt_writer.WriteSingle(value.left);
+		dt_writer.WriteSingle(value.top);
+		dt_writer.WriteSingle(value.right);
+		dt_writer.WriteSingle(value.bottom);
 	}
 
 	// データライターに寸法を書き込む.

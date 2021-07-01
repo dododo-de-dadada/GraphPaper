@@ -200,6 +200,8 @@ namespace winrt::GraphPaper::implementation
 	inline bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept;
 	// 位置が同じか判定する.
 	inline bool equal(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept;
+	// 方形が同じか判定する.
+	inline bool equal(const D2D1_RECT_F& a, const D2D1_RECT_F& b) noexcept;
 	// 寸法が同じか判定する.
 	inline bool equal(const D2D1_SIZE_F a, const D2D1_SIZE_F b) noexcept;
 	// 文字範囲が同じか判定する.
@@ -284,6 +286,8 @@ namespace winrt::GraphPaper::implementation
 	void dt_read(D2D1_COLOR_F& value, DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
 	void dt_read(D2D1_POINT_2F& value, DataReader const& dt_reader);
+	// データリーダーから方形を読み込む.
+	void dt_read(D2D1_RECT_F& value, DataReader const& dt_reader);
 	// データリーダーから寸法を読み込む.
 	void dt_read(D2D1_SIZE_F& value, DataReader const& dt_reader);
 	// データリーダーから寸法を読み込む.
@@ -308,6 +312,8 @@ namespace winrt::GraphPaper::implementation
 	void dt_write(const D2D1_COLOR_F& value, DataWriter const& dt_writer);
 	// データライターに位置を書き込む.
 	void dt_write(const D2D1_POINT_2F value, DataWriter const& dt_writer);
+	// データライターに方形を書き込む.
+	void dt_write(const D2D1_RECT_F value, DataWriter const& dt_writer);
 	// データライターに寸法を書き込む.
 	void dt_write(const D2D1_SIZE_F value, DataWriter const& dt_writer);
 	// データライターに寸法を書き込む.
@@ -625,12 +631,12 @@ namespace winrt::GraphPaper::implementation
 		bool m_is_deleted = false;	// 消去されたか判定
 		bool m_is_selected = false;	// 選択されたか判定
 		D2D1_POINT_2F m_pos;	// 始点の位置
-		D2D1_SIZE_F m_view_size;	// 表示寸法
-		D2D1_RECT_F m_bm_rect;	// ビットマップの矩形
-		D2D1_SIZE_U m_bm_size;	// ビットマップの原寸
-		uint8_t* m_bm_data;	// ビットマップのデータ
-		float m_bm_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
-		D2D1_SIZE_F m_ratio;	// 表示寸法と原寸の比率
+		D2D1_SIZE_F m_view;	// 表示寸法
+		D2D1_RECT_F m_rect;	// ビットマップの矩形
+		D2D1_SIZE_U m_size;	// ビットマップの原寸
+		uint8_t* m_data;	// ビットマップのデータ
+		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
+		D2D1_SIZE_F m_ratio;	// 表示寸法と原寸の縦横比
 		winrt::com_ptr<ID2D1Bitmap1> m_dx_bitmap{ nullptr };
 
 		~ShapeBitmap(void);
@@ -720,7 +726,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 画像
 		static bool s_bm_keep_aspect;	// 画像の縦横比の維持
-		float m_bm_opac = 1.0f;	// 画像の不透明率
+		float m_opac = 1.0f;	// 画像の不透明率
 
 		// 方眼
 		D2D1_COLOR_F m_grid_color{ ACCENT_COLOR };	// 方眼の色
@@ -1455,6 +1461,12 @@ namespace winrt::GraphPaper::implementation
 	inline bool equal(const D2D1_POINT_2F a, const D2D1_POINT_2F b) noexcept
 	{
 		return equal(a.x, b.x) && equal(a.y, b.y);
+	}
+
+	// 方形が同じか判定する.
+	inline bool equal(const D2D1_RECT_F& a, const D2D1_RECT_F& b) noexcept
+	{
+		return equal(a.left, b.left) && equal(a.top, b.top) && equal(a.right, b.right) && equal(a.bottom, b.bottom);
 	}
 
 	// 寸法が同じか判定する.

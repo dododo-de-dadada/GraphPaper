@@ -204,9 +204,9 @@ namespace winrt::GraphPaper::implementation
 
 	ShapeBitmap::~ShapeBitmap(void)
 	{
-		if (m_bm_data != nullptr) {
-			delete m_bm_data;
-			m_bm_data = nullptr;
+		if (m_data != nullptr) {
+			delete m_data;
+			m_data = nullptr;
 		}
 		if (m_dx_bitmap != nullptr) {
 			m_dx_bitmap = nullptr;
@@ -222,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 					D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
 				)
 			};
-			dx.m_d2dContext->CreateBitmap(m_bm_size, static_cast<void*>(m_bm_data), 4 * m_bm_size.width, b_prop, m_dx_bitmap.put());
+			dx.m_d2dContext->CreateBitmap(m_size, static_cast<void*>(m_data), 4 * m_size.width, b_prop, m_dx_bitmap.put());
 			if (m_dx_bitmap == nullptr) {
 				return;
 			}
@@ -230,10 +230,10 @@ namespace winrt::GraphPaper::implementation
 		D2D1_RECT_F dest_rect{
 			m_pos.x,
 			m_pos.y,
-			m_pos.x + m_view_size.width,
-			m_pos.y + m_view_size.height
+			m_pos.x + m_view.width,
+			m_pos.y + m_view.height
 		};
-		dx.m_d2dContext->DrawBitmap(m_dx_bitmap.get(), dest_rect, m_bm_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_bm_rect);
+		dx.m_d2dContext->DrawBitmap(m_dx_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_rect);
 
 		if (is_selected()) {
 			dx.m_shape_brush->SetColor(Shape::m_default_background);
@@ -243,9 +243,9 @@ namespace winrt::GraphPaper::implementation
 
 			D2D1_POINT_2F v_pos[4]{
 				m_pos,
-				{ m_pos.x + m_view_size.width, m_pos.y },
-				{ m_pos.x + m_view_size.width, m_pos.y + m_view_size.height },
-				{ m_pos.x, m_pos.y + m_view_size.height },
+				{ m_pos.x + m_view.width, m_pos.y },
+				{ m_pos.x + m_view.width, m_pos.y + m_view.height },
+				{ m_pos.x, m_pos.y + m_view.height },
 			};
 
 			anch_draw_rect(v_pos[0], dx);
@@ -262,32 +262,32 @@ namespace winrt::GraphPaper::implementation
 			value = m_pos;
 		}
 		else if (anch == ANCH_TYPE::ANCH_NORTH) {
-			value.x = m_pos.x + m_view_size.width * 0.5f;
+			value.x = m_pos.x + m_view.width * 0.5f;
 			value.y = m_pos.y;
 		}
 		else if (anch == ANCH_TYPE::ANCH_NE) {
-			value.x = m_pos.x + m_view_size.width;
+			value.x = m_pos.x + m_view.width;
 			value.y = m_pos.y;
 		}
 		else if (anch == ANCH_TYPE::ANCH_EAST) {
-			value.x = m_pos.x + m_view_size.width;
-			value.y = m_pos.y + m_view_size.height * 0.5f;
+			value.x = m_pos.x + m_view.width;
+			value.y = m_pos.y + m_view.height * 0.5f;
 		}
 		else if (anch == ANCH_TYPE::ANCH_SE) {
-			value.x = m_pos.x + m_view_size.width;
-			value.y = m_pos.y + m_view_size.height;
+			value.x = m_pos.x + m_view.width;
+			value.y = m_pos.y + m_view.height;
 		}
 		else if (anch == ANCH_TYPE::ANCH_SOUTH) {
-			value.x = m_pos.x + m_view_size.width * 0.5f;
-			value.y = m_pos.y + m_view_size.height;
+			value.x = m_pos.x + m_view.width * 0.5f;
+			value.y = m_pos.y + m_view.height;
 		}
 		else if (anch == ANCH_TYPE::ANCH_SW) {
 			value.x = m_pos.x;
-			value.y = m_pos.y + m_view_size.height;
+			value.y = m_pos.y + m_view.height;
 		}
 		else if (anch == ANCH_TYPE::ANCH_WEST) {
 			value.x = m_pos.x;
-			value.y = m_pos.y + m_view_size.height * 0.5f;
+			value.y = m_pos.y + m_view.height * 0.5f;
 		}
 	}
 
@@ -301,7 +301,7 @@ namespace winrt::GraphPaper::implementation
 	// 画像の不透明度を得る.
 	bool ShapeBitmap::get_bm_opacity(float& value) const noexcept
 	{
-		value = m_bm_opac;
+		value = m_opac;
 		return true;
 	}
 
@@ -310,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F b_pos[2]{
 			m_pos,
-			{ m_pos.x + m_view_size.width, m_pos.y + m_view_size.height }
+			{ m_pos.x + m_view.width, m_pos.y + m_view.height }
 		};
 		pt_bound(b_pos[0], b_pos[1], b_pos[0], b_pos[1]);
 		pt_min(a_min, b_pos[0], b_min);
@@ -341,7 +341,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		const D2D1_POINT_2F v_pos[2]{
 			m_pos,
-			{ m_pos.x + m_view_size.width, m_pos.y + m_view_size.height }
+			{ m_pos.x + m_view.width, m_pos.y + m_view.height }
 		};
 		pt_min(v_pos[0], v_pos[1], value);
 	}
@@ -357,9 +357,9 @@ namespace winrt::GraphPaper::implementation
 	size_t ShapeBitmap::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
 	{
 		v_pos[0] = m_pos;
-		v_pos[1] = D2D1_POINT_2F{ m_pos.x + m_view_size.width, m_pos.y };
-		v_pos[2] = D2D1_POINT_2F{ m_pos.x + m_view_size.width, m_pos.y + m_view_size.height };
-		v_pos[3] = D2D1_POINT_2F{ m_pos.x, m_pos.y + m_view_size.height };
+		v_pos[1] = D2D1_POINT_2F{ m_pos.x + m_view.width, m_pos.y };
+		v_pos[2] = D2D1_POINT_2F{ m_pos.x + m_view.width, m_pos.y + m_view.height };
+		v_pos[3] = D2D1_POINT_2F{ m_pos.x, m_pos.y + m_view.height };
 		return 4;
 	}
 
@@ -436,8 +436,8 @@ namespace winrt::GraphPaper::implementation
 	// 値を画像の不透明度に格納する.
 	bool ShapeBitmap::set_bm_opacity(const float value) noexcept
 	{
-		if (!equal(m_bm_opac, value)) {
-			m_bm_opac = value;
+		if (!equal(m_opac, value)) {
+			m_opac = value;
 			return true;
 		}
 		return false;
@@ -480,8 +480,8 @@ namespace winrt::GraphPaper::implementation
 		if (anch == ANCH_TYPE::ANCH_NW) {
 			// 画像の一部分でも表示されているか判定する.
 			// (画像がまったく表示されてない場合はスケールの変更は行わない.)
-			const float bm_w = m_bm_rect.right - m_bm_rect.left;	// 表示されている画像の幅 (原寸)
-			const float bm_h = m_bm_rect.bottom - m_bm_rect.top;	// 表示されている画像の高さ (原寸)
+			const float bm_w = m_rect.right - m_rect.left;	// 表示されている画像の幅 (原寸)
+			const float bm_h = m_rect.bottom - m_rect.top;	// 表示されている画像の高さ (原寸)
 			if (bm_w > 1.0f && bm_h > 1.0f) {
 				const D2D1_POINT_2F s_pos{ m_pos };	// 始点 (図形の頂点)
 				D2D1_POINT_2F pos;
@@ -497,11 +497,11 @@ namespace winrt::GraphPaper::implementation
 				pt_sub(pos, s_pos, v_vec);
 				if (pt_abs2(v_vec) >= FLT_MIN) {
 					// スケール変更後の表示の寸法を求め, その縦横が 1 ピクセル以上あるか判定する.
-					const float view_w = m_view_size.width - v_vec.x;
-					const float view_h = m_view_size.height - v_vec.y;
+					const float view_w = m_view.width - v_vec.x;
+					const float view_h = m_view.height - v_vec.y;
 					if (view_w >= 1.0f && view_h >= 1.0f) {
-						m_view_size.width = view_w;
-						m_view_size.height = view_h;
+						m_view.width = view_w;
+						m_view.height = view_h;
 						m_pos = pos;
 						m_ratio.width = view_w / bm_w;
 						m_ratio.height = view_h / bm_h;
@@ -514,21 +514,21 @@ namespace winrt::GraphPaper::implementation
 			// 変更する差分を求める.
 			const float dy = (value.y - m_pos.y);
 			if (fabs(dy) >= FLT_MIN) {
-				const float rect_top = min(m_bm_rect.top + dy / m_ratio.height, m_bm_rect.bottom - 1.0f);
-				m_bm_rect.top = max(rect_top, 0.0f);
-				m_view_size.height = (m_bm_rect.bottom - m_bm_rect.top) * m_ratio.height;
+				const float rect_top = min(m_rect.top + dy / m_ratio.height, m_rect.bottom - 1.0f);
+				m_rect.top = max(rect_top, 0.0f);
+				m_view.height = (m_rect.bottom - m_rect.top) * m_ratio.height;
 				m_pos.y = value.y;
 				flag = true;
-if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_rect.left) < 1.0) {
+			}
+if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
 	auto debug = 1;
 }
-			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_NE) {
-			const float bm_w = m_bm_rect.right - m_bm_rect.left;
-			const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
+			const float bm_w = m_rect.right - m_rect.left;
+			const float bm_h = m_rect.bottom - m_rect.top;
 			if (bm_w > 1.0f && bm_h > 1.0f) {
-				const D2D1_POINT_2F s_pos{ m_pos.x + m_view_size.width, m_pos.y };
+				const D2D1_POINT_2F s_pos{ m_pos.x + m_view.width, m_pos.y };
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x - bm_w, s_pos.y + bm_h };
@@ -541,10 +541,10 @@ if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_
 				pt_sub(pos, s_pos, v_vec);
 				if (pt_abs2(v_vec) >= FLT_MIN) {
 					const float view_w = pos.x - m_pos.x;
-					const float view_h = m_pos.y + m_view_size.height - pos.y;
+					const float view_h = m_pos.y + m_view.height - pos.y;
 					if (view_w >= 1.0f && view_h >= 1.0f) {
-						m_view_size.width = view_w;
-						m_view_size.height = view_h;
+						m_view.width = view_w;
+						m_view.height = view_h;
 						m_pos.y = pos.y;
 						m_ratio.width = view_w / bm_w;
 						m_ratio.height = view_h / bm_h;
@@ -554,24 +554,24 @@ if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_EAST) {
-			const float dx = (value.x - (m_pos.x + m_view_size.width));
+			const float dx = (value.x - (m_pos.x + m_view.width));
 			if (fabs(dx) >= FLT_MIN) {
-				const float rect_right = max(m_bm_rect.right + dx / m_ratio.width, m_bm_rect.left + 1.0f);
-				m_bm_rect.right = min(rect_right, m_bm_size.width);
-				//m_view_size.width = m_view_size.width + dx;
-				m_view_size.width = (m_bm_rect.right - m_bm_rect.left) * m_ratio.width;
-				m_pos.x = value.x - m_view_size.width;
+				const float rect_right = max(m_rect.right + dx / m_ratio.width, m_rect.left + 1.0f);
+				m_rect.right = min(rect_right, m_size.width);
+				//m_view.width = m_view.width + dx;
+				m_view.width = (m_rect.right - m_rect.left) * m_ratio.width;
+				m_pos.x = value.x - m_view.width;
 				flag = true;
-				if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_rect.left) < 1.0) {
+				if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
 					auto debug = 1;
 				}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SE) {
-			const float bm_w = m_bm_rect.right - m_bm_rect.left;
-			const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
+			const float bm_w = m_rect.right - m_rect.left;
+			const float bm_h = m_rect.bottom - m_rect.top;
 			if (bm_w > 1.0f && bm_h > 1.0f) {
-				const D2D1_POINT_2F s_pos{ m_pos.x + m_view_size.width, m_pos.y + m_view_size.height };
+				const D2D1_POINT_2F s_pos{ m_pos.x + m_view.width, m_pos.y + m_view.height };
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x - bm_w, s_pos.y - bm_h };
@@ -586,8 +586,8 @@ if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_
 					const float view_w = pos.x - m_pos.x;
 					const float view_h = pos.y - m_pos.y;
 					if (view_w >= 1.0f && view_h >= 1.0f) {
-						m_view_size.width = view_w;
-						m_view_size.height = view_h;
+						m_view.width = view_w;
+						m_view.height = view_h;
 						m_ratio.width = view_w / bm_w;
 						m_ratio.height = view_h / bm_h;
 						flag = true;
@@ -596,23 +596,23 @@ if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SOUTH) {
-			const float dy = (value.y - (m_pos.y + m_view_size.height));
+			const float dy = (value.y - (m_pos.y + m_view.height));
 			if (fabs(dy) >= FLT_MIN) {
-				const float rect_bottom = max(m_bm_rect.bottom + dy / m_ratio.height, m_bm_rect.top + 1.0f);
-				m_bm_rect.bottom = min(rect_bottom, m_bm_size.height);
-				m_view_size.height = (m_bm_rect.bottom - m_bm_rect.top) * m_ratio.height;
-				m_pos.y = value.y - m_view_size.height;
+				const float rect_bottom = max(m_rect.bottom + dy / m_ratio.height, m_rect.top + 1.0f);
+				m_rect.bottom = min(rect_bottom, m_size.height);
+				m_view.height = (m_rect.bottom - m_rect.top) * m_ratio.height;
+				m_pos.y = value.y - m_view.height;
 				flag = true;
-				if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_rect.left) < 1.0) {
+				if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
 					auto debug = 1;
 				}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SW) {
-			const float bm_w = m_bm_rect.right - m_bm_rect.left;
-			const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
+			const float bm_w = m_rect.right - m_rect.left;
+			const float bm_h = m_rect.bottom - m_rect.top;
 			if (bm_w > 1.0f && bm_h > 1.0f) {
-				const D2D1_POINT_2F s_pos{ m_pos.x, m_pos.y + m_view_size.height };
+				const D2D1_POINT_2F s_pos{ m_pos.x, m_pos.y + m_view.height };
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x + bm_w, s_pos.y - bm_h };
@@ -624,11 +624,11 @@ if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_
 				D2D1_POINT_2F v_vec;
 				pt_sub(pos, s_pos, v_vec);
 				if (pt_abs2(v_vec) >= FLT_MIN) {
-					const float view_w = m_pos.x + m_view_size.width - pos.x;
+					const float view_w = m_pos.x + m_view.width - pos.x;
 					const float view_h = pos.y - m_pos.y;
 					if (view_w >= 1.0f && view_h >= 1.0f) {
-						m_view_size.width = view_w;
-						m_view_size.height = view_h;
+						m_view.width = view_w;
+						m_view.height = view_h;
 						m_pos.x = pos.x;
 						m_ratio.width = view_w / bm_w;
 						m_ratio.height = view_h / bm_h;
@@ -640,12 +640,12 @@ if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_
 		else if (anch == ANCH_TYPE::ANCH_WEST) {
 			const float dx = (value.x - m_pos.x);
 			if (fabs(dx) >= FLT_MIN) {
-				const float r_left = min(m_bm_rect.left + dx / m_ratio.width, m_bm_rect.right - 1.0f);
-				m_bm_rect.left = max(r_left, 0.0f);
-				m_view_size.width = (m_bm_rect.right - m_bm_rect.left) * m_ratio.width;
+				const float r_left = min(m_rect.left + dx / m_ratio.width, m_rect.right - 1.0f);
+				m_rect.left = max(r_left, 0.0f);
+				m_view.width = (m_rect.right - m_rect.left) * m_ratio.width;
 				m_pos.x = value.x;
 				flag = true;
-				if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_rect.left) < 1.0) {
+				if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
 					auto debug = 1;
 				}
 			}
@@ -672,16 +672,16 @@ if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_
 	// dt_reader	データリーダー
 	ShapeBitmap::ShapeBitmap(const D2D1_POINT_2F c_pos, DataReader const& dt_reader)		
 	{
-		bitmap_read_dib(dt_reader, m_bm_size, &m_bm_data);
+		bitmap_read_dib(dt_reader, m_size, &m_data);
 
-		m_bm_rect.left = 0;
-		m_bm_rect.top = 0;
-		m_bm_rect.right = static_cast<FLOAT>(m_bm_size.width);
-		m_bm_rect.bottom = static_cast<FLOAT>(m_bm_size.height);
-		m_view_size.width = static_cast<FLOAT>(m_bm_size.width);
-		m_view_size.height = static_cast<FLOAT>(m_bm_size.height);
-		m_pos.x = c_pos.x - m_view_size.width * 0.5f;
-		m_pos.y = c_pos.y - m_view_size.height * 0.5;
+		m_rect.left = 0;
+		m_rect.top = 0;
+		m_rect.right = static_cast<FLOAT>(m_size.width);
+		m_rect.bottom = static_cast<FLOAT>(m_size.height);
+		m_view.width = static_cast<FLOAT>(m_size.width);
+		m_view.height = static_cast<FLOAT>(m_size.height);
+		m_pos.x = c_pos.x - m_view.width * 0.5f;
+		m_pos.y = c_pos.y - m_view.height * 0.5;
 		m_ratio.width = 1.0f;
 		m_ratio.height = 1.0f;
 	}
@@ -693,17 +693,17 @@ if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_
 		m_is_deleted = dt_reader.ReadBoolean();
 		m_is_selected = dt_reader.ReadBoolean();
 		dt_read(m_pos, dt_reader);
-		dt_read(m_view_size, dt_reader);
-		bitmap_read_rect(m_bm_rect, dt_reader);
-		dt_read(m_bm_size, dt_reader);
+		dt_read(m_view, dt_reader);
+		bitmap_read_rect(m_rect, dt_reader);
+		dt_read(m_size, dt_reader);
 		dt_read(m_ratio, dt_reader);
 
-		const size_t row_size = 4 * m_bm_size.width;
-		m_bm_data = new uint8_t[row_size * m_bm_size.height];
+		const size_t row_size = 4 * m_size.width;
+		m_data = new uint8_t[row_size * m_size.height];
 		std::vector<uint8_t> buf(row_size);
-		for (size_t i = 0; i < m_bm_size.height; i++) {
+		for (size_t i = 0; i < m_size.height; i++) {
 			dt_reader.ReadBytes(buf);
-			memcpy(m_bm_data + row_size * i, buf.data(), row_size);
+			memcpy(m_data + row_size * i, buf.data(), row_size);
 		}
 	}
 
@@ -714,15 +714,15 @@ if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_
 		dt_writer.WriteBoolean(m_is_deleted);
 		dt_writer.WriteBoolean(m_is_selected);
 		dt_write(m_pos, dt_writer);
-		dt_write(m_view_size, dt_writer);
-		bitmap_write_rect(m_bm_rect, dt_writer);
-		dt_write(m_bm_size, dt_writer);
+		dt_write(m_view, dt_writer);
+		bitmap_write_rect(m_rect, dt_writer);
+		dt_write(m_size, dt_writer);
 		dt_write(m_ratio, dt_writer);
 
-		const size_t row_size = 4 * m_bm_size.width;
+		const size_t row_size = 4 * m_size.width;
 		std::vector<uint8_t> buf(row_size);
-		for (size_t i = 0; i < m_bm_size.height; i++) {
-			memcpy(buf.data(), m_bm_data + row_size * i, row_size);
+		for (size_t i = 0; i < m_size.height; i++) {
+			memcpy(buf.data(), m_data + row_size * i, row_size);
 			dt_writer.WriteBytes(buf);
 		}
 	}

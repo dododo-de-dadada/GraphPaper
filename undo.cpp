@@ -12,6 +12,10 @@ namespace winrt::GraphPaper::implementation
 	static D2D1_POINT_2F undo_get_pos_anch(const Shape* s, const uint32_t anch) noexcept;
 	// データリーダーから位置を読み込む.
 	static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader);
+	// データリーダーから位置を読み込む.
+	static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader);
+	// データリーダーから位置を読み込む.
+	static D2D1_RECT_F undo_read_rect(DataReader const& dt_reader);
 	// データリーダーから添え字を読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader);
 	// 図形をデータライターに書き込む.
@@ -31,6 +35,26 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F pos;
 		dt_read(pos, dt_reader);
 		return pos;
+	}
+
+	// データリーダーから位置を読み込む.
+	static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader)
+	{
+		D2D1_SIZE_F size;
+		dt_read(size, dt_reader);
+		return size;
+	}
+
+	// データリーダーから位置を読み込む.
+	static D2D1_RECT_F undo_read_rect(DataReader const& dt_reader)
+	{
+		D2D1_RECT_F rect{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		};
+		return rect;
 	}
 
 	// データリーダーから添え字を読み込んで図形を得る.
@@ -81,73 +105,79 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::equal;
 
-		D2D1_POINT_2F a_pos;
-		m_shape->get_pos_anch(m_anch, a_pos);
-		return !equal(a_pos, m_anch_pos);
+		D2D1_POINT_2F pos;
+		m_shape->get_pos_anch(m_anch, pos);
+		return !equal(pos, m_pos);
 	}
 
 	// 操作を実行すると値が変わるか判定する.
-	bool UndoAnchor::changed(void) const noexcept
+	bool UndoBitmap::changed(void) const noexcept
 	{
-		using winrt::GraphPaper::implementation::equal;
+		//using winrt::GraphPaper::implementation::equal;
 
-		D2D1_POINT_2F a_pos;
-		m_shape->get_pos_anch(m_anch, a_pos);
-		return !equal(a_pos, m_anch_pos);
-	}
-
-	bool UndoAnchorBitmap::changed(void) const noexcept
-	{
-		return true;
+		const auto pos = static_cast<ShapeBitmap*>(m_shape)->m_pos;
+		const auto view = static_cast<ShapeBitmap*>(m_shape)->m_view;
+		const auto rect = static_cast<ShapeBitmap*>(m_shape)->m_rect;
+		const auto ratio = static_cast<ShapeBitmap*>(m_shape)->m_ratio;
+		return !equal(pos, m_pos) || !equal(view, m_view) || !equal(rect, m_rect) || !equal(ratio, m_ratio);
 	}
 
 	// 元に戻す操作を実行する.
 	void UndoAnchor::exec(void)
 	{
-		D2D1_POINT_2F a_pos;
-		m_shape->get_pos_anch(m_anch, a_pos);
-		m_shape->set_pos_anch(m_anch_pos, m_anch, 0.0f);
-		m_anch_pos = a_pos;
+		D2D1_POINT_2F pos;
+		m_shape->get_pos_anch(m_anch, pos);
+		m_shape->set_pos_anch(m_pos, m_anch, 0.0f);
+		m_pos = pos;
 	}
 
 	// 元に戻す操作を実行する.
-	void UndoAnchorBitmap::exec(void)
+	void UndoBitmap::exec(void)
 	{
-		D2D1_POINT_2F a_pos;
 		ShapeBitmap* s = static_cast<ShapeBitmap*>(m_shape);
 		const auto pos = s->m_pos;
-		const auto size = s->m_view_size;
-		const auto rect = s->m_bm_rect;
+		const auto view = s->m_view;
+		const auto rect = s->m_rect;
 		const auto ratio = s->m_ratio;
-		s->m_pos = m_anch_pos;
-		s->m_view_size = m_anch_size;
-		s->m_bm_rect = m_anch_rect;
-		s->m_ratio = m_anch_retio;
-		s->m_pos = pos;
-		s->m_view_size = size;
-		s->m_bm_rect = rect;
-		s->m_ratio = ratio;
+		s->m_pos = m_pos;
+		s->m_view = m_view;
+		s->m_rect = m_rect;
+		s->m_ratio = m_ratio;
+		m_pos = pos;
+		m_view = view;
+		m_rect = rect;
+		m_ratio = ratio;
 	}
 
 	// データリーダーから操作を読み込む.
 	UndoAnchor::UndoAnchor(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_anch(static_cast<ANCH_TYPE>(dt_reader.ReadUInt32())),
-		m_anch_pos(undo_read_pos(dt_reader))
+		m_pos(undo_read_pos(dt_reader))
 	{}
 
 	// データリーダーから操作を読み込む.
-	UndoAnchor::UndoAnchor(DataReader const& dt_reader) :
+	UndoBitmap::UndoBitmap(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
-		m_anch(static_cast<ANCH_TYPE>(dt_reader.ReadUInt32())),
-		m_anch_pos(undo_read_pos(dt_reader))
+		m_pos(undo_read_pos(dt_reader)),
+		m_view(undo_read_size(dt_reader)),
+		m_rect(undo_read_rect(dt_reader)),
+		m_ratio(undo_read_size(dt_reader))
 	{}
 
 	// 図形の, 指定された部位の位置を保存する.
-	UndoAnchorBitmap::UndoAnchorBitmap(Shape* const s, const uint32_t anch) :
+	UndoAnchor::UndoAnchor(Shape* const s, const uint32_t anch) :
 		Undo(s),
 		m_anch(anch),
-		m_anch_pos(undo_get_pos_anch(s, anch))
+		m_pos(undo_get_pos_anch(s, anch))
+	{}
+
+	UndoBitmap::UndoBitmap(ShapeBitmap* const s) :
+		Undo(s),
+		m_pos(s->m_pos),
+		m_view(s->m_view),
+		m_rect(s->m_rect),
+		m_ratio(s->m_ratio)
 	{}
 
 	// データライターに書き込む.
@@ -156,7 +186,18 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::POS_ANCH));
 		undo_write_shape(m_shape, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_anch));
-		dt_write(m_anch_pos, dt_writer);
+		dt_write(m_pos, dt_writer);
+	}
+
+	// データライターに書き込む.
+	void UndoBitmap::write(DataWriter const& dt_writer)
+	{
+		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::BITMAP));
+		undo_write_shape(m_shape, dt_writer);
+		dt_write(m_pos, dt_writer);
+		dt_write(m_view, dt_writer);
+		dt_write(m_rect, dt_writer);
+		dt_write(m_ratio, dt_writer);
 	}
 
 	// 操作を実行する.

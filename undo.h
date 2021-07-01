@@ -25,11 +25,12 @@ namespace winrt::GraphPaper::implementation
 	// 操作
 	//------------------------------
 	enum struct UNDO_OP {
-		END = -1,	// 操作スタックの終端 (ファイルの読み書きで使用)
-		NULLPTR = 0,	// 操作の区切り (ファイルの読み書きで使用)
+		END = -1,	// 操作スタックの終端 (ファイル読み書きで使用)
+		NULLPTR = 0,	// 操作の区切り (ファイル読み書きで使用)
 		ARRANGE,	// 図形の順番の入れ替え
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
+		BITMAP,	// 画像の操作 (ファイル読み書きで使用)
 		BM_KEEP,	// 画像の縦横維持の操作
 		BM_OPAC,	// 画像の不透明度の操作
 		CAP_STYLE,	// 端の形式の操作
@@ -139,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct UndoAnchor : Undo {
 		uint32_t m_anch;	// 操作される図形の部位
-		D2D1_POINT_2F m_anch_pos;	// 変更前の, 図形の部位の位置
+		D2D1_POINT_2F m_pos;	// 変更前の, 図形の部位の位置
 
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;
@@ -153,24 +154,22 @@ namespace winrt::GraphPaper::implementation
 		void write(DataWriter const& dt_writer);
 	};
 
-	struct UndoAnchorBitmap : Undo {
-		uint32_t m_anch;	// 操作される図形の部位
-		D2D1_POINT_2F m_anch_pos;	// 変更前の, 図形の部位の位置
-		D2D1_SIZE_F m_anch_size;
-		D2D1_RECT_F m_anch_rect;
-		D2D1_SIZE_F m_anch_retio;
+	struct UndoBitmap : Undo {
+		D2D1_POINT_2F m_pos;
+		D2D1_SIZE_F m_view;
+		D2D1_RECT_F m_rect;
+		D2D1_SIZE_F m_ratio;
 
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;
 		// 操作を実行する.
 		void exec(void);
 		// データリーダーから操作を読み込む.
-		UndoAnchorBitmap(DataReader const& dt_reader);
+		UndoBitmap(DataReader const& dt_reader);
 		// 図形の部位を保存する.
-		UndoAnchorBitmap(Shape* const s, const uint32_t anch);
+		UndoBitmap(ShapeBitmap* const s);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer);
-
 	};
 
 	//------------------------------

@@ -303,7 +303,7 @@ namespace winrt::GraphPaper::implementation
 	// 画像の不透明度を得る.
 	bool ShapeSheet::get_bm_opacity(float& value) const noexcept
 	{
-		value = m_bm_opac;
+		value = m_opac;
 		return true;
 	}
 
@@ -540,7 +540,7 @@ namespace winrt::GraphPaper::implementation
 		m_text_line_sp = dt_reader.ReadSingle();	// 行間
 		dt_read(m_text_padding, dt_reader);	// 文字列の余白
 		s_bm_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
-		m_bm_opac = dt_reader.ReadSingle();	// 画像の不透明率
+		m_opac = dt_reader.ReadSingle();	// 画像の不透明率
 
 		ShapeText::is_available_font(m_font_family);
 	}
@@ -574,8 +574,8 @@ namespace winrt::GraphPaper::implementation
 	// 値を画像の不透明度に格納する.
 	bool ShapeSheet::set_bm_opacity(const float value) noexcept
 	{
-		if (!equal(m_bm_opac, value)) {
-			m_bm_opac = value;
+		if (!equal(m_opac, value)) {
+			m_opac = value;
 			return true;
 		}
 		return false;
@@ -901,7 +901,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_text_line_sp);	// 行間
 		dt_write(m_text_padding, dt_writer);	// 文字列の余白
 		dt_writer.WriteBoolean(s_bm_keep_aspect);	// 画像の縦横比の維持
-		dt_writer.WriteSingle(m_bm_opac);	// 画像の不透明率
+		dt_writer.WriteSingle(m_opac);	// 画像の不透明率
 	}
 
 }
