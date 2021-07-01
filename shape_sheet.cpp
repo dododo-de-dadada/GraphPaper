@@ -296,7 +296,7 @@ namespace winrt::GraphPaper::implementation
 	// ‰æ‘œ‚Ìc‰¡”ä‚ÌˆÛ‚ğ“¾‚é.
 	bool ShapeSheet::get_bm_keep_aspect(bool& value) const noexcept
 	{
-		value = m_bm_keep_aspect;
+		value = s_bm_keep_aspect;
 		return true;
 	}
 
@@ -539,9 +539,13 @@ namespace winrt::GraphPaper::implementation
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());	// •¶š—ñ‚Ì‚»‚ë‚¦
 		m_text_line_sp = dt_reader.ReadSingle();	// sŠÔ
 		dt_read(m_text_padding, dt_reader);	// •¶š—ñ‚Ì—]”’
+		s_bm_keep_aspect = dt_reader.ReadBoolean();	// ‰æ‘œ‚Ìc‰¡”ä‚ÌˆÛ
+		m_bm_opac = dt_reader.ReadSingle();	// ‰æ‘œ‚Ì•s“§–¾—¦
 
 		ShapeText::is_available_font(m_font_family);
 	}
+
+	bool ShapeSheet::s_bm_keep_aspect = true;	// ‰æ‘œ‚Ìc‰¡”ä‚ÌˆÛ
 
 	// ’l‚ğ–î‚¶‚é‚µ‚Ì¡–@‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_arrow_size(const ARROW_SIZE& value)
@@ -563,8 +567,8 @@ namespace winrt::GraphPaper::implementation
 	// ’l‚ğ‰æ‘œ‚Ìc‰¡”ä‚ÌˆÛ‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_bm_keep_aspect(const bool value) noexcept
 	{
-		const auto old_value = m_bm_keep_aspect;
-		return (m_bm_keep_aspect = value) != old_value;
+		const auto old_value = s_bm_keep_aspect;
+		return (s_bm_keep_aspect = value) != old_value;
 	}
 
 	// ’l‚ğ‰æ‘œ‚Ì•s“§–¾“x‚ÉŠi”[‚·‚é.
@@ -896,7 +900,8 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));	// •¶š—ñ‚Ì‚»‚ë‚¦
 		dt_writer.WriteSingle(m_text_line_sp);	// sŠÔ
 		dt_write(m_text_padding, dt_writer);	// •¶š—ñ‚Ì—]”’
-
+		dt_writer.WriteBoolean(s_bm_keep_aspect);	// ‰æ‘œ‚Ìc‰¡”ä‚ÌˆÛ
+		dt_writer.WriteSingle(m_bm_opac);	// ‰æ‘œ‚Ì•s“§–¾—¦
 	}
 
 }

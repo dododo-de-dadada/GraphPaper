@@ -808,7 +808,7 @@ namespace winrt::GraphPaper::implementation
 	// value	値
 	// anch	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeText::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit)
+	bool ShapeText::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool /*keep_aspect*/)
 	{
 		if (ShapeRect::set_pos_anch(value, anch, limit)) {
 			create_text_metrics(s_dwrite_factory);

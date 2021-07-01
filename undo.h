@@ -153,6 +153,26 @@ namespace winrt::GraphPaper::implementation
 		void write(DataWriter const& dt_writer);
 	};
 
+	struct UndoAnchorBitmap : Undo {
+		uint32_t m_anch;	// 操作される図形の部位
+		D2D1_POINT_2F m_anch_pos;	// 変更前の, 図形の部位の位置
+		D2D1_SIZE_F m_anch_size;
+		D2D1_RECT_F m_anch_rect;
+		D2D1_SIZE_F m_anch_retio;
+
+		// 操作を実行すると値が変わるか判定する.
+		bool changed(void) const noexcept;
+		// 操作を実行する.
+		void exec(void);
+		// データリーダーから操作を読み込む.
+		UndoAnchorBitmap(DataReader const& dt_reader);
+		// 図形の部位を保存する.
+		UndoAnchorBitmap(Shape* const s, const uint32_t anch);
+		// データライターに書き込む.
+		void write(DataWriter const& dt_writer);
+
+	};
+
 	//------------------------------
 	// 図形の順番を入れ替える操作
 	//------------------------------

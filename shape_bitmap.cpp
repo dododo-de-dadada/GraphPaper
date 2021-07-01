@@ -432,7 +432,6 @@ namespace winrt::GraphPaper::implementation
 	//	const auto old_value = m_bm_keep_aspect;
 	//	return (m_bm_keep_aspect = value) != old_value;
 	//}
-	bool ShapeBitmap::s_bm_keep_aspect = true;
 
 	// 値を画像の不透明度に格納する.
 	bool ShapeBitmap::set_bm_opacity(const float value) noexcept
@@ -474,18 +473,19 @@ namespace winrt::GraphPaper::implementation
 	// value	値
 	// anch	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeBitmap::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit)
+	// keep_aspect	画像図形の縦横比を維持
+	bool ShapeBitmap::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect)
 	{
 		bool flag = false;
 		if (anch == ANCH_TYPE::ANCH_NW) {
 			// 画像の一部分でも表示されているか判定する.
 			// (画像がまったく表示されてない場合はスケールの変更は行わない.)
-			if (m_bm_rect.left + FLT_MIN < m_bm_rect.right && m_bm_rect.top + FLT_MIN < m_bm_rect.bottom) {
-				const float bm_w = m_bm_rect.right - m_bm_rect.left;	// 表示されている画像の幅 (原寸)
-				const float bm_h = m_bm_rect.bottom - m_bm_rect.top;	// 表示されている画像の高さ (原寸)
+			const float bm_w = m_bm_rect.right - m_bm_rect.left;	// 表示されている画像の幅 (原寸)
+			const float bm_h = m_bm_rect.bottom - m_bm_rect.top;	// 表示されている画像の高さ (原寸)
+			if (bm_w > 1.0f && bm_h > 1.0f) {
 				const D2D1_POINT_2F s_pos{ m_pos };	// 始点 (図形の頂点)
 				D2D1_POINT_2F pos;
-				if (s_bm_keep_aspect) {
+				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x + bm_w, s_pos.y + bm_h };	// 終点 (始点と対角にある画像上の点)
 					neighbor(value, s_pos, e_pos, pos);
 				}
@@ -512,22 +512,25 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (anch == ANCH_TYPE::ANCH_NORTH) {
 			// 変更する差分を求める.
-			const float dy = (value.y - m_pos.y) / m_ratio.height;
+			const float dy = (value.y - m_pos.y);
 			if (fabs(dy) >= FLT_MIN) {
-				const float rect_top = max(m_bm_rect.top + dy, 0.0f);
-				m_bm_rect.top = min(rect_top, m_bm_rect.bottom);
+				const float rect_top = min(m_bm_rect.top + dy / m_ratio.height, m_bm_rect.bottom - 1.0f);
+				m_bm_rect.top = max(rect_top, 0.0f);
 				m_view_size.height = (m_bm_rect.bottom - m_bm_rect.top) * m_ratio.height;
 				m_pos.y = value.y;
 				flag = true;
+if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_rect.left) < 1.0) {
+	auto debug = 1;
+}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_NE) {
-			if (m_bm_rect.left + FLT_MIN < m_bm_rect.right && m_bm_rect.top + FLT_MIN < m_bm_rect.bottom) {
-				const float bm_w = m_bm_rect.right - m_bm_rect.left;
-				const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
+			const float bm_w = m_bm_rect.right - m_bm_rect.left;
+			const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
+			if (bm_w > 1.0f && bm_h > 1.0f) {
 				const D2D1_POINT_2F s_pos{ m_pos.x + m_view_size.width, m_pos.y };
 				D2D1_POINT_2F pos;
-				if (s_bm_keep_aspect) {
+				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x - bm_w, s_pos.y + bm_h };
 					neighbor(value, s_pos, e_pos, pos);
 				}
@@ -551,22 +554,26 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_EAST) {
-			const float dx = (value.x - (m_pos.x + m_view_size.width)) / m_ratio.width;
+			const float dx = (value.x - (m_pos.x + m_view_size.width));
 			if (fabs(dx) >= FLT_MIN) {
-				const float rect_right = max(m_bm_rect.right + dx, m_bm_rect.left);
+				const float rect_right = max(m_bm_rect.right + dx / m_ratio.width, m_bm_rect.left + 1.0f);
 				m_bm_rect.right = min(rect_right, m_bm_size.width);
+				//m_view_size.width = m_view_size.width + dx;
 				m_view_size.width = (m_bm_rect.right - m_bm_rect.left) * m_ratio.width;
 				m_pos.x = value.x - m_view_size.width;
 				flag = true;
+				if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_rect.left) < 1.0) {
+					auto debug = 1;
+				}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SE) {
-			if (m_bm_rect.left + FLT_MIN < m_bm_rect.right && m_bm_rect.top + FLT_MIN < m_bm_rect.bottom) {
-				const float bm_w = m_bm_rect.right - m_bm_rect.left;
-				const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
+			const float bm_w = m_bm_rect.right - m_bm_rect.left;
+			const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
+			if (bm_w > 1.0f && bm_h > 1.0f) {
 				const D2D1_POINT_2F s_pos{ m_pos.x + m_view_size.width, m_pos.y + m_view_size.height };
 				D2D1_POINT_2F pos;
-				if (s_bm_keep_aspect) {
+				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x - bm_w, s_pos.y - bm_h };
 					neighbor(value, s_pos, e_pos, pos);
 				}
@@ -589,22 +596,25 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SOUTH) {
-			const float dy = (value.y - (m_pos.y + m_view_size.height)) / m_ratio.height;
+			const float dy = (value.y - (m_pos.y + m_view_size.height));
 			if (fabs(dy) >= FLT_MIN) {
-				const float rect_bottom = max(m_bm_rect.bottom + dy, m_bm_rect.top);
+				const float rect_bottom = max(m_bm_rect.bottom + dy / m_ratio.height, m_bm_rect.top + 1.0f);
 				m_bm_rect.bottom = min(rect_bottom, m_bm_size.height);
 				m_view_size.height = (m_bm_rect.bottom - m_bm_rect.top) * m_ratio.height;
 				m_pos.y = value.y - m_view_size.height;
 				flag = true;
+				if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_rect.left) < 1.0) {
+					auto debug = 1;
+				}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SW) {
-			if (m_bm_rect.left + FLT_MIN < m_bm_rect.right && m_bm_rect.top + FLT_MIN < m_bm_rect.bottom) {
-				const float bm_w = m_bm_rect.right - m_bm_rect.left;
-				const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
+			const float bm_w = m_bm_rect.right - m_bm_rect.left;
+			const float bm_h = m_bm_rect.bottom - m_bm_rect.top;
+			if (bm_w > 1.0f && bm_h > 1.0f) {
 				const D2D1_POINT_2F s_pos{ m_pos.x, m_pos.y + m_view_size.height };
 				D2D1_POINT_2F pos;
-				if (s_bm_keep_aspect) {
+				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x + bm_w, s_pos.y - bm_h };
 					neighbor(value, s_pos, e_pos, pos);
 				}
@@ -628,13 +638,16 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_WEST) {
-			const float dx = (value.x - m_pos.x) / m_ratio.width;
+			const float dx = (value.x - m_pos.x);
 			if (fabs(dx) >= FLT_MIN) {
-				const float r_left = max(m_bm_rect.left + dx, 0.0f);
-				m_bm_rect.left = min(r_left, m_bm_rect.right);
+				const float r_left = min(m_bm_rect.left + dx / m_ratio.width, m_bm_rect.right - 1.0f);
+				m_bm_rect.left = max(r_left, 0.0f);
 				m_view_size.width = (m_bm_rect.right - m_bm_rect.left) * m_ratio.width;
 				m_pos.x = value.x;
 				flag = true;
+				if (fabs(m_bm_rect.bottom - m_bm_rect.top) < 1.0 || fabs(m_bm_rect.right - m_bm_rect.left) < 1.0) {
+					auto debug = 1;
+				}
 			}
 		}
 		return flag;

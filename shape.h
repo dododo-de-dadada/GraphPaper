@@ -585,7 +585,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線分のつなぎに格納する.
 		virtual bool set_join_style(const D2D1_LINE_JOIN& /*value*/) { return false; }
 		// 値を, 部位の位置に格納する.
-		virtual bool set_pos_anch(const D2D1_POINT_2F /*value*/, const uint32_t /*anch*/, const float /*limit = 0.0f*/) { return false; }
+		virtual bool set_pos_anch(const D2D1_POINT_2F /*value*/, const uint32_t /*anch*/, const float limit = 0.0f, const bool keep_aspect = false) { return false; }
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F /*value*/) { return false; }
 		// 値を用紙の色に格納する.
@@ -622,7 +622,6 @@ namespace winrt::GraphPaper::implementation
 	// 画像
 	//------------------------------
 	struct ShapeBitmap : Shape {
-		static bool s_bm_keep_aspect;	// 縦横の比率を変えないか判定.
 		bool m_is_deleted = false;	// 消去されたか判定
 		bool m_is_selected = false;	// 選択されたか判定
 		D2D1_POINT_2F m_pos;	// 始点の位置
@@ -638,7 +637,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
 		// 画像の縦横比の維持を得る.
-		bool get_bm_keep_aspect(bool& /*value*/) const noexcept;
+		//bool get_bm_keep_aspect(bool& /*value*/) const noexcept;
 		// 画像の不透明度を得る.
 		bool get_bm_opacity(float& /*value*/) const noexcept;
 		// 図形を囲む領域を得る.
@@ -666,11 +665,11 @@ namespace winrt::GraphPaper::implementation
 		// 値を消去フラグに格納する.
 		bool set_delete(const bool value) noexcept;
 		// 値を画像の縦横比の維持に格納する.
-		bool set_bm_keep_aspect(const bool value) noexcept;
+		//bool set_bm_keep_aspect(const bool value) noexcept;
 		// 値を画像の不透明度に格納する.
 		bool set_bm_opacity(const float value) noexcept;
 		// 値を, 部位の位置に格納する.
-		bool set_pos_anch(const D2D1_POINT_2F /*value*/, const uint32_t /*anch*/, const float /*limit = 0.0f*/);
+		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f, const bool keep_aspect = false);
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F /*value*/);
 		// 値を選択フラグに格納する.
@@ -720,8 +719,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_text_padding{ DEF_TEXT_MARGIN };	// 文字列の左右と上下の余白
 
 		// 画像
-		bool m_bm_keep_aspect = true;
-		float m_bm_opac = 1.0f;
+		static bool s_bm_keep_aspect;	// 画像の縦横比の維持
+		float m_bm_opac = 1.0f;	// 画像の不透明率
 
 		// 方眼
 		D2D1_COLOR_F m_grid_color{ ACCENT_COLOR };	// 方眼の色
@@ -1016,7 +1015,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線分のつなぎに格納する.
 		bool set_join_style(const D2D1_LINE_JOIN& value);
 		// 値を, 部位の位置に格納する.
-		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f);
+		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f, const bool keep_aspect = false);
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F value);
 		// 値を選択フラグに格納する.
@@ -1077,7 +1076,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を矢じるしの形式に格納する.
 		bool set_arrow_style(const ARROW_STYLE value);
 		//	値を, 部位の位置に格納する. 
-		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f);
+		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f, const bool keep_aspect = false);
 		// 値を始点に格納する.
 		bool set_pos_start(const D2D1_POINT_2F value);
 		// 差分だけ移動する.
@@ -1129,7 +1128,7 @@ namespace winrt::GraphPaper::implementation
 		// 部位の位置を得る.
 		void get_pos_anch(const uint32_t anch, D2D1_POINT_2F& value) const noexcept;
 		//	値を, 部位の位置に格納する.
-		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f);
+		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f, const bool keep_aspect = false);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
@@ -1213,7 +1212,7 @@ namespace winrt::GraphPaper::implementation
 		// 部位の位置を得る.
 		void get_pos_anch(const uint32_t anch, D2D1_POINT_2F& value) const noexcept;
 		//	値を, 部位の位置に格納する.
-		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f);
+		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f, const bool keep_aspect = false);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
@@ -1244,7 +1243,7 @@ namespace winrt::GraphPaper::implementation
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F value);
 		// 値を, 部位の位置に格納する.
-		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f);
+		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f, const bool keep_aspect = false);
 		// 値を矢じるしの寸法に格納する.
 		bool set_arrow_size(const ARROW_SIZE& value);
 		// 値を矢じるしの形式に格納する.
@@ -1411,7 +1410,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		bool set_font_weight(const DWRITE_FONT_WEIGHT value);
 		// 値を, 部位の位置に格納する.
-		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f);
+		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f, const bool keep_aspect = false);
 		// 値を段落のそろえに格納する.
 		bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value);
 		// 値を文字列のそろえに格納する.

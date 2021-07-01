@@ -325,7 +325,7 @@
             </MenuFlyout>
 			<!-- 画像コンテキストメニュー -->
 			<MenuFlyout x:Key="mf_image_menu">
-				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect_2" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" Text="Keep Aspect Ratio" />
+				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect_2" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
 				<MenuFlyoutItem x:Name="mfi_image_opac_2" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
 			</MenuFlyout>
 		</ResourceDictionary>
@@ -746,7 +746,7 @@
             </muxc:MenuBarItem>
 			<!-- 画像メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_image_menu" AccessKey="I" Title="Image">
-				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" Text="Keep Aspect Ratio" />
+				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
 				<MenuFlyoutItem x:Name="mfi_image_opac" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
 			</muxc:MenuBarItem>
 			<!-- その他メニュー -->

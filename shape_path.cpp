@@ -24,9 +24,9 @@ namespace winrt::GraphPaper::implementation
 	// value	値
 	// anch	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapePath::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit)
+	bool ShapePath::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect)
 	{
-		if (ShapeStroke::set_pos_anch(value, anch, limit)) {
+		if (ShapeStroke::set_pos_anch(value, anch, limit, keep_aspect)) {
 			create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
