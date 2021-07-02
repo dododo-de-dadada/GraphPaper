@@ -114,14 +114,14 @@ namespace winrt::GraphPaper::implementation
 		// 延長実行セッションを要求し, その結果を得る.
 		auto hres = E_FAIL;
 		switch (co_await e_session.RequestExtensionAsync()) {
+		// 延長実行セッションが許可された場合.
 		case ExtendedExecutionResult::Allowed:
-			// 延長実行セッションが許可された場合,
+			// セッションがキャンセルか判定する.
 			if (ct_source.get_token().is_canceled()) {
-				// キャンセルされた場合, 中断する.
 				break;
 			}
 			try {
-				// キャンセルでない場合,
+				// キャンセル以外ならば,
 				auto s_file{ co_await app_cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 				if (s_file != nullptr) {
 					hres = co_await file_write_gpf_async(s_file, true, false);

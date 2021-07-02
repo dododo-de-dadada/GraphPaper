@@ -117,8 +117,8 @@ namespace winrt::GraphPaper::implementation
 		rmfi_tool_draw_ruler().IsChecked(value == DRAW_TOOL::RULER);
 	}
 
-	// 多角形ツールのメニューのチェックをつける.
-	void MainPage::tool_poly_is_checked(const POLY_TOOL& value)
+	// 多角形の選択肢メニューにチェックをつける.
+	void MainPage::tool_poly_is_checked(const POLY_OPTION& value)
 	{
 		tool_poly_n_is_checked(value.m_vertex_cnt);
 		tmfi_tool_poly_regular().IsChecked(value.m_regular);
@@ -127,7 +127,7 @@ namespace winrt::GraphPaper::implementation
 		tmfi_tool_poly_clockwise().IsChecked(value.m_clockwise);
 	}
 
-	// 多角形ツールのメニューのチェックをつける.
+	// 多角形の頂点数メニューにチェックをつける.
 	void MainPage::tool_poly_n_is_checked(const uint32_t value)
 	{
 		rmfi_tool_poly_line().IsChecked(value == 2);
@@ -140,19 +140,5 @@ namespace winrt::GraphPaper::implementation
 		rmfi_tool_poly_nona().IsChecked(value == 9);
 		rmfi_tool_poly_deca().IsChecked(value == 10);
 	}
-
-	// 作図ツールの状態を読み込む.
-	//void MainPage::tool_read(DataReader const& dt_reader)
-	//{
-	//	m_tool_draw = static_cast<DRAW_TOOL>(dt_reader.ReadUInt32());
-	//	dt_read(m_tool_poly, dt_reader);
-	//}
-
-	// 作図ツールの状態を書き込む.
-	//void MainPage::tool_write(DataWriter const& dt_writer)
-	//{
-	//	dt_writer.WriteUInt32(static_cast<uint32_t>(m_tool_draw));
-	//	dt_write(m_tool_poly, dt_writer);
-	//}
 
 }

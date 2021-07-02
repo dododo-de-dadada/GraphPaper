@@ -1,3 +1,4 @@
+#include <time.h>
 #include "pch.h"
 #include "shape.h"
 
@@ -18,10 +19,6 @@ namespace winrt::GraphPaper::implementation
 
 	// データリーダーから DIB を読み込む.
 	static void bitmap_read_dib(DataReader const& dt_reader, D2D1_SIZE_U& b_size, uint8_t** buf);
-	// データリーダーから D2D1_RECT_F を読み込む.
-	static void bitmap_read_rect(D2D1_RECT_F& rect, DataReader const& dt_reader);
-	// データライターに D2D1_RECT_F を書き込む.
-	static void bitmap_write_rect(const D2D1_RECT_F& rect, DataWriter const& dt_writer);
 
 	// データリーダーから DIB データを読み込む.
 	static void bitmap_read_dib(DataReader const& dt_reader, D2D1_SIZE_U& dib_size, uint8_t** dib_data)
@@ -38,11 +35,11 @@ namespace winrt::GraphPaper::implementation
 			if (b_order != ByteOrder::LittleEndian) {
 				dt_reader.ByteOrder(ByteOrder::LittleEndian);
 			}
-			uint32_t bf_size = dt_reader.ReadUInt32();	// ファイル全体のサイズ.
+			uint32_t bf_size = dt_reader.ReadUInt32();	// ファイル全体のサイズ
 			uint16_t bf_reserved_0 = dt_reader.ReadUInt16();
 			uint16_t bf_reserved_1 = dt_reader.ReadUInt16();
-			uint32_t bf_offset = dt_reader.ReadUInt32();	// イメージデータまでのオフセット
-			uint32_t bi_size = dt_reader.ReadUInt32();	// BITMAOINFOHEADER または BITMAPCOREHEADER のサイズ
+			uint32_t bf_offset = dt_reader.ReadUInt32();	// ファイル先頭から画像データまでのオフセット (54 + パレット)
+			uint32_t bi_size = dt_reader.ReadUInt32();	// BITMAOINFOHEADER = 40 または BITMAPCOREHEADER = 12 のサイズ
 			uint32_t bi_width = 0;
 			uint32_t bi_height = 0;
 			uint16_t bi_bit_cnt = 0;
@@ -55,9 +52,9 @@ namespace winrt::GraphPaper::implementation
 				bi_width = dt_reader.ReadUInt32();
 				bi_height = dt_reader.ReadUInt32();
 				uint16_t bi_planes = dt_reader.ReadUInt16();	// プレーンの数. かならず 1
-				bi_bit_cnt = dt_reader.ReadUInt16();
+				bi_bit_cnt = dt_reader.ReadUInt16();	// 色数 1=モノクロ, 4=16色, 8=256色, 24または32=フルカラー
 				bi_compress = dt_reader.ReadUInt32();	// 圧縮タイプ. (0=BI_RGB, 1=BI_RLE8, 2=BI_RLE4, 3=BI_BITFIELDS)
-				bi_size_img = dt_reader.ReadUInt32();
+				bi_size_img = dt_reader.ReadUInt32();	// 圧縮された画像データの大きさ (非圧縮=BI_RGB ならゼロ)
 				uint32_t x_px_per_meter = dt_reader.ReadUInt32();	// 96dpiのとき 3780. ふつうはゼロ.
 				uint32_t y_px_per_meter = dt_reader.ReadUInt32();
 				bi_color_used = dt_reader.ReadUInt32();
@@ -182,24 +179,6 @@ namespace winrt::GraphPaper::implementation
 				dt_reader.ByteOrder(b_order);
 			}
 		}
-	}
-
-	// データリーダーから D2D1_RECT_F を読み込む.
-	static void bitmap_read_rect(D2D1_RECT_F& rect, DataReader const& dt_reader)
-	{
-		rect.left = dt_reader.ReadSingle();
-		rect.top = dt_reader.ReadSingle();
-		rect.right = dt_reader.ReadSingle();
-		rect.bottom = dt_reader.ReadSingle();
-	}
-
-	// データライターに D2D1_RECT_F を書き込む.
-	static void bitmap_write_rect(const D2D1_RECT_F& rect, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteSingle(rect.left);
-		dt_writer.WriteSingle(rect.top);
-		dt_writer.WriteSingle(rect.right);
-		dt_writer.WriteSingle(rect.bottom);
 	}
 
 	ShapeBitmap::~ShapeBitmap(void)
@@ -443,19 +422,22 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を消去フラグに格納する.
+	// 値を消去されたか判定に格納する.
 	bool ShapeBitmap::set_delete(const bool value) noexcept
 	{
 		m_is_deleted = value;
 		return true;
 	}
 
-	static void neighbor(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& q)
+	// 点に最も近い, 線分上の点を求める.
+	static void get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& q)
 	{
+		// 線分 ab が垂直か判定する.
 		if (a.x == b.x) {
 			q.x = a.x;
 			q.y = p.y;
 		}
+		// 線分 ab が水平か判定する.
 		else if (a.y == b.y) {
 			q.x = p.x;
 			q.y = a.y;
@@ -467,6 +449,19 @@ namespace winrt::GraphPaper::implementation
 			const double ab_ab = ab.x * ab.x + ab.y * ab.y;	// ab.ab
 			pt_mul(ab, ap_ab / ab_ab, a, q);	// a + ap.ab / (|ab|^2) -> q
 		}
+	}
+
+	// 元の大きさに戻す.
+	void ShapeBitmap::resize_origin(void) noexcept
+	{
+		const float size_w = static_cast<float>(m_size.width);
+		const float size_h = static_cast<float>(m_size.height);
+		m_view.width = size_w;
+		m_view.height = size_h;
+		m_rect.left = m_rect.top = 0.0f;
+		m_rect.right = size_w;
+		m_rect.bottom = size_w;
+		m_ratio.width = m_ratio.height = 1.0f;
 	}
 
 	// 値を, 部位の位置に格納する.
@@ -487,7 +482,7 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x + bm_w, s_pos.y + bm_h };	// 終点 (始点と対角にある画像上の点)
-					neighbor(value, s_pos, e_pos, pos);
+					get_pos_on_line(value, s_pos, e_pos, pos);
 				}
 				else {
 					pos = value;
@@ -532,7 +527,7 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x - bm_w, s_pos.y + bm_h };
-					neighbor(value, s_pos, e_pos, pos);
+					get_pos_on_line(value, s_pos, e_pos, pos);
 				}
 				else {
 					pos = value;
@@ -575,7 +570,7 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x - bm_w, s_pos.y - bm_h };
-					neighbor(value, s_pos, e_pos, pos);
+					get_pos_on_line(value, s_pos, e_pos, pos);
 				}
 				else {
 					pos = value;
@@ -616,7 +611,7 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x + bm_w, s_pos.y - bm_h };
-					neighbor(value, s_pos, e_pos, pos);
+					get_pos_on_line(value, s_pos, e_pos, pos);
 				}
 				else {
 					pos = value;
@@ -660,7 +655,7 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		return true;
 	}
 
-	// 値を選択フラグに格納する.
+	// 値を選択されてるか判定に格納する.
 	bool ShapeBitmap::set_select(const bool value) noexcept
 	{
 		m_is_selected = value;
@@ -694,7 +689,7 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		m_is_selected = dt_reader.ReadBoolean();
 		dt_read(m_pos, dt_reader);
 		dt_read(m_view, dt_reader);
-		bitmap_read_rect(m_rect, dt_reader);
+		dt_read(m_rect, dt_reader);
 		dt_read(m_size, dt_reader);
 		dt_read(m_ratio, dt_reader);
 
@@ -715,7 +710,7 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		dt_writer.WriteBoolean(m_is_selected);
 		dt_write(m_pos, dt_writer);
 		dt_write(m_view, dt_writer);
-		bitmap_write_rect(m_rect, dt_writer);
+		dt_write(m_rect, dt_writer);
 		dt_write(m_size, dt_writer);
 		dt_write(m_ratio, dt_writer);
 
@@ -727,4 +722,57 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		}
 	}
 
+	void ShapeBitmap::write_bmp(DataWriter const& dt_writer) const
+	{
+		const D2D1_RECT_U rect{
+			static_cast<uint32_t>(roundf(m_rect.left)),
+			static_cast<uint32_t>(roundf(m_rect.right)),
+			static_cast<uint32_t>(roundf(m_rect.top)),
+			static_cast<uint32_t>(roundf(m_rect.bottom))
+		};
+		constexpr uint32_t bi_size = 0x28;	// BITMAOINFOHEADER のサイズ (40 バイト)
+		const uint32_t bi_width = rect.right - rect.left;
+		const uint32_t bi_height = rect.bottom - rect.top;
+		if (bi_width == 0 || bi_height == 0) {
+			return;
+		}
+		using winrt::Windows::Storage::Streams::ByteOrder;
+		dt_writer.ByteOrder(ByteOrder::LittleEndian);
+		dt_writer.WriteByte('B');
+		dt_writer.WriteByte('M');
+		dt_writer.WriteUInt32(12 + bi_size + bi_height * 4 * bi_width);	// bf_size: ファイル全体のサイズ.
+		dt_writer.WriteUInt16(0);	// 予約 1 = 0
+		dt_writer.WriteUInt16(0);	// 予約 2 = 0
+		dt_writer.WriteUInt32(54);	// bf_offset: ファイル先頭から画像データまでのオフセット (54 + パレット)
+		dt_writer.WriteUInt32(bi_size);	// bi_size: BITMAOINFOHEADER のサイズ = 40
+		dt_writer.WriteUInt32(bi_width); // bi_width
+		dt_writer.WriteUInt32(bi_height); //bi_height = dt_reader.ReadUInt32();
+		dt_writer.WriteUInt16(1); //uint16_t bi_planes = dt_reader.ReadUInt16();	// プレーンの数. かならず 1
+		dt_writer.WriteUInt16(32); //32? bi_bit_cnt = dt_reader.ReadUInt16();
+		dt_writer.WriteUInt32(0);	//bi_compress = dt_reader.ReadUInt32();	// 圧縮タイプ. (0=BI_RGB, 1=BI_RLE8, 2=BI_RLE4, 3=BI_BITFIELDS)
+		dt_writer.WriteUInt32(0);	//bi_size_img = dt_reader.ReadUInt32();
+		dt_writer.WriteUInt32(0); //uint32_t x_px_per_meter = dt_reader.ReadUInt32();	// 96dpiのとき 3780. ふつうはゼロ.
+		dt_writer.WriteUInt32(0); //uint32_t y_px_per_meter = dt_reader.ReadUInt32();
+		dt_writer.WriteUInt32(0); //bi_color_used = dt_reader.ReadUInt32();
+		dt_writer.WriteUInt32(0); //uint32_t bi_color_important = dt_reader.ReadUInt32();
+		for (size_t x = rect.left; x <= rect.right; x++) {
+			for (size_t y = rect.bottom; y != rect.top; y--) {
+				dt_writer.WriteByte(m_data[y * m_size.width + 4 * x + 0]);
+				dt_writer.WriteByte(m_data[y * m_size.width + 4 * x + 1]);
+				dt_writer.WriteByte(m_data[y * m_size.width + 4 * x + 2]);
+				dt_writer.WriteByte(m_data[y * m_size.width + 4 * x + 4] * m_opac);
+			}
+		}
+	}
+
+	void ShapeBitmap::write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const
+	{
+		dt_write_svg("<image href=\"", dt_writer);
+		dt_write_svg(f_name, wcslen(f_name), dt_writer);
+		dt_write_svg("\" ", dt_writer);
+		dt_write_svg(m_pos, "x", "y", dt_writer);
+		dt_write_svg(m_view.width, "width", dt_writer);
+		dt_write_svg(m_view.height, "height", dt_writer);
+		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
+	}
 }

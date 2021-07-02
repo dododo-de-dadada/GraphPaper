@@ -301,7 +301,7 @@ namespace winrt::GraphPaper::implementation
 			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0, g_pos);
 			pt_sub(g_pos, m_event_pos_curr, g_vec);
 			float g_len = min(static_cast<float>(sqrt(pt_abs2(g_vec))), m_misc_pile_up) / s_scale;
-			if (slist_neighbor(m_list_shapes, m_event_pos_curr, g_len, g_pos)) {
+			if (slist_find_vertex_closest(m_list_shapes, m_event_pos_curr, g_len, g_pos)) {
 				// 方眼との距離より近い頂点が見つかったなら, その距離に入れ替える.
 				pt_sub(g_pos, m_event_pos_curr, g_vec);
 				g_len = static_cast<float>(sqrt(pt_abs2(g_vec))) / s_scale;
@@ -316,7 +316,7 @@ namespace winrt::GraphPaper::implementation
 			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f, ShapeSheet::s_bm_keep_aspect);
 		}
 		else if (m_misc_pile_up >= FLT_MIN) {
-			slist_neighbor(m_list_shapes, m_event_pos_curr, m_misc_pile_up / m_sheet_main.m_sheet_scale, m_event_pos_curr);
+			slist_find_vertex_closest(m_list_shapes, m_event_pos_curr, m_misc_pile_up / m_sheet_main.m_sheet_scale, m_event_pos_curr);
 			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, m_misc_pile_up / m_sheet_main.m_sheet_scale, ShapeSheet::s_bm_keep_aspect);
 		}
 		if (!ustack_pop_if_invalid()) {
@@ -454,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(m_event_pos_curr, m_event_pos_pressed, vec);
 			// 差分の長さがクリックの判定距離を超えるか判定する.
 			if (pt_abs2(vec) > m_event_click_dist) {
-				// 作図ツールが選択ツールでないか判定する.
+				// 作図ツールが選択ツール以外か判定する.
 				if (m_tool_draw != DRAW_TOOL::SELECT) {
 					// 範囲を選択している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_AREA;
@@ -478,7 +478,7 @@ namespace winrt::GraphPaper::implementation
 					m_event_pos_prev = m_event_pos_curr;
 					ustack_push_move(vec);
 				}
-				// ポインターが押された図形の部位が図形の外部でないか判定する
+				// ポインターが押されたのが図形の外部以外か判定する.
 				else if (m_event_anch_pressed != ANCH_TYPE::ANCH_SHEET) {
 					// 図形を変形している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_FORM;
@@ -553,12 +553,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_event_time_pressed = t_stamp;
 		m_event_pos_pressed = m_event_pos_curr;
-		// 作図ツールが選択ツールでないか判定する.
+		// 作図ツールが選択ツール以外か判定する.
 		if (m_tool_draw != DRAW_TOOL::SELECT) {
 			return;
 		}
 		m_event_anch_pressed = slist_hit_test(m_list_shapes, m_event_pos_pressed, m_event_shape_pressed);
-		// 部位が, 外側でないか判定する.
+		// 押されたのが図形の外側以外か判定する.
 		if (m_event_anch_pressed != ANCH_TYPE::ANCH_SHEET) {
 			// 状態が左ボタンが押された状態, または, 右ボタンが押されていてかつ押された図形が選択されてないか判定する.
 			if (m_event_state == EVENT_STATE::PRESS_LBTN ||
@@ -589,7 +589,7 @@ namespace winrt::GraphPaper::implementation
 		// 左上位置に最も近い頂点とその距離を得る.
 		double v_abs[4];
 		D2D1_POINT_2F v_pos[4];
-		if (slist_neighbor(slist, b_pos[0], d_limit, v_pos[0])) {
+		if (slist_find_vertex_closest(slist, b_pos[0], d_limit, v_pos[0])) {
 			D2D1_POINT_2F v_sub;
 			pt_sub(v_pos[0], b_pos[0], v_sub);
 			v_abs[0] = pt_abs2(v_sub);
@@ -597,7 +597,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			v_abs[0] = FLT_MAX;
 		}
-		if (box_type && slist_neighbor(slist, b_pos[1], d_limit, v_pos[1])) {
+		if (box_type && slist_find_vertex_closest(slist, b_pos[1], d_limit, v_pos[1])) {
 			D2D1_POINT_2F v_sub;
 			pt_sub(v_pos[1], b_pos[1], v_sub);
 			v_abs[1] = pt_abs2(v_sub);
@@ -605,7 +605,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			v_abs[1] = FLT_MAX;
 		}
-		if (slist_neighbor(slist, b_pos[2], d_limit, v_pos[2])) {
+		if (slist_find_vertex_closest(slist, b_pos[2], d_limit, v_pos[2])) {
 			D2D1_POINT_2F v_sub;
 			pt_sub(v_pos[2], b_pos[2], v_sub);
 			v_abs[2] = pt_abs2(v_sub);
@@ -613,7 +613,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			v_abs[2] = FLT_MAX;
 		}
-		if (box_type && slist_neighbor(slist, b_pos[3], d_limit, v_pos[3])) {
+		if (box_type && slist_find_vertex_closest(slist, b_pos[3], d_limit, v_pos[3])) {
 			D2D1_POINT_2F v_sub;
 			pt_sub(v_pos[3], b_pos[3], v_sub);
 			v_abs[3] = pt_abs2(v_sub);
@@ -726,9 +726,9 @@ namespace winrt::GraphPaper::implementation
 				event_finish_selecting_area(args.KeyModifiers());
 			}
 			else {
-				unselect_all();
-				// 選択以外の作図ツールが選択されているならば,
+				// 作図ツールが選択ツール以外なら,
 				// 方眼に合わせるか, かつシフトキーが押されていないか判定する.
+				unselect_all();
 				if (m_misc_pile_up >= FLT_MIN) {
 					const bool box_type = (
 						m_tool_draw == DRAW_TOOL::ELLI ||
@@ -787,7 +787,7 @@ namespace winrt::GraphPaper::implementation
 	// 状況に応じた形状のカーソルを設定する.
 	void MainPage::event_set_cursor(void)
 	{
-		// 作図ツールが選択ツールでないか判定する.
+		// 作図ツールが選択ツール以外か判定する.
 		if (m_tool_draw != DRAW_TOOL::SELECT) {
 			Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 		}

@@ -61,18 +61,17 @@ namespace winrt::GraphPaper::implementation
 	// w_pos	ŒŸõ‚ðŠJŽn‚·‚éˆÊ’u
 	// f_text	ŒŸõ•¶Žš—ñ
 	// f_len	ŒŸõ•¶Žš—ñ‚Ì•¶Žš”
-	// f_case	‰p•¶Žš‚Ì‹æ•Êƒtƒ‰ƒO
-	// f_break	‰üs‚ð–³Ž‹ƒtƒ‰ƒO
+	// f_case	‰p•¶Žš‚ð‹æ•Ê‚·‚é
+	// f_break	‰üs‚ð–³Ž‹‚·‚é
 	// f_pos	Œ©‚Â‚©‚Á‚½ˆÊ’u
 	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept
 	{
-		// ŒŸõ‚³‚ê‚é•¶Žš—ñ‚ªƒkƒ‹‚Å‚È‚¢, ‚©‚ÂŒŸõ•¶Žš—ñ‚ªƒkƒ‹‚Å‚È‚¢, 
-		// ‚©‚ÂŒŸõ•¶Žš—ñ‚Ì•¶Žš”‚ª 0 ‚æ‚è‘å‚«‚­ŒŸõ‚³‚ê‚é•¶Žš—ñ‚Ì•¶Žš”ˆÈ‰º‚©”»’è‚·‚é.
-		if (w_text != nullptr && f_text != nullptr &&
-			f_len > 0 && f_len <= w_len) {
-			// ‰p•¶Žš‚Ì‹æ•Êƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚é‚©”»’è‚·‚é.
+		// ŒŸõ‚³‚ê‚é•¶Žš—ñ‚ª”ñƒkƒ‹, ‚©‚ÂŒŸõ•¶Žš—ñ‚ª”ñƒkƒ‹, 
+		// ‚©‚ÂŒŸõ•¶Žš—ñ‚Ì•¶Žš”‚ªƒ[ƒ‚æ‚è‘å‚«‚­, ŒŸõ‚³‚ê‚é•¶Žš—ñ‚Ì•¶Žš”ˆÈ‰º‚©”»’è‚·‚é.
+		if (w_text != nullptr && f_text != nullptr && f_len > 0 && f_len <= w_len) {
+			// ‰p•¶Žš‚ð‹æ•Ê‚·‚é‚©”»’è‚·‚é.
 			if (f_case) {
-				// ƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚é‚È‚ç,
+				// ‹æ•Ê‚·‚é‚È‚ç,
 				for (uint32_t i = 0; i <= w_len - f_len; i++) {
 					if (wcsncmp(w_text + i, f_text, f_len) == 0) {
 						f_pos = i;
@@ -81,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			else {
-				// ƒtƒ‰ƒO‚ª‚È‚¢‚È‚ç,
+				// ‹æ•Ê‚µ‚È‚¢‚È‚ç,
 				for (uint32_t i = 0; i <= w_len - f_len; i++) {
 					if (_wcsnicmp(w_text + i, f_text, f_len) == 0) {
 						f_pos = i;
@@ -97,8 +96,8 @@ namespace winrt::GraphPaper::implementation
 	// slist	}Œ`ƒŠƒXƒg
 	// f_text	ŒŸõ•¶Žš—ñ
 	// f_len	ŒŸõ•¶Žš—ñ‚Ì•¶Žš”
-	// f_case	‰p•¶Žš‚Ì‹æ•Êƒtƒ‰ƒO
-	// f_wrap	‰ñ‚èž‚ÝŒŸõƒtƒ‰ƒO
+	// f_case	‰p•¶Žš‚ð‹æ•Ê‚·‚é
+	// f_wrap	‰ñ‚èž‚ÝŒŸõ‚·‚é
 	// t	‚»‚ê‚Ü‚Å•¶Žš”ÍˆÍ‚ª‘I‘ð‚³‚ê‚Ä‚¢‚½}Œ`
 	// s_found	V‚½‚É•¶Žš—ñ‚ªŒ©‚Â‚©‚Á‚½}Œ`
 	// s_range	V‚½‚É•¶Žš—ñ‚ªŒ©‚Â‚©‚Á‚½}Œ`‚Ì•¶Žš”ÍˆÍ
@@ -386,7 +385,7 @@ namespace winrt::GraphPaper::implementation
 				auto w_len = wchar_len(w_text);// ŒŸõ‚³‚ê‚é•¶Žš—ñ‚Ì•¶Žš”
 				uint32_t w_pos = 0;	// ŒŸõ‚³‚ê‚é•¶Žš—ñ’†‚ÌˆÊ’u
 				uint32_t f_pos = 0;
-				flag = false;	// ˆê’vƒtƒ‰ƒO
+				flag = false;	// ˆê’v‚µ‚½‚©”»’è‚·‚é.
 				while (find_text(w_text + w_pos, w_len - w_pos, m_find_text, f_len, m_find_text_case, f_pos)) {
 					flag = true;
 					w_pos += f_pos;
@@ -415,18 +414,17 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		bool flag = false;	// ˆê’v‚Ü‚½‚Í’uŠ·ƒtƒ‰ƒO.
+		bool flag = false;	// ˆê’v‚Ü‚½‚Í’uŠ·‚µ‚½‚©”»’è.
 		DWRITE_TEXT_RANGE t_range;	// •¶Žš—ñ”ÍˆÍ
 		auto t = find_text_range_selected(m_list_shapes.begin(), m_list_shapes.end(), t_range);
 		if (t != nullptr) {
 			// }Œ`‚ªŒ©‚Â‚©‚Á‚½ê‡,
 			const auto w_pos = t_range.startPosition;
+			// ‰p•¶Žš‚ð‹æ•Ê‚·‚é‚©”»’è‚·‚é.
 			if (m_find_text_case) {
-				// ‰p•¶Žš‚Ì‹æ•Êƒtƒ‰ƒO‚ª—§‚Á‚Ä‚¢‚éê‡,
 				flag = wcsncmp(t->m_text + w_pos, m_find_text, f_len) == 0;
 			}
 			else {
-				// ‰p•¶Žš‚Ì‹æ•Êƒtƒ‰ƒO‚ª‚È‚¢ê‡,
 				flag = _wcsnicmp(t->m_text + w_pos, m_find_text, f_len) == 0;
 			}
 			if (flag) {

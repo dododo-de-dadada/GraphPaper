@@ -106,8 +106,8 @@ namespace winrt::GraphPaper::implementation
 				const auto pad = w * 0.125;
 				const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(pad), static_cast<FLOAT>(pad) };
 				const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
-				POLY_TOOL tool_poly { 3, true, true, false, true };
-				m_sample_shape = new ShapePoly(b_pos, b_vec, &m_sample_sheet, tool_poly);
+				POLY_OPTION p_opt { 3, true, true, false, true };
+				m_sample_shape = new ShapePoly(b_pos, b_vec, &m_sample_sheet, p_opt);
 				const double offset = h / 16.0;
 				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ static_cast<FLOAT>(-w * 0.25f), static_cast<FLOAT>(h * 0.5 - offset) }, ANCH_TYPE::ANCH_P0, m_misc_pile_up);
 				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ static_cast<FLOAT>(w * 0.25),  static_cast<FLOAT>(h * 0.5) }, ANCH_TYPE::ANCH_P0 + 1, m_misc_pile_up);
@@ -119,9 +119,9 @@ namespace winrt::GraphPaper::implementation
 				static uint32_t misc_cnt = misc_min;
 				const auto pad = w * 0.125;
 				const D2D1_POINT_2F samp_vec{ static_cast<FLOAT>(w - 2.0 * pad), static_cast<FLOAT>(h - 2.0 * pad) };
-				POLY_TOOL poly_tool{ m_tool_poly };
-				poly_tool.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
-				m_sample_shape = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, samp_vec, &m_sample_sheet, poly_tool);
+				POLY_OPTION p_opt{ m_tool_poly };
+				p_opt.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
+				m_sample_shape = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, samp_vec, &m_sample_sheet, p_opt);
 				D2D1_POINT_2F b_min;
 				D2D1_POINT_2F b_max;
 				D2D1_POINT_2F b_vec;

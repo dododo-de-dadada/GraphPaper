@@ -21,6 +21,7 @@
             <x:String x:Key="glyph_italic">&#xE8DB;</x:String>
 			<x:String x:Key="glyph_ibeam">&#xE933;</x:String>
             <x:String x:Key="glyph_fit_page">&#xE9A6;</x:String>
+			<x:String x:Key="glyph_draw">&#xEC87;</x:String>
 			<!-- 曲線アイコンの描画コマンド -->
             <x:String x:Key="data_bezi">
                 M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841 L15.310918,7.967942 C8.311178,14.40621 8.311178,0.405251 -0.032292,7.249824 Z
@@ -326,6 +327,7 @@
 			<!-- 画像コンテキストメニュー -->
 			<MenuFlyout x:Key="mf_image_menu">
 				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect_2" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
+				<MenuFlyoutItem x:Name="mfi_image_resize_origin_2" x:Uid="mfi_image_resize_origin" Click="image_resize_origin_click" Text="Resize to Original" />
 				<MenuFlyoutItem x:Name="mfi_image_opac_2" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
 			</MenuFlyout>
 		</ResourceDictionary>
@@ -541,7 +543,10 @@
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutSubItem x:Uid="mfsi_tool_poly_draw" Text="Drawing Polygon">
+				<MenuFlyoutSubItem x:Uid="mfsi_tool_poly_opt" Text="Polygon Option">
+					<MenuFlyoutSubItem.Icon>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_draw}"/>
+					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_line" x:Uid="rmfi_tool_poly_line" Click="tool_draw_click" GroupName="gn_poly_type" Text="2-Line" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_tri" x:Uid="rmfi_tool_poly_tri" Click="tool_draw_click" IsChecked="True" GroupName="gn_poly_type" Text="3-Triangle" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_quad" x:Uid="rmfi_tool_poly_quad" Click="tool_draw_click" GroupName="gn_poly_type" Text="4-Quadrilateral" />
@@ -747,6 +752,7 @@
 			<!-- 画像メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_image_menu" AccessKey="I" Title="Image">
 				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
+				<MenuFlyoutItem x:Name="mfi_image_resize_origin" x:Uid="mfi_image_resize_origin" Click="image_resize_origin_click" Text="Resize to Original" />
 				<MenuFlyoutItem x:Name="mfi_image_opac" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
 			</muxc:MenuBarItem>
 			<!-- その他メニュー -->

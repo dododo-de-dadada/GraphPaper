@@ -157,7 +157,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Application;
 
-		// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
+		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
 		if (m_ustack_updt && !co_await ask_for_conf_async()) {
 			co_return;
 		}
@@ -314,11 +314,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		catch (winrt::hresult_error const&) {}
 		if (added_text.empty() != true) {
-			// 追加する文字列が空でない場合,
+			// 追加する文字列が空以外の場合,
 			text = text + NEW_LINE + added_text;
 		}
 		else if (desc_key.empty() != true) {
-			// 説明そのものが空でない場合,
+			// 説明そのものが空以外の場合,
 			text = text + NEW_LINE + QUOT + desc_key + QUOT;
 		}
 		const auto glyph = Resources().TryLookup(box_value(glyph_key));
@@ -330,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 	// ファイルメニューの「新規」が選択された
 	IAsyncAction MainPage::new_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
+		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
 		if (m_ustack_updt && !co_await ask_for_conf_async()) {
 			co_return;
 		}

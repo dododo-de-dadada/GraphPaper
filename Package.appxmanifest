@@ -42,5 +42,7 @@ IgnorableNamespaces="uap mp rescap"
     <Capability Name="internetClient" />
     <!-- これを追加 -->
     <rescap:Capability Name="confirmAppClose" />
+    <!-- さらに追加 -->
+		<rescap:Capability Name="broadFileSystemAccess" />
   </Capabilities>
 </Package>

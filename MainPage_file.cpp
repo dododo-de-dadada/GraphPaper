@@ -13,7 +13,49 @@ C ++ / WinRTは、呼び出し側のコンテキストに既にいるかを確認し、
 そうでない場合は切り替えます。
 */
 
-// GetFileFromPathAsync を E_ACCESSDENIED なしに使うには以下が必要になる.
+/*
+Yes the behavior changed between the April 2018 and October 2018 releases, and the default is now Disabled.
+This is a privacy constraint - we're very focused on maintaining the user's privacy.
+The documentation for this is up-to-date: https://docs.microsoft.com/en-us/windows/uwp/files/file-access-permissions#accessing-additional-locations.
+As of right now, if you want to detect whether the setting is enabled or disabled, 
+you can simply try to access some file/folder to which this setting would grant you permission if enabled and deny permission if disabled (eg, "C:\").
+If disabled, you can then launch the Settings app on the File System privacy page. For example:
+
+protected override async void OnNavigatedTo(NavigationEventArgs e)
+{
+	try
+	{
+		StorageFolder folder = await StorageFolder.GetFolderFromPathAsync(@"C:\");
+		// do work
+	}
+	catch
+	{
+		MessageDialog dlg = new MessageDialog(
+			"It seems you have not granted permission for this app to access the file system broadly. " +
+			"Without this permission, the app will only be able to access a very limited set of filesystem locations. " +
+			"You can grant this permission in the Settings app, if you wish. You can do this now or later. " +
+			"If you change the setting while this app is running, it will terminate the app so that the " +
+			"setting can be applied. Do you want to do this now?",
+			"File system permissions");
+		dlg.Commands.Add(new UICommand("Yes", new UICommandInvokedHandler(InitMessageDialogHandler), 0));
+		dlg.Commands.Add(new UICommand("No", new UICommandInvokedHandler(InitMessageDialogHandler), 1));
+		dlg.DefaultCommandIndex = 0;
+		dlg.CancelCommandIndex = 1;
+		await dlg.ShowAsync();
+	}
+}
+
+private async void InitMessageDialogHandler(IUICommand command)
+{
+	if ((int)command.Id == 0)
+	{
+		await Launcher.LaunchUriAsync(new Uri("ms-settings:privacy-broadfilesystemaccess"));
+	}
+}
+*/
+
+// 以下の情報は古い.
+// GetFileFromPathAsync, CreateFileAsync を E_ACCESSDENIED なしに使うには以下が必要になる.
 // 1. XAMLテキストエディタを使って, Pakage.appxmanifest に broadFileSystemAccess を追加する.
 // Pakage.appxmanifest の <Package> のプロパティーに
 // xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" を追加する
@@ -182,10 +224,10 @@ namespace winrt::GraphPaper::implementation
 
 	// ストレージファイルを非同期に読む.
 	// s_file	読み込むストレージファイル
-	// suspend	中断フラグ
-	// sheet	シートのみフラグ
+	// suspend	中断したか判定する
+	// sheet	シートのみ読み込む
 	// 戻り値	読み込めたら S_OK.
-	// 中断フラグが立っている場合, 操作スタックも保存する.
+	// 中断したなら, 操作スタックも保存する.
 	IAsyncOperation<winrt::hresult> MainPage::file_read_async(StorageFile const& s_file, const bool suspend, const bool sheet) noexcept
 	{
 		using winrt::Windows::Storage::FileAccessMode;
@@ -242,12 +284,12 @@ namespace winrt::GraphPaper::implementation
 				co_return hres;
 			}
 #endif
+			// シートのみ読み込むか判定する.
 			if (sheet) {
-				// シートのみフラグが立っている場合,
 				hres = S_OK;
 			}
 			else if (slist_read(m_list_shapes, dt_reader)) {
-				// 中断フラグが立ってるか判定する.
+				// 中断されたか判定する.
 				if (suspend) {
 					ustack_read(dt_reader);
 				}
@@ -338,8 +380,8 @@ namespace winrt::GraphPaper::implementation
 		// ストレージファイルにヌルを格納する.
 		StorageFile s_file = nullptr;
 		try {
-			if (token.empty() != true) {
-				// トークンが空でない場合,
+			// トークンが空以外か判定する.
+			if (!token.empty()) {
 				// トークンからストレージファイルを得る.
 				auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
 				if (mru_list.ContainsItem(token)) {
@@ -424,7 +466,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 名前を付けてファイルに非同期に保存する.
-	// svg_allowed	SVG 許容フラグ.
+	// svg_allowed	SVG への保存を許す.
 	IAsyncOperation<winrt::hresult> MainPage::file_save_as_async(const bool svg_allowed) noexcept
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
@@ -443,7 +485,7 @@ namespace winrt::GraphPaper::implementation
 			auto desc_gpf = r_loader.GetString(DESC_GPF);
 			auto type_gpf = winrt::single_threaded_vector<winrt::hstring>({ FT_GPF });
 			s_picker.FileTypeChoices().Insert(desc_gpf, type_gpf);
-			// SVG 許容フラグが立っているか判定する.
+			// SVG への保存を許すか判定する.
 			if (svg_allowed) {
 				// ファイルタイプに拡張子 SVG とその説明を追加する.
 				auto desc_svg = r_loader.GetString(DESC_SVG);
@@ -527,9 +569,8 @@ namespace winrt::GraphPaper::implementation
 		auto const& prev_cur = file_wait_cursor();
 		// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
 		hres = co_await file_write_gpf_async(s_file);
-		// 結果を判定する.
+		// 結果が S_OK 以外か判定する.
 		if (hres != S_OK) {
-			// 結果が S_OK でない場合,
 			// スレッドをメインページの UI スレッドに変える.
 			// 最近使ったファイルのエラーメッセージダイアログを表示する.
 			auto cd = this->Dispatcher();
@@ -578,14 +619,42 @@ namespace winrt::GraphPaper::implementation
 			dt_write_svg(DOCTYPE, dt_writer);
 			// データライターに SVG 開始タグを書き込む.
 			file_dt_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, m_sheet_dx.m_logical_dpi, m_misc_len_unit, dt_writer);
+			// 日時 (注釈) を書き込む.
+			char buf[64];
+			const auto t = time(nullptr);
+			struct tm tm;
+			localtime_s(&tm, &t);
+			strftime(buf, 64, "<!-- %m/%d/%Y %H:%M:%S -->" SVG_NEW_LINE, &tm);
+			dt_write_svg(buf, dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {
-					// 消去フラグが立っている場合,
-					// 以下を無視する.
 					continue;
 				}
-				s->write_svg(dt_writer);
+				// 図形が画像か判定する.
+				if (typeid(*s) == typeid(ShapeBitmap)) {
+					static uint32_t magic_num = 0;	// ミリ秒の代わり
+					wchar_t bmp_name[256];
+					const auto t = time(nullptr);
+					struct tm tm;
+					localtime_s(&tm, &t);
+					wcsftime(bmp_name, 256, L"img%Y%m%d%H%M%S", &tm);
+					const auto len = wcsnlen(bmp_name, 256);
+					swprintf(bmp_name + len, 256 - len, L"%03d.bmp", magic_num++);
+					const auto s_folder{ co_await s_file.GetParentAsync() };
+					auto bmp_file{ co_await s_folder.CreateFileAsync(bmp_name) };
+					auto bmp_stream{ co_await bmp_file.OpenAsync(FileAccessMode::ReadWrite) };
+					auto bmp_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
+					static_cast<ShapeBitmap*>(s)->write_bmp(bmp_writer);
+					co_await bmp_writer.StoreAsync();
+					co_await bmp_stream.FlushAsync();
+					bmp_writer.Close();
+
+					static_cast<ShapeBitmap*>(s)->write_svg(bmp_name, dt_writer);
+				}
+				else {
+					s->write_svg(dt_writer);
+				}
 			}
 			// SVG 終了タグを書き込む.
 			dt_write_svg("</svg>" SVG_NEW_LINE, dt_writer);
@@ -606,8 +675,8 @@ namespace winrt::GraphPaper::implementation
 			// エラーが発生した場合, エラーコードを結果に格納する.
 			hres = e.code();
 		}
+		// 結果が S_OK 以外か判定する.
 		if (hres != S_OK) {
-			// 結果が S_OK でない場合,
 			// スレッドをメインページの UI スレッドに変える.
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
@@ -631,7 +700,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形データをストレージファイルに非同期に書き込む.
 	// s_file	ストレージファイル
-	// suspend	中断フラグ
+	// suspend	中断されたか判定
+	// layout	
 	// 戻り値	書き込みに成功したら true
 	IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async(StorageFile const& s_file, const bool suspend, const bool layout)
 	{
@@ -702,28 +772,27 @@ namespace winrt::GraphPaper::implementation
 				hres = S_OK;
 			}
 		}
+		// エラーが発生した場合, 
 		catch (winrt::hresult_error const& e) {
-			// エラーが発生した場合, 
-			// エラーコードを結果に格納する.
 			hres = e.code();
 		}
+		// 結果が S_OK 以外か判定する.
 		if (hres != S_OK) {
-			// 結果が S_OK でない場合,
 			// スレッドをメインページの UI スレッドに変える.
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
 		}
-		else if (suspend != true && layout != true) {
-			// 中断フラグがない場合,
+		// 中断されてない, かつレイアウト以外か判定する.
+		else if (!suspend && !layout) {
 			// スレッドをメインページの UI スレッドに変える.
 			auto cd = this->Dispatcher();
 			co_await winrt::resume_foreground(cd);
 			// ストレージファイルを最近使ったファイルに登録する.
 			// ここでエラーが出る.
 			file_recent_add(s_file);
-			// false を操作スタックの更新フラグに格納する.
+			// false をスタックが更新されたか判定に格納する.
 			m_ustack_updt = false;
 		}
 		// スレッドコンテキストを復元する.

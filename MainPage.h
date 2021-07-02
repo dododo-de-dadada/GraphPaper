@@ -248,7 +248,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 作図ツール
 		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
-		POLY_TOOL m_tool_poly{ DEF_POLY_TOOL };	// 多角形の作図ツール
+		POLY_OPTION m_tool_poly{ DEF_POLY_OPTION };	// 多角形の選択肢
 
 		// 図形リスト
 		SHAPE_LIST m_list_shapes;		// 図形リスト
@@ -277,11 +277,11 @@ namespace winrt::GraphPaper::implementation
 		UNDO_STACK m_ustack_redo;		// やり直し操作スタック
 		uint32_t m_ustack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
 		UNDO_STACK m_ustack_undo;		// 元に戻す操作スタック
-		bool m_ustack_updt = false;	// スタックに操作の組が積まれているか判定
+		bool m_ustack_updt = false;	// スタックが更新されたか判定
 
 		// スレッド
 		bool m_thread_activated = false;
-		bool m_thread_win_visible = false;		// ウィンドウの表示フラグ
+		bool m_thread_win_visible = false;		// ウィンドウが表示されてるか判定
 
 		// コンテキストメニュー
 		MenuFlyout m_menu_stroke{ nullptr };	// 線枠コンテキストメニュー
@@ -638,6 +638,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 画像メニューの「縦横比を変えない」が選択された.
 		void image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept;
+		// 画像メニューの「元の大きさに戻す」が選択された.
+		void image_resize_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 画像メニューの「不透明度...」が選択された.
 		IAsyncAction image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
 
@@ -713,7 +715,7 @@ namespace winrt::GraphPaper::implementation
 		bool select_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max);
 		// 次の図形を選択する.
 		template <VirtualKeyModifiers M, VirtualKey K> void select_next_shape(void);
-		// 指定した範囲にある図形を選択して, そうでない図形は選択しない.
+		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
 		bool select_range(Shape* const s_from, Shape* const s_to);
 		// 図形を選択する.
 		void select_shape(Shape* const s, const VirtualKeyModifiers k_mod);
@@ -921,10 +923,10 @@ namespace winrt::GraphPaper::implementation
 		void tool_draw_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 作図メニューに印をつける.
 		void tool_draw_is_checked(const DRAW_TOOL value);
-		// 作図メニューの「多角形ツール」に印をつける.
+		// 作図メニューの多角形の頂点数にチェックをつける.
 		void tool_poly_n_is_checked(const uint32_t value);
-		// 作図メニューの「多角形ツール」に印をつける.
-		void tool_poly_is_checked(const POLY_TOOL& value);
+		// 作図メニューの多角形の選択肢にチェックをつける.
+		void tool_poly_is_checked(const POLY_OPTION& value);
 		// 作図ツールの状態を読み込む.
 		//void tool_read(DataReader const& dt_reader);
 		// 作図ツールの状態を書き込む.

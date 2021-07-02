@@ -154,24 +154,6 @@ namespace winrt::GraphPaper::implementation
 		void write(DataWriter const& dt_writer);
 	};
 
-	struct UndoBitmap : Undo {
-		D2D1_POINT_2F m_pos;
-		D2D1_SIZE_F m_view;
-		D2D1_RECT_F m_rect;
-		D2D1_SIZE_F m_ratio;
-
-		// 操作を実行すると値が変わるか判定する.
-		bool changed(void) const noexcept;
-		// 操作を実行する.
-		void exec(void);
-		// データリーダーから操作を読み込む.
-		UndoBitmap(DataReader const& dt_reader);
-		// 図形の部位を保存する.
-		UndoBitmap(ShapeBitmap* const s);
-		// データライターに書き込む.
-		void write(DataWriter const& dt_writer);
-	};
-
 	//------------------------------
 	// 図形の順番を入れ替える操作
 	//------------------------------
@@ -216,6 +198,27 @@ namespace winrt::GraphPaper::implementation
 		UndoAttr(Shape* s);
 		// 図形の値を保存して変更する.
 		UndoAttr(Shape* s, const U_TYPE<U>::type& value);
+		// データライターに書き込む.
+		void write(DataWriter const& dt_writer);
+	};
+
+	//------------------------------
+	// 画像の操作
+	//------------------------------
+	struct UndoBitmap : Undo {
+		D2D1_POINT_2F m_pos;	// 位置
+		D2D1_SIZE_F m_view;	// 先寸法
+		D2D1_RECT_F m_rect;	// 元矩形
+		D2D1_SIZE_F m_ratio;	// 先寸法と元矩形の縦横比
+
+		// 操作を実行すると値が変わるか判定する.
+		bool changed(void) const noexcept;
+		// 操作を実行する.
+		void exec(void);
+		// データリーダーから操作を読み込む.
+		UndoBitmap(DataReader const& dt_reader);
+		// 図形の部位を保存する.
+		UndoBitmap(ShapeBitmap* const s);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};

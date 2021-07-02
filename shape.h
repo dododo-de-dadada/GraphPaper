@@ -3,6 +3,7 @@
 // shape.cpp	図形のひな型, その他
 // shape_anch.cpp	図形の部位を表示
 // shape_bezi.cpp	ベジェ曲線
+// shape_bitmap.cpp	画像
 // shape_dt.cpp	読み込み, 書き込み.
 // shape_dx.cpp	図形の描画環境
 // shape_elli.cpp	だ円
@@ -155,13 +156,13 @@ namespace winrt::GraphPaper::implementation
 		FRONT	// 最前面に表示
 	};
 
-	// 多角形のツール
-	struct POLY_TOOL {
-		uint32_t m_vertex_cnt;	// 多角形の頂点の数
-		bool m_regular;	// 正多角形で作図するか判定
-		bool m_vertex_up;	// 頂点を上に作図するか判定
-		bool m_end_closed;	// 辺を閉じて作図するか判定
-		bool m_clockwise;	// 頂点を時計回りに作図するか判定する.
+	// 多角形の選択肢
+	struct POLY_OPTION {
+		uint32_t m_vertex_cnt;	// 作図する多角形の頂点の数.
+		bool m_regular;	// 正多角形で作図する.
+		bool m_vertex_up;	// 頂点を上に作図する.
+		bool m_end_closed;	// 辺を閉じて作図する.
+		bool m_clockwise;	// 頂点を時計回りに作図する.
 	};
 
 	// 破線の様式
@@ -177,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr D2D1_COLOR_F DEF_GRID_COLOR{ ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 0.5f };	// 方眼の色
 	constexpr float DEF_GRID_LEN = 48.0f;
 	constexpr float DEF_MITER_LIMIT = 10.0f;	// マイター制限の比率
-	constexpr POLY_TOOL DEF_POLY_TOOL{ 3, true, true, true, true };
+	constexpr POLY_OPTION DEF_POLY_OPTION{ 3, true, true, true, true };	// 多角形の選択肢
 	constexpr DASH_PATT DEF_DASH_PATT{ { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F } };
 	constexpr D2D1_SIZE_F DEF_TEXT_MARGIN{ DEF_FONT_SIZE / 4.0, DEF_FONT_SIZE / 4.0 };
 	constexpr size_t MAX_N_GON = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
@@ -298,8 +299,8 @@ namespace winrt::GraphPaper::implementation
 	void dt_read(GRID_EMPH& value, DataReader const& dt_reader);
 	// データリーダーから破線の様式を読み込む.
 	void dt_read(DASH_PATT& value, DataReader const& dt_reader);
-	// データリーダーから多角形のツールを読み込む.
-	void dt_read(POLY_TOOL& value, DataReader const& dt_reader);
+	// データリーダーから多角形の選択肢を読み込む.
+	void dt_read(POLY_OPTION& value, DataReader const& dt_reader);
 	// データリーダーから文字列を読み込む.
 	void dt_read(wchar_t*& value, DataReader const& dt_reader);
 	// データリーダーから位置配列を読み込む.
@@ -324,8 +325,8 @@ namespace winrt::GraphPaper::implementation
 	void dt_write(const GRID_EMPH value, DataWriter const& dt_writer);
 	// データライターに破線の様式を書き込む.
 	void dt_write(const DASH_PATT& value, DataWriter const& dt_writer);
-	// データライターに多角形のツールを書き込む.
-	void dt_write(const POLY_TOOL& value, DataWriter const& dt_writer);
+	// データライターに多角形の選択肢を書き込む.
+	void dt_write(const POLY_OPTION& value, DataWriter const& dt_writer);
 	// データライターに文字列を書き込む.
 	void dt_write(const wchar_t* value, DataWriter const& dt_writer);
 	// データライターに位置配列を書き込む.
@@ -421,7 +422,7 @@ namespace winrt::GraphPaper::implementation
 	// 選択された図形のリストを得る.
 	template <typename S> void slist_selected(SHAPE_LIST const& slist, SHAPE_LIST& t_list) noexcept;
 
-	// データライターに図形リストを書き込む. REDUCE 場合の消去フラグの立つ図形は無視する.
+	// データライターに図形リストを書き込む. REDUCE なら消去された図形は書き込まない.
 	template <bool REDUCE> void slist_write(const SHAPE_LIST& slist, DataWriter const& dt_writer);
 
 	// リストの中の図形の順番を得る.
@@ -430,8 +431,8 @@ namespace winrt::GraphPaper::implementation
 	// 選択された文字列図形から, それらを改行で連結した文字列を得る.
 	winrt::hstring slist_selected_all_text(SHAPE_LIST const& slist) noexcept;
 
-	// 選択されてない図形から, 指定した位置に最も近い頂点を得る.
-	bool slist_neighbor(const SHAPE_LIST& slist, const D2D1_POINT_2F& n_pos, const float dist, D2D1_POINT_2F& value) noexcept;
+	// 選択されてない図形の頂点の中から 指定した位置に最も近い頂点を見つける.
+	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& c_pos, const float dist, D2D1_POINT_2F& value) noexcept;
 
 	//------------------------------
 	// 図形のひな型
@@ -536,9 +537,9 @@ namespace winrt::GraphPaper::implementation
 		virtual uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept { return ANCH_TYPE::ANCH_SHEET; }
 		// 範囲に含まれるか判定する.
 		virtual bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept { return false; }
-		// 消去フラグを判定する.
+		// 消去されたか判定する.
 		virtual bool is_deleted(void) const noexcept { return false; }
-		// 選択フラグを判定する.
+		// 選択されてるか判定する.
 		virtual bool is_selected(void) const noexcept { return false; }
 		// 差分だけ移動する.
 		virtual	bool move(const D2D1_POINT_2F /*value*/) { return false; }
@@ -560,7 +561,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_dash_patt(const DASH_PATT& /*value*/) { return false; }
 		// 値を線枠の形式に格納する.
 		virtual bool set_dash_style(const D2D1_DASH_STYLE /*value*/) { return false; }
-		// 値を消去フラグに格納する.
+		// 値を消去されたか判定に格納する.
 		virtual bool set_delete(const bool /*value*/) noexcept { return false; }
 		// 値を塗りつぶし色に格納する.
 		virtual bool set_fill_color(const D2D1_COLOR_F& /*value*/) noexcept { return false; }
@@ -600,7 +601,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_sheet_scale(const float /*value*/) noexcept { return false; }
 		// 値を用紙の大きさに格納する.
 		virtual bool set_sheet_size(const D2D1_SIZE_F /*value*/) noexcept { return false; }
-		// 値を選択フラグに格納する.
+		// 値を選択されてるか判定に格納する.
 		virtual bool set_select(const bool /*value*/) noexcept { return false; }
 		// 値を線枠の色に格納する.
 		virtual bool set_stroke_color(const D2D1_COLOR_F& /*value*/) noexcept { return false; }
@@ -662,13 +663,15 @@ namespace winrt::GraphPaper::implementation
 		uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept { return false; }
-		// 消去フラグを判定する.
+		// 消去されたか判定する.
 		bool is_deleted(void) const noexcept { return m_is_deleted; }
-		// 選択フラグを判定する.
+		// 選択されてるか判定する.
 		bool is_selected(void) const noexcept { return m_is_selected; }
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F value);
-		// 値を消去フラグに格納する.
+		// 元の大きさに戻す.
+		void resize_origin(void) noexcept;
+		// 値を消去されたか判定に格納する.
 		bool set_delete(const bool value) noexcept;
 		// 値を画像の縦横比の維持に格納する.
 		//bool set_bm_keep_aspect(const bool value) noexcept;
@@ -678,11 +681,18 @@ namespace winrt::GraphPaper::implementation
 		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f, const bool keep_aspect = false);
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F /*value*/);
-		// 値を選択フラグに格納する.
+		// 値を選択されてるか判定に格納する.
 		bool set_select(const bool /*value*/) noexcept;
+		// 図形を作成する.
 		ShapeBitmap(const D2D1_POINT_2F c_pos, DataReader const& dt_reader);
+		// データリーダーから読み込む.
 		ShapeBitmap(DataReader const& dt_reader);
+		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
+		// データライターに SVG として書き込む.
+		void write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const;
+		// データライターに DIB として書き込む.
+		void write_bmp(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -753,7 +763,7 @@ namespace winrt::GraphPaper::implementation
 		// 方形の補助線を表示する.
 		void draw_auxiliary_rect(SHAPE_DX const& dx, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
 		// 多角形の補助線を表示する.
-		void draw_auxiliary_poly(SHAPE_DX const& dx, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos, const POLY_TOOL& t_poly);
+		void draw_auxiliary_poly(SHAPE_DX const& dx, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos, const POLY_OPTION& p_opt);
 		// 角丸方形の補助線を表示する.
 		void draw_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
 		// 方眼を表示する,
@@ -923,15 +933,15 @@ namespace winrt::GraphPaper::implementation
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
-		// 消去フラグを判定する.
+		// 消去されているか判定する.
 		bool is_deleted(void) const noexcept;
-		// 選択フラグを判定する.
+		// 選択されているか判定する.
 		bool is_selected(void) const noexcept;
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F value);
-		// 値を消去フラグに格納する.
+		// 値を消去されたか判定に格納する.
 		bool set_delete(const bool value) noexcept;
-		// 値を選択フラグに格納する.
+		// 値を選択されたか判定に格納する.
 		bool set_select(const bool value) noexcept;
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F value);
@@ -1000,9 +1010,9 @@ namespace winrt::GraphPaper::implementation
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept;
-		// 消去フラグを判定する.
+		// 消去されたか判定する.
 		bool is_deleted(void) const noexcept { return m_is_deleted; }
-		// 選択フラグを判定する.
+		// 選択されてるか判定する.
 		bool is_selected(void) const noexcept { return m_is_selected; }
 		// 差分だけ移動する.
 		virtual	bool move(const D2D1_POINT_2F value);
@@ -1014,7 +1024,7 @@ namespace winrt::GraphPaper::implementation
 		bool set_dash_patt(const DASH_PATT& value);
 		// 値を線枠の形式に格納する.
 		bool set_dash_style(const D2D1_DASH_STYLE value);
-		// 値を消去フラグに格納する.
+		// 値を消去されたか判定に格納する.
 		bool set_delete(const bool value) noexcept { if (m_is_deleted != value) { m_is_deleted = value;  return true; } return false; }
 		// 値を線分のつなぎのマイター制限に格納する.
 		bool set_join_limit(const float& value);
@@ -1024,7 +1034,7 @@ namespace winrt::GraphPaper::implementation
 		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f, const bool keep_aspect = false);
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F value);
-		// 値を選択フラグに格納する.
+		// 値を選択されてるか判定に格納する.
 		bool set_select(const bool value) noexcept { if (m_is_selected != value) { m_is_selected = value; return true; } return false; }
 		// 値を線枠の色に格納する.
 		bool set_stroke_color(const D2D1_COLOR_F& value) noexcept;
@@ -1271,8 +1281,8 @@ namespace winrt::GraphPaper::implementation
 		// shape_poly.cpp
 		//------------------------------
 
-		// 境界方形をみたす多角形を作成する.
-		static void create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_TOOL& p_tool, D2D1_POINT_2F v_pos[], D2D1_POINT_2F& v_vec) noexcept;
+		// 方形をもとに多角形を作成する.
+		static void create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt, D2D1_POINT_2F v_pos[], D2D1_POINT_2F& v_vec) noexcept;
 		// パスジオメトリを作成する.
 		void create_path_geometry(ID2D1Factory3* const d_factory);
 		// 表示する
@@ -1288,7 +1298,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を塗りつぶし色に格納する.
 		bool set_fill_color(const D2D1_COLOR_F& value) noexcept;
 		// 図形を作成する.
-		ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr, const POLY_TOOL& poly);
+		ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr, const POLY_OPTION& p_opt);
 		// データリーダーから図形を読み込む.
 		ShapePoly(DataReader const& dt_reader);
 		// データライターに書き込む.

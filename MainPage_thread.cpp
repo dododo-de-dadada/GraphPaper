@@ -20,9 +20,8 @@ namespace winrt::GraphPaper::implementation
 		// 背後にあるウィンドウが直接クリックされた場合のみ PointerActivated,
 		// それ以外の場合はすべて CodeActivated になる.
 		const auto a_state = args.WindowActivationState();
-		if (a_state == CoreWindowActivationState::PointerActivated) {
-		}
-		else if (a_state == CoreWindowActivationState::CodeActivated) {
+		if (a_state == CoreWindowActivationState::PointerActivated ||
+			a_state == CoreWindowActivationState::CodeActivated) {
 			if (!m_thread_activated) {
 				m_thread_activated = true;
 

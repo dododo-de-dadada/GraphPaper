@@ -399,7 +399,7 @@ namespace winrt::GraphPaper::implementation
 						p_vec = d_vec[p];
 					}
 					// 見つからなかったならば,
-					// 辺が閉じている, かつ最後の辺の長さがゼロでないか判定する.
+					// 辺が閉じている, かつ最後の辺の長さが非ゼロか判定する.
 					else if (s_closed && s_len[d_cnt] >= FLT_MIN) {
 						// 最後の頂点の反対ベクトルを求め, 直前の辺ベクトルとする.
 						p_vec = D2D1_POINT_2F{ -v_pos[d_cnt].x, -v_pos[d_cnt].y };
@@ -622,15 +622,15 @@ namespace winrt::GraphPaper::implementation
 	// v_reg	正多角形を作成するか判定
 	// v_clock	時計周りで作成するか判定
 	// v_pos	頂点の配列 [v_cnt]
-	void ShapePoly::create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_TOOL& p_tool, D2D1_POINT_2F v_pos[], D2D1_POINT_2F& v_vec) noexcept
+	void ShapePoly::create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt, D2D1_POINT_2F v_pos[], D2D1_POINT_2F& v_vec) noexcept
 	{
-		const auto v_cnt = p_tool.m_vertex_cnt;
+		const auto v_cnt = p_opt.m_vertex_cnt;
 		if (v_cnt == 0) {
 			return;
 		}
-		const auto v_up = p_tool.m_vertex_up;
-		const auto v_reg = p_tool.m_regular;
-		const auto v_clock = p_tool.m_clockwise;
+		const auto v_up = p_opt.m_vertex_up;
+		const auto v_reg = p_opt.m_regular;
+		const auto v_clock = p_opt.m_clockwise;
 
 		// 原点を中心とする半径 1 の円をもとに正多角形を作成する.
 		D2D1_POINT_2F v_min{ 0.0, 0.0 };	// 多角形を囲む領域の左上点
@@ -836,24 +836,19 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// s_attr	属性
-	// v_cnt	頂点の数
-	// v_reg	正多角形に作図するか判定
-	// v_up	頂点を上に作図するか判定
-	// v_end	辺を閉じて作図するか判定
-	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr, const POLY_TOOL& t_poly) :
-		ShapePath::ShapePath(t_poly.m_vertex_cnt - 1, s_attr, t_poly.m_end_closed),
-		m_end_closed(t_poly.m_end_closed),
+	// p_opt	多角形の選択肢
+	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr, const POLY_OPTION& p_opt) :
+		ShapePath::ShapePath(p_opt.m_vertex_cnt - 1, s_attr, p_opt.m_end_closed),
+		m_end_closed(p_opt.m_end_closed),
 		m_fill_color(s_attr->m_fill_color)
 	{
-		std::vector<D2D1_POINT_2F> vert_pos(t_poly.m_vertex_cnt);	// 頂点の配列
-		const auto v_pos = reinterpret_cast<D2D1_POINT_2F*>(vert_pos.data());
+		D2D1_POINT_2F v_pos[MAX_N_GON];
 		D2D1_POINT_2F v_vec;
-		create_poly_by_bbox(b_pos, b_vec, t_poly, v_pos, v_vec);
+		create_poly_by_bbox(b_pos, b_vec, p_opt, v_pos, v_vec);
 		m_pos = v_pos[0];
-		for (size_t i = 1; i < t_poly.m_vertex_cnt; i++) {
+		for (size_t i = 1; i < p_opt.m_vertex_cnt; i++) {
 			pt_sub(v_pos[i], v_pos[i - 1], m_diff[i - 1]);
 		}
-		vert_pos.clear();
 		create_path_geometry(Shape::s_d2d_factory);
 	}
 

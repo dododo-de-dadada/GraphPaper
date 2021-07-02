@@ -94,8 +94,8 @@ namespace winrt::GraphPaper::implementation
 		value = GRID_EMPH_0;
 	}
 
-	// データリーダーから多角形のツールを読み込む.
-	void dt_read(POLY_TOOL& value, DataReader const& dt_reader)
+	// データリーダーから多角形の選択肢を読み込む.
+	void dt_read(POLY_OPTION& value, DataReader const& dt_reader)
 	{
 		value.m_vertex_cnt = dt_reader.ReadUInt32();
 		value.m_regular = dt_reader.ReadBoolean();
@@ -211,8 +211,8 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt16(value.m_gauge_2);
 	}
 
-	// データライターに多角形のツールを書き込む.
-	void dt_write(const POLY_TOOL& value, DataWriter const& dt_writer)
+	// データライターに多角形の選択肢を書き込む.
+	void dt_write(const POLY_OPTION& value, DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(value.m_vertex_cnt));
 		dt_writer.WriteBoolean(value.m_regular);

@@ -992,8 +992,8 @@
     <value>3:三角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_tool_poly_draw.Text" xml:space="preserve">
-    <value>多角形の作図</value>
+  <data name="mfsi_tool_poly_opt.Text" xml:space="preserve">
+    <value>多角形のオプション</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="tb_version.Text" xml:space="preserve">

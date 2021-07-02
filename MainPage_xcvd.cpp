@@ -318,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 						// ’Έ“_‚πd‚Λ‚ιθ‡’l‚ªƒ[ƒ‚ζ‚θ‘ε‚«‚Ά‚©”»’θ‚·‚ι.
 						if (m_misc_pile_up >= FLT_MIN) {
 							D2D1_POINT_2F v_pos;
-							if (slist_neighbor(m_list_shapes, s_min, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_pos)) {
+							if (slist_find_vertex_closest(m_list_shapes, s_min, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_pos)) {
 								D2D1_POINT_2F v_vec;
 								pt_sub(v_pos, s_min, v_vec);
 								D2D1_POINT_2F g_vec;

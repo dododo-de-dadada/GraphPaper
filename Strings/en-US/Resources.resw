@@ -990,8 +990,8 @@
     <value>Triangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_tool_poly_draw.Text" xml:space="preserve">
-    <value>Drawing Polygon</value>
+  <data name="mfsi_tool_poly_opt.Text" xml:space="preserve">
+    <value>Polygon Option</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="tb_version.Text" xml:space="preserve">

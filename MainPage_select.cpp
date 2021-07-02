@@ -148,7 +148,7 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Up>();
 
 
-	// 指定した範囲にある図形を選択して, そうでない図形は選択しない.
+	// 範囲の中の図形を選択して, それ以外の図形は選択をはずす.
 	// s_from	最初の図形
 	// s_to	最後の図形
 	// 戻り値	選択が変更された true
@@ -231,11 +231,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		// シフトキーが押されているか判定する.
 		else if (k_mod == VirtualKeyModifiers::Shift) {
-			// 前回ポインターが押された図形から今回押された図形までの
-			// 範囲にある図形を選択して, そうでない図形を選択しない.
+			// 前回ポインターが押された図形が空か判定する.
 			if (m_event_shape_prev == nullptr) {
+				// 図形リストの先頭を前回ポインターが押された図形に格納する.
 				m_event_shape_prev = m_list_shapes.front();
 			}
+			// 範囲の中の図形は選択して, それ以外の図形の選択をはずす.
 			if (select_range(s, m_event_shape_prev)) {
 				xcvd_is_enabled();
 				sheet_draw();
@@ -243,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// シフトキーもコントロールキーも押されてないならば,
-			// 図形の選択フラグが立ってないか判定する.
+			// 図形が選択されてるか判定する.
 			if (!s->is_selected()) {
 				unselect_all();
 				ustack_push_select(s);
@@ -293,10 +294,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の選択をすべて解除する.
-	// t_range_only	文字範囲のみ解除フラグ
-	// 戻り値	選択が解除された図形がある場合 true, ない場合 false
-	// 文字範囲のみフラグが立っている場合, 文字範囲の選択のみ解除される.
-	// 文字範囲のみフラグがない場合, 図形の選択も文字範囲の選択も両方解除される.
+	// t_range_only	文字範囲だけ解除 (文字範囲だけでないなら, 図形の選択も解除される).
+	// 戻り値	選択が解除された図形があるなら true
 	bool MainPage::unselect_all(const bool t_range_only)
 	{
 		auto flag = false;
@@ -304,7 +303,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			// 文字範囲のみ解除フラグがない, かつ図形が選択されているか判定する.
+			// 文字範囲だけ解除でない, かつ図形が選択されているか判定する.
 			if (!t_range_only && s->is_selected()) {
 				ustack_push_select(s);
 				flag = true;

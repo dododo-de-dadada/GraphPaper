@@ -569,8 +569,8 @@ namespace winrt::GraphPaper::implementation
 	template void slist_selected<ShapeGroup>(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept;
 
 	// 図形リストをデータライターに書き込む.
-	// REDUCE	消去フラグが立っている図形を除く.
-	// slist	書き込む図形リスト
+	// REDUCE	消去された図形は書き込まない.
+	// slist	図形リスト
 	// dt_writer	データライター
 	template<bool REDUCE> void slist_write(SHAPE_LIST const& slist, DataWriter const& dt_writer)
 	{
@@ -580,38 +580,37 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 			}
-			// 図形の種類を得る.
 			auto const& s_type = typeid(*s);
 			uint32_t s_int;
 			if (s_type == typeid(ShapeBezi)) {
-				s_int = SHAPE_BEZI;
+				s_int = SHAPE_TYPE::SHAPE_BEZI;
 			}
 			else if (s_type == typeid(ShapeBitmap)) {
-				s_int = SHAPE_IMAGE;
+				s_int = SHAPE_TYPE::SHAPE_IMAGE;
 			}
 			else if (s_type == typeid(ShapeElli)) {
-				s_int = SHAPE_ELLI;
+				s_int = SHAPE_TYPE::SHAPE_ELLI;
 			}
 			else if (s_type == typeid(ShapeGroup)) {
-				s_int = SHAPE_GROUP;
+				s_int = SHAPE_TYPE::SHAPE_GROUP;
 			}
 			else if (s_type == typeid(ShapeLineA)) {
-				s_int = SHAPE_LINE;
+				s_int = SHAPE_TYPE::SHAPE_LINE;
 			}
 			else if (s_type == typeid(ShapePoly)) {
-				s_int = SHAPE_POLY;
+				s_int = SHAPE_TYPE::SHAPE_POLY;
 			}
 			else if (s_type == typeid(ShapeRect)) {
-				s_int = SHAPE_RECT;
+				s_int = SHAPE_TYPE::SHAPE_RECT;
 			}
 			else if (s_type == typeid(ShapeRRect)) {
-				s_int = SHAPE_RRECT;
+				s_int = SHAPE_TYPE::SHAPE_RRECT;
 			}
 			else if (s_type == typeid(ShapeRuler)) {
-				s_int = SHAPE_RULER;
+				s_int = SHAPE_TYPE::SHAPE_RULER;
 			}
 			else if (s_type == typeid(ShapeText)) {
-				s_int = SHAPE_TEXT;
+				s_int = SHAPE_TYPE::SHAPE_TEXT;
 			}
 			else {
 				continue;
@@ -629,21 +628,15 @@ namespace winrt::GraphPaper::implementation
 
 	// 選択されてない図形から, 指定した位置に最も近い頂点を得る.
 	// slist	図形リスト
-	// n_pos	位置
+	// c_pos	位置
 	// limit	距離の制限
 	// value	最も近い頂点
-	bool slist_neighbor(const SHAPE_LIST& slist, const D2D1_POINT_2F& n_pos, const float limit, D2D1_POINT_2F& value) noexcept
+	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& c_pos, const float limit, D2D1_POINT_2F& value) noexcept
 	{
 		bool flag = false;
 		float dd = limit * limit;
 		for (const auto s : slist) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			if (s->is_selected()) {
-				continue;
-			}
-			if (s->get_pos_nearest(n_pos, dd, value) && !flag) {
+			if (!s->is_deleted() && !s->is_selected() && s->get_pos_nearest(c_pos, dd, value) && !flag) {
 				flag = true;
 			}
 		}

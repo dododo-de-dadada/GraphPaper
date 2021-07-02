@@ -464,7 +464,7 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_rcnt -= ustack_clear_stack(m_ustack_redo);
 		// 元に戻す操作スタックにヌルを積む.
 		m_ustack_undo.push_back(nullptr);
-		// 操作スタックの更新フラグを立てる.
+		// true をスタックが更新されたか判定に格納する.
 		m_ustack_updt = true;
 		// 操作の組数をインクリメントする.
 		m_ustack_ucnt++;

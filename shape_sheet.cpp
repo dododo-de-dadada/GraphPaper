@@ -150,8 +150,8 @@ namespace winrt::GraphPaper::implementation
 	// dx	図形の描画環境
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
-	// t_poly	多角形の作図ツール
-	void ShapeSheet::draw_auxiliary_poly(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos, const POLY_TOOL& t_poly)
+	// p_opt	多角形の選択肢
+	void ShapeSheet::draw_auxiliary_poly(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos, const POLY_OPTION& p_opt)
 	{
 		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
@@ -160,10 +160,10 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F p_vec;
 		pt_sub(c_pos, p_pos, p_vec);
 		D2D1_POINT_2F v_vec;
-		ShapePoly::create_poly_by_bbox(p_pos, p_vec, t_poly, v_pos, v_vec);
-		const auto i_start = (t_poly.m_end_closed ? t_poly.m_vertex_cnt - 1 : 0);
-		const auto j_start = (t_poly.m_end_closed ? 0 : 1);
-		for (size_t i = i_start, j = j_start; j < t_poly.m_vertex_cnt; i = j++) {
+		ShapePoly::create_poly_by_bbox(p_pos, p_vec, p_opt, v_pos, v_vec);
+		const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
+		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
+		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
 			dx.m_shape_brush->SetColor(Shape::m_default_background);
 			dx.m_d2dContext->DrawLine(v_pos[i], v_pos[j], dx.m_shape_brush.get(), s_width, nullptr);
 			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
