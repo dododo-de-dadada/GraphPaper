@@ -19,7 +19,8 @@ This is a privacy constraint - we're very focused on maintaining the user's priv
 The documentation for this is up-to-date: https://docs.microsoft.com/en-us/windows/uwp/files/file-access-permissions#accessing-additional-locations.
 As of right now, if you want to detect whether the setting is enabled or disabled, 
 you can simply try to access some file/folder to which this setting would grant you permission if enabled and deny permission if disabled (eg, "C:\").
-If disabled, you can then launch the Settings app on the File System privacy page. For example:
+If disabled, you can then launch the Settings app on the File System privacy page.
+For example:
 
 protected override async void OnNavigatedTo(NavigationEventArgs e)
 {
