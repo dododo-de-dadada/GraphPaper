@@ -278,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 	}
 	template UndoAttr<UNDO_OP::ARROW_SIZE>::UndoAttr(Shape* s, const ARROW_SIZE& value);
 	template UndoAttr<UNDO_OP::ARROW_STYLE>::UndoAttr(Shape* s, const ARROW_STYLE& value);
-	template UndoAttr<UNDO_OP::BM_KEEP>::UndoAttr(Shape* s, const bool& value);
+	//template UndoAttr<UNDO_OP::BM_KEEP>::UndoAttr(Shape* s, const bool& value);
 	template UndoAttr<UNDO_OP::BM_OPAC>::UndoAttr(Shape* s, const float& value);
 	template UndoAttr<UNDO_OP::CAP_STYLE>::UndoAttr(Shape* s, const CAP_STYLE& value);
 	template UndoAttr<UNDO_OP::DASH_CAP>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
@@ -335,9 +335,9 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_OP::TEXT_ALIGN_T) {
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
-		else if constexpr (U == UNDO_OP::BM_KEEP) {
-			m_value = dt_reader.ReadBoolean();
-		}
+		//else if constexpr (U == UNDO_OP::BM_KEEP) {
+		//	m_value = dt_reader.ReadBoolean();
+		//}
 		else {
 			dt_read(m_value, dt_reader);
 		}
@@ -345,7 +345,7 @@ namespace winrt::GraphPaper::implementation
 
 	template UndoAttr<UNDO_OP::ARROW_SIZE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::ARROW_STYLE>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::BM_KEEP>::UndoAttr(DataReader const& dt_reader);
+	//template UndoAttr<UNDO_OP::BM_KEEP>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::BM_OPAC>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::CAP_STYLE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::DASH_CAP>::UndoAttr(DataReader const& dt_reader);
@@ -392,14 +392,14 @@ namespace winrt::GraphPaper::implementation
 		s->set_arrow_style(value);
 	}
 
-	void UndoAttr<UNDO_OP::BM_KEEP>::SET(Shape* const s, const bool& value)
-	{
-		s->set_bm_keep_aspect(value);
-	}
+	//void UndoAttr<UNDO_OP::BM_KEEP>::SET(Shape* const s, const bool& value)
+	//{
+	//	s->set_bm_keep_aspect(value);
+	//}
 
 	void UndoAttr<UNDO_OP::BM_OPAC>::SET(Shape* const s, const float& value)
 	{
-		s->set_bm_opacity(value);
+		s->set_image_opacity(value);
 	}
 
 	void UndoAttr<UNDO_OP::FILL_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
@@ -557,14 +557,9 @@ namespace winrt::GraphPaper::implementation
 		return s->get_arrow_style(value);
 	}
 
-	bool UndoAttr<UNDO_OP::BM_KEEP>::GET(const Shape* s, bool& value) noexcept
-	{
-		return s->get_bm_keep_aspect(value);
-	}
-
 	bool UndoAttr<UNDO_OP::BM_OPAC>::GET(const Shape* s, float& value) noexcept
 	{
-		return s->get_bm_opacity(value);
+		return s->get_image_opacity(value);
 	}
 
 	bool UndoAttr<UNDO_OP::FILL_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
@@ -736,9 +731,9 @@ namespace winrt::GraphPaper::implementation
 			) {
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_value));
 		}
-		else if constexpr (U == UNDO_OP::BM_KEEP) {
-			dt_writer.WriteBoolean(m_value);
-		}
+		//else if constexpr (U == UNDO_OP::BM_KEEP) {
+		//	dt_writer.WriteBoolean(m_value);
+		//}
 		else {
 			dt_write(m_value, dt_writer);
 		}

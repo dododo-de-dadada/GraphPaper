@@ -171,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 		m_dw_layout = nullptr;
 		m_dw_test_cnt = 0;
 		if (m_dw_test_metrics != nullptr) {
-				delete[] m_dw_test_metrics;
+			delete[] m_dw_test_metrics;
 			m_dw_test_metrics = nullptr;
 		}
 		m_dw_line_cnt = 0;

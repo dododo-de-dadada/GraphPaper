@@ -461,6 +461,33 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// パスジオメトリを作成する.
+	void ShapeBezi::create_path_geometry(const SHAPE_DX& dx)
+	{
+		D2D1_BEZIER_SEGMENT b_seg;
+		winrt::com_ptr<ID2D1GeometrySink> sink;
+
+		if (m_d2d_path_geom != nullptr) {
+			m_d2d_path_geom = nullptr;
+		}
+		if (m_d2d_arrow_geom != nullptr) {
+			m_d2d_arrow_geom = nullptr;
+		}
+		pt_add(m_pos, m_diff[0], b_seg.point1);
+		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
+		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
+		winrt::check_hresult(dx.m_d2dFactory->CreatePathGeometry(m_d2d_path_geom.put()));
+		m_d2d_path_geom->Open(sink.put());
+		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+		sink->BeginFigure(m_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+		sink->AddBezier(b_seg);
+		sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+		winrt::check_hresult(sink->Close());
+		sink = nullptr;
+		if (m_arrow_style != ARROW_STYLE::NONE) {
+			bz_create_arrow_geom(dx.m_d2dFactory.get(), m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+		}
+	}
+	/*
 	void ShapeBezi::create_path_geometry(ID2D1Factory3* const d_factory)
 	{
 		D2D1_BEZIER_SEGMENT b_seg;
@@ -487,10 +514,20 @@ namespace winrt::GraphPaper::implementation
 			bz_create_arrow_geom(d_factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
 	}
+	*/
 
 	// 図形を表示する.
 	void ShapeBezi::draw(SHAPE_DX& dx)
 	{
+		if (m_d2d_arrow_geom == nullptr || m_d2d_path_geom == nullptr) {
+			if (m_d2d_path_geom != nullptr) {
+				m_d2d_path_geom = nullptr;
+			}
+			else if (m_d2d_arrow_geom != nullptr) {
+				m_d2d_arrow_geom = nullptr;
+			}
+			create_path_geometry(dx);
+		}
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
 
@@ -498,6 +535,9 @@ namespace winrt::GraphPaper::implementation
 			const auto s_width = m_stroke_width;
 			const auto s_brush = dx.m_shape_brush.get();
 			const auto s_style = m_d2d_stroke_style.get();
+			if (s_style == nullptr) {
+				
+			}
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawGeometry(m_d2d_path_geom.get(), s_brush, s_width, s_style);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
@@ -819,14 +859,14 @@ namespace winrt::GraphPaper::implementation
 		m_diff[1].y = b_vec.y;
 		m_diff[2].x = b_vec.x;
 		m_diff[2].y = 0.0f;
-		create_path_geometry(Shape::s_d2d_factory);
+		//create_path_geometry(Shape::s_d2d_factory);
 	}
 
 	// データリーダーから図形を読み込む.
 	ShapeBezi::ShapeBezi(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
 	{
-		create_path_geometry(Shape::s_d2d_factory);
+		//create_path_geometry(Shape::s_d2d_factory);
 	}
 
 	// データライターに SVG として書き込む.

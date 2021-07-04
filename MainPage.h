@@ -198,11 +198,12 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	enum struct SAMPLE_TYPE {
 		NONE,	// なし
-		STROKE,	// 線枠
+		BITMAP,	// 画像
 		FILL,	// 塗りつぶし
 		FONT,	// 書体
 		JOIN,	// 線のつなぎ
-		MISC	// その他
+		MISC,	// その他
+		STROKE	// 線枠
 	};
 
 	//-------------------------------
@@ -235,24 +236,27 @@ namespace winrt::GraphPaper::implementation
 		bool m_find_text_wrap = false;	// 回り込み検索するか
 
 		// ポインターイベント
-		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };		// ポインターの現在位置
-		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };		// ポインターの前回位置
-		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;		// ポインターの押された状態
-		uint32_t m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;		// ポインターが押された図形の部位
-		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };		// ポインターが押された位置
-		Shape* m_event_shape_pressed = nullptr;		// ポインターが押された図形
-		Shape* m_event_shape_prev = nullptr;		// 前回ポインターが押された図形
-		uint64_t m_event_time_pressed = 0ULL;		// ポインターが押された時刻
-		uint64_t m_event_click_time = 0ULL;		// クリックの判定時間 (マイクロ秒)
-		double m_event_click_dist = 6.0;		// クリックの判定距離 (DIPs)
+		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
+		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };	// ポインターの前回位置
+		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターの押された状態
+		uint32_t m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;	// ポインターが押された図形の部位
+		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された位置
+		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
+		Shape* m_event_shape_prev = nullptr;	// 前回ポインターが押された図形
+		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
+		uint64_t m_event_click_time = 0ULL;	// クリックの判定時間 (マイクロ秒)
+		double m_event_click_dist = 6.0;	// クリックの判定距離 (DIPs)
 
 		// 作図ツール
-		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;		// 作図ツール
+		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;	// 作図ツール
 		POLY_OPTION m_tool_poly{ DEF_POLY_OPTION };	// 多角形の選択肢
 
 		// 図形リスト
-		SHAPE_LIST m_list_shapes;		// 図形リスト
-		uint32_t m_list_sel_cnt = 0;		// 選択された図形の数
+		SHAPE_LIST m_list_shapes;	// 図形リスト
+		uint32_t m_list_sel_cnt = 0;	// 選択された図形の数
+
+		// 図形
+		bool m_image_keep_aspect = true;	// 画像の縦横比の維持
 
 		// その他
 		LEN_UNIT m_misc_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
@@ -261,27 +265,27 @@ namespace winrt::GraphPaper::implementation
 		STATUS_BAR m_misc_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		// 見本用紙
-		SHAPE_DX m_sample_dx;		// 見本の描画環境
-		ShapeSheet m_sample_sheet;		// 見本の用紙
+		SHAPE_DX m_sample_dx;	// 見本の描画環境
+		ShapeSheet m_sample_sheet;	// 見本の用紙
 		Shape* m_sample_shape = nullptr;	// 見本の図形
 		SAMPLE_TYPE m_sample_type = SAMPLE_TYPE::NONE;	// 見本の型
 
 		// 用紙
-		SHAPE_DX m_sheet_dx;		// 用紙の描画環境
-		ShapeSheet m_sheet_main;		// メインの用紙
-		D2D1_POINT_2F m_sheet_min{ 0.0F, 0.0F };		// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
-		D2D1_POINT_2F m_sheet_max{ 0.0F, 0.0F };		// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
+		SHAPE_DX m_sheet_dx;	// 用紙の描画環境
+		ShapeSheet m_sheet_main;	// メインの用紙
+		D2D1_POINT_2F m_sheet_min{ 0.0F, 0.0F };	// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
+		D2D1_POINT_2F m_sheet_max{ 0.0F, 0.0F };	// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
 		// 元に戻す・やり直し操作
 		uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数
-		UNDO_STACK m_ustack_redo;		// やり直し操作スタック
+		UNDO_STACK m_ustack_redo;	// やり直し操作スタック
 		uint32_t m_ustack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
-		UNDO_STACK m_ustack_undo;		// 元に戻す操作スタック
+		UNDO_STACK m_ustack_undo;	// 元に戻す操作スタック
 		bool m_ustack_updt = false;	// スタックが更新されたか判定
 
 		// スレッド
-		bool m_thread_activated = false;
-		bool m_thread_win_visible = false;		// ウィンドウが表示されてるか判定
+		bool m_thread_activated = false;	// アクティベートされた初回を判定
+		bool m_thread_win_visible = false;	// ウィンドウが表示されてるか判定
 
 		// コンテキストメニュー
 		MenuFlyout m_menu_stroke{ nullptr };	// 線枠コンテキストメニュー
@@ -290,6 +294,7 @@ namespace winrt::GraphPaper::implementation
 		MenuFlyout m_menu_sheet{ nullptr };	// 用紙コンテキストメニュー
 		MenuFlyout m_menu_ungroup{ nullptr };	// グループ解除コンテキストメニュー
 		MenuFlyout m_menu_ruler{ nullptr };	// 定規コンテキストメニュー
+		MenuFlyout m_menu_image{ nullptr };	// 画像コンテキストメニュー
 
 		// ハンドラートークン
 		winrt::event_token m_token_suspending;	// アプリケーションの中断ハンドラーのトークン
@@ -446,6 +451,7 @@ namespace winrt::GraphPaper::implementation
 		// ファイルの読み書き
 		//-------------------------------
 
+		IAsyncAction file_check_access(void) const;
 		// ストレージファイルを非同期に読む.
 		IAsyncOperation<winrt::hresult> file_read_async(StorageFile const& s_file, const bool suspend = false, const bool layout = false) noexcept;
 		// 名前を付けてファイルに非同期に保存する
@@ -636,12 +642,17 @@ namespace winrt::GraphPaper::implementation
 		// 画像
 		//-----------------------------
 
+		void image_keep_aspect_is_checked(const bool keep_aspect);
 		// 画像メニューの「縦横比を変えない」が選択された.
 		void image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 画像メニューの「元の大きさに戻す」が選択された.
 		void image_resize_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 画像メニューの「不透明度...」が選択された.
 		IAsyncAction image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 値をスライダーのヘッダーに格納する.
+		template <UNDO_OP U, int S> void image_slider_set_header(const float value);
+		// スライダーの値が変更された.
+		template <UNDO_OP U, int S> void image_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 
 		//-----------------------------
 		// MainPage_misc.cpp
@@ -688,7 +699,7 @@ namespace winrt::GraphPaper::implementation
 		// 見本を表示する
 		void sample_draw(void);
 		// 見本のスワップチェーンパネルの大きさが変わった.
-		void sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction sample_panel_size_changed_async(IInspectable const&, RoutedEventArgs const&);
 		//　リストビュー「見本リスト」がロードされた.
 		void sample_list_loaded(IInspectable const&, RoutedEventArgs const&);
 
@@ -889,8 +900,8 @@ namespace winrt::GraphPaper::implementation
 		void text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT value);
 		// 書体メニューの「段落のそろえ」に印をつける.
 		void text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT value);
-		// 書体メニューの「枠の大きさを合わせる」が選択された.
-		void edit_text_frame_click(IInspectable const&, RoutedEventArgs const&);
+		// 書体メニューの「枠を文字列に合わせる」が選択された.
+		void text_fit_frame_to_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行間...」が選択された.
 		IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「余白...」が選択された.

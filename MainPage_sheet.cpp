@@ -51,6 +51,7 @@ namespace winrt::GraphPaper::implementation
 		ARROW_STYLE a_style;
 		m_sheet_main.get_arrow_style(a_style);
 		arrow_style_is_checked(a_style);
+		//arrow_style_is_checked(m_sheet_main.m_arrow_style);
 		DWRITE_FONT_STYLE f_style;
 		m_sheet_main.get_font_style(f_style);
 		font_style_is_checked(f_style);
@@ -431,8 +432,6 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
 		m_sample_sheet.set_attr_to(&m_sheet_main);
-		//double pw = m_sheet_main.m_sheet_size.width;
-		//double ph = m_sheet_main.m_sheet_size.height;
 		float g_base;
 		m_sheet_main.get_grid_base(g_base);
 		wchar_t buf[32];

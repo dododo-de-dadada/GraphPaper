@@ -25,22 +25,24 @@ namespace winrt::GraphPaper::implementation
 			if (!m_thread_activated) {
 				m_thread_activated = true;
 
-				// クリップボードに受け入れ可能なフォーマットを設定する.
-				// クリップボードは, バックグラウンドではからはアクセスできない.
-				// デバッグなしで実行したとき, MainPage のコンストラクタで Clipboard::GetContent を呼ぶと, 
-				// アプリケーションの起動に失敗する.
-				using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
-				using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
+			}
+			// クリップボードに受け入れ可能なフォーマットを設定する.
+			// クリップボードは, バックグラウンドではからはアクセスできない.
+			// デバッグなしで実行したとき, MainPage のコンストラクタで Clipboard::GetContent を呼ぶと, 
+			// アプリケーションの起動に失敗する.
+			using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
+			using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 
-				const auto& dp_view = Clipboard::GetContent();
-				dp_view.SetAcceptedFormatId(CBF_GPD);
-				dp_view.SetAcceptedFormatId(StandardDataFormats::Text());
-				dp_view.SetAcceptedFormatId(StandardDataFormats::Bitmap());
-				if (dp_view.Contains(CBF_GPD) ||
-					dp_view.Contains(StandardDataFormats::Text()) ||
-					dp_view.Contains(StandardDataFormats::Bitmap())) {
-					mfi_xcvd_paste().IsEnabled(true);
-				}
+			const auto& dp_view = Clipboard::GetContent();
+			dp_view.SetAcceptedFormatId(CBF_GPD);
+			dp_view.SetAcceptedFormatId(StandardDataFormats::Text());
+			dp_view.SetAcceptedFormatId(StandardDataFormats::Bitmap());
+			dp_view.SetAcceptedFormatId(L"TaggedImageFileFormat");
+			if (dp_view.Contains(CBF_GPD) ||
+				dp_view.Contains(StandardDataFormats::Text()) ||
+				dp_view.Contains(StandardDataFormats::Bitmap()) ||
+				dp_view.Contains(L"TaggedImageFileFormat")) {
+				mfi_xcvd_paste().IsEnabled(true);
 			}
 		}
 		else if (a_state == CoreWindowActivationState::Deactivated) {

@@ -79,9 +79,9 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::BITMAP:
 			u = new UndoBitmap(dt_reader);
 			break;
-		case UNDO_OP::BM_KEEP:
-			u = new UndoAttr<UNDO_OP::BM_KEEP>(dt_reader);
-			break;
+		//case UNDO_OP::BM_KEEP:
+		//	u = new UndoAttr<UNDO_OP::BM_KEEP>(dt_reader);
+		//	break;
 		case UNDO_OP::BM_OPAC:
 			u = new UndoAttr<UNDO_OP::BM_OPAC>(dt_reader);
 			break;
@@ -607,7 +607,7 @@ namespace winrt::GraphPaper::implementation
 
 	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_SIZE>(ARROW_SIZE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::BM_KEEP>(bool const& value);
+	//template bool MainPage::ustack_push_set<UNDO_OP::BM_KEEP>(bool const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::BM_OPAC>(float const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::CAP_STYLE>(CAP_STYLE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::DASH_CAP>(D2D1_CAP_STYLE const& value);

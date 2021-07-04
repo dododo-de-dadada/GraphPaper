@@ -58,9 +58,9 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚ð•\Ž¦‚·‚é.
 	void ShapeRRect::draw(SHAPE_DX& dx)
 	{
-		auto sb = dx.m_shape_brush.get();
-		auto ss = m_d2d_stroke_style.get();
-		auto sw = m_stroke_width;
+		auto s_brush = dx.m_shape_brush.get();
+		auto s_style = m_d2d_stroke_style.get();
+		auto s_width = m_stroke_width;
 		auto dc = dx.m_d2dContext;
 
 		D2D1_POINT_2F r_min;
@@ -83,11 +83,11 @@ namespace winrt::GraphPaper::implementation
 		r_rec.radiusX = rx;
 		r_rec.radiusY = ry;
 		if (is_opaque(m_fill_color)) {
-			sb->SetColor(m_fill_color);
-			dc->FillRoundedRectangle(r_rec, sb);
+			s_brush->SetColor(m_fill_color);
+			dc->FillRoundedRectangle(r_rec, s_brush);
 		}
-		sb->SetColor(m_stroke_color);
-		dc->DrawRoundedRectangle(r_rec, sb, sw, ss);
+		s_brush->SetColor(m_stroke_color);
+		dc->DrawRoundedRectangle(r_rec, s_brush, s_width, s_style);
 		if (is_selected()) {
 			const auto flag = (std::abs(m_diff[0].x) >= FLT_MIN && std::abs(m_diff[0].y) >= FLT_MIN);
 			//if (flag) {

@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
 		BITMAP,	// 画像の操作 (ファイル読み書きで使用)
-		BM_KEEP,	// 画像の縦横維持の操作
+		//BM_KEEP,	// 画像の縦横維持の操作
 		BM_OPAC,	// 画像の不透明度の操作
 		CAP_STYLE,	// 端の形式の操作
 		DASH_CAP,	// 破線の端の形式の操作
@@ -73,7 +73,7 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U> struct U_TYPE { using type = int; };
 	template <> struct U_TYPE<UNDO_OP::ARROW_SIZE> { using type = ARROW_SIZE; };
 	template <> struct U_TYPE<UNDO_OP::ARROW_STYLE> { using type = ARROW_STYLE; };
-	template <> struct U_TYPE<UNDO_OP::BM_KEEP> { using type = bool; };
+	//template <> struct U_TYPE<UNDO_OP::BM_KEEP> { using type = bool; };
 	template <> struct U_TYPE<UNDO_OP::BM_OPAC> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::CAP_STYLE> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::DASH_CAP> { using type = D2D1_CAP_STYLE; };

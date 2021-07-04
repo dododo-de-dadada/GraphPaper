@@ -11,8 +11,8 @@ namespace winrt::GraphPaper::implementation
 {
 	constexpr float TEXT_LINE_SP_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
 
-	// 編集メニューの「枠の大きさを合わせる」が選択された.
-	void MainPage::edit_text_frame_click(IInspectable const&, RoutedEventArgs const&)
+	// 書体メニューの「枠を文字列に合わせる」が選択された.
+	void MainPage::text_fit_frame_to_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto flag = false;
 		for (auto s : m_list_shapes) {

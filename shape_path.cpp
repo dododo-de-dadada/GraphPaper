@@ -14,7 +14,9 @@ namespace winrt::GraphPaper::implementation
 	bool ShapePath::move(const D2D1_POINT_2F d_vec)
 	{
 		if (ShapeStroke::move(d_vec)) {
-			create_path_geometry(Shape::s_d2d_factory);
+			m_d2d_arrow_geom = nullptr;
+			m_d2d_path_geom = nullptr;
+			//create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
 		return false;
@@ -27,7 +29,9 @@ namespace winrt::GraphPaper::implementation
 	bool ShapePath::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect)
 	{
 		if (ShapeStroke::set_pos_anch(value, anch, limit, keep_aspect)) {
-			create_path_geometry(Shape::s_d2d_factory);
+			m_d2d_arrow_geom = nullptr;
+			m_d2d_path_geom = nullptr;
+			//create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
 		return false;
@@ -38,7 +42,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (!equal(m_arrow_size, value)) {
 			m_arrow_size = value;
-			create_path_geometry(Shape::s_d2d_factory);
+			m_d2d_arrow_geom = nullptr;
+			m_d2d_path_geom = nullptr;
+			//create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
 		return false;
@@ -49,7 +55,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_arrow_style != value) {
 			m_arrow_style = value;
-			create_path_geometry(Shape::s_d2d_factory);
+			m_d2d_arrow_geom = nullptr;
+			m_d2d_path_geom = nullptr;
+			//create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
 		return false;
@@ -60,7 +68,9 @@ namespace winrt::GraphPaper::implementation
 	bool ShapePath::set_pos_start(const D2D1_POINT_2F value)
 	{
 		if (ShapeStroke::set_pos_start(value)) {
-			create_path_geometry(Shape::s_d2d_factory);
+			m_d2d_arrow_geom = nullptr;
+			m_d2d_path_geom = nullptr;
+			//create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
 		return false;

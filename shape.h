@@ -457,10 +457,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_arrow_size(ARROW_SIZE& /*value*/) const noexcept { return false; }
 		// 矢じるしの形式を得る.
 		virtual bool get_arrow_style(ARROW_STYLE& /*value*/) const noexcept { return false; }
-		// 画像の縦横比の維持を得る.
-		virtual bool get_bm_keep_aspect(bool& /*value*/) const noexcept { return false; }
-		// 画像の不透明度を得る.
-		virtual bool get_bm_opacity(float& /*value*/) const noexcept { return false; }
 		// 図形を囲む領域を得る.
 		virtual void get_bound(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/, D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept {}
 		// 端の形式を得る.
@@ -497,6 +493,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_grid_show(GRID_SHOW& /*value*/) const noexcept { return false; }
 		// 方眼に合わせるを得る.
 		virtual bool get_grid_snap(bool& /*value*/) const noexcept { return false; }
+		// 画像の不透明度を得る.
+		virtual bool get_image_opacity(float& /*value*/) const noexcept { return false; }
 		// 線分のつなぎのマイター制限を得る.
 		virtual bool get_join_limit(float& /*value*/) const noexcept { return false; }
 		// 線分のつなぎを得る.
@@ -547,10 +545,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_arrow_size(const ARROW_SIZE& /*value*/) { return false; }
 		// 値を矢じるしの形式に格納する.
 		virtual bool set_arrow_style(const ARROW_STYLE /*value*/) { return false; }
-		// 画像の縦横比の維持を得る.
-		virtual bool set_bm_keep_aspect(const bool /*value*/) noexcept { return false; }
-		// 画像の不透明度を得る.
-		virtual bool set_bm_opacity(const float /*value*/) noexcept { return false; }
 		// 値を端の形式に格納する.
 		virtual bool set_cap_style(const CAP_STYLE& /*value*/) { return false; }
 		// 値を角丸半径に格納する.
@@ -587,6 +581,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_grid_show(const GRID_SHOW /*value*/) noexcept { return false; }
 		// 値を方眼に合わせるに格納する.
 		virtual bool set_grid_snap(const bool /*value*/) noexcept { return false; }
+		// 画像の不透明度を得る.
+		virtual bool set_image_opacity(const float /*value*/) noexcept { return false; }
 		// 値を線分のつなぎのマイター制限に格納する.
 		virtual bool set_join_limit(const float& /*value*/) { return false; }
 		// 値を線分のつなぎに格納する.
@@ -643,12 +639,10 @@ namespace winrt::GraphPaper::implementation
 		~ShapeBitmap(void);
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
-		// 画像の縦横比の維持を得る.
-		//bool get_bm_keep_aspect(bool& /*value*/) const noexcept;
-		// 画像の不透明度を得る.
-		bool get_bm_opacity(float& /*value*/) const noexcept;
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/, D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept;
+		// 画像の不透明度を得る.
+		bool get_image_opacity(float& /*value*/) const noexcept;
 		// 近傍の頂点を得る.
 		bool get_pos_nearest(const D2D1_POINT_2F /*pos*/, float& /*dd*/, D2D1_POINT_2F& /*value*/) const noexcept;
 		// 部位の位置を得る.
@@ -673,10 +667,8 @@ namespace winrt::GraphPaper::implementation
 		void resize_origin(void) noexcept;
 		// 値を消去されたか判定に格納する.
 		bool set_delete(const bool value) noexcept;
-		// 値を画像の縦横比の維持に格納する.
-		//bool set_bm_keep_aspect(const bool value) noexcept;
 		// 値を画像の不透明度に格納する.
-		bool set_bm_opacity(const float value) noexcept;
+		bool set_image_opacity(const float value) noexcept;
 		// 値を, 部位の位置に格納する.
 		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit = 0.0f, const bool keep_aspect = false);
 		// 値を始点に格納する. 他の部位の位置も動く.
@@ -735,8 +727,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_text_padding{ DEF_TEXT_MARGIN };	// 文字列の左右と上下の余白
 
 		// 画像
-		static bool s_bm_keep_aspect;	// 画像の縦横比の維持
-		float m_opac = 1.0f;	// 画像の不透明率
+		float m_image_opac = 1.0f;	// 画像の不透明率
 
 		// 方眼
 		D2D1_COLOR_F m_grid_color{ ACCENT_COLOR };	// 方眼の色
@@ -772,10 +763,6 @@ namespace winrt::GraphPaper::implementation
 		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
 		// 矢じるしの形式を得る.
 		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
-		// 画像の縦横比の維持を得る.
-		bool get_bm_keep_aspect(bool& value) const noexcept;
-		// 画像の不透明度を得る.
-		bool get_bm_opacity(float& value) const noexcept;
 		// 端の形式を得る.
 		bool get_cap_style(CAP_STYLE& value) const noexcept;
 		// 角丸半径を得る.
@@ -810,6 +797,8 @@ namespace winrt::GraphPaper::implementation
 		bool get_grid_show(GRID_SHOW& value) const noexcept;
 		// 方眼に合わせるを得る.
 		bool get_grid_snap(bool& value) const noexcept;
+		// 画像の不透明度を得る.
+		bool get_image_opacity(float& value) const noexcept;
 		// 線分のつなぎのマイター制限を得る.
 		bool get_join_limit(float& value) const noexcept;
 		// 線分のつなぎを得る.
@@ -840,10 +829,8 @@ namespace winrt::GraphPaper::implementation
 		bool set_arrow_style(const ARROW_STYLE value);
 		// 図形の属性値を格納する.
 		void set_attr_to(const Shape* s) noexcept;
-		// 値を画像の縦横比の維持に格納する.
-		bool set_bm_keep_aspect(const bool value) noexcept;
 		// 値を画像の不透明度に格納する.
-		bool set_bm_opacity(const float value) noexcept;
+		bool set_image_opacity(const float value) noexcept;
 		// 値を端の形式に格納する.
 		bool set_cap_style(const CAP_STYLE& value);
 		// 値を角丸半径に格納する.
@@ -1246,8 +1233,10 @@ namespace winrt::GraphPaper::implementation
 		// 折れ線のひな型
 		//------------------------------
 
+		virtual void create_path_geometry(const SHAPE_DX& /*dx*/) {}
+
 		// パスジオメトリを作成する.
-		virtual void create_path_geometry(ID2D1Factory3* const/*d_factory*/) {}
+		//virtual void create_path_geometry(ID2D1Factory3* const/*d_factory*/) {}
 		// 図形を作成する.
 		ShapePath(const size_t d_cnt, const ShapeSheet* s_attr, const bool s_closed) :
 			ShapeLineA::ShapeLineA(d_cnt, s_attr, s_closed), m_d2d_path_geom(nullptr) {}
@@ -1281,10 +1270,13 @@ namespace winrt::GraphPaper::implementation
 		// shape_poly.cpp
 		//------------------------------
 
+		void create_path_geometry(const SHAPE_DX& dx);
+
+
 		// 方形をもとに多角形を作成する.
 		static void create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt, D2D1_POINT_2F v_pos[], D2D1_POINT_2F& v_vec) noexcept;
 		// パスジオメトリを作成する.
-		void create_path_geometry(ID2D1Factory3* const d_factory);
+		//void create_path_geometry(ID2D1Factory3* const d_factory);
 		// 表示する
 		void draw(SHAPE_DX& dx);
 		// 塗りつぶし色を得る.
@@ -1317,8 +1309,10 @@ namespace winrt::GraphPaper::implementation
 		// ベジェ曲線
 		//------------------------------
 
+		void create_path_geometry(const SHAPE_DX& dx);
+
 		// パスジオメトリを作成する.
-		void create_path_geometry(ID2D1Factory3* const d_factory);
+		//void create_path_geometry(ID2D1Factory3* const d_factory);
 		// 表示する.
 		void draw(SHAPE_DX& dx);
 		// 位置を含むか判定する.

@@ -152,7 +152,8 @@ namespace winrt::GraphPaper::implementation
 		misc_color_is_checked(m_misc_color_code);
 		status_bar_is_checked(m_misc_status_bar);
 		misc_len_is_checked(m_misc_len_unit);
-
+		image_keep_aspect_is_checked(m_image_keep_aspect);
+		
 		sheet_attr_is_checked();
 
 		wchar_t* unavailable_font;	// 書体名
@@ -200,7 +201,7 @@ namespace winrt::GraphPaper::implementation
 		// 待機カーソルを表示, 表示する前のカーソルを得る.
 		auto const& prev_cur = file_wait_cursor();
 		// ファイル「オープン」ピッカーを取得して開く.
-		auto o_picker{FileOpenPicker()};
+		auto o_picker{ FileOpenPicker() };
 		o_picker.FileTypeFilter().Append(FT_GPF);
 		// ダブルクリックでファイルが選択された場合,
 		// co_await が終了する前に, PonterReleased と PonterEntered が呼ばれる.
@@ -264,6 +265,7 @@ namespace winrt::GraphPaper::implementation
 			m_misc_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
 			m_misc_pile_up = dt_reader.ReadSingle();
 			m_misc_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
+			m_image_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
 
 			const auto s_atom = dt_reader.ReadBoolean();
 			m_summary_atomic.store(s_atom, std::memory_order_release);
@@ -277,8 +279,7 @@ namespace winrt::GraphPaper::implementation
 
 #if defined(_DEBUG)
 			if (debug_leak_cnt != 0) {
-				auto cd = this->Dispatcher();
-				co_await winrt::resume_foreground(cd);
+				co_await winrt::resume_foreground(Dispatcher());
 				message_show(ICON_ALERT, DEBUG_MSG, {});
 				co_await context;
 				m_dx_mutex.unlock();
@@ -304,13 +305,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_dx_mutex.unlock();
 		if (hres != S_OK) {
-			auto cd = this->Dispatcher();
-			co_await winrt::resume_foreground(cd);
+			co_await winrt::resume_foreground(Dispatcher());
 			message_show(ICON_ALERT, ERR_READ, s_file.Path());
 		}
 		else if (!suspend && !sheet) {
-			auto cd = this->Dispatcher();
-			co_await winrt::resume_foreground(cd);
+			co_await winrt::resume_foreground(Dispatcher());
 			file_recent_add(s_file);
 			file_finish_reading();
 		}
@@ -477,7 +476,7 @@ namespace winrt::GraphPaper::implementation
 		auto const& prev_cur = file_wait_cursor();	// 表示する前のカーソル
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		//winrt::apartment_context context;
-		//co_await resume_background(this->Dispatcher());
+		//co_await winrt::resume_background();
 		try {
 			// ファイル保存ピッカーを得る.
 			// ファイルタイプに拡張子 GPF とその説明を追加する.
@@ -598,7 +597,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::Storage::CachedFileManager;
 		using winrt::Windows::Storage::FileAccessMode;
+		using winrt::Windows::Storage::Pickers::FileSavePicker;
 		using winrt::Windows::Storage::Provider::FileUpdateStatus;
+
 
 		constexpr char XML_DEC[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" SVG_NEW_LINE;
 		constexpr char DOCTYPE[] = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" SVG_NEW_LINE;
@@ -643,15 +644,36 @@ namespace winrt::GraphPaper::implementation
 					const auto len = wcsnlen(bmp_name, 256);
 					swprintf(bmp_name + len, 256 - len, L"%03d.bmp", magic_num++);
 					const auto s_folder{ co_await s_file.GetParentAsync() };
-					auto bmp_file{ co_await s_folder.CreateFileAsync(bmp_name) };
-					auto bmp_stream{ co_await bmp_file.OpenAsync(FileAccessMode::ReadWrite) };
-					auto bmp_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
-					static_cast<ShapeBitmap*>(s)->write_bmp(bmp_writer);
-					co_await bmp_writer.StoreAsync();
-					co_await bmp_stream.FlushAsync();
-					bmp_writer.Close();
+					auto bmp_picker{ FileSavePicker() };
+					const auto bmp_type = winrt::single_threaded_vector<winrt::hstring>({ L".bmp" });
 
-					static_cast<ShapeBitmap*>(s)->write_svg(bmp_name, dt_writer);
+					bmp_picker.FileTypeChoices().Insert(L"Bitmap", bmp_type);
+					bmp_picker.SuggestedFileName(bmp_name);
+					// ピッカーを非同期で表示してストレージファイルを取得する.
+					// ストレージファイルがヌルポインターか判定する.
+					// (「閉じる」ボタンが押された場合ストレージファイルは nullptr.)
+					// スレッドをメインページの UI スレッドに変える.
+					co_await winrt::resume_foreground(Dispatcher());
+					auto bmp_file{ co_await bmp_picker.PickSaveFileAsync() };
+					co_await winrt::resume_background();
+					if (bmp_file != nullptr) {
+						CachedFileManager::DeferUpdates(bmp_file);
+
+						auto bmp_stream{ co_await bmp_file.OpenAsync(FileAccessMode::ReadWrite) };
+						auto bmp_writer{ DataWriter(bmp_stream.GetOutputStreamAt(0)) };
+						static_cast<ShapeBitmap*>(s)->write_bmp(bmp_writer);
+						co_await bmp_writer.StoreAsync();
+						co_await bmp_stream.FlushAsync();
+						bmp_writer.Close();
+
+						// 遅延させたファイル更新を完了し, 結果を判定する.
+						if (co_await CachedFileManager::CompleteUpdatesAsync(bmp_file) == FileUpdateStatus::Complete) {
+							// 完了した場合, S_OK を結果に格納する.
+							hres = S_OK;
+						}
+
+						static_cast<ShapeBitmap*>(s)->write_svg(bmp_name, dt_writer);
+					}
 				}
 				else {
 					s->write_svg(dt_writer);
@@ -679,8 +701,7 @@ namespace winrt::GraphPaper::implementation
 		// 結果が S_OK 以外か判定する.
 		if (hres != S_OK) {
 			// スレッドをメインページの UI スレッドに変える.
-			auto cd = this->Dispatcher();
-			co_await winrt::resume_foreground(cd);
+			co_await winrt::resume_foreground(Dispatcher());
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
 		}
@@ -746,6 +767,8 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_color_code));
 			dt_writer.WriteSingle(m_misc_pile_up);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_status_bar));
+			dt_writer.WriteBoolean(m_image_keep_aspect);
+
 			dt_writer.WriteBoolean(summary_is_visible());
 
 			m_sheet_main.write(dt_writer);
@@ -780,16 +803,14 @@ namespace winrt::GraphPaper::implementation
 		// 結果が S_OK 以外か判定する.
 		if (hres != S_OK) {
 			// スレッドをメインページの UI スレッドに変える.
-			auto cd = this->Dispatcher();
-			co_await winrt::resume_foreground(cd);
+			co_await winrt::resume_foreground(this->Dispatcher());
 			// 「ファイルに書き込めません」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, ERR_WRITE, s_file.Path());
 		}
 		// 中断されてない, かつレイアウト以外か判定する.
 		else if (!suspend && !layout) {
 			// スレッドをメインページの UI スレッドに変える.
-			auto cd = this->Dispatcher();
-			co_await winrt::resume_foreground(cd);
+			co_await winrt::resume_foreground(Dispatcher());
 			// ストレージファイルを最近使ったファイルに登録する.
 			// ここでエラーが出る.
 			file_recent_add(s_file);
@@ -800,6 +821,26 @@ namespace winrt::GraphPaper::implementation
 		co_await context;
 		// 結果を返し終了する.
 		co_return hres;
+	}
+
+	IAsyncAction MainPage::file_check_access(void) const
+	{
+		using winrt::Windows::Foundation::Uri;
+		using winrt::Windows::Storage::StorageFolder;
+		using winrt::Windows::System::Launcher;
+
+		bool flag = false;
+		try {
+			co_await StorageFolder::GetFolderFromPathAsync(L"C:\\");
+		}
+		catch (winrt::hresult_error const& e) {
+			flag = true;
+		}
+		if (flag) {
+			Uri ms_setting{ L"ms-settings:privacy-broadfilesystemaccess" };
+			co_await Launcher::LaunchUriAsync(ms_setting);
+		}
+		co_return;
 	}
 
 }

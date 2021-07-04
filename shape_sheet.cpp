@@ -80,8 +80,6 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_bezi(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		//ID2D1SolidColorBrush* br = dx.m_aux_brush.get();
-		//ID2D1StrokeStyle* ss = dx.m_aux_style.get();
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
 		const auto s_brush = dx.m_shape_brush.get();
 		const auto a_style = dx.m_aux_style.get();
@@ -114,8 +112,6 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_elli(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		//auto br = dx.m_aux_brush.get();
-		//auto ss = dx.m_aux_style.get();
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
 		D2D1_POINT_2F rect;	// 方形
 		D2D1_ELLIPSE elli;		// だ円
@@ -137,8 +133,6 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_line(SHAPE_DX const& dx, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		//auto br = dx.m_aux_brush.get();
-		//auto ss = dx.m_aux_style.get();
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
 		dx.m_shape_brush->SetColor(Shape::m_default_background);
 		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), s_width, nullptr);
@@ -210,15 +204,15 @@ namespace winrt::GraphPaper::implementation
 		if (qy * ry < 0.0f) {
 			ry = -ry;
 		}
-		const D2D1_ROUNDED_RECT rr = {
+		const D2D1_ROUNDED_RECT r_rect = {
 			{ p_pos.x, p_pos.y, c_pos.x, c_pos.y },
 			static_cast<FLOAT>(rx),
 			static_cast<FLOAT>(ry)
 		};
 		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), s_width, nullptr);
+		dx.m_d2dContext->DrawRoundedRectangle(&r_rect, dx.m_shape_brush.get(), s_width, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawRoundedRectangle(&rr, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
+		dx.m_d2dContext->DrawRoundedRectangle(&r_rect, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
 
 	// 方眼を表示する.
@@ -293,17 +287,10 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 画像の縦横比の維持を得る.
-	bool ShapeSheet::get_bm_keep_aspect(bool& value) const noexcept
-	{
-		value = s_bm_keep_aspect;
-		return true;
-	}
-
 	// 画像の不透明度を得る.
-	bool ShapeSheet::get_bm_opacity(float& value) const noexcept
+	bool ShapeSheet::get_image_opacity(float& value) const noexcept
 	{
-		value = m_opac;
+		value = m_image_opac;
 		return true;
 	}
 
@@ -539,13 +526,10 @@ namespace winrt::GraphPaper::implementation
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());	// 文字列のそろえ
 		m_text_line_sp = dt_reader.ReadSingle();	// 行間
 		dt_read(m_text_padding, dt_reader);	// 文字列の余白
-		s_bm_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
-		m_opac = dt_reader.ReadSingle();	// 画像の不透明率
+		m_image_opac = dt_reader.ReadSingle();	// 画像の不透明率
 
 		ShapeText::is_available_font(m_font_family);
 	}
-
-	bool ShapeSheet::s_bm_keep_aspect = true;	// 画像の縦横比の維持
 
 	// 値を矢じるしの寸法に格納する.
 	bool ShapeSheet::set_arrow_size(const ARROW_SIZE& value)
@@ -564,23 +548,17 @@ namespace winrt::GraphPaper::implementation
 		return (m_arrow_style = value) != old_value;
 	}
 
-	// 値を画像の縦横比の維持に格納する.
-	bool ShapeSheet::set_bm_keep_aspect(const bool value) noexcept
-	{
-		const auto old_value = s_bm_keep_aspect;
-		return (s_bm_keep_aspect = value) != old_value;
-	}
-
 	// 値を画像の不透明度に格納する.
-	bool ShapeSheet::set_bm_opacity(const float value) noexcept
+	bool ShapeSheet::set_image_opacity(const float value) noexcept
 	{
-		if (!equal(m_opac, value)) {
-			m_opac = value;
+		if (!equal(m_image_opac, value)) {
+			m_image_opac = value;
 			return true;
 		}
 		return false;
 	}
 
+	// 値を角丸半径に格納する.
 	bool ShapeSheet::set_corner_radius(const D2D1_POINT_2F& value) noexcept
 	{
 		if (!equal(m_corner_rad, value)) {
@@ -623,7 +601,7 @@ namespace winrt::GraphPaper::implementation
 	// 値を書体の大きさに格納する.
 	bool ShapeSheet::set_font_size(const float value)
 	{
-		if (m_font_size != value) {
+		if (!equal(m_font_size, value)) {
 			m_font_size = value;
 			return true;
 		}
@@ -832,10 +810,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の属性値を用紙に格納する.
+	// s	図形
 	void ShapeSheet::set_attr_to(const Shape* s) noexcept
 	{
 		s->get_arrow_size(m_arrow_size);
 		s->get_arrow_style(m_arrow_style);
+		s->get_image_opacity(m_image_opac);
 		s->get_corner_radius(m_corner_rad);
 		s->get_fill_color(m_fill_color);
 		s->get_font_color(m_font_color);
@@ -865,6 +845,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーに書き込む.
+	// dt_writer	データリーダー
 	void ShapeSheet::write(DataWriter const& dt_writer)
 	{
 		D2D1_COLOR_F dummy;
@@ -900,8 +881,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));	// 文字列のそろえ
 		dt_writer.WriteSingle(m_text_line_sp);	// 行間
 		dt_write(m_text_padding, dt_writer);	// 文字列の余白
-		dt_writer.WriteBoolean(s_bm_keep_aspect);	// 画像の縦横比の維持
-		dt_writer.WriteSingle(m_opac);	// 画像の不透明率
+		dt_writer.WriteSingle(m_image_opac);	// 画像の不透明率
 	}
 
 }

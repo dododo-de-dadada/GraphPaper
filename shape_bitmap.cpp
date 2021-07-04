@@ -29,9 +29,8 @@ namespace winrt::GraphPaper::implementation
 		const char bf_type1 = dt_reader.ReadByte();
 		const char bf_type2 = dt_reader.ReadByte();
 		if (bf_type1 == 'B' && bf_type2 == 'M') {
-			// データのバイトオーダーを得る.
-			const auto b_order = dt_reader.ByteOrder();
 			// バイトオーダーがリトルエンディアン以外か判定する.
+			const auto b_order = dt_reader.ByteOrder();
 			if (b_order != ByteOrder::LittleEndian) {
 				dt_reader.ByteOrder(ByteOrder::LittleEndian);
 			}
@@ -54,7 +53,7 @@ namespace winrt::GraphPaper::implementation
 				uint16_t bi_planes = dt_reader.ReadUInt16();	// プレーンの数. かならず 1
 				bi_bit_cnt = dt_reader.ReadUInt16();	// 色数 1=モノクロ, 4=16色, 8=256色, 24または32=フルカラー
 				bi_compress = dt_reader.ReadUInt32();	// 圧縮タイプ. (0=BI_RGB, 1=BI_RLE8, 2=BI_RLE4, 3=BI_BITFIELDS)
-				bi_size_img = dt_reader.ReadUInt32();	// 圧縮された画像データの大きさ (非圧縮=BI_RGB ならゼロ)
+				bi_size_img = dt_reader.ReadUInt32();	// 圧縮された画像データの大きさ (非圧縮=BI_RGB ならゼロ, とは限らない!)
 				uint32_t x_px_per_meter = dt_reader.ReadUInt32();	// 96dpiのとき 3780. ふつうはゼロ.
 				uint32_t y_px_per_meter = dt_reader.ReadUInt32();
 				bi_color_used = dt_reader.ReadUInt32();
@@ -91,15 +90,32 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			const size_t row_len = 4 * bi_width;;
-			const auto buf_len = row_len * bi_height;
-			uint8_t* const buf_ptr = new uint8_t[buf_len];
-			*dib_data = buf_ptr;
+			const auto dst_len = row_len * bi_height;
+			uint8_t* const dst_buf = new uint8_t[dst_len];
+			*dib_data = dst_buf;
 			if (bi_compress == BI_RGB || bi_compress == BI_BITFIELDS)	// BI_RGB, no pixel array compression used
 			{
-				std::vector<uint8_t> line_buf(row_len);
-				for (size_t i = 1; i <= bi_height; i++) {
-					dt_reader.ReadBytes(line_buf);
-					memcpy(buf_ptr + buf_len - row_len * i, line_buf.data(), row_len);
+				if (bi_bit_cnt == 32) {
+					std::vector<uint8_t> src_buf(row_len);
+					for (size_t i = dst_len; i >= row_len; i -= row_len) {
+						dt_reader.ReadBytes(src_buf);
+						memcpy(dst_buf + i - row_len, src_buf.data(), row_len);
+					}
+					src_buf.clear();
+					src_buf.shrink_to_fit();
+				}
+				else if (bi_bit_cnt == 24) {
+					const size_t src_len = (static_cast<size_t>(bi_width) * 3 + (4 - 1)) / 4 * 4;
+					std::vector<uint8_t> src_buf(src_len);
+					for (size_t i = dst_len; i >= row_len; i -= row_len) {
+						dt_reader.ReadBytes(src_buf);
+						for (size_t j = 0, k = 0; j < row_len - 3 && k < src_len; j += 4, k += 3) {
+							memcpy(dst_buf + i - row_len + j, src_buf.data() + k, 3);
+							dst_buf[i - row_len + j + 3] = 0xff;
+						}
+					}
+					src_buf.clear();
+					src_buf.shrink_to_fit();
 				}
 			}
 			else if ((bi_compress == BI_RLE8 || bi_compress == BI_RLE4) && bi_size_img > 0) {
@@ -125,13 +141,13 @@ namespace winrt::GraphPaper::implementation
 						}
 						else {
 							for (size_t k = 0; k < b0; k++) { 
-								if (bi_compress == BI_RLE8 && j + 4 <= buf_len) {
-									DIB_SET(buf_ptr, j, pallete, b1);
+								if (bi_compress == BI_RLE8 && j + 4 <= dst_len) {
+									DIB_SET(dst_buf, j, pallete, b1);
 									j += 4;
 								}
-								else if (bi_compress == BI_RLE4 && j + 8 <= buf_len) {
-									DIB_SET(buf_ptr, j, pallete, NIBBLE_HI(b1));
-									DIB_SET(buf_ptr, j + 4, pallete, NIBBLE_LO(b1));
+								else if (bi_compress == BI_RLE4 && j + 8 <= dst_len) {
+									DIB_SET(dst_buf, j, pallete, NIBBLE_HI(b1));
+									DIB_SET(dst_buf, j + 4, pallete, NIBBLE_LO(b1));
 									j += 8;
 								}
 							}
@@ -142,29 +158,29 @@ namespace winrt::GraphPaper::implementation
 						s = 0;
 					}
 					else if (s == 3) {
-						if (bi_compress == BI_RLE8 && j + 4 <= buf_len) {
-							DIB_SET(buf_ptr, j, pallete, b0);
+						if (bi_compress == BI_RLE8 && j + 4 <= dst_len) {
+							DIB_SET(dst_buf, j, pallete, b0);
 							j += 4;
 						}
-						else if (bi_compress == BI_RLE4 && j + 8 <= buf_len) {
-							DIB_SET(buf_ptr, j, pallete, NIBBLE_HI(b0));
-							DIB_SET(buf_ptr, j + 4, pallete, NIBBLE_LO(b0));
+						else if (bi_compress == BI_RLE4 && j + 8 <= dst_len) {
+							DIB_SET(dst_buf, j, pallete, NIBBLE_HI(b0));
+							DIB_SET(dst_buf, j + 4, pallete, NIBBLE_LO(b0));
 							j += 8;
 						}
 						s = 0;
 					}
 					else {
-						if (bi_compress == BI_RLE8 && j + 8 <= buf_len) {
-							DIB_SET(buf_ptr, j, pallete, b0);
-							DIB_SET(buf_ptr, j + 4, pallete, b1);
+						if (bi_compress == BI_RLE8 && j + 8 <= dst_len) {
+							DIB_SET(dst_buf, j, pallete, b0);
+							DIB_SET(dst_buf, j + 4, pallete, b1);
 							j += 8;
 							s -= 2;
 						}
-						else if (bi_compress == BI_RLE4 && j + 16 <= buf_len) {
-							DIB_SET(buf_ptr, j, pallete, NIBBLE_HI(b0));
-							DIB_SET(buf_ptr, j + 4, pallete, NIBBLE_LO(b0));
-							DIB_SET(buf_ptr, j + 8, pallete, NIBBLE_HI(b1));
-							DIB_SET(buf_ptr, j + 12, pallete, NIBBLE_LO(b1));
+						else if (bi_compress == BI_RLE4 && j + 16 <= dst_len) {
+							DIB_SET(dst_buf, j, pallete, NIBBLE_HI(b0));
+							DIB_SET(dst_buf, j + 4, pallete, NIBBLE_LO(b0));
+							DIB_SET(dst_buf, j + 8, pallete, NIBBLE_HI(b1));
+							DIB_SET(dst_buf, j + 12, pallete, NIBBLE_LO(b1));
 							j += 16;
 							s -= 4;
 						}
@@ -270,15 +286,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 画像の縦横比の維持を得る.
-	//bool ShapeBitmap::get_bm_keep_aspect(bool& value) const noexcept
-	//{
-	//	value = m_bm_keep_aspect;
-	//	return true;
-	//}
-
 	// 画像の不透明度を得る.
-	bool ShapeBitmap::get_bm_opacity(float& value) const noexcept
+	bool ShapeBitmap::get_image_opacity(float& value) const noexcept
 	{
 		value = m_opac;
 		return true;
@@ -405,15 +414,8 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 値を画像の縦横比の維持に格納する.
-	//bool ShapeBitmap::set_bm_keep_aspect(const bool value) noexcept
-	//{
-	//	const auto old_value = m_bm_keep_aspect;
-	//	return (m_bm_keep_aspect = value) != old_value;
-	//}
-
 	// 値を画像の不透明度に格納する.
-	bool ShapeBitmap::set_bm_opacity(const float value) noexcept
+	bool ShapeBitmap::set_image_opacity(const float value) noexcept
 	{
 		if (!equal(m_opac, value)) {
 			m_opac = value;
@@ -460,7 +462,7 @@ namespace winrt::GraphPaper::implementation
 		m_view.height = size_h;
 		m_rect.left = m_rect.top = 0.0f;
 		m_rect.right = size_w;
-		m_rect.bottom = size_w;
+		m_rect.bottom = size_h;
 		m_ratio.width = m_ratio.height = 1.0f;
 	}
 
@@ -726,8 +728,8 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 	{
 		const D2D1_RECT_U rect{
 			static_cast<uint32_t>(roundf(m_rect.left)),
-			static_cast<uint32_t>(roundf(m_rect.right)),
 			static_cast<uint32_t>(roundf(m_rect.top)),
+			static_cast<uint32_t>(roundf(m_rect.right)),
 			static_cast<uint32_t>(roundf(m_rect.bottom))
 		};
 		constexpr uint32_t bi_size = 0x28;	// BITMAOINFOHEADER のサイズ (40 バイト)
@@ -740,7 +742,8 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		dt_writer.ByteOrder(ByteOrder::LittleEndian);
 		dt_writer.WriteByte('B');
 		dt_writer.WriteByte('M');
-		dt_writer.WriteUInt32(12 + bi_size + bi_height * 4 * bi_width);	// bf_size: ファイル全体のサイズ.
+		const uint32_t bf_size = 12 + bi_size + bi_height * 4 * bi_width;
+		dt_writer.WriteUInt32(bf_size);	// bf_size: ファイル全体のサイズ.
 		dt_writer.WriteUInt16(0);	// 予約 1 = 0
 		dt_writer.WriteUInt16(0);	// 予約 2 = 0
 		dt_writer.WriteUInt32(54);	// bf_offset: ファイル先頭から画像データまでのオフセット (54 + パレット)
@@ -755,12 +758,12 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		dt_writer.WriteUInt32(0); //uint32_t y_px_per_meter = dt_reader.ReadUInt32();
 		dt_writer.WriteUInt32(0); //bi_color_used = dt_reader.ReadUInt32();
 		dt_writer.WriteUInt32(0); //uint32_t bi_color_important = dt_reader.ReadUInt32();
-		for (size_t x = rect.left; x <= rect.right; x++) {
-			for (size_t y = rect.bottom; y != rect.top; y--) {
-				dt_writer.WriteByte(m_data[y * m_size.width + 4 * x + 0]);
-				dt_writer.WriteByte(m_data[y * m_size.width + 4 * x + 1]);
-				dt_writer.WriteByte(m_data[y * m_size.width + 4 * x + 2]);
-				dt_writer.WriteByte(m_data[y * m_size.width + 4 * x + 4] * m_opac);
+		for (size_t y = rect.bottom; y != rect.top; y--) {
+			for (size_t x = rect.left; x < rect.right; x++) {
+				dt_writer.WriteByte(m_data[(y - 1) * 4 * bi_width + 4 * x + 0]);
+				dt_writer.WriteByte(m_data[(y - 1) * 4 * bi_width + 4 * x + 1]);
+				dt_writer.WriteByte(m_data[(y - 1) * 4 * bi_width + 4 * x + 2]);
+				dt_writer.WriteByte(m_data[(y - 1) * 4 * bi_width + 4 * x + 3]);
 			}
 		}
 	}
@@ -773,6 +776,7 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		dt_write_svg(m_pos, "x", "y", dt_writer);
 		dt_write_svg(m_view.width, "width", dt_writer);
 		dt_write_svg(m_view.height, "height", dt_writer);
+		dt_write_svg(m_opac, "opacity", dt_writer);
 		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 	}
 }

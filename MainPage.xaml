@@ -226,31 +226,30 @@
             </MenuFlyout>
             <!-- 書体コンテキストメニュー -->
             <MenuFlyout x:Key="mf_front_menu">
-                <!--文字列の編集 -->
-				<MenuFlyoutItem x:Uid="mfi_edit_text" Click="edit_text_click" KeyboardAcceleratorTextOverride="Ctrl+E" Text="Edit Text" >
+                <!--文字列の編集, 検索と置換 -->
+                <MenuFlyoutItem x:Uid="mfi_edit_text" Click="edit_text_click" KeyboardAcceleratorTextOverride="Ctrl+E" Text="Edit Text" >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_ibeam}"/>
 					</MenuFlyoutItem.Icon>
 				</MenuFlyoutItem>
-				<!--文字列の検索と置換 -->
 				<MenuFlyoutItem x:Uid="mfi_find_text" Click="find_text_click" Icon="Find" KeyboardAcceleratorTextOverride="Ctrl+F" Text="Find/Replace Text" />
-                <MenuFlyoutItem x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Text="Fit Frame Size to" >
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_fit_page}"/>
-                    </MenuFlyoutItem.Icon>
-                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
                 <!-- 書体の種類 -->
 				<MenuFlyoutItem x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
                 <MenuFlyoutItem x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
                 <MenuFlyoutItem x:Uid="mfi_font_weight" Click="font_weight_click_async" Icon="Bold" Text="Weight..." />
                 <MenuFlyoutItem x:Uid="mfi_font_stretch" Click="font_stretch_click_async" Text="Stretch..."/>
-                <MenuFlyoutSubItem x:Uid="mfsi_font_style" Icon="Italic" Text="Style">
+                <MenuFlyoutSubItem x:Uid="mfsi_font_style" Text="Style">
+                    <MenuFlyoutSubItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_italic}" />
+                    </MenuFlyoutSubItem.Icon>
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_normal_2" x:Uid="rmfi_font_style_normal" Click="font_style_normal_click" IsChecked="True" Text="Normal" GroupName="gn_font_style_2"/>
                     <MenuFlyoutSeparator />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_oblique_2" x:Uid="rmfi_font_style_oblique" Click="font_style_oblique_click" Text="Normal" GroupName="gn_font_style_2"/>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_font_style_italic_2" x:Uid="rmfi_font_style_italic" Click="font_style_italic_click" Text="Normal" GroupName="gn_font_style_2"/>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
+                <!-- 文字列とその枠の整形 -->
                 <MenuFlyoutSubItem x:Uid="mfsi_text_align_t" Icon="AlignLeft" Text="Text Alignment">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left_2" x:Uid="rmfi_text_align_left" Click="text_align_t_click" IsChecked="True" Text="Left" GroupName="gn_text_align_t_2" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right_2" x:Uid="rmfi_text_align_right" Click="text_align_t_click" Text="Right" GroupName="gn_text_align_t_2" />
@@ -264,6 +263,11 @@
 				</MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
                 <MenuFlyoutItem x:Uid="mfi_text_padding" Click="text_padding_click_async" Text="Margin..." />
+                <MenuFlyoutItem x:Uid="mfi_text_fit_frame_to" Click="text_fit_frame_to_click" Text="Fit Frame to Text" >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_fit_page}"/>
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Font Color..." />
             </MenuFlyout>
@@ -328,7 +332,8 @@
 			<MenuFlyout x:Key="mf_image_menu">
 				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect_2" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
 				<MenuFlyoutItem x:Name="mfi_image_resize_origin_2" x:Uid="mfi_image_resize_origin" Click="image_resize_origin_click" Text="Resize to Original" />
-				<MenuFlyoutItem x:Name="mfi_image_opac_2" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Name="mfi_image_opac_2" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
 			</MenuFlyout>
 		</ResourceDictionary>
     </Page.Resources>
@@ -484,11 +489,6 @@
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_edit_text_frame" x:Uid="mfi_edit_text_frame" Click="edit_text_frame_click" Text="Fit Frame Size to" >
-                    <MenuFlyoutItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_fit_page}"/>
-                    </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
             </muxc:MenuBarItem>
             <!-- 作図メニュー -->
@@ -669,11 +669,23 @@
 				</MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
                 <MenuFlyoutItem x:Uid="mfi_text_padding" Click="text_padding_click_async" Text="Margin..." />
+                <MenuFlyoutItem x:Name="mfi_text_fit_frame_to" x:Uid="mfi_text_fit_frame_to" Click="text_fit_frame_to_click" Text="Fit Frame to Text" >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_fit_page}"/>
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Font Color..." />
             </muxc:MenuBarItem>
+            <!-- 画像メニュー -->
+            <muxc:MenuBarItem x:Uid="mbi_image_menu" AccessKey="I" Title="Image">
+                <ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
+                <MenuFlyoutItem x:Name="mfi_image_resize_origin" x:Uid="mfi_image_resize_origin" Click="image_resize_origin_click" Text="Resize to Original" />
+                <MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Name="mfi_image_opac" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
+            </muxc:MenuBarItem>
             <!-- 用紙メニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_men_sheet" AccessKey="H" Title="Sheet">
+            <muxc:MenuBarItem x:Uid="mbi_sheet_menu" AccessKey="H" Title="Sheet">
                 <!-- 方眼メニュー -->
                 <MenuFlyoutSubItem x:Uid="mfsi_grid_show" Text="Show Grid">
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_hide" x:Uid="rmfi_grid_show_hide" Click="grid_show_click" Text="Hide" GroupName="gn_grid_show"/>
@@ -749,12 +761,6 @@
 				<MenuFlyoutItem x:Uid="mfi_pref_save" Click="pref_save_click_async" Text="Save preference" />
 				<MenuFlyoutItem x:Name="mfi_pref_delete" x:Uid="mfi_pref_delete" Click="pref_delete_click_async" Text="Delete preference" />
             </muxc:MenuBarItem>
-			<!-- 画像メニュー -->
-			<muxc:MenuBarItem x:Uid="mbi_image_menu" AccessKey="I" Title="Image">
-				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
-				<MenuFlyoutItem x:Name="mfi_image_resize_origin" x:Uid="mfi_image_resize_origin" Click="image_resize_origin_click" Text="Resize to Original" />
-				<MenuFlyoutItem x:Name="mfi_image_opac" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
-			</muxc:MenuBarItem>
 			<!-- その他メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_misc_menu" AccessKey="M" Title="Misc">
                 <MenuFlyoutSubItem x:Uid="mfsi_misc_len_unit" Text="Length unit">
@@ -985,7 +991,7 @@
                     MaxWidth="170"
                     RelativePanel.AlignTopWithPanel="True"
                     RelativePanel.AlignHorizontalCenterWithPanel="True"
-                    SizeChanged="sample_panel_size_changed"
+                    SizeChanged="sample_panel_size_changed_async"
                     Width="170"
                     />
                 <!-- Height を指定するこれ大事 -->
