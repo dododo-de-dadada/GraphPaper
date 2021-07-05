@@ -768,6 +768,264 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		}
 	}
 
+	struct CHUNK_CRC {
+		static uint32_t table[256];
+		CHUNK_CRC(void) {
+			for (int n = 0; n < 256; n++) {
+				uint32_t c = static_cast<uint32_t>(n);
+				for (int k = 0; k < 8; k++) {
+					if (c & 1) {
+						c = (0xedb88320L ^ (c >> 1));
+					}
+					else {
+						c >>= 1;
+					}
+				}
+				table[n] = c;
+			}
+		}
+		uint32_t update(uint32_t crc, uint8_t buf[], size_t len) const noexcept
+		{
+			unsigned long c = crc;
+			for (size_t n = 0; n < len; n++) {
+				c = table[(c ^ buf[n]) & 0xff] ^ (c >> 8);
+			}
+			return c;
+		}
+		uint32_t check(uint8_t buf[], size_t len) const noexcept
+		{
+			return update(0xffffffffL, buf, len) ^ 0xffffffffL;
+		}
+	};
+	/*
+#define BYTE4(ptr) ((static_cast<uint32_t>((ptr)[0]) << 24) | (static_cast<uint32_t>((ptr)[1]) << 16) | (static_cast<uint32_t>((ptr)[2]) << 8) | (static_cast<uint32_t>((ptr)[3])))
+
+	void ShapeBitmap::read_png(DataReader const& dt_reader) const
+	{
+		constexpr uint8_t PNG[8]{
+			137, L'P', L'N', L'G', 13, 10, 26, 10
+		};
+		if (PNG[0] != dt_reader.ReadByte() ||
+			PNG[1] != dt_reader.ReadByte() ||
+			PNG[2] != dt_reader.ReadByte() ||
+			PNG[3] != dt_reader.ReadByte() ||
+			PNG[4] != dt_reader.ReadByte() ||
+			PNG[5] != dt_reader.ReadByte() ||
+			PNG[6] != dt_reader.ReadByte() ||
+			PNG[7] != dt_reader.ReadByte()) {
+			return;
+		}
+		constexpr size_t MAX_LENGTH = ((2 << 30) - 1);
+		uint8_t chunk_buf[MAX_LENGTH + 4];
+		uint8_t* const chunk_data = chunk_buf + 4;
+		uint8_t pallete[256 * 3];
+		uint8_t opacity[256];
+		memset(opacity, 0xff, 256);
+		CHUNK_CRC crc;
+		uint32_t width = -1;
+		uint32_t height = -1;
+		uint32_t bit_depth = -1;
+		uint32_t color_type = -1;
+		uint32_t compress_method = -1;
+		uint32_t filter_method = -1;
+		uint32_t interlace_method = -1;
+		uint32_t white_point_x = -1;
+		uint32_t white_point_y = -1;
+		uint32_t red_x = -1;
+		uint32_t red_y = -1;
+		uint32_t green_x = -1;
+		uint32_t green_y = -1;
+		uint32_t blue_x = -1;
+		uint32_t blue_y = -1;
+		int chunk_st = 0;
+		bool mult_cHRM = false;
+		bool mult_gAMA = false;
+		bool mult_iCCP = false;
+		bool mult_sBIT = false;
+		bool mult_sRGB = false;
+		bool mult_bKGD = false;
+		bool mult_hIST = false;
+		bool mult_tRNS = false;
+		bool mult_pHYs = false;
+		bool mult_tIME = false;
+		while (chunk_st != 4) {
+			const size_t chunk_len = dt_reader.ReadUInt32();
+			if (chunk_len > MAX_LENGTH) {
+				break;
+			}
+			for (size_t i = 0; i < 4; i++) {
+				chunk_buf[i] = dt_reader.ReadByte();
+			}
+			for (size_t i = 0; i < chunk_len; i++) {
+				chunk_data[i] = dt_reader.ReadByte();
+			}
+			if (dt_reader.ReadUInt32() != crc.check(chunk_buf, chunk_len)) {
+				break;
+			}
+			if (chunk_st == 0) {
+				if (memcmp(chunk_buf, "IHDR", 4) == 0 && chunk_len == 13) {
+					chunk_st = 1;
+					width = BYTE4(chunk_data);
+					if (width == 0 || width >= MAX_LENGTH) {
+						break;
+					}
+					height = BYTE4(chunk_data + 4);
+					if (height == 0 || height >= MAX_LENGTH) {
+						break;
+					}
+					bit_depth = chunk_data[8];
+					color_type = chunk_data[9];
+					if (color_type == 0 && (bit_depth == 1 || bit_depth == 2 || bit_depth == 4 || bit_depth == 8 || bit_depth == 16)) {
+					}
+					else if (color_type == 2 && (bit_depth == 8 || bit_depth == 16)) {
+					}
+					else if (color_type == 3 && (bit_depth == 1 || bit_depth == 2 || bit_depth == 4 || bit_depth == 8)) {
+					}
+					else if (color_type == 4 && (bit_depth == 8 || bit_depth == 16)) {
+					}
+					else if (color_type == 6 && (bit_depth == 8 || bit_depth == 16)) {
+					}
+					else {
+						break;
+					}
+					compress_method = chunk_data[10];
+					if (compress_method != 0) {
+						break;
+					}
+					filter_method = chunk_data[11];
+					if (filter_method != 0) {
+						break;
+					}
+					interlace_method = chunk_data[12];
+					if (interlace_method != 0 && interlace_method != 1) {
+						break;
+					}
+				}
+				else {
+					break;
+				}
+			}
+			else if (chunk_st == 1) {
+				if (memcmp(chunk_buf, "PLTE", 4) == 0 && chunk_len <= 768 && chunk_len % 3 == 0) {
+					chunk_st = 2;
+					memcpy(pallete, chunk_data, chunk_len);
+				}
+				else if (memcmp(chunk_buf, "IDAT", 4) == 0) {
+					chunk_st = 3;
+				}
+				else if (!mult_cHRM && memcmp(chunk_buf, "cHRM", 4) == 0) {
+					mult_cHRM = true;
+				}
+				else if (!mult_gAMA && memcmp(chunk_buf, "gAMA", 4) == 0) {
+					mult_gAMA = true;
+				}
+				else if (!mult_iCCP && memcmp(chunk_buf, "iCCP", 4) == 0) {
+					mult_iCCP = true;
+				}
+				else if (!mult_sBIT && memcmp(chunk_buf, "sBIT", 4) == 0) {
+					mult_sBIT = true;
+				}
+				else if (!mult_sBIT && memcmp(chunk_buf, "sRGB", 4) == 0) {
+					mult_sBIT = true;
+				}
+				else if (!mult_pHYs && memcmp(chunk_buf, "pHYs", 4) == 0) {
+					mult_pHYs = true;
+				}
+				else if (memcmp(chunk_buf, "sPLT", 4) == 0) {
+				}
+				else if (!mult_tIME && memcmp(chunk_buf, "tIME", 4) == 0) {
+					mult_tIME = true;
+				}
+				else if (memcmp(chunk_buf, "iTXt", 4) == 0) {
+				}
+				else {
+					break;
+				}
+			}
+			else if (chunk_st == 2) {
+				if (memcmp(chunk_buf, "IDAT", 4) == 0) {
+					chunk_st = 3;
+				}
+				else if (!mult_bKGD && memcmp(chunk_buf, "bKGD", 4) == 0) {
+					mult_bKGD = true;
+				}
+				else if (!mult_hIST && memcmp(chunk_buf, "hIST", 4) == 0) {
+					mult_hIST = true;
+				}
+				else if (!mult_tRNS && memcmp(chunk_buf, "tRNS", 4) == 0 && chunk_len <= 256 && (color_type != 4 && color_type != 6)) {
+					mult_tRNS = true;
+					memcpy(opacity, chunk_data, chunk_len);
+				}
+				else if (!mult_pHYs && memcmp(chunk_buf, "pHYs", 4) == 0) {
+					mult_pHYs = true;
+				}
+				else if (memcmp(chunk_buf, "sPLT", 4) == 0) {
+				}
+				else if (!mult_tIME && memcmp(chunk_buf, "tIME", 4) == 0) {
+					mult_tIME = true;
+				}
+				else if (memcmp(chunk_buf, "iTXt", 4) == 0) {
+				}
+				else {
+					break;
+				}
+			}
+			else if (chunk_st == 3) {
+				if (memcmp(chunk_buf, "IDAT", 4) == 0) {
+				}
+				else if (memcmp(chunk_buf, "IEND", 4) == 0) {
+					chunk_st = 4;
+				}
+				else if (!mult_tIME && memcmp(chunk_buf, "tIME", 4) == 0) {
+					mult_tIME = true;
+				}
+				else if (memcmp(chunk_buf, "iTXt", 4) == 0) {
+				}
+				else {
+					break;
+				}
+			}
+		}
+	}
+	*/
+	
+	void ShapeBitmap::write_png(DataWriter const& dt_writer) const
+	{
+		using winrt::Windows::Storage::Streams::ByteOrder;
+		dt_writer.ByteOrder(ByteOrder::LittleEndian);	// ネットワークバイトオーダー
+		// PNG ファイルシグネチャ
+		dt_writer.WriteByte(137);
+		dt_writer.WriteByte(L'P');
+		dt_writer.WriteByte(L'N');
+		dt_writer.WriteByte(L'G');
+		dt_writer.WriteByte(13);	// L'\r'
+		dt_writer.WriteByte(10);	// L'\n';
+		dt_writer.WriteByte(26);
+		dt_writer.WriteByte(10);
+		// IHDR チャンク
+		dt_writer.WriteUInt32(13);	// Length: Chunk Data のサイズ. 常に 13
+#define SET_BYTE4(ptr, u) { (ptr)[0] = static_cast<uint8_t>(((u) >> 24) & 0xff); (ptr)[1] = static_cast<uint8_t>(((u) >> 16) & 0xff); (ptr)[2] = static_cast<uint8_t>(((u) >> 8) & 0xff); (ptr)[3] = static_cast<uint8_t>((u) & 0xff);}
+		uint8_t chunk_buf[13];
+		chunk_buf[0] = L'I';
+		chunk_buf[1] = L'H';
+		chunk_buf[2] = L'D';
+		chunk_buf[3] = L'R';
+		SET_BYTE4(chunk_buf + 4, m_size.width);
+		SET_BYTE4(chunk_buf + 8, m_size.height);
+		chunk_buf[12] = 8;	// ビット深度
+		chunk_buf[13] = 6; // カラータイプ: トゥルーカラー＋アルファ 画像
+		CHUNK_CRC crc;
+		dt_writer.WriteUInt32(crc.check(chunk_buf, 13));
+
+		constexpr size_t BLOCK_SIZE = 32767;
+		const auto data_len = static_cast<size_t>(4) * m_size.width * m_size.height;
+		for (size_t i = 0; i < data_len; i++) {
+			if (i % BLOCK_SIZE == 0) {
+				
+			}
+		}
+	}
+
 	void ShapeBitmap::write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const
 	{
 		dt_write_svg("<image href=\"", dt_writer);

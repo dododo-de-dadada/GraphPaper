@@ -470,6 +470,7 @@ namespace winrt::GraphPaper::implementation
 	IAsyncOperation<winrt::hresult> MainPage::file_save_as_async(const bool svg_allowed) noexcept
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::Storage::Pickers::PickerLocationId;
 		using winrt::Windows::Storage::Pickers::FileSavePicker;
 
 		auto hres = E_FAIL;
@@ -482,14 +483,15 @@ namespace winrt::GraphPaper::implementation
 			// ファイルタイプに拡張子 GPF とその説明を追加する.
 			auto s_picker{ FileSavePicker() };
 			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			auto desc_gpf = r_loader.GetString(DESC_GPF);
-			auto type_gpf = winrt::single_threaded_vector<winrt::hstring>({ FT_GPF });
+			const auto desc_gpf = r_loader.GetString(DESC_GPF);
+			const auto type_gpf = winrt::single_threaded_vector<winrt::hstring>({ FT_GPF });
 			s_picker.FileTypeChoices().Insert(desc_gpf, type_gpf);
+			s_picker.SuggestedStartLocation(PickerLocationId::DocumentsLibrary());
 			// SVG への保存を許すか判定する.
 			if (svg_allowed) {
 				// ファイルタイプに拡張子 SVG とその説明を追加する.
-				auto desc_svg = r_loader.GetString(DESC_SVG);
-				auto type_svg = winrt::single_threaded_vector<winrt::hstring>({ FT_SVG });
+				const auto desc_svg = r_loader.GetString(DESC_SVG);
+				const auto type_svg = winrt::single_threaded_vector<winrt::hstring>({ FT_SVG });
 				s_picker.FileTypeChoices().Insert(desc_svg, type_svg);
 			}
 			// 最近使ったファイルのトークンが空か判定する.
@@ -636,13 +638,17 @@ namespace winrt::GraphPaper::implementation
 				// 図形が画像か判定する.
 				if (typeid(*s) == typeid(ShapeBitmap)) {
 					static uint32_t magic_num = 0;	// ミリ秒の代わり
-					wchar_t bmp_name[256];
+					constexpr size_t MAX_LEN = 1024 - 8;
+					wchar_t bmp_name[MAX_LEN + 8];
 					const auto t = time(nullptr);
 					struct tm tm;
 					localtime_s(&tm, &t);
-					wcsftime(bmp_name, 256, L"img%Y%m%d%H%M%S", &tm);
-					const auto len = wcsnlen(bmp_name, 256);
-					swprintf(bmp_name + len, 256 - len, L"%03d.bmp", magic_num++);
+					
+					swprintf(bmp_name, MAX_LEN, L"%s", s_file.Name().data());
+					const auto dot_ptr = wcsrchr(bmp_name, L'.');
+					const size_t dot_len = (dot_ptr != nullptr ? dot_ptr - bmp_name : wcslen(bmp_name));
+					const size_t tail_len = dot_len + wcsftime(bmp_name + dot_len, MAX_LEN - dot_len, L"%Y%m%d%H%M%S", &tm);
+					swprintf(bmp_name + tail_len, 8, L"%03d.bmp", magic_num++);
 					const auto s_folder{ co_await s_file.GetParentAsync() };
 					auto bmp_picker{ FileSavePicker() };
 					const auto bmp_type = winrt::single_threaded_vector<winrt::hstring>({ L".bmp" });
@@ -665,14 +671,13 @@ namespace winrt::GraphPaper::implementation
 						co_await bmp_writer.StoreAsync();
 						co_await bmp_stream.FlushAsync();
 						bmp_writer.Close();
-
 						// 遅延させたファイル更新を完了し, 結果を判定する.
 						if (co_await CachedFileManager::CompleteUpdatesAsync(bmp_file) == FileUpdateStatus::Complete) {
 							// 完了した場合, S_OK を結果に格納する.
 							hres = S_OK;
 						}
 
-						static_cast<ShapeBitmap*>(s)->write_svg(bmp_name, dt_writer);
+						static_cast<ShapeBitmap*>(s)->write_svg(bmp_file.Path().c_str(), dt_writer);
 					}
 				}
 				else {

@@ -685,6 +685,8 @@ namespace winrt::GraphPaper::implementation
 		void write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const;
 		// データライターに DIB として書き込む.
 		void write_bmp(DataWriter const& dt_writer) const;
+		// データライターに PNG として書き込む.
+		void write_png(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
