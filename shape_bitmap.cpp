@@ -768,35 +768,38 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		}
 	}
 
-	struct CHUNK_CRC {
+	struct CRC32 {
+		static bool computed;
 		static uint32_t table[256];
-		CHUNK_CRC(void) {
-			for (int n = 0; n < 256; n++) {
-				uint32_t c = static_cast<uint32_t>(n);
-				for (int k = 0; k < 8; k++) {
-					if (c & 1) {
-						c = (0xedb88320L ^ (c >> 1));
+		static uint32_t update(const uint32_t crc, const uint8_t b) noexcept
+		{
+			if (!computed) {
+				computed = true;
+				for (int n = 0; n < 256; n++) {
+					auto c = static_cast<uint32_t>(n);
+					for (int k = 0; k < 8; k++) {
+						if (c & 1) {
+							c = (0xedb88320L ^ (c >> 1));
+						}
+						else {
+							c >>= 1;
+						}
 					}
-					else {
-						c >>= 1;
-					}
+					table[n] = c;
 				}
-				table[n] = c;
 			}
+			return table[(crc ^ b) & 0xff] ^ (crc >> 8);
 		}
-		uint32_t update(uint32_t crc, uint8_t buf[], size_t len) const noexcept
-		{
-			unsigned long c = crc;
-			for (size_t n = 0; n < len; n++) {
-				c = table[(c ^ buf[n]) & 0xff] ^ (c >> 8);
-			}
-			return c;
-		}
-		uint32_t check(uint8_t buf[], size_t len) const noexcept
-		{
-			return update(0xffffffffL, buf, len) ^ 0xffffffffL;
-		}
+		//uint32_t update(uint32_t crc, const uint8_t buf[], const size_t len) const noexcept
+		//{
+		//	for (size_t n = 0; n < len; n++) {
+		//		crc = update(crc, buf[n]);
+		//	}
+		//	return crc;
+		//}
 	};
+	bool CRC32::computed = false;
+	uint32_t CRC32::table[256];
 	/*
 #define BYTE4(ptr) ((static_cast<uint32_t>((ptr)[0]) << 24) | (static_cast<uint32_t>((ptr)[1]) << 16) | (static_cast<uint32_t>((ptr)[2]) << 8) | (static_cast<uint32_t>((ptr)[3])))
 
@@ -989,41 +992,87 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 	}
 	*/
 	
+#define SET_BYTE4(ptr, u) { (ptr)[3] = static_cast<uint8_t>(((u) >> 24) & 0xff); (ptr)[2] = static_cast<uint8_t>(((u) >> 16) & 0xff); (ptr)[1] = static_cast<uint8_t>(((u) >> 8) & 0xff); (ptr)[0] = static_cast<uint8_t>((u) & 0xff);}
 	void ShapeBitmap::write_png(DataWriter const& dt_writer) const
 	{
 		using winrt::Windows::Storage::Streams::ByteOrder;
 		dt_writer.ByteOrder(ByteOrder::LittleEndian);	// ネットワークバイトオーダー
 		// PNG ファイルシグネチャ
-		dt_writer.WriteByte(137);
+		dt_writer.WriteByte(0x89);
 		dt_writer.WriteByte(L'P');
 		dt_writer.WriteByte(L'N');
 		dt_writer.WriteByte(L'G');
-		dt_writer.WriteByte(13);	// L'\r'
-		dt_writer.WriteByte(10);	// L'\n';
-		dt_writer.WriteByte(26);
-		dt_writer.WriteByte(10);
+		dt_writer.WriteByte(0x0D);	// '\r'
+		dt_writer.WriteByte(0x0A);	// '\n';
+		dt_writer.WriteByte(0x1A);	// Ctrl-Z (DOSコマンドを停止)
+		dt_writer.WriteByte(0x0A);	// '\n';
 		// IHDR チャンク
 		dt_writer.WriteUInt32(13);	// Length: Chunk Data のサイズ. 常に 13
-#define SET_BYTE4(ptr, u) { (ptr)[0] = static_cast<uint8_t>(((u) >> 24) & 0xff); (ptr)[1] = static_cast<uint8_t>(((u) >> 16) & 0xff); (ptr)[2] = static_cast<uint8_t>(((u) >> 8) & 0xff); (ptr)[3] = static_cast<uint8_t>((u) & 0xff);}
-		uint8_t chunk_buf[13];
-		chunk_buf[0] = L'I';
-		chunk_buf[1] = L'H';
-		chunk_buf[2] = L'D';
-		chunk_buf[3] = L'R';
-		SET_BYTE4(chunk_buf + 4, m_size.width);
-		SET_BYTE4(chunk_buf + 8, m_size.height);
-		chunk_buf[12] = 8;	// ビット深度
-		chunk_buf[13] = 6; // カラータイプ: トゥルーカラー＋アルファ 画像
-		CHUNK_CRC crc;
-		dt_writer.WriteUInt32(crc.check(chunk_buf, 13));
-
-		constexpr size_t BLOCK_SIZE = 32767;
-		const auto data_len = static_cast<size_t>(4) * m_size.width * m_size.height;
-		for (size_t i = 0; i < data_len; i++) {
-			if (i % BLOCK_SIZE == 0) {
-				
-			}
+		uint32_t crc = 0xffffffffL;
+		for (size_t i = 0; i < 4; i++) {
+			const uint8_t b = "IHDR"[4];
+			dt_writer.WriteByte(b);
+			crc = CRC32::update(crc, b);
 		}
+		uint8_t chunk_data[13];
+		SET_BYTE4(chunk_data + 0, m_size.width);
+		SET_BYTE4(chunk_data + 4, m_size.height);
+		chunk_data[8] = 8;	// ビット深度
+		chunk_data[9] = 6; // カラータイプ: トゥルーカラー＋アルファ 画像
+		chunk_data[10] = 0;// uint32_t compress_method = -1;
+		chunk_data[11] = 0;// uint32_t filter_method = -1;
+		chunk_data[12] = 0;// uint32_t interlace_method = -1;
+		for (size_t i = 0; i < 13; i++) {
+			dt_writer.WriteByte(chunk_data[i]);
+			crc = CRC32::update(crc, chunk_data[i]);
+		}
+		crc ^= 0xffffffffL;
+		dt_writer.WriteUInt32(crc);
+
+		const size_t len = 4 * m_size.width * m_size.height;
+		for (size_t i = 0; i < len; i++) {
+			if (i % 65536 == 0) {
+				if (len - i < 65536) {
+					const uint16_t len16 = len - i;
+					dt_writer.WriteUInt32(5 + len16);
+					crc = 0xffffffffL;
+					for (size_t i = 0; i < 4; i++) {
+						const uint8_t b = "IDAT"[i];
+						dt_writer.WriteByte(b);
+						crc = CRC32::update(crc, b);
+					}
+					dt_writer.WriteByte(0x80);
+					dt_writer.WriteUInt16(len16);
+					dt_writer.WriteUInt16(~len16);
+				}
+				else {
+					dt_writer.WriteUInt32(5 + 65535);
+					crc = 0xffffffffL;
+					for (size_t i = 0; i < 4; i++) {
+						const uint8_t b = "IDAT"[i];
+						dt_writer.WriteByte(b);
+						crc = CRC32::update(crc, b);
+					}
+					dt_writer.WriteByte(0);
+					dt_writer.WriteUInt16(0xffff);
+					dt_writer.WriteUInt16(0);
+				}
+			}
+			dt_writer.WriteByte(m_data[i]);
+			crc = CRC32::update(crc, m_data[i]);
+		}
+		crc ^= 0xffffffffL;
+		dt_writer.WriteUInt32(crc);
+
+		dt_writer.WriteUInt32(0);
+		crc = 0xffffffffL;
+		for (size_t i = 0; i < 4; i++) {
+			const uint8_t b = "IEND"[i];
+			dt_writer.WriteByte(b);
+			crc = CRC32::update(crc, b);
+		}
+		crc ^= 0xffffffffL;
+		dt_writer.WriteUInt32(crc);
 	}
 
 	void ShapeBitmap::write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const

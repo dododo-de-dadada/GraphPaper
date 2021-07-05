@@ -648,10 +648,12 @@ namespace winrt::GraphPaper::implementation
 					const auto dot_ptr = wcsrchr(bmp_name, L'.');
 					const size_t dot_len = (dot_ptr != nullptr ? dot_ptr - bmp_name : wcslen(bmp_name));
 					const size_t tail_len = dot_len + wcsftime(bmp_name + dot_len, MAX_LEN - dot_len, L"%Y%m%d%H%M%S", &tm);
-					swprintf(bmp_name + tail_len, 8, L"%03d.bmp", magic_num++);
+					//swprintf(bmp_name + tail_len, 8, L"%03d.bmp", magic_num++);
+					swprintf(bmp_name + tail_len, 8, L"%03d.png", magic_num++);
 					const auto s_folder{ co_await s_file.GetParentAsync() };
 					auto bmp_picker{ FileSavePicker() };
-					const auto bmp_type = winrt::single_threaded_vector<winrt::hstring>({ L".bmp" });
+					const auto bmp_type = winrt::single_threaded_vector<winrt::hstring>({ L".png" });
+					//const auto bmp_type = winrt::single_threaded_vector<winrt::hstring>({ L".bmp" });
 
 					bmp_picker.FileTypeChoices().Insert(L"Bitmap", bmp_type);
 					bmp_picker.SuggestedFileName(bmp_name);
@@ -667,7 +669,8 @@ namespace winrt::GraphPaper::implementation
 
 						auto bmp_stream{ co_await bmp_file.OpenAsync(FileAccessMode::ReadWrite) };
 						auto bmp_writer{ DataWriter(bmp_stream.GetOutputStreamAt(0)) };
-						static_cast<ShapeBitmap*>(s)->write_bmp(bmp_writer);
+						static_cast<ShapeBitmap*>(s)->write_png(bmp_writer);
+						//static_cast<ShapeBitmap*>(s)->write_bmp(bmp_writer);
 						co_await bmp_writer.StoreAsync();
 						co_await bmp_stream.FlushAsync();
 						bmp_writer.Close();
