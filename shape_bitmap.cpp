@@ -992,20 +992,16 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 	}
 	*/
 	
-#define SET_BYTE4(ptr, u) { (ptr)[3] = static_cast<uint8_t>(((u) >> 24) & 0xff); (ptr)[2] = static_cast<uint8_t>(((u) >> 16) & 0xff); (ptr)[1] = static_cast<uint8_t>(((u) >> 8) & 0xff); (ptr)[0] = static_cast<uint8_t>((u) & 0xff);}
+#define SET_BYTE4(ptr, u) { (ptr)[0] = static_cast<uint8_t>(((u) >> 24) & 0xff); (ptr)[1] = static_cast<uint8_t>(((u) >> 16) & 0xff); (ptr)[2] = static_cast<uint8_t>(((u) >> 8) & 0xff); (ptr)[3] = static_cast<uint8_t>((u) & 0xff);}
 	void ShapeBitmap::write_png(DataWriter const& dt_writer) const
 	{
 		using winrt::Windows::Storage::Streams::ByteOrder;
-		dt_writer.ByteOrder(ByteOrder::LittleEndian);	// ネットワークバイトオーダー
+		using winrt::Windows::Storage::Streams::DeflateStream;
+
+		dt_writer.ByteOrder(ByteOrder::BigEndian);	// ネットワークバイトオーダー
 		// PNG ファイルシグネチャ
-		dt_writer.WriteByte(0x89);
-		dt_writer.WriteByte(L'P');
-		dt_writer.WriteByte(L'N');
-		dt_writer.WriteByte(L'G');
-		dt_writer.WriteByte(0x0D);	// '\r'
-		dt_writer.WriteByte(0x0A);	// '\n';
-		dt_writer.WriteByte(0x1A);	// Ctrl-Z (DOSコマンドを停止)
-		dt_writer.WriteByte(0x0A);	// '\n';
+		constexpr std::array<uint8_t, 8> png { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
+		dt_writer.WriteBytes(png);
 		// IHDR チャンク
 		dt_writer.WriteUInt32(13);	// Length: Chunk Data のサイズ. 常に 13
 		uint32_t crc = 0xffffffffL;
@@ -1029,40 +1025,30 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		crc ^= 0xffffffffL;
 		dt_writer.WriteUInt32(crc);
 
-		const size_t len = 4 * m_size.width * m_size.height;
-		for (size_t i = 0; i < len; i++) {
+		// なんちゃって zlib ストリーム
+		const size_t data_len = 4ull * m_size.width * m_size.height;
+		const uint32_t chunk_len = 2ull + data_len + (data_len + 65534ull) / 65535ull * 5;
+		dt_writer.WriteUInt32(chunk_len);
+		std::array<uint8_t, 2> zlib{ 190, 94 };
+		crc = 0xffffffffL;
+		dt_writer.WriteBytes(zlib);
+		for (size_t i = 0; i < data_len; i++) {
 			if (i % 65536 == 0) {
-				if (len - i < 65536) {
-					const uint16_t len16 = len - i;
-					dt_writer.WriteUInt32(5 + len16);
-					crc = 0xffffffffL;
-					for (size_t i = 0; i < 4; i++) {
-						const uint8_t b = "IDAT"[i];
-						dt_writer.WriteByte(b);
-						crc = CRC32::update(crc, b);
-					}
-					dt_writer.WriteByte(0x80);
-					dt_writer.WriteUInt16(len16);
-					dt_writer.WriteUInt16(~len16);
-				}
-				else {
-					dt_writer.WriteUInt32(5 + 65535);
-					crc = 0xffffffffL;
-					for (size_t i = 0; i < 4; i++) {
-						const uint8_t b = "IDAT"[i];
-						dt_writer.WriteByte(b);
-						crc = CRC32::update(crc, b);
-					}
+				if (data_len - i > 65535) {
 					dt_writer.WriteByte(0);
-					dt_writer.WriteUInt16(0xffff);
+					dt_writer.WriteUInt16(0xfffff);
 					dt_writer.WriteUInt16(0);
 				}
+				else {
+					const uint16_t block_len = data_len - i;
+					dt_writer.WriteByte(1);
+					dt_writer.WriteUInt16(block_len);
+					dt_writer.WriteUInt16(~block_len);
+				}
 			}
-			dt_writer.WriteByte(m_data[i]);
-			crc = CRC32::update(crc, m_data[i]);
+
 		}
-		crc ^= 0xffffffffL;
-		dt_writer.WriteUInt32(crc);
+		
 
 		dt_writer.WriteUInt32(0);
 		crc = 0xffffffffL;
