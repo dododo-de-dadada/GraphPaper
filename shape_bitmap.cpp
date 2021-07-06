@@ -314,7 +314,7 @@ namespace winrt::GraphPaper::implementation
 		for (size_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F v_vec;
 			pt_sub(pos, v_pos[i], v_vec);
-			const float v_dd = pt_abs2(v_vec);
+			const auto v_dd = static_cast<float>(pt_abs2(v_vec));
 			if (v_dd < dd) {
 				dd = v_dd;
 				value = v_pos[i];
@@ -678,7 +678,7 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		m_view.width = static_cast<FLOAT>(m_size.width);
 		m_view.height = static_cast<FLOAT>(m_size.height);
 		m_pos.x = c_pos.x - m_view.width * 0.5f;
-		m_pos.y = c_pos.y - m_view.height * 0.5;
+		m_pos.y = c_pos.y - m_view.height * 0.5f;
 		m_ratio.width = 1.0f;
 		m_ratio.height = 1.0f;
 	}
@@ -790,13 +790,25 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 			}
 			return table[(crc ^ b) & 0xff] ^ (crc >> 8);
 		}
-		//uint32_t update(uint32_t crc, const uint8_t buf[], const size_t len) const noexcept
+		//static uint32_t update(uint32_t crc, const uint8_t buf[], const size_t len) noexcept
 		//{
 		//	for (size_t n = 0; n < len; n++) {
 		//		crc = update(crc, buf[n]);
 		//	}
 		//	return crc;
 		//}
+
+		template<int N>
+		static uint32_t update(uint32_t crc, const std::array<uint8_t, N>& buf) noexcept
+		{
+			for (const auto b : buf) {
+				crc = update(crc, b);
+			}
+			//for (size_t n = 0; n < N; n++) {
+			//	crc = update(crc, buf.data()[n]);
+			//}
+			return crc;
+		}
 	};
 	bool CRC32::computed = false;
 	uint32_t CRC32::table[256];
@@ -996,67 +1008,84 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 	void ShapeBitmap::write_png(DataWriter const& dt_writer) const
 	{
 		using winrt::Windows::Storage::Streams::ByteOrder;
-		using winrt::Windows::Storage::Streams::DeflateStream;
 
 		dt_writer.ByteOrder(ByteOrder::BigEndian);	// ネットワークバイトオーダー
 		// PNG ファイルシグネチャ
-		constexpr std::array<uint8_t, 8> png { 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
+		constexpr std::array<uint8_t, 8> png{ 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
 		dt_writer.WriteBytes(png);
 		// IHDR チャンク
-		dt_writer.WriteUInt32(13);	// Length: Chunk Data のサイズ. 常に 13
 		uint32_t crc = 0xffffffffL;
-		for (size_t i = 0; i < 4; i++) {
-			const uint8_t b = "IHDR"[4];
-			dt_writer.WriteByte(b);
-			crc = CRC32::update(crc, b);
-		}
-		uint8_t chunk_data[13];
-		SET_BYTE4(chunk_data + 0, m_size.width);
-		SET_BYTE4(chunk_data + 4, m_size.height);
-		chunk_data[8] = 8;	// ビット深度
-		chunk_data[9] = 6; // カラータイプ: トゥルーカラー＋アルファ 画像
-		chunk_data[10] = 0;// uint32_t compress_method = -1;
-		chunk_data[11] = 0;// uint32_t filter_method = -1;
-		chunk_data[12] = 0;// uint32_t interlace_method = -1;
-		for (size_t i = 0; i < 13; i++) {
-			dt_writer.WriteByte(chunk_data[i]);
-			crc = CRC32::update(crc, chunk_data[i]);
-		}
+		dt_writer.WriteUInt32(13);	// Length: Chunk Data のサイズ. 常に 13
+		const std::array<uint8_t, 4> ihdr_type{ 'I', 'H', 'D', 'R' };
+		dt_writer.WriteBytes(ihdr_type);
+		crc = CRC32::update(crc, ihdr_type);
+		const std::array<uint8_t, 13> ihdr_data{
+			static_cast<uint8_t>(m_size.width >> 24),
+			static_cast<uint8_t>(m_size.width >> 16),
+			static_cast<uint8_t>(m_size.width >> 8),
+			static_cast<uint8_t>(m_size.width),
+			static_cast<uint8_t>(m_size.height >> 24),
+			static_cast<uint8_t>(m_size.height >> 16),
+			static_cast<uint8_t>(m_size.height >> 8),
+			static_cast<uint8_t>(m_size.height),
+			8,	// ビット深度
+			6,	// カラータイプ: トゥルーカラー＋アルファ 画像
+			0,	// uint32_t compress_method = -1;
+			0,	// uint32_t filter_method = -1;
+			0	// uint32_t interlace_method = -1;
+		};
+		dt_writer.WriteBytes(ihdr_data);
+		crc = CRC32::update(crc, ihdr_data);
 		crc ^= 0xffffffffL;
 		dt_writer.WriteUInt32(crc);
 
 		// なんちゃって zlib ストリーム
+		crc = 0xffffffffL;
 		const size_t data_len = 4ull * m_size.width * m_size.height;
-		const uint32_t chunk_len = 2ull + data_len + (data_len + 65534ull) / 65535ull * 5;
-		dt_writer.WriteUInt32(chunk_len);
-		std::array<uint8_t, 2> zlib{ 190, 94 };
-		crc = 0xffffffffL;
-		dt_writer.WriteBytes(zlib);
-		for (size_t i = 0; i < data_len; i++) {
-			if (i % 65536 == 0) {
-				if (data_len - i > 65535) {
-					dt_writer.WriteByte(0);
-					dt_writer.WriteUInt16(0xfffff);
-					dt_writer.WriteUInt16(0);
-				}
-				else {
-					const uint16_t block_len = data_len - i;
-					dt_writer.WriteByte(1);
-					dt_writer.WriteUInt16(block_len);
-					dt_writer.WriteUInt16(~block_len);
-				}
+		const uint32_t idat_len = 2ull + data_len + (data_len + 65534ull) / 65535ull * 5;
+		dt_writer.WriteUInt32(idat_len);
+		const std::array<uint8_t, 4> idat_type{ 'I', 'D', 'A', 'T' };
+		dt_writer.WriteBytes(idat_type);
+		crc = CRC32::update(crc, idat_type);
+		std::array<uint8_t, 2> z_stream{ 190, 94 };
+		dt_writer.WriteBytes(z_stream);
+		crc = CRC32::update(crc, z_stream);
+		constexpr size_t b_size = 65532;	// 4 の倍数
+		for (size_t i = 0; i < data_len; i += 4) {
+			if (i % b_size == 0) {
+				const uint8_t  block_hdr = data_len <= i + b_size ?
+					1 : 0;
+				const uint16_t block_len = data_len <= i + b_size ?
+					static_cast<uint16_t>(data_len - i) :
+					static_cast<uint16_t>(b_size);
+				const std::array<uint8_t, 5> deflate{
+					block_hdr,
+					static_cast<uint8_t>(block_len >> 8),
+					static_cast<uint8_t>(block_len),
+					static_cast<uint8_t>(~block_len >> 8),
+					static_cast<uint8_t>(~block_len),
+				};
+				dt_writer.WriteBytes(deflate);
+				crc = CRC32::update(crc, deflate);
 			}
-
+			const std::array<uint8_t, 4> argb{
+				m_data[i + 3],
+				m_data[i + 2],
+				m_data[i + 1],
+				m_data[i],
+			};
+			dt_writer.WriteBytes(argb);
+			crc = CRC32::update(crc, argb);
 		}
-		
+		crc ^= 0xffffffffL;
+		dt_writer.WriteUInt32(crc);
 
-		dt_writer.WriteUInt32(0);
+
 		crc = 0xffffffffL;
-		for (size_t i = 0; i < 4; i++) {
-			const uint8_t b = "IEND"[i];
-			dt_writer.WriteByte(b);
-			crc = CRC32::update(crc, b);
-		}
+		dt_writer.WriteUInt32(0);
+		const std::array<uint8_t, 4> iend_type{ 'I', 'E', 'N', 'D' };
+		dt_writer.WriteBytes(iend_type);
+		crc = CRC32::update(crc, iend_type);
 		crc ^= 0xffffffffL;
 		dt_writer.WriteUInt32(crc);
 	}
@@ -1064,7 +1093,8 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 	void ShapeBitmap::write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const
 	{
 		dt_write_svg("<image href=\"", dt_writer);
-		dt_write_svg(f_name, wcslen(f_name), dt_writer);
+		const auto len = static_cast<uint32_t>(wcslen(f_name));
+		dt_write_svg(f_name, len, dt_writer);
 		dt_write_svg("\" ", dt_writer);
 		dt_write_svg(m_pos, "x", "y", dt_writer);
 		dt_write_svg(m_view.width, "width", dt_writer);
