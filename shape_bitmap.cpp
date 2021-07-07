@@ -1034,12 +1034,29 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 			o = put(o_buf, o, 1, 0);
 			o = put(o_buf, o, 8, i_buf[window_len++]);
 		}
-		size_t plane_len = 3;
-		for (size_t i = 0; i + plane_len <= window_len; i++) {
-			if (memcmp(window_ptr + i, i_buf + window_len, plane_len) == 0) {
-				o = put_len(o_buf, o, plane_len);
-				o = put_pos(o_buf, o, plane_len);
-				window_ptr += plane_len;
+		// Å’·ˆê’v
+		size_t plane_len = 2;
+		size_t window_pos = 0;
+		for (size_t i = 0; i + plane_len < window_len; i++) {
+			if (memcmp(window_ptr + i, i_buf + window_len, plane_len + 1) == 0) {
+				do {
+					plane_len++;
+				} while (i + plane_len < window_len && memcmp(window_ptr + i, i_buf + window_len, plane_len + 1) == 0);
+			}
+		}
+		if (plane_len >= 3) {
+			o = put_len(o_buf, o, plane_len);
+			o = put_pos(o_buf, o, window_len );
+			window_ptr += plane_len;
+		}
+		else {
+			o = put(o_buf, o, 1, 0);
+			o = put(o_buf, o, 8, i_buf[window_len]);
+			if (window_len < MAX_WINDOW_LEN) {
+				window_len++;
+			}
+			else {
+				window_ptr++;
 			}
 		}
 	}
