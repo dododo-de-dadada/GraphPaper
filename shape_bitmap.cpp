@@ -768,7 +768,27 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		}
 	}
 
+	struct ADLER32 {
+		static constexpr uint32_t INIT = 1;
+		static uint32_t update(const uint32_t adler, const uint8_t b) noexcept
+		{
+			#define ADLER32_BASE 65521
+			const uint32_t s1 = ((adler & 0xffff) + b) % ADLER32_BASE;
+			const uint32_t s2 = (((adler >> 16) & 0xffff) + s1) % ADLER32_BASE;
+			return (s2 << 16) + s1;
+		}
+		template <size_t N>
+		static uint32_t update(uint32_t adler, const std::array<uint8_t, N>& buf) noexcept
+		{
+			for (const auto b : buf) {
+				adler = update(adler, b);
+			}
+			return adler;
+		}
+	};
+
 	struct CRC32 {
+		static constexpr uint32_t INIT = 0xffffffff;
 		static bool computed;
 		static uint32_t table[256];
 		static uint32_t update(const uint32_t crc, const uint8_t b) noexcept
@@ -790,23 +810,13 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 			}
 			return table[(crc ^ b) & 0xff] ^ (crc >> 8);
 		}
-		//static uint32_t update(uint32_t crc, const uint8_t buf[], const size_t len) noexcept
-		//{
-		//	for (size_t n = 0; n < len; n++) {
-		//		crc = update(crc, buf[n]);
-		//	}
-		//	return crc;
-		//}
 
-		template<int N>
+		template<size_t N>
 		static uint32_t update(uint32_t crc, const std::array<uint8_t, N>& buf) noexcept
 		{
 			for (const auto b : buf) {
 				crc = update(crc, b);
 			}
-			//for (size_t n = 0; n < N; n++) {
-			//	crc = update(crc, buf.data()[n]);
-			//}
 			return crc;
 		}
 	};
@@ -1003,7 +1013,36 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		}
 	}
 	*/
-	
+	size_t put(uint8_t buf[], const size_t i, const size_t n, const size_t m)
+	{
+		return 0;
+	}
+	size_t put_len(uint8_t buf[], const size_t i, const size_t len)
+	{
+		return 0;
+	}
+	size_t put_pos(uint8_t buf[], const size_t i, const size_t pos)
+	{
+		return 0;
+	}
+	size_t compress(const uint8_t i_buf[], const size_t i_len, uint8_t o_buf[])
+	{
+		const uint8_t* window_ptr = i_buf;
+		size_t window_len = 0;
+		size_t o = 0;
+		while (window_len < 3) {
+			o = put(o_buf, o, 1, 0);
+			o = put(o_buf, o, 8, i_buf[window_len++]);
+		}
+		size_t plane_len = 3;
+		for (size_t i = 0; i + plane_len <= window_len; i++) {
+			if (memcmp(window_ptr + i, i_buf + window_len, plane_len) == 0) {
+				o = put_len(o_buf, o, plane_len);
+				o = put_pos(o_buf, o, plane_len);
+				window_ptr += plane_len;
+			}
+		}
+	}
 #define SET_BYTE4(ptr, u) { (ptr)[0] = static_cast<uint8_t>(((u) >> 24) & 0xff); (ptr)[1] = static_cast<uint8_t>(((u) >> 16) & 0xff); (ptr)[2] = static_cast<uint8_t>(((u) >> 8) & 0xff); (ptr)[3] = static_cast<uint8_t>((u) & 0xff);}
 	void ShapeBitmap::write_png(DataWriter const& dt_writer) const
 	{
@@ -1014,11 +1053,11 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		constexpr std::array<uint8_t, 8> png{ 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
 		dt_writer.WriteBytes(png);
 		// IHDR チャンク
-		uint32_t crc = 0xffffffffL;
+		uint32_t chunk_checksum = CRC32::INIT;
 		dt_writer.WriteUInt32(13);	// Length: Chunk Data のサイズ. 常に 13
-		const std::array<uint8_t, 4> ihdr_type{ 'I', 'H', 'D', 'R' };
+		constexpr std::array<uint8_t, 4> ihdr_type{ 'I', 'H', 'D', 'R' };
 		dt_writer.WriteBytes(ihdr_type);
-		crc = CRC32::update(crc, ihdr_type);
+		chunk_checksum = CRC32::update(chunk_checksum, ihdr_type);
 		const std::array<uint8_t, 13> ihdr_data{
 			static_cast<uint8_t>(m_size.width >> 24),
 			static_cast<uint8_t>(m_size.width >> 16),
@@ -1035,21 +1074,22 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 			0	// uint32_t interlace_method = -1;
 		};
 		dt_writer.WriteBytes(ihdr_data);
-		crc = CRC32::update(crc, ihdr_data);
-		crc ^= 0xffffffffL;
-		dt_writer.WriteUInt32(crc);
+		chunk_checksum = CRC32::update(chunk_checksum, ihdr_data);
+		dt_writer.WriteUInt32(chunk_checksum ^ CRC32::INIT);
+
+		chunk_checksum = CRC32::INIT;
+		const size_t data_len = 4ull * m_size.width * m_size.height;
+		const uint32_t idat_len = 2ull + 4ull + data_len + (data_len + 65534ull) / 65535ull * 5;
+		dt_writer.WriteUInt32(idat_len);
+		constexpr std::array<uint8_t, 4> idat_type{ 'I', 'D', 'A', 'T' };
+		dt_writer.WriteBytes(idat_type);
+		chunk_checksum = CRC32::update(chunk_checksum, idat_type);
 
 		// なんちゃって zlib ストリーム
-		crc = 0xffffffffL;
-		const size_t data_len = 4ull * m_size.width * m_size.height;
-		const uint32_t idat_len = 2ull + data_len + (data_len + 65534ull) / 65535ull * 5;
-		dt_writer.WriteUInt32(idat_len);
-		const std::array<uint8_t, 4> idat_type{ 'I', 'D', 'A', 'T' };
-		dt_writer.WriteBytes(idat_type);
-		crc = CRC32::update(crc, idat_type);
-		std::array<uint8_t, 2> z_stream{ 190, 94 };
-		dt_writer.WriteBytes(z_stream);
-		crc = CRC32::update(crc, z_stream);
+		constexpr std::array<uint8_t, 2> zlib_stream{ 190, 94 };	// 圧縮方式とフラグ
+		dt_writer.WriteBytes(zlib_stream);
+		chunk_checksum = CRC32::update(chunk_checksum, zlib_stream);
+		// なんちゃって Deflate
 		constexpr size_t b_size = 65532;	// 4 の倍数
 		for (size_t i = 0; i < data_len; i += 4) {
 			if (i % b_size == 0) {
@@ -1066,28 +1106,41 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 					static_cast<uint8_t>(~block_len),
 				};
 				dt_writer.WriteBytes(deflate);
-				crc = CRC32::update(crc, deflate);
+				chunk_checksum = CRC32::update(chunk_checksum, deflate);
 			}
 			const std::array<uint8_t, 4> argb{
-				m_data[i + 3],
-				m_data[i + 2],
+				0xff,
 				m_data[i + 1],
-				m_data[i],
+				m_data[i + 2],
+				0xff
 			};
+			//const std::array<uint8_t, 4> argb{
+			//	m_data[i],
+			//	m_data[i + 1],
+			//	m_data[i + 2],
+			//	m_data[i + 3]
+			//};
 			dt_writer.WriteBytes(argb);
-			crc = CRC32::update(crc, argb);
+			chunk_checksum = CRC32::update(chunk_checksum, argb);
 		}
-		crc ^= 0xffffffffL;
-		dt_writer.WriteUInt32(crc);
+		const auto zlib_checksum = ADLER32::update(ADLER32::INIT, zlib_stream);
+		const std::array<uint8_t, 4> zlib_adler{
+			static_cast<uint8_t>(zlib_checksum >> 24),
+			static_cast<uint8_t>(zlib_checksum >> 16),
+			static_cast<uint8_t>(zlib_checksum >> 8),
+			static_cast<uint8_t>(zlib_checksum)
+		};
+		dt_writer.WriteBytes(zlib_adler);
+		chunk_checksum = CRC32::update(chunk_checksum, zlib_adler);
+		dt_writer.WriteUInt32(chunk_checksum ^ CRC32::INIT);
 
 
-		crc = 0xffffffffL;
+		chunk_checksum = CRC32::INIT;
 		dt_writer.WriteUInt32(0);
-		const std::array<uint8_t, 4> iend_type{ 'I', 'E', 'N', 'D' };
+		constexpr std::array<uint8_t, 4> iend_type{ 'I', 'E', 'N', 'D' };
 		dt_writer.WriteBytes(iend_type);
-		crc = CRC32::update(crc, iend_type);
-		crc ^= 0xffffffffL;
-		dt_writer.WriteUInt32(crc);
+		chunk_checksum = CRC32::update(chunk_checksum, iend_type);
+		dt_writer.WriteUInt32(chunk_checksum ^ CRC32::INIT);
 	}
 
 	void ShapeBitmap::write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const
