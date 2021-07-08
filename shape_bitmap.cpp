@@ -1013,56 +1013,221 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		}
 	}
 	*/
-	size_t put(uint8_t buf[], const size_t i, const size_t n, const size_t m)
+	/*
+		
+符号	 拡張ビット数 長さ
+--- -	-----		------		----	----	------		----	----	------
+257	0	3				
+258	0	4				
+259	0	5				
+260	0	6				
+261	0	7				
+262	0	8				
+263	0	9				
+264	0	10				
+265	1	11,12				
+266	1	13,14		
+267	1	15,16
+268	1	17,18
+269	2	19-22
+270	2	23-26
+271	2	27-30
+272	2	31-34
+273	3	35-42
+274	3	43-50
+275	3	51-58
+276	3	59-66
+277	4	67-82
+278	4	83-98
+279	4	99-114
+280	4	115-130
+281	5	131-162
+282	5	163-194
+283	5	195-226
+284	5	227-257
+285	0	258
+*/
+	void bit_put(uint8_t buf[], const size_t pos, const size_t num, const uint16_t val)
 	{
-		return 0;
+		const auto bit_pos = pos % 8;
+		const auto val32 = static_cast<uint32_t>(val) << bit_pos;
+		const auto ptr = buf + pos / 8;
+		ptr[0] &= static_cast<uint8_t>(0xff >> (8 - bit_pos));
+		ptr[0] |= static_cast<uint8_t>(val32);
+		if (bit_pos + num <= 8) {
+			return;
+		}
+		bit_put(ptr + 1, 0, num + bit_pos - 8, static_cast<uint16_t>(val32 >> 8));
 	}
-	size_t put_len(uint8_t buf[], const size_t i, const size_t len)
-	{
-		return 0;
-	}
-	size_t put_pos(uint8_t buf[], const size_t i, const size_t pos)
-	{
-		return 0;
-	}
+
+static uint8_t debug_buf[256];
+static size_t debug_buf_cnt = 0;
 	size_t compress(const uint8_t i_buf[], const size_t i_len, uint8_t o_buf[])
 	{
+		constexpr size_t MAX_WINDOW_LEN = 32768;
+		constexpr size_t MAX_WORD_LEN = 258;
+
+		size_t o_bit_pos = 0;
+		for (size_t i = 0; i < min(i_len, 3); i++) {
+			bit_put(o_buf, o_bit_pos, 1, 0);
+			o_bit_pos += 1;
+debug_buf[debug_buf_cnt++] = '0';
+			bit_put(o_buf, o_bit_pos, 8, static_cast<uint16_t>(i_buf[i]));
+			o_bit_pos += 8;
+debug_buf[debug_buf_cnt++] = i_buf[i];
+		}
 		const uint8_t* window_ptr = i_buf;
-		size_t window_len = 0;
-		size_t o = 0;
-		while (window_len < 3) {
-			o = put(o_buf, o, 1, 0);
-			o = put(o_buf, o, 8, i_buf[window_len++]);
-		}
-		// 最長一致
-		size_t plane_len = 2;
-		size_t window_pos = 0;
-		for (size_t i = 0; i + plane_len < window_len; i++) {
-			if (memcmp(window_ptr + i, i_buf + window_len, plane_len + 1) == 0) {
-				do {
-					plane_len++;
-				} while (i + plane_len < window_len && memcmp(window_ptr + i, i_buf + window_len, plane_len + 1) == 0);
+		size_t window_len = 3;
+		while (window_ptr + window_len < i_buf + i_len - 3) {
+			// 最長一致
+			size_t word_len = 3;	// 一致した長さ
+			size_t match_dist = 0;	// 見つかった距離
+			for (size_t i = 0; i + word_len <= window_len; i++) {
+				if (memcmp(window_ptr + i, window_ptr + window_len, word_len) == 0) {
+					match_dist = window_len - i;
+					while (word_len < MAX_WORD_LEN &&
+						i + word_len < window_len &&
+						window_ptr[i + word_len] == window_ptr[window_len + word_len]) {
+						word_len++;
+					}
+				}
 			}
-		}
-		if (plane_len >= 3) {
-			o = put_len(o_buf, o, plane_len);
-			o = put_pos(o_buf, o, window_len );
-			window_ptr += plane_len;
-		}
-		else {
-			o = put(o_buf, o, 1, 0);
-			o = put(o_buf, o, 8, i_buf[window_len]);
-			if (window_len < MAX_WINDOW_LEN) {
-				window_len++;
+			if (match_dist == 0) {
+				bit_put(o_buf, o_bit_pos, 1, 0);
+				o_bit_pos += 1;
+debug_buf[debug_buf_cnt++] = '0';
+				bit_put(o_buf, o_bit_pos, 8, static_cast<uint16_t>(window_ptr[window_len]));
+				o_bit_pos += 8;
+debug_buf[debug_buf_cnt++] = window_ptr[window_len];
+				if (window_len < MAX_WINDOW_LEN) {
+					window_len++;
+				}
+				else {
+					window_ptr++;
+				}
 			}
 			else {
-				window_ptr++;
+				// 長さを符号化する.
+				size_t len_bit_num;
+				size_t len_bit_code;
+				if (255 <= word_len - 3) {
+					len_bit_num = 1 + 8;
+					len_bit_code = (256 + 29);
+				}
+				else if (128 <= word_len - 3) {
+					len_bit_num = 1 + 8 + 5;
+					len_bit_code = ((256 + 25) << 5) + (word_len - 3 - 128);
+				}
+				else if (64 <= word_len - 3) {
+					len_bit_num = 1 + 8 + 4;
+					len_bit_code = ((256 + 21) << 4) + (word_len - 3 - 64);
+				}
+				else if (32 <= word_len - 3) {
+					len_bit_num = 1 + 8 + 3;
+					len_bit_code = ((256 + 17) << 3) + (word_len - 3 - 32);
+				}
+				else if (16 <= word_len - 3) {
+					len_bit_num = 1 + 8 + 2;
+					len_bit_code = ((256 + 13) << 2) + (word_len - 3 - 16);
+				}
+				else if (8 <= word_len - 3) {
+					len_bit_num = 1 + 8 + 1;
+					len_bit_code = ((256 + 9) << 1) + (word_len - 3 - 8);
+				}
+				else if (0 <= word_len - 3) {
+					len_bit_num = 1 + 8 + 0;
+					len_bit_code = ((256 + 1) << 0) + (word_len - 3 - 0);
+				}
+				bit_put(o_buf, o_bit_pos, len_bit_num, static_cast<uint16_t>(len_bit_code));
+				o_bit_pos += len_bit_num;
+
+				// 距離を符号化する.
+				size_t dist_bit_num;
+				size_t dist_bit_code;
+				if (16384 <= match_dist - 1) {
+					dist_bit_num = 5 + 13;
+					dist_bit_code = (28 << 13) + (match_dist - 1 - 16384);
+				}
+				else if (8192 <= match_dist - 1) {
+					dist_bit_num = 5 + 12;
+					dist_bit_code = (26 << 12) + (match_dist - 1 - 8192);
+				}
+				else if (4096 <= match_dist - 1) {
+					dist_bit_num = 5 + 11;
+					dist_bit_code = (24 << 11) + (match_dist - 1 - 4096);
+				}
+				else if (2048 <= match_dist - 1) {
+					dist_bit_num = 5 + 10;
+					dist_bit_code = (22 << 10) + (match_dist - 1 - 2048);
+				}
+				else if (1024 <= match_dist - 1) {
+					dist_bit_num = 5 + 9;
+					dist_bit_code = (20 << 9) + (match_dist - 1 - 1024);
+				}
+				else if (512 <= match_dist - 1) {
+					dist_bit_num = 5 + 8;
+					dist_bit_code = (18 << 8) + (match_dist - 1 - 512);
+				}
+				else if (256 <= match_dist - 1) {
+					dist_bit_num = 5 + 7;
+					dist_bit_code = (16 << 7) + (match_dist - 1 - 256);
+				}
+				else if (128 <= match_dist - 1) {
+					dist_bit_num = 5 + 6;
+					dist_bit_code = (14 << 6) + (match_dist - 1 - 128);
+				}
+				else if (64 <= match_dist - 1) {
+					dist_bit_num = 5 + 5;
+					dist_bit_code = (12 << 5) + (match_dist - 1 - 64);
+				}
+				else if (32 <= match_dist - 1) {
+					dist_bit_num = 5 + 4;
+					dist_bit_code = (10 << 4) + (match_dist - 1 - 32);
+				}
+				else if (16 <= match_dist - 1) {
+					dist_bit_num = 5 + 3;
+					dist_bit_code = (8 << 3) + (match_dist - 1 - 16);
+				}
+				else if (8 <= match_dist - 1) {
+					dist_bit_num = 5 + 2;
+					dist_bit_code = (6 << 2) + (match_dist - 1 - 8);
+				}
+				else if (4 <= match_dist - 1) {
+					dist_bit_num = 5 + 1;
+					dist_bit_code = (4 << 1) + (match_dist - 1 - 4);
+				}
+				else {
+					dist_bit_num = 5 + 0;
+					dist_bit_code = match_dist - 1;
+				}
+				bit_put(o_buf, o_bit_pos, dist_bit_num, static_cast<uint16_t>(dist_bit_code));
+				o_bit_pos += dist_bit_num;
+
+				if (window_len < MAX_WINDOW_LEN) {
+					window_len++;
+				}
+				else {
+					window_ptr++;
+				}
+				window_ptr += word_len;
 			}
 		}
+		while (window_ptr + window_len < i_buf + i_len) {
+			bit_put(o_buf, o_bit_pos, 1, 0);
+			o_bit_pos += 1;
+			bit_put(o_buf, o_bit_pos, 8, static_cast<uint16_t>(window_ptr[window_len++]));
+			o_bit_pos += 9;
+		}
+		bit_put(o_buf, o_bit_pos, 9, 0x100);
+		o_bit_pos += 9;
+		return (o_bit_pos + 7) / 8;
 	}
 #define SET_BYTE4(ptr, u) { (ptr)[0] = static_cast<uint8_t>(((u) >> 24) & 0xff); (ptr)[1] = static_cast<uint8_t>(((u) >> 16) & 0xff); (ptr)[2] = static_cast<uint8_t>(((u) >> 8) & 0xff); (ptr)[3] = static_cast<uint8_t>((u) & 0xff);}
 	void ShapeBitmap::write_png(DataWriter const& dt_writer) const
 	{
+	uint8_t test[] = "WHAT IS THIS THIS IS A PEN";
+	uint8_t buf[128];
+	auto a = compress(test, 26, buf);
 		using winrt::Windows::Storage::Streams::ByteOrder;
 
 		dt_writer.ByteOrder(ByteOrder::BigEndian);	// ネットワークバイトオーダー
