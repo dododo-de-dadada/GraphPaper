@@ -1071,10 +1071,8 @@ static size_t debug_buf_cnt = 0;
 		for (size_t i = 0; i < min(i_len, 3); i++) {
 			bit_put(o_buf, o_bit_pos, 1, 0);
 			o_bit_pos += 1;
-debug_buf[debug_buf_cnt++] = '0';
 			bit_put(o_buf, o_bit_pos, 8, static_cast<uint16_t>(i_buf[i]));
 			o_bit_pos += 8;
-debug_buf[debug_buf_cnt++] = i_buf[i];
 		}
 		const uint8_t* window_ptr = i_buf;
 		size_t window_len = 3;
@@ -1225,9 +1223,10 @@ debug_buf[debug_buf_cnt++] = window_ptr[window_len];
 #define SET_BYTE4(ptr, u) { (ptr)[0] = static_cast<uint8_t>(((u) >> 24) & 0xff); (ptr)[1] = static_cast<uint8_t>(((u) >> 16) & 0xff); (ptr)[2] = static_cast<uint8_t>(((u) >> 8) & 0xff); (ptr)[3] = static_cast<uint8_t>((u) & 0xff);}
 	void ShapeBitmap::write_png(DataWriter const& dt_writer) const
 	{
-	uint8_t test[] = "WHAT IS THIS THIS IS A PEN";
+	uint8_t test[] = "WHAT IS THIS? THIS IS A PEN";
 	uint8_t buf[128];
 	auto a = compress(test, 26, buf);
+	// abd22835490526a720aa521fd027efec6fe6541905428b4e
 		using winrt::Windows::Storage::Streams::ByteOrder;
 
 		dt_writer.ByteOrder(ByteOrder::BigEndian);	// ネットワークバイトオーダー
