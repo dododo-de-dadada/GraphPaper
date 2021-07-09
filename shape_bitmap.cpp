@@ -1047,6 +1047,7 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 284	5	227-257
 285	0	258
 */
+	/*
 	void bit_put(uint8_t buf[], const size_t pos, const size_t num, const uint16_t val)
 	{
 		const auto bit_pos = pos % 8;
@@ -1059,30 +1060,71 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		}
 		bit_put(ptr + 1, 0, num + bit_pos - 8, static_cast<uint16_t>(val32 >> 8));
 	}
+	*/
 
-static uint8_t debug_buf[256];
-static size_t debug_buf_cnt = 0;
+	size_t bit_put(uint8_t buf[], const size_t bit_pos, const size_t bit_num, const uint16_t bit_val)
+	{
+		auto pos = bit_pos % 8;
+		auto val = (static_cast<uint32_t>(bit_val) & (0xffffu >> (16 - bit_num))) << pos;
+		auto ptr = buf + bit_pos / 8;
+		for (;;) {
+			ptr[0] &= static_cast<uint8_t>(0xff >> (8 - pos));
+			ptr[0] |= static_cast<uint8_t>(val);
+			pos += bit_num;
+			if (pos <= 8) {
+				break;
+			}
+			ptr++;
+			pos -= 8;
+			val >>= 8;
+		}
+		return bit_pos + bit_num;
+	}
+
+	struct CODE_CNT {
+		uint16_t code;
+		size_t cnt;
+	};
+
 	size_t compress(const uint8_t i_buf[], const size_t i_len, uint8_t o_buf[])
 	{
 		constexpr size_t MAX_WINDOW_LEN = 32768;
 		constexpr size_t MAX_WORD_LEN = 258;
+		static size_t word_table[256 * 256 * 256 - 1];	// 3文字の出現位置 (入力バッファ先頭を 0 とする絶対位置)
+		CODE_CNT char_tbl[286 * (286 + 1) / 2];	// 文字/一致した長さの値 (0～285) の出現回数
+		CODE_CNT dist_tbl[30 * (30 + 1) / 2];	// 距離の値 (0～29) の出現回数
+		for (uint16_t i = 0; i < 286; i++) {
+			char_tbl[i].code = i;
+		}
+		for (uint16_t i = 0; i < 30; i++) {
+			dist_tbl[i].code = i;
+		}
 
 		size_t o_bit_pos = 0;
 		for (size_t i = 0; i < min(i_len, 3); i++) {
-			bit_put(o_buf, o_bit_pos, 1, 0);
-			o_bit_pos += 1;
-			bit_put(o_buf, o_bit_pos, 8, static_cast<uint16_t>(i_buf[i]));
-			o_bit_pos += 8;
+			const auto c = static_cast<uint16_t>(i_buf[i]);
+			o_bit_pos = bit_put(o_buf, o_bit_pos, 9, c << 1);
+			char_tbl[c].cnt++;
+			//bit_put(o_buf, o_bit_pos, 1, 0);
+			//o_bit_pos += 1;
+			//bit_put(o_buf, o_bit_pos, 8, static_cast<uint16_t>(i_buf[i]));
+			//o_bit_pos += 8;
 		}
 		const uint8_t* window_ptr = i_buf;
 		size_t window_len = 3;
-		while (window_ptr + window_len < i_buf + i_len - 3) {
+		while (window_ptr - i_buf + window_len < i_len - 3) {
+			uint32_t word_index = (window_ptr[window_len] << 16) | (window_ptr[window_len + 1] << 8) | window_ptr[window_len + 2];
+			size_t window_start = 0;
+			if (word_table[word_index] > window_ptr - i_buf) {
+				window_start = word_table[word_index] - (window_ptr - i_buf);
+			}
 			// 最長一致
-			size_t word_len = 3;	// 一致した長さ
-			size_t match_dist = 0;	// 見つかった距離
-			for (size_t i = 0; i + word_len <= window_len; i++) {
+			size_t word_len = 3;	// 単語の長さ
+			size_t word_dist = 0;	// 単語が見つかった距離
+			for (size_t i = window_start; i + word_len <= window_len; i++) {
 				if (memcmp(window_ptr + i, window_ptr + window_len, word_len) == 0) {
-					match_dist = window_len - i;
+					word_table[word_index] = window_ptr - i_buf + i;
+					word_dist = window_len - i;
 					while (word_len < MAX_WORD_LEN &&
 						i + word_len < window_len &&
 						window_ptr[i + word_len] == window_ptr[window_len + word_len]) {
@@ -1090,13 +1132,14 @@ static size_t debug_buf_cnt = 0;
 					}
 				}
 			}
-			if (match_dist == 0) {
-				bit_put(o_buf, o_bit_pos, 1, 0);
-				o_bit_pos += 1;
-debug_buf[debug_buf_cnt++] = '0';
-				bit_put(o_buf, o_bit_pos, 8, static_cast<uint16_t>(window_ptr[window_len]));
-				o_bit_pos += 8;
-debug_buf[debug_buf_cnt++] = window_ptr[window_len];
+			if (word_dist == 0) {
+				const auto c = static_cast<uint16_t>(window_ptr[window_len]);
+				o_bit_pos = bit_put(o_buf, o_bit_pos, 9, c << 1);
+				char_tbl[c].cnt++;
+				//bit_put(o_buf, o_bit_pos, 1, 0);
+				//o_bit_pos += 1;
+				//bit_put(o_buf, o_bit_pos, 8, static_cast<uint16_t>(window_ptr[window_len]));
+				//o_bit_pos += 8;
 				if (window_len < MAX_WINDOW_LEN) {
 					window_len++;
 				}
@@ -1106,100 +1149,224 @@ debug_buf[debug_buf_cnt++] = window_ptr[window_len];
 			}
 			else {
 				// 長さを符号化する.
-				size_t len_bit_num;
-				size_t len_bit_code;
+				//size_t len_bit_num;
+				//size_t len_bit_code;
 				if (255 <= word_len - 3) {
-					len_bit_num = 1 + 8;
-					len_bit_code = (256 + 29);
+					const uint16_t len_code = 29;
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 9, (len_code << 1) | 1);
+					char_tbl[256 + len_code].cnt++;
+					//len_bit_num = 1 + 8;
+					//len_bit_code = (256 + 29);
 				}
 				else if (128 <= word_len - 3) {
-					len_bit_num = 1 + 8 + 5;
-					len_bit_code = ((256 + 25) << 5) + (word_len - 3 - 128);
+					constexpr int extr_len = 5;
+					const uint16_t extr_val = word_len - 3 - 128;
+					const uint16_t len_code = 25 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 9, (len_code << 1) | 1);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					char_tbl[256 + len_code].cnt++;
+
+					//len_bit_num = 1 + 8 + 5;
+					//len_bit_code = ((256 + 25) << 5) + (word_len - 3 - 128);
 				}
 				else if (64 <= word_len - 3) {
-					len_bit_num = 1 + 8 + 4;
-					len_bit_code = ((256 + 21) << 4) + (word_len - 3 - 64);
+					constexpr int extr_len = 4;
+					const uint16_t extr_val = word_len - 3 - 64;
+					const uint16_t len_code = 21 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 9, (len_code << 1) | 1);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					char_tbl[256 + len_code].cnt++;
+					//len_bit_num = 1 + 8 + 4;
+					//len_bit_code = ((256 + 21) << 4) + (word_len - 3 - 64);
 				}
 				else if (32 <= word_len - 3) {
-					len_bit_num = 1 + 8 + 3;
-					len_bit_code = ((256 + 17) << 3) + (word_len - 3 - 32);
+					constexpr int extr_len = 3;
+					const uint16_t extr_val = word_len - 3 - 32;
+					const uint16_t len_code = 17 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 9, (len_code << 1) | 1);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					char_tbl[256 + len_code].cnt++;
+					//len_bit_num = 1 + 8 + 3;
+					//len_bit_code = ((256 + 17) << 3) + (word_len - 3 - 32);
 				}
 				else if (16 <= word_len - 3) {
-					len_bit_num = 1 + 8 + 2;
-					len_bit_code = ((256 + 13) << 2) + (word_len - 3 - 16);
+					constexpr int extr_len = 2;
+					const uint16_t extr_val = word_len - 3 - 16;
+					const uint16_t len_code = 13 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 9, (len_code << 1) | 1);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					char_tbl[256 + len_code].cnt++;
+					//len_bit_num = 1 + 8 + 2;
+					//len_bit_code = ((256 + 13) << 2) + (word_len - 3 - 16);
 				}
 				else if (8 <= word_len - 3) {
-					len_bit_num = 1 + 8 + 1;
-					len_bit_code = ((256 + 9) << 1) + (word_len - 3 - 8);
+					constexpr int extr_len = 1;
+					const uint16_t extr_val = word_len - 3 - 8;
+					const uint16_t len_code = 9 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 9, (len_code << 1) | 1);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					char_tbl[256 + len_code].cnt++;
+					//len_bit_num = 1 + 8 + 1;
+					//len_bit_code = ((256 + 9) << 1) + (word_len - 3 - 8);
 				}
 				else if (0 <= word_len - 3) {
-					len_bit_num = 1 + 8 + 0;
-					len_bit_code = ((256 + 1) << 0) + (word_len - 3 - 0);
+					constexpr int extr_len = 0;
+					const uint16_t extr_val = word_len - 3 - 0;
+					const uint16_t len_code = 1 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 9, (len_code << 1) | 1);
+					char_tbl[256 + len_code].cnt++;
+					//o_bit_pos = bit_put(o_buf, o_bit_pos, 1, len_extr);
+					//len_bit_num = 1 + 8 + 0;
+					//len_bit_code = ((256 + 1) << 0) + (word_len - 3 - 0);
 				}
-				bit_put(o_buf, o_bit_pos, len_bit_num, static_cast<uint16_t>(len_bit_code));
-				o_bit_pos += len_bit_num;
+				//bit_put(o_buf, o_bit_pos, len_bit_num, static_cast<uint16_t>(len_bit_code));
+				//o_bit_pos += len_bit_num;
 
 				// 距離を符号化する.
-				size_t dist_bit_num;
-				size_t dist_bit_code;
-				if (16384 <= match_dist - 1) {
-					dist_bit_num = 5 + 13;
-					dist_bit_code = (28 << 13) + (match_dist - 1 - 16384);
+				//size_t dist_bit_num;
+				//size_t dist_bit_code;
+				if (16384 <= word_dist - 1) {
+					constexpr int extr_len = 13;
+					const uint16_t extr_val = word_dist - 1 - 16384;
+					const uint16_t dist_code = 28 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 13;
+					//dist_bit_code = (28 << 13) + (match_dist - 1 - 16384);
 				}
-				else if (8192 <= match_dist - 1) {
-					dist_bit_num = 5 + 12;
-					dist_bit_code = (26 << 12) + (match_dist - 1 - 8192);
+				else if (8192 <= word_dist - 1) {
+					constexpr int extr_len = 12;
+					const uint16_t extr_val = word_dist - 1 - 8192;
+					const uint16_t dist_code = 26 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 12;
+					//dist_bit_code = (26 << 12) + (match_dist - 1 - 8192);
 				}
-				else if (4096 <= match_dist - 1) {
-					dist_bit_num = 5 + 11;
-					dist_bit_code = (24 << 11) + (match_dist - 1 - 4096);
+				else if (4096 <= word_dist - 1) {
+					constexpr int extr_len = 11;
+					const uint16_t extr_val = word_dist - 1 - 4096;
+					const uint16_t dist_code = 24 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 11;
+					//dist_bit_code = (24 << 11) + (match_dist - 1 - 4096);
 				}
-				else if (2048 <= match_dist - 1) {
-					dist_bit_num = 5 + 10;
-					dist_bit_code = (22 << 10) + (match_dist - 1 - 2048);
+				else if (2048 <= word_dist - 1) {
+					constexpr int extr_len = 10;
+					const uint16_t extr_val = word_dist - 1 - 2048;
+					const uint16_t dist_code = 22 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 10;
+					//dist_bit_code = (22 << 10) + (match_dist - 1 - 2048);
 				}
-				else if (1024 <= match_dist - 1) {
-					dist_bit_num = 5 + 9;
-					dist_bit_code = (20 << 9) + (match_dist - 1 - 1024);
+				else if (1024 <= word_dist - 1) {
+					constexpr int extr_len = 9;
+					const uint16_t extr_val = word_dist - 1 - 1024;
+					const uint16_t dist_code = 20 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 9;
+					//dist_bit_code = (20 << 9) + (match_dist - 1 - 1024);
 				}
-				else if (512 <= match_dist - 1) {
-					dist_bit_num = 5 + 8;
-					dist_bit_code = (18 << 8) + (match_dist - 1 - 512);
+				else if (512 <= word_dist - 1) {
+					constexpr int extr_len = 8;
+					const uint16_t extr_val = word_dist - 1 - 512;
+					const uint16_t dist_code = 18 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 8;
+					//dist_bit_code = (18 << 8) + (match_dist - 1 - 512);
 				}
-				else if (256 <= match_dist - 1) {
-					dist_bit_num = 5 + 7;
-					dist_bit_code = (16 << 7) + (match_dist - 1 - 256);
+				else if (256 <= word_dist - 1) {
+					constexpr int extr_len = 7;
+					const uint16_t extr_val = word_dist - 1 - 256;
+					const uint16_t dist_code = 16 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 7;
+					//dist_bit_code = (16 << 7) + (match_dist - 1 - 256);
 				}
-				else if (128 <= match_dist - 1) {
-					dist_bit_num = 5 + 6;
-					dist_bit_code = (14 << 6) + (match_dist - 1 - 128);
+				else if (128 <= word_dist - 1) {
+					constexpr int extr_len = 6;
+					const uint16_t extr_val = word_dist - 1 - 128;
+					const uint16_t dist_code = 14 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 6;
+					//dist_bit_code = (14 << 6) + (match_dist - 1 - 128);
 				}
-				else if (64 <= match_dist - 1) {
-					dist_bit_num = 5 + 5;
-					dist_bit_code = (12 << 5) + (match_dist - 1 - 64);
+				else if (64 <= word_dist - 1) {
+					constexpr int extr_len = 5;
+					const uint16_t extr_val = word_dist - 1 - 64;
+					const uint16_t dist_code = 12 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 5;
+					//dist_bit_code = (12 << 5) + (match_dist - 1 - 64);
 				}
-				else if (32 <= match_dist - 1) {
-					dist_bit_num = 5 + 4;
-					dist_bit_code = (10 << 4) + (match_dist - 1 - 32);
+				else if (32 <= word_dist - 1) {
+					constexpr int extr_len = 4;
+					const uint16_t extr_val = word_dist - 1 - 32;
+					const uint16_t dist_code = 10 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 4;
+					//dist_bit_code = (10 << 4) + (match_dist - 1 - 32);
 				}
-				else if (16 <= match_dist - 1) {
-					dist_bit_num = 5 + 3;
-					dist_bit_code = (8 << 3) + (match_dist - 1 - 16);
+				else if (16 <= word_dist - 1) {
+					constexpr int extr_len = 3;
+					const uint16_t extr_val = word_dist - 1 - 16;
+					const uint16_t dist_code = 8 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 3;
+					//dist_bit_code = (8 << 3) + (match_dist - 1 - 16);
 				}
-				else if (8 <= match_dist - 1) {
-					dist_bit_num = 5 + 2;
-					dist_bit_code = (6 << 2) + (match_dist - 1 - 8);
+				else if (8 <= word_dist - 1) {
+					constexpr int extr_len = 2;
+					const uint16_t extr_val = word_dist - 1 - 8;
+					const uint16_t dist_code = 6 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 2;
+					//dist_bit_code = (6 << 2) + (match_dist - 1 - 8);
 				}
-				else if (4 <= match_dist - 1) {
-					dist_bit_num = 5 + 1;
-					dist_bit_code = (4 << 1) + (match_dist - 1 - 4);
+				else if (4 <= word_dist - 1) {
+					constexpr int extr_len = 1;
+					const uint16_t extr_val = word_dist - 1 - 4;
+					const uint16_t dist_code = 4 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 1;
+					//dist_bit_code = (4 << 1) + (match_dist - 1 - 4);
 				}
 				else {
-					dist_bit_num = 5 + 0;
-					dist_bit_code = match_dist - 1;
+					constexpr int extr_len = 0;
+					const uint16_t extr_val = word_dist - 1 - 0;
+					const uint16_t dist_code = 0 + (extr_val >> extr_len);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, 8, dist_code);
+					o_bit_pos = bit_put(o_buf, o_bit_pos, extr_len, extr_val);
+					dist_tbl[dist_code].cnt++;
+					//dist_bit_num = 5 + 0;
+					//dist_bit_code = match_dist - 1;
 				}
-				bit_put(o_buf, o_bit_pos, dist_bit_num, static_cast<uint16_t>(dist_bit_code));
-				o_bit_pos += dist_bit_num;
+				//bit_put(o_buf, o_bit_pos, dist_bit_num, static_cast<uint16_t>(dist_bit_code));
+				//o_bit_pos += dist_bit_num;
 
 				if (window_len < MAX_WINDOW_LEN) {
 					window_len++;
@@ -1211,21 +1378,35 @@ debug_buf[debug_buf_cnt++] = window_ptr[window_len];
 			}
 		}
 		while (window_ptr + window_len < i_buf + i_len) {
-			bit_put(o_buf, o_bit_pos, 1, 0);
-			o_bit_pos += 1;
-			bit_put(o_buf, o_bit_pos, 8, static_cast<uint16_t>(window_ptr[window_len++]));
-			o_bit_pos += 9;
+			const auto c = static_cast<uint16_t>(window_ptr[window_len++]);
+			o_bit_pos = bit_put(o_buf, o_bit_pos, 9, c << 1);
+			char_tbl[c].cnt++;
+			//bit_put(o_buf, o_bit_pos, 1, 0);
+			//o_bit_pos += 1;
+			//bit_put(o_buf, o_bit_pos, 8, static_cast<uint16_t>(window_ptr[window_len++]));
+			//o_bit_pos += 9;
 		}
-		bit_put(o_buf, o_bit_pos, 9, 0x100);
-		o_bit_pos += 9;
+		auto cmp = [](const void* a, const void* b) {
+			const auto a_cnt = static_cast<const CODE_CNT*>(a)->cnt;
+			const auto a_code = static_cast<const CODE_CNT*>(a)->code;
+			const auto b_cnt = static_cast<const CODE_CNT*>(b)->cnt;
+			const auto b_code = static_cast<const CODE_CNT*>(b)->code;
+			return a_cnt < b_cnt || (a_cnt == b_cnt && a_code < b_code) ? -1 : 1;
+		};
+		std::qsort(char_tbl, 286, sizeof(CODE_CNT), cmp);
+		std::qsort(dist_tbl, 30, sizeof(CODE_CNT), cmp);
+
+		o_bit_pos = bit_put(o_buf, o_bit_pos, 9, 1);
+		//bit_put(o_buf, o_bit_pos, 9, 0x100);
+		//o_bit_pos += 9;
 		return (o_bit_pos + 7) / 8;
 	}
 #define SET_BYTE4(ptr, u) { (ptr)[0] = static_cast<uint8_t>(((u) >> 24) & 0xff); (ptr)[1] = static_cast<uint8_t>(((u) >> 16) & 0xff); (ptr)[2] = static_cast<uint8_t>(((u) >> 8) & 0xff); (ptr)[3] = static_cast<uint8_t>((u) & 0xff);}
 	void ShapeBitmap::write_png(DataWriter const& dt_writer) const
 	{
-	uint8_t test[] = "WHAT IS THIS? THIS IS A PEN";
-	uint8_t buf[128];
-	auto a = compress(test, 26, buf);
+	//uint8_t test[] = "WHAT IS THIS? THIS IS A PEN";
+	//uint8_t buf[128];
+	//auto a = compress(test, 26, buf);
 	// abd22835490526a720aa521fd027efec6fe6541905428b4e
 		using winrt::Windows::Storage::Streams::ByteOrder;
 
@@ -1258,51 +1439,48 @@ debug_buf[debug_buf_cnt++] = window_ptr[window_len];
 		chunk_checksum = CRC32::update(chunk_checksum, ihdr_data);
 		dt_writer.WriteUInt32(chunk_checksum ^ CRC32::INIT);
 
+		constexpr size_t b_max = 65532;	// ブロックの最大長さ 4 の倍数
 		chunk_checksum = CRC32::INIT;
 		const size_t data_len = 4ull * m_size.width * m_size.height;
-		const uint32_t idat_len = 2ull + 4ull + data_len + (data_len + 65534ull) / 65535ull * 5;
+		const uint32_t idat_len = 2 + data_len + (data_len + b_max - 1) / b_max * 5 + 4;	// z ストリーム + deflate ブロック + z チェックサム
 		dt_writer.WriteUInt32(idat_len);
 		constexpr std::array<uint8_t, 4> idat_type{ 'I', 'D', 'A', 'T' };
 		dt_writer.WriteBytes(idat_type);
 		chunk_checksum = CRC32::update(chunk_checksum, idat_type);
 
 		// なんちゃって zlib ストリーム
-		constexpr std::array<uint8_t, 2> zlib_stream{ 190, 94 };	// 圧縮方式とフラグ
+		constexpr std::array<uint8_t, 2> zlib_stream{ 72, 13 };	// 圧縮方式とフラグ
 		dt_writer.WriteBytes(zlib_stream);
 		chunk_checksum = CRC32::update(chunk_checksum, zlib_stream);
 		// なんちゃって Deflate
-		constexpr size_t b_size = 65532;	// 4 の倍数
-		for (size_t i = 0; i < data_len; i += 4) {
-			if (i % b_size == 0) {
-				const uint8_t  block_hdr = data_len <= i + b_size ?
-					1 : 0;
-				const uint16_t block_len = data_len <= i + b_size ?
-					static_cast<uint16_t>(data_len - i) :
-					static_cast<uint16_t>(b_size);
-				const std::array<uint8_t, 5> deflate{
-					block_hdr,
-					static_cast<uint8_t>(block_len >> 8),
-					static_cast<uint8_t>(block_len),
-					static_cast<uint8_t>(~block_len >> 8),
-					static_cast<uint8_t>(~block_len),
+		size_t i = 0;
+		for (size_t y = 0; y < m_size.height; y++) {
+			for (size_t x = 0; x < m_size.width; x++) {
+				if (i++ % b_max == 0) {
+					const uint8_t  block_hdr = data_len <= i + b_max ?
+						1 : 0;
+					const uint16_t block_len = data_len <= i + b_max ?
+						static_cast<uint16_t>(data_len - i) :
+						static_cast<uint16_t>(b_max);
+					const std::array<uint8_t, 5> deflate{
+						block_hdr,
+						static_cast<uint8_t>(block_len >> 8),
+						static_cast<uint8_t>(block_len),
+						static_cast<uint8_t>(~block_len >> 8),
+						static_cast<uint8_t>(~block_len),
+					};
+					dt_writer.WriteBytes(deflate);
+					chunk_checksum = CRC32::update(chunk_checksum, deflate);
+				}
+				const std::array<uint8_t, 4> argb{
+					m_data[y * 4 * m_size.width + 4 * x],
+					m_data[y * 4 * m_size.width + 4 * x + 1],
+					m_data[y * 4 * m_size.width + 4 * x + 2],
+					m_data[y * 4 * m_size.width + 4 * x + 3]
 				};
-				dt_writer.WriteBytes(deflate);
-				chunk_checksum = CRC32::update(chunk_checksum, deflate);
+				dt_writer.WriteBytes(argb);
+				chunk_checksum = CRC32::update(chunk_checksum, argb);
 			}
-			const std::array<uint8_t, 4> argb{
-				0xff,
-				m_data[i + 1],
-				m_data[i + 2],
-				0xff
-			};
-			//const std::array<uint8_t, 4> argb{
-			//	m_data[i],
-			//	m_data[i + 1],
-			//	m_data[i + 2],
-			//	m_data[i + 3]
-			//};
-			dt_writer.WriteBytes(argb);
-			chunk_checksum = CRC32::update(chunk_checksum, argb);
 		}
 		const auto zlib_checksum = ADLER32::update(ADLER32::INIT, zlib_stream);
 		const std::array<uint8_t, 4> zlib_adler{
@@ -1314,7 +1492,6 @@ debug_buf[debug_buf_cnt++] = window_ptr[window_len];
 		dt_writer.WriteBytes(zlib_adler);
 		chunk_checksum = CRC32::update(chunk_checksum, zlib_adler);
 		dt_writer.WriteUInt32(chunk_checksum ^ CRC32::INIT);
-
 
 		chunk_checksum = CRC32::INIT;
 		dt_writer.WriteUInt32(0);

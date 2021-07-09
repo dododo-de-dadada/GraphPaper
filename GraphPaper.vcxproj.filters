@@ -99,6 +99,9 @@
     <Image Include="Assets\sample.bmp">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Assets\output.png">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
