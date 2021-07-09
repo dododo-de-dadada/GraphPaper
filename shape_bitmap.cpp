@@ -1455,8 +1455,8 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		// ‚È‚ñ‚¿‚á‚Á‚Ä Deflate
 		size_t i = 0;
 		for (size_t y = 0; y < m_size.height; y++) {
-			for (size_t x = 0; x < m_size.width; x++) {
-				if (i++ % b_max == 0) {
+			for (size_t x = 0; x < m_size.width; x++, i += 4) {
+				if (i % b_max == 0) {
 					const uint8_t  block_hdr = data_len <= i + b_max ?
 						1 : 0;
 					const uint16_t block_len = data_len <= i + b_max ?
@@ -1464,20 +1464,26 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 						static_cast<uint16_t>(b_max);
 					const std::array<uint8_t, 5> deflate{
 						block_hdr,
-						static_cast<uint8_t>(block_len >> 8),
 						static_cast<uint8_t>(block_len),
-						static_cast<uint8_t>(~block_len >> 8),
+						static_cast<uint8_t>(block_len >> 8),
 						static_cast<uint8_t>(~block_len),
+						static_cast<uint8_t>(~block_len >> 8),
 					};
 					dt_writer.WriteBytes(deflate);
 					chunk_checksum = CRC32::update(chunk_checksum, deflate);
 				}
 				const std::array<uint8_t, 4> argb{
-					m_data[y * 4 * m_size.width + 4 * x],
-					m_data[y * 4 * m_size.width + 4 * x + 1],
-					m_data[y * 4 * m_size.width + 4 * x + 2],
-					m_data[y * 4 * m_size.width + 4 * x + 3]
+					m_data[i + 3],
+					m_data[i + 2],
+					m_data[i + 1],
+					0//m_data[i + 0]
 				};
+				//const std::array<uint8_t, 4> argb{
+				//	m_data[y * 4 * m_size.width + 4 * x],
+				//	m_data[y * 4 * m_size.width + 4 * x + 1],
+				//	m_data[y * 4 * m_size.width + 4 * x + 2],
+				//	m_data[y * 4 * m_size.width + 4 * x + 3]
+				//};
 				dt_writer.WriteBytes(argb);
 				chunk_checksum = CRC32::update(chunk_checksum, argb);
 			}
