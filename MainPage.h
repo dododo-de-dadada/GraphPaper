@@ -463,7 +463,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形データをストレージファイルに非同期に書き込む.
 		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile const& s_file, const bool suspend = false, const bool layout = false);
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_dt_write_svg_async(StorageFile const& s_file);
+		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile const& s_file);
+		// 図形データを SVG としてストレージファイルに非同期に書き込む.
+		IAsyncOperation<winrt::hresult> file_write_img_async(ShapeImage* s, const wchar_t suggested_name[], wchar_t img_name[], const size_t name_len);
 		// ファイルの読み込みが終了した.
 		void file_finish_reading(void);
 		// ファイルメニューの「開く」が選択された

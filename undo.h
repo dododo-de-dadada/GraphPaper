@@ -218,7 +218,7 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから操作を読み込む.
 		UndoBitmap(DataReader const& dt_reader);
 		// 図形の部位を保存する.
-		UndoBitmap(ShapeBitmap* const s);
+		UndoBitmap(ShapeImage* const s);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};

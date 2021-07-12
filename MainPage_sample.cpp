@@ -120,12 +120,12 @@ namespace winrt::GraphPaper::implementation
 				co_await winrt::resume_background();
 				try {
 					const auto s_file{ co_await StorageFile::GetFileFromApplicationUriAsync(Uri{ L"ms-appx:///Assets/sample.bmp" }) };
-					const auto ra_stream{ co_await s_file.OpenReadAsync() };
+					const auto& ra_stream{ co_await s_file.OpenReadAsync() };
 					const auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
 					const auto ra_size = static_cast<uint32_t>(ra_stream.Size());
 					if (co_await dt_reader.LoadAsync(ra_size) == ra_size) {
 						const D2D1_POINT_2F c_pos{ samp_w * 0.5f, samp_h * 0.5f };
-						ShapeBitmap* s = new ShapeBitmap(c_pos, dt_reader);
+						ShapeImage* s = new ShapeImage(c_pos, dt_reader);
 						s->m_pos.x = samp_w * 0.125;
 						s->m_pos.y = samp_h * 0.125;
 						s->m_view.width = samp_w - samp_w * 0.25;

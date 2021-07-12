@@ -200,7 +200,7 @@ namespace winrt::GraphPaper::implementation
 					back_selected = true;
 				}
 				// ê}å`ÇÃå^Ç™âÊëúÇ©îªíËÇ∑ÇÈ.,
-				if (s_type == typeid(ShapeBitmap)) {
+				if (s_type == typeid(ShapeImage)) {
 					selected_image_cnt++;
 				}
 				else if (s_type == typeid(ShapeGroup)) {
@@ -465,7 +465,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeBezi(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_IMAGE) {
-			s = new ShapeBitmap(dt_reader);
+			s = new ShapeImage(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_ELLI) {
 			s = new ShapeElli(dt_reader);
@@ -585,7 +585,7 @@ namespace winrt::GraphPaper::implementation
 			if (s_type == typeid(ShapeBezi)) {
 				s_int = SHAPE_TYPE::SHAPE_BEZI;
 			}
-			else if (s_type == typeid(ShapeBitmap)) {
+			else if (s_type == typeid(ShapeImage)) {
 				s_int = SHAPE_TYPE::SHAPE_IMAGE;
 			}
 			else if (s_type == typeid(ShapeElli)) {

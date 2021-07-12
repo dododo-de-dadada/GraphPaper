@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr wchar_t NOT_FOUND[] = L"str_err_found";	// 「文字列が見つかりません」メッセージのリソースキー
+	constexpr wchar_t NOT_FOUND[] = L"str_info_not_found";	// 「文字列が見つかりません」メッセージのリソースキー
 
 	// 文字列の一部を置換する.
 	static wchar_t* find_replace(wchar_t const* w_text, const uint32_t w_pos, const uint32_t w_len, wchar_t const* r_text, const uint32_t r_len) noexcept;

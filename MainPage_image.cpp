@@ -25,10 +25,10 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::image_resize_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		for (auto s : m_list_shapes) {
-			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeBitmap)) {
+			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
 				continue;
 			}
-			auto bm = static_cast<ShapeBitmap*>(s);
+			auto bm = static_cast<ShapeImage*>(s);
 			ustack_push_anch(bm, ANCH_TYPE::ANCH_SHEET);
 			bm->resize_origin();
 		}

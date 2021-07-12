@@ -86,15 +86,15 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t ERR_RECENT[] = L"str_err_recent";	// 最近使ったファイルのエラーメッセージのリソース名
 	constexpr wchar_t ERR_WRITE[] = L"str_err_write";	// 書き込みエラーメッセージのリソース名
 	constexpr wchar_t FT_GPF[] = L".gpf";	// 図形データファイルの拡張子
-	constexpr wchar_t FT_SVG[] = L".svg";	// SVG ファイルの拡張子
+	//constexpr wchar_t FT_SVG[] = L".svg";	// SVG ファイルの拡張子
 	constexpr uint32_t MRU_MAX = 25;	// 最近使ったリストの最大数.
 	constexpr wchar_t UNTITLED[] = L"str_untitled";	// 無題のリソース名
 
 	// データライターに SVG 開始タグを書き込む.
-	static void file_dt_write_svg_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer);
+	static void file_write_svg_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer);
 
 	// データライターに SVG 開始タグを書き込む.
-	static void file_dt_write_svg_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer)
+	static void file_write_svg_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer)
 	{
 		constexpr char SVG_TAG[] = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" ";
 		constexpr char* SVG_UNIT_PX = "px";
@@ -245,7 +245,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_clear();
 			slist_clear(m_list_shapes);
 
-			const auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
+			const auto& ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
 			const auto ra_size = static_cast<uint32_t>(ra_stream.Size());
 			co_await dt_reader.LoadAsync(ra_size);
@@ -482,16 +482,17 @@ namespace winrt::GraphPaper::implementation
 			// ファイル保存ピッカーを得る.
 			// ファイルタイプに拡張子 GPF とその説明を追加する.
 			auto s_picker{ FileSavePicker() };
-			auto const& r_loader = ResourceLoader::GetForCurrentView();
-			const auto desc_gpf = r_loader.GetString(DESC_GPF);
+			//auto const& r_loader = ResourceLoader::GetForCurrentView();
+			const auto desc_gpf = ResourceLoader::GetForCurrentView().GetString(DESC_GPF);
 			const auto type_gpf = winrt::single_threaded_vector<winrt::hstring>({ FT_GPF });
 			s_picker.FileTypeChoices().Insert(desc_gpf, type_gpf);
-			s_picker.SuggestedStartLocation(PickerLocationId::DocumentsLibrary());
+			const auto loc_id{ PickerLocationId::DocumentsLibrary() };
+			s_picker.SuggestedStartLocation(loc_id);
 			// SVG への保存を許すか判定する.
 			if (svg_allowed) {
 				// ファイルタイプに拡張子 SVG とその説明を追加する.
-				const auto desc_svg = r_loader.GetString(DESC_SVG);
-				const auto type_svg = winrt::single_threaded_vector<winrt::hstring>({ FT_SVG });
+				const auto desc_svg = ResourceLoader::GetForCurrentView().GetString(DESC_SVG);
+				const auto type_svg = winrt::single_threaded_vector<winrt::hstring>({ L".svg" });
 				s_picker.FileTypeChoices().Insert(desc_svg, type_svg);
 			}
 			// 最近使ったファイルのトークンが空か判定する.
@@ -516,9 +517,16 @@ namespace winrt::GraphPaper::implementation
 			// ストレージファイルを取得したか判定する.
 			if (s_file != nullptr) {
 				// ファイルタイプが SVG か判定する.
-				if (s_file.FileType() == FT_SVG) {
+				if (s_file.FileType() == L".svg") {
+					//for (const auto s : m_list_shapes) {
+					//	if (s->is_deleted() || typeid(*s) != typeid(ShapeImage)) {
+					//		continue;
+					//	}
+					//	message_show(ICON_INFO, L"str_info_image_found", tx_find_text_what().Text());
+					//	break;
+					//}
 					// 図形データを SVG としてストレージファイルに非同期に書き込み, 結果を得る.
-					hres = co_await file_dt_write_svg_async(s_file);
+					hres = co_await file_write_svg_async(s_file);
 				}
 				else {
 					// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
@@ -592,16 +600,63 @@ namespace winrt::GraphPaper::implementation
 		auto _{ file_save_async() };
 	}
 
+	IAsyncOperation<winrt::hresult> MainPage::file_write_img_async(ShapeImage* s, const wchar_t suggested_name[], wchar_t img_name[], const size_t name_len)
+	{
+		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		using winrt::Windows::Storage::Pickers::FileSavePicker;
+		using winrt::Windows::Storage::CachedFileManager;
+		using winrt::Windows::Storage::FileAccessMode;
+		using winrt::Windows::Storage::Provider::FileUpdateStatus;
+
+		auto hres = E_FAIL;
+		// コルーチンの開始時のスレッドコンテキストを保存する.
+		winrt::apartment_context context;
+		auto img_picker{ FileSavePicker() };
+		const auto bmp_type = winrt::single_threaded_vector<winrt::hstring>({ L".bmp" });
+		const auto png_type = winrt::single_threaded_vector<winrt::hstring>({ L".png" });
+		co_await winrt::resume_foreground(Dispatcher());
+		const auto bmp_desc{ ResourceLoader::GetForCurrentView().GetString(L"str_desc_bmp") };
+		const auto png_desc{ ResourceLoader::GetForCurrentView().GetString(L"str_desc_png") };
+		img_picker.FileTypeChoices().Insert(bmp_desc, bmp_type);
+		img_picker.FileTypeChoices().Insert(png_desc, png_type);
+		img_picker.SuggestedFileName(suggested_name);
+		auto& img_file{ co_await img_picker.PickSaveFileAsync() };
+		co_await winrt::resume_background();
+		if (img_file != nullptr) {
+			CachedFileManager::DeferUpdates(img_file);
+
+			const auto& img_stream{ co_await img_file.OpenAsync(FileAccessMode::ReadWrite) };
+			auto img_writer{ DataWriter(img_stream.GetOutputStreamAt(0)) };
+			if (img_file.FileType() == L".bmp") {
+				static_cast<ShapeImage*>(s)->write_bmp(img_writer);
+			}
+			else if (img_file.FileType() == L".png") {
+				static_cast<ShapeImage*>(s)->write_png(img_writer);
+			}
+			co_await img_writer.StoreAsync();
+			co_await img_stream.FlushAsync();
+			img_writer.Close();
+			// 遅延させたファイル更新を完了し, 結果を判定する.
+			if (co_await CachedFileManager::CompleteUpdatesAsync(img_file) == FileUpdateStatus::Complete) {
+				hres = S_OK;
+				wcscpy_s(img_name, name_len, img_file.Path().c_str());
+			}
+		}
+		// スレッドコンテキストを復元する.
+		co_await context;
+		// 結果を返し終了する.
+		co_return hres;
+	}
+
 	// 図形データを SVG としてストレージファイルに非同期に書き込む.
 	// file	書き込み先のファイル
 	// 戻り値	書き込めた場合 S_OK
-	IAsyncOperation<winrt::hresult> MainPage::file_dt_write_svg_async(StorageFile const& s_file)
+	IAsyncOperation<winrt::hresult> MainPage::file_write_svg_async(StorageFile const& s_file)
 	{
 		using winrt::Windows::Storage::CachedFileManager;
 		using winrt::Windows::Storage::FileAccessMode;
-		using winrt::Windows::Storage::Pickers::FileSavePicker;
+		//using winrt::Windows::Storage::Pickers::FileSavePicker;
 		using winrt::Windows::Storage::Provider::FileUpdateStatus;
-
 
 		constexpr char XML_DEC[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" SVG_NEW_LINE;
 		constexpr char DOCTYPE[] = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" SVG_NEW_LINE;
@@ -614,7 +669,7 @@ namespace winrt::GraphPaper::implementation
 			// ファイル更新の遅延を設定する.
 			CachedFileManager::DeferUpdates(s_file);
 			// ストレージファイルを開いてランダムアクセスストリームを得る.
-			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::ReadWrite) };
+			const auto& ra_stream{ co_await s_file.OpenAsync(FileAccessMode::ReadWrite) };
 			// ランダムアクセスストリームの先頭からデータライターを作成する.
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
 			// XML 宣言を書き込む.
@@ -622,65 +677,40 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			dt_write_svg(DOCTYPE, dt_writer);
 			// データライターに SVG 開始タグを書き込む.
-			file_dt_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, m_sheet_dx.m_logical_dpi, m_misc_len_unit, dt_writer);
+			file_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, m_sheet_dx.m_logical_dpi, m_misc_len_unit, dt_writer);
 			// 日時 (注釈) を書き込む.
-			char buf[64];
-			const auto t = time(nullptr);
-			struct tm tm;
-			localtime_s(&tm, &t);
-			strftime(buf, 64, "<!-- %m/%d/%Y %H:%M:%S -->" SVG_NEW_LINE, &tm);
-			dt_write_svg(buf, dt_writer);
+			//char buf[64];
+			//const auto t = time(nullptr);
+			//struct tm tm;
+			//localtime_s(&tm, &t);
+			//strftime(buf, 64, "<!-- %m/%d/%Y %H:%M:%S -->" SVG_NEW_LINE, &tm);
+			//dt_write_svg(buf, dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_list_shapes) {
 				if (s->is_deleted()) {
 					continue;
 				}
 				// 図形が画像か判定する.
-				if (typeid(*s) == typeid(ShapeBitmap)) {
+				if (typeid(*s) == typeid(ShapeImage)) {
 					static uint32_t magic_num = 0;	// ミリ秒の代わり
 					constexpr size_t MAX_LEN = 1024 - 8;
-					wchar_t bmp_name[MAX_LEN + 8];
+					wchar_t img_name[MAX_LEN + 8];
 					const auto t = time(nullptr);
 					struct tm tm;
 					localtime_s(&tm, &t);
 					
-					swprintf(bmp_name, MAX_LEN, L"%s", s_file.Name().data());
-					const auto dot_ptr = wcsrchr(bmp_name, L'.');
-					const size_t dot_len = (dot_ptr != nullptr ? dot_ptr - bmp_name : wcslen(bmp_name));
-					const size_t tail_len = dot_len + wcsftime(bmp_name + dot_len, MAX_LEN - dot_len, L"%Y%m%d%H%M%S", &tm);
-					//swprintf(bmp_name + tail_len, 8, L"%03d.bmp", magic_num++);
-					swprintf(bmp_name + tail_len, 8, L"%03d.png", magic_num++);
-					const auto s_folder{ co_await s_file.GetParentAsync() };
-					auto bmp_picker{ FileSavePicker() };
-					const auto bmp_type = winrt::single_threaded_vector<winrt::hstring>({ L".png" });
-					//const auto bmp_type = winrt::single_threaded_vector<winrt::hstring>({ L".bmp" });
-
-					bmp_picker.FileTypeChoices().Insert(L"Bitmap", bmp_type);
-					bmp_picker.SuggestedFileName(bmp_name);
-					// ピッカーを非同期で表示してストレージファイルを取得する.
-					// ストレージファイルがヌルポインターか判定する.
-					// (「閉じる」ボタンが押された場合ストレージファイルは nullptr.)
-					// スレッドをメインページの UI スレッドに変える.
-					co_await winrt::resume_foreground(Dispatcher());
-					auto bmp_file{ co_await bmp_picker.PickSaveFileAsync() };
-					co_await winrt::resume_background();
-					if (bmp_file != nullptr) {
-						CachedFileManager::DeferUpdates(bmp_file);
-
-						auto bmp_stream{ co_await bmp_file.OpenAsync(FileAccessMode::ReadWrite) };
-						auto bmp_writer{ DataWriter(bmp_stream.GetOutputStreamAt(0)) };
-						static_cast<ShapeBitmap*>(s)->write_png(bmp_writer);
-						//static_cast<ShapeBitmap*>(s)->write_bmp(bmp_writer);
-						co_await bmp_writer.StoreAsync();
-						co_await bmp_stream.FlushAsync();
-						bmp_writer.Close();
-						// 遅延させたファイル更新を完了し, 結果を判定する.
-						if (co_await CachedFileManager::CompleteUpdatesAsync(bmp_file) == FileUpdateStatus::Complete) {
-							// 完了した場合, S_OK を結果に格納する.
-							hres = S_OK;
-						}
-
-						static_cast<ShapeBitmap*>(s)->write_svg(bmp_file.Path().c_str(), dt_writer);
+					swprintf(img_name, MAX_LEN, L"%s", s_file.Name().data());
+					const auto dot_ptr = wcsrchr(img_name, L'.');
+					const size_t dot_len = (dot_ptr != nullptr ? dot_ptr - img_name : wcslen(img_name));
+					const size_t tail_len = dot_len + wcsftime(img_name + dot_len, MAX_LEN - dot_len, L"%Y%m%d%H%M%S", &tm);
+					swprintf(img_name + tail_len, 8, L"%03d.bmp", magic_num++);
+					//const auto s_folder{ co_await s_file.GetParentAsync() };
+					const auto b = static_cast<ShapeImage*>(s);
+					if (co_await file_write_img_async(b, img_name, img_name, MAX_LEN) == S_OK) {
+						b->write_svg(img_name, dt_writer);
+					}
+					else {
+						b->write_svg(dt_writer);
 					}
 				}
 				else {
@@ -751,7 +781,7 @@ namespace winrt::GraphPaper::implementation
 			// ストレージファイルを開いてランダムアクセスストリームを得る.
 			// ランダムアクセスストリームからデータライターを作成する.
 			CachedFileManager::DeferUpdates(s_file);
-			auto ra_stream{ co_await s_file.OpenAsync(FileAccessMode::ReadWrite) };
+			const auto& ra_stream{ co_await s_file.OpenAsync(FileAccessMode::ReadWrite) };
 			auto dt_writer{ DataWriter(ra_stream.GetOutputStreamAt(0)) };
 
 			//tool_write(dt_writer);

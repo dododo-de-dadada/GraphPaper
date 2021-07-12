@@ -115,10 +115,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		//using winrt::GraphPaper::implementation::equal;
 
-		const auto pos = static_cast<ShapeBitmap*>(m_shape)->m_pos;
-		const auto view = static_cast<ShapeBitmap*>(m_shape)->m_view;
-		const auto rect = static_cast<ShapeBitmap*>(m_shape)->m_rect;
-		const auto ratio = static_cast<ShapeBitmap*>(m_shape)->m_ratio;
+		const auto pos = static_cast<ShapeImage*>(m_shape)->m_pos;
+		const auto view = static_cast<ShapeImage*>(m_shape)->m_view;
+		const auto rect = static_cast<ShapeImage*>(m_shape)->m_rect;
+		const auto ratio = static_cast<ShapeImage*>(m_shape)->m_ratio;
 		return !equal(pos, m_pos) || !equal(view, m_view) || !equal(rect, m_rect) || !equal(ratio, m_ratio);
 	}
 
@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 	// å≥Ç…ñﬂÇ∑ëÄçÏÇé¿çsÇ∑ÇÈ.
 	void UndoBitmap::exec(void)
 	{
-		ShapeBitmap* s = static_cast<ShapeBitmap*>(m_shape);
+		ShapeImage* s = static_cast<ShapeImage*>(m_shape);
 		const auto pos = s->m_pos;
 		const auto view = s->m_view;
 		const auto rect = s->m_rect;
@@ -172,7 +172,7 @@ namespace winrt::GraphPaper::implementation
 		m_pos(undo_get_pos_anch(s, anch))
 	{}
 
-	UndoBitmap::UndoBitmap(ShapeBitmap* const s) :
+	UndoBitmap::UndoBitmap(ShapeImage* const s) :
 		Undo(s),
 		m_pos(s->m_pos),
 		m_view(s->m_view),

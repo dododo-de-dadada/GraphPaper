@@ -875,7 +875,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// ‰Ÿ‚³‚ê‚½}Œ`‚ª’è‹K‚©”»’è‚·‚é.
-		else if (typeid(*m_event_shape_pressed) == typeid(ShapeBitmap)) {
+		else if (typeid(*m_event_shape_pressed) == typeid(ShapeImage)) {
 			if (m_menu_image != nullptr) {
 				scp_sheet_panel().ContextFlyout(m_menu_image);
 			}

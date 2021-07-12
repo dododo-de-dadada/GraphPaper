@@ -3,11 +3,11 @@
 // shape.cpp	図形のひな型, その他
 // shape_anch.cpp	図形の部位を表示
 // shape_bezi.cpp	ベジェ曲線
-// shape_bitmap.cpp	画像
 // shape_dt.cpp	読み込み, 書き込み.
 // shape_dx.cpp	図形の描画環境
 // shape_elli.cpp	だ円
 // shape_group.cpp	グループ
+// shape_image.cpp	画像
 // shape_line.cpp	直線
 // shape_path.cpp	折れ線のひな型
 // shape_poly.cpp	多角形
@@ -37,7 +37,7 @@
 //        +---------------+---------------+---------------+
 //        |               |               |               |
 // +------+------+ +------+------+ +------+------+ +------+------+
-// | ShapeStroke*| | ShapeBitmap | | ShapeGroup  | | ShapeSheet  |
+// | ShapeStroke*| | ShapeImage  | | ShapeGroup  | | ShapeSheet  |
 // +------+------+ +-------------+ +-------------+ +-------------+
 //        |
 //        +-------------------------------+
@@ -334,7 +334,7 @@ namespace winrt::GraphPaper::implementation
 	// データライターに SVG としてシングルバイト文字列を書き込む.
 	void dt_write_svg(const char* value, DataWriter const& dt_writer);
 	// データライターに SVG としてマルチバイト文字列を書き込む.
-	void dt_write_svg(const wchar_t* value, const uint32_t v_len, DataWriter const& dt_writer);
+	void dt_write_svg(const wchar_t value[], const uint32_t v_len, DataWriter const& dt_writer);
 	// データライターに SVG として属性名とシングルバイト文字列を書き込む.
 	void dt_write_svg(const char* value, const char* name, DataWriter const& dt_writer);
 	// データライターに SVG として命令と位置を書き込む.
@@ -624,7 +624,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 画像
 	//------------------------------
-	struct ShapeBitmap : Shape {
+	struct ShapeImage : Shape {
 		bool m_is_deleted = false;	// 消去されたか判定
 		bool m_is_selected = false;	// 選択されたか判定
 		D2D1_POINT_2F m_pos;	// 始点の位置
@@ -636,7 +636,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_ratio;	// 表示寸法と原寸の縦横比
 		winrt::com_ptr<ID2D1Bitmap1> m_dx_bitmap{ nullptr };
 
-		~ShapeBitmap(void);
+		// 図形を破棄する.
+		~ShapeImage(void);
 		// 図形を表示する.
 		void draw(SHAPE_DX& dx);
 		// 図形を囲む領域を得る.
@@ -676,17 +677,19 @@ namespace winrt::GraphPaper::implementation
 		// 値を選択されてるか判定に格納する.
 		bool set_select(const bool /*value*/) noexcept;
 		// 図形を作成する.
-		ShapeBitmap(const D2D1_POINT_2F c_pos, DataReader const& dt_reader);
+		ShapeImage(const D2D1_POINT_2F c_pos, DataReader const& dt_reader);
 		// データリーダーから読み込む.
-		ShapeBitmap(DataReader const& dt_reader);
+		ShapeImage(DataReader const& dt_reader);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
+		// データライターに DIB として画像データを書き込む.
+		void write_bmp(DataWriter const& dt_writer) const;
+		// データライターに PNG として画像データを書き込む.
+		void write_png(DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
 		void write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const;
-		// データライターに DIB として書き込む.
-		void write_bmp(DataWriter const& dt_writer) const;
-		// データライターに PNG として書き込む.
-		void write_png(DataWriter const& dt_writer) const;
+		// データライターに SVG として書き込む.
+		void write_svg(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------

@@ -29,8 +29,8 @@ namespace winrt::GraphPaper::implementation
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// 出力ストリームを作成して, データライターを得る.
-		auto ra_stream{ InMemoryRandomAccessStream() };
-		auto out_stream{ ra_stream.GetOutputStreamAt(0) };
+		auto mem_stream{ InMemoryRandomAccessStream() };
+		auto out_stream{ mem_stream.GetOutputStreamAt(0) };
 		auto dt_writer{ DataWriter(out_stream) };
 		// データライターに選択された図形のリストを書き込む.
 		constexpr bool REDUCED = true;
@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 			auto dt_pkg{ DataPackage() };
 			// ストリームをデータパッケージに格納する.
 			dt_pkg.RequestedOperation(DataPackageOperation::Copy);
-			dt_pkg.SetData(CBF_GPD, winrt::box_value(ra_stream));
+			dt_pkg.SetData(CBF_GPD, winrt::box_value(mem_stream));
 			if (text.empty() != true) {
 				// 文字列が空でない場合,
 				// 文字列をデータパッケージに格納する.
@@ -352,7 +352,7 @@ namespace winrt::GraphPaper::implementation
 						static_cast<FLOAT>((sb_w + act_w * 0.5) / scale),
 						static_cast<FLOAT>((sb_h + act_h * 0.5) / scale)
 					};
-					ShapeBitmap* bm = new ShapeBitmap(c_pos, dt_reader);
+					ShapeImage* bm = new ShapeImage(c_pos, dt_reader);
 					m_dx_mutex.lock();
 					ustack_push_append(bm);
 					ustack_push_select(bm);

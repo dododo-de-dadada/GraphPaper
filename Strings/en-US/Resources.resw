@@ -718,7 +718,15 @@
     <comment>String</comment>
   </data>
   <data name="str_desc_svg" xml:space="preserve">
-    <value>Scalable Vector Graphics</value>
+    <value>SVG File</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_desc_bmp" xml:space="preserve">
+    <value>BMP File</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_desc_png" xml:space="preserve">
+    <value>PNG File</value>
     <comment>String</comment>
   </data>
   <data name="str_dot_gap" xml:space="preserve">
@@ -729,8 +737,12 @@
     <value>Dot Length</value>
     <comment>String</comment>
   </data>
-  <data name="str_err_found" xml:space="preserve">
+  <data name="str_info_not_found" xml:space="preserve">
     <value>No search text was found.</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_info_image_found" xml:space="preserve">
+    <value>The file save picker opens for each image.</value>
     <comment>String</comment>
   </data>
   <data name="str_err_number" xml:space="preserve">

@@ -375,7 +375,7 @@ namespace winrt::GraphPaper::implementation
 	// value	マルチバイト文字列
 	// v_len	文字列の文字数
 	// dt_writer	データライター
-	void dt_write_svg(const wchar_t* value, const uint32_t v_len, DataWriter const& dt_writer)
+	void dt_write_svg(const wchar_t value[], const uint32_t v_len, DataWriter const& dt_writer)
 	{
 		if (v_len > 0) {
 			const auto s_len = WideCharToMultiByte(CP_UTF8, 0, value, v_len, (char*)NULL, 0, NULL, NULL);

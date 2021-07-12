@@ -714,7 +714,15 @@
     <comment>String</comment>
   </data>
   <data name="str_desc_svg" xml:space="preserve">
-    <value>スケーラブル・ベクター・グラフィックス</value>
+    <value>SVG ファイル</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_desc_bmp" xml:space="preserve">
+    <value>BMP ファイル</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_desc_png" xml:space="preserve">
+    <value>PNG ファイル</value>
     <comment>String</comment>
   </data>
   <data name="str_dot_gap" xml:space="preserve">
@@ -725,8 +733,12 @@
     <value>点線の長さ</value>
     <comment>String</comment>
   </data>
-  <data name="str_err_found" xml:space="preserve">
+  <data name="str_info_not_found" xml:space="preserve">
     <value>文字列が見つかりません.</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_info_image_found" xml:space="preserve">
+    <value>画像ごとにファイル保存ピッカーが開きます.</value>
     <comment>String</comment>
   </data>
   <data name="str_err_number" xml:space="preserve">

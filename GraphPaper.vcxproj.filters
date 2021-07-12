@@ -62,7 +62,7 @@
     <ClCompile Include="shape_anch.cpp" />
     <ClCompile Include="shape_dt.cpp" />
     <ClCompile Include="MainPage_dash.cpp" />
-    <ClCompile Include="shape_bitmap.cpp" />
+    <ClCompile Include="shape_image.cpp" />
     <ClCompile Include="MainPage_image.cpp" />
   </ItemGroup>
   <ItemGroup>
