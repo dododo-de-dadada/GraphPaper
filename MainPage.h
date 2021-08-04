@@ -484,6 +484,7 @@ namespace winrt::GraphPaper::implementation
 		IAsyncOperation<StorageFile> file_recent_get_async(const winrt::hstring token);
 		// 最近使ったファイルのメニュー項目を更新する.
 		void file_recent_update_menu(void);
+		void file_import_img_click(IInspectable const&, RoutedEventArgs const&) {};
 
 		//-------------------------------
 		// MainPage_fill.cpp

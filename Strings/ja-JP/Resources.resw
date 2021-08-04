@@ -718,14 +718,26 @@
     <comment>String</comment>
   </data>
   <data name="str_desc_bmp" xml:space="preserve">
-    <value>BMP ファイル</value>
+    <value>BMP</value>
     <comment>String</comment>
   </data>
-  <data name="str_desc_png" xml:space="preserve">
-    <value>PNG ファイル</value>
+	<data name="str_desc_gif" xml:space="preserve">
+    <value>GIF</value>
     <comment>String</comment>
   </data>
-  <data name="str_dot_gap" xml:space="preserve">
+	<data name="str_desc_jpg" xml:space="preserve">
+    <value>JPEG</value>
+    <comment>String</comment>
+  </data>
+	<data name="str_desc_png" xml:space="preserve">
+    <value>PNG</value>
+    <comment>String</comment>
+  </data>
+	<data name="str_desc_tif" xml:space="preserve">
+    <value>TIFF</value>
+    <comment>String</comment>
+  </data>
+	<data name="str_dot_gap" xml:space="preserve">
     <value>点線の間隔</value>
     <comment>String</comment>
   </data>

@@ -26,6 +26,7 @@
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
 #include <winrt/Windows.Devices.Input.h>
 #include <winrt/Windows.Globalization.Fonts.h>
+#include <winrt/Windows.Graphics.Imaging.h>
 #include <winrt/Windows.Storage.AccessCache.h>
 #include <winrt/Windows.Storage.Pickers.h>
 #include <winrt/Windows.System.Threading.h>
@@ -34,3 +35,4 @@
 #include <winrt/Windows.UI.Input.h>
 #include <winrt/Windows.UI.ViewManagement.h>
 #include <winrt/Windows.UI.Xaml.Input.h>
+#include <winrt/Windows.UI.Xaml.Media.Imaging.h>

@@ -773,7 +773,7 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		dt_read(m_size, dt_reader);
 		dt_read(m_ratio, dt_reader);
 
-		const size_t row_size = 4 * m_size.width;
+		const size_t row_size = 4ull * m_size.width;
 		m_data = new uint8_t[row_size * m_size.height];
 		std::vector<uint8_t> buf(row_size);
 		for (size_t i = 0; i < m_size.height; i++) {

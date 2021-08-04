@@ -374,7 +374,17 @@
                         <KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutSeparator />
+				<MenuFlyoutItem x:Name="mfi_file_import_img" x:Uid="mfi_file_import_img" Icon="Import" Click="file_import_img_click" Text="Import Image..." >
+                    <!--
+					<MenuFlyoutItem.Icon>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_save_as}" />
+					</MenuFlyoutItem.Icon>
+                    -->
+					<MenuFlyoutItem.KeyboardAccelerators>
+						<KeyboardAccelerator Key="I" Modifiers="Control,Shift" />
+					</MenuFlyoutItem.KeyboardAccelerators>
+				</MenuFlyoutItem>
+				<MenuFlyoutSeparator />
                 <MenuFlyoutSubItem x:Uid="mfsi_file_recent" Text="Recent Files">
                     <MenuFlyoutSubItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_recent}" />
