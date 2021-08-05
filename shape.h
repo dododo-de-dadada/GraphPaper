@@ -67,6 +67,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataWriter;
 	using winrt::Windows::UI::Color;
 	using winrt::Windows::UI::Xaml::Media::Brush;
+	using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
 
 #if defined(_DEBUG)
 	extern uint32_t debug_leak_cnt;
@@ -182,6 +183,15 @@ namespace winrt::GraphPaper::implementation
 	constexpr DASH_PATT DEF_DASH_PATT{ { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F } };
 	constexpr D2D1_SIZE_F DEF_TEXT_MARGIN{ DEF_FONT_SIZE / 4.0, DEF_FONT_SIZE / 4.0 };
 	constexpr size_t MAX_N_GON = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
+
+	MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
+		IMemoryBufferByteAccess : IUnknown
+	{
+		virtual HRESULT STDMETHODCALLTYPE GetBuffer(
+			BYTE * *value,
+			UINT32 * capacity
+			);
+	};
 
 	//------------------------------
 	// shape.cpp
@@ -633,7 +643,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_U m_size;	// ビットマップの原寸
 		uint8_t* m_data;	// ビットマップのデータ
 		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
-		D2D1_SIZE_F m_ratio;	// 表示寸法と原寸の縦横比
+		D2D1_SIZE_F m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
 		winrt::com_ptr<ID2D1Bitmap1> m_dx_bitmap{ nullptr };
 
 		// 図形を破棄する.
@@ -676,6 +686,8 @@ namespace winrt::GraphPaper::implementation
 		bool set_pos_start(const D2D1_POINT_2F /*value*/);
 		// 値を選択されてるか判定に格納する.
 		bool set_select(const bool /*value*/) noexcept;
+		// 図形を作成する.
+		ShapeImage(const D2D1_POINT_2F c_pos, const SoftwareBitmap& bitmap);
 		// 図形を作成する.
 		ShapeImage(const D2D1_POINT_2F c_pos, DataReader const& dt_reader);
 		// データリーダーから読み込む.

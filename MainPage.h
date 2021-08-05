@@ -468,6 +468,8 @@ namespace winrt::GraphPaper::implementation
 		IAsyncOperation<winrt::hresult> file_write_img_async(ShapeImage* s, const wchar_t suggested_name[], wchar_t img_name[], const size_t name_len);
 		// ファイルの読み込みが終了した.
 		void file_finish_reading(void);
+		// ファイルメニューの「画像をインポートする」が選択された
+		IAsyncAction file_import_img_click(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「開く」が選択された
 		IAsyncAction file_open_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「名前を付けて保存」が選択された
@@ -484,7 +486,6 @@ namespace winrt::GraphPaper::implementation
 		IAsyncOperation<StorageFile> file_recent_get_async(const winrt::hstring token);
 		// 最近使ったファイルのメニュー項目を更新する.
 		void file_recent_update_menu(void);
-		void file_import_img_click(IInspectable const&, RoutedEventArgs const&) {};
 
 		//-------------------------------
 		// MainPage_fill.cpp

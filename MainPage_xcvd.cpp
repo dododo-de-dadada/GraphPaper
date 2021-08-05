@@ -209,7 +209,7 @@ namespace winrt::GraphPaper::implementation
 			const auto& dp_view = Clipboard::GetContent();
 			if (dp_view.Contains(CBF_GPD)) {
 				// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.
-				auto dt_object{ co_await Clipboard::GetContent().GetDataAsync(CBF_GPD) };
+				auto& dt_object{ co_await Clipboard::GetContent().GetDataAsync(CBF_GPD) };
 				auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
 				auto in_stream{ ra_stream.GetInputStreamAt(0) };
 				auto dt_reader{ DataReader(in_stream) };
@@ -339,37 +339,36 @@ namespace winrt::GraphPaper::implementation
 				const float sb_h = static_cast<FLOAT>(sb_vert().Value());
 				// resume_background しないと GetBitmapAsync が失敗することがある.
 				co_await winrt::resume_background();
-				auto bitmap{ co_await Clipboard::GetContent().GetBitmapAsync() };
-				auto ra_stream{ co_await bitmap.OpenReadAsync() };
+				auto& bitmap{ co_await Clipboard::GetContent().GetBitmapAsync() };
+				auto& ra_stream{ co_await bitmap.OpenReadAsync() };
 				auto in_stream{ ra_stream.GetInputStreamAt(0) };
 				auto dt_reader{ DataReader(in_stream) };
 				auto ra_size = static_cast<UINT32>(ra_stream.Size());
-				auto operation{ co_await dt_reader.LoadAsync(ra_size) };
-				if (operation == ra_size) {
+				if (co_await dt_reader.LoadAsync(ra_size) == ra_size) {
 					// 用紙の表示された部分の中心の位置を求める.
 					const float scale = m_sheet_main.m_sheet_scale;
-					const D2D1_POINT_2F c_pos{
-						static_cast<FLOAT>((sb_w + act_w * 0.5) / scale),
-						static_cast<FLOAT>((sb_h + act_h * 0.5) / scale)
-					};
-					ShapeImage* bm = new ShapeImage(c_pos, dt_reader);
+					ShapeImage* img = new ShapeImage({ static_cast<FLOAT>((sb_w + act_w * 0.5) / scale), static_cast<FLOAT>((sb_h + act_h * 0.5) / scale) }, dt_reader);
 					m_dx_mutex.lock();
-					ustack_push_append(bm);
-					ustack_push_select(bm);
+					ustack_push_append(img);
+					ustack_push_select(img);
 					ustack_push_null();
 					m_dx_mutex.unlock();
 					co_await winrt::resume_foreground(Dispatcher());
 					ustack_is_enable();
 					// 一覧が表示されてるか判定する.
 					if (summary_is_visible()) {
-						summary_append(bm);
-						summary_select(bm);
+						summary_append(img);
+						summary_select(img);
 					}
 					xcvd_is_enabled();
-					sheet_update_bbox(bm);
+					sheet_update_bbox(img);
 					sheet_panle_size();
 					sheet_draw();
 				}
+				dt_reader.Close();
+				in_stream.Close();
+				ra_stream.Close();
+				bitmap = nullptr;
 			}
 		}
 		catch (winrt::hresult_error const& e) {

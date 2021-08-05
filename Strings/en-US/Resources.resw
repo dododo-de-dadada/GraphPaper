@@ -793,7 +793,11 @@
     <value>Height</value>
     <comment>String</comment>
   </data>
-  <data name="str_grid_length" xml:space="preserve">
+	<data name="str_image" xml:space="preserve">
+    <value>Image</value>
+    <comment>String</comment>
+  </data>
+	<data name="str_grid_length" xml:space="preserve">
     <value>Size</value>
     <comment>String</comment>
   </data>

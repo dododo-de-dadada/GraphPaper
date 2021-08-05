@@ -597,6 +597,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			v_abs[0] = FLT_MAX;
 		}
+		// ” Œ^‚È‚ç, ‰EãˆÊ’u‚ÉÅ‚à‹ß‚¢’¸“_‚Æ‚»‚Ì‹——£‚ğ“¾‚é.
 		if (box_type && slist_find_vertex_closest(slist, b_pos[1], d_limit, v_pos[1])) {
 			D2D1_POINT_2F v_sub;
 			pt_sub(v_pos[1], b_pos[1], v_sub);
@@ -621,7 +622,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			v_abs[3] = FLT_MAX;
 		}
-		double g_abs[2];
+		double g_abs[2];	// •ûŠá‚Æ‚Ì‹——£‚Ì©æ
 		D2D1_POINT_2F g_pos[2];
 		if (g_snap) {
 			D2D1_POINT_2F g_sub[2];
@@ -638,6 +639,7 @@ namespace winrt::GraphPaper::implementation
 			g_abs[0] = FLT_MAX;
 			g_abs[1] = FLT_MAX;
 		}
+
 		if (g_abs[0] <= v_abs[0] && g_abs[0] <= v_abs[3]) {
 			p_pos.x = g_pos[0].x;
 		}
@@ -647,7 +649,8 @@ namespace winrt::GraphPaper::implementation
 		else {
 			p_pos.x = v_pos[3].x;
 		}
-		if (g_snap && g_abs[0] <= v_abs[0] && g_abs[0] <= v_abs[1]) {
+
+		if (g_abs[0] <= v_abs[0] && g_abs[0] <= v_abs[1]) {
 			p_pos.y = g_pos[0].y;
 		}
 		else if (v_abs[0] <= g_abs[0] && v_abs[0] <= v_abs[1]) {
@@ -656,6 +659,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			p_pos.y = v_pos[1].y;
 		}
+
 		if (g_abs[1] <= v_abs[2] && g_abs[1] <= v_abs[1]) {
 			r_pos.x = g_pos[1].x;
 		}

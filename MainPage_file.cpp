@@ -85,8 +85,13 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t ERR_READ[] = L"str_err_read";	// 読み込みエラーメッセージのリソース名
 	constexpr wchar_t ERR_RECENT[] = L"str_err_recent";	// 最近使ったファイルのエラーメッセージのリソース名
 	constexpr wchar_t ERR_WRITE[] = L"str_err_write";	// 書き込みエラーメッセージのリソース名
-	constexpr wchar_t FT_GPF[] = L".gpf";	// 図形データファイルの拡張子
-	//constexpr wchar_t FT_SVG[] = L".svg";	// SVG ファイルの拡張子
+	constexpr wchar_t DOT_GPF[] = L".gpf";	// 図形データファイルの拡張子
+	constexpr wchar_t DOT_SVG[] = L".svg";	// SVG ファイルの拡張子
+	constexpr wchar_t DOT_BMP[] = L".bmp";	// 画像ファイルの拡張子
+	constexpr wchar_t DOT_GIF[] = L".gif";	// 画像ファイルの拡張子
+	constexpr wchar_t DOT_JPG[] = L".jpg";	// 画像ファイルの拡張子
+	constexpr wchar_t DOT_PNG[] = L".png";	// 画像ファイルの拡張子
+	constexpr wchar_t DOT_TIF[] = L".tif";	// 画像ファイルの拡張子
 	constexpr uint32_t MRU_MAX = 25;	// 最近使ったリストの最大数.
 	constexpr wchar_t UNTITLED[] = L"str_untitled";	// 無題のリソース名
 
@@ -193,7 +198,78 @@ namespace winrt::GraphPaper::implementation
 		status_bar_visibility();
 	}
 
-	// ファイルメニューの「開く」が選択された
+	// ファイルメニューの「画像をインポートする...」が選択された.
+	IAsyncAction MainPage::file_import_img_click(IInspectable const&, RoutedEventArgs const&)
+	{
+		using winrt::Windows::Storage::FileAccessMode;
+		using winrt::Windows::Storage::Pickers::FileOpenPicker;
+
+		winrt::apartment_context context;
+		// ファイル「オープン」ピッカーを取得して開く.
+		auto open_picker{ FileOpenPicker() };
+		open_picker.FileTypeFilter().Append(DOT_BMP);
+		open_picker.FileTypeFilter().Append(DOT_GIF);
+		open_picker.FileTypeFilter().Append(DOT_JPG);
+		open_picker.FileTypeFilter().Append(DOT_PNG);
+		open_picker.FileTypeFilter().Append(DOT_TIF);
+		// ピッカーを非同期で表示してストレージファイルを取得する.
+		// (「閉じる」ボタンが押された場合ストレージファイルは nullptr.)
+		auto& open_file{ co_await open_picker.PickSingleFileAsync() };
+		// ストレージファイルがヌルポインターか判定する.
+		if (open_file != nullptr) {
+			using winrt::Windows::Graphics::Imaging::BitmapDecoder;
+			using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
+			using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+
+			// 待機カーソルを表示, 表示する前のカーソルを得る.
+			auto const& prev_cur = file_wait_cursor();
+
+			const float act_w = static_cast<float>(scp_sheet_panel().ActualWidth());
+			const float act_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+			const float sb_w = static_cast<float>(sb_horz().Value());
+			const float sb_h = static_cast<FLOAT>(sb_vert().Value());
+			co_await winrt::resume_background();
+
+			auto& stream{ co_await open_file.OpenAsync(FileAccessMode::Read) };
+			auto& decoder{ co_await BitmapDecoder::CreateAsync(stream) };
+			auto bitmap{ SoftwareBitmap::Convert(co_await decoder .GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8) };
+
+			// 用紙の表示された部分の中心の位置を求める.
+			const float scale = m_sheet_main.m_sheet_scale;
+			ShapeImage* img = new ShapeImage({ static_cast<FLOAT>((sb_w + act_w * 0.5) / scale), static_cast<FLOAT>((sb_h + act_h * 0.5) / scale) }, bitmap);
+			bitmap.Close();
+			bitmap = nullptr;
+			decoder = nullptr;
+			stream.Close();
+			stream = nullptr;
+
+			m_dx_mutex.lock();
+			ustack_push_append(img);
+			ustack_push_select(img);
+			ustack_push_null();
+			m_dx_mutex.unlock();
+			co_await winrt::resume_foreground(Dispatcher());
+
+			ustack_is_enable();
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
+				summary_append(img);
+				summary_select(img);
+			}
+			xcvd_is_enabled();
+			sheet_update_bbox(img);
+			sheet_panle_size();
+			sheet_draw();
+
+			// カーソルを元に戻す.
+			Window::Current().CoreWindow().PointerCursor(prev_cur);
+		}
+
+		// スレッドコンテキストを復元する.
+		co_await context;
+	};
+
+	// ファイルメニューの「開く...」が選択された
 	IAsyncAction MainPage::file_open_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::Storage::Pickers::FileOpenPicker;
@@ -205,8 +281,8 @@ namespace winrt::GraphPaper::implementation
 		// 待機カーソルを表示, 表示する前のカーソルを得る.
 		auto const& prev_cur = file_wait_cursor();
 		// ファイル「オープン」ピッカーを取得して開く.
-		auto o_picker{ FileOpenPicker() };
-		o_picker.FileTypeFilter().Append(FT_GPF);
+		auto open_picker{ FileOpenPicker() };
+		open_picker.FileTypeFilter().Append(DOT_GPF);
 		// ダブルクリックでファイルが選択された場合,
 		// co_await が終了する前に, PonterReleased と PonterEntered が呼ばれる.
 		// これはピッカーが 2 度目の Released を待たずにダブルクリックを成立させているためだと思われる.
@@ -214,17 +290,16 @@ namespace winrt::GraphPaper::implementation
 		//scp_sheet_panel().PointerEntered(m_token_event_entered);
 
 		// ピッカーを非同期で表示してストレージファイルを取得する.
-		// ストレージファイルがヌルポインターか判定する.
 		// (「閉じる」ボタンが押された場合ストレージファイルは nullptr.)
-		auto s_file{ co_await o_picker.PickSingleFileAsync() };
-		if (s_file != nullptr) {
+		auto& open_file{ co_await open_picker.PickSingleFileAsync() };
+		// ストレージファイルがヌルポインターか判定する.
+		if (open_file != nullptr) {
 			// ストレージファイルを非同期に読む.
-			co_await file_read_async(s_file);
+			co_await file_read_async(open_file);
 			// ストレージファイルを解放する.
-			s_file = nullptr;
-			//file_finish_reading();
+			open_file = nullptr;
 		}
-		o_picker = nullptr;
+		open_picker = nullptr;
 		Window::Current().CoreWindow().PointerCursor(prev_cur);
 	}
 
@@ -488,7 +563,7 @@ namespace winrt::GraphPaper::implementation
 			auto s_picker{ FileSavePicker() };
 			//auto const& r_loader = ResourceLoader::GetForCurrentView();
 			const auto desc_gpf = ResourceLoader::GetForCurrentView().GetString(DESC_GPF);
-			const auto type_gpf = winrt::single_threaded_vector<winrt::hstring>({ FT_GPF });
+			const auto type_gpf = winrt::single_threaded_vector<winrt::hstring>({ DOT_GPF });
 			s_picker.FileTypeChoices().Insert(desc_gpf, type_gpf);
 			const auto loc_id = PickerLocationId::DocumentsLibrary;
 			s_picker.SuggestedStartLocation(loc_id);
@@ -496,20 +571,20 @@ namespace winrt::GraphPaper::implementation
 			if (svg_allowed) {
 				// ファイルタイプに拡張子 SVG とその説明を追加する.
 				const auto desc_svg = ResourceLoader::GetForCurrentView().GetString(DESC_SVG);
-				const auto type_svg = winrt::single_threaded_vector<winrt::hstring>({ L".svg" });
+				const auto type_svg = winrt::single_threaded_vector<winrt::hstring>({ DOT_SVG });
 				s_picker.FileTypeChoices().Insert(desc_svg, type_svg);
 			}
 			// 最近使ったファイルのトークンが空か判定する.
 			if (m_file_token_mru.empty()) {
 				// 提案されたファイル名に拡張子を格納する.
-				s_picker.SuggestedFileName(FT_GPF);
+				s_picker.SuggestedFileName(DOT_GPF);
 			}
 			else {
 				// ストレージファイルを最近使ったファイルのトークンから得る.
 				auto s_file{ co_await file_recent_get_async(m_file_token_mru) };
 				if (s_file != nullptr) {
-					// ファイルタイプが FT_GPF か判定する.
-					if (s_file.FileType() == FT_GPF) {
+					// ファイルタイプが DOT_GPF か判定する.
+					if (s_file.FileType() == DOT_GPF) {
 						// ファイル名を, 提案するファイル名に格納する.
 						s_picker.SuggestedFileName(s_file.Name());
 					}
@@ -521,7 +596,7 @@ namespace winrt::GraphPaper::implementation
 			// ストレージファイルを取得したか判定する.
 			if (s_file != nullptr) {
 				// ファイルタイプが SVG か判定する.
-				if (s_file.FileType() == L".svg") {
+				if (s_file.FileType() == DOT_SVG) {
 					//for (const auto s : m_list_shapes) {
 					//	if (s->is_deleted() || typeid(*s) != typeid(ShapeImage)) {
 					//		continue;
@@ -603,15 +678,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		auto _{ file_save_async() };
 	}
-
-	MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
-		IMemoryBufferByteAccess : IUnknown
-	{
-		virtual HRESULT STDMETHODCALLTYPE GetBuffer(
-			BYTE * *value,
-			UINT32 * capacity
-			);
-	};
 
 	IAsyncOperation<winrt::hresult> MainPage::file_write_img_async(ShapeImage* s, const wchar_t suggested_name[], wchar_t img_name[], const size_t name_len)
 	{

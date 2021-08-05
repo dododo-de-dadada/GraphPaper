@@ -742,6 +742,40 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		return true;
 	}
 
+	ShapeImage::ShapeImage(const D2D1_POINT_2F c_pos, const SoftwareBitmap& bitmap)
+	{
+		using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+		using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
+
+		m_size.width = bitmap.PixelWidth();
+		m_size.height = bitmap.PixelHeight();
+		m_pos.x = c_pos.x - m_size.width / 2;
+		m_pos.y = c_pos.y - m_size.height / 2;
+		m_view.width = static_cast<FLOAT>(m_size.width);
+		m_view.height = static_cast<FLOAT>(m_size.height);
+		m_rect.left = m_rect.top = 0;
+		m_rect.right = m_view.width;
+		m_rect.bottom = m_view.height;
+		m_data = new uint8_t[4ull * m_size.width * m_size.height];
+
+		// SoftwareBitmap のバッファをロックする.
+		auto bmp_buf{ bitmap.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
+		auto bmp_ref{ bmp_buf.CreateReference() };
+		winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem = bmp_ref.as<IMemoryBufferByteAccess>();
+		BYTE* src_data = nullptr;
+		UINT32 capacity = 0;
+		if (SUCCEEDED(bmp_mem->GetBuffer(&src_data, &capacity)))
+		{
+			// ロックしたバッファに画像データをコピーする.
+			memcpy(m_data, src_data, capacity);
+			// ロックしたバッファをkaiする.
+			bmp_buf.Close();
+			bmp_buf = nullptr;
+			bmp_mem->Release();
+			bmp_mem = nullptr;
+		}
+	}
+
 	// データリーダーから読み込む
 	// c_pos	画像を配置する中心の位置
 	// dt_reader	データリーダー

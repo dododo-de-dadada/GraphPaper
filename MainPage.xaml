@@ -22,11 +22,12 @@
 			<x:String x:Key="glyph_ibeam">&#xE933;</x:String>
             <x:String x:Key="glyph_fit_page">&#xE9A6;</x:String>
 			<x:String x:Key="glyph_draw">&#xEC87;</x:String>
+			<x:String x:Key="glyph_photo2">&#xEB9F;</x:String>
 			<!-- 曲線アイコンの描画コマンド -->
             <x:String x:Key="data_bezi">
                 M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841 L15.310918,7.967942 C8.311178,14.40621 8.311178,0.405251 -0.032292,7.249824 Z
             </x:String>
-            <!-- 破線アイコンの描画コマンド -->
+			<!-- 破線アイコンの描画コマンド -->
             <x:String x:Key="data_dash">
 				M0,8 L3,8 L3,9.5 L0,9.5 Z
                 M6,8 L10,8 L10,9.5 L6,9.5 Z
@@ -66,7 +67,16 @@
                 M13,0 L16,0 L16,3 L13,3 Z
                 M0,13 L3,13 L3,16 L0,16 Z
             </x:String>
-            <!-- 直線アイコンの描画コマンド -->
+			<!-- 画像アイコンの描画コマンド -->
+			<x:String x:Key="data_image">
+				M0.000000 2.4709035 l16.000000 -0.500000 l-0.125000 12.156248 l-15.8125 0.015627 Z
+                M1.06151575 3.06082725 l13.8125 -0.0625 l-0.0625 8.125 l-3.3125 -3.4375 l-1.9375 2.1875 l-5.0625 -5.1875 l-3.375 3.4375 Z
+                M4.499607 6.12283525 l6.75 6.8125 l-10.125 0 l0 -3.249998 Z
+                M11.56190875 9.1859245 l3.25 3.3125 l0 0.375 l-2.1875 0.000000 l-2.25 -2.4375 Z
+                M12.49921225 4.9375 A0.56220425 0.56220425 180 1 1 12.49921225 6.0619085 Z
+                A0.56220425 0.56220425 180 1 1 12.49921225 4.9375 Z
+			</x:String>
+			<!-- 直線アイコンの描画コマンド -->
             <x:String x:Key="data_line">
                 M0,8 L16,8 L16,9 L0,9 Z
             </x:String>
@@ -374,14 +384,12 @@
                         <KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-				<MenuFlyoutItem x:Name="mfi_file_import_img" x:Uid="mfi_file_import_img" Icon="Import" Click="file_import_img_click" Text="Import Image..." >
-                    <!--
+				<MenuFlyoutItem x:Name="mfi_file_import_img" x:Uid="mfi_file_import_img" Click="file_import_img_click" Text="Import Image..." >
 					<MenuFlyoutItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_save_as}" />
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_photo2}" />
 					</MenuFlyoutItem.Icon>
-                    -->
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="I" Modifiers="Control,Shift" />
+						<KeyboardAccelerator Key="I" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />

@@ -789,7 +789,11 @@
     <value>高さ</value>
     <comment>String</comment>
   </data>
-  <data name="str_opacity" xml:space="preserve">
+	<data name="str_image" xml:space="preserve">
+    <value>画像</value>
+    <comment>String</comment>
+  </data>
+	<data name="str_opacity" xml:space="preserve">
     <value>不透明度</value>
     <comment>String</comment>
   </data>
