@@ -214,12 +214,14 @@ namespace winrt::GraphPaper::implementation
 		open_picker.FileTypeFilter().Append(DOT_TIF);
 		// ピッカーを非同期で表示してストレージファイルを取得する.
 		// (「閉じる」ボタンが押された場合ストレージファイルは nullptr.)
-		auto& open_file{ co_await open_picker.PickSingleFileAsync() };
+		auto open_file{ co_await open_picker.PickSingleFileAsync() };
 		// ストレージファイルがヌルポインターか判定する.
 		if (open_file != nullptr) {
 			using winrt::Windows::Graphics::Imaging::BitmapDecoder;
 			using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
 			using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+
+			unselect_all();
 
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
 			auto const& prev_cur = file_wait_cursor();
@@ -230,8 +232,8 @@ namespace winrt::GraphPaper::implementation
 			const float sb_h = static_cast<FLOAT>(sb_vert().Value());
 			co_await winrt::resume_background();
 
-			auto& stream{ co_await open_file.OpenAsync(FileAccessMode::Read) };
-			auto& decoder{ co_await BitmapDecoder::CreateAsync(stream) };
+			auto stream{ co_await open_file.OpenAsync(FileAccessMode::Read) };
+			auto decoder{ co_await BitmapDecoder::CreateAsync(stream) };
 			auto bitmap{ SoftwareBitmap::Convert(co_await decoder .GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8) };
 
 			// 用紙の表示された部分の中心の位置を求める.
@@ -291,7 +293,7 @@ namespace winrt::GraphPaper::implementation
 
 		// ピッカーを非同期で表示してストレージファイルを取得する.
 		// (「閉じる」ボタンが押された場合ストレージファイルは nullptr.)
-		auto& open_file{ co_await open_picker.PickSingleFileAsync() };
+		auto open_file{ co_await open_picker.PickSingleFileAsync() };
 		// ストレージファイルがヌルポインターか判定する.
 		if (open_file != nullptr) {
 			// ストレージファイルを非同期に読む.
