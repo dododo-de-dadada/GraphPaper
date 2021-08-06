@@ -687,17 +687,13 @@ namespace winrt::GraphPaper::implementation
 		// 値を選択されてるか判定に格納する.
 		bool set_select(const bool /*value*/) noexcept;
 		// 図形を作成する.
-		ShapeImage(const D2D1_POINT_2F c_pos, const SoftwareBitmap& bitmap);
+		ShapeImage(const D2D1_POINT_2F center_pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bitmap);
 		// 図形を作成する.
-		ShapeImage(const D2D1_POINT_2F c_pos, DataReader const& dt_reader);
+		ShapeImage(const D2D1_POINT_2F center_pos, DataReader const& dt_reader);
 		// データリーダーから読み込む.
 		ShapeImage(DataReader const& dt_reader);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
-		// データライターに DIB として画像データを書き込む.
-		void write_bmp(DataWriter const& dt_writer) const;
-		// データライターに PNG として画像データを書き込む.
-		void write_png(DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
 		void write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.

@@ -115,24 +115,24 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (m_sample_type == SAMPLE_TYPE::BITMAP) {
 				using winrt::Windows::Foundation::Uri;
+				using winrt::Windows::Storage::FileAccessMode;
+				using winrt::Windows::Graphics::Imaging::BitmapDecoder;
+				using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+				using winrt::Windows::Storage::Streams::IRandomAccessStream;
 
 				winrt::apartment_context context;
 				co_await winrt::resume_background();
 				try {
-					const auto s_file{ co_await StorageFile::GetFileFromApplicationUriAsync(Uri{ L"ms-appx:///Assets/sample.bmp" }) };
-					const auto& ra_stream{ co_await s_file.OpenReadAsync() };
-					const auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
-					const auto ra_size = static_cast<uint32_t>(ra_stream.Size());
-					if (co_await dt_reader.LoadAsync(ra_size) == ra_size) {
-						const D2D1_POINT_2F c_pos{ samp_w * 0.5f, samp_h * 0.5f };
-						ShapeImage* s = new ShapeImage(c_pos, dt_reader);
-						s->m_pos.x = samp_w * 0.125;
-						s->m_pos.y = samp_h * 0.125;
-						s->m_view.width = samp_w - samp_w * 0.25;
-						s->m_view.height = samp_h - samp_h * 0.25;
-						s->m_opac = m_sample_sheet.m_image_opac;
-						m_sample_shape = s;
-					}
+					const StorageFile samp_file{ co_await StorageFile::GetFileFromApplicationUriAsync(Uri{ L"ms-appx:///Assets/4.1.05.tiff" }) };
+					const IRandomAccessStream samp_stream{ co_await samp_file.OpenAsync(FileAccessMode::Read) };
+					const BitmapDecoder samp_decoder{ co_await BitmapDecoder::CreateAsync(samp_stream) };
+					const SoftwareBitmap samp_bitmap{ SoftwareBitmap::Convert(co_await samp_decoder.GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8) };
+					ShapeImage* samp_shape = new ShapeImage(
+						D2D1_POINT_2F{ static_cast<FLOAT>(samp_w * 0.5), static_cast<FLOAT>(samp_h * 0.5f) },
+						D2D1_SIZE_F{ static_cast<FLOAT>(samp_w * 0.75), static_cast<FLOAT>(samp_h * 0.75) },
+						samp_bitmap);
+					samp_shape->m_opac = m_sample_sheet.m_image_opac;
+					m_sample_shape = samp_shape;
 				}
 				catch (winrt::hresult_error& e) {
 					auto a = e.code();

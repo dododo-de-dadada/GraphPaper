@@ -97,8 +97,6 @@ namespace winrt::GraphPaper::implementation
 		ustack_push_null();
 		m_dx_mutex.unlock();
 
-		// 選択された図形のリストを消去する.
-		//list_selected.clear();
 		xcvd_is_enabled();
 		sheet_update_bbox();
 		sheet_panle_size();
@@ -265,9 +263,9 @@ namespace winrt::GraphPaper::implementation
 
 					// パネルの大きさで文字列図形を作成する,.
 					const float scale = m_sheet_main.m_sheet_scale;
-					const float act_w = static_cast<float>(scp_sheet_panel().ActualWidth());
-					const float act_h = static_cast<float>(scp_sheet_panel().ActualHeight());
-					auto t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ act_w / scale, act_h / scale }, wchar_cpy(text.c_str()), &m_sheet_main);
+					const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
+					const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+					auto t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w / scale, win_h / scale }, wchar_cpy(text.c_str()), &m_sheet_main);
 #if (_DEBUG)
 					debug_leak_cnt++;
 #endif
@@ -275,8 +273,8 @@ namespace winrt::GraphPaper::implementation
 					t->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 					// パネルの中央になるよう左上位置を求める.
 					D2D1_POINT_2F s_min{
-						static_cast<FLOAT>((sb_horz().Value() + act_w * 0.5) / scale - t->m_diff[0].x * 0.5),
-						static_cast<FLOAT>((sb_vert().Value() + act_h * 0.5) / scale - t->m_diff[0].y * 0.5)
+						static_cast<FLOAT>((sb_horz().Value() + win_w * 0.5) / scale - t->m_diff[0].x * 0.5),
+						static_cast<FLOAT>((sb_vert().Value() + win_h * 0.5) / scale - t->m_diff[0].y * 0.5)
 					};
 					pt_add(s_min, m_sheet_min, s_min);
 
@@ -333,10 +331,10 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 
 				// resume_background する前に UI から値を得る.
-				const float act_w = static_cast<float>(scp_sheet_panel().ActualWidth());
-				const float act_h = static_cast<float>(scp_sheet_panel().ActualHeight());
-				const float sb_w = static_cast<float>(sb_horz().Value());
-				const float sb_h = static_cast<FLOAT>(sb_vert().Value());
+				const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
+				const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+				const float win_x = static_cast<float>(sb_horz().Value());
+				const float win_y = static_cast<float>(sb_vert().Value());
 				// resume_background しないと GetBitmapAsync が失敗することがある.
 				co_await winrt::resume_background();
 				auto& bitmap{ co_await Clipboard::GetContent().GetBitmapAsync() };
@@ -347,7 +345,8 @@ namespace winrt::GraphPaper::implementation
 				if (co_await dt_reader.LoadAsync(ra_size) == ra_size) {
 					// 用紙の表示された部分の中心の位置を求める.
 					const float scale = m_sheet_main.m_sheet_scale;
-					ShapeImage* img = new ShapeImage({ static_cast<FLOAT>((sb_w + act_w * 0.5) / scale), static_cast<FLOAT>((sb_h + act_h * 0.5) / scale) }, dt_reader);
+					ShapeImage* img = new ShapeImage(
+						{ static_cast<FLOAT>((win_x + win_w * 0.5) / scale), static_cast<FLOAT>((win_y + win_h * 0.5) / scale) }, dt_reader);
 					m_dx_mutex.lock();
 					ustack_push_append(img);
 					ustack_push_select(img);

@@ -420,10 +420,10 @@ namespace winrt::GraphPaper::implementation
 	// 用紙の大きさを設定する.
 	void MainPage::sheet_panle_size(void)
 	{
-		const auto w = scp_sheet_panel().ActualWidth();
-		const auto h = scp_sheet_panel().ActualHeight();
-		scroll_set(w, h);
-		m_sheet_dx.SetLogicalSize2({ static_cast<float>(w), static_cast<float>(h) });
+		const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
+		const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+		scroll_set(win_w, win_h);
+		m_sheet_dx.SetLogicalSize2(D2D1_SIZE_F{ win_w, win_h });
 	}
 
 	// 用紙メニューの「用紙の大きさ」が選択された

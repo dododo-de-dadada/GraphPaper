@@ -212,7 +212,7 @@ namespace winrt::GraphPaper::implementation
 		open_picker.FileTypeFilter().Append(DOT_JPG);
 		open_picker.FileTypeFilter().Append(DOT_PNG);
 		open_picker.FileTypeFilter().Append(DOT_TIF);
-		// ピッカーを非同期で表示してストレージファイルを取得する.
+		// ピッカーを非同期に表示してストレージファイルを取得する.
 		// (「閉じる」ボタンが押された場合ストレージファイルは nullptr.)
 		auto open_file{ co_await open_picker.PickSingleFileAsync() };
 		// ストレージファイルがヌルポインターか判定する.
@@ -221,15 +221,13 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
 			using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
 
+			auto const& prev_cur = file_wait_cursor();
 			unselect_all();
 
-			// 待機カーソルを表示, 表示する前のカーソルを得る.
-			auto const& prev_cur = file_wait_cursor();
-
-			const float act_w = static_cast<float>(scp_sheet_panel().ActualWidth());
-			const float act_h = static_cast<float>(scp_sheet_panel().ActualHeight());
-			const float sb_w = static_cast<float>(sb_horz().Value());
-			const float sb_h = static_cast<FLOAT>(sb_vert().Value());
+			const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
+			const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+			const float win_x = static_cast<float>(sb_horz().Value());
+			const float win_y = static_cast<FLOAT>(sb_vert().Value());
 			co_await winrt::resume_background();
 
 			auto stream{ co_await open_file.OpenAsync(FileAccessMode::Read) };
@@ -238,7 +236,10 @@ namespace winrt::GraphPaper::implementation
 
 			// 用紙の表示された部分の中心の位置を求める.
 			const float scale = m_sheet_main.m_sheet_scale;
-			ShapeImage* img = new ShapeImage({ static_cast<FLOAT>((sb_w + act_w * 0.5) / scale), static_cast<FLOAT>((sb_h + act_h * 0.5) / scale) }, bitmap);
+			ShapeImage* img = new ShapeImage(
+				{ static_cast<FLOAT>((win_x + win_w * 0.5) / scale), static_cast<FLOAT>((win_y + win_h * 0.5) / scale) },
+				{ static_cast<FLOAT>(bitmap.PixelWidth()), static_cast<FLOAT>(bitmap.PixelHeight()) },
+				bitmap);
 			bitmap.Close();
 			bitmap = nullptr;
 			decoder = nullptr;
@@ -328,7 +329,6 @@ namespace winrt::GraphPaper::implementation
 
 			const auto& ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
-			//const auto ra_size = static_cast<uint32_t>(ra_stream.Size());
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
 			//tool_read(dt_reader);

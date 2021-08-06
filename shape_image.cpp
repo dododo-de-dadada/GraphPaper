@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 	}
 #define NIBBLE_HI(b)	((b >> 4) & 0x0f)
 #define NIBBLE_LO(b)	(b & 0x0f)
-
+	/*
 	// Adler-32 チェックサム
 	// Z ストリームのヘッダーを検査する.
 	struct ADLER32 {
@@ -73,7 +73,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	};
 	uint32_t CRC32::table[256];
-
+	*/
 	// D2D1_RECT_F から D2D1_RECT_U を作成する.
 	static const D2D1_RECT_U image_conv_rect(const D2D1_RECT_F& f, const D2D1_SIZE_U s);
 	// 点に最も近い, 線分上の点を求める.
@@ -595,9 +595,6 @@ namespace winrt::GraphPaper::implementation
 				m_pos.y = value.y;
 				flag = true;
 			}
-if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
-	auto debug = 1;
-}
 		}
 		else if (anch == ANCH_TYPE::ANCH_NE) {
 			const float bm_w = m_rect.right - m_rect.left;
@@ -742,32 +739,31 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		return true;
 	}
 
-	ShapeImage::ShapeImage(const D2D1_POINT_2F c_pos, const SoftwareBitmap& bitmap)
+	ShapeImage::ShapeImage(const D2D1_POINT_2F center_pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bitmap)
 	{
 		using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
 		using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
 
 		m_size.width = bitmap.PixelWidth();
 		m_size.height = bitmap.PixelHeight();
-		m_pos.x = c_pos.x - m_size.width / 2;
-		m_pos.y = c_pos.y - m_size.height / 2;
-		m_view.width = static_cast<FLOAT>(m_size.width);
-		m_view.height = static_cast<FLOAT>(m_size.height);
+		m_pos.x = center_pos.x - view_size.width * 0.5f;
+		m_pos.y = center_pos.y - view_size.height * 0.5f;
+		m_view = view_size;
 		m_rect.left = m_rect.top = 0;
-		m_rect.right = m_view.width;
-		m_rect.bottom = m_view.height;
-		m_data = new uint8_t[4ull * m_size.width * m_size.height];
+		m_rect.right = static_cast<FLOAT>(bitmap.PixelWidth());
+		m_rect.bottom = static_cast<FLOAT>(bitmap.PixelHeight());
+		m_data = new uint8_t[4ull * bitmap.PixelWidth() * bitmap.PixelHeight()];
 
 		// SoftwareBitmap のバッファをロックする.
 		auto bmp_buf{ bitmap.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
 		auto bmp_ref{ bmp_buf.CreateReference() };
 		winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem = bmp_ref.as<IMemoryBufferByteAccess>();
-		BYTE* src_data = nullptr;
+		BYTE* bmp_data = nullptr;
 		UINT32 capacity = 0;
-		if (SUCCEEDED(bmp_mem->GetBuffer(&src_data, &capacity)))
+		if (SUCCEEDED(bmp_mem->GetBuffer(&bmp_data, &capacity)))
 		{
 			// ロックしたバッファに画像データをコピーする.
-			memcpy(m_data, src_data, capacity);
+			memcpy(m_data, bmp_data, capacity);
 			// ロックしたバッファをkaiする.
 			bmp_buf.Close();
 			bmp_buf = nullptr;
@@ -777,9 +773,9 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 	}
 
 	// データリーダーから読み込む
-	// c_pos	画像を配置する中心の位置
+	// center_pos	画像を配置する中心の位置
 	// dt_reader	データリーダー
-	ShapeImage::ShapeImage(const D2D1_POINT_2F c_pos, DataReader const& dt_reader)		
+	ShapeImage::ShapeImage(const D2D1_POINT_2F center_pos, DataReader const& dt_reader)		
 	{
 		image_read_dib(dt_reader, m_size, &m_data);
 
@@ -789,8 +785,8 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 		m_rect.bottom = static_cast<FLOAT>(m_size.height);
 		m_view.width = static_cast<FLOAT>(m_size.width);
 		m_view.height = static_cast<FLOAT>(m_size.height);
-		m_pos.x = c_pos.x - m_view.width * 0.5f;
-		m_pos.y = c_pos.y - m_view.height * 0.5f;
+		m_pos.x = center_pos.x - m_view.width * 0.5f;
+		m_pos.y = center_pos.y - m_view.height * 0.5f;
 		m_ratio.width = 1.0f;
 		m_ratio.height = 1.0f;
 	}
@@ -834,195 +830,6 @@ if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) <
 			memcpy(buf.data(), m_data + row_size * i, row_size);
 			dt_writer.WriteBytes(buf);
 		}
-	}
-
-	// データライターに DIB として画像データを書き込む.
-	void ShapeImage::write_bmp(DataWriter const& dt_writer) const
-	{
-		using winrt::Windows::Storage::Streams::ByteOrder;
-
-		constexpr std::array<uint8_t, 2> bf_type{ 'B', 'M' };
-		constexpr uint32_t bi_size = 0x28;	// BITMAOINFOHEADER のサイズ (40 バイト)
-		const D2D1_RECT_U rect{ image_conv_rect(m_rect, m_size) };
-		const uint32_t bi_width = rect.right - rect.left;
-		const uint32_t bi_height = rect.bottom - rect.top;
-		if (bi_width == 0 || bi_height == 0) {
-			return;
-		}
-		const uint32_t data_width = 4 * m_size.width;
-		const uint32_t bf_size = 12 + bi_size + bi_height * 4 * bi_width;
-		dt_writer.ByteOrder(ByteOrder::LittleEndian);
-		dt_writer.WriteBytes(bf_type);	// bf_type: ファイルタイプ
-		dt_writer.WriteUInt32(bf_size);	// bf_size: ファイル全体のサイズ.
-		dt_writer.WriteUInt16(0);	// bf_reserved1: 予約 1 = 0
-		dt_writer.WriteUInt16(0);	// bf_reserved2: 予約 2 = 0
-		dt_writer.WriteUInt32(54);	// bf_off_bits: ファイル先頭から画像データまでのオフセット (54 + パレット)
-		dt_writer.WriteUInt32(bi_size);	// bi_size: BITMAOINFOHEADER のサイズ = 40
-		dt_writer.WriteUInt32(bi_width);	// bi_width: 画像の幅[ピクセル]
-		dt_writer.WriteUInt32(bi_height);	// bi_height: 画像の高さ[ピクセル]
-		dt_writer.WriteUInt16(1);	// bi_planes: プレーン数. かならず 1
-		dt_writer.WriteUInt16(32);	// bi_bit_cnt: 色ビット数[bit]
-		dt_writer.WriteUInt32(0);	// bi_compress: 圧縮k形式. (0=BI_RGB, 1=BI_RLE8, 2=BI_RLE4, 3=BI_BITFIELDS)
-		dt_writer.WriteUInt32(0);	// bi_size_img: 画像データサイズ[byte]
-		dt_writer.WriteUInt32(0);	// x_px_per_meter: 水平解像度[dot/m]. 96dpiのとき 3780. ふつうはゼロ.
-		dt_writer.WriteUInt32(0);	// y_px_per_meter: 垂直解像度[dot/m]. ふつうはゼロ
-		dt_writer.WriteUInt32(0);	// bi_color_used: 格納パレット数[使用色数]. ふつうはゼロ	
-		dt_writer.WriteUInt32(0);	// bi_color_important: 	重要色数. ふつうはゼロ
-		for (size_t y = rect.bottom; y != rect.top; y--) {
-			for (size_t x = rect.left; x < rect.right; x++) {
-				const std::array<uint8_t, 4> bgra{
-					m_data[(y - 1) * data_width + 4 * x + 0],
-					m_data[(y - 1) * data_width + 4 * x + 1],
-					m_data[(y - 1) * data_width + 4 * x + 2],
-					m_data[(y - 1) * data_width + 4 * x + 3],
-				};
-				dt_writer.WriteBytes(bgra);
-			}
-		}
-	}
-
-	// データライターに PNG として画像データを書き込む.
-	// #define SET_BYTE4(ptr, u) { (ptr)[0] = static_cast<uint8_t>(((u) >> 24) & 0xff); (ptr)[1] = static_cast<uint8_t>(((u) >> 16) & 0xff); (ptr)[2] = static_cast<uint8_t>(((u) >> 8) & 0xff); (ptr)[3] = static_cast<uint8_t>((u) & 0xff);}
-	// PNG (Portable Network Graphics) Specification Version 1.0
-	// RFC 1950 ZLIB Compressed Data Format Specification version 3.3 日本語訳
-	// RFC 1951 DEFLATE Compressed Data Format Specification version 1.3 日本語訳
-	void ShapeImage::write_png(DataWriter const& dt_writer) const
-	{
-		using winrt::Windows::Storage::Streams::ByteOrder;
-		dt_writer.ByteOrder(ByteOrder::BigEndian);	// ネットワークバイトオーダー
-
-		// CRC32 の初期化
-		static bool crc_computed = false;
-		if (!crc_computed) {
-			crc_computed = true;
-			CRC32::init();
-		}
-
-		constexpr std::array<uint8_t, 8> PNG_HEADER{ 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A };
-		constexpr std::array<uint8_t, 4> IHDR_TYPE{ 'I', 'H', 'D', 'R' };
-		constexpr std::array<uint8_t, 4> IDAT_TYPE{ 'I', 'D', 'A', 'T' };
-		constexpr std::array<uint8_t, 4> IEND_TYPE{ 'I', 'E', 'N', 'D' };
-		constexpr std::array<uint8_t, 2> Z_CMF{ 72, 13 };	// 圧縮方式とフラグ
-		constexpr uint8_t PNG_FILTER_TYPE = 0;
-
-		// 画像の矩形
-		const D2D1_RECT_U rect{ image_conv_rect(m_rect, m_size) };
-		const auto rect_width = rect.right - rect.left;	// 画像のピクセル幅
-		const auto rect_height = rect.bottom - rect.top;	// 画像のピクセル高さ
-		const auto data_width = 4ull * m_size.width;	// 画像データのバイト幅
-
-		// PNG ヘッダー (ファイルシグネチャ) を書き込む.
-		dt_writer.WriteBytes(PNG_HEADER);
-
-		// IHDR チャンク
-		const std::array<uint8_t, 13> ihdr_data{
-			static_cast<uint8_t>(rect_width >> 24),
-			static_cast<uint8_t>(rect_width >> 16),
-			static_cast<uint8_t>(rect_width >> 8),
-			static_cast<uint8_t>(rect_width),
-			static_cast<uint8_t>(rect_height >> 24),
-			static_cast<uint8_t>(rect_height >> 16),
-			static_cast<uint8_t>(rect_height >> 8),
-			static_cast<uint8_t>(rect_height),
-			8,	// ビット深度: 8=
-			6,	// カラータイプ: 6=トゥルーカラー＋アルファ画像
-			0,	// uint32_t compress_method = -1;
-			0,	// uint32_t filter_method = -1;
-			0	// uint32_t interlace_method = -1;
-		};
-		dt_writer.WriteUInt32(13);	// Length: Chunk Data のサイズ. 常に 13
-		dt_writer.WriteBytes(IHDR_TYPE);
-		dt_writer.WriteBytes(ihdr_data);
-		dt_writer.WriteUInt32(CRC32::update(CRC32::update(CRC32::INIT, IHDR_TYPE), ihdr_data) ^ CRC32::INIT);
-
-		// IDAT チャンクの大きさを求める.
-		const uint16_t block_len = static_cast<uint16_t>(1 + 4 * rect_width);	// Deflate ブロックの大きさ
-		const uint32_t idat_len = 2 + (5 + block_len) * rect_height + 4;	// Z ストリーム + Deflate ブロック + Z チェックサム
-
-		// IDTA チャンクヘッダーを書き込む.
-		dt_writer.WriteUInt32(idat_len);
-		dt_writer.WriteBytes(IDAT_TYPE);
-		auto idat_crc = CRC32::update(CRC32::INIT, IDAT_TYPE);
-
-		// Z ストリームの圧縮方式とフラグを書き込む.
-		//                CMF                         FLG
-		//	+-----------------------------+-----------------------------+
-		//	|CMINFO(4)     |CM(4)         |FLEVEL(2)|FDICT(1)|FCHECK(5) |
-		//	+-----------------------------+-----------------------------+
-		//	 0100           1000           00        0        01101
-		dt_writer.WriteBytes(Z_CMF);
-		idat_crc = CRC32::update(idat_crc, Z_CMF);
-
-		for (size_t y = rect.top; y < rect.bottom; y++) {
-			// スキャンラインごとに Deflate ブロック (非圧縮) を書き込む.
-			// 非圧縮ブロック
-			//    7    6    5    4    3    2    1    0 ビット
-			// +------------------------------------------+
-			// |PADDING(6)                |BTYPE(2) |BFINAL(1)
-			// +------------------------------------------+
-			//   |
-			//   0   1   2   3   4 ...バイト
-			// +---+---+---+---+---+================================+
-			// |   |  LEN  | NLEN  |...LEN bytes of literal data... |
-			// +---+---+---+---+---+================================+
-			// BFINAL(1)	1=データセットの最後のブロック
-			// BTYPE(2)　0=非圧縮ブロック
-			// PADDING(6)	非圧縮のときのバイト境界合せ
-			// LEN(16)	ブロック内のデータバイトの数
-			// NLEN(16)	NLEN は、LEN の補数
-			// (LEN と NLEN はリトルエンディアン)
-			const std::array<uint8_t, 1 + 2 + 2> block_header{
-				static_cast<uint8_t>(y + 1 == rect.bottom ? 1 : 0),
-				static_cast<uint8_t>(block_len),
-				static_cast<uint8_t>(block_len >> 8),
-				static_cast<uint8_t>(~block_len),
-				static_cast<uint8_t>(~block_len >> 8),
-			};
-			dt_writer.WriteBytes(block_header);
-			idat_crc = CRC32::update(idat_crc, block_header);
-
-			// PNG フィルタータイプを各スキャンラインの先頭に加える
-			// Type	Name
-			//  0	None
-			//	1	Sub
-			//	2	Up
-			//	3	Average
-			//	4	Paeth
-			dt_writer.WriteByte(PNG_FILTER_TYPE);
-			idat_crc = CRC32::update(idat_crc, PNG_FILTER_TYPE);
-			for (size_t x = rect.left; x < rect.right; x++) {
-
-				// ビットマップの BGRA を PNG の RGBA に.
-				const std::array<uint8_t, 4> rgba{
-					m_data[y * data_width + 4 * x + 2],
-					m_data[y * data_width + 4 * x + 1],
-					m_data[y * data_width + 4 * x + 0],
-					m_data[y * data_width + 4 * x + 3],
-				};
-				dt_writer.WriteBytes(rgba);
-				idat_crc = CRC32::update(idat_crc, rgba);
-			}
-		}
-
-		// Z-ADLER32 チェックサムを書き込む.
-		const auto adler = ADLER32::update(ADLER32::INIT, Z_CMF);
-		const std::array<uint8_t, 4> z_adler{
-			static_cast<uint8_t>(adler >> 24),
-			static_cast<uint8_t>(adler >> 16),
-			static_cast<uint8_t>(adler >> 8),
-			static_cast<uint8_t>(adler)
-		};
-		dt_writer.WriteBytes(z_adler);
-		idat_crc = CRC32::update(idat_crc, z_adler);
-
-		// IDAT の CRC32 チェックサムを書き込む.
-		dt_writer.WriteUInt32(idat_crc ^ CRC32::INIT);
-
-		// IEND チャンクえを書き込む.
-		constexpr uint32_t IEND_DATA_LEN = 0;
-		dt_writer.WriteUInt32(IEND_DATA_LEN);
-		dt_writer.WriteBytes(IEND_TYPE);
-		dt_writer.WriteUInt32(CRC32::update(CRC32::INIT, IEND_TYPE) ^ CRC32::INIT);
 	}
 
 	// データライターに SVG として書き込む.

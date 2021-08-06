@@ -96,10 +96,10 @@
     <Image Include="Assets\LockScreenLogo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\sample.bmp">
+    <Image Include="Assets\output.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\output.png">
+    <Image Include="Assets\4.1.05.tiff">
       <Filter>Assets</Filter>
     </Image>
   </ItemGroup>
