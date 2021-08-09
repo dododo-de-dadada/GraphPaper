@@ -311,7 +311,7 @@ namespace winrt::GraphPaper::implementation
 	// value	値
 	// anch	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeRRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect)
+	bool ShapeRRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool /*keep_aspect*/)
 	{
 		D2D1_POINT_2F c_pos;
 		D2D1_POINT_2F vec;
@@ -358,7 +358,7 @@ namespace winrt::GraphPaper::implementation
 			calc_corner_radius(m_diff[0], rad, m_corner_rad);
 			break;
 		default:
-			ShapeRect::set_pos_anch(value, anch, limit);
+			ShapeRect::set_pos_anch(value, anch, limit, false);
 			if (m_diff[0].x * m_corner_rad.x < 0.0f) {
 				m_corner_rad.x = -m_corner_rad.x;
 			}

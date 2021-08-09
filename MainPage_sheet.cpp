@@ -319,10 +319,11 @@ namespace winrt::GraphPaper::implementation
 								m_sheet_main.set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(value));
 								//Determine the type of a boxed value
 								//auto prop = setter.Value().try_as<winrt::Windows::Foundation::IPropertyValue>();
-								//if (prop.Type() == winrt::Windows::Foundation::PropertyType::Inspectable) {
+								//auto prop_type = prop.Type();
+								//if (prop_type == winrt::Windows::Foundation::PropertyType::Inspectable) {
 								// ...
 								//}
-								//else if (prop.Type() == winrt::Windows::Foundation::PropertyType::int32) {
+								//else if (prop_type == winrt::Windows::Foundation::PropertyType::Int32) {
 								// ...
 								//}
 							}

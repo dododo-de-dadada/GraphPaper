@@ -9,17 +9,27 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
+	using winrt::Windows::ApplicationModel::DataTransfer::DataPackage;
+	using winrt::Windows::ApplicationModel::DataTransfer::DataPackageOperation;
+	using winrt::Windows::ApplicationModel::DataTransfer::DataPackageView;
+	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
+	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
+	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
+	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
+	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+	using winrt::Windows::Storage::Streams::DataWriter;
+	using winrt::Windows::Storage::Streams::IInputStream;
+	using winrt::Windows::Storage::Streams::InMemoryRandomAccessStream;
+	using winrt::Windows::Storage::Streams::IOutputStream;
+	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
+	using winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType;
+	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
+
 	// 編集メニューの「コピー」が選択された.
 	IAsyncAction MainPage::xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
-		using winrt::Windows::ApplicationModel::DataTransfer::DataPackage;
-		using winrt::Windows::ApplicationModel::DataTransfer::DataPackageOperation;
-		using winrt::Windows::Storage::Streams::DataWriter;
-		using winrt::Windows::Storage::Streams::InMemoryRandomAccessStream;
-
 		if (m_list_sel_cnt == 0) {
-			// 選択された図形の数が 0 の場合,
 			// 終了する.
 			return;
 		}
@@ -29,38 +39,57 @@ namespace winrt::GraphPaper::implementation
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		// 出力ストリームを作成して, データライターを得る.
-		auto mem_stream{ InMemoryRandomAccessStream() };
-		auto out_stream{ mem_stream.GetOutputStreamAt(0) };
-		auto dt_writer{ DataWriter(out_stream) };
+		InMemoryRandomAccessStream mem_stream{ InMemoryRandomAccessStream() };
+		IOutputStream out_stream{ mem_stream.GetOutputStreamAt(0) };
+		DataWriter dt_writer{ DataWriter(out_stream) };
 		// データライターに選択された図形のリストを書き込む.
 		constexpr bool REDUCED = true;
 		slist_write<REDUCED>(list_selected, dt_writer);
 		// 書き込んだらリストは破棄する.
 		list_selected.clear();
 		// 書き込んだデータを出力ストリームに格納し, 格納したバイト数を得る.
-		auto n_byte{ co_await dt_writer.StoreAsync() };
-		auto text = slist_selected_all_text(m_list_shapes);
+		uint32_t n_byte{ co_await dt_writer.StoreAsync() };
 		// スレッドをメインページの UI スレッドに変える.
 		co_await winrt::resume_foreground(Dispatcher());
 		if (n_byte > 0) {
 			// 格納したバイト数が 0 を超える場合,
 			// データパッケージを作成する.
-			auto dt_pkg{ DataPackage() };
+			DataPackage dt_pkg{ DataPackage() };
 			// ストリームをデータパッケージに格納する.
 			dt_pkg.RequestedOperation(DataPackageOperation::Copy);
-			dt_pkg.SetData(CBF_GPD, winrt::box_value(mem_stream));
-			if (text.empty() != true) {
-				// 文字列が空でない場合,
-				// 文字列をデータパッケージに格納する.
-				dt_pkg.SetText(text);
+			dt_pkg.SetData(CLIPBOARD_SHAPES, winrt::box_value(mem_stream));
+			for (auto it = m_list_shapes.rbegin(); it != m_list_shapes.rend(); it++) {
+				Shape* s = *it;
+				wchar_t* w;
+				if (!s->is_deleted() && s->is_selected() && s->get_text_content(w)) {
+					dt_pkg.SetText(w);
+					break;
+				}
+			}
+			for (auto it = m_list_shapes.rbegin(); it != m_list_shapes.rend(); it++) {
+				Shape* s = *it;
+				if (!s->is_deleted() && s->is_selected() && typeid(*s) == typeid(ShapeImage)) {
+					InMemoryRandomAccessStream ra_stream{ InMemoryRandomAccessStream() };
+					co_await static_cast<ShapeImage*>(s)->copy_to(BitmapEncoder::BmpEncoderId(), ra_stream);
+					if (ra_stream.Size() > 0) {
+						dt_pkg.SetBitmap(RandomAccessStreamReference::CreateFromStream(ra_stream));
+					}
+					break;
+				}
 			}
 			// データパッケージをクリップボードに格納する.
 			Clipboard::SetContent(dt_pkg);
+			dt_pkg = nullptr;
 		}
 		// データライターを閉じる.
 		dt_writer.Close();
+		dt_writer = nullptr;
 		// 出力ストリームを閉じる.
 		out_stream.Close();
+		out_stream = nullptr;
+		// メモリストリームは閉じちゃダメ.
+		//mem_stream.Close();
+		//mem_stream = nullptr;
 		xcvd_is_enabled();
 		// スレッドコンテキストを復元する.
 		co_await context;
@@ -77,14 +106,15 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「削除」が選択された.
 	void MainPage::xcvd_delete_click(IInspectable const&, RoutedEventArgs const&)
 	{
+		// 選択された図形の数がゼロか判定する.
 		if (m_list_sel_cnt == 0) {
-			// 選択された図形の数が 0 の場合,
 			// 終了する.
 			return;
 		}
 		// 選択された図形のリストを得る.
 		SHAPE_LIST list_selected;
 		slist_selected<Shape>(m_list_shapes, list_selected);
+		// リストの各図形について以下を繰り返す.
 		m_dx_mutex.lock();
 		for (auto s : list_selected) {
 			// 一覧が表示されてるか判定する.
@@ -108,9 +138,6 @@ namespace winrt::GraphPaper::implementation
 	// 選択の有無やクラスごとに図形を数え, メニュー項目の可否を判定する.
 	void MainPage::xcvd_is_enabled(void)
 	{
-		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
-		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
-
 		ustack_is_enable();
 
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
@@ -168,9 +195,10 @@ namespace winrt::GraphPaper::implementation
 		mfi_xcvd_copy().IsEnabled(exists_selected);
 		const auto& dp_view = Clipboard::GetContent();
 		mfi_xcvd_paste().IsEnabled(
-			dp_view.Contains(CBF_GPD) ||
+			dp_view.Contains(CLIPBOARD_SHAPES) ||
 			dp_view.Contains(StandardDataFormats::Text()) ||
-			dp_view.Contains(StandardDataFormats::Bitmap()));
+			dp_view.Contains(StandardDataFormats::Bitmap()) ||
+			dp_view.Contains(CLIPBOARD_TIFF));
 		mfi_xcvd_delete().IsEnabled(exists_selected);
 		mfi_select_all().IsEnabled(exists_unselected);
 		mfi_group().IsEnabled(exists_selected_2);
@@ -187,194 +215,268 @@ namespace winrt::GraphPaper::implementation
 		m_list_sel_cnt = selected_cnt;
 	}
 
-	// 編集メニューの「貼り付け」が選択された.
-	IAsyncAction MainPage::xcvd_paste_click_async(IInspectable const&, RoutedEventArgs const&)
+	// 図形を貼り付ける.
+	IAsyncAction MainPage::xcvd_paste_shape(void)
 	{
-		using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
-		using winrt::Windows::ApplicationModel::DataTransfer::DataPackageView;
-		using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
-		using winrt::Windows::Storage::Streams::InMemoryRandomAccessStream;
-		using winrt::Windows::Storage::Streams::IRandomAccessStream;
-		using winrt::Windows::Storage::Streams::DataReader;
+		bool ok = false;	// 貼り付けの成功を判定
 
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
+
+		// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.
+		IInspectable dt_object{ co_await Clipboard::GetContent().GetDataAsync(CLIPBOARD_SHAPES) };
+		InMemoryRandomAccessStream ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
+		uint32_t ra_size = static_cast<uint32_t>(ra_stream.Size());
+		if (ra_stream.Size() <= static_cast<uint64_t>(UINT32_MAX)) {
+			IInputStream in_stream{ ra_stream.GetInputStreamAt(0) };
+			DataReader dt_reader{ DataReader(in_stream) };
+			uint32_t ra_size = static_cast<uint32_t>(ra_stream.Size());
+			uint32_t operation{ co_await dt_reader.LoadAsync(ra_size) };
+			// 図形のためのメモリの確保が別スレッドで行われた場合, D2DERR_WRONG_STATE を引き起こすことがある.
+			// 図形を貼り付ける前に, スレッドをメインページの UI スレッドに変える.
+			co_await winrt::resume_foreground(Dispatcher());
+			// データリーダーに読み込めたか判定する.
+			if (operation == ra_size) {
+				SHAPE_LIST slist_pasted;	// 貼り付けリスト
+
+				// データリーダーから貼り付けリストを読み込み, それが空でないか判定する.
+				if (slist_read(slist_pasted, dt_reader) && !slist_pasted.empty()) {
+					m_dx_mutex.lock();
+					// 得られたリストが空でない場合,
+					// 図形リストの中の図形の選択をすべて解除する.
+					unselect_all();
+					// 得られたリストの各図形について以下を繰り返す.
+					for (auto s : slist_pasted) {
+						// 一覧が表示されてるか判定する.
+						if (summary_is_visible()) {
+							summary_append(s);
+						}
+						ustack_push_append(s);
+						sheet_update_bbox(s);
+					}
+					ustack_push_null();
+					m_dx_mutex.unlock();
+					slist_pasted.clear();
+					xcvd_is_enabled();
+					sheet_panle_size();
+					sheet_draw();
+					ok = true;
+				}
+			}
+			// データリーダーを閉じる.
+			dt_reader.Close();
+			in_stream.Close();
+		}
+		if (!ok) {
+			message_show(ICON_ALERT, L"str_err_paste", L"");
+		}
+		co_await context;
+	}
+
+	IAsyncAction MainPage::xcvd_paste_text(void)
+	{
+		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
+		winrt::apartment_context context;
+		// クリップボードから読み込むためのデータリーダーを得る.
+		const winrt::hstring text{ co_await Clipboard::GetContent().GetTextAsync() };
+		if (!text.empty()) {
+			unselect_all();
+
+			// パネルの大きさで文字列図形を作成する,.
+			const float scale = m_sheet_main.m_sheet_scale;
+			const float win_x = static_cast<float>(sb_horz().Value());
+			const float win_y = static_cast<float>(sb_vert().Value());
+			const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
+			const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+			const float min_x = m_sheet_min.x;
+			const float min_y = m_sheet_min.y;
+			auto t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w / scale, win_h / scale }, wchar_cpy(text.c_str()), &m_sheet_main);
+#if (_DEBUG)
+			debug_leak_cnt++;
+#endif
+			// 枠の大きさを文字列に合わせる.
+			t->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
+			// パネルの中央になるよう左上位置を求める.
+			D2D1_POINT_2F pos{
+				static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - t->m_diff[0].x * 0.5),
+				static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - t->m_diff[0].y * 0.5)
+			};
+			// 方眼に合わせるか判定する.
+			D2D1_POINT_2F g_pos{};
+			if (m_sheet_main.m_grid_snap) {
+				// 左上位置を方眼の大きさで丸める.
+				pt_round(pos, m_sheet_main.m_grid_base + 1.0, g_pos);
+				if (m_misc_pile_up < FLT_MIN) {
+					pos = g_pos;
+				}
+			}
+
+			// 頂点を重ねる閾値がゼロより大きいか判定する.
+			if (m_misc_pile_up >= FLT_MIN) {
+				D2D1_POINT_2F v_pos;
+				if (slist_find_vertex_closest(m_list_shapes, pos, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_pos)) {
+					D2D1_POINT_2F v_vec;
+					pt_sub(v_pos, pos, v_vec);
+					D2D1_POINT_2F g_vec;
+					pt_sub(g_pos, pos, g_vec);
+					if (m_sheet_main.m_grid_snap && pt_abs2(g_vec) < pt_abs2(v_vec)) {
+						pos = g_pos;
+					}
+					else {
+						pos = v_pos;
+					}
+				}
+				else if (m_sheet_main.m_grid_snap) {
+					pos = g_pos;
+				}
+			}
+			t->set_pos_start(pos);
+			m_dx_mutex.lock();
+			ustack_push_append(t);
+			ustack_push_select(t);
+			ustack_push_null();
+			m_dx_mutex.unlock();
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
+				summary_append(t);
+				summary_select(t);
+			}
+			xcvd_is_enabled();
+			sheet_update_bbox(t);
+			sheet_panle_size();
+			sheet_draw();
+		}
+		else {
+			message_show(ICON_ALERT, L"str_err_paste", L"");
+		}
+		co_await context;
+	}
+
+	IAsyncAction MainPage::xcvd_paste_image(void)
+	{
+		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
+		winrt::apartment_context context;
+
+		unselect_all();
+
+		// resume_background する前に UI から値を得る.
+		const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
+		const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+		const float win_x = static_cast<float>(sb_horz().Value());
+		const float win_y = static_cast<float>(sb_vert().Value());
+		const float min_x = m_sheet_min.x;
+		const float min_y = m_sheet_min.y;
+
+		// resume_background しないと GetBitmapAsync が失敗することがある.
+		co_await winrt::resume_background();
+
+		// クリップボードから SoftwareBitmap を取り出す.
+		RandomAccessStreamReference reference{ co_await Clipboard::GetContent().GetBitmapAsync() };
+		IRandomAccessStreamWithContentType stream{ co_await reference.OpenReadAsync() };
+		BitmapDecoder bmp_dec{ co_await BitmapDecoder::CreateAsync(stream) };
+		SoftwareBitmap bmp{ co_await bmp_dec.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight) };
+
+		// ウィンドウの真ん中に表示されるよう位置を求める.
+		// 図形の大きさは元画像と同じにする.
+		const float img_w = static_cast<float>(bmp.PixelWidth());
+		const float img_h = static_cast<float>(bmp.PixelHeight());
+		const float scale = m_sheet_main.m_sheet_scale;
+		D2D1_POINT_2F pos{
+			static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - img_w * 0.5),
+			static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - img_h * 0.5)
+		};
+		const D2D1_SIZE_F view_size{ img_w, img_h };
+
+		// SoftwareBitmap をもとに図形を作成する.
+		ShapeImage* img = new ShapeImage(pos, view_size, bmp);
+#if (_DEBUG)
+		debug_leak_cnt++;
+#endif
+		bmp.Close();
+		bmp = nullptr;
+		bmp_dec = nullptr;
+		stream.Close();
+		stream = nullptr;
+		reference = nullptr;
+
+		// 方眼に合わせるか判定する.
+		D2D1_POINT_2F g_pos{};
+		if (m_sheet_main.m_grid_snap) {
+			// 左上位置を方眼の大きさで丸める.
+			pt_round(pos, m_sheet_main.m_grid_base + 1.0, g_pos);
+			if (m_misc_pile_up < FLT_MIN) {
+				pos = g_pos;
+			}
+		}
+		// 頂点を重ねる閾値がゼロより大きいか判定する.
+		if (m_misc_pile_up >= FLT_MIN) {
+			D2D1_POINT_2F v_pos;
+			if (slist_find_vertex_closest(m_list_shapes, pos, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_pos)) {
+				D2D1_POINT_2F v_vec;
+				pt_sub(v_pos, pos, v_vec);
+				D2D1_POINT_2F g_vec;
+				pt_sub(g_pos, pos, g_vec);
+				if (m_sheet_main.m_grid_snap && pt_abs2(g_vec) < pt_abs2(v_vec)) {
+					pos = g_pos;
+				}
+				else {
+					pos = v_pos;
+				}
+			}
+			else if (m_sheet_main.m_grid_snap) {
+				pos = g_pos;
+			}
+		}
+		img->set_pos_start(pos);
+
+		m_dx_mutex.lock();
+		ustack_push_append(img);
+		ustack_push_select(img);
+		ustack_push_null();
+		m_dx_mutex.unlock();
+		co_await winrt::resume_foreground(Dispatcher());
+		ustack_is_enable();
+		// 一覧が表示されてるか判定する.
+		if (summary_is_visible()) {
+			summary_append(img);
+			summary_select(img);
+		}
+		xcvd_is_enabled();
+		sheet_update_bbox(img);
+		sheet_panle_size();
+		sheet_draw();
+
+		//スレッドコンテキストを復元する.
+		co_await context;
+	}
+
+	// 編集メニューの「貼り付け」が選択された.
+	void MainPage::xcvd_paste_click(IInspectable const&, RoutedEventArgs const&)
+	{
 		// Clipboard::GetContent() は, 
 		// WinRT originate error 0x80040904
 		// を引き起こすので, try ... catch 文が必要.
 		try {
-			// 図形データがクリップボードに含まれているか判定する.
-			const auto& dp_view = Clipboard::GetContent();
-			if (dp_view.Contains(CBF_GPD)) {
-				// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.
-				auto& dt_object{ co_await Clipboard::GetContent().GetDataAsync(CBF_GPD) };
-				auto ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
-				auto in_stream{ ra_stream.GetInputStreamAt(0) };
-				auto dt_reader{ DataReader(in_stream) };
-				auto ra_size = static_cast<UINT32>(ra_stream.Size());
-				auto operation{ co_await dt_reader.LoadAsync(ra_size) };
-				// 図形のためのメモリの確保が別スレッドで行われた場合, D2DERR_WRONG_STATE を引き起こすことがある.
-				// 図形を貼り付ける前に, スレッドをメインページの UI スレッドに変える.
-				co_await winrt::resume_foreground(Dispatcher());
-				// データリーダーに読み込めたか判定する.
-				if (operation == ra_stream.Size()) {
-					SHAPE_LIST slist_pasted;	// 貼り付けリスト
-
-					// データリーダーから貼り付けリストを読み込み, それが空でないか判定する.
-					if (slist_read(slist_pasted, dt_reader) && !slist_pasted.empty()) {
-						m_dx_mutex.lock();
-						// 得られたリストが空でない場合,
-						// 図形リストの中の図形の選択をすべて解除する.
-						unselect_all();
-						// 得られたリストの各図形について以下を繰り返す.
-						for (auto s : slist_pasted) {
-							// 一覧が表示されてるか判定する.
-							if (summary_is_visible()) {
-								summary_append(s);
-							}
-							ustack_push_append(s);
-							sheet_update_bbox(s);
-						}
-						ustack_push_null();
-						m_dx_mutex.unlock();
-						slist_pasted.clear();
-						xcvd_is_enabled();
-						sheet_panle_size();
-						sheet_draw();
-					}
-					else {
-						message_show(ICON_ALERT, L"str_err_paste", L"");
-					}
-				}
-				const auto _{ dt_reader.DetachStream() };
-				// データリーダーを閉じる.
-				dt_reader.Close();
-				in_stream.Close();
+			// クリップボードに図形が含まれているか判定する.
+			const DataPackageView& dp_view = Clipboard::GetContent();
+			if (dp_view.Contains(CLIPBOARD_SHAPES)) {
+				xcvd_paste_shape();
+				return;
 			}
 			// クリップボードにテキストが含まれているか判定する.
 			else if (dp_view.Contains(StandardDataFormats::Text())) {
-
-				// クリップボードから読み込むためのデータリーダーを得る.
-				const auto text{ co_await Clipboard::GetContent().GetTextAsync() };
-
-				// 文字列が空でないか判定する.
-				if (!text.empty()) {
-					unselect_all();
-
-					// パネルの大きさで文字列図形を作成する,.
-					const float scale = m_sheet_main.m_sheet_scale;
-					const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
-					const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
-					auto t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w / scale, win_h / scale }, wchar_cpy(text.c_str()), &m_sheet_main);
-#if (_DEBUG)
-					debug_leak_cnt++;
-#endif
-					// 枠の大きさを文字列に合わせる.
-					t->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
-					// パネルの中央になるよう左上位置を求める.
-					D2D1_POINT_2F s_min{
-						static_cast<FLOAT>((sb_horz().Value() + win_w * 0.5) / scale - t->m_diff[0].x * 0.5),
-						static_cast<FLOAT>((sb_vert().Value() + win_h * 0.5) / scale - t->m_diff[0].y * 0.5)
-					};
-					pt_add(s_min, m_sheet_min, s_min);
-
-					// 方眼に合わせるか判定する.
-					D2D1_POINT_2F g_pos{};
-					if (m_sheet_main.m_grid_snap) {
-						// 左上位置を方眼の大きさで丸める.
-						pt_round(s_min, m_sheet_main.m_grid_base + 1.0, g_pos);
-						if (m_misc_pile_up < FLT_MIN) {
-							s_min = g_pos;
-						}
-					}
-
-					// 頂点を重ねる閾値がゼロより大きいか判定する.
-					if (m_misc_pile_up >= FLT_MIN) {
-						D2D1_POINT_2F v_pos;
-						if (slist_find_vertex_closest(m_list_shapes, s_min, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_pos)) {
-							D2D1_POINT_2F v_vec;
-							pt_sub(v_pos, s_min, v_vec);
-							D2D1_POINT_2F g_vec;
-							pt_sub(g_pos, s_min, g_vec);
-							if (m_sheet_main.m_grid_snap && pt_abs2(g_vec) < pt_abs2(v_vec)) {
-								s_min = g_pos;
-							}
-							else {
-								s_min = v_pos;
-							}
-						}
-						else if (m_sheet_main.m_grid_snap) {
-							s_min = g_pos;
-						}
-					}
-					t->set_pos_start(s_min);
-					m_dx_mutex.lock();
-					ustack_push_append(t);
-					ustack_push_select(t);
-					ustack_push_null();
-					m_dx_mutex.unlock();
-					// 一覧が表示されてるか判定する.
-					if (summary_is_visible()) {
-						summary_append(t);
-						summary_select(t);
-					}
-					xcvd_is_enabled();
-					sheet_update_bbox(t);
-					sheet_panle_size();
-					sheet_draw();
-				}
-				else {
-					message_show(ICON_ALERT, L"str_err_paste", L"");
-				}
+				xcvd_paste_text();
+				return;
 			}
-			else if (dp_view.Contains(StandardDataFormats::Bitmap())) {
-				unselect_all();
-
-				// resume_background する前に UI から値を得る.
-				const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
-				const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
-				const float win_x = static_cast<float>(sb_horz().Value());
-				const float win_y = static_cast<float>(sb_vert().Value());
-				// resume_background しないと GetBitmapAsync が失敗することがある.
-				co_await winrt::resume_background();
-				auto& bitmap{ co_await Clipboard::GetContent().GetBitmapAsync() };
-				auto& ra_stream{ co_await bitmap.OpenReadAsync() };
-				auto in_stream{ ra_stream.GetInputStreamAt(0) };
-				auto dt_reader{ DataReader(in_stream) };
-				auto ra_size = static_cast<UINT32>(ra_stream.Size());
-				if (co_await dt_reader.LoadAsync(ra_size) == ra_size) {
-					// 用紙の表示された部分の中心の位置を求める.
-					const float scale = m_sheet_main.m_sheet_scale;
-					ShapeImage* img = new ShapeImage(
-						{ static_cast<FLOAT>((win_x + win_w * 0.5) / scale), static_cast<FLOAT>((win_y + win_h * 0.5) / scale) }, dt_reader);
-					m_dx_mutex.lock();
-					ustack_push_append(img);
-					ustack_push_select(img);
-					ustack_push_null();
-					m_dx_mutex.unlock();
-					co_await winrt::resume_foreground(Dispatcher());
-					ustack_is_enable();
-					// 一覧が表示されてるか判定する.
-					if (summary_is_visible()) {
-						summary_append(img);
-						summary_select(img);
-					}
-					xcvd_is_enabled();
-					sheet_update_bbox(img);
-					sheet_panle_size();
-					sheet_draw();
-				}
-				dt_reader.Close();
-				in_stream.Close();
-				ra_stream.Close();
-				bitmap = nullptr;
+			// クリップボードに画像が含まれているか判定する.
+			else if (dp_view.Contains(StandardDataFormats::Bitmap()) || dp_view.Contains(CLIPBOARD_TIFF)) {
+				xcvd_paste_image();
+				return;
 			}
 		}
-		catch (winrt::hresult_error const& e) {
-			auto a = e.code();
+		catch (winrt::hresult_error const&) {
 		}
-		//スレッドコンテキストを復元する.
-		co_await context;
+		message_show(ICON_ALERT, L"str_err_paste", L"");
 	}
 
 }

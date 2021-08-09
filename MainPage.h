@@ -56,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::SuspendingEventArgs;
 	using winrt::Windows::ApplicationModel::SuspendingOperation;
 	using winrt::Windows::Foundation::Collections::IVector;
-	using winrt::Windows::Foundation::IAsyncAction;
+	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Foundation::IAsyncOperation;
 	using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::Storage::StorageFile;
@@ -84,8 +84,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::System::VirtualKey;
 	using winrt::Windows::System::VirtualKeyModifiers;
 
-	static const winrt::hstring CBF_GPD{ L"graph_paper_data" };	// 図形データのクリップボード書式
-
+	static const winrt::param::hstring CLIPBOARD_SHAPES{ L"graph_paper_data" };	// 図形データのクリップボード書式
+	static const winrt::param::hstring CLIPBOARD_TIFF{ L"TaggedImageFileFormat" };
 	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
 	constexpr auto FMT_INCH_UNIT = L"%.3f \u33CC";	// インチ単位の書式
 	constexpr auto FMT_MILLI = L"%.3f";	// ミリメートル単位の書式
@@ -1018,8 +1018,13 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの可否を設定する.
 		void xcvd_is_enabled(void);
 		// 編集メニューの「貼り付け」が選択された.
-		IAsyncAction xcvd_paste_click_async(IInspectable const&, RoutedEventArgs const&);
-
+		void xcvd_paste_click(IInspectable const&, RoutedEventArgs const&);
+		// 図形を貼り付ける.
+		IAsyncAction xcvd_paste_shape(void);
+		// 文字列を貼り付ける.
+		IAsyncAction xcvd_paste_text(void);
+		// 画像を貼り付ける.
+		IAsyncAction xcvd_paste_image(void);
 	};
 
 }

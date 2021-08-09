@@ -120,30 +120,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		return static_cast<bool>(i_cnt & 1);
 	}
-	/*
-	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t v_cnt, const D2D1_POINT_2F v_pos[]) noexcept
-	{
-		D2D1_POINT_2F p_pos;
-		int i_cnt;	// 交点の数
-		int i;
-
-		i_cnt = 0;
-		for (p_pos = v_pos[v_cnt - 1], i = 0; i < v_cnt; p_pos = v_pos[i++]) {
-			// ルール 1. 上向きの辺. 点が y 軸方向について、始点と終点の間にある (ただし、終点は含まない).
-			// ルール 2. 下向きの辺. 点が y 軸方向について、始点と終点の間にある (ただし、始点は含まない).
-			if ((p_pos.y <= t_pos.y && v_pos[i].y > t_pos.y)
-				|| (p_pos.y > t_pos.y && v_pos[i].y <= t_pos.y)) {
-				// ルール 3. 点を通る水平線が辺と重なる (ルール 1, ルール 2 を確認することで, ルール 3 も確認できている).
-				// ルール 4. 辺は点よりも右側にある. ただし, 重ならない.
-				// 辺が点と同じ高さになる位置を特定し, その時のxの値と点のxの値を比較する.
-				if (t_pos.x < p_pos.x + (t_pos.y - p_pos.y) / (v_pos[i].y - p_pos.y) * (v_pos[i].x - p_pos.x)) {
-					i_cnt++;
-				}
-			}
-		}
-		return static_cast<bool>(i_cnt & 1);
-	}
-	*/
 
 	// 方形が位置を含むか判定する.
 	// t_pos	判定する位置

@@ -520,29 +520,19 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 選択された文字列図形から, それらを改行で連結した文字列を得る.
+	/*
 	winrt::hstring slist_selected_all_text(const SHAPE_LIST& slist) noexcept
 	{
-		winrt::hstring text;
-		for (auto s : slist) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			if (s->is_selected() != true) {
-				continue;
-			}
+		for (auto it = slist.rbegin(); it != slist.rend(); it++) {
+			Shape* s = *it;
 			wchar_t* w;
-			if (s->get_text_content(w) != true) {
-				continue;
-			}
-			if (text.empty()) {
-				text = w;
-			}
-			else {
-				text = text + L"\n" + w;
+			if (!s->is_deleted() && s->is_selected() && s->get_text_content(w)) {
+				return winrt::hstring(w);
 			}
 		}
-		return text;
+		return winrt::hstring();
 	}
+	*/
 
 	// 選択された図形のリストを得る.
 	// S	図形の型. Shape ならすべての種類, ShapeGroup ならグループ図形のみ.

@@ -221,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(t_box, m_diff[0])) {
 			D2D1_POINT_2F se;
 			pt_add(m_pos, t_box, se);
-			set_pos_anch(se, ANCH_TYPE::ANCH_SE, 0.0f);
+			set_pos_anch(se, ANCH_TYPE::ANCH_SE, 0.0f, false);
 			return true;
 		}
 		return false;
@@ -810,7 +810,7 @@ namespace winrt::GraphPaper::implementation
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
 	bool ShapeText::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool /*keep_aspect*/)
 	{
-		if (ShapeRect::set_pos_anch(value, anch, limit)) {
+		if (ShapeRect::set_pos_anch(value, anch, limit, false)) {
 			create_text_metrics(s_dwrite_factory);
 			return true;
 		}

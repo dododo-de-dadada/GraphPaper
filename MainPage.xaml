@@ -429,7 +429,7 @@
                         <KeyboardAccelerator Key="C" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="mfi_xcvd_paste" x:Uid="mfi_xcvd_paste" Click="xcvd_paste_click_async" Icon="Paste" IsEnabled="False" Text="Paste" >
+                <MenuFlyoutItem x:Name="mfi_xcvd_paste" x:Uid="mfi_xcvd_paste" Click="xcvd_paste_click" Icon="Paste" IsEnabled="False" Text="Paste" >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="V" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>

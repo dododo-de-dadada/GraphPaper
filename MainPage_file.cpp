@@ -236,10 +236,17 @@ namespace winrt::GraphPaper::implementation
 
 			// 用紙の表示された部分の中心の位置を求める.
 			const float scale = m_sheet_main.m_sheet_scale;
-			ShapeImage* img = new ShapeImage(
-				{ static_cast<FLOAT>((win_x + win_w * 0.5) / scale), static_cast<FLOAT>((win_y + win_h * 0.5) / scale) },
-				{ static_cast<FLOAT>(bitmap.PixelWidth()), static_cast<FLOAT>(bitmap.PixelHeight()) },
-				bitmap);
+			const float img_w = static_cast<float>(bitmap.PixelWidth());
+			const float img_h = static_cast<float>(bitmap.PixelHeight());
+			const D2D1_POINT_2F center_pos{
+				static_cast<FLOAT>((win_x + (win_w - img_w) * 0.5) / scale),
+				static_cast<FLOAT>((win_y + (win_h - img_h) * 0.5) / scale)
+			};
+			const D2D1_SIZE_F view_size{ img_w, img_h };
+			ShapeImage* img = new ShapeImage(center_pos, view_size, bitmap);
+#if (_DEBUG)
+			debug_leak_cnt++;
+#endif
 			bitmap.Close();
 			bitmap = nullptr;
 			decoder = nullptr;
@@ -696,15 +703,14 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::Storage::Pickers::FileSavePicker;
 		using winrt::Windows::Storage::Provider::FileUpdateStatus;
 
-		auto hres = E_FAIL;
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		winrt::apartment_context context;
-		auto img_picker{ FileSavePicker() };
+		FileSavePicker img_picker{ FileSavePicker() };
 		const auto bmp_type = winrt::single_threaded_vector<winrt::hstring>({ L".bmp" });
 		const auto gif_type = winrt::single_threaded_vector<winrt::hstring>({ L".gif" });
-		const auto jpg_type = winrt::single_threaded_vector<winrt::hstring>({ L".jpg" });
+		const auto jpg_type = winrt::single_threaded_vector<winrt::hstring>({ L".jpg", L".jpeg" });
 		const auto png_type = winrt::single_threaded_vector<winrt::hstring>({ L".png" });
-		const auto tif_type = winrt::single_threaded_vector<winrt::hstring>({ L".tif" });
+		const auto tif_type = winrt::single_threaded_vector<winrt::hstring>({ L".tif", L".tiff" });
 		// ResourceLoader::GetForCurrentView はフォアグラウンド.
 		co_await winrt::resume_foreground(Dispatcher());
 		const auto bmp_desc{ ResourceLoader::GetForCurrentView().GetString(L"str_desc_bmp") };
@@ -719,81 +725,48 @@ namespace winrt::GraphPaper::implementation
 		img_picker.FileTypeChoices().Insert(tif_desc, tif_type);
 		img_picker.SuggestedFileName(suggested_name);
 		auto img_file{ co_await img_picker.PickSaveFileAsync() };
-		co_await winrt::resume_background();
-
-		if (img_file != nullptr) {
-			CachedFileManager::DeferUpdates(img_file);
-
-			// SoftwareBitmap を作成する.
-			const auto w = static_cast<ShapeImage*>(s)->m_size.width;
-			const auto h = static_cast<ShapeImage*>(s)->m_size.height;
-			auto bmp{ SoftwareBitmap(BitmapPixelFormat::Bgra8, w, h, BitmapAlphaMode::Straight) };
-			// SoftwareBitmap のバッファをロックする.
-			auto bmp_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
-			auto bmp_ref{ bmp_buf.CreateReference() };
-			winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem = bmp_ref.as<IMemoryBufferByteAccess>();
-			BYTE* bmp_data = nullptr;
-			UINT32 capacity = 0;
-			if (SUCCEEDED(bmp_mem->GetBuffer(&bmp_data, &capacity)))
-			{
-				// ロックしたバッファに画像データをコピーする.
-				memcpy(bmp_data, static_cast<ShapeImage*>(s)->m_data, capacity);
-				// ロックしたバッファをkaiする.
-				bmp_buf.Close();
-				bmp_buf = nullptr;
-				bmp_mem->Release();
-				bmp_mem = nullptr;
-
-				// 保存するファイル形式
-				winrt::guid enc_id;
-				if (img_file.FileType() == L".gif") {
-					enc_id = BitmapEncoder::GifEncoderId();
-				}
-				else if (img_file.FileType() == L".jpg") {
-					enc_id = BitmapEncoder::JpegEncoderId();
-				}
-				else if (img_file.FileType() == L".png") {
-					enc_id = BitmapEncoder::PngEncoderId();
-				}
-				else if (img_file.FileType() == L".tif") {
-					enc_id = BitmapEncoder::TiffEncoderId();
-				}
-				else {
-					enc_id = BitmapEncoder::BmpEncoderId();
-				}
-
-				auto img_stream{ co_await img_file.OpenAsync(FileAccessMode::ReadWrite) };
-				auto bmp_enc { co_await BitmapEncoder::CreateAsync(enc_id, img_stream) };
-				bmp_enc.SetSoftwareBitmap(bmp);
-				//bmp_enc.BitmapTransform().ScaledWidth(w);
-				//bmp_enc.BitmapTransform().ScaledHeight(h);
-				//bmp_enc.BitmapTransform().Rotation(BitmapRotation::None);
-				//bmp_enc.BitmapTransform().InterpolationMode(BitmapInterpolationMode::Linear);
-				bmp_enc.IsThumbnailGenerated(true);
-				try {
-					co_await bmp_enc.FlushAsync();
-				}
-				catch (winrt::hresult_error& err) {
-					if (err.code() == WINCODEC_ERR_UNSUPPORTEDOPERATION) {
-						bmp_enc.IsThumbnailGenerated(false);
-					}
-				}
-				if (!bmp_enc.IsThumbnailGenerated()) {
-					co_await bmp_enc.FlushAsync();
-				}
-
-				// 遅延させたファイル更新を完了し, 結果を判定する.
-				if (co_await CachedFileManager::CompleteUpdatesAsync(img_file) == FileUpdateStatus::Complete) {
-					hres = S_OK;
-					wcscpy_s(img_name, name_len, img_file.Path().c_str());
-				}
-				img_stream.Close();
-				img_stream = nullptr;
-				bmp_enc = nullptr;
-				bmp = nullptr;
-			}
-			img_file = nullptr;
+		if (img_file == nullptr) {
+			co_await context;
+			co_return E_FAIL;
 		}
+		// 保存するファイル形式
+		winrt::guid enc_id;
+		if (std::find(bmp_type.begin(), bmp_type.end(), img_file.FileType()) != bmp_type.end()) {
+			enc_id = BitmapEncoder::BmpEncoderId();
+		}
+		else if (std::find(gif_type.begin(), gif_type.end(), img_file.FileType()) != gif_type.end()) {
+		//if (img_file.FileType() == L".gif") {
+			enc_id = BitmapEncoder::GifEncoderId();
+		}
+		else if (std::find(jpg_type.begin(), jpg_type.end(), img_file.FileType()) != jpg_type.end()) {
+		//else if (img_file.FileType() == L".jpg") {
+			enc_id = BitmapEncoder::JpegEncoderId();
+		}
+		else if (std::find(png_type.begin(), png_type.end(), img_file.FileType()) != png_type.end()) {
+		//else if (img_file.FileType() == L".png") {
+			enc_id = BitmapEncoder::PngEncoderId();
+		}
+		else if (std::find(tif_type.begin(), tif_type.end(), img_file.FileType()) != tif_type.end()) {
+		//else if (img_file.FileType() == L".tif") {
+			enc_id = BitmapEncoder::TiffEncoderId();
+		}
+		else {
+			co_await context;
+			co_return E_FAIL;
+		}
+		HRESULT hres = E_FAIL;
+		co_await winrt::resume_background();
+		CachedFileManager::DeferUpdates(img_file);
+		IRandomAccessStream img_stream{ co_await img_file.OpenAsync(FileAccessMode::ReadWrite) };
+		co_await s->copy_to(enc_id, img_stream);
+		// 遅延させたファイル更新を完了し, 結果を判定する.
+		if (co_await CachedFileManager::CompleteUpdatesAsync(img_file) == FileUpdateStatus::Complete) {
+			hres = S_OK;
+			wcscpy_s(img_name, name_len, img_file.Path().c_str());
+		}
+		img_stream.Close();
+		img_stream = nullptr;
+		img_file = nullptr;
 		// スレッドコンテキストを復元する.
 		co_await context;
 		// 結果を返し終了する.

@@ -34,15 +34,19 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 
 			const auto& dp_view = Clipboard::GetContent();
-			dp_view.SetAcceptedFormatId(CBF_GPD);
+			dp_view.SetAcceptedFormatId(CLIPBOARD_SHAPES);
 			dp_view.SetAcceptedFormatId(StandardDataFormats::Text());
 			dp_view.SetAcceptedFormatId(StandardDataFormats::Bitmap());
-			dp_view.SetAcceptedFormatId(L"TaggedImageFileFormat");
-			if (dp_view.Contains(CBF_GPD) ||
+			dp_view.SetAcceptedFormatId(StandardDataFormats::StorageItems());
+			dp_view.SetAcceptedFormatId(CLIPBOARD_TIFF);
+			if (dp_view.Contains(CLIPBOARD_SHAPES) ||
 				dp_view.Contains(StandardDataFormats::Text()) ||
 				dp_view.Contains(StandardDataFormats::Bitmap()) ||
-				dp_view.Contains(L"TaggedImageFileFormat")) {
+				dp_view.Contains(CLIPBOARD_TIFF)) {
 				mfi_xcvd_paste().IsEnabled(true);
+			}
+			else {
+				mfi_xcvd_paste().IsEnabled(false);
 			}
 		}
 		else if (a_state == CoreWindowActivationState::Deactivated) {

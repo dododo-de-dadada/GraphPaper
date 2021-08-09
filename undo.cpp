@@ -127,7 +127,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F pos;
 		m_shape->get_pos_anch(m_anch, pos);
-		m_shape->set_pos_anch(m_pos, m_anch, 0.0f);
+		m_shape->set_pos_anch(m_pos, m_anch, 0.0f, false);
 		m_pos = pos;
 	}
 

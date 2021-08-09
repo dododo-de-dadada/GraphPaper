@@ -16,70 +16,11 @@ namespace winrt::GraphPaper::implementation
 	}
 #define NIBBLE_HI(b)	((b >> 4) & 0x0f)
 #define NIBBLE_LO(b)	(b & 0x0f)
-	/*
-	// Adler-32 チェックサム
-	// Z ストリームのヘッダーを検査する.
-	struct ADLER32 {
-		static constexpr uint32_t INIT = 1;
-		static uint32_t update(const uint32_t adler, const uint8_t b) noexcept
-		{
-			constexpr uint32_t ADLER32_BASE = 65521;
-			const uint32_t s1 = ((adler & 0xffff) + b) % ADLER32_BASE;
-			const uint32_t s2 = (((adler >> 16) & 0xffff) + s1) % ADLER32_BASE;
-			return (s2 << 16) + s1;
-		}
-		template <size_t N>
-		static uint32_t update(uint32_t adler, const std::array<uint8_t, N>& buf) noexcept
-		{
-			for (const auto b : buf) {
-				adler = update(adler, b);
-			}
-			return adler;
-		}
-	};
 
-	// CRC-32 チェックサム
-	// PNG のチャンクデータを検査する
-	struct CRC32 {
-		static constexpr uint32_t INIT = 0xffffffff;
-		static uint32_t table[256];
-		static void init(void)
-		{
-			for (int n = 0; n < 256; n++) {
-				auto c = static_cast<uint32_t>(n);
-				for (int k = 0; k < 8; k++) {
-					if (c & 1) {
-						c = (0xedb88320L ^ (c >> 1));
-					}
-					else {
-						c >>= 1;
-					}
-				}
-				table[n] = c;
-			}
-		}
-		static uint32_t update(const uint32_t crc, const uint8_t b) noexcept
-		{
-			return table[(crc ^ b) & 0xff] ^ (crc >> 8);
-		}
-
-		template<size_t N>
-		static uint32_t update(uint32_t crc, const std::array<uint8_t, N>& buf) noexcept
-		{
-			for (const auto b : buf) {
-				crc = update(crc, b);
-			}
-			return crc;
-		}
-	};
-	uint32_t CRC32::table[256];
-	*/
 	// D2D1_RECT_F から D2D1_RECT_U を作成する.
 	static const D2D1_RECT_U image_conv_rect(const D2D1_RECT_F& f, const D2D1_SIZE_U s);
 	// 点に最も近い, 線分上の点を求める.
 	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& q);
-	// データリーダーから DIB を読み込む.
-	static void image_read_dib(DataReader const& dt_reader, D2D1_SIZE_U& b_size, uint8_t** buf);
 
 	// D2D1_RECT_F から D2D1_RECT_U を作成する.
 	// 左上位置は { 0, 0 } 以上, 右下位置は D2D1_SIZE_U 以下.
@@ -115,183 +56,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// データリーダーから DIB データを読み込む.
-	static void image_read_dib(DataReader const& dt_reader, D2D1_SIZE_U& dib_size, uint8_t** dib_data)
-	{
-		using winrt::Windows::Storage::Streams::ByteOrder;
-
-		// 2 バイトを読み込み, それが 'BM' か判定する.
-		const char bf_type1 = dt_reader.ReadByte();
-		const char bf_type2 = dt_reader.ReadByte();
-		if (bf_type1 == 'B' && bf_type2 == 'M') {
-			// バイトオーダーがリトルエンディアン以外か判定する.
-			const auto b_order = dt_reader.ByteOrder();
-			if (b_order != ByteOrder::LittleEndian) {
-				dt_reader.ByteOrder(ByteOrder::LittleEndian);
-			}
-			uint32_t bf_size = dt_reader.ReadUInt32();	// ファイル全体のサイズ
-			uint16_t bf_reserved_0 = dt_reader.ReadUInt16();
-			uint16_t bf_reserved_1 = dt_reader.ReadUInt16();
-			uint32_t bf_offset = dt_reader.ReadUInt32();	// ファイル先頭から画像データまでのオフセット (54 + パレット)
-			uint32_t bi_size = dt_reader.ReadUInt32();	// BITMAOINFOHEADER = 40 または BITMAPCOREHEADER = 12 のサイズ
-			uint32_t bi_width = 0;
-			uint32_t bi_height = 0;
-			uint16_t bi_bit_cnt = 0;
-			uint32_t bi_compress = 0;
-			uint32_t bi_size_img = 0;
-			uint32_t bi_color_used = 0;
-			uint8_t pallete[256][4];
-			// BITMAOINFOHEADER か判定する.
-			if (bi_size == 0x28) {
-				bi_width = dt_reader.ReadUInt32();
-				bi_height = dt_reader.ReadUInt32();
-				uint16_t bi_planes = dt_reader.ReadUInt16();	// プレーンの数. かならず 1
-				bi_bit_cnt = dt_reader.ReadUInt16();	// 色数 1=モノクロ, 4=16色, 8=256色, 24または32=フルカラー
-				bi_compress = dt_reader.ReadUInt32();	// 圧縮タイプ. (0=BI_RGB, 1=BI_RLE8, 2=BI_RLE4, 3=BI_BITFIELDS)
-				bi_size_img = dt_reader.ReadUInt32();	// 圧縮された画像データの大きさ (非圧縮=BI_RGB ならゼロ, とは限らない!)
-				uint32_t x_px_per_meter = dt_reader.ReadUInt32();	// 96dpiのとき 3780. ふつうはゼロ.
-				uint32_t y_px_per_meter = dt_reader.ReadUInt32();
-				bi_color_used = dt_reader.ReadUInt32();
-				uint32_t bi_color_important = dt_reader.ReadUInt32();
-				if (bi_color_used == 0) {
-					if (0 < bi_bit_cnt && bi_bit_cnt <= 8) {
-						bi_color_used = (1 << bi_bit_cnt);
-					}
-				}
-				for (size_t i = 0; i < bi_color_used; i++) {
-					pallete[i][0] = dt_reader.ReadByte();	// B
-					pallete[i][1] = dt_reader.ReadByte();	// G
-					pallete[i][2] = dt_reader.ReadByte();	// R
-					const auto opac = dt_reader.ReadByte();	// A
-					pallete[i][3] = (bi_bit_cnt == 32 ? opac : 0xff);
-				}
-			}
-			// BITMAPCOREHEADER か判定する.
-			else if (bi_size == 0x0c) {
-				bi_width = dt_reader.ReadUInt16();
-				bi_height = dt_reader.ReadUInt16();
-				uint16_t bi_planes = dt_reader.ReadUInt16();	// プレーンの数. かならず 1
-				bi_bit_cnt = dt_reader.ReadUInt16();
-				bi_compress = 0;
-				bi_size_img = 0;	// 非圧縮の場合はゼロ.
-				if (0 < bi_bit_cnt && bi_bit_cnt <= 8) {
-					bi_color_used = (1 << bi_bit_cnt);
-				}
-				for (size_t i = 0; i < bi_color_used; i++) {
-					pallete[i][0] = dt_reader.ReadByte();	// B
-					pallete[i][1] = dt_reader.ReadByte();	// G
-					pallete[i][2] = dt_reader.ReadByte();	// R
-					pallete[i][2] = 0xff;
-				}
-			}
-			const size_t row_len = 4 * bi_width;;
-			const auto dst_len = row_len * bi_height;
-			uint8_t* const dst_buf = new uint8_t[dst_len];
-			*dib_data = dst_buf;
-			if (bi_compress == BI_RGB || bi_compress == BI_BITFIELDS)	// BI_RGB, no pixel array compression used
-			{
-				if (bi_bit_cnt == 32) {
-					std::vector<uint8_t> src_buf(row_len);
-					for (size_t i = dst_len; i >= row_len; i -= row_len) {
-						dt_reader.ReadBytes(src_buf);
-						memcpy(dst_buf + i - row_len, src_buf.data(), row_len);
-					}
-					src_buf.clear();
-					src_buf.shrink_to_fit();
-				}
-				else if (bi_bit_cnt == 24) {
-					const size_t src_len = (static_cast<size_t>(bi_width) * 3 + (4 - 1)) / 4 * 4;
-					std::vector<uint8_t> src_buf(src_len);
-					for (size_t i = dst_len; i >= row_len; i -= row_len) {
-						dt_reader.ReadBytes(src_buf);
-						for (size_t j = 0, k = 0; j < row_len - 3 && k < src_len; j += 4, k += 3) {
-							memcpy(dst_buf + i - row_len + j, src_buf.data() + k, 3);
-							dst_buf[i - row_len + j + 3] = 0xff;
-						}
-					}
-					src_buf.clear();
-					src_buf.shrink_to_fit();
-				}
-			}
-			else if ((bi_compress == BI_RLE8 || bi_compress == BI_RLE4) && bi_size_img > 0) {
-				size_t j = 0;
-				size_t s = 0;
-				for (size_t i = 0; i < bi_size_img; i += 2) {
-					const auto b0 = dt_reader.ReadByte();
-					const auto b1 = dt_reader.ReadByte();
-					if (s == 0) {
-						if (b0 == 0) {
-							if (b1 == 0) {
-								j = (j / row_len + 1) * row_len;
-							}
-							else if (b1 == 1) {
-								break;
-							}
-							else if (b1 == 2) {
-								s = 1;
-							}
-							else {
-								s = b1;
-							}
-						}
-						else {
-							for (size_t k = 0; k < b0; k++) { 
-								if (bi_compress == BI_RLE8 && j + 4 <= dst_len) {
-									DIB_SET(dst_buf, j, pallete, b1);
-									j += 4;
-								}
-								else if (bi_compress == BI_RLE4 && j + 8 <= dst_len) {
-									DIB_SET(dst_buf, j, pallete, NIBBLE_HI(b1));
-									DIB_SET(dst_buf, j + 4, pallete, NIBBLE_LO(b1));
-									j += 8;
-								}
-							}
-						}
-					}
-					else if (s == 1) {
-						j = b0 * row_len + b1;
-						s = 0;
-					}
-					else if (s == 3) {
-						if (bi_compress == BI_RLE8 && j + 4 <= dst_len) {
-							DIB_SET(dst_buf, j, pallete, b0);
-							j += 4;
-						}
-						else if (bi_compress == BI_RLE4 && j + 8 <= dst_len) {
-							DIB_SET(dst_buf, j, pallete, NIBBLE_HI(b0));
-							DIB_SET(dst_buf, j + 4, pallete, NIBBLE_LO(b0));
-							j += 8;
-						}
-						s = 0;
-					}
-					else {
-						if (bi_compress == BI_RLE8 && j + 8 <= dst_len) {
-							DIB_SET(dst_buf, j, pallete, b0);
-							DIB_SET(dst_buf, j + 4, pallete, b1);
-							j += 8;
-							s -= 2;
-						}
-						else if (bi_compress == BI_RLE4 && j + 16 <= dst_len) {
-							DIB_SET(dst_buf, j, pallete, NIBBLE_HI(b0));
-							DIB_SET(dst_buf, j + 4, pallete, NIBBLE_LO(b0));
-							DIB_SET(dst_buf, j + 8, pallete, NIBBLE_HI(b1));
-							DIB_SET(dst_buf, j + 12, pallete, NIBBLE_LO(b1));
-							j += 16;
-							s -= 4;
-						}
-					}
-				}
-			}
-			dib_size.width = bi_width;
-			dib_size.height = bi_height;
-			// バイトオーダーがリトルエンディアン以外か判定する.
-			if (b_order != ByteOrder::LittleEndian) {
-				// バイトオーダーを元に戻す.
-				dt_reader.ByteOrder(b_order);
-			}
-		}
-	}
-
 	// 図形を破棄する.
 	ShapeImage::~ShapeImage(void)
 	{
@@ -302,6 +66,62 @@ namespace winrt::GraphPaper::implementation
 		if (m_dx_bitmap != nullptr) {
 			m_dx_bitmap = nullptr;
 		}
+	}
+
+	// ストリームに格納する.
+	// enc_id	画像の形式 (BitmapEncoder に定義されている)
+	// ra_stream	画像を格納するストリーム
+	IAsyncAction ShapeImage::copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream)
+	{
+		using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+		using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
+		using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
+		using winrt::Windows::Graphics::Imaging::BitmapEncoder;
+		using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
+
+		// SoftwareBitmap を作成する.
+		const uint32_t bmp_w = m_size.width;
+		const uint32_t bmp_h = m_size.height;
+		SoftwareBitmap bmp{ SoftwareBitmap(BitmapPixelFormat::Bgra8, bmp_w, bmp_h, BitmapAlphaMode::Straight) };
+
+		// SoftwareBitmap のバッファをロックする.
+		auto bmp_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
+		auto bmp_ref{ bmp_buf.CreateReference() };
+		winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem = bmp_ref.as<IMemoryBufferByteAccess>();
+
+		// ロックされたバッファーを得る.
+		BYTE* bmp_data = nullptr;
+		UINT32 capacity = 0;
+		if (SUCCEEDED(bmp_mem->GetBuffer(&bmp_data, &capacity)))
+		{
+			// バッファに画像データをコピーする.
+			memcpy(bmp_data, m_data, capacity);
+
+			// バッファを解放する.
+			bmp_buf.Close();
+			bmp_buf = nullptr;
+			bmp_mem->Release();
+			bmp_mem = nullptr;
+
+			// ビットマップエンコーダーにビットマップを格納する.
+			BitmapEncoder bmp_enc{ co_await BitmapEncoder::CreateAsync(enc_id, ra_stream) };
+			bmp_enc.IsThumbnailGenerated(true);
+			bmp_enc.SetSoftwareBitmap(bmp);
+			try {
+				co_await bmp_enc.FlushAsync();
+			}
+			catch (winrt::hresult_error& err) {
+				if (err.code() == WINCODEC_ERR_UNSUPPORTEDOPERATION) {
+					bmp_enc.IsThumbnailGenerated(false);
+				}
+			}
+			if (!bmp_enc.IsThumbnailGenerated()) {
+				co_await bmp_enc.FlushAsync();
+			}
+			bmp_enc = nullptr;
+		}
+		bmp.Close();
+		bmp = nullptr;
 	}
 
 	// 図形を表示する.
@@ -505,6 +325,13 @@ namespace winrt::GraphPaper::implementation
 			return ANCH_TYPE::ANCH_FILL;
 		}
 		return ANCH_TYPE::ANCH_SHEET;
+	}
+
+	// 範囲に含まれるか判定する.
+	bool ShapeImage::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
+	{
+		return pt_in_rect(m_pos, a_min, a_max) &&
+			pt_in_rect(D2D1_POINT_2F{ m_pos.x + m_view.width, m_pos.y + m_view.height }, a_min, a_max);
 	}
 
 	// 差分だけ移動する.
@@ -739,23 +566,26 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	ShapeImage::ShapeImage(const D2D1_POINT_2F center_pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bitmap)
+	// 図形を作成する.
+	// pos	左上位置
+	// view_size	表示される大きさ
+	// bmp	ビットマップ
+	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bmp)
 	{
 		using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
 		using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
 
-		m_size.width = bitmap.PixelWidth();
-		m_size.height = bitmap.PixelHeight();
-		m_pos.x = center_pos.x - view_size.width * 0.5f;
-		m_pos.y = center_pos.y - view_size.height * 0.5f;
+		m_size.width = bmp.PixelWidth();
+		m_size.height = bmp.PixelHeight();
+		m_pos = pos;
 		m_view = view_size;
 		m_rect.left = m_rect.top = 0;
-		m_rect.right = static_cast<FLOAT>(bitmap.PixelWidth());
-		m_rect.bottom = static_cast<FLOAT>(bitmap.PixelHeight());
-		m_data = new uint8_t[4ull * bitmap.PixelWidth() * bitmap.PixelHeight()];
+		m_rect.right = static_cast<FLOAT>(bmp.PixelWidth());
+		m_rect.bottom = static_cast<FLOAT>(bmp.PixelHeight());
+		m_data = new uint8_t[4ull * bmp.PixelWidth() * bmp.PixelHeight()];
 
 		// SoftwareBitmap のバッファをロックする.
-		auto bmp_buf{ bitmap.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
+		auto bmp_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
 		auto bmp_ref{ bmp_buf.CreateReference() };
 		winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem = bmp_ref.as<IMemoryBufferByteAccess>();
 		BYTE* bmp_data = nullptr;
@@ -770,25 +600,6 @@ namespace winrt::GraphPaper::implementation
 			bmp_mem->Release();
 			bmp_mem = nullptr;
 		}
-	}
-
-	// データリーダーから読み込む
-	// center_pos	画像を配置する中心の位置
-	// dt_reader	データリーダー
-	ShapeImage::ShapeImage(const D2D1_POINT_2F center_pos, DataReader const& dt_reader)		
-	{
-		image_read_dib(dt_reader, m_size, &m_data);
-
-		m_rect.left = 0;
-		m_rect.top = 0;
-		m_rect.right = static_cast<FLOAT>(m_size.width);
-		m_rect.bottom = static_cast<FLOAT>(m_size.height);
-		m_view.width = static_cast<FLOAT>(m_size.width);
-		m_view.height = static_cast<FLOAT>(m_size.height);
-		m_pos.x = center_pos.x - m_view.width * 0.5f;
-		m_pos.y = center_pos.y - m_view.height * 0.5f;
-		m_ratio.width = 1.0f;
-		m_ratio.height = 1.0f;
 	}
 
 	// データリーダーから読み込む
@@ -833,10 +644,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG として書き込む.
-	void ShapeImage::write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const
+	// file_name	画像ファイル名
+	// dt_write		データライター
+	void ShapeImage::write_svg(const wchar_t file_name[], DataWriter const& dt_writer) const
 	{
 		dt_write_svg("<image href=\"", dt_writer);
-		dt_write_svg(f_name, wchar_len(f_name), dt_writer);
+		dt_write_svg(file_name, wchar_len(file_name), dt_writer);
 		dt_write_svg("\" ", dt_writer);
 		dt_write_svg(m_pos, "x", "y", dt_writer);
 		dt_write_svg(m_view.width, "width", dt_writer);
@@ -846,6 +659,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG として書き込む.
+	// 画像なしの場合.
+	// dt_write		データライター
 	void ShapeImage::write_svg(DataWriter const& dt_writer) const
 	{
 		constexpr char RECT[] =

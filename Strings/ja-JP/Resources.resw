@@ -1031,7 +1031,7 @@
     <comment>String</comment>
   </data>
   <data name="str_err_paste" xml:space="preserve">
-    <value>データを貼り付けできません.</value>
+    <value>貼り付けに失敗しました.</value>
     <comment>String</comment>
   </data>
   <data name="rmfi_join_bevel.Text" xml:space="preserve">

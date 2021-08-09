@@ -296,8 +296,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialog;
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
-		const wchar_t QUOT[] = L"\"";	// 引用符
-		const wchar_t NEW_LINE[] = L"\u2028";	// テキストブロック内での改行
+		constexpr wchar_t QUOT[] = L"\"";	// 引用符
+		constexpr wchar_t NEW_LINE[] = L"\u2028";	// テキストブロック内での改行
 
 		auto const& r_loader = ResourceLoader::GetForCurrentView();
 		winrt::hstring text;
