@@ -73,24 +73,26 @@ namespace winrt::GraphPaper::implementation
 		slist_write<REDUCED>(list_selected, /*--->*/dt_writer);
 		// リストを破棄する.
 		list_selected.clear();
-		// 書き込んだデータをメモリストリームに格納し, 格納したバイト数を得る.
+		// メモリストリームにデータライターの内容を格納し, 格納したバイト数を得る.
 		uint32_t n_byte{ co_await dt_writer.StoreAsync() };
-		// スレッドをメインページの UI スレッドに変える.
-		co_await winrt::resume_foreground(Dispatcher());
 		if (n_byte > 0) {
-			// データパッケージを作成し, メモリストリームをデータパッケージに格納する.
+			// メインページの UI スレッドに変える.
+			co_await winrt::resume_foreground(Dispatcher());
+			// データパッケージを作成し, データパッケージにメモリストリームを格納する.
 			DataPackage dt_pkg{ DataPackage() };
 			dt_pkg.RequestedOperation(DataPackageOperation::Copy);
 			dt_pkg.SetData(CLIPBOARD_SHAPES, winrt::box_value(mem_stream));
-			// 選択されたリストから文字列が得られた
+			// 文字列が得られたか判定する.
 			if (txt != nullptr) {
-				// テキストを格納する.
+				// データパッケージにテキストを格納する.
 				dt_pkg.SetText(txt);
 			}
+			// 画像が得られたか判定する.
 			if (img_ref != nullptr) {
+				// データパッケージに画像を格納する.
 				dt_pkg.SetBitmap(img_ref);
 			}
-			// データパッケージをクリップボードに格納する.
+			// クリップボードにデータパッケージを格納する.
 			Clipboard::SetContent(dt_pkg);
 			dt_pkg = nullptr;
 		}
@@ -132,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 			if (summary_is_visible()) {
 				summary_remove(s);
 			}
-			// 図形を削除して, その操作をスタックに積む.
+			// 図形を削除し, その操作をスタックに積む.
 			ustack_push_remove(s);
 		}
 		ustack_push_null();
@@ -378,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 		// resume_background しないと GetBitmapAsync が失敗することがある.
 		co_await winrt::resume_background();
 
-		// クリップボードから SoftwareBitmap を取り出す.
+		// クリップボードからビットマップ SoftwareBitmap を取り出す.
 		RandomAccessStreamReference reference{ co_await Clipboard::GetContent().GetBitmapAsync() };
 		IRandomAccessStreamWithContentType stream{ co_await reference.OpenReadAsync() };
 		BitmapDecoder bmp_dec{ co_await BitmapDecoder::CreateAsync(stream) };
@@ -395,11 +397,12 @@ namespace winrt::GraphPaper::implementation
 		};
 		const D2D1_SIZE_F view_size{ img_w, img_h };
 
-		// SoftwareBitmap をもとに図形を作成する.
+		// ビットマップから図形を作成する.
 		ShapeImage* img = new ShapeImage(pos, view_size, bmp);
 #if (_DEBUG)
 		debug_leak_cnt++;
 #endif
+		// ビットマップを閉じ, ビットマップとデコーダーを解放する.
 		bmp.Close();
 		bmp = nullptr;
 		bmp_dec = nullptr;
@@ -407,12 +410,40 @@ namespace winrt::GraphPaper::implementation
 		stream = nullptr;
 		reference = nullptr;
 
+		const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
+		const float pile_up = m_misc_pile_up / m_sheet_main.m_sheet_scale;
+		D2D1_POINT_2F v_pos;
+		if (grid_len >= 1.0f && pile_up >= FLT_MIN &&
+			slist_find_vertex_closest(m_list_shapes, pos, pile_up, v_pos)) {
+			// 図形の左上位置を方眼の大きさで丸める.
+			D2D1_POINT_2F g_pos;
+			pt_round(pos, grid_len, g_pos);
+			D2D1_POINT_2F g_vec;
+			pt_sub(g_pos, pos, g_vec);
+			D2D1_POINT_2F v_vec;
+			pt_sub(v_pos, pos, v_vec);
+			if (pt_abs2(g_vec) < pt_abs2(v_vec)) {
+				pos = g_pos;
+			}
+			else {
+				pos = v_pos;
+			}
+		}
+		else if (grid_len >= 1.0f) {
+			pt_round(pos, grid_len, pos);
+		}
+		else if (pile_up >= FLT_MIN) {
+			slist_find_vertex_closest(m_list_shapes, pos, pile_up, pos);
+		}
+		/*
 		// 方眼に合わせるか判定する.
 		D2D1_POINT_2F g_pos{};
 		if (m_sheet_main.m_grid_snap) {
-			// 左上位置を方眼の大きさで丸める.
+			// 図形の左上位置を方眼の大きさで丸める.
 			pt_round(pos, m_sheet_main.m_grid_base + 1.0, g_pos);
+			// 頂点を重ねる閾値がゼロか判定する.
 			if (m_misc_pile_up < FLT_MIN) {
+				// 丸めた位置を図形の左上位置に格納する.
 				pos = g_pos;
 			}
 		}
@@ -420,6 +451,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_misc_pile_up >= FLT_MIN) {
 			D2D1_POINT_2F v_pos;
 			if (slist_find_vertex_closest(m_list_shapes, pos, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_pos)) {
+				// 図形の左上位置に, 近傍の頂点と方眼の格子の, より近い方を格納する.
 				D2D1_POINT_2F v_vec;
 				pt_sub(v_pos, pos, v_vec);
 				D2D1_POINT_2F g_vec;
@@ -435,6 +467,7 @@ namespace winrt::GraphPaper::implementation
 				pos = g_pos;
 			}
 		}
+		*/
 		img->set_pos_start(pos);
 
 		m_dx_mutex.lock();
