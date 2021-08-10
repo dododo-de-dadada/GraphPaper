@@ -21,61 +21,74 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataWriter;
 	using winrt::Windows::Storage::Streams::IInputStream;
 	using winrt::Windows::Storage::Streams::InMemoryRandomAccessStream;
+	using winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType;
 	using winrt::Windows::Storage::Streams::IOutputStream;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
-	using winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
 
+	const winrt::param::hstring CLIPBOARD_SHAPES{ L"graph_paper_shapes_data" };	// 図形データのクリップボード書式
+	const winrt::param::hstring CLIPBOARD_TIFF{ L"TaggedImageFileFormat" };	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
+
 	// 編集メニューの「コピー」が選択された.
+	// プログラム終了したら中身が消える！
 	IAsyncAction MainPage::xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		constexpr bool REDUCED = true;
+
 		if (m_list_sel_cnt == 0) {
 			// 終了する.
 			return;
 		}
+		// コルーチンが呼び出されたスレッドコンテキストを保存する.
+		winrt::apartment_context context;
 		// 選択された図形のリストを得る.
 		SHAPE_LIST list_selected;
 		slist_selected<Shape>(m_list_shapes, list_selected);
-		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
-		winrt::apartment_context context;
-		// 出力ストリームを作成して, データライターを得る.
+		// リストから降順に, 最初に見つかった文字列図形の文字列, あるいは画像図形の画像を得る.
+		wchar_t* txt = nullptr;
+		RandomAccessStreamReference img_ref = nullptr;
+		for (auto it = list_selected.rbegin(); it != list_selected.rend(); it++) {
+			Shape* s = *it;
+			if (txt == nullptr) {
+				s->get_text_content(txt);
+			}
+			if (img_ref == nullptr && typeid(*s) == typeid(ShapeImage)) {
+				// ビットマップを格納する.
+				InMemoryRandomAccessStream img_stream{ InMemoryRandomAccessStream() };
+				co_await static_cast<ShapeImage*>(s)->copy_to(BitmapEncoder::BmpEncoderId(), img_stream);
+				if (img_stream.Size() > 0) {
+					img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);
+				}
+			}
+			if (txt != nullptr && img_ref != nullptr) {
+				// 文字列と画像図形, 両方とも見つかったなら中断する.
+				break;
+			}
+		}
+		// メモリストリームを作成して, データライターを得る.
 		InMemoryRandomAccessStream mem_stream{ InMemoryRandomAccessStream() };
 		IOutputStream out_stream{ mem_stream.GetOutputStreamAt(0) };
 		DataWriter dt_writer{ DataWriter(out_stream) };
 		// データライターに選択された図形のリストを書き込む.
-		constexpr bool REDUCED = true;
-		slist_write<REDUCED>(list_selected, dt_writer);
-		// 書き込んだらリストは破棄する.
+		slist_write<REDUCED>(list_selected, /*--->*/dt_writer);
+		// リストを破棄する.
 		list_selected.clear();
-		// 書き込んだデータを出力ストリームに格納し, 格納したバイト数を得る.
+		// 書き込んだデータをメモリストリームに格納し, 格納したバイト数を得る.
 		uint32_t n_byte{ co_await dt_writer.StoreAsync() };
 		// スレッドをメインページの UI スレッドに変える.
 		co_await winrt::resume_foreground(Dispatcher());
 		if (n_byte > 0) {
-			// 格納したバイト数が 0 を超える場合,
-			// データパッケージを作成する.
+			// データパッケージを作成し, メモリストリームをデータパッケージに格納する.
 			DataPackage dt_pkg{ DataPackage() };
-			// ストリームをデータパッケージに格納する.
 			dt_pkg.RequestedOperation(DataPackageOperation::Copy);
 			dt_pkg.SetData(CLIPBOARD_SHAPES, winrt::box_value(mem_stream));
-			for (auto it = m_list_shapes.rbegin(); it != m_list_shapes.rend(); it++) {
-				Shape* s = *it;
-				wchar_t* w;
-				if (!s->is_deleted() && s->is_selected() && s->get_text_content(w)) {
-					dt_pkg.SetText(w);
-					break;
-				}
+			// 選択されたリストから文字列が得られた
+			if (txt != nullptr) {
+				// テキストを格納する.
+				dt_pkg.SetText(txt);
 			}
-			for (auto it = m_list_shapes.rbegin(); it != m_list_shapes.rend(); it++) {
-				Shape* s = *it;
-				if (!s->is_deleted() && s->is_selected() && typeid(*s) == typeid(ShapeImage)) {
-					InMemoryRandomAccessStream ra_stream{ InMemoryRandomAccessStream() };
-					co_await static_cast<ShapeImage*>(s)->copy_to(BitmapEncoder::BmpEncoderId(), ra_stream);
-					if (ra_stream.Size() > 0) {
-						dt_pkg.SetBitmap(RandomAccessStreamReference::CreateFromStream(ra_stream));
-					}
-					break;
-				}
+			if (img_ref != nullptr) {
+				dt_pkg.SetBitmap(img_ref);
 			}
 			// データパッケージをクリップボードに格納する.
 			Clipboard::SetContent(dt_pkg);
@@ -85,11 +98,9 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.Close();
 		dt_writer = nullptr;
 		// 出力ストリームを閉じる.
+		// メモリストリームは閉じちゃダメ.
 		out_stream.Close();
 		out_stream = nullptr;
-		// メモリストリームは閉じちゃダメ.
-		//mem_stream.Close();
-		//mem_stream = nullptr;
 		xcvd_is_enabled();
 		// スレッドコンテキストを復元する.
 		co_await context;
@@ -226,7 +237,6 @@ namespace winrt::GraphPaper::implementation
 		// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.
 		IInspectable dt_object{ co_await Clipboard::GetContent().GetDataAsync(CLIPBOARD_SHAPES) };
 		InMemoryRandomAccessStream ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
-		uint32_t ra_size = static_cast<uint32_t>(ra_stream.Size());
 		if (ra_stream.Size() <= static_cast<uint64_t>(UINT32_MAX)) {
 			IInputStream in_stream{ ra_stream.GetInputStreamAt(0) };
 			DataReader dt_reader{ DataReader(in_stream) };
@@ -237,12 +247,10 @@ namespace winrt::GraphPaper::implementation
 			co_await winrt::resume_foreground(Dispatcher());
 			// データリーダーに読み込めたか判定する.
 			if (operation == ra_size) {
-				SHAPE_LIST slist_pasted;	// 貼り付けリスト
-
 				// データリーダーから貼り付けリストを読み込み, それが空でないか判定する.
+				SHAPE_LIST slist_pasted;	// 貼り付けリスト
 				if (slist_read(slist_pasted, dt_reader) && !slist_pasted.empty()) {
 					m_dx_mutex.lock();
-					// 得られたリストが空でない場合,
 					// 図形リストの中の図形の選択をすべて解除する.
 					unselect_all();
 					// 得られたリストの各図形について以下を繰り返す.

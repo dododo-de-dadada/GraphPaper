@@ -84,8 +84,9 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::System::VirtualKey;
 	using winrt::Windows::System::VirtualKeyModifiers;
 
-	static const winrt::param::hstring CLIPBOARD_SHAPES{ L"graph_paper_data" };	// 図形データのクリップボード書式
-	static const winrt::param::hstring CLIPBOARD_TIFF{ L"TaggedImageFileFormat" };
+	extern const winrt::param::hstring CLIPBOARD_SHAPES;	// 図形データのクリップボード書式
+	extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
+
 	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
 	constexpr auto FMT_INCH_UNIT = L"%.3f \u33CC";	// インチ単位の書式
 	constexpr auto FMT_MILLI = L"%.3f";	// ミリメートル単位の書式

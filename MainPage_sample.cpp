@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 					samp_shape->m_opac = m_sample_sheet.m_image_opac;
 					m_sample_shape = samp_shape;
 				}
-				catch (winrt::hresult_error& e) {
+				catch (winrt::hresult_error&) {
 				}
 				co_await context;
 			}
