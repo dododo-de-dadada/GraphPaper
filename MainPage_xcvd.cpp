@@ -368,11 +368,12 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F v_pos;
 		if (grid_len >= 1.0f && pile_up >= FLT_MIN &&
 			slist_find_vertex_closest(slist, pos, pile_up, v_pos)) {
-			// 図形の左上位置を方眼の大きさで丸める.
+			// 図形の左上位置を方眼の大きさで丸め, 元の値との差分を求める.
 			D2D1_POINT_2F g_pos;
 			pt_round(pos, grid_len, g_pos);
 			D2D1_POINT_2F g_vec;
 			pt_sub(g_pos, pos, g_vec);
+			// 近傍の頂点との差分を求める.
 			D2D1_POINT_2F v_vec;
 			pt_sub(v_pos, pos, v_vec);
 			if (pt_abs2(g_vec) < pt_abs2(v_vec)) {
