@@ -440,7 +440,7 @@ namespace winrt::GraphPaper::implementation
 
 		const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
 		const float pile_up = m_misc_pile_up / m_sheet_main.m_sheet_scale;
-		xcvd_paste_pos(pos, m_list_shapes, grid_len, pile_up);
+		xcvd_paste_pos(pos, /*<---*/m_list_shapes, grid_len, pile_up);
 		/*
 		D2D1_POINT_2F v_pos;
 		if (grid_len >= 1.0f && pile_up >= FLT_MIN &&
