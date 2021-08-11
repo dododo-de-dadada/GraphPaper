@@ -362,6 +362,34 @@ namespace winrt::GraphPaper::implementation
 		co_await context;
 	}
 
+	// 貼り付ける位置を求める.
+	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float pile_up)
+	{
+		D2D1_POINT_2F v_pos;
+		if (grid_len >= 1.0f && pile_up >= FLT_MIN &&
+			slist_find_vertex_closest(slist, pos, pile_up, v_pos)) {
+			// 図形の左上位置を方眼の大きさで丸める.
+			D2D1_POINT_2F g_pos;
+			pt_round(pos, grid_len, g_pos);
+			D2D1_POINT_2F g_vec;
+			pt_sub(g_pos, pos, g_vec);
+			D2D1_POINT_2F v_vec;
+			pt_sub(v_pos, pos, v_vec);
+			if (pt_abs2(g_vec) < pt_abs2(v_vec)) {
+				pos = g_pos;
+			}
+			else {
+				pos = v_pos;
+			}
+		}
+		else if (grid_len >= 1.0f) {
+			pt_round(pos, grid_len, pos);
+		}
+		else if (pile_up >= FLT_MIN) {
+			slist_find_vertex_closest(slist, pos, pile_up, pos);
+		}
+	}
+
 	IAsyncAction MainPage::xcvd_paste_image(void)
 	{
 		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
@@ -412,6 +440,8 @@ namespace winrt::GraphPaper::implementation
 
 		const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
 		const float pile_up = m_misc_pile_up / m_sheet_main.m_sheet_scale;
+		xcvd_paste_pos(pos, m_list_shapes, grid_len, pile_up);
+		/*
 		D2D1_POINT_2F v_pos;
 		if (grid_len >= 1.0f && pile_up >= FLT_MIN &&
 			slist_find_vertex_closest(m_list_shapes, pos, pile_up, v_pos)) {
@@ -435,6 +465,7 @@ namespace winrt::GraphPaper::implementation
 		else if (pile_up >= FLT_MIN) {
 			slist_find_vertex_closest(m_list_shapes, pos, pile_up, pos);
 		}
+		*/
 		/*
 		// 方眼に合わせるか判定する.
 		D2D1_POINT_2F g_pos{};
