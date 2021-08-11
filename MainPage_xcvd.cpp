@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_xcvd.cpp
-// 切り取りとコピー, 文字列の編集など
+// 切り取りとコピー
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -28,6 +28,9 @@ namespace winrt::GraphPaper::implementation
 
 	const winrt::param::hstring CLIPBOARD_SHAPES{ L"graph_paper_shapes_data" };	// 図形データのクリップボード書式
 	const winrt::param::hstring CLIPBOARD_TIFF{ L"TaggedImageFileFormat" };	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
+
+	// 貼り付ける位置を求める.
+	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float pile_up);
 
 	// 編集メニューの「コピー」が選択された.
 	// プログラム終了したら中身が消える！
@@ -311,6 +314,10 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - t->m_diff[0].x * 0.5),
 				static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - t->m_diff[0].y * 0.5)
 			};
+			const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
+			const float pile_up = m_misc_pile_up / m_sheet_main.m_sheet_scale;
+			xcvd_paste_pos(pos, /*<---*/m_list_shapes, grid_len, pile_up);
+			/*
 			// 方眼に合わせるか判定する.
 			D2D1_POINT_2F g_pos{};
 			if (m_sheet_main.m_grid_snap) {
@@ -340,6 +347,7 @@ namespace winrt::GraphPaper::implementation
 					pos = g_pos;
 				}
 			}
+			*/
 			t->set_pos_start(pos);
 			m_dx_mutex.lock();
 			ustack_push_append(t);
@@ -363,20 +371,24 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 貼り付ける位置を求める.
+	// grid_len	方眼の大きさ
+	// pile_up	頂点を重ねる制限距離
 	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float pile_up)
 	{
 		D2D1_POINT_2F v_pos;
 		if (grid_len >= 1.0f && pile_up >= FLT_MIN &&
 			slist_find_vertex_closest(slist, pos, pile_up, v_pos)) {
-			// 図形の左上位置を方眼の大きさで丸め, 元の値との差分を求める.
+			// 図形の左上位置を方眼の大きさで丸め, 元の値との距離 (の自乗) を求める.
 			D2D1_POINT_2F g_pos;
 			pt_round(pos, grid_len, g_pos);
 			D2D1_POINT_2F g_vec;
 			pt_sub(g_pos, pos, g_vec);
-			// 近傍の頂点との差分を求める.
+			const double g_abs = pt_abs2(g_vec);
+			// 近傍の頂点との距離 (の自乗) を求める.
 			D2D1_POINT_2F v_vec;
 			pt_sub(v_pos, pos, v_vec);
-			if (pt_abs2(g_vec) < pt_abs2(v_vec)) {
+			const double v_abs = pt_abs2(v_vec);
+			if (g_abs < v_abs) {
 				pos = g_pos;
 			}
 			else {
