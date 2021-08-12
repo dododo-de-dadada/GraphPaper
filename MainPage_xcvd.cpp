@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t undeleted_cnt = 0;	// 消去フラグがない図形の数
 		uint32_t selected_cnt = 0;	// 選択された図形の数
 		uint32_t selected_group_cnt = 0;	// 選択されたグループ図形の数
-		uint32_t runlength_cnt = 0;	// 選択された図形のランレングスの数
+		uint32_t runlength_cnt = 0;	// 選択された図形の連続の数
 		uint32_t selected_text_cnt = 0;	// 選択された文字列図形の数
 		uint32_t text_cnt = 0;	// 文字列図形の数
 		uint32_t selected_image_cnt = 0;	// 選択された画像図形の数
@@ -236,7 +236,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool ok = false;	// 貼り付けの成功を判定
 
-		// コルーチンが最初に呼び出されたスレッドコンテキストを保存する.
+		// コルーチンが呼び出されたスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 
 		// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.

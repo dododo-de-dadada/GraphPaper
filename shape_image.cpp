@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 		const uint32_t bmp_h = m_size.height;
 		SoftwareBitmap bmp{ SoftwareBitmap(BitmapPixelFormat::Bgra8, bmp_w, bmp_h, BitmapAlphaMode::Straight) };
 
-		// SoftwareBitmap のバッファをロックする.
+		// ビットマップのバッファをロックする.
 		auto bmp_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
 		auto bmp_ref{ bmp_buf.CreateReference() };
 		winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem = bmp_ref.as<IMemoryBufferByteAccess>();
