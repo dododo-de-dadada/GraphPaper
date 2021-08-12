@@ -113,33 +113,33 @@ namespace winrt::GraphPaper::implementation
 		rmfi_misc_len_point_2().IsChecked(value == LEN_UNIT::POINT);
 	}
 
-	// その他メニューの「頂点を重ねる...」が選択された.
-	IAsyncAction MainPage::misc_pile_up_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
+	// その他メニューの「頂点をくっつける...」が選択された.
+	IAsyncAction MainPage::misc_vert_stick_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		misc_pile_up_set_header(m_misc_pile_up);
-		sd_misc_pile_up().Value(static_cast<double>(m_misc_pile_up));
-		const auto d_result{ co_await cd_misc_pile_up().ShowAsync() };
+		misc_vert_stick_set_header(m_misc_vert_stick);
+		sd_misc_vert_stick().Value(static_cast<double>(m_misc_vert_stick));
+		const auto d_result{ co_await cd_misc_vert_stick().ShowAsync() };
 		if (d_result == ContentDialogResult::Primary) {
-			m_misc_pile_up = static_cast<float>(sd_misc_pile_up().Value());
+			m_misc_vert_stick = static_cast<float>(sd_misc_vert_stick().Value());
 		}
 	}
 
-	void MainPage::misc_pile_up_set_header(const float value) noexcept
+	void MainPage::misc_vert_stick_set_header(const float value) noexcept
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
-		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_misc_pile_up") + L": " + buf;
-		sd_misc_pile_up().Header(box_value(text));
+		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_misc_vert_stick") + L": " + buf;
+		sd_misc_vert_stick().Header(box_value(text));
 	}
 
 	// スライダーの値が変更された.
-	void MainPage::misc_pile_up_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept
+	void MainPage::misc_vert_stick_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept
 	{
-		misc_pile_up_set_header(static_cast<float>(args.NewValue()));
+		misc_vert_stick_set_header(static_cast<float>(args.NewValue()));
 	}
 
 

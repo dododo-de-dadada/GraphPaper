@@ -1066,8 +1066,8 @@
     <value>Join Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_misc_pile_up.Text" xml:space="preserve">
-    <value>Pile-up Vertex...</value>
+  <data name="mfi_misc_vert_stick.Text" xml:space="preserve">
+    <value>Stick Vertices...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_cap_flat.Text" xml:space="preserve">
@@ -1086,7 +1086,7 @@
     <value>Triangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_misc_pile_up" xml:space="preserve">
+  <data name="str_misc_vert_stick" xml:space="preserve">
     <value>Thresholds</value>
     <comment>String</comment>
   </data>

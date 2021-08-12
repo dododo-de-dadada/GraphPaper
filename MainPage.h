@@ -27,7 +27,7 @@
 // MainPage_grid.cpp	方眼
 // MainPage_group.cpp	グループ化とグループの解除
 // NainPage_join.cpp	線分のつなぎ
-// MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, 頂点を重ねる
+// MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, 頂点をくっつける閾値
 // MainPage_sample.cpp	見本
 // MainPage_scroll.cpp	スクロールバー
 // MainPage_select.cpp	図形の選択
@@ -100,7 +100,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_GRID_UNIT = L"%.3f gd";	// グリッド単位の書式
 	constexpr auto ICON_INFO = L"glyph_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"glyph_alert";	// 警告アイコンの静的リソースのキー
-	constexpr auto DEF_PILE_UP_VERT = 2.0f * 6.0f;	// 頂点を重ねる閾値の既定値
+	constexpr auto DEF_VERT_STICK = 2.0f * 6.0f;	// 頂点をくっつける閾値の既定値
 	constexpr auto DEF_SHEET_SIZE = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
 	constexpr auto UI_VISIBLE = Visibility::Visible;	// 表示	
 	constexpr auto UI_COLLAPSED = Visibility::Collapsed;	// 非表示
@@ -262,7 +262,7 @@ namespace winrt::GraphPaper::implementation
 		// その他
 		LEN_UNIT m_misc_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COLOR_CODE m_misc_color_code = COLOR_CODE::DEC;	// 色成分の書式
-		float m_misc_pile_up = DEF_PILE_UP_VERT;	// 頂点を重ねる閾値
+		float m_misc_vert_stick = DEF_VERT_STICK;	// 頂点をくっつける閾値
 		STATUS_BAR m_misc_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		// 見本用紙
@@ -670,12 +670,12 @@ namespace winrt::GraphPaper::implementation
 		void misc_color_is_checked(const COLOR_CODE c_code);
 		// その他メニューの「色の表記」のサブ項目が選択された.
 		void misc_color_click(IInspectable const& sender, RoutedEventArgs const&);
-		// その他メニューの「頂点を重ねる...」が選択された.
-		IAsyncAction misc_pile_up_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
+		// その他メニューの「頂点をくっつける...」が選択された.
+		IAsyncAction misc_vert_stick_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 値をスライダーのヘッダーに格納する.
-		void misc_pile_up_set_header(const float value) noexcept;
+		void misc_vert_stick_set_header(const float value) noexcept;
 		// スライダーの値が変更された.
-		void misc_pile_up_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept;
+		void misc_vert_stick_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept;
 		// その他メニューの「長さの単位」に印をつける.
 		void misc_len_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.

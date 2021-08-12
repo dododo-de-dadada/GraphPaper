@@ -24,13 +24,12 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType;
 	using winrt::Windows::Storage::Streams::IOutputStream;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
-	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
 
 	const winrt::param::hstring CLIPBOARD_SHAPES{ L"graph_paper_shapes_data" };	// 図形データのクリップボード書式
 	const winrt::param::hstring CLIPBOARD_TIFF{ L"TaggedImageFileFormat" };	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
 
 	// 貼り付ける位置を求める.
-	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float pile_up);
+	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float vert_stick);
 
 	// 編集メニューの「コピー」が選択された.
 	// プログラム終了したら中身が消える！
@@ -53,10 +52,11 @@ namespace winrt::GraphPaper::implementation
 		for (auto it = list_selected.rbegin(); it != list_selected.rend(); it++) {
 			Shape* s = *it;
 			if (txt == nullptr) {
+				// 文字列をポインターに格納する.
 				s->get_text_content(txt);
 			}
 			if (img_ref == nullptr && typeid(*s) == typeid(ShapeImage)) {
-				// ビットマップを格納する.
+				// ビットマップをストリーム参照に格納する.
 				InMemoryRandomAccessStream img_stream{ InMemoryRandomAccessStream() };
 				co_await static_cast<ShapeImage*>(s)->copy_to(BitmapEncoder::BmpEncoderId(), img_stream);
 				if (img_stream.Size() > 0) {
@@ -315,39 +315,8 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - t->m_diff[0].y * 0.5)
 			};
 			const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
-			const float pile_up = m_misc_pile_up / m_sheet_main.m_sheet_scale;
-			xcvd_paste_pos(pos, /*<---*/m_list_shapes, grid_len, pile_up);
-			/*
-			// 方眼に合わせるか判定する.
-			D2D1_POINT_2F g_pos{};
-			if (m_sheet_main.m_grid_snap) {
-				// 左上位置を方眼の大きさで丸める.
-				pt_round(pos, m_sheet_main.m_grid_base + 1.0, g_pos);
-				if (m_misc_pile_up < FLT_MIN) {
-					pos = g_pos;
-				}
-			}
-
-			// 頂点を重ねる閾値がゼロより大きいか判定する.
-			if (m_misc_pile_up >= FLT_MIN) {
-				D2D1_POINT_2F v_pos;
-				if (slist_find_vertex_closest(m_list_shapes, pos, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_pos)) {
-					D2D1_POINT_2F v_vec;
-					pt_sub(v_pos, pos, v_vec);
-					D2D1_POINT_2F g_vec;
-					pt_sub(g_pos, pos, g_vec);
-					if (m_sheet_main.m_grid_snap && pt_abs2(g_vec) < pt_abs2(v_vec)) {
-						pos = g_pos;
-					}
-					else {
-						pos = v_pos;
-					}
-				}
-				else if (m_sheet_main.m_grid_snap) {
-					pos = g_pos;
-				}
-			}
-			*/
+			const float vert_stick = m_misc_vert_stick / m_sheet_main.m_sheet_scale;
+			xcvd_paste_pos(pos, /*<---*/m_list_shapes, grid_len, vert_stick);
 			t->set_pos_start(pos);
 			m_dx_mutex.lock();
 			ustack_push_append(t);
@@ -372,12 +341,12 @@ namespace winrt::GraphPaper::implementation
 
 	// 貼り付ける位置を求める.
 	// grid_len	方眼の大きさ
-	// pile_up	頂点を重ねる制限距離
-	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float pile_up)
+	// vert_stick	頂点をくっつける距離
+	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float vert_stick)
 	{
 		D2D1_POINT_2F v_pos;
-		if (grid_len >= 1.0f && pile_up >= FLT_MIN &&
-			slist_find_vertex_closest(slist, pos, pile_up, v_pos)) {
+		if (grid_len >= 1.0f && vert_stick >= FLT_MIN &&
+			slist_find_vertex_closest(slist, pos, vert_stick, v_pos)) {
 			// 図形の左上位置を方眼の大きさで丸め, 元の値との距離 (の自乗) を求める.
 			D2D1_POINT_2F g_pos;
 			pt_round(pos, grid_len, g_pos);
@@ -398,8 +367,8 @@ namespace winrt::GraphPaper::implementation
 		else if (grid_len >= 1.0f) {
 			pt_round(pos, grid_len, pos);
 		}
-		else if (pile_up >= FLT_MIN) {
-			slist_find_vertex_closest(slist, pos, pile_up, pos);
+		else if (vert_stick >= FLT_MIN) {
+			slist_find_vertex_closest(slist, pos, vert_stick, pos);
 		}
 	}
 
@@ -452,66 +421,8 @@ namespace winrt::GraphPaper::implementation
 		reference = nullptr;
 
 		const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
-		const float pile_up = m_misc_pile_up / m_sheet_main.m_sheet_scale;
-		xcvd_paste_pos(pos, /*<---*/m_list_shapes, grid_len, pile_up);
-		/*
-		D2D1_POINT_2F v_pos;
-		if (grid_len >= 1.0f && pile_up >= FLT_MIN &&
-			slist_find_vertex_closest(m_list_shapes, pos, pile_up, v_pos)) {
-			// 図形の左上位置を方眼の大きさで丸める.
-			D2D1_POINT_2F g_pos;
-			pt_round(pos, grid_len, g_pos);
-			D2D1_POINT_2F g_vec;
-			pt_sub(g_pos, pos, g_vec);
-			D2D1_POINT_2F v_vec;
-			pt_sub(v_pos, pos, v_vec);
-			if (pt_abs2(g_vec) < pt_abs2(v_vec)) {
-				pos = g_pos;
-			}
-			else {
-				pos = v_pos;
-			}
-		}
-		else if (grid_len >= 1.0f) {
-			pt_round(pos, grid_len, pos);
-		}
-		else if (pile_up >= FLT_MIN) {
-			slist_find_vertex_closest(m_list_shapes, pos, pile_up, pos);
-		}
-		*/
-		/*
-		// 方眼に合わせるか判定する.
-		D2D1_POINT_2F g_pos{};
-		if (m_sheet_main.m_grid_snap) {
-			// 図形の左上位置を方眼の大きさで丸める.
-			pt_round(pos, m_sheet_main.m_grid_base + 1.0, g_pos);
-			// 頂点を重ねる閾値がゼロか判定する.
-			if (m_misc_pile_up < FLT_MIN) {
-				// 丸めた位置を図形の左上位置に格納する.
-				pos = g_pos;
-			}
-		}
-		// 頂点を重ねる閾値がゼロより大きいか判定する.
-		if (m_misc_pile_up >= FLT_MIN) {
-			D2D1_POINT_2F v_pos;
-			if (slist_find_vertex_closest(m_list_shapes, pos, m_misc_pile_up / m_sheet_main.m_sheet_scale, v_pos)) {
-				// 図形の左上位置に, 近傍の頂点と方眼の格子の, より近い方を格納する.
-				D2D1_POINT_2F v_vec;
-				pt_sub(v_pos, pos, v_vec);
-				D2D1_POINT_2F g_vec;
-				pt_sub(g_pos, pos, g_vec);
-				if (m_sheet_main.m_grid_snap && pt_abs2(g_vec) < pt_abs2(v_vec)) {
-					pos = g_pos;
-				}
-				else {
-					pos = v_pos;
-				}
-			}
-			else if (m_sheet_main.m_grid_snap) {
-				pos = g_pos;
-			}
-		}
-		*/
+		const float vert_stick = m_misc_vert_stick / m_sheet_main.m_sheet_scale;
+		xcvd_paste_pos(pos, /*<---*/m_list_shapes, grid_len, vert_stick);
 		img->set_pos_start(pos);
 
 		m_dx_mutex.lock();

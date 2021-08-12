@@ -23,6 +23,8 @@
             <x:String x:Key="glyph_fit_page">&#xE9A6;</x:String>
 			<x:String x:Key="glyph_draw">&#xEC87;</x:String>
 			<x:String x:Key="glyph_photo2">&#xEB9F;</x:String>
+			<x:String x:Key="glyph_unit">&#xECC6;</x:String>
+			<x:String x:Key="glyph_color">&#xE790;</x:String>
 			<!-- 曲線アイコンの描画コマンド -->
             <x:String x:Key="data_bezi">
                 M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841 L15.310918,7.967942 C8.311178,14.40621 8.311178,0.405251 -0.032292,7.249824 Z
@@ -782,27 +784,36 @@
 			<!-- その他メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_misc_menu" AccessKey="M" Title="Misc">
                 <MenuFlyoutSubItem x:Uid="mfsi_misc_len_unit" Text="Length unit">
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_pixel" x:Uid="rmfi_misc_len_pixel" Click="misc_len_click" Text="Pixel" />
+					<MenuFlyoutSubItem.Icon>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_unit}" />
+					</MenuFlyoutSubItem.Icon>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_pixel" x:Uid="rmfi_misc_len_pixel" Click="misc_len_click" Text="Pixel" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_inch" x:Uid="rmfi_misc_len_inch" Click="misc_len_click" Text="Inch" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_milli" x:Uid="rmfi_misc_len_milli" Click="misc_len_click" Text="Millimeter" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_point" x:Uid="rmfi_misc_len_point" Click="misc_len_click" Text="Point" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_len_grid" x:Uid="rmfi_misc_len_grid" Click="misc_len_click" Text="Per Grid" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_misc_color_code" Text="Color Code">
+					<MenuFlyoutSubItem.Icon>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_color}" />
+					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_dec" x:Uid="rmfi_misc_color_dec" Click="misc_color_click" IsChecked="True" Text="Decimal" GroupName="gn_misc_color_code" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_hex" x:Uid="rmfi_misc_color_hex" Click="misc_color_click" Text="Hexadecimal" GroupName="gn_misc_color_code" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_real" x:Uid="rmfi_misc_color_real" Click="misc_color_click" Text="Real" GroupName="gn_misc_color_code" />
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_misc_color_cent" x:Uid="rmfi_misc_color_cent" Click="misc_color_click" Text="Percent" GroupName="gn_misc_color_code" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_misc_status_bar" Text="Status Bar">
-                    <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_draw" x:Uid="tmfi_misc_status_draw" Click="status_bar_click" Text="Draw Tool" />
+					<MenuFlyoutSubItem.Icon>
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_info}" />
+					</MenuFlyoutSubItem.Icon>
+					<ToggleMenuFlyoutItem x:Name="tmfi_misc_status_draw" x:Uid="tmfi_misc_status_draw" Click="status_bar_click" Text="Draw Tool" />
                     <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_unit" x:Uid="tmfi_misc_status_unit" Click="status_bar_click" Text="Unit Name" />
                     <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_curs" x:Uid="tmfi_misc_status_curs" Click="status_bar_click" Text="Cursor Pos" />
                     <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_grid" x:Uid="tmfi_misc_status_grid" Click="status_bar_click" Text="Grid Size" />
                     <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_sheet" x:Uid="tmfi_misc_status_sheet" Click="status_bar_click" Text="Sheet Size" />
                     <ToggleMenuFlyoutItem x:Name="tmfi_misc_status_zoom" x:Uid="tmfi_misc_status_zoom" Click="status_bar_click" Text="Scale" />
                 </MenuFlyoutSubItem>
-				<MenuFlyoutItem x:Name="mfi_misc_pile_up" x:Uid="mfi_misc_pile_up" Click="misc_pile_up_click_async" Text="Pile-up Vertex..." />
+				<MenuFlyoutItem x:Name="mfi_misc_vert_stick" x:Uid="mfi_misc_vert_stick" Click="misc_vert_stick_click_async" Text="Stick Vertices..." />
 				<MenuFlyoutSeparator />
                 <!-- バージョン情報メニュー -->
                 <MenuFlyoutItem x:Uid="mfi_about_this" Click="about_graph_paper_click" Text="About GraphPaper" />
@@ -991,10 +1002,10 @@
                 <TextBox x:Name="tx_sheet_size_max" x:Uid="tx_sheet_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum size" IsEnabled="false" />
             </StackPanel>
         </ContentDialog>
-        <!-- 頂点を重ねる閾値 -->
-        <ContentDialog x:Name="cd_misc_pile_up" x:Uid="cd_misc_pile_up" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" >
+        <!-- 頂点をくっつける閾値 -->
+        <ContentDialog x:Name="cd_misc_vert_stick" x:Uid="cd_misc_vert_stick" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" >
             <StackPanel>
-				<Slider x:Name="sd_misc_pile_up" x:Uid="sd_misc_pile_up" Maximum="127.5" Minimum="0" SnapsTo="Ticks" TickFrequency="0.5" Header="Thresholds" ValueChanged="misc_pile_up_value_changed"/>
+				<Slider x:Name="sd_misc_vert_stick" x:Uid="sd_misc_vert_stick" Maximum="127.5" Minimum="0" SnapsTo="Ticks" TickFrequency="0.5" Header="Thresholds" ValueChanged="misc_vert_stick_value_changed"/>
             </StackPanel>
         </ContentDialog>
         <!-- 属性入力ダイアログ -->

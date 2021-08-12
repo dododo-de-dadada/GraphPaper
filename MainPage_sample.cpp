@@ -9,6 +9,14 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Foundation::Uri;
+	using winrt::Windows::Storage::FileAccessMode;
+	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
+	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
+	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+	using winrt::Windows::Storage::Streams::IRandomAccessStream;
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+
 	// Œ©–{‚ð•\Ž¦‚·‚é
 	void MainPage::sample_draw(void)
 	{
@@ -75,7 +83,6 @@ namespace winrt::GraphPaper::implementation
 		m_sample_dx.SetSwapChainPanel(scp_sample_panel());
 		if (m_sample_type != SAMPLE_TYPE::NONE) {
 			if (m_sample_type == SAMPLE_TYPE::FONT) {
-				using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 				const auto padd_w = samp_w * 0.125;
 				const auto padd_h = samp_h * 0.25;
 				const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h) };
@@ -108,19 +115,14 @@ namespace winrt::GraphPaper::implementation
 				const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
 				POLY_OPTION p_opt { 3, true, true, false, true };
 				m_sample_shape = new ShapePoly(b_pos, b_vec, &m_sample_sheet, p_opt);
-				const double offset = samp_h / 16.0;
-				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ static_cast<FLOAT>(-samp_w * 0.25f), static_cast<FLOAT>(samp_h * 0.5 - offset) }, ANCH_TYPE::ANCH_P0, m_misc_pile_up, false);
-				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ static_cast<FLOAT>(samp_w * 0.25),  static_cast<FLOAT>(samp_h * 0.5) }, ANCH_TYPE::ANCH_P0 + 1, m_misc_pile_up, false);
-				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ static_cast<FLOAT>(-samp_w * 0.25f), static_cast<FLOAT>(samp_h * 0.5 + offset) }, ANCH_TYPE::ANCH_P0 + 2, m_misc_pile_up, false);
+				const float offset = samp_h / 16.0f;
+				const float samp_x = samp_w * 0.25f;
+				const float samp_y = samp_h * 0.5f;
+				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANCH_TYPE::ANCH_P0, m_misc_vert_stick, false);
+				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ samp_x, samp_y }, ANCH_TYPE::ANCH_P0 + 1, m_misc_vert_stick, false);
+				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANCH_TYPE::ANCH_P0 + 2, m_misc_vert_stick, false);
 			}
 			else if (m_sample_type == SAMPLE_TYPE::BITMAP) {
-				using winrt::Windows::Foundation::Uri;
-				using winrt::Windows::Storage::FileAccessMode;
-				using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
-				using winrt::Windows::Graphics::Imaging::BitmapDecoder;
-				using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
-				using winrt::Windows::Storage::Streams::IRandomAccessStream;
-
 				winrt::apartment_context context;
 				co_await winrt::resume_background();
 				try {

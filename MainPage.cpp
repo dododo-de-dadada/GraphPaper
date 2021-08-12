@@ -391,7 +391,7 @@ namespace winrt::GraphPaper::implementation
 			sheet_init();
 			m_misc_len_unit = LEN_UNIT::PIXEL;
 			m_misc_color_code = COLOR_CODE::DEC;
-			m_misc_pile_up = DEF_PILE_UP_VERT;
+			m_misc_vert_stick = DEF_VERT_STICK;
 			m_misc_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
 		}
 

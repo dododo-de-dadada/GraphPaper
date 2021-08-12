@@ -6,6 +6,12 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
+	using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
+	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
+	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
+
 #define DIB_SET(buf, i, pal, b)\
 	{\
 		const auto pal_i = (b);\
@@ -73,12 +79,6 @@ namespace winrt::GraphPaper::implementation
 	// ra_stream	画像を格納するストリーム
 	IAsyncAction ShapeImage::copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream)
 	{
-		using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
-		using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
-		using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
-		using winrt::Windows::Graphics::Imaging::BitmapEncoder;
-		using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
-
 		// SoftwareBitmap を作成する.
 		const uint32_t bmp_w = m_size.width;
 		const uint32_t bmp_h = m_size.height;
@@ -572,9 +572,6 @@ namespace winrt::GraphPaper::implementation
 	// bmp	ビットマップ
 	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bmp)
 	{
-		using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
-		using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
-
 		m_size.width = bmp.PixelWidth();
 		m_size.height = bmp.PixelHeight();
 		m_pos = pos;

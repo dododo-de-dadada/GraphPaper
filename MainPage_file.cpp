@@ -351,7 +351,7 @@ namespace winrt::GraphPaper::implementation
 
 			m_misc_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_misc_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
-			m_misc_pile_up = dt_reader.ReadSingle();
+			m_misc_vert_stick = dt_reader.ReadSingle();
 			m_misc_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 			m_image_keep_aspect = dt_reader.ReadBoolean();	// ‰æ‘œ‚Ìc‰¡”ä‚ÌˆÛ
 
@@ -928,7 +928,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt16(f_bit);
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_misc_len_unit));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_color_code));
-			dt_writer.WriteSingle(m_misc_pile_up);
+			dt_writer.WriteSingle(m_misc_vert_stick);
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_status_bar));
 			dt_writer.WriteBoolean(m_image_keep_aspect);
 

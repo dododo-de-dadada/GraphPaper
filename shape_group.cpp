@@ -16,8 +16,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeGroup::draw(SHAPE_DX& dx)
 	{
+		// 選択フラグが立ってるか判定する.
 		if (is_selected()) {
-			// 選択フラグが立っている場合,
 			D2D1_POINT_2F b_min{ FLT_MAX, FLT_MAX };
 			D2D1_POINT_2F b_max{ -FLT_MAX, -FLT_MAX };
 			// グループ化された各図形について以下を繰り返す.
@@ -29,10 +29,7 @@ namespace winrt::GraphPaper::implementation
 				s->draw(dx);
 				s->get_bound(b_min, b_max, b_min, b_max);
 			}
-			const D2D1_RECT_F rect{ b_min.x, b_min.y, b_max.x, b_max.y };
-			const auto brush = dx.m_shape_brush.get();
-			const auto s_style = dx.m_aux_style.get();
-			dx.m_d2dContext->DrawRectangle(rect, brush, 1.0f, s_style);
+			dx.m_d2dContext->DrawRectangle(D2D1_RECT_F{ b_min.x, b_min.y, b_max.x, b_max.y }, dx.m_shape_brush.get(), 1.0f, dx.m_aux_style.get());
 		}
 		else {
 			for (const auto s : m_list_grouped) {
