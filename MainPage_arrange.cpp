@@ -9,10 +9,12 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr auto SEND_TO_BACK = true;
+	//using winrt::Windows::UI::Xaml::Controls::ItemCollection;
+
+	constexpr bool SEND_TO_BACK = true;
 	using SEND_BACKWARD = SHAPE_LIST::iterator;
 	using BRING_FORWARD = SHAPE_LIST::reverse_iterator;
-	constexpr auto BRING_TO_FRONT = false;
+	constexpr bool BRING_TO_FRONT = false;
 
 	// 編集メニューの「前面に移動」が選択された.
 	void MainPage::arrange_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
@@ -60,23 +62,23 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 			// 消去フラグも選択フラグも立っていないか判定する.
-			const auto s = *it_src;
+			const Shape* s = *it_src;
 			if (!s->is_deleted() && !s->is_selected()) {
 				break;
 			}
 			it_src++;
 		}
-		auto flag = false;	// 交換フラグ
+		bool done = false;	// 交換済みか判定する
 		for (;;) {
 			// 交換元反復子を交換先反復子に格納して,
 			// 交換元反復子をインクリメントする.
-			auto it_dst = it_src++;
+			T it_dst = it_src++;
 			// 削除されてない次の図形を得る.
 			for (;;) {
 				// 次の図形がないか判定する.
 				if (it_src == it_end) {
-					// 交換フラグが立っているか判定する.
-					if (flag) {
+					// 交換済みか判定する
+					if (done) {
 						ustack_push_null();
 						xcvd_is_enabled();
 						sheet_draw();
@@ -90,18 +92,18 @@ namespace winrt::GraphPaper::implementation
 				it_src++;
 			}
 			// 次の図形が選択されてない場合,
-			const auto s = *it_src;
+			Shape* const s = *it_src;
 			if (s->is_selected() != true) {
 				continue;
 			}
-			const auto t = *it_dst;
+			Shape* const t = *it_dst;
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_arrange(s, t);
 			}
 			ustack_push_arrange(s, t);
-			// 交換フラグを立てる.
-			flag = true;
+			// 交換済みにする.
+			done = true;
 		}
 	}
 
@@ -123,8 +125,6 @@ namespace winrt::GraphPaper::implementation
 	// B	B が true の場合は最背面, false の場合は最前面に移動
 	template<bool B> void MainPage::arrange_to(void)
 	{
-		using winrt::Windows::UI::Xaml::Controls::ItemCollection;
-
 		SHAPE_LIST slist;
 		slist_selected<Shape>(m_list_shapes, slist);
 		if (slist.size() == 0) {
@@ -132,8 +132,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (B) {
 			uint32_t i = 0;
-			auto s = slist_front(m_list_shapes);
-			for (auto t : slist) {
+			Shape* const s = slist_front(m_list_shapes);
+			for (Shape* const t : slist) {
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {
 					summary_remove(t);
@@ -144,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			for (auto s : slist) {
+			for (Shape* const s : slist) {
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {
 					summary_remove(s);

@@ -10,6 +10,16 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::UI::Color;
+	using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
+	using winrt::Windows::UI::ViewManagement::UISettings;
+	using winrt::Windows::UI::Xaml::Application;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialog;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Media::Brush;
+
 	// UWP のブラシを D2D1_COLOR_F に変換する.
 	//static bool conv_uwp_to_color(const Brush& a, D2D1_COLOR_F& b) noexcept;
 
@@ -134,10 +144,8 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	「保存する」または「保存しない」が押されたなら true を, 応答がキャンセルなら, または内容を保存できなかったなら false を返す.
 	IAsyncOperation<bool> MainPage::ask_for_conf_async(void)
 	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
 		// 確認ダイアログを表示し, 応答を得る.
-		const auto d_res = co_await cd_conf_save_dialog().ShowAsync();
+		const ContentDialogResult d_res = co_await cd_conf_save_dialog().ShowAsync();
 		// 応答が「キャンセル」か判定する.
 		if (d_res == ContentDialogResult::None) {
 			co_return false;
@@ -155,8 +163,6 @@ namespace winrt::GraphPaper::implementation
 	// ファイルメニューの「終了」が選択された
 	IAsyncAction MainPage::exit_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::UI::Xaml::Application;
-
 		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
 		if (m_ustack_updt && !co_await ask_for_conf_async()) {
 			co_return;
@@ -186,9 +192,6 @@ namespace winrt::GraphPaper::implementation
 
 		// コードビハインドで設定したハンドラーの設定を解除する.
 		{
-			using winrt::Windows::UI::Xaml::Application;
-			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
-
 			auto const& app{ Application::Current() };
 			app.Suspending(m_token_suspending);
 			app.Resuming(m_token_resuming);
@@ -222,8 +225,6 @@ namespace winrt::GraphPaper::implementation
 
 		// アプリケーションの中断・継続などのイベントハンドラーを設定する.
 		{
-			using winrt::Windows::UI::Xaml::Application;
-
 			auto const& app{ Application::Current() };
 			m_token_suspending = app.Suspending({ this, &MainPage::app_suspending_async });
 			m_token_resuming = app.Resuming({ this, &MainPage::app_resuming_async });
@@ -248,7 +249,6 @@ namespace winrt::GraphPaper::implementation
 
 		// アプリケーションを閉じる前の確認のハンドラーを設定する.
 		{
-			using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
 			m_token_close_requested = SystemNavigationManagerPreview::GetForCurrentView().CloseRequested({ this, &MainPage::navi_close_requested });
 		}
 
@@ -263,8 +263,6 @@ namespace winrt::GraphPaper::implementation
 
 		// クリックの判定時間と判定距離をシステムから得る.
 		{
-			using winrt::Windows::UI::ViewManagement::UISettings;
-
 			m_event_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
 			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
@@ -293,13 +291,10 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	なし
 	void MainPage::message_show(winrt::hstring const& glyph_key, winrt::hstring const& message_key, winrt::hstring const& desc_key)
 	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialog;
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
 		constexpr wchar_t QUOT[] = L"\"";	// 引用符
 		constexpr wchar_t NEW_LINE[] = L"\u2028";	// テキストブロック内での改行
 
-		auto const& r_loader = ResourceLoader::GetForCurrentView();
+		ResourceLoader const& r_loader = ResourceLoader::GetForCurrentView();
 		winrt::hstring text;
 		try {
 			text = r_loader.GetString(message_key);
@@ -323,8 +318,8 @@ namespace winrt::GraphPaper::implementation
 			// 説明そのものが空以外の場合,
 			text = text + NEW_LINE + QUOT + desc_key + QUOT;
 		}
-		const auto glyph = Resources().TryLookup(box_value(glyph_key));
-		fi_message().Glyph(glyph != nullptr ? unbox_value<winrt::hstring>(glyph) : glyph_key);
+		const IInspectable glyph_val = Resources().TryLookup(box_value(glyph_key));
+		fi_message().Glyph(glyph_val != nullptr ? unbox_value<winrt::hstring>(glyph_val) : glyph_key);
 		tk_message().Text(text);
 		auto _{ cd_message_dialog().ShowAsync() };
 	}
@@ -354,11 +349,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 背景色, 前景色, 文字範囲の背景色, 文字範囲の文字色をリソースから得る.
 		{
-			using winrt::Windows::UI::Color;
-			using winrt::Windows::UI::Xaml::Media::Brush;
-
-			const auto sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
-			const auto sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
+			const IInspectable sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
+			const IInspectable sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
 			if (sel_back_color != nullptr && sel_text_color != nullptr) {
 				conv_uwp_to_color(unbox_value<Color>(sel_back_color), Shape::m_range_background);
 				conv_uwp_to_color(unbox_value<Color>(sel_text_color), Shape::m_range_foreground);

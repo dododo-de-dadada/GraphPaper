@@ -61,14 +61,14 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 		switch (u_op) {
-		case UNDO_OP::NULLPTR:
+		case UNDO_OP::NIL:
 			u = nullptr;
 			break;
 		case UNDO_OP::POS_ANCH:
 			u = new UndoAnchor(dt_reader);
 			break;
 		case UNDO_OP::ARRANGE:
-			u = new UndoArrange2(dt_reader);
+			u = new UndoArrange(dt_reader);
 			break;
 		case UNDO_OP::ARROW_SIZE:
 			u = new UndoAttr<UNDO_OP::ARROW_SIZE>(dt_reader);
@@ -194,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 			u->write(dt_writer);
 		}
 		else {
-			dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::NULLPTR));
+			dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::NIL));
 		}
 	}
 
@@ -428,9 +428,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を入れ替えて, その操作をスタックに積む.
-	void MainPage::ustack_push_arrange(Shape* s, Shape* t)
+	void MainPage::ustack_push_arrange(Shape* const s, Shape* const t)
 	{
-		m_ustack_undo.push_back(new UndoArrange2(s, t));
+		m_ustack_undo.push_back(new UndoArrange(s, t));
 	}
 
 	// 図形を挿入して, その操作をスタックに積む.

@@ -115,9 +115,9 @@ namespace winrt::GraphPaper::implementation
 				const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
 				POLY_OPTION p_opt { 3, true, true, false, true };
 				m_sample_shape = new ShapePoly(b_pos, b_vec, &m_sample_sheet, p_opt);
-				const float offset = samp_h / 16.0f;
-				const float samp_x = samp_w * 0.25f;
-				const float samp_y = samp_h * 0.5f;
+				const float offset = static_cast<float>(samp_h / 16.0);
+				const float samp_x = static_cast<float>(samp_w * 0.25);
+				const float samp_y = static_cast<float>(samp_h * 0.5);
 				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANCH_TYPE::ANCH_P0, m_misc_vert_stick, false);
 				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ samp_x, samp_y }, ANCH_TYPE::ANCH_P0 + 1, m_misc_vert_stick, false);
 				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANCH_TYPE::ANCH_P0 + 2, m_misc_vert_stick, false);

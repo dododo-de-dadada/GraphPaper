@@ -9,13 +9,24 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using concurrency::cancellation_token_source;
+	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionReason;
+	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionResult;
+	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionSession;
+	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedEventArgs;
+	using winrt::Windows::ApplicationModel::SuspendingDeferral;
+	using winrt::Windows::Foundation::TypedEventHandler;
+	using winrt::Windows::Storage::IStorageItem;
+	using winrt::Windows::Storage::StorageFolder;
+	using winrt::Windows::Storage::CreationCollisionOption;
+
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 
 	// アプリケーションデータを保存するフォルダーを得る.
-	static auto app_cache_folder(void);
+	static StorageFolder app_cache_folder(void);
 
 	// アプリケーションデータを保存するフォルダーを得る.
-	static auto app_cache_folder(void)
+	static StorageFolder app_cache_folder(void)
 	{
 		return winrt::Windows::Storage::ApplicationData::Current().LocalCacheFolder();
 	}
@@ -42,25 +53,25 @@ namespace winrt::GraphPaper::implementation
 
 		ShapeText::set_available_fonts();
 
-		auto hres = E_FAIL;
-		auto item{ co_await app_cache_folder().TryGetItemAsync(FILE_NAME) };
-		if (item != nullptr) {
-			auto s_file = item.try_as<StorageFile>();
-			if (s_file != nullptr) {
+		HRESULT ok = E_FAIL;
+		IStorageItem data_storage{ co_await app_cache_folder().TryGetItemAsync(FILE_NAME) };
+		if (data_storage != nullptr) {
+			StorageFile data_file = data_storage.try_as<StorageFile>();
+			if (data_file != nullptr) {
 				// ストレージファイルを非同期に読む.
 				try {
-					hres = co_await file_read_async(s_file, true, false);
+					ok = co_await file_read_async(data_file, true, false);
 					// スレッドをメインページの UI スレッドに変える.
 					//auto cd = this->Dispatcher();
 					//co_await winrt::resume_foreground(cd);
 					//file_finish_reading();
 				}
 				catch (winrt::hresult_error const& e) {
-					hres = e.code();
+					ok = e.code();
 				}
-				s_file = nullptr;
+				data_file = nullptr;
 			}
-			item = nullptr;
+			data_storage = nullptr;
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;
@@ -71,66 +82,57 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	なし
 	IAsyncAction MainPage::app_suspending_async(IInspectable const&, SuspendingEventArgs const& args)
 	{
-		using concurrency::cancellation_token_source;
-		using winrt::Windows::Foundation::TypedEventHandler;
-		using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionReason;
-		using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionResult;
-		using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionSession;
-		using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedEventArgs;
-		using winrt::Windows::ApplicationModel::SuspendingDeferral;
-		using winrt::Windows::Storage::StorageFolder;
-		using winrt::Windows::Storage::CreationCollisionOption;
-
 		winrt::apartment_context context;
-		auto const& s_operation = args.SuspendingOperation();
-		auto ct_source = cancellation_token_source();
-		auto s_deferral = s_operation.GetDeferral();
-		auto e_session = ExtendedExecutionSession();
-		e_session.Reason(ExtendedExecutionReason::SavingData);
-		e_session.Description(L"To save data.");
+		SuspendingOperation const& sus_operation = args.SuspendingOperation();
+		cancellation_token_source cancel_src = cancellation_token_source();
+		SuspendingDeferral sus_deferral = sus_operation.GetDeferral();
+		ExtendedExecutionSession ext_session = ExtendedExecutionSession();
+		ext_session.Reason(ExtendedExecutionReason::SavingData);
+		ext_session.Description(L"To save data.");
 		// 延長実行セッションが取り消されたときのコルーチンを登録する.
-		// RequestExtensionAsync の中でこのコルーチンは呼び出されるので, 上位関数のローカル変数は参照できる (たぶん).
-		auto handler = [&ct_source, &s_deferral](IInspectable const&, ExtendedExecutionRevokedEventArgs const& args)
-		{
-			using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
-			// トークンの元をキャンセルする.
-			ct_source.cancel();
-			switch (args.Reason()) {
-			case ExtendedExecutionRevokedReason::Resumed:
-				break;
-			case ExtendedExecutionRevokedReason::SystemPolicy:
-				break;
+		winrt::event_token ext_token = ext_session.Revoked(
+			// RequestExtensionAsync の中でこのコルーチンは呼び出されるので, 上位関数のローカル変数は参照できる (たぶん).
+			[&cancel_src, &sus_deferral](IInspectable const&, ExtendedExecutionRevokedEventArgs const& args)
+			{
+				using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
+				// トークンの元をキャンセルする.
+				cancel_src.cancel();
+				switch (args.Reason()) {
+				case ExtendedExecutionRevokedReason::Resumed:
+					break;
+				case ExtendedExecutionRevokedReason::SystemPolicy:
+					break;
+				}
+				if (sus_deferral != nullptr) {
+					// 中断延長を完了し OS に通知しなければ, アプリは再び中断延期を要求できない.
+					sus_deferral.Complete();
+					sus_deferral = nullptr;
+				}
 			}
-			if (s_deferral != nullptr) {
-				// 中断延長を完了し OS に通知しなければ, アプリは再び中断延期を要求できない.
-				s_deferral.Complete();
-				s_deferral = nullptr;
-			}
-		};
-		auto s_token = e_session.Revoked(handler);
+		);
 
 		// 延長実行セッションを要求し, その結果を得る.
-		auto hres = E_FAIL;
-		switch (co_await e_session.RequestExtensionAsync()) {
+		HRESULT ok = E_FAIL;
+		switch (co_await ext_session.RequestExtensionAsync()) {
 		// 延長実行セッションが許可された場合.
 		case ExtendedExecutionResult::Allowed:
 			// セッションがキャンセルか判定する.
-			if (ct_source.get_token().is_canceled()) {
+			if (cancel_src.get_token().is_canceled()) {
 				break;
 			}
 			try {
 				// キャンセル以外ならば,
-				auto s_file{ co_await app_cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
-				if (s_file != nullptr) {
-					hres = co_await file_write_gpf_async(s_file, true, false);
-					s_file = nullptr;
+				StorageFile data_file{ co_await app_cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
+				if (data_file != nullptr) {
+					ok = co_await file_write_gpf_async(data_file, true, false);
+					data_file = nullptr;
 					ustack_clear();
 					slist_clear(m_list_shapes);
 					ShapeText::release_available_fonts();
 				}
 			}
 			catch (winrt::hresult_error const& e) {
-				hres = e.code();
+				ok = e.code();
 			}
 			break;
 		case ExtendedExecutionResult::Denied:
@@ -138,15 +140,15 @@ namespace winrt::GraphPaper::implementation
 		}
 		// スレッドをメインページの UI スレッドに変える.
 		// スレッド変更は, セッションを閉じる前にでないとダメ.
-		auto cd = this->Dispatcher();
-		co_await winrt::resume_foreground(cd);
+		//auto cd = this->Dispatcher();
+		co_await winrt::resume_foreground(Dispatcher());
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			// 「メモリリーク」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, DEBUG_MSG, {});
 		}
 #endif
-		if (hres == S_OK) {
+		if (ok == S_OK) {
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_clear();
@@ -154,16 +156,16 @@ namespace winrt::GraphPaper::implementation
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;
-		if (e_session != nullptr) {
-			e_session.Revoked(s_token);
-			e_session.Close();
-			e_session = nullptr;
+		if (ext_session != nullptr) {
+			ext_session.Revoked(ext_token);
+			ext_session.Close();
+			ext_session = nullptr;
 		}
-		if (s_deferral != nullptr) {
+		if (sus_deferral != nullptr) {
 			// 中断延長を完了し OS に通知しなければ, 
 			// アプリは再び中断延期を要求できない.
-			s_deferral.Complete();
-			s_deferral = nullptr;
+			sus_deferral.Complete();
+			sus_deferral = nullptr;
 		}
 	}
 

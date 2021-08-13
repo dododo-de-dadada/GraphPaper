@@ -76,7 +76,28 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::Foundation::Uri;
+	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
+	using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
+	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
+	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
+	using winrt::Windows::Graphics::Imaging::BitmapInterpolationMode;
+	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+	using winrt::Windows::Graphics::Imaging::BitmapRotation;
+	using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
+	using winrt::Windows::Storage::AccessCache::AccessListEntry;
+	using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
+	using winrt::Windows::Storage::CachedFileManager;
+	using winrt::Windows::Storage::FileAccessMode;
+	using winrt::Windows::Storage::Pickers::FileOpenPicker;
+	using winrt::Windows::Storage::Pickers::FileSavePicker;
+	using winrt::Windows::Storage::Pickers::PickerLocationId;
+	using winrt::Windows::Storage::Provider::FileUpdateStatus;
+	using winrt::Windows::Storage::StorageFolder;
+	using winrt::Windows::System::Launcher;
 	using winrt::Windows::UI::Core::CoreCursorType;
+	using winrt::Windows::UI::ViewManagement::ApplicationView;
 
 	static auto const& CUR_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 待機カーソル.
 	constexpr wchar_t DESC_GPF[] = L"str_desc_gpf";	// 拡張子 gpf の説明
@@ -201,9 +222,6 @@ namespace winrt::GraphPaper::implementation
 	// ファイルメニューの「画像をインポートする...」が選択された.
 	IAsyncAction MainPage::file_import_img_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::Storage::FileAccessMode;
-		using winrt::Windows::Storage::Pickers::FileOpenPicker;
-
 		winrt::apartment_context context;
 		// ファイル「オープン」ピッカーを取得して開く.
 		auto open_picker{ FileOpenPicker() };
@@ -217,10 +235,6 @@ namespace winrt::GraphPaper::implementation
 		auto open_file{ co_await open_picker.PickSingleFileAsync() };
 		// ストレージファイルがヌルポインターか判定する.
 		if (open_file != nullptr) {
-			using winrt::Windows::Graphics::Imaging::BitmapDecoder;
-			using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
-			using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
-
 			auto const& prev_cur = file_wait_cursor();
 			unselect_all();
 
@@ -282,8 +296,6 @@ namespace winrt::GraphPaper::implementation
 	// ファイルメニューの「開く...」が選択された
 	IAsyncAction MainPage::file_open_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::Storage::Pickers::FileOpenPicker;
-
 		// スタックに操作の組が積まれている, かつ確認ダイアログの応答が「キャンセル」か判定する.
 		if (m_ustack_updt && !co_await ask_for_conf_async()) {
 			co_return;
@@ -321,8 +333,6 @@ namespace winrt::GraphPaper::implementation
 	// 中断したなら, 操作スタックも保存する.
 	IAsyncOperation<winrt::hresult> MainPage::file_read_async(StorageFile const& s_file, const bool suspend, const bool sheet) noexcept
 	{
-		using winrt::Windows::Storage::FileAccessMode;
-
 		auto hres = E_FAIL;
 		winrt::apartment_context context;
 		m_dx_mutex.lock();
@@ -414,10 +424,6 @@ namespace winrt::GraphPaper::implementation
 	// ストレージファイルがヌルの場合, ウィンドウタイトルに無題が格納される.
 	void MainPage::file_recent_add(StorageFile const& s_file)
 	{
-		using winrt::Windows::UI::ViewManagement::ApplicationView;
-		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		if (s_file != nullptr) {
 			m_file_token_mru = StorageApplicationPermissions::MostRecentlyUsedList().Add(s_file, s_file.Path());
 			ApplicationView::GetForCurrentView().Title(s_file.Name());
@@ -458,8 +464,6 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	ストレージファイル
 	IAsyncOperation<StorageFile> MainPage::file_recent_get_async(const winrt::hstring token)
 	{
-		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
-
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 
@@ -492,10 +496,6 @@ namespace winrt::GraphPaper::implementation
 	// i	最近使ったファイルの番号 (最も直近が 0).
 	IAsyncAction MainPage::file_recent_read_async(const uint32_t i)
 	{
-		//using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
-		using winrt::Windows::Storage::AccessCache::AccessListEntry;
-
 		// SHCore.dll スレッド
 		auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
 		auto const& mru_entries = mru_list.Entries();
@@ -531,9 +531,6 @@ namespace winrt::GraphPaper::implementation
 	// 最近使ったファイルメニュを更新する.
 	void MainPage::file_recent_update_menu(void)
 	{
-		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
-		using winrt::Windows::Storage::AccessCache::AccessListEntry;
-
 		auto const& mru_entries = StorageApplicationPermissions::MostRecentlyUsedList().Entries();
 		const auto ent_size = mru_entries.Size();
 		AccessListEntry items[MRU_MAX];
@@ -557,10 +554,6 @@ namespace winrt::GraphPaper::implementation
 	// svg_allowed	SVG への保存を許す.
 	IAsyncOperation<winrt::hresult> MainPage::file_save_as_async(const bool svg_allowed) noexcept
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::Storage::Pickers::PickerLocationId;
-		using winrt::Windows::Storage::Pickers::FileSavePicker;
-
 		auto hres = E_FAIL;
 		auto const& prev_cur = file_wait_cursor();	// 表示する前のカーソル
 		// コルーチンの開始時のスレッドコンテキストを保存する.
@@ -650,9 +643,6 @@ namespace winrt::GraphPaper::implementation
 	// ファイルに非同期に保存する
 	IAsyncOperation<winrt::hresult> MainPage::file_save_async(void) noexcept
 	{
-		using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
-		using winrt::Windows::Storage::AccessCache::AccessListEntry;
-
 		// 最近使ったファイルのトークンからストレージファイルを得る.
 		auto s_file{ co_await file_recent_get_async(m_file_token_mru) };
 		if (s_file == nullptr) {
@@ -690,19 +680,6 @@ namespace winrt::GraphPaper::implementation
 
 	IAsyncOperation<winrt::hresult> MainPage::file_write_img_async(ShapeImage* s, const wchar_t suggested_name[], wchar_t img_name[], const size_t name_len)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
-		using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
-		using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
-		using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
-		using winrt::Windows::Graphics::Imaging::BitmapEncoder;
-		using winrt::Windows::Graphics::Imaging::BitmapInterpolationMode;
-		using winrt::Windows::Graphics::Imaging::BitmapRotation;
-		using winrt::Windows::Storage::CachedFileManager;
-		using winrt::Windows::Storage::FileAccessMode;
-		using winrt::Windows::Storage::Pickers::FileSavePicker;
-		using winrt::Windows::Storage::Provider::FileUpdateStatus;
-
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		winrt::apartment_context context;
 		FileSavePicker img_picker{ FileSavePicker() };
@@ -778,11 +755,6 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	書き込めた場合 S_OK
 	IAsyncOperation<winrt::hresult> MainPage::file_write_svg_async(StorageFile const& s_file)
 	{
-		using winrt::Windows::Storage::CachedFileManager;
-		using winrt::Windows::Storage::FileAccessMode;
-		//using winrt::Windows::Storage::Pickers::FileSavePicker;
-		using winrt::Windows::Storage::Provider::FileUpdateStatus;
-
 		constexpr char XML_DEC[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" SVG_NEW_LINE;
 		constexpr char DOCTYPE[] = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" SVG_NEW_LINE;
 		auto hres = E_FAIL;
@@ -890,9 +862,6 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	書き込みに成功したら true
 	IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async(StorageFile const& s_file, const bool suspend, const bool layout)
 	{
-		using winrt::Windows::Storage::CachedFileManager;
-		using winrt::Windows::Storage::FileAccessMode;
-		using winrt::Windows::Storage::Provider::FileUpdateStatus;
 		constexpr auto REDUCE = true;
 
 		// E_FAIL を結果に格納する.
@@ -988,10 +957,6 @@ namespace winrt::GraphPaper::implementation
 
 	IAsyncAction MainPage::file_check_access(void) const
 	{
-		using winrt::Windows::Foundation::Uri;
-		using winrt::Windows::Storage::StorageFolder;
-		using winrt::Windows::System::Launcher;
-
 		bool flag = false;
 		try {
 			co_await StorageFolder::GetFolderFromPathAsync(L"C:\\");
