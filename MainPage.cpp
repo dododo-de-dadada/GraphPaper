@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 	//void conv_uwp_to_color(const Color& a, D2D1_COLOR_F& b) noexcept;
 
 	// 色成分を文字列に変換する.
-	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]);
+	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]) noexcept;
 
 	// UWP のブラシを D2D1_COLOR_F に変換する.
 	/*
@@ -51,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列 [t_len]
 	// 戻り値	なし
-	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[])
+	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]) noexcept
 	{
 		// 色の表記が 10 進数か判定する.
 		if (c_code == COLOR_CODE::DEC) {
@@ -70,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 			swprintf_s(t_buf, t_len, L"%.1lf%%", value / COLOR_MAX * 100.0);
 		}
 		else {
-			throw winrt::hresult_invalid_argument();
+			swprintf_s(t_buf, t_len, L"?");
 		}
 	}
 
@@ -82,7 +82,8 @@ namespace winrt::GraphPaper::implementation
 	// g_len	方眼の大きさ
 	// t_buf	文字列の配列
 	// t_len	文字列の最大長 ('\0' を含む長さ)
-	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t *t_buf)
+	template <bool B> 
+	void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t *t_buf) noexcept
 	{
 		// 長さの単位がピクセルか判定する.
 		if (len_unit == LEN_UNIT::PIXEL) {
@@ -130,15 +131,15 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			throw winrt::hresult_invalid_argument();
+			swprintf_s(t_buf, t_len, L"?");
 		}
 	}
 
 	// 長さを文字列に変換する (単位なし).
-	template void conv_len_to_str<LEN_UNIT_HIDE>(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf);
+	template void conv_len_to_str<LEN_UNIT_HIDE>(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さを文字列に変換する (単位つき).
-	template void conv_len_to_str<LEN_UNIT_SHOW>(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf);
+	template void conv_len_to_str<LEN_UNIT_SHOW>(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 確認ダイアログを表示してその応答を得る.
 	// 戻り値	「保存する」または「保存しない」が押されたなら true を, 応答がキャンセルなら, または内容を保存できなかったなら false を返す.

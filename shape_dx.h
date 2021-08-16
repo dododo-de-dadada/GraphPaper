@@ -24,8 +24,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Graphics::Display::DisplayOrientations;
 
 	
-	constexpr FLOAT AUX_DASHES[] = { 4.0f, 4.0f };	// 補助線の破線の様式
-	constexpr UINT32 AUX_DASHES_CONT = sizeof(AUX_DASHES) / sizeof(AUX_DASHES[0]);	// 補助線の破線の様式の要素数
+	constexpr FLOAT AUX_DASHES[] = { 4.0f, 4.0f };	// 補助線の破線の配置
+	constexpr UINT32 AUX_DASHES_CONT = sizeof(AUX_DASHES) / sizeof(AUX_DASHES[0]);	// 補助線の破線の配置の要素数
 	constexpr float AUX_OPAC = 0.975f;	// 補助線の不透明度
 	constexpr D2D1_STROKE_STYLE_PROPERTIES1 AUX_STYLE	// 補助線の線の特性
 	{

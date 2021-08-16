@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 			if (data_file != nullptr) {
 				// ストレージファイルを非同期に読む.
 				try {
-					ok = co_await file_read_async(data_file, true, false);
+					ok = co_await file_read_async<true, false>(data_file);
 					// スレッドをメインページの UI スレッドに変える.
 					//auto cd = this->Dispatcher();
 					//co_await winrt::resume_foreground(cd);
@@ -124,7 +124,7 @@ namespace winrt::GraphPaper::implementation
 				// キャンセル以外ならば,
 				StorageFile data_file{ co_await app_cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 				if (data_file != nullptr) {
-					ok = co_await file_write_gpf_async(data_file, true, false);
+					ok = co_await file_write_gpf_async<true, false>(data_file);
 					data_file = nullptr;
 					ustack_clear();
 					slist_clear(m_list_shapes);

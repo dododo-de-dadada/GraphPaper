@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	// c_style	端の形式
 	// d_cap	破線の端の形式
 	// d_style	破線の種類
-	// d_patt	破線の様式
+	// d_patt	破線の配置
 	// j_style	線のつなぎ
 	// j_limit	マイター制限
 	// s_width	線の太さ
@@ -30,8 +30,8 @@ namespace winrt::GraphPaper::implementation
 		ID2D1StrokeStyle** s_style
 	)
 	{
-		UINT32 d_cnt;	// 破線の様式の要素数
-		FLOAT d_arr[6];	// 破線の様式
+		UINT32 d_cnt;	// 破線の配置の要素数
+		FLOAT d_arr[6];	// 破線の配置
 		FLOAT *d_ptr;
 
 		// 太さがゼロか判定する.
@@ -132,7 +132,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 破線の様式を得る.
+	// 破線の配置を得る.
 	// 戻り値	つねに true
 	bool ShapeStroke::get_dash_patt(DASH_PATT& value) const noexcept
 	{
@@ -307,7 +307,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を破線の様式に格納する.
+	// 値を破線の配置に格納する.
 	// value	格納する値
 	bool ShapeStroke::set_dash_patt(const DASH_PATT& value)
 	{

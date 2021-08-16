@@ -470,7 +470,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_dash_patt.Text" xml:space="preserve">
-    <value>破線の様式...</value>
+    <value>破線の配置...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_stroke_width.Text" xml:space="preserve">
@@ -819,7 +819,7 @@
     <comment>String</comment>
   </data>
   <data name="str_dash_patt" xml:space="preserve">
-    <value>破線の様式</value>
+    <value>破線の配置</value>
     <comment>String</comment>
   </data>
   <data name="str_stroke_width" xml:space="preserve">

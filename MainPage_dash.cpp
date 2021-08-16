@@ -9,15 +9,15 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+
 	constexpr wchar_t DLG_TITLE[] = L"str_dash_patt";
 
-	// 線枠メニューの「破線の様式」が選択された.
+	// 線枠メニューの「破線の配置」が選択された.
 	IAsyncAction MainPage::dash_patt_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_sheet_main);
@@ -61,14 +61,26 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
 		sample_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
 		sample_slider_4().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 2> });
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 3> });
-		const auto slider_4_token = sample_slider_4().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::STROKE_WIDTH, 4> });
+		const winrt::event_token slider_0_token{
+			sample_slider_0().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 0> })
+		};
+		const winrt::event_token slider_1_token{
+			sample_slider_1().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 1> })
+		};
+		const winrt::event_token slider_2_token{
+			sample_slider_2().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 2> })
+		};
+		const winrt::event_token slider_3_token{
+			sample_slider_3().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 3> })
+		};
+		const winrt::event_token slider_4_token{
+			sample_slider_4().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::STROKE_WIDTH, 4> })
+		};
 		m_sample_type = SAMPLE_TYPE::STROKE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_sample_dialog().ShowAsync();
+		const ContentDialogResult d_result{
+			co_await cd_sample_dialog().ShowAsync()
+		};
 		if (d_result == ContentDialogResult::Primary) {
 			DASH_PATT sample_patt;
 			float sample_width;
@@ -152,13 +164,11 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S> void MainPage::dash_slider_set_header(const float value)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		if constexpr (U == UNDO_OP::DASH_PATT) {
 			constexpr wchar_t* R[]{ L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap" };
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, m_sheet_main.m_grid_base + 1.0f, buf);
-			const auto text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
+			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
 			if constexpr (S == 0) {
 				sample_slider_0().Header(box_value(text));
 			}
@@ -175,7 +185,9 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, m_sheet_main.m_grid_base + 1.0f, buf);
-			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
+			const winrt::hstring text{
+				ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf
+			};
 			sample_slider_4().Header(box_value(text));
 		}
 	}

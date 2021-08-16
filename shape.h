@@ -168,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_clockwise;	// 頂点を時計回りに作図する.
 	};
 
-	// 破線の様式
+	// 破線の配置
 	union DASH_PATT {
 		float m_[6];
 	};
@@ -221,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 	inline bool equal(const DWRITE_TEXT_RANGE a, const DWRITE_TEXT_RANGE b) noexcept;
 	// 方眼の強調が同じか判定する.
 	inline bool equal(const GRID_EMPH& a, const GRID_EMPH& b) noexcept;
-	// 破線の様式が同じか判定する.
+	// 破線の配置が同じか判定する.
 	inline bool equal(const DASH_PATT& a, const DASH_PATT& b) noexcept;
 	// ワイド文字列が同じか判定する.
 	inline bool equal(const wchar_t* a, const wchar_t* b) noexcept;
@@ -309,7 +309,7 @@ namespace winrt::GraphPaper::implementation
 	void dt_read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader);
 	// データリーダーから方眼の形式を読み込む.
 	void dt_read(GRID_EMPH& value, DataReader const& dt_reader);
-	// データリーダーから破線の様式を読み込む.
+	// データリーダーから破線の配置を読み込む.
 	void dt_read(DASH_PATT& value, DataReader const& dt_reader);
 	// データリーダーから多角形の選択肢を読み込む.
 	void dt_read(POLY_OPTION& value, DataReader const& dt_reader);
@@ -335,7 +335,7 @@ namespace winrt::GraphPaper::implementation
 	void dt_write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer);
 	// データライターに方眼の形式を書き込む.
 	void dt_write(const GRID_EMPH value, DataWriter const& dt_writer);
-	// データライターに破線の様式を書き込む.
+	// データライターに破線の配置を書き込む.
 	void dt_write(const DASH_PATT& value, DataWriter const& dt_writer);
 	// データライターに多角形の選択肢を書き込む.
 	void dt_write(const POLY_OPTION& value, DataWriter const& dt_writer);
@@ -363,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 	void dt_write_svg(const double value, const char* name, DataWriter const& dt_writer);
 	// データライターに SVG として属性名と 32 ビット正整数を書き込む
 	void dt_write_svg(const uint32_t value, const char* name, DataWriter const& dt_writer);
-	// データライターに SVG として破線の形式と様式を書き込む.
+	// データライターに SVG として破線の形式と配置を書き込む.
 	void dt_write_svg(const D2D1_DASH_STYLE style, const DASH_PATT& patt, const double width, DataWriter const& dt_writer);
 
 	//------------------------------
@@ -434,7 +434,7 @@ namespace winrt::GraphPaper::implementation
 	// 選択された図形のリストを得る.
 	template <typename S> void slist_selected(SHAPE_LIST const& slist, SHAPE_LIST& t_list) noexcept;
 
-	// データライターに図形リストを書き込む. REDUCE なら消去された図形は書き込まない.
+	// データライターに図形リストを書き込む. REDUCE なら消去された図形は省く.
 	template <bool REDUCE> void slist_write(const SHAPE_LIST& slist, DataWriter const& dt_writer);
 
 	// リストの中の図形の順番を得る.
@@ -477,7 +477,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_corner_radius(D2D1_POINT_2F& /*value*/) const noexcept { return false; }
 		// 破線の端の形式を得る.
 		virtual bool get_dash_cap(D2D1_CAP_STYLE& /*value*/) const noexcept { return false; }
-		// 破線の様式を得る.
+		// 破線の配置を得る.
 		virtual bool get_dash_patt(DASH_PATT& /*value*/) const noexcept { return false; }
 		// 破線の形式を得る.
 		virtual bool get_dash_style(D2D1_DASH_STYLE& /*value*/) const noexcept { return false; }
@@ -563,7 +563,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_corner_radius(const D2D1_POINT_2F& /*alue*/) noexcept { return false; }
 		// 値を破線の端の形式に格納する.
 		virtual bool set_dash_cap(const D2D1_CAP_STYLE& /*value*/) { return false; }
-		// 値を破線の様式に格納する.
+		// 値を破線の配置に格納する.
 		virtual bool set_dash_patt(const DASH_PATT& /*value*/) { return false; }
 		// 値を線枠の形式に格納する.
 		virtual bool set_dash_style(const D2D1_DASH_STYLE /*value*/) { return false; }
@@ -730,7 +730,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠
 		CAP_STYLE m_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
-		DASH_PATT m_dash_patt{ DEF_DASH_PATT };	// 破線の様式
+		DASH_PATT m_dash_patt{ DEF_DASH_PATT };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_join_limit = DEF_MITER_LIMIT;	// 線のつなぎのマイター制限
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線枠のつなぎ
@@ -786,7 +786,7 @@ namespace winrt::GraphPaper::implementation
 		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
 		// 破線の端の形式を得る.
 		bool get_dash_cap(D2D1_CAP_STYLE& value) const noexcept;
-		// 破線の様式を得る.
+		// 破線の配置を得る.
 		bool get_dash_patt(DASH_PATT& value) const noexcept;
 		// 破線の形式を得る.
 		bool get_dash_style(D2D1_DASH_STYLE& value) const noexcept;
@@ -854,7 +854,7 @@ namespace winrt::GraphPaper::implementation
 		bool set_corner_radius(const D2D1_POINT_2F& value) noexcept;
 		// 値を破線の端の形式に格納する.
 		bool set_dash_cap(const D2D1_CAP_STYLE& value);
-		// 値を破線の様式に格納する.
+		// 値を破線の配置に格納する.
 		bool set_dash_patt(const DASH_PATT& value);
 		// 値を線枠の形式に格納する.
 		bool set_dash_style(const D2D1_DASH_STYLE value);
@@ -968,7 +968,7 @@ namespace winrt::GraphPaper::implementation
 		CAP_STYLE m_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
-		DASH_PATT m_dash_patt{ DEF_DASH_PATT };	// 破線の様式
+		DASH_PATT m_dash_patt{ DEF_DASH_PATT };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_join_limit = DEF_MITER_LIMIT;		// 線のつなぎのマイター制限の比率
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線のつなぎ
@@ -988,7 +988,7 @@ namespace winrt::GraphPaper::implementation
 		bool get_cap_style(CAP_STYLE& value) const noexcept;
 		// 破線の端の形式を得る.
 		bool get_dash_cap(D2D1_CAP_STYLE& value) const noexcept;
-		// 破線の様式を得る.
+		// 破線の配置を得る.
 		bool get_dash_patt(DASH_PATT& value) const noexcept;
 		// 破線の形式を得る.
 		bool get_dash_style(D2D1_DASH_STYLE& value) const noexcept;
@@ -1024,7 +1024,7 @@ namespace winrt::GraphPaper::implementation
 		bool set_cap_style(const CAP_STYLE& value);
 		// 値を破線の端の形式に格納する.
 		bool set_dash_cap(const D2D1_CAP_STYLE& value);
-		// 値を破線の様式に格納する.
+		// 値を破線の配置に格納する.
 		bool set_dash_patt(const DASH_PATT& value);
 		// 値を線枠の形式に格納する.
 		bool set_dash_style(const D2D1_DASH_STYLE value);
@@ -1520,7 +1520,7 @@ namespace winrt::GraphPaper::implementation
 		return a.m_gauge_1 == b.m_gauge_1 && a.m_gauge_2 == b.m_gauge_2;
 	}
 
-	// 破線の様式が同じか判定する.
+	// 破線の配置が同じか判定する.
 	inline bool equal(const DASH_PATT& a, const DASH_PATT& b) noexcept
 	{
 		return equal(a.m_[0], b.m_[0]) && equal(a.m_[1], b.m_[1]) && equal(a.m_[2], b.m_[2]) && equal(a.m_[3], b.m_[3]) && equal(a.m_[4], b.m_[4]) && equal(a.m_[5], b.m_[5]);

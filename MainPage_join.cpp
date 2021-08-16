@@ -110,14 +110,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::join_slider_set_header(const float value)
+	template <UNDO_OP U, int S>
+	void MainPage::join_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		if constexpr (U == UNDO_OP::JOIN_LIMIT && S == 0) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			swprintf_s(buf, LEN, L"%.1f", value + 1.0f);
+			swprintf_s(buf, LEN, L"%.1lf", static_cast<double>(value) + 1.0);
 			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_join_limit") + L": " + buf;
 			sample_slider_0().Header(box_value(text));
 		}

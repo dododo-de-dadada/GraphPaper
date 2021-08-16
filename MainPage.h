@@ -18,6 +18,7 @@
 // MainPage_app.cpp	アプリケーションの中断と再開
 // MainPage_arrange.cpp	図形の並び替え
 // MainPage_arrow.cpp	矢じるしの形式と寸法
+// MainPage_dash.cpp	線の種類
 // MainPage_display.cpp	表示デバイスのハンドラー
 // MainPage_event.cpp	ポインターイベントのハンドラー
 // MainPage_file.cpp	ファイルの読み書き
@@ -116,10 +117,11 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 色成分を文字列に変換する.
-	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]);
+	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]) noexcept;
 
 	// 色成分を文字列に変換する.
-	template <size_t Z> void conv_col_to_str(const COLOR_CODE c_code, const double value, wchar_t(&t_buf)[Z])
+	template <size_t Z> 
+	void conv_col_to_str(const COLOR_CODE c_code, const double value, wchar_t(&t_buf)[Z]) noexcept
 	{
 		conv_col_to_str(c_code, value, Z, t_buf);
 	}
@@ -178,10 +180,12 @@ namespace winrt::GraphPaper::implementation
 	constexpr bool LEN_UNIT_HIDE = false;	// 単位名の非表示
 
 	// 長さを文字列に変換する.
-	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf);
+	template <bool B> 
+	void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さを文字列に変換する.
-	template <bool B, size_t Z> void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, wchar_t(&t_buf)[Z])
+	template <bool B, size_t Z>
+	void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, wchar_t(&t_buf)[Z]) noexcept
 	{
 		conv_len_to_str<B>(len_unit, value, dpi, g_len, Z, t_buf);
 	}
@@ -361,9 +365,11 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「つなぎの形式」が選択された.
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void join_slider_set_header(const float value);
+		template <UNDO_OP U, int S> 
+		void join_slider_set_header(const float value);
 		// スライダーの値が変更された.
-		template <UNDO_OP U, int S> void join_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
+		template <UNDO_OP U, int S> 
+		void join_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_arrange.cpp
@@ -371,9 +377,11 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 選択された図形を次または前の図形と入れ替える.
-		template<typename T> void arrange_order(void);
+		template<typename T> 
+		void arrange_order(void);
 		// 選択された図形を最背面または最前面に移動する.
-		template<bool B> void arrange_to(void);
+		template<bool B> 
+		void arrange_to(void);
 		// 編集メニューの「前面に移動」が選択された.
 		void arrange_bring_forward_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「最前面に移動」が選択された.
@@ -395,9 +403,11 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「矢じるしの大きさ」が選択された.
 		IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void arrow_slider_set_header(const float value);
+		template <UNDO_OP U, int S> 
+		void arrow_slider_set_header(const float value);
 		// スライダーの値が変更された.
-		template <UNDO_OP U, int S> void arrow_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		template <UNDO_OP U, int S> 
+		void arrow_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_disp.cpp
@@ -452,9 +462,11 @@ namespace winrt::GraphPaper::implementation
 		// ファイルの読み書き
 		//-------------------------------
 
-		IAsyncAction file_check_access(void) const;
+		// ファイルシステムへのアクセス権を確認して, 設定を促す.
+		//IAsyncAction file_check_broad_access(void) const;
 		// ストレージファイルを非同期に読む.
-		IAsyncOperation<winrt::hresult> file_read_async(StorageFile const& s_file, const bool suspend = false, const bool layout = false) noexcept;
+		template <bool SUSPEND, bool SETTEING>
+		IAsyncOperation<winrt::hresult> file_read_async(StorageFile s_file) noexcept;
 		// 名前を付けてファイルに非同期に保存する
 		IAsyncOperation<winrt::hresult> file_save_as_async(const bool svg_allowed = false) noexcept;
 		// ファイルに非同期に保存する
@@ -462,11 +474,12 @@ namespace winrt::GraphPaper::implementation
 		// 待機カーソルを表示, 表示する前のカーソルを得る.
 		CoreCursor file_wait_cursor(void) const;
 		// 図形データをストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile const& s_file, const bool suspend = false, const bool layout = false);
+		template <bool SUSPEND, bool SETTING>
+		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile s_file);
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile const& s_file);
-		// 図形データを SVG としてストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_write_img_async(ShapeImage* s, const wchar_t suggested_name[], wchar_t img_name[], const size_t name_len);
+		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile s_file);
+		// ファイルに画像図形の画像を保存する.
+		IAsyncOperation<winrt::hresult> file_save_img_async(ShapeImage* s, const wchar_t suggested_name[], /*-->*/wchar_t img_name[], const size_t name_len);
 		// ファイルの読み込みが終了した.
 		void file_finish_reading(void);
 		// ファイルメニューの「画像をインポートする」が選択された

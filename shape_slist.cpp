@@ -558,8 +558,8 @@ namespace winrt::GraphPaper::implementation
 	template void slist_selected<Shape>(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept;
 	template void slist_selected<ShapeGroup>(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept;
 
-	// 図形リストをデータライターに書き込む.
-	// REDUCE	消去された図形は書き込まない.
+	// データライターに図形リストを書き込む.
+	// REDUCE	消去された図形は省く.
 	// slist	図形リスト
 	// dt_writer	データライター
 	template<bool REDUCE> void slist_write(SHAPE_LIST const& slist, DataWriter const& dt_writer)
@@ -613,7 +613,9 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(SHAPE_NULL));
 	}
 	constexpr auto REDUCE = true;
+	// 消去された図形も含めて, 図形リストを書き込む.
 	template void slist_write<!REDUCE>(SHAPE_LIST const& slist, DataWriter const& dt_writer);
+	// 消去された図形は省いて, 図形リストを書き込む.
 	template void slist_write<REDUCE>(SHAPE_LIST const& slist, DataWriter const& dt_writer);
 
 	// 選択されてない図形から, 指定した位置に最も近い頂点を得る.

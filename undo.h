@@ -35,7 +35,7 @@ namespace winrt::GraphPaper::implementation
 		BM_OPAC,	// 画像の不透明度の操作
 		CAP_STYLE,	// 端の形式の操作
 		DASH_CAP,	// 破線の端の形式の操作
-		DASH_PATT,	// 破線の様式の操作
+		DASH_PATT,	// 破線の配置の操作
 		DASH_STYLE,	// 破線の形式の操作
 		FILL_COLOR,	// 塗りつぶしの色の操作
 		FONT_COLOR,	// 書体の色の操作

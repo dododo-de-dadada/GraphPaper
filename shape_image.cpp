@@ -24,12 +24,13 @@ namespace winrt::GraphPaper::implementation
 #define NIBBLE_LO(b)	(b & 0x0f)
 
 	// D2D1_RECT_F から D2D1_RECT_U を作成する.
-	static const D2D1_RECT_U image_conv_rect(const D2D1_RECT_F& f, const D2D1_SIZE_U s);
+	//static const D2D1_RECT_U image_conv_rect(const D2D1_RECT_F& f, const D2D1_SIZE_U s);
 	// 点に最も近い, 線分上の点を求める.
 	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& q);
 
 	// D2D1_RECT_F から D2D1_RECT_U を作成する.
 	// 左上位置は { 0, 0 } 以上, 右下位置は D2D1_SIZE_U 以下.
+	/*
 	static const D2D1_RECT_U image_conv_rect(const D2D1_RECT_F& f, const D2D1_SIZE_U s)
 	{
 		return D2D1_RECT_U{
@@ -39,8 +40,13 @@ namespace winrt::GraphPaper::implementation
 			min(static_cast<uint32_t>(ceil(f.bottom)), s.height)
 		};
 	}
+	*/
 
 	// 点に最も近い, 線分上の点を求める.
+	// p	点
+	// a	線分の端点
+	// b	線分のもう一方の端点
+	// q	線分上の点
 	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& q)
 	{
 		// 線分 ab が垂直か判定する.
@@ -54,11 +60,13 @@ namespace winrt::GraphPaper::implementation
 			q.y = a.y;
 		}
 		else {
-			const D2D1_POINT_2F ap{ p.x - a.x, p.y - a.y };	// p - a -> ap
-			const D2D1_POINT_2F ab{ b.x - a.x, b.y - a.y };	// b - a -> ab
-			const double ap_ab = ap.x * ab.x + ap.y * ab.y;	// ap.ab
-			const double ab_ab = ab.x * ab.x + ab.y * ab.y;	// ab.ab
-			pt_mul(ab, ap_ab / ab_ab, a, q);	// a + ap.ab / (|ab|^2) -> q
+			const double ap_x = static_cast<double>(p.x) - static_cast<double>(a.x);
+			const double ap_y = static_cast<double>(p.y) - static_cast<double>(a.y);
+			const double ab_x = static_cast<double>(b.x) - static_cast<double>(a.x);
+			const double ab_y = static_cast<double>(b.y) - static_cast<double>(a.y);
+			const double ap_ab = ap_x * ab_x + ap_y * ab_y;	// ap.ab
+			const double ab_ab = ab_x * ab_x + ab_y * ab_y;	// ab.ab
+			pt_mul(D2D1_POINT_2F{ static_cast<FLOAT>(ab_x), static_cast<FLOAT>(ab_y) }, ap_ab / ab_ab, a, q);	// a + ap.ab / (|ab|^2) ab -> q
 		}
 	}
 
@@ -376,7 +384,7 @@ namespace winrt::GraphPaper::implementation
 	// anch	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
 	// keep_aspect	画像図形の縦横比を維持
-	bool ShapeImage::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect)
+	bool ShapeImage::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float /*limit*/, const bool keep_aspect)
 	{
 		bool flag = false;
 		if (anch == ANCH_TYPE::ANCH_NW) {

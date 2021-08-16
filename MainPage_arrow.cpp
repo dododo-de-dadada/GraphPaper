@@ -9,23 +9,26 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+
 	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow_size";
 
 	//	値をスライダーのヘッダーに格納する.
 	//	value	値
-	template <UNDO_OP U, int S> void MainPage::arrow_slider_set_header(const float value)
+	template <UNDO_OP U, int S>
+	void MainPage::arrow_slider_set_header(const float value)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
-			constexpr wchar_t* HEADER[] = {
+			constexpr wchar_t* SLIDER_HEADER[] = {
 				L"str_arrow_width",
 				L"str_arrow_length",
 				L"str_arrow_offset"
 			};
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sheet_main.m_grid_base + 1.0f, buf);
-			const auto text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
+			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf;
 			if constexpr (S == 0) {
 				sample_slider_0().Header(box_value(text));
 			}
@@ -50,7 +53,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 値をスライダーのヘッダーに格納する.
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
-			const auto value = static_cast<float>(args.NewValue());
+			const float value = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
 			m_sample_shape->get_arrow_size(a_size);
 			if constexpr (S == 0) {
@@ -75,10 +78,6 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「矢じるしの大きさ」が選択された.
 	IAsyncAction MainPage::arrow_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 
@@ -105,12 +104,20 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 2> });
+		const winrt::event_token slider_0_token{
+			sample_slider_0().ValueChanged({ this, &MainPage::arrow_slider_value_changed<UNDO_OP::ARROW_SIZE, 0> })
+		};
+		const winrt::event_token slider_1_token{
+			sample_slider_1().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 1> })
+		};
+		const winrt::event_token slider_2_token{
+			sample_slider_2().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 2> })
+		};
 		m_sample_type = SAMPLE_TYPE::STROKE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
-		const auto d_result = co_await cd_sample_dialog().ShowAsync();
+		const ContentDialogResult d_result{
+			co_await cd_sample_dialog().ShowAsync()
+		};
 		if (d_result == ContentDialogResult::Primary) {
 			ARROW_SIZE sample_value;
 			m_sample_shape->get_arrow_size(sample_value);

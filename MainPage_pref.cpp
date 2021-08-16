@@ -56,7 +56,7 @@ namespace winrt::GraphPaper::implementation
 			auto s_file = item.try_as<StorageFile>();
 			if (s_file != nullptr) {
 				try {
-					hr = co_await file_read_async(s_file, false, true);
+					hr = co_await file_read_async<false, true>(s_file);
 				}
 				catch (winrt::hresult_error const& e) {
 					hr = e.code();
@@ -71,6 +71,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 用紙メニューの「設定を保存」が選択された
 	// ローカルフォルダーにファイルを作成し, 設定データを保存する.
+	// s_file	ストレージファイル
 	IAsyncAction MainPage::pref_save_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::Storage::CreationCollisionOption;
@@ -78,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 		try {
 			auto s_file{ co_await pref_local_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 			if (s_file != nullptr) {
-				co_await file_write_gpf_async(s_file, false, true);
+				co_await file_write_gpf_async<false, true>(s_file);
 				s_file = nullptr;
 				mfi_pref_delete().IsEnabled(true);
 			}

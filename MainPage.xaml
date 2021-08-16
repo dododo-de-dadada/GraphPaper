@@ -189,7 +189,7 @@
                         </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
-                <!-- 破線の様式 -->
+                <!-- 破線の配置 -->
                 <MenuFlyoutItem x:Name="mfi_dash_patt_2" x:Uid="mfi_dash_patt" Click="dash_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
 				<!-- 線枠の太さ -->
 				<MenuFlyoutItem x:Uid="mfi_stroke_width" Click="stroke_width_click_async" Text="Width..." />

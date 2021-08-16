@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 		value.height = dt_reader.ReadUInt32();
 	}
 
-	// データリーダーから破線の様式を読み込む.
+	// データリーダーから破線の配置を読み込む.
 	void dt_read(DASH_PATT& value, DataReader const& dt_reader)
 	{
 		value.m_[0] = dt_reader.ReadSingle();
@@ -186,7 +186,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(value.height);
 	}
 
-	// データライターに破線の様式を書き込む.
+	// データライターに破線の配置を書き込む.
 	void dt_write(const DASH_PATT& value, DataWriter const& dt_writer)
 	{
 		dt_writer.WriteSingle(value.m_[0]);
@@ -287,9 +287,9 @@ namespace winrt::GraphPaper::implementation
 		dt_write_svg(buf, dt_writer);
 	}
 
-	// データライターに SVG として破線の形式と様式を書き込む.
+	// データライターに SVG として破線の形式と配置を書き込む.
 	// d_style	線枠の形式
-	// d_patt	破線の様式
+	// d_patt	破線の配置
 	// s_width	線枠の太さ
 	void dt_write_svg(const D2D1_DASH_STYLE d_style, const DASH_PATT& d_patt, const double s_width, DataWriter const& dt_writer)
 	{
