@@ -20,13 +20,13 @@ namespace winrt::GraphPaper::implementation
 		pt_add(m_pos, rad, c_pos);
 		// ‚¾‰~\‘¢‘Ì‚ÉŠi”[‚·‚é.
 		D2D1_ELLIPSE elli{ c_pos, rad.x, rad.y };
+		// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚©”»’è‚·‚é.
 		if (is_opaque(m_fill_color)) {
-			// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚Èê‡,
 			dx.m_shape_brush->SetColor(m_fill_color);
 			dx.m_d2dContext->FillEllipse(elli, dx.m_shape_brush.get());
 		}
+		// ˜gü‚ÌF‚ª•s“§–¾‚©”»’è‚·‚é.
 		if (is_opaque(m_stroke_color)) {
-			// ˜gü‚ÌF‚ª•s“§–¾‚Èê‡,
 			dx.m_shape_brush->SetColor(m_stroke_color);
 			dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), m_stroke_width, m_d2d_stroke_style.get());
 		}

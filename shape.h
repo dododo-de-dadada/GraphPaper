@@ -176,14 +176,14 @@ namespace winrt::GraphPaper::implementation
 	constexpr float COLOR_MAX = 255.0f;	// 色成分の最大値
 	constexpr double PT_PER_INCH = 72.0;	// 1 インチあたりのポイント数
 	constexpr double MM_PER_INCH = 25.4;	// 1 インチあたりのミリメートル数
-	constexpr ARROW_SIZE DEF_ARROW_SIZE{ 7.0, 16.0, 0.0 };
-	constexpr float DEF_FONT_SIZE = static_cast<float>(12.0 * 96.0 / 72.0);
-	constexpr D2D1_COLOR_F DEF_GRID_COLOR{ ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 0.5f };	// 方眼の色
-	constexpr float DEF_GRID_LEN = 48.0f;
-	constexpr float DEF_MITER_LIMIT = 10.0f;	// マイター制限の比率
-	constexpr POLY_OPTION DEF_POLY_OPTION{ 3, true, true, true, true };	// 多角形の選択肢
-	constexpr DASH_PATT DEF_DASH_PATT{ { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F } };
-	constexpr D2D1_SIZE_F DEF_TEXT_MARGIN{ DEF_FONT_SIZE / 4.0, DEF_FONT_SIZE / 4.0 };
+	constexpr ARROW_SIZE DEF_ARROW_SIZE{ 7.0, 16.0, 0.0 };	// 矢じるしの寸法の既定値
+	constexpr DASH_PATT DEF_DASH_PATT{ { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F } };	// 破線の配置の既定値
+	constexpr float DEF_FONT_SIZE = static_cast<float>(12.0 * 96.0 / 72.0);	// 書体の大きさの既定値
+	constexpr D2D1_COLOR_F DEF_GRID_COLOR{ ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 0.5f };	// 方眼の色の既定値
+	constexpr float DEF_GRID_LEN = 48.0f;	// 方眼の長さの既定値
+	constexpr float DEF_MITER_LIMIT = 10.0f;	// マイター制限比率の既定値
+	constexpr POLY_OPTION DEF_POLY_OPTION{ 3, true, true, true, true };	// 多角形の選択肢の既定値
+	constexpr D2D1_SIZE_F DEF_TEXT_MARGIN{ DEF_FONT_SIZE / 4.0, DEF_FONT_SIZE / 4.0 };	// 文字列の余白の既定値
 	constexpr size_t MAX_N_GON = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 
 	MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
@@ -292,89 +292,89 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 
 	// データリーダーから矢じるしの寸法を読み込む.
-	void dt_read(ARROW_SIZE& value, DataReader const& dt_reader);
+	void dt_read(ARROW_SIZE& value, /*<---*/DataReader const& dt_reader);
 	// データリーダーから端の形式を読み込む.
-	void dt_read(CAP_STYLE& value, DataReader const& dt_reader);
+	void dt_read(CAP_STYLE& value, /*<---*/DataReader const& dt_reader);
 	// データリーダーから色を読み込む.
-	void dt_read(D2D1_COLOR_F& value, DataReader const& dt_reader);
+	void dt_read(D2D1_COLOR_F& value, /*<---*/DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
-	void dt_read(D2D1_POINT_2F& value, DataReader const& dt_reader);
+	void dt_read(D2D1_POINT_2F& value, /*<---*/DataReader const& dt_reader);
 	// データリーダーから方形を読み込む.
-	void dt_read(D2D1_RECT_F& value, DataReader const& dt_reader);
+	void dt_read(D2D1_RECT_F& value, /*<---*/DataReader const& dt_reader);
 	// データリーダーから寸法を読み込む.
-	void dt_read(D2D1_SIZE_F& value, DataReader const& dt_reader);
+	void dt_read(D2D1_SIZE_F& value, /*<---*/DataReader const& dt_reader);
 	// データリーダーから寸法を読み込む.
-	void dt_read(D2D1_SIZE_U& value, DataReader const& dt_reader);
-	// データリーダーから文字範囲を読み込む.
-	void dt_read(DWRITE_TEXT_RANGE& value, DataReader const& dt_reader);
-	// データリーダーから方眼の形式を読み込む.
-	void dt_read(GRID_EMPH& value, DataReader const& dt_reader);
+	void dt_read(D2D1_SIZE_U& value, /*<---*/DataReader const& dt_reader);
 	// データリーダーから破線の配置を読み込む.
-	void dt_read(DASH_PATT& value, DataReader const& dt_reader);
+	void dt_read(DASH_PATT& value, /*<---*/DataReader const& dt_reader);
+	// データリーダーから文字範囲を読み込む.
+	void dt_read(DWRITE_TEXT_RANGE& value, /*<---*/DataReader const& dt_reader);
+	// データリーダーから方眼の形式を読み込む.
+	void dt_read(GRID_EMPH& value, /*<---*/DataReader const& dt_reader);
 	// データリーダーから多角形の選択肢を読み込む.
-	void dt_read(POLY_OPTION& value, DataReader const& dt_reader);
-	// データリーダーから文字列を読み込む.
-	void dt_read(wchar_t*& value, DataReader const& dt_reader);
+	void dt_read(POLY_OPTION& value, /*<---*/DataReader const& dt_reader);
 	// データリーダーから位置配列を読み込む.
-	void dt_read(std::vector<D2D1_POINT_2F>& value, DataReader const& dt_reader);
+	void dt_read(std::vector<D2D1_POINT_2F>& value, /*<---*/DataReader const& dt_reader);
+	// データリーダーから文字列を読み込む.
+	void dt_read(wchar_t*& value, /*<---*/DataReader const& dt_reader);
 	// データライターに矢じるしの寸法を書き込む.
-	void dt_write(const ARROW_SIZE& value, DataWriter const& dt_writer);
+	void dt_write(const ARROW_SIZE& value, /*--->*/DataWriter const& dt_writer);
 	// データライターに端の形式を書き込む.
-	void dt_write(const CAP_STYLE& value, DataWriter const& dt_writer);
+	void dt_write(const CAP_STYLE& value, /*--->*/DataWriter const& dt_writer);
 	// データライターに色を書き込む.
-	void dt_write(const D2D1_COLOR_F& value, DataWriter const& dt_writer);
+	void dt_write(const D2D1_COLOR_F& value, /*--->*/DataWriter const& dt_writer);
 	// データライターに位置を書き込む.
-	void dt_write(const D2D1_POINT_2F value, DataWriter const& dt_writer);
+	void dt_write(const D2D1_POINT_2F value, /*--->*/DataWriter const& dt_writer);
 	// データライターに方形を書き込む.
-	void dt_write(const D2D1_RECT_F value, DataWriter const& dt_writer);
+	void dt_write(const D2D1_RECT_F value, /*--->*/DataWriter const& dt_writer);
 	// データライターに寸法を書き込む.
-	void dt_write(const D2D1_SIZE_F value, DataWriter const& dt_writer);
+	void dt_write(const D2D1_SIZE_F value, /*--->*/DataWriter const& dt_writer);
 	// データライターに寸法を書き込む.
-	void dt_write(const D2D1_SIZE_U value, DataWriter const& dt_writer);
-	// データライターに文字列範囲を書き込む.
-	void dt_write(const DWRITE_TEXT_RANGE value, DataWriter const& dt_writer);
-	// データライターに方眼の形式を書き込む.
-	void dt_write(const GRID_EMPH value, DataWriter const& dt_writer);
+	void dt_write(const D2D1_SIZE_U value, /*--->*/DataWriter const& dt_writer);
 	// データライターに破線の配置を書き込む.
-	void dt_write(const DASH_PATT& value, DataWriter const& dt_writer);
+	void dt_write(const DASH_PATT& value, /*--->*/DataWriter const& dt_writer);
+	// データライターに文字列範囲を書き込む.
+	void dt_write(const DWRITE_TEXT_RANGE value, /*--->*/DataWriter const& dt_writer);
+	// データライターに方眼の形式を書き込む.
+	void dt_write(const GRID_EMPH value, /*--->*/DataWriter const& dt_writer);
 	// データライターに多角形の選択肢を書き込む.
-	void dt_write(const POLY_OPTION& value, DataWriter const& dt_writer);
-	// データライターに文字列を書き込む.
-	void dt_write(const wchar_t* value, DataWriter const& dt_writer);
+	void dt_write(const POLY_OPTION& value, /*--->*/DataWriter const& dt_writer);
 	// データライターに位置配列を書き込む.
-	void dt_write(const std::vector<D2D1_POINT_2F>& value, DataWriter const& dt_writer);
-	// データライターに SVG としてシングルバイト文字列を書き込む.
-	void dt_write_svg(const char* value, DataWriter const& dt_writer);
-	// データライターに SVG としてマルチバイト文字列を書き込む.
-	void dt_write_svg(const wchar_t value[], const uint32_t v_len, DataWriter const& dt_writer);
+	void dt_write(const std::vector<D2D1_POINT_2F>& value, /*--->*/DataWriter const& dt_writer);
+	// データライターに文字列を書き込む.
+	void dt_write(const wchar_t* value, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名とシングルバイト文字列を書き込む.
-	void dt_write_svg(const char* value, const char* name, DataWriter const& dt_writer);
-	// データライターに SVG として命令と位置を書き込む.
-	void dt_write_svg(const D2D1_POINT_2F value, const char* cmd, DataWriter const& dt_writer);
-	// データライターに SVG として属性名と位置を書き込む.
-	void dt_write_svg(const D2D1_POINT_2F value, const char* name_x, const char* name_y, DataWriter const& dt_writer);
+	void dt_write_svg(const char* value, const char* name, /*--->*/DataWriter const& dt_writer);
+	// データライターに SVG としてシングルバイト文字列を書き込む.
+	void dt_write_svg(const char* value, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名と色を書き込む.
-	void dt_write_svg(const D2D1_COLOR_F value, const char* name, DataWriter const& dt_writer);
+	void dt_write_svg(const D2D1_COLOR_F value, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として色を書き込む.
-	void dt_write_svg(const D2D1_COLOR_F value, DataWriter const& dt_writer);
-	// データライターに SVG として浮動小数を書き込む
-	void dt_write_svg(const float value, DataWriter const& dt_writer);
-	// データライターに SVG として属性名と浮動小数値を書き込む
-	void dt_write_svg(const double value, const char* name, DataWriter const& dt_writer);
-	// データライターに SVG として属性名と 32 ビット正整数を書き込む
-	void dt_write_svg(const uint32_t value, const char* name, DataWriter const& dt_writer);
+	void dt_write_svg(const D2D1_COLOR_F value, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として破線の形式と配置を書き込む.
-	void dt_write_svg(const D2D1_DASH_STYLE style, const DASH_PATT& patt, const double width, DataWriter const& dt_writer);
+	void dt_write_svg(const D2D1_DASH_STYLE style, const DASH_PATT& patt, const double width, /*--->*/DataWriter const& dt_writer);
+	// データライターに SVG として命令と位置を書き込む.
+	void dt_write_svg(const D2D1_POINT_2F value, const char* cmd, /*--->*/DataWriter const& dt_writer);
+	// データライターに SVG として属性名と位置を書き込む.
+	void dt_write_svg(const D2D1_POINT_2F value, const char* name_x, const char* name_y, /*--->*/DataWriter const& dt_writer);
+	// データライターに SVG として属性名と浮動小数値を書き込む
+	void dt_write_svg(const double value, const char* name, /*--->*/DataWriter const& dt_writer);
+	// データライターに SVG として浮動小数を書き込む.
+	void dt_write_svg(const float value, /*--->*/DataWriter const& dt_writer);
+	// データライターに SVG として属性名と 32 ビット正整数を書き込む.
+	void dt_write_svg(const uint32_t value, const char* name, /*--->*/DataWriter const& dt_writer);
+	// データライターに SVG としてマルチバイト文字列を書き込む.
+	void dt_write_svg(const wchar_t value[], const uint32_t v_len, /*--->*/DataWriter const& dt_writer);
 
 	//------------------------------
 	// shape_anch.cpp
 	// 図形の部位を表示
 	//------------------------------
 
-	// 図形の部位 (方形) を表示する.
-	void anch_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx);
 	// 図形の部位（円形）を表示する.
 	void anch_draw_ellipse(const D2D1_POINT_2F c_pos, SHAPE_DX& dx);
+	// 図形の部位 (方形) を表示する.
+	void anch_draw_rect(const D2D1_POINT_2F a_pos, SHAPE_DX& dx);
 
 	//------------------------------
 	// shape_slist.cpp
@@ -432,13 +432,16 @@ namespace winrt::GraphPaper::implementation
 	Shape* slist_remove(SHAPE_LIST& slist, const Shape* s) noexcept;
 
 	// 選択された図形のリストを得る.
-	template <typename S> void slist_selected(SHAPE_LIST const& slist, SHAPE_LIST& t_list) noexcept;
+	template <typename S>
+	void slist_selected(SHAPE_LIST const& slist, SHAPE_LIST& t_list) noexcept;
 
 	// データライターに図形リストを書き込む. REDUCE なら消去された図形は省く.
-	template <bool REDUCE> void slist_write(const SHAPE_LIST& slist, DataWriter const& dt_writer);
+	template <bool REDUCE>
+	void slist_write(const SHAPE_LIST& slist, DataWriter const& dt_writer);
 
 	// リストの中の図形の順番を得る.
-	template <typename S, typename T> bool slist_match(SHAPE_LIST const& slist, S s, T& t);
+	template <typename S, typename T>
+	bool slist_match(SHAPE_LIST const& slist, S s, T& t);
 
 	// 選択された文字列図形から, それらを改行で連結した文字列を得る.
 	// winrt::hstring slist_selected_all_text(SHAPE_LIST const& slist) noexcept;
