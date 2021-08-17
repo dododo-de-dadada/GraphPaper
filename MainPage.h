@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	enum struct SAMPLE_TYPE {
 		NONE,	// なし
-		BITMAP,	// 画像
+		IMAGE,	// 画像
 		FILL,	// 塗りつぶし
 		FONT,	// 書体
 		JOIN,	// 線のつなぎ

@@ -5,7 +5,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	constexpr auto INDEX_NULL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
+	constexpr auto INDEX_NIL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
 	constexpr auto INDEX_SHEET = static_cast<uint32_t>(-1);	// 用紙図形の添え字
 
 	// 部位の位置を得る.
@@ -13,13 +13,13 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから位置を読み込む.
 	static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
-	static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader);
-	// データリーダーから位置を読み込む.
 	static D2D1_RECT_F undo_read_rect(DataReader const& dt_reader);
 	// データリーダーから添え字を読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader);
+	// データリーダーから位置を読み込む.
+	static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader);
 	// 図形をデータライターに書き込む.
-	static void undo_write_shape(const Shape* s, DataWriter const& dt_writer);
+	static void undo_write_shape(Shape* const s, DataWriter const& dt_writer);
 
 	// 部位の位置を得る.
 	static D2D1_POINT_2F undo_get_pos_anch(const Shape* s, const uint32_t anch) noexcept
@@ -38,40 +38,39 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから位置を読み込む.
-	static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader)
-	{
-		D2D1_SIZE_F size;
-		dt_read(size, dt_reader);
-		return size;
-	}
-
-	// データリーダーから位置を読み込む.
 	static D2D1_RECT_F undo_read_rect(DataReader const& dt_reader)
 	{
-		D2D1_RECT_F rect{
+		return D2D1_RECT_F{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		return rect;
 	}
 
 	// データリーダーから添え字を読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader)
 	{
 		Shape* s = static_cast<Shape*>(nullptr);
-		auto i = dt_reader.ReadUInt32();
+		const uint32_t i = dt_reader.ReadUInt32();
 		if (i == INDEX_SHEET) {
 			s = Undo::s_shape_sheet;
 		}
-		else if (i == INDEX_NULL) {
+		else if (i == INDEX_NIL) {
 			s = nullptr;
 		}
 		else {
 			slist_match<const uint32_t, Shape*>(*Undo::s_shape_list, i, s);
 		}
 		return s;
+	}
+
+	// データリーダーから位置を読み込む.
+	static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader)
+	{
+		D2D1_SIZE_F size;
+		dt_read(size, dt_reader);
+		return size;
 	}
 
 	// 図形をデータライターに書き込む.
@@ -81,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt32(INDEX_SHEET);
 		}
 		else if (s == nullptr) {
-			dt_writer.WriteUInt32(INDEX_NULL);
+			dt_writer.WriteUInt32(INDEX_NIL);
 		}
 		else {
 			uint32_t i = 0;
@@ -110,18 +109,6 @@ namespace winrt::GraphPaper::implementation
 		return !equal(pos, m_pos);
 	}
 
-	// 操作を実行すると値が変わるか判定する.
-	bool UndoBitmap::changed(void) const noexcept
-	{
-		//using winrt::GraphPaper::implementation::equal;
-
-		const auto pos = static_cast<ShapeImage*>(m_shape)->m_pos;
-		const auto view = static_cast<ShapeImage*>(m_shape)->m_view;
-		const auto rect = static_cast<ShapeImage*>(m_shape)->m_rect;
-		const auto ratio = static_cast<ShapeImage*>(m_shape)->m_ratio;
-		return !equal(pos, m_pos) || !equal(view, m_view) || !equal(rect, m_rect) || !equal(ratio, m_ratio);
-	}
-
 	// 元に戻す操作を実行する.
 	void UndoAnchor::exec(void)
 	{
@@ -131,38 +118,11 @@ namespace winrt::GraphPaper::implementation
 		m_pos = pos;
 	}
 
-	// 元に戻す操作を実行する.
-	void UndoBitmap::exec(void)
-	{
-		ShapeImage* s = static_cast<ShapeImage*>(m_shape);
-		const auto pos = s->m_pos;
-		const auto view = s->m_view;
-		const auto rect = s->m_rect;
-		const auto ratio = s->m_ratio;
-		s->m_pos = m_pos;
-		s->m_view = m_view;
-		s->m_rect = m_rect;
-		s->m_ratio = m_ratio;
-		m_pos = pos;
-		m_view = view;
-		m_rect = rect;
-		m_ratio = ratio;
-	}
-
 	// データリーダーから操作を読み込む.
 	UndoAnchor::UndoAnchor(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_anch(static_cast<ANCH_TYPE>(dt_reader.ReadUInt32())),
 		m_pos(undo_read_pos(dt_reader))
-	{}
-
-	// データリーダーから操作を読み込む.
-	UndoBitmap::UndoBitmap(DataReader const& dt_reader) :
-		Undo(undo_read_shape(dt_reader)),
-		m_pos(undo_read_pos(dt_reader)),
-		m_view(undo_read_size(dt_reader)),
-		m_rect(undo_read_rect(dt_reader)),
-		m_ratio(undo_read_size(dt_reader))
 	{}
 
 	// 図形の, 指定された部位の位置を保存する.
@@ -172,14 +132,6 @@ namespace winrt::GraphPaper::implementation
 		m_pos(undo_get_pos_anch(s, anch))
 	{}
 
-	UndoBitmap::UndoBitmap(ShapeImage* const s) :
-		Undo(s),
-		m_pos(s->m_pos),
-		m_view(s->m_view),
-		m_rect(s->m_rect),
-		m_ratio(s->m_ratio)
-	{}
-
 	// データライターに書き込む.
 	void UndoAnchor::write(DataWriter const& dt_writer)
 	{
@@ -187,17 +139,6 @@ namespace winrt::GraphPaper::implementation
 		undo_write_shape(m_shape, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_anch));
 		dt_write(m_pos, dt_writer);
-	}
-
-	// データライターに書き込む.
-	void UndoBitmap::write(DataWriter const& dt_writer)
-	{
-		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::BITMAP));
-		undo_write_shape(m_shape, dt_writer);
-		dt_write(m_pos, dt_writer);
-		dt_write(m_view, dt_writer);
-		dt_write(m_rect, dt_writer);
-		dt_write(m_ratio, dt_writer);
 	}
 
 	// 操作を実行する.
@@ -246,7 +187,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を実行すると値が変わるか判定する.
-	template <UNDO_OP U> bool UndoAttr<U>::changed(void) const noexcept
+	template <UNDO_OP U>
+	bool UndoAttr<U>::changed(void) const noexcept
 	{
 		using winrt::GraphPaper::implementation::equal;
 		U_TYPE<U>::type value{};
@@ -254,7 +196,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を実行する.
-	template <UNDO_OP U> void UndoAttr<U>::exec(void)
+	template <UNDO_OP U>
+	void UndoAttr<U>::exec(void)
 	{
 		U_TYPE<U>::type old_value{};
 		if (GET(m_shape, old_value)) {
@@ -264,22 +207,23 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の属性値を保存する.
-	template <UNDO_OP U> UndoAttr<U>::UndoAttr(Shape* s) :
+	template <UNDO_OP U>
+	UndoAttr<U>::UndoAttr(Shape* s) :
 		Undo(s)
 	{
 		GET(m_shape, m_value);
 	}
 
 	// 図形の属性値を保存したあと値を格納する.
-	template <UNDO_OP U> UndoAttr<U>::UndoAttr(Shape* s, U_TYPE<U>::type const& value) :
+	template <UNDO_OP U>
+	UndoAttr<U>::UndoAttr(Shape* s, U_TYPE<U>::type const& value) :
 		UndoAttr(s)
 	{
 		UndoAttr<U>::SET(m_shape, value);
 	}
 	template UndoAttr<UNDO_OP::ARROW_SIZE>::UndoAttr(Shape* s, const ARROW_SIZE& value);
 	template UndoAttr<UNDO_OP::ARROW_STYLE>::UndoAttr(Shape* s, const ARROW_STYLE& value);
-	//template UndoAttr<UNDO_OP::BM_KEEP>::UndoAttr(Shape* s, const bool& value);
-	template UndoAttr<UNDO_OP::BM_OPAC>::UndoAttr(Shape* s, const float& value);
+	template UndoAttr<UNDO_OP::IMAGE_OPAC>::UndoAttr(Shape* s, const float& value);
 	template UndoAttr<UNDO_OP::CAP_STYLE>::UndoAttr(Shape* s, const CAP_STYLE& value);
 	template UndoAttr<UNDO_OP::DASH_CAP>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
 	template UndoAttr<UNDO_OP::DASH_PATT>::UndoAttr(Shape* s, const DASH_PATT& value);
@@ -314,7 +258,7 @@ namespace winrt::GraphPaper::implementation
 		m_value()
 	{
 		if constexpr (
-			U == UNDO_OP::BM_OPAC ||
+			U == UNDO_OP::IMAGE_OPAC ||
 			U == UNDO_OP::FONT_SIZE ||
 			U == UNDO_OP::GRID_BASE ||
 			U == UNDO_OP::JOIN_LIMIT ||
@@ -335,7 +279,7 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_OP::TEXT_ALIGN_T) {
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
-		//else if constexpr (U == UNDO_OP::BM_KEEP) {
+		//else if constexpr (U == UNDO_OP::IMAGE_ASPECT) {
 		//	m_value = dt_reader.ReadBoolean();
 		//}
 		else {
@@ -345,8 +289,8 @@ namespace winrt::GraphPaper::implementation
 
 	template UndoAttr<UNDO_OP::ARROW_SIZE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::ARROW_STYLE>::UndoAttr(DataReader const& dt_reader);
-	//template UndoAttr<UNDO_OP::BM_KEEP>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::BM_OPAC>::UndoAttr(DataReader const& dt_reader);
+	//template UndoAttr<UNDO_OP::IMAGE_ASPECT>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::IMAGE_OPAC>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::CAP_STYLE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::DASH_CAP>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::DASH_PATT>::UndoAttr(DataReader const& dt_reader);
@@ -392,12 +336,12 @@ namespace winrt::GraphPaper::implementation
 		s->set_arrow_style(value);
 	}
 
-	//void UndoAttr<UNDO_OP::BM_KEEP>::SET(Shape* const s, const bool& value)
+	//void UndoAttr<UNDO_OP::IMAGE_ASPECT>::SET(Shape* const s, const bool& value)
 	//{
 	//	s->set_bm_keep_aspect(value);
 	//}
 
-	void UndoAttr<UNDO_OP::BM_OPAC>::SET(Shape* const s, const float& value)
+	void UndoAttr<UNDO_OP::IMAGE_OPAC>::SET(Shape* const s, const float& value)
 	{
 		s->set_image_opacity(value);
 	}
@@ -557,7 +501,7 @@ namespace winrt::GraphPaper::implementation
 		return s->get_arrow_style(value);
 	}
 
-	bool UndoAttr<UNDO_OP::BM_OPAC>::GET(const Shape* s, float& value) noexcept
+	bool UndoAttr<UNDO_OP::IMAGE_OPAC>::GET(const Shape* s, float& value) noexcept
 	{
 		return s->get_image_opacity(value);
 	}
@@ -708,7 +652,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(U));
 		undo_write_shape(m_shape, dt_writer);
 		if constexpr (
-			U == UNDO_OP::BM_OPAC ||
+			U == UNDO_OP::IMAGE_OPAC ||
 			U == UNDO_OP::FONT_SIZE ||
 			U == UNDO_OP::GRID_BASE ||
 			U == UNDO_OP::JOIN_LIMIT ||
@@ -731,12 +675,70 @@ namespace winrt::GraphPaper::implementation
 			) {
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_value));
 		}
-		//else if constexpr (U == UNDO_OP::BM_KEEP) {
+		//else if constexpr (U == UNDO_OP::IMAGE_ASPECT) {
 		//	dt_writer.WriteBoolean(m_value);
 		//}
 		else {
 			dt_write(m_value, dt_writer);
 		}
+	}
+
+	// 操作を実行すると値が変わるか判定する.
+	bool UndoImage::changed(void) const noexcept
+	{
+		//using winrt::GraphPaper::implementation::equal;
+
+		const auto pos = static_cast<ShapeImage*>(m_shape)->m_pos;
+		const auto view = static_cast<ShapeImage*>(m_shape)->m_view;
+		const auto rect = static_cast<ShapeImage*>(m_shape)->m_rect;
+		const auto ratio = static_cast<ShapeImage*>(m_shape)->m_ratio;
+		return !equal(pos, m_pos) || !equal(view, m_view) || !equal(rect, m_rect) || !equal(ratio, m_ratio);
+	}
+
+	// 元に戻す操作を実行する.
+	void UndoImage::exec(void)
+	{
+		ShapeImage* s = static_cast<ShapeImage*>(m_shape);
+		const auto pos = s->m_pos;
+		const auto view = s->m_view;
+		const auto rect = s->m_rect;
+		const auto ratio = s->m_ratio;
+		s->m_pos = m_pos;
+		s->m_view = m_view;
+		s->m_rect = m_rect;
+		s->m_ratio = m_ratio;
+		m_pos = pos;
+		m_view = view;
+		m_rect = rect;
+		m_ratio = ratio;
+	}
+
+	// データリーダーから操作を読み込む.
+	UndoImage::UndoImage(DataReader const& dt_reader) :
+		Undo(undo_read_shape(dt_reader)),
+		m_pos(undo_read_pos(dt_reader)),
+		m_view(undo_read_size(dt_reader)),
+		m_rect(undo_read_rect(dt_reader)),
+		m_ratio(undo_read_size(dt_reader))
+	{}
+
+	UndoImage::UndoImage(ShapeImage* const s) :
+		Undo(s),
+		m_pos(s->m_pos),
+		m_view(s->m_view),
+		m_rect(s->m_rect),
+		m_ratio(s->m_ratio)
+	{}
+
+	// データライターに書き込む.
+	void UndoImage::write(DataWriter const& dt_writer)
+	{
+		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::IMAGE));
+		undo_write_shape(m_shape, dt_writer);
+		dt_write(m_pos, dt_writer);
+		dt_write(m_view, dt_writer);
+		dt_write(m_rect, dt_writer);
+		dt_write(m_ratio, dt_writer);
 	}
 
 	// 操作を実行する.
@@ -771,7 +773,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をリストから取り除く.
 	// s	取り除く図形
-	// dont	初期化のみで操作を実行しない.
+	// dont_exec	初期化のみで操作を実行しない.
 	UndoList::UndoList(Shape* const s, const bool dont_exec) :
 		Undo(s),
 		m_insert(false),
@@ -784,12 +786,12 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をリストに挿入する
 	// s	挿入する図形
-	// s_pos	挿入する位置
-	// dont	初期化のみで操作を実行しない.
-	UndoList::UndoList(Shape* const s, Shape* const s_pos, const bool dont_exec) :
+	// p	挿入する位置にある図形
+	// dont_exec	初期化のみで操作を実行しない.
+	UndoList::UndoList(Shape* const s, Shape* const p, const bool dont_exec) :
 		Undo(s),
 		m_insert(true),
-		m_shape_at(s_pos)
+		m_shape_at(p)
 	{
 		if (dont_exec != true) {
 			exec();

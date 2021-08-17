@@ -17,11 +17,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataWriter;
 
 	//------------------------------
-	// 操作スタック
-	//------------------------------
-	using UNDO_STACK = std::list<struct Undo*>;	// 操作スタック
-
-	//------------------------------
 	// 操作
 	//------------------------------
 	enum struct UNDO_OP {
@@ -30,9 +25,6 @@ namespace winrt::GraphPaper::implementation
 		ARRANGE,	// 図形の順番の入れ替え
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
-		BITMAP,	// 画像の操作 (ファイル読み書きで使用)
-		//BM_KEEP,	// 画像の縦横維持の操作
-		BM_OPAC,	// 画像の不透明度の操作
 		CAP_STYLE,	// 端の形式の操作
 		DASH_CAP,	// 破線の端の形式の操作
 		DASH_PATT,	// 破線の配置の操作
@@ -41,14 +33,17 @@ namespace winrt::GraphPaper::implementation
 		FONT_COLOR,	// 書体の色の操作
 		FONT_FAMILY,	// 書体名の操作
 		FONT_SIZE,	// 書体の大きさの操作
-		FONT_STYLE,	// 書体の字体の操作
 		FONT_STRETCH,	// 書体の伸縮の操作
+		FONT_STYLE,	// 書体の字体の操作
 		FONT_WEIGHT,	// 書体の太さの操作
 		GRID_BASE,	// 方眼の基準の大さの操作
 		GRID_COLOR,	// 方眼の色の操作
 		GRID_EMPH,	// 方眼の形式の操作
 		GRID_SHOW,	// 方眼の表示方法の操作
 		GROUP,	// 図形をグループに挿入または削除する操作
+		IMAGE,	// 画像の操作 (ファイル読み書きで使用)
+		//IMAGE_ASPECT,	// 画像の縦横維持の操作
+		IMAGE_OPAC,	// 画像の不透明度の操作
 		JOIN_LIMIT,	// 線のマイター制限の操作
 		JOIN_STYLE,	// 破のつなぎの操作
 		LIST,	// 図形をリストに挿入または削除する操作
@@ -59,13 +54,18 @@ namespace winrt::GraphPaper::implementation
 		SHEET_SIZE,	// 用紙の寸法の操作
 		STROKE_COLOR,	// 線枠の色の操作
 		STROKE_WIDTH,	// 線枠の太さの操作
-		TEXT_CONTENT,	// 文字列の操作
 		TEXT_ALIGN_P,	// 段落の整列の操作
 		TEXT_ALIGN_T,	// 文字列の整列の操作
+		TEXT_CONTENT,	// 文字列の操作
 		TEXT_LINE_SP,	// 行間の操作
 		TEXT_MARGIN,	// 文字列の余白の操作
 		TEXT_RANGE,	// 文字範囲の操作
 	};
+
+	//------------------------------
+	// 操作スタック
+	//------------------------------
+	using UNDO_STACK = std::list<struct Undo*>;	// 操作スタック
 
 	//------------------------------
 	// 操作から値の型を得るテンプレート
@@ -73,8 +73,6 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U> struct U_TYPE { using type = int; };
 	template <> struct U_TYPE<UNDO_OP::ARROW_SIZE> { using type = ARROW_SIZE; };
 	template <> struct U_TYPE<UNDO_OP::ARROW_STYLE> { using type = ARROW_STYLE; };
-	//template <> struct U_TYPE<UNDO_OP::BM_KEEP> { using type = bool; };
-	template <> struct U_TYPE<UNDO_OP::BM_OPAC> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::CAP_STYLE> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::DASH_CAP> { using type = D2D1_CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::DASH_PATT> { using type = DASH_PATT; };
@@ -90,6 +88,8 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::GRID_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::GRID_EMPH> { using type = GRID_EMPH; };
 	template <> struct U_TYPE<UNDO_OP::GRID_SHOW> { using type = GRID_SHOW; };
+	//template <> struct U_TYPE<UNDO_OP::IMAGE_ASPECT> { using type = bool; };
+	template <> struct U_TYPE<UNDO_OP::IMAGE_OPAC> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::JOIN_LIMIT> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::JOIN_STYLE> { using type = D2D1_LINE_JOIN; };
 	template <> struct U_TYPE<UNDO_OP::POS_START> { using type = D2D1_POINT_2F; };
@@ -97,9 +97,9 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::SHEET_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_WIDTH> { using type = float; };
-	template <> struct U_TYPE<UNDO_OP::TEXT_CONTENT> { using type = wchar_t*; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_P> { using type = DWRITE_PARAGRAPH_ALIGNMENT; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_T> { using type = DWRITE_TEXT_ALIGNMENT; };
+	template <> struct U_TYPE<UNDO_OP::TEXT_CONTENT> { using type = wchar_t*; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_LINE_SP> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_MARGIN> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
@@ -108,12 +108,9 @@ namespace winrt::GraphPaper::implementation
 	// 操作のひな型
 	//------------------------------
 	struct Undo {
-		// 参照する図形リスト
-		static SHAPE_LIST* s_shape_list;
-		// 参照する図形シート
-		static ShapeSheet* s_shape_sheet;
-		// 操作する図形
-		Shape* m_shape;
+		static SHAPE_LIST* s_shape_list;	// 参照する図形リスト
+		static ShapeSheet* s_shape_sheet;	// 参照する用紙
+		Shape* m_shape;	// 操作する図形
 
 		// 操作を破棄する.
 		virtual ~Undo() {}
@@ -205,7 +202,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 画像の操作
 	//------------------------------
-	struct UndoBitmap : Undo {
+	struct UndoImage : Undo {
 		D2D1_POINT_2F m_pos;	// 位置
 		D2D1_SIZE_F m_view;	// 先寸法
 		D2D1_RECT_F m_rect;	// 元矩形
@@ -216,9 +213,9 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行する.
 		void exec(void);
 		// データリーダーから操作を読み込む.
-		UndoBitmap(DataReader const& dt_reader);
+		UndoImage(DataReader const& dt_reader);
 		// 図形の部位を保存する.
-		UndoBitmap(ShapeImage* const s);
+		UndoImage(ShapeImage* const s);
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};
@@ -245,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をリストから取り除く.
 		UndoList(Shape* const s, const bool dont_exec = false);
 		// 図形をリストに挿入する.
-		UndoList(Shape* const s, Shape* const s_pos, const bool dont_exec = false);
+		UndoList(Shape* const s, Shape* const p, const bool dont_exec = false);
 		// 操作をデータライターに書き込む.
 		void write(DataWriter const& dt_writer);
 	};
@@ -254,8 +251,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をグループに追加または削除する操作.
 	//------------------------------
 	struct UndoListGroup : UndoList {
-		// 操作するグループ
-		ShapeGroup* m_shape_group;
+		ShapeGroup* m_shape_group;	// 操作するグループ
 
 		// 操作を実行する.
 		void exec(void);

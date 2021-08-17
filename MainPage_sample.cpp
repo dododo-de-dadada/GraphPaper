@@ -122,7 +122,7 @@ namespace winrt::GraphPaper::implementation
 				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ samp_x, samp_y }, ANCH_TYPE::ANCH_P0 + 1, m_misc_vert_stick, false);
 				m_sample_shape->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANCH_TYPE::ANCH_P0 + 2, m_misc_vert_stick, false);
 			}
-			else if (m_sample_type == SAMPLE_TYPE::BITMAP) {
+			else if (m_sample_type == SAMPLE_TYPE::IMAGE) {
 				winrt::apartment_context context;
 				co_await winrt::resume_background();
 				try {

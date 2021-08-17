@@ -147,7 +147,7 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 		}
-		D2D1_RECT_F dest_rect{
+		const D2D1_RECT_F dest_rect{
 			m_pos.x,
 			m_pos.y,
 			m_pos.x + m_view.width,
@@ -161,7 +161,7 @@ namespace winrt::GraphPaper::implementation
 			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
 			dx.m_d2dContext->DrawRectangle(dest_rect, dx.m_shape_brush.get(), 1.0f, dx.m_aux_style.get());
 
-			D2D1_POINT_2F v_pos[4]{
+			const D2D1_POINT_2F v_pos[4]{
 				m_pos,
 				{ m_pos.x + m_view.width, m_pos.y },
 				{ m_pos.x + m_view.width, m_pos.y + m_view.height },

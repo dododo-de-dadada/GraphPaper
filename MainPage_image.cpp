@@ -50,17 +50,17 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().TickFrequency(1.0);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(value);
-		image_slider_set_header<UNDO_OP::BM_OPAC, 0>(value);
+		image_slider_set_header<UNDO_OP::IMAGE_OPAC, 0>(value);
 
 		sample_slider_0().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::image_slider_value_changed<UNDO_OP::BM_OPAC, 0> });
-		m_sample_type = SAMPLE_TYPE::BITMAP;
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::image_slider_value_changed<UNDO_OP::IMAGE_OPAC, 0> });
+		m_sample_type = SAMPLE_TYPE::IMAGE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_shape->get_image_opacity(sample_value);
-			if (ustack_push_set<UNDO_OP::BM_OPAC>(sample_value)) {
+			if (ustack_push_set<UNDO_OP::IMAGE_OPAC>(sample_value)) {
 				ustack_push_null();
 				ustack_is_enable();
 				xcvd_is_enabled();
@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
 
-		if constexpr (U == UNDO_OP::BM_OPAC) {
+		if constexpr (U == UNDO_OP::IMAGE_OPAC) {
 			constexpr wchar_t R[]{ L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_misc_color_code, value, buf);
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 	// –ß‚è’l	‚È‚µ
 	template <UNDO_OP U, int S> void MainPage::image_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_OP::BM_OPAC) {
+		if constexpr (U == UNDO_OP::IMAGE_OPAC) {
 			if constexpr (S == 0) {
 				const float value = static_cast<float>(args.NewValue());
 				image_slider_set_header<U, S>(value);

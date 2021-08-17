@@ -76,14 +76,14 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::ARROW_STYLE:
 			u = new UndoAttr<UNDO_OP::ARROW_STYLE>(dt_reader);
 			break;
-		case UNDO_OP::BITMAP:
-			u = new UndoBitmap(dt_reader);
+		case UNDO_OP::IMAGE:
+			u = new UndoImage(dt_reader);
 			break;
-		//case UNDO_OP::BM_KEEP:
-		//	u = new UndoAttr<UNDO_OP::BM_KEEP>(dt_reader);
+		//case UNDO_OP::IMAGE_ASPECT:
+		//	u = new UndoAttr<UNDO_OP::IMAGE_ASPECT>(dt_reader);
 		//	break;
-		case UNDO_OP::BM_OPAC:
-			u = new UndoAttr<UNDO_OP::BM_OPAC>(dt_reader);
+		case UNDO_OP::IMAGE_OPAC:
+			u = new UndoAttr<UNDO_OP::IMAGE_OPAC>(dt_reader);
 			break;
 		case UNDO_OP::FILL_COLOR:
 			u = new UndoAttr<UNDO_OP::FILL_COLOR>(dt_reader);
@@ -404,7 +404,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::ustack_push_anch(Shape* const s, const uint32_t anch)
 	{
 		if (typeid(*s) == typeid(ShapeImage)) {
-			m_ustack_undo.push_back(new UndoBitmap(static_cast<ShapeImage*>(s)));
+			m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
 		}
 		else {
 			m_ustack_undo.push_back(new UndoAnchor(s, anch));
@@ -607,8 +607,8 @@ namespace winrt::GraphPaper::implementation
 
 	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_SIZE>(ARROW_SIZE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE const& value);
-	//template bool MainPage::ustack_push_set<UNDO_OP::BM_KEEP>(bool const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::BM_OPAC>(float const& value);
+	//template bool MainPage::ustack_push_set<UNDO_OP::IMAGE_ASPECT>(bool const& value);
+	template bool MainPage::ustack_push_set<UNDO_OP::IMAGE_OPAC>(float const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::CAP_STYLE>(CAP_STYLE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::DASH_CAP>(D2D1_CAP_STYLE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::DASH_PATT>(DASH_PATT const& value);
