@@ -609,7 +609,7 @@ namespace winrt::GraphPaper::implementation
 		if (pt_in_anch(tp, c_pos[0])) {
 			return ANCH_TYPE::ANCH_P0 + 0;
 		}
-		if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+		if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
 			if (pt_in_circle(tp, e_width)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
@@ -617,12 +617,12 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
-		else if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
 			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, c_pos, m_diff.data(), e_width)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
-		else if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
 			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, c_pos, m_diff.data(), e_width)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}

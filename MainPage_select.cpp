@@ -37,7 +37,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::select_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		bool flag = false;
-		for (auto s : m_list_shapes) {
+		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool flag = false;
 		//uint32_t i = 0u;
-		for (auto s : m_list_shapes) {
+		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -98,11 +98,11 @@ namespace winrt::GraphPaper::implementation
 		Shape* s = static_cast<Shape*>(nullptr);
 		if constexpr (K == VirtualKey::Down) {
 			if (m_event_shape_prev == nullptr) {
-				s = slist_front(m_list_shapes);
+				s = slist_front(m_sheet_main.m_list_shapes);
 				m_event_shape_pressed = s;
 			}
 			else {
-				s = slist_next(m_list_shapes, m_event_shape_prev);
+				s = slist_next(m_sheet_main.m_list_shapes, m_event_shape_prev);
 			}
 			if (s != nullptr) {
 				//m_event_shape_summary = s;
@@ -111,11 +111,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (K == VirtualKey::Up) {
 			if (m_event_shape_prev == nullptr) {
-				s = slist_back(m_list_shapes);
+				s = slist_back(m_sheet_main.m_list_shapes);
 				m_event_shape_pressed = s;
 			}
 			else {
-				s = slist_prev(m_list_shapes, m_event_shape_prev);
+				s = slist_prev(m_sheet_main.m_list_shapes, m_event_shape_prev);
 			}
 			if (s != nullptr) {
 				//m_event_shape_summary = s;
@@ -161,7 +161,7 @@ namespace winrt::GraphPaper::implementation
 		auto st = BEGIN;
 		auto s_end = static_cast<Shape*>(nullptr);
 		auto i = 0u;
-		for (auto s : m_list_shapes) {
+		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 			// 前回ポインターが押された図形が空か判定する.
 			if (m_event_shape_prev == nullptr) {
 				// 図形リストの先頭を前回ポインターが押された図形に格納する.
-				m_event_shape_prev = m_list_shapes.front();
+				m_event_shape_prev = m_sheet_main.m_list_shapes.front();
 			}
 			// 範囲の中の図形は選択して, それ以外の図形の選択をはずす.
 			if (select_range(s, m_event_shape_prev)) {
@@ -271,7 +271,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		auto flag = false;
 		//uint32_t i = 0;
-		for (auto s : m_list_shapes) {
+		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -299,7 +299,7 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::unselect_all(const bool t_range_only)
 	{
 		auto flag = false;
-		for (auto s : m_list_shapes) {
+		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
 			}

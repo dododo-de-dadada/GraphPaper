@@ -6,6 +6,15 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	static void sheet_draw_grid(SHAPE_DX const& dx,
+		const float grid_base,
+		const D2D1_COLOR_F grid_color,
+		const GRID_EMPH grid_emph,
+		const D2D1_POINT_2F grid_offset,
+		const float sheet_scale,
+		const D2D1_SIZE_F sheet_size
+	);
+
 	// 指定した色と不透明度から反対色を得る.
 	//static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept;
 
@@ -215,38 +224,80 @@ namespace winrt::GraphPaper::implementation
 		dx.m_d2dContext->DrawRoundedRectangle(&r_rect, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
 	}
 
+	void ShapeSheet::draw(SHAPE_DX& dx)
+	{
+		// 用紙色で塗りつぶす.
+		dx.m_d2dContext->Clear(m_sheet_color);
+		if (m_grid_show == GRID_SHOW::BACK) {
+			// 方眼の表示が最背面に表示の場合,
+			// 方眼を表示する.
+			sheet_draw_grid(dx,
+				m_grid_base,
+				m_grid_color,
+				m_grid_emph,
+				m_grid_offset,
+				m_sheet_scale,
+				m_sheet_size);
+		}
+		for (auto s : m_list_shapes) {
+			if (!s->is_deleted()) {
+				// 図形を表示する.
+				s->draw(dx);
+			}
+		}
+		if (m_grid_show == GRID_SHOW::FRONT) {
+			// 方眼の表示が最前面に表示の場合,
+			// 方眼を表示する.
+			sheet_draw_grid(dx,
+				m_grid_base,
+				m_grid_color,
+				m_grid_emph,
+				m_grid_offset,
+				m_sheet_scale,
+				m_sheet_size);
+		}
+
+	}
+
 	// 方眼を表示する.
 	// dx	描画環境
 	// g_offset	方眼のずらし量
-	void ShapeSheet::draw_grid(SHAPE_DX const& dx, const D2D1_POINT_2F g_offset)
+	static void sheet_draw_grid(SHAPE_DX const& dx,
+		const float grid_base,
+		const D2D1_COLOR_F grid_color,
+		const GRID_EMPH grid_emph,
+		const D2D1_POINT_2F grid_offset,
+		const float sheet_scale,
+		const D2D1_SIZE_F sheet_size
+	)
 	{
-		const double sheet_w = m_sheet_size.width;	// 用紙の幅
-		const double sheet_h = m_sheet_size.height;	// 用紙の高さ
+		const double sheet_w = sheet_size.width;	// 用紙の幅
+		const double sheet_h = sheet_size.height;	// 用紙の高さ
 		// 拡大されても 1 ピクセルになるよう拡大率の逆数を線枠の太さに格納する.
-		const FLOAT grid_w = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 方眼の太さ
+		const FLOAT grid_w = static_cast<FLOAT>(1.0 / sheet_scale);	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
 		auto const& brush = dx.m_shape_brush.get();
 
-		const auto max_val = max(m_sheet_color.r, max(m_sheet_color.g, m_sheet_color.b));
-		const auto min_val = min(m_sheet_color.r, min(m_sheet_color.g, m_sheet_color.b));
-		const auto sum_val = max_val + min_val;
+		//const auto max_val = max(m_sheet_color.r, max(m_sheet_color.g, m_sheet_color.b));
+		//const auto min_val = min(m_sheet_color.r, min(m_sheet_color.g, m_sheet_color.b));
+		//const auto sum_val = max_val + min_val;
 
-		brush->SetColor(m_grid_color);
+		brush->SetColor(grid_color);
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
-		v_end.y = m_sheet_size.height;
-		h_end.x = m_sheet_size.width;
-		const double grid_len = max(m_grid_base + 1.0, 1.0);
+		v_end.y = sheet_size.height;
+		h_end.x = sheet_size.width;
+		const double grid_len = max(grid_base + 1.0, 1.0);
 
 		// 垂直な方眼を表示する.
 		float w;
 		double x;
-		for (uint32_t i = 0; (x = grid_len * i + g_offset.x) < sheet_w; i++) {
-			if (m_grid_emph.m_gauge_2 != 0 && (i % m_grid_emph.m_gauge_2) == 0) {
+		for (uint32_t i = 0; (x = grid_len * i + grid_offset.x) < sheet_w; i++) {
+			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
 				w = 2.0F * grid_w;
 			}
-			else if (m_grid_emph.m_gauge_1 != 0 && (i % m_grid_emph.m_gauge_1) == 0) {
+			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
 				w = grid_w;
 			}
 			else {
@@ -257,11 +308,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 水平な方眼を表示する.
 		double y;
-		for (uint32_t i = 0; (y = grid_len * i + g_offset.y) < sheet_h; i++) {
-			if (m_grid_emph.m_gauge_2 != 0 && (i % m_grid_emph.m_gauge_2) == 0) {
+		for (uint32_t i = 0; (y = grid_len * i + grid_offset.y) < sheet_h; i++) {
+			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
 				w = 2.0F * grid_w;
 			}
-			else if (m_grid_emph.m_gauge_1 != 0 && (i % m_grid_emph.m_gauge_1) == 0) {
+			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
 				w = grid_w;
 			}
 			else {
@@ -407,9 +458,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 端の形式を得る.
-	bool ShapeSheet::get_cap_style(CAP_STYLE& value) const noexcept
+	bool ShapeSheet::get_stroke_cap(CAP_STYLE& value) const noexcept
 	{
-		value = m_cap_style;
+		value = m_stroke_cap;
 		return true;
 	}
 
@@ -507,7 +558,7 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_arrow_size, dt_reader);	// 矢じるしの寸法
 		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());	// 矢じるしの形式
 		dt_read(m_corner_rad, dt_reader);	// 角丸半径
-		dt_read(m_cap_style, dt_reader);	// 端の形式
+		dt_read(m_stroke_cap, dt_reader);	// 端の形式
 		dt_read(m_stroke_color, dt_reader);	// 線・枠の色
 		m_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());	// 破線の端の形式
 		dt_read(m_dash_patt, dt_reader);	// 破線の配置
@@ -705,10 +756,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を端の形式に格納する.
-	bool ShapeSheet::set_cap_style(const CAP_STYLE& value)
+	bool ShapeSheet::set_stroke_cap(const CAP_STYLE& value)
 	{
-		if (!equal(m_cap_style, value)) {
-			m_cap_style = value;
+		if (!equal(m_stroke_cap, value)) {
+			m_stroke_cap = value;
 			return true;
 		}
 		return false;
@@ -830,13 +881,13 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
 		s->get_sheet_color(m_sheet_color);
-		s->get_cap_style(m_cap_style);
-		s->get_stroke_color(m_stroke_color);
 		s->get_dash_cap(m_dash_cap);
 		s->get_dash_patt(m_dash_patt);
 		s->get_dash_style(m_dash_style);
 		s->get_join_limit(m_join_limit);
 		s->get_join_style(m_join_style);
+		s->get_stroke_cap(m_stroke_cap);
+		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_width(m_stroke_width);
 		s->get_text_line_sp(m_text_line_sp);
 		s->get_text_align_t(m_text_align_t);
@@ -862,7 +913,7 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_arrow_size, dt_writer);	// 矢じるしの寸法
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));	// 矢じるしの形式
 		dt_write(m_corner_rad, dt_writer);	// 角丸半径
-		dt_write(m_cap_style, dt_writer);	// 端の形式
+		dt_write(m_stroke_cap, dt_writer);	// 端の形式
 		dt_write(m_stroke_color, dt_writer);	// 線枠の色
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_cap));	// 破線の端の形式
 		dt_write(m_dash_patt, dt_writer);	// 破線の配置

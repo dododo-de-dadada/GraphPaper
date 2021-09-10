@@ -346,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::CAP_STYLE>)) {
 			CAP_STYLE value;
-			m_sheet_main.get_cap_style(value);
+			m_sheet_main.get_stroke_cap(value);
 			cap_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::DASH_CAP>)) {
@@ -444,7 +444,7 @@ namespace winrt::GraphPaper::implementation
 	// all	‚·‚×‚Ä‚Ì}Œ`‚Ìê‡ true, ‘I‘ğ‚³‚ê‚½}Œ`‚Ìê‡ false
 	void MainPage::ustack_push_move(const D2D1_POINT_2F d_vec, const bool all)
 	{
-		for (auto s : m_list_shapes) {
+		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -587,7 +587,7 @@ namespace winrt::GraphPaper::implementation
 		// Ši”[‚·‚éŒ^ T ‚Í–¾¦‚µ‚È‚­‚Ä‚àˆø”‚ÌŒ^‚©‚ç„’è‚Å‚«‚é
 		m_ustack_undo.push_back(new UndoAttr<U>(&m_sheet_main, value));
 		auto flag = false;
-		for (auto s : m_list_shapes) {
+		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}

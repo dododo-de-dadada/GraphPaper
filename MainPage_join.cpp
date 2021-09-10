@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		CAP_STYLE old_value;
-		m_sheet_main.get_cap_style(old_value);
+		m_sheet_main.get_stroke_cap(old_value);
 		if (ustack_push_set<UNDO_OP::CAP_STYLE>(new_value)) {
 			ustack_push_null();
 			ustack_is_enable();
@@ -88,8 +88,10 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_limit;
 			float sample_width;
-			m_sample_shape->get_join_limit(sample_limit);
-			m_sample_shape->get_stroke_width(sample_width);
+			//m_sample_shape->get_join_limit(sample_limit);
+			//m_sample_shape->get_stroke_width(sample_width);
+			m_sample_sheet.m_list_shapes.back()->get_join_limit(sample_limit);
+			m_sample_sheet.m_list_shapes.back()->get_stroke_width(sample_width);
 			if (ustack_push_set<UNDO_OP::JOIN_LIMIT>(sample_limit) ||
 				ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
 				ustack_push_null();
@@ -97,11 +99,13 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		delete m_sample_shape;
+		//delete m_sample_shape;
+		delete m_sample_sheet.m_list_shapes.back();
+		m_sample_sheet.m_list_shapes.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
-		m_sample_shape = nullptr;
+		//m_sample_shape = nullptr;
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().Visibility(UI_COLLAPSED);
@@ -141,12 +145,14 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::JOIN_LIMIT && S == 0) {
 			const float value = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(value);
-			m_sample_shape->set_join_limit(value + 1.0f);
+			//m_sample_shape->set_join_limit(value + 1.0f);
+			m_sample_sheet.m_list_shapes.back()->set_join_limit(value + 1.0f);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
 			const float value = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(value);
-			m_sample_shape->set_stroke_width(value);
+			//m_sample_shape->set_stroke_width(value);
+			m_sample_sheet.m_list_shapes.back()->set_stroke_width(value);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

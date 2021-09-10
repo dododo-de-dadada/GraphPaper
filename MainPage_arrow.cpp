@@ -55,7 +55,8 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			const float value = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
-			m_sample_shape->get_arrow_size(a_size);
+			//m_sample_shape->get_arrow_size(a_size);
+			m_sample_sheet.m_list_shapes.back()->get_arrow_size(a_size);
 			if constexpr (S == 0) {
 				arrow_slider_set_header<U, S>(value);
 				a_size.m_width = static_cast<FLOAT>(value);
@@ -68,7 +69,8 @@ namespace winrt::GraphPaper::implementation
 				arrow_slider_set_header<U, S>(value);
 				a_size.m_offset = static_cast<FLOAT>(value);
 			}
-			m_sample_shape->set_arrow_size(a_size);
+			//m_sample_shape->set_arrow_size(a_size);
+			m_sample_sheet.m_list_shapes.back()->set_arrow_size(a_size);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -120,18 +122,21 @@ namespace winrt::GraphPaper::implementation
 		};
 		if (d_result == ContentDialogResult::Primary) {
 			ARROW_SIZE sample_value;
-			m_sample_shape->get_arrow_size(sample_value);
+			//m_sample_shape->get_arrow_size(sample_value);
+			m_sample_sheet.m_list_shapes.back()->get_arrow_size(sample_value);
 			if (ustack_push_set<UNDO_OP::ARROW_SIZE>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
-		delete m_sample_shape;
+		//delete m_sample_shape;
+		delete m_sample_sheet.m_list_shapes.back();
+		m_sample_sheet.m_list_shapes.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
-		m_sample_shape = nullptr;
+		//m_sample_shape = nullptr;
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_1().Visibility(UI_COLLAPSED);
 		sample_slider_2().Visibility(UI_COLLAPSED);

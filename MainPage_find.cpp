@@ -283,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// ‘I‘ğ‚³‚ê‚½}Œ`‚Ì‚¤‚¿Å‘O–Ê‚É‚ ‚é•¶š—ñ}Œ`‚ğ“¾‚é.
-			for (auto it = m_list_shapes.rbegin(); it != m_list_shapes.rend(); it++) {
+			for (auto it = m_sheet_main.m_list_shapes.rbegin(); it != m_sheet_main.m_list_shapes.rend(); it++) {
 				auto t = *it;
 				if (t->is_deleted()) {
 					continue;
@@ -317,8 +317,8 @@ namespace winrt::GraphPaper::implementation
 		// ‚ ‚ç‚©‚¶‚ßŒŸõ•¶š—ñ‚ğŠÜ‚Ş•¶š—ñ}Œ`‚ª‚ ‚é‚©”»’è‚·‚é.
 		auto flag = false;
 		std::list <SHAPE_LIST::iterator> stack;
-		stack.push_back(m_list_shapes.begin());
-		stack.push_back(m_list_shapes.end());
+		stack.push_back(m_sheet_main.m_list_shapes.begin());
+		stack.push_back(m_sheet_main.m_list_shapes.end());
 		while (stack.empty() != true) {
 			auto j = stack.back();
 			stack.pop_back();
@@ -358,8 +358,8 @@ namespace winrt::GraphPaper::implementation
 		unselect_all(true);
 
 		const auto r_len = wchar_len(m_find_repl);
-		stack.push_back(m_list_shapes.begin());
-		stack.push_back(m_list_shapes.end());
+		stack.push_back(m_sheet_main.m_list_shapes.begin());
+		stack.push_back(m_sheet_main.m_list_shapes.end());
 		while (stack.empty() != true) {
 			auto j = stack.back();
 			stack.pop_back();
@@ -416,7 +416,7 @@ namespace winrt::GraphPaper::implementation
 
 		bool flag = false;	// ˆê’v‚Ü‚½‚Í’uŠ·‚µ‚½‚©”»’è.
 		DWRITE_TEXT_RANGE t_range;	// •¶š—ñ”ÍˆÍ
-		auto t = find_text_range_selected(m_list_shapes.begin(), m_list_shapes.end(), t_range);
+		auto t = find_text_range_selected(m_sheet_main.m_list_shapes.begin(), m_sheet_main.m_list_shapes.end(), t_range);
 		if (t != nullptr) {
 			// }Œ`‚ªŒ©‚Â‚©‚Á‚½ê‡,
 			const auto w_pos = t_range.startPosition;
@@ -440,7 +440,7 @@ namespace winrt::GraphPaper::implementation
 		// Ÿ‚ğŒŸõ‚·‚é.
 		Shape* s;
 		DWRITE_TEXT_RANGE s_range;
-		if (find_text(m_list_shapes, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
+		if (find_text(m_sheet_main.m_list_shapes, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			// ŒŸõ‚Å‚«‚½‚È‚ç‚Î,
 			// •¶š”ÍˆÍ‚ª‘I‘ğ‚³‚ê‚½}Œ`‚ª‚ ‚è, ‚»‚ê‚ªŸ‚Ì}Œ`‚ÆˆÙ‚È‚é‚©”»’è‚·‚é.
 			if (t != nullptr && s != t) {
@@ -494,7 +494,7 @@ namespace winrt::GraphPaper::implementation
 		ShapeText* t;
 		Shape* s;
 		DWRITE_TEXT_RANGE s_range;
-		if (find_text(m_list_shapes, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
+		if (find_text(m_sheet_main.m_list_shapes, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			if (t != nullptr && s != t) {
 				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}

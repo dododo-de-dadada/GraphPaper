@@ -527,6 +527,8 @@ namespace winrt::GraphPaper::implementation
 	// D3D デバイスを構成し, D3D と相互運用される D2D デバイスを作成する.
 	SHAPE_DX::SHAPE_DX(void)
 	{
+		D3D_FEATURE_LEVEL m_d3dFeatureLevel{ D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_1 };
+
 		// D3D11_CREATE_DEVICE_BGRA_SUPPORT を作成フラグに格納する.
 		// D2D との互換性を保持するために必要.
 		UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;

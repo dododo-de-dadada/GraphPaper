@@ -848,7 +848,7 @@ namespace winrt::GraphPaper::implementation
 			is_opaque(m_stroke_color),
 			m_stroke_width,
 			m_end_closed,
-			m_cap_style,
+			m_stroke_cap,
 			m_join_style,
 			m_join_limit,
 			is_opaque(m_fill_color)

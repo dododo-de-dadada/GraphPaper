@@ -475,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を囲む領域を得る.
 		virtual void get_bound(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/, D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept {}
 		// 端の形式を得る.
-		virtual bool get_cap_style(CAP_STYLE& /*value*/) const noexcept { return false; }
+		virtual bool get_stroke_cap(CAP_STYLE& /*value*/) const noexcept { return false; }
 		// 角丸半径を得る.
 		virtual bool get_corner_radius(D2D1_POINT_2F& /*value*/) const noexcept { return false; }
 		// 破線の端の形式を得る.
@@ -561,7 +561,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を矢じるしの形式に格納する.
 		virtual bool set_arrow_style(const ARROW_STYLE /*value*/) { return false; }
 		// 値を端の形式に格納する.
-		virtual bool set_cap_style(const CAP_STYLE& /*value*/) { return false; }
+		virtual bool set_stroke_cap(const CAP_STYLE& /*value*/) { return false; }
 		// 値を角丸半径に格納する.
 		virtual bool set_corner_radius(const D2D1_POINT_2F& /*alue*/) noexcept { return false; }
 		// 値を破線の端の形式に格納する.
@@ -711,6 +711,7 @@ namespace winrt::GraphPaper::implementation
 	// 用紙
 	//------------------------------
 	struct ShapeSheet : Shape {
+		SHAPE_LIST m_list_shapes;	// 図形リスト
 
 		// 矢じるし
 		ARROW_SIZE m_arrow_size{ DEF_ARROW_SIZE };	// 矢じるしの寸法
@@ -731,12 +732,12 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 
 		// 線枠
-		CAP_STYLE m_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DEF_DASH_PATT };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_join_limit = DEF_MITER_LIMIT;	// 線のつなぎのマイター制限
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線枠のつなぎ
+		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色 (MainPage のコンストラクタで設定)
 		float m_stroke_width = 1.0;	// 線枠の太さ
 
@@ -750,10 +751,11 @@ namespace winrt::GraphPaper::implementation
 		float m_image_opac = 1.0f;	// 画像の不透明率
 
 		// 方眼
-		D2D1_COLOR_F m_grid_color{ ACCENT_COLOR };	// 方眼の色
 		float m_grid_base = DEF_GRID_LEN - 1.0f;	// 方眼の基準の大きさ (を -1 した値)
-		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
+		D2D1_COLOR_F m_grid_color{ ACCENT_COLOR };	// 方眼の色
 		GRID_EMPH m_grid_emph{ GRID_EMPH_0 };	// 方眼の強調
+		D2D1_POINT_2F m_grid_offset{ 0.0f, 0.0f };
+		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
 		bool m_grid_snap = true;	// 方眼に合わせる
 
 		// 用紙
@@ -765,6 +767,7 @@ namespace winrt::GraphPaper::implementation
 		// shape_sheet.cpp
 		//------------------------------
 
+		void draw(SHAPE_DX& dx);
 		// 曲線の補助線を表示する.
 		void draw_auxiliary_bezi(SHAPE_DX const& dx, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
 		// だ円の補助線を表示する.
@@ -777,14 +780,12 @@ namespace winrt::GraphPaper::implementation
 		void draw_auxiliary_poly(SHAPE_DX const& dx, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos, const POLY_OPTION& p_opt);
 		// 角丸方形の補助線を表示する.
 		void draw_auxiliary_rrect(SHAPE_DX const& dx, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
-		// 方眼を表示する,
-		void draw_grid(SHAPE_DX const& dx, const D2D1_POINT_2F offset);
 		// 矢じるしの寸法を得る.
 		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
 		// 矢じるしの形式を得る.
 		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
 		// 端の形式を得る.
-		bool get_cap_style(CAP_STYLE& value) const noexcept;
+		bool get_stroke_cap(CAP_STYLE& value) const noexcept;
 		// 角丸半径を得る.
 		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
 		// 破線の端の形式を得る.
@@ -852,7 +853,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を画像の不透明度に格納する.
 		bool set_image_opacity(const float value) noexcept;
 		// 値を端の形式に格納する.
-		bool set_cap_style(const CAP_STYLE& value);
+		bool set_stroke_cap(const CAP_STYLE& value);
 		// 値を角丸半径に格納する.
 		bool set_corner_radius(const D2D1_POINT_2F& value) noexcept;
 		// 値を破線の端の形式に格納する.
@@ -968,7 +969,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_is_selected = false;	// 選択されたか判定
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_diff;	// 次の位置への差分
-		CAP_STYLE m_cap_style{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
+		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
 		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DEF_DASH_PATT };	// 破線の配置
@@ -988,7 +989,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 端の形式を得る.
-		bool get_cap_style(CAP_STYLE& value) const noexcept;
+		bool get_stroke_cap(CAP_STYLE& value) const noexcept;
 		// 破線の端の形式を得る.
 		bool get_dash_cap(D2D1_CAP_STYLE& value) const noexcept;
 		// 破線の配置を得る.
@@ -1024,7 +1025,7 @@ namespace winrt::GraphPaper::implementation
 		// 差分だけ移動する.
 		virtual	bool move(const D2D1_POINT_2F value);
 		// 値を端の形式に格納する.
-		bool set_cap_style(const CAP_STYLE& value);
+		bool set_stroke_cap(const CAP_STYLE& value);
 		// 値を破線の端の形式に格納する.
 		bool set_dash_cap(const D2D1_CAP_STYLE& value);
 		// 値を破線の配置に格納する.
@@ -1111,7 +1112,7 @@ namespace winrt::GraphPaper::implementation
 		// データライターに SVG として書き込む.
 		void write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
 		// 値を端の形式に格納する.
-		bool set_cap_style(const CAP_STYLE& value);
+		bool set_stroke_cap(const CAP_STYLE& value);
 		// 値を線分のつなぎのマイター制限に格納する.
 		bool set_join_limit(const float& value);
 		// 値を線分のつなぎに格納する.

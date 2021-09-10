@@ -257,7 +257,6 @@ namespace winrt::GraphPaper::implementation
 		POLY_OPTION m_tool_poly{ DEF_POLY_OPTION };	// 多角形の選択肢
 
 		// 図形リスト
-		SHAPE_LIST m_list_shapes;	// 図形リスト
 		uint32_t m_list_sel_cnt = 0;	// 選択された図形の数
 
 		// 図形
@@ -272,7 +271,7 @@ namespace winrt::GraphPaper::implementation
 		// 見本用紙
 		SHAPE_DX m_sample_dx;	// 見本の描画環境
 		ShapeSheet m_sample_sheet;	// 見本の用紙
-		Shape* m_sample_shape = nullptr;	// 見本の図形
+		//Shape* m_sample_shape = nullptr;	// 見本の図形
 		SAMPLE_TYPE m_sample_type = SAMPLE_TYPE::NONE;	// 見本の型
 
 		// 用紙

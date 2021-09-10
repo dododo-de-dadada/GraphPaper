@@ -62,7 +62,8 @@ namespace winrt::GraphPaper::implementation
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
-			m_sample_shape->get_stroke_color(sample_value);
+			//m_sample_shape->get_stroke_color(sample_value);
+			m_sample_sheet.m_list_shapes.back()->get_stroke_color(sample_value);
 			if (ustack_push_set<UNDO_OP::STROKE_COLOR>(sample_value)) {
 				ustack_push_null();
 				ustack_is_enable();
@@ -70,11 +71,13 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		delete m_sample_shape;
+		//delete m_sample_shape;
+		delete m_sample_sheet.m_list_shapes.back();
+		m_sample_sheet.m_list_shapes.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
-		m_sample_shape = nullptr;
+		//m_sample_shape = nullptr;
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_1().Visibility(UI_COLLAPSED);
 		sample_slider_2().Visibility(UI_COLLAPSED);
@@ -133,13 +136,15 @@ namespace winrt::GraphPaper::implementation
 			const float value = static_cast<float>(args.NewValue());
 			if constexpr (S == 0) {
 				stroke_slider_set_header<U, S>(value);
-				m_sample_shape->set_stroke_width(value);
+				//m_sample_shape->set_stroke_width(value);
+				m_sample_sheet.m_list_shapes.back()->set_stroke_width(value);
 			}
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			const float value = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F color;
-			m_sample_shape->get_stroke_color(color);
+			//m_sample_shape->get_stroke_color(color);
+			m_sample_sheet.m_list_shapes.back()->get_stroke_color(color);
 			if constexpr (S == 0) {
 				stroke_slider_set_header<U, S>(value);
 				color.r = static_cast<FLOAT>(value / COLOR_MAX);
@@ -156,7 +161,8 @@ namespace winrt::GraphPaper::implementation
 				stroke_slider_set_header<U, S>(value);
 				color.a = static_cast<FLOAT>(value / COLOR_MAX);
 			}
-			m_sample_shape->set_stroke_color(color);
+			//m_sample_shape->set_stroke_color(color);
+			m_sample_sheet.m_list_shapes.back()->set_stroke_color(color);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -188,18 +194,21 @@ namespace winrt::GraphPaper::implementation
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
-			m_sample_shape->get_stroke_width(sample_value);
+			//m_sample_shape->get_stroke_width(sample_value);
+			m_sample_sheet.m_list_shapes.back()->get_stroke_width(sample_value);
 			if (ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
-		delete m_sample_shape;
+		//delete m_sample_shape;
+		delete m_sample_sheet.m_list_shapes.back();
+		m_sample_sheet.m_list_shapes.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
-		m_sample_shape = nullptr;
+		//m_sample_shape = nullptr;
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_0().StepFrequency(1.0);

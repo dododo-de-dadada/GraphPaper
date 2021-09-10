@@ -173,7 +173,7 @@ namespace winrt::GraphPaper::implementation
 			summary_close_click(nullptr, nullptr);
 		}
 		ustack_clear();
-		slist_clear(m_list_shapes);
+		slist_clear(m_sheet_main.m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			message_show(ICON_ALERT, DEBUG_MSG, {});
@@ -259,7 +259,7 @@ namespace winrt::GraphPaper::implementation
 			Shape::s_dx = &m_sheet_dx;
 			Shape::s_d2d_factory = m_sheet_dx.m_d2dFactory.get();
 			Shape::s_dwrite_factory = m_sheet_dx.m_dwriteFactory.get();
-			Undo::set(&m_list_shapes, &m_sheet_main);
+			Undo::set(&m_sheet_main.m_list_shapes, &m_sheet_main);
 		}
 
 		// クリックの判定時間と判定距離をシステムから得る.
@@ -337,7 +337,7 @@ namespace winrt::GraphPaper::implementation
 			summary_close_click(nullptr, nullptr);
 		}
 		ustack_clear();
-		slist_clear(m_list_shapes);
+		slist_clear(m_sheet_main.m_list_shapes);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			// 「メモリリーク」メッセージダイアログを表示する.

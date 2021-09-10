@@ -418,7 +418,7 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoAttr<UNDO_OP::CAP_STYLE>::SET(Shape* const s, const CAP_STYLE& value)
 	{
-		s->set_cap_style(value);
+		s->set_stroke_cap(value);
 	}
 
 	void UndoAttr<UNDO_OP::STROKE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
@@ -578,7 +578,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoAttr<UNDO_OP::CAP_STYLE>::GET(const Shape* s, CAP_STYLE& value) noexcept
 	{
-		return s->get_cap_style(value);
+		return s->get_stroke_cap(value);
 	}
 
 	bool UndoAttr<UNDO_OP::STROKE_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept

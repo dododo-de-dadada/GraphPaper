@@ -27,11 +27,13 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().CloseButtonText(close_text);
 		cd_sample_dialog().DefaultButton(def_btn);
 		tb_version().Visibility(UI_COLLAPSED);
-		delete m_sample_shape;
+		//delete m_sample_shape;
+		delete m_sample_sheet.m_list_shapes.back();
+		m_sample_sheet.m_list_shapes.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
-		m_sample_shape = nullptr;
+		//m_sample_shape = nullptr;
 		// バージョン情報のメッセージダイアログを表示する.
 		//message_show(ICON_INFO, L"str_appname", L"str_version");
 	}

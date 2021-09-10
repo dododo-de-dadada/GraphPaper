@@ -77,7 +77,6 @@ namespace winrt::GraphPaper::implementation
 
 		// デバイス属性
 
-		D3D_FEATURE_LEVEL m_d3dFeatureLevel{ D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_1 };
 		FLOAT m_d3d_target_width;
 		FLOAT m_d3d_target_height;
 		FLOAT m_output_width;

@@ -118,9 +118,9 @@ namespace winrt::GraphPaper::implementation
 	// 端の形式を得る.
 	// value	端の形式	
 	// 戻り値	つねに true
-	bool ShapeStroke::get_cap_style(CAP_STYLE& value) const noexcept
+	bool ShapeStroke::get_stroke_cap(CAP_STYLE& value) const noexcept
 	{
-		value = m_cap_style;
+		value = m_stroke_cap;
 		return true;
 	}
 
@@ -280,14 +280,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を端の形式に格納する.
-	bool ShapeStroke::set_cap_style(const CAP_STYLE& value)
+	bool ShapeStroke::set_stroke_cap(const CAP_STYLE& value)
 	{
-		if (!equal(m_cap_style, value)) {
-			m_cap_style = value;
+		if (!equal(m_stroke_cap, value)) {
+			m_stroke_cap = value;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_cap_style, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -301,7 +301,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_cap_style, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -316,7 +316,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_cap_style, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -331,7 +331,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_cap_style, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -346,7 +346,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_cap_style, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -361,7 +361,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_cap_style, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -476,7 +476,7 @@ namespace winrt::GraphPaper::implementation
 				if (m_d2d_stroke_style != nullptr) {
 					m_d2d_stroke_style = nullptr;
 				}
-				create_stroke_style(Shape::s_d2d_factory, m_cap_style, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+				create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			}
 			return true;
 		}
@@ -489,7 +489,7 @@ namespace winrt::GraphPaper::implementation
 	ShapeStroke::ShapeStroke(const size_t d_cnt, const ShapeSheet* s_attr) :
 		m_diff(d_cnt <= MAX_N_GON - 1 ? d_cnt : MAX_N_GON - 1),
 		m_dash_cap(s_attr->m_dash_cap),
-		m_cap_style(s_attr->m_cap_style),
+		m_stroke_cap(s_attr->m_stroke_cap),
 		m_stroke_color(s_attr->m_stroke_color),
 		m_dash_patt(s_attr->m_dash_patt),
 		m_dash_style(s_attr->m_dash_style),
@@ -498,7 +498,7 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_width(s_attr->m_stroke_width),
 		m_d2d_stroke_style(nullptr)
 	{
-		create_stroke_style(Shape::s_d2d_factory, m_cap_style, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+		create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 	}
 
 	/*
@@ -518,7 +518,7 @@ namespace winrt::GraphPaper::implementation
 		m_is_selected = dt_reader.ReadBoolean();
 		dt_read(m_pos, dt_reader);
 		dt_read(m_diff, dt_reader);
-		dt_read(m_cap_style, dt_reader);
+		dt_read(m_stroke_cap, dt_reader);
 		dt_read(m_stroke_color, dt_reader);
 		m_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
 		dt_read(m_dash_patt, dt_reader);
@@ -526,7 +526,7 @@ namespace winrt::GraphPaper::implementation
 		m_join_limit = dt_reader.ReadSingle();
 		m_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());
 		m_stroke_width = dt_reader.ReadSingle();
-		create_stroke_style(Shape::s_d2d_factory, m_cap_style, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+		create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 	}
 
 	// データライターに書き込む.
@@ -536,7 +536,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBoolean(m_is_selected);
 		dt_write(m_pos, dt_writer);
 		dt_write(m_diff, dt_writer);
-		dt_write(m_cap_style, dt_writer);
+		dt_write(m_stroke_cap, dt_writer);
 		dt_write(m_stroke_color, dt_writer);
 		dt_writer.WriteUInt32(m_dash_cap);
 		dt_writer.WriteSingle(m_dash_patt.m_[0]);
@@ -557,16 +557,16 @@ namespace winrt::GraphPaper::implementation
 		dt_write_svg(m_stroke_color, "stroke", dt_writer);
 		dt_write_svg(m_dash_style, m_dash_patt, m_stroke_width, dt_writer);
 		dt_write_svg(m_stroke_width, "stroke-width", dt_writer);
-		if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
+		if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
 			dt_write_svg("stroke-linecap=\"butt\" ", dt_writer);
 		}
-		else if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
 			dt_write_svg("stroke-linecap=\"round\" ", dt_writer);
 		}
-		else if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
 			dt_write_svg("stroke-linecap=\"square\" ", dt_writer);
 		}
-		else if (equal(m_cap_style, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
 			//dt_write_svg("stroke-linecap=\"???\" ", dt_writer);
 		}
 		if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {

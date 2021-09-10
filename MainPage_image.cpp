@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「元の大きさに戻す」が選択された.
 	void MainPage::image_resize_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		for (auto s : m_list_shapes) {
+		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
 				continue;
 			}
@@ -59,7 +59,8 @@ namespace winrt::GraphPaper::implementation
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
-			m_sample_shape->get_image_opacity(sample_value);
+			//m_sample_shape->get_image_opacity(sample_value);
+			m_sample_sheet.m_list_shapes.back()->get_image_opacity(sample_value);
 			if (ustack_push_set<UNDO_OP::IMAGE_OPAC>(sample_value)) {
 				ustack_push_null();
 				ustack_is_enable();
@@ -67,11 +68,13 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		delete m_sample_shape;
+		//delete m_sample_shape;
+		delete m_sample_sheet.m_list_shapes.back();
+		m_sample_sheet.m_list_shapes.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
-		m_sample_shape = nullptr;
+		//m_sample_shape = nullptr;
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sheet_draw();
@@ -105,7 +108,8 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				const float value = static_cast<float>(args.NewValue());
 				image_slider_set_header<U, S>(value);
-				m_sample_shape->set_image_opacity(value / COLOR_MAX);
+				//m_sample_shape->set_image_opacity(value / COLOR_MAX);
+				m_sample_sheet.m_list_shapes.back()->set_image_opacity(value / COLOR_MAX);
 			}
 		}
 		if (scp_sample_panel().IsLoaded()) {

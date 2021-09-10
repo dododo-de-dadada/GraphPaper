@@ -169,33 +169,7 @@ namespace winrt::GraphPaper::implementation
 		dc->SetTransform(&tran);
 		// 描画を開始する.
 		dc->BeginDraw();
-		// 用紙色で塗りつぶす.
-		dc->Clear(m_sheet_main.m_sheet_color);
-		GRID_SHOW g_show;
-		m_sample_sheet.get_grid_show(g_show);
-		if (equal(g_show, GRID_SHOW::BACK)) {
-			// 方眼の表示が最背面に表示の場合,
-			// 方眼を表示する.
-			m_sheet_main.draw_grid(m_sheet_dx, { 0.0f, 0.0f });
-		}
-		// 部位の色をブラシに格納する.
-		//D2D1_COLOR_F anch_color;
-		//m_sheet_main.get_anch_color(anch_color);
-		//m_sheet_dx.m_anch_brush->SetColor(anch_color);
-		for (auto s : m_list_shapes) {
-			if (s->is_deleted()) {
-				// 消去フラグが立っている場合,
-				// 継続する.
-				continue;
-			}
-			// 図形を表示する.
-			s->draw(m_sheet_dx);
-		}
-		if (equal(g_show, GRID_SHOW::FRONT)) {
-			// 方眼の表示が最前面に表示の場合,
-			// 方眼を表示する.
-			m_sheet_main.draw_grid(m_sheet_dx, { 0.0f, 0.0f });
-		}
+		m_sheet_main.draw(m_sheet_dx);
 		if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			const auto t_draw = m_tool_draw;
 			if (t_draw == DRAW_TOOL::SELECT || t_draw == DRAW_TOOL::RECT || t_draw == DRAW_TOOL::TEXT || t_draw == DRAW_TOOL::RULER) {
@@ -364,7 +338,7 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.set_sheet_scale(1.0);
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_sheet_main.m_sheet_size = DEF_SHEET_SIZE;
-			m_sheet_main.set_cap_style(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
+			m_sheet_main.set_stroke_cap(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
 			m_sheet_main.set_stroke_color(Shape::m_default_foreground);
 			m_sheet_main.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_sheet_main.set_dash_patt(DEF_DASH_PATT);
@@ -446,7 +420,7 @@ namespace winrt::GraphPaper::implementation
 		// TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
 		cd_sheet_size_dialog().IsPrimaryButtonEnabled(true);
-		cd_sheet_size_dialog().IsSecondaryButtonEnabled(m_list_shapes.size() > 0);
+		cd_sheet_size_dialog().IsSecondaryButtonEnabled(m_sheet_main.m_list_shapes.size() > 0);
 		const auto d_result = co_await cd_sheet_size_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::None) {
 			// 「キャンセル」が押された場合,
@@ -492,7 +466,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F b_max = { -FLT_MAX, -FLT_MAX };
 			D2D1_POINT_2F b_size;
 
-			slist_bound_all(m_list_shapes, b_min, b_max);
+			slist_bound_all(m_sheet_main.m_list_shapes, b_min, b_max);
 			pt_sub(b_max, b_min, b_size);
 			if (b_size.x < 1.0F || b_size.y < 1.0F) {
 				co_return;
@@ -630,7 +604,7 @@ namespace winrt::GraphPaper::implementation
 	// 用紙の左上位置と右下位置を設定する.
 	void MainPage::sheet_update_bbox(void) noexcept
 	{
-		slist_bound_sheet(m_list_shapes, m_sheet_main.m_sheet_size, m_sheet_min, m_sheet_max);
+		slist_bound_sheet(m_sheet_main.m_list_shapes, m_sheet_main.m_sheet_size, m_sheet_min, m_sheet_max);
 	}
 
 	// 用紙メニューの「表示倍率」が選択された.
