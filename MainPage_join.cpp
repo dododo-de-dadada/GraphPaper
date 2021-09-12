@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		CAP_STYLE old_value;
 		m_sheet_main.get_stroke_cap(old_value);
-		if (ustack_push_set<UNDO_OP::CAP_STYLE>(new_value)) {
+		if (ustack_push_set<UNDO_OP::STROKE_CAP>(new_value)) {
 			ustack_push_null();
 			ustack_is_enable();
 			sheet_draw();

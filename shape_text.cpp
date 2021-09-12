@@ -26,7 +26,11 @@ namespace winrt::GraphPaper::implementation
 	// text_range	文字列の範囲
 	// test_metrics	ヒットテストのための計量
 	// test_count	計量の要素数
-	static void tx_create_test_metrics(IDWriteTextLayout* text_layout, const DWRITE_TEXT_RANGE text_range, DWRITE_HIT_TEST_METRICS*& test_metrics, UINT32& test_count)
+	static void tx_create_test_metrics(
+		IDWriteTextLayout* text_layout,
+		const DWRITE_TEXT_RANGE text_range,
+		DWRITE_HIT_TEST_METRICS*& test_metrics,
+		UINT32& test_count)
 	{
 		const uint32_t pos = text_range.startPosition;
 		const uint32_t len = text_range.length;
@@ -267,19 +271,25 @@ namespace winrt::GraphPaper::implementation
 		t_format = nullptr;
 		winrt::com_ptr<IDWriteTextLayout3> t3;
 		if (m_dw_layout.try_as(t3)) {
-			DWRITE_LINE_SPACING spacing;
-			if (m_text_line_sp >= FLT_MIN) {
-				spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
-				spacing.height = m_font_size + m_text_line_sp;
-				spacing.baseline = m_font_size + m_text_line_sp - m_dw_descent;
-			}
-			else {
-				spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
-				spacing.height = 0.0f;
-				spacing.baseline = 0.0f;
-			}
-			spacing.leadingBefore = 0.0f;
-			spacing.fontLineGapUsage = DWRITE_FONT_LINE_GAP_USAGE_DEFAULT;
+			DWRITE_LINE_SPACING spacing{
+				m_text_line_sp >= FLT_MIN ? DWRITE_LINE_SPACING_METHOD_UNIFORM : DWRITE_LINE_SPACING_METHOD_DEFAULT,
+				m_text_line_sp >= FLT_MIN ? m_font_size + m_text_line_sp : 0.0f,
+				m_text_line_sp >= FLT_MIN ? m_font_size + m_text_line_sp - m_dw_descent : 0.0f,
+				0.0f,
+				DWRITE_FONT_LINE_GAP_USAGE_DEFAULT
+			};
+			//if (m_text_line_sp >= FLT_MIN) {
+			//	spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
+			//	spacing.height = m_font_size + m_text_line_sp;
+			//	spacing.baseline = m_font_size + m_text_line_sp - m_dw_descent;
+			//}
+			//else {
+			//	spacing.method = DWRITE_LINE_SPACING_METHOD_DEFAULT;
+			//	spacing.height = 0.0f;
+			//	spacing.baseline = 0.0f;
+			//}
+			//spacing.leadingBefore = 0.0f;
+			//spacing.fontLineGapUsage = DWRITE_FONT_LINE_GAP_USAGE_DEFAULT;
 			t3->SetLineSpacing(&spacing);
 		}
 		m_dw_layout->SetTextAlignment(m_text_align_t);
@@ -557,7 +567,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto anch = ShapeRect::hit_test_anch(t_pos);
+		const uint32_t anch = ShapeRect::hit_test_anch(t_pos);
 		if (anch != ANCH_TYPE::ANCH_SHEET) {
 			return anch;
 		}
@@ -654,6 +664,7 @@ namespace winrt::GraphPaper::implementation
 		GetUserDefaultLocaleName(lang, LOCALE_NAME_MAX_LENGTH);
 		// システムフォントコレクションを DWriteFactory から得る.
 		winrt::com_ptr<IDWriteFontCollection> collection;
+		//winrt::check_hresult(Shape::s_dx->m_dwriteFactory->GetSystemFontCollection(collection.put()));
 		winrt::check_hresult(Shape::s_dwrite_factory->GetSystemFontCollection(collection.put()));
 		// フォントコレクションの要素数を得る.
 		const auto f_cnt = collection->GetFontFamilyCount();
@@ -717,13 +728,13 @@ namespace winrt::GraphPaper::implementation
 		// 値が書体名と同じか判定する.
 		if (!equal(m_font_family, value)) {
 			m_font_family = value;
-			if (m_dw_layout.get() != nullptr) {
+			if (m_dw_layout != nullptr) {
 				const uint32_t text_len = wchar_len(m_text);
-				const DWRITE_TEXT_RANGE t_range{ 0, text_len };
-				m_dw_layout->SetFontFamilyName(m_font_family, t_range);
-				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+				m_dw_layout->SetFontFamilyName(m_font_family, DWRITE_TEXT_RANGE{ 0, text_len });
+				tx_create_text_metrics(m_dw_layout.get(), text_len, m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
 			}
 			else {
+				//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 				create_text_layout(s_dwrite_factory);
 			}
 			return true;
@@ -736,13 +747,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_font_size != value) {
 			m_font_size = value;
-			if (m_dw_layout.get() != nullptr) {
-				//const FLOAT z = value;
+			if (m_dw_layout != nullptr) {
 				const uint32_t text_len = wchar_len(m_text);
-				m_dw_layout->SetFontSize(value, { 0, text_len });
-				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+				m_dw_layout->SetFontSize(value, DWRITE_TEXT_RANGE{ 0, text_len });
+				tx_create_text_metrics(m_dw_layout.get(), text_len, m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
 			}
 			else {
+				//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 				create_text_layout(s_dwrite_factory);
 			}
 			return true;
@@ -755,12 +766,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_font_stretch != value) {
 			m_font_stretch = value;
-			if (m_dw_layout.get() != nullptr) {
+			if (m_dw_layout != nullptr) {
 				const uint32_t text_len = wchar_len(m_text);
-				m_dw_layout->SetFontStretch(value, { 0, text_len });
-				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+				m_dw_layout->SetFontStretch(value, DWRITE_TEXT_RANGE{ 0, text_len });
+				tx_create_text_metrics(m_dw_layout.get(), text_len, m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
 			}
 			else {
+				//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 				create_text_layout(s_dwrite_factory);
 			}
 			return true;
@@ -773,12 +785,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_font_style != value) {
 			m_font_style = value;
-			if (m_dw_layout.get() != nullptr) {
+			if (m_dw_layout != nullptr) {
 				const uint32_t text_len = wchar_len(m_text);
-				m_dw_layout->SetFontStyle(value, { 0, text_len });
-				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+				m_dw_layout->SetFontStyle(value, DWRITE_TEXT_RANGE{ 0, text_len });
+				tx_create_text_metrics(m_dw_layout.get(), text_len, m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
 			}
 			else {
+				//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 				create_text_layout(s_dwrite_factory);
 			}
 			return true;
@@ -791,12 +804,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_font_weight != value) {
 			m_font_weight = value;
-			if (m_dw_layout.get() != nullptr) {
+			if (m_dw_layout != nullptr) {
 				const uint32_t text_len = wchar_len(m_text);
-				m_dw_layout->SetFontWeight(value, { 0, text_len });
-				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
+				m_dw_layout->SetFontWeight(value, DWRITE_TEXT_RANGE{ 0, text_len });
+				tx_create_text_metrics(m_dw_layout.get(), text_len, m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
 			}
 			else {
+				//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 				create_text_layout(s_dwrite_factory);
 			}
 			return true;
@@ -811,6 +825,7 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeText::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool /*keep_aspect*/)
 	{
 		if (ShapeRect::set_pos_anch(value, anch, limit, false)) {
+			//create_text_metrics(Shape::s_dx->m_dwriteFactory.get());
 			create_text_metrics(s_dwrite_factory);
 			return true;
 		}
@@ -824,6 +839,7 @@ namespace winrt::GraphPaper::implementation
 			m_text = value;
 			m_select_range.startPosition = 0;
 			m_select_range.length = 0;
+			//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 			create_text_layout(s_dwrite_factory);
 			return true;
 		}
@@ -835,11 +851,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_text_align_p != value) {
 			m_text_align_p = value;
-			if (m_dw_layout.get() != nullptr) {
+			if (m_dw_layout != nullptr) {
 				m_dw_layout->SetParagraphAlignment(value);
 				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
 			}
 			else {
+				//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 				create_text_layout(s_dwrite_factory);
 			}
 			return true;
@@ -853,7 +870,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_text_align_t != value) {
 			m_text_align_t = value;
 			if (m_text != nullptr && m_text[0] != L'\0') {
-				if (m_dw_layout.get() == nullptr) {
+				if (m_dw_layout == nullptr) {
+					//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 					create_text_layout(s_dwrite_factory);
 				}
 				else {
@@ -892,6 +910,7 @@ namespace winrt::GraphPaper::implementation
 				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
 			}
 			else {
+				//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 				create_text_layout(s_dwrite_factory);
 			}
 			return true;
@@ -904,6 +923,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (!equal(m_text_padding, value)) {
 			m_text_padding = value;
+			//create_text_metrics(Shape::s_dx->m_dwriteFactory.get());
 			create_text_metrics(s_dwrite_factory);
 			return true;
 		}
@@ -941,6 +961,7 @@ namespace winrt::GraphPaper::implementation
 		m_text_align_p(s_attr->m_text_align_p),
 		m_select_range()
 	{
+		//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 		create_text_layout(s_dwrite_factory);
 	}
 
@@ -960,6 +981,7 @@ namespace winrt::GraphPaper::implementation
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_line_sp = dt_reader.ReadSingle();
 		dt_read(m_text_padding, dt_reader);
+		//create_text_layout(Shape::s_dx->m_dwriteFactory.get());
 		create_text_layout(s_dwrite_factory);
 	}
 

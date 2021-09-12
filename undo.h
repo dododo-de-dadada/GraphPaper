@@ -25,7 +25,6 @@ namespace winrt::GraphPaper::implementation
 		ARRANGE,	// 図形の順番の入れ替え
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
-		CAP_STYLE,	// 端の形式の操作
 		DASH_CAP,	// 破線の端の形式の操作
 		DASH_PATT,	// 破線の配置の操作
 		DASH_STYLE,	// 破線の形式の操作
@@ -52,6 +51,7 @@ namespace winrt::GraphPaper::implementation
 		SELECT,	// 図形の選択を切り替え
 		SHEET_COLOR,	// 用紙の色の操作
 		SHEET_SIZE,	// 用紙の寸法の操作
+		STROKE_CAP,	// 端の形式の操作
 		STROKE_COLOR,	// 線枠の色の操作
 		STROKE_WIDTH,	// 線枠の太さの操作
 		TEXT_ALIGN_P,	// 段落の整列の操作
@@ -73,7 +73,6 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_OP U> struct U_TYPE { using type = int; };
 	template <> struct U_TYPE<UNDO_OP::ARROW_SIZE> { using type = ARROW_SIZE; };
 	template <> struct U_TYPE<UNDO_OP::ARROW_STYLE> { using type = ARROW_STYLE; };
-	template <> struct U_TYPE<UNDO_OP::CAP_STYLE> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::DASH_CAP> { using type = D2D1_CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::DASH_PATT> { using type = DASH_PATT; };
 	template <> struct U_TYPE<UNDO_OP::DASH_STYLE> { using type = D2D1_DASH_STYLE; };
@@ -95,6 +94,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::POS_START> { using type = D2D1_POINT_2F; };
 	template <> struct U_TYPE<UNDO_OP::SHEET_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::SHEET_SIZE> { using type = D2D1_SIZE_F; };
+	template <> struct U_TYPE<UNDO_OP::STROKE_CAP> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_WIDTH> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_P> { using type = DWRITE_PARAGRAPH_ALIGNMENT; };

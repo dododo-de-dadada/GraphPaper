@@ -28,9 +28,11 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから図形を読み込む.
 	static Shape* slist_read_shape(DataReader const& dt_reader);
 	// 次の図形を得る.
-	template <typename T> static Shape* slist_next(T const& it_beg, T const& it_end, const Shape* s) noexcept;
+	template <typename T>
+	static Shape* slist_next(T const& it_beg, T const& it_end, const Shape* s) noexcept;
 	// 次の図形とその距離を得る.
-	template <typename T> static Shape* slist_next(T const& it_beg, T const& it_end, uint32_t& distance) noexcept;
+	template <typename T>
+	static Shape* slist_next(T const& it_beg, T const& it_end, uint32_t& distance) noexcept;
 
 	// 利用可能な書体名か判定し, 利用できない書体があったならばそれを得る.
 	bool slist_test_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept
@@ -40,11 +42,9 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			wchar_t* name;	// 書体名
-			if (s->get_font_family(name)) {
-				if (ShapeText::is_available_font(name) != true) {
-					unavailable_font = name;
-					return false;
-				}
+			if (s->get_font_family(name) && !ShapeText::is_available_font(name)) {
+				unavailable_font = name;
+				return false;
 			}
 		}
 		return true;
@@ -68,7 +68,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		b_min = { 0.0F, 0.0F };	// 左上位置
 		b_max = { s_size.width, s_size.height };	// 右下位置
-		for (auto s : slist) {
+		for (const Shape* s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		b_min = { FLT_MAX, FLT_MAX };	// 左上位置
 		b_max = { -FLT_MAX, -FLT_MAX };	// 右下位置
-		for (auto s : slist) {
+		for (const Shape* s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 		bool flag = false;
 		b_min = D2D1_POINT_2F{ FLT_MAX, FLT_MAX };	// 左上位置
 		b_max = D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX };	// 右下位置
-		for (auto s : slist) {
+		for (const Shape* s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}

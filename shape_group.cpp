@@ -201,13 +201,13 @@ namespace winrt::GraphPaper::implementation
 	// 値を選択フラグに格納する.
 	bool ShapeGroup::set_select(const bool value) noexcept
 	{
-		bool flaged = false;
+		bool flag = false;
 		for (const auto s : m_list_grouped) {
-			if (s->set_select(value) && !flaged) {
-				flaged = true;
+			if (s->set_select(value) && !flag) {
+				flag = true;
 			}
 		}
-		return flaged;
+		return flag;
 	}
 
 	// データリーダーから図形を作成する.

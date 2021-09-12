@@ -362,13 +362,6 @@ namespace winrt::GraphPaper::implementation
 		m_ratio.width = m_ratio.height = 1.0f;
 	}
 
-	// ’l‚ğÁ‹‚³‚ê‚½‚©”»’è‚ÉŠi”[‚·‚é.
-	bool ShapeImage::set_delete(const bool value) noexcept
-	{
-		m_is_deleted = value;
-		return true;
-	}
-
 	// ’l‚ğ‰æ‘œ‚Ì•s“§–¾“x‚ÉŠi”[‚·‚é.
 	bool ShapeImage::set_image_opacity(const float value) noexcept
 	{
@@ -564,13 +557,6 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeImage::set_pos_start(const D2D1_POINT_2F value)
 	{
 		m_pos = value;
-		return true;
-	}
-
-	// ’l‚ğ‘I‘ğ‚³‚ê‚Ä‚é‚©”»’è‚ÉŠi”[‚·‚é.
-	bool ShapeImage::set_select(const bool value) noexcept
-	{
-		m_is_selected = value;
 		return true;
 	}
 

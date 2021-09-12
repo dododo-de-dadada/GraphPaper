@@ -1,5 +1,5 @@
 //------------------------------
-// Shape_dx.cpp
+// shape_dx.cpp
 // 図形の描画環境
 //------------------------------
 #include "pch.h"
@@ -121,6 +121,91 @@ namespace winrt::GraphPaper::implementation
 		return dw_factory;
 	};
 
+	static DXGI_MODE_ROTATION get_display_rotation(const DisplayOrientations native, const DisplayOrientations current)
+	{
+		// 表示デバイスの既定の方向と現在の方向をもとに, 表示デバイスの回転を決定する.
+		// 規定値は, DXGI_MODE_ROTATION_UNSPECIFIED.
+		// メモ: DisplayOrientations 列挙型に他の値があっても、NativeOrientation として使用できるのは、
+		// Landscape または Portrait のどちらかのみ.
+		auto displayRotation = DXGI_MODE_ROTATION::DXGI_MODE_ROTATION_IDENTITY;
+		constexpr auto L = DisplayOrientations::Landscape;
+		constexpr auto P = DisplayOrientations::Portrait;
+		constexpr auto LF = DisplayOrientations::LandscapeFlipped;
+		constexpr auto PF = DisplayOrientations::PortraitFlipped;
+		// 既定がヨコ向きかつ現在がヨコ向き, または既定がタテ向きかつ現在がタテ向きか判定する.
+		if ((native == L && current == L)
+			|| (native == P && current == P)) {
+			// DXGI_MODE_ROTATION_IDENTITY. 
+			displayRotation = DXGI_MODE_ROTATION_IDENTITY;
+		}
+		// 既定がヨコ向きかつ現在がタテ向き, または既定がタテ向きかつ現在が反ヨコ向きか判定する.
+		else if ((native == L && current == P)
+			|| (native == P && current == LF)) {
+			// DXGI_MODE_ROTATION_ROTATE270.
+			displayRotation = DXGI_MODE_ROTATION_ROTATE270;
+		}
+		// 既定がヨコ向きかつ現在が反ヨコ向き, または既定がタテ向きかつ現在が反タテ向きか判定する.
+		else if ((native == L && current == LF)
+			|| (native == P && current == PF)) {
+			// DXGI_MODE_ROTATION_ROTATE180.
+			displayRotation = DXGI_MODE_ROTATION_ROTATE180;
+		}
+		// 既定がヨコ向きかつ現在が反タテ向き, または既定がタテ向きかつ現在がヨコ向きか判定する.
+		else if ((native == L && current == PF)
+			|| (native == P && current == L)) {
+			// DXGI_MODE_ROTATION_ROTATE90.
+			displayRotation = DXGI_MODE_ROTATION_ROTATE90;
+		}
+		return displayRotation;
+	}
+
+	// スワップ チェーンの適切な方向を設定し、回転されたスワップ チェーンにレンダリングするための 2D および
+	// 3D マトリックス変換を生成します。
+	// 2D および 3D 変換の回転角度は異なります。
+	// これは座標空間の違いによります。さらに、
+	// 丸めエラーを回避するために 3D マトリックスが明示的に指定されます。
+	static void set_display_rotation(
+		IDXGISwapChain3* dxgi_swap_chain,
+		Matrix3x2F& trans2D,
+		DirectX::XMFLOAT4X4& trans3D,
+		const DXGI_MODE_ROTATION displayRotation,
+		const float logical_width,
+		const float logical_height)
+	{
+		switch (displayRotation)
+		{
+		case DXGI_MODE_ROTATION_IDENTITY:
+			trans2D = Matrix3x2F::Identity();
+			trans3D = ScreenRotation::Rotation0;
+			break;
+
+		case DXGI_MODE_ROTATION_ROTATE90:
+			trans2D =
+				Matrix3x2F::Rotation(90.0f) *
+				Matrix3x2F::Translation(logical_height, 0.0f);
+			trans3D = ScreenRotation::Rotation270;
+			break;
+
+		case DXGI_MODE_ROTATION_ROTATE180:
+			trans2D =
+				Matrix3x2F::Rotation(180.0f) *
+				Matrix3x2F::Translation(logical_width, logical_height);
+			trans3D = ScreenRotation::Rotation180;
+			break;
+
+		case DXGI_MODE_ROTATION_ROTATE270:
+			trans2D =
+				Matrix3x2F::Rotation(270.0f) *
+				Matrix3x2F::Translation(0.0f, logical_width);
+			trans3D = ScreenRotation::Rotation90;
+			break;
+
+		default:
+			throw winrt::hresult_invalid_argument();
+		}
+		winrt::check_hresult(dxgi_swap_chain->SetRotation(displayRotation));
+	}
+
 	// ウィンドウサイズ依存のリソースを作成する.
 	// これらのリソースは、ウィンドウサイズが変更されるたびに再作成する必要がある.
 	void SHAPE_DX::CreateWindowSizeDependentResources()
@@ -133,13 +218,11 @@ namespace winrt::GraphPaper::implementation
 		// レンダーターゲットは空のビュー, 深度/ステンシルバッファーはヌルを指定する.
 		ID3D11RenderTargetView* nullViews[] = { nullptr };
 		m_d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
-		// ターゲットを　D2D コンテキストに格納する.
-		// ターゲットはヌルの D2D イメージを指定する.
+		// 空ターゲットを　D2D コンテキストに格納する.
 		m_d2dContext->SetTarget(nullptr);
 		// ヌルを D2D ビットマップに格納する.
 		m_d2dTargetBitmap = nullptr;
-		// GPU のコマンドバッファをフラッシュする.
-		// イベントクエリはヌルを指定する.
+		// GPU のコマンドバッファを空のイベントクエリでフラッシュする.
 		m_d3dContext->Flush1(D3D11_CONTEXT_TYPE_ALL, nullptr);
 
 		// 論理 DPI と合成倍率の値を, 有効な DPI と有効な合成倍率に格納する.
@@ -180,36 +263,7 @@ namespace winrt::GraphPaper::implementation
 		// 規定値は, DXGI_MODE_ROTATION_UNSPECIFIED.
 		// メモ: DisplayOrientations 列挙型に他の値があっても、NativeOrientation として使用できるのは、
 		// Landscape または Portrait のどちらかのみ.
-		auto displayRotation = DXGI_MODE_ROTATION::DXGI_MODE_ROTATION_IDENTITY;
-		constexpr auto L = DisplayOrientations::Landscape;
-		constexpr auto P = DisplayOrientations::Portrait;
-		constexpr auto LF = DisplayOrientations::LandscapeFlipped;
-		constexpr auto PF = DisplayOrientations::PortraitFlipped;
-		// 既定がヨコ向きかつ現在がヨコ向き, または既定がタテ向きかつ現在がタテ向きか判定する.
-		if ((m_nativeOrientation == L && m_currentOrientation == L)
-			|| (m_nativeOrientation == P && m_currentOrientation == P)) {
-			// DXGI_MODE_ROTATION_IDENTITY. 
-			displayRotation = DXGI_MODE_ROTATION_IDENTITY;
-		}
-		// 既定がヨコ向きかつ現在がタテ向き, または既定がタテ向きかつ現在が反ヨコ向きか判定する.
-		else if ((m_nativeOrientation == L && m_currentOrientation == P)
-			|| (m_nativeOrientation == P && m_currentOrientation == LF)) {
-			// DXGI_MODE_ROTATION_ROTATE270.
-			displayRotation = DXGI_MODE_ROTATION_ROTATE270;
-		}
-		// 既定がヨコ向きかつ現在が反ヨコ向き, または既定がタテ向きかつ現在が反タテ向きか判定する.
-		else if ((m_nativeOrientation == L && m_currentOrientation == LF)
-			|| (m_nativeOrientation == P && m_currentOrientation == PF)) {
-			// DXGI_MODE_ROTATION_ROTATE180.
-			displayRotation = DXGI_MODE_ROTATION_ROTATE180;
-		}
-		// 既定がヨコ向きかつ現在が反タテ向き, または既定がタテ向きかつ現在がヨコ向きか判定する.
-		else if ((m_nativeOrientation == L && m_currentOrientation == PF)
-			|| (m_nativeOrientation == P && m_currentOrientation == L)) {
-			// DXGI_MODE_ROTATION_ROTATE90.
-			displayRotation = DXGI_MODE_ROTATION_ROTATE90;
-		}
-
+		auto displayRotation = get_display_rotation(m_nativeOrientation, m_currentOrientation);
 		// 表示デバイスの回転が 90° または 270° か判定する.
 		if (displayRotation == DXGI_MODE_ROTATION_ROTATE90
 			|| displayRotation == DXGI_MODE_ROTATION_ROTATE270) {
@@ -274,10 +328,10 @@ namespace winrt::GraphPaper::implementation
 			// 原因はよくわからないが, たとえバッファサイズが一致していたとしても DXGI_SCALING_NONE を指定するとエラーになる.
 			//if (DisplayMetrics::SupportHighResolutions
 			// || m_logical_dpi <= DisplayMetrics::DpiThreshold) {
-			// swapChainDesc.Scaling = DXGI_SCALING_NONE;
+			//	swapChainDesc.Scaling = DXGI_SCALING_NONE;
 			//}
 			//else {
-			swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+				swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
 			//}
 			// D3D ドライバーが D3D_DRIVER_TYPE_HARDWARE か判定する.
 			if (m_d3d_driver_type == D3D_DRIVER_TYPE_HARDWARE) {
@@ -319,7 +373,7 @@ namespace winrt::GraphPaper::implementation
 
 			// スワップ チェーンと SwapChainPanel を関連付ける.
 			// UI の変更は、UI スレッドにディスパッチして戻す必要あり.
-			const auto _ = m_swapChainPanel.Dispatcher().RunAsync(
+			const auto _{ m_swapChainPanel.Dispatcher().RunAsync(
 				CoreDispatcherPriority::High,
 				[=]()
 				{
@@ -328,54 +382,20 @@ namespace winrt::GraphPaper::implementation
 					winrt::check_hresult(winrt::get_unknown(m_swapChainPanel)->QueryInterface(__uuidof(scpNative), scpNative.put_void()));
 					winrt::check_hresult(scpNative->SetSwapChain(m_dxgi_swap_chain.get()));
 				}
-			);
+			) };
 			// DXGI が 1 度に複数のフレームをキュー処理していないことを確認します。これにより、遅延が減少し、
 			// アプリケーションが各 VSync の後でのみレンダリングすることが保証され、消費電力が最小限に抑えられます。
 			winrt::check_hresult(dxgiDevice->SetMaximumFrameLatency(1));
 		}
 
-		// スワップ チェーンの適切な方向を設定し、回転されたスワップ チェーンにレンダリングするための 2D および
-		// 3D マトリックス変換を生成します。
-		// 2D および 3D 変換の回転角度は異なります。
-		//これは座標空間の違いによります。さらに、
-		// 丸めエラーを回避するために 3D マトリックスが明示的に指定されます。
-
-		switch (displayRotation)
-		{
-		case DXGI_MODE_ROTATION_IDENTITY:
-			m_orientationTransform2D = Matrix3x2F::Identity();
-			m_orientationTransform3D = ScreenRotation::Rotation0;
-			break;
-
-		case DXGI_MODE_ROTATION_ROTATE90:
-			m_orientationTransform2D =
-				Matrix3x2F::Rotation(90.0f) *
-				Matrix3x2F::Translation(m_logical_height, 0.0f);
-			m_orientationTransform3D = ScreenRotation::Rotation270;
-			break;
-
-		case DXGI_MODE_ROTATION_ROTATE180:
-			m_orientationTransform2D =
-				Matrix3x2F::Rotation(180.0f) *
-				Matrix3x2F::Translation(m_logical_width, m_logical_height);
-			m_orientationTransform3D = ScreenRotation::Rotation180;
-			break;
-
-		case DXGI_MODE_ROTATION_ROTATE270:
-			m_orientationTransform2D =
-				Matrix3x2F::Rotation(270.0f) *
-				Matrix3x2F::Translation(0.0f, m_logical_width);
-			m_orientationTransform3D = ScreenRotation::Rotation90;
-			break;
-
-		default:
-			throw winrt::hresult_invalid_argument();
-		}
-
-		winrt::check_hresult(m_dxgi_swap_chain->SetRotation(displayRotation));
+		// スワップ チェーンの適切な方向を設定し、回転されたスワップ チェーンにレンダリングするための
+		// 2D および 3D マトリックス変換を生成します。
+		// 2D および 3D 変換の回転角度は異なります。これは座標空間の違いによります。
+		// さらに、丸めエラーを回避するために 3D マトリックスが明示的に指定されます。
+		set_display_rotation(m_dxgi_swap_chain.get(), m_orientationTransform2D, m_orientationTransform3D, displayRotation, m_logical_width, m_logical_height);
 
 		// スワップ チェーンに逆拡大率を設定します
-		DXGI_MATRIX_3X2_F inverseScale = { 0 };
+		DXGI_MATRIX_3X2_F inverseScale{ 0 };
 		inverseScale._11 = 1.0f / m_effectiveCompositionScaleX;
 		inverseScale._22 = 1.0f / m_effectiveCompositionScaleY;
 		winrt::com_ptr<IDXGISwapChain2> spSwapChain2;
@@ -649,14 +669,6 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(
 			m_d2dContext->CreateSolidColorBrush({}, m_shape_brush.put())
 		);
-		//m_anch_brush = nullptr;
-		//winrt::check_hresult(
-		//	m_d2dContext->CreateSolidColorBrush({}, m_anch_brush.put())
-		//);
-		//m_aux_brush = nullptr;
-		//winrt::check_hresult(
-		//	m_d2dContext->CreateSolidColorBrush({}, m_aux_brush.put())
-		//);
 		m_range_brush = nullptr;
 		winrt::check_hresult(
 			m_d2dContext->CreateSolidColorBrush({}, m_range_brush.put())

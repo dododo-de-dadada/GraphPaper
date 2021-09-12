@@ -136,8 +136,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::POS_START:
 			u = new UndoAttr<UNDO_OP::POS_START>(dt_reader);
 			break;
-		case UNDO_OP::CAP_STYLE:
-			u = new UndoAttr<UNDO_OP::CAP_STYLE>(dt_reader);
+		case UNDO_OP::STROKE_CAP:
+			u = new UndoAttr<UNDO_OP::STROKE_CAP>(dt_reader);
 			break;
 		case UNDO_OP::STROKE_COLOR:
 			u = new UndoAttr<UNDO_OP::STROKE_COLOR>(dt_reader);
@@ -344,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 			// 用紙の大きさをステータスバーに格納する.
 			status_set_sheet();
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::CAP_STYLE>)) {
+		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP>)) {
 			CAP_STYLE value;
 			m_sheet_main.get_stroke_cap(value);
 			cap_style_is_checked(value);
@@ -609,7 +609,6 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE const& value);
 	//template bool MainPage::ustack_push_set<UNDO_OP::IMAGE_ASPECT>(bool const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::IMAGE_OPAC>(float const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::CAP_STYLE>(CAP_STYLE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::DASH_CAP>(D2D1_CAP_STYLE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::DASH_PATT>(DASH_PATT const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::DASH_STYLE>(D2D1_DASH_STYLE const& value);
@@ -629,6 +628,7 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::ustack_push_set<UNDO_OP::POS_START>(Shape* const s);
 	template void MainPage::ustack_push_set<UNDO_OP::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& value);
 	template void MainPage::ustack_push_set<UNDO_OP::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& value);
+	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_CAP>(CAP_STYLE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_WIDTH>(float const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& value);

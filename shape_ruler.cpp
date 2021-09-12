@@ -203,6 +203,7 @@ namespace winrt::GraphPaper::implementation
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
 		const float font_size = min(s_attr->m_font_size, s_attr->m_grid_base + 1.0f);
 		winrt::check_hresult(
+			//Shape::s_dx->m_dwriteFactory->CreateTextFormat(
 			Shape::s_dwrite_factory->CreateTextFormat(
 				s_attr->m_font_family,
 				static_cast<IDWriteFontCollection*>(nullptr),
@@ -237,6 +238,7 @@ namespace winrt::GraphPaper::implementation
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
 		winrt::check_hresult(
+			//Shape::s_dx->m_dwriteFactory->CreateTextFormat(
 			Shape::s_dwrite_factory->CreateTextFormat(
 				f_family,
 				static_cast<IDWriteFontCollection*>(nullptr),

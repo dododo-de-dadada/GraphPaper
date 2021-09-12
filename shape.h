@@ -34,21 +34,26 @@
 // | Shape*      |
 // +------+------+
 //        |
-//        +---------------+---------------+---------------+
+//        +---------------+---------------+
 //        |               |               |               |
-// +------+------+ +------+------+ +------+------+ +------+------+
-// | ShapeStroke*| | ShapeImage  | | ShapeGroup  | | ShapeSheet  |
-// +------+------+ +-------------+ +-------------+ +-------------+
+// +------+------+ +------+------+ +------+------+
+// | ShapeStatus | | ShapeGroup  | | ShapeSheet  |
+// +------+------+ +-------------+ +-------------+
+//        +---------------+
+//        |               |
+// +------+------+ +------+------+
+// | ShapeStroke*| | ShapeImage  |
+// +------+------+ +-------------+
 //        |
 //        +-------------------------------+
 //        |                               |
-// +------+------+                        |
-// | ShapeLineA  |                        |
-// +------+------+                        |
+// +------+------+                 +------+------+
+// | ShapeLineA  |                 | ShapeRect   |
+// +------+------+                 +------+------+
 //        |                               |
-// +------+------+                 +------+------+
-// | ShapePath*  |                 | ShapeRect   |
-// +------+------+                 +------+------+
+// +------+------+                        |
+// | ShapePath*  |                        |
+// +------+------+                        |
 //        |                               |
 //        +---------------+               +---------------+---------------+---------------+
 //        |               |               |               |               |               |
@@ -453,7 +458,6 @@ namespace winrt::GraphPaper::implementation
 	// 図形のひな型
 	//------------------------------
 	struct Shape {
-		static SHAPE_DX* s_dx;
 		static ID2D1Factory3* s_d2d_factory;	// D2D ファクトリのキャッシュ
 		static IDWriteFactory3* s_dwrite_factory;	// DWRITE ファクトリのキャッシュ
 		static D2D1_COLOR_F s_anch_color;	// 図形の部位の色
@@ -464,9 +468,16 @@ namespace winrt::GraphPaper::implementation
 		static D2D1_COLOR_F m_default_background;	// 前景色
 		static D2D1_COLOR_F m_default_foreground;	// 背景色
 
+		// 図形表示用の D2D オブジェクト
+		//static winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック
+		//static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
+		//static winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush;	// 文字範囲の文字色ブラシ
+		//static winrt::com_ptr<ID2D1SolidColorBrush> m_shape_brush;	// 図形の色ブラシ
+
+
 		// 図形を破棄する.
-		virtual ~Shape(void) {}
-		// 図形を表示する
+		virtual ~Shape(void) noexcept {}
+		// 図形を表示する.
 		virtual void draw(SHAPE_DX& /*dx*/) {}
 		// 矢じるしの寸法を得る
 		virtual bool get_arrow_size(ARROW_SIZE& /*value*/) const noexcept { return false; }
@@ -636,12 +647,23 @@ namespace winrt::GraphPaper::implementation
 		virtual void write_svg(DataWriter const& /*dt_writer*/) const {}
 	};
 
+	struct ShapeStatus : Shape {
+		bool m_is_deleted = false;	// 消去されたか判定
+		bool m_is_selected = false;	// 選択されたか判定
+		// 消去されたか判定する.
+		bool is_deleted(void) const noexcept { return m_is_deleted; }
+		// 選択されてるか判定する.
+		bool is_selected(void) const noexcept { return m_is_selected; }
+		// 値を消去されたか判定に格納する.
+		bool set_delete(const bool value) noexcept { m_is_deleted = value; return true; }
+		// 値を選択されてるか判定に格納する.
+		bool set_select(const bool value) noexcept { m_is_selected = value; return true; }
+	};
+
 	//------------------------------
 	// 画像
 	//------------------------------
-	struct ShapeImage : Shape {
-		bool m_is_deleted = false;	// 消去されたか判定
-		bool m_is_selected = false;	// 選択されたか判定
+	struct ShapeImage : ShapeStatus {
 		D2D1_POINT_2F m_pos;	// 始点の位置
 		D2D1_SIZE_F m_view;	// 表示寸法
 		D2D1_RECT_F m_rect;	// ビットマップの矩形
@@ -675,24 +697,16 @@ namespace winrt::GraphPaper::implementation
 		uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept;
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept;
-		// 消去されたか判定する.
-		bool is_deleted(void) const noexcept { return m_is_deleted; }
-		// 選択されてるか判定する.
-		bool is_selected(void) const noexcept { return m_is_selected; }
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F value);
 		// 元の大きさに戻す.
 		void resize_origin(void) noexcept;
-		// 値を消去されたか判定に格納する.
-		bool set_delete(const bool value) noexcept;
 		// 値を画像の不透明度に格納する.
 		bool set_image_opacity(const float value) noexcept;
 		// 値を, 部位の位置に格納する.
 		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect);
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F /*value*/);
-		// 値を選択されてるか判定に格納する.
-		bool set_select(const bool /*value*/) noexcept;
 		// 図形を作成する.
 		ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bitmap);
 		// 図形を作成する.
@@ -964,9 +978,9 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 線枠のひな型
 	//------------------------------
-	struct ShapeStroke : Shape {
-		bool m_is_deleted = false;	// 消去されたか判定
-		bool m_is_selected = false;	// 選択されたか判定
+	struct ShapeStroke : ShapeStatus {
+		//bool m_is_deleted = false;	// 消去されたか判定
+		//bool m_is_selected = false;	// 選択されたか判定
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_diff;	// 次の位置への差分
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式

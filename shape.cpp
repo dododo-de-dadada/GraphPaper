@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t debug_leak_cnt = 0;
 	uint32_t debug_shape_cnt = 0;
 #endif
-	SHAPE_DX* Shape::s_dx = nullptr;
+	//SHAPE_DX* Shape::s_dx = nullptr;
 	ID2D1Factory3* Shape::s_d2d_factory = nullptr;	// D2D1 ファクトリ
 	IDWriteFactory3* Shape::s_dwrite_factory = nullptr;	// DWRITE ファクトリ
 	float Shape::s_anch_len = 6.0f;
@@ -20,6 +20,10 @@ namespace winrt::GraphPaper::implementation
 	D2D1_COLOR_F Shape::m_range_foreground = RNG_TEXT;	// 文字範囲の文字色
 	D2D1_COLOR_F Shape::m_default_background = S_WHITE;	// 前景色 (アンカーの背景色)
 	D2D1_COLOR_F Shape::m_default_foreground = S_BLACK;	// 背景色 (アンカーの前景色)
+	//winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block = nullptr;	// 描画状態の保存ブロック
+	//winrt::com_ptr<ID2D1StrokeStyle1> Shape::m_aux_style = nullptr;	// 補助線の形式
+	//winrt::com_ptr<ID2D1SolidColorBrush> Shape::m_range_brush = nullptr;	// 文字範囲の文字色ブラシ
+	//winrt::com_ptr<ID2D1SolidColorBrush> Shape::m_shape_brush = nullptr;	// 図形の色ブラシ
 
 	// 文字が '0'...'9' または 'A'...'F', 'a'...'f' か判定する.
 	static bool is_hex(const wchar_t w, uint32_t& x) noexcept;
