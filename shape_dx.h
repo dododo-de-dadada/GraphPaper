@@ -67,9 +67,9 @@ namespace winrt::GraphPaper::implementation
 
 		static winrt::com_ptr<ID2D1Factory3> m_d2dFactory;
 		static winrt::com_ptr<IDWriteFactory3> m_dwriteFactory;
-		winrt::com_ptr<ID2D1Device2> m_d2dDevice;
+		//winrt::com_ptr<ID2D1Device2> m_d2dDevice;
 		winrt::com_ptr<ID2D1DeviceContext2> m_d2dContext;
-		winrt::com_ptr<ID2D1Bitmap1> m_d2dTargetBitmap;
+		//winrt::com_ptr<ID2D1Bitmap1> m_d2dTargetBitmap;
 
 		// XAML コントロール
 
@@ -77,10 +77,10 @@ namespace winrt::GraphPaper::implementation
 
 		// デバイス属性
 
-		FLOAT m_d3d_target_width;
-		FLOAT m_d3d_target_height;
-		FLOAT m_output_width;
-		FLOAT m_output_height;
+		//FLOAT m_d3d_target_width;
+		//FLOAT m_d3d_target_height;
+		//FLOAT m_output_width;
+		//FLOAT m_output_height;
 		FLOAT m_logical_width = 0.0f;
 		FLOAT m_logical_height = 0.0f;
 		DisplayOrientations	m_nativeOrientation = DisplayOrientations::None;
@@ -98,8 +98,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 方向変換用の行列
 
-		D2D1::Matrix3x2F m_orientationTransform2D;
-		DirectX::XMFLOAT4X4 m_orientationTransform3D;
+		//D2D1::Matrix3x2F m_orientationTransform2D;
+		//DirectX::XMFLOAT4X4 m_orientationTransform3D;
 
 		// 通知を受けるためのインターフェイス.
 
@@ -122,9 +122,9 @@ namespace winrt::GraphPaper::implementation
 			//m_aux_brush = nullptr;
 			//m_anch_brush = nullptr;
 			m_swapChainPanel = nullptr;
-			m_d2dTargetBitmap = nullptr;
+			//m_d2dTargetBitmap = nullptr;
 			m_d2dContext = nullptr;
-			m_d2dDevice = nullptr;
+			//m_d2dDevice = nullptr;
 			m_d3dContext = nullptr;
 			m_d3dDevice = nullptr;
 		}
