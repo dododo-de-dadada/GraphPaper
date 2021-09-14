@@ -514,7 +514,8 @@ namespace winrt::GraphPaper::implementation
 	// SizeChanged は, まずサイズ 0 で Loaded に先んじて呼び出される.
 	void SHAPE_DX::SetLogicalSize2(const D2D1_SIZE_F size)
 	{
-		if (m_logical_width == size.width && m_logical_height == size.height) {
+		if (m_logical_width == size.width &&
+			m_logical_height == size.height) {
 			return;
 		}
 		m_logical_width = size.width;
@@ -535,10 +536,13 @@ namespace winrt::GraphPaper::implementation
 		// パネルへの保持された参照に指定されたスワップチェーンパネルを保存する.
 		// パネルをもとに, 実際的な幅と高さ, 拡大率を得て, 
 		// それぞれ論理的な高さと幅, 合成倍率に格納する.
-		DisplayInformation di = DisplayInformation::GetForCurrentView();
-		m_nativeOrientation = di.NativeOrientation();
-		m_currentOrientation = di.CurrentOrientation();
-		m_logical_dpi = di.LogicalDpi();
+		const DisplayInformation& di = DisplayInformation::GetForCurrentView();
+		if (di != nullptr) {
+			m_nativeOrientation = di.NativeOrientation();
+			m_currentOrientation = di.CurrentOrientation();
+			m_logical_dpi = di.LogicalDpi();
+		}
+		
 		m_d2dContext->SetDpi(m_logical_dpi, m_logical_dpi);
 		m_swapChainPanel = xaml_scp;
 		m_compositionScaleX = xaml_scp.CompositionScaleX();

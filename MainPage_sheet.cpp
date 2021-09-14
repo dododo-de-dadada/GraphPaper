@@ -382,23 +382,22 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif	// _DEBUG
 		const auto z = args.NewSize();
-		const auto w = z.Width;
-		const auto h = z.Height;
+		const float w = z.Width;
+		const float h = z.Height;
 		scroll_set(w, h);
-		if (scp_sheet_panel().IsLoaded() != true) {
-			return;
+		if (scp_sheet_panel().IsLoaded()) {
+			m_sheet_dx.SetLogicalSize2(D2D1_SIZE_F{ w, h });
+			sheet_draw();
 		}
-		m_sheet_dx.SetLogicalSize2({ w, h });
-		sheet_draw();
 	}
 
 	// 用紙の大きさを設定する.
 	void MainPage::sheet_panle_size(void)
 	{
-		const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
-		const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
-		scroll_set(win_w, win_h);
-		m_sheet_dx.SetLogicalSize2(D2D1_SIZE_F{ win_w, win_h });
+		const float w = static_cast<float>(scp_sheet_panel().ActualWidth());
+		const float h = static_cast<float>(scp_sheet_panel().ActualHeight());
+		scroll_set(w, h);
+		m_sheet_dx.SetLogicalSize2(D2D1_SIZE_F{ w, h });
 	}
 
 	// 用紙メニューの「用紙の大きさ」が選択された
