@@ -29,7 +29,7 @@ namespace winrt::GraphPaper::implementation
 				s->draw(dx);
 				s->get_bound(b_min, b_max, b_min, b_max);
 			}
-			dx.m_d2dContext->DrawRectangle(D2D1_RECT_F{ b_min.x, b_min.y, b_max.x, b_max.y }, dx.m_shape_brush.get(), 1.0f, dx.m_aux_style.get());
+			dx.m_d2d_context->DrawRectangle(D2D1_RECT_F{ b_min.x, b_min.y, b_max.x, b_max.y }, dx.m_shape_brush.get(), 1.0f, Shape::m_aux_style.get());
 		}
 		else {
 			for (const auto s : m_list_grouped) {

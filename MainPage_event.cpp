@@ -11,6 +11,13 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::UI::Core::CoreCursorType;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollBar;
+	using winrt::Windows::UI::Xaml::Controls::SwapChainPanel;
+	using winrt::Windows::System::VirtualKeyModifiers;
+	using winrt::Windows::UI::Input::PointerPointProperties;
+	using winrt::Windows::Devices::Input::PointerDeviceType;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Window;
+	using winrt::Windows::UI::Xaml::UIElement;
 
 	static auto const& CC_ARROW = CoreCursor(CoreCursorType::Arrow, 0);	// 矢印カーソル
 	static auto const& CC_CROSS = CoreCursor(CoreCursorType::Cross, 0);	// 十字カーソル
@@ -253,8 +260,6 @@ namespace winrt::GraphPaper::implementation
 	// 文字列図形の作成を終了する.
 	IAsyncAction MainPage::event_finish_creating_text_async(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec)
 	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
 		tx_edit().Text(L"");
 		ck_edit_text_frame().IsChecked(m_edit_text_frame);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
@@ -365,8 +370,6 @@ namespace winrt::GraphPaper::implementation
 	// 範囲選択を終了する.
 	void MainPage::event_finish_selecting_area(const VirtualKeyModifiers k_mod)
 	{
-		using winrt::Windows::UI::Xaml::Window;
-
 		// 修飾キーがコントロールか判定する.
 		if (k_mod == VirtualKeyModifiers::Control) {
 			D2D1_POINT_2F a_min;
@@ -401,7 +404,6 @@ namespace winrt::GraphPaper::implementation
 	// ポインターが動いた.
 	void MainPage::event_moved(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
-		using winrt::Windows::UI::Xaml::Window;
 #if defined(_DEBUG)
 		if (sender != scp_sheet_panel()) {
 			throw winrt::hresult_not_implemented();
@@ -495,25 +497,21 @@ namespace winrt::GraphPaper::implementation
 	// キャプチャの有無にかかわらず, 片方のマウスボタンを押した状態で, もう一方のボタンを押しても, それは通知されない.
 	void MainPage::event_pressed(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
-		using winrt::Windows::System::VirtualKeyModifiers;
-		using winrt::Windows::UI::Input::PointerPointProperties;
-		using winrt::Windows::Devices::Input::PointerDeviceType;
-
 #if defined(_DEBUG)
 		if (sender != scp_sheet_panel()) {
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		auto const& panel = sender.as<SwapChainPanel>();
+		auto const& swap_chain_panel = sender.as<SwapChainPanel>();
 		// ポインターのキャプチャを始める.
-		panel.CapturePointer(args.Pointer());
+		swap_chain_panel.CapturePointer(args.Pointer());
 		// ポインターのイベント発生時間を得る.
-		auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
+		auto t_stamp = args.GetCurrentPoint(swap_chain_panel).Timestamp();
 		event_get_position(args);
 		// ポインターのプロパティーを得る.
-		auto const& p_prop = args.GetCurrentPoint(panel).Properties();
+		auto const& p_prop = args.GetCurrentPoint(swap_chain_panel).Properties();
 		// ポインターのデバイスタイプを判定する.
-		switch (args.GetCurrentPoint(panel).PointerDevice().PointerDeviceType()) {
+		switch (args.GetCurrentPoint(swap_chain_panel).PointerDevice().PointerDeviceType()) {
 		// デバイスタイプがマウスの場合
 		case PointerDeviceType::Mouse:
 			// プロパティーが右ボタン押下か判定する.
@@ -684,7 +682,6 @@ namespace winrt::GraphPaper::implementation
 	// ポインターのボタンが上げられた.
 	void MainPage::event_released(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
-		using winrt::Windows::System::VirtualKeyModifiers;
 #if defined(_DEBUG)
 		if (sender != scp_sheet_panel()) {
 			return;
@@ -912,10 +909,6 @@ namespace winrt::GraphPaper::implementation
 	// ポインターのホイールボタンが操作された.
 	void MainPage::event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
-		using winrt::Windows::System::VirtualKeyModifiers;
-		using winrt::Windows::UI::Xaml::UIElement;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollBar;
-
 #if defined(_DEBUG)
 		if (sender != scp_sheet_panel()) {
 			throw winrt::hresult_not_implemented();

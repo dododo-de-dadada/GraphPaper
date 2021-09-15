@@ -89,6 +89,24 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeRect;
 	struct ShapeStroke;
 
+	constexpr D2D1_COLOR_F ACCENT_COLOR = { 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// 文字範囲の背景色 SystemAccentColor
+
+	// 補助線
+	constexpr FLOAT AUX_DASHES[] = { 4.0f, 4.0f };	// 補助線の破線の配置
+	constexpr UINT32 AUX_DASHES_CONT = sizeof(AUX_DASHES) / sizeof(AUX_DASHES[0]);	// 補助線の破線の配置の要素数
+	constexpr float AUX_OPAC = 0.975f;	// 補助線の不透明度
+	constexpr D2D1_STROKE_STYLE_PROPERTIES1 AUX_STYLE	// 補助線の線の特性
+	{
+		D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// startCap
+		D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// endCap
+		D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND,	// dashCap
+		D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL,	// lineJoin
+		1.0f,	// miterLimit
+		D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM,	// dashStyle
+		0.0f,	// dashOffset
+		D2D1_STROKE_TRANSFORM_TYPE::D2D1_STROKE_TRANSFORM_TYPE_NORMAL
+	};
+
 	// アンカー (図形の部位) の種類
 	// 折れ線の頂点をあらわすため, enum struct でなく enum を用いる.
 	enum ANCH_TYPE {
@@ -148,6 +166,11 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_end;	// 終点
 	};
 
+	// 破線の配置
+	union DASH_PATT {
+		float m_[6];
+	};
+
 	// 方眼の強調
 	struct GRID_EMPH {
 		uint16_t m_gauge_1;	// 強調する間隔 (その1)
@@ -173,10 +196,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_clockwise;	// 頂点を時計回りに作図する.
 	};
 
-	// 破線の配置
-	union DASH_PATT {
-		float m_[6];
-	};
+	constexpr D2D1_COLOR_F RNG_TEXT = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
 
 	constexpr float COLOR_MAX = 255.0f;	// 色成分の最大値
 	constexpr double PT_PER_INCH = 72.0;	// 1 インチあたりのポイント数
@@ -467,6 +487,7 @@ namespace winrt::GraphPaper::implementation
 		static D2D1_COLOR_F m_range_foreground;	// 文字範囲の文字色
 		static D2D1_COLOR_F m_default_background;	// 前景色
 		static D2D1_COLOR_F m_default_foreground;	// 背景色
+		static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
 
 		// 図形表示用の D2D オブジェクト
 		//static winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック

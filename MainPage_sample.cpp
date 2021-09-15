@@ -26,7 +26,7 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		m_dx_mutex.lock();
-		auto dc = m_sample_dx.m_d2dContext.get();
+		auto dc = m_sample_dx.m_d2d_context.get();
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
 		dc->Clear(m_sample_sheet.m_sheet_color);
@@ -51,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 		*/
 		winrt::check_hresult(dc->EndDraw());
 		dc->RestoreDrawingState(m_sample_dx.m_state_block.get());
-		m_sample_dx.Present();
+		m_sample_dx.Present(scp_sample_panel());
 		m_dx_mutex.unlock();
 	}
 

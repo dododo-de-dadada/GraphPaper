@@ -91,28 +91,28 @@ namespace winrt::GraphPaper::implementation
 	{
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
 		const auto s_brush = dx.m_shape_brush.get();
-		const auto a_style = dx.m_aux_style.get();
+		const auto a_style = Shape::m_aux_style.get();
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
 
 		e_pos.x = c_pos.x;
 		e_pos.y = p_pos.y;
 		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawLine(p_pos, e_pos, s_brush, s_width, nullptr);
+		dx.m_d2d_context->DrawLine(p_pos, e_pos, s_brush, s_width, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawLine(p_pos, e_pos, s_brush, s_width, a_style);
+		dx.m_d2d_context->DrawLine(p_pos, e_pos, s_brush, s_width, a_style);
 		s_pos = e_pos;
 		e_pos.x = p_pos.x;
 		e_pos.y = c_pos.y;
 		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, s_brush, s_width, nullptr);
+		dx.m_d2d_context->DrawLine(s_pos, e_pos, s_brush, s_width, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawLine(s_pos, e_pos, s_brush, s_width, a_style);
+		dx.m_d2d_context->DrawLine(s_pos, e_pos, s_brush, s_width, a_style);
 		s_pos = e_pos;
 		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawLine(s_pos, c_pos, s_brush, s_width, nullptr);
+		dx.m_d2d_context->DrawLine(s_pos, c_pos, s_brush, s_width, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawLine(s_pos, c_pos, s_brush, s_width, a_style);
+		dx.m_d2d_context->DrawLine(s_pos, c_pos, s_brush, s_width, a_style);
 	}
 
 	// だ円の補助線を表示する.
@@ -131,9 +131,9 @@ namespace winrt::GraphPaper::implementation
 		elli.radiusX = rect.x;
 		elli.radiusY = rect.y;
 		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), s_width, nullptr);
+		dx.m_d2d_context->DrawEllipse(elli, dx.m_shape_brush.get(), s_width, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
+		dx.m_d2d_context->DrawEllipse(elli, dx.m_shape_brush.get(), s_width, Shape::m_aux_style.get());
 	}
 
 	// 直線の補助線を表示する.
@@ -144,9 +144,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
 		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), s_width, nullptr);
+		dx.m_d2d_context->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), s_width, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
+		dx.m_d2d_context->DrawLine(p_pos, c_pos, dx.m_shape_brush.get(), s_width, Shape::m_aux_style.get());
 	}
 
 	// 多角形の補助線を表示する.
@@ -168,9 +168,9 @@ namespace winrt::GraphPaper::implementation
 		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
 			dx.m_shape_brush->SetColor(Shape::m_default_background);
-			dx.m_d2dContext->DrawLine(v_pos[i], v_pos[j], dx.m_shape_brush.get(), s_width, nullptr);
+			dx.m_d2d_context->DrawLine(v_pos[i], v_pos[j], dx.m_shape_brush.get(), s_width, nullptr);
 			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-			dx.m_d2dContext->DrawLine(v_pos[i], v_pos[j], dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
+			dx.m_d2d_context->DrawLine(v_pos[i], v_pos[j], dx.m_shape_brush.get(), s_width, Shape::m_aux_style.get());
 		}
 	}
 
@@ -185,9 +185,9 @@ namespace winrt::GraphPaper::implementation
 			p_pos.x, p_pos.y, c_pos.x, c_pos.y
 		};
 		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), s_width, nullptr);
+		dx.m_d2d_context->DrawRectangle(&rc, dx.m_shape_brush.get(), s_width, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawRectangle(&rc, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
+		dx.m_d2d_context->DrawRectangle(&rc, dx.m_shape_brush.get(), s_width, Shape::m_aux_style.get());
 	}
 
 	// 角丸方形の補助線を表示する.
@@ -219,15 +219,15 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(ry)
 		};
 		dx.m_shape_brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawRoundedRectangle(&r_rect, dx.m_shape_brush.get(), s_width, nullptr);
+		dx.m_d2d_context->DrawRoundedRectangle(&r_rect, dx.m_shape_brush.get(), s_width, nullptr);
 		dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->DrawRoundedRectangle(&r_rect, dx.m_shape_brush.get(), s_width, dx.m_aux_style.get());
+		dx.m_d2d_context->DrawRoundedRectangle(&r_rect, dx.m_shape_brush.get(), s_width, Shape::m_aux_style.get());
 	}
 
 	void ShapeSheet::draw(SHAPE_DX& dx)
 	{
 		// 用紙色で塗りつぶす.
-		dx.m_d2dContext->Clear(m_sheet_color);
+		dx.m_d2d_context->Clear(m_sheet_color);
 		if (m_grid_show == GRID_SHOW::BACK) {
 			// 方眼の表示が最背面に表示の場合,
 			// 方眼を表示する.
@@ -304,7 +304,7 @@ namespace winrt::GraphPaper::implementation
 				w = 0.5F * grid_w;
 			}
 			v_start.x = v_end.x = static_cast<FLOAT>(x);
-			dx.m_d2dContext->DrawLine(v_start, v_end, brush, w, nullptr);
+			dx.m_d2d_context->DrawLine(v_start, v_end, brush, w, nullptr);
 		}
 		// 水平な方眼を表示する.
 		double y;
@@ -319,7 +319,7 @@ namespace winrt::GraphPaper::implementation
 				w = 0.5F * grid_w;
 			}
 			h_start.y = h_end.y = static_cast<FLOAT>(y);
-			dx.m_d2dContext->DrawLine(h_start, h_end, brush, w, nullptr);
+			dx.m_d2d_context->DrawLine(h_start, h_end, brush, w, nullptr);
 		}
 
 	}

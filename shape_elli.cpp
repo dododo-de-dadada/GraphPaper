@@ -23,12 +23,12 @@ namespace winrt::GraphPaper::implementation
 		// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚©”»’è‚·‚é.
 		if (is_opaque(m_fill_color)) {
 			dx.m_shape_brush->SetColor(m_fill_color);
-			dx.m_d2dContext->FillEllipse(elli, dx.m_shape_brush.get());
+			dx.m_d2d_context->FillEllipse(elli, dx.m_shape_brush.get());
 		}
 		// ˜gü‚ÌF‚ª•s“§–¾‚©”»’è‚·‚é.
 		if (is_opaque(m_stroke_color)) {
 			dx.m_shape_brush->SetColor(m_stroke_color);
-			dx.m_d2dContext->DrawEllipse(elli, dx.m_shape_brush.get(), m_stroke_width, m_d2d_stroke_style.get());
+			dx.m_d2d_context->DrawEllipse(elli, dx.m_shape_brush.get(), m_stroke_width, m_d2d_stroke_style.get());
 		}
 		if (is_selected() != true) {
 			return;

@@ -475,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 		pt_add(m_pos, m_diff[0], b_seg.point1);
 		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
 		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
-		winrt::check_hresult(dx.m_d2dFactory->CreatePathGeometry(m_d2d_path_geom.put()));
+		winrt::check_hresult(dx.m_d2d_fanctory->CreatePathGeometry(m_d2d_path_geom.put()));
 		m_d2d_path_geom->Open(sink.put());
 		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 		sink->BeginFigure(m_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
@@ -484,7 +484,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			bz_create_arrow_geom(dx.m_d2dFactory.get(), m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+			bz_create_arrow_geom(dx.m_d2d_fanctory.get(), m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
 	}
 	/*
@@ -539,18 +539,18 @@ namespace winrt::GraphPaper::implementation
 				
 			}
 			dx.m_shape_brush->SetColor(m_stroke_color);
-			dx.m_d2dContext->DrawGeometry(m_d2d_path_geom.get(), s_brush, s_width, s_style);
+			dx.m_d2d_context->DrawGeometry(m_d2d_path_geom.get(), s_brush, s_width, s_style);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
-					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
+					dx.m_d2d_context->FillGeometry(a_geom, s_brush, nullptr);
 				}
-				dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
+				dx.m_d2d_context->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
 			}
 		}
 		if (is_selected()) {
 			D2D1_MATRIX_3X2_F tran;
-			dx.m_d2dContext->GetTransform(&tran);
+			dx.m_d2d_context->GetTransform(&tran);
 			const auto sw = static_cast<FLOAT>(1.0 / tran.m11);
 			//auto sb = dx.m_anch_brush.get();
 			//auto ss = dx.m_aux_style.get();
@@ -559,25 +559,25 @@ namespace winrt::GraphPaper::implementation
 			s_pos = m_pos;
 			pt_add(s_pos, m_diff[0], e_pos);
 			dx.m_shape_brush->SetColor(Shape::m_default_background);
-			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
 			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, Shape::m_aux_style.get());
 			anch_draw_ellipse(e_pos, dx);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_diff[1], e_pos);
 			dx.m_shape_brush->SetColor(Shape::m_default_background);
-			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
 			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, Shape::m_aux_style.get());
 			anch_draw_ellipse(e_pos, dx);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_diff[2], e_pos);
 			dx.m_shape_brush->SetColor(Shape::m_default_background);
-			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
 			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-			dx.m_d2dContext->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, dx.m_aux_style.get());
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, Shape::m_aux_style.get());
 			anch_draw_rect(e_pos, dx);
 		}
 	}

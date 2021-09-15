@@ -14,9 +14,9 @@ namespace winrt::GraphPaper::implementation
 		const FLOAT rad = static_cast<FLOAT>(Shape::s_anch_len * 0.5 + 1.0);
 		ID2D1SolidColorBrush* const brush = dx.m_shape_brush.get();
 		brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->FillEllipse(D2D1_ELLIPSE{ a_pos, rad, rad }, brush);
+		dx.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad, rad }, brush);
 		brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->FillEllipse(D2D1_ELLIPSE{ a_pos, rad - 1.0f, rad - 1.0f }, brush);
+		dx.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad - 1.0f, rad - 1.0f }, brush);
 	}
 
 	// }Œ`‚Ì•”ˆÊ (•ûŒ`) ‚ð•\Ž¦‚·‚é.
@@ -31,9 +31,9 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_RECT_F rect{ r_min.x, r_min.y, r_max.x, r_max.y };
 		ID2D1SolidColorBrush* brush = dx.m_shape_brush.get();
 		brush->SetColor(Shape::m_default_background);
-		dx.m_d2dContext->DrawRectangle(rect, brush, 2.0, nullptr);
+		dx.m_d2d_context->DrawRectangle(rect, brush, 2.0, nullptr);
 		brush->SetColor(Shape::m_default_foreground);
-		dx.m_d2dContext->FillRectangle(rect, brush);
+		dx.m_d2d_context->FillRectangle(rect, brush);
 	}
 
 }

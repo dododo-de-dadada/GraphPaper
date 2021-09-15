@@ -140,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::sheet_draw(void)
 	{
 #if defined(_DEBUG)
-		if (m_sheet_dx.m_swapChainPanel.IsLoaded() != true) {
+		if (scp_sheet_panel().IsLoaded() != true) {
 			return;
 		}
 #endif
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		auto const& dc = m_sheet_dx.m_d2dContext;
+		auto const& dc = m_sheet_dx.m_d2d_context;
 		// デバイスコンテキストの描画状態を保存ブロックに保持する.
 		dc->SaveDrawingState(m_sheet_dx.m_state_block.get());
 		// デバイスコンテキストから変換行列を得る.
@@ -198,7 +198,7 @@ namespace winrt::GraphPaper::implementation
 		if (hr == S_OK) {
 			// 結果が S_OK の場合,
 			// スワップチェーンの内容を画面に表示する.
-			m_sheet_dx.Present();
+			m_sheet_dx.Present(scp_sheet_panel());
 			// ポインターの位置をステータスバーに格納する.
 			status_set_curs();
 		}
@@ -386,7 +386,7 @@ namespace winrt::GraphPaper::implementation
 		const float h = z.Height;
 		scroll_set(w, h);
 		if (scp_sheet_panel().IsLoaded()) {
-			m_sheet_dx.SetLogicalSize2(D2D1_SIZE_F{ w, h });
+			m_sheet_dx.SetLogicalSize2(scp_sheet_panel(), D2D1_SIZE_F{ w, h });
 			sheet_draw();
 		}
 	}
@@ -397,7 +397,7 @@ namespace winrt::GraphPaper::implementation
 		const float w = static_cast<float>(scp_sheet_panel().ActualWidth());
 		const float h = static_cast<float>(scp_sheet_panel().ActualHeight());
 		scroll_set(w, h);
-		m_sheet_dx.SetLogicalSize2(D2D1_SIZE_F{ w, h });
+		m_sheet_dx.SetLogicalSize2(scp_sheet_panel(), D2D1_SIZE_F{ w, h });
 	}
 
 	// 用紙メニューの「用紙の大きさ」が選択された

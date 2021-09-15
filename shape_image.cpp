@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 					D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
 				)
 			};
-			dx.m_d2dContext->CreateBitmap(m_size, static_cast<void*>(m_data), 4 * m_size.width, b_prop, m_dx_bitmap.put());
+			dx.m_d2d_context->CreateBitmap(m_size, static_cast<void*>(m_data), 4 * m_size.width, b_prop, m_dx_bitmap.put());
 			if (m_dx_bitmap == nullptr) {
 				return;
 			}
@@ -153,13 +153,13 @@ namespace winrt::GraphPaper::implementation
 			m_pos.x + m_view.width,
 			m_pos.y + m_view.height
 		};
-		dx.m_d2dContext->DrawBitmap(m_dx_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_rect);
+		dx.m_d2d_context->DrawBitmap(m_dx_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_rect);
 
 		if (is_selected()) {
 			dx.m_shape_brush->SetColor(Shape::m_default_background);
-			dx.m_d2dContext->DrawRectangle(dest_rect, dx.m_shape_brush.get(), 1.0f, nullptr);
+			dx.m_d2d_context->DrawRectangle(dest_rect, dx.m_shape_brush.get(), 1.0f, nullptr);
 			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-			dx.m_d2dContext->DrawRectangle(dest_rect, dx.m_shape_brush.get(), 1.0f, dx.m_aux_style.get());
+			dx.m_d2d_context->DrawRectangle(dest_rect, dx.m_shape_brush.get(), 1.0f, Shape::m_aux_style.get());
 
 			const D2D1_POINT_2F v_pos[4]{
 				m_pos,

@@ -240,14 +240,14 @@ namespace winrt::GraphPaper::implementation
 		const auto s_brush = dx.m_shape_brush.get();
 		const auto s_style = m_d2d_stroke_style.get();
 		const auto s_width = m_stroke_width;
-		dx.m_d2dContext->DrawLine(m_pos, e_pos, s_brush, s_width, s_style);
+		dx.m_d2d_context->DrawLine(m_pos, e_pos, s_brush, s_width, s_style);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			const auto a_geom = m_d2d_arrow_geom.get();
 			if (a_geom != nullptr) {
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
-					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
+					dx.m_d2d_context->FillGeometry(a_geom, s_brush, nullptr);
 				}
-				dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
+				dx.m_d2d_context->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
 			}
 		}
 		if (is_selected()) {

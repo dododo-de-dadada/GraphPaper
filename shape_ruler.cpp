@@ -110,7 +110,7 @@ namespace winrt::GraphPaper::implementation
 			// 塗りつぶし色が不透明な場合,
 			// 方形を塗りつぶす.
 			dx.m_shape_brush->SetColor(m_fill_color);
-			dx.m_d2dContext->FillRectangle(&rect, dx.m_shape_brush.get());
+			dx.m_d2d_context->FillRectangle(&rect, dx.m_shape_brush.get());
 		}
 		if (is_opaque(m_stroke_color)) {
 			// 線枠の色が不透明な場合,
@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
 					xy ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
-				dx.m_d2dContext->DrawLine(p0, p1, br.get());
+				dx.m_d2d_context->DrawLine(p0, p1, br.get());
 				// 目盛りの値を表示する.
 				const double x1 = x + f_size * 0.5;
 				const double x2 = x1 - f_size;
@@ -165,7 +165,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
 					xy ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
 				};
-				dx.m_d2dContext->DrawText(D[i % 10], 1u, m_dw_text_format.get(), t_rect, br.get());
+				dx.m_d2d_context->DrawText(D[i % 10], 1u, m_dw_text_format.get(), t_rect, br.get());
 			}
 		}
 		if (is_selected() != true) {
@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
 		const float font_size = min(s_attr->m_font_size, s_attr->m_grid_base + 1.0f);
 		winrt::check_hresult(
-			//Shape::s_dx->m_dwriteFactory->CreateTextFormat(
+			//Shape::s_dx->m_dwrite_factory->CreateTextFormat(
 			Shape::s_dwrite_factory->CreateTextFormat(
 				s_attr->m_font_family,
 				static_cast<IDWriteFontCollection*>(nullptr),
@@ -238,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
 		winrt::check_hresult(
-			//Shape::s_dx->m_dwriteFactory->CreateTextFormat(
+			//Shape::s_dx->m_dwrite_factory->CreateTextFormat(
 			Shape::s_dwrite_factory->CreateTextFormat(
 				f_family,
 				static_cast<IDWriteFontCollection*>(nullptr),

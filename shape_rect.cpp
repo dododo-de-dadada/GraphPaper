@@ -20,14 +20,14 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_fill_color)) {
 			// 方形を塗りつぶす.
 			dx.m_shape_brush->SetColor(m_fill_color);
-			dx.m_d2dContext->FillRectangle(&rect, dx.m_shape_brush.get());
+			dx.m_d2d_context->FillRectangle(&rect, dx.m_shape_brush.get());
 		}
 		// 線枠の色が不透明か判定する.
 		if (is_opaque(m_stroke_color)) {
 			// 方形の枠を表示する.
 			const auto w = m_stroke_width;
 			dx.m_shape_brush->SetColor(m_stroke_color);
-			dx.m_d2dContext->DrawRectangle(
+			dx.m_d2d_context->DrawRectangle(
 				rect, dx.m_shape_brush.get(), w, m_d2d_stroke_style.get());
 		}
 		// この図形が選択されてるか判定する.

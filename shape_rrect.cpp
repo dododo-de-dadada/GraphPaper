@@ -61,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 		auto s_brush = dx.m_shape_brush.get();
 		auto s_style = m_d2d_stroke_style.get();
 		auto s_width = m_stroke_width;
-		auto dc = dx.m_d2dContext;
+		auto dc = dx.m_d2d_context;
 
 		D2D1_POINT_2F r_min;
 		pt_add(m_pos, min(m_diff[0].x, 0.0), min(m_diff[0].y, 0.0), r_min);

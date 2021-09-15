@@ -683,7 +683,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 折れ線のパスジオメトリを作成する.
 		winrt::com_ptr<ID2D1GeometrySink> sink;
-		winrt::check_hresult(dx.m_d2dFactory->CreatePathGeometry(m_d2d_path_geom.put()));
+		winrt::check_hresult(dx.m_d2d_fanctory->CreatePathGeometry(m_d2d_path_geom.put()));
 		winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
 		sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
 		const auto figure_begin = is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
@@ -705,7 +705,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F h_barbs[2];
 		if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
 			// 矢じるしのパスジオメトリを作成する.
-			winrt::check_hresult(dx.m_d2dFactory->CreatePathGeometry(m_d2d_arrow_geom.put()));
+			winrt::check_hresult(dx.m_d2d_fanctory->CreatePathGeometry(m_d2d_arrow_geom.put()));
 			winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(h_barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
@@ -793,7 +793,7 @@ namespace winrt::GraphPaper::implementation
 			const auto p_geom = m_d2d_path_geom.get();
 			if (p_geom != nullptr) {
 				dx.m_shape_brush->SetColor(m_fill_color);
-				dx.m_d2dContext->FillGeometry(p_geom, dx.m_shape_brush.get(), nullptr);
+				dx.m_d2d_context->FillGeometry(p_geom, dx.m_shape_brush.get(), nullptr);
 			}
 		}
 		if (is_opaque(m_stroke_color)) {
@@ -802,13 +802,13 @@ namespace winrt::GraphPaper::implementation
 			const auto s_brush = dx.m_shape_brush.get();
 			const auto s_style = m_d2d_stroke_style.get();
 			s_brush->SetColor(m_stroke_color);
-			dx.m_d2dContext->DrawGeometry(p_geom, s_brush, s_width, s_style);
+			dx.m_d2d_context->DrawGeometry(p_geom, s_brush, s_width, s_style);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
 				if (a_geom != nullptr) {
-					dx.m_d2dContext->FillGeometry(a_geom, s_brush, nullptr);
+					dx.m_d2d_context->FillGeometry(a_geom, s_brush, nullptr);
 					if (m_arrow_style != ARROW_STYLE::FILLED) {
-						dx.m_d2dContext->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
+						dx.m_d2d_context->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
 					}
 				}
 			}
