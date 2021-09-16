@@ -1038,7 +1038,7 @@
     <value>Failed to paste the data.</value>
     <comment>String</comment>
   </data>
-  <data name="rmfi_join_bevel.Text" xml:space="preserve">
+  <data name="rmfi_join_style_bevel.Text" xml:space="preserve">
     <value>Bevel</value>
     <comment>RadioMenyFlyoutItem</comment>
   </data>
@@ -1046,15 +1046,15 @@
     <value>Miter Limit...</value>
     <comment>MenyFlyoutItem</comment>
   </data>
-  <data name="rmfi_join_miter.Text" xml:space="preserve">
+  <data name="rmfi_join_style_miter.Text" xml:space="preserve">
     <value>Miter</value>
     <comment>RadioMenyFlyoutItem</comment>
   </data>
-  <data name="rmfi_join_m_or_b.Text" xml:space="preserve">
+  <data name="rmfi_join_style_miter_or_bevel.Text" xml:space="preserve">
     <value>Miter or Bevel</value>
     <comment>RadioMenyFlyoutItem</comment>
   </data>
-  <data name="rmfi_join_round.Text" xml:space="preserve">
+  <data name="rmfi_join_style_round.Text" xml:space="preserve">
     <value>Round</value>
     <comment>RadioMenyFlyoutItem</comment>
   </data>
@@ -1070,19 +1070,19 @@
     <value>Stick Vertices...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_cap_flat.Text" xml:space="preserve">
+  <data name="rmfi_cap_style_flat.Text" xml:space="preserve">
     <value>Flat</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_cap_round.Text" xml:space="preserve">
+  <data name="rmfi_cap_style_round.Text" xml:space="preserve">
     <value>Round</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_cap_square.Text" xml:space="preserve">
+  <data name="rmfi_cap_style_square.Text" xml:space="preserve">
     <value>Square</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_cap_triangle.Text" xml:space="preserve">
+  <data name="rmfi_cap_style_triangle.Text" xml:space="preserve">
     <value>Triangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>

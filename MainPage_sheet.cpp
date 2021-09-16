@@ -233,7 +233,7 @@ namespace winrt::GraphPaper::implementation
 			// ÉäÉ\Å[ÉXÇÃéÊìæÇ…é∏îsÇµÇΩèÍçáÇ…îıÇ¶Çƒ,
 			// å≈íËÇÃä˘íËílÇèëëÃëÆê´Ç…äiî[Ç∑ÇÈ.
 			m_sheet_main.set_font_family(wchar_cpy(L"Segoe UI"));
-			m_sheet_main.set_font_size(DEF_FONT_SIZE);
+			m_sheet_main.set_font_size(FONT_SIZE_DEFVAL);
 			m_sheet_main.set_font_stretch(DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL);
 			m_sheet_main.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
 			m_sheet_main.set_font_weight(DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL);
@@ -322,14 +322,14 @@ namespace winrt::GraphPaper::implementation
 				grid_color.a = 0.5f;
 			}
 			else {
-				grid_color = DEF_GRID_COLOR;
+				grid_color = GRID_COLOR_DEFVAL;
 			}
-			m_sheet_main.set_arrow_size(DEF_ARROW_SIZE);
+			m_sheet_main.set_arrow_size(ARROW_SIZE_DEFVAL);
 			m_sheet_main.set_arrow_style(ARROW_STYLE::NONE);
-			m_sheet_main.set_corner_radius(D2D1_POINT_2F{ DEF_GRID_LEN, DEF_GRID_LEN });
+			m_sheet_main.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL });
 			m_sheet_main.set_fill_color(Shape::m_default_background);
 			m_sheet_main.set_font_color(Shape::m_default_foreground);
-			m_sheet_main.set_grid_base(DEF_GRID_LEN - 1.0);
+			m_sheet_main.set_grid_base(GRID_LEN_DEFVAL - 1.0);
 			m_sheet_main.set_grid_color(grid_color);
 			m_sheet_main.set_grid_emph(GRID_EMPH_0);
 			m_sheet_main.set_grid_show(GRID_SHOW::BACK);
@@ -341,15 +341,15 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.set_stroke_cap(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
 			m_sheet_main.set_stroke_color(Shape::m_default_foreground);
 			m_sheet_main.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
-			m_sheet_main.set_dash_patt(DEF_DASH_PATT);
+			m_sheet_main.set_dash_patt(DASH_PATT_DEFVAL);
 			m_sheet_main.set_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-			m_sheet_main.set_join_limit(DEF_MITER_LIMIT);
+			m_sheet_main.set_join_limit(MITER_LIMIT_DEFVAL);
 			m_sheet_main.set_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
 			m_sheet_main.set_stroke_width(1.0);
 			m_sheet_main.set_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			m_sheet_main.set_text_align_t(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 			m_sheet_main.set_text_line_sp(0.0);
-			m_sheet_main.set_text_padding(DEF_TEXT_MARGIN);
+			m_sheet_main.set_text_padding(TEXT_MARGIN_DEFVAL);
 		}
 	}
 

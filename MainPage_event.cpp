@@ -9,15 +9,15 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Devices::Input::PointerDeviceType;
+	using winrt::Windows::System::VirtualKeyModifiers;
 	using winrt::Windows::UI::Core::CoreCursorType;
+	using winrt::Windows::UI::Input::PointerPointProperties;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollBar;
 	using winrt::Windows::UI::Xaml::Controls::SwapChainPanel;
-	using winrt::Windows::System::VirtualKeyModifiers;
-	using winrt::Windows::UI::Input::PointerPointProperties;
-	using winrt::Windows::Devices::Input::PointerDeviceType;
-	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	using winrt::Windows::UI::Xaml::Window;
 	using winrt::Windows::UI::Xaml::UIElement;
+	using winrt::Windows::UI::Xaml::Window;
 
 	static auto const& CC_ARROW = CoreCursor(CoreCursorType::Arrow, 0);	// 矢印カーソル
 	static auto const& CC_CROSS = CoreCursor(CoreCursorType::Cross, 0);	// 十字カーソル
@@ -32,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 	// 消去フラグの立つ図形をリストから削除する.
 	static void event_reduce_slist(SHAPE_LIST& slist, UNDO_STACK const& u_stack, UNDO_STACK const& r_stack) noexcept;
 	// マウスホイールの値でスクロールする.
-	static bool event_scroll_by_wheel_delta(const ScrollBar& sb, const int32_t delta, const float scale);
+	static bool event_scroll_by_wheel_delta(const ScrollBar& scroll_bar, const int32_t delta, const float scale);
 	// 選択された図形の頂点に最も近い方眼を見つけ, 頂点と方眼との差分を求める.
 	static bool event_get_vec_nearby_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_vec) noexcept;
 	// 非選択の図形の頂点の中から, 選択された図形の頂点に最も近い頂点を見つけ, ２点間の差分を求める.
@@ -91,21 +91,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// マウスホイールの値でスクロールする.
-	static bool event_scroll_by_wheel_delta(const ScrollBar& s_bar, const int32_t delta, const float scale)
+	static bool event_scroll_by_wheel_delta(const ScrollBar& scroll_bar, const int32_t delta, const float scale)
 	{
 		constexpr double DELTA = 32.0;
-		double value = s_bar.Value();
+		double value = scroll_bar.Value();
 		double limit = 0.0;
-		if (delta < 0 && value < (limit = s_bar.Maximum())) {
+		if (delta < 0 && value < (limit = scroll_bar.Maximum())) {
 			value = min(value + DELTA * scale, limit);
 		}
-		else if (delta > 0 && value > (limit = s_bar.Minimum())) {
+		else if (delta > 0 && value > (limit = scroll_bar.Minimum())) {
 			value = max(value - DELTA * scale, limit);
 		}
 		else {
 			return false;
 		}
-		s_bar.Value(value);
+		scroll_bar.Value(value);
 		return true;
 	}
 

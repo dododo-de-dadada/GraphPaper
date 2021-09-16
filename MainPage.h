@@ -254,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 作図ツール
 		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;	// 作図ツール
-		POLY_OPTION m_tool_poly{ DEF_POLY_OPTION };	// 多角形の選択肢
+		POLY_OPTION m_tool_poly{ POLY_OPTION_DEFVAL };	// 多角形の選択肢
 
 		// 図形リスト
 		uint32_t m_list_sel_cnt = 0;	// 選択された図形の数

@@ -362,7 +362,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				Shape::m_range_background = { 0.0f, 0x00 / COLOR_MAX, 0x78 / COLOR_MAX, 0xD4 / COLOR_MAX };
-				Shape::m_range_foreground = S_WHITE;
+				Shape::m_range_foreground = COLOR_WHITE;
 			}
 			/*
 			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
@@ -372,8 +372,8 @@ namespace winrt::GraphPaper::implementation
 				conv_uwp_to_color(unbox_value<Brush>(fore_theme), Shape::m_default_foreground);
 			}
 			else {*/
-				Shape::m_default_background = S_WHITE;
-				Shape::m_default_foreground = S_BLACK;
+				Shape::m_default_background = COLOR_WHITE;
+				Shape::m_default_foreground = COLOR_BLACK;
 			//}
 			/*
 			Shape::m_range_background = Shape::m_range_background;

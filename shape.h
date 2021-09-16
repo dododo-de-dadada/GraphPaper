@@ -35,7 +35,7 @@
 // +------+------+
 //        |
 //        +---------------+---------------+
-//        |               |               |               |
+//        |               |               |
 // +------+------+ +------+------+ +------+------+
 // | ShapeStatus | | ShapeGroup  | | ShapeSheet  |
 // +------+------+ +-------------+ +-------------+
@@ -151,6 +151,7 @@ namespace winrt::GraphPaper::implementation
 		float m_length;		// 先端から付け根までの長さ
 		float m_offset;		// 先端のオフセット
 	};
+	constexpr ARROW_SIZE ARROW_SIZE_DEFVAL{ 7.0, 16.0, 0.0 };	// 矢じるしの寸法の既定値
 
 	// 矢じるしの形式
 	enum struct ARROW_STYLE {
@@ -166,10 +167,16 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_end;	// 終点
 	};
 
+	constexpr D2D1_COLOR_F COLOR_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
+	constexpr D2D1_COLOR_F COLOR_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
+	constexpr D2D1_COLOR_F COLOR_TEXT_SELECTED = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
+
+
 	// 破線の配置
 	union DASH_PATT {
 		float m_[6];
 	};
+	constexpr DASH_PATT DASH_PATT_DEFVAL{ { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F } };	// 破線の配置の既定値
 
 	// 方眼の強調
 	struct GRID_EMPH {
@@ -195,20 +202,16 @@ namespace winrt::GraphPaper::implementation
 		bool m_end_closed;	// 辺を閉じて作図する.
 		bool m_clockwise;	// 頂点を時計回りに作図する.
 	};
-
-	constexpr D2D1_COLOR_F RNG_TEXT = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
+	constexpr POLY_OPTION POLY_OPTION_DEFVAL{ 3, true, true, true, true };	// 多角形の選択肢の既定値
 
 	constexpr float COLOR_MAX = 255.0f;	// 色成分の最大値
 	constexpr double PT_PER_INCH = 72.0;	// 1 インチあたりのポイント数
 	constexpr double MM_PER_INCH = 25.4;	// 1 インチあたりのミリメートル数
-	constexpr ARROW_SIZE DEF_ARROW_SIZE{ 7.0, 16.0, 0.0 };	// 矢じるしの寸法の既定値
-	constexpr DASH_PATT DEF_DASH_PATT{ { 4.0F, 3.0F, 1.0F, 3.0F, 1.0F, 3.0F } };	// 破線の配置の既定値
-	constexpr float DEF_FONT_SIZE = static_cast<float>(12.0 * 96.0 / 72.0);	// 書体の大きさの既定値
-	constexpr D2D1_COLOR_F DEF_GRID_COLOR{ ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 0.5f };	// 方眼の色の既定値
-	constexpr float DEF_GRID_LEN = 48.0f;	// 方眼の長さの既定値
-	constexpr float DEF_MITER_LIMIT = 10.0f;	// マイター制限比率の既定値
-	constexpr POLY_OPTION DEF_POLY_OPTION{ 3, true, true, true, true };	// 多角形の選択肢の既定値
-	constexpr D2D1_SIZE_F DEF_TEXT_MARGIN{ DEF_FONT_SIZE / 4.0, DEF_FONT_SIZE / 4.0 };	// 文字列の余白の既定値
+	constexpr float FONT_SIZE_DEFVAL = static_cast<float>(12.0 * 96.0 / 72.0);	// 書体の大きさの既定値
+	constexpr D2D1_COLOR_F GRID_COLOR_DEFVAL{ ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 0.5f };	// 方眼の色の既定値
+	constexpr float GRID_LEN_DEFVAL = 48.0f;	// 方眼の長さの既定値
+	constexpr float MITER_LIMIT_DEFVAL = 10.0f;	// マイター制限比率の既定値
+	constexpr D2D1_SIZE_F TEXT_MARGIN_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
 	constexpr size_t MAX_N_GON = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 
 	MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
@@ -229,7 +232,8 @@ namespace winrt::GraphPaper::implementation
 	// 倍精度浮動小数が同じか判定する.
 	inline bool equal(const double a, const double b) noexcept;
 	// 同値か判定する.
-	template<typename T> inline bool equal(const T a, const T b) noexcept { return a == b; };
+	template<typename T>
+	inline bool equal(const T a, const T b) noexcept { return a == b; };
 	// 矢じるしの寸法が同じか判定する.
 	inline bool equal(const ARROW_SIZE& a, const ARROW_SIZE& b) noexcept;
 	// 線の単点が同じか判定する.
@@ -482,7 +486,6 @@ namespace winrt::GraphPaper::implementation
 		static IDWriteFactory3* s_dwrite_factory;	// DWRITE ファクトリのキャッシュ
 		static D2D1_COLOR_F s_anch_color;	// 図形の部位の色
 		static float s_anch_len;	// 図形の部位の大きさ
-		//static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
 		static D2D1_COLOR_F m_range_background;	// 文字範囲の背景色
 		static D2D1_COLOR_F m_range_foreground;	// 文字範囲の文字色
 		static D2D1_COLOR_F m_default_background;	// 前景色
@@ -491,7 +494,6 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形表示用の D2D オブジェクト
 		//static winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block;	// 描画状態の保存ブロック
-		//static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
 		//static winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush;	// 文字範囲の文字色ブラシ
 		//static winrt::com_ptr<ID2D1SolidColorBrush> m_shape_brush;	// 図形の色ブラシ
 
@@ -671,14 +673,15 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeStatus : Shape {
 		bool m_is_deleted = false;	// 消去されたか判定
 		bool m_is_selected = false;	// 選択されたか判定
+
 		// 消去されたか判定する.
-		bool is_deleted(void) const noexcept { return m_is_deleted; }
+		bool is_deleted(void) const noexcept override { return m_is_deleted; }
 		// 選択されてるか判定する.
-		bool is_selected(void) const noexcept { return m_is_selected; }
+		bool is_selected(void) const noexcept override { return m_is_selected; }
 		// 値を消去されたか判定に格納する.
-		bool set_delete(const bool value) noexcept { m_is_deleted = value; return true; }
+		bool set_delete(const bool value) noexcept override { m_is_deleted = value; return true; }
 		// 値を選択されてるか判定に格納する.
-		bool set_select(const bool value) noexcept { m_is_selected = value; return true; }
+		bool set_select(const bool value) noexcept override { m_is_selected = value; return true; }
 	};
 
 	//------------------------------
@@ -689,7 +692,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_view;	// 表示寸法
 		D2D1_RECT_F m_rect;	// ビットマップの矩形
 		D2D1_SIZE_U m_size;	// ビットマップの原寸
-		uint8_t* m_data;	// ビットマップのデータ
+		uint8_t* m_data = nullptr;	// ビットマップのデータ
 		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
 		D2D1_SIZE_F m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
 		winrt::com_ptr<ID2D1Bitmap1> m_dx_bitmap{ nullptr };
@@ -699,9 +702,9 @@ namespace winrt::GraphPaper::implementation
 		// ストリームに格納する.
 		IAsyncAction copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream);
 		// 図形を表示する.
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 図形を囲む領域を得る.
-		void get_bound(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/, D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept;
+		void get_bound(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/, D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept override;
 		// 画像の不透明度を得る.
 		bool get_image_opacity(float& /*value*/) const noexcept;
 		// 近傍の頂点を得る.
@@ -749,44 +752,44 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_LIST m_list_shapes;	// 図形リスト
 
 		// 矢じるし
-		ARROW_SIZE m_arrow_size{ DEF_ARROW_SIZE };	// 矢じるしの寸法
+		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
 
 		// 角丸
-		D2D1_POINT_2F m_corner_rad{ DEF_GRID_LEN, DEF_GRID_LEN };	// 角丸半径
+		D2D1_POINT_2F m_corner_rad{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL };	// 角丸半径
 
 		// 塗りつぶし
-		D2D1_COLOR_F m_fill_color{ S_WHITE };	// 塗りつぶしの色
+		D2D1_COLOR_F m_fill_color{ COLOR_WHITE };	// 塗りつぶしの色
 
 		// 書体
-		D2D1_COLOR_F m_font_color{ S_BLACK };	// 書体の色 (MainPage のコンストラクタで設定)
+		D2D1_COLOR_F m_font_color{ COLOR_BLACK };	// 書体の色 (MainPage のコンストラクタで設定)
 		wchar_t* m_font_family = nullptr;	// 書体名
-		float m_font_size = DEF_FONT_SIZE;	// 書体の大きさ
+		float m_font_size = FONT_SIZE_DEFVAL;	// 書体の大きさ
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 
 		// 線枠
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
-		DASH_PATT m_dash_patt{ DEF_DASH_PATT };	// 破線の配置
+		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_limit = DEF_MITER_LIMIT;	// 線のつなぎのマイター制限
+		float m_join_limit = MITER_LIMIT_DEFVAL;	// 線のつなぎのマイター制限
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線枠のつなぎ
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
-		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色 (MainPage のコンストラクタで設定)
+		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線枠の色 (MainPage のコンストラクタで設定)
 		float m_stroke_width = 1.0;	// 線枠の太さ
 
 		// 文字列
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
-		D2D1_SIZE_F m_text_padding{ DEF_TEXT_MARGIN };	// 文字列の左右と上下の余白
+		D2D1_SIZE_F m_text_padding{ TEXT_MARGIN_DEFVAL };	// 文字列の左右と上下の余白
 
 		// 画像
 		float m_image_opac = 1.0f;	// 画像の不透明率
 
 		// 方眼
-		float m_grid_base = DEF_GRID_LEN - 1.0f;	// 方眼の基準の大きさ (を -1 した値)
+		float m_grid_base = GRID_LEN_DEFVAL - 1.0f;	// 方眼の基準の大きさ (を -1 した値)
 		D2D1_COLOR_F m_grid_color{ ACCENT_COLOR };	// 方眼の色
 		GRID_EMPH m_grid_emph{ GRID_EMPH_0 };	// 方眼の強調
 		D2D1_POINT_2F m_grid_offset{ 0.0f, 0.0f };
@@ -794,7 +797,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_grid_snap = true;	// 方眼に合わせる
 
 		// 用紙
-		D2D1_COLOR_F m_sheet_color{ S_WHITE };	// 背景色 (MainPage のコンストラクタで設定)
+		D2D1_COLOR_F m_sheet_color{ COLOR_WHITE };	// 背景色 (MainPage のコンストラクタで設定)
 		float m_sheet_scale = 1.0f;	// 拡大率
 		D2D1_SIZE_F	m_sheet_size{ 0.0f, 0.0f };	// 大きさ (MainPage のコンストラクタで設定)
 
@@ -802,7 +805,7 @@ namespace winrt::GraphPaper::implementation
 		// shape_sheet.cpp
 		//------------------------------
 
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 曲線の補助線を表示する.
 		void draw_auxiliary_bezi(SHAPE_DX const& dx, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
 		// だ円の補助線を表示する.
@@ -963,7 +966,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapeGroup(void);
 		// 図形を表示する.
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 図形を囲む領域の左上位置を得る.
@@ -1000,16 +1003,14 @@ namespace winrt::GraphPaper::implementation
 	// 線枠のひな型
 	//------------------------------
 	struct ShapeStroke : ShapeStatus {
-		//bool m_is_deleted = false;	// 消去されたか判定
-		//bool m_is_selected = false;	// 選択されたか判定
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_diff;	// 次の位置への差分
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
-		D2D1_COLOR_F m_stroke_color{ S_BLACK };	// 線枠の色
+		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線枠の色
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
-		DASH_PATT m_dash_patt{ DEF_DASH_PATT };	// 破線の配置
+		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_limit = DEF_MITER_LIMIT;		// 線のつなぎのマイター制限の比率
+		float m_join_limit = MITER_LIMIT_DEFVAL;		// 線のつなぎのマイター制限の比率
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線のつなぎ
 		float m_stroke_width = 1.0f;	// 線枠の太さ
 
@@ -1098,7 +1099,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct ShapeLineA : ShapeStroke {
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
-		ARROW_SIZE m_arrow_size{ DEF_ARROW_SIZE };	// 矢じるしの寸法
+		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_style{ nullptr };	// 矢じるしの D2D ストロークスタイル
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_arrow_geom{ nullptr };	// 矢じるしの D2D パスジオメトリ
 
@@ -1121,7 +1122,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapeLineA(void);
 		// 表示する.
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 矢じるしの寸法を得る.
 		bool get_arrow_size(ARROW_SIZE& size) const noexcept;
 		// 矢じるしの形式を得る.
@@ -1158,7 +1159,7 @@ namespace winrt::GraphPaper::implementation
 	// 方形
 	//------------------------------
 	struct ShapeRect : ShapeStroke {
-		D2D1_COLOR_F m_fill_color{ S_WHITE };		// 塗りつぶし色
+		D2D1_COLOR_F m_fill_color{ COLOR_WHITE };		// 塗りつぶし色
 
 		//------------------------------
 		// shape_rect.cpp
@@ -1169,7 +1170,7 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから図形を読み込む.
 		ShapeRect(DataReader const& dt_reader);
 		// 表示する.
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 近傍の頂点を得る.
 		bool get_pos_nearest(const D2D1_POINT_2F a_pos, float& dd, D2D1_POINT_2F& value) const noexcept;
 		// 頂点を得る.
@@ -1199,7 +1200,7 @@ namespace winrt::GraphPaper::implementation
 	// 作成したあとで文字列の属性の変更はできない.
 	//------------------------------
 	struct ShapeRuler : ShapeRect {
-		float m_grid_base = DEF_GRID_LEN - 1.0f;	// 方眼の大きさ (を -1 した値)
+		float m_grid_base = GRID_LEN_DEFVAL - 1.0f;	// 方眼の大きさ (を -1 した値)
 		winrt::com_ptr<IDWriteTextFormat> m_dw_text_format{};	// テキストフォーマット
 
 		//------------------------------
@@ -1209,7 +1210,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapeRuler(void);
 		// 図形を表示する.
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 図形を作成する.
@@ -1240,7 +1241,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 図形を表示する.
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// データライターに SVG として書き込む.
@@ -1251,7 +1252,7 @@ namespace winrt::GraphPaper::implementation
 	// 角丸方形
 	//------------------------------
 	struct ShapeRRect : ShapeRect {
-		D2D1_POINT_2F m_corner_rad{ DEF_GRID_LEN, DEF_GRID_LEN };		// 角丸部分の半径
+		D2D1_POINT_2F m_corner_rad{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL };		// 角丸部分の半径
 
 		//------------------------------
 		// shape_rrect.cpp
@@ -1263,7 +1264,7 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから図形を読み込む.
 		ShapeRRect(DataReader const& dt_reader);
 		// 図形を表示する.
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 角丸半径を得る.
@@ -1334,7 +1335,7 @@ namespace winrt::GraphPaper::implementation
 		// パスジオメトリを作成する.
 		//void create_path_geometry(ID2D1Factory3* const d_factory);
 		// 表示する
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 塗りつぶし色を得る.
 		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
 		// 位置を含むか判定する.
@@ -1370,7 +1371,7 @@ namespace winrt::GraphPaper::implementation
 		// パスジオメトリを作成する.
 		//void create_path_geometry(ID2D1Factory3* const d_factory);
 		// 表示する.
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
@@ -1390,9 +1391,9 @@ namespace winrt::GraphPaper::implementation
 		static wchar_t** s_available_fonts;		// 有効な書体名
 
 		DWRITE_TEXT_RANGE m_select_range{ 0, 0 };	// 選択範囲
-		D2D1_COLOR_F m_font_color{ S_BLACK };	// 書体の色
+		D2D1_COLOR_F m_font_color{ COLOR_BLACK };	// 書体の色
 		wchar_t* m_font_family = nullptr;	// 書体名
-		float m_font_size = DEF_FONT_SIZE;	// 書体の大きさ
+		float m_font_size = FONT_SIZE_DEFVAL;	// 書体の大きさ
 		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
@@ -1400,7 +1401,7 @@ namespace winrt::GraphPaper::implementation
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落そろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字揃え
-		D2D1_SIZE_F m_text_padding{ DEF_TEXT_MARGIN };	// 文字列のまわりの上下と左右の余白
+		D2D1_SIZE_F m_text_padding{ TEXT_MARGIN_DEFVAL };	// 文字列のまわりの上下と左右の余白
 
 		winrt::com_ptr<IDWriteTextLayout> m_dw_layout{};	// 文字列を表示するためのレイアウト
 		float m_dw_descent = 0.0f;	// ディセント
@@ -1422,7 +1423,7 @@ namespace winrt::GraphPaper::implementation
 		// 文末の空白を取り除く.
 		void delete_bottom_blank(void) noexcept;
 		// 表示する.
-		void draw(SHAPE_DX& dx);
+		void draw(SHAPE_DX& dx) override;
 		// 選択された文字範囲を塗る.
 		void fill_range(SHAPE_DX& dx, const D2D1_POINT_2F t_min);
 		// 文字列の枠を表示する.

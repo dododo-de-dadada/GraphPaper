@@ -11,16 +11,16 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		CAP_STYLE new_value;
-		if (sender == rmfi_cap_flat() || sender == rmfi_cap_flat_2()) {
+		if (sender == rmfi_cap_style_flat() || sender == rmfi_cap_style_flat_2()) {
 			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };
 		}
-		else if (sender == rmfi_cap_square() || sender == rmfi_cap_square_2()) {
+		else if (sender == rmfi_cap_style_square() || sender == rmfi_cap_style_square_2()) {
 			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE };
 		}
-		else if (sender == rmfi_cap_round() || sender == rmfi_cap_round_2()) {
+		else if (sender == rmfi_cap_style_round() || sender == rmfi_cap_style_round_2()) {
 			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND };
 		}
-		else if (sender == rmfi_cap_triangle() || sender == rmfi_cap_triangle_2()) {
+		else if (sender == rmfi_cap_style_triangle() || sender == rmfi_cap_style_triangle_2()) {
 			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE };
 		}
 		else {
@@ -39,14 +39,14 @@ namespace winrt::GraphPaper::implementation
 	// s_cap	端の形式
 	void MainPage::cap_style_is_checked(const CAP_STYLE& value)
 	{
-		rmfi_cap_flat().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
-		rmfi_cap_flat_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
-		rmfi_cap_square().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
-		rmfi_cap_square_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
-		rmfi_cap_round().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
-		rmfi_cap_round_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
-		rmfi_cap_triangle().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
-		rmfi_cap_triangle_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
+		rmfi_cap_style_flat().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
+		rmfi_cap_style_flat_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
+		rmfi_cap_style_square().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
+		rmfi_cap_style_square_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
+		rmfi_cap_style_round().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
+		rmfi_cap_style_round_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
+		rmfi_cap_style_triangle().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
+		rmfi_cap_style_triangle_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
 	}
 
 	// 線枠メニューの「つなぎの種類」>「額ぶちの制限」が選択された.
@@ -163,22 +163,22 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_LINE_JOIN new_value;
-		if (sender == rmfi_join_bevel() || sender == rmfi_join_bevel_2()) {
+		if (sender == rmfi_join_style_bevel() || sender == rmfi_join_style_bevel_2()) {
 			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
 			mfi_join_limit().IsEnabled(false);
 			mfi_join_limit_2().IsEnabled(false);
 		}
-		else if (sender == rmfi_join_miter() || sender == rmfi_join_miter_2()) {
+		else if (sender == rmfi_join_style_miter() || sender == rmfi_join_style_miter_2()) {
 			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
 			mfi_join_limit().IsEnabled(true);
 			mfi_join_limit_2().IsEnabled(true);
 		}
-		else if (sender == rmfi_join_m_or_b() || sender == rmfi_join_m_or_b_2()) {
+		else if (sender == rmfi_join_style_miter_or_bevel() || sender == rmfi_join_style_miter_or_bevel_2()) {
 			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;
 			mfi_join_limit().IsEnabled(true);
 			mfi_join_limit_2().IsEnabled(true);
 		}
-		else if (sender == rmfi_join_round() || sender == rmfi_join_round_2()) {
+		else if (sender == rmfi_join_style_round() || sender == rmfi_join_style_round_2()) {
 			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND;
 			mfi_join_limit().IsEnabled(false);
 			mfi_join_limit_2().IsEnabled(false);
@@ -199,16 +199,16 @@ namespace winrt::GraphPaper::implementation
 	// s_join	線のつなぎ
 	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN value)
 	{
-		rmfi_join_bevel().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		rmfi_join_bevel_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		rmfi_join_miter().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
-		rmfi_join_miter_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
-		rmfi_join_m_or_b().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		rmfi_join_m_or_b_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		rmfi_join_round().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		rmfi_join_round_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		mfi_join_limit().IsEnabled(rmfi_join_miter().IsChecked() || rmfi_join_m_or_b().IsChecked());
-		mfi_join_limit_2().IsEnabled(rmfi_join_miter_2().IsChecked() || rmfi_join_m_or_b_2().IsChecked());
+		rmfi_join_style_bevel().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
+		rmfi_join_style_bevel_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
+		rmfi_join_style_miter().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		rmfi_join_style_miter_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		rmfi_join_style_miter_or_bevel().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_join_style_miter_or_bevel_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_join_style_round().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
+		rmfi_join_style_round_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
+		mfi_join_limit().IsEnabled(rmfi_join_style_miter().IsChecked() || rmfi_join_style_miter_or_bevel().IsChecked());
+		mfi_join_limit_2().IsEnabled(rmfi_join_style_miter_2().IsChecked() || rmfi_join_style_miter_or_bevel_2().IsChecked());
 	}
 
 }

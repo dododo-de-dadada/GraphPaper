@@ -36,11 +36,10 @@ namespace winrt::GraphPaper::implementation
 		D2D1_STROKE_TRANSFORM_TYPE_NORMAL
 	};
 	constexpr D2D1_COLOR_F ACCENT_COLOR = { 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// 文字範囲の背景色 SystemAccentColor
-	constexpr D2D1_COLOR_F RNG_TEXT = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
+	constexpr D2D1_COLOR_F COLOR_TEXT_SELECTED = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
+	constexpr D2D1_COLOR_F COLOR_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
+	constexpr D2D1_COLOR_F COLOR_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
 	*/
-	constexpr D2D1_COLOR_F S_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
-	constexpr D2D1_COLOR_F S_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
-
 	// SHAPE_DX を所有しているアプリケーションが、デバイスが失われたときまたは作成されたときに通知を受けるためのインターフェイスを提供する.
 	interface IDeviceNotify {
 		virtual void OnDeviceLost() = 0;
