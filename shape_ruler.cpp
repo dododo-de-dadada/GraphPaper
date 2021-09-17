@@ -95,10 +95,10 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// dx	描画環境
-	void ShapeRuler::draw(SHAPE_DX& dx)
+	void ShapeRuler::draw(D2D_UI& dx)
 	{
 		constexpr wchar_t* D[10] = { L"0", L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9" };
-		auto br = dx.m_shape_brush;
+		auto br = dx.m_solid_color_brush;
 
 		const D2D1_RECT_F rect{
 			m_pos.x,
@@ -109,8 +109,8 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_fill_color)) {
 			// 塗りつぶし色が不透明な場合,
 			// 方形を塗りつぶす.
-			dx.m_shape_brush->SetColor(m_fill_color);
-			dx.m_d2d_context->FillRectangle(&rect, dx.m_shape_brush.get());
+			dx.m_solid_color_brush->SetColor(m_fill_color);
+			dx.m_d2d_context->FillRectangle(&rect, dx.m_solid_color_brush.get());
 		}
 		if (is_opaque(m_stroke_color)) {
 			// 線枠の色が不透明な場合,

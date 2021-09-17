@@ -660,7 +660,7 @@ namespace winrt::GraphPaper::implementation
 
 	// パスジオメトリを作成する.
 	// d_factory DX ファクトリ
-	void ShapePoly::create_path_geometry(const SHAPE_DX& dx)
+	void ShapePoly::create_path_geometry(const D2D_UI& dx)
 	{
 		if (m_d2d_path_geom != nullptr) {
 			m_d2d_path_geom = nullptr;
@@ -784,7 +784,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// dx	図形の描画環境
-	void ShapePoly::draw(SHAPE_DX& dx)
+	void ShapePoly::draw(D2D_UI& dx)
 	{
 		if (m_d2d_arrow_geom == nullptr || m_d2d_path_geom == nullptr) {
 			create_path_geometry(dx);
@@ -792,14 +792,14 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_fill_color)) {
 			const auto p_geom = m_d2d_path_geom.get();
 			if (p_geom != nullptr) {
-				dx.m_shape_brush->SetColor(m_fill_color);
-				dx.m_d2d_context->FillGeometry(p_geom, dx.m_shape_brush.get(), nullptr);
+				dx.m_solid_color_brush->SetColor(m_fill_color);
+				dx.m_d2d_context->FillGeometry(p_geom, dx.m_solid_color_brush.get(), nullptr);
 			}
 		}
 		if (is_opaque(m_stroke_color)) {
 			const auto p_geom = m_d2d_path_geom.get();
 			const auto s_width = m_stroke_width;
-			const auto s_brush = dx.m_shape_brush.get();
+			const auto s_brush = dx.m_solid_color_brush.get();
 			const auto s_style = m_d2d_stroke_style.get();
 			s_brush->SetColor(m_stroke_color);
 			dx.m_d2d_context->DrawGeometry(p_geom, s_brush, s_width, s_style);

@@ -177,47 +177,47 @@
     <value>折り返しあり</value>
     <comment>CheckBox</comment>
   </data>
-  <data name="rmfi_misc_color_cent.Text" xml:space="preserve">
+  <data name="rmfi_color_code_cent.Text" xml:space="preserve">
     <value>パーセント</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_misc_color_dec.Text" xml:space="preserve">
+  <data name="rmfi_color_code_dec.Text" xml:space="preserve">
     <value>10進数</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_misc_color_real.Text" xml:space="preserve">
+  <data name="rmfi_color_code_real.Text" xml:space="preserve">
     <value>実数</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_misc_color_hex.Text" xml:space="preserve">
+  <data name="rmfi_color_code_hex.Text" xml:space="preserve">
     <value>16進数</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_misc_len_grid.Text" xml:space="preserve">
+  <data name="rmfi_len_unit_grid.Text" xml:space="preserve">
     <value>方眼</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_misc_len_inch.Text" xml:space="preserve">
+  <data name="rmfi_len_unit_inch.Text" xml:space="preserve">
     <value>インチ</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_misc_len_milli.Text" xml:space="preserve">
+  <data name="rmfi_len_unit_milli.Text" xml:space="preserve">
     <value>ミリメートル</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_misc_len_pixel.Text" xml:space="preserve">
+  <data name="rmfi_len_unit_pixel.Text" xml:space="preserve">
     <value>ピクセル</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_misc_len_point.Text" xml:space="preserve">
+  <data name="rmfi_len_unit_point.Text" xml:space="preserve">
     <value>ポイント</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_misc_color_code.Text" xml:space="preserve">
+  <data name="mfsi_color_code.Text" xml:space="preserve">
     <value>色の表記</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_misc_len_unit.Text" xml:space="preserve">
+  <data name="mfsi_len_unit.Text" xml:space="preserve">
     <value>長さの単位</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -529,7 +529,7 @@
     <value>最近使ったファイル</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_misc_status_bar.Text" xml:space="preserve">
+  <data name="mfsi_status_bar.Text" xml:space="preserve">
     <value>ステータスバー</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -870,27 +870,27 @@
     <value>方眼に合わせる</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_misc_status_curs.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_curs.Text" xml:space="preserve">
     <value>カーソルの位置</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_misc_status_grid.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_grid.Text" xml:space="preserve">
     <value>方眼の大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_misc_status_sheet.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_sheet.Text" xml:space="preserve">
     <value>用紙の大きさ</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_misc_status_draw.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_draw.Text" xml:space="preserve">
     <value>作図ツール</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_misc_status_unit.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_unit.Text" xml:space="preserve">
     <value>単位名</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="tmfi_misc_status_zoom.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_zoom.Text" xml:space="preserve">
     <value>拡大率</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -1062,7 +1062,7 @@
     <value>つなぎの種類</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_misc_vert_stick.Text" xml:space="preserve">
+  <data name="mfi_stick_to_vertex.Text" xml:space="preserve">
     <value>頂点をくっつける...</value>
     <comment>MenuFlyoutItem</comment>
   </data>

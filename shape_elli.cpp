@@ -10,7 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// }Œ`‚ð•\Ž¦‚·‚é.
-	void ShapeElli::draw(SHAPE_DX& dx)
+	void ShapeElli::draw(D2D_UI& dx)
 	{
 		// ”¼Œa‚ð‹‚ß‚é.
 		D2D1_POINT_2F rad;
@@ -22,13 +22,13 @@ namespace winrt::GraphPaper::implementation
 		D2D1_ELLIPSE elli{ c_pos, rad.x, rad.y };
 		// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚©”»’è‚·‚é.
 		if (is_opaque(m_fill_color)) {
-			dx.m_shape_brush->SetColor(m_fill_color);
-			dx.m_d2d_context->FillEllipse(elli, dx.m_shape_brush.get());
+			dx.m_solid_color_brush->SetColor(m_fill_color);
+			dx.m_d2d_context->FillEllipse(elli, dx.m_solid_color_brush.get());
 		}
 		// ˜gü‚ÌF‚ª•s“§–¾‚©”»’è‚·‚é.
 		if (is_opaque(m_stroke_color)) {
-			dx.m_shape_brush->SetColor(m_stroke_color);
-			dx.m_d2d_context->DrawEllipse(elli, dx.m_shape_brush.get(), m_stroke_width, m_d2d_stroke_style.get());
+			dx.m_solid_color_brush->SetColor(m_stroke_color);
+			dx.m_d2d_context->DrawEllipse(elli, dx.m_solid_color_brush.get(), m_stroke_width, m_d2d_stroke_style.get());
 		}
 		if (is_selected() != true) {
 			return;

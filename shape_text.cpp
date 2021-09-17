@@ -348,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚ð•\Ž¦‚·‚é.
 	//	dx	}Œ`‚Ì•`‰æŠÂ‹«
 	//	–ß‚è’l	‚È‚µ
-	void ShapeText::draw(SHAPE_DX& dx)
+	void ShapeText::draw(D2D_UI& dx)
 	{
 		ShapeRect::draw(dx);
 		if (m_dw_layout == nullptr) {
@@ -368,8 +368,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_select_range.length > 0 && m_text != nullptr) {
 			fill_range(dx, t_min);
 		}
-		dx.m_shape_brush->SetColor(m_font_color);
-		dx.m_d2d_context->DrawTextLayout(t_min, m_dw_layout.get(), dx.m_shape_brush.get());
+		dx.m_solid_color_brush->SetColor(m_font_color);
+		dx.m_d2d_context->DrawTextLayout(t_min, m_dw_layout.get(), dx.m_solid_color_brush.get());
 		if (m_select_range.length > 0 && m_text != nullptr) {
 			m_dw_layout->SetDrawingEffect(nullptr, { 0, wchar_len(m_text) });
 		}
@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// •¶Žš—ñ‚Ì˜g‚ð•\Ž¦‚·‚é.
-	void ShapeText::draw_frame(SHAPE_DX& dx, const D2D1_POINT_2F t_min)
+	void ShapeText::draw_frame(D2D_UI& dx, const D2D1_POINT_2F t_min)
 	{
 		const auto d_cnt = Shape::m_aux_style->GetDashesCount();
 		if (d_cnt <= 0 || d_cnt > 6) {
@@ -422,25 +422,25 @@ namespace winrt::GraphPaper::implementation
 			p[1].y = p[0].y;
 			p[3].x = p[0].x;
 			p[3].y = p[2].y;
-			dx.m_shape_brush->SetColor(Shape::m_range_foreground);
-			dc->DrawRectangle({ p[0].x, p[0].y, p[2].x, p[2].y }, dx.m_shape_brush.get(), s_width, nullptr);
-			dx.m_shape_brush->SetColor(Shape::m_range_background);
+			dx.m_solid_color_brush->SetColor(Shape::m_range_foreground);
+			dc->DrawRectangle({ p[0].x, p[0].y, p[2].x, p[2].y }, dx.m_solid_color_brush.get(), s_width, nullptr);
+			dx.m_solid_color_brush->SetColor(Shape::m_range_background);
 			s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].x, mod));
 			winrt::com_ptr<ID2D1StrokeStyle1> s_style;
 			Shape::s_d2d_factory->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
-			dc->DrawLine(p[0], p[1], dx.m_shape_brush.get(), s_width, s_style.get());
-			dc->DrawLine(p[3], p[2], dx.m_shape_brush.get(), s_width, s_style.get());
+			dc->DrawLine(p[0], p[1], dx.m_solid_color_brush.get(), s_width, s_style.get());
+			dc->DrawLine(p[3], p[2], dx.m_solid_color_brush.get(), s_width, s_style.get());
 			s_style = nullptr;
 			s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].y, mod));
 			Shape::s_d2d_factory->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
-			dc->DrawLine(p[1], p[2], dx.m_shape_brush.get(), s_width, s_style.get());
-			dc->DrawLine(p[0], p[3], dx.m_shape_brush.get(), s_width, s_style.get());
+			dc->DrawLine(p[1], p[2], dx.m_solid_color_brush.get(), s_width, s_style.get());
+			dc->DrawLine(p[0], p[3], dx.m_solid_color_brush.get(), s_width, s_style.get());
 			s_style = nullptr;
 		}
 
 	}
 
-	void ShapeText::fill_range(SHAPE_DX& dx, const D2D1_POINT_2F t_min)
+	void ShapeText::fill_range(D2D_UI& dx, const D2D1_POINT_2F t_min)
 	{
 		const auto rc = m_dw_selected_cnt;
 		const auto dc = dx.m_d2d_context.get();
@@ -462,10 +462,10 @@ namespace winrt::GraphPaper::implementation
 						rect.right = rect.left + rm.width;
 					}
 					rect.bottom = rect.top + m_font_size;
-					dx.m_shape_brush->SetColor(Shape::m_range_foreground);
-					dc->DrawRectangle(rect, dx.m_shape_brush.get(), 2.0, nullptr);
-					dx.m_shape_brush->SetColor(Shape::m_range_background);
-					dc->FillRectangle(rect, dx.m_shape_brush.get());
+					dx.m_solid_color_brush->SetColor(Shape::m_range_foreground);
+					dc->DrawRectangle(rect, dx.m_solid_color_brush.get(), 2.0, nullptr);
+					dx.m_solid_color_brush->SetColor(Shape::m_range_background);
+					dc->FillRectangle(rect, dx.m_solid_color_brush.get());
 					break;
 				}
 			}

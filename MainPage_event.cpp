@@ -97,10 +97,10 @@ namespace winrt::GraphPaper::implementation
 		double value = scroll_bar.Value();
 		double limit = 0.0;
 		if (delta < 0 && value < (limit = scroll_bar.Maximum())) {
-			value = min(value + DELTA * scale, limit);
+			value = min(value + DELTA / scale, limit);
 		}
 		else if (delta > 0 && value > (limit = scroll_bar.Minimum())) {
-			value = max(value - DELTA * scale, limit);
+			value = max(value - DELTA / scale, limit);
 		}
 		else {
 			return false;

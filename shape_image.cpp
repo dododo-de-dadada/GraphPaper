@@ -133,7 +133,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚ð•\Ž¦‚·‚é.
-	void ShapeImage::draw(SHAPE_DX& dx)
+	void ShapeImage::draw(D2D_UI& dx)
 	{
 		if (m_dx_bitmap == nullptr) {
 			const D2D1_BITMAP_PROPERTIES1 b_prop{
@@ -156,10 +156,10 @@ namespace winrt::GraphPaper::implementation
 		dx.m_d2d_context->DrawBitmap(m_dx_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_rect);
 
 		if (is_selected()) {
-			dx.m_shape_brush->SetColor(Shape::m_default_background);
-			dx.m_d2d_context->DrawRectangle(dest_rect, dx.m_shape_brush.get(), 1.0f, nullptr);
-			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-			dx.m_d2d_context->DrawRectangle(dest_rect, dx.m_shape_brush.get(), 1.0f, Shape::m_aux_style.get());
+			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
+			dx.m_d2d_context->DrawRectangle(dest_rect, dx.m_solid_color_brush.get(), 1.0f, nullptr);
+			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
+			dx.m_d2d_context->DrawRectangle(dest_rect, dx.m_solid_color_brush.get(), 1.0f, Shape::m_aux_style.get());
 
 			const D2D1_POINT_2F v_pos[4]{
 				m_pos,

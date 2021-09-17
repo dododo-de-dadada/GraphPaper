@@ -1,11 +1,11 @@
 //------------------------------
-// shape_dx.cpp
+// d2d_ui.cpp
 // 図形の描画環境
 //------------------------------
 #include "pch.h"
 #include <winrt/Windows.UI.Core.h>
 #include <windows.ui.xaml.media.dxinterop.h>
-#include "shape_dx.h"
+#include "d2d_ui.h"
 
 using namespace winrt;
 using namespace D2D1;
@@ -69,12 +69,14 @@ namespace ScreenRotation
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::Graphics::Display::DisplayOrientations;
+	using winrt::Windows::Graphics::Display::DisplayInformation;
+
 
 	static winrt::com_ptr<ID2D1Factory3> create_d2d_factory(void);
 	static winrt::com_ptr<IDWriteFactory3> create_dwrite_factory(void);
 
-	winrt::com_ptr<ID2D1Factory3> SHAPE_DX::m_d2d_fanctory{ create_d2d_factory() };
-	winrt::com_ptr<IDWriteFactory3> SHAPE_DX::m_dwrite_factory{ create_dwrite_factory() };
+	winrt::com_ptr<ID2D1Factory3> D2D_UI::m_d2d_fanctory{ create_d2d_factory() };
+	winrt::com_ptr<IDWriteFactory3> D2D_UI::m_dwrite_factory{ create_dwrite_factory() };
 
 	// デバイスに依存しないピクセル単位 (DIP) の長さを物理的なピクセルの長さに変換します。
 	inline float ConvertDipsToPixels(float dips, float dpi)
@@ -129,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 		// 規定値は, DXGI_MODE_ROTATION_UNSPECIFIED.
 		// メモ: DisplayOrientations 列挙型に他の値があっても、NativeOrientation として使用できるのは、
 		// Landscape または Portrait のどちらかのみ.
-		DXGI_MODE_ROTATION displayRotation = DXGI_MODE_ROTATION::DXGI_MODE_ROTATION_IDENTITY;
+		DXGI_MODE_ROTATION display_rotation = DXGI_MODE_ROTATION::DXGI_MODE_ROTATION_IDENTITY;
 		constexpr DisplayOrientations L = DisplayOrientations::Landscape;
 		constexpr DisplayOrientations P = DisplayOrientations::Portrait;
 		constexpr DisplayOrientations LF = DisplayOrientations::LandscapeFlipped;
@@ -138,27 +140,27 @@ namespace winrt::GraphPaper::implementation
 		if ((native == L && current == L)
 			|| (native == P && current == P)) {
 			// DXGI_MODE_ROTATION_IDENTITY. 
-			displayRotation = DXGI_MODE_ROTATION_IDENTITY;
+			display_rotation = DXGI_MODE_ROTATION_IDENTITY;
 		}
 		// 既定がヨコ向きかつ現在がタテ向き, または既定がタテ向きかつ現在が反ヨコ向きか判定する.
 		else if ((native == L && current == P)
 			|| (native == P && current == LF)) {
 			// DXGI_MODE_ROTATION_ROTATE270.
-			displayRotation = DXGI_MODE_ROTATION_ROTATE270;
+			display_rotation = DXGI_MODE_ROTATION_ROTATE270;
 		}
 		// 既定がヨコ向きかつ現在が反ヨコ向き, または既定がタテ向きかつ現在が反タテ向きか判定する.
 		else if ((native == L && current == LF)
 			|| (native == P && current == PF)) {
 			// DXGI_MODE_ROTATION_ROTATE180.
-			displayRotation = DXGI_MODE_ROTATION_ROTATE180;
+			display_rotation = DXGI_MODE_ROTATION_ROTATE180;
 		}
 		// 既定がヨコ向きかつ現在が反タテ向き, または既定がタテ向きかつ現在がヨコ向きか判定する.
 		else if ((native == L && current == PF)
 			|| (native == P && current == L)) {
 			// DXGI_MODE_ROTATION_ROTATE90.
-			displayRotation = DXGI_MODE_ROTATION_ROTATE90;
+			display_rotation = DXGI_MODE_ROTATION_ROTATE90;
 		}
-		return displayRotation;
+		return display_rotation;
 	}
 
 	// スワップ チェーンの適切な方向を設定し、回転されたスワップ チェーンにレンダリングするための 2D および
@@ -170,11 +172,11 @@ namespace winrt::GraphPaper::implementation
 		IDXGISwapChain3* dxgi_swap_chain,
 		Matrix3x2F& trans2D,
 		DirectX::XMFLOAT4X4& trans3D,
-		const DXGI_MODE_ROTATION displayRotation,
+		const DXGI_MODE_ROTATION display_rotation,
 		const float logical_width,
 		const float logical_height)
 	{
-		switch (displayRotation)
+		switch (display_rotation)
 		{
 		case DXGI_MODE_ROTATION_IDENTITY:
 			trans2D = Matrix3x2F::Identity();
@@ -205,12 +207,12 @@ namespace winrt::GraphPaper::implementation
 		default:
 			throw winrt::hresult_invalid_argument();
 		}
-		winrt::check_hresult(dxgi_swap_chain->SetRotation(displayRotation));
+		winrt::check_hresult(dxgi_swap_chain->SetRotation(display_rotation));
 	}
 
 	// ウィンドウサイズ依存のリソースを作成する.
 	// これらのリソースは、ウィンドウサイズが変更されるたびに再作成する必要がある.
-	void SHAPE_DX::CreateWindowSizeDependentResources(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::CreateWindowSizeDependentResources(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
 	{
 		using winrt::Windows::UI::Core::CoreDispatcherPriority;
 		using winrt::Windows::UI::Core::DispatchedHandler;
@@ -218,12 +220,12 @@ namespace winrt::GraphPaper::implementation
 		// 前のウィンドウサイズに固有のコンテキストをクリアするため,
 		// レンダーターゲットを D3D コンテキストの出力マージ (OM) ステージに格納する.
 		// レンダーターゲットは空のビュー, 深度/ステンシルバッファーはヌルを指定する.
-		ID3D11RenderTargetView* nullViews[] = { nullptr };
-		m_d3d_context->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
+		ID3D11RenderTargetView* null_views[] = { nullptr };
+		m_d3d_context->OMSetRenderTargets(ARRAYSIZE(null_views), null_views, nullptr);
 		// 空ターゲットを　D2D コンテキストに格納する.
 		m_d2d_context->SetTarget(nullptr);
 		// ヌルを D2D ビットマップに格納する.
-		winrt::com_ptr<ID2D1Bitmap1> m_d2dTargetBitmap = nullptr;
+		winrt::com_ptr<ID2D1Bitmap1> d2d_target_bitmap = nullptr;
 		// GPU のコマンドバッファを空のイベントクエリでフラッシュする.
 		m_d3d_context->Flush1(D3D11_CONTEXT_TYPE_ALL, nullptr);
 
@@ -267,10 +269,10 @@ namespace winrt::GraphPaper::implementation
 		// Landscape または Portrait のどちらかのみ.
 		FLOAT d3d_target_width;
 		FLOAT d3d_target_height;
-		auto displayRotation = get_display_rotation(m_nativeOrientation, m_currentOrientation);
+		auto display_rotation = get_display_rotation(m_nativeOrientation, m_currentOrientation);
 		// 表示デバイスの回転が 90° または 270° か判定する.
-		if (displayRotation == DXGI_MODE_ROTATION_ROTATE90
-			|| displayRotation == DXGI_MODE_ROTATION_ROTATE270) {
+		if (display_rotation == DXGI_MODE_ROTATION_ROTATE90
+			|| display_rotation == DXGI_MODE_ROTATION_ROTATE270) {
 			// ならば, 出力領域の幅と高さを入れ替えて, D3D ターゲットの幅と高さに格納する.
 			d3d_target_width = output_height;
 			d3d_target_height = output_width;
@@ -307,7 +309,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// それ以外の場合は、既存の Direct3D デバイスと同じアダプターを使用して、新規作成する.
-			DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { 0 };
+			DXGI_SWAP_CHAIN_DESC1 swap_chain_desc{ 0 };
 			// DXGI スワップチェーンの詳細を初期化する.
 			// 幅には D3D ターゲットの幅,
 			// 高さには D3D ターゲットの高さ,
@@ -318,56 +320,56 @@ namespace winrt::GraphPaper::implementation
 			// バッファの使用方法には DXGI_USAGE_RENDER_TARGET_OUTPUT,
 			// バッファの数には 2,
 			// フラグには 0 をそれぞれ指定する.
-			swapChainDesc.Width = lround(d3d_target_width);		// ウィンドウのサイズと一致させます。
-			swapChainDesc.Height = lround(d3d_target_height);
-			swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;				// これは、最も一般的なスワップ チェーンのフォーマットです。
-			swapChainDesc.Stereo = false;
-			swapChainDesc.SampleDesc.Count = 1;								// マルチサンプリングは使いません。
-			swapChainDesc.SampleDesc.Quality = 0;
-			swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			swapChainDesc.BufferCount = 2;	// 遅延を最小限に抑えるにはダブル バッファーを使用します。
-			swapChainDesc.Flags = 0;
-			swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+			swap_chain_desc.Width = lround(d3d_target_width);		// ウィンドウのサイズと一致させます。
+			swap_chain_desc.Height = lround(d3d_target_height);
+			swap_chain_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;				// これは、最も一般的なスワップ チェーンのフォーマットです。
+			swap_chain_desc.Stereo = false;
+			swap_chain_desc.SampleDesc.Count = 1;								// マルチサンプリングは使いません。
+			swap_chain_desc.SampleDesc.Quality = 0;
+			swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+			swap_chain_desc.BufferCount = 2;	// 遅延を最小限に抑えるにはダブル バッファーを使用します。
+			swap_chain_desc.Flags = 0;
+			swap_chain_desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 			// スケーリングには DXGI_SCALING_STRETCH を指定する.
 			// 原因はよくわからないが, たとえバッファサイズが一致していたとしても DXGI_SCALING_NONE を指定するとエラーになる.
 			//if (DisplayMetrics::SupportHighResolutions
 			// || m_logical_dpi <= DisplayMetrics::DpiThreshold) {
-			//	swapChainDesc.Scaling = DXGI_SCALING_NONE;
+			//	swap_chain_desc.Scaling = DXGI_SCALING_NONE;
 			//}
 			//else {
-				swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+				swap_chain_desc.Scaling = DXGI_SCALING_STRETCH;
 			//}
 			// D3D ドライバーが D3D_DRIVER_TYPE_HARDWARE か判定する.
 			if (m_d3d_driver_type == D3D_DRIVER_TYPE_HARDWARE) {
 				// 切り替え効果に DXGI_SWAP_EFFECT_FLIP_DISCARD を格納する.
 				// この効果を指定すると, Present1 呼び出し後に残ったバッファは破棄される.
 				// 破棄されてないバッファが残っている場合, ハードウェアドライバーはこれを表示してしまう.
-				swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+				swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_DISCARD;
 			}
 			else {
 				// D3D ドライバーが D3D_DRIVER_TYPE_HARDWARE 以外なら,
 				// 切り替え効果に DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL を格納する.
 				// この効果を指定すると, Present1 呼び出し後に残ったバッファは保持される.
 				// 破棄されてないバッファが残っている場合でも, WARP ドライバーは正常に表示する.
-				swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	// すべての Windows ストア アプリは、_FLIP_ SwapEffects を使用する必要があります。
+				swap_chain_desc.SwapEffect = DXGI_SWAP_EFFECT::DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;	// すべての Windows ストア アプリは、_FLIP_ SwapEffects を使用する必要があります。
 			}
 
 			// このシーケンスは、上の Direct3D デバイスを作成する際に使用された DXGI ファクトリを取得する.
-			winrt::com_ptr<IDXGIDevice3> dxgiDevice;
-			winrt::check_hresult(m_d3d_device.try_as(dxgiDevice));
+			winrt::com_ptr<IDXGIDevice3> dxgi_device;
+			winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
 
-			winrt::com_ptr<IDXGIAdapter> dxgiAdapter;
-			winrt::check_hresult(dxgiDevice->GetAdapter(dxgiAdapter.put()));
+			winrt::com_ptr<IDXGIAdapter> dxgi_adapter;
+			winrt::check_hresult(dxgi_device->GetAdapter(dxgi_adapter.put()));
 
-			winrt::com_ptr<IDXGIFactory4> dxgiFactory;
-			winrt::check_hresult(dxgiAdapter->GetParent(_uuidof(&dxgiFactory), dxgiFactory.put_void()));
+			winrt::com_ptr<IDXGIFactory4> dxgi_factory;
+			winrt::check_hresult(dxgi_adapter->GetParent(_uuidof(&dxgi_factory), dxgi_factory.put_void()));
 
 			// XAML 相互運用機能の使用時に, 合成用にスワップ チェーンを作成する必要あり.
 			winrt::com_ptr<IDXGISwapChain1> swapChain;
 			winrt::check_hresult(
-				dxgiFactory->CreateSwapChainForComposition(
+				dxgi_factory->CreateSwapChainForComposition(
 					m_d3d_device.get(),
-					&swapChainDesc,
+					&swap_chain_desc,
 					nullptr,
 					swapChain.put()
 				)
@@ -389,7 +391,7 @@ namespace winrt::GraphPaper::implementation
 			) };
 			// DXGI が 1 度に複数のフレームをキュー処理していないことを確認します。これにより、遅延が減少し、
 			// アプリケーションが各 VSync の後でのみレンダリングすることが保証され、消費電力が最小限に抑えられます。
-			winrt::check_hresult(dxgiDevice->SetMaximumFrameLatency(1));
+			winrt::check_hresult(dxgi_device->SetMaximumFrameLatency(1));
 		}
 
 		// スワップ チェーンの適切な方向を設定し、回転されたスワップ チェーンにレンダリングするための
@@ -398,43 +400,42 @@ namespace winrt::GraphPaper::implementation
 		// さらに、丸めエラーを回避するために 3D マトリックスが明示的に指定されます。
 		Matrix3x2F transform2D;
 		DirectX::XMFLOAT4X4 transform3D;
-		set_display_rotation(m_dxgi_swap_chain.get(), transform2D, transform3D, displayRotation, m_logical_width, m_logical_height);
+		set_display_rotation(m_dxgi_swap_chain.get(), transform2D, transform3D, display_rotation, m_logical_width, m_logical_height);
 
 		// スワップ チェーンに逆拡大率を設定します
-		DXGI_MATRIX_3X2_F inverseScale{ 0 };
-		inverseScale._11 = 1.0f / m_effectiveCompositionScaleX;
-		inverseScale._22 = 1.0f / m_effectiveCompositionScaleY;
-		winrt::com_ptr<IDXGISwapChain2> spSwapChain2;
-		winrt::check_hresult(m_dxgi_swap_chain.try_as(spSwapChain2));//As<IDXGISwapChain2>(&spSwapChain2));		
-		winrt::check_hresult(spSwapChain2->SetMatrixTransform(&inverseScale));
+		DXGI_MATRIX_3X2_F inverse_scale{ 0 };
+		inverse_scale._11 = 1.0f / m_effectiveCompositionScaleX;
+		inverse_scale._22 = 1.0f / m_effectiveCompositionScaleY;
+		winrt::com_ptr<IDXGISwapChain2> dxgi_swap_chain2;
+		winrt::check_hresult(m_dxgi_swap_chain.try_as(dxgi_swap_chain2));//As<IDXGISwapChain2>(&dxgi_swap_chain2));		
+		winrt::check_hresult(dxgi_swap_chain2->SetMatrixTransform(&inverse_scale));
 
 		// スワップ チェーンのバック バッファーのレンダリング ターゲット ビューを作成します。
-		winrt::com_ptr<ID3D11Texture2D1> backBuffer;
+		winrt::com_ptr<ID3D11Texture2D1> texture_buffer;
 		winrt::check_hresult(
-			m_dxgi_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D1), backBuffer.put_void())//IID_PPV_ARGS(&backBuffer))
+			m_dxgi_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D1), texture_buffer.put_void())//IID_PPV_ARGS(&texture_buffer))
 		);
 		// スワップ チェーン バック バッファーに関連付けられた Direct2D ターゲット ビットマップを作成し、
 		// それを現在のターゲットとして設定します。
-		D2D1_BITMAP_PROPERTIES1 bitmapProperties =
+		D2D1_BITMAP_PROPERTIES1 bitmap_properties =
 			D2D1::BitmapProperties1(
 				D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
 				D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
 				m_logical_dpi,
 				m_logical_dpi
 			);
-
-		winrt::com_ptr<IDXGISurface2> dxgiBackBuffer;
+		winrt::com_ptr<IDXGISurface2> dxgi_back_buffer;
 		winrt::check_hresult(
-			m_dxgi_swap_chain->GetBuffer(0, __uuidof(IDXGISurface2), dxgiBackBuffer.put_void())//IID_PPV_ARGS(&dxgiBackBuffer))
+			m_dxgi_swap_chain->GetBuffer(0, __uuidof(IDXGISurface2), dxgi_back_buffer.put_void())//IID_PPV_ARGS(&dxgi_back_buffer))
 		);
 		winrt::check_hresult(
 			m_d2d_context->CreateBitmapFromDxgiSurface(
-				dxgiBackBuffer.get(),
-				&bitmapProperties,
-				m_d2dTargetBitmap.put()
+				dxgi_back_buffer.get(),
+				&bitmap_properties,
+				d2d_target_bitmap.put()
 			)
 		);
-		m_d2d_context->SetTarget(m_d2dTargetBitmap.get());
+		m_d2d_context->SetTarget(d2d_target_bitmap.get());
 		m_d2d_context->SetDpi(m_effectiveDpi, m_effectiveDpi);
 
 		// すべての Windows ストア アプリで、グレースケール テキストのアンチエイリアシングをお勧めします。
@@ -442,7 +443,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// すべてのデバイス リソースを再作成し、現在の状態に再設定する.
-	void SHAPE_DX::HandleDeviceLost(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::HandleDeviceLost(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
 	{
 		m_dxgi_swap_chain = nullptr;
 
@@ -459,7 +460,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// スワップチェーンの内容を画面に表示する.
-	void SHAPE_DX::Present(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::Present(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
 	{
 		DXGI_PRESENT_PARAMETERS param{ 0 };
 		const HRESULT hr = m_dxgi_swap_chain->Present1(1, 0, &param);
@@ -472,14 +473,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// デバイスが失われたときと作成されたときに通知を受けるように、DeviceNotify を登録する.
-	void SHAPE_DX::RegisterDeviceNotify(IDeviceNotify* deviceNotify)
+	void D2D_UI::RegisterDeviceNotify(IDeviceNotify* deviceNotify)
 	{
 		m_deviceNotify = deviceNotify;
 	}
 
 	// 描画環境に合成倍率を設定する.
 	// このメソッドは、CompositionScaleChanged イベントハンドラーの中で呼び出される.
-	void SHAPE_DX::SetCompositionScale(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, float compositionScaleX, float compositionScaleY)
+	void D2D_UI::SetCompositionScale(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, float compositionScaleX, float compositionScaleY)
 	{
 		if (m_compositionScaleX != compositionScaleX || 
 			m_compositionScaleY != compositionScaleY) {
@@ -491,7 +492,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 描画環境にデバイスの向きを設定する.
 	// このメソッドは、OrientationChanged イベントハンドラーの中で呼び出される.
-	void SHAPE_DX::SetCurrentOrientation(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, DisplayOrientations currentOrientation)
+	void D2D_UI::SetCurrentOrientation(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, DisplayOrientations currentOrientation)
 	{
 		if (m_currentOrientation != currentOrientation) {
 			m_currentOrientation = currentOrientation;
@@ -501,7 +502,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 描画環境に DPI を設定する.
 	// このメソッドは、DpiChanged イベントハンドラーの中で呼び出される.
-	void SHAPE_DX::SetDpi(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, float dpi)
+	void D2D_UI::SetDpi(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, const float dpi)
 	{
 		if (dpi == m_logical_dpi) {
 			return;
@@ -514,7 +515,7 @@ namespace winrt::GraphPaper::implementation
 	// 描画環境に表示領域の大きさを設定する.
 	// このメソッドは、SizeChanged イベントハンドラーの中で呼び出される.
 	// SizeChanged は, まずサイズ 0 で Loaded に先んじて呼び出される.
-	void SHAPE_DX::SetLogicalSize2(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, const D2D1_SIZE_F size)
+	void D2D_UI::SetLogicalSize2(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, const D2D1_SIZE_F size)
 	{
 		if (m_logical_width == size.width &&
 			m_logical_height == size.height) {
@@ -527,10 +528,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 描画環境に XAML スワップチェーンパネルを設定する.
 	// このメソッドは, UI コントロールが作成 (または再作成) = Loaded されたときに呼び出される.
-	void SHAPE_DX::SetSwapChainPanel(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::SetSwapChainPanel(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
 	{
-		using winrt::Windows::Graphics::Display::DisplayInformation;
-
 		// 現在の表示状態 DisplayInfomation を得る.
 		// 表示状態をもとに, 表示デバイスの既定の向きと現在の向き, 
 		// 論理 DPI を得る. 
@@ -557,7 +556,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// D3D デバイスを構成し, D3D と相互運用される D2D デバイスを作成する.
-	SHAPE_DX::SHAPE_DX(void)
+	D2D_UI::D2D_UI(void)
 	{
 		D3D_FEATURE_LEVEL m_d3dFeatureLevel{ D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_1 };
 
@@ -658,12 +657,12 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(context.try_as(m_d3d_context));
 
 		// D3D デバイスを DXGI デバイスに格納する.
-		winrt::com_ptr<IDXGIDevice3> dxgiDevice;
-		winrt::check_hresult(m_d3d_device.try_as(dxgiDevice));
+		winrt::com_ptr<IDXGIDevice3> dxgi_device;
+		winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
 		// DXGI デバイスをもとに D2D デバイスを作成する.
 		winrt::com_ptr<ID2D1Device2> m_d2dDevice { nullptr };
 		winrt::check_hresult(
-			m_d2d_fanctory->CreateDevice(dxgiDevice.get(), m_d2dDevice.put())
+			m_d2d_fanctory->CreateDevice(dxgi_device.get(), m_d2dDevice.put())
 		);
 		// D2D デバイスをもとに D2D コンテキストを作成する.
 		// オプションは D2D1_DEVICE_CONTEXT_OPTIONS_NONE を指定する.
@@ -677,9 +676,9 @@ namespace winrt::GraphPaper::implementation
 		// D2D コンテキストをもとに, 図形の色ブラシ, 部位の色ブラシ,
 		// 補助線の色ブラシ, 文字範囲の文字の色ブラシ, 補助線の形式,
 		// 描画状態の保存ブロックを作成する.
-		m_shape_brush = nullptr;
+		m_solid_color_brush = nullptr;
 		winrt::check_hresult(
-			m_d2d_context->CreateSolidColorBrush({}, m_shape_brush.put())
+			m_d2d_context->CreateSolidColorBrush({}, m_solid_color_brush.put())
 		);
 		m_range_brush = nullptr;
 		winrt::check_hresult(
@@ -698,30 +697,30 @@ namespace winrt::GraphPaper::implementation
 
 	// バッファーを解放できることを, ドライバーに示す.
 	// このメソッドは, アプリが停止/中断したときに呼び出される.
-	void SHAPE_DX::Trim()
+	void D2D_UI::Trim()
 	{
 		if (m_d3d_device == nullptr) {
 			return;
 		}
-		winrt::com_ptr<IDXGIDevice3> dxgiDevice;
-		m_d3d_device.as(dxgiDevice);
-		dxgiDevice->Trim();
+		winrt::com_ptr<IDXGIDevice3> dxgi_device;
+		m_d3d_device.as(dxgi_device);
+		dxgi_device->Trim();
 	}
 
 	// 表示デバイスが有効になった.
 	// このメソッドは、DisplayContentsInvalidated イベント用のイベント ハンドラーの中で呼び出されます。
-	void SHAPE_DX::ValidateDevice(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::ValidateDevice(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
 	{
 		//デバイスが作成された後に既定のアダプターが変更された、
 		// またはこのデバイスが削除された場合は、D3D デバイスが有効でなくなります。
 
 		// まず、デバイスが作成された時点から、既定のアダプターに関する情報を取得します。
 
-		winrt::com_ptr<IDXGIDevice3> dxgiDevice;
-		winrt::check_hresult(m_d3d_device.try_as(dxgiDevice));
+		winrt::com_ptr<IDXGIDevice3> dxgi_device;
+		winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
 
 		winrt::com_ptr<IDXGIAdapter> deviceAdapter;
-		winrt::check_hresult(dxgiDevice->GetAdapter(deviceAdapter.put()));
+		winrt::check_hresult(dxgi_device->GetAdapter(deviceAdapter.put()));
 
 		winrt::com_ptr<IDXGIFactory2> deviceFactory;
 		winrt::check_hresult(deviceAdapter->GetParent(__uuidof(IDXGIFactory2), deviceFactory.put_void()));//IID_PPV_ARGS(&deviceFactory)));
@@ -751,7 +750,7 @@ namespace winrt::GraphPaper::implementation
 			FAILED(m_d3d_device->GetDeviceRemovedReason()))
 		{
 			// 古いデバイスに関連したリソースへの参照を解放します。
-			dxgiDevice = nullptr;
+			dxgi_device = nullptr;
 			deviceAdapter = nullptr;
 			deviceFactory = nullptr;
 			previousDefaultAdapter = nullptr;

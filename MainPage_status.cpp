@@ -52,91 +52,91 @@ namespace winrt::GraphPaper::implementation
 		STATUS_BAR s_bar;	// ステータスバーの状態
 		bool check;
 
-		if (sender == tmfi_misc_status_curs()) {
+		if (sender == tmfi_status_bar_curs()) {
 			s_bar = STATUS_BAR::CURS;
-			check = tmfi_misc_status_curs().IsChecked();
-			tmfi_misc_status_curs_2().IsChecked(tmfi_misc_status_curs().IsChecked());
+			check = tmfi_status_bar_curs().IsChecked();
+			tmfi_status_bar_curs_2().IsChecked(tmfi_status_bar_curs().IsChecked());
 			status_set_curs();
 			status_visiblity(check, tk_misc_status_bar_pos_x());
 			status_visiblity(check, tk_misc_status_bar_pos_y());
 		}
-		else if (sender == tmfi_misc_status_curs_2()) {
+		else if (sender == tmfi_status_bar_curs_2()) {
 			s_bar = STATUS_BAR::CURS;
-			check = tmfi_misc_status_curs_2().IsChecked();
-			tmfi_misc_status_curs().IsChecked(check);
+			check = tmfi_status_bar_curs_2().IsChecked();
+			tmfi_status_bar_curs().IsChecked(check);
 			status_set_curs();
 			status_visiblity(check, tk_misc_status_bar_pos_x());
 			status_visiblity(check, tk_misc_status_bar_pos_y());
 		}
-		else if (sender == tmfi_misc_status_grid()) {
+		else if (sender == tmfi_status_bar_grid()) {
 			s_bar = STATUS_BAR::GRID;
-			check = tmfi_misc_status_grid().IsChecked();
-			tmfi_misc_status_grid_2().IsChecked(check);
+			check = tmfi_status_bar_grid().IsChecked();
+			tmfi_status_bar_grid_2().IsChecked(check);
 			status_set_grid();
 			status_visiblity(check, tk_misc_status_grid());
 		}
-		else if (sender == tmfi_misc_status_grid_2()) {
+		else if (sender == tmfi_status_bar_grid_2()) {
 			s_bar = STATUS_BAR::GRID;
-			check = tmfi_misc_status_grid_2().IsChecked();
-			tmfi_misc_status_grid().IsChecked(check);
+			check = tmfi_status_bar_grid_2().IsChecked();
+			tmfi_status_bar_grid().IsChecked(check);
 			status_set_grid();
 			status_visiblity(check, tk_misc_status_grid());
 		}
-		else if (sender == tmfi_misc_status_sheet()) {
+		else if (sender == tmfi_status_bar_sheet()) {
 			s_bar = STATUS_BAR::SHEET;
-			check = tmfi_misc_status_sheet().IsChecked();
-			tmfi_misc_status_sheet_2().IsChecked(check);
+			check = tmfi_status_bar_sheet().IsChecked();
+			tmfi_status_bar_sheet_2().IsChecked(check);
 			status_set_sheet();
 			status_visiblity(check, tk_misc_status_bar_width());
 			status_visiblity(check, tk_misc_status_bar_height());
 		}
-		else if (sender == tmfi_misc_status_sheet_2()) {
+		else if (sender == tmfi_status_bar_sheet_2()) {
 			s_bar = STATUS_BAR::SHEET;
-			check = tmfi_misc_status_sheet_2().IsChecked();
-			tmfi_misc_status_sheet().IsChecked(check);
+			check = tmfi_status_bar_sheet_2().IsChecked();
+			tmfi_status_bar_sheet().IsChecked(check);
 			status_set_sheet();
 			status_visiblity(check, tk_misc_status_bar_width());
 			status_visiblity(check, tk_misc_status_bar_height());
 		}
-		else if (sender == tmfi_misc_status_zoom()) {
+		else if (sender == tmfi_status_bar_zoom()) {
 			s_bar = STATUS_BAR::ZOOM;
-			check = tmfi_misc_status_zoom().IsChecked();
-			tmfi_misc_status_zoom_2().IsChecked(check);
+			check = tmfi_status_bar_zoom().IsChecked();
+			tmfi_status_bar_zoom_2().IsChecked(check);
 			status_set_zoom();
 			status_visiblity(check, tk_misc_status_zoom());
 		}
-		else if (sender == tmfi_misc_status_zoom_2()) {
+		else if (sender == tmfi_status_bar_zoom_2()) {
 			s_bar = STATUS_BAR::ZOOM;
-			check = tmfi_misc_status_zoom_2().IsChecked();
-			tmfi_misc_status_zoom().IsChecked(check);
+			check = tmfi_status_bar_zoom_2().IsChecked();
+			tmfi_status_bar_zoom().IsChecked(check);
 			status_set_zoom();
 			status_visiblity(check, tk_misc_status_zoom());
 		}
-		else if (sender == tmfi_misc_status_draw()) {
+		else if (sender == tmfi_status_bar_draw()) {
 			s_bar = STATUS_BAR::DRAW;
-			check = tmfi_misc_status_draw().IsChecked();
-			tmfi_misc_status_draw_2().IsChecked(check);
+			check = tmfi_status_bar_draw().IsChecked();
+			tmfi_status_bar_draw_2().IsChecked(check);
 			status_set_draw();
 			status_visiblity(check, sp_misc_status_bar_panel_draw());
 		}
-		else if (sender == tmfi_misc_status_draw_2()) {
+		else if (sender == tmfi_status_bar_draw_2()) {
 			s_bar = STATUS_BAR::DRAW;
-			check = tmfi_misc_status_draw_2().IsChecked();
-			tmfi_misc_status_draw().IsChecked(check);
+			check = tmfi_status_bar_draw_2().IsChecked();
+			tmfi_status_bar_draw().IsChecked(check);
 			status_set_draw();
 			status_visiblity(check, sp_misc_status_bar_panel_draw());
 		}
-		else if (sender == tmfi_misc_status_unit()) {
+		else if (sender == tmfi_status_bar_unit()) {
 			s_bar = STATUS_BAR::UNIT;
-			check = tmfi_misc_status_unit().IsChecked();
-			tmfi_misc_status_unit_2().IsChecked(check);
+			check = tmfi_status_bar_unit().IsChecked();
+			tmfi_status_bar_unit_2().IsChecked(check);
 			status_set_unit();
 			status_visiblity(check, tk_misc_status_unit());
 		}
-		else if (sender == tmfi_misc_status_unit_2()) {
+		else if (sender == tmfi_status_bar_unit_2()) {
 			s_bar = STATUS_BAR::UNIT;
-			check = tmfi_misc_status_unit_2().IsChecked();
-			tmfi_misc_status_unit().IsChecked(check);
+			check = tmfi_status_bar_unit_2().IsChecked();
+			tmfi_status_bar_unit().IsChecked(check);
 			status_set_unit();
 			status_visiblity(check, tk_misc_status_unit());
 		}
@@ -156,18 +156,18 @@ namespace winrt::GraphPaper::implementation
 	// s_bar	ステータスバーの状態
 	void MainPage::status_bar_is_checked(const STATUS_BAR s_bar)
 	{
-		tmfi_misc_status_curs().IsChecked(status_mask(s_bar, STATUS_BAR::CURS));
-		tmfi_misc_status_grid().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
-		tmfi_misc_status_sheet().IsChecked(status_mask(s_bar, STATUS_BAR::SHEET));
-		tmfi_misc_status_draw().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
-		tmfi_misc_status_unit().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
-		tmfi_misc_status_zoom().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
-		tmfi_misc_status_curs_2().IsChecked(status_mask(s_bar, STATUS_BAR::CURS));
-		tmfi_misc_status_grid_2().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
-		tmfi_misc_status_sheet_2().IsChecked(status_mask(s_bar, STATUS_BAR::SHEET));
-		tmfi_misc_status_draw_2().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
-		tmfi_misc_status_unit_2().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
-		tmfi_misc_status_zoom_2().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
+		tmfi_status_bar_curs().IsChecked(status_mask(s_bar, STATUS_BAR::CURS));
+		tmfi_status_bar_grid().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
+		tmfi_status_bar_sheet().IsChecked(status_mask(s_bar, STATUS_BAR::SHEET));
+		tmfi_status_bar_draw().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
+		tmfi_status_bar_unit().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
+		tmfi_status_bar_zoom().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
+		tmfi_status_bar_curs_2().IsChecked(status_mask(s_bar, STATUS_BAR::CURS));
+		tmfi_status_bar_grid_2().IsChecked(status_mask(s_bar, STATUS_BAR::GRID));
+		tmfi_status_bar_sheet_2().IsChecked(status_mask(s_bar, STATUS_BAR::SHEET));
+		tmfi_status_bar_draw_2().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
+		tmfi_status_bar_unit_2().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
+		tmfi_status_bar_zoom_2().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
 	}
 
 	// 列挙型を OR 演算する.

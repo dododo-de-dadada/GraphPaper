@@ -56,9 +56,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ê}å`Çï\é¶Ç∑ÇÈ.
-	void ShapeRRect::draw(SHAPE_DX& dx)
+	void ShapeRRect::draw(D2D_UI& dx)
 	{
-		auto s_brush = dx.m_shape_brush.get();
+		auto s_brush = dx.m_solid_color_brush.get();
 		auto s_style = m_d2d_stroke_style.get();
 		auto s_width = m_stroke_width;
 		auto dc = dx.m_d2d_context;

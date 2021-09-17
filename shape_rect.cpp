@@ -8,7 +8,7 @@ namespace winrt::GraphPaper::implementation
 {
 	// 図形を表示する.
 	// dx	描画環境
-	void ShapeRect::draw(SHAPE_DX& dx)
+	void ShapeRect::draw(D2D_UI& dx)
 	{
 		const D2D1_RECT_F rect{
 			m_pos.x,
@@ -19,16 +19,16 @@ namespace winrt::GraphPaper::implementation
 		// 塗りつぶし色が不透明か判定する.
 		if (is_opaque(m_fill_color)) {
 			// 方形を塗りつぶす.
-			dx.m_shape_brush->SetColor(m_fill_color);
-			dx.m_d2d_context->FillRectangle(&rect, dx.m_shape_brush.get());
+			dx.m_solid_color_brush->SetColor(m_fill_color);
+			dx.m_d2d_context->FillRectangle(&rect, dx.m_solid_color_brush.get());
 		}
 		// 線枠の色が不透明か判定する.
 		if (is_opaque(m_stroke_color)) {
 			// 方形の枠を表示する.
 			const auto w = m_stroke_width;
-			dx.m_shape_brush->SetColor(m_stroke_color);
+			dx.m_solid_color_brush->SetColor(m_stroke_color);
 			dx.m_d2d_context->DrawRectangle(
-				rect, dx.m_shape_brush.get(), w, m_d2d_stroke_style.get());
+				rect, dx.m_solid_color_brush.get(), w, m_d2d_stroke_style.get());
 		}
 		// この図形が選択されてるか判定する.
 		if (is_selected()) {

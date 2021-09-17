@@ -86,7 +86,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::System::VirtualKeyModifiers;
 
 	extern const winrt::param::hstring CLIPBOARD_SHAPES;	// 図形データのクリップボード書式
-	extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
+	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
 
 	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
 	constexpr auto FMT_INCH_UNIT = L"%.3f \u33CC";	// インチ単位の書式
@@ -269,13 +269,13 @@ namespace winrt::GraphPaper::implementation
 		STATUS_BAR m_misc_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		// 見本用紙
-		SHAPE_DX m_sample_dx;	// 見本の描画環境
+		D2D_UI m_sample_dx;	// 見本の描画環境
 		ShapeSheet m_sample_sheet;	// 見本の用紙
 		//Shape* m_sample_shape = nullptr;	// 見本の図形
 		SAMPLE_TYPE m_sample_type = SAMPLE_TYPE::NONE;	// 見本の型
 
 		// 用紙
-		SHAPE_DX m_sheet_dx;	// 用紙の描画環境
+		D2D_UI m_sheet_dx;	// 用紙の描画環境
 		ShapeSheet m_sheet_main;	// メインの用紙
 		D2D1_POINT_2F m_sheet_min{ 0.0F, 0.0F };	// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
 		D2D1_POINT_2F m_sheet_max{ 0.0F, 0.0F };	// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
@@ -681,9 +681,9 @@ namespace winrt::GraphPaper::implementation
 		// その他メニューの「色の表記」に印をつける.
 		void misc_color_is_checked(const COLOR_CODE c_code);
 		// その他メニューの「色の表記」のサブ項目が選択された.
-		void misc_color_click(IInspectable const& sender, RoutedEventArgs const&);
+		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
 		// その他メニューの「頂点をくっつける...」が選択された.
-		IAsyncAction misc_vert_stick_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
+		IAsyncAction stick_to_vertex_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 値をスライダーのヘッダーに格納する.
 		void misc_vert_stick_set_header(const float value) noexcept;
 		// スライダーの値が変更された.
@@ -691,7 +691,7 @@ namespace winrt::GraphPaper::implementation
 		// その他メニューの「長さの単位」に印をつける.
 		void misc_len_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.
-		void misc_len_click(IInspectable const&, RoutedEventArgs const&);
+		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_pref.cpp
@@ -710,7 +710,7 @@ namespace winrt::GraphPaper::implementation
 		// 見本
 		//-------------------------------
 
-		//SHAPE_DX& sample_dx(void) { return m_sample_dx; }
+		//D2D_UI& sample_dx(void) { return m_sample_dx; }
 		// 見本ダイアログが開かれた.
 		void sample_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
 		// 見本を表示する

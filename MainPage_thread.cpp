@@ -38,11 +38,11 @@ namespace winrt::GraphPaper::implementation
 			dp_view.SetAcceptedFormatId(StandardDataFormats::Text());
 			dp_view.SetAcceptedFormatId(StandardDataFormats::Bitmap());
 			dp_view.SetAcceptedFormatId(StandardDataFormats::StorageItems());
-			dp_view.SetAcceptedFormatId(CLIPBOARD_TIFF);
+			//dp_view.SetAcceptedFormatId(CLIPBOARD_TIFF);
 			if (dp_view.Contains(CLIPBOARD_SHAPES) ||
 				dp_view.Contains(StandardDataFormats::Text()) ||
-				dp_view.Contains(StandardDataFormats::Bitmap()) ||
-				dp_view.Contains(CLIPBOARD_TIFF)) {
+				dp_view.Contains(StandardDataFormats::Bitmap())) {
+				//|| dp_view.Contains(CLIPBOARD_TIFF)) {
 				mfi_xcvd_paste().IsEnabled(true);
 			}
 			else {

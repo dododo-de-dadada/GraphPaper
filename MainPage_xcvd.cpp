@@ -26,7 +26,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
 
 	const winrt::param::hstring CLIPBOARD_SHAPES{ L"graph_paper_shapes_data" };	// 図形データのクリップボード書式
-	const winrt::param::hstring CLIPBOARD_TIFF{ L"TaggedImageFileFormat" };	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
+	//const winrt::param::hstring CLIPBOARD_TIFF{ L"TaggedImageFileFormat" };	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
 
 	// 貼り付ける位置を求める.
 	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float vert_stick);
@@ -209,12 +209,12 @@ namespace winrt::GraphPaper::implementation
 
 		mfi_xcvd_cut().IsEnabled(exists_selected);
 		mfi_xcvd_copy().IsEnabled(exists_selected);
-		const auto& dp_view = Clipboard::GetContent();
+		const DataPackageView& dp_view = Clipboard::GetContent();
 		mfi_xcvd_paste().IsEnabled(
 			dp_view.Contains(CLIPBOARD_SHAPES) ||
 			dp_view.Contains(StandardDataFormats::Text()) ||
-			dp_view.Contains(StandardDataFormats::Bitmap()) ||
-			dp_view.Contains(CLIPBOARD_TIFF));
+			dp_view.Contains(StandardDataFormats::Bitmap())); 
+			//|| dp_view.Contains(CLIPBOARD_TIFF));
 		mfi_xcvd_delete().IsEnabled(exists_selected);
 		mfi_select_all().IsEnabled(exists_unselected);
 		mfi_group().IsEnabled(exists_selected_2);
@@ -465,7 +465,7 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 			// クリップボードに画像が含まれているか判定する.
-			else if (dp_view.Contains(StandardDataFormats::Bitmap()) || dp_view.Contains(CLIPBOARD_TIFF)) {
+			else if (dp_view.Contains(StandardDataFormats::Bitmap())) {// || dp_view.Contains(CLIPBOARD_TIFF)) {
 				xcvd_paste_image();
 				return;
 			}

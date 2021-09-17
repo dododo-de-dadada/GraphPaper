@@ -231,13 +231,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚ð•\Ž¦‚·‚é.
-	void ShapeLineA::draw(SHAPE_DX& dx)
+	void ShapeLineA::draw(D2D_UI& dx)
 	{
 		D2D1_POINT_2F e_pos;
 		pt_add(m_pos, m_diff[0], e_pos);
 
-		dx.m_shape_brush->SetColor(m_stroke_color);
-		const auto s_brush = dx.m_shape_brush.get();
+		dx.m_solid_color_brush->SetColor(m_stroke_color);
+		const auto s_brush = dx.m_solid_color_brush.get();
 		const auto s_style = m_d2d_stroke_style.get();
 		const auto s_width = m_stroke_width;
 		dx.m_d2d_context->DrawLine(m_pos, e_pos, s_brush, s_width, s_style);

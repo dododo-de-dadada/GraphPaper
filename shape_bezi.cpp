@@ -461,7 +461,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// パスジオメトリを作成する.
-	void ShapeBezi::create_path_geometry(const SHAPE_DX& dx)
+	void ShapeBezi::create_path_geometry(const D2D_UI& dx)
 	{
 		D2D1_BEZIER_SEGMENT b_seg;
 		winrt::com_ptr<ID2D1GeometrySink> sink;
@@ -517,7 +517,7 @@ namespace winrt::GraphPaper::implementation
 	*/
 
 	// 図形を表示する.
-	void ShapeBezi::draw(SHAPE_DX& dx)
+	void ShapeBezi::draw(D2D_UI& dx)
 	{
 		if (m_d2d_arrow_geom == nullptr || m_d2d_path_geom == nullptr) {
 			if (m_d2d_path_geom != nullptr) {
@@ -533,12 +533,12 @@ namespace winrt::GraphPaper::implementation
 
 		if (is_opaque(m_stroke_color)) {
 			const auto s_width = m_stroke_width;
-			const auto s_brush = dx.m_shape_brush.get();
+			const auto s_brush = dx.m_solid_color_brush.get();
 			const auto s_style = m_d2d_stroke_style.get();
 			if (s_style == nullptr) {
 				
 			}
-			dx.m_shape_brush->SetColor(m_stroke_color);
+			dx.m_solid_color_brush->SetColor(m_stroke_color);
 			dx.m_d2d_context->DrawGeometry(m_d2d_path_geom.get(), s_brush, s_width, s_style);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
@@ -558,26 +558,26 @@ namespace winrt::GraphPaper::implementation
 			anch_draw_rect(m_pos, dx);
 			s_pos = m_pos;
 			pt_add(s_pos, m_diff[0], e_pos);
-			dx.m_shape_brush->SetColor(Shape::m_default_background);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, Shape::m_aux_style.get());
+			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
+			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, Shape::m_aux_style.get());
 			anch_draw_ellipse(e_pos, dx);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_diff[1], e_pos);
-			dx.m_shape_brush->SetColor(Shape::m_default_background);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, Shape::m_aux_style.get());
+			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
+			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, Shape::m_aux_style.get());
 			anch_draw_ellipse(e_pos, dx);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_diff[2], e_pos);
-			dx.m_shape_brush->SetColor(Shape::m_default_background);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, nullptr);
-			dx.m_shape_brush->SetColor(Shape::m_default_foreground);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_shape_brush.get(), sw, Shape::m_aux_style.get());
+			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
+			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, Shape::m_aux_style.get());
 			anch_draw_rect(e_pos, dx);
 		}
 	}
