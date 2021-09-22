@@ -227,7 +227,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_send_to_back().IsEnabled(enable_backward);
 		mfi_send_backward().IsEnabled(enable_backward);
 		mfi_summary_list().IsEnabled(exists_undeleted);
-		mfi_image_resize_origin().IsEnabled(exists_selected_image);
+		mfi_image_revert_origin().IsEnabled(exists_selected_image);
 		m_list_sel_cnt = selected_cnt;
 	}
 
@@ -408,7 +408,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_SIZE_F view_size{ img_w, img_h };
 
 		// ビットマップから図形を作成する.
-		ShapeImage* img = new ShapeImage(pos, view_size, bmp);
+		ShapeImage* img = new ShapeImage(pos, view_size, bmp, 1.0f);
 #if (_DEBUG)
 		debug_leak_cnt++;
 #endif

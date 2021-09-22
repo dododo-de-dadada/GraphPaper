@@ -662,8 +662,8 @@ namespace winrt::GraphPaper::implementation
 		void image_keep_aspect_is_checked(const bool keep_aspect);
 		// 画像メニューの「縦横比を変えない」が選択された.
 		void image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept;
-		// 画像メニューの「元の大きさに戻す」が選択された.
-		void image_resize_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept;
+		// 画像メニューの「元の画像に戻す」が選択された.
+		void image_revert_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 画像メニューの「不透明度...」が選択された.
 		IAsyncAction image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
@@ -716,9 +716,10 @@ namespace winrt::GraphPaper::implementation
 		// 見本を表示する
 		void sample_draw(void);
 		// 見本のスワップチェーンパネルの大きさが変わった.
-		IAsyncAction sample_panel_size_changed_async(IInspectable const&, RoutedEventArgs const&);
+		void sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&);
 		//　リストビュー「見本リスト」がロードされた.
 		void sample_list_loaded(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction sample_image_load_async(const float samp_w, const float samp_h);
 
 		//-------------------------------
 		// MainPage_scroll.cpp

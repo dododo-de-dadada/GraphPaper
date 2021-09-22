@@ -283,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>((win_y + (win_h - img_h) * 0.5) / scale)
 			};
 			const D2D1_SIZE_F view_size{ static_cast<FLOAT>(img_w), static_cast<FLOAT>(img_h) };
-			ShapeImage* img = new ShapeImage(center_pos, view_size, bitmap);
+			ShapeImage* img = new ShapeImage(center_pos, view_size, bitmap, m_sheet_main.m_image_opac);
 #if (_DEBUG)
 			debug_leak_cnt++;
 #endif

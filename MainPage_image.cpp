@@ -21,16 +21,18 @@ namespace winrt::GraphPaper::implementation
 		m_image_keep_aspect = !m_image_keep_aspect;
 	}
 
-	// 画像メニューの「元の大きさに戻す」が選択された.
-	void MainPage::image_resize_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept
+	// 画像メニューの「元の画像に戻す」が選択された.
+	void MainPage::image_revert_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
 				continue;
 			}
-			auto bm = static_cast<ShapeImage*>(s);
-			ustack_push_anch(bm, ANCH_TYPE::ANCH_SHEET);
-			bm->resize_origin();
+			// 画像の現在の不透明度と大きさを操作スタックにプッシュする.
+			ShapeImage* img = static_cast<ShapeImage*>(s);
+			ustack_push_set<UNDO_OP::IMAGE_OPAC>(img);
+			ustack_push_anch(img, ANCH_TYPE::ANCH_SHEET);
+			img->revert();
 		}
 		ustack_push_null();
 		sheet_panle_size();
@@ -51,16 +53,18 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		sample_slider_0().Value(value);
 		image_slider_set_header<UNDO_OP::IMAGE_OPAC, 0>(value);
+		sample_check_box().IsChecked(m_sample_sheet.m_image_opac_importing);
 
 		sample_slider_0().Visibility(UI_VISIBLE);
+		sample_check_box().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::image_slider_value_changed<UNDO_OP::IMAGE_OPAC, 0> });
 		m_sample_type = SAMPLE_TYPE::IMAGE;
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
-			//m_sample_shape->get_image_opacity(sample_value);
 			m_sample_sheet.m_list_shapes.back()->get_image_opacity(sample_value);
+			ustack_push_set<UNDO_OP::IMAGE_OPAC>(&m_sheet_main, sample_value);
 			if (ustack_push_set<UNDO_OP::IMAGE_OPAC>(sample_value)) {
 				ustack_push_null();
 				ustack_is_enable();

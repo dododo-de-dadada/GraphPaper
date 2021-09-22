@@ -657,18 +657,18 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(context.try_as(m_d3d_context));
 
 		// D3D デバイスを DXGI デバイスに格納する.
-		winrt::com_ptr<IDXGIDevice3> dxgi_device;
+		winrt::com_ptr<IDXGIDevice3> dxgi_device{ nullptr };
 		winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
 		// DXGI デバイスをもとに D2D デバイスを作成する.
-		winrt::com_ptr<ID2D1Device2> m_d2dDevice { nullptr };
+		winrt::com_ptr<ID2D1Device2> d2d_device{ nullptr };
 		winrt::check_hresult(
-			m_d2d_fanctory->CreateDevice(dxgi_device.get(), m_d2dDevice.put())
+			m_d2d_fanctory->CreateDevice(dxgi_device.get(), d2d_device.put())
 		);
 		// D2D デバイスをもとに D2D コンテキストを作成する.
 		// オプションは D2D1_DEVICE_CONTEXT_OPTIONS_NONE を指定する.
 		m_d2d_context = nullptr;
 		winrt::check_hresult(
-			m_d2dDevice->CreateDeviceContext(
+			d2d_device->CreateDeviceContext(
 				D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
 				m_d2d_context.put()
 			)

@@ -207,6 +207,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_view;	// 先寸法
 		D2D1_RECT_F m_rect;	// 元矩形
 		D2D1_SIZE_F m_ratio;	// 先寸法と元矩形の縦横比
+		float m_opac;	// 不透明度
 
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;

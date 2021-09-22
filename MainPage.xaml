@@ -343,7 +343,7 @@
 			<!-- 画像コンテキストメニュー -->
 			<MenuFlyout x:Key="mf_image_menu">
 				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect_2" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
-				<MenuFlyoutItem x:Name="mfi_image_resize_origin_2" x:Uid="mfi_image_resize_origin" Click="image_resize_origin_click" Text="Resize to Original" />
+				<MenuFlyoutItem x:Name="mfi_image_revert_origin_2" x:Uid="mfi_image_revert_origin" Click="image_revert_origin_click" Text="Resize to Original" />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Name="mfi_image_opac_2" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
 			</MenuFlyout>
@@ -700,7 +700,7 @@
             <!-- 画像メニュー -->
             <muxc:MenuBarItem x:Uid="mbi_image_menu" AccessKey="I" Title="Image">
                 <ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
-                <MenuFlyoutItem x:Name="mfi_image_resize_origin" x:Uid="mfi_image_resize_origin" Click="image_resize_origin_click" Text="Resize to Original" />
+				<MenuFlyoutItem x:Name="mfi_image_revert_origin" x:Uid="mfi_image_revert_origin" Click="image_revert_origin_click" Text="Resize to Original" />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem x:Name="mfi_image_opac" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
             </muxc:MenuBarItem>
@@ -1020,7 +1020,7 @@
                     MaxWidth="170"
                     RelativePanel.AlignTopWithPanel="True"
                     RelativePanel.AlignHorizontalCenterWithPanel="True"
-                    SizeChanged="sample_panel_size_changed_async"
+                    SizeChanged="sample_panel_size_changed"
                     Width="170"
                     />
                 <!-- Height を指定するこれ大事 -->
@@ -1031,6 +1031,7 @@
 				<Slider x:Name="sample_slider_3" x:Uid = "sample_slider_3" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
 				<Slider x:Name="sample_slider_4" x:Uid = "sample_slider_4" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_3" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
 				<TextBlock x:Name="tb_version" x:Uid="tb_version" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Visibility="Collapsed" />
+				<CheckBox x:Name="sample_check_box" x:Uid="sample_check_box" Content="Check Box" IsChecked="False" Visibility="Collapsed" />
 			</RelativePanel>
         </ContentDialog>
     </Grid>

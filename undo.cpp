@@ -223,7 +223,6 @@ namespace winrt::GraphPaper::implementation
 	}
 	template UndoAttr<UNDO_OP::ARROW_SIZE>::UndoAttr(Shape* s, const ARROW_SIZE& value);
 	template UndoAttr<UNDO_OP::ARROW_STYLE>::UndoAttr(Shape* s, const ARROW_STYLE& value);
-	template UndoAttr<UNDO_OP::IMAGE_OPAC>::UndoAttr(Shape* s, const float& value);
 	template UndoAttr<UNDO_OP::DASH_CAP>::UndoAttr(Shape* s, const D2D1_CAP_STYLE& value);
 	template UndoAttr<UNDO_OP::DASH_PATT>::UndoAttr(Shape* s, const DASH_PATT& value);
 	template UndoAttr<UNDO_OP::DASH_STYLE>::UndoAttr(Shape* s, const D2D1_DASH_STYLE& value);
@@ -238,6 +237,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::GRID_COLOR>::UndoAttr(Shape* s, const D2D1_COLOR_F& value);
 	template UndoAttr<UNDO_OP::GRID_EMPH>::UndoAttr(Shape* s, const GRID_EMPH& value);
 	template UndoAttr<UNDO_OP::GRID_SHOW>::UndoAttr(Shape* s, const GRID_SHOW& value);
+	template UndoAttr<UNDO_OP::IMAGE_OPAC>::UndoAttr(Shape* s, const float& value);
 	template UndoAttr<UNDO_OP::JOIN_LIMIT>::UndoAttr(Shape* s, const float& value);
 	template UndoAttr<UNDO_OP::JOIN_STYLE>::UndoAttr(Shape* s, const D2D1_LINE_JOIN& value);
 	template UndoAttr<UNDO_OP::POS_START>::UndoAttr(Shape* s, const D2D1_POINT_2F& value);
@@ -258,9 +258,9 @@ namespace winrt::GraphPaper::implementation
 		m_value()
 	{
 		if constexpr (
-			U == UNDO_OP::IMAGE_OPAC ||
 			U == UNDO_OP::FONT_SIZE ||
 			U == UNDO_OP::GRID_BASE ||
+			U == UNDO_OP::IMAGE_OPAC ||
 			U == UNDO_OP::JOIN_LIMIT ||
 			U == UNDO_OP::STROKE_WIDTH ||
 			U == UNDO_OP::TEXT_LINE_SP) {
@@ -289,8 +289,6 @@ namespace winrt::GraphPaper::implementation
 
 	template UndoAttr<UNDO_OP::ARROW_SIZE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::ARROW_STYLE>::UndoAttr(DataReader const& dt_reader);
-	//template UndoAttr<UNDO_OP::IMAGE_ASPECT>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::IMAGE_OPAC>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::DASH_CAP>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::DASH_PATT>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::DASH_STYLE>::UndoAttr(DataReader const& dt_reader);
@@ -305,6 +303,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::GRID_COLOR>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::GRID_EMPH>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::GRID_SHOW>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::IMAGE_OPAC>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::JOIN_LIMIT>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::JOIN_STYLE>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::POS_START>::UndoAttr(DataReader const& dt_reader);
@@ -336,14 +335,19 @@ namespace winrt::GraphPaper::implementation
 		s->set_arrow_style(value);
 	}
 
-	//void UndoAttr<UNDO_OP::IMAGE_ASPECT>::SET(Shape* const s, const bool& value)
-	//{
-	//	s->set_bm_keep_aspect(value);
-	//}
-
-	void UndoAttr<UNDO_OP::IMAGE_OPAC>::SET(Shape* const s, const float& value)
+	void UndoAttr<UNDO_OP::DASH_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& value)
 	{
-		s->set_image_opacity(value);
+		s->set_dash_cap(value);
+	}
+
+	void UndoAttr<UNDO_OP::DASH_PATT>::SET(Shape* const s, const DASH_PATT& value)
+	{
+		s->set_dash_patt(value);
+	}
+
+	void UndoAttr<UNDO_OP::DASH_STYLE>::SET(Shape* const s, const D2D1_DASH_STYLE& value)
+	{
+		s->set_dash_style(value);
 	}
 
 	void UndoAttr<UNDO_OP::FILL_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
@@ -401,44 +405,9 @@ namespace winrt::GraphPaper::implementation
 		s->set_grid_show(value);
 	}
 
-	void UndoAttr<UNDO_OP::SHEET_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
+	void UndoAttr<UNDO_OP::IMAGE_OPAC>::SET(Shape* const s, const float& value)
 	{
-		s->set_sheet_color(value);
-	}
-
-	void UndoAttr<UNDO_OP::SHEET_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& value)
-	{
-		s->set_sheet_size(value);
-	}
-
-	void UndoAttr<UNDO_OP::POS_START>::SET(Shape* const s, const D2D1_POINT_2F& value)
-	{
-		s->set_pos_start(value);
-	}
-
-	void UndoAttr<UNDO_OP::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& value)
-	{
-		s->set_stroke_cap(value);
-	}
-
-	void UndoAttr<UNDO_OP::STROKE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
-	{
-		s->set_stroke_color(value);
-	}
-
-	void UndoAttr<UNDO_OP::DASH_CAP>::SET(Shape* const s, const D2D1_CAP_STYLE& value)
-	{
-		s->set_dash_cap(value);
-	}
-
-	void UndoAttr<UNDO_OP::DASH_PATT>::SET(Shape* const s, const DASH_PATT& value)
-	{
-		s->set_dash_patt(value);
-	}
-
-	void UndoAttr<UNDO_OP::DASH_STYLE>::SET(Shape* const s, const D2D1_DASH_STYLE& value)
-	{
-		s->set_dash_style(value);
+		s->set_image_opacity(value);
 	}
 
 	void UndoAttr<UNDO_OP::JOIN_LIMIT>::SET(Shape* const s, const float& value)
@@ -449,6 +418,31 @@ namespace winrt::GraphPaper::implementation
 	void UndoAttr<UNDO_OP::JOIN_STYLE>::SET(Shape* const s, const D2D1_LINE_JOIN& value)
 	{
 		s->set_join_style(value);
+	}
+
+	void UndoAttr<UNDO_OP::POS_START>::SET(Shape* const s, const D2D1_POINT_2F& value)
+	{
+		s->set_pos_start(value);
+	}
+
+	void UndoAttr<UNDO_OP::SHEET_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
+	{
+		s->set_sheet_color(value);
+	}
+
+	void UndoAttr<UNDO_OP::SHEET_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& value)
+	{
+		s->set_sheet_size(value);
+	}
+
+	void UndoAttr<UNDO_OP::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& value)
+	{
+		s->set_stroke_cap(value);
+	}
+
+	void UndoAttr<UNDO_OP::STROKE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& value)
+	{
+		s->set_stroke_color(value);
 	}
 
 	void UndoAttr<UNDO_OP::STROKE_WIDTH>::SET(Shape* const s, const float& value)
@@ -501,9 +495,19 @@ namespace winrt::GraphPaper::implementation
 		return s->get_arrow_style(value);
 	}
 
-	bool UndoAttr<UNDO_OP::IMAGE_OPAC>::GET(const Shape* s, float& value) noexcept
+	bool UndoAttr<UNDO_OP::DASH_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& value) noexcept
 	{
-		return s->get_image_opacity(value);
+		return s->get_dash_cap(value);
+	}
+
+	bool UndoAttr<UNDO_OP::DASH_PATT>::GET(const Shape* s, DASH_PATT& value) noexcept
+	{
+		return s->get_dash_patt(value);
+	}
+
+	bool UndoAttr<UNDO_OP::DASH_STYLE>::GET(const Shape* s, D2D1_DASH_STYLE& value) noexcept
+	{
+		return s->get_dash_style(value);
 	}
 
 	bool UndoAttr<UNDO_OP::FILL_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
@@ -561,44 +565,9 @@ namespace winrt::GraphPaper::implementation
 		return s->get_grid_show(value);
 	}
 
-	bool UndoAttr<UNDO_OP::SHEET_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
+	bool UndoAttr<UNDO_OP::IMAGE_OPAC>::GET(const Shape* s, float& value) noexcept
 	{
-		return s->get_sheet_color(value);
-	}
-
-	bool UndoAttr<UNDO_OP::SHEET_SIZE>::GET(const Shape* s, D2D1_SIZE_F& value) noexcept
-	{
-		return s->get_sheet_size(value);
-	}
-
-	bool UndoAttr<UNDO_OP::POS_START>::GET(const Shape* s, D2D1_POINT_2F& value) noexcept
-	{
-		return s->get_pos_start(value);
-	}
-
-	bool UndoAttr<UNDO_OP::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& value) noexcept
-	{
-		return s->get_stroke_cap(value);
-	}
-
-	bool UndoAttr<UNDO_OP::STROKE_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
-	{
-		return s->get_stroke_color(value);
-	}
-
-	bool UndoAttr<UNDO_OP::DASH_CAP>::GET(const Shape* s, D2D1_CAP_STYLE& value) noexcept
-	{
-		return s->get_dash_cap(value);
-	}
-
-	bool UndoAttr<UNDO_OP::DASH_PATT>::GET(const Shape* s, DASH_PATT& value) noexcept
-	{
-		return s->get_dash_patt(value);
-	}
-
-	bool UndoAttr<UNDO_OP::DASH_STYLE>::GET(const Shape* s, D2D1_DASH_STYLE& value) noexcept
-	{
-		return s->get_dash_style(value);
+		return s->get_image_opacity(value);
 	}
 
 	bool UndoAttr<UNDO_OP::JOIN_LIMIT>::GET(const Shape* s, float& value) noexcept
@@ -609,6 +578,31 @@ namespace winrt::GraphPaper::implementation
 	bool UndoAttr<UNDO_OP::JOIN_STYLE>::GET(const Shape* s, D2D1_LINE_JOIN& value) noexcept
 	{
 		return s->get_join_style(value);
+	}
+
+	bool UndoAttr<UNDO_OP::POS_START>::GET(const Shape* s, D2D1_POINT_2F& value) noexcept
+	{
+		return s->get_pos_start(value);
+	}
+
+	bool UndoAttr<UNDO_OP::SHEET_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
+	{
+		return s->get_sheet_color(value);
+	}
+
+	bool UndoAttr<UNDO_OP::SHEET_SIZE>::GET(const Shape* s, D2D1_SIZE_F& value) noexcept
+	{
+		return s->get_sheet_size(value);
+	}
+
+	bool UndoAttr<UNDO_OP::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& value) noexcept
+	{
+		return s->get_stroke_cap(value);
+	}
+
+	bool UndoAttr<UNDO_OP::STROKE_COLOR>::GET(const Shape* s, D2D1_COLOR_F& value) noexcept
+	{
+		return s->get_stroke_color(value);
 	}
 
 	bool UndoAttr<UNDO_OP::STROKE_WIDTH>::GET(const Shape* s, float& value) noexcept
@@ -652,9 +646,9 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(U));
 		undo_write_shape(m_shape, dt_writer);
 		if constexpr (
-			U == UNDO_OP::IMAGE_OPAC ||
 			U == UNDO_OP::FONT_SIZE ||
 			U == UNDO_OP::GRID_BASE ||
+			U == UNDO_OP::IMAGE_OPAC ||
 			U == UNDO_OP::JOIN_LIMIT ||
 			U == UNDO_OP::STROKE_WIDTH ||
 			U == UNDO_OP::TEXT_LINE_SP
@@ -692,7 +686,8 @@ namespace winrt::GraphPaper::implementation
 		const auto view = static_cast<ShapeImage*>(m_shape)->m_view;
 		const auto rect = static_cast<ShapeImage*>(m_shape)->m_rect;
 		const auto ratio = static_cast<ShapeImage*>(m_shape)->m_ratio;
-		return !equal(pos, m_pos) || !equal(view, m_view) || !equal(rect, m_rect) || !equal(ratio, m_ratio);
+		const auto opac = static_cast<ShapeImage*>(m_shape)->m_opac;
+		return !equal(pos, m_pos) || !equal(view, m_view) || !equal(rect, m_rect) || !equal(ratio, m_ratio) || !eqaul(opac, m_opac);
 	}
 
 	// 元に戻す操作を実行する.
@@ -703,14 +698,17 @@ namespace winrt::GraphPaper::implementation
 		const auto view = s->m_view;
 		const auto rect = s->m_rect;
 		const auto ratio = s->m_ratio;
+		const auto opac = s->m_opac;
 		s->m_pos = m_pos;
 		s->m_view = m_view;
 		s->m_rect = m_rect;
 		s->m_ratio = m_ratio;
+		s->m_opac = m_opac;
 		m_pos = pos;
 		m_view = view;
 		m_rect = rect;
 		m_ratio = ratio;
+		m_opac = opac;
 	}
 
 	// データリーダーから操作を読み込む.
@@ -719,7 +717,8 @@ namespace winrt::GraphPaper::implementation
 		m_pos(undo_read_pos(dt_reader)),
 		m_view(undo_read_size(dt_reader)),
 		m_rect(undo_read_rect(dt_reader)),
-		m_ratio(undo_read_size(dt_reader))
+		m_ratio(undo_read_size(dt_reader)),
+		m_opac(undo_read_opac(dt_reader))
 	{}
 
 	UndoImage::UndoImage(ShapeImage* const s) :
@@ -727,7 +726,8 @@ namespace winrt::GraphPaper::implementation
 		m_pos(s->m_pos),
 		m_view(s->m_view),
 		m_rect(s->m_rect),
-		m_ratio(s->m_ratio)
+		m_ratio(s->m_ratio),
+		m_opac(s->m_opac)
 	{}
 
 	// データライターに書き込む.
@@ -739,6 +739,7 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_view, dt_writer);
 		dt_write(m_rect, dt_writer);
 		dt_write(m_ratio, dt_writer);
+		dt_write(m_opac, dt_writer);
 	}
 
 	// 操作を実行する.

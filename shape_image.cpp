@@ -349,8 +349,8 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 元の大きさに戻す.
-	void ShapeImage::resize_origin(void) noexcept
+	// 元の画像に戻す.
+	void ShapeImage::revert(void) noexcept
 	{
 		const float size_w = static_cast<float>(m_size.width);
 		const float size_h = static_cast<float>(m_size.height);
@@ -360,6 +360,7 @@ namespace winrt::GraphPaper::implementation
 		m_rect.right = size_w;
 		m_rect.bottom = size_h;
 		m_ratio.width = m_ratio.height = 1.0f;
+		m_opac = 1.0f;
 	}
 
 	// 値を画像の不透明度に格納する.
@@ -564,32 +565,42 @@ namespace winrt::GraphPaper::implementation
 	// pos	左上位置
 	// view_size	表示される大きさ
 	// bmp	ビットマップ
-	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bmp)
+	// opac	不透明度
+	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bmp, const float opac)
 	{
-		m_size.width = bmp.PixelWidth();
-		m_size.height = bmp.PixelHeight();
+		const uint32_t bmp_w = bmp.PixelWidth();
+		const uint32_t bmp_h = bmp.PixelHeight();
+
+		m_size.width = bmp_w;
+		m_size.height = bmp_h;
 		m_pos = pos;
 		m_view = view_size;
 		m_rect.left = m_rect.top = 0;
-		m_rect.right = static_cast<FLOAT>(bmp.PixelWidth());
-		m_rect.bottom = static_cast<FLOAT>(bmp.PixelHeight());
-		m_data = new uint8_t[4ull * bmp.PixelWidth() * bmp.PixelHeight()];
-
-		// SoftwareBitmap のバッファをロックする.
-		auto bmp_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
-		auto bmp_ref{ bmp_buf.CreateReference() };
-		winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem = bmp_ref.as<IMemoryBufferByteAccess>();
-		BYTE* bmp_data = nullptr;
-		UINT32 capacity = 0;
-		if (SUCCEEDED(bmp_mem->GetBuffer(&bmp_data, &capacity)))
-		{
-			// ロックしたバッファに画像データをコピーする.
-			memcpy(m_data, bmp_data, capacity);
-			// ロックしたバッファをkaiする.
-			bmp_buf.Close();
-			bmp_buf = nullptr;
-			bmp_mem->Release();
-			bmp_mem = nullptr;
+		m_rect.right = static_cast<FLOAT>(bmp_w);
+		m_rect.bottom = static_cast<FLOAT>(bmp_h);
+		m_opac = opac < 0.0f ? 0.0 : (opac > 1.0f ? 1.0f : opac);
+		const size_t data_size = 4ull * bmp_w * bmp_h;
+		if (data_size > 0) {
+			m_data = new uint8_t[data_size];
+			// SoftwareBitmap のバッファをロックする.
+			auto bmp_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
+			auto bmp_ref{ bmp_buf.CreateReference() };
+			winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem = bmp_ref.as<IMemoryBufferByteAccess>();
+			BYTE* bmp_data = nullptr;
+			UINT32 capacity = 0;
+			if (SUCCEEDED(bmp_mem->GetBuffer(&bmp_data, &capacity)))
+			{
+				// ロックしたバッファに画像データをコピーする.
+				memcpy(m_data, bmp_data, capacity);
+				// ロックしたバッファをkaiする.
+				bmp_buf.Close();
+				bmp_buf = nullptr;
+				bmp_mem->Release();
+				bmp_mem = nullptr;
+			}
+		}
+		else {
+			m_data = nullptr;
 		}
 	}
 

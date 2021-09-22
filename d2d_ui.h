@@ -33,19 +33,19 @@ namespace winrt::GraphPaper::implementation
 
 		// D3D オブジェクト
 
-		winrt::com_ptr<ID3D11Device3> m_d3d_device = nullptr;
-		winrt::com_ptr<ID3D11DeviceContext3> m_d3d_context = nullptr;
+		winrt::com_ptr<ID3D11Device3> m_d3d_device{ nullptr };
+		winrt::com_ptr<ID3D11DeviceContext3> m_d3d_context{ nullptr };
 
 		// DXGI スワップチェーン
 
-		winrt::com_ptr<IDXGISwapChain3> m_dxgi_swap_chain = nullptr;
+		winrt::com_ptr<IDXGISwapChain3> m_dxgi_swap_chain{ nullptr };
 
 		// D2D/DWeite 描画コンポーネント
 
 		static winrt::com_ptr<ID2D1Factory3> m_d2d_fanctory;
 		static winrt::com_ptr<IDWriteFactory3> m_dwrite_factory;
 		//winrt::com_ptr<ID2D1Device2> m_d2dDevice;
-		winrt::com_ptr<ID2D1DeviceContext2> m_d2d_context = nullptr;
+		winrt::com_ptr<ID2D1DeviceContext2> m_d2d_context{ nullptr };
 		//winrt::com_ptr<ID2D1Bitmap1> d2d_target_bitmap;
 
 		// XAML コントロール
@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 		float m_logical_dpi = -1.0f;
 		float m_compositionScaleX = 1.0f;
 		float m_compositionScaleY = 1.0f;
-		D3D_DRIVER_TYPE m_d3d_driver_type{ D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_NULL };
+		D3D_DRIVER_TYPE m_d3d_driver_type = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_NULL;
 
 		// スケーリング用の DPI と合成倍率
 
@@ -83,9 +83,9 @@ namespace winrt::GraphPaper::implementation
 		IDeviceNotify* m_deviceNotify = nullptr;
 
 		// 図形表示用の D2D オブジェクト
-		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block = nullptr;	// 描画状態の保存ブロック
-		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush = nullptr;	// 文字範囲の文字色ブラシ
-		winrt::com_ptr<ID2D1SolidColorBrush> m_solid_color_brush = nullptr;	// 図形の色ブラシ
+		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block{ nullptr };	// 描画状態の保存ブロック
+		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush{ nullptr };	// 文字範囲の文字色ブラシ
+		winrt::com_ptr<ID2D1SolidColorBrush> m_solid_color_brush{ nullptr };	// 図形の色ブラシ
 
 		// 描画環境を破棄する.
 		void Release(void)

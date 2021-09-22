@@ -693,8 +693,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_RECT_F m_rect;	// ビットマップの矩形
 		D2D1_SIZE_U m_size;	// ビットマップの原寸
 		uint8_t* m_data = nullptr;	// ビットマップのデータ
-		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
 		D2D1_SIZE_F m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
+		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
 		winrt::com_ptr<ID2D1Bitmap1> m_dx_bitmap{ nullptr };
 
 		// 図形を破棄する.
@@ -723,8 +723,8 @@ namespace winrt::GraphPaper::implementation
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept;
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F value);
-		// 元の大きさに戻す.
-		void resize_origin(void) noexcept;
+		// 元の画像に戻す.
+		void revert(void) noexcept;
 		// 値を画像の不透明度に格納する.
 		bool set_image_opacity(const float value) noexcept;
 		// 値を, 部位の位置に格納する.
@@ -732,7 +732,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F /*value*/);
 		// 図形を作成する.
-		ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bitmap);
+		ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bitmap, const float opacity);
 		// 図形を作成する.
 		//ShapeImage(const D2D1_POINT_2F center_pos, DataReader const& dt_reader);
 		// データリーダーから読み込む.
@@ -786,7 +786,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_text_padding{ TEXT_MARGIN_DEFVAL };	// 文字列の左右と上下の余白
 
 		// 画像
-		float m_image_opac = 1.0f;	// 画像の不透明率
+		float m_image_opac = 1.0f;	// 画像の不透明度
+		bool m_image_opac_importing = false;	// 画像をインポートするときに不透明度を適用する.
 
 		// 方眼
 		float m_grid_base = GRID_LEN_DEFVAL - 1.0f;	// 方眼の基準の大きさ (を -1 した値)

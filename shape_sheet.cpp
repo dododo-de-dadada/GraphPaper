@@ -866,7 +866,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		s->get_arrow_size(m_arrow_size);
 		s->get_arrow_style(m_arrow_style);
-		s->get_image_opacity(m_image_opac);
+		s->get_dash_cap(m_dash_cap);
+		s->get_dash_patt(m_dash_patt);
+		s->get_dash_style(m_dash_style);
 		s->get_corner_radius(m_corner_rad);
 		s->get_fill_color(m_fill_color);
 		s->get_font_color(m_font_color);
@@ -880,18 +882,16 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_emph(m_grid_emph);
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
-		s->get_sheet_color(m_sheet_color);
-		s->get_dash_cap(m_dash_cap);
-		s->get_dash_patt(m_dash_patt);
-		s->get_dash_style(m_dash_style);
+		s->get_image_opacity(m_image_opac);
 		s->get_join_limit(m_join_limit);
 		s->get_join_style(m_join_style);
+		s->get_sheet_color(m_sheet_color);
 		s->get_stroke_cap(m_stroke_cap);
 		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_width(m_stroke_width);
-		s->get_text_line_sp(m_text_line_sp);
 		s->get_text_align_t(m_text_align_t);
 		s->get_text_align_p(m_text_align_p);
+		s->get_text_line_sp(m_text_line_sp);
 		s->get_text_padding(m_text_padding);
 	}
 
