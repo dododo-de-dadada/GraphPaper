@@ -400,15 +400,15 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	void MainPage::ustack_push_image(Shape* const s)
+	{
+		m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
+	}
+
 	// 図形の部位の位置をスタックに保存する.
 	void MainPage::ustack_push_anch(Shape* const s, const uint32_t anch)
 	{
-		if (typeid(*s) == typeid(ShapeImage)) {
-			m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
-		}
-		else {
-			m_ustack_undo.push_back(new UndoAnchor(s, anch));
-		}
+		m_ustack_undo.push_back(new UndoAnchor(s, anch));
 	}
 
 	// 図形を追加して, その操作をスタックに積む.
@@ -597,14 +597,6 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
-	// 図形の値の保存を実行して, その操作をスタックに積む.
-	// s	値を保存する図形
-	// 戻り値	なし
-	template <UNDO_OP U> void MainPage::ustack_push_set(Shape* const s)
-	{
-		m_ustack_undo.push_back(new UndoAttr<U>(s));
-	}
-
 	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_SIZE>(ARROW_SIZE const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE const& value);
 	//template bool MainPage::ustack_push_set<UNDO_OP::IMAGE_ASPECT>(bool const& value);
@@ -625,7 +617,6 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::ustack_push_set<UNDO_OP::GRID_SHOW>(Shape* const s, GRID_SHOW const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::JOIN_LIMIT>(float const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::JOIN_STYLE>(D2D1_LINE_JOIN const& value);
-	template void MainPage::ustack_push_set<UNDO_OP::POS_START>(Shape* const s);
 	template void MainPage::ustack_push_set<UNDO_OP::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& value);
 	template void MainPage::ustack_push_set<UNDO_OP::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_CAP>(CAP_STYLE const& value);
@@ -636,6 +627,16 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::ustack_push_set<UNDO_OP::TEXT_CONTENT>(Shape* const s, wchar_t* const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_LINE_SP>(float const& value);
 	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_MARGIN>(D2D1_SIZE_F const& value);
+
+	// 図形の値の保存を実行して, その操作をスタックに積む.
+	// s	値を保存する図形
+	// 戻り値	なし
+	template <UNDO_OP U> void MainPage::ustack_push_set(Shape* const s)
+	{
+		m_ustack_undo.push_back(new UndoAttr<U>(s));
+	}
+	template void MainPage::ustack_push_set<UNDO_OP::POS_START>(Shape* const s);
+	template void MainPage::ustack_push_set<UNDO_OP::IMAGE_OPAC>(Shape* const s);
 
 	// 文字範囲の値を図形に格納して, その操作をスタックに積む.
 	// スタックの一番上の操作の組の中に、すでに文字範囲の操作が積まれている場合,

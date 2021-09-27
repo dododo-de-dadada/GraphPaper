@@ -691,7 +691,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_pos;	// 始点の位置
 		D2D1_SIZE_F m_view;	// 表示寸法
 		D2D1_RECT_F m_rect;	// ビットマップの矩形
-		D2D1_SIZE_U m_size;	// ビットマップの原寸
+		D2D1_SIZE_U m_src_size;	// ビットマップの原寸
 		uint8_t* m_data = nullptr;	// ビットマップのデータ
 		D2D1_SIZE_F m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
 		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)

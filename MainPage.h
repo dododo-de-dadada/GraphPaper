@@ -986,8 +986,10 @@ namespace winrt::GraphPaper::implementation
 		void ustack_push_append(ShapeGroup* const g, Shape* const s);
 		// 図形を入れ替えて, その操作をスタックに積む.
 		void ustack_push_arrange(Shape* const s, Shape* const t);
-		// 図形の頂点や制御点の位置をスタックに保存する.
+		// 図形の頂点をスタックに保存する.
 		void ustack_push_anch(Shape* const s, const uint32_t anch);
+		// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
+		void ustack_push_image(Shape* const s);
 		// 図形を挿入して, その操作をスタックに積む.
 		void ustack_push_insert(Shape* const s, Shape* const s_pos);
 		// 図形の位置をスタックに保存してから差分だけ移動する.

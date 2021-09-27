@@ -200,14 +200,14 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// 画像の操作
+	// 画像の位置と大きさの操作
 	//------------------------------
 	struct UndoImage : Undo {
 		D2D1_POINT_2F m_pos;	// 位置
 		D2D1_SIZE_F m_view;	// 先寸法
 		D2D1_RECT_F m_rect;	// 元矩形
 		D2D1_SIZE_F m_ratio;	// 先寸法と元矩形の縦横比
-		float m_opac;	// 不透明度
+		float m_opac;
 
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;

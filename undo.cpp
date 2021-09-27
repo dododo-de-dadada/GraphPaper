@@ -681,13 +681,13 @@ namespace winrt::GraphPaper::implementation
 	bool UndoImage::changed(void) const noexcept
 	{
 		//using winrt::GraphPaper::implementation::equal;
-
-		const auto pos = static_cast<ShapeImage*>(m_shape)->m_pos;
-		const auto view = static_cast<ShapeImage*>(m_shape)->m_view;
-		const auto rect = static_cast<ShapeImage*>(m_shape)->m_rect;
-		const auto ratio = static_cast<ShapeImage*>(m_shape)->m_ratio;
-		const auto opac = static_cast<ShapeImage*>(m_shape)->m_opac;
-		return !equal(pos, m_pos) || !equal(view, m_view) || !equal(rect, m_rect) || !equal(ratio, m_ratio) || !eqaul(opac, m_opac);
+		const ShapeImage* s = static_cast<const ShapeImage*>(m_shape);
+		const auto pos = s->m_pos;
+		const auto view = s->m_view;
+		const auto rect = s->m_rect;
+		const auto ratio = s->m_ratio;
+		const auto opac = s->m_opac;
+		return !equal(pos, m_pos) || !equal(view, m_view) || !equal(rect, m_rect) || !equal(ratio, m_ratio) || !equal(opac, m_opac);
 	}
 
 	// å≥Ç…ñﬂÇ∑ëÄçÏÇé¿çsÇ∑ÇÈ.
@@ -718,7 +718,7 @@ namespace winrt::GraphPaper::implementation
 		m_view(undo_read_size(dt_reader)),
 		m_rect(undo_read_rect(dt_reader)),
 		m_ratio(undo_read_size(dt_reader)),
-		m_opac(undo_read_opac(dt_reader))
+		m_opac(dt_reader.ReadSingle())
 	{}
 
 	UndoImage::UndoImage(ShapeImage* const s) :
@@ -739,7 +739,7 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_view, dt_writer);
 		dt_write(m_rect, dt_writer);
 		dt_write(m_ratio, dt_writer);
-		dt_write(m_opac, dt_writer);
+		dt_writer.WriteSingle(m_opac);
 	}
 
 	// ëÄçÏÇé¿çsÇ∑ÇÈ.

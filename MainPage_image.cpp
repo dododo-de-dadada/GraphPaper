@@ -9,6 +9,10 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+
 	void MainPage::image_keep_aspect_is_checked(const bool keep_aspect)
 	{
 		tmfi_image_keep_aspect().IsChecked(keep_aspect);
@@ -24,15 +28,13 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「元の画像に戻す」が選択された.
 	void MainPage::image_revert_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		for (auto s : m_sheet_main.m_list_shapes) {
+		for (Shape* const s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
 				continue;
 			}
-			// 画像の現在の不透明度と大きさを操作スタックにプッシュする.
-			ShapeImage* img = static_cast<ShapeImage*>(s);
-			ustack_push_set<UNDO_OP::IMAGE_OPAC>(img);
-			ustack_push_anch(img, ANCH_TYPE::ANCH_SHEET);
-			img->revert();
+			// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
+			ustack_push_image(s);
+			static_cast<ShapeImage*>(s)->revert();
 		}
 		ustack_push_null();
 		sheet_panle_size();
@@ -42,10 +44,6 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「不透明度...」が選択された.
 	IAsyncAction MainPage::image_opac_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-
 		m_sample_sheet.set_attr_to(&m_sheet_main);
 		const auto value = m_sample_sheet.m_image_opac * COLOR_MAX;
 		sample_slider_0().Maximum(255.0);
@@ -87,7 +85,6 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S> void MainPage::image_slider_set_header(const float value)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::IMAGE_OPAC) {

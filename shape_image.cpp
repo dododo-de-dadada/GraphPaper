@@ -88,9 +88,7 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction ShapeImage::copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream)
 	{
 		// SoftwareBitmap を作成する.
-		const uint32_t bmp_w = m_size.width;
-		const uint32_t bmp_h = m_size.height;
-		SoftwareBitmap bmp{ SoftwareBitmap(BitmapPixelFormat::Bgra8, bmp_w, bmp_h, BitmapAlphaMode::Straight) };
+		SoftwareBitmap bmp{ SoftwareBitmap(BitmapPixelFormat::Bgra8,  m_src_size.width, m_src_size.height, BitmapAlphaMode::Straight) };
 
 		// ビットマップのバッファをロックする.
 		auto bmp_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
@@ -142,7 +140,8 @@ namespace winrt::GraphPaper::implementation
 					D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
 				)
 			};
-			dx.m_d2d_context->CreateBitmap(m_size, static_cast<void*>(m_data), 4 * m_size.width, b_prop, m_dx_bitmap.put());
+			const UINT32 pitch = 4 * m_src_size.width;
+			dx.m_d2d_context->CreateBitmap(m_src_size, static_cast<void*>(m_data), pitch, b_prop, m_dx_bitmap.put());
 			if (m_dx_bitmap == nullptr) {
 				return;
 			}
@@ -352,13 +351,13 @@ namespace winrt::GraphPaper::implementation
 	// 元の画像に戻す.
 	void ShapeImage::revert(void) noexcept
 	{
-		const float size_w = static_cast<float>(m_size.width);
-		const float size_h = static_cast<float>(m_size.height);
-		m_view.width = size_w;
-		m_view.height = size_h;
+		const float src_w = static_cast<float>(m_src_size.width);
+		const float src_h = static_cast<float>(m_src_size.height);
+		m_view.width = src_w;
+		m_view.height = src_h;
 		m_rect.left = m_rect.top = 0.0f;
-		m_rect.right = size_w;
-		m_rect.bottom = size_h;
+		m_rect.right = src_w;
+		m_rect.bottom = src_h;
 		m_ratio.width = m_ratio.height = 1.0f;
 		m_opac = 1.0f;
 	}
@@ -458,7 +457,7 @@ namespace winrt::GraphPaper::implementation
 			const float dx = (value.x - (m_pos.x + m_view.width));
 			if (fabs(dx) >= FLT_MIN) {
 				const float rect_right = max(m_rect.right + dx / m_ratio.width, m_rect.left + 1.0f);
-				m_rect.right = min(rect_right, m_size.width);
+				m_rect.right = min(rect_right, m_src_size.width);
 				//m_view.width = m_view.width + dx;
 				m_view.width = (m_rect.right - m_rect.left) * m_ratio.width;
 				m_pos.x = value.x - m_view.width;
@@ -500,7 +499,7 @@ namespace winrt::GraphPaper::implementation
 			const float dy = (value.y - (m_pos.y + m_view.height));
 			if (fabs(dy) >= FLT_MIN) {
 				const float rect_bottom = max(m_rect.bottom + dy / m_ratio.height, m_rect.top + 1.0f);
-				m_rect.bottom = min(rect_bottom, m_size.height);
+				m_rect.bottom = min(rect_bottom, m_src_size.height);
 				m_view.height = (m_rect.bottom - m_rect.top) * m_ratio.height;
 				m_pos.y = value.y - m_view.height;
 				flag = true;
@@ -571,8 +570,8 @@ namespace winrt::GraphPaper::implementation
 		const uint32_t bmp_w = bmp.PixelWidth();
 		const uint32_t bmp_h = bmp.PixelHeight();
 
-		m_size.width = bmp_w;
-		m_size.height = bmp_h;
+		m_src_size.width = bmp_w;
+		m_src_size.height = bmp_h;
 		m_pos = pos;
 		m_view = view_size;
 		m_rect.left = m_rect.top = 0;
@@ -613,15 +612,15 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_pos, dt_reader);
 		dt_read(m_view, dt_reader);
 		dt_read(m_rect, dt_reader);
-		dt_read(m_size, dt_reader);
+		dt_read(m_src_size, dt_reader);
 		dt_read(m_ratio, dt_reader);
 
-		const size_t row_size = 4ull * m_size.width;
-		m_data = new uint8_t[row_size * m_size.height];
-		std::vector<uint8_t> buf(row_size);
-		for (size_t i = 0; i < m_size.height; i++) {
-			dt_reader.ReadBytes(buf);
-			memcpy(m_data + row_size * i, buf.data(), row_size);
+		const size_t pitch = 4ull * m_src_size.width;
+		m_data = new uint8_t[pitch * m_src_size.height];
+		std::vector<uint8_t> line_buf(pitch);
+		for (size_t i = 0; i < m_src_size.height; i++) {
+			dt_reader.ReadBytes(line_buf);
+			memcpy(m_data + pitch * i, line_buf.data(), pitch);
 		}
 	}
 
@@ -634,14 +633,14 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_pos, dt_writer);
 		dt_write(m_view, dt_writer);
 		dt_write(m_rect, dt_writer);
-		dt_write(m_size, dt_writer);
+		dt_write(m_src_size, dt_writer);
 		dt_write(m_ratio, dt_writer);
 
-		const size_t row_size = 4 * m_size.width;
-		std::vector<uint8_t> buf(row_size);
-		for (size_t i = 0; i < m_size.height; i++) {
-			memcpy(buf.data(), m_data + row_size * i, row_size);
-			dt_writer.WriteBytes(buf);
+		const size_t pitch = 4 * m_src_size.width;
+		std::vector<uint8_t> line_buf(pitch);
+		for (size_t i = 0; i < m_src_size.height; i++) {
+			memcpy(line_buf.data(), m_data + pitch * i, pitch);
+			dt_writer.WriteBytes(line_buf);
 		}
 	}
 
