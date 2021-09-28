@@ -201,8 +201,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		xcvd_is_enabled();
 
-		tool_draw_is_checked(m_tool_draw);
-		tool_poly_is_checked(m_tool_poly);
+		drawing_tool_is_checked(m_drawing_tool);
+		drawing_poly_opt_is_checked(m_drawing_poly_opt);
 		misc_color_is_checked(m_misc_color_code);
 		status_bar_is_checked(m_misc_status_bar);
 		misc_len_is_checked(m_misc_len_unit);
@@ -375,8 +375,8 @@ namespace winrt::GraphPaper::implementation
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
 			//tool_read(dt_reader);
-			m_tool_draw = static_cast<DRAW_TOOL>(dt_reader.ReadUInt32());
-			dt_read(m_tool_poly, dt_reader);
+			m_drawing_tool = static_cast<DRAWING_TOOL>(dt_reader.ReadUInt32());
+			dt_read(m_drawing_poly_opt, dt_reader);
 			//find_text_read(dt_reader);
 			dt_read(m_find_text, dt_reader);
 			dt_read(m_find_repl, dt_reader);
@@ -860,8 +860,8 @@ namespace winrt::GraphPaper::implementation
 			DataWriter dt_writer{
 				DataWriter(ra_stream.GetOutputStreamAt(0))
 			};
-			dt_writer.WriteUInt32(static_cast<uint32_t>(m_tool_draw));
-			dt_write(m_tool_poly, dt_writer);
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_drawing_tool));
+			dt_write(m_drawing_poly_opt, dt_writer);
 			dt_write(m_find_text, dt_writer);
 			dt_write(m_find_repl, dt_writer);
 			uint16_t f_bit = 0;

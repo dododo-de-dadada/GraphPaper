@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapeLineA::draw(D2D_UI& dx)
 	{
 		D2D1_POINT_2F e_pos;
-		pt_add(m_pos, m_diff[0], e_pos);
+		pt_add(m_pos, m_vec[0], e_pos);
 
 		dx.m_solid_color_brush->SetColor(m_stroke_color);
 		const auto s_brush = dx.m_solid_color_brush.get();
@@ -252,7 +252,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_selected()) {
 			D2D1_POINT_2F mid;
-			pt_mul(m_diff[0], 0.5, m_pos, mid);
+			pt_mul(m_vec[0], 0.5, m_pos, mid);
 			anch_draw_rect(m_pos, dx);
 			anch_draw_rect(mid, dx);
 			anch_draw_rect(e_pos, dx);
@@ -279,7 +279,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeLineA::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		D2D1_POINT_2F e_pos;
-		pt_add(m_pos, m_diff[0], e_pos);
+		pt_add(m_pos, m_vec[0], e_pos);
 		if (pt_in_anch(t_pos, e_pos)) {
 			return ANCH_TYPE::ANCH_P0 + 1;
 		}
@@ -303,7 +303,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F e_pos;
 
 		if (pt_in_rect(m_pos, a_min, a_max)) {
-			pt_add(m_pos, m_diff[0], e_pos);
+			pt_add(m_pos, m_vec[0], e_pos);
 			return pt_in_rect(e_pos, a_min, a_max);
 		}
 		return false;
@@ -317,7 +317,7 @@ namespace winrt::GraphPaper::implementation
 				m_d2d_arrow_geom = nullptr;
 			}
 			if (m_arrow_style != ARROW_STYLE::NONE) {
-				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 			}
 			return true;
 		}
@@ -378,7 +378,7 @@ namespace winrt::GraphPaper::implementation
 				m_d2d_arrow_geom = nullptr;
 			}
 			if (m_arrow_style != ARROW_STYLE::NONE) {
-				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 			}
 			return true;
 		}
@@ -402,7 +402,7 @@ namespace winrt::GraphPaper::implementation
 				if (m_d2d_arrow_geom != nullptr) {
 					m_d2d_arrow_geom = nullptr;
 				}
-				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 				if (m_d2d_arrow_style == nullptr) {
 					create_arrow_style(Shape::s_d2d_factory, m_stroke_cap, m_join_style, m_join_limit, m_d2d_arrow_style.put());
 				}
@@ -423,7 +423,7 @@ namespace winrt::GraphPaper::implementation
 				m_d2d_arrow_geom = nullptr;
 			}
 			if (m_arrow_style != ARROW_STYLE::NONE) {
-				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 			}
 			return true;
 		}
@@ -438,7 +438,7 @@ namespace winrt::GraphPaper::implementation
 				m_d2d_arrow_geom = nullptr;
 			}
 			if (m_arrow_style != ARROW_STYLE::NONE) {
-				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				create_arrow_geom(Shape::s_d2d_factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 			}
 			return true;
 		}
@@ -457,10 +457,10 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_arrow_style(nullptr)
 	{
 		m_pos = b_pos;
-		m_diff[0] = b_vec;
+		m_vec[0] = b_vec;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			create_arrow_style(Shape::s_d2d_factory, m_stroke_cap, m_join_style, m_join_limit, m_d2d_arrow_style.put());
-			create_arrow_geom(Shape::s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+			create_arrow_geom(Shape::s_d2d_factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
 	}
 
@@ -474,7 +474,7 @@ namespace winrt::GraphPaper::implementation
 		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadInt32());
 		dt_read(m_arrow_size, dt_reader);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			create_arrow_geom(Shape::s_d2d_factory, m_pos, m_diff[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+			create_arrow_geom(Shape::s_d2d_factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 			create_arrow_style(Shape::s_d2d_factory, m_stroke_cap, m_join_style, m_join_limit, m_d2d_arrow_style.put());
 		}
 	}
@@ -492,7 +492,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F e_pos;
 
-		pt_add(m_pos, m_diff[0], e_pos);
+		pt_add(m_pos, m_vec[0], e_pos);
 		dt_write_svg("<line ", dt_writer);
 		dt_write_svg(m_pos, "x1", "y1", dt_writer);
 		dt_write_svg(e_pos, "x2", "y2", dt_writer);
@@ -501,7 +501,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[2];
 			D2D1_POINT_2F tip_pos;
-			if (get_arrow_pos(m_pos, m_diff[0], m_arrow_size, barbs, tip_pos)) {
+			if (get_arrow_pos(m_pos, m_vec[0], m_arrow_size, barbs, tip_pos)) {
 				ShapeLineA::write_svg(barbs, tip_pos, dt_writer);
 			}
 		}

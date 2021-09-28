@@ -186,7 +186,7 @@ namespace winrt::GraphPaper::implementation
 			static uint32_t misc_cnt = misc_min;
 			const auto padd = samp_w * 0.125;
 			const D2D1_POINT_2F samp_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
-			POLY_OPTION p_opt{ m_tool_poly };
+			POLY_OPTION p_opt{ m_drawing_poly_opt };
 			p_opt.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
 			//m_sample_shape = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, samp_vec, &m_sample_sheet, p_opt);
 			auto s = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, samp_vec, &m_sample_sheet, p_opt);

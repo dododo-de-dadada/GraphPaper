@@ -527,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(v_pos[i], v_pos[i - 1], a_vec);
 			// 差分から矢軸とその長さを求める.
 			// 矢軸の長さがほぼゼロか判定する.
-			//const auto a_vec = m_diff[i - 1];	// 矢軸のベクトル
+			//const auto a_vec = m_vec[i - 1];	// 矢軸のベクトル
 			const auto a_len = sqrt(pt_abs2(a_vec));	// 矢軸の長さ
 			if (a_len < FLT_MIN) {
 				continue;
@@ -668,17 +668,17 @@ namespace winrt::GraphPaper::implementation
 		else if (m_d2d_arrow_geom != nullptr) {
 			m_d2d_arrow_geom = nullptr;
 		}
-		const auto d_cnt = m_diff.size();	// 差分の数
-		if (d_cnt < 1) {
+		//const auto d_cnt = m_vec.size();	// 差分の数
+		if (m_vec.size() < 1) {
 			return;
 		}
 
 		// 開始位置と, 差分の配列をもとに, 頂点を求める.
-		const size_t v_cnt = d_cnt + 1;	// 頂点の数 (差分の数 + 1)
+		const size_t v_cnt = m_vec.size() + 1;	// 頂点の数 (差分の数 + 1)
 		D2D1_POINT_2F v_pos[MAX_N_GON];
 		v_pos[0] = m_pos;
 		for (size_t i = 1; i < v_cnt; i++) {
-			pt_add(v_pos[i - 1], m_diff[i - 1], v_pos[i]);
+			pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
 		}
 
 		// 折れ線のパスジオメトリを作成する.
@@ -730,7 +730,7 @@ namespace winrt::GraphPaper::implementation
 			m_d2d_arrow_geom = nullptr;
 		}
 
-		const auto d_cnt = m_diff.size();	// 差分の数
+		const auto d_cnt = m_vec.size();	// 差分の数
 		if (d_cnt < 1) {
 			return;
 		}
@@ -742,7 +742,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F v_pos[MAX_N_GON];
 		v_pos[0] = m_pos;
 		for (size_t i = 1; i < v_cnt; i++) {
-			pt_add(v_pos[i - 1], m_diff[i - 1], v_pos[i]);
+			pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
 		}
 
 		// 折れ線のパスジオメトリを作成する.
@@ -816,9 +816,9 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected()) {
 			D2D1_POINT_2F a_pos{ m_pos };	// 図形の部位の位置
 			anch_draw_rect(a_pos, dx);
-			const size_t d_cnt = m_diff.size();	// 差分の数
+			const size_t d_cnt = m_vec.size();	// 差分の数
 			for (size_t i = 0; i < d_cnt; i++) {
-				pt_add(a_pos, m_diff[i], a_pos);
+				pt_add(a_pos, m_vec[i], a_pos);
 				anch_draw_rect(a_pos, dx);
 			}
 		}
@@ -842,8 +842,8 @@ namespace winrt::GraphPaper::implementation
 		pt_sub(t_pos, m_pos, t_vec);
 		return stroke_hit_test(
 			t_vec,
-			m_diff.size(),
-			m_diff.data(),
+			m_vec.size(),
+			m_vec.data(),
 			true,
 			is_opaque(m_stroke_color),
 			m_stroke_width,
@@ -865,10 +865,10 @@ namespace winrt::GraphPaper::implementation
 		if (!pt_in_rect(m_pos, a_min, a_max)) {
 			return false;
 		}
-		const size_t d_cnt = m_diff.size();	// 差分の数
+		const size_t d_cnt = m_vec.size();	// 差分の数
 		D2D1_POINT_2F e_pos = m_pos;
 		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(e_pos, m_diff[i], e_pos);	// 次の位置
+			pt_add(e_pos, m_vec[i], e_pos);	// 次の位置
 			if (!pt_in_rect(e_pos, a_min, a_max)) {
 				return false;
 			}
@@ -912,7 +912,7 @@ namespace winrt::GraphPaper::implementation
 		create_poly_by_bbox(b_pos, b_vec, p_opt, v_pos, v_vec);
 		m_pos = v_pos[0];
 		for (size_t i = 1; i < p_opt.m_vertex_cnt; i++) {
-			pt_sub(v_pos[i], v_pos[i - 1], m_diff[i - 1]);
+			pt_sub(v_pos[i], v_pos[i - 1], m_vec[i - 1]);
 		}
 		m_d2d_path_geom = nullptr;
 		m_d2d_arrow_geom = nullptr;
@@ -942,14 +942,14 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_write_svg("<path d=\"", dt_writer);
 		dt_write_svg(m_pos, "M", dt_writer);
-		const auto d_cnt = m_diff.size();	// 差分の数
+		const auto d_cnt = m_vec.size();	// 差分の数
 		const auto v_cnt = d_cnt + 1;
 		D2D1_POINT_2F v_pos[MAX_N_GON];
 
 		v_pos[0] = m_pos;
 		for (size_t i = 0; i < d_cnt; i++) {
-			dt_write_svg(m_diff[i], "l", dt_writer);
-			pt_add(v_pos[i], m_diff[i], v_pos[i + 1]);
+			dt_write_svg(m_vec[i], "l", dt_writer);
+			pt_add(v_pos[i], m_vec[i], v_pos[i + 1]);
 		}
 		if (m_end_closed) {
 			dt_write_svg("Z", dt_writer);

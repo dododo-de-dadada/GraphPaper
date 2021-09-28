@@ -333,7 +333,7 @@
     <value>Stroke</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_tool_draw.Title" xml:space="preserve">
+  <data name="mbi_menu_drawing.Title" xml:space="preserve">
     <value>Draw</value>
     <comment>MenuBarItem</comment>
   </data>
@@ -637,39 +637,39 @@
     <value>Top</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_draw_bezi.Text" xml:space="preserve">
+  <data name="rmfi_drawing_tool_bezi.Text" xml:space="preserve">
     <value>Curve</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_draw_elli.Text" xml:space="preserve">
+  <data name="rmfi_drawing_tool_elli.Text" xml:space="preserve">
     <value>Ellipse</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_draw_line.Text" xml:space="preserve">
+  <data name="rmfi_drawing_tool_line.Text" xml:space="preserve">
     <value>Line</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_draw_poly.Text" xml:space="preserve">
+  <data name="rmfi_drawing_tool_poly.Text" xml:space="preserve">
     <value>Quadrilateral</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_draw_rect.Text" xml:space="preserve">
+  <data name="rmfi_drawing_tool_rect.Text" xml:space="preserve">
     <value>Rectangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_draw_rrect.Text" xml:space="preserve">
+  <data name="rmfi_drawing_tool_rrect.Text" xml:space="preserve">
     <value>Rounded Rect</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_draw_ruler.Text" xml:space="preserve">
+  <data name="rmfi_drawing_tool_ruler.Text" xml:space="preserve">
     <value>Ruler</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_select.Text" xml:space="preserve">
+  <data name="rmfi_select_tool.Text" xml:space="preserve">
     <value>Select Shape</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_draw_text.Text" xml:space="preserve">
+  <data name="rmfi_drawing_tool_text.Text" xml:space="preserve">
     <value>Text</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -982,43 +982,43 @@
     <value>Fit Frame to Text</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_poly_deca.Text" xml:space="preserve">
+  <data name="rmfi_drawing_poly_deca.Text" xml:space="preserve">
     <value>Decagon</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_poly_line.Text" xml:space="preserve">
+  <data name="rmfi_drawing_poly_line.Text" xml:space="preserve">
     <value>Line</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_poly_hept.Text" xml:space="preserve">
+  <data name="rmfi_drawing_poly_hept.Text" xml:space="preserve">
     <value>Heptagon</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_poly_hexa.Text" xml:space="preserve">
+  <data name="rmfi_drawing_poly_hexa.Text" xml:space="preserve">
     <value>Hexagon</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_poly_nona.Text" xml:space="preserve">
+  <data name="rmfi_drawing_poly_nona.Text" xml:space="preserve">
     <value>Nonagon</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_poly_octa.Text" xml:space="preserve">
+  <data name="rmfi_drawing_poly_octa.Text" xml:space="preserve">
     <value>Octagon</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_poly_pent.Text" xml:space="preserve">
+  <data name="rmfi_drawing_poly_pent.Text" xml:space="preserve">
     <value>Pentagon</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_poly_quad.Text" xml:space="preserve">
+  <data name="rmfi_drawing_poly_quad.Text" xml:space="preserve">
     <value>Quadrilateral</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_poly_tri.Text" xml:space="preserve">
+  <data name="rmfi_drawing_poly_tri.Text" xml:space="preserve">
     <value>Triangle</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_tool_poly_opt.Text" xml:space="preserve">
+  <data name="mfsi_drawing_poly_opt.Text" xml:space="preserve">
     <value>Polygon Option</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>

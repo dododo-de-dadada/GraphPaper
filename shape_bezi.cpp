@@ -472,9 +472,9 @@ namespace winrt::GraphPaper::implementation
 		if (m_d2d_arrow_geom != nullptr) {
 			m_d2d_arrow_geom = nullptr;
 		}
-		pt_add(m_pos, m_diff[0], b_seg.point1);
-		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
-		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
+		pt_add(m_pos, m_vec[0], b_seg.point1);
+		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
+		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
 		winrt::check_hresult(dx.m_d2d_fanctory->CreatePathGeometry(m_d2d_path_geom.put()));
 		m_d2d_path_geom->Open(sink.put());
 		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
@@ -499,9 +499,9 @@ namespace winrt::GraphPaper::implementation
 		if (m_d2d_arrow_geom != nullptr) {
 			m_d2d_arrow_geom = nullptr;
 		}
-		pt_add(m_pos, m_diff[0], b_seg.point1);
-		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
-		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
+		pt_add(m_pos, m_vec[0], b_seg.point1);
+		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
+		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
 		winrt::check_hresult(d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
 		m_d2d_path_geom->Open(sink.put());
 		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
@@ -557,7 +557,7 @@ namespace winrt::GraphPaper::implementation
 
 			anch_draw_rect(m_pos, dx);
 			s_pos = m_pos;
-			pt_add(s_pos, m_diff[0], e_pos);
+			pt_add(s_pos, m_vec[0], e_pos);
 			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
 			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
 			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
@@ -565,7 +565,7 @@ namespace winrt::GraphPaper::implementation
 			anch_draw_ellipse(e_pos, dx);
 
 			s_pos = e_pos;
-			pt_add(s_pos, m_diff[1], e_pos);
+			pt_add(s_pos, m_vec[1], e_pos);
 			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
 			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
 			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
@@ -573,7 +573,7 @@ namespace winrt::GraphPaper::implementation
 			anch_draw_ellipse(e_pos, dx);
 
 			s_pos = e_pos;
-			pt_add(s_pos, m_diff[2], e_pos);
+			pt_add(s_pos, m_vec[2], e_pos);
 			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
 			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
 			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
@@ -594,9 +594,9 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F c_pos[4];
 		c_pos[0].x = c_pos[0].y = 0.0;
 		//pt_sub(m_pos, t_pos, c_pos[0]);
-		pt_add(c_pos[0], m_diff[0], c_pos[1]);
-		pt_add(c_pos[1], m_diff[1], c_pos[2]);
-		pt_add(c_pos[2], m_diff[2], c_pos[3]);
+		pt_add(c_pos[0], m_vec[0], c_pos[1]);
+		pt_add(c_pos[1], m_vec[1], c_pos[2]);
+		pt_add(c_pos[2], m_vec[2], c_pos[3]);
 		if (pt_in_anch(tp, c_pos[3])) {
 			return ANCH_TYPE::ANCH_P0 + 3;
 		}
@@ -618,12 +618,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
-			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, c_pos, m_diff.data(), e_width)) {
+			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, c_pos, m_vec.data(), e_width)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
-			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, c_pos, m_diff.data(), e_width)) {
+			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, c_pos, m_vec.data(), e_width)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
@@ -762,9 +762,9 @@ namespace winrt::GraphPaper::implementation
 		const auto h = static_cast<double>(a_max.y) - a_min.y;
 		D2D1_POINT_2F c_pos[4];
 		pt_sub(m_pos, a_min, c_pos[0]);
-		pt_add(c_pos[0], m_diff[0], c_pos[1]);
-		pt_add(c_pos[1], m_diff[1], c_pos[2]);
-		pt_add(c_pos[2], m_diff[2], c_pos[3]);
+		pt_add(c_pos[0], m_vec[0], c_pos[1]);
+		pt_add(c_pos[1], m_vec[1], c_pos[2]);
+		pt_add(c_pos[2], m_vec[2], c_pos[3]);
 		// 最初の制御点の組をプッシュする.
 		constexpr auto D_MAX = 52;	// 分割する最大回数
 		BZP s_arr[1 + D_MAX * 3] = {};
@@ -853,12 +853,12 @@ namespace winrt::GraphPaper::implementation
 		ShapePath::ShapePath(3, s_attr, false)
 	{
 		m_pos = b_pos;
-		m_diff[0].x = b_vec.x;
-		m_diff[0].y = 0.0f;
-		m_diff[1].x = -b_vec.x;
-		m_diff[1].y = b_vec.y;
-		m_diff[2].x = b_vec.x;
-		m_diff[2].y = 0.0f;
+		m_vec[0].x = b_vec.x;
+		m_vec[0].y = 0.0f;
+		m_vec[1].x = -b_vec.x;
+		m_vec[1].y = b_vec.y;
+		m_vec[2].x = b_vec.x;
+		m_vec[2].y = 0.0f;
 		//create_path_geometry(Shape::s_d2d_factory);
 	}
 
@@ -874,9 +874,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_BEZIER_SEGMENT b_seg;
 
-		pt_add(m_pos, m_diff[0], b_seg.point1);
-		pt_add(b_seg.point1, m_diff[1], b_seg.point2);
-		pt_add(b_seg.point2, m_diff[2], b_seg.point3);
+		pt_add(m_pos, m_vec[0], b_seg.point1);
+		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
+		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
 		dt_write_svg("<path d=\"", dt_writer);
 		dt_write_svg(m_pos, "M", dt_writer);
 		dt_write_svg(b_seg.point1, "C", dt_writer);
@@ -914,12 +914,12 @@ namespace winrt::GraphPaper::implementation
 
 		// 計算精度をなるべく一定にするため, ベジェ制御点 bz を, その始点が原点となるよう平行移動する.
 		bz[0] = 0.0;
-		bz[1].x = m_diff.x;
-		bz[1].y = m_diff.y;
-		bz[2].x = bz[1].x + m_diff_1.x;
-		bz[2].y = bz[1].y + m_diff_1.y;
-		bz[3].x = bz[2].x + m_diff_2.x;
-		bz[3].y = bz[2].y + m_diff_2.y;
+		bz[1].x = m_vec.x;
+		bz[1].y = m_vec.y;
+		bz[2].x = bz[1].x + m_vec_1.x;
+		bz[2].y = bz[1].y + m_vec_1.y;
+		bz[3].x = bz[2].x + m_vec_2.x;
+		bz[3].y = bz[2].y + m_vec_2.y;
 		// 線分 pq に外接する方形 pr を求める.
 		pb.x = p.x - m_pos.x;
 		pb.y = p.y - m_pos.y;

@@ -9,45 +9,58 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// Shift + 下矢印キーが押された.
-	void MainPage::kacc_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	using winrt::Windows::UI::Xaml::Controls::ListViewItem;
+
+	// Escape が押された.
+	void MainPage::select_tool_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
 	{
-		select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Down>();
+		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
+			unselect_all();
+			sheet_draw();
+		}
+		else {
+			drawing_tool_click(rmfi_select_tool(), nullptr);
+		}
 	}
+
+	// Shift + 下矢印キーが押された.
+	//void MainPage::select_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	//{
+	//	select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Down>();
+	//}
 
 	// Shift + 上矢印キーが押された.
-	void MainPage::kacc_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-	{
-		select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Up>();
-	}
+	//void MainPage::select_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	//{
+	//	select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Up>();
+	//}
 
 	// 下矢印キーが押された.
-	void MainPage::kacc_select_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-	{
-		select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
-	}
+	//void MainPage::select_shape_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	//{
+	//	select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
+	//}
 
 	// 上矢印キーが押された.
-	void MainPage::kacc_select_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
-	{
-		select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
-	}
+	//void MainPage::select_shape_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)
+	//{
+	//	select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
+	//}
 
 	// 編集メニューの「すべて選択」が選択された.
 	void MainPage::select_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		bool flag = false;
+		bool done = false;
 		for (auto s : m_sheet_main.m_list_shapes) {
-			if (s->is_deleted()) {
+			if (s->is_deleted() || s->is_selected()) {
 				continue;
 			}
-			if (s->is_selected()) {
-				continue;
+			if (!done) {
+				done = true;
 			}
-			flag = true;
 			ustack_push_select(s);
 		}
-		if (flag != true) {
+		if (!done) {
 			return;
 		}
 		// 一覧が表示されてるか判定する.
@@ -61,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 	// 範囲に含まれる図形を選択し, 含まれない図形の選択を解除する.
 	bool MainPage::select_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max)
 	{
-		bool flag = false;
+		bool done = false;
 		//uint32_t i = 0u;
 		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted()) {
@@ -74,25 +87,27 @@ namespace winrt::GraphPaper::implementation
 					if (summary_is_visible()) {
 						summary_select(s);
 					}
-					flag = true;
-				}
-			}
-			else {
-				if (s->is_selected()) {
-					ustack_push_select(s);
-					// 一覧が表示されてるか判定する.
-					if (summary_is_visible()) {
-						summary_unselect(s);
+					if (!done) {
+						done = true;
 					}
-					flag = true;
 				}
 			}
-			//i++;
+			else if (s->is_selected()) {
+				ustack_push_select(s);
+				// 一覧が表示されてるか判定する.
+				if (summary_is_visible()) {
+					summary_unselect(s);
+				}
+				if (!done) {
+					done = true;
+				}
+			}
 		}
-		return flag;
+		return done;
 	}
 
 	// 次の図形を選択する.
+	/*
 	template <VirtualKeyModifiers M, VirtualKey K> void MainPage::select_next_shape(void)
 	{
 		Shape* s = static_cast<Shape*>(nullptr);
@@ -146,7 +161,7 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
 	template void MainPage::select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Down>();
 	template void MainPage::select_next_shape<VirtualKeyModifiers::Shift, VirtualKey::Up>();
-
+	*/
 
 	// 範囲の中の図形を選択して, それ以外の図形は選択をはずす.
 	// s_from	最初の図形
@@ -211,8 +226,6 @@ namespace winrt::GraphPaper::implementation
 	// 図形を選択する.
 	void MainPage::select_shape(Shape* const s, const VirtualKeyModifiers k_mod)
 	{
-		using winrt::Windows::UI::Xaml::Controls::ListViewItem;
-
 		// コントロールキーが押されているか判定する.
 		if (k_mod == VirtualKeyModifiers::Control) {
 			ustack_push_select(s);
@@ -269,28 +282,26 @@ namespace winrt::GraphPaper::implementation
 	// a_max	範囲の右下位置
 	bool MainPage::toggle_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max)
 	{
-		auto flag = false;
-		//uint32_t i = 0;
+		bool done = false;
 		for (auto s : m_sheet_main.m_list_shapes) {
-			if (s->is_deleted()) {
+			if (s->is_deleted() || !s->in_area(a_min, a_max)) {
 				continue;
 			}
-			if (s->in_area(a_min, a_max)) {
-				ustack_push_select(s);
-				// 一覧が表示されてるか判定する.
-				if (summary_is_visible()) {
-					if (s->is_selected() != true) {
-						summary_select(s);
-					}
-					else {
-						summary_unselect(s);
-					}
+			ustack_push_select(s);
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
+				if (s->is_selected() != true) {
+					summary_select(s);
 				}
-				flag = true;
+				else {
+					summary_unselect(s);
+				}
 			}
-			//i++;
+			if (!done) {
+				done = true;
+			}
 		}
-		return flag;
+		return done;
 	}
 
 	// 図形の選択をすべて解除する.
@@ -298,7 +309,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	選択が解除された図形があるなら true
 	bool MainPage::unselect_all(const bool t_range_only)
 	{
-		auto flag = false;
+		bool done = false;
 		for (auto s : m_sheet_main.m_list_shapes) {
 			if (s->is_deleted()) {
 				continue;
@@ -306,7 +317,9 @@ namespace winrt::GraphPaper::implementation
 			// 文字範囲だけ解除でない, かつ図形が選択されているか判定する.
 			if (!t_range_only && s->is_selected()) {
 				ustack_push_select(s);
-				flag = true;
+				if (!done) {
+					done = true;
+				}
 			}
 			// 文字範囲が取得できない (文字列図形でない場合も含む) か判定する.
 			DWRITE_TEXT_RANGE d_range;
@@ -314,19 +327,21 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			// 得た文字範囲が { 0, 0 } か判定する.
-			const DWRITE_TEXT_RANGE s_range = DWRITE_TEXT_RANGE{ 0, 0 };
+			constexpr DWRITE_TEXT_RANGE s_range = DWRITE_TEXT_RANGE{ 0, 0 };
 			if (equal(s_range, d_range)) {
 				continue;
 			}
 			// { 0, 0 } を図形に格納して, その操作をスタックに積む.
 			ustack_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
-			flag = true;
+			if (!done) {
+				done = true;
+			}
 		}
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_unselect_all();
 		}
-		return flag;
+		return done;
 	}
 
 }

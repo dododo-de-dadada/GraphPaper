@@ -25,9 +25,9 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_stroke_color)) {
 			const double g_len = m_grid_base + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
-			const bool x_ge_y = fabs(m_diff[0].x) >= fabs(m_diff[0].y);
-			const double vec_x = (x_ge_y ? m_diff[0].x : m_diff[0].y);
-			const double vec_y = (x_ge_y ? m_diff[0].y : m_diff[0].x);
+			const bool x_ge_y = fabs(m_vec[0].x) >= fabs(m_vec[0].y);
+			const double vec_x = (x_ge_y ? m_vec[0].x : m_vec[0].y);
+			const double vec_y = (x_ge_y ? m_vec[0].y : m_vec[0].x);
 			const double grad_x = vec_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
 			const uint32_t k = static_cast<uint32_t>(floor(vec_x / grad_x));
@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_opaque(m_fill_color)) {
 			D2D1_POINT_2F e_pos;
-			pt_add(m_pos, m_diff[0], e_pos);
+			pt_add(m_pos, m_vec[0], e_pos);
 			D2D1_POINT_2F r_min, r_max;
 			pt_bound(m_pos, e_pos, r_min, r_max);
 			if (pt_in_rect(t_pos, r_min, r_max)) {
@@ -103,8 +103,8 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_RECT_F rect{
 			m_pos.x,
 			m_pos.y,
-			m_pos.x + m_diff[0].x,
-			m_pos.y + m_diff[0].y
+			m_pos.x + m_vec[0].x,
+			m_pos.y + m_vec[0].y
 		};
 		if (is_opaque(m_fill_color)) {
 			// ìhÇËÇ¬Ç‘ÇµêFÇ™ïsìßñæÇ»èÍçá,
@@ -116,9 +116,9 @@ namespace winrt::GraphPaper::implementation
 			// ê¸ògÇÃêFÇ™ïsìßñæÇ»èÍçá,
 			const double g_len = m_grid_base + 1.0;
 			const double f_size = m_dw_text_format->GetFontSize();
-			const bool xy = fabs(m_diff[0].x) >= fabs(m_diff[0].y);
-			const double vec_x = (xy ? m_diff[0].x : m_diff[0].y);
-			const double vec_y = (xy ? m_diff[0].y : m_diff[0].x);
+			const bool xy = fabs(m_vec[0].x) >= fabs(m_vec[0].y);
+			const double vec_x = (xy ? m_vec[0].x : m_vec[0].y);
+			const double vec_y = (xy ? m_vec[0].y : m_vec[0].x);
 			const double grad_x = vec_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
 			const uint32_t k = static_cast<uint32_t>(floor(vec_x / grad_x));
@@ -133,7 +133,7 @@ namespace winrt::GraphPaper::implementation
 				// çÇÇ≥Ç™ 0 à»è„ÇÃèÍçáâ∫ÇÊÇπÅAÇ»Ç¢èÍçáè„ÇÊÇπÇíióéÇÃÇªÇÎÇ¶Ç…äiî[Ç∑ÇÈ.
 				// ï∂éöóÒÇîzíuÇ∑ÇÈï˚å`Ç™è¨Ç≥Ç¢ (èëëÃÇÃëÂÇ´Ç≥Ç∆ìØÇ∂) ÇΩÇﬂ,
 				// DWRITE_PARAGRAPH_ALIGNMENT ÇÕ, ãtÇÃå¯â ÇÇ‡ÇΩÇÁÇ∑.
-				p_align = (m_diff[0].y >= 0.0f ? DWRITE_PARAGRAPH_ALIGNMENT_FAR : DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+				p_align = (m_vec[0].y >= 0.0f ? DWRITE_PARAGRAPH_ALIGNMENT_FAR : DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			}
 			else {
 				// ècÇÃÇŸÇ§Ç™è¨Ç≥Ç¢èÍçá,

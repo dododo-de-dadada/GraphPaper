@@ -264,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
 			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
 			if (m_edit_text_frame) {
-				ustack_push_anch(s, ANCH_TYPE::ANCH_SE);
+				ustack_push_position(s, ANCH_TYPE::ANCH_SE);
 				s->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 			}
 			ustack_push_null();

@@ -140,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// 作図ツール
 	//-------------------------------
-	enum struct DRAW_TOOL {
+	enum struct DRAWING_TOOL {
 		SELECT,	// 選択ツール
 		BEZI,	// 曲線
 		ELLI,	// だ円
@@ -253,8 +253,8 @@ namespace winrt::GraphPaper::implementation
 		double m_event_click_dist = 6.0;	// クリックの判定距離 (DIPs)
 
 		// 作図ツール
-		DRAW_TOOL m_tool_draw = DRAW_TOOL::SELECT;	// 作図ツール
-		POLY_OPTION m_tool_poly{ POLY_OPTION_DEFVAL };	// 多角形の選択肢
+		DRAWING_TOOL m_drawing_tool = DRAWING_TOOL::SELECT;	// 作図ツール
+		POLY_OPTION m_drawing_poly_opt{ POLY_OPTION_DEFVAL };	// 多角形の選択肢
 
 		// 図形リスト
 		uint32_t m_list_sel_cnt = 0;	// 選択された図形の数
@@ -743,7 +743,7 @@ namespace winrt::GraphPaper::implementation
 		// 領域に含まれる図形を選択し, 含まれない図形の選択を解除する.
 		bool select_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max);
 		// 次の図形を選択する.
-		template <VirtualKeyModifiers M, VirtualKey K> void select_next_shape(void);
+		//template <VirtualKeyModifiers M, VirtualKey K> void select_next_shape(void);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
 		bool select_range(Shape* const s_from, Shape* const s_to);
 		// 図形を選択する.
@@ -753,13 +753,15 @@ namespace winrt::GraphPaper::implementation
 		// すべての図形の選択を解除する.
 		bool unselect_all(const bool t_range_only = false);
 		//　Shft + 下矢印キーが押された.
-		void kacc_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void select_range_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　Shift + 上矢印キーが押された.
-		void kacc_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void select_range_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　下矢印キーが押された.
-		void kacc_select_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void select_shape_next_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 		//　上矢印キーが押された.
-		void kacc_select_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		void select_shape_prev_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
+		//　Escape が押された.
+		void select_tool_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_sheet.cpp
@@ -949,19 +951,17 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 作図メニューの項目が選択された.
-		void tool_draw_click(IInspectable const& sender, RoutedEventArgs const&);
+		void drawing_tool_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 作図メニューに印をつける.
-		void tool_draw_is_checked(const DRAW_TOOL value);
+		void drawing_tool_is_checked(const DRAWING_TOOL value);
 		// 作図メニューの多角形の頂点数にチェックをつける.
-		void tool_poly_n_is_checked(const uint32_t value);
+		void drawing_poly_vtx_is_checked(const uint32_t value);
 		// 作図メニューの多角形の選択肢にチェックをつける.
-		void tool_poly_is_checked(const POLY_OPTION& value);
+		void drawing_poly_opt_is_checked(const POLY_OPTION& value);
 		// 作図ツールの状態を読み込む.
 		//void tool_read(DataReader const& dt_reader);
 		// 作図ツールの状態を書き込む.
 		//void tool_write(DataWriter const& dt_writer);
-		//　Escape が押された.
-		void kacc_tool_select_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//-----------------------------
 		// MainPage_ustack.cpp
@@ -987,7 +987,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を入れ替えて, その操作をスタックに積む.
 		void ustack_push_arrange(Shape* const s, Shape* const t);
 		// 図形の頂点をスタックに保存する.
-		void ustack_push_anch(Shape* const s, const uint32_t anch);
+		void ustack_push_position(Shape* const s, const uint32_t anch);
 		// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
 		void ustack_push_image(Shape* const s);
 		// 図形を挿入して, その操作をスタックに積む.
@@ -1018,13 +1018,6 @@ namespace winrt::GraphPaper::implementation
 		// 切り取りとコピー, 文字列の編集など
 		//-------------------------------
 
-		// クリップボードにデータが含まれているか判定する.
-		//size_t xcvd_contains(const winrt::hstring formats[], const size_t f_cnt) const;
-		// クリップボードにデータが含まれているか判定する.
-		//template <size_t Z> size_t xcvd_contains(const winrt::hstring(&formats)[Z]) const
-		//{
-		//	return xcvd_contains(formats, Z);
-		//}
 		// 編集メニューの「コピー」が選択された.
 		IAsyncAction xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「切り取り」が選択された.

@@ -222,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 			t_box.x = floor((t_box.x + g - 1.0f) / g) * g;
 			t_box.y = floor((t_box.y + g - 1.0f) / g) * g;
 		}
-		if (!equal(t_box, m_diff[0])) {
+		if (!equal(t_box, m_vec[0])) {
 			D2D1_POINT_2F se;
 			pt_add(m_pos, t_box, se);
 			set_pos_anch(se, ANCH_TYPE::ANCH_SE, 0.0f, false);
@@ -265,8 +265,8 @@ namespace winrt::GraphPaper::implementation
 				m_font_weight, m_font_style, DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
 				m_font_size, locale_name, t_format.put())
 		);
-		const auto text_w = static_cast<FLOAT>(max(std::fabsf(m_diff[0].x) - 2.0 * m_text_padding.width, 0.0));
-		const auto text_h = static_cast<FLOAT>(max(std::fabsf(m_diff[0].y) - 2.0 * m_text_padding.height, 0.0));
+		const auto text_w = static_cast<FLOAT>(max(std::fabsf(m_vec[0].x) - 2.0 * m_text_padding.width, 0.0));
+		const auto text_h = static_cast<FLOAT>(max(std::fabsf(m_vec[0].y) - 2.0 * m_text_padding.height, 0.0));
 		winrt::check_hresult(d_factory->CreateTextLayout(m_text, text_len, t_format.get(), text_w, text_h, m_dw_layout.put()));
 		t_format = nullptr;
 		winrt::com_ptr<IDWriteTextLayout3> t3;
@@ -313,8 +313,8 @@ namespace winrt::GraphPaper::implementation
 				create_text_layout(d_factory);
 			}
 			else {
-				const FLOAT pad_w = static_cast<FLOAT>(max(std::fabs(m_diff[0].x) - m_text_padding.width * 2.0, 0.0));
-				const FLOAT pad_h = static_cast<FLOAT>(max(std::fabs(m_diff[0].y) - m_text_padding.height * 2.0, 0.0));
+				const FLOAT pad_w = static_cast<FLOAT>(max(std::fabs(m_vec[0].x) - m_text_padding.width * 2.0, 0.0));
+				const FLOAT pad_h = static_cast<FLOAT>(max(std::fabs(m_vec[0].y) - m_text_padding.height * 2.0, 0.0));
 				bool flag = false;
 				if (equal(pad_w, m_dw_layout->GetMaxWidth()) != true) {
 					m_dw_layout->SetMaxWidth(pad_w);
@@ -356,10 +356,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		D2D1_POINT_2F t_min;
-		pt_add(m_pos, m_diff[0], t_min);
+		pt_add(m_pos, m_vec[0], t_min);
 		pt_min(m_pos, t_min, t_min);
-		auto hm = min(m_text_padding.width, fabs(m_diff[0].x) * 0.5);
-		auto vm = min(m_text_padding.height, fabs(m_diff[0].y) * 0.5);
+		auto hm = min(m_text_padding.width, fabs(m_vec[0].x) * 0.5);
+		auto vm = min(m_text_padding.height, fabs(m_vec[0].y) * 0.5);
 		pt_add(t_min, hm, vm, t_min);
 		//uint32_t line_cnt;
 		//m_dw_layout->GetLineMetrics(nullptr, 0, &line_cnt);

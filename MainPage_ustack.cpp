@@ -406,7 +406,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の部位の位置をスタックに保存する.
-	void MainPage::ustack_push_anch(Shape* const s, const uint32_t anch)
+	void MainPage::ustack_push_position(Shape* const s, const uint32_t anch)
 	{
 		m_ustack_undo.push_back(new UndoAnchor(s, anch));
 	}

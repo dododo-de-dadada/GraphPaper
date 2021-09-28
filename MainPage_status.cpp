@@ -211,31 +211,31 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		winrt::hstring data;
-		if (m_tool_draw == DRAW_TOOL::BEZI) {
+		if (m_drawing_tool == DRAWING_TOOL::BEZI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));
 		}
-		else if (m_tool_draw == DRAW_TOOL::ELLI) {
+		else if (m_drawing_tool == DRAWING_TOOL::ELLI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_elli")));
 		}
-		else if (m_tool_draw == DRAW_TOOL::LINE) {
+		else if (m_drawing_tool == DRAWING_TOOL::LINE) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 		}
-		else if (m_tool_draw == DRAW_TOOL::POLY) {
+		else if (m_drawing_tool == DRAWING_TOOL::POLY) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_tri")));
 		}
-		else if (m_tool_draw == DRAW_TOOL::RECT) {
+		else if (m_drawing_tool == DRAWING_TOOL::RECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
 		}
-		else if (m_tool_draw == DRAW_TOOL::RRECT) {
+		else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")));
 		}
-		else if (m_tool_draw == DRAW_TOOL::RULER) {
+		else if (m_drawing_tool == DRAWING_TOOL::RULER) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_ruler")));
 		}
-		else if (m_tool_draw == DRAW_TOOL::SELECT) {
+		else if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_select")));
 		}
-		else if (m_tool_draw == DRAW_TOOL::TEXT) {
+		else if (m_drawing_tool == DRAWING_TOOL::TEXT) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 		}
 		else {

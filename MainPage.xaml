@@ -512,8 +512,8 @@
                 </MenuFlyoutItem>
             </muxc:MenuBarItem>
             <!-- 作図メニュー -->
-            <muxc:MenuBarItem x:Uid="mbi_menu_tool_draw" AccessKey="D" Title="Draw">
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_select" x:Uid="rmfi_tool_select" Click="tool_draw_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Select">
+            <muxc:MenuBarItem x:Uid="mbi_menu_drawing" AccessKey="D" Title="Draw">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_select_tool" x:Uid="rmfi_select_tool" Click="drawing_tool_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Select">
 					<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Escape" />
 					</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
@@ -522,65 +522,65 @@
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
                 <MenuFlyoutSeparator />
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_rect" x:Uid="rmfi_tool_draw_rect" Click="tool_draw_click" GroupName="gn_tool_type" Text="Rectangle">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_rect" x:Uid="rmfi_drawing_tool_rect" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rectangle">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_rect}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_rrect" x:Uid="rmfi_tool_draw_rrect" Click="tool_draw_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_rrect" x:Uid="rmfi_drawing_tool_rrect" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_rrect}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_poly" x:Uid="rmfi_tool_draw_poly" Click="tool_draw_click" GroupName="gn_tool_type" Text="Quadrangle">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_poly" x:Uid="rmfi_drawing_tool_poly" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quadrangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_tri}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_elli" x:Uid="rmfi_tool_draw_elli" Click="tool_draw_click" GroupName="gn_tool_type" Text="Ellipse">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_elli" x:Uid="rmfi_drawing_tool_elli" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ellipse">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_elli}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_line" x:Uid="rmfi_tool_draw_line" Click="tool_draw_click" GroupName="gn_tool_type" Text="Line" >
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_line" x:Uid="rmfi_drawing_tool_line" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Line" >
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_line}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_bezi" x:Uid="rmfi_tool_draw_bezi" Click="tool_draw_click" GroupName="gn_tool_type" Text="Curve" >
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_bezi" x:Uid="rmfi_drawing_tool_bezi" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Curve" >
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_bezi}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_text" x:Uid="rmfi_tool_draw_text" Click="tool_draw_click" GroupName="gn_tool_type" Text="Text" >
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_text" x:Uid="rmfi_drawing_tool_text" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Text" >
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_text}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_draw_ruler" x:Uid="rmfi_tool_draw_ruler" Click="tool_draw_click" GroupName="gn_tool_type" Text="Major" >
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_ruler" x:Uid="rmfi_drawing_tool_ruler" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Major" >
                     <muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_ruler}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutSubItem x:Uid="mfsi_tool_poly_opt" Text="Polygon Option">
+				<MenuFlyoutSubItem x:Uid="mfsi_drawing_poly_opt" Text="Polygon Option">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_draw}"/>
 					</MenuFlyoutSubItem.Icon>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_line" x:Uid="rmfi_tool_poly_line" Click="tool_draw_click" GroupName="gn_poly_type" Text="2-Line" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_tri" x:Uid="rmfi_tool_poly_tri" Click="tool_draw_click" IsChecked="True" GroupName="gn_poly_type" Text="3-Triangle" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_quad" x:Uid="rmfi_tool_poly_quad" Click="tool_draw_click" GroupName="gn_poly_type" Text="4-Quadrilateral" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_pent" x:Uid="rmfi_tool_poly_pent" Click="tool_draw_click" GroupName="gn_poly_type" Text="5-Pentagon" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_hexa" x:Uid="rmfi_tool_poly_hexa" Click="tool_draw_click" GroupName="gn_poly_type" Text="6-Hexagon" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_hept" x:Uid="rmfi_tool_poly_hept" Click="tool_draw_click" GroupName="gn_poly_type" Text="7-Heptagon" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_octa" x:Uid="rmfi_tool_poly_octa" Click="tool_draw_click" GroupName="gn_poly_type" Text="8-Octagon" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_nona" x:Uid="rmfi_tool_poly_nona" Click="tool_draw_click" GroupName="gn_poly_type" Text="9-Nonagon" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_poly_deca" x:Uid="rmfi_tool_poly_deca" Click="tool_draw_click" GroupName="gn_poly_type" Text="10-Decagon" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_line" x:Uid="rmfi_drawing_poly_line" Click="drawing_tool_click" GroupName="gn_poly_type" Text="2-Line" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_tri" x:Uid="rmfi_drawing_poly_tri" Click="drawing_tool_click" IsChecked="True" GroupName="gn_poly_type" Text="3-Triangle" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_quad" x:Uid="rmfi_drawing_poly_quad" Click="drawing_tool_click" GroupName="gn_poly_type" Text="4-Quadrilateral" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_pent" x:Uid="rmfi_drawing_poly_pent" Click="drawing_tool_click" GroupName="gn_poly_type" Text="5-Pentagon" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_hexa" x:Uid="rmfi_drawing_poly_hexa" Click="drawing_tool_click" GroupName="gn_poly_type" Text="6-Hexagon" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_hept" x:Uid="rmfi_drawing_poly_hept" Click="drawing_tool_click" GroupName="gn_poly_type" Text="7-Heptagon" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_octa" x:Uid="rmfi_drawing_poly_octa" Click="drawing_tool_click" GroupName="gn_poly_type" Text="8-Octagon" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_nona" x:Uid="rmfi_drawing_poly_nona" Click="drawing_tool_click" GroupName="gn_poly_type" Text="9-Nonagon" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_deca" x:Uid="rmfi_drawing_poly_deca" Click="drawing_tool_click" GroupName="gn_poly_type" Text="10-Decagon" />
 					<MenuFlyoutSeparator />
-					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_regular" x:Uid="tmfi_tool_poly_regular" Click="tool_draw_click" IsChecked="true" Text="Reguler Polygon" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_vertex_up" x:Uid="tmfi_tool_poly_vertex_up" Click="tool_draw_click" IsChecked="true" Text="Vertex Up" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_end_close" x:Uid="tmfi_tool_poly_end_close" Click="tool_draw_click" IsChecked="true" Text="End Close" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_clockwise" x:Uid="tmfi_tool_poly_clockwise" Click="tool_draw_click" IsChecked="true" Text="Clockwise" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_regular" x:Uid="tmfi_tool_poly_regular" Click="drawing_tool_click" IsChecked="true" Text="Reguler Polygon" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_vertex_up" x:Uid="tmfi_tool_poly_vertex_up" Click="drawing_tool_click" IsChecked="true" Text="Vertex Up" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_end_close" x:Uid="tmfi_tool_poly_end_close" Click="drawing_tool_click" IsChecked="true" Text="End Close" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_clockwise" x:Uid="tmfi_tool_poly_clockwise" Click="drawing_tool_click" IsChecked="true" Text="Clockwise" />
 				</MenuFlyoutSubItem>
 			</muxc:MenuBarItem>
             <!-- 線枠メニュー -->
@@ -890,45 +890,13 @@
                 通常は, MenuFlyoutItem でキーボードアクセラレータを指定すべきだが,
                 そうすると SwapChainPanel をクリックしたあとアクセラレーターが機能しなくなる.
                 フォーカスのせいかもしれないが, 原因は不明.
-                そこでこのエレメントにアクセラレーターを設定し Invoke する.
+                そこでこのエレメントにアクセラレーターを設定する.
                 通常は, ScopeOwner をすぐ上の親に限定すべきだが, 
                 そうすると, 親より上のオブジェクトは既存ではなく, 新規に作成
                 されてしまう。つまり, メンバ変数にアクセスできない。
                 -->
                 <SwapChainPanel.KeyboardAccelerators>
-                <!--
-                    <KeyboardAccelerator Invoked="kacc_range_next_invoked" Key="Down" Modifiers="Shift" />
-                    <KeyboardAccelerator Invoked="kacc_range_prev_invoked" Key="Up" Modifiers="Shift" />
-                    -->
-                    <KeyboardAccelerator Invoked="kacc_tool_select_invoked" Key="Escape" />
-					<!--
-                    <KeyboardAccelerator Invoked="kacc_select_prev_invoked" Key="Up" />
-                    <KeyboardAccelerator Invoked="kacc_select_next_invoked" Key="Down" />
-                    -->
-                    <!--
-                    <KeyboardAccelerator Invoked="kacc_select_all_invoked" Key="A" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_copy_invoked" Key="C" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_delete_invoked" Key="Delete" />
-                    <KeyboardAccelerator Invoked="kacc_edit_text_invoked" Key="E" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_bring_to_front_invoked" Key="End" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_bring_forward_invoked" Key="PageDown" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_find_text_invoked" Key="F" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_group_invoked" Key="G" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_send_to_back_invoked" Key="Home" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_send_backward_invoked" Key="PageUp" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_summaty_invoked" Key="L" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_new_invoked" Key="N" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_zoom_reset_invoked" Key="Number0" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_zoom_reset_invoked" Key="NumberPad0" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_open_invoked" Key="O" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_save_invoked" Key="S" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_save_as_invoked" Key="S" Modifiers="Control,Shift" />
-                    <KeyboardAccelerator Invoked="kacc_ungroup_invoked" Key="U" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_paste_invoked" Key="V" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_cut_invoked" Key="X" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_redo_invoked" Key="Y" Modifiers="Control" />
-                    <KeyboardAccelerator Invoked="kacc_undo_invoked" Key="Z" Modifiers="Control" />
-                    -->
+                    <KeyboardAccelerator Invoked="select_tool_invoked" Key="Escape" />
                 </SwapChainPanel.KeyboardAccelerators>
             </SwapChainPanel>
             <ScrollBar x:Name="sb_horz" Height="Auto" IndicatorMode="MouseIndicator" IsEnabled="True" Margin="0,0,16,0" Orientation="Horizontal" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Scroll="scroll" Visibility="Visible" Width="Auto" />

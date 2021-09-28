@@ -104,13 +104,13 @@ namespace winrt::GraphPaper::implementation
 	// b_max	囲む領域の右下位置.
 	void ShapeStroke::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
-		const size_t d_cnt = m_diff.size();	// 差分の数
+		const size_t d_cnt = m_vec.size();	// 差分の数
 		D2D1_POINT_2F e_pos = m_pos;
 		b_min = a_min;
 		b_max = a_max;
 		pt_inc(e_pos, b_min, b_max);
 		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(e_pos, m_diff[i], e_pos);
+			pt_add(e_pos, m_vec[i], e_pos);
 			pt_inc(e_pos, b_min, b_max);
 		}
 	}
@@ -177,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 			flag = true;
 		}
 		D2D1_POINT_2F v_pos{ m_pos };
-		for (const auto d_vec : m_diff) {
+		for (const auto d_vec : m_vec) {
 			pt_add(v_pos, d_vec, v_pos);
 			pt_sub(v_pos, pos, vec);
 			abs2 = static_cast<float>(pt_abs2(vec));
@@ -199,10 +199,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (anch > ANCH_TYPE::ANCH_P0) {
 			const size_t a_cnt = anch - ANCH_TYPE::ANCH_P0;
-			if (a_cnt < m_diff.size() + 1) {
+			if (a_cnt < m_vec.size() + 1) {
 				value = m_pos;
 				for (size_t i = 0; i < a_cnt; i++) {
-					pt_add(value, m_diff[i], value);
+					pt_add(value, m_vec[i], value);
 				}
 			}
 		}
@@ -212,11 +212,11 @@ namespace winrt::GraphPaper::implementation
 	// value	領域の左上位置
 	void ShapeStroke::get_pos_min(D2D1_POINT_2F& value) const noexcept
 	{
-		const size_t d_cnt = m_diff.size();	// 差分の数
+		const size_t d_cnt = m_vec.size();	// 差分の数
 		D2D1_POINT_2F v_pos = m_pos;	// 頂点の位置
 		value = m_pos;
 		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(v_pos, m_diff[i], v_pos);
+			pt_add(v_pos, m_vec[i], v_pos);
 			pt_min(value, v_pos, value);
 		}
 	}
@@ -249,9 +249,9 @@ namespace winrt::GraphPaper::implementation
 	size_t ShapeStroke::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
 	{
 		v_pos[0] = m_pos;
-		const size_t d_cnt = m_diff.size();
+		const size_t d_cnt = m_vec.size();
 		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(v_pos[i], m_diff[i], v_pos[i + 1]);
+			pt_add(v_pos[i], m_vec[i], v_pos[i + 1]);
 		}
 		return d_cnt + 1;
 	}
@@ -375,14 +375,14 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool flag = false;
 		// 変更する頂点がどの頂点か判定する.
-		const size_t d_cnt = m_diff.size();	// 差分の数
+		const size_t d_cnt = m_vec.size();	// 差分の数
 		if (anch >= ANCH_TYPE::ANCH_P0 && anch <= ANCH_TYPE::ANCH_P0 + d_cnt) {
 			D2D1_POINT_2F v_pos[MAX_N_GON];	// 頂点の位置
 			const size_t a_cnt = anch - ANCH_TYPE::ANCH_P0;	// 変更する頂点
 			// 最初の頂点から変更する頂点までの, 各頂点の位置を得る.
 			v_pos[0] = m_pos;
 			for (size_t i = 0; i < a_cnt; i++) {
-				pt_add(v_pos[i], m_diff[i], v_pos[i + 1]);
+				pt_add(v_pos[i], m_vec[i], v_pos[i + 1]);
 			}
 			// 値から変更前の位置を引き, 変更する差分を得る.
 			D2D1_POINT_2F vec;
@@ -393,7 +393,7 @@ namespace winrt::GraphPaper::implementation
 				// 変更するのが最初の頂点じゃないか判定する.
 				if (a_cnt > 0) {
 					// 頂点の直前の差分に変更分を加える.
-					pt_add(m_diff[a_cnt - 1], vec, m_diff[a_cnt - 1]);
+					pt_add(m_vec[a_cnt - 1], vec, m_vec[a_cnt - 1]);
 				}
 				else {
 					// 最初の頂点の位置に変更分を加える.
@@ -403,7 +403,7 @@ namespace winrt::GraphPaper::implementation
 				if (a_cnt < d_cnt) {
 					// 次の頂点が動かないように,
 					// 頂点の直後の差分から変更分を引く.
-					pt_sub(m_diff[a_cnt], vec, m_diff[a_cnt]);
+					pt_sub(m_vec[a_cnt], vec, m_vec[a_cnt]);
 				}
 				flag = true;
 			}
@@ -411,7 +411,7 @@ namespace winrt::GraphPaper::implementation
 			if (limit >= FLT_MIN) {
 				// 残りの頂点の位置を得る.
 				for (size_t i = a_cnt; i < d_cnt; i++) {
-					pt_add(v_pos[i], m_diff[i], v_pos[i + 1]);
+					pt_add(v_pos[i], m_vec[i], v_pos[i + 1]);
 				}
 				for (size_t i = 0; i < d_cnt + 1; i++) {
 					// 頂点が変更する頂点か判定する.
@@ -427,14 +427,14 @@ namespace winrt::GraphPaper::implementation
 					}
 					// 変更するのが最初の頂点以外か判定する.
 					if (a_cnt > 0) {
-						pt_add(m_diff[a_cnt - 1], v_vec, m_diff[a_cnt - 1]);
+						pt_add(m_vec[a_cnt - 1], v_vec, m_vec[a_cnt - 1]);
 					}
 					else {
 						pt_add(m_pos, v_vec, m_pos);
 					}
 					// 変更するのが最後の頂点以外か判定する.
 					if (a_cnt < d_cnt) {
-						pt_sub(m_diff[a_cnt], v_vec, m_diff[a_cnt]);
+						pt_sub(m_vec[a_cnt], v_vec, m_vec[a_cnt]);
 					}
 					flag = true;
 					break;
@@ -487,7 +487,7 @@ namespace winrt::GraphPaper::implementation
 	// d_cnt	差分の個数 (最大値は MAX_N_GON - 1)
 	// s_attr	属性値
 	ShapeStroke::ShapeStroke(const size_t d_cnt, const ShapeSheet* s_attr) :
-		m_diff(d_cnt <= MAX_N_GON - 1 ? d_cnt : MAX_N_GON - 1),
+		m_vec(d_cnt <= MAX_N_GON - 1 ? d_cnt : MAX_N_GON - 1),
 		m_dash_cap(s_attr->m_dash_cap),
 		m_stroke_cap(s_attr->m_stroke_cap),
 		m_stroke_color(s_attr->m_stroke_color),
@@ -517,7 +517,7 @@ namespace winrt::GraphPaper::implementation
 		m_is_deleted = dt_reader.ReadBoolean();
 		m_is_selected = dt_reader.ReadBoolean();
 		dt_read(m_pos, dt_reader);
-		dt_read(m_diff, dt_reader);
+		dt_read(m_vec, dt_reader);
 		dt_read(m_stroke_cap, dt_reader);
 		dt_read(m_stroke_color, dt_reader);
 		m_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
@@ -535,7 +535,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBoolean(m_is_deleted);
 		dt_writer.WriteBoolean(m_is_selected);
 		dt_write(m_pos, dt_writer);
-		dt_write(m_diff, dt_writer);
+		dt_write(m_vec, dt_writer);
 		dt_write(m_stroke_cap, dt_writer);
 		dt_write(m_stroke_color, dt_writer);
 		dt_writer.WriteUInt32(m_dash_cap);

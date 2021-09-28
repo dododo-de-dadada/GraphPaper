@@ -171,24 +171,24 @@ namespace winrt::GraphPaper::implementation
 		dc->BeginDraw();
 		m_sheet_main.draw(m_sheet_dx);
 		if (m_event_state == EVENT_STATE::PRESS_AREA) {
-			const auto t_draw = m_tool_draw;
-			if (t_draw == DRAW_TOOL::SELECT || t_draw == DRAW_TOOL::RECT || t_draw == DRAW_TOOL::TEXT || t_draw == DRAW_TOOL::RULER) {
+			const auto t_draw = m_drawing_tool;
+			if (t_draw == DRAWING_TOOL::SELECT || t_draw == DRAWING_TOOL::RECT || t_draw == DRAWING_TOOL::TEXT || t_draw == DRAWING_TOOL::RULER) {
 				m_sheet_main.draw_auxiliary_rect(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (t_draw == DRAW_TOOL::BEZI) {
+			else if (t_draw == DRAWING_TOOL::BEZI) {
 				m_sheet_main.draw_auxiliary_bezi(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (t_draw == DRAW_TOOL::ELLI) {
+			else if (t_draw == DRAWING_TOOL::ELLI) {
 				m_sheet_main.draw_auxiliary_elli(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (t_draw == DRAW_TOOL::LINE) {
+			else if (t_draw == DRAWING_TOOL::LINE) {
 				m_sheet_main.draw_auxiliary_line(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (t_draw == DRAW_TOOL::RRECT) {
+			else if (t_draw == DRAWING_TOOL::RRECT) {
 				m_sheet_main.draw_auxiliary_rrect(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (t_draw == DRAW_TOOL::POLY) {
-				m_sheet_main.draw_auxiliary_poly(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr, m_tool_poly);
+			else if (t_draw == DRAWING_TOOL::POLY) {
+				m_sheet_main.draw_auxiliary_poly(m_sheet_dx, m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
 			}
 		}
 		// ï`âÊÇèIóπÇ∑ÇÈ.

@@ -13,8 +13,8 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_RECT_F rect{
 			m_pos.x,
 			m_pos.y,
-			m_pos.x + m_diff[0].x,
-			m_pos.y + m_diff[0].y
+			m_pos.x + m_vec[0].x,
+			m_pos.y + m_vec[0].y
 		};
 		// 塗りつぶし色が不透明か判定する.
 		if (is_opaque(m_fill_color)) {
@@ -79,17 +79,17 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 方形の各頂点を求め, 判定する位置がそれぞれの部位に含まれるか判定する.
 		D2D1_POINT_2F v_pos[4]{ m_pos, };
-		v_pos[2].x = m_pos.x + m_diff[0].x;
-		v_pos[2].y = m_pos.y + m_diff[0].y;
+		v_pos[2].x = m_pos.x + m_vec[0].x;
+		v_pos[2].y = m_pos.y + m_vec[0].y;
 		if (pt_in_anch(t_pos, v_pos[2])) {
 			return ANCH_TYPE::ANCH_SE;
 		}
 		v_pos[3].x = m_pos.x;
-		v_pos[3].y = m_pos.y + m_diff[0].y;
+		v_pos[3].y = m_pos.y + m_vec[0].y;
 		if (pt_in_anch(t_pos, v_pos[3])) {
 			return ANCH_TYPE::ANCH_SW;
 		}
-		v_pos[1].x = m_pos.x + m_diff[0].x;
+		v_pos[1].x = m_pos.x + m_vec[0].x;
 		v_pos[1].y = m_pos.y;
 		if (pt_in_anch(t_pos, v_pos[1])) {
 			return ANCH_TYPE::ANCH_NE;
@@ -216,32 +216,32 @@ namespace winrt::GraphPaper::implementation
 	{
 		switch (anch) {
 		case ANCH_TYPE::ANCH_NORTH:
-			value.x = m_pos.x + m_diff[0].x * 0.5f;
+			value.x = m_pos.x + m_vec[0].x * 0.5f;
 			value.y = m_pos.y;
 			break;
 		case ANCH_TYPE::ANCH_NE:
-			value.x = m_pos.x + m_diff[0].x;
+			value.x = m_pos.x + m_vec[0].x;
 			value.y = m_pos.y;
 			break;
 		case ANCH_TYPE::ANCH_WEST:
 			value.x = m_pos.x;
-			value.y = m_pos.y + m_diff[0].y * 0.5f;
+			value.y = m_pos.y + m_vec[0].y * 0.5f;
 			break;
 		case ANCH_TYPE::ANCH_EAST:
-			value.x = m_pos.x + m_diff[0].x;
-			value.y = m_pos.y + m_diff[0].y * 0.5f;
+			value.x = m_pos.x + m_vec[0].x;
+			value.y = m_pos.y + m_vec[0].y * 0.5f;
 			break;
 		case ANCH_TYPE::ANCH_SW:
 			value.x = m_pos.x;
-			value.y = m_pos.y + m_diff[0].y;
+			value.y = m_pos.y + m_vec[0].y;
 			break;
 		case ANCH_TYPE::ANCH_SOUTH:
-			value.x = m_pos.x + m_diff[0].x * 0.5f;
-			value.y = m_pos.y + m_diff[0].y;
+			value.x = m_pos.x + m_vec[0].x * 0.5f;
+			value.y = m_pos.y + m_vec[0].y;
 			break;
 		case ANCH_TYPE::ANCH_SE:
-			value.x = m_pos.x + m_diff[0].x;
-			value.y = m_pos.y + m_diff[0].y;
+			value.x = m_pos.x + m_vec[0].x;
+			value.y = m_pos.y + m_vec[0].y;
 			break;
 		default:
 			value = m_pos;
@@ -258,7 +258,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F e_pos;
 
-		pt_add(m_pos, m_diff[0], e_pos);
+		pt_add(m_pos, m_vec[0], e_pos);
 		return pt_in_rect(m_pos, a_min, a_max) && pt_in_rect(e_pos, a_min, a_max);
 	}
 
@@ -288,7 +288,7 @@ namespace winrt::GraphPaper::implementation
 			pt_round(vec, PT_ROUND, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
 				pt_add(m_pos, vec, m_pos);
-				pt_sub(m_diff[0], vec, m_diff[0]);
+				pt_sub(m_vec[0], vec, m_vec[0]);
 				flag = true;
 			}
 			}
@@ -297,11 +297,11 @@ namespace winrt::GraphPaper::implementation
 		{
 			D2D1_POINT_2F pos;
 			D2D1_POINT_2F vec;
-			pt_add(m_pos, m_diff[0], pos);
+			pt_add(m_pos, m_vec[0], pos);
 			pt_sub(value, pos, vec);
 			pt_round(vec, PT_ROUND, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
-				pt_add(m_diff[0], vec, m_diff[0]);
+				pt_add(m_vec[0], vec, m_vec[0]);
 				flag = true;
 			}
 		}
@@ -315,7 +315,7 @@ namespace winrt::GraphPaper::implementation
 			pt_round(vec, PT_ROUND, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
 				m_pos.y += vec.y;
-				pt_add(m_diff[0], vec.x, -vec.y, m_diff[0]);
+				pt_add(m_vec[0], vec.x, -vec.y, m_vec[0]);
 				flag = true;
 			}
 		}
@@ -329,7 +329,7 @@ namespace winrt::GraphPaper::implementation
 			pt_round(vec, PT_ROUND, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
 				m_pos.x += vec.x;
-				pt_add(m_diff[0], -vec.x, vec.y, m_diff[0]);
+				pt_add(m_vec[0], -vec.x, vec.y, m_vec[0]);
 				flag = true;
 			}
 		}
@@ -338,7 +338,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
 			if (abs(vec_x) >= FLT_MIN) {
-				m_diff[0].x = static_cast<FLOAT>(m_diff[0].x - vec_x);
+				m_vec[0].x = static_cast<FLOAT>(m_vec[0].x - vec_x);
 				m_pos.x = static_cast<FLOAT>(m_pos.x + vec_x);
 				flag = true;
 			}
@@ -348,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
 			if (abs(vec_x) >= FLT_MIN) {
-				m_diff[0].x = static_cast<FLOAT>(vec_x);
+				m_vec[0].x = static_cast<FLOAT>(vec_x);
 				flag = true;
 			}
 		}
@@ -357,7 +357,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
 			if (fabs(vec_y) >= FLT_MIN) {
-				m_diff[0].y = static_cast<FLOAT>(m_diff[0].y - vec_y);
+				m_vec[0].y = static_cast<FLOAT>(m_vec[0].y - vec_y);
 				m_pos.y = static_cast<FLOAT>(m_pos.y + vec_y);
 				flag = true;
 			}
@@ -367,7 +367,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
 			if (abs(vec_y) >= FLT_MIN) {
-				m_diff[0].y = static_cast<FLOAT>(vec_y);
+				m_vec[0].y = static_cast<FLOAT>(vec_y);
 				flag = true;
 			}
 		}
@@ -376,18 +376,18 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 		if (limit >= FLT_MIN) {
-			if (m_diff[0].x < limit) {
+			if (m_vec[0].x < limit) {
 				if (anch == ANCH_TYPE::ANCH_NE) {
-					m_pos.x += m_diff[0].x;
+					m_pos.x += m_vec[0].x;
 				}
-				m_diff[0].x = 0.0f;
+				m_vec[0].x = 0.0f;
 				flag = true;
 			}
-			if (m_diff[0].y < limit) {
+			if (m_vec[0].y < limit) {
 				if (anch == ANCH_TYPE::ANCH_NE) {
-					m_pos.y += m_diff[0].y;
+					m_pos.y += m_vec[0].y;
 				}
-				m_diff[0].y = 0.0f;
+				m_vec[0].y = 0.0f;
 				flag = true;
 			}
 		}
@@ -403,7 +403,7 @@ namespace winrt::GraphPaper::implementation
 		m_fill_color(s_attr->m_fill_color)
 	{
 		m_pos = b_pos;
-		m_diff[0] = b_vec;
+		m_vec[0] = b_vec;
 	}
 
 	// データリーダーから図形を読み込む.
@@ -443,10 +443,10 @@ namespace winrt::GraphPaper::implementation
 	size_t ShapeRect::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
 	{
 		v_pos[0] = m_pos;
-		v_pos[1].x = m_pos.x + m_diff[0].x;
+		v_pos[1].x = m_pos.x + m_vec[0].x;
 		v_pos[1].y = m_pos.y;
 		v_pos[2].x = v_pos[1].x;
-		v_pos[2].y = m_pos.y + m_diff[0].y;
+		v_pos[2].y = m_pos.y + m_vec[0].y;
 		v_pos[3].x = m_pos.x;
 		v_pos[3].y = v_pos[2].y;
 		return 4;
@@ -457,7 +457,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_write_svg("<rect ", dt_writer);
 		dt_write_svg(m_pos, "x", "y", dt_writer);
-		dt_write_svg(m_diff[0], "width", "height", dt_writer);
+		dt_write_svg(m_vec[0], "width", "height", dt_writer);
 		dt_write_svg(m_fill_color, "fill", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
 		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);

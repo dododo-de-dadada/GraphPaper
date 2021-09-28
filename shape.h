@@ -706,13 +706,13 @@ namespace winrt::GraphPaper::implementation
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/, D2D1_POINT_2F& /*b_min*/, D2D1_POINT_2F& /*b_max*/) const noexcept override;
 		// 画像の不透明度を得る.
-		bool get_image_opacity(float& /*value*/) const noexcept;
+		bool get_image_opacity(float& /*value*/) const noexcept override;
 		// 近傍の頂点を得る.
-		bool get_pos_nearest(const D2D1_POINT_2F /*pos*/, float& /*dd*/, D2D1_POINT_2F& /*value*/) const noexcept;
+		bool get_pos_nearest(const D2D1_POINT_2F /*pos*/, float& /*dd*/, D2D1_POINT_2F& /*value*/) const noexcept override;
 		// 部位の位置を得る.
-		void get_pos_anch(const uint32_t /*anch*/, D2D1_POINT_2F&/*value*/) const noexcept;
+		void get_pos_anch(const uint32_t /*anch*/, D2D1_POINT_2F&/*value*/) const noexcept override;
 		// 図形を囲む領域の左上位置を得る.
-		void get_pos_min(D2D1_POINT_2F& /*value*/) const noexcept;
+		void get_pos_min(D2D1_POINT_2F& /*value*/) const noexcept override;
 		// 開始位置を得る.
 		bool get_pos_start(D2D1_POINT_2F& /*value*/) const noexcept;
 		// 頂点を得る.
@@ -820,49 +820,49 @@ namespace winrt::GraphPaper::implementation
 		// 角丸方形の補助線を表示する.
 		void draw_auxiliary_rrect(D2D_UI const& dx, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
 		// 矢じるしの寸法を得る.
-		bool get_arrow_size(ARROW_SIZE& value) const noexcept;
+		bool get_arrow_size(ARROW_SIZE& value) const noexcept override;
 		// 矢じるしの形式を得る.
-		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
+		bool get_arrow_style(ARROW_STYLE& value) const noexcept override;
 		// 端の形式を得る.
-		bool get_stroke_cap(CAP_STYLE& value) const noexcept;
+		bool get_stroke_cap(CAP_STYLE& value) const noexcept override;
 		// 角丸半径を得る.
-		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
+		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept override;
 		// 破線の端の形式を得る.
-		bool get_dash_cap(D2D1_CAP_STYLE& value) const noexcept;
+		bool get_dash_cap(D2D1_CAP_STYLE& value) const noexcept override;
 		// 破線の配置を得る.
-		bool get_dash_patt(DASH_PATT& value) const noexcept;
+		bool get_dash_patt(DASH_PATT& value) const noexcept override;
 		// 破線の形式を得る.
-		bool get_dash_style(D2D1_DASH_STYLE& value) const noexcept;
+		bool get_dash_style(D2D1_DASH_STYLE& value) const noexcept override;
 		// 塗りつぶし色を得る.
-		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
+		bool get_fill_color(D2D1_COLOR_F& value) const noexcept override;
 		// 書体の色を得る.
-		bool get_font_color(D2D1_COLOR_F& value) const noexcept;
+		bool get_font_color(D2D1_COLOR_F& value) const noexcept override;
 		// 書体名を得る.
-		bool get_font_family(wchar_t*& value) const noexcept;
+		bool get_font_family(wchar_t*& value) const noexcept override;
 		// 書体の大きさを得る.
-		bool get_font_size(float& value) const noexcept;
+		bool get_font_size(float& value) const noexcept override;
 		// 書体の横幅を得る.
-		bool get_font_stretch(DWRITE_FONT_STRETCH& value) const noexcept;
+		bool get_font_stretch(DWRITE_FONT_STRETCH& value) const noexcept override;
 		// 書体の字体を得る.
-		bool get_font_style(DWRITE_FONT_STYLE& value) const noexcept;
+		bool get_font_style(DWRITE_FONT_STYLE& value) const noexcept override;
 		// 書体の太さを得る.
-		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept;
+		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept override;
 		// 方眼の基準の大きさを得る.
-		bool get_grid_base(float& value) const noexcept;
+		bool get_grid_base(float& value) const noexcept override;
 		// 方眼の色を得る.
-		bool get_grid_color(D2D1_COLOR_F& value) const noexcept;
+		bool get_grid_color(D2D1_COLOR_F& value) const noexcept override;
 		// 方眼の強調を得る.
-		bool get_grid_emph(GRID_EMPH& value) const noexcept;
+		bool get_grid_emph(GRID_EMPH& value) const noexcept override;
 		// 方眼の表示の状態を得る.
-		bool get_grid_show(GRID_SHOW& value) const noexcept;
+		bool get_grid_show(GRID_SHOW& value) const noexcept override;
 		// 方眼に合わせるを得る.
-		bool get_grid_snap(bool& value) const noexcept;
+		bool get_grid_snap(bool& value) const noexcept override;
 		// 画像の不透明度を得る.
-		bool get_image_opacity(float& value) const noexcept;
+		bool get_image_opacity(float& value) const noexcept override;
 		// 線分のつなぎのマイター制限を得る.
-		bool get_join_limit(float& value) const noexcept;
+		bool get_join_limit(float& value) const noexcept override;
 		// 線分のつなぎを得る.
-		bool get_join_style(D2D1_LINE_JOIN& value) const noexcept;
+		bool get_join_style(D2D1_LINE_JOIN& value) const noexcept override;
 		// 用紙の色を得る.
 		bool get_sheet_color(D2D1_COLOR_F& value) const noexcept;
 		// 用紙の色を得る.
@@ -971,7 +971,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 図形を囲む領域の左上位置を得る.
-		void get_pos_min(D2D1_POINT_2F& value) const noexcept;
+		void get_pos_min(D2D1_POINT_2F& value) const noexcept override;
 		// 開始位置を得る.
 		bool get_pos_start(D2D1_POINT_2F& value) const noexcept;
 		// 文字列図形を含むか判定する.
@@ -1005,7 +1005,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct ShapeStroke : ShapeStatus {
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
-		std::vector<D2D1_POINT_2F> m_diff;	// 次の位置への差分
+		std::vector<D2D1_POINT_2F> m_vec;	// 次の位置への差分
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線枠の色
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
@@ -1026,23 +1026,23 @@ namespace winrt::GraphPaper::implementation
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept;
 		// 端の形式を得る.
-		bool get_stroke_cap(CAP_STYLE& value) const noexcept;
+		bool get_stroke_cap(CAP_STYLE& value) const noexcept override;
 		// 破線の端の形式を得る.
-		bool get_dash_cap(D2D1_CAP_STYLE& value) const noexcept;
+		bool get_dash_cap(D2D1_CAP_STYLE& value) const noexcept override;
 		// 破線の配置を得る.
-		bool get_dash_patt(DASH_PATT& value) const noexcept;
+		bool get_dash_patt(DASH_PATT& value) const noexcept override;
 		// 破線の形式を得る.
-		bool get_dash_style(D2D1_DASH_STYLE& value) const noexcept;
+		bool get_dash_style(D2D1_DASH_STYLE& value) const noexcept override;
 		// 線分のつなぎのマイター制限を得る.
-		bool get_join_limit(float& value) const noexcept;
+		bool get_join_limit(float& value) const noexcept override;
 		// 線分のつなぎを得る.
-		bool get_join_style(D2D1_LINE_JOIN& value) const noexcept;
+		bool get_join_style(D2D1_LINE_JOIN& value) const noexcept override;
 		// 近傍の頂点を得る.
-		bool get_pos_nearest(const D2D1_POINT_2F a_pos, float& dd, D2D1_POINT_2F& value) const noexcept;
+		bool get_pos_nearest(const D2D1_POINT_2F a_pos, float& dd, D2D1_POINT_2F& value) const noexcept override;
 		// 図形を囲む領域の左上位置を得る.
-		virtual void get_pos_min(D2D1_POINT_2F& value) const noexcept;
+		void get_pos_min(D2D1_POINT_2F& value) const noexcept override;
 		// 部位の位置を得る.
-		virtual	void get_pos_anch(const uint32_t /*anch*/, D2D1_POINT_2F& value) const noexcept;
+		virtual	void get_pos_anch(const uint32_t /*anch*/, D2D1_POINT_2F& value) const noexcept override;
 		// 開始位置を得る.
 		virtual bool get_pos_start(D2D1_POINT_2F& value) const noexcept;
 		// 線枠の色を得る.
@@ -1125,9 +1125,9 @@ namespace winrt::GraphPaper::implementation
 		// 表示する.
 		void draw(D2D_UI& dx) override;
 		// 矢じるしの寸法を得る.
-		bool get_arrow_size(ARROW_SIZE& size) const noexcept;
+		bool get_arrow_size(ARROW_SIZE& size) const noexcept override;
 		// 矢じるしの形式を得る.
-		bool get_arrow_style(ARROW_STYLE& value) const noexcept;
+		bool get_arrow_style(ARROW_STYLE& value) const noexcept override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
@@ -1173,7 +1173,7 @@ namespace winrt::GraphPaper::implementation
 		// 表示する.
 		void draw(D2D_UI& dx) override;
 		// 近傍の頂点を得る.
-		bool get_pos_nearest(const D2D1_POINT_2F a_pos, float& dd, D2D1_POINT_2F& value) const noexcept;
+		bool get_pos_nearest(const D2D1_POINT_2F a_pos, float& dd, D2D1_POINT_2F& value) const noexcept override;
 		// 頂点を得る.
 		size_t get_verts(D2D1_POINT_2F v_pos[]) const noexcept;
 		// 位置を含むか判定する.
@@ -1183,11 +1183,11 @@ namespace winrt::GraphPaper::implementation
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept;
 		// 塗りつぶしの色を得る.
-		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
+		bool get_fill_color(D2D1_COLOR_F& value) const noexcept override;
 		// 値を塗りつぶしの色に格納する.
 		bool set_fill_color(const D2D1_COLOR_F& value) noexcept;
 		// 部位の位置を得る.
-		void get_pos_anch(const uint32_t anch, D2D1_POINT_2F& value) const noexcept;
+		void get_pos_anch(const uint32_t anch, D2D1_POINT_2F& value) const noexcept override;
 		//	値を, 部位の位置に格納する.
 		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect);
 		// データライターに書き込む.
@@ -1269,9 +1269,9 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 角丸半径を得る.
-		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept;
+		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept override;
 		// 部位の位置を得る.
-		void get_pos_anch(const uint32_t anch, D2D1_POINT_2F& value) const noexcept;
+		void get_pos_anch(const uint32_t anch, D2D1_POINT_2F& value) const noexcept override;
 		//	値を, 部位の位置に格納する.
 		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect);
 		// データライターに書き込む.
@@ -1338,7 +1338,7 @@ namespace winrt::GraphPaper::implementation
 		// 表示する
 		void draw(D2D_UI& dx) override;
 		// 塗りつぶし色を得る.
-		bool get_fill_color(D2D1_COLOR_F& value) const noexcept;
+		bool get_fill_color(D2D1_COLOR_F& value) const noexcept override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
@@ -1432,17 +1432,17 @@ namespace winrt::GraphPaper::implementation
 		// 有効な書体名から要素を得る.
 		static wchar_t* get_available_font(const uint32_t i);
 		// 書体の色を得る.
-		bool get_font_color(D2D1_COLOR_F& value) const noexcept;
+		bool get_font_color(D2D1_COLOR_F& value) const noexcept override;
 		// 書体名を得る.
-		bool get_font_family(wchar_t*& value) const noexcept;
+		bool get_font_family(wchar_t*& value) const noexcept override;
 		// 書体の大きさを得る.
-		bool get_font_size(float& value) const noexcept;
+		bool get_font_size(float& value) const noexcept override;
 		// 書体の伸縮を得る.
-		bool get_font_stretch(DWRITE_FONT_STRETCH& value) const noexcept;
+		bool get_font_stretch(DWRITE_FONT_STRETCH& value) const noexcept override;
 		// 書体の字体を得る.
-		bool get_font_style(DWRITE_FONT_STYLE& value) const noexcept;
+		bool get_font_style(DWRITE_FONT_STYLE& value) const noexcept override;
 		// 書体の太さを得る.
-		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept;
+		bool get_font_weight(DWRITE_FONT_WEIGHT& value) const noexcept override;
 		// 段落のそろえを得る.
 		bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& value) const noexcept;
 		// 文字列のそろえを得る.

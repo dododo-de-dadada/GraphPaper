@@ -311,8 +311,8 @@ namespace winrt::GraphPaper::implementation
 			t->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
 			// ƒpƒlƒ‹‚Ì’†‰›‚É‚È‚é‚æ‚¤¶ãˆÊ’u‚ğ‹‚ß‚é.
 			D2D1_POINT_2F pos{
-				static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - t->m_diff[0].x * 0.5),
-				static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - t->m_diff[0].y * 0.5)
+				static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - t->m_vec[0].x * 0.5),
+				static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - t->m_vec[0].y * 0.5)
 			};
 			const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
 			const float vert_stick = m_misc_vert_stick / m_sheet_main.m_sheet_scale;

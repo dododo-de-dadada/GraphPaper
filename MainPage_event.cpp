@@ -212,27 +212,27 @@ namespace winrt::GraphPaper::implementation
 	// b_vec	終了位置への差分
 	void MainPage::event_finish_creating(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec)
 	{
-		const auto t_draw = m_tool_draw;
+		const auto t_draw = m_drawing_tool;
 		Shape* s;
-		if (t_draw == DRAW_TOOL::RECT) {
+		if (t_draw == DRAWING_TOOL::RECT) {
 			s = new ShapeRect(b_pos, b_vec, &m_sheet_main);
 		}
-		else if (t_draw == DRAW_TOOL::RRECT) {
+		else if (t_draw == DRAWING_TOOL::RRECT) {
 			s = new ShapeRRect(b_pos, b_vec, &m_sheet_main);
 		}
-		else if (t_draw == DRAW_TOOL::POLY) {
-			s = new ShapePoly(b_pos, b_vec, &m_sheet_main, m_tool_poly);
+		else if (t_draw == DRAWING_TOOL::POLY) {
+			s = new ShapePoly(b_pos, b_vec, &m_sheet_main, m_drawing_poly_opt);
 		}
-		else if (t_draw == DRAW_TOOL::ELLI) {
+		else if (t_draw == DRAWING_TOOL::ELLI) {
 			s = new ShapeElli(b_pos, b_vec, &m_sheet_main);
 		}
-		else if (t_draw == DRAW_TOOL::LINE) {
+		else if (t_draw == DRAWING_TOOL::LINE) {
 			s = new ShapeLineA(b_pos, b_vec, &m_sheet_main);
 		}
-		else if (t_draw == DRAW_TOOL::BEZI) {
+		else if (t_draw == DRAWING_TOOL::BEZI) {
 			s = new ShapeBezi(b_pos, b_vec, &m_sheet_main);
 		}
-		else if (t_draw == DRAW_TOOL::RULER) {
+		else if (t_draw == DRAWING_TOOL::RULER) {
 			s = new ShapeRuler(b_pos, b_vec, &m_sheet_main);
 		}
 		else {
@@ -457,7 +457,7 @@ namespace winrt::GraphPaper::implementation
 			// 差分の長さがクリックの判定距離を超えるか判定する.
 			if (pt_abs2(vec) > m_event_click_dist) {
 				// 作図ツールが選択ツール以外か判定する.
-				if (m_tool_draw != DRAW_TOOL::SELECT) {
+				if (m_drawing_tool != DRAWING_TOOL::SELECT) {
 					// 範囲を選択している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_AREA;
 				}
@@ -485,7 +485,7 @@ namespace winrt::GraphPaper::implementation
 					// 図形を変形している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_FORM;
 					m_event_pos_prev = m_event_pos_curr;
-					ustack_push_anch(m_event_shape_pressed, m_event_anch_pressed);
+					ustack_push_position(m_event_shape_pressed, m_event_anch_pressed);
 					m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
 				}
 				sheet_draw();
@@ -552,7 +552,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_time_pressed = t_stamp;
 		m_event_pos_pressed = m_event_pos_curr;
 		// 作図ツールが選択ツール以外か判定する.
-		if (m_tool_draw != DRAW_TOOL::SELECT) {
+		if (m_drawing_tool != DRAWING_TOOL::SELECT) {
 			return;
 		}
 		m_event_anch_pressed = slist_hit_test(m_sheet_main.m_list_shapes, m_event_pos_pressed, m_event_shape_pressed);
@@ -723,7 +723,7 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 範囲選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			// 作図ツールが選択ツールか判定する.
-			if (m_tool_draw == DRAW_TOOL::SELECT) {
+			if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 				event_finish_selecting_area(args.KeyModifiers());
 			}
 			else {
@@ -732,17 +732,17 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				if (m_misc_vert_stick >= FLT_MIN) {
 					const bool box_type = (
-						m_tool_draw == DRAW_TOOL::ELLI ||
-						m_tool_draw == DRAW_TOOL::POLY ||
-						m_tool_draw == DRAW_TOOL::RECT ||
-						m_tool_draw == DRAW_TOOL::RRECT ||
-						m_tool_draw == DRAW_TOOL::RULER ||
-						m_tool_draw == DRAW_TOOL::TEXT);
-					//if (m_tool_draw == DRAW_TOOL::POLY) {
+						m_drawing_tool == DRAWING_TOOL::ELLI ||
+						m_drawing_tool == DRAWING_TOOL::POLY ||
+						m_drawing_tool == DRAWING_TOOL::RECT ||
+						m_drawing_tool == DRAWING_TOOL::RRECT ||
+						m_drawing_tool == DRAWING_TOOL::RULER ||
+						m_drawing_tool == DRAWING_TOOL::TEXT);
+					//if (m_drawing_tool == DRAWING_TOOL::POLY) {
 					//	D2D1_POINT_2F v_pos[MAX_N_GON];
 					//	D2D1_POINT_2F v_vec;
 					//	pt_sub(m_event_pos_curr, m_event_pos_pressed, v_vec);
-					//	ShapePoly::create_poly_by_bbox(m_event_pos_pressed, v_vec, m_tool_poly, v_pos, v_vec);
+					//	ShapePoly::create_poly_by_bbox(m_event_pos_pressed, v_vec, m_drawing_poly_opt, v_pos, v_vec);
 					//	pt_add(m_event_pos_pressed, v_vec, m_event_pos_curr);
 					//}
 					const float d_lim = m_misc_vert_stick / m_sheet_main.m_sheet_scale;
@@ -760,7 +760,7 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F c_vec;	// 現在位置への差分
 				pt_sub(m_event_pos_curr, m_event_pos_pressed, c_vec);
 				if (fabs(c_vec.x) >= 1.0f || fabs(c_vec.y) >= 1.0f) {
-					if (m_tool_draw == DRAW_TOOL::TEXT) {
+					if (m_drawing_tool == DRAWING_TOOL::TEXT) {
 						event_finish_creating_text_async(m_event_pos_pressed, c_vec);
 						return;
 					}
@@ -789,7 +789,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_set_cursor(void)
 	{
 		// 作図ツールが選択ツール以外か判定する.
-		if (m_tool_draw != DRAW_TOOL::SELECT) {
+		if (m_drawing_tool != DRAWING_TOOL::SELECT) {
 			Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 		}
 		else if (!m_dx_mutex.try_lock()) {
@@ -839,7 +839,7 @@ namespace winrt::GraphPaper::implementation
 					if (s != nullptr &&
 						(typeid(*s) == typeid(ShapeLineA) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
 						// 図形の部位が, 頂点の数を超えないか判定する.
-						const auto d_cnt = static_cast<ShapePath*>(s)->m_diff.size();
+						const auto d_cnt = static_cast<ShapePath*>(s)->m_vec.size();
 						if (anch >= ANCH_TYPE::ANCH_P0 && anch < ANCH_TYPE::ANCH_P0 + d_cnt + 1) {
 							Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 							break;
