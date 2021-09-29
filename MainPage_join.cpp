@@ -90,8 +90,8 @@ namespace winrt::GraphPaper::implementation
 			float sample_width;
 			//m_sample_shape->get_join_limit(sample_limit);
 			//m_sample_shape->get_stroke_width(sample_width);
-			m_sample_sheet.m_list_shapes.back()->get_join_limit(sample_limit);
-			m_sample_sheet.m_list_shapes.back()->get_stroke_width(sample_width);
+			m_sample_sheet.m_shape_list.back()->get_join_limit(sample_limit);
+			m_sample_sheet.m_shape_list.back()->get_stroke_width(sample_width);
 			if (ustack_push_set<UNDO_OP::JOIN_LIMIT>(sample_limit) ||
 				ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
 				ustack_push_null();
@@ -100,8 +100,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -146,13 +146,13 @@ namespace winrt::GraphPaper::implementation
 			const float value = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(value);
 			//m_sample_shape->set_join_limit(value + 1.0f);
-			m_sample_sheet.m_list_shapes.back()->set_join_limit(value + 1.0f);
+			m_sample_sheet.m_shape_list.back()->set_join_limit(value + 1.0f);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
 			const float value = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(value);
 			//m_sample_shape->set_stroke_width(value);
-			m_sample_sheet.m_list_shapes.back()->set_stroke_width(value);
+			m_sample_sheet.m_shape_list.back()->set_stroke_width(value);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

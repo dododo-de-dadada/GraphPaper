@@ -95,8 +95,8 @@ namespace winrt::GraphPaper::implementation
 	// ‘€ì‚ªQÆ‚·‚é‚½‚ß‚Ì}Œ`ƒŠƒXƒg‚Æ—p†}Œ`‚ğŠi”[‚·‚é.
 	void Undo::set(SHAPE_LIST* slist, ShapeSheet* s_layout) noexcept
 	{
-		s_shape_list = slist;
-		s_shape_sheet = s_layout;
+		Undo::s_shape_list = slist;
+		Undo::s_shape_sheet = s_layout;
 	}
 
 	// ‘€ì‚ğÀs‚·‚é‚Æ’l‚ª•Ï‚í‚é‚©”»’è‚·‚é.
@@ -147,8 +147,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_shape == m_dst_shape) {
 			return;
 		}
-		auto it_beg{ s_shape_list->begin() };
-		auto it_end{ s_shape_list->end() };
+		auto it_beg{ Undo::s_shape_list->begin() };
+		auto it_end{ Undo::s_shape_list->end() };
 		auto it_src{ std::find(it_beg, it_end, m_shape) };
 		if (it_src == it_end) {
 			return;
@@ -746,20 +746,20 @@ namespace winrt::GraphPaper::implementation
 	void UndoList::exec(void)
 	{
 		if (m_insert) {
-			auto it_del{ std::find(s_shape_list->begin(), s_shape_list->end(), m_shape) };
-			if (it_del != s_shape_list->end()) {
-				s_shape_list->erase(it_del);
+			auto it_del{ std::find(Undo::s_shape_list->begin(), Undo::s_shape_list->end(), m_shape) };
+			if (it_del != Undo::s_shape_list->end()) {
+				Undo::s_shape_list->erase(it_del);
 			}
-			auto it_ins{ std::find(s_shape_list->begin(), s_shape_list->end(), m_shape_at) };
-			s_shape_list->insert(it_ins, m_shape);
+			auto it_ins{ std::find(Undo::s_shape_list->begin(), Undo::s_shape_list->end(), m_shape_at) };
+			Undo::s_shape_list->insert(it_ins, m_shape);
 			m_shape->set_delete(false);
 		}
 		else {
 			m_shape->set_delete(true);
-			auto it_del{ std::find(s_shape_list->begin(), s_shape_list->end(), m_shape) };
-			auto it_pos{ s_shape_list->erase(it_del) };
-			m_shape_at = (it_pos == s_shape_list->end() ? nullptr : *it_pos);
-			s_shape_list->push_front(m_shape);
+			auto it_del{ std::find(Undo::s_shape_list->begin(), Undo::s_shape_list->end(), m_shape) };
+			auto it_pos{ Undo::s_shape_list->erase(it_del) };
+			m_shape_at = (it_pos == Undo::s_shape_list->end() ? nullptr : *it_pos);
+			Undo::s_shape_list->push_front(m_shape);
 		}
 		m_insert = !m_insert;
 	}
@@ -812,9 +812,9 @@ namespace winrt::GraphPaper::implementation
 	void UndoListGroup::exec(void)
 	{
 		if (m_insert) {
-			auto it_del{ std::find(s_shape_list->begin(), s_shape_list->end(), m_shape) };
-			if (it_del != s_shape_list->end()) {
-				s_shape_list->erase(it_del);
+			auto it_del{ std::find(Undo::s_shape_list->begin(), Undo::s_shape_list->end(), m_shape) };
+			if (it_del != Undo::s_shape_list->end()) {
+				Undo::s_shape_list->erase(it_del);
 			}
 			SHAPE_LIST& list_grouped = m_shape_group->m_list_grouped;
 			auto it_ins{ std::find(list_grouped.begin(), list_grouped.end(), m_shape_at) };
@@ -827,7 +827,7 @@ namespace winrt::GraphPaper::implementation
 			auto it_del{ std::find(list_grouped.begin(), list_grouped.end(), m_shape) };
 			auto it_pos{ list_grouped.erase(it_del) };
 			m_shape_at = (it_pos == list_grouped.end() ? nullptr : *it_pos);
-			s_shape_list->push_front(m_shape);
+			Undo::s_shape_list->push_front(m_shape);
 		}
 		m_insert = !m_insert;
 	}

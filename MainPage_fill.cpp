@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			//m_sample_shape->get_fill_color(sample_value);
-			m_sample_sheet.m_list_shapes.back()->get_fill_color(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_fill_color(sample_value);
 			if (ustack_push_set<UNDO_OP::FILL_COLOR>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -67,8 +67,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -138,7 +138,7 @@ namespace winrt::GraphPaper::implementation
 			fill_slider_set_header<U, S>(value);
 			D2D1_COLOR_F f_color;
 			//m_sample_shape->get_fill_color(f_color);
-			m_sample_sheet.m_list_shapes.back()->get_fill_color(f_color);
+			m_sample_sheet.m_shape_list.back()->get_fill_color(f_color);
 			if constexpr (S == 0) {
 				f_color.r = static_cast<FLOAT>(value / COLOR_MAX);
 			}
@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 				f_color.a = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			//m_sample_shape->set_fill_color(f_color);
-			m_sample_sheet.m_list_shapes.back()->set_fill_color(f_color);
+			m_sample_sheet.m_shape_list.back()->set_fill_color(f_color);
 			if (scp_sample_panel().IsLoaded()) {
 				sample_draw();
 			}

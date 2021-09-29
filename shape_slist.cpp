@@ -98,22 +98,19 @@ namespace winrt::GraphPaper::implementation
 	// b_max	領域の右下位置
 	bool slist_bound_selected(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
 	{
-		bool flag = false;
+		bool done = false;
 		b_min = D2D1_POINT_2F{ FLT_MAX, FLT_MAX };	// 左上位置
 		b_max = D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX };	// 右下位置
 		for (const Shape* s : slist) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			if (!s->is_selected()) {
+			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
 			s->get_bound(b_min, b_max, b_min, b_max);
-			if (!flag) {
-				flag = true;
+			if (!done) {
+				done = true;
 			}
 		}
-		return flag;
+		return done;
 	}
 
 	// 図形リストを消去し, 含まれる図形を破棄する.
@@ -369,19 +366,16 @@ namespace winrt::GraphPaper::implementation
 	// d_vec	移動する差分
 	bool slist_move(SHAPE_LIST const& slist, const D2D1_POINT_2F d_vec) noexcept
 	{
-		bool flag = false;
+		bool done = false;
 		for (auto s : slist) {
-			if (s->is_deleted()) {
+			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
-			if (s->is_selected() != true) {
-				continue;
-			}
-			if (s->move(d_vec) && !flag) {
-				flag = true;
+			if (s->move(d_vec) && !done) {
+				done = true;
 			}
 		}
-		return flag;
+		return done;
 	}
 
 	// 図形のその次の図形をリストから得る.
@@ -625,14 +619,17 @@ namespace winrt::GraphPaper::implementation
 	// value	最も近い頂点
 	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& c_pos, const float limit, D2D1_POINT_2F& value) noexcept
 	{
-		bool flag = false;
+		bool done = false;
 		float dd = limit * limit;
 		for (const auto s : slist) {
-			if (!s->is_deleted() && !s->is_selected() && s->get_pos_nearest(c_pos, dd, value) && !flag) {
-				flag = true;
+			if (s->is_deleted() || s->is_selected()) {
+				continue;
+			}
+			if (s->get_pos_nearest(c_pos, dd, value) && !done) {
+				done = true;
 			}
 		}
-		return flag;
+		return done;
 	}
 
 }

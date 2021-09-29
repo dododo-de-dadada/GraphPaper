@@ -143,10 +143,10 @@ namespace winrt::GraphPaper::implementation
 					return ANCH_TYPE::ANCH_STROKE;
 				}
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-					if (pt_in_elli(t_pos, v_pos[0], e_width, e_width) ||
-						pt_in_elli(t_pos, v_pos[1], e_width, e_width) ||
-						pt_in_elli(t_pos, v_pos[2], e_width, e_width) ||
-						pt_in_elli(t_pos, v_pos[3], e_width, e_width)) {
+					if (pt_in_circle(t_pos, v_pos[0], e_width) ||
+						pt_in_circle(t_pos, v_pos[1], e_width) ||
+						pt_in_circle(t_pos, v_pos[2], e_width) ||
+						pt_in_circle(t_pos, v_pos[3], e_width)) {
 						return ANCH_TYPE::ANCH_STROKE;
 					}
 				}
@@ -268,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
 	bool ShapeRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool /*keep_aspect*/)
 	{
-		bool flag = false;
+		bool done = false;
 		switch (anch) {
 		case ANCH_TYPE::ANCH_SHEET:
 			{
@@ -277,7 +277,7 @@ namespace winrt::GraphPaper::implementation
 			pt_round(vec, PT_ROUND, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
 				pt_add(m_pos, vec, m_pos);
-				flag = true;
+				done = true;
 			}
 			}
 			break;
@@ -289,7 +289,7 @@ namespace winrt::GraphPaper::implementation
 			if (pt_abs2(vec) >= FLT_MIN) {
 				pt_add(m_pos, vec, m_pos);
 				pt_sub(m_vec[0], vec, m_vec[0]);
-				flag = true;
+				done = true;
 			}
 			}
 			break;
@@ -302,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 			pt_round(vec, PT_ROUND, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
 				pt_add(m_vec[0], vec, m_vec[0]);
-				flag = true;
+				done = true;
 			}
 		}
 		break;
@@ -316,7 +316,7 @@ namespace winrt::GraphPaper::implementation
 			if (pt_abs2(vec) >= FLT_MIN) {
 				m_pos.y += vec.y;
 				pt_add(m_vec[0], vec.x, -vec.y, m_vec[0]);
-				flag = true;
+				done = true;
 			}
 		}
 		break;
@@ -330,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 			if (pt_abs2(vec) >= FLT_MIN) {
 				m_pos.x += vec.x;
 				pt_add(m_vec[0], -vec.x, vec.y, m_vec[0]);
-				flag = true;
+				done = true;
 			}
 		}
 		break;
@@ -340,16 +340,16 @@ namespace winrt::GraphPaper::implementation
 			if (abs(vec_x) >= FLT_MIN) {
 				m_vec[0].x = static_cast<FLOAT>(m_vec[0].x - vec_x);
 				m_pos.x = static_cast<FLOAT>(m_pos.x + vec_x);
-				flag = true;
+				done = true;
 			}
 		}
 		break;
 		case ANCH_TYPE::ANCH_EAST:
 		{
-			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
+			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x - m_vec[0].x) / PT_ROUND) * PT_ROUND;
 			if (abs(vec_x) >= FLT_MIN) {
-				m_vec[0].x = static_cast<FLOAT>(vec_x);
-				flag = true;
+				m_vec[0].x += static_cast<FLOAT>(vec_x);
+				done = true;
 			}
 		}
 		break;
@@ -359,16 +359,16 @@ namespace winrt::GraphPaper::implementation
 			if (fabs(vec_y) >= FLT_MIN) {
 				m_vec[0].y = static_cast<FLOAT>(m_vec[0].y - vec_y);
 				m_pos.y = static_cast<FLOAT>(m_pos.y + vec_y);
-				flag = true;
+				done = true;
 			}
 		}
 		break;
 		case ANCH_TYPE::ANCH_SOUTH:
 		{
-			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
+			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y - m_vec[0].y) / PT_ROUND) * PT_ROUND;
 			if (abs(vec_y) >= FLT_MIN) {
-				m_vec[0].y = static_cast<FLOAT>(vec_y);
-				flag = true;
+				m_vec[0].y += static_cast<FLOAT>(vec_y);
+				done = true;
 			}
 		}
 		break;
@@ -381,17 +381,17 @@ namespace winrt::GraphPaper::implementation
 					m_pos.x += m_vec[0].x;
 				}
 				m_vec[0].x = 0.0f;
-				flag = true;
+				done = true;
 			}
 			if (m_vec[0].y < limit) {
 				if (anch == ANCH_TYPE::ANCH_NE) {
 					m_pos.y += m_vec[0].y;
 				}
 				m_vec[0].y = 0.0f;
-				flag = true;
+				done = true;
 			}
 		}
-		return flag;
+		return done;
 	}
 
 	// 図形を作成する.
@@ -423,7 +423,7 @@ namespace winrt::GraphPaper::implementation
 	// 近傍の頂点を得る.
 	bool ShapeRect::get_pos_nearest(const D2D1_POINT_2F a_pos, float& dd, D2D1_POINT_2F& value) const noexcept
 	{
-		bool flag = false;
+		bool done = false;
 		D2D1_POINT_2F v_pos[4];
 		const size_t v_cnt = get_verts(v_pos);
 		for (size_t i = 0; i < v_cnt; i++) {
@@ -433,10 +433,10 @@ namespace winrt::GraphPaper::implementation
 			if (abs2 < dd) {
 				dd = abs2;
 				value = v_pos[i];
-				flag = true;
+				done = true;
 			}
 		}
-		return flag;
+		return done;
 	}
 
 	// 頂点を得る.

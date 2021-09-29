@@ -127,7 +127,7 @@ namespace winrt::GraphPaper::implementation
 					ok = co_await file_write_gpf_async<true, false>(data_file);
 					data_file = nullptr;
 					ustack_clear();
-					slist_clear(m_sheet_main.m_list_shapes);
+					slist_clear(m_sheet_main.m_shape_list);
 					ShapeText::release_available_fonts();
 				}
 			}

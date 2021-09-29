@@ -86,7 +86,7 @@ namespace winrt::GraphPaper::implementation
 				samp_bmp,
 				m_sample_sheet.m_image_opac);
 			samp_bmp.Close();
-			m_sample_sheet.m_list_shapes.push_back(samp_shape);
+			m_sample_sheet.m_shape_list.push_back(samp_shape);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -127,7 +127,7 @@ namespace winrt::GraphPaper::implementation
 				text = pang.c_str();
 			}
 			//m_sample_shape = new ShapeText(b_pos, b_vec, wchar_cpy(text), &m_sample_sheet);
-			m_sample_sheet.m_list_shapes.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &m_sample_sheet));
+			m_sample_sheet.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &m_sample_sheet));
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -138,7 +138,7 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
 			const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
 			//m_sample_shape = new ShapeLineA(b_pos, b_vec, &m_sample_sheet);
-			m_sample_sheet.m_list_shapes.push_back(new ShapeLineA(b_pos, b_vec, &m_sample_sheet));
+			m_sample_sheet.m_shape_list.push_back(new ShapeLineA(b_pos, b_vec, &m_sample_sheet));
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
 			const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
 			//m_sample_shape = new ShapeRect(b_pos, b_vec, &m_sample_sheet);
-			m_sample_sheet.m_list_shapes.push_back(new ShapeRect(b_pos, b_vec, &m_sample_sheet));
+			m_sample_sheet.m_shape_list.push_back(new ShapeRect(b_pos, b_vec, &m_sample_sheet));
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -171,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 			s->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANCH_TYPE::ANCH_P0, m_misc_vert_stick, false);
 			s->set_pos_anch(D2D1_POINT_2F{ samp_x, samp_y }, ANCH_TYPE::ANCH_P0 + 1, m_misc_vert_stick, false);
 			s->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANCH_TYPE::ANCH_P0 + 2, m_misc_vert_stick, false);
-			m_sample_sheet.m_list_shapes.push_back(s);
+			m_sample_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -198,7 +198,7 @@ namespace winrt::GraphPaper::implementation
 			pt_sub(b_max, b_min, b_vec);
 			//m_sample_shape->move(D2D1_POINT_2F{ static_cast<FLOAT>((samp_w - b_vec.x) * 0.5), static_cast<FLOAT>((samp_h - b_vec.y) * 0.5) });
 			s->move(D2D1_POINT_2F{ static_cast<FLOAT>((samp_w - b_vec.x) * 0.5), static_cast<FLOAT>((samp_h - b_vec.y) * 0.5) });
-			m_sample_sheet.m_list_shapes.push_back(s);
+			m_sample_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif

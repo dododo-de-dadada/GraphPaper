@@ -239,7 +239,7 @@ namespace winrt::GraphPaper::implementation
 				m_sheet_scale,
 				m_sheet_size);
 		}
-		for (auto s : m_list_shapes) {
+		for (auto s : m_shape_list) {
 			if (!s->is_deleted()) {
 				// }Œ`‚ð•\Ž¦‚·‚é.
 				s->draw(dx);

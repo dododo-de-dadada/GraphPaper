@@ -211,14 +211,14 @@ namespace winrt::GraphPaper::implementation
 		sheet_attr_is_checked();
 
 		wchar_t* unavailable_font;	// 書体名
-		if (slist_test_font(m_sheet_main.m_list_shapes, unavailable_font) != true) {
+		if (slist_test_font(m_sheet_main.m_shape_list, unavailable_font) != true) {
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
 
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
-			if (m_sheet_main.m_list_shapes.empty()) {
+			if (m_sheet_main.m_shape_list.empty()) {
 				summary_close_click(nullptr, nullptr);
 			}
 			else if (lv_summary_list() != nullptr) {
@@ -368,7 +368,7 @@ namespace winrt::GraphPaper::implementation
 				summary_close_click(nullptr, nullptr);
 			}
 			ustack_clear();
-			slist_clear(m_sheet_main.m_list_shapes);
+			slist_clear(m_sheet_main.m_shape_list);
 
 			const auto& ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
@@ -415,7 +415,7 @@ namespace winrt::GraphPaper::implementation
 				ok = S_OK;
 			}
 			else {
-				if (slist_read(m_sheet_main.m_list_shapes, dt_reader)) {
+				if (slist_read(m_sheet_main.m_shape_list, dt_reader)) {
 					// 中断されたか判定する.
 					if constexpr (SUSPEND) {
 						ustack_read(dt_reader);
@@ -636,7 +636,7 @@ namespace winrt::GraphPaper::implementation
 			if (s_file != nullptr) {
 				// ファイルタイプが SVG か判定する.
 				if (s_file.FileType() == EXT_SVG) {
-					//for (const auto s : m_sheet_main.m_list_shapes) {
+					//for (const auto s : m_sheet_main.m_shape_list) {
 					//	if (s->is_deleted() || typeid(*s) != typeid(ShapeImage)) {
 					//		continue;
 					//	}
@@ -886,12 +886,12 @@ namespace winrt::GraphPaper::implementation
 			m_sheet_main.write(dt_writer);
 			if constexpr (SUSPEND) {
 				// 消去された図形も含めて書き込む.
-				slist_write<!REDUCE>(m_sheet_main.m_list_shapes, dt_writer);
+				slist_write<!REDUCE>(m_sheet_main.m_shape_list, dt_writer);
 				ustack_write(dt_writer);
 			}
 			else if constexpr (!SETTING) {
 				// 消去された図形は省いて書き込む.
-				slist_write<REDUCE>(m_sheet_main.m_list_shapes, dt_writer);
+				slist_write<REDUCE>(m_sheet_main.m_shape_list, dt_writer);
 			}
 			ra_stream.Size(ra_stream.Position());
 			co_await dt_writer.StoreAsync();
@@ -977,7 +977,7 @@ namespace winrt::GraphPaper::implementation
 			//strftime(buf, 64, "<!-- %m/%d/%Y %H:%M:%S -->" SVG_NEW_LINE, &tm);
 			//dt_write_svg(buf, dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
-			for (auto s : m_sheet_main.m_list_shapes) {
+			for (auto s : m_sheet_main.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}

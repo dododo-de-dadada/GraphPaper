@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			//m_sample_shape->get_stroke_color(sample_value);
-			m_sample_sheet.m_list_shapes.back()->get_stroke_color(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_stroke_color(sample_value);
 			if (ustack_push_set<UNDO_OP::STROKE_COLOR>(sample_value)) {
 				ustack_push_null();
 				ustack_is_enable();
@@ -72,8 +72,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -137,14 +137,14 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				stroke_slider_set_header<U, S>(value);
 				//m_sample_shape->set_stroke_width(value);
-				m_sample_sheet.m_list_shapes.back()->set_stroke_width(value);
+				m_sample_sheet.m_shape_list.back()->set_stroke_width(value);
 			}
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			const float value = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F color;
 			//m_sample_shape->get_stroke_color(color);
-			m_sample_sheet.m_list_shapes.back()->get_stroke_color(color);
+			m_sample_sheet.m_shape_list.back()->get_stroke_color(color);
 			if constexpr (S == 0) {
 				stroke_slider_set_header<U, S>(value);
 				color.r = static_cast<FLOAT>(value / COLOR_MAX);
@@ -162,7 +162,7 @@ namespace winrt::GraphPaper::implementation
 				color.a = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			//m_sample_shape->set_stroke_color(color);
-			m_sample_sheet.m_list_shapes.back()->set_stroke_color(color);
+			m_sample_sheet.m_shape_list.back()->set_stroke_color(color);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -195,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			//m_sample_shape->get_stroke_width(sample_value);
-			m_sample_sheet.m_list_shapes.back()->get_stroke_width(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_stroke_width(sample_value);
 			if (ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -203,8 +203,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif

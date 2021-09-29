@@ -86,8 +86,8 @@ namespace winrt::GraphPaper::implementation
 			float sample_width;
 			//m_sample_shape->get_dash_patt(sample_patt);
 			//m_sample_shape->get_stroke_width(sample_width);
-			m_sample_sheet.m_list_shapes.back()->get_dash_patt(sample_patt);
-			m_sample_sheet.m_list_shapes.back()->get_stroke_width(sample_width);
+			m_sample_sheet.m_shape_list.back()->get_dash_patt(sample_patt);
+			m_sample_sheet.m_shape_list.back()->get_stroke_width(sample_width);
 			if (ustack_push_set<UNDO_OP::DASH_PATT>(sample_patt) ||
 				ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
 				ustack_push_null();
@@ -96,8 +96,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -207,7 +207,7 @@ namespace winrt::GraphPaper::implementation
 			const float value = static_cast<float>(args.NewValue());
 			DASH_PATT patt;
 			//m_sample_shape->get_dash_patt(patt);
-			m_sample_sheet.m_list_shapes.back()->get_dash_patt(patt);
+			m_sample_sheet.m_shape_list.back()->get_dash_patt(patt);
 			if constexpr (S == 0) {
 				dash_slider_set_header<U, S>(value);
 				patt.m_[0] = static_cast<FLOAT>(value);
@@ -225,13 +225,13 @@ namespace winrt::GraphPaper::implementation
 				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(value);
 			}
 			//m_sample_shape->set_dash_patt(patt);
-			m_sample_sheet.m_list_shapes.back()->set_dash_patt(patt);
+			m_sample_sheet.m_shape_list.back()->set_dash_patt(patt);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
 			const float value = static_cast<float>(args.NewValue());
 			dash_slider_set_header<U, S>(value);
 			//m_sample_shape->set_stroke_width(value);
-			m_sample_sheet.m_list_shapes.back()->set_stroke_width(value);
+			m_sample_sheet.m_shape_list.back()->set_stroke_width(value);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

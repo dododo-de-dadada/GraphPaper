@@ -238,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// }Œ`‚Ìˆê——‚Ì”r‘¼§Œä‚ğ false ‚Æ“ü‚ê‘Ö‚¦‚é.
 		bool summary_visible = m_summary_atomic.exchange(false, std::memory_order_acq_rel); // “ü‚ê‘Ö‚¦‘O‚Ì”r‘¼§Œä
-		summary_create(lv_summary_list(), m_sheet_main.m_list_shapes, Resources());
+		summary_create(lv_summary_list(), m_sheet_main.m_shape_list, Resources());
 		m_summary_atomic.store(summary_visible, std::memory_order_release);
 	}
 
@@ -305,7 +305,7 @@ namespace winrt::GraphPaper::implementation
 			m_summary_atomic.store(false, std::memory_order_release);
 			const auto& list = lv_summary_list();
 			list.Items().Clear();
-			summary_create(list, m_sheet_main.m_list_shapes, Resources());
+			summary_create(list, m_sheet_main.m_shape_list, Resources());
 			list.UpdateLayout();
 			m_summary_atomic.store(true, std::memory_order_release);
 		}

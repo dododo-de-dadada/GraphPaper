@@ -315,16 +315,20 @@ namespace winrt::GraphPaper::implementation
 			else {
 				const FLOAT pad_w = static_cast<FLOAT>(max(std::fabs(m_vec[0].x) - m_text_padding.width * 2.0, 0.0));
 				const FLOAT pad_h = static_cast<FLOAT>(max(std::fabs(m_vec[0].y) - m_text_padding.height * 2.0, 0.0));
-				bool flag = false;
-				if (equal(pad_w, m_dw_layout->GetMaxWidth()) != true) {
+				bool done = false;
+				if (!equal(pad_w, m_dw_layout->GetMaxWidth())) {
 					m_dw_layout->SetMaxWidth(pad_w);
-					flag = true;
+					if (!done) {
+						done = true;
+					}
 				}
-				if (equal(pad_h, m_dw_layout->GetMaxHeight()) != true) {
+				if (!equal(pad_h, m_dw_layout->GetMaxHeight())) {
 					m_dw_layout->SetMaxHeight(pad_h);
-					flag = true;
+					if (!done) {
+						done = true;
+					}
 				}
-				if (flag) {
+				if (done) {
 					tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_cnt, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_dw_descent, m_select_range);
 				}
 			}

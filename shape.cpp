@@ -85,9 +85,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		const double dx = static_cast<double>(t_pos.x) - static_cast<double>(c_pos.x);
 		const double dy = static_cast<double>(t_pos.y) - static_cast<double>(c_pos.y);
-		const double rxrx = rad_x * rad_x;
-		const double ryry = rad_y * rad_y;
-		return dx * dx * ryry + dy * dy * rxrx <= rxrx * ryry;
+		const double xx = rad_x * rad_x;
+		const double yy = rad_y * rad_y;
+		return dx * dx * yy + dy * dy * xx <= xx * yy;
 	}
 
 	// ‘½ŠpŒ`‚ªˆÊ’u‚ðŠÜ‚Þ‚©”»’è‚·‚é.

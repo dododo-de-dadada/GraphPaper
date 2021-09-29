@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		// 選択された図形のリストを得る.
 		SHAPE_LIST list_selected;
-		slist_selected<Shape>(m_sheet_main.m_list_shapes, list_selected);
+		slist_selected<Shape>(m_sheet_main.m_shape_list, list_selected);
 		// リストから降順に, 最初に見つかった文字列図形の文字列, あるいは画像図形の画像を得る.
 		wchar_t* txt = nullptr;
 		RandomAccessStreamReference img_ref = nullptr;
@@ -129,7 +129,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 選択された図形のリストを得る.
 		SHAPE_LIST list_selected;
-		slist_selected<Shape>(m_sheet_main.m_list_shapes, list_selected);
+		slist_selected<Shape>(m_sheet_main.m_shape_list, list_selected);
 		// リストの各図形について以下を繰り返す.
 		m_dx_mutex.lock();
 		for (auto s : list_selected) {
@@ -167,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
 		slist_count(
-			m_sheet_main.m_list_shapes,
+			m_sheet_main.m_shape_list,
 			undeleted_cnt,
 			selected_cnt,
 			selected_group_cnt,
@@ -316,7 +316,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
 			const float vert_stick = m_misc_vert_stick / m_sheet_main.m_sheet_scale;
-			xcvd_paste_pos(pos, /*<---*/m_sheet_main.m_list_shapes, grid_len, vert_stick);
+			xcvd_paste_pos(pos, /*<---*/m_sheet_main.m_shape_list, grid_len, vert_stick);
 			t->set_pos_start(pos);
 			m_dx_mutex.lock();
 			ustack_push_append(t);
@@ -422,7 +422,7 @@ namespace winrt::GraphPaper::implementation
 
 		const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
 		const float vert_stick = m_misc_vert_stick / m_sheet_main.m_sheet_scale;
-		xcvd_paste_pos(pos, /*<---*/m_sheet_main.m_list_shapes, grid_len, vert_stick);
+		xcvd_paste_pos(pos, /*<---*/m_sheet_main.m_shape_list, grid_len, vert_stick);
 		img->set_pos_start(pos);
 
 		m_dx_mutex.lock();

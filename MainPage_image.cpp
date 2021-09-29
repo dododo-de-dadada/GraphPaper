@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「元の画像に戻す」が選択された.
 	void MainPage::image_revert_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		for (Shape* const s : m_sheet_main.m_list_shapes) {
+		for (Shape* const s : m_sheet_main.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
 				continue;
 			}
@@ -61,7 +61,7 @@ namespace winrt::GraphPaper::implementation
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
-			m_sample_sheet.m_list_shapes.back()->get_image_opacity(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_image_opacity(sample_value);
 			ustack_push_set<UNDO_OP::IMAGE_OPAC>(&m_sheet_main, sample_value);
 			if (ustack_push_set<UNDO_OP::IMAGE_OPAC>(sample_value)) {
 				ustack_push_null();
@@ -71,8 +71,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -110,7 +110,7 @@ namespace winrt::GraphPaper::implementation
 				const float value = static_cast<float>(args.NewValue());
 				image_slider_set_header<U, S>(value);
 				//m_sample_shape->set_image_opacity(value / COLOR_MAX);
-				m_sample_sheet.m_list_shapes.back()->set_image_opacity(value / COLOR_MAX);
+				m_sample_sheet.m_shape_list.back()->set_image_opacity(value / COLOR_MAX);
 			}
 		}
 		if (scp_sample_panel().IsLoaded()) {

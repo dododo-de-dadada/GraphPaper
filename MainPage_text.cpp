@@ -15,7 +15,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_fit_frame_to_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto flag = false;
-		for (auto s : m_sheet_main.m_list_shapes) {
+		for (auto s : m_sheet_main.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -146,15 +146,15 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			//m_sample_shape->get_text_line_sp(sample_value);
-			m_sample_sheet.m_list_shapes.back()->get_text_line_sp(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_text_line_sp(sample_value);
 			if (ustack_push_set<UNDO_OP::TEXT_LINE_SP>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
 			}
 		}
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -218,7 +218,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_SIZE_F sample_value;
 			//m_sample_shape->get_text_padding(sample_value);
-			m_sample_sheet.m_list_shapes.back()->get_text_padding(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_text_padding(sample_value);
 			if (ustack_push_set<UNDO_OP::TEXT_MARGIN>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -226,8 +226,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -288,14 +288,14 @@ namespace winrt::GraphPaper::implementation
 			const float value = static_cast<float>(args.NewValue());
 			text_slider_set_header<U, S>(value);
 			//m_sample_shape->set_text_line_sp(value);
-			m_sample_sheet.m_list_shapes.back()->set_text_line_sp(value);
+			m_sample_sheet.m_shape_list.back()->set_text_line_sp(value);
 		}
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			const float value = static_cast<float>(args.NewValue());
 			text_slider_set_header<U, S>(value);
 			D2D1_SIZE_F padding;
 			//m_sample_shape->get_text_padding(padding);
-			m_sample_sheet.m_list_shapes.back()->get_text_padding(padding);
+			m_sample_sheet.m_shape_list.back()->get_text_padding(padding);
 			if constexpr (S == 0) {
 				padding.width = static_cast<FLOAT>(value);
 			}
@@ -303,7 +303,7 @@ namespace winrt::GraphPaper::implementation
 				padding.height = static_cast<FLOAT>(value);
 			}
 			//m_sample_shape->set_text_padding(padding);
-			m_sample_sheet.m_list_shapes.back()->set_text_padding(padding);
+			m_sample_sheet.m_shape_list.back()->set_text_padding(padding);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

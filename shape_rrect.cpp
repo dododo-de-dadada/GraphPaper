@@ -89,8 +89,8 @@ namespace winrt::GraphPaper::implementation
 		s_brush->SetColor(m_stroke_color);
 		dc->DrawRoundedRectangle(r_rec, s_brush, s_width, s_style);
 		if (is_selected()) {
-			const auto flag = (std::abs(m_vec[0].x) >= FLT_MIN && std::abs(m_vec[0].y) >= FLT_MIN);
-			//if (flag) {
+			const auto zero = (std::abs(m_vec[0].x) >= FLT_MIN && std::abs(m_vec[0].y) >= FLT_MIN);
+			//if (zero) {
 			// D2D1_POINT_2F c_pos;
 			// pt_add(r_min, rx, ry, c_pos);
 			// anch_draw_ellipse(c_pos, dx);
@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 				anch_draw_rect(r_pos[i], dx);
 				anch_draw_rect(r_mid, dx);
 			}
-			//if (flag != true) {
+			//if (zero != true) {
 				D2D1_POINT_2F c_pos;
 				pt_add(r_min, rx, ry, c_pos);
 				anch_draw_ellipse(c_pos, dx);
@@ -223,8 +223,9 @@ namespace winrt::GraphPaper::implementation
 	// –ß‚è’l	ˆÊ’u‚ðŠÜ‚Þ}Œ`‚Ì•”ˆÊ
 	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto flag = (fabs(m_vec[0].x) >= FLT_MIN && fabs(m_vec[0].y) >= FLT_MIN);
-		if (flag) {
+		// •ûŒ`‚Ì‘å‚«‚³‚ªƒ[ƒ‚©”»’è‚·‚é.
+		const auto zero = (fabs(m_vec[0].x) >= FLT_MIN && fabs(m_vec[0].y) >= FLT_MIN);
+		if (zero) {
 			for (uint32_t i = 0; i < 4; i++) {
 				// ŠpŠÛ‚Ì’†S“_‚ð“¾‚é.
 				D2D1_POINT_2F r_cen;
@@ -250,7 +251,7 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_MIDDLE[i];
 			}
 		}
-		if (flag != true) {
+		if (!zero) {
 			for (uint32_t i = 0; i < 4; i++) {
 				D2D1_POINT_2F r_cen;	// ŠpŠÛ•”•ª‚Ì’†S“_
 				get_pos_anch(ANCH_ROUND[i], r_cen);
@@ -358,7 +359,9 @@ namespace winrt::GraphPaper::implementation
 			calc_corner_radius(m_vec[0], rad, m_corner_rad);
 			break;
 		default:
-			ShapeRect::set_pos_anch(value, anch, limit, false);
+			if (!ShapeRect::set_pos_anch(value, anch, limit, false)) {
+				return false;
+			}
 			if (m_vec[0].x * m_corner_rad.x < 0.0f) {
 				m_corner_rad.x = -m_corner_rad.x;
 			}

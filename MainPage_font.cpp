@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F sample_value;
 			//m_sample_shape->get_font_color(sample_value);
-			m_sample_sheet.m_list_shapes.back()->get_font_color(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_font_color(sample_value);
 			if (ustack_push_set<UNDO_OP::FONT_COLOR>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -131,8 +131,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -180,7 +180,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				auto i = lv_sample_list().SelectedIndex();
 				//m_sample_shape->set_font_family(ShapeText::get_available_font(i));
-				m_sample_sheet.m_list_shapes.back()->set_font_family(ShapeText::get_available_font(i));
+				m_sample_sheet.m_shape_list.back()->set_font_family(ShapeText::get_available_font(i));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
@@ -193,7 +193,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			wchar_t* sample_value;
 			//m_sample_shape->get_font_family(sample_value);
-			m_sample_sheet.m_list_shapes.back()->get_font_family(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_font_family(sample_value);
 			if (ustack_push_set<UNDO_OP::FONT_FAMILY>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -201,8 +201,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -280,14 +280,14 @@ namespace winrt::GraphPaper::implementation
 				const auto value = static_cast<float>(args.NewValue());
 				font_slider_set_header<U, S>(value);
 				//m_sample_shape->set_font_size(value);
-				m_sample_sheet.m_list_shapes.back()->set_font_size(value);
+				m_sample_sheet.m_shape_list.back()->set_font_size(value);
 			}
 		}
 		else if constexpr (U == UNDO_OP::FONT_COLOR) {
 			const auto value = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F f_color;
 			//m_sample_shape->get_font_color(f_color);
-			m_sample_sheet.m_list_shapes.back()->get_font_color(f_color);
+			m_sample_sheet.m_shape_list.back()->get_font_color(f_color);
 			if constexpr (S == 0) {
 				font_slider_set_header<U, S>(value);
 				f_color.r = static_cast<FLOAT>(value / COLOR_MAX);
@@ -305,7 +305,7 @@ namespace winrt::GraphPaper::implementation
 				f_color.a = static_cast<FLOAT>(value / COLOR_MAX);
 			}
 			//m_sample_shape->set_font_color(f_color);
-			m_sample_sheet.m_list_shapes.back()->set_font_color(f_color);
+			m_sample_sheet.m_shape_list.back()->set_font_color(f_color);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -338,7 +338,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			//m_sample_shape->get_font_size(sample_value);
-			m_sample_sheet.m_list_shapes.back()->get_font_size(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_font_size(sample_value);
 			if (ustack_push_set<UNDO_OP::FONT_SIZE>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -346,8 +346,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -386,7 +386,7 @@ namespace winrt::GraphPaper::implementation
 			[this](auto, auto args) {
 				uint32_t i = lv_sample_list().SelectedIndex();
 				//m_sample_shape->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
-				m_sample_sheet.m_list_shapes.back()->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
+				m_sample_sheet.m_shape_list.back()->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
@@ -399,7 +399,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_STRETCH sample_value;
 			//m_sample_shape->get_font_stretch(sample_value);
-			m_sample_sheet.m_list_shapes.back()->get_font_stretch(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_font_stretch(sample_value);
 			if (ustack_push_set<UNDO_OP::FONT_STRETCH>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -407,8 +407,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
@@ -492,7 +492,7 @@ namespace winrt::GraphPaper::implementation
 			[this](auto, auto args) {
 				uint32_t i = lv_sample_list().SelectedIndex();
 				//m_sample_shape->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
-				m_sample_sheet.m_list_shapes.back()->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
+				m_sample_sheet.m_shape_list.back()->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
 				if (scp_sample_panel().IsLoaded()) {
 					sample_draw();
 				}
@@ -505,7 +505,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_WEIGHT sample_value;
 			//m_sample_shape->get_font_weight(sample_value);
-			m_sample_sheet.m_list_shapes.back()->get_font_weight(sample_value);
+			m_sample_sheet.m_shape_list.back()->get_font_weight(sample_value);
 			if (ustack_push_set<UNDO_OP::FONT_WEIGHT>(sample_value)) {
 				ustack_push_null();
 				xcvd_is_enabled();
@@ -513,8 +513,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif

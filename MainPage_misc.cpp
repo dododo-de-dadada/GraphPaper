@@ -28,8 +28,8 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().DefaultButton(def_btn);
 		tb_version().Visibility(UI_COLLAPSED);
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_list_shapes.back();
-		m_sample_sheet.m_list_shapes.clear();
+		delete m_sample_sheet.m_shape_list.back();
+		m_sample_sheet.m_shape_list.clear();
 #if defined(_DEBUG)
 		debug_leak_cnt--;
 #endif
