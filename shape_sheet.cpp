@@ -640,7 +640,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ‘‘Ì–¼‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_font_family(wchar_t* const value)
+	bool ShapeSheet::set_font_family(wchar_t* const value) noexcept
 	{
 		if (!equal(m_font_family, value)) {
 			m_font_family = value;
@@ -650,7 +650,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ‘‘Ì‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_font_size(const float value)
+	bool ShapeSheet::set_font_size(const float value) noexcept
 	{
 		if (!equal(m_font_size, value)) {
 			m_font_size = value;
@@ -660,21 +660,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ‘‘Ì‚ÌLk‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_font_stretch(const DWRITE_FONT_STRETCH value)
+	bool ShapeSheet::set_font_stretch(const DWRITE_FONT_STRETCH value) noexcept
 	{
 		const auto old_value = m_font_stretch;
 		return (m_font_stretch = value) != old_value;
 	}
 
 	// ‘‘Ì‚Ìš‘Ì‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_font_style(const DWRITE_FONT_STYLE value)
+	bool ShapeSheet::set_font_style(const DWRITE_FONT_STYLE value) noexcept
 	{
 		const auto old_value = m_font_style;
 		return (m_font_style = value) != old_value;
 	}
 
 	// ’l‚ğ‘‘Ì‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_font_weight(const DWRITE_FONT_WEIGHT value)
+	bool ShapeSheet::set_font_weight(const DWRITE_FONT_WEIGHT value) noexcept
 	{
 		const auto old_value = m_font_weight;
 		return (m_font_weight = value) != old_value;
@@ -776,14 +776,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ”jü‚Ì’[‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_dash_cap(const D2D1_CAP_STYLE& value)
+	bool ShapeSheet::set_dash_cap(const D2D1_CAP_STYLE& value) noexcept
 	{
 		const auto old_value = m_dash_cap;
 		return (m_dash_cap = value) != old_value;
 	}
 
 	// ”jü‚Ì”z’u‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_dash_patt(const DASH_PATT& value)
+	bool ShapeSheet::set_dash_patt(const DASH_PATT& value) noexcept
 	{
 		if (!equal(m_dash_patt, value)) {
 			m_dash_patt = value;
@@ -793,7 +793,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ü˜g‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_dash_style(const D2D1_DASH_STYLE value)
+	bool ShapeSheet::set_dash_style(const D2D1_DASH_STYLE value) noexcept
 	{
 		const auto old_value = m_dash_style;
 		return (m_dash_style = value) != old_value;

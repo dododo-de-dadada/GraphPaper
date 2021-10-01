@@ -153,19 +153,6 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 消去フラグを判定する.
-	bool ShapeGroup::is_deleted(void) const noexcept
-	{
-		return m_list_grouped.size() == 0 || m_list_grouped.back()->is_deleted();
-	}
-
-	// 選択フラグを判定する.
-	bool ShapeGroup::is_selected(void) const noexcept
-	{
-		// グループに含まれる図形が選択されてるか判定する.
-		return m_list_grouped.size() > 0 && m_list_grouped.back()->is_selected();
-	}
-
 	// 差分だけ移動する
 	// d_vec	差分ベクトル
 	bool ShapeGroup::move(const D2D1_POINT_2F d_vec)

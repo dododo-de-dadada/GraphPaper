@@ -441,14 +441,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形の位置をスタックに保存してから差分だけ移動する.
 	// d_vec	移動させる差分
-	// all	すべての図形の場合 true, 選択された図形の場合 false
+	// all	図形すべての場合 true, 選択された図形のみの場合 false
 	void MainPage::ustack_push_move(const D2D1_POINT_2F d_vec, const bool all)
 	{
 		for (auto s : m_sheet_main.m_shape_list) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			if (all != true && s->is_selected() != true) {
+			if (s->is_deleted() || (!all && !s->is_selected())) {
 				continue;
 			}
 			ustack_push_set<UNDO_OP::POS_START>(s);
