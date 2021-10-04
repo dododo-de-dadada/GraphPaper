@@ -475,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 		pt_add(m_pos, m_vec[0], b_seg.point1);
 		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
 		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
-		winrt::check_hresult(dx.m_d2d_fanctory->CreatePathGeometry(m_d2d_path_geom.put()));
+		winrt::check_hresult(dx.m_d2d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
 		m_d2d_path_geom->Open(sink.put());
 		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 		sink->BeginFigure(m_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
@@ -484,7 +484,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			bz_create_arrow_geom(dx.m_d2d_fanctory.get(), m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+			bz_create_arrow_geom(dx.m_d2d_factory.get(), m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
 	}
 	/*
@@ -519,6 +519,9 @@ namespace winrt::GraphPaper::implementation
 	// ê}å`Çï\é¶Ç∑ÇÈ.
 	void ShapeBezi::draw(D2D_UI& dx)
 	{
+		if (m_d2d_stroke_style == nullptr) {
+			create_stroke_style(dx);
+		}
 		if (m_d2d_arrow_geom == nullptr || m_d2d_path_geom == nullptr) {
 			if (m_d2d_path_geom != nullptr) {
 				m_d2d_path_geom = nullptr;

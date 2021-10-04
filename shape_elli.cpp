@@ -12,6 +12,10 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚ğ•\¦‚·‚é.
 	void ShapeElli::draw(D2D_UI& dx)
 	{
+		if (m_d2d_stroke_style == nullptr) {
+			create_stroke_style(dx);
+		}
+
 		// ”¼Œa‚ğ‹‚ß‚é.
 		D2D1_POINT_2F rad;
 		pt_mul(m_vec[0], 0.5, rad);

@@ -257,11 +257,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形リストと用紙をアンドゥ操作に格納する.
 		{
 			//Shape::s_dx = &m_sheet_dx;
-			Shape::s_d2d_factory = m_sheet_dx.m_d2d_fanctory.get();
+			Shape::s_d2d_factory = m_sheet_dx.m_d2d_factory.get();
 			Shape::s_dwrite_factory = m_sheet_dx.m_dwrite_factory.get();
 			Shape::m_aux_style = nullptr;
 			winrt::check_hresult(
-				m_sheet_dx.m_d2d_fanctory->CreateStrokeStyle(AUX_STYLE, AUX_DASHES, AUX_DASHES_CONT, Shape::m_aux_style.put())
+				m_sheet_dx.m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
 			);
 			Undo::set(&m_sheet_main.m_shape_list, &m_sheet_main);
 		}

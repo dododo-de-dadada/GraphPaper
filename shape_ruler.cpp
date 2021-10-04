@@ -97,6 +97,10 @@ namespace winrt::GraphPaper::implementation
 	// dx	•`‰æŠÂ‹«
 	void ShapeRuler::draw(D2D_UI& dx)
 	{
+		if (m_d2d_stroke_style == nullptr) {
+			create_stroke_style(dx);
+		}
+
 		constexpr wchar_t* D[10] = { L"0", L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9" };
 		auto br = dx.m_solid_color_brush;
 

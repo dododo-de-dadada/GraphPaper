@@ -276,36 +276,41 @@ namespace winrt::GraphPaper::implementation
 
 	// ·•ª‚¾‚¯ˆÚ“®‚·‚é.
 	// d_vec	·•ªƒxƒNƒgƒ‹
-	bool ShapeStroke::move(const D2D1_POINT_2F d_vec)
+	bool ShapeStroke::move(const D2D1_POINT_2F d_vec) noexcept
 	{
 		D2D1_POINT_2F new_pos;
 		pt_add(m_pos, d_vec, new_pos);
 		return set_pos_start(new_pos);
 	}
 
+	void ShapeStroke::create_stroke_style(D2D_UI const& d2d)
+	{
+		winrt::GraphPaper::implementation::create_stroke_style(d2d.m_d2d_factory.get(), m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+	}
+
 	// ’l‚ğ’[‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	bool ShapeStroke::set_stroke_cap(const CAP_STYLE& value)
+	bool ShapeStroke::set_stroke_cap(const CAP_STYLE& value) noexcept
 	{
 		if (!equal(m_stroke_cap, value)) {
 			m_stroke_cap = value;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			//create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
 	}
 
 	// ’l‚ğ”jü‚Ì’[‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	bool ShapeStroke::set_dash_cap(const D2D1_CAP_STYLE& value)
+	bool ShapeStroke::set_dash_cap(const D2D1_CAP_STYLE& value) noexcept
 	{
 		if (!equal(m_dash_cap, value)) {
 			m_dash_cap = value;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			//create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -313,14 +318,14 @@ namespace winrt::GraphPaper::implementation
 
 	// ’l‚ğ”jü‚Ì”z’u‚ÉŠi”[‚·‚é.
 	// value	Ši”[‚·‚é’l
-	bool ShapeStroke::set_dash_patt(const DASH_PATT& value)
+	bool ShapeStroke::set_dash_patt(const DASH_PATT& value) noexcept
 	{
 		if (!equal(m_dash_patt, value)) {
 			m_dash_patt = value;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			//create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -328,14 +333,14 @@ namespace winrt::GraphPaper::implementation
 
 	// ’l‚ğü˜g‚ÌŒ`®‚ÉŠi”[‚·‚é.
 	// value	Ši”[‚·‚é’l
-	bool ShapeStroke::set_dash_style(const D2D1_DASH_STYLE value)
+	bool ShapeStroke::set_dash_style(const D2D1_DASH_STYLE value) noexcept
 	{
 		if (m_dash_style != value) {
 			m_dash_style = value;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			//create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -343,14 +348,14 @@ namespace winrt::GraphPaper::implementation
 
 	// ’l‚ğü•ª‚Ì‚Â‚È‚¬‚Ìƒ}ƒCƒ^[§ŒÀ‚ÉŠi”[‚·‚é.
 	// value	Ši”[‚·‚é’l
-	bool ShapeStroke::set_join_limit(const float& value)
+	bool ShapeStroke::set_join_limit(const float& value) noexcept
 	{
 		if (!equal(m_join_limit, value)) {
 			m_join_limit = value;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			//create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -358,14 +363,14 @@ namespace winrt::GraphPaper::implementation
 
 	// ’l‚ğü•ª‚Ì‚Â‚È‚¬‚ÉŠi”[‚·‚é.
 	// value	Ši”[‚·‚é’l
-	bool ShapeStroke::set_join_style(const D2D1_LINE_JOIN& value)
+	bool ShapeStroke::set_join_style(const D2D1_LINE_JOIN& value)  noexcept
 	{
 		if (m_join_style != value) {
 			m_join_style = value;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
-			create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+			//create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			return true;
 		}
 		return false;
@@ -453,7 +458,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// n“_‚É’l‚ğŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚à“®‚­.
-	bool ShapeStroke::set_pos_start(const D2D1_POINT_2F value)
+	bool ShapeStroke::set_pos_start(const D2D1_POINT_2F value) noexcept
 	{
 		D2D1_POINT_2F new_pos;
 		pt_round(value, PT_ROUND, new_pos);
@@ -481,10 +486,10 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(m_stroke_width, value)) {
 			m_stroke_width = value;
 			if (m_dash_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
-				if (m_d2d_stroke_style != nullptr) {
+				//if (m_d2d_stroke_style != nullptr) {
 					m_d2d_stroke_style = nullptr;
-				}
-				create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+				//}
+				//create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			}
 			return true;
 		}
@@ -506,7 +511,7 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_width(s_attr->m_stroke_width),
 		m_d2d_stroke_style(nullptr)
 	{
-		create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+		//create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 	}
 
 	/*
@@ -534,7 +539,7 @@ namespace winrt::GraphPaper::implementation
 		m_join_limit = dt_reader.ReadSingle();
 		m_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());
 		m_stroke_width = dt_reader.ReadSingle();
-		create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
+		//create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 	}
 
 	// ƒf[ƒ^ƒ‰ƒCƒ^[‚É‘‚«‚Ş.

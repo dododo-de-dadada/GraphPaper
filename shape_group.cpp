@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 差分だけ移動する
 	// d_vec	差分ベクトル
-	bool ShapeGroup::move(const D2D1_POINT_2F d_vec)
+	bool ShapeGroup::move(const D2D1_POINT_2F d_vec) noexcept
 	{
 		return slist_move(m_list_grouped, d_vec);
 	}
@@ -173,7 +173,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を開始位置に格納する. 他の部位の位置も動く.
-	bool ShapeGroup::set_pos_start(const D2D1_POINT_2F value)
+	bool ShapeGroup::set_pos_start(const D2D1_POINT_2F value) noexcept
 	{
 		D2D1_POINT_2F b_min;
 		if (get_pos_start(b_min) && !equal(value, b_min)) {

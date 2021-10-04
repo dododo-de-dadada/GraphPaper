@@ -683,7 +683,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 折れ線のパスジオメトリを作成する.
 		winrt::com_ptr<ID2D1GeometrySink> sink;
-		winrt::check_hresult(dx.m_d2d_fanctory->CreatePathGeometry(m_d2d_path_geom.put()));
+		winrt::check_hresult(dx.m_d2d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
 		winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
 		sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
 		const auto figure_begin = is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
@@ -705,7 +705,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F h_barbs[2];
 		if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
 			// 矢じるしのパスジオメトリを作成する.
-			winrt::check_hresult(dx.m_d2d_fanctory->CreatePathGeometry(m_d2d_arrow_geom.put()));
+			winrt::check_hresult(dx.m_d2d_factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
 			winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(h_barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
@@ -786,6 +786,9 @@ namespace winrt::GraphPaper::implementation
 	// dx	図形の描画環境
 	void ShapePoly::draw(D2D_UI& dx)
 	{
+		if (m_d2d_stroke_style == nullptr) {
+			create_stroke_style(dx);
+		}
 		if (m_d2d_arrow_geom == nullptr || m_d2d_path_geom == nullptr) {
 			create_path_geometry(dx);
 		}
@@ -876,7 +879,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	bool ShapePoly::set_arrow_style(const ARROW_STYLE value)
+	bool ShapePoly::set_arrow_style(const ARROW_STYLE value) noexcept
 	{
 		if (!m_end_closed) {
 			return ShapePath::set_arrow_style(value);

@@ -58,6 +58,10 @@ namespace winrt::GraphPaper::implementation
 	// ê}å`Çï\é¶Ç∑ÇÈ.
 	void ShapeRRect::draw(D2D_UI& dx)
 	{
+		if (m_d2d_stroke_style == nullptr) {
+			create_stroke_style(dx);
+		}
+
 		auto s_brush = dx.m_solid_color_brush.get();
 		auto s_style = m_d2d_stroke_style.get();
 		auto s_width = m_stroke_width;

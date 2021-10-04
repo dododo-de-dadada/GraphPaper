@@ -75,7 +75,7 @@ namespace winrt::GraphPaper::implementation
 	static winrt::com_ptr<ID2D1Factory3> create_d2d_factory(void);
 	static winrt::com_ptr<IDWriteFactory3> create_dwrite_factory(void);
 
-	winrt::com_ptr<ID2D1Factory3> D2D_UI::m_d2d_fanctory{ create_d2d_factory() };
+	winrt::com_ptr<ID2D1Factory3> D2D_UI::m_d2d_factory{ create_d2d_factory() };
 	winrt::com_ptr<IDWriteFactory3> D2D_UI::m_dwrite_factory{ create_dwrite_factory() };
 
 	// デバイスに依存しないピクセル単位 (DIP) の長さを物理的なピクセルの長さに変換します。
@@ -662,7 +662,7 @@ namespace winrt::GraphPaper::implementation
 		// DXGI デバイスをもとに D2D デバイスを作成する.
 		winrt::com_ptr<ID2D1Device2> d2d_device{ nullptr };
 		winrt::check_hresult(
-			m_d2d_fanctory->CreateDevice(dxgi_device.get(), d2d_device.put())
+			m_d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put())
 		);
 		// D2D デバイスをもとに D2D コンテキストを作成する.
 		// オプションは D2D1_DEVICE_CONTEXT_OPTIONS_NONE を指定する.
@@ -686,11 +686,11 @@ namespace winrt::GraphPaper::implementation
 		);
 		//m_aux_style = nullptr;
 		//winrt::check_hresult(
-		//	m_d2d_fanctory->CreateStrokeStyle(AUX_STYLE, AUX_DASHES, AUX_DASHES_CONT, m_aux_style.put())
+		//	m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, m_aux_style.put())
 		//);
 		m_state_block = nullptr;
 		winrt::check_hresult(
-			m_d2d_fanctory->CreateDrawingStateBlock(m_state_block.put())
+			m_d2d_factory->CreateDrawingStateBlock(m_state_block.put())
 		);
 
 	};

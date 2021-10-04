@@ -583,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ–î‚¶‚é‚µ‚Ì¡–@‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_arrow_size(const ARROW_SIZE& value)
+	bool ShapeSheet::set_arrow_size(const ARROW_SIZE& value) noexcept
 	{
 		if (!equal(m_arrow_size, value)) {
 			m_arrow_size = value;
@@ -593,7 +593,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ–î‚¶‚é‚µ‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_arrow_style(const ARROW_STYLE value)
+	bool ShapeSheet::set_arrow_style(const ARROW_STYLE value) noexcept
 	{
 		const auto old_value = m_arrow_style;
 		return (m_arrow_style = value) != old_value;
@@ -756,7 +756,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ’[‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_stroke_cap(const CAP_STYLE& value)
+	bool ShapeSheet::set_stroke_cap(const CAP_STYLE& value) noexcept
 	{
 		if (!equal(m_stroke_cap, value)) {
 			m_stroke_cap = value;
@@ -800,7 +800,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğü•ª‚Ì‚Â‚È‚¬‚Ìƒ}ƒCƒ^[§ŒÀ‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_join_limit(const float& value)
+	bool ShapeSheet::set_join_limit(const float& value) noexcept
 	{
 		if (!equal(m_join_limit, value)) {
 			m_join_limit = value;
@@ -810,7 +810,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğü•ª‚Ì‚Â‚È‚¬‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_join_style(const D2D1_LINE_JOIN& value)
+	bool ShapeSheet::set_join_style(const D2D1_LINE_JOIN& value) noexcept
 	{
 		const auto old_value = m_join_style;
 		return (m_join_style = value) != old_value;
@@ -827,21 +827,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ’i—‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value)
+	bool ShapeSheet::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value) noexcept
 	{
 		const auto old_value = m_text_align_p;
 		return (m_text_align_p = value) != old_value;
 	}
 
 	// •¶š—ñ‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_text_align_t(const DWRITE_TEXT_ALIGNMENT value)
+	bool ShapeSheet::set_text_align_t(const DWRITE_TEXT_ALIGNMENT value) noexcept
 	{
 		const auto old_value = m_text_align_t;
 		return (m_text_align_t = value) != old_value;
 	}
 
 	// ’l‚ğsŠÔ‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_text_line_sp(const float value)
+	bool ShapeSheet::set_text_line_sp(const float value) noexcept
 	{
 		if (!equal(m_text_line_sp, value)) {
 			m_text_line_sp = value;
@@ -851,7 +851,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ•¶š—ñ‚Ì—]”’‚ÉŠi”[‚·‚é.
-	bool ShapeSheet::set_text_padding(const D2D1_SIZE_F value)
+	bool ShapeSheet::set_text_padding(const D2D1_SIZE_F value) noexcept
 	{
 		if (!equal(m_text_padding, value)) {
 			m_text_padding = value;

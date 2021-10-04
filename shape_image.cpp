@@ -342,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する.
-	bool ShapeImage::move(const D2D1_POINT_2F value)
+	bool ShapeImage::move(const D2D1_POINT_2F value) noexcept
 	{
 		pt_add(m_pos, value, m_pos);
 		return true;
@@ -554,7 +554,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	bool ShapeImage::set_pos_start(const D2D1_POINT_2F value)
+	bool ShapeImage::set_pos_start(const D2D1_POINT_2F value) noexcept
 	{
 		if (!equal(m_pos, value)) {
 			m_pos = value;

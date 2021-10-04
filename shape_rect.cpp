@@ -10,6 +10,10 @@ namespace winrt::GraphPaper::implementation
 	// dx	描画環境
 	void ShapeRect::draw(D2D_UI& dx)
 	{
+		if (m_d2d_stroke_style == nullptr) {
+			create_stroke_style(dx);
+		}
+
 		const D2D1_RECT_F rect{
 			m_pos.x,
 			m_pos.y,
@@ -266,7 +270,7 @@ namespace winrt::GraphPaper::implementation
 	// value	値
 	// anch	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool /*keep_aspect*/)
+	bool ShapeRect::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool /*keep_aspect*/) noexcept
 	{
 		bool done = false;
 		switch (anch) {

@@ -39,6 +39,7 @@
 // +------+------+ +------+------+ +------+------+
 // | ShapeStatus | | ShapeGroup  | | ShapeSheet  |
 // +------+------+ +-------------+ +-------------+
+//        |
 //        +---------------+
 //        |               |
 // +------+------+ +------+------+
@@ -89,13 +90,13 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeRect;
 	struct ShapeStroke;
 
-	constexpr D2D1_COLOR_F ACCENT_COLOR = { 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// 文字範囲の背景色 SystemAccentColor
+	constexpr D2D1_COLOR_F ACCENT_COLOR{ 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// 文字範囲の背景色 SystemAccentColor
 
 	// 補助線
-	constexpr FLOAT AUX_DASHES[] = { 4.0f, 4.0f };	// 補助線の破線の配置
-	constexpr UINT32 AUX_DASHES_CONT = sizeof(AUX_DASHES) / sizeof(AUX_DASHES[0]);	// 補助線の破線の配置の要素数
-	constexpr float AUX_OPAC = 0.975f;	// 補助線の不透明度
-	constexpr D2D1_STROKE_STYLE_PROPERTIES1 AUX_STYLE	// 補助線の線の特性
+	constexpr FLOAT AUXILIARY_SEG_DASHES[]{ 4.0f, 4.0f };	// 補助線の破線の配置
+	constexpr UINT32 AUXILIARY_SEG_DASHES_CONT = sizeof(AUXILIARY_SEG_DASHES) / sizeof(AUXILIARY_SEG_DASHES[0]);	// 補助線の破線の配置の要素数
+	constexpr float AUXILIARY_SEG_OPAC = 0.975f;	// 補助線の不透明度
+	constexpr D2D1_STROKE_STYLE_PROPERTIES1 AUXILIARY_SEG_STYLE	// 補助線の線の特性
 	{
 		D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// startCap
 		D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// endCap
@@ -589,21 +590,21 @@ namespace winrt::GraphPaper::implementation
 		// 選択されてるか判定する.
 		virtual bool is_selected(void) const noexcept { return false; }
 		// 差分だけ移動する.
-		virtual	bool move(const D2D1_POINT_2F /*value*/) { return false; }
+		virtual	bool move(const D2D1_POINT_2F /*value*/) noexcept { return false; }
 		// 値を矢じるしの寸法に格納する.
-		virtual bool set_arrow_size(const ARROW_SIZE& /*value*/) { return false; }
+		virtual bool set_arrow_size(const ARROW_SIZE& /*value*/) noexcept { return false; }
 		// 値を矢じるしの形式に格納する.
-		virtual bool set_arrow_style(const ARROW_STYLE /*value*/) { return false; }
+		virtual bool set_arrow_style(const ARROW_STYLE /*value*/) noexcept { return false; }
 		// 値を端の形式に格納する.
-		virtual bool set_stroke_cap(const CAP_STYLE& /*value*/) { return false; }
+		virtual bool set_stroke_cap(const CAP_STYLE& /*value*/) noexcept { return false; }
 		// 値を角丸半径に格納する.
 		virtual bool set_corner_radius(const D2D1_POINT_2F& /*alue*/) noexcept { return false; }
 		// 値を破線の端の形式に格納する.
-		virtual bool set_dash_cap(const D2D1_CAP_STYLE& /*value*/) { return false; }
+		virtual bool set_dash_cap(const D2D1_CAP_STYLE& /*value*/) noexcept { return false; }
 		// 値を破線の配置に格納する.
-		virtual bool set_dash_patt(const DASH_PATT& /*value*/) { return false; }
+		virtual bool set_dash_patt(const DASH_PATT& /*value*/) noexcept { return false; }
 		// 値を線枠の形式に格納する.
-		virtual bool set_dash_style(const D2D1_DASH_STYLE /*value*/) { return false; }
+		virtual bool set_dash_style(const D2D1_DASH_STYLE /*value*/) noexcept { return false; }
 		// 値を消去されたか判定に格納する.
 		virtual bool set_delete(const bool /*value*/) noexcept { return false; }
 		// 値を塗りつぶし色に格納する.
@@ -633,13 +634,13 @@ namespace winrt::GraphPaper::implementation
 		// 画像の不透明度を得る.
 		virtual bool set_image_opacity(const float /*value*/) noexcept { return false; }
 		// 値を線分のつなぎのマイター制限に格納する.
-		virtual bool set_join_limit(const float& /*value*/) { return false; }
+		virtual bool set_join_limit(const float& /*value*/) noexcept { return false; }
 		// 値を線分のつなぎに格納する.
-		virtual bool set_join_style(const D2D1_LINE_JOIN& /*value*/) { return false; }
+		virtual bool set_join_style(const D2D1_LINE_JOIN& /*value*/) noexcept { return false; }
 		// 値を, 部位の位置に格納する.
-		virtual bool set_pos_anch(const D2D1_POINT_2F /*value*/, const uint32_t /*anch*/, const float /*limit*/, const bool /*keep_aspect*/) { return false; }
+		virtual bool set_pos_anch(const D2D1_POINT_2F /*value*/, const uint32_t /*anch*/, const float /*limit*/, const bool /*keep_aspect*/) noexcept { return false; }
 		// 値を始点に格納する. 他の部位の位置も動く.
-		virtual bool set_pos_start(const D2D1_POINT_2F /*value*/) { return false; }
+		virtual bool set_pos_start(const D2D1_POINT_2F /*value*/) noexcept { return false; }
 		// 値を用紙の色に格納する.
 		virtual bool set_sheet_color(const D2D1_COLOR_F& /*value*/) noexcept { return false; }
 		// 値を用紙の拡大率に格納する.
@@ -653,13 +654,13 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		virtual bool set_stroke_width(const float /*value*/) noexcept { return false; }
 		// 値を段落のそろえに格納する.
-		virtual bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT /*value*/) { return false; }
+		virtual bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT /*value*/) noexcept { return false; }
 		// 値を文字列のそろえに格納する.
-		virtual bool set_text_align_t(const DWRITE_TEXT_ALIGNMENT /*value*/) { return false; }
+		virtual bool set_text_align_t(const DWRITE_TEXT_ALIGNMENT /*value*/) noexcept { return false; }
 		// 値を文字列に格納する.
-		virtual bool set_text_content(wchar_t* const /*value*/) { return false; }
+		virtual bool set_text_content(wchar_t* const /*value*/) noexcept { return false; }
 		// 値を行間に格納する.
-		virtual bool set_text_line_sp(const float /*value*/) { return false; }
+		virtual bool set_text_line_sp(const float /*value*/) noexcept { return false; }
 		// 値を文字列の余白に格納する.
 		virtual bool set_text_padding(const D2D1_SIZE_F /*value*/) { return false; }
 		// 値を文字範囲に格納する.
@@ -722,7 +723,7 @@ namespace winrt::GraphPaper::implementation
 		// 範囲に含まれるか判定する.
 		bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept final override;
 		// 差分だけ移動する.
-		bool move(const D2D1_POINT_2F value) final override;
+		bool move(const D2D1_POINT_2F value) noexcept final override;
 		// 元の画像に戻す.
 		void revert(void) noexcept;
 		// 値を画像の不透明度に格納する.
@@ -730,7 +731,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を, 部位の位置に格納する.
 		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect) noexcept final override;
 		// 値を始点に格納する. 他の部位の位置も動く.
-		bool set_pos_start(const D2D1_POINT_2F /*value*/);
+		bool set_pos_start(const D2D1_POINT_2F /*value*/) noexcept final override;
 		// 図形を作成する.
 		ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bitmap, const float opacity);
 		// 図形を作成する.
@@ -791,7 +792,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 方眼
 		float m_grid_base = GRID_LEN_DEFVAL - 1.0f;	// 方眼の基準の大きさ (を -1 した値)
-		D2D1_COLOR_F m_grid_color{ ACCENT_COLOR };	// 方眼の色
+		D2D1_COLOR_F m_grid_color{ GRID_COLOR_DEFVAL };	// 方眼の色
 		GRID_EMPH m_grid_emph{ GRID_EMPH_0 };	// 方眼の強調
 		D2D1_POINT_2F m_grid_offset{ 0.0f, 0.0f };
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
@@ -884,15 +885,15 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから読み込む.
 		void read(DataReader const& dt_reader);
 		// 値を矢じるしの寸法に格納する.
-		bool set_arrow_size(const ARROW_SIZE& value) final override;
+		bool set_arrow_size(const ARROW_SIZE& value) noexcept final override;
 		// 値を矢じるしの形式に格納する.
-		bool set_arrow_style(const ARROW_STYLE value) final override;
+		bool set_arrow_style(const ARROW_STYLE value) noexcept final override;
 		// 図形の属性値を格納する.
 		void set_attr_to(const Shape* s) noexcept;
 		// 値を画像の不透明度に格納する.
 		bool set_image_opacity(const float value) noexcept;
 		// 値を端の形式に格納する.
-		bool set_stroke_cap(const CAP_STYLE& value) final override;
+		bool set_stroke_cap(const CAP_STYLE& value) noexcept final override;
 		// 値を角丸半径に格納する.
 		bool set_corner_radius(const D2D1_POINT_2F& value) noexcept final override;
 		// 値を破線の端の形式に格納する.
@@ -916,37 +917,37 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		bool set_font_weight(const DWRITE_FONT_WEIGHT value) noexcept final override;
 		// 値を方眼の基準の大きさに格納する.
-		bool set_grid_base(const float value) noexcept;
+		bool set_grid_base(const float value) noexcept final override;
 		// 値を方眼の色に格納する.
-		bool set_grid_color(const D2D1_COLOR_F& value) noexcept;
+		bool set_grid_color(const D2D1_COLOR_F& value) noexcept final override;
 		// 値を方眼の強調に格納する.
-		bool set_grid_emph(const GRID_EMPH& value) noexcept;
+		bool set_grid_emph(const GRID_EMPH& value) noexcept final override;
 		// 値を方眼の表示に格納する.
-		bool set_grid_show(const GRID_SHOW value) noexcept;
+		bool set_grid_show(const GRID_SHOW value) noexcept final override;
 		// 値を方眼に合わせるに格納する.
-		bool set_grid_snap(const bool value) noexcept;
+		bool set_grid_snap(const bool value) noexcept final override;
 		// 値を線分のつなぎのマイター制限に格納する.
-		bool set_join_limit(const float& value);
+		bool set_join_limit(const float& value) noexcept final override;
 		// 値を線分のつなぎに格納する.
-		bool set_join_style(const D2D1_LINE_JOIN& value);
+		bool set_join_style(const D2D1_LINE_JOIN& value) noexcept final override;
 		// 値を用紙の色に格納する.
-		bool set_sheet_color(const D2D1_COLOR_F& value) noexcept;
+		bool set_sheet_color(const D2D1_COLOR_F& value) noexcept final override;
 		// 値を用紙の拡大率に格納する.
-		bool set_sheet_scale(const float value) noexcept;
+		bool set_sheet_scale(const float value) noexcept final override;
 		// 値を用紙の寸法に格納する.
-		bool set_sheet_size(const D2D1_SIZE_F value) noexcept;
+		bool set_sheet_size(const D2D1_SIZE_F value) noexcept final override;
 		// 値を線枠の色に格納する.
-		bool set_stroke_color(const D2D1_COLOR_F& value) noexcept;
+		bool set_stroke_color(const D2D1_COLOR_F& value) noexcept final override;
 		// 値を書体の太さに格納する.
-		bool set_stroke_width(const float value) noexcept;
+		bool set_stroke_width(const float value) noexcept final override;
 		// 値を段落のそろえに格納する.
-		bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value);
+		bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value) noexcept final override;
 		// 値を文字列のそろえに格納する.
-		bool set_text_align_t(const DWRITE_TEXT_ALIGNMENT value);
+		bool set_text_align_t(const DWRITE_TEXT_ALIGNMENT value) noexcept final override;
 		// 値を行間に格納する.
-		bool set_text_line_sp(const float value);
+		bool set_text_line_sp(const float value) noexcept final override;
 		// 値を文字列の余白に格納する.
-		bool set_text_padding(const D2D1_SIZE_F value);
+		bool set_text_padding(const D2D1_SIZE_F value) noexcept final override;
 		// データリーダーに書き込む.
 		void write(DataWriter const& dt_writer);
 	};
@@ -985,13 +986,13 @@ namespace winrt::GraphPaper::implementation
 		// 選択されているか判定する.
 		bool is_selected(void) const noexcept final override { return m_list_grouped.size() > 0 && m_list_grouped.back()->is_selected(); }
 		// 差分だけ移動する.
-		bool move(const D2D1_POINT_2F value) final override;
+		bool move(const D2D1_POINT_2F value) noexcept final override;
 		// 値を消去されたか判定に格納する.
 		bool set_delete(const bool value) noexcept final override;
 		// 値を選択されたか判定に格納する.
 		bool set_select(const bool value) noexcept final override;
 		// 値を始点に格納する. 他の部位の位置も動く.
-		bool set_pos_start(const D2D1_POINT_2F value);
+		bool set_pos_start(const D2D1_POINT_2F value) noexcept final override;
 		// データリーダーから図形を読み込む.
 		ShapeGroup(DataReader const& dt_reader);
 		// データライターに書き込む.
@@ -1023,6 +1024,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形を破棄する.
 		~ShapeStroke(void);
+		// D2D ストロークスタイルを作成する.
+		void create_stroke_style(D2D_UI const& /*d2d*/);
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept final override;
 		// 端の形式を得る.
@@ -1056,23 +1059,23 @@ namespace winrt::GraphPaper::implementation
 		// 範囲に含まれるか判定する.
 		virtual bool in_area(const D2D1_POINT_2F /*a_min*/, const D2D1_POINT_2F /*a_max*/) const noexcept override;
 		// 差分だけ移動する.
-		virtual	bool move(const D2D1_POINT_2F value) override;
+		virtual	bool move(const D2D1_POINT_2F value) noexcept override;
 		// 値を端の形式に格納する.
-		virtual	bool set_stroke_cap(const CAP_STYLE& value) override;
+		virtual	bool set_stroke_cap(const CAP_STYLE& value) noexcept override;
 		// 値を破線の端の形式に格納する.
-		bool set_dash_cap(const D2D1_CAP_STYLE& value) final override;
+		bool set_dash_cap(const D2D1_CAP_STYLE& value) noexcept final override;
 		// 値を破線の配置に格納する.
-		bool set_dash_patt(const DASH_PATT& value) final override;
+		bool set_dash_patt(const DASH_PATT& value) noexcept final override;
 		// 値を線枠の形式に格納する.
-		bool set_dash_style(const D2D1_DASH_STYLE value) final override;
+		bool set_dash_style(const D2D1_DASH_STYLE value) noexcept final override;
 		// 値を線分のつなぎのマイター制限に格納する.
-		bool set_join_limit(const float& value);
+		virtual bool set_join_limit(const float& value) noexcept override;
 		// 値を線分のつなぎに格納する.
-		bool set_join_style(const D2D1_LINE_JOIN& value);
+		virtual bool set_join_style(const D2D1_LINE_JOIN& value) noexcept override;
 		// 値を, 部位の位置に格納する.
 		virtual bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect) noexcept override;
 		// 値を始点に格納する. 他の部位の位置も動く.
-		virtual bool set_pos_start(const D2D1_POINT_2F value);
+		virtual bool set_pos_start(const D2D1_POINT_2F value) noexcept override;
 		// 値を線枠の色に格納する.
 		bool set_stroke_color(const D2D1_COLOR_F& value) noexcept;
 		// 値を線枠の太さに格納する.
@@ -1125,15 +1128,15 @@ namespace winrt::GraphPaper::implementation
 		// 範囲に含まれるか判定する.
 		virtual bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept override;
 		// 値を矢じるしの寸法に格納する.
-		virtual bool set_arrow_size(const ARROW_SIZE& value) override;
+		virtual bool set_arrow_size(const ARROW_SIZE& value) noexcept override;
 		// 値を矢じるしの形式に格納する.
-		virtual bool set_arrow_style(const ARROW_STYLE value) override;
+		virtual bool set_arrow_style(const ARROW_STYLE value) noexcept override;
 		//	値を, 部位の位置に格納する. 
-		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect);
+		virtual bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect) noexcept override;
 		// 値を始点に格納する.
-		bool set_pos_start(const D2D1_POINT_2F value);
+		virtual bool set_pos_start(const D2D1_POINT_2F value) noexcept override;
 		// 差分だけ移動する.
-		virtual bool move(const D2D1_POINT_2F value) override;
+		virtual bool move(const D2D1_POINT_2F value) noexcept override;
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
@@ -1141,11 +1144,11 @@ namespace winrt::GraphPaper::implementation
 		// データライターに SVG として書き込む.
 		void write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
 		// 値を端の形式に格納する.
-		bool set_stroke_cap(const CAP_STYLE& value) final override;
+		bool set_stroke_cap(const CAP_STYLE& value) noexcept final override;
 		// 値を線分のつなぎのマイター制限に格納する.
-		bool set_join_limit(const float& value);
+		bool set_join_limit(const float& value) noexcept final override;
 		// 値を線分のつなぎに格納する.
-		bool set_join_style(const D2D1_LINE_JOIN& value);
+		bool set_join_style(const D2D1_LINE_JOIN& value) noexcept final override;
 	};
 
 	//------------------------------
@@ -1181,7 +1184,7 @@ namespace winrt::GraphPaper::implementation
 		// 部位の位置を得る.
 		virtual void get_pos_anch(const uint32_t anch, D2D1_POINT_2F& value) const noexcept override;
 		//	値を, 部位の位置に格納する.
-		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect);
+		virtual bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect) noexcept override;
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
@@ -1296,15 +1299,15 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapePath(void) { if (m_d2d_path_geom != nullptr) m_d2d_path_geom = nullptr; }
 		// 差分だけ移動する.
-		bool move(const D2D1_POINT_2F value) final override;
+		bool move(const D2D1_POINT_2F value) noexcept final override;
 		// 値を, 部位の位置に格納する.
-		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect);
+		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect) noexcept final override;
 		// 値を矢じるしの寸法に格納する.
-		bool set_arrow_size(const ARROW_SIZE& value) final override;
+		bool set_arrow_size(const ARROW_SIZE& value) noexcept final override;
 		// 値を矢じるしの形式に格納する.
-		virtual bool set_arrow_style(const ARROW_STYLE value) override;
+		virtual bool set_arrow_style(const ARROW_STYLE value) noexcept override;
 		// 値を始点に格納する. 他の部位の位置も動く.
-		bool set_pos_start(const D2D1_POINT_2F value);
+		bool set_pos_start(const D2D1_POINT_2F value) noexcept final override;
 		// データライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 	};
@@ -1336,7 +1339,7 @@ namespace winrt::GraphPaper::implementation
 		// 範囲に含まれるか判定する.
 		virtual bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept override;
 		// 値を矢じるしの形式に格納する.
-		bool set_arrow_style(const ARROW_STYLE value) final override;
+		bool set_arrow_style(const ARROW_STYLE value) noexcept final override;
 		// 値を塗りつぶし色に格納する.
 		bool set_fill_color(const D2D1_COLOR_F& value) noexcept final override;
 		// 図形を作成する.
@@ -1408,19 +1411,17 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapeText(void);
 		// 枠の大きさを文字列に合わせる.
-		bool adjust_bbox(const float g_len);
+		bool adjust_bbox(const float g_len) noexcept;
 		// テキストレイアウトを破棄して作成する.
-		void create_text_layout(IDWriteFactory3* d_factory);
+		//void create_text_layout(IDWriteFactory3* d_factory);
 		// 計量を破棄して作成する.
-		void create_text_metrics(IDWriteFactory3* d_factory);
+		//void create_text_metrics(IDWriteFactory3* d_factory);
 		// 文末の空白を取り除く.
 		void delete_bottom_blank(void) noexcept;
 		// 表示する.
 		void draw(D2D_UI& dx) final override;
 		// 選択された文字範囲を塗る.
 		void fill_range(D2D_UI& dx, const D2D1_POINT_2F t_min);
-		// 文字列の枠を表示する.
-		void draw_frame(D2D_UI& dx, const D2D1_POINT_2F t_min);
 		// 有効な書体名から要素を得る.
 		static wchar_t* get_available_font(const uint32_t i);
 		// 書体の色を得る.
@@ -1453,6 +1454,8 @@ namespace winrt::GraphPaper::implementation
 		bool in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept final override;
 		// 有効な書体名か判定し, 有効ならもとの書体名を破棄し, 有効な書体名要素へのポインターと置き換える.
 		static bool is_available_font(wchar_t*& font);
+		// 
+		bool is_updated(void);
 		// 有効な書体名の配列を破棄する.
 		static void release_available_fonts(void);
 		// 有効な書体名の配列を設定する.
@@ -1472,13 +1475,13 @@ namespace winrt::GraphPaper::implementation
 		// 値を, 部位の位置に格納する.
 		bool set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect) noexcept final override;
 		// 値を段落のそろえに格納する.
-		bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value);
+		bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value) noexcept final override;
 		// 値を文字列のそろえに格納する.
-		bool set_text_align_t(const DWRITE_TEXT_ALIGNMENT value);
+		bool set_text_align_t(const DWRITE_TEXT_ALIGNMENT value) noexcept final override;
 		// 値を文字列に格納する.
-		bool set_text_content(wchar_t* const value);
+		bool set_text_content(wchar_t* const value) noexcept final override;
 		// 値を行間に格納する.
-		bool set_text_line_sp(const float value);
+		bool set_text_line_sp(const float value) noexcept final override;
 		// 値を文字列の余白に格納する.
 		bool set_text_padding(const D2D1_SIZE_F value);
 		// 値を文字範囲に格納する.
