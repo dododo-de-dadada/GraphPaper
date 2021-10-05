@@ -227,7 +227,7 @@ namespace winrt::GraphPaper::implementation
 	// メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
-		std::mutex m_dx_mutex;	// 描画環境の排他制御
+		std::mutex m_d2d_mutex;	// 描画環境の排他制御
 		winrt::hstring m_file_token_mru;	// 最近使ったファイルのトークン
 
 		// 一覧
@@ -262,6 +262,12 @@ namespace winrt::GraphPaper::implementation
 		// 図形
 		bool m_image_keep_aspect = true;	// 画像の縦横比の維持
 
+		// メイン用紙
+		D2D_UI m_main_d2d;	// 用紙の描画環境
+		ShapeSheet m_main_sheet;	// メインの用紙
+		D2D1_POINT_2F m_main_min{ 0.0F, 0.0F };	// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
+		D2D1_POINT_2F m_main_max{ 0.0F, 0.0F };	// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
+
 		// その他
 		LEN_UNIT m_misc_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COLOR_CODE m_misc_color_code = COLOR_CODE::DEC;	// 色成分の書式
@@ -273,12 +279,6 @@ namespace winrt::GraphPaper::implementation
 		ShapeSheet m_sample_sheet;	// 見本の用紙
 		//Shape* m_sample_shape = nullptr;	// 見本の図形
 		SAMPLE_TYPE m_sample_type = SAMPLE_TYPE::NONE;	// 見本の型
-
-		// 用紙
-		D2D_UI m_sheet_dx;	// 用紙の描画環境
-		ShapeSheet m_sheet_main;	// メインの用紙
-		D2D1_POINT_2F m_sheet_min{ 0.0F, 0.0F };	// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
-		D2D1_POINT_2F m_sheet_max{ 0.0F, 0.0F };	// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
 		// 元に戻す・やり直し操作
 		uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数

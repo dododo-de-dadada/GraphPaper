@@ -25,7 +25,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		m_dx_mutex.lock();
+		m_d2d_mutex.lock();
 		auto dc = m_sample_dx.m_d2d_context.get();
 		dc->SaveDrawingState(m_sample_dx.m_state_block.get());
 		dc->BeginDraw();
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(dc->EndDraw());
 		dc->RestoreDrawingState(m_sample_dx.m_state_block.get());
 		m_sample_dx.Present(scp_sample_panel());
-		m_dx_mutex.unlock();
+		m_d2d_mutex.unlock();
 	}
 
 	//　見本リストビューがロードされた.
@@ -107,7 +107,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_sample_dx.m_dxgi_swap_chain != nullptr) {
 			m_sample_dx.m_dxgi_swap_chain = nullptr;
 		}
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		const auto samp_w = scp_sample_panel().ActualWidth();
 		const auto samp_h = scp_sample_panel().ActualHeight();
 		m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);

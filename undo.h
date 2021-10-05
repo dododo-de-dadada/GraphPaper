@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 		TEXT_CONTENT,	// •¶š—ñ‚Ì‘€ì
 		TEXT_LINE_SP,	// sŠÔ‚Ì‘€ì
 		TEXT_MARGIN,	// •¶š—ñ‚Ì—]”’‚Ì‘€ì
-		TEXT_RANGE,	// •¶š”ÍˆÍ‚Ì‘€ì
+		TEXT_SELECTED,	// ‘I‘ğ‚³‚ê‚½•¶š”ÍˆÍ‚Ì‘€ì
 	};
 
 	//------------------------------
@@ -102,7 +102,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::TEXT_CONTENT> { using type = wchar_t*; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_LINE_SP> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_MARGIN> { using type = D2D1_SIZE_F; };
-	template <> struct U_TYPE<UNDO_OP::TEXT_RANGE> { using type = DWRITE_TEXT_RANGE; };
+	template <> struct U_TYPE<UNDO_OP::TEXT_SELECTED> { using type = DWRITE_TEXT_RANGE; };
 
 	//------------------------------
 	// ‘€ì‚Ì‚Ğ‚ÈŒ^

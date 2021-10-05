@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 				L"str_arrow_offset"
 			};
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sheet_main.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf;
 			if constexpr (S == 0) {
 				sample_slider_0().Header(box_value(text));
@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		ARROW_SIZE a_size;
 		m_sample_sheet.get_arrow_size(a_size);
 

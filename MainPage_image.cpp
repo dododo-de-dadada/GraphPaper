@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「元の画像に戻す」が選択された.
 	void MainPage::image_revert_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		for (Shape* const s : m_sheet_main.m_shape_list) {
+		for (Shape* const s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
 				continue;
 			}
@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「不透明度...」が選択された.
 	IAsyncAction MainPage::image_opac_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		const auto value = m_sample_sheet.m_image_opac * COLOR_MAX;
 		sample_slider_0().Maximum(255.0);
 		sample_slider_0().TickFrequency(1.0);
@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
 			m_sample_sheet.m_shape_list.back()->get_image_opacity(sample_value);
-			ustack_push_set<UNDO_OP::IMAGE_OPAC>(&m_sheet_main, sample_value);
+			ustack_push_set<UNDO_OP::IMAGE_OPAC>(&m_main_sheet, sample_value);
 			if (ustack_push_set<UNDO_OP::IMAGE_OPAC>(sample_value)) {
 				ustack_push_null();
 				ustack_is_enable();

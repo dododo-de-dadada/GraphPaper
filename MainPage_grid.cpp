@@ -31,9 +31,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		GRID_EMPH g_emph;
-		m_sheet_main.get_grid_emph(g_emph);
+		m_main_sheet.get_grid_emph(g_emph);
 		if (!equal(g_emph, value)) {
-			ustack_push_set<UNDO_OP::GRID_EMPH>(&m_sheet_main, value);
+			ustack_push_set<UNDO_OP::GRID_EMPH>(&m_main_sheet, value);
 			ustack_is_enable();
 			sheet_draw();
 		}
@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		const auto val0 = m_sample_sheet.m_grid_color.r * COLOR_MAX;
 		const auto val1 = m_sample_sheet.m_grid_color.g * COLOR_MAX;
 		const auto val2 = m_sample_sheet.m_grid_color.b * COLOR_MAX;
@@ -98,8 +98,8 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			if (!equal(m_sheet_main.m_grid_color, m_sample_sheet.m_grid_color)) {
-				ustack_push_set<UNDO_OP::GRID_COLOR>(&m_sheet_main, m_sample_sheet.m_grid_color);
+			if (!equal(m_main_sheet.m_grid_color, m_sample_sheet.m_grid_color)) {
+				ustack_push_set<UNDO_OP::GRID_COLOR>(&m_main_sheet, m_sample_sheet.m_grid_color);
 				ustack_is_enable();
 				sheet_draw();
 			}
@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		float g_base;
 		m_sample_sheet.get_grid_base(g_base);
 
@@ -141,10 +141,10 @@ namespace winrt::GraphPaper::implementation
 			float sample_value;
 			float sheet_value;
 
-			m_sheet_main.get_grid_base(sheet_value);
+			m_main_sheet.get_grid_base(sheet_value);
 			m_sample_sheet.get_grid_base(sample_value);
 			if (!equal(sheet_value, sample_value)) {
-				ustack_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, sample_value);
+				ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, sample_value);
 				ustack_is_enable();
 				xcvd_is_enabled();
 				sheet_draw();
@@ -159,10 +159,10 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		float g_base;
-		m_sheet_main.get_grid_base(g_base);
+		m_main_sheet.get_grid_base(g_base);
 		const float value = (g_base + 1.0f) * 0.5f - 1.0f;
 		if (value >= 1.0f) {
-			ustack_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
+			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, value);
 			ustack_is_enable();
 			sheet_draw();
 		}
@@ -172,10 +172,10 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		float g_base;
-		m_sheet_main.get_grid_base(g_base);
+		m_main_sheet.get_grid_base(g_base);
 		const float value = (g_base + 1.0f) * 2.0f - 1.0f;
-		if (value <= max(m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height)) {
-			ustack_push_set<UNDO_OP::GRID_BASE>(&m_sheet_main, value);
+		if (value <= max(m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height)) {
+			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, value);
 			ustack_is_enable();
 			sheet_draw();
 		}
@@ -192,10 +192,10 @@ namespace winrt::GraphPaper::implementation
 
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			float g_base;
-			m_sheet_main.get_grid_base(g_base);
+			m_main_sheet.get_grid_base(g_base);
 			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/ + 1.0f, m_sheet_dx.m_logical_dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/ + 1.0f, m_main_d2d.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_COLOR) {
@@ -291,9 +291,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		GRID_SHOW g_show;
-		m_sheet_main.get_grid_show(g_show);
+		m_main_sheet.get_grid_show(g_show);
 		if (g_show != value) {
-			ustack_push_set<UNDO_OP::GRID_SHOW>(&m_sheet_main, value);
+			ustack_push_set<UNDO_OP::GRID_SHOW>(&m_main_sheet, value);
 			ustack_is_enable();
 			sheet_draw();
 		}
@@ -314,7 +314,7 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「方眼に合わせる」が選択された.
 	void MainPage::grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		m_sheet_main.m_grid_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
+		m_main_sheet.m_grid_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
 	}
 
 }

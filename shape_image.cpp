@@ -77,8 +77,8 @@ namespace winrt::GraphPaper::implementation
 			delete m_data;
 			m_data = nullptr;
 		}
-		if (m_dx_bitmap != nullptr) {
-			m_dx_bitmap = nullptr;
+		if (m_d2d_bitmap != nullptr) {
+			m_d2d_bitmap = nullptr;
 		}
 	}
 
@@ -131,9 +131,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚ð•\Ž¦‚·‚é.
-	void ShapeImage::draw(D2D_UI& dx)
+	void ShapeImage::draw(D2D_UI& d2d)
 	{
-		if (m_dx_bitmap == nullptr) {
+		if (m_d2d_bitmap == nullptr) {
 			const D2D1_BITMAP_PROPERTIES1 b_prop{
 				D2D1::BitmapProperties1(
 					D2D1_BITMAP_OPTIONS_NONE,
@@ -141,8 +141,8 @@ namespace winrt::GraphPaper::implementation
 				)
 			};
 			const UINT32 pitch = 4 * m_src_size.width;
-			dx.m_d2d_context->CreateBitmap(m_src_size, static_cast<void*>(m_data), pitch, b_prop, m_dx_bitmap.put());
-			if (m_dx_bitmap == nullptr) {
+			winrt::check_hresult(d2d.m_d2d_context->CreateBitmap(m_src_size, static_cast<void*>(m_data), pitch, b_prop, m_d2d_bitmap.put()));
+			if (m_d2d_bitmap == nullptr) {
 				return;
 			}
 		}
@@ -152,13 +152,13 @@ namespace winrt::GraphPaper::implementation
 			m_pos.x + m_view.width,
 			m_pos.y + m_view.height
 		};
-		dx.m_d2d_context->DrawBitmap(m_dx_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_rect);
+		d2d.m_d2d_context->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_rect);
 
 		if (is_selected()) {
-			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
-			dx.m_d2d_context->DrawRectangle(dest_rect, dx.m_solid_color_brush.get(), 1.0f, nullptr);
-			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
-			dx.m_d2d_context->DrawRectangle(dest_rect, dx.m_solid_color_brush.get(), 1.0f, Shape::m_aux_style.get());
+			d2d.m_solid_color_brush->SetColor(Shape::m_default_background);
+			d2d.m_d2d_context->DrawRectangle(dest_rect, d2d.m_solid_color_brush.get(), 1.0f, nullptr);
+			d2d.m_solid_color_brush->SetColor(Shape::m_default_foreground);
+			d2d.m_d2d_context->DrawRectangle(dest_rect, d2d.m_solid_color_brush.get(), 1.0f, Shape::m_aux_style.get());
 
 			const D2D1_POINT_2F v_pos[4]{
 				m_pos,
@@ -167,10 +167,10 @@ namespace winrt::GraphPaper::implementation
 				{ m_pos.x, m_pos.y + m_view.height },
 			};
 
-			anch_draw_rect(v_pos[0], dx);
-			anch_draw_rect(v_pos[1], dx);
-			anch_draw_rect(v_pos[2], dx);
-			anch_draw_rect(v_pos[3], dx);
+			anch_draw_rect(v_pos[0], d2d);
+			anch_draw_rect(v_pos[1], d2d);
+			anch_draw_rect(v_pos[2], d2d);
+			anch_draw_rect(v_pos[3], d2d);
 		}
 	}
 

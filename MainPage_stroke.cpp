@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		D2D1_COLOR_F s_color;
 		m_sample_sheet.get_stroke_color(s_color);
 
@@ -98,8 +98,8 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
 			wchar_t buf[32];
 			float g_base;
-			m_sheet_main.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, g_base + 1.0f, buf);
+			m_main_sheet.get_grid_base(g_base);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		float s_width;
 		m_sample_sheet.get_stroke_width(s_width);
 

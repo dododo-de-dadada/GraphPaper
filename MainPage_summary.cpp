@@ -238,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 図形の一覧の排他制御を false と入れ替える.
 		bool summary_visible = m_summary_atomic.exchange(false, std::memory_order_acq_rel); // 入れ替え前の排他制御
-		summary_create(lv_summary_list(), m_sheet_main.m_shape_list, Resources());
+		summary_create(lv_summary_list(), m_main_sheet.m_shape_list, Resources());
 		m_summary_atomic.store(summary_visible, std::memory_order_release);
 	}
 
@@ -305,7 +305,7 @@ namespace winrt::GraphPaper::implementation
 			m_summary_atomic.store(false, std::memory_order_release);
 			const auto& list = lv_summary_list();
 			list.Items().Clear();
-			summary_create(list, m_sheet_main.m_shape_list, Resources());
+			summary_create(list, m_main_sheet.m_shape_list, Resources());
 			list.UpdateLayout();
 			m_summary_atomic.store(true, std::memory_order_release);
 		}
@@ -413,7 +413,7 @@ namespace winrt::GraphPaper::implementation
 		if (t != static_cast<const Shape*>(nullptr)) {
 			// 図形が表示されるよう用紙をスクロールする.
 			scroll_to(t);
-			m_sheet_main.set_attr_to(t);
+			m_main_sheet.set_attr_to(t);
 			sheet_attr_is_checked();
 		}
 

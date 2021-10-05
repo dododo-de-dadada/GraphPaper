@@ -15,7 +15,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_fit_frame_to_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto flag = false;
-		for (auto s : m_sheet_main.m_shape_list) {
+		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -26,7 +26,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			auto u = new UndoAnchor(s, ANCH_TYPE::ANCH_SE);
-			if (static_cast<ShapeText*>(s)->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f)) {
+			if (static_cast<ShapeText*>(s)->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f)) {
 				m_ustack_undo.push_back(u);
 				if (!flag) {
 					flag = true;
@@ -128,7 +128,7 @@ namespace winrt::GraphPaper::implementation
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		float value;
 		m_sample_sheet.get_text_line_sp(value);
 
@@ -169,12 +169,12 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_line_sp_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float value;
-		m_sheet_main.get_text_line_sp(value);
+		m_main_sheet.get_text_line_sp(value);
 		if (sender == mfi_text_line_sp_con() || sender == mfi_text_line_sp_con_2()) {
-			value = max(value - m_sheet_main.m_font_size, 0.0f);
+			value = max(value - m_main_sheet.m_font_size, 0.0f);
 		}
 		else if (sender == mfi_text_line_sp_exp() || sender == mfi_text_line_sp_exp_2()) {
-			value = value + m_sheet_main.m_font_size;
+			value = value + m_main_sheet.m_font_size;
 		}
 		if (ustack_push_set<UNDO_OP::TEXT_LINE_SP>(value)) {
 			ustack_push_null();
@@ -192,7 +192,7 @@ namespace winrt::GraphPaper::implementation
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		D2D1_SIZE_F padding;
 		m_sample_sheet.get_text_padding(padding);
 
@@ -248,14 +248,14 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			constexpr wchar_t* HEADER[] = { L"str_text_pad_horzorz", L"str_text_pad_vertert" };
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE_SP) {
 			constexpr wchar_t HEADER[] = L"str_text_line_sp";
 			if (value >= FLT_MIN) {
 				wchar_t buf[32];
-				conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(HEADER) + L": " + buf;
 			}
 			else {

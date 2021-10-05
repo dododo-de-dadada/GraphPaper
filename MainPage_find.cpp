@@ -15,9 +15,9 @@ namespace winrt::GraphPaper::implementation
 	static wchar_t* find_replace(wchar_t const* w_text, const uint32_t w_pos, const uint32_t w_len, wchar_t const* r_text, const uint32_t r_len) noexcept;
 	// 文字列を検索して見つかった位置を得る.
 	static bool find_text(const wchar_t* w_text, const uint32_t w_len, const wchar_t* f_text, const uint32_t f_len, const bool f_case, uint32_t& f_pos) noexcept;
-	// 図形リストの中から文字列を検索し, それまで文字範囲が選択されていた図形, 新たに文字列が見つかった図形とその文字範囲を得る.
+	// 図形リストから, それまで文字範囲が選択されていた図形, 新たに選択される図形を得る.
 	static bool find_text(SHAPE_LIST& slist, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s, DWRITE_TEXT_RANGE& s_range);
-	// 文字範囲が選択された図形と文字範囲を見つける.
+	// 文字範囲が選択されている図形を見つける.
 	static ShapeText* find_text_range_selected(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, DWRITE_TEXT_RANGE& t_range);
 
 	// 文字列の一部を置換する.
@@ -92,15 +92,15 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 図形リストの中から文字列を検索し, それまで文字範囲が選択されていた図形, 新たに文字列が見つかった図形とその文字範囲を得る.
+	// 図形リストから, それまで文字範囲が選択されていた図形, 新たに選択される図形を得る.
 	// slist	図形リスト
 	// f_text	検索文字列
 	// f_len	検索文字列の文字数
 	// f_case	英文字を区別する
 	// f_wrap	回り込み検索する
 	// t	それまで文字範囲が選択されていた図形
-	// s_found	新たに文字列が見つかった図形
-	// s_range	新たに文字列が見つかった図形の文字範囲
+	// s_found	新たに選択される図形
+	// s_range	新たに選択される文字範囲
 	static bool find_text(SHAPE_LIST& slist, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s_found, DWRITE_TEXT_RANGE& s_range)
 	{
 		const auto f_len = wchar_len(f_text);
@@ -130,7 +130,7 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				DWRITE_TEXT_RANGE t_range;
-				if (s->get_text_range(t_range) != true) {
+				if (s->get_text_selected(t_range) != true) {
 					continue;
 				}
 				if (t == nullptr) {
@@ -211,9 +211,11 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 文字範囲が選択された図形と文字範囲を見つける.
+	// 文字範囲が選択されている図形を見つける.
+	// it_beg	最初の列挙子
+	// it_end	最後の列挙子 (の次）
 	// t_range	見つかった文字範囲
-	// 戻り値	見つかった図形
+	// 戻り値	見つかった文字列図形
 	static ShapeText* find_text_range_selected(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, DWRITE_TEXT_RANGE& t_range)
 	{
 		std::list<SHAPE_LIST::iterator> stack;
@@ -237,7 +239,7 @@ namespace winrt::GraphPaper::implementation
 					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
 					continue;
 				}
-				if (s->get_text_range(t_range) != true) {
+				if (s->get_text_selected(t_range) != true) {
 					continue;
 				}
 				if (t_range.startPosition > 0 || t_range.length > 0) {
@@ -265,7 +267,7 @@ namespace winrt::GraphPaper::implementation
 			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
 			if (m_edit_text_frame) {
 				ustack_push_position(s, ANCH_TYPE::ANCH_SE);
-				s->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
+				s->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			}
 			ustack_push_null();
 			xcvd_is_enabled();
@@ -283,7 +285,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// 選択された図形のうち最前面にある文字列図形を得る.
-			for (auto it = m_sheet_main.m_shape_list.rbegin(); it != m_sheet_main.m_shape_list.rend(); it++) {
+			for (auto it = m_main_sheet.m_shape_list.rbegin(); it != m_main_sheet.m_shape_list.rend(); it++) {
 				auto t = *it;
 				if (t->is_deleted()) {
 					continue;
@@ -317,8 +319,8 @@ namespace winrt::GraphPaper::implementation
 		// あらかじめ検索文字列を含む文字列図形があるか判定する.
 		bool done = false;
 		std::list <SHAPE_LIST::iterator> it_stack;
-		it_stack.push_back(m_sheet_main.m_shape_list.begin());
-		it_stack.push_back(m_sheet_main.m_shape_list.end());
+		it_stack.push_back(m_main_sheet.m_shape_list.begin());
+		it_stack.push_back(m_main_sheet.m_shape_list.end());
 		while (!it_stack.empty()) {
 			SHAPE_LIST::iterator j = it_stack.back();
 			it_stack.pop_back();
@@ -361,8 +363,8 @@ namespace winrt::GraphPaper::implementation
 		unselect_all(true);
 
 		const uint32_t r_len = wchar_len(m_find_repl);
-		it_stack.push_back(m_sheet_main.m_shape_list.begin());
-		it_stack.push_back(m_sheet_main.m_shape_list.end());
+		it_stack.push_back(m_main_sheet.m_shape_list.begin());
+		it_stack.push_back(m_main_sheet.m_shape_list.end());
 		while (!it_stack.empty()) {
 			SHAPE_LIST::iterator j = it_stack.back();
 			it_stack.pop_back();
@@ -421,8 +423,8 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		bool flag = false;	// 一致または置換したか判定.
-		DWRITE_TEXT_RANGE t_range;	// 文字列範囲
-		auto t = find_text_range_selected(m_sheet_main.m_shape_list.begin(), m_sheet_main.m_shape_list.end(), t_range);
+		DWRITE_TEXT_RANGE t_range;	// 文字範囲
+		auto t = find_text_range_selected(m_main_sheet.m_shape_list.begin(), m_main_sheet.m_shape_list.end(), t_range);
 		if (t != nullptr) {
 			// 図形が見つかった場合,
 			const auto w_pos = t_range.startPosition;
@@ -438,7 +440,7 @@ namespace winrt::GraphPaper::implementation
 				const auto r_len = wchar_len(m_find_repl);
 				const auto r_text = find_replace(t->m_text, w_pos, f_len, m_find_repl, r_len);
 				ustack_push_set<UNDO_OP::TEXT_CONTENT>(t, r_text);
-				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
+				ustack_push_set<UNDO_OP::TEXT_SELECTED>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 				ustack_push_null();
 				ustack_is_enable();
 			}
@@ -446,13 +448,13 @@ namespace winrt::GraphPaper::implementation
 		// 次を検索する.
 		Shape* s;
 		DWRITE_TEXT_RANGE s_range;
-		if (find_text(m_sheet_main.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
+		if (find_text(m_main_sheet.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			// 検索できたならば,
 			// 文字範囲が選択された図形があり, それが次の図形と異なるか判定する.
 			if (t != nullptr && s != t) {
-				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				ustack_push_set<UNDO_OP::TEXT_SELECTED>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			ustack_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
+			ustack_push_set<UNDO_OP::TEXT_SELECTED>(s, s_range);
 			scroll_to(s);
 			flag = true;
 		}
@@ -500,11 +502,11 @@ namespace winrt::GraphPaper::implementation
 		ShapeText* t;
 		Shape* s;
 		DWRITE_TEXT_RANGE s_range;
-		if (find_text(m_sheet_main.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
+		if (find_text(m_main_sheet.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			if (t != nullptr && s != t) {
-				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				ustack_push_set<UNDO_OP::TEXT_SELECTED>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			ustack_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
+			ustack_push_set<UNDO_OP::TEXT_SELECTED>(s, s_range);
 			scroll_to(s);
 			sheet_draw();
 		}

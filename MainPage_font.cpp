@@ -9,6 +9,10 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+
 	constexpr wchar_t DLG_TITLE[] = L"str_font";
 
 	// 書体の伸縮の配列
@@ -76,11 +80,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「色」が選択された.
 	IAsyncAction MainPage::font_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 
 		D2D1_COLOR_F f_color;
 		m_sample_sheet.get_font_color(f_color);
@@ -152,10 +152,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「書体名」が選択された.
 	IAsyncAction MainPage::font_family_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::get_available_font(i); i++) {
 			auto item = box_value(winrt::hstring(name));
 			lv_sample_list().Items().Append(item);
@@ -165,7 +162,7 @@ namespace winrt::GraphPaper::implementation
 			lv_sample_list().Items().GetMany(i, item);
 			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
 			wchar_t* f_family;
-			m_sheet_main.get_font_family(f_family);
+			m_main_sheet.get_font_family(f_family);
 			if (wcscmp(name, f_family) == 0) {
 				// 書体名が同じ場合,
 				// その書体をリストビューの選択済み項目に格納する.
@@ -217,7 +214,6 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	template <UNDO_OP U, int S> void MainPage::font_slider_set_header(const float value)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
@@ -315,13 +311,9 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「大きさ」が選択された.
 	IAsyncAction MainPage::font_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		float f_size;
 		m_sample_sheet.get_font_size(f_size);
 
@@ -360,10 +352,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「伸縮」が選択された.
 	IAsyncAction MainPage::font_stretch_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		for (uint32_t i = 0; FONT_STRETCH_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_STRETCH_NAME[i]));
 			lv_sample_list().Items().Append(item);
@@ -372,7 +361,7 @@ namespace winrt::GraphPaper::implementation
 		const auto k = lv_sample_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
 			DWRITE_FONT_STRETCH f_stretch;
-			m_sheet_main.get_font_stretch(f_stretch);
+			m_main_sheet.get_font_stretch(f_stretch);
 			if (FONT_STRETCH[i] == f_stretch) {
 				lv_sample_list().SelectedIndex(i);
 				IInspectable item[1];
@@ -466,10 +455,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「太さ」が選択された.
 	IAsyncAction MainPage::font_weight_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		for (uint32_t i = 0; FONT_WEIGHT_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_WEIGHT_NAME[i]));
 			lv_sample_list().Items().Append(item);
@@ -478,7 +464,7 @@ namespace winrt::GraphPaper::implementation
 		const auto k = lv_sample_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
 			DWRITE_FONT_WEIGHT f_weight;
-			m_sheet_main.get_font_weight(f_weight);
+			m_main_sheet.get_font_weight(f_weight);
 			if (FONT_WEIGHTS[i] == f_weight) {
 				lv_sample_list().SelectedIndex(i);
 				IInspectable item[1];

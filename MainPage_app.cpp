@@ -34,10 +34,10 @@ namespace winrt::GraphPaper::implementation
 	// アプリケーションがバックグラウンドに移った.
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
-		m_dx_mutex.lock();
-		m_sheet_dx.Trim();
+		m_d2d_mutex.lock();
+		m_main_d2d.Trim();
 		m_sample_dx.Trim();
-		m_dx_mutex.unlock();
+		m_d2d_mutex.unlock();
 	}
 
 	// アプリケーションがバックグラウンドから戻った.
@@ -51,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		winrt::apartment_context context;
 
-		ShapeText::set_available_fonts();
+		ShapeText::set_available_fonts(m_main_d2d);
 
 		HRESULT ok = E_FAIL;
 		IStorageItem data_storage{ co_await app_cache_folder().TryGetItemAsync(FILE_NAME) };
@@ -127,7 +127,7 @@ namespace winrt::GraphPaper::implementation
 					ok = co_await file_write_gpf_async<true, false>(data_file);
 					data_file = nullptr;
 					ustack_clear();
-					slist_clear(m_sheet_main.m_shape_list);
+					slist_clear(m_main_sheet.m_shape_list);
 					ShapeText::release_available_fonts();
 				}
 			}

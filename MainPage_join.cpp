@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		CAP_STYLE old_value;
-		m_sheet_main.get_stroke_cap(old_value);
+		m_main_sheet.get_stroke_cap(old_value);
 		if (ustack_push_set<UNDO_OP::STROKE_CAP>(new_value)) {
 			ustack_push_null();
 			ustack_is_enable();
@@ -58,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		float j_limit;
 		m_sample_sheet.get_join_limit(j_limit);
 		j_limit -= 1.0f;
@@ -129,7 +129,7 @@ namespace winrt::GraphPaper::implementation
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_sheet_dx.m_logical_dpi, m_sheet_main.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 			sample_slider_1().Header(box_value(text));
 		}
@@ -187,7 +187,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		D2D1_LINE_JOIN old_value;
-		m_sheet_main.get_join_style(old_value);
+		m_main_sheet.get_join_style(old_value);
 		if (ustack_push_set<UNDO_OP::JOIN_STYLE>(new_value)) {
 			ustack_push_null();
 			ustack_is_enable();

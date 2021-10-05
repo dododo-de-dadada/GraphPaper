@@ -251,7 +251,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::TEXT_CONTENT>::UndoAttr(Shape* s, wchar_t* const& value);
 	template UndoAttr<UNDO_OP::TEXT_LINE_SP>::UndoAttr(Shape* s, const float& value);
 	template UndoAttr<UNDO_OP::TEXT_MARGIN>::UndoAttr(Shape* s, const D2D1_SIZE_F& value);
-	template UndoAttr<UNDO_OP::TEXT_RANGE>::UndoAttr(Shape* s, const DWRITE_TEXT_RANGE& value);
+	template UndoAttr<UNDO_OP::TEXT_SELECTED>::UndoAttr(Shape* s, const DWRITE_TEXT_RANGE& value);
 
 	template <UNDO_OP U> UndoAttr<U>::UndoAttr(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
@@ -317,7 +317,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoAttr<UNDO_OP::TEXT_CONTENT>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::TEXT_LINE_SP>::UndoAttr(DataReader const& dt_reader);
 	template UndoAttr<UNDO_OP::TEXT_MARGIN>::UndoAttr(DataReader const& dt_reader);
-	template UndoAttr<UNDO_OP::TEXT_RANGE>::UndoAttr(DataReader const& dt_reader);
+	template UndoAttr<UNDO_OP::TEXT_SELECTED>::UndoAttr(DataReader const& dt_reader);
 
 	// 図形の属性値に値を格納する.
 	template <UNDO_OP U> void UndoAttr<U>::SET(Shape* const s, const U_TYPE<U>::type& value)
@@ -475,9 +475,9 @@ namespace winrt::GraphPaper::implementation
 		s->set_text_padding(value);
 	}
 
-	void UndoAttr<UNDO_OP::TEXT_RANGE>::SET(Shape* const s, const DWRITE_TEXT_RANGE& value)
+	void UndoAttr<UNDO_OP::TEXT_SELECTED>::SET(Shape* const s, const DWRITE_TEXT_RANGE& value)
 	{
-		s->set_text_range(value);
+		s->set_text_selected(value);
 	}
 
 	template <UNDO_OP U> bool UndoAttr<U>::GET(const Shape* s, U_TYPE<U>::type& value) noexcept
@@ -635,9 +635,9 @@ namespace winrt::GraphPaper::implementation
 		return s->get_text_padding(value);
 	}
 
-	bool UndoAttr<UNDO_OP::TEXT_RANGE>::GET(const Shape* s, DWRITE_TEXT_RANGE& value) noexcept
+	bool UndoAttr<UNDO_OP::TEXT_SELECTED>::GET(const Shape* s, DWRITE_TEXT_RANGE& value) noexcept
 	{
-		return s->get_text_range(value);
+		return s->get_text_selected(value);
 	}
 
 	// データライターに書き込む.

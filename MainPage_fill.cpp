@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		D2D1_COLOR_F value;
 		m_sample_sheet.get_fill_color(value);
 		const float val0 = value.r * COLOR_MAX;

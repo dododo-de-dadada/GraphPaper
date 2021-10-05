@@ -94,15 +94,32 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	// dx	描画環境
-	void ShapeRuler::draw(D2D_UI& dx)
+	// d2d	描画環境
+	void ShapeRuler::draw(D2D_UI& d2d)
 	{
 		if (m_d2d_stroke_style == nullptr) {
-			create_stroke_style(dx);
+			create_stroke_style(d2d);
 		}
-
+		if (m_dw_text_format == nullptr) {
+			wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
+			GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
+			const float font_size = min(m_font_size, m_grid_base + 1.0f);
+			winrt::check_hresult(
+				d2d.m_dwrite_factory->CreateTextFormat(
+					m_font_family,
+					static_cast<IDWriteFontCollection*>(nullptr),
+					DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL,
+					DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL,
+					DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
+					font_size,
+					locale_name,
+					m_dw_text_format.put()
+				)
+			);
+			m_dw_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		}
 		constexpr wchar_t* D[10] = { L"0", L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9" };
-		auto br = dx.m_solid_color_brush;
+		auto br = d2d.m_solid_color_brush;
 
 		const D2D1_RECT_F rect{
 			m_pos.x,
@@ -113,8 +130,8 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_fill_color)) {
 			// 塗りつぶし色が不透明な場合,
 			// 方形を塗りつぶす.
-			dx.m_solid_color_brush->SetColor(m_fill_color);
-			dx.m_d2d_context->FillRectangle(&rect, dx.m_solid_color_brush.get());
+			d2d.m_solid_color_brush->SetColor(m_fill_color);
+			d2d.m_d2d_context->FillRectangle(&rect, d2d.m_solid_color_brush.get());
 		}
 		if (is_opaque(m_stroke_color)) {
 			// 線枠の色が不透明な場合,
@@ -159,7 +176,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
 					xy ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
-				dx.m_d2d_context->DrawLine(p0, p1, br.get());
+				d2d.m_d2d_context->DrawLine(p0, p1, br.get());
 				// 目盛りの値を表示する.
 				const double x1 = x + f_size * 0.5;
 				const double x2 = x1 - f_size;
@@ -169,30 +186,64 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
 					xy ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
 				};
-				dx.m_d2d_context->DrawText(D[i % 10], 1u, m_dw_text_format.get(), t_rect, br.get());
+				d2d.m_d2d_context->DrawText(D[i % 10], 1u, m_dw_text_format.get(), t_rect, br.get());
 			}
 		}
-		if (is_selected() != true) {
-			// 選択フラグがない場合,
-			// 中断する.
-			return;
+		if (is_selected()) {
+			// 選択フラグが立っている場合,
+			// 選択されているなら基準部位を表示する.
+			D2D1_POINT_2F r_pos[4];	// 方形の頂点
+			r_pos[0] = m_pos;
+			r_pos[1].y = rect.top;
+			r_pos[1].x = rect.right;
+			r_pos[2].x = rect.right;
+			r_pos[2].y = rect.bottom;
+			r_pos[3].y = rect.bottom;
+			r_pos[3].x = rect.left;
+			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
+				anch_draw_rect(r_pos[i], d2d);
+				D2D1_POINT_2F r_mid;	// 方形の辺の中点
+				pt_avg(r_pos[j], r_pos[i], r_mid);
+				anch_draw_rect(r_mid, d2d);
+			}
 		}
-		// 選択フラグが立っている場合,
-		// 選択されているなら基準部位を表示する.
-		D2D1_POINT_2F r_pos[4];	// 方形の頂点
-		r_pos[0] = m_pos;
-		r_pos[1].y = rect.top;
-		r_pos[1].x = rect.right;
-		r_pos[2].x = rect.right;
-		r_pos[2].y = rect.bottom;
-		r_pos[3].y = rect.bottom;
-		r_pos[3].x = rect.left;
-		for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-			anch_draw_rect(r_pos[i], dx);
-			D2D1_POINT_2F r_mid;	// 方形の辺の中点
-			pt_avg(r_pos[j], r_pos[i], r_mid);
-			anch_draw_rect(r_mid, dx);
+	}
+
+	// 書体名を得る.
+	bool ShapeRuler::get_font_family(wchar_t*& value) const noexcept
+	{
+		value = m_font_family;
+		return true;
+	}
+
+	// 書体の大きさを得る.
+	bool ShapeRuler::get_font_size(float& value) const noexcept
+	{
+		value = m_font_size;
+		return true;
+	}
+
+	// 値を書体名に格納する.
+	bool ShapeRuler::set_font_family(wchar_t* const value) noexcept
+	{
+		// 値が書体名と同じか判定する.
+		if (!equal(m_font_family, value)) {
+			m_font_family = value;
+			m_dw_text_format = nullptr;
+			return true;
 		}
+		return false;
+	}
+
+	// 値を書体の大きさに格納する.
+	bool ShapeRuler::set_font_size(const float value) noexcept
+	{
+		if (m_font_size != value) {
+			m_font_size = value;
+			m_dw_text_format = nullptr;
+			return true;
+		}
+		return false;
 	}
 
 	// 図形を作成する.
@@ -201,61 +252,25 @@ namespace winrt::GraphPaper::implementation
 	// s_attr	属性
 	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr) :
 		ShapeRect::ShapeRect(b_pos, b_vec, s_attr),
-		m_grid_base(s_attr->m_grid_base)
+		m_grid_base(s_attr->m_grid_base),
+		m_font_family(s_attr->m_font_family),
+		m_font_size(min(s_attr->m_font_size, s_attr->m_grid_base + 1.0f))
+	{}
+
+	static wchar_t* dt_read_name(DataReader const& dt_reader)
 	{
-		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
-		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-		const float font_size = min(s_attr->m_font_size, s_attr->m_grid_base + 1.0f);
-		winrt::check_hresult(
-			//Shape::s_dx->m_dwrite_factory->CreateTextFormat(
-			Shape::s_dwrite_factory->CreateTextFormat(
-				s_attr->m_font_family,
-				static_cast<IDWriteFontCollection*>(nullptr),
-				s_attr->m_font_weight,
-				s_attr->m_font_style,
-				DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
-				font_size,
-				locale_name,
-				m_dw_text_format.put()
-			)
-		);
-		m_dw_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		wchar_t* name = nullptr;
+		dt_read(name, dt_reader);
+		return name;
 	}
 
 	// データリーダーから図形を読み込む.
 	ShapeRuler::ShapeRuler(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader),
-		m_grid_base(dt_reader.ReadSingle())
+		m_grid_base(dt_reader.ReadSingle()),
+		m_font_family(dt_read_name(dt_reader)),
+		m_font_size(dt_reader.ReadSingle())
 	{
-		// 書体名
-		wchar_t* f_family;
-		dt_read(f_family, dt_reader);
-		// 書体の大きさ
-		const auto f_size = dt_reader.ReadSingle();
-		// 字体
-		DWRITE_FONT_STYLE f_style;
-		f_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());
-		// 書体の太さ
-		DWRITE_FONT_WEIGHT f_weight;
-		f_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());
-
-		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
-		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-		winrt::check_hresult(
-			//Shape::s_dx->m_dwrite_factory->CreateTextFormat(
-			Shape::s_dwrite_factory->CreateTextFormat(
-				f_family,
-				static_cast<IDWriteFontCollection*>(nullptr),
-				f_weight,
-				f_style,
-				DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
-				min(f_size, m_grid_base + 1.0f),
-				locale_name,
-				m_dw_text_format.put()
-			)
-		);
-		delete[] f_family;
-		m_dw_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
 	}
 
 	// データライターに書き込む.
@@ -263,18 +278,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		ShapeRect::write(dt_writer);
 		dt_writer.WriteSingle(m_grid_base);
-		// 書体名
-		auto name_len = m_dw_text_format->GetFontFamilyNameLength() + 1;
-		wchar_t* const f_name = new wchar_t[name_len];
-		m_dw_text_format->GetFontFamilyName(f_name, name_len);
-		dt_write(f_name, dt_writer);
-		delete[] f_name;
-		// 書体の大きさ
+		dt_write(m_font_family, dt_writer);
 		dt_writer.WriteSingle(m_dw_text_format->GetFontSize());
-		// 字体
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dw_text_format->GetFontStyle()));
-		// 書体の太さ
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dw_text_format->GetFontWeight()));
 	}
 
 }

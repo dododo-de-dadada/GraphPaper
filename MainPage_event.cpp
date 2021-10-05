@@ -215,25 +215,25 @@ namespace winrt::GraphPaper::implementation
 		const auto t_draw = m_drawing_tool;
 		Shape* s;
 		if (t_draw == DRAWING_TOOL::RECT) {
-			s = new ShapeRect(b_pos, b_vec, &m_sheet_main);
+			s = new ShapeRect(b_pos, b_vec, &m_main_sheet);
 		}
 		else if (t_draw == DRAWING_TOOL::RRECT) {
-			s = new ShapeRRect(b_pos, b_vec, &m_sheet_main);
+			s = new ShapeRRect(b_pos, b_vec, &m_main_sheet);
 		}
 		else if (t_draw == DRAWING_TOOL::POLY) {
-			s = new ShapePoly(b_pos, b_vec, &m_sheet_main, m_drawing_poly_opt);
+			s = new ShapePoly(b_pos, b_vec, &m_main_sheet, m_drawing_poly_opt);
 		}
 		else if (t_draw == DRAWING_TOOL::ELLI) {
-			s = new ShapeElli(b_pos, b_vec, &m_sheet_main);
+			s = new ShapeElli(b_pos, b_vec, &m_main_sheet);
 		}
 		else if (t_draw == DRAWING_TOOL::LINE) {
-			s = new ShapeLineA(b_pos, b_vec, &m_sheet_main);
+			s = new ShapeLineA(b_pos, b_vec, &m_main_sheet);
 		}
 		else if (t_draw == DRAWING_TOOL::BEZI) {
-			s = new ShapeBezi(b_pos, b_vec, &m_sheet_main);
+			s = new ShapeBezi(b_pos, b_vec, &m_main_sheet);
 		}
 		else if (t_draw == DRAWING_TOOL::RULER) {
-			s = new ShapeRuler(b_pos, b_vec, &m_sheet_main);
+			s = new ShapeRuler(b_pos, b_vec, &m_main_sheet);
 		}
 		else {
 			return;
@@ -241,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
-		event_reduce_slist(m_sheet_main.m_shape_list, m_ustack_undo, m_ustack_redo);
+		event_reduce_slist(m_main_sheet.m_shape_list, m_ustack_undo, m_ustack_redo);
 		ustack_push_append(s);
 		ustack_push_select(s);
 		ustack_push_null();
@@ -264,15 +264,15 @@ namespace winrt::GraphPaper::implementation
 		ck_edit_text_frame().IsChecked(m_edit_text_frame);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit().Text().c_str());
-			auto s = new ShapeText(b_pos, b_vec, text, &m_sheet_main);
+			auto s = new ShapeText(b_pos, b_vec, text, &m_main_sheet);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
 			if (m_edit_text_frame) {
-				s->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
+				s->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			}
 			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
-			event_reduce_slist(m_sheet_main.m_shape_list, m_ustack_undo, m_ustack_redo);
+			event_reduce_slist(m_main_sheet.m_shape_list, m_ustack_undo, m_ustack_redo);
 			//unselect_all();
 			ustack_push_append(s);
 			ustack_push_select(s);
@@ -297,16 +297,16 @@ namespace winrt::GraphPaper::implementation
 	// 押された図形の変形を終了する.
 	void MainPage::event_finish_forming(void)
 	{
-		const auto g_snap = m_sheet_main.m_grid_snap;
+		const auto g_snap = m_main_sheet.m_grid_snap;
 		if (g_snap && m_misc_vert_stick >= FLT_MIN) {
 			// 現在の位置と, それを方眼の大きさに丸めた位置と間の距離を求める.
-			const auto s_scale = m_sheet_main.m_sheet_scale;
+			const auto s_scale = m_main_sheet.m_sheet_scale;
 			D2D1_POINT_2F g_pos;
 			D2D1_POINT_2F g_vec;
-			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0, g_pos);
+			pt_round(m_event_pos_curr, m_main_sheet.m_grid_base + 1.0, g_pos);
 			pt_sub(g_pos, m_event_pos_curr, g_vec);
 			float g_len = min(static_cast<float>(sqrt(pt_abs2(g_vec))), m_misc_vert_stick) / s_scale;
-			if (slist_find_vertex_closest(m_sheet_main.m_shape_list, m_event_pos_curr, g_len, g_pos)) {
+			if (slist_find_vertex_closest(m_main_sheet.m_shape_list, m_event_pos_curr, g_len, g_pos)) {
 				// 方眼との距離より近い頂点が見つかったなら, その距離に入れ替える.
 				pt_sub(g_pos, m_event_pos_curr, g_vec);
 				g_len = static_cast<float>(sqrt(pt_abs2(g_vec))) / s_scale;
@@ -318,12 +318,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (g_snap) {
-			pt_round(m_event_pos_curr, m_sheet_main.m_grid_base + 1.0, m_event_pos_curr);
+			pt_round(m_event_pos_curr, m_main_sheet.m_grid_base + 1.0, m_event_pos_curr);
 			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
 		}
 		else if (m_misc_vert_stick >= FLT_MIN) {
-			slist_find_vertex_closest(m_sheet_main.m_shape_list, m_event_pos_curr, m_misc_vert_stick / m_sheet_main.m_sheet_scale, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, m_misc_vert_stick / m_sheet_main.m_sheet_scale, m_image_keep_aspect);
+			slist_find_vertex_closest(m_main_sheet.m_shape_list, m_event_pos_curr, m_misc_vert_stick / m_main_sheet.m_sheet_scale, m_event_pos_curr);
+			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, m_misc_vert_stick / m_main_sheet.m_sheet_scale, m_image_keep_aspect);
 		}
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
@@ -336,28 +336,28 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_finish_moving(void)
 	{
 		// 方眼に合わせる, かつ頂点に合わせるか判定する.
-		if (m_sheet_main.m_grid_snap && m_misc_vert_stick >= FLT_MIN) {
+		if (m_main_sheet.m_grid_snap && m_misc_vert_stick >= FLT_MIN) {
 			D2D1_POINT_2F g_vec{};	// 方眼への差分
-			if (event_get_vec_nearby_grid(m_sheet_main.m_shape_list, m_sheet_main.m_grid_base + 1.0f, g_vec)) {
+			if (event_get_vec_nearby_grid(m_main_sheet.m_shape_list, m_main_sheet.m_grid_base + 1.0f, g_vec)) {
 				D2D1_POINT_2F v_vec{};	// 頂点への差分
-				if (event_get_vec_nearby_vert(m_sheet_main.m_shape_list, m_misc_vert_stick / m_sheet_main.m_sheet_scale, v_vec) && pt_abs2(v_vec) < pt_abs2(g_vec)) {
+				if (event_get_vec_nearby_vert(m_main_sheet.m_shape_list, m_misc_vert_stick / m_main_sheet.m_sheet_scale, v_vec) && pt_abs2(v_vec) < pt_abs2(g_vec)) {
 					g_vec = v_vec;
 				}
-				slist_move(m_sheet_main.m_shape_list, g_vec);
+				slist_move(m_main_sheet.m_shape_list, g_vec);
 			}
 		}
 		// 方眼に合わせる, かつ頂点に合わせないを判定する.
-		else if (m_sheet_main.m_grid_snap) {
+		else if (m_main_sheet.m_grid_snap) {
 			D2D1_POINT_2F g_vec{};	// 方眼との差分
-			if (event_get_vec_nearby_grid(m_sheet_main.m_shape_list, m_sheet_main.m_grid_base + 1.0f, g_vec)) {
-				slist_move(m_sheet_main.m_shape_list, g_vec);
+			if (event_get_vec_nearby_grid(m_main_sheet.m_shape_list, m_main_sheet.m_grid_base + 1.0f, g_vec)) {
+				slist_move(m_main_sheet.m_shape_list, g_vec);
 			}
 		} 
 		// 方眼に合わせない, かつ頂点に合わせるか判定する.
 		else if (m_misc_vert_stick >= FLT_MIN) {
 			D2D1_POINT_2F v_vec{};	// 頂点との差分
-			if (event_get_vec_nearby_vert(m_sheet_main.m_shape_list, m_misc_vert_stick / m_sheet_main.m_sheet_scale, v_vec)) {
-				slist_move(m_sheet_main.m_shape_list, v_vec);
+			if (event_get_vec_nearby_vert(m_main_sheet.m_shape_list, m_misc_vert_stick / m_main_sheet.m_sheet_scale, v_vec)) {
+				slist_move(m_main_sheet.m_shape_list, v_vec);
 			}
 		}
 		if (!ustack_pop_if_invalid()) {
@@ -398,8 +398,8 @@ namespace winrt::GraphPaper::implementation
 		// スワップチェーンパネル上でのポインターの位置を得て, 
 		// 用紙座標系に変換し, ポインターの現在位置に格納する.
 		D2D1_POINT_2F sheet_pos;
-		pt_add(m_sheet_min, sb_horz().Value(), sb_vert().Value(), sheet_pos);
-		pt_mul(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_sheet_main.m_sheet_scale, sheet_pos, m_event_pos_curr);
+		pt_add(m_main_min, sb_horz().Value(), sb_vert().Value(), sheet_pos);
+		pt_mul(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_main_sheet.m_sheet_scale, sheet_pos, m_event_pos_curr);
 	}
 
 	// ポインターが動いた.
@@ -437,7 +437,7 @@ namespace winrt::GraphPaper::implementation
 			// ポインターの現在位置と前回位置の差分を得る.
 			D2D1_POINT_2F d_vec;
 			pt_sub(m_event_pos_curr, m_event_pos_prev, d_vec);
-			slist_move(m_sheet_main.m_shape_list, d_vec);
+			slist_move(m_main_sheet.m_shape_list, d_vec);
 			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
 			sheet_draw();
@@ -556,7 +556,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_drawing_tool != DRAWING_TOOL::SELECT) {
 			return;
 		}
-		m_event_anch_pressed = slist_hit_test(m_sheet_main.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
+		m_event_anch_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
 		// 押されたのが図形の外側以外か判定する.
 		if (m_event_anch_pressed != ANCH_TYPE::ANCH_SHEET) {
 			// 状態が左ボタンが押された状態, または, 右ボタンが押されていてかつ押された図形が選択されてないか判定する.
@@ -746,13 +746,13 @@ namespace winrt::GraphPaper::implementation
 					//	ShapePoly::create_poly_by_bbox(m_event_pos_pressed, v_vec, m_drawing_poly_opt, v_pos, v_vec);
 					//	pt_add(m_event_pos_pressed, v_vec, m_event_pos_curr);
 					//}
-					const float d_lim = m_misc_vert_stick / m_sheet_main.m_sheet_scale;
-					const double g_len = max(m_sheet_main.m_grid_base + 1.0, 1.0);
-					event_released_snap_to_vertex(m_sheet_main.m_shape_list, box_type, d_lim, m_sheet_main.m_grid_snap, g_len, m_event_pos_pressed, m_event_pos_curr);
+					const float d_lim = m_misc_vert_stick / m_main_sheet.m_sheet_scale;
+					const double g_len = max(m_main_sheet.m_grid_base + 1.0, 1.0);
+					event_released_snap_to_vertex(m_main_sheet.m_shape_list, box_type, d_lim, m_main_sheet.m_grid_snap, g_len, m_event_pos_pressed, m_event_pos_curr);
 				}
-				else if (m_sheet_main.m_grid_snap) {
+				else if (m_main_sheet.m_grid_snap) {
 					// 押された位置よ離された位置を方眼の大きさで丸める.
-					const double g_len = max(m_sheet_main.m_grid_base + 1.0, 1.0);
+					const double g_len = max(m_main_sheet.m_grid_base + 1.0, 1.0);
 					pt_round(m_event_pos_pressed, g_len, m_event_pos_pressed);
 					pt_round(m_event_pos_curr, g_len, m_event_pos_curr);
 				}
@@ -793,13 +793,13 @@ namespace winrt::GraphPaper::implementation
 		if (m_drawing_tool != DRAWING_TOOL::SELECT) {
 			Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 		}
-		else if (!m_dx_mutex.try_lock()) {
+		else if (!m_d2d_mutex.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 		}
 		else {
 			Shape* s;
-			const auto anch = slist_hit_test(m_sheet_main.m_shape_list, m_event_pos_curr, s);
-			m_dx_mutex.unlock();
+			const auto anch = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_curr, s);
+			m_d2d_mutex.unlock();
 			if (anch == ANCH_TYPE::ANCH_SHEET) {
 				Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 			}
@@ -884,7 +884,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// 押された図形の属性値を用紙に格納する.
-			m_sheet_main.set_attr_to(m_event_shape_pressed);
+			m_main_sheet.set_attr_to(m_event_shape_pressed);
 			sheet_attr_is_checked();
 			// 押された図形の部位が内側か判定する.
 			if (m_event_anch_pressed == ANCH_TYPE::ANCH_FILL) {
@@ -925,7 +925,7 @@ namespace winrt::GraphPaper::implementation
 		else if (args.KeyModifiers() == VirtualKeyModifiers::Shift) {
 			// 横スクロール.
 			const int32_t delta = args.GetCurrentPoint(scp_sheet_panel()).Properties().MouseWheelDelta();
-			if (event_scroll_by_wheel_delta(sb_horz(), delta, m_sheet_main.m_sheet_scale)) {
+			if (event_scroll_by_wheel_delta(sb_horz(), delta, m_main_sheet.m_sheet_scale)) {
 				sheet_draw();
 				status_set_curs();
 			}
@@ -934,7 +934,7 @@ namespace winrt::GraphPaper::implementation
 		else if (args.KeyModifiers() == VirtualKeyModifiers::None) {
 			// 縦スクロール.
 			const int32_t delta = args.GetCurrentPoint(scp_sheet_panel()).Properties().MouseWheelDelta();
-			if (event_scroll_by_wheel_delta(sb_vert(), delta, m_sheet_main.m_sheet_scale)) {
+			if (event_scroll_by_wheel_delta(sb_vert(), delta, m_main_sheet.m_sheet_scale)) {
 				sheet_draw();
 				status_set_curs();
 			}

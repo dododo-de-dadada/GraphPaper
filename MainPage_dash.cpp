@@ -20,9 +20,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_sample_sheet.set_attr_to(&m_sheet_main);
+		m_sample_sheet.set_attr_to(&m_main_sheet);
 		DASH_PATT d_patt;
-		m_sheet_main.get_dash_patt(d_patt);
+		m_main_sheet.get_dash_patt(d_patt);
 
 		sample_slider_0().Maximum(MAX_VALUE);
 		sample_slider_0().TickFrequency(TICK_FREQ);
@@ -46,7 +46,7 @@ namespace winrt::GraphPaper::implementation
 		dash_slider_set_header<UNDO_OP::DASH_PATT, 3>(d_patt.m_[3]);
 
 		float s_width;
-		m_sheet_main.get_stroke_width(s_width);
+		m_main_sheet.get_stroke_width(s_width);
 
 		sample_slider_4().Maximum(MAX_VALUE);
 		sample_slider_4().TickFrequency(TICK_FREQ);
@@ -55,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 		dash_slider_set_header<UNDO_OP::STROKE_WIDTH, 4>(s_width);
 
 		D2D1_DASH_STYLE s_style;
-		m_sheet_main.get_dash_style(s_style);
+		m_main_sheet.get_dash_style(s_style);
 		sample_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? UI_VISIBLE : UI_COLLAPSED);
 		sample_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? UI_VISIBLE : UI_COLLAPSED);
 		sample_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
@@ -171,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::DASH_PATT) {
 			constexpr wchar_t* R[]{ L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap" };
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, m_sheet_main.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
 			if constexpr (S == 0) {
 				sample_slider_0().Header(box_value(text));
@@ -188,7 +188,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_sheet_dx.m_logical_dpi, m_sheet_main.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text{
 				ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf
 			};

@@ -43,11 +43,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::scroll_set(const double aw, const double ah)
 	{
 		constexpr double SB_SIZE = 16.0;
-		const double ss = m_sheet_main.m_sheet_scale;	// 用紙の表示倍率
+		const double ss = m_main_sheet.m_sheet_scale;	// 用紙の表示倍率
 		const double vw = aw / ss;	// 見えている部分の幅
 		const double vh = ah / ss;	// 見えている部分の高さ
-		const auto s_min = m_sheet_min;
-		const auto s_max = m_sheet_max;
+		const auto s_min = m_main_min;
+		const auto s_max = m_main_max;
 		const auto mw = static_cast<double>(s_max.x) - static_cast<double>(s_min.x) - vw;
 		const auto mh = static_cast<double>(s_max.y) - static_cast<double>(s_min.y) - vh;
 		const auto wgt0 = mw > 0.0;
@@ -99,8 +99,8 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::scroll_to(const Shape* s)
 	{
 		// スクロールビューアのビューポートの座標を, 用紙座標で求める.
-		const double ox = m_sheet_min.x;	// 原点 x
-		const double oy = m_sheet_min.y;	// 原点 y
+		const double ox = m_main_min.x;	// 原点 x
+		const double oy = m_main_min.y;	// 原点 y
 		const double ho = sb_horz().Value();	// 横のスクロール値
 		const double vo = sb_vert().Value();	// 縦のスクロール値
 		const double vw = sb_horz().ViewportSize();	// 用紙の幅
@@ -118,7 +118,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F r_min{};
 		D2D1_POINT_2F r_max{};
 		DWRITE_TEXT_RANGE t_range;
-		if (s->get_text_range(t_range) && t_range.length > 0) {
+		if (s->get_text_selected(t_range) && t_range.length > 0) {
 			const auto s_text = static_cast<const ShapeText*>(s);
 			const auto cnt = s_text->m_dw_selected_cnt;
 			const auto mtx = s_text->m_dw_selected_metrics;

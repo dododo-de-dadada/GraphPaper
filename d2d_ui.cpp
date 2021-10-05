@@ -674,7 +674,7 @@ namespace winrt::GraphPaper::implementation
 			)
 		);
 		// D2D コンテキストをもとに, 図形の色ブラシ, 部位の色ブラシ,
-		// 補助線の色ブラシ, 文字範囲の文字の色ブラシ, 補助線の形式,
+		// 補助線の色ブラシ, 選択された文字範囲の色ブラシ, 補助線の形式,
 		// 描画状態の保存ブロックを作成する.
 		m_solid_color_brush = nullptr;
 		winrt::check_hresult(

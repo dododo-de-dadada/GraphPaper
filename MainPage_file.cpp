@@ -211,14 +211,14 @@ namespace winrt::GraphPaper::implementation
 		sheet_attr_is_checked();
 
 		wchar_t* unavailable_font;	// 書体名
-		if (slist_test_font(m_sheet_main.m_shape_list, unavailable_font) != true) {
+		if (slist_test_font(m_main_sheet.m_shape_list, unavailable_font) != true) {
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}
 
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
-			if (m_sheet_main.m_shape_list.empty()) {
+			if (m_main_sheet.m_shape_list.empty()) {
 				summary_close_click(nullptr, nullptr);
 			}
 			else if (lv_summary_list() != nullptr) {
@@ -275,7 +275,7 @@ namespace winrt::GraphPaper::implementation
 			SoftwareBitmap bitmap{ SoftwareBitmap::Convert(co_await decoder.GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8) };
 
 			// 用紙の表示された部分の中心の位置を求める.
-			const double scale = m_sheet_main.m_sheet_scale;
+			const double scale = m_main_sheet.m_sheet_scale;
 			const double img_w = bitmap.PixelWidth();
 			const double img_h = bitmap.PixelHeight();
 			const D2D1_POINT_2F center_pos{
@@ -283,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>((win_y + (win_h - img_h) * 0.5) / scale)
 			};
 			const D2D1_SIZE_F view_size{ static_cast<FLOAT>(img_w), static_cast<FLOAT>(img_h) };
-			ShapeImage* img = new ShapeImage(center_pos, view_size, bitmap, m_sheet_main.m_image_opac);
+			ShapeImage* img = new ShapeImage(center_pos, view_size, bitmap, m_main_sheet.m_image_opac);
 #if (_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -293,11 +293,11 @@ namespace winrt::GraphPaper::implementation
 			stream.Close();
 			stream = nullptr;
 
-			m_dx_mutex.lock();
+			m_d2d_mutex.lock();
 			ustack_push_append(img);
 			ustack_push_select(img);
 			ustack_push_null();
-			m_dx_mutex.unlock();
+			m_d2d_mutex.unlock();
 			co_await winrt::resume_foreground(Dispatcher());
 
 			ustack_is_enable();
@@ -361,14 +361,14 @@ namespace winrt::GraphPaper::implementation
 	{
 		HRESULT ok = E_FAIL;
 		winrt::apartment_context context;
-		m_dx_mutex.lock();
+		m_d2d_mutex.lock();
 		try {
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_close_click(nullptr, nullptr);
 			}
 			ustack_clear();
-			slist_clear(m_sheet_main.m_shape_list);
+			slist_clear(m_main_sheet.m_shape_list);
 
 			const auto& ra_stream{ co_await s_file.OpenAsync(FileAccessMode::Read) };
 			auto dt_reader{ DataReader(ra_stream.GetInputStreamAt(0)) };
@@ -394,19 +394,19 @@ namespace winrt::GraphPaper::implementation
 			const auto s_atom = dt_reader.ReadBoolean();
 			m_summary_atomic.store(s_atom, std::memory_order_release);
 
-			m_sheet_main.read(dt_reader);
+			m_main_sheet.read(dt_reader);
 
-			m_sheet_main.m_grid_base = max(m_sheet_main.m_grid_base, 0.0f);
-			m_sheet_main.m_sheet_scale = min(max(m_sheet_main.m_sheet_scale, 0.25f), 4.0f);
-			m_sheet_main.m_sheet_size.width = max(min(m_sheet_main.m_sheet_size.width, sheet_size_max()), 1.0F);
-			m_sheet_main.m_sheet_size.height = max(min(m_sheet_main.m_sheet_size.height, sheet_size_max()), 1.0F);
+			m_main_sheet.m_grid_base = max(m_main_sheet.m_grid_base, 0.0f);
+			m_main_sheet.m_sheet_scale = min(max(m_main_sheet.m_sheet_scale, 0.25f), 4.0f);
+			m_main_sheet.m_sheet_size.width = max(min(m_main_sheet.m_sheet_size.width, sheet_size_max()), 1.0F);
+			m_main_sheet.m_sheet_size.height = max(min(m_main_sheet.m_sheet_size.height, sheet_size_max()), 1.0F);
 
 #if defined(_DEBUG)
 			if (debug_leak_cnt != 0) {
 				co_await winrt::resume_foreground(Dispatcher());
 				message_show(ICON_ALERT, DEBUG_MSG, {});
 				co_await context;
-				m_dx_mutex.unlock();
+				m_d2d_mutex.unlock();
 				co_return ok;
 			}
 #endif
@@ -415,7 +415,7 @@ namespace winrt::GraphPaper::implementation
 				ok = S_OK;
 			}
 			else {
-				if (slist_read(m_sheet_main.m_shape_list, dt_reader)) {
+				if (slist_read(m_main_sheet.m_shape_list, dt_reader)) {
 					// 中断されたか判定する.
 					if constexpr (SUSPEND) {
 						ustack_read(dt_reader);
@@ -429,7 +429,7 @@ namespace winrt::GraphPaper::implementation
 		catch (winrt::hresult_error const& e) {
 			ok = e.code();
 		}
-		m_dx_mutex.unlock();
+		m_d2d_mutex.unlock();
 		if (ok != S_OK) {
 			co_await winrt::resume_foreground(Dispatcher());
 			message_show(ICON_ALERT, ERR_READ, s_file.Path());
@@ -636,7 +636,7 @@ namespace winrt::GraphPaper::implementation
 			if (s_file != nullptr) {
 				// ファイルタイプが SVG か判定する.
 				if (s_file.FileType() == EXT_SVG) {
-					//for (const auto s : m_sheet_main.m_shape_list) {
+					//for (const auto s : m_main_sheet.m_shape_list) {
 					//	if (s->is_deleted() || typeid(*s) != typeid(ShapeImage)) {
 					//		continue;
 					//	}
@@ -883,15 +883,15 @@ namespace winrt::GraphPaper::implementation
 
 			dt_writer.WriteBoolean(summary_is_visible());
 
-			m_sheet_main.write(dt_writer);
+			m_main_sheet.write(dt_writer);
 			if constexpr (SUSPEND) {
 				// 消去された図形も含めて書き込む.
-				slist_write<!REDUCE>(m_sheet_main.m_shape_list, dt_writer);
+				slist_write<!REDUCE>(m_main_sheet.m_shape_list, dt_writer);
 				ustack_write(dt_writer);
 			}
 			else if constexpr (!SETTING) {
 				// 消去された図形は省いて書き込む.
-				slist_write<REDUCE>(m_sheet_main.m_shape_list, dt_writer);
+				slist_write<REDUCE>(m_main_sheet.m_shape_list, dt_writer);
 			}
 			ra_stream.Size(ra_stream.Position());
 			co_await dt_writer.StoreAsync();
@@ -968,7 +968,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			dt_write_svg(DOCTYPE, dt_writer);
 			// データライターに SVG 開始タグを書き込む.
-			file_write_svg_tag(m_sheet_main.m_sheet_size, m_sheet_main.m_sheet_color, m_sheet_dx.m_logical_dpi, m_misc_len_unit, dt_writer);
+			file_write_svg_tag(m_main_sheet.m_sheet_size, m_main_sheet.m_sheet_color, m_main_d2d.m_logical_dpi, m_misc_len_unit, dt_writer);
 			// 日時 (注釈) を書き込む.
 			//char buf[64];
 			//const auto t = time(nullptr);
@@ -977,7 +977,7 @@ namespace winrt::GraphPaper::implementation
 			//strftime(buf, 64, "<!-- %m/%d/%Y %H:%M:%S -->" SVG_NEW_LINE, &tm);
 			//dt_write_svg(buf, dt_writer);
 			// 図形リストの各図形について以下を繰り返す.
-			for (auto s : m_sheet_main.m_shape_list) {
+			for (auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}

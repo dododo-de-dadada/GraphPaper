@@ -43,13 +43,13 @@ namespace winrt::GraphPaper::implementation
 		T it_end;	// 終端
 		T it_src;	// 交換元反復子
 		if constexpr (std::is_same<T, BRING_FORWARD>::value) {
-			it_end = m_sheet_main.m_shape_list.rend();
-			it_src = m_sheet_main.m_shape_list.rbegin();
+			it_end = m_main_sheet.m_shape_list.rend();
+			it_src = m_main_sheet.m_shape_list.rbegin();
 		}
 		else {
 			if constexpr (std::is_same<T, SEND_BACKWARD>::value) {
-				it_end = m_sheet_main.m_shape_list.end();
-				it_src = m_sheet_main.m_shape_list.begin();
+				it_end = m_main_sheet.m_shape_list.end();
+				it_src = m_main_sheet.m_shape_list.begin();
 			}
 			else {
 				throw winrt::hresult_not_implemented();
@@ -126,13 +126,13 @@ namespace winrt::GraphPaper::implementation
 	template<bool B> void MainPage::arrange_to(void)
 	{
 		SHAPE_LIST slist;
-		slist_selected<Shape>(m_sheet_main.m_shape_list, slist);
+		slist_selected<Shape>(m_main_sheet.m_shape_list, slist);
 		if (slist.size() == 0) {
 			return;
 		}
 		if constexpr (B) {
 			uint32_t i = 0;
-			Shape* const s = slist_front(m_sheet_main.m_shape_list);
+			Shape* const s = slist_front(m_main_sheet.m_shape_list);
 			for (Shape* const t : slist) {
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {

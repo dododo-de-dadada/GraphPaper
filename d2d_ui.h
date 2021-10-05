@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形表示用の D2D オブジェクト
 		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block{ nullptr };	// 描画状態の保存ブロック
-		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush{ nullptr };	// 文字範囲の文字色ブラシ
+		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush{ nullptr };	// 選択された文字範囲の色ブラシ
 		winrt::com_ptr<ID2D1SolidColorBrush> m_solid_color_brush{ nullptr };	// 図形の色ブラシ
 
 		// 描画環境を破棄する.
@@ -106,7 +106,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		//------------------------------
-		// shape_dx.cpp
+		// d2d_ui.cpp
 		//------------------------------
 
 		// ウィンドウサイズ依存のリソースを初期化する.

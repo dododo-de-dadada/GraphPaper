@@ -173,7 +173,7 @@ namespace winrt::GraphPaper::implementation
 			summary_close_click(nullptr, nullptr);
 		}
 		ustack_clear();
-		slist_clear(m_sheet_main.m_shape_list);
+		slist_clear(m_main_sheet.m_shape_list);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			message_show(ICON_ALERT, DEBUG_MSG, {});
@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 		// 本来なら DirectX をコードビハインドでリリースしたいところだが,
 		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがあるため,
 		// Trim を呼び出すだけにする.
-		m_sheet_dx.Trim();
+		m_main_d2d.Trim();
 		m_sample_dx.Trim();
 
 		// アプリケーションを終了する.
@@ -256,14 +256,14 @@ namespace winrt::GraphPaper::implementation
 		// D2D/DWRITE ファクトリを図形クラスに, 
 		// 図形リストと用紙をアンドゥ操作に格納する.
 		{
-			//Shape::s_dx = &m_sheet_dx;
-			Shape::s_d2d_factory = m_sheet_dx.m_d2d_factory.get();
-			Shape::s_dwrite_factory = m_sheet_dx.m_dwrite_factory.get();
+			//Shape::s_dx = &m_main_d2d;
+			//Shape::s_d2d_factory = m_main_d2d.m_d2d_factory.get();
+			//Shape::s_dwrite_factory = m_main_d2d.m_dwrite_factory.get();
 			Shape::m_aux_style = nullptr;
 			winrt::check_hresult(
-				m_sheet_dx.m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
+				m_main_d2d.m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
 			);
-			Undo::set(&m_sheet_main.m_shape_list, &m_sheet_main);
+			Undo::set(&m_main_sheet.m_shape_list, &m_main_sheet);
 		}
 
 		// クリックの判定時間と判定距離をシステムから得る.
@@ -341,7 +341,7 @@ namespace winrt::GraphPaper::implementation
 			summary_close_click(nullptr, nullptr);
 		}
 		ustack_clear();
-		slist_clear(m_sheet_main.m_shape_list);
+		slist_clear(m_main_sheet.m_shape_list);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			// 「メモリリーク」メッセージダイアログを表示する.
@@ -350,9 +350,9 @@ namespace winrt::GraphPaper::implementation
 #endif
 		ShapeText::release_available_fonts();
 
-		ShapeText::set_available_fonts();
+		ShapeText::set_available_fonts(m_main_d2d);
 
-		// 背景色, 前景色, 文字範囲の背景色, 文字範囲の文字色をリソースから得る.
+		// 背景色, 前景色, 選択された文字範囲の背景色, 文字色をリソースから得る.
 		{
 			const IInspectable sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
 			const IInspectable sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
@@ -378,8 +378,8 @@ namespace winrt::GraphPaper::implementation
 			/*
 			Shape::m_range_background = Shape::m_range_background;
 			Shape::m_range_foreground = Shape::m_range_foreground;
-			Shape::m_default_background = m_sheet_dx.m_default_background;
-			Shape::m_default_foreground = m_sheet_dx.m_default_foreground;
+			Shape::m_default_background = m_main_d2d.m_default_background;
+			Shape::m_default_foreground = m_main_d2d.m_default_foreground;
 			*/
 		}
 
@@ -394,8 +394,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 用紙の左上位置と右下位置を初期化する.
 		{
-			m_sheet_min = D2D1_POINT_2F{ 0.0F, 0.0F };
-			m_sheet_max = D2D1_POINT_2F{ m_sheet_main.m_sheet_size.width, m_sheet_main.m_sheet_size.height };
+			m_main_min = D2D1_POINT_2F{ 0.0F, 0.0F };
+			m_main_max = D2D1_POINT_2F{ m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height };
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();

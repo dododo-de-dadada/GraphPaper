@@ -191,16 +191,16 @@ namespace winrt::GraphPaper::implementation
 		const double wy = wp.Y;
 		const double ty = tp.Y;
 		const double by = wb.Y;
-		const double px = m_sheet_min.x;
-		const double py = m_sheet_min.y;
-		const double ps = m_sheet_main.m_sheet_scale;
+		const double px = m_main_min.x;
+		const double py = m_main_min.y;
+		const double ps = m_main_sheet.m_sheet_scale;
 		const float fx = static_cast<FLOAT>((wx - bx - tx) / ps + sx + px);
 		const float fy = static_cast<FLOAT>((wy - by - ty) / ps + sy + py);
-		const float g_len = m_sheet_main.m_grid_base + 1.0f;
+		const float g_len = m_main_sheet.m_grid_base + 1.0f;
 		wchar_t buf_x[32];
 		wchar_t buf_y[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, fx, m_sheet_dx.m_logical_dpi, g_len, buf_x);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, fy, m_sheet_dx.m_logical_dpi, g_len, buf_y);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, fx, m_main_d2d.m_logical_dpi, g_len, buf_x);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, fy, m_main_d2d.m_logical_dpi, g_len, buf_y);
 		tk_misc_status_bar_pos_x().Text(winrt::hstring{ L"X:" } + buf_x);
 		tk_misc_status_bar_pos_y().Text(winrt::hstring{ L"Y:" } + buf_y);
 	}
@@ -248,20 +248,20 @@ namespace winrt::GraphPaper::implementation
 	// 方眼の大きさをステータスバーに格納する.
 	void MainPage::status_set_grid(void)
 	{
-		const float g_len = m_sheet_main.m_grid_base + 1.0f;
+		const float g_len = m_main_sheet.m_grid_base + 1.0f;
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, g_len, m_sheet_dx.m_logical_dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, g_len, m_main_d2d.m_logical_dpi, g_len, buf);
 		tk_misc_status_grid().Text(winrt::hstring{ L"G:" } +buf);
 	}
 
 	// 用紙の大きさをステータスバーに格納する.
 	void MainPage::status_set_sheet(void)
 	{
-		const float g_len = m_sheet_main.m_grid_base + 1.0f;
+		const float g_len = m_main_sheet.m_grid_base + 1.0f;
 		wchar_t buf_w[32];
 		wchar_t buf_h[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_sheet_main.m_sheet_size.width, m_sheet_dx.m_logical_dpi, g_len, buf_w);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_sheet_main.m_sheet_size.height, m_sheet_dx.m_logical_dpi, g_len, buf_h);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_len, buf_w);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_len, buf_h);
 		tk_misc_status_bar_width().Text(winrt::hstring{ L"W:" } + buf_w);
 		tk_misc_status_bar_height().Text(winrt::hstring{ L"H:" } + buf_h);
 	}
@@ -292,7 +292,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::status_set_zoom(void)
 	{
 		wchar_t buf[32];
-		swprintf_s(buf, 31, FMT_ZOOM, m_sheet_main.m_sheet_scale * 100.0);
+		swprintf_s(buf, 31, FMT_ZOOM, m_main_sheet.m_sheet_scale * 100.0);
 		tk_misc_status_zoom().Text(winrt::hstring{ L"Z:" } + buf);
 	}
 

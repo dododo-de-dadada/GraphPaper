@@ -175,8 +175,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::TEXT_MARGIN:
 			u = new UndoAttr<UNDO_OP::TEXT_MARGIN>(dt_reader);
 			break;
-		case UNDO_OP::TEXT_RANGE:
-			u = new UndoAttr<UNDO_OP::TEXT_RANGE>(dt_reader);
+		case UNDO_OP::TEXT_SELECTED:
+			u = new UndoAttr<UNDO_OP::TEXT_SELECTED>(dt_reader);
 			break;
 		default:
 			throw winrt::hresult_invalid_argument();
@@ -316,7 +316,7 @@ namespace winrt::GraphPaper::implementation
 		if (u_type == typeid(UndoAttr<UNDO_OP::ARROW_STYLE>)) {
 			// 線枠メニューの「矢じるしの種類」に印をつける.
 			ARROW_STYLE value;
-			m_sheet_main.get_arrow_style(value);
+			m_main_sheet.get_arrow_style(value);
 			arrow_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_BASE>)) {
@@ -326,18 +326,18 @@ namespace winrt::GraphPaper::implementation
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_EMPH>)) {
 			// 用紙メニューの「方眼の強調」に印をつける.
 			GRID_EMPH value;
-			m_sheet_main.get_grid_emph(value);
+			m_main_sheet.get_grid_emph(value);
 			grid_emph_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_SHOW>)) {
 			GRID_SHOW value;
-			m_sheet_main.get_grid_show(value);
+			m_main_sheet.get_grid_show(value);
 			grid_show_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
 			DWRITE_FONT_STYLE value;
-			m_sheet_main.get_font_style(value);
+			m_main_sheet.get_font_style(value);
 			font_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::SHEET_SIZE>)) {
@@ -346,32 +346,32 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP>)) {
 			CAP_STYLE value;
-			m_sheet_main.get_stroke_cap(value);
+			m_main_sheet.get_stroke_cap(value);
 			cap_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::DASH_CAP>)) {
 			D2D1_CAP_STYLE value;
-			m_sheet_main.get_dash_cap(value);
+			m_main_sheet.get_dash_cap(value);
 			//cap_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::DASH_STYLE>)) {
 			D2D1_DASH_STYLE value;
-			m_sheet_main.get_dash_style(value);
+			m_main_sheet.get_dash_style(value);
 			dash_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::JOIN_STYLE>)) {
 			D2D1_LINE_JOIN value;
-			m_sheet_main.get_join_style(value);
+			m_main_sheet.get_join_style(value);
 			join_style_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT value;
-			m_sheet_main.get_text_align_t(value);
+			m_main_sheet.get_text_align_t(value);
 			text_align_t_is_checked(value);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_P>)) {
 			DWRITE_PARAGRAPH_ALIGNMENT value;
-			m_sheet_main.get_text_align_p(value);
+			m_main_sheet.get_text_align_p(value);
 			text_align_p_is_checked(value);
 		}
 	}
@@ -444,7 +444,7 @@ namespace winrt::GraphPaper::implementation
 	// all	図形すべての場合 true, 選択された図形のみの場合 false
 	void MainPage::ustack_push_move(const D2D1_POINT_2F d_vec, const bool all)
 	{
-		for (auto s : m_sheet_main.m_shape_list) {
+		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || (!all && !s->is_selected())) {
 				continue;
 			}
@@ -582,9 +582,9 @@ namespace winrt::GraphPaper::implementation
 	template<UNDO_OP U, typename T> bool MainPage::ustack_push_set(T const& value)
 	{
 		// 格納する型 T は明示しなくても引数の型から推定できる
-		m_ustack_undo.push_back(new UndoAttr<U>(&m_sheet_main, value));
+		m_ustack_undo.push_back(new UndoAttr<U>(&m_main_sheet, value));
 		auto flag = false;
-		for (auto s : m_sheet_main.m_shape_list) {
+		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
@@ -642,7 +642,7 @@ namespace winrt::GraphPaper::implementation
 	// s	操作する図形
 	// value	文字範囲の値
 	// 戻り値	なし
-	template<> void MainPage::ustack_push_set<UNDO_OP::TEXT_RANGE, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& value)
+	template<> void MainPage::ustack_push_set<UNDO_OP::TEXT_SELECTED, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& value)
 	{
 		auto flag = false;
 		// 元に戻す操作スタックの各操作について
@@ -652,7 +652,7 @@ namespace winrt::GraphPaper::implementation
 				// 操作がヌルの場合,
 				break;
 			}
-			else if (typeid(*u) != typeid(UndoAttr<UNDO_OP::TEXT_RANGE>)) {
+			else if (typeid(*u) != typeid(UndoAttr<UNDO_OP::TEXT_SELECTED>)) {
 				// 操作が文字範囲の選択する操作でない場合,
 				if (typeid(*u) != typeid(UndoSelect)) {
 					// 操作が図形の選択を反転する操作でない場合,
@@ -664,13 +664,13 @@ namespace winrt::GraphPaper::implementation
 			else if (u->m_shape == s) {
 				// 操作する図形が引数の図形と同じ場合,
 				// 図形を直接操作してスタックには積まないようにする.
-				s->set_text_range(value);
+				s->set_text_selected(value);
 				flag = true;
 				break;
 			}
 		}
 		if (flag != true) {
-			m_ustack_undo.push_back(new UndoAttr<UNDO_OP::TEXT_RANGE>(s, value));
+			m_ustack_undo.push_back(new UndoAttr<UNDO_OP::TEXT_SELECTED>(s, value));
 		}
 
 	}

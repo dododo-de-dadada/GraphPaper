@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		// 選択された図形のリストを得る.
 		SHAPE_LIST list_selected;
-		slist_selected<Shape>(m_sheet_main.m_shape_list, list_selected);
+		slist_selected<Shape>(m_main_sheet.m_shape_list, list_selected);
 		// リストから降順に, 最初に見つかった文字列図形の文字列, あるいは画像図形の画像を得る.
 		wchar_t* txt = nullptr;
 		RandomAccessStreamReference img_ref = nullptr;
@@ -129,9 +129,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 選択された図形のリストを得る.
 		SHAPE_LIST list_selected;
-		slist_selected<Shape>(m_sheet_main.m_shape_list, list_selected);
+		slist_selected<Shape>(m_main_sheet.m_shape_list, list_selected);
 		// リストの各図形について以下を繰り返す.
-		m_dx_mutex.lock();
+		m_d2d_mutex.lock();
 		for (auto s : list_selected) {
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
@@ -141,7 +141,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_remove(s);
 		}
 		ustack_push_null();
-		m_dx_mutex.unlock();
+		m_d2d_mutex.unlock();
 
 		xcvd_is_enabled();
 		sheet_update_bbox();
@@ -167,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
 		slist_count(
-			m_sheet_main.m_shape_list,
+			m_main_sheet.m_shape_list,
 			undeleted_cnt,
 			selected_cnt,
 			selected_group_cnt,
@@ -255,7 +255,7 @@ namespace winrt::GraphPaper::implementation
 				// データリーダーから貼り付けリストを読み込み, それが空でないか判定する.
 				SHAPE_LIST slist_pasted;	// 貼り付けリスト
 				if (slist_read(slist_pasted, dt_reader) && !slist_pasted.empty()) {
-					m_dx_mutex.lock();
+					m_d2d_mutex.lock();
 					// 図形リストの中の図形の選択をすべて解除する.
 					unselect_all();
 					// 得られたリストの各図形について以下を繰り返す.
@@ -268,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 						sheet_update_bbox(s);
 					}
 					ustack_push_null();
-					m_dx_mutex.unlock();
+					m_d2d_mutex.unlock();
 					slist_pasted.clear();
 					xcvd_is_enabled();
 					sheet_panle_size();
@@ -296,33 +296,33 @@ namespace winrt::GraphPaper::implementation
 			unselect_all();
 
 			// パネルの大きさで文字列図形を作成する,.
-			const float scale = m_sheet_main.m_sheet_scale;
+			const float scale = m_main_sheet.m_sheet_scale;
 			const float win_x = static_cast<float>(sb_horz().Value());
 			const float win_y = static_cast<float>(sb_vert().Value());
 			const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
 			const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
-			const float min_x = m_sheet_min.x;
-			const float min_y = m_sheet_min.y;
-			auto t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w / scale, win_h / scale }, wchar_cpy(text.c_str()), &m_sheet_main);
+			const float min_x = m_main_min.x;
+			const float min_y = m_main_min.y;
+			auto t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w / scale, win_h / scale }, wchar_cpy(text.c_str()), &m_main_sheet);
 #if (_DEBUG)
 			debug_leak_cnt++;
 #endif
 			// 枠の大きさを文字列に合わせる.
-			t->adjust_bbox(m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0f : 0.0f);
+			t->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			// パネルの中央になるよう左上位置を求める.
 			D2D1_POINT_2F pos{
 				static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - t->m_vec[0].x * 0.5),
 				static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - t->m_vec[0].y * 0.5)
 			};
-			const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
-			const float vert_stick = m_misc_vert_stick / m_sheet_main.m_sheet_scale;
-			xcvd_paste_pos(pos, /*<---*/m_sheet_main.m_shape_list, grid_len, vert_stick);
+			const double grid_len = (m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0 : 0.0);
+			const float vert_stick = m_misc_vert_stick / m_main_sheet.m_sheet_scale;
+			xcvd_paste_pos(pos, /*<---*/m_main_sheet.m_shape_list, grid_len, vert_stick);
 			t->set_pos_start(pos);
-			m_dx_mutex.lock();
+			m_d2d_mutex.lock();
 			ustack_push_append(t);
 			ustack_push_select(t);
 			ustack_push_null();
-			m_dx_mutex.unlock();
+			m_d2d_mutex.unlock();
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_append(t);
@@ -384,8 +384,8 @@ namespace winrt::GraphPaper::implementation
 		const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
 		const float win_x = static_cast<float>(sb_horz().Value());
 		const float win_y = static_cast<float>(sb_vert().Value());
-		const float min_x = m_sheet_min.x;
-		const float min_y = m_sheet_min.y;
+		const float min_x = m_main_min.x;
+		const float min_y = m_main_min.y;
 
 		// resume_background しないと GetBitmapAsync が失敗することがある.
 		co_await winrt::resume_background();
@@ -400,7 +400,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形の大きさは元画像と同じにする.
 		const float img_w = static_cast<float>(bmp.PixelWidth());
 		const float img_h = static_cast<float>(bmp.PixelHeight());
-		const float scale = m_sheet_main.m_sheet_scale;
+		const float scale = m_main_sheet.m_sheet_scale;
 		D2D1_POINT_2F pos{
 			static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - img_w * 0.5),
 			static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - img_h * 0.5)
@@ -420,16 +420,16 @@ namespace winrt::GraphPaper::implementation
 		stream = nullptr;
 		reference = nullptr;
 
-		const double grid_len = (m_sheet_main.m_grid_snap ? m_sheet_main.m_grid_base + 1.0 : 0.0);
-		const float vert_stick = m_misc_vert_stick / m_sheet_main.m_sheet_scale;
-		xcvd_paste_pos(pos, /*<---*/m_sheet_main.m_shape_list, grid_len, vert_stick);
+		const double grid_len = (m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0 : 0.0);
+		const float vert_stick = m_misc_vert_stick / m_main_sheet.m_sheet_scale;
+		xcvd_paste_pos(pos, /*<---*/m_main_sheet.m_shape_list, grid_len, vert_stick);
 		img->set_pos_start(pos);
 
-		m_dx_mutex.lock();
+		m_d2d_mutex.lock();
 		ustack_push_append(img);
 		ustack_push_select(img);
 		ustack_push_null();
-		m_dx_mutex.unlock();
+		m_d2d_mutex.unlock();
 		co_await winrt::resume_foreground(Dispatcher());
 		ustack_is_enable();
 		// 一覧が表示されてるか判定する.
