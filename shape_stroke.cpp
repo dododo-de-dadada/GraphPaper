@@ -5,6 +5,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	// D2D ストローク特性を作成する.
 	static void create_stroke_style(ID2D1Factory3* const d_factory, const CAP_STYLE& c_style, const D2D1_CAP_STYLE d_cap, D2D1_DASH_STYLE d_style, const DASH_PATT& d_patt, const D2D1_LINE_JOIN j_style, const float j_limit, const float s_width, ID2D1StrokeStyle** s_style);
 

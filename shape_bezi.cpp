@@ -9,6 +9,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	// セグメントを区切る助変数の値
 	constexpr double T0 = 0.0;
 	constexpr double T1 = 1.0 / 3.0;

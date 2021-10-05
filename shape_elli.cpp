@@ -9,6 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	// ê}å`Çï\é¶Ç∑ÇÈ.
 	void ShapeElli::draw(D2D_UI& dx)
 	{

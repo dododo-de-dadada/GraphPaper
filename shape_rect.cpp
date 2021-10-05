@@ -6,6 +6,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	// }Œ`‚ğ•\¦‚·‚é.
 	// dx	•`‰æŠÂ‹«
 	void ShapeRect::draw(D2D_UI& dx)

@@ -7,6 +7,9 @@
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	// データリーダーから矢じるしの寸法を読み込む.
 	void dt_read(ARROW_SIZE& value, DataReader const& dt_reader)
 	{

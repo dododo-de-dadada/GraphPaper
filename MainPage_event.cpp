@@ -298,14 +298,14 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_finish_forming(void)
 	{
 		const auto g_snap = m_main_sheet.m_grid_snap;
-		if (g_snap && m_misc_vert_stick >= FLT_MIN) {
+		if (g_snap && m_vert_stick >= FLT_MIN) {
 			// 現在の位置と, それを方眼の大きさに丸めた位置と間の距離を求める.
 			const auto s_scale = m_main_sheet.m_sheet_scale;
 			D2D1_POINT_2F g_pos;
 			D2D1_POINT_2F g_vec;
 			pt_round(m_event_pos_curr, m_main_sheet.m_grid_base + 1.0, g_pos);
 			pt_sub(g_pos, m_event_pos_curr, g_vec);
-			float g_len = min(static_cast<float>(sqrt(pt_abs2(g_vec))), m_misc_vert_stick) / s_scale;
+			float g_len = min(static_cast<float>(sqrt(pt_abs2(g_vec))), m_vert_stick) / s_scale;
 			if (slist_find_vertex_closest(m_main_sheet.m_shape_list, m_event_pos_curr, g_len, g_pos)) {
 				// 方眼との距離より近い頂点が見つかったなら, その距離に入れ替える.
 				pt_sub(g_pos, m_event_pos_curr, g_vec);
@@ -321,9 +321,9 @@ namespace winrt::GraphPaper::implementation
 			pt_round(m_event_pos_curr, m_main_sheet.m_grid_base + 1.0, m_event_pos_curr);
 			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
 		}
-		else if (m_misc_vert_stick >= FLT_MIN) {
-			slist_find_vertex_closest(m_main_sheet.m_shape_list, m_event_pos_curr, m_misc_vert_stick / m_main_sheet.m_sheet_scale, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, m_misc_vert_stick / m_main_sheet.m_sheet_scale, m_image_keep_aspect);
+		else if (m_vert_stick >= FLT_MIN) {
+			slist_find_vertex_closest(m_main_sheet.m_shape_list, m_event_pos_curr, m_vert_stick / m_main_sheet.m_sheet_scale, m_event_pos_curr);
+			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, m_vert_stick / m_main_sheet.m_sheet_scale, m_image_keep_aspect);
 		}
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
@@ -336,11 +336,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_finish_moving(void)
 	{
 		// 方眼に合わせる, かつ頂点に合わせるか判定する.
-		if (m_main_sheet.m_grid_snap && m_misc_vert_stick >= FLT_MIN) {
+		if (m_main_sheet.m_grid_snap && m_vert_stick >= FLT_MIN) {
 			D2D1_POINT_2F g_vec{};	// 方眼への差分
 			if (event_get_vec_nearby_grid(m_main_sheet.m_shape_list, m_main_sheet.m_grid_base + 1.0f, g_vec)) {
 				D2D1_POINT_2F v_vec{};	// 頂点への差分
-				if (event_get_vec_nearby_vert(m_main_sheet.m_shape_list, m_misc_vert_stick / m_main_sheet.m_sheet_scale, v_vec) && pt_abs2(v_vec) < pt_abs2(g_vec)) {
+				if (event_get_vec_nearby_vert(m_main_sheet.m_shape_list, m_vert_stick / m_main_sheet.m_sheet_scale, v_vec) && pt_abs2(v_vec) < pt_abs2(g_vec)) {
 					g_vec = v_vec;
 				}
 				slist_move(m_main_sheet.m_shape_list, g_vec);
@@ -354,9 +354,9 @@ namespace winrt::GraphPaper::implementation
 			}
 		} 
 		// 方眼に合わせない, かつ頂点に合わせるか判定する.
-		else if (m_misc_vert_stick >= FLT_MIN) {
+		else if (m_vert_stick >= FLT_MIN) {
 			D2D1_POINT_2F v_vec{};	// 頂点との差分
-			if (event_get_vec_nearby_vert(m_main_sheet.m_shape_list, m_misc_vert_stick / m_main_sheet.m_sheet_scale, v_vec)) {
+			if (event_get_vec_nearby_vert(m_main_sheet.m_shape_list, m_vert_stick / m_main_sheet.m_sheet_scale, v_vec)) {
 				slist_move(m_main_sheet.m_shape_list, v_vec);
 			}
 		}
@@ -731,7 +731,7 @@ namespace winrt::GraphPaper::implementation
 				// 作図ツールが選択ツール以外なら,
 				// 方眼に合わせるか, かつシフトキーが押されていないか判定する.
 				unselect_all();
-				if (m_misc_vert_stick >= FLT_MIN) {
+				if (m_vert_stick >= FLT_MIN) {
 					const bool box_type = (
 						m_drawing_tool == DRAWING_TOOL::ELLI ||
 						m_drawing_tool == DRAWING_TOOL::POLY ||
@@ -746,7 +746,7 @@ namespace winrt::GraphPaper::implementation
 					//	ShapePoly::create_poly_by_bbox(m_event_pos_pressed, v_vec, m_drawing_poly_opt, v_pos, v_vec);
 					//	pt_add(m_event_pos_pressed, v_vec, m_event_pos_curr);
 					//}
-					const float d_lim = m_misc_vert_stick / m_main_sheet.m_sheet_scale;
+					const float d_lim = m_vert_stick / m_main_sheet.m_sheet_scale;
 					const double g_len = max(m_main_sheet.m_grid_base + 1.0, 1.0);
 					event_released_snap_to_vertex(m_main_sheet.m_shape_list, box_type, d_lim, m_main_sheet.m_grid_snap, g_len, m_event_pos_pressed, m_event_pos_curr);
 				}

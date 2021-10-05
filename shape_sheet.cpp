@@ -6,6 +6,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	static void sheet_draw_grid(D2D_UI const& d2d,
 		const float grid_base,
 		const D2D1_COLOR_F grid_color,

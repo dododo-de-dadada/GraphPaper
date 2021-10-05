@@ -10,6 +10,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	wchar_t** ShapeText::s_available_fonts = nullptr;	//有効な書体名
 
 	// テキストレイアウトから, ヒットテストのための計量の配列を得る.

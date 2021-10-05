@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::IMAGE_OPAC) {
 			constexpr wchar_t R[]{ L"str_opacity" };
 			wchar_t buf[32];
-			conv_col_to_str(m_misc_color_code, value, buf);
+			conv_col_to_str(m_color_code, value, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(R) + L": " + buf;
 		}
 		if constexpr (S == 0) {

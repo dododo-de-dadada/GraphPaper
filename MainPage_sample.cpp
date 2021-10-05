@@ -165,12 +165,12 @@ namespace winrt::GraphPaper::implementation
 			const float offset = static_cast<float>(samp_h / 16.0);
 			const float samp_x = static_cast<float>(samp_w * 0.25);
 			const float samp_y = static_cast<float>(samp_h * 0.5);
-			//m_sample_shape->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANCH_TYPE::ANCH_P0, m_misc_vert_stick, false);
-			//m_sample_shape->set_pos_anch(D2D1_POINT_2F{ samp_x, samp_y }, ANCH_TYPE::ANCH_P0 + 1, m_misc_vert_stick, false);
-			//m_sample_shape->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANCH_TYPE::ANCH_P0 + 2, m_misc_vert_stick, false);
-			s->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANCH_TYPE::ANCH_P0, m_misc_vert_stick, false);
-			s->set_pos_anch(D2D1_POINT_2F{ samp_x, samp_y }, ANCH_TYPE::ANCH_P0 + 1, m_misc_vert_stick, false);
-			s->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANCH_TYPE::ANCH_P0 + 2, m_misc_vert_stick, false);
+			//m_sample_shape->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANCH_TYPE::ANCH_P0, m_vert_stick, false);
+			//m_sample_shape->set_pos_anch(D2D1_POINT_2F{ samp_x, samp_y }, ANCH_TYPE::ANCH_P0 + 1, m_vert_stick, false);
+			//m_sample_shape->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANCH_TYPE::ANCH_P0 + 2, m_vert_stick, false);
+			s->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANCH_TYPE::ANCH_P0, m_vert_stick, false);
+			s->set_pos_anch(D2D1_POINT_2F{ samp_x, samp_y }, ANCH_TYPE::ANCH_P0 + 1, m_vert_stick, false);
+			s->set_pos_anch(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANCH_TYPE::ANCH_P0 + 2, m_vert_stick, false);
 			m_sample_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 			sample_draw();
 		}
 		else if (m_sample_type == SAMPLE_TYPE::IMAGE) {
-			sample_image_load_async(samp_w, samp_h);
+			sample_image_load_async(static_cast<float>(samp_w), static_cast<float>(samp_h));
 		}
 		else if (m_sample_type == SAMPLE_TYPE::MISC) {
 			constexpr uint32_t misc_min = 3;

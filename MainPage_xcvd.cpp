@@ -24,6 +24,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType;
 	using winrt::Windows::Storage::Streams::IOutputStream;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
+	using winrt::Windows::Storage::Streams::DataReader;
 
 	const winrt::param::hstring CLIPBOARD_SHAPES{ L"graph_paper_shapes_data" };	// 図形データのクリップボード書式
 	//const winrt::param::hstring CLIPBOARD_TIFF{ L"TaggedImageFileFormat" };	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
@@ -315,7 +316,7 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - t->m_vec[0].y * 0.5)
 			};
 			const double grid_len = (m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0 : 0.0);
-			const float vert_stick = m_misc_vert_stick / m_main_sheet.m_sheet_scale;
+			const float vert_stick = m_vert_stick / m_main_sheet.m_sheet_scale;
 			xcvd_paste_pos(pos, /*<---*/m_main_sheet.m_shape_list, grid_len, vert_stick);
 			t->set_pos_start(pos);
 			m_d2d_mutex.lock();
@@ -421,7 +422,7 @@ namespace winrt::GraphPaper::implementation
 		reference = nullptr;
 
 		const double grid_len = (m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0 : 0.0);
-		const float vert_stick = m_misc_vert_stick / m_main_sheet.m_sheet_scale;
+		const float vert_stick = m_vert_stick / m_main_sheet.m_sheet_scale;
 		xcvd_paste_pos(pos, /*<---*/m_main_sheet.m_shape_list, grid_len, vert_stick);
 		img->set_pos_start(pos);
 

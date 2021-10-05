@@ -9,6 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	// ·•ª‚¾‚¯ˆÚ“®‚·‚é.
 	// d_vec	·•ª
 	bool ShapePath::move(const D2D1_POINT_2F d_vec) noexcept

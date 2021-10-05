@@ -9,6 +9,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	// 角丸方形の中点の配列
 	constexpr uint32_t ANCH_ROUND[4]{
 		ANCH_TYPE::ANCH_R_SE,	// 右下角

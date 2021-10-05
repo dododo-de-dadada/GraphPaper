@@ -57,8 +57,9 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::SuspendingEventArgs;
 	using winrt::Windows::ApplicationModel::SuspendingOperation;
 	using winrt::Windows::Foundation::Collections::IVector;
-	//using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Foundation::IAsyncOperation;
+	using winrt::Windows::Foundation::Point;
 	using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::UI::Core::CoreCursor;
@@ -129,7 +130,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr double UWP_COLOR_MAX = 255.0;	// UWP の色成分の最大値
 
 	// UWP の色を D2D1_COLOR_F に変換する.
-	inline void conv_uwp_to_color(const Color& a, D2D1_COLOR_F& b) noexcept
+	inline void conv_uwp_to_color(const winrt::Windows::UI::Color& a, D2D1_COLOR_F& b) noexcept
 	{
 		b.r = static_cast<FLOAT>(static_cast<double>(a.R) / UWP_COLOR_MAX);
 		b.g = static_cast<FLOAT>(static_cast<double>(a.G) / UWP_COLOR_MAX);
@@ -268,12 +269,6 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_main_min{ 0.0F, 0.0F };	// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
 		D2D1_POINT_2F m_main_max{ 0.0F, 0.0F };	// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
-		// その他
-		LEN_UNIT m_misc_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
-		COLOR_CODE m_misc_color_code = COLOR_CODE::DEC;	// 色成分の書式
-		float m_misc_vert_stick = DEF_VERT_STICK;	// 頂点をくっつける閾値
-		STATUS_BAR m_misc_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
-
 		// 見本用紙
 		D2D_UI m_sample_dx;	// 見本の描画環境
 		ShapeSheet m_sample_sheet;	// 見本の用紙
@@ -286,6 +281,12 @@ namespace winrt::GraphPaper::implementation
 		uint32_t m_ustack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
 		UNDO_STACK m_ustack_undo;	// 元に戻す操作スタック
 		bool m_ustack_updt = false;	// スタックが更新されたか判定
+
+		// その他
+		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
+		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
+		float m_vert_stick = DEF_VERT_STICK;	// 頂点をくっつける閾値
+		STATUS_BAR m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
 
 		// スレッド
 		bool m_thread_activated = false;	// アクティベートされた初回を判定
@@ -1009,9 +1010,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形の値をスタックに保存する.
 		template <UNDO_OP U> void ustack_push_set(Shape* const s);
 		// データリーダーから操作スタックを読み込む.
-		void ustack_read(DataReader const& dt_reader);
+		void ustack_read(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
 		// データリーダーに操作スタックを書き込む.
-		void ustack_write(DataWriter const& dt_writer);
+		void ustack_write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
 
 		//-------------------------------
 		// MainPage_xcvd.cpp

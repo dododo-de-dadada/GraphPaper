@@ -144,12 +144,12 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		if (check) {
-			m_misc_status_bar = status_or(m_misc_status_bar, s_bar);
+			m_status_bar = status_or(m_status_bar, s_bar);
 		}
 		else {
-			m_misc_status_bar = status_and(m_misc_status_bar, status_not(s_bar));
+			m_status_bar = status_and(m_status_bar, status_not(s_bar));
 		}
-		status_visiblity(m_misc_status_bar != static_cast<STATUS_BAR>(0), sp_misc_status_bar_panel());
+		status_visiblity(m_status_bar != static_cast<STATUS_BAR>(0), sp_misc_status_bar_panel());
 	}
 
 	// ステータスバーのメニュー項目に印をつける.
@@ -199,8 +199,8 @@ namespace winrt::GraphPaper::implementation
 		const float g_len = m_main_sheet.m_grid_base + 1.0f;
 		wchar_t buf_x[32];
 		wchar_t buf_y[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, fx, m_main_d2d.m_logical_dpi, g_len, buf_x);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, fy, m_main_d2d.m_logical_dpi, g_len, buf_y);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, fx, m_main_d2d.m_logical_dpi, g_len, buf_x);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, fy, m_main_d2d.m_logical_dpi, g_len, buf_y);
 		tk_misc_status_bar_pos_x().Text(winrt::hstring{ L"X:" } + buf_x);
 		tk_misc_status_bar_pos_y().Text(winrt::hstring{ L"Y:" } + buf_y);
 	}
@@ -250,7 +250,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		const float g_len = m_main_sheet.m_grid_base + 1.0f;
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, g_len, m_main_d2d.m_logical_dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, g_len, m_main_d2d.m_logical_dpi, g_len, buf);
 		tk_misc_status_grid().Text(winrt::hstring{ L"G:" } +buf);
 	}
 
@@ -260,8 +260,8 @@ namespace winrt::GraphPaper::implementation
 		const float g_len = m_main_sheet.m_grid_base + 1.0f;
 		wchar_t buf_w[32];
 		wchar_t buf_h[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_len, buf_w);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_misc_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_len, buf_h);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_len, buf_w);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_len, buf_h);
 		tk_misc_status_bar_width().Text(winrt::hstring{ L"W:" } + buf_w);
 		tk_misc_status_bar_height().Text(winrt::hstring{ L"H:" } + buf_h);
 	}
@@ -271,19 +271,19 @@ namespace winrt::GraphPaper::implementation
 	{
 		//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
-		if (m_misc_len_unit == LEN_UNIT::GRID) {
+		if (m_len_unit == LEN_UNIT::GRID) {
 			tk_misc_status_unit().Text(L"U:grid");
 		}
-		else if (m_misc_len_unit == LEN_UNIT::INCH) {
+		else if (m_len_unit == LEN_UNIT::INCH) {
 			tk_misc_status_unit().Text(L"U:\u33CC");
 		}
-		else if (m_misc_len_unit == LEN_UNIT::MILLI) {
+		else if (m_len_unit == LEN_UNIT::MILLI) {
 			tk_misc_status_unit().Text(L"U:\u339C");
 		}
-		else if (m_misc_len_unit == LEN_UNIT::PIXEL) {
+		else if (m_len_unit == LEN_UNIT::PIXEL) {
 			tk_misc_status_unit().Text(L"U:px");
 		}
-		else if (m_misc_len_unit == LEN_UNIT::POINT) {
+		else if (m_len_unit == LEN_UNIT::POINT) {
 			tk_misc_status_unit().Text(L"U:pt");
 		}
 	}
@@ -299,15 +299,15 @@ namespace winrt::GraphPaper::implementation
 	// ステータスバーの表示を設定する.
 	void MainPage::status_bar_visibility(void)
 	{
-		tk_misc_status_bar_pos_x().Visibility(status_mask(m_misc_status_bar, STATUS_BAR::CURS) ? UI_VISIBLE : UI_COLLAPSED);
-		tk_misc_status_bar_pos_y().Visibility(status_mask(m_misc_status_bar, STATUS_BAR::CURS) ? UI_VISIBLE : UI_COLLAPSED);
-		tk_misc_status_grid().Visibility(status_mask(m_misc_status_bar, STATUS_BAR::GRID) ? UI_VISIBLE : UI_COLLAPSED);
-		tk_misc_status_bar_width().Visibility(status_mask(m_misc_status_bar, STATUS_BAR::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
-		tk_misc_status_bar_height().Visibility(status_mask(m_misc_status_bar, STATUS_BAR::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
-		sp_misc_status_bar_panel_draw().Visibility(status_mask(m_misc_status_bar, STATUS_BAR::DRAW) ? UI_VISIBLE : UI_COLLAPSED);
-		tk_misc_status_unit().Visibility(status_mask(m_misc_status_bar, STATUS_BAR::UNIT) ? UI_VISIBLE : UI_COLLAPSED);
-		tk_misc_status_zoom().Visibility(status_mask(m_misc_status_bar, STATUS_BAR::ZOOM) ? UI_VISIBLE : UI_COLLAPSED);
-		sp_misc_status_bar_panel().Visibility(m_misc_status_bar != static_cast<STATUS_BAR>(0) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_misc_status_bar_pos_x().Visibility(status_mask(m_status_bar, STATUS_BAR::CURS) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_misc_status_bar_pos_y().Visibility(status_mask(m_status_bar, STATUS_BAR::CURS) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_misc_status_grid().Visibility(status_mask(m_status_bar, STATUS_BAR::GRID) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_misc_status_bar_width().Visibility(status_mask(m_status_bar, STATUS_BAR::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_misc_status_bar_height().Visibility(status_mask(m_status_bar, STATUS_BAR::SHEET) ? UI_VISIBLE : UI_COLLAPSED);
+		sp_misc_status_bar_panel_draw().Visibility(status_mask(m_status_bar, STATUS_BAR::DRAW) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_misc_status_unit().Visibility(status_mask(m_status_bar, STATUS_BAR::UNIT) ? UI_VISIBLE : UI_COLLAPSED);
+		tk_misc_status_zoom().Visibility(status_mask(m_status_bar, STATUS_BAR::ZOOM) ? UI_VISIBLE : UI_COLLAPSED);
+		sp_misc_status_bar_panel().Visibility(m_status_bar != static_cast<STATUS_BAR>(0) ? UI_VISIBLE : UI_COLLAPSED);
 	}
 
 }

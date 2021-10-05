@@ -5,6 +5,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	constexpr auto INDEX_NIL = static_cast<uint32_t>(-2);	// ƒkƒ‹}Œ`‚Ì“Y‚¦š
 	constexpr auto INDEX_SHEET = static_cast<uint32_t>(-1);	// —p†}Œ`‚Ì“Y‚¦š
 

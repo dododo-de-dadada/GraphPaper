@@ -386,10 +386,10 @@ namespace winrt::GraphPaper::implementation
 		if (co_await pref_load_async() != S_OK) {
 			// 読み込みに失敗した場合,
 			sheet_init();
-			m_misc_len_unit = LEN_UNIT::PIXEL;
-			m_misc_color_code = COLOR_CODE::DEC;
-			m_misc_vert_stick = DEF_VERT_STICK;
-			m_misc_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
+			m_len_unit = LEN_UNIT::PIXEL;
+			m_color_code = COLOR_CODE::DEC;
+			m_vert_stick = DEF_VERT_STICK;
+			m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
 		}
 
 		// 用紙の左上位置と右下位置を初期化する.

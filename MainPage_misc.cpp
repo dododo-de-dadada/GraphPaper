@@ -42,16 +42,16 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::color_code_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (sender == rmfi_color_code_cent() || sender == rmfi_color_code_cent_2()) {
-			m_misc_color_code = COLOR_CODE::CENT;
+			m_color_code = COLOR_CODE::CENT;
 		}
 		else if (sender == rmfi_color_code_dec() || sender == rmfi_color_code_dec_2()) {
-			m_misc_color_code = COLOR_CODE::DEC;
+			m_color_code = COLOR_CODE::DEC;
 		}
 		else if (sender == rmfi_color_code_hex() || sender == rmfi_color_code_hex_2()) {
-			m_misc_color_code = COLOR_CODE::HEX;
+			m_color_code = COLOR_CODE::HEX;
 		}
 		else if (sender == rmfi_color_code_real() || sender == rmfi_color_code_real_2()) {
-			m_misc_color_code = COLOR_CODE::REAL;
+			m_color_code = COLOR_CODE::REAL;
 		}
 	}
 
@@ -90,10 +90,10 @@ namespace winrt::GraphPaper::implementation
 		else {
 			return;
 		}
-		if (m_misc_len_unit == l_unit) {
+		if (m_len_unit == l_unit) {
 			return;
 		}
-		m_misc_len_unit = l_unit;
+		m_len_unit = l_unit;
 		status_set_curs();
 		status_set_grid();
 		status_set_sheet();
@@ -120,11 +120,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 
-		misc_vert_stick_set_header(m_misc_vert_stick);
-		sd_misc_vert_stick().Value(static_cast<double>(m_misc_vert_stick));
+		misc_vert_stick_set_header(m_vert_stick);
+		sd_misc_vert_stick().Value(static_cast<double>(m_vert_stick));
 		const auto d_result{ co_await cd_misc_vert_stick().ShowAsync() };
 		if (d_result == ContentDialogResult::Primary) {
-			m_misc_vert_stick = static_cast<float>(sd_misc_vert_stick().Value());
+			m_vert_stick = static_cast<float>(sd_misc_vert_stick().Value());
 		}
 	}
 
@@ -133,7 +133,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_misc_vert_stick") + L": " + buf;
 		sd_misc_vert_stick().Header(box_value(text));
 	}

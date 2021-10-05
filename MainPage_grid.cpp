@@ -195,32 +195,32 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.get_grid_base(g_base);
 			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/ + 1.0f, m_main_d2d.m_logical_dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value/* * SLIDER_STEP*/ + 1.0f, m_main_d2d.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_COLOR) {
 			if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_misc_color_code, value, buf);
+				conv_col_to_str(m_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_r") + L": " + buf;
 			}
 			if constexpr (S == 1) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_misc_color_code, value, buf);
+				conv_col_to_str(m_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " + buf;
 			}
 			if constexpr (S == 2) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_misc_color_code, value, buf);
+				conv_col_to_str(m_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " + buf;
 			}
 			if constexpr (S == 3) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_misc_color_code, value, buf);
+				conv_col_to_str(m_color_code, value, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
 			}
 		}

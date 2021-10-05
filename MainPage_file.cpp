@@ -95,6 +95,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Pickers::PickerLocationId;
 	using winrt::Windows::Storage::Provider::FileUpdateStatus;
 	using winrt::Windows::Storage::StorageFolder;
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
 	using winrt::Windows::System::Launcher;
 	using winrt::Windows::UI::Core::CoreCursorType;
 	using winrt::Windows::UI::ViewManagement::ApplicationView;
@@ -203,9 +205,9 @@ namespace winrt::GraphPaper::implementation
 
 		drawing_tool_is_checked(m_drawing_tool);
 		drawing_poly_opt_is_checked(m_drawing_poly_opt);
-		misc_color_is_checked(m_misc_color_code);
-		status_bar_is_checked(m_misc_status_bar);
-		misc_len_is_checked(m_misc_len_unit);
+		misc_color_is_checked(m_color_code);
+		status_bar_is_checked(m_status_bar);
+		misc_len_is_checked(m_len_unit);
 		image_keep_aspect_is_checked(m_image_keep_aspect);
 		
 		sheet_attr_is_checked();
@@ -385,10 +387,10 @@ namespace winrt::GraphPaper::implementation
 			m_find_text_case = ((f_bit & 2) != 0);
 			m_find_text_wrap = ((f_bit & 4) != 0);
 
-			m_misc_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
-			m_misc_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
-			m_misc_vert_stick = dt_reader.ReadSingle();
-			m_misc_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
+			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
+			m_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
+			m_vert_stick = dt_reader.ReadSingle();
+			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
 			m_image_keep_aspect = dt_reader.ReadBoolean();	// 画像の縦横比の維持
 
 			const auto s_atom = dt_reader.ReadBoolean();
@@ -875,10 +877,10 @@ namespace winrt::GraphPaper::implementation
 				f_bit |= 4;
 			}
 			dt_writer.WriteUInt16(f_bit);
-			dt_writer.WriteUInt32(static_cast<uint32_t>(m_misc_len_unit));
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_color_code));
-			dt_writer.WriteSingle(m_misc_vert_stick);
-			dt_writer.WriteUInt16(static_cast<uint16_t>(m_misc_status_bar));
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_code));
+			dt_writer.WriteSingle(m_vert_stick);
+			dt_writer.WriteUInt16(static_cast<uint16_t>(m_status_bar));
 			dt_writer.WriteBoolean(m_image_keep_aspect);
 
 			dt_writer.WriteBoolean(summary_is_visible());
@@ -968,7 +970,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			dt_write_svg(DOCTYPE, dt_writer);
 			// データライターに SVG 開始タグを書き込む.
-			file_write_svg_tag(m_main_sheet.m_sheet_size, m_main_sheet.m_sheet_color, m_main_d2d.m_logical_dpi, m_misc_len_unit, dt_writer);
+			file_write_svg_tag(m_main_sheet.m_sheet_size, m_main_sheet.m_sheet_color, m_main_d2d.m_logical_dpi, m_len_unit, dt_writer);
 			// 日時 (注釈) を書き込む.
 			//char buf[64];
 			//const auto t = time(nullptr);

@@ -10,6 +10,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	// 線分の交点と, その助変数を求める.
 	// a	線分 ab の始点
 	// b	線分 ab の終点

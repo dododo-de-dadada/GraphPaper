@@ -11,6 +11,9 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
 	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
+	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
 
 #define DIB_SET(buf, i, pal, b)\
 	{\
@@ -580,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 		m_rect.left = m_rect.top = 0;
 		m_rect.right = static_cast<FLOAT>(bmp_w);
 		m_rect.bottom = static_cast<FLOAT>(bmp_h);
-		m_opac = opac < 0.0f ? 0.0 : (opac > 1.0f ? 1.0f : opac);
+		m_opac = opac < 0.0f ? 0.0f : (opac > 1.0f ? 1.0f : opac);
 		const size_t data_size = 4ull * bmp_w * bmp_h;
 		if (data_size > 0) {
 			m_data = new uint8_t[data_size];

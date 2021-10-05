@@ -7,6 +7,9 @@
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	// }Œ`‚ğ”jŠü‚·‚é.
 	ShapeGroup::~ShapeGroup(void)
 	{

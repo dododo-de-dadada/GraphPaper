@@ -171,7 +171,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::DASH_PATT) {
 			constexpr wchar_t* R[]{ L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap" };
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
 			if constexpr (S == 0) {
 				sample_slider_0().Header(box_value(text));
@@ -188,7 +188,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_misc_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text{
 				ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf
 			};

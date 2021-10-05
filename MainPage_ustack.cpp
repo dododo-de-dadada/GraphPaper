@@ -20,6 +20,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+
 	// ヌルで区切られる一連の操作を, 操作の組とみなし, その数を組数とする.
 	// スタックに積むことができる最大の組数.
 	constexpr uint32_t MAX_UCNT = 32;
