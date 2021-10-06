@@ -9,6 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Graphics::Display::DisplayInformation;
+
 	// 再描画が必要になった
 	// sender	イベントが発生した表示デバイス
 	void MainPage::display_contents_invalidated(DisplayInformation const& sender, IInspectable const&)

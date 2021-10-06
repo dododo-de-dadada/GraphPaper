@@ -10,15 +10,21 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using concurrency::cancellation_token_source;
+	using winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionReason;
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionResult;
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionSession;
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedEventArgs;
+	using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::SuspendingDeferral;
+	using winrt::Windows::ApplicationModel::SuspendingEventArgs;
+	using winrt::Windows::ApplicationModel::SuspendingOperation;
+	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Foundation::TypedEventHandler;
-	using winrt::Windows::Storage::IStorageItem;
-	using winrt::Windows::Storage::StorageFolder;
 	using winrt::Windows::Storage::CreationCollisionOption;
+	using winrt::Windows::Storage::IStorageItem;
+	using winrt::Windows::Storage::StorageFile;
+	using winrt::Windows::Storage::StorageFolder;
 
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 

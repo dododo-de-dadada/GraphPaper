@@ -9,6 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Foundation::IAsyncAction;
+
 	// その他メニューの「バージョン情報」が選択された.
 	IAsyncAction MainPage::about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 	{

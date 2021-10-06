@@ -269,7 +269,7 @@ namespace winrt::GraphPaper::implementation
 		// Landscape または Portrait のどちらかのみ.
 		FLOAT d3d_target_width;
 		FLOAT d3d_target_height;
-		auto display_rotation = get_display_rotation(m_nativeOrientation, m_currentOrientation);
+		const DXGI_MODE_ROTATION display_rotation = get_display_rotation(m_nativeOrientation, m_currentOrientation);
 		// 表示デバイスの回転が 90° または 270° か判定する.
 		if (display_rotation == DXGI_MODE_ROTATION_ROTATE90
 			|| display_rotation == DXGI_MODE_ROTATION_ROTATE270) {

@@ -88,7 +88,9 @@ namespace winrt::GraphPaper::implementation
 				flag = true;
 			}
 			else {
-				pt_min(pos, value, value);
+				//pt_min(pos, value, value);
+				value.x = pos.x < value.x ? pos.x : value.x;
+				value.y = pos.y < value.y ? pos.y : value.y;
 			}
 		}
 		return flag;

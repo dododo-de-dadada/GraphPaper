@@ -11,6 +11,9 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Foundation::IAsyncOperation;
+	using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::UI::Color;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
 	using winrt::Windows::UI::ViewManagement::UISettings;
@@ -357,12 +360,12 @@ namespace winrt::GraphPaper::implementation
 			const IInspectable sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
 			const IInspectable sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
 			if (sel_back_color != nullptr && sel_text_color != nullptr) {
-				conv_uwp_to_color(unbox_value<Color>(sel_back_color), Shape::m_range_background);
-				conv_uwp_to_color(unbox_value<Color>(sel_text_color), Shape::m_range_foreground);
+				conv_uwp_to_color(unbox_value<Color>(sel_back_color), ShapeText::s_text_selected_background);
+				conv_uwp_to_color(unbox_value<Color>(sel_text_color), ShapeText::s_text_selected_foreground);
 			}
 			else {
-				Shape::m_range_background = { 0.0f, 0x00 / COLOR_MAX, 0x78 / COLOR_MAX, 0xD4 / COLOR_MAX };
-				Shape::m_range_foreground = COLOR_WHITE;
+				ShapeText::s_text_selected_background = { 0.0f, 0x00 / COLOR_MAX, 0x78 / COLOR_MAX, 0xD4 / COLOR_MAX };
+				ShapeText::s_text_selected_foreground = COLOR_WHITE;
 			}
 			/*
 			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
@@ -376,8 +379,6 @@ namespace winrt::GraphPaper::implementation
 				Shape::m_default_foreground = COLOR_BLACK;
 			//}
 			/*
-			Shape::m_range_background = Shape::m_range_background;
-			Shape::m_range_foreground = Shape::m_range_foreground;
 			Shape::m_default_background = m_main_d2d.m_default_background;
 			Shape::m_default_foreground = m_main_d2d.m_default_foreground;
 			*/

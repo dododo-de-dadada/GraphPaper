@@ -9,6 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 
 	//constexpr float SLIDER_STEP = 0.5f;

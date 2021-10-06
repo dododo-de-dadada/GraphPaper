@@ -9,6 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Foundation::IAsyncAction;
+
 	// 線枠メニューの「ストロークの色...」が選択された.
 	IAsyncAction MainPage::stroke_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{

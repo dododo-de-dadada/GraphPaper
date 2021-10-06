@@ -129,12 +129,28 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_POINT_2F r_min;
 		D2D1_POINT_2F r_max;
-		pt_bound(v_pos[0], v_pos[2], r_min, r_max);
+		//pt_bound(v_pos[0], v_pos[2], r_min, r_max);
+		if (v_pos[0].x < v_pos[2].x) {
+			r_min.x = v_pos[0].x;
+			r_max.x = v_pos[2].x;
+		}
+		else {
+			r_min.x = v_pos[2].x;
+			r_max.x = v_pos[0].x;
+		}
+		if (v_pos[0].y < v_pos[2].y) {
+			r_min.y = v_pos[0].y;
+			r_max.y = v_pos[2].y;
+		}
+		else {
+			r_min.y = v_pos[2].y;
+			r_max.y = v_pos[0].y;
+		}
 		D2D1_POINT_2F o_min;
 		D2D1_POINT_2F o_max;
 		const double e_width = m_stroke_width * 0.5;
-		pt_add(r_min, -e_width, -e_width, o_min);
-		pt_add(r_max, e_width, e_width, o_max);
+		pt_add(r_min, -e_width, o_min);
+		pt_add(r_max, e_width, o_max);
 		if (!pt_in_rect(t_pos, o_min, o_max)) {
 			return ANCH_TYPE::ANCH_SHEET;
 		}

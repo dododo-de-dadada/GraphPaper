@@ -67,13 +67,6 @@
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-	//using winrt::Windows::UI::Color;
-	//using winrt::Windows::UI::Xaml::Media::Brush;
-	using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
-	using winrt::Windows::Storage::Streams::IRandomAccessStream;
-
 #if defined(_DEBUG)
 	extern uint32_t debug_leak_cnt;
 	constexpr wchar_t DEBUG_MSG[] = L"Memory leak occurs";
@@ -271,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 	// 二点の中点を得る.
 	inline void pt_avg(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept;
 	// 二点で囲まれた方形を得る.
-	void pt_bound(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept;
+	//void pt_bound(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c_min, D2D1_POINT_2F& c_max) noexcept;
 	// 位置が図形の部位に含まれるか判定する.
 	inline bool pt_in_anch(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept;
 	// 位置がだ円に含まれるか判定する.
@@ -285,33 +278,33 @@ namespace winrt::GraphPaper::implementation
 	// 方形が位置を含むか判定する.
 	bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept;
 	// 指定した位置を含むよう, 方形を拡大する.
-	void pt_inc(const D2D1_POINT_2F a, D2D1_POINT_2F& r_min, D2D1_POINT_2F& r_max) noexcept;
+	//void pt_inc(const D2D1_POINT_2F a, D2D1_POINT_2F& r_min, D2D1_POINT_2F& r_max) noexcept;
 	// 二点のそれぞれ大きい値を持つ位置を得る.
-	inline void pt_max(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& r_min) noexcept;
-	// 位置の符号を逆にする.
-	inline void pt_neg(const D2D1_POINT_2F a, D2D1_POINT_2F& b) noexcept;
+	//inline void pt_max(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept;
 	// 二点のそれぞれ小さい値を持つ位置を得る.
-	inline void pt_min(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& r_min) noexcept;
+	//inline void pt_min(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept;
+	// 位置の符号を逆にする.
+	//inline void pt_neg(const D2D1_POINT_2F a, D2D1_POINT_2F& b) noexcept;
 	// 位置をスカラー倍に丸める.
 	inline void pt_round(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& round) noexcept;
 	// 位置にスカラー値を掛け, 別の位置を足す.
-	inline void pt_mul(const D2D1_POINT_2F a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept;
+	inline void pt_mul_add(const D2D1_POINT_2F a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept;
+	// 点にスカラー値を掛け, 別の位置を足す.
+	inline void pt_mul_add(const winrt::Windows::Foundation::Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept;
 	// 位置にスカラー値を掛ける.
 	inline void pt_mul(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept;
 	// 寸法に値を掛ける.
 	inline void pt_mul(const D2D1_SIZE_F a, const double b, D2D1_SIZE_F& c) noexcept;
-	// 点にスカラー値を掛け, 別の位置を足す.
-	inline void pt_mul(const winrt::Windows::Foundation::Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept;
 	// 位置から位置を引く.
-	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& sub) noexcept;
+	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept;
 	// 位置から大きさを引く.
-	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& sub) noexcept;
+	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& c) noexcept;
 	// 文字列を複製する. 元の文字列がヌルポインター, または元の文字数が 0 のときは, ヌルポインターを返す.
 	wchar_t* wchar_cpy(const wchar_t* const s);
 	// 文字列を複製する. エスケープ文字列は文字コードに変換する.
-	wchar_t* wchar_cpy_esc(const wchar_t* const s);
+	//wchar_t* find_wchar_cpy(const wchar_t* const s);
 	// 文字列の長さ. 引数がヌルポインタの場合, 0 を返す.
-	uint32_t wchar_len(const wchar_t* const t) noexcept;
+	inline uint32_t wchar_len(const wchar_t* const t) noexcept;
 
 	//------------------------------
 	// shape_dt.cpp
@@ -484,8 +477,6 @@ namespace winrt::GraphPaper::implementation
 		//static IDWriteFactory3* s_dwrite_factory;	// DWRITE ファクトリのキャッシュ
 		static D2D1_COLOR_F s_anch_color;	// 図形の部位の色
 		static float s_anch_len;	// 図形の部位の大きさ
-		static D2D1_COLOR_F m_range_background;	// 文字範囲の背景色
-		static D2D1_COLOR_F m_range_foreground;	// 文字範囲の文字色
 		static D2D1_COLOR_F m_default_background;	// 前景色
 		static D2D1_COLOR_F m_default_foreground;	// 背景色
 		static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
@@ -698,7 +689,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapeImage(void);
 		// ストリームに格納する.
-		winrt::Windows::Foundation::IAsyncAction copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream);
+		winrt::Windows::Foundation::IAsyncAction copy_to(const winrt::guid enc_id, winrt::Windows::Storage::Streams::IRandomAccessStream& ra_stream);
 		// 図形を表示する.
 		void draw(D2D_UI& d2d) final override;
 		// 図形を囲む領域を得る.
@@ -730,7 +721,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F /*value*/) noexcept final override;
 		// 図形を作成する.
-		ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bitmap, const float opacity);
+		ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const winrt::Windows::Graphics::Imaging::SoftwareBitmap& bitmap, const float opacity);
 		// データリーダーから読み込む.
 		ShapeImage(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
 		// データライターに書き込む.
@@ -1391,6 +1382,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct ShapeText : ShapeRect {
 		static wchar_t** s_available_fonts;		// 有効な書体名
+		static D2D1_COLOR_F s_text_selected_background;	// 文字範囲の背景色
+		static D2D1_COLOR_F s_text_selected_foreground;	// 文字範囲の文字色
 
 		D2D1_COLOR_F m_font_color{ COLOR_BLACK };	// 書体の色
 		wchar_t* m_font_family = nullptr;	// 書体名
@@ -1403,7 +1396,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落そろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字揃え
 		D2D1_SIZE_F m_text_padding{ TEXT_MARGIN_DEFVAL };	// 文字列のまわりの上下と左右の余白
-		DWRITE_TEXT_RANGE m_text_selected{ 0, 0 };	// 選択された文字範囲
+		DWRITE_TEXT_RANGE m_text_selected_range{ 0, 0 };	// 選択された文字範囲
 
 		winrt::com_ptr<IDWriteTextLayout> m_dw_layout{};	// 文字列レイアウト
 		float m_dw_descent = 0.0f;	// ディセント
@@ -1646,30 +1639,30 @@ namespace winrt::GraphPaper::implementation
 	// a	一方の位置
 	// b	もう一方の位置
 	// c	結果
-	inline void pt_max(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = a.x > b.x ? a.x : b.x;
-		c.y = a.y > b.y ? a.y : b.y;
-	}
+	//inline void pt_max(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
+	//{
+	//	c.x = a.x > b.x ? a.x : b.x;
+	//	c.y = a.y > b.y ? a.y : b.y;
+	//}
 
 	// 二点の位置を比べてそれぞれ小さい値を求める.
 	// a	一方の位置
 	// b	もう一方の位置
 	// c	結果
-	inline void pt_min(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
-	{
-		c.x = a.x < b.x ? a.x : b.x;
-		c.y = a.y < b.y ? a.y : b.y;
-	}
+	//inline void pt_min(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept
+	//{
+	//	c.x = a.x < b.x ? a.x : b.x;
+	//	c.y = a.y < b.y ? a.y : b.y;
+	//}
 
 	// 位置の符号を反対にする.
 	// a	位置
 	// b	結果
-	inline void pt_neg(const D2D1_POINT_2F a, D2D1_POINT_2F& b) noexcept
-	{
-		b.x = -a.x;
-		b.y = -a.y;
-	}
+	//inline void pt_neg(const D2D1_POINT_2F a, D2D1_POINT_2F& b) noexcept
+	//{
+	//	b.x = -a.x;
+	//	b.y = -a.y;
+	//}
 
 	// 位置をスカラー倍に丸める.
 	// a	位置
@@ -1686,7 +1679,7 @@ namespace winrt::GraphPaper::implementation
 	// b	スカラー値
 	// c	加える位置
 	// d	結果
-	inline void pt_mul(const D2D1_POINT_2F a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
+	inline void pt_mul_add(const D2D1_POINT_2F a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
 	{
 		d.x = static_cast<FLOAT>(a.x * b + c.x);
 		d.y = static_cast<FLOAT>(a.y * b + c.y);
@@ -1717,7 +1710,7 @@ namespace winrt::GraphPaper::implementation
 	// b	スカラー値
 	// c	加える位置
 	// d	結果
-	inline void pt_mul(const winrt::Windows::Foundation::Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
+	inline void pt_mul_add(const winrt::Windows::Foundation::Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
 	{
 		d.x = static_cast<FLOAT>(a.X * b + c.x);
 		d.y = static_cast<FLOAT>(a.Y * b + c.y);
@@ -1746,4 +1739,10 @@ namespace winrt::GraphPaper::implementation
 		return (a & 0xff) > 0;
 	}
 
+	// 文字列の長さ.
+	// 引数がヌルポインタの場合, 0 を返す.
+	inline uint32_t wchar_len(const wchar_t* const t) noexcept
+	{
+		return (t == nullptr || t[0] == '\0') ? 0 : static_cast<uint32_t>(wcslen(t));
+	}
 }

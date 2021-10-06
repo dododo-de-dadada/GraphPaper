@@ -76,7 +76,9 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F q_pos[4];
 				pt_add(s_vec, o_vec, q_pos[0]);
 				pt_sub(s_vec, o_vec, q_pos[1]);
-				pt_neg(o_vec, q_pos[2]);
+				//pt_neg(o_vec, q_pos[2]);
+				q_pos[2].x = -o_vec.x;
+				q_pos[2].y = -o_vec.y;
 				q_pos[3] = o_vec;
 				if (pt_in_poly(t_pos, 4, q_pos)) {
 					return true;
@@ -94,7 +96,9 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F q_pos[4];
 				pt_add(s_vec, o_vec, q_pos[0]);
 				pt_sub(s_vec, o_vec, q_pos[1]);
-				pt_neg(o_vec, q_pos[2]);
+				//pt_neg(o_vec, q_pos[2]);
+				q_pos[2].x = -o_vec.x;
+				q_pos[2].y = -o_vec.y;
 				q_pos[3] = o_vec;
 				if (pt_in_poly(u_pos, 4, q_pos)) {
 					return true;
@@ -114,7 +118,9 @@ namespace winrt::GraphPaper::implementation
 				const D2D1_POINT_2F o_vec{ s_vec.y, -s_vec.x };
 				D2D1_POINT_2F tri_pos[3];
 				tri_pos[0] = s_vec;
-				pt_neg(o_vec, tri_pos[1]);
+				//pt_neg(o_vec, tri_pos[1]);
+				tri_pos[1].x = -o_vec.x;
+				tri_pos[1].y = -o_vec.y;
 				tri_pos[2] = o_vec;
 				if (pt_in_poly(t_pos, 3, tri_pos)) {
 					return true;
@@ -131,7 +137,9 @@ namespace winrt::GraphPaper::implementation
 				const D2D1_POINT_2F o_vec{ s_vec.y, -s_vec.x };
 				D2D1_POINT_2F tri_pos[3];
 				tri_pos[0] = s_vec;
-				pt_neg(o_vec, tri_pos[1]);
+				//pt_neg(o_vec, tri_pos[1]);
+				tri_pos[1].x = -o_vec.x;
+				tri_pos[1].y = -o_vec.y;
 				tri_pos[2] = o_vec;
 				if (pt_in_poly(u_pos, 3, tri_pos)) {
 					return true;
@@ -271,7 +279,7 @@ namespace winrt::GraphPaper::implementation
 			// 線分 q0 q1 と m n との交点を求め, これを新たな q0 とする.
 			// 調べる位置を五角形 { q0, q1, q2, q3, q4 } が含むか判定する.
 			D2D1_POINT_2F mit_pos;
-			pt_mul(d_vec, limit_len / sqrt(d_abs2), exp_side[i][4], mit_pos);
+			pt_mul_add(d_vec, limit_len / sqrt(d_abs2), exp_side[i][4], mit_pos);
 			D2D1_POINT_2F nor_pos;
 			pt_add(mit_pos, D2D1_POINT_2F{ d_vec.y, -d_vec.x }, nor_pos);
 			stroke_find_intersection(q_pos[3], q_pos[0], mit_pos, nor_pos, s, t, q_pos[4]);
@@ -487,7 +495,9 @@ namespace winrt::GraphPaper::implementation
 				pt_sub(v_pos[d_cnt], o_vec, e_side[e_cnt][0]);
 				pt_add(v_pos[d_cnt], o_vec, e_side[e_cnt][1]);
 				e_side[e_cnt][2] = o_vec; // v0 + o_vec
-				pt_neg(o_vec, e_side[e_cnt][3]); // v0 - o_vec
+				//pt_neg(o_vec, e_side[e_cnt][3]); // v0 - o_vec
+				e_side[e_cnt][3].x = -o_vec.x;
+				e_side[e_cnt][3].y = -o_vec.y;
 				e_side[e_cnt][4] = v_pos[d_cnt];
 				// 判定する位置が拡張された辺に含まれるか判定する.
 				if (pt_in_poly(t_vec, 4, e_side[e_cnt++])) {
@@ -552,7 +562,7 @@ namespace winrt::GraphPaper::implementation
 			const auto b_len = a_size.m_length;	// 矢じるしの長さ
 			const auto b_width = a_size.m_width;	// 矢じるしの幅
 			get_arrow_barbs(a_vec, a_len, b_width, b_len, h_barbs);
-			pt_mul(a_vec, 1.0 - b_offset / a_len, a_end, h_tip);
+			pt_mul_add(a_vec, 1.0 - b_offset / a_len, a_end, h_tip);
 			pt_add(h_barbs[0], h_tip, h_barbs[0]);
 			pt_add(h_barbs[1], h_tip, h_barbs[1]);
 			return true;
@@ -644,7 +654,19 @@ namespace winrt::GraphPaper::implementation
 			const double t = s + pi2 * i / v_cnt;	// i 番目の頂点の角度
 			v_pos[i].x = static_cast<FLOAT>(cos(t));
 			v_pos[i].y = static_cast<FLOAT>(-sin(t));
-			pt_inc(v_pos[i], v_min, v_max);
+			//pt_inc(v_pos[i], v_min, v_max);
+			if (v_pos[i].x < v_min.x) {
+				v_min.x = v_pos[i].x;
+			}
+			if (v_pos[i].y < v_min.y) {
+				v_min.y = v_pos[i].y;
+			}
+			if (v_pos[i].x > v_max.x) {
+				v_max.x = v_pos[i].x;
+			}
+			if (v_pos[i].y > v_max.y) {
+				v_max.y = v_pos[i].y;
+			}
 		}
 
 		// 正多角形を領域の大きさに合わせる.

@@ -50,18 +50,18 @@
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Microsoft::UI::Xaml::Controls::RadioMenuFlyoutItem;
-	using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
-	using winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs;
-	using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
-	using winrt::Windows::ApplicationModel::SuspendingEventArgs;
-	using winrt::Windows::ApplicationModel::SuspendingOperation;
-	using winrt::Windows::Foundation::Collections::IVector;
-	using winrt::Windows::Foundation::IAsyncAction;
-	using winrt::Windows::Foundation::IAsyncOperation;
-	using winrt::Windows::Foundation::Point;
-	using winrt::Windows::Graphics::Display::DisplayInformation;
-	using winrt::Windows::Storage::StorageFile;
+	//using winrt::Microsoft::UI::Xaml::Controls::RadioMenuFlyoutItem;
+	//using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
+	//using winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs;
+	//using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
+	//using winrt::Windows::ApplicationModel::SuspendingEventArgs;
+	//using winrt::Windows::ApplicationModel::SuspendingOperation;
+	//using winrt::Windows::Foundation::Collections::IVector;
+	//using winrt::Windows::Foundation::IAsyncAction;
+	//using winrt::Windows::Foundation::IAsyncOperation;
+	//using winrt::Windows::Foundation::Point;
+	//using winrt::Windows::Graphics::Display::DisplayInformation;
+	//using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::UI::Core::CoreCursor;
 	using winrt::Windows::UI::Core::CoreWindow;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
@@ -319,9 +319,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 確認ダイアログを表示してその応答を得る.
-		IAsyncOperation<bool> ask_for_conf_async(void);
+		winrt::Windows::Foundation::IAsyncOperation<bool> ask_for_conf_async(void);
 		// ファイルメニューの「終了」が選択された
-		IAsyncAction exit_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction exit_click_async(IInspectable const&, RoutedEventArgs const&);
 		// メインページを作成する.
 		MainPage(void);
 		// メッセージダイアログを表示する.
@@ -333,7 +333,7 @@ namespace winrt::GraphPaper::implementation
 			auto _{ exit_click_async(nullptr, nullptr) };
 		}
 		// ファイルメニューの「新規」が選択された
-		IAsyncAction new_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction new_click_async(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_app.cpp
@@ -341,13 +341,13 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// アプリケーションがバックグラウンドに移った.
-		void app_entered_background(IInspectable const& sender, EnteredBackgroundEventArgs const& args);
+		void app_entered_background(IInspectable const& sender, winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs const& args);
 		// アプリケーションがバックグラウンドに移った.
-		void app_leaving_background(IInspectable const& sender, LeavingBackgroundEventArgs const& args);
+		void app_leaving_background(IInspectable const& sender, winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs const& args);
 		// アプリケーションが再開された.
-		IAsyncAction app_resuming_async(IInspectable const&, IInspectable const&);
+		winrt::Windows::Foundation::IAsyncAction app_resuming_async(IInspectable const&, IInspectable const&);
 		// アプリケーションが中断された.
-		IAsyncAction app_suspending_async(IInspectable const&, SuspendingEventArgs const& args);
+		winrt::Windows::Foundation::IAsyncAction app_suspending_async(IInspectable const&, winrt::Windows::ApplicationModel::SuspendingEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_join.cpp
@@ -359,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「端の種類」が選択された.
 		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「つなぎの種類」>「額ぶちの制限」が選択された.
-		IAsyncAction join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「つなぎの種類」に印をつける.
 		void join_style_is_checked(const D2D1_LINE_JOIN s_join);
 		// 線枠メニューの「つなぎの形式」が選択された.
@@ -401,7 +401,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「矢じるしの種類」が選択された.
 		void arrow_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「矢じるしの大きさ」が選択された.
-		IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> 
 		void arrow_slider_set_header(const float value);
@@ -415,11 +415,11 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// ディスプレーの再描画が必要となった場合のハンドラー
-		void display_contents_invalidated(DisplayInformation const& sender, IInspectable const& args);
+		void display_contents_invalidated(winrt::Windows::Graphics::Display::DisplayInformation const& sender, IInspectable const& args);
 		// ディスプレーの DPI が変更された場合のハンドラー
-		void display_dpi_changed(DisplayInformation const& sender, IInspectable const& args);
+		void display_dpi_changed(winrt::Windows::Graphics::Display::DisplayInformation const& sender, IInspectable const& args);
 		// ディスプレーの向きが変更された場合のハンドラー
-		void display_orientation_changed(DisplayInformation const& sender, IInspectable const& args);
+		void display_orientation_changed(winrt::Windows::Graphics::Display::DisplayInformation const& sender, IInspectable const& args);
 
 		//-------------------------------
 		// MainPage_event.cpp
@@ -437,7 +437,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形の作成を終了する.
 		void event_finish_creating(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec);
 		// 文字列図形の作成を終了する.
-		IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec);
+		winrt::Windows::Foundation::IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec);
 		// 押された図形の変形を終了する.
 		void event_finish_forming(void);
 		// 選択された図形の移動を終了する.
@@ -466,38 +466,38 @@ namespace winrt::GraphPaper::implementation
 		//IAsyncAction file_check_broad_access(void) const;
 		// ストレージファイルを非同期に読む.
 		template <bool SUSPEND, bool SETTEING>
-		IAsyncOperation<winrt::hresult> file_read_async(StorageFile s_file) noexcept;
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_read_async(winrt::Windows::Storage::StorageFile s_file) noexcept;
 		// 名前を付けてファイルに非同期に保存する
-		IAsyncOperation<winrt::hresult> file_save_as_async(const bool svg_allowed = false) noexcept;
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_save_as_async(const bool svg_allowed = false) noexcept;
 		// ファイルに非同期に保存する
-		IAsyncOperation<winrt::hresult> file_save_async(void) noexcept;
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_save_async(void) noexcept;
 		// 待機カーソルを表示, 表示する前のカーソルを得る.
 		CoreCursor file_wait_cursor(void) const;
 		// 図形データをストレージファイルに非同期に書き込む.
 		template <bool SUSPEND, bool SETTING>
-		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile s_file);
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_write_gpf_async(winrt::Windows::Storage::StorageFile s_file);
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile s_file);
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_write_svg_async(winrt::Windows::Storage::StorageFile s_file);
 		// ファイルに画像図形の画像を保存する.
-		IAsyncOperation<winrt::hresult> file_save_img_async(ShapeImage* s, const wchar_t suggested_name[], /*-->*/wchar_t img_name[], const size_t name_len);
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_save_img_async(ShapeImage* s, const wchar_t suggested_name[], /*-->*/wchar_t img_name[], const size_t name_len);
 		// ファイルの読み込みが終了した.
 		void file_finish_reading(void);
 		// ファイルメニューの「画像をインポートする」が選択された
-		IAsyncAction file_import_img_click(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction file_import_img_click(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「開く」が選択された
-		IAsyncAction file_open_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction file_open_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「名前を付けて保存」が選択された
 		void file_save_as_click(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「上書き保存」が選択された
 		void file_save_click(IInspectable const&, RoutedEventArgs const&);
 		// 最近使ったファイルを非同期に読む.
-		IAsyncAction file_recent_read_async(const uint32_t i);
+		winrt::Windows::Foundation::IAsyncAction file_recent_read_async(const uint32_t i);
 		// ファイルメニューの「最近使ったファイル 」のサブ項目が選択された
 		void file_recent_click(IInspectable const&, RoutedEventArgs const&);
 		// 最近使ったファイルにストレージファイルを追加する.
-		void file_recent_add(StorageFile const& s_file);
+		void file_recent_add(winrt::Windows::Storage::StorageFile const& s_file);
 		// 最近使ったファイルのトークンからストレージファイルを得る.
-		IAsyncOperation<StorageFile> file_recent_get_async(const winrt::hstring token);
+		winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::StorageFile> file_recent_get_async(const winrt::hstring token);
 		// 最近使ったファイルのメニュー項目を更新する.
 		void file_recent_update_menu(void);
 
@@ -507,7 +507,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 塗りつぶしメニューの「色」が選択された.
-		IAsyncAction fill_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction fill_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// スライダーの値が変更された.
 		template <UNDO_OP U, int S> void fill_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
@@ -519,7 +519,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 図形が持つ文字列を編集する.
-		IAsyncAction edit_text_async(ShapeText* s);
+		winrt::Windows::Foundation::IAsyncAction edit_text_async(ShapeText* s);
 		// 編集メニューの「文字列の編集」が選択された.
 		void edit_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「閉じる」ボタンが押された.
@@ -549,9 +549,9 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「字体」に印をつける.
 		void font_style_is_checked(const DWRITE_FONT_STYLE f_style);
 		// 書体メニューの「色」が選択された.
-		IAsyncAction font_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction font_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「書体名」が選択された.
-		IAsyncAction font_family_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction font_family_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「イタリック体」が選択された.
 		void font_style_italic_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「標準」が選択された.
@@ -559,11 +559,11 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「斜体」が選択された.
 		void font_style_oblique_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「大きさ」が選択された.
-		IAsyncAction font_size_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction font_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「伸縮」が選択された.
-		IAsyncAction font_stretch_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction font_stretch_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「太さ」が選択された.
-		IAsyncAction font_weight_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction font_weight_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void font_slider_set_header(const float value);
 		// スライダーの値が変更された.
@@ -579,13 +579,13 @@ namespace winrt::GraphPaper::implementation
 		// 用紙メニューの「方眼の表示」に印をつける.
 		void grid_show_is_checked(const GRID_SHOW g_show);
 		// 用紙メニューの「方眼の大きさ」>「大きさ」が選択された.
-		IAsyncAction grid_len_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction grid_len_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の大きさ」>「狭める」が選択された.
 		void grid_len_con_click(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の大きさ」>「広げる」が選択された.
 		void grid_len_exp_click(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の色」が選択された.
-		IAsyncAction grid_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction grid_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の強調」が選択された.
 		void grid_emph_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 用紙メニューの「方眼の表示」が選択された.
@@ -666,7 +666,7 @@ namespace winrt::GraphPaper::implementation
 		// 画像メニューの「元の画像に戻す」が選択された.
 		void image_revert_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 画像メニューの「不透明度...」が選択された.
-		IAsyncAction image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void image_slider_set_header(const float value);
 		// スライダーの値が変更された.
@@ -678,13 +678,13 @@ namespace winrt::GraphPaper::implementation
 		// 長さの単位, 色の表記, ステータスバー, バージョン情報
 		//-----------------------------
 
-		IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction about_graph_paper_click(IInspectable const&, RoutedEventArgs const&);
 		// その他メニューの「色の表記」に印をつける.
 		void misc_color_is_checked(const COLOR_CODE c_code);
 		// その他メニューの「色の表記」のサブ項目が選択された.
 		void color_code_click(IInspectable const& sender, RoutedEventArgs const&);
 		// その他メニューの「頂点をくっつける...」が選択された.
-		IAsyncAction stick_to_vertex_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
+		winrt::Windows::Foundation::IAsyncAction stick_to_vertex_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 値をスライダーのヘッダーに格納する.
 		void misc_vert_stick_set_header(const float value) noexcept;
 		// スライダーの値が変更された.
@@ -700,11 +700,11 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 保存された用紙とその他の属性を読み込む.
-		IAsyncOperation<winrt::hresult> pref_load_async(void);
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> pref_load_async(void);
 		// 用紙メニューの「設定を削除」が選択された.
-		IAsyncAction pref_delete_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction pref_delete_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「設定を保存」が選択された.
-		IAsyncAction pref_save_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction pref_save_click_async(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_sample.cpp
@@ -720,7 +720,7 @@ namespace winrt::GraphPaper::implementation
 		void sample_panel_size_changed(IInspectable const&, RoutedEventArgs const&);
 		//　リストビュー「見本リスト」がロードされた.
 		void sample_list_loaded(IInspectable const&, RoutedEventArgs const&);
-		IAsyncAction sample_image_load_async(const float samp_w, const float samp_h);
+		winrt::Windows::Foundation::IAsyncAction sample_image_load_async(const float samp_w, const float samp_h);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -770,9 +770,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 用紙メニューの「用紙の色」が選択された.
-		IAsyncAction sheet_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction sheet_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 用紙メニューの「用紙の大きさ」が選択された
-		IAsyncAction sheet_size_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction sheet_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 用紙の左上位置と右下位置を更新する.
 		void sheet_update_bbox(void) noexcept;
 		// 図形をもとに用紙の左上位置と右下位置を更新する.
@@ -842,7 +842,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「種類」に印をつける.
 		void dash_style_is_checked(const D2D1_DASH_STYLE d_style);
 		// 線枠メニューの「破線の配列」が選択された.
-		IAsyncAction dash_patt_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction dash_patt_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template<UNDO_OP U, int S> void dash_slider_set_header(const float value);
 		// スライダーの値が変更された.
@@ -854,9 +854,9 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 線枠メニューの「色」が選択された.
-		IAsyncAction stroke_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction stroke_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「太さ」が選択された.
-		IAsyncAction stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction stroke_width_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template<UNDO_OP U, int S> void stroke_slider_set_header(const float value);
 		// スライダーの値が変更された.
@@ -884,7 +884,7 @@ namespace winrt::GraphPaper::implementation
 			return m_summary_atomic.load(std::memory_order_acquire);
 		}
 		// 一覧の項目が選択された.
-		void summary_item_click(IInspectable const&, ItemClickEventArgs const&);
+		void summary_item_click(IInspectable const&, winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs const&);
 		// 編集メニューの「リストの表示」が選択された.
 		void summary_list_click(IInspectable const&, RoutedEventArgs const&);
 		// 一覧がロードされた.
@@ -924,9 +924,9 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「枠を文字列に合わせる」が選択された.
 		void text_fit_frame_to_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行間...」が選択された.
-		IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「余白...」が選択された.
-		IAsyncAction text_padding_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction text_padding_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」が選択された.
 		void text_align_p_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」が選択された.
@@ -1020,9 +1020,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 編集メニューの「コピー」が選択された.
-		IAsyncAction xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「切り取り」が選択された.
-		IAsyncAction xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&);
+		winrt::Windows::Foundation::IAsyncAction xcvd_cut_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「削除」が選択された.
 		void xcvd_delete_click(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの可否を設定する.
@@ -1030,11 +1030,11 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「貼り付け」が選択された.
 		void xcvd_paste_click(IInspectable const&, RoutedEventArgs const&);
 		// 図形を貼り付ける.
-		IAsyncAction xcvd_paste_shape(void);
+		winrt::Windows::Foundation::IAsyncAction xcvd_paste_shape(void);
 		// 文字列を貼り付ける.
-		IAsyncAction xcvd_paste_text(void);
+		winrt::Windows::Foundation::IAsyncAction xcvd_paste_text(void);
 		// 画像を貼り付ける.
-		IAsyncAction xcvd_paste_image(void);
+		winrt::Windows::Foundation::IAsyncAction xcvd_paste_image(void);
 	};
 
 }

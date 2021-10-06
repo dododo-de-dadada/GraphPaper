@@ -9,13 +9,16 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Foundation::Uri;
-	using winrt::Windows::Storage::FileAccessMode;
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
 	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+	using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
+	using winrt::Windows::Storage::FileAccessMode;
+	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::Storage::Streams::IRandomAccessStream;
-	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 	// Œ©–{‚ð•\Ž¦‚·‚é
 	void MainPage::sample_draw(void)

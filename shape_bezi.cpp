@@ -256,9 +256,9 @@ namespace winrt::GraphPaper::implementation
 		if (i == 3) {
 			D2D1_POINT_2F e_pos[4];
 			if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
-				pt_add(c_pos[0], -e_width, -e_width, e_pos[0]);
+				pt_add(c_pos[0], -e_width, e_pos[0]);
 				pt_add(c_pos[0], e_width, -e_width, e_pos[1]);
-				pt_add(c_pos[0], e_width, e_width, e_pos[2]);
+				pt_add(c_pos[0], e_width, e_pos[2]);
 				pt_add(c_pos[0], -e_width, e_width, e_pos[3]);
 				if (pt_in_poly(t_pos, 4, e_pos)) {
 					return true;

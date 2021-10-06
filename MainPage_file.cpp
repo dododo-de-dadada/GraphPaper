@@ -77,6 +77,9 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::Foundation::Collections::IVector;
+	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Foundation::IAsyncOperation;
 	using winrt::Windows::Foundation::Uri;
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
 	using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
@@ -94,12 +97,15 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Pickers::FileSavePicker;
 	using winrt::Windows::Storage::Pickers::PickerLocationId;
 	using winrt::Windows::Storage::Provider::FileUpdateStatus;
+	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::Storage::StorageFolder;
 	using winrt::Windows::Storage::Streams::DataReader;
 	using winrt::Windows::Storage::Streams::DataWriter;
+	using winrt::Windows::Storage::Streams::IRandomAccessStream;
 	using winrt::Windows::System::Launcher;
 	using winrt::Windows::UI::Core::CoreCursorType;
 	using winrt::Windows::UI::ViewManagement::ApplicationView;
+
 
 	static CoreCursor const& CUR_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 待機カーソル.
 	constexpr wchar_t DESC_GPF[] = L"str_desc_gpf";	// 拡張子 gpf の説明

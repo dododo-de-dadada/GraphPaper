@@ -10,6 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::Devices::Input::PointerDeviceType;
+	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::System::VirtualKeyModifiers;
 	using winrt::Windows::UI::Core::CoreCursorType;
 	using winrt::Windows::UI::Input::PointerPointProperties;
@@ -375,7 +376,23 @@ namespace winrt::GraphPaper::implementation
 		if (k_mod == VirtualKeyModifiers::Control) {
 			D2D1_POINT_2F a_min;
 			D2D1_POINT_2F a_max;
-			pt_bound(m_event_pos_pressed, m_event_pos_curr, a_min, a_max);
+			//pt_bound(m_event_pos_pressed, m_event_pos_curr, a_min, a_max);
+			if (m_event_pos_pressed.x < m_event_pos_curr.x) {
+				a_min.x = m_event_pos_pressed.x;
+				a_max.x = m_event_pos_curr.x;
+			}
+			else {
+				a_min.x = m_event_pos_curr.x;
+				a_max.x = m_event_pos_pressed.x;
+			}
+			if (m_event_pos_pressed.y < m_event_pos_curr.y) {
+				a_min.y = m_event_pos_pressed.y;
+				a_max.y = m_event_pos_curr.y;
+			}
+			else {
+				a_min.y = m_event_pos_curr.y;
+				a_max.y = m_event_pos_pressed.y;
+			}
 			if (toggle_area(a_min, a_max)) {
 				xcvd_is_enabled();
 			}
@@ -384,7 +401,23 @@ namespace winrt::GraphPaper::implementation
 		else if (k_mod == VirtualKeyModifiers::None) {
 			D2D1_POINT_2F a_min;
 			D2D1_POINT_2F a_max;
-			pt_bound(m_event_pos_pressed, m_event_pos_curr, a_min, a_max);
+			//pt_bound(m_event_pos_pressed, m_event_pos_curr, a_min, a_max);
+			if (m_event_pos_pressed.x < m_event_pos_curr.x) {
+				a_min.x = m_event_pos_pressed.x;
+				a_max.x = m_event_pos_curr.x;
+			}
+			else {
+				a_min.x = m_event_pos_curr.x;
+				a_max.x = m_event_pos_pressed.x;
+			}
+			if (m_event_pos_pressed.y < m_event_pos_curr.y) {
+				a_min.y = m_event_pos_pressed.y;
+				a_max.y = m_event_pos_curr.y;
+			}
+			else {
+				a_min.y = m_event_pos_curr.y;
+				a_max.y = m_event_pos_pressed.y;
+			}
 			if (select_area(a_min, a_max)) {
 				xcvd_is_enabled();
 			}
@@ -399,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 		// 用紙座標系に変換し, ポインターの現在位置に格納する.
 		D2D1_POINT_2F sheet_pos;
 		pt_add(m_main_min, sb_horz().Value(), sb_vert().Value(), sheet_pos);
-		pt_mul(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_main_sheet.m_sheet_scale, sheet_pos, m_event_pos_curr);
+		pt_mul_add(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_main_sheet.m_sheet_scale, sheet_pos, m_event_pos_curr);
 	}
 
 	// ポインターが動いた.

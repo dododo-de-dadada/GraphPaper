@@ -51,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 				tip = a_pos;
 			}
 			else {
-				pt_mul(a_vec, 1.0 - a_size.m_offset / a_len, a_pos, tip);
+				pt_mul_add(a_vec, 1.0 - a_size.m_offset / a_len, a_pos, tip);
 			}
 			pt_add(barbs[0], tip, barbs[0]);
 			pt_add(barbs[1], tip, barbs[1]);
@@ -265,7 +265,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_selected()) {
 			D2D1_POINT_2F mid;
-			pt_mul(m_vec[0], 0.5, m_pos, mid);
+			pt_mul_add(m_vec[0], 0.5, m_pos, mid);
 			anch_draw_rect(m_pos, dx);
 			anch_draw_rect(mid, dx);
 			anch_draw_rect(e_pos, dx);

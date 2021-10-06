@@ -9,6 +9,10 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Foundation::IAsyncOperation;
+	using winrt::Windows::Storage::StorageFile;
+
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 
 	// 設定データを保存するフォルダーを得る.

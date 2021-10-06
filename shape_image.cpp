@@ -6,14 +6,17 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
 	using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
 	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
-	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
-	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
 	using winrt::Windows::Storage::Streams::DataReader;
 	using winrt::Windows::Storage::Streams::DataWriter;
+	using winrt::Windows::Storage::Streams::IRandomAccessStream;
+	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
+
 
 #define DIB_SET(buf, i, pal, b)\
 	{\
@@ -69,7 +72,7 @@ namespace winrt::GraphPaper::implementation
 			const double ab_y = static_cast<double>(b.y) - static_cast<double>(a.y);
 			const double ap_ab = ap_x * ab_x + ap_y * ab_y;	// ap.ab
 			const double ab_ab = ab_x * ab_x + ab_y * ab_y;	// ab.ab
-			pt_mul(D2D1_POINT_2F{ static_cast<FLOAT>(ab_x), static_cast<FLOAT>(ab_y) }, ap_ab / ab_ab, a, q);	// a + ap.ab / (|ab|^2) ab -> q
+			pt_mul_add(D2D1_POINT_2F{ static_cast<FLOAT>(ab_x), static_cast<FLOAT>(ab_y) }, ap_ab / ab_ab, a, q);	// a + ap.ab / (|ab|^2) ab -> q
 		}
 	}
 
@@ -184,9 +187,23 @@ namespace winrt::GraphPaper::implementation
 			m_pos,
 			{ m_pos.x + m_view.width, m_pos.y + m_view.height }
 		};
-		pt_bound(b_pos[0], b_pos[1], b_pos[0], b_pos[1]);
-		pt_min(a_min, b_pos[0], b_min);
-		pt_max(a_max, b_pos[1], b_max);
+		//pt_bound(b_pos[0], b_pos[1], b_pos[0], b_pos[1]);
+		if (b_pos[0].x > b_pos[1].x) {
+			const auto less_x = b_pos[1].x;
+			b_pos[1].x = b_pos[0].x;
+			b_pos[0].x = less_x;
+		}
+		if (b_pos[0].y > b_pos[1].y) {
+			const auto less_y = b_pos[1].y;
+			b_pos[1].y = b_pos[0].y;
+			b_pos[0].y = less_y;
+		}
+		//pt_min(a_min, b_pos[0], b_min);
+		b_min.x = a_min.x < b_pos[0].x ? a_min.x : b_pos[0].x;
+		b_min.y = a_min.y < b_pos[0].y ? a_min.y : b_pos[0].y;
+		//pt_max(a_max, b_pos[1], b_max);
+		b_max.x = a_max.x > b_pos[1].x ? a_max.x : b_pos[1].x;
+		b_max.y = a_max.y > b_pos[1].y ? a_max.y : b_pos[1].y;
 	}
 
 	// 画像の不透明度を得る.
@@ -239,7 +256,9 @@ namespace winrt::GraphPaper::implementation
 			m_pos,
 			{ m_pos.x + m_view.width, m_pos.y + m_view.height }
 		};
-		pt_min(v_pos[0], v_pos[1], value);
+		//pt_min(v_pos[0], v_pos[1], value);
+		value.x = v_pos[0].x < v_pos[1].x ? v_pos[0].x : v_pos[1].x;
+		value.y = v_pos[0].y < v_pos[1].y ? v_pos[0].y : v_pos[1].y;
 	}
 
 	// 近傍の頂点を得る.
@@ -329,7 +348,17 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_TYPE::ANCH_WEST;
 			}
 		}
-		pt_bound(v_pos[0], v_pos[2], v_pos[0], v_pos[2]);
+		//pt_bound(v_pos[0], v_pos[2], v_pos[0], v_pos[2]);
+		if (v_pos[0].x > v_pos[2].x) {
+			const auto less_x = v_pos[2].x;
+			v_pos[2].x = v_pos[0].x;
+			v_pos[0].x = less_x;
+		}
+		if (v_pos[0].y > v_pos[2].y) {
+			const auto less_y = v_pos[2].y;
+			v_pos[2].y = v_pos[0].y;
+			v_pos[0].y = less_y;
+		}
 		if (v_pos[0].x <= t_pos.x && t_pos.x <= v_pos[2].x &&
 			v_pos[0].y <= t_pos.y && t_pos.y <= v_pos[2].y) {
 			return ANCH_TYPE::ANCH_FILL;
@@ -340,6 +369,7 @@ namespace winrt::GraphPaper::implementation
 	// 範囲に含まれるか判定する.
 	bool ShapeImage::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
+		// 始点と終点とが範囲に含まれるか判定する.
 		return pt_in_rect(m_pos, a_min, a_max) &&
 			pt_in_rect(D2D1_POINT_2F{ m_pos.x + m_view.width, m_pos.y + m_view.height }, a_min, a_max);
 	}
@@ -465,9 +495,9 @@ namespace winrt::GraphPaper::implementation
 				m_view.width = (m_rect.right - m_rect.left) * m_ratio.width;
 				m_pos.x = value.x - m_view.width;
 				flag = true;
-				if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
-					auto debug = 1;
-				}
+				//if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
+				//	auto debug = 1;
+				//}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SE) {
@@ -506,9 +536,9 @@ namespace winrt::GraphPaper::implementation
 				m_view.height = (m_rect.bottom - m_rect.top) * m_ratio.height;
 				m_pos.y = value.y - m_view.height;
 				flag = true;
-				if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
-					auto debug = 1;
-				}
+				//if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
+				//	auto debug = 1;
+				//}
 			}
 		}
 		else if (anch == ANCH_TYPE::ANCH_SW) {
@@ -548,9 +578,9 @@ namespace winrt::GraphPaper::implementation
 				m_view.width = (m_rect.right - m_rect.left) * m_ratio.width;
 				m_pos.x = value.x;
 				flag = true;
-				if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
-					auto debug = 1;
-				}
+				//if (fabs(m_rect.bottom - m_rect.top) < 1.0 || fabs(m_rect.right - m_rect.left) < 1.0) {
+				//	auto debug = 1;
+				//}
 			}
 		}
 		return flag;

@@ -9,6 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Foundation::IAsyncAction;
+
 	constexpr wchar_t TITLE_FILL[] = L"str_fill";
 
 	// 塗りつぶしメニューの「色」が選択された.

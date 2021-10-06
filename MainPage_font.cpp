@@ -10,6 +10,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 

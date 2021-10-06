@@ -78,7 +78,19 @@ namespace winrt::GraphPaper::implementation
 					x_ge_y ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
 					x_ge_y ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
 				};
-				pt_bound(r_min, r_max, r_min, r_max);
+				//pt_bound(r_min, r_max, r_min, r_max);
+				/*
+				if (r_min.x > r_max.x) {
+					const auto less_x = r_max.x;
+					r_max.x = r_min.x;
+					r_min.x = less_x;
+				}
+				if (r_min.y > r_max.y) {
+					const auto less_y = r_max.y;
+					r_max.y = r_min.y;
+					r_min.y = less_y;
+				}
+				*/
 				if (pt_in_rect(t_pos, r_min, r_max)) {
 					return ANCH_TYPE::ANCH_STROKE;
 				}
@@ -87,9 +99,28 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_fill_color)) {
 			D2D1_POINT_2F e_pos;
 			pt_add(m_pos, m_vec[0], e_pos);
-			D2D1_POINT_2F r_min, r_max;
-			pt_bound(m_pos, e_pos, r_min, r_max);
-			if (pt_in_rect(t_pos, r_min, r_max)) {
+			//D2D1_POINT_2F r_min, r_max;
+			//pt_bound(m_pos, e_pos, r_min, r_max);
+			/*
+			if (m_pos.x < e_pos.x) {
+				r_min.x = m_pos.x;
+				r_max.x = e_pos.x;
+			}
+			else {
+				r_min.x = e_pos.x;
+				r_max.x = m_pos.x;
+			}
+			if (m_pos.y < e_pos.y) {
+				r_min.y = m_pos.y;
+				r_max.y = e_pos.y;
+			}
+			else {
+				r_min.y = e_pos.y;
+				r_max.y = m_pos.y;
+			}
+			*/
+			//if (pt_in_rect(t_pos, r_min, r_max)) {
+			if (pt_in_rect(t_pos, m_pos, e_pos)) {
 				return ANCH_TYPE::ANCH_FILL;
 			}
 		}

@@ -9,6 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Foundation::IAsyncAction;
+
 	constexpr wchar_t NOT_FOUND[] = L"str_info_not_found";	// 「文字列が見つかりません」メッセージのリソースキー
 
 	// 文字列の一部を置換する.
@@ -19,6 +21,234 @@ namespace winrt::GraphPaper::implementation
 	static bool find_text(SHAPE_LIST& slist, wchar_t* f_text, const bool f_case, const bool f_wrap, ShapeText*& t, Shape*& s, DWRITE_TEXT_RANGE& s_range);
 	// 文字範囲が選択されている図形を見つける.
 	static ShapeText* find_text_range_selected(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, DWRITE_TEXT_RANGE& t_range);
+	// 文字列を複製する. エスケープ文字列は文字コードに変換する.
+	static wchar_t* find_wchar_cpy(const wchar_t* const s) noexcept;
+	// 文字が '0'...'9' または 'A'...'F', 'a'...'f' か判定する.
+	static bool find_wchar_is_hex(const wchar_t w, uint32_t& x) noexcept;
+
+	// 文字が 0...9 または A...F, a...f か判定する
+	static bool find_wchar_is_hex(const wchar_t w, uint32_t& x) noexcept
+	{
+		if (isdigit(w)) {
+			x = w - '0';
+		}
+		else if (w >= 'a' && w <= 'f') {
+			x = w - 'a' + 10;
+		}
+		else if (w >= 'A' && w <= 'F') {
+			x = w - 'A' + 10;
+		}
+		else {
+			return false;
+		}
+		return true;
+	}
+
+	// 文字列を複製する.
+	// エスケープ文字列は文字コードに変換する.
+	static wchar_t* find_wchar_cpy(const wchar_t* const s) noexcept
+	{
+		const auto s_len = wchar_len(s);
+		if (s_len == 0) {
+			return nullptr;
+		}
+		auto t = new wchar_t[static_cast<size_t>(s_len) + 1];
+		auto st = 0;
+		uint32_t j = 0;
+		for (uint32_t i = 0; i < s_len && s[i] != '\0' && j < s_len; i++) {
+			if (st == 0) {
+				if (s[i] == '\\') {
+					st = 1;
+				}
+				else {
+					t[j++] = s[i];
+				}
+			}
+			else if (st == 1) {
+				// \0-9
+				if (s[i] >= '0' && s[i] <= '8') {
+					t[j] = s[i] - '0';
+					st = 2;
+				}
+				// \x
+				else if (s[i] == 'x') {
+					st = 4;
+				}
+				// \u
+				else if (s[i] == 'u') {
+					st = 6;
+				}
+				// \a
+				else if (s[i] == 'a') {
+					t[j++] = '\a';
+					st = 0;
+				}
+				// \b
+				else if (s[i] == 'b') {
+					t[j++] = '\b';
+					st = 0;
+				}
+				// \f
+				else if (s[i] == 'f') {
+					t[j++] = '\f';
+					st = 0;
+				}
+				// \n
+				else if (s[i] == 'n') {
+					t[j++] = '\n';
+					st = 0;
+				}
+				// \r
+				else if (s[i] == 'r') {
+					t[j++] = '\r';
+					st = 0;
+				}
+				// \s
+				else if (s[i] == 's') {
+					t[j++] = ' ';
+					st = 0;
+				}
+				else if (s[i] == 't') {
+					t[j++] = '\t';
+					st = 0;
+				}
+				else if (s[i] == 'v') {
+					t[j++] = '\v';
+					st = 0;
+				}
+				else {
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 2) {
+				if (s[i] >= '0' && s[i] <= '8') {
+					t[j] = t[j] * 8 + s[i] - '0';
+					st = 3;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 3) {
+				if (s[i] >= '0' && s[i] <= '8') {
+					t[j++] = t[j] * 8 + s[i] - '0';
+					st = 0;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 4) {
+				uint32_t x;
+				if (find_wchar_is_hex(s[i], x)) {
+					t[j] = static_cast<wchar_t>(x);
+					st = 5;
+				}
+				else if (s[i] == '\\') {
+					st = 1;
+				}
+				else {
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 5) {
+				uint32_t x;
+				if (find_wchar_is_hex(s[i], x)) {
+					t[j++] = static_cast<wchar_t>(t[j] * 16 + x);
+					st = 0;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 6) {
+				uint32_t x;
+				if (find_wchar_is_hex(s[i], x)) {
+					t[j] = static_cast<wchar_t>(x);
+					st = 7;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 7) {
+				uint32_t x;
+				if (find_wchar_is_hex(s[i], x)) {
+					t[j] = static_cast<wchar_t>(t[j] * 16 + x);
+					st = 8;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 8) {
+				uint32_t x;
+				if (find_wchar_is_hex(s[i], x)) {
+					t[j] = static_cast<wchar_t>(t[j] * 16 + x);
+					st = 9;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+			else if (st == 9) {
+				uint32_t x;
+				if (find_wchar_is_hex(s[i], x)) {
+					t[j++] = static_cast<wchar_t>(t[j] * 16 + x);
+					st = 0;
+				}
+				else if (s[i] == '\\') {
+					j++;
+					st = 1;
+				}
+				else {
+					j++;
+					t[j++] = s[i];
+					st = 0;
+				}
+			}
+		}
+		t[j] = '\0';
+		return t;
+	}
 
 	// 文字列の一部を置換する.
 	// w_text	置換される前の文字列
@@ -534,11 +764,11 @@ namespace winrt::GraphPaper::implementation
 		if (m_find_text != nullptr) {
 			delete[] m_find_text;
 		}
-		m_find_text = wchar_cpy_esc(tx_find_text_what().Text().c_str());
+		m_find_text = find_wchar_cpy(tx_find_text_what().Text().c_str());
 		if (m_find_repl != nullptr) {
 			delete[] m_find_repl;
 		}
-		m_find_repl = wchar_cpy_esc(tx_find_replace_with().Text().c_str());
+		m_find_repl = find_wchar_cpy(tx_find_replace_with().Text().c_str());
 		m_find_text_case = ck_find_text_case().IsChecked().GetBoolean();
 		m_find_text_wrap = ck_find_text_wrap().IsChecked().GetBoolean();
 	}

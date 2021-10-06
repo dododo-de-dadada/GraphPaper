@@ -16,14 +16,39 @@ namespace winrt::GraphPaper::implementation
 	//ID2D1Factory3* Shape::s_d2d_factory = nullptr;	// D2D1 ファクトリ
 	//IDWriteFactory3* Shape::s_dwrite_factory = nullptr;	// DWRITE ファクトリ
 	float Shape::s_anch_len = 6.0f;
-	D2D1_COLOR_F Shape::m_range_background = ACCENT_COLOR;	// 文字範囲の背景色
-	D2D1_COLOR_F Shape::m_range_foreground = COLOR_TEXT_SELECTED;	// 文字範囲の文字色
 	D2D1_COLOR_F Shape::m_default_background = COLOR_WHITE;	// 前景色 (アンカーの背景色)
 	D2D1_COLOR_F Shape::m_default_foreground = COLOR_BLACK;	// 背景色 (アンカーの前景色)
 	winrt::com_ptr<ID2D1StrokeStyle1> Shape::m_aux_style = nullptr;	// 補助線の形式
 
-	// 文字が '0'...'9' または 'A'...'F', 'a'...'f' か判定する.
-	static bool is_hex(const wchar_t w, uint32_t& x) noexcept;
+	// 図形の部位（円形）を表示する.
+	// a_pos	部位の位置
+	// dx		図形の描画環境
+	void anch_draw_ellipse(const D2D1_POINT_2F a_pos, D2D_UI& dx)
+	{
+		const FLOAT rad = static_cast<FLOAT>(Shape::s_anch_len * 0.5 + 1.0);
+		ID2D1SolidColorBrush* const brush = dx.m_solid_color_brush.get();
+		brush->SetColor(Shape::m_default_background);
+		dx.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad, rad }, brush);
+		brush->SetColor(Shape::m_default_foreground);
+		dx.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad - 1.0f, rad - 1.0f }, brush);
+	}
+
+	// 図形の部位 (方形) を表示する.
+	// a_pos	部位の位置
+	// dx		図形の描画環境
+	void anch_draw_rect(const D2D1_POINT_2F a_pos, D2D_UI& dx)
+	{
+		D2D1_POINT_2F r_min;
+		pt_add(a_pos, -0.5 * Shape::s_anch_len, r_min);
+		D2D1_POINT_2F r_max;
+		pt_add(r_min, Shape::s_anch_len, r_max);
+		const D2D1_RECT_F rect{ r_min.x, r_min.y, r_max.x, r_max.y };
+		ID2D1SolidColorBrush* brush = dx.m_solid_color_brush.get();
+		brush->SetColor(Shape::m_default_background);
+		dx.m_d2d_context->DrawRectangle(rect, brush, 2.0, nullptr);
+		brush->SetColor(Shape::m_default_foreground);
+		dx.m_d2d_context->FillRectangle(rect, brush);
+	}
 
 	// 矢じるしの返しの位置を求める.
 	// a_vec	矢軸ベクトル.
@@ -53,26 +78,27 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 二点で囲まれた方形を得る.
-	void pt_bound(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& r_min, D2D1_POINT_2F& r_max) noexcept
+	/*
+	void pt_bound(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c_min, D2D1_POINT_2F& c_max) noexcept
 	{
 		if (a.x < b.x) {
-			r_min.x = a.x;
-			r_max.x = b.x;
+			c_min.x = a.x;
+			c_max.x = b.x;
 		}
 		else {
-			r_min.x = b.x;
-			r_max.x = a.x;
+			c_min.x = b.x;
+			c_max.x = a.x;
 		}
 		if (a.y < b.y) {
-			r_min.y = a.y;
-			r_max.y = b.y;
+			c_min.y = a.y;
+			c_max.y = b.y;
 		}
 		else {
-			r_min.y = b.y;
-			r_max.y = a.y;
+			c_min.y = b.y;
+			c_max.y = a.y;
 		}
 	}
-
+	*/
 	// だ円にが位置を含むか判定する.
 	// t_pos	判定する位置
 	// c_pos	だ円の中心
@@ -157,6 +183,7 @@ namespace winrt::GraphPaper::implementation
 	// a	含まれる位置
 	// r_min	元の方形の左上位置, 得られた左上位置
 	// r_max	元の方形の右下位置, 得られた右下位置
+	/*
 	void pt_inc(const D2D1_POINT_2F a, D2D1_POINT_2F& r_min, D2D1_POINT_2F& r_max) noexcept
 	{
 		if (a.x < r_min.x) {
@@ -172,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 			r_max.y = a.y;
 		}
 	}
-
+	*/
 	//	文字列を複製する.
 	//	元の文字列がヌルポインター, または元の文字数が 0 のときは,
 	//	ヌルポインターを返す.
@@ -185,237 +212,6 @@ namespace winrt::GraphPaper::implementation
 		auto t = new wchar_t[static_cast<size_t>(s_len) + 1];
 		wcscpy_s(t, static_cast<size_t>(s_len) + 1, s);
 		return t;
-	}
-
-	// 文字が 0...9 または A...F, a...f か判定する
-	static bool is_hex(const wchar_t w, uint32_t& x) noexcept
-	{
-		if (isdigit(w)) {
-			x = w - '0';
-		}
-		else if (w >= 'a' && w <= 'f') {
-			x = w - 'a' + 10;
-		}
-		else if (w >= 'A' && w <= 'F') {
-			x = w - 'A' + 10;
-		}
-		else {
-			return false;
-		}
-		return true;
-	}
-
-	// 文字列を複製する.
-	// エスケープ文字列は文字コードに変換する.
-	wchar_t* wchar_cpy_esc(const wchar_t* const s)
-	{
-		const auto s_len = wchar_len(s);
-		if (s_len == 0) {
-			return nullptr;
-		}
-		auto t = new wchar_t[static_cast<size_t>(s_len) + 1];
-		auto st = 0;
-		uint32_t j = 0;
-		for (uint32_t i = 0; i < s_len && s[i] != '\0' && j < s_len; i++) {
-			if (st == 0) {
-				if (s[i] == '\\') {
-					st = 1;
-				}
-				else {
-					t[j++] = s[i];
-				}
-			}
-			else if (st == 1) {
-				// \0-9
-				if (s[i] >= '0' && s[i] <= '8') {
-					t[j] = s[i] - '0';
-					st = 2;
-				}
-				// \x
-				else if (s[i] == 'x') {
-					st = 4;
-				}
-				// \u
-				else if (s[i] == 'u') {
-					st = 6;
-				}
-				// \a
-				else if (s[i] == 'a') {
-					t[j++] = '\a';
-					st = 0;
-				}
-				// \b
-				else if (s[i] == 'b') {
-					t[j++] = '\b';
-					st = 0;
-				}
-				// \f
-				else if (s[i] == 'f') {
-					t[j++] = '\f';
-					st = 0;
-				}
-				// \n
-				else if (s[i] == 'n') {
-					t[j++] = '\n';
-					st = 0;
-				}
-				// \r
-				else if (s[i] == 'r') {
-					t[j++] = '\r';
-					st = 0;
-				}
-				// \s
-				else if (s[i] == 's') {
-					t[j++] = ' ';
-					st = 0;
-				}
-				else if (s[i] == 't') {
-					t[j++] = '\t';
-					st = 0;
-				}
-				else if (s[i] == 'v') {
-					t[j++] = '\v';
-					st = 0;
-				}
-				else {
-					t[j++] = s[i];
-					st = 0;
-				}
-			}
-			else if (st == 2) {
-				if (s[i] >= '0' && s[i] <= '8') {
-					t[j] = t[j] * 8 + s[i] - '0';
-					st = 3;
-				}
-				else if (s[i] == '\\') {
-					j++;
-					st = 1;
-				}
-				else {
-					j++;
-					t[j++] = s[i];
-					st = 0;
-				}
-			}
-			else if (st == 3) {
-				if (s[i] >= '0' && s[i] <= '8') {
-					t[j++] = t[j] * 8 + s[i] - '0';
-					st = 0;
-				}
-				else if (s[i] == '\\') {
-					j++;
-					st = 1;
-				}
-				else {
-					j++;
-					t[j++] = s[i];
-					st = 0;
-				}
-			}
-			else if (st == 4) {
-				uint32_t x;
-				if (is_hex(s[i], x)) {
-					t[j] = static_cast<wchar_t>(x);
-					st = 5;
-				}
-				else if (s[i] == '\\') {
-					st = 1;
-				}
-				else {
-					t[j++] = s[i];
-					st = 0;
-				}
-			}
-			else if (st == 5) {
-				uint32_t x;
-				if (is_hex(s[i], x)) {
-					t[j++] = static_cast<wchar_t>(t[j] * 16 + x);
-					st = 0;
-				}
-				else if (s[i] == '\\') {
-					j++;
-					st = 1;
-				}
-				else {
-					j++;
-					t[j++] = s[i];
-					st = 0;
-				}
-			}
-			else if (st == 6) {
-				uint32_t x;
-				if (is_hex(s[i], x)) {
-					t[j] = static_cast<wchar_t>(x);
-					st = 7;
-				}
-				else if (s[i] == '\\') {
-					j++;
-					st = 1;
-				}
-				else {
-					j++;
-					t[j++] = s[i];
-					st = 0;
-				}
-			}
-			else if (st == 7) {
-				uint32_t x;
-				if (is_hex(s[i], x)) {
-					t[j] = static_cast<wchar_t>(t[j] * 16 + x);
-					st = 8;
-				}
-				else if (s[i] == '\\') {
-					j++;
-					st = 1;
-				}
-				else {
-					j++;
-					t[j++] = s[i];
-					st = 0;
-				}
-			}
-			else if (st == 8) {
-				uint32_t x;
-				if (is_hex(s[i], x)) {
-					t[j] = static_cast<wchar_t>(t[j] * 16 + x);
-					st = 9;
-				}
-				else if (s[i] == '\\') {
-					j++;
-					st = 1;
-				}
-				else {
-					j++;
-					t[j++] = s[i];
-					st = 0;
-				}
-			}
-			else if (st == 9) {
-				uint32_t x;
-				if (is_hex(s[i], x)) {
-					t[j++] = static_cast<wchar_t>(t[j] * 16 + x);
-					st = 0;
-				}
-				else if (s[i] == '\\') {
-					j++;
-					st = 1;
-				}
-				else {
-					j++;
-					t[j++] = s[i];
-					st = 0;
-				}
-			}
-		}
-		t[j] = '\0';
-		return t;
-	}
-
-	// 文字列の長さ.
-	// 引数がヌルポインタの場合, 0 を返す.
-	uint32_t wchar_len(const wchar_t* const t) noexcept
-	{
-		return (t == nullptr || t[0] == '\0') ? 0 : static_cast<uint32_t>(wcslen(t));
 	}
 
 }

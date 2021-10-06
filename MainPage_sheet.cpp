@@ -9,8 +9,10 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::UI::Xaml::Controls::TextBox;
+	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::UI::Color;
+	using winrt::Windows::UI::Xaml::Controls::TextBox;
 
 	constexpr wchar_t DLG_TITLE[] = L"str_sheet";	// —pŽ†‚Ì•\‘è
 

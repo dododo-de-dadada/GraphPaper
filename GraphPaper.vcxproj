@@ -180,7 +180,6 @@
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="shape.cpp" />
-    <ClCompile Include="shape_anch.cpp" />
     <ClCompile Include="shape_bezi.cpp" />
     <ClCompile Include="shape_image.cpp" />
     <ClCompile Include="shape_dt.cpp" />

@@ -14,10 +14,12 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::DataTransfer::DataPackageOperation;
 	using winrt::Windows::ApplicationModel::DataTransfer::DataPackageView;
 	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
+	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
 	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
 	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
+	using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
 	using winrt::Windows::Storage::Streams::DataWriter;
 	using winrt::Windows::Storage::Streams::IInputStream;
 	using winrt::Windows::Storage::Streams::InMemoryRandomAccessStream;

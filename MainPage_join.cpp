@@ -5,6 +5,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Foundation::IAsyncAction;
+
 	constexpr wchar_t DLG_TITLE[] = L"str_line_join";
 
 	// 線枠メニューの「端の種類」が選択された.

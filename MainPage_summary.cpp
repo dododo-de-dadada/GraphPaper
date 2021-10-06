@@ -10,6 +10,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 	using winrt::Windows::UI::Xaml::Controls::ListView;
 

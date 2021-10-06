@@ -109,12 +109,28 @@ namespace winrt::GraphPaper::implementation
 	{
 		const size_t d_cnt = m_vec.size();	// ç∑ï™ÇÃêî
 		D2D1_POINT_2F e_pos = m_pos;
-		b_min = a_min;
-		b_max = a_max;
-		pt_inc(e_pos, b_min, b_max);
+		//b_min = a_min;
+		//b_max = a_max;
+		//pt_inc(e_pos, b_min, b_max);
+		b_min.x = e_pos.x < a_min.x ? e_pos.x : a_min.x;
+		b_min.y = e_pos.y < a_min.y ? e_pos.y : a_min.y;
+		b_max.x = e_pos.x > a_max.x ? e_pos.x : a_max.x;
+		b_max.y = e_pos.y > a_max.y ? e_pos.y : a_max.y;
 		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(e_pos, m_vec[i], e_pos);
-			pt_inc(e_pos, b_min, b_max);
+			//pt_inc(e_pos, b_min, b_max);
+			if (e_pos.x < b_min.x) {
+				b_min.x = e_pos.x;
+			}
+			if (e_pos.x > b_max.x) {
+				b_max.x = e_pos.x;
+			}
+			if (e_pos.y < b_min.y) {
+				b_min.y = e_pos.y;
+			}
+			if (e_pos.y > b_max.y) {
+				b_max.y = e_pos.y;
+			}
 		}
 	}
 
@@ -224,7 +240,9 @@ namespace winrt::GraphPaper::implementation
 		value = m_pos;
 		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(v_pos, m_vec[i], v_pos);
-			pt_min(value, v_pos, value);
+			//pt_min(value, v_pos, value);
+			value.x = value.x < v_pos.x ? value.x : v_pos.x;
+			value.y = value.y < v_pos.y ? value.y : v_pos.y;
 		}
 	}
 
