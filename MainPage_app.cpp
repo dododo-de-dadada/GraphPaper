@@ -15,6 +15,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionResult;
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionSession;
 	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedEventArgs;
+	using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
 	using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::SuspendingDeferral;
 	using winrt::Windows::ApplicationModel::SuspendingEventArgs;
@@ -100,7 +101,6 @@ namespace winrt::GraphPaper::implementation
 			// RequestExtensionAsync の中でこのコルーチンは呼び出されるので, 上位関数のローカル変数は参照できる (たぶん).
 			[&cancel_src, &sus_deferral](IInspectable const&, ExtendedExecutionRevokedEventArgs const& args)
 			{
-				using winrt::Windows::ApplicationModel::ExtendedExecution::ExtendedExecutionRevokedReason;
 				// トークンの元をキャンセルする.
 				cancel_src.cancel();
 				switch (args.Reason()) {

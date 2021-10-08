@@ -13,6 +13,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr wchar_t DLG_TITLE[] = L"str_font";
 
@@ -270,7 +272,8 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::font_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S>
+	void MainPage::font_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			if constexpr (S == 0) {

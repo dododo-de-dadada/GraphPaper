@@ -12,11 +12,14 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Devices::Input::PointerDeviceType;
 	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::System::VirtualKeyModifiers;
+	using winrt::Windows::UI::Core::CoreCursor;
 	using winrt::Windows::UI::Core::CoreCursorType;
+	using winrt::Windows::UI::Core::CoreWindow;
 	using winrt::Windows::UI::Input::PointerPointProperties;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollBar;
 	using winrt::Windows::UI::Xaml::Controls::SwapChainPanel;
+	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
 	using winrt::Windows::UI::Xaml::UIElement;
 	using winrt::Windows::UI::Xaml::Window;
 

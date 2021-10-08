@@ -9,17 +9,18 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr wchar_t TITLE_FILL[] = L"str_fill";
 
 	// 塗りつぶしメニューの「色」が選択された.
 	IAsyncAction MainPage::fill_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-
 		m_sample_sheet.set_attr_to(&m_main_sheet);
 		D2D1_COLOR_F value;
 		m_sample_sheet.get_fill_color(value);
@@ -87,9 +88,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::fill_slider_set_header(const float value)
+	template <UNDO_OP U, int S>
+	void MainPage::fill_slider_set_header(const float value)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::FILL_COLOR) {
@@ -133,7 +134,8 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::fill_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S>
+	void MainPage::fill_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::FILL_COLOR) {
 			const float value = static_cast<float>(args.NewValue());

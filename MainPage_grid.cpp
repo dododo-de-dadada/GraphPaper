@@ -9,8 +9,13 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	//constexpr float SLIDER_STEP = 0.5f;
 	constexpr wchar_t TITLE_GRID[] = L"str_grid";
@@ -56,10 +61,6 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「方眼の色」が選択された.
 	IAsyncAction MainPage::grid_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-
 		m_sample_sheet.set_attr_to(&m_main_sheet);
 		const auto val0 = m_sample_sheet.m_grid_color.r * COLOR_MAX;
 		const auto val1 = m_sample_sheet.m_grid_color.g * COLOR_MAX;
@@ -118,10 +119,6 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「方眼の大きさ」>「大きさ」が選択された.
 	IAsyncAction MainPage::grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_main_sheet);
@@ -188,7 +185,6 @@ namespace winrt::GraphPaper::implementation
 	// value	値
 	template <UNDO_OP U, int S> void MainPage::grid_slider_set_header(const float value)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
 
 		if constexpr (U == UNDO_OP::GRID_BASE) {
@@ -244,7 +240,8 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S>
+	void MainPage::grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			const float value = static_cast<float>(args.NewValue());

@@ -9,6 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+
 	// 編集メニューの「グループ化」が選択された.
 	void MainPage::group_click(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -16,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		SHAPE_LIST slist;
-		slist_selected<Shape>(m_main_sheet.m_shape_list, slist);
+		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
 		ShapeGroup* g = new ShapeGroup();
 #if defined(_DEBUG)
 		debug_leak_cnt++;
@@ -50,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 選択されたグループ図形のリストを得て, リストが空か判定する.
 		SHAPE_LIST g_list;
-		slist_selected<ShapeGroup>(m_main_sheet.m_shape_list, g_list);
+		slist_get_selected<ShapeGroup>(m_main_sheet.m_shape_list, g_list);
 		if (g_list.empty()) {
 			return;
 		}

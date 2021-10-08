@@ -9,12 +9,24 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::UI::Color;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::Controls::TextBox;
+	using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
 	constexpr wchar_t DLG_TITLE[] = L"str_sheet";	// 用紙の表題
+
+	void MainPage::sheet_panel_scale_changed(IInspectable const&, IInspectable const&)
+	{
+		m_main_d2d.SetCompositionScale(scp_sheet_panel(), scp_sheet_panel().CompositionScaleX(), scp_sheet_panel().CompositionScaleY());
+	}
 
 	// 長さををピクセル単位の値に変換する.
 	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept;
@@ -85,10 +97,6 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「用紙の色」が選択された.
 	IAsyncAction MainPage::sheet_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-
 		m_sample_sheet.set_attr_to(&m_main_sheet);
 		const float val0 = m_sample_sheet.m_sheet_color.r * COLOR_MAX;
 		const float val1 = m_sample_sheet.m_sheet_color.g * COLOR_MAX;
@@ -356,6 +364,12 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	void MainPage::sheet_xaml_root_changed(winrt::Windows::UI::Xaml::XamlRoot const&, winrt::Windows::UI::Xaml::XamlRootChangedEventArgs const& args)
+	{
+		auto a_prop = args.as<winrt::Windows::Foundation::IPropertyValue>();
+		auto a_type = a_prop.Type();
+	}
+
 	// 用紙のスワップチェーンパネルがロードされた.
 #if defined(_DEBUG)
 	void MainPage::sheet_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
@@ -368,6 +382,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif // _DEBUG
+		auto xaml_root = scp_sheet_panel().XamlRoot();
+		xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed});
+
 		m_main_d2d.SetSwapChainPanel(scp_sheet_panel());
 		sheet_draw();
 	}
@@ -573,7 +590,8 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::sheet_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S>
+	void MainPage::sheet_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::SHEET_COLOR) {
 			const auto value = static_cast<float>(args.NewValue());

@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::UI::Xaml::Controls::ItemCollection;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr bool SEND_TO_BACK = true;
 	using SEND_BACKWARD = SHAPE_LIST::iterator;
@@ -31,14 +31,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 選択された図形を次の図形と入れ替える.
-	template void MainPage::arrange_order<BRING_FORWARD>(void);
+	template 
+	void MainPage::arrange_order<BRING_FORWARD>(void);
 
 	// 選択された図形を前の図形と入れ替える.
-	template void MainPage::arrange_order<SEND_BACKWARD>(void);
+	template 
+	void MainPage::arrange_order<SEND_BACKWARD>(void);
 
 	// 選択された図形を次または前の図形と入れ替える.
 	// T	T が iterator の場合は背面の図形と入れ替え, reverse_iterator の場合は前面の図形と入れ替える. 
-	template<typename T> void MainPage::arrange_order(void)
+	template<typename T>
+	void MainPage::arrange_order(void)
 	{
 		T it_end;	// 終端
 		T it_src;	// 交換元反復子
@@ -123,10 +126,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 選択された図形を最背面または最前面に移動する.
 	// B	B が true の場合は最背面, false の場合は最前面に移動
-	template<bool B> void MainPage::arrange_to(void)
+	template<bool B> 
+	void MainPage::arrange_to(void)
 	{
 		SHAPE_LIST slist;
-		slist_selected<Shape>(m_main_sheet.m_shape_list, slist);
+		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
 		if (slist.size() == 0) {
 			return;
 		}
@@ -161,9 +165,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 選択された図形を最前面に移動する.
-	template void MainPage::arrange_to<BRING_TO_FRONT>(void);
+	template
+	void MainPage::arrange_to<BRING_TO_FRONT>(void);
 
 	// 選択された図形を最背面に移動する.
-	template void MainPage::arrange_to<SEND_TO_BACK>(void);
+	template 
+	void MainPage::arrange_to<SEND_TO_BACK>(void);
 
 }

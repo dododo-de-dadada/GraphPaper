@@ -10,6 +10,10 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+	using winrt::Windows::UI::Core::CoreWindow;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+
 	// AND 演算する.
 	static STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 	// ビットマスクする.
@@ -48,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「ステータスバー」が選択された.
 	void MainPage::status_bar_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
+		//using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
 		STATUS_BAR s_bar;	// ステータスバーの状態
 		bool check;
 
@@ -208,8 +212,6 @@ namespace winrt::GraphPaper::implementation
 	// 作図ツールをステータスバーに格納する.
 	void MainPage::status_set_draw(void)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		winrt::hstring data;
 		if (m_drawing_tool == DRAWING_TOOL::BEZI) {
 			data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));

@@ -10,12 +10,13 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// その他メニューの「バージョン情報」が選択された.
 	IAsyncAction MainPage::about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		tb_version().Visibility(UI_VISIBLE);
 		const auto def_btn = cd_sample_dialog().DefaultButton();
 		const auto pri_text = cd_sample_dialog().PrimaryButtonText();
@@ -103,7 +104,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// その他メニューの「長さの単位」に印をつける.
-	void MainPage::misc_len_is_checked(const LEN_UNIT value)
+	void MainPage::len_unit_is_checked(const LEN_UNIT value)
 	{
 		rmfi_len_unit_grid().IsChecked(value == LEN_UNIT::GRID);
 		rmfi_len_unit_grid_2().IsChecked(value == LEN_UNIT::GRID);
@@ -120,8 +121,6 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「頂点をくっつける...」が選択された.
 	IAsyncAction MainPage::stick_to_vertex_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
 		misc_vert_stick_set_header(m_vert_stick);
 		sd_misc_vert_stick().Value(static_cast<double>(m_vert_stick));
 		const auto d_result{ co_await cd_misc_vert_stick().ShowAsync() };

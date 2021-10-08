@@ -13,6 +13,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow_size";
 

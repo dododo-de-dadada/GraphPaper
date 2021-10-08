@@ -15,13 +15,16 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Foundation::IAsyncOperation;
 	using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::UI::Color;
+	using winrt::Windows::UI::Core::CoreWindow;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
 	using winrt::Windows::UI::ViewManagement::UISettings;
 	using winrt::Windows::UI::Xaml::Application;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialog;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
 	using winrt::Windows::UI::Xaml::Media::Brush;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// UWP のブラシを D2D1_COLOR_F に変換する.
 	//static bool conv_uwp_to_color(const Brush& a, D2D1_COLOR_F& b) noexcept;
@@ -204,10 +207,10 @@ namespace winrt::GraphPaper::implementation
 			auto const& thread{ CoreWindow::GetForCurrentThread() };
 			thread.Activated(m_token_activated);
 			thread.VisibilityChanged(m_token_visibility_changed);
-			auto const& disp{ DisplayInformation::GetForCurrentView() };
-			disp.DpiChanged(m_token_dpi_changed);
-			disp.OrientationChanged(m_token_orientation_changed);
-			disp.DisplayContentsInvalidated(m_token_contents_invalidated);
+			//auto const& disp{ DisplayInformation::GetForCurrentView() };
+			//disp.DpiChanged(m_token_dpi_changed);
+			//disp.OrientationChanged(m_token_orientation_changed);
+			//disp.DisplayContentsInvalidated(m_token_contents_invalidated);
 			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(m_token_close_requested);
 		}
 

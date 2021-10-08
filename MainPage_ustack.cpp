@@ -22,6 +22,7 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::Storage::Streams::DataReader;
 	using winrt::Windows::Storage::Streams::DataWriter;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// ヌルで区切られる一連の操作を, 操作の組とみなし, その数を組数とする.
 	// スタックに積むことができる最大の組数.

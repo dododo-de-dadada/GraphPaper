@@ -9,7 +9,10 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::System::VirtualKeyModifiers;
 	using winrt::Windows::UI::Xaml::Controls::ListViewItem;
+	using winrt::Windows::UI::Xaml::Input::KeyboardAcceleratorInvokedEventArgs;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// Escape ‚ª‰Ÿ‚³‚ê‚½.
 	void MainPage::select_tool_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&)

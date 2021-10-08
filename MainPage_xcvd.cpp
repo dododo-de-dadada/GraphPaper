@@ -27,8 +27,9 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::IOutputStream;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
 	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
-	const winrt::param::hstring CLIPBOARD_SHAPES{ L"graph_paper_shapes_data" };	// 図形データのクリップボード書式
+	const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES{ L"graph_paper_shapes_data" };	// 図形データのクリップボード書式
 	//const winrt::param::hstring CLIPBOARD_TIFF{ L"TaggedImageFileFormat" };	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
 
 	// 貼り付ける位置を求める.
@@ -48,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		// 選択された図形のリストを得る.
 		SHAPE_LIST list_selected;
-		slist_selected<Shape>(m_main_sheet.m_shape_list, list_selected);
+		slist_get_selected<Shape>(m_main_sheet.m_shape_list, list_selected);
 		// リストから降順に, 最初に見つかった文字列図形の文字列, あるいは画像図形の画像を得る.
 		wchar_t* txt = nullptr;
 		RandomAccessStreamReference img_ref = nullptr;
@@ -87,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 			// データパッケージを作成し, データパッケージにメモリストリームを格納する.
 			DataPackage dt_pkg{ DataPackage() };
 			dt_pkg.RequestedOperation(DataPackageOperation::Copy);
-			dt_pkg.SetData(CLIPBOARD_SHAPES, winrt::box_value(mem_stream));
+			dt_pkg.SetData(CLIPBOARD_FORMAT_SHAPES, winrt::box_value(mem_stream));
 			// 文字列が得られたか判定する.
 			if (txt != nullptr) {
 				// データパッケージにテキストを格納する.
@@ -132,7 +133,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 選択された図形のリストを得る.
 		SHAPE_LIST list_selected;
-		slist_selected<Shape>(m_main_sheet.m_shape_list, list_selected);
+		slist_get_selected<Shape>(m_main_sheet.m_shape_list, list_selected);
 		// リストの各図形について以下を繰り返す.
 		m_d2d_mutex.lock();
 		for (auto s : list_selected) {
@@ -214,7 +215,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_xcvd_copy().IsEnabled(exists_selected);
 		const DataPackageView& dp_view = Clipboard::GetContent();
 		mfi_xcvd_paste().IsEnabled(
-			dp_view.Contains(CLIPBOARD_SHAPES) ||
+			dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) ||
 			dp_view.Contains(StandardDataFormats::Text()) ||
 			dp_view.Contains(StandardDataFormats::Bitmap())); 
 			//|| dp_view.Contains(CLIPBOARD_TIFF));
@@ -243,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 
 		// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.
-		IInspectable dt_object{ co_await Clipboard::GetContent().GetDataAsync(CLIPBOARD_SHAPES) };
+		IInspectable dt_object{ co_await Clipboard::GetContent().GetDataAsync(CLIPBOARD_FORMAT_SHAPES) };
 		InMemoryRandomAccessStream ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
 		if (ra_stream.Size() <= static_cast<uint64_t>(UINT32_MAX)) {
 			IInputStream in_stream{ ra_stream.GetInputStreamAt(0) };
@@ -458,7 +459,7 @@ namespace winrt::GraphPaper::implementation
 		try {
 			// クリップボードに図形が含まれているか判定する.
 			const DataPackageView& dp_view = Clipboard::GetContent();
-			if (dp_view.Contains(CLIPBOARD_SHAPES)) {
+			if (dp_view.Contains(CLIPBOARD_FORMAT_SHAPES)) {
 				xcvd_paste_shape();
 				return;
 			}

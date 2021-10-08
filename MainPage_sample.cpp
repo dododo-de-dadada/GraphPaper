@@ -19,6 +19,9 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::FileAccessMode;
 	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::Storage::Streams::IRandomAccessStream;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialog;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// Œ©–{‚ð•\Ž¦‚·‚é
 	void MainPage::sample_draw(void)

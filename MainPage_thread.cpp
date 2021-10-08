@@ -12,11 +12,14 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::UI::Core::CoreWindow;
+	using winrt::Windows::UI::Core::CoreWindowActivationState;
+	using winrt::Windows::UI::Core::VisibilityChangedEventArgs;
+	using winrt::Windows::UI::Core::WindowActivatedEventArgs;
+
 	// ウィンドウの実行/停止が切り替わった.
 	void MainPage::thread_activated(IInspectable const&, WindowActivatedEventArgs const& args)
 	{
-		using winrt::Windows::UI::Core::CoreWindowActivationState;
-
 		// 背後にあるウィンドウが直接クリックされた場合のみ PointerActivated,
 		// それ以外の場合はすべて CodeActivated になる.
 		const auto a_state = args.WindowActivationState();
@@ -34,12 +37,12 @@ namespace winrt::GraphPaper::implementation
 			using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 
 			const auto& dp_view = Clipboard::GetContent();
-			dp_view.SetAcceptedFormatId(CLIPBOARD_SHAPES);
+			dp_view.SetAcceptedFormatId(CLIPBOARD_FORMAT_SHAPES);
 			dp_view.SetAcceptedFormatId(StandardDataFormats::Text());
 			dp_view.SetAcceptedFormatId(StandardDataFormats::Bitmap());
 			dp_view.SetAcceptedFormatId(StandardDataFormats::StorageItems());
 			//dp_view.SetAcceptedFormatId(CLIPBOARD_TIFF);
-			if (dp_view.Contains(CLIPBOARD_SHAPES) ||
+			if (dp_view.Contains(CLIPBOARD_FORMAT_SHAPES) ||
 				dp_view.Contains(StandardDataFormats::Text()) ||
 				dp_view.Contains(StandardDataFormats::Bitmap())) {
 				//|| dp_view.Contains(CLIPBOARD_TIFF)) {

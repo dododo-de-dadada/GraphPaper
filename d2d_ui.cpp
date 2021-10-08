@@ -70,7 +70,9 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::Graphics::Display::DisplayOrientations;
 	using winrt::Windows::Graphics::Display::DisplayInformation;
-
+	using winrt::Windows::UI::Core::CoreDispatcherPriority;
+	using winrt::Windows::UI::Core::DispatchedHandler;
+	using winrt::Windows::UI::Xaml::Controls::SwapChainPanel;
 
 	static winrt::com_ptr<ID2D1Factory3> create_d2d_factory(void);
 	static winrt::com_ptr<IDWriteFactory3> create_dwrite_factory(void);
@@ -212,11 +214,8 @@ namespace winrt::GraphPaper::implementation
 
 	// ウィンドウサイズ依存のリソースを作成する.
 	// これらのリソースは、ウィンドウサイズが変更されるたびに再作成する必要がある.
-	void D2D_UI::CreateWindowSizeDependentResources(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::CreateWindowSizeDependentResources(SwapChainPanel const& swap_chain_panel)
 	{
-		using winrt::Windows::UI::Core::CoreDispatcherPriority;
-		using winrt::Windows::UI::Core::DispatchedHandler;
-
 		// 前のウィンドウサイズに固有のコンテキストをクリアするため,
 		// レンダーターゲットを D3D コンテキストの出力マージ (OM) ステージに格納する.
 		// レンダーターゲットは空のビュー, 深度/ステンシルバッファーはヌルを指定する.
@@ -379,16 +378,28 @@ namespace winrt::GraphPaper::implementation
 
 			// スワップ チェーンと SwapChainPanel を関連付ける.
 			// UI の変更は、UI スレッドにディスパッチして戻す必要あり.
+#ifdef WIN_UI3
+			const winrt::Microsoft::UI::Dispatching::DispatcherQueue queue = swap_chain_panel.DispatcherQueue();
+			queue.TryEnqueue(winrt::Microsoft::UI::Dispatching::DispatcherQueuePriority::High,
+				winrt::Microsoft::UI::Dispatching::DispatcherQueueHandler([=]()
+					{
+						// SwapChainPanel のネイティブ インターフェイスに戻す.
+						winrt::com_ptr<ISwapChainPanelNative> scp_native{ nullptr };
+						winrt::check_hresult(winrt::get_unknown(swap_chain_panel)->QueryInterface(__uuidof(scp_native), scp_native.put_void()));
+						winrt::check_hresult(scp_native->SetSwapChain(dxgi_swap_chain.get()));
+					})
+			);
+#else
 			const auto _{ swap_chain_panel.Dispatcher().RunAsync(
-				CoreDispatcherPriority::High,
-				[=]()
-				{
-					// SwapChainPanel のネイティブ インターフェイスに戻す.
-					winrt::com_ptr<ISwapChainPanelNative> scpNative{ nullptr };
-					winrt::check_hresult(winrt::get_unknown(swap_chain_panel)->QueryInterface(__uuidof(scpNative), scpNative.put_void()));
-					winrt::check_hresult(scpNative->SetSwapChain(m_dxgi_swap_chain.get()));
-				}
-			) };
+				CoreDispatcherPriority::High, [=]()
+					{
+						// SwapChainPanel のネイティブ インターフェイスに戻す.
+						winrt::com_ptr<ISwapChainPanelNative> scpNative{ nullptr };
+						winrt::check_hresult(winrt::get_unknown(swap_chain_panel)->QueryInterface(__uuidof(scpNative), scpNative.put_void()));
+						winrt::check_hresult(scpNative->SetSwapChain(m_dxgi_swap_chain.get()));
+					})
+			};
+#endif // WIN_UI3
 			// DXGI が 1 度に複数のフレームをキュー処理していないことを確認します。これにより、遅延が減少し、
 			// アプリケーションが各 VSync の後でのみレンダリングすることが保証され、消費電力が最小限に抑えられます。
 			winrt::check_hresult(dxgi_device->SetMaximumFrameLatency(1));
@@ -439,11 +450,11 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_context->SetDpi(m_effectiveDpi, m_effectiveDpi);
 
 		// すべての Windows ストア アプリで、グレースケール テキストのアンチエイリアシングをお勧めします。
-		m_d2d_context->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
+		m_d2d_context->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE::D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
 	}
 
 	// すべてのデバイス リソースを再作成し、現在の状態に再設定する.
-	void D2D_UI::HandleDeviceLost(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::HandleDeviceLost(SwapChainPanel const& swap_chain_panel)
 	{
 		m_dxgi_swap_chain = nullptr;
 
@@ -460,7 +471,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// スワップチェーンの内容を画面に表示する.
-	void D2D_UI::Present(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::Present(SwapChainPanel const& swap_chain_panel)
 	{
 		DXGI_PRESENT_PARAMETERS param{ 0 };
 		const HRESULT hr = m_dxgi_swap_chain->Present1(1, 0, &param);
@@ -480,7 +491,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 描画環境に合成倍率を設定する.
 	// このメソッドは、CompositionScaleChanged イベントハンドラーの中で呼び出される.
-	void D2D_UI::SetCompositionScale(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, float compositionScaleX, float compositionScaleY)
+	// CompositionScaleChanged は Loaded のあとに呼び出される.
+	void D2D_UI::SetCompositionScale(SwapChainPanel const& swap_chain_panel, float compositionScaleX, float compositionScaleY)
 	{
 		if (m_compositionScaleX != compositionScaleX || 
 			m_compositionScaleY != compositionScaleY) {
@@ -492,7 +504,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 描画環境にデバイスの向きを設定する.
 	// このメソッドは、OrientationChanged イベントハンドラーの中で呼び出される.
-	void D2D_UI::SetCurrentOrientation(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, DisplayOrientations currentOrientation)
+	void D2D_UI::SetCurrentOrientation(SwapChainPanel const& swap_chain_panel, DisplayOrientations currentOrientation)
 	{
 		if (m_currentOrientation != currentOrientation) {
 			m_currentOrientation = currentOrientation;
@@ -502,7 +514,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 描画環境に DPI を設定する.
 	// このメソッドは、DpiChanged イベントハンドラーの中で呼び出される.
-	void D2D_UI::SetDpi(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, const float dpi)
+	void D2D_UI::SetDpi(SwapChainPanel const& swap_chain_panel, const float dpi)
 	{
 		if (dpi == m_logical_dpi) {
 			return;
@@ -515,10 +527,9 @@ namespace winrt::GraphPaper::implementation
 	// 描画環境に表示領域の大きさを設定する.
 	// このメソッドは、SizeChanged イベントハンドラーの中で呼び出される.
 	// SizeChanged は, まずサイズ 0 で Loaded に先んじて呼び出される.
-	void D2D_UI::SetLogicalSize2(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, const D2D1_SIZE_F size)
+	void D2D_UI::SetLogicalSize2(SwapChainPanel const& swap_chain_panel, const D2D1_SIZE_F size)
 	{
-		if (m_logical_width == size.width &&
-			m_logical_height == size.height) {
+		if (m_logical_width == size.width && m_logical_height == size.height) {
 			return;
 		}
 		m_logical_width = size.width;
@@ -528,8 +539,9 @@ namespace winrt::GraphPaper::implementation
 
 	// 描画環境に XAML スワップチェーンパネルを設定する.
 	// このメソッドは, UI コントロールが作成 (または再作成) = Loaded されたときに呼び出される.
-	void D2D_UI::SetSwapChainPanel(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::SetSwapChainPanel(SwapChainPanel const& swap_chain_panel)
 	{
+		//const auto rast_scale = xaml_root.RasterizationScale();
 		// 現在の表示状態 DisplayInfomation を得る.
 		// 表示状態をもとに, 表示デバイスの既定の向きと現在の向き, 
 		// 論理 DPI を得る. 
@@ -543,9 +555,11 @@ namespace winrt::GraphPaper::implementation
 			m_currentOrientation = di.CurrentOrientation();
 			m_logical_dpi = di.LogicalDpi();
 		}
-		
-		m_d2d_context->SetDpi(m_logical_dpi, m_logical_dpi);
-		//m_swapChainPanel = xaml_scp;
+		FLOAT system_dpi_x;
+		FLOAT system_dpi_y;
+		m_d2d_context->GetDpi(&system_dpi_x, &system_dpi_y);
+		//m_d2d_context->SetDpi(m_logical_dpi, m_logical_dpi);
+		m_d2d_context->SetDpi(0, 0);
 		m_compositionScaleX = swap_chain_panel.CompositionScaleX();
 		m_compositionScaleY = swap_chain_panel.CompositionScaleY();
 		m_logical_width = static_cast<FLOAT>(swap_chain_panel.ActualWidth());
@@ -661,9 +675,9 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
 		// DXGI デバイスをもとに D2D デバイスを作成する.
 		winrt::com_ptr<ID2D1Device2> d2d_device{ nullptr };
-		winrt::check_hresult(
-			m_d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put())
-		);
+
+		winrt::check_hresult(m_d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put()));
+
 		// D2D デバイスをもとに D2D コンテキストを作成する.
 		// オプションは D2D1_DEVICE_CONTEXT_OPTIONS_NONE を指定する.
 		m_d2d_context = nullptr;
@@ -709,7 +723,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 表示デバイスが有効になった.
 	// このメソッドは、DisplayContentsInvalidated イベント用のイベント ハンドラーの中で呼び出されます。
-	void D2D_UI::ValidateDevice(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::ValidateDevice(SwapChainPanel const& swap_chain_panel)
 	{
 		//デバイスが作成された後に既定のアダプターが変更された、
 		// またはこのデバイスが削除された場合は、D3D デバイスが有効でなくなります。

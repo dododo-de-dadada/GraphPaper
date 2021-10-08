@@ -409,7 +409,7 @@ namespace winrt::GraphPaper::implementation
 		if (anch >= ANCH_TYPE::ANCH_P0 && anch <= ANCH_TYPE::ANCH_P0 + d_cnt) {
 			D2D1_POINT_2F v_pos[MAX_N_GON];	// 頂点の位置
 			const size_t a_cnt = anch - ANCH_TYPE::ANCH_P0;	// 変更する頂点
-			// 最初の頂点から変更する頂点までの, 各頂点の位置を得る.
+			// 変更する頂点までの, 各頂点の位置を得る.
 			v_pos[0] = m_pos;
 			for (size_t i = 0; i < a_cnt; i++) {
 				pt_add(v_pos[i], m_vec[i], v_pos[i + 1]);
@@ -432,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 				// 変更するのが最後の頂点じゃないか判定する.
 				if (a_cnt < d_cnt) {
 					// 次の頂点が動かないように,
-					// 頂点の直後の差分から変更分を引く.
+					// 変更する頂点の次の頂点への差分から変更分を引く.
 					pt_sub(m_vec[a_cnt], vec, m_vec[a_cnt]);
 				}
 				if (!done) {
@@ -446,7 +446,7 @@ namespace winrt::GraphPaper::implementation
 					pt_add(v_pos[i], m_vec[i], v_pos[i + 1]);
 				}
 				for (size_t i = 0; i < d_cnt + 1; i++) {
-					// 頂点が変更する頂点か判定する.
+					// 頂点が, 変更する頂点か判定する.
 					if (i == a_cnt) {
 						continue;
 					}
@@ -507,9 +507,9 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(m_stroke_width, value)) {
 			m_stroke_width = value;
 			if (m_dash_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
-				//if (m_d2d_stroke_style != nullptr) {
+				if (m_d2d_stroke_style != nullptr) {
 					m_d2d_stroke_style = nullptr;
-				//}
+				}
 				//create_stroke_style(Shape::s_d2d_factory, m_stroke_cap, m_dash_cap, m_dash_style, m_dash_patt, m_join_style, m_join_limit, m_stroke_width, m_d2d_stroke_style.put());
 			}
 			return true;

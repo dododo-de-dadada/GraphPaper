@@ -63,8 +63,8 @@ namespace winrt::GraphPaper::implementation
 		winrt::Windows::Graphics::Display::DisplayOrientations m_nativeOrientation = winrt::Windows::Graphics::Display::DisplayOrientations::None;
 		winrt::Windows::Graphics::Display::DisplayOrientations m_currentOrientation = winrt::Windows::Graphics::Display::DisplayOrientations::None;
 		float m_logical_dpi = -1.0f;
-		float m_compositionScaleX = 1.0f;
-		float m_compositionScaleY = 1.0f;
+		float m_compositionScaleX;
+		float m_compositionScaleY;
 		D3D_DRIVER_TYPE m_d3d_driver_type = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_NULL;
 
 		// スケーリング用の DPI と合成倍率

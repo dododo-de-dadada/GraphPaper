@@ -36,7 +36,7 @@
 //        +---------------+---------------+
 //        |               |               |
 // +------+------+ +------+------+ +------+------+
-// | ShapeStatus | | ShapeGroup  | | ShapeSheet  |
+// | ShapeFlag*  | | ShapeGroup  | | ShapeSheet  |
 // +------+------+ +-------------+ +-------------+
 //        |
 //        +---------------+
@@ -403,8 +403,8 @@ namespace winrt::GraphPaper::implementation
 
 	using SHAPE_LIST = std::list<struct Shape*>;
 
-	// 利用可能な書体名か判定し, 利用できない書体があったならばそれを得る.
-	bool slist_test_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept;
+	// 図形リストの中の文字列図形に, 利用できない書体があったならばその書体名を得る.
+	bool slist_test_avaiable_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept;
 
 	// 最後の図形を得る.
 	Shape* slist_back(SHAPE_LIST const& slist) noexcept;
@@ -452,8 +452,8 @@ namespace winrt::GraphPaper::implementation
 	Shape* slist_remove(SHAPE_LIST& slist, const Shape* s) noexcept;
 
 	// 選択された図形のリストを得る.
-	template <typename S>
-	void slist_selected(SHAPE_LIST const& slist, SHAPE_LIST& t_list) noexcept;
+	template <typename T>
+	void slist_get_selected(SHAPE_LIST const& slist, SHAPE_LIST& t_list) noexcept;
 
 	// データライターに図形リストを書き込む. REDUCE なら消去された図形は省く.
 	template <bool REDUCE>
@@ -659,7 +659,7 @@ namespace winrt::GraphPaper::implementation
 		virtual void write_svg(winrt::Windows::Storage::Streams::DataWriter const& /*dt_writer*/) const {}
 	};
 
-	struct ShapeStatus : Shape {
+	struct ShapeFlag : Shape {
 		bool m_is_deleted = false;	// 消去されたか判定
 		bool m_is_selected = false;	// 選択されたか判定
 
@@ -676,7 +676,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 画像
 	//------------------------------
-	struct ShapeImage : ShapeStatus {
+	struct ShapeImage : ShapeFlag {
 		D2D1_POINT_2F m_pos;	// 始点の位置
 		D2D1_SIZE_F m_view;	// 表示寸法
 		D2D1_RECT_F m_rect;	// ビットマップの矩形
@@ -990,7 +990,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 線枠のひな型
 	//------------------------------
-	struct ShapeStroke : ShapeStatus {
+	struct ShapeStroke : ShapeFlag {
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_vec;	// 次の位置への差分
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式

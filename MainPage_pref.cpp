@@ -12,6 +12,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Foundation::IAsyncOperation;
 	using winrt::Windows::Storage::StorageFile;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 

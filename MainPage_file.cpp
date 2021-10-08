@@ -103,9 +103,12 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataWriter;
 	using winrt::Windows::Storage::Streams::IRandomAccessStream;
 	using winrt::Windows::System::Launcher;
+	using winrt::Windows::UI::Core::CoreCursor;
 	using winrt::Windows::UI::Core::CoreCursorType;
+	using winrt::Windows::UI::Core::CoreWindow;
 	using winrt::Windows::UI::ViewManagement::ApplicationView;
-
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	using winrt::Windows::UI::Xaml::Window;
 
 	static CoreCursor const& CUR_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 待機カーソル.
 	constexpr wchar_t DESC_GPF[] = L"str_desc_gpf";	// 拡張子 gpf の説明
@@ -213,13 +216,13 @@ namespace winrt::GraphPaper::implementation
 		drawing_poly_opt_is_checked(m_drawing_poly_opt);
 		misc_color_is_checked(m_color_code);
 		status_bar_is_checked(m_status_bar);
-		misc_len_is_checked(m_len_unit);
+		len_unit_is_checked(m_len_unit);
 		image_keep_aspect_is_checked(m_image_keep_aspect);
 		
 		sheet_attr_is_checked();
 
 		wchar_t* unavailable_font;	// 書体名
-		if (slist_test_font(m_main_sheet.m_shape_list, unavailable_font) != true) {
+		if (!slist_test_avaiable_font(m_main_sheet.m_shape_list, unavailable_font)) {
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, ERR_FONT, unavailable_font);
 		}

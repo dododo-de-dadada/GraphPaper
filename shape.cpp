@@ -12,9 +12,6 @@ namespace winrt::GraphPaper::implementation
 	uint32_t debug_leak_cnt = 0;
 	uint32_t debug_shape_cnt = 0;
 #endif
-	//D2D_UI* Shape::s_dx = nullptr;
-	//ID2D1Factory3* Shape::s_d2d_factory = nullptr;	// D2D1 ファクトリ
-	//IDWriteFactory3* Shape::s_dwrite_factory = nullptr;	// DWRITE ファクトリ
 	float Shape::s_anch_len = 6.0f;
 	D2D1_COLOR_F Shape::m_default_background = COLOR_WHITE;	// 前景色 (アンカーの背景色)
 	D2D1_COLOR_F Shape::m_default_foreground = COLOR_BLACK;	// 背景色 (アンカーの前景色)
@@ -39,11 +36,11 @@ namespace winrt::GraphPaper::implementation
 	void anch_draw_rect(const D2D1_POINT_2F a_pos, D2D_UI& dx)
 	{
 		D2D1_POINT_2F r_min;
-		pt_add(a_pos, -0.5 * Shape::s_anch_len, r_min);
 		D2D1_POINT_2F r_max;
+		pt_add(a_pos, -0.5 * Shape::s_anch_len, r_min);
 		pt_add(r_min, Shape::s_anch_len, r_max);
 		const D2D1_RECT_F rect{ r_min.x, r_min.y, r_max.x, r_max.y };
-		ID2D1SolidColorBrush* brush = dx.m_solid_color_brush.get();
+		ID2D1SolidColorBrush* const brush = dx.m_solid_color_brush.get();
 		brush->SetColor(Shape::m_default_background);
 		dx.m_d2d_context->DrawRectangle(rect, brush, 2.0, nullptr);
 		brush->SetColor(Shape::m_default_foreground);

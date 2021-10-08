@@ -10,6 +10,9 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
+	using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr wchar_t NOT_FOUND[] = L"str_info_not_found";	// 「文字列が見つかりません」メッセージのリソースキー
 
@@ -484,7 +487,6 @@ namespace winrt::GraphPaper::implementation
 	// s	文字列図形
 	IAsyncAction MainPage::edit_text_async(ShapeText* s)
 	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		static winrt::event_token primary_token;
 		static winrt::event_token closed_token;
 

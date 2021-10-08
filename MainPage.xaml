@@ -319,11 +319,11 @@
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_pixel_2" x:Uid="rmfi_len_unit_pixel" Click="len_unit_click" Text="Pixel" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_inch_2" x:Uid="rmfi_len_unit_inch" Click="len_unit_click" Text="Inch" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_milli_2" x:Uid="rmfi_len_unit_milli" Click="len_unit_click" Text="Millimeter" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_point_2" x:Uid="rmfi_len_unit_point" Click="len_unit_click" Text="Point" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_grid_2" x:Uid="rmfi_len_unit_grid" Click="len_unit_click" Text="Per Grid" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_pixel_2" x:Uid="rmfi_len_unit_pixel"  IsChecked="True" Click="len_unit_click" GroupName="gn_len_unit_2" Text="Pixel" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_inch_2" x:Uid="rmfi_len_unit_inch" Click="len_unit_click" GroupName="gn_len_unit_2" Text="Inch" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_milli_2" x:Uid="rmfi_len_unit_milli" Click="len_unit_click" GroupName="gn_len_unit_2" Text="Millimeter" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_point_2" x:Uid="rmfi_len_unit_point" Click="len_unit_click" GroupName="gn_len_unit_2" Text="Point" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_grid_2" x:Uid="rmfi_len_unit_grid" Click="len_unit_click" GroupName="gn_len_unit_2" Text="Per Grid" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color Code">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_dec_2" x:Uid="rmfi_color_code_dec" Click="color_code_click" IsChecked="True" Text="Decimal" GroupName="gn_misc_color_2" />
@@ -787,11 +787,11 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_unit}" />
 					</MenuFlyoutSubItem.Icon>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_pixel" x:Uid="rmfi_len_unit_pixel" Click="len_unit_click" Text="Pixel" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_inch" x:Uid="rmfi_len_unit_inch" Click="len_unit_click" Text="Inch" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_milli" x:Uid="rmfi_len_unit_milli" Click="len_unit_click" Text="Millimeter" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_point" x:Uid="rmfi_len_unit_point" Click="len_unit_click" Text="Point" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_grid" x:Uid="rmfi_len_unit_grid" Click="len_unit_click" Text="Per Grid" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_pixel" x:Uid="rmfi_len_unit_pixel" IsChecked="True" Click="len_unit_click" GroupName="gn_len_unit" Text="Pixel" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_inch" x:Uid="rmfi_len_unit_inch" Click="len_unit_click" GroupName="gn_len_unit" Text="Inch" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_milli" x:Uid="rmfi_len_unit_milli" Click="len_unit_click" GroupName="gn_len_unit" Text="Millimeter" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_point" x:Uid="rmfi_len_unit_point" Click="len_unit_click" GroupName="gn_len_unit" Text="Point" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_grid" x:Uid="rmfi_len_unit_grid" Click="len_unit_click" GroupName="gn_len_unit" Text="Per Grid" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color Code">
 					<MenuFlyoutSubItem.Icon>
@@ -872,6 +872,7 @@
             <SwapChainPanel
                 x:Name="scp_sheet_panel"
                 Loaded="sheet_panel_loaded"
+                CompositionScaleChanged="sheet_panel_scale_changed"
                 KeyboardAcceleratorPlacementMode="Hidden"
                 PointerCanceled="event_canceled"
                 PointerEntered="event_entered"

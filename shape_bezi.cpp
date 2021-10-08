@@ -19,15 +19,15 @@ namespace winrt::GraphPaper::implementation
 	constexpr double T3 = 1.0;
 
 	// シンプソン法の回数
-	constexpr uint32_t SIMPSON_N = 30;
+	constexpr uint32_t SIMPSON_CNT = 30;
 
 	// double 型の値をもつ位置
 	// ShapeBase 内でのみ使用する.
 	struct BZP {
 		double x;
 		double y;
-
-		inline void inc(BZP& r_min, BZP& r_max) const noexcept
+		// この位置を含むよう方形を拡張する.
+		inline void exp(BZP& r_min, BZP& r_max) const noexcept
 		{
 			if (x < r_min.x) {
 				r_min.x = x;
@@ -61,44 +61,44 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 曲線の矢じるしの端点を求める.
-	static bool bz_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
+	static bool bezi_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
 
 	// 曲線の矢じるしのジオメトリを作成する.
-	static void bz_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
+	static void bezi_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
 
 	// 曲線上の助変数をもとに微分値を求める.
-	static double bz_deriv_by_param(const BZP b_pos[4], const double t) noexcept;
+	static double bezi_deriv_by_param(const BZP b_pos[4], const double t_val) noexcept;
 
 	// 点の配列をもとにそれらをすべて含む凸包を求める.
-	static void bz_get_convex(const uint32_t e_cnt, const BZP e_pos[], uint32_t& c_cnt, BZP c_pos[]);
+	static void bezi_get_convex(const uint32_t e_cnt, const BZP e_pos[], uint32_t& c_cnt, BZP c_pos[]);
 
 	// 位置を曲線の端点が含むか判定する.
-	template<D2D1_CAP_STYLE S> static bool bz_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F d_vec[3], const double e_width);
+	template<D2D1_CAP_STYLE S> static bool bezi_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F d_vec[3], const double e_width);
 
 	// 点が凸包に含まれるか判定する.
-	static bool bz_in_convex(const double tx, const double ty, const size_t c_cnt, const BZP c_pos[]) noexcept;
+	static bool bezi_in_convex(const double tx, const double ty, const size_t c_cnt, const BZP c_pos[]) noexcept;
 
 	// 曲線上の助変数の区間をもとに長さを求める.
-	static double bz_len_by_param(const BZP b_pos[4], const double t_min, const double t_max, const uint32_t sim_n) noexcept;
+	static double bezi_len_by_param(const BZP b_pos[4], const double t_min, const double t_max, const uint32_t s_cnt) noexcept;
 
 	// 曲線上の長さをもとに助変数を求める.
-	static double bz_param_by_len(const BZP b_pos[4], const double b_len) noexcept;
+	static double bezi_param_by_len(const BZP b_pos[4], const double b_len) noexcept;
 
 	// 曲線上の助変数をもとに位置を求める.
-	static void bz_point_by_param(const BZP b_pos[4], const double t, BZP& p) noexcept;
+	static void bezi_point_by_param(const BZP b_pos[4], const double t_val, BZP& p) noexcept;
 
 	// 2 つの助変数が区間 0-1 の間で正順か判定する.
-	static bool bz_test_param(const double t_min, const double t_max) noexcept;
+	static bool bezi_test_param(const double t_min, const double t_max) noexcept;
 
 	// 曲線上の助変数をもとに接線ベクトルを求める.
-	static void bz_tvec_by_param(const BZP b_pos[4], const double t, BZP& t_vec) noexcept;
+	static void bezi_tvec_by_param(const BZP b_pos[4], const double t_val, BZP& t_vec) noexcept;
 
 	// 曲線の矢じるしの端点を求める.
 	// b_start	曲線の開始位置
 	// b_seg	曲線の制御点
 	// a_size	矢じるしの寸法
 	// a_barbs[3]	計算された返しの端点と先端点
-	static bool bz_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F a_barbs[3]) noexcept
+	static bool bezi_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F a_barbs[3]) noexcept
 	{
 		BZP seg[3]{};
 		BZP b_pos[4]{};
@@ -112,19 +112,19 @@ namespace winrt::GraphPaper::implementation
 		b_pos[2] = seg[0] - b_start;
 		b_pos[1] = seg[1] - b_start;
 		b_pos[0] = seg[2] - b_start;
-		auto b_len = bz_len_by_param(b_pos, 0.0, 1.0, SIMPSON_N);
+		auto b_len = bezi_len_by_param(b_pos, 0.0, 1.0, SIMPSON_CNT);
 		if (b_len >= FLT_MIN) {
 			// 矢じるしの先端のオフセット, または曲線の長さ, 
 			// どちらか短い方で, 助変数を求める.
-			const auto t = bz_param_by_len(b_pos, min(b_len, a_size.m_offset));
+			const auto t = bezi_param_by_len(b_pos, min(b_len, a_size.m_offset));
 			// 助変数をもとに曲線の接線ベクトルを得る.
 			BZP t_vec;
-			bz_tvec_by_param(b_pos, t, t_vec);
+			bezi_tvec_by_param(b_pos, t, t_vec);
 			// 矢じるしの返しの位置を計算する
 			get_arrow_barbs(-t_vec, sqrt(t_vec * t_vec), a_size.m_width, a_size.m_length, a_barbs);
 			// 助変数で曲線上の位置を得る.
 			BZP t_pos;	// 終点を原点とする, 矢じるしの先端の位置
-			bz_point_by_param(b_pos, t, t_pos);
+			bezi_point_by_param(b_pos, t, t_pos);
 			// 曲線上の位置を矢じるしの先端とし, 返しの位置も並行移動する.
 			pt_add(a_barbs[0], t_pos.x, t_pos.y, a_barbs[0]);
 			pt_add(a_barbs[1], t_pos.x, t_pos.y, a_barbs[1]);
@@ -144,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 	// a_style	矢じるしの種別
 	// a_size	矢じるしの寸法
 	// a_geo	矢じるしが追加されたジオメトリ
-	static void bz_create_arrow_geom(
+	static void bezi_create_arrow_geom(
 		ID2D1Factory3* const d_factory,
 		const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, 
 		ID2D1PathGeometry** a_geom)
@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F barbs[3];	// 矢じるしの返しの端点	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (bz_calc_arrow(b_pos, b_seg, a_size, barbs)) {
+		if (bezi_calc_arrow(b_pos, b_seg, a_size, barbs)) {
 			// ジオメトリシンクに追加する.
 			winrt::check_hresult(d_factory->CreatePathGeometry(a_geom));
 			winrt::check_hresult((*a_geom)->Open(sink.put()));
@@ -169,12 +169,12 @@ namespace winrt::GraphPaper::implementation
 	// 曲線上の助変数をもとに微分値を求める.
 	// b_pos	制御点
 	// t	助変数
-	static double bz_deriv_by_param(const BZP b_pos[4], const double t) noexcept
+	static double bezi_deriv_by_param(const BZP b_pos[4], const double t_val) noexcept
 	{
 		BZP t_vec;
 
 		// 助変数をもとにベジェ曲線上の接線ベクトルを求め, その接線ベクトルの長さを返す.
-		bz_tvec_by_param(b_pos, t, t_vec);
+		bezi_tvec_by_param(b_pos, t_val, t_vec);
 		return sqrt(t_vec * t_vec);
 	}
 
@@ -184,7 +184,7 @@ namespace winrt::GraphPaper::implementation
 	// e_pos	点の配列
 	// c_cnt	凸包の頂点の数
 	// c_pos	凸包の頂点の配列
-	static void bz_get_convex(const uint32_t e_cnt, const BZP e_pos[], uint32_t& c_cnt, BZP c_pos[])
+	static void bezi_get_convex(const uint32_t e_cnt, const BZP e_pos[], uint32_t& c_cnt, BZP c_pos[])
 	{
 		// e のうち, y 値が最も小さい点の集合から, x 値が最も小さい点の添え字 k を得る.
 		uint32_t k = 0;
@@ -223,9 +223,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を曲線の端が含むか判定する.
-	// t_pos	位置
-	// c_pos
-	template<D2D1_CAP_STYLE S> static bool bz_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F d_vec[3], const double e_width)
+	// t_pos	判定される位置
+	// c_pos	凸包 (四辺形) の頂点の配列
+	template<D2D1_CAP_STYLE S> static bool bezi_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F d_vec[3], const double e_width)
 	{
 		size_t i;
 		for (i = 0; i < 3; i++) {
@@ -304,12 +304,12 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 点 { 0, 0 } が凸包に含まれるか判定する.
+	// 点 { tx, ty } が凸包に含まれるか判定する.
 	// 交差数判定を用いる.
 	// c_cnt	凸包の頂点の数
 	// c_pos	凸包の頂点の配列
 	// 戻り値	含まれるなら true を, 含まれないなら false を返す.
-	static bool bz_in_convex(const double tx, const double ty, const size_t c_cnt, const BZP c_pos[]) noexcept
+	static bool bezi_in_convex(const double tx, const double ty, const size_t c_cnt, const BZP c_pos[]) noexcept
 	{
 		int k = 0;	// 点をとおる水平線が凸包の辺と交差する回数.
 		for (size_t i = c_cnt - 1, j = 0; j < c_cnt; i = j++) {
@@ -336,7 +336,8 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	制御点
 	// t_min	区間の始端
 	// t_max	区間の終端
-	static double bz_len_by_param(const BZP b_pos[4], const double t_min, const double t_max, const uint32_t sim_n) noexcept
+	// s_cnt	シンプソン法の回数
+	static double bezi_len_by_param(const BZP b_pos[4], const double t_min, const double t_max, const uint32_t s_cnt) noexcept
 	{
 		double t_vec;
 		uint32_t n;
@@ -348,13 +349,13 @@ namespace winrt::GraphPaper::implementation
 
 		/* 範囲の上限下限は正順か判定する. */
 		/* 正順 ? */
-		if (bz_test_param(t_min, t_max)) {
+		if (bezi_test_param(t_min, t_max)) {
 			/* 範囲上限 t_max -範囲下限 t_min を差分 t_vec に格納する. */
 			t_vec = t_max - t_min;
-			/* 区間の分割数 sim_n と t_vec を乗算する. */
+			/* 区間の分割数 s_cnt と t_vec を乗算する. */
 			/* その結果を切り上げて整数値する. */
 			/* 整数値を区間の半数 n に格納する. */
-			n = (int)std::ceil(t_vec * (double)sim_n);
+			n = (int)std::ceil(t_vec * (double)s_cnt);
 			/* t_vec÷2n を階差 h に格納する. */
 			h = t_vec / (2.0 * n);
 			/* 0 を奇数番目の部分区間の合計値 a に格納する. */
@@ -367,21 +368,21 @@ namespace winrt::GraphPaper::implementation
 			/* i は n より小 ? */
 			for (uint32_t i = 1; i < n; i++) {
 				/* 2i-1 番目の部分区間の微分値を求め, a に加える. */
-				a += bz_deriv_by_param(b_pos, t);
+				a += bezi_deriv_by_param(b_pos, t);
 				/* 階差 h を助変数 t に加える. */
 				t += h;
 				/* 2i 番目の部分区間の微分値を求め, b に加える. */
-				b += bz_deriv_by_param(b_pos, t);
+				b += bezi_deriv_by_param(b_pos, t);
 				/* 階差 h を助変数 t に加える. */
 				t += h;
 				/* i をインクリメントする. */
 			}
 			/* 2n-1 番目の部分区間の微分値を求め, a に加える. */
-			a += bz_deriv_by_param(b_pos, t);
+			a += bezi_deriv_by_param(b_pos, t);
 			/* 0 番目の部分区間での微分値を求め, b0 に格納する. */
-			b0 = bz_deriv_by_param(b_pos, t_min);
+			b0 = bezi_deriv_by_param(b_pos, t_min);
 			/* 2n 番目の部分区間での微分値を求め, b2 に格納する. */
-			b2 = bz_deriv_by_param(b_pos, t_max);
+			b2 = bezi_deriv_by_param(b_pos, t_max);
 			/* (b0+4×a+2×b+b2)×h/3 を求め, 積分値 s に格納する. */
 			s = (b0 + 4.0 * a + 2.0 * b + b2) * h / 3.0f;
 		}
@@ -397,7 +398,7 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	制御点
 	// b_len	長さ
 	// 戻り値	得られた助変数の値
-	static double bz_param_by_len(const BZP b_pos[4], const double b_len) noexcept
+	static double bezi_param_by_len(const BZP b_pos[4], const double b_len) noexcept
 	{
 		double t;	// 助変数
 		double d;	// 助変数の変分
@@ -410,7 +411,7 @@ namespace winrt::GraphPaper::implementation
 		for (d = 0.25; d >= 0.001953125; d *= 0.5) {
 			/* 0-助変数の範囲を合成シンプソン公式で積分し, 曲線の長さを求める. */
 			/* 求めた長さと指定された長さの差分を誤差に格納する. */
-			e = bz_len_by_param(b_pos, 0.0, t, SIMPSON_N) - b_len;
+			e = bezi_len_by_param(b_pos, 0.0, t, SIMPSON_CNT) - b_len;
 			/* 誤差の絶対は 0.125 より小 ? */
 			if (fabs(e) < 0.125) {
 				break;
@@ -430,20 +431,20 @@ namespace winrt::GraphPaper::implementation
 
 	// 曲線上の助変数をもとに位置を求める.
 	// b_pos	制御点
-	// t	助変数
+	// t_val	助変数
 	// p	求まった位置
-	static void bz_point_by_param(const BZP b_pos[4], const double t, BZP& p) noexcept
+	static void bezi_point_by_param(const BZP b_pos[4], const double t_val, BZP& p) noexcept
 	{
-		const double s = 1.0 - t;
+		const double s = 1.0 - t_val;
 		const double ss = s * s;
-		const double tt = t * t;
-		p = b_pos[0] * s * ss + b_pos[1] * 3.0 * ss * t + b_pos[2] * 3.0 * s * tt + b_pos[3] * t * tt;
+		const double tt = t_val * t_val;
+		p = b_pos[0] * s * ss + b_pos[1] * 3.0 * ss * t_val + b_pos[2] * 3.0 * s * tt + b_pos[3] * t_val * tt;
 	}
 
 	// 2 つの助変数が区間 0-1 の間で正順か判定する.
 	// t_min	小さい方の助変数
 	// t_max	大きい方の助変数
-	static bool bz_test_param(const double t_min, const double t_max) noexcept
+	static bool bezi_test_param(const double t_min, const double t_max) noexcept
 	{
 		// 範囲の上限 t_max は 1+DBL_EPSILON より小 ?
 		// t_min より大きくて最も近い値は t_max より小 ?
@@ -452,14 +453,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 曲線上の助変数をもとに接線ベクトルを求める.
 	// b_pos	曲線
-	// t	助変数
+	// t_val	助変数
 	// t_vec	接線ベクトル
-	static void bz_tvec_by_param(const BZP b_pos[4], const double t, BZP& t_vec) noexcept
+	static void bezi_tvec_by_param(const BZP b_pos[4], const double t_val, BZP& t_vec) noexcept
 	{
-		const double a = -3.0 * (1.0 - t) * (1.0 - t);
-		const double b = 3.0 * (1.0 - t) * (1.0 - 3.0 * t);
-		const double c = 3.0 * t * (2.0 - 3.0 * t);
-		const double d = (3.0 * t * t);
+		const double a = -3.0 * (1.0 - t_val) * (1.0 - t_val);
+		const double b = 3.0 * (1.0 - t_val) * (1.0 - 3.0 * t_val);
+		const double c = 3.0 * t_val * (2.0 - 3.0 * t_val);
+		const double d = (3.0 * t_val * t_val);
 		t_vec = b_pos[0] * a + b_pos[1] * b + b_pos[2] * c + b_pos[3] * d;
 	}
 
@@ -487,7 +488,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			bz_create_arrow_geom(dx.m_d2d_factory.get(), m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+			bezi_create_arrow_geom(dx.m_d2d_factory.get(), m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
 	}
 	/*
@@ -514,7 +515,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			bz_create_arrow_geom(d_factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+			bezi_create_arrow_geom(d_factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
 	}
 	*/
@@ -624,12 +625,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
-			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, c_pos, m_vec.data(), e_width)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, c_pos, m_vec.data(), e_width)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
-			if (bz_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, c_pos, m_vec.data(), e_width)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, c_pos, m_vec.data(), e_width)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
@@ -663,7 +664,7 @@ namespace winrt::GraphPaper::implementation
 			for (uint32_t i = 1; i < 4; i++) {
 				if (d_pos[d_cnt - 1] != b_pos[i]) {
 					d_pos[d_cnt++] = b_pos[i];
-					b_pos[i].inc(c0_min, c0_max);
+					b_pos[i].exp(c0_min, c0_max);
 				}
 			}
 			// 重複しない点の集合の要素数が 2 未満か判定する.
@@ -706,9 +707,9 @@ namespace winrt::GraphPaper::implementation
 			// 拡張・延長された線分から, 凸包 c1 を得る.
 			uint32_t c1_cnt;
 			BZP c1_pos[3 * 4];
-			bz_get_convex((d_cnt - 1) * 4, e_pos, c1_cnt, c1_pos);
+			bezi_get_convex((d_cnt - 1) * 4, e_pos, c1_cnt, c1_pos);
 			// 点が凸包 c1 に含まれないか判定する.
-			if (!bz_in_convex(tp.x, tp.y, c1_cnt, c1_pos)) {
+			if (!bezi_in_convex(tp.x, tp.y, c1_cnt, c1_pos)) {
 				// これ以上この制御点の組を分割する必要はない.
 				// スタックに残った他の制御点の組を試す.
 				continue;
@@ -812,9 +813,9 @@ namespace winrt::GraphPaper::implementation
 			// 制御点を含む領域を得る.
 			BZP b_min = b_pos[0];
 			BZP b_max = b_pos[0];
-			b_pos[1].inc(b_min, b_max);
-			b_pos[2].inc(b_min, b_max);
-			b_pos[3].inc(b_min, b_max);
+			b_pos[1].exp(b_min, b_max);
+			b_pos[2].exp(b_min, b_max);
+			b_pos[3].exp(b_min, b_max);
 			BZP d = b_max - b_min;
 			if (d.x <= 1.0 && d.y <= 1.0) {
 				// 領域の各辺の大きさが 1 以下ならば, 
@@ -894,7 +895,7 @@ namespace winrt::GraphPaper::implementation
 		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
-			bz_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
+			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
 			ShapeLineA::write_svg(barbs, barbs[2], dt_writer);
 		}
 	}
@@ -929,7 +930,7 @@ namespace winrt::GraphPaper::implementation
 		// 線分 pq に外接する方形 pr を求める.
 		pb.x = p.x - m_pos.x;
 		pb.y = p.y - m_pos.y;
-		bz_bound(p, q, pr);
+		bezi_bound(p, q, pr);
 		pr[0].x -= m_pos.x;
 		pr[0].y -= m_pos.y;
 		pr[1].x -= m_pos.x;
@@ -944,14 +945,14 @@ namespace winrt::GraphPaper::implementation
 		// 0 を助変数の個数に格納する.
 		t_cnt = 0;
 		// ベジェ制御点 b をスタックにプッシュする.
-		bz_push(st, bz);
+		bezi_push(st, bz);
 		do {
-			bz_pop(st, bz);
-			bz_bound(bz, br);
+			bezi_pop(st, bz);
+			bezi_bound(bz, br);
 			// 方形 br は方形 pr の少なくとも一部と重なる ?
 			if (pr[1].x >= br[0].x && pr[0].x <= br[1].x
 				&& pr[1].y >= br[0].y && pr[0].y <= br[1].y) {
-				if (bz_dividable(br, br_mid) != true) {
+				if (bezi_dividable(br, br_mid) != true) {
 					// 線分 pq は y 軸にほぼ平行 ?
 					if (pr[1].x < pr_next.x) {
 						dist = br_mid.x - p.x;
@@ -963,7 +964,7 @@ namespace winrt::GraphPaper::implementation
 					}
 					else {
 						// 中点と直線 pq の長さを求める.
-						dist = bz_shortest_dist(br_mid, a, b, c, d);
+						dist = bezi_shortest_dist(br_mid, a, b, c, d);
 					}
 					if (dist < 1.0) {
 						s = nearest(pb, pq, br_mid);
@@ -992,10 +993,10 @@ namespace winrt::GraphPaper::implementation
 						f3 = bz[3].y - pb.y;
 					}
 					else {
-						f0 = bz_shortest_dist(bz[0], a, b, c, d);
-						f1 = bz_shortest_dist(bz[1], a, b, c, d);
-						f2 = bz_shortest_dist(bz[2], a, b, c, d);
-						f3 = bz_shortest_dist(bz[3], a, b, c, d);
+						f0 = bezi_shortest_dist(bz[0], a, b, c, d);
+						f1 = bezi_shortest_dist(bz[1], a, b, c, d);
+						f2 = bezi_shortest_dist(bz[2], a, b, c, d);
+						f3 = bezi_shortest_dist(bz[3], a, b, c, d);
 					}
 					// 凸包 f の少なくとも 1 つは 0 以下 ?
 					// (変換された凸包は t 軸と交わる ?)
@@ -1028,16 +1029,16 @@ namespace winrt::GraphPaper::implementation
 							bz[8] = (bz[5] + bz[6]) * 0.5;
 							bz[9] = (bz[7] + bz[8]) * 0.5;
 							// 一方の組の制御点をスタックにプッシュする.
-							bz_push(st, bz, 0, 4, 7, 9);
+							bezi_push(st, bz, 0, 4, 7, 9);
 							// もう一方の組の制御点をスタックにプッシュする.
-							bz_push(st, bz, 9, 8, 6, 3);
+							bezi_push(st, bz, 9, 8, 6, 3);
 						}
 						// 区間の差分はほぼ 0 ?
 						// tMax は tMin の浮動小数で表現可能な次の数より小 ?
 						else if (t_max <= std::nextafter(t_min, t_min + 1.0)) {
 							// 区間の収斂した値をもちいて曲線上の点 bzP を求める.
 							BZP tp;
-							bz_point_by_param(bz, t_min, tp);
+							bezi_point_by_param(bz, t_min, tp);
 							/* 直線 pq 上にあって, 点 bzP に最も近い点の助変数を得る.
 							s = nearest(pb, pq, tp);
 							// 助変数は 0 以上 1 以下 ?
@@ -1071,7 +1072,7 @@ namespace winrt::GraphPaper::implementation
 							bz[6] = bz[2] + (bz[3] - bz[2]) * t_max;
 							bz[8] = bz[5] + (bz[6] - bz[5]) * t_max;
 							// 求めた制御点をスタックにプッシュする.
-							bz_push(st, bz, 8, 6, 3, 9);
+							bezi_push(st, bz, 8, 6, 3, 9);
 						}
 					}
 				}
@@ -1083,7 +1084,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 点と直線の間の最短距離を求める.
 	/*
-	static double bz_shortest_dist(const BZP& p, const double a, const double b, const double c, const double d) noexcept
+	static double bezi_shortest_dist(const BZP& p, const double a, const double b, const double c, const double d) noexcept
 	{
 		return (a * p.x + b * p.y + c) / d;
 	}
@@ -1091,7 +1092,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 二点を囲む方形を得る.
 	/*
-	static void bz_bound(const BZP& p, const BZP& q, BZP r[2])
+	static void bezi_bound(const BZP& p, const BZP& q, BZP r[2])
 	{
 		if (p.x < q.x) {
 			r[0].x = p.x;
@@ -1114,9 +1115,9 @@ namespace winrt::GraphPaper::implementation
 
 	// 四つの点を囲む方形を得る.
 	/*
-	static void bz_bound(const BZP bz[4], BZP br[2])
+	static void bezi_bound(const BZP bz[4], BZP br[2])
 	{
-		bz_bound(bz[0], bz[1], br);
+		bezi_bound(bz[0], bz[1], br);
 		br[0].x = min(br[0].x, bz[2].x);
 		br[0].y = min(br[0].y, bz[2].y);
 		br[0].x = min(br[0].x, bz[3].x);

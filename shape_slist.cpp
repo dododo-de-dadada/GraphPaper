@@ -37,10 +37,13 @@ namespace winrt::GraphPaper::implementation
 	template <typename T>
 	static Shape* slist_next(T const& it_beg, T const& it_end, uint32_t& distance) noexcept;
 
-	// 利用可能な書体名か判定し, 利用できない書体があったならばそれを得る.
-	bool slist_test_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept
+	// 図形リストの中の文字列図形に, 利用できない書体があったならばその書体名を得る.
+	// slist	図形リスト
+	// unavailable_font	利用できない書体名
+	// 戻り値	利用できない書体があったなら true
+	bool slist_test_avaiable_font(const SHAPE_LIST& slist, wchar_t*& unavailable_font) noexcept
 	{
-		for (const auto s : slist) {
+		for (const Shape* s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -516,44 +519,26 @@ namespace winrt::GraphPaper::implementation
 		return static_cast<Shape*>(nullptr);
 	}
 
-	// 選択された文字列図形から, それらを改行で連結した文字列を得る.
-	/*
-	winrt::hstring slist_selected_all_text(const SHAPE_LIST& slist) noexcept
-	{
-		for (auto it = slist.rbegin(); it != slist.rend(); it++) {
-			Shape* s = *it;
-			wchar_t* w;
-			if (!s->is_deleted() && s->is_selected() && s->get_text_content(w)) {
-				return winrt::hstring(w);
-			}
-		}
-		return winrt::hstring();
-	}
-	*/
-
 	// 選択された図形のリストを得る.
-	// S	図形の型. Shape ならすべての種類, ShapeGroup ならグループ図形のみ.
+	// T	図形の型. Shape ならすべての種類, ShapeGroup ならグループ図形のみ.
 	// slist	図形リスト
 	// t_list	得られたリスト
-	template <typename S> void slist_selected(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept
+	template <typename T> void slist_get_selected(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept
 	{
 		for (auto s : slist) {
-			if (s->is_deleted()) {
+			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
-			if (s->is_selected() != true) {
-				continue;
-			}
-			if constexpr (std::is_same<S, ShapeGroup>::value) {
-				if (typeid(*s) != typeid(S)) {
+			if constexpr (std::is_same<T, ShapeGroup>::value) {
+				if (typeid(*s) != typeid(T)) {
 					continue;
 				}
 			}
 			t_list.push_back(s);
 		}
 	}
-	template void slist_selected<Shape>(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept;
-	template void slist_selected<ShapeGroup>(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept;
+	template void slist_get_selected<Shape>(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept;
+	template void slist_get_selected<ShapeGroup>(const SHAPE_LIST& slist, SHAPE_LIST& t_list) noexcept;
 
 	// データライターに図形リストを書き込む.
 	// REDUCE	消去された図形は省く.
