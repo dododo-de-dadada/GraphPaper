@@ -12,38 +12,38 @@ namespace winrt::GraphPaper::implementation
 	uint32_t debug_leak_cnt = 0;
 	uint32_t debug_shape_cnt = 0;
 #endif
-	float Shape::s_anch_len = 6.0f;
-	D2D1_COLOR_F Shape::m_default_background = COLOR_WHITE;	// 前景色 (アンカーの背景色)
-	D2D1_COLOR_F Shape::m_default_foreground = COLOR_BLACK;	// 背景色 (アンカーの前景色)
+	float Shape::s_anchor_len = 6.0f;
+	D2D1_COLOR_F Shape::s_background_color = COLOR_WHITE;	// 前景色 (アンカーの背景色)
+	D2D1_COLOR_F Shape::s_foreground_color = COLOR_BLACK;	// 背景色 (アンカーの前景色)
 	winrt::com_ptr<ID2D1StrokeStyle1> Shape::m_aux_style = nullptr;	// 補助線の形式
 
 	// 図形の部位（円形）を表示する.
 	// a_pos	部位の位置
 	// dx		図形の描画環境
-	void anch_draw_ellipse(const D2D1_POINT_2F a_pos, D2D_UI& dx)
+	void anchor_draw_ellipse(const D2D1_POINT_2F a_pos, D2D_UI& dx)
 	{
-		const FLOAT rad = static_cast<FLOAT>(Shape::s_anch_len * 0.5 + 1.0);
+		const FLOAT rad = static_cast<FLOAT>(Shape::s_anchor_len * 0.5 + 1.0);
 		ID2D1SolidColorBrush* const brush = dx.m_solid_color_brush.get();
-		brush->SetColor(Shape::m_default_background);
+		brush->SetColor(Shape::s_background_color);
 		dx.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad, rad }, brush);
-		brush->SetColor(Shape::m_default_foreground);
+		brush->SetColor(Shape::s_foreground_color);
 		dx.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad - 1.0f, rad - 1.0f }, brush);
 	}
 
 	// 図形の部位 (方形) を表示する.
 	// a_pos	部位の位置
 	// dx		図形の描画環境
-	void anch_draw_rect(const D2D1_POINT_2F a_pos, D2D_UI& dx)
+	void anchor_draw_rect(const D2D1_POINT_2F a_pos, D2D_UI& dx)
 	{
 		D2D1_POINT_2F r_min;
 		D2D1_POINT_2F r_max;
-		pt_add(a_pos, -0.5 * Shape::s_anch_len, r_min);
-		pt_add(r_min, Shape::s_anch_len, r_max);
+		pt_add(a_pos, -0.5 * Shape::s_anchor_len, r_min);
+		pt_add(r_min, Shape::s_anchor_len, r_max);
 		const D2D1_RECT_F rect{ r_min.x, r_min.y, r_max.x, r_max.y };
 		ID2D1SolidColorBrush* const brush = dx.m_solid_color_brush.get();
-		brush->SetColor(Shape::m_default_background);
+		brush->SetColor(Shape::s_background_color);
 		dx.m_d2d_context->DrawRectangle(rect, brush, 2.0, nullptr);
-		brush->SetColor(Shape::m_default_foreground);
+		brush->SetColor(Shape::s_foreground_color);
 		dx.m_d2d_context->FillRectangle(rect, brush);
 	}
 
@@ -96,20 +96,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 	*/
-	// だ円にが位置を含むか判定する.
-	// t_pos	判定する位置
-	// c_pos	だ円の中心
-	// rad	だ円の径
-	// 戻り値	含む場合 true
-	bool pt_in_elli(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept
-	{
-		const double dx = static_cast<double>(t_pos.x) - static_cast<double>(c_pos.x);
-		const double dy = static_cast<double>(t_pos.y) - static_cast<double>(c_pos.y);
-		const double xx = rad_x * rad_x;
-		const double yy = rad_y * rad_y;
-		return dx * dx * yy + dy * dy * xx <= xx * yy;
-	}
-
 	// 多角形が位置を含むか判定する.
 	// t_pos	判定する位置
 	// v_cnt	頂点の数
@@ -197,18 +183,4 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 	*/
-	//	文字列を複製する.
-	//	元の文字列がヌルポインター, または元の文字数が 0 のときは,
-	//	ヌルポインターを返す.
-	wchar_t* wchar_cpy(const wchar_t* const s)
-	{
-		const auto s_len = wchar_len(s);
-		if (s_len == 0) {
-			return nullptr;
-		}
-		auto t = new wchar_t[static_cast<size_t>(s_len) + 1];
-		wcscpy_s(t, static_cast<size_t>(s_len) + 1, s);
-		return t;
-	}
-
 }

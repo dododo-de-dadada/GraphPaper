@@ -67,7 +67,7 @@ namespace winrt::GraphPaper::implementation
 	static void bezi_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
 
 	// 曲線上の助変数をもとに微分値を求める.
-	static double bezi_deriv_by_param(const BZP b_pos[4], const double t_val) noexcept;
+	static inline double bezi_deriv_by_param(const BZP b_pos[4], const double t_val) noexcept;
 
 	// 点の配列をもとにそれらをすべて含む凸包を求める.
 	static void bezi_get_convex(const uint32_t e_cnt, const BZP e_pos[], uint32_t& c_cnt, BZP c_pos[]);
@@ -85,13 +85,13 @@ namespace winrt::GraphPaper::implementation
 	static double bezi_param_by_len(const BZP b_pos[4], const double b_len) noexcept;
 
 	// 曲線上の助変数をもとに位置を求める.
-	static void bezi_point_by_param(const BZP b_pos[4], const double t_val, BZP& p) noexcept;
+	static inline void bezi_point_by_param(const BZP b_pos[4], const double t_val, BZP& p) noexcept;
 
 	// 2 つの助変数が区間 0-1 の間で正順か判定する.
-	static bool bezi_test_param(const double t_min, const double t_max) noexcept;
+	static inline bool bezi_test_param(const double t_min, const double t_max) noexcept;
 
 	// 曲線上の助変数をもとに接線ベクトルを求める.
-	static void bezi_tvec_by_param(const BZP b_pos[4], const double t_val, BZP& t_vec) noexcept;
+	static inline void bezi_tvec_by_param(const BZP b_pos[4], const double t_val, BZP& t_vec) noexcept;
 
 	// 曲線の矢じるしの端点を求める.
 	// b_start	曲線の開始位置
@@ -169,11 +169,10 @@ namespace winrt::GraphPaper::implementation
 	// 曲線上の助変数をもとに微分値を求める.
 	// b_pos	制御点
 	// t	助変数
-	static double bezi_deriv_by_param(const BZP b_pos[4], const double t_val) noexcept
+	static inline double bezi_deriv_by_param(const BZP b_pos[4], const double t_val) noexcept
 	{
-		BZP t_vec;
-
 		// 助変数をもとにベジェ曲線上の接線ベクトルを求め, その接線ベクトルの長さを返す.
+		BZP t_vec;
 		bezi_tvec_by_param(b_pos, t_val, t_vec);
 		return sqrt(t_vec * t_vec);
 	}
@@ -188,8 +187,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		// e のうち, y 値が最も小さい点の集合から, x 値が最も小さい点の添え字 k を得る.
 		uint32_t k = 0;
-		auto ex = e_pos[0].x;
-		auto ey = e_pos[0].y;
+		double ex = e_pos[0].x;
+		double ey = e_pos[0].y;
 		for (uint32_t i = 1; i < e_cnt; i++) {
 			if (e_pos[i].y < ey || (e_pos[i].y == ey && e_pos[i].x < ex)) {
 				ex = e_pos[i].x;
@@ -198,21 +197,21 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// e[k] を a に格納する.
-		auto a = e_pos[k];
+		BZP a = e_pos[k];
 		c_cnt = 0;
 		do {
 			// c に a を追加する.
 			c_pos[c_cnt++] = a;
-			auto b = e_pos[0];
+			BZP b = e_pos[0];
 			for (uint32_t i = 1; i < e_cnt; i++) {
-				const auto c = e_pos[i];
+				const BZP c = e_pos[i];
 				if (b == a) {
 					b = c;
 				}
 				else {
-					const auto ab = b - a;
-					const auto ac = c - a;
-					const auto v = ab.opro(ac);
+					const BZP ab = b - a;
+					const BZP ac = c - a;
+					const double v = ab.opro(ac);
 					if (v > 0.0 || (fabs(v) < FLT_MIN && ac * ac > ab * ab)) {
 						b = c;
 					}
@@ -433,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	制御点
 	// t_val	助変数
 	// p	求まった位置
-	static void bezi_point_by_param(const BZP b_pos[4], const double t_val, BZP& p) noexcept
+	static inline void bezi_point_by_param(const BZP b_pos[4], const double t_val, BZP& p) noexcept
 	{
 		const double s = 1.0 - t_val;
 		const double ss = s * s;
@@ -444,7 +443,7 @@ namespace winrt::GraphPaper::implementation
 	// 2 つの助変数が区間 0-1 の間で正順か判定する.
 	// t_min	小さい方の助変数
 	// t_max	大きい方の助変数
-	static bool bezi_test_param(const double t_min, const double t_max) noexcept
+	static inline bool bezi_test_param(const double t_min, const double t_max) noexcept
 	{
 		// 範囲の上限 t_max は 1+DBL_EPSILON より小 ?
 		// t_min より大きくて最も近い値は t_max より小 ?
@@ -455,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	曲線
 	// t_val	助変数
 	// t_vec	接線ベクトル
-	static void bezi_tvec_by_param(const BZP b_pos[4], const double t_val, BZP& t_vec) noexcept
+	static inline void bezi_tvec_by_param(const BZP b_pos[4], const double t_val, BZP& t_vec) noexcept
 	{
 		const double a = -3.0 * (1.0 - t_val) * (1.0 - t_val);
 		const double b = 3.0 * (1.0 - t_val) * (1.0 - 3.0 * t_val);
@@ -562,30 +561,30 @@ namespace winrt::GraphPaper::implementation
 			//auto sb = dx.m_anch_brush.get();
 			//auto ss = dx.m_aux_style.get();
 
-			anch_draw_rect(m_pos, dx);
+			anchor_draw_rect(m_pos, dx);
 			s_pos = m_pos;
 			pt_add(s_pos, m_vec[0], e_pos);
-			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
+			dx.m_solid_color_brush->SetColor(Shape::s_background_color);
 			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
-			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
+			dx.m_solid_color_brush->SetColor(Shape::s_foreground_color);
 			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, Shape::m_aux_style.get());
-			anch_draw_ellipse(e_pos, dx);
+			anchor_draw_ellipse(e_pos, dx);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[1], e_pos);
-			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
+			dx.m_solid_color_brush->SetColor(Shape::s_background_color);
 			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
-			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
+			dx.m_solid_color_brush->SetColor(Shape::s_foreground_color);
 			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, Shape::m_aux_style.get());
-			anch_draw_ellipse(e_pos, dx);
+			anchor_draw_ellipse(e_pos, dx);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[2], e_pos);
-			dx.m_solid_color_brush->SetColor(Shape::m_default_background);
+			dx.m_solid_color_brush->SetColor(Shape::s_background_color);
 			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
-			dx.m_solid_color_brush->SetColor(Shape::m_default_foreground);
+			dx.m_solid_color_brush->SetColor(Shape::s_foreground_color);
 			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, Shape::m_aux_style.get());
-			anch_draw_rect(e_pos, dx);
+			anchor_draw_rect(e_pos, dx);
 		}
 	}
 
@@ -594,7 +593,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
 	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto e_width = max(max(static_cast<double>(m_stroke_width), Shape::s_anch_len) * 0.5, 0.5);	// 線枠の太さの半分の値
+		const auto e_width = max(max(static_cast<double>(m_stroke_width), Shape::s_anchor_len) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
 		pt_sub(t_pos, m_pos, tp);
 		// 判定する位置によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
@@ -604,16 +603,16 @@ namespace winrt::GraphPaper::implementation
 		pt_add(c_pos[0], m_vec[0], c_pos[1]);
 		pt_add(c_pos[1], m_vec[1], c_pos[2]);
 		pt_add(c_pos[2], m_vec[2], c_pos[3]);
-		if (pt_in_anch(tp, c_pos[3])) {
+		if (pt_in_anchor(tp, c_pos[3])) {
 			return ANCH_TYPE::ANCH_P0 + 3;
 		}
-		if (pt_in_anch(tp, c_pos[2])) {
+		if (pt_in_anchor(tp, c_pos[2])) {
 			return ANCH_TYPE::ANCH_P0 + 2;
 		}
-		if (pt_in_anch(tp, c_pos[1])) {
+		if (pt_in_anchor(tp, c_pos[1])) {
 			return ANCH_TYPE::ANCH_P0 + 1;
 		}
-		if (pt_in_anch(tp, c_pos[0])) {
+		if (pt_in_anchor(tp, c_pos[0])) {
 			return ANCH_TYPE::ANCH_P0 + 0;
 		}
 		if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
@@ -636,7 +635,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 最初の制御点の組をプッシュする.
 		// ４つの点のうち端点は, 次につまれる組と共有するので, 1 + 3 * D_MAX 個の配列を確保する.
-		constexpr auto D_MAX = 64;	// 分割する深さの最大値
+		constexpr int32_t D_MAX = 64;	// 分割する深さの最大値
 		BZP s_arr[1 + D_MAX * 3] {};	// 制御点のスタック
 		int32_t s_cnt = 0;	// スタックに積まれた点の数
 		s_arr[0] = c_pos[0];
@@ -758,17 +757,17 @@ namespace winrt::GraphPaper::implementation
 
 	// 範囲に含まれるか判定する.
 	// 線の太さは考慮されない.
-	// a_min	範囲の左上位置
-	// a_max	範囲の右下位置
+	// area_min	範囲の左上位置
+	// area_max	範囲の右下位置
 	// 戻り値	含まれるなら true
-	bool ShapeBezi::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
+	bool ShapeBezi::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,
 		// 範囲の左上が原点となるよう平行移動した制御点を得る.
-		const auto w = static_cast<double>(a_max.x) - a_min.x;
-		const auto h = static_cast<double>(a_max.y) - a_min.y;
+		const double w = static_cast<double>(area_max.x) - area_min.x;
+		const double h = static_cast<double>(area_max.y) - area_min.y;
 		D2D1_POINT_2F c_pos[4];
-		pt_sub(m_pos, a_min, c_pos[0]);
+		pt_sub(m_pos, area_min, c_pos[0]);
 		pt_add(c_pos[0], m_vec[0], c_pos[1]);
 		pt_add(c_pos[1], m_vec[1], c_pos[2]);
 		pt_add(c_pos[2], m_vec[2], c_pos[3]);
@@ -857,24 +856,20 @@ namespace winrt::GraphPaper::implementation
 	// b_vec	囲む領域の終点への差分
 	// s_attr	属性
 	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr) :
-		ShapePath::ShapePath(3, s_attr, false)
+		ShapePath::ShapePath(s_attr, false)
 	{
 		m_pos = b_pos;
-		m_vec[0].x = b_vec.x;
-		m_vec[0].y = 0.0f;
-		m_vec[1].x = -b_vec.x;
-		m_vec[1].y = b_vec.y;
-		m_vec[2].x = b_vec.x;
-		m_vec[2].y = 0.0f;
-		//create_path_geometry(Shape::s_d2d_factory);
+		m_vec.resize(3);
+		m_vec.shrink_to_fit();
+		m_vec[0] = D2D1_POINT_2F{ b_vec.x , 0.0f };
+		m_vec[1] = D2D1_POINT_2F{ -b_vec.x , b_vec.y };
+		m_vec[2] = D2D1_POINT_2F{ b_vec.x , 0.0f };
 	}
 
 	// データリーダーから図形を読み込む.
 	ShapeBezi::ShapeBezi(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
-	{
-		//create_path_geometry(Shape::s_d2d_factory);
-	}
+	{}
 
 	// データライターに SVG として書き込む.
 	void ShapeBezi::write_svg(DataWriter const& dt_writer) const
@@ -1128,6 +1123,5 @@ namespace winrt::GraphPaper::implementation
 		br[1].y = max(br[1].y, bz[3].y);
 	}
 	*/
-
 
 }

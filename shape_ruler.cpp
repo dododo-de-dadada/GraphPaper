@@ -21,7 +21,7 @@ namespace winrt::GraphPaper::implementation
 	// ˆÊ’u‚ðŠÜ‚Þ‚©”»’è‚·‚é.
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto anch = ShapeRect::hit_test_anch(t_pos);
+		const uint32_t anch = ShapeRect::hit_test_anchor(t_pos);
 		if (anch != ANCH_TYPE::ANCH_SHEET) {
 			return anch;
 		}
@@ -52,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 					x_ge_y ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				if (x_ge_y) {
-					const float a_len = s_anch_len * 0.5f;
+					const float a_len = s_anchor_len * 0.5f;
 					const D2D1_POINT_2F p_min{ p0.x - a_len, min(p0.y, p1.y) };
 					const D2D1_POINT_2F p_max{ p0.x + a_len, max(p0.y, p1.y) };
 					if (pt_in_rect(t_pos, p_min, p_max)) {
@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				else {
-					const float a_len = s_anch_len * 0.5f;
+					const float a_len = s_anchor_len * 0.5f;
 					const D2D1_POINT_2F p_min{ min(p0.x, p1.x), p0.y - a_len };
 					const D2D1_POINT_2F p_max{ max(p0.x, p1.x), p0.y + a_len };
 					if (pt_in_rect(t_pos, p_min, p_max)) {
@@ -235,10 +235,10 @@ namespace winrt::GraphPaper::implementation
 			r_pos[3].y = rect.bottom;
 			r_pos[3].x = rect.left;
 			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-				anch_draw_rect(r_pos[i], d2d);
+				anchor_draw_rect(r_pos[i], d2d);
 				D2D1_POINT_2F r_mid;	// •ûŒ`‚Ì•Ó‚Ì’†“_
 				pt_avg(r_pos[j], r_pos[i], r_mid);
-				anch_draw_rect(r_mid, d2d);
+				anchor_draw_rect(r_mid, d2d);
 			}
 		}
 	}

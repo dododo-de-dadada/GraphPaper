@@ -59,7 +59,15 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_check_box().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::image_slider_value_changed<UNDO_OP::IMAGE_OPAC, 0> });
-		m_sample_type = SAMPLE_TYPE::IMAGE;
+		//m_sample_type = SAMPLE_TYPE::IMAGE;
+		//m_sample_type = SAMPLE_TYPE::IMAGE;
+		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		const auto samp_w = scp_sample_panel().Width();
+		const auto samp_h = scp_sample_panel().Height();
+		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
+		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
+		sample_image_load_async(static_cast<float>(samp_w), static_cast<float>(samp_h));
+
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -73,13 +81,7 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		//delete m_sample_shape;
-		delete m_sample_sheet.m_shape_list.back();
-		m_sample_sheet.m_shape_list.clear();
-#if defined(_DEBUG)
-		debug_leak_cnt--;
-#endif
-		//m_sample_shape = nullptr;
+		slist_clear(m_sample_sheet.m_shape_list);
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sheet_draw();

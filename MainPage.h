@@ -273,7 +273,7 @@ namespace winrt::GraphPaper::implementation
 		D2D_UI m_sample_dx;	// 見本の描画環境
 		ShapeSheet m_sample_sheet;	// 見本の用紙
 		//Shape* m_sample_shape = nullptr;	// 見本の図形
-		SAMPLE_TYPE m_sample_type = SAMPLE_TYPE::NONE;	// 見本の型
+		//SAMPLE_TYPE m_sample_type = SAMPLE_TYPE::NONE;	// 見本の型
 
 		// 元に戻す・やり直し操作
 		uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数
@@ -318,6 +318,7 @@ namespace winrt::GraphPaper::implementation
 		// メインページの作成, アプリの終了
 		//-------------------------------
 
+		void sheet_panel_loading(IInspectable const& sender, winrt::Windows::Foundation::IInspectable const&);
 		// 確認ダイアログを表示してその応答を得る.
 		winrt::Windows::Foundation::IAsyncOperation<bool> ask_for_conf_async(void);
 		// ファイルメニューの「終了」が選択された
@@ -714,13 +715,17 @@ namespace winrt::GraphPaper::implementation
 		//D2D_UI& sample_dx(void) { return m_sample_dx; }
 		// 見本ダイアログが開かれた.
 		void sample_opened(winrt::Windows::UI::Xaml::Controls::ContentDialog const& sender, winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs const& args);
-		// 見本を表示する
+		// 見本ダイアログが開かれた.
+		void sample_closed(winrt::Windows::UI::Xaml::Controls::ContentDialog const& sender, winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs const& args);
+		// 見本を表示する]
 		void sample_draw(void);
 		// 見本のスワップチェーンパネルの大きさが変わった.
-		void sample_panel_size_changed(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
+		void sample_panel_size_changed(IInspectable const&, winrt::Windows::UI::Xaml::SizeChangedEventArgs const&);
 		//　リストビュー「見本リスト」がロードされた.
 		void sample_list_loaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		winrt::Windows::Foundation::IAsyncAction sample_image_load_async(const float samp_w, const float samp_h);
+		void sample_panel_loaded(IInspectable const& sender, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
+		void sample_panel_scale_changed(IInspectable const&, IInspectable const&);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -742,7 +747,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「すべて選択」が選択された.
 		void select_all_click(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 領域に含まれる図形を選択し, 含まれない図形の選択を解除する.
-		bool select_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max);
+		bool select_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max);
 		// 次の図形を選択する.
 		//template <VirtualKeyModifiers M, VirtualKey K> void select_next_shape(void);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
@@ -750,7 +755,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を選択する.
 		void select_shape(Shape* const s, const winrt::Windows::System::VirtualKeyModifiers k_mod);
 		// 領域に含まれる図形の選択を反転する.
-		bool toggle_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max);
+		bool toggle_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max);
 		// すべての図形の選択を解除する.
 		bool unselect_all(const bool t_range_only = false);
 		//　Shft + 下矢印キーが押された.

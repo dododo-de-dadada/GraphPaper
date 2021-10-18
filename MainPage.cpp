@@ -374,16 +374,16 @@ namespace winrt::GraphPaper::implementation
 			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
 			auto const& fore_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
 			if (back_theme != nullptr && fore_theme != nullptr) {
-				conv_uwp_to_color(unbox_value<Brush>(back_theme), Shape::m_default_background);
-				conv_uwp_to_color(unbox_value<Brush>(fore_theme), Shape::m_default_foreground);
+				conv_uwp_to_color(unbox_value<Brush>(back_theme), Shape::s_background_color);
+				conv_uwp_to_color(unbox_value<Brush>(fore_theme), Shape::s_foreground_color);
 			}
 			else {*/
-				Shape::m_default_background = COLOR_WHITE;
-				Shape::m_default_foreground = COLOR_BLACK;
+				Shape::s_background_color = COLOR_WHITE;
+				Shape::s_foreground_color = COLOR_BLACK;
 			//}
 			/*
-			Shape::m_default_background = m_main_d2d.m_default_background;
-			Shape::m_default_foreground = m_main_d2d.m_default_foreground;
+			Shape::s_background_color = m_main_d2d.s_background_color;
+			Shape::s_foreground_color = m_main_d2d.s_foreground_color;
 			*/
 		}
 

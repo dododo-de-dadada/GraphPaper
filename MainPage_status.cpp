@@ -15,34 +15,34 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// AND 演算する.
-	static STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept;
+	static inline STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 	// ビットマスクする.
-	static bool status_mask(const STATUS_BAR a, const STATUS_BAR b) noexcept;
+	static inline bool status_mask(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 	// NOT 演算する.
-	static STATUS_BAR status_not(const STATUS_BAR a) noexcept;
+	static inline STATUS_BAR status_not(const STATUS_BAR a) noexcept;
 	// ステータスバーの項目の表示を設定する.
-	static void status_visiblity(const bool check, FrameworkElement const& f_elem) noexcept;
+	static inline void status_visiblity(const bool check, FrameworkElement const& f_elem) noexcept;
 
 	// 列挙型を AND 演算する.
-	static STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept
+	static inline STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept
 	{
 		return static_cast<STATUS_BAR>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
 	}
 
 	// 列挙型をビットマスクする.
-	static bool status_mask(const STATUS_BAR a, const STATUS_BAR b) noexcept
+	static inline bool status_mask(const STATUS_BAR a, const STATUS_BAR b) noexcept
 	{
 		return static_cast<uint32_t>(a) & static_cast<uint32_t>(b);
 	}
 
 	// 列挙型を NOT 演算する.
-	static STATUS_BAR status_not(const STATUS_BAR a) noexcept
+	static inline STATUS_BAR status_not(const STATUS_BAR a) noexcept
 	{
 		return static_cast<STATUS_BAR>(~static_cast<uint32_t>(a));
 	}
 
 	// ステータスバーの項目の表示を設定する.
-	static void status_visiblity(const bool check, FrameworkElement const& f_elem) noexcept
+	static inline void status_visiblity(const bool check, FrameworkElement const& f_elem) noexcept
 	{
 		if (f_elem.Visibility() == (check ? UI_COLLAPSED : UI_VISIBLE)) {
 			f_elem.Visibility(check ? UI_VISIBLE : UI_COLLAPSED);
@@ -271,8 +271,6 @@ namespace winrt::GraphPaper::implementation
 	// 単位をステータスバーに格納する.
 	void MainPage::status_set_unit(void)
 	{
-		//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		if (m_len_unit == LEN_UNIT::GRID) {
 			tk_misc_status_unit().Text(L"U:grid");
 		}

@@ -86,7 +86,29 @@ namespace winrt::GraphPaper::implementation
 
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::JOIN_LIMIT, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::STROKE_WIDTH, 1> });
-		m_sample_type = SAMPLE_TYPE::JOIN;
+		//m_sample_type = SAMPLE_TYPE::JOIN;
+		//m_sample_type = SAMPLE_TYPE::JOIN;
+		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		const auto samp_w = scp_sample_panel().Width();
+		const auto samp_h = scp_sample_panel().Height();
+		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
+		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
+		const auto padd = samp_w * 0.125;
+		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
+		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
+		POLY_OPTION p_opt{ 3, true, true, false, true };
+		auto s = new ShapePoly(b_pos, b_vec, &m_sample_sheet, p_opt);
+		const float offset = static_cast<float>(samp_h / 16.0);
+		const float samp_x = static_cast<float>(samp_w * 0.25);
+		const float samp_y = static_cast<float>(samp_h * 0.5);
+		s->set_pos_anchor(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANCH_TYPE::ANCH_P0, m_vert_stick, false);
+		s->set_pos_anchor(D2D1_POINT_2F{ samp_x, samp_y }, ANCH_TYPE::ANCH_P0 + 1, m_vert_stick, false);
+		s->set_pos_anchor(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANCH_TYPE::ANCH_P0 + 2, m_vert_stick, false);
+		m_sample_sheet.m_shape_list.push_back(s);
+#if defined(_DEBUG)
+		debug_leak_cnt++;
+#endif
+
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_line_join")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -103,13 +125,7 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		//delete m_sample_shape;
-		delete m_sample_sheet.m_shape_list.back();
-		m_sample_sheet.m_shape_list.clear();
-#if defined(_DEBUG)
-		debug_leak_cnt--;
-#endif
-		//m_sample_shape = nullptr;
+		slist_clear(m_sample_sheet.m_shape_list);
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_1().Visibility(UI_COLLAPSED);

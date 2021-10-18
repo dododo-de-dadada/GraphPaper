@@ -11,12 +11,17 @@
 // 追加されている.
 //
 #pragma once
+//#define WIN_UI3
 #include <d3d11_3.h>
 #include <d2d1_3.h>
 #include <dwrite_3.h>
 #include <dxgi1_4.h>
 #include <winrt/Windows.Graphics.Display.h>
+#ifdef WIN_UI3
+#include <winrt/Microsoft.UI.Xaml.Controls.h>
+#else
 #include <winrt/Windows.UI.Xaml.Controls.h>
+#endif
 
 namespace winrt::GraphPaper::implementation
 {
@@ -49,34 +54,27 @@ namespace winrt::GraphPaper::implementation
 		//winrt::com_ptr<ID2D1Bitmap1> d2d_target_bitmap;
 
 		// XAML コントロール
-
-		//SwapChainPanel m_swapChainPanel{};	// パネルへの保持された参照
-
+#ifdef WIN_UI3
+		winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel m_swap_chain_panel{};	// パネルへの保持された参照
+#else
+		winrt::Windows::UI::Xaml::Controls::SwapChainPanel m_swap_chain_panel{};	// パネルへの保持された参照
+#endif
 		// デバイス属性
 
-		//FLOAT m_d3d_target_width;
-		//FLOAT m_d3d_target_height;
-		//FLOAT m_output_width;
-		//FLOAT m_output_height;
 		FLOAT m_logical_width = 0.0f;
 		FLOAT m_logical_height = 0.0f;
 		winrt::Windows::Graphics::Display::DisplayOrientations m_nativeOrientation = winrt::Windows::Graphics::Display::DisplayOrientations::None;
-		winrt::Windows::Graphics::Display::DisplayOrientations m_currentOrientation = winrt::Windows::Graphics::Display::DisplayOrientations::None;
+		winrt::Windows::Graphics::Display::DisplayOrientations m_current_orientation = winrt::Windows::Graphics::Display::DisplayOrientations::None;
 		float m_logical_dpi = -1.0f;
-		float m_compositionScaleX;
-		float m_compositionScaleY;
+		float m_composition_scale_x = 1.0f;
+		float m_composition_scale_y = 1.0f;
 		D3D_DRIVER_TYPE m_d3d_driver_type = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_NULL;
 
 		// スケーリング用の DPI と合成倍率
 
-		float m_effectiveDpi = -1.0f;
-		float m_effectiveCompositionScaleX;
-		float m_effectiveCompositionScaleY;
-
-		// 方向変換用の行列
-
-		//D2D1::Matrix3x2F m_orientationTransform2D;
-		//DirectX::XMFLOAT4X4 m_orientationTransform3D;
+		float m_effective_dpi = 0.0f;
+		float m_effectiveCompositionScaleX = 1.0f;
+		float m_effectiveCompositionScaleY = 1.0f;
 
 		// 通知を受けるためのインターフェイス.
 
@@ -91,18 +89,13 @@ namespace winrt::GraphPaper::implementation
 		void Release(void)
 		{
 			Trim();
-			m_state_block = nullptr;
+			//m_state_block = nullptr;
 			m_solid_color_brush = nullptr;
 			m_range_brush = nullptr;
-			//m_aux_style = nullptr;
-			//m_aux_brush = nullptr;
-			//m_anch_brush = nullptr;
-			//m_swapChainPanel = nullptr;
-			//d2d_target_bitmap = nullptr;
-			m_d2d_context = nullptr;
-			//m_d2dDevice = nullptr;
-			m_d3d_context = nullptr;
-			m_d3d_device = nullptr;
+			m_swap_chain_panel = nullptr;
+			//m_d2d_context = nullptr;
+			//m_d3d_context = nullptr;
+			//m_d3d_device = nullptr;
 		}
 
 		//------------------------------
@@ -110,35 +103,39 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// ウィンドウサイズ依存のリソースを初期化する.
-		void CreateWindowSizeDependentResources(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const&);
+		void CreateWindowSizeDependentResources(void);
 		// D3D デバイスを構成し, D3D と相互運用される D2D デバイスを作成する.
 		D2D_UI(void);
 		// すべてのデバイス リソースを再作成し, 現在の状態に再設定する.
-		void HandleDeviceLost(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const&);
+		void HandleDeviceLost(void);
 		// スワップチェーンの内容を画面に表示する.
-		void Present(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const&);
+		void Present(void);
 		// デバイスが失われたときと作成されたときに通知を受けるように、DeviceNotify を登録する.
 		void RegisterDeviceNotify(IDeviceNotify* deviceNotify);
 		// 描画環境に XAML スワップチェーンパネルを設定する.
 		// このメソッドは, UI コントロールが作成 (または再作成) されたときに呼び出される.
+#ifdef WIN_UI3
+		void SetSwapChainPanel(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& xamk_scp);
+#else
 		void SetSwapChainPanel(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& xamk_scp);
+#endif
 		// 描画環境に表示領域の大きさを設定する.
 		// このメソッドは、SizeChanged イベントハンドラーの中で呼び出される.
-		void SetLogicalSize2(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const&, const D2D1_SIZE_F logicalSize);
+		void SetLogicalSize2(const D2D1_SIZE_F logicalSize);
 		// 描画環境に DPI を設定する.
 		// このメソッドは、DpiChanged イベントハンドラーの中で呼び出される.
-		void SetDpi(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const&, const float dpi);
+		void SetDpi(const float dpi);
 		// 描画環境にデバイスの向きを設定する.
 		// このメソッドは、OrientationChanged イベントハンドラーの中で呼び出される.
-		void SetCurrentOrientation(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, winrt::Windows::Graphics::Display::DisplayOrientations currentOrientation);
+		void SetCurrentOrientation(winrt::Windows::Graphics::Display::DisplayOrientations current_orientation);
 		// 描画環境に合成倍率を設定する.
 		// このメソッドは、CompositionScaleChanged イベントハンドラーの中で呼び出される.
-		void SetCompositionScale(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel, float compositionScaleX, float compositionScaleY);
+		void SetCompositionScale(float composition_scale_x, float composition_scale_y);
 		// バッファーを解放できることを, ドライバーに示す.
 		// このメソッドは, アプリが停止/中断したときに呼び出される.
 		void Trim();
 		// 表示デバイスが有効になった.
-		void ValidateDevice(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& swap_chain_panel);
+		void ValidateDevice(void);
 	};
 }
 

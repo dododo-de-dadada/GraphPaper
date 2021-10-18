@@ -22,21 +22,13 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::SuspendingOperation;
 	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Foundation::TypedEventHandler;
+	using winrt::Windows::Storage::ApplicationData;
 	using winrt::Windows::Storage::CreationCollisionOption;
 	using winrt::Windows::Storage::IStorageItem;
 	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::Storage::StorageFolder;
 
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
-
-	// アプリケーションデータを保存するフォルダーを得る.
-	static StorageFolder app_cache_folder(void);
-
-	// アプリケーションデータを保存するフォルダーを得る.
-	static StorageFolder app_cache_folder(void)
-	{
-		return winrt::Windows::Storage::ApplicationData::Current().LocalCacheFolder();
-	}
 
 	// アプリケーションがバックグラウンドに移った.
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
@@ -61,7 +53,7 @@ namespace winrt::GraphPaper::implementation
 		ShapeText::set_available_fonts(m_main_d2d);
 
 		HRESULT ok = E_FAIL;
-		IStorageItem data_storage{ co_await app_cache_folder().TryGetItemAsync(FILE_NAME) };
+		IStorageItem data_storage{ co_await ApplicationData::Current().LocalCacheFolder().TryGetItemAsync(FILE_NAME) };
 		if (data_storage != nullptr) {
 			StorageFile data_file = data_storage.try_as<StorageFile>();
 			if (data_file != nullptr) {
@@ -128,7 +120,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			try {
 				// キャンセル以外ならば,
-				StorageFile data_file{ co_await app_cache_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
+				StorageFile data_file{ co_await ApplicationData::Current().LocalCacheFolder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
 				if (data_file != nullptr) {
 					ok = co_await file_write_gpf_async<true, false>(data_file);
 					data_file = nullptr;

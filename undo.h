@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形の部位の操作
 	//------------------------------
 	struct UndoAnchor : Undo {
-		uint32_t m_anch;	// 操作される図形の部位
+		uint32_t m_anc;	// 操作される図形の部位
 		D2D1_POINT_2F m_pos;	// 変更前の, 図形の部位の位置
 
 		// 操作を実行すると値が変わるか判定する.

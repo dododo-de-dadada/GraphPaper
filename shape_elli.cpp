@@ -53,7 +53,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[3].x = a_pos[0].x;
 		a_pos[3].y = m_pos.y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anch_draw_rect(a_pos[i], dx);
+			anchor_draw_rect(a_pos[i], dx);
 		}
 		a_pos[0] = m_pos;
 		pt_add(m_pos, m_vec[0], a_pos[3]);
@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[2].x = a_pos[3].x;
 		a_pos[2].y = a_pos[0].y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anch_draw_ellipse(a_pos[i], dx);
+			anchor_draw_ellipse(a_pos[i], dx);
 		}
 	}
 
@@ -71,9 +71,9 @@ namespace winrt::GraphPaper::implementation
 	// –ß‚è’l	ˆÊ’u‚ğŠÜ‚Ş}Œ`‚Ì•”ˆÊ
 	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto anch = hit_test_anch(t_pos);
-		if (anch != ANCH_TYPE::ANCH_SHEET) {
-			return anch;
+		const auto a = hit_test_anchor(t_pos);
+		if (a != ANCH_TYPE::ANCH_SHEET) {
+			return a;
 		}
 
 		// ”¼Œa‚ğ“¾‚é.
@@ -88,11 +88,11 @@ namespace winrt::GraphPaper::implementation
 			// ˆÊ’u‚ª‚¾‰~‚ÌŠO‘¤‚É‚ ‚é‚©”»’è‚·‚é.
 			// ˜g‚Ì‘¾‚³‚ª•”ˆÊ‚Ì‘å‚«‚³–¢–‚È‚ç‚Î,
 			// •”ˆÊ‚Ì‘å‚«‚³‚ğ˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-			const double s_width = max(static_cast<double>(m_stroke_width), Shape::s_anch_len);
+			const double s_width = max(static_cast<double>(m_stroke_width), Shape::s_anchor_len);
 			// ”¼Œa‚É˜g‚Ì‘¾‚³‚Ì”¼•ª‚ğ‰Á‚¦‚½’l‚ğŠOŒa‚ÉŠi”[‚·‚é.
 			D2D1_POINT_2F r_outer;
 			pt_add(rad, s_width * 0.5, r_outer);
-			if (pt_in_elli(t_pos, c_pos, r_outer.x, r_outer.y) != true) {
+			if (pt_in_ellipse(t_pos, c_pos, r_outer.x, r_outer.y) != true) {
 				// ŠOŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç, 
 				// ANCH_SHEET ‚ğ•Ô‚·.
 				return ANCH_TYPE::ANCH_SHEET;
@@ -110,13 +110,13 @@ namespace winrt::GraphPaper::implementation
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 			// “àŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚©”»’è‚·‚é.
-			if (!pt_in_elli(t_pos, c_pos, r_inner.x, r_inner.y)) {
+			if (!pt_in_ellipse(t_pos, c_pos, r_inner.x, r_inner.y)) {
 				return ANCH_TYPE::ANCH_STROKE;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
 			// ‚¾‰~‚ÉˆÊ’u‚ªŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
-			if (pt_in_elli(t_pos, c_pos, rad.x, rad.y)) {
+			if (pt_in_ellipse(t_pos, c_pos, rad.x, rad.y)) {
 				return ANCH_TYPE::ANCH_FILL;
 			}
 		}
@@ -126,14 +126,14 @@ namespace winrt::GraphPaper::implementation
 	// ƒf[ƒ^ƒ‰ƒCƒ^[‚É SVG ƒ^ƒO‚Æ‚µ‚Ä‘‚«‚Ş.
 	void ShapeElli::write_svg(DataWriter const& dt_writer) const
 	{
-		D2D1_POINT_2F rad;
-		pt_mul(m_vec[0], 0.5, rad);
+		D2D1_POINT_2F r;
+		pt_mul(m_vec[0], 0.5, r);
 		D2D1_POINT_2F c_pos;
-		pt_add(m_pos, rad, c_pos);
+		pt_add(m_pos, r, c_pos);
 		dt_write_svg("<ellipse ", dt_writer);
 		dt_write_svg(c_pos, "cx", "cy", dt_writer);
-		dt_write_svg(static_cast<double>(rad.x), "rx", dt_writer);
-		dt_write_svg(static_cast<double>(rad.y), "ry", dt_writer);
+		dt_write_svg(static_cast<double>(r.x), "rx", dt_writer);
+		dt_write_svg(static_cast<double>(r.y), "ry", dt_writer);
 		dt_write_svg(m_fill_color, "fill", dt_writer);
 		ShapeStroke::write_svg(dt_writer);
 		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);

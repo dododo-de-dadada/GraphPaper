@@ -132,7 +132,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		for (const auto s : m_list_grouped) {
+		for (const Shape* s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -144,14 +144,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれるか判定する.
-	// a_min	範囲の左上位置
-	// a_max	範囲の右下位置
+	// area_min	範囲の左上位置
+	// area_max	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeGroup::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
+	bool ShapeGroup::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
 	{
-		for (const auto s : m_list_grouped) {
-			if (s->in_area(a_min, a_max) != true) {
+		for (const Shape* s : m_list_grouped) {
+			if (s->in_area(area_min, area_max) != true) {
 				return false;
 			}
 		}
@@ -169,7 +169,7 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeGroup::set_delete(const bool value) noexcept
 	{
 		bool flag = false;
-		for (const auto s : m_list_grouped) {
+		for (Shape* s : m_list_grouped) {
 			if (s->set_delete(value) && !flag) {
 				flag = true;
 			}
@@ -194,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeGroup::set_select(const bool value) noexcept
 	{
 		bool flag = false;
-		for (const auto s : m_list_grouped) {
+		for (Shape* s : m_list_grouped) {
 			if (s->set_select(value) && !flag) {
 				flag = true;
 			}
@@ -219,7 +219,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapeGroup::write_svg(DataWriter const& dt_writer) const
 	{
 		dt_write_svg("<g>" SVG_NEW_LINE, dt_writer);
-		for (const auto s : m_list_grouped) {
+		for (const Shape* s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}

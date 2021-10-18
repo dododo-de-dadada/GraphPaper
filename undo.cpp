@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto INDEX_SHEET = static_cast<uint32_t>(-1);	// 用紙図形の添え字
 
 	// 部位の位置を得る.
-	static D2D1_POINT_2F undo_get_pos_anch(const Shape* s, const uint32_t anch) noexcept;
+	static D2D1_POINT_2F undo_get_pos_anchor(const Shape* s, const uint32_t anch) noexcept;
 	// データリーダーから位置を読み込む.
 	static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
@@ -25,10 +25,10 @@ namespace winrt::GraphPaper::implementation
 	static void undo_write_shape(Shape* const s, DataWriter const& dt_writer);
 
 	// 部位の位置を得る.
-	static D2D1_POINT_2F undo_get_pos_anch(const Shape* s, const uint32_t anch) noexcept
+	static D2D1_POINT_2F undo_get_pos_anchor(const Shape* s, const uint32_t anchor) noexcept
 	{
 		D2D1_POINT_2F pos;
-		s->get_pos_anch(anch, pos);
+		s->get_pos_anchor(anchor, pos);
 		return pos;
 	}
 
@@ -108,7 +108,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::GraphPaper::implementation::equal;
 
 		D2D1_POINT_2F pos;
-		m_shape->get_pos_anch(m_anch, pos);
+		m_shape->get_pos_anchor(m_anc, pos);
 		return !equal(pos, m_pos);
 	}
 
@@ -116,23 +116,23 @@ namespace winrt::GraphPaper::implementation
 	void UndoAnchor::exec(void)
 	{
 		D2D1_POINT_2F pos;
-		m_shape->get_pos_anch(m_anch, pos);
-		m_shape->set_pos_anch(m_pos, m_anch, 0.0f, false);
+		m_shape->get_pos_anchor(m_anc, pos);
+		m_shape->set_pos_anchor(m_pos, m_anc, 0.0f, false);
 		m_pos = pos;
 	}
 
 	// データリーダーから操作を読み込む.
 	UndoAnchor::UndoAnchor(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
-		m_anch(static_cast<ANCH_TYPE>(dt_reader.ReadUInt32())),
+		m_anc(static_cast<ANCH_TYPE>(dt_reader.ReadUInt32())),
 		m_pos(undo_read_pos(dt_reader))
 	{}
 
 	// 図形の, 指定された部位の位置を保存する.
 	UndoAnchor::UndoAnchor(Shape* const s, const uint32_t anch) :
 		Undo(s),
-		m_anch(anch),
-		m_pos(undo_get_pos_anch(s, anch))
+		m_anc(anch),
+		m_pos(undo_get_pos_anchor(s, anch))
 	{}
 
 	// データライターに書き込む.
@@ -140,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::POS_ANCH));
 		undo_write_shape(m_shape, dt_writer);
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_anch));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_anc));
 		dt_write(m_pos, dt_writer);
 	}
 

@@ -308,6 +308,7 @@ namespace winrt::GraphPaper::implementation
 	// t_vec	判定する位置 (線分の始点を原点とする)
 	// d_cnt	差分ベクトルの数
 	// d_vec	差分ベクトル (頂点の間の差分)
+	// t_anc
 	// s_opa	線が不透明か判定
 	// s_width	線の太さ
 	// s_closed	線が閉じているか判定
@@ -318,7 +319,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F t_vec,
 		const size_t d_cnt,
 		const D2D1_POINT_2F d_vec[],
-		const bool t_anch,
+		const bool t_anc,
 		const bool s_opa,
 		const double s_width,
 		const bool s_closed,
@@ -335,7 +336,7 @@ namespace winrt::GraphPaper::implementation
 		size_t k = static_cast<size_t>(-1);	// 見つかった頂点
 		for (size_t i = 0; i < d_cnt; i++) {
 			// 判定する位置が, 頂点の部位に含まれるか判定する.
-			if (t_anch && pt_in_anch(t_vec, v_pos[i])) {
+			if (t_anc && pt_in_anchor(t_vec, v_pos[i])) {
 				k = i;
 			}
 			// 辺の長さを求める.
@@ -348,7 +349,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(v_pos[i], d_vec[i], v_pos[i + 1]);
 		}
 		// 判定する位置が, 終点の部位に含まれるか判定する.
-		if (pt_in_anch(t_vec, v_pos[d_cnt])) {
+		if (pt_in_anchor(t_vec, v_pos[d_cnt])) {
 			k = d_cnt;
 		}
 		// 頂点が見つかったか判定する.
@@ -358,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 		// 線が不透明か判定する.
 		if (s_opa) {
 			// 不透明ならば, 線の太さの半分の幅を求め, 拡張する幅に格納する.
-			const auto e_width = max(max(static_cast<double>(s_width), Shape::s_anch_len) * 0.5, 0.5);	// 拡張する幅
+			const auto e_width = max(max(static_cast<double>(s_width), Shape::s_anchor_len) * 0.5, 0.5);	// 拡張する幅
 			// 全ての辺の長さがゼロか判定する.
 			if (nz_cnt == 0) {
 				// ゼロならば, 判定する位置が, 拡張する幅を半径とする円に含まれるか判定する.
@@ -843,11 +844,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_selected()) {
 			D2D1_POINT_2F a_pos{ m_pos };	// 図形の部位の位置
-			anch_draw_rect(a_pos, dx);
+			anchor_draw_rect(a_pos, dx);
 			const size_t d_cnt = m_vec.size();	// 差分の数
 			for (size_t i = 0; i < d_cnt; i++) {
 				pt_add(a_pos, m_vec[i], a_pos);
-				anch_draw_rect(a_pos, dx);
+				anchor_draw_rect(a_pos, dx);
 			}
 		}
 	}
@@ -931,7 +932,7 @@ namespace winrt::GraphPaper::implementation
 	// s_attr	属性
 	// p_opt	多角形の選択肢
 	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr, const POLY_OPTION& p_opt) :
-		ShapePath::ShapePath(p_opt.m_vertex_cnt - 1, s_attr, p_opt.m_end_closed),
+		ShapePath::ShapePath(s_attr, p_opt.m_end_closed),
 		m_end_closed(p_opt.m_end_closed),
 		m_fill_color(s_attr->m_fill_color)
 	{
@@ -939,6 +940,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F v_vec;
 		create_poly_by_bbox(b_pos, b_vec, p_opt, v_pos, v_vec);
 		m_pos = v_pos[0];
+		m_vec.resize(p_opt.m_vertex_cnt - 1);
+		m_vec.shrink_to_fit();
 		for (size_t i = 1; i < p_opt.m_vertex_cnt; i++) {
 			pt_sub(v_pos[i], v_pos[i - 1], m_vec[i - 1]);
 		}

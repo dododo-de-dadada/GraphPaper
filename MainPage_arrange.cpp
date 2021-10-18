@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::arrange_order(void)
 	{
 		T it_end;	// I’[
-		T it_src;	// ŒğŠ·Œ³”½•œq
+		T it_src;	// ŒğŠ·Œ³
 		if constexpr (std::is_same<T, BRING_FORWARD>::value) {
 			it_end = m_main_sheet.m_shape_list.rend();
 			it_src = m_main_sheet.m_shape_list.rbegin();

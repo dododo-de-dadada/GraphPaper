@@ -28,14 +28,14 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから色を読み込む.
 	void dt_read(D2D1_COLOR_F& value, DataReader const& dt_reader)
 	{
-		value.a = dt_reader.ReadSingle();
 		value.r = dt_reader.ReadSingle();
 		value.g = dt_reader.ReadSingle();
 		value.b = dt_reader.ReadSingle();
-		value.a = min(max(value.a, 0.0F), 1.0F);
+		value.a = dt_reader.ReadSingle();
 		value.r = min(max(value.r, 0.0F), 1.0F);
 		value.g = min(max(value.g, 0.0F), 1.0F);
 		value.b = min(max(value.b, 0.0F), 1.0F);
+		value.a = min(max(value.a, 0.0F), 1.0F);
 	}
 
 	// データリーダーから位置を読み込む.
@@ -98,6 +98,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから多角形の選択肢を読み込む.
+	/*
 	void dt_read(POLY_OPTION& value, DataReader const& dt_reader)
 	{
 		value.m_vertex_cnt = dt_reader.ReadUInt32();
@@ -106,6 +107,7 @@ namespace winrt::GraphPaper::implementation
 		value.m_end_closed = dt_reader.ReadBoolean();
 		value.m_clockwise = dt_reader.ReadBoolean();
 	}
+	*/
 
 	// データリーダーから位置配列を読み込む.
 	void dt_read(std::vector<D2D1_POINT_2F>& value, DataReader const& dt_reader)
@@ -153,10 +155,10 @@ namespace winrt::GraphPaper::implementation
 	// データライターに色を書き込む.
 	void dt_write(const D2D1_COLOR_F& value, DataWriter const& dt_writer)
 	{
-		dt_writer.WriteSingle(value.a);
 		dt_writer.WriteSingle(value.r);
 		dt_writer.WriteSingle(value.g);
 		dt_writer.WriteSingle(value.b);
+		dt_writer.WriteSingle(value.a);
 	}
 
 	// データライターに位置を書き込む.
@@ -215,6 +217,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに多角形の選択肢を書き込む.
+	/*
 	void dt_write(const POLY_OPTION& value, DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(value.m_vertex_cnt));
@@ -223,7 +226,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBoolean(value.m_end_closed);
 		dt_writer.WriteBoolean(value.m_clockwise);
 	}
-
+	*/
 	// データライターに位置配列を書き込む.
 	void dt_write(const std::vector<D2D1_POINT_2F>& value, DataWriter const& dt_writer)
 	{

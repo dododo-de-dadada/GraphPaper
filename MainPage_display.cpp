@@ -22,19 +22,19 @@ namespace winrt::GraphPaper::implementation
 #endif
 		{
 			m_d2d_mutex.lock();
-			m_main_d2d.ValidateDevice(scp_sheet_panel());
-			m_sample_dx.ValidateDevice(scp_sheet_panel());
+			m_main_d2d.ValidateDevice();
+			m_sample_dx.ValidateDevice();
 			m_d2d_mutex.unlock();
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
-			m_sample_dx.ValidateDevice(scp_sheet_panel());
+			m_sample_dx.ValidateDevice();
 			m_d2d_mutex.unlock();
 			sample_draw();
 		}
 		if (scp_sheet_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
-			m_main_d2d.ValidateDevice(scp_sheet_panel());
+			m_main_d2d.ValidateDevice();
 			m_d2d_mutex.unlock();
 			sheet_draw();
 		}
@@ -51,13 +51,15 @@ namespace winrt::GraphPaper::implementation
 #endif
 		if (scp_sample_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
-			m_sample_dx.SetDpi(scp_sample_panel(), sender.LogicalDpi());
+			const float logical_dpi = sender.LogicalDpi();
+			m_sample_dx.SetDpi(logical_dpi);
 			m_d2d_mutex.unlock();
 			sample_draw();
 		}
 		if (scp_sheet_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
-			m_main_d2d.SetDpi(scp_sheet_panel(), sender.LogicalDpi());
+			const float logical_dpi = sender.LogicalDpi();
+			m_main_d2d.SetDpi(logical_dpi);
 			m_d2d_mutex.unlock();
 			sheet_draw();
 		}
@@ -75,14 +77,14 @@ namespace winrt::GraphPaper::implementation
 		if (scp_sample_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
 			const auto ori = sender.CurrentOrientation();
-			m_sample_dx.SetCurrentOrientation(scp_sample_panel(), ori);
+			m_sample_dx.SetCurrentOrientation(ori);
 			m_d2d_mutex.unlock();
 			sample_draw();
 		}
 		if (scp_sheet_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
 			const auto ori = sender.CurrentOrientation();
-			m_main_d2d.SetCurrentOrientation(scp_sheet_panel(), ori);
+			m_main_d2d.SetCurrentOrientation(ori);
 			m_d2d_mutex.unlock();
 			sheet_draw();
 		}

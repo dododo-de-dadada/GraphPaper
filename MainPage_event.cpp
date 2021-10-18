@@ -316,18 +316,18 @@ namespace winrt::GraphPaper::implementation
 				g_len = static_cast<float>(sqrt(pt_abs2(g_vec))) / s_scale;
 			}
 			// 近傍の頂点によって位置が変わらなかったか判定する.
-			if (!m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, g_len, m_image_keep_aspect)) {
+			if (!m_event_shape_pressed->set_pos_anchor(m_event_pos_curr, m_event_anch_pressed, g_len, m_image_keep_aspect)) {
 				// 変わらなかったならば, 方眼に合わせる.
-				m_event_shape_pressed->set_pos_anch(g_pos, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
+				m_event_shape_pressed->set_pos_anchor(g_pos, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
 			}
 		}
 		else if (g_snap) {
 			pt_round(m_event_pos_curr, m_main_sheet.m_grid_base + 1.0, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
+			m_event_shape_pressed->set_pos_anchor(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
 		}
 		else if (m_vert_stick >= FLT_MIN) {
 			slist_find_vertex_closest(m_main_sheet.m_shape_list, m_event_pos_curr, m_vert_stick / m_main_sheet.m_sheet_scale, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, m_vert_stick / m_main_sheet.m_sheet_scale, m_image_keep_aspect);
+			m_event_shape_pressed->set_pos_anchor(m_event_pos_curr, m_event_anch_pressed, m_vert_stick / m_main_sheet.m_sheet_scale, m_image_keep_aspect);
 		}
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
@@ -377,51 +377,49 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 修飾キーがコントロールか判定する.
 		if (k_mod == VirtualKeyModifiers::Control) {
-			D2D1_POINT_2F a_min;
-			D2D1_POINT_2F a_max;
-			//pt_bound(m_event_pos_pressed, m_event_pos_curr, a_min, a_max);
+			D2D1_POINT_2F area_min;
+			D2D1_POINT_2F area_max;
 			if (m_event_pos_pressed.x < m_event_pos_curr.x) {
-				a_min.x = m_event_pos_pressed.x;
-				a_max.x = m_event_pos_curr.x;
+				area_min.x = m_event_pos_pressed.x;
+				area_max.x = m_event_pos_curr.x;
 			}
 			else {
-				a_min.x = m_event_pos_curr.x;
-				a_max.x = m_event_pos_pressed.x;
+				area_min.x = m_event_pos_curr.x;
+				area_max.x = m_event_pos_pressed.x;
 			}
 			if (m_event_pos_pressed.y < m_event_pos_curr.y) {
-				a_min.y = m_event_pos_pressed.y;
-				a_max.y = m_event_pos_curr.y;
+				area_min.y = m_event_pos_pressed.y;
+				area_max.y = m_event_pos_curr.y;
 			}
 			else {
-				a_min.y = m_event_pos_curr.y;
-				a_max.y = m_event_pos_pressed.y;
+				area_min.y = m_event_pos_curr.y;
+				area_max.y = m_event_pos_pressed.y;
 			}
-			if (toggle_area(a_min, a_max)) {
+			if (toggle_area(area_min, area_max)) {
 				xcvd_is_enabled();
 			}
 		}
 		// 修飾キーが押されてないか判定する.
 		else if (k_mod == VirtualKeyModifiers::None) {
-			D2D1_POINT_2F a_min;
-			D2D1_POINT_2F a_max;
-			//pt_bound(m_event_pos_pressed, m_event_pos_curr, a_min, a_max);
+			D2D1_POINT_2F area_min;
+			D2D1_POINT_2F area_max;
 			if (m_event_pos_pressed.x < m_event_pos_curr.x) {
-				a_min.x = m_event_pos_pressed.x;
-				a_max.x = m_event_pos_curr.x;
+				area_min.x = m_event_pos_pressed.x;
+				area_max.x = m_event_pos_curr.x;
 			}
 			else {
-				a_min.x = m_event_pos_curr.x;
-				a_max.x = m_event_pos_pressed.x;
+				area_min.x = m_event_pos_curr.x;
+				area_max.x = m_event_pos_pressed.x;
 			}
 			if (m_event_pos_pressed.y < m_event_pos_curr.y) {
-				a_min.y = m_event_pos_pressed.y;
-				a_max.y = m_event_pos_curr.y;
+				area_min.y = m_event_pos_pressed.y;
+				area_max.y = m_event_pos_curr.y;
 			}
 			else {
-				a_min.y = m_event_pos_curr.y;
-				a_max.y = m_event_pos_pressed.y;
+				area_min.y = m_event_pos_curr.y;
+				area_max.y = m_event_pos_pressed.y;
 			}
-			if (select_area(a_min, a_max)) {
+			if (select_area(area_min, area_max)) {
 				xcvd_is_enabled();
 			}
 		}
@@ -481,7 +479,7 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_FORM) {
 			// ポインターの現在位置を, ポインターが押された図形の, 部位の位置に格納する.
-			m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
+			m_event_shape_pressed->set_pos_anchor(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
 			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
 			sheet_draw();
@@ -523,7 +521,7 @@ namespace winrt::GraphPaper::implementation
 					m_event_state = EVENT_STATE::PRESS_FORM;
 					m_event_pos_prev = m_event_pos_curr;
 					ustack_push_position(m_event_shape_pressed, m_event_anch_pressed);
-					m_event_shape_pressed->set_pos_anch(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
+					m_event_shape_pressed->set_pos_anchor(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
 				}
 				sheet_draw();
 			}
@@ -834,16 +832,16 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			Shape* s;
-			const auto anch = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_curr, s);
+			const auto a = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_curr, s);
 			m_d2d_mutex.unlock();
-			if (anch == ANCH_TYPE::ANCH_SHEET) {
+			if (a == ANCH_TYPE::ANCH_SHEET) {
 				Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 			}
 			else if (m_list_sel_cnt > 1) {
 				Window::Current().CoreWindow().PointerCursor(CC_SIZE_ALL);
 			}
 			else {
-				switch (anch) {
+				switch (a) {
 				case ANCH_TYPE::ANCH_R_NW:
 				case ANCH_TYPE::ANCH_R_NE:
 				case ANCH_TYPE::ANCH_R_SE:
@@ -877,7 +875,7 @@ namespace winrt::GraphPaper::implementation
 						(typeid(*s) == typeid(ShapeLineA) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
 						// 図形の部位が, 頂点の数を超えないか判定する.
 						const auto d_cnt = static_cast<ShapePath*>(s)->m_vec.size();
-						if (anch >= ANCH_TYPE::ANCH_P0 && anch < ANCH_TYPE::ANCH_P0 + d_cnt + 1) {
+						if (a >= ANCH_TYPE::ANCH_P0 && a < ANCH_TYPE::ANCH_P0 + d_cnt + 1) {
 							Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 							break;
 						}

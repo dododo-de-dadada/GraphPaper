@@ -18,6 +18,28 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr float TEXT_LINE_SP_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
 
+	static void text_create_sample(const float samp_w, const float samp_h, ShapeSheet& sample_sheet)
+	{
+		//sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
+		//sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
+		const auto padd_w = samp_w * 0.125;
+		const auto padd_h = samp_h * 0.25;
+		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h) };
+		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd_w), static_cast<FLOAT>(samp_w - 2.0 * padd_h) };
+		const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
+		const wchar_t* text = nullptr;
+		if (pang.empty()) {
+			text = L"The quick brown fox jumps over a lazy dog.";
+		}
+		else {
+			text = pang.c_str();
+		}
+		sample_sheet.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &sample_sheet));
+#if defined(_DEBUG)
+		debug_leak_cnt++;
+#endif
+	}
+
 	// 書体メニューの「枠を文字列に合わせる」が選択された.
 	void MainPage::text_fit_frame_to_click(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -143,7 +165,30 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(UI_VISIBLE);
 
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_LINE_SP, 0> });
-		m_sample_type = SAMPLE_TYPE::FONT;
+		text_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
+		//m_sample_type = SAMPLE_TYPE::FONT;
+		//m_sample_type = SAMPLE_TYPE::FONT;
+		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		//const auto samp_w = scp_sample_panel().Width();
+		//const auto samp_h = scp_sample_panel().Height();
+		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
+		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
+		//const auto padd_w = samp_w * 0.125;
+		//const auto padd_h = samp_h * 0.25;
+		//const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h) };
+		//const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd_w), static_cast<FLOAT>(samp_w - 2.0 * padd_h) };
+		//const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
+		//const wchar_t* text = nullptr;
+		//if (pang.empty()) {
+		//	text = L"The quick brown fox jumps over a lazy dog.";
+		//}
+		//else {
+		//	text = pang.c_str();
+		//}
+		//m_sample_sheet.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &m_sample_sheet));
+//#if defined(_DEBUG)
+//		debug_leak_cnt++;
+//#endif
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_line_sp")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -156,12 +201,7 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		delete m_sample_sheet.m_shape_list.back();
-		m_sample_sheet.m_shape_list.clear();
-#if defined(_DEBUG)
-		debug_leak_cnt--;
-#endif
-		//m_sample_shape = nullptr;
+		slist_clear(m_sample_sheet.m_shape_list);
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 		sheet_draw();
@@ -215,7 +255,9 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_MARGIN, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_MARGIN, 1> });
-		m_sample_type = SAMPLE_TYPE::FONT;
+
+		text_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
+
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_padding")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -229,12 +271,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//delete m_sample_shape;
-		delete m_sample_sheet.m_shape_list.back();
-		m_sample_sheet.m_shape_list.clear();
-#if defined(_DEBUG)
-		debug_leak_cnt--;
-#endif
-		//m_sample_shape = nullptr;
+		slist_clear(m_sample_sheet.m_shape_list);
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_1().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);

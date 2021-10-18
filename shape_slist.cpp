@@ -47,9 +47,9 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			wchar_t* name;	// 書体名
-			if (s->get_font_family(name) && !ShapeText::is_available_font(name)) {
-				unavailable_font = name;
+			wchar_t* f_name;	// 書体名
+			if (s->get_font_family(f_name) && !ShapeText::is_available_font(f_name)) {
+				unavailable_font = f_name;
 				return false;
 			}
 		}
@@ -82,7 +82,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を囲む領域を得る.
+	// すべての図形を囲む領域を得る.
 	// slist	図形リスト
 	// b_min	領域の左上位置
 	// b_max	領域の右下位置
@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を囲む領域を得る.
+	// 選択された図形を囲む領域を得る.
 	// slist	図形リスト
 	// b_min	領域の左上位置
 	// b_max	領域の右下位置

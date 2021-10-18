@@ -13,20 +13,19 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::UI::Color;
+	//using winrt::Windows::UI::Text::FontWeight;
+	using winrt::Windows::UI::Text::FontStretch;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+	using winrt::Windows::UI::Xaml::Controls::TextBlock;
 	using winrt::Windows::UI::Xaml::Controls::TextBox;
 	using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
 	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	using winrt::Windows::UI::Xaml::Setter;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
 	constexpr wchar_t DLG_TITLE[] = L"str_sheet";	// 用紙の表題
-
-	void MainPage::sheet_panel_scale_changed(IInspectable const&, IInspectable const&)
-	{
-		m_main_d2d.SetCompositionScale(scp_sheet_panel(), scp_sheet_panel().CompositionScaleX(), scp_sheet_panel().CompositionScaleY());
-	}
 
 	// 長さををピクセル単位の値に変換する.
 	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept;
@@ -124,7 +123,13 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 2> });
-		m_sample_type = SAMPLE_TYPE::NONE;
+		//m_sample_type = SAMPLE_TYPE::NONE;
+		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		//const auto samp_w = scp_sample_panel().Width();
+		//const auto samp_h = scp_sample_panel().Height();
+		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
+		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
+
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -139,6 +144,7 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
+		//m_sample_dx.Release();
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_1().Visibility(UI_COLLAPSED);
 		sample_slider_2().Visibility(UI_COLLAPSED);
@@ -160,12 +166,12 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		auto const& dc = m_main_d2d.m_d2d_context;
+		//auto const& dc = m_main_d2d.m_d2d_context;
 		// デバイスコンテキストの描画状態を保存ブロックに保持する.
-		dc->SaveDrawingState(m_main_d2d.m_state_block.get());
+		m_main_d2d.m_d2d_context->SaveDrawingState(m_main_d2d.m_state_block.get());
 		// デバイスコンテキストから変換行列を得る.
 		D2D1_MATRIX_3X2_F tran;
-		dc->GetTransform(&tran);
+		m_main_d2d.m_d2d_context->GetTransform(&tran);
 		// 拡大率を変換行列の拡大縮小の成分に格納する.
 		const auto sheet_scale = max(m_main_sheet.m_sheet_scale, 0.0f);
 		tran.m11 = tran.m22 = sheet_scale;
@@ -177,9 +183,9 @@ namespace winrt::GraphPaper::implementation
 		tran.dx = -t_pos.x;
 		tran.dy = -t_pos.y;
 		// 変換行列をデバイスコンテキストに格納する.
-		dc->SetTransform(&tran);
+		m_main_d2d.m_d2d_context->SetTransform(&tran);
 		// 描画を開始する.
-		dc->BeginDraw();
+		m_main_d2d.m_d2d_context->BeginDraw();
 		m_main_sheet.draw(m_main_d2d);
 		if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			const auto t_draw = m_drawing_tool;
@@ -203,13 +209,13 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 描画を終了する.
-		HRESULT hr = dc->EndDraw();
+		HRESULT hr = m_main_d2d.m_d2d_context->EndDraw();
 		// 保存された描画環境を元に戻す.
-		dc->RestoreDrawingState(m_main_d2d.m_state_block.get());
+		m_main_d2d.m_d2d_context->RestoreDrawingState(m_main_d2d.m_state_block.get());
 		if (hr == S_OK) {
 			// 結果が S_OK の場合,
 			// スワップチェーンの内容を画面に表示する.
-			m_main_d2d.Present(scp_sheet_panel());
+			m_main_d2d.Present();
 			// ポインターの位置をステータスバーに格納する.
 			status_set_curs();
 		}
@@ -226,7 +232,7 @@ namespace winrt::GraphPaper::implementation
 	// 前景色を得る.
 	const D2D1_COLOR_F& MainPage::sheet_foreground(void) const noexcept
 	{
-		return Shape::m_default_foreground;
+		return Shape::s_foreground_color;
 	}
 
 	// 用紙の属性を初期化する.
@@ -234,13 +240,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 書体の属性を初期化する.
 		{
-			using winrt::Windows::UI::Xaml::Setter;
-			using winrt::Windows::UI::Xaml::Controls::TextBlock;
-			using winrt::Windows::UI::Xaml::Media::FontFamily;
-			using winrt::Windows::UI::Text::FontWeight;
-			using winrt::Windows::UI::Text::FontStretch;
-			using winrt::Windows::UI::Xaml::Style;
-
 			// リソースの取得に失敗した場合に備えて,
 			// 固定の既定値を書体属性に格納する.
 			m_main_sheet.set_font_family(wchar_cpy(L"Segoe UI"));
@@ -251,8 +250,8 @@ namespace winrt::GraphPaper::implementation
 			// BodyTextBlockStyle をリソースディクショナリから得る.
 			auto resource = Resources().TryLookup(box_value(L"BodyTextBlockStyle"));
 			if (resource != nullptr) {
-				auto style = resource.try_as<Style>();
-				std::list<Style> stack;
+				auto style = resource.try_as<winrt::Windows::UI::Xaml::Style>();
+				std::list<winrt::Windows::UI::Xaml::Style> stack;
 				// リソースからスタイルを得る.
 				while (style != nullptr) {
 					// スタイルが空でない場合.
@@ -276,7 +275,7 @@ namespace winrt::GraphPaper::implementation
 							if (prop == TextBlock::FontFamilyProperty()) {
 								// プロパティーが FontFamily の場合,
 								// セッターの値から, 書体名を得る.
-								auto value = unbox_value<FontFamily>(setter.Value());
+								auto value = unbox_value<winrt::Windows::UI::Xaml::Media::FontFamily>(setter.Value());
 								m_main_sheet.set_font_family(wchar_cpy(value.Source().c_str()));
 							}
 							else if (prop == TextBlock::FontSizeProperty()) {
@@ -338,19 +337,19 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.set_arrow_size(ARROW_SIZE_DEFVAL);
 			m_main_sheet.set_arrow_style(ARROW_STYLE::NONE);
 			m_main_sheet.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL });
-			m_main_sheet.set_fill_color(Shape::m_default_background);
-			m_main_sheet.set_font_color(Shape::m_default_foreground);
+			m_main_sheet.set_fill_color(Shape::s_background_color);
+			m_main_sheet.set_font_color(Shape::s_foreground_color);
 			m_main_sheet.set_grid_base(GRID_LEN_DEFVAL - 1.0);
 			m_main_sheet.set_grid_color(grid_color);
 			m_main_sheet.set_grid_emph(GRID_EMPH_0);
 			m_main_sheet.set_grid_show(GRID_SHOW::BACK);
 			m_main_sheet.set_grid_snap(true);
-			m_main_sheet.set_sheet_color(Shape::m_default_background);
+			m_main_sheet.set_sheet_color(Shape::s_background_color);
 			m_main_sheet.set_sheet_scale(1.0);
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_main_sheet.m_sheet_size = DEF_SHEET_SIZE;
 			m_main_sheet.set_stroke_cap(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
-			m_main_sheet.set_stroke_color(Shape::m_default_foreground);
+			m_main_sheet.set_stroke_color(Shape::s_foreground_color);
 			m_main_sheet.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_main_sheet.set_dash_patt(DASH_PATT_DEFVAL);
 			m_main_sheet.set_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
@@ -370,23 +369,27 @@ namespace winrt::GraphPaper::implementation
 		auto a_type = a_prop.Type();
 	}
 
+	void MainPage::sheet_panel_loading(IInspectable const& sender, winrt::Windows::Foundation::IInspectable const&)
+	{
+		auto xaml_root = scp_sheet_panel().XamlRoot();
+		xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed });
+
+		//m_main_d2d.SetSwapChainPanel(scp_sheet_panel());
+	}
+
 	// 用紙のスワップチェーンパネルがロードされた.
-#if defined(_DEBUG)
 	void MainPage::sheet_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
-#else
-	void MainPage::sheet_panel_loaded(IInspectable const&, RoutedEventArgs const&)
-#endif
 	{
 #if defined(_DEBUG)
 		if (sender != scp_sheet_panel()) {
 			return;
 		}
 #endif // _DEBUG
-		auto xaml_root = scp_sheet_panel().XamlRoot();
-		xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed});
+		//auto xaml_root = scp_sheet_panel().XamlRoot();
+		//xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed });
 
 		m_main_d2d.SetSwapChainPanel(scp_sheet_panel());
-		sheet_draw();
+		//sheet_draw();
 	}
 
 	// 用紙のスワップチェーンパネルの寸法が変わった.
@@ -406,9 +409,14 @@ namespace winrt::GraphPaper::implementation
 		const float h = z.Height;
 		scroll_set(w, h);
 		if (scp_sheet_panel().IsLoaded()) {
-			m_main_d2d.SetLogicalSize2(scp_sheet_panel(), D2D1_SIZE_F{ w, h });
+			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
 			sheet_draw();
 		}
+	}
+
+	void MainPage::sheet_panel_scale_changed(IInspectable const&, IInspectable const&)
+	{
+		m_main_d2d.SetCompositionScale(scp_sheet_panel().CompositionScaleX(), scp_sheet_panel().CompositionScaleY());
 	}
 
 	// 用紙の大きさを設定する.
@@ -416,15 +424,15 @@ namespace winrt::GraphPaper::implementation
 	{
 		const float w = static_cast<float>(scp_sheet_panel().ActualWidth());
 		const float h = static_cast<float>(scp_sheet_panel().ActualHeight());
-		scroll_set(w, h);
-		m_main_d2d.SetLogicalSize2(scp_sheet_panel(), D2D1_SIZE_F{ w, h });
+		if (w > 0.0f && h > 0.0f) {
+			scroll_set(w, h);
+			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
+		}
 	}
 
 	// 用紙メニューの「用紙の大きさ」が選択された
 	IAsyncAction MainPage::sheet_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-
 		m_sample_sheet.set_attr_to(&m_main_sheet);
 		float g_base;
 		m_main_sheet.get_grid_base(g_base);
@@ -435,8 +443,7 @@ namespace winrt::GraphPaper::implementation
 		tx_sheet_height().Text(buf);
 		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, sheet_size_max(), m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_size_max().Text(buf);
-		// この時点では, テキストボックスに正しい数値を格納しても, 
-		// TextChanged は呼ばれない.
+		// この時点では, テキストボックスに正しい数値を格納しても, TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
 		cd_sheet_size_dialog().IsPrimaryButtonEnabled(true);
 		cd_sheet_size_dialog().IsSecondaryButtonEnabled(m_main_sheet.m_shape_list.size() > 0);
@@ -512,7 +519,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F p_max;
 			pt_add(b_max, b_min, p_max);
 			D2D1_SIZE_F p_size = { p_max.x, p_max.y };
-			if (equal(m_main_sheet.m_sheet_size, p_size) != true) {
+			if (!equal(m_main_sheet.m_sheet_size, p_size)) {
 				ustack_push_set<UNDO_OP::SHEET_SIZE>(&m_main_sheet, p_size);
 				flag = true;
 			}

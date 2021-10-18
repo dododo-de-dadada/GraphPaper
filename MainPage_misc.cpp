@@ -24,19 +24,38 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().PrimaryButtonText(L"");
 		cd_sample_dialog().CloseButtonText(L"OK");
 		cd_sample_dialog().Title(box_value(L"GraphPaper"));
-		m_sample_type = SAMPLE_TYPE::MISC;
+
+		//m_sample_type = SAMPLE_TYPE::MISC;
+		//m_sample_type = SAMPLE_TYPE::MISC;
+		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		const auto samp_w = scp_sample_panel().Width();
+		const auto samp_h = scp_sample_panel().Height();
+		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
+		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
+		constexpr uint32_t misc_min = 3;
+		constexpr uint32_t misc_max = 12;
+		static uint32_t misc_cnt = misc_min;
+		const auto padd = samp_w * 0.125;
+		const D2D1_POINT_2F samp_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
+		POLY_OPTION p_opt{ m_drawing_poly_opt };
+		p_opt.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
+		Shape* s = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, samp_vec, &m_sample_sheet, p_opt);
+		D2D1_POINT_2F b_min;
+		D2D1_POINT_2F b_max;
+		D2D1_POINT_2F b_vec;
+		s->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, b_min, b_max);
+		pt_sub(b_max, b_min, b_vec);
+		s->move(D2D1_POINT_2F{ static_cast<FLOAT>((samp_w - b_vec.x) * 0.5), static_cast<FLOAT>((samp_h - b_vec.y) * 0.5) });
+		m_sample_sheet.m_shape_list.push_back(s);
+#if defined(_DEBUG)
+		debug_leak_cnt++;
+#endif
 		co_await cd_sample_dialog().ShowAsync();
 		cd_sample_dialog().PrimaryButtonText(pri_text);
 		cd_sample_dialog().CloseButtonText(close_text);
 		cd_sample_dialog().DefaultButton(def_btn);
 		tb_version().Visibility(UI_COLLAPSED);
-		//delete m_sample_shape;
-		delete m_sample_sheet.m_shape_list.back();
-		m_sample_sheet.m_shape_list.clear();
-#if defined(_DEBUG)
-		debug_leak_cnt--;
-#endif
-		//m_sample_shape = nullptr;
+		slist_clear(m_sample_sheet.m_shape_list);
 		// バージョン情報のメッセージダイアログを表示する.
 		//message_show(ICON_INFO, L"str_appname", L"str_version");
 	}

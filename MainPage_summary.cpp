@@ -188,8 +188,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の一覧の添え字の位置に図形を挿入する.
-	// s	図形
-	// i	添え字
+	// s	挿入する図形
+	// i	挿入される位置 (添え字)
 	void MainPage::summary_insert_at(Shape* const s, const uint32_t i)
 	{
 		// 一覧が表示されてるか判定する.
@@ -211,9 +211,9 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::summary_item_click(IInspectable const&, ItemClickEventArgs const& args)
 	{
 		const auto item = args.ClickedItem();
-		const auto summary = item.try_as<Summary>();
+		const winrt::impl::com_ref<Summary> summary = item.try_as<Summary>();
 		m_event_shape_prev =
-			m_event_shape_pressed = summary->get_shape();
+		m_event_shape_pressed = summary->get_shape();
 	}
 
 	// 編集メニューの「一覧を表示」が選択された.
@@ -334,6 +334,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧の図形を選択する.
+	// s	選択する図形
 	void MainPage::summary_select(Shape* const s)
 	{
 		// 一覧が表示されてるか判定する.
@@ -426,6 +427,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 一覧の図形を選択解除する.
+	// s	選択解除する図形
 	void MainPage::summary_unselect(Shape* const s)
 	{
 		// 一覧が表示されてるか判定する.

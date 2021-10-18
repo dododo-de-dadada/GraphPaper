@@ -40,28 +40,28 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// スクロールバーの値を設定する.
-	// aw	実際の幅
-	// ah	実際の高さ
-	void MainPage::scroll_set(const double aw, const double ah)
+	// act_w	実際の幅
+	// act_h	実際の高さ
+	void MainPage::scroll_set(const double act_w, const double act_h)
 	{
 		constexpr double SB_SIZE = 16.0;
 		const double ss = m_main_sheet.m_sheet_scale;	// 用紙の表示倍率
-		const double vw = aw / ss;	// 見えている部分の幅
-		const double vh = ah / ss;	// 見えている部分の高さ
+		const double vw = act_w / ss;	// 見えている部分の幅
+		const double vh = act_h / ss;	// 見えている部分の高さ
 		const auto s_min = m_main_min;
 		const auto s_max = m_main_max;
 		const auto mw = static_cast<double>(s_max.x) - static_cast<double>(s_min.x) - vw;
 		const auto mh = static_cast<double>(s_max.y) - static_cast<double>(s_min.y) - vh;
-		const auto wgt0 = mw > 0.0;
-		const auto hgt0 = mh > 0.0;
+		const auto w_gt0 = mw > 0.0;
+		const auto h_gt0 = mh > 0.0;
 		sb_horz().ViewportSize(vw);
-		sb_horz().Maximum(wgt0 ? (hgt0 ? mw + SB_SIZE : mw) : 0.0);
-		sb_horz().Visibility(wgt0 ? UI_VISIBLE : UI_COLLAPSED);
-		sb_horz().Margin({ 0, 0, hgt0 ? SB_SIZE : 0.0, 0 });
+		sb_horz().Maximum(w_gt0 ? (h_gt0 ? mw + SB_SIZE : mw) : 0.0);
+		sb_horz().Visibility(w_gt0 ? UI_VISIBLE : UI_COLLAPSED);
+		sb_horz().Margin({ 0, 0, h_gt0 ? SB_SIZE : 0.0, 0 });
 		sb_vert().ViewportSize(vh);
-		sb_vert().Maximum(hgt0 ? (wgt0 ? mh + SB_SIZE : mh) : 0.0);
-		sb_vert().Visibility(hgt0 ? UI_VISIBLE : UI_COLLAPSED);
-		sb_vert().Margin({ 0, 0, 0, wgt0 ? SB_SIZE : 0.0 });
+		sb_vert().Maximum(h_gt0 ? (w_gt0 ? mh + SB_SIZE : mh) : 0.0);
+		sb_vert().Visibility(h_gt0 ? UI_VISIBLE : UI_COLLAPSED);
+		sb_vert().Margin({ 0, 0, 0, w_gt0 ? SB_SIZE : 0.0 });
 		//sb_horz().ViewportSize(vw);
 		//if (pw > vw) {
 			//if (ph > vh) {

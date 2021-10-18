@@ -351,7 +351,7 @@
     </Page.Resources>
     <Grid Margin="0,0,0,0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="{StaticResource AppBarExpandButtonThemeWidthGridLength}"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -360,7 +360,7 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <!-- メインメニュー -->
-        <muxc:MenuBar Grid.Row="0" Grid.ColumnSpan="2" Background="{ThemeResource AppBarBackgroundThemeBrush}">
+        <muxc:MenuBar Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="{ThemeResource AppBarBackgroundThemeBrush}" Height="Auto">
             <!-- ファイルメニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_menu_file" AccessKey="F" Title="File" >
 				<MenuFlyoutItem x:Name="mfi_new" x:Uid="mfi_new" Click="new_click_async" Icon="Page2" Text="New" >
@@ -843,7 +843,10 @@
 			</Grid.RowDefinitions>
 			<Button x:Name="btn_summary_close" x:Uid="btn_summary_close" Click="summary_close_click" Content="Close" Grid.Row="2" HorizontalAlignment="Stretch" Margin="12,12,12,12" />
 			<Button Click="summary_close_click" Background="{ThemeResource ButtonBackgroundThemeBrush}" Content="{StaticResource glyph_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" Grid.Row="0" HorizontalAlignment="Right" />
-			<ListView x:Name="lv_summary_list" Grid.Row="1" IsItemClickEnabled="True" ItemClick="summary_item_click" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >
+			<ListView x:Name="lv_summary_list" Grid.Row="1"
+            Transitions="{x:Null}"
+            ItemContainerTransitions="{x:Null}"
+            IsItemClickEnabled="True" ItemClick="summary_item_click" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >
 				<!--<ListView x:Name="lv_summary_list" Grid.Row="1" IsItemClickEnabled="False" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
 				<!--<ListView x:Name="lv_summary_list" IsItemClickEnabled="False" Loaded="summary_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_summary_close" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
 				<ListView.Header>
@@ -871,8 +874,9 @@
         <RelativePanel Grid.Row="1" Grid.Column="0" >
             <SwapChainPanel
                 x:Name="scp_sheet_panel"
-                Loaded="sheet_panel_loaded"
                 CompositionScaleChanged="sheet_panel_scale_changed"
+                Loading="sheet_panel_loading"
+                Loaded="sheet_panel_loaded"
                 KeyboardAcceleratorPlacementMode="Hidden"
                 PointerCanceled="event_canceled"
                 PointerEntered="event_entered"
@@ -978,12 +982,14 @@
             </StackPanel>
         </ContentDialog>
         <!-- 属性入力ダイアログ -->
-        <ContentDialog x:Name="cd_sample_dialog" CloseButtonText="Close" DefaultButton="Close" Opened="sample_opened" PrimaryButtonText="Apply" >
+        <ContentDialog x:Name="cd_sample_dialog" CloseButtonText="Close" Closed="sample_closed" DefaultButton="Close" Opened="sample_opened" PrimaryButtonText="Apply" >
             <RelativePanel>
                 <SwapChainPanel
                     x:Name="scp_sample_panel"
                     BorderBrush="{ThemeResource ButtonBackgroundThemeBrush}" BorderThickness="1" CornerRadius="1" Padding="1"
+                    CompositionScaleChanged="sample_panel_scale_changed"
                     Height="170"
+                    Loaded="sample_panel_loaded"
                     Margin="0,0,0,8"
                     MaxHeight="170"
                     MaxWidth="170"

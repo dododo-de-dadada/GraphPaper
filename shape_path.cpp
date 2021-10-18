@@ -26,11 +26,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 値を, 部位の位置に格納する. 他の部位の位置は動かない. 
 	// value	値
-	// anch	図形の部位
+	// anchor	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapePath::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool keep_aspect) noexcept
+	bool ShapePath::set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool keep_aspect) noexcept
 	{
-		if (ShapeStroke::set_pos_anch(value, anch, limit, keep_aspect)) {
+		if (ShapeStroke::set_pos_anchor(value, anchor, limit, keep_aspect)) {
 			//m_d2d_arrow_geom = nullptr;
 			m_d2d_path_geom = nullptr;
 			//create_path_geometry(Shape::s_d2d_factory);

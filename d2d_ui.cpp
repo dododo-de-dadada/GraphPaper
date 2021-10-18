@@ -3,9 +3,12 @@
 // 図形の描画環境
 //------------------------------
 #include "pch.h"
-#include <winrt/Windows.UI.Core.h>
-#include <windows.ui.xaml.media.dxinterop.h>
 #include "d2d_ui.h"
+#ifdef WIN_UI3
+#include <microsoft.ui.xaml.media.dxinterop.h>
+#else
+#include <windows.ui.xaml.media.dxinterop.h>
+#endif
 
 using namespace winrt;
 using namespace D2D1;
@@ -71,9 +74,12 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Graphics::Display::DisplayOrientations;
 	using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::UI::Core::CoreDispatcherPriority;
+#ifdef WIN_UI3
+	using winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel;
+#else
 	using winrt::Windows::UI::Core::DispatchedHandler;
 	using winrt::Windows::UI::Xaml::Controls::SwapChainPanel;
-
+#endif
 	static winrt::com_ptr<ID2D1Factory3> create_d2d_factory(void);
 	static winrt::com_ptr<IDWriteFactory3> create_dwrite_factory(void);
 
@@ -214,7 +220,7 @@ namespace winrt::GraphPaper::implementation
 
 	// ウィンドウサイズ依存のリソースを作成する.
 	// これらのリソースは、ウィンドウサイズが変更されるたびに再作成する必要がある.
-	void D2D_UI::CreateWindowSizeDependentResources(SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::CreateWindowSizeDependentResources(void)
 	{
 		// 前のウィンドウサイズに固有のコンテキストをクリアするため,
 		// レンダーターゲットを D3D コンテキストの出力マージ (OM) ステージに格納する.
@@ -229,9 +235,9 @@ namespace winrt::GraphPaper::implementation
 		m_d3d_context->Flush1(D3D11_CONTEXT_TYPE_ALL, nullptr);
 
 		// 論理 DPI と合成倍率の値を, 有効な DPI と有効な合成倍率に格納する.
-		m_effectiveDpi = m_logical_dpi;
-		m_effectiveCompositionScaleX = m_compositionScaleX;
-		m_effectiveCompositionScaleY = m_compositionScaleY;
+		m_effective_dpi = m_logical_dpi;
+		m_effectiveCompositionScaleX = m_composition_scale_x;
+		m_effectiveCompositionScaleY = m_composition_scale_y;
 
 		// (高解像度のデバイスのバッテリ寿命を上げるためには、より小さいレンダー ターゲットにレンダリングして
 		// 出力が提示された場合は GPU で出力をスケーリングできるようする.)
@@ -244,10 +250,10 @@ namespace winrt::GraphPaper::implementation
 			const float height = ConvertDipsToPixels(m_logical_height, m_logical_dpi);
 
 			// 変換された幅と高さがしきい値を超えるか判定する.
-			if (max(width, height) > DisplayMetrics::WidthThreshold&& min(width, height) > DisplayMetrics::HeightThreshold)
+			if (max(width, height) > DisplayMetrics::WidthThreshold && min(width, height) > DisplayMetrics::HeightThreshold)
 			{
 				// 有効な DPI と有効な合成倍率を 1/2 する.
-				m_effectiveDpi *= 0.5f;
+				m_effective_dpi *= 0.5f;
 				m_effectiveCompositionScaleX *= 0.5f;
 				m_effectiveCompositionScaleY *= 0.5f;
 			}
@@ -257,8 +263,8 @@ namespace winrt::GraphPaper::implementation
 		// 出力領域の幅と高さに格納する.
 		// サイズ 0 の DirectX コンテンツが作成されることを防止するため,
 		// 出力領域の幅と高さは最低でも 1px とする.
-		float output_width = ConvertDipsToPixels(m_logical_width, m_effectiveDpi);
-		float output_height = ConvertDipsToPixels(m_logical_height, m_effectiveDpi);
+		float output_width = ConvertDipsToPixels(m_logical_width, m_effective_dpi);
+		float output_height = ConvertDipsToPixels(m_logical_height, m_effective_dpi);
 		output_width = max(output_width, 1.0f);
 		output_height = max(output_height, 1.0f);
 
@@ -268,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 		// Landscape または Portrait のどちらかのみ.
 		FLOAT d3d_target_width;
 		FLOAT d3d_target_height;
-		const DXGI_MODE_ROTATION display_rotation = get_display_rotation(m_nativeOrientation, m_currentOrientation);
+		const DXGI_MODE_ROTATION display_rotation = get_display_rotation(m_nativeOrientation, m_current_orientation);
 		// 表示デバイスの回転が 90° または 270° か判定する.
 		if (display_rotation == DXGI_MODE_ROTATION_ROTATE90
 			|| display_rotation == DXGI_MODE_ROTATION_ROTATE270) {
@@ -299,7 +305,7 @@ namespace winrt::GraphPaper::implementation
 			// 結果が DXGI_ERROR_DEVICE_REMOVED または DXGI_ERROR_DEVICE_RESET か判定する.
 			if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
 				// すべてのデバイス リソースを再作成し, 現在の状態に再設定する.
-				HandleDeviceLost(swap_chain_panel);
+				HandleDeviceLost();
 				return;
 			}
 			else {
@@ -336,7 +342,7 @@ namespace winrt::GraphPaper::implementation
 			//	swap_chain_desc.Scaling = DXGI_SCALING_NONE;
 			//}
 			//else {
-				swap_chain_desc.Scaling = DXGI_SCALING_STRETCH;
+			swap_chain_desc.Scaling = DXGI_SCALING_STRETCH;
 			//}
 			// D3D ドライバーが D3D_DRIVER_TYPE_HARDWARE か判定する.
 			if (m_d3d_driver_type == D3D_DRIVER_TYPE_HARDWARE) {
@@ -379,25 +385,25 @@ namespace winrt::GraphPaper::implementation
 			// スワップ チェーンと SwapChainPanel を関連付ける.
 			// UI の変更は、UI スレッドにディスパッチして戻す必要あり.
 #ifdef WIN_UI3
-			const winrt::Microsoft::UI::Dispatching::DispatcherQueue queue = swap_chain_panel.DispatcherQueue();
+			const winrt::Microsoft::UI::Dispatching::DispatcherQueue queue = m_swap_chain_panel.DispatcherQueue();
 			queue.TryEnqueue(winrt::Microsoft::UI::Dispatching::DispatcherQueuePriority::High,
 				winrt::Microsoft::UI::Dispatching::DispatcherQueueHandler([=]()
 					{
 						// SwapChainPanel のネイティブ インターフェイスに戻す.
 						winrt::com_ptr<ISwapChainPanelNative> scp_native{ nullptr };
-						winrt::check_hresult(winrt::get_unknown(swap_chain_panel)->QueryInterface(__uuidof(scp_native), scp_native.put_void()));
-						winrt::check_hresult(scp_native->SetSwapChain(dxgi_swap_chain.get()));
+						winrt::check_hresult(winrt::get_unknown(m_swap_chain_panel)->QueryInterface(__uuidof(scp_native), scp_native.put_void()));
+						winrt::check_hresult(scp_native->SetSwapChain(m_dxgi_swap_chain.get()));
 					})
 			);
 #else
-			const auto _{ swap_chain_panel.Dispatcher().RunAsync(
+			const auto _{ m_swap_chain_panel.Dispatcher().RunAsync(
 				CoreDispatcherPriority::High, [=]()
 					{
-						// SwapChainPanel のネイティブ インターフェイスに戻す.
-						winrt::com_ptr<ISwapChainPanelNative> scpNative{ nullptr };
-						winrt::check_hresult(winrt::get_unknown(swap_chain_panel)->QueryInterface(__uuidof(scpNative), scpNative.put_void()));
-						winrt::check_hresult(scpNative->SetSwapChain(m_dxgi_swap_chain.get()));
-					})
+					// SwapChainPanel のネイティブ インターフェイスに戻す.
+					winrt::com_ptr<ISwapChainPanelNative> scpNative{ nullptr };
+					winrt::check_hresult(winrt::get_unknown(m_swap_chain_panel)->QueryInterface(__uuidof(scpNative), scpNative.put_void()));
+					winrt::check_hresult(scpNative->SetSwapChain(m_dxgi_swap_chain.get()));
+				})
 			};
 #endif // WIN_UI3
 			// DXGI が 1 度に複数のフレームをキュー処理していないことを確認します。これにより、遅延が減少し、
@@ -447,14 +453,14 @@ namespace winrt::GraphPaper::implementation
 			)
 		);
 		m_d2d_context->SetTarget(d2d_target_bitmap.get());
-		m_d2d_context->SetDpi(m_effectiveDpi, m_effectiveDpi);
+		m_d2d_context->SetDpi(m_effective_dpi, m_effective_dpi);
 
 		// すべての Windows ストア アプリで、グレースケール テキストのアンチエイリアシングをお勧めします。
 		m_d2d_context->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE::D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
 	}
 
 	// すべてのデバイス リソースを再作成し、現在の状態に再設定する.
-	void D2D_UI::HandleDeviceLost(SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::HandleDeviceLost(void)
 	{
 		m_dxgi_swap_chain = nullptr;
 
@@ -463,7 +469,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		m_d2d_context->SetDpi(m_logical_dpi, m_logical_dpi);
-		CreateWindowSizeDependentResources(swap_chain_panel);
+		CreateWindowSizeDependentResources();
 
 		if (m_deviceNotify != nullptr) {
 			m_deviceNotify->OnDeviceRestored();
@@ -471,16 +477,18 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// スワップチェーンの内容を画面に表示する.
-	void D2D_UI::Present(SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::Present(void)
 	{
+		//if (m_dxgi_swap_chain != nullptr) {
 		DXGI_PRESENT_PARAMETERS param{ 0 };
 		const HRESULT hr = m_dxgi_swap_chain->Present1(1, 0, &param);
 		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
-			HandleDeviceLost(swap_chain_panel);
+			HandleDeviceLost();
 		}
 		else {
 			winrt::check_hresult(hr);
 		}
+		//}
 	}
 
 	// デバイスが失われたときと作成されたときに通知を受けるように、DeviceNotify を登録する.
@@ -492,80 +500,86 @@ namespace winrt::GraphPaper::implementation
 	// 描画環境に合成倍率を設定する.
 	// このメソッドは、CompositionScaleChanged イベントハンドラーの中で呼び出される.
 	// CompositionScaleChanged は Loaded のあとに呼び出される.
-	void D2D_UI::SetCompositionScale(SwapChainPanel const& swap_chain_panel, float compositionScaleX, float compositionScaleY)
+	void D2D_UI::SetCompositionScale(float composition_scale_x, float composition_scale_y)
 	{
-		if (m_compositionScaleX != compositionScaleX || 
-			m_compositionScaleY != compositionScaleY) {
-			m_compositionScaleX = compositionScaleX;
-			m_compositionScaleY = compositionScaleY;
-			CreateWindowSizeDependentResources(swap_chain_panel);
+		if (m_composition_scale_x != composition_scale_x || m_composition_scale_y != composition_scale_y) {
+			m_composition_scale_x = composition_scale_x;
+			m_composition_scale_y = composition_scale_y;
+			CreateWindowSizeDependentResources();
 		}
 	}
 
 	// 描画環境にデバイスの向きを設定する.
 	// このメソッドは、OrientationChanged イベントハンドラーの中で呼び出される.
-	void D2D_UI::SetCurrentOrientation(SwapChainPanel const& swap_chain_panel, DisplayOrientations currentOrientation)
+	void D2D_UI::SetCurrentOrientation(DisplayOrientations current_orientation)
 	{
-		if (m_currentOrientation != currentOrientation) {
-			m_currentOrientation = currentOrientation;
-			CreateWindowSizeDependentResources(swap_chain_panel);
+		if (m_current_orientation != current_orientation) {
+			m_current_orientation = current_orientation;
+			CreateWindowSizeDependentResources();
 		}
 	}
 
 	// 描画環境に DPI を設定する.
 	// このメソッドは、DpiChanged イベントハンドラーの中で呼び出される.
-	void D2D_UI::SetDpi(SwapChainPanel const& swap_chain_panel, const float dpi)
+	void D2D_UI::SetDpi(const float dpi)
 	{
-		if (dpi == m_logical_dpi) {
-			return;
+		if (dpi != m_logical_dpi) {
+			m_logical_dpi = dpi;
+			m_d2d_context->SetDpi(m_logical_dpi, m_logical_dpi);
+			CreateWindowSizeDependentResources();
 		}
-		m_logical_dpi = dpi;
-		m_d2d_context->SetDpi(m_logical_dpi, m_logical_dpi);
-		CreateWindowSizeDependentResources(swap_chain_panel);
 	}
 
 	// 描画環境に表示領域の大きさを設定する.
 	// このメソッドは、SizeChanged イベントハンドラーの中で呼び出される.
 	// SizeChanged は, まずサイズ 0 で Loaded に先んじて呼び出される.
-	void D2D_UI::SetLogicalSize2(SwapChainPanel const& swap_chain_panel, const D2D1_SIZE_F size)
+	void D2D_UI::SetLogicalSize2(const D2D1_SIZE_F size)
 	{
-		if (m_logical_width == size.width && m_logical_height == size.height) {
-			return;
+		if (m_logical_width != size.width || m_logical_height != size.height) {
+			m_logical_width = size.width;
+			m_logical_height = size.height;
+			CreateWindowSizeDependentResources();
 		}
-		m_logical_width = size.width;
-		m_logical_height = size.height;
-		CreateWindowSizeDependentResources(swap_chain_panel);
 	}
 
 	// 描画環境に XAML スワップチェーンパネルを設定する.
 	// このメソッドは, UI コントロールが作成 (または再作成) = Loaded されたときに呼び出される.
 	void D2D_UI::SetSwapChainPanel(SwapChainPanel const& swap_chain_panel)
 	{
+		if (m_swap_chain_panel == swap_chain_panel) {
+			return;
+		}
+		m_swap_chain_panel = swap_chain_panel;
+
 		//const auto rast_scale = xaml_root.RasterizationScale();
 		// 現在の表示状態 DisplayInfomation を得る.
-		// 表示状態をもとに, 表示デバイスの既定の向きと現在の向き, 
-		// 論理 DPI を得る. 
+		// 表示状態をもとに, 表示デバイスの既定の向きと現在の向き, 論理 DPI を得る. 
 		// D2D コンテキストに論理 DPI を格納する.
 		// パネルへの保持された参照に指定されたスワップチェーンパネルを保存する.
 		// パネルをもとに, 実際的な幅と高さ, 拡大率を得て, 
 		// それぞれ論理的な高さと幅, 合成倍率に格納する.
+#ifdef WIN_UI3
+		//FLOAT system_dpi_x;
+		//FLOAT system_dpi_y;
+		//m_d2d_context->GetDpi(&system_dpi_x, &system_dpi_y);
+		//m_logical_dpi = system_dpi_x;
+#else
 		const DisplayInformation& di = DisplayInformation::GetForCurrentView();
 		if (di != nullptr) {
 			m_nativeOrientation = di.NativeOrientation();
-			m_currentOrientation = di.CurrentOrientation();
+			m_current_orientation = di.CurrentOrientation();
 			m_logical_dpi = di.LogicalDpi();
+			m_d2d_context->SetDpi(m_logical_dpi, m_logical_dpi);
 		}
-		FLOAT system_dpi_x;
-		FLOAT system_dpi_y;
-		m_d2d_context->GetDpi(&system_dpi_x, &system_dpi_y);
-		//m_d2d_context->SetDpi(m_logical_dpi, m_logical_dpi);
-		m_d2d_context->SetDpi(0, 0);
-		m_compositionScaleX = swap_chain_panel.CompositionScaleX();
-		m_compositionScaleY = swap_chain_panel.CompositionScaleY();
-		m_logical_width = static_cast<FLOAT>(swap_chain_panel.ActualWidth());
-		m_logical_height = static_cast<FLOAT>(swap_chain_panel.ActualHeight());
+#endif
+		m_composition_scale_x = swap_chain_panel.CompositionScaleX();
+		m_composition_scale_y = swap_chain_panel.CompositionScaleY();
+		const auto panel_w = swap_chain_panel.Width();
+		const auto panel_h = swap_chain_panel.Height();
+		m_logical_width = static_cast<FLOAT>(panel_w >= 1.0 ? panel_w : swap_chain_panel.ActualWidth());
+		m_logical_height = static_cast<FLOAT>(panel_h >= 1.0 ? panel_h : swap_chain_panel.ActualHeight());
 		if (m_logical_width > 0.0 && m_logical_height > 0.0) {
-			CreateWindowSizeDependentResources(swap_chain_panel);
+			CreateWindowSizeDependentResources();
 		}
 	}
 
@@ -578,8 +592,7 @@ namespace winrt::GraphPaper::implementation
 		// D2D との互換性を保持するために必要.
 		UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #if defined(_DEBUG)
-		// コンパイルがデバッグビルドなら,
-		// D3D デバイスを作成できるか判定し, その結果を得る.
+		// コンパイルがデバッグビルドなら, D3D デバイスを作成できるか判定し, その結果を得る.
 		// ドライバータイプは D3D_DRIVER_TYPE_NULL を, 
 		// フラグは D3D11_CREATE_DEVICE_DEBUG を,
 		// SDK バージョンは D3D11_SDK_VERSION を,
@@ -608,8 +621,8 @@ namespace winrt::GraphPaper::implementation
 		// D3D_FEATURE_LEVEL_9_1 以降を機能レベル配列に格納する.
 		constexpr D3D_FEATURE_LEVEL featureLevels[] = {
 			// この配列では、順序が保存されることに注意する.
-			// アプリケーションの最低限必要な機能レベルをその説明で宣言することを忘れないでください。
-			// 特に記載がない限り、すべてのアプリケーションは 9.1 をサポートすることが想定されます。
+			// アプリケーションの最低限必要な機能レベルをその説明で宣言すること.
+			// 特に記載がない限り、すべてのアプリケーションは 9.1 をサポートすることが想定される.
 			D3D_FEATURE_LEVEL_12_1,
 			D3D_FEATURE_LEVEL_12_0,
 			D3D_FEATURE_LEVEL_11_1,
@@ -630,18 +643,18 @@ namespace winrt::GraphPaper::implementation
 #if !defined(_DEBUG)
 		HRESULT
 #endif
-		hr = D3D11CreateDevice(
-			nullptr,
-			D3D_DRIVER_TYPE_HARDWARE,
-			0,
-			creationFlags,
-			featureLevels,
-			ARRAYSIZE(featureLevels),
-			D3D11_SDK_VERSION,
-			device.put(),
-			&m_d3dFeatureLevel,
-			context.put()
-		);
+			hr = D3D11CreateDevice(
+				nullptr,
+				D3D_DRIVER_TYPE_HARDWARE,
+				0,
+				creationFlags,
+				featureLevels,
+				ARRAYSIZE(featureLevels),
+				D3D11_SDK_VERSION,
+				device.put(),
+				&m_d3dFeatureLevel,
+				context.put()
+			);
 		if (SUCCEEDED(hr)) {
 			// 作成できたなら, D3D_DRIVER_TYPE_HARDWARE を D3D ドライバータイプに格納する.
 			m_d3d_driver_type = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE;
@@ -675,37 +688,22 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
 		// DXGI デバイスをもとに D2D デバイスを作成する.
 		winrt::com_ptr<ID2D1Device2> d2d_device{ nullptr };
-
 		winrt::check_hresult(m_d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put()));
 
 		// D2D デバイスをもとに D2D コンテキストを作成する.
 		// オプションは D2D1_DEVICE_CONTEXT_OPTIONS_NONE を指定する.
 		m_d2d_context = nullptr;
-		winrt::check_hresult(
-			d2d_device->CreateDeviceContext(
-				D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
-				m_d2d_context.put()
-			)
-		);
+		winrt::check_hresult(d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, m_d2d_context.put()));
+
 		// D2D コンテキストをもとに, 図形の色ブラシ, 部位の色ブラシ,
 		// 補助線の色ブラシ, 選択された文字範囲の色ブラシ, 補助線の形式,
 		// 描画状態の保存ブロックを作成する.
 		m_solid_color_brush = nullptr;
-		winrt::check_hresult(
-			m_d2d_context->CreateSolidColorBrush({}, m_solid_color_brush.put())
-		);
+		winrt::check_hresult(m_d2d_context->CreateSolidColorBrush({}, m_solid_color_brush.put()));
 		m_range_brush = nullptr;
-		winrt::check_hresult(
-			m_d2d_context->CreateSolidColorBrush({}, m_range_brush.put())
-		);
-		//m_aux_style = nullptr;
-		//winrt::check_hresult(
-		//	m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, m_aux_style.put())
-		//);
+		winrt::check_hresult(m_d2d_context->CreateSolidColorBrush({}, m_range_brush.put()));
 		m_state_block = nullptr;
-		winrt::check_hresult(
-			m_d2d_factory->CreateDrawingStateBlock(m_state_block.put())
-		);
+		winrt::check_hresult(m_d2d_factory->CreateDrawingStateBlock(m_state_block.put()));
 
 	};
 
@@ -723,7 +721,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 表示デバイスが有効になった.
 	// このメソッドは、DisplayContentsInvalidated イベント用のイベント ハンドラーの中で呼び出されます。
-	void D2D_UI::ValidateDevice(SwapChainPanel const& swap_chain_panel)
+	void D2D_UI::ValidateDevice(void)
 	{
 		//デバイスが作成された後に既定のアダプターが変更された、
 		// またはこのデバイスが削除された場合は、D3D デバイスが有効でなくなります。
@@ -770,7 +768,7 @@ namespace winrt::GraphPaper::implementation
 			previousDefaultAdapter = nullptr;
 
 			// すべてのデバイス リソースを再作成し、現在の状態に再設定する.
-			HandleDeviceLost(swap_chain_panel);
+			HandleDeviceLost();
 		}
 	}
 

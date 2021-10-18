@@ -14,8 +14,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataWriter;
 
 	wchar_t** ShapeText::s_available_fonts = nullptr;	//有効な書体名
-	D2D1_COLOR_F ShapeText::s_text_selected_background = ACCENT_COLOR;	// 文字範囲の背景色
-	D2D1_COLOR_F ShapeText::s_text_selected_foreground = COLOR_TEXT_SELECTED;	// 文字範囲の文字色
+	D2D1_COLOR_F ShapeText::s_text_selected_background{ ACCENT_COLOR };	// 文字範囲の背景色
+	D2D1_COLOR_F ShapeText::s_text_selected_foreground{ COLOR_TEXT_SELECTED };	// 文字範囲の文字色
 
 	// テキストレイアウトから, ヒットテストのための計量の配列を得る.
 	static void tx_create_test_metrics(IDWriteTextLayout* text_layout, const DWRITE_TEXT_RANGE text_range, DWRITE_HIT_TEST_METRICS*& test_metrics, UINT32& test_count);
@@ -47,7 +47,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(text_layout->HitTestTextRange(pos, len, 0, 0, test_metrics, test_count, &test_count));
 	}
 
-	// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
+	// 位置の計量, 行の計量, 選択された文字範囲の計量を破棄する.
 	static void tx_relese_metrics(UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_metrics, DWRITE_LINE_METRICS*& line_metrics, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_metrics) noexcept
 	{
 		test_cnt = 0;
@@ -211,14 +211,14 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(t_box, m_vec[0])) {
 			D2D1_POINT_2F se;
 			pt_add(m_pos, t_box, se);
-			set_pos_anch(se, ANCH_TYPE::ANCH_SE, 0.0f, false);
+			set_pos_anchor(se, ANCH_TYPE::ANCH_SE, 0.0f, false);
 			return true;
 		}
 		return false;
 	}
 
 	// 書体や文字列の属性が変更されたか判定する.
-	bool ShapeText::is_updated(void)
+	bool ShapeText::is_updated(void) const
 	{
 		const uint32_t text_len = wchar_len(m_text);
 		bool updated = false;
@@ -636,7 +636,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const uint32_t anch = ShapeRect::hit_test_anch(t_pos);
+		const uint32_t anch = ShapeRect::hit_test_anchor(t_pos);
 		if (anch != ANCH_TYPE::ANCH_SHEET) {
 			return anch;
 		}
@@ -658,11 +658,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれるか判定する.
-	// a_min	範囲の左上位置
-	// a_max	範囲の右下位置
+	// area_min	範囲の左上位置
+	// area_max	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeText::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
+	bool ShapeText::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
 	{
 		D2D1_POINT_2F p_min;
 		D2D1_POINT_2F h_min;
@@ -673,25 +673,25 @@ namespace winrt::GraphPaper::implementation
 			for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 				DWRITE_HIT_TEST_METRICS const& tm = m_dw_test_metrics[i];
 				DWRITE_LINE_METRICS const& lm = m_dw_line_metrics[i];
-				const double top = tm.top + lm.baseline + m_dw_descent - m_font_size;
+				const double top = static_cast<double>(tm.top) + lm.baseline + m_dw_descent - m_font_size;
 				pt_add(p_min, tm.left, top, h_min);
-				if (pt_in_rect(h_min, a_min, a_max) != true) {
+				if (!pt_in_rect(h_min, area_min, area_max)) {
 					return false;
 				}
 				pt_add(h_min, tm.width, m_font_size, h_max);
-				if (pt_in_rect(h_max, a_min, a_max) != true) {
+				if (!pt_in_rect(h_max, area_min, area_max)) {
 					return false;
 				}
 			}
 		}
-		return ShapeRect::in_area(a_min, a_max);
+		return ShapeRect::in_area(area_min, area_max);
 	}
 
 	// 書体名が有効か判定する.
 	// font	書体名
 	// 戻り値	有効なら true
 	// 有効なら, 引数の書体名を破棄し, 有効な書体名の配列の要素と置き換える.
-	bool ShapeText::is_available_font(wchar_t*& font)
+	bool ShapeText::is_available_font(wchar_t*& font) noexcept
 	{
 		if (font) {
 			for (uint32_t i = 0; s_available_fonts[i]; i++) {
@@ -709,16 +709,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 有効な書体名の配列を破棄する.
-	void ShapeText::release_available_fonts(void)
+	void ShapeText::release_available_fonts(void) noexcept
 	{
-		if (s_available_fonts == nullptr) {
-			return;
+		if (s_available_fonts != nullptr) {
+			for (uint32_t i = 0; s_available_fonts[i]; i++) {
+				delete[] s_available_fonts[i];
+			}
+			delete[] s_available_fonts;
+			s_available_fonts = nullptr;
 		}
-		for (uint32_t i = 0; s_available_fonts[i]; i++) {
-			delete[] s_available_fonts[i];
-		}
-		delete[] s_available_fonts;
-		s_available_fonts = nullptr;
 	}
 
 	// 有効な書体名の配列を設定する.
@@ -743,20 +742,14 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < f_cnt; i++) {
 			// 要素から書体を得る.
 			winrt::com_ptr<IDWriteFontFamily> font_family;
-			winrt::check_hresult(
-				collection->GetFontFamily(i, font_family.put())
-			);
+			winrt::check_hresult(collection->GetFontFamily(i, font_family.put()));
 			// 書体からローカライズされた書体名を得る.
 			winrt::com_ptr<IDWriteLocalizedStrings> localized_name;
-			winrt::check_hresult(
-				font_family->GetFamilyNames(localized_name.put())
-			);
+			winrt::check_hresult(font_family->GetFamilyNames(localized_name.put()));
 			// ローカライズされた書体名から, 地域名をのぞいた書体名の開始位置を得る.
 			UINT32 index = 0;
 			BOOL exists = false;
-			winrt::check_hresult(
-				localized_name->FindLocaleName(lang, &index, &exists)
-			);
+			winrt::check_hresult(localized_name->FindLocaleName(lang, &index, &exists));
 			if (exists != TRUE) {
 				// 地域名がない場合,
 				// 0 を開始位置に格納する.
@@ -764,14 +757,10 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 開始位置より後ろの文字数を得る (ヌル文字は含まれない).
 			UINT32 length;
-			winrt::check_hresult(
-				localized_name->GetStringLength(index, &length)
-			);
+			winrt::check_hresult(localized_name->GetStringLength(index, &length));
 			// 文字数 + 1 の文字配列を確保し, 書体名の配列に格納する.
 			s_available_fonts[i] = new wchar_t[static_cast<size_t>(length) + 1];
-			winrt::check_hresult(
-				localized_name->GetString(index, s_available_fonts[i], length + 1)
-			);
+			winrt::check_hresult(localized_name->GetString(index, s_available_fonts[i], length + 1));
 			// ローカライズされた書体名を破棄する.
 			localized_name = nullptr;
 			// 書体をを破棄する.
@@ -844,11 +833,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 値を, 部位の位置に格納する.
 	// value	値
-	// anch	図形の部位
+	// anchor	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeText::set_pos_anch(const D2D1_POINT_2F value, const uint32_t anch, const float limit, const bool /*keep_aspect*/) noexcept
+	bool ShapeText::set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool /*keep_aspect*/) noexcept
 	{
-		if (ShapeRect::set_pos_anch(value, anch, limit, false)) {
+		if (ShapeRect::set_pos_anchor(value, anchor, limit, false)) {
 			return true;
 		}
 		return false;
@@ -900,7 +889,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を文字列の余白に格納する.
-	bool ShapeText::set_text_padding(const D2D1_SIZE_F value)
+	bool ShapeText::set_text_padding(const D2D1_SIZE_F value) noexcept
 	{
 		if (!equal(m_text_padding, value)) {
 			m_text_padding = value;
@@ -910,7 +899,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を選択された文字範囲に格納する.
-	bool ShapeText::set_text_selected(const DWRITE_TEXT_RANGE value)
+	bool ShapeText::set_text_selected(const DWRITE_TEXT_RANGE value) noexcept
 	{
 		if (!equal(m_text_selected_range, value)) {
 			m_text_selected_range = value;

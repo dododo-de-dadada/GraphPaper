@@ -387,7 +387,14 @@ namespace winrt::GraphPaper::implementation
 
 			//tool_read(dt_reader);
 			m_drawing_tool = static_cast<DRAWING_TOOL>(dt_reader.ReadUInt32());
-			dt_read(m_drawing_poly_opt, dt_reader);
+			
+			//dt_read(m_drawing_poly_opt, dt_reader);
+			m_drawing_poly_opt.m_vertex_cnt = dt_reader.ReadUInt32();
+			m_drawing_poly_opt.m_regular = dt_reader.ReadBoolean();
+			m_drawing_poly_opt.m_vertex_up = dt_reader.ReadBoolean();
+			m_drawing_poly_opt.m_end_closed = dt_reader.ReadBoolean();
+			m_drawing_poly_opt.m_clockwise = dt_reader.ReadBoolean();
+
 			//find_text_read(dt_reader);
 			dt_read(m_find_text, dt_reader);
 			dt_read(m_find_repl, dt_reader);
@@ -872,7 +879,12 @@ namespace winrt::GraphPaper::implementation
 				DataWriter(ra_stream.GetOutputStreamAt(0))
 			};
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_drawing_tool));
-			dt_write(m_drawing_poly_opt, dt_writer);
+			//dt_write(m_drawing_poly_opt, dt_writer);
+			dt_writer.WriteUInt32(static_cast<uint32_t>(m_drawing_poly_opt.m_vertex_cnt));
+			dt_writer.WriteBoolean(m_drawing_poly_opt.m_regular);
+			dt_writer.WriteBoolean(m_drawing_poly_opt.m_vertex_up);
+			dt_writer.WriteBoolean(m_drawing_poly_opt.m_end_closed);
+			dt_writer.WriteBoolean(m_drawing_poly_opt.m_clockwise);
 			dt_write(m_find_text, dt_writer);
 			dt_write(m_find_repl, dt_writer);
 			uint16_t f_bit = 0;
