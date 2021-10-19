@@ -101,9 +101,9 @@ namespace winrt::GraphPaper::implementation
 		const float offset = static_cast<float>(samp_h / 16.0);
 		const float samp_x = static_cast<float>(samp_w * 0.25);
 		const float samp_y = static_cast<float>(samp_h * 0.5);
-		s->set_pos_anchor(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANCH_TYPE::ANCH_P0, m_vert_stick, false);
-		s->set_pos_anchor(D2D1_POINT_2F{ samp_x, samp_y }, ANCH_TYPE::ANCH_P0 + 1, m_vert_stick, false);
-		s->set_pos_anchor(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANCH_TYPE::ANCH_P0 + 2, m_vert_stick, false);
+		s->set_pos_anp(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANP_TYPE::ANP_P0, m_vert_stick, false);
+		s->set_pos_anp(D2D1_POINT_2F{ samp_x, samp_y }, ANP_TYPE::ANP_P0 + 1, m_vert_stick, false);
+		s->set_pos_anp(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANP_TYPE::ANP_P0 + 2, m_vert_stick, false);
 		m_sample_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;

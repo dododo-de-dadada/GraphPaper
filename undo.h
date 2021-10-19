@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行する.
 		virtual void exec(void) {}
 		// 操作をデータライターから読み込む.
-		virtual void read(winrt::Windows::Storage::Streams::DataReader const& /*dt_reader*/) {}
+		//virtual void read(winrt::Windows::Storage::Streams::DataReader const& /*dt_reader*/) {}
 		// 図形を参照しているか判定する.
 		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
 		// 参照する図形リストと用紙図形を格納する.
@@ -135,8 +135,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形の部位の操作
 	//------------------------------
-	struct UndoAnchor : Undo {
-		uint32_t m_anc;	// 操作される図形の部位
+	struct UndoAnp : Undo {
+		uint32_t m_anp;	// 操作される図形の部位
 		D2D1_POINT_2F m_pos;	// 変更前の, 図形の部位の位置
 
 		// 操作を実行すると値が変わるか判定する.
@@ -144,9 +144,9 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行する.
 		void exec(void);
 		// データリーダーから操作を読み込む.
-		UndoAnchor(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		UndoAnp(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
 		// 図形の部位を保存する.
-		UndoAnchor(Shape* const s, const uint32_t anch);
+		UndoAnp(Shape* const s, const uint32_t anp);
 		// データライターに書き込む.
 		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
 	};
@@ -164,7 +164,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行する.
 		void exec(void);
 		// 図形を参照しているか判定する.
-		bool refer_to(const Shape* s) const noexcept { return Undo::refer_to(s) || m_dst_shape == s; };
+		bool refer_to(const Shape* s) const noexcept final override { return Undo::refer_to(s) || m_dst_shape == s; };
 		// 図形の順番を入れ替える.
 		UndoArrange(Shape* const s, Shape* const t);
 		// データリーダーから操作を読み込む.
@@ -204,8 +204,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct UndoImage : Undo {
 		D2D1_POINT_2F m_pos;	// 位置
-		D2D1_SIZE_F m_view;	// 先寸法
-		D2D1_RECT_F m_rect;	// 元矩形
+		D2D1_SIZE_F m_view;	// 表示されている画面上の寸法
+		D2D1_RECT_F m_clip;	// 表示されている画像上の矩形
 		D2D1_SIZE_F m_ratio;	// 先寸法と元矩形の縦横比
 		float m_opac;
 
@@ -235,7 +235,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作が挿入か判定する.
 		bool is_insert(void) const noexcept { return m_insert; }
 		// 図形を参照しているか判定する.
-		bool refer_to(const Shape* s) const noexcept { return Undo::refer_to(s) || m_shape_at == s; };
+		virtual bool refer_to(const Shape* s) const noexcept override { return Undo::refer_to(s) || m_shape_at == s; };
 		// 操作される位置にあった図形を得る.
 		Shape* const shape_at(void) const noexcept { return m_shape_at; }
 		// データリーダーから操作を読み込む.
@@ -257,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行する.
 		void exec(void);
 		// 図形を参照しているか判定する.
-		bool refer_to(const Shape* s) const noexcept { return UndoList::refer_to(s) || m_shape_group == s; };
+		bool refer_to(const Shape* s) const noexcept final override { return UndoList::refer_to(s) || m_shape_group == s; };
 		// データリーダーから操作を読み込む.
 		UndoListGroup(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
 		// 図形をグループから削除する.

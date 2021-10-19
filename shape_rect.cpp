@@ -48,34 +48,34 @@ namespace winrt::GraphPaper::implementation
 			a_pos[3].y = rect.bottom;
 			a_pos[3].x = rect.left;
 			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-				anchor_draw_rect(a_pos[i], dx);
+				anp_draw_rect(a_pos[i], dx);
 				D2D1_POINT_2F a_mid;	// 方形の辺の中点
 				pt_avg(a_pos[j], a_pos[i], a_mid);
-				anchor_draw_rect(a_mid, dx);
+				anp_draw_rect(a_mid, dx);
 			}
 		}
 	}
 
 	// 折れ線の図形の部位が位置を含むか判定する.
-	uint32_t ShapeRect::hit_test_anchor(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeRect::hit_test_anp(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		// どの頂点が位置を含むか判定する.
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F a_pos;
-			get_pos_anchor(ANCH_CORNER[i], a_pos);
-			if (pt_in_anchor(t_pos, a_pos)) {
-				return ANCH_CORNER[i];
+			get_pos_anp(ANP_CORNER[i], a_pos);
+			if (pt_in_anp(t_pos, a_pos)) {
+				return ANP_CORNER[i];
 			}
 		}
 		// どの中点が位置を含むか判定する.
 		for (uint32_t i = 0; i < 4; i++) {
 			D2D1_POINT_2F a_pos;
-			get_pos_anchor(ANCH_MIDDLE[i], a_pos);
-			if (pt_in_anchor(t_pos, a_pos)) {
-				return ANCH_MIDDLE[i];
+			get_pos_anp(ANP_MIDDLE[i], a_pos);
+			if (pt_in_anp(t_pos, a_pos)) {
+				return ANP_MIDDLE[i];
 			}
 		}
-		return ANCH_TYPE::ANCH_SHEET;
+		return ANP_TYPE::ANP_SHEET;
 	}
 
 	// 位置を含むか判定する.
@@ -87,43 +87,43 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F v_pos[4]{ m_pos, };
 		v_pos[2].x = m_pos.x + m_vec[0].x;
 		v_pos[2].y = m_pos.y + m_vec[0].y;
-		if (pt_in_anchor(t_pos, v_pos[2])) {
-			return ANCH_TYPE::ANCH_SE;
+		if (pt_in_anp(t_pos, v_pos[2])) {
+			return ANP_TYPE::ANP_SE;
 		}
 		v_pos[3].x = m_pos.x;
 		v_pos[3].y = m_pos.y + m_vec[0].y;
-		if (pt_in_anchor(t_pos, v_pos[3])) {
-			return ANCH_TYPE::ANCH_SW;
+		if (pt_in_anp(t_pos, v_pos[3])) {
+			return ANP_TYPE::ANP_SW;
 		}
 		v_pos[1].x = m_pos.x + m_vec[0].x;
 		v_pos[1].y = m_pos.y;
-		if (pt_in_anchor(t_pos, v_pos[1])) {
-			return ANCH_TYPE::ANCH_NE;
+		if (pt_in_anp(t_pos, v_pos[1])) {
+			return ANP_TYPE::ANP_NE;
 		}
-		if (pt_in_anchor(t_pos, v_pos[0])) {
-			return ANCH_TYPE::ANCH_NW;
+		if (pt_in_anp(t_pos, v_pos[0])) {
+			return ANP_TYPE::ANP_NW;
 		}
 
 		// 各辺の中点の部位に含まれるか判定する.
 		D2D1_POINT_2F s_pos;
 		pt_avg(v_pos[2], v_pos[3], s_pos);
-		if (pt_in_anchor(t_pos, s_pos)) {
-			return ANCH_TYPE::ANCH_SOUTH;
+		if (pt_in_anp(t_pos, s_pos)) {
+			return ANP_TYPE::ANP_SOUTH;
 		}
 		D2D1_POINT_2F e_pos;
 		pt_avg(v_pos[1], v_pos[2], e_pos);
-		if (pt_in_anchor(t_pos, e_pos)) {
-			return ANCH_TYPE::ANCH_EAST;
+		if (pt_in_anp(t_pos, e_pos)) {
+			return ANP_TYPE::ANP_EAST;
 		}
 		D2D1_POINT_2F w_pos;
 		pt_avg(v_pos[0], v_pos[3], w_pos);
-		if (pt_in_anchor(t_pos, w_pos)) {
-			return ANCH_TYPE::ANCH_WEST;
+		if (pt_in_anp(t_pos, w_pos)) {
+			return ANP_TYPE::ANP_WEST;
 		}
 		D2D1_POINT_2F n_pos;
 		pt_avg(v_pos[0], v_pos[1], n_pos);
-		if (pt_in_anchor(t_pos, n_pos)) {
-			return ANCH_TYPE::ANCH_NORTH;
+		if (pt_in_anp(t_pos, n_pos)) {
+			return ANP_TYPE::ANP_NORTH;
 		}
 
 		// 対角にある頂点をもとに, 方形を得る.
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_stroke_color) && m_stroke_width > 0.0) {
 			// 外側の方形に含まれるか判定する.
 			D2D1_POINT_2F s_min, s_max;
-			const double s_width = m_stroke_width > 0.0 ? max(m_stroke_width, Shape::s_anchor_len) : 0.0;
+			const double s_width = m_stroke_width > 0.0 ? max(m_stroke_width, Shape::s_anp_len) : 0.0;
 			const double e_width = s_width * 0.5;
 			pt_add(t_min, -e_width, s_min);
 			pt_add(t_max, e_width, s_max);
@@ -160,17 +160,17 @@ namespace winrt::GraphPaper::implementation
 				pt_add(s_max, -s_width, u_max);
 				// 内側の方形が反転する (枠が太すぎて図形を覆う) か判定する.
 				if (u_max.x <= u_min.x || u_max.y <= u_min.y) {
-					return ANCH_TYPE::ANCH_STROKE;
+					return ANP_TYPE::ANP_STROKE;
 				}
 				// 内側の方形に含まれる (辺に含まれない) か判定する.
 				else if (pt_in_rect(t_pos, u_min, u_max)) {
 					if (is_opaque(m_fill_color)) {
-						return ANCH_TYPE::ANCH_FILL;
+						return ANP_TYPE::ANP_FILL;
 					}
 				}
 				// 方形の角に含まれてない (辺に含まれる) か判定する.
 				else if (t_min.x <= t_pos.x && t_pos.x <= t_max.x || t_min.y <= t_pos.y && t_pos.y <= t_max.y) {
-					return ANCH_TYPE::ANCH_STROKE;
+					return ANP_TYPE::ANP_STROKE;
 				}
 				// 線枠のつなぎが丸めか判定する.
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 						pt_in_circle(t_pos, v_pos[1], e_width) ||
 						pt_in_circle(t_pos, v_pos[2], e_width) ||
 						pt_in_circle(t_pos, v_pos[3], e_width)) {
-						return ANCH_TYPE::ANCH_STROKE;
+						return ANP_TYPE::ANP_STROKE;
 					}
 				}
 				// 線枠のつなぎが面取り, または, マイター・面取りでかつマイター制限が√2 未満か判定する.
@@ -192,7 +192,7 @@ namespace winrt::GraphPaper::implementation
 						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[1].x, t_pos.y - v_pos[1].y }, 4, q_pos) ||
 						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[2].x, t_pos.y - v_pos[2].y }, 4, q_pos) ||
 						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[3].x, t_pos.y - v_pos[3].y }, 4, q_pos)) {
-						return ANCH_TYPE::ANCH_STROKE;
+						return ANP_TYPE::ANP_STROKE;
 					}
 				}
 				// 線枠のつなぎがマイター, または, マイター/面取りでかつマイター制限が√2 以上か判定する.
@@ -206,15 +206,15 @@ namespace winrt::GraphPaper::implementation
 						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[1].x, t_pos.y - v_pos[1].y }, 4, q_pos) ||
 						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[2].x, t_pos.y - v_pos[2].y }, 4, q_pos) ||
 						pt_in_poly(D2D1_POINT_2F{ t_pos.x - v_pos[3].x, t_pos.y - v_pos[3].y }, 4, q_pos)) {
-						return ANCH_TYPE::ANCH_STROKE;
+						return ANP_TYPE::ANP_STROKE;
 					}
 				}
 			}
 		}
 		else if (is_opaque(m_fill_color) && pt_in_rect(t_pos, t_min, t_max)) {
-			return ANCH_TYPE::ANCH_FILL;
+			return ANP_TYPE::ANP_FILL;
 		}
-		return ANCH_TYPE::ANCH_SHEET;
+		return ANP_TYPE::ANP_SHEET;
 	}
 
 	// 塗りつぶしの色を得る.
@@ -237,37 +237,37 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//	部位の位置を得る.
-	//	anch	図形の部位.
+	//	anp	図形の部位.
 	//	value	得られた位置.
 	//	戻り値	なし
-	void ShapeRect::get_pos_anchor(const uint32_t anchor, D2D1_POINT_2F& value) const noexcept
+	void ShapeRect::get_pos_anp(const uint32_t anp, D2D1_POINT_2F& value) const noexcept
 	{
-		switch (anchor) {
-		case ANCH_TYPE::ANCH_NORTH:
+		switch (anp) {
+		case ANP_TYPE::ANP_NORTH:
 			value.x = m_pos.x + m_vec[0].x * 0.5f;
 			value.y = m_pos.y;
 			break;
-		case ANCH_TYPE::ANCH_NE:
+		case ANP_TYPE::ANP_NE:
 			value.x = m_pos.x + m_vec[0].x;
 			value.y = m_pos.y;
 			break;
-		case ANCH_TYPE::ANCH_WEST:
+		case ANP_TYPE::ANP_WEST:
 			value.x = m_pos.x;
 			value.y = m_pos.y + m_vec[0].y * 0.5f;
 			break;
-		case ANCH_TYPE::ANCH_EAST:
+		case ANP_TYPE::ANP_EAST:
 			value.x = m_pos.x + m_vec[0].x;
 			value.y = m_pos.y + m_vec[0].y * 0.5f;
 			break;
-		case ANCH_TYPE::ANCH_SW:
+		case ANP_TYPE::ANP_SW:
 			value.x = m_pos.x;
 			value.y = m_pos.y + m_vec[0].y;
 			break;
-		case ANCH_TYPE::ANCH_SOUTH:
+		case ANP_TYPE::ANP_SOUTH:
 			value.x = m_pos.x + m_vec[0].x * 0.5f;
 			value.y = m_pos.y + m_vec[0].y;
 			break;
-		case ANCH_TYPE::ANCH_SE:
+		case ANP_TYPE::ANP_SE:
 			value.x = m_pos.x + m_vec[0].x;
 			value.y = m_pos.y + m_vec[0].y;
 			break;
@@ -291,13 +291,13 @@ namespace winrt::GraphPaper::implementation
 
 	// 値を, 部位の位置に格納する. 他の部位の位置も動く.
 	// value	値
-	// anchor	図形の部位
+	// anp	図形の部位
 	// limit	他の頂点との限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeRect::set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool /*keep_aspect*/) noexcept
+	bool ShapeRect::set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool /*keep_aspect*/) noexcept
 	{
 		bool done = false;
-		switch (anchor) {
-		case ANCH_TYPE::ANCH_SHEET:
+		switch (anp) {
+		case ANP_TYPE::ANP_SHEET:
 		{
 			D2D1_POINT_2F new_pos;
 			pt_round(value, PT_ROUND, new_pos);
@@ -309,7 +309,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case ANCH_TYPE::ANCH_NW:
+		case ANP_TYPE::ANP_NW:
 		{
 			D2D1_POINT_2F new_pos;
 			pt_round(value, PT_ROUND, new_pos);
@@ -322,7 +322,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case ANCH_TYPE::ANCH_SE:
+		case ANP_TYPE::ANP_SE:
 		{
 			D2D1_POINT_2F pos;
 			pt_add(m_pos, m_vec[0], pos);
@@ -336,10 +336,10 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case ANCH_TYPE::ANCH_NE:
+		case ANP_TYPE::ANP_NE:
 		{
 			D2D1_POINT_2F pos;
-			get_pos_anchor(ANCH_TYPE::ANCH_NE, pos);
+			get_pos_anp(ANP_TYPE::ANP_NE, pos);
 			D2D1_POINT_2F new_pos;
 			pt_round(value, PT_ROUND, new_pos);
 			D2D1_POINT_2F vec;
@@ -351,10 +351,10 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case ANCH_TYPE::ANCH_SW:
+		case ANP_TYPE::ANP_SW:
 		{
 			D2D1_POINT_2F pos;
-			get_pos_anchor(ANCH_TYPE::ANCH_SW, pos);
+			get_pos_anp(ANP_TYPE::ANP_SW, pos);
 			D2D1_POINT_2F new_pos;
 			pt_round(value, PT_ROUND, new_pos);
 			D2D1_POINT_2F vec;
@@ -366,7 +366,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case ANCH_TYPE::ANCH_WEST:
+		case ANP_TYPE::ANP_WEST:
 		{
 			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
 			if (vec_x <= -FLT_MIN || vec_x >= FLT_MIN) {
@@ -376,7 +376,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case ANCH_TYPE::ANCH_EAST:
+		case ANP_TYPE::ANP_EAST:
 		{
 			const double vec_x = std::round((static_cast<double>(value.x) - m_pos.x - m_vec[0].x) / PT_ROUND) * PT_ROUND;
 			if (vec_x <= -FLT_MIN || vec_x >= FLT_MIN) {
@@ -385,7 +385,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case ANCH_TYPE::ANCH_NORTH:
+		case ANP_TYPE::ANP_NORTH:
 		{
 			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
 			if (vec_y <= -FLT_MIN || vec_y >= FLT_MIN) {
@@ -395,7 +395,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		break;
-		case ANCH_TYPE::ANCH_SOUTH:
+		case ANP_TYPE::ANP_SOUTH:
 		{
 			const double vec_y = std::round((static_cast<double>(value.y) - m_pos.y - m_vec[0].y) / PT_ROUND) * PT_ROUND;
 			if (vec_y <= -FLT_MIN || vec_y >= FLT_MIN) {
@@ -410,14 +410,14 @@ namespace winrt::GraphPaper::implementation
 		if (limit >= FLT_MIN) {
 			// 終点への差分の x 値が, 限界距離未満か判定する.
 			if (m_vec[0].x > -limit && m_vec[0].x < limit) {
-				if (anchor == ANCH_TYPE::ANCH_NE) {
+				if (anp == ANP_TYPE::ANP_NE) {
 					m_pos.x += m_vec[0].x;
 				}
 				m_vec[0].x = 0.0f;
 				done = true;
 			}
 			if (m_vec[0].y > -limit && m_vec[0].y < limit) {
-				if (anchor == ANCH_TYPE::ANCH_NE) {
+				if (anp == ANP_TYPE::ANP_NE) {
 					m_pos.y += m_vec[0].y;
 				}
 				m_vec[0].y = 0.0f;

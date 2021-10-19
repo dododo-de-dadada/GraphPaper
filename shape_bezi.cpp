@@ -557,34 +557,31 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected()) {
 			D2D1_MATRIX_3X2_F tran;
 			dx.m_d2d_context->GetTransform(&tran);
-			const auto sw = static_cast<FLOAT>(1.0 / tran.m11);
-			//auto sb = dx.m_anch_brush.get();
-			//auto ss = dx.m_aux_style.get();
-
-			anchor_draw_rect(m_pos, dx);
+			const auto s_width = static_cast<FLOAT>(1.0 / tran.m11);
+			anp_draw_rect(m_pos, dx);
 			s_pos = m_pos;
 			pt_add(s_pos, m_vec[0], e_pos);
 			dx.m_solid_color_brush->SetColor(Shape::s_background_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, nullptr);
 			dx.m_solid_color_brush->SetColor(Shape::s_foreground_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, Shape::m_aux_style.get());
-			anchor_draw_ellipse(e_pos, dx);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, Shape::m_aux_style.get());
+			anp_draw_ellipse(e_pos, dx);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[1], e_pos);
 			dx.m_solid_color_brush->SetColor(Shape::s_background_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, nullptr);
 			dx.m_solid_color_brush->SetColor(Shape::s_foreground_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, Shape::m_aux_style.get());
-			anchor_draw_ellipse(e_pos, dx);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, Shape::m_aux_style.get());
+			anp_draw_ellipse(e_pos, dx);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[2], e_pos);
 			dx.m_solid_color_brush->SetColor(Shape::s_background_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, nullptr);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, nullptr);
 			dx.m_solid_color_brush->SetColor(Shape::s_foreground_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), sw, Shape::m_aux_style.get());
-			anchor_draw_rect(e_pos, dx);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, Shape::m_aux_style.get());
+			anp_draw_rect(e_pos, dx);
 		}
 	}
 
@@ -593,7 +590,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
 	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto e_width = max(max(static_cast<double>(m_stroke_width), Shape::s_anchor_len) * 0.5, 0.5);	// 線枠の太さの半分の値
+		const auto e_width = max(max(static_cast<double>(m_stroke_width), Shape::s_anp_len) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
 		pt_sub(t_pos, m_pos, tp);
 		// 判定する位置によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
@@ -603,34 +600,34 @@ namespace winrt::GraphPaper::implementation
 		pt_add(c_pos[0], m_vec[0], c_pos[1]);
 		pt_add(c_pos[1], m_vec[1], c_pos[2]);
 		pt_add(c_pos[2], m_vec[2], c_pos[3]);
-		if (pt_in_anchor(tp, c_pos[3])) {
-			return ANCH_TYPE::ANCH_P0 + 3;
+		if (pt_in_anp(tp, c_pos[3])) {
+			return ANP_TYPE::ANP_P0 + 3;
 		}
-		if (pt_in_anchor(tp, c_pos[2])) {
-			return ANCH_TYPE::ANCH_P0 + 2;
+		if (pt_in_anp(tp, c_pos[2])) {
+			return ANP_TYPE::ANP_P0 + 2;
 		}
-		if (pt_in_anchor(tp, c_pos[1])) {
-			return ANCH_TYPE::ANCH_P0 + 1;
+		if (pt_in_anp(tp, c_pos[1])) {
+			return ANP_TYPE::ANP_P0 + 1;
 		}
-		if (pt_in_anchor(tp, c_pos[0])) {
-			return ANCH_TYPE::ANCH_P0 + 0;
+		if (pt_in_anp(tp, c_pos[0])) {
+			return ANP_TYPE::ANP_P0 + 0;
 		}
 		if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
 			if (pt_in_circle(tp, e_width)) {
-				return ANCH_TYPE::ANCH_STROKE;
+				return ANP_TYPE::ANP_STROKE;
 			}
 			if (pt_in_circle(tp, c_pos[3], e_width)) {
-				return ANCH_TYPE::ANCH_STROKE;
+				return ANP_TYPE::ANP_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, c_pos, m_vec.data(), e_width)) {
-				return ANCH_TYPE::ANCH_STROKE;
+				return ANP_TYPE::ANP_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, c_pos, m_vec.data(), e_width)) {
-				return ANCH_TYPE::ANCH_STROKE;
+				return ANP_TYPE::ANP_STROKE;
 			}
 		}
 		// 最初の制御点の組をプッシュする.
@@ -719,14 +716,14 @@ namespace winrt::GraphPaper::implementation
 			if (c0.x <= 1.0 && c0.y <= 1.0) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割する必要はない.
 				// 凸包 c1 は判定する位置を含んでいるので, 図形の部位を返す.
-				return ANCH_TYPE::ANCH_STROKE;
+				return ANP_TYPE::ANP_STROKE;
 			}
 
 			// スタックがオバーフローするか判定する.
 			if (s_cnt + 6 > 1 + D_MAX * 3) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割することはできない.
 				// 凸包 c1は判定する位置を含んでいるので, 図形の部位を返す.
-				return ANCH_TYPE::ANCH_STROKE;
+				return ANP_TYPE::ANP_STROKE;
 			}
 
 			// 制御点の組を 2 分割する.
@@ -752,7 +749,7 @@ namespace winrt::GraphPaper::implementation
 			s_arr[s_cnt + 5] = b_pos[3];
 			s_cnt += 6;
 		}
-		return ANCH_TYPE::ANCH_SHEET;
+		return ANP_TYPE::ANP_SHEET;
 	}
 
 	// 範囲に含まれるか判定する.

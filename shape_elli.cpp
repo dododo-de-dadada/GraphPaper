@@ -53,7 +53,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[3].x = a_pos[0].x;
 		a_pos[3].y = m_pos.y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anchor_draw_rect(a_pos[i], dx);
+			anp_draw_rect(a_pos[i], dx);
 		}
 		a_pos[0] = m_pos;
 		pt_add(m_pos, m_vec[0], a_pos[3]);
@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[2].x = a_pos[3].x;
 		a_pos[2].y = a_pos[0].y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anchor_draw_ellipse(a_pos[i], dx);
+			anp_draw_ellipse(a_pos[i], dx);
 		}
 	}
 
@@ -71,8 +71,8 @@ namespace winrt::GraphPaper::implementation
 	// –ß‚è’l	ˆÊ’u‚ğŠÜ‚Ş}Œ`‚Ì•”ˆÊ
 	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto a = hit_test_anchor(t_pos);
-		if (a != ANCH_TYPE::ANCH_SHEET) {
+		const auto a = hit_test_anp(t_pos);
+		if (a != ANP_TYPE::ANP_SHEET) {
 			return a;
 		}
 
@@ -88,39 +88,39 @@ namespace winrt::GraphPaper::implementation
 			// ˆÊ’u‚ª‚¾‰~‚ÌŠO‘¤‚É‚ ‚é‚©”»’è‚·‚é.
 			// ˜g‚Ì‘¾‚³‚ª•”ˆÊ‚Ì‘å‚«‚³–¢–‚È‚ç‚Î,
 			// •”ˆÊ‚Ì‘å‚«‚³‚ğ˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-			const double s_width = max(static_cast<double>(m_stroke_width), Shape::s_anchor_len);
+			const double s_width = max(static_cast<double>(m_stroke_width), Shape::s_anp_len);
 			// ”¼Œa‚É˜g‚Ì‘¾‚³‚Ì”¼•ª‚ğ‰Á‚¦‚½’l‚ğŠOŒa‚ÉŠi”[‚·‚é.
 			D2D1_POINT_2F r_outer;
 			pt_add(rad, s_width * 0.5, r_outer);
 			if (pt_in_ellipse(t_pos, c_pos, r_outer.x, r_outer.y) != true) {
 				// ŠOŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç, 
-				// ANCH_SHEET ‚ğ•Ô‚·.
-				return ANCH_TYPE::ANCH_SHEET;
+				// ANP_SHEET ‚ğ•Ô‚·.
+				return ANP_TYPE::ANP_SHEET;
 			}
 			// ˆÊ’u‚ª‚¾‰~‚Ì˜gã‚É‚ ‚é‚©”»’è‚·‚é.
 			D2D1_POINT_2F r_inner;
 			// ŠOŒa‚©‚ç˜g‚Ì‘¾‚³‚ğˆø‚¢‚½’l‚ğ“àŒa‚ÉŠi”[‚·‚é.
 			pt_add(r_outer, -s_width, r_inner);
 			// “àŒa‚ª•‰”‚È‚ç,
-			// ANCH_STROKE ‚ğ•Ô‚·.
+			// ANP_STROKE ‚ğ•Ô‚·.
 			if (r_inner.x <= 0.0f) {
-				return ANCH_TYPE::ANCH_STROKE;
+				return ANP_TYPE::ANP_STROKE;
 			}
 			if (r_inner.y <= 0.0f) {
-				return ANCH_TYPE::ANCH_STROKE;
+				return ANP_TYPE::ANP_STROKE;
 			}
 			// “àŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚©”»’è‚·‚é.
 			if (!pt_in_ellipse(t_pos, c_pos, r_inner.x, r_inner.y)) {
-				return ANCH_TYPE::ANCH_STROKE;
+				return ANP_TYPE::ANP_STROKE;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
 			// ‚¾‰~‚ÉˆÊ’u‚ªŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
 			if (pt_in_ellipse(t_pos, c_pos, rad.x, rad.y)) {
-				return ANCH_TYPE::ANCH_FILL;
+				return ANP_TYPE::ANP_FILL;
 			}
 		}
-		return ANCH_TYPE::ANCH_SHEET;
+		return ANP_TYPE::ANP_SHEET;
 	}
 
 	// ƒf[ƒ^ƒ‰ƒCƒ^[‚É SVG ƒ^ƒO‚Æ‚µ‚Ä‘‚«‚Ş.

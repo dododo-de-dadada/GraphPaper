@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::SELECT);
 			m_event_state = EVENT_STATE::BEGIN;
 			m_event_shape_pressed = nullptr;
-			m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;
+			m_event_anp_pressed = ANP_TYPE::ANP_SHEET;
 		}
 		else if (sender == rmfi_drawing_tool_rect()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RECT);
@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
 		}
 		status_set_draw();
-		event_set_cursor();
+		//event_set_cursor();
 	}
 
 	// 作図ツールのメニューに印をつける.

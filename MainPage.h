@@ -228,7 +228,7 @@ namespace winrt::GraphPaper::implementation
 	// メインページ
 	//-------------------------------
 	struct MainPage : MainPageT<MainPage> {
-		std::mutex m_d2d_mutex;	// 描画環境の排他制御
+		std::mutex m_d2d_mutex;	// 描画の排他制御
 		winrt::hstring m_file_token_mru;	// 最近使ったファイルのトークン
 
 		// 一覧
@@ -245,7 +245,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
 		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };	// ポインターの前回位置
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターの押された状態
-		uint32_t m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;	// ポインターが押された図形の部位
+		uint32_t m_event_anp_pressed = ANP_TYPE::ANP_SHEET;	// ポインターが押された図形の部位
 		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された位置
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
 		Shape* m_event_shape_prev = nullptr;	// 前回ポインターが押された図形
@@ -255,7 +255,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 作図ツール
 		DRAWING_TOOL m_drawing_tool = DRAWING_TOOL::SELECT;	// 作図ツール
-		POLY_OPTION m_drawing_poly_opt{ POLY_OPTION_DEFVAL };	// 多角形の選択肢
+		POLY_OPTION m_drawing_poly_opt{ POLY_OPTION_DEFVAL };	// 多角形の作成方法
 
 		// 図形リスト
 		uint32_t m_list_sel_cnt = 0;	// 選択された図形の数
@@ -380,9 +380,6 @@ namespace winrt::GraphPaper::implementation
 		// 選択された図形を次または前の図形と入れ替える.
 		template<typename T> 
 		void arrange_order(void);
-		// 選択された図形を最背面または最前面に移動する.
-		template<bool B> 
-		void arrange_to(void);
 		// 編集メニューの「前面に移動」が選択された.
 		void arrange_bring_forward_click(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 編集メニューの「最前面に移動」が選択された.
@@ -997,7 +994,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を入れ替えて, その操作をスタックに積む.
 		void ustack_push_arrange(Shape* const s, Shape* const t);
 		// 図形の頂点をスタックに保存する.
-		void ustack_push_position(Shape* const s, const uint32_t anch);
+		void ustack_push_position(Shape* const s, const uint32_t anp);
 		// 画像の現在の位置や大きさ、不透明度を操作スタックにプッシュする.
 		void ustack_push_image(Shape* const s);
 		// 図形を挿入して, その操作をスタックに積む.

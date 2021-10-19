@@ -294,7 +294,7 @@ namespace winrt::GraphPaper::implementation
 		// ポインターの押された状態を初期状態に戻す.
 		m_event_state = EVENT_STATE::BEGIN;
 		m_event_shape_pressed = nullptr;
-		m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;
+		m_event_anp_pressed = ANP_TYPE::ANP_SHEET;
 		sheet_draw();
 	}
 
@@ -316,18 +316,18 @@ namespace winrt::GraphPaper::implementation
 				g_len = static_cast<float>(sqrt(pt_abs2(g_vec))) / s_scale;
 			}
 			// 近傍の頂点によって位置が変わらなかったか判定する.
-			if (!m_event_shape_pressed->set_pos_anchor(m_event_pos_curr, m_event_anch_pressed, g_len, m_image_keep_aspect)) {
+			if (!m_event_shape_pressed->set_pos_anp(m_event_pos_curr, m_event_anp_pressed, g_len, m_image_keep_aspect)) {
 				// 変わらなかったならば, 方眼に合わせる.
-				m_event_shape_pressed->set_pos_anchor(g_pos, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
+				m_event_shape_pressed->set_pos_anp(g_pos, m_event_anp_pressed, 0.0f, m_image_keep_aspect);
 			}
 		}
 		else if (g_snap) {
 			pt_round(m_event_pos_curr, m_main_sheet.m_grid_base + 1.0, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_anchor(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
+			m_event_shape_pressed->set_pos_anp(m_event_pos_curr, m_event_anp_pressed, 0.0f, m_image_keep_aspect);
 		}
 		else if (m_vert_stick >= FLT_MIN) {
 			slist_find_vertex_closest(m_main_sheet.m_shape_list, m_event_pos_curr, m_vert_stick / m_main_sheet.m_sheet_scale, m_event_pos_curr);
-			m_event_shape_pressed->set_pos_anchor(m_event_pos_curr, m_event_anch_pressed, m_vert_stick / m_main_sheet.m_sheet_scale, m_image_keep_aspect);
+			m_event_shape_pressed->set_pos_anp(m_event_pos_curr, m_event_anp_pressed, m_vert_stick / m_main_sheet.m_sheet_scale, m_image_keep_aspect);
 		}
 		if (!ustack_pop_if_invalid()) {
 			ustack_push_null();
@@ -479,7 +479,7 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 図形を変形している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_FORM) {
 			// ポインターの現在位置を, ポインターが押された図形の, 部位の位置に格納する.
-			m_event_shape_pressed->set_pos_anchor(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
+			m_event_shape_pressed->set_pos_anp(m_event_pos_curr, m_event_anp_pressed, 0.0f, m_image_keep_aspect);
 			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
 			sheet_draw();
@@ -506,9 +506,9 @@ namespace winrt::GraphPaper::implementation
 				// 選択された図形の数が 1 を超える,
 				// または押された図形の部位が線枠, 内側, 文字列かを判定する.
 				else if (m_list_sel_cnt > 1 ||
-					m_event_anch_pressed == ANCH_TYPE::ANCH_STROKE ||
-					m_event_anch_pressed == ANCH_TYPE::ANCH_FILL ||
-					m_event_anch_pressed == ANCH_TYPE::ANCH_TEXT) {
+					m_event_anp_pressed == ANP_TYPE::ANP_STROKE ||
+					m_event_anp_pressed == ANP_TYPE::ANP_FILL ||
+					m_event_anp_pressed == ANP_TYPE::ANP_TEXT) {
 					// 状態を図形を移動している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_MOVE;
 					// ポインターの現在位置を前回位置に格納する.
@@ -516,12 +516,12 @@ namespace winrt::GraphPaper::implementation
 					ustack_push_move(vec);
 				}
 				// ポインターが押されたのが図形の外部以外か判定する.
-				else if (m_event_anch_pressed != ANCH_TYPE::ANCH_SHEET) {
+				else if (m_event_anp_pressed != ANP_TYPE::ANP_SHEET) {
 					// 図形を変形している状態に遷移する.
 					m_event_state = EVENT_STATE::PRESS_FORM;
 					m_event_pos_prev = m_event_pos_curr;
-					ustack_push_position(m_event_shape_pressed, m_event_anch_pressed);
-					m_event_shape_pressed->set_pos_anchor(m_event_pos_curr, m_event_anch_pressed, 0.0f, m_image_keep_aspect);
+					ustack_push_position(m_event_shape_pressed, m_event_anp_pressed);
+					m_event_shape_pressed->set_pos_anp(m_event_pos_curr, m_event_anp_pressed, 0.0f, m_image_keep_aspect);
 				}
 				sheet_draw();
 			}
@@ -590,9 +590,9 @@ namespace winrt::GraphPaper::implementation
 		if (m_drawing_tool != DRAWING_TOOL::SELECT) {
 			return;
 		}
-		m_event_anch_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
+		m_event_anp_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
 		// 押されたのが図形の外側以外か判定する.
-		if (m_event_anch_pressed != ANCH_TYPE::ANCH_SHEET) {
+		if (m_event_anp_pressed != ANP_TYPE::ANP_SHEET) {
 			// 状態が左ボタンが押された状態, または, 右ボタンが押されていてかつ押された図形が選択されてないか判定する.
 			if (m_event_state == EVENT_STATE::PRESS_LBTN ||
 				(m_event_state == EVENT_STATE::PRESS_RBTN && !m_event_shape_pressed->is_selected())) {
@@ -600,7 +600,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			return;
 		}
-		m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;
+		m_event_anp_pressed = ANP_TYPE::ANP_SHEET;
 		m_event_shape_pressed = nullptr;
 		m_event_shape_prev = nullptr;
 		// 修飾キーが押されていないならば, すべての図形の選択を解除し, 解除された図形があるか判定する.
@@ -755,16 +755,16 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::PRESS_FORM) {
 			event_finish_forming();
 		}
-		// 状態が, 範囲選択している状態か判定する.
+		// 状態が, 範囲を選択している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			// 作図ツールが選択ツールか判定する.
 			if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 				event_finish_selecting_area(args.KeyModifiers());
 			}
 			else {
-				// 作図ツールが選択ツール以外なら,
-				// 方眼に合わせるか, かつシフトキーが押されていないか判定する.
+				// 作図ツールが選択ツール以外.
 				unselect_all();
+				// 頂点をくっつける閾値がゼロより大きいか判定する.
 				if (m_vert_stick >= FLT_MIN) {
 					const bool box_type = (
 						m_drawing_tool == DRAWING_TOOL::ELLI ||
@@ -773,17 +773,11 @@ namespace winrt::GraphPaper::implementation
 						m_drawing_tool == DRAWING_TOOL::RRECT ||
 						m_drawing_tool == DRAWING_TOOL::RULER ||
 						m_drawing_tool == DRAWING_TOOL::TEXT);
-					//if (m_drawing_tool == DRAWING_TOOL::POLY) {
-					//	D2D1_POINT_2F v_pos[MAX_N_GON];
-					//	D2D1_POINT_2F v_vec;
-					//	pt_sub(m_event_pos_curr, m_event_pos_pressed, v_vec);
-					//	ShapePoly::create_poly_by_bbox(m_event_pos_pressed, v_vec, m_drawing_poly_opt, v_pos, v_vec);
-					//	pt_add(m_event_pos_pressed, v_vec, m_event_pos_curr);
-					//}
 					const float d_lim = m_vert_stick / m_main_sheet.m_sheet_scale;
-					const double g_len = max(m_main_sheet.m_grid_base + 1.0, 1.0);
+					const double g_len = max(m_main_sheet.m_grid_base, 0.0) + 1.0;
 					event_released_snap_to_vertex(m_main_sheet.m_shape_list, box_type, d_lim, m_main_sheet.m_grid_snap, g_len, m_event_pos_pressed, m_event_pos_curr);
 				}
+				// 方眼に合わせるか判定する.
 				else if (m_main_sheet.m_grid_snap) {
 					// 押された位置よ離された位置を方眼の大きさで丸める.
 					const double g_len = max(m_main_sheet.m_grid_base + 1.0, 1.0);
@@ -794,6 +788,7 @@ namespace winrt::GraphPaper::implementation
 				// ポインターの現在位置と押された位置の差分を求める.
 				D2D1_POINT_2F c_vec;	// 現在位置への差分
 				pt_sub(m_event_pos_curr, m_event_pos_pressed, c_vec);
+				// 差分の x 値または y 値のいずれかが 1 以上か判定する.
 				if (fabs(c_vec.x) >= 1.0f || fabs(c_vec.y) >= 1.0f) {
 					if (m_drawing_tool == DRAWING_TOOL::TEXT) {
 						event_finish_creating_text_async(m_event_pos_pressed, c_vec);
@@ -810,13 +805,13 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 初期状態か判定する.
 		else if (m_event_state == EVENT_STATE::BEGIN) {
 			// 本来は初期状態でこのハンドラーが呼び出されるはずはないが,
-			// コンテンツダイアログを終了したとき呼び出されてしまう.
+			// コンテンツダイアログやメニューを終了したとき呼び出されることがあった.
 			return;
 		}
 		// 初期状態に戻す.
 		m_event_state = EVENT_STATE::BEGIN;
 		m_event_shape_pressed = nullptr;
-		m_event_anch_pressed = ANCH_TYPE::ANCH_SHEET;
+		m_event_anp_pressed = ANP_TYPE::ANP_SHEET;
 		sheet_draw();
 	}
 
@@ -827,46 +822,48 @@ namespace winrt::GraphPaper::implementation
 		if (m_drawing_tool != DRAWING_TOOL::SELECT) {
 			Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 		}
+		// 描画の排他制御をロックできないか判定する.
 		else if (!m_d2d_mutex.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 		}
 		else {
+			// 描画の排他制御をロックできた場合.
 			Shape* s;
-			const auto a = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_curr, s);
+			const auto anp = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_curr, s);
 			m_d2d_mutex.unlock();
-			if (a == ANCH_TYPE::ANCH_SHEET) {
+			if (anp == ANP_TYPE::ANP_SHEET) {
 				Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 			}
 			else if (m_list_sel_cnt > 1) {
 				Window::Current().CoreWindow().PointerCursor(CC_SIZE_ALL);
 			}
 			else {
-				switch (a) {
-				case ANCH_TYPE::ANCH_R_NW:
-				case ANCH_TYPE::ANCH_R_NE:
-				case ANCH_TYPE::ANCH_R_SE:
-				case ANCH_TYPE::ANCH_R_SW:
+				switch (anp) {
+				case ANP_TYPE::ANP_R_NW:
+				case ANP_TYPE::ANP_R_NE:
+				case ANP_TYPE::ANP_R_SE:
+				case ANP_TYPE::ANP_R_SW:
 					Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 					break;
-				case ANCH_TYPE::ANCH_FILL:
-				case ANCH_TYPE::ANCH_STROKE:
-				case ANCH_TYPE::ANCH_TEXT:
+				case ANP_TYPE::ANP_FILL:
+				case ANP_TYPE::ANP_STROKE:
+				case ANP_TYPE::ANP_TEXT:
 					Window::Current().CoreWindow().PointerCursor(CC_SIZE_ALL);
 					break;
-				case ANCH_TYPE::ANCH_NE:
-				case ANCH_TYPE::ANCH_SW:
+				case ANP_TYPE::ANP_NE:
+				case ANP_TYPE::ANP_SW:
 					Window::Current().CoreWindow().PointerCursor(CC_SIZE_NESW);
 					break;
-				case ANCH_TYPE::ANCH_NORTH:
-				case ANCH_TYPE::ANCH_SOUTH:
+				case ANP_TYPE::ANP_NORTH:
+				case ANP_TYPE::ANP_SOUTH:
 					Window::Current().CoreWindow().PointerCursor(CC_SIZE_NS);
 					break;
-				case ANCH_TYPE::ANCH_NW:
-				case ANCH_TYPE::ANCH_SE:
+				case ANP_TYPE::ANP_NW:
+				case ANP_TYPE::ANP_SE:
 					Window::Current().CoreWindow().PointerCursor(CC_SIZE_NWSE);
 					break;
-				case ANCH_TYPE::ANCH_WEST:
-				case ANCH_TYPE::ANCH_EAST:
+				case ANP_TYPE::ANP_WEST:
+				case ANP_TYPE::ANP_EAST:
 					Window::Current().CoreWindow().PointerCursor(CC_SIZE_WE);
 					break;
 				default:
@@ -875,7 +872,7 @@ namespace winrt::GraphPaper::implementation
 						(typeid(*s) == typeid(ShapeLineA) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
 						// 図形の部位が, 頂点の数を超えないか判定する.
 						const auto d_cnt = static_cast<ShapePath*>(s)->m_vec.size();
-						if (a >= ANCH_TYPE::ANCH_P0 && a < ANCH_TYPE::ANCH_P0 + d_cnt + 1) {
+						if (anp >= ANP_TYPE::ANP_P0 && anp < ANP_TYPE::ANP_P0 + d_cnt + 1) {
 							Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 							break;
 						}
@@ -893,7 +890,7 @@ namespace winrt::GraphPaper::implementation
 		// コンテキストメニューを解放する.
 		scp_sheet_panel().ContextFlyout(nullptr);
 		// 押された図形がヌル, または押された図形の部位が外側か判定する.
-		if (m_event_shape_pressed == nullptr || m_event_anch_pressed == ANCH_TYPE::ANCH_SHEET) {
+		if (m_event_shape_pressed == nullptr || m_event_anp_pressed == ANP_TYPE::ANP_SHEET) {
 			if (m_menu_sheet != nullptr) {
 				scp_sheet_panel().ContextFlyout(m_menu_sheet);
 			}
@@ -921,19 +918,19 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.set_attr_to(m_event_shape_pressed);
 			sheet_attr_is_checked();
 			// 押された図形の部位が内側か判定する.
-			if (m_event_anch_pressed == ANCH_TYPE::ANCH_FILL) {
+			if (m_event_anp_pressed == ANP_TYPE::ANP_FILL) {
 				if (m_menu_fill != nullptr) {
 					scp_sheet_panel().ContextFlyout(m_menu_fill);
 				}
 			}
 			// 押された図形の部位が文字列か判定する.
-			else if (m_event_anch_pressed == ANCH_TYPE::ANCH_TEXT) {
+			else if (m_event_anp_pressed == ANP_TYPE::ANP_TEXT) {
 				if (m_menu_font != nullptr) {
 					scp_sheet_panel().ContextFlyout(m_menu_font);
 				}
 			}
 			// 押された図形の部位が線枠か判定する.
-			else if (m_event_anch_pressed == ANCH_TYPE::ANCH_STROKE) {
+			else if (m_event_anp_pressed == ANP_TYPE::ANP_STROKE) {
 				if (m_menu_stroke != nullptr) {
 					scp_sheet_panel().ContextFlyout(m_menu_stroke);
 				}

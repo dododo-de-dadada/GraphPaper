@@ -2,7 +2,6 @@
 //------------------------------
 // shape.h
 // shape.cpp	図形のひな型, その他
-// shape_anch.cpp	図形の部位を表示
 // shape_bezi.cpp	ベジェ曲線
 // shape_dt.cpp	読み込み, 書き込み.
 // shape_elli.cpp	だ円
@@ -98,42 +97,42 @@ namespace winrt::GraphPaper::implementation
 		D2D1_STROKE_TRANSFORM_TYPE::D2D1_STROKE_TRANSFORM_TYPE_NORMAL
 	};
 
-	// アンカー (図形の部位) の種類
+	// アンカーポイント
 	// 折れ線の頂点をあらわすため, enum struct でなく enum を用いる.
-	enum ANCH_TYPE {
-		ANCH_SHEET,		// 図形の外部 (矢印カーソル)
-		ANCH_FILL,		// 図形の内部 (移動カーソル)
-		ANCH_STROKE,	// 線枠 (移動カーソル)
-		ANCH_TEXT,		// 文字列 (移動カーソル)
-		ANCH_NW,		// 方形の左上の頂点 (北西南東カーソル)
-		ANCH_SE,		// 方形の右下の頂点 (北西南東カーソル)
-		ANCH_NE,		// 方形の右上の頂点 (北東南西カーソル)
-		ANCH_SW,		// 方形の左下の頂点 (北東南西カーソル)
-		ANCH_NORTH,		// 方形の上辺の中点 (上下カーソル)
-		ANCH_SOUTH,		// 方形の下辺の中点 (上下カーソル)
-		ANCH_EAST,		// 方形の左辺の中点 (左右カーソル)
-		ANCH_WEST,		// 方形の右辺の中点 (左右カーソル)
-		ANCH_R_NW,		// 左上の角丸の中心点 (十字カーソル)
-		ANCH_R_NE,		// 右上の角丸の中心点 (十字カーソル)
-		ANCH_R_SE,		// 右下の角丸の中心点 (十字カーソル)
-		ANCH_R_SW,		// 左下の角丸の中心点 (十字カーソル)
-		ANCH_P0,	// パスの開始点 (十字カーソル)
+	enum ANP_TYPE {
+		ANP_SHEET,		// 図形の外部 (矢印カーソル)
+		ANP_FILL,		// 図形の内部 (移動カーソル)
+		ANP_STROKE,	// 線枠 (移動カーソル)
+		ANP_TEXT,		// 文字列 (移動カーソル)
+		ANP_NW,		// 方形の左上の頂点 (北西南東カーソル)
+		ANP_SE,		// 方形の右下の頂点 (北西南東カーソル)
+		ANP_NE,		// 方形の右上の頂点 (北東南西カーソル)
+		ANP_SW,		// 方形の左下の頂点 (北東南西カーソル)
+		ANP_NORTH,		// 方形の上辺の中点 (上下カーソル)
+		ANP_SOUTH,		// 方形の下辺の中点 (上下カーソル)
+		ANP_EAST,		// 方形の左辺の中点 (左右カーソル)
+		ANP_WEST,		// 方形の右辺の中点 (左右カーソル)
+		ANP_R_NW,		// 左上の角丸の中心点 (十字カーソル)
+		ANP_R_NE,		// 右上の角丸の中心点 (十字カーソル)
+		ANP_R_SE,		// 右下の角丸の中心点 (十字カーソル)
+		ANP_R_SW,		// 左下の角丸の中心点 (十字カーソル)
+		ANP_P0,	// パスの開始点 (十字カーソル)
 	};
 
 	// 方形の中点の配列
-	constexpr uint32_t ANCH_MIDDLE[4]{
-		ANCH_TYPE::ANCH_SOUTH,
-		ANCH_TYPE::ANCH_EAST,
-		ANCH_TYPE::ANCH_WEST,
-		ANCH_TYPE::ANCH_NORTH
+	constexpr uint32_t ANP_MIDDLE[4]{
+		ANP_TYPE::ANP_SOUTH,
+		ANP_TYPE::ANP_EAST,
+		ANP_TYPE::ANP_WEST,
+		ANP_TYPE::ANP_NORTH
 	};
 
 	// 方形の頂点の配列
-	constexpr uint32_t ANCH_CORNER[4]{
-		ANCH_TYPE::ANCH_SE,
-		ANCH_TYPE::ANCH_NE,
-		ANCH_TYPE::ANCH_SW,
-		ANCH_TYPE::ANCH_NW
+	constexpr uint32_t ANP_CORNER[4]{
+		ANP_TYPE::ANP_SE,
+		ANP_TYPE::ANP_NE,
+		ANP_TYPE::ANP_SW,
+		ANP_TYPE::ANP_NW
 	};
 
 	// 矢じるしの寸法
@@ -185,7 +184,7 @@ namespace winrt::GraphPaper::implementation
 		FRONT	// 最前面に表示
 	};
 
-	// 多角形の選択肢
+	// 多角形の作成方法
 	struct POLY_OPTION {
 		uint32_t m_vertex_cnt;	// 作図する多角形の頂点の数.
 		bool m_regular;	// 正多角形で作図する.
@@ -193,7 +192,7 @@ namespace winrt::GraphPaper::implementation
 		bool m_end_closed;	// 辺を閉じて作図する.
 		bool m_clockwise;	// 頂点を時計回りに作図する.
 	};
-	constexpr POLY_OPTION POLY_OPTION_DEFVAL{ 3, true, true, true, true };	// 多角形の選択肢の既定値
+	constexpr POLY_OPTION POLY_OPTION_DEFVAL{ 3, true, true, true, true };	// 多角形の作成方法の既定値
 
 	constexpr float COLOR_MAX = 255.0f;	// 色成分の最大値
 	constexpr double PT_PER_INCH = 72.0;	// 1 インチあたりのポイント数
@@ -219,9 +218,9 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 
 	// 図形の部位（円形）を表示する.
-	void anchor_draw_ellipse(const D2D1_POINT_2F a_pos, D2D_UI& d2d);
+	void anp_draw_ellipse(const D2D1_POINT_2F a_pos, D2D_UI& d2d);
 	// 図形の部位 (方形) を表示する.
-	void anchor_draw_rect(const D2D1_POINT_2F a_pos, D2D_UI& d2d);
+	void anp_draw_rect(const D2D1_POINT_2F a_pos, D2D_UI& d2d);
 	// 単精度浮動小数が同じか判定する.
 	inline bool equal(const float a, const float b) noexcept;
 	// 倍精度浮動小数が同じか判定する.
@@ -268,7 +267,7 @@ namespace winrt::GraphPaper::implementation
 	// 二点の中点を得る.
 	inline void pt_avg(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c) noexcept;
 	// 位置が図形の部位に含まれるか判定する.
-	inline bool pt_in_anchor(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept;
+	inline bool pt_in_anp(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept;
 	// 位置がだ円に含まれるか判定する.
 	inline bool pt_in_ellipse(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept;
 	// 位置が円に含まれるか判定する.
@@ -451,8 +450,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形のひな型
 	//------------------------------
 	struct Shape {
-		static D2D1_COLOR_F s_anchor_color;	// 図形の部位の色
-		static float s_anchor_len;	// 図形の部位の大きさ
+		//static D2D1_COLOR_F s_anp_color;	// 図形の部位の色
+		static float s_anp_len;	// 図形の部位の大きさ
 		static D2D1_COLOR_F s_background_color;	// 前景色
 		static D2D1_COLOR_F s_foreground_color;	// 背景色
 		static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// 補助線の形式
@@ -510,7 +509,7 @@ namespace winrt::GraphPaper::implementation
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(const D2D1_POINT_2F /*pos*/, float& /*dd*/, D2D1_POINT_2F& /*value*/) const noexcept { return false; }
 		// 部位の位置を得る.
-		virtual	void get_pos_anchor(const uint32_t /*anch*/, D2D1_POINT_2F&/*value*/) const noexcept {}
+		virtual	void get_pos_anp(const uint32_t /*anp*/, D2D1_POINT_2F&/*value*/) const noexcept {}
 		// 図形を囲む領域の左上位置を得る.
 		virtual void get_pos_min(D2D1_POINT_2F& /*value*/) const noexcept {}
 		// 開始位置を得る.
@@ -540,7 +539,7 @@ namespace winrt::GraphPaper::implementation
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F /*v_pos*/[]) const noexcept { return 0; };
 		// 位置を含むか判定する.
-		virtual uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept { return ANCH_TYPE::ANCH_SHEET; }
+		virtual uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept { return ANP_TYPE::ANP_SHEET; }
 		// 範囲に含まれるか判定する.
 		virtual bool in_area(const D2D1_POINT_2F /*area_min*/, const D2D1_POINT_2F /*area_max*/) const noexcept { return false; }
 		// 消去されたか判定する.
@@ -596,7 +595,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線分のつなぎに格納する.
 		virtual bool set_join_style(const D2D1_LINE_JOIN& /*value*/) noexcept { return false; }
 		// 値を, 部位の位置に格納する.
-		virtual bool set_pos_anchor(const D2D1_POINT_2F /*value*/, const uint32_t /*anch*/, const float /*limit*/, const bool /*keep_aspect*/) noexcept { return false; }
+		virtual bool set_pos_anp(const D2D1_POINT_2F /*value*/, const uint32_t /*anp*/, const float /*limit*/, const bool /*keep_aspect*/) noexcept { return false; }
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F /*value*/) noexcept { return false; }
 		// 値を用紙の色に格納する.
@@ -629,6 +628,9 @@ namespace winrt::GraphPaper::implementation
 		virtual void write_svg(winrt::Windows::Storage::Streams::DataWriter const& /*dt_writer*/) const {}
 	};
 
+	//------------------------------
+	// フラグ
+	//------------------------------
 	struct ShapeFlag : Shape {
 		bool m_is_deleted = false;	// 消去されたか判定
 		bool m_is_selected = false;	// 選択されたか判定
@@ -644,7 +646,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を選択されてるか判定に格納する.
 		bool set_select(const bool value) noexcept final override { if (m_is_selected != value) { m_is_selected = value; return true; } return false; }
 		// コンストラクター
-		ShapeFlag(void) {}
+		ShapeFlag(void) {};
 		// データリーダーから読み込む.
 		ShapeFlag(const winrt::Windows::Storage::Streams::DataReader& dt_reader) :
 			m_is_deleted(dt_reader.ReadBoolean()),
@@ -658,8 +660,8 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeImage : ShapeFlag {
 		D2D1_POINT_2F m_pos;	// 始点の位置
 		D2D1_SIZE_F m_view;	// 表示寸法
-		D2D1_RECT_F m_rect;	// ビットマップの矩形
-		D2D1_SIZE_U m_src_size;	// ビットマップの原寸
+		D2D1_RECT_F m_clip;	// 表示されている矩形
+		D2D1_SIZE_U m_orig;	// ビットマップの原寸
 		uint8_t* m_data = nullptr;	// ビットマップのデータ
 		D2D1_SIZE_F m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
 		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
@@ -678,7 +680,7 @@ namespace winrt::GraphPaper::implementation
 		// 近傍の頂点を見つける.
 		bool get_pos_nearest(const D2D1_POINT_2F /*pos*/, float& /*dd*/, D2D1_POINT_2F& /*value*/) const noexcept final override;
 		// 部位の位置を得る.
-		void get_pos_anchor(const uint32_t /*anch*/, D2D1_POINT_2F&/*value*/) const noexcept final override;
+		void get_pos_anp(const uint32_t /*anp*/, D2D1_POINT_2F&/*value*/) const noexcept final override;
 		// 図形を囲む領域の左上位置を得る.
 		void get_pos_min(D2D1_POINT_2F& /*value*/) const noexcept final override;
 		// 開始位置を得る.
@@ -696,7 +698,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を画像の不透明度に格納する.
 		bool set_image_opacity(const float value) noexcept final override;
 		// 値を, 部位の位置に格納する.
-		bool set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool keep_aspect) noexcept final override;
+		bool set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool keep_aspect) noexcept final override;
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F /*value*/) noexcept final override;
 		// 図形を作成する.
@@ -772,6 +774,7 @@ namespace winrt::GraphPaper::implementation
 		// shape_sheet.cpp
 		//------------------------------
 
+		// 表示する.
 		void draw(D2D_UI& d2d) final override;
 		// 曲線の補助線を表示する.
 		void draw_auxiliary_bezi(D2D_UI const& d2d, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
@@ -991,6 +994,8 @@ namespace winrt::GraphPaper::implementation
 		~ShapeStroke(void);
 		// D2D ストロークスタイルを作成する.
 		void create_stroke_style(D2D_UI const& d2d);
+		// 図形を表示する.
+		virtual void draw(D2D_UI& d2d) override = 0;
 		// 図形を囲む領域を得る.
 		void get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept final override;
 		// 端の形式を得る.
@@ -1010,7 +1015,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を囲む領域の左上位置を得る.
 		void get_pos_min(D2D1_POINT_2F& value) const noexcept final override;
 		// 部位の位置を得る.
-		virtual void get_pos_anchor(const uint32_t /*anch*/, D2D1_POINT_2F& value) const noexcept override;
+		virtual void get_pos_anp(const uint32_t /*anp*/, D2D1_POINT_2F& value) const noexcept override;
 		// 開始位置を得る.
 		bool get_pos_start(D2D1_POINT_2F& value) const noexcept final override;
 		// 線枠の色を得る.
@@ -1038,7 +1043,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線分のつなぎに格納する.
 		virtual bool set_join_style(const D2D1_LINE_JOIN& value) noexcept override;
 		// 値を, 部位の位置に格納する.
-		virtual bool set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool keep_aspect) noexcept override;
+		virtual bool set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool keep_aspect) noexcept override;
 		// 値を始点に格納する. 他の部位の位置も動く.
 		virtual bool set_pos_start(const D2D1_POINT_2F value) noexcept override;
 		// 値を線枠の色に格納する.
@@ -1098,7 +1103,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を矢じるしの形式に格納する.
 		virtual bool set_arrow_style(const ARROW_STYLE value) noexcept override;
 		//	値を, 部位の位置に格納する. 
-		virtual bool set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool keep_aspect) noexcept override;
+		virtual bool set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool keep_aspect) noexcept override;
 		// 値を始点に格納する.
 		virtual bool set_pos_start(const D2D1_POINT_2F value) noexcept override;
 		// 差分だけ移動する.
@@ -1140,7 +1145,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept override;
 		// 図形の部位が位置を含むか判定する.
-		uint32_t hit_test_anchor(const D2D1_POINT_2F t_pos) const noexcept;
+		uint32_t hit_test_anp(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
 		virtual bool in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept override;
 		// 塗りつぶしの色を得る.
@@ -1148,9 +1153,9 @@ namespace winrt::GraphPaper::implementation
 		// 値を塗りつぶしの色に格納する.
 		bool set_fill_color(const D2D1_COLOR_F& value) noexcept final override;
 		// 部位の位置を得る.
-		virtual void get_pos_anchor(const uint32_t anchor, D2D1_POINT_2F& value) const noexcept override;
+		virtual void get_pos_anp(const uint32_t anp, D2D1_POINT_2F& value) const noexcept override;
 		//	値を, 部位の位置に格納する.
-		virtual bool set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool keep_aspect) noexcept override;
+		virtual bool set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool keep_aspect) noexcept override;
 		// データライターに書き込む.
 		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
@@ -1232,20 +1237,20 @@ namespace winrt::GraphPaper::implementation
 		// 角丸方形
 		//------------------------------
 
+		// 図形を表示する.
+		void draw(D2D_UI& d2d) final override;
+		// 角丸半径を得る.
+		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept final override;
+		// 部位の位置を得る.
+		void get_pos_anp(const uint32_t anp, D2D1_POINT_2F& value) const noexcept final override;
+		// 位置を含むか判定する.
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
+		//	値を, 部位の位置に格納する.
+		bool set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool keep_aspect) noexcept final override;
 		// 図形を作成する.
 		ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr);
 		// データリーダーから図形を読み込む.
 		ShapeRRect(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
-		// 図形を表示する.
-		void draw(D2D_UI& d2d) final override;
-		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
-		// 角丸半径を得る.
-		bool get_corner_radius(D2D1_POINT_2F& value) const noexcept final override;
-		// 部位の位置を得る.
-		void get_pos_anchor(const uint32_t anchor, D2D1_POINT_2F& value) const noexcept final override;
-		//	値を, 部位の位置に格納する.
-		bool set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool keep_aspect) noexcept final override;
 		// データライターに書き込む.
 		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
@@ -1263,10 +1268,8 @@ namespace winrt::GraphPaper::implementation
 		// 折れ線のひな型
 		//------------------------------
 
-		virtual void create_path_geometry(const D2D_UI& /*d2d*/) {}
-
 		// パスジオメトリを作成する.
-		//virtual void create_path_geometry(ID2D1Factory3* const/*d_factory*/) {}
+		virtual void create_path_geometry(const D2D_UI& /*d2d*/) = 0;
 		// 図形を作成する.
 		ShapePath(const ShapeSheet* s_attr, const bool s_closed) :
 			ShapeLineA::ShapeLineA(s_attr, s_closed),
@@ -1281,7 +1284,7 @@ namespace winrt::GraphPaper::implementation
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F value) noexcept final override;
 		// 値を, 部位の位置に格納する.
-		bool set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool keep_aspect) noexcept final override;
+		bool set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool keep_aspect) noexcept final override;
 		// 値を矢じるしの寸法に格納する.
 		bool set_arrow_size(const ARROW_SIZE& value) noexcept final override;
 		// 値を矢じるしの形式に格納する.
@@ -1303,15 +1306,12 @@ namespace winrt::GraphPaper::implementation
 		// shape_poly.cpp
 		//------------------------------
 
-		void create_path_geometry(const D2D_UI& d2d);
-
-
-		// 方形をもとに多角形を作成する.
-		static void create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt, D2D1_POINT_2F v_pos[], D2D1_POINT_2F& v_vec) noexcept;
 		// パスジオメトリを作成する.
-		//void create_path_geometry(ID2D1Factory3* const d_factory);
+		void create_path_geometry(const D2D_UI& d2d) final override;
+		// 方形をもとに多角形を作成する.
+		static void create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt, D2D1_POINT_2F v_pos[]/*, D2D1_POINT_2F& v_vec*/) noexcept;
 		// 表示する
-		virtual void draw(D2D_UI& d2d) override;
+		void draw(D2D_UI& d2d) final override;
 		// 塗りつぶし色を得る.
 		bool get_fill_color(D2D1_COLOR_F& value) const noexcept final override;
 		// 位置を含むか判定する.
@@ -1342,10 +1342,8 @@ namespace winrt::GraphPaper::implementation
 		// ベジェ曲線
 		//------------------------------
 
-		void create_path_geometry(const D2D_UI& d2d);
-
 		// パスジオメトリを作成する.
-		//void create_path_geometry(ID2D1Factory3* const d_factory);
+		void create_path_geometry(const D2D_UI& d2d) final override;
 		// 表示する.
 		void draw(D2D_UI& d2d) final override;
 		// 位置を含むか判定する.
@@ -1447,8 +1445,6 @@ namespace winrt::GraphPaper::implementation
 		bool set_font_style(const DWRITE_FONT_STYLE value) noexcept final override;
 		// 値を書体の太さに格納する.
 		bool set_font_weight(const DWRITE_FONT_WEIGHT value) noexcept final override;
-		// 値を, 部位の位置に格納する.
-		bool set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool keep_aspect) noexcept final override;
 		// 値を段落のそろえに格納する.
 		bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT value) noexcept final override;
 		// 値を文字列のそろえに格納する.
@@ -1594,9 +1590,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の部位が位置を含むか判定する.
-	inline bool pt_in_anchor(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept
+	inline bool pt_in_anp(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept
 	{
-		const double a = Shape::s_anchor_len * 0.5;
+		const double a = Shape::s_anp_len * 0.5;
 		const double dx = static_cast<double>(t_pos.x) - static_cast<double>(a_pos.x);
 		const double dy = static_cast<double>(t_pos.y) - static_cast<double>(a_pos.y);
 		return -a <= dx && dx <= a && -a <= dy && dy <= a;
@@ -1748,12 +1744,13 @@ namespace winrt::GraphPaper::implementation
 	//	ヌルポインターを返す.
 	inline wchar_t* wchar_cpy(const wchar_t* const s)
 	{
-		wchar_t* t = nullptr;
-		const size_t s_len = wchar_len(s);
+		const size_t s_len = (s == nullptr || s[0] == '\0') ? 0 : static_cast<uint32_t>(wcslen(s));
 		if (s_len > 0) {
+			wchar_t* t;
 			wcscpy_s(t = new wchar_t[s_len + 1], s_len + 1, s);
+			return t;
 		}
-		return t;
+		return nullptr;
 	}
 
 }

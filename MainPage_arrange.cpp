@@ -26,8 +26,23 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「最前面に移動」が選択された.
 	void MainPage::arrange_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 選択された図形を最背面または最前面に移動する.
-		arrange_to<BRING_TO_FRONT>();
+		SHAPE_LIST slist;	// 選択された図形のリスト
+		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
+		if (slist.size() > 0) {
+			// 最前面 (リストでは末尾) に移動
+			for (Shape* const s : slist) {
+				if (summary_is_visible()) {
+					summary_remove(s);
+					summary_append(s);
+				}
+				ustack_push_remove(s);
+				ustack_push_insert(s, nullptr);
+			}
+		}
+		slist.clear();
+		ustack_push_null();
+		xcvd_is_enabled();
+		sheet_draw();
 	}
 
 	// 選択された図形を次の図形と入れ替える.
@@ -120,25 +135,13 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「最背面に移動」が選択された.
 	void MainPage::arrange_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		// 選択された図形を最背面または最前面に移動する.
-		arrange_to<SEND_TO_BACK>();
-	}
-
-	// 選択された図形を最背面または最前面に移動する.
-	// B	B が true の場合は最背面, false の場合は最前面に移動
-	template<bool B> 
-	void MainPage::arrange_to(void)
-	{
-		SHAPE_LIST slist;
+		SHAPE_LIST slist;	// 選択された図形のリスト
 		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
-		if (slist.size() == 0) {
-			return;
-		}
-		if constexpr (B) {
+		if (slist.size() > 0) {
+			// 最背面 (リストでは先頭) に移動
 			uint32_t i = 0;
 			Shape* const s = slist_front(m_main_sheet.m_shape_list);
 			for (Shape* const t : slist) {
-				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {
 					summary_remove(t);
 					summary_insert_at(t, i++);
@@ -147,29 +150,10 @@ namespace winrt::GraphPaper::implementation
 				ustack_push_insert(t, s);
 			}
 		}
-		else {
-			for (Shape* const s : slist) {
-				// 一覧が表示されてるか判定する.
-				if (summary_is_visible()) {
-					summary_remove(s);
-					summary_append(s);
-				}
-				ustack_push_remove(s);
-				ustack_push_insert(s, nullptr);
-			}
-		}
 		slist.clear();
 		ustack_push_null();
 		xcvd_is_enabled();
 		sheet_draw();
 	}
-
-	// 選択された図形を最前面に移動する.
-	template
-	void MainPage::arrange_to<BRING_TO_FRONT>(void);
-
-	// 選択された図形を最背面に移動する.
-	template 
-	void MainPage::arrange_to<SEND_TO_BACK>(void);
 
 }

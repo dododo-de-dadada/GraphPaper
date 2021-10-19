@@ -274,13 +274,13 @@ namespace winrt::GraphPaper::implementation
 			//if (!t->is_selected()) {
 			//	continue;
 			//}
-			const auto anch = t->hit_test(t_pos);
-			if (anch != ANCH_TYPE::ANCH_SHEET) {
+			const uint32_t anp = t->hit_test(t_pos);
+			if (anp != ANP_TYPE::ANP_SHEET) {
 				s = t;
-				return anch;
+				return anp;
 			}
 		}
-		return ANCH_TYPE::ANCH_SHEET;
+		return ANP_TYPE::ANP_SHEET;
 	}
 
 	// }Œ`‚ğ‘}“ü‚·‚é.

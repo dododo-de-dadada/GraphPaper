@@ -19,11 +19,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を含むか判定する.
+	// t_pos	判定する位置
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const uint32_t anch = ShapeRect::hit_test_anchor(t_pos);
-		if (anch != ANCH_TYPE::ANCH_SHEET) {
-			return anch;
+		const uint32_t anp = ShapeRect::hit_test_anp(t_pos);
+		if (anp != ANP_TYPE::ANP_SHEET) {
+			return anp;
 		}
 		if (is_opaque(m_stroke_color)) {
 			const double g_len = m_grid_base + 1.0;
@@ -52,19 +53,19 @@ namespace winrt::GraphPaper::implementation
 					x_ge_y ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				if (x_ge_y) {
-					const float a_len = s_anchor_len * 0.5f;
+					const float a_len = s_anp_len * 0.5f;
 					const D2D1_POINT_2F p_min{ p0.x - a_len, min(p0.y, p1.y) };
 					const D2D1_POINT_2F p_max{ p0.x + a_len, max(p0.y, p1.y) };
 					if (pt_in_rect(t_pos, p_min, p_max)) {
-						return ANCH_TYPE::ANCH_STROKE;
+						return ANP_TYPE::ANP_STROKE;
 					}
 				}
 				else {
-					const float a_len = s_anchor_len * 0.5f;
+					const float a_len = s_anp_len * 0.5f;
 					const D2D1_POINT_2F p_min{ min(p0.x, p1.x), p0.y - a_len };
 					const D2D1_POINT_2F p_max{ max(p0.x, p1.x), p0.y + a_len };
 					if (pt_in_rect(t_pos, p_min, p_max)) {
-						return ANCH_TYPE::ANCH_STROKE;
+						return ANP_TYPE::ANP_STROKE;
 					}
 				}
 				// 目盛りの値を表示する.
@@ -92,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				*/
 				if (pt_in_rect(t_pos, r_min, r_max)) {
-					return ANCH_TYPE::ANCH_STROKE;
+					return ANP_TYPE::ANP_STROKE;
 				}
 			}
 		}
@@ -121,10 +122,10 @@ namespace winrt::GraphPaper::implementation
 			*/
 			//if (pt_in_rect(t_pos, r_min, r_max)) {
 			if (pt_in_rect(t_pos, m_pos, e_pos)) {
-				return ANCH_TYPE::ANCH_FILL;
+				return ANP_TYPE::ANP_FILL;
 			}
 		}
-		return ANCH_TYPE::ANCH_SHEET;
+		return ANP_TYPE::ANP_SHEET;
 	}
 
 	// 図形を表示する.
@@ -153,7 +154,7 @@ namespace winrt::GraphPaper::implementation
 			m_dw_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
 		}
 		constexpr wchar_t* D[10] = { L"0", L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9" };
-		auto br = d2d.m_solid_color_brush;
+		//auto br = d2d.m_solid_color_brush;
 
 		const D2D1_RECT_F rect{
 			m_pos.x,
@@ -197,7 +198,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 段落のそろえをテキストフォーマットに格納する.
 			m_dw_text_format->SetParagraphAlignment(p_align);
-			br->SetColor(m_stroke_color);
+			d2d.m_solid_color_brush->SetColor(m_stroke_color);
 			for (uint32_t i = 0; i <= k; i++) {
 				// 方眼の大きさごとに目盛りを表示する.
 				const double x = x0 + i * grad_x;
@@ -210,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
 					xy ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
-				d2d.m_d2d_context->DrawLine(p0, p1, br.get());
+				d2d.m_d2d_context->DrawLine(p0, p1, d2d.m_solid_color_brush.get());
 				// 目盛りの値を表示する.
 				const double x1 = x + f_size * 0.5;
 				const double x2 = x1 - f_size;
@@ -220,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
 					xy ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
 				};
-				d2d.m_d2d_context->DrawText(D[i % 10], 1u, m_dw_text_format.get(), t_rect, br.get());
+				d2d.m_d2d_context->DrawText(D[i % 10], 1u, m_dw_text_format.get(), t_rect, d2d.m_solid_color_brush.get());
 			}
 		}
 		if (is_selected()) {
@@ -235,10 +236,10 @@ namespace winrt::GraphPaper::implementation
 			r_pos[3].y = rect.bottom;
 			r_pos[3].x = rect.left;
 			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-				anchor_draw_rect(r_pos[i], d2d);
+				anp_draw_rect(r_pos[i], d2d);
 				D2D1_POINT_2F r_mid;	// 方形の辺の中点
 				pt_avg(r_pos[j], r_pos[i], r_mid);
-				anchor_draw_rect(r_mid, d2d);
+				anp_draw_rect(r_mid, d2d);
 			}
 		}
 	}

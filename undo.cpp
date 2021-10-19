@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto INDEX_SHEET = static_cast<uint32_t>(-1);	// 用紙図形の添え字
 
 	// 部位の位置を得る.
-	static D2D1_POINT_2F undo_get_pos_anchor(const Shape* s, const uint32_t anch) noexcept;
+	static D2D1_POINT_2F undo_get_pos_anp(const Shape* s, const uint32_t anp) noexcept;
 	// データリーダーから位置を読み込む.
 	static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
@@ -25,10 +25,10 @@ namespace winrt::GraphPaper::implementation
 	static void undo_write_shape(Shape* const s, DataWriter const& dt_writer);
 
 	// 部位の位置を得る.
-	static D2D1_POINT_2F undo_get_pos_anchor(const Shape* s, const uint32_t anchor) noexcept
+	static D2D1_POINT_2F undo_get_pos_anp(const Shape* s, const uint32_t anp) noexcept
 	{
 		D2D1_POINT_2F pos;
-		s->get_pos_anchor(anchor, pos);
+		s->get_pos_anp(anp, pos);
 		return pos;
 	}
 
@@ -103,44 +103,44 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を実行すると値が変わるか判定する.
-	bool UndoAnchor::changed(void) const noexcept
+	bool UndoAnp::changed(void) const noexcept
 	{
 		using winrt::GraphPaper::implementation::equal;
 
 		D2D1_POINT_2F pos;
-		m_shape->get_pos_anchor(m_anc, pos);
+		m_shape->get_pos_anp(m_anp, pos);
 		return !equal(pos, m_pos);
 	}
 
 	// 元に戻す操作を実行する.
-	void UndoAnchor::exec(void)
+	void UndoAnp::exec(void)
 	{
 		D2D1_POINT_2F pos;
-		m_shape->get_pos_anchor(m_anc, pos);
-		m_shape->set_pos_anchor(m_pos, m_anc, 0.0f, false);
+		m_shape->get_pos_anp(m_anp, pos);
+		m_shape->set_pos_anp(m_pos, m_anp, 0.0f, false);
 		m_pos = pos;
 	}
 
 	// データリーダーから操作を読み込む.
-	UndoAnchor::UndoAnchor(DataReader const& dt_reader) :
+	UndoAnp::UndoAnp(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
-		m_anc(static_cast<ANCH_TYPE>(dt_reader.ReadUInt32())),
+		m_anp(static_cast<ANP_TYPE>(dt_reader.ReadUInt32())),
 		m_pos(undo_read_pos(dt_reader))
 	{}
 
 	// 図形の, 指定された部位の位置を保存する.
-	UndoAnchor::UndoAnchor(Shape* const s, const uint32_t anch) :
+	UndoAnp::UndoAnp(Shape* const s, const uint32_t anp) :
 		Undo(s),
-		m_anc(anch),
-		m_pos(undo_get_pos_anchor(s, anch))
+		m_anp(anp),
+		m_pos(undo_get_pos_anp(s, anp))
 	{}
 
 	// データライターに書き込む.
-	void UndoAnchor::write(DataWriter const& dt_writer)
+	void UndoAnp::write(DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::POS_ANCH));
 		undo_write_shape(m_shape, dt_writer);
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_anc));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_anp));
 		dt_write(m_pos, dt_writer);
 	}
 
@@ -687,10 +687,10 @@ namespace winrt::GraphPaper::implementation
 		const ShapeImage* s = static_cast<const ShapeImage*>(m_shape);
 		const auto pos = s->m_pos;
 		const auto view = s->m_view;
-		const auto rect = s->m_rect;
+		const auto clip = s->m_clip;
 		const auto ratio = s->m_ratio;
 		const auto opac = s->m_opac;
-		return !equal(pos, m_pos) || !equal(view, m_view) || !equal(rect, m_rect) || !equal(ratio, m_ratio) || !equal(opac, m_opac);
+		return !equal(pos, m_pos) || !equal(view, m_view) || !equal(clip, m_clip) || !equal(ratio, m_ratio) || !equal(opac, m_opac);
 	}
 
 	// 元に戻す操作を実行する.
@@ -699,17 +699,17 @@ namespace winrt::GraphPaper::implementation
 		ShapeImage* s = static_cast<ShapeImage*>(m_shape);
 		const auto pos = s->m_pos;
 		const auto view = s->m_view;
-		const auto rect = s->m_rect;
+		const auto clip = s->m_clip;
 		const auto ratio = s->m_ratio;
 		const auto opac = s->m_opac;
 		s->m_pos = m_pos;
 		s->m_view = m_view;
-		s->m_rect = m_rect;
+		s->m_clip = m_clip;
 		s->m_ratio = m_ratio;
 		s->m_opac = m_opac;
 		m_pos = pos;
 		m_view = view;
-		m_rect = rect;
+		m_clip = clip;
 		m_ratio = ratio;
 		m_opac = opac;
 	}
@@ -719,7 +719,7 @@ namespace winrt::GraphPaper::implementation
 		Undo(undo_read_shape(dt_reader)),
 		m_pos(undo_read_pos(dt_reader)),
 		m_view(undo_read_size(dt_reader)),
-		m_rect(undo_read_rect(dt_reader)),
+		m_clip(undo_read_rect(dt_reader)),
 		m_ratio(undo_read_size(dt_reader)),
 		m_opac(dt_reader.ReadSingle())
 	{}
@@ -728,7 +728,7 @@ namespace winrt::GraphPaper::implementation
 		Undo(s),
 		m_pos(s->m_pos),
 		m_view(s->m_view),
-		m_rect(s->m_rect),
+		m_clip(s->m_clip),
 		m_ratio(s->m_ratio),
 		m_opac(s->m_opac)
 	{}
@@ -740,7 +740,7 @@ namespace winrt::GraphPaper::implementation
 		undo_write_shape(m_shape, dt_writer);
 		dt_write(m_pos, dt_writer);
 		dt_write(m_view, dt_writer);
-		dt_write(m_rect, dt_writer);
+		dt_write(m_clip, dt_writer);
 		dt_write(m_ratio, dt_writer);
 		dt_writer.WriteSingle(m_opac);
 	}

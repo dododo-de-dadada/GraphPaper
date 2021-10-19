@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		if (m_d2d_mutex.try_lock() != true) {
+		if (!m_d2d_mutex.try_lock()) {
 			// ÉçÉbÉNÇ≈Ç´Ç»Ç¢èÍçá
 			return;
 		}
@@ -80,11 +80,9 @@ namespace winrt::GraphPaper::implementation
 			const IRandomAccessStream samp_strm{ co_await samp_file.OpenAsync(FileAccessMode::Read) };
 			const BitmapDecoder samp_dec{ co_await BitmapDecoder::CreateAsync(samp_strm) };
 			const SoftwareBitmap samp_bmp{ co_await samp_dec.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight) };
-			ShapeImage* samp_shape = new ShapeImage(
-				D2D1_POINT_2F{ static_cast<FLOAT>(panel_w * 0.125), static_cast<FLOAT>(panel_h * 0.125) },
-				D2D1_SIZE_F{ static_cast<float>(panel_w * 0.75), static_cast<FLOAT>(panel_h * 0.75) },
-				samp_bmp,
-				m_sample_sheet.m_image_opac);
+			const D2D1_POINT_2F pos{ static_cast<FLOAT>(panel_w * 0.125), static_cast<FLOAT>(panel_h * 0.125) };
+			const D2D1_SIZE_F size{ static_cast<float>(panel_w * 0.75), static_cast<FLOAT>(panel_h * 0.75) };
+			ShapeImage* samp_shape = new ShapeImage(pos, size, samp_bmp, m_sample_sheet.m_image_opac);
 			samp_bmp.Close();
 			m_sample_sheet.m_shape_list.push_back(samp_shape);
 #if defined(_DEBUG)

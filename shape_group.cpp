@@ -136,11 +136,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(t_pos) != ANCH_TYPE::ANCH_SHEET) {
-				return ANCH_TYPE::ANCH_FILL;
+			if (s->hit_test(t_pos) != ANP_TYPE::ANP_SHEET) {
+				return ANP_TYPE::ANP_FILL;
 			}
 		}
-		return ANCH_TYPE::ANCH_SHEET;
+		return ANP_TYPE::ANP_SHEET;
 	}
 
 	// ”ÍˆÍ‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.

@@ -211,7 +211,7 @@ namespace winrt::GraphPaper::implementation
 		if (!equal(t_box, m_vec[0])) {
 			D2D1_POINT_2F se;
 			pt_add(m_pos, t_box, se);
-			set_pos_anchor(se, ANCH_TYPE::ANCH_SE, 0.0f, false);
+			set_pos_anp(se, ANP_TYPE::ANP_SE, 0.0f, false);
 			return true;
 		}
 		return false;
@@ -303,7 +303,7 @@ namespace winrt::GraphPaper::implementation
 			DWRITE_LINE_SPACING src_spacing;
 			winrt::check_hresult(t3->GetLineSpacing(&src_spacing));
 			DWRITE_LINE_SPACING dst_spacing;
-			if (m_text_line_sp > 0.0f) {
+			if (m_text_line_sp >= FLT_MIN) {
 				dst_spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
 				dst_spacing.height = m_font_size + m_text_line_sp;
 				dst_spacing.baseline = m_font_size + m_text_line_sp - m_dw_descent;
@@ -636,9 +636,9 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const uint32_t anch = ShapeRect::hit_test_anchor(t_pos);
-		if (anch != ANCH_TYPE::ANCH_SHEET) {
-			return anch;
+		const uint32_t anp = ShapeRect::hit_test_anp(t_pos);
+		if (anp != ANP_TYPE::ANP_SHEET) {
+			return anp;
 		}
 		// 文字列の範囲の左上が原点になるよう, 判定する位置を移動する.
 		D2D1_POINT_2F p_min;
@@ -648,10 +648,10 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 			DWRITE_HIT_TEST_METRICS const& tm = m_dw_test_metrics[i];
 			DWRITE_LINE_METRICS const& lm = m_dw_line_metrics[i];
-			D2D1_POINT_2F r_max{ tm.left + tm.width, tm.top + lm.baseline + m_dw_descent };
-			D2D1_POINT_2F r_min{ tm.left, r_max.y - m_font_size };
+			const D2D1_POINT_2F r_max{ tm.left + tm.width, tm.top + lm.baseline + m_dw_descent };
+			const D2D1_POINT_2F r_min{ tm.left, r_max.y - m_font_size };
 			if (pt_in_rect(p_min, r_min, r_max)) {
-				return ANCH_TYPE::ANCH_TEXT;
+				return ANP_TYPE::ANP_TEXT;
 			}
 		}
 		return ShapeRect::hit_test(t_pos);
@@ -826,18 +826,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_font_weight != value) {
 			m_font_weight = value;
-			return true;
-		}
-		return false;
-	}
-
-	// 値を, 部位の位置に格納する.
-	// value	値
-	// anchor	図形の部位
-	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeText::set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool /*keep_aspect*/) noexcept
-	{
-		if (ShapeRect::set_pos_anchor(value, anchor, limit, false)) {
 			return true;
 		}
 		return false;

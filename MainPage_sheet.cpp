@@ -157,11 +157,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::sheet_draw(void)
 	{
 #if defined(_DEBUG)
-		if (scp_sheet_panel().IsLoaded() != true) {
+		if (!scp_sheet_panel().IsLoaded()) {
 			return;
 		}
 #endif
-		if (m_d2d_mutex.try_lock() != true) {
+		if (!m_d2d_mutex.try_lock()) {
 			// ƒƒbƒN‚Å‚«‚È‚¢ê‡
 			return;
 		}

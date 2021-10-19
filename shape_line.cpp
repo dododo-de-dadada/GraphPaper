@@ -266,9 +266,9 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected()) {
 			D2D1_POINT_2F mid;
 			pt_mul_add(m_vec[0], 0.5, m_pos, mid);
-			anchor_draw_rect(m_pos, dx);
-			anchor_draw_rect(mid, dx);
-			anchor_draw_rect(e_pos, dx);
+			anp_draw_rect(m_pos, dx);
+			anp_draw_rect(mid, dx);
+			anp_draw_rect(e_pos, dx);
 		}
 	}
 
@@ -293,17 +293,17 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F e_pos;
 		pt_add(m_pos, m_vec[0], e_pos);
-		if (pt_in_anchor(t_pos, e_pos)) {
-			return ANCH_TYPE::ANCH_P0 + 1;
+		if (pt_in_anp(t_pos, e_pos)) {
+			return ANP_TYPE::ANP_P0 + 1;
 		}
-		if (pt_in_anchor(t_pos, m_pos)) {
-			return ANCH_TYPE::ANCH_P0;
+		if (pt_in_anp(t_pos, m_pos)) {
+			return ANP_TYPE::ANP_P0;
 		}
-		const float s_width = static_cast<float>(max(static_cast<double>(m_stroke_width), Shape::s_anchor_len));
+		const float s_width = static_cast<float>(max(static_cast<double>(m_stroke_width), Shape::s_anp_len));
 		if (line_hit_test(t_pos, m_pos, e_pos, s_width, m_stroke_cap)) {
-			return ANCH_TYPE::ANCH_STROKE;
+			return ANP_TYPE::ANP_STROKE;
 		}
-		return ANCH_TYPE::ANCH_SHEET;
+		return ANP_TYPE::ANP_SHEET;
 	}
 
 	// 範囲に含まれるか判定する.
@@ -419,17 +419,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 値を, 部位の位置に格納する. 
 	// value	値
-	// anchor	図形の部位
+	// anp	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeLineA::set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool keep_aspect) noexcept
+	bool ShapeLineA::set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool keep_aspect) noexcept
 	{
-		if (ShapeStroke::set_pos_anchor(value, anchor, limit, keep_aspect)) {
+		if (ShapeStroke::set_pos_anp(value, anp, limit, keep_aspect)) {
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}
-			//if (m_arrow_style != ARROW_STYLE::NONE) {
-			//	create_arrow_geom(Shape::s_d2d_factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
-			//}
 			return true;
 		}
 		return false;
@@ -442,9 +439,6 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}
-			//if (m_arrow_style != ARROW_STYLE::NONE) {
-			//	create_arrow_geom(Shape::s_d2d_factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
-			//}
 			return true;
 		}
 		return false;

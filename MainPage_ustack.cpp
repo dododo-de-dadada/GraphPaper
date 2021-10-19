@@ -69,7 +69,7 @@ namespace winrt::GraphPaper::implementation
 			u = nullptr;
 			break;
 		case UNDO_OP::POS_ANCH:
-			u = new UndoAnchor(dt_reader);
+			u = new UndoAnp(dt_reader);
 			break;
 		case UNDO_OP::ARRANGE:
 			u = new UndoArrange(dt_reader);
@@ -410,9 +410,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の部位の位置をスタックに保存する.
-	void MainPage::ustack_push_position(Shape* const s, const uint32_t anch)
+	// s	保存する図形
+	// anp	図形の部位
+	void MainPage::ustack_push_position(Shape* const s, const uint32_t anp)
 	{
-		m_ustack_undo.push_back(new UndoAnchor(s, anch));
+		m_ustack_undo.push_back(new UndoAnp(s, anp));
 	}
 
 	// 図形を追加して, その操作をスタックに積む.

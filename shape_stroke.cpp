@@ -136,14 +136,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 指定された部位の位置を得る.
-	void ShapeStroke::get_pos_anchor(const uint32_t anchor, D2D1_POINT_2F& value) const noexcept
+	// anp	図形の部位
+	// value	得られた位置
+	void ShapeStroke::get_pos_anp(const uint32_t anp, D2D1_POINT_2F& value) const noexcept
 	{
-		if (anchor == ANCH_TYPE::ANCH_SHEET || anchor == ANCH_TYPE::ANCH_P0) {
+		if (anp == ANP_TYPE::ANP_SHEET || anp == ANP_TYPE::ANP_P0) {
 			// 図形の部位が「外部」または「開始点」ならば, 開始位置を得る.
 			value = m_pos;
 		}
-		else if (anchor > ANCH_TYPE::ANCH_P0) {
-			const size_t a_cnt = anchor - ANCH_TYPE::ANCH_P0;
+		else if (anp > ANP_TYPE::ANP_P0) {
+			const size_t a_cnt = anp - ANP_TYPE::ANP_P0;
 			if (a_cnt < m_vec.size() + 1) {
 				value = m_pos;
 				for (size_t i = 0; i < a_cnt; i++) {
@@ -204,10 +206,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を含むか判定する.
-	// 戻り値	つねに ANCH_SHEET
+	// 戻り値	つねに ANP_SHEET
 	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept
 	{
-		return ANCH_TYPE::ANCH_SHEET;
+		return ANP_TYPE::ANP_SHEET;
 	}
 
 	// 範囲に含まれるか判定する.
@@ -373,16 +375,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 値を, 部位の位置に格納する.
 	// value	値
-	// anch	図形の部位
+	// anp	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeStroke::set_pos_anchor(const D2D1_POINT_2F value, const uint32_t anchor, const float limit, const bool /*keep_aspect*/) noexcept
+	bool ShapeStroke::set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool /*keep_aspect*/) noexcept
 	{
 		bool done = false;
 		// 変更する頂点がどの頂点か判定する.
 		const size_t d_cnt = m_vec.size();	// 差分の数
-		if (anchor >= ANCH_TYPE::ANCH_P0 && anchor <= ANCH_TYPE::ANCH_P0 + d_cnt) {
+		if (anp >= ANP_TYPE::ANP_P0 && anp <= ANP_TYPE::ANP_P0 + d_cnt) {
 			D2D1_POINT_2F v_pos[MAX_N_GON];	// 頂点の位置
-			const size_t a_cnt = anchor - ANCH_TYPE::ANCH_P0;	// 変更する頂点
+			const size_t a_cnt = anp - ANP_TYPE::ANP_P0;	// 変更する頂点
 			// 変更する頂点までの, 各頂点の位置を得る.
 			v_pos[0] = m_pos;
 			for (size_t i = 0; i < a_cnt; i++) {

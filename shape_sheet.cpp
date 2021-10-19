@@ -91,9 +91,10 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_bezi(D2D_UI const& d2d, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
-		const auto s_brush = d2d.m_solid_color_brush.get();
-		const auto a_style = Shape::m_aux_style.get();
+		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
+		ID2D1SolidColorBrush* const s_brush = d2d.m_solid_color_brush.get();
+		ID2D1StrokeStyle1* const a_style = Shape::m_aux_style.get();
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
 
@@ -123,7 +124,8 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_elli(D2D_UI const& d2d, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
+		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
 		D2D1_POINT_2F rect;	// 方形
 		D2D1_ELLIPSE elli;		// だ円
 
@@ -144,7 +146,8 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_line(D2D_UI const& d2d, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
+		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
 		d2d.m_solid_color_brush->SetColor(Shape::s_background_color);
 		d2d.m_d2d_context->DrawLine(p_pos, c_pos, d2d.m_solid_color_brush.get(), s_width, nullptr);
 		d2d.m_solid_color_brush->SetColor(Shape::s_foreground_color);
@@ -164,8 +167,8 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_POINT_2F p_vec;
 		pt_sub(c_pos, p_pos, p_vec);
-		D2D1_POINT_2F v_vec;
-		ShapePoly::create_poly_by_bbox(p_pos, p_vec, p_opt, v_pos, v_vec);
+		//D2D1_POINT_2F v_vec;
+		ShapePoly::create_poly_by_bbox(p_pos, p_vec, p_opt, v_pos);//, v_vec);
 		const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
 		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
@@ -182,7 +185,8 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	ポインターの現在位置
 	void ShapeSheet::draw_auxiliary_rect(D2D_UI const& d2d, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
+		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
 		const D2D1_RECT_F rc = {
 			p_pos.x, p_pos.y, c_pos.x, c_pos.y
 		};
@@ -198,7 +202,8 @@ namespace winrt::GraphPaper::implementation
 	// c_rad	角丸半径
 	void ShapeSheet::draw_auxiliary_rrect(D2D_UI const& d2d, const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);
+		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
 		const double cx = c_pos.x;
 		const double cy = c_pos.y;
 		const double px = p_pos.x;
@@ -279,13 +284,13 @@ namespace winrt::GraphPaper::implementation
 		const FLOAT grid_w = static_cast<FLOAT>(1.0 / sheet_scale);	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
-		auto const& brush = d2d.m_solid_color_brush.get();
+		//auto const& brush = d2d.m_solid_color_brush.get();
 
 		//const auto max_val = max(m_sheet_color.r, max(m_sheet_color.g, m_sheet_color.b));
 		//const auto min_val = min(m_sheet_color.r, min(m_sheet_color.g, m_sheet_color.b));
 		//const auto sum_val = max_val + min_val;
 
-		brush->SetColor(grid_color);
+		d2d.m_solid_color_brush->SetColor(grid_color);
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
 		v_end.y = sheet_size.height;
@@ -306,7 +311,7 @@ namespace winrt::GraphPaper::implementation
 				w = 0.5F * grid_w;
 			}
 			v_start.x = v_end.x = static_cast<FLOAT>(x);
-			d2d.m_d2d_context->DrawLine(v_start, v_end, brush, w, nullptr);
+			d2d.m_d2d_context->DrawLine(v_start, v_end, d2d.m_solid_color_brush.get(), w, nullptr);
 		}
 		// 水平な方眼を表示する.
 		double y;
@@ -321,7 +326,7 @@ namespace winrt::GraphPaper::implementation
 				w = 0.5F * grid_w;
 			}
 			h_start.y = h_end.y = static_cast<FLOAT>(y);
-			d2d.m_d2d_context->DrawLine(h_start, h_end, brush, w, nullptr);
+			d2d.m_d2d_context->DrawLine(h_start, h_end, d2d.m_solid_color_brush.get(), w, nullptr);
 		}
 
 	}
