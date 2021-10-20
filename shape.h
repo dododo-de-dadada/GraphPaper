@@ -97,8 +97,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_STROKE_TRANSFORM_TYPE::D2D1_STROKE_TRANSFORM_TYPE_NORMAL
 	};
 
-	// アンカーポイント
-	// 折れ線の頂点をあらわすため, enum struct でなく enum を用いる.
+	// 図形の部位 (アンカーポイント)
+	// 数の定まっていない多角形の頂点をあらわすため, enum struct でなく enum を用いる.
 	enum ANP_TYPE {
 		ANP_SHEET,		// 図形の外部 (矢印カーソル)
 		ANP_FILL,		// 図形の内部 (移動カーソル)
@@ -117,22 +117,6 @@ namespace winrt::GraphPaper::implementation
 		ANP_R_SE,		// 右下の角丸の中心点 (十字カーソル)
 		ANP_R_SW,		// 左下の角丸の中心点 (十字カーソル)
 		ANP_P0,	// パスの開始点 (十字カーソル)
-	};
-
-	// 方形の中点の配列
-	constexpr uint32_t ANP_MIDDLE[4]{
-		ANP_TYPE::ANP_SOUTH,
-		ANP_TYPE::ANP_EAST,
-		ANP_TYPE::ANP_WEST,
-		ANP_TYPE::ANP_NORTH
-	};
-
-	// 方形の頂点の配列
-	constexpr uint32_t ANP_CORNER[4]{
-		ANP_TYPE::ANP_SE,
-		ANP_TYPE::ANP_NE,
-		ANP_TYPE::ANP_SW,
-		ANP_TYPE::ANP_NW
 	};
 
 	// 矢じるしの寸法
@@ -278,6 +262,8 @@ namespace winrt::GraphPaper::implementation
 	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t p_cnt, const D2D1_POINT_2F p_pos[]) noexcept;
 	// 方形が位置を含むか判定する.
 	bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept;
+	// 方形が位置を含むか判定する.
+	inline bool pt_in_rect2(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept;
 	// 位置をスカラー倍に丸める.
 	inline void pt_round(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& round) noexcept;
 	// 位置にスカラー値を掛け, 別の位置を足す.
@@ -293,7 +279,7 @@ namespace winrt::GraphPaper::implementation
 	// 位置から大きさを引く.
 	inline void pt_sub(const D2D1_POINT_2F a, const D2D1_SIZE_F b, D2D1_POINT_2F& c) noexcept;
 	// 文字列を複製する. 元の文字列がヌルポインター, または元の文字数が 0 のときは, ヌルポインターを返す.
-	inline wchar_t* wchar_cpy(const wchar_t* const s);
+	inline wchar_t* wchar_cpy(const wchar_t* const s) noexcept;
 	// 文字列の長さ. 引数がヌルポインタの場合, 0 を返す.
 	inline uint32_t wchar_len(const wchar_t* const t) noexcept;
 
@@ -1742,7 +1728,7 @@ namespace winrt::GraphPaper::implementation
 	//	文字列を複製する.
 	//	元の文字列がヌルポインター, または元の文字数が 0 のときは,
 	//	ヌルポインターを返す.
-	inline wchar_t* wchar_cpy(const wchar_t* const s)
+	inline wchar_t* wchar_cpy(const wchar_t* const s) noexcept
 	{
 		const size_t s_len = (s == nullptr || s[0] == '\0') ? 0 : static_cast<uint32_t>(wcslen(s));
 		if (s_len > 0) {
@@ -1753,4 +1739,8 @@ namespace winrt::GraphPaper::implementation
 		return nullptr;
 	}
 
+	inline bool pt_in_rect2(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept
+	{
+		return r_min.x <= t_pos.x && t_pos.x <= r_max.x && r_max.y <= t_pos.y && t_pos.y <= r_max.y;
+	}
 }

@@ -28,9 +28,9 @@ namespace winrt::GraphPaper::implementation
 		b_max.x = m_pos.x > a_max.x ? m_pos.x : a_max.x;
 		b_max.y = m_pos.y > a_max.y ? m_pos.y : a_max.y;
 		const size_t d_cnt = m_vec.size();	// ç∑ï™ÇÃêî
+		D2D1_POINT_2F pos = m_pos;
 		for (size_t i = 0; i < d_cnt; i++) {
-			D2D1_POINT_2F pos;
-			pt_add(m_pos, m_vec[i], pos);
+			pt_add(pos, m_vec[i], pos);
 			//pt_inc(e_pos, b_min, b_max);
 			if (pos.x < b_min.x) {
 				b_min.x = pos.x;

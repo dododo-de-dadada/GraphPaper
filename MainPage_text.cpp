@@ -166,34 +166,11 @@ namespace winrt::GraphPaper::implementation
 
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_LINE_SP, 0> });
 		text_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
-		//m_sample_type = SAMPLE_TYPE::FONT;
-		//m_sample_type = SAMPLE_TYPE::FONT;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
-		//const auto samp_w = scp_sample_panel().Width();
-		//const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
-		//const auto padd_w = samp_w * 0.125;
-		//const auto padd_h = samp_h * 0.25;
-		//const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h) };
-		//const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd_w), static_cast<FLOAT>(samp_w - 2.0 * padd_h) };
-		//const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
-		//const wchar_t* text = nullptr;
-		//if (pang.empty()) {
-		//	text = L"The quick brown fox jumps over a lazy dog.";
-		//}
-		//else {
-		//	text = pang.c_str();
-		//}
-		//m_sample_sheet.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &m_sample_sheet));
-//#if defined(_DEBUG)
-//		debug_leak_cnt++;
-//#endif
+
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_line_sp")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
-			//m_sample_shape->get_text_line_sp(sample_value);
 			m_sample_sheet.m_shape_list.back()->get_text_line_sp(sample_value);
 			if (ustack_push_set<UNDO_OP::TEXT_LINE_SP>(sample_value)) {
 				ustack_push_null();
@@ -207,25 +184,6 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	// 書体メニューの「行間」が選択された.
-	/*
-	void MainPage::text_line_sp_click(IInspectable const& sender, RoutedEventArgs const&)
-	{
-		float value;
-		m_main_sheet.get_text_line_sp(value);
-		if (sender == mfi_text_line_sp_con() || sender == mfi_text_line_sp_con_2()) {
-			value = max(value - m_main_sheet.m_font_size, 0.0f);
-		}
-		else if (sender == mfi_text_line_sp_exp() || sender == mfi_text_line_sp_exp_2()) {
-			value = value + m_main_sheet.m_font_size;
-		}
-		if (ustack_push_set<UNDO_OP::TEXT_LINE_SP>(value)) {
-			ustack_push_null();
-			xcvd_is_enabled();
-			sheet_draw();
-		}
-	}
-	*/
 	// 書体メニューの「余白」が選択された.
 	IAsyncAction MainPage::text_padding_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -262,7 +220,6 @@ namespace winrt::GraphPaper::implementation
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_SIZE_F sample_value;
-			//m_sample_shape->get_text_padding(sample_value);
 			m_sample_sheet.m_shape_list.back()->get_text_padding(sample_value);
 			if (ustack_push_set<UNDO_OP::TEXT_MARGIN>(sample_value)) {
 				ustack_push_null();
@@ -270,7 +227,6 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		//delete m_sample_shape;
 		slist_clear(m_sample_sheet.m_shape_list);
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_1().Visibility(UI_COLLAPSED);
@@ -335,7 +291,6 @@ namespace winrt::GraphPaper::implementation
 			const float value = static_cast<float>(args.NewValue());
 			text_slider_set_header<U, S>(value);
 			D2D1_SIZE_F padding;
-			//m_sample_shape->get_text_padding(padding);
 			m_sample_sheet.m_shape_list.back()->get_text_padding(padding);
 			if constexpr (S == 0) {
 				padding.width = static_cast<FLOAT>(value);
@@ -343,7 +298,6 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 1) {
 				padding.height = static_cast<FLOAT>(value);
 			}
-			//m_sample_shape->set_text_padding(padding);
 			m_sample_sheet.m_shape_list.back()->set_text_padding(padding);
 		}
 		if (scp_sample_panel().IsLoaded()) {

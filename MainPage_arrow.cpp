@@ -18,8 +18,10 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow_size";
 
-	//	値をスライダーのヘッダーに格納する.
-	//	value	値
+	// 値をスライダーのヘッダーに格納する.
+	// U	操作の種類
+	// S	スライダーの番号
+	// value	値
 	template <UNDO_OP U, int S>
 	void MainPage::arrow_slider_set_header(const float value)
 	{
@@ -118,13 +120,8 @@ namespace winrt::GraphPaper::implementation
 		const winrt::event_token slider_2_token{
 			sample_slider_2().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 2> })
 		};
-		//m_sample_type = SAMPLE_TYPE::STROKE;
-		//m_sample_type = SAMPLE_TYPE::STROKE;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
 		const auto samp_w = scp_sample_panel().Width();
 		const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
 		const auto padd = samp_w * 0.125;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
 		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };

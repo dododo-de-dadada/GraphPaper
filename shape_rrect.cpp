@@ -12,14 +12,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataReader;
 	using winrt::Windows::Storage::Streams::DataWriter;
 
-	// 角丸方形の中点の配列
-	constexpr uint32_t ANP_ROUND[4]{
-		ANP_TYPE::ANP_R_SE,	// 右下角
-		ANP_TYPE::ANP_R_NE,	// 右上角
-		ANP_TYPE::ANP_R_SW,	// 左下角
-		ANP_TYPE::ANP_R_NW	// 左上角
-	};
-
 	// 角丸半径を計算する.
 	static void calc_corner_radius(const D2D1_POINT_2F d_vec, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad);
 
@@ -180,6 +172,12 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 位置が角丸方形に含まれるか判定する.
+	// t_pos	判定する位置
+	// r_min	角丸方形の左上位置
+	// r_max	角丸方形の右下位置
+	// r_rad	角丸の半径
+	// 戻り値	含まれるなら true を返す.
 	static bool pt_in_rrect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max, const D2D1_POINT_2F r_rad)
 	{
 		if (t_pos.x < r_min.x) {
@@ -230,43 +228,59 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		// 方形の大きさがゼロか判定する.
-		const auto zero = (fabs(m_vec[0].x) >= FLT_MIN && fabs(m_vec[0].y) >= FLT_MIN);
-		if (zero) {
-			for (uint32_t i = 0; i < 4; i++) {
-				// 角丸の中心点を得る.
-				D2D1_POINT_2F r_cen;
-				get_pos_anp(ANP_ROUND[i], r_cen);
-				// 角丸の部位に位置が含まれるか判定する.
-				if (pt_in_anp(t_pos, r_cen)) {
-					// 含まれるなら角丸の部位を返す.
-					return ANP_ROUND[i];
+		// 角丸の円弧の中心点に含まれるか判定する.
+		// +---------+
+		// | 1     3 |
+		// |         |
+		// | 4     2 |
+		// +---------+
+		uint32_t anp_r;
+		const double mx = m_vec[0].x * 0.5;	// 中点
+		const double my = m_vec[0].y * 0.5;	// 中点
+		const double rx = fabs(mx) < fabs(m_corner_rad.x) ? mx : m_corner_rad.x;	// 角丸
+		const double ry = fabs(my) < fabs(m_corner_rad.y) ? my : m_corner_rad.y;	// 角丸
+		const D2D1_POINT_2F anp_r_nw{ static_cast<FLOAT>(m_pos.x + rx), static_cast<FLOAT>(m_pos.y + ry) };
+		if (pt_in_anp(t_pos, anp_r_nw)) {
+			anp_r = ANP_TYPE::ANP_R_NW;
+		}
+		else {
+			const D2D1_POINT_2F anp_r_se{ static_cast<FLOAT>(m_pos.x + m_vec[0].x - rx), static_cast<FLOAT>(m_pos.y + m_vec[0].y - ry) };
+			if (pt_in_anp(t_pos, anp_r_se)) {
+				anp_r = ANP_TYPE::ANP_R_SE;
+			}
+			else {
+				const D2D1_POINT_2F anp_r_ne{ anp_r_se.x, anp_r_nw.y };
+				if (pt_in_anp(t_pos, anp_r_ne)) {
+					anp_r = ANP_TYPE::ANP_R_NE;
+				}
+				else {
+					const D2D1_POINT_2F anp_r_sw{ anp_r_nw.x, anp_r_se.y };
+					if (pt_in_anp(t_pos, anp_r_ne)) {
+						anp_r = ANP_TYPE::ANP_R_NE;
+					}
+					else {
+						anp_r = ANP_TYPE::ANP_SHEET;
+					}
 				}
 			}
 		}
-		for (uint32_t i = 0; i < 4; i++) {
-			D2D1_POINT_2F r_pos;	// 方形の頂点
-			get_pos_anp(ANP_CORNER[i], r_pos);
-			if (pt_in_anp(t_pos, r_pos)) {
-				return ANP_CORNER[i];
-			}
+		// 角丸の円弧の中心点に含まれる,
+		if (anp_r != ANP_TYPE::ANP_SHEET &&
+			// かつ, 方形の大きさが図形の部位の大きさより大きいか判定する.
+			fabs(m_vec[0].x) > Shape::s_anp_len && fabs(m_vec[0].y) > Shape::s_anp_len) {
+			return anp_r;
 		}
-		for (uint32_t i = 0; i < 4; i++) {
-			D2D1_POINT_2F r_pos;	// 方形の辺の中点
-			get_pos_anp(ANP_MIDDLE[i], r_pos);
-			if (pt_in_anp(t_pos, r_pos)) {
-				return ANP_MIDDLE[i];
-			}
+		// 方形の各頂点に含まれるか判定する.
+		const uint32_t anp_v = hit_test_anp(t_pos);
+		if (anp_v != ANP_TYPE::ANP_SHEET) {
+			return anp_v;
 		}
-		if (!zero) {
-			for (uint32_t i = 0; i < 4; i++) {
-				D2D1_POINT_2F r_cen;	// 角丸部分の中心点
-				get_pos_anp(ANP_ROUND[i], r_cen);
-				if (pt_in_anp(t_pos, r_cen)) {
-					return ANP_ROUND[i];
-				}
-			}
+		// 頂点に含まれず, 角丸の円弧の中心点に含まれるか判定する.
+		else if (anp_r != ANP_TYPE::ANP_SHEET) {
+			return anp_r;
 		}
+
+		// 角丸方形を正規化する.
 		D2D1_POINT_2F r_min;
 		D2D1_POINT_2F r_max;
 		D2D1_POINT_2F r_rad;
@@ -288,31 +302,39 @@ namespace winrt::GraphPaper::implementation
 		}
 		r_rad.x = std::abs(m_corner_rad.x);
 		r_rad.y = std::abs(m_corner_rad.y);
-		if (is_opaque(m_stroke_color) && m_stroke_width > 0.0) {
+
+		// 線枠が透明または太さ 0 か判定する.
+		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
+			// 塗りつぶし色が不透明, かつ角丸方形そのものに含まれるか判定する.
+			if (is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_min, r_max, r_rad)) {
+				return ANP_TYPE::ANP_FILL;
+			}
+		}
+		// 線枠の色が不透明, かつ太さが 0 より大きい.
+		else {
+			// 外側の角丸方形に含まれるか判定
 			const double s_width = max(m_stroke_width, Shape::s_anp_len);
-			// 外側の角丸方形の判定
 			D2D1_POINT_2F s_min, s_max, s_rad;
 			pt_add(r_min, -s_width * 0.5, s_min);
 			pt_add(r_max, s_width * 0.5, s_max);
 			pt_add(r_rad, s_width * 0.5, s_rad);
 			if (pt_in_rrect(t_pos, s_min, s_max, s_rad)) {
-				// 内側の角丸方形の判定
+				// 内側の角丸方形が逆転してない, かつ位置が角丸方形に含まれるか判定する.
 				D2D1_POINT_2F u_min, u_max, u_rad;
 				pt_add(s_min, s_width, u_min);
 				pt_add(s_max, -s_width, u_max);
 				pt_add(s_rad, -s_width, u_rad);
 				if (u_min.x < u_max.x && u_min.y < u_max.y && pt_in_rrect(t_pos, r_min, r_max, r_rad)) {
+					// 内側の角丸方形に含まれる場合, 塗りつぶし色が不透明なら, ANP_FILL を返す.
 					if (is_opaque(m_fill_color)) {
 						return ANP_TYPE::ANP_FILL;
 					}
 				}
 				else {
+					// 外側に含まれ, 内側に含まれないなら ANP_STROKE を返す.
 					return ANP_TYPE::ANP_STROKE;
 				}
 			}
-		}
-		else if (is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_min, r_max, r_rad)) {
-			return ANP_TYPE::ANP_FILL;
 		}
 		return ANP_TYPE::ANP_SHEET;
 	}

@@ -71,9 +71,9 @@ namespace winrt::GraphPaper::implementation
 	// –ß‚è’l	ˆÊ’u‚ğŠÜ‚Ş}Œ`‚Ì•”ˆÊ
 	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto a = hit_test_anp(t_pos);
-		if (a != ANP_TYPE::ANP_SHEET) {
-			return a;
+		const auto anp = hit_test_anp(t_pos);
+		if (anp != ANP_TYPE::ANP_SHEET) {
+			return anp;
 		}
 
 		// ”¼Œa‚ğ“¾‚é.
