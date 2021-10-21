@@ -220,7 +220,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::font_slider_set_header(const float value)
+	// U	操作の種類
+	// S	スライダーの番号
+	// value	格納する値
+	// 戻り値	なし.
+	template <UNDO_OP U, int S>
+	void MainPage::font_slider_set_header(const float value)
 	{
 		winrt::hstring text;
 
@@ -228,7 +233,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			float g_base;
 			m_sample_sheet.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value, m_sample_dx.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value, m_sample_d2d.m_logical_dpi, g_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::FONT_COLOR) {

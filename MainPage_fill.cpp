@@ -58,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::fill_slider_value_changed<UNDO_OP::FILL_COLOR, 3> });
 		//m_sample_type = SAMPLE_TYPE::FILL;
 		//m_sample_type = SAMPLE_TYPE::FILL;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		//m_sample_d2d.SetSwapChainPanel(scp_sample_panel());
 		const auto samp_w = scp_sample_panel().Width();
 		const auto samp_h = scp_sample_panel().Height();
 		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
@@ -96,6 +96,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
+	// U	操作の種類
+	// S	スライダーの番号
+	// value	格納する値
+	// 戻り値	なし.
 	template <UNDO_OP U, int S>
 	void MainPage::fill_slider_set_header(const float value)
 	{

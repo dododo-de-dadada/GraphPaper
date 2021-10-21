@@ -16,6 +16,17 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
+	static void stroke_create_sample(const float samp_w, const float samp_h, ShapeSheet& sample_sheet)
+	{
+		const auto padd = samp_w * 0.125;
+		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
+		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
+		sample_sheet.m_shape_list.push_back(new ShapeLineA(b_pos, b_vec, &sample_sheet));
+#if defined(_DEBUG)
+		debug_leak_cnt++;
+#endif
+	}
+
 	// 線枠メニューの「ストロークの色...」が選択された.
 	IAsyncAction MainPage::stroke_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -60,20 +71,8 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 3> });
-		//m_sample_type = SAMPLE_TYPE::STROKE;
-		//m_sample_type = SAMPLE_TYPE::STROKE;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
-		const auto samp_w = scp_sample_panel().Width();
-		const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
-		const auto padd = samp_w * 0.125;
-		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
-		m_sample_sheet.m_shape_list.push_back(new ShapeLineA(b_pos, b_vec, &m_sample_sheet));
-#if defined(_DEBUG)
-		debug_leak_cnt++;
-#endif
+
+		stroke_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_stroke_color")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -101,7 +100,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::stroke_slider_set_header(const float value)
+	// U	操作の種類
+	// S	スライダーの番号
+	// value	格納する値
+	// 戻り値	なし.
+	template <UNDO_OP U, int S>
+	void MainPage::stroke_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
@@ -201,26 +205,13 @@ namespace winrt::GraphPaper::implementation
 		stroke_slider_set_header<UNDO_OP::STROKE_WIDTH, 0>(s_width);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_WIDTH, 0> });
-		//m_sample_type = SAMPLE_TYPE::STROKE;
-		//m_sample_type = SAMPLE_TYPE::STROKE;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
-		const auto samp_w = scp_sample_panel().Width();
-		const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
-		const auto padd = samp_w * 0.125;
-		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
-		m_sample_sheet.m_shape_list.push_back(new ShapeLineA(b_pos, b_vec, &m_sample_sheet));
-#if defined(_DEBUG)
-		debug_leak_cnt++;
-#endif
+
+		stroke_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_value;
-			//m_sample_shape->get_stroke_width(sample_value);
 			m_sample_sheet.m_shape_list.back()->get_stroke_width(sample_value);
 			if (ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_value)) {
 				ustack_push_null();

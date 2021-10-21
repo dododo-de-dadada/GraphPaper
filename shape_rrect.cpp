@@ -51,16 +51,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapeRRect::draw(D2D_UI& dx)
+	void ShapeRRect::draw(D2D_UI& d2d)
 	{
 		if (m_d2d_stroke_style == nullptr) {
-			create_stroke_style(dx);
+			create_stroke_style(d2d);
 		}
 
-		auto s_brush = dx.m_solid_color_brush.get();
+		auto s_brush = d2d.m_solid_color_brush.get();
 		auto s_style = m_d2d_stroke_style.get();
 		auto s_width = m_stroke_width;
-		auto dc = dx.m_d2d_context;
+		auto dc = d2d.m_d2d_context;
 
 		D2D1_POINT_2F r_min;
 		pt_add(m_pos, min(m_vec[0].x, 0.0), min(m_vec[0].y, 0.0), r_min);
@@ -92,13 +92,13 @@ namespace winrt::GraphPaper::implementation
 			//if (zero) {
 			// D2D1_POINT_2F c_pos;
 			// pt_add(r_min, rx, ry, c_pos);
-			// anp_draw_ellipse(c_pos, dx);
+			// anp_draw_ellipse(c_pos, d2d);
 			// c_pos.x = r_rec.rect.right - rx;
-			// anp_draw_ellipse(c_pos, dx);
+			// anp_draw_ellipse(c_pos, d2d);
 			// c_pos.y = r_rec.rect.bottom - ry;
-			// anp_draw_ellipse(c_pos, dx);
+			// anp_draw_ellipse(c_pos, d2d);
 			// c_pos.x = r_min.x + rx;
-			// anp_draw_ellipse(c_pos, dx);
+			// anp_draw_ellipse(c_pos, d2d);
 			//}
 			D2D1_POINT_2F r_pos[4];
 			r_pos[0] = r_min;
@@ -113,19 +113,19 @@ namespace winrt::GraphPaper::implementation
 				// 方形の頂点のアンカーを表示する.
 				// 辺の中点を求め, そのアンカーを表示する.
 				pt_avg(r_pos[j], r_pos[i], r_mid);
-				anp_draw_rect(r_pos[i], dx);
-				anp_draw_rect(r_mid, dx);
+				anp_draw_rect(r_pos[i], d2d);
+				anp_draw_rect(r_mid, d2d);
 			}
 			//if (zero != true) {
 				D2D1_POINT_2F c_pos;
 				pt_add(r_min, rx, ry, c_pos);
-				anp_draw_ellipse(c_pos, dx);
+				anp_draw_ellipse(c_pos, d2d);
 				c_pos.x = r_rec.rect.right - rx;
-				anp_draw_ellipse(c_pos, dx);
+				anp_draw_ellipse(c_pos, d2d);
 				c_pos.y = r_rec.rect.bottom - ry;
-				anp_draw_ellipse(c_pos, dx);
+				anp_draw_ellipse(c_pos, d2d);
 				c_pos.x = r_min.x + rx;
-				anp_draw_ellipse(c_pos, dx);
+				anp_draw_ellipse(c_pos, d2d);
 			//}
 		}
 	}
@@ -255,8 +255,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				else {
 					const D2D1_POINT_2F anp_r_sw{ anp_r_nw.x, anp_r_se.y };
-					if (pt_in_anp(t_pos, anp_r_ne)) {
-						anp_r = ANP_TYPE::ANP_R_NE;
+					if (pt_in_anp(t_pos, anp_r_sw)) {
+						anp_r = ANP_TYPE::ANP_R_SW;
 					}
 					else {
 						anp_r = ANP_TYPE::ANP_SHEET;
@@ -312,26 +312,27 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 線枠の色が不透明, かつ太さが 0 より大きい.
 		else {
-			// 外側の角丸方形に含まれるか判定
-			const double s_width = max(m_stroke_width, Shape::s_anp_len);
+			// 以下の手順は, 縮小した角丸方形の外側に, 角丸交点があるケースでうまくいかない.
+			// 拡大した角丸方形に含まれるか判定
+			const double s_thick = max(m_stroke_width, Shape::s_anp_len);
 			D2D1_POINT_2F s_min, s_max, s_rad;
-			pt_add(r_min, -s_width * 0.5, s_min);
-			pt_add(r_max, s_width * 0.5, s_max);
-			pt_add(r_rad, s_width * 0.5, s_rad);
+			pt_add(r_min, -s_thick * 0.5, s_min);
+			pt_add(r_max, s_thick * 0.5, s_max);
+			pt_add(r_rad, s_thick * 0.5, s_rad);
 			if (pt_in_rrect(t_pos, s_min, s_max, s_rad)) {
-				// 内側の角丸方形が逆転してない, かつ位置が角丸方形に含まれるか判定する.
+				// 縮小した角丸方形が逆転してない, かつ位置が縮小した角丸方形に含まれるか判定する.
 				D2D1_POINT_2F u_min, u_max, u_rad;
-				pt_add(s_min, s_width, u_min);
-				pt_add(s_max, -s_width, u_max);
-				pt_add(s_rad, -s_width, u_rad);
-				if (u_min.x < u_max.x && u_min.y < u_max.y && pt_in_rrect(t_pos, r_min, r_max, r_rad)) {
-					// 内側の角丸方形に含まれる場合, 塗りつぶし色が不透明なら, ANP_FILL を返す.
+				pt_add(s_min, s_thick, u_min);
+				pt_add(s_max, -s_thick, u_max);
+				pt_add(s_rad, -s_thick, u_rad);
+				if (u_min.x < u_max.x && u_min.y < u_max.y && pt_in_rrect(t_pos, u_min, u_max, u_rad)) {
+					// 塗りつぶし色が不透明なら, ANP_FILL を返す.
 					if (is_opaque(m_fill_color)) {
 						return ANP_TYPE::ANP_FILL;
 					}
 				}
 				else {
-					// 外側に含まれ, 内側に含まれないなら ANP_STROKE を返す.
+					// 拡大した角丸方形に含まれ, 縮小した角丸方形に含まれないなら ANP_STROKE を返す.
 					return ANP_TYPE::ANP_STROKE;
 				}
 			}

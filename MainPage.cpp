@@ -53,27 +53,27 @@ namespace winrt::GraphPaper::implementation
 
 	// 色成分を文字列に変換する.
 	// c_code	色の表記
-	// value	色成分の値
+	// c_value	色成分の値
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列 [t_len]
 	// 戻り値	なし
-	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]) noexcept
+	void conv_col_to_str(const COLOR_CODE c_code, const double c_value, const size_t t_len, wchar_t t_buf[]) noexcept
 	{
 		// 色の表記が 10 進数か判定する.
 		if (c_code == COLOR_CODE::DEC) {
-			swprintf_s(t_buf, t_len, L"%.0lf", std::round(value));
+			swprintf_s(t_buf, t_len, L"%.0lf", std::round(c_value));
 		}
 		// 色の表記が 16 進数か判定する.
 		else if (c_code == COLOR_CODE::HEX) {
-			swprintf_s(t_buf, t_len, L"%02X", static_cast<uint32_t>(std::round(value)));
+			swprintf_s(t_buf, t_len, L"%02X", static_cast<uint32_t>(std::round(c_value)));
 		}
 		// 色の表記が実数か判定する.
 		else if (c_code == COLOR_CODE::REAL) {
-			swprintf_s(t_buf, t_len, L"%.4lf", value / COLOR_MAX);
+			swprintf_s(t_buf, t_len, L"%.4lf", c_value / COLOR_MAX);
 		}
 		// 色の表記がパーセントか判定する.
 		else if (c_code == COLOR_CODE::CENT) {
-			swprintf_s(t_buf, t_len, L"%.1lf%%", value / COLOR_MAX * 100.0);
+			swprintf_s(t_buf, t_len, L"%.1lf%%", c_value / COLOR_MAX * 100.0);
 		}
 		else {
 			swprintf_s(t_buf, t_len, L"?");
@@ -83,57 +83,56 @@ namespace winrt::GraphPaper::implementation
 	// 長さを文字列に変換する.
 	// B	単位付加フラグ
 	// len_unit	長さの単位
-	// value	ピクセル単位の長さ
+	// pixel_val	ピクセル単位の長さ
 	// dpi	DPI
 	// g_len	方眼の大きさ
-	// t_buf	文字列の配列
 	// t_len	文字列の最大長 ('\0' を含む長さ)
-	template <bool B> 
-	void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t *t_buf) noexcept
+	// t_buf	文字列の配列
+	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float pixel_val, const float dpi, const float g_len, const uint32_t t_len, wchar_t *t_buf) noexcept
 	{
 		// 長さの単位がピクセルか判定する.
 		if (len_unit == LEN_UNIT::PIXEL) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_PIXEL_UNIT, value);
+				swprintf_s(t_buf, t_len, FMT_PIXEL_UNIT, pixel_val);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_PIXEL, value);
+				swprintf_s(t_buf, t_len, FMT_PIXEL, pixel_val);
 			}
 		}
 		// 長さの単位がインチか判定する.
 		else if (len_unit == LEN_UNIT::INCH) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_INCH_UNIT, value / dpi);
+				swprintf_s(t_buf, t_len, FMT_INCH_UNIT, pixel_val / dpi);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_INCH, value / dpi);
+				swprintf_s(t_buf, t_len, FMT_INCH, pixel_val / dpi);
 			}
 		}
 		// 長さの単位がミリメートルか判定する.
 		else if (len_unit == LEN_UNIT::MILLI) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_MILLI_UNIT, value * MM_PER_INCH / dpi);
+				swprintf_s(t_buf, t_len, FMT_MILLI_UNIT, pixel_val * MM_PER_INCH / dpi);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_MILLI, value * MM_PER_INCH / dpi);
+				swprintf_s(t_buf, t_len, FMT_MILLI, pixel_val * MM_PER_INCH / dpi);
 			}
 		}
 		// 長さの単位がポイントか判定する.
 		else if (len_unit == LEN_UNIT::POINT) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_POINT_UNIT, value * PT_PER_INCH / dpi);
+				swprintf_s(t_buf, t_len, FMT_POINT_UNIT, pixel_val * PT_PER_INCH / dpi);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_POINT, value * PT_PER_INCH / dpi);
+				swprintf_s(t_buf, t_len, FMT_POINT, pixel_val * PT_PER_INCH / dpi);
 			}
 		}
 		// 長さの単位が方眼か判定する.
 		else if (len_unit == LEN_UNIT::GRID) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_GRID_UNIT, value / g_len);
+				swprintf_s(t_buf, t_len, FMT_GRID_UNIT, pixel_val / g_len);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_GRID, value / g_len);
+				swprintf_s(t_buf, t_len, FMT_GRID, pixel_val / g_len);
 			}
 		}
 		else {
@@ -142,10 +141,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 長さを文字列に変換する (単位なし).
-	template void conv_len_to_str<LEN_UNIT_HIDE>(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
+	template void conv_len_to_str<LEN_UNIT_HIDE>(const LEN_UNIT len_unit, const float pixel_val, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さを文字列に変換する (単位つき).
-	template void conv_len_to_str<LEN_UNIT_SHOW>(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
+	template void conv_len_to_str<LEN_UNIT_SHOW>(const LEN_UNIT len_unit, const float pixel_val, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 確認ダイアログを表示してその応答を得る.
 	// 戻り値	「保存する」または「保存しない」が押されたなら true を, 応答がキャンセルなら, または内容を保存できなかったなら false を返す.
@@ -218,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがあるため,
 		// Trim を呼び出すだけにする.
 		m_main_d2d.Trim();
-		m_sample_dx.Trim();
+		m_sample_d2d.Trim();
 
 		// アプリケーションを終了する.
 		Application::Current().Exit();
@@ -392,8 +391,8 @@ namespace winrt::GraphPaper::implementation
 			sheet_init();
 			m_len_unit = LEN_UNIT::PIXEL;
 			m_color_code = COLOR_CODE::DEC;
-			m_vert_stick = DEF_VERT_STICK;
-			m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);
+			m_vert_stick = VERT_STICK_DEF_VAL;
+			m_status_bar = STATUS_BAR_DEF_VAL;
 		}
 
 		// 用紙の左上位置と右下位置を初期化する.

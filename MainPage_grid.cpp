@@ -97,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_COLOR, 3> });
 		//m_sample_type = SAMPLE_TYPE::NONE;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		//m_sample_d2d.SetSwapChainPanel(scp_sample_panel());
 		const auto samp_w = scp_sample_panel().Width();
 		const auto samp_h = scp_sample_panel().Height();
 		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
@@ -112,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		//m_sample_dx.Release();
+		//m_sample_d2d.Release();
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_1().Visibility(UI_COLLAPSED);
 		sample_slider_2().Visibility(UI_COLLAPSED);
@@ -139,12 +139,8 @@ namespace winrt::GraphPaper::implementation
 		grid_slider_set_header<UNDO_OP::GRID_BASE, 0>(g_base);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_slider_value_changed<UNDO_OP::GRID_BASE, 0> });
-		//m_sample_type = SAMPLE_TYPE::NONE;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
-		const auto samp_w = scp_sample_panel().Width();
-		const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
+		//const auto samp_w = scp_sample_panel().Width();
+		//const auto samp_h = scp_sample_panel().Height();
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -162,7 +158,6 @@ namespace winrt::GraphPaper::implementation
 			}
 
 		}
-		//m_sample_dx.Release();
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_0().ValueChanged(slider_0_token);
 	}
@@ -194,10 +189,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	// U	操作
-	// S	スライダー
-	// value	値
-	template <UNDO_OP U, int S> void MainPage::grid_slider_set_header(const float value)
+	// U	操作の種類
+	// S	スライダーの番号
+	// value	格納する値
+	// 戻り値	なし.
+	template <UNDO_OP U, int S>
+	void MainPage::grid_slider_set_header(const float value)
 	{
 		winrt::hstring text;
 

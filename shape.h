@@ -261,7 +261,7 @@ namespace winrt::GraphPaper::implementation
 	// 多角形が位置を含むか判定する.
 	bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t p_cnt, const D2D1_POINT_2F p_pos[]) noexcept;
 	// 方形が位置を含むか判定する.
-	bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept;
+	inline bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept;
 	// 方形が位置を含むか判定する.
 	inline bool pt_in_rect2(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept;
 	// 位置をスカラー倍に丸める.
@@ -1741,6 +1741,21 @@ namespace winrt::GraphPaper::implementation
 
 	inline bool pt_in_rect2(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept
 	{
-		return r_min.x <= t_pos.x && t_pos.x <= r_max.x && r_max.y <= t_pos.y && t_pos.y <= r_max.y;
+		return r_min.x <= t_pos.x && t_pos.x <= r_max.x && r_min.y <= t_pos.y && t_pos.y <= r_max.y;
 	}
+
+	// 方形が位置を含むか判定する.
+	// t_pos	判定する位置
+	// r_min	方形のいずれかの頂点
+	// r_max	方形のもう一方の頂点
+	// 戻り値	含む場合 true
+	inline bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept
+	{
+		const double min_x = r_min.x < r_max.x ? r_min.x : r_max.x;
+		const double max_x = r_min.x < r_max.x ? r_max.x : r_min.x;
+		const double min_y = r_min.y < r_max.y ? r_min.y : r_max.y;
+		const double max_y = r_min.y < r_max.y ? r_max.y : r_min.y;
+		return min_x <= t_pos.x && t_pos.x <= max_x && min_y <= t_pos.y && t_pos.y <= max_y;
+	}
+
 }

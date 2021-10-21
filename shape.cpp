@@ -19,32 +19,32 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形の部位（円形）を表示する.
 	// a_pos	部位の位置
-	// dx		図形の描画環境
-	void anp_draw_ellipse(const D2D1_POINT_2F a_pos, D2D_UI& dx)
+	// d2d	図形の描画環境
+	void anp_draw_ellipse(const D2D1_POINT_2F a_pos, D2D_UI& d2d)
 	{
 		const FLOAT rad = static_cast<FLOAT>(Shape::s_anp_len * 0.5 + 1.0);
-		ID2D1SolidColorBrush* const brush = dx.m_solid_color_brush.get();
+		ID2D1SolidColorBrush* const brush = d2d.m_solid_color_brush.get();
 		brush->SetColor(Shape::s_background_color);
-		dx.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad, rad }, brush);
+		d2d.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad, rad }, brush);
 		brush->SetColor(Shape::s_foreground_color);
-		dx.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad - 1.0f, rad - 1.0f }, brush);
+		d2d.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad - 1.0f, rad - 1.0f }, brush);
 	}
 
 	// 図形の部位 (方形) を表示する.
 	// a_pos	部位の位置
-	// dx		図形の描画環境
-	void anp_draw_rect(const D2D1_POINT_2F a_pos, D2D_UI& dx)
+	// d2d	図形の描画環境
+	void anp_draw_rect(const D2D1_POINT_2F a_pos, D2D_UI& d2d)
 	{
 		D2D1_POINT_2F r_min;
 		D2D1_POINT_2F r_max;
 		pt_add(a_pos, -0.5 * Shape::s_anp_len, r_min);
 		pt_add(r_min, Shape::s_anp_len, r_max);
 		const D2D1_RECT_F rect{ r_min.x, r_min.y, r_max.x, r_max.y };
-		ID2D1SolidColorBrush* const brush = dx.m_solid_color_brush.get();
+		ID2D1SolidColorBrush* const brush = d2d.m_solid_color_brush.get();
 		brush->SetColor(Shape::s_background_color);
-		dx.m_d2d_context->DrawRectangle(rect, brush, 2.0, nullptr);
+		d2d.m_d2d_context->DrawRectangle(rect, brush, 2.0, nullptr);
 		brush->SetColor(Shape::s_foreground_color);
-		dx.m_d2d_context->FillRectangle(rect, brush);
+		d2d.m_d2d_context->FillRectangle(rect, brush);
 	}
 
 	// 矢じるしの返しの位置を求める.
@@ -131,56 +131,4 @@ namespace winrt::GraphPaper::implementation
 		return static_cast<bool>(i_cnt & 1);
 	}
 
-	// 方形が位置を含むか判定する.
-	// t_pos	判定する位置
-	// r_min	方形のいずれかの頂点
-	// r_max	方形のもう一方の頂点
-	// 戻り値	含む場合 true
-	bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept
-	{
-		double min_x;
-		double max_x;
-		double min_y;
-		double max_y;
-
-		if (r_min.x < r_max.x) {
-			min_x = r_min.x;
-			max_x = r_max.x;
-		}
-		else {
-			min_x = r_max.x;
-			max_x = r_min.x;
-		}
-		if (r_min.y < r_max.y) {
-			min_y = r_min.y;
-			max_y = r_max.y;
-		}
-		else {
-			min_y = r_max.y;
-			max_y = r_min.y;
-		}
-		return min_x <= t_pos.x && t_pos.x <= max_x && min_y <= t_pos.y && t_pos.y <= max_y;
-	}
-
-	// 指定した位置を含むよう, 方形を拡大する.
-	// a	含まれる位置
-	// r_min	元の方形の左上位置, 得られた左上位置
-	// r_max	元の方形の右下位置, 得られた右下位置
-	/*
-	void pt_inc(const D2D1_POINT_2F a, D2D1_POINT_2F& r_min, D2D1_POINT_2F& r_max) noexcept
-	{
-		if (a.x < r_min.x) {
-			r_min.x = a.x;
-		}
-		if (a.x > r_max.x) {
-			r_max.x = a.x;
-		}
-		if (a.y < r_min.y) {
-			r_min.y = a.y;
-		}
-		if (a.y > r_max.y) {
-			r_max.y = a.y;
-		}
-	}
-	*/
 }

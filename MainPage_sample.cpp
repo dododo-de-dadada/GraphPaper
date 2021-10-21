@@ -38,16 +38,16 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		m_sample_dx.m_d2d_context->SaveDrawingState(m_sample_dx.m_state_block.get());
-		m_sample_dx.m_d2d_context->BeginDraw();
-		m_sample_dx.m_d2d_context->Clear(m_sample_sheet.m_sheet_color);
+		m_sample_d2d.m_d2d_context->SaveDrawingState(m_sample_d2d.m_state_block.get());
+		m_sample_d2d.m_d2d_context->BeginDraw();
+		m_sample_d2d.m_d2d_context->Clear(m_sample_sheet.m_sheet_color);
 		const float offset = static_cast<FLOAT>(std::fmod(m_sample_sheet.m_sheet_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0));
 		m_sample_sheet.m_grid_offset.x = offset;
 		m_sample_sheet.m_grid_offset.y = offset;
-		m_sample_sheet.draw(m_sample_dx);
-		m_sample_dx.m_d2d_context->EndDraw();
-		m_sample_dx.m_d2d_context->RestoreDrawingState(m_sample_dx.m_state_block.get());
-		m_sample_dx.Present();
+		m_sample_sheet.draw(m_sample_d2d);
+		m_sample_d2d.m_d2d_context->EndDraw();
+		m_sample_d2d.m_d2d_context->RestoreDrawingState(m_sample_d2d.m_state_block.get());
+		m_sample_d2d.Present();
 		m_d2d_mutex.unlock();
 	}
 
@@ -111,7 +111,7 @@ namespace winrt::GraphPaper::implementation
 	{
 #endif // _DEBUG
 		const auto& swap_chain_panel = scp_sample_panel();
-		m_sample_dx.SetSwapChainPanel(swap_chain_panel);
+		m_sample_d2d.SetSwapChainPanel(swap_chain_panel);
 		sample_draw();
 	}
 
@@ -128,13 +128,13 @@ namespace winrt::GraphPaper::implementation
 #endif	// _DEBUG
 		m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(args.NewSize().Width);
 		m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(args.NewSize().Height);
-		m_sample_dx.SetLogicalSize2(m_sample_sheet.m_sheet_size);
+		m_sample_d2d.SetLogicalSize2(m_sample_sheet.m_sheet_size);
 		sample_draw();
 	}
 
 	void MainPage::sample_panel_scale_changed(IInspectable const&, IInspectable const&)
 	{
-		m_sample_dx.SetCompositionScale(scp_sample_panel().CompositionScaleX(), scp_sample_panel().CompositionScaleY());
+		m_sample_d2d.SetCompositionScale(scp_sample_panel().CompositionScaleX(), scp_sample_panel().CompositionScaleY());
 	}
 
 }

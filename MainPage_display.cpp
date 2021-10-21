@@ -23,12 +23,12 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_d2d_mutex.lock();
 			m_main_d2d.ValidateDevice();
-			m_sample_dx.ValidateDevice();
+			m_sample_d2d.ValidateDevice();
 			m_d2d_mutex.unlock();
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
-			m_sample_dx.ValidateDevice();
+			m_sample_d2d.ValidateDevice();
 			m_d2d_mutex.unlock();
 			sample_draw();
 		}
@@ -52,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 		if (scp_sample_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
 			const float logical_dpi = sender.LogicalDpi();
-			m_sample_dx.SetDpi(logical_dpi);
+			m_sample_d2d.SetDpi(logical_dpi);
 			m_d2d_mutex.unlock();
 			sample_draw();
 		}
@@ -77,7 +77,7 @@ namespace winrt::GraphPaper::implementation
 		if (scp_sample_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
 			const auto ori = sender.CurrentOrientation();
-			m_sample_dx.SetCurrentOrientation(ori);
+			m_sample_d2d.SetCurrentOrientation(ori);
 			m_d2d_mutex.unlock();
 			sample_draw();
 		}

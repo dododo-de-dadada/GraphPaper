@@ -21,7 +21,8 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
-	// value	値
+	// value	格納する値
+	// 戻り値	なし.
 	template <UNDO_OP U, int S>
 	void MainPage::arrow_slider_set_header(const float value)
 	{

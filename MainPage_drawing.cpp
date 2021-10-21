@@ -90,7 +90,7 @@ namespace winrt::GraphPaper::implementation
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
 		}
 		status_set_draw();
-		//event_set_cursor();
+		event_set_cursor();
 	}
 
 	// 作図ツールのメニューに印をつける.

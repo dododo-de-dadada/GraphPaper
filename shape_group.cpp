@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapeGroup::draw(D2D_UI& dx)
+	void ShapeGroup::draw(D2D_UI& d2d)
 	{
 		// 選択フラグが立ってるか判定する.
 		if (is_selected()) {
@@ -29,17 +29,17 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
-				s->draw(dx);
+				s->draw(d2d);
 				s->get_bound(b_min, b_max, b_min, b_max);
 			}
-			dx.m_d2d_context->DrawRectangle(D2D1_RECT_F{ b_min.x, b_min.y, b_max.x, b_max.y }, dx.m_solid_color_brush.get(), 1.0f, Shape::m_aux_style.get());
+			d2d.m_d2d_context->DrawRectangle(D2D1_RECT_F{ b_min.x, b_min.y, b_max.x, b_max.y }, d2d.m_solid_color_brush.get(), 1.0f, Shape::m_aux_style.get());
 		}
 		else {
 			for (const auto s : m_list_grouped) {
 				if (s->is_deleted()) {
 					continue;
 				}
-				s->draw(dx);
+				s->draw(d2d);
 			}
 		}
 	}

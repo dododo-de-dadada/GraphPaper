@@ -86,13 +86,8 @@ namespace winrt::GraphPaper::implementation
 
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::JOIN_LIMIT, 0> });
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::STROKE_WIDTH, 1> });
-		//m_sample_type = SAMPLE_TYPE::JOIN;
-		//m_sample_type = SAMPLE_TYPE::JOIN;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
 		const auto samp_w = scp_sample_panel().Width();
 		const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
 		const auto padd = samp_w * 0.125;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
 		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
@@ -101,6 +96,7 @@ namespace winrt::GraphPaper::implementation
 		const float offset = static_cast<float>(samp_h / 16.0);
 		const float samp_x = static_cast<float>(samp_w * 0.25);
 		const float samp_y = static_cast<float>(samp_h * 0.5);
+		s->set_select(true);
 		s->set_pos_anp(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANP_TYPE::ANP_P0, m_vert_stick, false);
 		s->set_pos_anp(D2D1_POINT_2F{ samp_x, samp_y }, ANP_TYPE::ANP_P0 + 1, m_vert_stick, false);
 		s->set_pos_anp(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANP_TYPE::ANP_P0 + 2, m_vert_stick, false);
@@ -114,8 +110,6 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float sample_limit;
 			float sample_width;
-			//m_sample_shape->get_join_limit(sample_limit);
-			//m_sample_shape->get_stroke_width(sample_width);
 			m_sample_sheet.m_shape_list.back()->get_join_limit(sample_limit);
 			m_sample_sheet.m_shape_list.back()->get_stroke_width(sample_width);
 			if (ustack_push_set<UNDO_OP::JOIN_LIMIT>(sample_limit) ||
@@ -134,6 +128,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
+	// U	操作の種類
+	// S	スライダーの番号
+	// value	格納する値
+	// 戻り値	なし.
 	template <UNDO_OP U, int S>
 	void MainPage::join_slider_set_header(const float value)
 	{
@@ -166,13 +164,11 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::JOIN_LIMIT && S == 0) {
 			const float value = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(value);
-			//m_sample_shape->set_join_limit(value + 1.0f);
 			m_sample_sheet.m_shape_list.back()->set_join_limit(value + 1.0f);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
 			const float value = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(value);
-			//m_sample_shape->set_stroke_width(value);
 			m_sample_sheet.m_shape_list.back()->set_stroke_width(value);
 		}
 		if (scp_sample_panel().IsLoaded()) {

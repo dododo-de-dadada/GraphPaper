@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		//m_sample_type = SAMPLE_TYPE::STROKE;
 		//m_sample_type = SAMPLE_TYPE::STROKE;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		//m_sample_d2d.SetSwapChainPanel(scp_sample_panel());
 		const auto samp_w = scp_sample_panel().Width();
 		const auto samp_h = scp_sample_panel().Height();
 		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
@@ -177,7 +177,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::dash_slider_set_header(const float value)
+	// U	操作の種類
+	// S	スライダーの番号
+	// value	格納する値
+	// 戻り値	なし.
+	template <UNDO_OP U, int S>
+	void MainPage::dash_slider_set_header(const float value)
 	{
 		if constexpr (U == UNDO_OP::DASH_PATT) {
 			constexpr wchar_t* R[]{ L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap" };

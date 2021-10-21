@@ -10,11 +10,11 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形を表示する.
-	// dx	描画環境
-	void ShapeRect::draw(D2D_UI& dx)
+	// d2d	描画環境
+	void ShapeRect::draw(D2D_UI& d2d)
 	{
 		if (m_d2d_stroke_style == nullptr) {
-			create_stroke_style(dx);
+			create_stroke_style(d2d);
 		}
 
 		const D2D1_RECT_F rect{
@@ -26,15 +26,15 @@ namespace winrt::GraphPaper::implementation
 		// 塗りつぶし色が不透明か判定する.
 		if (is_opaque(m_fill_color)) {
 			// 方形を塗りつぶす.
-			dx.m_solid_color_brush->SetColor(m_fill_color);
-			dx.m_d2d_context->FillRectangle(rect, dx.m_solid_color_brush.get());
+			d2d.m_solid_color_brush->SetColor(m_fill_color);
+			d2d.m_d2d_context->FillRectangle(rect, d2d.m_solid_color_brush.get());
 		}
 		// 線枠の色が不透明か判定する.
 		if (is_opaque(m_stroke_color)) {
 			// 方形の枠を表示する.
 			const auto w = m_stroke_width;
-			dx.m_solid_color_brush->SetColor(m_stroke_color);
-			dx.m_d2d_context->DrawRectangle(rect, dx.m_solid_color_brush.get(), w, m_d2d_stroke_style.get());
+			d2d.m_solid_color_brush->SetColor(m_stroke_color);
+			d2d.m_d2d_context->DrawRectangle(rect, d2d.m_solid_color_brush.get(), w, m_d2d_stroke_style.get());
 		}
 		// この図形が選択されてるか判定する.
 		if (is_selected()) {
@@ -48,15 +48,15 @@ namespace winrt::GraphPaper::implementation
 			a_pos[3].y = rect.bottom;
 			a_pos[3].x = rect.left;
 			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-				anp_draw_rect(a_pos[i], dx);
+				anp_draw_rect(a_pos[i], d2d);
 				D2D1_POINT_2F a_mid;	// 方形の辺の中点
 				pt_avg(a_pos[j], a_pos[i], a_mid);
-				anp_draw_rect(a_mid, dx);
+				anp_draw_rect(a_mid, d2d);
 			}
 		}
 	}
 
-	// 折れ線の図形の部位が位置を含むか判定する.
+	// 図形の部位が位置を含むか判定する.
 	uint32_t ShapeRect::hit_test_anp(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		// 4----8----2
@@ -172,44 +172,52 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			// 外側の方形に含まれるか判定する.
-			D2D1_POINT_2F s_min, s_max;
-			const double s_width = m_stroke_width > 0.0 ? max(m_stroke_width, Shape::s_anp_len) : 0.0;
-			const double e_width = s_width * 0.5;
-			pt_add(t_min, -e_width, s_min);
-			pt_add(t_max, e_width, s_max);
+			//      |                |
+			//    +-+----------------+-+
+			// ---+-+----------------+-+---
+			//    | |                | |
+			//    | |                | |
+			// ---+-+----------------+-+---
+			//    +-+----------------+-+
+			//      |                |
+			// 線枠の太さの半分の大きさだけ外側に, 方形を拡大する.
+			// ただし太さがアンカーポイントの大きさ未満なら, 太さはアンカーポイントの大きさに調整する.
+			D2D1_POINT_2F s_min, s_max;	// 拡大した方形
+			const double s_thick = max(m_stroke_width, Shape::s_anp_len);
+			const double e_thick = s_thick * 0.5;
+			pt_add(t_min, -e_thick, s_min);
+			pt_add(t_max, e_thick, s_max);
+			// 拡大した方形に含まれるか判定する.
 			if (pt_in_rect2(t_pos, s_min, s_max)) {
-				// 内側の方形を計算する.
-				D2D1_POINT_2F u_min, u_max;
-				pt_add(s_min, s_width, u_min);
-				pt_add(s_max, -s_width, u_max);
-				// 内側の方形が反転する (枠が太すぎて図形を覆う) か判定する.
-				if (u_max.x <= u_min.x || u_max.y <= u_min.y) {
-					return ANP_TYPE::ANP_STROKE;
-				}
-				// 内側の方形に含まれる (辺に含まれない) か判定する.
-				else if (pt_in_rect2(t_pos, u_min, u_max)) {
+				// 太さの大きさだけ内側に, 拡大した方形を縮小する.
+				D2D1_POINT_2F u_min, u_max;	// 縮小した方形
+				pt_add(s_min, s_thick, u_min);
+				pt_add(s_max, -s_thick, u_max);
+				// 縮小した方形に含まれる (辺に含まれない) か判定する.
+				if (pt_in_rect2(t_pos, u_min, u_max)) {
 					if (is_opaque(m_fill_color)) {
 						return ANP_TYPE::ANP_FILL;
 					}
 				}
-				// 方形の角に含まれてない (辺に含まれる) か判定する.
-				else if (t_min.x <= t_pos.x && t_pos.x <= t_max.x || t_min.y <= t_pos.y && t_pos.y <= t_max.y) {
+				// 縮小した方形が反転する (枠が太すぎて図形を覆う),
+				// または, 方形の角に含まれてない (辺に含まれる) か判定する.
+				else if (u_max.x <= u_min.x || u_max.y <= u_min.y ||
+					t_min.x <= t_pos.x && t_pos.x <= t_max.x || t_min.y <= t_pos.y && t_pos.y <= t_max.y) {
 					return ANP_TYPE::ANP_STROKE;
 				}
 				// 線枠のつなぎが丸めか判定する.
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-					if (pt_in_circle(t_pos, v_pos[0], e_width) ||
-						pt_in_circle(t_pos, v_pos[1], e_width) ||
-						pt_in_circle(t_pos, v_pos[2], e_width) ||
-						pt_in_circle(t_pos, v_pos[3], e_width)) {
+					if (pt_in_circle(t_pos, v_pos[0], e_thick) ||
+						pt_in_circle(t_pos, v_pos[1], e_thick) ||
+						pt_in_circle(t_pos, v_pos[2], e_thick) ||
+						pt_in_circle(t_pos, v_pos[3], e_thick)) {
 						return ANP_TYPE::ANP_STROKE;
 					}
 				}
 				// 線枠のつなぎが面取り, または, マイター・面取りでかつマイター制限が√2 未満か判定する.
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
 					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL && m_join_limit < M_SQRT2)) {
-					const auto limit = static_cast<FLOAT>(e_width);
+					const auto limit = static_cast<FLOAT>(e_thick);
 					const D2D1_POINT_2F q_pos[4]{
 						D2D1_POINT_2F{ 0.0f, -limit }, D2D1_POINT_2F{ limit, 0.0f }, D2D1_POINT_2F{ 0.0f, limit }, D2D1_POINT_2F{ -limit, 0.0f }
 					};

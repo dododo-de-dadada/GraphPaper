@@ -20,6 +20,8 @@ namespace winrt::GraphPaper::implementation
 	static inline bool status_mask(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 	// NOT 演算する.
 	static inline STATUS_BAR status_not(const STATUS_BAR a) noexcept;
+	// 列挙型を OR 演算する.
+	static inline STATUS_BAR status_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 	// ステータスバーの項目の表示を設定する.
 	static inline void status_visiblity(const bool check, FrameworkElement const& f_elem) noexcept;
 
@@ -33,6 +35,12 @@ namespace winrt::GraphPaper::implementation
 	static inline bool status_mask(const STATUS_BAR a, const STATUS_BAR b) noexcept
 	{
 		return static_cast<uint32_t>(a) & static_cast<uint32_t>(b);
+	}
+
+	// 列挙型を OR 演算する.
+	static inline STATUS_BAR status_or(const STATUS_BAR a, const STATUS_BAR b) noexcept
+	{
+		return static_cast<STATUS_BAR>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 	}
 
 	// 列挙型を NOT 演算する.
@@ -172,12 +180,6 @@ namespace winrt::GraphPaper::implementation
 		tmfi_status_bar_draw_2().IsChecked(status_mask(s_bar, STATUS_BAR::DRAW));
 		tmfi_status_bar_unit_2().IsChecked(status_mask(s_bar, STATUS_BAR::UNIT));
 		tmfi_status_bar_zoom_2().IsChecked(status_mask(s_bar, STATUS_BAR::ZOOM));
-	}
-
-	// 列挙型を OR 演算する.
-	STATUS_BAR MainPage::status_or(const STATUS_BAR a, const STATUS_BAR b) noexcept
-	{
-		return static_cast<STATUS_BAR>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 	}
 
 	// ポインターの位置をステータスバーに格納する.

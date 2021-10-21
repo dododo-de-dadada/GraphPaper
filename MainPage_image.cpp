@@ -16,16 +16,17 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
-	void MainPage::image_keep_aspect_is_checked(const bool keep_aspect)
-	{
-		tmfi_image_keep_aspect().IsChecked(keep_aspect);
-		tmfi_image_keep_aspect_2().IsChecked(keep_aspect);
-	}
-
 	// 画像メニューの「縦横比を変えない」が選択された.
 	void MainPage::image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		m_image_keep_aspect = !m_image_keep_aspect;
+	}
+
+	// 画像メニューの「縦横比を変えない」に印をつける.
+	void MainPage::image_keep_aspect_is_checked(const bool keep_aspect)
+	{
+		tmfi_image_keep_aspect().IsChecked(keep_aspect);
+		tmfi_image_keep_aspect_2().IsChecked(keep_aspect);
 	}
 
 	// 画像メニューの「元の画像に戻す」が選択された.
@@ -59,14 +60,8 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_check_box().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::image_slider_value_changed<UNDO_OP::IMAGE_OPAC, 0> });
-		//m_sample_type = SAMPLE_TYPE::IMAGE;
-		//m_sample_type = SAMPLE_TYPE::IMAGE;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
-		const auto samp_w = scp_sample_panel().Width();
-		const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
-		sample_image_load_async(static_cast<float>(samp_w), static_cast<float>(samp_h));
+
+		sample_image_load_async(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()));
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -88,7 +83,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::image_slider_set_header(const float value)
+	// U	操作の種類
+	// S	スライダーの番号
+	// value	格納する値
+	// 戻り値	なし.
+	template <UNDO_OP U, int S>
+	void MainPage::image_slider_set_header(const float value)
 	{
 		winrt::hstring text;
 

@@ -20,6 +20,7 @@
 // MainPage_arrow.cpp	矢じるしの形式と寸法
 // MainPage_dash.cpp	線の種類
 // MainPage_display.cpp	表示デバイスのハンドラー
+// MainPage_drawing.cpp	作図ツール
 // MainPage_event.cpp	ポインターイベントのハンドラー
 // MainPage_file.cpp	ファイルの読み書き
 // MainPage_fill.cpp	塗りつぶし
@@ -27,18 +28,19 @@
 // MainPage_font.cpp	書体と文字列の配置
 // MainPage_grid.cpp	方眼
 // MainPage_group.cpp	グループ化とグループの解除
+// NainPage_image.cpp	画像
 // NainPage_join.cpp	線分のつなぎ
 // MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, 頂点をくっつける閾値
+// MainPage_pref.cpp	設定の保存とリセット
 // MainPage_sample.cpp	見本
 // MainPage_scroll.cpp	スクロールバー
 // MainPage_select.cpp	図形の選択
 // MainPage_sheet.cpp	用紙の属性, 表示倍率
-// MainPage_summary.cpp	図形の一覧
 // MainPage_status.cpp	ステータスバー
 // MainPage_stroke.cpp	線枠
+// MainPage_summary.cpp	図形の一覧
 // MainPage_text.cpp	文字列の編集と検索/置換
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
-// MainPage_tool.cpp	作図ツール
 // MainPage_ustack.cpp	元に戻すとやり直し操作
 // MainPage_xcvd.cpp	切り取りとコピー, 文字列の編集など
 //------------------------------
@@ -50,42 +52,6 @@
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Microsoft::UI::Xaml::Controls::RadioMenuFlyoutItem;
-	//using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
-	//using winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs;
-	//using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
-	//using winrt::Windows::ApplicationModel::SuspendingEventArgs;
-	//using winrt::Windows::ApplicationModel::SuspendingOperation;
-	//using winrt::Windows::Foundation::Collections::IVector;
-	//using winrt::Windows::Foundation::IAsyncAction;
-	//using winrt::Windows::Foundation::IAsyncOperation;
-	//using winrt::Windows::Foundation::Point;
-	//using winrt::Windows::Graphics::Display::DisplayInformation;
-	//using winrt::Windows::Storage::StorageFile;
-	//using winrt::Windows::UI::Core::CoreCursor;
-	//using winrt::Windows::UI::Core::CoreWindow;
-	//using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
-	//using winrt::Windows::UI::Core::VisibilityChangedEventArgs;
-	//using winrt::Windows::UI::Core::WindowActivatedEventArgs;
-	//using winrt::Windows::UI::Xaml::Controls::ContentDialog;
-	//using winrt::Windows::UI::Xaml::Controls::ContentDialogButtonClickEventArgs;
-	//using winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs;
-	//using winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs;
-	//using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
-	//using winrt::Windows::UI::Xaml::Controls::MenuFlyoutItem;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollEventArgs;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
-	//using winrt::Windows::UI::Xaml::Input::KeyboardAcceleratorInvokedEventArgs;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
-	//using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::Visibility;
-	//using winrt::Windows::UI::Xaml::Window;
-	//using winrt::Windows::System::VirtualKey;
-	//using winrt::Windows::System::VirtualKeyModifiers;
-
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
 
@@ -102,8 +68,8 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_GRID_UNIT = L"%.3f gd";	// グリッド単位の書式
 	constexpr auto ICON_INFO = L"glyph_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"glyph_alert";	// 警告アイコンの静的リソースのキー
-	constexpr auto DEF_VERT_STICK = 2.0f * 6.0f;	// 頂点をくっつける閾値の既定値
-	constexpr auto DEF_SHEET_SIZE = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
+	constexpr auto VERT_STICK_DEF_VAL = 2.0f * 6.0f;	// 頂点をくっつける閾値の既定値
+	constexpr auto SHEET_SIZE_DEF_VAL = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
 	constexpr auto UI_VISIBLE = winrt::Windows::UI::Xaml::Visibility::Visible;	// 表示	
 	constexpr auto UI_COLLAPSED = winrt::Windows::UI::Xaml::Visibility::Collapsed;	// 非表示
 
@@ -121,8 +87,7 @@ namespace winrt::GraphPaper::implementation
 	void conv_col_to_str(const COLOR_CODE c_code, const double value, const size_t t_len, wchar_t t_buf[]) noexcept;
 
 	// 色成分を文字列に変換する.
-	template <size_t Z> 
-	void conv_col_to_str(const COLOR_CODE c_code, const double value, wchar_t(&t_buf)[Z]) noexcept
+	template <size_t Z> inline void conv_col_to_str(const COLOR_CODE c_code, const double value, wchar_t(&t_buf)[Z]) noexcept
 	{
 		conv_col_to_str(c_code, value, Z, t_buf);
 	}
@@ -180,15 +145,18 @@ namespace winrt::GraphPaper::implementation
 	constexpr bool LEN_UNIT_SHOW = true;	// 単位名の表示
 	constexpr bool LEN_UNIT_HIDE = false;	// 単位名の非表示
 
-	// 長さを文字列に変換する.
-	template <bool B> 
-	void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
+	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さを文字列に変換する.
-	template <bool B, size_t Z>
-	void conv_len_to_str(const LEN_UNIT len_unit, const float value, const float dpi, const float g_len, wchar_t(&t_buf)[Z]) noexcept
+	// B
+	// len_unit	長さの単位
+	// val_pixel	ピクセル単位の長さ
+	// dpi	DPI
+	// g_len	グリッドの大きさ
+	// t_buf	文字列を格納した固定配列
+	template <bool B, size_t Z> inline void conv_len_to_str(const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len, wchar_t(&t_buf)[Z]) noexcept
 	{
-		conv_len_to_str<B>(len_unit, value, dpi, g_len, Z, t_buf);
+		conv_len_to_str<B>(len_unit, val_pixel, dpi, g_len, Z, t_buf);
 	}
 
 	//-------------------------------
@@ -216,13 +184,14 @@ namespace winrt::GraphPaper::implementation
 	// ステータスバーの状態
 	//-------------------------------
 	enum struct STATUS_BAR {
-		GRID = 1,	// 方眼の大きさ
-		SHEET = (2 | 4),	// 用紙の大きさ
-		CURS = (8 | 16),	// カーソルの位置
-		ZOOM = 32,	// 拡大率
-		DRAW = 64,	// 作図ツール
-		UNIT = 128	// 単位名
+		CURS = (1 | 2),	// カーソルの位置
+		DRAW = 4,	// 作図ツール
+		GRID = 8,	// 方眼の大きさ
+		SHEET = (16 | 32),	// 用紙の大きさ
+		UNIT = 64,	// 単位名
+		ZOOM = 128,	// 拡大率
 	};
+	constexpr STATUS_BAR STATUS_BAR_DEF_VAL = static_cast<STATUS_BAR>(static_cast<uint32_t>(STATUS_BAR::DRAW) | static_cast<uint32_t>(STATUS_BAR::CURS) | static_cast<uint32_t>(STATUS_BAR::ZOOM));
 
 	//-------------------------------
 	// メインページ
@@ -270,7 +239,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_main_max{ 0.0F, 0.0F };	// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
 		// 見本用紙
-		D2D_UI m_sample_dx;	// 見本の描画環境
+		D2D_UI m_sample_d2d;	// 見本の描画環境
 		ShapeSheet m_sample_sheet;	// 見本の用紙
 		//Shape* m_sample_shape = nullptr;	// 見本の図形
 		//SAMPLE_TYPE m_sample_type = SAMPLE_TYPE::NONE;	// 見本の型
@@ -285,8 +254,8 @@ namespace winrt::GraphPaper::implementation
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
-		float m_vert_stick = DEF_VERT_STICK;	// 頂点をくっつける閾値
-		STATUS_BAR m_status_bar = status_or(STATUS_BAR::CURS, STATUS_BAR::ZOOM);	// ステータスバーの状態
+		float m_vert_stick = VERT_STICK_DEF_VAL;	// 頂点をくっつける閾値
+		STATUS_BAR m_status_bar = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
 
 		// スレッド
 		bool m_thread_activated = false;	// アクティベートされた初回を判定
@@ -507,9 +476,11 @@ namespace winrt::GraphPaper::implementation
 		// 塗りつぶしメニューの「色」が選択された.
 		winrt::Windows::Foundation::IAsyncAction fill_color_click_async(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// スライダーの値が変更された.
-		template <UNDO_OP U, int S> void fill_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
+		template <UNDO_OP U, int S>
+		void fill_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void fill_slider_set_header(const float value);
+		template <UNDO_OP U, int S>
+		void fill_slider_set_header(const float value);
 
 		//-------------------------------
 		// MainPage_find.cpp
@@ -532,8 +503,6 @@ namespace winrt::GraphPaper::implementation
 		//void find_text_read(DataReader const& dt_reader);
 		// 文字列検索パネルから値を格納する.
 		void find_text_set(void);
-		// 検索の値をデータリーダーに書き込む.
-		//void find_text_write(DataWriter const& dt_writer);
 		// 編集メニューの「文字列の検索/置換」が選択された.
 		void find_text_click(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 検索文字列が変更された.
@@ -563,9 +532,11 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「太さ」が選択された.
 		winrt::Windows::Foundation::IAsyncAction font_weight_click_async(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void font_slider_set_header(const float value);
+		template <UNDO_OP U, int S>
+		void font_slider_set_header(const float value);
 		// スライダーの値が変更された.
-		template <UNDO_OP U, int S> void font_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
+		template <UNDO_OP U, int S>
+		void font_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_grid.cpp
@@ -658,17 +629,20 @@ namespace winrt::GraphPaper::implementation
 		// 画像
 		//-----------------------------
 
-		void image_keep_aspect_is_checked(const bool keep_aspect);
 		// 画像メニューの「縦横比を変えない」が選択された.
 		void image_keep_aspect_click(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&) noexcept;
+		// 画像メニューの「縦横比を変えない」に印をつける.
+		void image_keep_aspect_is_checked(const bool keep_aspect);
 		// 画像メニューの「元の画像に戻す」が選択された.
 		void image_revert_origin_click(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&) noexcept;
 		// 画像メニューの「不透明度...」が選択された.
 		winrt::Windows::Foundation::IAsyncAction image_opac_click_async(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void image_slider_set_header(const float value);
+		template <UNDO_OP U, int S>
+		void image_slider_set_header(const float value);
 		// スライダーの値が変更された.
-		template <UNDO_OP U, int S> void image_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const& args);
+		template <UNDO_OP U, int S>
+		void image_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const& args);
 
 		//-----------------------------
 		// MainPage_misc.cpp
@@ -709,7 +683,7 @@ namespace winrt::GraphPaper::implementation
 		// 見本
 		//-------------------------------
 
-		//D2D_UI& sample_dx(void) { return m_sample_dx; }
+		//D2D_UI& sample_dx(void) { return m_sample_d2d; }
 		// 見本ダイアログが開かれた.
 		void sample_opened(winrt::Windows::UI::Xaml::Controls::ContentDialog const& sender, winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs const& args);
 		// 見本ダイアログが開かれた.
@@ -786,9 +760,11 @@ namespace winrt::GraphPaper::implementation
 		// 前景色を得る.
 		const D2D1_COLOR_F& sheet_foreground(void) const noexcept;
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void sheet_slider_set_header(const float value);
+		template <UNDO_OP U, int S>
+		void sheet_slider_set_header(const float value);
 		// スライダーの値が変更された.
-		template <UNDO_OP U, int S> void sheet_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
+		template <UNDO_OP U, int S>
+		void sheet_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
 		// 用紙の大きさの最大値 (ピクセル) を得る.
 		constexpr float sheet_size_max(void) const noexcept { return 32767.0F; }
 		// 用紙のスワップチェーンパネルがロードされた.
@@ -822,7 +798,7 @@ namespace winrt::GraphPaper::implementation
 		// その他メニューの「ステータスバー」に印をつける.
 		void status_bar_is_checked(const STATUS_BAR a);
 		// 列挙型を OR 演算する.
-		static STATUS_BAR status_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
+		//static STATUS_BAR status_or(const STATUS_BAR a, const STATUS_BAR b) noexcept;
 		// ポインターの位置をステータスバーに格納する.
 		void status_set_curs(void);
 		// 作図ツールをステータスバーに格納する.
@@ -850,9 +826,11 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「破線の配列」が選択された.
 		winrt::Windows::Foundation::IAsyncAction dash_patt_click_async(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template<UNDO_OP U, int S> void dash_slider_set_header(const float value);
+		template<UNDO_OP U, int S>
+		void dash_slider_set_header(const float value);
 		// スライダーの値が変更された.
-		template<UNDO_OP U, int S> void dash_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
+		template<UNDO_OP U, int S>
+		void dash_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -864,9 +842,11 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「太さ」が選択された.
 		winrt::Windows::Foundation::IAsyncAction stroke_width_click_async(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template<UNDO_OP U, int S> void stroke_slider_set_header(const float value);
+		template<UNDO_OP U, int S>
+		void stroke_slider_set_header(const float value);
 		// スライダーの値が変更された.
-		template<UNDO_OP U, int S> void stroke_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
+		template<UNDO_OP U, int S>
+		void stroke_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_summary.cpp
@@ -938,9 +918,11 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「文字列のそろえ」が選択された.
 		void text_align_t_click(IInspectable const& sender, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void text_slider_set_header(const float value);
+		template <UNDO_OP U, int S>
+		void text_slider_set_header(const float value);
 		// スライダーの値が変更された.
-		template <UNDO_OP U, int S> void text_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
+		template <UNDO_OP U, int S>
+		void text_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_thread.cpp

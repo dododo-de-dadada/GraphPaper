@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 
 		//m_sample_type = SAMPLE_TYPE::MISC;
 		//m_sample_type = SAMPLE_TYPE::MISC;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		//m_sample_d2d.SetSwapChainPanel(scp_sample_panel());
 		const auto samp_w = scp_sample_panel().Width();
 		const auto samp_h = scp_sample_panel().Height();
 		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);

@@ -124,7 +124,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 2> });
 		//m_sample_type = SAMPLE_TYPE::NONE;
-		//m_sample_dx.SetSwapChainPanel(scp_sample_panel());
+		//m_sample_d2d.SetSwapChainPanel(scp_sample_panel());
 		//const auto samp_w = scp_sample_panel().Width();
 		//const auto samp_h = scp_sample_panel().Height();
 		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
@@ -144,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		//m_sample_dx.Release();
+		//m_sample_d2d.Release();
 		sample_slider_0().Visibility(UI_COLLAPSED);
 		sample_slider_1().Visibility(UI_COLLAPSED);
 		sample_slider_2().Visibility(UI_COLLAPSED);
@@ -347,7 +347,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.set_sheet_color(Shape::s_background_color);
 			m_main_sheet.set_sheet_scale(1.0);
 			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			m_main_sheet.m_sheet_size = DEF_SHEET_SIZE;
+			m_main_sheet.m_sheet_size = SHEET_SIZE_DEF_VAL;
 			m_main_sheet.set_stroke_cap(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
 			m_main_sheet.set_stroke_color(Shape::s_foreground_color);
 			m_main_sheet.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
@@ -553,7 +553,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	template <UNDO_OP U, int S> void MainPage::sheet_slider_set_header(const float value)
+	// U	操作の種類
+	// S	スライダーの番号
+	// value	格納する値
+	// 戻り値	なし.
+	template <UNDO_OP U, int S>
+	void MainPage::sheet_slider_set_header(const float value)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
