@@ -741,7 +741,7 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	// 保存された設定データを読み込む.
+	// 保存された用紙設定データを読み込む.
 	// 設定データを保存したファイルがある場合, それを読み込む.
 	// 戻り値	読み込めたら S_OK.
 	IAsyncOperation<winrt::hresult> MainPage::sheet_pref_load_async(void)
@@ -766,7 +766,7 @@ namespace winrt::GraphPaper::implementation
 		co_return hr;
 	}
 
-	// 用紙メニューの「設定を保存」が選択された
+	// 用紙メニューの「用紙設定を保存」が選択された
 	// ローカルフォルダーにファイルを作成し, 設定データを保存する.
 	// s_file	ストレージファイル
 	IAsyncAction MainPage::sheet_pref_save_click_async(IInspectable const&, RoutedEventArgs const&)
