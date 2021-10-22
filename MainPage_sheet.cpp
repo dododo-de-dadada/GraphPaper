@@ -30,6 +30,8 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr wchar_t DLG_TITLE[] = L"str_sheet";	// 用紙の表題
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
+	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI";	// 書体名の規定値 (書体の規定値に書体名が無かった場合)
+	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 書体の規定値
 
 	// 長さををピクセル単位の値に変換する.
 	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept;
@@ -254,13 +256,13 @@ namespace winrt::GraphPaper::implementation
 		{
 			// リソースの取得に失敗した場合に備えて,
 			// 固定の既定値を書体属性に格納する.
-			m_main_sheet.set_font_family(wchar_cpy(L"Segoe UI"));
+			m_main_sheet.set_font_family(wchar_cpy(FONT_FAMILY_DEFVAL));
 			m_main_sheet.set_font_size(FONT_SIZE_DEFVAL);
 			m_main_sheet.set_font_stretch(DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL);
 			m_main_sheet.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
 			m_main_sheet.set_font_weight(DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL);
 			// BodyTextBlockStyle をリソースディクショナリから得る.
-			auto resource = Resources().TryLookup(box_value(L"BodyTextBlockStyle"));
+			auto resource = Resources().TryLookup(box_value(FONT_STYLE_DEFVAL));
 			if (resource != nullptr) {
 				auto style = resource.try_as<winrt::Windows::UI::Xaml::Style>();
 				std::list<winrt::Windows::UI::Xaml::Style> stack;
@@ -576,37 +578,12 @@ namespace winrt::GraphPaper::implementation
 
 		winrt::hstring text;
 		if constexpr (U == UNDO_OP::SHEET_COLOR) {
-			if constexpr (S == 0) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_r") + L": " + buf;
-			}
-			if constexpr (S == 1) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " + buf;
-			}
-			if constexpr (S == 2) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " + buf;
-			}
+			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
+			wchar_t buf[32];
+			conv_col_to_str(m_color_code, value, buf);
+			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
-		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(text));
-		}
-		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(text));
-		}
-		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(text));
-		}
-		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(text));
-		}
+		sample_slider_set_header<S>(text);
 	}
 
 	// スライダーの値が変更された.

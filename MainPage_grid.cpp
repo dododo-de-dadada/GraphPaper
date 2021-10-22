@@ -207,43 +207,12 @@ namespace winrt::GraphPaper::implementation
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_COLOR) {
-			if constexpr (S == 0) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_r") + L": " + buf;
-			}
-			if constexpr (S == 1) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " + buf;
-			}
-			if constexpr (S == 2) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " + buf;
-			}
-			if constexpr (S == 3) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
-			}
+			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
+			wchar_t buf[32];
+			conv_col_to_str(m_color_code, value, buf);
+			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
-		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(text));
-		}
-		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(text));
-		}
-		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(text));
-		}
-		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(text));
-		}
+		sample_slider_set_header<S>(text);
 	}
 
 	// スライダーの値が変更された.

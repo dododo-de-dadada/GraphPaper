@@ -256,6 +256,7 @@ namespace winrt::GraphPaper::implementation
 		float m_vert_stick = VERT_STICK_DEF_VAL;	// 頂点をくっつける閾値
 		STATUS_BAR m_status_bar = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
 
+
 		// スレッド
 		bool m_thread_activated = false;	// アクティベートされた初回を判定
 		bool m_thread_win_visible = false;	// ウィンドウが表示されてるか判定
@@ -334,11 +335,9 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「つなぎの形式」が選択された.
 		void join_style_click(IInspectable const& sender, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> 
-		void join_slider_set_header(const float value);
+		template <UNDO_OP U, int S> void join_slider_set_header(const float value);
 		// スライダーの値が変更された.
-		template <UNDO_OP U, int S> 
-		void join_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const& args);
+		template <UNDO_OP U, int S> void join_slider_value_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_arrange.cpp
@@ -346,8 +345,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 選択された図形を次または前の図形と入れ替える.
-		template<typename T> 
-		void arrange_order(void);
+		template<typename T> void arrange_order(void);
 		// 編集メニューの「前面に移動」が選択された.
 		void arrange_bring_forward_click(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 編集メニューの「最前面に移動」が選択された.
@@ -684,6 +682,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::Windows::Foundation::IAsyncAction sample_image_load_async(const float samp_w, const float samp_h);
 		void sample_panel_loaded(IInspectable const& sender, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		void sample_panel_scale_changed(IInspectable const&, IInspectable const&);
+		template<int S> void sample_slider_set_header(const winrt::hstring& text);
 
 		//-------------------------------
 		// MainPage_scroll.cpp

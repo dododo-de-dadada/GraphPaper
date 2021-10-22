@@ -264,18 +264,7 @@ namespace winrt::GraphPaper::implementation
 				text = r_loader.GetString(HEADER) + L": " + r_loader.GetString(L"str_def_val");
 			}
 		}
-		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(text));
-		}
-		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(text));
-		}
-		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(text));
-		}
-		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(text));
-		}
+		sample_slider_set_header<S>(text);
 	}
 
 	// スライダーの値が変更された.

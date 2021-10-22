@@ -25,6 +25,27 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
+	template<int S> void MainPage::sample_slider_set_header(const winrt::hstring& text)
+	{
+		if constexpr (S == 0) {
+			sample_slider_0().Header(box_value(text));
+		}
+		if constexpr (S == 1) {
+			sample_slider_1().Header(box_value(text));
+		}
+		if constexpr (S == 2) {
+			sample_slider_2().Header(box_value(text));
+		}
+		if constexpr (S == 3) {
+			sample_slider_3().Header(box_value(text));
+		}
+	}
+	template void MainPage::sample_slider_set_header<0>(const winrt::hstring& text);
+	template void MainPage::sample_slider_set_header<1>(const winrt::hstring& text);
+	template void MainPage::sample_slider_set_header<2>(const winrt::hstring& text);
+	template void MainPage::sample_slider_set_header<3>(const winrt::hstring& text);
+
+
 	// Œ©–{‚ð•\Ž¦‚·‚é
 	void MainPage::sample_draw(void)
 	{
