@@ -386,7 +386,7 @@ namespace winrt::GraphPaper::implementation
 			*/
 		}
 
-		if (co_await pref_load_async() != S_OK) {
+		if (co_await sheet_pref_load_async() != S_OK) {
 			// 読み込みに失敗した場合,
 			sheet_init();
 			m_len_unit = LEN_UNIT::PIXEL;

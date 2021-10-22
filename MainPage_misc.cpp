@@ -25,13 +25,8 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().CloseButtonText(L"OK");
 		cd_sample_dialog().Title(box_value(L"GraphPaper"));
 
-		//m_sample_type = SAMPLE_TYPE::MISC;
-		//m_sample_type = SAMPLE_TYPE::MISC;
-		//m_sample_d2d.SetSwapChainPanel(scp_sample_panel());
 		const auto samp_w = scp_sample_panel().Width();
 		const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
 		constexpr uint32_t misc_min = 3;
 		constexpr uint32_t misc_max = 12;
 		static uint32_t misc_cnt = misc_min;
@@ -78,7 +73,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// その他メニューの「色の表記」に印をつける.
-	void MainPage::misc_color_is_checked(const COLOR_CODE value)
+	void MainPage::color_code_is_checked(const COLOR_CODE value)
 	{
 		rmfi_color_code_dec().IsChecked(value == COLOR_CODE::DEC);
 		rmfi_color_code_dec_2().IsChecked(value == COLOR_CODE::DEC);
@@ -116,10 +111,10 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		m_len_unit = l_unit;
-		status_set_curs();
-		status_set_grid();
-		status_set_sheet();
-		status_set_unit();
+		status_bar_set_pos();
+		status_bar_set_grid();
+		status_bar_set_sheet();
+		status_bar_set_unit();
 	}
 
 	// その他メニューの「長さの単位」に印をつける.

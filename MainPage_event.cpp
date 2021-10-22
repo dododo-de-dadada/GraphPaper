@@ -193,9 +193,9 @@ namespace winrt::GraphPaper::implementation
 			Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 		}
 		else {
-			event_get_position(args);
-			event_set_cursor();
-			status_set_curs();
+			event_set_pos_cur(args);
+			event_set_curs_style();
+			status_bar_set_pos();
 		}
 	}
 
@@ -264,10 +264,10 @@ namespace winrt::GraphPaper::implementation
 	// 文字列図形の作成を終了する.
 	IAsyncAction MainPage::event_finish_creating_text_async(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec)
 	{
-		tx_edit().Text(L"");
-		ck_edit_text_frame().IsChecked(m_edit_text_frame);
+		tx_edit_text().Text(L"");
+		ck_text_fit_frame_to().IsChecked(m_edit_text_frame);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
-			auto text = wchar_cpy(tx_edit().Text().c_str());
+			auto text = wchar_cpy(tx_edit_text().Text().c_str());
 			auto s = new ShapeText(b_pos, b_vec, text, &m_main_sheet);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
@@ -275,7 +275,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_edit_text_frame) {
 				s->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			}
-			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
+			m_edit_text_frame = ck_text_fit_frame_to().IsChecked().GetBoolean();
 			event_reduce_slist(m_main_sheet.m_shape_list, m_ustack_undo, m_ustack_redo);
 			//unselect_all();
 			ustack_push_append(s);
@@ -333,6 +333,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_null();
 			sheet_update_bbox();
 			sheet_panle_size();
+			xcvd_is_enabled();
 		}
 	}
 
@@ -426,16 +427,6 @@ namespace winrt::GraphPaper::implementation
 		Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 	}
 
-	// ポインターの現在位置を得る.
-	void MainPage::event_get_position(PointerRoutedEventArgs const& args)
-	{
-		// スワップチェーンパネル上でのポインターの位置を得て, 
-		// 用紙座標系に変換し, ポインターの現在位置に格納する.
-		D2D1_POINT_2F sheet_pos;
-		pt_add(m_main_min, sb_horz().Value(), sb_vert().Value(), sheet_pos);
-		pt_mul_add(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_main_sheet.m_sheet_scale, sheet_pos, m_event_pos_curr);
-	}
-
 	// ポインターが動いた.
 	void MainPage::event_moved(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
@@ -444,11 +435,11 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		event_get_position(args);
-		status_set_curs();
+		event_set_pos_cur(args);
+		status_bar_set_pos();
 		// ポインターの押された状態が, 初期状態か判定する.
 		if (m_event_state == EVENT_STATE::BEGIN) {
-			event_set_cursor();
+			event_set_curs_style();
 		}
 		// 状態が. クリックした状態か判定する.
 		else if (m_event_state == EVENT_STATE::CLICK) {
@@ -459,7 +450,7 @@ namespace winrt::GraphPaper::implementation
 			if (pt_abs2(vec) > m_event_click_dist) {
 				// 初期状態に戻る.
 				m_event_state = EVENT_STATE::BEGIN;
-				event_set_cursor();
+				event_set_curs_style();
 			}
 		}
 		// 状態が, 範囲を選択している状態か判定する.
@@ -469,9 +460,9 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 図形を移動している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_MOVE) {
 			// ポインターの現在位置と前回位置の差分を得る.
-			D2D1_POINT_2F d_vec;
-			pt_sub(m_event_pos_curr, m_event_pos_prev, d_vec);
-			slist_move(m_main_sheet.m_shape_list, d_vec);
+			D2D1_POINT_2F vec;
+			pt_sub(m_event_pos_curr, m_event_pos_prev, vec);
+			slist_move(m_main_sheet.m_shape_list, vec);
 			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
 			sheet_draw();
@@ -489,7 +480,7 @@ namespace winrt::GraphPaper::implementation
 			// ポインターの現在位置と押された位置との差分を得る.
 			D2D1_POINT_2F vec;
 			pt_sub(m_event_pos_curr, m_event_pos_pressed, vec);
-			// 差分の長さがクリックの判定距離を超えるか判定する.
+			// 差分がクリックの判定距離を超えるか判定する.
 			if (pt_abs2(vec) > m_event_click_dist) {
 				// 作図ツールが選択ツール以外か判定する.
 				if (m_drawing_tool != DRAWING_TOOL::SELECT) {
@@ -499,8 +490,8 @@ namespace winrt::GraphPaper::implementation
 				// 押された図形がヌルか判定する.
 				else if (m_event_shape_pressed == nullptr) {
 					// 範囲を選択している状態に遷移する.
-					m_event_state = EVENT_STATE::PRESS_AREA;
 					// 十字カーソルをカーソルに設定する.
+					m_event_state = EVENT_STATE::PRESS_AREA;
 					Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 				}
 				// 選択された図形の数が 1 を超える,
@@ -509,15 +500,16 @@ namespace winrt::GraphPaper::implementation
 					m_event_anp_pressed == ANP_TYPE::ANP_STROKE ||
 					m_event_anp_pressed == ANP_TYPE::ANP_FILL ||
 					m_event_anp_pressed == ANP_TYPE::ANP_TEXT) {
-					// 状態を図形を移動している状態に遷移する.
+					// 図形を移動している状態に遷移する.
+					// ポインターの現在位置を前回位置に保存する.
 					m_event_state = EVENT_STATE::PRESS_MOVE;
-					// ポインターの現在位置を前回位置に格納する.
 					m_event_pos_prev = m_event_pos_curr;
 					ustack_push_move(vec);
 				}
 				// ポインターが押されたのが図形の外部以外か判定する.
 				else if (m_event_anp_pressed != ANP_TYPE::ANP_SHEET) {
 					// 図形を変形している状態に遷移する.
+					// ポインターの現在位置を前回位置に保存する.
 					m_event_state = EVENT_STATE::PRESS_FORM;
 					m_event_pos_prev = m_event_pos_curr;
 					ustack_push_position(m_event_shape_pressed, m_event_anp_pressed);
@@ -537,14 +529,15 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		auto const& swap_chain_panel = sender.as<SwapChainPanel>();
 		// ポインターのキャプチャを始める.
-		swap_chain_panel.CapturePointer(args.Pointer());
+		// 引数の値をポンインターの現在位置に格納する.
 		// ポインターのイベント発生時間を得る.
-		auto t_stamp = args.GetCurrentPoint(swap_chain_panel).Timestamp();
-		event_get_position(args);
 		// ポインターのプロパティーを得る.
-		auto const& p_prop = args.GetCurrentPoint(swap_chain_panel).Properties();
+		const SwapChainPanel& swap_chain_panel = sender.as<SwapChainPanel>();
+		swap_chain_panel.CapturePointer(args.Pointer());
+		event_set_pos_cur(args);
+		const uint64_t t_stamp = args.GetCurrentPoint(swap_chain_panel).Timestamp();
+		const PointerPointProperties& p_prop = args.GetCurrentPoint(swap_chain_panel).Properties();
 		// ポインターのデバイスタイプを判定する.
 		switch (args.GetCurrentPoint(swap_chain_panel).PointerDevice().PointerDeviceType()) {
 		// デバイスタイプがマウスの場合
@@ -563,6 +556,7 @@ namespace winrt::GraphPaper::implementation
 				switch (m_event_state) {
 				// 状態がクリックした状態の場合
 				case EVENT_STATE::CLICK:
+					// イベント発生時刻と前回ポインターが押された時刻の差がクリック判定時間以下か判定する.
 					if (t_stamp - m_event_time_pressed <= m_event_click_time) {
 						m_event_state = EVENT_STATE::CLICK_LBTN;
 					}
@@ -586,27 +580,27 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_event_time_pressed = t_stamp;
 		m_event_pos_pressed = m_event_pos_curr;
-		// 作図ツールが選択ツール以外か判定する.
-		if (m_drawing_tool != DRAWING_TOOL::SELECT) {
-			return;
-		}
-		m_event_anp_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
-		// 押されたのが図形の外側以外か判定する.
-		if (m_event_anp_pressed != ANP_TYPE::ANP_SHEET) {
-			// 状態が左ボタンが押された状態, または, 右ボタンが押されていてかつ押された図形が選択されてないか判定する.
-			if (m_event_state == EVENT_STATE::PRESS_LBTN ||
-				(m_event_state == EVENT_STATE::PRESS_RBTN && !m_event_shape_pressed->is_selected())) {
-				select_shape(m_event_shape_pressed, args.KeyModifiers());
+		// 作図ツールが選択ツールか判定する.
+		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
+			m_event_anp_pressed = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
+			// 押されたのが図形の外側か判定する.
+			if (m_event_anp_pressed == ANP_TYPE::ANP_SHEET) {
+				m_event_shape_pressed = nullptr;
+				m_event_shape_prev = nullptr;
+				// 修飾キーが押されていないならば, すべての図形の選択を解除する.
+				// 解除された図形があるか判定する.
+				if (args.KeyModifiers() == VirtualKeyModifiers::None && unselect_all()) {
+					xcvd_is_enabled();
+					sheet_draw();
+				}
 			}
-			return;
-		}
-		m_event_anp_pressed = ANP_TYPE::ANP_SHEET;
-		m_event_shape_pressed = nullptr;
-		m_event_shape_prev = nullptr;
-		// 修飾キーが押されていないならば, すべての図形の選択を解除し, 解除された図形があるか判定する.
-		if (args.KeyModifiers() == VirtualKeyModifiers::None && unselect_all()) {
-			xcvd_is_enabled();
-			sheet_draw();
+			else {
+				// 状態が左ボタンが押された状態, または, 右ボタンが押されていてかつ押された図形が選択されてないか判定する.
+				if (m_event_state == EVENT_STATE::PRESS_LBTN ||
+					(m_event_state == EVENT_STATE::PRESS_RBTN && !m_event_shape_pressed->is_selected())) {
+					select_shape(m_event_shape_pressed, args.KeyModifiers());
+				}
+			}
 		}
 	}
 
@@ -725,7 +719,7 @@ namespace winrt::GraphPaper::implementation
 		// ポインターの追跡を停止する.
 		auto const& panel = sender.as<SwapChainPanel>();
 		panel.ReleasePointerCaptures();
-		event_get_position(args);
+		event_set_pos_cur(args);
 		// 状態が, 左ボタンが押された状態か判定する.
 		if (m_event_state == EVENT_STATE::PRESS_LBTN) {
 			// ボタンが離れた時刻と押された時刻の差が, クリックの判定時間以下か判定する.
@@ -733,7 +727,7 @@ namespace winrt::GraphPaper::implementation
 			if (t_stamp - m_event_time_pressed <= m_event_click_time) {
 				// クリックした状態に遷移する.
 				m_event_state = EVENT_STATE::CLICK;
-				event_set_cursor();
+				event_set_curs_style();
 				return;
 			}
 		}
@@ -815,8 +809,8 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	// 状況に応じた形状のカーソルを設定する.
-	void MainPage::event_set_cursor(void)
+	// ポインターの形状を設定する.
+	void MainPage::event_set_curs_style(void)
 	{
 		// 作図ツールが選択ツール以外か判定する.
 		if (m_drawing_tool != DRAWING_TOOL::SELECT) {
@@ -827,10 +821,10 @@ namespace winrt::GraphPaper::implementation
 			Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 		}
 		else {
-			// 描画の排他制御をロックできた場合.
+			// 描画の排他制御をロックできたなら, ただちに解除する.
+			m_d2d_mutex.unlock();
 			Shape* s;
 			const auto anp = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_curr, s);
-			m_d2d_mutex.unlock();
 			if (anp == ANP_TYPE::ANP_SHEET) {
 				Window::Current().CoreWindow().PointerCursor(CC_ARROW);
 			}
@@ -871,8 +865,7 @@ namespace winrt::GraphPaper::implementation
 					if (s != nullptr &&
 						(typeid(*s) == typeid(ShapeLineA) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
 						// 図形の部位が, 頂点の数を超えないか判定する.
-						const auto d_cnt = static_cast<ShapePath*>(s)->m_vec.size();
-						if (anp >= ANP_TYPE::ANP_P0 && anp < ANP_TYPE::ANP_P0 + d_cnt + 1) {
+						if (anp >= ANP_TYPE::ANP_P0 && anp < ANP_TYPE::ANP_P0 + static_cast<ShapePath*>(s)->m_vec.size() + 1) {
 							Window::Current().CoreWindow().PointerCursor(CC_CROSS);
 							break;
 						}
@@ -882,6 +875,15 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
+	}
+
+	// ポインターの現在位置に格納する.
+	void MainPage::event_set_pos_cur(PointerRoutedEventArgs const& args)
+	{
+		// スワップチェーンパネル上でのポインターの位置を用紙座標系に変換する.
+		D2D1_POINT_2F sheet_pos;
+		pt_add(m_main_min, sb_horz().Value(), sb_vert().Value(), sheet_pos);
+		pt_mul_add(args.GetCurrentPoint(scp_sheet_panel()).Position(), 1.0 / m_main_sheet.m_sheet_scale, sheet_pos, m_event_pos_curr);
 	}
 
 	// コンテキストメニューを表示する.
@@ -958,7 +960,7 @@ namespace winrt::GraphPaper::implementation
 			const int32_t delta = args.GetCurrentPoint(scp_sheet_panel()).Properties().MouseWheelDelta();
 			if (event_scroll_by_wheel_delta(sb_horz(), delta, m_main_sheet.m_sheet_scale)) {
 				sheet_draw();
-				status_set_curs();
+				status_bar_set_pos();
 			}
 		}
 		// 何も押されてないか判定する.
@@ -967,7 +969,7 @@ namespace winrt::GraphPaper::implementation
 			const int32_t delta = args.GetCurrentPoint(scp_sheet_panel()).Properties().MouseWheelDelta();
 			if (event_scroll_by_wheel_delta(sb_vert(), delta, m_main_sheet.m_sheet_scale)) {
 				sheet_draw();
-				status_set_curs();
+				status_bar_set_pos();
 			}
 		}
 	}

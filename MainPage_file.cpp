@@ -214,7 +214,7 @@ namespace winrt::GraphPaper::implementation
 
 		drawing_tool_is_checked(m_drawing_tool);
 		drawing_poly_opt_is_checked(m_drawing_poly_opt);
-		misc_color_is_checked(m_color_code);
+		color_code_is_checked(m_color_code);
 		status_bar_is_checked(m_status_bar);
 		len_unit_is_checked(m_len_unit);
 		image_keep_aspect_is_checked(m_image_keep_aspect);
@@ -245,13 +245,12 @@ namespace winrt::GraphPaper::implementation
 		sheet_update_bbox();
 		sheet_panle_size();
 		sheet_draw();
-		status_set_curs();
-		status_set_draw();
-		status_set_grid();
-		status_set_sheet();
-		status_set_zoom();
-		status_set_unit();
-		status_bar_visibility();
+		status_bar_set_pos();
+		status_bar_set_draw();
+		status_bar_set_grid();
+		status_bar_set_sheet();
+		status_bar_set_zoom();
+		status_bar_set_unit();
 	}
 
 	// ファイルメニューの「画像をインポートする...」が選択された.

@@ -11,9 +11,12 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Foundation::IAsyncOperation;
 	using winrt::Windows::Graphics::Display::DisplayInformation;
+	using winrt::Windows::Storage::ApplicationData;
+	using winrt::Windows::Storage::CreationCollisionOption;
+	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::UI::Color;
-	//using winrt::Windows::UI::Text::FontWeight;
 	using winrt::Windows::UI::Text::FontStretch;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
@@ -26,9 +29,12 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
 	constexpr wchar_t DLG_TITLE[] = L"str_sheet";	// 用紙の表題
+	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 
 	// 長さををピクセル単位の値に変換する.
 	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept;
+	// 設定データを保存するフォルダーを得る.
+	static auto pref_local_folder(void);
 
 	// 長さををピクセル単位の値に変換する.
 	// 変換された値は, 0.5 ピクセル単位に丸められる.
@@ -57,6 +63,12 @@ namespace winrt::GraphPaper::implementation
 			ret = value;
 		}
 		return std::round(2.0 * ret) * 0.5;
+	}
+
+	// 設定データを保存するフォルダーを得る.
+	static auto pref_local_folder(void)
+	{
+		return ApplicationData::Current().LocalFolder();
 	}
 
 	// チェックマークを図形の属性関連のメニュー項目につける.
@@ -217,7 +229,7 @@ namespace winrt::GraphPaper::implementation
 			// スワップチェーンの内容を画面に表示する.
 			m_main_d2d.Present();
 			// ポインターの位置をステータスバーに格納する.
-			status_set_curs();
+			status_bar_set_pos();
 		}
 #if defined(_DEBUG)
 		else {
@@ -481,10 +493,10 @@ namespace winrt::GraphPaper::implementation
 				sheet_update_bbox();
 				sheet_panle_size();
 				sheet_draw();
-				status_set_curs();
-				status_set_grid();
-				status_set_sheet();
-				status_set_unit();
+				status_bar_set_pos();
+				status_bar_set_grid();
+				status_bar_set_sheet();
+				status_bar_set_unit();
 			}
 		}
 		else if (d_result == ContentDialogResult::Secondary) {
@@ -530,7 +542,7 @@ namespace winrt::GraphPaper::implementation
 			sheet_update_bbox();
 			sheet_panle_size();
 			sheet_draw();
-			status_set_sheet();
+			status_bar_set_sheet();
 		}
 	}
 
@@ -682,7 +694,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.m_sheet_scale = scale;
 			sheet_panle_size();
 			sheet_draw();
-			status_set_zoom();
+			status_bar_set_zoom();
 		}
 	}
 
@@ -702,6 +714,76 @@ namespace winrt::GraphPaper::implementation
 		}
 		sheet_panle_size();
 		sheet_draw();
-		status_set_zoom();
+		status_bar_set_zoom();
 	}
+
+	// 用紙メニューの「用紙設定をリセット」が選択された.
+	// 設定データを保存したファイルがある場合, それを削除する.
+	IAsyncAction MainPage::sheet_pref_reset_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		using winrt::Windows::Storage::StorageDeleteOption;
+
+		auto item{ co_await pref_local_folder().TryGetItemAsync(FILE_NAME) };
+		if (item != nullptr) {
+			auto s_file = item.try_as<StorageFile>();
+			if (s_file != nullptr) {
+				try {
+					co_await s_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
+					mfi_sheet_pref_reset().IsEnabled(false);
+				}
+				catch (winrt::hresult_error const&) {
+				}
+				s_file = nullptr;
+			}
+			item = nullptr;
+		}
+		sheet_init();
+		sheet_draw();
+	}
+
+	// 保存された設定データを読み込む.
+	// 設定データを保存したファイルがある場合, それを読み込む.
+	// 戻り値	読み込めたら S_OK.
+	IAsyncOperation<winrt::hresult> MainPage::sheet_pref_load_async(void)
+	{
+		mfi_sheet_pref_reset().IsEnabled(false);
+		auto hr = E_FAIL;
+		auto item{ co_await pref_local_folder().TryGetItemAsync(FILE_NAME) };
+		if (item != nullptr) {
+			auto s_file = item.try_as<StorageFile>();
+			if (s_file != nullptr) {
+				try {
+					hr = co_await file_read_async<false, true>(s_file);
+				}
+				catch (winrt::hresult_error const& e) {
+					hr = e.code();
+				}
+				s_file = nullptr;
+				mfi_sheet_pref_reset().IsEnabled(true);
+			}
+			item = nullptr;
+		}
+		co_return hr;
+	}
+
+	// 用紙メニューの「設定を保存」が選択された
+	// ローカルフォルダーにファイルを作成し, 設定データを保存する.
+	// s_file	ストレージファイル
+	IAsyncAction MainPage::sheet_pref_save_click_async(IInspectable const&, RoutedEventArgs const&)
+	{
+		try {
+			auto s_file{ co_await pref_local_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
+			if (s_file != nullptr) {
+				co_await file_write_gpf_async<false, true>(s_file);
+				s_file = nullptr;
+				mfi_sheet_pref_reset().IsEnabled(true);
+			}
+		}
+		catch (winrt::hresult_error const&) {
+		}
+		//using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
+		//auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
+		//mru_list.Clear();
+	}
+
 }

@@ -490,13 +490,13 @@ namespace winrt::GraphPaper::implementation
 		static winrt::event_token primary_token;
 		static winrt::event_token closed_token;
 
-		tx_edit().Text(s->m_text == nullptr ? L"" : s->m_text);
-		tx_edit().SelectAll();
-		ck_edit_text_frame().IsChecked(m_edit_text_frame);
+		tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
+		tx_edit_text().SelectAll();
+		ck_text_fit_frame_to().IsChecked(m_edit_text_frame);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
-			auto text = wchar_cpy(tx_edit().Text().c_str());
+			auto text = wchar_cpy(tx_edit_text().Text().c_str());
 			ustack_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
-			m_edit_text_frame = ck_edit_text_frame().IsChecked().GetBoolean();
+			m_edit_text_frame = ck_text_fit_frame_to().IsChecked().GetBoolean();
 			if (m_edit_text_frame) {
 				ustack_push_position(s, ANP_TYPE::ANP_SE);
 				s->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);

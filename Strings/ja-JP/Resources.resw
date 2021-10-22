@@ -165,7 +165,7 @@
     <value>用紙の大きさ</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_edit_text_frame.Content" xml:space="preserve">
+  <data name="ck_text_fit_frame_to.Content" xml:space="preserve">
     <value>枠の大きさを文字列に合わせる</value>
     <comment>CheckBox</comment>
   </data>
@@ -870,7 +870,7 @@
     <value>方眼に合わせる</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_status_bar_curs.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_pos.Text" xml:space="preserve">
     <value>カーソルの位置</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -942,12 +942,12 @@
     <value>図形として貼り付け</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="mfi_pref_delete.Text" xml:space="preserve">
-    <value>設定を削除</value>
+  <data name="mfi_sheet_pref_reset.Text" xml:space="preserve">
+    <value>用紙設定をリセット</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_pref_save.Text" xml:space="preserve">
-    <value>設定を保存</value>
+  <data name="mfi_sheet_pref_save.Text" xml:space="preserve">
+    <value>用紙設定を保存</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_emph.Text" xml:space="preserve">
@@ -975,7 +975,7 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfi_text_fit_frame_to.Text" xml:space="preserve">
-    <value>枠を文字列に合わせる</value>
+    <value>枠の大きさを文字列に合わせる</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_deca.Text" xml:space="preserve">
@@ -1059,7 +1059,7 @@
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfs_join_style.Text" xml:space="preserve">
-    <value>つなぎの種類</value>
+    <value>線分のつなぎの種類</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_stick_to_vertex.Text" xml:space="preserve">

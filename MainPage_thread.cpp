@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 		if (sender == CoreWindow::GetForCurrentThread()) {
 			m_thread_win_visible = args.Visible();
 			if (m_thread_win_visible) {
-				event_set_cursor();
+				event_set_curs_style();
 				sheet_draw();
 			}
 		}

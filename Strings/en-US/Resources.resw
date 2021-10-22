@@ -165,7 +165,7 @@
     <value>Sheet Size</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_edit_text_frame.Content" xml:space="preserve">
+  <data name="ck_text_fit_frame_to.Content" xml:space="preserve">
     <value>Fit Frame Size to Text</value>
     <comment>CheckBox</comment>
   </data>
@@ -878,7 +878,7 @@
     <value>Snap to Grid</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="tmfi_status_bar_curs.Text" xml:space="preserve">
+  <data name="tmfi_status_bar_pos.Text" xml:space="preserve">
     <value>Cursor Position</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
@@ -950,12 +950,12 @@
     <value>Paste as shape</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="mfi_pref_delete.Text" xml:space="preserve">
-    <value>Delete preference</value>
+  <data name="mfi_sheet_pref_reset.Text" xml:space="preserve">
+    <value>Reset Sheet Preference</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_pref_save.Text" xml:space="preserve">
-    <value>Save preference</value>
+  <data name="mfi_sheet_pref_save.Text" xml:space="preserve">
+    <value>Save Sheet Preference</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_grid_emph.Text" xml:space="preserve">
@@ -979,7 +979,7 @@
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_text_fit_frame_to.Text" xml:space="preserve">
-    <value>Fit Frame to Text</value>
+    <value>Fit Frame Size to Text</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_deca.Text" xml:space="preserve">
@@ -1063,7 +1063,7 @@
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfs_join_style.Text" xml:space="preserve">
-    <value>Join Style</value>
+    <value>Line Join Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_stick_to_vertex.Text" xml:space="preserve">
