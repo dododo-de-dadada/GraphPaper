@@ -56,16 +56,12 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::fill_slider_value_changed<UNDO_OP::FILL_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::fill_slider_value_changed<UNDO_OP::FILL_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::fill_slider_value_changed<UNDO_OP::FILL_COLOR, 3> });
-		//m_sample_type = SAMPLE_TYPE::FILL;
-		//m_sample_type = SAMPLE_TYPE::FILL;
-		//m_sample_d2d.SetSwapChainPanel(scp_sample_panel());
-		const auto samp_w = scp_sample_panel().Width();
-		const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
-		const auto padd = samp_w * 0.125;
+
+		const auto panel_w = scp_sample_panel().Width();
+		const auto panel_h = scp_sample_panel().Height();
+		const auto padd = panel_w * 0.125;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
+		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(panel_w - 2.0 * padd), static_cast<FLOAT>(panel_h - 2.0 * padd) };
 		//m_sample_shape = new ShapeRect(b_pos, b_vec, &m_sample_sheet);
 		m_sample_sheet.m_shape_list.push_back(new ShapeRect(b_pos, b_vec, &m_sample_sheet));
 #if defined(_DEBUG)
@@ -111,7 +107,7 @@ namespace winrt::GraphPaper::implementation
 			conv_col_to_str(m_color_code, value, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
-		sample_slider_set_header<S>(text);
+		sample_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.

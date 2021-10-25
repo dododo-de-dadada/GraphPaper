@@ -16,11 +16,18 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
-	static void stroke_create_sample(const float samp_w, const float samp_h, ShapeSheet& sample_sheet)
+	// 見本の図形を作成する.
+	static void stroke_create_sample_shape(const float panel_w, const float panel_h, ShapeSheet& sample_sheet);
+
+	// 見本の図形を作成する.
+	// panel_w	見本を表示するパネルの幅
+	// panel_h	見本を表示するパネルの高さ
+	// sample_sheet	見本を表示するシート
+	static void stroke_create_sample_shape(const float panel_w, const float panel_h, ShapeSheet& sample_sheet)
 	{
-		const auto padd = samp_w * 0.125;
+		const auto padd = panel_w * 0.125;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
+		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(panel_w - 2.0 * padd), static_cast<FLOAT>(panel_h - 2.0 * padd) };
 		sample_sheet.m_shape_list.push_back(new ShapeLineA(b_pos, b_vec, &sample_sheet));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
@@ -72,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 3> });
 
-		stroke_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
+		stroke_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_stroke_color")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -123,7 +130,7 @@ namespace winrt::GraphPaper::implementation
 			conv_col_to_str(m_color_code, value, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
 		}
-		sample_slider_set_header<S>(text);
+		sample_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.
@@ -192,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_WIDTH, 0> });
 
-		stroke_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
+		stroke_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();

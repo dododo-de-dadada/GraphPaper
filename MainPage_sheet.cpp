@@ -30,8 +30,8 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr wchar_t DLG_TITLE[] = L"str_sheet";	// 用紙の表題
 	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
-	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI";	// 書体名の規定値 (書体の規定値に書体名が無かった場合)
-	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 書体の規定値
+	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI";	// 書体名の規定値 (システムリソースに値が無かった場合)
+	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 
 	// 長さををピクセル単位の値に変換する.
 	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept;
@@ -254,8 +254,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 書体の属性を初期化する.
 		{
-			// リソースの取得に失敗した場合に備えて,
-			// 固定の既定値を書体属性に格納する.
+			// リソースの取得に失敗した場合に備えて, 静的な既定値を書体属性に格納する.
 			m_main_sheet.set_font_family(wchar_cpy(FONT_FAMILY_DEFVAL));
 			m_main_sheet.set_font_size(FONT_SIZE_DEFVAL);
 			m_main_sheet.set_font_stretch(DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL);
@@ -338,7 +337,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		{
-			const auto accent_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
+			const IInspectable& accent_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
 			D2D1_COLOR_F grid_color;
 			if (accent_color != nullptr) {
 				const auto uwp_color = unbox_value<Color>(accent_color);
@@ -383,12 +382,11 @@ namespace winrt::GraphPaper::implementation
 		auto a_type = a_prop.Type();
 	}
 
-	void MainPage::sheet_panel_loading(IInspectable const& sender, winrt::Windows::Foundation::IInspectable const&)
+	// 用紙のスワップチェーンパネルがロードされた.
+	void MainPage::sheet_panel_loading(IInspectable const&, winrt::Windows::Foundation::IInspectable const&)
 	{
 		auto xaml_root = scp_sheet_panel().XamlRoot();
 		xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed });
-
-		//m_main_d2d.SetSwapChainPanel(scp_sheet_panel());
 	}
 
 	// 用紙のスワップチェーンパネルがロードされた.
@@ -403,7 +401,7 @@ namespace winrt::GraphPaper::implementation
 		//xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed });
 
 		m_main_d2d.SetSwapChainPanel(scp_sheet_panel());
-		//sheet_draw();
+		sheet_draw();
 	}
 
 	// 用紙のスワップチェーンパネルの寸法が変わった.
@@ -583,7 +581,7 @@ namespace winrt::GraphPaper::implementation
 			conv_col_to_str(m_color_code, value, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
-		sample_slider_set_header<S>(text);
+		sample_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.

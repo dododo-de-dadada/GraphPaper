@@ -147,7 +147,8 @@ namespace winrt::GraphPaper::implementation
 	// 長さを文字列に変換する.
 	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
-	// B
+	// 長さを文字列に変換する.
+	// B	単位名を付加するか判定する.
 	// len_unit	長さの単位
 	// val_pixel	ピクセル単位の長さ
 	// dpi	DPI
@@ -240,8 +241,6 @@ namespace winrt::GraphPaper::implementation
 		// 見本用紙
 		D2D_UI m_sample_d2d;	// 見本の描画環境
 		ShapeSheet m_sample_sheet;	// 見本の用紙
-		//Shape* m_sample_shape = nullptr;	// 見本の図形
-		//SAMPLE_TYPE m_sample_type = SAMPLE_TYPE::NONE;	// 見本の型
 
 		// 元に戻す・やり直し操作
 		uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数
@@ -670,19 +669,19 @@ namespace winrt::GraphPaper::implementation
 
 		//D2D_UI& sample_dx(void) { return m_sample_d2d; }
 		// 見本ダイアログが開かれた.
-		void sample_opened(winrt::Windows::UI::Xaml::Controls::ContentDialog const& sender, winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs const& args);
+		void sample_dialog_opened(winrt::Windows::UI::Xaml::Controls::ContentDialog const& sender, winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs const& args);
 		// 見本ダイアログが開かれた.
-		void sample_closed(winrt::Windows::UI::Xaml::Controls::ContentDialog const& sender, winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs const& args);
+		void sample_dialog_closed(winrt::Windows::UI::Xaml::Controls::ContentDialog const& sender, winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs const& args);
 		// 見本を表示する]
 		void sample_draw(void);
 		// 見本のスワップチェーンパネルの大きさが変わった.
 		void sample_panel_size_changed(IInspectable const&, winrt::Windows::UI::Xaml::SizeChangedEventArgs const&);
 		//　リストビュー「見本リスト」がロードされた.
-		void sample_list_loaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
+		void sample_list_view_loaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		winrt::Windows::Foundation::IAsyncAction sample_image_load_async(const float samp_w, const float samp_h);
 		void sample_panel_loaded(IInspectable const& sender, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		void sample_panel_scale_changed(IInspectable const&, IInspectable const&);
-		template<int S> void sample_slider_set_header(const winrt::hstring& text);
+		template<int S> void sample_set_slider_header(const winrt::hstring& text);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -925,10 +924,6 @@ namespace winrt::GraphPaper::implementation
 		void drawing_poly_vtx_is_checked(const uint32_t value);
 		// 作図メニューの多角形の選択肢にチェックをつける.
 		void drawing_poly_opt_is_checked(const POLY_OPTION& value);
-		// 作図ツールの状態を読み込む.
-		//void tool_read(DataReader const& dt_reader);
-		// 作図ツールの状態を書き込む.
-		//void tool_write(DataWriter const& dt_writer);
 
 		//-----------------------------
 		// MainPage_ustack.cpp

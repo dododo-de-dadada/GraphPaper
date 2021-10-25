@@ -181,7 +181,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr float COLOR_MAX = 255.0f;	// 色成分の最大値
 	constexpr double PT_PER_INCH = 72.0;	// 1 インチあたりのポイント数
 	constexpr double MM_PER_INCH = 25.4;	// 1 インチあたりのミリメートル数
-	constexpr float FONT_SIZE_DEFVAL = static_cast<float>(12.0 * 96.0 / 72.0);	// 書体の大きさの既定値
+	constexpr float FONT_SIZE_DEFVAL = static_cast<float>(12.0 * 96.0 / 72.0);	// 書体の大きさの既定値 (システムリソースに値が無かった場合)
 	constexpr D2D1_COLOR_F GRID_COLOR_DEFVAL{ ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 0.5f };	// 方眼の色の既定値
 	constexpr float GRID_LEN_DEFVAL = 48.0f;	// 方眼の長さの既定値
 	constexpr float MITER_LIMIT_DEFVAL = 10.0f;	// マイター制限比率の既定値
@@ -716,12 +716,12 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_fill_color{ COLOR_WHITE };	// 塗りつぶしの色
 
 		// 書体
-		D2D1_COLOR_F m_font_color{ COLOR_BLACK };	// 書体の色 (MainPage のコンストラクタで設定)
-		wchar_t* m_font_family = nullptr;	// 書体名
-		float m_font_size = FONT_SIZE_DEFVAL;	// 書体の大きさ
-		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮
-		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
-		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
+		D2D1_COLOR_F m_font_color{ COLOR_BLACK };	// 書体の色
+		wchar_t* m_font_family = nullptr;	// 書体名 (システムリソースに値が無かった場合)
+		float m_font_size = FONT_SIZE_DEFVAL;	// 書体の大きさ (システムリソースに値が無かった場合)
+		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮 (システムリソースに値が無かった場合)
+		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体 (システムリソースに値が無かった場合)
+		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ (システムリソースに値が無かった場合)
 
 		// 線枠
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
@@ -730,7 +730,7 @@ namespace winrt::GraphPaper::implementation
 		float m_join_limit = MITER_LIMIT_DEFVAL;	// 線のつなぎのマイター制限
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線枠のつなぎ
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
-		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線枠の色 (MainPage のコンストラクタで設定)
+		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線枠の色
 		float m_stroke_width = 1.0;	// 線枠の太さ
 
 		// 文字列
@@ -747,12 +747,12 @@ namespace winrt::GraphPaper::implementation
 		float m_grid_base = GRID_LEN_DEFVAL - 1.0f;	// 方眼の基準の大きさ (を -1 した値)
 		D2D1_COLOR_F m_grid_color{ GRID_COLOR_DEFVAL };	// 方眼の色
 		GRID_EMPH m_grid_emph{ GRID_EMPH_0 };	// 方眼の強調
-		D2D1_POINT_2F m_grid_offset{ 0.0f, 0.0f };
+		D2D1_POINT_2F m_grid_offset{ 0.0f, 0.0f };	// 方眼のオフセット
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
 		bool m_grid_snap = true;	// 方眼に合わせる
 
 		// 用紙
-		D2D1_COLOR_F m_sheet_color{ COLOR_WHITE };	// 背景色 (MainPage のコンストラクタで設定)
+		D2D1_COLOR_F m_sheet_color{ COLOR_WHITE };	// 背景色
 		float m_sheet_scale = 1.0f;	// 拡大率
 		D2D1_SIZE_F	m_sheet_size{ 0.0f, 0.0f };	// 大きさ (MainPage のコンストラクタで設定)
 

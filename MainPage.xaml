@@ -999,7 +999,7 @@
 			</StackPanel>
 		</ContentDialog>
 		<!-- 属性入力ダイアログ -->
-		<ContentDialog x:Name="cd_sample_dialog" CloseButtonText="Close" Closed="sample_closed" DefaultButton="Close" Opened="sample_opened" PrimaryButtonText="Apply" >
+		<ContentDialog x:Name="cd_sample_dialog" CloseButtonText="Close" Closed="sample_dialog_closed" DefaultButton="Close" Opened="sample_dialog_opened" PrimaryButtonText="Apply" >
 			<RelativePanel>
 				<SwapChainPanel
 					x:Name="scp_sample_panel"

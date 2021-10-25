@@ -78,14 +78,19 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_WEIGHT_EXTRA_BLACK
 	};
 
-	static void font_create_sample(const float samp_w, const float samp_h, ShapeSheet& sample_sheet)
+	// 見本の図形を作成する.
+	static void font_create_sample_shape(const float panel_w, const float panel_h, ShapeSheet& sample_sheet);
+
+	// 見本の図形を作成する.
+	// panel_w	見本を表示するパネルの幅
+	// panel_h	見本を表示するパネルの高さ
+	// sample_sheet	見本を表示するシート
+	static void font_create_sample_shape(const float panel_w, const float panel_h, ShapeSheet& sample_sheet)
 	{
-		//sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
-		const auto padd_w = samp_w * 0.125;
-		const auto padd_h = samp_h * 0.25;
+		const auto padd_w = panel_w * 0.125;
+		const auto padd_h = panel_h * 0.25;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd_w), static_cast<FLOAT>(samp_w - 2.0 * padd_h) };
+		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(panel_w - 2.0 * padd_w), static_cast<FLOAT>(panel_w - 2.0 * padd_h) };
 		const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 		const wchar_t* text = nullptr;
 		if (pang.empty()) {
@@ -140,7 +145,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 1> });
 		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 2> });
 		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 3> });
-		font_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
+		font_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -187,7 +192,7 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_view_loaded });
 		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto)
 			{
@@ -199,7 +204,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_sample_list().Visibility(UI_VISIBLE);
-		font_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
+		font_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -336,7 +341,7 @@ namespace winrt::GraphPaper::implementation
 		font_slider_set_header<UNDO_OP::FONT_SIZE, 0>(f_size);
 		sample_slider_0().Visibility(UI_VISIBLE);
 		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_SIZE, 0> });
-		font_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
+		font_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -375,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_view_loaded });
 		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto args) {
 				uint32_t i = lv_sample_list().SelectedIndex();
@@ -386,7 +391,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_sample_list().Visibility(UI_VISIBLE);
-		font_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
+		font_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -470,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_loaded });
+		const auto loaded_token = lv_sample_list().Loaded({ this, &MainPage::sample_list_view_loaded });
 		const auto changed_token = lv_sample_list().SelectionChanged(
 			[this](auto, auto args) {
 				uint32_t i = lv_sample_list().SelectedIndex();
@@ -481,7 +486,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_sample_list().Visibility(UI_VISIBLE);
-		font_create_sample(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
+		font_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

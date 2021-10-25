@@ -79,16 +79,11 @@ namespace winrt::GraphPaper::implementation
 		const winrt::event_token slider_4_token{
 			sample_slider_4().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::STROKE_WIDTH, 4> })
 		};
-		//m_sample_type = SAMPLE_TYPE::STROKE;
-		//m_sample_type = SAMPLE_TYPE::STROKE;
-		//m_sample_d2d.SetSwapChainPanel(scp_sample_panel());
-		const auto samp_w = scp_sample_panel().Width();
-		const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
-		const auto padd = samp_w * 0.125;
+		const auto panel_w = scp_sample_panel().Width();
+		const auto panel_h = scp_sample_panel().Height();
+		const auto padd = panel_w * 0.125;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
+		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(panel_w - 2.0 * padd), static_cast<FLOAT>(panel_h - 2.0 * padd) };
 		m_sample_sheet.m_shape_list.push_back(new ShapeLineA(b_pos, b_vec, &m_sample_sheet));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
@@ -189,7 +184,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf };
-			sample_slider_set_header<S>(text);
+			sample_set_slider_header<S>(text);
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
 			wchar_t buf[32];

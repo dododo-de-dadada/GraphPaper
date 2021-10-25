@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 			conv_col_to_str(m_color_code, value, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(R) + L": " + buf;
 		}
-		sample_slider_set_header<S>(text);
+		sample_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.

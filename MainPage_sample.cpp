@@ -25,7 +25,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
-	template<int S> void MainPage::sample_slider_set_header(const winrt::hstring& text)
+	// 見本ダイアログのスライダーヘッダーに文字列を格納する.
+	template<int S> void MainPage::sample_set_slider_header(const winrt::hstring& text)
 	{
 		if constexpr (S == 0) {
 			sample_slider_0().Header(box_value(text));
@@ -40,10 +41,10 @@ namespace winrt::GraphPaper::implementation
 			sample_slider_3().Header(box_value(text));
 		}
 	}
-	template void MainPage::sample_slider_set_header<0>(const winrt::hstring& text);
-	template void MainPage::sample_slider_set_header<1>(const winrt::hstring& text);
-	template void MainPage::sample_slider_set_header<2>(const winrt::hstring& text);
-	template void MainPage::sample_slider_set_header<3>(const winrt::hstring& text);
+	template void MainPage::sample_set_slider_header<0>(const winrt::hstring& text);
+	template void MainPage::sample_set_slider_header<1>(const winrt::hstring& text);
+	template void MainPage::sample_set_slider_header<2>(const winrt::hstring& text);
+	template void MainPage::sample_set_slider_header<3>(const winrt::hstring& text);
 
 
 	// 見本を表示する
@@ -73,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//　見本リストビューがロードされた.
-	void MainPage::sample_list_loaded(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::sample_list_view_loaded(IInspectable const&, RoutedEventArgs const&)
 	{
 		const auto item = lv_sample_list().SelectedItem();
 		if (item != nullptr) {
@@ -82,12 +83,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 見本ダイアログが開かれた.
-	void MainPage::sample_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
+	void MainPage::sample_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
 	{
 	}
 
 	// 見本ダイアログが閉じられた.
-	void MainPage::sample_closed(ContentDialog const&, ContentDialogClosedEventArgs const&)
+	void MainPage::sample_dialog_closed(ContentDialog const&, ContentDialogClosedEventArgs const&)
 	{
 	}
 
@@ -122,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 用紙のスワップチェーンパネルがロードされた.
 #if defined(_DEBUG)
-	void MainPage::sample_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args)
+	void MainPage::sample_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (sender != scp_sample_panel()) {
 			return;
