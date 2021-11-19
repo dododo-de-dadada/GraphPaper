@@ -92,6 +92,13 @@ namespace winrt::GraphPaper::implementation
 	{
 	}
 
+	// 見本ダイアログが閉じられた.
+	void MainPage::sample_dialog_unloaded(IInspectable const&, RoutedEventArgs const&)
+	{
+	}
+
+
+
 	IAsyncAction MainPage::sample_image_load_async(const float panel_w, const float panel_h)
 	{
 		bool ok;

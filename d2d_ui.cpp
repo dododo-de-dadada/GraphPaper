@@ -4,7 +4,7 @@
 //------------------------------
 #include "pch.h"
 #include "d2d_ui.h"
-#ifdef WIN_UI3
+#if WIN_UI == 3
 #include <microsoft.ui.xaml.media.dxinterop.h>
 #else
 #include <windows.ui.xaml.media.dxinterop.h>
@@ -71,12 +71,12 @@ namespace ScreenRotation
 
 namespace winrt::GraphPaper::implementation
 {
+#if WIN_UI == 3
+	using winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel;
+#else
 	using winrt::Windows::Graphics::Display::DisplayOrientations;
 	using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::UI::Core::CoreDispatcherPriority;
-#ifdef WIN_UI3
-	using winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel;
-#else
 	using winrt::Windows::UI::Core::DispatchedHandler;
 	using winrt::Windows::UI::Xaml::Controls::SwapChainPanel;
 #endif
@@ -133,6 +133,8 @@ namespace winrt::GraphPaper::implementation
 		return dw_factory;
 	};
 
+#if WIN_UI == 3
+#else
 	static DXGI_MODE_ROTATION get_display_rotation(DisplayOrientations native, DisplayOrientations current)
 	{
 		// 表示デバイスの既定の方向と現在の方向をもとに, 表示デバイスの回転を決定する.
@@ -145,26 +147,22 @@ namespace winrt::GraphPaper::implementation
 		constexpr DisplayOrientations LF = DisplayOrientations::LandscapeFlipped;
 		constexpr DisplayOrientations PF = DisplayOrientations::PortraitFlipped;
 		// 既定がヨコ向きかつ現在がヨコ向き, または既定がタテ向きかつ現在がタテ向きか判定する.
-		if ((native == L && current == L)
-			|| (native == P && current == P)) {
+		if ((native == L && current == L) || (native == P && current == P)) {
 			// DXGI_MODE_ROTATION_IDENTITY. 
 			display_rotation = DXGI_MODE_ROTATION_IDENTITY;
 		}
 		// 既定がヨコ向きかつ現在がタテ向き, または既定がタテ向きかつ現在が反ヨコ向きか判定する.
-		else if ((native == L && current == P)
-			|| (native == P && current == LF)) {
+		else if ((native == L && current == P) || (native == P && current == LF)) {
 			// DXGI_MODE_ROTATION_ROTATE270.
 			display_rotation = DXGI_MODE_ROTATION_ROTATE270;
 		}
 		// 既定がヨコ向きかつ現在が反ヨコ向き, または既定がタテ向きかつ現在が反タテ向きか判定する.
-		else if ((native == L && current == LF)
-			|| (native == P && current == PF)) {
+		else if ((native == L && current == LF) || (native == P && current == PF)) {
 			// DXGI_MODE_ROTATION_ROTATE180.
 			display_rotation = DXGI_MODE_ROTATION_ROTATE180;
 		}
 		// 既定がヨコ向きかつ現在が反タテ向き, または既定がタテ向きかつ現在がヨコ向きか判定する.
-		else if ((native == L && current == PF)
-			|| (native == P && current == L)) {
+		else if ((native == L && current == PF) || (native == P && current == L)) {
 			// DXGI_MODE_ROTATION_ROTATE90.
 			display_rotation = DXGI_MODE_ROTATION_ROTATE90;
 		}
@@ -217,6 +215,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		winrt::check_hresult(dxgi_swap_chain->SetRotation(display_rotation));
 	}
+#endif
 
 	// ウィンドウサイズ依存のリソースを作成する.
 	// これらのリソースは、ウィンドウサイズが変更されるたびに再作成する必要がある.
@@ -272,6 +271,10 @@ namespace winrt::GraphPaper::implementation
 		// 規定値は, DXGI_MODE_ROTATION_UNSPECIFIED.
 		// メモ: DisplayOrientations 列挙型に他の値があっても、NativeOrientation として使用できるのは、
 		// Landscape または Portrait のどちらかのみ.
+#if WIN_UI == 3
+		FLOAT d3d_target_width = output_width;
+		FLOAT d3d_target_height = output_height;
+#else
 		FLOAT d3d_target_width;
 		FLOAT d3d_target_height;
 		const DXGI_MODE_ROTATION display_rotation = get_display_rotation(m_nativeOrientation, m_current_orientation);
@@ -287,7 +290,7 @@ namespace winrt::GraphPaper::implementation
 			d3d_target_width = output_width;
 			d3d_target_height = output_height;
 		}
-
+#endif
 		// DXGI スワップチェーンが初期化されているか判定する.
 		if (m_dxgi_swap_chain != nullptr) {
 			// DXGI スワップチェーンのバッファサイズを変更し, その結果を得る.
@@ -384,7 +387,7 @@ namespace winrt::GraphPaper::implementation
 
 			// スワップ チェーンと SwapChainPanel を関連付ける.
 			// UI の変更は、UI スレッドにディスパッチして戻す必要あり.
-#ifdef WIN_UI3
+#if WIN_UI == 3
 			const winrt::Microsoft::UI::Dispatching::DispatcherQueue queue = m_swap_chain_panel.DispatcherQueue();
 			queue.TryEnqueue(winrt::Microsoft::UI::Dispatching::DispatcherQueuePriority::High,
 				winrt::Microsoft::UI::Dispatching::DispatcherQueueHandler([=]()
@@ -405,7 +408,7 @@ namespace winrt::GraphPaper::implementation
 					winrt::check_hresult(scpNative->SetSwapChain(m_dxgi_swap_chain.get()));
 				})
 			};
-#endif // WIN_UI3
+#endif // WIN_UI
 			// DXGI が 1 度に複数のフレームをキュー処理していないことを確認します。これにより、遅延が減少し、
 			// アプリケーションが各 VSync の後でのみレンダリングすることが保証され、消費電力が最小限に抑えられます。
 			winrt::check_hresult(dxgi_device->SetMaximumFrameLatency(1));
@@ -415,10 +418,12 @@ namespace winrt::GraphPaper::implementation
 		// 2D および 3D マトリックス変換を生成します。
 		// 2D および 3D 変換の回転角度は異なります。これは座標空間の違いによります。
 		// さらに、丸めエラーを回避するために 3D マトリックスが明示的に指定されます。
+#if WIN_UI == 3
+#else
 		Matrix3x2F transform2D;
 		DirectX::XMFLOAT4X4 transform3D;
 		set_display_rotation(m_dxgi_swap_chain.get(), transform2D, transform3D, display_rotation, m_logical_width, m_logical_height);
-
+#endif
 		// スワップ チェーンに逆拡大率を設定します
 		DXGI_MATRIX_3X2_F inverse_scale{ 0 };
 		inverse_scale._11 = 1.0f / m_effectiveCompositionScaleX;
@@ -558,11 +563,11 @@ namespace winrt::GraphPaper::implementation
 		// パネルへの保持された参照に指定されたスワップチェーンパネルを保存する.
 		// パネルをもとに, 実際的な幅と高さ, 拡大率を得て, 
 		// それぞれ論理的な高さと幅, 合成倍率に格納する.
-#ifdef WIN_UI3
-		//FLOAT system_dpi_x;
-		//FLOAT system_dpi_y;
-		//m_d2d_context->GetDpi(&system_dpi_x, &system_dpi_y);
-		//m_logical_dpi = system_dpi_x;
+#if WIN_UI == 3
+		FLOAT system_dpi_x;
+		FLOAT system_dpi_y;
+		m_d2d_context->GetDpi(&system_dpi_x, &system_dpi_y);
+		m_logical_dpi = system_dpi_x;
 #else
 		const DisplayInformation& di = DisplayInformation::GetForCurrentView();
 		if (di != nullptr) {
@@ -586,8 +591,7 @@ namespace winrt::GraphPaper::implementation
 	// D3D デバイスを構成し, D3D と相互運用される D2D デバイスを作成する.
 	D2D_UI::D2D_UI(void)
 	{
-		D3D_FEATURE_LEVEL m_d3dFeatureLevel{ D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_1 };
-
+		D3D_FEATURE_LEVEL d3d_feature_level{ D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_9_1 };
 		// D3D11_CREATE_DEVICE_BGRA_SUPPORT を作成フラグに格納する.
 		// D2D との互換性を保持するために必要.
 		UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
@@ -619,7 +623,7 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		// D3D_FEATURE_LEVEL_9_1 以降を機能レベル配列に格納する.
-		constexpr D3D_FEATURE_LEVEL featureLevels[] = {
+		constexpr D3D_FEATURE_LEVEL feature_levels[] = {
 			// この配列では、順序が保存されることに注意する.
 			// アプリケーションの最低限必要な機能レベルをその説明で宣言すること.
 			// 特に記載がない限り、すべてのアプリケーションは 9.1 をサポートすることが想定される.
@@ -648,11 +652,11 @@ namespace winrt::GraphPaper::implementation
 				D3D_DRIVER_TYPE_HARDWARE,
 				0,
 				creationFlags,
-				featureLevels,
-				ARRAYSIZE(featureLevels),
+				feature_levels,
+				ARRAYSIZE(feature_levels),
 				D3D11_SDK_VERSION,
 				device.put(),
-				&m_d3dFeatureLevel,
+				&d3d_feature_level,
 				context.put()
 			);
 		if (SUCCEEDED(hr)) {
@@ -670,11 +674,11 @@ namespace winrt::GraphPaper::implementation
 					D3D_DRIVER_TYPE_WARP,
 					0,
 					creationFlags,
-					featureLevels,
-					ARRAYSIZE(featureLevels),
+					feature_levels,
+					ARRAYSIZE(feature_levels),
 					D3D11_SDK_VERSION,
 					device.put(),
-					&m_d3dFeatureLevel,
+					&d3d_feature_level,
 					context.put()
 				)
 			);
@@ -686,7 +690,7 @@ namespace winrt::GraphPaper::implementation
 		// D3D デバイスを DXGI デバイスに格納する.
 		winrt::com_ptr<IDXGIDevice3> dxgi_device{ nullptr };
 		winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
-		// DXGI デバイスをもとに D2D デバイスを作成する.
+		// DXGI デバイスから D2D デバイスを作成する.
 		winrt::com_ptr<ID2D1Device2> d2d_device{ nullptr };
 		winrt::check_hresult(m_d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put()));
 
@@ -711,12 +715,11 @@ namespace winrt::GraphPaper::implementation
 	// このメソッドは, アプリが停止/中断したときに呼び出される.
 	void D2D_UI::Trim()
 	{
-		if (m_d3d_device == nullptr) {
-			return;
+		if (m_d3d_device != nullptr) {
+			winrt::com_ptr<IDXGIDevice3> dxgi_device;
+			m_d3d_device.as(dxgi_device);
+			dxgi_device->Trim();
 		}
-		winrt::com_ptr<IDXGIDevice3> dxgi_device;
-		m_d3d_device.as(dxgi_device);
-		dxgi_device->Trim();
 	}
 
 	// 表示デバイスが有効になった.

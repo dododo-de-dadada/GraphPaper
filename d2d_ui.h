@@ -11,13 +11,14 @@
 // 追加されている.
 //
 #pragma once
-//#define WIN_UI3
+//#define WIN_UI	3
+#define WIN_UI	2
 #include <d3d11_3.h>
 #include <d2d1_3.h>
 #include <dwrite_3.h>
 #include <dxgi1_4.h>
 #include <winrt/Windows.Graphics.Display.h>
-#ifdef WIN_UI3
+#if WIN_UI == 3
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #else
 #include <winrt/Windows.UI.Xaml.Controls.h>
@@ -38,7 +39,7 @@ namespace winrt::GraphPaper::implementation
 
 		// D3D オブジェクト
 
-		winrt::com_ptr<ID3D11Device3> m_d3d_device{ nullptr };
+		winrt::com_ptr<ID3D11Device3> m_d3d_device{ nullptr };	
 		winrt::com_ptr<ID3D11DeviceContext3> m_d3d_context{ nullptr };
 
 		// DXGI スワップチェーン
@@ -49,12 +50,10 @@ namespace winrt::GraphPaper::implementation
 
 		static winrt::com_ptr<ID2D1Factory3> m_d2d_factory;
 		static winrt::com_ptr<IDWriteFactory3> m_dwrite_factory;
-		//winrt::com_ptr<ID2D1Device2> m_d2dDevice;
 		winrt::com_ptr<ID2D1DeviceContext2> m_d2d_context{ nullptr };
-		//winrt::com_ptr<ID2D1Bitmap1> d2d_target_bitmap;
 
 		// XAML コントロール
-#ifdef WIN_UI3
+#if WIN_UI == 3
 		winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel m_swap_chain_panel{};	// パネルへの保持された参照
 #else
 		winrt::Windows::UI::Xaml::Controls::SwapChainPanel m_swap_chain_panel{};	// パネルへの保持された参照
@@ -63,9 +62,12 @@ namespace winrt::GraphPaper::implementation
 
 		FLOAT m_logical_width = 0.0f;
 		FLOAT m_logical_height = 0.0f;
+#if WIN_UI == 3
+#else
 		winrt::Windows::Graphics::Display::DisplayOrientations m_nativeOrientation = winrt::Windows::Graphics::Display::DisplayOrientations::None;
 		winrt::Windows::Graphics::Display::DisplayOrientations m_current_orientation = winrt::Windows::Graphics::Display::DisplayOrientations::None;
-		float m_logical_dpi = -1.0f;
+#endif
+		float m_logical_dpi = 96.0f;
 		float m_composition_scale_x = 1.0f;
 		float m_composition_scale_y = 1.0f;
 		D3D_DRIVER_TYPE m_d3d_driver_type = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_NULL;
@@ -89,13 +91,9 @@ namespace winrt::GraphPaper::implementation
 		void Release(void)
 		{
 			Trim();
-			//m_state_block = nullptr;
 			m_solid_color_brush = nullptr;
 			m_range_brush = nullptr;
 			m_swap_chain_panel = nullptr;
-			//m_d2d_context = nullptr;
-			//m_d3d_context = nullptr;
-			//m_d3d_device = nullptr;
 		}
 
 		//------------------------------
@@ -114,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 		void RegisterDeviceNotify(IDeviceNotify* deviceNotify);
 		// 描画環境に XAML スワップチェーンパネルを設定する.
 		// このメソッドは, UI コントロールが作成 (または再作成) されたときに呼び出される.
-#ifdef WIN_UI3
+#if WIN_UI == 3
 		void SetSwapChainPanel(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& xamk_scp);
 #else
 		void SetSwapChainPanel(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& xamk_scp);

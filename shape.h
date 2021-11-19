@@ -1739,6 +1739,11 @@ namespace winrt::GraphPaper::implementation
 		return nullptr;
 	}
 
+	// 方形が位置を含むか判定する.
+	// t_pos	判定する位置
+	// r_min	方形の左上位置
+	// r_max	方形の右下位置
+	// 戻り値	含む場合 true
 	inline bool pt_in_rect2(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept
 	{
 		return r_min.x <= t_pos.x && t_pos.x <= r_max.x && r_min.y <= t_pos.y && t_pos.y <= r_max.y;
@@ -1747,7 +1752,7 @@ namespace winrt::GraphPaper::implementation
 	// 方形が位置を含むか判定する.
 	// t_pos	判定する位置
 	// r_min	方形のいずれかの頂点
-	// r_max	方形のもう一方の頂点
+	// r_max	r_min に対して対角にある頂点
 	// 戻り値	含む場合 true
 	inline bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept
 	{

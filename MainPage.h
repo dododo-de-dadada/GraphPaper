@@ -667,7 +667,7 @@ namespace winrt::GraphPaper::implementation
 		// 見本
 		//-------------------------------
 
-		//D2D_UI& sample_dx(void) { return m_sample_d2d; }
+		void sample_dialog_unloaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 見本ダイアログが開かれた.
 		void sample_dialog_opened(winrt::Windows::UI::Xaml::Controls::ContentDialog const& sender, winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs const& args);
 		// 見本ダイアログが開かれた.

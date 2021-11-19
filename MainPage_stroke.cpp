@@ -185,15 +185,16 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
+		FindName(L"cd_sample_dialog");
+
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_main_sheet);
 		float s_width;
 		m_sample_sheet.get_stroke_width(s_width);
-
 		sample_slider_0().Maximum(MAX_VALUE);
-		sample_slider_0().TickFrequency(TICK_FREQ);
-		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		sample_slider_0().StepFrequency(TICK_FREQ);
+		sample_slider_0().SnapsTo(SliderSnapsTo::StepValues);
 		sample_slider_0().Value(s_width);
 		stroke_slider_set_header<UNDO_OP::STROKE_WIDTH, 0>(s_width);
 		sample_slider_0().Visibility(UI_VISIBLE);
@@ -217,6 +218,10 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().ValueChanged(slider_0_token);
 		sample_slider_0().StepFrequency(1.0);
 		sample_slider_0().Maximum(255.0);
+
+		m_sample_d2d.Trim();
+		UnloadObject(cd_sample_dialog());
+
 		sheet_draw();
 	}
 

@@ -376,13 +376,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	void MainPage::sheet_xaml_root_changed(winrt::Windows::UI::Xaml::XamlRoot const&, winrt::Windows::UI::Xaml::XamlRootChangedEventArgs const& args)
+	void MainPage::sheet_xaml_root_changed(winrt::Windows::UI::Xaml::XamlRoot const&, winrt::Windows::UI::Xaml::XamlRootChangedEventArgs const& /*args*/)
 	{
-		auto a_prop = args.as<winrt::Windows::Foundation::IPropertyValue>();
-		auto a_type = a_prop.Type();
 	}
 
-	// 用紙のスワップチェーンパネルがロードされた.
+	// 用紙のスワップチェーンパネルがロード中.
 	void MainPage::sheet_panel_loading(IInspectable const&, winrt::Windows::Foundation::IInspectable const&)
 	{
 		auto xaml_root = scp_sheet_panel().XamlRoot();
