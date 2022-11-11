@@ -173,6 +173,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「書体名」が選択された.
 	IAsyncAction MainPage::font_family_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		//FindName(L"cd_sample_dialog");
 		m_sample_sheet.set_attr_to(&m_main_sheet);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::get_available_font(i); i++) {
 			auto item = box_value(winrt::hstring(name));
@@ -221,6 +222,7 @@ namespace winrt::GraphPaper::implementation
 		lv_sample_list().SelectionChanged(changed_token);
 		lv_sample_list().Visibility(UI_COLLAPSED);
 		lv_sample_list().Items().Clear();
+		//UnloadObject(cd_sample_dialog());
 		sheet_draw();
 	}
 

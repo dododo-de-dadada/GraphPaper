@@ -46,6 +46,8 @@ namespace winrt::GraphPaper::implementation
 		const float val2 = s_color.b * COLOR_MAX;
 		const float val3 = s_color.a * COLOR_MAX;
 
+		//FindName(L"cd_sample_dialog");
+
 		sample_slider_0().Maximum(255.0);
 		sample_slider_0().TickFrequency(1.0);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
@@ -103,6 +105,9 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
 		sample_slider_3().ValueChanged(slider_3_token);
+
+		//UnloadObject(cd_sample_dialog());
+
 		sheet_draw();
 	}
 
@@ -185,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-		FindName(L"cd_sample_dialog");
+		//FindName(L"cd_sample_dialog");
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
@@ -219,8 +224,8 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().StepFrequency(1.0);
 		sample_slider_0().Maximum(255.0);
 
-		m_sample_d2d.Trim();
-		UnloadObject(cd_sample_dialog());
+		//m_sample_d2d.Trim();
+		//UnloadObject(cd_sample_dialog());
 
 		sheet_draw();
 	}

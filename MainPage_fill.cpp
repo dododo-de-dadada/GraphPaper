@@ -28,6 +28,9 @@ namespace winrt::GraphPaper::implementation
 		const float val1 = value.g * COLOR_MAX;
 		const float val2 = value.b * COLOR_MAX;
 		const float val3 = value.a * COLOR_MAX;
+
+		//FindName(L"cd_sample_dialog");
+
 		sample_slider_0().Maximum(255.0);
 		sample_slider_0().TickFrequency(1.0);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
@@ -88,6 +91,9 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().ValueChanged(slider_1_token);
 		sample_slider_2().ValueChanged(slider_2_token);
 		sample_slider_3().ValueChanged(slider_3_token);
+
+		//UnloadObject(cd_sample_dialog());
+
 		sheet_draw();
 	}
 

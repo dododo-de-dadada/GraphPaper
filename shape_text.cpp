@@ -400,7 +400,8 @@ namespace winrt::GraphPaper::implementation
 				winrt::check_hresult(d2d.m_dwrite_factory->CreateTextLayout(m_text, text_len, t_format.get(), text_w, text_h, m_dw_layout.put()));
 				// 文字列フォーマットを破棄する.
 				t_format = nullptr;
-				// 文字列レイアウトが IDWriteTextLayout3 に変換できるか判定する. 
+
+				// 文字列レイアウトが IDWriteTextLayout3 に変換できるか判定する.
 				winrt::com_ptr<IDWriteTextLayout3> t3;
 				if (m_dw_layout.try_as(t3)) {
 					// 行間を設定する.
@@ -423,6 +424,7 @@ namespace winrt::GraphPaper::implementation
 				tx_create_test_metrics(m_dw_layout.get(), text_range, m_dw_test_metrics, m_dw_test_cnt);
 
 				tx_get_font_descent(m_dw_layout.get(), m_dw_descent);
+
 				UINT32 line_cnt;
 				m_dw_layout->GetLineMetrics(nullptr, 0, &line_cnt);
 				m_dw_line_metrics = new DWRITE_LINE_METRICS[line_cnt];
@@ -987,7 +989,7 @@ namespace winrt::GraphPaper::implementation
 		family->GetFont(0, &font);
 		DWRITE_FONT_METRICS metrics;
 		font->GetMetrics(&metrics);
-		const double descent = m_font_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
+		//const double descent = m_font_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
 
 		if (is_opaque(m_fill_color) || is_opaque(m_stroke_color)) {
 			ShapeRect::write_svg(dt_writer);

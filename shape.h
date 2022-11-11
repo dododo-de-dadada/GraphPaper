@@ -960,7 +960,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct ShapeStroke : ShapeFlag {
 		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
-		std::vector<D2D1_POINT_2F> m_vec;	// 次の位置への差分
+		std::vector<D2D1_POINT_2F> m_vec{};	// 次の位置への差分
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線枠の色
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
