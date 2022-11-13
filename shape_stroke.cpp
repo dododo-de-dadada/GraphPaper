@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を囲む領域を得る.
 	// a_min	元の領域の左上位置.
-	// a_man	元の領域の右下位置.
+	// a_max	元の領域の右下位置.
 	// b_min	囲む領域の左上位置.
 	// b_max	囲む領域の右下位置.
 	void ShapeStroke::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
@@ -48,65 +48,65 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 端の形式を得る.
-	// value	得られた値
+	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_stroke_cap(CAP_STYLE& value) const noexcept
+	bool ShapeStroke::get_stroke_cap(CAP_STYLE& val) const noexcept
 	{
-		value = m_stroke_cap;
+		val = m_stroke_cap;
 		return true;
 	}
 
 	// 線のつなぎを得る.
-	// value	得られた値
+	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_dash_cap(D2D1_CAP_STYLE& value) const noexcept
+	bool ShapeStroke::get_dash_cap(D2D1_CAP_STYLE& val) const noexcept
 	{
-		value = m_dash_cap;
+		val = m_dash_cap;
 		return true;
 	}
 
 	// 破線の配置を得る.
-	// value	得られた値
+	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_dash_patt(DASH_PATT& value) const noexcept
+	bool ShapeStroke::get_dash_patt(DASH_PATT& val) const noexcept
 	{
-		value = m_dash_patt;
+		val = m_dash_patt;
 		return true;
 	}
 
 	// 線枠の形式を得る.
-	// value	得られた値
+	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_dash_style(D2D1_DASH_STYLE& value) const noexcept
+	bool ShapeStroke::get_dash_style(D2D1_DASH_STYLE& val) const noexcept
 	{
-		value = m_dash_style;
+		val = m_dash_style;
 		return true;
 	}
 
 	// 線分のつなぎのマイター制限を得る.
-	// value	得られた値
+	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_join_limit(float& value) const noexcept
+	bool ShapeStroke::get_join_limit(float& val) const noexcept
 	{
-		value = m_join_limit;
+		val = m_join_limit;
 		return true;
 	}
 
 	// 線分のつなぎを得る.
-	// value	得られた値
+	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_join_style(D2D1_LINE_JOIN& value) const noexcept
+	bool ShapeStroke::get_join_style(D2D1_LINE_JOIN& val) const noexcept
 	{
-		value = m_join_style;
+		val = m_join_style;
 		return true;
 	}
 
 	// 近傍の頂点を見つける.
 	// pos	ある位置
 	// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
-	// value	ある位置の近傍にある頂点
+	// val	ある位置の近傍にある頂点
 	// 戻り値	見つかったら true
-	bool ShapeStroke::get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& value) const noexcept
+	bool ShapeStroke::get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& val) const noexcept
 	{
 		bool done = false;
 		D2D1_POINT_2F vec;
@@ -114,7 +114,7 @@ namespace winrt::GraphPaper::implementation
 		float vv = static_cast<float>(pt_abs2(vec));
 		if (vv < dd) {
 			dd = vv;
-			value = m_pos;
+			val = m_pos;
 			if (!done) {
 				done = true;
 			}
@@ -126,7 +126,7 @@ namespace winrt::GraphPaper::implementation
 			vv = static_cast<float>(pt_abs2(vec));
 			if (vv < dd) {
 				dd = vv;
-				value = v_pos;
+				val = v_pos;
 				if (!done) {
 					done = true;
 				}
@@ -136,61 +136,61 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 指定された部位の位置を得る.
-	// anp	図形の部位
-	// value	得られた位置
-	void ShapeStroke::get_pos_anp(const uint32_t anp, D2D1_POINT_2F& value) const noexcept
+	// anc	図形の部位
+	// val	得られた位置
+	void ShapeStroke::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
 	{
-		if (anp == ANP_TYPE::ANP_SHEET || anp == ANP_TYPE::ANP_P0) {
+		if (anc == ANC_TYPE::ANC_SHEET || anc == ANC_TYPE::ANC_P0) {
 			// 図形の部位が「外部」または「開始点」ならば, 開始位置を得る.
-			value = m_pos;
+			val = m_pos;
 		}
-		else if (anp > ANP_TYPE::ANP_P0) {
-			const size_t a_cnt = anp - ANP_TYPE::ANP_P0;
+		else if (anc > ANC_TYPE::ANC_P0) {
+			const size_t a_cnt = anc - ANC_TYPE::ANC_P0;
 			if (a_cnt < m_vec.size() + 1) {
-				value = m_pos;
+				val = m_pos;
 				for (size_t i = 0; i < a_cnt; i++) {
-					pt_add(value, m_vec[i], value);
+					pt_add(val, m_vec[i], val);
 				}
 			}
 		}
 	}
 
 	// 図形を囲む領域の左上位置を得る.
-	// value	領域の左上位置
-	void ShapeStroke::get_pos_min(D2D1_POINT_2F& value) const noexcept
+	// val	領域の左上位置
+	void ShapeStroke::get_pos_min(D2D1_POINT_2F& val) const noexcept
 	{
 		const size_t d_cnt = m_vec.size();	// 差分の数
 		D2D1_POINT_2F v_pos = m_pos;	// 頂点の位置
-		value = m_pos;
+		val = m_pos;
 		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(v_pos, m_vec[i], v_pos);
-			//pt_min(value, v_pos, value);
-			value.x = value.x < v_pos.x ? value.x : v_pos.x;
-			value.y = value.y < v_pos.y ? value.y : v_pos.y;
+			//pt_min(val, v_pos, val);
+			val.x = val.x < v_pos.x ? val.x : v_pos.x;
+			val.y = val.y < v_pos.y ? val.y : v_pos.y;
 		}
 	}
 
 	// 開始位置を得る
 	// 戻り値	つねに true
-	bool ShapeStroke::get_pos_start(D2D1_POINT_2F& value) const noexcept
+	bool ShapeStroke::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
-		value = m_pos;
+		val = m_pos;
 		return true;
 	}
 
 	// 線枠の色を得る.
 	// 戻り値	つねに true
-	bool ShapeStroke::get_stroke_color(D2D1_COLOR_F& value) const noexcept
+	bool ShapeStroke::get_stroke_color(D2D1_COLOR_F& val) const noexcept
 	{
-		value = m_stroke_color;
+		val = m_stroke_color;
 		return true;
 	}
 
 	// 線枠の太さを得る.
 	// 戻り値	つねに true
-	bool ShapeStroke::get_stroke_width(float& value) const noexcept
+	bool ShapeStroke::get_stroke_width(float& val) const noexcept
 	{
-		value = m_stroke_width;
+		val = m_stroke_width;
 		return true;
 	}
 
@@ -206,10 +206,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を含むか判定する.
-	// 戻り値	つねに ANP_SHEET
+	// 戻り値	つねに ANC_SHEET
 	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept
 	{
-		return ANP_TYPE::ANP_SHEET;
+		return ANC_TYPE::ANC_SHEET;
 	}
 
 	// 範囲に含まれるか判定する.
@@ -292,10 +292,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を端の形式に格納する.
-	bool ShapeStroke::set_stroke_cap(const CAP_STYLE& value) noexcept
+	bool ShapeStroke::set_stroke_cap(const CAP_STYLE& val) noexcept
 	{
-		if (!equal(m_stroke_cap, value)) {
-			m_stroke_cap = value;
+		if (!equal(m_stroke_cap, val)) {
+			m_stroke_cap = val;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
@@ -305,10 +305,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を破線の端の形式に格納する.
-	bool ShapeStroke::set_dash_cap(const D2D1_CAP_STYLE& value) noexcept
+	bool ShapeStroke::set_dash_cap(const D2D1_CAP_STYLE& val) noexcept
 	{
-		if (!equal(m_dash_cap, value)) {
-			m_dash_cap = value;
+		if (!equal(m_dash_cap, val)) {
+			m_dash_cap = val;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
@@ -318,11 +318,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を破線の配置に格納する.
-	// value	格納する値
-	bool ShapeStroke::set_dash_patt(const DASH_PATT& value) noexcept
+	// val	格納する値
+	bool ShapeStroke::set_dash_patt(const DASH_PATT& val) noexcept
 	{
-		if (!equal(m_dash_patt, value)) {
-			m_dash_patt = value;
+		if (!equal(m_dash_patt, val)) {
+			m_dash_patt = val;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
@@ -332,11 +332,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線枠の形式に格納する.
-	// value	格納する値
-	bool ShapeStroke::set_dash_style(const D2D1_DASH_STYLE value) noexcept
+	// val	格納する値
+	bool ShapeStroke::set_dash_style(const D2D1_DASH_STYLE val) noexcept
 	{
-		if (m_dash_style != value) {
-			m_dash_style = value;
+		if (m_dash_style != val) {
+			m_dash_style = val;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
@@ -346,11 +346,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分のつなぎのマイター制限に格納する.
-	// value	格納する値
-	bool ShapeStroke::set_join_limit(const float& value) noexcept
+	// val	格納する値
+	bool ShapeStroke::set_join_limit(const float& val) noexcept
 	{
-		if (!equal(m_join_limit, value)) {
-			m_join_limit = value;
+		if (!equal(m_join_limit, val)) {
+			m_join_limit = val;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
@@ -360,11 +360,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分のつなぎに格納する.
-	// value	格納する値
-	bool ShapeStroke::set_join_style(const D2D1_LINE_JOIN& value)  noexcept
+	// val	格納する値
+	bool ShapeStroke::set_join_style(const D2D1_LINE_JOIN& val)  noexcept
 	{
-		if (m_join_style != value) {
-			m_join_style = value;
+		if (m_join_style != val) {
+			m_join_style = val;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
@@ -374,17 +374,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を, 部位の位置に格納する.
-	// value	値
-	// anp	図形の部位
+	// val	値
+	// anc	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeStroke::set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool /*keep_aspect*/) noexcept
+	bool ShapeStroke::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool /*keep_aspect*/) noexcept
 	{
 		bool done = false;
 		// 変更する頂点がどの頂点か判定する.
 		const size_t d_cnt = m_vec.size();	// 差分の数
-		if (anp >= ANP_TYPE::ANP_P0 && anp <= ANP_TYPE::ANP_P0 + d_cnt) {
+		if (anc >= ANC_TYPE::ANC_P0 && anc <= ANC_TYPE::ANC_P0 + d_cnt) {
 			D2D1_POINT_2F v_pos[MAX_N_GON];	// 頂点の位置
-			const size_t a_cnt = anp - ANP_TYPE::ANP_P0;	// 変更する頂点
+			const size_t a_cnt = anc - ANC_TYPE::ANC_P0;	// 変更する頂点
 			// 変更する頂点までの, 各頂点の位置を得る.
 			v_pos[0] = m_pos;
 			for (size_t i = 0; i < a_cnt; i++) {
@@ -392,7 +392,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 値から変更前の位置を引き, 変更する差分を得る.
 			D2D1_POINT_2F vec;
-			pt_sub(value, v_pos[a_cnt], vec);
+			pt_sub(val, v_pos[a_cnt], vec);
 			pt_round(vec, PT_ROUND, vec);
 			// 差分の長さがゼロより大きいか判定する.
 			if (pt_abs2(vec) >= FLT_MIN) {
@@ -455,10 +455,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 始点に値を格納する. 他の部位の位置も動く.
-	bool ShapeStroke::set_pos_start(const D2D1_POINT_2F value) noexcept
+	bool ShapeStroke::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
 		D2D1_POINT_2F new_pos;
-		pt_round(value, PT_ROUND, new_pos);
+		pt_round(val, PT_ROUND, new_pos);
 		if (!equal(m_pos, new_pos)) {
 			m_pos = new_pos;
 			return true;
@@ -467,21 +467,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠の色に格納する.
-	bool ShapeStroke::set_stroke_color(const D2D1_COLOR_F& value) noexcept
+	bool ShapeStroke::set_stroke_color(const D2D1_COLOR_F& val) noexcept
 	{
-		if (!equal(m_stroke_color, value)) {
-			m_stroke_color = value;
+		if (!equal(m_stroke_color, val)) {
+			m_stroke_color = val;
 			return true;
 		}
 		return false;
 	}
 
 	// 値を線枠の太さに格納する.
-	// value	格納する値
-	bool ShapeStroke::set_stroke_width(const float value) noexcept
+	// val	格納する値
+	bool ShapeStroke::set_stroke_width(const float val) noexcept
 	{
-		if (!equal(m_stroke_width, value)) {
-			m_stroke_width = value;
+		if (!equal(m_stroke_width, val)) {
+			m_stroke_width = val;
 			if (m_dash_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID) {
 				if (m_d2d_stroke_style != nullptr) {
 					m_d2d_stroke_style = nullptr;
@@ -495,7 +495,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// s_attr	属性値
 	ShapeStroke::ShapeStroke(const ShapeSheet* s_attr) :
-		ShapeFlag(),
+		ShapeSele(),
 		m_dash_cap(s_attr->m_dash_cap),
 		m_stroke_cap(s_attr->m_stroke_cap),
 		m_stroke_color(s_attr->m_stroke_color),
@@ -524,7 +524,7 @@ namespace winrt::GraphPaper::implementation
 
 	// データリーダーから図形を読み込む.
 	ShapeStroke::ShapeStroke(DataReader const& dt_reader) :
-		ShapeFlag(dt_reader),
+		ShapeSele(dt_reader),
 		m_pos(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_vec(dt_read_vec<D2D1_POINT_2F>(dt_reader)),
 		m_stroke_cap(dt_read_cap(dt_reader)),

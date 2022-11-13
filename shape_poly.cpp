@@ -336,7 +336,7 @@ namespace winrt::GraphPaper::implementation
 		size_t k = static_cast<size_t>(-1);	// 見つかった頂点
 		for (size_t i = 0; i < d_cnt; i++) {
 			// 判定する位置が, 頂点の部位に含まれるか判定する.
-			if (t_anc && pt_in_anp(t_vec, v_pos[i])) {
+			if (t_anc && pt_in_anc(t_vec, v_pos[i])) {
 				k = i;
 			}
 			// 辺の長さを求める.
@@ -349,24 +349,24 @@ namespace winrt::GraphPaper::implementation
 			pt_add(v_pos[i], d_vec[i], v_pos[i + 1]);
 		}
 		// 判定する位置が, 終点の部位に含まれるか判定する.
-		if (pt_in_anp(t_vec, v_pos[d_cnt])) {
+		if (pt_in_anc(t_vec, v_pos[d_cnt])) {
 			k = d_cnt;
 		}
 		// 頂点が見つかったか判定する.
 		if (k != -1) {
-			return ANP_TYPE::ANP_P0 + static_cast<uint32_t>(k);
+			return ANC_TYPE::ANC_P0 + static_cast<uint32_t>(k);
 		}
 		// 線が不透明か判定する.
 		if (s_opa) {
 			// 不透明ならば, 線の太さの半分の幅を求め, 拡張する幅に格納する.
-			const auto e_width = max(max(static_cast<double>(s_width), Shape::s_anp_len) * 0.5, 0.5);	// 拡張する幅
+			const auto e_width = max(max(static_cast<double>(s_width), Shape::s_anc_len) * 0.5, 0.5);	// 拡張する幅
 			// 全ての辺の長さがゼロか判定する.
 			if (nz_cnt == 0) {
 				// ゼロならば, 判定する位置が, 拡張する幅を半径とする円に含まれるか判定する.
 				if (pt_in_circle(t_vec, e_width)) {
-					return ANP_TYPE::ANP_STROKE;
+					return ANC_TYPE::ANC_STROKE;
 				}
-				return ANP_TYPE::ANP_SHEET;
+				return ANC_TYPE::ANC_SHEET;
 			}
 			// 辺が閉じているか判定する.
 			if (s_closed) {
@@ -376,19 +376,19 @@ namespace winrt::GraphPaper::implementation
 			// 閉じてないなら, 端の形式が円形か判定する.
 			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
 				if (pt_in_circle(t_vec, e_width) || pt_in_circle(t_vec, v_pos[d_cnt], e_width)) {
-					return ANP_TYPE::ANP_STROKE;
+					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が正方形か判定する.
 			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
 				if (stroke_test_cap_square(t_vec, v_pos[d_cnt], d_cnt, d_vec, s_len, e_width)) {
-					return ANP_TYPE::ANP_STROKE;
+					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が三角形か判定する.
 			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
 				if (stroke_test_cap_triangle(t_vec, v_pos[d_cnt], d_cnt, d_vec, s_len, e_width)) {
-					return ANP_TYPE::ANP_STROKE;
+					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			D2D1_POINT_2F e_side[MAX_N_GON][4 + 1];	// 拡張された辺 (+頂点)
@@ -482,7 +482,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				// 調べる位置が, 拡張された辺に含まれるか判定する.
 				if (pt_in_poly(t_vec, 4, e_side[e_cnt++])) {
-					return ANP_TYPE::ANP_STROKE;
+					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			// 辺が閉じているか, 閉じた辺に長さがあるか判定する.
@@ -502,32 +502,32 @@ namespace winrt::GraphPaper::implementation
 				e_side[e_cnt][4] = v_pos[d_cnt];
 				// 判定する位置が拡張された辺に含まれるか判定する.
 				if (pt_in_poly(t_vec, 4, e_side[e_cnt++])) {
-					return ANP_TYPE::ANP_STROKE;
+					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
 				if (stroke_test_join_bevel(t_vec, e_cnt, s_closed, e_side)) {
-					return ANP_TYPE::ANP_STROKE;
+					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER
 				|| s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
 				if (stroke_test_join_miter(t_vec, e_cnt, s_closed, e_width, e_side, s_limit, s_join)) {
-					return ANP_TYPE::ANP_STROKE;
+					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 				if (stroke_test_join_round(t_vec, d_cnt + 1, v_pos, e_width)) {
-					return ANP_TYPE::ANP_STROKE;
+					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 		}
 		if (f_opa) {
 			if (pt_in_poly(t_vec, d_cnt + 1, v_pos)) {
-				return ANP_TYPE::ANP_FILL;
+				return ANC_TYPE::ANC_FILL;
 			}
 		}
-		return ANP_TYPE::ANP_SHEET;
+		return ANC_TYPE::ANC_SHEET;
 	}
 
 	// 直行するベクトルを得る.
@@ -846,21 +846,21 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_selected()) {
 			D2D1_POINT_2F a_pos{ m_pos };	// 図形の部位の位置
-			anp_draw_rect(a_pos, dx);
+			anc_draw_rect(a_pos, dx);
 			const size_t d_cnt = m_vec.size();	// 差分の数
 			for (size_t i = 0; i < d_cnt; i++) {
 				pt_add(a_pos, m_vec[i], a_pos);
-				anp_draw_rect(a_pos, dx);
+				anc_draw_rect(a_pos, dx);
 			}
 		}
 	}
 
 	// 塗りつぶし色を得る.
-	// value	得られた値
+	// val	得られた値
 	// 戻り値	得られたなら true
-	bool ShapePoly::get_fill_color(D2D1_COLOR_F& value) const noexcept
+	bool ShapePoly::get_fill_color(D2D1_COLOR_F& val) const noexcept
 	{
-		value = m_fill_color;
+		val = m_fill_color;
 		return true;
 	}
 
@@ -907,22 +907,21 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	bool ShapePoly::set_arrow_style(const ARROW_STYLE value) noexcept
+	bool ShapePoly::set_arrow_style(const ARROW_STYLE val) noexcept
 	{
 		if (!m_end_closed) {
-			return ShapePath::set_arrow_style(value);
+			return ShapePath::set_arrow_style(val);
 		}
 		return false;
 	}
 
 	// 塗りつぶしの色に格納する.
-	bool ShapePoly::set_fill_color(const D2D1_COLOR_F& value) noexcept
+	bool ShapePoly::set_fill_color(const D2D1_COLOR_F& val) noexcept
 	{
-		if (!equal(m_fill_color, value)) {
-			m_fill_color = value;
+		if (!equal(m_fill_color, val)) {
+			m_fill_color = val;
 			m_d2d_path_geom = nullptr;
 			m_d2d_arrow_geom = nullptr;
-			//create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
 		return false;

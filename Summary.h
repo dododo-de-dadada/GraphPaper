@@ -119,9 +119,9 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 16 i•¶š—ñ‚É’l‚ğŠi”[‚·‚é.
-		void Hexa(winrt::hstring const& value)
+		void Hexa(winrt::hstring const& val)
 		{
-			if (Hexa() == value) {
+			if (Hexa() == val) {
 				return;
 			}
 			m_changed(*this, Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"Hexa" });
@@ -134,9 +134,9 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// –¼‘O‚É’l‚ğŠi”[‚·‚é.
-		void Name(winrt::hstring const& value)
+		void Name(winrt::hstring const& val)
 		{
-			if (Name() == value) {
+			if (Name() == val) {
 				return;
 			}
 			m_changed(*this, Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"Name" });

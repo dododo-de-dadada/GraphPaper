@@ -65,19 +65,19 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
 		sample_slider_4().Visibility(UI_VISIBLE);
 		const winrt::event_token slider_0_token{
-			sample_slider_0().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 0> })
+			sample_slider_0().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 0> })
 		};
 		const winrt::event_token slider_1_token{
-			sample_slider_1().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 1> })
+			sample_slider_1().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 1> })
 		};
 		const winrt::event_token slider_2_token{
-			sample_slider_2().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 2> })
+			sample_slider_2().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 2> })
 		};
 		const winrt::event_token slider_3_token{
-			sample_slider_3().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::DASH_PATT, 3> })
+			sample_slider_3().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 3> })
 		};
 		const winrt::event_token slider_4_token{
-			sample_slider_4().ValueChanged({ this, &MainPage::dash_slider_value_changed<UNDO_OP::STROKE_WIDTH, 4> })
+			sample_slider_4().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::STROKE_WIDTH, 4> })
 		};
 		const auto panel_w = scp_sample_panel().Width();
 		const auto panel_h = scp_sample_panel().Height();
@@ -174,21 +174,21 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
-	// value	格納する値
+	// val	格納する値
 	// 戻り値	なし.
 	template <UNDO_OP U, int S>
-	void MainPage::dash_slider_set_header(const float value)
+	void MainPage::dash_slider_set_header(const float val)
 	{
 		if constexpr (U == UNDO_OP::DASH_PATT) {
 			constexpr wchar_t* R[]{ L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap" };
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf };
 			sample_set_slider_header<S>(text);
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf };
 			sample_slider_4().Header(box_value(text));
 		}
@@ -199,37 +199,36 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::dash_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::dash_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::DASH_PATT) {
-			const float value = static_cast<float>(args.NewValue());
+			const float val = static_cast<float>(args.NewValue());
 			DASH_PATT patt;
 			//m_sample_shape->get_dash_patt(patt);
 			m_sample_sheet.m_shape_list.back()->get_dash_patt(patt);
 			if constexpr (S == 0) {
-				dash_slider_set_header<U, S>(value);
-				patt.m_[0] = static_cast<FLOAT>(value);
+				dash_slider_set_header<U, S>(val);
+				patt.m_[0] = static_cast<FLOAT>(val);
 			}
 			else if constexpr (S == 1) {
-				dash_slider_set_header<U, S>(value);
-				patt.m_[1] = static_cast<FLOAT>(value);
+				dash_slider_set_header<U, S>(val);
+				patt.m_[1] = static_cast<FLOAT>(val);
 			}
 			else if constexpr (S == 2) {
-				dash_slider_set_header<U, S>(value);
-				patt.m_[2] = patt.m_[4] = static_cast<FLOAT>(value);
+				dash_slider_set_header<U, S>(val);
+				patt.m_[2] = patt.m_[4] = static_cast<FLOAT>(val);
 			}
 			else if constexpr (S == 3) {
-				dash_slider_set_header<U, S>(value);
-				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(value);
+				dash_slider_set_header<U, S>(val);
+				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(val);
 			}
 			//m_sample_shape->set_dash_patt(patt);
 			m_sample_sheet.m_shape_list.back()->set_dash_patt(patt);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
-			const float value = static_cast<float>(args.NewValue());
-			dash_slider_set_header<U, S>(value);
-			//m_sample_shape->set_stroke_width(value);
-			m_sample_sheet.m_shape_list.back()->set_stroke_width(value);
+			const float val = static_cast<float>(args.NewValue());
+			dash_slider_set_header<U, S>(val);
+			m_sample_sheet.m_shape_list.back()->set_stroke_width(val);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();

@@ -73,16 +73,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// その他メニューの「色の表記」に印をつける.
-	void MainPage::color_code_is_checked(const COLOR_CODE value)
+	void MainPage::color_code_is_checked(const COLOR_CODE val)
 	{
-		rmfi_color_code_dec().IsChecked(value == COLOR_CODE::DEC);
-		rmfi_color_code_dec_2().IsChecked(value == COLOR_CODE::DEC);
-		rmfi_color_code_hex().IsChecked(value == COLOR_CODE::HEX);
-		rmfi_color_code_hex_2().IsChecked(value == COLOR_CODE::HEX);
-		rmfi_color_code_real().IsChecked(value == COLOR_CODE::REAL);
-		rmfi_color_code_real_2().IsChecked(value == COLOR_CODE::REAL);
-		rmfi_color_code_cent().IsChecked(value == COLOR_CODE::CENT);
-		rmfi_color_code_cent_2().IsChecked(value == COLOR_CODE::CENT);
+		rmfi_color_code_dec().IsChecked(val == COLOR_CODE::DEC);
+		rmfi_color_code_dec_2().IsChecked(val == COLOR_CODE::DEC);
+		rmfi_color_code_hex().IsChecked(val == COLOR_CODE::HEX);
+		rmfi_color_code_hex_2().IsChecked(val == COLOR_CODE::HEX);
+		rmfi_color_code_real().IsChecked(val == COLOR_CODE::REAL);
+		rmfi_color_code_real_2().IsChecked(val == COLOR_CODE::REAL);
+		rmfi_color_code_cent().IsChecked(val == COLOR_CODE::CENT);
+		rmfi_color_code_cent_2().IsChecked(val == COLOR_CODE::CENT);
 	}
 
 	// その他メニューの「長さの単位」のサブ項目が選択された.
@@ -118,18 +118,18 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// その他メニューの「長さの単位」に印をつける.
-	void MainPage::len_unit_is_checked(const LEN_UNIT value)
+	void MainPage::len_unit_is_checked(const LEN_UNIT val)
 	{
-		rmfi_len_unit_grid().IsChecked(value == LEN_UNIT::GRID);
-		rmfi_len_unit_grid_2().IsChecked(value == LEN_UNIT::GRID);
-		rmfi_len_unit_inch().IsChecked(value == LEN_UNIT::INCH);
-		rmfi_len_unit_inch_2().IsChecked(value == LEN_UNIT::INCH);
-		rmfi_len_unit_milli().IsChecked(value == LEN_UNIT::MILLI);
-		rmfi_len_unit_milli_2().IsChecked(value == LEN_UNIT::MILLI);
-		rmfi_len_unit_pixel().IsChecked(value == LEN_UNIT::PIXEL);
-		rmfi_len_unit_pixel_2().IsChecked(value == LEN_UNIT::PIXEL);
-		rmfi_len_unit_point().IsChecked(value == LEN_UNIT::POINT);
-		rmfi_len_unit_point_2().IsChecked(value == LEN_UNIT::POINT);
+		rmfi_len_unit_grid().IsChecked(val == LEN_UNIT::GRID);
+		rmfi_len_unit_grid_2().IsChecked(val == LEN_UNIT::GRID);
+		rmfi_len_unit_inch().IsChecked(val == LEN_UNIT::INCH);
+		rmfi_len_unit_inch_2().IsChecked(val == LEN_UNIT::INCH);
+		rmfi_len_unit_milli().IsChecked(val == LEN_UNIT::MILLI);
+		rmfi_len_unit_milli_2().IsChecked(val == LEN_UNIT::MILLI);
+		rmfi_len_unit_pixel().IsChecked(val == LEN_UNIT::PIXEL);
+		rmfi_len_unit_pixel_2().IsChecked(val == LEN_UNIT::PIXEL);
+		rmfi_len_unit_point().IsChecked(val == LEN_UNIT::POINT);
+		rmfi_len_unit_point_2().IsChecked(val == LEN_UNIT::POINT);
 	}
 
 	// その他メニューの「頂点をくっつける...」が選択された.
@@ -143,18 +143,18 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	void MainPage::misc_vert_stick_set_header(const float value) noexcept
+	void MainPage::misc_vert_stick_set_header(const float val) noexcept
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_misc_vert_stick") + L": " + buf;
 		sd_misc_vert_stick().Header(box_value(text));
 	}
 
 	// スライダーの値が変更された.
-	void MainPage::misc_vert_stick_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept
+	void MainPage::misc_vert_stick_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept
 	{
 		misc_vert_stick_set_header(static_cast<float>(args.NewValue()));
 	}

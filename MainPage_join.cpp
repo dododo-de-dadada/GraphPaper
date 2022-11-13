@@ -14,25 +14,25 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「端の種類」が選択された.
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		CAP_STYLE new_value;
+		CAP_STYLE new_val;
 		if (sender == rmfi_cap_style_flat() || sender == rmfi_cap_style_flat_2()) {
-			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };
+			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };
 		}
 		else if (sender == rmfi_cap_style_square() || sender == rmfi_cap_style_square_2()) {
-			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE };
+			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE };
 		}
 		else if (sender == rmfi_cap_style_round() || sender == rmfi_cap_style_round_2()) {
-			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND };
+			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND };
 		}
 		else if (sender == rmfi_cap_style_triangle() || sender == rmfi_cap_style_triangle_2()) {
-			new_value = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE };
+			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE };
 		}
 		else {
 			return;
 		}
-		CAP_STYLE old_value;
-		m_main_sheet.get_stroke_cap(old_value);
-		if (ustack_push_set<UNDO_OP::STROKE_CAP>(new_value)) {
+		CAP_STYLE old_val;
+		m_main_sheet.get_stroke_cap(old_val);
+		if (ustack_push_set<UNDO_OP::STROKE_CAP>(new_val)) {
 			ustack_push_null();
 			ustack_is_enable();
 			sheet_draw();
@@ -41,16 +41,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠メニューの「端の種類」に印をつける.
 	// s_cap	端の形式
-	void MainPage::cap_style_is_checked(const CAP_STYLE& value)
+	void MainPage::cap_style_is_checked(const CAP_STYLE& val)
 	{
-		rmfi_cap_style_flat().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
-		rmfi_cap_style_flat_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
-		rmfi_cap_style_square().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
-		rmfi_cap_style_square_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
-		rmfi_cap_style_round().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
-		rmfi_cap_style_round_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
-		rmfi_cap_style_triangle().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
-		rmfi_cap_style_triangle_2().IsChecked(equal(value, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
+		rmfi_cap_style_flat().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
+		rmfi_cap_style_flat_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
+		rmfi_cap_style_square().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
+		rmfi_cap_style_square_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
+		rmfi_cap_style_round().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
+		rmfi_cap_style_round_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
+		rmfi_cap_style_triangle().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
+		rmfi_cap_style_triangle_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
 	}
 
 	// 線枠メニューの「つなぎの種類」>「額ぶちの制限」が選択された.
@@ -84,8 +84,8 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(UI_VISIBLE);
 		join_slider_set_header<UNDO_OP::STROKE_WIDTH, 1>(s_width);
 
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::JOIN_LIMIT, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_slider_value_changed<UNDO_OP::STROKE_WIDTH, 1> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_OP::JOIN_LIMIT, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_OP::STROKE_WIDTH, 1> });
 		const auto samp_w = scp_sample_panel().Width();
 		const auto samp_h = scp_sample_panel().Height();
 		const auto padd = samp_w * 0.125;
@@ -97,9 +97,9 @@ namespace winrt::GraphPaper::implementation
 		const float samp_x = static_cast<float>(samp_w * 0.25);
 		const float samp_y = static_cast<float>(samp_h * 0.5);
 		s->set_select(true);
-		s->set_pos_anp(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANP_TYPE::ANP_P0, m_vert_stick, false);
-		s->set_pos_anp(D2D1_POINT_2F{ samp_x, samp_y }, ANP_TYPE::ANP_P0 + 1, m_vert_stick, false);
-		s->set_pos_anp(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANP_TYPE::ANP_P0 + 2, m_vert_stick, false);
+		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANC_TYPE::ANC_P0, m_vert_stick, false);
+		s->set_pos_anc(D2D1_POINT_2F{ samp_x, samp_y }, ANC_TYPE::ANC_P0 + 1, m_vert_stick, false);
+		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANC_TYPE::ANC_P0 + 2, m_vert_stick, false);
 		m_sample_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
@@ -108,12 +108,12 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_line_join")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			float sample_limit;
-			float sample_width;
-			m_sample_sheet.m_shape_list.back()->get_join_limit(sample_limit);
-			m_sample_sheet.m_shape_list.back()->get_stroke_width(sample_width);
-			if (ustack_push_set<UNDO_OP::JOIN_LIMIT>(sample_limit) ||
-				ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
+			float samp_limit;
+			float samp_width;
+			m_sample_sheet.m_shape_list.back()->get_join_limit(samp_limit);
+			m_sample_sheet.m_shape_list.back()->get_stroke_width(samp_width);
+			if (ustack_push_set<UNDO_OP::JOIN_LIMIT>(samp_limit) ||
+				ustack_push_set<UNDO_OP::STROKE_WIDTH>(samp_width)) {
 				ustack_push_null();
 				ustack_is_enable();
 				sheet_draw();
@@ -130,24 +130,24 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
-	// value	格納する値
+	// val	格納する値
 	// 戻り値	なし.
 	template <UNDO_OP U, int S>
-	void MainPage::join_slider_set_header(const float value)
+	void MainPage::join_slider_set_header(const float val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		if constexpr (U == UNDO_OP::JOIN_LIMIT && S == 0) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			swprintf_s(buf, LEN, L"%.1lf", static_cast<double>(value) + 1.0);
+			swprintf_s(buf, LEN, L"%.1lf", static_cast<double>(val) + 1.0);
 			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_join_limit") + L": " + buf;
 			sample_slider_0().Header(box_value(text));
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 			sample_slider_1().Header(box_value(text));
 		}
@@ -159,17 +159,17 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	template <UNDO_OP U, int S>
-	void MainPage::join_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::join_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::JOIN_LIMIT && S == 0) {
-			const float value = static_cast<float>(args.NewValue());
-			join_slider_set_header<U, S>(value);
-			m_sample_sheet.m_shape_list.back()->set_join_limit(value + 1.0f);
+			const float val = static_cast<float>(args.NewValue());
+			join_slider_set_header<U, S>(val);
+			m_sample_sheet.m_shape_list.back()->set_join_limit(val + 1.0f);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
-			const float value = static_cast<float>(args.NewValue());
-			join_slider_set_header<U, S>(value);
-			m_sample_sheet.m_shape_list.back()->set_stroke_width(value);
+			const float val = static_cast<float>(args.NewValue());
+			join_slider_set_header<U, S>(val);
+			m_sample_sheet.m_shape_list.back()->set_stroke_width(val);
 		}
 		if (scp_sample_panel().IsLoaded()) {
 			sample_draw();
@@ -179,33 +179,33 @@ namespace winrt::GraphPaper::implementation
 	// 線枠メニューの「つなぎの種類」が選択された.
 	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		D2D1_LINE_JOIN new_value;
+		D2D1_LINE_JOIN new_val;
 		if (sender == rmfi_join_style_bevel() || sender == rmfi_join_style_bevel_2()) {
-			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
+			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
 			mfi_join_limit().IsEnabled(false);
 			mfi_join_limit_2().IsEnabled(false);
 		}
 		else if (sender == rmfi_join_style_miter() || sender == rmfi_join_style_miter_2()) {
-			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
+			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
 			mfi_join_limit().IsEnabled(true);
 			mfi_join_limit_2().IsEnabled(true);
 		}
 		else if (sender == rmfi_join_style_miter_or_bevel() || sender == rmfi_join_style_miter_or_bevel_2()) {
-			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;
+			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;
 			mfi_join_limit().IsEnabled(true);
 			mfi_join_limit_2().IsEnabled(true);
 		}
 		else if (sender == rmfi_join_style_round() || sender == rmfi_join_style_round_2()) {
-			new_value = D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND;
+			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND;
 			mfi_join_limit().IsEnabled(false);
 			mfi_join_limit_2().IsEnabled(false);
 		}
 		else {
 			return;
 		}
-		D2D1_LINE_JOIN old_value;
-		m_main_sheet.get_join_style(old_value);
-		if (ustack_push_set<UNDO_OP::JOIN_STYLE>(new_value)) {
+		D2D1_LINE_JOIN old_val;
+		m_main_sheet.get_join_style(old_val);
+		if (ustack_push_set<UNDO_OP::JOIN_STYLE>(new_val)) {
 			ustack_push_null();
 			ustack_is_enable();
 			sheet_draw();
@@ -214,16 +214,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠メニューの「つなぎ」に印をつける.
 	// s_join	線のつなぎ
-	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN value)
+	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN val)
 	{
-		rmfi_join_style_bevel().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		rmfi_join_style_bevel_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		rmfi_join_style_miter().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
-		rmfi_join_style_miter_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
-		rmfi_join_style_miter_or_bevel().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		rmfi_join_style_miter_or_bevel_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		rmfi_join_style_round().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		rmfi_join_style_round_2().IsChecked(value == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
+		rmfi_join_style_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
+		rmfi_join_style_bevel_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
+		rmfi_join_style_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		rmfi_join_style_miter_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+		rmfi_join_style_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_join_style_miter_or_bevel_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
+		rmfi_join_style_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
+		rmfi_join_style_round_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
 		mfi_join_limit().IsEnabled(rmfi_join_style_miter().IsChecked() || rmfi_join_style_miter_or_bevel().IsChecked());
 		mfi_join_limit_2().IsEnabled(rmfi_join_style_miter_2().IsChecked() || rmfi_join_style_miter_or_bevel_2().IsChecked());
 	}

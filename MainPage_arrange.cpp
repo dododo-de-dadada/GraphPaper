@@ -46,17 +46,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 選択された図形を次の図形と入れ替える.
-	template 
-	void MainPage::arrange_order<BRING_FORWARD>(void);
+	template void MainPage::arrange_order<BRING_FORWARD>(void);
 
 	// 選択された図形を前の図形と入れ替える.
-	template 
-	void MainPage::arrange_order<SEND_BACKWARD>(void);
+	template void MainPage::arrange_order<SEND_BACKWARD>(void);
 
 	// 選択された図形を次または前の図形と入れ替える.
 	// T	T が iterator の場合は背面の図形と入れ替え, reverse_iterator の場合は前面の図形と入れ替える. 
-	template<typename T>
-	void MainPage::arrange_order(void)
+	template<typename T> void MainPage::arrange_order(void)
 	{
 		T it_end;	// 終端
 		T it_src;	// 交換元

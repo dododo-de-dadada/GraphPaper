@@ -274,13 +274,13 @@ namespace winrt::GraphPaper::implementation
 			//if (!t->is_selected()) {
 			//	continue;
 			//}
-			const uint32_t anp = t->hit_test(t_pos);
-			if (anp != ANP_TYPE::ANP_SHEET) {
+			const uint32_t anc = t->hit_test(t_pos);
+			if (anc != ANC_TYPE::ANC_SHEET) {
 				s = t;
-				return anp;
+				return anc;
 			}
 		}
-		return ANP_TYPE::ANP_SHEET;
+		return ANC_TYPE::ANC_SHEET;
 	}
 
 	// 図形を挿入する.
@@ -604,8 +604,8 @@ namespace winrt::GraphPaper::implementation
 	// slist	図形リスト
 	// c_pos	位置
 	// limit	距離の制限
-	// value	最も近い頂点
-	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& c_pos, const float limit, D2D1_POINT_2F& value) noexcept
+	// val	最も近い頂点
+	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& c_pos, const float limit, D2D1_POINT_2F& val) noexcept
 	{
 		bool done = false;
 		float dd = limit * limit;
@@ -613,7 +613,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted() || s->is_selected()) {
 				continue;
 			}
-			if (s->get_pos_nearest(c_pos, dd, value) && !done) {
+			if (s->get_pos_nearest(c_pos, dd, val) && !done) {
 				done = true;
 			}
 		}

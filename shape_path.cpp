@@ -25,12 +25,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’l‚ğ, •”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚Í“®‚©‚È‚¢. 
-	// value	’l
-	// anp	}Œ`‚Ì•”ˆÊ
+	// val	’l
+	// anc	}Œ`‚Ì•”ˆÊ
 	// limit	ŒÀŠE‹——£ (‘¼‚Ì’¸“_‚Æ‚Ì‹——£‚ª‚±‚Ì’l–¢–‚É‚È‚é‚È‚ç, ‚»‚Ì’¸“_‚ÉˆÊ’u‚É‡‚í‚¹‚é)
-	bool ShapePath::set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool keep_aspect) noexcept
+	bool ShapePath::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept
 	{
-		if (ShapeStroke::set_pos_anp(value, anp, limit, keep_aspect)) {
+		if (ShapeStroke::set_pos_anc(val, anc, limit, keep_aspect)) {
 			//m_d2d_arrow_geom = nullptr;
 			m_d2d_path_geom = nullptr;
 			//create_path_geometry(Shape::s_d2d_factory);
@@ -40,10 +40,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// –î‚¶‚é‚µ‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	bool ShapePath::set_arrow_size(const ARROW_SIZE& value) noexcept
+	bool ShapePath::set_arrow_size(const ARROW_SIZE& val) noexcept
 	{
-		if (!equal(m_arrow_size, value)) {
-			m_arrow_size = value;
+		if (!equal(m_arrow_size, val)) {
+			m_arrow_size = val;
 			//m_d2d_arrow_geom = nullptr;
 			m_d2d_path_geom = nullptr;
 			//create_path_geometry(Shape::s_d2d_factory);
@@ -53,10 +53,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// –î‚¶‚é‚µ‚ÌŒ`®‚ÉŠi”[‚·‚é.
-	bool ShapePath::set_arrow_style(const ARROW_STYLE value) noexcept
+	bool ShapePath::set_arrow_style(const ARROW_STYLE val) noexcept
 	{
-		if (m_arrow_style != value) {
-			m_arrow_style = value;
+		if (m_arrow_style != val) {
+			m_arrow_style = val;
 			//m_d2d_arrow_geom = nullptr;
 			if (m_d2d_path_geom != nullptr) {
 				m_d2d_path_geom = nullptr;
@@ -68,13 +68,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// n“_‚É’l‚ğŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚à“®‚­.
-	// value	Ši”[‚·‚é’l
-	bool ShapePath::set_pos_start(const D2D1_POINT_2F value) noexcept
+	// val	Ši”[‚·‚é’l
+	bool ShapePath::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
-		if (ShapeStroke::set_pos_start(value)) {
-			//m_d2d_arrow_geom = nullptr;
+		if (ShapeStroke::set_pos_start(val)) {
 			m_d2d_path_geom = nullptr;
-			//create_path_geometry(Shape::s_d2d_factory);
 			return true;
 		}
 		return false;

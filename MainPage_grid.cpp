@@ -23,23 +23,23 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「方眼の強調」が選択された.
 	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		GRID_EMPH value;
+		GRID_EMPH val;
 		if (sender == rmfi_grid_emph_1() || sender == rmfi_grid_emph_1_2()) {
-			value = GRID_EMPH_0;
+			val = GRID_EMPH_0;
 		}
 		else if (sender == rmfi_grid_emph_2() || sender == rmfi_grid_emph_2_2()) {
-			value = GRID_EMPH_2;
+			val = GRID_EMPH_2;
 		}
 		else if (sender == rmfi_grid_emph_3() || sender == rmfi_grid_emph_3_2()) {
-			value = GRID_EMPH_3;
+			val = GRID_EMPH_3;
 		}
 		else {
 			return;
 		}
 		GRID_EMPH g_emph;
 		m_main_sheet.get_grid_emph(g_emph);
-		if (!equal(g_emph, value)) {
-			ustack_push_set<UNDO_OP::GRID_EMPH>(&m_main_sheet, value);
+		if (!equal(g_emph, val)) {
+			ustack_push_set<UNDO_OP::GRID_EMPH>(&m_main_sheet, val);
 			ustack_is_enable();
 			sheet_draw();
 		}
@@ -92,10 +92,10 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
 		sample_slider_3().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_COLOR, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_COLOR, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_COLOR, 2> });
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_slider_value_changed< UNDO_OP::GRID_COLOR, 3> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 3> });
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
@@ -132,20 +132,20 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(g_base);
 		grid_slider_set_header<UNDO_OP::GRID_BASE, 0>(g_base);
 		sample_slider_0().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_slider_value_changed<UNDO_OP::GRID_BASE, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed<UNDO_OP::GRID_BASE, 0> });
 		//const auto samp_w = scp_sample_panel().Width();
 		//const auto samp_h = scp_sample_panel().Height();
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			float sample_value;
-			float sheet_value;
+			float samp_val;
+			float sheet_val;
 
-			m_main_sheet.get_grid_base(sheet_value);
-			m_sample_sheet.get_grid_base(sample_value);
-			if (!equal(sheet_value, sample_value)) {
-				ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, sample_value);
+			m_main_sheet.get_grid_base(sheet_val);
+			m_sample_sheet.get_grid_base(samp_val);
+			if (!equal(sheet_val, samp_val)) {
+				ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, samp_val);
 				ustack_is_enable();
 				xcvd_is_enabled();
 				sheet_draw();
@@ -161,9 +161,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		float g_base;
 		m_main_sheet.get_grid_base(g_base);
-		const float value = (g_base + 1.0f) * 0.5f - 1.0f;
-		if (value >= 1.0f) {
-			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, value);
+		const float val = (g_base + 1.0f) * 0.5f - 1.0f;
+		if (val >= 1.0f) {
+			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, val);
 			ustack_is_enable();
 			sheet_draw();
 		}
@@ -174,9 +174,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		float g_base;
 		m_main_sheet.get_grid_base(g_base);
-		const float value = (g_base + 1.0f) * 2.0f - 1.0f;
-		if (value <= max(m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height)) {
-			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, value);
+		const float val = (g_base + 1.0f) * 2.0f - 1.0f;
+		if (val <= max(m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height)) {
+			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, val);
 			ustack_is_enable();
 			sheet_draw();
 		}
@@ -185,10 +185,10 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
-	// value	格納する値
+	// val	格納する値
 	// 戻り値	なし.
 	template <UNDO_OP U, int S>
-	void MainPage::grid_slider_set_header(const float value)
+	void MainPage::grid_slider_set_header(const float val)
 	{
 		winrt::hstring text;
 
@@ -197,13 +197,13 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.get_grid_base(g_base);
 			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value/* * SLIDER_STEP*/ + 1.0f, m_main_d2d.m_logical_dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val + 1.0f, m_main_d2d.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::GRID_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
-			conv_col_to_str(m_color_code, value, buf);
+			conv_col_to_str(m_color_code, val, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
 		sample_set_slider_header<S>(text);
@@ -215,29 +215,29 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	template <UNDO_OP U, int S>
-	void MainPage::grid_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::grid_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::GRID_BASE) {
-			const float value = static_cast<float>(args.NewValue());
-			grid_slider_set_header<U, S>(value);
-			m_sample_sheet.set_grid_base(value/* * SLIDER_STEP*/);
+			const float val = static_cast<float>(args.NewValue());
+			grid_slider_set_header<U, S>(val);
+			m_sample_sheet.set_grid_base(val);
 		}
 		else if constexpr (U == UNDO_OP::GRID_COLOR) {
-			const float value = static_cast<float>(args.NewValue());
-			grid_slider_set_header<U, S>(value);
+			const float val = static_cast<float>(args.NewValue());
+			grid_slider_set_header<U, S>(val);
 			D2D1_COLOR_F g_color;
 			m_sample_sheet.get_grid_color(g_color);
 			if constexpr (S == 0) {
-				g_color.r = value / COLOR_MAX;
+				g_color.r = val / COLOR_MAX;
 			}
 			else if constexpr (S == 1) {
-				g_color.g = value / COLOR_MAX;
+				g_color.g = val / COLOR_MAX;
 			}
 			else if constexpr (S == 2) {
-				g_color.b = value / COLOR_MAX;
+				g_color.b = val / COLOR_MAX;
 			}
 			else if constexpr (S == 3) {
-				g_color.a = value / COLOR_MAX;
+				g_color.a = val / COLOR_MAX;
 			}
 			m_sample_sheet.set_grid_color(g_color);
 		}
@@ -249,23 +249,23 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「方眼の表示」>「最背面」が選択された.
 	void MainPage::grid_show_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		GRID_SHOW value;
+		GRID_SHOW val;
 		if (sender == rmfi_grid_show_back() || sender == rmfi_grid_show_back_2()) {
-			value = GRID_SHOW::BACK;
+			val = GRID_SHOW::BACK;
 		}
 		else if (sender == rmfi_grid_show_front() || sender == rmfi_grid_show_front_2()) {
-			value = GRID_SHOW::FRONT;
+			val = GRID_SHOW::FRONT;
 		}
 		else if (sender == rmfi_grid_show_hide() || sender == rmfi_grid_show_hide_2()) {
-			value = GRID_SHOW::HIDE;
+			val = GRID_SHOW::HIDE;
 		}
 		else {
 			return;
 		}
 		GRID_SHOW g_show;
 		m_main_sheet.get_grid_show(g_show);
-		if (g_show != value) {
-			ustack_push_set<UNDO_OP::GRID_SHOW>(&m_main_sheet, value);
+		if (g_show != val) {
+			ustack_push_set<UNDO_OP::GRID_SHOW>(&m_main_sheet, val);
 			ustack_is_enable();
 			sheet_draw();
 		}

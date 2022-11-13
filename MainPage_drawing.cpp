@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::SELECT);
 			m_event_state = EVENT_STATE::BEGIN;
 			m_event_shape_pressed = nullptr;
-			m_event_anp_pressed = ANP_TYPE::ANP_SHEET;
+			m_event_anc_pressed = ANC_TYPE::ANC_SHEET;
 		}
 		else if (sender == rmfi_drawing_tool_rect()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RECT);
@@ -94,41 +94,41 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 作図ツールのメニューに印をつける.
-	void MainPage::drawing_tool_is_checked(const DRAWING_TOOL value)
+	void MainPage::drawing_tool_is_checked(const DRAWING_TOOL val)
 	{
-		rmfi_select_tool().IsChecked(value == DRAWING_TOOL::SELECT);
-		rmfi_drawing_tool_rect().IsChecked(value == DRAWING_TOOL::RECT);
-		rmfi_drawing_tool_rrect().IsChecked(value == DRAWING_TOOL::RRECT);
-		rmfi_drawing_tool_poly().IsChecked(value == DRAWING_TOOL::POLY);
-		rmfi_drawing_tool_elli().IsChecked(value == DRAWING_TOOL::ELLI);
-		rmfi_drawing_tool_line().IsChecked(value == DRAWING_TOOL::LINE);
-		rmfi_drawing_tool_bezi().IsChecked(value == DRAWING_TOOL::BEZI);
-		rmfi_drawing_tool_text().IsChecked(value == DRAWING_TOOL::TEXT);
-		rmfi_drawing_tool_ruler().IsChecked(value == DRAWING_TOOL::RULER);
+		rmfi_select_tool().IsChecked(val == DRAWING_TOOL::SELECT);
+		rmfi_drawing_tool_rect().IsChecked(val == DRAWING_TOOL::RECT);
+		rmfi_drawing_tool_rrect().IsChecked(val == DRAWING_TOOL::RRECT);
+		rmfi_drawing_tool_poly().IsChecked(val == DRAWING_TOOL::POLY);
+		rmfi_drawing_tool_elli().IsChecked(val == DRAWING_TOOL::ELLI);
+		rmfi_drawing_tool_line().IsChecked(val == DRAWING_TOOL::LINE);
+		rmfi_drawing_tool_bezi().IsChecked(val == DRAWING_TOOL::BEZI);
+		rmfi_drawing_tool_text().IsChecked(val == DRAWING_TOOL::TEXT);
+		rmfi_drawing_tool_ruler().IsChecked(val == DRAWING_TOOL::RULER);
 	}
 
 	// 多角形の選択肢メニューにチェックをつける.
-	void MainPage::drawing_poly_opt_is_checked(const POLY_OPTION& value)
+	void MainPage::drawing_poly_opt_is_checked(const POLY_OPTION& val)
 	{
-		drawing_poly_vtx_is_checked(value.m_vertex_cnt);
-		tmfi_tool_poly_regular().IsChecked(value.m_regular);
-		tmfi_tool_poly_vertex_up().IsChecked(value.m_vertex_up);
-		tmfi_tool_poly_end_close().IsChecked(value.m_end_closed);
-		tmfi_tool_poly_clockwise().IsChecked(value.m_clockwise);
+		drawing_poly_vtx_is_checked(val.m_vertex_cnt);
+		tmfi_tool_poly_regular().IsChecked(val.m_regular);
+		tmfi_tool_poly_vertex_up().IsChecked(val.m_vertex_up);
+		tmfi_tool_poly_end_close().IsChecked(val.m_end_closed);
+		tmfi_tool_poly_clockwise().IsChecked(val.m_clockwise);
 	}
 
 	// 多角形の頂点数メニューにチェックをつける.
-	void MainPage::drawing_poly_vtx_is_checked(const uint32_t value)
+	void MainPage::drawing_poly_vtx_is_checked(const uint32_t val)
 	{
-		rmfi_drawing_poly_line().IsChecked(value == 2);
-		rmfi_drawing_poly_tri().IsChecked(value == 3);
-		rmfi_drawing_poly_quad().IsChecked(value == 4);
-		rmfi_drawing_poly_pent().IsChecked(value == 5);
-		rmfi_drawing_poly_hexa().IsChecked(value == 6);
-		rmfi_drawing_poly_hept().IsChecked(value == 7);
-		rmfi_drawing_poly_octa().IsChecked(value == 8);
-		rmfi_drawing_poly_nona().IsChecked(value == 9);
-		rmfi_drawing_poly_deca().IsChecked(value == 10);
+		rmfi_drawing_poly_line().IsChecked(val == 2);
+		rmfi_drawing_poly_tri().IsChecked(val == 3);
+		rmfi_drawing_poly_quad().IsChecked(val == 4);
+		rmfi_drawing_poly_pent().IsChecked(val == 5);
+		rmfi_drawing_poly_hexa().IsChecked(val == 6);
+		rmfi_drawing_poly_hept().IsChecked(val == 7);
+		rmfi_drawing_poly_octa().IsChecked(val == 8);
+		rmfi_drawing_poly_nona().IsChecked(val == 9);
+		rmfi_drawing_poly_deca().IsChecked(val == 10);
 	}
 
 }

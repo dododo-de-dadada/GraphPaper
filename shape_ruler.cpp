@@ -22,9 +22,9 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	判定する位置
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const uint32_t anp = ShapeRect::hit_test_anp(t_pos);
-		if (anp != ANP_TYPE::ANP_SHEET) {
-			return anp;
+		const uint32_t anc = ShapeRect::hit_test_anc(t_pos);
+		if (anc != ANC_TYPE::ANC_SHEET) {
+			return anc;
 		}
 		if (is_opaque(m_stroke_color)) {
 			const double g_len = m_grid_base + 1.0;
@@ -53,19 +53,19 @@ namespace winrt::GraphPaper::implementation
 					x_ge_y ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				if (x_ge_y) {
-					const float a_len = s_anp_len * 0.5f;
+					const float a_len = s_anc_len * 0.5f;
 					const D2D1_POINT_2F p_min{ p0.x - a_len, min(p0.y, p1.y) };
 					const D2D1_POINT_2F p_max{ p0.x + a_len, max(p0.y, p1.y) };
 					if (pt_in_rect(t_pos, p_min, p_max)) {
-						return ANP_TYPE::ANP_STROKE;
+						return ANC_TYPE::ANC_STROKE;
 					}
 				}
 				else {
-					const float a_len = s_anp_len * 0.5f;
+					const float a_len = s_anc_len * 0.5f;
 					const D2D1_POINT_2F p_min{ min(p0.x, p1.x), p0.y - a_len };
 					const D2D1_POINT_2F p_max{ max(p0.x, p1.x), p0.y + a_len };
 					if (pt_in_rect(t_pos, p_min, p_max)) {
-						return ANP_TYPE::ANP_STROKE;
+						return ANC_TYPE::ANC_STROKE;
 					}
 				}
 				// 目盛りの値を表示する.
@@ -93,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				*/
 				if (pt_in_rect(t_pos, r_min, r_max)) {
-					return ANP_TYPE::ANP_STROKE;
+					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 		}
@@ -122,10 +122,10 @@ namespace winrt::GraphPaper::implementation
 			*/
 			//if (pt_in_rect(t_pos, r_min, r_max)) {
 			if (pt_in_rect(t_pos, m_pos, e_pos)) {
-				return ANP_TYPE::ANP_FILL;
+				return ANC_TYPE::ANC_FILL;
 			}
 		}
-		return ANP_TYPE::ANP_SHEET;
+		return ANC_TYPE::ANC_SHEET;
 	}
 
 	// 図形を表示する.
@@ -236,34 +236,34 @@ namespace winrt::GraphPaper::implementation
 			r_pos[3].y = rect.bottom;
 			r_pos[3].x = rect.left;
 			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-				anp_draw_rect(r_pos[i], d2d);
+				anc_draw_rect(r_pos[i], d2d);
 				D2D1_POINT_2F r_mid;	// 方形の辺の中点
 				pt_avg(r_pos[j], r_pos[i], r_mid);
-				anp_draw_rect(r_mid, d2d);
+				anc_draw_rect(r_mid, d2d);
 			}
 		}
 	}
 
 	// 書体名を得る.
-	bool ShapeRuler::get_font_family(wchar_t*& value) const noexcept
+	bool ShapeRuler::get_font_family(wchar_t*& val) const noexcept
 	{
-		value = m_font_family;
+		val = m_font_family;
 		return true;
 	}
 
 	// 書体の大きさを得る.
-	bool ShapeRuler::get_font_size(float& value) const noexcept
+	bool ShapeRuler::get_font_size(float& val) const noexcept
 	{
-		value = m_font_size;
+		val = m_font_size;
 		return true;
 	}
 
 	// 値を書体名に格納する.
-	bool ShapeRuler::set_font_family(wchar_t* const value) noexcept
+	bool ShapeRuler::set_font_family(wchar_t* const val) noexcept
 	{
 		// 値が書体名と同じか判定する.
-		if (!equal(m_font_family, value)) {
-			m_font_family = value;
+		if (!equal(m_font_family, val)) {
+			m_font_family = val;
 			m_dw_text_format = nullptr;
 			return true;
 		}
@@ -271,10 +271,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を書体の大きさに格納する.
-	bool ShapeRuler::set_font_size(const float value) noexcept
+	bool ShapeRuler::set_font_size(const float val) noexcept
 	{
-		if (m_font_size != value) {
-			m_font_size = value;
+		if (m_font_size != val) {
+			m_font_size = val;
 			m_dw_text_format = nullptr;
 			return true;
 		}

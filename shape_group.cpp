@@ -62,16 +62,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を囲む領域の左上位置を得る.
-	// value	領域の左上位置
-	void ShapeGroup::get_pos_min(D2D1_POINT_2F& value) const noexcept
+	// val	領域の左上位置
+	void ShapeGroup::get_pos_min(D2D1_POINT_2F& val) const noexcept
 	{
-		get_pos_start(value);
+		get_pos_start(val);
 	}
 
 	// 開始位置を得る.
-	// value	開始位置
+	// val	開始位置
 	// グループ図形の場合, 開始位置は図形を囲む領域の左上位置.
-	bool ShapeGroup::get_pos_start(D2D1_POINT_2F& value) const noexcept
+	bool ShapeGroup::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
 		//if (m_list_grouped.empty()) {
 		//	return false;
@@ -84,13 +84,12 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F pos;
 			s->get_pos_min(pos);
 			if (!flag) {
-				value = pos;
+				val = pos;
 				flag = true;
 			}
 			else {
-				//pt_min(pos, value, value);
-				value.x = pos.x < value.x ? pos.x : value.x;
-				value.y = pos.y < value.y ? pos.y : value.y;
+				val.x = pos.x < val.x ? pos.x : val.x;
+				val.y = pos.y < val.y ? pos.y : val.y;
 			}
 		}
 		return flag;
@@ -136,11 +135,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(t_pos) != ANP_TYPE::ANP_SHEET) {
-				return ANP_TYPE::ANP_FILL;
+			if (s->hit_test(t_pos) != ANC_TYPE::ANC_SHEET) {
+				return ANC_TYPE::ANC_FILL;
 			}
 		}
-		return ANP_TYPE::ANP_SHEET;
+		return ANC_TYPE::ANC_SHEET;
 	}
 
 	// 範囲に含まれるか判定する.
@@ -166,11 +165,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を消去フラグに格納する.
-	bool ShapeGroup::set_delete(const bool value) noexcept
+	bool ShapeGroup::set_delete(const bool val) noexcept
 	{
 		bool flag = false;
 		for (Shape* s : m_list_grouped) {
-			if (s->set_delete(value) && !flag) {
+			if (s->set_delete(val) && !flag) {
 				flag = true;
 			}
 		}
@@ -178,12 +177,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を開始位置に格納する. 他の部位の位置も動く.
-	bool ShapeGroup::set_pos_start(const D2D1_POINT_2F value) noexcept
+	bool ShapeGroup::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
 		D2D1_POINT_2F b_min;
-		if (get_pos_start(b_min) && !equal(value, b_min)) {
+		if (get_pos_start(b_min) && !equal(val, b_min)) {
 			D2D1_POINT_2F d_vec;
-			pt_sub(value, b_min, d_vec);
+			pt_sub(val, b_min, d_vec);
 			move(d_vec);
 			return true;
 		}
@@ -191,11 +190,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を選択フラグに格納する.
-	bool ShapeGroup::set_select(const bool value) noexcept
+	bool ShapeGroup::set_select(const bool val) noexcept
 	{
 		bool flag = false;
 		for (Shape* s : m_list_grouped) {
-			if (s->set_select(value) && !flag) {
+			if (s->set_select(val) && !flag) {
 				flag = true;
 			}
 		}

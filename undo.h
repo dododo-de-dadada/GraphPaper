@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形の部位の操作
 	//------------------------------
 	struct UndoAnp : Undo {
-		uint32_t m_anp;	// 操作される図形の部位
+		uint32_t m_anc;	// 操作される図形の部位
 		D2D1_POINT_2F m_pos;	// 変更前の, 図形の部位の位置
 
 		// 操作を実行すると値が変わるか判定する.
@@ -146,7 +146,7 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから操作を読み込む.
 		UndoAnp(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
 		// 図形の部位を保存する.
-		UndoAnp(Shape* const s, const uint32_t anp);
+		UndoAnp(Shape* const s, const uint32_t anc);
 		// データライターに書き込む.
 		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
 	};
@@ -186,15 +186,15 @@ namespace winrt::GraphPaper::implementation
 		// 操作を実行する.
 		void exec(void);
 		// 値を図形から得る.
-		static bool GET(const Shape* s, U_TYPE<U>::type& value) noexcept;
+		static bool GET(const Shape* s, U_TYPE<U>::type& val) noexcept;
 		// 値を図形に格納する.
-		static void SET(Shape* const s, const U_TYPE<U>::type& value);
+		static void SET(Shape* const s, const U_TYPE<U>::type& val);
 		// データリーダーから操作を読み込む.
 		UndoAttr(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
 		// 図形の値を保存する.
 		UndoAttr(Shape* s);
 		// 図形の値を保存して変更する.
-		UndoAttr(Shape* s, const U_TYPE<U>::type& value);
+		UndoAttr(Shape* s, const U_TYPE<U>::type& val);
 		// データライターに書き込む.
 		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
 	};

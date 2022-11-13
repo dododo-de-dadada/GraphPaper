@@ -147,10 +147,10 @@ namespace winrt::GraphPaper::implementation
 				{ m_pos.x, m_pos.y + m_view.height },
 			};
 
-			anp_draw_rect(v_pos[0], d2d);
-			anp_draw_rect(v_pos[1], d2d);
-			anp_draw_rect(v_pos[2], d2d);
-			anp_draw_rect(v_pos[3], d2d);
+			anc_draw_rect(v_pos[0], d2d);
+			anc_draw_rect(v_pos[1], d2d);
+			anc_draw_rect(v_pos[2], d2d);
+			anc_draw_rect(v_pos[3], d2d);
 		}
 	}
 
@@ -181,65 +181,65 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 画像の不透明度を得る.
-	bool ShapeImage::get_image_opacity(float& value) const noexcept
+	bool ShapeImage::get_image_opacity(float& val) const noexcept
 	{
-		value = m_opac;
+		val = m_opac;
 		return true;
 	}
 
 	// 部位の位置を得る.
-	void ShapeImage::get_pos_anp(const uint32_t anp, D2D1_POINT_2F& value) const noexcept
+	void ShapeImage::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
 	{
-		if (anp == ANP_TYPE::ANP_NW) {
-			value = m_pos;
+		if (anc == ANC_TYPE::ANC_NW) {
+			val = m_pos;
 		}
-		else if (anp == ANP_TYPE::ANP_NORTH) {
-			value.x = m_pos.x + m_view.width * 0.5f;
-			value.y = m_pos.y;
+		else if (anc == ANC_TYPE::ANC_NORTH) {
+			val.x = m_pos.x + m_view.width * 0.5f;
+			val.y = m_pos.y;
 		}
-		else if (anp == ANP_TYPE::ANP_NE) {
-			value.x = m_pos.x + m_view.width;
-			value.y = m_pos.y;
+		else if (anc == ANC_TYPE::ANC_NE) {
+			val.x = m_pos.x + m_view.width;
+			val.y = m_pos.y;
 		}
-		else if (anp == ANP_TYPE::ANP_EAST) {
-			value.x = m_pos.x + m_view.width;
-			value.y = m_pos.y + m_view.height * 0.5f;
+		else if (anc == ANC_TYPE::ANC_EAST) {
+			val.x = m_pos.x + m_view.width;
+			val.y = m_pos.y + m_view.height * 0.5f;
 		}
-		else if (anp == ANP_TYPE::ANP_SE) {
-			value.x = m_pos.x + m_view.width;
-			value.y = m_pos.y + m_view.height;
+		else if (anc == ANC_TYPE::ANC_SE) {
+			val.x = m_pos.x + m_view.width;
+			val.y = m_pos.y + m_view.height;
 		}
-		else if (anp == ANP_TYPE::ANP_SOUTH) {
-			value.x = m_pos.x + m_view.width * 0.5f;
-			value.y = m_pos.y + m_view.height;
+		else if (anc == ANC_TYPE::ANC_SOUTH) {
+			val.x = m_pos.x + m_view.width * 0.5f;
+			val.y = m_pos.y + m_view.height;
 		}
-		else if (anp == ANP_TYPE::ANP_SW) {
-			value.x = m_pos.x;
-			value.y = m_pos.y + m_view.height;
+		else if (anc == ANC_TYPE::ANC_SW) {
+			val.x = m_pos.x;
+			val.y = m_pos.y + m_view.height;
 		}
-		else if (anp == ANP_TYPE::ANP_WEST) {
-			value.x = m_pos.x;
-			value.y = m_pos.y + m_view.height * 0.5f;
+		else if (anc == ANC_TYPE::ANC_WEST) {
+			val.x = m_pos.x;
+			val.y = m_pos.y + m_view.height * 0.5f;
 		}
 	}
 
 	// 図形を囲む領域の左上位置を得る.
-	void ShapeImage::get_pos_min(D2D1_POINT_2F& value) const noexcept
+	void ShapeImage::get_pos_min(D2D1_POINT_2F& val) const noexcept
 	{
 		const float ax = m_pos.x;
 		const float ay = m_pos.y;
 		const float bx = m_pos.x + m_view.width;
 		const float by = m_pos.y + m_view.height;
-		value.x = ax < bx ? ax : bx;
-		value.y = ay < by ? ay : by;
+		val.x = ax < bx ? ax : bx;
+		val.y = ay < by ? ay : by;
 	}
 
 	// 近傍の頂点を見つける.
 	// pos	ある位置
 	// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
-	// value	ある位置の近傍にある頂点
+	// val	ある位置の近傍にある頂点
 	// 戻り値	見つかったら true
-	bool ShapeImage::get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& value) const noexcept
+	bool ShapeImage::get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& val) const noexcept
 	{
 		bool found = false;
 		D2D1_POINT_2F v_pos[4];
@@ -250,7 +250,7 @@ namespace winrt::GraphPaper::implementation
 			const float vv = static_cast<float>(pt_abs2(vec));
 			if (vv < dd) {
 				dd = vv;
-				value = v_pos[i];
+				val = v_pos[i];
 				if (!found) {
 					found = true;
 				}
@@ -260,9 +260,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 開始位置を得る.
-	bool ShapeImage::get_pos_start(D2D1_POINT_2F& value) const noexcept
+	bool ShapeImage::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
-		value = m_pos;
+		val = m_pos;
 		return true;
 	}
 
@@ -283,48 +283,48 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F v_pos[4];
 		get_verts(v_pos);
-		if (pt_in_anp(t_pos, v_pos[0])) {
-			return ANP_TYPE::ANP_NW;
+		if (pt_in_anc(t_pos, v_pos[0])) {
+			return ANC_TYPE::ANC_NW;
 		}
-		else if (pt_in_anp(t_pos, v_pos[1])) {
-			return ANP_TYPE::ANP_NE;
+		else if (pt_in_anc(t_pos, v_pos[1])) {
+			return ANC_TYPE::ANC_NE;
 		}
-		else if (pt_in_anp(t_pos, v_pos[2])) {
-			return ANP_TYPE::ANP_SE;
+		else if (pt_in_anc(t_pos, v_pos[2])) {
+			return ANC_TYPE::ANC_SE;
 		}
-		else if (pt_in_anp(t_pos, v_pos[3])) {
-			return ANP_TYPE::ANP_SW;
+		else if (pt_in_anc(t_pos, v_pos[3])) {
+			return ANC_TYPE::ANC_SW;
 		}
 		else {
-			const auto e_width = Shape::s_anp_len * 0.5f;
+			const auto e_width = Shape::s_anc_len * 0.5f;
 			D2D1_POINT_2F e_pos[2];
 			e_pos[0].x = v_pos[0].x;
 			e_pos[0].y = v_pos[0].y - e_width;
 			e_pos[1].x = v_pos[1].x;
 			e_pos[1].y = v_pos[1].y + e_width;
 			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
-				return ANP_TYPE::ANP_NORTH;
+				return ANC_TYPE::ANC_NORTH;
 			}
 			e_pos[0].x = v_pos[1].x - e_width;
 			e_pos[0].y = v_pos[1].y;
 			e_pos[1].x = v_pos[2].x + e_width;
 			e_pos[1].y = v_pos[2].y;
 			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
-				return ANP_TYPE::ANP_EAST;
+				return ANC_TYPE::ANC_EAST;
 			}
 			e_pos[0].x = v_pos[3].x;
 			e_pos[0].y = v_pos[3].y - e_width;
 			e_pos[1].x = v_pos[2].x;
 			e_pos[1].y = v_pos[2].y + e_width;
 			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
-				return ANP_TYPE::ANP_SOUTH;
+				return ANC_TYPE::ANC_SOUTH;
 			}
 			e_pos[0].x = v_pos[0].x - e_width;
 			e_pos[0].y = v_pos[0].y;
 			e_pos[1].x = v_pos[3].x + e_width;
 			e_pos[1].y = v_pos[3].y;
 			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
-				return ANP_TYPE::ANP_WEST;
+				return ANC_TYPE::ANC_WEST;
 			}
 		}
 		//pt_bound(v_pos[0], v_pos[2], v_pos[0], v_pos[2]);
@@ -340,9 +340,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (v_pos[0].x <= t_pos.x && t_pos.x <= v_pos[2].x &&
 			v_pos[0].y <= t_pos.y && t_pos.y <= v_pos[2].y) {
-			return ANP_TYPE::ANP_FILL;
+			return ANC_TYPE::ANC_FILL;
 		}
-		return ANP_TYPE::ANP_SHEET;
+		return ANC_TYPE::ANC_SHEET;
 	}
 
 	// 範囲に含まれるか判定する.
@@ -358,9 +358,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 差分だけ移動する.
-	bool ShapeImage::move(const D2D1_POINT_2F value) noexcept
+	bool ShapeImage::move(const D2D1_POINT_2F val) noexcept
 	{
-		pt_add(m_pos, value, m_pos);
+		pt_add(m_pos, val, m_pos);
 		return true;
 	}
 
@@ -379,26 +379,26 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を画像の不透明度に格納する.
-	bool ShapeImage::set_image_opacity(const float value) noexcept
+	bool ShapeImage::set_image_opacity(const float val) noexcept
 	{
-		if (!equal(m_opac, value)) {
-			m_opac = value;
+		if (!equal(m_opac, val)) {
+			m_opac = val;
 			return true;
 		}
 		return false;
 	}
 
 	// 値を, 部位の位置に格納する.
-	// value	値
-	// anp	図形の部位
+	// val	値
+	// anc	図形の部位
 	// limit	他の頂点との限界距離 (この値未満になるなら, 図形の部位が指定する頂点を他の頂点に位置に合わせる)
 	// keep_aspect	画像図形の縦横比を維持
-	bool ShapeImage::set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float /*limit*/, const bool keep_aspect) noexcept
+	bool ShapeImage::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float /*limit*/, const bool keep_aspect) noexcept
 	{
 		D2D1_POINT_2F new_pos;
-		pt_round(value, PT_ROUND, new_pos);
+		pt_round(val, PT_ROUND, new_pos);
 		bool flag = false;
-		if (anp == ANP_TYPE::ANP_NW) {
+		if (anc == ANC_TYPE::ANC_NW) {
 			// 画像の一部分でも表示されているか判定する.
 			// (画像がまったく表示されてない場合はスケールの変更は行わない.)
 			const float image_w = m_clip.right - m_clip.left;	// 表示されている画像の幅 (原寸)
@@ -433,7 +433,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anp == ANP_TYPE::ANP_NE) {
+		else if (anc == ANC_TYPE::ANC_NE) {
 			const float image_w = m_clip.right - m_clip.left;
 			const float image_h = m_clip.bottom - m_clip.top;
 			if (image_w > 1.0f && image_h > 1.0f) {
@@ -464,7 +464,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anp == ANP_TYPE::ANP_SE) {
+		else if (anc == ANC_TYPE::ANC_SE) {
 			const float image_w = m_clip.right - m_clip.left;
 			const float image_h = m_clip.bottom - m_clip.top;
 			if (image_w > 1.0f && image_h > 1.0f) {
@@ -494,7 +494,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anp == ANP_TYPE::ANP_SW) {
+		else if (anc == ANC_TYPE::ANC_SW) {
 			const float image_w = m_clip.right - m_clip.left;
 			const float image_h = m_clip.bottom - m_clip.top;
 			if (image_w > 1.0f && image_h > 1.0f) {
@@ -525,7 +525,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anp == ANP_TYPE::ANP_NORTH) {
+		else if (anc == ANC_TYPE::ANC_NORTH) {
 			// 変更する差分を求める.
 			const float dy = (new_pos.y - m_pos.y);
 			if (fabs(dy) >= FLT_MIN) {
@@ -538,7 +538,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anp == ANP_TYPE::ANP_EAST) {
+		else if (anc == ANC_TYPE::ANC_EAST) {
 			const float dx = (new_pos.x - (m_pos.x + m_view.width));
 			if (fabs(dx) >= FLT_MIN) {
 				const float rect_right = max(m_clip.right + dx / m_ratio.width, m_clip.left + 1.0f);
@@ -550,7 +550,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anp == ANP_TYPE::ANP_SOUTH) {
+		else if (anc == ANC_TYPE::ANC_SOUTH) {
 			const float dy = (new_pos.y - (m_pos.y + m_view.height));
 			if (fabs(dy) >= FLT_MIN) {
 				const float rect_bottom = max(m_clip.bottom + dy / m_ratio.height, m_clip.top + 1.0f);
@@ -562,7 +562,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		else if (anp == ANP_TYPE::ANP_WEST) {
+		else if (anc == ANC_TYPE::ANC_WEST) {
 			const float dx = (new_pos.x - m_pos.x);
 			if (fabs(dx) >= FLT_MIN) {
 				const float rect_left = min(m_clip.left + dx / m_ratio.width, m_clip.right - 1.0f);
@@ -578,10 +578,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	bool ShapeImage::set_pos_start(const D2D1_POINT_2F value) noexcept
+	bool ShapeImage::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
 		D2D1_POINT_2F new_pos;
-		pt_round(value, PT_ROUND, new_pos);
+		pt_round(val, PT_ROUND, new_pos);
 		if (!equal(m_pos, new_pos)) {
 			m_pos = new_pos;
 			return true;
@@ -595,7 +595,7 @@ namespace winrt::GraphPaper::implementation
 	// bmp	ビットマップ
 	// opac	不透明度
 	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bmp, const float opac) :
-		ShapeFlag()
+		ShapeSele()
 	{
 		const uint32_t image_w = bmp.PixelWidth();
 		const uint32_t image_h = bmp.PixelHeight();
@@ -635,7 +635,7 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから読み込む
 	// dt_reader	データリーダー
 	ShapeImage::ShapeImage(DataReader const& dt_reader) :
-		ShapeFlag(dt_reader),
+		ShapeSele(dt_reader),
 		m_pos(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_view(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_clip(D2D1_RECT_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle() }),

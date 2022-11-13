@@ -319,9 +319,9 @@ namespace winrt::GraphPaper::implementation
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoAttr<UNDO_OP::ARROW_STYLE>)) {
 			// 線枠メニューの「矢じるしの種類」に印をつける.
-			ARROW_STYLE value;
-			m_main_sheet.get_arrow_style(value);
-			arrow_style_is_checked(value);
+			ARROW_STYLE val;
+			m_main_sheet.get_arrow_style(val);
+			arrow_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
@@ -329,54 +329,54 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_EMPH>)) {
 			// 用紙メニューの「方眼の強調」に印をつける.
-			GRID_EMPH value;
-			m_main_sheet.get_grid_emph(value);
-			grid_emph_is_checked(value);
+			GRID_EMPH val;
+			m_main_sheet.get_grid_emph(val);
+			grid_emph_is_checked(val);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_SHOW>)) {
-			GRID_SHOW value;
-			m_main_sheet.get_grid_show(value);
-			grid_show_is_checked(value);
+			GRID_SHOW val;
+			m_main_sheet.get_grid_show(val);
+			grid_show_is_checked(val);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
-			DWRITE_FONT_STYLE value;
-			m_main_sheet.get_font_style(value);
-			font_style_is_checked(value);
+			DWRITE_FONT_STYLE val;
+			m_main_sheet.get_font_style(val);
+			font_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::SHEET_SIZE>)) {
 			// 用紙の大きさをステータスバーに格納する.
 			status_bar_set_sheet();
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP>)) {
-			CAP_STYLE value;
-			m_main_sheet.get_stroke_cap(value);
-			cap_style_is_checked(value);
+			CAP_STYLE val;
+			m_main_sheet.get_stroke_cap(val);
+			cap_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::DASH_CAP>)) {
-			D2D1_CAP_STYLE value;
-			m_main_sheet.get_dash_cap(value);
-			//cap_style_is_checked(value);
+			D2D1_CAP_STYLE val;
+			m_main_sheet.get_dash_cap(val);
+			//cap_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::DASH_STYLE>)) {
-			D2D1_DASH_STYLE value;
-			m_main_sheet.get_dash_style(value);
-			dash_style_is_checked(value);
+			D2D1_DASH_STYLE val;
+			m_main_sheet.get_dash_style(val);
+			dash_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::JOIN_STYLE>)) {
-			D2D1_LINE_JOIN value;
-			m_main_sheet.get_join_style(value);
-			join_style_is_checked(value);
+			D2D1_LINE_JOIN val;
+			m_main_sheet.get_join_style(val);
+			join_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_T>)) {
-			DWRITE_TEXT_ALIGNMENT value;
-			m_main_sheet.get_text_align_t(value);
-			text_align_t_is_checked(value);
+			DWRITE_TEXT_ALIGNMENT val;
+			m_main_sheet.get_text_align_t(val);
+			text_align_t_is_checked(val);
 		}
 		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_P>)) {
-			DWRITE_PARAGRAPH_ALIGNMENT value;
-			m_main_sheet.get_text_align_p(value);
-			text_align_p_is_checked(value);
+			DWRITE_PARAGRAPH_ALIGNMENT val;
+			m_main_sheet.get_text_align_p(val);
+			text_align_p_is_checked(val);
 		}
 	}
 
@@ -411,10 +411,10 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形の部位の位置をスタックに保存する.
 	// s	保存する図形
-	// anp	図形の部位
-	void MainPage::ustack_push_position(Shape* const s, const uint32_t anp)
+	// anc	図形の部位
+	void MainPage::ustack_push_position(Shape* const s, const uint32_t anc)
 	{
-		m_ustack_undo.push_back(new UndoAnp(s, anp));
+		m_ustack_undo.push_back(new UndoAnp(s, anc));
 	}
 
 	// 図形を追加して, その操作をスタックに積む.
@@ -567,69 +567,69 @@ namespace winrt::GraphPaper::implementation
 	// 値を図形へ格納して, その操作をスタックに積む.
 	// ただし, 図形がその値を持たない場合, またはすでに同値の場合は何もしない.
 	// s	図形
-	// value	値
+	// val	値
 	// 戻り値	なし
-	template <UNDO_OP U, typename T> void MainPage::ustack_push_set(Shape* const s, T const& value)
+	template <UNDO_OP U, typename T> void MainPage::ustack_push_set(Shape* const s, T const& val)
 	{
 		// 図形がその値を持たない場合, またはすでに同値の場合,
-		T t_value;
-		if (UndoAttr<U>::GET(s, t_value) != true || equal(t_value, value)) {
+		T t_val;
+		if (UndoAttr<U>::GET(s, t_val) != true || equal(t_val, val)) {
 			// 終了する.
 			return;
 		}
-		m_ustack_undo.push_back(new UndoAttr<U>(s, value));
+		m_ustack_undo.push_back(new UndoAttr<U>(s, val));
 	}
 
 	// 値を選択された図形に格納して, その操作をスタックに積む.
 	// U	操作の種類.
 	// T	格納する型.
-	// value	格納する値
+	// val	格納する値
 	// 戻り値	格納される前の値と異なっており, 値が格納されたら true.
-	template<UNDO_OP U, typename T> bool MainPage::ustack_push_set(T const& value)
+	template<UNDO_OP U, typename T> bool MainPage::ustack_push_set(T const& val)
 	{
 		// 格納する型 T は明示しなくても引数の型から推定できる
-		m_ustack_undo.push_back(new UndoAttr<U>(&m_main_sheet, value));
+		m_ustack_undo.push_back(new UndoAttr<U>(&m_main_sheet, val));
 		auto flag = false;
 		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
-			ustack_push_set<U>(s, value);
+			ustack_push_set<U>(s, val);
 			flag = true;
 		}
 		return flag;
 	}
 
-	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_SIZE>(ARROW_SIZE const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE const& value);
-	//template bool MainPage::ustack_push_set<UNDO_OP::IMAGE_ASPECT>(bool const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::IMAGE_OPAC>(float const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::DASH_CAP>(D2D1_CAP_STYLE const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::DASH_PATT>(DASH_PATT const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::DASH_STYLE>(D2D1_DASH_STYLE const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::FILL_COLOR>(D2D1_COLOR_F const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::FONT_COLOR>(D2D1_COLOR_F const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::FONT_FAMILY>(wchar_t* const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::FONT_SIZE>(float const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::FONT_STRETCH>(DWRITE_FONT_STRETCH const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& value);
-	template void MainPage::ustack_push_set<UNDO_OP::GRID_BASE>(Shape* const s, float const& value);
-	template void MainPage::ustack_push_set<UNDO_OP::GRID_EMPH>(Shape* const s, GRID_EMPH const& value);
-	template void MainPage::ustack_push_set<UNDO_OP::GRID_COLOR>(Shape* const s, D2D1_COLOR_F const& value);
-	template void MainPage::ustack_push_set<UNDO_OP::GRID_SHOW>(Shape* const s, GRID_SHOW const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::JOIN_LIMIT>(float const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::JOIN_STYLE>(D2D1_LINE_JOIN const& value);
-	template void MainPage::ustack_push_set<UNDO_OP::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& value);
-	template void MainPage::ustack_push_set<UNDO_OP::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_CAP>(CAP_STYLE const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_WIDTH>(float const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& value);
-	template void MainPage::ustack_push_set<UNDO_OP::TEXT_CONTENT>(Shape* const s, wchar_t* const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_LINE_SP>(float const& value);
-	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_MARGIN>(D2D1_SIZE_F const& value);
+	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_SIZE>(ARROW_SIZE const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::ARROW_STYLE>(ARROW_STYLE const& val);
+	//template bool MainPage::ustack_push_set<UNDO_OP::IMAGE_ASPECT>(bool const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::IMAGE_OPAC>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::DASH_CAP>(D2D1_CAP_STYLE const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::DASH_PATT>(DASH_PATT const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::DASH_STYLE>(D2D1_DASH_STYLE const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::FILL_COLOR>(D2D1_COLOR_F const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::FONT_COLOR>(D2D1_COLOR_F const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::FONT_FAMILY>(wchar_t* const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::FONT_SIZE>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::FONT_STRETCH>(DWRITE_FONT_STRETCH const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::FONT_WEIGHT>(DWRITE_FONT_WEIGHT const& val);
+	template void MainPage::ustack_push_set<UNDO_OP::GRID_BASE>(Shape* const s, float const& val);
+	template void MainPage::ustack_push_set<UNDO_OP::GRID_EMPH>(Shape* const s, GRID_EMPH const& val);
+	template void MainPage::ustack_push_set<UNDO_OP::GRID_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
+	template void MainPage::ustack_push_set<UNDO_OP::GRID_SHOW>(Shape* const s, GRID_SHOW const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::JOIN_LIMIT>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
+	template void MainPage::ustack_push_set<UNDO_OP::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
+	template void MainPage::ustack_push_set<UNDO_OP::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_CAP>(CAP_STYLE const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_WIDTH>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& val);
+	template void MainPage::ustack_push_set<UNDO_OP::TEXT_CONTENT>(Shape* const s, wchar_t* const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_LINE_SP>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_MARGIN>(D2D1_SIZE_F const& val);
 
 	// 図形の値の保存を実行して, その操作をスタックに積む.
 	// s	値を保存する図形
@@ -646,9 +646,9 @@ namespace winrt::GraphPaper::implementation
 	// その値が書き換えられる.
 	// そうでない場合, 新たな操作としてスタックに積む.
 	// s	操作する図形
-	// value	文字範囲の値
+	// val	文字範囲の値
 	// 戻り値	なし
-	template<> void MainPage::ustack_push_set<UNDO_OP::TEXT_SELECTED, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& value)
+	template<> void MainPage::ustack_push_set<UNDO_OP::TEXT_SELECTED, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& val)
 	{
 		auto flag = false;
 		// 元に戻す操作スタックの各操作について
@@ -670,13 +670,13 @@ namespace winrt::GraphPaper::implementation
 			else if (u->m_shape == s) {
 				// 操作する図形が引数の図形と同じ場合,
 				// 図形を直接操作してスタックには積まないようにする.
-				s->set_text_selected(value);
+				s->set_text_selected(val);
 				flag = true;
 				break;
 			}
 		}
 		if (flag != true) {
-			m_ustack_undo.push_back(new UndoAttr<UNDO_OP::TEXT_SELECTED>(s, value));
+			m_ustack_undo.push_back(new UndoAttr<UNDO_OP::TEXT_SELECTED>(s, val));
 		}
 
 	}

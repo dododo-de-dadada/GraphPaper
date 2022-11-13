@@ -21,10 +21,10 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
-	// value	格納する値
+	// val	格納する値
 	// 戻り値	なし.
 	template <UNDO_OP U, int S>
-	void MainPage::arrow_slider_set_header(const float value)
+	void MainPage::arrow_slider_set_header(const float val)
 	{
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
 			constexpr wchar_t* SLIDER_HEADER[] = {
@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 				L"str_arrow_offset"
 			};
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf;
 			if constexpr (S == 0) {
 				sample_slider_0().Header(box_value(text));
@@ -55,25 +55,25 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::arrow_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_OP U, int S> void MainPage::arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		// 値をスライダーのヘッダーに格納する.
 		if constexpr (U == UNDO_OP::ARROW_SIZE) {
-			const float value = static_cast<float>(args.NewValue());
+			const float val = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
 			//m_sample_shape->get_arrow_size(a_size);
 			m_sample_sheet.m_shape_list.back()->get_arrow_size(a_size);
 			if constexpr (S == 0) {
-				arrow_slider_set_header<U, S>(value);
-				a_size.m_width = static_cast<FLOAT>(value);
+				arrow_slider_set_header<U, S>(val);
+				a_size.m_width = static_cast<FLOAT>(val);
 			}
 			else if constexpr (S == 1) {
-				arrow_slider_set_header<U, S>(value);
-				a_size.m_length = static_cast<FLOAT>(value);
+				arrow_slider_set_header<U, S>(val);
+				a_size.m_length = static_cast<FLOAT>(val);
 			}
 			else if constexpr (S == 2) {
-				arrow_slider_set_header<U, S>(value);
-				a_size.m_offset = static_cast<FLOAT>(value);
+				arrow_slider_set_header<U, S>(val);
+				a_size.m_offset = static_cast<FLOAT>(val);
 			}
 			//m_sample_shape->set_arrow_size(a_size);
 			m_sample_sheet.m_shape_list.back()->set_arrow_size(a_size);
@@ -113,13 +113,13 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
 		const winrt::event_token slider_0_token{
-			sample_slider_0().ValueChanged({ this, &MainPage::arrow_slider_value_changed<UNDO_OP::ARROW_SIZE, 0> })
+			sample_slider_0().ValueChanged({ this, &MainPage::arrow_slider_val_changed<UNDO_OP::ARROW_SIZE, 0> })
 		};
 		const winrt::event_token slider_1_token{
-			sample_slider_1().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 1> })
+			sample_slider_1().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_OP::ARROW_SIZE, 1> })
 		};
 		const winrt::event_token slider_2_token{
-			sample_slider_2().ValueChanged({ this, &MainPage::arrow_slider_value_changed< UNDO_OP::ARROW_SIZE, 2> })
+			sample_slider_2().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_OP::ARROW_SIZE, 2> })
 		};
 		const auto samp_w = scp_sample_panel().Width();
 		const auto samp_h = scp_sample_panel().Height();
@@ -136,10 +136,10 @@ namespace winrt::GraphPaper::implementation
 			co_await cd_sample_dialog().ShowAsync()
 		};
 		if (d_result == ContentDialogResult::Primary) {
-			ARROW_SIZE sample_value;
-			//m_sample_shape->get_arrow_size(sample_value);
-			m_sample_sheet.m_shape_list.back()->get_arrow_size(sample_value);
-			if (ustack_push_set<UNDO_OP::ARROW_SIZE>(sample_value)) {
+			ARROW_SIZE samp_val;
+			//m_sample_shape->get_arrow_size(samp_val);
+			m_sample_sheet.m_shape_list.back()->get_arrow_size(samp_val);
+			if (ustack_push_set<UNDO_OP::ARROW_SIZE>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
@@ -182,16 +182,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 線枠メニューの「矢じるしの種類」に印をつける.
 	// a_style	矢じるしの形式
-	void MainPage::arrow_style_is_checked(const ARROW_STYLE value)
+	void MainPage::arrow_style_is_checked(const ARROW_STYLE val)
 	{
-		rmfi_arrow_style_none().IsChecked(value == ARROW_STYLE::NONE);
-		rmfi_arrow_style_none_2().IsChecked(value == ARROW_STYLE::NONE);
-		rmfi_arrow_style_opened().IsChecked(value == ARROW_STYLE::OPENED);
-		rmfi_arrow_style_opened_2().IsChecked(value == ARROW_STYLE::OPENED);
-		rmfi_arrow_style_filled().IsChecked(value == ARROW_STYLE::FILLED);
-		rmfi_arrow_style_filled_2().IsChecked(value == ARROW_STYLE::FILLED);
-		mfi_arrow_size().IsEnabled(value != ARROW_STYLE::NONE);
-		mfi_arrow_size_2().IsEnabled(value != ARROW_STYLE::NONE);
+		rmfi_arrow_style_none().IsChecked(val == ARROW_STYLE::NONE);
+		rmfi_arrow_style_none_2().IsChecked(val == ARROW_STYLE::NONE);
+		rmfi_arrow_style_opened().IsChecked(val == ARROW_STYLE::OPENED);
+		rmfi_arrow_style_opened_2().IsChecked(val == ARROW_STYLE::OPENED);
+		rmfi_arrow_style_filled().IsChecked(val == ARROW_STYLE::FILLED);
+		rmfi_arrow_style_filled_2().IsChecked(val == ARROW_STYLE::FILLED);
+		mfi_arrow_size().IsEnabled(val != ARROW_STYLE::NONE);
+		mfi_arrow_size_2().IsEnabled(val != ARROW_STYLE::NONE);
 	}
 
 }

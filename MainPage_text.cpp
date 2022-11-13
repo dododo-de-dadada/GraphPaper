@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 			else if (typeid(*s) != typeid(ShapeText)) {
 				continue;
 			}
-			auto u = new UndoAnp(s, ANP_TYPE::ANP_SE);
+			auto u = new UndoAnp(s, ANC_TYPE::ANC_SE);
 			if (static_cast<ShapeText*>(s)->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f)) {
 				m_ustack_undo.push_back(u);
 				if (!flag) {
@@ -80,20 +80,20 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「段落のそろえ」が選択された.
 	void MainPage::text_align_p_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		DWRITE_PARAGRAPH_ALIGNMENT value;
+		DWRITE_PARAGRAPH_ALIGNMENT val;
 		if (sender == rmfi_text_align_top() || sender == rmfi_text_align_top_2()) {
-			value = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
+			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
 		}
 		else if (sender == rmfi_text_align_bot() || sender == rmfi_text_align_bot_2()) {
-			value = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR;
+			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR;
 		}
 		else if (sender == rmfi_text_align_mid() || sender == rmfi_text_align_mid_2()) {
-			value = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
+			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 		}
 		else {
 			return;
 		}
-		if (ustack_push_set<UNDO_OP::TEXT_ALIGN_P>(value)) {
+		if (ustack_push_set<UNDO_OP::TEXT_ALIGN_P>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			sheet_draw();
@@ -101,37 +101,37 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「段落のそろえ」に印をつける.
-	// value	段落のそろえ
-	void MainPage::text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT value)
+	// val	段落のそろえ
+	void MainPage::text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val)
 	{
-		rmfi_text_align_top().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_top_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bot().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_bot_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_mid().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-		rmfi_text_align_mid_2().IsChecked(value == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		rmfi_text_align_top().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_text_align_top_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_text_align_bot().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_bot_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_mid().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		rmfi_text_align_mid_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」が選択された.
 	void MainPage::text_align_t_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		DWRITE_TEXT_ALIGNMENT value;
+		DWRITE_TEXT_ALIGNMENT val;
 		if (sender == rmfi_text_align_left() || sender == rmfi_text_align_left_2()) {
-			value = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
+			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
 		}
 		else if (sender == rmfi_text_align_right() || sender == rmfi_text_align_right_2()) {
-			value = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING;
+			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING;
 		}
 		else if (sender == rmfi_text_align_center() || sender == rmfi_text_align_center_2()) {
-			value = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER;
+			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER;
 		}
 		else if (sender == rmfi_text_align_just() || sender == rmfi_text_align_just_2()) {
-			value = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
+			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
 		}
 		else {
 			return;
 		}
-		if (ustack_push_set<UNDO_OP::TEXT_ALIGN_T>(value)) {
+		if (ustack_push_set<UNDO_OP::TEXT_ALIGN_T>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			sheet_draw();
@@ -140,16 +140,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 書体メニューの「文字列のそろえ」に印をつける.
 	// t_align	文字列のそろえ
-	void MainPage::text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT value)
+	void MainPage::text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT val)
 	{
-		rmfi_text_align_left().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_text_align_left_2().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_text_align_right().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_text_align_right_2().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_text_align_center().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_center_2().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_just().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-		rmfi_text_align_just_2().IsChecked(value == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		rmfi_text_align_left().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+		rmfi_text_align_left_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+		rmfi_text_align_right().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
+		rmfi_text_align_right_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
+		rmfi_text_align_center().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		rmfi_text_align_center_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		rmfi_text_align_just().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		rmfi_text_align_just_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 
 	}
 
@@ -159,25 +159,25 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 		m_sample_sheet.set_attr_to(&m_main_sheet);
-		float value;
-		m_sample_sheet.get_text_line_sp(value);
+		float val;
+		m_sample_sheet.get_text_line_sp(val);
 
 		sample_slider_0().Maximum(MAX_VALUE);
 		sample_slider_0().TickFrequency(TICK_FREQ);
 		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_0().Value(value);
-		text_slider_set_header<UNDO_OP::TEXT_LINE_SP, 0>(value);
+		sample_slider_0().Value(val);
+		text_slider_set_header<UNDO_OP::TEXT_LINE_SP, 0>(val);
 		sample_slider_0().Visibility(UI_VISIBLE);
 
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_LINE_SP, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_LINE_SP, 0> });
 		text_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_line_sp")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			float sample_value;
-			m_sample_sheet.m_shape_list.back()->get_text_line_sp(sample_value);
-			if (ustack_push_set<UNDO_OP::TEXT_LINE_SP>(sample_value)) {
+			float samp_val;
+			m_sample_sheet.m_shape_list.back()->get_text_line_sp(samp_val);
+			if (ustack_push_set<UNDO_OP::TEXT_LINE_SP>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
@@ -216,17 +216,17 @@ namespace winrt::GraphPaper::implementation
 
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_MARGIN, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::text_slider_value_changed<UNDO_OP::TEXT_MARGIN, 1> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_MARGIN, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_MARGIN, 1> });
 
 		text_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_padding")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_SIZE_F sample_value;
-			m_sample_sheet.m_shape_list.back()->get_text_padding(sample_value);
-			if (ustack_push_set<UNDO_OP::TEXT_MARGIN>(sample_value)) {
+			D2D1_SIZE_F samp_val;
+			m_sample_sheet.m_shape_list.back()->get_text_padding(samp_val);
+			if (ustack_push_set<UNDO_OP::TEXT_MARGIN>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
@@ -243,10 +243,10 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
-	// value	格納する値
+	// val	格納する値
 	// 戻り値	なし.
 	template <UNDO_OP U, int S>
-	void MainPage::text_slider_set_header(const float value)
+	void MainPage::text_slider_set_header(const float val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
@@ -254,14 +254,14 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			constexpr wchar_t* HEADER[] = { L"str_text_pad_horzorz", L"str_text_pad_vertert" };
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE_SP) {
 			constexpr wchar_t HEADER[] = L"str_text_line_sp";
-			if (value >= FLT_MIN) {
+			if (val >= FLT_MIN) {
 				wchar_t buf[32];
-				conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(HEADER) + L": " + buf;
 			}
 			else {
@@ -278,24 +278,24 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	template <UNDO_OP U, int S>
-	void MainPage::text_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::text_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::TEXT_LINE_SP) {
-			const float value = static_cast<float>(args.NewValue());
-			text_slider_set_header<U, S>(value);
-			//m_sample_shape->set_text_line_sp(value);
-			m_sample_sheet.m_shape_list.back()->set_text_line_sp(value);
+			const float val = static_cast<float>(args.NewValue());
+			text_slider_set_header<U, S>(val);
+			//m_sample_shape->set_text_line_sp(val);
+			m_sample_sheet.m_shape_list.back()->set_text_line_sp(val);
 		}
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
-			const float value = static_cast<float>(args.NewValue());
-			text_slider_set_header<U, S>(value);
+			const float val = static_cast<float>(args.NewValue());
+			text_slider_set_header<U, S>(val);
 			D2D1_SIZE_F padding;
 			m_sample_sheet.m_shape_list.back()->get_text_padding(padding);
 			if constexpr (S == 0) {
-				padding.width = static_cast<FLOAT>(value);
+				padding.width = static_cast<FLOAT>(val);
 			}
 			if constexpr (S == 1) {
-				padding.height = static_cast<FLOAT>(value);
+				padding.height = static_cast<FLOAT>(val);
 			}
 			m_sample_sheet.m_shape_list.back()->set_text_padding(padding);
 		}

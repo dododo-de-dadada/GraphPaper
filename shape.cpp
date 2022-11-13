@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t debug_leak_cnt = 0;
 	uint32_t debug_shape_cnt = 0;
 #endif
-	float Shape::s_anp_len = 6.0f;	// アンカーポイントの大きさ
+	float Shape::s_anc_len = 6.0f;	// アンカーポイントの大きさ
 	D2D1_COLOR_F Shape::s_background_color = COLOR_WHITE;	// 前景色 (アンカーの背景色)
 	D2D1_COLOR_F Shape::s_foreground_color = COLOR_BLACK;	// 背景色 (アンカーの前景色)
 	winrt::com_ptr<ID2D1StrokeStyle1> Shape::m_aux_style = nullptr;	// 補助線の形式
@@ -20,9 +20,9 @@ namespace winrt::GraphPaper::implementation
 	// 図形の部位（円形）を表示する.
 	// a_pos	部位の位置
 	// d2d	図形の描画環境
-	void anp_draw_ellipse(const D2D1_POINT_2F a_pos, D2D_UI& d2d)
+	void anc_draw_ellipse(const D2D1_POINT_2F a_pos, D2D_UI& d2d)
 	{
-		const FLOAT rad = static_cast<FLOAT>(Shape::s_anp_len * 0.5 + 1.0);
+		const FLOAT rad = static_cast<FLOAT>(Shape::s_anc_len * 0.5 + 1.0);
 		ID2D1SolidColorBrush* const brush = d2d.m_solid_color_brush.get();
 		brush->SetColor(Shape::s_background_color);
 		d2d.m_d2d_context->FillEllipse(D2D1_ELLIPSE{ a_pos, rad, rad }, brush);
@@ -33,12 +33,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形の部位 (方形) を表示する.
 	// a_pos	部位の位置
 	// d2d	図形の描画環境
-	void anp_draw_rect(const D2D1_POINT_2F a_pos, D2D_UI& d2d)
+	void anc_draw_rect(const D2D1_POINT_2F a_pos, D2D_UI& d2d)
 	{
 		D2D1_POINT_2F r_min;
 		D2D1_POINT_2F r_max;
-		pt_add(a_pos, -0.5 * Shape::s_anp_len, r_min);
-		pt_add(r_min, Shape::s_anp_len, r_max);
+		pt_add(a_pos, -0.5 * Shape::s_anc_len, r_min);
+		pt_add(r_min, Shape::s_anc_len, r_max);
 		const D2D1_RECT_F rect{ r_min.x, r_min.y, r_max.x, r_max.y };
 		ID2D1SolidColorBrush* const brush = d2d.m_solid_color_brush.get();
 		brush->SetColor(Shape::s_background_color);

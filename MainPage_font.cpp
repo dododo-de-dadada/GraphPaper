@@ -141,17 +141,17 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
 		sample_slider_3().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 2> });
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_COLOR, 3> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 3> });
 		font_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F sample_value;
-			m_sample_sheet.m_shape_list.back()->get_font_color(sample_value);
-			if (ustack_push_set<UNDO_OP::FONT_COLOR>(sample_value)) {
+			D2D1_COLOR_F samp_val;
+			m_sample_sheet.m_shape_list.back()->get_font_color(samp_val);
+			if (ustack_push_set<UNDO_OP::FONT_COLOR>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
@@ -209,9 +209,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			wchar_t* sample_value;
-			m_sample_sheet.m_shape_list.back()->get_font_family(sample_value);
-			if (ustack_push_set<UNDO_OP::FONT_FAMILY>(sample_value)) {
+			wchar_t* samp_val;
+			m_sample_sheet.m_shape_list.back()->get_font_family(samp_val);
+			if (ustack_push_set<UNDO_OP::FONT_FAMILY>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
@@ -229,10 +229,10 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
-	// value	格納する値
+	// val	格納する値
 	// 戻り値	なし.
 	template <UNDO_OP U, int S>
-	void MainPage::font_slider_set_header(const float value)
+	void MainPage::font_slider_set_header(const float val)
 	{
 		winrt::hstring text;
 
@@ -240,7 +240,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			float g_base;
 			m_sample_sheet.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value, m_sample_d2d.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_sample_d2d.m_logical_dpi, g_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::FONT_COLOR) {
@@ -248,25 +248,25 @@ namespace winrt::GraphPaper::implementation
 			//if constexpr (S == 0) {
 				wchar_t buf[32];
 				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, value, buf);
+				conv_col_to_str(m_color_code, val, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 			//}
 			//if constexpr (S == 1) {
 			//	wchar_t buf[32];
 			//	// 色成分の値を文字列に変換する.
-			//	conv_col_to_str(m_color_code, value, buf);
+			//	conv_col_to_str(m_color_code, val, buf);
 			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " + buf;
 			//}
 			//if constexpr (S == 2) {
 			//	wchar_t buf[32];
 			//	// 色成分の値を文字列に変換する.
-			//	conv_col_to_str(m_color_code, value, buf);
+			//	conv_col_to_str(m_color_code, val, buf);
 			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " + buf;
 			//}
 			//if constexpr (S == 3) {
 			//	wchar_t buf[32];
 			//	// 色成分の値を文字列に変換する.
-			//	conv_col_to_str(m_color_code, value, buf);
+			//	conv_col_to_str(m_color_code, val, buf);
 			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
 			//}
 		}
@@ -290,35 +290,35 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	template <UNDO_OP U, int S>
-	void MainPage::font_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::font_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			if constexpr (S == 0) {
-				const auto value = static_cast<float>(args.NewValue());
-				font_slider_set_header<U, S>(value);
-				m_sample_sheet.m_shape_list.back()->set_font_size(value);
+				const auto val = static_cast<float>(args.NewValue());
+				font_slider_set_header<U, S>(val);
+				m_sample_sheet.m_shape_list.back()->set_font_size(val);
 			}
 		}
 		else if constexpr (U == UNDO_OP::FONT_COLOR) {
-			const auto value = static_cast<float>(args.NewValue());
+			const auto val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F f_color;
 			//m_sample_shape->get_font_color(f_color);
 			m_sample_sheet.m_shape_list.back()->get_font_color(f_color);
 			if constexpr (S == 0) {
-				font_slider_set_header<U, S>(value);
-				f_color.r = static_cast<FLOAT>(value / COLOR_MAX);
+				font_slider_set_header<U, S>(val);
+				f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			else if constexpr (S == 1) {
-				font_slider_set_header<U, S>(value);
-				f_color.g = static_cast<FLOAT>(value / COLOR_MAX);
+				font_slider_set_header<U, S>(val);
+				f_color.g = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			else if constexpr (S == 2) {
-				font_slider_set_header<U, S>(value);
-				f_color.b = static_cast<FLOAT>(value / COLOR_MAX);
+				font_slider_set_header<U, S>(val);
+				f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			else if constexpr (S == 3) {
-				font_slider_set_header<U, S>(value);
-				f_color.a = static_cast<FLOAT>(value / COLOR_MAX);
+				font_slider_set_header<U, S>(val);
+				f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			m_sample_sheet.m_shape_list.back()->set_font_color(f_color);
 		}
@@ -342,14 +342,14 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(f_size);
 		font_slider_set_header<UNDO_OP::FONT_SIZE, 0>(f_size);
 		sample_slider_0().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_slider_value_changed<UNDO_OP::FONT_SIZE, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_SIZE, 0> });
 		font_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			float sample_value;
-			m_sample_sheet.m_shape_list.back()->get_font_size(sample_value);
-			if (ustack_push_set<UNDO_OP::FONT_SIZE>(sample_value)) {
+			float samp_val;
+			m_sample_sheet.m_shape_list.back()->get_font_size(samp_val);
+			if (ustack_push_set<UNDO_OP::FONT_SIZE>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
@@ -397,9 +397,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			DWRITE_FONT_STRETCH sample_value;
-			m_sample_sheet.m_shape_list.back()->get_font_stretch(sample_value);
-			if (ustack_push_set<UNDO_OP::FONT_STRETCH>(sample_value)) {
+			DWRITE_FONT_STRETCH samp_val;
+			m_sample_sheet.m_shape_list.back()->get_font_stretch(samp_val);
+			if (ustack_push_set<UNDO_OP::FONT_STRETCH>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
@@ -492,9 +492,9 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			DWRITE_FONT_WEIGHT sample_value;
-			m_sample_sheet.m_shape_list.back()->get_font_weight(sample_value);
-			if (ustack_push_set<UNDO_OP::FONT_WEIGHT>(sample_value)) {
+			DWRITE_FONT_WEIGHT samp_val;
+			m_sample_sheet.m_shape_list.back()->get_font_weight(samp_val);
+			if (ustack_push_set<UNDO_OP::FONT_WEIGHT>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();

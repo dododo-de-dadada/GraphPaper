@@ -266,23 +266,23 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected()) {
 			D2D1_POINT_2F mid;
 			pt_mul_add(m_vec[0], 0.5, m_pos, mid);
-			anp_draw_rect(m_pos, dx);
-			anp_draw_rect(mid, dx);
-			anp_draw_rect(e_pos, dx);
+			anc_draw_rect(m_pos, dx);
+			anc_draw_rect(mid, dx);
+			anc_draw_rect(e_pos, dx);
 		}
 	}
 
 	// 矢じるしの寸法を得る.
-	bool ShapeLineA::get_arrow_size(ARROW_SIZE& value) const noexcept
+	bool ShapeLineA::get_arrow_size(ARROW_SIZE& val) const noexcept
 	{
-		value = m_arrow_size;
+		val = m_arrow_size;
 		return true;
 	}
 
 	// 矢じるしの形式を得る.
-	bool ShapeLineA::get_arrow_style(ARROW_STYLE& value) const noexcept
+	bool ShapeLineA::get_arrow_style(ARROW_STYLE& val) const noexcept
 	{
-		value = m_arrow_style;
+		val = m_arrow_style;
 		return true;
 	}
 
@@ -293,17 +293,17 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F e_pos;
 		pt_add(m_pos, m_vec[0], e_pos);
-		if (pt_in_anp(t_pos, e_pos)) {
-			return ANP_TYPE::ANP_P0 + 1;
+		if (pt_in_anc(t_pos, e_pos)) {
+			return ANC_TYPE::ANC_P0 + 1;
 		}
-		if (pt_in_anp(t_pos, m_pos)) {
-			return ANP_TYPE::ANP_P0;
+		if (pt_in_anc(t_pos, m_pos)) {
+			return ANC_TYPE::ANC_P0;
 		}
-		const float s_width = static_cast<float>(max(static_cast<double>(m_stroke_width), Shape::s_anp_len));
+		const float s_width = static_cast<float>(max(static_cast<double>(m_stroke_width), Shape::s_anc_len));
 		if (line_hit_test(t_pos, m_pos, e_pos, s_width, m_stroke_cap)) {
-			return ANP_TYPE::ANP_STROKE;
+			return ANC_TYPE::ANC_STROKE;
 		}
-		return ANP_TYPE::ANP_SHEET;
+		return ANC_TYPE::ANC_SHEET;
 	}
 
 	// 範囲に含まれるか判定する.
@@ -337,9 +337,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を端の形式に格納する.
-	bool ShapeLineA::set_stroke_cap(const CAP_STYLE& value) noexcept
+	bool ShapeLineA::set_stroke_cap(const CAP_STYLE& val) noexcept
 	{
-		if (ShapeStroke::set_stroke_cap(value)) {
+		if (ShapeStroke::set_stroke_cap(val)) {
 			if (m_d2d_arrow_style != nullptr) {
 				m_d2d_arrow_style = nullptr;
 			}
@@ -352,9 +352,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分のつなぎのマイター制限に格納する.
-	bool ShapeLineA::set_join_limit(const float& value) noexcept
+	bool ShapeLineA::set_join_limit(const float& val) noexcept
 	{
-		if (ShapeStroke::set_join_limit(value)) {
+		if (ShapeStroke::set_join_limit(val)) {
 			if (m_d2d_arrow_style != nullptr) {
 				m_d2d_arrow_style = nullptr;
 			}
@@ -367,9 +367,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分のつなぎに格納する.
-	bool ShapeLineA::set_join_style(const D2D1_LINE_JOIN& value) noexcept
+	bool ShapeLineA::set_join_style(const D2D1_LINE_JOIN& val) noexcept
 	{
-		if (ShapeStroke::set_join_style(value)) {
+		if (ShapeStroke::set_join_style(val)) {
 			if (m_d2d_arrow_style != nullptr) {
 				m_d2d_arrow_style = nullptr;
 			}
@@ -382,10 +382,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を矢じるしの寸法に格納する.
-	bool ShapeLineA::set_arrow_size(const ARROW_SIZE& value) noexcept
+	bool ShapeLineA::set_arrow_size(const ARROW_SIZE& val) noexcept
 	{
-		if (!equal(m_arrow_size, value)) {
-			m_arrow_size = value;
+		if (!equal(m_arrow_size, val)) {
+			m_arrow_size = val;
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}
@@ -398,10 +398,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を矢じるしの形式に格納する.
-	bool ShapeLineA::set_arrow_style(const ARROW_STYLE value) noexcept
+	bool ShapeLineA::set_arrow_style(const ARROW_STYLE val) noexcept
 	{
-		if (m_arrow_style != value) {
-			m_arrow_style = value;
+		if (m_arrow_style != val) {
+			m_arrow_style = val;
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}
@@ -418,12 +418,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を, 部位の位置に格納する. 
-	// value	値
-	// anp	図形の部位
+	// val	値
+	// anc	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapeLineA::set_pos_anp(const D2D1_POINT_2F value, const uint32_t anp, const float limit, const bool keep_aspect) noexcept
+	bool ShapeLineA::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept
 	{
-		if (ShapeStroke::set_pos_anp(value, anp, limit, keep_aspect)) {
+		if (ShapeStroke::set_pos_anc(val, anc, limit, keep_aspect)) {
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}
@@ -433,9 +433,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を始点に格納する. 他の部位の位置も動く.
-	bool ShapeLineA::set_pos_start(const D2D1_POINT_2F value) noexcept
+	bool ShapeLineA::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
-		if (ShapeStroke::set_pos_start(value)) {
+		if (ShapeStroke::set_pos_start(val)) {
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}

@@ -34,35 +34,35 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 
 	// 長さををピクセル単位の値に変換する.
-	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept;
+	static double conv_len_to_val(const LEN_UNIT l_unit, const double val, const double dpi, const double g_len) noexcept;
 	// 設定データを保存するフォルダーを得る.
 	static auto pref_local_folder(void);
 
 	// 長さををピクセル単位の値に変換する.
 	// 変換された値は, 0.5 ピクセル単位に丸められる.
 	// l_unit	長さの単位
-	// value	長さの値
+	// l_val	長さの値
 	// dpi	DPI
 	// g_len	方眼の大きさ
 	// 戻り値	ピクセル単位の値
-	static double conv_len_to_val(const LEN_UNIT l_unit, const double value, const double dpi, const double g_len) noexcept
+	static double conv_len_to_val(const LEN_UNIT l_unit, const double l_val, const double dpi, const double g_len) noexcept
 	{
 		double ret;
 
 		if (l_unit == LEN_UNIT::INCH) {
-			ret = value * dpi;
+			ret = l_val * dpi;
 		}
 		else if (l_unit == LEN_UNIT::MILLI) {
-			ret = value * dpi / MM_PER_INCH;
+			ret = l_val * dpi / MM_PER_INCH;
 		}
 		else if (l_unit == LEN_UNIT::POINT) {
-			ret = value * dpi / PT_PER_INCH;
+			ret = l_val * dpi / PT_PER_INCH;
 		}
 		else if (l_unit == LEN_UNIT::GRID) {
-			ret = value * g_len;
+			ret = l_val * g_len;
 		}
 		else {
-			ret = value;
+			ret = l_val;
 		}
 		return std::round(2.0 * ret) * 0.5;
 	}
@@ -134,9 +134,9 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Visibility(UI_VISIBLE);
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::sheet_slider_value_changed<UNDO_OP::SHEET_COLOR, 2> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 2> });
 		//m_sample_type = SAMPLE_TYPE::NONE;
 		//m_sample_d2d.SetSwapChainPanel(scp_sample_panel());
 		//const auto samp_w = scp_sample_panel().Width();
@@ -147,12 +147,12 @@ namespace winrt::GraphPaper::implementation
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F sample_value;
-			m_sample_sheet.get_sheet_color(sample_value);
-			D2D1_COLOR_F sheet_value;
-			m_main_sheet.get_sheet_color(sheet_value);
-			if (equal(sheet_value, sample_value) != true) {
-				ustack_push_set<UNDO_OP::SHEET_COLOR>(&m_main_sheet, sample_value);
+			D2D1_COLOR_F samp_val;
+			m_sample_sheet.get_sheet_color(samp_val);
+			D2D1_COLOR_F sheet_val;
+			m_main_sheet.get_sheet_color(sheet_val);
+			if (equal(sheet_val, samp_val) != true) {
+				ustack_push_set<UNDO_OP::SHEET_COLOR>(&m_main_sheet, samp_val);
 				ustack_push_null();
 				ustack_is_enable();
 				sheet_draw();
@@ -288,32 +288,32 @@ namespace winrt::GraphPaper::implementation
 							if (prop == TextBlock::FontFamilyProperty()) {
 								// プロパティーが FontFamily の場合,
 								// セッターの値から, 書体名を得る.
-								auto value = unbox_value<winrt::Windows::UI::Xaml::Media::FontFamily>(setter.Value());
-								m_main_sheet.set_font_family(wchar_cpy(value.Source().c_str()));
+								const auto val = unbox_value<winrt::Windows::UI::Xaml::Media::FontFamily>(setter.Value());
+								m_main_sheet.set_font_family(wchar_cpy(val.Source().c_str()));
 							}
 							else if (prop == TextBlock::FontSizeProperty()) {
 								// プロパティーが FontSize の場合,
 								// セッターの値から, 書体の大きさを得る.
-								const auto value = unbox_value<float>(setter.Value());
-								m_main_sheet.m_font_size = value;
+								const auto val = unbox_value<float>(setter.Value());
+								m_main_sheet.m_font_size = val;
 							}
 							else if (prop == TextBlock::FontStretchProperty()) {
 								// プロパティーが FontStretch の場合,
 								// セッターの値から, 書体の伸縮を得る.
-								auto value = unbox_value<int32_t>(setter.Value());
-								m_main_sheet.set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(value));
+								const auto val = unbox_value<int32_t>(setter.Value());
+								m_main_sheet.set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(val));
 							}
 							else if (prop == TextBlock::FontStyleProperty()) {
 								// プロパティーが FontStyle の場合,
 								// セッターの値から, 字体を得る.
-								auto value = unbox_value<int32_t>(setter.Value());
-								m_main_sheet.set_font_style(static_cast<DWRITE_FONT_STYLE>(value));
+								const auto val = unbox_value<int32_t>(setter.Value());
+								m_main_sheet.set_font_style(static_cast<DWRITE_FONT_STYLE>(val));
 							}
 							else if (prop == TextBlock::FontWeightProperty()) {
 								// プロパティーが FontWeight の場合,
 								// セッターの値から, 書体の太さを得る.
-								auto value = unbox_value<int32_t>(setter.Value());
-								m_main_sheet.set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(value));
+								const auto val = unbox_value<int32_t>(setter.Value());
+								m_main_sheet.set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(val));
 								//Determine the type of a boxed value
 								//auto prop = setter.Value().try_as<winrt::Windows::Foundation::IPropertyValue>();
 								//auto prop_type = prop.Type();
@@ -548,27 +548,27 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::sheet_size_text_changed(IInspectable const& sender, TextChangedEventArgs const&)
 	{
 		const double dpi = m_main_d2d.m_logical_dpi;
-		double value;
+		double val;
 		wchar_t buf[2];
 		int cnt;
 		// テキストボックスの文字列を数値に変換する.
-		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &value, buf, 2);
-		if (cnt == 1 && value > 0.0) {
+		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &val, buf, 2);
+		if (cnt == 1 && val > 0.0) {
 			// 文字列が数値に変換できた場合,
 			float g_base;
 			m_main_sheet.get_grid_base(g_base);
-			value = conv_len_to_val(m_len_unit, value, dpi, g_base + 1.0);
+			val = conv_len_to_val(m_len_unit, val, dpi, g_base + 1.0);
 		}
-		cd_sheet_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && value >= 1.0 && value < sheet_size_max());
+		cd_sheet_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && val >= 1.0 && val < sheet_size_max());
 	}
 
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
-	// value	格納する値
+	// val	格納する値
 	// 戻り値	なし.
 	template <UNDO_OP U, int S>
-	void MainPage::sheet_slider_set_header(const float value)
+	void MainPage::sheet_slider_set_header(const float val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
@@ -576,7 +576,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::SHEET_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
-			conv_col_to_str(m_color_code, value, buf);
+			conv_col_to_str(m_color_code, val, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
 		sample_set_slider_header<S>(text);
@@ -588,21 +588,21 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	template <UNDO_OP U, int S>
-	void MainPage::sheet_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::sheet_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::SHEET_COLOR) {
-			const auto value = static_cast<float>(args.NewValue());
-			sheet_slider_set_header<U, S>(value);
+			const auto val = static_cast<float>(args.NewValue());
+			sheet_slider_set_header<U, S>(val);
 			D2D1_COLOR_F s_color;
 			m_sample_sheet.get_sheet_color(s_color);
 			if constexpr (S == 0) {
-				s_color.r = static_cast<FLOAT>(value / COLOR_MAX);
+				s_color.r = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			if constexpr (S == 1) {
-				s_color.g = static_cast<FLOAT>(value / COLOR_MAX);
+				s_color.g = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			if constexpr (S == 2) {
-				s_color.b = static_cast<FLOAT>(value / COLOR_MAX);
+				s_color.b = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			m_sample_sheet.set_sheet_color(s_color);
 		}

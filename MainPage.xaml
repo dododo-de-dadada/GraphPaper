@@ -995,7 +995,7 @@
 		<!-- 頂点をくっつける閾値 -->
 		<ContentDialog x:Name="cd_misc_vert_stick" x:Uid="cd_misc_vert_stick" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" >
 			<StackPanel>
-				<Slider x:Name="sd_misc_vert_stick" x:Uid="sd_misc_vert_stick" Maximum="127.5" Minimum="0" SnapsTo="Ticks" TickFrequency="0.5" Header="Thresholds" ValueChanged="misc_vert_stick_value_changed"/>
+				<Slider x:Name="sd_misc_vert_stick" x:Uid="sd_misc_vert_stick" Maximum="127.5" Minimum="0" SnapsTo="Ticks" TickFrequency="0.5" Header="Thresholds" ValueChanged="misc_vert_stick_val_changed"/>
 			</StackPanel>
 		</ContentDialog>
 		<!-- 属性入力ダイアログ -->

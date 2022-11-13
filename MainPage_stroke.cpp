@@ -76,20 +76,20 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_1().Visibility(UI_VISIBLE);
 		sample_slider_2().Visibility(UI_VISIBLE);
 		sample_slider_3().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 2> });
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_COLOR, 3> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_OP::STROKE_COLOR, 0> });
+		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_OP::STROKE_COLOR, 1> });
+		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_OP::STROKE_COLOR, 2> });
+		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_OP::STROKE_COLOR, 3> });
 
 		stroke_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_stroke_color")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F sample_value;
-			//m_sample_shape->get_stroke_color(sample_value);
-			m_sample_sheet.m_shape_list.back()->get_stroke_color(sample_value);
-			if (ustack_push_set<UNDO_OP::STROKE_COLOR>(sample_value)) {
+			D2D1_COLOR_F samp_val;
+			//m_sample_shape->get_stroke_color(samp_val);
+			m_sample_sheet.m_shape_list.back()->get_stroke_color(samp_val);
+			if (ustack_push_set<UNDO_OP::STROKE_COLOR>(samp_val)) {
 				ustack_push_null();
 				ustack_is_enable();
 				xcvd_is_enabled();
@@ -114,10 +114,10 @@ namespace winrt::GraphPaper::implementation
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
-	// value	格納する値
+	// val	格納する値
 	// 戻り値	なし.
 	template <UNDO_OP U, int S>
-	void MainPage::stroke_slider_set_header(const float value)
+	void MainPage::stroke_slider_set_header(const float val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		winrt::hstring text;
@@ -126,13 +126,13 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			float g_base;
 			m_main_sheet.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, value/* * SLIDER_STEP*/, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
 			constexpr wchar_t* R[]{ L"str_color_r", L"str_color_g", L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
-			conv_col_to_str(m_color_code, value, buf);
+			conv_col_to_str(m_color_code, val, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf;
 		}
 		sample_set_slider_header<S>(text);
@@ -144,36 +144,36 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	template <UNDO_OP U, int S>
-	void MainPage::stroke_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::stroke_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_OP::STROKE_WIDTH) {
-			const float value = static_cast<float>(args.NewValue());
+			const float val = static_cast<float>(args.NewValue());
 			if constexpr (S == 0) {
-				stroke_slider_set_header<U, S>(value);
-				//m_sample_shape->set_stroke_width(value);
-				m_sample_sheet.m_shape_list.back()->set_stroke_width(value);
+				stroke_slider_set_header<U, S>(val);
+				//m_sample_shape->set_stroke_width(val);
+				m_sample_sheet.m_shape_list.back()->set_stroke_width(val);
 			}
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
-			const float value = static_cast<float>(args.NewValue());
+			const float val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F color;
 			//m_sample_shape->get_stroke_color(color);
 			m_sample_sheet.m_shape_list.back()->get_stroke_color(color);
 			if constexpr (S == 0) {
-				stroke_slider_set_header<U, S>(value);
-				color.r = static_cast<FLOAT>(value / COLOR_MAX);
+				stroke_slider_set_header<U, S>(val);
+				color.r = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			if constexpr (S == 1) {
-				stroke_slider_set_header<U, S>(value);
-				color.g = static_cast<FLOAT>(value / COLOR_MAX);
+				stroke_slider_set_header<U, S>(val);
+				color.g = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			if constexpr (S == 2) {
-				stroke_slider_set_header<U, S>(value);
-				color.b = static_cast<FLOAT>(value / COLOR_MAX);
+				stroke_slider_set_header<U, S>(val);
+				color.b = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			if constexpr (S == 3) {
-				stroke_slider_set_header<U, S>(value);
-				color.a = static_cast<FLOAT>(value / COLOR_MAX);
+				stroke_slider_set_header<U, S>(val);
+				color.a = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			//m_sample_shape->set_stroke_color(color);
 			m_sample_sheet.m_shape_list.back()->set_stroke_color(color);
@@ -203,16 +203,16 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().Value(s_width);
 		stroke_slider_set_header<UNDO_OP::STROKE_WIDTH, 0>(s_width);
 		sample_slider_0().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_slider_value_changed<UNDO_OP::STROKE_WIDTH, 0> });
+		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_OP::STROKE_WIDTH, 0> });
 
 		stroke_create_sample_shape(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()), m_sample_sheet);
 
 		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width")));
 		const auto d_result = co_await cd_sample_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			float sample_value;
-			m_sample_sheet.m_shape_list.back()->get_stroke_width(sample_value);
-			if (ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_value)) {
+			float samp_val;
+			m_sample_sheet.m_shape_list.back()->get_stroke_width(samp_val);
+			if (ustack_push_set<UNDO_OP::STROKE_WIDTH>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				sheet_draw();
