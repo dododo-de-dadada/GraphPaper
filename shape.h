@@ -1361,6 +1361,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_text_padding{ TEXT_MARGIN_DEFVAL };	// 文字列のまわりの上下と左右の余白
 		DWRITE_TEXT_RANGE m_text_selected_range{ 0, 0 };	// 選択された文字範囲
 
+		DWRITE_FONT_METRICS m_dw_font_metrics{};
 		winrt::com_ptr<IDWriteTextLayout> m_dw_layout{};	// 文字列レイアウト
 		DWRITE_LINE_METRICS* m_dw_line_metrics = nullptr;	// 行の計量
 		UINT32 m_dw_selected_cnt = 0;	// 選択された文字範囲の計量の要素数
@@ -1409,7 +1410,7 @@ namespace winrt::GraphPaper::implementation
 		// 有効な書体名か判定し, 有効ならもとの書体名を破棄し, 有効な書体名要素へのポインターと置き換える.
 		static bool is_available_font(wchar_t*& font) noexcept;
 		// 書体や文字列の属性が変更されたか判定する.
-		bool is_updated(void) const;
+		bool is_updated(void);// const;
 		// 有効な書体名の配列を破棄する.
 		static void release_available_fonts(void) noexcept;
 		// 有効な書体名の配列を設定する.

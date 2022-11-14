@@ -23,6 +23,8 @@ namespace winrt::GraphPaper::implementation
 	static void tx_create_text_metrics(IDWriteTextLayout* text_lay, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, DWRITE_LINE_METRICS*& line_met, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met, const DWRITE_TEXT_RANGE& sele_rng);
 	// 文字列をデータライターに SVG として書き込む.
 	static void tx_dt_write_svg(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer);
+	// 書体の計量を得る
+	static void tx_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met);
 	// 書体のディセントを得る.
 	static void tx_get_font_descent(IDWriteTextLayout* text_layout, float& descent);
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を破棄する.
@@ -45,6 +47,21 @@ namespace winrt::GraphPaper::implementation
 		text_lay->HitTestTextRange(pos, len, 0, 0, test, 1, &test_cnt);
 		test_met = new DWRITE_HIT_TEST_METRICS[test_cnt];
 		winrt::check_hresult(text_lay->HitTestTextRange(pos, len, 0, 0, test_met, test_cnt, &test_cnt));
+	}
+
+	// 書体の計量を得る
+	static void tx_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met)
+	{
+		winrt::com_ptr<IDWriteFontCollection> fonts;
+		text_lay->GetFontCollection(fonts.put());
+		winrt::com_ptr<IDWriteFontFamily> fam;
+		fonts->GetFontFamily(0, fam.put());
+		fonts = nullptr;
+		winrt::com_ptr<IDWriteFont> font;
+		fam->GetFont(0, font.put());
+		fam = nullptr;
+		font->GetMetrics(font_met);
+		font = nullptr;
 	}
 
 	// ヒットテストの計量, 行の計量, 選択された文字範囲の計量を破棄する.
@@ -160,17 +177,17 @@ namespace winrt::GraphPaper::implementation
 
 		IDWriteFontFamily* fam;
 		fonts->GetFontFamily(0, &fam);
-		fonts->Release();
+		//fonts->Release();
 		fonts = nullptr;
 
 		IDWriteFont* font;
 		fam->GetFont(0, &font);
-		fam->Release();
+		//fam->Release();
 		fam = nullptr;
 
 		DWRITE_FONT_METRICS met;
 		font->GetMetrics(&met);
-		font->Release();
+		//font->Release();
 		font = nullptr;
 
 		const double font_size = text_lay->GetFontSize();
@@ -185,9 +202,10 @@ namespace winrt::GraphPaper::implementation
 
 		// 書体名がヌルでないか判定する.
 		if (m_font_family != nullptr) {
+			// 書体名が, 複数のオブジェクトで参照されていないことを確認して破棄する.
 			// 書体名が有効でないか判定する.
 			if (!is_available_font(m_font_family)) {
-				// 書体名配列に含まれてない名前なのでここで破棄する.
+				// 書体名配列に含まれてないので破棄する.
 				delete[] m_font_family;
 			}
 			// ヌルを書体名に格納する.
@@ -226,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体や文字列の属性が変更されたか判定する.
-	bool ShapeText::is_updated(void) const
+	bool ShapeText::is_updated(void)
 	{
 		const uint32_t text_len = wchar_len(m_text);
 		bool updated = false;
@@ -312,8 +330,10 @@ namespace winrt::GraphPaper::implementation
 			winrt::check_hresult(t3->GetLineSpacing(&src_spacing));
 			DWRITE_LINE_SPACING dst_spacing;
 			if (m_text_line_sp >= FLT_MIN) {
-				float descent = 0.0;
-				tx_get_font_descent(m_dw_layout.get(), descent);
+				if (m_dw_font_metrics.designUnitsPerEm == 0) {
+					tx_get_font_metrics(m_dw_layout.get(), &m_dw_font_metrics);
+				}
+				const float descent = (m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);
 
 				dst_spacing.method = DWRITE_LINE_SPACING_METHOD_UNIFORM;
 				dst_spacing.height = m_font_size + m_text_line_sp;
@@ -383,15 +403,16 @@ namespace winrt::GraphPaper::implementation
 			// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
 			tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
 			// 文字列レイアウトが空でないなら破棄する.
-			if (m_dw_layout == nullptr) {
+			if (m_dw_layout != nullptr) {
+				//m_dw_layout->Release();
 				m_dw_layout = nullptr;
 			}
 		}
 		else {
-			// 文字列レイアウトが空か判定する.
+			// 文字列レイアウトが空, あるいはレイアウトが変更されたか判定する.
 			if (m_dw_layout == nullptr) {
 				// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
-				tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
+				//tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
 				// 文字列フォーマットを作成する.
 				wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 				GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
@@ -410,8 +431,10 @@ namespace winrt::GraphPaper::implementation
 				const UINT32 text_len = wchar_len(m_text);
 				winrt::check_hresult(d2d.m_dwrite_factory->CreateTextLayout(m_text, text_len, t_format.get(), text_w, text_h, m_dw_layout.put()));
 				// 文字列フォーマットを破棄する.
+				// t_format->Release();
 				t_format = nullptr;
-
+				is_updated();
+				/*
 				// 文字列レイアウトに文字そろえを格納する.
 				winrt::check_hresult(m_dw_layout->SetTextAlignment(m_text_align_t));
 				// 文字列レイアウトに段落そろえを格納する.
@@ -420,13 +443,14 @@ namespace winrt::GraphPaper::implementation
 				DWRITE_TEXT_RANGE text_range{ 0, text_len };
 				winrt::check_hresult(m_dw_layout->SetFontStretch(m_font_stretch, text_range));
 				tx_create_test_metrics(m_dw_layout.get(), text_range, m_dw_test_metrics, m_dw_test_cnt);
-
-				UINT32 line_cnt;
-				m_dw_layout->GetLineMetrics(nullptr, 0, &line_cnt);
-				m_dw_line_metrics = new DWRITE_LINE_METRICS[line_cnt];
-				winrt::check_hresult(m_dw_layout->GetLineMetrics(m_dw_line_metrics, line_cnt, &line_cnt));
-				m_text_line_sp = m_dw_line_metrics[0].height - m_font_size;
-				tx_create_test_metrics(m_dw_layout.get(), m_text_selected_range, m_dw_selected_metrics, m_dw_selected_cnt);
+				*/
+				//UINT32 line_cnt;
+				//m_dw_layout->GetLineMetrics(nullptr, 0, &line_cnt);
+				//m_dw_line_metrics = new DWRITE_LINE_METRICS[line_cnt];
+				//winrt::check_hresult(m_dw_layout->GetLineMetrics(m_dw_line_metrics, line_cnt, &line_cnt));
+				//m_text_line_sp = m_dw_line_metrics[0].height - m_font_size;
+				//tx_create_test_metrics(m_dw_layout.get(), m_text_selected_range, m_dw_selected_metrics, m_dw_selected_cnt);
+				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_text_selected_range);
 			}
 
 			// 書体や文字列の属性が変更されたか判定する.
@@ -434,23 +458,6 @@ namespace winrt::GraphPaper::implementation
 				// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
 				tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
 				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_text_selected_range);
-			}
-
-			// 文字列レイアウトが IDWriteTextLayout3 に変換できるか判定する.
-			winrt::com_ptr<IDWriteTextLayout3> t3;
-			if (m_dw_layout.try_as(t3)) {
-				float descent = 0.0f;
-				tx_get_font_descent(m_dw_layout.get(), descent);
-
-				// 行間を設定する.
-				const DWRITE_LINE_SPACING spacing{
-					m_text_line_sp >= FLT_MIN ? DWRITE_LINE_SPACING_METHOD_UNIFORM : DWRITE_LINE_SPACING_METHOD_DEFAULT,
-					m_text_line_sp >= FLT_MIN ? m_font_size + m_text_line_sp : 0.0f,
-					m_text_line_sp >= FLT_MIN ? m_font_size + m_text_line_sp - descent : 0.0f,
-					0.0f,
-					DWRITE_FONT_LINE_GAP_USAGE_DEFAULT
-				};
-				winrt::check_hresult(t3->SetLineSpacing(&spacing));
 			}
 
 			// 余白分をくわえて, 文字列の左上位置を計算する.
@@ -469,8 +476,10 @@ namespace winrt::GraphPaper::implementation
 			if (m_text_selected_range.length > 0) {
 
 				// 選択された文字範囲を塗りつぶす.
-				float descent = 0.0f;
-				tx_get_font_descent(m_dw_layout.get(), descent);
+				if (m_dw_font_metrics.designUnitsPerEm == 0) {
+					tx_get_font_metrics(m_dw_layout.get(), &m_dw_font_metrics);
+				}
+				const float descent = (m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);
 				const uint32_t rc = m_dw_selected_cnt;
 				const uint32_t tc = m_dw_test_cnt;
 				for (uint32_t i = 0; i < rc; i++) {
@@ -527,8 +536,10 @@ namespace winrt::GraphPaper::implementation
 				for (uint32_t i = 1; i < d_cnt; i++) {
 					mod += d_arr[i];
 				}
-				float descent = 0.0f;
-				tx_get_font_descent(m_dw_layout.get(), descent);
+				if (m_dw_font_metrics.designUnitsPerEm == 0) {
+					tx_get_font_metrics(m_dw_layout.get(), &m_dw_font_metrics);
+				}
+				const float descent = (m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);
 				for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 					DWRITE_HIT_TEST_METRICS const& tm = m_dw_test_metrics[i];
 					DWRITE_LINE_METRICS const& lm = m_dw_line_metrics[i];
@@ -661,8 +672,7 @@ namespace winrt::GraphPaper::implementation
 		if (anc != ANC_TYPE::ANC_SHEET) {
 			return anc;
 		}
-		float descent = 0.0f;
-		tx_get_font_descent(m_dw_layout.get(), descent);
+		const float descent = m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : (m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);
 		// 文字列の範囲の左上が原点になるよう, 判定する位置を移動する.
 		D2D1_POINT_2F p_min;
 		ShapeStroke::get_pos_min(p_min);
@@ -692,8 +702,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F h_max;
 
 		if (m_dw_test_cnt > 0 && m_dw_test_cnt < UINT32_MAX) {
-			float descent = 0.0f;
-			tx_get_font_descent(m_dw_layout.get(), descent);
+			const float descent = m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : (m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);
 
 			ShapeStroke::get_pos_min(p_min);
 			for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
@@ -1005,14 +1014,14 @@ namespace winrt::GraphPaper::implementation
 		// ちなみに, designUnitsPerEm は, 配置 (Em) ボックスの単位あたりの大きさ.
 		// デセントは, フォント文字の配置ボックスの下部からベースラインまでの長さ.
 		// dy = その行のヒットテストメトリックスの高さ - フォントの大きさ × (デセント ÷ 単位大きさ) となる, はず.
-		IDWriteFontCollection* fonts;
-		m_dw_layout->GetFontCollection(&fonts);
-		IDWriteFontFamily* family;
-		fonts->GetFontFamily(0, &family);
-		IDWriteFont* font;
-		family->GetFont(0, &font);
-		DWRITE_FONT_METRICS metrics;
-		font->GetMetrics(&metrics);
+		//IDWriteFontCollection* fonts;
+		//m_dw_layout->GetFontCollection(&fonts);
+		//IDWriteFontFamily* family;
+		//fonts->GetFontFamily(0, &family);
+		//IDWriteFont* font;
+		//family->GetFont(0, &font);
+		//DWRITE_FONT_METRICS metrics;
+		//font->GetMetrics(&metrics);
 		//const double descent = m_font_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
 
 		if (is_opaque(m_fill_color) || is_opaque(m_stroke_color)) {

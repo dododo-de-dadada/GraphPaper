@@ -174,7 +174,7 @@
     <comment>CheckBox</comment>
   </data>
   <data name="ck_find_text_wrap.Content" xml:space="preserve">
-    <value>折り返しあり</value>
+    <value>折り返す</value>
     <comment>CheckBox</comment>
   </data>
   <data name="rmfi_color_code_cent.Text" xml:space="preserve">
