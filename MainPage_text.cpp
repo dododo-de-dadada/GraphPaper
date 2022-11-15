@@ -53,7 +53,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			else if (s->is_selected() != true) {
+			else if (!s->is_selected()) {
 				continue;
 			}
 			else if (typeid(*s) != typeid(ShapeText)) {

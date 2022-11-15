@@ -204,12 +204,12 @@ namespace winrt::GraphPaper::implementation
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最前面の図形は選択されいない.
-		const auto enable_forward = (runlength_cnt > 1 || (exists_selected && fore_selected != true));
+		const auto enable_forward = (runlength_cnt > 1 || (exists_selected && !fore_selected));
 		// 背面に配置可能か判定する.
 		// 1. 複数のランレングスがある.
 		// 2. または, 少なくとも 1 つは選択された図形があり, 
 		//    かつ最背面の図形は選択されいない.
-		const auto enable_backward = (runlength_cnt > 1 || (exists_selected && back_selected != true));
+		const auto enable_backward = (runlength_cnt > 1 || (exists_selected && !back_selected));
 
 		mfi_xcvd_cut().IsEnabled(exists_selected);
 		mfi_xcvd_copy().IsEnabled(exists_selected);

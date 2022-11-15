@@ -216,7 +216,7 @@ namespace winrt::GraphPaper::implementation
 					// 選択された文字列図形の数をインクリメントする.
 					selected_text_cnt++;
 				}
-				if (prev_selected != true) {
+				if (!prev_selected) {
 					// ひとつ背面の図形がヌル
 					// またはひとつ背面の図形の選択フラグがない場合,
 					// 選択された図形のランレングスの数をインクリメントする.
@@ -421,7 +421,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t i = 0;
 		for (auto it = it_beg; it != it_end; it++) {
 			auto s = *it;
-			if (s->is_deleted() != true) {
+			if (!s->is_deleted()) {
 				distance = i;
 				return s;
 			}
@@ -471,7 +471,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeElli(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_LINE) {
-			s = new ShapeLineA(dt_reader);
+			s = new ShapeLine(dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_POLY) {
 			s = new ShapePoly(dt_reader);
@@ -566,7 +566,7 @@ namespace winrt::GraphPaper::implementation
 			else if (s_type == typeid(ShapeGroup)) {
 				s_int = SHAPE_TYPE::SHAPE_GROUP;
 			}
-			else if (s_type == typeid(ShapeLineA)) {
+			else if (s_type == typeid(ShapeLine)) {
 				s_int = SHAPE_TYPE::SHAPE_LINE;
 			}
 			else if (s_type == typeid(ShapePoly)) {

@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 				i = summary_remove(t);
 			}
 			auto g = static_cast<ShapeGroup*>(t);
-			while (g->m_list_grouped.empty() != true) {
+			while (!g->m_list_grouped.empty()) {
 				// グループ化された図形のリストから最初の図形を得る.
 				auto s = g->m_list_grouped.front();
 				// 図形の消去フラグが立っているか判定する.

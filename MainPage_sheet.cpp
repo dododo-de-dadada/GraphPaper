@@ -151,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 			m_sample_sheet.get_sheet_color(samp_val);
 			D2D1_COLOR_F sheet_val;
 			m_main_sheet.get_sheet_color(sheet_val);
-			if (equal(sheet_val, samp_val) != true) {
+			if (!equal(sheet_val, samp_val)) {
 				ustack_push_set<UNDO_OP::SHEET_COLOR>(&m_main_sheet, samp_val);
 				ustack_push_null();
 				ustack_is_enable();
@@ -274,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 					style = style.BasedOn();
 				}
 				try {
-					while (stack.empty() != true) {
+					while (!stack.empty()) {
 						// スタックが空でない場合,
 						// スタイルをスタックから取り出す.
 						style = stack.back();

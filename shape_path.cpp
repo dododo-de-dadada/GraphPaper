@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 	// データライターに書き込む.
 	void ShapePath::write(DataWriter const& dt_writer) const
 	{
-		ShapeLineA::write(dt_writer);
+		ShapeLine::write(dt_writer);
 	}
 
 }

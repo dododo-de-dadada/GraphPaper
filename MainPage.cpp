@@ -320,11 +320,11 @@ namespace winrt::GraphPaper::implementation
 			added_text = r_loader.GetString(desc_key);
 		}
 		catch (winrt::hresult_error const&) {}
-		if (added_text.empty() != true) {
+		if (!added_text.empty()) {
 			// 追加する文字列が空以外の場合,
 			text = text + NEW_LINE + added_text;
 		}
-		else if (desc_key.empty() != true) {
+		else if (!desc_key.empty()) {
 			// 説明そのものが空以外の場合,
 			text = text + NEW_LINE + QUOT + desc_key + QUOT;
 		}

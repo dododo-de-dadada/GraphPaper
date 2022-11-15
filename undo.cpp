@@ -195,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::equal;
 		U_TYPE<U>::type val{};
-		return GET(m_shape, val) && equal(val, m_value) != true;
+		return GET(m_shape, val) && !equal(val, m_value);
 	}
 
 	// ëÄçÏÇé¿çsÇ∑ÇÈ.
@@ -783,7 +783,7 @@ namespace winrt::GraphPaper::implementation
 		m_insert(false),
 		m_shape_at(static_cast<Shape*>(nullptr))
 	{
-		if (dont_exec != true) {
+		if (!dont_exec) {
 			exec();
 		}
 	}
@@ -797,7 +797,7 @@ namespace winrt::GraphPaper::implementation
 		m_insert(true),
 		m_shape_at(p)
 	{
-		if (dont_exec != true) {
+		if (!dont_exec) {
 			exec();
 		}
 	}

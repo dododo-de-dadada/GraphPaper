@@ -150,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeGroup::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
 	{
 		for (const Shape* s : m_list_grouped) {
-			if (s->in_area(area_min, area_max) != true) {
+			if (!s->in_area(area_min, area_max)) {
 				return false;
 			}
 		}

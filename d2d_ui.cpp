@@ -240,7 +240,7 @@ namespace winrt::GraphPaper::implementation
 
 		// (高解像度のデバイスのバッテリ寿命を上げるためには、より小さいレンダー ターゲットにレンダリングして
 		// 出力が提示された場合は GPU で出力をスケーリングできるようする.)
-		if constexpr (DisplayMetrics::SupportHighResolutions != true
+		if constexpr (!DisplayMetrics::SupportHighResolutions
 			&& m_logical_dpi > DisplayMetrics::DpiThreshold) {
 			// 高解像度をサポートしない, かつ論理 DPI はしき値を超えるなら,
 			// 論理的な幅と高さを, 論理 DPI をもちいて, 

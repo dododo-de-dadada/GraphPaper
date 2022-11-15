@@ -36,7 +36,7 @@ namespace winrt::GraphPaper::implementation
 			dx.m_solid_color_brush->SetColor(m_stroke_color);
 			dx.m_d2d_context->DrawEllipse(elli, dx.m_solid_color_brush.get(), m_stroke_width, m_d2d_stroke_style.get());
 		}
-		if (is_selected() != true) {
+		if (!is_selected()) {
 			return;
 		}
 		D2D1_POINT_2F a_pos[4];
@@ -92,7 +92,7 @@ namespace winrt::GraphPaper::implementation
 			// ”¼Œa‚É˜g‚Ì‘¾‚³‚Ì”¼•ª‚ð‰Á‚¦‚½’l‚ðŠOŒa‚ÉŠi”[‚·‚é.
 			D2D1_POINT_2F r_outer;
 			pt_add(rad, s_width * 0.5, r_outer);
-			if (pt_in_ellipse(t_pos, c_pos, r_outer.x, r_outer.y) != true) {
+			if (!pt_in_ellipse(t_pos, c_pos, r_outer.x, r_outer.y)) {
 				// ŠOŒa‚Ì‚¾‰~‚ÉŠÜ‚Ü‚ê‚È‚¢‚È‚ç, 
 				// ANC_SHEET ‚ð•Ô‚·.
 				return ANC_TYPE::ANC_SHEET;

@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeElli(b_pos, b_vec, &m_main_sheet);
 		}
 		else if (t_draw == DRAWING_TOOL::LINE) {
-			s = new ShapeLineA(b_pos, b_vec, &m_main_sheet);
+			s = new ShapeLine(b_pos, b_vec, &m_main_sheet);
 		}
 		else if (t_draw == DRAWING_TOOL::BEZI) {
 			s = new ShapeBezi(b_pos, b_vec, &m_main_sheet);
@@ -863,7 +863,7 @@ namespace winrt::GraphPaper::implementation
 				default:
 					// }Œ`‚ÌƒNƒ‰ƒX‚ª, ‘½ŠpŒ`‚Ü‚½‚Í‹Èü‚Å‚ ‚é‚©”»’è‚·‚é.
 					if (s != nullptr &&
-						(typeid(*s) == typeid(ShapeLineA) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
+						(typeid(*s) == typeid(ShapeLine) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
 						// }Œ`‚Ì•”ˆÊ‚ª, ’¸“_‚Ì”‚ð’´‚¦‚È‚¢‚©”»’è‚·‚é.
 						if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 + static_cast<ShapePath*>(s)->m_vec.size() + 1) {
 							Window::Current().CoreWindow().PointerCursor(CC_CROSS);

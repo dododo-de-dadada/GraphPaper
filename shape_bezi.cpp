@@ -888,7 +888,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			ShapeLineA::write_svg(barbs, barbs[2], dt_writer);
+			ShapeLine::write_svg(barbs, barbs[2], dt_writer);
 		}
 	}
 
@@ -944,7 +944,7 @@ namespace winrt::GraphPaper::implementation
 			// 方形 br は方形 pr の少なくとも一部と重なる ?
 			if (pr[1].x >= br[0].x && pr[0].x <= br[1].x
 				&& pr[1].y >= br[0].y && pr[0].y <= br[1].y) {
-				if (bezi_dividable(br, br_mid) != true) {
+				if (!bezi_dividable(br, br_mid)) {
 					// 線分 pq は y 軸にほぼ平行 ?
 					if (pr[1].x < pr_next.x) {
 						dist = br_mid.x - p.x;
@@ -1069,7 +1069,7 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 			}
-		} while (st.empty() != true);
+		} while (!st.empty());
 		return t_cnt;
 	}
 	*/

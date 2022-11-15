@@ -108,7 +108,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// ŽŸ‚Ì}Œ`‚ª‘I‘ð‚³‚ê‚Ä‚È‚¢ê‡,
 			Shape* const s = *it_src;
-			if (s->is_selected() != true) {
+			if (!s->is_selected()) {
 				continue;
 			}
 			Shape* const t = *it_dst;

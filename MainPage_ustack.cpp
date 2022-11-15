@@ -210,7 +210,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		auto flag = false;
 		// 元に戻す操作スタックからヌルで区切られていない (選択などの) 操作を取り除く.
-		while (m_ustack_undo.empty() != true) {
+		while (!m_ustack_undo.empty()) {
 			auto u = m_ustack_undo.back();
 			if (u == nullptr) {
 				break;
@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_exec(r);
 			flag = true;
 		}
-		if (flag != true) {
+		if (!flag) {
 			return;
 		}
 		xcvd_is_enabled();
@@ -272,7 +272,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		auto st = 0;
-		while (m_ustack_undo.empty() != true) {
+		while (!m_ustack_undo.empty()) {
 			auto u = m_ustack_undo.back();
 			if (st == 0) {
 				m_ustack_undo.pop_back();
@@ -476,7 +476,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// 元に戻す操作スタックが空でないか判定する.
-		while (m_ustack_undo.empty() != true) {
+		while (!m_ustack_undo.empty()) {
 			// 操作スタックの一番底の操作を取り出す.
 			const auto u = m_ustack_undo.front();
 			m_ustack_undo.pop_front();
@@ -573,7 +573,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 図形がその値を持たない場合, またはすでに同値の場合,
 		T t_val;
-		if (UndoAttr<U>::GET(s, t_val) != true || equal(t_val, val)) {
+		if (!UndoAttr<U>::GET(s, t_val) || equal(t_val, val)) {
 			// 終了する.
 			return;
 		}
@@ -675,7 +675,7 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		if (flag != true) {
+		if (!flag) {
 			m_ustack_undo.push_back(new UndoAttr<UNDO_OP::TEXT_SELECTED>(s, val));
 		}
 

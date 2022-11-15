@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			if (s->in_area(area_min, area_max)) {
-				if (s->is_selected() != true) {
+				if (!s->is_selected()) {
 					ustack_push_select(s);
 					// 一覧が表示されてるか判定する.
 					if (summary_is_visible()) {
@@ -210,7 +210,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				[[fallthrough]];
 			case NEXT:
-				if (s->is_selected() != true) {
+				if (!s->is_selected()) {
 					ustack_push_select(s);
 					// 一覧が表示されてるか判定する.
 					if (summary_is_visible()) {
@@ -249,13 +249,14 @@ namespace winrt::GraphPaper::implementation
 			}
 			m_event_shape_prev = s;
 		}
-		// シフトキーが押されているか判定する.
-		else if (k_mod == VirtualKeyModifiers::Shift) {
+		// シフトキーが押されて, かつ直前に押された図形があり, その図形が選択されているか判定する.
+		else if (k_mod == VirtualKeyModifiers::Shift &&
+			m_event_shape_prev != nullptr && m_event_shape_prev->is_selected() && !m_event_shape_prev->is_deleted()) {
 			// 前回ポインターが押された図形が空か判定する.
-			if (m_event_shape_prev == nullptr) {
-				// 図形リストの先頭を前回ポインターが押された図形に格納する.
-				m_event_shape_prev = m_main_sheet.m_shape_list.front();
-			}
+			//if (m_event_shape_prev == nullptr) {
+			//	// 図形リストの先頭を前回ポインターが押された図形に格納する.
+			//	m_event_shape_prev = m_main_sheet.m_shape_list.front();
+			//}
 			// 範囲の中の図形は選択して, それ以外の図形の選択をはずす.
 			if (select_range(s, m_event_shape_prev)) {
 				xcvd_is_enabled();
@@ -263,7 +264,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			// シフトキーもコントロールキーも押されてないならば,
+			// 上記以外なら,
 			// 図形が選択されてるか判定する.
 			if (!s->is_selected()) {
 				unselect_all();
@@ -297,7 +298,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_push_select(s);
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
-				if (s->is_selected() != true) {
+				if (!s->is_selected()) {
 					summary_select(s);
 				}
 				else {

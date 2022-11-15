@@ -116,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 				anc_draw_rect(r_pos[i], d2d);
 				anc_draw_rect(r_mid, d2d);
 			}
-			//if (zero != true) {
+			//if (!zero) {
 				D2D1_POINT_2F c_pos;
 				pt_add(r_min, rx, ry, c_pos);
 				anc_draw_ellipse(c_pos, d2d);

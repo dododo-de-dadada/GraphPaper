@@ -289,7 +289,7 @@ namespace winrt::GraphPaper::implementation
 			else if (u_type == typeid(UndoSelect)) {
 				const auto s = u->shape();
 				const auto i = summary_distance(lv_summary_list().Items(), s);
-				if (s->is_selected() != true) {
+				if (!s->is_selected()) {
 					summary_select_at(lv_summary_list(), i);
 				}
 				else {

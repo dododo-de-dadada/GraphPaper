@@ -276,7 +276,7 @@ namespace winrt::GraphPaper::implementation
 		const uint32_t vg = static_cast<uint32_t>(std::round(val.g * 255.0)) & 0xff;
 		sprintf_s(buf, "%s=\"#%02x%02x%02x\" ", name, vr, vg, vb);
 		dt_write_svg(buf, dt_writer);
-		if (is_opaque(val) != true) {
+		if (!is_opaque(val)) {
 			std::snprintf(buf, sizeof(buf), "%s-opacity=\"%.3f\" ", name, val.a);
 			dt_write_svg(buf, dt_writer);
 		}

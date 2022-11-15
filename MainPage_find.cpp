@@ -345,7 +345,7 @@ namespace winrt::GraphPaper::implementation
 		stack.push_back(slist.end());
 		t = static_cast<ShapeText*>(nullptr);
 		uint32_t t_pos = 0;
-		while (stack.empty() != true) {
+		while (!stack.empty()) {
 			auto j = stack.back();
 			stack.pop_back();
 			auto i = stack.back();
@@ -363,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				DWRITE_TEXT_RANGE t_range;
-				if (s->get_text_selected(t_range) != true) {
+				if (!s->get_text_selected(t_range)) {
 					continue;
 				}
 				if (t == nullptr) {
@@ -395,12 +395,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// ‰ñ‚è‚İŒŸõ‚ª‚È‚¢, ‚©‚Â•¶š”ÍˆÍ‚ª‘I‘ğ‚³‚ê‚½}Œ`‚ªŒ©‚Â‚©‚Á‚½‚©”»’è‚·‚é.
-		if (f_wrap != true && t != nullptr) {
+		if (!f_wrap && t != nullptr) {
 			return false;
 		}
 		stack.push_back(slist.begin());
 		stack.push_back(slist.end());
-		while (stack.empty() != true) {
+		while (!stack.empty()) {
 			auto j = stack.back();
 			stack.pop_back();
 			auto i = stack.back();
@@ -454,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 		std::list<SHAPE_LIST::iterator> stack;
 		stack.push_back(it_beg);
 		stack.push_back(it_end);
-		while (stack.empty() != true) {
+		while (!stack.empty()) {
 			auto j = stack.back();
 			stack.pop_back();
 			auto i = stack.back();
@@ -472,7 +472,7 @@ namespace winrt::GraphPaper::implementation
 					j = static_cast<ShapeGroup*>(s)->m_list_grouped.end();
 					continue;
 				}
-				if (s->get_text_selected(t_range) != true) {
+				if (!s->get_text_selected(t_range)) {
 					continue;
 				}
 				if (t_range.startPosition > 0 || t_range.length > 0) {
@@ -522,7 +522,7 @@ namespace winrt::GraphPaper::implementation
 				if (t->is_deleted()) {
 					continue;
 				}
-				if (t->is_selected() != true) {
+				if (!t->is_selected()) {
 					continue;
 				}
 				if (typeid(*t) == typeid(ShapeText)) {
@@ -572,7 +572,7 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				wchar_t* w_text;
-				if (s->get_text_content(w_text) != true) {
+				if (!s->get_text_content(w_text)) {
 					continue;
 				}
 				uint32_t f_pos = 0;
@@ -778,7 +778,7 @@ namespace winrt::GraphPaper::implementation
 	// ŒŸõ•¶š—ñ‚ª•ÏX‚³‚ê‚½.
 	void MainPage::find_text_what_changed(IInspectable const&, TextChangedEventArgs const&)
 	{
-		const auto not_empty = (tx_find_text_what().Text().empty() != true);
+		const auto not_empty = !tx_find_text_what().Text().empty();
 		btn_find_text_next().IsEnabled(not_empty);
 		btn_find_replace().IsEnabled(not_empty);
 		btn_find_replace_all().IsEnabled(not_empty);
