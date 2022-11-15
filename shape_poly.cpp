@@ -687,7 +687,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// パスジオメトリを作成する.
-	// d_factory DX ファクトリ
+	// dx	図形の描画環境
 	void ShapePoly::create_path_geometry(const D2D_UI& dx)
 	{
 		if (m_d2d_path_geom != nullptr) {

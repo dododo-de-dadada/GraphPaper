@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 		s_brush->SetColor(m_stroke_color);
 		dc->DrawRoundedRectangle(r_rec, s_brush, s_width, s_style);
 		if (is_selected()) {
-			const auto zero = (std::abs(m_vec[0].x) >= FLT_MIN && std::abs(m_vec[0].y) >= FLT_MIN);
+			//const auto zero = (std::abs(m_vec[0].x) >= FLT_MIN && std::abs(m_vec[0].y) >= FLT_MIN);
 			//if (zero) {
 			// D2D1_POINT_2F c_pos;
 			// pt_add(r_min, rx, ry, c_pos);

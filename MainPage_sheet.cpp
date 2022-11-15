@@ -359,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.set_grid_snap(true);
 			m_main_sheet.set_sheet_color(Shape::s_background_color);
 			m_main_sheet.set_sheet_scale(1.0);
-			const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
+			//const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_main_sheet.m_sheet_size = SHEET_SIZE_DEF_VAL;
 			m_main_sheet.set_stroke_cap(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
 			m_main_sheet.set_stroke_color(Shape::s_foreground_color);
