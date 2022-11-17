@@ -520,8 +520,10 @@ namespace winrt::GraphPaper::implementation
 	*/
 
 	// 図形を表示する.
-	void ShapeBezi::draw(D2D_UI& dx)
+	// sh	表示する用紙
+	void ShapeBezi::draw(ShapeSheet const& sh)
 	{
+		const D2D_UI& dx = sh.m_d2d;
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(dx);
 		}
@@ -539,49 +541,48 @@ namespace winrt::GraphPaper::implementation
 
 		if (is_opaque(m_stroke_color)) {
 			const auto s_width = m_stroke_width;
-			const auto s_brush = dx.m_solid_color_brush.get();
 			const auto s_style = m_d2d_stroke_style.get();
 			if (s_style == nullptr) {
 				
 			}
-			dx.m_solid_color_brush->SetColor(m_stroke_color);
-			dx.m_d2d_context->DrawGeometry(m_d2d_path_geom.get(), s_brush, s_width, s_style);
+			sh.m_color_brush->SetColor(m_stroke_color);
+			dx.m_d2d_context->DrawGeometry(m_d2d_path_geom.get(), sh.m_color_brush.get(), s_width, s_style);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
-					dx.m_d2d_context->FillGeometry(a_geom, s_brush, nullptr);
+					dx.m_d2d_context->FillGeometry(a_geom, sh.m_color_brush.get(), nullptr);
 				}
-				dx.m_d2d_context->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
+				dx.m_d2d_context->DrawGeometry(a_geom, sh.m_color_brush.get(), s_width, m_d2d_arrow_style.get());
 			}
 		}
 		if (is_selected()) {
 			D2D1_MATRIX_3X2_F tran;
 			dx.m_d2d_context->GetTransform(&tran);
 			const auto s_width = static_cast<FLOAT>(1.0 / tran.m11);
-			anc_draw_rect(m_pos, dx);
+			anc_draw_rect(m_pos, sh);
 			s_pos = m_pos;
 			pt_add(s_pos, m_vec[0], e_pos);
-			dx.m_solid_color_brush->SetColor(Shape::s_background_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, nullptr);
-			dx.m_solid_color_brush->SetColor(Shape::s_foreground_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, Shape::m_aux_style.get());
-			anc_draw_ellipse(e_pos, dx);
+			sh.m_color_brush->SetColor(Shape::s_background_color);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, nullptr);
+			sh.m_color_brush->SetColor(Shape::s_foreground_color);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, Shape::m_aux_style.get());
+			anc_draw_ellipse(e_pos, sh);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[1], e_pos);
-			dx.m_solid_color_brush->SetColor(Shape::s_background_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, nullptr);
-			dx.m_solid_color_brush->SetColor(Shape::s_foreground_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, Shape::m_aux_style.get());
-			anc_draw_ellipse(e_pos, dx);
+			sh.m_color_brush->SetColor(Shape::s_background_color);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, nullptr);
+			sh.m_color_brush->SetColor(Shape::s_foreground_color);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, Shape::m_aux_style.get());
+			anc_draw_ellipse(e_pos, sh);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[2], e_pos);
-			dx.m_solid_color_brush->SetColor(Shape::s_background_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, nullptr);
-			dx.m_solid_color_brush->SetColor(Shape::s_foreground_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, dx.m_solid_color_brush.get(), s_width, Shape::m_aux_style.get());
-			anc_draw_rect(e_pos, dx);
+			sh.m_color_brush->SetColor(Shape::s_background_color);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, nullptr);
+			sh.m_color_brush->SetColor(Shape::s_foreground_color);
+			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, Shape::m_aux_style.get());
+			anc_draw_rect(e_pos, sh);
 		}
 	}
 

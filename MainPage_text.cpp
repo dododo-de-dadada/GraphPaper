@@ -254,14 +254,14 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			constexpr wchar_t* HEADER[] = { L"str_text_pad_horzorz", L"str_text_pad_vertert" };
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_sheet.m_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE_SP) {
 			constexpr wchar_t HEADER[] = L"str_text_line_sp";
 			if (val >= FLT_MIN) {
 				wchar_t buf[32];
-				conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_sheet.m_d2d.m_logical_dpi, m_sample_sheet.m_grid_base + 1.0f, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(HEADER) + L": " + buf;
 			}
 			else {

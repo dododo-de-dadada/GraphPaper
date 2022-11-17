@@ -34,8 +34,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
 		m_d2d_mutex.lock();
-		m_main_d2d.Trim();
-		m_sample_d2d.Trim();
+		m_main_sheet.m_d2d.Trim();
+		m_sample_sheet.m_d2d.Trim();
 		m_d2d_mutex.unlock();
 	}
 
@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		winrt::apartment_context context;
 
-		ShapeText::set_available_fonts(m_main_d2d);
+		ShapeText::set_available_fonts(m_main_sheet.m_d2d);
 
 		HRESULT ok = E_FAIL;
 		IStorageItem data_storage{ co_await ApplicationData::Current().LocalCacheFolder().TryGetItemAsync(FILE_NAME) };

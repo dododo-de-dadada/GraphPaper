@@ -51,13 +51,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapeRRect::draw(D2D_UI& d2d)
+	// sh	表示する用紙
+	void ShapeRRect::draw(ShapeSheet const& sh)
 	{
+		const D2D_UI& d2d = sh.m_d2d;
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(d2d);
 		}
 
-		auto s_brush = d2d.m_solid_color_brush.get();
 		auto s_style = m_d2d_stroke_style.get();
 		auto s_width = m_stroke_width;
 		auto dc = d2d.m_d2d_context;
@@ -82,11 +83,11 @@ namespace winrt::GraphPaper::implementation
 		r_rec.radiusX = rx;
 		r_rec.radiusY = ry;
 		if (is_opaque(m_fill_color)) {
-			s_brush->SetColor(m_fill_color);
-			dc->FillRoundedRectangle(r_rec, s_brush);
+			sh.m_color_brush->SetColor(m_fill_color);
+			dc->FillRoundedRectangle(r_rec, sh.m_color_brush.get());
 		}
-		s_brush->SetColor(m_stroke_color);
-		dc->DrawRoundedRectangle(r_rec, s_brush, s_width, s_style);
+		sh.m_color_brush->SetColor(m_stroke_color);
+		dc->DrawRoundedRectangle(r_rec, sh.m_color_brush.get(), s_width, s_style);
 		if (is_selected()) {
 			//const auto zero = (std::abs(m_vec[0].x) >= FLT_MIN && std::abs(m_vec[0].y) >= FLT_MIN);
 			//if (zero) {
@@ -113,19 +114,19 @@ namespace winrt::GraphPaper::implementation
 				// 方形の頂点のアンカーを表示する.
 				// 辺の中点を求め, そのアンカーを表示する.
 				pt_avg(r_pos[j], r_pos[i], r_mid);
-				anc_draw_rect(r_pos[i], d2d);
-				anc_draw_rect(r_mid, d2d);
+				anc_draw_rect(r_pos[i], sh);
+				anc_draw_rect(r_mid, sh);
 			}
 			//if (!zero) {
 				D2D1_POINT_2F c_pos;
 				pt_add(r_min, rx, ry, c_pos);
-				anc_draw_ellipse(c_pos, d2d);
+				anc_draw_ellipse(c_pos, sh);
 				c_pos.x = r_rec.rect.right - rx;
-				anc_draw_ellipse(c_pos, d2d);
+				anc_draw_ellipse(c_pos, sh);
 				c_pos.y = r_rec.rect.bottom - ry;
-				anc_draw_ellipse(c_pos, d2d);
+				anc_draw_ellipse(c_pos, sh);
 				c_pos.x = r_min.x + rx;
-				anc_draw_ellipse(c_pos, d2d);
+				anc_draw_ellipse(c_pos, sh);
 			//}
 		}
 	}

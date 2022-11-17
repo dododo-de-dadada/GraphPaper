@@ -233,13 +233,13 @@ namespace winrt::GraphPaper::implementation
 		bool m_image_keep_aspect = true;	// 画像の縦横比の維持
 
 		// メイン用紙
-		D2D_UI m_main_d2d;	// 用紙の描画環境
+		//D2D_UI m_main_sheet.m_d2d;	// 用紙の描画環境
 		ShapeSheet m_main_sheet;	// メインの用紙
 		D2D1_POINT_2F m_main_min{ 0.0F, 0.0F };	// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
 		D2D1_POINT_2F m_main_max{ 0.0F, 0.0F };	// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
 		// 見本用紙
-		D2D_UI m_sample_d2d;	// 見本の描画環境
+		//D2D_UI m_sample_sheet.m_d2d;	// 見本の描画環境
 		ShapeSheet m_sample_sheet;	// 見本の用紙
 
 		// 元に戻す・やり直し操作

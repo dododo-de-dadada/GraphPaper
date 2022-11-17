@@ -12,6 +12,7 @@ namespace winrt::GraphPaper::implementation
 	ShapeStroke::~ShapeStroke(void)
 	{
 		if (m_d2d_stroke_style != nullptr) {
+			m_d2d_stroke_style->Release();
 			m_d2d_stroke_style = nullptr;
 		}
 	}
@@ -495,7 +496,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// s_attr	属性値
 	ShapeStroke::ShapeStroke(const ShapeSheet* s_attr) :
-		ShapeSele(),
+		ShapeSelect(),
 		m_dash_cap(s_attr->m_dash_cap),
 		m_stroke_cap(s_attr->m_stroke_cap),
 		m_stroke_color(s_attr->m_stroke_color),
@@ -524,7 +525,7 @@ namespace winrt::GraphPaper::implementation
 
 	// データリーダーから図形を読み込む.
 	ShapeStroke::ShapeStroke(DataReader const& dt_reader) :
-		ShapeSele(dt_reader),
+		ShapeSelect(dt_reader),
 		m_pos(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_vec(dt_read_vec<D2D1_POINT_2F>(dt_reader)),
 		m_stroke_cap(dt_read_cap(dt_reader)),

@@ -7,8 +7,6 @@
 // 含まれる DeviceResources クラスをもとに,
 // 3D 表示やフレームレートに関した処理を削除して,
 // 2D 表示に必要な部分を残している.
-// 図形を表示するため, 色ブラシなど D2D オブジェクトが
-// 追加されている.
 //
 #pragma once
 //#define WIN_UI	3
@@ -82,18 +80,10 @@ namespace winrt::GraphPaper::implementation
 
 		IDeviceNotify* m_deviceNotify = nullptr;
 
-		// 図形表示用の D2D オブジェクト
-		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block{ nullptr };	// 描画状態の保存ブロック
-		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush{ nullptr };	// 選択された文字範囲の色ブラシ
-		winrt::com_ptr<ID2D1SolidColorBrush> m_solid_color_brush{ nullptr };	// 図形の色ブラシ
-
 		// 描画環境を破棄する.
 		void Release(void)
 		{
 			Trim();
-			m_solid_color_brush = nullptr;
-			m_range_brush = nullptr;
-			m_swap_chain_panel = nullptr;
 		}
 
 		//------------------------------

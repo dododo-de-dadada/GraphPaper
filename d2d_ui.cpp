@@ -699,16 +699,6 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_context = nullptr;
 		winrt::check_hresult(d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, m_d2d_context.put()));
 
-		// D2D コンテキストをもとに, 図形の色ブラシ, 部位の色ブラシ,
-		// 補助線の色ブラシ, 選択された文字範囲の色ブラシ, 補助線の形式,
-		// 描画状態の保存ブロックを作成する.
-		m_solid_color_brush = nullptr;
-		winrt::check_hresult(m_d2d_context->CreateSolidColorBrush({}, m_solid_color_brush.put()));
-		m_range_brush = nullptr;
-		winrt::check_hresult(m_d2d_context->CreateSolidColorBrush({}, m_range_brush.put()));
-		m_state_block = nullptr;
-		winrt::check_hresult(m_d2d_factory->CreateDrawingStateBlock(m_state_block.put()));
-
 	};
 
 	// バッファーを解放できることを, ドライバーに示す.

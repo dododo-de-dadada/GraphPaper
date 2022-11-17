@@ -58,6 +58,7 @@ namespace winrt::GraphPaper::implementation
 			m_data = nullptr;
 		}
 		if (m_d2d_bitmap != nullptr) {
+			m_d2d_bitmap->Release();
 			m_d2d_bitmap = nullptr;
 		}
 	}
@@ -111,8 +112,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapeImage::draw(D2D_UI& d2d)
+	// sh	表示する用紙
+	void ShapeImage::draw(ShapeSheet const& sh)
 	{
+		const D2D_UI& d2d = sh.m_d2d;
 		if (m_d2d_bitmap == nullptr) {
 			const D2D1_BITMAP_PROPERTIES1 b_prop{
 				D2D1::BitmapProperties1(
@@ -135,10 +138,10 @@ namespace winrt::GraphPaper::implementation
 		d2d.m_d2d_context->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_clip);
 
 		if (is_selected()) {
-			d2d.m_solid_color_brush->SetColor(Shape::s_background_color);
-			d2d.m_d2d_context->DrawRectangle(dest_rect, d2d.m_solid_color_brush.get(), 1.0f, nullptr);
-			d2d.m_solid_color_brush->SetColor(Shape::s_foreground_color);
-			d2d.m_d2d_context->DrawRectangle(dest_rect, d2d.m_solid_color_brush.get(), 1.0f, Shape::m_aux_style.get());
+			sh.m_color_brush->SetColor(Shape::s_background_color);
+			d2d.m_d2d_context->DrawRectangle(dest_rect, sh.m_color_brush.get(), 1.0f, nullptr);
+			sh.m_color_brush->SetColor(Shape::s_foreground_color);
+			d2d.m_d2d_context->DrawRectangle(dest_rect, sh.m_color_brush.get(), 1.0f, Shape::m_aux_style.get());
 
 			const D2D1_POINT_2F v_pos[4]{
 				m_pos,
@@ -147,10 +150,10 @@ namespace winrt::GraphPaper::implementation
 				{ m_pos.x, m_pos.y + m_view.height },
 			};
 
-			anc_draw_rect(v_pos[0], d2d);
-			anc_draw_rect(v_pos[1], d2d);
-			anc_draw_rect(v_pos[2], d2d);
-			anc_draw_rect(v_pos[3], d2d);
+			anc_draw_rect(v_pos[0], sh);
+			anc_draw_rect(v_pos[1], sh);
+			anc_draw_rect(v_pos[2], sh);
+			anc_draw_rect(v_pos[3], sh);
 		}
 	}
 
@@ -595,7 +598,7 @@ namespace winrt::GraphPaper::implementation
 	// bmp	ビットマップ
 	// opac	不透明度
 	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bmp, const float opac) :
-		ShapeSele()
+		ShapeSelect()
 	{
 		const uint32_t image_w = bmp.PixelWidth();
 		const uint32_t image_h = bmp.PixelHeight();
@@ -635,7 +638,7 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから読み込む
 	// dt_reader	データリーダー
 	ShapeImage::ShapeImage(DataReader const& dt_reader) :
-		ShapeSele(dt_reader),
+		ShapeSelect(dt_reader),
 		m_pos(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_view(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_clip(D2D1_RECT_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle() }),

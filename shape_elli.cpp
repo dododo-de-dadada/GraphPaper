@@ -12,8 +12,10 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形を表示する.
-	void ShapeElli::draw(D2D_UI& dx)
+	// sh	表示する用紙
+	void ShapeElli::draw(ShapeSheet const& sh)
 	{
+		const D2D_UI& dx = sh.m_d2d;
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(dx);
 		}
@@ -28,13 +30,13 @@ namespace winrt::GraphPaper::implementation
 		D2D1_ELLIPSE elli{ c_pos, rad.x, rad.y };
 		// 塗りつぶし色が不透明か判定する.
 		if (is_opaque(m_fill_color)) {
-			dx.m_solid_color_brush->SetColor(m_fill_color);
-			dx.m_d2d_context->FillEllipse(elli, dx.m_solid_color_brush.get());
+			sh.m_color_brush->SetColor(m_fill_color);
+			dx.m_d2d_context->FillEllipse(elli, sh.m_color_brush.get());
 		}
 		// 枠線の色が不透明か判定する.
 		if (is_opaque(m_stroke_color)) {
-			dx.m_solid_color_brush->SetColor(m_stroke_color);
-			dx.m_d2d_context->DrawEllipse(elli, dx.m_solid_color_brush.get(), m_stroke_width, m_d2d_stroke_style.get());
+			sh.m_color_brush->SetColor(m_stroke_color);
+			dx.m_d2d_context->DrawEllipse(elli, sh.m_color_brush.get(), m_stroke_width, m_d2d_stroke_style.get());
 		}
 		if (!is_selected()) {
 			return;
@@ -53,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[3].x = a_pos[0].x;
 		a_pos[3].y = m_pos.y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anc_draw_rect(a_pos[i], dx);
+			anc_draw_rect(a_pos[i], sh);
 		}
 		a_pos[0] = m_pos;
 		pt_add(m_pos, m_vec[0], a_pos[3]);
@@ -62,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[2].x = a_pos[3].x;
 		a_pos[2].y = a_pos[0].y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anc_draw_ellipse(a_pos[i], dx);
+			anc_draw_ellipse(a_pos[i], sh);
 		}
 	}
 

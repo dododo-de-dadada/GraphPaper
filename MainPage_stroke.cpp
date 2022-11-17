@@ -126,7 +126,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			float g_base;
 			m_main_sheet.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_sheet.m_d2d.m_logical_dpi, g_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::STROKE_COLOR) {
@@ -224,7 +224,7 @@ namespace winrt::GraphPaper::implementation
 		sample_slider_0().StepFrequency(1.0);
 		sample_slider_0().Maximum(255.0);
 
-		//m_sample_d2d.Trim();
+		//m_sample_sheet.m_d2d.Trim();
 		//UnloadObject(cd_sample_dialog());
 
 		sheet_draw();

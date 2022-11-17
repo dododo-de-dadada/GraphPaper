@@ -213,11 +213,40 @@ namespace winrt::GraphPaper::implementation
 			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(m_token_close_requested);
 		}
 
-		// 本来なら DirectX をコードビハインドでリリースしたいところだが,
-		// このあとスワップチェーンパネルの SizeChanged が呼び出されることがあるため,
-		// Trim を呼び出すだけにする.
-		m_main_d2d.Trim();
-		m_sample_d2d.Trim();
+		// DirectX のオブジェクトを破棄する.
+		{
+			// ウィンドウに他のコントロールを表示していた場合 (例えばリストビュー),
+			// この後, スワップチェーンパネルの SizeChanged が呼び出されてしまう.
+			// その時, 描画処理しないよう排他制御をロックする.
+			m_d2d_mutex.lock();
+			if (m_main_sheet.m_state_block != nullptr) {
+				m_main_sheet.m_state_block->Release();
+				m_main_sheet.m_state_block = nullptr;
+			}
+			if (m_main_sheet.m_color_brush != nullptr) {
+				m_main_sheet.m_color_brush->Release();
+				m_main_sheet.m_color_brush = nullptr;
+			}
+			if (m_main_sheet.m_range_brush != nullptr) {
+				m_main_sheet.m_range_brush->Release();
+				m_main_sheet.m_range_brush = nullptr;
+			}
+			m_main_sheet.m_d2d.Release();
+			if (m_sample_sheet.m_state_block != nullptr) {
+				m_sample_sheet.m_state_block->Release();
+				m_sample_sheet.m_state_block = nullptr;
+			}
+			if (m_sample_sheet.m_color_brush != nullptr) {
+				m_sample_sheet.m_color_brush->Release();
+				m_sample_sheet.m_color_brush = nullptr;
+			}
+			if (m_sample_sheet.m_range_brush != nullptr) {
+				m_sample_sheet.m_range_brush->Release();
+				m_sample_sheet.m_range_brush = nullptr;
+			}
+			m_sample_sheet.m_d2d.Release();
+			//m_sample_sheet.m_d2d.Trim();
+		}
 
 		// アプリケーションを終了する.
 		Application::Current().Exit();
@@ -261,12 +290,9 @@ namespace winrt::GraphPaper::implementation
 		// D2D/DWRITE ファクトリを図形クラスに, 
 		// 図形リストと用紙をアンドゥ操作に格納する.
 		{
-			//Shape::s_dx = &m_main_d2d;
-			//Shape::s_d2d_factory = m_main_d2d.m_d2d_factory.get();
-			//Shape::s_dwrite_factory = m_main_d2d.m_dwrite_factory.get();
 			Shape::m_aux_style = nullptr;
 			winrt::check_hresult(
-				m_main_d2d.m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
+				m_main_sheet.m_d2d.m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
 			);
 			Undo::set(&m_main_sheet.m_shape_list, &m_main_sheet);
 		}
@@ -355,7 +381,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		ShapeText::release_available_fonts();
 
-		ShapeText::set_available_fonts(m_main_d2d);
+		ShapeText::set_available_fonts(m_main_sheet.m_d2d);
 
 		// 背景色, 前景色, 選択された文字範囲の背景色, 文字色をリソースから得る.
 		{
@@ -380,10 +406,6 @@ namespace winrt::GraphPaper::implementation
 				Shape::s_background_color = COLOR_WHITE;
 				Shape::s_foreground_color = COLOR_BLACK;
 			//}
-			/*
-			Shape::s_background_color = m_main_d2d.s_background_color;
-			Shape::s_foreground_color = m_main_d2d.s_foreground_color;
-			*/
 		}
 
 		if (co_await sheet_pref_load_async() != S_OK) {

@@ -106,13 +106,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		tx_relese_metrics(test_cnt, test_met, line_met, sele_cnt, sele_met);
 		if (text_lay != nullptr) {
+			// ヒットテストの計量
 			tx_create_test_metrics(text_lay, { 0, text_len }, test_met, test_cnt);
 
+			// 行の計量
 			UINT32 line_cnt;
 			text_lay->GetLineMetrics(nullptr, 0, &line_cnt);
 			line_met = new DWRITE_LINE_METRICS[line_cnt];
 			text_lay->GetLineMetrics(line_met, line_cnt, &line_cnt);
 
+			// 選択された文字範囲の計量
 			if (sele_rng.length > 0) {
 				tx_create_test_metrics(text_lay, sele_rng, sele_met, sele_cnt);
 			}
@@ -170,12 +173,15 @@ namespace winrt::GraphPaper::implementation
 	// 図形を破棄する.
 	ShapeText::~ShapeText(void)
 	{
-		m_dw_layout = nullptr;
+		if (m_dw_text_layout != nullptr) {
+			m_dw_text_layout->Release();
+			m_dw_text_layout = nullptr;
+		}
 		tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
 
 		// 書体名を破棄する.
 		if (m_font_family != nullptr) {
-			// 書体名が, 複数のオブジェクトで参照されていないことを確認して破棄する.
+			// 複数のオブジェクトから参照されていない場合のみ, 書体名を破棄する.
 			if (!is_available_font(m_font_family)) {
 				delete[] m_font_family;
 			}
@@ -218,27 +224,27 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	// d2d	図形の描画環境
-	// 戻り値	なし
-	void ShapeText::draw(D2D_UI& d2d)
+	// sh	表示する用紙
+	void ShapeText::draw(ShapeSheet const& sh)
 	{
+		const D2D_UI& d2d = sh.m_d2d;
 		// 方形を描く.
-		ShapeRect::draw(d2d);
+		ShapeRect::draw(sh);
 
 		// 文字列が空か判定する.
 		if (m_text == nullptr || m_text[0] == L'\0') {
 			// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
 			tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
 			// 文字列レイアウトが空でないなら破棄する.
-			if (m_dw_layout != nullptr) {
-				//m_dw_layout->Release();
-				m_dw_layout = nullptr;
+			if (m_dw_text_layout != nullptr) {
+				m_dw_text_layout->Release();
+				m_dw_text_layout = nullptr;
 			}
 		}
 		else {
-			// 新しい文字列図形
+			// 新規作成
 			// 文字列レイアウトが空か判定する.
-			if (m_dw_layout == nullptr) {
+			if (m_dw_text_layout == nullptr) {
 				// 既定のロケール名を得る.
 				wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 				GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
@@ -258,26 +264,26 @@ namespace winrt::GraphPaper::implementation
 				const double text_w = std::fabs(m_vec[0].x) - 2.0 * m_text_padding.width;
 				const double text_h = std::fabs(m_vec[0].y) - 2.0 * m_text_padding.height;
 				const UINT32 text_len = wchar_len(m_text);
-				winrt::check_hresult(d2d.m_dwrite_factory->CreateTextLayout(m_text, text_len, t_format.get(), static_cast<FLOAT>(max(text_w, 0.0)), static_cast<FLOAT>(max(text_h, 0.0)), m_dw_layout.put()));
+				winrt::check_hresult(d2d.m_dwrite_factory->CreateTextLayout(m_text, text_len, t_format.get(), static_cast<FLOAT>(max(text_w, 0.0)), static_cast<FLOAT>(max(text_h, 0.0)), m_dw_text_layout.put()));
 
 				// 文字列フォーマットを破棄する.
 				t_format = nullptr;
 
 				// 文字の伸縮, 文字のそろえ, 段落のそろえを文字列レイアウトに格納する.
-				winrt::check_hresult(m_dw_layout->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len }));
-				winrt::check_hresult(m_dw_layout->SetTextAlignment(m_text_align_t));
-				winrt::check_hresult(m_dw_layout->SetParagraphAlignment(m_text_align_p));
+				winrt::check_hresult(m_dw_text_layout->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len }));
+				winrt::check_hresult(m_dw_text_layout->SetTextAlignment(m_text_align_t));
+				winrt::check_hresult(m_dw_text_layout->SetParagraphAlignment(m_text_align_p));
 
 				// 行間を文字列レイアウトに格納する.
 				winrt::com_ptr<IDWriteTextLayout3> t3;
-				if (m_dw_layout.try_as(t3)) {
+				if (m_dw_text_layout.try_as(t3)) {
 					DWRITE_LINE_SPACING new_sp;
 					new_sp.leadingBefore = 0.0f;
 					new_sp.fontLineGapUsage = DWRITE_FONT_LINE_GAP_USAGE_DEFAULT;
 					// 行間がゼロより大きいなら, 行間を設定する.
 					if (m_text_line_sp >= FLT_MIN) {
 						if (m_dw_font_metrics.designUnitsPerEm == 0) {
-							tx_get_font_metrics(m_dw_layout.get(), &m_dw_font_metrics);
+							tx_get_font_metrics(t3.get(), &m_dw_font_metrics);
 						}
 						const float descent = (m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);
 
@@ -292,11 +298,12 @@ namespace winrt::GraphPaper::implementation
 						new_sp.baseline = 0.0f;
 					}
 					winrt::check_hresult(t3->SetLineSpacing(&new_sp));
+					t3 = nullptr;
 				}
-				tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_text_selected_range);
+				tx_create_text_metrics(m_dw_text_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_text_selected_range);
 			}
 
-			// 文字列図形の変更.
+			// 変更.
 			else {
 
 				const uint32_t text_len = wchar_len(m_text);
@@ -304,9 +311,9 @@ namespace winrt::GraphPaper::implementation
 
 				// 書体名が変更されたなら文字列レイアウトに格納する.
 				WCHAR font_family[256];
-				winrt::check_hresult(m_dw_layout->GetFontFamilyName(0, font_family, 256));
+				winrt::check_hresult(m_dw_text_layout->GetFontFamilyName(0, font_family, 256));
 				if (wcscmp(font_family, m_font_family) != 0) {
-					winrt::check_hresult(m_dw_layout->SetFontFamilyName(m_font_family, DWRITE_TEXT_RANGE{ 0, text_len }));
+					winrt::check_hresult(m_dw_text_layout->SetFontFamilyName(m_font_family, DWRITE_TEXT_RANGE{ 0, text_len }));
 					if (!updated) {
 						updated = true;
 					}
@@ -314,9 +321,9 @@ namespace winrt::GraphPaper::implementation
 
 				// 書体の大きさが変更されたなら文字列レイアウトに格納する.
 				FLOAT font_size;
-				winrt::check_hresult(m_dw_layout->GetFontSize(0, &font_size));
+				winrt::check_hresult(m_dw_text_layout->GetFontSize(0, &font_size));
 				if (!equal(font_size, m_font_size)) {
-					winrt::check_hresult(m_dw_layout->SetFontSize(m_font_size, DWRITE_TEXT_RANGE{ 0, text_len }));
+					winrt::check_hresult(m_dw_text_layout->SetFontSize(m_font_size, DWRITE_TEXT_RANGE{ 0, text_len }));
 					if (!updated) {
 						updated = true;
 					}
@@ -324,9 +331,9 @@ namespace winrt::GraphPaper::implementation
 
 				// 書体の伸縮が変更されたなら文字列レイアウトに格納する.
 				DWRITE_FONT_STRETCH font_stretch;
-				winrt::check_hresult(m_dw_layout->GetFontStretch(0, &font_stretch));
+				winrt::check_hresult(m_dw_text_layout->GetFontStretch(0, &font_stretch));
 				if (!equal(font_stretch, m_font_stretch)) {
-					winrt::check_hresult(m_dw_layout->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len }));
+					winrt::check_hresult(m_dw_text_layout->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len }));
 					if (!updated) {
 						updated = true;
 					}
@@ -334,9 +341,9 @@ namespace winrt::GraphPaper::implementation
 
 				// 書体の字体が変更されたなら文字列レイアウトに格納する.
 				DWRITE_FONT_STYLE font_style;
-				winrt::check_hresult(m_dw_layout->GetFontStyle(0, &font_style));
+				winrt::check_hresult(m_dw_text_layout->GetFontStyle(0, &font_style));
 				if (!equal(font_style, m_font_style)) {
-					winrt::check_hresult(m_dw_layout->SetFontStyle(m_font_style, DWRITE_TEXT_RANGE{ 0, text_len }));
+					winrt::check_hresult(m_dw_text_layout->SetFontStyle(m_font_style, DWRITE_TEXT_RANGE{ 0, text_len }));
 					if (!updated) {
 						updated = true;
 					}
@@ -344,9 +351,9 @@ namespace winrt::GraphPaper::implementation
 
 				// 書体の太さが変更されたなら文字列レイアウトに格納する.
 				DWRITE_FONT_WEIGHT font_weight;
-				winrt::check_hresult(m_dw_layout->GetFontWeight(0, &font_weight));
+				winrt::check_hresult(m_dw_text_layout->GetFontWeight(0, &font_weight));
 				if (!equal(font_weight, m_font_weight)) {
-					winrt::check_hresult(m_dw_layout->SetFontWeight(m_font_weight, DWRITE_TEXT_RANGE{ 0, text_len }));
+					winrt::check_hresult(m_dw_text_layout->SetFontWeight(m_font_weight, DWRITE_TEXT_RANGE{ 0, text_len }));
 					if (!updated) {
 						updated = true;
 					}
@@ -355,32 +362,32 @@ namespace winrt::GraphPaper::implementation
 				// 文字列のパディングが変更されたなら文字列レイアウトに格納する.
 				const FLOAT text_w = static_cast<FLOAT>(max(std::fabs(m_vec[0].x) - m_text_padding.width * 2.0, 0.0));
 				const FLOAT text_h = static_cast<FLOAT>(max(std::fabs(m_vec[0].y) - m_text_padding.height * 2.0, 0.0));
-				if (!equal(text_w, m_dw_layout->GetMaxWidth())) {
-					winrt::check_hresult(m_dw_layout->SetMaxWidth(text_w));
+				if (!equal(text_w, m_dw_text_layout->GetMaxWidth())) {
+					winrt::check_hresult(m_dw_text_layout->SetMaxWidth(text_w));
 					if (!updated) {
 						updated = true;
 					}
 				}
-				if (!equal(text_h, m_dw_layout->GetMaxHeight())) {
-					winrt::check_hresult(m_dw_layout->SetMaxHeight(text_h));
+				if (!equal(text_h, m_dw_text_layout->GetMaxHeight())) {
+					winrt::check_hresult(m_dw_text_layout->SetMaxHeight(text_h));
 					if (!updated) {
 						updated = true;
 					}
 				}
 
 				// 段落のそろえが変更されたなら文字列レイアウトに格納する.
-				DWRITE_PARAGRAPH_ALIGNMENT para_align = m_dw_layout->GetParagraphAlignment();
+				DWRITE_PARAGRAPH_ALIGNMENT para_align = m_dw_text_layout->GetParagraphAlignment();
 				if (!equal(para_align, m_text_align_p)) {
-					winrt::check_hresult(m_dw_layout->SetParagraphAlignment(m_text_align_p));
+					winrt::check_hresult(m_dw_text_layout->SetParagraphAlignment(m_text_align_p));
 					if (!updated) {
 						updated = true;
 					}
 				}
 
 				// 文字のそろえが変更されたなら文字列レイアウトに格納する.
-				DWRITE_TEXT_ALIGNMENT text_align = m_dw_layout->GetTextAlignment();
+				DWRITE_TEXT_ALIGNMENT text_align = m_dw_text_layout->GetTextAlignment();
 				if (!equal(text_align, m_text_align_t)) {
-					winrt::check_hresult(m_dw_layout->SetTextAlignment(m_text_align_t));
+					winrt::check_hresult(m_dw_text_layout->SetTextAlignment(m_text_align_t));
 					if (!updated) {
 						updated = true;
 					}
@@ -388,7 +395,7 @@ namespace winrt::GraphPaper::implementation
 
 				// 行間が変更されたなら文字列レイアウトに格納する.
 				winrt::com_ptr<IDWriteTextLayout3> t3;
-				if (m_dw_layout.try_as(t3)) {
+				if (m_dw_text_layout.try_as(t3)) {
 					DWRITE_LINE_SPACING old_sp;
 					winrt::check_hresult(t3->GetLineSpacing(&old_sp));
 
@@ -398,7 +405,7 @@ namespace winrt::GraphPaper::implementation
 					// 行間がゼロより大きいなら, 行間を設定する.
 					if (m_text_line_sp >= FLT_MIN) {
 						if (m_dw_font_metrics.designUnitsPerEm == 0) {
-							tx_get_font_metrics(m_dw_layout.get(), &m_dw_font_metrics);
+							tx_get_font_metrics(t3.get(), &m_dw_font_metrics);
 						}
 						const float descent = (m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);
 
@@ -418,6 +425,7 @@ namespace winrt::GraphPaper::implementation
 							updated = true;
 						}
 					}
+					t3 = nullptr;
 				}
 
 				// 計量の要素数が 0 なのに選択された文字範囲が 0 でない,
@@ -446,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 				if (updated) {
 					// 位置の計量, 行の計量, 文字列選択の計量を再作成する.
 					tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
-					tx_create_text_metrics(m_dw_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_text_selected_range);
+					tx_create_text_metrics(m_dw_text_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_text_selected_range);
 				}
 			}
 
@@ -466,7 +474,7 @@ namespace winrt::GraphPaper::implementation
 			// 選択された文字範囲があるなら, 背景を塗りつぶす.
 			if (m_text_selected_range.length > 0) {
 				if (m_dw_font_metrics.designUnitsPerEm == 0) {
-					tx_get_font_metrics(m_dw_layout.get(), &m_dw_font_metrics);
+					tx_get_font_metrics(m_dw_text_layout.get(), &m_dw_font_metrics);
 				}
 				const float descent = (m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);
 				const uint32_t rc = m_dw_selected_cnt;
@@ -488,23 +496,23 @@ namespace winrt::GraphPaper::implementation
 								rect.right = rect.left + rm.width;
 							}
 							rect.bottom = rect.top + m_font_size;
-							d2d.m_solid_color_brush->SetColor(ShapeText::s_text_selected_foreground);
-							d2d.m_d2d_context->DrawRectangle(rect, d2d.m_solid_color_brush.get(), 2.0, nullptr);
-							d2d.m_solid_color_brush->SetColor(ShapeText::s_text_selected_background);
-							d2d.m_d2d_context->FillRectangle(rect, d2d.m_solid_color_brush.get());
+							sh.m_color_brush->SetColor(ShapeText::s_text_selected_foreground);
+							d2d.m_d2d_context->DrawRectangle(rect, sh.m_color_brush.get(), 2.0, nullptr);
+							sh.m_color_brush->SetColor(ShapeText::s_text_selected_background);
+							d2d.m_d2d_context->FillRectangle(rect, sh.m_color_brush.get());
 							break;
 						}
 					}
 				}
-				d2d.m_range_brush->SetColor(ShapeText::s_text_selected_foreground);
-				winrt::check_hresult(m_dw_layout->SetDrawingEffect(d2d.m_range_brush.get(), m_text_selected_range));
+				sh.m_range_brush->SetColor(ShapeText::s_text_selected_foreground);
+				winrt::check_hresult(m_dw_text_layout->SetDrawingEffect(sh.m_range_brush.get(), m_text_selected_range));
 			}
 
 			// 文字列を表示する
-			d2d.m_solid_color_brush->SetColor(m_font_color);
-			d2d.m_d2d_context->DrawTextLayout(t_min, m_dw_layout.get(), d2d.m_solid_color_brush.get());
+			sh.m_color_brush->SetColor(m_font_color);
+			d2d.m_d2d_context->DrawTextLayout(t_min, m_dw_text_layout.get(), sh.m_color_brush.get());
 			if (m_text_selected_range.length > 0) {
-				winrt::check_hresult(m_dw_layout->SetDrawingEffect(nullptr, { 0, wchar_len(m_text) }));
+				winrt::check_hresult(m_dw_text_layout->SetDrawingEffect(nullptr, { 0, wchar_len(m_text) }));
 			}
 
 			// 図形が選択されているなら, 文字列の補助線を表示する
@@ -526,7 +534,7 @@ namespace winrt::GraphPaper::implementation
 					mod += d_arr[i];
 				}
 				if (m_dw_font_metrics.designUnitsPerEm == 0) {
-					tx_get_font_metrics(m_dw_layout.get(), &m_dw_font_metrics);
+					tx_get_font_metrics(m_dw_text_layout.get(), &m_dw_font_metrics);
 				}
 				const float descent = (m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);
 				for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
@@ -543,19 +551,19 @@ namespace winrt::GraphPaper::implementation
 					p[1].y = p[0].y;
 					p[3].x = p[0].x;
 					p[3].y = p[2].y;
-					d2d.m_solid_color_brush->SetColor(ShapeText::s_text_selected_foreground);
-					d2d.m_d2d_context->DrawRectangle({ p[0].x, p[0].y, p[2].x, p[2].y }, d2d.m_solid_color_brush.get(), s_width, nullptr);
-					d2d.m_solid_color_brush->SetColor(ShapeText::s_text_selected_background);
+					sh.m_color_brush->SetColor(ShapeText::s_text_selected_foreground);
+					d2d.m_d2d_context->DrawRectangle({ p[0].x, p[0].y, p[2].x, p[2].y }, sh.m_color_brush.get(), s_width, nullptr);
+					sh.m_color_brush->SetColor(ShapeText::s_text_selected_background);
 					s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].x, mod));
 					winrt::com_ptr<ID2D1StrokeStyle1> s_style;
 					d2d.m_d2d_factory->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
-					d2d.m_d2d_context->DrawLine(p[0], p[1], d2d.m_solid_color_brush.get(), s_width, s_style.get());
-					d2d.m_d2d_context->DrawLine(p[3], p[2], d2d.m_solid_color_brush.get(), s_width, s_style.get());
+					d2d.m_d2d_context->DrawLine(p[0], p[1], sh.m_color_brush.get(), s_width, s_style.get());
+					d2d.m_d2d_context->DrawLine(p[3], p[2], sh.m_color_brush.get(), s_width, s_style.get());
 					s_style = nullptr;
 					s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].y, mod));
 					d2d.m_d2d_factory->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
-					d2d.m_d2d_context->DrawLine(p[1], p[2], d2d.m_solid_color_brush.get(), s_width, s_style.get());
-					d2d.m_d2d_context->DrawLine(p[0], p[3], d2d.m_solid_color_brush.get(), s_width, s_style.get());
+					d2d.m_d2d_context->DrawLine(p[1], p[2], sh.m_color_brush.get(), s_width, s_style.get());
+					d2d.m_d2d_context->DrawLine(p[0], p[3], sh.m_color_brush.get(), s_width, s_style.get());
 					s_style = nullptr;
 				}
 			}
@@ -855,8 +863,9 @@ namespace winrt::GraphPaper::implementation
 			m_text = val;
 			m_text_selected_range.startPosition = 0;
 			m_text_selected_range.length = 0;
-			if (m_dw_layout != nullptr) {
-				m_dw_layout = nullptr;
+			if (m_dw_text_layout != nullptr) {
+				m_dw_text_layout->Release();
+				m_dw_text_layout = nullptr;
 			}
 			return true;
 		}
@@ -931,8 +940,7 @@ namespace winrt::GraphPaper::implementation
 		m_text(text),
 		m_text_align_t(s_attr->m_text_align_t),
 		m_text_align_p(s_attr->m_text_align_p),
-		m_text_selected_range(DWRITE_TEXT_RANGE{ 0, 0 }),
-		m_dw_layout(nullptr)
+		m_text_selected_range(DWRITE_TEXT_RANGE{ 0, 0 })
 	{
 	}
 
@@ -952,7 +960,6 @@ namespace winrt::GraphPaper::implementation
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_line_sp = dt_reader.ReadSingle();
 		dt_read(m_text_padding, dt_reader);
-		m_dw_layout = nullptr;
 	}
 
 	// データライターに書き込む.

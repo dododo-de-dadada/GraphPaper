@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 				L"str_arrow_offset"
 			};
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_sheet.m_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf;
 			if constexpr (S == 0) {
 				sample_slider_0().Header(box_value(text));

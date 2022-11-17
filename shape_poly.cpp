@@ -811,9 +811,10 @@ namespace winrt::GraphPaper::implementation
 	*/
 
 	// 図形を表示する.
-	// dx	図形の描画環境
-	void ShapePoly::draw(D2D_UI& dx)
+	// sh	表示する用紙
+	void ShapePoly::draw(ShapeSheet const& sh)
 	{
+		const D2D_UI& dx = sh.m_d2d;
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(dx);
 		}
@@ -823,34 +824,33 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_fill_color)) {
 			const auto p_geom = m_d2d_path_geom.get();
 			if (p_geom != nullptr) {
-				dx.m_solid_color_brush->SetColor(m_fill_color);
-				dx.m_d2d_context->FillGeometry(p_geom, dx.m_solid_color_brush.get(), nullptr);
+				sh.m_color_brush->SetColor(m_fill_color);
+				dx.m_d2d_context->FillGeometry(p_geom, sh.m_color_brush.get(), nullptr);
 			}
 		}
 		if (is_opaque(m_stroke_color)) {
-			const auto p_geom = m_d2d_path_geom.get();
-			const auto s_width = m_stroke_width;
-			const auto s_brush = dx.m_solid_color_brush.get();
-			const auto s_style = m_d2d_stroke_style.get();
-			s_brush->SetColor(m_stroke_color);
-			dx.m_d2d_context->DrawGeometry(p_geom, s_brush, s_width, s_style);
+			const auto p_geom = m_d2d_path_geom.get();	// パスのジオメトリ
+			const auto s_width = m_stroke_width;	// 折れ線の太さ
+			const auto s_style = m_d2d_stroke_style.get();	// 折れ線の形式
+			sh.m_color_brush->SetColor(m_stroke_color);
+			dx.m_d2d_context->DrawGeometry(p_geom, sh.m_color_brush.get(), s_width, s_style);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
 				if (a_geom != nullptr) {
-					dx.m_d2d_context->FillGeometry(a_geom, s_brush, nullptr);
+					dx.m_d2d_context->FillGeometry(a_geom, sh.m_color_brush.get(), nullptr);
 					if (m_arrow_style != ARROW_STYLE::FILLED) {
-						dx.m_d2d_context->DrawGeometry(a_geom, s_brush, s_width, m_d2d_arrow_style.get());
+						dx.m_d2d_context->DrawGeometry(a_geom, sh.m_color_brush.get(), s_width, m_d2d_arrow_style.get());
 					}
 				}
 			}
 		}
 		if (is_selected()) {
 			D2D1_POINT_2F a_pos{ m_pos };	// 図形の部位の位置
-			anc_draw_rect(a_pos, dx);
+			anc_draw_rect(a_pos, sh);
 			const size_t d_cnt = m_vec.size();	// 差分の数
 			for (size_t i = 0; i < d_cnt; i++) {
 				pt_add(a_pos, m_vec[i], a_pos);
-				anc_draw_rect(a_pos, dx);
+				anc_draw_rect(a_pos, sh);
 			}
 		}
 	}
@@ -946,9 +946,8 @@ namespace winrt::GraphPaper::implementation
 		for (size_t i = 1; i < p_opt.m_vertex_cnt; i++) {
 			pt_sub(v_pos[i], v_pos[i - 1], m_vec[i - 1]);
 		}
-		m_d2d_path_geom = nullptr;
-		m_d2d_arrow_geom = nullptr;
-		//create_path_geometry(Shape::s_d2d_factory);
+		//m_d2d_path_geom = nullptr;
+		//m_d2d_arrow_geom = nullptr;
 	}
 
 	// データリーダーから図形を読み込む.
@@ -958,7 +957,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_end_closed = dt_reader.ReadBoolean();
 		dt_read(m_fill_color, dt_reader);
-		//create_path_geometry(Shape::s_d2d_factory);
 	}
 
 	// データライターに書き込む.

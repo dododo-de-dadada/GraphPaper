@@ -15,7 +15,10 @@ namespace winrt::GraphPaper::implementation
 	// 図形を破棄する.
 	ShapeRuler::~ShapeRuler(void)
 	{
-		m_dw_text_format = nullptr;
+		if (m_dw_text_format != nullptr) {
+			m_dw_text_format->Release();
+			m_dw_text_format = nullptr;
+		}
 	}
 
 	// 位置を含むか判定する.
@@ -129,9 +132,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	// d2d	描画環境
-	void ShapeRuler::draw(D2D_UI& d2d)
+	// sh	表示する用紙
+	void ShapeRuler::draw(ShapeSheet const& sh)
 	{
+		const D2D_UI& d2d = sh.m_d2d;
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(d2d);
 		}
@@ -154,7 +158,6 @@ namespace winrt::GraphPaper::implementation
 			m_dw_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
 		}
 		constexpr wchar_t* D[10] = { L"0", L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9" };
-		//auto br = d2d.m_solid_color_brush;
 
 		const D2D1_RECT_F rect{
 			m_pos.x,
@@ -165,8 +168,8 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_fill_color)) {
 			// 塗りつぶし色が不透明な場合,
 			// 方形を塗りつぶす.
-			d2d.m_solid_color_brush->SetColor(m_fill_color);
-			d2d.m_d2d_context->FillRectangle(&rect, d2d.m_solid_color_brush.get());
+			sh.m_color_brush->SetColor(m_fill_color);
+			d2d.m_d2d_context->FillRectangle(&rect, sh.m_color_brush.get());
 		}
 		if (is_opaque(m_stroke_color)) {
 			// 線枠の色が不透明な場合,
@@ -198,7 +201,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 段落のそろえをテキストフォーマットに格納する.
 			m_dw_text_format->SetParagraphAlignment(p_align);
-			d2d.m_solid_color_brush->SetColor(m_stroke_color);
+			sh.m_color_brush->SetColor(m_stroke_color);
 			for (uint32_t i = 0; i <= k; i++) {
 				// 方眼の大きさごとに目盛りを表示する.
 				const double x = x0 + i * grad_x;
@@ -211,7 +214,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
 					xy ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
-				d2d.m_d2d_context->DrawLine(p0, p1, d2d.m_solid_color_brush.get());
+				d2d.m_d2d_context->DrawLine(p0, p1, sh.m_color_brush.get());
 				// 目盛りの値を表示する.
 				const double x1 = x + f_size * 0.5;
 				const double x2 = x1 - f_size;
@@ -221,7 +224,7 @@ namespace winrt::GraphPaper::implementation
 					xy ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
 					xy ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
 				};
-				d2d.m_d2d_context->DrawText(D[i % 10], 1u, m_dw_text_format.get(), t_rect, d2d.m_solid_color_brush.get());
+				d2d.m_d2d_context->DrawText(D[i % 10], 1u, m_dw_text_format.get(), t_rect, sh.m_color_brush.get());
 			}
 		}
 		if (is_selected()) {
@@ -236,10 +239,10 @@ namespace winrt::GraphPaper::implementation
 			r_pos[3].y = rect.bottom;
 			r_pos[3].x = rect.left;
 			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-				anc_draw_rect(r_pos[i], d2d);
+				anc_draw_rect(r_pos[i], sh);
 				D2D1_POINT_2F r_mid;	// 方形の辺の中点
 				pt_avg(r_pos[j], r_pos[i], r_mid);
-				anc_draw_rect(r_mid, d2d);
+				anc_draw_rect(r_mid, sh);
 			}
 		}
 	}

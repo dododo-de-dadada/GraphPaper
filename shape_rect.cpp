@@ -10,11 +10,12 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形を表示する.
-	// d2d	描画環境
-	void ShapeRect::draw(D2D_UI& d2d)
+	// sh	表示する用紙
+	void ShapeRect::draw(ShapeSheet const& sh)
 	{
+		const D2D_UI& dx = sh.m_d2d;
 		if (m_d2d_stroke_style == nullptr) {
-			create_stroke_style(d2d);
+			create_stroke_style(dx);
 		}
 
 		const D2D1_RECT_F rect{
@@ -26,15 +27,15 @@ namespace winrt::GraphPaper::implementation
 		// 塗りつぶし色が不透明か判定する.
 		if (is_opaque(m_fill_color)) {
 			// 方形を塗りつぶす.
-			d2d.m_solid_color_brush->SetColor(m_fill_color);
-			d2d.m_d2d_context->FillRectangle(rect, d2d.m_solid_color_brush.get());
+			sh.m_color_brush->SetColor(m_fill_color);
+			dx.m_d2d_context->FillRectangle(rect, sh.m_color_brush.get());
 		}
 		// 線枠の色が不透明か判定する.
 		if (is_opaque(m_stroke_color)) {
 			// 方形の枠を表示する.
 			const auto w = m_stroke_width;
-			d2d.m_solid_color_brush->SetColor(m_stroke_color);
-			d2d.m_d2d_context->DrawRectangle(rect, d2d.m_solid_color_brush.get(), w, m_d2d_stroke_style.get());
+			sh.m_color_brush->SetColor(m_stroke_color);
+			dx.m_d2d_context->DrawRectangle(rect, sh.m_color_brush.get(), w, m_d2d_stroke_style.get());
 		}
 		// この図形が選択されてるか判定する.
 		if (is_selected()) {
@@ -48,10 +49,10 @@ namespace winrt::GraphPaper::implementation
 			a_pos[3].y = rect.bottom;
 			a_pos[3].x = rect.left;
 			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-				anc_draw_rect(a_pos[i], d2d);
+				anc_draw_rect(a_pos[i], sh);
 				D2D1_POINT_2F a_mid;	// 方形の辺の中点
 				pt_avg(a_pos[j], a_pos[i], a_mid);
-				anc_draw_rect(a_mid, d2d);
+				anc_draw_rect(a_mid, sh);
 			}
 		}
 	}

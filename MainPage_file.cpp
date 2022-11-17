@@ -990,7 +990,7 @@ namespace winrt::GraphPaper::implementation
 			// DOCTYPE を書き込む.
 			dt_write_svg(DOCTYPE, dt_writer);
 			// データライターに SVG 開始タグを書き込む.
-			file_write_svg_tag(m_main_sheet.m_sheet_size, m_main_sheet.m_sheet_color, m_main_d2d.m_logical_dpi, m_len_unit, dt_writer);
+			file_write_svg_tag(m_main_sheet.m_sheet_size, m_main_sheet.m_sheet_color, m_main_sheet.m_d2d.m_logical_dpi, m_len_unit, dt_writer);
 			// 日時 (注釈) を書き込む.
 			//char buf[64];
 			//const auto t = time(nullptr);
