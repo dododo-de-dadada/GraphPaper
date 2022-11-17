@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	ShapeStroke::~ShapeStroke(void)
 	{
 		if (m_d2d_stroke_style != nullptr) {
-			m_d2d_stroke_style->Release();
+			//m_d2d_stroke_style->Release();
 			m_d2d_stroke_style = nullptr;
 		}
 	}

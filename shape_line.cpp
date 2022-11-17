@@ -174,11 +174,11 @@ namespace winrt::GraphPaper::implementation
 	ShapeLine::~ShapeLine(void)
 	{
 		if (m_d2d_arrow_geom != nullptr) {
-			m_d2d_arrow_geom->Release();
+			//m_d2d_arrow_geom->Release();
 			m_d2d_arrow_geom = nullptr;
 		}
 		if (m_d2d_arrow_style != nullptr) {
-			m_d2d_arrow_style->Release();
+			//m_d2d_arrow_style->Release();
 			m_d2d_arrow_style = nullptr;
 		}
 	}

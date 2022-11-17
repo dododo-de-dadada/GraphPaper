@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 	ShapeRuler::~ShapeRuler(void)
 	{
 		if (m_dw_text_format != nullptr) {
-			m_dw_text_format->Release();
+			//m_dw_text_format->Release();
 			m_dw_text_format = nullptr;
 		}
 	}

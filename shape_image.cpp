@@ -58,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 			m_data = nullptr;
 		}
 		if (m_d2d_bitmap != nullptr) {
-			m_d2d_bitmap->Release();
+			//m_d2d_bitmap->Release();
 			m_d2d_bitmap = nullptr;
 		}
 	}

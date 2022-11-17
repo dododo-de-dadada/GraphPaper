@@ -220,32 +220,31 @@ namespace winrt::GraphPaper::implementation
 			// その時, 描画処理しないよう排他制御をロックする.
 			m_d2d_mutex.lock();
 			if (m_main_sheet.m_state_block != nullptr) {
-				m_main_sheet.m_state_block->Release();
+				//m_main_sheet.m_state_block->Release();
 				m_main_sheet.m_state_block = nullptr;
 			}
 			if (m_main_sheet.m_color_brush != nullptr) {
-				m_main_sheet.m_color_brush->Release();
+				//m_main_sheet.m_color_brush->Release();
 				m_main_sheet.m_color_brush = nullptr;
 			}
 			if (m_main_sheet.m_range_brush != nullptr) {
-				m_main_sheet.m_range_brush->Release();
+				//m_main_sheet.m_range_brush->Release();
 				m_main_sheet.m_range_brush = nullptr;
 			}
-			m_main_sheet.m_d2d.Release();
+			m_main_sheet.m_d2d.Trim();
 			if (m_sample_sheet.m_state_block != nullptr) {
-				m_sample_sheet.m_state_block->Release();
+				//m_sample_sheet.m_state_block->Release();
 				m_sample_sheet.m_state_block = nullptr;
 			}
 			if (m_sample_sheet.m_color_brush != nullptr) {
-				m_sample_sheet.m_color_brush->Release();
+				//m_sample_sheet.m_color_brush->Release();
 				m_sample_sheet.m_color_brush = nullptr;
 			}
 			if (m_sample_sheet.m_range_brush != nullptr) {
-				m_sample_sheet.m_range_brush->Release();
+				//m_sample_sheet.m_range_brush->Release();
 				m_sample_sheet.m_range_brush = nullptr;
 			}
-			m_sample_sheet.m_d2d.Release();
-			//m_sample_sheet.m_d2d.Trim();
+			m_sample_sheet.m_d2d.Trim();
 		}
 
 		// アプリケーションを終了する.

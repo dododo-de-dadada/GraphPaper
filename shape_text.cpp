@@ -174,7 +174,7 @@ namespace winrt::GraphPaper::implementation
 	ShapeText::~ShapeText(void)
 	{
 		if (m_dw_text_layout != nullptr) {
-			m_dw_text_layout->Release();
+			//m_dw_text_layout->Release();
 			m_dw_text_layout = nullptr;
 		}
 		tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
@@ -237,7 +237,7 @@ namespace winrt::GraphPaper::implementation
 			tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
 			// 文字列レイアウトが空でないなら破棄する.
 			if (m_dw_text_layout != nullptr) {
-				m_dw_text_layout->Release();
+				//m_dw_text_layout->Release();
 				m_dw_text_layout = nullptr;
 			}
 		}
@@ -864,7 +864,7 @@ namespace winrt::GraphPaper::implementation
 			m_text_selected_range.startPosition = 0;
 			m_text_selected_range.length = 0;
 			if (m_dw_text_layout != nullptr) {
-				m_dw_text_layout->Release();
+				//_dw_text_layout->Release();
 				m_dw_text_layout = nullptr;
 			}
 			return true;

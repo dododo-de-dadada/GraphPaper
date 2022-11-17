@@ -1246,7 +1246,7 @@ namespace winrt::GraphPaper::implementation
 		~ShapePath(void)
 		{
 			if (m_d2d_path_geom != nullptr) {
-				m_d2d_path_geom->Release();
+				//m_d2d_path_geom->Release();
 				m_d2d_path_geom = nullptr;
 			}
 		}
