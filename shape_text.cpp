@@ -864,7 +864,7 @@ namespace winrt::GraphPaper::implementation
 			m_text_selected_range.startPosition = 0;
 			m_text_selected_range.length = 0;
 			if (m_dw_text_layout != nullptr) {
-				//_dw_text_layout->Release();
+				//m_dw_text_layout->Release();
 				m_dw_text_layout = nullptr;
 			}
 			return true;
