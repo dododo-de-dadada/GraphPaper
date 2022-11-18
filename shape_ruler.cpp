@@ -302,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 		return name;
 	}
 
-	// データリーダーから図形を読み込む.
+	// 図形をデータリーダーから読み込む.
 	ShapeRuler::ShapeRuler(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader),
 		m_grid_base(dt_reader.ReadSingle()),
@@ -311,7 +311,7 @@ namespace winrt::GraphPaper::implementation
 	{
 	}
 
-	// データライターに書き込む.
+	// 図形をデータライターに書き込む.
 	void ShapeRuler::write(DataWriter const& dt_writer) const
 	{
 		ShapeRect::write(dt_writer);

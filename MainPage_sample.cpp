@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_sample.cpp
-// 見本
+// 属性
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -25,33 +25,33 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
-	// 見本ダイアログのスライダーヘッダーに文字列を格納する.
-	template<int S> void MainPage::sample_set_slider_header(const winrt::hstring& text)
+	// 属性ダイアログのスライダーヘッダーに文字列を格納する.
+	template<int S> void MainPage::prop_set_slider_header(const winrt::hstring& text)
 	{
 		if constexpr (S == 0) {
-			sample_slider_0().Header(box_value(text));
+			prop_slider_0().Header(box_value(text));
 		}
 		if constexpr (S == 1) {
-			sample_slider_1().Header(box_value(text));
+			prop_slider_1().Header(box_value(text));
 		}
 		if constexpr (S == 2) {
-			sample_slider_2().Header(box_value(text));
+			prop_slider_2().Header(box_value(text));
 		}
 		if constexpr (S == 3) {
-			sample_slider_3().Header(box_value(text));
+			prop_slider_3().Header(box_value(text));
 		}
 	}
-	template void MainPage::sample_set_slider_header<0>(const winrt::hstring& text);
-	template void MainPage::sample_set_slider_header<1>(const winrt::hstring& text);
-	template void MainPage::sample_set_slider_header<2>(const winrt::hstring& text);
-	template void MainPage::sample_set_slider_header<3>(const winrt::hstring& text);
+	template void MainPage::prop_set_slider_header<0>(const winrt::hstring& text);
+	template void MainPage::prop_set_slider_header<1>(const winrt::hstring& text);
+	template void MainPage::prop_set_slider_header<2>(const winrt::hstring& text);
+	template void MainPage::prop_set_slider_header<3>(const winrt::hstring& text);
 
 
-	// 見本を表示する
-	void MainPage::sample_draw(void)
+	// 属性の見本を表示する
+	void MainPage::prop_sample_draw(void)
 	{
 #if defined(_DEBUG)
-		if (!scp_sample_panel().IsLoaded()) {
+		if (!scp_prop_panel().IsLoaded()) {
 			return;
 		}
 #endif
@@ -60,58 +60,61 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		m_sample_sheet.m_d2d.m_d2d_context->SaveDrawingState(m_sample_sheet.m_state_block.get());
-		m_sample_sheet.m_d2d.m_d2d_context->BeginDraw();
-		m_sample_sheet.m_d2d.m_d2d_context->Clear(m_sample_sheet.m_sheet_color);
-		const float offset = static_cast<FLOAT>(std::fmod(m_sample_sheet.m_sheet_size.width * 0.5, m_sample_sheet.m_grid_base + 1.0));
-		m_sample_sheet.m_grid_offset.x = offset;
-		m_sample_sheet.m_grid_offset.y = offset;
-		m_sample_sheet.draw(m_sample_sheet);
-		m_sample_sheet.m_d2d.m_d2d_context->EndDraw();
-		m_sample_sheet.m_d2d.m_d2d_context->RestoreDrawingState(m_sample_sheet.m_state_block.get());
-		m_sample_sheet.m_d2d.Present();
+		m_prop_sheet.m_d2d.m_d2d_context->SaveDrawingState(m_prop_sheet.m_state_block.get());
+		m_prop_sheet.m_d2d.m_d2d_context->BeginDraw();
+		m_prop_sheet.m_d2d.m_d2d_context->Clear(m_prop_sheet.m_sheet_color);
+		const float offset = static_cast<FLOAT>(std::fmod(m_prop_sheet.m_sheet_size.width * 0.5, m_prop_sheet.m_grid_base + 1.0));
+		m_prop_sheet.m_grid_offset.x = offset;
+		m_prop_sheet.m_grid_offset.y = offset;
+		m_prop_sheet.draw(m_prop_sheet);
+		m_prop_sheet.m_d2d.m_d2d_context->EndDraw();
+		m_prop_sheet.m_d2d.m_d2d_context->RestoreDrawingState(m_prop_sheet.m_state_block.get());
+		m_prop_sheet.m_d2d.Present();
 		m_d2d_mutex.unlock();
 	}
 
-	//　見本リストビューがロードされた.
-	void MainPage::sample_list_view_loaded(IInspectable const&, RoutedEventArgs const&)
+	// 属性リストビューがロードされた.
+	void MainPage::prop_list_view_loaded(IInspectable const&, RoutedEventArgs const&)
 	{
-		const auto item = lv_sample_list().SelectedItem();
+		const auto item = lv_prop_list().SelectedItem();
 		if (item != nullptr) {
-			lv_sample_list().ScrollIntoView(item);
+			lv_prop_list().ScrollIntoView(item);
 		}
 	}
 
-	// 見本ダイアログが開かれた.
-	void MainPage::sample_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
+	// 属性ダイアログが開かれた.
+	void MainPage::prop_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
 	{
 	}
 
-	// 見本ダイアログが閉じられた.
-	void MainPage::sample_dialog_closed(ContentDialog const&, ContentDialogClosedEventArgs const&)
+	// 属性ダイアログが閉じられた.
+	void MainPage::prop_dialog_closed(ContentDialog const&, ContentDialogClosedEventArgs const&)
 	{
 	}
 
-	// 見本ダイアログが閉じられた.
-	void MainPage::sample_dialog_unloaded(IInspectable const&, RoutedEventArgs const&)
+	// 属性ダイアログが閉じられた.
+	void MainPage::prop_dialog_unloaded(IInspectable const&, RoutedEventArgs const&)
 	{
 	}
 
-	IAsyncAction MainPage::sample_image_load_async(const float panel_w, const float panel_h)
+	// 属性の画像を読み込む
+	// panel_w	表示の幅
+	// panel_h	表示の高さ
+	IAsyncAction MainPage::prop_image_load_async(const float panel_w, const float panel_h)
 	{
 		bool ok;
 		winrt::apartment_context context;
 		co_await winrt::resume_background();
 		try {
 			const StorageFile samp_file{ co_await StorageFile::GetFileFromApplicationUriAsync(Uri{ L"ms-appx:///Assets/4.1.05.tiff" }) };
-			const IRandomAccessStream samp_strm{ co_await samp_file.OpenAsync(FileAccessMode::Read) };
-			const BitmapDecoder samp_dec{ co_await BitmapDecoder::CreateAsync(samp_strm) };
-			const SoftwareBitmap samp_bmp{ co_await samp_dec.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight) };
+			const IRandomAccessStream samp_stream{ co_await samp_file.OpenAsync(FileAccessMode::Read) };
+			const BitmapDecoder samp_decoder{ co_await BitmapDecoder::CreateAsync(samp_stream) };
+			const SoftwareBitmap samp_bmp{ co_await samp_decoder.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight) };
 			const D2D1_POINT_2F pos{ static_cast<FLOAT>(panel_w * 0.125), static_cast<FLOAT>(panel_h * 0.125) };
 			const D2D1_SIZE_F size{ static_cast<float>(panel_w * 0.75), static_cast<FLOAT>(panel_h * 0.75) };
-			ShapeImage* samp_shape = new ShapeImage(pos, size, samp_bmp, m_sample_sheet.m_image_opac);
+			ShapeImage* samp_shape = new ShapeImage(pos, size, samp_bmp, m_prop_sheet.m_image_opac);
 			samp_bmp.Close();
-			m_sample_sheet.m_shape_list.push_back(samp_shape);
+			m_prop_sheet.m_shape_list.push_back(samp_shape);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -122,49 +125,52 @@ namespace winrt::GraphPaper::implementation
 		}
 		co_await context;
 		if (ok) {
-			sample_draw();
+			prop_sample_draw();
 		}
 	}
 
-	// 用紙のスワップチェーンパネルがロードされた.
 #if defined(_DEBUG)
-	void MainPage::sample_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
+	// 属性のスワップチェーンパネルが読み込まれた.
+	void MainPage::prop_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender != scp_sample_panel()) {
+		if (sender != scp_prop_panel()) {
 			return;
 		}
 #else
-	void MainPage::sample_panel_loaded(IInspectable const&, RoutedEventArgs const& args)
+	// 属性のスワップチェーンパネルが読み込まれた.
+	void MainPage::prop_panel_loaded(IInspectable const&, RoutedEventArgs const& args)
 	{
 #endif // _DEBUG
-		const auto& swap_chain_panel = scp_sample_panel();
-		m_sample_sheet.m_d2d.SetSwapChainPanel(swap_chain_panel);
-		m_sample_sheet.m_d2d.m_d2d_factory->CreateDrawingStateBlock(m_sample_sheet.m_state_block.put());
-		m_sample_sheet.m_d2d.m_d2d_context->CreateSolidColorBrush({}, m_sample_sheet.m_color_brush.put());
-		m_sample_sheet.m_d2d.m_d2d_context->CreateSolidColorBrush({}, m_sample_sheet.m_range_brush.put());
-		sample_draw();
+		const auto& swap_chain_panel = scp_prop_panel();
+		m_prop_sheet.m_d2d.SetSwapChainPanel(swap_chain_panel);
+		m_prop_sheet.m_d2d.m_d2d_factory->CreateDrawingStateBlock(m_prop_sheet.m_state_block.put());
+		m_prop_sheet.m_d2d.m_d2d_context->CreateSolidColorBrush({}, m_prop_sheet.m_color_brush.put());
+		m_prop_sheet.m_d2d.m_d2d_context->CreateSolidColorBrush({}, m_prop_sheet.m_range_brush.put());
+		prop_sample_draw();
 	}
 
-	// 用紙のスワップチェーンパネルの寸法が変わった.
 #if defined(_DEBUG)
-	void MainPage::sample_panel_size_changed(IInspectable const& sender, winrt::Windows::UI::Xaml::SizeChangedEventArgs const& args)
+	// 属性のスワップチェーンパネルの寸法が変わった.
+	void MainPage::prop_panel_size_changed(IInspectable const& sender, winrt::Windows::UI::Xaml::SizeChangedEventArgs const& args)
 	{
-		if (sender != scp_sample_panel()) {
+		if (sender != scp_prop_panel()) {
 			return;
 		}
 #else
-	void MainPage::sample_panel_size_changed(IInspectable const&, SizeChangedEventArgs const& args)
+	// 属性のスワップチェーンパネルの寸法が変わった.
+	void MainPage::prop_panel_size_changed(IInspectable const&, SizeChangedEventArgs const& args)
 	{
 #endif	// _DEBUG
-		m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(args.NewSize().Width);
-		m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(args.NewSize().Height);
-		m_sample_sheet.m_d2d.SetLogicalSize2(m_sample_sheet.m_sheet_size);
-		sample_draw();
+		m_prop_sheet.m_sheet_size.width = static_cast<FLOAT>(args.NewSize().Width);
+		m_prop_sheet.m_sheet_size.height = static_cast<FLOAT>(args.NewSize().Height);
+		m_prop_sheet.m_d2d.SetLogicalSize2(m_prop_sheet.m_sheet_size);
+		prop_sample_draw();
 	}
 
-	void MainPage::sample_panel_scale_changed(IInspectable const&, IInspectable const&)
+	// 属性のスワップチェーンパネルの倍率が変わった.
+	void MainPage::prop_panel_scale_changed(IInspectable const&, IInspectable const&)
 	{
-		m_sample_sheet.m_d2d.SetCompositionScale(scp_sample_panel().CompositionScaleX(), scp_sample_panel().CompositionScaleY());
+		m_prop_sheet.m_d2d.SetCompositionScale(scp_prop_panel().CompositionScaleX(), scp_prop_panel().CompositionScaleY());
 	}
 
 }

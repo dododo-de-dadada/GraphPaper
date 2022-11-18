@@ -48,26 +48,26 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「不透明度...」が選択された.
 	IAsyncAction MainPage::image_opac_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_sample_sheet.set_attr_to(&m_main_sheet);
-		const auto val = m_sample_sheet.m_image_opac * COLOR_MAX;
-		sample_slider_0().Maximum(255.0);
-		sample_slider_0().TickFrequency(1.0);
-		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_0().Value(val);
+		m_prop_sheet.set_attr_to(&m_main_sheet);
+		const auto val = m_prop_sheet.m_image_opac * COLOR_MAX;
+		prop_slider_0().Maximum(255.0);
+		prop_slider_0().TickFrequency(1.0);
+		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_0().Value(val);
 		image_slider_set_header<UNDO_OP::IMAGE_OPAC, 0>(val);
-		sample_check_box().IsChecked(m_sample_sheet.m_image_opac_importing);
+		prop_check_box().IsChecked(m_prop_sheet.m_image_opac_importing);
 
-		sample_slider_0().Visibility(UI_VISIBLE);
-		sample_check_box().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::image_slider_val_changed<UNDO_OP::IMAGE_OPAC, 0> });
+		prop_slider_0().Visibility(UI_VISIBLE);
+		prop_check_box().Visibility(UI_VISIBLE);
+		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::image_slider_val_changed<UNDO_OP::IMAGE_OPAC, 0> });
 
-		sample_image_load_async(static_cast<float>(scp_sample_panel().Width()), static_cast<float>(scp_sample_panel().Height()));
+		prop_image_load_async(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()));
 
-		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
-		const auto d_result = co_await cd_sample_dialog().ShowAsync();
+		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
+		const auto d_result = co_await cd_prop_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
-			m_sample_sheet.m_shape_list.back()->get_image_opacity(samp_val);
+			m_prop_sheet.m_shape_list.back()->get_image_opacity(samp_val);
 			ustack_push_set<UNDO_OP::IMAGE_OPAC>(&m_main_sheet, samp_val);
 			if (ustack_push_set<UNDO_OP::IMAGE_OPAC>(samp_val)) {
 				ustack_push_null();
@@ -76,9 +76,10 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		slist_clear(m_sample_sheet.m_shape_list);
-		sample_slider_0().Visibility(UI_COLLAPSED);
-		sample_slider_0().ValueChanged(slider_0_token);
+		slist_clear(m_prop_sheet.m_shape_list);
+		prop_slider_0().Visibility(UI_COLLAPSED);
+		prop_slider_0().ValueChanged(slider_0_token);
+		prop_check_box().Visibility(UI_COLLAPSED);
 		sheet_draw();
 	}
 
@@ -98,7 +99,7 @@ namespace winrt::GraphPaper::implementation
 			conv_col_to_str(m_color_code, val, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(R) + L": " + buf;
 		}
-		sample_set_slider_header<S>(text);
+		prop_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.
@@ -113,11 +114,11 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				const float val = static_cast<float>(args.NewValue());
 				image_slider_set_header<U, S>(val);
-				m_sample_sheet.m_shape_list.back()->set_image_opacity(val / COLOR_MAX);
+				m_prop_sheet.m_shape_list.back()->set_image_opacity(val / COLOR_MAX);
 			}
 		}
-		if (scp_sample_panel().IsLoaded()) {
-			sample_draw();
+		if (scp_prop_panel().IsLoaded()) {
+			prop_sample_draw();
 		}
 	}
 

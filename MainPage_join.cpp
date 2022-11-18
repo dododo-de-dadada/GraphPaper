@@ -62,37 +62,37 @@ namespace winrt::GraphPaper::implementation
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_sample_sheet.set_attr_to(&m_main_sheet);
+		m_prop_sheet.set_attr_to(&m_main_sheet);
 		float j_limit;
-		m_sample_sheet.get_join_limit(j_limit);
+		m_prop_sheet.get_join_limit(j_limit);
 		j_limit -= 1.0f;
 
-		sample_slider_0().Maximum(MAX_VALUE);
-		sample_slider_0().TickFrequency(TICK_FREQ);
-		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_0().Value(j_limit);
-		sample_slider_0().Visibility(UI_VISIBLE);
+		prop_slider_0().Maximum(MAX_VALUE);
+		prop_slider_0().TickFrequency(TICK_FREQ);
+		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_0().Value(j_limit);
+		prop_slider_0().Visibility(UI_VISIBLE);
 		join_slider_set_header<UNDO_OP::JOIN_LIMIT, 0>(j_limit);
 
 		float s_width;
-		m_sample_sheet.get_stroke_width(s_width);
+		m_prop_sheet.get_stroke_width(s_width);
 
-		sample_slider_1().Maximum(MAX_VALUE);
-		sample_slider_1().TickFrequency(TICK_FREQ);
-		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_1().Value(s_width);
-		sample_slider_1().Visibility(UI_VISIBLE);
+		prop_slider_1().Maximum(MAX_VALUE);
+		prop_slider_1().TickFrequency(TICK_FREQ);
+		prop_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_1().Value(s_width);
+		prop_slider_1().Visibility(UI_VISIBLE);
 		join_slider_set_header<UNDO_OP::STROKE_WIDTH, 1>(s_width);
 
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_OP::JOIN_LIMIT, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_OP::STROKE_WIDTH, 1> });
-		const auto samp_w = scp_sample_panel().Width();
-		const auto samp_h = scp_sample_panel().Height();
+		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_OP::JOIN_LIMIT, 0> });
+		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_OP::STROKE_WIDTH, 1> });
+		const auto samp_w = scp_prop_panel().Width();
+		const auto samp_h = scp_prop_panel().Height();
 		const auto padd = samp_w * 0.125;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
 		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
 		POLY_OPTION p_opt{ 3, true, true, false, true };
-		auto s = new ShapePoly(b_pos, b_vec, &m_sample_sheet, p_opt);
+		auto s = new ShapePoly(b_pos, b_vec, &m_prop_sheet, p_opt);
 		const float offset = static_cast<float>(samp_h / 16.0);
 		const float samp_x = static_cast<float>(samp_w * 0.25);
 		const float samp_y = static_cast<float>(samp_h * 0.5);
@@ -100,18 +100,18 @@ namespace winrt::GraphPaper::implementation
 		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y - offset }, ANC_TYPE::ANC_P0, m_vert_stick, false);
 		s->set_pos_anc(D2D1_POINT_2F{ samp_x, samp_y }, ANC_TYPE::ANC_P0 + 1, m_vert_stick, false);
 		s->set_pos_anc(D2D1_POINT_2F{ -samp_x, samp_y + offset }, ANC_TYPE::ANC_P0 + 2, m_vert_stick, false);
-		m_sample_sheet.m_shape_list.push_back(s);
+		m_prop_sheet.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
 
-		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_line_join")));
-		const auto d_result = co_await cd_sample_dialog().ShowAsync();
+		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_line_join")));
+		const auto d_result = co_await cd_prop_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_limit;
 			float samp_width;
-			m_sample_sheet.m_shape_list.back()->get_join_limit(samp_limit);
-			m_sample_sheet.m_shape_list.back()->get_stroke_width(samp_width);
+			m_prop_sheet.m_shape_list.back()->get_join_limit(samp_limit);
+			m_prop_sheet.m_shape_list.back()->get_stroke_width(samp_width);
 			if (ustack_push_set<UNDO_OP::JOIN_LIMIT>(samp_limit) ||
 				ustack_push_set<UNDO_OP::STROKE_WIDTH>(samp_width)) {
 				ustack_push_null();
@@ -119,11 +119,11 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		slist_clear(m_sample_sheet.m_shape_list);
-		sample_slider_0().Visibility(UI_COLLAPSED);
-		sample_slider_0().ValueChanged(slider_0_token);
-		sample_slider_1().Visibility(UI_COLLAPSED);
-		sample_slider_1().ValueChanged(slider_1_token);
+		slist_clear(m_prop_sheet.m_shape_list);
+		prop_slider_0().Visibility(UI_COLLAPSED);
+		prop_slider_0().ValueChanged(slider_0_token);
+		prop_slider_1().Visibility(UI_COLLAPSED);
+		prop_slider_1().ValueChanged(slider_1_token);
 		co_return;
 	}
 
@@ -142,14 +142,14 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[LEN + 1];
 			swprintf_s(buf, LEN, L"%.1lf", static_cast<double>(val) + 1.0);
 			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_join_limit") + L": " + buf;
-			sample_slider_0().Header(box_value(text));
+			prop_slider_0().Header(box_value(text));
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_sheet.m_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf;
-			sample_slider_1().Header(box_value(text));
+			prop_slider_1().Header(box_value(text));
 		}
 	}
 
@@ -164,15 +164,15 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::JOIN_LIMIT && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(val);
-			m_sample_sheet.m_shape_list.back()->set_join_limit(val + 1.0f);
+			m_prop_sheet.m_shape_list.back()->set_join_limit(val + 1.0f);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
 			const float val = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(val);
-			m_sample_sheet.m_shape_list.back()->set_stroke_width(val);
+			m_prop_sheet.m_shape_list.back()->set_stroke_width(val);
 		}
-		if (scp_sample_panel().IsLoaded()) {
-			sample_draw();
+		if (scp_prop_panel().IsLoaded()) {
+			prop_sample_draw();
 		}
 	}
 

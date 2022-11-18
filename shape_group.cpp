@@ -203,13 +203,13 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
-	// データリーダーから図形を作成する.
+	// 図形をデータリーダーから読み込む.
 	ShapeGroup::ShapeGroup(DataReader const& dt_reader)
 	{
 		slist_read(m_list_grouped, dt_reader);
 	}
 
-	// データライターに書き込む.
+	// 図形をデータライターに書き込む.
 	void ShapeGroup::write(DataWriter const& dt_writer) const
 	{
 		constexpr bool REDUCED = true;

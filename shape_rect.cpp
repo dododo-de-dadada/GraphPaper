@@ -465,14 +465,14 @@ namespace winrt::GraphPaper::implementation
 		m_vec.shrink_to_fit();
 	}
 
-	// データリーダーから図形を読み込む.
+	// 図形をデータリーダーから読み込む.
 	ShapeRect::ShapeRect(DataReader const& dt_reader) :
 		ShapeStroke::ShapeStroke(dt_reader)
 	{
 		dt_read(m_fill_color, dt_reader);
 	}
 
-	// データライターに書き込む.
+	// 図形をデータライターに書き込む.
 	void ShapeRect::write(DataWriter const& dt_writer) const
 	{
 		ShapeStroke::write(dt_writer);

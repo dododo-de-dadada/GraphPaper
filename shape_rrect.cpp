@@ -425,14 +425,14 @@ namespace winrt::GraphPaper::implementation
 		calc_corner_radius(m_vec[0], s_attr->m_corner_rad, m_corner_rad);
 	}
 
-	// データリーダーから図形を読み込む.
+	// 図形をデータリーダーから読み込む.
 	ShapeRRect::ShapeRRect(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader)
 	{
 		dt_read(m_corner_rad, dt_reader);
 	}
 
-	// データライターに書き込む.
+	// 図形をデータライターに書き込む.
 	void ShapeRRect::write(DataWriter const& dt_writer) const
 	{
 		ShapeRect::write(dt_writer);

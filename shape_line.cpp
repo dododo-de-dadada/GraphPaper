@@ -463,7 +463,7 @@ namespace winrt::GraphPaper::implementation
 		m_vec.shrink_to_fit();
 	}
 
-	// データリーダーから図形を読み込む.
+	// 図形をデータリーダーから読み込む.
 	// dt_reader	読み込むデータリーダー
 	ShapeLine::ShapeLine(DataReader const& dt_reader) :
 		ShapeStroke::ShapeStroke(dt_reader),
@@ -478,7 +478,7 @@ namespace winrt::GraphPaper::implementation
 		//}
 	}
 
-	// データライターに書き込む.
+	// 図形をデータライターに書き込む.
 	void ShapeLine::write(DataWriter const& dt_writer) const
 	{
 		ShapeStroke::write(dt_writer);

@@ -13,7 +13,7 @@
 			<!-- フォントアイコンのグリフ -->
 			<x:String x:Key="glyph_info">&#xE946;</x:String>
 			<x:String x:Key="glyph_alert">&#xEA39;</x:String>
-			<x:String x:Key="glyph_arrange">&#xE8CB;</x:String>
+			<x:String x:Key="glyph_order">&#xE8CB;</x:String>
 			<x:String x:Key="glyph_conf">&#xE9CE;</x:String>
 			<x:String x:Key="glyph_save_as">&#xE792;</x:String>
 			<x:String x:Key="glyph_recent">&#xE823;</x:String>
@@ -448,26 +448,26 @@
 						<KeyboardAccelerator Key="A" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutSubItem x:Uid="mfsi_arrange" Text="Arrange">
+				<MenuFlyoutSubItem x:Uid="mfsi_order" Text="Order">
 					<MenuFlyoutSubItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_arrange}" />
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_order}" />
 					</MenuFlyoutSubItem.Icon>
-					<MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="arrange_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
+					<MenuFlyoutItem x:Name="mfi_bring_to_front" x:Uid="mfi_bring_to_front" Click="order_bring_to_front_click" IsEnabled="false" Text="Bring to Front" >
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="End" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
-					<MenuFlyoutItem x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward" Click="arrange_bring_forward_click" IsEnabled="false" Text="Bring Forward">
+					<MenuFlyoutItem x:Name="mfi_bring_forward" x:Uid="mfi_bring_forward" Click="order_bring_forward_click" IsEnabled="false" Text="Bring Forward">
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="PageDown" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
-					<MenuFlyoutItem x:Name="mfi_send_backward" x:Uid="mfi_send_backward" Click="arrange_send_backward_click" IsEnabled="false" Text="Send Backward" >
+					<MenuFlyoutItem x:Name="mfi_send_backward" x:Uid="mfi_send_backward" Click="order_send_backward_click" IsEnabled="false" Text="Send Backward" >
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="PageUp" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
-					<MenuFlyoutItem x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back" Click="arrange_send_to_back_click" IsEnabled="false" Text="Send to Back">
+					<MenuFlyoutItem x:Name="mfi_send_to_back" x:Uid="mfi_send_to_back" Click="order_send_to_back_click" IsEnabled="false" Text="Send to Back">
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Home" Modifiers="Control" />
 						</MenuFlyoutItem.KeyboardAccelerators>
@@ -998,32 +998,32 @@
 				<Slider x:Name="sd_misc_vert_stick" x:Uid="sd_misc_vert_stick" Maximum="127.5" Minimum="0" SnapsTo="Ticks" TickFrequency="0.5" Header="Thresholds" ValueChanged="misc_vert_stick_val_changed"/>
 			</StackPanel>
 		</ContentDialog>
-		<!-- 属性入力ダイアログ -->
-		<ContentDialog x:Name="cd_sample_dialog" CloseButtonText="Close" Closed="sample_dialog_closed" DefaultButton="Close" Opened="sample_dialog_opened" PrimaryButtonText="Apply" Unloaded="sample_dialog_unloaded">
+		<!-- 属性ダイアログ -->
+		<ContentDialog x:Name="cd_prop_dialog" CloseButtonText="Close" Closed="prop_dialog_closed" DefaultButton="Close" Opened="prop_dialog_opened" PrimaryButtonText="Apply" Unloaded="prop_dialog_unloaded">
 			<RelativePanel>
 				<SwapChainPanel
-					x:Name="scp_sample_panel"
+					x:Name="scp_prop_panel"
 					BorderBrush="{ThemeResource ButtonBackgroundThemeBrush}" BorderThickness="1" CornerRadius="1" Padding="1"
-					CompositionScaleChanged="sample_panel_scale_changed"
+					CompositionScaleChanged="prop_panel_scale_changed"
 					Height="170"
-					Loaded="sample_panel_loaded"
+					Loaded="prop_panel_loaded"
 					Margin="0,0,0,8"
 					MaxHeight="170"
 					MaxWidth="170"
 					RelativePanel.AlignTopWithPanel="True"
 					RelativePanel.AlignHorizontalCenterWithPanel="True"
-					SizeChanged="sample_panel_size_changed"
+					SizeChanged="prop_panel_size_changed"
 					Width="170"
 					/>
 				<!-- Height を指定するこれ大事 -->
-				<ListView x:Name="lv_sample_list" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
-				<Slider x:Name="sample_slider_0" x:Uid = "sample_slider_0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<Slider x:Name="sample_slider_1" x:Uid = "sample_slider_1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<Slider x:Name="sample_slider_2" x:Uid = "sample_slider_2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<Slider x:Name="sample_slider_3" x:Uid = "sample_slider_3" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<Slider x:Name="sample_slider_4" x:Uid = "sample_slider_4" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="sample_slider_3" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<TextBlock x:Name="tb_version" x:Uid="tb_version" RelativePanel.Below="scp_sample_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Visibility="Collapsed" />
-				<CheckBox x:Name="sample_check_box" x:Uid="sample_check_box" Content="Check Box" IsChecked="False" Visibility="Collapsed" />
+				<ListView x:Name="lv_prop_list" RelativePanel.Below="scp_prop_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
+				<Slider x:Name="prop_slider_0" x:Uid = "prop_slider_0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_prop_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider x:Name="prop_slider_1" x:Uid = "prop_slider_1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="prop_slider_0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider x:Name="prop_slider_2" x:Uid = "prop_slider_2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="prop_slider_1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider x:Name="prop_slider_3" x:Uid = "prop_slider_3" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="prop_slider_2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider x:Name="prop_slider_4" x:Uid = "prop_slider_4" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="prop_slider_3" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<TextBlock x:Name="tb_version" x:Uid="tb_version" RelativePanel.Below="scp_prop_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Visibility="Collapsed" />
+                <CheckBox x:Name="prop_check_box" x:Uid="prop_check_box" Content="Check Box" IsChecked="False" RelativePanel.Below="prop_slider_0" RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
 			</RelativePanel>
 		</ContentDialog>
 	</Grid>

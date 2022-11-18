@@ -523,7 +523,7 @@ namespace winrt::GraphPaper::implementation
 		return cap;
 	}
 
-	// データリーダーから図形を読み込む.
+	// 図形をデータリーダーから読み込む.
 	ShapeStroke::ShapeStroke(DataReader const& dt_reader) :
 		ShapeSelect(dt_reader),
 		m_pos(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
@@ -539,7 +539,7 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_stroke_style(nullptr)
 	{}
 
-	// データライターに書き込む.
+	// 図形をデータライターに書き込む.
 	void ShapeStroke::write(DataWriter const& dt_writer) const
 	{
 		dt_writer.WriteBoolean(m_is_deleted);

@@ -561,7 +561,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// データリーダーから読み込む.
+	// 図形をデータリーダーから読み込む.
 	void ShapeSheet::read(DataReader const& dt_reader)
 	{
 		D2D1_COLOR_F dummy;

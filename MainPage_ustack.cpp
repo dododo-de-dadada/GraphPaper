@@ -71,8 +71,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::POS_ANCH:
 			u = new UndoAnp(dt_reader);
 			break;
-		case UNDO_OP::ARRANGE:
-			u = new UndoArrange(dt_reader);
+		case UNDO_OP::ORDER:
+			u = new UndoOrder(dt_reader);
 			break;
 		case UNDO_OP::ARROW_SIZE:
 			u = new UndoAttr<UNDO_OP::ARROW_SIZE>(dt_reader);
@@ -434,9 +434,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を入れ替えて, その操作をスタックに積む.
-	void MainPage::ustack_push_arrange(Shape* const s, Shape* const t)
+	void MainPage::ustack_push_order(Shape* const s, Shape* const t)
 	{
-		m_ustack_undo.push_back(new UndoArrange(s, t));
+		m_ustack_undo.push_back(new UndoOrder(s, t));
 	}
 
 	// 図形を挿入して, その操作をスタックに積む.

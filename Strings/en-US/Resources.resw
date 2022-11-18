@@ -974,8 +974,8 @@
     <value>Emphasize the 2nd and 10th</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_arrange.Text" xml:space="preserve">
-    <value>Arrange</value>
+  <data name="mfsi_order.Text" xml:space="preserve">
+    <value>Order</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_text_fit_frame_to.Text" xml:space="preserve">
@@ -1126,8 +1126,8 @@
     <value>Keep Aspect Ratio</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="sample_check_box.Content" xml:space="preserve">
-    <value>Apply when importing images.</value>
+  <data name="prop_check_box.Content" xml:space="preserve">
+    <value>Apply when importing.</value>
     <comment>CheckBox</comment>
   </data>
 </root>

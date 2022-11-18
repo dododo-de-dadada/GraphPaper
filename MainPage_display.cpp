@@ -23,14 +23,14 @@ namespace winrt::GraphPaper::implementation
 		{
 			m_d2d_mutex.lock();
 			m_main_sheet.m_d2d.ValidateDevice();
-			m_sample_sheet.m_d2d.ValidateDevice();
+			m_prop_sheet.m_d2d.ValidateDevice();
 			m_d2d_mutex.unlock();
 		}
-		if (scp_sample_panel().IsLoaded()) {
+		if (scp_prop_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
-			m_sample_sheet.m_d2d.ValidateDevice();
+			m_prop_sheet.m_d2d.ValidateDevice();
 			m_d2d_mutex.unlock();
-			sample_draw();
+			prop_sample_draw();
 		}
 		if (scp_sheet_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
@@ -49,12 +49,12 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		if (scp_sample_panel().IsLoaded()) {
+		if (scp_prop_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
 			const float logical_dpi = sender.LogicalDpi();
-			m_sample_sheet.m_d2d.SetDpi(logical_dpi);
+			m_prop_sheet.m_d2d.SetDpi(logical_dpi);
 			m_d2d_mutex.unlock();
-			sample_draw();
+			prop_sample_draw();
 		}
 		if (scp_sheet_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
@@ -74,12 +74,12 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		if (scp_sample_panel().IsLoaded()) {
+		if (scp_prop_panel().IsLoaded()) {
 			m_d2d_mutex.lock();
 			const auto ori = sender.CurrentOrientation();
-			m_sample_sheet.m_d2d.SetCurrentOrientation(ori);
+			m_prop_sheet.m_d2d.SetCurrentOrientation(ori);
 			m_d2d_mutex.unlock();
-			sample_draw();
+			prop_sample_draw();
 		}
 		if (scp_sheet_panel().IsLoaded()) {
 			m_d2d_mutex.lock();

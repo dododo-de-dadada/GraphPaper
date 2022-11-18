@@ -135,7 +135,7 @@ namespace winrt::GraphPaper::implementation
 		m_pos(undo_get_pos_anc(s, anc))
 	{}
 
-	// データライターに書き込む.
+	// 部位の操作をデータライターに書き込む.
 	void UndoAnp::write(DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::POS_ANCH));
@@ -145,7 +145,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を実行する.
-	void UndoArrange::exec(void)
+	void UndoOrder::exec(void)
 	{
 		if (m_shape == m_dst_shape) {
 			return;
@@ -165,7 +165,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから操作を読み込む.
-	UndoArrange::UndoArrange(DataReader const& dt_reader) :
+	UndoOrder::UndoOrder(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_dst_shape(undo_read_shape(dt_reader))
 	{
@@ -173,7 +173,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を作成する.
-	UndoArrange::UndoArrange(Shape* const s, Shape* const t) :
+	UndoOrder::UndoOrder(Shape* const s, Shape* const t) :
 		Undo(s),
 		m_dst_shape(t)
 	{
@@ -182,9 +182,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作をデータライターに書き込む.
-	void UndoArrange::write(DataWriter const& dt_writer)
+	void UndoOrder::write(DataWriter const& dt_writer)
 	{
-		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::ARRANGE));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::ORDER));
 		undo_write_shape(m_shape, dt_writer);
 		undo_write_shape(m_dst_shape, dt_writer);
 	}

@@ -232,19 +232,19 @@ namespace winrt::GraphPaper::implementation
 				m_main_sheet.m_range_brush = nullptr;
 			}
 			m_main_sheet.m_d2d.Trim();
-			if (m_sample_sheet.m_state_block != nullptr) {
-				//m_sample_sheet.m_state_block->Release();
-				m_sample_sheet.m_state_block = nullptr;
+			if (m_prop_sheet.m_state_block != nullptr) {
+				//m_prop_sheet.m_state_block->Release();
+				m_prop_sheet.m_state_block = nullptr;
 			}
-			if (m_sample_sheet.m_color_brush != nullptr) {
-				//m_sample_sheet.m_color_brush->Release();
-				m_sample_sheet.m_color_brush = nullptr;
+			if (m_prop_sheet.m_color_brush != nullptr) {
+				//m_prop_sheet.m_color_brush->Release();
+				m_prop_sheet.m_color_brush = nullptr;
 			}
-			if (m_sample_sheet.m_range_brush != nullptr) {
-				//m_sample_sheet.m_range_brush->Release();
-				m_sample_sheet.m_range_brush = nullptr;
+			if (m_prop_sheet.m_range_brush != nullptr) {
+				//m_prop_sheet.m_range_brush->Release();
+				m_prop_sheet.m_range_brush = nullptr;
 			}
-			m_sample_sheet.m_d2d.Trim();
+			m_prop_sheet.m_d2d.Trim();
 		}
 
 		// アプリケーションを終了する.

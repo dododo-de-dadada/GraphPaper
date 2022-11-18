@@ -635,7 +635,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// データリーダーから読み込む
+	// 図形をデータリーダーから読み込む
 	// dt_reader	データリーダー
 	ShapeImage::ShapeImage(DataReader const& dt_reader) :
 		ShapeSelect(dt_reader),
@@ -643,7 +643,8 @@ namespace winrt::GraphPaper::implementation
 		m_view(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_clip(D2D1_RECT_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_orig(D2D1_SIZE_U{ dt_reader.ReadUInt32(), dt_reader.ReadUInt32() }),
-		m_ratio(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() })
+		m_ratio(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
+		m_opac(dt_reader.ReadSingle())
 	{
 		const size_t pitch = 4ull * m_orig.width;
 		m_data = new uint8_t[pitch * m_orig.height];
@@ -655,7 +656,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// データライターに書き込む.
+	// 図形をデータライターに書き込む.
 	// dt_writer	データライター
 	void ShapeImage::write(DataWriter const& dt_writer) const
 	{
@@ -666,6 +667,7 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_clip, dt_writer);
 		dt_write(m_orig, dt_writer);
 		dt_write(m_ratio, dt_writer);
+		dt_writer.WriteSingle(m_opac);
 
 		const size_t pitch = 4ull * m_orig.width;
 		std::vector<uint8_t> line_buf(pitch);

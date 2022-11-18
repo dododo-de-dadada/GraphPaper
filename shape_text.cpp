@@ -962,7 +962,7 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_text_padding, dt_reader);
 	}
 
-	// データライターに書き込む.
+	// 図形をデータライターに書き込む.
 	void ShapeText::write(DataWriter const& dt_writer) const
 	{
 		ShapeRect::write(dt_writer);

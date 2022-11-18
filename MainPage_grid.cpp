@@ -61,60 +61,60 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「方眼の色」が選択された.
 	IAsyncAction MainPage::grid_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_sample_sheet.set_attr_to(&m_main_sheet);
-		const auto val0 = m_sample_sheet.m_grid_color.r * COLOR_MAX;
-		const auto val1 = m_sample_sheet.m_grid_color.g * COLOR_MAX;
-		const auto val2 = m_sample_sheet.m_grid_color.b * COLOR_MAX;
-		const auto val3 = m_sample_sheet.m_grid_color.a * COLOR_MAX;
+		m_prop_sheet.set_attr_to(&m_main_sheet);
+		const auto val0 = m_prop_sheet.m_grid_color.r * COLOR_MAX;
+		const auto val1 = m_prop_sheet.m_grid_color.g * COLOR_MAX;
+		const auto val2 = m_prop_sheet.m_grid_color.b * COLOR_MAX;
+		const auto val3 = m_prop_sheet.m_grid_color.a * COLOR_MAX;
 
-		sample_slider_0().Maximum(255.0);
-		sample_slider_0().TickFrequency(1.0);
-		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_0().Value(val0);
+		prop_slider_0().Maximum(255.0);
+		prop_slider_0().TickFrequency(1.0);
+		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_0().Value(val0);
 		grid_slider_set_header<UNDO_OP::GRID_COLOR, 0>(val0);
-		sample_slider_1().Maximum(255.0);
-		sample_slider_1().TickFrequency(1.0);
-		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_1().Value(val1);
+		prop_slider_1().Maximum(255.0);
+		prop_slider_1().TickFrequency(1.0);
+		prop_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_1().Value(val1);
 		grid_slider_set_header<UNDO_OP::GRID_COLOR, 1>(val1);
-		sample_slider_2().Maximum(255.0);
-		sample_slider_2().TickFrequency(1.0);
-		sample_slider_2().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_2().Value(val2);
+		prop_slider_2().Maximum(255.0);
+		prop_slider_2().TickFrequency(1.0);
+		prop_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_2().Value(val2);
 		grid_slider_set_header<UNDO_OP::GRID_COLOR, 2>(val2);
-		sample_slider_3().Maximum(255.0);
-		sample_slider_3().TickFrequency(1.0);
-		sample_slider_3().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_3().Value(val3);
+		prop_slider_3().Maximum(255.0);
+		prop_slider_3().TickFrequency(1.0);
+		prop_slider_3().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_3().Value(val3);
 		grid_slider_set_header<UNDO_OP::GRID_COLOR, 3>(val3);
 
-		sample_slider_0().Visibility(UI_VISIBLE);
-		sample_slider_1().Visibility(UI_VISIBLE);
-		sample_slider_2().Visibility(UI_VISIBLE);
-		sample_slider_3().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 2> });
-		const auto slider_3_token = sample_slider_3().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 3> });
+		prop_slider_0().Visibility(UI_VISIBLE);
+		prop_slider_1().Visibility(UI_VISIBLE);
+		prop_slider_2().Visibility(UI_VISIBLE);
+		prop_slider_3().Visibility(UI_VISIBLE);
+		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 0> });
+		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 1> });
+		const auto slider_2_token = prop_slider_2().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 2> });
+		const auto slider_3_token = prop_slider_3().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 3> });
 
-		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
-		const auto d_result = co_await cd_sample_dialog().ShowAsync();
+		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		const auto d_result = co_await cd_prop_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			if (!equal(m_main_sheet.m_grid_color, m_sample_sheet.m_grid_color)) {
-				ustack_push_set<UNDO_OP::GRID_COLOR>(&m_main_sheet, m_sample_sheet.m_grid_color);
+			if (!equal(m_main_sheet.m_grid_color, m_prop_sheet.m_grid_color)) {
+				ustack_push_set<UNDO_OP::GRID_COLOR>(&m_main_sheet, m_prop_sheet.m_grid_color);
 				ustack_is_enable();
 				sheet_draw();
 			}
 		}
 
-		sample_slider_0().Visibility(UI_COLLAPSED);
-		sample_slider_1().Visibility(UI_COLLAPSED);
-		sample_slider_2().Visibility(UI_COLLAPSED);
-		sample_slider_3().Visibility(UI_COLLAPSED);
-		sample_slider_0().ValueChanged(slider_0_token);
-		sample_slider_1().ValueChanged(slider_1_token);
-		sample_slider_2().ValueChanged(slider_2_token);
-		sample_slider_3().ValueChanged(slider_3_token);
+		prop_slider_0().Visibility(UI_COLLAPSED);
+		prop_slider_1().Visibility(UI_COLLAPSED);
+		prop_slider_2().Visibility(UI_COLLAPSED);
+		prop_slider_3().Visibility(UI_COLLAPSED);
+		prop_slider_0().ValueChanged(slider_0_token);
+		prop_slider_1().ValueChanged(slider_1_token);
+		prop_slider_2().ValueChanged(slider_2_token);
+		prop_slider_3().ValueChanged(slider_3_token);
 	}
 
 	// 用紙メニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -122,28 +122,28 @@ namespace winrt::GraphPaper::implementation
 	{
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_sample_sheet.set_attr_to(&m_main_sheet);
+		m_prop_sheet.set_attr_to(&m_main_sheet);
 		float g_base;
-		m_sample_sheet.get_grid_base(g_base);
+		m_prop_sheet.get_grid_base(g_base);
 
-		sample_slider_0().Maximum(MAX_VALUE);
-		sample_slider_0().TickFrequency(TICK_FREQ);
-		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_0().Value(g_base);
+		prop_slider_0().Maximum(MAX_VALUE);
+		prop_slider_0().TickFrequency(TICK_FREQ);
+		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_0().Value(g_base);
 		grid_slider_set_header<UNDO_OP::GRID_BASE, 0>(g_base);
-		sample_slider_0().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed<UNDO_OP::GRID_BASE, 0> });
-		//const auto samp_w = scp_sample_panel().Width();
-		//const auto samp_h = scp_sample_panel().Height();
+		prop_slider_0().Visibility(UI_VISIBLE);
+		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed<UNDO_OP::GRID_BASE, 0> });
+		//const auto samp_w = scp_prop_panel().Width();
+		//const auto samp_h = scp_prop_panel().Height();
 
-		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
-		const auto d_result = co_await cd_sample_dialog().ShowAsync();
+		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		const auto d_result = co_await cd_prop_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
 			float sheet_val;
 
 			m_main_sheet.get_grid_base(sheet_val);
-			m_sample_sheet.get_grid_base(samp_val);
+			m_prop_sheet.get_grid_base(samp_val);
 			if (!equal(sheet_val, samp_val)) {
 				ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, samp_val);
 				ustack_is_enable();
@@ -152,8 +152,8 @@ namespace winrt::GraphPaper::implementation
 			}
 
 		}
-		sample_slider_0().Visibility(UI_COLLAPSED);
-		sample_slider_0().ValueChanged(slider_0_token);
+		prop_slider_0().Visibility(UI_COLLAPSED);
+		prop_slider_0().ValueChanged(slider_0_token);
 	}
 
 	// 用紙メニューの「方眼の大きさ」>「狭める」が選択された.
@@ -206,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 			conv_col_to_str(m_color_code, val, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
-		sample_set_slider_header<S>(text);
+		prop_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.
@@ -220,13 +220,13 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			const float val = static_cast<float>(args.NewValue());
 			grid_slider_set_header<U, S>(val);
-			m_sample_sheet.set_grid_base(val);
+			m_prop_sheet.set_grid_base(val);
 		}
 		else if constexpr (U == UNDO_OP::GRID_COLOR) {
 			const float val = static_cast<float>(args.NewValue());
 			grid_slider_set_header<U, S>(val);
 			D2D1_COLOR_F g_color;
-			m_sample_sheet.get_grid_color(g_color);
+			m_prop_sheet.get_grid_color(g_color);
 			if constexpr (S == 0) {
 				g_color.r = val / COLOR_MAX;
 			}
@@ -239,10 +239,10 @@ namespace winrt::GraphPaper::implementation
 			else if constexpr (S == 3) {
 				g_color.a = val / COLOR_MAX;
 			}
-			m_sample_sheet.set_grid_color(g_color);
+			m_prop_sheet.set_grid_color(g_color);
 		}
-		if (scp_sample_panel().IsLoaded()) {
-			sample_draw();
+		if (scp_prop_panel().IsLoaded()) {
+			prop_sample_draw();
 		}
 	}
 

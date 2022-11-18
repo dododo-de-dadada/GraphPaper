@@ -23,83 +23,83 @@ namespace winrt::GraphPaper::implementation
 	{
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_sample_sheet.set_attr_to(&m_main_sheet);
+		m_prop_sheet.set_attr_to(&m_main_sheet);
 		DASH_PATT d_patt;
 		m_main_sheet.get_dash_patt(d_patt);
 
-		sample_slider_0().Maximum(MAX_VALUE);
-		sample_slider_0().TickFrequency(TICK_FREQ);
-		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_0().Value(d_patt.m_[0]);
+		prop_slider_0().Maximum(MAX_VALUE);
+		prop_slider_0().TickFrequency(TICK_FREQ);
+		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_0().Value(d_patt.m_[0]);
 		dash_slider_set_header<UNDO_OP::DASH_PATT, 0>(d_patt.m_[0]);
-		sample_slider_1().Maximum(MAX_VALUE);
-		sample_slider_1().TickFrequency(TICK_FREQ);
-		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_1().Value(d_patt.m_[1]);
+		prop_slider_1().Maximum(MAX_VALUE);
+		prop_slider_1().TickFrequency(TICK_FREQ);
+		prop_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_1().Value(d_patt.m_[1]);
 		dash_slider_set_header<UNDO_OP::DASH_PATT, 1>(d_patt.m_[1]);
-		sample_slider_2().Maximum(MAX_VALUE);
-		sample_slider_2().TickFrequency(TICK_FREQ);
-		sample_slider_2().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_2().Value(d_patt.m_[2]);
+		prop_slider_2().Maximum(MAX_VALUE);
+		prop_slider_2().TickFrequency(TICK_FREQ);
+		prop_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_2().Value(d_patt.m_[2]);
 		dash_slider_set_header<UNDO_OP::DASH_PATT, 2>(d_patt.m_[2]);
-		sample_slider_3().Maximum(MAX_VALUE);
-		sample_slider_3().TickFrequency(TICK_FREQ);
-		sample_slider_3().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_3().Value(d_patt.m_[3]);
+		prop_slider_3().Maximum(MAX_VALUE);
+		prop_slider_3().TickFrequency(TICK_FREQ);
+		prop_slider_3().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_3().Value(d_patt.m_[3]);
 		dash_slider_set_header<UNDO_OP::DASH_PATT, 3>(d_patt.m_[3]);
 
 		float s_width;
 		m_main_sheet.get_stroke_width(s_width);
 
-		sample_slider_4().Maximum(MAX_VALUE);
-		sample_slider_4().TickFrequency(TICK_FREQ);
-		sample_slider_4().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_4().Value(s_width);
+		prop_slider_4().Maximum(MAX_VALUE);
+		prop_slider_4().TickFrequency(TICK_FREQ);
+		prop_slider_4().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_4().Value(s_width);
 		dash_slider_set_header<UNDO_OP::STROKE_WIDTH, 4>(s_width);
 
 		D2D1_DASH_STYLE s_style;
 		m_main_sheet.get_dash_style(s_style);
-		sample_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? UI_VISIBLE : UI_COLLAPSED);
-		sample_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? UI_VISIBLE : UI_COLLAPSED);
-		sample_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
-		sample_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
-		sample_slider_4().Visibility(UI_VISIBLE);
+		prop_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? UI_VISIBLE : UI_COLLAPSED);
+		prop_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? UI_VISIBLE : UI_COLLAPSED);
+		prop_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
+		prop_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
+		prop_slider_4().Visibility(UI_VISIBLE);
 		const winrt::event_token slider_0_token{
-			sample_slider_0().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 0> })
+			prop_slider_0().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 0> })
 		};
 		const winrt::event_token slider_1_token{
-			sample_slider_1().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 1> })
+			prop_slider_1().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 1> })
 		};
 		const winrt::event_token slider_2_token{
-			sample_slider_2().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 2> })
+			prop_slider_2().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 2> })
 		};
 		const winrt::event_token slider_3_token{
-			sample_slider_3().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 3> })
+			prop_slider_3().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 3> })
 		};
 		const winrt::event_token slider_4_token{
-			sample_slider_4().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::STROKE_WIDTH, 4> })
+			prop_slider_4().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::STROKE_WIDTH, 4> })
 		};
-		const auto panel_w = scp_sample_panel().Width();
-		const auto panel_h = scp_sample_panel().Height();
+		const auto panel_w = scp_prop_panel().Width();
+		const auto panel_h = scp_prop_panel().Height();
 		const auto padd = panel_w * 0.125;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
 		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(panel_w - 2.0 * padd), static_cast<FLOAT>(panel_h - 2.0 * padd) };
-		m_sample_sheet.m_shape_list.push_back(new ShapeLine(b_pos, b_vec, &m_sample_sheet));
+		m_prop_sheet.m_shape_list.push_back(new ShapeLine(b_pos, b_vec, &m_prop_sheet));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
 
-		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const ContentDialogResult d_result{
-			co_await cd_sample_dialog().ShowAsync()
+			co_await cd_prop_dialog().ShowAsync()
 		};
 		if (d_result == ContentDialogResult::Primary) {
 			DASH_PATT sample_patt;
 			float sample_width;
 			//m_sample_shape->get_dash_patt(sample_patt);
 			//m_sample_shape->get_stroke_width(sample_width);
-			m_sample_sheet.m_shape_list.back()->get_dash_patt(sample_patt);
-			m_sample_sheet.m_shape_list.back()->get_stroke_width(sample_width);
+			m_prop_sheet.m_shape_list.back()->get_dash_patt(sample_patt);
+			m_prop_sheet.m_shape_list.back()->get_stroke_width(sample_width);
 			if (ustack_push_set<UNDO_OP::DASH_PATT>(sample_patt) ||
 				ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
 				ustack_push_null();
@@ -107,17 +107,17 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		slist_clear(m_sample_sheet.m_shape_list);
-		sample_slider_0().Visibility(UI_COLLAPSED);
-		sample_slider_1().Visibility(UI_COLLAPSED);
-		sample_slider_2().Visibility(UI_COLLAPSED);
-		sample_slider_3().Visibility(UI_COLLAPSED);
-		sample_slider_4().Visibility(UI_COLLAPSED);
-		sample_slider_0().ValueChanged(slider_0_token);
-		sample_slider_1().ValueChanged(slider_1_token);
-		sample_slider_2().ValueChanged(slider_2_token);
-		sample_slider_3().ValueChanged(slider_3_token);
-		sample_slider_4().ValueChanged(slider_4_token);
+		slist_clear(m_prop_sheet.m_shape_list);
+		prop_slider_0().Visibility(UI_COLLAPSED);
+		prop_slider_1().Visibility(UI_COLLAPSED);
+		prop_slider_2().Visibility(UI_COLLAPSED);
+		prop_slider_3().Visibility(UI_COLLAPSED);
+		prop_slider_4().Visibility(UI_COLLAPSED);
+		prop_slider_0().ValueChanged(slider_0_token);
+		prop_slider_1().ValueChanged(slider_1_token);
+		prop_slider_2().ValueChanged(slider_2_token);
+		prop_slider_3().ValueChanged(slider_3_token);
+		prop_slider_4().ValueChanged(slider_4_token);
 		sheet_draw();
 	}
 
@@ -184,13 +184,13 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_sheet.m_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf };
-			sample_set_slider_header<S>(text);
+			prop_set_slider_header<S>(text);
 		}
 		if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_sheet.m_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
 			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf };
-			sample_slider_4().Header(box_value(text));
+			prop_slider_4().Header(box_value(text));
 		}
 	}
 
@@ -205,7 +205,7 @@ namespace winrt::GraphPaper::implementation
 			const float val = static_cast<float>(args.NewValue());
 			DASH_PATT patt;
 			//m_sample_shape->get_dash_patt(patt);
-			m_sample_sheet.m_shape_list.back()->get_dash_patt(patt);
+			m_prop_sheet.m_shape_list.back()->get_dash_patt(patt);
 			if constexpr (S == 0) {
 				dash_slider_set_header<U, S>(val);
 				patt.m_[0] = static_cast<FLOAT>(val);
@@ -223,15 +223,15 @@ namespace winrt::GraphPaper::implementation
 				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(val);
 			}
 			//m_sample_shape->set_dash_patt(patt);
-			m_sample_sheet.m_shape_list.back()->set_dash_patt(patt);
+			m_prop_sheet.m_shape_list.back()->set_dash_patt(patt);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
 			const float val = static_cast<float>(args.NewValue());
 			dash_slider_set_header<U, S>(val);
-			m_sample_sheet.m_shape_list.back()->set_stroke_width(val);
+			m_prop_sheet.m_shape_list.back()->set_stroke_width(val);
 		}
-		if (scp_sample_panel().IsLoaded()) {
-			sample_draw();
+		if (scp_prop_panel().IsLoaded()) {
+			prop_sample_draw();
 		}
 	}
 

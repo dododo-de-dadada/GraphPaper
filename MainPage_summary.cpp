@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚Ìˆê——‚Ì’†‚Å}Œ`‚ğ“ü‚ê‘Ö‚¦‚é.
 	// s	“ü‚ê‘Ö‚¦‚é}Œ`
 	// t	‚à‚¤ˆê•û‚Ì}Œ`
-	void MainPage::summary_arrange(Shape* const s, Shape* const t)
+	void MainPage::summary_order(Shape* const s, Shape* const t)
 	{
 		// ˆê——‚ª•\¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
@@ -282,8 +282,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				list.UpdateLayout();
 			}
-			else if (u_type == typeid(UndoArrange)) {
-				const auto v = static_cast<const UndoArrange*>(u);
+			else if (u_type == typeid(UndoOrder)) {
+				const auto v = static_cast<const UndoOrder*>(u);
 				summary_swap(lv_summary_list(), v->shape(), v->dest(), Resources());
 			}
 			else if (u_type == typeid(UndoSelect)) {

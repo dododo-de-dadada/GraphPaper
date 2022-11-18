@@ -18,7 +18,7 @@
     <ClCompile Include="MainPage.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="MainPage_app.cpp" />
-    <ClCompile Include="MainPage_arrange.cpp" />
+    <ClCompile Include="MainPage_order.cpp" />
     <ClCompile Include="MainPage_arrow.cpp" />
     <ClCompile Include="MainPage_display.cpp" />
     <ClCompile Include="MainPage_file.cpp" />

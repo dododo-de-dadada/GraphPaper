@@ -110,45 +110,45 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「用紙の色」が選択された.
 	IAsyncAction MainPage::sheet_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_sample_sheet.set_attr_to(&m_main_sheet);
-		const float val0 = m_sample_sheet.m_sheet_color.r * COLOR_MAX;
-		const float val1 = m_sample_sheet.m_sheet_color.g * COLOR_MAX;
-		const float val2 = m_sample_sheet.m_sheet_color.b * COLOR_MAX;
+		m_prop_sheet.set_attr_to(&m_main_sheet);
+		const float val0 = m_prop_sheet.m_sheet_color.r * COLOR_MAX;
+		const float val1 = m_prop_sheet.m_sheet_color.g * COLOR_MAX;
+		const float val2 = m_prop_sheet.m_sheet_color.b * COLOR_MAX;
 
-		sample_slider_0().Maximum(255.0);
-		sample_slider_0().TickFrequency(1.0);
-		sample_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_0().Value(val0);
+		prop_slider_0().Maximum(255.0);
+		prop_slider_0().TickFrequency(1.0);
+		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_0().Value(val0);
 		sheet_slider_set_header<UNDO_OP::SHEET_COLOR, 0>(val0);
-		sample_slider_1().Maximum(255.0);
-		sample_slider_1().TickFrequency(1.0);
-		sample_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_1().Value(val1);
+		prop_slider_1().Maximum(255.0);
+		prop_slider_1().TickFrequency(1.0);
+		prop_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_1().Value(val1);
 		sheet_slider_set_header<UNDO_OP::SHEET_COLOR, 1>(val1);
-		sample_slider_2().Maximum(255.0);
-		sample_slider_2().TickFrequency(1.0);
-		sample_slider_2().SnapsTo(SliderSnapsTo::Ticks);
-		sample_slider_2().Value(val2);
+		prop_slider_2().Maximum(255.0);
+		prop_slider_2().TickFrequency(1.0);
+		prop_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		prop_slider_2().Value(val2);
 		sheet_slider_set_header<UNDO_OP::SHEET_COLOR, 2>(val2);
 
-		sample_slider_0().Visibility(UI_VISIBLE);
-		sample_slider_1().Visibility(UI_VISIBLE);
-		sample_slider_2().Visibility(UI_VISIBLE);
-		const auto slider_0_token = sample_slider_0().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 0> });
-		const auto slider_1_token = sample_slider_1().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 1> });
-		const auto slider_2_token = sample_slider_2().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 2> });
-		//m_sample_type = SAMPLE_TYPE::NONE;
-		//m_sample_sheet.m_d2d.SetSwapChainPanel(scp_sample_panel());
-		//const auto samp_w = scp_sample_panel().Width();
-		//const auto samp_h = scp_sample_panel().Height();
-		//m_sample_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_sample_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
+		prop_slider_0().Visibility(UI_VISIBLE);
+		prop_slider_1().Visibility(UI_VISIBLE);
+		prop_slider_2().Visibility(UI_VISIBLE);
+		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 0> });
+		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 1> });
+		const auto slider_2_token = prop_slider_2().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 2> });
+		//m_sample_type = PROP_TYPE::NONE;
+		//m_prop_sheet.m_d2d.SetSwapChainPanel(scp_prop_panel());
+		//const auto samp_w = scp_prop_panel().Width();
+		//const auto samp_h = scp_prop_panel().Height();
+		//m_prop_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
+		//m_prop_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
 
-		cd_sample_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_sample_dialog().ShowAsync();
+		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_prop_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F samp_val;
-			m_sample_sheet.get_sheet_color(samp_val);
+			m_prop_sheet.get_sheet_color(samp_val);
 			D2D1_COLOR_F sheet_val;
 			m_main_sheet.get_sheet_color(sheet_val);
 			if (!equal(sheet_val, samp_val)) {
@@ -158,13 +158,13 @@ namespace winrt::GraphPaper::implementation
 				sheet_draw();
 			}
 		}
-		//m_sample_sheet.m_d2d.Release();
-		sample_slider_0().Visibility(UI_COLLAPSED);
-		sample_slider_1().Visibility(UI_COLLAPSED);
-		sample_slider_2().Visibility(UI_COLLAPSED);
-		sample_slider_0().ValueChanged(slider_0_token);
-		sample_slider_1().ValueChanged(slider_1_token);
-		sample_slider_2().ValueChanged(slider_2_token);
+		//m_prop_sheet.m_d2d.Release();
+		prop_slider_0().Visibility(UI_COLLAPSED);
+		prop_slider_1().Visibility(UI_COLLAPSED);
+		prop_slider_2().Visibility(UI_COLLAPSED);
+		prop_slider_0().ValueChanged(slider_0_token);
+		prop_slider_1().ValueChanged(slider_1_token);
+		prop_slider_2().ValueChanged(slider_2_token);
 	}
 
 	// 用紙を表示する.
@@ -446,7 +446,7 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「用紙の大きさ」が選択された
 	IAsyncAction MainPage::sheet_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_sample_sheet.set_attr_to(&m_main_sheet);
+		m_prop_sheet.set_attr_to(&m_main_sheet);
 		float g_base;
 		m_main_sheet.get_grid_base(g_base);
 		wchar_t buf[32];
@@ -582,7 +582,7 @@ namespace winrt::GraphPaper::implementation
 			conv_col_to_str(m_color_code, val, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
-		sample_set_slider_header<S>(text);
+		prop_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.
@@ -597,7 +597,7 @@ namespace winrt::GraphPaper::implementation
 			const auto val = static_cast<float>(args.NewValue());
 			sheet_slider_set_header<U, S>(val);
 			D2D1_COLOR_F s_color;
-			m_sample_sheet.get_sheet_color(s_color);
+			m_prop_sheet.get_sheet_color(s_color);
 			if constexpr (S == 0) {
 				s_color.r = static_cast<FLOAT>(val / COLOR_MAX);
 			}
@@ -607,10 +607,10 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 2) {
 				s_color.b = static_cast<FLOAT>(val / COLOR_MAX);
 			}
-			m_sample_sheet.set_sheet_color(s_color);
+			m_prop_sheet.set_sheet_color(s_color);
 		}
-		if (scp_sample_panel().IsLoaded()) {
-			sample_draw();
+		if (scp_prop_panel().IsLoaded()) {
+			prop_sample_draw();
 		}
 	}
 

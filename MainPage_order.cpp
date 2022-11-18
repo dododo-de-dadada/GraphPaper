@@ -1,5 +1,5 @@
 //-------------------------------
-// MainPage_arrange.cpp
+// MainPage_order.cpp
 // 図形の並び替え
 //-------------------------------
 #include "pch.h"
@@ -17,14 +17,14 @@ namespace winrt::GraphPaper::implementation
 	constexpr bool BRING_TO_FRONT = false;
 
 	// 編集メニューの「前面に移動」が選択された.
-	void MainPage::arrange_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::order_bring_forward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を次または前の図形と入れ替える.
-		arrange_order<BRING_FORWARD>();
+		order_swap<BRING_FORWARD>();
 	}
 
 	// 編集メニューの「最前面に移動」が選択された.
-	void MainPage::arrange_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::order_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		SHAPE_LIST slist;	// 選択された図形のリスト
 		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
@@ -46,14 +46,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 選択された図形を次の図形と入れ替える.
-	template void MainPage::arrange_order<BRING_FORWARD>(void);
+	template void MainPage::order_swap<BRING_FORWARD>(void);
 
 	// 選択された図形を前の図形と入れ替える.
-	template void MainPage::arrange_order<SEND_BACKWARD>(void);
+	template void MainPage::order_swap<SEND_BACKWARD>(void);
 
 	// 選択された図形を次または前の図形と入れ替える.
 	// T	T が iterator の場合は背面の図形と入れ替え, reverse_iterator の場合は前面の図形と入れ替える. 
-	template<typename T> void MainPage::arrange_order(void)
+	template<typename T> void MainPage::order_swap(void)
 	{
 		T it_end;	// 終端
 		T it_src;	// 交換元
@@ -114,23 +114,23 @@ namespace winrt::GraphPaper::implementation
 			Shape* const t = *it_dst;
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
-				summary_arrange(s, t);
+				summary_order(s, t);
 			}
-			ustack_push_arrange(s, t);
+			ustack_push_order(s, t);
 			// 交換済みにする.
 			done = true;
 		}
 	}
 
 	// 編集メニューの「ひとつ背面に移動」が選択された.
-	void MainPage::arrange_send_backward_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::order_send_backward_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 選択された図形を次または前の図形と入れ替える.
-		arrange_order<SEND_BACKWARD>();
+		order_swap<SEND_BACKWARD>();
 	}
 
 	// 編集メニューの「最背面に移動」が選択された.
-	void MainPage::arrange_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::order_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		SHAPE_LIST slist;	// 選択された図形のリスト
 		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);

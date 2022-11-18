@@ -363,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 
 	// ストレージファイルを非同期に読む.
 	// SUSPEND	ライフサイクルが中断のとき true
-	// SETTING	「設定を保存」のとき true
+	// SETTING	「用紙設定を保存」のとき true
 	// s_file	読み込むストレージファイル
 	// 戻り値	読み込めたら S_OK.
 	template <bool SUSPEND, bool SETTING>
@@ -853,7 +853,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形データをストレージファイルに非同期に書き込む.
 	// SUSPEND	ライフサイクルが中断のとき true
-	// SETTING	「設定を保存」のとき true
+	// SETTING	「用紙設定を保存」のとき true
 	// s_file	ストレージファイル
 	// 戻り値	書き込みに成功したら true
 	template <bool SUSPEND, bool SETTING>

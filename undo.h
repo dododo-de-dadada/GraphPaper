@@ -22,7 +22,7 @@ namespace winrt::GraphPaper::implementation
 	enum struct UNDO_OP {
 		END = -1,	// 操作スタックの終端 (ファイル読み書きで使用)
 		NIL = 0,	// 操作の区切り (ファイル読み書きで使用)
-		ARRANGE,	// 図形の順番の入れ替え
+		ORDER,	// 図形の順番の入れ替え
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
 		DASH_CAP,	// 破線の端の形式の操作
@@ -154,7 +154,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形の順番を入れ替える操作
 	//------------------------------
-	struct UndoArrange : Undo {
+	struct UndoOrder : Undo {
 		Shape* m_dst_shape;	// 入れ替え先の図形
 
 		// 操作を実行すると値が変わるか判定する.
@@ -166,9 +166,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形を参照しているか判定する.
 		bool refer_to(const Shape* s) const noexcept final override { return Undo::refer_to(s) || m_dst_shape == s; };
 		// 図形の順番を入れ替える.
-		UndoArrange(Shape* const s, Shape* const t);
+		UndoOrder(Shape* const s, Shape* const t);
 		// データリーダーから操作を読み込む.
-		UndoArrange(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		UndoOrder(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
 		// データライターに書き込む.
 		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
 	};

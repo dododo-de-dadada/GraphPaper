@@ -950,7 +950,7 @@ namespace winrt::GraphPaper::implementation
 		//m_d2d_arrow_geom = nullptr;
 	}
 
-	// データリーダーから図形を読み込む.
+	// 図形をデータリーダーから読み込む.
 	// dt_reader	データリーダー
 	ShapePoly::ShapePoly(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
@@ -959,7 +959,7 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_fill_color, dt_reader);
 	}
 
-	// データライターに書き込む.
+	// 図形をデータライターに書き込む.
 	void ShapePoly::write(DataWriter const& dt_writer) const
 	{
 		ShapePath::write(dt_writer);

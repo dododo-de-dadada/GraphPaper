@@ -966,7 +966,7 @@
     <value>2番目と10番目を強調</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfsi_arrange.Text" xml:space="preserve">
+  <data name="mfsi_order.Text" xml:space="preserve">
     <value>並び替え</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -1122,8 +1122,8 @@
     <value>縦横比を維持</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="sample_check_box.Content" xml:space="preserve">
-    <value>画像をインポートするときに適用.</value>
+  <data name="prop_check_box.Content" xml:space="preserve">
+    <value>インポートするとき適用.</value>
     <comment>CheckBox</comment>
   </data>
 </root>
