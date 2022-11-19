@@ -22,7 +22,6 @@ namespace winrt::GraphPaper::implementation
 	enum struct UNDO_OP {
 		END = -1,	// 操作スタックの終端 (ファイル読み書きで使用)
 		NIL = 0,	// 操作の区切り (ファイル読み書きで使用)
-		ORDER,	// 図形の順番の入れ替え
 		ARROW_SIZE,	// 矢じるしの大きさの操作
 		ARROW_STYLE,	// 矢じるしの形式の操作
 		DASH_CAP,	// 破線の端の形式の操作
@@ -39,15 +38,16 @@ namespace winrt::GraphPaper::implementation
 		GRID_COLOR,	// 方眼の色の操作
 		GRID_EMPH,	// 方眼の形式の操作
 		GRID_SHOW,	// 方眼の表示方法の操作
-		GROUP,	// 図形をグループに挿入または削除する操作
+		GROUP,	// グループのリスト操作
 		IMAGE,	// 画像の操作 (ファイル読み書きで使用)
 		//IMAGE_ASPECT,	// 画像の縦横維持の操作
 		IMAGE_OPAC,	// 画像の不透明度の操作
 		JOIN_LIMIT,	// 線のマイター制限の操作
 		JOIN_STYLE,	// 破のつなぎの操作
-		LIST,	// 図形をリストに挿入または削除する操作
-		POS_ANCH,	// 図形の部位の位置の操作
-		POS_START,	// 図形の開始位置の操作
+		LIST,	// 図形を挿入または削除する操作
+		ORDER,	// 図形の順番の入れ替え
+		FORM,	// 図形の形 (部位の位置) の操作
+		MOVE,	// 図形の移動の操作
 		SELECT,	// 図形の選択を切り替え
 		SHEET_COLOR,	// 用紙の色の操作
 		SHEET_SIZE,	// 用紙の寸法の操作
@@ -91,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::IMAGE_OPAC> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::JOIN_LIMIT> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::JOIN_STYLE> { using type = D2D1_LINE_JOIN; };
-	template <> struct U_TYPE<UNDO_OP::POS_START> { using type = D2D1_POINT_2F; };
+	template <> struct U_TYPE<UNDO_OP::MOVE> { using type = D2D1_POINT_2F; };
 	template <> struct U_TYPE<UNDO_OP::SHEET_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::SHEET_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_CAP> { using type = CAP_STYLE; };
@@ -133,20 +133,20 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// 図形の部位の操作
+	// 形の操作
 	//------------------------------
-	struct UndoAnp : Undo {
-		uint32_t m_anc;	// 操作される図形の部位
-		D2D1_POINT_2F m_pos;	// 変更前の, 図形の部位の位置
+	struct UndoForm : Undo {
+		uint32_t m_anc;	// 操作される部位
+		D2D1_POINT_2F m_pos;	// 変形前の部位の位置
 
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;
 		// 操作を実行する.
 		void exec(void);
 		// データリーダーから操作を読み込む.
-		UndoAnp(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
-		// 図形の部位を保存する.
-		UndoAnp(Shape* const s, const uint32_t anc);
+		UndoForm(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		// 図形の形を保存する.
+		UndoForm(Shape* const s, const uint32_t anc);
 		// データライターに書き込む.
 		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
 	};
@@ -177,10 +177,10 @@ namespace winrt::GraphPaper::implementation
 	// 図形の値を保存して変更する操作.
 	//------------------------------
 	template <UNDO_OP U>
-	struct UndoAttr : Undo, U_TYPE<U> {
+	struct UndoValue : Undo, U_TYPE<U> {
 		U_TYPE<U>::type m_value;	// // 変更される前の値
 
-		~UndoAttr() {};
+		~UndoValue() {};
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;
 		// 操作を実行する.
@@ -190,11 +190,11 @@ namespace winrt::GraphPaper::implementation
 		// 値を図形に格納する.
 		static void SET(Shape* const s, const U_TYPE<U>::type& val);
 		// データリーダーから操作を読み込む.
-		UndoAttr(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		UndoValue(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
 		// 図形の値を保存する.
-		UndoAttr(Shape* s);
+		UndoValue(Shape* s);
 		// 図形の値を保存して変更する.
-		UndoAttr(Shape* s, const U_TYPE<U>::type& val);
+		UndoValue(Shape* s, const U_TYPE<U>::type& val);
 		// データライターに書き込む.
 		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
 	};
@@ -251,7 +251,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形をグループに追加または削除する操作.
 	//------------------------------
-	struct UndoListGroup : UndoList {
+	struct UndoGroup : UndoList {
 		ShapeGroup* m_shape_group;	// 操作するグループ
 
 		// 操作を実行する.
@@ -259,11 +259,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形を参照しているか判定する.
 		bool refer_to(const Shape* s) const noexcept final override { return UndoList::refer_to(s) || m_shape_group == s; };
 		// データリーダーから操作を読み込む.
-		UndoListGroup(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		UndoGroup(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
 		// 図形をグループから削除する.
-		UndoListGroup(ShapeGroup* const g, Shape* const s);
+		UndoGroup(ShapeGroup* const g, Shape* const s);
 		// 図形をグループに追加する.
-		UndoListGroup(ShapeGroup* const g, Shape* const s, Shape* const s_pos);
+		UndoGroup(ShapeGroup* const g, Shape* const s, Shape* const s_pos);
 		// 操作をデータライターに書き込む.
 		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
 	};
@@ -285,7 +285,7 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 文字列の操作を破棄する.
-	template <> UndoAttr<UNDO_OP::TEXT_CONTENT>::~UndoAttr() 
+	template <> UndoValue<UNDO_OP::TEXT_CONTENT>::~UndoValue() 
 	{
 		if (m_value != nullptr) {
 			delete[] m_value;

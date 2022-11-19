@@ -59,7 +59,7 @@ namespace winrt::GraphPaper::implementation
 			else if (typeid(*s) != typeid(ShapeText)) {
 				continue;
 			}
-			auto u = new UndoAnp(s, ANC_TYPE::ANC_SE);
+			auto u = new UndoForm(s, ANC_TYPE::ANC_SE);
 			if (static_cast<ShapeText*>(s)->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f)) {
 				m_ustack_undo.push_back(u);
 				if (!flag) {

@@ -8,13 +8,13 @@
 using namespace winrt;
 
 // 図形をグループに追加する.
-#define UndoAppendG(g, s)	UndoListGroup(static_cast<ShapeGroup* const>(g), static_cast<Shape* const>(s), static_cast<Shape* const>(nullptr))
+#define UndoAppendG(g, s)	UndoGroup(static_cast<ShapeGroup* const>(g), static_cast<Shape* const>(s), static_cast<Shape* const>(nullptr))
 // 図形をリストに追加する.
 #define UndoAppend(s)	UndoList(static_cast<Shape* const>(s), static_cast<Shape* const>(nullptr))
 // 図形をリストに挿入する.
 #define UndoInsert(s, p)	UndoList(static_cast<Shape* const>(s), static_cast<Shape* const>(p))
 // 図形をグループから取り除く.
-#define UndoRemoveG(g, s)	UndoListGroup(static_cast<ShapeGroup* const>(g), static_cast<Shape* const>(s))
+#define UndoRemoveG(g, s)	UndoGroup(static_cast<ShapeGroup* const>(g), static_cast<Shape* const>(s))
 // 図形をリストから取り除く.
 #define UndoRemove(s)	UndoList(static_cast<Shape* const>(s))
 
@@ -29,26 +29,26 @@ namespace winrt::GraphPaper::implementation
 	constexpr uint32_t MAX_UCNT = 32;
 
 	// 操作スタックを消去し, 含まれる操作を破棄する.
-	static uint32_t ustack_clear_stack(UNDO_STACK& u_stack);
+	static uint32_t ustack_clear_stack(UNDO_STACK& ustack);
 	// データリーダーから操作を読み込む.
 	static bool ustack_read_op(Undo*& u, DataReader const& dt_reader);
 	// 操作をデータリーダーに書き込む.
 	static void ustack_write_op(Undo* u, DataWriter const& dt_writer);
 
 	// 操作スタックを消去し, 含まれる操作を破棄する.
-	// u_stack	操作スタック
+	// ustack	操作スタック
 	// 戻り値	消去した操作の組数
-	static uint32_t ustack_clear_stack(UNDO_STACK& u_stack)
+	static uint32_t ustack_clear_stack(UNDO_STACK& ustack)
 	{
 		uint32_t n = 0;
-		for (auto u : u_stack) {
+		for (auto u : ustack) {
 			if (u == nullptr) {
 				n++;
 				continue;
 			}
 			delete u;
 		}
-		u_stack.clear();
+		ustack.clear();
 		return n;
 	}
 
@@ -68,62 +68,62 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::NIL:
 			u = nullptr;
 			break;
-		case UNDO_OP::POS_ANCH:
-			u = new UndoAnp(dt_reader);
+		case UNDO_OP::FORM:
+			u = new UndoForm(dt_reader);
 			break;
 		case UNDO_OP::ORDER:
 			u = new UndoOrder(dt_reader);
 			break;
 		case UNDO_OP::ARROW_SIZE:
-			u = new UndoAttr<UNDO_OP::ARROW_SIZE>(dt_reader);
+			u = new UndoValue<UNDO_OP::ARROW_SIZE>(dt_reader);
 			break;
 		case UNDO_OP::ARROW_STYLE:
-			u = new UndoAttr<UNDO_OP::ARROW_STYLE>(dt_reader);
+			u = new UndoValue<UNDO_OP::ARROW_STYLE>(dt_reader);
 			break;
 		case UNDO_OP::IMAGE:
 			u = new UndoImage(dt_reader);
 			break;
 		//case UNDO_OP::IMAGE_ASPECT:
-		//	u = new UndoAttr<UNDO_OP::IMAGE_ASPECT>(dt_reader);
+		//	u = new UndoValue<UNDO_OP::IMAGE_ASPECT>(dt_reader);
 		//	break;
 		case UNDO_OP::IMAGE_OPAC:
-			u = new UndoAttr<UNDO_OP::IMAGE_OPAC>(dt_reader);
+			u = new UndoValue<UNDO_OP::IMAGE_OPAC>(dt_reader);
 			break;
 		case UNDO_OP::FILL_COLOR:
-			u = new UndoAttr<UNDO_OP::FILL_COLOR>(dt_reader);
+			u = new UndoValue<UNDO_OP::FILL_COLOR>(dt_reader);
 			break;
 		case UNDO_OP::FONT_COLOR:
-			u = new UndoAttr<UNDO_OP::FONT_COLOR>(dt_reader);
+			u = new UndoValue<UNDO_OP::FONT_COLOR>(dt_reader);
 			break;
 		case UNDO_OP::FONT_FAMILY:
-			u = new UndoAttr<UNDO_OP::FONT_FAMILY>(dt_reader);
+			u = new UndoValue<UNDO_OP::FONT_FAMILY>(dt_reader);
 			break;
 		case UNDO_OP::FONT_SIZE:
-			u = new UndoAttr<UNDO_OP::FONT_SIZE>(dt_reader);
+			u = new UndoValue<UNDO_OP::FONT_SIZE>(dt_reader);
 			break;
 		case UNDO_OP::FONT_STYLE:
-			u = new UndoAttr<UNDO_OP::FONT_STYLE>(dt_reader);
+			u = new UndoValue<UNDO_OP::FONT_STYLE>(dt_reader);
 			break;
 		case UNDO_OP::FONT_STRETCH:
-			u = new UndoAttr<UNDO_OP::FONT_STRETCH>(dt_reader);
+			u = new UndoValue<UNDO_OP::FONT_STRETCH>(dt_reader);
 			break;
 		case UNDO_OP::FONT_WEIGHT:
-			u = new UndoAttr<UNDO_OP::FONT_WEIGHT>(dt_reader);
+			u = new UndoValue<UNDO_OP::FONT_WEIGHT>(dt_reader);
 			break;
 		case UNDO_OP::GRID_BASE:
-			u = new UndoAttr<UNDO_OP::GRID_BASE>(dt_reader);
+			u = new UndoValue<UNDO_OP::GRID_BASE>(dt_reader);
 			break;
 		case UNDO_OP::GRID_COLOR:
-			u = new UndoAttr<UNDO_OP::GRID_COLOR>(dt_reader);
+			u = new UndoValue<UNDO_OP::GRID_COLOR>(dt_reader);
 			break;
 		case UNDO_OP::GRID_EMPH:
-			u = new UndoAttr<UNDO_OP::GRID_EMPH>(dt_reader);
+			u = new UndoValue<UNDO_OP::GRID_EMPH>(dt_reader);
 			break;
 		case UNDO_OP::GRID_SHOW:
-			u = new UndoAttr<UNDO_OP::GRID_SHOW>(dt_reader);
+			u = new UndoValue<UNDO_OP::GRID_SHOW>(dt_reader);
 			break;
 		case UNDO_OP::GROUP:
-			u = new UndoListGroup(dt_reader);
+			u = new UndoGroup(dt_reader);
 			break;
 		case UNDO_OP::LIST:
 			u = new UndoList(dt_reader);
@@ -132,55 +132,55 @@ namespace winrt::GraphPaper::implementation
 			u = new UndoSelect(dt_reader);
 			break;
 		case UNDO_OP::SHEET_COLOR:
-			u = new UndoAttr<UNDO_OP::SHEET_COLOR>(dt_reader);
+			u = new UndoValue<UNDO_OP::SHEET_COLOR>(dt_reader);
 			break;
 		case UNDO_OP::SHEET_SIZE:
-			u = new UndoAttr<UNDO_OP::SHEET_SIZE>(dt_reader);
+			u = new UndoValue<UNDO_OP::SHEET_SIZE>(dt_reader);
 			break;
-		case UNDO_OP::POS_START:
-			u = new UndoAttr<UNDO_OP::POS_START>(dt_reader);
+		case UNDO_OP::MOVE:
+			u = new UndoValue<UNDO_OP::MOVE>(dt_reader);
 			break;
 		case UNDO_OP::STROKE_CAP:
-			u = new UndoAttr<UNDO_OP::STROKE_CAP>(dt_reader);
+			u = new UndoValue<UNDO_OP::STROKE_CAP>(dt_reader);
 			break;
 		case UNDO_OP::STROKE_COLOR:
-			u = new UndoAttr<UNDO_OP::STROKE_COLOR>(dt_reader);
+			u = new UndoValue<UNDO_OP::STROKE_COLOR>(dt_reader);
 			break;
 		case UNDO_OP::DASH_CAP:
-			u = new UndoAttr<UNDO_OP::DASH_CAP>(dt_reader);
+			u = new UndoValue<UNDO_OP::DASH_CAP>(dt_reader);
 			break;
 		case UNDO_OP::DASH_PATT:
-			u = new UndoAttr<UNDO_OP::DASH_PATT>(dt_reader);
+			u = new UndoValue<UNDO_OP::DASH_PATT>(dt_reader);
 			break;
 		case UNDO_OP::DASH_STYLE:
-			u = new UndoAttr<UNDO_OP::DASH_STYLE>(dt_reader);
+			u = new UndoValue<UNDO_OP::DASH_STYLE>(dt_reader);
 			break;
 		case UNDO_OP::JOIN_LIMIT:
-			u = new UndoAttr<UNDO_OP::JOIN_LIMIT>(dt_reader);
+			u = new UndoValue<UNDO_OP::JOIN_LIMIT>(dt_reader);
 			break;
 		case UNDO_OP::JOIN_STYLE:
-			u = new UndoAttr<UNDO_OP::JOIN_STYLE>(dt_reader);
+			u = new UndoValue<UNDO_OP::JOIN_STYLE>(dt_reader);
 			break;
 		case UNDO_OP::STROKE_WIDTH:
-			u = new UndoAttr<UNDO_OP::STROKE_WIDTH>(dt_reader);
+			u = new UndoValue<UNDO_OP::STROKE_WIDTH>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_ALIGN_P:
-			u = new UndoAttr<UNDO_OP::TEXT_ALIGN_P>(dt_reader);
+			u = new UndoValue<UNDO_OP::TEXT_ALIGN_P>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_ALIGN_T:
-			u = new UndoAttr<UNDO_OP::TEXT_ALIGN_T>(dt_reader);
+			u = new UndoValue<UNDO_OP::TEXT_ALIGN_T>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_CONTENT:
-			u = new UndoAttr<UNDO_OP::TEXT_CONTENT>(dt_reader);
+			u = new UndoValue<UNDO_OP::TEXT_CONTENT>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_LINE_SP:
-			u = new UndoAttr<UNDO_OP::TEXT_LINE_SP>(dt_reader);
+			u = new UndoValue<UNDO_OP::TEXT_LINE_SP>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_MARGIN:
-			u = new UndoAttr<UNDO_OP::TEXT_MARGIN>(dt_reader);
+			u = new UndoValue<UNDO_OP::TEXT_MARGIN>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_SELECTED:
-			u = new UndoAttr<UNDO_OP::TEXT_SELECTED>(dt_reader);
+			u = new UndoValue<UNDO_OP::TEXT_SELECTED>(dt_reader);
 			break;
 		default:
 			throw winrt::hresult_invalid_argument();
@@ -317,63 +317,63 @@ namespace winrt::GraphPaper::implementation
 		summary_reflect(u);
 		u->exec();
 		auto const& u_type = typeid(*u);
-		if (u_type == typeid(UndoAttr<UNDO_OP::ARROW_STYLE>)) {
+		if (u_type == typeid(UndoValue<UNDO_OP::ARROW_STYLE>)) {
 			// 線枠メニューの「矢じるしの種類」に印をつける.
 			ARROW_STYLE val;
 			m_main_sheet.get_arrow_style(val);
 			arrow_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_BASE>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
 			status_bar_set_grid();
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_EMPH>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::GRID_EMPH>)) {
 			// 用紙メニューの「方眼の強調」に印をつける.
 			GRID_EMPH val;
 			m_main_sheet.get_grid_emph(val);
 			grid_emph_is_checked(val);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::GRID_SHOW>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::GRID_SHOW>)) {
 			GRID_SHOW val;
 			m_main_sheet.get_grid_show(val);
 			grid_show_is_checked(val);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::FONT_STYLE>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
 			DWRITE_FONT_STYLE val;
 			m_main_sheet.get_font_style(val);
 			font_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::SHEET_SIZE>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::SHEET_SIZE>)) {
 			// 用紙の大きさをステータスバーに格納する.
 			status_bar_set_sheet();
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::STROKE_CAP>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::STROKE_CAP>)) {
 			CAP_STYLE val;
 			m_main_sheet.get_stroke_cap(val);
 			cap_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::DASH_CAP>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::DASH_CAP>)) {
 			D2D1_CAP_STYLE val;
 			m_main_sheet.get_dash_cap(val);
 			//cap_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::DASH_STYLE>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::DASH_STYLE>)) {
 			D2D1_DASH_STYLE val;
 			m_main_sheet.get_dash_style(val);
 			dash_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::JOIN_STYLE>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::JOIN_STYLE>)) {
 			D2D1_LINE_JOIN val;
 			m_main_sheet.get_join_style(val);
 			join_style_is_checked(val);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_T>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT val;
 			m_main_sheet.get_text_align_t(val);
 			text_align_t_is_checked(val);
 		}
-		else if (u_type == typeid(UndoAttr<UNDO_OP::TEXT_ALIGN_P>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::TEXT_ALIGN_P>)) {
 			DWRITE_PARAGRAPH_ALIGNMENT val;
 			m_main_sheet.get_text_align_p(val);
 			text_align_p_is_checked(val);
@@ -409,12 +409,12 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_undo.push_back(new UndoImage(static_cast<ShapeImage*>(s)));
 	}
 
-	// 図形の部位の位置をスタックに保存する.
+	// 図形の形をスタックに保存する.
 	// s	保存する図形
 	// anc	図形の部位
 	void MainPage::ustack_push_position(Shape* const s, const uint32_t anc)
 	{
-		m_ustack_undo.push_back(new UndoAnp(s, anc));
+		m_ustack_undo.push_back(new UndoForm(s, anc));
 	}
 
 	// 図形を追加して, その操作をスタックに積む.
@@ -454,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted() || (!all && !s->is_selected())) {
 				continue;
 			}
-			ustack_push_set<UNDO_OP::POS_START>(s);
+			ustack_push_set<UNDO_OP::MOVE>(s);
 			s->move(d_vec);
 		}
 	}
@@ -573,11 +573,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 図形がその値を持たない場合, またはすでに同値の場合,
 		T t_val;
-		if (!UndoAttr<U>::GET(s, t_val) || equal(t_val, val)) {
+		if (!UndoValue<U>::GET(s, t_val) || equal(t_val, val)) {
 			// 終了する.
 			return;
 		}
-		m_ustack_undo.push_back(new UndoAttr<U>(s, val));
+		m_ustack_undo.push_back(new UndoValue<U>(s, val));
 	}
 
 	// 値を選択された図形に格納して, その操作をスタックに積む.
@@ -588,7 +588,7 @@ namespace winrt::GraphPaper::implementation
 	template<UNDO_OP U, typename T> bool MainPage::ustack_push_set(T const& val)
 	{
 		// 格納する型 T は明示しなくても引数の型から推定できる
-		m_ustack_undo.push_back(new UndoAttr<U>(&m_main_sheet, val));
+		m_ustack_undo.push_back(new UndoValue<U>(&m_main_sheet, val));
 		auto flag = false;
 		for (auto s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected()) {
@@ -636,9 +636,9 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	なし
 	template <UNDO_OP U> void MainPage::ustack_push_set(Shape* const s)
 	{
-		m_ustack_undo.push_back(new UndoAttr<U>(s));
+		m_ustack_undo.push_back(new UndoValue<U>(s));
 	}
-	template void MainPage::ustack_push_set<UNDO_OP::POS_START>(Shape* const s);
+	template void MainPage::ustack_push_set<UNDO_OP::MOVE>(Shape* const s);
 	template void MainPage::ustack_push_set<UNDO_OP::IMAGE_OPAC>(Shape* const s);
 
 	// 文字範囲の値を図形に格納して, その操作をスタックに積む.
@@ -658,7 +658,7 @@ namespace winrt::GraphPaper::implementation
 				// 操作がヌルの場合,
 				break;
 			}
-			else if (typeid(*u) != typeid(UndoAttr<UNDO_OP::TEXT_SELECTED>)) {
+			else if (typeid(*u) != typeid(UndoValue<UNDO_OP::TEXT_SELECTED>)) {
 				// 操作が文字範囲の選択する操作でない場合,
 				if (typeid(*u) != typeid(UndoSelect)) {
 					// 操作が図形の選択を反転する操作でない場合,
@@ -676,7 +676,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (!flag) {
-			m_ustack_undo.push_back(new UndoAttr<UNDO_OP::TEXT_SELECTED>(s, val));
+			m_ustack_undo.push_back(new UndoValue<UNDO_OP::TEXT_SELECTED>(s, val));
 		}
 
 	}

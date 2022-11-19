@@ -32,9 +32,9 @@ namespace winrt::GraphPaper::implementation
 	static auto const& CC_SIZE_WE = CoreCursor(CoreCursorType::SizeWestEast, 0);	// 左右カーソル
 
 	// 図形が操作スタックに含まれるか判定する.
-	static bool event_if_shape_on_stack(UNDO_STACK const& u_stack, Shape* const s) noexcept;
+	static bool event_ustack_include_shape(UNDO_STACK const& ustack, Shape* const s) noexcept;
 	// 消去フラグの立つ図形をリストから削除する.
-	static void event_reduce_slist(SHAPE_LIST& slist, UNDO_STACK const& u_stack, UNDO_STACK const& r_stack) noexcept;
+	static void event_slist_reduce(SHAPE_LIST& slist, UNDO_STACK const& ustack, UNDO_STACK const& r_stack) noexcept;
 	// マウスホイールの値でスクロールする.
 	static bool event_scroll_by_wheel_delta(const ScrollBar& scroll_bar, const int32_t delta, const float scale);
 	// 選択された図形の頂点に最も近い方眼を見つけ, 頂点と方眼との差分を求める.
@@ -43,12 +43,12 @@ namespace winrt::GraphPaper::implementation
 	static bool event_get_vec_nearby_vert(const SHAPE_LIST& slist, const float d_limit, D2D1_POINT_2F& v_vec) noexcept;
 
 	// 操作スタックが図形を参照するか判定する.
-	// u_stack	操作スタック
+	// ustack	操作スタック
 	// s	図形
 	// 戻り値	参照する場合 true.
-	static bool event_if_shape_on_stack(UNDO_STACK const& u_stack, Shape* const s) noexcept
+	static bool event_ustack_include_shape(UNDO_STACK const& ustack, Shape* const s) noexcept
 	{
-		for (const auto u : u_stack) {
+		for (const auto u : ustack) {
 			if (u == nullptr) {
 				continue;
 			}
@@ -62,27 +62,27 @@ namespace winrt::GraphPaper::implementation
 
 	// 消去フラグの立つ図形をリストから削除する.
 	// slist	図形リスト
-	// u_stack	元に戻す操作スタック
-	// r_stack	やり直す操作スタック
-	static void event_reduce_slist(SHAPE_LIST& slist, UNDO_STACK const& u_stack, UNDO_STACK const& r_stack) noexcept
+	// ustack	元に戻す操作スタック
+	// rstack	やり直す操作スタック
+	static void event_slist_reduce(SHAPE_LIST& slist, UNDO_STACK const& ustack, UNDO_STACK const& rstack) noexcept
 	{
 		// 消去フラグの立つ図形を消去リストに格納する.
-		SHAPE_LIST list_del;
+		SHAPE_LIST slist_del;
 		for (const auto t : slist) {
 			// 図形の消去フラグがない,
 			// または図形が元に戻す操作スタックに含まれる,
 			// または図形がやり直し操作スタックに含まれる,　か判定する.
 			if (!t->is_deleted() ||
-				event_if_shape_on_stack(u_stack, t) ||
-				event_if_shape_on_stack(r_stack, t)) {
+				event_ustack_include_shape(ustack, t) ||
+				event_ustack_include_shape(rstack, t)) {
 				continue;
 			}
 			// 上記のいずれでもない図形を消去リストに追加する.
-			list_del.push_back(t);
+			slist_del.push_back(t);
 		}
 		// 消去リストに含まれる図形をリストから取り除き, 解放する.
 		auto it_beg = slist.begin();
-		for (const auto s : list_del) {
+		for (const auto s : slist_del) {
 			const auto it = std::find(it_beg, slist.end(), s);
 			it_beg = slist.erase(it);
 			delete s;
@@ -91,7 +91,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		}
 		// 消去リストを消去する.
-		list_del.clear();
+		slist_del.clear();
 	}
 
 	// マウスホイールの値でスクロールする.
@@ -245,7 +245,7 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
-		event_reduce_slist(m_main_sheet.m_shape_list, m_ustack_undo, m_ustack_redo);
+		event_slist_reduce(m_main_sheet.m_shape_list, m_ustack_undo, m_ustack_redo);
 		ustack_push_append(s);
 		ustack_push_select(s);
 		ustack_push_null();
@@ -276,7 +276,7 @@ namespace winrt::GraphPaper::implementation
 				s->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			}
 			m_edit_text_frame = ck_text_fit_frame_to().IsChecked().GetBoolean();
-			event_reduce_slist(m_main_sheet.m_shape_list, m_ustack_undo, m_ustack_redo);
+			event_slist_reduce(m_main_sheet.m_shape_list, m_ustack_undo, m_ustack_redo);
 			//unselect_all();
 			ustack_push_append(s);
 			ustack_push_select(s);
