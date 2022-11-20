@@ -92,17 +92,20 @@ namespace winrt::GraphPaper::implementation
 
 			// ビットマップエンコーダーにビットマップを格納する.
 			BitmapEncoder bmp_enc{ co_await BitmapEncoder::CreateAsync(enc_id, ra_stream) };
+			// 新しいサムネイルを自動的に生成するよう true を格納する.
 			bmp_enc.IsThumbnailGenerated(true);
 			bmp_enc.SetSoftwareBitmap(bmp);
 			try {
 				co_await bmp_enc.FlushAsync();
 			}
 			catch (winrt::hresult_error& err) {
+				// サムネイルの自動生成が出来ないなら, false を格納する.
 				if (err.code() == WINCODEC_ERR_UNSUPPORTEDOPERATION) {
 					bmp_enc.IsThumbnailGenerated(false);
 				}
 			}
 			if (!bmp_enc.IsThumbnailGenerated()) {
+				// 再度やり直す.
 				co_await bmp_enc.FlushAsync();
 			}
 			bmp_enc = nullptr;

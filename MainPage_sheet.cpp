@@ -380,14 +380,18 @@ namespace winrt::GraphPaper::implementation
 	{
 	}
 
-	// 用紙のスワップチェーンパネルがロード中.
+	//------------------------------
+	// 用紙のスワップチェーンパネルのロードが始まった.
+	//------------------------------
 	void MainPage::sheet_panel_loading(IInspectable const&, winrt::Windows::Foundation::IInspectable const&)
 	{
 		auto xaml_root = scp_sheet_panel().XamlRoot();
 		xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed });
 	}
 
+	//------------------------------
 	// 用紙のスワップチェーンパネルがロードされた.
+	//------------------------------
 	void MainPage::sheet_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
 	{
 #if defined(_DEBUG)
@@ -405,10 +409,17 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	// 用紙のスワップチェーンパネルの寸法が変わった.
 #if defined(_DEBUG)
+	//------------------------------
+	// 用紙のスワップチェーンパネルの寸法が変わった.
+	// args	イベントの引数
+	//------------------------------
 	void MainPage::sheet_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
 #else
+	//------------------------------
+	// 用紙のスワップチェーンパネルの寸法が変わった.
+	// args	イベントの引数
+	//------------------------------
 	void MainPage::sheet_panel_size_changed(IInspectable const&, SizeChangedEventArgs const& args)
 #endif	// _DEBUG
 	{
@@ -427,12 +438,17 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
+	// 用紙のスワップチェーンパネルの寸法が変わった.
+	//------------------------------
 	void MainPage::sheet_panel_scale_changed(IInspectable const&, IInspectable const&)
 	{
 		m_main_sheet.m_d2d.SetCompositionScale(scp_sheet_panel().CompositionScaleX(), scp_sheet_panel().CompositionScaleY());
 	}
 
+	//------------------------------
 	// 用紙の大きさを設定する.
+	//------------------------------
 	void MainPage::sheet_panle_size(void)
 	{
 		const float w = static_cast<float>(scp_sheet_panel().ActualWidth());
@@ -443,7 +459,9 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// 用紙メニューの「用紙の大きさ」が選択された
+	//------------------------------
 	IAsyncAction MainPage::sheet_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_prop_sheet.set_attr_to(&m_main_sheet);
@@ -547,17 +565,20 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// テキストボックス「用紙の幅」「用紙の高さ」の値が変更された.
+	//------------------------------
 	void MainPage::sheet_size_text_changed(IInspectable const& sender, TextChangedEventArgs const&)
 	{
-		const double dpi = m_main_sheet.m_d2d.m_logical_dpi;
+		const double dpi = m_main_sheet.m_d2d.m_logical_dpi;	// DPI
 		double val;
 		wchar_t buf[2];
-		int cnt;
+
 		// テキストボックスの文字列を数値に変換する.
-		cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &val, buf, 2);
+		const int cnt = swscanf_s(unbox_value<TextBox>(sender).Text().c_str(), L"%lf%1s", &val, buf, 2);
+		// 文字列が数値に変換できたか判定する.
+		// 変換できたなら,
 		if (cnt == 1 && val > 0.0) {
-			// 文字列が数値に変換できた場合,
 			float g_base;
 			m_main_sheet.get_grid_base(g_base);
 			val = conv_len_to_val(m_len_unit, val, dpi, g_base + 1.0);

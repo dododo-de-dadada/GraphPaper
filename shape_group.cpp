@@ -10,14 +10,18 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataReader;
 	using winrt::Windows::Storage::Streams::DataWriter;
 
+	//------------------------------
 	// 図形を破棄する.
+	//------------------------------
 	ShapeGroup::~ShapeGroup(void)
 	{
 		slist_clear(m_list_grouped);
 	}
 
+	//------------------------------
 	// 図形を表示する.
 	// sh	表示する用紙
+	//------------------------------
 	void ShapeGroup::draw(ShapeSheet const& sh)
 	{
 		const D2D_UI& dx = sh.m_d2d;
@@ -46,11 +50,13 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// 図形を囲む領域を得る.
 	// a_min	元の領域の左上位置.
 	// a_man	元の領域の右下位置.
 	// b_min	得られた領域の左上位置.
 	// b_max	得られた領域の右下位置.
+	//------------------------------
 	void ShapeGroup::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
 		b_min = a_min;
@@ -63,16 +69,20 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// 図形を囲む領域の左上位置を得る.
 	// val	領域の左上位置
+	//------------------------------
 	void ShapeGroup::get_pos_min(D2D1_POINT_2F& val) const noexcept
 	{
 		get_pos_start(val);
 	}
 
+	//------------------------------
 	// 開始位置を得る.
 	// val	開始位置
 	// グループ図形の場合, 開始位置は図形を囲む領域の左上位置.
+	//------------------------------
 	bool ShapeGroup::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
 		//if (m_list_grouped.empty()) {
@@ -97,7 +107,9 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
+	//------------------------------
 	// 文字列図形を含むか判定する.
+	//------------------------------
 	bool ShapeGroup::has_text(void) noexcept
 	{
 		std::list<SHAPE_LIST::iterator> stack;
@@ -128,9 +140,11 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	//------------------------------
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位
+	//------------------------------
 	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		for (const Shape* s : m_list_grouped) {
@@ -144,11 +158,13 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_SHEET;
 	}
 
+	//------------------------------
 	// 範囲に含まれるか判定する.
 	// area_min	範囲の左上位置
 	// area_max	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
+	//------------------------------
 	bool ShapeGroup::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
 	{
 		for (const Shape* s : m_list_grouped) {
@@ -159,14 +175,20 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
+	//------------------------------
 	// 差分だけ移動する
 	// d_vec	差分ベクトル
+	//------------------------------
 	bool ShapeGroup::move(const D2D1_POINT_2F d_vec) noexcept
 	{
 		return slist_move(m_list_grouped, d_vec);
 	}
 
+	//------------------------------
 	// 値を消去フラグに格納する.
+	// val	格納する値
+	// 戻り値	変更されたなら true
+	//------------------------------
 	bool ShapeGroup::set_delete(const bool val) noexcept
 	{
 		bool flag = false;
@@ -178,7 +200,11 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
+	//------------------------------
 	// 値を開始位置に格納する. 他の部位の位置も動く.
+	// val	格納する値
+	// 戻り値	変更されたなら true
+	//------------------------------
 	bool ShapeGroup::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
 		D2D1_POINT_2F b_min;
@@ -191,7 +217,11 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	//------------------------------
 	// 値を選択フラグに格納する.
+	// val	格納する値
+	// 戻り値	変更されたなら true
+	//------------------------------
 	bool ShapeGroup::set_select(const bool val) noexcept
 	{
 		bool flag = false;
@@ -203,20 +233,26 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
+	//------------------------------
 	// 図形をデータリーダーから読み込む.
+	//------------------------------
 	ShapeGroup::ShapeGroup(DataReader const& dt_reader)
 	{
 		slist_read(m_list_grouped, dt_reader);
 	}
 
+	//------------------------------
 	// 図形をデータライターに書き込む.
+	//------------------------------
 	void ShapeGroup::write(DataWriter const& dt_writer) const
 	{
 		constexpr bool REDUCED = true;
 		slist_write<!REDUCED>(m_list_grouped, dt_writer);
 	}
 
+	//------------------------------
 	// データライターに SVG として書き込む.
+	//------------------------------
 	void ShapeGroup::write_svg(DataWriter const& dt_writer) const
 	{
 		dt_write_svg("<g>" SVG_NEW_LINE, dt_writer);

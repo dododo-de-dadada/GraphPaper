@@ -124,9 +124,6 @@ namespace winrt::GraphPaper::implementation
 				if (data_file != nullptr) {
 					ok = co_await file_write_gpf_async<true, false>(data_file);
 					data_file = nullptr;
-					ustack_clear();
-					slist_clear(m_main_sheet.m_shape_list);
-					ShapeText::release_available_fonts();
 				}
 			}
 			catch (winrt::hresult_error const& e) {
@@ -151,6 +148,9 @@ namespace winrt::GraphPaper::implementation
 			if (summary_is_visible()) {
 				summary_clear();
 			}
+			//ustack_clear();
+			//slist_clear(m_main_sheet.m_shape_list);
+			//ShapeText::release_available_fonts();
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;

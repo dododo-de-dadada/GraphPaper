@@ -13,16 +13,17 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::DataWriter;
 
 	// セグメントを区切る助変数の値
-	constexpr double T0 = 0.0;
-	constexpr double T1 = 1.0 / 3.0;
-	constexpr double T2 = 2.0 / 3.0;
-	constexpr double T3 = 1.0;
+	constexpr double T0 = 0.0;	// 区間の開始
+	constexpr double T1 = 1.0 / 3.0;	// 1 番目の区切り
+	constexpr double T2 = 2.0 / 3.0;	// 2 番目の区切り
+	constexpr double T3 = 1.0;	// 区間の終端
 
-	// シンプソン法の回数
-	constexpr uint32_t SIMPSON_CNT = 30;
+	constexpr uint32_t SIMPSON_CNT = 30;	// シンプソン法の回数
 
+	//------------------------------
 	// double 型の値をもつ位置
 	// ShapeBase 内でのみ使用する.
+	//------------------------------
 	struct BZP {
 		double x;
 		double y;
@@ -93,11 +94,13 @@ namespace winrt::GraphPaper::implementation
 	// 曲線上の助変数をもとに接線ベクトルを求める.
 	static inline void bezi_tvec_by_param(const BZP b_pos[4], const double t_val, BZP& t_vec) noexcept;
 
+	//------------------------------
 	// 曲線の矢じるしの端点を求める.
 	// b_start	曲線の開始位置
 	// b_seg	曲線の制御点
 	// a_size	矢じるしの寸法
 	// a_barbs[3]	計算された返しの端点と先端点
+	//------------------------------
 	static bool bezi_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F a_barbs[3]) noexcept
 	{
 		BZP seg[3]{};
@@ -137,6 +140,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	//------------------------------
 	// 曲線の矢じるしのジオメトリを作成する.
 	// d_factory	D2D ファクトリ
 	// b_pos	曲線の開始位置
@@ -144,6 +148,7 @@ namespace winrt::GraphPaper::implementation
 	// a_style	矢じるしの種別
 	// a_size	矢じるしの寸法
 	// a_geo	矢じるしが追加されたジオメトリ
+	//------------------------------
 	static void bezi_create_arrow_geom(
 		ID2D1Factory3* const d_factory,
 		const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, 
@@ -166,9 +171,12 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// 曲線上の助変数をもとに微分値を求める.
 	// b_pos	制御点
 	// t	助変数
+	// 戻り値	求まった微分値
+	//------------------------------
 	static inline double bezi_deriv_by_param(const BZP b_pos[4], const double t_val) noexcept
 	{
 		// 助変数をもとにベジェ曲線上の接線ベクトルを求め, その接線ベクトルの長さを返す.
@@ -177,12 +185,14 @@ namespace winrt::GraphPaper::implementation
 		return sqrt(t_vec * t_vec);
 	}
 
+	//------------------------------
 	// 点の配列をもとにそれらをすべて含む凸包を求める.
 	// ギフト包装法をもちいる.
 	// e_cnt	点の数
 	// e_pos	点の配列
 	// c_cnt	凸包の頂点の数
 	// c_pos	凸包の頂点の配列
+	//------------------------------
 	static void bezi_get_convex(const uint32_t e_cnt, const BZP e_pos[], uint32_t& c_cnt, BZP c_pos[])
 	{
 		// e のうち, y 値が最も小さい点の集合から, x 値が最も小さい点の添え字 k を得る.
@@ -221,9 +231,12 @@ namespace winrt::GraphPaper::implementation
 		} while (c_cnt < e_cnt && a != c_pos[0]);
 	}
 
+	//------------------------------
 	// 位置を曲線の端が含むか判定する.
 	// t_pos	判定される位置
 	// c_pos	凸包 (四辺形) の頂点の配列
+	// 戻り値	含むなら true
+	//------------------------------
 	template<D2D1_CAP_STYLE S> static bool bezi_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F d_vec[3], const double e_width)
 	{
 		size_t i;
@@ -303,11 +316,13 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	//------------------------------
 	// 点 { tx, ty } が凸包に含まれるか判定する.
 	// 交差数判定を用いる.
 	// c_cnt	凸包の頂点の数
 	// c_pos	凸包の頂点の配列
 	// 戻り値	含まれるなら true を, 含まれないなら false を返す.
+	//------------------------------
 	static bool bezi_in_convex(const double tx, const double ty, const size_t c_cnt, const BZP c_pos[]) noexcept
 	{
 		int k = 0;	// 点をとおる水平線が凸包の辺と交差する回数.
@@ -330,12 +345,15 @@ namespace winrt::GraphPaper::implementation
 		return static_cast<bool>(k & 1);
 	}
 
+	//------------------------------
 	// 曲線上の助変数の区間をもとに長さを求める.
 	// シンプソン法を用いる.
 	// b_pos	制御点
 	// t_min	区間の始端
 	// t_max	区間の終端
 	// s_cnt	シンプソン法の回数
+	// 戻り値	求まった長さ
+	//------------------------------
 	static double bezi_len_by_param(const BZP b_pos[4], const double t_min, const double t_max, const uint32_t s_cnt) noexcept
 	{
 		double t_vec;
@@ -393,10 +411,12 @@ namespace winrt::GraphPaper::implementation
 		return s;
 	}
 
+	//------------------------------
 	// 曲線上の長さをもとに助変数を求める.
 	// b_pos	制御点
 	// b_len	長さ
 	// 戻り値	得られた助変数の値
+	//------------------------------
 	static double bezi_param_by_len(const BZP b_pos[4], const double b_len) noexcept
 	{
 		double t;	// 助変数
@@ -428,10 +448,12 @@ namespace winrt::GraphPaper::implementation
 		return t;
 	}
 
+	//------------------------------
 	// 曲線上の助変数をもとに位置を求める.
 	// b_pos	制御点
 	// t_val	助変数
 	// p	求まった位置
+	//------------------------------
 	static inline void bezi_point_by_param(const BZP b_pos[4], const double t_val, BZP& p) noexcept
 	{
 		const double s = 1.0 - t_val;
@@ -450,10 +472,12 @@ namespace winrt::GraphPaper::implementation
 		return -DBL_MIN < t_min && t_max < 1.0 + DBL_EPSILON && std::nextafter(t_min, t_min + 1.0) < t_max;
 	}
 
+	//------------------------------
 	// 曲線上の助変数をもとに接線ベクトルを求める.
 	// b_pos	曲線
 	// t_val	助変数
 	// t_vec	接線ベクトル
+	//------------------------------
 	static inline void bezi_tvec_by_param(const BZP b_pos[4], const double t_val, BZP& t_vec) noexcept
 	{
 		const double a = -3.0 * (1.0 - t_val) * (1.0 - t_val);
@@ -463,8 +487,11 @@ namespace winrt::GraphPaper::implementation
 		t_vec = b_pos[0] * a + b_pos[1] * b + b_pos[2] * c + b_pos[3] * d;
 	}
 
+	//------------------------------
 	// パスジオメトリを作成する.
-	void ShapeBezi::create_path_geometry(const D2D_UI& dx)
+	// d2d	D2D 描画環境
+	//------------------------------
+	void ShapeBezi::create_path_geometry(const D2D_UI& d2d)
 	{
 		D2D1_BEZIER_SEGMENT b_seg;
 		winrt::com_ptr<ID2D1GeometrySink> sink;
@@ -478,7 +505,7 @@ namespace winrt::GraphPaper::implementation
 		pt_add(m_pos, m_vec[0], b_seg.point1);
 		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
 		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
-		winrt::check_hresult(dx.m_d2d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
+		winrt::check_hresult(d2d.m_d2d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
 		m_d2d_path_geom->Open(sink.put());
 		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 		sink->BeginFigure(m_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
@@ -487,40 +514,14 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			bezi_create_arrow_geom(dx.m_d2d_factory.get(), m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+			bezi_create_arrow_geom(d2d.m_d2d_factory.get(), m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 		}
 	}
-	/*
-	void ShapeBezi::create_path_geometry(ID2D1Factory3* const d_factory)
-	{
-		D2D1_BEZIER_SEGMENT b_seg;
-		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (m_d2d_path_geom != nullptr) {
-			m_d2d_path_geom = nullptr;
-		}
-		if (m_d2d_arrow_geom != nullptr) {
-			m_d2d_arrow_geom = nullptr;
-		}
-		pt_add(m_pos, m_vec[0], b_seg.point1);
-		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
-		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
-		winrt::check_hresult(d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
-		m_d2d_path_geom->Open(sink.put());
-		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-		sink->BeginFigure(m_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-		sink->AddBezier(b_seg);
-		sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-		winrt::check_hresult(sink->Close());
-		sink = nullptr;
-		if (m_arrow_style != ARROW_STYLE::NONE) {
-			bezi_create_arrow_geom(d_factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
-		}
-	}
-	*/
-
+	//------------------------------
 	// 図形を表示する.
 	// sh	表示する用紙
+	//------------------------------
 	void ShapeBezi::draw(ShapeSheet const& sh)
 	{
 		const D2D_UI& dx = sh.m_d2d;
@@ -586,9 +587,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
+	//------------------------------
 	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const auto e_width = max(max(static_cast<double>(m_stroke_width), Shape::s_anc_len) * 0.5, 0.5);	// 線枠の太さの半分の値
@@ -753,11 +756,13 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_SHEET;
 	}
 
+	//------------------------------
 	// 範囲に含まれるか判定する.
 	// 線の太さは考慮されない.
 	// area_min	範囲の左上位置
 	// area_max	範囲の右下位置
 	// 戻り値	含まれるなら true
+	//------------------------------
 	bool ShapeBezi::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,
@@ -849,10 +854,12 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
+	//------------------------------
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// s_attr	属性
+	//------------------------------
 	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr) :
 		ShapePath::ShapePath(s_attr, false)
 	{
@@ -864,12 +871,18 @@ namespace winrt::GraphPaper::implementation
 		m_vec[2] = D2D1_POINT_2F{ b_vec.x , 0.0f };
 	}
 
+	//------------------------------
 	// データリーダーから図形を読み込む.
+	// dt_reader	データリーダー
+	//------------------------------
 	ShapeBezi::ShapeBezi(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
 	{}
 
+	//------------------------------
 	// データライターに SVG として書き込む.
+	// dt_reader	データリーダー
+	//------------------------------
 	void ShapeBezi::write_svg(DataWriter const& dt_writer) const
 	{
 		D2D1_BEZIER_SEGMENT b_seg;

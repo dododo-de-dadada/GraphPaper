@@ -123,7 +123,7 @@ namespace winrt::GraphPaper::implementation
 	void dt_read(wchar_t*& val, DataReader const& dt_reader)
 	{
 		const size_t n = dt_reader.ReadUInt32();	// 文字数
-		if (n > 0) {
+		//if (n > -1) {
 			val = new wchar_t[n + 1];
 			if (val != nullptr) {
 				for (size_t i = 0; i < n; i++) {
@@ -131,10 +131,10 @@ namespace winrt::GraphPaper::implementation
 				}
 				val[n] = L'\0';
 			}
-		}
-		else {
-			val = nullptr;
-		}
+		//}
+		//else {
+		//	val = nullptr;
+		//}
 	}
 
 	// データライターに矢じるしの寸法を書き込む.

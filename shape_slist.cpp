@@ -47,9 +47,13 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			wchar_t* f_name;	// ‘‘Ì–¼
-			if (s->get_font_family(f_name) && !ShapeText::is_available_font(f_name)) {
-				unavailable_font = f_name;
+			wchar_t* fam;	// ‘‘Ì–¼
+			if (!s->get_font_family(fam)) {
+				continue;
+			}
+			// ‹ó•¶š—ñ‚ÍŠù’è‚Ì‘‘Ì–¼‚Æ‚µ‚Ä‚¤‚¯‚Â‚¯‚é.
+			if (wchar_len(fam) > 0 && !ShapeText::is_available_font(fam)) {
+				unavailable_font = fam;
 				return false;
 			}
 		}

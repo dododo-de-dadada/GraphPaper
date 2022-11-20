@@ -108,8 +108,6 @@ namespace winrt::GraphPaper::implementation
 	// 操作のひな型
 	//------------------------------
 	struct Undo {
-		static SHAPE_LIST* s_shape_list;	// 参照する図形リスト
-		static ShapeSheet* s_shape_sheet;	// 参照する用紙
 		Shape* m_shape;	// 操作する図形
 
 		// 操作を破棄する.
@@ -207,7 +205,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F m_view;	// 表示されている画面上の寸法
 		D2D1_RECT_F m_clip;	// 表示されている画像上の矩形
 		D2D1_SIZE_F m_ratio;	// 先寸法と元矩形の縦横比
-		float m_opac;
+		float m_opac;	// 不透明度
 
 		// 操作を実行すると値が変わるか判定する.
 		bool changed(void) const noexcept;

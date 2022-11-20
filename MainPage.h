@@ -246,7 +246,7 @@ namespace winrt::GraphPaper::implementation
 		UNDO_STACK m_ustack_redo;	// やり直し操作スタック
 		uint32_t m_ustack_ucnt = 0;	// 元に戻す操作スタックに積まれた組数
 		UNDO_STACK m_ustack_undo;	// 元に戻す操作スタック
-		bool m_ustack_updt = false;	// スタックが更新されたか判定
+		bool m_ustack_is_changed = false;	// スタックが更新されたか判定
 
 		// その他
 		LEN_UNIT m_len_unit = LEN_UNIT::PIXEL;	// 長さの単位
@@ -285,7 +285,6 @@ namespace winrt::GraphPaper::implementation
 		// メインページの作成, アプリの終了
 		//-------------------------------
 
-		void sheet_panel_loading(IInspectable const& sender, winrt::Windows::Foundation::IInspectable const&);
 		// 確認ダイアログを表示してその応答を得る.
 		winrt::Windows::Foundation::IAsyncOperation<bool> ask_for_conf_async(void);
 		// ファイルメニューの「終了」が選択された
@@ -302,6 +301,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		// ファイルメニューの「新規」が選択された
 		winrt::Windows::Foundation::IAsyncAction new_click_async(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
+		// 用紙のスワップチェーンパネルのロードが始まった.
+		void sheet_panel_loading(IInspectable const& sender, winrt::Windows::Foundation::IInspectable const&);
 
 		//-------------------------------
 		// MainPage_app.cpp
@@ -426,21 +427,6 @@ namespace winrt::GraphPaper::implementation
 
 		// ファイルシステムへのアクセス権を確認して, 設定を促す.
 		//IAsyncAction file_check_broad_access(void) const;
-		// ストレージファイルを非同期に読む.
-		template <bool SUSPEND, bool SETTEING> winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_read_async(winrt::Windows::Storage::StorageFile s_file) noexcept;
-		// 名前を付けてファイルに非同期に保存する
-		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_save_as_async(const bool svg_allowed = false) noexcept;
-		// ファイルに非同期に保存する
-		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_save_async(void) noexcept;
-		// 待機カーソルを表示, 表示する前のカーソルを得る.
-		winrt::Windows::UI::Core::CoreCursor file_wait_cursor(void) const;
-		// 図形データをストレージファイルに非同期に書き込む.
-		template <bool SUSPEND, bool SETTING>
-		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_write_gpf_async(winrt::Windows::Storage::StorageFile s_file);
-		// 図形データを SVG としてストレージファイルに非同期に書き込む.
-		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_write_svg_async(winrt::Windows::Storage::StorageFile s_file);
-		// ファイルに画像図形の画像を保存する.
-		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_save_img_async(ShapeImage* s, const wchar_t suggested_name[], /*-->*/wchar_t img_name[], const size_t name_len);
 		// ファイルの読み込みが終了した.
 		void file_finish_reading(void);
 		// ファイルメニューの「画像をインポートする」が選択された
@@ -451,6 +437,16 @@ namespace winrt::GraphPaper::implementation
 		void file_save_as_click(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// ファイルメニューの「上書き保存」が選択された
 		void file_save_click(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
+		// ストレージファイルを非同期に読む.
+		template <bool SUSPEND, bool SETTEING> winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_read_async(winrt::Windows::Storage::StorageFile s_file) noexcept;
+		// 名前を付けてファイルに非同期に保存する
+		//winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_save_as_async(const bool svg_allowed = false) noexcept;
+		winrt::Windows::Foundation::IAsyncAction file_save_as_async(const bool svg_allowed = false) noexcept;
+		// ファイルに非同期に保存する
+		//winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_save_async(void) noexcept;
+		winrt::Windows::Foundation::IAsyncAction file_save_async(void) noexcept;
+		// ファイルに画像図形の画像を保存する.
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_save_img_async(ShapeImage* s, const wchar_t suggested_name[], /*-->*/wchar_t img_name[], const size_t name_len);
 		// 最近使ったファイルを非同期に読む.
 		winrt::Windows::Foundation::IAsyncAction file_recent_read_async(const uint32_t i);
 		// ファイルメニューの「最近使ったファイル 」のサブ項目が選択された
@@ -461,6 +457,15 @@ namespace winrt::GraphPaper::implementation
 		winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::StorageFile> file_recent_get_async(const winrt::hstring token);
 		// 最近使ったファイルのメニュー項目を更新する.
 		void file_recent_update_menu(void);
+		// 待機カーソルを表示, 表示する前のカーソルを得る.
+		winrt::Windows::UI::Core::CoreCursor file_wait_cursor(void) const;
+		// 図形データをストレージファイルに非同期に書き込む.
+		template <bool SUSPEND, bool SETTING>
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_write_gpf_async(winrt::Windows::Storage::StorageFile s_file);
+		// 図形データを SVG としてストレージファイルに非同期に書き込む.
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_write_svg_async(winrt::Windows::Storage::StorageFile s_file);
+		// 図形データを画像としてストレージファイルに非同期に書き込む.
+		winrt::Windows::Foundation::IAsyncOperation<winrt::hresult> file_write_image_async(winrt::Windows::Storage::StorageFile s_file);
 
 		//-------------------------------
 		// MainPage_fill.cpp

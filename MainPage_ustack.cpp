@@ -250,7 +250,7 @@ namespace winrt::GraphPaper::implementation
 	// 操作スタックを消去し, 含まれる操作を破棄する.
 	void MainPage::ustack_clear(void)
 	{
-		m_ustack_updt = false;
+		m_ustack_is_changed = false;
 		m_ustack_rcnt -= ustack_clear_stack(m_ustack_redo);
 		m_ustack_ucnt -= ustack_clear_stack(m_ustack_undo);
 #if defined(_DEBUG)
@@ -468,7 +468,7 @@ namespace winrt::GraphPaper::implementation
 		// 元に戻す操作スタックにヌルを積む.
 		m_ustack_undo.push_back(nullptr);
 		// true をスタックが更新されたか判定に格納する.
-		m_ustack_updt = true;
+		m_ustack_is_changed = true;
 		// 操作の組数をインクリメントする.
 		m_ustack_ucnt++;
 		// 操作の組数が最大の組数以下か判定する.
@@ -696,7 +696,7 @@ namespace winrt::GraphPaper::implementation
 			m_ustack_undo.push_back(u);
 		}
 		m_ustack_ucnt = dt_reader.ReadUInt32();
-		m_ustack_updt = dt_reader.ReadBoolean();
+		m_ustack_is_changed = dt_reader.ReadBoolean();
 	}
 
 	// 操作スタックをデータライターに書き込む.
@@ -713,7 +713,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_OP::END));
 		dt_writer.WriteUInt32(m_ustack_ucnt);
-		dt_writer.WriteBoolean(m_ustack_updt);
+		dt_writer.WriteBoolean(m_ustack_is_changed);
 	}
 
 }

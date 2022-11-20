@@ -11,6 +11,9 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto INDEX_NIL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
 	constexpr auto INDEX_SHEET = static_cast<uint32_t>(-1);	// 用紙図形の添え字
 
+	static SHAPE_LIST* undo_slist = nullptr;	// 参照する図形リスト
+	static ShapeSheet* undo_sheet = nullptr;	// 参照する用紙
+
 	// 部位の位置を得る.
 	static D2D1_POINT_2F undo_get_pos_anc(const Shape* s, const uint32_t anc) noexcept;
 	// データリーダーから位置を読み込む.
@@ -41,6 +44,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから位置を読み込む.
+	// dt_reader	データリーダー
 	static D2D1_RECT_F undo_read_rect(DataReader const& dt_reader)
 	{
 		return D2D1_RECT_F{
@@ -52,23 +56,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから添え字を読み込んで図形を得る.
+	// dt_reader	データリーダー
 	static Shape* undo_read_shape(DataReader const& dt_reader)
 	{
 		Shape* s = static_cast<Shape*>(nullptr);
 		const uint32_t i = dt_reader.ReadUInt32();
 		if (i == INDEX_SHEET) {
-			s = Undo::s_shape_sheet;
+			s = undo_sheet;
 		}
 		else if (i == INDEX_NIL) {
 			s = nullptr;
 		}
 		else {
-			slist_match<const uint32_t, Shape*>(*Undo::s_shape_list, i, s);
+			slist_match<const uint32_t, Shape*>(*undo_slist, i, s);
 		}
 		return s;
 	}
 
 	// データリーダーから位置を読み込む.
+	// dt_reader	データリーダー
 	static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader)
 	{
 		D2D1_SIZE_F size;
@@ -77,9 +83,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに書き込む.
+	// dt_reader	データリーダー
 	static void undo_write_shape(Shape* const s, DataWriter const& dt_writer)
 	{
-		if (s == Undo::s_shape_sheet) {
+		if (s == undo_sheet) {
 			dt_writer.WriteUInt32(INDEX_SHEET);
 		}
 		else if (s == nullptr) {
@@ -87,19 +94,16 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			uint32_t i = 0;
-			slist_match<Shape* const, uint32_t>(*Undo::s_shape_list, s, i);
+			slist_match<Shape* const, uint32_t>(*undo_slist, s, i);
 			dt_writer.WriteUInt32(i);
 		}
 	}
 
-	SHAPE_LIST* Undo::s_shape_list = nullptr;
-	ShapeSheet* Undo::s_shape_sheet = nullptr;
-
 	// 操作が参照するための図形リストと用紙図形を格納する.
-	void Undo::set(SHAPE_LIST* slist, ShapeSheet* s_layout) noexcept
+	void Undo::set(SHAPE_LIST* slist, ShapeSheet* sheet) noexcept
 	{
-		Undo::s_shape_list = slist;
-		Undo::s_shape_sheet = s_layout;
+		undo_slist = slist;
+		undo_sheet = sheet;
 	}
 
 	// 操作を実行すると値が変わるか判定する.
@@ -150,8 +154,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_shape == m_dst_shape) {
 			return;
 		}
-		auto it_beg{ Undo::s_shape_list->begin() };
-		auto it_end{ Undo::s_shape_list->end() };
+		auto it_beg{ undo_slist->begin() };
+		auto it_end{ undo_slist->end() };
 		auto it_src{ std::find(it_beg, it_end, m_shape) };
 		if (it_src == it_end) {
 			return;
@@ -749,20 +753,20 @@ namespace winrt::GraphPaper::implementation
 	void UndoList::exec(void)
 	{
 		if (m_insert) {
-			auto it_del{ std::find(Undo::s_shape_list->begin(), Undo::s_shape_list->end(), m_shape) };
-			if (it_del != Undo::s_shape_list->end()) {
-				Undo::s_shape_list->erase(it_del);
+			auto it_del{ std::find(undo_slist->begin(), undo_slist->end(), m_shape) };
+			if (it_del != undo_slist->end()) {
+				undo_slist->erase(it_del);
 			}
-			auto it_ins{ std::find(Undo::s_shape_list->begin(), Undo::s_shape_list->end(), m_shape_at) };
-			Undo::s_shape_list->insert(it_ins, m_shape);
+			auto it_ins{ std::find(undo_slist->begin(), undo_slist->end(), m_shape_at) };
+			undo_slist->insert(it_ins, m_shape);
 			m_shape->set_delete(false);
 		}
 		else {
 			m_shape->set_delete(true);
-			auto it_del{ std::find(Undo::s_shape_list->begin(), Undo::s_shape_list->end(), m_shape) };
-			auto it_pos{ Undo::s_shape_list->erase(it_del) };
-			m_shape_at = (it_pos == Undo::s_shape_list->end() ? nullptr : *it_pos);
-			Undo::s_shape_list->push_front(m_shape);
+			auto it_del{ std::find(undo_slist->begin(), undo_slist->end(), m_shape) };
+			auto it_pos{ undo_slist->erase(it_del) };
+			m_shape_at = (it_pos == undo_slist->end() ? nullptr : *it_pos);
+			undo_slist->push_front(m_shape);
 		}
 		m_insert = !m_insert;
 	}
@@ -815,9 +819,9 @@ namespace winrt::GraphPaper::implementation
 	void UndoGroup::exec(void)
 	{
 		if (m_insert) {
-			auto it_del{ std::find(Undo::s_shape_list->begin(), Undo::s_shape_list->end(), m_shape) };
-			if (it_del != Undo::s_shape_list->end()) {
-				Undo::s_shape_list->erase(it_del);
+			auto it_del{ std::find(undo_slist->begin(), undo_slist->end(), m_shape) };
+			if (it_del != undo_slist->end()) {
+				undo_slist->erase(it_del);
 			}
 			SHAPE_LIST& list_grouped = m_shape_group->m_list_grouped;
 			auto it_ins{ std::find(list_grouped.begin(), list_grouped.end(), m_shape_at) };
@@ -830,7 +834,7 @@ namespace winrt::GraphPaper::implementation
 			auto it_del{ std::find(list_grouped.begin(), list_grouped.end(), m_shape) };
 			auto it_pos{ list_grouped.erase(it_del) };
 			m_shape_at = (it_pos == list_grouped.end() ? nullptr : *it_pos);
-			Undo::s_shape_list->push_front(m_shape);
+			undo_slist->push_front(m_shape);
 		}
 		m_insert = !m_insert;
 	}

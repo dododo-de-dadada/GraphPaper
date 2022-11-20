@@ -51,12 +51,13 @@ namespace winrt::GraphPaper::implementation
 	}
 	*/
 
+	//-------------------------------
 	// 色成分を文字列に変換する.
 	// c_code	色の表記
 	// c_val	色成分の値
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列 [t_len]
-	// 戻り値	なし
+	//-------------------------------
 	void conv_col_to_str(const COLOR_CODE c_code, const double c_val, const size_t t_len, wchar_t t_buf[]) noexcept
 	{
 		// 色の表記が 10 進数か判定する.
@@ -80,6 +81,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//-------------------------------
 	// 長さを文字列に変換する.
 	// B	単位付加フラグ
 	// len_unit	長さの単位
@@ -88,6 +90,7 @@ namespace winrt::GraphPaper::implementation
 	// g_len	方眼の大きさ
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列
+	//-------------------------------
 	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len, const uint32_t t_len, wchar_t *t_buf) noexcept
 	{
 		// 長さの単位がピクセルか判定する.
@@ -146,8 +149,10 @@ namespace winrt::GraphPaper::implementation
 	// 長さを文字列に変換する (単位つき).
 	template void conv_len_to_str<LEN_UNIT_SHOW>(const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
+	//-------------------------------
 	// 確認ダイアログを表示してその応答を得る.
 	// 戻り値	「保存する」または「保存しない」が押されたなら true を, 応答がキャンセルなら, または内容を保存できなかったなら false を返す.
+	//-------------------------------
 	IAsyncOperation<bool> MainPage::ask_for_conf_async(void)
 	{
 		// 確認ダイアログを表示し, 応答を得る.
@@ -159,33 +164,27 @@ namespace winrt::GraphPaper::implementation
 		// 応答が「保存する」か判定する.
 		else if (d_res == ContentDialogResult::Primary) {
 			// ファイルに非同期に保存し, 結果が S_OK 以外か判定する.
-			if (co_await file_save_async() != S_OK) {
-				co_return false;
-			}
+			//if (co_await file_save_async() != S_OK) {
+			//	co_return false;
+			//}
+			co_await file_save_async();
 		}
 		co_return true;
 	}
 
+	//-------------------------------
 	// ファイルメニューの「終了」が選択された
+	//-------------------------------
 	IAsyncAction MainPage::exit_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
-		if (m_ustack_updt && !co_await ask_for_conf_async()) {
+		if (m_ustack_is_changed && !co_await ask_for_conf_async()) {
 			co_return;
 		}
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_close_click(nullptr, nullptr);
 		}
-		ustack_clear();
-		slist_clear(m_main_sheet.m_shape_list);
-#if defined(_DEBUG)
-		if (debug_leak_cnt != 0) {
-			message_show(ICON_ALERT, DEBUG_MSG, {});
-		}
-#endif
-		ShapeText::release_available_fonts();
-
 		// 静的リソースから読み込んだコンテキストメニューを破棄する.
 		{
 			m_menu_stroke = nullptr;
@@ -247,11 +246,22 @@ namespace winrt::GraphPaper::implementation
 			m_prop_sheet.m_d2d.Trim();
 		}
 
+		ustack_clear();
+		slist_clear(m_main_sheet.m_shape_list);
+#if defined(_DEBUG)
+		if (debug_leak_cnt != 0) {
+			message_show(ICON_ALERT, DEBUG_MSG, {});
+		}
+#endif
+		ShapeText::release_available_fonts();
+
 		// アプリケーションを終了する.
 		Application::Current().Exit();
 	}
 
+	//-------------------------------
 	// メインページを作成する.
+	//-------------------------------
 	MainPage::MainPage(void)
 	{
 		// お約束.
@@ -319,11 +329,13 @@ namespace winrt::GraphPaper::implementation
 		auto _{ new_click_async(nullptr, nullptr) };
 	}
 
+	//-------------------------------
 	// メッセージダイアログを表示する.
 	// glyph_key	フォントアイコンのグリフの静的リソースのキー
 	// message_key	メッセージのアプリケーションリソースのキー
 	// desc_key		説明文のアプリケーションリソースのキー
 	// 戻り値	なし
+	//-------------------------------
 	void MainPage::message_show(winrt::hstring const& glyph_key, winrt::hstring const& message_key, winrt::hstring const& desc_key)
 	{
 		constexpr wchar_t QUOT[] = L"\"";	// 引用符
@@ -363,7 +375,7 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::new_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
-		if (m_ustack_updt && !co_await ask_for_conf_async()) {
+		if (m_ustack_is_changed && !co_await ask_for_conf_async()) {
 			co_return;
 		}
 		// 一覧が表示されてるか判定する.
