@@ -93,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 			// ビットマップエンコーダーにビットマップを格納する.
 			BitmapEncoder bmp_enc{ co_await BitmapEncoder::CreateAsync(enc_id, ra_stream) };
 			// 新しいサムネイルを自動的に生成するよう true を格納する.
-			bmp_enc.IsThumbnailGenerated(true);
+			//bmp_enc.IsThumbnailGenerated(true);
 			bmp_enc.SetSoftwareBitmap(bmp);
 			try {
 				co_await bmp_enc.FlushAsync();
@@ -104,10 +104,10 @@ namespace winrt::GraphPaper::implementation
 					bmp_enc.IsThumbnailGenerated(false);
 				}
 			}
-			if (!bmp_enc.IsThumbnailGenerated()) {
+			//if (!bmp_enc.IsThumbnailGenerated()) {
 				// 再度やり直す.
-				co_await bmp_enc.FlushAsync();
-			}
+			//	co_await bmp_enc.FlushAsync();
+			//}
 			bmp_enc = nullptr;
 		}
 		bmp.Close();
@@ -370,7 +370,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 元の画像に戻す.
+	// 原画像に戻す.
 	void ShapeImage::revert(void) noexcept
 	{
 		const float src_w = static_cast<float>(m_orig.width);

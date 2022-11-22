@@ -28,9 +28,11 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::Storage::StorageFolder;
 
-	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
+	constexpr wchar_t APP_DATA_FILE[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
 
+	//------------------------------
 	// アプリケーションがバックグラウンドに移った.
+	//------------------------------
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
 		m_d2d_mutex.lock();
@@ -39,55 +41,64 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_mutex.unlock();
 	}
 
+	//------------------------------
 	// アプリケーションがバックグラウンドから戻った.
+	//------------------------------
 	void MainPage::app_leaving_background(IInspectable const&/*sender*/, LeavingBackgroundEventArgs const&/*args*/)
 	{
 	}
 
+	//------------------------------
 	// アプリケーションの再開の処理を行う.
 	// アプリ起動のときは呼ばれない.
+	//------------------------------
 	IAsyncAction MainPage::app_resuming_async(IInspectable const&, IInspectable const&)
 	{
 		winrt::apartment_context context;
 
 		ShapeText::set_available_fonts(m_main_sheet.m_d2d);
 
-		HRESULT ok = E_FAIL;
-		IStorageItem data_storage{ co_await ApplicationData::Current().LocalCacheFolder().TryGetItemAsync(FILE_NAME) };
-		if (data_storage != nullptr) {
-			StorageFile data_file = data_storage.try_as<StorageFile>();
-			if (data_file != nullptr) {
-				// ストレージファイルを非同期に読む.
+		// アプリケーションデータを読み込む.
+		IStorageItem app_data_item{ co_await ApplicationData::Current().LocalCacheFolder().TryGetItemAsync(APP_DATA_FILE) };
+		if (app_data_item != nullptr) {
+			StorageFile app_data_file = app_data_item.try_as<StorageFile>();
+			if (app_data_file != nullptr) {
+				HRESULT hr = E_FAIL;
 				try {
-					ok = co_await file_read_async<true, false>(data_file);
-					// スレッドをメインページの UI スレッドに変える.
-					//auto cd = this->Dispatcher();
-					//co_await winrt::resume_foreground(cd);
-					//file_finish_reading();
+					// アプリケーションデータを非同期に読む.
+					hr = co_await file_read_async<true, false>(app_data_file);
 				}
 				catch (winrt::hresult_error const& e) {
-					ok = e.code();
+					hr = e.code();
 				}
-				data_file = nullptr;
+				if (hr != S_OK) {
+					constexpr wchar_t ERR_LOAD[] = L"str_err_load";	// 設定読み込みのエラーメッセージのリソース名
+					co_await winrt::resume_foreground(Dispatcher());
+					message_show(ICON_ALERT, ERR_LOAD, {});
+				}
+				app_data_file = nullptr;
 			}
-			data_storage = nullptr;
+			app_data_item = nullptr;
 		}
 		// スレッドコンテキストを復元する.
 		co_await context;
 	}
 
+	//------------------------------
 	// アプリケーションの中断の処理を行う.
 	// args	中断ハンドラーに渡された引数.
-	// 戻り値	なし
+	//------------------------------
 	IAsyncAction MainPage::app_suspending_async(IInspectable const&, SuspendingEventArgs const& args)
 	{
-		winrt::apartment_context context;
 		SuspendingOperation const& sus_operation = args.SuspendingOperation();
 		cancellation_token_source cancel_src = cancellation_token_source();
-		SuspendingDeferral sus_deferral = sus_operation.GetDeferral();
+		SuspendingDeferral sus_deferral = sus_operation.GetDeferral();	// 延長実行セッションの中断	
+
+		// 延長実行セッションに理由と説明を格納する.
 		ExtendedExecutionSession ext_session = ExtendedExecutionSession();
 		ext_session.Reason(ExtendedExecutionReason::SavingData);
 		ext_session.Description(L"To save data.");
+
 		// 延長実行セッションが取り消されたときのコルーチンを登録する.
 		winrt::event_token ext_token = ext_session.Revoked(
 			// RequestExtensionAsync の中でこのコルーチンは呼び出されるので, 上位関数のローカル変数は参照できる (たぶん).
@@ -109,8 +120,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 
+		HRESULT hr = E_FAIL;
 		// 延長実行セッションを要求し, その結果を得る.
-		HRESULT ok = E_FAIL;
 		switch (co_await ext_session.RequestExtensionAsync()) {
 		// 延長実行セッションが許可された場合.
 		case ExtendedExecutionResult::Allowed:
@@ -120,40 +131,44 @@ namespace winrt::GraphPaper::implementation
 			}
 			try {
 				// キャンセル以外ならば,
-				StorageFile data_file{ co_await ApplicationData::Current().LocalCacheFolder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
-				if (data_file != nullptr) {
-					ok = co_await file_write_gpf_async<true, false>(data_file);
-					data_file = nullptr;
+				StorageFile app_data_file{ co_await ApplicationData::Current().LocalCacheFolder().CreateFileAsync(APP_DATA_FILE, CreationCollisionOption::ReplaceExisting) };
+				if (app_data_file != nullptr) {
+					hr = co_await file_write_gpf_async<true, false>(app_data_file);
+					app_data_file = nullptr;
 				}
 			}
 			catch (winrt::hresult_error const& e) {
-				ok = e.code();
+				hr = e.code();
+			}
+			if (hr != S_OK) {
+				// スレッドをメインページの UI スレッドに変える.
+				winrt::apartment_context context;
+				co_await winrt::resume_foreground(Dispatcher());
+
+				constexpr wchar_t ERR_SAVE[] = L"str_err_save";	// 設定保存のエラーメッセージのリソース名
+				message_show(ICON_ALERT, ERR_SAVE, {});
+
+				// 一覧が表示されてるなら閉じる.
+				if (summary_is_visible()) {
+					summary_clear();
+				}
+				ustack_clear();
+				slist_clear(m_main_sheet.m_shape_list);
+#if defined(_DEBUG)
+				if (debug_leak_cnt != 0) {
+					// 「メモリリーク」メッセージダイアログを表示する.
+					message_show(ICON_ALERT, DEBUG_MSG, {});
+				}
+#endif
+				sheet_draw();
+				// スレッドコンテキストを復元する.
+				co_await context;
 			}
 			break;
 		case ExtendedExecutionResult::Denied:
 			break;
 		}
-		// スレッドをメインページの UI スレッドに変える.
-		// スレッド変更は, セッションを閉じる前にでないとダメ.
-		//auto cd = this->Dispatcher();
-		co_await winrt::resume_foreground(Dispatcher());
-#if defined(_DEBUG)
-		if (debug_leak_cnt != 0) {
-			// 「メモリリーク」メッセージダイアログを表示する.
-			message_show(ICON_ALERT, DEBUG_MSG, {});
-		}
-#endif
-		if (ok == S_OK) {
-			// 一覧が表示されてるか判定する.
-			if (summary_is_visible()) {
-				summary_clear();
-			}
-			//ustack_clear();
-			//slist_clear(m_main_sheet.m_shape_list);
-			//ShapeText::release_available_fonts();
-		}
-		// スレッドコンテキストを復元する.
-		co_await context;
+
 		if (ext_session != nullptr) {
 			ext_session.Revoked(ext_token);
 			ext_session.Close();

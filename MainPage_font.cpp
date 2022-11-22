@@ -175,7 +175,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		//FindName(L"cd_prop_dialog");
 		m_prop_sheet.set_attr_to(&m_main_sheet);
-		for (uint32_t i = 0; wchar_t* name = ShapeText::get_available_font(i); i++) {
+		for (uint32_t i = 0; wchar_t* name = ShapeText::s_available_fonts[i]; i++) {
 			auto item = box_value(winrt::hstring(name));
 			lv_prop_list().Items().Append(item);
 		}
@@ -198,7 +198,7 @@ namespace winrt::GraphPaper::implementation
 			[this](auto, auto)
 			{
 				auto i = lv_prop_list().SelectedIndex();
-				m_prop_sheet.m_shape_list.back()->set_font_family(ShapeText::get_available_font(i));
+				m_prop_sheet.m_shape_list.back()->set_font_family(ShapeText::s_available_fonts[i]);
 				if (scp_prop_panel().IsLoaded()) {
 					prop_sample_draw();
 				}

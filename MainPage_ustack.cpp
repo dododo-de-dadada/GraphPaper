@@ -164,8 +164,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::STROKE_WIDTH:
 			u = new UndoValue<UNDO_OP::STROKE_WIDTH>(dt_reader);
 			break;
-		case UNDO_OP::TEXT_ALIGN_P:
-			u = new UndoValue<UNDO_OP::TEXT_ALIGN_P>(dt_reader);
+		case UNDO_OP::TEXT_PAR_ALIGN:
+			u = new UndoValue<UNDO_OP::TEXT_PAR_ALIGN>(dt_reader);
 			break;
 		case UNDO_OP::TEXT_ALIGN_T:
 			u = new UndoValue<UNDO_OP::TEXT_ALIGN_T>(dt_reader);
@@ -373,10 +373,10 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.get_text_align_t(val);
 			text_align_t_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_OP::TEXT_ALIGN_P>)) {
+		else if (u_type == typeid(UndoValue<UNDO_OP::TEXT_PAR_ALIGN>)) {
 			DWRITE_PARAGRAPH_ALIGNMENT val;
-			m_main_sheet.get_text_align_p(val);
-			text_align_p_is_checked(val);
+			m_main_sheet.get_text_par_align(val);
+			text_par_align_is_checked(val);
 		}
 	}
 
@@ -625,7 +625,7 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_CAP>(CAP_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_WIDTH>(float const& val);
-	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_ALIGN_P>(DWRITE_PARAGRAPH_ALIGNMENT const& val);
+	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_PAR_ALIGN>(DWRITE_PARAGRAPH_ALIGNMENT const& val);
 	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_ALIGN_T>(DWRITE_TEXT_ALIGNMENT const& val);
 	template void MainPage::ustack_push_set<UNDO_OP::TEXT_CONTENT>(Shape* const s, wchar_t* const& val);
 	template bool MainPage::ustack_push_set<UNDO_OP::TEXT_LINE_SP>(float const& val);

@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 		STROKE_CAP,	// 端の形式の操作
 		STROKE_COLOR,	// 線枠の色の操作
 		STROKE_WIDTH,	// 線枠の太さの操作
-		TEXT_ALIGN_P,	// 段落の整列の操作
+		TEXT_PAR_ALIGN,	// 段落の整列の操作
 		TEXT_ALIGN_T,	// 文字列の整列の操作
 		TEXT_CONTENT,	// 文字列の操作
 		TEXT_LINE_SP,	// 行間の操作
@@ -97,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::STROKE_CAP> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_WIDTH> { using type = float; };
-	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_P> { using type = DWRITE_PARAGRAPH_ALIGNMENT; };
+	template <> struct U_TYPE<UNDO_OP::TEXT_PAR_ALIGN> { using type = DWRITE_PARAGRAPH_ALIGNMENT; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_ALIGN_T> { using type = DWRITE_TEXT_ALIGNMENT; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_CONTENT> { using type = wchar_t*; };
 	template <> struct U_TYPE<UNDO_OP::TEXT_LINE_SP> { using type = float; };

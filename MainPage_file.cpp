@@ -151,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 	static const IVector<winrt::hstring> TYPE_SVG{
 		winrt::single_threaded_vector<winrt::hstring>({ EXT_SVG })
 	};
-	static winrt::guid enc_id = BitmapEncoder::BmpEncoderId();
+	static winrt::guid enc_id_default = BitmapEncoder::BmpEncoderId();	// 既定のエンコード識別子
 
 	// データライターに SVG 開始タグを書き込む.
 	static void file_write_svg_tag(D2D1_SIZE_F const& size, D2D1_COLOR_F const& color, const double dpi, const LEN_UNIT unit, DataWriter const& dt_writer);
@@ -268,9 +268,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//-------------------------------
-	// ファイルメニューの「画像をインポートする...」が選択された.
+	// ファイルメニューの「画像を図形としてインポートする...」が選択された.
 	//-------------------------------
-	IAsyncAction MainPage::file_import_img_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::file_import_img_as_shape_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		winrt::apartment_context context;
 
@@ -421,7 +421,7 @@ namespace winrt::GraphPaper::implementation
 			dt_read(m_find_text, dt_reader);
 			dt_read(m_find_repl, dt_reader);
 			uint16_t f_bit = dt_reader.ReadUInt16();
-			m_edit_text_frame = ((f_bit & 1) != 0);
+			m_text_frame_fit_text = ((f_bit & 1) != 0);
 			m_find_text_case = ((f_bit & 2) != 0);
 			m_find_text_wrap = ((f_bit & 4) != 0);
 
@@ -650,6 +650,7 @@ namespace winrt::GraphPaper::implementation
 	//IAsyncOperation<winrt::hresult> MainPage::file_save_as_async(const bool svg_allowed) noexcept
 	IAsyncAction MainPage::file_save_as_async(const bool svg_allowed) noexcept
 	{
+		m_save_mutex.lock();
 		HRESULT ok = E_FAIL;
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		//winrt::apartment_context context;
@@ -741,6 +742,7 @@ namespace winrt::GraphPaper::implementation
 		//co_await context;
 		// 結果を返し終了する.
 		//co_return ok;
+		m_save_mutex.unlock();
 	}
 
 	//-------------------------------
@@ -765,27 +767,27 @@ namespace winrt::GraphPaper::implementation
 			// ストレージファイルが空の場合,
 			constexpr bool SVG_ALLOWED = true;
 			// 名前を付けてファイルに非同期に保存する
-			//co_return co_await file_save_as_async(!SVG_ALLOWED);
 			co_await file_save_as_async(!SVG_ALLOWED);
-			co_return;
 		}
+		else {
+			m_save_mutex.lock();
 
-		HRESULT ok = E_FAIL;	// 結果
-		// 待機カーソルを表示, 表示する前のカーソルを得る.
-		const CoreCursor& prev_cur = file_wait_cursor();	// 前のカーソル
-		// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
-		ok = co_await file_write_gpf_async<false, false>(s_file);
-		// カーソルを元に戻す.
-		Window::Current().CoreWindow().PointerCursor(prev_cur);
-		// 結果が S_OK 以外か判定する.
-		if (ok != S_OK) {
-			// スレッドをメインページの UI スレッドに変える.
-			co_await winrt::resume_foreground(Dispatcher());
-			// 「ファイルに書き込めません」メッセージダイアログを表示する.
-			message_show(ICON_ALERT, ERR_WRITE, m_file_token_mru);
+			HRESULT ok = E_FAIL;	// 結果
+			// 待機カーソルを表示, 表示する前のカーソルを得る.
+			const CoreCursor& prev_cur = file_wait_cursor();	// 前のカーソル
+			// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
+			ok = co_await file_write_gpf_async<false, false>(s_file);
+			// カーソルを元に戻す.
+			Window::Current().CoreWindow().PointerCursor(prev_cur);
+			// 結果が S_OK 以外か判定する.
+			if (ok != S_OK) {
+				// スレッドをメインページの UI スレッドに変える.
+				co_await winrt::resume_foreground(Dispatcher());
+				// 「ファイルに書き込めません」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, ERR_WRITE, m_file_token_mru);
+			}
+			m_save_mutex.unlock();
 		}
-		// 結果を返し終了する.
-		//co_return ok;
 	}
 
 	//-------------------------------
@@ -797,19 +799,11 @@ namespace winrt::GraphPaper::implementation
 		file_save_async();
 	}
 
-	//-------------------------------
-	// ファイルに画像図形の画像を保存する.
-	// s	画像図形
-	// sug_name	あらかじめ表示されるファイル名
-	// img_name	ファイルセーブピッカーで選択されたファイル名
-	//-------------------------------
-	IAsyncOperation<winrt::hresult> MainPage::file_save_img_async(ShapeImage* s, const wchar_t sug_name[], wchar_t img_name[], const size_t name_len)
+	IAsyncOperation <StorageFile> MainPage::file_image_get_async(const wchar_t sug_name[])
 	{
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		winrt::apartment_context context;
-		FileSavePicker img_picker{
-			FileSavePicker()
-		};
+		// リソースから説明文を読み込む.
 		// ResourceLoader::GetForCurrentView はフォアグラウンド.
 		co_await winrt::resume_foreground(Dispatcher());
 		const ResourceLoader& res_loader = ResourceLoader::GetForCurrentView();
@@ -828,77 +822,200 @@ namespace winrt::GraphPaper::implementation
 		const winrt::hstring desc_tif{
 			res_loader.GetString(L"str_desc_tif")
 		};
-		if (enc_id == BitmapEncoder::GifEncoderId()) {
+		co_await context;
+
+		FileSavePicker img_picker{
+			FileSavePicker()
+		};
+		// まず既定のエンコード識別子の説明を設定する.
+		if (enc_id_default == BitmapEncoder::GifEncoderId()) {
 			img_picker.FileTypeChoices().Insert(desc_gif, TYPE_GIF);
 		}
-		else if (enc_id == BitmapEncoder::JpegEncoderId()) {
+		else if (enc_id_default == BitmapEncoder::JpegEncoderId()) {
 			img_picker.FileTypeChoices().Insert(desc_jpg, TYPE_JPG);
 		}
-		else if (enc_id == BitmapEncoder::PngEncoderId()) {
+		else if (enc_id_default == BitmapEncoder::PngEncoderId()) {
 			img_picker.FileTypeChoices().Insert(desc_png, TYPE_PNG);
 		}
-		else if (enc_id == BitmapEncoder::TiffEncoderId()) {
+		else if (enc_id_default == BitmapEncoder::TiffEncoderId()) {
 			img_picker.FileTypeChoices().Insert(desc_tif, TYPE_TIF);
 		}
 		else {
 			img_picker.FileTypeChoices().Insert(desc_bmp, TYPE_BMP);
-			enc_id = BitmapEncoder::BmpEncoderId();
+			enc_id_default = BitmapEncoder::BmpEncoderId();
 		}
-		if (enc_id != BitmapEncoder::BmpEncoderId()) {
+
+		// 上記以外のエンコード識別子の説明を設定する.
+		if (enc_id_default != BitmapEncoder::BmpEncoderId()) {
 			img_picker.FileTypeChoices().Insert(desc_bmp, TYPE_BMP);
 		}
-		if (enc_id != BitmapEncoder::GifEncoderId()) {
+		if (enc_id_default != BitmapEncoder::GifEncoderId()) {
 			img_picker.FileTypeChoices().Insert(desc_gif, TYPE_GIF);
 		}
-		if (enc_id != BitmapEncoder::JpegEncoderId()) {
+		if (enc_id_default != BitmapEncoder::JpegEncoderId()) {
 			img_picker.FileTypeChoices().Insert(desc_jpg, TYPE_JPG);
 		}
-		if (enc_id != BitmapEncoder::PngEncoderId()) {
+		if (enc_id_default != BitmapEncoder::PngEncoderId()) {
 			img_picker.FileTypeChoices().Insert(desc_png, TYPE_PNG);
 		}
-		if (enc_id != BitmapEncoder::TiffEncoderId()) {
+		if (enc_id_default != BitmapEncoder::TiffEncoderId()) {
 			img_picker.FileTypeChoices().Insert(desc_tif, TYPE_TIF);
 		}
 
 		// 画像ライブラリーを保管場所に設定する.
 		const PickerLocationId loc_id = PickerLocationId::PicturesLibrary;
 		img_picker.SuggestedStartLocation(loc_id);
+
 		// ピッカーに, あらかじめ表示されるファイル名を設定する.
-		img_picker.SuggestedFileName(sug_name);
+		if (sug_name != nullptr) {
+			img_picker.SuggestedFileName(sug_name);
+		}
+
+		// ピッカーを表示しストレージファイルを得る.
+		auto img_file{ co_await img_picker.PickSaveFileAsync() };
+		if (img_file != nullptr) {
+
+			// 保存するファイル形式
+			if (std::find(TYPE_BMP.begin(), TYPE_BMP.end(), img_file.FileType()) != TYPE_BMP.end()) {
+				enc_id_default = BitmapEncoder::BmpEncoderId();
+			}
+			else if (std::find(TYPE_GIF.begin(), TYPE_GIF.end(), img_file.FileType()) != TYPE_GIF.end()) {
+				enc_id_default = BitmapEncoder::GifEncoderId();
+			}
+			else if (std::find(TYPE_JPG.begin(), TYPE_JPG.end(), img_file.FileType()) != TYPE_JPG.end()) {
+				enc_id_default = BitmapEncoder::JpegEncoderId();
+			}
+			else if (std::find(TYPE_PNG.begin(), TYPE_PNG.end(), img_file.FileType()) != TYPE_PNG.end()) {
+				enc_id_default = BitmapEncoder::PngEncoderId();
+			}
+			else if (std::find(TYPE_TIF.begin(), TYPE_TIF.end(), img_file.FileType()) != TYPE_TIF.end()) {
+				enc_id_default = BitmapEncoder::TiffEncoderId();
+			}
+			else {
+				//co_await context;
+				co_return nullptr;
+			}
+		}
+		// ピッカーを表示しストレージファイルを得る.
+		co_return img_file;
+	}
+
+	//-------------------------------
+	// ファイルに画像図形の画像を保存する.
+	// s	画像図形
+	// sug_name	あらかじめ表示されるファイル名
+	// img_name	ファイルセーブピッカーで選択されたファイル名
+	//-------------------------------
+	IAsyncOperation<winrt::hresult> MainPage::file_save_shape_image_async(ShapeImage* s, const wchar_t sug_name[], wchar_t img_name[], const size_t name_len)
+	{
+		StorageFile img_file{ co_await file_image_get_async(sug_name) };
+		/*
+		// コルーチンの開始時のスレッドコンテキストを保存する.
+		winrt::apartment_context context;
+		// リソースから説明文を読み込む.
+		// ResourceLoader::GetForCurrentView はフォアグラウンド.
+		co_await winrt::resume_foreground(Dispatcher());
+		const ResourceLoader& res_loader = ResourceLoader::GetForCurrentView();
+		const winrt::hstring desc_bmp{
+			res_loader.GetString(L"str_desc_bmp")
+		};
+		const winrt::hstring desc_gif{
+			res_loader.GetString(L"str_desc_gif")
+		};
+		const winrt::hstring desc_jpg{
+			res_loader.GetString(L"str_desc_jpg")
+		};
+		const winrt::hstring desc_png{
+			res_loader.GetString(L"str_desc_png")
+		};
+		const winrt::hstring desc_tif{
+			res_loader.GetString(L"str_desc_tif")
+		};
+
+		FileSavePicker img_picker{
+			FileSavePicker()
+		};
+		// まず既定のエンコード識別子の説明を設定する.
+		if (enc_id_default == BitmapEncoder::GifEncoderId()) {
+			img_picker.FileTypeChoices().Insert(desc_gif, TYPE_GIF);
+		}
+		else if (enc_id_default == BitmapEncoder::JpegEncoderId()) {
+			img_picker.FileTypeChoices().Insert(desc_jpg, TYPE_JPG);
+		}
+		else if (enc_id_default == BitmapEncoder::PngEncoderId()) {
+			img_picker.FileTypeChoices().Insert(desc_png, TYPE_PNG);
+		}
+		else if (enc_id_default == BitmapEncoder::TiffEncoderId()) {
+			img_picker.FileTypeChoices().Insert(desc_tif, TYPE_TIF);
+		}
+		else {
+			img_picker.FileTypeChoices().Insert(desc_bmp, TYPE_BMP);
+			enc_id_default = BitmapEncoder::BmpEncoderId();
+		}
+
+		// 上記以外のエンコード識別子の説明を設定する.
+		if (enc_id_default != BitmapEncoder::BmpEncoderId()) {
+			img_picker.FileTypeChoices().Insert(desc_bmp, TYPE_BMP);
+		}
+		if (enc_id_default != BitmapEncoder::GifEncoderId()) {
+			img_picker.FileTypeChoices().Insert(desc_gif, TYPE_GIF);
+		}
+		if (enc_id_default != BitmapEncoder::JpegEncoderId()) {
+			img_picker.FileTypeChoices().Insert(desc_jpg, TYPE_JPG);
+		}
+		if (enc_id_default != BitmapEncoder::PngEncoderId()) {
+			img_picker.FileTypeChoices().Insert(desc_png, TYPE_PNG);
+		}
+		if (enc_id_default != BitmapEncoder::TiffEncoderId()) {
+			img_picker.FileTypeChoices().Insert(desc_tif, TYPE_TIF);
+		}
+
+		// 画像ライブラリーを保管場所に設定する.
+		const PickerLocationId loc_id = PickerLocationId::PicturesLibrary;
+		img_picker.SuggestedStartLocation(loc_id);
+
+		// ピッカーに, あらかじめ表示されるファイル名を設定する.
+		if (sug_name != nullptr) {
+			img_picker.SuggestedFileName(sug_name);
+		}
+
+		// ピッカーを表示しストレージファイルを得る.
 		StorageFile img_file{
 			co_await img_picker.PickSaveFileAsync()
 		};
 		if (img_file == nullptr) {
-			co_await context;
+			//co_await context;
 			co_return E_FAIL;
 		}
 		// 保存するファイル形式
 		if (std::find(TYPE_BMP.begin(), TYPE_BMP.end(), img_file.FileType()) != TYPE_BMP.end()) {
-			enc_id = BitmapEncoder::BmpEncoderId();
+			enc_id_default = BitmapEncoder::BmpEncoderId();
 		}
 		else if (std::find(TYPE_GIF.begin(), TYPE_GIF.end(), img_file.FileType()) != TYPE_GIF.end()) {
-			enc_id = BitmapEncoder::GifEncoderId();
+			enc_id_default = BitmapEncoder::GifEncoderId();
 		}
 		else if (std::find(TYPE_JPG.begin(), TYPE_JPG.end(), img_file.FileType()) != TYPE_JPG.end()) {
-			enc_id = BitmapEncoder::JpegEncoderId();
+			enc_id_default = BitmapEncoder::JpegEncoderId();
 		}
 		else if (std::find(TYPE_PNG.begin(), TYPE_PNG.end(), img_file.FileType()) != TYPE_PNG.end()) {
-			enc_id = BitmapEncoder::PngEncoderId();
+			enc_id_default = BitmapEncoder::PngEncoderId();
 		}
 		else if (std::find(TYPE_TIF.begin(), TYPE_TIF.end(), img_file.FileType()) != TYPE_TIF.end()) {
-			enc_id = BitmapEncoder::TiffEncoderId();
+			enc_id_default = BitmapEncoder::TiffEncoderId();
 		}
 		else {
-			co_await context;
+			//co_await context;
 			co_return E_FAIL;
 		}
+		*/
+
 		HRESULT ok = E_FAIL;
 		co_await winrt::resume_background();
 		CachedFileManager::DeferUpdates(img_file);
 		IRandomAccessStream img_stream{
 			co_await img_file.OpenAsync(FileAccessMode::ReadWrite)
 		};
-		co_await s->copy_to(enc_id, img_stream);
+		co_await s->copy_to(enc_id_default, img_stream);
 		// 遅延させたファイル更新を完了し, 結果を判定する.
 		if (co_await CachedFileManager::CompleteUpdatesAsync(img_file) == FileUpdateStatus::Complete) {
 			ok = S_OK;
@@ -908,7 +1025,7 @@ namespace winrt::GraphPaper::implementation
 		img_stream = nullptr;
 		img_file = nullptr;
 		// スレッドコンテキストを復元する.
-		co_await context;
+		//co_await context;
 		// 結果を返し終了する.
 		co_return ok;
 	}
@@ -962,7 +1079,7 @@ namespace winrt::GraphPaper::implementation
 			dt_write(m_find_text, dt_writer);
 			dt_write(m_find_repl, dt_writer);
 			uint16_t f_bit = 0;
-			if (m_edit_text_frame) {
+			if (m_text_frame_fit_text) {
 				f_bit |= 1;
 			}
 			if (m_find_text_case) {
@@ -1053,8 +1170,13 @@ namespace winrt::GraphPaper::implementation
 		swprintf(img_name + tail_len, 8, L"%03d", magic_num++);
 	}
 
-	IAsyncOperation<winrt::hresult> MainPage::file_write_image_async(StorageFile s_file)
+	IAsyncOperation<winrt::hresult> MainPage::file_export_sheet_as_image_async(void)
 	{
+		StorageFile s_file{ co_await file_image_get_async(nullptr) };
+		if (s_file == nullptr) {
+			co_return E_FAIL;
+		}
+
 		// Direct2D コンテンツを画像ファイルに保存する方法
 		const GUID& wic_fmt = [](const winrt::hstring& f_type) 
 		{
@@ -1087,15 +1209,18 @@ namespace winrt::GraphPaper::implementation
 
 		winrt::com_ptr<IWICImagingFactory2> wic_factory;
 		winrt::check_hresult(
-			D2D1CreateFactory(
-				D2D1_FACTORY_TYPE_SINGLE_THREADED,
-				__uuidof(IWICImagingFactory2),
-				wic_factory.put_void()
+			CoCreateInstance(
+				CLSID_WICImagingFactory,
+				nullptr,
+				CLSCTX_INPROC_SERVER,
+				IID_PPV_ARGS(&wic_factory)
 			)
 		);
 
 		winrt::com_ptr<IWICBitmapEncoder> wic_enc;
-		wic_factory->CreateEncoder(wic_fmt, nullptr, wic_enc.put());
+		winrt::check_hresult(
+			wic_factory->CreateEncoder(wic_fmt, nullptr, wic_enc.put())
+		);
 		winrt::check_hresult(
 			wic_enc->Initialize(stream.get(), WICBitmapEncoderNoCache)
 		);
@@ -1107,7 +1232,27 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(
 			wic_frm->Initialize(nullptr)
 		);
+		/*
+		D2D1_BITMAP_PROPERTIES bp{
+			D2D1_PIXEL_FORMAT{ DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_STRAIGHT },
+			96.0f,
+			96.0f
+		};
 
+		winrt::com_ptr<ID2D1Bitmap> bm;
+		m_main_sheet.m_d2d.m_d2d_context->CreateBitmap(
+			D2D1_SIZE_U{
+				static_cast<uint32_t>(m_main_sheet.m_sheet_size.width),
+				static_cast<uint32_t>(m_main_sheet.m_sheet_size.height)
+			},
+			NULL,
+			0,
+			bp,
+			bm.put()
+		);
+		m_main_sheet.m_d2d.m_d2d_context->SetTarget(nullptr);
+		m_main_sheet.m_d2d.m_d2d_context->SetTarget(bm.get());
+		*/
 		winrt::com_ptr<ID2D1Device> d2d_dev;
 		m_main_sheet.m_d2d.m_d2d_context->GetDevice(d2d_dev.put());
 
@@ -1115,11 +1260,22 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(
 			wic_factory->CreateImageEncoder(d2d_dev.get(), img_enc.put())
 		);
+
 		winrt::com_ptr<ID2D1Image> d2d_img;
 		m_main_sheet.m_d2d.m_d2d_context->GetTarget(d2d_img.put());
 		winrt::check_hresult(
 			img_enc->WriteFrame(d2d_img.get(), wic_frm.get(), nullptr)
 		);
+
+		//m_main_sheet.m_d2d.HandleDeviceLost();
+		
+		//scp_sheet_panel().Width(w);
+		//scp_sheet_panel().Height(h);
+
+		// スレッドをメインページの UI スレッドに変える.
+		//co_await winrt::resume_foreground(Dispatcher());
+		//m_main_sheet.m_d2d.SetSwapChainPanel(scp_sheet_panel());
+
 		winrt::check_hresult(
 			wic_frm->Commit()
 		);
@@ -1183,7 +1339,7 @@ namespace winrt::GraphPaper::implementation
 
 					//const auto s_folder{ co_await s_file.GetParentAsync() };
 					ShapeImage* const img = static_cast<ShapeImage*>(s);
-					if (co_await file_save_img_async(img, img_name, img_name, MAX_LEN) == S_OK) {
+					if (co_await file_save_shape_image_async(img, img_name, img_name, MAX_LEN) == S_OK) {
 						img->write_svg(img_name, dt_writer);
 					}
 					else {
@@ -1223,6 +1379,12 @@ namespace winrt::GraphPaper::implementation
 		co_await context;
 		// 結果を返し終了する.
 		co_return ok;
+	}
+
+	// ファイルメニューの「画像としてエクスポートする」が選択された
+	void MainPage::file_export_sheet_as_img_click(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&)
+	{
+		file_export_sheet_as_image_async();
 	}
 
 	// ファイルシステムへのアクセス権を確認して, 設定を促す.

@@ -18,11 +18,12 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow_size";
 
+	//------------------------------
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
 	// val	格納する値
-	// 戻り値	なし.
+	//------------------------------
 	template <UNDO_OP U, int S>
 	void MainPage::arrow_slider_set_header(const float val)
 	{
@@ -50,11 +51,12 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// スライダーの値が変更された.
 	// U	操作の種類
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
-	// 戻り値	なし
+	//------------------------------
 	template <UNDO_OP U, int S> void MainPage::arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		// 値をスライダーのヘッダーに格納する.
@@ -83,7 +85,9 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「矢じるしの大きさ」が選択された.
+	//------------------------------
+	// 線枠メニューの「矢じるしの寸法...」が選択された.
+	//------------------------------
 	IAsyncAction MainPage::arrow_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		constexpr auto MAX_VALUE = 127.5;
@@ -155,7 +159,9 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
+	//------------------------------
 	// 線枠メニューの「矢じるしの種類」のサブ項目が選択された.
+	//------------------------------
 	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		ARROW_STYLE a_style;
@@ -180,8 +186,10 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// 線枠メニューの「矢じるしの種類」に印をつける.
 	// a_style	矢じるしの形式
+	//------------------------------
 	void MainPage::arrow_style_is_checked(const ARROW_STYLE val)
 	{
 		rmfi_arrow_style_none().IsChecked(val == ARROW_STYLE::NONE);

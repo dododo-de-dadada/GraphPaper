@@ -29,14 +29,14 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
 	constexpr wchar_t DLG_TITLE[] = L"str_sheet";	// 用紙の表題
-	constexpr wchar_t FILE_NAME[] = L"ji32k7au4a83";	// アプリケーションデータを格納するファイル名
-	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI";	// 書体名の規定値 (システムリソースに値が無かった場合)
+	constexpr wchar_t SHEET_PROP[] = L"sheet_prop.dat";	// 用紙設定を格納するファイル名
+	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI Variable";	// 書体名の規定値 (システムリソースに値が無かった場合)
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 
 	// 長さををピクセル単位の値に変換する.
 	static double conv_len_to_val(const LEN_UNIT l_unit, const double val, const double dpi, const double g_len) noexcept;
 	// 設定データを保存するフォルダーを得る.
-	static auto pref_local_folder(void);
+	static auto prop_local_folder(void);
 
 	// 長さををピクセル単位の値に変換する.
 	// 変換された値は, 0.5 ピクセル単位に丸められる.
@@ -68,7 +68,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 設定データを保存するフォルダーを得る.
-	static auto pref_local_folder(void)
+	static auto prop_local_folder(void)
 	{
 		return ApplicationData::Current().LocalFolder();
 	}
@@ -79,7 +79,6 @@ namespace winrt::GraphPaper::implementation
 		ARROW_STYLE a_style;
 		m_main_sheet.get_arrow_style(a_style);
 		arrow_style_is_checked(a_style);
-		//arrow_style_is_checked(m_main_sheet.m_arrow_style);
 		DWRITE_FONT_STYLE f_style;
 		m_main_sheet.get_font_style(f_style);
 		font_style_is_checked(f_style);
@@ -92,9 +91,9 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_TEXT_ALIGNMENT t_align_t;
 		m_main_sheet.get_text_align_t(t_align_t);
 		text_align_t_is_checked(t_align_t);
-		DWRITE_PARAGRAPH_ALIGNMENT t_align_p;
-		m_main_sheet.get_text_align_p(t_align_p);
-		text_align_p_is_checked(t_align_p);
+		DWRITE_PARAGRAPH_ALIGNMENT t_par_align;
+		m_main_sheet.get_text_par_align(t_par_align);
+		text_par_align_is_checked(t_par_align);
 		GRID_EMPH g_emph;
 		m_main_sheet.get_grid_emph(g_emph);
 		grid_emph_is_checked(g_emph);
@@ -180,7 +179,6 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		//auto const& dc = m_main_sheet.m_d2d.m_d2d_context;
 		// デバイスコンテキストの描画状態を保存ブロックに保持する.
 		m_main_sheet.m_d2d.m_d2d_context->SaveDrawingState(m_main_sheet.m_state_block.get());
 		// デバイスコンテキストから変換行列を得る.
@@ -369,7 +367,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.set_join_limit(MITER_LIMIT_DEFVAL);
 			m_main_sheet.set_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
 			m_main_sheet.set_stroke_width(1.0);
-			m_main_sheet.set_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+			m_main_sheet.set_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			m_main_sheet.set_text_align_t(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 			m_main_sheet.set_text_line_sp(0.0);
 			m_main_sheet.set_text_padding(TEXT_MARGIN_DEFVAL);
@@ -716,23 +714,31 @@ namespace winrt::GraphPaper::implementation
 
 	// 用紙メニューの「用紙設定をリセット」が選択された.
 	// 設定データを保存したファイルがある場合, それを削除する.
-	IAsyncAction MainPage::sheet_pref_reset_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::sheet_prop_reset_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::Storage::StorageDeleteOption;
 
-		auto item{ co_await pref_local_folder().TryGetItemAsync(FILE_NAME) };
-		if (item != nullptr) {
-			auto s_file = item.try_as<StorageFile>();
-			if (s_file != nullptr) {
+		winrt::Windows::Storage::IStorageItem prop_item{
+			co_await prop_local_folder().TryGetItemAsync(SHEET_PROP)
+		};
+		if (prop_item != nullptr) {
+			auto preg_file = prop_item.try_as<StorageFile>();
+			if (preg_file != nullptr) {
+				HRESULT hr = E_FAIL;
 				try {
-					co_await s_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
-					mfi_sheet_pref_reset().IsEnabled(false);
+					co_await preg_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
+					mfi_sheet_prop_reset().IsEnabled(false);
+					hr = S_OK;
 				}
-				catch (winrt::hresult_error const&) {
+				catch (winrt::hresult_error const& e) {
+					hr = e.code();
 				}
-				s_file = nullptr;
+				if (hr != S_OK) {
+
+				}
+				preg_file = nullptr;
 			}
-			item = nullptr;
+			prop_item = nullptr;
 		}
 		sheet_init();
 		sheet_draw();
@@ -741,24 +747,26 @@ namespace winrt::GraphPaper::implementation
 	// 保存された用紙設定データを読み込む.
 	// 設定データを保存したファイルがある場合, それを読み込む.
 	// 戻り値	読み込めたら S_OK.
-	IAsyncOperation<winrt::hresult> MainPage::sheet_pref_load_async(void)
+	IAsyncOperation<winrt::hresult> MainPage::sheet_prop_load_async(void)
 	{
-		mfi_sheet_pref_reset().IsEnabled(false);
-		auto hr = E_FAIL;
-		auto item{ co_await pref_local_folder().TryGetItemAsync(FILE_NAME) };
-		if (item != nullptr) {
-			auto s_file = item.try_as<StorageFile>();
-			if (s_file != nullptr) {
+		mfi_sheet_prop_reset().IsEnabled(false);
+		winrt::Windows::Storage::IStorageItem prop_item{
+			co_await prop_local_folder().TryGetItemAsync(SHEET_PROP)
+		};
+		HRESULT hr = E_FAIL;
+		if (prop_item != nullptr) {
+			auto prop_file = prop_item.try_as<StorageFile>();
+			if (prop_file != nullptr) {
 				try {
-					hr = co_await file_read_async<false, true>(s_file);
+					hr = co_await file_read_async<false, true>(prop_file);
 				}
 				catch (winrt::hresult_error const& e) {
 					hr = e.code();
 				}
-				s_file = nullptr;
-				mfi_sheet_pref_reset().IsEnabled(true);
+				prop_file = nullptr;
+				mfi_sheet_prop_reset().IsEnabled(true);
 			}
-			item = nullptr;
+			prop_item = nullptr;
 		}
 		co_return hr;
 	}
@@ -766,14 +774,16 @@ namespace winrt::GraphPaper::implementation
 	// 用紙メニューの「用紙設定を保存」が選択された
 	// ローカルフォルダーにファイルを作成し, 設定データを保存する.
 	// s_file	ストレージファイル
-	IAsyncAction MainPage::sheet_pref_save_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::sheet_prop_save_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		try {
-			auto s_file{ co_await pref_local_folder().CreateFileAsync(FILE_NAME, CreationCollisionOption::ReplaceExisting) };
+			auto s_file{ 
+				co_await prop_local_folder().CreateFileAsync(SHEET_PROP, CreationCollisionOption::ReplaceExisting)
+			};
 			if (s_file != nullptr) {
 				co_await file_write_gpf_async<false, true>(s_file);
 				s_file = nullptr;
-				mfi_sheet_pref_reset().IsEnabled(true);
+				mfi_sheet_prop_reset().IsEnabled(true);
 			}
 		}
 		catch (winrt::hresult_error const&) {

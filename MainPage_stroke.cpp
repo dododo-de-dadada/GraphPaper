@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 	}
 
-	// 線枠メニューの「ストロークの色...」が選択された.
+	// 線枠メニューの「線枠の色...」が選択された.
 	IAsyncAction MainPage::stroke_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_prop_sheet.set_attr_to(&m_main_sheet);

@@ -492,14 +492,14 @@ namespace winrt::GraphPaper::implementation
 
 		tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
 		tx_edit_text().SelectAll();
-		ck_text_fit_frame_to().IsChecked(m_edit_text_frame);
+		ck_text_frame_fit_text().IsChecked(m_text_frame_fit_text);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit_text().Text().c_str());
 			ustack_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
-			m_edit_text_frame = ck_text_fit_frame_to().IsChecked().GetBoolean();
-			if (m_edit_text_frame) {
+			m_text_frame_fit_text = ck_text_frame_fit_text().IsChecked().GetBoolean();
+			if (m_text_frame_fit_text) {
 				ustack_push_position(s, ANC_TYPE::ANC_SE);
-				s->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
+				s->frame_fit(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			}
 			ustack_push_null();
 			xcvd_is_enabled();
@@ -540,7 +540,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字列検索パネルの「すべて置換」ボタンが押された.
 	void MainPage::find_replace_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		find_text_set();
+		find_text_preserve();
 		// 検索文字列の文字数を得る.
 		const uint32_t f_len = wchar_len(m_find_text);
 		if (f_len == 0) {
@@ -648,7 +648,7 @@ namespace winrt::GraphPaper::implementation
 	// 文字列検索パネルの「置換して次に」ボタンが押された.
 	void MainPage::find_replace_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		find_text_set();
+		find_text_preserve();
 		const auto f_len = wchar_len(m_find_text);
 		if (f_len == 0) {
 			return;
@@ -705,7 +705,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列検索パネルが表示されているか判定する.
 		if (sp_find_text_panel().Visibility() == UI_VISIBLE) {
 			sp_find_text_panel().Visibility(UI_COLLAPSED);
-			find_text_set();
+			find_text_preserve();
 		}
 		else {
 			// 一覧が表示されてるか判定する.
@@ -723,14 +723,14 @@ namespace winrt::GraphPaper::implementation
 	// 文字列検索パネルの「閉じる」ボタンが押された.
 	void MainPage::find_text_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		find_text_set();
+		find_text_preserve();
 		sp_find_text_panel().Visibility(UI_COLLAPSED);
 	}
 
 	// 文字列検索パネルの「次を検索」ボタンが押された.
 	void MainPage::find_text_next_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		find_text_set();
+		find_text_preserve();
 		ShapeText* t;
 		Shape* s;
 		DWRITE_TEXT_RANGE s_range;
@@ -755,13 +755,13 @@ namespace winrt::GraphPaper::implementation
 	//	dt_read(m_find_text, dt_reader);
 	//	dt_read(m_find_repl, dt_reader);
 	//	uint16_t bit = dt_reader.ReadUInt16();
-	//	m_edit_text_frame = ((bit & 1) != 0);
+	//	m_text_frame_fit_text = ((bit & 1) != 0);
 	//	m_find_text_case = ((bit & 2) != 0);
 	//	m_find_text_wrap = ((bit & 4) != 0);
 	//}
 
-	// 文字列検索パネルから値を格納する.
-	void MainPage::find_text_set(void)
+	// 文字列検索パネルの値を保存する.
+	void MainPage::find_text_preserve(void)
 	{
 		if (m_find_text != nullptr) {
 			delete[] m_find_text;
@@ -790,7 +790,7 @@ namespace winrt::GraphPaper::implementation
 	//	dt_write(m_find_text, dt_writer);
 	//	dt_write(m_find_repl, dt_writer);
 	//	uint16_t bit = 0;
-	//	if (m_edit_text_frame) {
+	//	if (m_text_frame_fit_text) {
 	//		bit |= 1;
 	//	}
 	//	if (m_find_text_case) {

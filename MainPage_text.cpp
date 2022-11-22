@@ -46,7 +46,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「枠を文字列に合わせる」が選択された.
-	void MainPage::text_fit_frame_to_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::text_frame_fit_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto flag = false;
 		for (auto s : m_main_sheet.m_shape_list) {
@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			auto u = new UndoForm(s, ANC_TYPE::ANC_SE);
-			if (static_cast<ShapeText*>(s)->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f)) {
+			if (static_cast<ShapeText*>(s)->frame_fit(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f)) {
 				m_ustack_undo.push_back(u);
 				if (!flag) {
 					flag = true;
@@ -78,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「段落のそろえ」が選択された.
-	void MainPage::text_align_p_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::text_par_align_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_PARAGRAPH_ALIGNMENT val;
 		if (sender == rmfi_text_align_top() || sender == rmfi_text_align_top_2()) {
@@ -93,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			return;
 		}
-		if (ustack_push_set<UNDO_OP::TEXT_ALIGN_P>(val)) {
+		if (ustack_push_set<UNDO_OP::TEXT_PAR_ALIGN>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			sheet_draw();
@@ -102,7 +102,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 書体メニューの「段落のそろえ」に印をつける.
 	// val	段落のそろえ
-	void MainPage::text_align_p_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val)
+	void MainPage::text_par_align_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val)
 	{
 		rmfi_text_align_top().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 		rmfi_text_align_top_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);

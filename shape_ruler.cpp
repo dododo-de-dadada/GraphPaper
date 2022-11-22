@@ -293,7 +293,9 @@ namespace winrt::GraphPaper::implementation
 		m_grid_base(s_attr->m_grid_base),
 		m_font_family(s_attr->m_font_family),
 		m_font_size(min(s_attr->m_font_size, s_attr->m_grid_base + 1.0f))
-	{}
+	{
+		ShapeText::is_available_font(m_font_family);
+	}
 
 	static wchar_t* dt_read_name(DataReader const& dt_reader)
 	{
@@ -309,6 +311,7 @@ namespace winrt::GraphPaper::implementation
 		m_font_family(dt_read_name(dt_reader)),
 		m_font_size(dt_reader.ReadSingle())
 	{
+		ShapeText::is_available_font(m_font_family);
 	}
 
 	// 図形をデータライターに書き込む.
@@ -316,6 +319,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		ShapeRect::write(dt_writer);
 		dt_writer.WriteSingle(m_grid_base);
+#ifdef _DEBUG
+		if (!equal(m_font_family, L"Yu Gothic UI")) {
+			__debugbreak();
+		}
+#endif // _DEBUG
 		dt_write(m_font_family, dt_writer);
 		dt_writer.WriteSingle(m_dw_text_format->GetFontSize());
 	}

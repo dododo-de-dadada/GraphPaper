@@ -17,9 +17,9 @@ namespace winrt::GraphPaper::implementation
 	D2D1_COLOR_F ShapeText::s_text_selected_background{ ACCENT_COLOR };	// 文字範囲の背景色
 	D2D1_COLOR_F ShapeText::s_text_selected_foreground{ COLOR_TEXT_SELECTED };	// 文字範囲の文字色
 
-	// ヒットテストの計量を得る.
+	// ヒットテストの計量を作成する.
 	static void tx_create_test_metrics(IDWriteTextLayout* text_lay, const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt);
-	// ヒットテストの計量, 行の計量, 文字列選択の計量を得る.
+	// ヒットテストの計量, 行の計量, 文字列選択の計量を作成する.
 	static void tx_create_text_metrics(IDWriteTextLayout* text_lay, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, DWRITE_LINE_METRICS*& line_met, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met, const DWRITE_TEXT_RANGE& sele_rng);
 	// 文字列をデータライターに SVG として書き込む.
 	static void tx_dt_write_svg(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer);
@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を破棄する.
 	static void tx_relese_metrics(UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_metrics, DWRITE_LINE_METRICS*& line_metrics, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_metrics) noexcept;
 
-	// ヒットテストの計量を得る.
+	// ヒットテストの計量を作成する.
 	// text_lay	文字列レイアウト
 	// text_rng	文字範囲
 	// test_met	ヒットテストの計量
@@ -106,16 +106,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		tx_relese_metrics(test_cnt, test_met, line_met, sele_cnt, sele_met);
 		if (text_lay != nullptr) {
-			// ヒットテストの計量
+			// ヒットテストの計量を作成する.
 			tx_create_test_metrics(text_lay, { 0, text_len }, test_met, test_cnt);
 
-			// 行の計量
+			// 行の計量を作成する.
 			UINT32 line_cnt;
 			text_lay->GetLineMetrics(nullptr, 0, &line_cnt);
 			line_met = new DWRITE_LINE_METRICS[line_cnt];
 			text_lay->GetLineMetrics(line_met, line_cnt, &line_cnt);
 
-			// 選択された文字範囲の計量
+			// 選択された文字範囲の計量を作成する.
 			if (sele_rng.length > 0) {
 				tx_create_test_metrics(text_lay, sele_rng, sele_met, sele_cnt);
 			}
@@ -173,15 +173,11 @@ namespace winrt::GraphPaper::implementation
 	// 図形を破棄する.
 	ShapeText::~ShapeText(void)
 	{
-		if (m_dw_text_layout != nullptr) {
-			//m_dw_text_layout->Release();
-			m_dw_text_layout = nullptr;
-		}
 		tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
 
 		// 書体名を破棄する.
 		if (m_font_family != nullptr) {
-			// 複数のオブジェクトから参照されていない場合のみ, 書体名を破棄する.
+			// 有効な書体名に含まれてない書体名なら破棄する.
 			if (!is_available_font(m_font_family)) {
 				delete[] m_font_family;
 			}
@@ -192,12 +188,18 @@ namespace winrt::GraphPaper::implementation
 			delete[] m_text;
 			m_text = nullptr;
 		}
+
+		// 文字列レイアウトを破棄する.
+		if (m_dw_text_layout != nullptr) {
+			//m_dw_text_layout->Release();
+			m_dw_text_layout = nullptr;
+		}
 	}
 
 	// 枠の大きさを文字列に合わせる.
 	// g_len	方眼の大きさ (1 以上ならば方眼の大きさに合わせる)
 	// 戻り値	大きさが調整されたならば真.
-	bool ShapeText::adjust_bbox(const float g_len) noexcept
+	bool ShapeText::frame_fit(const float g_len) noexcept
 	{
 		// 文字列の大きさを計算し, 枠に格納する.
 		D2D1_POINT_2F t_box{ 0.0f, 0.0f };	// 枠
@@ -272,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 				// 文字の伸縮, 文字のそろえ, 段落のそろえを文字列レイアウトに格納する.
 				winrt::check_hresult(m_dw_text_layout->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len }));
 				winrt::check_hresult(m_dw_text_layout->SetTextAlignment(m_text_align_t));
-				winrt::check_hresult(m_dw_text_layout->SetParagraphAlignment(m_text_align_p));
+				winrt::check_hresult(m_dw_text_layout->SetParagraphAlignment(m_text_par_align));
 
 				// 行間を文字列レイアウトに格納する.
 				winrt::com_ptr<IDWriteTextLayout3> t3;
@@ -377,8 +379,8 @@ namespace winrt::GraphPaper::implementation
 
 				// 段落のそろえが変更されたなら文字列レイアウトに格納する.
 				DWRITE_PARAGRAPH_ALIGNMENT para_align = m_dw_text_layout->GetParagraphAlignment();
-				if (!equal(para_align, m_text_align_p)) {
-					winrt::check_hresult(m_dw_text_layout->SetParagraphAlignment(m_text_align_p));
+				if (!equal(para_align, m_text_par_align)) {
+					winrt::check_hresult(m_dw_text_layout->SetParagraphAlignment(m_text_par_align));
 					if (!updated) {
 						updated = true;
 					}
@@ -613,9 +615,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 段落のそろえを得る.
-	bool ShapeText::get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept
+	bool ShapeText::get_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept
 	{
-		val = m_text_align_p;
+		val = m_text_par_align;
 		return true;
 	}
 
@@ -713,17 +715,20 @@ namespace winrt::GraphPaper::implementation
 		return ShapeRect::in_area(area_min, area_max);
 	}
 
-	// 書体名が有効か判定し, 有効なら, 引数の書体名は破棄し, 有効な書体名の配列の要素と置き換える.
+	// 書体名が有効か判定する.
 	// font	書体名
 	// 戻り値	有効なら true
 	bool ShapeText::is_available_font(wchar_t*& font) noexcept
 	{
 		if (font) {
 			for (uint32_t i = 0; s_available_fonts[i]; i++) {
+				// 有効な書体名とアドレスが一致したなら true を返す.
 				if (font == s_available_fonts[i]) {
 					return true;
 				}
+				// アドレスは違うが有効な書体名と一致したなら,
 				if (wcscmp(font, s_available_fonts[i]) == 0) {
+					// 引数の書体名は破棄し, かわりに有効な書体名を引数に格納し, true を返す.
 					delete[] font;
 					font = s_available_fonts[i];
 					return true;
@@ -737,8 +742,9 @@ namespace winrt::GraphPaper::implementation
 	void ShapeText::release_available_fonts(void) noexcept
 	{
 		if (s_available_fonts != nullptr) {
-			for (uint32_t i = 0; s_available_fonts[i]; i++) {
+			for (uint32_t i = 0; s_available_fonts[i] != nullptr; i++) {
 				delete[] s_available_fonts[i];
+				s_available_fonts[i] = nullptr;
 			}
 			delete[] s_available_fonts;
 			s_available_fonts = nullptr;
@@ -873,10 +879,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を段落のそろえに格納する.
-	bool ShapeText::set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept
+	bool ShapeText::set_text_par_align(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept
 	{
-		if (m_text_align_p != val) {
-			m_text_align_p = val;
+		if (m_text_par_align != val) {
+			m_text_par_align = val;
 			return true;
 		}
 		return false;
@@ -939,9 +945,10 @@ namespace winrt::GraphPaper::implementation
 		m_text_padding(s_attr->m_text_padding),
 		m_text(text),
 		m_text_align_t(s_attr->m_text_align_t),
-		m_text_align_p(s_attr->m_text_align_p),
+		m_text_par_align(s_attr->m_text_par_align),
 		m_text_selected_range(DWRITE_TEXT_RANGE{ 0, 0 })
 	{
+		ShapeText::is_available_font(m_font_family);
 	}
 
 	// 図形をデータライターから読み込む.
@@ -956,7 +963,7 @@ namespace winrt::GraphPaper::implementation
 		m_font_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());
 		m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());
 		dt_read(m_text, dt_reader);
-		m_text_align_p = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
+		m_text_par_align = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_line_sp = dt_reader.ReadSingle();
 		dt_read(m_text_padding, dt_reader);
@@ -973,7 +980,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_style));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));
 		dt_write(m_text, dt_writer);
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_p));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_par_align));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
 		dt_writer.WriteSingle(m_text_line_sp);
 		dt_write(m_text_padding, dt_writer);

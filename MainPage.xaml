@@ -25,14 +25,27 @@
 			<x:String x:Key="glyph_photo2">&#xEB9F;</x:String>
 			<x:String x:Key="glyph_unit">&#xECC6;</x:String>
 			<x:String x:Key="glyph_color">&#xE790;</x:String>
+            <x:String x:Key="glyph_list">&#xE8FD;</x:String>
 			<!-- 曲線アイコンの描画コマンド -->
 			<x:String x:Key="data_bezi">
 				M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841 L15.310918,7.967942 C8.311178,14.40621 8.311178,0.405251 -0.032292,7.249824 Z
 			</x:String>
-			<!-- 破線アイコンの描画コマンド -->
+            <!-- 破線の形式アイコンの描画コマンド -->
+            <x:String x:Key="data_dash_style">
+                M   0,   2 L  16,   2 L  16,  3 L   0,  3 Z
+				M   0,   7 L   3,   7 L   3,8.5 L   0,8.5 Z
+				M 6.5,   7 L 9.5,   7 L 9.5,8.5 L 6.5,8.5 Z
+				M  13,   7 L  16,   7 L  16,8.5 L  13,8.5 Z
+				M   0,12.5 L   2,12.5 L   2, 14 L   0, 14 Z
+				M 3.5,12.5 L 5.5,12.5 L 5.5, 14 L 3.5, 14 Z
+				M   7,12.5 L   9,12.5 L   9, 14 L   7, 14 Z
+				M10.5,12.5 L12.5,12.5 L12.5, 14 L10.5, 14 Z
+				M  14,12.5 L  16,12.5 L  16, 14 L  14, 14 Z
+            </x:String>
+            <!-- 破線アイコンの描画コマンド -->
 			<x:String x:Key="data_dash">
-				M0,8 L3,8 L3,9.5 L0,9.5 Z
-				M6,8 L10,8 L10,9.5 L6,9.5 Z
+				M 0,8 L 3,8 L 3,9.5 L 0,9.5 Z
+				M 6,8 L10,8 L10,9.5 L 6,9.5 Z
 				M13,8 L16,8 L16,9.5 L13,9.5 Z
 			</x:String>
 			<!-- 点線アイコンの描画コマンド -->
@@ -50,13 +63,19 @@
 				M11.5, 8 L15.5, 8 L15.5, 9.5 L11.5, 9.5 Z
 			</x:String>
 			<!-- 二点破線アイコンの描画コマンド -->
-			<x:String x:Key="data_dash_dot_dot">
-				M   0, 8 L 2.5, 8 L 2.5, 9.5 L   0, 9.5 Z
+            <x:String x:Key="data_dash_dot_dot">
+                M   0, 8 L 2.5, 8 L 2.5, 9.5 L   0, 9.5 Z
 				M 5.5, 8 L 6.5, 8 L 6.5, 9.5 L 5.5, 9.5 Z
 				M 9.5, 8 L10.5, 8 L10.5, 9.5 L 9.5, 9.5 Z
 				M13.5, 8 L16.0, 8 L16.0, 9.5 L13.5, 9.5 Z
-			</x:String>
-			<!-- だ円アイコンの描画コマンド -->
+            </x:String>
+            <!-- 線枠の太さの描画コマンド -->
+            <x:String x:Key="data_stroke_width">
+                M 0,   2 L16,   2 L16, 3 L 0, 3 Z
+				M 0,   6 L16,   6 L16, 8 L 0, 8 Z
+				M 0,11 L16,11 L16,14 L 0,14 Z
+            </x:String>
+            <!-- だ円アイコンの描画コマンド -->
 			<x:String x:Key="data_elli">
 				M8,2 A8,6 0 0 1 8,14 A8,6 0 0 1 8,2 Z
 				M8,3 A7,5 0 0 1 8,13 A7,5 0 0 1 8,3 Z
@@ -162,7 +181,10 @@
 			<MenuFlyout x:Key="mf_stroke_menu">
 				<!-- 線枠の種類 -->
 				<MenuFlyoutSubItem x:Uid="mfsi_dash_style" Text="Style">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_dash_style_solid_2" x:Uid="rmfi_dash_style_solid" Click="dash_style_click" IsChecked="True" Text="Solid" GroupName="gn_dash_style_2">
+                    <MenuFlyoutSubItem.Icon>
+                        <PathIcon Data="{StaticResource data_dash_style}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutSubItem.Icon>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_dash_style_solid_2" x:Uid="rmfi_dash_style_solid" Click="dash_style_click" IsChecked="True" Text="Solid" GroupName="gn_dash_style_2">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_line}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -192,8 +214,12 @@
 				<!-- 破線の配置 -->
 				<MenuFlyoutItem x:Name="mfi_dash_patt_2" x:Uid="mfi_dash_patt" Click="dash_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
 				<!-- 線枠の太さ -->
-				<MenuFlyoutItem x:Uid="mfi_stroke_width" Click="stroke_width_click_async" Text="Width..." />
-				<MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
+                <MenuFlyoutItem x:Uid="mfi_stroke_width" Click="stroke_width_click_async" Text="Width..." >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_stroke_width}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_flat_2" x:Uid="rmfi_cap_style_flat" Click="cap_style_click" GroupName="gn_cap_style_2" IsChecked="true" Text="Flat" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_square_2" x:Uid="rmfi_cap_style_square" Click="cap_style_click" GroupName="gn_cap_style_2" Text="Square" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_round_2" x:Uid="rmfi_cap_style_round" Click="cap_style_click" GroupName="gn_cap_style_2" Text="Round" />
@@ -268,14 +294,14 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center_2" x:Uid="rmfi_text_align_center" Click="text_align_t_click" Text="Center" GroupName="gn_text_align_t_2" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just_2" x:Uid="rmfi_text_align_just" Click="text_align_t_click" Text="Justified" GroupName="gn_text_align_t_2" />
 				</MenuFlyoutSubItem>
-				<MenuFlyoutSubItem x:Uid="mfsi_text_align_p" Text="Paragraph Alignment">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top_2" x:Uid="rmfi_text_align_top" Click="text_align_p_click" IsChecked="True" Text="Top" GroupName="gn_text_align_p_2" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot_2" x:Uid="rmfi_text_align_bot" Click="text_align_p_click" Text="Bottom" GroupName="gn_text_align_p_2" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid_2" x:Uid="rmfi_text_align_mid" Click="text_align_p_click" Text="Middle" GroupName="gn_text_align_p_2" />
+				<MenuFlyoutSubItem x:Uid="mfsi_text_par_align" Text="Paragraph Alignment">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top_2" x:Uid="rmfi_text_align_top" Click="text_par_align_click" IsChecked="True" Text="Top" GroupName="gn_text_par_align_2" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot_2" x:Uid="rmfi_text_align_bot" Click="text_par_align_click" Text="Bottom" GroupName="gn_text_par_align_2" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid_2" x:Uid="rmfi_text_align_mid" Click="text_par_align_click" Text="Middle" GroupName="gn_text_par_align_2" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
 				<MenuFlyoutItem x:Uid="mfi_text_padding" Click="text_padding_click_async" Text="Margin..." />
-				<MenuFlyoutItem x:Uid="mfi_text_fit_frame_to" Click="text_fit_frame_to_click" Text="Fit Frame Size to Text" >
+				<MenuFlyoutItem x:Uid="mfi_text_frame_fit_text" Click="text_frame_fit_text_click" Text="Fit Frame Size to Text" >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_fit_page}"/>
 					</MenuFlyoutItem.Icon>
@@ -343,7 +369,7 @@
 			<!-- 画像コンテキストメニュー -->
 			<MenuFlyout x:Key="mf_image_menu">
 				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect_2" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
-				<MenuFlyoutItem x:Name="mfi_image_revert_origin_2" x:Uid="mfi_image_revert_origin" Click="image_revert_origin_click" Text="Resize to Original" />
+				<MenuFlyoutItem x:Name="mfi_image_revert_to_original_2" x:Uid="mfi_image_revert_to_original" Click="image_revert_to_original_click" Text="Revert to Original" />
 				<MenuFlyoutSeparator />
 				<MenuFlyoutItem x:Name="mfi_image_opac_2" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
 			</MenuFlyout>
@@ -386,15 +412,23 @@
 						<KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutItem x:Name="mfi_file_import_img" x:Uid="mfi_file_import_img" Click="file_import_img_click" Text="Import Image..." >
+				<MenuFlyoutItem x:Name="mfi_file_import_img_as_shape" x:Uid="mfi_file_import_img_as_shape" Click="file_import_img_as_shape_click" Text="Import Image as Shape..." >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_photo2}" />
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="I" Modifiers="Control" />
+                        <KeyboardAccelerator Key="I" Modifiers="Control,Shift" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutSeparator />
+                <MenuFlyoutItem x:Name="mfi_file_export_as_img" x:Uid="mfi_file_export_as_img" Click="file_export_sheet_as_img_click" Text="Export Sheet as Image..." >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_photo2}" />
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="E" Modifiers="Control,Shift" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator />
 				<MenuFlyoutSubItem x:Uid="mfsi_file_recent" Text="Recent Files">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_recent}" />
@@ -491,8 +525,11 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Name="mfi_summary_list" x:Uid="mfi_summary_list" Click="summary_list_click" Icon="List" IsEnabled="false" Text="List Summary" >
-					<MenuFlyoutItem.KeyboardAccelerators>
+                <MenuFlyoutItem x:Name="mfi_summary_list" x:Uid="mfi_summary_list" Click="summary_list_click" IsEnabled="false" Text="List Summary" >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_list}"/>
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="L" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
@@ -587,7 +624,10 @@
 			<muxc:MenuBarItem x:Uid="mbi_stroke_menu" AccessKey="S" Title="Stroke">
 			<!--<muxc:MenuBarItem x:Name="mbi_stroke_menu" x:Uid="mbi_stroke_menu" AccessKey="S" Title="Stroke">-->
 				<MenuFlyoutSubItem x:Uid="mfsi_dash_style" Text="Style">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_dash_style_solid" x:Uid="rmfi_dash_style_solid" Click="dash_style_click" IsChecked="True" Text="Solid" GroupName="gn_dash_style">
+                    <MenuFlyoutSubItem.Icon>
+                        <PathIcon Data="{StaticResource data_dash_style}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutSubItem.Icon>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_dash_style_solid" x:Uid="rmfi_dash_style_solid" Click="dash_style_click" IsChecked="True" Text="Solid" GroupName="gn_dash_style">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_line}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -615,8 +655,15 @@
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Name="mfi_dash_patt" x:Uid="mfi_dash_patt" Click="dash_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
-				<MenuFlyoutItem x:Name="mfi_stroke_width" x:Uid="mfi_stroke_width" Click="stroke_width_click_async" Text="Width..." />
-				<MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
+                <MenuFlyoutSubItem x:Uid="mfsi_stroke_width" Text="Width" >
+                    <MenuFlyoutSubItem.Icon>
+                        <PathIcon Data="{StaticResource data_stroke_width}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutSubItem.Icon>
+                    <muxc:RadioMenuFlyoutItem x:Uid="rmfi_stroke_width_1pt" Text="1 px" />
+                    <muxc:RadioMenuFlyoutItem x:Uid="rmfi_stroke_width_2pt" Text="2 px" />
+                    <MenuFlyoutItem x:Uid="mfi_stroke_width_other" Click="stroke_width_click_async" Text="Others..." />
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_flat" x:Uid="rmfi_cap_style_flat" Click="cap_style_click" GroupName="gn_cap_style" IsChecked="true" Text="Flat" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_square" x:Uid="rmfi_cap_style_square" Click="cap_style_click" GroupName="gn_cap_style" Text="Square" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_round" x:Uid="rmfi_cap_style_round" Click="cap_style_click" GroupName="gn_cap_style" Text="Round" />
@@ -682,14 +729,14 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="text_align_t_click" Text="Center" GroupName="gn_text_align_t" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just" x:Uid="rmfi_text_align_just" Click="text_align_t_click" Text="Justified" GroupName="gn_text_align_t" />
 				</MenuFlyoutSubItem>
-				<MenuFlyoutSubItem x:Uid="mfsi_text_align_p" Text="Paragraph Alignment">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="text_align_p_click" IsChecked="True" Text="Top" GroupName="gn_text_align_p" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot" x:Uid="rmfi_text_align_bot" Click="text_align_p_click" Text="Bottom" GroupName="gn_text_align_p" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid" x:Uid="rmfi_text_align_mid" Click="text_align_p_click" Text="Middle" GroupName="gn_text_align_p" />
+				<MenuFlyoutSubItem x:Uid="mfsi_text_par_align" Text="Paragraph Alignment">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="text_par_align_click" IsChecked="True" Text="Top" GroupName="gn_text_par_align" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot" x:Uid="rmfi_text_align_bot" Click="text_par_align_click" Text="Bottom" GroupName="gn_text_par_align" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid" x:Uid="rmfi_text_align_mid" Click="text_par_align_click" Text="Middle" GroupName="gn_text_par_align" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
 				<MenuFlyoutItem x:Uid="mfi_text_padding" Click="text_padding_click_async" Text="Margin..." />
-				<MenuFlyoutItem x:Name="mfi_text_fit_frame_to" x:Uid="mfi_text_fit_frame_to" Click="text_fit_frame_to_click" Text="Fit Frame Size to Text" >
+				<MenuFlyoutItem x:Name="mfi_text_frame_fit_text" x:Uid="mfi_text_frame_fit_text" Click="text_frame_fit_text_click" Text="Fit Frame Size to Text" >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_fit_page}"/>
 					</MenuFlyoutItem.Icon>
@@ -700,7 +747,7 @@
 			<!-- 画像メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_image_menu" AccessKey="I" Title="Image">
 				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
-				<MenuFlyoutItem x:Name="mfi_image_revert_origin" x:Uid="mfi_image_revert_origin" Click="image_revert_origin_click" Text="Resize to Original" />
+				<MenuFlyoutItem x:Name="mfi_image_revert_to_original" x:Uid="mfi_image_revert_to_original" Click="image_revert_to_original_click" Text="Resize to Original" />
 				<MenuFlyoutSeparator />
 				<MenuFlyoutItem x:Name="mfi_image_opac" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
 			</muxc:MenuBarItem>
@@ -729,8 +776,8 @@
 				<!-- 用紙メニュー -->
 				<MenuFlyoutItem x:Uid="mfi_sheet_size" Click="sheet_size_click_async" Text="Sheet Size..." />
 				<MenuFlyoutItem x:Uid="mfi_sheet_color" Click="sheet_color_click_async" Text="Sheet Color..." />
-				<MenuFlyoutItem x:Uid="mfi_sheet_pref_save" Click="sheet_pref_save_click_async" Text="Save Sheet preference" />
-				<MenuFlyoutItem x:Name="mfi_sheet_pref_reset" x:Uid="mfi_sheet_pref_reset" Click="sheet_pref_reset_click_async" Text="Reset Sheet preference" />
+				<MenuFlyoutItem x:Uid="mfi_sheet_prop_save" Click="sheet_prop_save_click_async" Text="Save Sheet properence" />
+				<MenuFlyoutItem x:Name="mfi_sheet_prop_reset" x:Uid="mfi_sheet_prop_reset" Click="sheet_prop_reset_click_async" Text="Reset Sheet properence" />
 				<MenuFlyoutSeparator />
 				<!-- 拡大率メニュー -->
 				<MenuFlyoutSubItem x:Uid="mfsi_sheet_zoom" Text="Zoom">
@@ -958,7 +1005,7 @@
 		<ContentDialog x:Name="cd_edit_text_dialog" x:Uid="cd_edit_text_dialog" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
 			<StackPanel>
 				<TextBox x:Name="tx_edit_text" AcceptsReturn="True" Height="128" HorizontalAlignment="Stretch" PlaceholderText="Text" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-				<CheckBox x:Name="ck_text_fit_frame_to" x:Uid="ck_text_fit_frame_to" Content="Fit Frame Size to Text" Margin="4,4" />
+				<CheckBox x:Name="ck_text_frame_fit_text" x:Uid="ck_text_frame_fit_text" Content="Fit Frame Size to Text" Margin="4,4" />
 			</StackPanel>
 		</ContentDialog>
 		<!-- 貼り付け確認ダイアログ -->

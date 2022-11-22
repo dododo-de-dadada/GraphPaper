@@ -29,8 +29,8 @@ namespace winrt::GraphPaper::implementation
 		tmfi_image_keep_aspect_2().IsChecked(keep_aspect);
 	}
 
-	// 画像メニューの「元の画像に戻す」が選択された.
-	void MainPage::image_revert_origin_click(IInspectable const&, RoutedEventArgs const&) noexcept
+	// 画像メニューの「原画像に戻す」が選択された.
+	void MainPage::image_revert_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		for (Shape* const s : m_main_sheet.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {

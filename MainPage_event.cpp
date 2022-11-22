@@ -61,13 +61,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 消去フラグの立つ図形をリストから削除する.
+	// ただし, 操作スタックで参照されている図形は削除されない.
 	// slist	図形リスト
 	// ustack	元に戻す操作スタック
 	// rstack	やり直す操作スタック
 	static void event_slist_reduce(SHAPE_LIST& slist, UNDO_STACK const& ustack, UNDO_STACK const& rstack) noexcept
 	{
 		// 消去フラグの立つ図形を消去リストに格納する.
-		SHAPE_LIST slist_del;
+		SHAPE_LIST slist_del;	// 消去リスト
 		for (const auto t : slist) {
 			// 図形の消去フラグがない,
 			// または図形が元に戻す操作スタックに含まれる,
@@ -146,7 +147,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 非選択の図形の頂点の中から, 選択された図形の頂点に最も近い頂点を見つけ, ２点間の差分を求める.
-	// s_list	図形リスト
+	// slist	図形リスト
 	// d_limit	制限距離 (これ以上離れた頂点は対象としない)
 	// v_vec	最も近い頂点間の差分
 	// 戻り値	見つかったなら true
@@ -265,17 +266,17 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::event_finish_creating_text_async(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec)
 	{
 		tx_edit_text().Text(L"");
-		ck_text_fit_frame_to().IsChecked(m_edit_text_frame);
+		ck_text_frame_fit_text().IsChecked(m_text_frame_fit_text);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit_text().Text().c_str());
 			auto s = new ShapeText(b_pos, b_vec, text, &m_main_sheet);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
-			if (m_edit_text_frame) {
-				s->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
+			if (m_text_frame_fit_text) {
+				s->frame_fit(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			}
-			m_edit_text_frame = ck_text_fit_frame_to().IsChecked().GetBoolean();
+			m_text_frame_fit_text = ck_text_frame_fit_text().IsChecked().GetBoolean();
 			event_slist_reduce(m_main_sheet.m_shape_list, m_ustack_undo, m_ustack_redo);
 			//unselect_all();
 			ustack_push_append(s);

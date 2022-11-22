@@ -165,7 +165,7 @@
     <value>用紙の大きさ</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_text_fit_frame_to.Content" xml:space="preserve">
+  <data name="ck_text_frame_fit_text.Content" xml:space="preserve">
     <value>枠の大きさを文字列に合わせる</value>
     <comment>CheckBox</comment>
   </data>
@@ -330,7 +330,7 @@
     <comment>MenuBarItem</comment>
   </data>
   <data name="mbi_stroke_menu.Title" xml:space="preserve">
-    <value>ストローク(S)</value>
+    <value>線枠(S)</value>
     <comment>MenuBarItem</comment>
   </data>
   <data name="mbi_menu_drawing.Title" xml:space="preserve">
@@ -466,15 +466,19 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_stroke_color.Text" xml:space="preserve">
-    <value>ストロークの色...</value>
+    <value>線枠の色...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_dash_patt.Text" xml:space="preserve">
     <value>破線の配置...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_stroke_width.Text" xml:space="preserve">
-    <value>太さ...</value>
+  <data name="mfsi_stroke_width.Text" xml:space="preserve">
+    <value>太さ</value>
+    <comment>MenuFlyoutSubItem</comment>
+  </data>
+  <data name="mfi_stroke_width_other.Text" xml:space="preserve">
+    <value>その他...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_summary_list.Text" xml:space="preserve">
@@ -537,7 +541,7 @@
     <value>種類</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_text_align_p.Text" xml:space="preserve">
+  <data name="mfsi_text_par_align.Text" xml:space="preserve">
     <value>段落の整列</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
@@ -753,7 +757,15 @@
     <value>画像ごとにファイル保存ピッカーが開きます.</value>
     <comment>String</comment>
   </data>
-  <data name="str_err_number" xml:space="preserve">
+  <data name="str_err_load" xml:space="preserve">
+    <value>設定の読み込みに失敗しました.</value>
+    <comment>String</comment>
+  </data>
+　<data name="str_err_save" xml:space="preserve">
+    <value>設定の保存に失敗しました.</value>
+    <comment>String</comment>
+  </data>
+	<data name="str_err_number" xml:space="preserve">
     <value>無効な数値です.</value>
     <comment>String</comment>
   </data>
@@ -815,7 +827,7 @@
     <comment>String</comment>
   </data>
   <data name="str_stroke_color" xml:space="preserve">
-    <value>ストロークの色</value>
+    <value>線枠の色</value>
     <comment>String</comment>
   </data>
   <data name="str_dash_patt" xml:space="preserve">
@@ -823,7 +835,7 @@
     <comment>String</comment>
   </data>
   <data name="str_stroke_width" xml:space="preserve">
-    <value>ストロークの太さ</value>
+    <value>線枠の太さ</value>
     <comment>String</comment>
   </data>
   <data name="str_join" xml:space="preserve">
@@ -942,11 +954,11 @@
     <value>図形として貼り付け</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="mfi_sheet_pref_reset.Text" xml:space="preserve">
+  <data name="mfi_sheet_prop_reset.Text" xml:space="preserve">
     <value>用紙設定をリセット</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_sheet_pref_save.Text" xml:space="preserve">
+  <data name="mfi_sheet_prop_save.Text" xml:space="preserve">
     <value>用紙設定を保存</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -974,7 +986,7 @@
     <value>文字列</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_fit_frame_to.Text" xml:space="preserve">
+  <data name="mfi_text_frame_fit_text.Text" xml:space="preserve">
     <value>枠の大きさを文字列に合わせる</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -1110,8 +1122,8 @@
     <value>不透明度...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_image_revert_origin.Text" xml:space="preserve">
-    <value>元の画像に戻す</value>
+  <data name="mfi_image_revert_to_original.Text" xml:space="preserve">
+    <value>原画像に戻す</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="str_image_opac" xml:space="preserve">

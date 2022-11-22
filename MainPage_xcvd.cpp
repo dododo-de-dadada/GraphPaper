@@ -225,13 +225,13 @@ namespace winrt::GraphPaper::implementation
 		mfi_ungroup().IsEnabled(exists_selected_group);
 		mfi_edit_text().IsEnabled(exists_selected_text);
 		mfi_find_text().IsEnabled(exists_text);
-		mfi_text_fit_frame_to().IsEnabled(exists_selected_text);
+		mfi_text_frame_fit_text().IsEnabled(exists_selected_text);
 		mfi_bring_forward().IsEnabled(enable_forward);
 		mfi_bring_to_front().IsEnabled(enable_forward);
 		mfi_send_to_back().IsEnabled(enable_backward);
 		mfi_send_backward().IsEnabled(enable_backward);
 		mfi_summary_list().IsEnabled(exists_undeleted);
-		mfi_image_revert_origin().IsEnabled(exists_selected_image);
+		mfi_image_revert_to_original().IsEnabled(exists_selected_image);
 		m_list_sel_cnt = selected_cnt;
 	}
 
@@ -312,7 +312,7 @@ namespace winrt::GraphPaper::implementation
 			debug_leak_cnt++;
 #endif
 			// ˜g‚Ì‘å‚«‚³‚ğ•¶š—ñ‚É‡‚í‚¹‚é.
-			t->adjust_bbox(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
+			t->frame_fit(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			// ƒpƒlƒ‹‚Ì’†‰›‚É‚È‚é‚æ‚¤¶ãˆÊ’u‚ğ‹‚ß‚é.
 			D2D1_POINT_2F pos{
 				static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - t->m_vec[0].x * 0.5),

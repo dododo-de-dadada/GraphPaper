@@ -488,7 +488,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体の太さを得る
 		virtual bool get_stroke_width(float& /*val*/) const noexcept { return false; }
 		// 段落のそろえを得る.
-		virtual bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& /*val*/) const noexcept { return false; }
+		virtual bool get_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT& /*val*/) const noexcept { return false; }
 		// 文字列のそろえを得る.
 		virtual bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& /*val*/) const noexcept { return false; }
 		// 文字列を得る.
@@ -574,7 +574,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		virtual bool set_stroke_width(const float /*val*/) noexcept { return false; }
 		// 値を段落のそろえに格納する.
-		virtual bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT /*val*/) noexcept { return false; }
+		virtual bool set_text_par_align(const DWRITE_PARAGRAPH_ALIGNMENT /*val*/) noexcept { return false; }
 		// 値を文字列のそろえに格納する.
 		virtual bool set_text_align_t(const DWRITE_TEXT_ALIGNMENT /*val*/) noexcept { return false; }
 		// 値を文字列に格納する.
@@ -660,7 +660,7 @@ namespace winrt::GraphPaper::implementation
 		bool in_area(const D2D1_POINT_2F /*area_min*/, const D2D1_POINT_2F /*area_max*/) const noexcept final override;
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F val) noexcept final override;
-		// 元の画像に戻す.
+		// 原画像に戻す.
 		void revert(void) noexcept;
 		// 値を画像の不透明度に格納する.
 		bool set_image_opacity(const float val) noexcept final override;
@@ -716,7 +716,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 文字列
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
-		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
+		DWRITE_PARAGRAPH_ALIGNMENT m_text_par_align = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
 		D2D1_SIZE_F m_text_padding{ TEXT_MARGIN_DEFVAL };	// 文字列の左右と上下の余白
 
@@ -815,7 +815,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体の太さを得る
 		bool get_stroke_width(float& val) const noexcept final override;
 		// 段落のそろえを得る.
-		bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept final override;
+		bool get_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept final override;
 		// 文字列のそろえを得る.
 		bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& val) const noexcept final override;
 		// 行間を得る.
@@ -881,7 +881,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		bool set_stroke_width(const float val) noexcept final override;
 		// 値を段落のそろえに格納する.
-		bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept final override;
+		bool set_text_par_align(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept final override;
 		// 値を文字列のそろえに格納する.
 		bool set_text_align_t(const DWRITE_TEXT_ALIGNMENT val) noexcept final override;
 		// 値を行間に格納する.
@@ -1351,7 +1351,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		wchar_t* m_text = nullptr;	// 文字列
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
-		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_p = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落のそろえ
+		DWRITE_PARAGRAPH_ALIGNMENT m_text_par_align = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落のそろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字のそろえ
 		D2D1_SIZE_F m_text_padding{ TEXT_MARGIN_DEFVAL };	// 文字列の上下と左右の余白
 		DWRITE_TEXT_RANGE m_text_selected_range{ 0, 0 };	// 選択された文字範囲
@@ -1364,12 +1364,6 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_HIT_TEST_METRICS* m_dw_test_metrics = nullptr;	// 位置の計量
 		winrt::com_ptr<IDWriteTextLayout> m_dw_text_layout{ nullptr };	// 文字列レイアウト
 
-		// 有効な書体名から要素を得る.
-		static wchar_t* get_available_font(const uint32_t i) noexcept
-		{
-			return s_available_fonts[i];
-		}
-
 		//------------------------------
 		// shape_text.cpp
 		// 文字列図形
@@ -1378,7 +1372,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapeText(void);
 		// 枠の大きさを文字列に合わせる.
-		bool adjust_bbox(const float g_len) noexcept;
+		bool frame_fit(const float g_len) noexcept;
 		// 図形を表示する.
 		void draw(ShapeSheet const& sh) final override;
 		// 書体の色を得る.
@@ -1394,7 +1388,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体の太さを得る.
 		bool get_font_weight(DWRITE_FONT_WEIGHT& val) const noexcept final override;
 		// 段落のそろえを得る.
-		bool get_text_align_p(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept final override;
+		bool get_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept final override;
 		// 文字列のそろえを得る.
 		bool get_text_align_t(DWRITE_TEXT_ALIGNMENT& val) const noexcept final override;
 		// 文字列を得る.
@@ -1428,7 +1422,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		bool set_font_weight(const DWRITE_FONT_WEIGHT val) noexcept final override;
 		// 値を段落のそろえに格納する.
-		bool set_text_align_p(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept final override;
+		bool set_text_par_align(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept final override;
 		// 値を文字列のそろえに格納する.
 		bool set_text_align_t(const DWRITE_TEXT_ALIGNMENT val) noexcept final override;
 		// 値を文字列に格納する.

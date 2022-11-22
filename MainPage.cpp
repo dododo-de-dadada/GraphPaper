@@ -181,6 +181,13 @@ namespace winrt::GraphPaper::implementation
 		if (m_ustack_is_changed && !co_await ask_for_conf_async()) {
 			co_return;
 		}
+		while (!m_save_mutex.try_lock()) {
+#ifdef _DEBUG
+			__debugbreak();
+#endif // _DEBUG
+		}
+		m_save_mutex.unlock();
+
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_close_click(nullptr, nullptr);
@@ -270,8 +277,8 @@ namespace winrt::GraphPaper::implementation
 		// アプリケーションの中断・継続などのイベントハンドラーを設定する.
 		{
 			auto const& app{ Application::Current() };
-			m_token_suspending = app.Suspending({ this, &MainPage::app_suspending_async });
 			m_token_resuming = app.Resuming({ this, &MainPage::app_resuming_async });
+			m_token_suspending = app.Suspending({ this, &MainPage::app_suspending_async });
 			m_token_entered_background = app.EnteredBackground({ this, &MainPage::app_entered_background });
 			m_token_leaving_background = app.LeavingBackground({ this, &MainPage::app_leaving_background });
 		}
@@ -419,7 +426,7 @@ namespace winrt::GraphPaper::implementation
 			//}
 		}
 
-		if (co_await sheet_pref_load_async() != S_OK) {
+		if (co_await sheet_prop_load_async() != S_OK) {
 			// 読み込みに失敗した場合,
 			sheet_init();
 			m_len_unit = LEN_UNIT::PIXEL;
