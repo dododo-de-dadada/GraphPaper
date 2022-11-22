@@ -184,6 +184,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠メニューの「太さ...」が選択された.
+	void MainPage::stroke_width_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+	}
+
+	// 線枠メニューの「太さ...」が選択された.
 	IAsyncAction MainPage::stroke_width_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;

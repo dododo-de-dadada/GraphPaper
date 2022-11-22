@@ -822,6 +822,8 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「色」が選択された.
 		winrt::Windows::Foundation::IAsyncAction stroke_color_click_async(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 線枠メニューの「太さ」が選択された.
+		void stroke_width_click(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
+		// 線枠メニューの「太さ」が選択された.
 		winrt::Windows::Foundation::IAsyncAction stroke_width_click_async(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template<UNDO_OP U, int S> void stroke_slider_set_header(const float val);
