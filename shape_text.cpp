@@ -196,7 +196,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// ˜g‚Ì‘å‚«‚³‚ğ•¶š—ñ‚É‡‚í‚¹‚é.
+	// ˜g‚ğ•¶š—ñ‚É‡‚í‚¹‚é.
 	// g_len	•ûŠá‚Ì‘å‚«‚³ (1 ˆÈã‚È‚ç‚Î•ûŠá‚Ì‘å‚«‚³‚É‡‚í‚¹‚é)
 	// –ß‚è’l	‘å‚«‚³‚ª’²®‚³‚ê‚½‚È‚ç‚Î^.
 	bool ShapeText::frame_fit(const float g_len) noexcept

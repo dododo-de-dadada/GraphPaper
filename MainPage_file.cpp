@@ -650,7 +650,6 @@ namespace winrt::GraphPaper::implementation
 	//IAsyncOperation<winrt::hresult> MainPage::file_save_as_async(const bool svg_allowed) noexcept
 	IAsyncAction MainPage::file_save_as_async(const bool svg_allowed) noexcept
 	{
-		m_save_mutex.lock();
 		HRESULT ok = E_FAIL;
 		// コルーチンの開始時のスレッドコンテキストを保存する.
 		//winrt::apartment_context context;
@@ -740,9 +739,6 @@ namespace winrt::GraphPaper::implementation
 		//co_await winrt::resume_foreground(Dispatcher());
 		// スレッドコンテキストを復元する.
 		//co_await context;
-		// 結果を返し終了する.
-		//co_return ok;
-		m_save_mutex.unlock();
 	}
 
 	//-------------------------------
@@ -770,8 +766,6 @@ namespace winrt::GraphPaper::implementation
 			co_await file_save_as_async(!SVG_ALLOWED);
 		}
 		else {
-			m_save_mutex.lock();
-
 			HRESULT ok = E_FAIL;	// 結果
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
 			const CoreCursor& prev_cur = file_wait_cursor();	// 前のカーソル
@@ -786,7 +780,6 @@ namespace winrt::GraphPaper::implementation
 				// 「ファイルに書き込めません」メッセージダイアログを表示する.
 				message_show(ICON_ALERT, ERR_WRITE, m_file_token_mru);
 			}
-			m_save_mutex.unlock();
 		}
 	}
 
@@ -1059,6 +1052,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		// スレッドをバックグラウンドに変える.
 		co_await winrt::resume_background();
+		m_save_mutex.lock();
 		try {
 			// ファイル更新の遅延を設定する.
 			// ストレージファイル->ランダムアクセスストリーム->データライターを作成する.
@@ -1128,6 +1122,7 @@ namespace winrt::GraphPaper::implementation
 		catch (winrt::hresult_error const& err) {
 			ok = err.code();
 		}
+		m_save_mutex.unlock();
 		// 結果が S_OK 以外か判定する.
 		if (ok != S_OK) {
 			// スレッドをメインページの UI スレッドに変える.
@@ -1302,6 +1297,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		// スレッドをバックグラウンドに変える.
 		co_await winrt::resume_background();
+		m_save_mutex.lock();
 		try {
 			// ファイル更新の遅延を設定する.
 			CachedFileManager::DeferUpdates(s_file);
@@ -1368,6 +1364,7 @@ namespace winrt::GraphPaper::implementation
 			// エラーが発生した場合, エラーコードを結果に格納する.
 			ok = e.code();
 		}
+		m_save_mutex.unlock();
 		// 結果が S_OK 以外か判定する.
 		if (ok != S_OK) {
 			// スレッドをメインページの UI スレッドに変える.

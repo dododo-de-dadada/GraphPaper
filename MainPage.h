@@ -205,7 +205,7 @@ namespace winrt::GraphPaper::implementation
 		std::mutex m_save_mutex;	// 非同期処理中に終了しない
 
 		// 文字列の編集, 検索と置換
-		bool m_text_frame_fit_text = false;	// 枠の大きさを文字列に合わせる
+		bool m_text_frame_fit_text = false;	// 枠を文字列に合わせる
 		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
 		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
 		bool m_find_text_case = false;	// 英文字の区別するか
@@ -829,6 +829,7 @@ namespace winrt::GraphPaper::implementation
 		template<UNDO_OP U, int S> void stroke_slider_set_header(const float val);
 		// スライダーの値が変更された.
 		template<UNDO_OP U, int S> void stroke_slider_val_changed(IInspectable const&, winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
+		void stroke_width_is_checked(const float s_width) noexcept;
 
 		//-------------------------------
 		// MainPage_summary.cpp
@@ -959,9 +960,9 @@ namespace winrt::GraphPaper::implementation
 		void ustack_push_move(const D2D1_POINT_2F d_vec, const bool all = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void ustack_push_null(void);
-		// 図形をグループから削除して, その操作をスタックに積む.
+		// 図形をグループから取り去り, その操作をスタックに積む.
 		void ustack_push_remove(Shape* const g, Shape* const s);
-		// 図形を削除して, その操作をスタックに積む.
+		// 図形を取り去り, その操作をスタックに積む.
 		void ustack_push_remove(Shape* const s);
 		// 図形の選択を反転して, その操作をスタックに積む.
 		void ustack_push_select(Shape* const s);

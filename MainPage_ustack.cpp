@@ -323,6 +323,12 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.get_arrow_style(val);
 			arrow_style_is_checked(val);
 		}
+		else if (u_type == typeid(UndoValue<UNDO_OP::FONT_STYLE>)) {
+			// 書体メニューの「字体」に印をつける.
+			DWRITE_FONT_STYLE val;
+			m_main_sheet.get_font_style(val);
+			font_style_is_checked(val);
+		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::GRID_BASE>)) {
 			// 方眼の大きさをステータスバーに格納する.
 			status_bar_set_grid();
@@ -337,12 +343,6 @@ namespace winrt::GraphPaper::implementation
 			GRID_SHOW val;
 			m_main_sheet.get_grid_show(val);
 			grid_show_is_checked(val);
-		}
-		else if (u_type == typeid(UndoValue<UNDO_OP::FONT_STYLE>)) {
-			// 書体メニューの「字体」に印をつける.
-			DWRITE_FONT_STYLE val;
-			m_main_sheet.get_font_style(val);
-			font_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::SHEET_SIZE>)) {
 			// 用紙の大きさをステータスバーに格納する.
@@ -367,6 +367,11 @@ namespace winrt::GraphPaper::implementation
 			D2D1_LINE_JOIN val;
 			m_main_sheet.get_join_style(val);
 			join_style_is_checked(val);
+		}
+		else if (u_type == typeid(UndoValue<UNDO_OP::STROKE_WIDTH>)) {
+			float val;
+			m_main_sheet.get_stroke_width(val);
+			stroke_width_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT val;
@@ -489,16 +494,16 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_ucnt--;
 	}
 
-	// 図形をグループから削除して, その操作をスタックに積む.
+	// 図形をグループから取り去り, その操作をスタックに積む.
 	// g	グループ図形
-	// s	削除する図形
+	// s	取り去る図形
 	void MainPage::ustack_push_remove(Shape* g, Shape* s)
 	{
 		m_ustack_undo.push_back(new UndoRemoveG(g, s));
 	}
 
-	// 図形を削除して, その操作をスタックに積む.
-	// s	削除する図形
+	// 図形を取り去り, その操作をスタックに積む.
+	// s	取り去る図形
 	void MainPage::ustack_push_remove(Shape* s)
 	{
 		m_ustack_undo.push_back(new UndoRemove(s));

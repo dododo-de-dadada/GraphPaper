@@ -75,14 +75,18 @@ namespace winrt::GraphPaper::implementation
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {
 					summary_insert_at(s, i++);
+					summary_select(s);
 				}
+				// グループ図形から先頭の図形を取り去り,
+				// 図形リスト中のそのグループ図形の直前に,
+				// 取り去った図形を挿入する.
 				ustack_push_remove(g, s);
 				ustack_push_insert(s, g);
+				ustack_push_select(s);
 				//t = s;
 			}
 			ustack_push_remove(g);
 		}
-		g_list.clear();
 		ustack_push_null();
 		xcvd_is_enabled();
 		sheet_draw();

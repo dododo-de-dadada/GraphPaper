@@ -79,27 +79,39 @@ namespace winrt::GraphPaper::implementation
 		ARROW_STYLE a_style;
 		m_main_sheet.get_arrow_style(a_style);
 		arrow_style_is_checked(a_style);
+
 		DWRITE_FONT_STYLE f_style;
 		m_main_sheet.get_font_style(f_style);
 		font_style_is_checked(f_style);
+
 		D2D1_DASH_STYLE s_style;
 		m_main_sheet.get_dash_style(s_style);
 		dash_style_is_checked(s_style);
+
 		D2D1_LINE_JOIN j_style;
 		m_main_sheet.get_join_style(j_style);
 		join_style_is_checked(j_style);
+
+		float s_width;
+		m_main_sheet.get_stroke_width(s_width);
+		stroke_width_is_checked(s_width);
+
 		DWRITE_TEXT_ALIGNMENT t_align_t;
 		m_main_sheet.get_text_align_t(t_align_t);
 		text_align_t_is_checked(t_align_t);
+
 		DWRITE_PARAGRAPH_ALIGNMENT t_par_align;
 		m_main_sheet.get_text_par_align(t_par_align);
 		text_par_align_is_checked(t_par_align);
+
 		GRID_EMPH g_emph;
 		m_main_sheet.get_grid_emph(g_emph);
 		grid_emph_is_checked(g_emph);
+
 		GRID_SHOW g_show;
 		m_main_sheet.get_grid_show(g_show);
 		grid_show_is_checked(g_show);
+
 		bool g_snap;
 		m_main_sheet.get_grid_snap(g_snap);
 		tmfi_grid_snap().IsChecked(g_snap);

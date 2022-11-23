@@ -166,7 +166,7 @@
     <comment>ContentDialog</comment>
   </data>
   <data name="ck_text_frame_fit_text.Content" xml:space="preserve">
-    <value>枠の大きさを文字列に合わせる</value>
+    <value>枠を文字列に合わせる</value>
     <comment>CheckBox</comment>
   </data>
   <data name="ck_find_text_case.Content" xml:space="preserve">
@@ -477,9 +477,9 @@
     <value>太さ</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_stroke_width_other.Text" xml:space="preserve">
+  <data name="rmfi_stroke_width_other.Text" xml:space="preserve">
     <value>その他...</value>
-    <comment>MenuFlyoutItem</comment>
+    <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfi_summary_list.Text" xml:space="preserve">
     <value>一覧を表示</value>
@@ -761,11 +761,11 @@
     <value>設定の読み込みに失敗しました.</value>
     <comment>String</comment>
   </data>
-　<data name="str_err_save" xml:space="preserve">
+  <data name="str_err_save" xml:space="preserve">
     <value>設定の保存に失敗しました.</value>
     <comment>String</comment>
   </data>
-	<data name="str_err_number" xml:space="preserve">
+  <data name="str_err_number" xml:space="preserve">
     <value>無効な数値です.</value>
     <comment>String</comment>
   </data>
@@ -987,7 +987,7 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfi_text_frame_fit_text.Text" xml:space="preserve">
-    <value>枠の大きさを文字列に合わせる</value>
+    <value>枠を文字列に合わせる</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_deca.Text" xml:space="preserve">

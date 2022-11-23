@@ -183,12 +183,35 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「太さ...」が選択された.
+	// 線枠メニューの「太さ」のサブ項目が選択された.
 	void MainPage::stroke_width_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
+		float s_width;
+		if (sender == rmfi_stroke_width_1px()) {
+			s_width = 1.0f;
+		}
+		else if (sender == rmfi_stroke_width_2px()) {
+			s_width = 2.0f;
+		}
+		else {
+			return;
+		}
+		stroke_width_is_checked(s_width);
+		if (ustack_push_set<UNDO_OP::STROKE_WIDTH>(s_width)) {
+			ustack_push_null();
+			xcvd_is_enabled();
+			sheet_draw();
+		}
 	}
 
-	// 線枠メニューの「太さ...」が選択された.
+	void MainPage::stroke_width_is_checked(const float s_width) noexcept
+	{
+		rmfi_stroke_width_1px().IsChecked(s_width == 1.0f);
+		rmfi_stroke_width_2px().IsChecked(s_width == 2.0f);
+		rmfi_stroke_width_3px().IsChecked(s_width == 3.0f);
+	}
+
+	// 線枠メニューの「太さ」が選択された.
 	IAsyncAction MainPage::stroke_width_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
@@ -217,6 +240,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
 			m_prop_sheet.m_shape_list.back()->get_stroke_width(samp_val);
+			stroke_width_is_checked(samp_val);
 			if (ustack_push_set<UNDO_OP::STROKE_WIDTH>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();

@@ -141,7 +141,7 @@ namespace winrt::GraphPaper::implementation
 			if (summary_is_visible()) {
 				summary_remove(s);
 			}
-			// 図形を削除し, その操作をスタックに積む.
+			// 図形を取り去り, その操作をスタックに積む.
 			ustack_push_remove(s);
 		}
 		ustack_push_null();
@@ -311,7 +311,7 @@ namespace winrt::GraphPaper::implementation
 #if (_DEBUG)
 			debug_leak_cnt++;
 #endif
-			// 枠の大きさを文字列に合わせる.
+			// 枠を文字列に合わせる.
 			t->frame_fit(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
 			// パネルの中央になるよう左上位置を求める.
 			D2D1_POINT_2F pos{

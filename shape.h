@@ -712,7 +712,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// ü˜g‚Ì‚Â‚È‚¬
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// ’[‚ÌŒ`®
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// ü˜g‚ÌF
-		float m_stroke_width = 1.0;	// ü˜g‚Ì‘¾‚³
+		float m_stroke_width = 1.0f;	// ü˜g‚Ì‘¾‚³
 
 		// •¶š—ñ
 		float m_text_line_sp = 0.0f;	// sŠÔ (DIPs 96dpiŒÅ’è)
@@ -1371,7 +1371,7 @@ namespace winrt::GraphPaper::implementation
 
 		// }Œ`‚ğ”jŠü‚·‚é.
 		~ShapeText(void);
-		// ˜g‚Ì‘å‚«‚³‚ğ•¶š—ñ‚É‡‚í‚¹‚é.
+		// ˜g‚ğ•¶š—ñ‚É‡‚í‚¹‚é.
 		bool frame_fit(const float g_len) noexcept;
 		// }Œ`‚ğ•\¦‚·‚é.
 		void draw(ShapeSheet const& sh) final override;

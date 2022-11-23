@@ -255,6 +255,7 @@ namespace winrt::GraphPaper::implementation
 
 		ustack_clear();
 		slist_clear(m_main_sheet.m_shape_list);
+		slist_clear(m_prop_sheet.m_shape_list);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
 			message_show(ICON_ALERT, DEBUG_MSG, {});
