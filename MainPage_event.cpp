@@ -205,8 +205,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (sender == scp_sheet_panel()) {
 			auto const& c_win = Window::Current().CoreWindow();
-			auto const& cur = c_win.PointerCursor();
-			if (cur.Type() != CC_ARROW.Type()) {
+			auto const& p_cur = c_win.PointerCursor();
+			if (p_cur.Type() != CC_ARROW.Type()) {
 				c_win.PointerCursor(CC_ARROW);
 			}
 		}
@@ -890,30 +890,39 @@ namespace winrt::GraphPaper::implementation
 	// コンテキストメニューを表示する.
 	void MainPage::event_show_context_menu(void)
 	{
+		using winrt::Windows::UI::Xaml::Controls::Primitives::FlyoutBase;
 		// コンテキストメニューを解放する.
-		scp_sheet_panel().ContextFlyout(nullptr);
+		//scp_sheet_panel().ContextFlyout(nullptr);
+		ContextFlyout(nullptr);
 		// 押された図形がヌル, または押された図形の部位が外側か判定する.
 		if (m_event_shape_pressed == nullptr || m_event_anc_pressed == ANC_TYPE::ANC_SHEET) {
 			if (m_menu_sheet != nullptr) {
-				scp_sheet_panel().ContextFlyout(m_menu_sheet);
+				auto a = m_menu_sheet.ShowMode();
+				//scp_sheet_panel().ContextFlyout(m_menu_sheet);
+				ContextFlyout(m_menu_sheet);
+				//FlyoutBase::SetAttachedFlyout(*this, m_menu_sheet);
+				//FlyoutBase::ShowAttachedFlyout(*this);
 			}
 		}
 		// 押された図形がグループか判定する.
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeGroup)) {
 			if (m_menu_ungroup != nullptr) {
-				scp_sheet_panel().ContextFlyout(m_menu_ungroup);
+				//scp_sheet_panel().ContextFlyout(m_menu_ungroup);
+				ContextFlyout(m_menu_ungroup);
 			}
 		}
 		// 押された図形が定規か判定する.
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeRuler)) {
 			if (m_menu_ruler != nullptr) {
-				scp_sheet_panel().ContextFlyout(m_menu_ruler);
+				//scp_sheet_panel().ContextFlyout(m_menu_ruler);
+				ContextFlyout(m_menu_ruler);
 			}
 		}
 		// 押された図形が定規か判定する.
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeImage)) {
 			if (m_menu_image != nullptr) {
-				scp_sheet_panel().ContextFlyout(m_menu_image);
+				//scp_sheet_panel().ContextFlyout(m_menu_image);
+				ContextFlyout(m_menu_image);
 			}
 		}
 		else {
@@ -923,19 +932,22 @@ namespace winrt::GraphPaper::implementation
 			// 押された図形の部位が内側か判定する.
 			if (m_event_anc_pressed == ANC_TYPE::ANC_FILL) {
 				if (m_menu_fill != nullptr) {
-					scp_sheet_panel().ContextFlyout(m_menu_fill);
+					//scp_sheet_panel().ContextFlyout(m_menu_fill);
+					ContextFlyout(m_menu_fill);
 				}
 			}
 			// 押された図形の部位が文字列か判定する.
 			else if (m_event_anc_pressed == ANC_TYPE::ANC_TEXT) {
 				if (m_menu_font != nullptr) {
-					scp_sheet_panel().ContextFlyout(m_menu_font);
+					//scp_sheet_panel().ContextFlyout(m_menu_font);
+					ContextFlyout(m_menu_font);
 				}
 			}
 			// 押された図形の部位が線枠か判定する.
 			else if (m_event_anc_pressed == ANC_TYPE::ANC_STROKE) {
 				if (m_menu_stroke != nullptr) {
-					scp_sheet_panel().ContextFlyout(m_menu_stroke);
+					//scp_sheet_panel().ContextFlyout(m_menu_stroke);
+					ContextFlyout(m_menu_stroke);
 				}
 			}
 		}

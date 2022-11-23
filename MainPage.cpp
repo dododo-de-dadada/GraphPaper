@@ -155,8 +155,17 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	IAsyncOperation<bool> MainPage::ask_for_conf_async(void)
 	{
+		// コルーチンの開始時のスレッドコンテキストを保存する.
+		winrt::apartment_context context;
+		// スレッドをメインページの UI スレッドに変える.
+		co_await winrt::resume_foreground(Dispatcher());
+
 		// 確認ダイアログを表示し, 応答を得る.
 		const ContentDialogResult d_res = co_await cd_conf_save_dialog().ShowAsync();
+
+		// スレッドコンテキストを復元する.
+		co_await context;
+
 		// 応答が「キャンセル」か判定する.
 		if (d_res == ContentDialogResult::None) {
 			co_return false;
@@ -177,6 +186,35 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	IAsyncAction MainPage::exit_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		if (m_menu_fill.IsOpen()) {
+			m_menu_fill.Hide();
+			ContextFlyout(nullptr);
+		}
+		else if (m_menu_font.IsOpen()) {
+			m_menu_font.Hide();
+			ContextFlyout(nullptr);
+		}
+		else if (m_menu_image.IsOpen()) {
+			m_menu_image.Hide();
+			ContextFlyout(nullptr);
+		}
+		else if (m_menu_ruler.IsOpen()) {
+			m_menu_ruler.Hide();
+			ContextFlyout(nullptr);
+		}
+		else if (m_menu_sheet.IsOpen()) {
+			m_menu_sheet.Hide();
+			ContextFlyout(nullptr);
+		}
+		else if (m_menu_stroke.IsOpen()) {
+			m_menu_stroke.Hide();
+			ContextFlyout(nullptr);
+		}
+		else if (m_menu_ungroup.IsOpen()) {
+			m_menu_ungroup.Hide();
+			ContextFlyout(nullptr);
+		}
+
 		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
 		if (m_ustack_is_changed && !co_await ask_for_conf_async()) {
 			co_return;
