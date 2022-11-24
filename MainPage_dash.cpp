@@ -125,26 +125,26 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::dash_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_DASH_STYLE d_style;
-		if (sender == rmfi_dash_style_solid() || sender == rmfi_dash_style_solid_2()) {
+		if (sender == rmfi_dash_style_solid()) {
 			d_style = D2D1_DASH_STYLE_SOLID;
 		}
-		else if (sender == rmfi_dash_style_dash() || sender == rmfi_dash_style_dash_2()) {
+		else if (sender == rmfi_dash_style_dash()) {
 			d_style = D2D1_DASH_STYLE_DASH;
 		}
-		else if (sender == rmfi_dash_style_dot() || sender == rmfi_dash_style_dot_2()) {
+		else if (sender == rmfi_dash_style_dot()) {
 			d_style = D2D1_DASH_STYLE_DOT;
 		}
-		else if (sender == rmfi_dash_style_dash_dot() || sender == rmfi_dash_style_dash_dot_2()) {
+		else if (sender == rmfi_dash_style_dash_dot()) {
 			d_style = D2D1_DASH_STYLE_DASH_DOT;
 		}
-		else if (sender == rmfi_dash_style_dash_dot_dot() || sender == rmfi_dash_style_dash_dot_dot_2()) {
+		else if (sender == rmfi_dash_style_dash_dot_dot()) {
 			d_style = D2D1_DASH_STYLE_DASH_DOT_DOT;
 		}
 		else {
 			return;
 		}
 		mfi_dash_patt().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
-		mfi_dash_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
+		//mfi_dash_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
 		if (ustack_push_set<UNDO_OP::DASH_STYLE>(d_style)) {
 			ustack_push_null();
 			xcvd_is_enabled();
@@ -157,18 +157,18 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::dash_style_is_checked(const D2D1_DASH_STYLE d_style)
 	{
 		rmfi_dash_style_solid().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-		rmfi_dash_style_solid_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		//rmfi_dash_style_solid_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 		rmfi_dash_style_dash().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
-		rmfi_dash_style_dash_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
+		//rmfi_dash_style_dash_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH);
 		rmfi_dash_style_dash_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
-		rmfi_dash_style_dash_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
+		//rmfi_dash_style_dash_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT);
 		rmfi_dash_style_dash_dot_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
-		rmfi_dash_style_dash_dot_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
+		//rmfi_dash_style_dash_dot_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT);
 		rmfi_dash_style_dot().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
-		rmfi_dash_style_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
+		//rmfi_dash_style_dot_2().IsChecked(d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT);
 
 		mfi_dash_patt().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-		mfi_dash_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+		//mfi_dash_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
 	}
 
 	// 値をスライダーのヘッダーに格納する.

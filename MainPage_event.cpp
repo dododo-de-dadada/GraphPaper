@@ -890,40 +890,40 @@ namespace winrt::GraphPaper::implementation
 	// コンテキストメニューを表示する.
 	void MainPage::event_show_context_menu(void)
 	{
-		using winrt::Windows::UI::Xaml::Controls::Primitives::FlyoutBase;
+		using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
 		// コンテキストメニューを解放する.
-		//scp_sheet_panel().ContextFlyout(nullptr);
 		ContextFlyout(nullptr);
 		// 押された図形がヌル, または押された図形の部位が外側か判定する.
 		if (m_event_shape_pressed == nullptr || m_event_anc_pressed == ANC_TYPE::ANC_SHEET) {
-			if (m_menu_sheet != nullptr) {
-				auto a = m_menu_sheet.ShowMode();
-				//scp_sheet_panel().ContextFlyout(m_menu_sheet);
-				ContextFlyout(m_menu_sheet);
-				//FlyoutBase::SetAttachedFlyout(*this, m_menu_sheet);
-				//FlyoutBase::ShowAttachedFlyout(*this);
+			if (m_menu_sheet == nullptr) {
+				m_menu_sheet = MenuFlyout();
+				for (const auto item : mbi_sheet().Items()) {
+					m_menu_sheet.Items().Append(item);
+				}
 			}
+			ContextFlyout(m_menu_sheet);
 		}
 		// 押された図形がグループか判定する.
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeGroup)) {
-			if (m_menu_ungroup != nullptr) {
-				//scp_sheet_panel().ContextFlyout(m_menu_ungroup);
-				ContextFlyout(m_menu_ungroup);
+			if (m_menu_ungroup == nullptr) {
+				m_menu_ungroup = MenuFlyout();
+				m_menu_sheet.Items().Append(mfi_ungroup());
 			}
+			ContextFlyout(m_menu_ungroup);
 		}
 		// 押された図形が定規か判定する.
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeRuler)) {
-			if (m_menu_ruler != nullptr) {
-				//scp_sheet_panel().ContextFlyout(m_menu_ruler);
-				ContextFlyout(m_menu_ruler);
-			}
+			ContextFlyout(m_menu_ruler);
 		}
 		// 押された図形が定規か判定する.
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeImage)) {
-			if (m_menu_image != nullptr) {
-				//scp_sheet_panel().ContextFlyout(m_menu_image);
-				ContextFlyout(m_menu_image);
+			if (m_menu_image == nullptr) {
+				m_menu_image = MenuFlyout();
+				for (const auto item : mbi_image().Items()) {
+					m_menu_image.Items().Append(item);
+				}
 			}
+			ContextFlyout(m_menu_image);
 		}
 		else {
 			// 押された図形の属性値を用紙に格納する.
@@ -931,24 +931,33 @@ namespace winrt::GraphPaper::implementation
 			sheet_attr_is_checked();
 			// 押された図形の部位が内側か判定する.
 			if (m_event_anc_pressed == ANC_TYPE::ANC_FILL) {
-				if (m_menu_fill != nullptr) {
-					//scp_sheet_panel().ContextFlyout(m_menu_fill);
-					ContextFlyout(m_menu_fill);
+				if (m_menu_fill == nullptr) {
+					m_menu_fill = MenuFlyout();
+					for (const auto item : mbi_fill().Items()) {
+						m_menu_fill.Items().Append(item);
+					}
 				}
+				ContextFlyout(m_menu_fill);
 			}
 			// 押された図形の部位が文字列か判定する.
 			else if (m_event_anc_pressed == ANC_TYPE::ANC_TEXT) {
-				if (m_menu_font != nullptr) {
-					//scp_sheet_panel().ContextFlyout(m_menu_font);
-					ContextFlyout(m_menu_font);
+				if (m_menu_font == nullptr) {
+					m_menu_font = MenuFlyout();
+					for (const auto item : mbi_font().Items()) {
+						m_menu_font.Items().Append(item);
+					}
 				}
+				ContextFlyout(m_menu_font);
 			}
 			// 押された図形の部位が線枠か判定する.
 			else if (m_event_anc_pressed == ANC_TYPE::ANC_STROKE) {
-				if (m_menu_stroke != nullptr) {
-					//scp_sheet_panel().ContextFlyout(m_menu_stroke);
-					ContextFlyout(m_menu_stroke);
+				if (m_menu_stroke == nullptr) {
+					m_menu_stroke = MenuFlyout();
+					for (const auto item : mbi_stroke().Items()) {
+						m_menu_stroke.Items().Append(item);
+					}
 				}
+				ContextFlyout(m_menu_stroke);
 			}
 		}
 	}

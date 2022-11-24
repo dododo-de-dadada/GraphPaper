@@ -24,18 +24,19 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		GRID_EMPH val;
-		if (sender == rmfi_grid_emph_1() || sender == rmfi_grid_emph_1_2()) {
+		if (sender == rmfi_grid_emph_1()) {
 			val = GRID_EMPH_0;
 		}
-		else if (sender == rmfi_grid_emph_2() || sender == rmfi_grid_emph_2_2()) {
+		else if (sender == rmfi_grid_emph_2()) {
 			val = GRID_EMPH_2;
 		}
-		else if (sender == rmfi_grid_emph_3() || sender == rmfi_grid_emph_3_2()) {
+		else if (sender == rmfi_grid_emph_3()) {
 			val = GRID_EMPH_3;
 		}
 		else {
 			return;
 		}
+		grid_emph_is_checked(val);
 		GRID_EMPH g_emph;
 		m_main_sheet.get_grid_emph(g_emph);
 		if (!equal(g_emph, val)) {
@@ -52,10 +53,6 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_emph_1().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
 		rmfi_grid_emph_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
 		rmfi_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
-
-		rmfi_grid_emph_1_2().IsChecked(g_emph.m_gauge_1 == 0 && g_emph.m_gauge_2 == 0);
-		rmfi_grid_emph_2_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 == 0);
-		rmfi_grid_emph_3_2().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
 	}
 
 	// 用紙メニューの「方眼の色」が選択された.
@@ -250,21 +247,20 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_show_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		GRID_SHOW val;
-		if (sender == rmfi_grid_show_back() || sender == rmfi_grid_show_back_2()) {
+		if (sender == rmfi_grid_show_back()) {
 			val = GRID_SHOW::BACK;
 		}
-		else if (sender == rmfi_grid_show_front() || sender == rmfi_grid_show_front_2()) {
+		else if (sender == rmfi_grid_show_front()) {
 			val = GRID_SHOW::FRONT;
 		}
-		else if (sender == rmfi_grid_show_hide() || sender == rmfi_grid_show_hide_2()) {
+		else if (sender == rmfi_grid_show_hide()) {
 			val = GRID_SHOW::HIDE;
 		}
 		else {
 			return;
 		}
-		GRID_SHOW g_show;
-		m_main_sheet.get_grid_show(g_show);
-		if (g_show != val) {
+		grid_show_is_checked(val);
+		if (m_main_sheet.m_grid_show != val) {
 			ustack_push_set<UNDO_OP::GRID_SHOW>(&m_main_sheet, val);
 			ustack_is_enable();
 			sheet_draw();
@@ -278,9 +274,9 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_show_back().IsChecked(g_show == GRID_SHOW::BACK);
 		rmfi_grid_show_front().IsChecked(g_show == GRID_SHOW::FRONT);
 		rmfi_grid_show_hide().IsChecked(g_show == GRID_SHOW::HIDE);
-		rmfi_grid_show_back_2().IsChecked(g_show == GRID_SHOW::BACK);
-		rmfi_grid_show_front_2().IsChecked(g_show == GRID_SHOW::FRONT);
-		rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
+		//rmfi_grid_show_back_2().IsChecked(g_show == GRID_SHOW::BACK);
+		//rmfi_grid_show_front_2().IsChecked(g_show == GRID_SHOW::FRONT);
+		//rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
 
 	// 用紙メニューの「方眼に合わせる」が選択された.

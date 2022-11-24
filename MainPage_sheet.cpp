@@ -115,7 +115,10 @@ namespace winrt::GraphPaper::implementation
 		bool g_snap;
 		m_main_sheet.get_grid_snap(g_snap);
 		tmfi_grid_snap().IsChecked(g_snap);
-		tmfi_grid_snap_2().IsChecked(g_snap);
+		//tmfi_grid_snap_2().IsChecked(g_snap);
+		float scale;
+		m_main_sheet.get_sheet_scale(scale);
+		sheet_zoom_is_checked(scale);
 	}
 
 	// 用紙メニューの「用紙の色」が選択された.
@@ -658,45 +661,50 @@ namespace winrt::GraphPaper::implementation
 		slist_bound_sheet(m_main_sheet.m_shape_list, m_main_sheet.m_sheet_size, m_main_min, m_main_max);
 	}
 
+	void MainPage::sheet_zoom_is_checked(float scale)
+	{
+		rmfi_sheet_zoom_100().IsChecked(equal(scale, 1.0f));
+		rmfi_sheet_zoom_150().IsChecked(equal(scale, 1.5f));
+		rmfi_sheet_zoom_200().IsChecked(equal(scale, 2.0f));
+		rmfi_sheet_zoom_300().IsChecked(equal(scale, 3.0f));
+		rmfi_sheet_zoom_400().IsChecked(equal(scale, 4.0f));
+		rmfi_sheet_zoom_075().IsChecked(equal(scale, 0.75f));
+		rmfi_sheet_zoom_050().IsChecked(equal(scale, 0.5f));
+		rmfi_sheet_zoom_025().IsChecked(equal(scale, 0.25f));
+	}
+
 	// 用紙メニューの「表示倍率」が選択された.
 	void MainPage::sheet_zoom_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float scale;
-		if (sender == mfi_sheet_zoom_100() ||
-			sender == mfi_sheet_zoom_100_2()) {
+		if (sender == rmfi_sheet_zoom_100()) {
 			scale = 1.0f;
 		}
-		else if (sender == mfi_sheet_zoom_150() ||
-			sender == mfi_sheet_zoom_150_2()) {
+		else if (sender == rmfi_sheet_zoom_150()) {
 			scale = 1.5f;
 		}
-		else if (sender == mfi_sheet_zoom_200() ||
-			sender == mfi_sheet_zoom_200_2()) {
+		else if (sender == rmfi_sheet_zoom_200()) {
 			scale = 2.0f;
 		}
-		else if (sender == mfi_sheet_zoom_300() ||
-			sender == mfi_sheet_zoom_300_2()) {
+		else if (sender == rmfi_sheet_zoom_300()) {
 			scale = 3.0f;
 		}
-		else if (sender == mfi_sheet_zoom_400() ||
-			sender == mfi_sheet_zoom_400_2()) {
+		else if (sender == rmfi_sheet_zoom_400()) {
 			scale = 4.0f;
 		}
-		else if (sender == mfi_sheet_zoom_075() ||
-			sender == mfi_sheet_zoom_075_2()) {
+		else if (sender == rmfi_sheet_zoom_075()) {
 			scale = 0.75f;
 		}
-		else if (sender == mfi_sheet_zoom_050() ||
-			sender == mfi_sheet_zoom_050_2()) {
+		else if (sender == rmfi_sheet_zoom_050()) {
 			scale = 0.5f;
 		}
-		else if (sender == mfi_sheet_zoom_025() ||
-			sender == mfi_sheet_zoom_025_2()) {
+		else if (sender == rmfi_sheet_zoom_025()) {
 			scale = 0.25f;
 		}
 		else {
 			return;
 		}
+		sheet_zoom_is_checked(scale);
 		if (scale != m_main_sheet.m_sheet_scale) {
 			m_main_sheet.m_sheet_scale = scale;
 			sheet_panle_size();

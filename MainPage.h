@@ -295,18 +295,6 @@ namespace winrt::GraphPaper::implementation
 		// ウィンドウの閉じるボタンが押された.
 		void navi_close_requested(IInspectable const&, winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs const& args)
 		{
-			if (m_menu_stroke.IsOpen()) {
-				scp_sheet_panel().ContextFlyout(nullptr);
-			}
-
-			/*
-			m_menu_fill = nullptr;
-			m_menu_font = nullptr;
-			m_menu_sheet = nullptr;
-			m_menu_ruler = nullptr;
-			m_menu_image = nullptr;
-			*/
-
 			args.Handled(true);
 			auto _{ exit_click_async(nullptr, nullptr) };
 		}
@@ -785,6 +773,7 @@ namespace winrt::GraphPaper::implementation
 		void sheet_zoom_click(IInspectable const& sender, winrt::Windows::UI::Xaml::RoutedEventArgs const&);
 		// 表示を拡大または縮小する.
 		void sheet_zoom_delta(const int32_t delta) noexcept;
+		void sheet_zoom_is_checked(float scale);
 
 		//-------------------------------
 		// MainPage_status.cpp

@@ -187,16 +187,16 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::stroke_width_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float s_width;
-		if (sender == rmfi_stroke_width_1px() || sender == rmfi_stroke_width_1px_2()) {
+		if (sender == rmfi_stroke_width_1px()) {
 			s_width = 1.0f;
 		}
-		else if (sender == rmfi_stroke_width_2px() || sender == rmfi_stroke_width_2px_2()) {
+		else if (sender == rmfi_stroke_width_2px()) {
 			s_width = 2.0f;
 		}
-		else if (sender == rmfi_stroke_width_3px() || sender == rmfi_stroke_width_3px_2()) {
+		else if (sender == rmfi_stroke_width_3px()) {
 			s_width = 3.0f;
 		}
-		else if (sender == rmfi_stroke_width_4px() || sender == rmfi_stroke_width_4px_2()) {
+		else if (sender == rmfi_stroke_width_4px()) {
 			s_width = 4.0f;
 		}
 		else {
@@ -217,11 +217,11 @@ namespace winrt::GraphPaper::implementation
 		rmfi_stroke_width_3px().IsChecked(s_width == 3.0f);
 		rmfi_stroke_width_4px().IsChecked(s_width == 4.0f);
 		rmfi_stroke_width_other().IsChecked(s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f);
-		rmfi_stroke_width_1px_2().IsChecked(s_width == 1.0f);
-		rmfi_stroke_width_2px_2().IsChecked(s_width == 2.0f);
-		rmfi_stroke_width_3px_2().IsChecked(s_width == 3.0f);
-		rmfi_stroke_width_4px_2().IsChecked(s_width == 4.0f);
-		rmfi_stroke_width_other_2().IsChecked(s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f);
+		//rmfi_stroke_width_1px_2().IsChecked(s_width == 1.0f);
+		//rmfi_stroke_width_2px_2().IsChecked(s_width == 2.0f);
+		//rmfi_stroke_width_3px_2().IsChecked(s_width == 3.0f);
+		//rmfi_stroke_width_4px_2().IsChecked(s_width == 4.0f);
+		//rmfi_stroke_width_other_2().IsChecked(s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f);
 	}
 
 	// 線枠メニューの「太さ」が選択された.

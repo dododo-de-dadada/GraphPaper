@@ -159,26 +159,24 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		// スレッドをメインページの UI スレッドに変える.
 		co_await winrt::resume_foreground(Dispatcher());
-
 		// 確認ダイアログを表示し, 応答を得る.
-		const ContentDialogResult d_res = co_await cd_conf_save_dialog().ShowAsync();
-
+		const ContentDialogResult dr = co_await cd_conf_save_dialog().ShowAsync();
 		// スレッドコンテキストを復元する.
 		co_await context;
 
-		// 応答が「キャンセル」か判定する.
-		if (d_res == ContentDialogResult::None) {
-			co_return false;
-		}
 		// 応答が「保存する」か判定する.
-		else if (d_res == ContentDialogResult::Primary) {
-			// ファイルに非同期に保存し, 結果が S_OK 以外か判定する.
-			//if (co_await file_save_async() != S_OK) {
-			//	co_return false;
-			//}
+		if (dr == ContentDialogResult::Primary) {
+			// ファイルに非同期に保存.
+			// 保存に失敗しても, true を返す.
 			co_await file_save_async();
+			co_return true;
 		}
-		co_return true;
+		// 応答が「保存しない」か判定する.
+		else if (dr == ContentDialogResult::Secondary) {
+			co_return true;
+		}
+		// 応答が「キャンセル」(上記以外) なら false を返す.
+		co_return false;
 	}
 
 	//-------------------------------
@@ -186,39 +184,50 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	IAsyncAction MainPage::exit_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_menu_fill.IsOpen()) {
+		// コンテキストメニューが開いているなら閉じる.
+		if (m_menu_fill != nullptr && m_menu_fill.IsOpen()) {
 			m_menu_fill.Hide();
 			ContextFlyout(nullptr);
 		}
-		else if (m_menu_font.IsOpen()) {
+		else if (m_menu_font != nullptr && m_menu_font.IsOpen()) {
 			m_menu_font.Hide();
 			ContextFlyout(nullptr);
 		}
-		else if (m_menu_image.IsOpen()) {
+		else if (m_menu_image != nullptr && m_menu_image.IsOpen()) {
 			m_menu_image.Hide();
 			ContextFlyout(nullptr);
 		}
-		else if (m_menu_ruler.IsOpen()) {
+		else if (m_menu_ruler != nullptr && m_menu_ruler.IsOpen()) {
 			m_menu_ruler.Hide();
 			ContextFlyout(nullptr);
 		}
-		else if (m_menu_sheet.IsOpen()) {
+		else if (m_menu_sheet != nullptr && m_menu_sheet.IsOpen()) {
 			m_menu_sheet.Hide();
 			ContextFlyout(nullptr);
 		}
-		else if (m_menu_stroke.IsOpen()) {
+		else if (m_menu_stroke != nullptr && m_menu_stroke.IsOpen()) {
 			m_menu_stroke.Hide();
 			ContextFlyout(nullptr);
 		}
-		else if (m_menu_ungroup.IsOpen()) {
+		else if (m_menu_ungroup != nullptr && m_menu_ungroup.IsOpen()) {
 			m_menu_ungroup.Hide();
 			ContextFlyout(nullptr);
 		}
+
+		// コンテキストダイアログを閉じる.
+		cd_conf_save_dialog().Hide();
+		cd_edit_text_dialog().Hide();
+		cd_message_dialog().Hide();
+		cd_misc_vert_stick().Hide();
+		cd_prop_dialog().Hide();
+		cd_sheet_size_dialog().Hide();
 
 		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
 		if (m_ustack_is_changed && !co_await ask_for_conf_async()) {
 			co_return;
 		}
+
+		// ファイルの書き込みが終わるまでブロックする.
 		while (!m_save_mutex.try_lock()) {
 #ifdef _DEBUG
 			__debugbreak();
@@ -238,6 +247,7 @@ namespace winrt::GraphPaper::implementation
 			m_menu_sheet = nullptr;
 			m_menu_ruler = nullptr;
 			m_menu_image = nullptr;
+			m_menu_ungroup = nullptr;
 		}
 
 		// コードビハインドで設定したハンドラーの設定を解除する.
@@ -363,11 +373,11 @@ namespace winrt::GraphPaper::implementation
 		// コンテキストメニューを静的リソースから読み込む.
 		// ポップアップは静的なリソースとして定義して、複数の要素で使用することができる.
 		{
-			m_menu_stroke = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_stroke_menu")));
-			m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill_menu")));
-			m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_front_menu")));
-			m_menu_sheet = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet_menu")));
-			m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup_menu")));
+			using winrt::Windows::UI::Xaml::Controls::MenuFlyoutSubItem;
+			//m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill_menu")));
+			//m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_front_menu")));
+			//m_menu_sheet = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet_menu")));
+			//m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup_menu")));
 			m_menu_ruler = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ruler_menu")));
 			m_menu_image = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_image_menu")));
 		}

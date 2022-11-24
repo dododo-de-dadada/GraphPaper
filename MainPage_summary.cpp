@@ -417,8 +417,8 @@ namespace winrt::GraphPaper::implementation
 		if (t != static_cast<const Shape*>(nullptr)) {
 			// 図形が表示されるよう用紙をスクロールする.
 			scroll_to(t);
-			m_main_sheet.set_attr_to(t);
-			sheet_attr_is_checked();
+//			m_main_sheet.set_attr_to(t);
+//			sheet_attr_is_checked();
 		}
 
 		// 編集メニュー項目の使用の可否を設定する.

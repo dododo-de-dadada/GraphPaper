@@ -65,7 +65,6 @@ namespace winrt::GraphPaper::implementation
 			if (app_data_file != nullptr) {
 				HRESULT hr = E_FAIL;
 				try {
-					// アプリケーションデータを非同期に読む.
 					hr = co_await file_read_async<true, false>(app_data_file);
 				}
 				catch (winrt::hresult_error const& e) {
@@ -127,11 +126,15 @@ namespace winrt::GraphPaper::implementation
 		case ExtendedExecutionResult::Allowed:
 			// セッションがキャンセルか判定する.
 			if (cancel_src.get_token().is_canceled()) {
+				// キャンセルならば何もしない.
 				break;
 			}
 			try {
-				// キャンセル以外ならば,
-				StorageFile app_data_file{ co_await ApplicationData::Current().LocalCacheFolder().CreateFileAsync(APP_DATA_FILE, CreationCollisionOption::ReplaceExisting) };
+				// キャンセル以外ならば, アプリケーションデータを格納するストレージファイルを作成する.
+				StorageFile app_data_file{
+					co_await ApplicationData::Current().LocalCacheFolder().CreateFileAsync(APP_DATA_FILE, CreationCollisionOption::ReplaceExisting) 
+				};
+				// ストレージファイルが作成できたなら, アプリケーションデータを書き込む.
 				if (app_data_file != nullptr) {
 					hr = co_await file_write_gpf_async<true, false>(app_data_file);
 					app_data_file = nullptr;
@@ -154,6 +157,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				ustack_clear();
 				slist_clear(m_main_sheet.m_shape_list);
+				slist_clear(m_prop_sheet.m_shape_list);
 #if defined(_DEBUG)
 				if (debug_leak_cnt != 0) {
 					// 「メモリリーク」メッセージダイアログを表示する.

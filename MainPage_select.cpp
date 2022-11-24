@@ -280,8 +280,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (s->is_selected()) {
 			// ‰Ÿ‚³‚ê‚½}Œ`‚ª‘I‘ğ‚³‚ê‚Ä‚¢‚éê‡,
-			m_main_sheet.set_attr_to(s);
-			sheet_attr_is_checked();
+//			m_main_sheet.set_attr_to(s);
+//			sheet_attr_is_checked();
 		}
 	}
 

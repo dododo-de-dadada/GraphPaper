@@ -81,18 +81,19 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_par_align_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_PARAGRAPH_ALIGNMENT val;
-		if (sender == rmfi_text_align_top() || sender == rmfi_text_align_top_2()) {
+		if (sender == rmfi_text_align_top()) {
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
 		}
-		else if (sender == rmfi_text_align_bot() || sender == rmfi_text_align_bot_2()) {
+		else if (sender == rmfi_text_align_bot()) {
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR;
 		}
-		else if (sender == rmfi_text_align_mid() || sender == rmfi_text_align_mid_2()) {
+		else if (sender == rmfi_text_align_mid()) {
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 		}
 		else {
 			return;
 		}
+		text_par_align_is_checked(val);
 		if (ustack_push_set<UNDO_OP::TEXT_PAR_ALIGN>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
@@ -105,32 +106,33 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_par_align_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val)
 	{
 		rmfi_text_align_top().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_top_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		//rmfi_text_align_top_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 		rmfi_text_align_bot().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_bot_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		//rmfi_text_align_bot_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
 		rmfi_text_align_mid().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-		rmfi_text_align_mid_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		//rmfi_text_align_mid_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」が選択された.
 	void MainPage::text_align_t_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_TEXT_ALIGNMENT val;
-		if (sender == rmfi_text_align_left() || sender == rmfi_text_align_left_2()) {
+		if (sender == rmfi_text_align_left()) {
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;
 		}
-		else if (sender == rmfi_text_align_right() || sender == rmfi_text_align_right_2()) {
+		else if (sender == rmfi_text_align_right()) {
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING;
 		}
-		else if (sender == rmfi_text_align_center() || sender == rmfi_text_align_center_2()) {
+		else if (sender == rmfi_text_align_center()) {
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER;
 		}
-		else if (sender == rmfi_text_align_just() || sender == rmfi_text_align_just_2()) {
+		else if (sender == rmfi_text_align_just()) {
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
 		}
 		else {
 			return;
 		}
+		text_align_t_is_checked(val);
 		if (ustack_push_set<UNDO_OP::TEXT_ALIGN_T>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
@@ -143,13 +145,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT val)
 	{
 		rmfi_text_align_left().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_text_align_left_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+		//rmfi_text_align_left_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 		rmfi_text_align_right().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_text_align_right_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
+		//rmfi_text_align_right_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
 		rmfi_text_align_center().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_center_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		//rmfi_text_align_center_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
 		rmfi_text_align_just().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-		rmfi_text_align_just_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		//rmfi_text_align_just_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 
 	}
 

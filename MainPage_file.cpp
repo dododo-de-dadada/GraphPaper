@@ -766,15 +766,15 @@ namespace winrt::GraphPaper::implementation
 			co_await file_save_as_async(!SVG_ALLOWED);
 		}
 		else {
-			HRESULT ok = E_FAIL;	// 結果
+			HRESULT hr = E_FAIL;	// 結果
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
 			const CoreCursor& prev_cur = file_wait_cursor();	// 前のカーソル
 			// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
-			ok = co_await file_write_gpf_async<false, false>(s_file);
+			hr = co_await file_write_gpf_async<false, false>(s_file);
 			// カーソルを元に戻す.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);
 			// 結果が S_OK 以外か判定する.
-			if (ok != S_OK) {
+			if (hr != S_OK) {
 				// スレッドをメインページの UI スレッドに変える.
 				co_await winrt::resume_foreground(Dispatcher());
 				// 「ファイルに書き込めません」メッセージダイアログを表示する.

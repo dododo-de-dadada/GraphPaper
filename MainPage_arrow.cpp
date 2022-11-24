@@ -165,20 +165,19 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		ARROW_STYLE a_style;
-		if (sender == rmfi_arrow_style_none() || sender == rmfi_arrow_style_none_2()) {
+		if (sender == rmfi_arrow_style_none()) {
 			a_style = ARROW_STYLE::NONE;
 		}
-		else if (sender == rmfi_arrow_style_opened() || sender == rmfi_arrow_style_opened_2()) {
+		else if (sender == rmfi_arrow_style_opened()) {
 			a_style = ARROW_STYLE::OPENED;
 		}
-		else if (sender == rmfi_arrow_style_filled() || sender == rmfi_arrow_style_filled_2()) {
+		else if (sender == rmfi_arrow_style_filled()) {
 			a_style = ARROW_STYLE::FILLED;
 		}
 		else {
 			return;
 		}
-		mfi_arrow_size().IsEnabled(a_style != ARROW_STYLE::NONE);
-		mfi_arrow_size_2().IsEnabled(a_style != ARROW_STYLE::NONE);
+		arrow_style_is_checked(a_style);
 		if (ustack_push_set<UNDO_OP::ARROW_STYLE>(a_style)) {
 			ustack_push_null();
 			xcvd_is_enabled();
@@ -193,13 +192,14 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::arrow_style_is_checked(const ARROW_STYLE val)
 	{
 		rmfi_arrow_style_none().IsChecked(val == ARROW_STYLE::NONE);
-		rmfi_arrow_style_none_2().IsChecked(val == ARROW_STYLE::NONE);
+		//rmfi_arrow_style_none_2().IsChecked(val == ARROW_STYLE::NONE);
 		rmfi_arrow_style_opened().IsChecked(val == ARROW_STYLE::OPENED);
-		rmfi_arrow_style_opened_2().IsChecked(val == ARROW_STYLE::OPENED);
+		//rmfi_arrow_style_opened_2().IsChecked(val == ARROW_STYLE::OPENED);
 		rmfi_arrow_style_filled().IsChecked(val == ARROW_STYLE::FILLED);
-		rmfi_arrow_style_filled_2().IsChecked(val == ARROW_STYLE::FILLED);
+		//rmfi_arrow_style_filled_2().IsChecked(val == ARROW_STYLE::FILLED);
 		mfi_arrow_size().IsEnabled(val != ARROW_STYLE::NONE);
-		mfi_arrow_size_2().IsEnabled(val != ARROW_STYLE::NONE);
+		//mfi_arrow_size_2().IsEnabled(val != ARROW_STYLE::NONE);
+		mfi_arrow_size().IsEnabled(val != ARROW_STYLE::NONE);
 	}
 
 }

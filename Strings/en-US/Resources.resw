@@ -305,35 +305,35 @@
     <value>Thin</value>
     <comment>ListViewItem</comment>
   </data>
-  <data name="mbi_menu_edit.Title" xml:space="preserve">
+  <data name="mbi_edit.Title" xml:space="preserve">
     <value>Edit</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_file.Title" xml:space="preserve">
+  <data name="mbi_file.Title" xml:space="preserve">
     <value>File</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_fill_menu.Title" xml:space="preserve">
+  <data name="mbi_fill.Title" xml:space="preserve">
     <value>Fill</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_font_menu.Title" xml:space="preserve">
+  <data name="mbi_font.Title" xml:space="preserve">
     <value>Font</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_sheet_menu.Title" xml:space="preserve">
+  <data name="mbi_sheet.Title" xml:space="preserve">
     <value>Sheet</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_misc_menu.Title" xml:space="preserve">
+  <data name="mbi_misc.Title" xml:space="preserve">
     <value>&amp;Misc</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_stroke_menu.Title" xml:space="preserve">
+  <data name="mbi_stroke.Title" xml:space="preserve">
     <value>Stroke</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_menu_drawing.Title" xml:space="preserve">
+  <data name="mbi_drawing.Title" xml:space="preserve">
     <value>Draw</value>
     <comment>MenuBarItem</comment>
   </data>
@@ -1118,7 +1118,7 @@
     <value>Vertex Up</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
-  <data name="mbi_image_menu.Title" xml:space="preserve">
+  <data name="mbi_image.Title" xml:space="preserve">
     <value>Image</value>
     <comment>MenuBarItem</comment>
   </data>

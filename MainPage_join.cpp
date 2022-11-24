@@ -15,23 +15,22 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		CAP_STYLE new_val;
-		if (sender == rmfi_cap_style_flat() || sender == rmfi_cap_style_flat_2()) {
+		if (sender == rmfi_cap_style_flat()) {
 			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };
 		}
-		else if (sender == rmfi_cap_style_square() || sender == rmfi_cap_style_square_2()) {
+		else if (sender == rmfi_cap_style_square()) {
 			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE };
 		}
-		else if (sender == rmfi_cap_style_round() || sender == rmfi_cap_style_round_2()) {
+		else if (sender == rmfi_cap_style_round()) {
 			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND };
 		}
-		else if (sender == rmfi_cap_style_triangle() || sender == rmfi_cap_style_triangle_2()) {
+		else if (sender == rmfi_cap_style_triangle()) {
 			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE };
 		}
 		else {
 			return;
 		}
-		CAP_STYLE old_val;
-		m_main_sheet.get_stroke_cap(old_val);
+		cap_style_is_checked(new_val);
 		if (ustack_push_set<UNDO_OP::STROKE_CAP>(new_val)) {
 			ustack_push_null();
 			ustack_is_enable();
@@ -44,13 +43,13 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::cap_style_is_checked(const CAP_STYLE& val)
 	{
 		rmfi_cap_style_flat().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
-		rmfi_cap_style_flat_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
+		//rmfi_cap_style_flat_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
 		rmfi_cap_style_square().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
-		rmfi_cap_style_square_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
+		//rmfi_cap_style_square_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
 		rmfi_cap_style_round().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
-		rmfi_cap_style_round_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
+		//rmfi_cap_style_round_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
 		rmfi_cap_style_triangle().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
-		rmfi_cap_style_triangle_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
+		//rmfi_cap_style_triangle_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
 	}
 
 	// 線枠メニューの「つなぎの種類」>「額ぶちの制限」が選択された.
@@ -180,31 +179,22 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_LINE_JOIN new_val;
-		if (sender == rmfi_join_style_bevel() || sender == rmfi_join_style_bevel_2()) {
+		if (sender == rmfi_join_style_bevel()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;
-			mfi_join_limit().IsEnabled(false);
-			mfi_join_limit_2().IsEnabled(false);
 		}
-		else if (sender == rmfi_join_style_miter() || sender == rmfi_join_style_miter_2()) {
+		else if (sender == rmfi_join_style_miter()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;
-			mfi_join_limit().IsEnabled(true);
-			mfi_join_limit_2().IsEnabled(true);
 		}
-		else if (sender == rmfi_join_style_miter_or_bevel() || sender == rmfi_join_style_miter_or_bevel_2()) {
+		else if (sender == rmfi_join_style_miter_or_bevel()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL;
-			mfi_join_limit().IsEnabled(true);
-			mfi_join_limit_2().IsEnabled(true);
 		}
-		else if (sender == rmfi_join_style_round() || sender == rmfi_join_style_round_2()) {
+		else if (sender == rmfi_join_style_round()) {
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND;
-			mfi_join_limit().IsEnabled(false);
-			mfi_join_limit_2().IsEnabled(false);
 		}
 		else {
 			return;
 		}
-		D2D1_LINE_JOIN old_val;
-		m_main_sheet.get_join_style(old_val);
+		join_style_is_checked(new_val);
 		if (ustack_push_set<UNDO_OP::JOIN_STYLE>(new_val)) {
 			ustack_push_null();
 			ustack_is_enable();
@@ -217,15 +207,10 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN val)
 	{
 		rmfi_join_style_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
-		rmfi_join_style_bevel_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
 		rmfi_join_style_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
-		rmfi_join_style_miter_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
 		rmfi_join_style_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
-		rmfi_join_style_miter_or_bevel_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
 		rmfi_join_style_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		rmfi_join_style_round_2().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
 		mfi_join_limit().IsEnabled(rmfi_join_style_miter().IsChecked() || rmfi_join_style_miter_or_bevel().IsChecked());
-		mfi_join_limit_2().IsEnabled(rmfi_join_style_miter_2().IsChecked() || rmfi_join_style_miter_or_bevel_2().IsChecked());
 	}
 
 }
