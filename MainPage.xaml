@@ -369,7 +369,7 @@
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_stroke_width}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</MenuFlyoutSubItem.Icon>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_width_1px" x:Uid="rmfi_stroke_width_1px" Click="stroke_width_click" Text="1 px" >
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_width_1px" x:Uid="rmfi_stroke_width_1px" Click="stroke_width_click" IsChecked="true" Text="1 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_1px}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>

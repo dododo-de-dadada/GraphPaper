@@ -217,11 +217,6 @@ namespace winrt::GraphPaper::implementation
 		rmfi_stroke_width_3px().IsChecked(s_width == 3.0f);
 		rmfi_stroke_width_4px().IsChecked(s_width == 4.0f);
 		rmfi_stroke_width_other().IsChecked(s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f);
-		//rmfi_stroke_width_1px_2().IsChecked(s_width == 1.0f);
-		//rmfi_stroke_width_2px_2().IsChecked(s_width == 2.0f);
-		//rmfi_stroke_width_3px_2().IsChecked(s_width == 3.0f);
-		//rmfi_stroke_width_4px_2().IsChecked(s_width == 4.0f);
-		//rmfi_stroke_width_other_2().IsChecked(s_width != 1.0f && s_width != 2.0f && s_width != 3.0f && s_width != 4.0f);
 	}
 
 	// 線枠メニューの「太さ」が選択された.
