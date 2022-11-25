@@ -85,6 +85,8 @@ namespace winrt::GraphPaper::implementation
 			memcpy(bmp_data, m_data, capacity);
 
 			// バッファを解放する.
+			// SoftwareBitmap がロックされたままになるので,
+			// IMemoryBufferByteAccess は Release() する必要がある.
 			bmp_buf.Close();
 			bmp_buf = nullptr;
 			bmp_mem->Release();
@@ -100,9 +102,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			catch (winrt::hresult_error& err) {
 				// サムネイルの自動生成が出来ないなら, false を格納する.
-				if (err.code() == WINCODEC_ERR_UNSUPPORTEDOPERATION) {
-					bmp_enc.IsThumbnailGenerated(false);
-				}
+				//if (err.code() == WINCODEC_ERR_UNSUPPORTEDOPERATION) {
+				//	bmp_enc.IsThumbnailGenerated(false);
+				//}
 			}
 			//if (!bmp_enc.IsThumbnailGenerated()) {
 				// 再度やり直す.
@@ -629,7 +631,7 @@ namespace winrt::GraphPaper::implementation
 				// ロックしたバッファを解放する.
 				image_buf.Close();
 				image_buf = nullptr;
-				image_mem->Release();
+				//image_mem->Release();
 				image_mem = nullptr;
 			}
 		}

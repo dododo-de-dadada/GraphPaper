@@ -115,7 +115,7 @@ namespace winrt::GraphPaper::implementation
 		bool g_snap;
 		m_main_sheet.get_grid_snap(g_snap);
 		tmfi_grid_snap().IsChecked(g_snap);
-		//tmfi_grid_snap_2().IsChecked(g_snap);
+
 		float scale;
 		m_main_sheet.get_sheet_scale(scale);
 		sheet_zoom_is_checked(scale);

@@ -13,77 +13,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="Dictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-			<!-- 定規コンテキストメニュー -->
-			<MenuFlyout x:Key="mf_ruler_menu">
-				<MenuFlyoutItem x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
-				<MenuFlyoutItem x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
-			</MenuFlyout>
 			
-			<!-- 用紙コンテキストメニュー -->
-			<MenuFlyout x:Key="mf_sheet_menu">
-				<MenuFlyoutSubItem x:Uid="mfsi_grid_show" Text="Show Grid">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_hide_2" x:Uid="rmfi_grid_show_hide" Click="grid_show_click" Text="Hide" GroupName="gn_grid_show_2"/>
-					<MenuFlyoutSeparator />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_back_2" x:Uid="rmfi_grid_show_back" Click="grid_show_click" IsChecked="True" Text="Back" GroupName="gn_grid_show_2"/>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_front_2" x:Uid="rmfi_grid_show_front" Click="grid_show_click" Text="Front" GroupName="gn_grid_show_2"/>
-				</MenuFlyoutSubItem>
-				<ToggleMenuFlyoutItem x:Name="tmfi_grid_snap_2" x:Uid="tmfi_grid_snap" Click="grid_snap_click" Text="Snap to Grid" />
-				<MenuFlyoutSubItem x:Uid="mfsi_grid_len" Text="Size Grid">
-					<MenuFlyoutItem x:Uid="mfi_grid_len_con" Click="grid_len_con_click" Text="Condense" />
-					<MenuFlyoutItem x:Uid="mfi_grid_len_exp" Click="grid_len_exp_click" Text="Expand" />
-					<MenuFlyoutSeparator />
-					<MenuFlyoutItem x:Uid="mfi_grid_len" Click="grid_len_click_async" Text="Length..." />
-				</MenuFlyoutSubItem>
-				<MenuFlyoutItem x:Uid="mfi_grid_color" Click="grid_color_click_async" Text="Grid Color..." />
-				<MenuFlyoutSubItem x:Uid="mfsi_grid_emph" Text="Grid Emphasis">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_1_2" x:Uid="rmfi_grid_emph_1" Click="grid_emph_click" IsChecked="True" Text="No emphasis" GroupName="gn_grid_emph_2" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_2_2" x:Uid="rmfi_grid_emph_2" Click="grid_emph_click" Text="Emphasize the 2nd" GroupName="gn_grid_emph_2" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_3_2" x:Uid="rmfi_grid_emph_3" Click="grid_emph_click" Text="Emphasize the 2nd and 5th" GroupName="gn_grid_emph_2" />
-				</MenuFlyoutSubItem>
-				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Uid="mfi_sheet_size" Click="sheet_size_click_async" Text="Sheet Size..." />
-				<MenuFlyoutItem x:Uid="mfi_sheet_color" Click="sheet_color_click_async" Text="Sheet Color..." />
-				<MenuFlyoutSubItem x:Uid="mfsi_sheet_zoom" Text="Zoom">
-					<MenuFlyoutItem x:Name="mfi_sheet_zoom_025_2" Click="sheet_zoom_click" Icon="ZoomOut" Text="25%" />
-					<MenuFlyoutItem x:Name="mfi_sheet_zoom_050_2" Click="sheet_zoom_click" Icon="ZoomOut" KeyboardAcceleratorTextOverride="Ctrl+0" Text="50%" />
-					<MenuFlyoutItem x:Name="mfi_sheet_zoom_075_2" Click="sheet_zoom_click" Icon="ZoomOut" Text="75%" />
-					<MenuFlyoutItem x:Name="mfi_sheet_zoom_100_2" Click="sheet_zoom_click" Icon="Zoom" KeyboardAcceleratorTextOverride="Ctrl+1" Text="100%" />
-					<MenuFlyoutItem x:Name="mfi_sheet_zoom_150_2" Click="sheet_zoom_click" Icon="ZoomIn" Text="150%" />
-					<MenuFlyoutItem x:Name="mfi_sheet_zoom_200_2" Click="sheet_zoom_click" Icon="ZoomIn" KeyboardAcceleratorTextOverride="Ctrl+2" Text="200%" />
-					<MenuFlyoutItem x:Name="mfi_sheet_zoom_300_2" Click="sheet_zoom_click" Icon="ZoomIn" KeyboardAcceleratorTextOverride="Ctrl+3" Text="300%" />
-					<MenuFlyoutItem x:Name="mfi_sheet_zoom_400_2" Click="sheet_zoom_click" Icon="ZoomIn" KeyboardAcceleratorTextOverride="Ctrl+4" Text="400%" />
-				</MenuFlyoutSubItem>
-				<MenuFlyoutSeparator />
-				<MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_pixel_2" x:Uid="rmfi_len_unit_pixel"  IsChecked="True" Click="len_unit_click" GroupName="gn_len_unit_2" Text="Pixel" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_inch_2" x:Uid="rmfi_len_unit_inch" Click="len_unit_click" GroupName="gn_len_unit_2" Text="Inch" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_milli_2" x:Uid="rmfi_len_unit_milli" Click="len_unit_click" GroupName="gn_len_unit_2" Text="Millimeter" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_point_2" x:Uid="rmfi_len_unit_point" Click="len_unit_click" GroupName="gn_len_unit_2" Text="Point" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_grid_2" x:Uid="rmfi_len_unit_grid" Click="len_unit_click" GroupName="gn_len_unit_2" Text="Per Grid" />
-				</MenuFlyoutSubItem>
-				<MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color Code">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_dec_2" x:Uid="rmfi_color_code_dec" Click="color_code_click" IsChecked="True" Text="Decimal" GroupName="gn_misc_color_2" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_hex_2" x:Uid="rmfi_color_code_hex" Click="color_code_click" Text="Hexadecimal" GroupName="gn_misc_color_2" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_real_2" x:Uid="rmfi_color_code_real" Click="color_code_click" Text="Real" GroupName="gn_misc_color_2" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_cent_2" x:Uid="rmfi_color_code_cent" Click="color_code_click" Text="Point" GroupName="gn_misc_color_2" />
-				</MenuFlyoutSubItem>
-			</MenuFlyout>
-			<!-- グループコンテキストメニュー -->
-			<MenuFlyout x:Key="mf_ungroup_menu">
-				<MenuFlyoutItem x:Name="mfi_ungroup_2" x:Uid="mfi_ungroup" Click="ungroup_click" KeyboardAcceleratorTextOverride="Ctrl+U" Text="Ungroup" >
-					<MenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_ungroup}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
-					</MenuFlyoutItem.Icon>
-				</MenuFlyoutItem>
-			</MenuFlyout>
-			<!-- 画像コンテキストメニュー -->
-			<MenuFlyout x:Key="mf_image_menu">
-				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect_2" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
-				<MenuFlyoutItem x:Name="mfi_image_revert_to_original_2" x:Uid="mfi_image_revert_to_original" Click="image_revert_to_original_click" Text="Revert to Original" />
-				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Name="mfi_image_opac_2" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
-			</MenuFlyout>
-
 		</ResourceDictionary>
 	</Page.Resources>
 	<Grid Margin="0,0,0,0">
@@ -154,7 +84,7 @@
 				<MenuFlyoutItem x:Uid="mfi_exit" Click="exit_click_async" Icon="Cancel" Text="Exit" />
 			</muxc:MenuBarItem>
 			<!-- 編集メニュー -->
-			<muxc:MenuBarItem x:Uid="mbi_edit" AccessKey="E" Title="Edit">
+            <muxc:MenuBarItem x:Name="mbi_edit" x:Uid="mbi_edit" AccessKey="E" Title="Edit">
 				<MenuFlyoutItem x:Name="mfi_undo" x:Uid="mfi_undo" Click="ustack_undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Z" Modifiers="Control" />
@@ -428,17 +358,17 @@
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Name="mfi_arrow_size" x:Uid="mfi_arrow_size" Click="arrow_size_click_async" IsEnabled="False" Text="Arrowhead Size..." />
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
+                <MenuFlyoutItem x:Name="mfi_stroke_color" x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
 			</muxc:MenuBarItem>
 			<!-- 塗りつぶしメニュー -->
             <muxc:MenuBarItem x:Name="mbi_fill" x:Uid="mbi_fill" AccessKey="L" Title="Fill">
-				<MenuFlyoutItem x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
+                <MenuFlyoutItem x:Name="mfi_fill_color" x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
 			</muxc:MenuBarItem>
 			<!-- 書体メニュー -->
             <muxc:MenuBarItem x:Name="mbi_font" x:Uid="mbi_font" AccessKey="T" Title="Font">
 				<!-- 字体メニュー -->
-				<MenuFlyoutItem x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
-				<MenuFlyoutItem x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
+                <MenuFlyoutItem x:Name="mfi_font_family" x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
+                <MenuFlyoutItem x:Name="mfi_font_size" x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
 				<MenuFlyoutItem x:Uid="mfi_font_weight" Click="font_weight_click_async" Icon="Bold" Text="Weight..." />
 				<MenuFlyoutItem x:Uid="mfi_font_stretch" Click="font_stretch_click_async" Text="Stretch..."/>
 				<MenuFlyoutSubItem x:Uid="mfsi_font_style" Text="Style">

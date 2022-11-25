@@ -253,6 +253,7 @@ namespace winrt::GraphPaper::implementation
 		COLOR_CODE m_color_code = COLOR_CODE::DEC;	// 色成分の書式
 		float m_vert_stick = VERT_STICK_DEF_VAL;	// 頂点をくっつける閾値
 		STATUS_BAR m_status_bar = STATUS_BAR_DEF_VAL;	// ステータスバーの状態
+		winrt::guid m_enc_id = winrt::Windows::Graphics::Imaging::BitmapEncoder::BmpEncoderId();	// 既定の画像形式 (エンコード識別子)
 
 		// スレッド
 		bool m_thread_activated = false;	// アクティベートされた初回を判定

@@ -891,6 +891,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_show_context_menu(void)
 	{
 		using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
+		using winrt::Windows::UI::Xaml::Controls::MenuFlyoutSeparator;
 		// ƒRƒ“ƒeƒLƒXƒgƒƒjƒ…[‚ğ‰ğ•ú‚·‚é.
 		ContextFlyout(nullptr);
 		// ‰Ÿ‚³‚ê‚½}Œ`‚ªƒkƒ‹, ‚Ü‚½‚Í‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ªŠO‘¤‚©”»’è‚·‚é.
@@ -907,30 +908,39 @@ namespace winrt::GraphPaper::implementation
 		else if (typeid(*m_event_shape_pressed) == typeid(ShapeGroup)) {
 			if (m_menu_ungroup == nullptr) {
 				m_menu_ungroup = MenuFlyout();
-				m_menu_sheet.Items().Append(mfi_ungroup());
+				for (const auto& item : mbi_edit().Items()) {
+					if (item.Name() == L"mfi_ungroup") {
+						m_menu_ungroup.Items().Append(item);
+					}
+				}
 			}
 			ContextFlyout(m_menu_ungroup);
 		}
-		// ‰Ÿ‚³‚ê‚½}Œ`‚ª’è‹K‚©”»’è‚·‚é.
-		else if (typeid(*m_event_shape_pressed) == typeid(ShapeRuler)) {
-			ContextFlyout(m_menu_ruler);
-		}
-		// ‰Ÿ‚³‚ê‚½}Œ`‚ª’è‹K‚©”»’è‚·‚é.
-		else if (typeid(*m_event_shape_pressed) == typeid(ShapeImage)) {
-			if (m_menu_image == nullptr) {
-				m_menu_image = MenuFlyout();
-				for (const auto item : mbi_image().Items()) {
-					m_menu_image.Items().Append(item);
-				}
-			}
-			ContextFlyout(m_menu_image);
-		}
 		else {
-			// ‰Ÿ‚³‚ê‚½}Œ`‚Ì‘®«’l‚ğ—p†‚ÉŠi”[‚·‚é.
-			m_main_sheet.set_attr_to(m_event_shape_pressed);
-			sheet_attr_is_checked();
+			// ‰Ÿ‚³‚ê‚½}Œ`‚ª’è‹K‚©”»’è‚·‚é.
+			if (typeid(*m_event_shape_pressed) == typeid(ShapeRuler)) {
+				if (m_menu_ruler == nullptr) {
+					m_menu_ruler = MenuFlyout();
+					m_menu_ruler.Items().Append(mfi_stroke_color());
+					m_menu_ruler.Items().Append(mfi_fill_color());
+					m_menu_ruler.Items().Append(MenuFlyoutSeparator());
+					m_menu_ruler.Items().Append(mfi_font_family());
+					m_menu_ruler.Items().Append(mfi_font_size());
+				}
+				ContextFlyout(m_menu_ruler);
+			}
+			// ‰Ÿ‚³‚ê‚½}Œ`‚ª‰æ‘œ‚©”»’è‚·‚é.
+			else if (typeid(*m_event_shape_pressed) == typeid(ShapeImage)) {
+				if (m_menu_image == nullptr) {
+					m_menu_image = MenuFlyout();
+					for (const auto item : mbi_image().Items()) {
+						m_menu_image.Items().Append(item);
+					}
+				}
+				ContextFlyout(m_menu_image);
+			}
 			// ‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ª“à‘¤‚©”»’è‚·‚é.
-			if (m_event_anc_pressed == ANC_TYPE::ANC_FILL) {
+			else if (m_event_anc_pressed == ANC_TYPE::ANC_FILL) {
 				if (m_menu_fill == nullptr) {
 					m_menu_fill = MenuFlyout();
 					for (const auto item : mbi_fill().Items()) {
@@ -959,6 +969,9 @@ namespace winrt::GraphPaper::implementation
 				}
 				ContextFlyout(m_menu_stroke);
 			}
+			// ‰Ÿ‚³‚ê‚½}Œ`‚Ì‘®«’l‚ğ—p†‚ÉŠi”[‚·‚é.
+			m_main_sheet.set_attr_to(m_event_shape_pressed);
+			sheet_attr_is_checked();
 		}
 	}
 

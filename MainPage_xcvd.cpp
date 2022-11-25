@@ -36,11 +36,8 @@ namespace winrt::GraphPaper::implementation
 	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float vert_stick);
 
 	// 編集メニューの「コピー」が選択された.
-	// プログラム終了したら中身が消える！
 	IAsyncAction MainPage::xcvd_copy_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		constexpr bool REDUCED = true;
-
 		if (m_list_sel_cnt == 0) {
 			// 終了する.
 			return;
@@ -51,23 +48,22 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_LIST list_selected;
 		slist_get_selected<Shape>(m_main_sheet.m_shape_list, list_selected);
 		// リストから降順に, 最初に見つかった文字列図形の文字列, あるいは画像図形の画像を得る.
-		wchar_t* txt = nullptr;
+		wchar_t* text_ptr = nullptr;
 		RandomAccessStreamReference img_ref = nullptr;
 		for (auto it = list_selected.rbegin(); it != list_selected.rend(); it++) {
-			Shape* s = *it;
-			if (txt == nullptr) {
+			if (text_ptr == nullptr) {
 				// 文字列をポインターに格納する.
-				s->get_text_content(txt);
+				(*it)->get_text_content(text_ptr);
 			}
-			if (img_ref == nullptr && typeid(*s) == typeid(ShapeImage)) {
-				// ビットマップをストリーム参照に格納する.
+			if (img_ref == nullptr && typeid(*it) == typeid(ShapeImage)) {
+				// ビットマップをストリームに格納し, その参照を得る.
 				InMemoryRandomAccessStream img_stream{ InMemoryRandomAccessStream() };
-				co_await static_cast<ShapeImage*>(s)->copy_to(BitmapEncoder::BmpEncoderId(), img_stream);
+				co_await static_cast<ShapeImage*>(*it)->copy_to(BitmapEncoder::BmpEncoderId(), img_stream);
 				if (img_stream.Size() > 0) {
 					img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);
 				}
 			}
-			if (txt != nullptr && img_ref != nullptr) {
+			if (text_ptr != nullptr && img_ref != nullptr) {
 				// 文字列と画像図形, 両方とも見つかったなら中断する.
 				break;
 			}
@@ -77,6 +73,7 @@ namespace winrt::GraphPaper::implementation
 		IOutputStream out_stream{ mem_stream.GetOutputStreamAt(0) };
 		DataWriter dt_writer{ DataWriter(out_stream) };
 		// データライターに選択された図形のリストを書き込む.
+		constexpr bool REDUCED = true;
 		slist_write<REDUCED>(list_selected, /*--->*/dt_writer);
 		// リストを破棄する.
 		list_selected.clear();
@@ -86,22 +83,22 @@ namespace winrt::GraphPaper::implementation
 			// メインページの UI スレッドに変える.
 			co_await winrt::resume_foreground(Dispatcher());
 			// データパッケージを作成し, データパッケージにメモリストリームを格納する.
-			DataPackage dt_pkg{ DataPackage() };
-			dt_pkg.RequestedOperation(DataPackageOperation::Copy);
-			dt_pkg.SetData(CLIPBOARD_FORMAT_SHAPES, winrt::box_value(mem_stream));
+			DataPackage dt_pack{ DataPackage() };
+			dt_pack.RequestedOperation(DataPackageOperation::Copy);
+			dt_pack.SetData(CLIPBOARD_FORMAT_SHAPES, winrt::box_value(mem_stream));
 			// 文字列が得られたか判定する.
-			if (txt != nullptr) {
+			if (text_ptr != nullptr) {
 				// データパッケージにテキストを格納する.
-				dt_pkg.SetText(txt);
+				dt_pack.SetText(text_ptr);
 			}
 			// 画像が得られたか判定する.
 			if (img_ref != nullptr) {
 				// データパッケージに画像を格納する.
-				dt_pkg.SetBitmap(img_ref);
+				dt_pack.SetBitmap(img_ref);
 			}
 			// クリップボードにデータパッケージを格納する.
-			Clipboard::SetContent(dt_pkg);
-			dt_pkg = nullptr;
+			Clipboard::SetContent(dt_pack);
+			dt_pack = nullptr;
 		}
 		// データライターを閉じる.
 		dt_writer.Close();
@@ -429,11 +426,13 @@ namespace winrt::GraphPaper::implementation
 		xcvd_paste_pos(pos, /*<---*/m_main_sheet.m_shape_list, grid_len, vert_stick);
 		img->set_pos_start(pos);
 
-		m_d2d_mutex.lock();
-		ustack_push_append(img);
-		ustack_push_select(img);
-		ustack_push_null();
-		m_d2d_mutex.unlock();
+		{
+			m_d2d_mutex.lock();
+			ustack_push_append(img);
+			ustack_push_select(img);
+			ustack_push_null();
+			m_d2d_mutex.unlock();
+		}
 		co_await winrt::resume_foreground(Dispatcher());
 		ustack_is_enable();
 		// 一覧が表示されてるか判定する.
