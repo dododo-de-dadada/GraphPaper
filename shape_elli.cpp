@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::Storage::Streams::DataWriter;
+	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形を表示する.
 	// sh	表示する用紙

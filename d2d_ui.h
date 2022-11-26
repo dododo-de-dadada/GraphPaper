@@ -24,6 +24,12 @@
 
 namespace winrt::GraphPaper::implementation
 {
+#if WIN_UI == 3
+	using winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel;
+#else
+	using winrt::Windows::Graphics::Display::DisplayOrientations;
+	using winrt::Windows::UI::Xaml::Controls::SwapChainPanel;
+#endif
 	// D2D_UI を所有しているアプリケーションが、デバイスが失われたときまたは作成されたときに通知を受けるためのインターフェイスを提供する.
 	interface IDeviceNotify {
 		virtual void OnDeviceLost() = 0;
@@ -51,19 +57,16 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1DeviceContext2> m_d2d_context{ nullptr };
 
 		// XAML コントロール
-#if WIN_UI == 3
-		winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel m_swap_chain_panel{};	// パネルへの保持された参照
-#else
-		winrt::Windows::UI::Xaml::Controls::SwapChainPanel m_swap_chain_panel{};	// パネルへの保持された参照
-#endif
+		SwapChainPanel m_swap_chain_panel{};	// パネルへの保持された参照
+
 		// デバイス属性
 
 		FLOAT m_logical_width = 0.0f;
 		FLOAT m_logical_height = 0.0f;
 #if WIN_UI == 3
 #else
-		winrt::Windows::Graphics::Display::DisplayOrientations m_nativeOrientation = winrt::Windows::Graphics::Display::DisplayOrientations::None;
-		winrt::Windows::Graphics::Display::DisplayOrientations m_current_orientation = winrt::Windows::Graphics::Display::DisplayOrientations::None;
+		DisplayOrientations m_nativeOrientation = DisplayOrientations::None;
+		DisplayOrientations m_current_orientation = DisplayOrientations::None;
 #endif
 		float m_logical_dpi = 96.0f;
 		float m_composition_scale_x = 1.0f;
@@ -102,11 +105,7 @@ namespace winrt::GraphPaper::implementation
 		void RegisterDeviceNotify(IDeviceNotify* deviceNotify);
 		// 描画環境に XAML スワップチェーンパネルを設定する.
 		// このメソッドは, UI コントロールが作成 (または再作成) されたときに呼び出される.
-#if WIN_UI == 3
-		void SetSwapChainPanel(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& xamk_scp);
-#else
-		void SetSwapChainPanel(winrt::Windows::UI::Xaml::Controls::SwapChainPanel const& xamk_scp);
-#endif
+		void SetSwapChainPanel(SwapChainPanel const& xamk_scp);
 		// 描画環境に表示領域の大きさを設定する.
 		// このメソッドは、SizeChanged イベントハンドラーの中で呼び出される.
 		void SetLogicalSize2(const D2D1_SIZE_F logicalSize);

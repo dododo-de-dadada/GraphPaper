@@ -9,8 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::Storage::Streams::DataReader;
-	using winrt::Windows::Storage::Streams::DataWriter;
+	//using winrt::Windows::Storage::Streams::DataReader;
+	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 矢じるしの D2D ストローク特性を作成する.
 	static void create_arrow_style(ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, const D2D1_LINE_JOIN s_join_style, const double s_join_limit, ID2D1StrokeStyle** s_arrow_style);

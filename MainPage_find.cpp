@@ -9,10 +9,10 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::Foundation::IAsyncAction;
+	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	//using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
+	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr wchar_t NOT_FOUND[] = L"str_info_not_found";	// 「文字列が見つかりません」メッセージのリソースキー
 

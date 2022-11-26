@@ -9,8 +9,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::Storage::Streams::DataReader;
-	using winrt::Windows::Storage::Streams::DataWriter;
+	//using winrt::Windows::Storage::Streams::DataReader;
+	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形の種類
 	// ファイルへの書き込みで使用する.

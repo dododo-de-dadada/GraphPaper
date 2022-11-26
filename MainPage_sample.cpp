@@ -10,20 +10,20 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	using winrt::Windows::Foundation::IAsyncAction;
+	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Foundation::Uri;
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
 	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
-	using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
+	//using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
 	using winrt::Windows::Storage::FileAccessMode;
-	using winrt::Windows::Storage::StorageFile;
-	using winrt::Windows::Storage::Streams::IRandomAccessStream;
-	using winrt::Windows::UI::Xaml::Controls::ContentDialog;
-	using winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs;
-	using winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs;
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
-	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
+	//using winrt::Windows::Storage::StorageFile;
+	//using winrt::Windows::Storage::Streams::IRandomAccessStream;
+	//using winrt::Windows::UI::Xaml::Controls::ContentDialog;
+	//using winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs;
+	//using winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs;
+	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	//using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
 	// 属性ダイアログのスライダーヘッダーに文字列を格納する.
 	template<int S> void MainPage::prop_set_slider_header(const winrt::hstring& text)
@@ -151,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 
 #if defined(_DEBUG)
 	// 属性のスワップチェーンパネルの寸法が変わった.
-	void MainPage::prop_panel_size_changed(IInspectable const& sender, winrt::Windows::UI::Xaml::SizeChangedEventArgs const& args)
+	void MainPage::prop_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
 	{
 		if (sender != scp_prop_panel()) {
 			return;

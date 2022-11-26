@@ -30,7 +30,7 @@
 		<muxc:MenuBar Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="{ThemeResource AppBarBackgroundThemeBrush}" Height="Auto">
 			<!-- ファイルメニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_file" AccessKey="F" Title="File" >
-				<MenuFlyoutItem x:Uid="mfi_new" Click="new_click_async" Icon="Page2" Text="New" >
+				<MenuFlyoutItem x:Uid="mfi_new" Click="file_new_click_async" Icon="Page2" Text="New" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="N" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
@@ -40,12 +40,12 @@
 						<KeyboardAccelerator Key="O" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutItem x:Uid="mfi_file_save" Click="file_save_click" Icon="Save" Text="Save" >
+				<MenuFlyoutItem x:Uid="mfi_file_save" Click="file_save_click_async" Icon="Save" Text="Save" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="S" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutItem x:Uid="mfi_file_save_as" Click="file_save_as_click" Text="Save As..." >
+				<MenuFlyoutItem x:Uid="mfi_file_save_as" Click="file_save_as_click_async" Text="Save As..." >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_save_as}" />
 					</MenuFlyoutItem.Icon>
@@ -53,7 +53,7 @@
 						<KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutItem x:Uid="mfi_file_import_img_as_shape" Click="file_import_img_as_shape_click" Text="Import Image as Shape..." >
+				<MenuFlyoutItem x:Uid="mfi_file_import_image" Click="file_import_image_click_async" Text="Import Image as Shape..." >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_photo2}" />
 					</MenuFlyoutItem.Icon>
@@ -61,7 +61,7 @@
 						<KeyboardAccelerator Key="I" Modifiers="Control,Shift" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutItem x:Uid="mfi_file_export_as_img" Click="file_export_sheet_as_img_click" Text="Export Sheet as Image..." >
+				<MenuFlyoutItem x:Uid="mfi_file_export_as_image" Click="file_export_as_image_click_async" Text="Export Sheet as Image..." >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_photo2}" />
 					</MenuFlyoutItem.Icon>
@@ -74,14 +74,14 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_recent}" />
 					</MenuFlyoutSubItem.Icon>
-					<MenuFlyoutItem x:Name="mfi_file_recent_1" Click="file_recent_click" Text="1" />
-					<MenuFlyoutItem x:Name="mfi_file_recent_2" Click="file_recent_click" Text="2" />
-					<MenuFlyoutItem x:Name="mfi_file_recent_3" Click="file_recent_click" Text="3" />
-					<MenuFlyoutItem x:Name="mfi_file_recent_4" Click="file_recent_click" Text="4" />
-					<MenuFlyoutItem x:Name="mfi_file_recent_5" Click="file_recent_click" Text="5" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_1" Click="file_recent_click_async" Text="1" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_2" Click="file_recent_click_async" Text="2" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_3" Click="file_recent_click_async" Text="3" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_4" Click="file_recent_click_async" Text="4" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_5" Click="file_recent_click_async" Text="5" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Uid="mfi_exit" Click="exit_click_async" Icon="Cancel" Text="Exit" />
+				<MenuFlyoutItem x:Uid="mfi_exit" Click="file_exit_click_async" Icon="Cancel" Text="Exit" />
 			</muxc:MenuBarItem>
 			<!-- 編集メニュー -->
             <muxc:MenuBarItem x:Name="mbi_edit" x:Uid="mbi_edit" AccessKey="E" Title="Edit">

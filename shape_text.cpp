@@ -10,8 +10,8 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::Storage::Streams::DataReader;
-	using winrt::Windows::Storage::Streams::DataWriter;
+	//using winrt::Windows::Storage::Streams::DataReader;
+	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	wchar_t** ShapeText::s_available_fonts = nullptr;	//—LŒø‚È‘‘Ì–¼
 	D2D1_COLOR_F ShapeText::s_text_selected_background{ ACCENT_COLOR };	// •¶š”ÍˆÍ‚Ì”wŒiF

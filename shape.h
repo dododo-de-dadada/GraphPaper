@@ -64,6 +64,12 @@
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Storage::Streams::DataReader;
+	using winrt::Windows::Storage::Streams::DataWriter;
+	using winrt::Windows::Foundation::Point;
+	using winrt::Windows::Storage::Streams::IRandomAccessStream;
+	using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
 #if defined(_DEBUG)
 	extern uint32_t debug_leak_cnt;
 	constexpr wchar_t DEBUG_MSG[] = L"Memory leak occurs";
@@ -272,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 	// 位置にスカラー値を掛け, 別の位置を足す.
 	inline void pt_mul_add(const D2D1_POINT_2F a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept;
 	// 点にスカラー値を掛け, 別の位置を足す.
-	inline void pt_mul_add(const winrt::Windows::Foundation::Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept;
+	inline void pt_mul_add(const Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept;
 	// 位置にスカラー値を掛ける.
 	inline void pt_mul(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& c) noexcept;
 	// 寸法に値を掛ける.
@@ -292,75 +298,75 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 
 	// データリーダーから矢じるしの寸法を読み込む.
-	void dt_read(ARROW_SIZE& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(ARROW_SIZE& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから端の形式を読み込む.
-	void dt_read(CAP_STYLE& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(CAP_STYLE& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから色を読み込む.
-	void dt_read(D2D1_COLOR_F& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(D2D1_COLOR_F& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
-	void dt_read(D2D1_POINT_2F& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(D2D1_POINT_2F& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから方形を読み込む.
-	void dt_read(D2D1_RECT_F& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(D2D1_RECT_F& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから寸法を読み込む.
-	void dt_read(D2D1_SIZE_F& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(D2D1_SIZE_F& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから寸法を読み込む.
-	void dt_read(D2D1_SIZE_U& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(D2D1_SIZE_U& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから破線の配置を読み込む.
-	void dt_read(DASH_PATT& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(DASH_PATT& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから文字範囲を読み込む.
-	void dt_read(DWRITE_TEXT_RANGE& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(DWRITE_TEXT_RANGE& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから方眼の形式を読み込む.
-	void dt_read(GRID_EMPH& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(GRID_EMPH& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから位置配列を読み込む.
-	void dt_read(std::vector<D2D1_POINT_2F>& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(std::vector<D2D1_POINT_2F>& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから文字列を読み込む.
-	void dt_read(wchar_t*& val, /*<---*/winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	void dt_read(wchar_t*& val, /*<---*/DataReader const& dt_reader);
 	// データライターに矢じるしの寸法を書き込む.
-	void dt_write(const ARROW_SIZE& val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const ARROW_SIZE& val, /*--->*/DataWriter const& dt_writer);
 	// データライターに端の形式を書き込む.
-	void dt_write(const CAP_STYLE& val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const CAP_STYLE& val, /*--->*/DataWriter const& dt_writer);
 	// データライターに色を書き込む.
-	void dt_write(const D2D1_COLOR_F& val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const D2D1_COLOR_F& val, /*--->*/DataWriter const& dt_writer);
 	// データライターに位置を書き込む.
-	void dt_write(const D2D1_POINT_2F val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const D2D1_POINT_2F val, /*--->*/DataWriter const& dt_writer);
 	// データライターに方形を書き込む.
-	void dt_write(const D2D1_RECT_F val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const D2D1_RECT_F val, /*--->*/DataWriter const& dt_writer);
 	// データライターに寸法を書き込む.
-	void dt_write(const D2D1_SIZE_F val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const D2D1_SIZE_F val, /*--->*/DataWriter const& dt_writer);
 	// データライターに寸法を書き込む.
-	void dt_write(const D2D1_SIZE_U val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const D2D1_SIZE_U val, /*--->*/DataWriter const& dt_writer);
 	// データライターに破線の配置を書き込む.
-	void dt_write(const DASH_PATT& val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const DASH_PATT& val, /*--->*/DataWriter const& dt_writer);
 	// データライターに文字列範囲を書き込む.
-	void dt_write(const DWRITE_TEXT_RANGE val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const DWRITE_TEXT_RANGE val, /*--->*/DataWriter const& dt_writer);
 	// データライターに方眼の形式を書き込む.
-	void dt_write(const GRID_EMPH val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const GRID_EMPH val, /*--->*/DataWriter const& dt_writer);
 	// データライターに位置配列を書き込む.
-	void dt_write(const std::vector<D2D1_POINT_2F>& val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const std::vector<D2D1_POINT_2F>& val, /*--->*/DataWriter const& dt_writer);
 	// データライターに文字列を書き込む.
-	void dt_write(const wchar_t* val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write(const wchar_t* val, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名とシングルバイト文字列を書き込む.
-	void dt_write_svg(const char* val, const char* name, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const char* val, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG としてシングルバイト文字列を書き込む.
-	void dt_write_svg(const char* val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const char* val, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名と色を書き込む.
-	void dt_write_svg(const D2D1_COLOR_F val, const char* name, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const D2D1_COLOR_F val, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として色を書き込む.
-	void dt_write_svg(const D2D1_COLOR_F val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const D2D1_COLOR_F val, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として破線の形式と配置を書き込む.
-	void dt_write_svg(const D2D1_DASH_STYLE style, const DASH_PATT& patt, const double width, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const D2D1_DASH_STYLE style, const DASH_PATT& patt, const double width, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として命令と位置を書き込む.
-	void dt_write_svg(const D2D1_POINT_2F val, const char* cmd, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const D2D1_POINT_2F val, const char* cmd, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名と位置を書き込む.
-	void dt_write_svg(const D2D1_POINT_2F val, const char* name_x, const char* name_y, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const D2D1_POINT_2F val, const char* name_x, const char* name_y, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名と浮動小数値を書き込む
-	void dt_write_svg(const double val, const char* name, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const double val, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として浮動小数を書き込む.
-	void dt_write_svg(const float val, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const float val, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名と 32 ビット正整数を書き込む.
-	void dt_write_svg(const uint32_t val, const char* name, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const uint32_t val, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG としてマルチバイト文字列を書き込む.
-	void dt_write_svg(const wchar_t val[], const uint32_t v_len, /*--->*/winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	void dt_write_svg(const wchar_t val[], const uint32_t v_len, /*--->*/DataWriter const& dt_writer);
 
 	//------------------------------
 	// shape_slist.cpp
@@ -398,13 +404,13 @@ namespace winrt::GraphPaper::implementation
 	// 図形のその前の図形を得る.
 	Shape* slist_prev(SHAPE_LIST const& slist, const Shape* s) noexcept;
 	// データリーダーから図形リストを読み込む.
-	bool slist_read(SHAPE_LIST& slist, winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+	bool slist_read(SHAPE_LIST& slist, DataReader const& dt_reader);
 	// 図形をリストから削除し, 削除した図形の次の図形を得る.
 	Shape* slist_remove(SHAPE_LIST& slist, const Shape* s) noexcept;
 	// 選択された図形のリストを得る.
 	template <typename T> void slist_get_selected(SHAPE_LIST const& slist, SHAPE_LIST& t_list) noexcept;
 	// データライターに図形リストを書き込む. REDUCE なら消去された図形は省く.
-	template <bool REDUCE> void slist_write(const SHAPE_LIST& slist, winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+	template <bool REDUCE> void slist_write(const SHAPE_LIST& slist, DataWriter const& dt_writer);
 	// リストの中の図形の順番を得る.
 	template <typename S, typename T> bool slist_match(SHAPE_LIST const& slist, S s, T& t);
 	// 選択されてない図形の頂点の中から 指定した位置に最も近い頂点を見つける.
@@ -586,9 +592,9 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字範囲に格納する.
 		virtual bool set_text_selected(const DWRITE_TEXT_RANGE /*val*/) noexcept { return false; }
 		// 図形をデータライターに書き込む.
-		virtual void write(winrt::Windows::Storage::Streams::DataWriter const& /*dt_writer*/) const {}
+		virtual void write(DataWriter const& /*dt_writer*/) const {}
 		// 図形をデータライターに SVG として書き込む.
-		virtual void write_svg(winrt::Windows::Storage::Streams::DataWriter const& /*dt_writer*/) const {}
+		virtual void write_svg(DataWriter const& /*dt_writer*/) const {}
 	};
 
 	//------------------------------
@@ -611,7 +617,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeSelect(void) {};
 		// 図形をデータリーダーから読み込む.
-		ShapeSelect(const winrt::Windows::Storage::Streams::DataReader& dt_reader) :
+		ShapeSelect(const DataReader& dt_reader) :
 			m_is_deleted(dt_reader.ReadBoolean()),
 			m_is_selected(dt_reader.ReadBoolean())
 			{}
@@ -637,7 +643,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapeImage(void);
 		// ストリームに格納する.
-		winrt::Windows::Foundation::IAsyncAction copy_to(const winrt::guid enc_id, winrt::Windows::Storage::Streams::IRandomAccessStream& ra_stream);
+		IAsyncAction copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream);
 		// 図形を表示する.
 		void draw(ShapeSheet const& sh) final override;
 		// 図形を囲む領域を得る.
@@ -669,15 +675,15 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F /*val*/) noexcept final override;
 		// 図形を作成する.
-		ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const winrt::Windows::Graphics::Imaging::SoftwareBitmap& bitmap, const float opacity);
+		ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bitmap, const float opacity);
 		// 図形をデータリーダーから読み込む.
-		ShapeImage(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		ShapeImage(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG ファイルとして書き込む.
-		void write_svg(const wchar_t f_name[], winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write_svg(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -823,7 +829,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列の周囲の余白を得る.
 		bool get_text_padding(D2D1_SIZE_F& val) const noexcept final override;
 		// 図形をデータリーダーから読み込む.
-		void read(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		void read(DataReader const& dt_reader);
 		// 値を矢じるしの寸法に格納する.
 		bool set_arrow_size(const ARROW_SIZE& val) noexcept final override;
 		// 値を矢じるしの形式に格納する.
@@ -889,7 +895,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を文字列の余白に格納する.
 		bool set_text_padding(const D2D1_SIZE_F val) noexcept final override;
 		// 図形をデータリーダーに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer);
+		void write(DataWriter const& dt_writer);
 	};
 
 	//------------------------------
@@ -934,11 +940,11 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
 		// 図形をデータリーダーから読み込む.
-		ShapeGroup(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		ShapeGroup(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write_svg(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1025,11 +1031,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeStroke(const ShapeSheet* s_attr);
 		// 図形をデータリーダーから読み込む.
-		ShapeStroke(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		ShapeStroke(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write_svg(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1055,7 +1061,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeLine(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr);
 		// データリーダーから図形を読み込む.
-		ShapeLine(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		ShapeLine(DataReader const& dt_reader);
 		// 図形を破棄する.
 		~ShapeLine(void);
 		// 図形を表示する.
@@ -1079,11 +1085,11 @@ namespace winrt::GraphPaper::implementation
 		// 差分だけ移動する.
 		virtual bool move(const D2D1_POINT_2F val) noexcept override;
 		// 図形をデータライターに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write_svg(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write_svg(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
 		// 値を端の形式に格納する.
 		bool set_stroke_cap(const CAP_STYLE& val) noexcept final override;
 		// 値を線分のつなぎのマイター制限に格納する.
@@ -1105,7 +1111,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr);
 		// データリーダーから図形を読み込む.
-		ShapeRect(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		ShapeRect(DataReader const& dt_reader);
 		// 図形を表示する.
 		virtual void draw(ShapeSheet const& sh) override;
 		// 近傍の頂点を見つける.
@@ -1127,9 +1133,9 @@ namespace winrt::GraphPaper::implementation
 		// 値を, 部位の位置に格納する.
 		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept override;
 		// 図形をデータライターに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		virtual void write_svg(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		virtual void write_svg(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1164,11 +1170,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr);
 		// 図形をデータリーダーから読み込む.
-		ShapeRuler(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		ShapeRuler(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(winrt::Windows::Storage::Streams::DataWriter const& /*dt_writer*/) const {}
+		void write_svg(DataWriter const& /*dt_writer*/) const {}
 	};
 
 	//------------------------------
@@ -1180,7 +1186,7 @@ namespace winrt::GraphPaper::implementation
 			ShapeRect::ShapeRect(b_pos, b_vec, s_attr)
 		{}
 		// 図形をデータリーダーから読み込む.
-		ShapeElli(winrt::Windows::Storage::Streams::DataReader const& dt_reader) :
+		ShapeElli(DataReader const& dt_reader) :
 			ShapeRect::ShapeRect(dt_reader)
 		{}
 
@@ -1193,7 +1199,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write_svg(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1220,11 +1226,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr);
 		// 図形をデータリーダーから読み込む.
-		ShapeRRect(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		ShapeRRect(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write_svg(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1238,7 +1244,7 @@ namespace winrt::GraphPaper::implementation
 			ShapeLine::ShapeLine(s_attr, s_closed)
 		{}
 		// 図形をデータリーダーから読み込む.
-		ShapePath(winrt::Windows::Storage::Streams::DataReader const& dt_reader) :
+		ShapePath(DataReader const& dt_reader) :
 			ShapeLine::ShapeLine(dt_reader)
 		{}
 
@@ -1269,7 +1275,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
 		// 図形をデータライターに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1302,11 +1308,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr, const POLY_OPTION& p_opt);
 		// 図形をデータリーダーから読み込む.
-		ShapePoly(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		ShapePoly(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& /*dt_writer*/) const;
+		void write(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(winrt::Windows::Storage::Streams::DataWriter const& /*dt_writer*/) const;
+		void write_svg(DataWriter const& /*dt_writer*/) const;
 	};
 
 	//------------------------------
@@ -1330,9 +1336,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr);
 		// 図形をデータリーダーから読み込む.
-		ShapeBezi(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		ShapeBezi(DataReader const& dt_reader);
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write_svg(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1436,11 +1442,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const ShapeSheet* s_attr);
 		// 図形をデータリーダーから読み込む.
-		ShapeText(winrt::Windows::Storage::Streams::DataReader const& dt_reader);
+		ShapeText(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
-		void write(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write(DataWriter const& dt_writer) const;
 		// データライターに SVG として書き込む.
-		void write_svg(winrt::Windows::Storage::Streams::DataWriter const& dt_writer) const;
+		void write_svg(DataWriter const& dt_writer) const;
 	};
 
 	// 図形の部位（円形）を表示する.
@@ -1763,7 +1769,7 @@ namespace winrt::GraphPaper::implementation
 	// b	スカラー値
 	// c	加える位置
 	// d	結果
-	inline void pt_mul_add(const winrt::Windows::Foundation::Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
+	inline void pt_mul_add(const Point a, const double b, const D2D1_POINT_2F c, D2D1_POINT_2F& d) noexcept
 	{
 		d.x = static_cast<FLOAT>(a.X * b + c.x);
 		d.y = static_cast<FLOAT>(a.Y * b + c.y);

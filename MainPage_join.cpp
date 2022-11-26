@@ -5,9 +5,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::Foundation::IAsyncAction;
-	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	//using winrt::Windows::Foundation::IAsyncAction;
+	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
+	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr wchar_t DLG_TITLE[] = L"str_line_join";
 

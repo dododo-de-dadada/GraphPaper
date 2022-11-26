@@ -10,23 +10,23 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	using winrt::Windows::Foundation::IAsyncAction;
-	using winrt::Windows::Foundation::IAsyncOperation;
-	using winrt::Windows::Graphics::Display::DisplayInformation;
+	//using winrt::Windows::Foundation::IAsyncAction;
+	//using winrt::Windows::Foundation::IAsyncOperation;
+	//using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::Storage::ApplicationData;
 	using winrt::Windows::Storage::CreationCollisionOption;
-	using winrt::Windows::Storage::StorageFile;
-	using winrt::Windows::UI::Color;
+	//using winrt::Windows::Storage::StorageFile;
+	//using winrt::Windows::UI::Color;
 	using winrt::Windows::UI::Text::FontStretch;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
+	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::Controls::TextBlock;
 	using winrt::Windows::UI::Xaml::Controls::TextBox;
-	using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	//using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
+	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 	using winrt::Windows::UI::Xaml::Setter;
-	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
+	//using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
 	constexpr wchar_t DLG_TITLE[] = L"str_sheet";	// 用紙の表題
 	constexpr wchar_t SHEET_PROP[] = L"sheet_prop.dat";	// 用紙設定を格納するファイル名
@@ -389,17 +389,17 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	void MainPage::sheet_xaml_root_changed(winrt::Windows::UI::Xaml::XamlRoot const&, winrt::Windows::UI::Xaml::XamlRootChangedEventArgs const& /*args*/)
-	{
-	}
+	//void MainPage::sheet_xaml_root_changed(winrt::Windows::UI::Xaml::XamlRoot const&, winrt::Windows::UI::Xaml::XamlRootChangedEventArgs const& /*args*/)
+	//{
+	//}
 
 	//------------------------------
 	// 用紙のスワップチェーンパネルのロードが始まった.
 	//------------------------------
-	void MainPage::sheet_panel_loading(IInspectable const&, winrt::Windows::Foundation::IInspectable const&)
+	void MainPage::sheet_panel_loading(IInspectable const&, IInspectable const&)
 	{
-		auto xaml_root = scp_sheet_panel().XamlRoot();
-		xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed });
+		//auto xaml_root = scp_sheet_panel().XamlRoot();
+		//xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed });
 	}
 
 	//------------------------------

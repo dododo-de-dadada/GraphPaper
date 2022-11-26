@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollEventArgs;
+	//using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollEventArgs;
 
 	// スクロールバーが操作された.
 	void MainPage::scroll(IInspectable const& sender, ScrollEventArgs const& args)

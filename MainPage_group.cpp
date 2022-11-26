@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// 編集メニューの「グループ化」が選択された.
 	void MainPage::group_click(IInspectable const&, RoutedEventArgs const&)

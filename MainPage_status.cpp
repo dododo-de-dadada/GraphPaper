@@ -11,8 +11,8 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	using winrt::Windows::UI::Core::CoreWindow;
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	//using winrt::Windows::UI::Core::CoreWindow;
+	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// AND ‰‰ŽZ‚·‚é.
 	static inline STATUS_BAR status_and(const STATUS_BAR a, const STATUS_BAR b) noexcept;

@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr bool SEND_TO_BACK = true;
 	using SEND_BACKWARD = SHAPE_LIST::iterator;

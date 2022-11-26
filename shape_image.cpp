@@ -6,15 +6,15 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::Foundation::IAsyncAction;
+	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
 	using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
 	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
-	using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
-	using winrt::Windows::Storage::Streams::DataReader;
-	using winrt::Windows::Storage::Streams::DataWriter;
-	using winrt::Windows::Storage::Streams::IRandomAccessStream;
+	//using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
+	//using winrt::Windows::Storage::Streams::DataReader;
+	//using winrt::Windows::Storage::Streams::DataWriter;
+	//using winrt::Windows::Storage::Streams::IRandomAccessStream;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
 
 	// D2D1_RECT_F から D2D1_RECT_U を作成する.
@@ -100,7 +100,7 @@ namespace winrt::GraphPaper::implementation
 			try {
 				co_await bmp_enc.FlushAsync();
 			}
-			catch (winrt::hresult_error& err) {
+			catch (winrt::hresult_error&) {
 				// サムネイルの自動生成が出来ないなら, false を格納する.
 				//if (err.code() == WINCODEC_ERR_UNSUPPORTEDOPERATION) {
 				//	bmp_enc.IsThumbnailGenerated(false);

@@ -20,9 +20,9 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::Storage::Streams::DataReader;
-	using winrt::Windows::Storage::Streams::DataWriter;
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	//using winrt::Windows::Storage::Streams::DataReader;
+	//using winrt::Windows::Storage::Streams::DataWriter;
+	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// ヌルで区切られる一連の操作を, 操作の組とみなし, その数を組数とする.
 	// スタックに積むことができる最大の組数.
@@ -257,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_ustack_rcnt == 0 && m_ustack_ucnt == 0) {
 			return;
 		}
-		using winrt::Windows::UI::Xaml::Controls::ContentDialog;
+		//using winrt::Windows::UI::Xaml::Controls::ContentDialog;
 		ContentDialog dialog;
 		dialog.Title(box_value(L"Undo is not empty."));
 		dialog.CloseButtonText(L"Close");

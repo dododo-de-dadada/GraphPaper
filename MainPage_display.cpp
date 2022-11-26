@@ -9,7 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::Graphics::Display::DisplayInformation;
+	//using winrt::Windows::Graphics::Display::DisplayInformation;
 
 	// 再描画が必要になった
 	// sender	イベントが発生した表示デバイス

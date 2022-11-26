@@ -11,45 +11,15 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	using winrt::Windows::Foundation::IAsyncAction;
-	using winrt::Windows::Foundation::IAsyncOperation;
-	using winrt::Windows::Graphics::Display::DisplayInformation;
-	using winrt::Windows::UI::Color;
-	using winrt::Windows::UI::Core::CoreWindow;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
 	using winrt::Windows::UI::ViewManagement::UISettings;
 	using winrt::Windows::UI::Xaml::Application;
-	using winrt::Windows::UI::Xaml::Controls::ContentDialog;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
 	using winrt::Windows::UI::Xaml::Media::Brush;
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
-
-	// UWP のブラシを D2D1_COLOR_F に変換する.
-	//static bool conv_uwp_to_color(const Brush& a, D2D1_COLOR_F& b) noexcept;
-
-	// UWP の色を D2D1_COLOR_F に変換する.
-	//void conv_uwp_to_color(const Color& a, D2D1_COLOR_F& b) noexcept;
 
 	// 色成分を文字列に変換する.
 	void conv_col_to_str(const COLOR_CODE c_code, const double val, const size_t t_len, wchar_t t_buf[]) noexcept;
-
-	// UWP のブラシを D2D1_COLOR_F に変換する.
-	/*
-	static bool conv_uwp_to_color(const Brush& a, D2D1_COLOR_F& b) noexcept
-	{
-		using winrt::Windows::UI::Xaml::Media::SolidColorBrush;
-
-		const auto brush = a.try_as<SolidColorBrush>();
-		if (brush == nullptr) {
-			return false;
-		}
-		const auto color = brush.Color();
-		conv_uwp_to_color(color, b);
-		return true;
-	}
-	*/
 
 	//-------------------------------
 	// 色成分を文字列に変換する.
@@ -150,172 +120,6 @@ namespace winrt::GraphPaper::implementation
 	template void conv_len_to_str<LEN_UNIT_SHOW>(const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	//-------------------------------
-	// 確認ダイアログを表示してその応答を得る.
-	// 戻り値	「保存する」または「保存しない」が押されたなら true を, 応答がキャンセルなら, または内容を保存できなかったなら false を返す.
-	//-------------------------------
-	IAsyncOperation<bool> MainPage::ask_for_conf_async(void)
-	{
-		// コルーチンの開始時のスレッドコンテキストを保存する.
-		winrt::apartment_context context;
-		// スレッドをメインページの UI スレッドに変える.
-		co_await winrt::resume_foreground(Dispatcher());
-		// 確認ダイアログを表示し, 応答を得る.
-		const ContentDialogResult dr = co_await cd_conf_save_dialog().ShowAsync();
-		// スレッドコンテキストを復元する.
-		co_await context;
-
-		// 応答が「保存する」か判定する.
-		if (dr == ContentDialogResult::Primary) {
-			// ファイルに非同期に保存.
-			// 保存に失敗しても, true を返す.
-			co_await file_save_async();
-			co_return true;
-		}
-		// 応答が「保存しない」か判定する.
-		else if (dr == ContentDialogResult::Secondary) {
-			co_return true;
-		}
-		// 応答が「キャンセル」(上記以外) なら false を返す.
-		co_return false;
-	}
-
-	//-------------------------------
-	// ファイルメニューの「終了」が選択された
-	//-------------------------------
-	IAsyncAction MainPage::exit_click_async(IInspectable const&, RoutedEventArgs const&)
-	{
-		// コンテキストメニューが開いているなら閉じる.
-		if (m_menu_fill != nullptr && m_menu_fill.IsOpen()) {
-			m_menu_fill.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_font != nullptr && m_menu_font.IsOpen()) {
-			m_menu_font.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_image != nullptr && m_menu_image.IsOpen()) {
-			m_menu_image.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_ruler != nullptr && m_menu_ruler.IsOpen()) {
-			m_menu_ruler.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_sheet != nullptr && m_menu_sheet.IsOpen()) {
-			m_menu_sheet.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_stroke != nullptr && m_menu_stroke.IsOpen()) {
-			m_menu_stroke.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_ungroup != nullptr && m_menu_ungroup.IsOpen()) {
-			m_menu_ungroup.Hide();
-			ContextFlyout(nullptr);
-		}
-
-		// コンテキストダイアログを閉じる.
-		cd_conf_save_dialog().Hide();
-		cd_edit_text_dialog().Hide();
-		cd_message_dialog().Hide();
-		cd_misc_vert_stick().Hide();
-		cd_prop_dialog().Hide();
-		cd_sheet_size_dialog().Hide();
-
-		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
-		if (m_ustack_is_changed && !co_await ask_for_conf_async()) {
-			co_return;
-		}
-
-		// ファイルの書き込みが終わるまでブロックする.
-		while (!m_save_mutex.try_lock()) {
-#ifdef _DEBUG
-			__debugbreak();
-#endif // _DEBUG
-		}
-		m_save_mutex.unlock();
-
-		// 一覧が表示されてるか判定する.
-		if (summary_is_visible()) {
-			summary_close_click(nullptr, nullptr);
-		}
-		// 静的リソースから読み込んだコンテキストメニューを破棄する.
-		{
-			m_menu_stroke = nullptr;
-			m_menu_fill = nullptr;
-			m_menu_font = nullptr;
-			m_menu_sheet = nullptr;
-			m_menu_ruler = nullptr;
-			m_menu_image = nullptr;
-			m_menu_ungroup = nullptr;
-		}
-
-		// コードビハインドで設定したハンドラーの設定を解除する.
-		{
-			auto const& app{ Application::Current() };
-			app.Suspending(m_token_suspending);
-			app.Resuming(m_token_resuming);
-			app.EnteredBackground(m_token_entered_background);
-			app.LeavingBackground(m_token_leaving_background);
-			auto const& thread{ CoreWindow::GetForCurrentThread() };
-			thread.Activated(m_token_activated);
-			thread.VisibilityChanged(m_token_visibility_changed);
-			//auto const& disp{ DisplayInformation::GetForCurrentView() };
-			//disp.DpiChanged(m_token_dpi_changed);
-			//disp.OrientationChanged(m_token_orientation_changed);
-			//disp.DisplayContentsInvalidated(m_token_contents_invalidated);
-			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(m_token_close_requested);
-		}
-
-		// DirectX のオブジェクトを破棄する.
-		{
-			// ウィンドウに他のコントロールを表示していた場合 (例えばリストビュー),
-			// この後, スワップチェーンパネルの SizeChanged が呼び出されてしまう.
-			// その時, 描画処理しないよう排他制御をロックする.
-			m_d2d_mutex.lock();
-			if (m_main_sheet.m_state_block != nullptr) {
-				//m_main_sheet.m_state_block->Release();
-				m_main_sheet.m_state_block = nullptr;
-			}
-			if (m_main_sheet.m_color_brush != nullptr) {
-				//m_main_sheet.m_color_brush->Release();
-				m_main_sheet.m_color_brush = nullptr;
-			}
-			if (m_main_sheet.m_range_brush != nullptr) {
-				//m_main_sheet.m_range_brush->Release();
-				m_main_sheet.m_range_brush = nullptr;
-			}
-			m_main_sheet.m_d2d.Trim();
-			if (m_prop_sheet.m_state_block != nullptr) {
-				//m_prop_sheet.m_state_block->Release();
-				m_prop_sheet.m_state_block = nullptr;
-			}
-			if (m_prop_sheet.m_color_brush != nullptr) {
-				//m_prop_sheet.m_color_brush->Release();
-				m_prop_sheet.m_color_brush = nullptr;
-			}
-			if (m_prop_sheet.m_range_brush != nullptr) {
-				//m_prop_sheet.m_range_brush->Release();
-				m_prop_sheet.m_range_brush = nullptr;
-			}
-			m_prop_sheet.m_d2d.Trim();
-		}
-
-		ustack_clear();
-		slist_clear(m_main_sheet.m_shape_list);
-		slist_clear(m_prop_sheet.m_shape_list);
-#if defined(_DEBUG)
-		if (debug_leak_cnt != 0) {
-			message_show(ICON_ALERT, DEBUG_MSG, {});
-		}
-#endif
-		ShapeText::release_available_fonts();
-
-		// アプリケーションを終了する.
-		Application::Current().Exit();
-	}
-
-	//-------------------------------
 	// メインページを作成する.
 	//-------------------------------
 	MainPage::MainPage(void)
@@ -373,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 		// コンテキストメニューを静的リソースから読み込む.
 		// ポップアップは静的なリソースとして定義して、複数の要素で使用することができる.
 		{
-			using winrt::Windows::UI::Xaml::Controls::MenuFlyoutSubItem;
+			//using winrt::Windows::UI::Xaml::Controls::MenuFlyoutSubItem;
 			//m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill_menu")));
 			//m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_front_menu")));
 			//m_menu_sheet = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet_menu")));
@@ -382,7 +186,7 @@ namespace winrt::GraphPaper::implementation
 			//m_menu_image = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_image_menu")));
 		}
 
-		auto _{ new_click_async(nullptr, nullptr) };
+		auto _{ file_new_click_async(nullptr, nullptr) };
 	}
 
 	//-------------------------------
@@ -425,72 +229,6 @@ namespace winrt::GraphPaper::implementation
 		fi_message().Glyph(glyph_val != nullptr ? unbox_value<winrt::hstring>(glyph_val) : glyph_key);
 		tk_message().Text(text);
 		auto _{ cd_message_dialog().ShowAsync() };
-	}
-
-	// ファイルメニューの「新規」が選択された
-	IAsyncAction MainPage::new_click_async(IInspectable const&, RoutedEventArgs const&)
-	{
-		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
-		if (m_ustack_is_changed && !co_await ask_for_conf_async()) {
-			co_return;
-		}
-		// 一覧が表示されてるか判定する.
-		if (summary_is_visible()) {
-			summary_close_click(nullptr, nullptr);
-		}
-		ustack_clear();
-		slist_clear(m_main_sheet.m_shape_list);
-#if defined(_DEBUG)
-		if (debug_leak_cnt != 0) {
-			// 「メモリリーク」メッセージダイアログを表示する.
-			message_show(ICON_ALERT, DEBUG_MSG, {});
-		}
-#endif
-		ShapeText::release_available_fonts();
-
-		ShapeText::set_available_fonts(m_main_sheet.m_d2d);
-
-		// 背景色, 前景色, 選択された文字範囲の背景色, 文字色をリソースから得る.
-		{
-			const IInspectable sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
-			const IInspectable sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
-			if (sel_back_color != nullptr && sel_text_color != nullptr) {
-				conv_uwp_to_color(unbox_value<Color>(sel_back_color), ShapeText::s_text_selected_background);
-				conv_uwp_to_color(unbox_value<Color>(sel_text_color), ShapeText::s_text_selected_foreground);
-			}
-			else {
-				ShapeText::s_text_selected_background = { 0.0f, 0x00 / COLOR_MAX, 0x78 / COLOR_MAX, 0xD4 / COLOR_MAX };
-				ShapeText::s_text_selected_foreground = COLOR_WHITE;
-			}
-			/*
-			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
-			auto const& fore_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
-			if (back_theme != nullptr && fore_theme != nullptr) {
-				conv_uwp_to_color(unbox_value<Brush>(back_theme), Shape::s_background_color);
-				conv_uwp_to_color(unbox_value<Brush>(fore_theme), Shape::s_foreground_color);
-			}
-			else {*/
-				Shape::s_background_color = COLOR_WHITE;
-				Shape::s_foreground_color = COLOR_BLACK;
-			//}
-		}
-
-		if (co_await sheet_prop_load_async() != S_OK) {
-			// 読み込みに失敗した場合,
-			sheet_init();
-			m_len_unit = LEN_UNIT::PIXEL;
-			m_color_code = COLOR_CODE::DEC;
-			m_vert_stick = VERT_STICK_DEF_VAL;
-			m_status_bar = STATUS_BAR_DEF_VAL;
-		}
-
-		// 用紙の左上位置と右下位置を初期化する.
-		{
-			m_main_min = D2D1_POINT_2F{ 0.0F, 0.0F };
-			m_main_max = D2D1_POINT_2F{ m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height };
-		}
-		file_recent_add(nullptr);
-		file_finish_reading();
 	}
 
 }

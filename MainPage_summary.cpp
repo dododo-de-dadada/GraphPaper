@@ -10,11 +10,11 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
+	//using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ItemCollection;
 	using winrt::Windows::UI::Xaml::Controls::ListView;
-	using winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs;
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
+	//using winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs;
+	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// 図形リストをもとに図形の一覧を作成する.
 	static void summary_create(ListView const& l_view, const SHAPE_LIST& slist, const ResourceDictionary& r_dict);
@@ -237,7 +237,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の一覧がロードされた.
-	void MainPage::summary_loaded(IInspectable const&, winrt::Windows::UI::Xaml::RoutedEventArgs const& /*e*/)
+	void MainPage::summary_loaded(IInspectable const&, RoutedEventArgs const& /*e*/)
 	{
 		// 図形の一覧の排他制御を false と入れ替える.
 		bool summary_visible = m_summary_atomic.exchange(false, std::memory_order_acq_rel); // 入れ替え前の排他制御
