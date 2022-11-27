@@ -476,7 +476,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				// リソースから図形の一覧パネルを見つける.
-				auto _{ 
+				auto _{
 					FindName(L"gd_summary_panel")
 				};
 				gd_summary_panel().Visibility(UI_VISIBLE);
