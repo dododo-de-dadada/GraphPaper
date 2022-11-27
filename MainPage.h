@@ -1,9 +1,9 @@
 ﻿#pragma once
 //------------------------------
-// 1	「ソリューションエクスプローラー」>「ビューを切り替える」>「フォルダービュー」
-// 2	「ビルド」>「構成マネージャー」>「アクティブソリューションプラットフォーム」を x64
-// 3	「プロジェクト」>「NuGetパッケージの管理」>「復元」. 必要なら「MicroSoft.UI.Xaml」と「Microsoft.Windows.CppWinRT」を更新.
-// 4	「デバッグ」>「GraphPaper のプロパティ」>「構成プロパティ」>「ターゲットプラットフォームの最小バージョン」>「10.0.17763.0」
+// 1「ソリューションエクスプローラー」>「ビューを切り替える」>「フォルダービュー」
+// 2「ビルド」>「構成マネージャー」>「アクティブソリューションプラットフォーム」を x64
+// 3「プロジェクト」>「NuGetパッケージの管理」>「復元」. 必要なら「MicroSoft.UI.Xaml」と「Microsoft.Windows.CppWinRT」を更新.
+// 4「デバッグ」>「GraphPaper のプロパティ」>「構成プロパティ」>「ターゲットプラットフォームの最小バージョン」>「10.0.17763.0」
 // 	(MicroSoft.UI.Xaml の MenuBar には、Windows 10 Version 1809 (SDK 17763) 以降、または Windows UI ライブラリが必要)
 //
 // デバッガーの停止で終了したときはすべて 0 になるが,
@@ -122,7 +122,9 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr double UWP_COLOR_MAX = 255.0;	// UWP の色成分の最大値
 
+	//-------------------------------
 	// UWP の色を D2D1_COLOR_F に変換する.
+	//-------------------------------
 	inline void conv_uwp_to_color(const Color& a, D2D1_COLOR_F& b) noexcept
 	{
 		b.r = static_cast<FLOAT>(static_cast<double>(a.R) / UWP_COLOR_MAX);
@@ -176,6 +178,7 @@ namespace winrt::GraphPaper::implementation
 	// 長さを文字列に変換する.
 	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
 
+	//-------------------------------
 	// 長さを文字列に変換する.
 	// B	単位名を付加するか判定する.
 	// len_unit	長さの単位
@@ -183,6 +186,7 @@ namespace winrt::GraphPaper::implementation
 	// dpi	DPI
 	// g_len	グリッドの大きさ
 	// t_buf	文字列を格納した固定配列
+	//-------------------------------
 	template <bool B, size_t Z> inline void conv_len_to_str(const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len, wchar_t(&t_buf)[Z]) noexcept
 	{
 		conv_len_to_str<B>(len_unit, val_pixel, dpi, g_len, Z, t_buf);
@@ -230,8 +234,9 @@ namespace winrt::GraphPaper::implementation
 
 		// 排他制御
 		std::atomic_bool m_summary_atomic{ false };	// 一覧の排他制御
-		std::mutex m_d2d_mutex;	// 描画の排他制御
-		std::mutex m_save_mutex;	// 非同期処理中に終了しない
+		std::mutex m_mutex_d2d;	// 描画中のの排他制御
+		std::mutex m_mutex_fwrite;	// ファイル書き込み中の排他制御
+		std::mutex m_mutex_fopen;	// ファイルオープン中の排他制御
 
 		// 文字列の編集, 検索と置換
 		bool m_text_frame_fit_text = false;	// 枠を文字列に合わせる
@@ -453,7 +458,7 @@ namespace winrt::GraphPaper::implementation
 		// ファイルシステムへのアクセス権を確認して, 設定を促す.
 		//IAsyncAction file_check_broad_access(void) const;
 		// ファイルへの更新を確認する.
-		IAsyncOperation<bool> file_comfirm_updates(void);
+		IAsyncOperation<bool> file_comfirm_dialog(void);
 		// ファイルメニューの「終了」が選択された
 		IAsyncAction file_exit_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルの読み込みが終了した.
@@ -475,9 +480,9 @@ namespace winrt::GraphPaper::implementation
 		// 最近使ったファイルにストレージファイルを追加する.
 		void file_recent_add(StorageFile const& s_file);
 		// 最近使ったファイルのトークンからストレージファイルを得る.
-		IAsyncOperation<StorageFile> file_recent_from_token_async(const winrt::hstring token);
+		IAsyncOperation<StorageFile> file_recent_token_async(const winrt::hstring token);
 		// 最近使ったファイルのメニュー項目を更新する.
-		void file_recent_update_menu(void);
+		void file_recent_menu_update(void);
 		// 図形データをストレージファイルに非同期に書き込む.
 		template <bool SUSPEND, bool SETTING>
 		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile s_file);
@@ -486,7 +491,7 @@ namespace winrt::GraphPaper::implementation
 		// ファイルメニューの「用紙を画像としてエクスポートする」が選択された
 		IAsyncAction file_export_as_image_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 画像用のファイル保存ピッカーを開いて, ストレージファイルを得る.
-		IAsyncOperation<StorageFile> MainPage::file_pick_save_image_async(const wchar_t sug_name[]);
+		IAsyncOperation<StorageFile> file_pick_save_image_async(const wchar_t sug_name[]);
 
 		//-------------------------------
 		// MainPage_fill.cpp
@@ -778,8 +783,6 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_OP U, int S> void sheet_slider_set_header(const float val);
 		// スライダーの値が変更された.
 		template <UNDO_OP U, int S> void sheet_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
-		// 用紙の大きさの最大値 (ピクセル) を得る.
-		constexpr float sheet_size_max(void) const noexcept { return 32767.0F; }
 		// 用紙のスワップチェーンパネルがロードされた.
 		void sheet_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
 		// 用紙のスワップチェーンパネルの寸法が変わった.
@@ -978,8 +981,8 @@ namespace winrt::GraphPaper::implementation
 		void ustack_push_image(Shape* const s);
 		// 図形を挿入して, その操作をスタックに積む.
 		void ustack_push_insert(Shape* const s, Shape* const s_pos);
-		// 図形の位置をスタックに保存してから差分だけ移動する.
-		void ustack_push_move(const D2D1_POINT_2F d_vec, const bool all = false);
+		// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
+		void ustack_push_move(const D2D1_POINT_2F d_vec, const bool any = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void ustack_push_null(void);
 		// 図形をグループから取り去り, その操作をスタックに積む.

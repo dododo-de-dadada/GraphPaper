@@ -567,13 +567,20 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F dummy;
 		dt_read(dummy, dt_reader);
 		m_grid_base = dt_reader.ReadSingle();
+		m_grid_base = max(m_grid_base, 0.0f);
 		dt_read(m_grid_color, dt_reader);
 		dt_read(m_grid_emph, dt_reader);
 		m_grid_show = static_cast<GRID_SHOW>(dt_reader.ReadUInt32());
 		m_grid_snap = dt_reader.ReadBoolean();
 		dt_read(m_sheet_color, dt_reader);
 		m_sheet_scale = dt_reader.ReadSingle();
+		m_sheet_scale = max(m_sheet_scale, 0.25f);
+		m_sheet_scale = min(m_sheet_scale, 4.0f);
 		dt_read(m_sheet_size, dt_reader);
+		m_sheet_size.width = min(m_sheet_size.width, ShapeSheet::size_max());
+		m_sheet_size.width = max(m_sheet_size.width, 1.0F);
+		m_sheet_size.height = min(m_sheet_size.height, ShapeSheet::size_max());
+		m_sheet_size.height = max(m_sheet_size.height, 1.0F);
 
 		dt_read(m_arrow_size, dt_reader);	// ñÓÇ∂ÇÈÇµÇÃê°ñ@
 		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());	// ñÓÇ∂ÇÈÇµÇÃå`éÆ

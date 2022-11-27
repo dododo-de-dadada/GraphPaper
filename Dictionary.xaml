@@ -18,7 +18,12 @@
 	<x:String x:Key="glyph_unit">&#xECC6;</x:String>
 	<x:String x:Key="glyph_color">&#xE790;</x:String>
 	<x:String x:Key="glyph_list">&#xE8FD;</x:String>
-	<!-- 曲線アイコンの描画コマンド -->
+    <x:String x:Key="glyph_dial1">&#xF146;</x:String>
+    <x:String x:Key="glyph_dial2">&#xF147;</x:String>
+    <x:String x:Key="glyph_dial3">&#xF148;</x:String>
+    <x:String x:Key="glyph_dial4">&#xF149;</x:String>
+    <x:String x:Key="glyph_dial5">&#xF14A;</x:String>
+    <!-- 曲線アイコンの描画コマンド -->
 	<x:String x:Key="data_bezi">
 		M0.560633,8.093141 C7.686753,1.656054 7.654862,15.655831 16.030224,8.749841 L15.310918,7.967942 C8.311178,14.40621 8.311178,0.405251 -0.032292,7.249824 Z
 	</x:String>

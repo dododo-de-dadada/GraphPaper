@@ -189,7 +189,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		if (!m_d2d_mutex.try_lock()) {
+		if (!m_mutex_d2d.try_lock()) {
 			// ロックできない場合
 			return;
 		}
@@ -253,7 +253,7 @@ namespace winrt::GraphPaper::implementation
 			message_show(ICON_ALERT, L"str_err_draw", {});
 		}
 #endif
-		m_d2d_mutex.unlock();
+		m_mutex_d2d.unlock();
 	}
 
 	// 前景色を得る.
@@ -485,7 +485,7 @@ namespace winrt::GraphPaper::implementation
 		tx_sheet_width().Text(buf);
 		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_sheet.m_d2d.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_height().Text(buf);
-		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, sheet_size_max(), m_main_sheet.m_d2d.m_logical_dpi, g_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, ShapeSheet::size_max(), m_main_sheet.m_d2d.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
@@ -555,8 +555,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			bool flag = false;
 			if (dx > 0.0F || dy > 0.0F) {
-				constexpr auto ALL = true;
-				ustack_push_move({ dx, dy }, ALL);
+				constexpr auto ANY = true;
+				ustack_push_move({ dx, dy }, ANY);
 				flag = true;
 			}
 			D2D1_POINT_2F p_min = { 0.0F, 0.0F };
@@ -596,7 +596,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.get_grid_base(g_base);
 			val = conv_len_to_val(m_len_unit, val, dpi, g_base + 1.0);
 		}
-		cd_sheet_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && val >= 1.0 && val < sheet_size_max());
+		cd_sheet_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && val >= 1.0 && val < ShapeSheet::size_max());
 	}
 
 	// 値をスライダーのヘッダーに格納する.

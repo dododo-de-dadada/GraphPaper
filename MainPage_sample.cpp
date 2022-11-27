@@ -55,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		if (!m_d2d_mutex.try_lock()) {
+		if (!m_mutex_d2d.try_lock()) {
 			// ロックできない場合
 			return;
 		}
@@ -70,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 		m_prop_sheet.m_d2d.m_d2d_context->EndDraw();
 		m_prop_sheet.m_d2d.m_d2d_context->RestoreDrawingState(m_prop_sheet.m_state_block.get());
 		m_prop_sheet.m_d2d.Present();
-		m_d2d_mutex.unlock();
+		m_mutex_d2d.unlock();
 	}
 
 	// 属性リストビューがロードされた.

@@ -752,6 +752,7 @@ namespace winrt::GraphPaper::implementation
 		// shape_sheet.cpp
 		//------------------------------
 
+		static constexpr float size_max(void) noexcept { return 32767.0F; }
 		// }Œ`‚ğ•\¦‚·‚é.
 		void draw(ShapeSheet const& sh) final override;
 		// ‹Èü‚Ì•â•ü‚ğ•\¦‚·‚é.

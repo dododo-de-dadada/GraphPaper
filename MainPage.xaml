@@ -74,11 +74,31 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_recent}" />
 					</MenuFlyoutSubItem.Icon>
-                    <MenuFlyoutItem x:Name="mfi_file_recent_1" Click="file_recent_click_async" Text="1" />
-                    <MenuFlyoutItem x:Name="mfi_file_recent_2" Click="file_recent_click_async" Text="2" />
-                    <MenuFlyoutItem x:Name="mfi_file_recent_3" Click="file_recent_click_async" Text="3" />
-                    <MenuFlyoutItem x:Name="mfi_file_recent_4" Click="file_recent_click_async" Text="4" />
-                    <MenuFlyoutItem x:Name="mfi_file_recent_5" Click="file_recent_click_async" Text="5" />
+                    <MenuFlyoutItem x:Name="mfi_file_recent_1" Click="file_recent_click_async" Text="" >
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial1}" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="mfi_file_recent_2" Click="file_recent_click_async" Text="" >
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial2}" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="mfi_file_recent_3" Click="file_recent_click_async" Text="" >
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial3}" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="mfi_file_recent_4" Click="file_recent_click_async" Text="" >
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial4}" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem x:Name="mfi_file_recent_5" Click="file_recent_click_async" Text="" >
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial5}" />
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<MenuFlyoutItem x:Uid="mfi_exit" Click="file_exit_click_async" Icon="Cancel" Text="Exit" />

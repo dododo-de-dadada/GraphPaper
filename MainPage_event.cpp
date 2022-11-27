@@ -23,13 +23,14 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::UIElement;
 	using winrt::Windows::UI::Xaml::Window;
 
-	static auto const& CC_ARROW = CoreCursor(CoreCursorType::Arrow, 0);	// 矢印カーソル
-	static auto const& CC_CROSS = CoreCursor(CoreCursorType::Cross, 0);	// 十字カーソル
-	static auto const& CC_SIZE_ALL = CoreCursor(CoreCursorType::SizeAll, 0);	// 移動カーソル
-	static auto const& CC_SIZE_NESW = CoreCursor(CoreCursorType::SizeNortheastSouthwest, 0);	// 右上左下カーソル
-	static auto const& CC_SIZE_NS = CoreCursor(CoreCursorType::SizeNorthSouth, 0);	// 上下カーソル
-	static auto const& CC_SIZE_NWSE = CoreCursor(CoreCursorType::SizeNorthwestSoutheast, 0);	// 左上右下カーソル
-	static auto const& CC_SIZE_WE = CoreCursor(CoreCursorType::SizeWestEast, 0);	// 左右カーソル
+	static auto const& CURS_ARROW = CoreCursor(CoreCursorType::Arrow, 0);	// 矢印カーソル
+	static auto const& CURS_CROSS = CoreCursor(CoreCursorType::Cross, 0);	// 十字カーソル
+	static auto const& CURS_SIZE_ALL = CoreCursor(CoreCursorType::SizeAll, 0);	// 移動カーソル
+	static auto const& CURS_SIZE_NESW = CoreCursor(CoreCursorType::SizeNortheastSouthwest, 0);	// 右上左下カーソル
+	static auto const& CURS_SIZE_NS = CoreCursor(CoreCursorType::SizeNorthSouth, 0);	// 上下カーソル
+	static auto const& CURS_SIZE_NWSE = CoreCursor(CoreCursorType::SizeNorthwestSoutheast, 0);	// 左上右下カーソル
+	static auto const& CURS_SIZE_WE = CoreCursor(CoreCursorType::SizeWestEast, 0);	// 左右カーソル
+	static auto const& CURS_WAIT = CoreCursor(CoreCursorType::Wait , 0);	// 左右カーソル
 
 	// 図形が操作スタックに含まれるか判定する.
 	static bool event_ustack_include_shape(UNDO_STACK const& ustack, Shape* const s) noexcept;
@@ -191,7 +192,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_entered(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
 		if (sender != scp_sheet_panel()) {
-			Window::Current().CoreWindow().PointerCursor(CC_ARROW);
+			Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 		}
 		else {
 			event_set_pos_cur(args);
@@ -206,8 +207,8 @@ namespace winrt::GraphPaper::implementation
 		if (sender == scp_sheet_panel()) {
 			auto const& c_win = Window::Current().CoreWindow();
 			auto const& p_cur = c_win.PointerCursor();
-			if (p_cur.Type() != CC_ARROW.Type()) {
-				c_win.PointerCursor(CC_ARROW);
+			if (p_cur.Type() != CURS_ARROW.Type()) {
+				c_win.PointerCursor(CURS_ARROW);
 			}
 		}
 	}
@@ -425,7 +426,7 @@ namespace winrt::GraphPaper::implementation
 				xcvd_is_enabled();
 			}
 		}
-		Window::Current().CoreWindow().PointerCursor(CC_ARROW);
+		Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 	}
 
 	// ポインターが動いた.
@@ -436,6 +437,13 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
+		// ファイル開くピッカーが返値を戻すまでの排他処理.
+		if (!m_mutex_fopen.try_lock()) {
+			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
+			return;
+		}
+		m_mutex_fopen.unlock();
+
 		event_set_pos_cur(args);
 		status_bar_set_pos();
 		// ポインターの押された状態が, 初期状態か判定する.
@@ -476,8 +484,10 @@ namespace winrt::GraphPaper::implementation
 			m_event_pos_prev = m_event_pos_curr;
 			sheet_draw();
 		}
-		// 状態が, 左ボタンを押している状態, またはクリック後に左ボタンを押した状態か判定する.
-		else if (m_event_state == EVENT_STATE::PRESS_LBTN || m_event_state == EVENT_STATE::CLICK_LBTN) {
+		// 状態が, 左ボタンを押している状態, または
+		// クリック後に左ボタンを押した状態か判定する.
+		else if (m_event_state == EVENT_STATE::PRESS_LBTN || 
+			m_event_state == EVENT_STATE::CLICK_LBTN) {
 			// ポインターの現在位置と押された位置との差分を得る.
 			D2D1_POINT_2F vec;
 			pt_sub(m_event_pos_curr, m_event_pos_pressed, vec);
@@ -491,9 +501,9 @@ namespace winrt::GraphPaper::implementation
 				// 押された図形がヌルか判定する.
 				else if (m_event_shape_pressed == nullptr) {
 					// 範囲を選択している状態に遷移する.
-					// 十字カーソルをカーソルに設定する.
 					m_event_state = EVENT_STATE::PRESS_AREA;
-					Window::Current().CoreWindow().PointerCursor(CC_CROSS);
+					// 十字カーソルをカーソルに設定する.
+					Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 				}
 				// 選択された図形の数が 1 を超える,
 				// または押された図形の部位が線枠, 内側, 文字列かを判定する.
@@ -502,8 +512,8 @@ namespace winrt::GraphPaper::implementation
 					m_event_anc_pressed == ANC_TYPE::ANC_FILL ||
 					m_event_anc_pressed == ANC_TYPE::ANC_TEXT) {
 					// 図形を移動している状態に遷移する.
-					// ポインターの現在位置を前回位置に保存する.
 					m_event_state = EVENT_STATE::PRESS_MOVE;
+					// ポインターの現在位置を前回位置に保存する.
 					m_event_pos_prev = m_event_pos_curr;
 					ustack_push_move(vec);
 				}
@@ -530,6 +540,13 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
+		// ファイル開くピッカーが返値を戻すまでの排他処理.
+		if (!m_mutex_fopen.try_lock()) {
+			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
+			return;
+		}
+		m_mutex_fopen.unlock();
+
 		// ポインターのキャプチャを始める.
 		// 引数の値をポンインターの現在位置に格納する.
 		// ポインターのイベント発生時間を得る.
@@ -717,6 +734,13 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
+		// ファイル開くピッカーが返値を戻すまでの排他処理.
+		if (!m_mutex_fopen.try_lock()) {
+			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
+			return;
+		}
+		m_mutex_fopen.unlock();
+
 		// ポインターの追跡を停止する.
 		auto const& panel = sender.as<SwapChainPanel>();
 		panel.ReleasePointerCaptures();
@@ -815,22 +839,22 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 作図ツールが選択ツール以外か判定する.
 		if (m_drawing_tool != DRAWING_TOOL::SELECT) {
-			Window::Current().CoreWindow().PointerCursor(CC_CROSS);
+			Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 		}
 		// 描画の排他制御をロックできないか判定する.
-		else if (!m_d2d_mutex.try_lock()) {
-			Window::Current().CoreWindow().PointerCursor(CC_ARROW);
+		else if (!m_mutex_d2d.try_lock()) {
+			Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 		}
 		else {
 			// 描画の排他制御をロックできたなら, ただちに解除する.
-			m_d2d_mutex.unlock();
+			m_mutex_d2d.unlock();
 			Shape* s;
 			const auto anc = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_curr, s);
 			if (anc == ANC_TYPE::ANC_SHEET) {
-				Window::Current().CoreWindow().PointerCursor(CC_ARROW);
+				Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 			}
 			else if (m_list_sel_cnt > 1) {
-				Window::Current().CoreWindow().PointerCursor(CC_SIZE_ALL);
+				Window::Current().CoreWindow().PointerCursor(CURS_SIZE_ALL);
 			}
 			else {
 				switch (anc) {
@@ -838,28 +862,28 @@ namespace winrt::GraphPaper::implementation
 				case ANC_TYPE::ANC_R_NE:
 				case ANC_TYPE::ANC_R_SE:
 				case ANC_TYPE::ANC_R_SW:
-					Window::Current().CoreWindow().PointerCursor(CC_CROSS);
+					Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 					break;
 				case ANC_TYPE::ANC_FILL:
 				case ANC_TYPE::ANC_STROKE:
 				case ANC_TYPE::ANC_TEXT:
-					Window::Current().CoreWindow().PointerCursor(CC_SIZE_ALL);
+					Window::Current().CoreWindow().PointerCursor(CURS_SIZE_ALL);
 					break;
 				case ANC_TYPE::ANC_NE:
 				case ANC_TYPE::ANC_SW:
-					Window::Current().CoreWindow().PointerCursor(CC_SIZE_NESW);
+					Window::Current().CoreWindow().PointerCursor(CURS_SIZE_NESW);
 					break;
 				case ANC_TYPE::ANC_NORTH:
 				case ANC_TYPE::ANC_SOUTH:
-					Window::Current().CoreWindow().PointerCursor(CC_SIZE_NS);
+					Window::Current().CoreWindow().PointerCursor(CURS_SIZE_NS);
 					break;
 				case ANC_TYPE::ANC_NW:
 				case ANC_TYPE::ANC_SE:
-					Window::Current().CoreWindow().PointerCursor(CC_SIZE_NWSE);
+					Window::Current().CoreWindow().PointerCursor(CURS_SIZE_NWSE);
 					break;
 				case ANC_TYPE::ANC_WEST:
 				case ANC_TYPE::ANC_EAST:
-					Window::Current().CoreWindow().PointerCursor(CC_SIZE_WE);
+					Window::Current().CoreWindow().PointerCursor(CURS_SIZE_WE);
 					break;
 				default:
 					// 図形のクラスが, 多角形または曲線であるか判定する.
@@ -867,7 +891,7 @@ namespace winrt::GraphPaper::implementation
 						(typeid(*s) == typeid(ShapeLine) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
 						// 図形の部位が, 頂点の数を超えないか判定する.
 						if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 + static_cast<ShapePath*>(s)->m_vec.size() + 1) {
-							Window::Current().CoreWindow().PointerCursor(CC_CROSS);
+							Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 							break;
 						}
 					}
@@ -983,6 +1007,13 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
+		// ファイル開くピッカーが返値を戻すまでの排他処理.
+		if (!m_mutex_fopen.try_lock()) {
+			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
+			return;
+		}
+		m_mutex_fopen.unlock();
+
 		// コントロールキーが押されてるか判定する.
 		if (args.KeyModifiers() == VirtualKeyModifiers::Control) {
 			// 拡大縮小

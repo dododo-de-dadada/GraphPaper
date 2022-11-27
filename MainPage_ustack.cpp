@@ -450,13 +450,13 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_undo.push_back(new UndoInsert(s, s_pos));
 	}
 
-	// 図形の位置をスタックに保存してから差分だけ移動する.
+	// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
 	// d_vec	移動させる差分
-	// all	図形すべての場合 true, 選択された図形のみの場合 false
-	void MainPage::ustack_push_move(const D2D1_POINT_2F d_vec, const bool all)
+	// any	図形すべての場合 true, 選択された図形のみの場合 false
+	void MainPage::ustack_push_move(const D2D1_POINT_2F d_vec, const bool any)
 	{
 		for (auto s : m_main_sheet.m_shape_list) {
-			if (s->is_deleted() || (!all && !s->is_selected())) {
+			if (s->is_deleted() || (!any && !s->is_selected())) {
 				continue;
 			}
 			ustack_push_set<UNDO_OP::MOVE>(s);

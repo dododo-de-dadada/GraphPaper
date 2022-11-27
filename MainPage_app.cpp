@@ -35,10 +35,10 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
-		m_d2d_mutex.lock();
+		m_mutex_d2d.lock();
 		m_main_sheet.m_d2d.Trim();
 		m_prop_sheet.m_d2d.Trim();
-		m_d2d_mutex.unlock();
+		m_mutex_d2d.unlock();
 	}
 
 	//------------------------------
