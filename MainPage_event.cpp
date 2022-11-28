@@ -438,11 +438,11 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		// ファイル開くピッカーが返値を戻すまでの排他処理.
-		if (!m_mutex_fopen.try_lock()) {
+		if (!m_mutex_event.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
 			return;
 		}
-		m_mutex_fopen.unlock();
+		m_mutex_event.unlock();
 
 		event_set_pos_cur(args);
 		status_bar_set_pos();
@@ -541,11 +541,11 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		// ファイル開くピッカーが返値を戻すまでの排他処理.
-		if (!m_mutex_fopen.try_lock()) {
+		if (!m_mutex_event.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
 			return;
 		}
-		m_mutex_fopen.unlock();
+		m_mutex_event.unlock();
 
 		// ポインターのキャプチャを始める.
 		// 引数の値をポンインターの現在位置に格納する.
@@ -735,11 +735,11 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		// ファイル開くピッカーが返値を戻すまでの排他処理.
-		if (!m_mutex_fopen.try_lock()) {
+		if (!m_mutex_event.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
 			return;
 		}
-		m_mutex_fopen.unlock();
+		m_mutex_event.unlock();
 
 		// ポインターの追跡を停止する.
 		auto const& panel = sender.as<SwapChainPanel>();
@@ -842,12 +842,12 @@ namespace winrt::GraphPaper::implementation
 			Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 		}
 		// 描画の排他制御をロックできないか判定する.
-		else if (!m_mutex_d2d.try_lock()) {
+		else if (!m_mutex_draw.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 		}
 		else {
 			// 描画の排他制御をロックできたなら, ただちに解除する.
-			m_mutex_d2d.unlock();
+			m_mutex_draw.unlock();
 			Shape* s;
 			const auto anc = slist_hit_test(m_main_sheet.m_shape_list, m_event_pos_curr, s);
 			if (anc == ANC_TYPE::ANC_SHEET) {
@@ -1008,11 +1008,11 @@ namespace winrt::GraphPaper::implementation
 		}
 #endif
 		// ファイル開くピッカーが返値を戻すまでの排他処理.
-		if (!m_mutex_fopen.try_lock()) {
+		if (!m_mutex_event.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
 			return;
 		}
-		m_mutex_fopen.unlock();
+		m_mutex_event.unlock();
 
 		// コントロールキーが押されてるか判定する.
 		if (args.KeyModifiers() == VirtualKeyModifiers::Control) {

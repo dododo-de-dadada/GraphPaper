@@ -145,9 +145,9 @@ namespace winrt::GraphPaper::implementation
 		prop_slider_2().Value(val2);
 		sheet_slider_set_header<UNDO_OP::SHEET_COLOR, 2>(val2);
 
-		prop_slider_0().Visibility(UI_VISIBLE);
-		prop_slider_1().Visibility(UI_VISIBLE);
-		prop_slider_2().Visibility(UI_VISIBLE);
+		prop_slider_0().Visibility(Visibility::Visible);
+		prop_slider_1().Visibility(Visibility::Visible);
+		prop_slider_2().Visibility(Visibility::Visible);
 		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 0> });
 		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 1> });
 		const auto slider_2_token = prop_slider_2().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 2> });
@@ -173,9 +173,9 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		//m_prop_sheet.m_d2d.Release();
-		prop_slider_0().Visibility(UI_COLLAPSED);
-		prop_slider_1().Visibility(UI_COLLAPSED);
-		prop_slider_2().Visibility(UI_COLLAPSED);
+		prop_slider_0().Visibility(Visibility::Collapsed);
+		prop_slider_1().Visibility(Visibility::Collapsed);
+		prop_slider_2().Visibility(Visibility::Collapsed);
 		prop_slider_0().ValueChanged(slider_0_token);
 		prop_slider_1().ValueChanged(slider_1_token);
 		prop_slider_2().ValueChanged(slider_2_token);
@@ -189,7 +189,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		if (!m_mutex_d2d.try_lock()) {
+		if (!m_mutex_draw.try_lock()) {
 			// ロックできない場合
 			return;
 		}
@@ -246,14 +246,12 @@ namespace winrt::GraphPaper::implementation
 			// ポインターの位置をステータスバーに格納する.
 			status_bar_set_pos();
 		}
-#if defined(_DEBUG)
 		else {
 			// 結果が S_OK でない場合,
 			// 「描画できません」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, L"str_err_draw", {});
 		}
-#endif
-		m_mutex_d2d.unlock();
+		m_mutex_draw.unlock();
 	}
 
 	// 前景色を得る.

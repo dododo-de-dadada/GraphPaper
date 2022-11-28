@@ -1,6 +1,7 @@
 //-------------------------------
 // MainPage_app.cpp
 // アプリケーションの中断と再開
+// デバッガーで「中断」をすることはできるが「再開」ができない.
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -35,10 +36,10 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
-		m_mutex_d2d.lock();
+		m_mutex_draw.lock();
 		m_main_sheet.m_d2d.Trim();
 		m_prop_sheet.m_d2d.Trim();
-		m_mutex_d2d.unlock();
+		m_mutex_draw.unlock();
 	}
 
 	//------------------------------
@@ -161,7 +162,7 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 				if (debug_leak_cnt != 0) {
 					// 「メモリリーク」メッセージダイアログを表示する.
-					message_show(ICON_ALERT, DEBUG_MSG, {});
+					message_show(ICON_DEBUG, DEBUG_MSG, {});
 				}
 #endif
 				sheet_draw();

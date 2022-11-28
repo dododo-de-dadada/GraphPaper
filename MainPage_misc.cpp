@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「バージョン情報」が選択された.
 	IAsyncAction MainPage::about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		tb_version().Visibility(UI_VISIBLE);
+		tb_version().Visibility(Visibility::Visible);
 		const auto def_btn = cd_prop_dialog().DefaultButton();
 		const auto pri_text = cd_prop_dialog().PrimaryButtonText();
 		const auto close_text = cd_prop_dialog().CloseButtonText();
@@ -49,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 		cd_prop_dialog().PrimaryButtonText(pri_text);
 		cd_prop_dialog().CloseButtonText(close_text);
 		cd_prop_dialog().DefaultButton(def_btn);
-		tb_version().Visibility(UI_COLLAPSED);
+		tb_version().Visibility(Visibility::Collapsed);
 		slist_clear(m_prop_sheet.m_shape_list);
 		// バージョン情報のメッセージダイアログを表示する.
 		//message_show(ICON_INFO, L"str_appname", L"str_version");

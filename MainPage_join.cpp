@@ -70,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 		prop_slider_0().TickFrequency(TICK_FREQ);
 		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		prop_slider_0().Value(j_limit);
-		prop_slider_0().Visibility(UI_VISIBLE);
+		prop_slider_0().Visibility(Visibility::Visible);
 		join_slider_set_header<UNDO_OP::JOIN_LIMIT, 0>(j_limit);
 
 		float s_width;
@@ -80,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 		prop_slider_1().TickFrequency(TICK_FREQ);
 		prop_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		prop_slider_1().Value(s_width);
-		prop_slider_1().Visibility(UI_VISIBLE);
+		prop_slider_1().Visibility(Visibility::Visible);
 		join_slider_set_header<UNDO_OP::STROKE_WIDTH, 1>(s_width);
 
 		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_OP::JOIN_LIMIT, 0> });
@@ -119,9 +119,9 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(UI_COLLAPSED);
+		prop_slider_0().Visibility(Visibility::Collapsed);
 		prop_slider_0().ValueChanged(slider_0_token);
-		prop_slider_1().Visibility(UI_COLLAPSED);
+		prop_slider_1().Visibility(Visibility::Collapsed);
 		prop_slider_1().ValueChanged(slider_1_token);
 		co_return;
 	}

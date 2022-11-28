@@ -59,11 +59,11 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_DASH_STYLE s_style;
 		m_main_sheet.get_dash_style(s_style);
-		prop_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? UI_VISIBLE : UI_COLLAPSED);
-		prop_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? UI_VISIBLE : UI_COLLAPSED);
-		prop_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
-		prop_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? UI_VISIBLE : UI_COLLAPSED);
-		prop_slider_4().Visibility(UI_VISIBLE);
+		prop_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? Visibility::Visible : Visibility::Collapsed);
+		prop_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? Visibility::Visible : Visibility::Collapsed);
+		prop_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? Visibility::Visible : Visibility::Collapsed);
+		prop_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? Visibility::Visible : Visibility::Collapsed);
+		prop_slider_4().Visibility(Visibility::Visible);
 		const winrt::event_token slider_0_token{
 			prop_slider_0().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 0> })
 		};
@@ -108,11 +108,11 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(UI_COLLAPSED);
-		prop_slider_1().Visibility(UI_COLLAPSED);
-		prop_slider_2().Visibility(UI_COLLAPSED);
-		prop_slider_3().Visibility(UI_COLLAPSED);
-		prop_slider_4().Visibility(UI_COLLAPSED);
+		prop_slider_0().Visibility(Visibility::Collapsed);
+		prop_slider_1().Visibility(Visibility::Collapsed);
+		prop_slider_2().Visibility(Visibility::Collapsed);
+		prop_slider_3().Visibility(Visibility::Collapsed);
+		prop_slider_4().Visibility(Visibility::Collapsed);
 		prop_slider_0().ValueChanged(slider_0_token);
 		prop_slider_1().ValueChanged(slider_1_token);
 		prop_slider_2().ValueChanged(slider_2_token);

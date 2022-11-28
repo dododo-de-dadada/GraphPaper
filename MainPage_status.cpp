@@ -126,8 +126,8 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		const bool is_not_checked = (m_status_bar != static_cast<STATUS_BAR>(0));
-		if (sp_status_bar_panel().Visibility() == (is_not_checked ? UI_COLLAPSED : UI_VISIBLE)) {
-			sp_status_bar_panel().Visibility(is_not_checked ? UI_VISIBLE : UI_COLLAPSED);
+		if (sp_status_bar_panel().Visibility() == (is_not_checked ? Visibility::Collapsed : Visibility::Visible)) {
+			sp_status_bar_panel().Visibility(is_not_checked ? Visibility::Visible : Visibility::Collapsed);
 		}
 	}
 
@@ -177,13 +177,13 @@ namespace winrt::GraphPaper::implementation
 			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, fy, m_main_sheet.m_d2d.m_logical_dpi, g_len, buf_y);
 			tk_status_bar_pos_x().Text(buf_x);
 			tk_status_bar_pos_y().Text(buf_y);
-			if (sp_status_bar_pos().Visibility() != UI_VISIBLE) {
-				sp_status_bar_pos().Visibility(UI_VISIBLE);
+			if (sp_status_bar_pos().Visibility() != Visibility::Visible) {
+				sp_status_bar_pos().Visibility(Visibility::Visible);
 			}
 		}
 		else {
-			if (sp_status_bar_pos().Visibility() != UI_COLLAPSED) {
-				sp_status_bar_pos().Visibility(UI_COLLAPSED);
+			if (sp_status_bar_pos().Visibility() != Visibility::Collapsed) {
+				sp_status_bar_pos().Visibility(Visibility::Collapsed);
 			}
 		}
 	}
@@ -225,13 +225,13 @@ namespace winrt::GraphPaper::implementation
 			}
 			pi_draw().Data(nullptr);
 			pi_draw().Data(Summary::Data(data));
-			if (sp_status_bar_draw().Visibility() != UI_VISIBLE) {
-				sp_status_bar_draw().Visibility(UI_VISIBLE);
+			if (sp_status_bar_draw().Visibility() != Visibility::Visible) {
+				sp_status_bar_draw().Visibility(Visibility::Visible);
 			}
 		}
 		else {
-			if (sp_status_bar_draw().Visibility() != UI_COLLAPSED) {
-				sp_status_bar_draw().Visibility(UI_COLLAPSED);
+			if (sp_status_bar_draw().Visibility() != Visibility::Collapsed) {
+				sp_status_bar_draw().Visibility(Visibility::Collapsed);
 			}
 		}
 	}
@@ -244,13 +244,13 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, g_len, m_main_sheet.m_d2d.m_logical_dpi, g_len, buf);
 			tk_status_bar_grid().Text(buf);
-			if (sp_status_bar_grid().Visibility() != UI_VISIBLE) {
-				sp_status_bar_grid().Visibility(UI_VISIBLE);
+			if (sp_status_bar_grid().Visibility() != Visibility::Visible) {
+				sp_status_bar_grid().Visibility(Visibility::Visible);
 			}
 		}
 		else {
-			if (sp_status_bar_grid().Visibility() != UI_COLLAPSED) {
-				sp_status_bar_grid().Visibility(UI_COLLAPSED);
+			if (sp_status_bar_grid().Visibility() != Visibility::Collapsed) {
+				sp_status_bar_grid().Visibility(Visibility::Collapsed);
 			}
 		}
 	}
@@ -266,13 +266,13 @@ namespace winrt::GraphPaper::implementation
 			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_sheet.m_d2d.m_logical_dpi, g_len, buf_h);
 			tk_status_bar_sheet_w().Text(buf_w);
 			tk_status_bar_sheet_h().Text(buf_h);
-			if (sp_status_bar_sheet().Visibility() != UI_VISIBLE) {
-				sp_status_bar_sheet().Visibility(UI_VISIBLE);
+			if (sp_status_bar_sheet().Visibility() != Visibility::Visible) {
+				sp_status_bar_sheet().Visibility(Visibility::Visible);
 			}
 		}
 		else {
-			if (sp_status_bar_sheet().Visibility() != UI_COLLAPSED) {
-				sp_status_bar_sheet().Visibility(UI_COLLAPSED);
+			if (sp_status_bar_sheet().Visibility() != Visibility::Collapsed) {
+				sp_status_bar_sheet().Visibility(Visibility::Collapsed);
 			}
 		}
 	}
@@ -296,13 +296,13 @@ namespace winrt::GraphPaper::implementation
 			else if (m_len_unit == LEN_UNIT::POINT) {
 				tk_status_bar_unit().Text(L"pt");
 			}
-			if (sp_status_bar_unit().Visibility() != UI_VISIBLE) {
-				sp_status_bar_unit().Visibility(UI_VISIBLE);
+			if (sp_status_bar_unit().Visibility() != Visibility::Visible) {
+				sp_status_bar_unit().Visibility(Visibility::Visible);
 			}
 		}
 		else {
-			if (sp_status_bar_unit().Visibility() != UI_COLLAPSED) {
-				sp_status_bar_unit().Visibility(UI_COLLAPSED);
+			if (sp_status_bar_unit().Visibility() != Visibility::Collapsed) {
+				sp_status_bar_unit().Visibility(Visibility::Collapsed);
 			}
 		}
 	}
@@ -311,16 +311,17 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::status_bar_set_zoom(void)
 	{
 		if (status_and(m_status_bar, STATUS_BAR::ZOOM) == STATUS_BAR::ZOOM) {
+			constexpr auto FMT_ZOOM = L"%.f%%";	// î{ó¶ÇÃèëéÆ
 			wchar_t buf[32];
 			swprintf_s(buf, 31, FMT_ZOOM, m_main_sheet.m_sheet_scale * 100.0);
 			tk_status_bar_zoom().Text(buf);
-			if (sp_status_bar_zoom().Visibility() != UI_VISIBLE) {
-				sp_status_bar_zoom().Visibility(UI_VISIBLE);
+			if (sp_status_bar_zoom().Visibility() != Visibility::Visible) {
+				sp_status_bar_zoom().Visibility(Visibility::Visible);
 			}
 		}
 		else {
-			if (sp_status_bar_zoom().Visibility() != UI_COLLAPSED) {
-				sp_status_bar_zoom().Visibility(UI_COLLAPSED);
+			if (sp_status_bar_zoom().Visibility() != Visibility::Collapsed) {
+				sp_status_bar_zoom().Visibility(Visibility::Collapsed);
 			}
 		}
 	}

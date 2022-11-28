@@ -43,7 +43,7 @@
 //        +-------------------------------+
 //        |                               |
 // +------+------+                 +------+------+
-// | ShapeLine   |                 | ShapeRect   |
+// | ShapeLine*  |                 | ShapeRect*  |
 // +------+------+                 +------+------+
 //        |                               |
 // +------+------+                        |
@@ -64,7 +64,7 @@
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Foundation::IAsyncOperation;
 	using winrt::Windows::Storage::Streams::DataReader;
 	using winrt::Windows::Storage::Streams::DataWriter;
 	using winrt::Windows::Foundation::Point;
@@ -593,6 +593,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_text_selected(const DWRITE_TEXT_RANGE /*val*/) noexcept { return false; }
 		// 図形をデータライターに書き込む.
 		virtual void write(DataWriter const& /*dt_writer*/) const {}
+		// 図形をデータライターに PDF として書き込む.
+		//virtual void write_pdf(DataWriter const& /*dt_writer*/) const {}
 		// 図形をデータライターに SVG として書き込む.
 		virtual void write_svg(DataWriter const& /*dt_writer*/) const {}
 	};
@@ -643,7 +645,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		~ShapeImage(void);
 		// ストリームに格納する.
-		IAsyncAction copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream);
+		IAsyncOperation<bool> copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream);
 		// 図形を表示する.
 		void draw(ShapeSheet const& sh) final override;
 		// 図形を囲む領域を得る.
@@ -1035,6 +1037,8 @@ namespace winrt::GraphPaper::implementation
 		ShapeStroke(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
+		// 図形をデータライターに PDF として書き込む.
+		//void write_pdf(DataWriter const& /*dt_writer*/) const {}
 		// 図形をデータライターに SVG として書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
 	};
@@ -1087,6 +1091,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool move(const D2D1_POINT_2F val) noexcept override;
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
+		// 図形をデータライターに PDF として書き込む.
+		//void write_pdf(DataWriter const& /*dt_writer*/) const {}
 		// 図形をデータライターに SVG として書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
@@ -1200,6 +1206,8 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
 		// 図形をデータライターに SVG として書き込む.
+		//void write_pdf(DataWriter const& /*dt_writer*/) const {}
+		// 図形をデータライターに SVG として書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
 	};
 
@@ -1230,6 +1238,8 @@ namespace winrt::GraphPaper::implementation
 		ShapeRRect(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
+		// 図形をデータライターに SVG として書き込む.
+		//void write_pdf(DataWriter const& dt_writer) const {}
 		// 図形をデータライターに SVG として書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
 	};
@@ -1313,6 +1323,8 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに SVG として書き込む.
+		//void write_pdf(DataWriter const& /*dt_writer*/) const override {}
+		// 図形をデータライターに SVG として書き込む.
 		void write_svg(DataWriter const& /*dt_writer*/) const;
 	};
 
@@ -1338,6 +1350,8 @@ namespace winrt::GraphPaper::implementation
 		ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr);
 		// 図形をデータリーダーから読み込む.
 		ShapeBezi(DataReader const& dt_reader);
+		// 図形をデータライターに PDF として書き込む.
+		//void write_pdf(DataWriter const& dt_writer) const override;
 		// 図形をデータライターに SVG として書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
 	};

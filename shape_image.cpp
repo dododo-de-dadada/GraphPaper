@@ -66,8 +66,16 @@ namespace winrt::GraphPaper::implementation
 	// ストリームに格納する.
 	// enc_id	画像の形式 (BitmapEncoder に定義されている)
 	// ra_stream	画像を格納するストリーム
-	IAsyncAction ShapeImage::copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream)
+	// 戻り値	格納できたら true
+	IAsyncOperation<bool> ShapeImage::copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream)
 	{
+		bool ret = false;	// 返値
+		// コルーチンの開始時のスレッドコンテキストを保存し,
+		// バックグラウンドに切替かえて再開する.
+		// UI スレッドのままでは, SoftwareBitmap が解放されるときエラーが起きる.
+		winrt::apartment_context context;
+		co_await winrt::resume_background();
+
 		// SoftwareBitmap を作成する.
 		SoftwareBitmap bmp{ SoftwareBitmap(BitmapPixelFormat::Bgra8,  m_orig.width, m_orig.height, BitmapAlphaMode::Straight) };
 
@@ -99,6 +107,7 @@ namespace winrt::GraphPaper::implementation
 			bmp_enc.SetSoftwareBitmap(bmp);
 			try {
 				co_await bmp_enc.FlushAsync();
+				ret = true;
 			}
 			catch (winrt::hresult_error&) {
 				// サムネイルの自動生成が出来ないなら, false を格納する.
@@ -112,8 +121,13 @@ namespace winrt::GraphPaper::implementation
 			//}
 			bmp_enc = nullptr;
 		}
+		// ビットマップを破棄する.
 		bmp.Close();
 		bmp = nullptr;
+
+		// スレッドコンテキストを復元する.
+		co_await context;
+		co_return ret;
 	}
 
 	// 図形を表示する.

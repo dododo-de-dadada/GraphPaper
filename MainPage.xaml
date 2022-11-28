@@ -706,7 +706,7 @@
 		<!-- メッセージダイアログ -->
 		<ContentDialog x:Name="cd_message_dialog" x:Uid="cd_message_dialog" CloseButtonText="Close" DefaultButton="Close">
 			<StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
-				<FontIcon x:Name="fi_message" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_alert}" Margin="0,0,16,0"/>
+				<FontIcon x:Name="fi_message" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_block}" Margin="0,0,16,0"/>
 				<TextBlock x:Name="tk_message"/>
 			</StackPanel>
 		</ContentDialog>

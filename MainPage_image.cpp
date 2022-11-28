@@ -10,11 +10,8 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// 画像メニューの「縦横比を変えない」が選択された.
 	void MainPage::image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept
@@ -56,8 +53,8 @@ namespace winrt::GraphPaper::implementation
 		image_slider_set_header<UNDO_OP::IMAGE_OPAC, 0>(val);
 		prop_check_box().IsChecked(m_prop_sheet.m_image_opac_importing);
 
-		prop_slider_0().Visibility(UI_VISIBLE);
-		prop_check_box().Visibility(UI_VISIBLE);
+		prop_slider_0().Visibility(Visibility::Visible);
+		prop_check_box().Visibility(Visibility::Visible);
 		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::image_slider_val_changed<UNDO_OP::IMAGE_OPAC, 0> });
 
 		prop_image_load_async(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()));
@@ -76,9 +73,9 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(UI_COLLAPSED);
+		prop_slider_0().Visibility(Visibility::Collapsed);
 		prop_slider_0().ValueChanged(slider_0_token);
-		prop_check_box().Visibility(UI_COLLAPSED);
+		prop_check_box().Visibility(Visibility::Collapsed);
 		sheet_draw();
 	}
 

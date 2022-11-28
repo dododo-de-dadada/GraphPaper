@@ -18,6 +18,19 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Media::Brush;
 
+	// 書式文字列
+	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
+	constexpr auto FMT_INCH_UNIT = L"%.3f \u33CC";	// インチ単位の書式
+	constexpr auto FMT_MILLI = L"%.3f";	// ミリメートル単位の書式
+	constexpr auto FMT_MILLI_UNIT = L"%.3f \u339C";	// ミリメートル単位の書式
+	constexpr auto FMT_POINT = L"%.2f";	// ポイント単位の書式
+	constexpr auto FMT_POINT_UNIT = L"%.2f pt";	// ポイント単位の書式
+	constexpr auto FMT_PIXEL = L"%.1f";	// ピクセル単位の書式
+	constexpr auto FMT_PIXEL_UNIT = L"%.1f px";	// ピクセル単位の書式
+	constexpr auto FMT_ZOOM = L"%.f%%";	// 倍率の書式
+	constexpr auto FMT_GRID = L"%.3f";	// グリッド単位の書式
+	constexpr auto FMT_GRID_UNIT = L"%.3f gd";	// グリッド単位の書式
+
 	// 色成分を文字列に変換する.
 	void conv_col_to_str(const COLOR_CODE c_code, const double val, const size_t t_len, wchar_t t_buf[]) noexcept;
 
@@ -226,9 +239,20 @@ namespace winrt::GraphPaper::implementation
 			text = text + NEW_LINE + QUOT + desc_key + QUOT;
 		}
 		const IInspectable glyph_val = Resources().TryLookup(box_value(glyph_key));
-		fi_message().Glyph(glyph_val != nullptr ? unbox_value<winrt::hstring>(glyph_val) : glyph_key);
+		const winrt::hstring font_icon{
+			glyph_val != nullptr ? unbox_value<winrt::hstring>(glyph_val) : glyph_key
+		};
+		fi_message().Glyph(font_icon);
 		tk_message().Text(text);
-		auto _{ cd_message_dialog().ShowAsync() };
+		// マイクロソフトによると,
+		// > アプリでの最も低速なステージとして、起動や、ビューの切り替えなどがあります。
+		// > ユーザーに最初に表示される UI を起動するために必要なもの以上の作業を実行しないでください。
+		// > たとえば、段階的に公開される UI の UI や、ポップアップのコンテンツなどは作成しないでください。
+		// メッセージダイアログを起動時からでも表示できるよう, RunIdleAsync を使用する.
+		Dispatcher().RunIdleAsync([=](
+			winrt::Windows::UI::Core::IdleDispatchedHandlerArgs) {
+			auto _{ cd_message_dialog().ShowAsync() };
+		});
 	}
 
 }

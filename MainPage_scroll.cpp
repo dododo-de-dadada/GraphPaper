@@ -56,11 +56,11 @@ namespace winrt::GraphPaper::implementation
 		const auto h_gt0 = mh > 0.0;
 		sb_horz().ViewportSize(vw);
 		sb_horz().Maximum(w_gt0 ? (h_gt0 ? mw + SB_SIZE : mw) : 0.0);
-		sb_horz().Visibility(w_gt0 ? UI_VISIBLE : UI_COLLAPSED);
+		sb_horz().Visibility(w_gt0 ? Visibility::Visible : Visibility::Collapsed);
 		sb_horz().Margin({ 0, 0, h_gt0 ? SB_SIZE : 0.0, 0 });
 		sb_vert().ViewportSize(vh);
 		sb_vert().Maximum(h_gt0 ? (w_gt0 ? mh + SB_SIZE : mh) : 0.0);
-		sb_vert().Visibility(h_gt0 ? UI_VISIBLE : UI_COLLAPSED);
+		sb_vert().Visibility(h_gt0 ? Visibility::Visible : Visibility::Collapsed);
 		sb_vert().Margin({ 0, 0, 0, w_gt0 ? SB_SIZE : 0.0 });
 		//sb_horz().ViewportSize(vw);
 		//if (pw > vw) {
@@ -70,12 +70,12 @@ namespace winrt::GraphPaper::implementation
 			//else {
 			// sb_horz().Maximum(pw - vw);
 			//}
-			//sb_horz().Visibility(UI_VISIBLE);
+			//sb_horz().Visibility(Visibility::Visible);
 			//sb_vert().Margin({ 0, 0, 0, SB_SIZE });
 		//}
 		//else {
 			//sb_horz().Maximum(0.0);
-			//sb_horz().Visibility(UI_COLLAPSED);
+			//sb_horz().Visibility(Visibility::Collapsed);
 			//sb_vert().Margin({ 0, 0, 0, 0 });
 		//}
 		//sb_vert().ViewportSize(vh);
@@ -86,12 +86,12 @@ namespace winrt::GraphPaper::implementation
 			//else {
 			// sb_vert().Maximum(ph - vh);
 			//}
-			//sb_vert().Visibility(UI_VISIBLE);
+			//sb_vert().Visibility(Visibility::Visible);
 			//sb_horz().Margin({ 0, 0, SB_SIZE, 0 });
 		//}
 		//else {
 			//sb_vert().Maximum(0.0);
-			//sb_vert().Visibility(UI_COLLAPSED);
+			//sb_vert().Visibility(Visibility::Collapsed);
 			//sb_horz().Margin({ 0, 0, 0, 0 });
 		//}
 	}

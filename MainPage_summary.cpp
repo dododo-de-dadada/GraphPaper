@@ -180,7 +180,7 @@ namespace winrt::GraphPaper::implementation
 			m_summary_atomic.store(false, std::memory_order_release);
 
 			if (gd_summary_panel() != nullptr) {
-				gd_summary_panel().Visibility(UI_COLLAPSED);
+				gd_summary_panel().Visibility(Visibility::Collapsed);
 				lv_summary_list().Items().Clear();
 				UnloadObject(gd_summary_panel());
 			}
@@ -226,13 +226,13 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		// 検索パネルが表示されてるか判定する.
-		if (sp_find_text_panel().Visibility() == UI_VISIBLE) {
+		if (sp_find_text_panel().Visibility() == Visibility::Visible) {
 			// 検索パネルを非表示にする.
 			find_text_click(nullptr, nullptr);
 		}
 		// リソースから図形の一覧パネルを見つける.
 		auto _{ FindName(L"gd_summary_panel") };
-		gd_summary_panel().Visibility(UI_VISIBLE);
+		gd_summary_panel().Visibility(Visibility::Visible);
 		m_summary_atomic.store(true, std::memory_order_release);
 	}
 

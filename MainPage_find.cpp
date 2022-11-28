@@ -703,8 +703,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::find_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// 文字列検索パネルが表示されているか判定する.
-		if (sp_find_text_panel().Visibility() == UI_VISIBLE) {
-			sp_find_text_panel().Visibility(UI_COLLAPSED);
+		if (sp_find_text_panel().Visibility() == Visibility::Visible) {
+			sp_find_text_panel().Visibility(Visibility::Collapsed);
 			find_text_preserve();
 		}
 		else {
@@ -716,7 +716,7 @@ namespace winrt::GraphPaper::implementation
 			tx_find_replace_with().Text({ m_find_repl == nullptr ? L"" : m_find_repl });
 			ck_find_text_case().IsChecked(m_find_text_case);
 			ck_find_text_wrap().IsChecked(m_find_text_wrap);
-			sp_find_text_panel().Visibility(UI_VISIBLE);
+			sp_find_text_panel().Visibility(Visibility::Visible);
 		}
 	}
 
@@ -724,7 +724,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::find_text_close_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		find_text_preserve();
-		sp_find_text_panel().Visibility(UI_COLLAPSED);
+		sp_find_text_panel().Visibility(Visibility::Collapsed);
 	}
 
 	// 文字列検索パネルの「次を検索」ボタンが押された.

@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Graphics::Display::DisplayInformation;
 	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
 	using winrt::Windows::System::VirtualKeyModifiers;
-	using winrt::Windows::Foundation::IAsyncOperation;
+	using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialog;
@@ -83,23 +83,11 @@ namespace winrt::GraphPaper::implementation
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
 
-	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
-	constexpr auto FMT_INCH_UNIT = L"%.3f \u33CC";	// インチ単位の書式
-	constexpr auto FMT_MILLI = L"%.3f";	// ミリメートル単位の書式
-	constexpr auto FMT_MILLI_UNIT = L"%.3f \u339C";	// ミリメートル単位の書式
-	constexpr auto FMT_POINT = L"%.2f";	// ポイント単位の書式
-	constexpr auto FMT_POINT_UNIT = L"%.2f pt";	// ポイント単位の書式
-	constexpr auto FMT_PIXEL = L"%.1f";	// ピクセル単位の書式
-	constexpr auto FMT_PIXEL_UNIT = L"%.1f px";	// ピクセル単位の書式
-	constexpr auto FMT_ZOOM = L"%.f%%";	// 倍率の書式
-	constexpr auto FMT_GRID = L"%.3f";	// グリッド単位の書式
-	constexpr auto FMT_GRID_UNIT = L"%.3f gd";	// グリッド単位の書式
 	constexpr auto ICON_INFO = L"glyph_info";	// 情報アイコンの静的リソースのキー
-	constexpr auto ICON_ALERT = L"glyph_alert";	// 警告アイコンの静的リソースのキー
+	constexpr auto ICON_ALERT = L"glyph_block";	// 警告アイコンの静的リソースのキー
+	constexpr auto ICON_DEBUG = L"\uEBE8";	// デバッグアイコン
 	constexpr auto VERT_STICK_DEF_VAL = 2.0f * 6.0f;	// 頂点をくっつける閾値の既定値
 	constexpr auto SHEET_SIZE_DEF_VAL = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
-	constexpr auto UI_VISIBLE = Visibility::Visible;	// 表示	
-	constexpr auto UI_COLLAPSED = Visibility::Collapsed;	// 非表示
 
 	//-------------------------------
 	// 色の表記
@@ -233,10 +221,14 @@ namespace winrt::GraphPaper::implementation
 		winrt::hstring m_file_token_mru;	// 最近使ったファイルのトークン
 
 		// 排他制御
+		// 1. 図形や描画環境の変更中に描画させないための排他制御
+		// 2. ファイルを書き込み中に終了を延長するための排他制御.
+		// 3. ファイルピッカーのボタンが押されてストレージファイルが得られるまでの間,
+		//    イベント処理させないための排他制御.
 		std::atomic_bool m_summary_atomic{ false };	// 一覧の排他制御
-		std::mutex m_mutex_d2d;	// 描画中のの排他制御
-		std::mutex m_mutex_fwrite;	// ファイル書き込み中の排他制御
-		std::mutex m_mutex_fopen;	// ファイルオープン中の排他制御
+		std::mutex m_mutex_draw;	// 描画させないための排他制御
+		std::mutex m_mutex_exit;	// 終了を延長するための排他制御
+		std::mutex m_mutex_event;	// イベント処理させないための排他制御
 
 		// 文字列の編集, 検索と置換
 		bool m_text_frame_fit_text = false;	// 枠を文字列に合わせる
@@ -458,7 +450,7 @@ namespace winrt::GraphPaper::implementation
 		// ファイルシステムへのアクセス権を確認して, 設定を促す.
 		//IAsyncAction file_check_broad_access(void) const;
 		// ファイルへの更新を確認する.
-		IAsyncOperation<bool> file_comfirm_dialog(void);
+		IAsyncOperation<bool> file_confirm_dialog(void);
 		// ファイルメニューの「終了」が選択された
 		IAsyncAction file_exit_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルの読み込みが終了した.
@@ -485,7 +477,9 @@ namespace winrt::GraphPaper::implementation
 		void file_recent_menu_update(void);
 		// 図形データをストレージファイルに非同期に書き込む.
 		template <bool SUSPEND, bool SETTING>
-		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile s_file);
+		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile gpf_file);
+		//IAsyncOperation<winrt::hresult> file_write_pdf_async(StorageFile pdf_file);
+
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
 		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile s_file);
 		// ファイルメニューの「用紙を画像としてエクスポートする」が選択された

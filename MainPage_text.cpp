@@ -169,7 +169,7 @@ namespace winrt::GraphPaper::implementation
 		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		prop_slider_0().Value(val);
 		text_slider_set_header<UNDO_OP::TEXT_LINE_SP, 0>(val);
-		prop_slider_0().Visibility(UI_VISIBLE);
+		prop_slider_0().Visibility(Visibility::Visible);
 
 		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_LINE_SP, 0> });
 		text_create_sample_shape(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()), m_prop_sheet);
@@ -186,7 +186,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(UI_COLLAPSED);
+		prop_slider_0().Visibility(Visibility::Collapsed);
 		prop_slider_0().ValueChanged(slider_0_token);
 		sheet_draw();
 	}
@@ -216,8 +216,8 @@ namespace winrt::GraphPaper::implementation
 		prop_slider_1().Value(padding.height);
 		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 1>(padding.height);
 
-		prop_slider_0().Visibility(UI_VISIBLE);
-		prop_slider_1().Visibility(UI_VISIBLE);
+		prop_slider_0().Visibility(Visibility::Visible);
+		prop_slider_1().Visibility(Visibility::Visible);
 		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_MARGIN, 0> });
 		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_MARGIN, 1> });
 
@@ -235,8 +235,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(UI_COLLAPSED);
-		prop_slider_1().Visibility(UI_COLLAPSED);
+		prop_slider_0().Visibility(Visibility::Collapsed);
+		prop_slider_1().Visibility(Visibility::Collapsed);
 		prop_slider_0().ValueChanged(slider_0_token);
 		prop_slider_1().ValueChanged(slider_1_token);
 		sheet_draw();

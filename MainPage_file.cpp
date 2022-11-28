@@ -1,6 +1,6 @@
-//-------------------------------
+ï»¿//-------------------------------
 // MainPage_file.cpp
-// ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‘‚«
+// ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿æ›¸ã
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -9,11 +9,14 @@
 
 using namespace winrt;
 /*
-file_comfirm_dialog
+* ãƒ•ã‚¡ã‚¤ãƒ«é–¢ä¿‚ã®éåŒæœŸã®é–¢æ•°ã¯, UI ã‚¹ãƒ¬ãƒƒãƒ‰ã§å®Ÿè¡Œã•ã‚Œã‚‹ã“ã¨ã‚’å‰æã¨ã—ã¦ã„ã‚‹.
+* UI ã‚¹ãƒ¬ãƒƒãƒ‰ä»¥å¤–ãŒå‘¼ã³å‡ºã™ã¨å¤±æ•—ã™ã‚‹é–¢æ•°ãŒã‚ã‚‹.
+
+file_confirm_dialog
 	+---file_save_click_async
 
 file_exit_click_async
-	+---file_comfirm_dialog
+	+---file_confirm_dialog
 
 file_export_as_image_click_async
 	+---file_pick_save_image_async
@@ -26,12 +29,12 @@ file_import_image_click_async
 	+---file_wait_cursor
 
 file_new_click_async
-	+---file_comfirm_dialog
+	+---file_confirm_dialog
 	+---file_recent_add
 	+---file_finish_reading
 
 file_open_click_async
-	+---file_comfirm_dialog
+	+---file_confirm_dialog
 	+---file_wait_cursor
 	+---file_read_async
 
@@ -43,7 +46,7 @@ file_recent_add
 	+---file_recent_menu_update
 
 file_recent_click_async
-	+---file_comfirm_dialog
+	+---file_confirm_dialog
 	+---file_recent_token_async
 	+---file_wait_cursor
 
@@ -100,24 +103,24 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::System::Launcher;
 	using winrt::Windows::UI::Xaml::Window;
 
-	static const CoreCursor& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// ‘Ò‹@ƒJ[ƒ\ƒ‹.
-	constexpr wchar_t RES_DESC_GPF[] = L"str_desc_gpf";	// Šg’£q gpf ‚Ìà–¾
-	constexpr wchar_t RES_DESC_SVG[] = L"str_desc_svg";	// Šg’£q svg ‚Ìà–¾
-	constexpr wchar_t RES_ERR_FONT[] = L"str_err_font";	// —LŒø‚Å‚È‚¢‘‘Ì‚ÌƒGƒ‰[ƒƒbƒZ[ƒW‚ÌƒŠƒ\[ƒX–¼
-	constexpr wchar_t RES_ERR_READ[] = L"str_err_read";	// “Ç‚İ‚İƒGƒ‰[ƒƒbƒZ[ƒW‚ÌƒŠƒ\[ƒX–¼
-	constexpr wchar_t RES_ERR_RECENT[] = L"str_err_recent";	// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚ÌƒGƒ‰[ƒƒbƒZ[ƒW‚ÌƒŠƒ\[ƒX–¼
-	constexpr wchar_t RES_ERR_WRITE[] = L"str_err_write";	// ‘‚«‚İƒGƒ‰[ƒƒbƒZ[ƒW‚ÌƒŠƒ\[ƒX–¼
-	constexpr wchar_t RES_EXT_BMP[] = L".bmp";	// ‰æ‘œƒtƒ@ƒCƒ‹‚ÌŠg’£q
-	constexpr wchar_t RES_EXT_GIF[] = L".gif";	// ‰æ‘œƒtƒ@ƒCƒ‹‚ÌŠg’£q
-	constexpr wchar_t RES_EXT_GPF[] = L".gpf";	// }Œ`ƒf[ƒ^ƒtƒ@ƒCƒ‹‚ÌŠg’£q
-	constexpr wchar_t RES_EXT_JPEG[] = L".jpeg";	// ‰æ‘œƒtƒ@ƒCƒ‹‚ÌŠg’£q
-	constexpr wchar_t RES_EXT_JPG[] = L".jpg";	// ‰æ‘œƒtƒ@ƒCƒ‹‚ÌŠg’£q
-	constexpr wchar_t RES_EXT_PNG[] = L".png";	// ‰æ‘œƒtƒ@ƒCƒ‹‚ÌŠg’£q
-	constexpr wchar_t RES_EXT_SVG[] = L".svg";	// SVG ƒtƒ@ƒCƒ‹‚ÌŠg’£q
-	constexpr wchar_t RES_EXT_TIF[] = L".tif";	// ‰æ‘œƒtƒ@ƒCƒ‹‚ÌŠg’£q
-	constexpr wchar_t RES_EXT_TIFF[] = L".tiff";	// ‰æ‘œƒtƒ@ƒCƒ‹‚ÌŠg’£q
-	constexpr uint32_t MRU_MAX = 25;	// Å‹ßg‚Á‚½ƒŠƒXƒg‚ÌÅ‘å”.
-	constexpr wchar_t UNTITLED[] = L"str_untitled";	// –³‘è‚ÌƒŠƒ\[ƒX–¼
+	static const CoreCursor& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// å¾…æ©Ÿã‚«ãƒ¼ã‚½ãƒ«.
+	constexpr uint32_t MRU_MAX = 25;	// æœ€è¿‘ä½¿ã£ãŸãƒªã‚¹ãƒˆã®æœ€å¤§æ•°.
+	constexpr wchar_t RES_DESC_GPF[] = L"str_desc_gpf";	// æ‹¡å¼µå­ gpf ã®èª¬æ˜
+	constexpr wchar_t RES_DESC_SVG[] = L"str_desc_svg";	// æ‹¡å¼µå­ svg ã®èª¬æ˜
+	constexpr wchar_t RES_ERR_FONT[] = L"str_err_font";	// æœ‰åŠ¹ã§ãªã„æ›¸ä½“ã®ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®ãƒªã‚½ãƒ¼ã‚¹å
+	constexpr wchar_t RES_ERR_READ[] = L"str_err_read";	// èª­ã¿è¾¼ã¿ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®ãƒªã‚½ãƒ¼ã‚¹å
+	constexpr wchar_t RES_ERR_RECENT[] = L"str_err_recent";	// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®ãƒªã‚½ãƒ¼ã‚¹å
+	constexpr wchar_t RES_ERR_WRITE[] = L"str_err_write";	// æ›¸ãè¾¼ã¿ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã®ãƒªã‚½ãƒ¼ã‚¹å
+	constexpr wchar_t RES_EXT_BMP[] = L".bmp";	// ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­
+	constexpr wchar_t RES_EXT_GIF[] = L".gif";	// ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­
+	constexpr wchar_t RES_EXT_GPF[] = L".gpf";	// å›³å½¢ãƒ‡ãƒ¼ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­
+	constexpr wchar_t RES_EXT_JPEG[] = L".jpeg";	// ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­
+	constexpr wchar_t RES_EXT_JPG[] = L".jpg";	// ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­
+	constexpr wchar_t RES_EXT_PNG[] = L".png";	// ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­
+	constexpr wchar_t RES_EXT_SVG[] = L".svg";	// SVG ãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­
+	constexpr wchar_t RES_EXT_TIF[] = L".tif";	// ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­
+	constexpr wchar_t RES_EXT_TIFF[] = L".tiff";	// ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­
+	constexpr wchar_t UNTITLED[] = L"str_untitled";	// ç„¡é¡Œã®ãƒªã‚½ãƒ¼ã‚¹å
 	static const IVector<winrt::hstring> TYPE_BMP{
 		winrt::single_threaded_vector<winrt::hstring>({ RES_EXT_BMP })
 	};
@@ -139,12 +142,12 @@ namespace winrt::GraphPaper::implementation
 	static const IVector<winrt::hstring> TYPE_SVG{
 		winrt::single_threaded_vector<winrt::hstring>({ RES_EXT_SVG })
 	};
-	static winrt::guid enc_id_default = BitmapEncoder::BmpEncoderId();	// Šù’è‚ÌƒGƒ“ƒR[ƒh¯•Êq
+	static winrt::guid enc_id_default = BitmapEncoder::BmpEncoderId();	// æ—¢å®šã®ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰è­˜åˆ¥å­
 
 	inline static CoreCursor file_wait_cursor(void);
 
 	//-------------------------------
-	// ‘Ò‹@ƒJ[ƒ\ƒ‹‚ğ•\¦, •\¦‚·‚é‘O‚ÌƒJ[ƒ\ƒ‹‚ğ“¾‚é.
+	// å¾…æ©Ÿã‚«ãƒ¼ã‚½ãƒ«ã‚’è¡¨ç¤º, è¡¨ç¤ºã™ã‚‹å‰ã®ã‚«ãƒ¼ã‚½ãƒ«ã‚’å¾—ã‚‹.
 	//-------------------------------
 	inline static CoreCursor file_wait_cursor(void)
 	{
@@ -157,43 +160,45 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//-------------------------------
-	// ƒtƒ@ƒCƒ‹‚Ö‚ÌXV‚ğŠm”F‚·‚é.
-	// –ß‚è’l	u•Û‘¶‚·‚év‚Ü‚½‚Íu•Û‘¶‚µ‚È‚¢v‚ª‰Ÿ‚³‚ê‚½‚È‚ç true ‚ğ, ‰“š‚ªƒLƒƒƒ“ƒZƒ‹‚È‚ç, ‚Ü‚½‚Í“à—e‚ğ•Û‘¶‚Å‚«‚È‚©‚Á‚½‚È‚ç false ‚ğ•Ô‚·.
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã¸ã®æ›´æ–°ã‚’ç¢ºèªã™ã‚‹.
+	// æˆ»ã‚Šå€¤	ã€Œä¿å­˜ã™ã‚‹ã€ã¾ãŸã¯ã€Œä¿å­˜ã—ãªã„ã€ãŒæŠ¼ã•ã‚ŒãŸãªã‚‰ true ã‚’, å¿œç­”ãŒã‚­ãƒ£ãƒ³ã‚»ãƒ«ãªã‚‰, ã¾ãŸã¯å†…å®¹ã‚’ä¿å­˜ã§ããªã‹ã£ãŸãªã‚‰ false ã‚’è¿”ã™.
 	//-------------------------------
-	IAsyncOperation<bool> MainPage::file_comfirm_dialog(void)
+	IAsyncOperation<bool> MainPage::file_confirm_dialog(void)
 	{
-		// ƒRƒ‹[ƒ`ƒ“‚ÌŠJn‚ÌƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•Û‘¶‚·‚é.
-		winrt::apartment_context context;
-		// ƒXƒŒƒbƒh‚ğƒƒCƒ“ƒy[ƒW‚Ì UI ƒXƒŒƒbƒh‚É•Ï‚¦‚é.
-		co_await winrt::resume_foreground(Dispatcher());
-		// Šm”Fƒ_ƒCƒAƒƒO‚ğ•\¦‚µ, ‰“š‚ğ“¾‚é.
+		// ç¢ºèªãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã—, å¿œç­”ã‚’å¾—ã‚‹.
 		const ContentDialogResult dr{
 			co_await cd_conf_save_dialog().ShowAsync()
 		};
-		// ƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•œŒ³‚·‚é.
-		co_await context;
 
-		// ‰“š‚ªu•Û‘¶‚·‚év‚©”»’è‚·‚é.
+		// å¿œç­”ãŒã€Œä¿å­˜ã™ã‚‹ã€ã‹åˆ¤å®šã™ã‚‹.
 		if (dr == ContentDialogResult::Primary) {
-			// ƒtƒ@ƒCƒ‹‚É”ñ“¯Šú‚É•Û‘¶.
-			// •Û‘¶‚É¸”s‚µ‚Ä‚à, true ‚ğ•Ô‚·.
+			// ãƒ•ã‚¡ã‚¤ãƒ«ã«éåŒæœŸã«ä¿å­˜.
+			// ä¿å­˜ã«å¤±æ•—ã—ã¦ã‚‚, true ã‚’è¿”ã™.
 			co_await file_save_click_async(nullptr, nullptr);
 			co_return true;
 		}
-		// ‰“š‚ªu•Û‘¶‚µ‚È‚¢v‚©”»’è‚·‚é.
+		// å¿œç­”ãŒã€Œä¿å­˜ã—ãªã„ã€ã‹åˆ¤å®šã™ã‚‹.
 		else if (dr == ContentDialogResult::Secondary) {
 			co_return true;
 		}
-		// ‰“š‚ªuƒLƒƒƒ“ƒZƒ‹v(ã‹LˆÈŠO) ‚È‚ç false ‚ğ•Ô‚·.
+		// å¿œç­”ãŒã€Œã‚­ãƒ£ãƒ³ã‚»ãƒ«ã€(ä¸Šè¨˜ä»¥å¤–) ãªã‚‰ false ã‚’è¿”ã™.
 		co_return false;
 	}
 
 	//-------------------------------
-	// ƒtƒ@ƒCƒ‹ƒƒjƒ…[‚ÌuI—¹v‚ª‘I‘ğ‚³‚ê‚½
+	// ãƒ•ã‚¡ã‚¤ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ã€Œçµ‚äº†ã€ãŒé¸æŠã•ã‚ŒãŸ
 	//-------------------------------
 	IAsyncAction MainPage::file_exit_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		// ƒRƒ“ƒeƒLƒXƒgƒƒjƒ…[‚ªŠJ‚¢‚Ä‚¢‚é‚È‚ç•Â‚¶‚é.
+		// UWP ã® Windows10 ã§ã¯, ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ã‚¿ã‚¤ãƒˆãƒ«ãƒãƒ¼ã‚’å¤‰æ›´ã™ã‚‹ã“ã¨ã¯ã§ããªã„.
+		// é–‰ã˜ã‚‹ãƒœã‚¿ãƒ³ã®å¯å¦ã‚’å¤‰ãˆã‚‹ã“ã¨ã¯ã§ããªã„ã®ã§, æ’ä»–å‡¦ç†ã‚’è¡Œãªã†.
+		// ã¡ãªã¿ã« Windows11 ã§ã¯, ã€Œã‚¿ã‚¤ãƒˆãƒ« ãƒãƒ¼ã®ã‚«ã‚¹ã‚¿ãƒã‚¤ã‚ºã€ã‚’å‚ç…§.
+		static std::mutex exit{};	// çµ‚äº†ã®æ’ä»–å‡¦ç†
+		if (!exit.try_lock()) {
+			co_return;
+		}
+
+		// ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ãŒé–‹ã„ã¦ã„ã‚‹ãªã‚‰é–‰ã˜ã‚‹.
 		if (m_menu_fill != nullptr && m_menu_fill.IsOpen()) {
 			m_menu_fill.Hide();
 			ContextFlyout(nullptr);
@@ -223,7 +228,7 @@ namespace winrt::GraphPaper::implementation
 			ContextFlyout(nullptr);
 		}
 
-		// ƒRƒ“ƒeƒLƒXƒgƒ_ƒCƒAƒƒO‚ğ•Â‚¶‚é.
+		// ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’é–‰ã˜ã‚‹.
 		cd_conf_save_dialog().Hide();
 		cd_edit_text_dialog().Hide();
 		cd_message_dialog().Hide();
@@ -231,24 +236,28 @@ namespace winrt::GraphPaper::implementation
 		cd_prop_dialog().Hide();
 		cd_sheet_size_dialog().Hide();
 
-		// ƒXƒ^ƒbƒN‚ªXV‚³‚ê‚½, ‚©‚ÂŠm”Fƒ_ƒCƒAƒƒO‚Ì‰“š‚ªuƒLƒƒƒ“ƒZƒ‹v‚©”»’è‚·‚é.
-		if (m_ustack_is_changed && !co_await file_comfirm_dialog()) {
+		// ã‚¹ã‚¿ãƒƒã‚¯ãŒæ›´æ–°ã•ã‚ŒãŸ, ã‹ã¤ç¢ºèªãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®å¿œç­”ãŒã€Œã‚­ãƒ£ãƒ³ã‚»ãƒ«ã€ã‹åˆ¤å®šã™ã‚‹.
+		if (m_ustack_is_changed && !co_await file_confirm_dialog()) {
+			// ã€Œã‚­ãƒ£ãƒ³ã‚»ãƒ«ã€ãªã‚‰, æ’ä»–å‡¦ç†ã‚’è§£é™¤ã—ã¦ä¸­æ–­ã™ã‚‹.
+			exit.unlock();
 			co_return;
 		}
 
-		// ƒtƒ@ƒCƒ‹‚Ì‘‚«‚İ‚ªI‚í‚é‚Ü‚ÅƒuƒƒbƒN‚·‚é.
-		while (!m_mutex_fwrite.try_lock()) {
+		// ä¿å­˜ãƒ”ãƒƒã‚«ãƒ¼ã§ã€Œä¿å­˜ã€ã‚’æŠ¼ã—, ãƒ”ãƒƒã‚«ãƒ¼ãŒã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’è¿”ã™ã¾ã§ã®é–“ã«,
+		// ã€Œçµ‚äº†ã€ã‚’æŠ¼ã™ã“ã¨ãŒã§ãã‚‹.
+		// ãƒ•ã‚¡ã‚¤ãƒ«ã®æ›¸ãè¾¼ã¿ãŒçµ‚ã‚ã‚‹ã¾ã§ãƒ–ãƒ­ãƒƒã‚¯ã™ã‚‹.
+		while (!m_mutex_exit.try_lock()) {
 #ifdef _DEBUG
 			__debugbreak();
 #endif // _DEBUG
 		}
-		m_mutex_fwrite.unlock();
+		m_mutex_exit.unlock();
 
-		// ˆê——‚ª•\¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
+		// ä¸€è¦§ãŒè¡¨ç¤ºã•ã‚Œã¦ã‚‹ã‹åˆ¤å®šã™ã‚‹.
 		if (summary_is_visible()) {
 			summary_close_click(nullptr, nullptr);
 		}
-		// Ã“IƒŠƒ\[ƒX‚©‚ç“Ç‚İ‚ñ‚¾ƒRƒ“ƒeƒLƒXƒgƒƒjƒ…[‚ğ”jŠü‚·‚é.
+		// é™çš„ãƒªã‚½ãƒ¼ã‚¹ã‹ã‚‰èª­ã¿è¾¼ã‚“ã ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚’ç ´æ£„ã™ã‚‹.
 		{
 			m_menu_stroke = nullptr;
 			m_menu_fill = nullptr;
@@ -259,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 			m_menu_ungroup = nullptr;
 		}
 
-		// ƒR[ƒhƒrƒnƒCƒ“ƒh‚Åİ’è‚µ‚½ƒnƒ“ƒhƒ‰[‚Ìİ’è‚ğ‰ğœ‚·‚é.
+		// ã‚³ãƒ¼ãƒ‰ãƒ“ãƒã‚¤ãƒ³ãƒ‰ã§è¨­å®šã—ãŸãƒãƒ³ãƒ‰ãƒ©ãƒ¼ã®è¨­å®šã‚’è§£é™¤ã™ã‚‹.
 		{
 			auto const& app{ Application::Current() };
 			app.Suspending(m_token_suspending);
@@ -276,12 +285,12 @@ namespace winrt::GraphPaper::implementation
 			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(m_token_close_requested);
 		}
 
-		// DirectX ‚ÌƒIƒuƒWƒFƒNƒg‚ğ”jŠü‚·‚é.
+		// DirectX ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç ´æ£„ã™ã‚‹.
 		{
-			// ƒEƒBƒ“ƒhƒE‚É‘¼‚ÌƒRƒ“ƒgƒ[ƒ‹‚ğ•\¦‚µ‚Ä‚¢‚½ê‡ (—á‚¦‚ÎƒŠƒXƒgƒrƒ…[),
-			// ‚±‚ÌŒã, ƒXƒƒbƒvƒ`ƒF[ƒ“ƒpƒlƒ‹‚Ì SizeChanged ‚ªŒÄ‚Ño‚³‚ê‚Ä‚µ‚Ü‚¤.
-			// ‚»‚Ì, •`‰æˆ—‚µ‚È‚¢‚æ‚¤”r‘¼§Œä‚ğƒƒbƒN‚·‚é.
-			m_mutex_d2d.lock();
+			// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã«ä»–ã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã‚’è¡¨ç¤ºã—ã¦ã„ãŸå ´åˆ (ä¾‹ãˆã°ãƒªã‚¹ãƒˆãƒ“ãƒ¥ãƒ¼),
+			// ã“ã®å¾Œ, ã‚¹ãƒ¯ãƒƒãƒ—ãƒã‚§ãƒ¼ãƒ³ãƒ‘ãƒãƒ«ã® SizeChanged ãŒå‘¼ã³å‡ºã•ã‚Œã¦ã—ã¾ã†.
+			// ãã®æ™‚, æç”»å‡¦ç†ã—ãªã„ã‚ˆã†æ’ä»–åˆ¶å¾¡ã‚’ãƒ­ãƒƒã‚¯ã™ã‚‹.
+			m_mutex_draw.lock();
 			if (m_main_sheet.m_state_block != nullptr) {
 				//m_main_sheet.m_state_block->Release();
 				m_main_sheet.m_state_block = nullptr;
@@ -315,17 +324,17 @@ namespace winrt::GraphPaper::implementation
 		slist_clear(m_prop_sheet.m_shape_list);
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
-			message_show(ICON_ALERT, DEBUG_MSG, {});
+			message_show(ICON_DEBUG, DEBUG_MSG, {});
 		}
 #endif
 		ShapeText::release_available_fonts();
 
-		// ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğI—¹‚·‚é.
+		// ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚’çµ‚äº†ã™ã‚‹.
 		Application::Current().Exit();
 	}
 
 	//------------------------------
-	// ƒtƒ@ƒCƒ‹ƒƒjƒ…[‚Ìu—p†‚ğ‰æ‘œ‚Æ‚µ‚ÄƒGƒNƒXƒ|[ƒg‚·‚év‚ª‘I‘ğ‚³‚ê‚½
+	// ãƒ•ã‚¡ã‚¤ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ã€Œç”¨ç´™ã‚’ç”»åƒã¨ã—ã¦ã‚¨ã‚¯ã‚¹ãƒãƒ¼ãƒˆã™ã‚‹ã€ãŒé¸æŠã•ã‚ŒãŸ
 	//------------------------------
 	IAsyncAction MainPage::file_export_as_image_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -334,7 +343,7 @@ namespace winrt::GraphPaper::implementation
 			co_return;
 		}
 
-		// Direct2D ƒRƒ“ƒeƒ“ƒc‚ğ‰æ‘œƒtƒ@ƒCƒ‹‚É•Û‘¶‚·‚é•û–@
+		// Direct2D ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã‚’ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã«ä¿å­˜ã™ã‚‹æ–¹æ³•
 		const GUID& wic_fmt = [](const winrt::hstring& f_type)
 		{
 			if (f_type == L".png") {
@@ -429,7 +438,7 @@ namespace winrt::GraphPaper::implementation
 		//scp_sheet_panel().Width(w);
 		//scp_sheet_panel().Height(h);
 
-		// ƒXƒŒƒbƒh‚ğƒƒCƒ“ƒy[ƒW‚Ì UI ƒXƒŒƒbƒh‚É•Ï‚¦‚é.
+		// ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ãƒ¡ã‚¤ãƒ³ãƒšãƒ¼ã‚¸ã® UI ã‚¹ãƒ¬ãƒƒãƒ‰ã«å¤‰ãˆã‚‹.
 		//co_await winrt::resume_foreground(Dispatcher());
 		//m_main_sheet.m_d2d.SetSwapChainPanel(scp_sheet_panel());
 
@@ -445,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//-------------------------------
-	// ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚ªI—¹‚µ‚½.
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ãŒçµ‚äº†ã—ãŸ.
 	//-------------------------------
 	void MainPage::file_finish_reading(void)
 	{
@@ -460,13 +469,13 @@ namespace winrt::GraphPaper::implementation
 		
 		sheet_attr_is_checked();
 
-		wchar_t* unavailable_font;	// –³Œø‚È‘‘Ì–¼
+		wchar_t* unavailable_font;	// ç„¡åŠ¹ãªæ›¸ä½“å
 		if (!slist_test_avaiable_font(m_main_sheet.m_shape_list, unavailable_font)) {
-			// u–³Œø‚È‘‘Ì‚ªg—p‚³‚ê‚Ä‚¢‚Ü‚·vƒƒbƒZ[ƒWƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é.
+			// ã€Œç„¡åŠ¹ãªæ›¸ä½“ãŒä½¿ç”¨ã•ã‚Œã¦ã„ã¾ã™ã€ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹.
 			message_show(ICON_ALERT, RES_ERR_FONT, unavailable_font);
 		}
 
-		// ˆê——‚ª•\¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
+		// ä¸€è¦§ãŒè¡¨ç¤ºã•ã‚Œã¦ã‚‹ã‹åˆ¤å®šã™ã‚‹.
 		if (summary_is_visible()) {
 			if (m_main_sheet.m_shape_list.empty()) {
 				summary_close_click(nullptr, nullptr);
@@ -475,11 +484,11 @@ namespace winrt::GraphPaper::implementation
 				summary_remake();
 			}
 			else {
-				// ƒŠƒ\[ƒX‚©‚ç}Œ`‚Ìˆê——ƒpƒlƒ‹‚ğŒ©‚Â‚¯‚é.
+				// ãƒªã‚½ãƒ¼ã‚¹ã‹ã‚‰å›³å½¢ã®ä¸€è¦§ãƒ‘ãƒãƒ«ã‚’è¦‹ã¤ã‘ã‚‹.
 				auto _{
 					FindName(L"gd_summary_panel")
 				};
-				gd_summary_panel().Visibility(UI_VISIBLE);
+				gd_summary_panel().Visibility(Visibility::Visible);
 			}
 		}
 
@@ -495,13 +504,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//-------------------------------
-	// ƒtƒ@ƒCƒ‹ƒƒjƒ…[‚Ìu‰æ‘œ‚ğ}Œ`‚Æ‚µ‚ÄƒCƒ“ƒ|[ƒg‚·‚é...v‚ª‘I‘ğ‚³‚ê‚½.
+	// ãƒ•ã‚¡ã‚¤ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ã€Œç”»åƒã‚’å›³å½¢ã¨ã—ã¦ã‚¤ãƒ³ãƒãƒ¼ãƒˆã™ã‚‹...ã€ãŒé¸æŠã•ã‚ŒãŸ.
 	//-------------------------------
 	IAsyncAction MainPage::file_import_image_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		winrt::apartment_context context;
-
-		// ƒtƒ@ƒCƒ‹uƒI[ƒvƒ“vƒsƒbƒJ[‚ğæ“¾‚µ‚ÄŠJ‚­.
+		// ãƒ•ã‚¡ã‚¤ãƒ«ã€Œã‚ªãƒ¼ãƒ—ãƒ³ã€ãƒ”ãƒƒã‚«ãƒ¼ã‚’å–å¾—ã—ã¦é–‹ã.
 		FileOpenPicker open_picker{ FileOpenPicker() };
 		open_picker.FileTypeFilter().Append(RES_EXT_BMP);
 		open_picker.FileTypeFilter().Append(RES_EXT_GIF);
@@ -511,19 +518,19 @@ namespace winrt::GraphPaper::implementation
 		open_picker.FileTypeFilter().Append(RES_EXT_TIF);
 		open_picker.FileTypeFilter().Append(RES_EXT_TIFF);
 
-		// ƒsƒbƒJ[‚ğ”ñ“¯Šú‚É•\¦‚µ‚ÄƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğæ“¾‚·‚é.
-		// (u•Â‚¶‚évƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½ê‡ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚Í nullptr.)
-		// co_await ‚µ‚Ä‚é‚É‚à‚©‚©‚í‚ç‚¸, ƒtƒ@ƒCƒ‹ŠJ‚­ƒsƒbƒJ[‚ª•Ô’l‚ğ–ß‚·‚Ü‚ÅŠÔ‚ª‚©‚©‚é.
-		// ‚»‚ÌŠÔƒtƒHƒAƒOƒ‰ƒ“ƒh‚ÌƒXƒŒƒbƒh‚ª“®ì‚µ‚Ä‚µ‚Ü‚¤.
-		m_mutex_fopen.lock();
+		// ãƒ”ãƒƒã‚«ãƒ¼ã‚’éåŒæœŸã«è¡¨ç¤ºã—ã¦ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å–å¾—ã™ã‚‹.
+		// (ã€Œé–‰ã˜ã‚‹ã€ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸå ´åˆã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã¯ nullptr.)
+		// co_await ã—ã¦ã‚‹ã«ã‚‚ã‹ã‹ã‚ã‚‰ãš, ãƒ•ã‚¡ã‚¤ãƒ«é–‹ããƒ”ãƒƒã‚«ãƒ¼ãŒè¿”å€¤ã‚’æˆ»ã™ã¾ã§æ™‚é–“ãŒã‹ã‹ã‚‹.
+		// ãã®é–“ãƒ•ã‚©ã‚¢ã‚°ãƒ©ãƒ³ãƒ‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ãŒå‹•ä½œã—ã¦ã—ã¾ã†.
+		m_mutex_event.lock();
 		StorageFile open_file{
 			co_await open_picker.PickSingleFileAsync()
 		};
-		m_mutex_fopen.unlock();
+		m_mutex_event.unlock();
 		open_picker = nullptr;
-		// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ªƒkƒ‹ƒ|ƒCƒ“ƒ^[‚©”»’è‚·‚é.
+		// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ãŒãƒŒãƒ«ãƒã‚¤ãƒ³ã‚¿ãƒ¼ã‹åˆ¤å®šã™ã‚‹.
 		if (open_file != nullptr) {
-			// ‘Ò‹@ƒJ[ƒ\ƒ‹‚ğ•\¦, •\¦‚·‚é‘O‚ÌƒJ[ƒ\ƒ‹‚ğ“¾‚é.
+			// å¾…æ©Ÿã‚«ãƒ¼ã‚½ãƒ«ã‚’è¡¨ç¤º, è¡¨ç¤ºã™ã‚‹å‰ã®ã‚«ãƒ¼ã‚½ãƒ«ã‚’å¾—ã‚‹.
 			const CoreCursor& prev_cur = file_wait_cursor();
 			unselect_all();
 			const double win_w = scp_sheet_panel().ActualWidth();
@@ -535,7 +542,7 @@ namespace winrt::GraphPaper::implementation
 			BitmapDecoder decoder{ co_await BitmapDecoder::CreateAsync(stream) };
 			SoftwareBitmap bitmap{ SoftwareBitmap::Convert(co_await decoder.GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8) };
 
-			// —p†‚Ì•\¦‚³‚ê‚½•”•ª‚Ì’†S‚ÌˆÊ’u‚ğ‹‚ß‚é.
+			// ç”¨ç´™ã®è¡¨ç¤ºã•ã‚ŒãŸéƒ¨åˆ†ã®ä¸­å¿ƒã®ä½ç½®ã‚’æ±‚ã‚ã‚‹.
 			const double scale = m_main_sheet.m_sheet_scale;
 			const double image_w = bitmap.PixelWidth();
 			const double image_h = bitmap.PixelHeight();
@@ -555,15 +562,15 @@ namespace winrt::GraphPaper::implementation
 			stream = nullptr;
 
 			{
-				m_mutex_d2d.lock();
+				m_mutex_draw.lock();
 				ustack_push_append(s);
 				ustack_push_select(s);
 				ustack_push_null();
-				m_mutex_d2d.unlock();
+				m_mutex_draw.unlock();
 			}
 
 			ustack_is_enable();
-			// ˆê——‚ª•\¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
+			// ä¸€è¦§ãŒè¡¨ç¤ºã•ã‚Œã¦ã‚‹ã‹åˆ¤å®šã™ã‚‹.
 			if (summary_is_visible()) {
 				summary_append(s);
 				summary_select(s);
@@ -573,87 +580,84 @@ namespace winrt::GraphPaper::implementation
 			sheet_panle_size();
 			sheet_draw();
 
-			// ƒJ[ƒ\ƒ‹‚ğŒ³‚É–ß‚·.
+			// ã‚«ãƒ¼ã‚½ãƒ«ã‚’å…ƒã«æˆ»ã™.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);
 		}
-
-		// ƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•œŒ³‚·‚é.
-		co_await context;
 	};
 
 	//-------------------------------
-	// ƒtƒ@ƒCƒ‹ƒƒjƒ…[‚ÌuŠJ‚­...v‚ª‘I‘ğ‚³‚ê‚½
+	// ãƒ•ã‚¡ã‚¤ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ã€Œé–‹ã...ã€ãŒé¸æŠã•ã‚ŒãŸ
 	//-------------------------------
 	IAsyncAction MainPage::file_open_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		// ƒXƒ^ƒbƒN‚É‘€ì‚Ì‘g‚ªÏ‚Ü‚ê‚Ä‚¢‚é, ‚©‚ÂŠm”Fƒ_ƒCƒAƒƒO‚Ì‰“š‚ªuƒLƒƒƒ“ƒZƒ‹v‚©”»’è‚·‚é.
-		if (m_ustack_is_changed && !co_await file_comfirm_dialog()) {
+		// ã‚¹ã‚¿ãƒƒã‚¯ã«æ“ä½œã®çµ„ãŒç©ã¾ã‚Œã¦ã„ã‚‹, ã‹ã¤ç¢ºèªãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®å¿œç­”ãŒã€Œã‚­ãƒ£ãƒ³ã‚»ãƒ«ã€ã‹åˆ¤å®šã™ã‚‹.
+		if (m_ustack_is_changed && !co_await file_confirm_dialog()) {
 			co_return;
 		}
-		// ƒtƒ@ƒCƒ‹uƒI[ƒvƒ“vƒsƒbƒJ[‚ğæ“¾‚µ‚ÄŠJ‚­.
+		// ãƒ•ã‚¡ã‚¤ãƒ«ã€Œã‚ªãƒ¼ãƒ—ãƒ³ã€ãƒ”ãƒƒã‚«ãƒ¼ã‚’å–å¾—ã—ã¦é–‹ã.
 		FileOpenPicker open_picker{
 			FileOpenPicker()
 		};
 		open_picker.FileTypeFilter().Append(RES_EXT_GPF);
-		// ƒ_ƒuƒ‹ƒNƒŠƒbƒN‚Åƒtƒ@ƒCƒ‹‚ª‘I‘ğ‚³‚ê‚½ê‡,
-		// co_await ‚ªI—¹‚·‚é‘O‚É, PonterReleased ‚Æ PonterEntered ‚ªŒÄ‚Î‚ê‚é.
-		// ‚±‚ê‚ÍƒsƒbƒJ[‚ª 2 “x–Ú‚Ì Released ‚ğ‘Ò‚½‚¸‚Éƒ_ƒuƒ‹ƒNƒŠƒbƒN‚ğ¬—§‚³‚¹‚Ä‚¢‚é‚½‚ß‚¾‚Æv‚í‚ê‚é.
+		// ãƒ€ãƒ–ãƒ«ã‚¯ãƒªãƒƒã‚¯ã§ãƒ•ã‚¡ã‚¤ãƒ«ãŒé¸æŠã•ã‚ŒãŸå ´åˆ,
+		// co_await ãŒçµ‚äº†ã™ã‚‹å‰ã«, PonterReleased ã¨ PonterEntered ãŒå‘¼ã°ã‚Œã‚‹.
+		// ã“ã‚Œã¯ãƒ”ãƒƒã‚«ãƒ¼ãŒ 2 åº¦ç›®ã® Released ã‚’å¾…ãŸãšã«ãƒ€ãƒ–ãƒ«ã‚¯ãƒªãƒƒã‚¯ã‚’æˆç«‹ã•ã›ã¦ã„ã‚‹ãŸã‚ã ã¨æ€ã‚ã‚Œã‚‹.
 		//scp_sheet_panel().PointerReleased(m_token_event_released);
 		//scp_sheet_panel().PointerEntered(m_token_event_entered);
 
-		// ƒsƒbƒJ[‚ğ”ñ“¯Šú‚Å•\¦‚µ‚ÄƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğæ“¾‚·‚é.
-		// (u•Â‚¶‚évƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½ê‡ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚Í nullptr.)
-		m_mutex_fopen.lock();
+		// ãƒ”ãƒƒã‚«ãƒ¼ã‚’éåŒæœŸã§è¡¨ç¤ºã—ã¦ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å–å¾—ã™ã‚‹.
+		// (ã€Œé–‰ã˜ã‚‹ã€ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸå ´åˆã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã¯ nullptr.)
+		m_mutex_event.lock();
 		StorageFile open_file{
 			co_await open_picker.PickSingleFileAsync()
 		};
-		m_mutex_fopen.unlock();
+		m_mutex_event.unlock();
 		open_picker = nullptr;
-		// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ªƒkƒ‹ƒ|ƒCƒ“ƒ^[‚©”»’è‚·‚é.
+		// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ãŒãƒŒãƒ«ãƒã‚¤ãƒ³ã‚¿ãƒ¼ã‹åˆ¤å®šã™ã‚‹.
 		if (open_file != nullptr) {
-			// ‘Ò‹@ƒJ[ƒ\ƒ‹‚ğ•\¦, •\¦‚·‚é‘O‚ÌƒJ[ƒ\ƒ‹‚ğ“¾‚é.
+			// å¾…æ©Ÿã‚«ãƒ¼ã‚½ãƒ«ã‚’è¡¨ç¤º, è¡¨ç¤ºã™ã‚‹å‰ã®ã‚«ãƒ¼ã‚½ãƒ«ã‚’å¾—ã‚‹.
 			const CoreCursor& prev_cur = file_wait_cursor();
-			// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ”ñ“¯Šú‚É“Ç‚Ş.
+			// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’éåŒæœŸã«èª­ã‚€.
 			auto _{
 				co_await file_read_async<false, false>(open_file)
 			};
-			// ƒJ[ƒ\ƒ‹‚ğŒ³‚É–ß‚·.
+			// ã‚«ãƒ¼ã‚½ãƒ«ã‚’å…ƒã«æˆ»ã™.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);
-			// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ‰ğ•ú‚·‚é.
+			// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’è§£æ”¾ã™ã‚‹.
 			open_file = nullptr;
 		}
 	}
 
 	//-------------------------------
-	// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ”ñ“¯Šú‚É“Ç‚Ş.
-	// SUSPEND	ƒ‰ƒCƒtƒTƒCƒNƒ‹‚ª’†’f‚Ì‚Æ‚« true
-	// SETTING	u—p†İ’è‚ğ•Û‘¶v‚Ì‚Æ‚« true
-	// s_file	“Ç‚İ‚ŞƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹
-	// –ß‚è’l	“Ç‚İ‚ß‚½‚ç S_OK.
+	// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’éåŒæœŸã«èª­ã‚€.
+	// SUSPEND	ãƒ©ã‚¤ãƒ•ã‚µã‚¤ã‚¯ãƒ«ãŒä¸­æ–­ã®ã¨ã true
+	// SETTING	ã€Œç”¨ç´™è¨­å®šã‚’ä¿å­˜ã€ã®ã¨ã true
+	// s_file	èª­ã¿è¾¼ã‚€ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«
+	// æˆ»ã‚Šå€¤	èª­ã¿è¾¼ã‚ãŸã‚‰ S_OK.
 	//-------------------------------
 	template <bool SUSPEND, bool SETTING>
 	IAsyncOperation<winrt::hresult> MainPage::file_read_async(StorageFile s_file) noexcept
 	{
 		HRESULT hr = E_FAIL;
-		m_mutex_d2d.lock();
+		m_mutex_draw.lock();
 		try {
-			// ˆê——‚ª•\¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
+			// ä¸€è¦§ãŒè¡¨ç¤ºã•ã‚Œã¦ã‚‹ã‹åˆ¤å®šã™ã‚‹.
 			if (summary_is_visible()) {
-				// ˆê——‚ğÁ‹‚·‚é.
+				// ä¸€è¦§ã‚’æ¶ˆå»ã™ã‚‹.
 				summary_close_click(nullptr, nullptr);
 			}
-			// ‘€ìƒXƒ^ƒbƒN‚Æ}Œ`ƒŠƒXƒg‚ğÁ‹‚·‚é.
+			// æ“ä½œã‚¹ã‚¿ãƒƒã‚¯ã¨å›³å½¢ãƒªã‚¹ãƒˆã‚’æ¶ˆå»ã™ã‚‹.
 			ustack_clear();
 			slist_clear(m_main_sheet.m_shape_list);
 #if defined(_DEBUG)
 			if (debug_leak_cnt != 0) {
-				message_show(ICON_ALERT, DEBUG_MSG, {});
-				m_mutex_d2d.unlock();
+				message_show(ICON_DEBUG, DEBUG_MSG, {});
+				m_mutex_draw.unlock();
 				co_return hr;
 			}
 #endif
 
-			// ƒXƒgƒŠ[ƒ€ƒtƒ@ƒCƒ‹‚ğŠJ‚¢‚Äƒf[ƒ^ƒŠ[ƒ_[‚É“Ç‚İ‚Ş.
+			// ã‚¹ãƒˆãƒªãƒ¼ãƒ ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã„ã¦ãƒ‡ãƒ¼ã‚¿ãƒªãƒ¼ãƒ€ãƒ¼ã«èª­ã¿è¾¼ã‚€.
 			const auto& ra_stream{
 				co_await s_file.OpenAsync(FileAccessMode::Read)
 			};
@@ -662,7 +666,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
-			// ƒƒCƒ“ƒy[ƒW‚Ìì}‚Ì‘®«‚ğ“Ç‚İ‚Ş.
+			// ãƒ¡ã‚¤ãƒ³ãƒšãƒ¼ã‚¸ã®ä½œå›³ã®å±æ€§ã‚’èª­ã¿è¾¼ã‚€.
 			m_drawing_tool = static_cast<DRAWING_TOOL>(dt_reader.ReadUInt32());			
 			m_drawing_poly_opt.m_vertex_cnt = dt_reader.ReadUInt32();
 			m_drawing_poly_opt.m_regular = dt_reader.ReadBoolean();
@@ -670,7 +674,7 @@ namespace winrt::GraphPaper::implementation
 			m_drawing_poly_opt.m_end_closed = dt_reader.ReadBoolean();
 			m_drawing_poly_opt.m_clockwise = dt_reader.ReadBoolean();
 
-			// ƒƒCƒ“ƒy[ƒW‚Ì•¶šŒŸõ‚Ì‘®«‚ğ“Ç‚İ‚Ş.
+			// ãƒ¡ã‚¤ãƒ³ãƒšãƒ¼ã‚¸ã®æ–‡å­—æ¤œç´¢ã®å±æ€§ã‚’èª­ã¿è¾¼ã‚€.
 			dt_read(m_find_text, dt_reader);
 			dt_read(m_find_repl, dt_reader);
 			const uint16_t f_bit = dt_reader.ReadUInt16();
@@ -678,26 +682,26 @@ namespace winrt::GraphPaper::implementation
 			m_find_text_case = ((f_bit & 2) != 0);
 			m_find_text_wrap = ((f_bit & 4) != 0);
 
-			// ƒƒCƒ“ƒy[ƒW‚Ì‚»‚Ì‘¼‚Ì‘®«‚ğ“Ç‚İ‚Ş.
+			// ãƒ¡ã‚¤ãƒ³ãƒšãƒ¼ã‚¸ã®ãã®ä»–ã®å±æ€§ã‚’èª­ã¿è¾¼ã‚€.
 			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
 			m_vert_stick = dt_reader.ReadSingle();
 			m_status_bar = static_cast<STATUS_BAR>(dt_reader.ReadUInt16());
-			m_image_keep_aspect = dt_reader.ReadBoolean();	// ‰æ‘œ‚Ìc‰¡”ä‚ÌˆÛ
+			m_image_keep_aspect = dt_reader.ReadBoolean();	// ç”»åƒã®ç¸¦æ¨ªæ¯”ã®ç¶­æŒ
 
 			const bool s_atom = dt_reader.ReadBoolean();
 			m_summary_atomic.store(s_atom, std::memory_order_release);
 
-			// ƒƒCƒ“—p†‚ğ“Ç‚İ‚Ş.
+			// ãƒ¡ã‚¤ãƒ³ç”¨ç´™ã‚’èª­ã¿è¾¼ã‚€.
 			m_main_sheet.read(dt_reader);
 
-			// ƒV[ƒg‚Ì‚İ“Ç‚İ‚Ş‚©”»’è‚·‚é.
+			// ã‚·ãƒ¼ãƒˆã®ã¿èª­ã¿è¾¼ã‚€ã‹åˆ¤å®šã™ã‚‹.
 			if constexpr (SETTING) {
 				hr = S_OK;
 			}
 			else {
 				if (slist_read(m_main_sheet.m_shape_list, dt_reader)) {
-					// ’†’f‚³‚ê‚½‚©”»’è‚·‚é.
+					// ä¸­æ–­ã•ã‚ŒãŸã‹åˆ¤å®šã™ã‚‹.
 					if constexpr (SUSPEND) {
 						ustack_read(dt_reader);
 					}
@@ -710,7 +714,7 @@ namespace winrt::GraphPaper::implementation
 		catch (winrt::hresult_error const& e) {
 			hr = e.code();
 		}
-		m_mutex_d2d.unlock();
+		m_mutex_draw.unlock();
 		if (hr != S_OK) {
 			message_show(ICON_ALERT, RES_ERR_READ, s_file.Path());
 		}
@@ -720,7 +724,7 @@ namespace winrt::GraphPaper::implementation
 				file_finish_reading();
 			}
 		}
-		// Œ‹‰Ê‚ğ•Ô‚µI—¹‚·‚é.
+		// çµæœã‚’è¿”ã—çµ‚äº†ã™ã‚‹.
 		co_return hr;
 	}
 
@@ -729,10 +733,10 @@ namespace winrt::GraphPaper::implementation
 	template IAsyncOperation<winrt::hresult> MainPage::file_read_async<true, false>(StorageFile s_file) noexcept;
 
 	//-------------------------------
-	// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğÅ‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚É“o˜^‚·‚é.
-	// s_file	ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹
-	// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹ƒƒjƒ…[‚ÆƒEƒBƒ“ƒhƒEƒ^ƒCƒgƒ‹‚àXV‚³‚ê‚é.
-	// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ªƒkƒ‹‚Ìê‡, ƒEƒBƒ“ƒhƒEƒ^ƒCƒgƒ‹‚É–³‘è‚ªŠi”[‚³‚ê‚é.
+	// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã«ç™»éŒ²ã™ã‚‹.
+	// s_file	ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«
+	// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã¨ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¿ã‚¤ãƒˆãƒ«ã‚‚æ›´æ–°ã•ã‚Œã‚‹.
+	// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ãŒãƒŒãƒ«ã®å ´åˆ, ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¿ã‚¤ãƒˆãƒ«ã«ç„¡é¡ŒãŒæ ¼ç´ã•ã‚Œã‚‹.
 	//-------------------------------
 	void MainPage::file_recent_add(StorageFile const& s_file)
 	{
@@ -747,7 +751,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//-------------------------------
-	// ƒtƒ@ƒCƒ‹ƒƒjƒ…[‚ÌuÅ‹ßg‚Á‚½ƒtƒ@ƒCƒ‹v‚ÌƒTƒu€–Ú‚ª‘I‘ğ‚³‚ê‚½.
+	// ãƒ•ã‚¡ã‚¤ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ã€Œæœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã€ã®ã‚µãƒ–é …ç›®ãŒé¸æŠã•ã‚ŒãŸ.
 	//-------------------------------
 	IAsyncAction MainPage::file_recent_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
@@ -770,99 +774,91 @@ namespace winrt::GraphPaper::implementation
 		else {
 			co_return;
 		}
-		// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş.
+		// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€.
 		{
-			// SHCore.dll ƒXƒŒƒbƒh
+			// SHCore.dll ã‚¹ãƒ¬ãƒƒãƒ‰
 			auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
 			auto const& mru_entries = mru_list.Entries();
-			// ƒtƒ@ƒCƒ‹‚Ì”Ô†‚ªÅ‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚Ì”ˆÈã‚©”»’è‚·‚é.
-			// ”ˆÈã‚È‚ç
+			// ãƒ•ã‚¡ã‚¤ãƒ«ã®ç•ªå·ãŒæœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®æ•°ä»¥ä¸Šã‹åˆ¤å®šã™ã‚‹.
+			// æ•°ä»¥ä¸Šãªã‚‰
 			if (n >= mru_entries.Size()) {
-				// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚ÌƒGƒ‰[‚ğ•\¦‚·‚é.
+				// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚¨ãƒ©ãƒ¼ã‚’è¡¨ç¤ºã™ã‚‹.
 				message_show(ICON_ALERT, RES_ERR_RECENT, to_hstring(n + 1));
 				co_return;
 			}
-			// Å‹ßg‚Á‚½ƒŠƒXƒg‚©‚ç i ”Ô–Ú‚Ì—v‘f‚ğ“¾‚é.
+			// æœ€è¿‘ä½¿ã£ãŸãƒªã‚¹ãƒˆã‹ã‚‰ i ç•ªç›®ã®è¦ç´ ã‚’å¾—ã‚‹.
 			AccessListEntry item[1];
 			mru_entries.GetMany(n, item);
 
-			// ƒXƒ^ƒbƒN‚É‘€ì‚Ì‘g‚ªÏ‚Ü‚ê‚Ä‚¢‚é, ‚©‚ÂŠm”Fƒ_ƒCƒAƒƒO‚Ì‰“š‚ªuƒLƒƒƒ“ƒZƒ‹v‚©”»’è‚·‚é.
-			if (m_ustack_is_changed && !co_await file_comfirm_dialog()) {
+			// ã‚¹ã‚¿ãƒƒã‚¯ã«æ“ä½œã®çµ„ãŒç©ã¾ã‚Œã¦ã„ã‚‹, ã‹ã¤ç¢ºèªãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®å¿œç­”ãŒã€Œã‚­ãƒ£ãƒ³ã‚»ãƒ«ã€ã‹åˆ¤å®šã™ã‚‹.
+			if (m_ustack_is_changed && !co_await file_confirm_dialog()) {
 				co_return;
 			}
 
-			// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚Ìƒg[ƒNƒ“‚©‚çƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚é.
-			StorageFile s_file{ co_await file_recent_token_async(item[0].Token) };	// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹
-			// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ª‹ó‚Å‚È‚¢‚©”»’è‚·‚é.
-			// ‹ó‚Å‚È‚¢‚È‚ç
+			// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒˆãƒ¼ã‚¯ãƒ³ã‹ã‚‰ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ã‚‹.
+			StorageFile s_file{ co_await file_recent_token_async(item[0].Token) };	// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«
+			// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ãŒç©ºã§ãªã„ã‹åˆ¤å®šã™ã‚‹.
+			// ç©ºã§ãªã„ãªã‚‰
 			if (s_file != nullptr) {
-				// ‘Ò‹@ƒJ[ƒ\ƒ‹‚ğ•\¦, •\¦‚·‚é‘O‚ÌƒJ[ƒ\ƒ‹‚ğ“¾‚é.
+				// å¾…æ©Ÿã‚«ãƒ¼ã‚½ãƒ«ã‚’è¡¨ç¤º, è¡¨ç¤ºã™ã‚‹å‰ã®ã‚«ãƒ¼ã‚½ãƒ«ã‚’å¾—ã‚‹.
 				const CoreCursor& prev_cur = file_wait_cursor();
 				co_await file_read_async<false, false>(s_file);
-				// ƒJ[ƒ\ƒ‹‚ğŒ³‚É–ß‚·.
+				// ã‚«ãƒ¼ã‚½ãƒ«ã‚’å…ƒã«æˆ»ã™.
 				Window::Current().CoreWindow().PointerCursor(prev_cur);
-				// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ”jŠü‚·‚é.
+				// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ç ´æ£„ã™ã‚‹.
 				s_file = nullptr;
 			}
 			else {
-				// æ“¾‚Å‚«‚È‚¢‚È‚ç‚Î,
+				// å–å¾—ã§ããªã„ãªã‚‰ã°,
 				message_show(ICON_ALERT, RES_ERR_RECENT, item[0].Metadata);
 			}
 		}
 	}
 
 	//-------------------------------
-	// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚Ìƒg[ƒNƒ“‚©‚çƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚é.
-	// token	ƒtƒ@ƒCƒ‹‚Ìƒg[ƒNƒ“
-	// –ß‚è’l	ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹
+	// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒˆãƒ¼ã‚¯ãƒ³ã‹ã‚‰ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ã‚‹.
+	// token	ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒˆãƒ¼ã‚¯ãƒ³
+	// æˆ»ã‚Šå€¤	ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«
 	//-------------------------------
 	IAsyncOperation<StorageFile> MainPage::file_recent_token_async(const winrt::hstring token)
 	{
-		// ƒRƒ‹[ƒ`ƒ“‚ÌŠJn‚ÌƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•Û‘¶‚·‚é.
-		//winrt::apartment_context context;
-
-		// ƒXƒŒƒbƒh‚ğƒƒCƒ“ƒy[ƒW‚Ì UI ƒXƒŒƒbƒh‚É•Ï‚¦‚é.
-		//co_await winrt::resume_foreground(this->Dispatcher());
-
-		// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚Éƒkƒ‹‚ğŠi”[‚·‚é.
-		StorageFile s_file = nullptr;	// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹
+		// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã«ãƒŒãƒ«ã‚’æ ¼ç´ã™ã‚‹.
+		StorageFile recent_file = nullptr;	// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«
 		try {
-			// ƒg[ƒNƒ“‚ª‹ó‚Å‚È‚¢‚©”»’è‚·‚é.
-			// ‹ó‚Å‚È‚¢‚È‚ç,
+			// ãƒˆãƒ¼ã‚¯ãƒ³ãŒç©ºã§ãªã„ã‹åˆ¤å®šã™ã‚‹.
+			// ç©ºã§ãªã„ãªã‚‰,
 			if (!token.empty()) {
-				// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚ÌƒŠƒXƒg‚ğ“¾‚é.
-				// ƒŠƒXƒg‚Éƒg[ƒNƒ“‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é‚©”»’è‚·‚é.
-				// ŠÜ‚Ü‚ê‚Ä‚¢‚é‚È‚ç,
+				// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒªã‚¹ãƒˆã‚’å¾—ã‚‹.
+				// ãƒªã‚¹ãƒˆã«ãƒˆãƒ¼ã‚¯ãƒ³ãŒå«ã¾ã‚Œã¦ã„ã‚‹ã‹åˆ¤å®šã™ã‚‹.
+				// å«ã¾ã‚Œã¦ã„ã‚‹ãªã‚‰,
 				auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();
 				if (mru_list.ContainsItem(token)) {
-					// ƒŠƒXƒg‚©‚ç‚»‚Ìƒg[ƒNƒ“‚ª‚µ‚ß‚·ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚é.
-					s_file = co_await mru_list.GetFileAsync(token);
+					// ãƒªã‚¹ãƒˆã‹ã‚‰ãã®ãƒˆãƒ¼ã‚¯ãƒ³ãŒã—ã‚ã™ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ã‚‹.
+					recent_file = co_await mru_list.GetFileAsync(token);
 				}
 			}
 		}
 		catch (winrt::hresult_error) {
 		}
-		// æ“¾‚Å‚«‚Ä‚ào—ˆ‚È‚­‚Ä‚àÅ‹ßg‚Á‚½ƒŠƒXƒg‚Ì‡”Ô‚Í“ü‚ê‘Ö‚í‚é‚Ì‚Å,
-		// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹ƒƒjƒ…[‚ğXV‚·‚é.
+		// å–å¾—ã§ãã¦ã‚‚å‡ºæ¥ãªãã¦ã‚‚æœ€è¿‘ä½¿ã£ãŸãƒªã‚¹ãƒˆã®é †ç•ªã¯å…¥ã‚Œæ›¿ã‚ã‚‹ã®ã§,
+		// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚’æ›´æ–°ã™ã‚‹.
 		file_recent_menu_update();
-		// ƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•œŒ³‚·‚é.
-		//co_await context;
-		// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ•Ô‚·.
-		co_return s_file;
+		// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’è¿”ã™.
+		co_return recent_file;
 	}
 
 	//-------------------------------
-	// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹ƒƒjƒ…[‚ğXV‚·‚é.
+	// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚’æ›´æ–°ã™ã‚‹.
 	//-------------------------------
 	void MainPage::file_recent_menu_update(void)
 	{
-		// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚ÌƒAƒNƒZƒXƒŠƒXƒg‚ğ“¾‚é.
+		// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚¢ã‚¯ã‚»ã‚¹ãƒªã‚¹ãƒˆã‚’å¾—ã‚‹.
 		auto const& mru_entries = StorageApplicationPermissions::MostRecentlyUsedList().Entries();
 		const auto ent_size = mru_entries.Size();
 		AccessListEntry items[MRU_MAX];
 		winrt::hstring data[MRU_MAX];
 		mru_entries.GetMany(0, items);
-		// ƒAƒNƒZƒXƒŠƒXƒg‚Ìƒtƒ@ƒCƒ‹–¼‚ğ”z—ñ‚ÉŠi”[‚·‚é.
+		// ã‚¢ã‚¯ã‚»ã‚¹ãƒªã‚¹ãƒˆã®ãƒ•ã‚¡ã‚¤ãƒ«åã‚’é…åˆ—ã«æ ¼ç´ã™ã‚‹.
 		for (uint32_t i = 0; i < MRU_MAX; i++) {
 			if (i < ent_size) {
 				data[i] = items[i].Metadata;
@@ -871,7 +867,7 @@ namespace winrt::GraphPaper::implementation
 				data[i] = L"";
 			}
 		}
-		// ”z—ñ‚ğƒƒjƒ…[€–Ú‚ÉŠi”[‚·‚é.
+		// é…åˆ—ã‚’ãƒ¡ãƒ‹ãƒ¥ãƒ¼é …ç›®ã«æ ¼ç´ã™ã‚‹.
 		mfi_file_recent_1().Text(data[0]);
 		mfi_file_recent_2().Text(data[1]);
 		mfi_file_recent_3().Text(data[2]);
@@ -880,150 +876,136 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//-------------------------------
-	// –¼‘O‚ğ•t‚¯‚Äƒtƒ@ƒCƒ‹‚É”ñ“¯Šú‚É•Û‘¶‚·‚é.
-	// svg_allowed	SVG ‚Ö‚Ì•Û‘¶‚ğ‹–‚·.
+	// åå‰ã‚’ä»˜ã‘ã¦ãƒ•ã‚¡ã‚¤ãƒ«ã«éåŒæœŸã«ä¿å­˜ã™ã‚‹.
+	// svg_allowed	SVG ã¸ã®ä¿å­˜ã‚’è¨±ã™.
 	//-------------------------------
 	template <bool SVG_ARROWED>
 	IAsyncAction MainPage::file_save_as_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		HRESULT hr = E_FAIL;
-		// ƒRƒ‹[ƒ`ƒ“‚ÌŠJn‚ÌƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•Û‘¶‚·‚é.
-		//winrt::apartment_context context;
-		//co_await winrt::resume_background();
 		try {
-			// ƒtƒ@ƒCƒ‹•Û‘¶ƒsƒbƒJ[‚ğ“¾‚é.
-			// ƒtƒ@ƒCƒ‹ƒ^ƒCƒv‚ÉŠg’£q GPF ‚Æ‚»‚Ìà–¾‚ğ’Ç‰Á‚·‚é.
+			// ãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜ãƒ”ãƒƒã‚«ãƒ¼ã‚’å¾—ã‚‹.
+			// ãƒ•ã‚¡ã‚¤ãƒ«ã‚¿ã‚¤ãƒ—ã«æ‹¡å¼µå­ GPF ã¨ãã®èª¬æ˜ã‚’è¿½åŠ ã™ã‚‹.
 			FileSavePicker save_picker{ FileSavePicker() };
 			const winrt::hstring desc_gpf{
 				ResourceLoader::GetForCurrentView().GetString(RES_DESC_GPF)
 			};
 			save_picker.FileTypeChoices().Insert(desc_gpf, TYPE_GPF);
-			// SVG ‚Ö‚Ì•Û‘¶‚ğ‹–‚·‚©”»’è‚·‚é.
+			// SVG ã¸ã®ä¿å­˜ã‚’è¨±ã™ã‹åˆ¤å®šã™ã‚‹.
 			if constexpr (SVG_ARROWED) {
-				// ƒtƒ@ƒCƒ‹ƒ^ƒCƒv‚ÉŠg’£q SVG ‚Æ‚»‚Ìà–¾‚ğ’Ç‰Á‚·‚é.
+				// ãƒ•ã‚¡ã‚¤ãƒ«ã‚¿ã‚¤ãƒ—ã«æ‹¡å¼µå­ SVG ã¨ãã®èª¬æ˜ã‚’è¿½åŠ ã™ã‚‹.
 				const winrt::hstring desc_svg{
 					ResourceLoader::GetForCurrentView().GetString(RES_DESC_SVG)
 				};
 				save_picker.FileTypeChoices().Insert(desc_svg, TYPE_SVG);
 			}
 
-			// ƒhƒLƒ…ƒƒ“ƒgƒ‰ƒCƒuƒ‰ƒŠ[‚ğ•ÛŠÇêŠ‚Éİ’è‚·‚é.
+			// ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆãƒ©ã‚¤ãƒ–ãƒ©ãƒªãƒ¼ã‚’ä¿ç®¡å ´æ‰€ã«è¨­å®šã™ã‚‹.
 			const PickerLocationId loc_id = PickerLocationId::DocumentsLibrary;
 			save_picker.SuggestedStartLocation(loc_id);
 
-			// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚Ìƒg[ƒNƒ“‚ª‹ó‚©”»’è‚·‚é.
+			// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒˆãƒ¼ã‚¯ãƒ³ãŒç©ºã‹åˆ¤å®šã™ã‚‹.
 			if (m_file_token_mru.empty()) {
-				// ’ñˆÄ‚³‚ê‚½ƒtƒ@ƒCƒ‹–¼‚ÉŠg’£q‚ğŠi”[‚·‚é.
+				// ææ¡ˆã•ã‚ŒãŸãƒ•ã‚¡ã‚¤ãƒ«åã«æ‹¡å¼µå­ã‚’æ ¼ç´ã™ã‚‹.
 				save_picker.SuggestedFileName(RES_EXT_GPF);
 			}
 			else {
-				// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚Ìƒg[ƒNƒ“‚©‚çƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚é.
+				// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒˆãƒ¼ã‚¯ãƒ³ã‹ã‚‰ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ã‚‹.
 				StorageFile recent_file{
 					co_await file_recent_token_async(m_file_token_mru)
 				};
-				// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚½‚È‚ç,
+				// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ãŸãªã‚‰,
 				if (recent_file != nullptr) {
-					// ƒtƒ@ƒCƒ‹ƒ^ƒCƒv‚ª RES_EXT_GPF ‚©”»’è‚·‚é.
+					// ãƒ•ã‚¡ã‚¤ãƒ«ã‚¿ã‚¤ãƒ—ãŒ RES_EXT_GPF ã‹åˆ¤å®šã™ã‚‹.
 					if (recent_file.FileType() == RES_EXT_GPF) {
-						// ƒtƒ@ƒCƒ‹–¼‚ğ, ’ñˆÄ‚·‚éƒtƒ@ƒCƒ‹–¼‚ÉŠi”[‚·‚é.
+						// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’, ææ¡ˆã™ã‚‹ãƒ•ã‚¡ã‚¤ãƒ«åã«æ ¼ç´ã™ã‚‹.
 						save_picker.SuggestedFileName(recent_file.Name());
 					}
 					recent_file = nullptr;
 				}
 			}
-			// ƒtƒ@ƒCƒ‹•Û‘¶ƒsƒbƒJ[‚ğ•\¦‚µ, ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚é.
+			// ãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜ãƒ”ãƒƒã‚«ãƒ¼ã‚’è¡¨ç¤ºã—, ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ã‚‹.
 			StorageFile save_file{
 				co_await save_picker.PickSaveFileAsync()
 			};
-			// ƒsƒbƒJ[‚ğ”jŠü‚·‚é.
+			// ãƒ”ãƒƒã‚«ãƒ¼ã‚’ç ´æ£„ã™ã‚‹.
 			save_picker = nullptr;
-			// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğæ“¾‚µ‚½‚©”»’è‚·‚é.
+			// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å–å¾—ã—ãŸã‹åˆ¤å®šã™ã‚‹.
 			if (save_file != nullptr) {
-				// ‘Ò‹@ƒJ[ƒ\ƒ‹‚ğ•\¦, •\¦‚·‚é‘O‚ÌƒJ[ƒ\ƒ‹‚ğ“¾‚é.
+				// å¾…æ©Ÿã‚«ãƒ¼ã‚½ãƒ«ã‚’è¡¨ç¤º, è¡¨ç¤ºã™ã‚‹å‰ã®ã‚«ãƒ¼ã‚½ãƒ«ã‚’å¾—ã‚‹.
 				const CoreCursor& prev_cur = file_wait_cursor();
-				// ƒtƒ@ƒCƒ‹ƒ^ƒCƒv‚ª SVG ‚©”»’è‚·‚é.
+				// ãƒ•ã‚¡ã‚¤ãƒ«ã‚¿ã‚¤ãƒ—ãŒ SVG ã‹åˆ¤å®šã™ã‚‹.
 				const auto f_type = save_file.FileType();
 				if (f_type == RES_EXT_SVG) {
-					// }Œ`ƒf[ƒ^‚ğ SVG ‚Æ‚µ‚ÄƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚É”ñ“¯Šú‚É‘‚«‚İ, Œ‹‰Ê‚ğ“¾‚é.
+					// å›³å½¢ãƒ‡ãƒ¼ã‚¿ã‚’ SVG ã¨ã—ã¦ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã«éåŒæœŸã«æ›¸ãè¾¼ã¿, çµæœã‚’å¾—ã‚‹.
 					hr = co_await file_write_svg_async(save_file);
 				}
 				else if (f_type == RES_EXT_GPF) {
-					// }Œ`ƒf[ƒ^‚ğƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚É”ñ“¯Šú‚É‘‚«‚İ, Œ‹‰Ê‚ğ“¾‚é.
+					// å›³å½¢ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã«éåŒæœŸã«æ›¸ãè¾¼ã¿, çµæœã‚’å¾—ã‚‹.
 					hr = co_await file_write_gpf_async<false, false>(save_file);
 				}
-				// ƒJ[ƒ\ƒ‹‚ğŒ³‚É–ß‚·.
+				// ã‚«ãƒ¼ã‚½ãƒ«ã‚’å…ƒã«æˆ»ã™.
 				Window::Current().CoreWindow().PointerCursor(prev_cur);
-				// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ”jŠü‚·‚é.
+				// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ç ´æ£„ã™ã‚‹.
 				save_file = nullptr;
 			}
 			else {
-				// ƒtƒ@ƒCƒ‹•Û‘¶ƒsƒbƒJ[‚ÅƒLƒƒƒ“ƒZƒ‹‚ª‰Ÿ‚³‚ê‚½.
+				// ãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜ãƒ”ãƒƒã‚«ãƒ¼ã§ã‚­ãƒ£ãƒ³ã‚»ãƒ«ãŒæŠ¼ã•ã‚ŒãŸ.
 				hr = S_OK;
 			}
 		}
 		catch (winrt::hresult_error const& e) {
-			// ƒGƒ‰[‚ª”­¶‚µ‚½ê‡, ƒGƒ‰[ƒR[ƒh‚ğŒ‹‰Ê‚ÉŠi”[‚·‚é.
+			// ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ãŸå ´åˆ, ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’çµæœã«æ ¼ç´ã™ã‚‹.
 			hr = e.code();
 		}
 		if (hr != S_OK) {
-			// ƒXƒŒƒbƒh‚ğƒƒCƒ“ƒy[ƒW‚Ì UI ƒXƒŒƒbƒh‚É•Ï‚¦‚é.
-			//co_await winrt::resume_foreground(Dispatcher());
-			// uƒtƒ@ƒCƒ‹‚É‘‚«‚ß‚Ü‚¹‚ñvƒƒbƒZ[ƒWƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é.
+			// ã€Œãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚ã¾ã›ã‚“ã€ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹.
 			message_show(ICON_ALERT, RES_ERR_WRITE, m_file_token_mru);
 		}
-		// ƒXƒŒƒbƒh‚ğƒƒCƒ“ƒy[ƒW‚Ì UI ƒXƒŒƒbƒh‚É•Ï‚¦‚é.
-		//co_await winrt::resume_foreground(Dispatcher());
-		// ƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•œŒ³‚·‚é.
-		//co_await context;
 	}
 	template IAsyncAction MainPage::file_save_as_click_async<true>(IInspectable const&, RoutedEventArgs const&) noexcept;
 	template IAsyncAction MainPage::file_save_as_click_async<false>(IInspectable const&, RoutedEventArgs const&) noexcept;
 
 	//-------------------------------
-	// ƒtƒ@ƒCƒ‹ƒƒjƒ…[‚Ìuã‘‚«•Û‘¶v‚ª‘I‘ğ‚³‚ê‚½
+	// ãƒ•ã‚¡ã‚¤ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ã€Œä¸Šæ›¸ãä¿å­˜ã€ãŒé¸æŠã•ã‚ŒãŸ
 	//-------------------------------
 	IAsyncAction MainPage::file_save_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		// Å‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚Ìƒg[ƒNƒ“‚©‚çƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚é.
+		// æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒˆãƒ¼ã‚¯ãƒ³ã‹ã‚‰ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ã‚‹.
 		StorageFile recent_file{
 			co_await file_recent_token_async(m_file_token_mru)
 		};
-		// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ª‹ó‚Ìê‡,
+		// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ãŒç©ºã®å ´åˆ,
 		if (recent_file == nullptr) {
-			// –¼‘O‚ğ•t‚¯‚Äƒtƒ@ƒCƒ‹‚É”ñ“¯Šú‚É•Û‘¶‚·‚é
+			// åå‰ã‚’ä»˜ã‘ã¦ãƒ•ã‚¡ã‚¤ãƒ«ã«éåŒæœŸã«ä¿å­˜ã™ã‚‹
 			constexpr bool SVG_ALLOWED = true;
 			co_await file_save_as_click_async<!SVG_ALLOWED>(nullptr, nullptr);
 		}
-		// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚½ê‡,
+		// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ãŸå ´åˆ,
 		else {
-			// ‘Ò‹@ƒJ[ƒ\ƒ‹‚ğ•\¦, •\¦‚·‚é‘O‚ÌƒJ[ƒ\ƒ‹‚ğ“¾‚é.
-			const CoreCursor& prev_cur = file_wait_cursor();	// ‘O‚ÌƒJ[ƒ\ƒ‹
-			// }Œ`ƒf[ƒ^‚ğƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚É”ñ“¯Šú‚É‘‚«‚İ, Œ‹‰Ê‚ğ“¾‚é.
+			// å¾…æ©Ÿã‚«ãƒ¼ã‚½ãƒ«ã‚’è¡¨ç¤º, è¡¨ç¤ºã™ã‚‹å‰ã®ã‚«ãƒ¼ã‚½ãƒ«ã‚’å¾—ã‚‹.
+			const CoreCursor& prev_cur = file_wait_cursor();	// å‰ã®ã‚«ãƒ¼ã‚½ãƒ«
+			// å›³å½¢ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã«éåŒæœŸã«æ›¸ãè¾¼ã¿, çµæœã‚’å¾—ã‚‹.
 			const HRESULT hr = co_await file_write_gpf_async<false, false>(recent_file);
 			recent_file = nullptr;
-			// ƒJ[ƒ\ƒ‹‚ğŒ³‚É–ß‚·.
+			// ã‚«ãƒ¼ã‚½ãƒ«ã‚’å…ƒã«æˆ»ã™.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);
-			// Œ‹‰Ê‚ª S_OK ˆÈŠO‚©”»’è‚·‚é.
+			// çµæœãŒ S_OK ä»¥å¤–ã‹åˆ¤å®šã™ã‚‹.
 			if (hr != S_OK) {
-				// ƒXƒŒƒbƒh‚ğƒƒCƒ“ƒy[ƒW‚Ì UI ƒXƒŒƒbƒh‚É•Ï‚¦‚é.
+				// ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ãƒ¡ã‚¤ãƒ³ãƒšãƒ¼ã‚¸ã® UI ã‚¹ãƒ¬ãƒƒãƒ‰ã«å¤‰ãˆã‚‹.
 				//co_await winrt::resume_foreground(Dispatcher());
-				// uƒtƒ@ƒCƒ‹‚É‘‚«‚ß‚Ü‚¹‚ñvƒƒbƒZ[ƒWƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é.
+				// ã€Œãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚ã¾ã›ã‚“ã€ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹.
 				message_show(ICON_ALERT, RES_ERR_WRITE, m_file_token_mru);
 			}
 		}
 	}
 
 	//-------------------------------
-	// ‰æ‘œ—p‚Ìƒtƒ@ƒCƒ‹•Û‘¶ƒsƒbƒJ[‚ğŠJ‚¢‚Ä, ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚é.
+	// ç”»åƒç”¨ã®ãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜ãƒ”ãƒƒã‚«ãƒ¼ã‚’é–‹ã„ã¦, ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ã‚‹.
 	//-------------------------------
 	IAsyncOperation <StorageFile> MainPage::file_pick_save_image_async(const wchar_t sug_name[])
 	{
-		// ƒRƒ‹[ƒ`ƒ“‚ÌŠJn‚ÌƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•Û‘¶‚·‚é.
-		//winrt::apartment_context context;
-		// ƒŠƒ\[ƒX‚©‚çà–¾•¶‚ğ“Ç‚İ‚Ş.
-		// ResourceLoader::GetForCurrentView ‚ÍƒtƒHƒAƒOƒ‰ƒEƒ“ƒh.
-		//co_await winrt::resume_foreground(Dispatcher());
-
+		// ResourceLoader::GetForCurrentView ã¯ãƒ•ã‚©ã‚¢ã‚°ãƒ©ã‚¦ãƒ³ãƒ‰.
 		const ResourceLoader& res_loader = ResourceLoader::GetForCurrentView();
 		const winrt::hstring desc_bmp{ res_loader.GetString(L"str_desc_bmp") };
 		const winrt::hstring desc_gif{ res_loader.GetString(L"str_desc_gif") };
@@ -1033,7 +1015,7 @@ namespace winrt::GraphPaper::implementation
 
 		FileSavePicker image_picker{ FileSavePicker() };
 
-		// •Û‘¶ƒsƒbƒJ[‚É, Šù’è‚ÌƒGƒ“ƒR[ƒh¯•Êq‚Ìà–¾‚ğİ’è‚·‚é.
+		// ä¿å­˜ãƒ”ãƒƒã‚«ãƒ¼ã«, æ—¢å®šã®ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰è­˜åˆ¥å­ã®èª¬æ˜ã‚’è¨­å®šã™ã‚‹.
 		if (m_enc_id == BitmapEncoder::GifEncoderId()) {
 			image_picker.FileTypeChoices().Insert(desc_gif, TYPE_GIF);
 		}
@@ -1051,7 +1033,7 @@ namespace winrt::GraphPaper::implementation
 			m_enc_id = BitmapEncoder::BmpEncoderId();
 		}
 
-		// ã‹LˆÈŠO‚ÌƒGƒ“ƒR[ƒh¯•Êq‚Ìà–¾‚ğİ’è‚·‚é.
+		// ä¸Šè¨˜ä»¥å¤–ã®ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰è­˜åˆ¥å­ã®èª¬æ˜ã‚’è¨­å®šã™ã‚‹.
 		if (m_enc_id != BitmapEncoder::BmpEncoderId()) {
 			image_picker.FileTypeChoices().Insert(desc_bmp, TYPE_BMP);
 		}
@@ -1068,23 +1050,23 @@ namespace winrt::GraphPaper::implementation
 			image_picker.FileTypeChoices().Insert(desc_tif, TYPE_TIF);
 		}
 
-		// ‰æ‘œƒ‰ƒCƒuƒ‰ƒŠ[‚ğ•ÛŠÇêŠ‚Éİ’è‚·‚é.
+		// ç”»åƒãƒ©ã‚¤ãƒ–ãƒ©ãƒªãƒ¼ã‚’ä¿ç®¡å ´æ‰€ã«è¨­å®šã™ã‚‹.
 		const PickerLocationId loc_id = PickerLocationId::PicturesLibrary;
 		image_picker.SuggestedStartLocation(loc_id);
 
-		// ƒsƒbƒJ[‚É, ‚ ‚ç‚©‚¶‚ß•\¦‚³‚ê‚éƒtƒ@ƒCƒ‹–¼‚ğİ’è‚·‚é.
+		// ãƒ”ãƒƒã‚«ãƒ¼ã«, ã‚ã‚‰ã‹ã˜ã‚è¡¨ç¤ºã•ã‚Œã‚‹ãƒ•ã‚¡ã‚¤ãƒ«åã‚’è¨­å®šã™ã‚‹.
 		if (sug_name != nullptr) {
 			image_picker.SuggestedFileName(sug_name);
 		}
 
-		// ƒsƒbƒJ[‚ğ•\¦‚µƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚é.
+		// ãƒ”ãƒƒã‚«ãƒ¼ã‚’è¡¨ç¤ºã—ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ã‚‹.
 		StorageFile img_file{
 			co_await image_picker.PickSaveFileAsync()
 		};
 		image_picker = nullptr;
 		if (img_file != nullptr) {
 
-			// “¾‚ç‚ê‚½ƒtƒ@ƒCƒ‹‚ÌŠg’£q‚ğŠù’è‚ÌƒGƒ“ƒR[ƒh¯•Êq‚Éİ’è‚·‚é.
+			// å¾—ã‚‰ã‚ŒãŸãƒ•ã‚¡ã‚¤ãƒ«ã®æ‹¡å¼µå­ã‚’æ—¢å®šã®ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰è­˜åˆ¥å­ã«è¨­å®šã™ã‚‹.
 			if (std::find(TYPE_BMP.begin(), TYPE_BMP.end(), img_file.FileType()) != TYPE_BMP.end()) {
 				m_enc_id = BitmapEncoder::BmpEncoderId();
 			}
@@ -1104,34 +1086,28 @@ namespace winrt::GraphPaper::implementation
 				img_file = nullptr;
 			}
 		}
-		//co_await context;
-
 		co_return img_file;
 	}
 
 	//-------------------------------
-	// }Œ`ƒf[ƒ^‚ğƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚É”ñ“¯Šú‚É‘‚«‚Ş.
-	// SUSPEND	ƒ‰ƒCƒtƒTƒCƒNƒ‹‚ª’†’f‚Ì‚Æ‚« true
-	// SETTING	u—p†İ’è‚ğ•Û‘¶v‚Ì‚Æ‚« true
-	// s_file	ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹
-	// –ß‚è’l	‘‚«‚İ‚É¬Œ÷‚µ‚½‚ç true
+	// å›³å½¢ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã«éåŒæœŸã«æ›¸ãè¾¼ã‚€.
+	// SUSPEND	ãƒ©ã‚¤ãƒ•ã‚µã‚¤ã‚¯ãƒ«ãŒä¸­æ–­ã®ã¨ã true
+	// SETTING	ã€Œç”¨ç´™è¨­å®šã‚’ä¿å­˜ã€ã®ã¨ã true
+	// s_file	ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«
+	// æˆ»ã‚Šå€¤	æ›¸ãè¾¼ã¿ã«æˆåŠŸã—ãŸã‚‰ true
 	//-------------------------------
 	template <bool SUSPEND, bool SETTING>
 	IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async(StorageFile s_file)
 	{
 		constexpr auto REDUCE = true;
 
-		// ƒXƒŒƒbƒh‚ğ•ÏX‚·‚é‘O‚É, ”r‘¼§Œä‚ğƒƒbƒN
-		m_mutex_fwrite.lock();
-		// ƒRƒ‹[ƒ`ƒ“‚ÌŠJn‚ÌƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•Û‘¶‚µ
-		winrt::apartment_context context;
-		// ƒXƒŒƒbƒh‚ğƒoƒbƒNƒOƒ‰ƒEƒ“ƒh‚É•Ï‚¦‚é.
-		co_await winrt::resume_background();
-		// E_FAIL ‚ğŒ‹‰Ê‚ÉŠi”[‚·‚é.
+		// ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å¤‰æ›´ã™ã‚‹å‰ã«, æ’ä»–åˆ¶å¾¡ã‚’ãƒ­ãƒƒã‚¯
+		m_mutex_exit.lock();
+		// E_FAIL ã‚’çµæœã«æ ¼ç´ã™ã‚‹.
 		HRESULT hr = E_FAIL;
 		try {
-			// ƒtƒ@ƒCƒ‹XV‚Ì’x‰„‚ğİ’è‚·‚é.
-			// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹->ƒ‰ƒ“ƒ_ƒ€ƒAƒNƒZƒXƒXƒgƒŠ[ƒ€->ƒf[ƒ^ƒ‰ƒCƒ^[‚ğì¬‚·‚é.
+			// ãƒ•ã‚¡ã‚¤ãƒ«æ›´æ–°ã®é…å»¶ã‚’è¨­å®šã™ã‚‹.
+			// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«->ãƒ©ãƒ³ãƒ€ãƒ ã‚¢ã‚¯ã‚»ã‚¹ã‚¹ãƒˆãƒªãƒ¼ãƒ ->ãƒ‡ãƒ¼ã‚¿ãƒ©ã‚¤ã‚¿ãƒ¼ã‚’ä½œæˆã™ã‚‹.
 			CachedFileManager::DeferUpdates(s_file);
 			const IRandomAccessStream& ra_stream{
 				co_await s_file.OpenAsync(FileAccessMode::ReadWrite)
@@ -1169,102 +1145,160 @@ namespace winrt::GraphPaper::implementation
 
 			m_main_sheet.write(dt_writer);
 			if constexpr (SUSPEND) {
-				// Á‹‚³‚ê‚½}Œ`‚àŠÜ‚ß‚Ä‘‚«‚Ş.
-				// ‘€ìƒXƒ^ƒbƒN‚à‘‚«‚Ş.
+				// æ¶ˆå»ã•ã‚ŒãŸå›³å½¢ã‚‚å«ã‚ã¦æ›¸ãè¾¼ã‚€.
+				// æ“ä½œã‚¹ã‚¿ãƒƒã‚¯ã‚‚æ›¸ãè¾¼ã‚€.
 				slist_write<!REDUCE>(m_main_sheet.m_shape_list, dt_writer);
 				ustack_write(dt_writer);
 			}
 			else if constexpr (!SETTING) {
-				// Á‹‚³‚ê‚½}Œ`‚ÍÈ‚¢‚Ä‘‚«‚Ş.
-				// ‘€ìƒXƒ^ƒbƒN‚ÍÁ‹‚·‚é.
+				// æ¶ˆå»ã•ã‚ŒãŸå›³å½¢ã¯çœã„ã¦æ›¸ãè¾¼ã‚€.
+				// æ“ä½œã‚¹ã‚¿ãƒƒã‚¯ã¯æ¶ˆå»ã™ã‚‹.
 				slist_write<REDUCE>(m_main_sheet.m_shape_list, dt_writer);
 			}
 			ra_stream.Size(ra_stream.Position());
 			co_await dt_writer.StoreAsync();
 			co_await ra_stream.FlushAsync();
-			// ƒf[ƒ^ƒ‰ƒCƒ^[‚ğ•Â‚¶‚é.
+			// ãƒ‡ãƒ¼ã‚¿ãƒ©ã‚¤ã‚¿ãƒ¼ã‚’é–‰ã˜ã‚‹.
 			dt_writer.Close();
 			dt_writer = nullptr;
-			// ƒXƒgƒŠ[ƒ€‚ğ•Â‚¶‚é.
+			// ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’é–‰ã˜ã‚‹.
 			ra_stream.Close();
-			// ’x‰„‚³‚¹‚½ƒtƒ@ƒCƒ‹XV‚ğŠ®—¹‚·‚é.
+			// é…å»¶ã•ã›ãŸãƒ•ã‚¡ã‚¤ãƒ«æ›´æ–°ã‚’å®Œäº†ã™ã‚‹.
 			if (co_await CachedFileManager::CompleteUpdatesAsync(s_file) == FileUpdateStatus::Complete) {
-				// Š®—¹‚µ‚½ê‡, 
-				// S_OK ‚ğŒ‹‰Ê‚ÉŠi”[‚·‚é.
+				// å®Œäº†ã—ãŸå ´åˆ, 
+				// S_OK ã‚’çµæœã«æ ¼ç´ã™ã‚‹.
 				hr = S_OK;
 			}
 		}
-		// ƒGƒ‰[‚ª”­¶‚µ‚½ê‡, 
+		// ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ãŸå ´åˆ, 
 		catch (winrt::hresult_error const& err) {
 			hr = err.code();
 		}
 
-		// Œ‹‰Ê‚ª S_OK ˆÈŠO‚©”»’è‚·‚é.
+		// çµæœãŒ S_OK ä»¥å¤–ã‹åˆ¤å®šã™ã‚‹.
 		if (hr != S_OK) {
-			// ƒXƒŒƒbƒh‚ğƒƒCƒ“ƒy[ƒW‚Ì UI ƒXƒŒƒbƒh‚É•Ï‚¦‚é.
-			co_await winrt::resume_foreground(Dispatcher());
-			// uƒtƒ@ƒCƒ‹‚É‘‚«‚ß‚Ü‚¹‚ñvƒƒbƒZ[ƒWƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é.
+			// ã€Œãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚ã¾ã›ã‚“ã€ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹.
 			message_show(ICON_ALERT, RES_ERR_WRITE, s_file.Path());
 		}
 		else {
-			// ’†’f‚Å‚Í‚È‚¢, ‚©‚Âİ’è‚Å‚Í‚È‚¢‚©”»’è‚·‚é.
+			// ä¸­æ–­ã§ã¯ãªã„, ã‹ã¤è¨­å®šã§ã¯ãªã„ã‹åˆ¤å®šã™ã‚‹.
 			if constexpr (!SUSPEND && !SETTING) {
-				// ƒXƒŒƒbƒh‚ğƒƒCƒ“ƒy[ƒW‚Ì UI ƒXƒŒƒbƒh‚É•Ï‚¦‚é.
-				co_await winrt::resume_foreground(Dispatcher());
-				// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğÅ‹ßg‚Á‚½ƒtƒ@ƒCƒ‹‚É“o˜^‚·‚é.
-				// ‚±‚±‚ÅƒGƒ‰[‚ªo‚é.
+				// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æœ€è¿‘ä½¿ã£ãŸãƒ•ã‚¡ã‚¤ãƒ«ã«ç™»éŒ²ã™ã‚‹.
+				// ã“ã“ã§ã‚¨ãƒ©ãƒ¼ãŒå‡ºã‚‹.
 				file_recent_add(s_file);
-				// false ‚ğƒXƒ^ƒbƒN‚ªXV‚³‚ê‚½‚©”»’è‚ÉŠi”[‚·‚é.
+				// false ã‚’ã‚¹ã‚¿ãƒƒã‚¯ãŒæ›´æ–°ã•ã‚ŒãŸã‹åˆ¤å®šã«æ ¼ç´ã™ã‚‹.
 				m_ustack_is_changed = false;
 			}
 		}
-		// ƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•œŒ³‚·‚é.
-		co_await context;
-		m_mutex_fwrite.unlock();
-		// Œ‹‰Ê‚ğ•Ô‚µI—¹‚·‚é.
+		m_mutex_exit.unlock();
+		// çµæœã‚’è¿”ã—çµ‚äº†ã™ã‚‹.
 		co_return hr;
 	}
 	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, false>(StorageFile s_file);
 	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<true, false>(StorageFile s_file);
 	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, true>(StorageFile s_file);
+	/*
+	IAsyncOperation<winrt::hresult> MainPage::file_write_pdf_async(StorageFile pdf_file)
+	{
+		try {
+			// ãƒ•ã‚¡ã‚¤ãƒ«æ›´æ–°ã®é…å»¶ã‚’è¨­å®šã™ã‚‹.
+			CachedFileManager::DeferUpdates(pdf_file);
+			// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã„ã¦ãƒ©ãƒ³ãƒ€ãƒ ã‚¢ã‚¯ã‚»ã‚¹ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’å¾—ã‚‹.
+			const IRandomAccessStream& pdf_stream{
+				co_await pdf_file.OpenAsync(FileAccessMode::ReadWrite)
+			};
+			// ãƒ©ãƒ³ãƒ€ãƒ ã‚¢ã‚¯ã‚»ã‚¹ã‚¹ãƒˆãƒªãƒ¼ãƒ ã®å…ˆé ­ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ãƒ©ã‚¤ã‚¿ãƒ¼ã‚’ä½œæˆã™ã‚‹.
+			// å¿…ãšå…ˆé ­ã‚’æŒ‡å®šã™ã‚‹.
+			DataWriter dt_writer{
+				DataWriter(pdf_stream.GetOutputStreamAt(0))
+			};
+			dt_writer.WriteBytes(
+				"%PDF-1.7\n"
+				"%\1\2\3\4\n"
+			);
+			dt_writer.WriteBytes(
+				"1 0 obj\n"
+				"<<\n"
+				"/Kids[2 0 R]\n"
+				"/Count 1\n"
+				"/Type /Pages\n"
+				">>\n"
+				"endobj\n");
+			char buf[1024];
+			sprintf_s(buf,
+				"2 0 obj\n"
+				"<<\n"
+				"/Parent 1 0 R\n"
+				"/Resources 3 0 R\n"
+				"/MediaBox[0 0 %f %f]\n"
+				"/Contents[3 0 R]\n"
+				"/Type /Page\n"
+				">>\n"
+				"endobj\n", m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height);
+			dt_writer.WriteBytes(buf);
+			sprintf_s(buf,
+				"3 0 obj\n"
+				"stream\n"
+				"1 0 0 -1 0 %f cm\n",
+				m_main_sheet.m_sheet_size.height);
+			dt_writer.WriteBytes(buf);
+			for (const auto s : m_main_sheet.m_shape_list) {
+				s->write_pdf(dt_writer);
+			}
+			dt_writer.WriteBytes(
+				"endstream\n"
+				"endobj\n"
+				"4 0 obj\n"
+				"<<\n"
+				"/Pages 1 0 R\n"
+				"/Type /Catalog"
+				">>\n"
+				"endobj\n"
+				"%%EOF\n");
+		}
+		catch (winrt::hresult) {
 
+		}
+		co_return S_OK;
+	}
+	*/
 	//-------------------------------
-	// }Œ`ƒf[ƒ^‚ğ SVG ‚Æ‚µ‚ÄƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚É”ñ“¯Šú‚É‘‚«‚Ş.
-	// svg_file	‘‚«‚İæ‚Ìƒtƒ@ƒCƒ‹
-	// –ß‚è’l	‘‚«‚ß‚½ê‡ S_OK
+	// å›³å½¢ãƒ‡ãƒ¼ã‚¿ã‚’ SVG ã¨ã—ã¦ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã«éåŒæœŸã«æ›¸ãè¾¼ã‚€.
+	// svg_file	æ›¸ãè¾¼ã¿å…ˆã®ãƒ•ã‚¡ã‚¤ãƒ«
+	// æˆ»ã‚Šå€¤	æ›¸ãè¾¼ã‚ãŸå ´åˆ S_OK
 	//-------------------------------
 	IAsyncOperation<winrt::hresult> MainPage::file_write_svg_async(StorageFile svg_file)
 	{
 		constexpr char XML_DEC[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" SVG_NEW_LINE;
 		constexpr char DOCTYPE[] = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" SVG_NEW_LINE;
 
-		m_mutex_fwrite.lock();
-		// ƒRƒ‹[ƒ`ƒ“‚ÌŠJn‚ÌƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•Û‘¶‚·‚é.
-		winrt::apartment_context context;
-		// ƒXƒŒƒbƒh‚ğƒoƒbƒNƒOƒ‰ƒEƒ“ƒh‚É•Ï‚¦‚é.
-		co_await winrt::resume_background();
+		m_mutex_exit.lock();
+		// ã‚³ãƒ«ãƒ¼ãƒãƒ³ã®é–‹å§‹æ™‚ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã‚’ä¿å­˜ã™ã‚‹.
+//		winrt::apartment_context context;
+		// ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ãƒãƒƒã‚¯ã‚°ãƒ©ã‚¦ãƒ³ãƒ‰ã«å¤‰ãˆã‚‹.
+//		co_await winrt::resume_background();
 		HRESULT hr = E_FAIL;
 		try {
-			// ƒtƒ@ƒCƒ‹XV‚Ì’x‰„‚ğİ’è‚·‚é.
+			// ãƒ•ã‚¡ã‚¤ãƒ«æ›´æ–°ã®é…å»¶ã‚’è¨­å®šã™ã‚‹.
 			CachedFileManager::DeferUpdates(svg_file);
-			// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğŠJ‚¢‚Äƒ‰ƒ“ƒ_ƒ€ƒAƒNƒZƒXƒXƒgƒŠ[ƒ€‚ğ“¾‚é.
+			// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã„ã¦ãƒ©ãƒ³ãƒ€ãƒ ã‚¢ã‚¯ã‚»ã‚¹ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’å¾—ã‚‹.
 			const IRandomAccessStream& svg_stream{
 				co_await svg_file.OpenAsync(FileAccessMode::ReadWrite)
 			};
-			// ƒ‰ƒ“ƒ_ƒ€ƒAƒNƒZƒXƒXƒgƒŠ[ƒ€‚Ìæ“ª‚©‚çƒf[ƒ^ƒ‰ƒCƒ^[‚ğì¬‚·‚é.
+			// ãƒ©ãƒ³ãƒ€ãƒ ã‚¢ã‚¯ã‚»ã‚¹ã‚¹ãƒˆãƒªãƒ¼ãƒ ã®å…ˆé ­ã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ãƒ©ã‚¤ã‚¿ãƒ¼ã‚’ä½œæˆã™ã‚‹.
 			DataWriter dt_writer{
 				DataWriter(svg_stream.GetOutputStreamAt(0))
 			};
-			// XML éŒ¾‚ğ‘‚«‚Ş.
+			// XML å®£è¨€ã‚’æ›¸ãè¾¼ã‚€.
 			dt_write_svg(XML_DEC, dt_writer);
-			// DOCTYPE ‚ğ‘‚«‚Ş.
+			// DOCTYPE ã‚’æ›¸ãè¾¼ã‚€.
 			dt_write_svg(DOCTYPE, dt_writer);
-			// SVG ŠJnƒ^ƒO‚ğ‘‚«‚Ş.
+			// SVG é–‹å§‹ã‚¿ã‚°ã‚’æ›¸ãè¾¼ã‚€.
 			{
-				const auto size = m_main_sheet.m_sheet_size;	// —p†‚Ì‘å‚«‚³
-				const auto unit = m_len_unit;	// ’·‚³‚Ì’PˆÊ
-				const auto dpi = m_main_sheet.m_d2d.m_logical_dpi;	// ˜_— DPI
-				const auto color = m_main_sheet.m_sheet_color;	// ”wŒiF
+				const auto size = m_main_sheet.m_sheet_size;	// ç”¨ç´™ã®å¤§ãã•
+				const auto unit = m_len_unit;	// é•·ã•ã®å˜ä½
+				const auto dpi = m_main_sheet.m_d2d.m_logical_dpi;	// è«–ç† DPI
+				const auto color = m_main_sheet.m_sheet_color;	// èƒŒæ™¯è‰²
 				constexpr char SVG_TAG[] =
 					"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" ";
 				constexpr char* SVG_UNIT_PX = "px";
@@ -1272,14 +1306,14 @@ namespace winrt::GraphPaper::implementation
 				constexpr char* SVG_UNIT_MM = "mm";
 				constexpr char* SVG_UNIT_PT = "pt";
 
-				// SVG ƒ^ƒO‚ÌŠJn‚ğ‘‚«‚Ş.
+				// SVG ã‚¿ã‚°ã®é–‹å§‹ã‚’æ›¸ãè¾¼ã‚€.
 				dt_write_svg(SVG_TAG, dt_writer);
 
-				// ’PˆÊ•t‚«‚Å•‚Æ‚‚³‚Ì‘®«‚ğ‘‚«‚Ş.
+				// å˜ä½ä»˜ãã§å¹…ã¨é«˜ã•ã®å±æ€§ã‚’æ›¸ãè¾¼ã‚€.
 				char buf[256];
-				double w;	// ’PˆÊ•ÏŠ·Œã‚Ì•
-				double h;	// ’PˆÊ•ÏŠ·Œã‚Ì‚‚³
-				char* u;	// ’PˆÊ
+				double w;	// å˜ä½å¤‰æ›å¾Œã®å¹…
+				double h;	// å˜ä½å¤‰æ›å¾Œã®é«˜ã•
+				char* u;	// å˜ä½
 				if (unit == LEN_UNIT::INCH) {
 					w = size.width / dpi;
 					h = size.height / dpi;
@@ -1295,7 +1329,7 @@ namespace winrt::GraphPaper::implementation
 					h = size.height * PT_PER_INCH / dpi;
 					u = SVG_UNIT_PT;
 				}
-				// SVG ‚Åg—p‚Å‚«‚éã‹L‚Ì’PˆÊˆÈŠO‚Í‚·‚×‚ÄƒsƒNƒZƒ‹.
+				// SVG ã§ä½¿ç”¨ã§ãã‚‹ä¸Šè¨˜ã®å˜ä½ä»¥å¤–ã¯ã™ã¹ã¦ãƒ”ã‚¯ã‚»ãƒ«.
 				else {
 					w = size.width;
 					h = size.height;
@@ -1304,67 +1338,67 @@ namespace winrt::GraphPaper::implementation
 				sprintf_s(buf, "width=\"%lf%s\" height=\"%lf%s\" ", w, u, h, u);
 				dt_write_svg(buf, dt_writer);
 
-				// ƒsƒNƒZƒ‹’PˆÊ‚Ì•‚Æ‚‚³‚ğ viewBox ‘®«‚Æ‚µ‚Ä‘‚«‚Ş.
+				// ãƒ”ã‚¯ã‚»ãƒ«å˜ä½ã®å¹…ã¨é«˜ã•ã‚’ viewBox å±æ€§ã¨ã—ã¦æ›¸ãè¾¼ã‚€.
 				dt_write_svg("viewBox=\"0 0 ", dt_writer);
 				dt_write_svg(size.width, dt_writer);
 				dt_write_svg(size.height, dt_writer);
 				dt_write_svg("\" ", dt_writer);
 
-				// ”wŒiF‚ğƒXƒ^ƒCƒ‹‘®«‚Æ‚µ‚Ä‘‚«‚Ş.
+				// èƒŒæ™¯è‰²ã‚’ã‚¹ã‚¿ã‚¤ãƒ«å±æ€§ã¨ã—ã¦æ›¸ãè¾¼ã‚€.
 				dt_write_svg("style=\"background-color:", dt_writer);
 				dt_write_svg(color, dt_writer);
 
-				// svg ŠJnƒ^ƒO‚ÌI—¹‚ğ‘‚«‚Ş.
+				// svg é–‹å§‹ã‚¿ã‚°ã®çµ‚äº†ã‚’æ›¸ãè¾¼ã‚€.
 				dt_write_svg("\" >" SVG_NEW_LINE, dt_writer);
 			}
 
-			// }Œ`ƒŠƒXƒg‚ÌŠe}Œ`‚É‚Â‚¢‚ÄˆÈ‰º‚ğŒJ‚è•Ô‚·.
+			// å›³å½¢ãƒªã‚¹ãƒˆã®å„å›³å½¢ã«ã¤ã„ã¦ä»¥ä¸‹ã‚’ç¹°ã‚Šè¿”ã™.
 			for (auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
-				// }Œ`‚ª‰æ‘œ‚©”»’è‚·‚é.
+				// å›³å½¢ãŒç”»åƒã‹åˆ¤å®šã™ã‚‹.
 				if (typeid(*s) == typeid(ShapeImage)) {
-					// ’ñˆÄ‚³‚ê‚é‰æ‘œƒtƒ@ƒCƒ‹–¼‚ğ“¾‚é.
-					// SVG ƒtƒ@ƒCƒ‹–¼‚ğ xxxx.svg ‚Æ‚·‚é‚Æ,
-					// “¾‚ç‚ê‚éƒtƒ@ƒCƒ‹–¼‚Í xxxx_yyyymmddhhmmss_999.bmp ‚É‚È‚é
+					// ææ¡ˆã•ã‚Œã‚‹ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«åã‚’å¾—ã‚‹.
+					// SVG ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ xxxx.svg ã¨ã™ã‚‹ã¨,
+					// å¾—ã‚‰ã‚Œã‚‹ãƒ•ã‚¡ã‚¤ãƒ«åã¯ xxxx_yyyymmddhhmmss_999.bmp ã«ãªã‚‹
 					const size_t NAME_LEN = 1024;
 					wchar_t image_name[NAME_LEN];
 					{
-						static uint32_t magic_num = 0;	// ƒ~ƒŠ•b‚Ì‘ã‚í‚è
+						static uint32_t magic_num = 0;	// ãƒŸãƒªç§’ã®ä»£ã‚ã‚Š
 						const time_t t = time(nullptr);
 						struct tm tm;
 						localtime_s(&tm, &t);
 						swprintf(image_name, NAME_LEN - 20, L"%s", svg_file.Name().data());
 						const wchar_t* const dot_ptr = wcsrchr(image_name, L'.');
-						const size_t dot_len = (dot_ptr != nullptr ? dot_ptr - image_name : wcslen(image_name));	// ƒsƒŠƒIƒh‚Ü‚Å‚Ì’·‚³
+						const size_t dot_len = (dot_ptr != nullptr ? dot_ptr - image_name : wcslen(image_name));	// ãƒ”ãƒªã‚ªãƒ‰ã¾ã§ã®é•·ã•
 						const size_t tail_len = dot_len + wcsftime(image_name + dot_len, NAME_LEN - 8 - dot_len, L"_%Y%m%d%H%M%S_", &tm);
 						swprintf(image_name + tail_len, NAME_LEN - tail_len, L"%03d", magic_num++);
 					}
 
-					// ‰æ‘œ—p‚Ìƒtƒ@ƒCƒ‹•Û‘¶ƒsƒbƒJ[‚ğŠJ‚¢‚Ä, ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğ“¾‚é.
-					// ƒsƒbƒJ[‚ğŠJ‚­‚Ì‚Å UI ƒXƒŒƒbƒh‚É•Ï‚¦‚é.
+					// ç”»åƒç”¨ã®ãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜ãƒ”ãƒƒã‚«ãƒ¼ã‚’é–‹ã„ã¦, ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å¾—ã‚‹.
+					// ãƒ”ãƒƒã‚«ãƒ¼ã‚’é–‹ãã®ã§ UI ã‚¹ãƒ¬ãƒƒãƒ‰ã«å¤‰ãˆã‚‹.
 					ShapeImage* const t = static_cast<ShapeImage*>(s);
-					co_await winrt::resume_foreground(Dispatcher());
+//					co_await winrt::resume_foreground(Dispatcher());
 					StorageFile image_file{
 						co_await file_pick_save_image_async(image_name)
 					};
-					co_await winrt::resume_background();
+//					co_await winrt::resume_background();
 					if (image_file != nullptr) {
 						CachedFileManager::DeferUpdates(image_file);
 						IRandomAccessStream image_stream{
 							co_await image_file.OpenAsync(FileAccessMode::ReadWrite)
 						};
-						co_await t->copy_to(m_enc_id, image_stream);
-						// ’x‰„‚³‚¹‚½ƒtƒ@ƒCƒ‹XV‚ğŠ®—¹‚µ, Œ‹‰Ê‚ğ”»’è‚·‚é.
-						if (co_await CachedFileManager::CompleteUpdatesAsync(image_file) == FileUpdateStatus::Complete) {
+						const bool ret = co_await t->copy_to(m_enc_id, image_stream);
+						// é…å»¶ã•ã›ãŸãƒ•ã‚¡ã‚¤ãƒ«æ›´æ–°ã‚’å®Œäº†ã—, çµæœã‚’åˆ¤å®šã™ã‚‹.
+						if (ret && co_await CachedFileManager::CompleteUpdatesAsync(image_file) == FileUpdateStatus::Complete) {
 							wcscpy_s(image_name, NAME_LEN, image_file.Path().c_str());
 						}
 						image_stream.Close();
 						image_stream = nullptr;
 						image_file = nullptr;
 
-						// ƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•œŒ³‚·‚é.
+						// ã‚¹ãƒ¬ãƒƒãƒ‰ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã‚’å¾©å…ƒã™ã‚‹.
 						//co_await context;
 						t->write_svg(image_name, dt_writer);
 					}
@@ -1376,62 +1410,64 @@ namespace winrt::GraphPaper::implementation
 					s->write_svg(dt_writer);
 				}
 			}
-			// SVG I—¹ƒ^ƒO‚ğ‘‚«‚Ş.
+			// SVG çµ‚äº†ã‚¿ã‚°ã‚’æ›¸ãè¾¼ã‚€.
 			dt_write_svg("</svg>" SVG_NEW_LINE, dt_writer);
-			// ƒXƒgƒŠ[ƒ€‚ÌŒ»İˆÊ’u‚ğƒXƒgƒŠ[ƒ€‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
+			// ã‚¹ãƒˆãƒªãƒ¼ãƒ ã®ç¾åœ¨ä½ç½®ã‚’ã‚¹ãƒˆãƒªãƒ¼ãƒ ã®å¤§ãã•ã«æ ¼ç´ã™ã‚‹.
 			svg_stream.Size(svg_stream.Position());
-			// ƒoƒbƒtƒ@“à‚Ìƒf[ƒ^‚ğƒXƒgƒŠ[ƒ€‚Éo—Í‚·‚é.
+			// ãƒãƒƒãƒ•ã‚¡å†…ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¹ãƒˆãƒªãƒ¼ãƒ ã«å‡ºåŠ›ã™ã‚‹.
 			co_await dt_writer.StoreAsync();
-			// ƒXƒgƒŠ[ƒ€‚ğƒtƒ‰ƒbƒVƒ…‚·‚é.
+			// ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ã™ã‚‹.
 			co_await svg_stream.FlushAsync();
-			// ’x‰„‚³‚¹‚½ƒtƒ@ƒCƒ‹XV‚ğŠ®—¹‚µ, Œ‹‰Ê‚ğ”»’è‚·‚é.
+			// é…å»¶ã•ã›ãŸãƒ•ã‚¡ã‚¤ãƒ«æ›´æ–°ã‚’å®Œäº†ã—, çµæœã‚’åˆ¤å®šã™ã‚‹.
 			if (co_await CachedFileManager::CompleteUpdatesAsync(svg_file) == FileUpdateStatus::Complete) {
-				// Š®—¹‚µ‚½ê‡, S_OK ‚ğŒ‹‰Ê‚ÉŠi”[‚·‚é.
+				// å®Œäº†ã—ãŸå ´åˆ, S_OK ã‚’çµæœã«æ ¼ç´ã™ã‚‹.
 				hr = S_OK;
 			}
 		}
 		catch (winrt::hresult_error const& e) {
-			// ƒGƒ‰[‚ª”­¶‚µ‚½ê‡, ƒGƒ‰[ƒR[ƒh‚ğŒ‹‰Ê‚ÉŠi”[‚·‚é.
+			// ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ãŸå ´åˆ, ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’çµæœã«æ ¼ç´ã™ã‚‹.
 			hr = e.code();
 		}
-		// Œ‹‰Ê‚ª S_OK ˆÈŠO‚©”»’è‚·‚é.
+		// çµæœãŒ S_OK ä»¥å¤–ã‹åˆ¤å®šã™ã‚‹.
 		if (hr != S_OK) {
-			// ƒXƒŒƒbƒh‚ğƒƒCƒ“ƒy[ƒW‚Ì UI ƒXƒŒƒbƒh‚É•Ï‚¦‚é.
-			co_await winrt::resume_foreground(Dispatcher());
-			// uƒtƒ@ƒCƒ‹‚É‘‚«‚ß‚Ü‚¹‚ñvƒƒbƒZ[ƒWƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é.
+			// ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ãƒ¡ã‚¤ãƒ³ãƒšãƒ¼ã‚¸ã® UI ã‚¹ãƒ¬ãƒƒãƒ‰ã«å¤‰ãˆã‚‹.
+//			co_await winrt::resume_foreground(Dispatcher());
+			// ã€Œãƒ•ã‚¡ã‚¤ãƒ«ã«æ›¸ãè¾¼ã‚ã¾ã›ã‚“ã€ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹.
 			message_show(ICON_ALERT, RES_ERR_WRITE, svg_file.Path());
 		}
-		// ƒXƒŒƒbƒhƒRƒ“ƒeƒLƒXƒg‚ğ•œŒ³‚·‚é.
-		co_await context;
-		m_mutex_fwrite.unlock();
-		// Œ‹‰Ê‚ğ•Ô‚µI—¹‚·‚é.
+		// ã‚¹ãƒ¬ãƒƒãƒ‰ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã‚’å¾©å…ƒã™ã‚‹.
+//		co_await context;
+		m_mutex_exit.unlock();
+		// çµæœã‚’è¿”ã—çµ‚äº†ã™ã‚‹.
 		co_return hr;
 	}
 
-	// ƒtƒ@ƒCƒ‹ƒƒjƒ…[‚ÌuV‹Kv‚ª‘I‘ğ‚³‚ê‚½
+	// ãƒ•ã‚¡ã‚¤ãƒ«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ã€Œæ–°è¦ã€ãŒé¸æŠã•ã‚ŒãŸ
 	IAsyncAction MainPage::file_new_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		// ƒXƒ^ƒbƒN‚ªXV‚³‚ê‚½, ‚©‚ÂŠm”Fƒ_ƒCƒAƒƒO‚Ì‰“š‚ªuƒLƒƒƒ“ƒZƒ‹v‚©”»’è‚·‚é.
-		if (m_ustack_is_changed && !co_await file_comfirm_dialog()) {
+		// ã‚¹ã‚¿ãƒƒã‚¯ãŒæ›´æ–°ã•ã‚ŒãŸ, ã‹ã¤ç¢ºèªãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®å¿œç­”ãŒã€Œã‚­ãƒ£ãƒ³ã‚»ãƒ«ã€ã‹åˆ¤å®šã™ã‚‹.
+		if (m_ustack_is_changed && !co_await file_confirm_dialog()) {
 			co_return;
 		}
-		// ˆê——‚ª•\¦‚³‚ê‚Ä‚é‚©”»’è‚·‚é.
+		// ä¸€è¦§ãŒè¡¨ç¤ºã•ã‚Œã¦ã‚‹ã‹åˆ¤å®šã™ã‚‹.
 		if (summary_is_visible()) {
 			summary_close_click(nullptr, nullptr);
 		}
 		ustack_clear();
 		slist_clear(m_main_sheet.m_shape_list);
+
 #if defined(_DEBUG)
 		if (debug_leak_cnt != 0) {
-			// uƒƒ‚ƒŠƒŠ[ƒNvƒƒbƒZ[ƒWƒ_ƒCƒAƒƒO‚ğ•\¦‚·‚é.
-			message_show(ICON_ALERT, DEBUG_MSG, {});
+			// ã€Œãƒ¡ãƒ¢ãƒªãƒªãƒ¼ã‚¯ã€ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’è¡¨ç¤ºã™ã‚‹.
+			message_show(ICON_DEBUG, DEBUG_MSG, {});
 		}
 #endif
+
 		ShapeText::release_available_fonts();
 
 		ShapeText::set_available_fonts(m_main_sheet.m_d2d);
 
-		// ”wŒiF, ‘OŒiF, ‘I‘ğ‚³‚ê‚½•¶š”ÍˆÍ‚Ì”wŒiF, •¶šF‚ğƒŠƒ\[ƒX‚©‚ç“¾‚é.
+		// èƒŒæ™¯è‰², å‰æ™¯è‰², é¸æŠã•ã‚ŒãŸæ–‡å­—ç¯„å›²ã®èƒŒæ™¯è‰², æ–‡å­—è‰²ã‚’ãƒªã‚½ãƒ¼ã‚¹ã‹ã‚‰å¾—ã‚‹.
 		{
 			const IInspectable sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
 			const IInspectable sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
@@ -1457,7 +1493,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		if (co_await sheet_prop_load_async() != S_OK) {
-			// “Ç‚İ‚İ‚É¸”s‚µ‚½ê‡,
+			// èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ãŸå ´åˆ,
 			sheet_init();
 			m_len_unit = LEN_UNIT::PIXEL;
 			m_color_code = COLOR_CODE::DEC;
@@ -1465,16 +1501,17 @@ namespace winrt::GraphPaper::implementation
 			m_status_bar = STATUS_BAR_DEF_VAL;
 		}
 
-		// —p†‚Ì¶ãˆÊ’u‚Æ‰E‰ºˆÊ’u‚ğ‰Šú‰»‚·‚é.
+		// ç”¨ç´™ã®å·¦ä¸Šä½ç½®ã¨å³ä¸‹ä½ç½®ã‚’åˆæœŸåŒ–ã™ã‚‹.
 		{
 			m_main_min = D2D1_POINT_2F{ 0.0F, 0.0F };
 			m_main_max = D2D1_POINT_2F{ m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height };
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();
+
 	}
 
-	// ƒtƒ@ƒCƒ‹ƒVƒXƒeƒ€‚Ö‚ÌƒAƒNƒZƒXŒ ‚ğŠm”F‚µ‚Ä, İ’è‚ğ‘£‚·.
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã‚·ã‚¹ãƒ†ãƒ ã¸ã®ã‚¢ã‚¯ã‚»ã‚¹æ¨©ã‚’ç¢ºèªã—ã¦, è¨­å®šã‚’ä¿ƒã™.
 	/*
 	IAsyncAction MainPage::file_check_broad_access(void) const
 	{
@@ -1496,11 +1533,11 @@ namespace winrt::GraphPaper::implementation
 }
 
 /*
-‚½‚¾‚µA4‚Â‚ÌWindowsƒ‰ƒ“ƒ^ƒCƒ€”ñ“¯Šú‘€ìƒ^ƒCƒviIAsyncXxxj‚Ì‚¢‚¸‚ê‚©‚ğ
-co_await‚µ‚½ê‡AC ++ / WinRT‚Íco_await‚Ì“_‚ÅŒÄ‚Ño‚µƒRƒ“ƒeƒLƒXƒg‚ğƒLƒƒƒvƒ`ƒƒ‚µ‚Ü‚·B
-‚Ü‚½AŒp‘±‚ªÄŠJ‚³‚ê‚½‚Æ‚«‚ÉA‚»‚ÌƒRƒ“ƒeƒLƒXƒg‚É‚¢‚é‚±‚Æ‚ª•ÛØ‚³‚ê‚Ü‚·B
-C ++ / WinRT‚ÍAŒÄ‚Ño‚µ‘¤‚ÌƒRƒ“ƒeƒLƒXƒg‚ÉŠù‚É‚¢‚é‚©‚ğŠm”F‚µA
-‚»‚¤‚Å‚È‚¢ê‡‚ÍØ‚è‘Ö‚¦‚Ü‚·B
+ãŸã ã—ã€4ã¤ã®Windowsãƒ©ãƒ³ã‚¿ã‚¤ãƒ éåŒæœŸæ“ä½œã‚¿ã‚¤ãƒ—ï¼ˆIAsyncXxxï¼‰ã®ã„ãšã‚Œã‹ã‚’
+co_awaitã—ãŸå ´åˆã€C ++ / WinRTã¯co_awaitã®æ™‚ç‚¹ã§å‘¼ã³å‡ºã—ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã‚’ã‚­ãƒ£ãƒ—ãƒãƒ£ã—ã¾ã™ã€‚
+ã¾ãŸã€ç¶™ç¶šãŒå†é–‹ã•ã‚ŒãŸã¨ãã«ã€ãã®ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã«ã„ã‚‹ã“ã¨ãŒä¿è¨¼ã•ã‚Œã¾ã™ã€‚
+C ++ / WinRTã¯ã€å‘¼ã³å‡ºã—å´ã®ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã«æ—¢ã«ã„ã‚‹ã‹ã‚’ç¢ºèªã—ã€
+ãã†ã§ãªã„å ´åˆã¯åˆ‡ã‚Šæ›¿ãˆã¾ã™ã€‚
 */
 
 /*
@@ -1545,20 +1582,20 @@ private async void InitMessageDialogHandler(IUICommand command)
 }
 */
 
-// ˆÈ‰º‚Ìî•ñ‚ÍŒÃ‚¢.
-// GetFileFromPathAsync, CreateFileAsync ‚ğ E_ACCESSDENIED ‚È‚µ‚Ég‚¤‚É‚ÍˆÈ‰º‚ª•K—v‚É‚È‚é.
-// 1. XAMLƒeƒLƒXƒgƒGƒfƒBƒ^‚ğg‚Á‚Ä, Pakage.appxmanifest ‚É broadFileSystemAccess ‚ğ’Ç‰Á‚·‚é.
-// Pakage.appxmanifest ‚Ì <Package> ‚ÌƒvƒƒpƒeƒB[‚É
-// xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" ‚ğ’Ç‰Á‚·‚é
-// IgnorableNamespaces="uap mp" ‚ğ IgnorableNamespaces="uap mp rescap" ‚É•ÏX‚·‚é
-// 2. ‚à‚µ‚È‚¯‚ê‚Î <Capabilities> ƒ^ƒO‚ğ <Package> ‚Ìq—v‘f‚Æ‚µ‚Ä’Ç‰Á‚·‚é.
-// <Capabilities> ‚Ìq—v‘f‚Æ‚µ‚Ä <rescap:Capability Name="broadFileSystemAccess" /> ‚ğ‰Á‚¦‚é
-// 3. ƒRƒ“ƒpƒCƒ‹‚·‚é‚½‚Ñ‚É, İ’è‚ğg‚Á‚ÄƒAƒvƒŠ‚Éƒtƒ@ƒCƒ‹ƒAƒNƒZƒX‚ğ‹–‰Â‚·‚é.
-// ƒXƒ^[ƒgƒƒjƒ…[ > İ’è > ƒvƒ‰ƒCƒo[ > ƒtƒ@ƒCƒ‹ ƒVƒXƒeƒ€ > ƒtƒ@ƒCƒ‹ƒVƒXƒeƒ€‚ÉƒAƒNƒZƒX‚Å‚«‚éƒAƒvƒŠ‚ğ‘I‚Ô
-// •\¦‚³‚ê‚Ä‚¢‚éƒAƒvƒŠ‚ğƒIƒ“‚É‚·‚é.
-// ‚Ü‚½‚Í,
-// ƒXƒ^[ƒgƒƒjƒ…[ > İ’è > ƒAƒvƒŠ > ƒAƒvƒŠ‚Æ‹@”\
-// •\¦‚³‚ê‚Ä‚¢‚éƒAƒvƒŠ‚ğƒNƒŠƒbƒN‚·‚é.
-// Ú×ƒIƒvƒVƒ‡ƒ“ > ƒAƒvƒŠ‚ÌƒAƒNƒZƒX‹–‰Â
-// ƒtƒ@ƒCƒ‹ ƒVƒXƒeƒ€‚ğƒIƒ“‚É‚·‚é.
+// ä»¥ä¸‹ã®æƒ…å ±ã¯å¤ã„.
+// GetFileFromPathAsync, CreateFileAsync ã‚’ E_ACCESSDENIED ãªã—ã«ä½¿ã†ã«ã¯ä»¥ä¸‹ãŒå¿…è¦ã«ãªã‚‹.
+// 1. XAMLãƒ†ã‚­ã‚¹ãƒˆã‚¨ãƒ‡ã‚£ã‚¿ã‚’ä½¿ã£ã¦, Pakage.appxmanifest ã« broadFileSystemAccess ã‚’è¿½åŠ ã™ã‚‹.
+// Pakage.appxmanifest ã® <Package> ã®ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ãƒ¼ã«
+// xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" ã‚’è¿½åŠ ã™ã‚‹
+// IgnorableNamespaces="uap mp" ã‚’ IgnorableNamespaces="uap mp rescap" ã«å¤‰æ›´ã™ã‚‹
+// 2. ã‚‚ã—ãªã‘ã‚Œã° <Capabilities> ã‚¿ã‚°ã‚’ <Package> ã®å­è¦ç´ ã¨ã—ã¦è¿½åŠ ã™ã‚‹.
+// <Capabilities> ã®å­è¦ç´ ã¨ã—ã¦ <rescap:Capability Name="broadFileSystemAccess" /> ã‚’åŠ ãˆã‚‹
+// 3. ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã™ã‚‹ãŸã³ã«, è¨­å®šã‚’ä½¿ã£ã¦ã‚¢ãƒ—ãƒªã«ãƒ•ã‚¡ã‚¤ãƒ«ã‚¢ã‚¯ã‚»ã‚¹ã‚’è¨±å¯ã™ã‚‹.
+// ã‚¹ã‚¿ãƒ¼ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ > è¨­å®š > ãƒ—ãƒ©ã‚¤ãƒãƒ¼ > ãƒ•ã‚¡ã‚¤ãƒ« ã‚·ã‚¹ãƒ†ãƒ  > ãƒ•ã‚¡ã‚¤ãƒ«ã‚·ã‚¹ãƒ†ãƒ ã«ã‚¢ã‚¯ã‚»ã‚¹ã§ãã‚‹ã‚¢ãƒ—ãƒªã‚’é¸ã¶
+// è¡¨ç¤ºã•ã‚Œã¦ã„ã‚‹ã‚¢ãƒ—ãƒªã‚’ã‚ªãƒ³ã«ã™ã‚‹.
+// ã¾ãŸã¯,
+// ã‚¹ã‚¿ãƒ¼ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ > è¨­å®š > ã‚¢ãƒ—ãƒª > ã‚¢ãƒ—ãƒªã¨æ©Ÿèƒ½
+// è¡¨ç¤ºã•ã‚Œã¦ã„ã‚‹ã‚¢ãƒ—ãƒªã‚’ã‚¯ãƒªãƒƒã‚¯ã™ã‚‹.
+// è©³ç´°ã‚ªãƒ—ã‚·ãƒ§ãƒ³ > ã‚¢ãƒ—ãƒªã®ã‚¢ã‚¯ã‚»ã‚¹è¨±å¯
+// ãƒ•ã‚¡ã‚¤ãƒ« ã‚·ã‚¹ãƒ†ãƒ ã‚’ã‚ªãƒ³ã«ã™ã‚‹.
 

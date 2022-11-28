@@ -4,7 +4,7 @@
 	xmlns:muxc="using:Microsoft.UI.Xaml.Controls">
 	<!-- フォントアイコンのグリフ -->
 	<x:String x:Key="glyph_info">&#xE946;</x:String>
-	<x:String x:Key="glyph_alert">&#xEA39;</x:String>
+    <x:String x:Key="glyph_block">&#xF140;</x:String>
 	<x:String x:Key="glyph_order">&#xE8CB;</x:String>
 	<x:String x:Key="glyph_conf">&#xE9CE;</x:String>
 	<x:String x:Key="glyph_save_as">&#xE792;</x:String>

@@ -72,10 +72,10 @@ namespace winrt::GraphPaper::implementation
 		prop_slider_3().Value(val3);
 		stroke_slider_set_header<UNDO_OP::STROKE_COLOR, 3>(val3);
 
-		prop_slider_0().Visibility(UI_VISIBLE);
-		prop_slider_1().Visibility(UI_VISIBLE);
-		prop_slider_2().Visibility(UI_VISIBLE);
-		prop_slider_3().Visibility(UI_VISIBLE);
+		prop_slider_0().Visibility(Visibility::Visible);
+		prop_slider_1().Visibility(Visibility::Visible);
+		prop_slider_2().Visibility(Visibility::Visible);
+		prop_slider_3().Visibility(Visibility::Visible);
 		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_OP::STROKE_COLOR, 0> });
 		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_OP::STROKE_COLOR, 1> });
 		const auto slider_2_token = prop_slider_2().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_OP::STROKE_COLOR, 2> });
@@ -97,10 +97,10 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(UI_COLLAPSED);
-		prop_slider_1().Visibility(UI_COLLAPSED);
-		prop_slider_2().Visibility(UI_COLLAPSED);
-		prop_slider_3().Visibility(UI_COLLAPSED);
+		prop_slider_0().Visibility(Visibility::Collapsed);
+		prop_slider_1().Visibility(Visibility::Collapsed);
+		prop_slider_2().Visibility(Visibility::Collapsed);
+		prop_slider_3().Visibility(Visibility::Collapsed);
 		prop_slider_0().ValueChanged(slider_0_token);
 		prop_slider_1().ValueChanged(slider_1_token);
 		prop_slider_2().ValueChanged(slider_2_token);
@@ -238,7 +238,7 @@ namespace winrt::GraphPaper::implementation
 		prop_slider_0().SnapsTo(SliderSnapsTo::StepValues);
 		prop_slider_0().Value(s_width);
 		stroke_slider_set_header<UNDO_OP::STROKE_WIDTH, 0>(s_width);
-		prop_slider_0().Visibility(UI_VISIBLE);
+		prop_slider_0().Visibility(Visibility::Visible);
 		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_OP::STROKE_WIDTH, 0> });
 
 		stroke_create_sample_shape(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()), m_prop_sheet);
@@ -256,7 +256,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(UI_COLLAPSED);
+		prop_slider_0().Visibility(Visibility::Collapsed);
 		prop_slider_0().ValueChanged(slider_0_token);
 		prop_slider_0().StepFrequency(1.0);
 		prop_slider_0().Maximum(255.0);

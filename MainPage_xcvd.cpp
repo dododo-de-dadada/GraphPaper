@@ -60,8 +60,8 @@ namespace winrt::GraphPaper::implementation
 			if (img_ref == nullptr && typeid(*it) == typeid(ShapeImage)) {
 				// ビットマップをストリームに格納し, その参照を得る.
 				InMemoryRandomAccessStream img_stream{ InMemoryRandomAccessStream() };
-				co_await static_cast<ShapeImage*>(*it)->copy_to(BitmapEncoder::BmpEncoderId(), img_stream);
-				if (img_stream.Size() > 0) {
+				const bool ret = co_await static_cast<ShapeImage*>(*it)->copy_to(BitmapEncoder::BmpEncoderId(), img_stream);
+				if (ret && img_stream.Size() > 0) {
 					img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);
 				}
 			}
@@ -137,7 +137,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_LIST selected_list;
 		slist_get_selected<Shape>(m_main_sheet.m_shape_list, selected_list);
 		// リストの各図形について以下を繰り返す.
-		m_mutex_d2d.lock();
+		m_mutex_draw.lock();
 		for (auto s : selected_list) {
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
@@ -146,7 +146,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形を取り去り, その操作をスタックに積む.
 			ustack_push_remove(s);
 		}
-		m_mutex_d2d.unlock();
+		m_mutex_draw.unlock();
 		ustack_push_null();
 
 		selected_list.clear();
@@ -328,10 +328,10 @@ namespace winrt::GraphPaper::implementation
 		s->set_pos_start(pos);
 
 		{
-			m_mutex_d2d.lock();
+			m_mutex_draw.lock();
 			ustack_push_append(s);
 			ustack_push_select(s);
-			m_mutex_d2d.unlock();
+			m_mutex_draw.unlock();
 		}
 		ustack_push_null();
 
@@ -377,7 +377,7 @@ namespace winrt::GraphPaper::implementation
 				// データリーダーから貼り付けリストを読み込み, それが空でないか判定する.
 				SHAPE_LIST slist_pasted;	// 貼り付けリスト
 				if (slist_read(slist_pasted, dt_reader) && !slist_pasted.empty()) {
-					m_mutex_d2d.lock();
+					m_mutex_draw.lock();
 					// 図形リストの中の図形の選択をすべて解除する.
 					unselect_all();
 					// 得られたリストの各図形について以下を繰り返す.
@@ -389,7 +389,7 @@ namespace winrt::GraphPaper::implementation
 						ustack_push_append(s);
 						sheet_update_bbox(s);
 					}
-					m_mutex_d2d.unlock();
+					m_mutex_draw.unlock();
 					ustack_push_null();
 					slist_pasted.clear();
 					xcvd_is_enabled();
@@ -444,10 +444,10 @@ namespace winrt::GraphPaper::implementation
 			xcvd_paste_pos(pos, /*<---*/m_main_sheet.m_shape_list, grid_len, vert_stick);
 			t->set_pos_start(pos);
 			{
-				m_mutex_d2d.lock();
+				m_mutex_draw.lock();
 				ustack_push_append(t);
 				ustack_push_select(t);
-				m_mutex_d2d.unlock();
+				m_mutex_draw.unlock();
 			}
 			ustack_push_null();
 

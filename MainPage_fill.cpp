@@ -51,10 +51,10 @@ namespace winrt::GraphPaper::implementation
 		prop_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		prop_slider_3().Value(val3);
 		fill_slider_set_header<UNDO_OP::FILL_COLOR, 3>(val3);
-		prop_slider_0().Visibility(UI_VISIBLE);
-		prop_slider_1().Visibility(UI_VISIBLE);
-		prop_slider_2().Visibility(UI_VISIBLE);
-		prop_slider_3().Visibility(UI_VISIBLE);
+		prop_slider_0().Visibility(Visibility::Visible);
+		prop_slider_1().Visibility(Visibility::Visible);
+		prop_slider_2().Visibility(Visibility::Visible);
+		prop_slider_3().Visibility(Visibility::Visible);
 		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_OP::FILL_COLOR, 0> });
 		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_OP::FILL_COLOR, 1> });
 		const auto slider_2_token = prop_slider_2().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_OP::FILL_COLOR, 2> });
@@ -82,10 +82,10 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(UI_COLLAPSED);
-		prop_slider_1().Visibility(UI_COLLAPSED);
-		prop_slider_2().Visibility(UI_COLLAPSED);
-		prop_slider_3().Visibility(UI_COLLAPSED);
+		prop_slider_0().Visibility(Visibility::Collapsed);
+		prop_slider_1().Visibility(Visibility::Collapsed);
+		prop_slider_2().Visibility(Visibility::Collapsed);
+		prop_slider_3().Visibility(Visibility::Collapsed);
 		prop_slider_0().ValueChanged(slider_0_token);
 		prop_slider_1().ValueChanged(slider_1_token);
 		prop_slider_2().ValueChanged(slider_2_token);
