@@ -142,6 +142,9 @@ namespace winrt::GraphPaper::implementation
 	static const IVector<winrt::hstring> TYPE_SVG{
 		winrt::single_threaded_vector<winrt::hstring>({ RES_EXT_SVG })
 	};
+	static const IVector<winrt::hstring> TYPE_PDF{
+		winrt::single_threaded_vector<winrt::hstring>({ L".pdf" })
+	};
 	static winrt::guid enc_id_default = BitmapEncoder::BmpEncoderId();	// 既定のエンコード識別子
 
 	inline static CoreCursor file_wait_cursor(void);
@@ -898,6 +901,8 @@ namespace winrt::GraphPaper::implementation
 					ResourceLoader::GetForCurrentView().GetString(RES_DESC_SVG)
 				};
 				save_picker.FileTypeChoices().Insert(desc_svg, TYPE_SVG);
+				const winrt::hstring desc_pdf{ L"" };
+				save_picker.FileTypeChoices().Insert(desc_pdf, TYPE_PDF);
 			}
 
 			// ドキュメントライブラリーを保管場所に設定する.
@@ -925,9 +930,11 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			// ファイル保存ピッカーを表示し, ストレージファイルを得る.
+			m_mutex_event.lock();
 			StorageFile save_file{
 				co_await save_picker.PickSaveFileAsync()
 			};
+			m_mutex_event.unlock();
 			// ピッカーを破棄する.
 			save_picker = nullptr;
 			// ストレージファイルを取得したか判定する.
@@ -943,6 +950,9 @@ namespace winrt::GraphPaper::implementation
 				else if (f_type == RES_EXT_GPF) {
 					// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
 					hr = co_await file_write_gpf_async<false, false>(save_file);
+				}
+				else if (f_type == L".pdf") {
+					hr = co_await file_write_pdf_async(save_file);
 				}
 				// カーソルを元に戻す.
 				Window::Current().CoreWindow().PointerCursor(prev_cur);
@@ -1197,9 +1207,10 @@ namespace winrt::GraphPaper::implementation
 	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, false>(StorageFile s_file);
 	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<true, false>(StorageFile s_file);
 	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, true>(StorageFile s_file);
-	/*
+
 	IAsyncOperation<winrt::hresult> MainPage::file_write_pdf_async(StorageFile pdf_file)
 	{
+		HRESULT hr = S_OK;
 		try {
 			// ファイル更新の遅延を設定する.
 			CachedFileManager::DeferUpdates(pdf_file);
@@ -1212,18 +1223,17 @@ namespace winrt::GraphPaper::implementation
 			DataWriter dt_writer{
 				DataWriter(pdf_stream.GetOutputStreamAt(0))
 			};
-			dt_writer.WriteBytes(
+			dt_write_pdf(
 				"%PDF-1.7\n"
-				"%\1\2\3\4\n"
-			);
-			dt_writer.WriteBytes(
+				"%\1\2\3\4\n", dt_writer);
+			dt_write_pdf(
 				"1 0 obj\n"
 				"<<\n"
 				"/Kids[2 0 R]\n"
 				"/Count 1\n"
 				"/Type /Pages\n"
 				">>\n"
-				"endobj\n");
+				"endobj\n", dt_writer);
 			char buf[1024];
 			sprintf_s(buf,
 				"2 0 obj\n"
@@ -1235,17 +1245,17 @@ namespace winrt::GraphPaper::implementation
 				"/Type /Page\n"
 				">>\n"
 				"endobj\n", m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height);
-			dt_writer.WriteBytes(buf);
+			dt_write_pdf(buf, dt_writer);
 			sprintf_s(buf,
 				"3 0 obj\n"
 				"stream\n"
 				"1 0 0 -1 0 %f cm\n",
 				m_main_sheet.m_sheet_size.height);
-			dt_writer.WriteBytes(buf);
+			dt_write_pdf(buf, dt_writer);
 			for (const auto s : m_main_sheet.m_shape_list) {
 				s->write_pdf(dt_writer);
 			}
-			dt_writer.WriteBytes(
+			dt_write_pdf(
 				"endstream\n"
 				"endobj\n"
 				"4 0 obj\n"
@@ -1254,14 +1264,25 @@ namespace winrt::GraphPaper::implementation
 				"/Type /Catalog"
 				">>\n"
 				"endobj\n"
-				"%%EOF\n");
+				"%%EOF\n", dt_writer);
+			// ストリームの現在位置をストリームの大きさに格納する.
+			pdf_stream.Size(pdf_stream.Position());
+			// バッファ内のデータをストリームに出力する.
+			co_await dt_writer.StoreAsync();
+			// ストリームをフラッシュする.
+			co_await pdf_stream.FlushAsync();
+			// 遅延させたファイル更新を完了し, 結果を判定する.
+			if (co_await CachedFileManager::CompleteUpdatesAsync(pdf_file) == FileUpdateStatus::Complete) {
+				// 完了した場合, S_OK を結果に格納する.
+				hr = S_OK;
+			}
 		}
-		catch (winrt::hresult) {
-
+		catch (winrt::hresult_error const& e) {
+			hr = e.code();
 		}
-		co_return S_OK;
+		co_return hr;
 	}
-	*/
+
 	//-------------------------------
 	// 図形データを SVG としてストレージファイルに非同期に書き込む.
 	// svg_file	書き込み先のファイル

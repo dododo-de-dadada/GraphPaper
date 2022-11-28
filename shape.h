@@ -345,6 +345,8 @@ namespace winrt::GraphPaper::implementation
 	void dt_write(const std::vector<D2D1_POINT_2F>& val, /*--->*/DataWriter const& dt_writer);
 	// データライターに文字列を書き込む.
 	void dt_write(const wchar_t* val, /*--->*/DataWriter const& dt_writer);
+	// データライターに文字列を書き込む.
+	void dt_write_pdf(const char val[], DataWriter const& dt_writer);
 	// データライターに SVG として属性名とシングルバイト文字列を書き込む.
 	void dt_write_svg(const char* val, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG としてシングルバイト文字列を書き込む.
@@ -594,7 +596,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		virtual void write(DataWriter const& /*dt_writer*/) const {}
 		// 図形をデータライターに PDF として書き込む.
-		//virtual void write_pdf(DataWriter const& /*dt_writer*/) const {}
+		virtual void write_pdf(DataWriter const& /*dt_writer*/) const {}
 		// 図形をデータライターに SVG として書き込む.
 		virtual void write_svg(DataWriter const& /*dt_writer*/) const {}
 	};
@@ -1351,7 +1353,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータリーダーから読み込む.
 		ShapeBezi(DataReader const& dt_reader);
 		// 図形をデータライターに PDF として書き込む.
-		//void write_pdf(DataWriter const& dt_writer) const override;
+		void write_pdf(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
 	};

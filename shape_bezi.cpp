@@ -883,29 +883,29 @@ namespace winrt::GraphPaper::implementation
 	// データライターに SVG として書き込む.
 	// dt_reader	データリーダー
 	//------------------------------
-	/*
 	void ShapeBezi::write_pdf(DataWriter const& dt_writer) const
 	{
 		char buf[1024];
-		dt_writer.WriteBytes("q\n");
+		dt_write_pdf("q\n", dt_writer);
 		sprintf_s(buf, "%f w", m_stroke_width);
-		dt_writer.WriteBytes(buf);
+		dt_write_pdf(buf, dt_writer);
 		sprintf_s(buf, "%f %f %f RG\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);
-		dt_writer.WriteBytes(buf);
+		dt_write_pdf(buf, dt_writer);
 		//sprintf_s(buf, "%f %f %f rg\n", m_.r, m_stroke_color.g, m_stroke_color.b);
 		sprintf_s(buf, "%f %f m", m_pos.x, m_pos.y);
+		dt_write_pdf(buf, dt_writer);
 		D2D1_POINT_2F pos;
 		pt_add(m_pos, m_vec[0], pos);
 		sprintf_s(buf, "%f %f ", pos.x, pos.y);
-		dt_writer.WriteBytes(buf);
+		dt_write_pdf(buf, dt_writer);
 		pt_add(pos, m_vec[1], pos);
 		sprintf_s(buf, "%f %f ", pos.x, pos.y);
-		dt_writer.WriteBytes(buf);
+		dt_write_pdf(buf, dt_writer);
 		pt_add(pos, m_vec[2], pos);
 		sprintf_s(buf, "%f %f ", pos.x, pos.y);
-		dt_writer.WriteBytes("c\nS\nQ\n");
+		dt_write_pdf(buf, dt_writer);
+		dt_write_pdf("c\nS\nQ\n", dt_writer);
 	}
-	*/
 
 	//------------------------------
 	// データライターに SVG として書き込む.

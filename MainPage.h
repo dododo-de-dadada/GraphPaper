@@ -478,7 +478,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形データをストレージファイルに非同期に書き込む.
 		template <bool SUSPEND, bool SETTING>
 		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile gpf_file);
-		//IAsyncOperation<winrt::hresult> file_write_pdf_async(StorageFile pdf_file);
+		IAsyncOperation<winrt::hresult> file_write_pdf_async(StorageFile pdf_file);
 
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
 		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile s_file);
