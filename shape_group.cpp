@@ -11,14 +11,6 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	//------------------------------
-	// 図形を破棄する.
-	//------------------------------
-	ShapeGroup::~ShapeGroup(void)
-	{
-		slist_clear(m_list_grouped);
-	}
-
-	//------------------------------
 	// 図形を表示する.
 	// sh	表示する用紙
 	//------------------------------

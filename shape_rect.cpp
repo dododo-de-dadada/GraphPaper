@@ -456,9 +456,9 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// s_sttr	属性
-	ShapeRect::ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr) :
-		ShapeStroke::ShapeStroke(s_attr),
-		m_fill_color(s_attr->m_fill_color)
+	ShapeRect::ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_sheet) :
+		ShapeStroke::ShapeStroke(s_sheet),
+		m_fill_color(s_sheet->m_fill_color)
 	{
 		m_pos = b_pos;
 		m_vec.resize(1, b_vec);

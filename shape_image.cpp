@@ -50,19 +50,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形を破棄する.
-	ShapeImage::~ShapeImage(void)
-	{
-		if (m_data != nullptr) {
-			delete m_data;
-			m_data = nullptr;
-		}
-		if (m_d2d_bitmap != nullptr) {
-			//m_d2d_bitmap->Release();
-			m_d2d_bitmap = nullptr;
-		}
-	}
-
 	// ストリームに格納する.
 	// enc_id	画像の形式 (BitmapEncoder に定義されている)
 	// ra_stream	画像を格納するストリーム
@@ -616,8 +603,8 @@ namespace winrt::GraphPaper::implementation
 	// view_size	表示される大きさ
 	// bmp	ビットマップ
 	// opac	不透明度
-	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bmp, const float opac) :
-		ShapeSelect()
+	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bmp, const float opac) //:
+		//ShapeSelect()
 	{
 		const uint32_t image_w = bmp.PixelWidth();
 		const uint32_t image_h = bmp.PixelHeight();

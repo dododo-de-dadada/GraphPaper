@@ -1212,6 +1212,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		HRESULT hr = S_OK;
 		try {
+			// D2D の論理 DPI (96dpi) を PDF の 72dpi に変換する.
+			const float dpi = m_main_sheet.m_d2d.m_logical_dpi;
+			const float w_pt = m_main_sheet.m_sheet_size.width * 72.0f / dpi;
+			const float h_pt = m_main_sheet.m_sheet_size.height * 72.0f / dpi;
 			// ファイル更新の遅延を設定する.
 			CachedFileManager::DeferUpdates(pdf_file);
 			// ストレージファイルを開いてランダムアクセスストリームを得る.
@@ -1223,48 +1227,107 @@ namespace winrt::GraphPaper::implementation
 			DataWriter dt_writer{
 				DataWriter(pdf_stream.GetOutputStreamAt(0))
 			};
-			dt_write_pdf(
-				"%PDF-1.7\n"
-				"%\1\2\3\4\n", dt_writer);
-			dt_write_pdf(
+			// ヘッダー
+			size_t len;
+			len = dt_write_pdf(
+				"%PDF-1.6\n"
+				"%\xff\xff\xff\xff\n",
+				dt_writer);
+			// ページツリーディクショナリ
+			const size_t obj_1 = len;
+			len = dt_write_pdf(
 				"1 0 obj\n"
 				"<<\n"
-				"/Kids[2 0 R]\n"
-				"/Count 1\n"
 				"/Type /Pages\n"
+				"/Count 1\n"
+				"/Kids[2 0 R]\n"
 				">>\n"
-				"endobj\n", dt_writer);
+				"endobj\n", 
+				dt_writer
+			);
+			// ページオブジェクト
+			const size_t obj_2 = obj_1 + len;
 			char buf[1024];
 			sprintf_s(buf,
 				"2 0 obj\n"
 				"<<\n"
-				"/Parent 1 0 R\n"
-				"/Resources 3 0 R\n"
-				"/MediaBox[0 0 %f %f]\n"
-				"/Contents[3 0 R]\n"
 				"/Type /Page\n"
+				"/MediaBox[0 0 %f %f]\n"
+				"/Resources 3 0 R\n"
+				"/Parent 1 0 R\n"
+				"/Contents[4 0 R]\n"
 				">>\n"
-				"endobj\n", m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height);
-			dt_write_pdf(buf, dt_writer);
-			sprintf_s(buf,
+				"endobj\n",
+				w_pt, h_pt);
+			len = dt_write_pdf(buf, dt_writer);
+			// リソース
+			const size_t obj_3 = obj_2 + len;
+			len = dt_write_pdf(
 				"3 0 obj\n"
-				"stream\n"
-				"1 0 0 -1 0 %f cm\n",
-				m_main_sheet.m_sheet_size.height);
-			dt_write_pdf(buf, dt_writer);
-			for (const auto s : m_main_sheet.m_shape_list) {
-				s->write_pdf(dt_writer);
-			}
-			dt_write_pdf(
-				"endstream\n"
-				"endobj\n"
+				"<<\n"
+				">>\n"
+				"endobj\n",
+				dt_writer
+			);
+			// コンテントオブジェクト
+			const size_t obj_4 = obj_3 + len;
+			sprintf_s(buf,
 				"4 0 obj\n"
 				"<<\n"
-				"/Pages 1 0 R\n"
-				"/Type /Catalog"
 				">>\n"
-				"endobj\n"
-				"%%EOF\n", dt_writer);
+				"stream\n"
+				"%f 0 0 -%f 0 %f cm\n"
+				"q\n",
+				72.0f / dpi, 72.0f / dpi,
+				h_pt);
+			len = dt_write_pdf(buf, dt_writer);
+			for (const auto s : m_main_sheet.m_shape_list) {
+				len += s->write_pdf(dt_writer);
+			}
+			len += dt_write_pdf(
+				"Q\n"
+				"endstream\n"
+				"endobj\n", dt_writer
+			);
+			// ドキュメントカタログ
+			const size_t obj_5 = obj_4 + len;
+			len = dt_write_pdf(
+				"5 0 obj\n"
+				"<<\n"
+				"/Type /Catalog"
+				"/Pages 1 0 R\n"
+				">>\n"
+				"endobj\n", dt_writer
+			);
+			// クロスリファレンス
+			const size_t xref = obj_5 + len;
+			sprintf_s(
+				buf,
+				"xref\n"
+				"0 6\n"
+				"0000000000 65535 f\n"
+				"%010zu 00000 n\n"
+				"%010zu 00000 n\n"
+				"%010zu 00000 n\n"
+				"%010zu 00000 n\n"
+				"%010zu 00000 n\n",
+				obj_1, obj_2, obj_3, obj_4, obj_5
+			);
+			// トレイラーと EOF
+			dt_write_pdf(buf, dt_writer);
+			sprintf_s(
+				buf,
+				"trailer\n"
+				"<<\n"
+				"/Size 6\n"
+				"/Root 5 0 R\n"
+				">>\n"
+				"startxref\n"
+				"%zu\n"
+				"%%%%EOF\n",
+				xref
+			);
+			dt_write_pdf(buf, dt_writer);
 			// ストリームの現在位置をストリームの大きさに格納する.
 			pdf_stream.Size(pdf_stream.Position());
 			// バッファ内のデータをストリームに出力する.

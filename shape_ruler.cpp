@@ -12,15 +12,6 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataReader;
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
-	// 図形を破棄する.
-	ShapeRuler::~ShapeRuler(void)
-	{
-		if (m_dw_text_format != nullptr) {
-			//m_dw_text_format->Release();
-			m_dw_text_format = nullptr;
-		}
-	}
-
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
@@ -287,12 +278,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// s_attr	属性
-	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr) :
-		ShapeRect::ShapeRect(b_pos, b_vec, s_attr),
-		m_grid_base(s_attr->m_grid_base),
-		m_font_family(s_attr->m_font_family),
-		m_font_size(min(s_attr->m_font_size, s_attr->m_grid_base + 1.0f))
+	// s_sheet	属性
+	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_sheet) :
+		ShapeRect::ShapeRect(b_pos, b_vec, s_sheet),
+		m_grid_base(s_sheet->m_grid_base),
+		m_font_family(s_sheet->m_font_family),
+		m_font_size(min(s_sheet->m_font_size, s_sheet->m_grid_base + 1.0f))
 	{
 		ShapeText::is_available_font(m_font_family);
 	}

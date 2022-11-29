@@ -26,7 +26,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体の計量を得る
 	static void tx_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met);
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を破棄する.
-	static void tx_relese_metrics(UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_metrics, DWRITE_LINE_METRICS*& line_metrics, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_metrics) noexcept;
+	//static void tx_relese_metrics(UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_metrics, DWRITE_LINE_METRICS*& line_metrics, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_metrics) noexcept;
 
 	// ヒットテストの計量を作成する.
 	// text_lay	文字列レイアウト
@@ -71,21 +71,21 @@ namespace winrt::GraphPaper::implementation
 	// line_met 行の計量
 	// sele_cnt	選択された文字範囲の計量の要素数
 	// sele_met 選択された文字範囲の計量
-	static void tx_relese_metrics(UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, DWRITE_LINE_METRICS*& line_met, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met) noexcept
+	void ShapeText::relese_metrics(void) noexcept
 	{
-		test_cnt = 0;
-		if (test_met != nullptr) {
-			delete[] test_met;
-			test_met = nullptr;
+		m_dw_test_cnt = 0;
+		if (m_dw_test_metrics != nullptr) {
+			delete[] m_dw_test_metrics;
+			m_dw_test_metrics = nullptr;
 		}
-		if (line_met != nullptr) {
-			delete[] line_met;
-			line_met = nullptr;
+		if (m_dw_line_metrics != nullptr) {
+			delete[] m_dw_line_metrics;
+			m_dw_line_metrics = nullptr;
 		}
-		sele_cnt = 0;
-		if (sele_met != nullptr) {
-			delete[] sele_met;
-			sele_met = nullptr;
+		m_dw_selected_cnt = 0;
+		if (m_dw_selected_metrics != nullptr) {
+			delete[] m_dw_selected_metrics;
+			m_dw_selected_metrics = nullptr;
 		}
 	}
 
@@ -104,7 +104,6 @@ namespace winrt::GraphPaper::implementation
 		UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met,
 		const DWRITE_TEXT_RANGE& sele_rng)
 	{
-		tx_relese_metrics(test_cnt, test_met, line_met, sele_cnt, sele_met);
 		if (text_lay != nullptr) {
 			// ヒットテストの計量を作成する.
 			tx_create_test_metrics(text_lay, { 0, text_len }, test_met, test_cnt);
@@ -170,32 +169,6 @@ namespace winrt::GraphPaper::implementation
 		dt_write_svg("</text>" SVG_NEW_LINE, dt_writer);
 	}
 
-	// 図形を破棄する.
-	ShapeText::~ShapeText(void)
-	{
-		tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
-
-		// 書体名を破棄する.
-		if (m_font_family != nullptr) {
-			// 有効な書体名に含まれてない書体名なら破棄する.
-			if (!is_available_font(m_font_family)) {
-				delete[] m_font_family;
-			}
-			m_font_family = nullptr;
-		}
-		// 文字列を破棄する.
-		if (m_text != nullptr) {
-			delete[] m_text;
-			m_text = nullptr;
-		}
-
-		// 文字列レイアウトを破棄する.
-		if (m_dw_text_layout != nullptr) {
-			//m_dw_text_layout->Release();
-			m_dw_text_layout = nullptr;
-		}
-	}
-
 	// 枠を文字列に合わせる.
 	// g_len	方眼の大きさ (1 以上ならば方眼の大きさに合わせる)
 	// 戻り値	大きさが調整されたならば真.
@@ -236,7 +209,7 @@ namespace winrt::GraphPaper::implementation
 		// 文字列が空か判定する.
 		if (m_text == nullptr || m_text[0] == L'\0') {
 			// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
-			tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
+			relese_metrics();
 			// 文字列レイアウトが空でないなら破棄する.
 			if (m_dw_text_layout != nullptr) {
 				//m_dw_text_layout->Release();
@@ -302,6 +275,8 @@ namespace winrt::GraphPaper::implementation
 					winrt::check_hresult(t3->SetLineSpacing(&new_sp));
 					t3 = nullptr;
 				}
+				// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
+				relese_metrics();
 				tx_create_text_metrics(m_dw_text_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_text_selected_range);
 			}
 
@@ -454,8 +429,8 @@ namespace winrt::GraphPaper::implementation
 
 				// 変更されたか判定する.
 				if (updated) {
-					// 位置の計量, 行の計量, 文字列選択の計量を再作成する.
-					tx_relese_metrics(m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics);
+					// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
+					relese_metrics();
 					tx_create_text_metrics(m_dw_text_layout.get(), wchar_len(m_text), m_dw_test_cnt, m_dw_test_metrics, m_dw_line_metrics, m_dw_selected_cnt, m_dw_selected_metrics, m_text_selected_range);
 				}
 			}
@@ -932,20 +907,20 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// text	文字列
-	// s_attr	属性
-	ShapeText::ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const ShapeSheet* s_attr) :
-		ShapeRect::ShapeRect(b_pos, b_vec, s_attr),
-		m_font_color(s_attr->m_font_color),
-		m_font_family(s_attr->m_font_family),
-		m_font_size(s_attr->m_font_size),
-		m_font_stretch(s_attr->m_font_stretch),
-		m_font_style(s_attr->m_font_style),
-		m_font_weight(s_attr->m_font_weight),
-		m_text_line_sp(s_attr->m_text_line_sp),
-		m_text_padding(s_attr->m_text_padding),
+	// s_sheet	属性
+	ShapeText::ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const ShapeSheet* s_sheet) :
+		ShapeRect::ShapeRect(b_pos, b_vec, s_sheet),
+		m_font_color(s_sheet->m_font_color),
+		m_font_family(s_sheet->m_font_family),
+		m_font_size(s_sheet->m_font_size),
+		m_font_stretch(s_sheet->m_font_stretch),
+		m_font_style(s_sheet->m_font_style),
+		m_font_weight(s_sheet->m_font_weight),
+		m_text_line_sp(s_sheet->m_text_line_sp),
+		m_text_padding(s_sheet->m_text_padding),
 		m_text(text),
-		m_text_align_t(s_attr->m_text_align_t),
-		m_text_par_align(s_attr->m_text_par_align),
+		m_text_align_t(s_sheet->m_text_align_t),
+		m_text_par_align(s_sheet->m_text_par_align),
 		m_text_selected_range(DWRITE_TEXT_RANGE{ 0, 0 })
 	{
 		ShapeText::is_available_font(m_font_family);

@@ -930,12 +930,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// s_attr	属性
+	// s_sheet	属性
 	// p_opt	多角形の選択肢
-	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr, const POLY_OPTION& p_opt) :
-		ShapePath::ShapePath(s_attr, p_opt.m_end_closed),
+	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_sheet, const POLY_OPTION& p_opt) :
+		ShapePath::ShapePath(s_sheet, p_opt.m_end_closed),
 		m_end_closed(p_opt.m_end_closed),
-		m_fill_color(s_attr->m_fill_color)
+		m_fill_color(s_sheet->m_fill_color)
 	{
 		D2D1_POINT_2F v_pos[MAX_N_GON];
 		//D2D1_POINT_2F v_vec;
@@ -985,13 +985,15 @@ namespace winrt::GraphPaper::implementation
 			dt_write_svg("Z", dt_writer);
 		}
 		dt_write_svg("\" ", dt_writer);
-		ShapeStroke::write_svg(dt_writer);
+		write_svg_stroke(dt_writer);
 		dt_write_svg(m_fill_color, "fill", dt_writer);
 		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F h_tip;
 			D2D1_POINT_2F h_barbs[2];
 			if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
+				write_svg_barbs(h_barbs, h_tip, dt_writer);
+				/*
 				dt_write_svg("<path d=\"", dt_writer);
 				dt_write_svg(h_barbs[0], "M", dt_writer);
 				dt_write_svg(h_tip, "L", dt_writer);
@@ -1008,6 +1010,7 @@ namespace winrt::GraphPaper::implementation
 					dt_write_svg("fill=\"transparent\" ", dt_writer);
 				}
 				dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
+				*/
 			}
 		}
 	}

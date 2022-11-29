@@ -250,11 +250,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに文字列を書き込む
-	void dt_write_pdf(const char val[], DataWriter const& dt_writer)
+	// 戻り値	書き込んだバイト数.
+	size_t dt_write_pdf(const char val[], DataWriter const& dt_writer)
 	{
-		for (int i = 0; val[i] != '\0'; i++) {
+		size_t i = 0;
+		for (; val[i] != '\0'; i++) {
 			dt_writer.WriteByte(val[i]);
 		}
+		return i;
 	}
 
 	// データライターに SVG として属性名とシングルバイト文字列を書き込む.

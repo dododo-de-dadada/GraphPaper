@@ -5,18 +5,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
-	// 図形を破棄する.
-	ShapeStroke::~ShapeStroke(void)
-	{
-		if (m_d2d_stroke_style != nullptr) {
-			//m_d2d_stroke_style->Release();
-			m_d2d_stroke_style = nullptr;
-		}
-	}
-
 	// 図形を囲む領域を得る.
 	// a_min	元の領域の左上位置.
 	// a_max	元の領域の右下位置.
@@ -494,17 +482,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// s_attr	属性値
-	ShapeStroke::ShapeStroke(const ShapeSheet* s_attr) :
-		ShapeSelect(),
-		m_dash_cap(s_attr->m_dash_cap),
-		m_stroke_cap(s_attr->m_stroke_cap),
-		m_stroke_color(s_attr->m_stroke_color),
-		m_dash_patt(s_attr->m_dash_patt),
-		m_dash_style(s_attr->m_dash_style),
-		m_join_limit(s_attr->m_join_limit),
-		m_join_style(s_attr->m_join_style),
-		m_stroke_width(s_attr->m_stroke_width),
+	// s_sheet	用紙
+	ShapeStroke::ShapeStroke(const ShapeSheet* s_sheet) :
+		//ShapeSelect(),
+		m_dash_cap(s_sheet->m_dash_cap),
+		m_stroke_cap(s_sheet->m_stroke_cap),
+		m_stroke_color(s_sheet->m_stroke_color),
+		m_dash_patt(s_sheet->m_dash_patt),
+		m_dash_style(s_sheet->m_dash_style),
+		m_join_limit(s_sheet->m_join_limit),
+		m_join_style(s_sheet->m_join_style),
+		m_stroke_width(s_sheet->m_stroke_width),
 		m_d2d_stroke_style(nullptr)
 	{}
 
@@ -562,7 +550,34 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeStroke::write_svg(DataWriter const& dt_writer) const
+	size_t ShapeStroke::write_pdf_stroke(DataWriter const& dt_writer) const
+	{
+		size_t n = 0;
+		char buf[1024];
+		sprintf_s(buf, "%f w\n", m_stroke_width);
+		n += dt_write_pdf(buf, dt_writer);
+		sprintf_s(buf, "%f %f %f RG\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);	// RG は線枠 (rg は塗りつぶし) 色
+		n += dt_write_pdf(buf, dt_writer);
+		if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
+			sprintf_s(buf, "[ %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1]);
+			n += dt_write_pdf(buf, dt_writer);
+		}
+		else if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
+			sprintf_s(buf, "[ %f %f %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1], m_dash_patt.m_[2], m_dash_patt.m_[3]);
+			n += dt_write_pdf(buf, dt_writer);
+		}
+		else if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
+			sprintf_s(buf, "[ %f %f %f %f %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1], m_dash_patt.m_[2], m_dash_patt.m_[3], m_dash_patt.m_[4], m_dash_patt.m_[5]);
+			n += dt_write_pdf(buf, dt_writer);
+		}
+		else {
+			n += dt_write_pdf("[ ] 0 d\n", dt_writer);
+		}
+		return n;
+	}
+
+	// データライターに SVG タグとして書き込む.
+	void ShapeStroke::write_svg_stroke(DataWriter const& dt_writer) const
 	{
 		dt_write_svg(m_stroke_color, "stroke", dt_writer);
 		dt_write_svg(m_dash_style, m_dash_patt, m_stroke_width, dt_writer);

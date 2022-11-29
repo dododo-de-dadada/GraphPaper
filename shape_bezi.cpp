@@ -858,10 +858,10 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// s_attr	属性
+	// s_sheet	属性
 	//------------------------------
-	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_attr) :
-		ShapePath::ShapePath(s_attr, false)
+	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_sheet) :
+		ShapePath::ShapePath(s_sheet, false)
 	{
 		m_pos = b_pos;
 		m_vec.resize(3);
@@ -882,29 +882,54 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// データライターに SVG として書き込む.
 	// dt_reader	データリーダー
+	// 戻り値	書き込んだバイト数
 	//------------------------------
-	void ShapeBezi::write_pdf(DataWriter const& dt_writer) const
+	size_t ShapeBezi::write_pdf(DataWriter const& dt_writer) const
 	{
+		size_t n = write_pdf_stroke(dt_writer);
+
+		D2D1_BEZIER_SEGMENT b_seg;
+		pt_add(m_pos, m_vec[0], b_seg.point1);
+		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
+		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
+
 		char buf[1024];
-		dt_write_pdf("q\n", dt_writer);
-		sprintf_s(buf, "%f w", m_stroke_width);
-		dt_write_pdf(buf, dt_writer);
-		sprintf_s(buf, "%f %f %f RG\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);
-		dt_write_pdf(buf, dt_writer);
-		//sprintf_s(buf, "%f %f %f rg\n", m_.r, m_stroke_color.g, m_stroke_color.b);
-		sprintf_s(buf, "%f %f m", m_pos.x, m_pos.y);
-		dt_write_pdf(buf, dt_writer);
-		D2D1_POINT_2F pos;
-		pt_add(m_pos, m_vec[0], pos);
-		sprintf_s(buf, "%f %f ", pos.x, pos.y);
-		dt_write_pdf(buf, dt_writer);
-		pt_add(pos, m_vec[1], pos);
-		sprintf_s(buf, "%f %f ", pos.x, pos.y);
-		dt_write_pdf(buf, dt_writer);
-		pt_add(pos, m_vec[2], pos);
-		sprintf_s(buf, "%f %f ", pos.x, pos.y);
-		dt_write_pdf(buf, dt_writer);
-		dt_write_pdf("c\nS\nQ\n", dt_writer);
+		sprintf_s(buf, "%f %f m\n", m_pos.x, m_pos.y);
+		n += dt_write_pdf(buf, dt_writer);
+		sprintf_s(buf, "%f %f ", b_seg.point1.x, b_seg.point1.y);
+		n += dt_write_pdf(buf, dt_writer);
+		sprintf_s(buf, "%f %f ", b_seg.point2.x, b_seg.point2.y);
+		n += dt_write_pdf(buf, dt_writer);
+		sprintf_s(buf, "%f %f c\n", b_seg.point3.x, b_seg.point3.y);
+		n += dt_write_pdf(buf, dt_writer);
+		n += dt_write_pdf("S\n", dt_writer);
+		if (m_arrow_style == ARROW_STYLE::OPENED || m_arrow_style == ARROW_STYLE::FILLED) {
+			D2D1_POINT_2F barbs[3];
+			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
+			// 破線ならば, 実線に戻す.
+			if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH ||
+				m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT ||
+				m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
+				n += dt_write_pdf("[ ] 0 d\n", dt_writer);
+			}
+			if (m_arrow_style == ARROW_STYLE::FILLED) {
+				sprintf_s(buf, "%f %f %f rg\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);
+				n += dt_write_pdf(buf, dt_writer);
+			}
+			sprintf_s(buf, "%f %f m\n", barbs[0].x, barbs[0].y);
+			n += dt_write_pdf(buf, dt_writer);
+			sprintf_s(buf, "%f %f l\n", barbs[2].x, barbs[2].y);
+			n += dt_write_pdf(buf, dt_writer);
+			sprintf_s(buf, "%f %f l\n", barbs[1].x, barbs[1].y);
+			n += dt_write_pdf(buf, dt_writer);
+			if (m_arrow_style == ARROW_STYLE::OPENED) {
+				n += dt_write_pdf("S\n", dt_writer);
+			}
+			else if (m_arrow_style == ARROW_STYLE::FILLED) {
+				n += dt_write_pdf("b\n", dt_writer);	// b はパスを閉じて (B は閉じずに) 塗りつぶす.
+			}
+		}
+		return n;
 	}
 
 	//------------------------------
@@ -925,12 +950,12 @@ namespace winrt::GraphPaper::implementation
 		dt_write_svg(b_seg.point3, ",", dt_writer);
 		dt_write_svg("\" ", dt_writer);
 		dt_write_svg("none", "fill", dt_writer);
-		ShapeStroke::write_svg(dt_writer);
+		write_svg_stroke(dt_writer);
 		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			ShapeLine::write_svg(barbs, barbs[2], dt_writer);
+			write_svg_barbs(barbs, barbs[2], dt_writer);
 		}
 	}
 

@@ -137,6 +137,9 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	MainPage::MainPage(void)
 	{
+		Shape* s = new ShapeText(D2D1_POINT_2F{ 0, 0 }, D2D1_POINT_2F{ 10, 10 }, wchar_cpy(L""), & m_main_sheet);
+		delete s;
+
 		// お約束.
 		InitializeComponent();
 
