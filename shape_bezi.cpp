@@ -880,13 +880,14 @@ namespace winrt::GraphPaper::implementation
 	{}
 
 	//------------------------------
-	// データライターに SVG として書き込む.
-	// dt_reader	データリーダー
+	// データライターに PDF ストリームの一部として書き込む.
+	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
 	size_t ShapeBezi::write_pdf(DataWriter const& dt_writer) const
 	{
-		size_t n = write_pdf_stroke(dt_writer);
+		size_t n = dt_write("%Bezi\n", dt_writer);
+		n += write_pdf_stroke(dt_writer);
 
 		D2D1_BEZIER_SEGMENT b_seg;
 		pt_add(m_pos, m_vec[0], b_seg.point1);
@@ -895,39 +896,18 @@ namespace winrt::GraphPaper::implementation
 
 		char buf[1024];
 		sprintf_s(buf, "%f %f m\n", m_pos.x, m_pos.y);
-		n += dt_write_pdf(buf, dt_writer);
+		n += dt_write(buf, dt_writer);
 		sprintf_s(buf, "%f %f ", b_seg.point1.x, b_seg.point1.y);
-		n += dt_write_pdf(buf, dt_writer);
+		n += dt_write(buf, dt_writer);
 		sprintf_s(buf, "%f %f ", b_seg.point2.x, b_seg.point2.y);
-		n += dt_write_pdf(buf, dt_writer);
+		n += dt_write(buf, dt_writer);
 		sprintf_s(buf, "%f %f c\n", b_seg.point3.x, b_seg.point3.y);
-		n += dt_write_pdf(buf, dt_writer);
-		n += dt_write_pdf("S\n", dt_writer);
+		n += dt_write(buf, dt_writer);
+		n += dt_write("S\n", dt_writer);
 		if (m_arrow_style == ARROW_STYLE::OPENED || m_arrow_style == ARROW_STYLE::FILLED) {
 			D2D1_POINT_2F barbs[3];
 			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			// 破線ならば, 実線に戻す.
-			if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH ||
-				m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT ||
-				m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
-				n += dt_write_pdf("[ ] 0 d\n", dt_writer);
-			}
-			if (m_arrow_style == ARROW_STYLE::FILLED) {
-				sprintf_s(buf, "%f %f %f rg\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);
-				n += dt_write_pdf(buf, dt_writer);
-			}
-			sprintf_s(buf, "%f %f m\n", barbs[0].x, barbs[0].y);
-			n += dt_write_pdf(buf, dt_writer);
-			sprintf_s(buf, "%f %f l\n", barbs[2].x, barbs[2].y);
-			n += dt_write_pdf(buf, dt_writer);
-			sprintf_s(buf, "%f %f l\n", barbs[1].x, barbs[1].y);
-			n += dt_write_pdf(buf, dt_writer);
-			if (m_arrow_style == ARROW_STYLE::OPENED) {
-				n += dt_write_pdf("S\n", dt_writer);
-			}
-			else if (m_arrow_style == ARROW_STYLE::FILLED) {
-				n += dt_write_pdf("b\n", dt_writer);	// b はパスを閉じて (B は閉じずに) 塗りつぶす.
-			}
+			n += write_pdf_barbs(barbs, barbs[2], dt_writer);
 		}
 		return n;
 	}

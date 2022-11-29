@@ -555,23 +555,23 @@ namespace winrt::GraphPaper::implementation
 		size_t n = 0;
 		char buf[1024];
 		sprintf_s(buf, "%f w\n", m_stroke_width);
-		n += dt_write_pdf(buf, dt_writer);
+		n += dt_write(buf, dt_writer);
 		sprintf_s(buf, "%f %f %f RG\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);	// RG ÇÕê¸òg (rg ÇÕìhÇËÇ¬Ç‘Çµ) êF
-		n += dt_write_pdf(buf, dt_writer);
+		n += dt_write(buf, dt_writer);
 		if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
 			sprintf_s(buf, "[ %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1]);
-			n += dt_write_pdf(buf, dt_writer);
+			n += dt_write(buf, dt_writer);
 		}
 		else if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
 			sprintf_s(buf, "[ %f %f %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1], m_dash_patt.m_[2], m_dash_patt.m_[3]);
-			n += dt_write_pdf(buf, dt_writer);
+			n += dt_write(buf, dt_writer);
 		}
 		else if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
 			sprintf_s(buf, "[ %f %f %f %f %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1], m_dash_patt.m_[2], m_dash_patt.m_[3], m_dash_patt.m_[4], m_dash_patt.m_[5]);
-			n += dt_write_pdf(buf, dt_writer);
+			n += dt_write(buf, dt_writer);
 		}
 		else {
-			n += dt_write_pdf("[ ] 0 d\n", dt_writer);
+			n += dt_write("[ ] 0 d\n", dt_writer);
 		}
 		return n;
 	}

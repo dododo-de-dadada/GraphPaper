@@ -251,7 +251,7 @@ namespace winrt::GraphPaper::implementation
 
 	// データライターに文字列を書き込む
 	// 戻り値	書き込んだバイト数.
-	size_t dt_write_pdf(const char val[], DataWriter const& dt_writer)
+	size_t dt_write(const char val[], DataWriter const& dt_writer)
 	{
 		size_t i = 0;
 		for (; val[i] != '\0'; i++) {

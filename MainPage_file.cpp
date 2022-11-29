@@ -1208,8 +1208,25 @@ namespace winrt::GraphPaper::implementation
 	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<true, false>(StorageFile s_file);
 	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, true>(StorageFile s_file);
 
+	//詳細PDF入門 ー 実装して学ぼう！PDFファイルの構造とその書き方読み方
+	///F0 36 Tf
+	//40 TL
+	//(Hello, world!) Tj
+	// Tfというフォント演算子
+	// Tjという演算子に (Hello, world!) という引数を渡してテキストを表示
+	//50 650 m 150 750 l S
+	// m は移動 (move) 演算子
+	//lは直線 (line) 演算子
+	// Sはストローク (stroke) 演算子
+	// 190 650 100 100 re f
+	// reは矩形 (rectangle) 演算子
+	// fは塗りつぶし (fill) を行う演算子
+	// cはベジェ曲線を生成する演算子
+	// rgは塗りつぶしに対する色で、RGはストロークに対する色
+	// gは塗りつぶしの色を灰色の0(黒)〜1(白)で指定する演算子で、Gはそのストローク版
 	IAsyncOperation<winrt::hresult> MainPage::file_write_pdf_async(StorageFile pdf_file)
 	{
+		// 
 		HRESULT hr = S_OK;
 		try {
 			// D2D の論理 DPI (96dpi) を PDF の 72dpi に変換する.
@@ -1229,13 +1246,13 @@ namespace winrt::GraphPaper::implementation
 			};
 			// ヘッダー
 			size_t len;
-			len = dt_write_pdf(
+			len = dt_write(
 				"%PDF-1.6\n"
 				"%\xff\xff\xff\xff\n",
 				dt_writer);
 			// ページツリーディクショナリ
 			const size_t obj_1 = len;
-			len = dt_write_pdf(
+			len = dt_write(
 				"1 0 obj\n"
 				"<<\n"
 				"/Type /Pages\n"
@@ -1259,10 +1276,10 @@ namespace winrt::GraphPaper::implementation
 				">>\n"
 				"endobj\n",
 				w_pt, h_pt);
-			len = dt_write_pdf(buf, dt_writer);
+			len = dt_write(buf, dt_writer);
 			// リソース
 			const size_t obj_3 = obj_2 + len;
-			len = dt_write_pdf(
+			len = dt_write(
 				"3 0 obj\n"
 				"<<\n"
 				">>\n"
@@ -1280,18 +1297,18 @@ namespace winrt::GraphPaper::implementation
 				"q\n",
 				72.0f / dpi, 72.0f / dpi,
 				h_pt);
-			len = dt_write_pdf(buf, dt_writer);
+			len = dt_write(buf, dt_writer);
 			for (const auto s : m_main_sheet.m_shape_list) {
 				len += s->write_pdf(dt_writer);
 			}
-			len += dt_write_pdf(
+			len += dt_write(
 				"Q\n"
 				"endstream\n"
 				"endobj\n", dt_writer
 			);
 			// ドキュメントカタログ
 			const size_t obj_5 = obj_4 + len;
-			len = dt_write_pdf(
+			len = dt_write(
 				"5 0 obj\n"
 				"<<\n"
 				"/Type /Catalog"
@@ -1314,7 +1331,7 @@ namespace winrt::GraphPaper::implementation
 				obj_1, obj_2, obj_3, obj_4, obj_5
 			);
 			// トレイラーと EOF
-			dt_write_pdf(buf, dt_writer);
+			dt_write(buf, dt_writer);
 			sprintf_s(
 				buf,
 				"trailer\n"
@@ -1327,7 +1344,7 @@ namespace winrt::GraphPaper::implementation
 				"%%%%EOF\n",
 				xref
 			);
-			dt_write_pdf(buf, dt_writer);
+			dt_write(buf, dt_writer);
 			// ストリームの現在位置をストリームの大きさに格納する.
 			pdf_stream.Size(pdf_stream.Position());
 			// バッファ内のデータをストリームに出力する.
