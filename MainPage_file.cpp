@@ -1226,7 +1226,13 @@ namespace winrt::GraphPaper::implementation
 	// gは塗りつぶしの色を灰色の0(黒)〜1(白)で指定する演算子で、Gはそのストローク版
 	IAsyncOperation<winrt::hresult> MainPage::file_write_pdf_async(StorageFile pdf_file)
 	{
-		// 
+		std::vector<wchar_t*> used_fonts{};	// 使用している書体
+		for (const auto s : m_main_sheet.m_shape_list) {
+			wchar_t* val = nullptr;
+			if (s->is_deleted() && !s->get_font_family(val)) {
+				continue;
+			}
+		}
 		HRESULT hr = S_OK;
 		try {
 			// D2D の論理 DPI (96dpi) を PDF の 72dpi に変換する.
@@ -1282,10 +1288,35 @@ namespace winrt::GraphPaper::implementation
 			len = dt_write(
 				"3 0 obj\n"
 				"<<\n"
+				"/Font\n"
+				"<<\n",
+				dt_writer);
+			for (int i = 0; ShapeText::s_available_fonts[i] != nullptr; i++) {
+				const wchar_t* y = ShapeText::s_available_fonts[i];
+				if (std::find_if(
+					m_main_sheet.m_shape_list.begin(),
+					m_main_sheet.m_shape_list.end(),
+					[y](wchar_t* x) { return equal(x, y); }) != m_main_sheet.m_shape_list.end()) {
+					char sjis[256];
+					WideCharToMultiByte(CP_ACP, 0, y, wchar_len(y), sjis, 256, NULL, NULL);
+					sprintf_s(buf,
+						"<<\n"
+						"/F%d\n"
+						"<<\n"
+						"/Type /Font\n"
+						"/BaseFont /%s\n"
+						"/Subtype /TrueType\n"
+						"/Encoding /UniJIS-UTF16-H\n"
+						">>\n"
+						">>\n",
+						i, sjis);
+					len += dt_write(buf, dt_writer);
+				}
+			}
+			len += dt_write(
 				">>\n"
 				"endobj\n",
-				dt_writer
-			);
+				dt_writer);
 			// コンテントオブジェクト
 			const size_t obj_4 = obj_3 + len;
 			sprintf_s(buf,

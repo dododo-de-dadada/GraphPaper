@@ -762,7 +762,7 @@ namespace winrt::GraphPaper::implementation
 				index = 0;
 			}
 			// 開始位置より後ろの文字数を得る (ヌル文字は含まれない).
-			UINT32 length;
+			UINT32 length = 0;
 			winrt::check_hresult(localized_name->GetStringLength(index, &length));
 			// 文字数 + 1 の文字配列を確保し, 書体名の配列に格納する.
 			s_available_fonts[i] = new wchar_t[static_cast<size_t>(length) + 1];
