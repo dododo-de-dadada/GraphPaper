@@ -1404,6 +1404,8 @@ namespace winrt::GraphPaper::implementation
 	// 文字列
 	//------------------------------
 	struct ShapeText : ShapeRect {
+		static ID2D1Factory* s_d2d_factory;	//
+		static ID2D1DeviceContext2* s_d2d_context;	//
 		static wchar_t** s_available_fonts;		// 有効な書体名
 		static D2D1_COLOR_F s_text_selected_background;	// 文字範囲の背景色
 		static D2D1_COLOR_F s_text_selected_foreground;	// 文字範囲の文字色
@@ -1428,6 +1430,8 @@ namespace winrt::GraphPaper::implementation
 		UINT32 m_dw_test_cnt = 0;	// 位置の計量の要素数
 		DWRITE_HIT_TEST_METRICS* m_dw_test_metrics = nullptr;	// 位置の計量
 		winrt::com_ptr<IDWriteTextLayout> m_dw_text_layout{ nullptr };	// 文字列レイアウト
+
+		int pdf = 0;
 
 		// 図形を破棄する.
 		~ShapeText(void)
@@ -1530,6 +1534,8 @@ namespace winrt::GraphPaper::implementation
 		ShapeText(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
+		size_t write_pdf(DataWriter const& dt_writer) const;
+
 		// データライターに SVG として書き込む.
 		void write_svg(DataWriter const& dt_writer) const;
 	};

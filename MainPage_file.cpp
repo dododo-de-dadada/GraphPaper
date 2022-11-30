@@ -1287,16 +1287,41 @@ namespace winrt::GraphPaper::implementation
 			const size_t obj_3 = obj_2 + len;
 			len = dt_write(
 				"3 0 obj\n"
-				"<<\n"
-				"/Font\n"
-				"<<\n",
+				"<</Font<<\n",
 				dt_writer);
+			int fn = 0;
+			for (const auto s : m_main_sheet.m_shape_list) {
+				wchar_t* val = nullptr;
+				if (!s->is_deleted() && s->get_text_content(val)) {
+					wchar_t val2[256];
+					int i = 0;
+					for (int j = 0; val[j] != '\0'; j++) {
+						if (val[j] != L' ') {
+							val2[i++] = val[j];
+						}
+					}
+					val2[i] = '\0';
+					char bf[256];
+					const auto n = WideCharToMultiByte(CP_ACP, 0, val, i, bf, 256, NULL, NULL);
+					sprintf_s(buf,
+						"/F%d\n"
+						"<< /Type /Font\n"
+						"/Subtype /Type0\n"
+						"/BaseFont /%s-UniJIS-UTF16-H",
+						fn, bf);
+					static_cast<ShapeText*>(s)->pdf = fn++;
+				}
+			}
 			for (int i = 0; ShapeText::s_available_fonts[i] != nullptr; i++) {
 				const wchar_t* y = ShapeText::s_available_fonts[i];
-				if (std::find_if(
-					m_main_sheet.m_shape_list.begin(),
-					m_main_sheet.m_shape_list.end(),
-					[y](wchar_t* x) { return equal(x, y); }) != m_main_sheet.m_shape_list.end()) {
+				if (std::find_if(m_main_sheet.m_shape_list.begin(), m_main_sheet.m_shape_list.end(),
+					[y](Shape* s) {
+						wchar_t* x;
+						if (!s->is_deleted() && s->get_text_content(x)) {
+							return equal(x, y);
+						}
+						return false;
+					}) != m_main_sheet.m_shape_list.end()) {
 					char sjis[256];
 					WideCharToMultiByte(CP_ACP, 0, y, wchar_len(y), sjis, 256, NULL, NULL);
 					sprintf_s(buf,
@@ -1304,10 +1329,10 @@ namespace winrt::GraphPaper::implementation
 						"/F%d\n"
 						"<<\n"
 						"/Type /Font\n"
-						"/BaseFont /%s\n"
-						"/Subtype /TrueType\n"
+						"/Subtype /True0\n"
+						"/BaseFont /%s-UniJIS-UTF16-H\n"
 						"/Encoding /UniJIS-UTF16-H\n"
-						">>\n"
+						"Encoding\n"
 						">>\n",
 						i, sjis);
 					len += dt_write(buf, dt_writer);
@@ -1731,3 +1756,136 @@ private async void InitMessageDialogHandler(IUICommand command)
 // 詳細オプション > アプリのアクセス許可
 // ファイル システムをオンにする.
 
+/*
+* https://aznote.jakou.com/prog/pdf/index.html
+%PDF-1.7
+%ｵｵｵｵ
+1 0 obj
+<</Type/Catalog/Pages 2 0 R/Lang(ja-JP) /StructTreeRoot 15 0 R/MarkInfo<</Marked true>>/Metadata 29 0 R/ViewerPreferences 30 0 R>>
+endobj
+2 0 obj
+<</Type/Pages/Count 1/Kids[ 3 0 R] >>
+endobj
+3 0 obj
+<</Type/Page/Parent 2 0 R/Resources<</Font<</F1 5 0 R/F2 12 0 R>>/ExtGState<</GS10 10 0 R/GS11 11 0 R>>/ProcSet[/PDF/Text/ImageB/ImageC/ImageI] >>/MediaBox[ 0 0 595.32 841.92] /Contents 4 0 R/Group<</Type/Group/S/Transparency/CS/DeviceRGB>>/Tabs/S/StructParents 0>>
+endobj
+4 0 obj
+<</Filter/FlateDecode/Length 184>>
+stream
+...
+endstream
+endobj
+5 0 obj
+<</Type/Font/Subtype/Type0/BaseFont/BCDEEE+YuMincho-Regular/Encoding/Identity-H/DescendantFonts 6 0 R/ToUnicode 25 0 R>>
+endobj
+6 0 obj
+[ 7 0 R]
+endobj
+7 0 obj
+<</BaseFont/BCDEEE+YuMincho-Regular/Subtype/CIDFontType2/Type/Font/CIDToGIDMap/Identity/DW 1000/CIDSystemInfo 8 0 R/FontDescriptor 9 0 R/W 27 0 R>>
+endobj
+8 0 obj
+<</Ordering(Identity) /Registry(Adobe) /Supplement 0>>
+endobj
+9 0 obj
+<</Type/FontDescriptor/FontName/BCDEEE+YuMincho-Regular/Flags 32/ItalicAngle 0/Ascent 880/Descent -120/CapHeight 880/AvgWidth 969/MaxWidth 2243/FontWeight 400/XHeight 250/Leading 315/StemV 96/FontBBox[ -1000 -120 1243 880] /FontFile2 26 0 R>>
+endobj
+10 0 obj
+<</Type/ExtGState/BM/Normal/ca 1>>
+endobj
+11 0 obj
+<</Type/ExtGState/BM/Normal/CA 1>>
+endobj
+12 0 obj
+<</Type/Font/Subtype/TrueType/Name/F2/BaseFont/BCDFEE+YuMincho-Regular/Encoding/WinAnsiEncoding/FontDescriptor 13 0 R/FirstChar 32/LastChar 32/Widths 28 0 R>>
+endobj
+13 0 obj
+<</Type/FontDescriptor/FontName/BCDFEE+YuMincho-Regular/Flags 32/ItalicAngle 0/Ascent 880/Descent -120/CapHeight 880/AvgWidth 969/MaxWidth 2243/FontWeight 400/XHeight 250/Leading 315/StemV 96/FontBBox[ -1000 -120 1243 880] /FontFile2 26 0 R>>
+endobj
+14 0 obj
+<</Author(hi lite) /Creator( M i c r o s o f t ｮ   W o r d   2 0 2 1) /CreationDate(D:20221130175734+09'00') /ModDate(D:20221130175734+09'00') /Producer( M i c r o s o f t ｮ   W o r d   2 0 2 1) >>
+endobj
+23 0 obj
+<</Type/ObjStm/N 9/First 60/Filter/FlateDecode/Length 328>>
+stream
+...
+endstream
+endobj
+25 0 obj
+<</Filter/FlateDecode/Length 232>>
+stream
+...
+endstream
+endobj
+26 0 obj
+<</Filter/FlateDecode/Length 37142/Length1 186368>>
+stream
+endstream
+endobj
+27 0 obj
+[ 0[ 1000]  3[ 260] ]
+endobj
+28 0 obj
+[ 260]
+endobj
+29 0 obj
+<</Type/Metadata/Subtype/XML/Length 3057>>
+stream
+,,,
+endstream
+endobj
+30 0 obj
+<</DisplayDocTitle true>>
+endobj
+31 0 obj
+<</Type/XRef/Size 31/W[ 1 4 2] /Root 1 0 R/Info 14 0 R/ID[<47FFC3B70211E546AB2A9D2C4F35C08D><47FFC3B70211E546AB2A9D2C4F35C08D>] /Filter/FlateDecode/Length 117>>
+stream
+...
+endstream
+endobj
+xref
+0 32
+0000000015 65535 f
+0000000017 00000 n
+0000000166 00000 n
+0000000222 00000 n
+0000000506 00000 n
+0000000764 00000 n
+0000000903 00000 n
+0000000931 00000 n
+0000001097 00000 n
+0000001170 00000 n
+0000001431 00000 n
+0000001485 00000 n
+0000001539 00000 n
+0000001717 00000 n
+0000001979 00000 n
+0000000016 65535 f
+0000000017 65535 f
+0000000018 65535 f
+0000000019 65535 f
+0000000020 65535 f
+0000000021 65535 f
+0000000022 65535 f
+0000000023 65535 f
+0000000024 65535 f
+0000000000 65535 f
+0000002628 00000 n
+0000002935 00000 n
+0000040169 00000 n
+0000040211 00000 n
+0000040238 00000 n
+0000043378 00000 n
+0000043423 00000 n
+trailer
+<</Size 32/Root 1 0 R/Info 14 0 R/ID[<47FFC3B70211E546AB2A9D2C4F35C08D><47FFC3B70211E546AB2A9D2C4F35C08D>] >>
+startxref
+43741
+%%EOF
+xref
+0 0
+trailer
+<</Size 32/Root 1 0 R/Info 14 0 R/ID[<47FFC3B70211E546AB2A9D2C4F35C08D><47FFC3B70211E546AB2A9D2C4F35C08D>] /Prev 43741/XRefStm 43423>>
+startxref
+44538
+%%EOF*/

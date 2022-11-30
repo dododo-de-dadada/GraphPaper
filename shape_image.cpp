@@ -6,15 +6,10 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
 	using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
 	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
-	//using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-	//using winrt::Windows::Storage::Streams::IRandomAccessStream;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
 
 	// D2D1_RECT_F Ç©ÇÁ D2D1_RECT_U ÇçÏê¨Ç∑ÇÈ.

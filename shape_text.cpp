@@ -2,7 +2,8 @@
 // shape_text.cpp
 // 文字列図形
 //------------------------------
-#include <cwctype> 
+#include <cwctype>
+#include <wincodec.h>
 #include "pch.h"
 #include "shape.h"
 
@@ -12,7 +13,8 @@ namespace winrt::GraphPaper::implementation
 {
 	//using winrt::Windows::Storage::Streams::DataReader;
 	//using winrt::Windows::Storage::Streams::DataWriter;
-
+	ID2D1Factory* ShapeText::s_d2d_factory = nullptr;	//
+	ID2D1DeviceContext2* ShapeText::s_d2d_context = nullptr;	//
 	wchar_t** ShapeText::s_available_fonts = nullptr;	//有効な書体名
 	D2D1_COLOR_F ShapeText::s_text_selected_background{ ACCENT_COLOR };	// 文字範囲の背景色
 	D2D1_COLOR_F ShapeText::s_text_selected_foreground{ COLOR_TEXT_SELECTED };	// 文字範囲の文字色
@@ -438,10 +440,8 @@ namespace winrt::GraphPaper::implementation
 			// 余白分をくわえて, 文字列の左上位置を計算する.
 			D2D1_POINT_2F t_min;
 			pt_add(m_pos, m_vec[0], t_min);
-			//pt_min(m_pos, t_min, t_min);
 			t_min.x = m_pos.x < t_min.x ? m_pos.x : t_min.x;
 			t_min.y = m_pos.y < t_min.y ? m_pos.y : t_min.y;
-
 			const FLOAT pw = m_text_padding.width;
 			const FLOAT ph = m_text_padding.height;
 			const double hm = min(pw, fabs(m_vec[0].x) * 0.5);
@@ -733,6 +733,7 @@ namespace winrt::GraphPaper::implementation
 	// それらを配列に格納する.
 	void ShapeText::set_available_fonts(const D2D_UI& d2d)
 	{
+		s_d2d_factory = d2d.m_d2d_factory.get();
 		// 既定の地域・言語名を得る.
 		wchar_t lang[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(lang, LOCALE_NAME_MAX_LENGTH);
@@ -959,6 +960,63 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
 		dt_writer.WriteSingle(m_text_line_sp);
 		dt_write(m_text_padding, dt_writer);
+	}
+
+	size_t ShapeText::write_pdf(DataWriter const& dt_writer) const
+	{
+		winrt::com_ptr<IWICImagingFactory2> wic_factory;
+		winrt::check_hresult(
+			CoCreateInstance(
+				CLSID_WICImagingFactory,
+				nullptr,
+				CLSCTX_INPROC_SERVER,
+				IID_PPV_ARGS(&wic_factory)
+			)
+		);
+
+		UINT w = 0;
+		UINT h = 0;
+		for (int i = 0; i < m_dw_test_cnt; i++) {
+			w = max(w, m_dw_test_metrics[i].width);
+			h += m_dw_test_metrics[i].height;
+		}
+		
+		std::vector<uint8_t> vec(4 * w * h);
+		winrt::com_ptr<IWICBitmap> wic_bitmap;
+		wic_factory->CreateBitmapFromMemory(w, h, GUID_WICPixelFormat32bppBGRA, 4 * w, 4 * w * h, vec.data(), wic_bitmap.put());
+		D2D1_RENDER_TARGET_PROPERTIES prop{
+			D2D1_RENDER_TARGET_TYPE::D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+			D2D1_PIXEL_FORMAT{
+				DXGI_FORMAT_B8G8R8A8_UNORM,
+				D2D1_ALPHA_MODE_STRAIGHT
+				},
+			96.0f,
+			96.0f,
+			D2D1_RENDER_TARGET_USAGE_FORCE_BITMAP_REMOTING,
+			D2D1_FEATURE_LEVEL_DEFAULT
+		};
+		winrt::com_ptr<ID2D1RenderTarget> target;
+		s_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
+		winrt::com_ptr<ID2D1SolidColorBrush> brush;
+		target->CreateSolidColorBrush(m_fill_color, brush.put());
+		target->BeginDraw();
+		target->DrawTextLayout(D2D1_POINT_2F{ m_text_padding.width, m_text_padding.height },
+			m_dw_text_layout.get(), brush.get());
+		target->EndDraw();
+		target->Flush();
+
+		char buf[1024];
+		sprintf_s(
+			buf,
+			"<<\n"
+			"/Length /%zu\n"
+			">>\n"
+			"",
+			4 * w * h
+		);
+		dt_write(buf, dt_writer);
+		dt_writer.WriteBytes(vec);
+		vec.clear();
 	}
 
 	// データライターに SVG タグとして書き込む.
