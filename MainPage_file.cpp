@@ -1228,9 +1228,15 @@ namespace winrt::GraphPaper::implementation
 	{
 		std::vector<wchar_t*> used_fonts{};	// 使用している書体
 		for (const auto s : m_main_sheet.m_shape_list) {
-			wchar_t* val = nullptr;
-			if (s->is_deleted() && !s->get_font_family(val)) {
-				continue;
+			wchar_t* x = nullptr;
+			if (!s->is_deleted() && s->get_font_family(x)) {
+				int i = 0;
+				for (; i < used_fonts.size() && !equal(x, used_fonts[i]); i++) {
+				}
+				if (i == used_fonts.size()) {
+					used_fonts.push_back(x);
+				}
+				static_cast<ShapeText*>(s)->pdf = i;
 			}
 		}
 		HRESULT hr = S_OK;
@@ -1251,102 +1257,89 @@ namespace winrt::GraphPaper::implementation
 				DataWriter(pdf_stream.GetOutputStreamAt(0))
 			};
 			// ヘッダー
-			size_t len;
-			len = dt_write(
-				"%PDF-1.6\n"
+			size_t len = dt_write(
+				"%PDF-1.7\n"
 				"%\xff\xff\xff\xff\n",
 				dt_writer);
-			// ページツリーディクショナリ
+			// カタログ辞書 = Root.
+			// ページツリーを参照する.
 			const size_t obj_1 = len;
 			len = dt_write(
 				"1 0 obj\n"
 				"<<\n"
+				"/Type /Catalog\n"
+				"/Pages 2 0 R\n"
+				">>\n"
+				"endobj\n", dt_writer
+			);
+			// ページツリーディクショナリ
+			const size_t obj_2 = obj_1 + len;
+			len = dt_write(
+				"2 0 obj\n"
+				"<<\n"
 				"/Type /Pages\n"
 				"/Count 1\n"
-				"/Kids[2 0 R]\n"
+				"/Kids[3 0 R]\n"
 				">>\n"
-				"endobj\n", 
+				"endobj\n",
 				dt_writer
 			);
 			// ページオブジェクト
-			const size_t obj_2 = obj_1 + len;
+			const size_t obj_3 = obj_2 + len;
 			char buf[1024];
 			sprintf_s(buf,
-				"2 0 obj\n"
+				"3 0 obj\n"
 				"<<\n"
 				"/Type /Page\n"
-				"/MediaBox[0 0 %f %f]\n"
-				"/Resources 3 0 R\n"
+				"/MediaBox [0 0 %f %f]\n"
+				"/Resources 4 0 R\n"
 				"/Parent 1 0 R\n"
-				"/Contents[4 0 R]\n"
+				"/Contents [5 0 R]\n"
 				">>\n"
 				"endobj\n",
 				w_pt, h_pt);
 			len = dt_write(buf, dt_writer);
 			// リソース
-			const size_t obj_3 = obj_2 + len;
+			const size_t obj_4 = obj_3 + len;
 			len = dt_write(
-				"3 0 obj\n"
-				"<</Font<<\n"
+				"4 0 obj\n"
 				"<<\n",
 				dt_writer);
-			int fn = 0;
-			for (const auto s : m_main_sheet.m_shape_list) {
-				wchar_t* val = nullptr;
-				if (!s->is_deleted() && s->get_text_content(val)) {
-					wchar_t val2[256];
-					int i = 0;
-					for (int j = 0; val[j] != '\0'; j++) {
-						if (val[j] != L' ') {
-							val2[i++] = val[j];
-						}
+			len += dt_write(
+				"/Font <<\n", dt_writer);
+			for (int k = 0; k < used_fonts.size(); k++) {
+				wchar_t* u = used_fonts[k];
+				wchar_t v[256];
+				int j = 0;
+				for (int i = 0; u[i] != '\0' || (v[j] = '\0') != '\0'; i++) {
+					if (u[i] != L' ') {
+						v[j++] = v[i];
 					}
-					val2[i] = '\0';
-					char bf[256];
-					const auto n = WideCharToMultiByte(CP_ACP, 0, val, i, bf, 256, NULL, NULL);
-					sprintf_s(buf,
-						"/F%d\n"
-						"<< /Type /Font\n"
-						"/Subtype /Type0\n"
-						"/BaseFont /%s-UniJIS-UTF16-H\n",
-						"/Encoding /UniJIS-UTF16-H\n"
-						fn, bf);
-					static_cast<ShapeText*>(s)->pdf = fn++;
 				}
+				char w[256];
+				WideCharToMultiByte(CP_ACP, 0, v, j, w, 256, NULL, NULL);
+				sprintf_s(buf,
+					"/F%d <<\n"
+					"/Type /Font\n"
+					"/BaseFont /%s\n"
+					"/Subtype /Type0\n"
+					"/Encoding /90ms-RKSJ-H\n"
+					"/DescendantFonts[%d 0 R]\n"
+					">>\n",
+					k, w, 6 + k
+				);
+				len += dt_write(buf, dt_writer);
 			}
-			for (int i = 0; ShapeText::s_available_fonts[i] != nullptr; i++) {
-				const wchar_t* y = ShapeText::s_available_fonts[i];
-				if (std::find_if(m_main_sheet.m_shape_list.begin(), m_main_sheet.m_shape_list.end(),
-					[y](Shape* s) {
-						wchar_t* x;
-						if (!s->is_deleted() && s->get_text_content(x)) {
-							return equal(x, y);
-						}
-						return false;
-					}) != m_main_sheet.m_shape_list.end()) {
-					char sjis[256];
-					WideCharToMultiByte(CP_ACP, 0, y, wchar_len(y), sjis, 256, NULL, NULL);
-					sprintf_s(buf,
-						"/F%d\n"
-						"<<\n"
-						"/Type /Font\n"
-						"/Subtype /True0\n"
-						"/BaseFont /%s-UniJIS-UTF16-H\n"
-						"/Encoding /UniJIS-UTF16-H\n"
-						"Encoding\n"
-						">>\n",
-						i, sjis);
-					len += dt_write(buf, dt_writer);
-				}
-			}
+			len += dt_write(">>\n", dt_writer);
+			len += dt_write(">>\n", dt_writer);
 			len += dt_write(
 				">>\n"
 				"endobj\n",
 				dt_writer);
 			// コンテントオブジェクト
-			const size_t obj_4 = obj_3 + len;
+			const size_t obj_5 = obj_4 + len;
 			sprintf_s(buf,
-				"4 0 obj\n"
+				"5 0 obj\n"
 				"<<\n"
 				">>\n"
 				"stream\n"
@@ -1361,17 +1354,6 @@ namespace winrt::GraphPaper::implementation
 			len += dt_write(
 				"Q\n"
 				"endstream\n"
-				"endobj\n", dt_writer
-			);
-			// カタログ辞書 = Root.
-			// ページツリーを参照する.
-			const size_t obj_5 = obj_4 + len;
-			len = dt_write(
-				"5 0 obj\n"
-				"<<\n"
-				"/Type /Catalog"
-				"/Pages 1 0 R\n"
-				">>\n"
 				"endobj\n", dt_writer
 			);
 			// クロスリファレンス
@@ -1395,7 +1377,7 @@ namespace winrt::GraphPaper::implementation
 				"trailer\n"
 				"<<\n"
 				"/Size 6\n"
-				"/Root 5 0 R\n"
+				"/Root 1 0 R\n"
 				">>\n"
 				"startxref\n"
 				"%zu\n"

@@ -964,6 +964,7 @@ namespace winrt::GraphPaper::implementation
 
 	size_t ShapeText::write_pdf(DataWriter const& dt_writer) const
 	{
+		/*
 		winrt::com_ptr<IWICImagingFactory2> wic_factory;
 		winrt::check_hresult(
 			CoCreateInstance(
@@ -1017,6 +1018,8 @@ namespace winrt::GraphPaper::implementation
 		dt_write(buf, dt_writer);
 		dt_writer.WriteBytes(vec);
 		vec.clear();
+		*/
+		return 0;
 	}
 
 	// データライターに SVG タグとして書き込む.
