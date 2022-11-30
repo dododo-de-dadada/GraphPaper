@@ -1287,7 +1287,8 @@ namespace winrt::GraphPaper::implementation
 			const size_t obj_3 = obj_2 + len;
 			len = dt_write(
 				"3 0 obj\n"
-				"<</Font<<\n",
+				"<</Font<<\n"
+				"<<\n",
 				dt_writer);
 			int fn = 0;
 			for (const auto s : m_main_sheet.m_shape_list) {
@@ -1307,7 +1308,8 @@ namespace winrt::GraphPaper::implementation
 						"/F%d\n"
 						"<< /Type /Font\n"
 						"/Subtype /Type0\n"
-						"/BaseFont /%s-UniJIS-UTF16-H",
+						"/BaseFont /%s-UniJIS-UTF16-H\n",
+						"/Encoding /UniJIS-UTF16-H\n"
 						fn, bf);
 					static_cast<ShapeText*>(s)->pdf = fn++;
 				}
@@ -1325,7 +1327,6 @@ namespace winrt::GraphPaper::implementation
 					char sjis[256];
 					WideCharToMultiByte(CP_ACP, 0, y, wchar_len(y), sjis, 256, NULL, NULL);
 					sprintf_s(buf,
-						"<<\n"
 						"/F%d\n"
 						"<<\n"
 						"/Type /Font\n"
@@ -1362,7 +1363,8 @@ namespace winrt::GraphPaper::implementation
 				"endstream\n"
 				"endobj\n", dt_writer
 			);
-			// ドキュメントカタログ
+			// カタログ辞書 = Root.
+			// ページツリーを参照する.
 			const size_t obj_5 = obj_4 + len;
 			len = dt_write(
 				"5 0 obj\n"
@@ -1889,3 +1891,98 @@ trailer
 startxref
 44538
 %%EOF*/
+/*
+* https://itchyny.hatenablog.com/entry/2015/09/16/100000
+%PDF-1.7
+
+1 0 obj
+<<
+  /Type /Catalog
+  /Pages 2 0 R
+>>
+endobj
+
+2 0 obj
+<<
+  /Type /Pages
+  /Kids [4 0 R]
+  /Count 1
+>>
+endobj
+
+3 0 obj
+<<
+  /Font <<
+	/F0 <<
+	  /Type /Font
+	  /BaseFont /KozMinPro6N-Regular
+	  /Subtype /Type0
+	  /Encoding /90ms-RKSJ-H
+	  /DescendantFonts [6 0 R]
+	>>
+  >>
+>>
+endobj
+
+4 0 obj
+<<
+  /Type /Page
+  /Parent 2 0 R
+  /Resources 3 0 R
+  /MediaBox [0 0 595 842]
+  /Contents 5 0 R
+>>
+endobj
+
+5 0 obj
+<< >>
+stream
+1. 0. 0. 1. 50. 770. cm
+BT
+/F0 36 Tf
+40 TL
+<6162632082a082a282a4> Tj T*
+<82a082a282a482a682a82082a982ab82ad82af82b1> Tj T*
+<8e71894e93d0894b924396a48cdf96a2905c93d19cfa88e5> Tj T*
+ET
+endstream
+endobj
+
+6 0 obj
+<<
+  /Type /Font
+  /Subtype /CIDFontType0
+  /BaseFont /KozMinPr6N-Regular
+  /CIDSystemInfo <<
+	/Registry (Adobe)
+	/Ordering (Japan1)
+	/Supplement 6
+  >>
+  /FontDescriptor 7 0 R
+>>
+endobj
+
+7 0 obj
+<<
+  /Type /FontDescriptor
+  /FontName /KozMinPr6N-Regular
+  /Flags 4
+  /FontBBox [-437 -340 1147 1317]
+  /ItalicAngle 0
+  /Ascent 1317
+  /Descent -349
+  /CapHeight 742
+  /StemV 80
+>>
+endobj
+
+xref
+trailer
+<<
+  /Size 8
+  /Root 1 0 R
+>>
+startxref
+0
+%%EOF
+*/
