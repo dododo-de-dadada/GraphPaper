@@ -884,7 +884,7 @@ namespace winrt::GraphPaper::implementation
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
-	size_t ShapeBezi::write_pdf(DataWriter const& dt_writer) const
+	size_t ShapeBezi::write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const
 	{
 		size_t n = dt_write("% Bezi\n", dt_writer);
 		n += write_pdf_stroke(dt_writer);
@@ -895,19 +895,19 @@ namespace winrt::GraphPaper::implementation
 		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
 
 		char buf[1024];
-		sprintf_s(buf, "%f %f m\n", m_pos.x, m_pos.y);
+		sprintf_s(buf, "%f %f m\n", m_pos.x, -m_pos.y + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f ", b_seg.point1.x, b_seg.point1.y);
+		sprintf_s(buf, "%f %f ", b_seg.point1.x, -b_seg.point1.y + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f ", b_seg.point2.x, b_seg.point2.y);
+		sprintf_s(buf, "%f %f ", b_seg.point2.x, -b_seg.point2.y + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f c\n", b_seg.point3.x, b_seg.point3.y);
+		sprintf_s(buf, "%f %f c\n", b_seg.point3.x, -b_seg.point3.y + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
 		n += dt_write("S\n", dt_writer);
 		if (m_arrow_style == ARROW_STYLE::OPENED || m_arrow_style == ARROW_STYLE::FILLED) {
 			D2D1_POINT_2F barbs[3];
 			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			n += write_pdf_barbs(barbs, barbs[2], dt_writer);
+			n += write_pdf_barbs(sheet, barbs, barbs[2], dt_writer);
 		}
 		return n;
 	}

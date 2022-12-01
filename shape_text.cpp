@@ -11,10 +11,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-	ID2D1Factory* ShapeText::s_d2d_factory = nullptr;	//
-	ID2D1DeviceContext2* ShapeText::s_d2d_context = nullptr;	//
 	wchar_t** ShapeText::s_available_fonts = nullptr;	//有効な書体名
 	D2D1_COLOR_F ShapeText::s_text_selected_background{ ACCENT_COLOR };	// 文字範囲の背景色
 	D2D1_COLOR_F ShapeText::s_text_selected_foreground{ COLOR_TEXT_SELECTED };	// 文字範囲の文字色
@@ -734,7 +730,7 @@ namespace winrt::GraphPaper::implementation
 	// "ＭＳ ゴシック\0MS Gothic\0"
 	void ShapeText::set_available_fonts(const D2D_UI& d2d)
 	{
-		s_d2d_factory = d2d.m_d2d_factory.get();
+		//s_d2d_factory = d2d.m_d2d_factory.get();
 		// 既定の地域・言語名を得る.
 		wchar_t lang[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(lang, LOCALE_NAME_MAX_LENGTH);
@@ -978,7 +974,7 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_text_padding, dt_writer);
 	}
 
-	size_t ShapeText::write_pdf(DataWriter const& dt_writer) const
+	size_t ShapeText::write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const
 	{
 		/*
 		winrt::com_ptr<IWICImagingFactory2> wic_factory;
@@ -1046,28 +1042,35 @@ namespace winrt::GraphPaper::implementation
 			"%f %f %f rg\n"
 			"%f %f %f RG\n"
 			"BT\n"
-			"1 0 0 -1 0 0 Tm\n"
 			"/F%d %f Tf\n"
 			"0 Tr\n"
 			"%f %f Td\n",
 			m_font_color.r, m_font_color.g, m_font_color.b,
 			m_font_color.r, m_font_color.g, m_font_color.b,
 			pdf, m_font_size,
-			nw_pos.x, nw_pos.y
+			nw_pos.x, -nw_pos.y + sheet.m_sheet_size.height
 		);
 		size_t len = dt_write(buf, dt_writer);
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
+
 			const DWRITE_HIT_TEST_METRICS& tm = m_dw_test_metrics[i];
 			const wchar_t* t = m_text + tm.textPosition;
 			const uint32_t t_len = tm.length;
-			// 文字列を表示する垂直なずらし位置を求める.
-			const double dy = static_cast<double>(m_dw_line_metrics[i].baseline);
-			// 文字列を書き込む.
-			sprintf_s(buf,
-				"<6162632082a082a282a4> Tj \n"
-				"%f %f Td\n",
-				tm.left, tm.top);
+
+			sprintf_s(buf, "%f %f Td\n", tm.left, -tm.top);
 			len += dt_write(buf, dt_writer);
+
+			// 文字列を表示する垂直なずらし位置を求める.
+			//const double dy = static_cast<double>(m_dw_line_metrics[i].baseline);
+
+			// 文字列を書き込む.
+			char utf16[5];
+			len += dt_write("<", dt_writer);
+			for (int j = 0; j < t_len; j++) {
+				sprintf_s(utf16, "%04x", t[j]);
+				len += dt_write(utf16, dt_writer);
+			}
+			len += dt_write("> Tj\n", dt_writer);
 		}
 		len += dt_write("ET\n", dt_writer);
 		return len;

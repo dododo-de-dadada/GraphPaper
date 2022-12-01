@@ -400,27 +400,27 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに PDF ストリームの一部として書き込む.
-	size_t ShapeLine::write_pdf(DataWriter const& dt_writer) const
+	size_t ShapeLine::write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const
 	{
 		size_t n = dt_write("% Line\n", dt_writer);
 		n += write_pdf_stroke(dt_writer);
 
 		char buf[1024];
-		sprintf_s(buf, "%f %f m\n", m_pos.x, m_pos.y);
+		sprintf_s(buf, "%f %f m\n", m_pos.x, -m_pos.y + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f l\n", m_pos.x + m_vec[0].x, m_pos.y + m_vec[0].y);
+		sprintf_s(buf, "%f %f l\n", m_pos.x + m_vec[0].x, -(m_pos.y + m_vec[0].y) + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
 		n += dt_write("S\n", dt_writer);
 		if (m_arrow_style == ARROW_STYLE::OPENED || m_arrow_style == ARROW_STYLE::FILLED) {
 			D2D1_POINT_2F barbs[3];
 			if (line_get_arrow_pos(m_pos, m_vec[0], m_arrow_size, barbs, barbs[2])) {
-				n += write_pdf_barbs(barbs, barbs[2], dt_writer);
+				n += write_pdf_barbs(sheet, barbs, barbs[2], dt_writer);
 			}
 		}
 		return n;
 	}
 
-	size_t ShapeLine::write_pdf_barbs(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const
+	size_t ShapeLine::write_pdf_barbs(const ShapeSheet& sheet, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const
 	{
 		char buf[1024];
 		size_t n = 0;
@@ -435,11 +435,11 @@ namespace winrt::GraphPaper::implementation
 			sprintf_s(buf, "%f %f %f rg\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);
 			n += dt_write(buf, dt_writer);
 		}
-		sprintf_s(buf, "%f %f m\n", barbs[0].x, barbs[0].y);
+		sprintf_s(buf, "%f %f m\n", barbs[0].x, -barbs[0].y + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f l\n", tip_pos.x, tip_pos.y);
+		sprintf_s(buf, "%f %f l\n", tip_pos.x, -tip_pos.y + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f l\n", barbs[1].x, barbs[1].y);
+		sprintf_s(buf, "%f %f l\n", barbs[1].x, -barbs[1].y + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
 		if (m_arrow_style == ARROW_STYLE::OPENED) {
 			n += dt_write("S\n", dt_writer);

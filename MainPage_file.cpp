@@ -1240,10 +1240,10 @@ namespace winrt::GraphPaper::implementation
 		HRESULT hr = S_OK;
 		try {
 			// 用紙の幅と高さを
-			// D2D の論理 DPI (96dpi) から PDF の 72dpi に変換する.
-			const float dpi = m_main_sheet.m_d2d.m_logical_dpi;	// DPI
-			const float w_pt = m_main_sheet.m_sheet_size.width * 72.0f / dpi;	// 変換された幅
-			const float h_pt = m_main_sheet.m_sheet_size.height * 72.0f / dpi;	// 変換された高さ
+			// D2D の固定 DPI (96dpi) から PDF の 72dpi に変換する.
+			// モニターに応じて変化する論理 DPI は用いない. 
+			const float w_pt = m_main_sheet.m_sheet_size.width * 72.0f / 96.0f;	// 変換された幅
+			const float h_pt = m_main_sheet.m_sheet_size.height * 72.0f / 96.0f;	// 変換された高さ
 			// ファイル更新の遅延を設定する.
 			CachedFileManager::DeferUpdates(pdf_file);
 			// ストレージファイルを開いてランダムアクセスストリームを得る.
@@ -1346,7 +1346,8 @@ namespace winrt::GraphPaper::implementation
 					"/Type /Font\n"
 					"/BaseFont /%s\n"
 					"/Subtype /Type0\n"
-					"/Encoding /90ms-RKSJ-H\n"
+					//"/Encoding /90ms-RKSJ-H\n"
+					"/Encoding /UniJIS-UTF16-H\n"
 					"/DescendantFonts[%d 0 R]\n"
 					">>\n",
 					k, w, 6 + 2 * k
@@ -1362,19 +1363,20 @@ namespace winrt::GraphPaper::implementation
 			obj_len.push_back(obj_len.back() + len);
 
 			// コンテントストリーム
+			// 座標変換に 72dpi / 96dpi (=0.75) を指定する.   
 			sprintf_s(buf,
 				"%% Content Stream\n"
 				"5 0 obj\n"
 				"<<\n"
 				">>\n"
 				"stream\n"
-				"%f 0 0 -%f 0 %f cm\n"
+				"%f 0 0 %f 0 0 cm\n"
 				"q\n",
-				72.0f / dpi, 72.0f / dpi,
-				h_pt);
+				72.0f / 96.0f, 72.0f / 96.0f
+			);
 			len = dt_write(buf, dt_writer);
 			for (const auto s : m_main_sheet.m_shape_list) {
-				len += s->write_pdf(dt_writer);
+				len += s->write_pdf(m_main_sheet, dt_writer);
 			}
 			len += dt_write(
 				"Q\n"
@@ -1475,9 +1477,9 @@ namespace winrt::GraphPaper::implementation
 					FONT_STRETCH_NAME[font_stretch < 10 ? font_stretch : 0],
 					font_weight <= 900 ? font_weight : 900,
 					1000u * metrics.glyphBoxLeft / per_em,
-					1000u * metrics.glyphBoxTop / per_em,
-					1000u * metrics.glyphBoxRight / per_em,
 					1000u * metrics.glyphBoxBottom / per_em,
+					1000u * metrics.glyphBoxRight / per_em,
+					1000u * metrics.glyphBoxTop / per_em,
 					1000u * metrics.ascent / per_em,
 					1000u * metrics.descent / per_em,
 					1000u * metrics.capHeight / per_em//,

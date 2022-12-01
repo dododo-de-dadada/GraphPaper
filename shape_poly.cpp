@@ -970,7 +970,7 @@ namespace winrt::GraphPaper::implementation
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
-	size_t ShapePoly::write_pdf(DataWriter const& dt_writer) const
+	size_t ShapePoly::write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const
 	{
 		size_t n = dt_write("% Poly\n", dt_writer);
 		n += write_pdf_stroke(dt_writer);
@@ -978,11 +978,11 @@ namespace winrt::GraphPaper::implementation
 		const size_t v_cnt = m_vec.size() + 1;
 		D2D1_POINT_2F v_pos[MAX_N_GON];
 		v_pos[0] = m_pos;
-		sprintf_s(buf, "%f %f m\n", v_pos[0].x, v_pos[0].y);
+		sprintf_s(buf, "%f %f m\n", v_pos[0].x, -v_pos[0].y + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
 		for (size_t i = 1; i < v_cnt; i++) {
 			pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
-			sprintf_s(buf, "%f %f l\n", v_pos[i].x, v_pos[i].y);
+			sprintf_s(buf, "%f %f l\n", v_pos[i].x, -v_pos[i].y + sheet.m_sheet_size.height);
 			n += dt_write(buf, dt_writer);
 		}
 		if (m_end_closed) {
@@ -1005,7 +1005,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F h_tip;
 			D2D1_POINT_2F h_barbs[2];
 			if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
-				n += write_pdf_barbs(h_barbs, h_tip, dt_writer);
+				n += write_pdf_barbs(sheet, h_barbs, h_tip, dt_writer);
 			}
 		}
 		return n;
