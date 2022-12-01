@@ -559,6 +559,13 @@ namespace winrt::GraphPaper::implementation
 		sprintf_s(buf, "%f %f %f RG\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);	// RG は線枠 (rg は塗りつぶし) 色
 		n += dt_write(buf, dt_writer);
 		if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
+			// 最後の数値は配置 (破線パターン) を適用するオフセット.
+			// [] 0		| 実線
+			// [3] 0	| ***___ ***___
+			// [2] 1	| *__**__**
+			// [2 1] 0	| **_**_ **_
+			// [3 5] 6	| __ ***_____***_____
+			// [2 3] 11	| *___ **___ **___
 			sprintf_s(buf, "[ %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1]);
 			n += dt_write(buf, dt_writer);
 		}

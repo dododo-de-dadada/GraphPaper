@@ -176,7 +176,7 @@ namespace winrt::GraphPaper::implementation
 		//FindName(L"cd_prop_dialog");
 		m_prop_sheet.set_attr_to(&m_main_sheet);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::s_available_fonts[i]; i++) {
-			auto item = box_value(winrt::hstring(name));
+			auto item = box_value(winrt::hstring(name + wcslen(name) + 1));
 			lv_prop_list().Items().Append(item);
 		}
 		for (uint32_t i = 0; i < lv_prop_list().Items().Size(); i++) {
@@ -185,7 +185,7 @@ namespace winrt::GraphPaper::implementation
 			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
 			wchar_t* f_family;
 			m_main_sheet.get_font_family(f_family);
-			if (wcscmp(name, f_family) == 0) {
+			if (wcscmp(name, f_family + wcslen(f_family) + 1) == 0) {
 				// 書体名が同じ場合,
 				// その書体をリストビューの選択済み項目に格納する.
 				lv_prop_list().SelectedItem(item[0]);

@@ -53,7 +53,6 @@ namespace winrt::GraphPaper::implementation
 	static void tx_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met)
 	{
 		// 文字列レイアウト ---> 書体リスト ---> 書体ファミリー ---> 書体を得る.
-		// 文字列レイアウトにひとつの書体ファミリーが, 書体ファミリーにひとつの書体が設定されていることが前提.
 		winrt::com_ptr<IDWriteFontCollection> fonts;
 		text_lay->GetFontCollection(fonts.put());
 		winrt::com_ptr<IDWriteFontFamily> fam;
@@ -727,10 +726,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 有効な書体名の配列を設定する.
-	//
 	// DWriteFactory のシステムフォントコレクションから,
-	// 既定の地域・言語名に対応した書体を得て,
+	// 既定の地域・言語名に対応した書体名を得て,
 	// それらを配列に格納する.
+	// 'en-us' と GetUserDefaultLocaleName で得られたロケールと, 2 つの書体名を得る.
+	// 次のように格納される.
+	// "ＭＳ ゴシック\0MS Gothic\0"
 	void ShapeText::set_available_fonts(const D2D_UI& d2d)
 	{
 		s_d2d_factory = d2d.m_d2d_factory.get();
@@ -740,7 +741,6 @@ namespace winrt::GraphPaper::implementation
 		// システムフォントコレクションを DWriteFactory から得る.
 		winrt::com_ptr<IDWriteFontCollection> collection;
 		winrt::check_hresult(d2d.m_dwrite_factory->GetSystemFontCollection(collection.put()));
-		//winrt::check_hresult(Shape::s_dwrite_factory->GetSystemFontCollection(collection.put()));
 		// フォントコレクションの要素数を得る.
 		const uint32_t f_cnt = collection->GetFontFamilyCount();
 		// 得られた要素数 + 1 の配列を確保する.
@@ -753,21 +753,37 @@ namespace winrt::GraphPaper::implementation
 			// 書体からローカライズされた書体名を得る.
 			winrt::com_ptr<IDWriteLocalizedStrings> localized_name;
 			winrt::check_hresult(font_family->GetFamilyNames(localized_name.put()));
-			// ローカライズされた書体名から, 地域名をのぞいた書体名の開始位置を得る.
-			UINT32 index = 0;
+			// ローカライズされた書体名の位置を得る.
+			UINT32 index_en_us = 0;
+			UINT32 index_local = 0;
 			BOOL exists = false;
-			winrt::check_hresult(localized_name->FindLocaleName(lang, &index, &exists));
+			winrt::check_hresult(localized_name->FindLocaleName(L"en-us", &index_en_us, &exists));
+			if (exists != TRUE) {
+				// en-us がない場合,
+				// 0 を位置に格納する.
+				index_en_us = 0;
+			}
+			winrt::check_hresult(localized_name->FindLocaleName(lang, &index_local, &exists));
 			if (exists != TRUE) {
 				// 地域名がない場合,
-				// 0 を開始位置に格納する.
-				index = 0;
+				// en_us を開始位置に格納する.
+				index_local = index_en_us;
 			}
+			/*
+			winrt::com_ptr<IDWriteFont> font;
+			font_family->GetFont(0, font.put());
+			DWRITE_FONT_METRICS1 metrics;
+			font.as<IDWriteFont1>()->GetMetrics(&metrics);
+			*/
 			// 開始位置より後ろの文字数を得る (ヌル文字は含まれない).
-			UINT32 length = 0;
-			winrt::check_hresult(localized_name->GetStringLength(index, &length));
+			UINT32 length_en_us = 0;
+			UINT32 length_local = 0;
+			winrt::check_hresult(localized_name->GetStringLength(index_en_us, &length_en_us));
+			winrt::check_hresult(localized_name->GetStringLength(index_local, &length_local));
 			// 文字数 + 1 の文字配列を確保し, 書体名の配列に格納する.
-			s_available_fonts[i] = new wchar_t[static_cast<size_t>(length) + 1];
-			winrt::check_hresult(localized_name->GetString(index, s_available_fonts[i], length + 1));
+			s_available_fonts[i] = new wchar_t[static_cast<size_t>(length_en_us) + 1 + static_cast<size_t>(length_local) + 1];
+			winrt::check_hresult(localized_name->GetString(index_en_us, s_available_fonts[i], length_en_us + 1));
+			winrt::check_hresult(localized_name->GetString(index_local, s_available_fonts[i] + length_en_us + 1, length_local + 1));
 			// ローカライズされた書体名を破棄する.
 			localized_name = nullptr;
 			// 書体をを破棄する.
@@ -1005,7 +1021,6 @@ namespace winrt::GraphPaper::implementation
 			m_dw_text_layout.get(), brush.get());
 		target->EndDraw();
 		target->Flush();
-
 		char buf[1024];
 		sprintf_s(
 			buf,
@@ -1019,7 +1034,43 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBytes(vec);
 		vec.clear();
 		*/
-		return 0;
+		char buf[1024];
+		// BT テキストオブジェクトの開始
+		// フォント名 サイズ Tf
+		// x座標 y座標 Td
+		// TLという行間を設定する演算子
+		D2D1_POINT_2F nw_pos;	// 左上の位置
+		pt_add(m_pos, m_text_padding.width, m_text_padding.height, nw_pos);
+		sprintf_s(buf,
+			"%% Text\n"
+			"%f %f %f rg\n"
+			"%f %f %f RG\n"
+			"BT\n"
+			"1 0 0 -1 0 0 Tm\n"
+			"/F%d %f Tf\n"
+			"0 Tr\n"
+			"%f %f Td\n",
+			m_font_color.r, m_font_color.g, m_font_color.b,
+			m_font_color.r, m_font_color.g, m_font_color.b,
+			pdf, m_font_size,
+			nw_pos.x, nw_pos.y
+		);
+		size_t len = dt_write(buf, dt_writer);
+		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
+			const DWRITE_HIT_TEST_METRICS& tm = m_dw_test_metrics[i];
+			const wchar_t* t = m_text + tm.textPosition;
+			const uint32_t t_len = tm.length;
+			// 文字列を表示する垂直なずらし位置を求める.
+			const double dy = static_cast<double>(m_dw_line_metrics[i].baseline);
+			// 文字列を書き込む.
+			sprintf_s(buf,
+				"<6162632082a082a282a4> Tj \n"
+				"%f %f Td\n",
+				tm.left, tm.top);
+			len += dt_write(buf, dt_writer);
+		}
+		len += dt_write("ET\n", dt_writer);
+		return len;
 	}
 
 	// データライターに SVG タグとして書き込む.

@@ -402,7 +402,7 @@ namespace winrt::GraphPaper::implementation
 	// データライターに PDF ストリームの一部として書き込む.
 	size_t ShapeLine::write_pdf(DataWriter const& dt_writer) const
 	{
-		size_t n = dt_write("%Line\n", dt_writer);
+		size_t n = dt_write("% Line\n", dt_writer);
 		n += write_pdf_stroke(dt_writer);
 
 		char buf[1024];

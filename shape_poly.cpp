@@ -972,7 +972,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapePoly::write_pdf(DataWriter const& dt_writer) const
 	{
-		size_t n = dt_write("%Poly\n", dt_writer);
+		size_t n = dt_write("% Poly\n", dt_writer);
 		n += write_pdf_stroke(dt_writer);
 		char buf[1024];
 		const size_t v_cnt = m_vec.size() + 1;

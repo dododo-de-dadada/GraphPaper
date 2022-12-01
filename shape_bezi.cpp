@@ -886,7 +886,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeBezi::write_pdf(DataWriter const& dt_writer) const
 	{
-		size_t n = dt_write("%Bezi\n", dt_writer);
+		size_t n = dt_write("% Bezi\n", dt_writer);
 		n += write_pdf_stroke(dt_writer);
 
 		D2D1_BEZIER_SEGMENT b_seg;
