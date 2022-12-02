@@ -1051,6 +1051,7 @@ namespace winrt::GraphPaper::implementation
 			nw_pos.x, -nw_pos.y + sheet.m_sheet_size.height
 		);
 		size_t len = dt_write(buf, dt_writer);
+		std::vector<char> sjis{};
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 
 			const DWRITE_HIT_TEST_METRICS& tm = m_dw_test_metrics[i];
@@ -1063,12 +1064,18 @@ namespace winrt::GraphPaper::implementation
 			// •¶Žš—ñ‚ð•\Ž¦‚·‚é‚’¼‚È‚¸‚ç‚µˆÊ’u‚ð‹‚ß‚é.
 			//const double dy = static_cast<double>(m_dw_line_metrics[i].baseline);
 
+			size_t sjis_len = WideCharToMultiByte(CP_ACP, 0, t, t_len, NULL, 0, NULL, NULL);
+			if (sjis.size() < sjis_len) {
+				sjis.resize(sjis_len);
+			}
+			WideCharToMultiByte(CP_ACP, 0, t, t_len, sjis.data(), sjis_len, NULL, NULL);
+
 			// •¶Žš—ñ‚ð‘‚«ž‚Þ.
-			char utf16[5];
+			char shis_buf[3];
 			len += dt_write("<", dt_writer);
 			for (int j = 0; j < t_len; j++) {
-				sprintf_s(utf16, "%04x", t[j]);
-				len += dt_write(utf16, dt_writer);
+				sprintf_s(shis_buf, "%02x", sjis[j]);
+				len += dt_write(shis_buf, dt_writer);
 			}
 			len += dt_write("> Tj\n", dt_writer);
 		}

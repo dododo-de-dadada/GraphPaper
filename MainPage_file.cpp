@@ -1236,6 +1236,57 @@ namespace winrt::GraphPaper::implementation
 	{
 		winrt::com_ptr<IDWriteFontCollection> collection;
 		winrt::check_hresult(m_main_sheet.m_d2d.m_dwrite_factory->GetSystemFontCollection(collection.put()));
+		winrt::com_ptr <IDWriteFontSet> set;
+		collection.as<IDWriteFontCollection1>()->GetFontSet(set.put());
+
+		std::vector<wchar_t*> used_font{};
+		for (const auto s : m_main_sheet.m_shape_list) {
+			wchar_t* x;
+			if (s->is_deleted() || !s->get_font_family(x)) {
+				continue;
+			}
+			if (std::find_if(used_font.begin(), used_font.end(),
+				[x](wchar_t* y) { return equal(x, y); }) != used_font.end()) {
+				used_font.push_back(x);
+			}
+			const ShapeText* t = static_cast<const ShapeText*>(s);
+			winrt::com_ptr<IDWriteFontCollection> coll;
+			t->m_dw_text_layout->GetFontCollection(coll.put());
+			winrt::com_ptr<IDWriteFontFamily> fam;
+			coll->GetFontFamily(0, fam.put());
+			winrt::com_ptr<IDWriteFont> font;
+			fam->GetFont(0, font.put());
+			winrt::com_ptr<IDWriteFontFaceReference> ref;
+			font.as<IDWriteFont3>()->GetFontFaceReference(ref.put());
+			winrt::com_ptr<IDWriteFontFace3> face;
+			ref->CreateFontFace(face.put());
+			std::vector<UINT32> u32{};
+			int i = 0;
+			for (; t->m_text[i] != L'\0'; i++) {
+				u32.push_back(t->m_text[i]);
+			}
+			// グリフとグリフの実行
+			// https://learn.microsoft.com/ja-JP/windows/win32/directwrite/glyphs-and-glyph-runs
+			// IDWriteFontFace::GetDesignGlyphMetrics メソッド
+			// https://learn.microsoft.com/ja-jp/windows/win32/api/dwrite/nf-dwrite-idwritefontface-getdesignglyphmetrics
+			// https://deep-verdure.hatenablog.com/entry/2022/07/26/012943
+			std::vector<UINT16> g16(i);
+			winrt::check_hresult(face->GetGlyphIndices(u32.data(), i, g16.data()));
+
+			/*
+			winrt::com_ptr<IDWriteFontFile> file;
+			ref->GetFontFile(file.put());
+
+			UINT32 index;
+			BOOL exists;
+			set->FindFontFaceReference(ref.get(), &index, &exists);
+			
+			winrt::com_ptr<IDWriteFontSetBuilder> builder;
+			m_main_sheet.m_d2d.m_dwrite_factory.as<IDWriteFactory5>()->CreateFontSetBuilder(builder.put());
+
+			m_main_sheet.m_d2d.m_dwrite_factory->CreateFontFace(DWRITE_FONT_FACE_TYPE::DWRITE_FONT_FACE_TYPE_TRUETYPE, 1, )
+			*/
+		}
 
 		HRESULT hr = S_OK;
 		try {
@@ -1346,8 +1397,8 @@ namespace winrt::GraphPaper::implementation
 					"/Type /Font\n"
 					"/BaseFont /%s\n"
 					"/Subtype /Type0\n"
-					//"/Encoding /90ms-RKSJ-H\n"
-					"/Encoding /UniJIS-UTF16-H\n"
+					"/Encoding /90msp-RKSJ-H\n"
+					//"/Encoding /UniJIS-UTF16-H\n"
 					"/DescendantFonts[%d 0 R]\n"
 					">>\n",
 					k, w, 6 + 2 * k
@@ -1424,12 +1475,18 @@ namespace winrt::GraphPaper::implementation
 				collection->FindFamilyName(u, &index, &exists);
 				winrt::com_ptr<IDWriteFontFamily> family;
 				collection->GetFontFamily(index, family.put());
+				winrt::com_ptr<IDWriteFontFaceReference> ref;
+				family.as<IDWriteFontFamily2>()->GetFontFaceReference(0, ref.put());
+
 				winrt::com_ptr<IDWriteFont> font;
 				family->GetFont(0, font.put());
 				font.as<IDWriteFont1>()->GetMetrics(&metrics);
 				const uint32_t per_em = metrics.designUnitsPerEm;
 
+				// CIDFont 辞書
+				// W = 各グリフ毎の幅を含む.
 				int k = static_cast<ShapeText*>(s)->pdf;
+
 				sprintf_s(buf,
 					"%% Descendant Font\n"
 					"%d 0 obj\n"
@@ -1442,7 +1499,7 @@ namespace winrt::GraphPaper::implementation
 					"/Ordering (Japan1)\n"
 					"/Supplement 6\n"
 					">>\n"
-					"/FontDescriptor %d 0 R\n"
+					"/FontDescriptor %d 0 R\n"	// 間接参照で必須.
 					">>\n"
 					"endobj\n",
 					6 + 2 * k,
@@ -1454,7 +1511,20 @@ namespace winrt::GraphPaper::implementation
 
 				// グリフにおける座標値や幅を指定する場合、PDF 内では、常に 1 em = 1000 であるものとして、
 				// 値を設定します。実際のフォントで 1 em = 1024 などとなっている場合は、n / 1024 * 1000 
-				// というようにして、値を 1 em = 1000 に合わせます
+				// というようにして、値を 1 em = 1000 に合わせます.
+				// 
+				// PDF の FontBBox (Black Box) のイメージ
+				//     y
+				//     ^
+				//     |
+				//   +-+--------+
+				//   | |   /\   |
+				//   | |  /__\  |
+				//   | | /    \ |
+				// --+-+--------+--> x
+				//   | |        |
+				//   +-+--------+
+				//     |
 				sprintf_s(buf,
 					"%% Font Descriptor\n"
 					"%d 0 obj\n"
@@ -1464,7 +1534,7 @@ namespace winrt::GraphPaper::implementation
 					"/FontStretch /%s\n"
 					"/FontWeight /%d\n"
 					"/Flags 4\n"
-					"/FontBBox[%u %u %u %u]\n"
+					"/FontBBox[%d %d %d %d]\n"
 					"/ItalicAngle 0\n"
 					"/Ascent %u\n"
 					"/Descent -%u\n"
@@ -1476,14 +1546,13 @@ namespace winrt::GraphPaper::implementation
 					w,
 					FONT_STRETCH_NAME[font_stretch < 10 ? font_stretch : 0],
 					font_weight <= 900 ? font_weight : 900,
-					1000u * metrics.glyphBoxLeft / per_em,
-					1000u * metrics.glyphBoxBottom / per_em,
-					1000u * metrics.glyphBoxRight / per_em,
-					1000u * metrics.glyphBoxTop / per_em,
+					static_cast<int>(1000u * metrics.glyphBoxLeft / per_em),
+					-static_cast<int>(1000u * metrics.glyphBoxTop / per_em),
+					static_cast<int>(1000u * metrics.glyphBoxRight / per_em),
+					-static_cast<int>(1000u * metrics.glyphBoxBottom / per_em),
 					1000u * metrics.ascent / per_em,
 					1000u * metrics.descent / per_em,
-					1000u * metrics.capHeight / per_em//,
-					//1000u * metrics.xHeight / per_em
+					1000u * metrics.capHeight / per_em
 				);
 				len = dt_write(buf, dt_writer);
 				obj_len.push_back(obj_len.back() + len);
