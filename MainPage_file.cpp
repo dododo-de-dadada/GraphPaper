@@ -1249,9 +1249,12 @@ namespace winrt::GraphPaper::implementation
 				[x](wchar_t* y) { return equal(x, y); }) != used_font.end()) {
 				used_font.push_back(x);
 			}
-			const ShapeText* t = static_cast<const ShapeText*>(s);
+			// 図形からフォントコレクションを得る
+			// フォントコレクションからフォントファミリーを得る
+			// フォントファミリーからフォントを得る.
+			// フォントからフォントフェイスを得る.
 			winrt::com_ptr<IDWriteFontCollection> coll;
-			t->m_dw_text_layout->GetFontCollection(coll.put());
+			s->get_font_collection(coll.put());
 			winrt::com_ptr<IDWriteFontFamily> fam;
 			coll->GetFontFamily(0, fam.put());
 			winrt::com_ptr<IDWriteFont> font;
@@ -1261,18 +1264,40 @@ namespace winrt::GraphPaper::implementation
 			winrt::com_ptr<IDWriteFontFace3> face;
 			ref->CreateFontFace(face.put());
 			std::vector<UINT32> u32{};
-			int i = 0;
-			for (; t->m_text[i] != L'\0'; i++) {
-				u32.push_back(t->m_text[i]);
+			wchar_t* t;
+			if (s->get_text_content(t)) {
+				int i = 0;
+				for (; t[i] != L'\0'; i++) {
+					u32.push_back(t[i]);
+				}
+			}
+			else {
+				u32.push_back(L'0');
+				u32.push_back(L'1');
+				u32.push_back(L'2');
+				u32.push_back(L'3');
+				u32.push_back(L'4');
+				u32.push_back(L'5');
+				u32.push_back(L'6');
+				u32.push_back(L'7');
+				u32.push_back(L'8');
+				u32.push_back(L'9');
 			}
 			// グリフとグリフの実行
 			// https://learn.microsoft.com/ja-JP/windows/win32/directwrite/glyphs-and-glyph-runs
 			// IDWriteFontFace::GetDesignGlyphMetrics メソッド
 			// https://learn.microsoft.com/ja-jp/windows/win32/api/dwrite/nf-dwrite-idwritefontface-getdesignglyphmetrics
 			// https://deep-verdure.hatenablog.com/entry/2022/07/26/012943
-			std::vector<UINT16> g16(i);
-			winrt::check_hresult(face->GetGlyphIndices(u32.data(), i, g16.data()));
-
+			std::vector<UINT16> g16(u32.size());
+			winrt::check_hresult(face->GetGlyphIndices(u32.data(), static_cast<UINT32>(u32.size()), g16.data()));
+			std::vector<UINT16> gid{};
+			for (const auto g : gid) {
+				if (std::find(gid.begin(), gid.end(), g) != gid.end()) {
+					gid.push_back(g);
+				}
+			}
+			std::vector<DWRITE_GLYPH_METRICS> gmet(gid.size());
+			face->GetDesignGlyphMetrics(gid.data(), static_cast<UINT32>(gid.size()), gmet.data());
 			/*
 			winrt::com_ptr<IDWriteFontFile> file;
 			ref->GetFontFile(file.put());
@@ -1307,14 +1332,16 @@ namespace winrt::GraphPaper::implementation
 				DataWriter(pdf_stream.GetOutputStreamAt(0))
 			};
 			// ヘッダー
+			// PDF にバイナリデータが含まれる場合は、
+			// ヘッダと改行の直後に、4 つ以上のバイナリ文字を含むコメント行を置くことが推奨.
+			// 逆に, 含まない場合は, 置かなくていい.
 			size_t len = dt_write(
-				"%PDF-1.7\n"
-				"%\xff\xff\xff\xff\n",
+				"%PDF-1.7\n",
 				dt_writer);
 			std::vector<size_t> obj_len{};
 			obj_len.push_back(len);
 
-			// カタログ.
+			// カタログ辞書.
 			// トレーラーから参照され,
 			// ページツリーを参照する.
 			char buf[1024];
@@ -1328,7 +1355,7 @@ namespace winrt::GraphPaper::implementation
 				"endobj\n", dt_writer);
 			obj_len.push_back(obj_len.back() + len);
 
-			// ページツリー
+			// ページツリーノードの辞書
 			// カタログから参照され,
 			// ページを参照する.
 			len = dt_write(
@@ -1344,7 +1371,7 @@ namespace winrt::GraphPaper::implementation
 			);
 			obj_len.push_back(obj_len.back() + len);
 
-			// ページオブジェクト
+			// ページオブジェクトの辞書
 			// ページツリーから参照され,
 			// リソースとコンテンツを参照する.
 			sprintf_s(buf,
@@ -1375,11 +1402,14 @@ namespace winrt::GraphPaper::implementation
 			len += dt_write(
 				"/Font <<\n", dt_writer);
 			int k = 0;
+			std::vector<std::vector<char>> base_font;
 			for (const auto s : m_main_sheet.m_shape_list) {
-				wchar_t* u;
-				if (s->is_deleted() || !s->get_font_family(u)) {
+				if (s->is_deleted() || typeid(*s) != typeid(ShapeText)) {
 					continue;
 				}
+
+				wchar_t* u;
+				s->get_font_family(u);
 				// フォント名を, 含まれる空白文字を取り除いて, マルチバイト文字列に変換する.
 				wchar_t v[256];
 				int j = 0;
@@ -1388,8 +1418,9 @@ namespace winrt::GraphPaper::implementation
 						v[j++] = u[i];
 					}
 				}
-				char w[256];
-				WideCharToMultiByte(CP_ACP, 0, v, j + 1, w, 256, NULL, NULL);
+				int name_len = WideCharToMultiByte(CP_ACP, 0, v, j + 1, NULL, 0, NULL, NULL);
+				base_font.emplace_back(name_len);
+				WideCharToMultiByte(CP_ACP, 0, v, j + 1, base_font[k].data(), name_len, NULL, NULL);
 
 				// フォント
 				sprintf_s(buf,
@@ -1397,15 +1428,19 @@ namespace winrt::GraphPaper::implementation
 					"/Type /Font\n"
 					"/BaseFont /%s\n"
 					"/Subtype /Type0\n"
-					"/Encoding /90msp-RKSJ-H\n"
-					//"/Encoding /UniJIS-UTF16-H\n"
+					//"/Encoding /90msp-RKSJ-H\n"
+					"/Encoding /UniJIS-UTF16-H\n"
 					"/DescendantFonts[%d 0 R]\n"
 					">>\n",
-					k, w, 6 + 2 * k
+					k,
+					base_font[k].data(),
+					6 + 2 * k
 				);
 				len += dt_write(buf, dt_writer);
-				static_cast<ShapeText*>(s)->pdf = k++;
+
+				static_cast<ShapeText*>(s)->m_pdf_font = k++;
 			}
+
 			len += dt_write(">>\n", dt_writer);
 			len += dt_write(
 				">>\n"
@@ -1426,7 +1461,15 @@ namespace winrt::GraphPaper::implementation
 				72.0f / 96.0f, 72.0f / 96.0f
 			);
 			len = dt_write(buf, dt_writer);
+
+			int st_cnt = 0;	// 文字列図形のカウント
 			for (const auto s : m_main_sheet.m_shape_list) {
+				if (s->is_deleted()) {
+					continue;
+				}
+				else if (typeid(*s) != typeid(ShapeText)) {
+					static_cast<ShapeText*>(s)->m_pdf_font = st_cnt++;
+				}
 				len += s->write_pdf(m_main_sheet, dt_writer);
 			}
 			len += dt_write(
@@ -1438,55 +1481,92 @@ namespace winrt::GraphPaper::implementation
 
 			// 辞書
 			for (const auto s : m_main_sheet.m_shape_list) {
-				wchar_t* u;
-				if (s->is_deleted() || !s->get_font_family(u)) {
+				if (s->is_deleted() || typeid(*s) != typeid(ShapeText)) {
 					continue;
 				}
+				wchar_t* u;
+				s->get_font_family(u);
 				DWRITE_FONT_STRETCH font_stretch;
 				s->get_font_stretch(font_stretch);
-				constexpr const char* FONT_STRETCH_NAME[] = {
-					"Normal",
-					"UltraCondensed",
-					"ExtraCondensed",
-					"Condensed",
-					"SemiCondensed",
-					"Normal",
-					"SemiExpanded",
-					"Expanded",
-					"ExtraExpanded",
-					"UltraExpanded"
-				};
 				DWRITE_FONT_WEIGHT font_weight;
 				s->get_font_weight(font_weight);
 
-				wchar_t v[256];
-				int j = 0;
-				for (int i = 0; u[i] != '\0' || (v[j] = '\0') != '\0'; i++) {
-					if (u[i] != L' ') {
-						v[j++] = u[i];
-					}
-				}
-				char w[256];
-				WideCharToMultiByte(CP_ACP, 0, v, j + 1, w, 256, NULL, NULL);
-
-				DWRITE_FONT_METRICS1 metrics;
 				UINT32 index;
 				BOOL exists;
 				collection->FindFamilyName(u, &index, &exists);
-				winrt::com_ptr<IDWriteFontFamily> family;
-				collection->GetFontFamily(index, family.put());
-				winrt::com_ptr<IDWriteFontFaceReference> ref;
-				family.as<IDWriteFontFamily2>()->GetFontFaceReference(0, ref.put());
-
+				winrt::com_ptr<IDWriteFontFamily> fam;
+				collection->GetFontFamily(index, fam.put());
 				winrt::com_ptr<IDWriteFont> font;
-				family->GetFont(0, font.put());
+				fam->GetFont(0, font.put());
+				winrt::com_ptr<IDWriteFontFaceReference> ref;
+				font.as<IDWriteFont3>()->GetFontFaceReference(ref.put());
+
+				// 図形からフォントコレクションを得る
+				// フォントコレクションからフォントファミリーを得る
+				// フォントファミリーからフォントを得る.
+				// フォントからフォントフェイスを得る.
+				//winrt::com_ptr<IDWriteFontCollection> coll;
+				//s->get_font_collection(coll.put());
+				//winrt::com_ptr<IDWriteFontFamily> fam;
+				//coll->GetFontFamily(0, fam.put());
+				//winrt::com_ptr<IDWriteFont> font;
+				//fam->GetFont(0, font.put());
+				//winrt::com_ptr<IDWriteFontFaceReference> ref;
+				//font.as<IDWriteFont3>()->GetFontFaceReference(ref.put());
+				winrt::com_ptr<IDWriteFontFace3> face;
+				ref->CreateFontFace(face.put());
+
+				//winrt::com_ptr<IDWriteLocalizedStrings> loc;
+				//face->GetFaceNames(loc.put());
+				//loc->FindLocaleName(L"en-us", &index, &exists);
+				//UINT32 name_len = 0;
+				//std::vector<WCHAR> loc_name(loc->GetStringLength(index, &name_len));
+				//loc->GetString(index, loc_name.data(), name_len);
+
+				std::vector<UINT32> u32{};
+				wchar_t* t;
+				if (s->get_text_content(t)) {
+					int i = 0;
+					for (; t[i] != L'\0'; i++) {
+						u32.push_back(t[i]);
+					}
+				}
+				else {
+					u32.push_back(L'0');
+					u32.push_back(L'1');
+					u32.push_back(L'2');
+					u32.push_back(L'3');
+					u32.push_back(L'4');
+					u32.push_back(L'5');
+					u32.push_back(L'6');
+					u32.push_back(L'7');
+					u32.push_back(L'8');
+					u32.push_back(L'9');
+				}
+				// グリフとグリフの実行
+				// https://learn.microsoft.com/ja-JP/windows/win32/directwrite/glyphs-and-glyph-runs
+				// IDWriteFontFace::GetDesignGlyphMetrics メソッド
+				// https://learn.microsoft.com/ja-jp/windows/win32/api/dwrite/nf-dwrite-idwritefontface-getdesignglyphmetrics
+				// https://deep-verdure.hatenablog.com/entry/2022/07/26/012943
+				std::vector<UINT16> g16(u32.size());
+				winrt::check_hresult(face->GetGlyphIndices(u32.data(), static_cast<UINT32>(u32.size()), g16.data()));
+				std::vector<UINT16> gid{};
+				for (const auto g : g16) {
+					if (std::find(gid.begin(), gid.end(), g) == gid.end()) {
+						gid.push_back(g);
+					}
+				}
+				std::vector<DWRITE_GLYPH_METRICS> gmet(gid.size());
+				face->GetDesignGlyphMetrics(gid.data(),static_cast<UINT32>(gid.size()), gmet.data());
+				//winrt::com_ptr<IDWriteFont> font;
+				//fam->GetFont(0, font.put());
+				DWRITE_FONT_METRICS1 metrics;
 				font.as<IDWriteFont1>()->GetMetrics(&metrics);
 				const uint32_t per_em = metrics.designUnitsPerEm;
 
 				// CIDFont 辞書
 				// W = 各グリフ毎の幅を含む.
-				int k = static_cast<ShapeText*>(s)->pdf;
-
+				int n = static_cast<ShapeText*>(s)->m_pdf_font;
 				sprintf_s(buf,
 					"%% Descendant Font\n"
 					"%d 0 obj\n"
@@ -1502,9 +1582,9 @@ namespace winrt::GraphPaper::implementation
 					"/FontDescriptor %d 0 R\n"	// 間接参照で必須.
 					">>\n"
 					"endobj\n",
-					6 + 2 * k,
-					w,
-					6 + 2 * k + 1
+					6 + 2 * n,
+					base_font[n].data(),
+					6 + 2 * n + 1
 				);
 				len = dt_write(buf, dt_writer);
 				obj_len.push_back(obj_len.back() + len);
@@ -1525,6 +1605,18 @@ namespace winrt::GraphPaper::implementation
 				//   | |        |
 				//   +-+--------+
 				//     |
+				constexpr const char* FONT_STRETCH_NAME[] = {
+					"Normal",
+					"UltraCondensed",
+					"ExtraCondensed",
+					"Condensed",
+					"SemiCondensed",
+					"Normal",
+					"SemiExpanded",
+					"Expanded",
+					"ExtraExpanded",
+					"UltraExpanded"
+				};
 				sprintf_s(buf,
 					"%% Font Descriptor\n"
 					"%d 0 obj\n"
@@ -1542,8 +1634,8 @@ namespace winrt::GraphPaper::implementation
 					"/StemV 0\n"
 					">>\n"
 					"endobj\n",
-					6 + 2 * k + 1,
-					w,
+					6 + 2 * n + 1,
+					base_font[n].data(),
 					FONT_STRETCH_NAME[font_stretch < 10 ? font_stretch : 0],
 					font_weight <= 900 ? font_weight : 900,
 					static_cast<int>(1000u * metrics.glyphBoxLeft / per_em),

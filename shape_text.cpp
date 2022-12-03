@@ -1047,11 +1047,11 @@ namespace winrt::GraphPaper::implementation
 			"%f %f Td\n",
 			m_font_color.r, m_font_color.g, m_font_color.b,
 			m_font_color.r, m_font_color.g, m_font_color.b,
-			pdf, m_font_size,
+			m_pdf_font, m_font_size,
 			nw_pos.x, -nw_pos.y + sheet.m_sheet_size.height
 		);
 		size_t len = dt_write(buf, dt_writer);
-		std::vector<char> sjis{};
+		std::vector<uint8_t> sjis{};
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 
 			const DWRITE_HIT_TEST_METRICS& tm = m_dw_test_metrics[i];
@@ -1064,20 +1064,29 @@ namespace winrt::GraphPaper::implementation
 			// •¶Žš—ñ‚ð•\Ž¦‚·‚é‚’¼‚È‚¸‚ç‚µˆÊ’u‚ð‹‚ß‚é.
 			//const double dy = static_cast<double>(m_dw_line_metrics[i].baseline);
 
-			size_t sjis_len = WideCharToMultiByte(CP_ACP, 0, t, t_len, NULL, 0, NULL, NULL);
-			if (sjis.size() < sjis_len) {
-				sjis.resize(sjis_len);
-			}
-			WideCharToMultiByte(CP_ACP, 0, t, t_len, sjis.data(), sjis_len, NULL, NULL);
 
 			// •¶Žš—ñ‚ð‘‚«ž‚Þ.
-			char shis_buf[3];
-			len += dt_write("<", dt_writer);
-			for (int j = 0; j < t_len; j++) {
-				sprintf_s(shis_buf, "%02x", sjis[j]);
-				len += dt_write(shis_buf, dt_writer);
+			dt_writer.WriteByte(L'<'); len++;
+			for (int i = 0; i < t_len; i++) {
+				sprintf_s(buf, "%04x", t[i]);
+				len += dt_write(buf, dt_writer);
 			}
 			len += dt_write("> Tj\n", dt_writer);
+
+			//dt_writer.WriteByte(L'<'); len++;
+			//size_t sjis_len = WideCharToMultiByte(CP_ACP, 0, t, t_len, NULL, 0, NULL, NULL);
+			//if (sjis.size() < sjis_len) {
+			//	sjis.resize(sjis_len);
+			//}
+			//WideCharToMultiByte(CP_ACP, 0, t, t_len, (LPSTR)sjis.data(), sjis_len, NULL, NULL);
+			//len += dt_write("<", dt_writer);
+			//for (int j = 0; j < sjis_len; j++) {
+			//	constexpr char* X = "0123456789abcdef";
+			//	dt_writer.WriteByte(X[sjis[j] >> 4]);
+			//	dt_writer.WriteByte(X[sjis[j] & 15]);
+			//}
+			//len += 2 * sjis_len;
+			//len += dt_write("> Tj\n", dt_writer);
 		}
 		len += dt_write("ET\n", dt_writer);
 		return len;

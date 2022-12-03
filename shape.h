@@ -507,6 +507,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_text_padding(D2D1_SIZE_F& /*val*/) const noexcept { return false; }
 		// 文字範囲を得る
 		virtual bool get_text_selected(DWRITE_TEXT_RANGE& /*val*/) const noexcept { return false; }
+		// 文字範囲を得る
+		virtual bool get_font_collection(IDWriteFontCollection** /*val*/) const noexcept { return false; }
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F /*v_pos*/[]) const noexcept { return 0; };
 		// 位置を含むか判定する.
@@ -1201,6 +1203,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		} // ~ShapeStroke
 
+		bool get_font_collection(IDWriteFontCollection** val) const noexcept final override
+		{
+			winrt::check_hresult(m_dw_text_format->GetFontCollection(val));
+			return true;
+		}
+
 		//------------------------------
 		// shape_ruler.cpp
 		//------------------------------
@@ -1431,7 +1439,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_HIT_TEST_METRICS* m_dw_test_metrics = nullptr;	// 位置の計量
 		winrt::com_ptr<IDWriteTextLayout> m_dw_text_layout{ nullptr };	// 文字列レイアウト
 
-		int pdf = 0;
+		int m_pdf_font = 0;
 
 		// 図形を破棄する.
 		~ShapeText(void)
@@ -1458,6 +1466,12 @@ namespace winrt::GraphPaper::implementation
 				m_dw_text_layout = nullptr;
 			}
 		} // ~ShapeStroke
+
+		bool get_font_collection(IDWriteFontCollection** val) const noexcept final override
+		{
+			winrt::check_hresult(m_dw_text_layout->GetFontCollection(val));
+			return true;
+		}
 
 		//------------------------------
 		// shape_text.cpp
