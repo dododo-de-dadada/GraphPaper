@@ -482,7 +482,7 @@ namespace winrt::GraphPaper::implementation
 		IAsyncOperation<winrt::hresult> file_write_pdf_async(StorageFile pdf_file);
 
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_write_svg_async(StorageFile s_file);
+		IAsyncOperation<winrt::hresult> file_svg_write_async(StorageFile s_file);
 		// ファイルメニューの「用紙を画像としてエクスポートする」が選択された
 		IAsyncAction file_export_as_image_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 画像用のファイル保存ピッカーを開いて, ストレージファイルを得る.

@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	// svg_file	書き込み先のファイル
 	// 戻り値	書き込めた場合 S_OK
 	//-------------------------------
-	IAsyncOperation<winrt::hresult> MainPage::file_write_svg_async(StorageFile svg_file)
+	IAsyncOperation<winrt::hresult> MainPage::file_svg_write_async(StorageFile svg_file)
 	{
 		constexpr char XML_DEC[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" SVG_NEW_LINE;
 		constexpr char DOCTYPE[] = "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">" SVG_NEW_LINE;
@@ -37,9 +37,9 @@ namespace winrt::GraphPaper::implementation
 				DataWriter(svg_stream.GetOutputStreamAt(0))
 			};
 			// XML 宣言を書き込む.
-			dt_write_svg(XML_DEC, dt_writer);
+			svg_dt_write(XML_DEC, dt_writer);
 			// DOCTYPE を書き込む.
-			dt_write_svg(DOCTYPE, dt_writer);
+			svg_dt_write(DOCTYPE, dt_writer);
 			// SVG 開始タグを書き込む.
 			{
 				const auto size = m_main_sheet.m_sheet_size;	// 用紙の大きさ
@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 				constexpr char* SVG_UNIT_PT = "pt";
 
 				// SVG タグの開始を書き込む.
-				dt_write_svg(SVG_TAG, dt_writer);
+				svg_dt_write(SVG_TAG, dt_writer);
 
 				// 単位付きで幅と高さの属性を書き込む.
 				char buf[256];
@@ -83,20 +83,20 @@ namespace winrt::GraphPaper::implementation
 					u = SVG_UNIT_PX;
 				}
 				sprintf_s(buf, "width=\"%lf%s\" height=\"%lf%s\" ", w, u, h, u);
-				dt_write_svg(buf, dt_writer);
+				svg_dt_write(buf, dt_writer);
 
 				// ピクセル単位の幅と高さを viewBox 属性として書き込む.
-				dt_write_svg("viewBox=\"0 0 ", dt_writer);
-				dt_write_svg(size.width, dt_writer);
-				dt_write_svg(size.height, dt_writer);
-				dt_write_svg("\" ", dt_writer);
+				svg_dt_write("viewBox=\"0 0 ", dt_writer);
+				svg_dt_write(size.width, dt_writer);
+				svg_dt_write(size.height, dt_writer);
+				svg_dt_write("\" ", dt_writer);
 
 				// 背景色をスタイル属性として書き込む.
-				dt_write_svg("style=\"background-color:", dt_writer);
-				dt_write_svg(color, dt_writer);
+				svg_dt_write("style=\"background-color:", dt_writer);
+				svg_dt_write(color, dt_writer);
 
 				// svg 開始タグの終了を書き込む.
-				dt_write_svg("\" >" SVG_NEW_LINE, dt_writer);
+				svg_dt_write("\" >" SVG_NEW_LINE, dt_writer);
 			}
 
 			// 図形リストの各図形について以下を繰り返す.
@@ -147,18 +147,18 @@ namespace winrt::GraphPaper::implementation
 
 						// スレッドコンテキストを復元する.
 						//co_await context;
-						t->write_svg(image_name, dt_writer);
+						t->svg_write(image_name, dt_writer);
 					}
 					else {
-						t->write_svg(dt_writer);
+						t->svg_write(dt_writer);
 					}
 				}
 				else {
-					s->write_svg(dt_writer);
+					s->svg_write(dt_writer);
 				}
 			}
 			// SVG 終了タグを書き込む.
-			dt_write_svg("</svg>" SVG_NEW_LINE, dt_writer);
+			svg_dt_write("</svg>" SVG_NEW_LINE, dt_writer);
 			// ストリームの現在位置をストリームの大きさに格納する.
 			svg_stream.Size(svg_stream.Position());
 			// バッファ内のデータをストリームに出力する.

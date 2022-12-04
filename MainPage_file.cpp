@@ -58,7 +58,7 @@ file_recent_menu_update
 file_save_as_click_async
 	+---file_recent_token_async
 	+---file_wait_cursor
-	+---file_write_svg_async
+	+---file_svg_write_async
 	+---file_write_gpf_async
 
 file_save_click_async
@@ -70,7 +70,7 @@ file_save_click_async
 file_write_gpf_async
 	+---file_recent_add
 
-file_write_svg_async
+file_svg_write_async
 	+---file_pick_save_image_async
 
 */
@@ -944,7 +944,7 @@ namespace winrt::GraphPaper::implementation
 				const auto f_type = save_file.FileType();
 				if (f_type == RES_EXT_SVG) {
 					// 図形データを SVG としてストレージファイルに非同期に書き込み, 結果を得る.
-					hr = co_await file_write_svg_async(save_file);
+					hr = co_await file_svg_write_async(save_file);
 				}
 				else if (f_type == RES_EXT_GPF) {
 					// 図形データをストレージファイルに非同期に書き込み, 結果を得る.

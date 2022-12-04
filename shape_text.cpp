@@ -19,8 +19,6 @@ namespace winrt::GraphPaper::implementation
 	static void tx_create_test_metrics(IDWriteTextLayout* text_lay, const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt);
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を作成する.
 	static void tx_create_text_metrics(IDWriteTextLayout* text_lay, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, DWRITE_LINE_METRICS*& line_met, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met, const DWRITE_TEXT_RANGE& sele_rng);
-	// 文字列をデータライターに SVG として書き込む.
-	static void tx_dt_write_svg(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer);
 	// 書体の計量を得る
 	static void tx_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met);
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を破棄する.
@@ -116,54 +114,6 @@ namespace winrt::GraphPaper::implementation
 				tx_create_test_metrics(text_lay, sele_rng, sele_met, sele_cnt);
 			}
 		}
-	}
-
-	// 文字列をデータライターに SVG として書き込む.
-	// t	文字列
-	// t_len	文字数
-	// x, y	位置
-	// dy	垂直なずらし量
-	// dt_writer	データライター
-	static void tx_dt_write_svg(const wchar_t* t, const uint32_t t_len, const double x, const double y, const double dy, DataWriter const& dt_writer)
-	{
-		dt_write_svg("<text ", dt_writer);
-		dt_write_svg(x, "x", dt_writer);
-		dt_write_svg(y, "y", dt_writer);
-		dt_write_svg(dy, "dy", dt_writer);
-		//dt_write_svg("text-before-edge", "alignment-baseline", dt_writer);
-		dt_write_svg(">", dt_writer);
-		uint32_t k = 0;
-		for (uint32_t i = k; i < t_len; i++) {
-			const wchar_t c = t[i];
-			char* ent;
-			if (c == L'<') {
-				ent = "&lt;";
-			}
-			else if (c == L'>') {
-				ent = "&gt;";
-			}
-			else if (c == L'&') {
-				ent = "&amp;";
-			}
-			//else if (c == L'"') {
-			// ent = "&quot;";
-			//}
-			//else if (c == L'\'') {
-			// ent = "&apos;";
-			//}
-			else {
-				continue;
-			}
-			if (i > k) {
-				dt_write_svg(t + k, i - k, dt_writer);
-			}
-			dt_write_svg(ent, dt_writer);
-			k = i + 1;
-		}
-		if (t_len > k) {
-			dt_write_svg(t + k, t_len - k, dt_writer);
-		}
-		dt_write_svg("</text>" SVG_NEW_LINE, dt_writer);
 	}
 
 	// 枠を文字列に合わせる.
@@ -972,83 +922,6 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
 		dt_writer.WriteSingle(m_text_line_sp);
 		dt_write(m_text_padding, dt_writer);
-	}
-
-	// データライターに SVG タグとして書き込む.
-	void ShapeText::write_svg(DataWriter const& dt_writer) const
-	{
-		static constexpr char* SVG_STYLE[] = {
-			"normal", "oblique", "italic"
-		};
-		static constexpr char* SVG_STRETCH[] = {
-			"normal", "ultra-condensed", "extra-condensed",
-			"condensed", "semi-condensed", "normal", "semi-expanded",
-			"expanded", "extra-expanded", "ultra-expanded"
-		};
-		// 垂直方向のずらし量を求める.
-		//
-		// Chrome では, テキストタグに属性 alignment-baseline="text-before-edge" 
-		// を指定するだけで, 左上位置を基準にして Dwrite と同じように表示される.
-		// しかし, IE や Edge では, alignment-baseline 属性は期待した働きをしないので,
-		// 上部からのベースラインまで値である, 垂直方向のずらし量 dy を
-		// 行ごとに計算を必要がある.
-		// このとき, 上部からのベースラインの高さ = アセントにはならないので
-		// デセントを用いて計算する必要もある.
-		// テキストレイアウトからフォントメトリックスを取得して, 以下のように求める.
-		// ちなみに, designUnitsPerEm は, 配置 (Em) ボックスの単位あたりの大きさ.
-		// デセントは, フォント文字の配置ボックスの下部からベースラインまでの長さ.
-		// dy = その行のヒットテストメトリックスの高さ - フォントの大きさ × (デセント ÷ 単位大きさ) となる, はず.
-		//IDWriteFontCollection* fonts;
-		//m_dw_layout->GetFontCollection(&fonts);
-		//IDWriteFontFamily* family;
-		//fonts->GetFontFamily(0, &family);
-		//IDWriteFont* font;
-		//family->GetFont(0, &font);
-		//DWRITE_FONT_METRICS metrics;
-		//font->GetMetrics(&metrics);
-		//const double descent = m_font_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
-
-		if (is_opaque(m_fill_color) || is_opaque(m_stroke_color)) {
-			ShapeRect::write_svg(dt_writer);
-		}
-		// 文字列全体の属性を指定するための g タグを開始する.
-		dt_write_svg("<g ", dt_writer);
-		// 書体の色を書き込む.
-		dt_write_svg(m_font_color, "fill", dt_writer);
-		// 書体名を書き込む.
-		dt_write_svg("font-family=\"", dt_writer);
-		dt_write_svg(m_font_family, wchar_len(m_font_family), dt_writer);
-		dt_write_svg("\" ", dt_writer);
-		// 書体の大きさを書き込む.
-		dt_write_svg(m_font_size, "font-size", dt_writer);
-		// 書体の幅の伸縮を書き込む.
-		const int32_t stretch = static_cast<int32_t>(m_font_stretch);
-		dt_write_svg(SVG_STRETCH[stretch], "font-stretch", dt_writer);
-		// 書体の形式を書き込む.
-		const int32_t style = static_cast<int32_t>(m_font_style);
-		dt_write_svg(SVG_STYLE[style], "font-style", dt_writer);
-		// 書体の太さを書き込む.
-		const uint32_t weight = static_cast<uint32_t>(m_font_weight);
-		dt_write_svg(weight, "font-weight", dt_writer);
-		dt_write_svg("none", "stroke", dt_writer);
-		dt_write_svg(">" SVG_NEW_LINE, dt_writer);
-		// 書体を表示する左上位置に余白を加える.
-		D2D1_POINT_2F nw_pos;
-		pt_add(m_pos, m_text_padding.width, m_text_padding.height, nw_pos);
-		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
-			const DWRITE_HIT_TEST_METRICS& tm = m_dw_test_metrics[i];
-			const wchar_t* t = m_text + tm.textPosition;
-			const uint32_t t_len = tm.length;
-			const double px = static_cast<double>(nw_pos.x);
-			const double qx = static_cast<double>(tm.left);
-			const double py = static_cast<double>(nw_pos.y);
-			const double qy = static_cast<double>(tm.top);
-			// 文字列を表示する垂直なずらし位置を求める.
-			const double dy = static_cast<double>(m_dw_line_metrics[i].baseline);
-			// 文字列を書き込む.
-			tx_dt_write_svg(t, t_len, px + qx, py + qy, dy, dt_writer);
-		}
-		dt_write_svg("</g>" SVG_NEW_LINE, dt_writer);
 	}
 
 }

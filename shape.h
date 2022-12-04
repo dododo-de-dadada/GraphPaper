@@ -353,27 +353,27 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 
 	// データライターに SVG として属性名とシングルバイト文字列を書き込む.
-	void dt_write_svg(const char* val, const char* name, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const char* val, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG としてシングルバイト文字列を書き込む.
-	void dt_write_svg(const char* val, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const char* val, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名と色を書き込む.
-	void dt_write_svg(const D2D1_COLOR_F val, const char* name, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const D2D1_COLOR_F val, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として色を書き込む.
-	void dt_write_svg(const D2D1_COLOR_F val, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const D2D1_COLOR_F val, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として破線の形式と配置を書き込む.
-	void dt_write_svg(const D2D1_DASH_STYLE style, const DASH_PATT& patt, const double width, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const D2D1_DASH_STYLE style, const DASH_PATT& patt, const double width, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として命令と位置を書き込む.
-	void dt_write_svg(const D2D1_POINT_2F val, const char* cmd, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const D2D1_POINT_2F val, const char* cmd, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名と位置を書き込む.
-	void dt_write_svg(const D2D1_POINT_2F val, const char* name_x, const char* name_y, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const D2D1_POINT_2F val, const char* name_x, const char* name_y, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名と浮動小数値を書き込む
-	void dt_write_svg(const double val, const char* name, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const double val, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として浮動小数を書き込む.
-	void dt_write_svg(const float val, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const float val, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG として属性名と 32 ビット正整数を書き込む.
-	void dt_write_svg(const uint32_t val, const char* name, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const uint32_t val, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG としてマルチバイト文字列を書き込む.
-	void dt_write_svg(const wchar_t val[], const uint32_t v_len, /*--->*/DataWriter const& dt_writer);
+	void svg_dt_write(const wchar_t val[], const uint32_t v_len, /*--->*/DataWriter const& dt_writer);
 
 	//------------------------------
 	// shape_slist.cpp
@@ -605,7 +605,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに PDF として書き込む.
 		virtual size_t write_pdf(const ShapeSheet& /*sheet*/, DataWriter const& /*dt_writer*/) const { return 0; }
 		// 図形をデータライターに SVG として書き込む.
-		virtual void write_svg(DataWriter const& /*dt_writer*/) const {}
+		virtual void svg_write(DataWriter const& /*dt_writer*/) const {}
 	};
 
 	//------------------------------
@@ -703,9 +703,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG ファイルとして書き込む.
-		void write_svg(const wchar_t f_name[], DataWriter const& dt_writer) const;
+		void svg_write(const wchar_t f_name[], DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(DataWriter const& dt_writer) const;
+		void svg_write(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -970,7 +970,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(DataWriter const& dt_writer) const;
+		void svg_write(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1070,7 +1070,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに PDF として書き込む.
 		size_t write_pdf_stroke(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg_stroke(DataWriter const& dt_writer) const;
+		void svg_write_stroke(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1138,11 +1138,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに PDF として書き込む.
 		virtual size_t write_pdf(const ShapeSheet& sheet, DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(DataWriter const& dt_writer) const;
+		void svg_write(DataWriter const& dt_writer) const;
 		// 矢じりをデータライターに PDF として書き込む.
 		size_t write_pdf_barbs(const ShapeSheet& sheet, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
 		// 矢じりをデータライターに SVG として書き込む.
-		void write_svg_barbs(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
+		void svg_write_barbs(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
 		// 値を端の形式に格納する.
 		bool set_stroke_cap(const CAP_STYLE& val) noexcept final override;
 		// 値を線分のつなぎのマイター制限に格納する.
@@ -1188,7 +1188,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		virtual void write_svg(DataWriter const& dt_writer) const;
+		virtual void svg_write(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1240,7 +1240,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(DataWriter const& /*dt_writer*/) const {}
+		void svg_write(DataWriter const& /*dt_writer*/) const {}
 	};
 
 	//------------------------------
@@ -1267,7 +1267,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに SVG として書き込む.
 		//size_t write_pdf(const ShapeSheet &sheet, DataWriter const& /*dt_writer*/) const {}
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(DataWriter const& dt_writer) const;
+		void svg_write(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1300,7 +1300,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに SVG として書き込む.
 		//size_t write_pdf(const ShapeSheet &sheet, DataWriter const& dt_writer) const {}
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(DataWriter const& dt_writer) const;
+		void svg_write(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1386,7 +1386,7 @@ namespace winrt::GraphPaper::implementation
 		// データライターに PDF ストリームの一部として書き込む.
 		size_t write_pdf(const ShapeSheet& sheet, DataWriter const& /*dt_writer*/) const final override;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(DataWriter const& /*dt_writer*/) const;
+		void svg_write(DataWriter const& /*dt_writer*/) const;
 	};
 
 	//------------------------------
@@ -1415,7 +1415,7 @@ namespace winrt::GraphPaper::implementation
 		// データライターに PDF ストリームの一部として書き込む.
 		size_t write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void write_svg(DataWriter const& dt_writer) const;
+		void svg_write(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1561,7 +1561,7 @@ namespace winrt::GraphPaper::implementation
 		size_t write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const;
 
 		// データライターに SVG として書き込む.
-		void write_svg(DataWriter const& dt_writer) const;
+		void svg_write(DataWriter const& dt_writer) const;
 	};
 
 	// 図形の部位（円形）を表示する.
