@@ -419,7 +419,7 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoValue<UNDO_OP::JOIN_LIMIT>::SET(Shape* const s, const float& val)
 	{
-		s->set_join_limit(val);
+		s->set_join_miter_limit(val);
 	}
 
 	void UndoValue<UNDO_OP::JOIN_STYLE>::SET(Shape* const s, const D2D1_LINE_JOIN& val)
@@ -579,7 +579,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_OP::JOIN_LIMIT>::GET(const Shape* s, float& val) noexcept
 	{
-		return s->get_join_limit(val);
+		return s->get_join_miter_limit(val);
 	}
 
 	bool UndoValue<UNDO_OP::JOIN_STYLE>::GET(const Shape* s, D2D1_LINE_JOIN& val) noexcept

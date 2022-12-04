@@ -206,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 					t_min.x <= t_pos.x && t_pos.x <= t_max.x || t_min.y <= t_pos.y && t_pos.y <= t_max.y) {
 					return ANC_TYPE::ANC_STROKE;
 				}
-				// 線枠のつなぎが丸めか判定する.
+				// 線枠の結合が丸めか判定する.
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 					if (pt_in_circle(t_pos, v_pos[0], e_thick) ||
 						pt_in_circle(t_pos, v_pos[1], e_thick) ||
@@ -215,9 +215,9 @@ namespace winrt::GraphPaper::implementation
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
-				// 線枠のつなぎが面取り, または, マイター・面取りでかつマイター制限が√2 未満か判定する.
+				// 線枠の結合が面取り, または, マイター・面取りでかつマイター制限が√2 未満か判定する.
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
-					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL && m_join_limit < M_SQRT2)) {
+					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL && m_join_miter_limit < M_SQRT2)) {
 					const auto limit = static_cast<FLOAT>(e_thick);
 					const D2D1_POINT_2F q_pos[4]{
 						D2D1_POINT_2F{ 0.0f, -limit }, D2D1_POINT_2F{ limit, 0.0f }, D2D1_POINT_2F{ 0.0f, limit }, D2D1_POINT_2F{ -limit, 0.0f }
@@ -229,10 +229,10 @@ namespace winrt::GraphPaper::implementation
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
-				// 線枠のつなぎがマイター, または, マイター/面取りでかつマイター制限が√2 以上か判定する.
+				// 線枠の結合がマイター, または, マイター/面取りでかつマイター制限が√2 以上か判定する.
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
-					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL && m_join_limit >= M_SQRT2)) {
-					const auto limit = static_cast<FLOAT>(m_stroke_width * M_SQRT2 * 0.5 * m_join_limit);
+					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL && m_join_miter_limit >= M_SQRT2)) {
+					const auto limit = static_cast<FLOAT>(m_stroke_width * M_SQRT2 * 0.5 * m_join_miter_limit);
 					const D2D1_POINT_2F q_pos[4]{
 						D2D1_POINT_2F{ 0.0f, -limit }, D2D1_POINT_2F{ limit, 0.0f }, D2D1_POINT_2F{ 0.0f, limit }, D2D1_POINT_2F{ -limit, 0.0f }
 					};

@@ -377,7 +377,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_sheet.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_main_sheet.set_dash_patt(DASH_PATT_DEFVAL);
 			m_main_sheet.set_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-			m_main_sheet.set_join_limit(MITER_LIMIT_DEFVAL);
+			m_main_sheet.set_join_miter_limit(MITER_LIMIT_DEFVAL);
 			m_main_sheet.set_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
 			m_main_sheet.set_stroke_width(1.0);
 			m_main_sheet.set_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);

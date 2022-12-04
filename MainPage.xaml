@@ -354,7 +354,7 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_miter" x:Uid="rmfi_join_style_miter" Click="join_style_click" GroupName="gn_join_style" IsChecked="true" Text="Shape" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_miter_or_bevel" x:Uid="rmfi_join_style_miter_or_bevel" Click="join_style_click" GroupName="gn_join_style" Text="Miter or Bevel" />
 					<MenuFlyoutSeparator />
-					<MenuFlyoutItem x:Name="mfi_join_limit" x:Uid="mfi_join_limit" Click="join_limit_click_async" Text="Miter Limit..." />
+					<MenuFlyoutItem x:Name="mfi_join_miter_limit" x:Uid="mfi_join_miter_limit" Click="join_miter_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<!-- 矢じるしメニュー -->

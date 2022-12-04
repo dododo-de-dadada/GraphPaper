@@ -22,7 +22,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::CachedFileManager;
 	using winrt::Windows::Storage::Provider::FileUpdateStatus;
 
-	IAsyncOperation<winrt::hresult> MainPage::file_write_pdf_async(StorageFile pdf_file)
+	IAsyncOperation<winrt::hresult> MainPage::pdf_write_async(StorageFile pdf_file)
 	{
 		// システムフォントコレクションを DWriteFactory から得る.
 		winrt::com_ptr<IDWriteFontCollection> collection;
@@ -231,8 +231,25 @@ namespace winrt::GraphPaper::implementation
 			);
 			len = dt_write(buf, dt_writer);
 
+			// 背景
+			//const double a = m_main_sheet.m_sheet_color.a;
+			//const D2D1_COLOR_F c{
+			//	(1.0 - a) + m_main_sheet.m_sheet_color.r * a,
+			//	(1.0 - a) + m_main_sheet.m_sheet_color.g * a,
+			//	(1.0 - a) + m_main_sheet.m_sheet_color.b * a
+			//};
+			const D2D1_COLOR_F c{ m_main_sheet.m_sheet_color };
+			sprintf_s(buf,
+				"%f %f %f rg\n"
+				"0 0 %f %f re\n"
+				"b\n",
+				c.r, c.g, c.b,
+				m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height
+				//m_main_sheet.m_sheet_size.height, m_main_sheet.m_sheet_size.width
+			);
+
 			for (const auto s : m_main_sheet.m_shape_list) {
-				len += s->write_pdf(m_main_sheet, dt_writer);
+				len += s->pdf_write(m_main_sheet, dt_writer);
 			}
 			len += dt_write(
 				"Q\n"

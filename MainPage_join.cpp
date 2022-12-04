@@ -52,8 +52,8 @@ namespace winrt::GraphPaper::implementation
 		//rmfi_cap_style_triangle_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
 	}
 
-	// 線枠メニューの「つなぎの種類」>「額ぶちの制限」が選択された.
-	IAsyncAction MainPage::join_limit_click_async(IInspectable const& sender, RoutedEventArgs const&)
+	// 線枠メニューの「結合の種類」>「額ぶちの制限」が選択された.
+	IAsyncAction MainPage::join_miter_limit_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto TICK_FREQ = 0.5;
 		m_prop_sheet.set_attr_to(&m_main_sheet);
 		float j_limit;
-		m_prop_sheet.get_join_limit(j_limit);
+		m_prop_sheet.get_join_miter_limit(j_limit);
 		j_limit -= 1.0f;
 
 		prop_slider_0().Maximum(MAX_VALUE);
@@ -109,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_limit;
 			float samp_width;
-			m_prop_sheet.m_shape_list.back()->get_join_limit(samp_limit);
+			m_prop_sheet.m_shape_list.back()->get_join_miter_limit(samp_limit);
 			m_prop_sheet.m_shape_list.back()->get_stroke_width(samp_width);
 			if (ustack_push_set<UNDO_OP::JOIN_LIMIT>(samp_limit) ||
 				ustack_push_set<UNDO_OP::STROKE_WIDTH>(samp_width)) {
@@ -140,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
 			swprintf_s(buf, LEN, L"%.1lf", static_cast<double>(val) + 1.0);
-			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_join_limit") + L": " + buf;
+			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_join_miter_limit") + L": " + buf;
 			prop_slider_0().Header(box_value(text));
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
@@ -163,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::JOIN_LIMIT && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(val);
-			m_prop_sheet.m_shape_list.back()->set_join_limit(val + 1.0f);
+			m_prop_sheet.m_shape_list.back()->set_join_miter_limit(val + 1.0f);
 		}
 		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
 			const float val = static_cast<float>(args.NewValue());
@@ -175,7 +175,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「つなぎの種類」が選択された.
+	// 線枠メニューの「結合の種類」が選択された.
 	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_LINE_JOIN new_val;
@@ -202,15 +202,15 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「つなぎ」に印をつける.
-	// s_join	線のつなぎ
+	// 線枠メニューの「結合」に印をつける.
+	// s_join	線の結合
 	void MainPage::join_style_is_checked(const D2D1_LINE_JOIN val)
 	{
 		rmfi_join_style_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL);
 		rmfi_join_style_miter().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
 		rmfi_join_style_miter_or_bevel().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL);
 		rmfi_join_style_round().IsChecked(val == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND);
-		mfi_join_limit().IsEnabled(rmfi_join_style_miter().IsChecked() || rmfi_join_style_miter_or_bevel().IsChecked());
+		mfi_join_miter_limit().IsEnabled(rmfi_join_style_miter().IsChecked() || rmfi_join_style_miter_or_bevel().IsChecked());
 	}
 
 }

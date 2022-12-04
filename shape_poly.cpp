@@ -177,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 	// exp_width	辺の太さの半分.
 	// exp_side	拡張した辺の配列 [exp_cnt][4+1]
 	// mit_limit	線のマイター制限
-	// s_join	線のつなぎ方法
+	// s_join	線の結合方法
 	static bool stroke_test_join_miter(
 		const D2D1_POINT_2F t_pos,
 		const size_t exp_cnt,
@@ -202,7 +202,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 拡張された辺 j と i が重なるか判定する.
 			if (equal(exp_side[j][3], exp_side[i][1])) {
-				// 線のつなぎがマイターか判定する.
+				// 線の結合がマイターか判定する.
 				if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
 					// マイターならば, 辺 j をマイター制限の長さだけ延長した四辺形を求める.
 					D2D1_POINT_2F e_vec;	// 辺ベクトル
@@ -263,9 +263,9 @@ namespace winrt::GraphPaper::implementation
 				}
 				continue;
 			}
-			// マイター制限を超えるならば, 線のつなぎがマイターまたは面取りか判定する.
+			// マイター制限を超えるならば, 線の結合がマイターまたは面取りか判定する.
 			if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-				// 線のつなぎがマイターまたは面取りならば, 調べる位置を三角形 { q1, q2, q3 } が含むか判定する.
+				// 線の結合がマイターまたは面取りならば, 調べる位置を三角形 { q1, q2, q3 } が含むか判定する.
 				const D2D1_POINT_2F* tri_pos = q_pos + 1;
 				if (pt_in_poly(t_pos, 3, tri_pos)) {
 					// 位置を含むなら true を返す.
@@ -312,7 +312,7 @@ namespace winrt::GraphPaper::implementation
 	// s_opa	線が不透明か判定
 	// s_width	線の太さ
 	// s_closed	線が閉じているか判定
-	// s_join	線のつなぎ
+	// s_join	線の結合
 	// s_limit	マイター制限
 	// f_opa	塗りつぶしが不透明か判定
 	static uint32_t stroke_hit_test(
@@ -881,7 +881,7 @@ namespace winrt::GraphPaper::implementation
 			m_end_closed,
 			m_stroke_cap,
 			m_join_style,
-			m_join_limit,
+			m_join_miter_limit,
 			is_opaque(m_fill_color)
 		);
 	}

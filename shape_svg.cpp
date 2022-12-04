@@ -60,9 +60,11 @@ namespace winrt::GraphPaper::implementation
 		svg_dt_write("</text>" SVG_NEW_LINE, dt_writer);
 	}
 
+	//------------------------------
 	// データライターに SVG として属性名とシングルバイト文字列を書き込む.
 	// val	シングルバイト文字列
 	// name	属性名
+	//------------------------------
 	void svg_dt_write(const char* val, const char* name, DataWriter const& dt_writer)
 	{
 		char buf[256];
@@ -70,7 +72,11 @@ namespace winrt::GraphPaper::implementation
 		svg_dt_write(buf, dt_writer);
 	}
 
+	//------------------------------
 	// データライターに SVG としてシングルバイト文字列を書き込む.
+	// val	シングルバイト文字列
+	// dt_writer	データライター
+	//------------------------------
 	void svg_dt_write(const char* val, DataWriter const& dt_writer)
 	{
 		for (uint32_t i = 0; val[i] != '\0'; i++) {
@@ -78,7 +84,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// データライターに SVG として属性名と色を書き込む.
+	// val	色
+	// name	属性名
+	//------------------------------
 	void svg_dt_write(const D2D1_COLOR_F val, const char* name, DataWriter const& dt_writer)
 	{
 		char buf[256];
@@ -93,7 +103,10 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// データライターに SVG として色を書き込む.
+	// val	色
+	//------------------------------
 	void svg_dt_write(const D2D1_COLOR_F val, DataWriter const& dt_writer)
 	{
 		char buf[8];
@@ -368,7 +381,7 @@ namespace winrt::GraphPaper::implementation
 		else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 			m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
 			svg_dt_write("stroke-linejoin=\"miter\" ", dt_writer);
-			svg_dt_write(m_join_limit, "stroke-miterlimit", dt_writer);
+			svg_dt_write(m_join_miter_limit, "stroke-miterlimit", dt_writer);
 		}
 		else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 			svg_dt_write("stroke-linejoin=\"round\" ", dt_writer);
@@ -455,7 +468,7 @@ namespace winrt::GraphPaper::implementation
 		else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 			m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
 			svg_dt_write("stroke-linejoin=\"miter\" ", dt_writer);
-			svg_dt_write(m_join_limit, "stroke-miterlimit", dt_writer);
+			svg_dt_write(m_join_miter_limit, "stroke-miterlimit", dt_writer);
 		}
 		else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
 			svg_dt_write("stroke-linejoin=\"round\" ", dt_writer);

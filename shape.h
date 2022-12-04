@@ -9,6 +9,7 @@
 // shape_image.cpp	画像
 // shape_line.cpp	直線 (矢じるしつき)
 // shape_path.cpp	折れ線のひな型
+// shape_pdf.cpp	PDF への書き込み
 // shape_poly.cpp	多角形
 // shape.rect.cpp	方形
 // shape_rrect.cpp	角丸方形
@@ -16,6 +17,7 @@
 // shape_sheet.cpp	用紙
 // shape_slist.cpp	図形リスト
 // shape_stroke.cpp	線枠のひな型
+// shape_svg.cpp	SVG への書き込み
 // shape_text.cpp	文字列
 //------------------------------
 #include <list>
@@ -148,8 +150,8 @@ namespace winrt::GraphPaper::implementation
 		FILLED	// 閉じた矢じるし
 	};
 
-	// 線分の単点
-	// (SVG は, 始点終点の区別ができない)
+	// 線分の端点
+	// (SVG や PDF は, 始点終点の区別ができない)
 	struct CAP_STYLE {
 		D2D1_CAP_STYLE m_start;	// 始点
 		D2D1_CAP_STYLE m_end;	// 終点
@@ -478,9 +480,9 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_grid_snap(bool& /*val*/) const noexcept { return false; }
 		// 画像の不透明度を得る.
 		virtual bool get_image_opacity(float& /*val*/) const noexcept { return false; }
-		// 線分のつなぎのマイター制限を得る.
-		virtual bool get_join_limit(float& /*val*/) const noexcept { return false; }
-		// 線分のつなぎを得る.
+		// 線分の結合のマイター制限を得る.
+		virtual bool get_join_miter_limit(float& /*val*/) const noexcept { return false; }
+		// 線分の結合を得る.
 		virtual bool get_join_style(D2D1_LINE_JOIN& /*val*/) const noexcept { return false; }
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(const D2D1_POINT_2F /*pos*/, float& /*dd*/, D2D1_POINT_2F& /*val*/) const noexcept { return false; }
@@ -568,9 +570,9 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_grid_snap(const bool /*val*/) noexcept { return false; }
 		// 画像の不透明度を得る.
 		virtual bool set_image_opacity(const float /*val*/) noexcept { return false; }
-		// 値を線分のつなぎのマイター制限に格納する.
-		virtual bool set_join_limit(const float& /*val*/) noexcept { return false; }
-		// 値を線分のつなぎに格納する.
+		// 値を線分の結合のマイター制限に格納する.
+		virtual bool set_join_miter_limit(const float& /*val*/) noexcept { return false; }
+		// 値を線分の結合に格納する.
 		virtual bool set_join_style(const D2D1_LINE_JOIN& /*val*/) noexcept { return false; }
 		// 値を, 部位の位置に格納する.
 		virtual bool set_pos_anc(const D2D1_POINT_2F /*val*/, const uint32_t /*anc*/, const float /*limit*/, const bool /*keep_aspect*/) noexcept { return false; }
@@ -603,7 +605,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		virtual void write(DataWriter const& /*dt_writer*/) const {}
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t write_pdf(const ShapeSheet& /*sheet*/, DataWriter const& /*dt_writer*/) const { return 0; }
+		virtual size_t pdf_write(const ShapeSheet& /*sheet*/, DataWriter const& /*dt_writer*/) const { return 0; }
 		// 図形をデータライターに SVG として書き込む.
 		virtual void svg_write(DataWriter const& /*dt_writer*/) const {}
 	};
@@ -736,8 +738,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_limit = MITER_LIMIT_DEFVAL;	// 線のつなぎのマイター制限
-		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線枠のつなぎ
+		float m_join_miter_limit = MITER_LIMIT_DEFVAL;	// 線の結合のマイター制限
+		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線枠の結合
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線枠の色
 		float m_stroke_width = 1.0f;	// 線枠の太さ
@@ -829,9 +831,9 @@ namespace winrt::GraphPaper::implementation
 		bool get_grid_snap(bool& val) const noexcept final override;
 		// 画像の不透明度を得る.
 		bool get_image_opacity(float& val) const noexcept final override;
-		// 線分のつなぎのマイター制限を得る.
-		bool get_join_limit(float& val) const noexcept final override;
-		// 線分のつなぎを得る.
+		// 線分の結合のマイター制限を得る.
+		bool get_join_miter_limit(float& val) const noexcept final override;
+		// 線分の結合を得る.
 		bool get_join_style(D2D1_LINE_JOIN& val) const noexcept final override;
 		// 用紙の色を得る.
 		bool get_sheet_color(D2D1_COLOR_F& val) const noexcept final override;
@@ -895,9 +897,9 @@ namespace winrt::GraphPaper::implementation
 		bool set_grid_show(const GRID_SHOW val) noexcept final override;
 		// 値を方眼に合わせるに格納する.
 		bool set_grid_snap(const bool val) noexcept final override;
-		// 値を線分のつなぎのマイター制限に格納する.
-		bool set_join_limit(const float& val) noexcept final override;
-		// 値を線分のつなぎに格納する.
+		// 値を線分の結合のマイター制限に格納する.
+		bool set_join_miter_limit(const float& val) noexcept final override;
+		// 値を線分の結合に格納する.
 		bool set_join_style(const D2D1_LINE_JOIN& val) noexcept final override;
 		// 値を用紙の色に格納する.
 		bool set_sheet_color(const D2D1_COLOR_F& val) noexcept final override;
@@ -984,8 +986,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_limit = MITER_LIMIT_DEFVAL;		// 線のつなぎのマイター制限の比率
-		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線のつなぎ
+		float m_join_miter_limit = MITER_LIMIT_DEFVAL;		// 線の結合のマイター制限の比率
+		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線の結合
 		float m_stroke_width = 1.0f;	// 線枠の太さ
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
@@ -1017,9 +1019,9 @@ namespace winrt::GraphPaper::implementation
 		bool get_dash_patt(DASH_PATT& val) const noexcept final override;
 		// 破線の形式を得る.
 		bool get_dash_style(D2D1_DASH_STYLE& val) const noexcept final override;
-		// 線分のつなぎのマイター制限を得る.
-		bool get_join_limit(float& val) const noexcept final override;
-		// 線分のつなぎを得る.
+		// 線分の結合のマイター制限を得る.
+		bool get_join_miter_limit(float& val) const noexcept final override;
+		// 線分の結合を得る.
 		bool get_join_style(D2D1_LINE_JOIN& val) const noexcept final override;
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& val) const noexcept override;
@@ -1049,9 +1051,9 @@ namespace winrt::GraphPaper::implementation
 		bool set_dash_patt(const DASH_PATT& val) noexcept final override;
 		// 値を線枠の形式に格納する.
 		bool set_dash_style(const D2D1_DASH_STYLE val) noexcept final override;
-		// 値を線分のつなぎのマイター制限に格納する.
-		virtual bool set_join_limit(const float& val) noexcept override;
-		// 値を線分のつなぎに格納する.
+		// 値を線分の結合のマイター制限に格納する.
+		virtual bool set_join_miter_limit(const float& val) noexcept override;
+		// 値を線分の結合に格納する.
 		virtual bool set_join_style(const D2D1_LINE_JOIN& val) noexcept override;
 		// 値を, 部位の位置に格納する.
 		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept override;
@@ -1068,7 +1070,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに PDF として書き込む.
-		size_t write_pdf_stroke(DataWriter const& /*dt_writer*/) const;
+		size_t pdf_write_stroke(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに SVG として書き込む.
 		void svg_write_stroke(DataWriter const& dt_writer) const;
 	};
@@ -1136,18 +1138,18 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t write_pdf(const ShapeSheet& sheet, DataWriter const& /*dt_writer*/) const;
+		virtual size_t pdf_write(const ShapeSheet& sheet, DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに SVG として書き込む.
 		void svg_write(DataWriter const& dt_writer) const;
 		// 矢じりをデータライターに PDF として書き込む.
-		size_t write_pdf_barbs(const ShapeSheet& sheet, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
+		size_t pdf_write_barbs(const ShapeSheet& sheet, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
 		// 矢じりをデータライターに SVG として書き込む.
 		void svg_write_barbs(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
 		// 値を端の形式に格納する.
 		bool set_stroke_cap(const CAP_STYLE& val) noexcept final override;
-		// 値を線分のつなぎのマイター制限に格納する.
-		bool set_join_limit(const float& val) noexcept final override;
-		// 値を線分のつなぎに格納する.
+		// 値を線分の結合のマイター制限に格納する.
+		bool set_join_miter_limit(const float& val) noexcept final override;
+		// 値を線分の結合に格納する.
 		bool set_join_style(const D2D1_LINE_JOIN& val) noexcept final override;
 	};
 
@@ -1189,6 +1191,8 @@ namespace winrt::GraphPaper::implementation
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
 		virtual void svg_write(DataWriter const& dt_writer) const;
+		// 図形をデータライターに PDF として書き込む.
+		virtual size_t pdf_write(const ShapeSheet& sheet, DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
@@ -1265,7 +1269,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
 		// 図形をデータライターに SVG として書き込む.
-		//size_t write_pdf(const ShapeSheet &sheet, DataWriter const& /*dt_writer*/) const {}
+		//size_t pdf_write(const ShapeSheet &sheet, DataWriter const& /*dt_writer*/) const {}
 		// 図形をデータライターに SVG として書き込む.
 		void svg_write(DataWriter const& dt_writer) const;
 	};
@@ -1298,7 +1302,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		//size_t write_pdf(const ShapeSheet &sheet, DataWriter const& dt_writer) const {}
+		//size_t pdf_write(const ShapeSheet &sheet, DataWriter const& dt_writer) const {}
 		// 図形をデータライターに SVG として書き込む.
 		void svg_write(DataWriter const& dt_writer) const;
 	};
@@ -1384,7 +1388,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& /*dt_writer*/) const;
 		// データライターに PDF ストリームの一部として書き込む.
-		size_t write_pdf(const ShapeSheet& sheet, DataWriter const& /*dt_writer*/) const final override;
+		size_t pdf_write(const ShapeSheet& sheet, DataWriter const& /*dt_writer*/) const final override;
 		// 図形をデータライターに SVG として書き込む.
 		void svg_write(DataWriter const& /*dt_writer*/) const;
 	};
@@ -1413,7 +1417,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータリーダーから読み込む.
 		ShapeBezi(DataReader const& dt_reader);
 		// データライターに PDF ストリームの一部として書き込む.
-		size_t write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const;
+		size_t pdf_write(const ShapeSheet& sheet, DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
 		void svg_write(DataWriter const& dt_writer) const;
 	};
@@ -1558,7 +1562,7 @@ namespace winrt::GraphPaper::implementation
 		ShapeText(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
-		size_t write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const;
+		size_t pdf_write(const ShapeSheet& sheet, DataWriter const& dt_writer) const;
 
 		// データライターに SVG として書き込む.
 		void svg_write(DataWriter const& dt_writer) const;

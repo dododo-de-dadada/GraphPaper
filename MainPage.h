@@ -28,7 +28,7 @@
 // MainPage_grid.cpp	方眼
 // MainPage_group.cpp	グループ化とグループの解除
 // NainPage_image.cpp	画像
-// NainPage_join.cpp	線分のつなぎ
+// NainPage_join.cpp	線分の結合
 // MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, 頂点をくっつける閾値
 // MainPage_order.cpp	並び替え
 // MainPage_prop.cpp	属性
@@ -197,7 +197,7 @@ namespace winrt::GraphPaper::implementation
 		IMAGE,	// 画像
 		FILL,	// 塗りつぶし
 		FONT,	// 書体
-		JOIN,	// 線のつなぎ
+		JOIN,	// 線の結合
 		MISC,	// その他
 		STROKE	// 線枠
 	};
@@ -343,18 +343,18 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_join.cpp
-		// 線分のつなぎと端
+		// 線分の結合と端
 		//-------------------------------
 
 		// 線枠メニューの「端の種類」に印をつける.
 		void cap_style_is_checked(const CAP_STYLE& s_cap);
 		// 線枠メニューの「端の種類」が選択された.
 		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 線枠メニューの「つなぎの種類」>「額ぶちの制限」が選択された.
-		IAsyncAction join_limit_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「つなぎの種類」に印をつける.
+		// 線枠メニューの「結合の種類」>「額ぶちの制限」が選択された.
+		IAsyncAction join_miter_limit_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 線枠メニューの「結合の種類」に印をつける.
 		void join_style_is_checked(const D2D1_LINE_JOIN s_join);
-		// 線枠メニューの「つなぎの形式」が選択された.
+		// 線枠メニューの「結合の形式」が選択された.
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_OP U, int S> void join_slider_set_header(const float val);
@@ -479,10 +479,6 @@ namespace winrt::GraphPaper::implementation
 		// 図形データをストレージファイルに非同期に書き込む.
 		template <bool SUSPEND, bool SETTING>
 		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile gpf_file);
-		IAsyncOperation<winrt::hresult> file_write_pdf_async(StorageFile pdf_file);
-
-		// 図形データを SVG としてストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> file_svg_write_async(StorageFile s_file);
 		// ファイルメニューの「用紙を画像としてエクスポートする」が選択された
 		IAsyncAction file_export_as_image_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 画像用のファイル保存ピッカーを開いて, ストレージファイルを得る.
@@ -677,6 +673,13 @@ namespace winrt::GraphPaper::implementation
 		void len_unit_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.
 		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
+
+		//-------------------------------
+		// MainPage_pdf.cpp
+		// PDF
+		//-------------------------------
+
+		IAsyncOperation<winrt::hresult> pdf_write_async(StorageFile pdf_file);
 
 		//-------------------------------
 		// MainPage_sample.cpp
@@ -898,6 +901,14 @@ namespace winrt::GraphPaper::implementation
 		void summary_unselect_all(void);
 		// 一覧の表示を更新する.
 		void summary_update(void);
+
+		//------------------------------
+		// MainPage_svg.cpp
+		// 線枠の色, 太さ
+		//------------------------------
+
+		// 図形データを SVG としてストレージファイルに非同期に書き込む.
+		IAsyncOperation<winrt::hresult> svg_write_async(StorageFile s_file);
 
 		//-------------------------------
 		//　MainPage_text.cpp

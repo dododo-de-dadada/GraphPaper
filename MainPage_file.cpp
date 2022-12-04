@@ -58,7 +58,7 @@ file_recent_menu_update
 file_save_as_click_async
 	+---file_recent_token_async
 	+---file_wait_cursor
-	+---file_svg_write_async
+	+---svg_write_async
 	+---file_write_gpf_async
 
 file_save_click_async
@@ -70,7 +70,7 @@ file_save_click_async
 file_write_gpf_async
 	+---file_recent_add
 
-file_svg_write_async
+svg_write_async
 	+---file_pick_save_image_async
 
 */
@@ -104,22 +104,23 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Window;
 
 	static const CoreCursor& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 待機カーソル.
-	constexpr uint32_t MRU_MAX = 25;	// 最近使ったリストの最大数.
-	constexpr wchar_t RES_DESC_GPF[] = L"str_desc_gpf";	// 拡張子 gpf の説明
-	constexpr wchar_t RES_DESC_SVG[] = L"str_desc_svg";	// 拡張子 svg の説明
-	constexpr wchar_t RES_ERR_FONT[] = L"str_err_font";	// 有効でない書体のエラーメッセージのリソース名
-	constexpr wchar_t RES_ERR_READ[] = L"str_err_read";	// 読み込みエラーメッセージのリソース名
-	constexpr wchar_t RES_ERR_RECENT[] = L"str_err_recent";	// 最近使ったファイルのエラーメッセージのリソース名
-	constexpr wchar_t RES_EXT_BMP[] = L".bmp";	// 画像ファイルの拡張子
-	constexpr wchar_t RES_EXT_GIF[] = L".gif";	// 画像ファイルの拡張子
-	constexpr wchar_t RES_EXT_GPF[] = L".gpf";	// 図形データファイルの拡張子
-	constexpr wchar_t RES_EXT_JPEG[] = L".jpeg";	// 画像ファイルの拡張子
-	constexpr wchar_t RES_EXT_JPG[] = L".jpg";	// 画像ファイルの拡張子
-	constexpr wchar_t RES_EXT_PNG[] = L".png";	// 画像ファイルの拡張子
-	constexpr wchar_t RES_EXT_SVG[] = L".svg";	// SVG ファイルの拡張子
-	constexpr wchar_t RES_EXT_TIF[] = L".tif";	// 画像ファイルの拡張子
-	constexpr wchar_t RES_EXT_TIFF[] = L".tiff";	// 画像ファイルの拡張子
-	constexpr wchar_t UNTITLED[] = L"str_untitled";	// 無題のリソース名
+	constexpr static uint32_t MRU_MAX = 25;	// 最近使ったリストの最大数.
+	constexpr static wchar_t RES_DESC_GPF[] = L"str_desc_gpf";	// 拡張子 gpf の説明
+	constexpr static wchar_t RES_DESC_SVG[] = L"str_desc_svg";	// 拡張子 svg の説明
+	constexpr static wchar_t RES_DESC_PDF[] = L"str_desc_pdf";	// 拡張子 pdf の説明
+	constexpr static wchar_t RES_ERR_FONT[] = L"str_err_font";	// 有効でない書体のエラーメッセージのリソース名
+	constexpr static wchar_t RES_ERR_READ[] = L"str_err_read";	// 読み込みエラーメッセージのリソース名
+	constexpr static wchar_t RES_ERR_RECENT[] = L"str_err_recent";	// 最近使ったファイルのエラーメッセージのリソース名
+	constexpr static wchar_t RES_EXT_BMP[] = L".bmp";	// 画像ファイルの拡張子
+	constexpr static wchar_t RES_EXT_GIF[] = L".gif";	// 画像ファイルの拡張子
+	constexpr static wchar_t RES_EXT_GPF[] = L".gpf";	// 図形データファイルの拡張子
+	constexpr static wchar_t RES_EXT_JPEG[] = L".jpeg";	// 画像ファイルの拡張子
+	constexpr static wchar_t RES_EXT_JPG[] = L".jpg";	// 画像ファイルの拡張子
+	constexpr static wchar_t RES_EXT_PNG[] = L".png";	// 画像ファイルの拡張子
+	constexpr static wchar_t RES_EXT_SVG[] = L".svg";	// SVG ファイルの拡張子
+	constexpr static wchar_t RES_EXT_TIF[] = L".tif";	// 画像ファイルの拡張子
+	constexpr static wchar_t RES_EXT_TIFF[] = L".tiff";	// 画像ファイルの拡張子
+	constexpr static wchar_t UNTITLED[] = L"str_untitled";	// 無題のリソース名
 	static const IVector<winrt::hstring> TYPE_BMP{
 		winrt::single_threaded_vector<winrt::hstring>({ RES_EXT_BMP })
 	};
@@ -900,7 +901,9 @@ namespace winrt::GraphPaper::implementation
 					ResourceLoader::GetForCurrentView().GetString(RES_DESC_SVG)
 				};
 				save_picker.FileTypeChoices().Insert(desc_svg, TYPE_SVG);
-				const winrt::hstring desc_pdf{ L"" };
+				const winrt::hstring desc_pdf{
+					ResourceLoader::GetForCurrentView().GetString(RES_DESC_PDF)
+				};
 				save_picker.FileTypeChoices().Insert(desc_pdf, TYPE_PDF);
 			}
 
@@ -944,14 +947,14 @@ namespace winrt::GraphPaper::implementation
 				const auto f_type = save_file.FileType();
 				if (f_type == RES_EXT_SVG) {
 					// 図形データを SVG としてストレージファイルに非同期に書き込み, 結果を得る.
-					hr = co_await file_svg_write_async(save_file);
+					hr = co_await svg_write_async(save_file);
 				}
 				else if (f_type == RES_EXT_GPF) {
 					// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
 					hr = co_await file_write_gpf_async<false, false>(save_file);
 				}
 				else if (f_type == L".pdf") {
-					hr = co_await file_write_pdf_async(save_file);
+					hr = co_await pdf_write_async(save_file);
 				}
 				// カーソルを元に戻す.
 				Window::Current().CoreWindow().PointerCursor(prev_cur);

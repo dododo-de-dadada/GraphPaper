@@ -512,14 +512,14 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 線分のつなぎのマイター制限を得る.
-	bool ShapeSheet::get_join_limit(float& val) const noexcept
+	// 線分の結合のマイター制限を得る.
+	bool ShapeSheet::get_join_miter_limit(float& val) const noexcept
 	{
-		val = m_join_limit;
+		val = m_join_miter_limit;
 		return true;
 	}
 
-	// 線分のつなぎを得る.
+	// 線分の結合を得る.
 	bool ShapeSheet::get_join_style(D2D1_LINE_JOIN& val) const noexcept
 	{
 		val = m_join_style;
@@ -590,8 +590,8 @@ namespace winrt::GraphPaper::implementation
 		m_dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());	// 破線の端の形式
 		dt_read(m_dash_patt, dt_reader);	// 破線の配置
 		m_dash_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());	// 破線の形式
-		m_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());	// 線のつなぎの形状
-		m_join_limit = dt_reader.ReadSingle();	// 線のつなぎのマイター制限
+		m_join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());	// 線の結合の形状
+		m_join_miter_limit = dt_reader.ReadSingle();	// 線の結合のマイター制限
 		m_stroke_width = dt_reader.ReadSingle();	// 線・枠の太さ
 		dt_read(m_fill_color, dt_reader);	// 塗りつぶしの色
 		dt_read(m_font_color, dt_reader);	// 書体の色
@@ -826,17 +826,17 @@ namespace winrt::GraphPaper::implementation
 		return (m_dash_style = val) != old_val;
 	}
 
-	// 値を線分のつなぎのマイター制限に格納する.
-	bool ShapeSheet::set_join_limit(const float& val) noexcept
+	// 値を線分の結合のマイター制限に格納する.
+	bool ShapeSheet::set_join_miter_limit(const float& val) noexcept
 	{
-		if (!equal(m_join_limit, val)) {
-			m_join_limit = val;
+		if (!equal(m_join_miter_limit, val)) {
+			m_join_miter_limit = val;
 			return true;
 		}
 		return false;
 	}
 
-	// 値を線分のつなぎに格納する.
+	// 値を線分の結合に格納する.
 	bool ShapeSheet::set_join_style(const D2D1_LINE_JOIN& val) noexcept
 	{
 		const auto old_val = m_join_style;
@@ -910,7 +910,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_grid_show(m_grid_show);
 		s->get_grid_snap(m_grid_snap);
 		s->get_image_opacity(m_image_opac);
-		s->get_join_limit(m_join_limit);
+		s->get_join_miter_limit(m_join_miter_limit);
 		s->get_join_style(m_join_style);
 		s->get_sheet_color(m_sheet_color);
 		s->get_stroke_cap(m_stroke_cap);
@@ -945,8 +945,8 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_cap));	// 破線の端の形式
 		dt_write(m_dash_patt, dt_writer);	// 破線の配置
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_style));	// 線枠の形式
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_join_style));	// 線分のつなぎ
-		dt_writer.WriteSingle(m_join_limit);	// 線分のマイター制限
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_join_style));	// 線分の結合
+		dt_writer.WriteSingle(m_join_miter_limit);	// 線分のマイター制限
 		dt_writer.WriteSingle(m_stroke_width);	// 線枠の太さ
 		dt_write(m_fill_color, dt_writer);	// 塗りつぶしの色
 		dt_write(m_font_color, dt_writer);	// 書体の色

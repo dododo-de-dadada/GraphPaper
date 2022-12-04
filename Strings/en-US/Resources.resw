@@ -718,31 +718,31 @@
     <comment>String</comment>
   </data>
   <data name="str_desc_gpf" xml:space="preserve">
-    <value>Shape Data</value>
+    <value>Grid Paper File</value>
     <comment>String</comment>
   </data>
   <data name="str_desc_svg" xml:space="preserve">
-    <value>SVG File</value>
+    <value>SVG (Scalable Vector Graphics)</value>
     <comment>String</comment>
   </data>
   <data name="str_desc_bmp" xml:space="preserve">
-    <value>BMP</value>
+    <value>BMP (Bitmap)</value>
     <comment>String</comment>
   </data>
   <data name="str_desc_gif" xml:space="preserve">
-    <value>GIF</value>
+    <value>GIF (Graphics Interchange Format)</value>
     <comment>String</comment>
   </data>
   <data name="str_desc_jpg" xml:space="preserve">
-    <value>JPEG</value>
+    <value>JPEG (Joint Photographic Experts Group)</value>
     <comment>String</comment>
   </data>
   <data name="str_desc_png" xml:space="preserve">
-    <value>PNG</value>
+    <value>PNG (Portable Network Graphics)</value>
     <comment>String</comment>
   </data>
   <data name="str_desc_tif" xml:space="preserve">
-    <value>TIFF</value>
+    <value>TIFF (Tagged Image File Format)</value>
     <comment>String</comment>
   </data>
   <data name="str_dot_gap" xml:space="preserve">
@@ -850,7 +850,7 @@
     <value>Line Join</value>
     <comment>String</comment>
   </data>
-  <data name="str_join_limit" xml:space="preserve">
+  <data name="str_join_miter_limit" xml:space="preserve">
     <value>Miter Limit</value>
     <comment>String</comment>
   </data>
@@ -1054,7 +1054,7 @@
     <value>Bevel</value>
     <comment>RadioMenyFlyoutItem</comment>
   </data>
-  <data name="mfi_join_limit.Text" xml:space="preserve">
+  <data name="mfi_join_miter_limit.Text" xml:space="preserve">
     <value>Miter Limit...</value>
     <comment>MenyFlyoutItem</comment>
   </data>
@@ -1141,5 +1141,9 @@
   <data name="prop_check_box.Content" xml:space="preserve">
     <value>Apply when importing.</value>
     <comment>CheckBox</comment>
+  </data>
+  <data name="str_desc_pdf" xml:space="preserve">
+    <value>PDF (Portable Document Format)</value>
+    <comment>String</comment>
   </data>
 </root>

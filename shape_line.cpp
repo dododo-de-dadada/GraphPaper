@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	// 矢じるしの D2D1 パスジオメトリを作成する.
 	static void line_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_vec, ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo);
 	// 矢じるしの D2D ストローク特性を作成する.
-	static void line_create_arrow_style(ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, const D2D1_LINE_JOIN s_join_style, const double s_join_limit, ID2D1StrokeStyle** s_arrow_style);
+	static void line_create_arrow_style(ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, const D2D1_LINE_JOIN s_join_style, const double s_join_miter_limit, ID2D1StrokeStyle** s_arrow_style);
 	// 矢じるしの先端と返しの位置を求める.
 	//static bool line_get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
 	// 線分が位置を含むか, 太さも考慮して判定する.
@@ -55,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じるしの D2D ストローク特性を作成する.
-	static void line_create_arrow_style(ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, const D2D1_LINE_JOIN s_join_style, const double s_join_limit, ID2D1StrokeStyle** s_arrow_style)
+	static void line_create_arrow_style(ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, const D2D1_LINE_JOIN s_join_style, const double s_join_miter_limit, ID2D1StrokeStyle** s_arrow_style)
 	{
 		// 矢じるしの破線の形式はかならずソリッドとする.
 		const D2D1_STROKE_STYLE_PROPERTIES s_prop{
@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 			s_cap_style.m_end,	// endCap
 			D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// dashCap
 			s_join_style,	// lineJoin
-			static_cast<FLOAT>(s_join_limit),	// miterLimit
+			static_cast<FLOAT>(s_join_miter_limit),	// miterLimit
 			D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
 			0.0f	// dashOffset
 		};
@@ -189,7 +189,7 @@ namespace winrt::GraphPaper::implementation
 		dx.m_d2d_context->DrawLine(m_pos, e_pos, sh.m_color_brush.get(), s_width, s_style);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			if (m_d2d_arrow_style == nullptr) {
-				line_create_arrow_style(dx.m_d2d_factory.get(), m_stroke_cap, m_join_style, m_join_limit, m_d2d_arrow_style.put());
+				line_create_arrow_style(dx.m_d2d_factory.get(), m_stroke_cap, m_join_style, m_join_miter_limit, m_d2d_arrow_style.put());
 			}
 			if (m_d2d_arrow_geom == nullptr) {
 				line_create_arrow_geom(dx.m_d2d_factory.get(), m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
@@ -301,10 +301,10 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を線分のつなぎのマイター制限に格納する.
-	bool ShapeLine::set_join_limit(const float& val) noexcept
+	// 値を線分の結合のマイター制限に格納する.
+	bool ShapeLine::set_join_miter_limit(const float& val) noexcept
 	{
-		if (ShapeStroke::set_join_limit(val)) {
+		if (ShapeStroke::set_join_miter_limit(val)) {
 			if (m_d2d_arrow_style != nullptr) {
 				m_d2d_arrow_style = nullptr;
 			}
@@ -313,7 +313,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を線分のつなぎに格納する.
+	// 値を線分の結合に格納する.
 	bool ShapeLine::set_join_style(const D2D1_LINE_JOIN& val) noexcept
 	{
 		if (ShapeStroke::set_join_style(val)) {

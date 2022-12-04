@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 線のつなぎを得る.
+	// 線の結合を得る.
 	// val	得られた値
 	// 戻り値	つねに true
 	bool ShapeStroke::get_dash_cap(D2D1_CAP_STYLE& val) const noexcept
@@ -72,16 +72,16 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 線分のつなぎのマイター制限を得る.
+	// 線分の結合のマイター制限を得る.
 	// val	得られた値
 	// 戻り値	つねに true
-	bool ShapeStroke::get_join_limit(float& val) const noexcept
+	bool ShapeStroke::get_join_miter_limit(float& val) const noexcept
 	{
-		val = m_join_limit;
+		val = m_join_miter_limit;
 		return true;
 	}
 
-	// 線分のつなぎを得る.
+	// 線分の結合を得る.
 	// val	得られた値
 	// 戻り値	つねに true
 	bool ShapeStroke::get_join_style(D2D1_LINE_JOIN& val) const noexcept
@@ -273,7 +273,7 @@ namespace winrt::GraphPaper::implementation
 			m_stroke_cap.m_end,	// endCap
 			m_dash_cap,	// dashCap
 			m_join_style,	// lineJoin
-			m_join_limit,	// miterLimit
+			m_join_miter_limit,	// miterLimit
 			d_style,	// dashStyle
 			0.0f,
 		};
@@ -334,12 +334,12 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を線分のつなぎのマイター制限に格納する.
+	// 値を線分の結合のマイター制限に格納する.
 	// val	格納する値
-	bool ShapeStroke::set_join_limit(const float& val) noexcept
+	bool ShapeStroke::set_join_miter_limit(const float& val) noexcept
 	{
-		if (!equal(m_join_limit, val)) {
-			m_join_limit = val;
+		if (!equal(m_join_miter_limit, val)) {
+			m_join_miter_limit = val;
 			if (m_d2d_stroke_style != nullptr) {
 				m_d2d_stroke_style = nullptr;
 			}
@@ -348,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を線分のつなぎに格納する.
+	// 値を線分の結合に格納する.
 	// val	格納する値
 	bool ShapeStroke::set_join_style(const D2D1_LINE_JOIN& val)  noexcept
 	{
@@ -490,7 +490,7 @@ namespace winrt::GraphPaper::implementation
 		m_stroke_color(s_sheet->m_stroke_color),
 		m_dash_patt(s_sheet->m_dash_patt),
 		m_dash_style(s_sheet->m_dash_style),
-		m_join_limit(s_sheet->m_join_limit),
+		m_join_miter_limit(s_sheet->m_join_miter_limit),
 		m_join_style(s_sheet->m_join_style),
 		m_stroke_width(s_sheet->m_stroke_width),
 		m_d2d_stroke_style(nullptr)
@@ -521,7 +521,7 @@ namespace winrt::GraphPaper::implementation
 		m_dash_cap(static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())),
 		m_dash_patt(DASH_PATT{ dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_dash_style(static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32())),
-		m_join_limit(dt_reader.ReadSingle()),
+		m_join_miter_limit(dt_reader.ReadSingle()),
 		m_join_style(static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32())),
 		m_stroke_width(dt_reader.ReadSingle()),
 		m_d2d_stroke_style(nullptr)
@@ -544,7 +544,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_dash_patt.m_[4]);
 		dt_writer.WriteSingle(m_dash_patt.m_[5]);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_style));
-		dt_writer.WriteSingle(m_join_limit);
+		dt_writer.WriteSingle(m_join_miter_limit);
 		dt_writer.WriteUInt32(m_join_style);
 		dt_writer.WriteSingle(m_stroke_width);
 	}

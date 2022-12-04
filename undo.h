@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 		//IMAGE_ASPECT,	// 画像の縦横維持の操作
 		IMAGE_OPAC,	// 画像の不透明度の操作
 		JOIN_LIMIT,	// 線のマイター制限の操作
-		JOIN_STYLE,	// 破のつなぎの操作
+		JOIN_STYLE,	// 破の結合の操作
 		LIST,	// 図形を挿入または削除する操作
 		ORDER,	// 図形の順番の入れ替え
 		FORM,	// 図形の形 (部位の位置) の操作
