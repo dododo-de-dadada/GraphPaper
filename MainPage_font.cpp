@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr wchar_t DLG_TITLE[] = L"str_font";
 
-	// 書体の伸縮の配列
+	// 書体の幅の伸縮の配列
 	constexpr std::underlying_type_t<DWRITE_FONT_STRETCH> FONT_STRETCH[] = {
 		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_UNDEFINED,
 		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED,
@@ -32,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED,
 	};
 
-	// 書体の伸縮の文字列配列
+	// 書体の幅の伸縮の文字列配列
 	constexpr wchar_t* FONT_STRETCH_NAME[] = {
 		L"str_font_stretch_undefined",
 		L"str_font_stretch_ultra_condensed",
@@ -361,7 +361,7 @@ namespace winrt::GraphPaper::implementation
 		sheet_draw();
 	}
 
-	// 書体メニューの「伸縮」が選択された.
+	// 書体メニューの「幅の伸縮」が選択された.
 	IAsyncAction MainPage::font_stretch_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_prop_sheet.set_attr_to(&m_main_sheet);

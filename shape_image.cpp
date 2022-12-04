@@ -679,46 +679,4 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// データライターに SVG として書き込む.
-	// file_name	画像ファイル名
-	// dt_write		データライター
-	void ShapeImage::write_svg(const wchar_t file_name[], DataWriter const& dt_writer) const
-	{
-		dt_write_svg("<image href=\"", dt_writer);
-		dt_write_svg(file_name, wchar_len(file_name), dt_writer);
-		dt_write_svg("\" ", dt_writer);
-		dt_write_svg(m_pos, "x", "y", dt_writer);
-		dt_write_svg(m_view.width, "width", dt_writer);
-		dt_write_svg(m_view.height, "height", dt_writer);
-		dt_write_svg(m_opac, "opacity", dt_writer);
-		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
-	}
-
-	// データライターに SVG として書き込む.
-	// 画像なしの場合.
-	// dt_write		データライター
-	void ShapeImage::write_svg(DataWriter const& dt_writer) const
-	{
-		constexpr char RECT[] =
-			"<rect x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" "
-			"stroke=\"black\" fill=\"white\" />" SVG_NEW_LINE;
-		constexpr char TEXT[] =
-			"<text x=\"50%\" y=\"50%\" text-anchor=\"middle\" dominant-baseline=\"central\">"
-			"NO IMAGE</text>" SVG_NEW_LINE;
-		dt_write_svg("<!--" SVG_NEW_LINE, dt_writer);
-		write_svg(nullptr, dt_writer);
-		dt_write_svg("-->" SVG_NEW_LINE, dt_writer);
-		dt_write_svg("<svg ", dt_writer);
-		dt_write_svg(m_pos, "x", "y", dt_writer);
-		dt_write_svg(m_view.width, "width", dt_writer);
-		dt_write_svg(m_view.height, "height", dt_writer);
-		dt_write_svg("viewBox=\"0 0 ", dt_writer);
-		dt_write_svg(m_view.width, dt_writer);
-		dt_write_svg(m_view.height, dt_writer);
-		dt_write_svg("\">" SVG_NEW_LINE, dt_writer);
-		dt_write_svg(RECT, dt_writer);
-		dt_write_svg(TEXT, dt_writer);
-		dt_write_svg("</svg>" SVG_NEW_LINE, dt_writer);
-	}
-
 }

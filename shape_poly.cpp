@@ -533,7 +533,7 @@ namespace winrt::GraphPaper::implementation
 	// 直行するベクトルを得る.
 	//static D2D1_POINT_2F poly_pt_orth(const D2D1_POINT_2F vec) { return { -vec.y, vec.x }; }
 
-	static bool poly_get_arrow_barbs(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROW_SIZE& a_size, D2D1_POINT_2F& h_tip, D2D1_POINT_2F h_barbs[]) noexcept
+	bool ShapePoly::poly_get_arrow_barbs(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROW_SIZE& a_size, D2D1_POINT_2F& h_tip, D2D1_POINT_2F h_barbs[]) noexcept
 	{
 		double b_offset = a_size.m_offset;	// 矢じるし先端のオフセット
 		for (size_t i = v_cnt - 1; i > 0; i--) {
@@ -963,82 +963,6 @@ namespace winrt::GraphPaper::implementation
 		ShapePath::write(dt_writer);
 		dt_writer.WriteBoolean(m_end_closed);
 		dt_write(m_fill_color, dt_writer);
-	}
-
-	//------------------------------
-	// データライターに PDF ストリームの一部として書き込む.
-	// dt_weiter	データライター
-	// 戻り値	書き込んだバイト数
-	//------------------------------
-	size_t ShapePoly::write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const
-	{
-		size_t n = dt_write("% Poly\n", dt_writer);
-		n += write_pdf_stroke(dt_writer);
-		char buf[1024];
-		const size_t v_cnt = m_vec.size() + 1;
-		D2D1_POINT_2F v_pos[MAX_N_GON];
-		v_pos[0] = m_pos;
-		sprintf_s(buf, "%f %f m\n", v_pos[0].x, -v_pos[0].y + sheet.m_sheet_size.height);
-		n += dt_write(buf, dt_writer);
-		for (size_t i = 1; i < v_cnt; i++) {
-			pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
-			sprintf_s(buf, "%f %f l\n", v_pos[i].x, -v_pos[i].y + sheet.m_sheet_size.height);
-			n += dt_write(buf, dt_writer);
-		}
-		if (m_end_closed) {
-			// b はパスを閉じて (B は閉じずに) 塗りつぶす.
-			sprintf_s(buf, "%f %f %f rg\nb\n", m_fill_color.r, m_fill_color.g, m_fill_color.b);
-			n += dt_write(buf, dt_writer);
-		}
-		else {
-			if (equal(m_fill_color.a, 1.0f)) {
-				// b はパスを閉じて (B は閉じずに) 塗りつぶす.
-				sprintf_s(buf, "%f %f %f rg\nB\n", m_fill_color.r, m_fill_color.g, m_fill_color.b);
-				n += dt_write(buf, dt_writer);
-			}
-			else {
-				n += dt_write("S\n", dt_writer);
-			}
-		}
-		if (m_arrow_style == ARROW_STYLE::OPENED ||
-			m_arrow_style == ARROW_STYLE::FILLED) {
-			D2D1_POINT_2F h_tip;
-			D2D1_POINT_2F h_barbs[2];
-			if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
-				n += write_pdf_barbs(sheet, h_barbs, h_tip, dt_writer);
-			}
-		}
-		return n;
-	}
-
-	// データライターに SVG タグとして書き込む.
-	void ShapePoly::write_svg(DataWriter const& dt_writer) const
-	{
-		dt_write_svg("<path d=\"", dt_writer);
-		dt_write_svg(m_pos, "M", dt_writer);
-		const auto d_cnt = m_vec.size();	// 差分の数
-		const auto v_cnt = d_cnt + 1;
-		D2D1_POINT_2F v_pos[MAX_N_GON];
-
-		v_pos[0] = m_pos;
-		for (size_t i = 0; i < d_cnt; i++) {
-			dt_write_svg(m_vec[i], "l", dt_writer);
-			pt_add(v_pos[i], m_vec[i], v_pos[i + 1]);
-		}
-		if (m_end_closed) {
-			dt_write_svg("Z", dt_writer);
-		}
-		dt_write_svg("\" ", dt_writer);
-		write_svg_stroke(dt_writer);
-		dt_write_svg(m_fill_color, "fill", dt_writer);
-		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
-		if (m_arrow_style != ARROW_STYLE::NONE) {
-			D2D1_POINT_2F h_tip;
-			D2D1_POINT_2F h_barbs[2];
-			if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
-				write_svg_barbs(h_barbs, h_tip, dt_writer);
-			}
-		}
 	}
 
 }

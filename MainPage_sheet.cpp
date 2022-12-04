@@ -310,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 							}
 							else if (prop == TextBlock::FontStretchProperty()) {
 								// プロパティーが FontStretch の場合,
-								// セッターの値から, 書体の伸縮を得る.
+								// セッターの値から, 書体の幅の伸縮を得る.
 								const auto val = unbox_value<int32_t>(setter.Value());
 								m_main_sheet.set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(val));
 							}

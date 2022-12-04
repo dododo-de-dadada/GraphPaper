@@ -400,7 +400,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// ‘‘Ì‚ÌLk‚ğ“¾‚é.
+	// ‘‘Ì‚Ì•‚ÌLk‚ğ“¾‚é.
 	bool ShapeSheet::get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept
 	{
 		val = m_font_stretch;
@@ -597,7 +597,7 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_font_color, dt_reader);	// ‘‘Ì‚ÌF
 		dt_read(m_font_family, dt_reader);	// ‘‘Ì–¼
 		m_font_size = dt_reader.ReadSingle();	// ‘‘Ì‚Ì‘å‚«‚³
-		m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());	// ‘‘Ì‚ÌLk
+		m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());	// ‘‘Ì‚Ì•‚ÌLk
 		m_font_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());	// ‘‘Ì‚Ìš‘Ì
 		m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());	// ‘‘Ì‚Ì‘¾‚³
 		m_text_par_align = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());	// ’i—‚Ì‚»‚ë‚¦
@@ -686,7 +686,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// ’l‚ğ‘‘Ì‚ÌLk‚ÉŠi”[‚·‚é.
+	// ’l‚ğ‘‘Ì‚Ì•‚ÌLk‚ÉŠi”[‚·‚é.
 	bool ShapeSheet::set_font_stretch(const DWRITE_FONT_STRETCH val) noexcept
 	{
 		const auto old_val = m_font_stretch;
@@ -952,7 +952,7 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_font_color, dt_writer);	// ‘‘Ì‚ÌF
 		dt_write(m_font_family, dt_writer);	// ‘‘Ì–¼
 		dt_writer.WriteSingle(m_font_size);	// ‘‘Ì‚Ì‘å‚«‚³
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_stretch));	// ‘‘Ì‚ÌLk
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_stretch));	// ‘‘Ì‚Ì•‚ÌLk
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_style));	// ‘‘Ì‚Ìš‘Ì
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));	// ‘‘Ì‚Ì‘¾‚³
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_par_align));	// ’i—‚Ì‚»‚ë‚¦

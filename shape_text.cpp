@@ -241,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 				// 文字列フォーマットを破棄する.
 				t_format = nullptr;
 
-				// 文字の伸縮, 文字のそろえ, 段落のそろえを文字列レイアウトに格納する.
+				// 文字の幅の伸縮, 文字のそろえ, 段落のそろえを文字列レイアウトに格納する.
 				winrt::check_hresult(m_dw_text_layout->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len }));
 				winrt::check_hresult(m_dw_text_layout->SetTextAlignment(m_text_align_t));
 				winrt::check_hresult(m_dw_text_layout->SetParagraphAlignment(m_text_par_align));
@@ -303,7 +303,7 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 
-				// 書体の伸縮が変更されたなら文字列レイアウトに格納する.
+				// 書体の幅の伸縮が変更されたなら文字列レイアウトに格納する.
 				DWRITE_FONT_STRETCH font_stretch;
 				winrt::check_hresult(m_dw_text_layout->GetFontStretch(0, &font_stretch));
 				if (!equal(font_stretch, m_font_stretch)) {
@@ -563,7 +563,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 書体の伸縮を得る.
+	// 書体の幅の伸縮を得る.
 	bool ShapeText::get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept
 	{
 		val = m_font_stretch;
@@ -974,124 +974,6 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_text_padding, dt_writer);
 	}
 
-	size_t ShapeText::write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const
-	{
-		/*
-		winrt::com_ptr<IWICImagingFactory2> wic_factory;
-		winrt::check_hresult(
-			CoCreateInstance(
-				CLSID_WICImagingFactory,
-				nullptr,
-				CLSCTX_INPROC_SERVER,
-				IID_PPV_ARGS(&wic_factory)
-			)
-		);
-
-		UINT w = 0;
-		UINT h = 0;
-		for (int i = 0; i < m_dw_test_cnt; i++) {
-			w = max(w, m_dw_test_metrics[i].width);
-			h += m_dw_test_metrics[i].height;
-		}
-		
-		std::vector<uint8_t> vec(4 * w * h);
-		winrt::com_ptr<IWICBitmap> wic_bitmap;
-		wic_factory->CreateBitmapFromMemory(w, h, GUID_WICPixelFormat32bppBGRA, 4 * w, 4 * w * h, vec.data(), wic_bitmap.put());
-		D2D1_RENDER_TARGET_PROPERTIES prop{
-			D2D1_RENDER_TARGET_TYPE::D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-			D2D1_PIXEL_FORMAT{
-				DXGI_FORMAT_B8G8R8A8_UNORM,
-				D2D1_ALPHA_MODE_STRAIGHT
-				},
-			96.0f,
-			96.0f,
-			D2D1_RENDER_TARGET_USAGE_FORCE_BITMAP_REMOTING,
-			D2D1_FEATURE_LEVEL_DEFAULT
-		};
-		winrt::com_ptr<ID2D1RenderTarget> target;
-		s_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
-		winrt::com_ptr<ID2D1SolidColorBrush> brush;
-		target->CreateSolidColorBrush(m_fill_color, brush.put());
-		target->BeginDraw();
-		target->DrawTextLayout(D2D1_POINT_2F{ m_text_padding.width, m_text_padding.height },
-			m_dw_text_layout.get(), brush.get());
-		target->EndDraw();
-		target->Flush();
-		char buf[1024];
-		sprintf_s(
-			buf,
-			"<<\n"
-			"/Length /%zu\n"
-			">>\n"
-			"",
-			4 * w * h
-		);
-		dt_write(buf, dt_writer);
-		dt_writer.WriteBytes(vec);
-		vec.clear();
-		*/
-		char buf[1024];
-		// BT テキストオブジェクトの開始
-		// フォント名 サイズ Tf
-		// x座標 y座標 Td
-		// TLという行間を設定する演算子
-		D2D1_POINT_2F nw_pos;	// 左上の位置
-		pt_add(m_pos, m_text_padding.width, m_text_padding.height, nw_pos);
-		sprintf_s(buf,
-			"%% Text\n"
-			"%f %f %f rg\n"
-			"%f %f %f RG\n"
-			"BT\n"
-			"/F%d %f Tf\n"
-			"0 Tr\n"
-			"%f %f Td\n",
-			m_font_color.r, m_font_color.g, m_font_color.b,
-			m_font_color.r, m_font_color.g, m_font_color.b,
-			m_pdf_font, m_font_size,
-			nw_pos.x, -nw_pos.y + sheet.m_sheet_size.height
-		);
-		size_t len = dt_write(buf, dt_writer);
-		std::vector<uint8_t> sjis{};
-		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
-
-			const DWRITE_HIT_TEST_METRICS& tm = m_dw_test_metrics[i];
-			const wchar_t* t = m_text + tm.textPosition;
-			const uint32_t t_len = tm.length;
-
-			sprintf_s(buf, "%f %f Td\n", tm.left, -tm.top);
-			len += dt_write(buf, dt_writer);
-
-			// 文字列を表示する垂直なずらし位置を求める.
-			//const double dy = static_cast<double>(m_dw_line_metrics[i].baseline);
-
-
-			// 文字列を書き込む.
-			dt_writer.WriteByte(L'<'); len++;
-			for (int i = 0; i < t_len; i++) {
-				sprintf_s(buf, "%04x", t[i]);
-				len += dt_write(buf, dt_writer);
-			}
-			len += dt_write("> Tj\n", dt_writer);
-
-			//dt_writer.WriteByte(L'<'); len++;
-			//size_t sjis_len = WideCharToMultiByte(CP_ACP, 0, t, t_len, NULL, 0, NULL, NULL);
-			//if (sjis.size() < sjis_len) {
-			//	sjis.resize(sjis_len);
-			//}
-			//WideCharToMultiByte(CP_ACP, 0, t, t_len, (LPSTR)sjis.data(), sjis_len, NULL, NULL);
-			//len += dt_write("<", dt_writer);
-			//for (int j = 0; j < sjis_len; j++) {
-			//	constexpr char* X = "0123456789abcdef";
-			//	dt_writer.WriteByte(X[sjis[j] >> 4]);
-			//	dt_writer.WriteByte(X[sjis[j] & 15]);
-			//}
-			//len += 2 * sjis_len;
-			//len += dt_write("> Tj\n", dt_writer);
-		}
-		len += dt_write("ET\n", dt_writer);
-		return len;
-	}
-
 	// データライターに SVG タグとして書き込む.
 	void ShapeText::write_svg(DataWriter const& dt_writer) const
 	{
@@ -1139,7 +1021,7 @@ namespace winrt::GraphPaper::implementation
 		dt_write_svg("\" ", dt_writer);
 		// 書体の大きさを書き込む.
 		dt_write_svg(m_font_size, "font-size", dt_writer);
-		// 書体の伸縮を書き込む.
+		// 書体の幅の伸縮を書き込む.
 		const int32_t stretch = static_cast<int32_t>(m_font_stretch);
 		dt_write_svg(SVG_STRETCH[stretch], "font-stretch", dt_writer);
 		// 書体の形式を書き込む.

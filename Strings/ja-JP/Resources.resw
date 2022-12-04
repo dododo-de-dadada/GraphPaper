@@ -394,7 +394,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_font_stretch.Text" xml:space="preserve">
-    <value>伸縮...</value>
+    <value>幅の伸縮...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_font_weight.Text" xml:space="preserve">

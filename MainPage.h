@@ -86,6 +86,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto ICON_INFO = L"glyph_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"glyph_block";	// 警告アイコンの静的リソースのキー
 	constexpr auto ICON_DEBUG = L"\uEBE8";	// デバッグアイコン
+	constexpr wchar_t RES_ERR_WRITE[] = L"str_err_write";	// 書き込みエラーメッセージのリソース名
 	constexpr auto VERT_STICK_DEF_VAL = 2.0f * 6.0f;	// 頂点をくっつける閾値の既定値
 	constexpr auto SHEET_SIZE_DEF_VAL = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
 
@@ -542,7 +543,7 @@ namespace winrt::GraphPaper::implementation
 		void font_style_oblique_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「大きさ」が選択された.
 		IAsyncAction font_size_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「伸縮」が選択された.
+		// 書体メニューの「幅の伸縮」が選択された.
 		IAsyncAction font_stretch_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「太さ」が選択された.
 		IAsyncAction font_weight_click_async(IInspectable const&, RoutedEventArgs const&);

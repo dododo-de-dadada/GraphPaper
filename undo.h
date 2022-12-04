@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 		FONT_COLOR,	// ‘‘Ì‚ÌF‚Ì‘€ì
 		FONT_FAMILY,	// ‘‘Ì–¼‚Ì‘€ì
 		FONT_SIZE,	// ‘‘Ì‚Ì‘å‚«‚³‚Ì‘€ì
-		FONT_STRETCH,	// ‘‘Ì‚ÌLk‚Ì‘€ì
+		FONT_STRETCH,	// ‘‘Ì‚Ì•‚ÌLk‚Ì‘€ì
 		FONT_STYLE,	// ‘‘Ì‚ÌŽš‘Ì‚Ì‘€ì
 		FONT_WEIGHT,	// ‘‘Ì‚Ì‘¾‚³‚Ì‘€ì
 		GRID_BASE,	// •ûŠá‚ÌŠî€‚Ì‘å‚³‚Ì‘€ì

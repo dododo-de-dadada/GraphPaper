@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 曲線の矢じるしの端点を求める.
-	static bool bezi_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
+	//static bool bezi_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
 
 	// 曲線の矢じるしのジオメトリを作成する.
 	static void bezi_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
@@ -101,7 +101,7 @@ namespace winrt::GraphPaper::implementation
 	// a_size	矢じるしの寸法
 	// a_barbs[3]	計算された返しの端点と先端点
 	//------------------------------
-	static bool bezi_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F a_barbs[3]) noexcept
+	bool ShapeBezi::bezi_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F a_barbs[3]) noexcept
 	{
 		BZP seg[3]{};
 		BZP b_pos[4]{};
@@ -157,7 +157,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F barbs[3];	// 矢じるしの返しの端点	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (bezi_calc_arrow(b_pos, b_seg, a_size, barbs)) {
+		if (ShapeBezi::bezi_calc_arrow(b_pos, b_seg, a_size, barbs)) {
 			// ジオメトリシンクに追加する.
 			winrt::check_hresult(d_factory->CreatePathGeometry(a_geom));
 			winrt::check_hresult((*a_geom)->Open(sink.put()));
@@ -878,66 +878,6 @@ namespace winrt::GraphPaper::implementation
 	ShapeBezi::ShapeBezi(DataReader const& dt_reader) :
 		ShapePath::ShapePath(dt_reader)
 	{}
-
-	//------------------------------
-	// データライターに PDF ストリームの一部として書き込む.
-	// dt_weiter	データライター
-	// 戻り値	書き込んだバイト数
-	//------------------------------
-	size_t ShapeBezi::write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const
-	{
-		size_t n = dt_write("% Bezi\n", dt_writer);
-		n += write_pdf_stroke(dt_writer);
-
-		D2D1_BEZIER_SEGMENT b_seg;
-		pt_add(m_pos, m_vec[0], b_seg.point1);
-		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
-		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
-
-		char buf[1024];
-		sprintf_s(buf, "%f %f m\n", m_pos.x, -m_pos.y + sheet.m_sheet_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f ", b_seg.point1.x, -b_seg.point1.y + sheet.m_sheet_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f ", b_seg.point2.x, -b_seg.point2.y + sheet.m_sheet_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f c\n", b_seg.point3.x, -b_seg.point3.y + sheet.m_sheet_size.height);
-		n += dt_write(buf, dt_writer);
-		n += dt_write("S\n", dt_writer);
-		if (m_arrow_style == ARROW_STYLE::OPENED || m_arrow_style == ARROW_STYLE::FILLED) {
-			D2D1_POINT_2F barbs[3];
-			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			n += write_pdf_barbs(sheet, barbs, barbs[2], dt_writer);
-		}
-		return n;
-	}
-
-	//------------------------------
-	// データライターに SVG として書き込む.
-	// dt_reader	データリーダー
-	//------------------------------
-	void ShapeBezi::write_svg(DataWriter const& dt_writer) const
-	{
-		D2D1_BEZIER_SEGMENT b_seg;
-
-		pt_add(m_pos, m_vec[0], b_seg.point1);
-		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
-		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
-		dt_write_svg("<path d=\"", dt_writer);
-		dt_write_svg(m_pos, "M", dt_writer);
-		dt_write_svg(b_seg.point1, "C", dt_writer);
-		dt_write_svg(b_seg.point2, ",", dt_writer);
-		dt_write_svg(b_seg.point3, ",", dt_writer);
-		dt_write_svg("\" ", dt_writer);
-		dt_write_svg("none", "fill", dt_writer);
-		write_svg_stroke(dt_writer);
-		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
-		if (m_arrow_style != ARROW_STYLE::NONE) {
-			D2D1_POINT_2F barbs[3];
-			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
-			write_svg_barbs(barbs, barbs[2], dt_writer);
-		}
-	}
 
 	/*
 	static uint32_t clipping(const BZP& p, const BZP& q, double* t)

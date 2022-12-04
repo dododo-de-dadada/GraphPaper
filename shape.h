@@ -347,6 +347,11 @@ namespace winrt::GraphPaper::implementation
 	void dt_write(const wchar_t* val, /*--->*/DataWriter const& dt_writer);
 	// データライターに文字列を書き込む.
 	size_t dt_write(const char val[], DataWriter const& dt_writer);
+
+	//-------------------------------
+	// shape_svg.cpp
+	//-------------------------------
+
 	// データライターに SVG として属性名とシングルバイト文字列を書き込む.
 	void dt_write_svg(const char* val, const char* name, /*--->*/DataWriter const& dt_writer);
 	// データライターに SVG としてシングルバイト文字列を書き込む.
@@ -455,7 +460,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_font_family(wchar_t*& /*val*/) const noexcept { return false; }
 		// 書体の大きさを得る.
 		virtual bool get_font_size(float& /*val*/) const noexcept { return false; }
-		// 書体の横幅を得る.
+		// 書体の幅の伸縮を得る.
 		virtual bool get_font_stretch(DWRITE_FONT_STRETCH& /*val*/) const noexcept { return false; }
 		// 書体の字体を得る.
 		virtual bool get_font_style(DWRITE_FONT_STYLE& /*val*/) const noexcept { return false; }
@@ -545,7 +550,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_font_family(wchar_t* const /*val*/) noexcept { return false; }
 		// 値を書体の大きさに格納する.
 		virtual bool set_font_size(const float /*val*/) noexcept { return false; }
-		// 値を書体の横幅に格納する.
+		// 値を書体の幅の伸縮に格納する.
 		virtual bool set_font_stretch(const DWRITE_FONT_STRETCH /*val*/) noexcept { return false; }
 		// 値を書体の字体に格納する.
 		virtual bool set_font_style(const DWRITE_FONT_STYLE /*val*/) noexcept { return false; }
@@ -723,7 +728,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_font_color{ COLOR_BLACK };	// 書体の色
 		wchar_t* m_font_family = nullptr;	// 書体名 (システムリソースに値が無かった場合)
 		float m_font_size = FONT_SIZE_DEFVAL;	// 書体の大きさ (システムリソースに値が無かった場合)
-		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮 (システムリソースに値が無かった場合)
+		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の幅の伸縮 (システムリソースに値が無かった場合)
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体 (システムリソースに値が無かった場合)
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ (システムリソースに値が無かった場合)
 
@@ -806,7 +811,7 @@ namespace winrt::GraphPaper::implementation
 		bool get_font_family(wchar_t*& val) const noexcept final override;
 		// 書体の大きさを得る.
 		bool get_font_size(float& val) const noexcept final override;
-		// 書体の横幅を得る.
+		// 書体の幅の伸縮を得る.
 		bool get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept final override;
 		// 書体の字体を得る.
 		bool get_font_style(DWRITE_FONT_STYLE& val) const noexcept final override;
@@ -874,7 +879,7 @@ namespace winrt::GraphPaper::implementation
 		bool set_font_family(wchar_t* const val) noexcept final override;
 		// 書体の大きさに格納する.
 		bool set_font_size(const float val) noexcept final override;
-		// 値を書体の伸縮に格納する.
+		// 値を書体の幅の伸縮に格納する.
 		bool set_font_stretch(const DWRITE_FONT_STRETCH val) noexcept final override;
 		// 値を書体の字体に格納する.
 		bool set_font_style(const DWRITE_FONT_STYLE val) noexcept final override;
@@ -1094,6 +1099,9 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 		// shape_line.cpp
 		//------------------------------
+
+		// 矢じるしの先端と返しの位置を求める.
+		static bool line_get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
 
 		// 図形を作成する.
 		ShapeLine(const ShapeSheet* s_sheet, const bool a_none = false) :
@@ -1352,6 +1360,7 @@ namespace winrt::GraphPaper::implementation
 		// shape_poly.cpp
 		//------------------------------
 
+		static bool poly_get_arrow_barbs(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROW_SIZE& a_size, D2D1_POINT_2F& h_tip, D2D1_POINT_2F h_barbs[]) noexcept;
 		// パスジオメトリを作成する.
 		void create_path_geometry(const D2D_UI& d2d) final override;
 		// 方形をもとに多角形を作成する.
@@ -1390,6 +1399,7 @@ namespace winrt::GraphPaper::implementation
 		// ベジェ曲線
 		//------------------------------
 
+		static bool bezi_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
 		// パスジオメトリを作成する.
 		void create_path_geometry(const D2D_UI& d2d) final override;
 		// 図形を表示する.
@@ -1421,7 +1431,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_font_color{ COLOR_BLACK };	// 書体の色
 		wchar_t* m_font_family = nullptr;	// 書体名
 		float m_font_size = FONT_SIZE_DEFVAL;	// 書体の大きさ
-		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の伸縮
+		DWRITE_FONT_STRETCH m_font_stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;	// 書体の幅の伸縮
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		wchar_t* m_text = nullptr;	// 文字列
@@ -1488,7 +1498,7 @@ namespace winrt::GraphPaper::implementation
 		bool get_font_family(wchar_t*& val) const noexcept final override;
 		// 書体の大きさを得る.
 		bool get_font_size(float& val) const noexcept final override;
-		// 書体の伸縮を得る.
+		// 書体の幅の伸縮を得る.
 		bool get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept final override;
 		// 書体の字体を得る.
 		bool get_font_style(DWRITE_FONT_STYLE& val) const noexcept final override;
@@ -1524,7 +1534,7 @@ namespace winrt::GraphPaper::implementation
 		bool set_font_family(wchar_t* const val) noexcept final override;
 		// 値を書体の大きさに格納する.
 		bool set_font_size(const float val) noexcept final override;
-		// 値を書体の伸縮に格納する.
+		// 値を書体の幅の伸縮に格納する.
 		bool set_font_stretch(const DWRITE_FONT_STRETCH val) noexcept final override;
 		// 値を書体の字体に格納する.
 		bool set_font_style(const DWRITE_FONT_STYLE val) noexcept final override;

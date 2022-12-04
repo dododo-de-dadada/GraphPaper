@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	// 矢じるしの D2D ストローク特性を作成する.
 	static void line_create_arrow_style(ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, const D2D1_LINE_JOIN s_join_style, const double s_join_limit, ID2D1StrokeStyle** s_arrow_style);
 	// 矢じるしの先端と返しの位置を求める.
-	static bool line_get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
+	//static bool line_get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
 	// 線分が位置を含むか, 太さも考慮して判定する.
 	static bool line_hit_test(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const CAP_STYLE& s_cap) noexcept;
 
@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F tip_pos;	// 矢じるしの先端点
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (line_get_arrow_pos(s_pos, d_vec, a_size, barbs, tip_pos)) {
+		if (ShapeLine::line_get_arrow_pos(s_pos, d_vec, a_size, barbs, tip_pos)) {
 			// ジオメトリパスを作成する.
 			winrt::check_hresult(d_factory->CreatePathGeometry(geo));
 			winrt::check_hresult((*geo)->Open(sink.put()));
@@ -78,7 +78,7 @@ namespace winrt::GraphPaper::implementation
 	// a_size	矢じるしの寸法
 	// barbs	返しの位置
 	// tip		先端の位置
-	static bool line_get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept
+	bool ShapeLine::line_get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept
 	{
 		const auto a_len = std::sqrt(pt_abs2(a_vec));	// 矢軸の長さ
 		if (a_len >= FLT_MIN) {
@@ -397,129 +397,6 @@ namespace winrt::GraphPaper::implementation
 		ShapeStroke::write(dt_writer);
 		dt_writer.WriteInt32(static_cast<int32_t>(m_arrow_style));
 		dt_write(m_arrow_size, dt_writer);
-	}
-
-	// データライターに PDF ストリームの一部として書き込む.
-	size_t ShapeLine::write_pdf(const ShapeSheet& sheet, DataWriter const& dt_writer) const
-	{
-		size_t n = dt_write("% Line\n", dt_writer);
-		n += write_pdf_stroke(dt_writer);
-
-		char buf[1024];
-		sprintf_s(buf, "%f %f m\n", m_pos.x, -m_pos.y + sheet.m_sheet_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f l\n", m_pos.x + m_vec[0].x, -(m_pos.y + m_vec[0].y) + sheet.m_sheet_size.height);
-		n += dt_write(buf, dt_writer);
-		n += dt_write("S\n", dt_writer);
-		if (m_arrow_style == ARROW_STYLE::OPENED || m_arrow_style == ARROW_STYLE::FILLED) {
-			D2D1_POINT_2F barbs[3];
-			if (line_get_arrow_pos(m_pos, m_vec[0], m_arrow_size, barbs, barbs[2])) {
-				n += write_pdf_barbs(sheet, barbs, barbs[2], dt_writer);
-			}
-		}
-		return n;
-	}
-
-	size_t ShapeLine::write_pdf_barbs(const ShapeSheet& sheet, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const
-	{
-		char buf[1024];
-		size_t n = 0;
-
-		// 破線ならば, 実線に戻す.
-		if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH ||
-			m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT ||
-			m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
-			n += dt_write("[ ] 0 d\n", dt_writer);
-		}
-		if (m_arrow_style == ARROW_STYLE::FILLED) {
-			sprintf_s(buf, "%f %f %f rg\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);
-			n += dt_write(buf, dt_writer);
-		}
-		sprintf_s(buf, "%f %f m\n", barbs[0].x, -barbs[0].y + sheet.m_sheet_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f l\n", tip_pos.x, -tip_pos.y + sheet.m_sheet_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f l\n", barbs[1].x, -barbs[1].y + sheet.m_sheet_size.height);
-		n += dt_write(buf, dt_writer);
-		if (m_arrow_style == ARROW_STYLE::OPENED) {
-			n += dt_write("S\n", dt_writer);
-		}
-		else if (m_arrow_style == ARROW_STYLE::FILLED) {
-			n += dt_write("b\n", dt_writer);	// b はパスを閉じて (B は閉じずに) 塗りつぶす.
-		}
-		return n;
-	}
-
-	// データライターに SVG タグとして書き込む.
-	void ShapeLine::write_svg(DataWriter const& dt_writer) const
-	{
-		D2D1_POINT_2F e_pos;
-
-		pt_add(m_pos, m_vec[0], e_pos);
-		dt_write_svg("<line ", dt_writer);
-		dt_write_svg(m_pos, "x1", "y1", dt_writer);
-		dt_write_svg(e_pos, "x2", "y2", dt_writer);
-		write_svg_stroke(dt_writer);
-		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
-		if (m_arrow_style != ARROW_STYLE::NONE) {
-			D2D1_POINT_2F barbs[2];
-			D2D1_POINT_2F tip_pos;
-			if (line_get_arrow_pos(m_pos, m_vec[0], m_arrow_size, barbs, tip_pos)) {
-				write_svg_barbs(barbs, tip_pos, dt_writer);
-			}
-		}
-	}
-
-	// 矢じりをデータライターに SVG タグとして書き込む.
-	// barbs	矢じるしの両端の位置 [2]
-	// tip_pos	矢じるしの先端の位置
-	// a_style	矢じるしの形状
-	// dt_writer	データライター
-	void ShapeLine::write_svg_barbs(const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const
-	{
-		dt_write_svg("<path d=\"", dt_writer);
-		dt_write_svg("M", dt_writer);
-		dt_write_svg(barbs[0].x, dt_writer);
-		dt_write_svg(barbs[0].y, dt_writer);
-		dt_write_svg("L", dt_writer);
-		dt_write_svg(tip_pos.x, dt_writer);
-		dt_write_svg(tip_pos.y, dt_writer);
-		dt_write_svg("L", dt_writer);
-		dt_write_svg(barbs[1].x, dt_writer);
-		dt_write_svg(barbs[1].y, dt_writer);
-		dt_write_svg("\" ", dt_writer);
-		if (m_arrow_style == ARROW_STYLE::FILLED) {
-			dt_write_svg(m_stroke_color, "fill", dt_writer);
-		}
-		else {
-			dt_write_svg("fill=\"none\" ", dt_writer);
-		}
-		dt_write_svg(m_stroke_color, "stroke", dt_writer);
-		dt_write_svg(m_stroke_width, "stroke-width", dt_writer);
-		if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
-			dt_write_svg("stroke-linecap=\"butt\" ", dt_writer);
-		}
-		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
-			dt_write_svg("stroke-linecap=\"round\" ", dt_writer);
-		}
-		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
-			dt_write_svg("stroke-linecap=\"square\" ", dt_writer);
-		}
-		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
-			//dt_write_svg("stroke-linecap=\"square\" ", dt_writer);
-		}
-		if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
-			dt_write_svg("stroke-linejoin=\"bevel\" ", dt_writer);
-		}
-		else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
-			m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-			dt_write_svg("stroke-linejoin=\"miter\" ", dt_writer);
-			dt_write_svg(m_join_limit, "stroke-miterlimit", dt_writer);
-		}
-		else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-			dt_write_svg("stroke-linejoin=\"round\" ", dt_writer);
-		}
-		dt_write_svg(" />" SVG_NEW_LINE, dt_writer);
 	}
 
 }

@@ -439,17 +439,4 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_corner_rad, dt_writer);
 	}
 
-	// データライターに SVG タグとして書き込む.
-	void ShapeRRect::write_svg(DataWriter const& dt_writer) const
-	{
-		dt_write_svg("<rect ", dt_writer);
-		dt_write_svg(m_pos, "x", "y", dt_writer);
-		dt_write_svg(m_vec[0], "width", "height", dt_writer);
-		if (std::round(m_corner_rad.x) != 0.0f && std::round(m_corner_rad.y) != 0.0f) {
-			dt_write_svg(m_corner_rad, "rx", "ry", dt_writer);
-		}
-		dt_write_svg(m_fill_color, "fill", dt_writer);
-		ShapeStroke::write_svg(dt_writer);
-		dt_write_svg("/>", dt_writer);
-	}
 }

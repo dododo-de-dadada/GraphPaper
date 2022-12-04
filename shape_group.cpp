@@ -242,18 +242,4 @@ namespace winrt::GraphPaper::implementation
 		slist_write<!REDUCED>(m_list_grouped, dt_writer);
 	}
 
-	//------------------------------
-	// データライターに SVG として書き込む.
-	//------------------------------
-	void ShapeGroup::write_svg(DataWriter const& dt_writer) const
-	{
-		dt_write_svg("<g>" SVG_NEW_LINE, dt_writer);
-		for (const Shape* s : m_list_grouped) {
-			if (s->is_deleted()) {
-				continue;
-			}
-			s->write_svg(dt_writer);
-		}
-		dt_write_svg("</g>" SVG_NEW_LINE, dt_writer);
-	}
 }

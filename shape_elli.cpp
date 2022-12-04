@@ -125,19 +125,4 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_SHEET;
 	}
 
-	// データライターに SVG タグとして書き込む.
-	void ShapeElli::write_svg(DataWriter const& dt_writer) const
-	{
-		D2D1_POINT_2F r;
-		pt_mul(m_vec[0], 0.5, r);
-		D2D1_POINT_2F c_pos;
-		pt_add(m_pos, r, c_pos);
-		dt_write_svg("<ellipse ", dt_writer);
-		dt_write_svg(c_pos, "cx", "cy", dt_writer);
-		dt_write_svg(static_cast<double>(r.x), "rx", dt_writer);
-		dt_write_svg(static_cast<double>(r.y), "ry", dt_writer);
-		dt_write_svg(m_fill_color, "fill", dt_writer);
-		ShapeStroke::write_svg(dt_writer);
-		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
-	}
 }

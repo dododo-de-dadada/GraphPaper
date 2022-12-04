@@ -523,14 +523,4 @@ namespace winrt::GraphPaper::implementation
 		return 4;
 	}
 
-	// データライターに SVG タグとして書き込む.
-	void ShapeRect::write_svg(DataWriter const& dt_writer) const
-	{
-		dt_write_svg("<rect ", dt_writer);
-		dt_write_svg(m_pos, "x", "y", dt_writer);
-		dt_write_svg(m_vec[0], "width", "height", dt_writer);
-		dt_write_svg(m_fill_color, "fill", dt_writer);
-		ShapeStroke::write_svg(dt_writer);
-		dt_write_svg("/>" SVG_NEW_LINE, dt_writer);
-	}
 }
