@@ -22,6 +22,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::CachedFileManager;
 	using winrt::Windows::Storage::Provider::FileUpdateStatus;
 
+	// 図形をデータライターに PDF として書き込む.
 	IAsyncOperation<winrt::hresult> MainPage::pdf_write_async(StorageFile pdf_file)
 	{
 		// システムフォントコレクションを DWriteFactory から得る.
@@ -107,10 +108,13 @@ namespace winrt::GraphPaper::implementation
 
 		HRESULT hr = S_OK;
 		try {
+			char buf[1024];	// PDF
+
 			// 用紙の幅と高さを, D2D の固定 DPI (96dpi) から PDF の 72dpi に,
 			// 変換する (モニターに応じて変化する論理 DPI は用いない). 
 			const float w_pt = m_main_sheet.m_sheet_size.width * 72.0f / 96.0f;	// 変換された幅
 			const float h_pt = m_main_sheet.m_sheet_size.height * 72.0f / 96.0f;	// 変換された高さ
+
 			// ファイル更新の遅延を設定する.
 			CachedFileManager::DeferUpdates(pdf_file);
 			// ストレージファイルを開いてランダムアクセスストリームを得る.
@@ -128,7 +132,8 @@ namespace winrt::GraphPaper::implementation
 			// ヘッダと改行の直後に, 4 つ以上のバイナリ文字を含むコメント行を置くことが推奨.
 			// 逆に, 含まない場合は, 置かなくていいってことだろうか.
 			size_t len = dt_write(
-				"%PDF-1.7\n",
+				"%PDF-1.7\n"
+				"%\xff\xff\xff\xff\n",
 				dt_writer);
 			std::vector<size_t> obj_len{};
 			obj_len.push_back(len);
@@ -136,7 +141,6 @@ namespace winrt::GraphPaper::implementation
 			// カタログ辞書.
 			// トレーラーから参照され,
 			// ページツリーを参照する.
-			char buf[1024];
 			len = dt_write(
 				"% Document Catalog\n"
 				"1 0 obj\n"
@@ -181,7 +185,7 @@ namespace winrt::GraphPaper::implementation
 			len = dt_write(buf, dt_writer);
 			obj_len.push_back(obj_len.back() + len);
 
-			// リソース
+			// ページのリソース辞書
 			// ページとコンテンツから参照され,
 			// 辞書を参照する.
 			len = dt_write(
@@ -190,27 +194,47 @@ namespace winrt::GraphPaper::implementation
 				"<<\n",
 				dt_writer);
 
-			// リソース - フォント
-			len += dt_write(
-				"/Font\n",
-				dt_writer);
-
-			int k = 0;
+			int font_cnt = 0;
 			std::vector<std::vector<char>> base_font;	// ベースフォント名
 			for (const auto s : m_main_sheet.m_shape_list) {
-				if (s->is_deleted() || typeid(*s) != typeid(ShapeText)) {
+				if (s->is_deleted()) {
 					continue;
 				}
-				// フォント
-				sprintf_s(buf,
-					"<</F%d %d 0 R>>\n",
-					k, 6 + 3 * k
-				);
-				len += dt_write(buf, dt_writer);
-
-				static_cast<ShapeText*>(s)->m_pdf_font = k++;
+				if (typeid(*s) == typeid(ShapeText)) {
+					if (font_cnt == 0) {
+						len += dt_write(
+							"/Font\n",
+							dt_writer);
+					}
+					// フォント
+					sprintf_s(buf,
+						"<</F%d %d 0 R>>\n",
+						font_cnt, 6 + 3 * font_cnt
+					);
+					len += dt_write(buf, dt_writer);
+					static_cast<ShapeText*>(s)->m_pdf_font_num = font_cnt++;
+				}
 			}
-			len += dt_write(">>\n", dt_writer);
+			int image_cnt = 0;
+			for (const auto s : m_main_sheet.m_shape_list) {
+				if (s->is_deleted()) {
+					continue;
+				}
+				if (typeid(*s) == typeid(ShapeImage)) {
+					if (image_cnt == 0) {
+						len += dt_write(
+							"/XObject\n",
+							dt_writer);
+					}
+					// 画像
+					sprintf_s(buf,
+						"<</I%d %d 0 R>>\n",
+						image_cnt, 6 + 3 * font_cnt + image_cnt
+					);
+					len += dt_write(buf, dt_writer);
+					static_cast<ShapeImage*>(s)->m_pdf_image_num = image_cnt++;
+				}
+			}
 			len += dt_write(
 				">>\n"
 				"endobj\n",
@@ -245,10 +269,13 @@ namespace winrt::GraphPaper::implementation
 				"b\n",
 				c.r, c.g, c.b,
 				m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height
-				//m_main_sheet.m_sheet_size.height, m_main_sheet.m_sheet_size.width
 			);
+			len += dt_write(buf, dt_writer);
 
 			for (const auto s : m_main_sheet.m_shape_list) {
+				if (s->is_deleted()) {
+					continue;
+				}
 				len += s->pdf_write(m_main_sheet, dt_writer);
 			}
 			len += dt_write(
@@ -260,178 +287,232 @@ namespace winrt::GraphPaper::implementation
 
 			// 辞書
 			for (const auto s : m_main_sheet.m_shape_list) {
-				if (s->is_deleted() || typeid(*s) != typeid(ShapeText)) {
+				if (s->is_deleted()) {
 					continue;
 				}
 
-				wchar_t* t;	// 図形の文字列
-				s->get_text_content(t);
-				wchar_t* u;	// 図形の書体名
-				s->get_font_family(u);
-				DWRITE_FONT_STRETCH font_stretch;	// 幅の伸縮
-				s->get_font_stretch(font_stretch);
-				DWRITE_FONT_WEIGHT font_weight;
-				s->get_font_weight(font_weight);
-				int n = static_cast<ShapeText*>(s)->m_pdf_font;
-
-				UINT32 index;
-				BOOL exists;
-				collection->FindFamilyName(u, &index, &exists);
-				winrt::com_ptr<IDWriteFontFamily> fam;
-				collection->GetFontFamily(index, fam.put());
-				winrt::com_ptr<IDWriteFont> font;
-				fam->GetFont(0, font.put());
-				winrt::com_ptr<IDWriteFontFaceReference> ref;
-				font.as<IDWriteFont3>()->GetFontFaceReference(ref.put());
-				winrt::com_ptr<IDWriteFontFace3> face;
-				ref->CreateFontFace(face.put());
-
-				// ベースフォント名を得る.
-				// 文字列図形から得たフォント名を,
-				// 含まれる半角空白を取り除いて, マルチバイト文字列に変換する.
-				std::vector<wchar_t> v{};	// 空白を除いた書体名
-				for (int i = 0; u[i] != '\0'; i++) {
-					if (u[i] != L' ') {
-						v.push_back(u[i]);
-					}
-				}
-				v.push_back(L'\0');
-				int name_len = WideCharToMultiByte(CP_ACP, 0, v.data(), static_cast<int>(v.size()), NULL, 0, NULL, NULL);
-				base_font.emplace_back(name_len);
-				WideCharToMultiByte(CP_ACP, 0, v.data(), static_cast<int>(v.size()), base_font[n].data(), name_len, NULL, NULL);
-
-				// 文字列を, 文字がダブらないように, UINT32 型配列にコピーする.
-				std::vector<UINT32> u32{};
-				for (int i = 0; t[i] != L'\0'; i++) {
-					if (std::find(u32.begin(), u32.end(), t[i]) == u32.end()) {
-						u32.push_back(t[i]);
-					}
-				}
-				std::vector<UINT16> gid(u32.size());
-				winrt::check_hresult(face->GetGlyphIndices(u32.data(), static_cast<UINT32>(u32.size()), gid.data()));
-				std::vector<DWRITE_GLYPH_METRICS> gmet(gid.size());
-				face->GetDesignGlyphMetrics(gid.data(), static_cast<UINT32>(gid.size()), gmet.data());
-				DWRITE_FONT_METRICS1 fmet;
-				font.as<IDWriteFont1>()->GetMetrics(&fmet);
-				const int per_em = fmet.designUnitsPerEm;
-
-
-				// フォント辞書
-				sprintf_s(buf,
-					"%% Font\n"
-					"%d 0 obj\n"
-					"<<\n"
-					"/Type /Font\n"
-					"/BaseFont /%s\n"
-					"/Subtype /Type0\n"
-					"/Encoding /90msp-RKSJ-H\n"
-					//"/Encoding /UniJIS-UTF16-H\n"
-					"/DescendantFonts[%d 0 R]\n"
-					">>\n",
-					6 + 3 * n,
-					base_font[n].data(),
-					6 + 3 * n + 1
-				);
-				len += dt_write(buf, dt_writer);
-
-				// CID フォント辞書
-				// フォント辞書から参照され,
-				// フォント詳細辞書を参照する.
-				// W = 各グリフ毎の幅を含む.
-				sprintf_s(buf,
-					"%% Descendant Font\n"
-					"%d 0 obj\n"
-					"<<\n"
-					"/Type /Font\n"
-					"/Subtype /CIDFontType0\n"
-					"/BaseFont /%s\n"
-					"/CIDSystemInfo <<\n"
-					"/Registry (Adobe)\n"
-					"/Ordering (Japan1)\n"
-					"/Supplement 6\n"
-					">>\n"
-					"/FontDescriptor %d 0 R\n",	// 間接参照で必須.
-					6 + 3 * n + 1,
-					base_font[n].data(),
-					6 + 3 * n + 2
-				);
-				len = dt_write(buf, dt_writer);
-				/*
-				len += dt_write("/W [\n", dt_writer);
-				for (int i = 0; i < gid.size(); i++) {
+				if (typeid(*s) == typeid(ShapeImage)) {
+					const ShapeImage* t = static_cast<const ShapeImage*>(s);
 					sprintf_s(buf,
-						"%u %u %u\n",
-						gid[i], gid[i], 1000 * gmet[i].advanceWidth / per_em
+						"%% XObject\n"
+						"%d 0 obj\n"
+						"<<\n"
+						"/Type /XObject\n"
+						"/Subtype /Image\n"
+						"/Width %u\n"
+						"/Height %u\n"
+						"/ColorSpace /DeviceRGB\n"
+						"/BitsPerComponent 8\n"
+						"/Filter /ASCIIHexDecode\n"
+						">>\n",
+						6 + 3 * font_cnt + t->m_pdf_image_num,
+						t->m_orig.width,
+						t->m_orig.height
 					);
 					len += dt_write(buf, dt_writer);
+					len += dt_write("stream\n", dt_writer);
+					for (uint32_t y = 0; y < t->m_orig.height; y++) {
+						for (uint32_t x = 0; x < t->m_orig.width; x++) {
+							sprintf_s(buf,
+								"%02x %02x %02x ",
+								t->m_data[y * 4 * t->m_orig.width + 4 * x + 0],
+								t->m_data[y * 4 * t->m_orig.width + 4 * x + 1],
+								t->m_data[y * 4 * t->m_orig.width + 4 * x + 2]
+							);
+							len += dt_write(buf, dt_writer);
+						}
+						len += dt_write("\n", dt_writer);
+					}
+					len += dt_write(
+						"endstream\n"
+						"endobj\n",
+						dt_writer);
+					obj_len.push_back(obj_len.back() + len);
 				}
-				len += dt_write(
-					"]\n"
-					">>\n"
-					"endobj\n",
-					dt_writer);
-				*/
-				obj_len.push_back(obj_len.back() + len);
+				else if (typeid(*s) == typeid(ShapeText)) {
+					int n = static_cast<ShapeText*>(s)->m_pdf_font_num;
 
-				// グリフにおける座標値や幅を指定する場合、PDF 内では、常に 1 em = 1000 であるものとして、
-				// 値を設定します。実際のフォントで 1 em = 1024 などとなっている場合は、n / 1024 * 1000 
-				// というようにして、値を 1 em = 1000 に合わせます.
-				// 
-				// PDF の FontBBox (Black Box) のイメージ
-				//     y
-				//     ^
-				//     |
-				//   +-+--------+
-				//   | |   /\   |
-				//   | |  /__\  |
-				//   | | /    \ |
-				// --+-+--------+--> x
-				//   | |        |
-				//   +-+--------+
-				//     |
-				constexpr const char* FONT_STRETCH_NAME[] = {
-					"Normal",
-					"UltraCondensed",
-					"ExtraCondensed",
-					"Condensed",
-					"SemiCondensed",
-					"Normal",
-					"SemiExpanded",
-					"Expanded",
-					"ExtraExpanded",
-					"UltraExpanded"
-				};
-				sprintf_s(buf,
-					"%% Font Descriptor\n"
-					"%d 0 obj\n"
-					"<<\n"
-					"/Type /FontDescriptor\n"
-					"/FontName /%s\n"
-					"/FontStretch /%s\n"
-					"/FontWeight /%d\n"
-					"/Flags 4\n"
-					"/FontBBox [%d %d %d %d]\n"
-					"/ItalicAngle 0\n"
-					"/Ascent %u\n"
-					"/Descent -%u\n"
-					"/CapHeight %u\n"
-					"/StemV 0\n"
-					">>\n"
-					"endobj\n",
-					6 + 3 * n + 2,
-					base_font[n].data(),
-					FONT_STRETCH_NAME[font_stretch < 10 ? font_stretch : 0],
-					font_weight <= 900 ? font_weight : 900,
-					1000 * fmet.glyphBoxLeft / per_em,
-					-(1000 * fmet.glyphBoxTop / per_em),
-					1000 * fmet.glyphBoxRight / per_em,
-					-(1000 * fmet.glyphBoxBottom / per_em),
-					1000 * fmet.ascent / per_em,
-					1000 * fmet.descent / per_em,
-					1000 * fmet.capHeight / per_em
-				);
-				len = dt_write(buf, dt_writer);
-				obj_len.push_back(obj_len.back() + len);
+					wchar_t* t;	// 図形の文字列
+					s->get_text_content(t);
+					wchar_t* u;	// 図形の書体名
+					s->get_font_family(u);
+					DWRITE_FONT_STRETCH font_stretch;	// 幅の伸縮
+					s->get_font_stretch(font_stretch);
+					DWRITE_FONT_WEIGHT font_weight;
+					s->get_font_weight(font_weight);
+
+					UINT32 index;
+					BOOL exists;
+					collection->FindFamilyName(u, &index, &exists);
+					winrt::com_ptr<IDWriteFontFamily> fam;
+					collection->GetFontFamily(index, fam.put());
+					winrt::com_ptr<IDWriteFont> font;
+					fam->GetFont(0, font.put());
+					winrt::com_ptr<IDWriteFontFaceReference> ref;
+					font.as<IDWriteFont3>()->GetFontFaceReference(ref.put());
+					winrt::com_ptr<IDWriteFontFace3> face;
+					ref->CreateFontFace(face.put());
+
+					// ベースフォント名を得る.
+					// 文字列図形から得たフォント名を,
+					// 含まれる半角空白を取り除いて, マルチバイト文字列に変換する.
+					std::vector<wchar_t> v{};	// 空白を除いた書体名
+					for (int i = 0; u[i] != '\0'; i++) {
+						if (u[i] != L' ') {
+							v.push_back(u[i]);
+						}
+					}
+					v.push_back(L'\0');
+					int base_font_len = WideCharToMultiByte(CP_ACP, 0, v.data(), static_cast<int>(v.size()), NULL, 0, NULL, NULL);
+					base_font.emplace_back(base_font_len);
+					WideCharToMultiByte(CP_ACP, 0, v.data(), static_cast<int>(v.size()), base_font[n].data(), base_font_len, NULL, NULL);
+
+					// グリフ幅を得るため, 文字列を, 文字がダブらないように, UINT32 型配列にコピーする.
+					//std::vector<UINT32> u32{};
+					//for (int i = 0; t[i] != L'\0'; i++) {
+					//	if (std::find(u32.begin(), u32.end(), t[i]) == u32.end()) {
+					//		u32.push_back(t[i]);
+					//	}
+					//}
+
+					// 半角文字のみグリフ幅を得る.
+					// 全ての文字のグリフ幅を取得したいが,
+					// GID を CID に変換する方法がよく分からない.
+					// 半角に限れば ' ' (32) から '~' (126) までが, 連続した CID (1 から始まる) に対応する.
+					// なので半角のみでごまかす.
+					std::vector<UINT32> u32{};
+					for (int i = 32; i <= 126; i++) {
+						u32.push_back(i);
+					}
+					std::vector<UINT16> gid(u32.size());
+					winrt::check_hresult(face->GetGlyphIndices(u32.data(), static_cast<UINT32>(u32.size()), gid.data()));
+					std::vector<DWRITE_GLYPH_METRICS> gmet(gid.size());
+					face->GetDesignGlyphMetrics(gid.data(), static_cast<UINT32>(gid.size()), gmet.data());
+
+					// 1 em あたりのデザイン単位を得る.
+					DWRITE_FONT_METRICS1 fmet;
+					font.as<IDWriteFont1>()->GetMetrics(&fmet);
+					const int upe = fmet.designUnitsPerEm;
+
+
+					// フォント辞書
+					sprintf_s(buf,
+						"%% Font\n"
+						"%d 0 obj\n"
+						"<<\n"
+						"/Type /Font\n"
+						"/BaseFont /%s\n"
+						"/Subtype /Type0\n"
+						//"/Subtype /TrueType\n"
+						//"/Encoding /90msp-RKSJ-H\n"
+						"/Encoding /UniJIS-UTF16-H\n"
+						"/DescendantFonts [%d 0 R]\n"
+						">>\n",
+						6 + 3 * n,
+						base_font[n].data(),
+						6 + 3 * n + 1
+					);
+					len += dt_write(buf, dt_writer);
+
+					// CID フォント辞書
+					// フォント辞書から参照され,
+					// フォント詳細辞書を参照する.
+					sprintf_s(buf,
+						"%% Descendant Font\n"
+						"%d 0 obj\n"
+						"<<\n"
+						"/Type /Font\n"
+						"/Subtype /CIDFontType2\n"
+						"/BaseFont /%s\n"
+						"/CIDSystemInfo <<\n"
+						"/Registry (Adobe)\n"
+						"/Ordering (Japan1)\n"
+						"/Supplement 7\n"
+						">>\n"
+						"/FontDescriptor %d 0 R\n"	// 間接参照で必須.
+						//">>\n"
+						//"endobj\n"
+						,
+						6 + 3 * n + 1,
+						base_font[n].data(),
+						6 + 3 * n + 2
+					);
+					len = dt_write(buf, dt_writer);
+
+					// 半角のグリフ幅を設定する
+					// CID 開始番号は 1 (= 半角空白)
+					len += dt_write("/W [1 [\n", dt_writer);
+					for (int i = 1; i <= gid.size(); i++) {
+						sprintf_s(buf, "%u ", 1000 * gmet[i - 1].advanceWidth / upe);
+						len += dt_write(buf, dt_writer);
+					}
+					len += dt_write(
+						"\n]]\n"
+						">>\n"
+						"endobj\n",
+						dt_writer);
+					obj_len.push_back(obj_len.back() + len);
+
+					// グリフにおける座標値や幅を指定する場合、PDF 内では、常に 1 em = 1000 であるものとして、
+					// 値を設定します。実際のフォントで 1 em = 1024 などとなっている場合は、n / 1024 * 1000 
+					// というようにして、値を 1 em = 1000 に合わせます.
+					// 
+					// PDF の FontBBox (Black Box) のイメージ
+					//     y
+					//     ^
+					//     |
+					//   +-+--------+
+					//   | |   /\   |
+					//   | |  /__\  |
+					//   | | /    \ |
+					// --+-+--------+--> x
+					//   | |        |
+					//   +-+--------+
+					//     |
+					constexpr const char* FONT_STRETCH_NAME[] = {
+						"Normal",
+						"UltraCondensed",
+						"ExtraCondensed",
+						"Condensed",
+						"SemiCondensed",
+						"Normal",
+						"SemiExpanded",
+						"Expanded",
+						"ExtraExpanded",
+						"UltraExpanded"
+					};
+					sprintf_s(buf,
+						"%% Font Descriptor\n"
+						"%d 0 obj\n"
+						"<<\n"
+						"/Type /FontDescriptor\n"
+						"/FontName /%s\n"
+						"/FontStretch /%s\n"
+						"/FontWeight /%d\n"
+						"/Flags 4\n"
+						"/FontBBox [%d %d %d %d]\n"
+						"/ItalicAngle 0\n"
+						"/Ascent %u\n"
+						"/Descent %u\n"
+						"/CapHeight %u\n"
+						"/StemV 0\n"
+						">>\n"
+						"endobj\n",
+						6 + 3 * n + 2,
+						base_font[n].data(),
+						FONT_STRETCH_NAME[font_stretch < 10 ? font_stretch : 0],
+						font_weight <= 900 ? font_weight : 900,
+						1000 * fmet.glyphBoxLeft / upe,
+						(1000 * fmet.glyphBoxBottom / upe),
+						1000 * fmet.glyphBoxRight / upe,
+						(1000 * fmet.glyphBoxTop / upe),
+						1000 * fmet.ascent / upe,
+						1000 * fmet.descent / upe,
+						1000 * fmet.capHeight / upe
+					);
+					len = dt_write(buf, dt_writer);
+					obj_len.push_back(obj_len.back() + len);
+				}
 			}
 
 			// 相互参照 (クロスリファレンス)

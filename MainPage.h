@@ -679,6 +679,7 @@ namespace winrt::GraphPaper::implementation
 		// PDF
 		//-------------------------------
 
+		// 図形をデータライターに PDF として書き込む.
 		IAsyncOperation<winrt::hresult> pdf_write_async(StorageFile pdf_file);
 
 		//-------------------------------

@@ -5,16 +5,16 @@
 
 // PDF フォーマット
 // https://aznote.jakou.com/prog/pdf/index.html
-
 #include "pch.h"
 #include "shape.h"
+#include <wincodec.h>
 
 using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
 	//------------------------------
-	// データライターに PDF ストリームの一部として書き込む.
+	// 図形をデータライターに PDF として書き込む.
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
@@ -42,7 +42,8 @@ namespace winrt::GraphPaper::implementation
 		sprintf_s(buf, "%f %f c\n", b_seg.point3.x, -b_seg.point3.y + sheet.m_sheet_size.height);
 		n += dt_write(buf, dt_writer);
 		n += dt_write("S\n", dt_writer);
-		if (m_arrow_style == ARROW_STYLE::OPENED || m_arrow_style == ARROW_STYLE::FILLED) {
+		if (m_arrow_style == ARROW_STYLE::OPENED ||
+			m_arrow_style == ARROW_STYLE::FILLED) {
 			D2D1_POINT_2F barbs[3];
 			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
 			n += pdf_write_barbs(sheet, barbs, barbs[2], dt_writer);
@@ -51,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// データライターに PDF ストリームの一部として書き込む.
+	// 図形をデータライターに PDF として書き込む.
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
@@ -79,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 矢じるしをデータライターに PDF ストリームの一部として書き込む.
+	// 矢じるしをデータライターに PDF として書き込む.
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
@@ -116,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// データライターに PDF ストリームの一部として書き込む.
+	// 図形をデータライターに PDF として書き込む.
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
@@ -174,8 +175,85 @@ namespace winrt::GraphPaper::implementation
 		return n;
 	}
 
+	// 図形をデータライターに PDF として書き込む.
+	size_t ShapeElli::pdf_write(const ShapeSheet& sheet, DataWriter const& dt_writer) const
+	{
+		size_t n = dt_write("% Rect\n", dt_writer);
+		n += pdf_write_stroke(dt_writer);
+
+		char buf[1024];
+		sprintf_s(
+			buf,
+			"%f %f %f rg\n",
+			m_fill_color.r, m_fill_color.g, m_fill_color.b
+		);
+		n += dt_write(buf, dt_writer);
+
+		const float ty = sheet.m_sheet_size.height;
+		const double a = 4.0 * (sqrt(2.0) - 1.0) / 3.0;
+		const float rx = 0.5f * m_vec[0].x;
+		const float ry = 0.5f * m_vec[0].y;
+		const float cx = m_pos.x + rx;
+		const float cy = m_pos.y + ry;
+
+		sprintf_s(buf,
+			"%f %f m\n",
+			cx + rx, -(cy)+ty
+		);
+		n += dt_write(buf, dt_writer);
+
+		sprintf_s(buf,
+			"%f %f "
+			"%f %f "
+			"%f %f c\n",
+			cx + rx, -(cy + a * ry) + ty,
+			cx + a * rx, -(cy + ry) + ty,
+			cx, -(cy + ry) + ty
+		);
+		n += dt_write(buf, dt_writer);
+
+		sprintf_s(buf,
+			"%f %f "
+			"%f %f "
+			"%f %f c\n",
+			cx - a * rx, -(cy + ry) + ty,
+			cx - rx, -(cy + a * ry) + ty,
+			cx - rx, -(cy)+ty
+		);
+		n += dt_write(buf, dt_writer);
+
+		sprintf_s(buf,
+			"%f %f "
+			"%f %f "
+			"%f %f c\n",
+			cx - rx, -(cy - a * ry) + ty,
+			cx - a * rx, -(cy - ry) + ty,
+			cx, -(cy - ry) + ty
+		);
+		n += dt_write(buf, dt_writer);
+
+		sprintf_s(buf,
+			"%f %f "
+			"%f %f "
+			"%f %f c\n",
+			cx + a * rx, -(cy - ry) + ty,
+			cx + rx, -(cy - a * ry) + ty,
+			cx + rx, -(cy)+ty
+		);
+		n += dt_write(buf, dt_writer);
+
+		if (equal(m_fill_color.a, 0.0f)) {
+			n += dt_write("S\n", dt_writer);
+		}
+		else {
+			n += dt_write("B\n", dt_writer);
+		}
+		return n;
+	}
+
+
 	//------------------------------
-	// データライターに PDF ストリームの一部として書き込む.
+	// 図形をデータライターに PDF として書き込む.
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
@@ -192,73 +270,122 @@ namespace winrt::GraphPaper::implementation
 		);
 		n += dt_write(buf, dt_writer);
 
-		if (typeid(*this) == typeid(ShapeElli)) {
-			const float ty = sheet.m_sheet_size.height;
-			const double a = 4.0 * (sqrt(2.0) - 1.0) / 3.0;
-			D2D1_POINT_2F r;
-			pt_mul(m_vec[0], 0.5, r);
-			D2D1_POINT_2F c;
-			pt_add(m_pos, r, c);
-			sprintf_s(buf,
-				"%f %f m\n"
-				"%f %f "
-				"%f %f "
-				"%f %f c\n",
-				c.x + r.x, -(c.y) + ty,
-				c.x + r.x, -(c.y + a * r.y) + ty,
-				c.x + a * r.x, -(c.y + r.y) + ty,
-				c.x, -(c.y + r.y) + ty
-			);
-			n += dt_write(buf, dt_writer);
-			sprintf_s(buf,
-				"%f %f "
-				"%f %f "
-				"%f %f c\n",
-				c.x - a * r.x, -(c.y + r.y) + ty,
-				c.x - r.x, -(c.y + a * r.y) + ty,
-				c.x - r.x, -(c.y) + ty
-			);
-			n += dt_write(buf, dt_writer);
-			sprintf_s(buf,
-				"%f %f "
-				"%f %f "
-				"%f %f c\n",
-				c.x - r.x, -(c.y - a * r.y) + ty,
-				c.x - a * r.x, -(c.y - r.y) + ty,
-				c.x, -(c.y - r.y) + ty
-			);
-			n += dt_write(buf, dt_writer);
-			sprintf_s(buf,
-				"%f %f "
-				"%f %f "
-				"%f %f c\n",
-				c.x + a * r.x, -(c.y - r.y) + ty,
-				c.x + r.x, -(c.y - a * r.y) + ty,
-				c.x + r.x, -(c.y) + ty
-			);
-			n += dt_write(buf, dt_writer);
-		}
-		else if (typeid(*this) == typeid(ShapeRRect)) {
+		sprintf_s(buf,
+			"%f %f %f %f re\n",
+			m_pos.x, -(m_pos.y) + sheet.m_sheet_size.height, m_vec[0].x, -m_vec[0].y
+		);
+		n += dt_write(buf, dt_writer);
 
-		}
-		else {
-			sprintf_s(buf,
-				"%f %f %f %f re\n",
-				m_pos.x, -m_pos.y + sheet.m_sheet_size.height, m_vec[0].x, -m_vec[0].y
-			);
-			n += dt_write(buf, dt_writer);
-		}
 		if (equal(m_fill_color.a, 0.0f)) {
 			n += dt_write("S\n", dt_writer);
 		}
 		else {
 			n += dt_write("B\n", dt_writer);
 		}
-		return 0;
+		return n;
 	}
 
 	//------------------------------
-	// データライターに PDF ストリームの一部として書き込む.
+	// 図形をデータライターに PDF として書き込む.
+	// dt_weiter	データライター
+	// 戻り値	書き込んだバイト数
+	//------------------------------
+	size_t ShapeRRect::pdf_write(const ShapeSheet& sheet, DataWriter const& dt_writer) const
+	{
+		char buf[1024];
+		size_t n = dt_write("% RRect\n", dt_writer);
+		n += pdf_write_stroke(dt_writer);
+
+		// 塗りつぶし色
+		sprintf_s(buf,
+			"%f %f %f rg\n",
+			m_fill_color.r, m_fill_color.g, m_fill_color.b
+		);
+		n += dt_write(buf, dt_writer);
+
+		const double a = 4.0 * (sqrt(2.0) - 1.0) / 3.0;	// ベジェでだ円を近似する係数
+		const float ty = sheet.m_sheet_size.height;	// D2D 座標を PDF ユーザー空間へ変換するため
+		const float rx = (m_vec[0].x >= 0.0f ? m_corner_rad.x : -m_corner_rad.x);	// だ円の x 方向の半径
+		const float ry = (m_vec[0].y >= 0.0f ? m_corner_rad.y : -m_corner_rad.y);	// だ円の y 方向の半径
+
+		// 上辺の開始位置に移動.
+		sprintf_s(buf,
+			"%f %f m\n",
+			m_pos.x + rx, -(m_pos.y) + ty
+		);
+		n += dt_write(buf, dt_writer);
+
+		// 上辺と右上の角を描く.
+		float cx = m_pos.x + m_vec[0].x - rx;	// 角丸の中心点 x
+		float cy = m_pos.y + ry;	// 角丸の中心点 y
+		sprintf_s(buf,
+			"%f %f l\n"
+			"%f %f "
+			"%f %f "
+			"%f %f c\n",
+			cx, -(m_pos.y) + ty,
+			cx + a * rx, -(cy - ry) + ty,
+			cx + rx, -(cy - a * ry) + ty,
+			cx + rx, -(cy)+ty
+		);
+		n += dt_write(buf, dt_writer);
+
+		// 右辺と右下の角を描く.
+		cx = m_pos.x + m_vec[0].x - rx;
+		cy = m_pos.y + m_vec[0].y - ry;
+		sprintf_s(buf,
+			"%f %f l\n"
+			"%f %f "
+			"%f %f "
+			"%f %f c\n",
+			m_pos.x + m_vec[0].x, -(cy)+ty,
+			cx + rx, -(cy + a * ry) + ty,
+			cx + a * rx, -(cy + ry) + ty,
+			cx, -(cy + ry) + ty
+		);
+		n += dt_write(buf, dt_writer);
+
+		//　下辺と左下の角を描く.
+		cx = m_pos.x + rx;
+		cy = m_pos.y + m_vec[0].y - ry;
+		sprintf_s(buf,
+			"%f %f l\n"
+			"%f %f "
+			"%f %f "
+			"%f %f c\n",
+			cx, -(m_pos.y + m_vec[0].y) + ty,
+			cx - a * rx, -(cy + ry) + ty,
+			cx - rx, -(cy + a * ry) + ty,
+			cx - rx, -(cy)+ty
+		);
+		n += dt_write(buf, dt_writer);
+
+		// 左辺と左上の角を描く.
+		cx = m_pos.x + rx;
+		cy = m_pos.y + ry;
+		sprintf_s(buf,
+			"%f %f l\n"
+			"%f %f "
+			"%f %f "
+			"%f %f c\n",
+			m_pos.x, -(cy)+ty,
+			cx - rx, -(cy - a * ry) + ty,
+			cx - a * rx, -(cy - ry) + ty,
+			cx, -(cy - ry) + ty
+		);
+		n += dt_write(buf, dt_writer);
+
+		if (equal(m_fill_color.a, 0.0f)) {
+			n += dt_write("S\n", dt_writer);
+		}
+		else {
+			n += dt_write("B\n", dt_writer);
+		}
+		return n;
+	}
+
+	//------------------------------
+	// 図形をデータライターに PDF として書き込む.
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
@@ -300,9 +427,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// マイター制限
-		sprintf_s(buf,
-			"%f M\n",
-			m_join_miter_limit);
+		sprintf_s(buf, "%f M\n", m_join_miter_limit);
 		n += dt_write(buf, dt_writer);
 
 		// 破線の種類
@@ -326,20 +451,15 @@ namespace winrt::GraphPaper::implementation
 			n += dt_write(buf, dt_writer);
 		}
 		else {
+			// 実線
 			n += dt_write("[ ] 0 d\n", dt_writer);
 		}
 		return n;
 	}
 
-	//------------------------------
-	// データライターに PDF ストリームの一部として書き込む.
-	// dt_weiter	データライター
-	// 戻り値	書き込んだバイト数
-	//------------------------------
-	size_t ShapeText::pdf_write(const ShapeSheet& sheet, DataWriter const& dt_writer) const
+	// 図形をデータライターに PDF として書き込む.
+	size_t ShapeImage::pdf_write(const ShapeSheet& sheet, DataWriter const& dt_writer) const
 	{
-		size_t len = dt_write("% Text\n", dt_writer);
-		len += ShapeRect::pdf_write(sheet, dt_writer);
 		/*
 		winrt::com_ptr<IWICImagingFactory2> wic_factory;
 		winrt::check_hresult(
@@ -350,17 +470,9 @@ namespace winrt::GraphPaper::implementation
 				IID_PPV_ARGS(&wic_factory)
 			)
 		);
-
-		UINT w = 0;
-		UINT h = 0;
-		for (int i = 0; i < m_dw_test_cnt; i++) {
-			w = max(w, m_dw_test_metrics[i].width);
-			h += m_dw_test_metrics[i].height;
-		}
-
-		std::vector<uint8_t> vec(4 * w * h);
+		std::vector<uint8_t> vec(4 * m_orig.width * m_orig.height);
 		winrt::com_ptr<IWICBitmap> wic_bitmap;
-		wic_factory->CreateBitmapFromMemory(w, h, GUID_WICPixelFormat32bppBGRA, 4 * w, 4 * w * h, vec.data(), wic_bitmap.put());
+		wic_factory->CreateBitmapFromMemory(m_orig.width, m_orig.height, GUID_WICPixelFormat32bppBGRA, 4 * m_orig.width, 4 * m_orig.width * m_orig.height, vec.data(), wic_bitmap.put());
 		D2D1_RENDER_TARGET_PROPERTIES prop{
 			D2D1_RENDER_TARGET_TYPE::D2D1_RENDER_TARGET_TYPE_SOFTWARE,
 			D2D1_PIXEL_FORMAT{
@@ -373,26 +485,27 @@ namespace winrt::GraphPaper::implementation
 			D2D1_FEATURE_LEVEL_DEFAULT
 		};
 		winrt::com_ptr<ID2D1RenderTarget> target;
-		s_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
-		winrt::com_ptr<ID2D1SolidColorBrush> brush;
-		target->CreateSolidColorBrush(m_fill_color, brush.put());
-		target->BeginDraw();
-		target->DrawTextLayout(D2D1_POINT_2F{ m_text_padding.width, m_text_padding.height },
-			m_dw_text_layout.get(), brush.get());
-		target->EndDraw();
-		target->Flush();
+		sheet.m_d2d.m_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
+		*/
 		char buf[1024];
-		sprintf_s(
-			buf,
-			"<<\n"
-			"/Length /%zu\n"
-			">>\n"
-			"",
-			4 * w * h
-		);
-		dt_write(buf, dt_writer);
-		dt_writer.WriteBytes(vec);
-		vec.clear();
+
+		sprintf_s(buf,
+			"%% XObject\n"
+			"/I%d Do\n",
+			m_pdf_image_num);
+		return dt_write(buf, dt_writer);
+	}
+
+	//------------------------------
+	// 図形をデータライターに PDF として書き込む.
+	// dt_weiter	データライター
+	// 戻り値	書き込んだバイト数
+	//------------------------------
+	size_t ShapeText::pdf_write(const ShapeSheet& sheet, DataWriter const& dt_writer) const
+	{
+		size_t len = dt_write("% Text\n", dt_writer);
+		len += ShapeRect::pdf_write(sheet, dt_writer);
+		/*
 		*/
 		//ShapeText::pdf_write(sheet, dt_writer);
 		char buf[1024];
@@ -400,8 +513,6 @@ namespace winrt::GraphPaper::implementation
 		// フォント名 サイズ Tf
 		// x座標 y座標 Td
 		// TLという行間を設定する演算子
-		D2D1_POINT_2F nw_pos;	// 左上の位置
-		pt_add(m_pos, m_text_padding.width, m_text_padding.height, nw_pos);
 		sprintf_s(buf,
 			"%f %f %f rg\n"
 			"%f %f %f RG\n"
@@ -411,51 +522,49 @@ namespace winrt::GraphPaper::implementation
 			"%f %f Td\n",
 			m_font_color.r, m_font_color.g, m_font_color.b,
 			m_font_color.r, m_font_color.g, m_font_color.b,
-			m_pdf_font, m_font_size,
-			nw_pos.x, -nw_pos.y + sheet.m_sheet_size.height
+			m_pdf_font_num, m_font_size,
+			m_pos.x + m_text_padding.width,
+			-(m_pos.y + m_text_padding.height + m_dw_line_metrics[0].baseline) + sheet.m_sheet_size.height
 		);
 		len += dt_write(buf, dt_writer);
 
 		std::vector<uint8_t> sjis{};
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
-
-			const DWRITE_HIT_TEST_METRICS& tm = m_dw_test_metrics[i];
-			const wchar_t* t = m_text + tm.textPosition;
-			const uint32_t t_len = tm.length;
-
-			sprintf_s(buf, "%f %f Td\n", tm.left, -tm.top);
+			const wchar_t* t = m_text + m_dw_test_metrics[i].textPosition;	// 行の先頭文字を指すポインター
+			const uint32_t t_len = m_dw_test_metrics[i].length;	// 行の文字数
+			const float td_x = (i > 0 ? m_dw_test_metrics[i].left - m_dw_test_metrics[i - 1].left : m_dw_test_metrics[i].left);	// 行の x 方向のオフセット
+			const float td_y = (i > 0 ? m_dw_test_metrics[i].top - m_dw_test_metrics[i - 1].top : m_dw_test_metrics[i].top);	// 行の y 方向のオフセット
+			sprintf_s(buf,
+				"%f %f Td\n",
+				td_x, -td_y);
 			len += dt_write(buf, dt_writer);
 
-			// 文字列を表示する垂直なずらし位置を求める.
-			//const double dy = static_cast<double>(m_dw_line_metrics[i].baseline);
-
-
 			// 文字列を書き込む.
-			//dt_writer.WriteByte(L'<'); len++;
-			//for (int i = 0; i < t_len; i++) {
-			//	sprintf_s(buf, "%04x", t[i]);
-			//	len += dt_write(buf, dt_writer);
-			//}
-			//len += dt_write("> Tj\n", dt_writer);
-
-			size_t sjis_len = WideCharToMultiByte(CP_ACP, 0, t, t_len, NULL, 0, NULL, NULL);
+			dt_writer.WriteByte(L'<'); len++;
+			for (uint32_t j = 0; j < t_len; j++) {
+				sprintf_s(buf, "%04x", t[j]);
+				len += dt_write(buf, dt_writer);
+			}
+			len += dt_write("> Tj\n", dt_writer);
+			/*
+			const size_t sjis_len = WideCharToMultiByte(CP_ACP, 0, t, t_len, NULL, 0, NULL, NULL);
 			if (sjis.size() < sjis_len) {
 				sjis.resize(sjis_len);
 			}
 			WideCharToMultiByte(CP_ACP, 0, t, t_len, (LPSTR)sjis.data(), static_cast<int>(sjis_len), NULL, NULL);
-
 			len += dt_write(
 				"<",
 				dt_writer);
 			for (int j = 0; j < sjis_len; j++) {
-				constexpr char* X = "0123456789abcdef";
-				dt_writer.WriteByte(X[sjis[j] >> 4]);
-				dt_writer.WriteByte(X[sjis[j] & 15]);
+				constexpr char* HEX = "0123456789abcdef";
+				dt_writer.WriteByte(HEX[sjis[j] >> 4]);
+				dt_writer.WriteByte(HEX[sjis[j] & 15]);
 			}
 			len += 2 * sjis_len;
 			len += dt_write(
 				"> Tj\n",
 				dt_writer);
+			*/
 		}
 		len += dt_write("ET\n", dt_writer);
 		return len;
