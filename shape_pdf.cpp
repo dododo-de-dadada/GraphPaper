@@ -489,10 +489,20 @@ namespace winrt::GraphPaper::implementation
 		*/
 		char buf[1024];
 
+		// 表示の大きさの規定値は 1 × 1.
+		// そもままでは, 画像全体が 1 × 1 にマッピングされる.
+		// 表示するには, 変換行列に表示する大きさを指定し, 拡大する.
+		// 表示する位置は, 左上でなく左下隅を指定する.
 		sprintf_s(buf,
-			"%% XObject\n"
-			"/I%d Do\n",
-			m_pdf_image_num);
+			"%% Image XObject\n"
+			"q\n"
+			"%f 0 0 %f %f %f cm\n"
+			"/I%d Do\n"
+			"Q\n",
+			m_view.width, m_view.height,
+			m_pos.x, -(m_pos.y + m_view.height) + sheet.m_sheet_size.height,
+			m_pdf_image_num
+		);
 		return dt_write(buf, dt_writer);
 	}
 

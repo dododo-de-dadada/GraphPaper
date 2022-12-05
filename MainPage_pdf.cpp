@@ -312,18 +312,23 @@ namespace winrt::GraphPaper::implementation
 					len += dt_write(buf, dt_writer);
 					len += dt_write("stream\n", dt_writer);
 					for (uint32_t y = 0; y < t->m_orig.height; y++) {
+						if (y > 0) {
+							len += dt_write("\n", dt_writer);
+						}
 						for (uint32_t x = 0; x < t->m_orig.width; x++) {
+							// BGRA -> RGB
 							sprintf_s(buf,
-								"%02x %02x %02x ",
-								t->m_data[y * 4 * t->m_orig.width + 4 * x + 0],
+								"%02x%02x%02x",
+								t->m_data[y * 4 * t->m_orig.width + 4 * x + 2],
 								t->m_data[y * 4 * t->m_orig.width + 4 * x + 1],
-								t->m_data[y * 4 * t->m_orig.width + 4 * x + 2]
+								t->m_data[y * 4 * t->m_orig.width + 4 * x + 0]
 							);
 							len += dt_write(buf, dt_writer);
 						}
-						len += dt_write("\n", dt_writer);
 					}
+					// ƒXƒgƒŠ[ƒ€‚ÌÅŒã‚Í '>'.
 					len += dt_write(
+						">\n"
 						"endstream\n"
 						"endobj\n",
 						dt_writer);
