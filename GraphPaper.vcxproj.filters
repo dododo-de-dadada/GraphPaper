@@ -67,6 +67,7 @@
     <ClCompile Include="shape_svg.cpp" />
     <ClCompile Include="MainPage_svg.cpp" />
     <ClCompile Include="shape_pdf.cpp" />
+    <ClCompile Include="zlib.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -76,6 +77,7 @@
     <ClInclude Include="SummaryViewModel.h" />
     <ClInclude Include="undo.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="zlib.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">

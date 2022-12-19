@@ -115,6 +115,7 @@
     <ClInclude Include="Summary.h" />
     <ClInclude Include="SummaryViewModel.h" />
     <ClInclude Include="undo.h" />
+    <ClInclude Include="zlib.h" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -203,6 +204,9 @@
     <ClCompile Include="shape_svg.cpp" />
     <ClCompile Include="shape_text.cpp" />
     <ClCompile Include="undo.cpp" />
+    <ClCompile Include="zlib.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="App.idl">

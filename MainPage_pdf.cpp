@@ -1,5 +1,8 @@
 #include "pch.h"
+#include "zlib.h"
 #include "MainPage.h"
+
+using namespace::Zlib::implementation;
 
 // PDF フォーマット
 // https://aznote.jakou.com/prog/pdf/index.html
@@ -293,6 +296,10 @@ namespace winrt::GraphPaper::implementation
 
 				if (typeid(*s) == typeid(ShapeImage)) {
 					const ShapeImage* t = static_cast<const ShapeImage*>(s);
+					std::vector<uint8_t> z_buf;
+					const size_t data_size = 4ull * t->m_orig.width * t->m_orig.height;
+					z_compress(z_buf, /*<---*/t->m_data, data_size);
+
 					sprintf_s(buf,
 						"%% XObject\n"
 						"%d 0 obj\n"
@@ -301,16 +308,22 @@ namespace winrt::GraphPaper::implementation
 						"/Subtype /Image\n"
 						"/Width %u\n"
 						"/Height %u\n"
+						"/Length %u\n"
 						"/ColorSpace /DeviceRGB\n"
 						"/BitsPerComponent 8\n"
-						"/Filter /ASCIIHexDecode\n"
+						//"/Filter /ASCIIHexDecode\n"
+						"/Filter /FlateDecode\n"
 						">>\n",
 						6 + 3 * font_cnt + t->m_pdf_image_num,
 						t->m_orig.width,
-						t->m_orig.height
+						t->m_orig.height,
+						z_buf.size()
 					);
 					len += dt_write(buf, dt_writer);
 					len += dt_write("stream\n", dt_writer);
+					dt_writer.WriteBytes(z_buf);
+					len += z_buf.size();
+					/*
 					for (uint32_t y = 0; y < t->m_orig.height; y++) {
 						if (y > 0) {
 							len += dt_write("\n", dt_writer);
@@ -326,6 +339,7 @@ namespace winrt::GraphPaper::implementation
 							len += dt_write(buf, dt_writer);
 						}
 					}
+					*/
 					// ストリームの最後は '>'.
 					len += dt_write(
 						">\n"
