@@ -3,21 +3,23 @@
 
 namespace winrt::Zlib::implementation
 {
+	//------------------------------
 	// Adler-32 チェックサム
+	//------------------------------
 	// zlib ストリームの非圧縮データを検査する.
 	struct ADLER32 {
 		static constexpr uint32_t INIT = 1;
-		static uint32_t update(const uint32_t adler, const uint8_t b) noexcept
+		static uint32_t update(const uint8_t b, const uint32_t adler) noexcept
 		{
 			constexpr uint32_t ADLER32_BASE = 65521;
 			const uint32_t s1 = ((adler & 0xffff) + b) % ADLER32_BASE;
 			const uint32_t s2 = (((adler >> 16) & 0xffff) + s1) % ADLER32_BASE;
 			return (s2 << 16) + s1;
 		}
-		static uint32_t update(uint32_t adler, const uint8_t buf[], const size_t len) noexcept
+		static uint32_t update(const uint8_t buf[], const size_t len, uint32_t adler = 1) noexcept
 		{
 			for (size_t i = 0; i < len; i++) {
-				adler = update(adler, buf[i]);
+				adler = update(buf[i], adler);
 			}
 			return adler;
 		}
@@ -33,7 +35,6 @@ namespace winrt::Zlib::implementation
 
 	void deflate(std::vector<uint8_t>& out_buf, /*<---*/const uint8_t in_data[], const size_t in_len) noexcept;
 	size_t inflate(uint8_t out_data[], /*--->*/const uint8_t in_data[], size_t& in_len) noexcept;
-
 	void z_compress(std::vector<uint8_t>& z_buf, /*<---*/const uint8_t in_data[], const size_t in_len) noexcept;
 	bool z_decompress(uint8_t out_data[], /*<---*/const uint8_t z_data[]) noexcept;
 }

@@ -133,7 +133,6 @@ namespace winrt::GraphPaper::implementation
 			// PDF ヘッダー
 			// ファイルにバイナリデータが含まれる場合は,
 			// ヘッダと改行の直後に, 4 つ以上のバイナリ文字を含むコメント行を置くことが推奨.
-			// 逆に, 含まない場合は, 置かなくていいってことだろうか.
 			size_t len = dt_write(
 				"%PDF-1.7\n"
 				"%\xff\xff\xff\xff\n",
@@ -145,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 			// トレーラーから参照され,
 			// ページツリーを参照する.
 			len = dt_write(
-				"% Document Catalog\n"
+				"% Catalog Dictionary\n"
 				"1 0 obj\n"
 				"<<\n"
 				"/Type /Catalog\n"
@@ -154,11 +153,11 @@ namespace winrt::GraphPaper::implementation
 				"endobj\n", dt_writer);
 			obj_len.push_back(obj_len.back() + len);
 
-			// ページツリーノードの辞書
+			// ページツリー辞書
 			// カタログから参照され,
 			// ページを参照する.
 			len = dt_write(
-				"% Page Tree\n"
+				"% Page Tree Dictionary\n"
 				"2 0 obj\n"
 				"<<\n"
 				"/Type /Pages\n"
@@ -170,17 +169,17 @@ namespace winrt::GraphPaper::implementation
 			);
 			obj_len.push_back(obj_len.back() + len);
 
-			// ページオブジェクトの辞書
+			// ページオブジェクト
 			// ページツリーから参照され,
 			// リソースとコンテンツを参照する.
 			sprintf_s(buf,
-				"%% Page\n"
+				"%% Page Object\n"
 				"3 0 obj\n"
 				"<<\n"
 				"/Type /Page\n"
 				"/MediaBox [0 0 %f %f]\n"
-				"/Resources 4 0 R\n"
 				"/Parent 2 0 R\n"
+				"/Resources 4 0 R\n"
 				"/Contents [5 0 R]\n"
 				">>\n"
 				"endobj\n",
@@ -188,15 +187,14 @@ namespace winrt::GraphPaper::implementation
 			len = dt_write(buf, dt_writer);
 			obj_len.push_back(obj_len.back() + len);
 
-			// ページのリソース辞書
-			// ページとコンテンツから参照され,
-			// 辞書を参照する.
+			// リソース辞書
+			// ページとコンテンツから参照され, 辞書を参照する.
 			len = dt_write(
-				"% Resouces\n"
+				"% Resouces Dictionary\n"
 				"4 0 obj\n"
 				"<<\n",
 				dt_writer);
-
+			// フォント
 			int font_cnt = 0;
 			std::vector<std::vector<char>> base_font;	// ベースフォント名
 			for (const auto s : m_main_sheet.m_shape_list) {
@@ -206,18 +204,21 @@ namespace winrt::GraphPaper::implementation
 				if (typeid(*s) == typeid(ShapeText)) {
 					if (font_cnt == 0) {
 						len += dt_write(
-							"/Font\n",
+							"/Font <<\n",
 							dt_writer);
 					}
-					// フォント
 					sprintf_s(buf,
-						"<</F%d %d 0 R>>\n",
+						"/F%d %d 0 R\n",
 						font_cnt, 6 + 3 * font_cnt
 					);
 					len += dt_write(buf, dt_writer);
 					static_cast<ShapeText*>(s)->m_pdf_font_num = font_cnt++;
 				}
 			}
+			if (font_cnt > 0) {
+				len += dt_write(">>\n", dt_writer);
+			}
+			// 画像
 			int image_cnt = 0;
 			for (const auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
@@ -226,17 +227,20 @@ namespace winrt::GraphPaper::implementation
 				if (typeid(*s) == typeid(ShapeImage)) {
 					if (image_cnt == 0) {
 						len += dt_write(
-							"/XObject\n",
+							"/XObject\n"
+							"<<\n",
 							dt_writer);
 					}
-					// 画像
 					sprintf_s(buf,
-						"<</I%d %d 0 R>>\n",
+						"/I%d %d 0 R\n",
 						image_cnt, 6 + 3 * font_cnt + image_cnt
 					);
 					len += dt_write(buf, dt_writer);
-					static_cast<ShapeImage*>(s)->m_pdf_image_num = image_cnt++;
+					static_cast<ShapeImage*>(s)->m_pdf_obj = image_cnt++;
 				}
+			}
+			if (image_cnt > 0) {
+				len += dt_write(">>\n", dt_writer);
 			}
 			len += dt_write(
 				">>\n"
@@ -244,10 +248,10 @@ namespace winrt::GraphPaper::implementation
 				dt_writer);
 			obj_len.push_back(obj_len.back() + len);
 
-			// コンテントストリーム
-			// 座標変換に 72dpi / 96dpi (=0.75) を指定する.   
+			// コンテントオブジェクト (ストリーム)
+			// 変換行列に 72dpi / 96dpi (=0.75) を指定する.   
 			sprintf_s(buf,
-				"%% Content Stream\n"
+				"%% Content Object\n"
 				"5 0 obj\n"
 				"<<\n"
 				">>\n"
@@ -259,22 +263,19 @@ namespace winrt::GraphPaper::implementation
 			len = dt_write(buf, dt_writer);
 
 			// 背景
-			//const double a = m_main_sheet.m_sheet_color.a;
-			//const D2D1_COLOR_F c{
-			//	(1.0 - a) + m_main_sheet.m_sheet_color.r * a,
-			//	(1.0 - a) + m_main_sheet.m_sheet_color.g * a,
-			//	(1.0 - a) + m_main_sheet.m_sheet_color.b * a
-			//};
-			const D2D1_COLOR_F c{ m_main_sheet.m_sheet_color };
 			sprintf_s(buf,
 				"%f %f %f rg\n"
 				"0 0 %f %f re\n"
 				"b\n",
-				c.r, c.g, c.b,
-				m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height
+				m_main_sheet.m_sheet_color.r,
+				m_main_sheet.m_sheet_color.g,
+				m_main_sheet.m_sheet_color.b,
+				m_main_sheet.m_sheet_size.width,
+				m_main_sheet.m_sheet_size.height
 			);
 			len += dt_write(buf, dt_writer);
 
+			// 図形を出力
 			for (const auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
@@ -288,17 +289,25 @@ namespace winrt::GraphPaper::implementation
 			);
 			obj_len.push_back(obj_len.back() + len);
 
-			// 辞書
+			// 画像 XObject (ストリームオブジェクト) とフォント辞書
 			for (const auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
 
 				if (typeid(*s) == typeid(ShapeImage)) {
+					// 画像 XObject (ストリームオブジェクト)
 					const ShapeImage* t = static_cast<const ShapeImage*>(s);
 					std::vector<uint8_t> z_buf;
-					const size_t data_size = 4ull * t->m_orig.width * t->m_orig.height;
-					z_compress(z_buf, /*<---*/t->m_data, data_size);
+					std::vector<uint8_t> in_buf(3ull * t->m_orig.width * t->m_orig.height);
+					for (size_t i = 0; i < t->m_orig.width * t->m_orig.height; i++) {
+						in_buf[3 * i + 2] = t->m_data[4 * i + 0];	// B
+						in_buf[3 * i + 1] = t->m_data[4 * i + 1];	// G
+						in_buf[3 * i + 0] = t->m_data[4 * i + 2];	// R
+					}
+					z_compress(z_buf, /*<---*/std::data(in_buf), std::size(in_buf));
+					in_buf.clear();
+					in_buf.shrink_to_fit();
 
 					sprintf_s(buf,
 						"%% XObject\n"
@@ -308,13 +317,13 @@ namespace winrt::GraphPaper::implementation
 						"/Subtype /Image\n"
 						"/Width %u\n"
 						"/Height %u\n"
-						"/Length %u\n"
+						"/Length %zu\n"
 						"/ColorSpace /DeviceRGB\n"
 						"/BitsPerComponent 8\n"
 						//"/Filter /ASCIIHexDecode\n"
 						"/Filter /FlateDecode\n"
 						">>\n",
-						6 + 3 * font_cnt + t->m_pdf_image_num,
+						6 + 3 * font_cnt + t->m_pdf_obj,
 						t->m_orig.width,
 						t->m_orig.height,
 						z_buf.size()
@@ -323,6 +332,8 @@ namespace winrt::GraphPaper::implementation
 					len += dt_write("stream\n", dt_writer);
 					dt_writer.WriteBytes(z_buf);
 					len += z_buf.size();
+					z_buf.clear();
+					z_buf.shrink_to_fit();
 					/*
 					for (uint32_t y = 0; y < t->m_orig.height; y++) {
 						if (y > 0) {
@@ -349,6 +360,8 @@ namespace winrt::GraphPaper::implementation
 					obj_len.push_back(obj_len.back() + len);
 				}
 				else if (typeid(*s) == typeid(ShapeText)) {
+					// フォント辞書 (Type0), CID フォント辞書, フォント詳細辞書
+					// 
 					int n = static_cast<ShapeText*>(s)->m_pdf_font_num;
 
 					wchar_t* t;	// 図形の文字列
@@ -357,7 +370,7 @@ namespace winrt::GraphPaper::implementation
 					s->get_font_family(u);
 					DWRITE_FONT_STRETCH font_stretch;	// 幅の伸縮
 					s->get_font_stretch(font_stretch);
-					DWRITE_FONT_WEIGHT font_weight;
+					DWRITE_FONT_WEIGHT font_weight;	// 書体の太さ
 					s->get_font_weight(font_weight);
 
 					UINT32 index;
@@ -411,12 +424,12 @@ namespace winrt::GraphPaper::implementation
 					// 1 em あたりのデザイン単位を得る.
 					DWRITE_FONT_METRICS1 fmet;
 					font.as<IDWriteFont1>()->GetMetrics(&fmet);
-					const int upe = fmet.designUnitsPerEm;
+					const int upem = fmet.designUnitsPerEm;
 
 
 					// フォント辞書
 					sprintf_s(buf,
-						"%% Font\n"
+						"%% Font Dictionary\n"
 						"%d 0 obj\n"
 						"<<\n"
 						"/Type /Font\n"
@@ -433,25 +446,24 @@ namespace winrt::GraphPaper::implementation
 					);
 					len += dt_write(buf, dt_writer);
 
-					// CID フォント辞書
+					// CID フォント辞書 (Type 0 の子孫となるフォント)
 					// フォント辞書から参照され,
 					// フォント詳細辞書を参照する.
 					sprintf_s(buf,
-						"%% Descendant Font\n"
+						"%% Descendant Font Dictionary\n"
 						"%d 0 obj\n"
 						"<<\n"
 						"/Type /Font\n"
 						"/Subtype /CIDFontType2\n"
 						"/BaseFont /%s\n"
-						"/CIDSystemInfo <<\n"
+						"/CIDSystemInfo\n"
+						"<<\n"
 						"/Registry (Adobe)\n"
 						"/Ordering (Japan1)\n"
 						"/Supplement 7\n"
 						">>\n"
 						"/FontDescriptor %d 0 R\n"	// 間接参照で必須.
-						//">>\n"
-						//"endobj\n"
-						,
+						"/W [1 [",	// CID 開始番号は 1 (= 半角空白)
 						6 + 3 * n + 1,
 						base_font[n].data(),
 						6 + 3 * n + 2
@@ -459,35 +471,19 @@ namespace winrt::GraphPaper::implementation
 					len = dt_write(buf, dt_writer);
 
 					// 半角のグリフ幅を設定する
-					// CID 開始番号は 1 (= 半角空白)
-					len += dt_write("/W [1 [\n", dt_writer);
 					for (int i = 1; i <= gid.size(); i++) {
-						sprintf_s(buf, "%u ", 1000 * gmet[i - 1].advanceWidth / upe);
+						sprintf_s(buf, "%u ", 1000 * gmet[i - 1].advanceWidth / upem);
 						len += dt_write(buf, dt_writer);
 					}
 					len += dt_write(
-						"\n]]\n"
+						"]]\n"
 						">>\n"
 						"endobj\n",
 						dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
-					// グリフにおける座標値や幅を指定する場合、PDF 内では、常に 1 em = 1000 であるものとして、
-					// 値を設定します。実際のフォントで 1 em = 1024 などとなっている場合は、n / 1024 * 1000 
-					// というようにして、値を 1 em = 1000 に合わせます.
-					// 
-					// PDF の FontBBox (Black Box) のイメージ
-					//     y
-					//     ^
-					//     |
-					//   +-+--------+
-					//   | |   /\   |
-					//   | |  /__\  |
-					//   | | /    \ |
-					// --+-+--------+--> x
-					//   | |        |
-					//   +-+--------+
-					//     |
+					// フォント詳細辞書
+					// CID フォント辞書から参照される.
 					constexpr const char* FONT_STRETCH_NAME[] = {
 						"Normal",
 						"UltraCondensed",
@@ -501,7 +497,7 @@ namespace winrt::GraphPaper::implementation
 						"UltraExpanded"
 					};
 					sprintf_s(buf,
-						"%% Font Descriptor\n"
+						"%% Font Descriptor Dictionary\n"
 						"%d 0 obj\n"
 						"<<\n"
 						"/Type /FontDescriptor\n"
@@ -521,13 +517,13 @@ namespace winrt::GraphPaper::implementation
 						base_font[n].data(),
 						FONT_STRETCH_NAME[font_stretch < 10 ? font_stretch : 0],
 						font_weight <= 900 ? font_weight : 900,
-						1000 * fmet.glyphBoxLeft / upe,
-						(1000 * fmet.glyphBoxBottom / upe),
-						1000 * fmet.glyphBoxRight / upe,
-						(1000 * fmet.glyphBoxTop / upe),
-						1000 * fmet.ascent / upe,
-						1000 * fmet.descent / upe,
-						1000 * fmet.capHeight / upe
+						1000 * fmet.glyphBoxLeft / upem,
+						(1000 * fmet.glyphBoxBottom / upem),
+						1000 * fmet.glyphBoxRight / upem,
+						(1000 * fmet.glyphBoxTop / upem),
+						1000 * fmet.ascent / upem,
+						1000 * fmet.descent / upem,
+						1000 * fmet.capHeight / upem
 					);
 					len = dt_write(buf, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
@@ -588,3 +584,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 }
+
+// グリフにおける座標値や幅を指定する場合、PDF 内では、常に 1 em = 1000 であるものとして、
+// 値を設定します。実際のフォントで 1 em = 1024 などとなっている場合は、n / 1024 * 1000 
+// というようにして、値を 1 em = 1000 に合わせます.
+// 
+// PDF の FontBBox (Black Box) のイメージ
+//     y
+//     ^
+//     |
+//   +-+--------+
+//   | |   /\   |
+//   | |  /__\  |
+//   | | /    \ |
+// --+-+--------+--> x
+//   | |        |
+//   +-+--------+
+//     |

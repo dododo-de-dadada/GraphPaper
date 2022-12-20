@@ -649,7 +649,7 @@ namespace winrt::GraphPaper::implementation
 		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
 		winrt::com_ptr<ID2D1Bitmap1> m_d2d_bitmap{ nullptr };	// D2D ビットマップ
 
-		int m_pdf_image_num = 0;
+		int m_pdf_obj = 0;
 
 		// 図形を破棄する.
 		ShapeImage::~ShapeImage(void)

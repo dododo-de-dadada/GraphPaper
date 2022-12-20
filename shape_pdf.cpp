@@ -501,7 +501,7 @@ namespace winrt::GraphPaper::implementation
 			"Q\n",
 			m_view.width, m_view.height,
 			m_pos.x, -(m_pos.y + m_view.height) + sheet.m_sheet_size.height,
-			m_pdf_image_num
+			m_pdf_obj
 		);
 		return dt_write(buf, dt_writer);
 	}

@@ -31,38 +31,39 @@ namespace winrt::Zlib::implementation
 
 	static constexpr uint16_t FIXED_LIT_TBL[][3]	// 固定ハフマン符号表
 	{
-		// uint16_t lit_code = 0;
-		//lit_cnt = 0;
-		//dist_cnt = 0;
-		//for (uint16_t i = 256; i <= 279; i++) {
-		//	lit_tbl[lit_cnt][ABC] = i;
-		//	lit_tbl[lit_cnt][CLEN] = 7;
-		//	lit_tbl[lit_cnt++][CODE] = lit_code++;
-		//}
-		//lit_code <<= 1;
-		//for (uint16_t i = 0; i <= 143; i++) {
-		//	lit_tbl[lit_cnt][ABC] = i;
-		//	lit_tbl[lit_cnt][CLEN] = 8;
-		//	lit_tbl[lit_cnt++][CODE] = lit_code++;
-		//}
-		//for (uint16_t i = 280; i <= 287; i++) {
-		//	lit_tbl[lit_cnt][ABC] = i;
-		//	lit_tbl[lit_cnt][CLEN] = 8;
-		//	lit_tbl[lit_cnt++][CODE] = lit_code++;
-		//}
-		//lit_code <<= 1;
-		//for (uint16_t i = 144; i <= 255; i++) {
-		//	lit_tbl[lit_cnt][ABC] = i;
-		//	lit_tbl[lit_cnt][CLEN] = 9;
-		//	lit_tbl[lit_cnt++][CODE] = lit_code++;
-		//}
-		//dist_tbl = lit_tbl + lit_cnt;
-		//dist_cnt = 0;
-		//for (uint16_t i = 0; i <= 31; i++) {
-		//	dist_tbl[dist_cnt][ABC] = i;
-		//	dist_tbl[dist_cnt][CLEN] = 5;
-		//	dist_tbl[dist_cnt++][CODE] = i;
-		//}
+		// 固定ハフマン符号の作成
+		//	uint16_t lit_code = 0;
+		//	lit_cnt = 0;
+		//	dist_cnt = 0;
+		//	for (uint16_t i = 256; i <= 279; i++) {
+		//		lit_tbl[lit_cnt][ABC] = i;
+		//		lit_tbl[lit_cnt][CLEN] = 7;
+		//		lit_tbl[lit_cnt++][CODE] = lit_code++;
+		//	}
+		//	lit_code <<= 1;
+		//	for (uint16_t i = 0; i <= 143; i++) {
+		//		lit_tbl[lit_cnt][ABC] = i;
+		//		lit_tbl[lit_cnt][CLEN] = 8;
+		//		lit_tbl[lit_cnt++][CODE] = lit_code++;
+		//	}
+		//	for (uint16_t i = 280; i <= 287; i++) {
+		//		lit_tbl[lit_cnt][ABC] = i;
+		//		lit_tbl[lit_cnt][CLEN] = 8;
+		//		lit_tbl[lit_cnt++][CODE] = lit_code++;
+		//	}
+		//	lit_code <<= 1;
+		//	for (uint16_t i = 144; i <= 255; i++) {
+		//		lit_tbl[lit_cnt][ABC] = i;
+		//		lit_tbl[lit_cnt][CLEN] = 9;
+		//		lit_tbl[lit_cnt++][CODE] = lit_code++;
+		//	}
+		//	dist_tbl = lit_tbl + lit_cnt;
+		//	dist_cnt = 0;
+		//	for (uint16_t i = 0; i <= 31; i++) {
+		//		dist_tbl[dist_cnt][ABC] = i;
+		//		dist_tbl[dist_cnt][CLEN] = 5;
+		//		dist_tbl[dist_cnt++][CODE] = i;
+		//	}
 		{256, 7, 0}, {257, 7, 1}, {258, 7, 2}, {259, 7, 3}, {260, 7, 4}, {261, 7, 5}, {262, 7, 6}, {263, 7, 7},
 		{264, 7, 8}, {265, 7, 9}, {266, 7, 10}, {267, 7, 11},  {268, 7, 12}, {269, 7, 13},  {270, 7, 14}, {271, 7, 15},
 		{272, 7, 16}, {273, 7, 17}, {274, 7, 18}, {275, 7, 19}, {276, 7, 20}, {277, 7, 21}, {278, 7, 22}, {279, 7, 23},
@@ -161,7 +162,7 @@ namespace winrt::Zlib::implementation
 		{	28,		13,	16385,24576 },
 		{	29,		13,	24577,32768 },	// 45
 		//			 拡張
-		// 符号		ビット数	 距離
+		// 符号		ビット数	 回数
 		// ----		----	--------
 		{   16,      2,     3,6     },
 		{	17,		 3,	    3,10    },
@@ -251,7 +252,7 @@ namespace winrt::Zlib::implementation
 		// |1:0:0:1:0:0:1: | : : : : : : : | : : ...
 		// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		// val
-		//  0 1 2 3 4 5 6 7
+		//  0 1 2 3 4 5 6 7 0 1 2 3 4 5
 		// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		// |0:0:0:0:0:0:0:1|0:0:1:0:0:1: : | : : ...
 		// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -329,32 +330,37 @@ namespace winrt::Zlib::implementation
 			const size_t block_len = std::min(in_len - len, IN_BLOCK);	// ブロック長
 			deflate_put_data<TO_TBL>(empty_buf, 0, lit_tbl, dist_tbl, in_data + len, block_len);
 
-			// リテラル/長さアルファベットに対応するハフマン符号を得る.
-			deflate_huffman<15, LIT_ABC_MAX>(lit_tbl);
+			// 出現回数にもとづいて符号長を得る.
 			// リテラル/長さアルファベットの個数を求める.
+			// 末尾の連続する符号長ゼロのアルファベットは個数に含まない.
+			// 符号長にもとづいてハフマン符号を設定する.
+			// ただし, 個数は最小個数未満にはならない.
+			deflate_huffman<15, LIT_ABC_MAX>(lit_tbl);
 			uint32_t lit_cnt = LIT_ABC_MAX;	// リテラル/長さアルファベットの個数
 			for (; lit_cnt > 0 && lit_tbl[lit_cnt - 1][CLEN] == 0; lit_cnt--);
 			inflate_huffman(lit_tbl, lit_cnt);
-			// 最低個数未満にならない限り, 末尾の連続する符号長ゼロのアルファベットは個数に含まない.
 			lit_cnt = std::max(LIT_ABC_MIN, lit_cnt);
 
-			// 距離アルファベットに対応する符号長を得る.
-			deflate_huffman<15, DIST_ABC_MAX>(dist_tbl);
+			// 出現回数にもとづいて符号長を得る.
 			// 距離アルファベットの個数を求める.
+			// 末尾の連続する符号長ゼロのアルファベットは個数に含まない.
+			// 符号長にもとづいてハフマン符号を設定する.
+			// ただし, 個数は最小個数未満にはならない.
+			deflate_huffman<15, DIST_ABC_MAX>(dist_tbl);
 			uint32_t dist_cnt = DIST_ABC_MAX;	// 距離アルファベットの個数
 			for (; dist_cnt > 0 && dist_tbl[dist_cnt - 1][CLEN] == 0; dist_cnt--);
 			inflate_huffman(dist_tbl, dist_cnt);
-			// 最低個数未満にならない限り, 末尾の連続する符号長ゼロのアルファベットは個数に含まない.
 			dist_cnt = std::max(DIST_ABC_MIN, dist_cnt);
 
 			// 符号長アルファベットの出現回数を数える.
 			deflate_put_len<TO_TBL>(empty_buf, 0, clen_tbl, lit_tbl, lit_cnt);
 			deflate_put_len<TO_TBL>(empty_buf, 0, clen_tbl, dist_tbl, dist_cnt);
 
-			// 符号長アルファベットに対応するハフマン符号を得て,
+			// 出現回数にもとづいて符号長を得る.
+			// 符号長にもとづいてハフマン符号を設定する.
 			// 符号長アルファベットの個数を求める.
-			// 最低個数未満にならない限り, 末尾の連続する符号長ゼロのアルファベットは個数に含まない.
-			// ただし, アルファベット順ではない.
+			// 末尾の連続する符号長ゼロのアルファベットは個数に含まない.
+			// ただし, 最小個数未満にはならず, アルファベット順ではない.
 			deflate_huffman<7, CLEN_ABC_MAX>(clen_tbl);
 			inflate_huffman(clen_tbl, CLEN_ABC_MAX);
 			uint32_t clen_cnt = CLEN_ABC_MAX;	// 符号長アルファベットの個数
@@ -380,7 +386,7 @@ namespace winrt::Zlib::implementation
 			// リテラル/長さと距離の, 各アルファベットの符号長とその拡張ビットを出力する.
 			bit_pos = deflate_put_len<TO_BUF>(out_buf, bit_pos, clen_tbl, lit_tbl, lit_cnt);
 			bit_pos = deflate_put_len<TO_BUF>(out_buf, bit_pos, clen_tbl, dist_tbl, dist_cnt);
-			// データを圧縮して出力する.
+			// アルファベットに対応する符号をバッファに書き込む.
 			bit_pos = deflate_put_data<TO_BUF>(out_buf, bit_pos, lit_tbl, dist_tbl, in_data + len, std::min(in_len - len, IN_BLOCK));
 		}
 		// 出力バッファの大きさを合わせる.
@@ -388,7 +394,7 @@ namespace winrt::Zlib::implementation
 		out_buf.shrink_to_fit();
 	}
 
-	// アルファベットに対応する符号長を得る
+	// 出現回数にもとづいて符号長を得る.
 	// B	符号の最大ビット長
 	// N	符号表の最大行数
 	// M	符号表の列数
@@ -413,7 +419,7 @@ namespace winrt::Zlib::implementation
 		// +-----+-----+-----+-----+-----+
 		// 
 		//                       奇数個なら末尾は
-		// 並び替え                  取り除く    パッケージ化
+		// 並び替え                    無視      パッケージ化
 		// +-----+-----+-----+-----+ +-----+    +-----+-----+
 		// | A 2 | E 4 | B 6 | D 8 |-| C10 | => |AE 6 |BD 14|
 		// +-----+-----+-----+-----+ +-----+    +-----+-----+
@@ -424,7 +430,7 @@ namespace winrt::Zlib::implementation
 		// +-----+-----+-----+-----+-----+ +-----+-----+
 		// 
 		//                                   奇数個なら末尾は
-		// 並び替え                               取り除く   パッケージ
+		// 並び替え                                無視      パッケージ化
 		// +-----+-----+-----+-----+-----+-----+ +-----+    +-----+-----+-----+
 		// | A 2 | E 4 | B 6 |AE 6 | D 8 | C10 |-|BD 14| => |AE 6 |BAE12|DC 18|
 		// +-----+-----+-----+-----+-----+-----+ +-----+    +-----+-----+-----+
@@ -434,7 +440,7 @@ namespace winrt::Zlib::implementation
 		// | A 2 | B 6 | C10 | D 8 | E 4 |+|AE 6 |BAE12|DC 18|
 		// +-----+-----+-----+-----+-----+ +-----+-----+-----+
 		// 
-		// 並び替え                                       　　　 パッケージ
+		// 並び替え                                       　　　 パッケージ化
 		// +-----+-----+-----+-----+-----+-----+-----+-----+    +-----+-----+-----+-------+
 		// | A 2 | E 4 | B 6 |AE 6 | D 8 | C10 |BAE12|DC 18| => |AE 6 |BAE12|DC 18|BAEDC30|
 		// +-----+-----+-----+-----+-----+-----+-----+-----+    +-----+-----+-----+-------+
@@ -444,7 +450,7 @@ namespace winrt::Zlib::implementation
 		// | A 2 | B 6 | C10 | D 8 | E 4 |+|AE 6 |BAE12|DC 18|BAEDC30|
 		// +-----+-----+-----+-----+-----+ +------+-----+-----+-------+
 		//                                                奇数個なら末尾は
-		// 並び替え                                           取り除く
+		// 並び替え                                             無視
 		// +-----+-----+-----+-----+-----+-----+-----+-----+ +-------+
 		// | A 2 | E 4 | B 6 |AE 6 | D 8 | C10 |BAE12|DC 18|-|BAEDC30|
 		// +-----+-----+-----+-----+-----+-----+-----+-----+ +-------+
@@ -490,8 +496,6 @@ namespace winrt::Zlib::implementation
 			if (lit_tbl[i][FREQ] > 0) {
 				tbl[tbl_cnt].abc.push_back(lit_tbl[i][ABC]);
 				tbl[tbl_cnt].freq = lit_tbl[i][FREQ];
-				//tbl[tbl_cnt].first.push_back(lit_tbl[i][ABC]);
-				//tbl[tbl_cnt].second = lit_tbl[i][FREQ];
 				idx[tbl_cnt++] = tbl_cnt;
 			}
 			lit_tbl[i][CLEN] = 0;
@@ -504,7 +508,6 @@ namespace winrt::Zlib::implementation
 			std::sort(std::begin(idx), end,
 				[tbl](const uint32_t& a, const uint32_t& b) {
 					return tbl[a].freq < tbl[b].freq;
-			//return tbl[a].second < tbl[b].second;
 				});
 		}
 
@@ -521,14 +524,10 @@ namespace winrt::Zlib::implementation
 				for (int j = 0; j < tbl[i0].abc.size(); j++) {
 					const uint32_t abc = tbl[i0].abc[j];
 					pkg[i].abc.push_back(abc);
-					//const uint32_t abc = tbl[i0].first[j];
-					//pkg[i].first.push_back(abc);
 				}
 				for (int j = 0; j < tbl[i1].abc.size(); j++) {
 					const uint32_t abc = tbl[i1].abc[j];
 					pkg[i].abc.push_back(abc);
-					//const uint32_t abc = tbl[i1].first[j];
-					//pkg[i].first.push_back(abc);
 				}
 				pkg[i].freq = tbl[i0].freq + tbl[i1].freq;
 			}
@@ -545,7 +544,6 @@ namespace winrt::Zlib::implementation
 			std::sort(std::begin(idx), end,
 				[tbl](const uint32_t& a, const uint32_t& b) {
 					return tbl[a].freq < tbl[b].freq;
-			//return tbl[a].second < tbl[b].second;
 				});
 			// 奇数個なら末尾は取り除く
 			b = (a / 2) * 2;
@@ -555,8 +553,6 @@ namespace winrt::Zlib::implementation
 			for (int k = 0; k < tbl[j].abc.size(); k++) {
 				const uint32_t abc = tbl[j].abc[k];
 				lit_tbl[abc][CLEN]++;
-				//const uint32_t abc = tbl[j].first[k];
-				//lit_tbl[abc][CLEN]++;
 			}
 		}
 	}
@@ -657,9 +653,37 @@ namespace winrt::Zlib::implementation
 
 	}
 
+	static void deflate_slide(const size_t word_len, const size_t win_max, const uint8_t* win_ptr, const size_t win_len, const uint8_t*& new_ptr, size_t& new_len)
+	{
+		auto len = win_len;
+		auto ptr = win_ptr;
+		//------------------------------
+		// 窓のスライド
+		//------------------------------
+		// スライド窓長が最大長以下なら,
+		if (len < win_max) {
+			// ポインターはそのままで, スライド窓長のみ増やす.
+			len += word_len;
+		}
+		// それ以外なら,
+		else {
+			// 長さはそのままでスライド窓ポインターのみ増やす.
+			ptr += word_len;
+		}
+		// スライド窓が入力データからはみ出したなら,
+		if (len > win_max) {
+			// はみ出した分を戻す.
+			const size_t over_len = len - win_max;	// はみ出した長さ
+			len -= over_len;
+			ptr += over_len;
+		}
+		new_len = len;
+		new_ptr = ptr;
+	}
 
-	// 画像データを読み込んで, リテラル／長さ, 距離を得て, それらのアルファベットの出現回数をカウントする.
-	// または, アルファベットに対応する符号をバッファに書き込む.
+	// リテラル/長さアルファベットと距離アルファベットの出現回数を数える.
+	// または, 
+	// アルファベットに対応する符号をバッファに書き込む.
 	// TO_BUF	true ならばバッファに出力, false ならば出現回数を数える.
 	// out_buf	出力バッファ
 	// bit_pos	出力ビット位置
@@ -677,19 +701,23 @@ namespace winrt::Zlib::implementation
 		const size_t in_len) noexcept
 	{
 		// 単語 (3 バイト) の出現位置を検索するハッシュ.
-		// ハッシュキーは, 3 バイトを整数にした値.
-		// キーに対応する値は, 単語の出現位置を順に格納したリスト.
+		// キーと値のペアが格納される.
+		// キーは, データ 3 バイトを整数にした値.
+		// 値は, 単語の出現位置を順に格納したチェイン (リスト)
 		//
+		//  ペア
+		// キー:値    出現位置
 		// +---+--+   +-----+-----+-----+   +-----+
 		// |AAA| ---->|addr0|addr1|addr2|...|addrK|
 		// +---+--+   +-----+-----+-----+   +-----+
 		// +---+--+   +-----+-----+   +-----+
 		// |ABC| ---->|addr0|addr1|...|addrL|
 		// +---+--+   +-----+-----+   +-----+
-		//   :   :       :     :         
+		//   :   :       :     :
 		// +---+--+   +-----+-----+-----+-----+   +-----+
 		// |XYZ| ---->|addr0|addr1|addr2|addr3|...|addrM|
 		// +---+--+   +-----+-----+-----+-----+   +-----+
+		//   :   :       :     :
 		std::unordered_map<uint32_t, std::list<const uint8_t*>> xyz_hash;
 
 		// 符号表の出現回数を初期化.
@@ -715,7 +743,7 @@ namespace winrt::Zlib::implementation
 		//  |
 		//  |-- - --------------------in_len---------------------- - - >|
 		const uint8_t* const in_end = in_data + in_len;	// 入力データの終端
-		const size_t win_len_max = std::min(32768ull, in_len);	// スライド窓の最大幅
+		const size_t win_max = std::min(32768ull, in_len);	// スライド窓の最大幅
 		const uint8_t* win_ptr = in_data;	// スライド窓ポインター
 		size_t win_len = 0;	// スライド窓幅
 		size_t word_len = 0;	// 単語長
@@ -729,8 +757,8 @@ namespace winrt::Zlib::implementation
 			/*
 			//------------------------------
 			// スライド窓の中から, 最長一致する単語を探す.
-			// 最長一致のリニアサーチ
 			//------------------------------
+			// 最長一致のリニアサーチ
 			word_len = 1;	// 単語長
 			const auto word_abc = win_ptr[win_len];	// 単語の最初のバイト
 			for (size_t pos = 0;	// 一致した位置
@@ -758,19 +786,19 @@ namespace winrt::Zlib::implementation
 
 			//------------------------------
 			// スライド窓の中から, 最長一致する単語を探す.
-			// 最長一致のハッシュサーチ
 			//------------------------------
+			// 最長一致のハッシュサーチ
 			word_len = 1;	// 単語長
 			const uint32_t xyz_key = XYZ_KEY(win_ptr + win_len);	// XYZ ハッシュキー
 
-			// キーに合致するペア (要素) が XYZ ハッシュに中にあるなら,
+			// キーに合致する要素 (ペア) が XYZ ハッシュに中にあるなら,
 			if (xyz_hash.count(xyz_key) > 0) {
 				int cnt_out = 0;	// ウィンドウ窓の範囲外になった個数.
+				auto& chain = xyz_hash[xyz_key];	// ペアに格納されたチェイン
 
-				// ペアから, 出現位置が格納されたチェインを取り出す.
-				auto& xyz_chain = xyz_hash[xyz_key];	// 出現位置が格納されたチェイン
-				for (const auto ptr : xyz_chain) {
-					// 位置がウィンドウ窓の範囲外になったなら,
+				// チェインに格納された各位置について.
+				for (const auto ptr : chain) {
+					// 位置がウィンドウ窓の範囲外にだったなら,
 					if (ptr < win_ptr) {
 						// その個数を数え, 次の出現位置に進む.
 						cnt_out++;
@@ -798,61 +826,69 @@ namespace winrt::Zlib::implementation
 				// チェインから, 範囲外になった位置を削除する.
 				//------------------------------
 				for (; cnt_out > 0; cnt_out--) {
-					xyz_chain.pop_front();
+					chain.pop_front();
 				}
-
 				/*
 				if (lazy_cnt > 0) {
 					lazy_cnt--;
 				}
 				else {
-					const uint32_t lazy_xyz_key = XYZ_KEY(win_ptr + 1 + win_len);	// XYZ ハッシュキー
-					size_t lazy_word_len = word_len;
-					auto& lazy_xyz_chain = xyz_hash[lazy_xyz_key];	// 出現位置が格納されたチェイン
-					for (const auto ptr : lazy_xyz_chain) {
-						// 位置がウィンドウ窓の範囲外なら,
-						if (ptr < win_ptr) {
-							// 無視する.
-							continue;
-						}
-						// 単語長を 1 バイトずつ増やしながら比較する.
-						// ハッシュによって 3 バイトは一致済み.
-						size_t len = 3;	// 一致した長さ
-						for (;
-							// 単語の最大長さ以下
-							len < 258 &&
-							// データの終端は超えない.
-							win_ptr + win_len + 1 + len < in_end &&
-							ptr[len] == win_ptr[win_len + 1 + len];
-							len++) {
-						}
-						// より長い最長一致を得る.
-						if (len > lazy_word_len) {
-							lazy_word_len = len;
+					const uint8_t* lazy_ptr;
+					size_t lazy_len;
+					size_t lazy_word = word_len;
+
+					int i = 1;
+					for (; i < 258 && win_ptr + win_len + i + 3 < in_end; i++) {
+						deflate_slide(i, win_max, win_ptr, win_len, lazy_ptr, lazy_len);
+
+						const uint32_t lazy_key = XYZ_KEY(lazy_ptr + lazy_len);	// XYZ ハッシュキー
+						auto& lazy_chain = xyz_hash[lazy_key];	// 出現位置が格納されたチェイン
+						for (const auto ptr : lazy_chain) {
+							// 位置がウィンドウ窓の範囲外なら,
+							if (ptr < lazy_ptr) {
+								// 無視する.
+								continue;
+							}
+							// 単語長を 1 バイトずつ増やしながら比較する.
+							// ハッシュによって 3 バイトは一致済み.
+							size_t len = 3;	// 一致した長さ
+							for (;
+								// 単語の最大長さ以下
+								len < 258 &&
+								// データの終端は超えない.
+								lazy_ptr + lazy_len + len < in_end &&
+								ptr[len] == lazy_ptr[lazy_len + len];
+								len++) {
+							}
+							// より長い最長一致を得る.
+							if (len > lazy_len) {
+								lazy_len = len;
+							}
 						}
 					}
-					if (lazy_word_len > word_len) {
-						lazy_cnt++;
+					if (lazy_word > word_len + 1) {
+						lazy_cnt = i;
 						word_len = 1;
 					}
 				}
 				*/
 			}
 
-			//------------------------------
 			// 単語が見つからない, または見つかっても単語長が 2 バイト以下なら,
-			// リテラル (1 バイト) のアルファベットに対応する符号をそのまま出力.
-			//------------------------------
 			if (word_len >= 0 && word_len <= 2) {
+				//------------------------------
+				// アルファベットに対応する符号をそのまま出力
+				//------------------------------
 				const uint32_t abc = win_ptr[win_len];	// アルファベット
 				bit_pos = deflate_put_abc<TO_BUF>(out_buf, bit_pos, abc, lit_tbl);
 				word_len = 1;
 			}
-			//------------------------------
+
 			// 単語長が 3 バイト以上の単語が見つかったなら,
-			// 長さ符号, 距離符号 (とその拡張ビット列) を出力する.
-			//------------------------------
 			else {
+				//------------------------------
+				// 長さ符号, 距離符号 (とその拡張ビット列) を出力する.
+				//------------------------------
 				if (word_len >= 3 && word_len <= 10) {
 					const uint32_t abc = 257 + (static_cast<uint32_t>(word_len) - 3);
 					bit_pos = deflate_put_abc<TO_BUF>(out_buf, bit_pos, abc, lit_tbl);
@@ -1017,9 +1053,9 @@ namespace winrt::Zlib::implementation
 			//------------------------------
 			// 窓のスライド
 			//------------------------------
-			const auto win_end = win_ptr + win_len;
+			const auto win_end = win_ptr + win_len;	// スライド前の窓の終端
 			// スライド窓長が最大長以下なら,
-			if (win_len < win_len_max) {
+			if (win_len < win_max) {
 				// ポインターはそのままで, スライド窓長のみ増やす.
 				win_len += word_len;
 			}
@@ -1029,31 +1065,30 @@ namespace winrt::Zlib::implementation
 				win_ptr += word_len;
 			}
 			// スライド窓が入力データからはみ出したなら,
-			if (win_len > win_len_max) {
+			if (win_len > win_max) {
 				// はみ出した分を戻す.
-				const size_t over_len = win_len - win_len_max;	// はみ出した長さ
+				const size_t over_len = win_len - win_max;	// はみ出した長さ
 				win_len -= over_len;
 				win_ptr += over_len;
 			}
 
 			//------------------------------
-			// スライドによって新たに窓の中に含まれた
-			// 単語キー/位置のペアを XYZ ハッシュに追加
+			// XYZ ハッシュへの追加
 			//------------------------------
-			// 移動した窓に含まれる単語 (3 バイト) と
-			// その位置をチェインに追加する.
-			for (auto ptr = win_end;
-				ptr < win_ptr + win_len &&
-				// データの終端を超える単語キーは追加しない.
-				ptr + 3 <= in_end;
-				ptr++) {
+			const uint8_t* const new_end = win_ptr + win_len;	// スライド後の窓の終端
+			// 窓のスライドによって生じた各バイトについて,
+			for (auto ptr = win_end; ptr < new_end && ptr + 3 <= in_end; ptr++) {
+				// 3 バイトのキーで, XYZ ハッシュを検索する.
+				// あればそのペアを, なければ新たなペアを得る.
+				// 得えられたペアに格納されたチェインに, 
+				// キーを生成したときの位置を格納する.
 				auto& chain = xyz_hash[XYZ_KEY(ptr)];
 				chain.push_back(ptr);
 			}
 		}
 
 		//------------------------------
-		// 残りのアルファベット (3 バイト未満) を 1 バイトずつ出力する.
+		// 残りのアルファベット (3 バイト未満) を出力する.
 		//------------------------------
 		for (; win_ptr + win_len < in_end; win_len++) {
 			const uint32_t abc = win_ptr[win_len];	// アルファベット
@@ -1380,7 +1415,7 @@ namespace winrt::Zlib::implementation
 		}
 	}
 
-	// 符号の長さで並び替えし, 符号表にハフマン符号を設定する.
+	// 符号長にもとづいてハフマン符号を設定する.
 	// T	符号表の列の型. 伸張ならば uint16_t, 圧縮ならば uint32_t (出現回数を格納するため)
 	// M	符号表の列数
 	// tbl	符号表 (アルファベット順, または符号長/アルファベット順)
@@ -1414,6 +1449,7 @@ namespace winrt::Zlib::implementation
 			}
 		}
 	}
+
 
 	// ビット列を読み込んで, 符号表から一致する行を見つける.
 	static size_t inflate_match(const uint8_t data[], const size_t bit_pos, const uint16_t tbl[][3], const size_t tbl_cnt, size_t& new_pos) noexcept
@@ -1463,7 +1499,7 @@ namespace winrt::Zlib::implementation
 		z_buf.push_back(cmf);
 		z_buf.push_back(flg);
 		deflate(z_buf, /*<===*/ in_data, in_len);
-		const uint32_t checksum = ADLER32::update(1, in_data, in_len);
+		const uint32_t checksum = ADLER32::update(in_data, in_len);
 		z_buf.push_back(static_cast<uint8_t>(checksum >> 24));
 		z_buf.push_back(static_cast<uint8_t>(checksum >> 16));
 		z_buf.push_back(static_cast<uint8_t>(checksum >> 8));
@@ -1480,21 +1516,16 @@ namespace winrt::Zlib::implementation
 		// +----------------------------+----------------------------+
 		// |CMINFO(4)    |CM(4)         |FLEVEL(2)|FDICT(1)|FCHECK(5)|
 		// +----------------------------+----------------------------+
-		const uint8_t cmf = z_data[0];
-		const uint8_t flg = z_data[1];
-		//const auto cm = bit_get(z_data, 0, 4);
-		const uint8_t cm = (cmf & 0x0F);
+		const uint8_t cmf = z_data[0];	// 圧縮方式と, 圧縮方式の情報
+		const uint8_t flg = z_data[1];	// CMF と FLG のチェックビット, プリセット辞書, 圧縮レベル
+		const uint8_t cm = (cmf & 0x0F);	// 圧縮方式
 		if (cm == 8)
 		{
-			//const auto cinfo = bit_get(z_data, 4, 4);
-			//const auto fcheck = bit_get(z_data + 1, 0, 5);
-			//const auto fdict = bit_get(z_data + 1, 5, 1);
-			//const auto flevel = bit_get(z_data + 1, 6, 2);
-			const uint8_t cinfo = (cmf >> 4);
-			const uint32_t window_size = 1ul << (static_cast<int>(cinfo) + 8);
-			const uint8_t fcheck = (flg & 0x1f);
-			const uint8_t fdict = ((flg >> 5) & 1);
-			const uint8_t flevel = ((flg >> 6) & 3);
+			const uint8_t cinfo = (cmf >> 4);	// 圧縮方式の情報
+			const uint32_t window_size = 1ul << (static_cast<int>(cinfo) + 8);	// CM=8 ならウィンドウサイズの対数-1
+			const uint8_t fcheck = (flg & 0x1f);	// CMF と FLG のチェックビット
+			const uint8_t fdict = ((flg >> 5) & 1);	// プリセット辞書
+			const uint8_t flevel = ((flg >> 6) & 3);	// 圧縮レベル (0...3)
 			// CMF と FLG を MSB の順序で蓄積された 16 ビットの符号なし整数（CMF*256 + FLG）としてみたときに,
 			// この値が 31 の倍数となるように、FCHECK の値が定義されなければいけません
 			if (((static_cast<uint32_t>(cmf) << 8) + flg) % 31ul == 0) {
@@ -1505,7 +1536,7 @@ namespace winrt::Zlib::implementation
 					const auto out_len = inflate(out_data, in_data, in_len);
 					if (out_len < static_cast<size_t>(-1)) {
 						// 展開したデータの ADLER32 チェックサムと zlib ストリームのチェックサムが一致するか判定する.
-						if (ADLER32::update(1, out_data, out_len) == BYTE_TO_U32(in_data + in_len)) {
+						if (ADLER32::update(out_data, out_len) == BYTE_TO_U32(in_data + in_len)) {
 							return true;
 						}
 					}
