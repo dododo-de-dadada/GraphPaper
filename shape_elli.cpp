@@ -13,11 +13,14 @@ namespace winrt::GraphPaper::implementation
 
 	// }Œ`‚ð•\Ž¦‚·‚é.
 	// sh	•\Ž¦‚·‚é—pŽ†
-	void ShapeElli::draw(ShapeSheet const& sh)
+	void ShapeElli::draw(ShapeSheet const& sheet)
 	{
-		const D2D_UI& dx = sh.m_d2d;
+		ID2D1Factory* const factory = Shape::s_factory;
+		ID2D1RenderTarget* const target = Shape::s_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+
 		if (m_d2d_stroke_style == nullptr) {
-			create_stroke_style(dx);
+			create_stroke_style(factory);
 		}
 
 		// ”¼Œa‚ð‹‚ß‚é.
@@ -30,13 +33,13 @@ namespace winrt::GraphPaper::implementation
 		D2D1_ELLIPSE elli{ c_pos, rad.x, rad.y };
 		// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚©”»’è‚·‚é.
 		if (is_opaque(m_fill_color)) {
-			sh.m_color_brush->SetColor(m_fill_color);
-			dx.m_d2d_context->FillEllipse(elli, sh.m_color_brush.get());
+			brush->SetColor(m_fill_color);
+			target->FillEllipse(elli, brush);
 		}
 		// ˜gü‚ÌF‚ª•s“§–¾‚©”»’è‚·‚é.
 		if (is_opaque(m_stroke_color)) {
-			sh.m_color_brush->SetColor(m_stroke_color);
-			dx.m_d2d_context->DrawEllipse(elli, sh.m_color_brush.get(), m_stroke_width, m_d2d_stroke_style.get());
+			brush->SetColor(m_stroke_color);
+			target->DrawEllipse(elli, brush, m_stroke_width, m_d2d_stroke_style.get());
 		}
 		if (!is_selected()) {
 			return;
@@ -55,7 +58,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[3].x = a_pos[0].x;
 		a_pos[3].y = m_pos.y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anc_draw_rect(a_pos[i], sh);
+			anc_draw_rect(a_pos[i], target, brush);
 		}
 		a_pos[0] = m_pos;
 		pt_add(m_pos, m_vec[0], a_pos[3]);
@@ -64,7 +67,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[2].x = a_pos[3].x;
 		a_pos[2].y = a_pos[0].y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anc_draw_ellipse(a_pos[i], sh);
+			anc_draw_ellipse(a_pos[i], target, brush);
 		}
 	}
 

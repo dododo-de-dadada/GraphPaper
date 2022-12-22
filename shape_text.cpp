@@ -21,8 +21,6 @@ namespace winrt::GraphPaper::implementation
 	static void tx_create_text_metrics(IDWriteTextLayout* text_lay, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, DWRITE_LINE_METRICS*& line_met, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met, const DWRITE_TEXT_RANGE& sele_rng);
 	// 書体の計量を得る
 	static void tx_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met);
-	// ヒットテストの計量, 行の計量, 文字列選択の計量を破棄する.
-	//static void tx_relese_metrics(UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_metrics, DWRITE_LINE_METRICS*& line_metrics, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_metrics) noexcept;
 
 	// ヒットテストの計量を作成する.
 	// text_lay	文字列レイアウト
@@ -147,11 +145,16 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapeText::draw(ShapeSheet const& sh)
+	void ShapeText::draw(ShapeSheet const& sheet)
 	{
-		const D2D_UI& d2d = sh.m_d2d;
+		ID2D1Factory2* const factory = Shape::s_factory;
+		IDWriteFactory* const dw_factory = Shape::s_dw_factory;
+		ID2D1RenderTarget* const target = Shape::s_target;
+		ID2D1SolidColorBrush* const color_brush = Shape::s_color_brush;
+		ID2D1SolidColorBrush* const range_brush = Shape::s_range_brush;
+
 		// 方形を描く.
-		ShapeRect::draw(sh);
+		ShapeRect::draw(sheet);
 
 		// 文字列が空か判定する.
 		if (m_text == nullptr || m_text[0] == L'\0') {
@@ -159,7 +162,6 @@ namespace winrt::GraphPaper::implementation
 			relese_metrics();
 			// 文字列レイアウトが空でないなら破棄する.
 			if (m_dw_text_layout != nullptr) {
-				//m_dw_text_layout->Release();
 				m_dw_text_layout = nullptr;
 			}
 		}
@@ -176,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 				// 属性値がなんであれ, DWRITE_FONT_STRETCH_NORMAL でテキストフォーマットは作成する.
 				winrt::com_ptr<IDWriteTextFormat> t_format;
 				winrt::check_hresult(
-					d2d.m_dwrite_factory->CreateTextFormat(
+					dw_factory->CreateTextFormat(
 						m_font_family, static_cast<IDWriteFontCollection*>(nullptr),
 						m_font_weight, m_font_style, DWRITE_FONT_STRETCH_NORMAL,
 						m_font_size, locale_name, t_format.put())
@@ -186,7 +188,7 @@ namespace winrt::GraphPaper::implementation
 				const double text_w = std::fabs(m_vec[0].x) - 2.0 * m_text_padding.width;
 				const double text_h = std::fabs(m_vec[0].y) - 2.0 * m_text_padding.height;
 				const UINT32 text_len = wchar_len(m_text);
-				winrt::check_hresult(d2d.m_dwrite_factory->CreateTextLayout(m_text, text_len, t_format.get(), static_cast<FLOAT>(max(text_w, 0.0)), static_cast<FLOAT>(max(text_h, 0.0)), m_dw_text_layout.put()));
+				winrt::check_hresult(dw_factory->CreateTextLayout(m_text, text_len, t_format.get(), static_cast<FLOAT>(max(text_w, 0.0)), static_cast<FLOAT>(max(text_h, 0.0)), m_dw_text_layout.put()));
 
 				// 文字列フォーマットを破棄する.
 				t_format = nullptr;
@@ -418,21 +420,21 @@ namespace winrt::GraphPaper::implementation
 								rect.right = rect.left + rm.width;
 							}
 							rect.bottom = rect.top + m_font_size;
-							sh.m_color_brush->SetColor(ShapeText::s_text_selected_foreground);
-							d2d.m_d2d_context->DrawRectangle(rect, sh.m_color_brush.get(), 2.0, nullptr);
-							sh.m_color_brush->SetColor(ShapeText::s_text_selected_background);
-							d2d.m_d2d_context->FillRectangle(rect, sh.m_color_brush.get());
+							color_brush->SetColor(ShapeText::s_text_selected_foreground);
+							target->DrawRectangle(rect, color_brush, 2.0, nullptr);
+							color_brush->SetColor(ShapeText::s_text_selected_background);
+							target->FillRectangle(rect, color_brush);
 							break;
 						}
 					}
 				}
-				sh.m_range_brush->SetColor(ShapeText::s_text_selected_foreground);
-				winrt::check_hresult(m_dw_text_layout->SetDrawingEffect(sh.m_range_brush.get(), m_text_selected_range));
+				range_brush->SetColor(ShapeText::s_text_selected_foreground);
+				winrt::check_hresult(m_dw_text_layout->SetDrawingEffect(range_brush, m_text_selected_range));
 			}
 
 			// 文字列を表示する
-			sh.m_color_brush->SetColor(m_font_color);
-			d2d.m_d2d_context->DrawTextLayout(t_min, m_dw_text_layout.get(), sh.m_color_brush.get());
+			color_brush->SetColor(m_font_color);
+			target->DrawTextLayout(t_min, m_dw_text_layout.get(), color_brush);
 			if (m_text_selected_range.length > 0) {
 				winrt::check_hresult(m_dw_text_layout->SetDrawingEffect(nullptr, { 0, wchar_len(m_text) }));
 			}
@@ -445,7 +447,7 @@ namespace winrt::GraphPaper::implementation
 				}
 
 				D2D1_MATRIX_3X2_F tran;
-				d2d.m_d2d_context->GetTransform(&tran);
+				target->GetTransform(&tran);
 				FLOAT s_width = static_cast<FLOAT>(1.0 / tran.m11);
 				D2D1_STROKE_STYLE_PROPERTIES1 s_prop{ AUXILIARY_SEG_STYLE };
 
@@ -473,19 +475,19 @@ namespace winrt::GraphPaper::implementation
 					p[1].y = p[0].y;
 					p[3].x = p[0].x;
 					p[3].y = p[2].y;
-					sh.m_color_brush->SetColor(ShapeText::s_text_selected_foreground);
-					d2d.m_d2d_context->DrawRectangle({ p[0].x, p[0].y, p[2].x, p[2].y }, sh.m_color_brush.get(), s_width, nullptr);
-					sh.m_color_brush->SetColor(ShapeText::s_text_selected_background);
+					color_brush->SetColor(ShapeText::s_text_selected_foreground);
+					target->DrawRectangle({ p[0].x, p[0].y, p[2].x, p[2].y }, color_brush, s_width, nullptr);
+					color_brush->SetColor(ShapeText::s_text_selected_background);
 					s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].x, mod));
 					winrt::com_ptr<ID2D1StrokeStyle1> s_style;
-					d2d.m_d2d_factory->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
-					d2d.m_d2d_context->DrawLine(p[0], p[1], sh.m_color_brush.get(), s_width, s_style.get());
-					d2d.m_d2d_context->DrawLine(p[3], p[2], sh.m_color_brush.get(), s_width, s_style.get());
+					factory->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
+					target->DrawLine(p[0], p[1], color_brush, s_width, s_style.get());
+					target->DrawLine(p[3], p[2], color_brush, s_width, s_style.get());
 					s_style = nullptr;
 					s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].y, mod));
-					d2d.m_d2d_factory->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
-					d2d.m_d2d_context->DrawLine(p[1], p[2], sh.m_color_brush.get(), s_width, s_style.get());
-					d2d.m_d2d_context->DrawLine(p[0], p[3], sh.m_color_brush.get(), s_width, s_style.get());
+					factory->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
+					target->DrawLine(p[1], p[2], color_brush, s_width, s_style.get());
+					target->DrawLine(p[0], p[3], color_brush, s_width, s_style.get());
 					s_style = nullptr;
 				}
 			}

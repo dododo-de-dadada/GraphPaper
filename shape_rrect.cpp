@@ -52,16 +52,15 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapeRRect::draw(ShapeSheet const& sh)
+	void ShapeRRect::draw(ShapeSheet const& sheet)
 	{
-		const D2D_UI& d2d = sh.m_d2d;
-		if (m_d2d_stroke_style == nullptr) {
-			create_stroke_style(d2d);
-		}
+		ID2D1Factory* const factory = Shape::s_factory;
+		ID2D1RenderTarget* const target = Shape::s_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
 
-		auto s_style = m_d2d_stroke_style.get();
-		auto s_width = m_stroke_width;
-		auto dc = d2d.m_d2d_context;
+		if (m_d2d_stroke_style == nullptr) {
+			create_stroke_style(factory);
+		}
 
 		D2D1_POINT_2F r_min;
 		pt_add(m_pos, min(m_vec[0].x, 0.0), min(m_vec[0].y, 0.0), r_min);
@@ -83,24 +82,12 @@ namespace winrt::GraphPaper::implementation
 		r_rec.radiusX = rx;
 		r_rec.radiusY = ry;
 		if (is_opaque(m_fill_color)) {
-			sh.m_color_brush->SetColor(m_fill_color);
-			dc->FillRoundedRectangle(r_rec, sh.m_color_brush.get());
+			brush->SetColor(m_fill_color);
+			target->FillRoundedRectangle(r_rec, brush);
 		}
-		sh.m_color_brush->SetColor(m_stroke_color);
-		dc->DrawRoundedRectangle(r_rec, sh.m_color_brush.get(), s_width, s_style);
+		brush->SetColor(m_stroke_color);
+		target->DrawRoundedRectangle(r_rec, brush, m_stroke_width, m_d2d_stroke_style.get());
 		if (is_selected()) {
-			//const auto zero = (std::abs(m_vec[0].x) >= FLT_MIN && std::abs(m_vec[0].y) >= FLT_MIN);
-			//if (zero) {
-			// D2D1_POINT_2F c_pos;
-			// pt_add(r_min, rx, ry, c_pos);
-			// anc_draw_ellipse(c_pos, d2d);
-			// c_pos.x = r_rec.rect.right - rx;
-			// anc_draw_ellipse(c_pos, d2d);
-			// c_pos.y = r_rec.rect.bottom - ry;
-			// anc_draw_ellipse(c_pos, d2d);
-			// c_pos.x = r_min.x + rx;
-			// anc_draw_ellipse(c_pos, d2d);
-			//}
 			D2D1_POINT_2F r_pos[4];
 			r_pos[0] = r_min;
 			r_pos[1].x = r_rec.rect.right;
@@ -114,19 +101,19 @@ namespace winrt::GraphPaper::implementation
 				// 方形の頂点のアンカーを表示する.
 				// 辺の中点を求め, そのアンカーを表示する.
 				pt_avg(r_pos[j], r_pos[i], r_mid);
-				anc_draw_rect(r_pos[i], sh);
-				anc_draw_rect(r_mid, sh);
+				anc_draw_rect(r_pos[i], target, brush);
+				anc_draw_rect(r_mid, target, brush);
 			}
 			//if (!zero) {
 				D2D1_POINT_2F c_pos;
 				pt_add(r_min, rx, ry, c_pos);
-				anc_draw_ellipse(c_pos, sh);
+				anc_draw_ellipse(c_pos, target, brush);
 				c_pos.x = r_rec.rect.right - rx;
-				anc_draw_ellipse(c_pos, sh);
+				anc_draw_ellipse(c_pos, target, brush);
 				c_pos.y = r_rec.rect.bottom - ry;
-				anc_draw_ellipse(c_pos, sh);
+				anc_draw_ellipse(c_pos, target, brush);
 				c_pos.x = r_min.x + rx;
-				anc_draw_ellipse(c_pos, sh);
+				anc_draw_ellipse(c_pos, target, brush);
 			//}
 		}
 	}

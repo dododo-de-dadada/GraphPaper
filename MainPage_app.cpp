@@ -37,8 +37,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::app_entered_background(IInspectable const&/*sender*/, EnteredBackgroundEventArgs const&/*args*/)
 	{
 		m_mutex_draw.lock();
-		m_main_sheet.m_d2d.Trim();
-		m_prop_sheet.m_d2d.Trim();
+		m_main_d2d.Trim();
+		m_prop_d2d.Trim();
 		m_mutex_draw.unlock();
 	}
 
@@ -57,7 +57,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		winrt::apartment_context context;
 
-		ShapeText::set_available_fonts(m_main_sheet.m_d2d);
+		ShapeText::set_available_fonts(m_main_d2d);
 
 		// アプリケーションデータを読み込む.
 		IStorageItem app_data_item{ co_await ApplicationData::Current().LocalCacheFolder().TryGetItemAsync(APP_DATA_FILE) };

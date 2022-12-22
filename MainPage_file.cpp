@@ -307,7 +307,7 @@ namespace winrt::GraphPaper::implementation
 				//m_main_sheet.m_range_brush->Release();
 				m_main_sheet.m_range_brush = nullptr;
 			}
-			m_main_sheet.m_d2d.Trim();
+			m_main_d2d.Trim();
 			if (m_prop_sheet.m_state_block != nullptr) {
 				//m_prop_sheet.m_state_block->Release();
 				m_prop_sheet.m_state_block = nullptr;
@@ -320,7 +320,7 @@ namespace winrt::GraphPaper::implementation
 				//m_prop_sheet.m_range_brush->Release();
 				m_prop_sheet.m_range_brush = nullptr;
 			}
-			m_prop_sheet.m_d2d.Trim();
+			m_prop_d2d.Trim();
 		}
 
 		ustack_clear();
@@ -369,9 +369,12 @@ namespace winrt::GraphPaper::implementation
 			co_return;
 		}
 
+		// ファイルのランダムアクセスストリーム
 		IRandomAccessStream ra_stream{
 			co_await s_file.OpenAsync(FileAccessMode::ReadWrite)
 		};
+
+		// WIC のランダムアクセスストリーム
 		winrt::com_ptr<IStream> stream;
 		winrt::hresult(
 			CreateStreamOverRandomAccessStream(winrt::get_unknown(ra_stream), IID_PPV_ARGS(&stream))
@@ -387,6 +390,7 @@ namespace winrt::GraphPaper::implementation
 			)
 		);
 
+		// Create and initialize WIC Bitmap Encoder.
 		winrt::com_ptr<IWICBitmapEncoder> wic_enc;
 		winrt::check_hresult(
 			wic_factory->CreateEncoder(wic_fmt, nullptr, wic_enc.put())
@@ -394,7 +398,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(
 			wic_enc->Initialize(stream.get(), WICBitmapEncoderNoCache)
 		);
-
+		// Create and initialize WIC Frame Encoder.
 		winrt::com_ptr<IWICBitmapFrameEncode> wic_frm;
 		winrt::check_hresult(
 			wic_enc->CreateNewFrame(wic_frm.put(), nullptr)
@@ -402,49 +406,57 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(
 			wic_frm->Initialize(nullptr)
 		);
-		/*
+
+		// デバイスの作成
+		D2D_UI d2d;
+
+		// ビットマップの作成
 		D2D1_BITMAP_PROPERTIES bp{
 			D2D1_PIXEL_FORMAT{ DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_STRAIGHT },
 			96.0f,
 			96.0f
 		};
-
+		D2D_SIZE_U size{ m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height };
 		winrt::com_ptr<ID2D1Bitmap> bm;
-		m_main_sheet.m_d2d.m_d2d_context->CreateBitmap(
-			D2D1_SIZE_U{
-				static_cast<uint32_t>(m_main_sheet.m_sheet_size.width),
-				static_cast<uint32_t>(m_main_sheet.m_sheet_size.height)
-			},
-			NULL,
-			0,
-			bp,
-			bm.put()
-		);
-		m_main_sheet.m_d2d.m_d2d_context->SetTarget(nullptr);
-		m_main_sheet.m_d2d.m_d2d_context->SetTarget(bm.get());
-		*/
-		winrt::com_ptr<ID2D1Device> d2d_dev;
-		m_main_sheet.m_d2d.m_d2d_context->GetDevice(d2d_dev.put());
+		d2d.m_d2d_context->CreateBitmap(size, bp, bm.put());
 
+		// ビットマップをデバイスに設定
+		d2d.m_d2d_context->SetTarget(bm.get());
+
+
+		winrt::com_ptr<ID2D1SolidColorBrush> cb;
+		d2d.m_d2d_context->CreateSolidColorBrush(D2D1_COLOR_F{}, cb.put());
+		winrt::com_ptr<ID2D1SolidColorBrush> rb;
+		d2d.m_d2d_context->CreateSolidColorBrush(D2D1_COLOR_F{}, rb.put());
+
+		Shape::s_color_brush = cb.get();
+		Shape::s_target = d2d.m_d2d_context.get();
+		Shape::s_range_brush = rb.get();
+
+		// デバイスコンテキストの描画状態を保存ブロックに保持する.
+		Shape::s_target->SaveDrawingState(m_main_sheet.m_state_block.get());
+		Shape::s_target->BeginDraw();
+		m_main_sheet.draw(m_main_sheet);
+		HRESULT hr = Shape::s_target->EndDraw();
+
+		// 保存された描画環境を元に戻す.
+		Shape::s_target->RestoreDrawingState(m_main_sheet.m_state_block.get());
+		m_mutex_draw.unlock();
+
+		// Retrieve D2D Device.
+		winrt::com_ptr<ID2D1Device> dev;
+		d2d.m_d2d_context->GetDevice(dev.put());
+
+		// IWICImageEncoder を使用して Direct2D コンテンツを書き込む
 		winrt::com_ptr<IWICImageEncoder> image_enc;
 		winrt::check_hresult(
-			wic_factory->CreateImageEncoder(d2d_dev.get(), image_enc.put())
+			wic_factory->CreateImageEncoder(dev.get(), image_enc.put())
 		);
-
 		winrt::com_ptr<ID2D1Image> d2d_image;
-		m_main_sheet.m_d2d.m_d2d_context->GetTarget(d2d_image.put());
+		d2d.m_d2d_context->GetTarget(d2d_image.put());
 		winrt::check_hresult(
 			image_enc->WriteFrame(d2d_image.get(), wic_frm.get(), nullptr)
 		);
-
-		//m_main_sheet.m_d2d.HandleDeviceLost();
-
-		//scp_sheet_panel().Width(w);
-		//scp_sheet_panel().Height(h);
-
-		// スレッドをメインページの UI スレッドに変える.
-		//co_await winrt::resume_foreground(Dispatcher());
-		//m_main_sheet.m_d2d.SetSwapChainPanel(scp_sheet_panel());
 
 		winrt::check_hresult(
 			wic_frm->Commit()
@@ -452,9 +464,12 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(
 			wic_enc->Commit()
 		);
+		// Flush all memory buffers to the next-level storage object.
 		winrt::check_hresult(
 			stream->Commit(STGC_DEFAULT)
 		);
+
+		d2d.Trim();
 	}
 
 	//-------------------------------
@@ -857,56 +872,44 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::file_recent_menu_update(void)
 	{
 		// 最近使ったファイルのアクセスリストを得る.
-		auto const& mru_entries = StorageApplicationPermissions::MostRecentlyUsedList().Entries();
-		const auto ent_size = mru_entries.Size();
+		auto const& mru_entries{
+			StorageApplicationPermissions::MostRecentlyUsedList().Entries()
+		};
+		const auto mru_size = mru_entries.Size();
 		AccessListEntry items[MRU_MAX];
-		winrt::hstring data[MRU_MAX];
 		mru_entries.GetMany(0, items);
-		// アクセスリストのファイル名を配列に格納する.
-		for (uint32_t i = 0; i < MRU_MAX; i++) {
-			if (i < ent_size) {
-				data[i] = items[i].Metadata;
-			}
-			else {
-				data[i] = L"";
-			}
-		}
-		// 配列をメニュー項目に格納する.
-		mfi_file_recent_1().Text(data[0]);
-		mfi_file_recent_2().Text(data[1]);
-		mfi_file_recent_3().Text(data[2]);
-		mfi_file_recent_4().Text(data[3]);
-		mfi_file_recent_5().Text(data[4]);
+		// アクセスリストのファイル名をメニュー項目に格納する.
+		mfi_file_recent_1().Text(mru_size > 0 ? items[0].Metadata : L"");
+		mfi_file_recent_2().Text(mru_size > 1 ? items[1].Metadata : L"");
+		mfi_file_recent_3().Text(mru_size > 2 ? items[2].Metadata : L"");
+		mfi_file_recent_4().Text(mru_size > 3 ? items[3].Metadata : L"");
+		mfi_file_recent_5().Text(mru_size > 4 ? items[4].Metadata : L"");
 	}
 
 	//-------------------------------
 	// 名前を付けてファイルに非同期に保存する.
-	// svg_allowed	SVG への保存を許す.
 	//-------------------------------
-	template <bool SVG_ARROWED>
 	IAsyncAction MainPage::file_save_as_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		HRESULT hr = E_FAIL;
 		try {
 			// ファイル保存ピッカーを得る.
-			// ファイルタイプに拡張子 GPF とその説明を追加する.
-			FileSavePicker save_picker{ FileSavePicker() };
+			FileSavePicker save_picker{
+				FileSavePicker()
+			};
+			// ファイルタイプに拡張子とその説明を追加する.
 			const winrt::hstring desc_gpf{
 				ResourceLoader::GetForCurrentView().GetString(RES_DESC_GPF)
 			};
 			save_picker.FileTypeChoices().Insert(desc_gpf, TYPE_GPF);
-			// SVG への保存を許すか判定する.
-			if constexpr (SVG_ARROWED) {
-				// ファイルタイプに拡張子 SVG とその説明を追加する.
-				const winrt::hstring desc_svg{
-					ResourceLoader::GetForCurrentView().GetString(RES_DESC_SVG)
-				};
-				save_picker.FileTypeChoices().Insert(desc_svg, TYPE_SVG);
-				const winrt::hstring desc_pdf{
-					ResourceLoader::GetForCurrentView().GetString(RES_DESC_PDF)
-				};
-				save_picker.FileTypeChoices().Insert(desc_pdf, TYPE_PDF);
-			}
+			const winrt::hstring desc_svg{
+				ResourceLoader::GetForCurrentView().GetString(RES_DESC_SVG)
+			};
+			save_picker.FileTypeChoices().Insert(desc_svg, TYPE_SVG);
+			const winrt::hstring desc_pdf{
+				ResourceLoader::GetForCurrentView().GetString(RES_DESC_PDF)
+			};
+			save_picker.FileTypeChoices().Insert(desc_pdf, TYPE_PDF);
 
 			// ドキュメントライブラリーを保管場所に設定する.
 			const PickerLocationId loc_id = PickerLocationId::DocumentsLibrary;
@@ -976,8 +979,6 @@ namespace winrt::GraphPaper::implementation
 			message_show(ICON_ALERT, RES_ERR_WRITE, m_file_token_mru);
 		}
 	}
-	template IAsyncAction MainPage::file_save_as_click_async<true>(IInspectable const&, RoutedEventArgs const&) noexcept;
-	template IAsyncAction MainPage::file_save_as_click_async<false>(IInspectable const&, RoutedEventArgs const&) noexcept;
 
 	//-------------------------------
 	// ファイルメニューの「上書き保存」が選択された
@@ -988,11 +989,10 @@ namespace winrt::GraphPaper::implementation
 		StorageFile recent_file{
 			co_await file_recent_token_async(m_file_token_mru)
 		};
-		// ストレージファイルが空の場合,
+		// ストレージファイルがない場合,
 		if (recent_file == nullptr) {
 			// 名前を付けてファイルに非同期に保存する
-			constexpr bool SVG_ALLOWED = true;
-			co_await file_save_as_click_async<!SVG_ALLOWED>(nullptr, nullptr);
+			co_await file_save_as_click_async(nullptr, nullptr);
 		}
 		// ストレージファイルを得た場合,
 		else {
@@ -1214,7 +1214,8 @@ namespace winrt::GraphPaper::implementation
 	// ファイルメニューの「新規」が選択された
 	IAsyncAction MainPage::file_new_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		// スタックが更新された, かつ確認ダイアログの応答が「キャンセル」か判定する.
+		// スタックが更新されたなら確認ダイアログを表示して, 
+		// ダイアログの応答が「キャンセル」か判定する.
 		if (m_ustack_is_changed && !co_await file_confirm_dialog()) {
 			co_return;
 		}
@@ -1234,7 +1235,7 @@ namespace winrt::GraphPaper::implementation
 
 		ShapeText::release_available_fonts();
 
-		ShapeText::set_available_fonts(m_main_sheet.m_d2d);
+		ShapeText::set_available_fonts(m_main_d2d);
 
 		// 背景色, 前景色, 選択された文字範囲の背景色, 文字色をリソースから得る.
 		{
@@ -1368,231 +1369,3 @@ private async void InitMessageDialogHandler(IUICommand command)
 // 詳細オプション > アプリのアクセス許可
 // ファイル システムをオンにする.
 
-/*
-* https://aznote.jakou.com/prog/pdf/index.html
-%PDF-1.7
-%ｵｵｵｵ
-1 0 obj
-<</Type/Catalog/Pages 2 0 R/Lang(ja-JP) /StructTreeRoot 15 0 R/MarkInfo<</Marked true>>/Metadata 29 0 R/ViewerPreferences 30 0 R>>
-endobj
-2 0 obj
-<</Type/Pages/Count 1/Kids[ 3 0 R] >>
-endobj
-3 0 obj
-<</Type/Page/Parent 2 0 R/Resources<</Font<</F1 5 0 R/F2 12 0 R>>/ExtGState<</GS10 10 0 R/GS11 11 0 R>>/ProcSet[/PDF/Text/ImageB/ImageC/ImageI] >>/MediaBox[ 0 0 595.32 841.92] /Contents 4 0 R/Group<</Type/Group/S/Transparency/CS/DeviceRGB>>/Tabs/S/StructParents 0>>
-endobj
-4 0 obj
-<</Filter/FlateDecode/Length 184>>
-stream
-...
-endstream
-endobj
-5 0 obj
-<</Type/Font/Subtype/Type0/BaseFont/BCDEEE+YuMincho-Regular/Encoding/Identity-H/DescendantFonts 6 0 R/ToUnicode 25 0 R>>
-endobj
-6 0 obj
-[ 7 0 R]
-endobj
-7 0 obj
-<</BaseFont/BCDEEE+YuMincho-Regular/Subtype/CIDFontType2/Type/Font/CIDToGIDMap/Identity/DW 1000/CIDSystemInfo 8 0 R/FontDescriptor 9 0 R/W 27 0 R>>
-endobj
-8 0 obj
-<</Ordering(Identity) /Registry(Adobe) /Supplement 0>>
-endobj
-9 0 obj
-<</Type/FontDescriptor/FontName/BCDEEE+YuMincho-Regular/Flags 32/ItalicAngle 0/Ascent 880/Descent -120/CapHeight 880/AvgWidth 969/MaxWidth 2243/FontWeight 400/XHeight 250/Leading 315/StemV 96/FontBBox[ -1000 -120 1243 880] /FontFile2 26 0 R>>
-endobj
-10 0 obj
-<</Type/ExtGState/BM/Normal/ca 1>>
-endobj
-11 0 obj
-<</Type/ExtGState/BM/Normal/CA 1>>
-endobj
-12 0 obj
-<</Type/Font/Subtype/TrueType/Name/F2/BaseFont/BCDFEE+YuMincho-Regular/Encoding/WinAnsiEncoding/FontDescriptor 13 0 R/FirstChar 32/LastChar 32/Widths 28 0 R>>
-endobj
-13 0 obj
-<</Type/FontDescriptor/FontName/BCDFEE+YuMincho-Regular/Flags 32/ItalicAngle 0/Ascent 880/Descent -120/CapHeight 880/AvgWidth 969/MaxWidth 2243/FontWeight 400/XHeight 250/Leading 315/StemV 96/FontBBox[ -1000 -120 1243 880] /FontFile2 26 0 R>>
-endobj
-14 0 obj
-<</Author(hi lite) /Creator( M i c r o s o f t ｮ   W o r d   2 0 2 1) /CreationDate(D:20221130175734+09'00') /ModDate(D:20221130175734+09'00') /Producer( M i c r o s o f t ｮ   W o r d   2 0 2 1) >>
-endobj
-23 0 obj
-<</Type/ObjStm/N 9/First 60/Filter/FlateDecode/Length 328>>
-stream
-...
-endstream
-endobj
-25 0 obj
-<</Filter/FlateDecode/Length 232>>
-stream
-...
-endstream
-endobj
-26 0 obj
-<</Filter/FlateDecode/Length 37142/Length1 186368>>
-stream
-endstream
-endobj
-27 0 obj
-[ 0[ 1000]  3[ 260] ]
-endobj
-28 0 obj
-[ 260]
-endobj
-29 0 obj
-<</Type/Metadata/Subtype/XML/Length 3057>>
-stream
-,,,
-endstream
-endobj
-30 0 obj
-<</DisplayDocTitle true>>
-endobj
-31 0 obj
-<</Type/XRef/Size 31/W[ 1 4 2] /Root 1 0 R/Info 14 0 R/ID[<47FFC3B70211E546AB2A9D2C4F35C08D><47FFC3B70211E546AB2A9D2C4F35C08D>] /Filter/FlateDecode/Length 117>>
-stream
-...
-endstream
-endobj
-xref
-0 32
-0000000015 65535 f
-0000000017 00000 n
-0000000166 00000 n
-0000000222 00000 n
-0000000506 00000 n
-0000000764 00000 n
-0000000903 00000 n
-0000000931 00000 n
-0000001097 00000 n
-0000001170 00000 n
-0000001431 00000 n
-0000001485 00000 n
-0000001539 00000 n
-0000001717 00000 n
-0000001979 00000 n
-0000000016 65535 f
-0000000017 65535 f
-0000000018 65535 f
-0000000019 65535 f
-0000000020 65535 f
-0000000021 65535 f
-0000000022 65535 f
-0000000023 65535 f
-0000000024 65535 f
-0000000000 65535 f
-0000002628 00000 n
-0000002935 00000 n
-0000040169 00000 n
-0000040211 00000 n
-0000040238 00000 n
-0000043378 00000 n
-0000043423 00000 n
-trailer
-<</Size 32/Root 1 0 R/Info 14 0 R/ID[<47FFC3B70211E546AB2A9D2C4F35C08D><47FFC3B70211E546AB2A9D2C4F35C08D>] >>
-startxref
-43741
-%%EOF
-xref
-0 0
-trailer
-<</Size 32/Root 1 0 R/Info 14 0 R/ID[<47FFC3B70211E546AB2A9D2C4F35C08D><47FFC3B70211E546AB2A9D2C4F35C08D>] /Prev 43741/XRefStm 43423>>
-startxref
-44538
-%%EOF*/
-/*
-* https://itchyny.hatenablog.com/entry/2015/09/16/100000
-%PDF-1.7
-
-1 0 obj
-<<
-  /Type /Catalog
-  /Pages 2 0 R
->>
-endobj
-
-2 0 obj
-<<
-  /Type /Pages
-  /Kids [4 0 R]
-  /Count 1
->>
-endobj
-
-3 0 obj
-<<
-  /Font <<
-	/F0 <<
-	  /Type /Font
-	  /BaseFont /KozMinPro6N-Regular
-	  /Subtype /Type0
-	  /Encoding /90ms-RKSJ-H
-	  /DescendantFonts [6 0 R]
-	>>
-  >>
->>
-endobj
-
-4 0 obj
-<<
-  /Type /Page
-  /Parent 2 0 R
-  /Resources 3 0 R
-  /MediaBox [0 0 595 842]
-  /Contents 5 0 R
->>
-endobj
-
-5 0 obj
-<< >>
-stream
-1. 0. 0. 1. 50. 770. cm
-BT
-/F0 36 Tf
-40 TL
-<6162632082a082a282a4> Tj T*
-<82a082a282a482a682a82082a982ab82ad82af82b1> Tj T*
-<8e71894e93d0894b924396a48cdf96a2905c93d19cfa88e5> Tj T*
-ET
-endstream
-endobj
-
-6 0 obj
-<<
-  /Type /Font
-  /Subtype /CIDFontType0
-  /BaseFont /KozMinPr6N-Regular
-  /CIDSystemInfo <<
-	/Registry (Adobe)
-	/Ordering (Japan1)
-	/Supplement 6
-  >>
-  /FontDescriptor 7 0 R
->>
-endobj
-
-7 0 obj
-<<
-  /Type /FontDescriptor
-  /FontName /KozMinPr6N-Regular
-  /Flags 4
-  /FontBBox [-437 -340 1147 1317]
-  /ItalicAngle 0
-  /Ascent 1317
-  /Descent -349
-  /CapHeight 742
-  /StemV 80
->>
-endobj
-
-xref
-trailer
-<<
-  /Size 8
-  /Root 1 0 R
->>
-startxref
-0
-%%EOF
-*/

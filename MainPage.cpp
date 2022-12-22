@@ -177,7 +177,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			Shape::m_aux_style = nullptr;
 			winrt::check_hresult(
-				m_main_sheet.m_d2d.m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
+				m_main_d2d.m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
 			);
 			Undo::set(&m_main_sheet.m_shape_list, &m_main_sheet);
 		}

@@ -262,11 +262,13 @@ namespace winrt::GraphPaper::implementation
 
 		// メイン用紙
 		ShapeSheet m_main_sheet;	// メインの用紙
+		D2D_UI m_main_d2d;	// 描画環境
 		D2D1_POINT_2F m_main_min{ 0.0F, 0.0F };	// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
 		D2D1_POINT_2F m_main_max{ 0.0F, 0.0F };	// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
 
 		// 属性用紙
 		ShapeSheet m_prop_sheet;	// 属性の用紙
+		D2D_UI m_prop_d2d;	// 描画環境
 
 		// 元に戻す・やり直し操作
 		uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数
@@ -461,7 +463,6 @@ namespace winrt::GraphPaper::implementation
 		// ファイルメニューの「開く」が選択された
 		IAsyncAction file_open_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「名前を付けて保存」が選択された
-		template <bool SVG_ARROWED = true>
 		IAsyncAction file_save_as_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// ファイルメニューの「上書き保存」が選択された
 		IAsyncAction file_save_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;

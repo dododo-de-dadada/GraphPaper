@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 	//static bool bezi_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
 
 	// 曲線の矢じるしのジオメトリを作成する.
-	static void bezi_create_arrow_geom(ID2D1Factory3* const d_factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
+	static void bezi_create_arrow_geom(ID2D1Factory3* const factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
 
 	// 曲線上の助変数をもとに微分値を求める.
 	static inline double bezi_deriv_by_param(const BZP b_pos[4], const double t_val) noexcept;
@@ -150,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 	// a_geo	矢じるしが追加されたジオメトリ
 	//------------------------------
 	static void bezi_create_arrow_geom(
-		ID2D1Factory3* const d_factory,
+		ID2D1Factory3* const factory,
 		const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, 
 		ID2D1PathGeometry** a_geom)
 	{
@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 
 		if (ShapeBezi::bezi_calc_arrow(b_pos, b_seg, a_size, barbs)) {
 			// ジオメトリシンクに追加する.
-			winrt::check_hresult(d_factory->CreatePathGeometry(a_geom));
+			winrt::check_hresult(factory->CreatePathGeometry(a_geom));
 			winrt::check_hresult((*a_geom)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN_HOLLOW);
@@ -488,54 +488,50 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// パスジオメトリを作成する.
-	// d2d	D2D 描画環境
-	//------------------------------
-	void ShapeBezi::create_path_geometry(const D2D_UI& d2d)
-	{
-		D2D1_BEZIER_SEGMENT b_seg;
-		winrt::com_ptr<ID2D1GeometrySink> sink;
-
-		if (m_d2d_path_geom != nullptr) {
-			m_d2d_path_geom = nullptr;
-		}
-		if (m_d2d_arrow_geom != nullptr) {
-			m_d2d_arrow_geom = nullptr;
-		}
-		pt_add(m_pos, m_vec[0], b_seg.point1);
-		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
-		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
-		winrt::check_hresult(d2d.m_d2d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
-		m_d2d_path_geom->Open(sink.put());
-		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-		sink->BeginFigure(m_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-		sink->AddBezier(b_seg);
-		sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-		winrt::check_hresult(sink->Close());
-		sink = nullptr;
-		if (m_arrow_style != ARROW_STYLE::NONE) {
-			bezi_create_arrow_geom(d2d.m_d2d_factory.get(), m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
-		}
-	}
-
-	//------------------------------
 	// 図形を表示する.
 	// sh	表示する用紙
 	//------------------------------
-	void ShapeBezi::draw(ShapeSheet const& sh)
+	void ShapeBezi::draw(ShapeSheet const& sheet)
 	{
-		const D2D_UI& dx = sh.m_d2d;
+		ID2D1Factory3* const factory = Shape::s_factory;
+		ID2D1RenderTarget* const target = Shape::s_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+
 		if (m_d2d_stroke_style == nullptr) {
-			create_stroke_style(dx);
+			create_stroke_style(factory);
 		}
 		if (m_d2d_arrow_geom == nullptr || m_d2d_path_geom == nullptr) {
 			if (m_d2d_path_geom != nullptr) {
 				m_d2d_path_geom = nullptr;
 			}
-			else if (m_d2d_arrow_geom != nullptr) {
+			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}
-			create_path_geometry(dx);
+			{
+				D2D1_BEZIER_SEGMENT b_seg;
+				winrt::com_ptr<ID2D1GeometrySink> sink;
+
+				if (m_d2d_path_geom != nullptr) {
+					m_d2d_path_geom = nullptr;
+				}
+				if (m_d2d_arrow_geom != nullptr) {
+					m_d2d_arrow_geom = nullptr;
+				}
+				pt_add(m_pos, m_vec[0], b_seg.point1);
+				pt_add(b_seg.point1, m_vec[1], b_seg.point2);
+				pt_add(b_seg.point2, m_vec[2], b_seg.point3);
+				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
+				m_d2d_path_geom->Open(sink.put());
+				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+				sink->BeginFigure(m_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				sink->AddBezier(b_seg);
+				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+				winrt::check_hresult(sink->Close());
+				sink = nullptr;
+				if (m_arrow_style != ARROW_STYLE::NONE) {
+					bezi_create_arrow_geom(factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				}
+			}
 		}
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
@@ -546,44 +542,44 @@ namespace winrt::GraphPaper::implementation
 			if (s_style == nullptr) {
 				
 			}
-			sh.m_color_brush->SetColor(m_stroke_color);
-			dx.m_d2d_context->DrawGeometry(m_d2d_path_geom.get(), sh.m_color_brush.get(), s_width, s_style);
+			brush->SetColor(m_stroke_color);
+			target->DrawGeometry(m_d2d_path_geom.get(), brush, s_width, s_style);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
-					dx.m_d2d_context->FillGeometry(a_geom, sh.m_color_brush.get(), nullptr);
+					target->FillGeometry(a_geom, brush, nullptr);
 				}
-				dx.m_d2d_context->DrawGeometry(a_geom, sh.m_color_brush.get(), s_width, m_d2d_arrow_style.get());
+				target->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_style.get());
 			}
 		}
 		if (is_selected()) {
 			D2D1_MATRIX_3X2_F tran;
-			dx.m_d2d_context->GetTransform(&tran);
+			target->GetTransform(&tran);
 			const auto s_width = static_cast<FLOAT>(1.0 / tran.m11);
-			anc_draw_rect(m_pos, sh);
+			anc_draw_rect(m_pos, target, brush);
 			s_pos = m_pos;
 			pt_add(s_pos, m_vec[0], e_pos);
-			sh.m_color_brush->SetColor(Shape::s_background_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, nullptr);
-			sh.m_color_brush->SetColor(Shape::s_foreground_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, Shape::m_aux_style.get());
-			anc_draw_ellipse(e_pos, sh);
+			brush->SetColor(Shape::s_background_color);
+			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
+			brush->SetColor(Shape::s_foreground_color);
+			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
+			anc_draw_ellipse(e_pos, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[1], e_pos);
-			sh.m_color_brush->SetColor(Shape::s_background_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, nullptr);
-			sh.m_color_brush->SetColor(Shape::s_foreground_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, Shape::m_aux_style.get());
-			anc_draw_ellipse(e_pos, sh);
+			brush->SetColor(Shape::s_background_color);
+			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
+			brush->SetColor(Shape::s_foreground_color);
+			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
+			anc_draw_ellipse(e_pos, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[2], e_pos);
-			sh.m_color_brush->SetColor(Shape::s_background_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, nullptr);
-			sh.m_color_brush->SetColor(Shape::s_foreground_color);
-			dx.m_d2d_context->DrawLine(s_pos, e_pos, sh.m_color_brush.get(), s_width, Shape::m_aux_style.get());
-			anc_draw_rect(e_pos, sh);
+			brush->SetColor(Shape::s_background_color);
+			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
+			brush->SetColor(Shape::s_foreground_color);
+			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
+			anc_draw_rect(e_pos, target, brush);
 		}
 	}
 

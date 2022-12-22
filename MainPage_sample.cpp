@@ -10,20 +10,11 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Foundation::Uri;
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
 	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
-	//using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
 	using winrt::Windows::Storage::FileAccessMode;
-	//using winrt::Windows::Storage::StorageFile;
-	//using winrt::Windows::Storage::Streams::IRandomAccessStream;
-	//using winrt::Windows::UI::Xaml::Controls::ContentDialog;
-	//using winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs;
-	//using winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
-	//using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
 	// 属性ダイアログのスライダーヘッダーに文字列を格納する.
 	template<int S> void MainPage::prop_set_slider_header(const winrt::hstring& text)
@@ -60,16 +51,22 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		m_prop_sheet.m_d2d.m_d2d_context->SaveDrawingState(m_prop_sheet.m_state_block.get());
-		m_prop_sheet.m_d2d.m_d2d_context->BeginDraw();
-		m_prop_sheet.m_d2d.m_d2d_context->Clear(m_prop_sheet.m_sheet_color);
+		Shape::s_factory = m_prop_d2d.m_d2d_factory.get();
+		Shape::s_target = m_prop_d2d.m_d2d_context.get();
+		Shape::s_dw_factory = m_prop_d2d.m_dwrite_factory.get();
+		Shape::s_color_brush = m_prop_sheet.m_color_brush.get();
+		Shape::s_range_brush = m_prop_sheet.m_range_brush.get();
+
+		m_prop_d2d.m_d2d_context->SaveDrawingState(m_prop_sheet.m_state_block.get());
+		m_prop_d2d.m_d2d_context->BeginDraw();
+		m_prop_d2d.m_d2d_context->Clear(m_prop_sheet.m_sheet_color);
 		const float offset = static_cast<FLOAT>(std::fmod(m_prop_sheet.m_sheet_size.width * 0.5, m_prop_sheet.m_grid_base + 1.0));
 		m_prop_sheet.m_grid_offset.x = offset;
 		m_prop_sheet.m_grid_offset.y = offset;
 		m_prop_sheet.draw(m_prop_sheet);
-		m_prop_sheet.m_d2d.m_d2d_context->EndDraw();
-		m_prop_sheet.m_d2d.m_d2d_context->RestoreDrawingState(m_prop_sheet.m_state_block.get());
-		m_prop_sheet.m_d2d.Present();
+		m_prop_d2d.m_d2d_context->EndDraw();
+		m_prop_d2d.m_d2d_context->RestoreDrawingState(m_prop_sheet.m_state_block.get());
+		m_prop_d2d.Present();
 		m_mutex_draw.unlock();
 	}
 
@@ -142,10 +139,11 @@ namespace winrt::GraphPaper::implementation
 	{
 #endif // _DEBUG
 		const auto& swap_chain_panel = scp_prop_panel();
-		m_prop_sheet.m_d2d.SetSwapChainPanel(swap_chain_panel);
-		m_prop_sheet.m_d2d.m_d2d_factory->CreateDrawingStateBlock(m_prop_sheet.m_state_block.put());
-		m_prop_sheet.m_d2d.m_d2d_context->CreateSolidColorBrush({}, m_prop_sheet.m_color_brush.put());
-		m_prop_sheet.m_d2d.m_d2d_context->CreateSolidColorBrush({}, m_prop_sheet.m_range_brush.put());
+		m_prop_d2d.SetSwapChainPanel(swap_chain_panel);
+		m_prop_d2d.m_d2d_factory->CreateDrawingStateBlock(m_prop_sheet.m_state_block.put());
+		m_prop_d2d.m_d2d_context->CreateSolidColorBrush({}, m_prop_sheet.m_color_brush.put());
+		m_prop_d2d.m_d2d_context->CreateSolidColorBrush({}, m_prop_sheet.m_range_brush.put());
+
 		prop_sample_draw();
 	}
 
@@ -163,14 +161,15 @@ namespace winrt::GraphPaper::implementation
 #endif	// _DEBUG
 		m_prop_sheet.m_sheet_size.width = static_cast<FLOAT>(args.NewSize().Width);
 		m_prop_sheet.m_sheet_size.height = static_cast<FLOAT>(args.NewSize().Height);
-		m_prop_sheet.m_d2d.SetLogicalSize2(m_prop_sheet.m_sheet_size);
+		m_prop_d2d.SetLogicalSize2(m_prop_sheet.m_sheet_size);
+
 		prop_sample_draw();
 	}
 
 	// 属性のスワップチェーンパネルの倍率が変わった.
 	void MainPage::prop_panel_scale_changed(IInspectable const&, IInspectable const&)
 	{
-		m_prop_sheet.m_d2d.SetCompositionScale(scp_prop_panel().CompositionScaleX(), scp_prop_panel().CompositionScaleY());
+		m_prop_d2d.SetCompositionScale(scp_prop_panel().CompositionScaleX(), scp_prop_panel().CompositionScaleY());
 	}
 
 }

@@ -14,9 +14,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	// sh	表示する用紙
 	//------------------------------
-	void ShapeGroup::draw(ShapeSheet const& sh)
+	void ShapeGroup::draw(ShapeSheet const& sheet)
 	{
-		const D2D_UI& dx = sh.m_d2d;
+		//ID2D1DeviceContext* const context = sheet.m_d2d.m_d2d_context.get();
+		ID2D1RenderTarget* const context = Shape::s_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+
 		// 選択フラグが立ってるか判定する.
 		if (is_selected()) {
 			D2D1_POINT_2F b_min{ FLT_MAX, FLT_MAX };
@@ -27,17 +30,17 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
-				s->draw(sh);
+				s->draw(sheet);
 				s->get_bound(b_min, b_max, b_min, b_max);
 			}
-			dx.m_d2d_context->DrawRectangle(D2D1_RECT_F{ b_min.x, b_min.y, b_max.x, b_max.y }, sh.m_color_brush.get(), 1.0f, Shape::m_aux_style.get());
+			context->DrawRectangle(D2D1_RECT_F{ b_min.x, b_min.y, b_max.x, b_max.y }, brush, 1.0f, Shape::m_aux_style.get());
 		}
 		else {
 			for (const auto s : m_list_grouped) {
 				if (s->is_deleted()) {
 					continue;
 				}
-				s->draw(sh);
+				s->draw(sheet);
 			}
 		}
 	}

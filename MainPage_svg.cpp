@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 			{
 				const auto size = m_main_sheet.m_sheet_size;	// 用紙の大きさ
 				const auto unit = m_len_unit;	// 長さの単位
-				const auto dpi = m_main_sheet.m_d2d.m_logical_dpi;	// 論理 DPI
+				const auto dpi = m_main_d2d.m_logical_dpi;	// 論理 DPI
 				const auto color = m_main_sheet.m_sheet_color;	// 背景色
 				constexpr char SVG_TAG[] =
 					"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" ";

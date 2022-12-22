@@ -193,12 +193,20 @@ namespace winrt::GraphPaper::implementation
 			// ロックできない場合
 			return;
 		}
+		Shape::s_factory = m_main_d2d.m_d2d_factory.get();
+		Shape::s_target = m_main_d2d.m_d2d_context.get();
+		Shape::s_dw_factory = m_main_d2d.m_dwrite_factory.get();
+		Shape::s_color_brush = m_main_sheet.m_color_brush.get();
+		Shape::s_range_brush = m_main_sheet.m_range_brush.get();
+
+		ID2D1RenderTarget* const target = Shape::s_target;
+		ID2D1SolidColorBrush * const brush = Shape::s_color_brush;
 
 		// デバイスコンテキストの描画状態を保存ブロックに保持する.
-		m_main_sheet.m_d2d.m_d2d_context->SaveDrawingState(m_main_sheet.m_state_block.get());
+		target->SaveDrawingState(m_main_sheet.m_state_block.get());
 		// デバイスコンテキストから変換行列を得る.
 		D2D1_MATRIX_3X2_F tran;
-		m_main_sheet.m_d2d.m_d2d_context->GetTransform(&tran);
+		target->GetTransform(&tran);
 		// 拡大率を変換行列の拡大縮小の成分に格納する.
 		const auto sheet_scale = max(m_main_sheet.m_sheet_scale, 0.0f);
 		tran.m11 = tran.m22 = sheet_scale;
@@ -210,39 +218,42 @@ namespace winrt::GraphPaper::implementation
 		tran.dx = -t_pos.x;
 		tran.dy = -t_pos.y;
 		// 変換行列をデバイスコンテキストに格納する.
-		m_main_sheet.m_d2d.m_d2d_context->SetTransform(&tran);
+		target->SetTransform(&tran);
 		// 描画を開始する.
-		m_main_sheet.m_d2d.m_d2d_context->BeginDraw();
+		target->BeginDraw();
 		m_main_sheet.draw(m_main_sheet);
 		if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			const auto t_draw = m_drawing_tool;
-			if (t_draw == DRAWING_TOOL::SELECT || t_draw == DRAWING_TOOL::RECT || t_draw == DRAWING_TOOL::TEXT || t_draw == DRAWING_TOOL::RULER) {
-				m_main_sheet.draw_auxiliary_rect(m_main_sheet, m_event_pos_pressed, m_event_pos_curr);
+			if (t_draw == DRAWING_TOOL::SELECT ||
+				t_draw == DRAWING_TOOL::RECT ||
+				t_draw == DRAWING_TOOL::TEXT ||
+				t_draw == DRAWING_TOOL::RULER) {
+				m_main_sheet.draw_auxiliary_rect(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAWING_TOOL::BEZI) {
-				m_main_sheet.draw_auxiliary_bezi(m_main_sheet, m_event_pos_pressed, m_event_pos_curr);
+				m_main_sheet.draw_auxiliary_bezi(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAWING_TOOL::ELLI) {
-				m_main_sheet.draw_auxiliary_elli(m_main_sheet, m_event_pos_pressed, m_event_pos_curr);
+				m_main_sheet.draw_auxiliary_elli(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAWING_TOOL::LINE) {
-				m_main_sheet.draw_auxiliary_line(m_main_sheet, m_event_pos_pressed, m_event_pos_curr);
+				m_main_sheet.draw_auxiliary_line(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAWING_TOOL::RRECT) {
-				m_main_sheet.draw_auxiliary_rrect(m_main_sheet, m_event_pos_pressed, m_event_pos_curr);
+				m_main_sheet.draw_auxiliary_rrect(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAWING_TOOL::POLY) {
-				m_main_sheet.draw_auxiliary_poly(m_main_sheet, m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
+				m_main_sheet.draw_auxiliary_poly(target, brush, m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
 			}
 		}
 		// 描画を終了する.
-		HRESULT hr = m_main_sheet.m_d2d.m_d2d_context->EndDraw();
+		HRESULT hr = target->EndDraw();
 		// 保存された描画環境を元に戻す.
-		m_main_sheet.m_d2d.m_d2d_context->RestoreDrawingState(m_main_sheet.m_state_block.get());
+		target->RestoreDrawingState(m_main_sheet.m_state_block.get());
 		if (hr == S_OK) {
 			// 結果が S_OK の場合,
 			// スワップチェーンの内容を画面に表示する.
-			m_main_sheet.m_d2d.Present();
+			m_main_d2d.Present();
 			// ポインターの位置をステータスバーに格納する.
 			status_bar_set_pos();
 		}
@@ -413,10 +424,10 @@ namespace winrt::GraphPaper::implementation
 		//auto xaml_root = scp_sheet_panel().XamlRoot();
 		//xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed });
 
-		m_main_sheet.m_d2d.SetSwapChainPanel(scp_sheet_panel());
-		m_main_sheet.m_d2d.m_d2d_factory->CreateDrawingStateBlock(m_main_sheet.m_state_block.put());
-		m_main_sheet.m_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_sheet.m_color_brush.put());
-		m_main_sheet.m_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_sheet.m_range_brush.put());
+		m_main_d2d.SetSwapChainPanel(scp_sheet_panel());
+		m_main_d2d.m_d2d_factory->CreateDrawingStateBlock(m_main_sheet.m_state_block.put());
+		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_sheet.m_color_brush.put());
+		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_sheet.m_range_brush.put());
 		sheet_draw();
 	}
 
@@ -444,7 +455,7 @@ namespace winrt::GraphPaper::implementation
 		const float h = z.Height;
 		scroll_set(w, h);
 		if (scp_sheet_panel().IsLoaded()) {
-			m_main_sheet.m_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
+			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
 			sheet_draw();
 		}
 	}
@@ -454,7 +465,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::sheet_panel_scale_changed(IInspectable const&, IInspectable const&)
 	{
-		m_main_sheet.m_d2d.SetCompositionScale(scp_sheet_panel().CompositionScaleX(), scp_sheet_panel().CompositionScaleY());
+		m_main_d2d.SetCompositionScale(scp_sheet_panel().CompositionScaleX(), scp_sheet_panel().CompositionScaleY());
 	}
 
 	//------------------------------
@@ -466,7 +477,7 @@ namespace winrt::GraphPaper::implementation
 		const float h = static_cast<float>(scp_sheet_panel().ActualHeight());
 		if (w > 0.0f && h > 0.0f) {
 			scroll_set(w, h);
-			m_main_sheet.m_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
+			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
 		}
 	}
 
@@ -479,11 +490,11 @@ namespace winrt::GraphPaper::implementation
 		float g_base;
 		m_main_sheet.get_grid_base(g_base);
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_sheet.m_d2d.m_logical_dpi, g_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_width().Text(buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_sheet.m_d2d.m_logical_dpi, g_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_height().Text(buf);
-		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, ShapeSheet::size_max(), m_main_sheet.m_d2d.m_logical_dpi, g_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, ShapeSheet::size_max(), m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
 		tx_sheet_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
@@ -512,8 +523,8 @@ namespace winrt::GraphPaper::implementation
 			// 用紙の縦横の長さの値をピクセル単位の値に変換する.
 			const float g_len = g_base + 1.0f;
 			D2D1_SIZE_F p_size{
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_sheet.m_d2d.m_logical_dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_sheet.m_d2d.m_logical_dpi, g_len))
+				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_len))
 			};
 			if (!equal(p_size, m_main_sheet.m_sheet_size)) {
 				// 変換された値が用紙の大きさと異なる場合,
@@ -581,7 +592,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::sheet_size_text_changed(IInspectable const& sender, TextChangedEventArgs const&)
 	{
-		const double dpi = m_main_sheet.m_d2d.m_logical_dpi;	// DPI
+		const double dpi = m_main_d2d.m_logical_dpi;	// DPI
 		double val;
 		wchar_t buf[2];
 

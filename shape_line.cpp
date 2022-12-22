@@ -173,41 +173,44 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapeLine::draw(ShapeSheet const& sh)
+	void ShapeLine::draw(ShapeSheet const& sheet)
 	{
-		const D2D_UI& dx = sh.m_d2d;
+		ID2D1Factory3* const factory = Shape::s_factory;
+		ID2D1RenderTarget* const context = Shape::s_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+
 		if (m_d2d_stroke_style == nullptr) {
-			create_stroke_style(dx);
+			create_stroke_style(factory);
 		}
 
-		sh.m_color_brush->SetColor(m_stroke_color);
+		brush->SetColor(m_stroke_color);
 		const auto s_style = m_d2d_stroke_style.get();
 		const auto s_width = m_stroke_width;
 
 		D2D1_POINT_2F e_pos;
 		pt_add(m_pos, m_vec[0], e_pos);
-		dx.m_d2d_context->DrawLine(m_pos, e_pos, sh.m_color_brush.get(), s_width, s_style);
+		context->DrawLine(m_pos, e_pos, brush, s_width, s_style);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			if (m_d2d_arrow_style == nullptr) {
-				line_create_arrow_style(dx.m_d2d_factory.get(), m_stroke_cap, m_join_style, m_join_miter_limit, m_d2d_arrow_style.put());
+				line_create_arrow_style(factory, m_stroke_cap, m_join_style, m_join_miter_limit, m_d2d_arrow_style.put());
 			}
 			if (m_d2d_arrow_geom == nullptr) {
-				line_create_arrow_geom(dx.m_d2d_factory.get(), m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				line_create_arrow_geom(factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 			}
 			const auto a_geom = m_d2d_arrow_geom.get();
 			if (m_d2d_arrow_geom != nullptr) {
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
-					dx.m_d2d_context->FillGeometry(a_geom, sh.m_color_brush.get(), nullptr);
+					context->FillGeometry(a_geom, brush, nullptr);
 				}
-				dx.m_d2d_context->DrawGeometry(a_geom, sh.m_color_brush.get(), s_width, m_d2d_arrow_style.get());
+				context->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_style.get());
 			}
 		}
 		if (is_selected()) {
 			D2D1_POINT_2F mid;
 			pt_mul_add(m_vec[0], 0.5, m_pos, mid);
-			anc_draw_rect(m_pos, sh);
-			anc_draw_rect(mid, sh);
-			anc_draw_rect(e_pos, sh);
+			anc_draw_rect(m_pos, context, brush);
+			anc_draw_rect(mid, context, brush);
+			anc_draw_rect(e_pos, context, brush);
 		}
 	}
 

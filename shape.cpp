@@ -16,6 +16,11 @@ namespace winrt::GraphPaper::implementation
 	D2D1_COLOR_F Shape::s_background_color = COLOR_WHITE;	// 前景色 (アンカーの背景色)
 	D2D1_COLOR_F Shape::s_foreground_color = COLOR_BLACK;	// 背景色 (アンカーの前景色)
 	winrt::com_ptr<ID2D1StrokeStyle1> Shape::m_aux_style = nullptr;	// 補助線の形式
+	ID2D1Factory3* Shape::s_factory = nullptr;
+	ID2D1RenderTarget* Shape::s_target = nullptr;
+	ID2D1SolidColorBrush* Shape::s_color_brush = nullptr;
+	IDWriteFactory* Shape::s_dw_factory = nullptr;
+	ID2D1SolidColorBrush* Shape::s_range_brush = nullptr;
 
 	// 二点で囲まれた方形を得る.
 	/*

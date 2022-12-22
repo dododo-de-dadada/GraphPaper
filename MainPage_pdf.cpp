@@ -25,90 +25,102 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::CachedFileManager;
 	using winrt::Windows::Storage::Provider::FileUpdateStatus;
 
+	// 文字列図形からフォントの情報を得る.
+	static void pdf_get_font(const ShapeText* s,
+		DWRITE_FONT_WEIGHT& weight,
+		DWRITE_FONT_STRETCH& stretch,
+		DWRITE_FONT_STYLE& style,
+		DWRITE_FONT_METRICS1& fmet,
+		std::vector<char>& ps_name, 
+		std::vector<DWRITE_GLYPH_METRICS>& gmet)
+	{
+		s->get_font_weight(weight);
+		s->get_font_stretch(stretch);
+		s->get_font_style(style);
+
+		IDWriteFontCollection* coll = nullptr;
+		if (s->m_dw_text_layout->GetFontCollection(&coll) == S_OK) {
+			IDWriteFontFamily* family = nullptr;
+			UINT32 index;
+			BOOL exists;
+			if (coll->FindFamilyName(s->m_font_family, &index, &exists) == S_OK &&
+				exists &&
+				coll->GetFontFamily(index, &family) == S_OK) {
+				IDWriteFont* font = nullptr;
+				if (family->GetFirstMatchingFont(weight, stretch, style, &font) == S_OK) {
+					// フォント情報を得る,
+					static_cast<IDWriteFont1*>(font)->GetMetrics(&fmet);
+					IDWriteFontFaceReference* ref = nullptr;
+					// 各グリフの文字幅を得る.
+					if (static_cast<IDWriteFont3*>(font)->GetFontFaceReference(&ref) == S_OK) {
+						IDWriteFontFace3* face = nullptr;
+						if (ref->CreateFontFace(&face) == S_OK) {
+							static constexpr uint32_t U32[]{
+								32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+								48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
+								64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+								80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
+								96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
+								112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126
+							};
+							static constexpr auto U32_SIZE = std::size(U32);
+							static uint16_t gid[U32_SIZE];
+							winrt::check_hresult(face->GetGlyphIndices(std::data(U32), static_cast<UINT32>(U32_SIZE), std::data(gid)));
+							gmet.resize(U32_SIZE);
+							face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(U32_SIZE), std::data(gmet));
+
+							face->Release();
+						}
+						ref->Release();
+					}
+					// 書体のポストスクリプト名を得る.
+					IDWriteLocalizedStrings* str = nullptr;
+					BOOL exists = false;
+					if (font->GetInformationalStrings(DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_NAME, &str, &exists) == S_OK) {
+						if (exists) {
+							const UINT32 str_cnt = str->GetCount();
+							for (uint32_t j = 0; j < str_cnt; j++) {
+								UINT32 wstr_len = 0;	// 終端ヌルを除く文字列長
+								if (str->GetStringLength(j, &wstr_len) == S_OK && wstr_len > 0) {
+									std::vector<wchar_t> wstr(wstr_len + 1);
+									if (str->GetString(j, std::data(wstr), wstr_len + 1) == S_OK) {
+										int ps_name_len = WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, NULL, 0, NULL, NULL);
+										ps_name.resize(ps_name_len);
+										WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, std::data(ps_name), ps_name_len, NULL, NULL);
+										break;
+									}
+								}
+							}
+						}
+						// 存在しないなら書体名から空白文字を取り除いた文字列を, ポストスクリプト名とする.
+						else {
+							const auto k = wchar_len(s->m_font_family);
+							std::vector<wchar_t> wstr(k + 1);
+							int wstr_len = 0;
+							for (int i = 0; i < k; i++) {
+								if (!iswspace(s->m_font_family[i])) {
+									wstr[wstr_len++] = s->m_font_family[i];
+								}
+							}
+							wstr[wstr_len] = L'\0';
+							int ps_name_len = WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, NULL, 0, NULL, NULL);
+							ps_name.resize(ps_name_len);
+							WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, std::data(ps_name), ps_name_len, NULL, NULL);
+						}
+						str->Release();
+					}
+					font->Release();
+				}
+				family->Release();
+			}
+			coll->Release();
+		}
+	}
+
+
 	// 図形をデータライターに PDF として書き込む.
 	IAsyncOperation<winrt::hresult> MainPage::pdf_write_async(StorageFile pdf_file)
 	{
-		// システムフォントコレクションを DWriteFactory から得る.
-		winrt::com_ptr<IDWriteFontCollection> collection;
-		winrt::check_hresult(m_main_sheet.m_d2d.m_dwrite_factory->GetSystemFontCollection(collection.put()));
-		//winrt::com_ptr<IDWriteFactory5> f5{
-		//	m_main_sheet.m_d2d.m_dwrite_factory.as<IDWriteFactory5>()
-		//};
-		//winrt::com_ptr<IDWriteInMemoryFontFileLoader> loa;
-		//f5->CreateInMemoryFontFileLoader(loa.put());
-		//f5->RegisterFontFileLoader(loa.get());
-		//int fcnt = loa->GetFileCount();
-		//f5->UnregisterFontFileLoader(loa.get());
-
-		std::vector<wchar_t*> used_font{};
-		for (const auto s : m_main_sheet.m_shape_list) {
-			wchar_t* x;
-			if (s->is_deleted() || !s->get_font_family(x)) {
-				continue;
-			}
-			if (std::find_if(used_font.begin(), used_font.end(),
-				[x](wchar_t* y) { return equal(x, y); }) != used_font.end()) {
-				used_font.push_back(x);
-			}
-			// 図形からフォントコレクションを得る
-			// フォントコレクションからフォントファミリーを得る
-			// フォントファミリーからフォントを得る.
-			// フォントからフォントフェイスを得る.
-			winrt::com_ptr<IDWriteFontCollection> coll;
-			s->get_font_collection(coll.put());
-			winrt::com_ptr<IDWriteFontFamily> fam;
-			coll->GetFontFamily(0, fam.put());
-			winrt::com_ptr<IDWriteFont> font;
-			fam->GetFont(0, font.put());
-			winrt::com_ptr<IDWriteFontFaceReference> ref;
-			font.as<IDWriteFont3>()->GetFontFaceReference(ref.put());
-			winrt::com_ptr<IDWriteFontFace3> face;
-			ref->CreateFontFace(face.put());
-			std::vector<UINT32> u32{};
-			wchar_t* t;
-			if (s->get_text_content(t)) {
-				int i = 0;
-				for (; t[i] != L'\0'; i++) {
-					u32.push_back(t[i]);
-				}
-			}
-			else {
-				u32.push_back(L'0');
-				u32.push_back(L'1');
-				u32.push_back(L'2');
-				u32.push_back(L'3');
-				u32.push_back(L'4');
-				u32.push_back(L'5');
-				u32.push_back(L'6');
-				u32.push_back(L'7');
-				u32.push_back(L'8');
-				u32.push_back(L'9');
-			}
-			std::vector<UINT16> g16(u32.size());
-			winrt::check_hresult(face->GetGlyphIndices(u32.data(), static_cast<UINT32>(u32.size()), g16.data()));
-			std::vector<UINT16> gid{};
-			for (const auto g : gid) {
-				if (std::find(gid.begin(), gid.end(), g) != gid.end()) {
-					gid.push_back(g);
-				}
-			}
-			std::vector<DWRITE_GLYPH_METRICS> gmet(gid.size());
-			face->GetDesignGlyphMetrics(gid.data(), static_cast<UINT32>(gid.size()), gmet.data());
-			/*
-			winrt::com_ptr<IDWriteFontFile> file;
-			ref->GetFontFile(file.put());
-
-			UINT32 index;
-			BOOL exists;
-			set->FindFontFaceReference(ref.get(), &index, &exists);
-
-			winrt::com_ptr<IDWriteFontSetBuilder> builder;
-			m_main_sheet.m_d2d.m_dwrite_factory.as<IDWriteFactory5>()->CreateFontSetBuilder(builder.put());
-
-			m_main_sheet.m_d2d.m_dwrite_factory->CreateFontFace(DWRITE_FONT_FACE_TYPE::DWRITE_FONT_FACE_TYPE_TRUETYPE, 1, )
-			*/
-		}
-
 		HRESULT hr = S_OK;
 		try {
 			char buf[1024];	// PDF
@@ -145,8 +157,7 @@ namespace winrt::GraphPaper::implementation
 			// ページツリーを参照する.
 			len = dt_write(
 				"% Catalog Dictionary\n"
-				"1 0 obj\n"
-				"<<\n"
+				"1 0 obj <<\n"
 				"/Type /Catalog\n"
 				"/Pages 2 0 R\n"
 				">>\n"
@@ -158,8 +169,7 @@ namespace winrt::GraphPaper::implementation
 			// ページを参照する.
 			len = dt_write(
 				"% Page Tree Dictionary\n"
-				"2 0 obj\n"
-				"<<\n"
+				"2 0 obj <<\n"
 				"/Type /Pages\n"
 				"/Count 1\n"
 				"/Kids[3 0 R]\n"
@@ -174,8 +184,7 @@ namespace winrt::GraphPaper::implementation
 			// リソースとコンテンツを参照する.
 			sprintf_s(buf,
 				"%% Page Object\n"
-				"3 0 obj\n"
-				"<<\n"
+				"3 0 obj <<\n"
 				"/Type /Page\n"
 				"/MediaBox [0 0 %f %f]\n"
 				"/Parent 2 0 R\n"
@@ -191,8 +200,7 @@ namespace winrt::GraphPaper::implementation
 			// ページとコンテンツから参照され, 辞書を参照する.
 			len = dt_write(
 				"% Resouces Dictionary\n"
-				"4 0 obj\n"
-				"<<\n",
+				"4 0 obj <<\n",
 				dt_writer);
 			// フォント
 			int font_cnt = 0;
@@ -227,8 +235,7 @@ namespace winrt::GraphPaper::implementation
 				if (typeid(*s) == typeid(ShapeImage)) {
 					if (image_cnt == 0) {
 						len += dt_write(
-							"/XObject\n"
-							"<<\n",
+							"/XObject <<\n",
 							dt_writer);
 					}
 					sprintf_s(buf,
@@ -252,8 +259,7 @@ namespace winrt::GraphPaper::implementation
 			// 変換行列に 72dpi / 96dpi (=0.75) を指定する.   
 			sprintf_s(buf,
 				"%% Content Object\n"
-				"5 0 obj\n"
-				"<<\n"
+				"5 0 obj <<\n"
 				">>\n"
 				"stream\n"
 				"%f 0 0 %f 0 0 cm\n"
@@ -276,11 +282,12 @@ namespace winrt::GraphPaper::implementation
 			len += dt_write(buf, dt_writer);
 
 			// 図形を出力
+			const D2D1_SIZE_F sheet_size = m_main_sheet.m_sheet_size;
 			for (const auto s : m_main_sheet.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
-				len += s->pdf_write(m_main_sheet, dt_writer);
+				len += s->pdf_write(sheet_size, dt_writer);
 			}
 			len += dt_write(
 				"Q\n"
@@ -311,8 +318,7 @@ namespace winrt::GraphPaper::implementation
 
 					sprintf_s(buf,
 						"%% XObject\n"
-						"%d 0 obj\n"
-						"<<\n"
+						"%d 0 obj <<\n"
 						"/Type /XObject\n"
 						"/Subtype /Image\n"
 						"/Width %u\n"
@@ -361,77 +367,22 @@ namespace winrt::GraphPaper::implementation
 				}
 				else if (typeid(*s) == typeid(ShapeText)) {
 					// フォント辞書 (Type0), CID フォント辞書, フォント詳細辞書
-					// 
-					int n = static_cast<ShapeText*>(s)->m_pdf_font_num;
+					const auto t = static_cast<ShapeText*>(s);
+					int n = t->m_pdf_font_num;
 
-					wchar_t* t;	// 図形の文字列
-					s->get_text_content(t);
-					wchar_t* u;	// 図形の書体名
-					s->get_font_family(u);
-					DWRITE_FONT_STRETCH font_stretch;	// 幅の伸縮
-					s->get_font_stretch(font_stretch);
-					DWRITE_FONT_WEIGHT font_weight;	// 書体の太さ
-					s->get_font_weight(font_weight);
-
-					UINT32 index;
-					BOOL exists;
-					collection->FindFamilyName(u, &index, &exists);
-					winrt::com_ptr<IDWriteFontFamily> fam;
-					collection->GetFontFamily(index, fam.put());
-					winrt::com_ptr<IDWriteFont> font;
-					fam->GetFont(0, font.put());
-					winrt::com_ptr<IDWriteFontFaceReference> ref;
-					font.as<IDWriteFont3>()->GetFontFaceReference(ref.put());
-					winrt::com_ptr<IDWriteFontFace3> face;
-					ref->CreateFontFace(face.put());
-
-					// ベースフォント名を得る.
-					// 文字列図形から得たフォント名を,
-					// 含まれる半角空白を取り除いて, マルチバイト文字列に変換する.
-					std::vector<wchar_t> v{};	// 空白を除いた書体名
-					for (int i = 0; u[i] != '\0'; i++) {
-						if (u[i] != L' ') {
-							v.push_back(u[i]);
-						}
-					}
-					v.push_back(L'\0');
-					int base_font_len = WideCharToMultiByte(CP_ACP, 0, v.data(), static_cast<int>(v.size()), NULL, 0, NULL, NULL);
-					base_font.emplace_back(base_font_len);
-					WideCharToMultiByte(CP_ACP, 0, v.data(), static_cast<int>(v.size()), base_font[n].data(), base_font_len, NULL, NULL);
-
-					// グリフ幅を得るため, 文字列を, 文字がダブらないように, UINT32 型配列にコピーする.
-					//std::vector<UINT32> u32{};
-					//for (int i = 0; t[i] != L'\0'; i++) {
-					//	if (std::find(u32.begin(), u32.end(), t[i]) == u32.end()) {
-					//		u32.push_back(t[i]);
-					//	}
-					//}
-
-					// 半角文字のみグリフ幅を得る.
-					// 全ての文字のグリフ幅を取得したいが,
-					// GID を CID に変換する方法がよく分からない.
-					// 半角に限れば ' ' (32) から '~' (126) までが, 連続した CID (1 から始まる) に対応する.
-					// なので半角のみでごまかす.
-					std::vector<UINT32> u32{};
-					for (int i = 32; i <= 126; i++) {
-						u32.push_back(i);
-					}
-					std::vector<UINT16> gid(u32.size());
-					winrt::check_hresult(face->GetGlyphIndices(u32.data(), static_cast<UINT32>(u32.size()), gid.data()));
-					std::vector<DWRITE_GLYPH_METRICS> gmet(gid.size());
-					face->GetDesignGlyphMetrics(gid.data(), static_cast<UINT32>(gid.size()), gmet.data());
-
-					// 1 em あたりのデザイン単位を得る.
-					DWRITE_FONT_METRICS1 fmet;
-					font.as<IDWriteFont1>()->GetMetrics(&fmet);
+					DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;
+					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;
+					DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;
+					std::vector<char> psn{};
+					std::vector<DWRITE_GLYPH_METRICS> gmet{};
+					DWRITE_FONT_METRICS1 fmet{};
+					pdf_get_font(t, weight, stretch, style, fmet, psn, gmet);
 					const int upem = fmet.designUnitsPerEm;
-
 
 					// フォント辞書
 					sprintf_s(buf,
 						"%% Font Dictionary\n"
-						"%d 0 obj\n"
-						"<<\n"
+						"%d 0 obj <<\n"
 						"/Type /Font\n"
 						"/BaseFont /%s\n"
 						"/Subtype /Type0\n"
@@ -441,7 +392,7 @@ namespace winrt::GraphPaper::implementation
 						"/DescendantFonts [%d 0 R]\n"
 						">>\n",
 						6 + 3 * n,
-						base_font[n].data(),
+						std::data(psn),
 						6 + 3 * n + 1
 					);
 					len += dt_write(buf, dt_writer);
@@ -451,32 +402,30 @@ namespace winrt::GraphPaper::implementation
 					// フォント詳細辞書を参照する.
 					sprintf_s(buf,
 						"%% Descendant Font Dictionary\n"
-						"%d 0 obj\n"
-						"<<\n"
+						"%d 0 obj <<\n"
 						"/Type /Font\n"
 						"/Subtype /CIDFontType2\n"
 						"/BaseFont /%s\n"
-						"/CIDSystemInfo\n"
-						"<<\n"
+						"/CIDSystemInfo <<\n"
 						"/Registry (Adobe)\n"
 						"/Ordering (Japan1)\n"
 						"/Supplement 7\n"
 						">>\n"
-						"/FontDescriptor %d 0 R\n"	// 間接参照で必須.
-						"/W [1 [",	// CID 開始番号は 1 (= 半角空白)
+						"/FontDescriptor %d 0 R\n",	// 間接参照で必須.
 						6 + 3 * n + 1,
-						base_font[n].data(),
+						std::data(psn),
 						6 + 3 * n + 2
 					);
 					len = dt_write(buf, dt_writer);
-
 					// 半角のグリフ幅を設定する
-					for (int i = 1; i <= gid.size(); i++) {
+					// 設定しなければ全て全角幅になってしまう.
+					len += dt_write("/W [1 [", dt_writer);	// CID 開始番号は 1 (半角空白)
+					for (int i = 1; i <= gmet.size(); i++) {
 						sprintf_s(buf, "%u ", 1000 * gmet[i - 1].advanceWidth / upem);
 						len += dt_write(buf, dt_writer);
 					}
+					len += dt_write("]]\n", dt_writer);
 					len += dt_write(
-						"]]\n"
 						">>\n"
 						"endobj\n",
 						dt_writer);
@@ -498,8 +447,7 @@ namespace winrt::GraphPaper::implementation
 					};
 					sprintf_s(buf,
 						"%% Font Descriptor Dictionary\n"
-						"%d 0 obj\n"
-						"<<\n"
+						"%d 0 obj <<\n"
 						"/Type /FontDescriptor\n"
 						"/FontName /%s\n"
 						"/FontStretch /%s\n"
@@ -514,9 +462,9 @@ namespace winrt::GraphPaper::implementation
 						">>\n"
 						"endobj\n",
 						6 + 3 * n + 2,
-						base_font[n].data(),
-						FONT_STRETCH_NAME[font_stretch < 10 ? font_stretch : 0],
-						font_weight <= 900 ? font_weight : 900,
+						std::data(psn),
+						FONT_STRETCH_NAME[stretch < 10 ? stretch : 0],
+						weight <= 900 ? weight : 900,
 						1000 * fmet.glyphBoxLeft / upem,
 						(1000 * fmet.glyphBoxBottom / upem),
 						1000 * fmet.glyphBoxRight / upem,
@@ -552,8 +500,7 @@ namespace winrt::GraphPaper::implementation
 			sprintf_s(
 				buf,
 				"%% Trailer\n"
-				"trailer\n"
-				"<<\n"
+				"trailer <<\n"
 				"/Size %zu\n"
 				"/Root 1 0 R\n"
 				">>\n"

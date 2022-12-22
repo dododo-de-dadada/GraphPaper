@@ -173,8 +173,8 @@ namespace winrt::GraphPaper::implementation
 			const float g_len = m_main_sheet.m_grid_base + 1.0f;
 			wchar_t buf_x[32];
 			wchar_t buf_y[32];
-			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, fx, m_main_sheet.m_d2d.m_logical_dpi, g_len, buf_x);
-			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, fy, m_main_sheet.m_d2d.m_logical_dpi, g_len, buf_y);
+			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, fx, m_main_d2d.m_logical_dpi, g_len, buf_x);
+			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, fy, m_main_d2d.m_logical_dpi, g_len, buf_y);
 			tk_status_bar_pos_x().Text(buf_x);
 			tk_status_bar_pos_y().Text(buf_y);
 			if (sp_status_bar_pos().Visibility() != Visibility::Visible) {
@@ -242,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 		if (status_and(m_status_bar, STATUS_BAR::GRID) == STATUS_BAR::GRID) {
 			const float g_len = m_main_sheet.m_grid_base + 1.0f;
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, g_len, m_main_sheet.m_d2d.m_logical_dpi, g_len, buf);
+			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, g_len, m_main_d2d.m_logical_dpi, g_len, buf);
 			tk_status_bar_grid().Text(buf);
 			if (sp_status_bar_grid().Visibility() != Visibility::Visible) {
 				sp_status_bar_grid().Visibility(Visibility::Visible);
@@ -262,8 +262,8 @@ namespace winrt::GraphPaper::implementation
 			const float g_len = m_main_sheet.m_grid_base + 1.0f;
 			wchar_t buf_w[32];
 			wchar_t buf_h[32];
-			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_sheet.m_d2d.m_logical_dpi, g_len, buf_w);
-			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_sheet.m_d2d.m_logical_dpi, g_len, buf_h);
+			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_len, buf_w);
+			conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_len, buf_h);
 			tk_status_bar_sheet_w().Text(buf_w);
 			tk_status_bar_sheet_h().Text(buf_h);
 			if (sp_status_bar_sheet().Visibility() != Visibility::Visible) {

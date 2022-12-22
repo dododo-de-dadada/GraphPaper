@@ -633,7 +633,7 @@ namespace winrt::GraphPaper::implementation
 	// b_vec	領域の終点への差分
 	// p_opt	多角形の作成方法
 	// v_pos	頂点の配列 [v_cnt]
-	void ShapePoly::create_poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt, D2D1_POINT_2F v_pos[]) noexcept//, D2D1_POINT_2F& v_vec) noexcept
+	void ShapePoly::poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt, D2D1_POINT_2F v_pos[]) noexcept//, D2D1_POINT_2F& v_vec) noexcept
 	{
 		// v_cnt	多角形の頂点の数
 		// v_up	頂点を上に作成するか判定
@@ -686,171 +686,102 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// パスジオメトリを作成する.
-	// dx	図形の描画環境
-	void ShapePoly::create_path_geometry(const D2D_UI& dx)
-	{
-		if (m_d2d_path_geom != nullptr) {
-			m_d2d_path_geom = nullptr;
-		}
-		else if (m_d2d_arrow_geom != nullptr) {
-			m_d2d_arrow_geom = nullptr;
-		}
-		//const auto d_cnt = m_vec.size();	// 差分の数
-		if (m_vec.size() < 1) {
-			return;
-		}
-
-		// 開始位置と, 差分の配列をもとに, 頂点を求める.
-		const size_t v_cnt = m_vec.size() + 1;	// 頂点の数 (差分の数 + 1)
-		D2D1_POINT_2F v_pos[MAX_N_GON];
-		v_pos[0] = m_pos;
-		for (size_t i = 1; i < v_cnt; i++) {
-			pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
-		}
-
-		// 折れ線のパスジオメトリを作成する.
-		winrt::com_ptr<ID2D1GeometrySink> sink;
-		winrt::check_hresult(dx.m_d2d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
-		winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
-		sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
-		const auto figure_begin = is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
-		sink->BeginFigure(v_pos[0], figure_begin);
-		for (size_t i = 1; i < v_cnt; i++) {
-			sink->AddLine(v_pos[i]);
-		}
-		sink->EndFigure(m_end_closed ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-		winrt::check_hresult(sink->Close());
-		sink = nullptr;
-
-		// 矢じるしの形式がなしか判定する.
-		const auto a_style = m_arrow_style;
-		if (a_style == ARROW_STYLE::NONE) {
-			return;
-		}
-		// 矢じるしの位置を求める.
-		D2D1_POINT_2F h_tip;
-		D2D1_POINT_2F h_barbs[2];
-		if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
-			// 矢じるしのパスジオメトリを作成する.
-			winrt::check_hresult(dx.m_d2d_factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
-			winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
-			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-			sink->BeginFigure(h_barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-			sink->AddLine(h_tip);
-			sink->AddLine(h_barbs[1]);
-			sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-			winrt::check_hresult(sink->Close());
-			sink = nullptr;
-		}
-
-	}
-
-	// パスジオメトリを作成する.
-	// d_factory DX ファクトリ
-	/*
-	void ShapePoly::create_path_geometry(ID2D1Factory3* const d_factory)
-	{
-		if (m_d2d_path_geom != nullptr) {
-			m_d2d_path_geom = nullptr;
-		}
-		if (m_d2d_arrow_geom != nullptr) {
-			m_d2d_arrow_geom = nullptr;
-		}
-
-		const auto d_cnt = m_vec.size();	// 差分の数
-		if (d_cnt < 1) {
-			return;
-		}
-
-		// 開始位置と, 差分の配列をもとに, 頂点を求める.
-		const size_t v_cnt = d_cnt + 1;	// 頂点の数 (差分の数 + 1)
-		//std::vector<D2D1_POINT_2F> vert_pos(v_cnt);	// 頂点の配列
-		//const auto v_pos = reinterpret_cast<D2D1_POINT_2F*>(vert_pos.data());
-		D2D1_POINT_2F v_pos[MAX_N_GON];
-		v_pos[0] = m_pos;
-		for (size_t i = 1; i < v_cnt; i++) {
-			pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
-		}
-
-		// 折れ線のパスジオメトリを作成する.
-		winrt::com_ptr<ID2D1GeometrySink> sink;
-		winrt::check_hresult(d_factory->CreatePathGeometry(m_d2d_path_geom.put()));
-		winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
-		sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
-		const auto figure_begin = is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
-		sink->BeginFigure(v_pos[0], figure_begin);
-		for (size_t i = 1; i < v_cnt; i++) {
-			sink->AddLine(v_pos[i]);
-		}
-		sink->EndFigure(m_end_closed ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-		winrt::check_hresult(sink->Close());
-		sink = nullptr;
-
-		// 矢じるしの形式がなしか判定する.
-		const auto a_style = m_arrow_style;
-		if (a_style == ARROW_STYLE::NONE) {
-			return;
-		}
-		// 矢じるしの位置を求める.
-		D2D1_POINT_2F h_tip;
-		D2D1_POINT_2F h_barbs[2];
-		if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
-			// 矢じるしのパスジオメトリを作成する.
-			winrt::check_hresult(d_factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
-			winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
-			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-			sink->BeginFigure(h_barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-			sink->AddLine(h_tip);
-			sink->AddLine(h_barbs[1]);
-			sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-			winrt::check_hresult(sink->Close());
-			sink = nullptr;
-		}
-	}
-	*/
-
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapePoly::draw(ShapeSheet const& sh)
+	void ShapePoly::draw(ShapeSheet const& sheet)
 	{
-		const D2D_UI& dx = sh.m_d2d;
+		ID2D1Factory3* const factory = Shape::s_factory;
+		ID2D1RenderTarget* const taget = Shape::s_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+
 		if (m_d2d_stroke_style == nullptr) {
-			create_stroke_style(dx);
+			create_stroke_style(factory);
 		}
 		if (m_d2d_arrow_geom == nullptr || m_d2d_path_geom == nullptr) {
-			create_path_geometry(dx);
+			if (m_d2d_path_geom != nullptr) {
+				m_d2d_path_geom = nullptr;
+			}
+			else if (m_d2d_arrow_geom != nullptr) {
+				m_d2d_arrow_geom = nullptr;
+			}
+			//const auto d_cnt = m_vec.size();	// 差分の数
+			if (m_vec.size() < 1) {
+				return;
+			}
+
+			// 開始位置と, 差分の配列をもとに, 頂点を求める.
+			const size_t v_cnt = m_vec.size() + 1;	// 頂点の数 (差分の数 + 1)
+			D2D1_POINT_2F v_pos[MAX_N_GON];
+			v_pos[0] = m_pos;
+			for (size_t i = 1; i < v_cnt; i++) {
+				pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
+			}
+
+			// 折れ線のパスジオメトリを作成する.
+			winrt::com_ptr<ID2D1GeometrySink> sink;
+			winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
+			winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
+			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
+			const auto figure_begin = is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
+			sink->BeginFigure(v_pos[0], figure_begin);
+			for (size_t i = 1; i < v_cnt; i++) {
+				sink->AddLine(v_pos[i]);
+			}
+			sink->EndFigure(m_end_closed ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+			winrt::check_hresult(sink->Close());
+			sink = nullptr;
+
+			// 矢じるしの形式がなしか判定する.
+			const auto a_style = m_arrow_style;
+			if (a_style == ARROW_STYLE::NONE) {
+				return;
+			}
+			// 矢じるしの位置を求める.
+			D2D1_POINT_2F h_tip;
+			D2D1_POINT_2F h_barbs[2];
+			if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
+				// 矢じるしのパスジオメトリを作成する.
+				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
+				winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
+				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+				sink->BeginFigure(h_barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				sink->AddLine(h_tip);
+				sink->AddLine(h_barbs[1]);
+				sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+				winrt::check_hresult(sink->Close());
+				sink = nullptr;
+			}
 		}
 		if (is_opaque(m_fill_color)) {
 			const auto p_geom = m_d2d_path_geom.get();
 			if (p_geom != nullptr) {
-				sh.m_color_brush->SetColor(m_fill_color);
-				dx.m_d2d_context->FillGeometry(p_geom, sh.m_color_brush.get(), nullptr);
+				brush->SetColor(m_fill_color);
+				taget->FillGeometry(p_geom, brush, nullptr);
 			}
 		}
 		if (is_opaque(m_stroke_color)) {
 			const auto p_geom = m_d2d_path_geom.get();	// パスのジオメトリ
 			const auto s_width = m_stroke_width;	// 折れ線の太さ
 			const auto s_style = m_d2d_stroke_style.get();	// 折れ線の形式
-			sh.m_color_brush->SetColor(m_stroke_color);
-			dx.m_d2d_context->DrawGeometry(p_geom, sh.m_color_brush.get(), s_width, s_style);
+			brush->SetColor(m_stroke_color);
+			taget->DrawGeometry(p_geom, brush, s_width, s_style);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
 				if (a_geom != nullptr) {
-					dx.m_d2d_context->FillGeometry(a_geom, sh.m_color_brush.get(), nullptr);
+					taget->FillGeometry(a_geom, brush, nullptr);
 					if (m_arrow_style != ARROW_STYLE::FILLED) {
-						dx.m_d2d_context->DrawGeometry(a_geom, sh.m_color_brush.get(), s_width, m_d2d_arrow_style.get());
+						taget->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_style.get());
 					}
 				}
 			}
 		}
 		if (is_selected()) {
 			D2D1_POINT_2F a_pos{ m_pos };	// 図形の部位の位置
-			anc_draw_rect(a_pos, sh);
+			anc_draw_rect(a_pos, taget, brush);
 			const size_t d_cnt = m_vec.size();	// 差分の数
 			for (size_t i = 0; i < d_cnt; i++) {
 				pt_add(a_pos, m_vec[i], a_pos);
-				anc_draw_rect(a_pos, sh);
+				anc_draw_rect(a_pos, taget, brush);
 			}
 		}
 	}
@@ -939,7 +870,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F v_pos[MAX_N_GON];
 
-		create_poly_by_bbox(b_pos, b_vec, p_opt, v_pos);//, v_vec);
+		poly_by_bbox(b_pos, b_vec, p_opt, v_pos);
 		m_pos = v_pos[0];
 		m_vec.resize(p_opt.m_vertex_cnt - 1);
 		m_vec.shrink_to_fit();

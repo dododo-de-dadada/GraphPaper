@@ -114,18 +114,28 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapeImage::draw(ShapeSheet const& sh)
+	void ShapeImage::draw(ShapeSheet const& sheet)
 	{
-		const D2D_UI& d2d = sh.m_d2d;
+		ID2D1RenderTarget* const target = Shape::s_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+
 		if (m_d2d_bitmap == nullptr) {
-			const D2D1_BITMAP_PROPERTIES1 b_prop{
-				D2D1::BitmapProperties1(
-					D2D1_BITMAP_OPTIONS_NONE,
+			//const D2D1_BITMAP_PROPERTIES1 b_prop{
+			//	D2D1::BitmapProperties1(
+			//		D2D1_BITMAP_OPTIONS_NONE,
+			//		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+			//	)
+			//};
+			const D2D1_BITMAP_PROPERTIES b_prop{
+				D2D1::BitmapProperties(
 					D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
 				)
 			};
 			const UINT32 pitch = 4 * m_orig.width;
-			winrt::check_hresult(d2d.m_d2d_context->CreateBitmap(m_orig, static_cast<void*>(m_data), pitch, b_prop, m_d2d_bitmap.put()));
+			winrt::com_ptr<ID2D1Bitmap> bitmap;
+			target->CreateBitmap(m_orig, static_cast<void*>(m_data), pitch, b_prop, bitmap.put());
+			m_d2d_bitmap = bitmap.as<ID2D1Bitmap1>();
+			//winrt::check_hresult(target->CreateBitmap(m_orig, m_data, pitch, b_prop, m_d2d_bitmap.put_void()));
 			if (m_d2d_bitmap == nullptr) {
 				return;
 			}
@@ -136,13 +146,16 @@ namespace winrt::GraphPaper::implementation
 			m_pos.x + m_view.width,
 			m_pos.y + m_view.height
 		};
-		d2d.m_d2d_context->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_clip);
+		//context->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_clip);
+		target->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_clip);
 
 		if (is_selected()) {
-			sh.m_color_brush->SetColor(Shape::s_background_color);
-			d2d.m_d2d_context->DrawRectangle(dest_rect, sh.m_color_brush.get(), 1.0f, nullptr);
-			sh.m_color_brush->SetColor(Shape::s_foreground_color);
-			d2d.m_d2d_context->DrawRectangle(dest_rect, sh.m_color_brush.get(), 1.0f, Shape::m_aux_style.get());
+			brush->SetColor(Shape::s_background_color);
+			//context->DrawRectangle(dest_rect, brush, 1.0f, nullptr);
+			target->DrawRectangle(dest_rect, brush, 1.0f, nullptr);
+			brush->SetColor(Shape::s_foreground_color);
+			//context->DrawRectangle(dest_rect, brush, 1.0f, Shape::m_aux_style.get());
+			target->DrawRectangle(dest_rect, brush, 1.0f, Shape::m_aux_style.get());
 
 			const D2D1_POINT_2F v_pos[4]{
 				m_pos,
@@ -151,10 +164,14 @@ namespace winrt::GraphPaper::implementation
 				{ m_pos.x, m_pos.y + m_view.height },
 			};
 
-			anc_draw_rect(v_pos[0], sh);
-			anc_draw_rect(v_pos[1], sh);
-			anc_draw_rect(v_pos[2], sh);
-			anc_draw_rect(v_pos[3], sh);
+			//anc_draw_rect(v_pos[0], context, brush);
+			//anc_draw_rect(v_pos[1], context, brush);
+			//anc_draw_rect(v_pos[2], context, brush);
+			//anc_draw_rect(v_pos[3], context, brush);
+			anc_draw_rect(v_pos[0], target, brush);
+			anc_draw_rect(v_pos[1], target, brush);
+			anc_draw_rect(v_pos[2], target, brush);
+			anc_draw_rect(v_pos[3], target, brush);
 		}
 	}
 

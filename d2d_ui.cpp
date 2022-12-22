@@ -690,6 +690,7 @@ namespace winrt::GraphPaper::implementation
 		// D3D デバイスを DXGI デバイスに格納する.
 		winrt::com_ptr<IDXGIDevice3> dxgi_device{ nullptr };
 		winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
+
 		// DXGI デバイスから D2D デバイスを作成する.
 		winrt::com_ptr<ID2D1Device2> d2d_device{ nullptr };
 		winrt::check_hresult(m_d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put()));
