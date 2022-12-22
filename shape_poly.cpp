@@ -733,23 +733,22 @@ namespace winrt::GraphPaper::implementation
 
 			// 矢じるしの形式がなしか判定する.
 			const auto a_style = m_arrow_style;
-			if (a_style == ARROW_STYLE::NONE) {
-				return;
-			}
-			// 矢じるしの位置を求める.
-			D2D1_POINT_2F h_tip;
-			D2D1_POINT_2F h_barbs[2];
-			if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
-				// 矢じるしのパスジオメトリを作成する.
-				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
-				winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
-				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-				sink->BeginFigure(h_barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-				sink->AddLine(h_tip);
-				sink->AddLine(h_barbs[1]);
-				sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-				winrt::check_hresult(sink->Close());
-				sink = nullptr;
+			if (a_style != ARROW_STYLE::NONE) {
+				// 矢じるしの位置を求める.
+				D2D1_POINT_2F h_tip;
+				D2D1_POINT_2F h_barbs[2];
+				if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
+					// 矢じるしのパスジオメトリを作成する.
+					winrt::check_hresult(factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
+					winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
+					sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+					sink->BeginFigure(h_barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+					sink->AddLine(h_tip);
+					sink->AddLine(h_barbs[1]);
+					sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+					winrt::check_hresult(sink->Close());
+					sink = nullptr;
+				}
 			}
 		}
 		if (is_opaque(m_fill_color)) {
