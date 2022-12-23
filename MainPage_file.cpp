@@ -409,8 +409,7 @@ namespace winrt::GraphPaper::implementation
 		);
 
 		// デバイスの作成
-		//D2D_UI d2d;
-
+		/*
 		const UINT w = m_main_sheet.m_sheet_size.width;
 		const UINT h = m_main_sheet.m_sheet_size.height;
 		std::vector<uint8_t> mem(4 * w * h);
@@ -431,20 +430,33 @@ namespace winrt::GraphPaper::implementation
 		};
 		winrt::com_ptr<ID2D1RenderTarget> target;
 		Shape::s_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
-/*
+		*/
 		// ビットマップの作成
-		D2D1_BITMAP_PROPERTIES bp{
-			D2D1_PIXEL_FORMAT{ DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_STRAIGHT },
-			96.0f,
-			96.0f
-		};
 		D2D_SIZE_U size{ m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height };
-		winrt::com_ptr<ID2D1Bitmap> bm;
-		d2d.m_d2d_context->CreateBitmap(size, bp, bm.put());
+		D2D_UI d2d;
+		winrt::com_ptr<ID2D1BitmapRenderTarget> target;
+		auto res = d2d.m_d2d_context->CreateCompatibleRenderTarget(
+			m_main_sheet.m_sheet_size,
+			size,
+			D2D1_PIXEL_FORMAT{
+				DXGI_FORMAT_B8G8R8A8_UNORM,
+				D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_PREMULTIPLIED,
+			},
+			D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS::D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE,
+			target.put()
+		);
+		/*
+		const D2D1_BITMAP_PROPERTIES b_prop{
+			D2D1::BitmapProperties(
+				D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+			)
+		};
+		*/
+		//d2d.m_d2d_context->CreateBitmap(size, b_prop, bm.put());
 
 		// ビットマップをデバイスに設定
-		d2d.m_d2d_context->SetTarget(bm.get());
-		*/
+		//d2d.m_d2d_context->SetTarget(bm.get());
+
 		winrt::com_ptr<ID2D1SolidColorBrush> cb;
 		target->CreateSolidColorBrush(D2D1_COLOR_F{}, cb.put());
 		winrt::com_ptr<ID2D1SolidColorBrush> rb;
@@ -455,6 +467,7 @@ namespace winrt::GraphPaper::implementation
 		Shape::s_range_brush = rb.get();
 
 		// デバイスコンテキストの描画状態を保存ブロックに保持する.
+		m_mutex_draw.lock();
 		Shape::s_target->SaveDrawingState(m_main_sheet.m_state_block.get());
 		Shape::s_target->BeginDraw();
 		m_main_sheet.draw(m_main_sheet);
@@ -465,19 +478,19 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_draw.unlock();
 
 		// Retrieve D2D Device.
-		//winrt::com_ptr<ID2D1Device> dev;
-		//target->GetDevice(dev.put());
+		winrt::com_ptr<ID2D1Device> dev;
+		d2d.m_d2d_context->GetDevice(dev.put());
 
 		// IWICImageEncoder を使用して Direct2D コンテンツを書き込む
-		//winrt::com_ptr<IWICImageEncoder> image_enc;
-		//winrt::check_hresult(
-		//	wic_factory->CreateImageEncoder(dev.get(), image_enc.put())
-		//);
-		//winrt::com_ptr<ID2D1Image> d2d_image;
-		//d2d.m_d2d_context->GetTarget(d2d_image.put());
-		//winrt::check_hresult(
-		//	image_enc->WriteFrame(d2d_image.get(), wic_frm.get(), nullptr)
-		//);
+		winrt::com_ptr<IWICImageEncoder> image_enc;
+		winrt::check_hresult(
+			wic_factory->CreateImageEncoder(dev.get(), image_enc.put())
+		);
+		winrt::com_ptr<ID2D1Bitmap> d2d_image;
+		target->GetBitmap(d2d_image.put());
+		winrt::check_hresult(
+			image_enc->WriteFrame(d2d_image.get(), wic_frm.get(), nullptr)
+		);
 
 		winrt::check_hresult(
 			wic_frm->Commit()
