@@ -717,32 +717,32 @@
     <value>Default Value</value>
     <comment>String</comment>
   </data>
+  <data name="str_desc_bmp" xml:space="preserve">
+    <value>Bitmap</value>
+    <comment>String</comment>
+  </data>
   <data name="str_desc_gpf" xml:space="preserve">
     <value>Grid Paper File</value>
     <comment>String</comment>
   </data>
-  <data name="str_desc_svg" xml:space="preserve">
-    <value>SVG (Scalable Vector Graphics)</value>
-    <comment>String</comment>
-  </data>
-  <data name="str_desc_bmp" xml:space="preserve">
-    <value>BMP (Bitmap)</value>
-    <comment>String</comment>
-  </data>
   <data name="str_desc_gif" xml:space="preserve">
-    <value>GIF (Graphics Interchange Format)</value>
+    <value>GIF</value>
     <comment>String</comment>
   </data>
   <data name="str_desc_jpg" xml:space="preserve">
-    <value>JPEG (Joint Photographic Experts Group)</value>
+    <value>JPEG</value>
     <comment>String</comment>
   </data>
   <data name="str_desc_png" xml:space="preserve">
-    <value>PNG (Portable Network Graphics)</value>
+    <value>PNG</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_desc_svg" xml:space="preserve">
+    <value>SVG</value>
     <comment>String</comment>
   </data>
   <data name="str_desc_tif" xml:space="preserve">
-    <value>TIFF (Tagged Image File Format)</value>
+    <value>TIFF</value>
     <comment>String</comment>
   </data>
   <data name="str_dot_gap" xml:space="preserve">
@@ -1143,7 +1143,7 @@
     <comment>CheckBox</comment>
   </data>
   <data name="str_desc_pdf" xml:space="preserve">
-    <value>PDF (Portable Document Format)</value>
+    <value>PDF</value>
     <comment>String</comment>
   </data>
 </root>

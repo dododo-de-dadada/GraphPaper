@@ -17,6 +17,21 @@ namespace winrt::GraphPaper::implementation
 	// 点に最も近い, 線分上の点を求める.
 	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& q) noexcept;
 
+	winrt::com_ptr<IWICImagingFactory2> ShapeImage::wic_factory{
+		[]() {
+			winrt::com_ptr<IWICImagingFactory2> factory;
+			winrt::check_hresult(
+				CoCreateInstance(
+					CLSID_WICImagingFactory,
+					nullptr,
+					CLSCTX_INPROC_SERVER,
+					IID_PPV_ARGS(&factory)
+				)
+			);
+			return factory;
+		}()
+	};
+
 	// 点に最も近い, 線分上の点を求める.
 	// p	点
 	// a	線分の端点
@@ -49,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 	// enc_id	画像の形式 (BitmapEncoder に定義されている)
 	// ra_stream	画像を格納するストリーム
 	// 戻り値	格納できたら true
-	IAsyncOperation<bool> ShapeImage::copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream)
+	IAsyncOperation<bool> ShapeImage::copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream) const
 	{
 		bool ret = false;	// 返値
 		// コルーチンの開始時のスレッドコンテキストを保存し,
@@ -59,7 +74,9 @@ namespace winrt::GraphPaper::implementation
 		co_await winrt::resume_background();
 
 		// SoftwareBitmap を作成する.
-		SoftwareBitmap bmp{ SoftwareBitmap(BitmapPixelFormat::Bgra8,  m_orig.width, m_orig.height, BitmapAlphaMode::Straight) };
+		SoftwareBitmap bmp{
+			SoftwareBitmap(BitmapPixelFormat::Bgra8, m_orig.width, m_orig.height, BitmapAlphaMode::Straight) 
+		};
 
 		// ビットマップのバッファをロックする.
 		auto bmp_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };

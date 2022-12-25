@@ -8,7 +8,6 @@
 
 #include "pch.h"
 #include "shape.h"
-#include <wincodec.h>
 
 using namespace winrt;
 

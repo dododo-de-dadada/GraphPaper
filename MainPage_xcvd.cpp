@@ -59,7 +59,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (img_ref == nullptr && typeid(*it) == typeid(ShapeImage)) {
 				// ビットマップをストリームに格納し, その参照を得る.
-				InMemoryRandomAccessStream img_stream{ InMemoryRandomAccessStream() };
+				InMemoryRandomAccessStream img_stream{
+					InMemoryRandomAccessStream()
+				};
 				const bool ret = co_await static_cast<ShapeImage*>(*it)->copy_to(BitmapEncoder::BmpEncoderId(), img_stream);
 				if (ret && img_stream.Size() > 0) {
 					img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);

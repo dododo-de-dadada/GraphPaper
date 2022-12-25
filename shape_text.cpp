@@ -3,7 +3,6 @@
 // •¶š—ñ}Œ`
 //------------------------------
 #include <cwctype>
-#include <wincodec.h>
 #include "pch.h"
 #include "shape.h"
 

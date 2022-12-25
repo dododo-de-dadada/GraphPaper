@@ -27,6 +27,7 @@
 #include <winrt/Windows.Devices.Input.h>
 #include <winrt/Windows.Globalization.Fonts.h>
 #include <winrt/Windows.Graphics.Imaging.h>
+#include <winrt/Windows.Security.Cryptography.h>
 #include <winrt/Windows.Storage.AccessCache.h>
 #include <winrt/Windows.Storage.Pickers.h>
 #include <winrt/Windows.System.Threading.h>
