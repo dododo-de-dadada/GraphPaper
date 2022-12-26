@@ -765,12 +765,16 @@
     <value>文字列が見つかりません.</value>
     <comment>String</comment>
   </data>
-  <data name="str_info_image_found" xml:space="preserve">
-    <value>画像ごとにファイル保存ピッカーが開きます.</value>
-    <comment>String</comment>
-  </data>
   <data name="str_err_load" xml:space="preserve">
     <value>設定の読み込みに失敗しました.</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_err_resume" xml:space="preserve">
+    <value>アプリケーションデータの読み込みに失敗しました</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_err_suspend" xml:space="preserve">
+    <value>アプリケーションデータの保存に失敗しました</value>
     <comment>String</comment>
   </data>
   <data name="str_err_save" xml:space="preserve">

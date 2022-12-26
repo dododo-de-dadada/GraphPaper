@@ -802,20 +802,15 @@ namespace winrt::GraphPaper::implementation
 
 	// 用紙メニューの「用紙設定を保存」が選択された
 	// ローカルフォルダーにファイルを作成し, 設定データを保存する.
-	// s_file	ストレージファイル
 	IAsyncAction MainPage::sheet_prop_save_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		try {
-			auto s_file{ 
-				co_await prop_local_folder().CreateFileAsync(SHEET_PROP, CreationCollisionOption::ReplaceExisting)
-			};
-			if (s_file != nullptr) {
-				co_await file_write_gpf_async<false, true>(s_file);
-				s_file = nullptr;
-				mfi_sheet_prop_reset().IsEnabled(true);
-			}
-		}
-		catch (winrt::hresult_error const&) {
+		auto prop_file{ 
+			co_await prop_local_folder().CreateFileAsync(SHEET_PROP, CreationCollisionOption::ReplaceExisting)
+		};
+		if (prop_file != nullptr) {
+			co_await file_write_gpf_async<false, true>(prop_file);
+			prop_file = nullptr;
+			mfi_sheet_prop_reset().IsEnabled(true);
 		}
 		//using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
 		//auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();

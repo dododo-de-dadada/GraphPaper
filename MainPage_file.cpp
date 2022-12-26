@@ -605,12 +605,12 @@ namespace winrt::GraphPaper::implementation
 
 	//-------------------------------
 	// ストレージファイルを非同期に読む.
-	// SUSPEND	ライフサイクルが中断のとき true
+	// RESUME	ライフサイクルが再開のとき true
 	// SETTING	「用紙設定を保存」のとき true
 	// s_file	読み込むストレージファイル
 	// 戻り値	読み込めたら S_OK.
 	//-------------------------------
-	template <bool SUSPEND, bool SETTING>
+	template <bool RESUME, bool SETTING>
 	IAsyncOperation<winrt::hresult> MainPage::file_read_async(StorageFile s_file) noexcept
 	{
 		HRESULT hr = E_FAIL;
@@ -676,8 +676,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				if (slist_read(m_main_sheet.m_shape_list, dt_reader)) {
-					// 中断されたか判定する.
-					if constexpr (SUSPEND) {
+					// 再開されたなら,
+					if constexpr (RESUME) {
+						// スタックも読み込む.
 						ustack_read(dt_reader);
 					}
 					hr = S_OK;
@@ -691,10 +692,24 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_mutex_draw.unlock();
 		if (hr != S_OK) {
-			message_show(ICON_ALERT, RES_ERR_READ, s_file.Path());
+			if constexpr (RESUME) {
+				message_show(ICON_ALERT, L"str_err_resume", s_file.Path());
+				// 読み込みに失敗した場合,
+				sheet_init();
+				m_len_unit = LEN_UNIT::PIXEL;
+				m_color_code = COLOR_CODE::DEC;
+				m_vert_stick = VERT_STICK_DEF_VAL;
+				m_status_bar = STATUS_BAR_DEF_VAL;
+			}
+			else if constexpr (SETTING) {
+				message_show(ICON_ALERT, L"str_err_load", s_file.Path());
+			}
+			else {
+				message_show(ICON_ALERT, RES_ERR_READ, s_file.Path());
+			}
 		}
 		else {
-			if constexpr (!SUSPEND && !SETTING) {
+			if constexpr (!RESUME && !SETTING) {
 				file_recent_add(s_file);
 				file_finish_reading();
 			}
@@ -848,75 +863,61 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::file_save_as_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		m_mutex_event.lock();
-		HRESULT hr = E_FAIL;
-		try {
-			// ファイル保存ピッカーを得る.
-			FileSavePicker save_picker{
-				FileSavePicker()
-			};
-			// ファイルタイプに拡張子とその説明を追加する.
-			const winrt::hstring desc_gpf{
-				ResourceLoader::GetForCurrentView().GetString(RES_DESC_GPF)
-			};
-			save_picker.FileTypeChoices().Insert(desc_gpf, TYPE_GPF);
 
-			// ドキュメントライブラリーを保管場所に設定する.
-			const PickerLocationId loc_id = PickerLocationId::DocumentsLibrary;
-			save_picker.SuggestedStartLocation(loc_id);
+		// ファイル保存ピッカーを得る.
+		FileSavePicker save_picker{
+			FileSavePicker()
+		};
+		// ファイルタイプに拡張子とその説明を追加する.
+		const winrt::hstring desc_gpf{
+			ResourceLoader::GetForCurrentView().GetString(RES_DESC_GPF)
+		};
+		save_picker.FileTypeChoices().Insert(desc_gpf, TYPE_GPF);
 
-			// 最近使ったファイルのトークンが空か判定する.
-			if (m_file_token_mru.empty()) {
-				// 提案されたファイル名に拡張子を格納する.
-				save_picker.SuggestedFileName(FILE_EXT_GPF);
-			}
-			else {
-				// 最近使ったファイルのトークンからストレージファイルを得る.
-				StorageFile recent_file{
-					co_await file_recent_token_async(m_file_token_mru)
-				};
-				// ストレージファイルを得たなら,
-				if (recent_file != nullptr) {
-					// ファイルタイプが FILE_EXT_GPF か判定する.
-					if (recent_file.FileType() == FILE_EXT_GPF) {
-						// ファイル名を, 提案するファイル名に格納する.
-						save_picker.SuggestedFileName(recent_file.Name());
-					}
-					recent_file = nullptr;
-				}
-			}
-			// ファイル保存ピッカーを表示し, ストレージファイルを得る.
-			StorageFile save_file{
-				co_await save_picker.PickSaveFileAsync()
+		// ドキュメントライブラリーを保管場所に設定する.
+		const PickerLocationId loc_id = PickerLocationId::DocumentsLibrary;
+		save_picker.SuggestedStartLocation(loc_id);
+
+		// 最近使ったファイルのトークンが空か判定する.
+		if (m_file_token_mru.empty()) {
+			// 提案されたファイル名に拡張子を格納する.
+			save_picker.SuggestedFileName(FILE_EXT_GPF);
+		}
+		else {
+			// 最近使ったファイルのトークンからストレージファイルを得る.
+			StorageFile recent_file{
+				co_await file_recent_token_async(m_file_token_mru)
 			};
-			// ピッカーを破棄する.
-			save_picker = nullptr;
-			// ストレージファイルを取得したか判定する.
-			if (save_file != nullptr) {
-				// 待機カーソルを表示, 表示する前のカーソルを得る.
-				const CoreCursor& prev_cur = file_wait_cursor();
-				// ファイルタイプが方眼紙ファイルか判定する.
-				const auto f_type = save_file.FileType();
-				if (f_type == FILE_EXT_GPF) {
-					// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
-					hr = co_await file_write_gpf_async<false, false>(save_file);
+			// ストレージファイルを得たなら,
+			if (recent_file != nullptr) {
+				// ファイルタイプが FILE_EXT_GPF か判定する.
+				if (recent_file.FileType() == FILE_EXT_GPF) {
+					// ファイル名を, 提案するファイル名に格納する.
+					save_picker.SuggestedFileName(recent_file.Name());
 				}
-				// ストレージファイルを破棄する.
-				save_file = nullptr;
-				// カーソルを元に戻す.
-				Window::Current().CoreWindow().PointerCursor(prev_cur);
-			}
-			else {
-				// ファイル保存ピッカーでキャンセルが押された.
-				hr = S_OK;
+				recent_file = nullptr;
 			}
 		}
-		catch (winrt::hresult_error const& e) {
-			// エラーが発生した場合, エラーコードを結果に格納する.
-			hr = e.code();
-		}
-		if (hr != S_OK) {
-			// 「ファイルに書き込めません」メッセージダイアログを表示する.
-			message_show(ICON_ALERT, RES_ERR_WRITE, m_file_token_mru);
+		// ファイル保存ピッカーを表示し, ストレージファイルを得る.
+		StorageFile save_file{
+			co_await save_picker.PickSaveFileAsync()
+		};
+		// ピッカーを破棄する.
+		save_picker = nullptr;
+		// ストレージファイルを取得したか判定する.
+		if (save_file != nullptr) {
+			// 待機カーソルを表示, 表示する前のカーソルを得る.
+			const CoreCursor& prev_cur = file_wait_cursor();
+			// ファイルタイプが方眼紙ファイルか判定する.
+			const auto f_type = save_file.FileType();
+			if (f_type == FILE_EXT_GPF) {
+				// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
+				co_await file_write_gpf_async<false, false>(save_file);
+			}
+			// ストレージファイルを破棄する.
+			save_file = nullptr;
+			// カーソルを元に戻す.
+			Window::Current().CoreWindow().PointerCursor(prev_cur);
 		}
 		m_mutex_event.unlock();
 	}
@@ -940,17 +941,10 @@ namespace winrt::GraphPaper::implementation
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
 			const CoreCursor& prev_cur = file_wait_cursor();	// 前のカーソル
 			// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
-			const HRESULT hr = co_await file_write_gpf_async<false, false>(recent_file);
+			co_await file_write_gpf_async<false, false>(recent_file);
 			recent_file = nullptr;
 			// カーソルを元に戻す.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);
-			// 結果が S_OK 以外か判定する.
-			if (hr != S_OK) {
-				// スレッドをメインページの UI スレッドに変える.
-				//co_await winrt::resume_foreground(Dispatcher());
-				// 「ファイルに書き込めません」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, RES_ERR_WRITE, m_file_token_mru);
-			}
 		}
 	}
 
@@ -1013,7 +1007,7 @@ namespace winrt::GraphPaper::implementation
 
 	//-------------------------------
 	// 図形データをストレージファイルに非同期に書き込む.
-	// SUSPEND	ライフサイクルが中断のとき true
+	// SUSPEND 	ライフサイクルが中断のとき true
 	// SETTING	「用紙設定を保存」のとき true
 	// s_file	ストレージファイル
 	// 戻り値	書き込みに成功したら true
@@ -1099,8 +1093,31 @@ namespace winrt::GraphPaper::implementation
 
 		// 結果が S_OK 以外か判定する.
 		if (hr != S_OK) {
-			// 「ファイルに書き込めません」メッセージダイアログを表示する.
-			message_show(ICON_ALERT, RES_ERR_WRITE, s_file.Path());
+			if constexpr (SUSPEND) {
+				// 「ファイルに書き込めません」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, L"str_err_suspend", s_file.Path());
+				// 一覧が表示されてるなら閉じる.
+				if (summary_is_visible()) {
+					summary_clear();
+				}
+				ustack_clear();
+				slist_clear(m_main_sheet.m_shape_list);
+				slist_clear(m_prop_sheet.m_shape_list);
+#if defined(_DEBUG)
+				if (debug_leak_cnt != 0) {
+					// 「メモリリーク」メッセージダイアログを表示する.
+					message_show(ICON_DEBUG, DEBUG_MSG, {});
+				}
+#endif
+				sheet_draw();
+			}
+			else if constexpr (SETTING) {
+				message_show(ICON_ALERT, L"str_err_save", s_file.Path());
+			}
+			else {
+				// 「ファイルに書き込めません」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, RES_ERR_WRITE, s_file.Path());
+			}
 		}
 		else {
 			// 中断ではない, かつ設定ではないか判定する.

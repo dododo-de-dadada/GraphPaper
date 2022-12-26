@@ -157,7 +157,6 @@
     <ClCompile Include="MainPage_group.cpp" />
     <ClCompile Include="MainPage_image.cpp" />
     <ClCompile Include="MainPage_join.cpp" />
-    <ClCompile Include="MainPage_pdf.cpp" />
     <ClCompile Include="MainPage_sheet.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
     <ClCompile Include="MainPage_event.cpp" />

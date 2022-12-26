@@ -74,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 				if (hr != S_OK) {
 					constexpr wchar_t ERR_LOAD[] = L"str_err_load";	// 設定読み込みのエラーメッセージのリソース名
 					co_await winrt::resume_foreground(Dispatcher());
-					message_show(ICON_ALERT, ERR_LOAD, {});
+					message_show(ICON_ALERT, L"str_err_load", {});
 				}
 				app_data_file = nullptr;
 			}
@@ -125,49 +125,22 @@ namespace winrt::GraphPaper::implementation
 		switch (co_await ext_session.RequestExtensionAsync()) {
 		// 延長実行セッションが許可された場合.
 		case ExtendedExecutionResult::Allowed:
-			// セッションがキャンセルか判定する.
-			if (cancel_src.get_token().is_canceled()) {
-				// キャンセルならば何もしない.
-				break;
-			}
-			try {
-				// キャンセル以外ならば, アプリケーションデータを格納するストレージファイルを作成する.
+			// セッションがキャンセル以外なら
+			if (!cancel_src.get_token().is_canceled()) {
+				// アプリケーションデータを格納するストレージファイルを作成する.
 				StorageFile app_data_file{
 					co_await ApplicationData::Current().LocalCacheFolder().CreateFileAsync(APP_DATA_FILE, CreationCollisionOption::ReplaceExisting) 
 				};
-				// ストレージファイルが作成できたなら, アプリケーションデータを書き込む.
+				// ファイルが作成できたなら, 
 				if (app_data_file != nullptr) {
-					hr = co_await file_write_gpf_async<true, false>(app_data_file);
+					// アプリケーションデータを書き込む.
+					co_await file_write_gpf_async<true, false>(app_data_file);
 					app_data_file = nullptr;
 				}
-			}
-			catch (winrt::hresult_error const& e) {
-				hr = e.code();
-			}
-			if (hr != S_OK) {
-				// スレッドをメインページの UI スレッドに変える.
-				winrt::apartment_context context;
-				co_await winrt::resume_foreground(Dispatcher());
-
-				constexpr wchar_t ERR_SAVE[] = L"str_err_save";	// 設定保存のエラーメッセージのリソース名
-				message_show(ICON_ALERT, ERR_SAVE, {});
-
-				// 一覧が表示されてるなら閉じる.
-				if (summary_is_visible()) {
-					summary_clear();
+				// ファイルが作成できないなら,
+				else {
+					message_show(ICON_ALERT, L"str_err_save", {});
 				}
-				ustack_clear();
-				slist_clear(m_main_sheet.m_shape_list);
-				slist_clear(m_prop_sheet.m_shape_list);
-#if defined(_DEBUG)
-				if (debug_leak_cnt != 0) {
-					// 「メモリリーク」メッセージダイアログを表示する.
-					message_show(ICON_DEBUG, DEBUG_MSG, {});
-				}
-#endif
-				sheet_draw();
-				// スレッドコンテキストを復元する.
-				co_await context;
 			}
 			break;
 		case ExtendedExecutionResult::Denied:

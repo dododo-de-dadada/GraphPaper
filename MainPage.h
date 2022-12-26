@@ -467,7 +467,7 @@ namespace winrt::GraphPaper::implementation
 		// ファイルメニューの「上書き保存」が選択された
 		IAsyncAction file_save_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// ストレージファイルを非同期に読む.
-		template <bool SUSPEND, bool SETTEING>
+		template <bool RESUME, bool SETTING>
 		IAsyncOperation<winrt::hresult> file_read_async(StorageFile s_file) noexcept;
 		// ファイルメニューの「最近使ったファイル 」のサブ項目が選択された
 		IAsyncAction file_recent_click_async(IInspectable const&, RoutedEventArgs const&);
