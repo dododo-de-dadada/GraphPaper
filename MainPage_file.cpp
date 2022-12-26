@@ -102,43 +102,43 @@ namespace winrt::GraphPaper::implementation
 
 	static const CoreCursor& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 待機カーソル.
 	constexpr static uint32_t MRU_MAX = 25;	// 最近使ったリストの最大数.
-	constexpr static wchar_t RES_DESC_GPF[] = L"str_desc_gpf";	// 拡張子 gpf の説明
-	constexpr static wchar_t RES_DESC_SVG[] = L"str_desc_svg";	// 拡張子 svg の説明
-	constexpr static wchar_t RES_DESC_PDF[] = L"str_desc_pdf";	// 拡張子 pdf の説明
-	constexpr static wchar_t RES_ERR_FONT[] = L"str_err_font";	// 有効でない書体のエラーメッセージのリソース名
-	constexpr static wchar_t RES_ERR_READ[] = L"str_err_read";	// 読み込みエラーメッセージのリソース名
-	constexpr static wchar_t RES_ERR_RECENT[] = L"str_err_recent";	// 最近使ったファイルのエラーメッセージのリソース名
-	constexpr static wchar_t FILE_EXT_BMP[] = L".bmp";	// 画像ファイルの拡張子
-	constexpr static wchar_t FILE_EXT_GIF[] = L".gif";	// 画像ファイルの拡張子
-	constexpr static wchar_t FILE_EXT_GPF[] = L".gpf";	// 図形データファイルの拡張子
-	constexpr static wchar_t FILE_EXT_JPEG[] = L".jpeg";	// 画像ファイルの拡張子
-	constexpr static wchar_t FILE_EXT_JPG[] = L".jpg";	// 画像ファイルの拡張子
-	constexpr static wchar_t FILE_EXT_PNG[] = L".png";	// 画像ファイルの拡張子
-	constexpr static wchar_t FILE_EXT_SVG[] = L".svg";	// SVG ファイルの拡張子
-	constexpr static wchar_t FILE_EXT_TIF[] = L".tif";	// 画像ファイルの拡張子
-	constexpr static wchar_t FILE_EXT_TIFF[] = L".tiff";	// 画像ファイルの拡張子
-	constexpr static wchar_t FILE_EXT_PDF[] = L".pdf";	// PDF ファイルの拡張子
-	constexpr static wchar_t UNTITLED[] = L"str_untitled";	// 無題のリソース名
+	//constexpr static wchar_t RES_DESC_GPF[] = L"str_desc_gpf";	// 拡張子 gpf の説明
+	//constexpr static wchar_t RES_DESC_SVG[] = L"str_desc_svg";	// 拡張子 svg の説明
+	//constexpr static wchar_t RES_DESC_PDF[] = L"str_desc_pdf";	// 拡張子 pdf の説明
+	//constexpr static wchar_t RES_ERR_FONT[] = L"str_err_font";	// 有効でない書体のエラーメッセージのリソース名
+	//constexpr static wchar_t RES_ERR_READ[] = L"str_err_read";	// 読み込みエラーメッセージのリソース名
+	//constexpr static wchar_t RES_ERR_RECENT[] = L"str_err_recent";	// 最近使ったファイルのエラーメッセージのリソース名
+	//constexpr static wchar_t FILE_EXT_BMP[] = L".bmp";	// 画像ファイルの拡張子
+	//constexpr static wchar_t FILE_EXT_GIF[] = L".gif";	// 画像ファイルの拡張子
+	//constexpr static wchar_t FILE_EXT_GPF[] = L".gpf";	// 図形データファイルの拡張子
+	//constexpr static wchar_t FILE_EXT_JPEG[] = L".jpeg";	// 画像ファイルの拡張子
+	//constexpr static wchar_t FILE_EXT_JPG[] = L".jpg";	// 画像ファイルの拡張子
+	//constexpr static wchar_t FILE_EXT_PNG[] = L".png";	// 画像ファイルの拡張子
+	//constexpr static wchar_t FILE_EXT_SVG[] = L".svg";	// SVG ファイルの拡張子
+	//constexpr static wchar_t FILE_EXT_TIF[] = L".tif";	// 画像ファイルの拡張子
+	//constexpr static wchar_t FILE_EXT_TIFF[] = L".tiff";	// 画像ファイルの拡張子
+	//constexpr static wchar_t FILE_EXT_PDF[] = L".pdf";	// PDF ファイルの拡張子
+	//constexpr static wchar_t UNTITLED[] = L"str_untitled";	// 無題のリソース名
 	static const IVector<winrt::hstring> TYPE_BMP{
-		winrt::single_threaded_vector<winrt::hstring>({ FILE_EXT_BMP })
+		winrt::single_threaded_vector<winrt::hstring>({ L".bmp" })
 	};
 	static const IVector<winrt::hstring> TYPE_GIF{
-		winrt::single_threaded_vector<winrt::hstring>({ FILE_EXT_GIF })
+		winrt::single_threaded_vector<winrt::hstring>({ L".gif" })
 	};
 	static const IVector<winrt::hstring> TYPE_JPG{
-		winrt::single_threaded_vector<winrt::hstring>({ FILE_EXT_JPG, FILE_EXT_JPEG })
+		winrt::single_threaded_vector<winrt::hstring>({ L".jpg", L".jpeg" })
 	};
 	static const IVector<winrt::hstring> TYPE_PNG{
-		winrt::single_threaded_vector<winrt::hstring>({ FILE_EXT_PNG })
+		winrt::single_threaded_vector<winrt::hstring>({ L".png" })
 	};
 	static const IVector<winrt::hstring> TYPE_TIF{
-		winrt::single_threaded_vector<winrt::hstring>({ FILE_EXT_TIF, FILE_EXT_TIFF })
+		winrt::single_threaded_vector<winrt::hstring>({ L".tif", L".tiff" })
 	};
 	static const IVector<winrt::hstring> TYPE_GPF{
-		winrt::single_threaded_vector<winrt::hstring>({ FILE_EXT_GPF })
+		winrt::single_threaded_vector<winrt::hstring>({ L".gpf" })
 	};
 	static const IVector<winrt::hstring> TYPE_SVG{
-		winrt::single_threaded_vector<winrt::hstring>({ FILE_EXT_SVG })
+		winrt::single_threaded_vector<winrt::hstring>({ L".svg" })
 	};
 	static const IVector<winrt::hstring> TYPE_PDF{
 		winrt::single_threaded_vector<winrt::hstring>({ L".pdf" })
@@ -376,7 +376,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			// ストレージファイルを得たなら,
 			if (recent_file != nullptr) {
-				if (recent_file.FileType() == FILE_EXT_GPF) {
+				if (recent_file.FileType() == L".gpf") {
 					// ファイル名を, 提案するファイル名に格納する.
 					auto sug_name = recent_file.DisplayName();
 					image_picker.SuggestedFileName(sug_name);
@@ -446,7 +446,7 @@ namespace winrt::GraphPaper::implementation
 		wchar_t* unavailable_font;	// 無効な書体名
 		if (!slist_test_avaiable_font(m_main_sheet.m_shape_list, unavailable_font)) {
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
-			message_show(ICON_ALERT, RES_ERR_FONT, unavailable_font);
+			message_show(ICON_ALERT, L"str_err_font", unavailable_font);
 		}
 
 		// 一覧が表示されてるか判定する.
@@ -486,13 +486,13 @@ namespace winrt::GraphPaper::implementation
 
 		// ファイル「オープン」ピッカーを取得して開く.
 		FileOpenPicker open_picker{ FileOpenPicker() };
-		open_picker.FileTypeFilter().Append(FILE_EXT_BMP);
-		open_picker.FileTypeFilter().Append(FILE_EXT_GIF);
-		open_picker.FileTypeFilter().Append(FILE_EXT_JPG);
-		open_picker.FileTypeFilter().Append(FILE_EXT_JPEG);
-		open_picker.FileTypeFilter().Append(FILE_EXT_PNG);
-		open_picker.FileTypeFilter().Append(FILE_EXT_TIF);
-		open_picker.FileTypeFilter().Append(FILE_EXT_TIFF);
+		open_picker.FileTypeFilter().Append(L".bmp");
+		open_picker.FileTypeFilter().Append(L".gif");
+		open_picker.FileTypeFilter().Append(L".jpg");
+		open_picker.FileTypeFilter().Append(L".jpeg");
+		open_picker.FileTypeFilter().Append(L".png");
+		open_picker.FileTypeFilter().Append(L".tif");
+		open_picker.FileTypeFilter().Append(L".tiff");
 
 		// ピッカーを非同期に表示してストレージファイルを取得する.
 		// (「閉じる」ボタンが押された場合ストレージファイルは nullptr.)
@@ -574,7 +574,7 @@ namespace winrt::GraphPaper::implementation
 		FileOpenPicker open_picker{
 			FileOpenPicker()
 		};
-		open_picker.FileTypeFilter().Append(FILE_EXT_GPF);
+		open_picker.FileTypeFilter().Append(L".gpf");
 		// ダブルクリックでファイルが選択された場合,
 		// co_await が終了する前に, PonterReleased と PonterEntered が呼ばれる.
 		// これはピッカーが 2 度目の Released を待たずにダブルクリックを成立させているためだと思われる.
@@ -705,7 +705,7 @@ namespace winrt::GraphPaper::implementation
 				message_show(ICON_ALERT, L"str_err_load", s_file.Path());
 			}
 			else {
-				message_show(ICON_ALERT, RES_ERR_READ, s_file.Path());
+				message_show(ICON_ALERT, L"str_err_read", s_file.Path());
 			}
 		}
 		else {
@@ -735,7 +735,8 @@ namespace winrt::GraphPaper::implementation
 			ApplicationView::GetForCurrentView().Title(s_file.Name());
 		}
 		else {
-			ApplicationView::GetForCurrentView().Title(ResourceLoader::GetForCurrentView().GetString(UNTITLED));
+			const auto untitle = ResourceLoader::GetForCurrentView().GetString(L"str_untitled");
+			ApplicationView::GetForCurrentView().Title(untitle);
 		}
 		file_recent_menu_update();
 	}
@@ -773,7 +774,7 @@ namespace winrt::GraphPaper::implementation
 			// 数以上なら
 			if (n >= mru_entries.Size()) {
 				// 最近使ったファイルのエラーを表示する.
-				message_show(ICON_ALERT, RES_ERR_RECENT, to_hstring(n + 1));
+				message_show(ICON_ALERT, L"str_err_recent", to_hstring(n + 1));
 				co_return;
 			}
 			// 最近使ったリストから i 番目の要素を得る.
@@ -800,7 +801,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				// 取得できないならば,
-				message_show(ICON_ALERT, RES_ERR_RECENT, item[0].Metadata);
+				message_show(ICON_ALERT, L"str_err_recent", item[0].Metadata);
 			}
 		}
 	}
@@ -870,7 +871,7 @@ namespace winrt::GraphPaper::implementation
 		};
 		// ファイルタイプに拡張子とその説明を追加する.
 		const winrt::hstring desc_gpf{
-			ResourceLoader::GetForCurrentView().GetString(RES_DESC_GPF)
+			ResourceLoader::GetForCurrentView().GetString(L"str_desc_gpf")
 		};
 		save_picker.FileTypeChoices().Insert(desc_gpf, TYPE_GPF);
 
@@ -881,7 +882,7 @@ namespace winrt::GraphPaper::implementation
 		// 最近使ったファイルのトークンが空か判定する.
 		if (m_file_token_mru.empty()) {
 			// 提案されたファイル名に拡張子を格納する.
-			save_picker.SuggestedFileName(FILE_EXT_GPF);
+			save_picker.SuggestedFileName(L".gpf");
 		}
 		else {
 			// 最近使ったファイルのトークンからストレージファイルを得る.
@@ -890,8 +891,8 @@ namespace winrt::GraphPaper::implementation
 			};
 			// ストレージファイルを得たなら,
 			if (recent_file != nullptr) {
-				// ファイルタイプが FILE_EXT_GPF か判定する.
-				if (recent_file.FileType() == FILE_EXT_GPF) {
+				// ファイルタイプが ".gpf" か判定する.
+				if (recent_file.FileType() == L".gpf") {
 					// ファイル名を, 提案するファイル名に格納する.
 					save_picker.SuggestedFileName(recent_file.Name());
 				}
@@ -909,8 +910,7 @@ namespace winrt::GraphPaper::implementation
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
 			const CoreCursor& prev_cur = file_wait_cursor();
 			// ファイルタイプが方眼紙ファイルか判定する.
-			const auto f_type = save_file.FileType();
-			if (f_type == FILE_EXT_GPF) {
+			if (save_file.FileType() == L".gpf") {
 				// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
 				co_await file_write_gpf_async<false, false>(save_file);
 			}
@@ -988,7 +988,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			// ストレージファイルを得たなら,
 			if (recent_file != nullptr) {
-				if (recent_file.FileType() == FILE_EXT_GPF) {
+				if (recent_file.FileType() == L".gpf") {
 					// ファイル名を, 提案するファイル名に格納する.
 					image_picker.SuggestedFileName(recent_file.Name());
 				}

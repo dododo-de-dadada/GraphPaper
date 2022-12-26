@@ -12,38 +12,52 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::FileAccessMode;
 	using winrt::Windows::Storage::Provider::FileUpdateStatus;
 
+	//------------------------------
 	// 文字列図形からフォントの情報を得る.
+	// s	文字列図形
+	// weight	書体の太さ
+	// stretch	書体の幅
+	// style	字体
+	// f_met	書体の計量
+	// p_name	書体のポストスクリプト名
+	// g_met	字体の計量
+	//------------------------------
 	static void pdf_get_font(
 		const ShapeText* s,
 		DWRITE_FONT_WEIGHT& weight,
 		DWRITE_FONT_STRETCH& stretch,
 		DWRITE_FONT_STYLE& style,
-		DWRITE_FONT_METRICS1& fmet,
-		std::vector<char>& ps_name,
-		std::vector<DWRITE_GLYPH_METRICS>& gmet)
+		DWRITE_FONT_METRICS1& f_met,
+		std::vector<char>& p_name,
+		std::vector<DWRITE_GLYPH_METRICS>& g_met
+	)
 	{
 		s->get_font_weight(weight);
 		s->get_font_stretch(stretch);
 		s->get_font_style(style);
 
+		// 文字列レイアウトから書体コレクションを得る.
 		IDWriteFontCollection* coll = nullptr;
 		if (s->m_dw_text_layout->GetFontCollection(&coll) == S_OK) {
+			// 図形と一致する書体ファミリを得る.
 			IDWriteFontFamily* family = nullptr;
 			UINT32 index;
 			BOOL exists;
 			if (coll->FindFamilyName(s->m_font_family, &index, &exists) == S_OK &&
 				exists &&
 				coll->GetFontFamily(index, &family) == S_OK) {
+				// 書体ファミリから, 太さと幅, 字体が一致する書体を得る.
 				IDWriteFont* font = nullptr;
 				if (family->GetFirstMatchingFont(weight, stretch, style, &font) == S_OK) {
-					// フォント情報を得る,
-					static_cast<IDWriteFont1*>(font)->GetMetrics(&fmet);
+					// 書体の計量を得る,
+					static_cast<IDWriteFont1*>(font)->GetMetrics(&f_met);
 					IDWriteFontFaceReference* ref = nullptr;
 					// 各グリフの文字幅を得る.
 					if (static_cast<IDWriteFont3*>(font)->GetFontFaceReference(&ref) == S_OK) {
 						IDWriteFontFace3* face = nullptr;
 						if (ref->CreateFontFace(&face) == S_OK) {
-							// アスキー空白と図形文字 (32-126)
+							// CID の空白と図形文字 (0-94) に対応する
+							// アスキーコード  (32-126) 配列
 							static constexpr uint32_t ASCII[]{
 								32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
 								48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
@@ -53,10 +67,11 @@ namespace winrt::GraphPaper::implementation
 								112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126
 							};
 							static constexpr auto ASCII_SIZE = std::size(ASCII);
+							// アスキーコードに応じた GID (グリフインデックス) を得る.
 							static uint16_t gid[ASCII_SIZE];
 							winrt::check_hresult(face->GetGlyphIndices(std::data(ASCII), static_cast<UINT32>(ASCII_SIZE), std::data(gid)));
-							gmet.resize(ASCII_SIZE);
-							face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(ASCII_SIZE), std::data(gmet));
+							g_met.resize(ASCII_SIZE);
+							face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(ASCII_SIZE), std::data(g_met));
 
 							face->Release();
 						}
@@ -73,9 +88,9 @@ namespace winrt::GraphPaper::implementation
 								if (str->GetStringLength(j, &wstr_len) == S_OK && wstr_len > 0) {
 									std::vector<wchar_t> wstr(wstr_len + 1);
 									if (str->GetString(j, std::data(wstr), wstr_len + 1) == S_OK) {
-										int ps_name_len = WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, NULL, 0, NULL, NULL);
-										ps_name.resize(ps_name_len);
-										WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, std::data(ps_name), ps_name_len, NULL, NULL);
+										int p_name_len = WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, NULL, 0, NULL, NULL);
+										p_name.resize(p_name_len);
+										WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, std::data(p_name), p_name_len, NULL, NULL);
 										break;
 									}
 								}
@@ -92,9 +107,9 @@ namespace winrt::GraphPaper::implementation
 								}
 							}
 							wstr[wstr_len] = L'\0';
-							int ps_name_len = WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, NULL, 0, NULL, NULL);
-							ps_name.resize(ps_name_len);
-							WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, std::data(ps_name), ps_name_len, NULL, NULL);
+							int p_name_len = WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, NULL, 0, NULL, NULL);
+							p_name.resize(p_name_len);
+							WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, std::data(p_name), p_name_len, NULL, NULL);
 						}
 						str->Release();
 					}
@@ -386,10 +401,10 @@ namespace winrt::GraphPaper::implementation
 					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;
 					DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;
 					std::vector<char> psn{};
-					std::vector<DWRITE_GLYPH_METRICS> gmet{};
-					DWRITE_FONT_METRICS1 fmet{};
-					pdf_get_font(t, weight, stretch, style, fmet, psn, gmet);
-					const int upem = fmet.designUnitsPerEm;
+					std::vector<DWRITE_GLYPH_METRICS> g_met{};
+					DWRITE_FONT_METRICS1 f_met{};
+					pdf_get_font(t, weight, stretch, style, f_met, psn, g_met);
+					const int upem = f_met.designUnitsPerEm;
 
 					// フォント辞書
 					sprintf_s(buf,
@@ -430,8 +445,8 @@ namespace winrt::GraphPaper::implementation
 					// 半角のグリフ幅を設定する
 					// 設定しなければ全て全角幅になってしまう.
 					len += dt_write("/W [1 [", dt_writer);	// CID 開始番号は 1 (半角空白)
-					for (int i = 1; i <= gmet.size(); i++) {
-						sprintf_s(buf, "%u ", 1000 * gmet[i - 1].advanceWidth / upem);
+					for (int i = 1; i <= g_met.size(); i++) {
+						sprintf_s(buf, "%u ", 1000 * g_met[i - 1].advanceWidth / upem);
 						len += dt_write(buf, dt_writer);
 					}
 					len += dt_write("]]\n", dt_writer);
@@ -475,13 +490,13 @@ namespace winrt::GraphPaper::implementation
 						std::data(psn),
 						FONT_STRETCH_NAME[stretch < 10 ? stretch : 0],
 						weight <= 900 ? weight : 900,
-						1000 * fmet.glyphBoxLeft / upem,
-						(1000 * fmet.glyphBoxBottom / upem),
-						1000 * fmet.glyphBoxRight / upem,
-						(1000 * fmet.glyphBoxTop / upem),
-						1000 * fmet.ascent / upem,
-						1000 * fmet.descent / upem,
-						1000 * fmet.capHeight / upem
+						1000 * f_met.glyphBoxLeft / upem,
+						(1000 * f_met.glyphBoxBottom / upem),
+						1000 * f_met.glyphBoxRight / upem,
+						(1000 * f_met.glyphBoxTop / upem),
+						1000 * f_met.ascent / upem,
+						1000 * f_met.descent / upem,
+						1000 * f_met.capHeight / upem
 					);
 					len = dt_write(buf, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
@@ -767,7 +782,7 @@ namespace winrt::GraphPaper::implementation
 				if (unit == LEN_UNIT::INCH) {
 					w = size.width / dpi;
 					h = size.height / dpi;
-					u = L"px";
+					u = L"in";
 				}
 				else if (unit == LEN_UNIT::MILLI) {
 					w = size.width * MM_PER_INCH / dpi;
@@ -783,7 +798,7 @@ namespace winrt::GraphPaper::implementation
 				else {
 					w = size.width;
 					h = size.height;
-					u = L"in";
+					u = L"px";
 				}
 
 				// ピクセル単位の幅と高さを viewBox 属性として書き込む.
