@@ -221,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 		target->SetTransform(&tran);
 		// •`‰æ‚ðŠJŽn‚·‚é.
 		target->BeginDraw();
-		m_main_sheet.draw(m_main_sheet);
+		m_main_sheet.draw();
 		if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			const auto t_draw = m_drawing_tool;
 			if (t_draw == DRAWING_TOOL::SELECT ||

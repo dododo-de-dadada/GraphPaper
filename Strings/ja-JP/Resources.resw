@@ -373,6 +373,14 @@
     <value>終了</value>
     <comment>MenuFlyoutItem</comment>
   </data>
+  <data name="mfi_file_export_to.Text" xml:space="preserve">
+    <value>他の形式でエクスポートする...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="mfi_file_import_image.Text" xml:space="preserve">
+    <value>画像をインポートする...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
   <data name="mfi_fill_color.Text" xml:space="preserve">
     <value>塗りつぶし色...</value>
     <comment>MenuFlyoutItem</comment>

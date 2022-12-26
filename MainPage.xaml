@@ -61,7 +61,7 @@
 						<KeyboardAccelerator Key="I" Modifiers="Control,Shift" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutItem x:Uid="mfi_file_export_as_image" Click="file_export_as_image_click_async" Text="Export Sheet as Image..." >
+				<MenuFlyoutItem x:Uid="mfi_file_export_to" Click="file_export_to_click_async" Text="Export Sheet as Image..." >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_photo2}" />
 					</MenuFlyoutItem.Icon>

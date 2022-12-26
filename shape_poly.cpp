@@ -688,7 +688,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapePoly::draw(ShapeSheet const& sheet)
+	void ShapePoly::draw(void)
 	{
 		ID2D1Factory3* const factory = Shape::s_factory;
 		ID2D1RenderTarget* const taget = Shape::s_target;

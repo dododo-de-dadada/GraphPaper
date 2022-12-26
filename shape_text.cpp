@@ -144,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapeText::draw(ShapeSheet const& sheet)
+	void ShapeText::draw(void)
 	{
 		ID2D1Factory2* const factory = Shape::s_factory;
 		IDWriteFactory* const dw_factory = Shape::s_dw_factory;
@@ -153,7 +153,7 @@ namespace winrt::GraphPaper::implementation
 		ID2D1SolidColorBrush* const range_brush = Shape::s_range_brush;
 
 		// 方形を描く.
-		ShapeRect::draw(sheet);
+		ShapeRect::draw();
 
 		// 文字列が空か判定する.
 		if (m_text == nullptr || m_text[0] == L'\0') {

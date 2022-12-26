@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	// sh	表示する用紙
 	//------------------------------
-	void ShapeGroup::draw(ShapeSheet const& sheet)
+	void ShapeGroup::draw(void)
 	{
 		//ID2D1DeviceContext* const context = sheet.m_d2d.m_d2d_context.get();
 		ID2D1RenderTarget* const context = Shape::s_target;
@@ -30,7 +30,7 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
-				s->draw(sheet);
+				s->draw();
 				s->get_bound(b_min, b_max, b_min, b_max);
 			}
 			context->DrawRectangle(D2D1_RECT_F{ b_min.x, b_min.y, b_max.x, b_max.y }, brush, 1.0f, Shape::m_aux_style.get());
@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
-				s->draw(sheet);
+				s->draw();
 			}
 		}
 	}

@@ -480,8 +480,8 @@ namespace winrt::GraphPaper::implementation
 		// 図形データをストレージファイルに非同期に書き込む.
 		template <bool SUSPEND, bool SETTING>
 		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile gpf_file);
-		// ファイルメニューの「用紙を画像としてエクスポートする」が選択された
-		IAsyncAction file_export_as_image_click_async(IInspectable const&, RoutedEventArgs const&);
+		// ファイルメニューの「他の形式でエクスポートする」が選択された
+		IAsyncAction file_export_to_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 画像用のファイル保存ピッカーを開いて, ストレージファイルを得る.
 		IAsyncOperation<StorageFile> file_pick_save_image_async(const wchar_t sug_name[]);
 
@@ -679,9 +679,6 @@ namespace winrt::GraphPaper::implementation
 		// MainPage_pdf.cpp
 		// PDF
 		//-------------------------------
-
-		// 図形をデータライターに PDF として書き込む.
-		IAsyncOperation<winrt::hresult> pdf_write_async(StorageFile pdf_file);
 
 		//-------------------------------
 		// MainPage_sample.cpp
@@ -910,7 +907,10 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
-		IAsyncOperation<winrt::hresult> svg_write_async(StorageFile s_file);
+		// 図形をデータライターに PDF として書き込む.
+		IAsyncOperation<winrt::hresult> export_to_pdf_async(const StorageFile pdf_file) const noexcept;
+		IAsyncOperation<winrt::hresult> export_to_svg_async(const StorageFile& svg_file) const noexcept;
+		IAsyncOperation<winrt::hresult> export_to_image_async(const StorageFile& image_file) noexcept;
 
 		//-------------------------------
 		//　MainPage_text.cpp

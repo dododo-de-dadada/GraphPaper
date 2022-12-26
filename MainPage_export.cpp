@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <shcore.h>
 #include "MainPage.h"
 #include "zlib.h"
 
@@ -12,7 +13,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Provider::FileUpdateStatus;
 
 	// 文字列図形からフォントの情報を得る.
-	static void pdf_get_font(const ShapeText* s,
+	static void pdf_get_font(
+		const ShapeText* s,
 		DWRITE_FONT_WEIGHT& weight,
 		DWRITE_FONT_STRETCH& stretch,
 		DWRITE_FONT_STYLE& style,
@@ -41,7 +43,8 @@ namespace winrt::GraphPaper::implementation
 					if (static_cast<IDWriteFont3*>(font)->GetFontFaceReference(&ref) == S_OK) {
 						IDWriteFontFace3* face = nullptr;
 						if (ref->CreateFontFace(&face) == S_OK) {
-							static constexpr uint32_t U32[]{
+							// アスキー空白と図形文字 (32-126)
+							static constexpr uint32_t ASCII[]{
 								32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
 								48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
 								64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
@@ -49,11 +52,11 @@ namespace winrt::GraphPaper::implementation
 								96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
 								112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126
 							};
-							static constexpr auto U32_SIZE = std::size(U32);
-							static uint16_t gid[U32_SIZE];
-							winrt::check_hresult(face->GetGlyphIndices(std::data(U32), static_cast<UINT32>(U32_SIZE), std::data(gid)));
-							gmet.resize(U32_SIZE);
-							face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(U32_SIZE), std::data(gmet));
+							static constexpr auto ASCII_SIZE = std::size(ASCII);
+							static uint16_t gid[ASCII_SIZE];
+							winrt::check_hresult(face->GetGlyphIndices(std::data(ASCII), static_cast<UINT32>(ASCII_SIZE), std::data(gid)));
+							gmet.resize(ASCII_SIZE);
+							face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(ASCII_SIZE), std::data(gmet));
 
 							face->Release();
 						}
@@ -104,9 +107,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに PDF として書き込む.
-	IAsyncOperation<winrt::hresult> MainPage::pdf_write_async(StorageFile pdf_file)
+	// PDF フォーマット
+	// https://aznote.jakou.com/prog/pdf/index.html
+	// 詳細PDF入門 ー 実装して学ぼう！PDFファイルの構造とその書き方読み方
+	// https://itchyny.hatenablog.com/entry/2015/09/16/100000
+	// PDFから「使える」テキストを取り出す（第1回）
+	// https://golden-lucky.hatenablog.com/entry/2019/12/01/001701
+	// PDF 構文解説
+	// https://www.pdf-tools.trustss.co.jp/Syntax/parsePdfProc.html#proc
+	// 見て作って学ぶ、PDFファイルの基本構造
+	// https://techracho.bpsinc.jp/west/2018_12_07/65062
+	// グリフとグリフの実行
+	// https://learn.microsoft.com/ja-JP/windows/win32/directwrite/glyphs-and-glyph-runs
+	IAsyncOperation<winrt::hresult> MainPage::export_to_pdf_async(const StorageFile pdf_file) const noexcept
 	{
-		HRESULT hr = S_OK;
+		HRESULT hr = E_FAIL;
 		try {
 			char buf[1024];	// PDF
 
@@ -115,14 +130,10 @@ namespace winrt::GraphPaper::implementation
 			const float w_pt = m_main_sheet.m_sheet_size.width * 72.0f / 96.0f;	// 変換された幅
 			const float h_pt = m_main_sheet.m_sheet_size.height * 72.0f / 96.0f;	// 変換された高さ
 
-			// ファイル更新の遅延を設定する.
-			CachedFileManager::DeferUpdates(pdf_file);
-			// ストレージファイルを開いてランダムアクセスストリームを得る.
+			// ストレージファイルを開いて, ストリームとそのデータライターを得る.
 			const IRandomAccessStream& pdf_stream{
 				co_await pdf_file.OpenAsync(FileAccessMode::ReadWrite)
 			};
-			// ランダムアクセスストリームの先頭からデータライターを作成する.
-			// 必ず先頭を指定する.
 			DataWriter dt_writer{
 				DataWriter(pdf_stream.GetOutputStreamAt(0))
 			};
@@ -272,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
-				len += s->pdf_write(sheet_size, dt_writer);
+				len += s->export_pdf(sheet_size, dt_writer);
 			}
 			len += dt_write(
 				"Q\n"
@@ -352,6 +363,22 @@ namespace winrt::GraphPaper::implementation
 				}
 				else if (typeid(*s) == typeid(ShapeText)) {
 					// フォント辞書 (Type0), CID フォント辞書, フォント詳細辞書
+					// グリフにおける座標値や幅を指定する場合、PDF 内では、常に 1 em = 1000 であるものとして、
+					// 値を設定します。実際のフォントで 1 em = 1024 などとなっている場合は、n / 1024 * 1000 
+					// というようにして、値を 1 em = 1000 に合わせます.
+					// 
+					// PDF の FontBBox (Black Box) のイメージ
+					//     y
+					//     ^
+					//     |
+					//   +-+--------+
+					//   | |   /\   |
+					//   | |  /__\  |
+					//   | | /    \ |
+					// --+-+--------+--> x
+					//   | |        |
+					//   +-+--------+
+					//     |
 					const auto t = static_cast<ShapeText*>(s);
 					int n = t->m_pdf_font_num;
 
@@ -501,11 +528,7 @@ namespace winrt::GraphPaper::implementation
 			co_await dt_writer.StoreAsync();
 			// ストリームをフラッシュする.
 			co_await pdf_stream.FlushAsync();
-			// 遅延させたファイル更新を完了し, 結果を判定する.
-			if (co_await CachedFileManager::CompleteUpdatesAsync(pdf_file) == FileUpdateStatus::Complete) {
-				// 完了した場合, S_OK を結果に格納する.
-				hr = S_OK;
-			}
+			hr = S_OK;
 		}
 		catch (winrt::hresult_error const& e) {
 			hr = e.code();
@@ -518,65 +541,251 @@ namespace winrt::GraphPaper::implementation
 	// svg_file	書き込み先のファイル
 	// 戻り値	書き込めた場合 S_OK
 	//-------------------------------
-	IAsyncOperation<winrt::hresult> MainPage::svg_write_async(StorageFile svg_file)
+	IAsyncOperation<winrt::hresult> MainPage::export_to_image_async(const StorageFile& image_file) noexcept
 	{
-		m_mutex_exit.lock();
+		HRESULT hr = E_FAIL;
 
+		const GUID& wic_fmt = [](const winrt::hstring& c_type)
+		{
+			if (c_type == L"image/bmp") {
+				return GUID_ContainerFormatBmp;
+			}
+			else if (c_type == L"image/gif") {
+				return GUID_ContainerFormatGif;
+			}
+			else if (c_type == L"image/jpeg") {
+				return GUID_ContainerFormatJpeg;
+			}
+			else if (c_type == L"image/png") {
+				return GUID_ContainerFormatPng;
+			}
+			else if (c_type == L"image/tiff") {
+				return GUID_ContainerFormatTiff;
+			}
+			return GUID_NULL;
+		}(image_file.ContentType());
+
+		if (wic_fmt != GUID_NULL) {
+
+			// Direct2D コンテンツを画像ファイルに保存する方法
+			try {
+				// ファイルのランダムアクセスストリーム
+				IRandomAccessStream image_stream{
+					co_await image_file.OpenAsync(FileAccessMode::ReadWrite)
+				};
+
+				// WIC のランダムアクセスストリーム
+				winrt::com_ptr<IStream> wic_stream;
+				winrt::hresult(
+					CreateStreamOverRandomAccessStream(
+						winrt::get_unknown(image_stream),
+						IID_PPV_ARGS(&wic_stream))
+				);
+
+				//winrt::com_ptr<IWICImagingFactory2> wic_factory;
+				//winrt::check_hresult(
+				//	CoCreateInstance(
+				//		CLSID_WICImagingFactory,
+				//		nullptr,
+				//		CLSCTX_INPROC_SERVER,
+				//		IID_PPV_ARGS(&wic_factory)
+				//	)
+				//);
+
+				// Create and initialize WIC Bitmap Encoder.
+				winrt::com_ptr<IWICBitmapEncoder> wic_enc;
+				winrt::check_hresult(
+					ShapeImage::wic_factory->CreateEncoder(
+						wic_fmt, nullptr, wic_enc.put())
+				);
+				winrt::check_hresult(
+					wic_enc->Initialize(
+						wic_stream.get(), WICBitmapEncoderNoCache)
+				);
+
+				// Create and initialize WIC Frame Encoder.
+				winrt::com_ptr<IWICBitmapFrameEncode> wic_frm;
+				winrt::check_hresult(
+					wic_enc->CreateNewFrame(wic_frm.put(), nullptr)
+				);
+				winrt::check_hresult(
+					wic_frm->Initialize(nullptr)
+				);
+
+				// デバイスの作成
+				/*
+				const UINT w = m_main_sheet.m_sheet_size.width;
+				const UINT h = m_main_sheet.m_sheet_size.height;
+				std::vector<uint8_t> mem(4 * w * h);
+				winrt::com_ptr<IWICBitmap> wic_bitmap;
+				ShapeImage::wic_factory->CreateBitmapFromMemory(
+					w, h,
+					GUID_WICPixelFormat32bppBGRA, 4 * w, 4 * w * h, std::data(mem), wic_bitmap.put());
+				D2D1_RENDER_TARGET_PROPERTIES prop{
+					D2D1_RENDER_TARGET_TYPE::D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+					D2D1_PIXEL_FORMAT{
+						DXGI_FORMAT_B8G8R8A8_UNORM,
+						D2D1_ALPHA_MODE_STRAIGHT
+						},
+					96.0f,
+					96.0f,
+					D2D1_RENDER_TARGET_USAGE_FORCE_BITMAP_REMOTING,
+					D2D1_FEATURE_LEVEL_DEFAULT
+				};
+				winrt::com_ptr<ID2D1RenderTarget> target;
+				Shape::s_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
+				*/
+
+				// デバイスとデバイスコンテキストの作成
+				D2D_UI d2d;
+
+				// ビットマップレンダーターゲットの作成
+				const UINT32 sheet_w = static_cast<UINT32>(m_main_sheet.m_sheet_size.width);
+				const UINT32 sheet_h = static_cast<UINT32>(m_main_sheet.m_sheet_size.height);
+				winrt::com_ptr<ID2D1BitmapRenderTarget> target;
+				winrt::check_hresult(
+					d2d.m_d2d_context->CreateCompatibleRenderTarget(
+						m_main_sheet.m_sheet_size,
+						D2D_SIZE_U{ sheet_w, sheet_h },
+						D2D1_PIXEL_FORMAT{
+							DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
+							D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_PREMULTIPLIED,
+						},
+						D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS::D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE,
+						target.put()
+						)
+				);
+
+				// レンダーターゲット依存のオブジェクトを消去
+				for (const auto s : m_main_sheet.m_shape_list) {
+					if (typeid(*s) == typeid(ShapeImage)) {
+						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
+					}
+				}
+
+				winrt::com_ptr<ID2D1SolidColorBrush> cb;
+				winrt::com_ptr<ID2D1SolidColorBrush> rb;
+				winrt::check_hresult(
+					target->CreateSolidColorBrush(D2D1_COLOR_F{}, cb.put())
+				);
+				winrt::check_hresult(
+					target->CreateSolidColorBrush(D2D1_COLOR_F{}, rb.put())
+				);
+				Shape::s_target = target.get();
+				Shape::s_color_brush = cb.get();
+				Shape::s_range_brush = rb.get();
+
+				// ビットマップへの描画
+				m_mutex_draw.lock();
+				Shape::s_target->SaveDrawingState(m_main_sheet.m_state_block.get());
+				Shape::s_target->BeginDraw();
+				m_main_sheet.draw();
+				winrt::check_hresult(
+					Shape::s_target->EndDraw()
+				);
+				Shape::s_target->RestoreDrawingState(m_main_sheet.m_state_block.get());
+				m_mutex_draw.unlock();
+
+				// レンダーターゲット依存のオブジェクトを消去
+				for (const auto s : m_main_sheet.m_shape_list) {
+					if (typeid(*s) == typeid(ShapeImage)) {
+						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
+					}
+				}
+
+				// Retrieve D2D Device.
+				winrt::com_ptr<ID2D1Device> dev;
+				d2d.m_d2d_context->GetDevice(dev.put());
+
+				// IWICImageEncoder を使用して Direct2D コンテンツを書き込む
+				winrt::com_ptr<IWICImageEncoder> image_enc;
+				winrt::check_hresult(
+					ShapeImage::wic_factory->CreateImageEncoder(
+						dev.get(), image_enc.put())
+				);
+				winrt::com_ptr<ID2D1Bitmap> d2d_image;
+				winrt::check_hresult(
+					target->GetBitmap(d2d_image.put())
+				);
+				winrt::check_hresult(
+					image_enc->WriteFrame(d2d_image.get(), wic_frm.get(), nullptr)
+				);
+				winrt::check_hresult(
+					wic_frm->Commit()
+				);
+				winrt::check_hresult(
+					wic_enc->Commit()
+				);
+				// Flush all memory buffers to the next-level storage object.
+				winrt::check_hresult(
+					wic_stream->Commit(STGC_DEFAULT)
+				);
+
+				d2d.Trim();
+				hr = S_OK;
+			}
+			catch (const winrt::hresult_error& e) {
+				hr = e.code();
+			}
+		}
+		co_return hr;
+	}
+
+	//-------------------------------
+	// 図形データを SVG としてストレージファイルに非同期に書き込む.
+	// svg_file	書き込み先のファイル
+	// 戻り値	書き込めた場合 S_OK
+	//-------------------------------
+	IAsyncOperation<winrt::hresult> MainPage::export_to_svg_async(const StorageFile& svg_file) const noexcept
+	{
 		HRESULT hr = E_FAIL;
 		try {
-			// ファイル更新の遅延を設定する.
-			CachedFileManager::DeferUpdates(svg_file);
-			// ストレージファイルを開いてランダムアクセスストリームを得る.
+			// ストレージファイルを開いて, ストリームとそのデータライターを得る.
 			const IRandomAccessStream& svg_stream{
 				co_await svg_file.OpenAsync(FileAccessMode::ReadWrite)
 			};
-			// ランダムアクセスストリームの先頭からデータライターを作成する.
 			DataWriter dt_writer{
 				DataWriter(svg_stream.GetOutputStreamAt(0))
 			};
-			// XML 宣言を書き込む.
-			dt_writer.WriteString(L"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
-			// DOCTYPE を書き込む.
-			dt_writer.WriteString(L"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
+			// XML 宣言と DOCTYPE を書き込む.
+			dt_writer.WriteString(
+				L"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
+				L"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
+				L"\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
 			// SVG 開始タグを書き込む.
 			{
 				const auto size = m_main_sheet.m_sheet_size;	// 用紙の大きさ
 				const auto unit = m_len_unit;	// 長さの単位
 				const auto dpi = m_main_d2d.m_logical_dpi;	// 論理 DPI
 				const auto color = m_main_sheet.m_sheet_color;	// 背景色
-				constexpr wchar_t* SVG_UNIT_PX = L"px";
-				constexpr wchar_t* SVG_UNIT_IN = L"in";
-				constexpr wchar_t* SVG_UNIT_MM = L"mm";
-				constexpr wchar_t* SVG_UNIT_PT = L"pt";
 
 				// 単位付きで幅と高さの属性を書き込む.
-				wchar_t buf[1024];
+				wchar_t buf[1024];	// 出力バッファ
 				double w;	// 単位変換後の幅
 				double h;	// 単位変換後の高さ
 				wchar_t* u;	// 単位
 				if (unit == LEN_UNIT::INCH) {
 					w = size.width / dpi;
 					h = size.height / dpi;
-					u = SVG_UNIT_IN;
+					u = L"px";
 				}
 				else if (unit == LEN_UNIT::MILLI) {
 					w = size.width * MM_PER_INCH / dpi;
 					h = size.height * MM_PER_INCH / dpi;
-					u = SVG_UNIT_MM;
+					u = L"mm";
 				}
 				else if (unit == LEN_UNIT::POINT) {
 					w = size.width * PT_PER_INCH / dpi;
 					h = size.height * PT_PER_INCH / dpi;
-					u = SVG_UNIT_PT;
+					u = L"pt";
 				}
 				// SVG で使用できる上記の単位以外はすべてピクセル.
 				else {
 					w = size.width;
 					h = size.height;
-					u = SVG_UNIT_PX;
+					u = L"in";
 				}
 
-				// SVG タグの開始を書き込む.
 				// ピクセル単位の幅と高さを viewBox 属性として書き込む.
 				// 背景色をスタイル属性として書き込む.
 				// svg 開始タグの終了を書き込む.
@@ -600,14 +809,14 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				if (typeid(*s) == typeid(ShapeGroup)) {
-					co_await static_cast<const ShapeGroup*>(s)->svg_write_async(dt_writer);
+					co_await static_cast<const ShapeGroup*>(s)->export_to_svg_async(dt_writer);
 				}
 				// 図形が画像か判定する.
 				else if (typeid(*s) == typeid(ShapeImage)) {
-					co_await static_cast<const ShapeImage*>(s)->svg_write_async(dt_writer);
+					co_await static_cast<const ShapeImage*>(s)->export_to_svg_async(dt_writer);
 				}
 				else {
-					s->svg_write(dt_writer);
+					s->export_svg(dt_writer);
 				}
 			}
 			// SVG 終了タグを書き込む.
@@ -618,27 +827,12 @@ namespace winrt::GraphPaper::implementation
 			co_await dt_writer.StoreAsync();
 			// ストリームをフラッシュする.
 			co_await svg_stream.FlushAsync();
-			// 遅延させたファイル更新を完了し, 結果を判定する.
-			if (co_await CachedFileManager::CompleteUpdatesAsync(svg_file) == FileUpdateStatus::Complete) {
-				// 完了した場合, S_OK を結果に格納する.
-				hr = S_OK;
-			}
+			hr = S_OK;
 		}
 		catch (winrt::hresult_error const& e) {
 			// エラーが発生した場合, エラーコードを結果に格納する.
 			hr = e.code();
 		}
-		// 結果が S_OK 以外か判定する.
-		if (hr != S_OK) {
-			// スレッドをメインページの UI スレッドに変える.
-//			co_await winrt::resume_foreground(Dispatcher());
-			// 「ファイルに書き込めません」メッセージダイアログを表示する.
-			message_show(ICON_ALERT, RES_ERR_WRITE, svg_file.Path());
-		}
-		// スレッドコンテキストを復元する.
-//		co_await context;
-		m_mutex_exit.unlock();
-		// 結果を返し終了する.
 		co_return hr;
 	}
 

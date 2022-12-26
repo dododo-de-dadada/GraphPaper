@@ -52,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapeRRect::draw(ShapeSheet const& sheet)
+	void ShapeRRect::draw(void)
 	{
 		ID2D1Factory* const factory = Shape::s_factory;
 		ID2D1RenderTarget* const target = Shape::s_target;

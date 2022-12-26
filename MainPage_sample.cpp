@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 		const float offset = static_cast<FLOAT>(std::fmod(m_prop_sheet.m_sheet_size.width * 0.5, m_prop_sheet.m_grid_base + 1.0));
 		m_prop_sheet.m_grid_offset.x = offset;
 		m_prop_sheet.m_grid_offset.y = offset;
-		m_prop_sheet.draw(m_prop_sheet);
+		m_prop_sheet.draw();
 		m_prop_d2d.m_d2d_context->EndDraw();
 		m_prop_d2d.m_d2d_context->RestoreDrawingState(m_prop_sheet.m_state_block.get());
 		m_prop_d2d.Present();

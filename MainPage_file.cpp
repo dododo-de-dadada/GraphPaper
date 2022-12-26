@@ -4,7 +4,6 @@
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
-#include <shcore.h>
 
 using namespace winrt;
 /*
@@ -17,7 +16,7 @@ file_confirm_dialog
 file_exit_click_async
 	+---file_confirm_dialog
 
-file_export_as_image_click_async
+file_export_to_click_async
 	+---file_pick_save_image_async
 
 file_finish_reading
@@ -57,7 +56,6 @@ file_recent_menu_update
 file_save_as_click_async
 	+---file_recent_token_async
 	+---file_wait_cursor
-	+---svg_write_async
 	+---file_write_gpf_async
 
 file_save_click_async
@@ -69,7 +67,7 @@ file_save_click_async
 file_write_gpf_async
 	+---file_recent_add
 
-svg_write_async
+export_as_svg_async
 	+---file_pick_save_image_async
 
 */
@@ -339,7 +337,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// ファイルメニューの「用紙を画像としてエクスポートする」が選択された
 	//------------------------------
-	IAsyncAction MainPage::file_export_as_image_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::file_export_to_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_mutex_event.lock();
 
@@ -393,183 +391,38 @@ namespace winrt::GraphPaper::implementation
 		};
 
 		if (image_file != nullptr) {
+			// 待機カーソルを表示, 表示する前のカーソルを得る.
+			const CoreCursor& prev_cur = file_wait_cursor();
+			HRESULT hr;
+			// ファイル更新の遅延を設定する.
+			CachedFileManager::DeferUpdates(image_file);
+
 			if (image_file.ContentType() == L"image/svg+xml") {
-				co_await svg_write_async(image_file);
+				hr = co_await export_to_svg_async(image_file);
 			}
 			else if (image_file.ContentType() == L"application/pdf") {
-				co_await pdf_write_async(image_file);
+				hr = co_await export_to_pdf_async(image_file);
 			}
 			else {
-				const GUID& wic_fmt = [](const winrt::hstring& c_type)
-				{
-					if (c_type == L"image/bmp") {
-						return GUID_ContainerFormatBmp;
-					}
-					else if (c_type == L"image/gif") {
-						return GUID_ContainerFormatGif;
-					}
-					else if (c_type == L"image/jpeg") {
-						return GUID_ContainerFormatJpeg;
-					}
-					else if (c_type == L"image/png") {
-						return GUID_ContainerFormatPng;
-					}
-					else if (c_type == L"image/tiff") {
-						return GUID_ContainerFormatTiff;
-					}
-					return GUID_NULL;
-				}(image_file.ContentType());
-
-				if (wic_fmt != GUID_NULL) {
-
-					// Direct2D コンテンツを画像ファイルに保存する方法
-
-					// ファイルのランダムアクセスストリーム
-					IRandomAccessStream image_stream{
-						co_await image_file.OpenAsync(FileAccessMode::ReadWrite)
-					};
-
-					// WIC のランダムアクセスストリーム
-					winrt::com_ptr<IStream> wic_stream;
-					winrt::hresult(
-						CreateStreamOverRandomAccessStream(
-							winrt::get_unknown(image_stream),
-							IID_PPV_ARGS(&wic_stream))
-					);
-
-					//winrt::com_ptr<IWICImagingFactory2> wic_factory;
-					//winrt::check_hresult(
-					//	CoCreateInstance(
-					//		CLSID_WICImagingFactory,
-					//		nullptr,
-					//		CLSCTX_INPROC_SERVER,
-					//		IID_PPV_ARGS(&wic_factory)
-					//	)
-					//);
-
-					// Create and initialize WIC Bitmap Encoder.
-					winrt::com_ptr<IWICBitmapEncoder> wic_enc;
-					winrt::check_hresult(
-						ShapeImage::wic_factory->CreateEncoder(
-							wic_fmt, nullptr, wic_enc.put())
-					);
-					winrt::check_hresult(
-						wic_enc->Initialize(
-							wic_stream.get(), WICBitmapEncoderNoCache)
-					);
-
-					// Create and initialize WIC Frame Encoder.
-					winrt::com_ptr<IWICBitmapFrameEncode> wic_frm;
-					winrt::check_hresult(
-						wic_enc->CreateNewFrame(wic_frm.put(), nullptr)
-					);
-					winrt::check_hresult(
-						wic_frm->Initialize(nullptr)
-					);
-
-					// デバイスの作成
-					/*
-					const UINT w = m_main_sheet.m_sheet_size.width;
-					const UINT h = m_main_sheet.m_sheet_size.height;
-					std::vector<uint8_t> mem(4 * w * h);
-					winrt::com_ptr<IWICBitmap> wic_bitmap;
-					ShapeImage::wic_factory->CreateBitmapFromMemory(
-						w, h,
-						GUID_WICPixelFormat32bppBGRA, 4 * w, 4 * w * h, std::data(mem), wic_bitmap.put());
-					D2D1_RENDER_TARGET_PROPERTIES prop{
-						D2D1_RENDER_TARGET_TYPE::D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-						D2D1_PIXEL_FORMAT{
-							DXGI_FORMAT_B8G8R8A8_UNORM,
-							D2D1_ALPHA_MODE_STRAIGHT
-							},
-						96.0f,
-						96.0f,
-						D2D1_RENDER_TARGET_USAGE_FORCE_BITMAP_REMOTING,
-						D2D1_FEATURE_LEVEL_DEFAULT
-					};
-					winrt::com_ptr<ID2D1RenderTarget> target;
-					Shape::s_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
-					*/
-
-					// デバイスとデバイスコンテキストの作成
-					D2D_UI d2d;
-
-					// ビットマップレンダーターゲットの作成
-					const UINT32 sheet_w = static_cast<UINT32>(m_main_sheet.m_sheet_size.width);
-					const UINT32 sheet_h = static_cast<UINT32>(m_main_sheet.m_sheet_size.height);
-					winrt::com_ptr<ID2D1BitmapRenderTarget> target;
-					auto res = d2d.m_d2d_context->CreateCompatibleRenderTarget(
-						m_main_sheet.m_sheet_size,
-						D2D_SIZE_U{ sheet_w, sheet_h },
-						D2D1_PIXEL_FORMAT{
-							DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
-							D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_PREMULTIPLIED,
-						},
-						D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS::D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE,
-						target.put()
-						);
-
-					// レンダーターゲット依存のオブジェクトを消去
-					for (const auto s : m_main_sheet.m_shape_list) {
-						if (typeid(*s) == typeid(ShapeImage)) {
-							static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
-						}
-					}
-
-					winrt::com_ptr<ID2D1SolidColorBrush> cb;
-					winrt::com_ptr<ID2D1SolidColorBrush> rb;
-					target->CreateSolidColorBrush(D2D1_COLOR_F{}, cb.put());
-					target->CreateSolidColorBrush(D2D1_COLOR_F{}, rb.put());
-
-					Shape::s_target = target.get();
-					Shape::s_color_brush = cb.get();
-					Shape::s_range_brush = rb.get();
-
-					// ビットマップへの描画
-					m_mutex_draw.lock();
-					Shape::s_target->SaveDrawingState(m_main_sheet.m_state_block.get());
-					Shape::s_target->BeginDraw();
-					m_main_sheet.draw(m_main_sheet);
-					HRESULT hr = Shape::s_target->EndDraw();
-					Shape::s_target->RestoreDrawingState(m_main_sheet.m_state_block.get());
-					m_mutex_draw.unlock();
-
-					for (const auto s : m_main_sheet.m_shape_list) {
-						if (typeid(*s) == typeid(ShapeImage)) {
-							static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
-						}
-					}
-
-					// Retrieve D2D Device.
-					winrt::com_ptr<ID2D1Device> dev;
-					d2d.m_d2d_context->GetDevice(dev.put());
-
-					// IWICImageEncoder を使用して Direct2D コンテンツを書き込む
-					winrt::com_ptr<IWICImageEncoder> image_enc;
-					winrt::check_hresult(
-						ShapeImage::wic_factory->CreateImageEncoder(
-							dev.get(), image_enc.put())
-					);
-					winrt::com_ptr<ID2D1Bitmap> d2d_image;
-					target->GetBitmap(d2d_image.put());
-					winrt::check_hresult(
-						image_enc->WriteFrame(d2d_image.get(), wic_frm.get(), nullptr)
-					);
-
-					winrt::check_hresult(
-						wic_frm->Commit()
-					);
-					winrt::check_hresult(
-						wic_enc->Commit()
-					);
-					// Flush all memory buffers to the next-level storage object.
-					winrt::check_hresult(
-						wic_stream->Commit(STGC_DEFAULT)
-					);
-
-					d2d.Trim();
-				}
+				hr = co_await export_to_image_async(image_file);
 			}
+			// 遅延させたファイル更新を完了し, 結果を判定する.
+			if (co_await CachedFileManager::CompleteUpdatesAsync(image_file) != 
+				FileUpdateStatus::Complete) {
+				// 完了しなかったなら E_FAIL.
+				hr = E_FAIL;
+			}
+
+			// カーソルを元に戻す.
+			Window::Current().CoreWindow().PointerCursor(prev_cur);
+			// 結果が S_OK 以外か判定する.
+			if (hr != S_OK) {
+				// スレッドをメインページの UI スレッドに変える.
+	//			co_await winrt::resume_foreground(Dispatcher());
+				// 「ファイルに書き込めません」メッセージダイアログを表示する.
+				message_show(ICON_ALERT, RES_ERR_WRITE, image_file.Path());
+			}
+
 		}
 		m_mutex_event.unlock();
 	}
@@ -925,10 +778,10 @@ namespace winrt::GraphPaper::implementation
 				// 待機カーソルを表示, 表示する前のカーソルを得る.
 				const CoreCursor& prev_cur = file_wait_cursor();
 				co_await file_read_async<false, false>(s_file);
-				// カーソルを元に戻す.
-				Window::Current().CoreWindow().PointerCursor(prev_cur);
 				// ストレージファイルを破棄する.
 				s_file = nullptr;
+				// カーソルを元に戻す.
+				Window::Current().CoreWindow().PointerCursor(prev_cur);
 			}
 			else {
 				// 取得できないならば,
@@ -1006,16 +859,7 @@ namespace winrt::GraphPaper::implementation
 				ResourceLoader::GetForCurrentView().GetString(RES_DESC_GPF)
 			};
 			save_picker.FileTypeChoices().Insert(desc_gpf, TYPE_GPF);
-			/*
-			const winrt::hstring desc_svg{
-				ResourceLoader::GetForCurrentView().GetString(RES_DESC_SVG)
-			};
-			save_picker.FileTypeChoices().Insert(desc_svg, TYPE_SVG);
-			const winrt::hstring desc_pdf{
-				ResourceLoader::GetForCurrentView().GetString(RES_DESC_PDF)
-			};
-			save_picker.FileTypeChoices().Insert(desc_pdf, TYPE_PDF);
-			*/
+
 			// ドキュメントライブラリーを保管場所に設定する.
 			const PickerLocationId loc_id = PickerLocationId::DocumentsLibrary;
 			save_picker.SuggestedStartLocation(loc_id);
@@ -1050,23 +894,16 @@ namespace winrt::GraphPaper::implementation
 			if (save_file != nullptr) {
 				// 待機カーソルを表示, 表示する前のカーソルを得る.
 				const CoreCursor& prev_cur = file_wait_cursor();
-				// ファイルタイプが SVG か判定する.
+				// ファイルタイプが方眼紙ファイルか判定する.
 				const auto f_type = save_file.FileType();
-				if (f_type == FILE_EXT_SVG) {
-					// 図形データを SVG としてストレージファイルに非同期に書き込み, 結果を得る.
-					hr = co_await svg_write_async(save_file);
-				}
-				else if (f_type == FILE_EXT_GPF) {
+				if (f_type == FILE_EXT_GPF) {
 					// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
 					hr = co_await file_write_gpf_async<false, false>(save_file);
 				}
-				else if (f_type == FILE_EXT_PDF) {
-					hr = co_await pdf_write_async(save_file);
-				}
-				// カーソルを元に戻す.
-				Window::Current().CoreWindow().PointerCursor(prev_cur);
 				// ストレージファイルを破棄する.
 				save_file = nullptr;
+				// カーソルを元に戻す.
+				Window::Current().CoreWindow().PointerCursor(prev_cur);
 			}
 			else {
 				// ファイル保存ピッカーでキャンセルが押された.

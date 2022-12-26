@@ -124,7 +124,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapeRuler::draw(ShapeSheet const& sheet)
+	void ShapeRuler::draw(void)
 	{
 		ID2D1Factory* const factory = Shape::s_factory;
 		IDWriteFactory* const dw_factory = Shape::s_dw_factory;

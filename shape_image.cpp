@@ -131,7 +131,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapeImage::draw(ShapeSheet const& sheet)
+	void ShapeImage::draw(void)
 	{
 		ID2D1RenderTarget* const target = Shape::s_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;

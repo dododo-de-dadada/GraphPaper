@@ -250,7 +250,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を表示する.
 	// sh	表示する用紙
-	void ShapeSheet::draw(ShapeSheet const& sheet)
+	void ShapeSheet::draw(void)
 	{
 		ID2D1RenderTarget* const target = Shape::s_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
@@ -273,7 +273,7 @@ namespace winrt::GraphPaper::implementation
 		for (auto s : m_shape_list) {
 			if (!s->is_deleted()) {
 				// 図形を表示する.
-				s->draw(sheet);
+				s->draw();
 			}
 		}
 		if (m_grid_show == GRID_SHOW::FRONT) {

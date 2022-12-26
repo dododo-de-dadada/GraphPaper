@@ -377,6 +377,14 @@
     <value>Fill Color...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
+  <data name="mfi_file_export_to.Text" xml:space="preserve">
+    <value>Export to...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+  <data name="mfi_file_import_image.Text" xml:space="preserve">
+    <value>Import image...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
   <data name="mfi_find_text.Text" xml:space="preserve">
     <value>Find/Replace Text...</value>
     <comment>MenuFlyoutItem</comment>
