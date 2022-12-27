@@ -69,15 +69,15 @@ namespace winrt::GraphPaper::implementation
 		return slist_next(slist.rbegin(), slist.rend(), _);
 	}
 
-	// 図形と用紙を囲む領域を得る.
+	// 図形と表示を囲む領域を得る.
 	// slist	図形リスト
-	// s_size	用紙の寸法
+	// page_size	表示の大きさ
 	// b_min	領域の左上位置
 	// b_max	領域の右下位置
-	void slist_bound_sheet(SHAPE_LIST const& slist, const D2D1_SIZE_F s_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	void slist_bound_view(SHAPE_LIST const& slist, const D2D1_SIZE_F page_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
 	{
 		b_min = { 0.0F, 0.0F };	// 左上位置
-		b_max = { s_size.width, s_size.height };	// 右下位置
+		b_max = { page_size.width, page_size.height };	// 右下位置
 		for (const Shape* s : slist) {
 			if (s->is_deleted()) {
 				continue;
@@ -279,12 +279,12 @@ namespace winrt::GraphPaper::implementation
 			//	continue;
 			//}
 			const uint32_t anc = t->hit_test(t_pos);
-			if (anc != ANC_TYPE::ANC_SHEET) {
+			if (anc != ANC_TYPE::ANC_VIEW) {
 				s = t;
 				return anc;
 			}
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	// 図形を挿入する.

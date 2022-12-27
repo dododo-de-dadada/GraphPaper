@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 	// 画像メニューの「原画像に戻す」が選択された.
 	void MainPage::image_revert_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		for (Shape* const s : m_main_sheet.m_shape_list) {
+		for (Shape* const s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeImage)) {
 				continue;
 			}
@@ -37,46 +37,46 @@ namespace winrt::GraphPaper::implementation
 			static_cast<ShapeImage*>(s)->revert();
 		}
 		ustack_push_null();
-		sheet_panle_size();
-		sheet_draw();
+		page_panel_size();
+		page_draw();
 	}
 
 	// 画像メニューの「不透明度...」が選択された.
 	IAsyncAction MainPage::image_opac_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_prop_sheet.set_attr_to(&m_main_sheet);
-		const auto val = m_prop_sheet.m_image_opac * COLOR_MAX;
-		prop_slider_0().Maximum(255.0);
-		prop_slider_0().TickFrequency(1.0);
-		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_0().Value(val);
+		m_dialog_page.set_attr_to(&m_main_page);
+		const auto val = m_dialog_page.m_image_opac * COLOR_MAX;
+		dialog_slider_0().Maximum(255.0);
+		dialog_slider_0().TickFrequency(1.0);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(val);
 		image_slider_set_header<UNDO_OP::IMAGE_OPAC, 0>(val);
-		prop_check_box().IsChecked(m_prop_sheet.m_image_opac_importing);
+		dialog_check_box().IsChecked(m_dialog_page.m_image_opac_importing);
 
-		prop_slider_0().Visibility(Visibility::Visible);
-		prop_check_box().Visibility(Visibility::Visible);
-		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::image_slider_val_changed<UNDO_OP::IMAGE_OPAC, 0> });
+		dialog_slider_0().Visibility(Visibility::Visible);
+		dialog_check_box().Visibility(Visibility::Visible);
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::image_slider_val_changed<UNDO_OP::IMAGE_OPAC, 0> });
 
-		prop_image_load_async(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()));
+		dialog_image_load_async(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()));
 
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
-			m_prop_sheet.m_shape_list.back()->get_image_opacity(samp_val);
-			ustack_push_set<UNDO_OP::IMAGE_OPAC>(&m_main_sheet, samp_val);
+			m_dialog_page.m_shape_list.back()->get_image_opacity(samp_val);
+			ustack_push_set<UNDO_OP::IMAGE_OPAC>(&m_main_page, samp_val);
 			if (ustack_push_set<UNDO_OP::IMAGE_OPAC>(samp_val)) {
 				ustack_push_null();
 				ustack_is_enable();
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 		}
-		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(Visibility::Collapsed);
-		prop_slider_0().ValueChanged(slider_0_token);
-		prop_check_box().Visibility(Visibility::Collapsed);
-		sheet_draw();
+		slist_clear(m_dialog_page.m_shape_list);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_0().ValueChanged(slider_0_token);
+		dialog_check_box().Visibility(Visibility::Collapsed);
+		page_draw();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 			conv_col_to_str(m_color_code, val, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(R) + L": " + buf;
 		}
-		prop_set_slider_header<S>(text);
+		dialog_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.
@@ -110,11 +110,11 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				const float val = static_cast<float>(args.NewValue());
 				image_slider_set_header<U, S>(val);
-				m_prop_sheet.m_shape_list.back()->set_image_opacity(val / COLOR_MAX);
+				m_dialog_page.m_shape_list.back()->set_image_opacity(val / COLOR_MAX);
 			}
 		}
-		if (scp_prop_panel().IsLoaded()) {
-			prop_sample_draw();
+		if (scp_dialog_panel().IsLoaded()) {
+			dialog_draw();
 		}
 	}
 

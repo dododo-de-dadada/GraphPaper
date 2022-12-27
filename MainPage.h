@@ -31,10 +31,10 @@
 // NainPage_join.cpp	線分の結合
 // MainPage_misc.cpp	長さの単位, 色の表記, ステータスバー, 頂点をくっつける閾値
 // MainPage_order.cpp	並び替え
-// MainPage_prop.cpp	属性
+// MainPage_prop.cpp	設定
 // MainPage_scroll.cpp	スクロールバー
 // MainPage_select.cpp	図形の選択
-// MainPage_sheet.cpp	用紙の属性, 表示倍率, 設定の保存とリセット
+// MainPage_sheet.cpp	ページの設定の保存とリセット
 // MainPage_status.cpp	ステータスバー
 // MainPage_stroke.cpp	線枠
 // MainPage_summary.cpp	図形の一覧
@@ -86,10 +86,9 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto ICON_INFO = L"glyph_info";	// 情報アイコンの静的リソースのキー
 	constexpr auto ICON_ALERT = L"glyph_block";	// 警告アイコンの静的リソースのキー
 	constexpr auto ICON_DEBUG = L"\uEBE8";	// デバッグアイコン
-	constexpr wchar_t RES_ERR_WRITE[] = L"str_err_write";	// 書き込みエラーメッセージのリソース名
 	constexpr auto VERT_STICK_DEF_VAL = 2.0f * 6.0f;	// 頂点をくっつける閾値の既定値
-	constexpr auto SHEET_SIZE_DEF_VAL = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// 用紙寸法の既定値 (ピクセル)
-
+	constexpr auto PAGE_SIZE_DEF_VAL = D2D1_SIZE_F{ 8.0F * 96.0F, 11.0F * 96.0F };	// ページの大きさの既定値 (ピクセル)
+	constexpr wchar_t PAGE_SETTING[] = L"page_setting.dat";	// ページ設定を格納するファイル名
 	//-------------------------------
 	// 色の表記
 	//-------------------------------
@@ -192,6 +191,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// 属性の型
 	//-------------------------------
+	/*
 	enum struct PROP_TYPE {
 		NONE,	// なし
 		IMAGE,	// 画像
@@ -201,6 +201,7 @@ namespace winrt::GraphPaper::implementation
 		MISC,	// その他
 		STROKE	// 線枠
 	};
+	*/
 
 	//-------------------------------
 	// ステータスバーの状態
@@ -209,7 +210,7 @@ namespace winrt::GraphPaper::implementation
 		POS = (1 | 2),	// カーソルの位置
 		DRAW = 4,	// 作図ツール
 		GRID = 8,	// 方眼の大きさ
-		SHEET = (16 | 32),	// 用紙の大きさ
+		PAGE = (16 | 32),	// ページの大きさ
 		UNIT = 64,	// 単位名
 		ZOOM = 128,	// 拡大率
 	};
@@ -242,7 +243,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
 		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };	// ポインターの前回位置
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターの押された状態
-		uint32_t m_event_anc_pressed = ANC_TYPE::ANC_SHEET;	// ポインターが押された図形の部位
+		uint32_t m_event_anc_pressed = ANC_TYPE::ANC_VIEW;	// ポインターが押された図形の部位
 		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された位置
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
 		Shape* m_event_shape_prev = nullptr;	// 前回ポインターが押された図形
@@ -260,15 +261,15 @@ namespace winrt::GraphPaper::implementation
 		// 図形
 		bool m_image_keep_aspect = true;	// 画像の縦横比の維持
 
-		// メイン用紙
-		ShapeSheet m_main_sheet;	// メインの用紙
+		// メインページ
+		ShapePage m_main_page;	// メインページ
 		D2D_UI m_main_d2d;	// 描画環境
-		D2D1_POINT_2F m_main_min{ 0.0F, 0.0F };	// 用紙の左上位置 (値がマイナスのときは, 図形が用紙の外側にある)
-		D2D1_POINT_2F m_main_max{ 0.0F, 0.0F };	// 用紙の右下位置 (値が用紙の大きさより大きいときは, 図形が用紙の外側にある)
+		D2D1_POINT_2F m_main_min{ 0.0F, 0.0F };	// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_main_max{ 0.0F, 0.0F };	// ページの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
 
-		// 属性用紙
-		ShapeSheet m_prop_sheet;	// 属性の用紙
-		D2D_UI m_prop_d2d;	// 描画環境
+		// 設定ページ
+		ShapePage m_dialog_page;	// ダイアログページ
+		D2D_UI m_dialog_d2d;	// 描画環境
 
 		// 元に戻す・やり直し操作
 		uint32_t m_ustack_rcnt = 0;	// やり直し操作スタックに積まれた組数
@@ -292,7 +293,7 @@ namespace winrt::GraphPaper::implementation
 		MenuFlyout m_menu_stroke{ nullptr };	// 線枠コンテキストメニュー
 		MenuFlyout m_menu_fill{ nullptr };	// 塗りつぶしコンテキストメニュー
 		MenuFlyout m_menu_font{ nullptr };	// 書体コンテキストメニュー
-		MenuFlyout m_menu_sheet{ nullptr };	// 用紙コンテキストメニュー
+		MenuFlyout m_menu_page{ nullptr };	// ページコンテキストメニュー
 		MenuFlyout m_menu_ungroup{ nullptr };	// グループ解除コンテキストメニュー
 		MenuFlyout m_menu_ruler{ nullptr };	// 定規コンテキストメニュー
 		MenuFlyout m_menu_image{ nullptr };	// 画像コンテキストメニュー
@@ -326,8 +327,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		// ファイルメニューの「新規」が選択された
 		IAsyncAction file_new_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙のスワップチェーンパネルのロードが始まった.
-		void sheet_panel_loading(IInspectable const& sender, IInspectable const&);
+		// ページのスワップチェーンパネルのロードが始まった.
+		void page_panel_loading(IInspectable const& sender, IInspectable const&);
 
 		//-------------------------------
 		// MainPage_app.cpp
@@ -467,7 +468,7 @@ namespace winrt::GraphPaper::implementation
 		// ファイルメニューの「上書き保存」が選択された
 		IAsyncAction file_save_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// ストレージファイルを非同期に読む.
-		template <bool RESUME, bool SETTING>
+		template <bool RESUME, bool SETTING_ONLY>
 		IAsyncOperation<winrt::hresult> file_read_async(StorageFile s_file) noexcept;
 		// ファイルメニューの「最近使ったファイル 」のサブ項目が選択された
 		IAsyncAction file_recent_click_async(IInspectable const&, RoutedEventArgs const&);
@@ -480,10 +481,8 @@ namespace winrt::GraphPaper::implementation
 		// 図形データをストレージファイルに非同期に書き込む.
 		template <bool SUSPEND, bool SETTING>
 		IAsyncOperation<winrt::hresult> file_write_gpf_async(StorageFile gpf_file);
-		// ファイルメニューの「他の形式でエクスポートする」が選択された
-		IAsyncAction file_export_to_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 画像用のファイル保存ピッカーを開いて, ストレージファイルを得る.
-		IAsyncOperation<StorageFile> file_pick_save_image_async(const wchar_t sug_name[]);
+		// ファイルメニューの「他の形式としてエクスポートする」が選択された
+		IAsyncAction file_export_as_click_async(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_fill.cpp
@@ -554,23 +553,23 @@ namespace winrt::GraphPaper::implementation
 		// 方眼
 		//-------------------------------
 
-		// 用紙メニューの「方眼の強調」に印をつける.
+		// 方眼メニューの「方眼の強調」に印をつける.
 		void grid_emph_is_checked(const GRID_EMPH& g_emph);
-		// 用紙メニューの「方眼の表示」に印をつける.
+		// 方眼メニューの「方眼の表示」に印をつける.
 		void grid_show_is_checked(const GRID_SHOW g_show);
-		// 用紙メニューの「方眼の大きさ」>「大きさ」が選択された.
+		// 方眼メニューの「方眼の大きさ」>「大きさ」が選択された.
 		IAsyncAction grid_len_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の大きさ」>「狭める」が選択された.
+		// 方眼メニューの「方眼の大きさ」>「狭める」が選択された.
 		void grid_len_con_click(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の大きさ」>「広げる」が選択された.
+		// 方眼メニューの「方眼の大きさ」>「広げる」が選択された.
 		void grid_len_exp_click(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の色」が選択された.
+		// 方眼メニューの「方眼の色」が選択された.
 		IAsyncAction grid_color_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の強調」が選択された.
+		// 方眼メニューの「方眼の強調」が選択された.
 		void grid_emph_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 用紙メニューの「方眼の表示」が選択された.
+		// 方眼メニューの「方眼の表示」が選択された.
 		void grid_show_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 用紙メニューの「方眼に合わせる」が選択された.
+		// 方眼メニューの「方眼に合わせる」が選択された.
 		void grid_snap_click(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーと図形に格納する.
 		template <UNDO_OP U, int S> void grid_slider_set_header(const float val);
@@ -685,25 +684,25 @@ namespace winrt::GraphPaper::implementation
 		// 属性
 		//-------------------------------
 
-		void prop_dialog_unloaded(IInspectable const&, RoutedEventArgs const&);
+		void setting_dialog_unloaded(IInspectable const&, RoutedEventArgs const&);
 		// 属性ダイアログが開かれた.
-		void prop_dialog_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
+		void setting_dialog_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const& args);
 		// 属性ダイアログが開かれた.
-		void prop_dialog_closed(ContentDialog const& sender, ContentDialogClosedEventArgs const& args);
-		// 属性の見本を表示する
-		void prop_sample_draw(void);
+		void setting_dialog_closed(ContentDialog const& sender, ContentDialogClosedEventArgs const& args);
+		// 設定を表示する
+		void dialog_draw(void);
 		// 属性のリストがロードされた.
-		void prop_list_view_loaded(IInspectable const&, RoutedEventArgs const&);
+		void dialog_list_loaded(IInspectable const&, RoutedEventArgs const&);
 		// 属性の画像を読み込む.
-		IAsyncAction prop_image_load_async(const float samp_w, const float samp_h);
+		IAsyncAction dialog_image_load_async(const float samp_w, const float samp_h);
 		// 属性のスワップチェーンパネルが読み込まれた.
-		void prop_panel_loaded(IInspectable const& sender, RoutedEventArgs const&);
+		void dialog_panel_loaded(IInspectable const& sender, RoutedEventArgs const&);
 		// 属性のスワップチェーンパネルの大きさが変わった.
-		void prop_panel_size_changed(IInspectable const&, SizeChangedEventArgs const&);
+		void dialog_panel_size_changed(IInspectable const&, SizeChangedEventArgs const&);
 		// 属性のスワップチェーンパネルの倍率が変わった.
-		void prop_panel_scale_changed(IInspectable const&, IInspectable const&);
+		void dialog_panel_scale_changed(IInspectable const&, IInspectable const&);
 		// 属性ダイアログのスライダーヘッダーに文字列を格納する.
-		template<int S> void prop_set_slider_header(const winrt::hstring& text);
+		template<int S> void dialog_set_slider_header(const winrt::hstring& text);
 
 		//-------------------------------
 		// MainPage_scroll.cpp
@@ -749,52 +748,48 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_sheet.cpp
-		// 用紙の属性, 表示倍率, 設定の保存と削除
+		// ページ設定の保存と削除
 		//-------------------------------
 
-		//void sheet_xaml_root_changed(winrt::Windows::UI::Xaml::XamlRoot const&, winrt::Windows::UI::Xaml::XamlRootChangedEventArgs const& args);
-
-		// 図形の属性関連に印をつける.
-		void sheet_attr_is_checked(void) noexcept;
-		// 用紙の属性を初期化する.
-		void sheet_init(void) noexcept;
-		// 用紙メニューの「用紙の色」が選択された.
-		IAsyncAction sheet_color_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「用紙の大きさ」が選択された
-		IAsyncAction sheet_size_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙の左上位置と右下位置を更新する.
-		void sheet_update_bbox(void) noexcept;
-		// 図形をもとに用紙の左上位置と右下位置を更新する.
-		void sheet_update_bbox(const Shape* s) noexcept;
-		// 用紙を表示する.
-		void sheet_draw(void);
+		// ページ設定に印をつける.
+		void page_setting_is_checked(void) noexcept;
+		// ページ設定を初期化する.
+		void page_setting_init(void) noexcept;
+		// 方眼メニューの「ページの色」が選択された.
+		IAsyncAction page_color_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 方眼メニューの「ページの大きさ」が選択された
+		IAsyncAction page_size_click_async(IInspectable const&, RoutedEventArgs const&);
+		// ページの左上位置と右下位置を更新する.
+		void page_bbox_update(void) noexcept;
+		// 図形をもとにページの左上位置と右下位置を更新する.
+		void page_bbox_update(const Shape* s) noexcept;
+		// ページを表示する.
+		void page_draw(void);
 		// 前景色を得る.
-		const D2D1_COLOR_F& sheet_foreground(void) const noexcept;
-		// 保存された用紙とその他の属性を読み込む.
-		IAsyncOperation<winrt::hresult> sheet_prop_load_async(void);
-		// 用紙メニューの「用紙設定をリセット」が選択された.
-		IAsyncAction sheet_prop_reset_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 用紙メニューの「用紙設定を保存」が選択された.
-		IAsyncAction sheet_prop_save_click_async(IInspectable const&, RoutedEventArgs const&);
+		const D2D1_COLOR_F& page_foreground(void) const noexcept;
+		// 方眼メニューの「ページ設定をリセット」が選択された.
+		IAsyncAction page_setting_reset_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 方眼メニューの「ページ設定を保存」が選択された.
+		IAsyncAction page_setting_save_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_OP U, int S> void sheet_slider_set_header(const float val);
+		template <UNDO_OP U, int S> void page_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_OP U, int S> void sheet_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
-		// 用紙のスワップチェーンパネルがロードされた.
-		void sheet_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
-		// 用紙のスワップチェーンパネルの寸法が変わった.
-		void sheet_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
-		// 用紙のスワップチェーンパネルの寸法が変わった.
-		void sheet_panel_scale_changed(IInspectable const& sender, IInspectable const&);
-		// 用紙のスワップチェーンパネルの大きさを設定する.
-		void sheet_panle_size(void);
-		// 用紙寸法ダイアログの「用紙の幅」「用紙の高さ」テキストボックスの値が変更された.
-		void sheet_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
-		// 用紙メニューの「表示倍率」が選択された.
-		void sheet_zoom_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 表示を拡大または縮小する.
-		void sheet_zoom_delta(const int32_t delta) noexcept;
-		void sheet_zoom_is_checked(float scale);
+		template <UNDO_OP U, int S> void page_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		// 表示のスワップチェーンパネルがロードされた.
+		void page_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
+		// 表示のスワップチェーンパネルの寸法が変わった.
+		void page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
+		// 表示のスワップチェーンパネルの寸法が変わった.
+		void page_panel_scale_changed(IInspectable const& sender, IInspectable const&);
+		// 表示のスワップチェーンパネルの大きさを設定する.
+		void page_panel_size(void);
+		// ページの大きさダイアログの「ページの幅」「ページの高さ」テキストボックスの値が変更された.
+		void page_size_text_changed(IInspectable const&, TextChangedEventArgs const&);
+		// 方眼メニューの「ページの倍率」が選択された.
+		void page_zoom_click(IInspectable const& sender, RoutedEventArgs const&);
+		// ページを拡大または縮小する.
+		void page_zoom_delta(const int32_t delta) noexcept;
+		void page_zoom_is_checked(float scale);
 
 		//-------------------------------
 		// MainPage_status.cpp
@@ -813,8 +808,8 @@ namespace winrt::GraphPaper::implementation
 		void status_bar_set_draw(void);
 		// 方眼の大きさをステータスバーに格納する.
 		void status_bar_set_grid(void);
-		// 用紙の大きさをステータスバーに格納する.
-		void status_bar_set_sheet(void);
+		// ページの大きさをステータスバーに格納する.
+		void status_bar_set_page(void);
 		// 単位をステータスバーに格納する.
 		void status_bar_set_unit(void);
 		// 拡大率をステータスバーに格納する.
@@ -908,9 +903,9 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
 		// 図形をデータライターに PDF として書き込む.
-		IAsyncOperation<winrt::hresult> export_to_pdf_async(const StorageFile pdf_file) const noexcept;
-		IAsyncOperation<winrt::hresult> export_to_svg_async(const StorageFile& svg_file) const noexcept;
-		IAsyncOperation<winrt::hresult> export_to_image_async(const StorageFile& image_file) noexcept;
+		IAsyncOperation<winrt::hresult> export_as_pdf_async(const StorageFile pdf_file) const noexcept;
+		IAsyncOperation<winrt::hresult> export_as_svg_async(const StorageFile& svg_file) const noexcept;
+		IAsyncOperation<winrt::hresult> export_as_raster_async(const StorageFile& image_file) noexcept;
 
 		//-------------------------------
 		//　MainPage_text.cpp

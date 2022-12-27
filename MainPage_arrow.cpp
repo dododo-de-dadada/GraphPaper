@@ -34,19 +34,19 @@ namespace winrt::GraphPaper::implementation
 				L"str_arrow_offset"
 			};
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
 			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf;
 			if constexpr (S == 0) {
-				prop_slider_0().Header(box_value(text));
+				dialog_slider_0().Header(box_value(text));
 			}
 			if constexpr (S == 1) {
-				prop_slider_1().Header(box_value(text));
+				dialog_slider_1().Header(box_value(text));
 			}
 			if constexpr (S == 2) {
-				prop_slider_2().Header(box_value(text));
+				dialog_slider_2().Header(box_value(text));
 			}
 			if constexpr (S == 3) {
-				prop_slider_3().Header(box_value(text));
+				dialog_slider_3().Header(box_value(text));
 			}
 		}
 	}
@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 			const float val = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
 			//m_sample_shape->get_arrow_size(a_size);
-			m_prop_sheet.m_shape_list.back()->get_arrow_size(a_size);
+			m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
 			if constexpr (S == 0) {
 				arrow_slider_set_header<U, S>(val);
 				a_size.m_width = static_cast<FLOAT>(val);
@@ -78,10 +78,10 @@ namespace winrt::GraphPaper::implementation
 				a_size.m_offset = static_cast<FLOAT>(val);
 			}
 			//m_sample_shape->set_arrow_size(a_size);
-			m_prop_sheet.m_shape_list.back()->set_arrow_size(a_size);
+			m_dialog_page.m_shape_list.back()->set_arrow_size(a_size);
 		}
-		if (scp_prop_panel().IsLoaded()) {
-			prop_sample_draw();
+		if (scp_dialog_panel().IsLoaded()) {
+			dialog_draw();
 		}
 	}
 
@@ -93,70 +93,70 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 
-		m_prop_sheet.set_attr_to(&m_main_sheet);
+		m_dialog_page.set_attr_to(&m_main_page);
 		ARROW_SIZE a_size;
-		m_prop_sheet.get_arrow_size(a_size);
+		m_dialog_page.get_arrow_size(a_size);
 
-		prop_slider_0().Maximum(MAX_VALUE);
-		prop_slider_0().TickFrequency(TICK_FREQ);
-		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_0().Value(a_size.m_width);
+		dialog_slider_0().Maximum(MAX_VALUE);
+		dialog_slider_0().TickFrequency(TICK_FREQ);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(a_size.m_width);
 		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 0>(a_size.m_width);
-		prop_slider_1().Maximum(MAX_VALUE);
-		prop_slider_1().TickFrequency(TICK_FREQ);
-		prop_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_1().Value(a_size.m_length);
+		dialog_slider_1().Maximum(MAX_VALUE);
+		dialog_slider_1().TickFrequency(TICK_FREQ);
+		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_1().Value(a_size.m_length);
 		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 1>(a_size.m_length);
-		prop_slider_2().Maximum(MAX_VALUE);
-		prop_slider_2().TickFrequency(TICK_FREQ);
-		prop_slider_2().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_2().Value(a_size.m_offset);
+		dialog_slider_2().Maximum(MAX_VALUE);
+		dialog_slider_2().TickFrequency(TICK_FREQ);
+		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_2().Value(a_size.m_offset);
 		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 2>(a_size.m_offset);
 
-		prop_slider_0().Visibility(Visibility::Visible);
-		prop_slider_1().Visibility(Visibility::Visible);
-		prop_slider_2().Visibility(Visibility::Visible);
+		dialog_slider_0().Visibility(Visibility::Visible);
+		dialog_slider_1().Visibility(Visibility::Visible);
+		dialog_slider_2().Visibility(Visibility::Visible);
 		const winrt::event_token slider_0_token{
-			prop_slider_0().ValueChanged({ this, &MainPage::arrow_slider_val_changed<UNDO_OP::ARROW_SIZE, 0> })
+			dialog_slider_0().ValueChanged({ this, &MainPage::arrow_slider_val_changed<UNDO_OP::ARROW_SIZE, 0> })
 		};
 		const winrt::event_token slider_1_token{
-			prop_slider_1().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_OP::ARROW_SIZE, 1> })
+			dialog_slider_1().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_OP::ARROW_SIZE, 1> })
 		};
 		const winrt::event_token slider_2_token{
-			prop_slider_2().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_OP::ARROW_SIZE, 2> })
+			dialog_slider_2().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_OP::ARROW_SIZE, 2> })
 		};
-		const auto samp_w = scp_prop_panel().Width();
-		const auto samp_h = scp_prop_panel().Height();
+		const auto samp_w = scp_dialog_panel().Width();
+		const auto samp_h = scp_dialog_panel().Height();
 		const auto padd = samp_w * 0.125;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
 		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
-		m_prop_sheet.m_shape_list.push_back(new ShapeLine(b_pos, b_vec, &m_prop_sheet));
+		m_dialog_page.m_shape_list.push_back(new ShapeLine(b_pos, b_vec, &m_dialog_page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
 
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
 		const ContentDialogResult d_result{
-			co_await cd_prop_dialog().ShowAsync()
+			co_await cd_setting_dialog().ShowAsync()
 		};
 		if (d_result == ContentDialogResult::Primary) {
 			ARROW_SIZE samp_val;
 			//m_sample_shape->get_arrow_size(samp_val);
-			m_prop_sheet.m_shape_list.back()->get_arrow_size(samp_val);
+			m_dialog_page.m_shape_list.back()->get_arrow_size(samp_val);
 			if (ustack_push_set<UNDO_OP::ARROW_SIZE>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 		}
-		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(Visibility::Collapsed);
-		prop_slider_1().Visibility(Visibility::Collapsed);
-		prop_slider_2().Visibility(Visibility::Collapsed);
-		prop_slider_0().ValueChanged(slider_0_token);
-		prop_slider_1().ValueChanged(slider_1_token);
-		prop_slider_2().ValueChanged(slider_2_token);
-		sheet_draw();
+		slist_clear(m_dialog_page.m_shape_list);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_1().Visibility(Visibility::Collapsed);
+		dialog_slider_2().Visibility(Visibility::Collapsed);
+		dialog_slider_0().ValueChanged(slider_0_token);
+		dialog_slider_1().ValueChanged(slider_1_token);
+		dialog_slider_2().ValueChanged(slider_2_token);
+		page_draw();
 	}
 
 	//------------------------------
@@ -181,7 +181,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_OP::ARROW_STYLE>(a_style)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			sheet_draw();
+			page_draw();
 		}
 	}
 

@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::order_bring_to_front_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		SHAPE_LIST slist;	// 選択された図形のリスト
-		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
+		slist_get_selected<Shape>(m_main_page.m_shape_list, slist);
 		if (slist.size() > 0) {
 			// 最前面 (リストでは末尾) に移動
 			for (Shape* const s : slist) {
@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 		slist.clear();
 		ustack_push_null();
 		xcvd_is_enabled();
-		sheet_draw();
+		page_draw();
 	}
 
 	// 選択された図形を次の図形と入れ替える.
@@ -58,13 +58,13 @@ namespace winrt::GraphPaper::implementation
 		T it_end;	// 終端
 		T it_src;	// 交換元
 		if constexpr (std::is_same<T, BRING_FORWARD>::value) {
-			it_end = m_main_sheet.m_shape_list.rend();
-			it_src = m_main_sheet.m_shape_list.rbegin();
+			it_end = m_main_page.m_shape_list.rend();
+			it_src = m_main_page.m_shape_list.rbegin();
 		}
 		else {
 			if constexpr (std::is_same<T, SEND_BACKWARD>::value) {
-				it_end = m_main_sheet.m_shape_list.end();
-				it_src = m_main_sheet.m_shape_list.begin();
+				it_end = m_main_page.m_shape_list.end();
+				it_src = m_main_page.m_shape_list.begin();
 			}
 			else {
 				throw winrt::hresult_not_implemented();
@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 					if (done) {
 						ustack_push_null();
 						xcvd_is_enabled();
-						sheet_draw();
+						page_draw();
 					}
 					return;
 				}
@@ -133,11 +133,11 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::order_send_to_back_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		SHAPE_LIST slist;	// 選択された図形のリスト
-		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
+		slist_get_selected<Shape>(m_main_page.m_shape_list, slist);
 		if (slist.size() > 0) {
 			// 最背面 (リストでは先頭) に移動
 			uint32_t i = 0;
-			Shape* const s = slist_front(m_main_sheet.m_shape_list);
+			Shape* const s = slist_front(m_main_page.m_shape_list);
 			for (Shape* const t : slist) {
 				if (summary_is_visible()) {
 					summary_remove(t);
@@ -150,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 		slist.clear();
 		ustack_push_null();
 		xcvd_is_enabled();
-		sheet_draw();
+		page_draw();
 	}
 
 }

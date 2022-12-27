@@ -130,7 +130,6 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	// sh	表示する用紙
 	void ShapeImage::draw(void)
 	{
 		ID2D1RenderTarget* const target = Shape::s_target;
@@ -381,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 			v_pos[0].y <= t_pos.y && t_pos.y <= v_pos[2].y) {
 			return ANC_TYPE::ANC_FILL;
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	// 範囲に含まれるか判定する.
@@ -457,14 +456,14 @@ namespace winrt::GraphPaper::implementation
 				pt_sub(pos, s_pos, v_vec);
 				if (pt_abs2(v_vec) >= FLT_MIN) {
 					// スケール変更後の表示の寸法を求め, その縦横が 1 ピクセル以上あるか判定する.
-					const float view_w = m_view.width - v_vec.x;
-					const float view_h = m_view.height - v_vec.y;
-					if (view_w >= 1.0f && view_h >= 1.0f) {
-						m_view.width = view_w;
-						m_view.height = view_h;
+					const float page_w = m_view.width - v_vec.x;
+					const float page_h = m_view.height - v_vec.y;
+					if (page_w >= 1.0f && page_h >= 1.0f) {
+						m_view.width = page_w;
+						m_view.height = page_h;
 						m_pos = pos;
-						m_ratio.width = view_w / image_w;
-						m_ratio.height = view_h / image_h;
+						m_ratio.width = page_w / image_w;
+						m_ratio.height = page_h / image_h;
 						if (!flag) {
 							flag = true;
 						}
@@ -488,14 +487,14 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F v_vec;
 				pt_sub(pos, s_pos, v_vec);
 				if (pt_abs2(v_vec) >= FLT_MIN) {
-					const float view_w = pos.x - m_pos.x;
-					const float view_h = m_pos.y + m_view.height - pos.y;
-					if (view_w >= 1.0f && view_h >= 1.0f) {
-						m_view.width = view_w;
-						m_view.height = view_h;
+					const float page_w = pos.x - m_pos.x;
+					const float page_h = m_pos.y + m_view.height - pos.y;
+					if (page_w >= 1.0f && page_h >= 1.0f) {
+						m_view.width = page_w;
+						m_view.height = page_h;
 						m_pos.y = pos.y;
-						m_ratio.width = view_w / image_w;
-						m_ratio.height = view_h / image_h;
+						m_ratio.width = page_w / image_w;
+						m_ratio.height = page_h / image_h;
 						if (!flag) {
 							flag = true;
 						}
@@ -519,13 +518,13 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F v_vec;
 				pt_sub(pos, s_pos, v_vec);
 				if (pt_abs2(v_vec) >= FLT_MIN) {
-					const float view_w = pos.x - m_pos.x;
-					const float view_h = pos.y - m_pos.y;
-					if (view_w >= 1.0f && view_h >= 1.0f) {
-						m_view.width = view_w;
-						m_view.height = view_h;
-						m_ratio.width = view_w / image_w;
-						m_ratio.height = view_h / image_h;
+					const float page_w = pos.x - m_pos.x;
+					const float page_h = pos.y - m_pos.y;
+					if (page_w >= 1.0f && page_h >= 1.0f) {
+						m_view.width = page_w;
+						m_view.height = page_h;
+						m_ratio.width = page_w / image_w;
+						m_ratio.height = page_h / image_h;
 						if (!flag) {
 							flag = true;
 						}
@@ -549,14 +548,14 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F v_vec;
 				pt_sub(pos, s_pos, v_vec);
 				if (pt_abs2(v_vec) >= FLT_MIN) {
-					const float view_w = m_pos.x + m_view.width - pos.x;
-					const float view_h = pos.y - m_pos.y;
-					if (view_w >= 1.0f && view_h >= 1.0f) {
-						m_view.width = view_w;
-						m_view.height = view_h;
+					const float page_w = m_pos.x + m_view.width - pos.x;
+					const float page_h = pos.y - m_pos.y;
+					if (page_w >= 1.0f && page_h >= 1.0f) {
+						m_view.width = page_w;
+						m_view.height = page_h;
 						m_pos.x = pos.x;
-						m_ratio.width = view_w / image_w;
-						m_ratio.height = view_h / image_h;
+						m_ratio.width = page_w / image_w;
+						m_ratio.height = page_h / image_h;
 						if (!flag) {
 							flag = true;
 						}
@@ -630,10 +629,10 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// pos	左上位置
-	// view_size	表示される大きさ
+	// page_size	表示される大きさ
 	// bmp	ビットマップ
 	// opac	不透明度
-	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view_size, const SoftwareBitmap& bmp, const float opac) //:
+	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F page_size, const SoftwareBitmap& bmp, const float opac) //:
 		//ShapeSelect()
 	{
 		const uint32_t image_w = bmp.PixelWidth();
@@ -642,7 +641,7 @@ namespace winrt::GraphPaper::implementation
 		m_orig.width = image_w;
 		m_orig.height = image_h;
 		m_pos = pos;
-		m_view = view_size;
+		m_view = page_size;
 		m_clip.left = m_clip.top = 0;
 		m_clip.right = static_cast<FLOAT>(image_w);
 		m_clip.bottom = static_cast<FLOAT>(image_h);

@@ -19,7 +19,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 			unselect_all();
-			sheet_draw();
+			page_draw();
 		}
 		else {
 			drawing_tool_click(rmfi_select_tool(), nullptr);
@@ -54,7 +54,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::select_all_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		bool done = false;
-		for (auto s : m_main_sheet.m_shape_list) {
+		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || s->is_selected()) {
 				continue;
 			}
@@ -71,7 +71,7 @@ namespace winrt::GraphPaper::implementation
 			summary_select_all();
 		}
 		xcvd_is_enabled();
-		sheet_draw();
+		page_draw();
 	}
 
 	// 範囲に含まれる図形を選択し, 含まれない図形の選択を解除する.
@@ -79,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool done = false;
 		//uint32_t i = 0u;
-		for (auto s : m_main_sheet.m_shape_list) {
+		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -116,11 +116,11 @@ namespace winrt::GraphPaper::implementation
 		Shape* s = static_cast<Shape*>(nullptr);
 		if constexpr (K == VirtualKey::Down) {
 			if (m_event_shape_prev == nullptr) {
-				s = slist_front(m_main_sheet.m_shape_list);
+				s = slist_front(m_main_page.m_shape_list);
 				m_event_shape_pressed = s;
 			}
 			else {
-				s = slist_next(m_main_sheet.m_shape_list, m_event_shape_prev);
+				s = slist_next(m_main_page.m_shape_list, m_event_shape_prev);
 			}
 			if (s != nullptr) {
 				//m_event_shape_summary = s;
@@ -129,11 +129,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		if constexpr (K == VirtualKey::Up) {
 			if (m_event_shape_prev == nullptr) {
-				s = slist_back(m_main_sheet.m_shape_list);
+				s = slist_back(m_main_page.m_shape_list);
 				m_event_shape_pressed = s;
 			}
 			else {
-				s = slist_prev(m_main_sheet.m_shape_list, m_event_shape_prev);
+				s = slist_prev(m_main_page.m_shape_list, m_event_shape_prev);
 			}
 			if (s != nullptr) {
 				//m_event_shape_summary = s;
@@ -158,7 +158,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 編集メニュー項目の使用の可否を設定する.
 		xcvd_is_enabled();
-		sheet_draw();
+		page_draw();
 	}
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Down>();
 	template void MainPage::select_next_shape<VirtualKeyModifiers::None, VirtualKey::Up>();
@@ -179,7 +179,7 @@ namespace winrt::GraphPaper::implementation
 		auto st = BEGIN;
 		auto s_end = static_cast<Shape*>(nullptr);
 		auto i = 0u;
-		for (auto s : m_main_sheet.m_shape_list) {
+		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -237,7 +237,7 @@ namespace winrt::GraphPaper::implementation
 		if (k_mod == VirtualKeyModifiers::Control) {
 			ustack_push_select(s);
 			xcvd_is_enabled();
-			sheet_draw();
+			page_draw();
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				if (s->is_selected()) {
@@ -255,12 +255,12 @@ namespace winrt::GraphPaper::implementation
 			// 前回ポインターが押された図形が空か判定する.
 			//if (m_event_shape_prev == nullptr) {
 			//	// 図形リストの先頭を前回ポインターが押された図形に格納する.
-			//	m_event_shape_prev = m_main_sheet.m_shape_list.front();
+			//	m_event_shape_prev = m_main_page.m_shape_list.front();
 			//}
 			// 範囲の中の図形は選択して, それ以外の図形の選択をはずす.
 			if (select_range(s, m_event_shape_prev)) {
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 		}
 		else {
@@ -270,7 +270,7 @@ namespace winrt::GraphPaper::implementation
 				unselect_all();
 				ustack_push_select(s);
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 				// 一覧が表示されてるか判定する.
 				if (summary_is_visible()) {
 					summary_select(s);
@@ -280,8 +280,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (s->is_selected()) {
 			// 押された図形が選択されている場合,
-//			m_main_sheet.set_attr_to(s);
-//			sheet_attr_is_checked();
+//			m_main_page.set_attr_to(s);
+//			page_setting_is_checked();
 		}
 	}
 
@@ -291,7 +291,7 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::toggle_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max)
 	{
 		bool done = false;
-		for (auto s : m_main_sheet.m_shape_list) {
+		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->in_area(area_min, area_max)) {
 				continue;
 			}
@@ -318,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::unselect_all(const bool t_range_only)
 	{
 		bool done = false;
-		for (auto s : m_main_sheet.m_shape_list) {
+		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
 			}

@@ -9,10 +9,10 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	constexpr auto INDEX_NIL = static_cast<uint32_t>(-2);	// ヌル図形の添え字
-	constexpr auto INDEX_SHEET = static_cast<uint32_t>(-1);	// 用紙図形の添え字
+	constexpr auto INDEX_VIEW = static_cast<uint32_t>(-1);	// 表示図形の添え字
 
 	static SHAPE_LIST* undo_slist = nullptr;	// 参照する図形リスト
-	static ShapeSheet* undo_sheet = nullptr;	// 参照する用紙
+	static ShapePage* undo_page = nullptr;	// 参照するページ
 
 	// 部位の位置を得る.
 	static D2D1_POINT_2F undo_get_pos_anc(const Shape* s, const uint32_t anc) noexcept;
@@ -61,8 +61,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		Shape* s = static_cast<Shape*>(nullptr);
 		const uint32_t i = dt_reader.ReadUInt32();
-		if (i == INDEX_SHEET) {
-			s = undo_sheet;
+		if (i == INDEX_VIEW) {
+			s = undo_page;
 		}
 		else if (i == INDEX_NIL) {
 			s = nullptr;
@@ -86,8 +86,8 @@ namespace winrt::GraphPaper::implementation
 	// dt_reader	データリーダー
 	static void undo_write_shape(Shape* const s, DataWriter const& dt_writer)
 	{
-		if (s == undo_sheet) {
-			dt_writer.WriteUInt32(INDEX_SHEET);
+		if (s == undo_page) {
+			dt_writer.WriteUInt32(INDEX_VIEW);
 		}
 		else if (s == nullptr) {
 			dt_writer.WriteUInt32(INDEX_NIL);
@@ -99,11 +99,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 操作が参照するための図形リストと用紙図形を格納する.
-	void Undo::set(SHAPE_LIST* slist, ShapeSheet* sheet) noexcept
+	// 操作が参照するための図形リストと表示図形を格納する.
+	void Undo::set(SHAPE_LIST* slist, ShapePage* page) noexcept
 	{
 		undo_slist = slist;
-		undo_sheet = sheet;
+		undo_page = page;
 	}
 
 	// 操作を実行すると値が変わるか判定する.
@@ -248,8 +248,8 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_OP::JOIN_LIMIT>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_OP::JOIN_STYLE>::UndoValue(Shape* s, const D2D1_LINE_JOIN& val);
 	template UndoValue<UNDO_OP::MOVE>::UndoValue(Shape* s, const D2D1_POINT_2F& val);
-	template UndoValue<UNDO_OP::SHEET_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
-	template UndoValue<UNDO_OP::SHEET_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
+	template UndoValue<UNDO_OP::PAGE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
+	template UndoValue<UNDO_OP::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
 	template UndoValue<UNDO_OP::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
 	template UndoValue<UNDO_OP::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_OP::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
@@ -314,8 +314,8 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_OP::JOIN_LIMIT>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_OP::JOIN_STYLE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_OP::MOVE>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_OP::SHEET_COLOR>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_OP::SHEET_SIZE>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_OP::PAGE_COLOR>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_OP::PAGE_SIZE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_OP::STROKE_CAP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_OP::STROKE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_OP::STROKE_WIDTH>::UndoValue(DataReader const& dt_reader);
@@ -432,14 +432,14 @@ namespace winrt::GraphPaper::implementation
 		s->set_pos_start(val);
 	}
 
-	void UndoValue<UNDO_OP::SHEET_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val)
+	void UndoValue<UNDO_OP::PAGE_COLOR>::SET(Shape* const s, const D2D1_COLOR_F& val)
 	{
-		s->set_sheet_color(val);
+		s->set_page_color(val);
 	}
 
-	void UndoValue<UNDO_OP::SHEET_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& val)
+	void UndoValue<UNDO_OP::PAGE_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& val)
 	{
-		s->set_sheet_size(val);
+		s->set_page_size(val);
 	}
 
 	void UndoValue<UNDO_OP::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
@@ -592,14 +592,14 @@ namespace winrt::GraphPaper::implementation
 		return s->get_pos_start(val);
 	}
 
-	bool UndoValue<UNDO_OP::SHEET_COLOR>::GET(const Shape* s, D2D1_COLOR_F& val) noexcept
+	bool UndoValue<UNDO_OP::PAGE_COLOR>::GET(const Shape* s, D2D1_COLOR_F& val) noexcept
 	{
-		return s->get_sheet_color(val);
+		return s->get_page_color(val);
 	}
 
-	bool UndoValue<UNDO_OP::SHEET_SIZE>::GET(const Shape* s, D2D1_SIZE_F& val) noexcept
+	bool UndoValue<UNDO_OP::PAGE_SIZE>::GET(const Shape* s, D2D1_SIZE_F& val) noexcept
 	{
-		return s->get_sheet_size(val);
+		return s->get_page_size(val);
 	}
 
 	bool UndoValue<UNDO_OP::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& val) noexcept

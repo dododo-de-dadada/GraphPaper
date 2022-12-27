@@ -172,7 +172,6 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	// sh	表示する用紙
 	void ShapeLine::draw(void)
 	{
 		ID2D1Factory3* const factory = Shape::s_factory;
@@ -245,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 		if (line_hit_test(t_pos, m_pos, e_pos, s_width, m_stroke_cap)) {
 			return ANC_TYPE::ANC_STROKE;
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	// 範囲に含まれるか判定する.
@@ -370,11 +369,11 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// s_sheet	既定の属性値
-	ShapeLine::ShapeLine(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_sheet) :
-		ShapeStroke::ShapeStroke(s_sheet),
-		m_arrow_style(s_sheet->m_arrow_style),
-		m_arrow_size(s_sheet->m_arrow_size),
+	// setting	既定の属性値
+	ShapeLine::ShapeLine(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+		ShapeStroke::ShapeStroke(page),
+		m_arrow_style(page->m_arrow_style),
+		m_arrow_size(page->m_arrow_size),
 		m_d2d_arrow_geom(nullptr),
 		m_d2d_arrow_style(nullptr)
 	{

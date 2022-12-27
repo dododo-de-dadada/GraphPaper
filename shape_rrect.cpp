@@ -51,7 +51,6 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	// sh	表示する用紙
 	void ShapeRRect::draw(void)
 	{
 		ID2D1Factory* const factory = Shape::s_factory;
@@ -247,24 +246,24 @@ namespace winrt::GraphPaper::implementation
 						anc_r = ANC_TYPE::ANC_R_SW;
 					}
 					else {
-						anc_r = ANC_TYPE::ANC_SHEET;
+						anc_r = ANC_TYPE::ANC_VIEW;
 					}
 				}
 			}
 		}
 		// 角丸の円弧の中心点に含まれる,
-		if (anc_r != ANC_TYPE::ANC_SHEET &&
+		if (anc_r != ANC_TYPE::ANC_VIEW &&
 			// かつ, 方形の大きさが図形の部位の大きさより大きいか判定する.
 			fabs(m_vec[0].x) > Shape::s_anc_len && fabs(m_vec[0].y) > Shape::s_anc_len) {
 			return anc_r;
 		}
 		// 方形の各頂点に含まれるか判定する.
 		const uint32_t anc_v = hit_test_anc(t_pos);
-		if (anc_v != ANC_TYPE::ANC_SHEET) {
+		if (anc_v != ANC_TYPE::ANC_VIEW) {
 			return anc_v;
 		}
 		// 頂点に含まれず, 角丸の円弧の中心点に含まれるか判定する.
-		else if (anc_r != ANC_TYPE::ANC_SHEET) {
+		else if (anc_r != ANC_TYPE::ANC_VIEW) {
 			return anc_r;
 		}
 
@@ -325,7 +324,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	// 値を, 部位の位置に格納する. 他の部位の位置も動く.
@@ -405,11 +404,11 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// s_sheet	属性
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_sheet) :
-		ShapeRect::ShapeRect(b_pos, b_vec, s_sheet)
+	// page	属性
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+		ShapeRect::ShapeRect(b_pos, b_vec, page)
 	{
-		calc_corner_radius(m_vec[0], s_sheet->m_corner_rad, m_corner_rad);
+		calc_corner_radius(m_vec[0], page->m_corner_rad, m_corner_rad);
 	}
 
 	// 図形をデータリーダーから読み込む.

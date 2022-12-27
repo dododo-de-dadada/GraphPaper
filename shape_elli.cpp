@@ -12,7 +12,6 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// ê}å`Çï\é¶Ç∑ÇÈ.
-	// sh	ï\é¶Ç∑ÇÈópéÜ
 	void ShapeElli::draw(void)
 	{
 		ID2D1Factory* const factory = Shape::s_factory;
@@ -77,7 +76,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const auto anc = hit_test_anc(t_pos);
-		if (anc != ANC_TYPE::ANC_SHEET) {
+		if (anc != ANC_TYPE::ANC_VIEW) {
 			return anc;
 		}
 
@@ -99,8 +98,8 @@ namespace winrt::GraphPaper::implementation
 			pt_add(rad, s_width * 0.5, r_outer);
 			if (!pt_in_ellipse(t_pos, c_pos, r_outer.x, r_outer.y)) {
 				// äOåaÇÃÇæâ~Ç…ä‹Ç‹ÇÍÇ»Ç¢Ç»ÇÁ, 
-				// ANC_SHEET Çï‘Ç∑.
-				return ANC_TYPE::ANC_SHEET;
+				// ANC_VIEW Çï‘Ç∑.
+				return ANC_TYPE::ANC_VIEW;
 			}
 			// à íuÇ™Çæâ~ÇÃògè„Ç…Ç†ÇÈÇ©îªíËÇ∑ÇÈ.
 			D2D1_POINT_2F r_inner;
@@ -125,7 +124,7 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 }

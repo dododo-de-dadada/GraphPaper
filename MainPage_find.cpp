@@ -499,11 +499,11 @@ namespace winrt::GraphPaper::implementation
 			m_text_frame_fit_text = ck_text_frame_fit_text().IsChecked().GetBoolean();
 			if (m_text_frame_fit_text) {
 				ustack_push_position(s, ANC_TYPE::ANC_SE);
-				s->frame_fit(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
+				s->frame_fit(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			}
 			ustack_push_null();
 			xcvd_is_enabled();
-			sheet_draw();
+			page_draw();
 		}
 	}
 
@@ -517,7 +517,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			// 選択された図形のうち最前面にある文字列図形を得る.
-			for (auto it = m_main_sheet.m_shape_list.rbegin(); it != m_main_sheet.m_shape_list.rend(); it++) {
+			for (auto it = m_main_page.m_shape_list.rbegin(); it != m_main_page.m_shape_list.rend(); it++) {
 				auto t = *it;
 				if (t->is_deleted()) {
 					continue;
@@ -551,8 +551,8 @@ namespace winrt::GraphPaper::implementation
 		// あらかじめ検索文字列を含む文字列図形があるか判定する.
 		bool done = false;
 		std::list <SHAPE_LIST::iterator> it_stack;
-		it_stack.push_back(m_main_sheet.m_shape_list.begin());
-		it_stack.push_back(m_main_sheet.m_shape_list.end());
+		it_stack.push_back(m_main_page.m_shape_list.begin());
+		it_stack.push_back(m_main_page.m_shape_list.end());
 		while (!it_stack.empty()) {
 			SHAPE_LIST::iterator j = it_stack.back();
 			it_stack.pop_back();
@@ -595,8 +595,8 @@ namespace winrt::GraphPaper::implementation
 		unselect_all(true);
 
 		const uint32_t r_len = wchar_len(m_find_repl);
-		it_stack.push_back(m_main_sheet.m_shape_list.begin());
-		it_stack.push_back(m_main_sheet.m_shape_list.end());
+		it_stack.push_back(m_main_page.m_shape_list.begin());
+		it_stack.push_back(m_main_page.m_shape_list.end());
 		while (!it_stack.empty()) {
 			SHAPE_LIST::iterator j = it_stack.back();
 			it_stack.pop_back();
@@ -642,7 +642,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		ustack_push_null();
 		ustack_is_enable();
-		sheet_draw();
+		page_draw();
 	}
 
 	// 文字列検索パネルの「置換して次に」ボタンが押された.
@@ -656,7 +656,7 @@ namespace winrt::GraphPaper::implementation
 
 		bool flag = false;	// 一致または置換したか判定.
 		DWRITE_TEXT_RANGE t_range;	// 文字範囲
-		auto t = find_text_range_selected(m_main_sheet.m_shape_list.begin(), m_main_sheet.m_shape_list.end(), t_range);
+		auto t = find_text_range_selected(m_main_page.m_shape_list.begin(), m_main_page.m_shape_list.end(), t_range);
 		if (t != nullptr) {
 			// 図形が見つかった場合,
 			const auto w_pos = t_range.startPosition;
@@ -680,7 +680,7 @@ namespace winrt::GraphPaper::implementation
 		// 次を検索する.
 		Shape* s;
 		DWRITE_TEXT_RANGE s_range;
-		if (find_text(m_main_sheet.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
+		if (find_text(m_main_page.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			// 検索できたならば,
 			// 文字範囲が選択された図形があり, それが次の図形と異なるか判定する.
 			if (t != nullptr && s != t) {
@@ -691,7 +691,7 @@ namespace winrt::GraphPaper::implementation
 			flag = true;
 		}
 		if (flag) {
-			sheet_draw();
+			page_draw();
 		}
 		else {
 			// 検索できない, かつ置換もされてない場合,
@@ -734,13 +734,13 @@ namespace winrt::GraphPaper::implementation
 		ShapeText* t;
 		Shape* s;
 		DWRITE_TEXT_RANGE s_range;
-		if (find_text(m_main_sheet.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
+		if (find_text(m_main_page.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			if (t != nullptr && s != t) {
 				ustack_push_set<UNDO_OP::TEXT_SELECTED>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
 			ustack_push_set<UNDO_OP::TEXT_SELECTED>(s, s_range);
 			scroll_to(s);
-			sheet_draw();
+			page_draw();
 		}
 		else {
 			// 検索できない場合,

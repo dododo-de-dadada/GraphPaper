@@ -48,7 +48,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		// 選択された図形のリストを得る.
 		SHAPE_LIST selected_list;
-		slist_get_selected<Shape>(m_main_sheet.m_shape_list, selected_list);
+		slist_get_selected<Shape>(m_main_page.m_shape_list, selected_list);
 		// リストから降順に, 最初に見つかった文字列図形の文字列と画像図形の画像を得る.
 		wchar_t* text_ptr = nullptr;
 		RandomAccessStreamReference img_ref = nullptr;
@@ -137,7 +137,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 選択された図形のリストを得る.
 		SHAPE_LIST selected_list;
-		slist_get_selected<Shape>(m_main_sheet.m_shape_list, selected_list);
+		slist_get_selected<Shape>(m_main_page.m_shape_list, selected_list);
 		// リストの各図形について以下を繰り返す.
 		m_mutex_draw.lock();
 		for (auto s : selected_list) {
@@ -153,9 +153,9 @@ namespace winrt::GraphPaper::implementation
 
 		selected_list.clear();
 		xcvd_is_enabled();
-		sheet_update_bbox();
-		sheet_panle_size();
-		sheet_draw();
+		page_bbox_update();
+		page_panel_size();
+		page_draw();
 	}
 
 	//------------------------------
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
 		slist_count(
-			m_main_sheet.m_shape_list,
+			m_main_page.m_shape_list,
 			undeleted_cnt,
 			selected_cnt,
 			selected_group_cnt,
@@ -284,8 +284,8 @@ namespace winrt::GraphPaper::implementation
 		unselect_all();
 
 		// resume_background する前に UI から値を得る.
-		const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
-		const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+		const float win_w = static_cast<float>(scp_page_panel().ActualWidth());
+		const float win_h = static_cast<float>(scp_page_panel().ActualHeight());
 		const float win_x = static_cast<float>(sb_horz().Value());
 		const float win_y = static_cast<float>(sb_vert().Value());
 		const float min_x = m_main_min.x;
@@ -304,15 +304,15 @@ namespace winrt::GraphPaper::implementation
 		// 図形の大きさは元画像と同じにする.
 		const float img_w = static_cast<float>(bmp.PixelWidth());
 		const float img_h = static_cast<float>(bmp.PixelHeight());
-		const float scale = m_main_sheet.m_sheet_scale;
+		const float scale = m_main_page.m_page_scale;
 		D2D1_POINT_2F pos{
 			static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - img_w * 0.5),
 			static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - img_h * 0.5)
 		};
-		const D2D1_SIZE_F view_size{ img_w, img_h };
+		const D2D1_SIZE_F page_size{ img_w, img_h };
 
 		// ビットマップから図形を作成する.
-		ShapeImage* s = new ShapeImage(pos, view_size, bmp, 1.0f);
+		ShapeImage* s = new ShapeImage(pos, page_size, bmp, 1.0f);
 #if (_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -324,9 +324,9 @@ namespace winrt::GraphPaper::implementation
 		stream = nullptr;
 		reference = nullptr;
 
-		const double grid_len = (m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0 : 0.0);
-		const float vert_stick = m_vert_stick / m_main_sheet.m_sheet_scale;
-		xcvd_paste_pos(pos, /*<---*/m_main_sheet.m_shape_list, grid_len, vert_stick);
+		const double grid_len = (m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0 : 0.0);
+		const float vert_stick = m_vert_stick / m_main_page.m_page_scale;
+		xcvd_paste_pos(pos, /*<---*/m_main_page.m_shape_list, grid_len, vert_stick);
 		s->set_pos_start(pos);
 
 		{
@@ -345,9 +345,9 @@ namespace winrt::GraphPaper::implementation
 			summary_select(s);
 		}
 		xcvd_is_enabled();
-		sheet_update_bbox(s);
-		sheet_panle_size();
-		sheet_draw();
+		page_bbox_update(s);
+		page_panel_size();
+		page_draw();
 
 		//スレッドコンテキストを復元する.
 		co_await context;
@@ -389,14 +389,14 @@ namespace winrt::GraphPaper::implementation
 							summary_append(s);
 						}
 						ustack_push_append(s);
-						sheet_update_bbox(s);
+						page_bbox_update(s);
 					}
 					m_mutex_draw.unlock();
 					ustack_push_null();
 					slist_pasted.clear();
 					xcvd_is_enabled();
-					sheet_panle_size();
-					sheet_draw();
+					page_panel_size();
+					page_draw();
 					ok = true;
 				}
 			}
@@ -423,27 +423,27 @@ namespace winrt::GraphPaper::implementation
 			unselect_all();
 
 			// パネルの大きさで文字列図形を作成する,.
-			const float scale = m_main_sheet.m_sheet_scale;
+			const float scale = m_main_page.m_page_scale;
 			const float win_x = static_cast<float>(sb_horz().Value());
 			const float win_y = static_cast<float>(sb_vert().Value());
-			const float win_w = static_cast<float>(scp_sheet_panel().ActualWidth());
-			const float win_h = static_cast<float>(scp_sheet_panel().ActualHeight());
+			const float win_w = static_cast<float>(scp_page_panel().ActualWidth());
+			const float win_h = static_cast<float>(scp_page_panel().ActualHeight());
 			const float min_x = m_main_min.x;
 			const float min_y = m_main_min.y;
-			ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w / scale, win_h / scale }, wchar_cpy(text.c_str()), &m_main_sheet);
+			ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w / scale, win_h / scale }, wchar_cpy(text.c_str()), &m_main_page);
 #if (_DEBUG)
 			debug_leak_cnt++;
 #endif
 			// 枠を文字列に合わせる.
-			t->frame_fit(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f);
+			t->frame_fit(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			// パネルの中央になるよう左上位置を求める.
 			D2D1_POINT_2F pos{
 				static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - t->m_vec[0].x * 0.5),
 				static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - t->m_vec[0].y * 0.5)
 			};
-			const double grid_len = (m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0 : 0.0);
-			const float vert_stick = m_vert_stick / m_main_sheet.m_sheet_scale;
-			xcvd_paste_pos(pos, /*<---*/m_main_sheet.m_shape_list, grid_len, vert_stick);
+			const double grid_len = (m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0 : 0.0);
+			const float vert_stick = m_vert_stick / m_main_page.m_page_scale;
+			xcvd_paste_pos(pos, /*<---*/m_main_page.m_shape_list, grid_len, vert_stick);
 			t->set_pos_start(pos);
 			{
 				m_mutex_draw.lock();
@@ -459,9 +459,9 @@ namespace winrt::GraphPaper::implementation
 				summary_select(t);
 			}
 			xcvd_is_enabled();
-			sheet_update_bbox(t);
-			sheet_panle_size();
-			sheet_draw();
+			page_bbox_update(t);
+			page_panel_size();
+			page_draw();
 		}
 		else {
 			message_show(ICON_ALERT, L"str_err_paste", L"");

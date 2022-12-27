@@ -10,7 +10,6 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形を表示する.
-	// sh	表示する用紙
 	void ShapeRect::draw(void)
 	{
 		ID2D1Factory* const factory = Shape::s_factory;
@@ -99,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 		if (pt_in_anc(t_pos, anc_n)) {
 			return ANC_TYPE::ANC_NORTH;
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	// 位置を含むか判定する.
@@ -248,7 +247,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	// 塗りつぶしの色を得る.
@@ -331,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool done = false;
 		switch (anc) {
-		case ANC_TYPE::ANC_SHEET:
+		case ANC_TYPE::ANC_VIEW:
 		{
 			D2D1_POINT_2F pos;
 			pt_round(val, PT_ROUND, pos);
@@ -458,10 +457,10 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// s_sttr	属性
-	ShapeRect::ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_sheet) :
-		ShapeStroke::ShapeStroke(s_sheet),
-		m_fill_color(s_sheet->m_fill_color)
+	// page	属性
+	ShapeRect::ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+		ShapeStroke::ShapeStroke(page),
+		m_fill_color(page->m_fill_color)
 	{
 		m_pos = b_pos;
 		m_vec.resize(1, b_vec);

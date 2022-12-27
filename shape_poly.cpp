@@ -366,7 +366,7 @@ namespace winrt::GraphPaper::implementation
 				if (pt_in_circle(t_vec, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
-				return ANC_TYPE::ANC_SHEET;
+				return ANC_TYPE::ANC_VIEW;
 			}
 			// 辺が閉じているか判定する.
 			if (s_closed) {
@@ -527,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	// 直行するベクトルを得る.
@@ -687,7 +687,6 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	// sh	表示する用紙
 	void ShapePoly::draw(void)
 	{
 		ID2D1Factory3* const factory = Shape::s_factory;
@@ -860,12 +859,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// s_sheet	属性
+	// page	ページ
 	// p_opt	多角形の選択肢
-	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_sheet, const POLY_OPTION& p_opt) :
-		ShapePath::ShapePath(s_sheet, p_opt.m_end_closed),
+	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page, const POLY_OPTION& p_opt) :
+		ShapePath::ShapePath(page, p_opt.m_end_closed),
 		m_end_closed(p_opt.m_end_closed),
-		m_fill_color(p_opt.m_end_closed ? s_sheet->m_fill_color : D2D1_COLOR_F{ s_sheet->m_fill_color.r, s_sheet->m_fill_color.g, s_sheet->m_fill_color.b, 0.0f })
+		m_fill_color(p_opt.m_end_closed ? page->m_fill_color : D2D1_COLOR_F{ page->m_fill_color.r, page->m_fill_color.g, page->m_fill_color.b, 0.0f })
 	{
 		D2D1_POINT_2F v_pos[MAX_N_GON];
 

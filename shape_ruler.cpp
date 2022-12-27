@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const uint32_t anc = ShapeRect::hit_test_anc(t_pos);
-		if (anc != ANC_TYPE::ANC_SHEET) {
+		if (anc != ANC_TYPE::ANC_VIEW) {
 			return anc;
 		}
 		if (is_opaque(m_stroke_color)) {
@@ -119,11 +119,10 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	// 図形を表示する.
-	// sh	表示する用紙
 	void ShapeRuler::draw(void)
 	{
 		ID2D1Factory* const factory = Shape::s_factory;
@@ -282,12 +281,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// s_sheet	属性
-	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_sheet) :
-		ShapeRect::ShapeRect(b_pos, b_vec, s_sheet),
-		m_grid_base(s_sheet->m_grid_base),
-		m_font_family(s_sheet->m_font_family),
-		m_font_size(min(s_sheet->m_font_size, s_sheet->m_grid_base + 1.0f))
+	// page	属性
+	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+		ShapeRect::ShapeRect(b_pos, b_vec, page),
+		m_grid_base(page->m_grid_base),
+		m_font_family(page->m_font_family),
+		m_font_size(min(page->m_font_size, page->m_grid_base + 1.0f))
 	{
 		ShapeText::is_available_font(m_font_family);
 	}

@@ -20,7 +20,7 @@ namespace winrt::GraphPaper::implementation
 	//constexpr float SLIDER_STEP = 0.5f;
 	constexpr wchar_t TITLE_GRID[] = L"str_grid";
 
-	// 用紙メニューの「方眼の強調」が選択された.
+	// 方眼メニューの「方眼の強調」が選択された.
 	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		GRID_EMPH val;
@@ -38,15 +38,15 @@ namespace winrt::GraphPaper::implementation
 		}
 		grid_emph_is_checked(val);
 		GRID_EMPH g_emph;
-		m_main_sheet.get_grid_emph(g_emph);
+		m_main_page.get_grid_emph(g_emph);
 		if (!equal(g_emph, val)) {
-			ustack_push_set<UNDO_OP::GRID_EMPH>(&m_main_sheet, val);
+			ustack_push_set<UNDO_OP::GRID_EMPH>(&m_main_page, val);
 			ustack_is_enable();
-			sheet_draw();
+			page_draw();
 		}
 	}
 
-	// 用紙メニューの「方眼の強調」に印をつける.
+	// 方眼メニューの「方眼の強調」に印をつける.
 	// g_emph	方眼の強調
 	void MainPage::grid_emph_is_checked(const GRID_EMPH& g_emph)
 	{
@@ -55,127 +55,127 @@ namespace winrt::GraphPaper::implementation
 		rmfi_grid_emph_3().IsChecked(g_emph.m_gauge_1 != 0 && g_emph.m_gauge_2 != 0);
 	}
 
-	// 用紙メニューの「方眼の色」が選択された.
+	// 方眼メニューの「方眼の色」が選択された.
 	IAsyncAction MainPage::grid_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_prop_sheet.set_attr_to(&m_main_sheet);
-		const auto val0 = m_prop_sheet.m_grid_color.r * COLOR_MAX;
-		const auto val1 = m_prop_sheet.m_grid_color.g * COLOR_MAX;
-		const auto val2 = m_prop_sheet.m_grid_color.b * COLOR_MAX;
-		const auto val3 = m_prop_sheet.m_grid_color.a * COLOR_MAX;
+		m_dialog_page.set_attr_to(&m_main_page);
+		const auto val0 = m_dialog_page.m_grid_color.r * COLOR_MAX;
+		const auto val1 = m_dialog_page.m_grid_color.g * COLOR_MAX;
+		const auto val2 = m_dialog_page.m_grid_color.b * COLOR_MAX;
+		const auto val3 = m_dialog_page.m_grid_color.a * COLOR_MAX;
 
-		prop_slider_0().Maximum(255.0);
-		prop_slider_0().TickFrequency(1.0);
-		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_0().Value(val0);
+		dialog_slider_0().Maximum(255.0);
+		dialog_slider_0().TickFrequency(1.0);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(val0);
 		grid_slider_set_header<UNDO_OP::GRID_COLOR, 0>(val0);
-		prop_slider_1().Maximum(255.0);
-		prop_slider_1().TickFrequency(1.0);
-		prop_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_1().Value(val1);
+		dialog_slider_1().Maximum(255.0);
+		dialog_slider_1().TickFrequency(1.0);
+		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_1().Value(val1);
 		grid_slider_set_header<UNDO_OP::GRID_COLOR, 1>(val1);
-		prop_slider_2().Maximum(255.0);
-		prop_slider_2().TickFrequency(1.0);
-		prop_slider_2().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_2().Value(val2);
+		dialog_slider_2().Maximum(255.0);
+		dialog_slider_2().TickFrequency(1.0);
+		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_2().Value(val2);
 		grid_slider_set_header<UNDO_OP::GRID_COLOR, 2>(val2);
-		prop_slider_3().Maximum(255.0);
-		prop_slider_3().TickFrequency(1.0);
-		prop_slider_3().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_3().Value(val3);
+		dialog_slider_3().Maximum(255.0);
+		dialog_slider_3().TickFrequency(1.0);
+		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_3().Value(val3);
 		grid_slider_set_header<UNDO_OP::GRID_COLOR, 3>(val3);
 
-		prop_slider_0().Visibility(Visibility::Visible);
-		prop_slider_1().Visibility(Visibility::Visible);
-		prop_slider_2().Visibility(Visibility::Visible);
-		prop_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 0> });
-		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 1> });
-		const auto slider_2_token = prop_slider_2().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 2> });
-		const auto slider_3_token = prop_slider_3().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 3> });
+		dialog_slider_0().Visibility(Visibility::Visible);
+		dialog_slider_1().Visibility(Visibility::Visible);
+		dialog_slider_2().Visibility(Visibility::Visible);
+		dialog_slider_3().Visibility(Visibility::Visible);
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 3> });
 
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			if (!equal(m_main_sheet.m_grid_color, m_prop_sheet.m_grid_color)) {
-				ustack_push_set<UNDO_OP::GRID_COLOR>(&m_main_sheet, m_prop_sheet.m_grid_color);
+			if (!equal(m_main_page.m_grid_color, m_dialog_page.m_grid_color)) {
+				ustack_push_set<UNDO_OP::GRID_COLOR>(&m_main_page, m_dialog_page.m_grid_color);
 				ustack_is_enable();
-				sheet_draw();
+				page_draw();
 			}
 		}
 
-		prop_slider_0().Visibility(Visibility::Collapsed);
-		prop_slider_1().Visibility(Visibility::Collapsed);
-		prop_slider_2().Visibility(Visibility::Collapsed);
-		prop_slider_3().Visibility(Visibility::Collapsed);
-		prop_slider_0().ValueChanged(slider_0_token);
-		prop_slider_1().ValueChanged(slider_1_token);
-		prop_slider_2().ValueChanged(slider_2_token);
-		prop_slider_3().ValueChanged(slider_3_token);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_1().Visibility(Visibility::Collapsed);
+		dialog_slider_2().Visibility(Visibility::Collapsed);
+		dialog_slider_3().Visibility(Visibility::Collapsed);
+		dialog_slider_0().ValueChanged(slider_0_token);
+		dialog_slider_1().ValueChanged(slider_1_token);
+		dialog_slider_2().ValueChanged(slider_2_token);
+		dialog_slider_3().ValueChanged(slider_3_token);
 	}
 
-	// 用紙メニューの「方眼の大きさ」>「大きさ」が選択された.
+	// 方眼メニューの「方眼の大きさ」>「大きさ」が選択された.
 	IAsyncAction MainPage::grid_len_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_prop_sheet.set_attr_to(&m_main_sheet);
+		m_dialog_page.set_attr_to(&m_main_page);
 		float g_base;
-		m_prop_sheet.get_grid_base(g_base);
+		m_dialog_page.get_grid_base(g_base);
 
-		prop_slider_0().Maximum(MAX_VALUE);
-		prop_slider_0().TickFrequency(TICK_FREQ);
-		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_0().Value(g_base);
+		dialog_slider_0().Maximum(MAX_VALUE);
+		dialog_slider_0().TickFrequency(TICK_FREQ);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(g_base);
 		grid_slider_set_header<UNDO_OP::GRID_BASE, 0>(g_base);
-		prop_slider_0().Visibility(Visibility::Visible);
-		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed<UNDO_OP::GRID_BASE, 0> });
-		//const auto samp_w = scp_prop_panel().Width();
-		//const auto samp_h = scp_prop_panel().Height();
+		dialog_slider_0().Visibility(Visibility::Visible);
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed<UNDO_OP::GRID_BASE, 0> });
+		//const auto samp_w = scp_dialog_panel().Width();
+		//const auto samp_h = scp_dialog_panel().Height();
 
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			float samp_val;
-			float sheet_val;
+			float setting_val;
+			float page_val;
 
-			m_main_sheet.get_grid_base(sheet_val);
-			m_prop_sheet.get_grid_base(samp_val);
-			if (!equal(sheet_val, samp_val)) {
-				ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, samp_val);
+			m_main_page.get_grid_base(page_val);
+			m_dialog_page.get_grid_base(setting_val);
+			if (!equal(page_val, setting_val)) {
+				ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_page, setting_val);
 				ustack_is_enable();
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 
 		}
-		prop_slider_0().Visibility(Visibility::Collapsed);
-		prop_slider_0().ValueChanged(slider_0_token);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_0().ValueChanged(slider_0_token);
 	}
 
-	// 用紙メニューの「方眼の大きさ」>「狭める」が選択された.
+	// 方眼メニューの「方眼の大きさ」>「狭める」が選択された.
 	void MainPage::grid_len_con_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		float g_base;
-		m_main_sheet.get_grid_base(g_base);
+		m_main_page.get_grid_base(g_base);
 		const float val = (g_base + 1.0f) * 0.5f - 1.0f;
 		if (val >= 1.0f) {
-			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, val);
+			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_page, val);
 			ustack_is_enable();
-			sheet_draw();
+			page_draw();
 		}
 	}
 
-	// 用紙メニューの「方眼の大きさ」>「広げる」が選択された.
+	// 方眼メニューの「方眼の大きさ」>「広げる」が選択された.
 	void MainPage::grid_len_exp_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		float g_base;
-		m_main_sheet.get_grid_base(g_base);
+		m_main_page.get_grid_base(g_base);
 		const float val = (g_base + 1.0f) * 2.0f - 1.0f;
-		if (val <= max(m_main_sheet.m_sheet_size.width, m_main_sheet.m_sheet_size.height)) {
-			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_sheet, val);
+		if (val <= max(m_main_page.m_page_size.width, m_main_page.m_page_size.height)) {
+			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_page, val);
 			ustack_is_enable();
-			sheet_draw();
+			page_draw();
 		}
 	}
 
@@ -191,7 +191,7 @@ namespace winrt::GraphPaper::implementation
 
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			float g_base;
-			m_main_sheet.get_grid_base(g_base);
+			m_main_page.get_grid_base(g_base);
 			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val + 1.0f, m_main_d2d.m_logical_dpi, g_len, buf);
@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 			conv_col_to_str(m_color_code, val, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
-		prop_set_slider_header<S>(text);
+		dialog_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.
@@ -217,13 +217,13 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::GRID_BASE) {
 			const float val = static_cast<float>(args.NewValue());
 			grid_slider_set_header<U, S>(val);
-			m_prop_sheet.set_grid_base(val);
+			m_dialog_page.set_grid_base(val);
 		}
 		else if constexpr (U == UNDO_OP::GRID_COLOR) {
 			const float val = static_cast<float>(args.NewValue());
 			grid_slider_set_header<U, S>(val);
 			D2D1_COLOR_F g_color;
-			m_prop_sheet.get_grid_color(g_color);
+			m_dialog_page.get_grid_color(g_color);
 			if constexpr (S == 0) {
 				g_color.r = val / COLOR_MAX;
 			}
@@ -236,14 +236,14 @@ namespace winrt::GraphPaper::implementation
 			else if constexpr (S == 3) {
 				g_color.a = val / COLOR_MAX;
 			}
-			m_prop_sheet.set_grid_color(g_color);
+			m_dialog_page.set_grid_color(g_color);
 		}
-		if (scp_prop_panel().IsLoaded()) {
-			prop_sample_draw();
+		if (scp_dialog_panel().IsLoaded()) {
+			dialog_draw();
 		}
 	}
 
-	// 用紙メニューの「方眼の表示」>「最背面」が選択された.
+	// 方眼メニューの「方眼の表示」>「最背面」が選択された.
 	void MainPage::grid_show_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		GRID_SHOW val;
@@ -260,14 +260,14 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		grid_show_is_checked(val);
-		if (m_main_sheet.m_grid_show != val) {
-			ustack_push_set<UNDO_OP::GRID_SHOW>(&m_main_sheet, val);
+		if (m_main_page.m_grid_show != val) {
+			ustack_push_set<UNDO_OP::GRID_SHOW>(&m_main_page, val);
 			ustack_is_enable();
-			sheet_draw();
+			page_draw();
 		}
 	}
 
-	// 用紙メニューの「方眼の表示」に印をつける.
+	// 方眼メニューの「方眼の表示」に印をつける.
 	// g_show	方眼の表示
 	void MainPage::grid_show_is_checked(const GRID_SHOW g_show)
 	{
@@ -279,10 +279,10 @@ namespace winrt::GraphPaper::implementation
 		//rmfi_grid_show_hide_2().IsChecked(g_show == GRID_SHOW::HIDE);
 	}
 
-	// 用紙メニューの「方眼に合わせる」が選択された.
+	// 方眼メニューの「方眼に合わせる」が選択された.
 	void MainPage::grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		m_main_sheet.m_grid_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
+		m_main_page.m_grid_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
 	}
 
 }

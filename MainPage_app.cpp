@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_mutex_draw.lock();
 		m_main_d2d.Trim();
-		m_prop_d2d.Trim();
+		m_dialog_d2d.Trim();
 		m_mutex_draw.unlock();
 	}
 
@@ -60,22 +60,15 @@ namespace winrt::GraphPaper::implementation
 		ShapeText::set_available_fonts(m_main_d2d);
 
 		// アプリケーションデータを読み込む.
-		IStorageItem app_data_item{ co_await ApplicationData::Current().LocalCacheFolder().TryGetItemAsync(APP_DATA_FILE) };
+		IStorageItem app_data_item{
+			co_await ApplicationData::Current().LocalCacheFolder().TryGetItemAsync(APP_DATA_FILE) 
+		};
 		if (app_data_item != nullptr) {
 			StorageFile app_data_file = app_data_item.try_as<StorageFile>();
 			if (app_data_file != nullptr) {
-				HRESULT hr = E_FAIL;
-				try {
-					hr = co_await file_read_async<true, false>(app_data_file);
-				}
-				catch (winrt::hresult_error const& e) {
-					hr = e.code();
-				}
-				if (hr != S_OK) {
-					constexpr wchar_t ERR_LOAD[] = L"str_err_load";	// 設定読み込みのエラーメッセージのリソース名
-					co_await winrt::resume_foreground(Dispatcher());
-					message_show(ICON_ALERT, L"str_err_load", {});
-				}
+				constexpr bool RESUME = true;
+				constexpr bool SETTING_ONLY = true;
+				co_await file_read_async<RESUME, !SETTING_ONLY>(app_data_file);
 				app_data_file = nullptr;
 			}
 			app_data_item = nullptr;

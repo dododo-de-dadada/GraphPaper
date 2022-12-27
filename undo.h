@@ -49,8 +49,8 @@ namespace winrt::GraphPaper::implementation
 		FORM,	// 図形の形 (部位の位置) の操作
 		MOVE,	// 図形の移動の操作
 		SELECT,	// 図形の選択を切り替え
-		SHEET_COLOR,	// 用紙の色の操作
-		SHEET_SIZE,	// 用紙の寸法の操作
+		PAGE_COLOR,	// ページの色の操作
+		PAGE_SIZE,	// ページの寸法の操作
 		STROKE_CAP,	// 端の形式の操作
 		STROKE_COLOR,	// 線枠の色の操作
 		STROKE_WIDTH,	// 線枠の太さの操作
@@ -92,8 +92,8 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_OP::JOIN_LIMIT> { using type = float; };
 	template <> struct U_TYPE<UNDO_OP::JOIN_STYLE> { using type = D2D1_LINE_JOIN; };
 	template <> struct U_TYPE<UNDO_OP::MOVE> { using type = D2D1_POINT_2F; };
-	template <> struct U_TYPE<UNDO_OP::SHEET_COLOR> { using type = D2D1_COLOR_F; };
-	template <> struct U_TYPE<UNDO_OP::SHEET_SIZE> { using type = D2D1_SIZE_F; };
+	template <> struct U_TYPE<UNDO_OP::PAGE_COLOR> { using type = D2D1_COLOR_F; };
+	template <> struct U_TYPE<UNDO_OP::PAGE_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_CAP> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_OP::STROKE_WIDTH> { using type = float; };
@@ -121,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を参照しているか判定する.
 		virtual bool refer_to(const Shape* s) const noexcept { return m_shape == s; };
 		// 参照する図形リストと用紙図形を格納する.
-		static void set(SHAPE_LIST* slist, ShapeSheet* s_sheet) noexcept;
+		static void set(SHAPE_LIST* slist, ShapePage* page) noexcept;
 		// 操作する図形を得る.
 		Shape* shape(void) const noexcept { return m_shape; }
 		// 操作を作成する.

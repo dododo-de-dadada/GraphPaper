@@ -129,7 +129,7 @@ namespace winrt::GraphPaper::implementation
 	// val	得られた位置
 	void ShapeStroke::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
 	{
-		if (anc == ANC_TYPE::ANC_SHEET || anc == ANC_TYPE::ANC_P0) {
+		if (anc == ANC_TYPE::ANC_VIEW || anc == ANC_TYPE::ANC_P0) {
 			// 図形の部位が「外部」または「開始点」ならば, 開始位置を得る.
 			val = m_pos;
 		}
@@ -195,10 +195,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を含むか判定する.
-	// 戻り値	つねに ANC_SHEET
+	// 戻り値	つねに ANC_VIEW
 	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept
 	{
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	// 範囲に含まれるか判定する.
@@ -482,17 +482,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// s_sheet	用紙
-	ShapeStroke::ShapeStroke(const ShapeSheet* s_sheet) :
+	// setting	設定
+	ShapeStroke::ShapeStroke(const ShapePage* page) :
 		//ShapeSelect(),
-		m_dash_cap(s_sheet->m_dash_cap),
-		m_stroke_cap(s_sheet->m_stroke_cap),
-		m_stroke_color(s_sheet->m_stroke_color),
-		m_dash_patt(s_sheet->m_dash_patt),
-		m_dash_style(s_sheet->m_dash_style),
-		m_join_miter_limit(s_sheet->m_join_miter_limit),
-		m_join_style(s_sheet->m_join_style),
-		m_stroke_width(s_sheet->m_stroke_width),
+		m_dash_cap(page->m_dash_cap),
+		m_stroke_cap(page->m_stroke_cap),
+		m_stroke_color(page->m_stroke_color),
+		m_dash_patt(page->m_dash_patt),
+		m_dash_style(page->m_dash_style),
+		m_join_miter_limit(page->m_join_miter_limit),
+		m_join_style(page->m_join_style),
+		m_stroke_width(page->m_stroke_width),
 		m_d2d_stroke_style(nullptr)
 	{}
 

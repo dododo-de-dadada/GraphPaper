@@ -134,16 +134,16 @@ namespace winrt::GraphPaper::implementation
 	// https://techracho.bpsinc.jp/west/2018_12_07/65062
 	// グリフとグリフの実行
 	// https://learn.microsoft.com/ja-JP/windows/win32/directwrite/glyphs-and-glyph-runs
-	IAsyncOperation<winrt::hresult> MainPage::export_to_pdf_async(const StorageFile pdf_file) const noexcept
+	IAsyncOperation<winrt::hresult> MainPage::export_as_pdf_async(const StorageFile pdf_file) const noexcept
 	{
 		HRESULT hr = E_FAIL;
 		try {
 			char buf[1024];	// PDF
 
-			// 用紙の幅と高さを, D2D の固定 DPI (96dpi) から PDF の 72dpi に,
+			// 表示の幅と高さを, D2D の固定 DPI (96dpi) から PDF の 72dpi に,
 			// 変換する (モニターに応じて変化する論理 DPI は用いない). 
-			const float w_pt = m_main_sheet.m_sheet_size.width * 72.0f / 96.0f;	// 変換された幅
-			const float h_pt = m_main_sheet.m_sheet_size.height * 72.0f / 96.0f;	// 変換された高さ
+			const float w_pt = m_main_page.m_page_size.width * 72.0f / 96.0f;	// 変換された幅
+			const float h_pt = m_main_page.m_page_size.height * 72.0f / 96.0f;	// 変換された高さ
 
 			// ストレージファイルを開いて, ストリームとそのデータライターを得る.
 			const IRandomAccessStream& pdf_stream{
@@ -216,7 +216,7 @@ namespace winrt::GraphPaper::implementation
 			// フォント
 			int font_cnt = 0;
 			std::vector<std::vector<char>> base_font;	// ベースフォント名
-			for (const auto s : m_main_sheet.m_shape_list) {
+			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
@@ -239,7 +239,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 画像
 			int image_cnt = 0;
-			for (const auto s : m_main_sheet.m_shape_list) {
+			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
@@ -284,21 +284,21 @@ namespace winrt::GraphPaper::implementation
 				"%f %f %f rg\n"
 				"0 0 %f %f re\n"
 				"b\n",
-				m_main_sheet.m_sheet_color.r,
-				m_main_sheet.m_sheet_color.g,
-				m_main_sheet.m_sheet_color.b,
-				m_main_sheet.m_sheet_size.width,
-				m_main_sheet.m_sheet_size.height
+				m_main_page.m_page_color.r,
+				m_main_page.m_page_color.g,
+				m_main_page.m_page_color.b,
+				m_main_page.m_page_size.width,
+				m_main_page.m_page_size.height
 			);
 			len += dt_write(buf, dt_writer);
 
 			// 図形を出力
-			const D2D1_SIZE_F sheet_size = m_main_sheet.m_sheet_size;
-			for (const auto s : m_main_sheet.m_shape_list) {
+			const D2D1_SIZE_F page_size = m_main_page.m_page_size;
+			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
-				len += s->export_pdf(sheet_size, dt_writer);
+				len += s->export_pdf(page_size, dt_writer);
 			}
 			len += dt_write(
 				"Q\n"
@@ -308,7 +308,7 @@ namespace winrt::GraphPaper::implementation
 			obj_len.push_back(obj_len.back() + len);
 
 			// 画像 XObject (ストリームオブジェクト) とフォント辞書
-			for (const auto s : m_main_sheet.m_shape_list) {
+			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
@@ -556,7 +556,7 @@ namespace winrt::GraphPaper::implementation
 	// svg_file	書き込み先のファイル
 	// 戻り値	書き込めた場合 S_OK
 	//-------------------------------
-	IAsyncOperation<winrt::hresult> MainPage::export_to_image_async(const StorageFile& image_file) noexcept
+	IAsyncOperation<winrt::hresult> MainPage::export_as_raster_async(const StorageFile& image_file) noexcept
 	{
 		HRESULT hr = E_FAIL;
 
@@ -629,8 +629,8 @@ namespace winrt::GraphPaper::implementation
 
 				// デバイスの作成
 				/*
-				const UINT w = m_main_sheet.m_sheet_size.width;
-				const UINT h = m_main_sheet.m_sheet_size.height;
+				const UINT w = m_main_page.m_page_size.width;
+				const UINT h = m_main_page.m_page_size.height;
 				std::vector<uint8_t> mem(4 * w * h);
 				winrt::com_ptr<IWICBitmap> wic_bitmap;
 				ShapeImage::wic_factory->CreateBitmapFromMemory(
@@ -655,13 +655,13 @@ namespace winrt::GraphPaper::implementation
 				D2D_UI d2d;
 
 				// ビットマップレンダーターゲットの作成
-				const UINT32 sheet_w = static_cast<UINT32>(m_main_sheet.m_sheet_size.width);
-				const UINT32 sheet_h = static_cast<UINT32>(m_main_sheet.m_sheet_size.height);
+				const UINT32 page_w = static_cast<UINT32>(m_main_page.m_page_size.width);
+				const UINT32 page_h = static_cast<UINT32>(m_main_page.m_page_size.height);
 				winrt::com_ptr<ID2D1BitmapRenderTarget> target;
 				winrt::check_hresult(
 					d2d.m_d2d_context->CreateCompatibleRenderTarget(
-						m_main_sheet.m_sheet_size,
-						D2D_SIZE_U{ sheet_w, sheet_h },
+						m_main_page.m_page_size,
+						D2D_SIZE_U{ page_w, page_h },
 						D2D1_PIXEL_FORMAT{
 							DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM,
 							D2D1_ALPHA_MODE::D2D1_ALPHA_MODE_PREMULTIPLIED,
@@ -672,7 +672,7 @@ namespace winrt::GraphPaper::implementation
 				);
 
 				// レンダーターゲット依存のオブジェクトを消去
-				for (const auto s : m_main_sheet.m_shape_list) {
+				for (const auto s : m_main_page.m_shape_list) {
 					if (typeid(*s) == typeid(ShapeImage)) {
 						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
 					}
@@ -692,17 +692,17 @@ namespace winrt::GraphPaper::implementation
 
 				// ビットマップへの描画
 				m_mutex_draw.lock();
-				Shape::s_target->SaveDrawingState(m_main_sheet.m_state_block.get());
+				Shape::s_target->SaveDrawingState(m_main_page.m_state_block.get());
 				Shape::s_target->BeginDraw();
-				m_main_sheet.draw();
+				m_main_page.draw();
 				winrt::check_hresult(
 					Shape::s_target->EndDraw()
 				);
-				Shape::s_target->RestoreDrawingState(m_main_sheet.m_state_block.get());
+				Shape::s_target->RestoreDrawingState(m_main_page.m_state_block.get());
 				m_mutex_draw.unlock();
 
 				// レンダーターゲット依存のオブジェクトを消去
-				for (const auto s : m_main_sheet.m_shape_list) {
+				for (const auto s : m_main_page.m_shape_list) {
 					if (typeid(*s) == typeid(ShapeImage)) {
 						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
 					}
@@ -751,7 +751,7 @@ namespace winrt::GraphPaper::implementation
 	// svg_file	書き込み先のファイル
 	// 戻り値	書き込めた場合 S_OK
 	//-------------------------------
-	IAsyncOperation<winrt::hresult> MainPage::export_to_svg_async(const StorageFile& svg_file) const noexcept
+	IAsyncOperation<winrt::hresult> MainPage::export_as_svg_async(const StorageFile& svg_file) const noexcept
 	{
 		HRESULT hr = E_FAIL;
 		try {
@@ -769,10 +769,10 @@ namespace winrt::GraphPaper::implementation
 				L"\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
 			// SVG 開始タグを書き込む.
 			{
-				const auto size = m_main_sheet.m_sheet_size;	// 用紙の大きさ
+				const auto size = m_main_page.m_page_size;	// 表示の大きさ
 				const auto unit = m_len_unit;	// 長さの単位
 				const auto dpi = m_main_d2d.m_logical_dpi;	// 論理 DPI
-				const auto color = m_main_sheet.m_sheet_color;	// 背景色
+				const auto color = m_main_page.m_page_color;	// 背景色
 
 				// 単位付きで幅と高さの属性を書き込む.
 				wchar_t buf[1024];	// 出力バッファ
@@ -819,16 +819,16 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 図形リストの各図形について以下を繰り返す.
-			for (auto s : m_main_sheet.m_shape_list) {
+			for (auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
 				if (typeid(*s) == typeid(ShapeGroup)) {
-					co_await static_cast<const ShapeGroup*>(s)->export_to_svg_async(dt_writer);
+					co_await static_cast<const ShapeGroup*>(s)->export_as_svg_async(dt_writer);
 				}
 				// 図形が画像か判定する.
 				else if (typeid(*s) == typeid(ShapeImage)) {
-					co_await static_cast<const ShapeImage*>(s)->export_to_svg_async(dt_writer);
+					co_await static_cast<const ShapeImage*>(s)->export_as_svg_async(dt_writer);
 				}
 				else {
 					s->export_svg(dt_writer);

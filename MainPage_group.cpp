@@ -18,7 +18,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		SHAPE_LIST slist;
-		slist_get_selected<Shape>(m_main_sheet.m_shape_list, slist);
+		slist_get_selected<Shape>(m_main_page.m_shape_list, slist);
 		ShapeGroup* g = new ShapeGroup();
 #if defined(_DEBUG)
 		debug_leak_cnt++;
@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 		ustack_push_select(g);
 		ustack_push_null();
 		xcvd_is_enabled();
-		sheet_draw();
+		page_draw();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_append(g);
@@ -52,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 選択されたグループ図形のリストを得て, リストが空か判定する.
 		SHAPE_LIST g_list;
-		slist_get_selected<ShapeGroup>(m_main_sheet.m_shape_list, g_list);
+		slist_get_selected<ShapeGroup>(m_main_page.m_shape_list, g_list);
 		if (g_list.empty()) {
 			return;
 		}
@@ -89,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		ustack_push_null();
 		xcvd_is_enabled();
-		sheet_draw();
+		page_draw();
 	}
 
 }

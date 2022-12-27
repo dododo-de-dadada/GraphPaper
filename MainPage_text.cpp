@@ -19,13 +19,13 @@ namespace winrt::GraphPaper::implementation
 	constexpr float TEXT_LINE_SP_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
 
 	// 見本の図形を作成する.
-	static void text_create_sample_shape(const float panel_w, const float panel_h, ShapeSheet& prop_sheet);
+	static void text_create_sample_shape(const float panel_w, const float panel_h, ShapePage& setting);
 
 	// 見本の図形を作成する.
 	// panel_w	見本を表示するパネルの幅
 	// panel_h	見本を表示するパネルの高さ
 	// prop_sheet	見本を表示するシート
-	static void text_create_sample_shape(const float panel_w, const float panel_h, ShapeSheet& prop_sheet)
+	static void text_create_sample_shape(const float panel_w, const float panel_h, ShapePage& setting)
 	{
 		const auto padd_w = panel_w * 0.125;
 		const auto padd_h = panel_h * 0.25;
@@ -39,7 +39,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			text = pang.c_str();
 		}
-		prop_sheet.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &prop_sheet));
+		setting.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &setting));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -49,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_frame_fit_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto flag = false;
-		for (auto s : m_main_sheet.m_shape_list) {
+		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
 			}
@@ -60,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			auto u = new UndoForm(s, ANC_TYPE::ANC_SE);
-			if (static_cast<ShapeText*>(s)->frame_fit(m_main_sheet.m_grid_snap ? m_main_sheet.m_grid_base + 1.0f : 0.0f)) {
+			if (static_cast<ShapeText*>(s)->frame_fit(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f)) {
 				m_ustack_undo.push_back(u);
 				if (!flag) {
 					flag = true;
@@ -72,8 +72,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (flag) {
 			ustack_push_null();
-			sheet_panle_size();
-			sheet_draw();
+			page_panel_size();
+			page_draw();
 		}
 	}
 
@@ -97,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_OP::TEXT_PAR_ALIGN>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			sheet_draw();
+			page_draw();
 		}
 	}
 
@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_OP::TEXT_ALIGN_T>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			sheet_draw();
+			page_draw();
 		}
 	}
 
@@ -160,35 +160,35 @@ namespace winrt::GraphPaper::implementation
 	{
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_prop_sheet.set_attr_to(&m_main_sheet);
+		m_dialog_page.set_attr_to(&m_main_page);
 		float val;
-		m_prop_sheet.get_text_line_sp(val);
+		m_dialog_page.get_text_line_sp(val);
 
-		prop_slider_0().Maximum(MAX_VALUE);
-		prop_slider_0().TickFrequency(TICK_FREQ);
-		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_0().Value(val);
+		dialog_slider_0().Maximum(MAX_VALUE);
+		dialog_slider_0().TickFrequency(TICK_FREQ);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(val);
 		text_slider_set_header<UNDO_OP::TEXT_LINE_SP, 0>(val);
-		prop_slider_0().Visibility(Visibility::Visible);
+		dialog_slider_0().Visibility(Visibility::Visible);
 
-		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_LINE_SP, 0> });
-		text_create_sample_shape(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()), m_prop_sheet);
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_LINE_SP, 0> });
+		text_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_line_sp")));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_line_sp")));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
-			m_prop_sheet.m_shape_list.back()->get_text_line_sp(samp_val);
+			m_dialog_page.m_shape_list.back()->get_text_line_sp(samp_val);
 			if (ustack_push_set<UNDO_OP::TEXT_LINE_SP>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 		}
-		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(Visibility::Collapsed);
-		prop_slider_0().ValueChanged(slider_0_token);
-		sheet_draw();
+		slist_clear(m_dialog_page.m_shape_list);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_0().ValueChanged(slider_0_token);
+		page_draw();
 	}
 
 	// 書体メニューの「余白」が選択された.
@@ -200,46 +200,46 @@ namespace winrt::GraphPaper::implementation
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_prop_sheet.set_attr_to(&m_main_sheet);
+		m_dialog_page.set_attr_to(&m_main_page);
 		D2D1_SIZE_F padding;
-		m_prop_sheet.get_text_padding(padding);
+		m_dialog_page.get_text_padding(padding);
 
-		prop_slider_0().Maximum(MAX_VALUE);
-		prop_slider_0().TickFrequency(TICK_FREQ);
-		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_0().Value(padding.width);
+		dialog_slider_0().Maximum(MAX_VALUE);
+		dialog_slider_0().TickFrequency(TICK_FREQ);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(padding.width);
 		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 0>(padding.width);
 
-		prop_slider_1().Maximum(MAX_VALUE);
-		prop_slider_1().TickFrequency(TICK_FREQ);
-		prop_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_1().Value(padding.height);
+		dialog_slider_1().Maximum(MAX_VALUE);
+		dialog_slider_1().TickFrequency(TICK_FREQ);
+		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_1().Value(padding.height);
 		text_slider_set_header<UNDO_OP::TEXT_MARGIN, 1>(padding.height);
 
-		prop_slider_0().Visibility(Visibility::Visible);
-		prop_slider_1().Visibility(Visibility::Visible);
-		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_MARGIN, 0> });
-		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_MARGIN, 1> });
+		dialog_slider_0().Visibility(Visibility::Visible);
+		dialog_slider_1().Visibility(Visibility::Visible);
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_MARGIN, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_OP::TEXT_MARGIN, 1> });
 
-		text_create_sample_shape(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()), m_prop_sheet);
+		text_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_padding")));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_padding")));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_SIZE_F samp_val;
-			m_prop_sheet.m_shape_list.back()->get_text_padding(samp_val);
+			m_dialog_page.m_shape_list.back()->get_text_padding(samp_val);
 			if (ustack_push_set<UNDO_OP::TEXT_MARGIN>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 		}
-		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(Visibility::Collapsed);
-		prop_slider_1().Visibility(Visibility::Collapsed);
-		prop_slider_0().ValueChanged(slider_0_token);
-		prop_slider_1().ValueChanged(slider_1_token);
-		sheet_draw();
+		slist_clear(m_dialog_page.m_shape_list);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_1().Visibility(Visibility::Collapsed);
+		dialog_slider_0().ValueChanged(slider_0_token);
+		dialog_slider_1().ValueChanged(slider_1_token);
+		page_draw();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -256,14 +256,14 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			constexpr wchar_t* HEADER[] = { L"str_text_pad_horzorz", L"str_text_pad_vertert" };
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_sheet.m_grid_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_dialog_page.m_grid_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::TEXT_LINE_SP) {
 			constexpr wchar_t HEADER[] = L"str_text_line_sp";
 			if (val >= FLT_MIN) {
 				wchar_t buf[32];
-				conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_sheet.m_grid_base + 1.0f, buf);
+				conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_dialog_page.m_grid_base + 1.0f, buf);
 				text = ResourceLoader::GetForCurrentView().GetString(HEADER) + L": " + buf;
 			}
 			else {
@@ -271,7 +271,7 @@ namespace winrt::GraphPaper::implementation
 				text = r_loader.GetString(HEADER) + L": " + r_loader.GetString(L"str_def_val");
 			}
 		}
-		prop_set_slider_header<S>(text);
+		dialog_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.
@@ -286,23 +286,23 @@ namespace winrt::GraphPaper::implementation
 			const float val = static_cast<float>(args.NewValue());
 			text_slider_set_header<U, S>(val);
 			//m_sample_shape->set_text_line_sp(val);
-			m_prop_sheet.m_shape_list.back()->set_text_line_sp(val);
+			m_dialog_page.m_shape_list.back()->set_text_line_sp(val);
 		}
 		if constexpr (U == UNDO_OP::TEXT_MARGIN) {
 			const float val = static_cast<float>(args.NewValue());
 			text_slider_set_header<U, S>(val);
 			D2D1_SIZE_F padding;
-			m_prop_sheet.m_shape_list.back()->get_text_padding(padding);
+			m_dialog_page.m_shape_list.back()->get_text_padding(padding);
 			if constexpr (S == 0) {
 				padding.width = static_cast<FLOAT>(val);
 			}
 			if constexpr (S == 1) {
 				padding.height = static_cast<FLOAT>(val);
 			}
-			m_prop_sheet.m_shape_list.back()->set_text_padding(padding);
+			m_dialog_page.m_shape_list.back()->set_text_padding(padding);
 		}
-		if (scp_prop_panel().IsLoaded()) {
-			prop_sample_draw();
+		if (scp_dialog_panel().IsLoaded()) {
+			dialog_draw();
 		}
 	}
 

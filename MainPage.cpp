@@ -137,9 +137,6 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	MainPage::MainPage(void)
 	{
-		Shape* s = new ShapeText(D2D1_POINT_2F{ 0, 0 }, D2D1_POINT_2F{ 10, 10 }, wchar_cpy(L""), & m_main_sheet);
-		delete s;
-
 		// お約束.
 		InitializeComponent();
 
@@ -173,13 +170,13 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// D2D/DWRITE ファクトリを図形クラスに, 
-		// 図形リストと用紙をアンドゥ操作に格納する.
+		// 図形リストとページをアンドゥ操作に格納する.
 		{
 			Shape::m_aux_style = nullptr;
 			winrt::check_hresult(
 				m_main_d2d.m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
 			);
-			Undo::set(&m_main_sheet.m_shape_list, &m_main_sheet);
+			Undo::set(&m_main_page.m_shape_list, &m_main_page);
 		}
 
 		// クリックの判定時間と判定距離をシステムから得る.
@@ -188,18 +185,6 @@ namespace winrt::GraphPaper::implementation
 			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_event_click_dist = 6.0 * raw_dpi / log_dpi;
-		}
-
-		// コンテキストメニューを静的リソースから読み込む.
-		// ポップアップは静的なリソースとして定義して、複数の要素で使用することができる.
-		{
-			//using winrt::Windows::UI::Xaml::Controls::MenuFlyoutSubItem;
-			//m_menu_fill = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_fill_menu")));
-			//m_menu_font = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_front_menu")));
-			//m_menu_sheet = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_sheet_menu")));
-			//m_menu_ungroup = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ungroup_menu")));
-			//m_menu_ruler = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_ruler_menu")));
-			//m_menu_image = unbox_value<MenuFlyout>(Resources().Lookup(box_value(L"mf_image_menu")));
 		}
 
 		auto _{ file_new_click_async(nullptr, nullptr) };

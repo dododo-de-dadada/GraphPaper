@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// データライターに SVG として書き込む.
 	//------------------------------
-	winrt::Windows::Foundation::IAsyncAction ShapeGroup::export_to_svg_async(const DataWriter& dt_writer) const
+	winrt::Windows::Foundation::IAsyncAction ShapeGroup::export_as_svg_async(const DataWriter& dt_writer) const
 	{
 		dt_writer.WriteString(L"<g>\n");
 		for (const Shape* s : m_list_grouped) {
@@ -103,10 +103,10 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			if (typeid(*s) == typeid(ShapeImage)) {
-				co_await static_cast<const ShapeImage*>(s)->export_to_svg_async(dt_writer);
+				co_await static_cast<const ShapeImage*>(s)->export_as_svg_async(dt_writer);
 			}
 			else if (typeid(*s) == typeid(ShapeGroup)) {
-				co_await static_cast<const ShapeGroup*>(s)->export_to_svg_async(dt_writer);
+				co_await static_cast<const ShapeGroup*>(s)->export_as_svg_async(dt_writer);
 			}
 			else {
 				s->export_svg(dt_writer);
@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 
 	// データライターに SVG として書き込む.
 	// dt_write		データライター
-	winrt::Windows::Foundation::IAsyncAction ShapeImage::export_to_svg_async(const DataWriter& dt_writer) const
+	winrt::Windows::Foundation::IAsyncAction ShapeImage::export_as_svg_async(const DataWriter& dt_writer) const
 	{
 		// メモリのランダムアクセスストリーム
 		InMemoryRandomAccessStream image_stream{};

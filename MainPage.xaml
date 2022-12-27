@@ -53,17 +53,14 @@
 						<KeyboardAccelerator Key="S" Modifiers="Control,Shift" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutItem x:Uid="mfi_file_import_image" Click="file_import_image_click_async" Text="Import Image as Shape..." >
-					<MenuFlyoutItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_photo2}" />
-					</MenuFlyoutItem.Icon>
+				<MenuFlyoutItem x:Uid="mfi_file_import_image" Click="file_import_image_click_async" Icon="Import" Text="Import Image..." >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="I" Modifiers="Control,Shift" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutItem x:Uid="mfi_file_export_to" Click="file_export_to_click_async" Text="Export Sheet as Image..." >
+				<MenuFlyoutItem x:Uid="mfi_file_export_as" Click="file_export_as_click_async" Text="Export As..." >
 					<MenuFlyoutItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_photo2}" />
+						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_export}" />
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="E" Modifiers="Control,Shift" />
@@ -74,37 +71,37 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_recent}" />
 					</MenuFlyoutSubItem.Icon>
-                    <MenuFlyoutItem x:Name="mfi_file_recent_1" Click="file_recent_click_async" Text="" >
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial1}" />
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_file_recent_2" Click="file_recent_click_async" Text="" >
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial2}" />
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_file_recent_3" Click="file_recent_click_async" Text="" >
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial3}" />
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_file_recent_4" Click="file_recent_click_async" Text="" >
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial4}" />
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
-                    <MenuFlyoutItem x:Name="mfi_file_recent_5" Click="file_recent_click_async" Text="" >
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial5}" />
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
+					<MenuFlyoutItem x:Name="mfi_file_recent_1" Click="file_recent_click_async" Text="" >
+						<MenuFlyoutItem.Icon>
+							<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial1}" />
+						</MenuFlyoutItem.Icon>
+					</MenuFlyoutItem>
+					<MenuFlyoutItem x:Name="mfi_file_recent_2" Click="file_recent_click_async" Text="" >
+						<MenuFlyoutItem.Icon>
+							<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial2}" />
+						</MenuFlyoutItem.Icon>
+					</MenuFlyoutItem>
+					<MenuFlyoutItem x:Name="mfi_file_recent_3" Click="file_recent_click_async" Text="" >
+						<MenuFlyoutItem.Icon>
+							<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial3}" />
+						</MenuFlyoutItem.Icon>
+					</MenuFlyoutItem>
+					<MenuFlyoutItem x:Name="mfi_file_recent_4" Click="file_recent_click_async" Text="" >
+						<MenuFlyoutItem.Icon>
+							<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial4}" />
+						</MenuFlyoutItem.Icon>
+					</MenuFlyoutItem>
+					<MenuFlyoutItem x:Name="mfi_file_recent_5" Click="file_recent_click_async" Text="" >
+						<MenuFlyoutItem.Icon>
+							<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_dial5}" />
+						</MenuFlyoutItem.Icon>
+					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<MenuFlyoutItem x:Uid="mfi_exit" Click="file_exit_click_async" Icon="Cancel" Text="Exit" />
 			</muxc:MenuBarItem>
 			<!-- 編集メニュー -->
-            <muxc:MenuBarItem x:Name="mbi_edit" x:Uid="mbi_edit" AccessKey="E" Title="Edit">
+			<muxc:MenuBarItem x:Name="mbi_edit" x:Uid="mbi_edit" AccessKey="E" Title="Edit">
 				<MenuFlyoutItem x:Name="mfi_undo" x:Uid="mfi_undo" Click="ustack_undo_click" Icon="Undo" IsEnabled="False" Text="Undo" >
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Z" Modifiers="Control" />
@@ -378,17 +375,17 @@
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Name="mfi_arrow_size" x:Uid="mfi_arrow_size" Click="arrow_size_click_async" IsEnabled="False" Text="Arrowhead Size..." />
 				<MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="mfi_stroke_color" x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
+				<MenuFlyoutItem x:Name="mfi_stroke_color" x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
 			</muxc:MenuBarItem>
 			<!-- 塗りつぶしメニュー -->
-            <muxc:MenuBarItem x:Name="mbi_fill" x:Uid="mbi_fill" AccessKey="L" Title="Fill">
-                <MenuFlyoutItem x:Name="mfi_fill_color" x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
+			<muxc:MenuBarItem x:Name="mbi_fill" x:Uid="mbi_fill" AccessKey="L" Title="Fill">
+				<MenuFlyoutItem x:Name="mfi_fill_color" x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
 			</muxc:MenuBarItem>
 			<!-- 書体メニュー -->
-            <muxc:MenuBarItem x:Name="mbi_font" x:Uid="mbi_font" AccessKey="T" Title="Font">
+			<muxc:MenuBarItem x:Name="mbi_font" x:Uid="mbi_font" AccessKey="T" Title="Font">
 				<!-- 字体メニュー -->
-                <MenuFlyoutItem x:Name="mfi_font_family" x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
-                <MenuFlyoutItem x:Name="mfi_font_size" x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
+				<MenuFlyoutItem x:Name="mfi_font_family" x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
+				<MenuFlyoutItem x:Name="mfi_font_size" x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
 				<MenuFlyoutItem x:Uid="mfi_font_weight" Click="font_weight_click_async" Icon="Bold" Text="Weight..." />
 				<MenuFlyoutItem x:Uid="mfi_font_stretch" Click="font_stretch_click_async" Text="Stretch..."/>
 				<MenuFlyoutSubItem x:Uid="mfsi_font_style" Text="Style">
@@ -424,14 +421,14 @@
 				<MenuFlyoutItem x:Uid="mfi_font_color" Click="font_color_click_async" Icon="FontColor" Text="Font Color..." />
 			</muxc:MenuBarItem>
 			<!-- 画像メニュー -->
-            <muxc:MenuBarItem x:Name="mbi_image" x:Uid="mbi_image" AccessKey="I" Title="Image">
+			<muxc:MenuBarItem x:Name="mbi_image" x:Uid="mbi_image" AccessKey="I" Title="Image">
 				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
 				<MenuFlyoutItem x:Name="mfi_image_revert_to_original" x:Uid="mfi_image_revert_to_original" Click="image_revert_to_original_click" Text="Resize to Original" />
 				<MenuFlyoutSeparator />
 				<MenuFlyoutItem x:Name="mfi_image_opac" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
 			</muxc:MenuBarItem>
-			<!-- 用紙メニュー -->
-            <muxc:MenuBarItem x:Name="mbi_sheet" x:Uid="mbi_sheet" AccessKey="H" Title="Sheet">
+            <!-- 方眼メニュー -->
+            <muxc:MenuBarItem x:Name="mbi_grid" x:Uid="mbi_grid" AccessKey="G" Title="Grid">
 				<!-- 方眼メニュー -->
 				<MenuFlyoutSubItem x:Uid="mfsi_grid_show" Text="Show Grid">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_hide" x:Uid="rmfi_grid_show_hide" Click="grid_show_click" Text="Hide" GroupName="gn_grid_show"/>
@@ -452,54 +449,54 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_2" x:Uid="rmfi_grid_emph_2" Click="grid_emph_click" Text="Pattern 2" GroupName="gn_grid_emph" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_emph_3" x:Uid="rmfi_grid_emph_3" Click="grid_emph_click" Text="Pattern 3" GroupName="gn_grid_emph" />
 				</MenuFlyoutSubItem>
-				<!-- 用紙メニュー -->
-				<MenuFlyoutItem x:Uid="mfi_sheet_size" Click="sheet_size_click_async" Text="Sheet Size..." />
-				<MenuFlyoutItem x:Uid="mfi_sheet_color" Click="sheet_color_click_async" Text="Sheet Color..." />
-				<MenuFlyoutItem x:Uid="mfi_sheet_prop_save" Click="sheet_prop_save_click_async" Text="Save Sheet properence" />
-				<MenuFlyoutItem x:Name="mfi_sheet_prop_reset" x:Uid="mfi_sheet_prop_reset" Click="sheet_prop_reset_click_async" Text="Reset Sheet properence" />
+				<!-- 表示メニュー -->
+				<MenuFlyoutItem x:Uid="mfi_page_size" Click="page_size_click_async" Text="Page Size..." />
+                <MenuFlyoutItem x:Uid="mfi_page_color" Click="page_color_click_async" Text="Page Color..." />
+                <MenuFlyoutItem x:Uid="mfi_page_setting_save" Click="page_setting_save_click_async" Text="Save Page setting" />
+                <MenuFlyoutItem x:Name="mfi_page_setting_reset" x:Uid="mfi_page_setting_reset" Click="page_setting_reset_click_async" Text="Reset Page Setting" />
 				<MenuFlyoutSeparator />
 				<!-- 拡大率メニュー -->
-				<MenuFlyoutSubItem x:Uid="mfsi_sheet_zoom" Text="Zoom">
+				<MenuFlyoutSubItem x:Uid="mfsi_page_zoom" Text="Zoom">
 					<!--
-					<MenuFlyoutItem x:Uid="mfi_sheet_zoom_in" Click="mfi_sheet_zoom_in_clicked" Icon="ZoomIn" Text="In" />
-					<MenuFlyoutItem x:Uid="mfi_sheet_zoom_out" Click="mfi_sheet_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
+					<MenuFlyoutItem x:Uid="mfi_page_zoom_in" Click="mfi_page_zoom_in_clicked" Icon="ZoomIn" Text="In" />
+					<MenuFlyoutItem x:Uid="mfi_page_zoom_out" Click="mfi_page_zoom_out_clicked" Icon="ZoomOut" Text="Out" />
 					<MenuFlyoutSeparator />
-					<MenuFlyoutItem x:Uid="mfi_sheet_zoom_100" Click="mfi_sheet_zoom_100_click" Icon="Zoom" Text="Reset">
+					<MenuFlyoutItem x:Uid="mfi_page_zoom_100" Click="mfi_page_zoom_100_click" Icon="Zoom" Text="Reset">
 						<MenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
 						</MenuFlyoutItem.KeyboardAccelerators>
 					</MenuFlyoutItem>
 					-->
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_sheet_zoom_025" Click="sheet_zoom_click" Icon="ZoomOut" Text="25%" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_sheet_zoom_050" Click="sheet_zoom_click" Icon="ZoomOut" Text="50%">
-                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_025" Click="page_zoom_click" Icon="ZoomOut" Text="25%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_050" Click="page_zoom_click" Icon="ZoomOut" Text="50%">
+						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number0" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad0" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_sheet_zoom_075" Click="sheet_zoom_click" Icon="ZoomOut" Text="75%" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_sheet_zoom_100" Click="sheet_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+1" Icon="Zoom" Text="100%">
-                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_075" Click="page_zoom_click" Icon="ZoomOut" Text="75%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_100" Click="page_zoom_click" KeyboardAcceleratorTextOverride="Ctrl+1" Icon="Zoom" Text="100%">
+						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number1" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad1" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_sheet_zoom_150" Click="sheet_zoom_click" Icon="ZoomIn" Text="150%" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_sheet_zoom_200" Click="sheet_zoom_click" Icon="ZoomIn" Text="200%">
-                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_150" Click="page_zoom_click" Icon="ZoomIn" Text="150%" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_200" Click="page_zoom_click" Icon="ZoomIn" Text="200%">
+						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number2" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad2" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_sheet_zoom_300" Click="sheet_zoom_click" Icon="ZoomIn" Text="300%">
-                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_300" Click="page_zoom_click" Icon="ZoomIn" Text="300%">
+						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number3" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad3" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_sheet_zoom_400" Click="sheet_zoom_click" Icon="ZoomIn" Text="400%" >
-                        <muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_page_zoom_400" Click="page_zoom_click" Icon="ZoomIn" Text="400%" >
+						<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 							<KeyboardAccelerator Key="Number4" Modifiers="Control"/>
 							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
@@ -536,7 +533,7 @@
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_unit" x:Uid="tmfi_status_bar_unit" Click="status_bar_click" Text="Unit Name" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_pos" x:Uid="tmfi_status_bar_pos" Click="status_bar_click" Text="Cursor Pos" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_grid" x:Uid="tmfi_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_sheet" x:Uid="tmfi_status_bar_sheet" Click="status_bar_click" Text="Sheet Size" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_page" x:Uid="tmfi_status_bar_page" Click="status_bar_click" Text="Page Size" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Name="mfi_stick_to_vertex" x:Uid="mfi_stick_to_vertex" Click="stick_to_vertex_click_async" Text="Stick to Vertex..." />
@@ -596,13 +593,13 @@
 		</Grid>
 
 		<!--</Grid>-->
-		<!-- 用紙パネル -->
+        <!-- 表示パネル -->
 		<RelativePanel Grid.Row="1" Grid.Column="0" >
 			<SwapChainPanel
-				x:Name="scp_sheet_panel"
-				CompositionScaleChanged="sheet_panel_scale_changed"
-				Loading="sheet_panel_loading"
-				Loaded="sheet_panel_loaded"
+				x:Name="scp_page_panel"
+				CompositionScaleChanged="page_panel_scale_changed"
+				Loading="page_panel_loading"
+				Loaded="page_panel_loaded"
 				KeyboardAcceleratorPlacementMode="Hidden"
 				PointerCanceled="event_canceled"
 				PointerEntered="event_entered"
@@ -615,7 +612,7 @@
 				RelativePanel.AlignTopWithPanel="True"
 				RelativePanel.AlignRightWithPanel="True"
 				RelativePanel.AlignBottomWithPanel="True"
-				SizeChanged="sheet_panel_size_changed"
+				SizeChanged="page_panel_size_changed"
 				>
 				<!--
 				通常は, MenuFlyoutItem でキーボードアクセラレータを指定すべきだが,
@@ -642,7 +639,7 @@
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_unit_2" x:Uid="tmfi_status_bar_unit" Click="status_bar_click" Text="Len Unit Name" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_pos_2" x:Uid="tmfi_status_bar_pos" Click="status_bar_click" Text="Cursor Position" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_grid_2" x:Uid="tmfi_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_sheet_2" x:Uid="tmfi_status_bar_sheet" Click="status_bar_click" Text="Sheet Size" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_page_2" x:Uid="tmfi_status_bar_page" Click="status_bar_click" Text="Page Size" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom_2" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
 				</MenuFlyout>
 			</StackPanel.ContextFlyout>
@@ -668,11 +665,11 @@
 				<TextBlock x:Uid="tk_status_bar_grid" Text="g:"/>
 				<TextBlock x:Name="tk_status_bar_grid" Text="0" />
 			</StackPanel>
-			<StackPanel x:Name="sp_status_bar_sheet" Margin="0,0,12,0" Orientation="Horizontal">
-				<TextBlock x:Uid="tk_status_bar_sheet_w" Text="w:"/>
-				<TextBlock x:Name="tk_status_bar_sheet_w" Margin="0,0,4,0" Text="0"/>
-				<TextBlock x:Uid="tk_status_bar_sheet_h" Text="h:"/>
-				<TextBlock x:Name="tk_status_bar_sheet_h" Text="0"/>
+			<StackPanel x:Name="sp_status_bar_page" Margin="0,0,12,0" Orientation="Horizontal">
+				<TextBlock x:Uid="tk_status_bar_page_w" Text="w:"/>
+				<TextBlock x:Name="tk_status_bar_page_w" Margin="0,0,4,0" Text="0"/>
+				<TextBlock x:Uid="tk_status_bar_page_h" Text="h:"/>
+				<TextBlock x:Name="tk_status_bar_page_h" Text="0"/>
 			</StackPanel>
 			<StackPanel x:Name="sp_status_bar_zoom" Margin="0,0,12,0" Orientation="Horizontal">
 				<TextBlock x:Uid="tk_status_bar_zoom" Text="z:"/>
@@ -710,12 +707,12 @@
 				<TextBlock x:Name="tk_message"/>
 			</StackPanel>
 		</ContentDialog>
-		<!-- 用紙の大きさ入力ダイアログ -->
-		<ContentDialog x:Name="cd_sheet_size_dialog" x:Uid="cd_sheet_size_dialog" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
+		<!-- 表示の大きさ入力ダイアログ -->
+		<ContentDialog x:Name="cd_page_size_dialog" x:Uid="cd_page_size_dialog" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
 			<StackPanel >
-				<TextBox x:Name="tx_sheet_width" x:Uid="tx_sheet_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="sheet_size_text_changed" />
-				<TextBox x:Name="tx_sheet_height" x:Uid="tx_sheet_height" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="sheet_size_text_changed" />
-				<TextBox x:Name="tx_sheet_size_max" x:Uid="tx_sheet_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum size" IsEnabled="false" />
+				<TextBox x:Name="tx_page_width" x:Uid="tx_page_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="page_size_text_changed" />
+				<TextBox x:Name="tx_page_height" x:Uid="tx_page_height" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="page_size_text_changed" />
+				<TextBox x:Name="tx_page_size_max" x:Uid="tx_page_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum size" IsEnabled="false" />
 			</StackPanel>
 		</ContentDialog>
 		<!-- 頂点をくっつける閾値 -->
@@ -725,31 +722,31 @@
 			</StackPanel>
 		</ContentDialog>
 		<!-- 属性ダイアログ -->
-		<ContentDialog x:Name="cd_prop_dialog" CloseButtonText="Close" Closed="prop_dialog_closed" DefaultButton="Close" Opened="prop_dialog_opened" PrimaryButtonText="Apply" Unloaded="prop_dialog_unloaded">
+		<ContentDialog x:Name="cd_setting_dialog" CloseButtonText="Close" Closed="setting_dialog_closed" DefaultButton="Close" Opened="setting_dialog_opened" PrimaryButtonText="Apply" Unloaded="setting_dialog_unloaded">
 			<RelativePanel>
 				<SwapChainPanel
-					x:Name="scp_prop_panel"
+					x:Name="scp_dialog_panel"
 					BorderBrush="{ThemeResource ButtonBackgroundThemeBrush}" BorderThickness="1" CornerRadius="1" Padding="1"
-					CompositionScaleChanged="prop_panel_scale_changed"
+					CompositionScaleChanged="dialog_panel_scale_changed"
 					Height="170"
-					Loaded="prop_panel_loaded"
+					Loaded="dialog_panel_loaded"
 					Margin="0,0,0,8"
 					MaxHeight="170"
 					MaxWidth="170"
 					RelativePanel.AlignTopWithPanel="True"
 					RelativePanel.AlignHorizontalCenterWithPanel="True"
-					SizeChanged="prop_panel_size_changed"
+					SizeChanged="dialog_panel_size_changed"
 					Width="170"
 					/>
 				<!-- Height を指定するこれ大事 -->
-				<ListView x:Name="lv_prop_list" RelativePanel.Below="scp_prop_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
-				<Slider x:Name="prop_slider_0" x:Uid = "prop_slider_0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_prop_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<Slider x:Name="prop_slider_1" x:Uid = "prop_slider_1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="prop_slider_0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<Slider x:Name="prop_slider_2" x:Uid = "prop_slider_2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="prop_slider_1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<Slider x:Name="prop_slider_3" x:Uid = "prop_slider_3" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="prop_slider_2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<Slider x:Name="prop_slider_4" x:Uid = "prop_slider_4" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="prop_slider_3" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<TextBlock x:Name="tb_version" x:Uid="tb_version" RelativePanel.Below="scp_prop_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Visibility="Collapsed" />
-				<CheckBox x:Name="prop_check_box" x:Uid="prop_check_box" Content="Check Box" IsChecked="False" RelativePanel.Below="prop_slider_0" RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
+				<ListView x:Name="lv_dialog_list" RelativePanel.Below="scp_dialog_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Width="256" />
+				<Slider x:Name="dialog_slider_0" x:Uid = "dialog_slider_0" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="scp_dialog_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider x:Name="dialog_slider_1" x:Uid = "dialog_slider_1" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="dialog_slider_0" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider x:Name="dialog_slider_2" x:Uid = "dialog_slider_2" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="dialog_slider_1" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider x:Name="dialog_slider_3" x:Uid = "dialog_slider_3" IsThumbToolTipEnabled="False" Margin="0,0,0,4" Maximum="255" Minimum="0" RelativePanel.Below="dialog_slider_2" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<Slider x:Name="dialog_slider_4" x:Uid = "dialog_slider_4" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="dialog_slider_3" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
+				<TextBlock x:Name="tb_version" x:Uid="tb_version" RelativePanel.Below="scp_dialog_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Visibility="Collapsed" />
+				<CheckBox x:Name="dialog_check_box" x:Uid="dialog_check_box" Content="Check Box" IsChecked="False" RelativePanel.Below="dialog_slider_0" RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
 			</RelativePanel>
 		</ContentDialog>
 	</Grid>

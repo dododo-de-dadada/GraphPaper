@@ -12,11 +12,9 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 図形を表示する.
-	// sh	表示する用紙
 	//------------------------------
 	void ShapeGroup::draw(void)
 	{
-		//ID2D1DeviceContext* const context = sheet.m_d2d.m_d2d_context.get();
 		ID2D1RenderTarget* const context = Shape::s_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
 
@@ -146,11 +144,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(t_pos) != ANC_TYPE::ANC_SHEET) {
+			if (s->hit_test(t_pos) != ANC_TYPE::ANC_VIEW) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	//------------------------------

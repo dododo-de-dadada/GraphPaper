@@ -489,7 +489,6 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 図形を表示する.
-	// sh	表示する用紙
 	//------------------------------
 	void ShapeBezi::draw(void)
 	{
@@ -749,7 +748,7 @@ namespace winrt::GraphPaper::implementation
 			s_arr[s_cnt + 5] = b_pos[3];
 			s_cnt += 6;
 		}
-		return ANC_TYPE::ANC_SHEET;
+		return ANC_TYPE::ANC_VIEW;
 	}
 
 	//------------------------------
@@ -854,10 +853,10 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// s_sheet	属性
+	// setting	属性
 	//------------------------------
-	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapeSheet* s_sheet) :
-		ShapePath::ShapePath(s_sheet, false)
+	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+		ShapePath::ShapePath(page, false)
 	{
 		m_pos = b_pos;
 		m_vec.resize(3);

@@ -131,11 +131,11 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::SELECT:
 			u = new UndoSelect(dt_reader);
 			break;
-		case UNDO_OP::SHEET_COLOR:
-			u = new UndoValue<UNDO_OP::SHEET_COLOR>(dt_reader);
+		case UNDO_OP::PAGE_COLOR:
+			u = new UndoValue<UNDO_OP::PAGE_COLOR>(dt_reader);
 			break;
-		case UNDO_OP::SHEET_SIZE:
-			u = new UndoValue<UNDO_OP::SHEET_SIZE>(dt_reader);
+		case UNDO_OP::PAGE_SIZE:
+			u = new UndoValue<UNDO_OP::PAGE_SIZE>(dt_reader);
 			break;
 		case UNDO_OP::MOVE:
 			u = new UndoValue<UNDO_OP::MOVE>(dt_reader);
@@ -238,9 +238,9 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		xcvd_is_enabled();
-		sheet_update_bbox();
-		sheet_panle_size();
-		sheet_draw();
+		page_bbox_update();
+		page_panel_size();
+		page_draw();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_update();
@@ -301,9 +301,9 @@ namespace winrt::GraphPaper::implementation
 			m_ustack_rcnt++;
 		}
 		xcvd_is_enabled();
-		sheet_update_bbox();
-		sheet_panle_size();
-		sheet_draw();
+		page_bbox_update();
+		page_panel_size();
+		page_draw();
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_update();
@@ -320,13 +320,13 @@ namespace winrt::GraphPaper::implementation
 		if (u_type == typeid(UndoValue<UNDO_OP::ARROW_STYLE>)) {
 			// 線枠メニューの「矢じるしの種類」に印をつける.
 			ARROW_STYLE val;
-			m_main_sheet.get_arrow_style(val);
+			m_main_page.get_arrow_style(val);
 			arrow_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::FONT_STYLE>)) {
 			// 書体メニューの「字体」に印をつける.
 			DWRITE_FONT_STYLE val;
-			m_main_sheet.get_font_style(val);
+			m_main_page.get_font_style(val);
 			font_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::GRID_BASE>)) {
@@ -334,53 +334,53 @@ namespace winrt::GraphPaper::implementation
 			status_bar_set_grid();
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::GRID_EMPH>)) {
-			// 用紙メニューの「方眼の強調」に印をつける.
+			// 方眼メニューの「方眼の強調」に印をつける.
 			GRID_EMPH val;
-			m_main_sheet.get_grid_emph(val);
+			m_main_page.get_grid_emph(val);
 			grid_emph_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::GRID_SHOW>)) {
 			GRID_SHOW val;
-			m_main_sheet.get_grid_show(val);
+			m_main_page.get_grid_show(val);
 			grid_show_is_checked(val);
 		}
-		else if (u_type == typeid(UndoValue<UNDO_OP::SHEET_SIZE>)) {
-			// 用紙の大きさをステータスバーに格納する.
-			status_bar_set_sheet();
+		else if (u_type == typeid(UndoValue<UNDO_OP::PAGE_SIZE>)) {
+			// ページの大きさをステータスバーに格納する.
+			status_bar_set_page();
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::STROKE_CAP>)) {
 			CAP_STYLE val;
-			m_main_sheet.get_stroke_cap(val);
+			m_main_page.get_stroke_cap(val);
 			cap_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::DASH_CAP>)) {
 			D2D1_CAP_STYLE val;
-			m_main_sheet.get_dash_cap(val);
+			m_main_page.get_dash_cap(val);
 			//cap_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::DASH_STYLE>)) {
 			D2D1_DASH_STYLE val;
-			m_main_sheet.get_dash_style(val);
+			m_main_page.get_dash_style(val);
 			dash_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::JOIN_STYLE>)) {
 			D2D1_LINE_JOIN val;
-			m_main_sheet.get_join_style(val);
+			m_main_page.get_join_style(val);
 			join_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::STROKE_WIDTH>)) {
 			float val;
-			m_main_sheet.get_stroke_width(val);
+			m_main_page.get_stroke_width(val);
 			stroke_width_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT val;
-			m_main_sheet.get_text_align_t(val);
+			m_main_page.get_text_align_t(val);
 			text_align_t_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_OP::TEXT_PAR_ALIGN>)) {
 			DWRITE_PARAGRAPH_ALIGNMENT val;
-			m_main_sheet.get_text_par_align(val);
+			m_main_page.get_text_par_align(val);
 			text_par_align_is_checked(val);
 		}
 	}
@@ -455,7 +455,7 @@ namespace winrt::GraphPaper::implementation
 	// any	図形すべての場合 true, 選択された図形のみの場合 false
 	void MainPage::ustack_push_move(const D2D1_POINT_2F d_vec, const bool any)
 	{
-		for (auto s : m_main_sheet.m_shape_list) {
+		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || (!any && !s->is_selected())) {
 				continue;
 			}
@@ -593,9 +593,9 @@ namespace winrt::GraphPaper::implementation
 	template<UNDO_OP U, typename T> bool MainPage::ustack_push_set(T const& val)
 	{
 		// 格納する型 T は明示しなくても引数の型から推定できる
-		m_ustack_undo.push_back(new UndoValue<U>(&m_main_sheet, val));
+		m_ustack_undo.push_back(new UndoValue<U>(&m_main_page, val));
 		auto flag = false;
-		for (auto s : m_main_sheet.m_shape_list) {
+		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
@@ -625,8 +625,8 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::ustack_push_set<UNDO_OP::GRID_SHOW>(Shape* const s, GRID_SHOW const& val);
 	template bool MainPage::ustack_push_set<UNDO_OP::JOIN_LIMIT>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_OP::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
-	template void MainPage::ustack_push_set<UNDO_OP::SHEET_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
-	template void MainPage::ustack_push_set<UNDO_OP::SHEET_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
+	template void MainPage::ustack_push_set<UNDO_OP::PAGE_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
+	template void MainPage::ustack_push_set<UNDO_OP::PAGE_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_CAP>(CAP_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_OP::STROKE_WIDTH>(float const& val);

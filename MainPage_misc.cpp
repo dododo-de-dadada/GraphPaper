@@ -18,15 +18,15 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		tb_version().Visibility(Visibility::Visible);
-		const auto def_btn = cd_prop_dialog().DefaultButton();
-		const auto pri_text = cd_prop_dialog().PrimaryButtonText();
-		const auto close_text = cd_prop_dialog().CloseButtonText();
-		cd_prop_dialog().PrimaryButtonText(L"");
-		cd_prop_dialog().CloseButtonText(L"OK");
-		cd_prop_dialog().Title(box_value(L"GraphPaper"));
+		const auto def_btn = cd_setting_dialog().DefaultButton();
+		const auto pri_text = cd_setting_dialog().PrimaryButtonText();
+		const auto close_text = cd_setting_dialog().CloseButtonText();
+		cd_setting_dialog().PrimaryButtonText(L"");
+		cd_setting_dialog().CloseButtonText(L"OK");
+		cd_setting_dialog().Title(box_value(L"GraphPaper"));
 
-		const auto samp_w = scp_prop_panel().Width();
-		const auto samp_h = scp_prop_panel().Height();
+		const auto samp_w = scp_dialog_panel().Width();
+		const auto samp_h = scp_dialog_panel().Height();
 		constexpr uint32_t misc_min = 3;
 		constexpr uint32_t misc_max = 12;
 		static uint32_t misc_cnt = misc_min;
@@ -34,23 +34,23 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F samp_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
 		POLY_OPTION p_opt{ m_drawing_poly_opt };
 		p_opt.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
-		Shape* s = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, samp_vec, &m_prop_sheet, p_opt);
+		Shape* s = new ShapePoly(D2D1_POINT_2F{ 0.0f, 0.0f }, samp_vec, &m_dialog_page, p_opt);
 		D2D1_POINT_2F b_min;
 		D2D1_POINT_2F b_max;
 		D2D1_POINT_2F b_vec;
 		s->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, b_min, b_max);
 		pt_sub(b_max, b_min, b_vec);
 		s->move(D2D1_POINT_2F{ static_cast<FLOAT>((samp_w - b_vec.x) * 0.5), static_cast<FLOAT>((samp_h - b_vec.y) * 0.5) });
-		m_prop_sheet.m_shape_list.push_back(s);
+		m_dialog_page.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
-		co_await cd_prop_dialog().ShowAsync();
-		cd_prop_dialog().PrimaryButtonText(pri_text);
-		cd_prop_dialog().CloseButtonText(close_text);
-		cd_prop_dialog().DefaultButton(def_btn);
+		co_await cd_setting_dialog().ShowAsync();
+		cd_setting_dialog().PrimaryButtonText(pri_text);
+		cd_setting_dialog().CloseButtonText(close_text);
+		cd_setting_dialog().DefaultButton(def_btn);
 		tb_version().Visibility(Visibility::Collapsed);
-		slist_clear(m_prop_sheet.m_shape_list);
+		slist_clear(m_dialog_page.m_shape_list);
 		// バージョン情報のメッセージダイアログを表示する.
 		//message_show(ICON_INFO, L"str_appname", L"str_version");
 	}
@@ -113,7 +113,7 @@ namespace winrt::GraphPaper::implementation
 		m_len_unit = l_unit;
 		status_bar_set_pos();
 		status_bar_set_grid();
-		status_bar_set_sheet();
+		status_bar_set_page();
 		status_bar_set_unit();
 	}
 
@@ -143,7 +143,7 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_prop_sheet.m_grid_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_dialog_page.m_grid_base + 1.0f, buf);
 		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_misc_vert_stick") + L": " + buf;
 		sd_misc_vert_stick().Header(box_value(text));
 	}

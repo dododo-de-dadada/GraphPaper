@@ -1,6 +1,6 @@
 //-------------------------------
 // MainPage_sheet.cpp
-// 用紙の各属性の設定
+// 表示の設定
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Foundation::IAsyncAction;
 	//using winrt::Windows::Foundation::IAsyncOperation;
 	//using winrt::Windows::Graphics::Display::DisplayInformation;
-	using winrt::Windows::Storage::ApplicationData;
+	//using winrt::Windows::Storage::ApplicationData;
 	using winrt::Windows::Storage::CreationCollisionOption;
 	//using winrt::Windows::Storage::StorageFile;
 	//using winrt::Windows::UI::Color;
@@ -27,16 +27,15 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 	using winrt::Windows::UI::Xaml::Setter;
 	//using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
+	using winrt::Windows::Storage::ApplicationData;
 
-	constexpr wchar_t DLG_TITLE[] = L"str_sheet";	// 用紙の表題
-	constexpr wchar_t SHEET_PROP[] = L"sheet_prop.dat";	// 用紙設定を格納するファイル名
+
+	constexpr wchar_t DLG_TITLE[] = L"str_page";	// 表示の表題
 	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI Variable";	// 書体名の規定値 (システムリソースに値が無かった場合)
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 
 	// 長さををピクセル単位の値に変換する.
 	static double conv_len_to_val(const LEN_UNIT l_unit, const double val, const double dpi, const double g_len) noexcept;
-	// 設定データを保存するフォルダーを得る.
-	static auto prop_local_folder(void);
 
 	// 長さををピクセル単位の値に変換する.
 	// 変換された値は, 0.5 ピクセル単位に丸められる.
@@ -67,125 +66,119 @@ namespace winrt::GraphPaper::implementation
 		return std::round(2.0 * ret) * 0.5;
 	}
 
-	// 設定データを保存するフォルダーを得る.
-	static auto prop_local_folder(void)
-	{
-		return ApplicationData::Current().LocalFolder();
-	}
-
 	// チェックマークを図形の属性関連のメニュー項目につける.
-	void MainPage::sheet_attr_is_checked(void) noexcept
+	void MainPage::page_setting_is_checked(void) noexcept
 	{
 		ARROW_STYLE a_style;
-		m_main_sheet.get_arrow_style(a_style);
+		m_main_page.get_arrow_style(a_style);
 		arrow_style_is_checked(a_style);
 
 		DWRITE_FONT_STYLE f_style;
-		m_main_sheet.get_font_style(f_style);
+		m_main_page.get_font_style(f_style);
 		font_style_is_checked(f_style);
 
 		D2D1_DASH_STYLE s_style;
-		m_main_sheet.get_dash_style(s_style);
+		m_main_page.get_dash_style(s_style);
 		dash_style_is_checked(s_style);
 
 		D2D1_LINE_JOIN j_style;
-		m_main_sheet.get_join_style(j_style);
+		m_main_page.get_join_style(j_style);
 		join_style_is_checked(j_style);
 
 		float s_width;
-		m_main_sheet.get_stroke_width(s_width);
+		m_main_page.get_stroke_width(s_width);
 		stroke_width_is_checked(s_width);
 
 		DWRITE_TEXT_ALIGNMENT t_align_t;
-		m_main_sheet.get_text_align_t(t_align_t);
+		m_main_page.get_text_align_t(t_align_t);
 		text_align_t_is_checked(t_align_t);
 
 		DWRITE_PARAGRAPH_ALIGNMENT t_par_align;
-		m_main_sheet.get_text_par_align(t_par_align);
+		m_main_page.get_text_par_align(t_par_align);
 		text_par_align_is_checked(t_par_align);
 
 		GRID_EMPH g_emph;
-		m_main_sheet.get_grid_emph(g_emph);
+		m_main_page.get_grid_emph(g_emph);
 		grid_emph_is_checked(g_emph);
 
 		GRID_SHOW g_show;
-		m_main_sheet.get_grid_show(g_show);
+		m_main_page.get_grid_show(g_show);
 		grid_show_is_checked(g_show);
 
 		bool g_snap;
-		m_main_sheet.get_grid_snap(g_snap);
+		m_main_page.get_grid_snap(g_snap);
 		tmfi_grid_snap().IsChecked(g_snap);
 
 		float scale;
-		m_main_sheet.get_sheet_scale(scale);
-		sheet_zoom_is_checked(scale);
+		m_main_page.get_page_scale(scale);
+		page_zoom_is_checked(scale);
 	}
 
-	// 用紙メニューの「用紙の色」が選択された.
-	IAsyncAction MainPage::sheet_color_click_async(IInspectable const&, RoutedEventArgs const&)
+	// 方眼メニューの「ページの色」が選択された.
+	IAsyncAction MainPage::page_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_prop_sheet.set_attr_to(&m_main_sheet);
-		const float val0 = m_prop_sheet.m_sheet_color.r * COLOR_MAX;
-		const float val1 = m_prop_sheet.m_sheet_color.g * COLOR_MAX;
-		const float val2 = m_prop_sheet.m_sheet_color.b * COLOR_MAX;
+		m_dialog_page.set_attr_to(&m_main_page);
+		const float val0 = m_dialog_page.m_page_color.r * COLOR_MAX;
+		const float val1 = m_dialog_page.m_page_color.g * COLOR_MAX;
+		const float val2 = m_dialog_page.m_page_color.b * COLOR_MAX;
 
-		prop_slider_0().Maximum(255.0);
-		prop_slider_0().TickFrequency(1.0);
-		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_0().Value(val0);
-		sheet_slider_set_header<UNDO_OP::SHEET_COLOR, 0>(val0);
-		prop_slider_1().Maximum(255.0);
-		prop_slider_1().TickFrequency(1.0);
-		prop_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_1().Value(val1);
-		sheet_slider_set_header<UNDO_OP::SHEET_COLOR, 1>(val1);
-		prop_slider_2().Maximum(255.0);
-		prop_slider_2().TickFrequency(1.0);
-		prop_slider_2().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_2().Value(val2);
-		sheet_slider_set_header<UNDO_OP::SHEET_COLOR, 2>(val2);
+		dialog_slider_0().Maximum(255.0);
+		dialog_slider_0().TickFrequency(1.0);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(val0);
+		page_slider_set_header<UNDO_OP::PAGE_COLOR, 0>(val0);
+		dialog_slider_1().Maximum(255.0);
+		dialog_slider_1().TickFrequency(1.0);
+		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_1().Value(val1);
+		page_slider_set_header<UNDO_OP::PAGE_COLOR, 1>(val1);
+		dialog_slider_2().Maximum(255.0);
+		dialog_slider_2().TickFrequency(1.0);
+		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_2().Value(val2);
+		page_slider_set_header<UNDO_OP::PAGE_COLOR, 2>(val2);
 
-		prop_slider_0().Visibility(Visibility::Visible);
-		prop_slider_1().Visibility(Visibility::Visible);
-		prop_slider_2().Visibility(Visibility::Visible);
-		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 0> });
-		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 1> });
-		const auto slider_2_token = prop_slider_2().ValueChanged({ this, &MainPage::sheet_slider_val_changed<UNDO_OP::SHEET_COLOR, 2> });
+		dialog_slider_0().Visibility(Visibility::Visible);
+		dialog_slider_1().Visibility(Visibility::Visible);
+		dialog_slider_2().Visibility(Visibility::Visible);
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_OP::PAGE_COLOR, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_OP::PAGE_COLOR, 1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_OP::PAGE_COLOR, 2> });
 		//m_sample_type = PROP_TYPE::NONE;
-		//m_prop_sheet.m_d2d.SetSwapChainPanel(scp_prop_panel());
-		//const auto samp_w = scp_prop_panel().Width();
-		//const auto samp_h = scp_prop_panel().Height();
-		//m_prop_sheet.m_sheet_size.width = static_cast<FLOAT>(samp_w);
-		//m_prop_sheet.m_sheet_size.height = static_cast<FLOAT>(samp_h);
+		//m_dialog_page.m_d2d.SetSwapChainPanel(scp_dialog_panel());
+		//const auto samp_w = scp_dialog_panel().Width();
+		//const auto samp_h = scp_dialog_panel().Height();
+		//m_dialog_page.m_page_size.width = static_cast<FLOAT>(samp_w);
+		//m_dialog_page.m_page_size.height = static_cast<FLOAT>(samp_h);
 
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F samp_val;
-			m_prop_sheet.get_sheet_color(samp_val);
-			D2D1_COLOR_F sheet_val;
-			m_main_sheet.get_sheet_color(sheet_val);
-			if (!equal(sheet_val, samp_val)) {
-				ustack_push_set<UNDO_OP::SHEET_COLOR>(&m_main_sheet, samp_val);
+			D2D1_COLOR_F setting_val;
+			m_dialog_page.get_page_color(setting_val);
+			D2D1_COLOR_F page_val;
+			m_main_page.get_page_color(page_val);
+			if (!equal(page_val, setting_val)) {
+				ustack_push_set<UNDO_OP::PAGE_COLOR>(&m_main_page, setting_val);
 				ustack_push_null();
 				ustack_is_enable();
-				sheet_draw();
+				page_draw();
 			}
 		}
-		//m_prop_sheet.m_d2d.Release();
-		prop_slider_0().Visibility(Visibility::Collapsed);
-		prop_slider_1().Visibility(Visibility::Collapsed);
-		prop_slider_2().Visibility(Visibility::Collapsed);
-		prop_slider_0().ValueChanged(slider_0_token);
-		prop_slider_1().ValueChanged(slider_1_token);
-		prop_slider_2().ValueChanged(slider_2_token);
+		//m_dialog_page.m_d2d.Release();
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_1().Visibility(Visibility::Collapsed);
+		dialog_slider_2().Visibility(Visibility::Collapsed);
+		dialog_slider_0().ValueChanged(slider_0_token);
+		dialog_slider_1().ValueChanged(slider_1_token);
+		dialog_slider_2().ValueChanged(slider_2_token);
 	}
 
-	// 用紙を表示する.
-	void MainPage::sheet_draw(void)
+	// 表示する.
+	void MainPage::page_draw(void)
 	{
 #if defined(_DEBUG)
-		if (!scp_sheet_panel().IsLoaded()) {
+		if (!scp_page_panel().IsLoaded()) {
 			return;
 		}
 #endif
@@ -196,92 +189,92 @@ namespace winrt::GraphPaper::implementation
 		Shape::s_factory = m_main_d2d.m_d2d_factory.get();
 		Shape::s_target = m_main_d2d.m_d2d_context.get();
 		Shape::s_dw_factory = m_main_d2d.m_dwrite_factory.get();
-		Shape::s_color_brush = m_main_sheet.m_color_brush.get();
-		Shape::s_range_brush = m_main_sheet.m_range_brush.get();
+		Shape::s_color_brush = m_main_page.m_color_brush.get();
+		Shape::s_range_brush = m_main_page.m_range_brush.get();
 
 		ID2D1RenderTarget* const target = Shape::s_target;
 		ID2D1SolidColorBrush * const brush = Shape::s_color_brush;
 
 		// デバイスコンテキストの描画状態を保存ブロックに保持する.
-		target->SaveDrawingState(m_main_sheet.m_state_block.get());
+		target->SaveDrawingState(m_main_page.m_state_block.get());
 		// デバイスコンテキストから変換行列を得る.
 		D2D1_MATRIX_3X2_F tran;
 		target->GetTransform(&tran);
 		// 拡大率を変換行列の拡大縮小の成分に格納する.
-		const auto sheet_scale = max(m_main_sheet.m_sheet_scale, 0.0f);
-		tran.m11 = tran.m22 = sheet_scale;
+		const auto page_scale = max(m_main_page.m_page_scale, 0.0f);
+		tran.m11 = tran.m22 = page_scale;
 		// スクロールの変分に拡大率を掛けた値を
 		// 変換行列の平行移動の成分に格納する.
 		D2D1_POINT_2F t_pos;
 		pt_add(m_main_min, sb_horz().Value(), sb_vert().Value(), t_pos);
-		pt_mul(t_pos, sheet_scale, t_pos);
+		pt_mul(t_pos, page_scale, t_pos);
 		tran.dx = -t_pos.x;
 		tran.dy = -t_pos.y;
 		// 変換行列をデバイスコンテキストに格納する.
 		target->SetTransform(&tran);
 		// 描画を開始する.
 		target->BeginDraw();
-		m_main_sheet.draw();
+		m_main_page.draw();
 		if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			const auto t_draw = m_drawing_tool;
 			if (t_draw == DRAWING_TOOL::SELECT ||
 				t_draw == DRAWING_TOOL::RECT ||
 				t_draw == DRAWING_TOOL::TEXT ||
 				t_draw == DRAWING_TOOL::RULER) {
-				m_main_sheet.draw_auxiliary_rect(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_rect(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAWING_TOOL::BEZI) {
-				m_main_sheet.draw_auxiliary_bezi(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_bezi(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAWING_TOOL::ELLI) {
-				m_main_sheet.draw_auxiliary_elli(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_elli(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAWING_TOOL::LINE) {
-				m_main_sheet.draw_auxiliary_line(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_line(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAWING_TOOL::RRECT) {
-				m_main_sheet.draw_auxiliary_rrect(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_rrect(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (t_draw == DRAWING_TOOL::POLY) {
-				m_main_sheet.draw_auxiliary_poly(target, brush, m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
+				m_main_page.draw_auxiliary_poly(target, brush, m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
 			}
 		}
 		// 描画を終了する.
 		HRESULT hr = target->EndDraw();
 		// 保存された描画環境を元に戻す.
-		target->RestoreDrawingState(m_main_sheet.m_state_block.get());
-		if (hr == S_OK) {
+		target->RestoreDrawingState(m_main_page.m_state_block.get());
+		if (hr != S_OK) {
+			// 結果が S_OK でない場合,
+			// 「描画できません」メッセージダイアログを表示する.
+			message_show(ICON_ALERT, L"str_err_draw", {});
+		}
+		else {
 			// 結果が S_OK の場合,
 			// スワップチェーンの内容を画面に表示する.
 			m_main_d2d.Present();
 			// ポインターの位置をステータスバーに格納する.
 			status_bar_set_pos();
 		}
-		else {
-			// 結果が S_OK でない場合,
-			// 「描画できません」メッセージダイアログを表示する.
-			message_show(ICON_ALERT, L"str_err_draw", {});
-		}
 		m_mutex_draw.unlock();
 	}
 
 	// 前景色を得る.
-	const D2D1_COLOR_F& MainPage::sheet_foreground(void) const noexcept
+	const D2D1_COLOR_F& MainPage::page_foreground(void) const noexcept
 	{
 		return Shape::s_foreground_color;
 	}
 
-	// 用紙の属性を初期化する.
-	void MainPage::sheet_init(void) noexcept
+	// 表示の設定を初期化する.
+	void MainPage::page_setting_init(void) noexcept
 	{
 		// 書体の属性を初期化する.
 		{
 			// リソースの取得に失敗した場合に備えて, 静的な既定値を書体属性に格納する.
-			m_main_sheet.set_font_family(wchar_cpy(FONT_FAMILY_DEFVAL));
-			m_main_sheet.set_font_size(FONT_SIZE_DEFVAL);
-			m_main_sheet.set_font_stretch(DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL);
-			m_main_sheet.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
-			m_main_sheet.set_font_weight(DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL);
+			m_main_page.set_font_family(wchar_cpy(FONT_FAMILY_DEFVAL));
+			m_main_page.set_font_size(FONT_SIZE_DEFVAL);
+			m_main_page.set_font_stretch(DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL);
+			m_main_page.set_font_style(DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL);
+			m_main_page.set_font_weight(DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL);
 			// BodyTextBlockStyle をリソースディクショナリから得る.
 			auto resource = Resources().TryLookup(box_value(FONT_STYLE_DEFVAL));
 			if (resource != nullptr) {
@@ -311,31 +304,31 @@ namespace winrt::GraphPaper::implementation
 								// プロパティーが FontFamily の場合,
 								// セッターの値から, 書体名を得る.
 								const auto val = unbox_value<winrt::Windows::UI::Xaml::Media::FontFamily>(setter.Value());
-								m_main_sheet.set_font_family(wchar_cpy(val.Source().c_str()));
+								m_main_page.set_font_family(wchar_cpy(val.Source().c_str()));
 							}
 							else if (prop == TextBlock::FontSizeProperty()) {
 								// プロパティーが FontSize の場合,
 								// セッターの値から, 書体の大きさを得る.
 								const auto val = unbox_value<float>(setter.Value());
-								m_main_sheet.m_font_size = val;
+								m_main_page.m_font_size = val;
 							}
 							else if (prop == TextBlock::FontStretchProperty()) {
 								// プロパティーが FontStretch の場合,
 								// セッターの値から, 書体の幅の伸縮を得る.
 								const auto val = unbox_value<int32_t>(setter.Value());
-								m_main_sheet.set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(val));
+								m_main_page.set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(val));
 							}
 							else if (prop == TextBlock::FontStyleProperty()) {
 								// プロパティーが FontStyle の場合,
 								// セッターの値から, 字体を得る.
 								const auto val = unbox_value<int32_t>(setter.Value());
-								m_main_sheet.set_font_style(static_cast<DWRITE_FONT_STYLE>(val));
+								m_main_page.set_font_style(static_cast<DWRITE_FONT_STYLE>(val));
 							}
 							else if (prop == TextBlock::FontWeightProperty()) {
 								// プロパティーが FontWeight の場合,
 								// セッターの値から, 書体の太さを得る.
 								const auto val = unbox_value<int32_t>(setter.Value());
-								m_main_sheet.set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(val));
+								m_main_page.set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(val));
 								//Determine the type of a boxed value
 								//auto prop = setter.Value().try_as<winrt::Windows::Foundation::IPropertyValue>();
 								//auto prop_type = prop.Type();
@@ -355,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 				style = nullptr;
 				resource = nullptr;
 			}
-			ShapeText::is_available_font(m_main_sheet.m_font_family);
+			ShapeText::is_available_font(m_main_page.m_font_family);
 		}
 
 		{
@@ -369,84 +362,76 @@ namespace winrt::GraphPaper::implementation
 			else {
 				grid_color = GRID_COLOR_DEFVAL;
 			}
-			m_main_sheet.set_arrow_size(ARROW_SIZE_DEFVAL);
-			m_main_sheet.set_arrow_style(ARROW_STYLE::NONE);
-			m_main_sheet.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL });
-			m_main_sheet.set_fill_color(Shape::s_background_color);
-			m_main_sheet.set_font_color(Shape::s_foreground_color);
-			m_main_sheet.set_grid_base(GRID_LEN_DEFVAL - 1.0);
-			m_main_sheet.set_grid_color(grid_color);
-			m_main_sheet.set_grid_emph(GRID_EMPH_0);
-			m_main_sheet.set_grid_show(GRID_SHOW::BACK);
-			m_main_sheet.set_grid_snap(true);
-			m_main_sheet.set_sheet_color(Shape::s_background_color);
-			m_main_sheet.set_sheet_scale(1.0);
+			m_main_page.set_arrow_size(ARROW_SIZE_DEFVAL);
+			m_main_page.set_arrow_style(ARROW_STYLE::NONE);
+			m_main_page.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL });
+			m_main_page.set_fill_color(Shape::s_background_color);
+			m_main_page.set_font_color(Shape::s_foreground_color);
+			m_main_page.set_grid_base(GRID_LEN_DEFVAL - 1.0);
+			m_main_page.set_grid_color(grid_color);
+			m_main_page.set_grid_emph(GRID_EMPH_0);
+			m_main_page.set_grid_show(GRID_SHOW::BACK);
+			m_main_page.set_grid_snap(true);
+			m_main_page.set_page_color(Shape::s_background_color);
+			m_main_page.set_page_scale(1.0);
 			//const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			m_main_sheet.m_sheet_size = SHEET_SIZE_DEF_VAL;
-			m_main_sheet.set_stroke_cap(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
-			m_main_sheet.set_stroke_color(Shape::s_foreground_color);
-			m_main_sheet.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
-			m_main_sheet.set_dash_patt(DASH_PATT_DEFVAL);
-			m_main_sheet.set_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
-			m_main_sheet.set_join_miter_limit(MITER_LIMIT_DEFVAL);
-			m_main_sheet.set_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
-			m_main_sheet.set_stroke_width(1.0);
-			m_main_sheet.set_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-			m_main_sheet.set_text_align_t(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-			m_main_sheet.set_text_line_sp(0.0);
-			m_main_sheet.set_text_padding(TEXT_MARGIN_DEFVAL);
+			m_main_page.m_page_size = PAGE_SIZE_DEF_VAL;
+			m_main_page.set_stroke_cap(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
+			m_main_page.set_stroke_color(Shape::s_foreground_color);
+			m_main_page.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
+			m_main_page.set_dash_patt(DASH_PATT_DEFVAL);
+			m_main_page.set_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
+			m_main_page.set_join_miter_limit(MITER_LIMIT_DEFVAL);
+			m_main_page.set_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
+			m_main_page.set_stroke_width(1.0);
+			m_main_page.set_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+			m_main_page.set_text_align_t(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+			m_main_page.set_text_line_sp(0.0);
+			m_main_page.set_text_padding(TEXT_MARGIN_DEFVAL);
 		}
 	}
 
-	//void MainPage::sheet_xaml_root_changed(winrt::Windows::UI::Xaml::XamlRoot const&, winrt::Windows::UI::Xaml::XamlRootChangedEventArgs const& /*args*/)
-	//{
-	//}
-
 	//------------------------------
-	// 用紙のスワップチェーンパネルのロードが始まった.
+	// 表示のスワップチェーンパネルのロードが始まった.
 	//------------------------------
-	void MainPage::sheet_panel_loading(IInspectable const&, IInspectable const&)
+	void MainPage::page_panel_loading(IInspectable const&, IInspectable const&)
 	{
-		//auto xaml_root = scp_sheet_panel().XamlRoot();
-		//xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed });
 	}
 
 	//------------------------------
-	// 用紙のスワップチェーンパネルがロードされた.
+	// 表示のスワップチェーンパネルがロードされた.
 	//------------------------------
-	void MainPage::sheet_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::page_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
 	{
 #if defined(_DEBUG)
-		if (sender != scp_sheet_panel()) {
+		if (sender != scp_page_panel()) {
 			return;
 		}
 #endif // _DEBUG
-		//auto xaml_root = scp_sheet_panel().XamlRoot();
-		//xaml_root.Changed({ this, &MainPage::sheet_xaml_root_changed });
 
-		m_main_d2d.SetSwapChainPanel(scp_sheet_panel());
-		m_main_d2d.m_d2d_factory->CreateDrawingStateBlock(m_main_sheet.m_state_block.put());
-		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_sheet.m_color_brush.put());
-		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_sheet.m_range_brush.put());
-		sheet_draw();
+		m_main_d2d.SetSwapChainPanel(scp_page_panel());
+		m_main_d2d.m_d2d_factory->CreateDrawingStateBlock(m_main_page.m_state_block.put());
+		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_page.m_color_brush.put());
+		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_page.m_range_brush.put());
+		page_draw();
 	}
 
 #if defined(_DEBUG)
 	//------------------------------
-	// 用紙のスワップチェーンパネルの寸法が変わった.
+	// 表示のスワップチェーンパネルの寸法が変わった.
 	// args	イベントの引数
 	//------------------------------
-	void MainPage::sheet_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
+	void MainPage::page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
 #else
 	//------------------------------
-	// 用紙のスワップチェーンパネルの寸法が変わった.
+	// 表示のスワップチェーンパネルの寸法が変わった.
 	// args	イベントの引数
 	//------------------------------
-	void MainPage::sheet_panel_size_changed(IInspectable const&, SizeChangedEventArgs const& args)
+	void MainPage::page_panel_size_changed(IInspectable const&, SizeChangedEventArgs const& args)
 #endif	// _DEBUG
 	{
 #if defined(_DEBUG)
-		if (sender != scp_sheet_panel()) {
+		if (sender != scp_page_panel()) {
 			return;
 		}
 #endif	// _DEBUG
@@ -454,27 +439,27 @@ namespace winrt::GraphPaper::implementation
 		const float w = z.Width;
 		const float h = z.Height;
 		scroll_set(w, h);
-		if (scp_sheet_panel().IsLoaded()) {
+		if (scp_page_panel().IsLoaded()) {
 			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
-			sheet_draw();
+			page_draw();
 		}
 	}
 
 	//------------------------------
-	// 用紙のスワップチェーンパネルの寸法が変わった.
+	// 表示のスワップチェーンパネルの寸法が変わった.
 	//------------------------------
-	void MainPage::sheet_panel_scale_changed(IInspectable const&, IInspectable const&)
+	void MainPage::page_panel_scale_changed(IInspectable const&, IInspectable const&)
 	{
-		m_main_d2d.SetCompositionScale(scp_sheet_panel().CompositionScaleX(), scp_sheet_panel().CompositionScaleY());
+		m_main_d2d.SetCompositionScale(scp_page_panel().CompositionScaleX(), scp_page_panel().CompositionScaleY());
 	}
 
 	//------------------------------
-	// 用紙の大きさを設定する.
+	// 表示の大きさを設定する.
 	//------------------------------
-	void MainPage::sheet_panle_size(void)
+	void MainPage::page_panel_size(void)
 	{
-		const float w = static_cast<float>(scp_sheet_panel().ActualWidth());
-		const float h = static_cast<float>(scp_sheet_panel().ActualHeight());
+		const float w = static_cast<float>(scp_page_panel().ActualWidth());
+		const float h = static_cast<float>(scp_page_panel().ActualHeight());
 		if (w > 0.0f && h > 0.0f) {
 			scroll_set(w, h);
 			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
@@ -482,25 +467,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 用紙メニューの「用紙の大きさ」が選択された
+	// 方眼メニューの「表示の大きさ」が選択された
 	//------------------------------
-	IAsyncAction MainPage::sheet_size_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::page_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_prop_sheet.set_attr_to(&m_main_sheet);
+		m_dialog_page.set_attr_to(&m_main_page);
 		float g_base;
-		m_main_sheet.get_grid_base(g_base);
+		m_main_page.get_grid_base(g_base);
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
-		tx_sheet_width().Text(buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
-		tx_sheet_height().Text(buf);
-		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, ShapeSheet::size_max(), m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
-		tx_sheet_size_max().Text(buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_page.m_page_size.width, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
+		tx_page_width().Text(buf);
+		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_page.m_page_size.height, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
+		tx_page_height().Text(buf);
+		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, ShapePage::size_max(), m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
+		tx_page_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
-		cd_sheet_size_dialog().IsPrimaryButtonEnabled(true);
-		cd_sheet_size_dialog().IsSecondaryButtonEnabled(m_main_sheet.m_shape_list.size() > 0);
-		const auto d_result = co_await cd_sheet_size_dialog().ShowAsync();
+		cd_page_size_dialog().IsPrimaryButtonEnabled(true);
+		cd_page_size_dialog().IsSecondaryButtonEnabled(m_main_page.m_shape_list.size() > 0);
+		const auto d_result = co_await cd_page_size_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::None) {
 			// 「キャンセル」が押された場合,
 			co_return;
@@ -510,33 +495,33 @@ namespace winrt::GraphPaper::implementation
 
 			// 本来, 無効な数値が入力されている場合, 「適用」ボタンは不可になっているので
 			// 必要ないエラーチェックだが, 念のため.
-			if (swscanf_s(tx_sheet_width().Text().c_str(), L"%f", &m_main_sheet.m_sheet_size.width) != 1) {
+			if (swscanf_s(tx_page_width().Text().c_str(), L"%f", &m_main_page.m_page_size.width) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_width/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_width/Header");
 				co_return;
 			}
-			if (swscanf_s(tx_sheet_height().Text().c_str(), L"%f", &m_main_sheet.m_sheet_size.height) != 1) {
+			if (swscanf_s(tx_page_height().Text().c_str(), L"%f", &m_main_page.m_page_size.height) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
-				message_show(ICON_ALERT, INVALID_NUM, L"tx_sheet_height/Header");
+				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_height/Header");
 				co_return;
 			}
-			// 用紙の縦横の長さの値をピクセル単位の値に変換する.
+			// 表示の縦横の長さの値をピクセル単位の値に変換する.
 			const float g_len = g_base + 1.0f;
 			D2D1_SIZE_F p_size{
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_main_sheet.m_sheet_size.width, m_main_d2d.m_logical_dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_main_sheet.m_sheet_size.height, m_main_d2d.m_logical_dpi, g_len))
+				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_main_page.m_page_size.width, m_main_d2d.m_logical_dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_main_page.m_page_size.height, m_main_d2d.m_logical_dpi, g_len))
 			};
-			if (!equal(p_size, m_main_sheet.m_sheet_size)) {
-				// 変換された値が用紙の大きさと異なる場合,
-				ustack_push_set<UNDO_OP::SHEET_SIZE>(&m_main_sheet, p_size);
+			if (!equal(p_size, m_main_page.m_page_size)) {
+				// 変換された値が表示の大きさと異なる場合,
+				ustack_push_set<UNDO_OP::PAGE_SIZE>(&m_main_page, p_size);
 				ustack_push_null();
 				ustack_is_enable();
-				sheet_update_bbox();
-				sheet_panle_size();
-				sheet_draw();
+				page_bbox_update();
+				page_panel_size();
+				page_draw();
 				status_bar_set_pos();
 				status_bar_set_grid();
-				status_bar_set_sheet();
+				status_bar_set_page();
 				status_bar_set_unit();
 			}
 		}
@@ -545,7 +530,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F b_max = { -FLT_MAX, -FLT_MAX };
 			D2D1_POINT_2F b_size;
 
-			slist_bound_all(m_main_sheet.m_shape_list, b_min, b_max);
+			slist_bound_all(m_main_page.m_shape_list, b_min, b_max);
 			pt_sub(b_max, b_min, b_size);
 			if (b_size.x < 1.0F || b_size.y < 1.0F) {
 				co_return;
@@ -572,25 +557,25 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F p_max;
 			pt_add(b_max, b_min, p_max);
 			D2D1_SIZE_F p_size = { p_max.x, p_max.y };
-			if (!equal(m_main_sheet.m_sheet_size, p_size)) {
-				ustack_push_set<UNDO_OP::SHEET_SIZE>(&m_main_sheet, p_size);
+			if (!equal(m_main_page.m_page_size, p_size)) {
+				ustack_push_set<UNDO_OP::PAGE_SIZE>(&m_main_page, p_size);
 				flag = true;
 			}
 			if (flag) {
 				ustack_push_null();
 				ustack_is_enable();
 			}
-			sheet_update_bbox();
-			sheet_panle_size();
-			sheet_draw();
-			status_bar_set_sheet();
+			page_bbox_update();
+			page_panel_size();
+			page_draw();
+			status_bar_set_page();
 		}
 	}
 
 	//------------------------------
-	// テキストボックス「用紙の幅」「用紙の高さ」の値が変更された.
+	// テキストボックス「表示の幅」「表示の高さ」の値が変更された.
 	//------------------------------
-	void MainPage::sheet_size_text_changed(IInspectable const& sender, TextChangedEventArgs const&)
+	void MainPage::page_size_text_changed(IInspectable const& sender, TextChangedEventArgs const&)
 	{
 		const double dpi = m_main_d2d.m_logical_dpi;	// DPI
 		double val;
@@ -602,10 +587,10 @@ namespace winrt::GraphPaper::implementation
 		// 変換できたなら,
 		if (cnt == 1 && val > 0.0) {
 			float g_base;
-			m_main_sheet.get_grid_base(g_base);
+			m_main_page.get_grid_base(g_base);
 			val = conv_len_to_val(m_len_unit, val, dpi, g_base + 1.0);
 		}
-		cd_sheet_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && val >= 1.0 && val < ShapeSheet::size_max());
+		cd_page_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && val >= 1.0 && val < ShapePage::size_max());
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -614,18 +599,18 @@ namespace winrt::GraphPaper::implementation
 	// val	格納する値
 	// 戻り値	なし.
 	template <UNDO_OP U, int S>
-	void MainPage::sheet_slider_set_header(const float val)
+	void MainPage::page_slider_set_header(const float val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		winrt::hstring text;
-		if constexpr (U == UNDO_OP::SHEET_COLOR) {
+		if constexpr (U == UNDO_OP::PAGE_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
 		}
-		prop_set_slider_header<S>(text);
+		dialog_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.
@@ -634,13 +619,13 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	template <UNDO_OP U, int S>
-	void MainPage::sheet_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::page_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_OP::SHEET_COLOR) {
+		if constexpr (U == UNDO_OP::PAGE_COLOR) {
 			const auto val = static_cast<float>(args.NewValue());
-			sheet_slider_set_header<U, S>(val);
+			page_slider_set_header<U, S>(val);
 			D2D1_COLOR_F s_color;
-			m_prop_sheet.get_sheet_color(s_color);
+			m_dialog_page.get_page_color(s_color);
 			if constexpr (S == 0) {
 				s_color.r = static_cast<FLOAT>(val / COLOR_MAX);
 			}
@@ -650,113 +635,113 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 2) {
 				s_color.b = static_cast<FLOAT>(val / COLOR_MAX);
 			}
-			m_prop_sheet.set_sheet_color(s_color);
+			m_dialog_page.set_page_color(s_color);
 		}
-		if (scp_prop_panel().IsLoaded()) {
-			prop_sample_draw();
+		if (scp_dialog_panel().IsLoaded()) {
+			dialog_draw();
 		}
 	}
 
-	// 図形が含まれるよう用紙の左上位置と右下位置を更新する.
+	// 図形が含まれるよう表示の左上位置と右下位置を更新する.
 	// s	図形
-	void MainPage::sheet_update_bbox(const Shape* s) noexcept
+	void MainPage::page_bbox_update(const Shape* s) noexcept
 	{
 		s->get_bound(m_main_min, m_main_max, m_main_min, m_main_max);
 	}
 
-	// 用紙の左上位置と右下位置を設定する.
-	void MainPage::sheet_update_bbox(void) noexcept
+	// 表示の左上位置と右下位置を設定する.
+	void MainPage::page_bbox_update(void) noexcept
 	{
-		slist_bound_sheet(m_main_sheet.m_shape_list, m_main_sheet.m_sheet_size, m_main_min, m_main_max);
+		slist_bound_view(m_main_page.m_shape_list, m_main_page.m_page_size, m_main_min, m_main_max);
 	}
 
-	void MainPage::sheet_zoom_is_checked(float scale)
+	void MainPage::page_zoom_is_checked(float scale)
 	{
-		rmfi_sheet_zoom_100().IsChecked(equal(scale, 1.0f));
-		rmfi_sheet_zoom_150().IsChecked(equal(scale, 1.5f));
-		rmfi_sheet_zoom_200().IsChecked(equal(scale, 2.0f));
-		rmfi_sheet_zoom_300().IsChecked(equal(scale, 3.0f));
-		rmfi_sheet_zoom_400().IsChecked(equal(scale, 4.0f));
-		rmfi_sheet_zoom_075().IsChecked(equal(scale, 0.75f));
-		rmfi_sheet_zoom_050().IsChecked(equal(scale, 0.5f));
-		rmfi_sheet_zoom_025().IsChecked(equal(scale, 0.25f));
+		rmfi_page_zoom_100().IsChecked(equal(scale, 1.0f));
+		rmfi_page_zoom_150().IsChecked(equal(scale, 1.5f));
+		rmfi_page_zoom_200().IsChecked(equal(scale, 2.0f));
+		rmfi_page_zoom_300().IsChecked(equal(scale, 3.0f));
+		rmfi_page_zoom_400().IsChecked(equal(scale, 4.0f));
+		rmfi_page_zoom_075().IsChecked(equal(scale, 0.75f));
+		rmfi_page_zoom_050().IsChecked(equal(scale, 0.5f));
+		rmfi_page_zoom_025().IsChecked(equal(scale, 0.25f));
 	}
 
-	// 用紙メニューの「表示倍率」が選択された.
-	void MainPage::sheet_zoom_click(IInspectable const& sender, RoutedEventArgs const&)
+	// 方眼メニューの「ページの倍率」が選択された.
+	void MainPage::page_zoom_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float scale;
-		if (sender == rmfi_sheet_zoom_100()) {
+		if (sender == rmfi_page_zoom_100()) {
 			scale = 1.0f;
 		}
-		else if (sender == rmfi_sheet_zoom_150()) {
+		else if (sender == rmfi_page_zoom_150()) {
 			scale = 1.5f;
 		}
-		else if (sender == rmfi_sheet_zoom_200()) {
+		else if (sender == rmfi_page_zoom_200()) {
 			scale = 2.0f;
 		}
-		else if (sender == rmfi_sheet_zoom_300()) {
+		else if (sender == rmfi_page_zoom_300()) {
 			scale = 3.0f;
 		}
-		else if (sender == rmfi_sheet_zoom_400()) {
+		else if (sender == rmfi_page_zoom_400()) {
 			scale = 4.0f;
 		}
-		else if (sender == rmfi_sheet_zoom_075()) {
+		else if (sender == rmfi_page_zoom_075()) {
 			scale = 0.75f;
 		}
-		else if (sender == rmfi_sheet_zoom_050()) {
+		else if (sender == rmfi_page_zoom_050()) {
 			scale = 0.5f;
 		}
-		else if (sender == rmfi_sheet_zoom_025()) {
+		else if (sender == rmfi_page_zoom_025()) {
 			scale = 0.25f;
 		}
 		else {
 			return;
 		}
-		sheet_zoom_is_checked(scale);
-		if (scale != m_main_sheet.m_sheet_scale) {
-			m_main_sheet.m_sheet_scale = scale;
-			sheet_panle_size();
-			sheet_draw();
+		page_zoom_is_checked(scale);
+		if (scale != m_main_page.m_page_scale) {
+			m_main_page.m_page_scale = scale;
+			page_panel_size();
+			page_draw();
 			status_bar_set_zoom();
 		}
 	}
 
 	// 表示を拡大または縮小する.
-	void MainPage::sheet_zoom_delta(const int32_t delta) noexcept
+	void MainPage::page_zoom_delta(const int32_t delta) noexcept
 	{
 		if (delta > 0 &&
-			m_main_sheet.m_sheet_scale < 4.f / 1.1f - FLT_MIN) {
-			m_main_sheet.m_sheet_scale *= 1.1f;
+			m_main_page.m_page_scale < 4.f / 1.1f - FLT_MIN) {
+			m_main_page.m_page_scale *= 1.1f;
 		}
 		else if (delta < 0 &&
-			m_main_sheet.m_sheet_scale > 0.25f * 1.1f + FLT_MIN) {
-			m_main_sheet.m_sheet_scale /= 1.1f;
+			m_main_page.m_page_scale > 0.25f * 1.1f + FLT_MIN) {
+			m_main_page.m_page_scale /= 1.1f;
 		}
 		else {
 			return;
 		}
-		sheet_panle_size();
-		sheet_draw();
+		page_panel_size();
+		page_draw();
 		status_bar_set_zoom();
 	}
 
-	// 用紙メニューの「用紙設定をリセット」が選択された.
+	// 方眼メニューの「用紙設定をリセット」が選択された.
 	// 設定データを保存したファイルがある場合, それを削除する.
-	IAsyncAction MainPage::sheet_prop_reset_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::page_setting_reset_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		using winrt::Windows::Storage::StorageDeleteOption;
 
-		winrt::Windows::Storage::IStorageItem prop_item{
-			co_await prop_local_folder().TryGetItemAsync(SHEET_PROP)
+		winrt::Windows::Storage::IStorageItem setting_item{
+			co_await ApplicationData::Current().LocalFolder().TryGetItemAsync(PAGE_SETTING)
 		};
-		if (prop_item != nullptr) {
-			auto preg_file = prop_item.try_as<StorageFile>();
-			if (preg_file != nullptr) {
+		if (setting_item != nullptr) {
+			auto delete_file = setting_item.try_as<StorageFile>();
+			if (delete_file != nullptr) {
 				HRESULT hr = E_FAIL;
 				try {
-					co_await preg_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
-					mfi_sheet_prop_reset().IsEnabled(false);
+					co_await delete_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
+					mfi_page_setting_reset().IsEnabled(false);
 					hr = S_OK;
 				}
 				catch (winrt::hresult_error const& e) {
@@ -765,52 +750,25 @@ namespace winrt::GraphPaper::implementation
 				if (hr != S_OK) {
 
 				}
-				preg_file = nullptr;
+				delete_file = nullptr;
 			}
-			prop_item = nullptr;
+			setting_item = nullptr;
 		}
-		sheet_init();
-		sheet_draw();
+		page_setting_init();
+		page_draw();
 	}
 
-	// 保存された用紙設定データを読み込む.
-	// 設定データを保存したファイルがある場合, それを読み込む.
-	// 戻り値	読み込めたら S_OK.
-	IAsyncOperation<winrt::hresult> MainPage::sheet_prop_load_async(void)
-	{
-		mfi_sheet_prop_reset().IsEnabled(false);
-		winrt::Windows::Storage::IStorageItem prop_item{
-			co_await prop_local_folder().TryGetItemAsync(SHEET_PROP)
-		};
-		HRESULT hr = E_FAIL;
-		if (prop_item != nullptr) {
-			auto prop_file = prop_item.try_as<StorageFile>();
-			if (prop_file != nullptr) {
-				try {
-					hr = co_await file_read_async<false, true>(prop_file);
-				}
-				catch (winrt::hresult_error const& e) {
-					hr = e.code();
-				}
-				prop_file = nullptr;
-				mfi_sheet_prop_reset().IsEnabled(true);
-			}
-			prop_item = nullptr;
-		}
-		co_return hr;
-	}
-
-	// 用紙メニューの「用紙設定を保存」が選択された
+	// 方眼メニューの「表示設定を保存」が選択された
 	// ローカルフォルダーにファイルを作成し, 設定データを保存する.
-	IAsyncAction MainPage::sheet_prop_save_click_async(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::page_setting_save_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto prop_file{ 
-			co_await prop_local_folder().CreateFileAsync(SHEET_PROP, CreationCollisionOption::ReplaceExisting)
+		auto setting_file{ 
+			co_await ApplicationData::Current().LocalFolder().CreateFileAsync(PAGE_SETTING, CreationCollisionOption::ReplaceExisting)
 		};
-		if (prop_file != nullptr) {
-			co_await file_write_gpf_async<false, true>(prop_file);
-			prop_file = nullptr;
-			mfi_sheet_prop_reset().IsEnabled(true);
+		if (setting_file != nullptr) {
+			co_await file_write_gpf_async<false, true>(setting_file);
+			setting_file = nullptr;
+			mfi_page_setting_reset().IsEnabled(true);
 		}
 		//using winrt::Windows::Storage::AccessCache::StorageApplicationPermissions;
 		//auto const& mru_list = StorageApplicationPermissions::MostRecentlyUsedList();

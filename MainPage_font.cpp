@@ -78,14 +78,14 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_WEIGHT_EXTRA_BLACK
 	};
 
-	// 見本の図形を作成する.
-	static void font_create_sample_shape(const float panel_w, const float panel_h, ShapeSheet& prop_sheet);
+	// 設定の図形を作成する.
+	static void font_create_sample_shape(const float panel_w, const float panel_h, ShapePage& setting);
 
 	// 見本の図形を作成する.
 	// panel_w	見本を表示するパネルの幅
 	// panel_h	見本を表示するパネルの高さ
-	// prop_sheet	見本を表示するシート
-	static void font_create_sample_shape(const float panel_w, const float panel_h, ShapeSheet& prop_sheet)
+	// setting	見本を表示するシート
+	static void font_create_sample_shape(const float panel_w, const float panel_h, ShapePage& setting)
 	{
 		const auto padd_w = panel_w * 0.125;
 		const auto padd_h = panel_h * 0.25;
@@ -99,7 +99,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			text = pang.c_str();
 		}
-		prop_sheet.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &prop_sheet));
+		setting.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &setting));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -108,122 +108,122 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「色」が選択された.
 	IAsyncAction MainPage::font_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_prop_sheet.set_attr_to(&m_main_sheet);
+		m_dialog_page.set_attr_to(&m_main_page);
 
 		D2D1_COLOR_F f_color;
-		m_prop_sheet.get_font_color(f_color);
+		m_dialog_page.get_font_color(f_color);
 		const float val0 = f_color.r * COLOR_MAX;
 		const float val1 = f_color.g * COLOR_MAX;
 		const float val2 = f_color.b * COLOR_MAX;
 		const float val3 = f_color.a * COLOR_MAX;
-		prop_slider_0().Maximum(255.0);
-		prop_slider_0().TickFrequency(1.0);
-		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_0().Value(val0);
+		dialog_slider_0().Maximum(255.0);
+		dialog_slider_0().TickFrequency(1.0);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(val0);
 		font_slider_set_header<UNDO_OP::FONT_COLOR, 0>(val0);
-		prop_slider_1().Maximum(255.0);
-		prop_slider_1().TickFrequency(1.0);
-		prop_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_1().Value(val1);
+		dialog_slider_1().Maximum(255.0);
+		dialog_slider_1().TickFrequency(1.0);
+		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_1().Value(val1);
 		font_slider_set_header<UNDO_OP::FONT_COLOR, 1>(val1);
-		prop_slider_2().Maximum(255.0);
-		prop_slider_2().TickFrequency(1.0);
-		prop_slider_2().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_2().Value(val2);
+		dialog_slider_2().Maximum(255.0);
+		dialog_slider_2().TickFrequency(1.0);
+		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_2().Value(val2);
 		font_slider_set_header<UNDO_OP::FONT_COLOR, 2>(val2);
-		prop_slider_3().Maximum(255.0);
-		prop_slider_3().TickFrequency(1.0);
-		prop_slider_3().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_3().Value(val3);
+		dialog_slider_3().Maximum(255.0);
+		dialog_slider_3().TickFrequency(1.0);
+		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_3().Value(val3);
 		font_slider_set_header<UNDO_OP::FONT_COLOR, 3>(val3);
 
-		prop_slider_0().Visibility(Visibility::Visible);
-		prop_slider_1().Visibility(Visibility::Visible);
-		prop_slider_2().Visibility(Visibility::Visible);
-		prop_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 0> });
-		const auto slider_1_token = prop_slider_1().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 1> });
-		const auto slider_2_token = prop_slider_2().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 2> });
-		const auto slider_3_token = prop_slider_3().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 3> });
-		font_create_sample_shape(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()), m_prop_sheet);
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		dialog_slider_0().Visibility(Visibility::Visible);
+		dialog_slider_1().Visibility(Visibility::Visible);
+		dialog_slider_2().Visibility(Visibility::Visible);
+		dialog_slider_3().Visibility(Visibility::Visible);
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 3> });
+		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F samp_val;
-			m_prop_sheet.m_shape_list.back()->get_font_color(samp_val);
+			m_dialog_page.m_shape_list.back()->get_font_color(samp_val);
 			if (ustack_push_set<UNDO_OP::FONT_COLOR>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 		}
-		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(Visibility::Collapsed);
-		prop_slider_1().Visibility(Visibility::Collapsed);
-		prop_slider_2().Visibility(Visibility::Collapsed);
-		prop_slider_3().Visibility(Visibility::Collapsed);
-		prop_slider_0().ValueChanged(slider_0_token);
-		prop_slider_1().ValueChanged(slider_1_token);
-		prop_slider_2().ValueChanged(slider_2_token);
-		prop_slider_3().ValueChanged(slider_3_token);
-		sheet_draw();
+		slist_clear(m_dialog_page.m_shape_list);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_1().Visibility(Visibility::Collapsed);
+		dialog_slider_2().Visibility(Visibility::Collapsed);
+		dialog_slider_3().Visibility(Visibility::Collapsed);
+		dialog_slider_0().ValueChanged(slider_0_token);
+		dialog_slider_1().ValueChanged(slider_1_token);
+		dialog_slider_2().ValueChanged(slider_2_token);
+		dialog_slider_3().ValueChanged(slider_3_token);
+		page_draw();
 
 	}
 
 	// 書体メニューの「書体名」が選択された.
 	IAsyncAction MainPage::font_family_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		//FindName(L"cd_prop_dialog");
-		m_prop_sheet.set_attr_to(&m_main_sheet);
+		//FindName(L"cd_setting_dialog");
+		m_dialog_page.set_attr_to(&m_main_page);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::s_available_fonts[i]; i++) {
 			auto item = box_value(winrt::hstring(name + wcslen(name) + 1));
-			lv_prop_list().Items().Append(item);
+			lv_dialog_list().Items().Append(item);
 		}
-		for (uint32_t i = 0; i < lv_prop_list().Items().Size(); i++) {
+		for (uint32_t i = 0; i < lv_dialog_list().Items().Size(); i++) {
 			IInspectable item[1];
-			lv_prop_list().Items().GetMany(i, item);
+			lv_dialog_list().Items().GetMany(i, item);
 			auto name = unbox_value<winrt::hstring>(item[0]).c_str();
 			wchar_t* f_family;
-			m_main_sheet.get_font_family(f_family);
+			m_main_page.get_font_family(f_family);
 			if (wcscmp(name, f_family + wcslen(f_family) + 1) == 0) {
 				// 書体名が同じ場合,
 				// その書体をリストビューの選択済み項目に格納する.
-				lv_prop_list().SelectedItem(item[0]);
-				lv_prop_list().ScrollIntoView(item[0]);
+				lv_dialog_list().SelectedItem(item[0]);
+				lv_dialog_list().ScrollIntoView(item[0]);
 				break;
 			}
 		}
-		const auto loaded_token = lv_prop_list().Loaded({ this, &MainPage::prop_list_view_loaded });
-		const auto changed_token = lv_prop_list().SelectionChanged(
+		const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::dialog_list_loaded });
+		const auto changed_token = lv_dialog_list().SelectionChanged(
 			[this](auto, auto)
 			{
-				auto i = lv_prop_list().SelectedIndex();
-				m_prop_sheet.m_shape_list.back()->set_font_family(ShapeText::s_available_fonts[i]);
-				if (scp_prop_panel().IsLoaded()) {
-					prop_sample_draw();
+				auto i = lv_dialog_list().SelectedIndex();
+				m_dialog_page.m_shape_list.back()->set_font_family(ShapeText::s_available_fonts[i]);
+				if (scp_dialog_panel().IsLoaded()) {
+					dialog_draw();
 				}
 			}
 		);
-		lv_prop_list().Visibility(Visibility::Visible);
-		font_create_sample_shape(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()), m_prop_sheet);
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		lv_dialog_list().Visibility(Visibility::Visible);
+		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			wchar_t* samp_val;
-			m_prop_sheet.m_shape_list.back()->get_font_family(samp_val);
+			m_dialog_page.m_shape_list.back()->get_font_family(samp_val);
 			if (ustack_push_set<UNDO_OP::FONT_FAMILY>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 		}
-		slist_clear(m_prop_sheet.m_shape_list);
-		lv_prop_list().Loaded(loaded_token);
-		lv_prop_list().SelectionChanged(changed_token);
-		lv_prop_list().Visibility(Visibility::Collapsed);
-		lv_prop_list().Items().Clear();
-		//UnloadObject(cd_prop_dialog());
-		sheet_draw();
+		slist_clear(m_dialog_page.m_shape_list);
+		lv_dialog_list().Loaded(loaded_token);
+		lv_dialog_list().SelectionChanged(changed_token);
+		lv_dialog_list().Visibility(Visibility::Collapsed);
+		lv_dialog_list().Items().Clear();
+		//UnloadObject(cd_setting_dialog());
+		page_draw();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -239,8 +239,8 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_OP::FONT_SIZE) {
 			wchar_t buf[32];
 			float g_base;
-			m_prop_sheet.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_prop_d2d.m_logical_dpi, g_base + 1.0f, buf);
+			m_dialog_page.get_grid_base(g_base);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_dialog_d2d.m_logical_dpi, g_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_OP::FONT_COLOR) {
@@ -271,16 +271,16 @@ namespace winrt::GraphPaper::implementation
 			//}
 		}
 		if constexpr (S == 0) {
-			prop_slider_0().Header(box_value(text));
+			dialog_slider_0().Header(box_value(text));
 		}
 		if constexpr (S == 1) {
-			prop_slider_1().Header(box_value(text));
+			dialog_slider_1().Header(box_value(text));
 		}
 		if constexpr (S == 2) {
-			prop_slider_2().Header(box_value(text));
+			dialog_slider_2().Header(box_value(text));
 		}
 		if constexpr (S == 3) {
-			prop_slider_3().Header(box_value(text));
+			dialog_slider_3().Header(box_value(text));
 		}
 	}
 
@@ -296,14 +296,14 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 0) {
 				const auto val = static_cast<float>(args.NewValue());
 				font_slider_set_header<U, S>(val);
-				m_prop_sheet.m_shape_list.back()->set_font_size(val);
+				m_dialog_page.m_shape_list.back()->set_font_size(val);
 			}
 		}
 		else if constexpr (U == UNDO_OP::FONT_COLOR) {
 			const auto val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F f_color;
 			//m_sample_shape->get_font_color(f_color);
-			m_prop_sheet.m_shape_list.back()->get_font_color(f_color);
+			m_dialog_page.m_shape_list.back()->get_font_color(f_color);
 			if constexpr (S == 0) {
 				font_slider_set_header<U, S>(val);
 				f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
@@ -320,10 +320,10 @@ namespace winrt::GraphPaper::implementation
 				font_slider_set_header<U, S>(val);
 				f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
 			}
-			m_prop_sheet.m_shape_list.back()->set_font_color(f_color);
+			m_dialog_page.m_shape_list.back()->set_font_color(f_color);
 		}
-		if (scp_prop_panel().IsLoaded()) {
-			prop_sample_draw();
+		if (scp_dialog_panel().IsLoaded()) {
+			dialog_draw();
 		}
 	}
 
@@ -332,85 +332,85 @@ namespace winrt::GraphPaper::implementation
 	{
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_prop_sheet.set_attr_to(&m_main_sheet);
+		m_dialog_page.set_attr_to(&m_main_page);
 		float f_size;
-		m_prop_sheet.get_font_size(f_size);
+		m_dialog_page.get_font_size(f_size);
 
-		prop_slider_0().Maximum(MAX_VALUE);
-		prop_slider_0().TickFrequency(TICK_FREQ);
-		prop_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		prop_slider_0().Value(f_size);
+		dialog_slider_0().Maximum(MAX_VALUE);
+		dialog_slider_0().TickFrequency(TICK_FREQ);
+		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_0().Value(f_size);
 		font_slider_set_header<UNDO_OP::FONT_SIZE, 0>(f_size);
-		prop_slider_0().Visibility(Visibility::Visible);
-		const auto slider_0_token = prop_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_SIZE, 0> });
-		font_create_sample_shape(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()), m_prop_sheet);
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		dialog_slider_0().Visibility(Visibility::Visible);
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_SIZE, 0> });
+		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
-			m_prop_sheet.m_shape_list.back()->get_font_size(samp_val);
+			m_dialog_page.m_shape_list.back()->get_font_size(samp_val);
 			if (ustack_push_set<UNDO_OP::FONT_SIZE>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 		}
-		slist_clear(m_prop_sheet.m_shape_list);
-		prop_slider_0().Visibility(Visibility::Collapsed);
-		prop_slider_0().ValueChanged(slider_0_token);
-		sheet_draw();
+		slist_clear(m_dialog_page.m_shape_list);
+		dialog_slider_0().Visibility(Visibility::Collapsed);
+		dialog_slider_0().ValueChanged(slider_0_token);
+		page_draw();
 	}
 
 	// 書体メニューの「幅の伸縮」が選択された.
 	IAsyncAction MainPage::font_stretch_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_prop_sheet.set_attr_to(&m_main_sheet);
+		m_dialog_page.set_attr_to(&m_main_page);
 		for (uint32_t i = 0; FONT_STRETCH_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_STRETCH_NAME[i]));
-			lv_prop_list().Items().Append(item);
+			lv_dialog_list().Items().Append(item);
 		}
-		lv_prop_list().SelectedIndex(-1);
-		const auto k = lv_prop_list().Items().Size();
+		lv_dialog_list().SelectedIndex(-1);
+		const auto k = lv_dialog_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
 			DWRITE_FONT_STRETCH f_stretch;
-			m_main_sheet.get_font_stretch(f_stretch);
+			m_main_page.get_font_stretch(f_stretch);
 			if (FONT_STRETCH[i] == f_stretch) {
-				lv_prop_list().SelectedIndex(i);
+				lv_dialog_list().SelectedIndex(i);
 				IInspectable item[1];
-				lv_prop_list().Items().GetMany(i, item);
-				lv_prop_list().ScrollIntoView(item[0]);
+				lv_dialog_list().Items().GetMany(i, item);
+				lv_dialog_list().ScrollIntoView(item[0]);
 				break;
 			}
 		}
-		const auto loaded_token = lv_prop_list().Loaded({ this, &MainPage::prop_list_view_loaded });
-		const auto changed_token = lv_prop_list().SelectionChanged(
+		const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::dialog_list_loaded });
+		const auto changed_token = lv_dialog_list().SelectionChanged(
 			[this](auto, auto args) {
-				uint32_t i = lv_prop_list().SelectedIndex();
-				m_prop_sheet.m_shape_list.back()->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
-				if (scp_prop_panel().IsLoaded()) {
-					prop_sample_draw();
+				uint32_t i = lv_dialog_list().SelectedIndex();
+				m_dialog_page.m_shape_list.back()->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
+				if (scp_dialog_panel().IsLoaded()) {
+					dialog_draw();
 				}
 			}
 		);
-		lv_prop_list().Visibility(Visibility::Visible);
-		font_create_sample_shape(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()), m_prop_sheet);
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		lv_dialog_list().Visibility(Visibility::Visible);
+		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_STRETCH samp_val;
-			m_prop_sheet.m_shape_list.back()->get_font_stretch(samp_val);
+			m_dialog_page.m_shape_list.back()->get_font_stretch(samp_val);
 			if (ustack_push_set<UNDO_OP::FONT_STRETCH>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 		}
-		slist_clear(m_prop_sheet.m_shape_list);
-		lv_prop_list().Loaded(loaded_token);
-		lv_prop_list().SelectionChanged(changed_token);
-		lv_prop_list().Visibility(Visibility::Collapsed);
-		lv_prop_list().Items().Clear();
-		sheet_draw();
+		slist_clear(m_dialog_page.m_shape_list);
+		lv_dialog_list().Loaded(loaded_token);
+		lv_dialog_list().SelectionChanged(changed_token);
+		lv_dialog_list().Visibility(Visibility::Collapsed);
+		lv_dialog_list().Items().Clear();
+		page_draw();
 	}
 
 	// 書体メニューの「字体」に印をつける.
@@ -432,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			sheet_draw();
+			page_draw();
 		}
 	}
 
@@ -442,7 +442,7 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			sheet_draw();
+			page_draw();
 		}
 	}
 
@@ -452,60 +452,60 @@ namespace winrt::GraphPaper::implementation
 		if (ustack_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
 			ustack_push_null();
 			xcvd_is_enabled();
-			sheet_draw();
+			page_draw();
 		}
 	}
 
 	// 書体メニューの「太さ」が選択された.
 	IAsyncAction MainPage::font_weight_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		m_prop_sheet.set_attr_to(&m_main_sheet);
+		m_dialog_page.set_attr_to(&m_main_page);
 		for (uint32_t i = 0; FONT_WEIGHT_NAME[i] != nullptr; i++) {
 			auto item = box_value(ResourceLoader::GetForCurrentView().GetString(FONT_WEIGHT_NAME[i]));
-			lv_prop_list().Items().Append(item);
+			lv_dialog_list().Items().Append(item);
 		}
-		lv_prop_list().SelectedIndex(-1);
-		const auto k = lv_prop_list().Items().Size();
+		lv_dialog_list().SelectedIndex(-1);
+		const auto k = lv_dialog_list().Items().Size();
 		for (uint32_t i = 0; i < k; i++) {
 			DWRITE_FONT_WEIGHT f_weight;
-			m_main_sheet.get_font_weight(f_weight);
+			m_main_page.get_font_weight(f_weight);
 			if (FONT_WEIGHTS[i] == f_weight) {
-				lv_prop_list().SelectedIndex(i);
+				lv_dialog_list().SelectedIndex(i);
 				IInspectable item[1];
-				lv_prop_list().Items().GetMany(i, item);
-				lv_prop_list().ScrollIntoView(item[0]);
+				lv_dialog_list().Items().GetMany(i, item);
+				lv_dialog_list().ScrollIntoView(item[0]);
 				break;
 			}
 		}
-		const auto loaded_token = lv_prop_list().Loaded({ this, &MainPage::prop_list_view_loaded });
-		const auto changed_token = lv_prop_list().SelectionChanged(
+		const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::dialog_list_loaded });
+		const auto changed_token = lv_dialog_list().SelectionChanged(
 			[this](auto, auto args) {
-				uint32_t i = lv_prop_list().SelectedIndex();
-				m_prop_sheet.m_shape_list.back()->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
-				if (scp_prop_panel().IsLoaded()) {
-					prop_sample_draw();
+				uint32_t i = lv_dialog_list().SelectedIndex();
+				m_dialog_page.m_shape_list.back()->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
+				if (scp_dialog_panel().IsLoaded()) {
+					dialog_draw();
 				}
 			}
 		);
-		lv_prop_list().Visibility(Visibility::Visible);
-		font_create_sample_shape(static_cast<float>(scp_prop_panel().Width()), static_cast<float>(scp_prop_panel().Height()), m_prop_sheet);
-		cd_prop_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const auto d_result = co_await cd_prop_dialog().ShowAsync();
+		lv_dialog_list().Visibility(Visibility::Visible);
+		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_WEIGHT samp_val;
-			m_prop_sheet.m_shape_list.back()->get_font_weight(samp_val);
+			m_dialog_page.m_shape_list.back()->get_font_weight(samp_val);
 			if (ustack_push_set<UNDO_OP::FONT_WEIGHT>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
-				sheet_draw();
+				page_draw();
 			}
 		}
-		slist_clear(m_prop_sheet.m_shape_list);
-		lv_prop_list().Loaded(loaded_token);
-		lv_prop_list().SelectionChanged(changed_token);
-		lv_prop_list().Visibility(Visibility::Collapsed);
-		lv_prop_list().Items().Clear();
-		sheet_draw();
+		slist_clear(m_dialog_page.m_shape_list);
+		lv_dialog_list().Loaded(loaded_token);
+		lv_dialog_list().SelectionChanged(changed_token);
+		lv_dialog_list().Visibility(Visibility::Collapsed);
+		lv_dialog_list().Items().Clear();
+		page_draw();
 	}
 
 }

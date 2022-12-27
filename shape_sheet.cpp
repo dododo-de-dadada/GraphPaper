@@ -9,15 +9,14 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 方眼を表示する.
-	// sh	表示する用紙
-	static void sheet_draw_grid(
+	static void page_draw_grid(
 		ID2D1RenderTarget* const target,
 		ID2D1SolidColorBrush* const brush,
 		const float grid_base,
 		const D2D1_COLOR_F grid_color,
 		const GRID_EMPH grid_emph,
 		const D2D1_POINT_2F grid_offset,
-		const float sh_scale,
+		const float page_scale,
 		const D2D1_SIZE_F sh_size
 	);
 
@@ -90,15 +89,14 @@ namespace winrt::GraphPaper::implementation
 	*/
 
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
-	// sh	表示する用紙
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
-	void ShapeSheet::draw_auxiliary_bezi(
+	void ShapePage::draw_auxiliary_bezi(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
+		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// 線の太さ
 		ID2D1StrokeStyle1* const a_style = Shape::m_aux_style.get();
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
@@ -124,15 +122,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// だ円の補助線を表示する.
-	// sh	表示する用紙
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
-	void ShapeSheet::draw_auxiliary_elli(
+	void ShapePage::draw_auxiliary_elli(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
+		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// 線の太さ
 		//const D2D_UI& d2d = sh.m_d2d;
 		D2D1_POINT_2F rect;	// 方形
 		D2D1_ELLIPSE elli;		// だ円
@@ -149,15 +146,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 直線の補助線を表示する.
-	// sh	表示する用紙
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
-	void ShapeSheet::draw_auxiliary_line(
+	void ShapePage::draw_auxiliary_line(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
+		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// 線の太さ
 		brush->SetColor(Shape::s_background_color);
 		target->DrawLine(p_pos, c_pos, brush, s_width, nullptr);
 		brush->SetColor(Shape::s_foreground_color);
@@ -165,16 +161,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 多角形の補助線を表示する.
-	// sh	表示する用紙
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	// p_opt	多角形の選択肢
-	void ShapeSheet::draw_auxiliary_poly(
+	void ShapePage::draw_auxiliary_poly(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos, const POLY_OPTION& p_opt)
 	{
-		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
+		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// 線の太さ
 		D2D1_POINT_2F v_pos[MAX_N_GON];	// 頂点の配列
 
 		D2D1_POINT_2F p_vec;
@@ -192,15 +187,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方形の補助線を表示する.
-	// sh	表示する用紙
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
-	void ShapeSheet::draw_auxiliary_rect(
+	void ShapePage::draw_auxiliary_rect(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
+		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// 線の太さ
 		const D2D1_RECT_F rc = {
 			p_pos.x, p_pos.y, c_pos.x, c_pos.y
 		};
@@ -211,16 +205,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 角丸方形の補助線を表示する.
-	// sh	表示する用紙
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	// c_rad	角丸半径
-	void ShapeSheet::draw_auxiliary_rrect(
+	void ShapePage::draw_auxiliary_rrect(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		// 表示倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_sheet_scale);	// 線の太さ
+		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// 線の太さ
 		const double cx = c_pos.x;
 		const double cy = c_pos.y;
 		const double px = p_pos.x;
@@ -249,26 +242,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	// sh	表示する用紙
-	void ShapeSheet::draw(void)
+	void ShapePage::draw(void)
 	{
 		ID2D1RenderTarget* const target = Shape::s_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
 
-		// 用紙色で塗りつぶす.
-		target->Clear(m_sheet_color);
+		// ページの色で塗りつぶす.
+		target->Clear(m_page_color);
 		if (m_grid_show == GRID_SHOW::BACK) {
 			// 方眼の表示が最背面に表示の場合,
 			// 方眼を表示する.
-			sheet_draw_grid(
+			page_draw_grid(
 				target,
 				brush,
 				m_grid_base,
 				m_grid_color,
 				m_grid_emph,
 				m_grid_offset,
-				m_sheet_scale,
-				m_sheet_size);
+				m_page_scale,
+				m_page_size);
 		}
 		for (auto s : m_shape_list) {
 			if (!s->is_deleted()) {
@@ -279,15 +271,15 @@ namespace winrt::GraphPaper::implementation
 		if (m_grid_show == GRID_SHOW::FRONT) {
 			// 方眼の表示が最前面に表示の場合,
 			// 方眼を表示する.
-			sheet_draw_grid(
+			page_draw_grid(
 				target,
 				brush,
 				m_grid_base,
 				m_grid_color,
 				m_grid_emph,
 				m_grid_offset,
-				m_sheet_scale,
-				m_sheet_size);
+				m_page_scale,
+				m_page_size);
 		}
 
 	}
@@ -295,36 +287,34 @@ namespace winrt::GraphPaper::implementation
 	// 方眼を表示する.
 	// d2d	描画環境
 	// g_offset	方眼のずらし量
-	static void sheet_draw_grid(
+	static void page_draw_grid(
 		ID2D1RenderTarget* const target,
 		ID2D1SolidColorBrush* const brush,
 		const float grid_base,
 		const D2D1_COLOR_F grid_color,
 		const GRID_EMPH grid_emph,
 		const D2D1_POINT_2F grid_offset,
-		const float sh_scale,
-		const D2D1_SIZE_F sheet_size
+		const float page_scale,
+		const D2D1_SIZE_F page_size
 	)
 	{
-		//const double sh_w = sheet_size.width;	// 用紙の幅
-		//const double sh_h = sheet_size.height;	// 用紙の高さ
 		// 拡大されても 1 ピクセルになるよう拡大率の逆数を線枠の太さに格納する.
-		const FLOAT grid_w = static_cast<FLOAT>(1.0 / sh_scale);	// 方眼の太さ
+		const FLOAT grid_w = static_cast<FLOAT>(1.0 / page_scale);	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
 		brush->SetColor(grid_color);
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
-		const auto sheet_h = sheet_size.height;
-		const auto sheet_w = sheet_size.width;
-		v_end.y = sheet_size.height;
-		h_end.x = sheet_size.width;
+		const auto page_h = page_size.height;
+		const auto page_w = page_size.width;
+		v_end.y = page_size.height;
+		h_end.x = page_size.width;
 		const double grid_len = max(grid_base + 1.0, 1.0);
 
 		// 垂直な方眼を表示する.
 		float w;
 		double x;
-		for (uint32_t i = 0; (x = round((grid_len * i + grid_offset.x) / PT_ROUND) * PT_ROUND) < sheet_w; i++) {
+		for (uint32_t i = 0; (x = round((grid_len * i + grid_offset.x) / PT_ROUND) * PT_ROUND) < page_w; i++) {
 			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
 				w = 2.0F * grid_w;
 			}
@@ -339,7 +329,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 水平な方眼を表示する.
 		double y;
-		for (uint32_t i = 0; (y = round((grid_len * i + grid_offset.y) / PT_ROUND) * PT_ROUND) < sheet_h; i++) {
+		for (uint32_t i = 0; (y = round((grid_len * i + grid_offset.y) / PT_ROUND) * PT_ROUND) < page_h; i++) {
 			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
 				w = 2.0F * grid_w;
 			}
@@ -356,224 +346,224 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じるしの寸法を得る.
-	bool ShapeSheet::get_arrow_size(ARROW_SIZE& val) const noexcept
+	bool ShapePage::get_arrow_size(ARROW_SIZE& val) const noexcept
 	{
 		val = m_arrow_size;
 		return true;
 	}
 
 	// 矢じるしの形式を得る.
-	bool ShapeSheet::get_arrow_style(ARROW_STYLE& val) const noexcept
+	bool ShapePage::get_arrow_style(ARROW_STYLE& val) const noexcept
 	{
 		val = m_arrow_style;
 		return true;
 	}
 
 	// 画像の不透明度を得る.
-	bool ShapeSheet::get_image_opacity(float& val) const noexcept
+	bool ShapePage::get_image_opacity(float& val) const noexcept
 	{
 		val = m_image_opac;
 		return true;
 	}
 
 	// 角丸半径を得る.
-	bool ShapeSheet::get_corner_radius(D2D1_POINT_2F& val) const noexcept
+	bool ShapePage::get_corner_radius(D2D1_POINT_2F& val) const noexcept
 	{
 		val = m_corner_rad;
 		return true;
 	}
 
 	// 塗りつぶしの色を得る.
-	bool ShapeSheet::get_fill_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapePage::get_fill_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_fill_color;
 		return true;
 	}
 
 	// 書体の色を得る.
-	bool ShapeSheet::get_font_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapePage::get_font_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_font_color;
 		return true;
 	}
 
 	// 書体名を得る.
-	bool ShapeSheet::get_font_family(wchar_t*& val) const noexcept
+	bool ShapePage::get_font_family(wchar_t*& val) const noexcept
 	{
 		val = m_font_family;
 		return true;
 	}
 
 	// 書体の大きさを得る.
-	bool ShapeSheet::get_font_size(float& val) const noexcept
+	bool ShapePage::get_font_size(float& val) const noexcept
 	{
 		val = m_font_size;
 		return true;
 	}
 
 	// 書体の幅の伸縮を得る.
-	bool ShapeSheet::get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept
+	bool ShapePage::get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept
 	{
 		val = m_font_stretch;
 		return true;
 	}
 
 	// 書体の字体を得る.
-	bool ShapeSheet::get_font_style(DWRITE_FONT_STYLE& val) const noexcept
+	bool ShapePage::get_font_style(DWRITE_FONT_STYLE& val) const noexcept
 	{
 		val = m_font_style;
 		return true;
 	}
 
 	// 書体の太さを得る.
-	bool ShapeSheet::get_font_weight(DWRITE_FONT_WEIGHT& val) const noexcept
+	bool ShapePage::get_font_weight(DWRITE_FONT_WEIGHT& val) const noexcept
 	{
 		val = m_font_weight;
 		return true;
 	}
 
 	// 方眼の基準の大きさを得る.
-	bool ShapeSheet::get_grid_base(float& val) const noexcept
+	bool ShapePage::get_grid_base(float& val) const noexcept
 	{
 		val = m_grid_base;
 		return true;
 	}
 
 	// 方眼の色を得る.
-	bool ShapeSheet::get_grid_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapePage::get_grid_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_grid_color;
 		return true;
 	}
 
 	// 方眼の強調を得る.
-	bool ShapeSheet::get_grid_emph(GRID_EMPH& val) const noexcept
+	bool ShapePage::get_grid_emph(GRID_EMPH& val) const noexcept
 	{
 		val = m_grid_emph;
 		return true;
 	}
 
 	// 方眼の表示を得る.
-	bool ShapeSheet::get_grid_show(GRID_SHOW& val) const noexcept
+	bool ShapePage::get_grid_show(GRID_SHOW& val) const noexcept
 	{
 		val = m_grid_show;
 		return true;
 	}
 
 	// 方眼に合わせるを得る.
-	bool ShapeSheet::get_grid_snap(bool& val) const noexcept
+	bool ShapePage::get_grid_snap(bool& val) const noexcept
 	{
 		val = m_grid_snap;
 		return true;
 	}
 
-	// 用紙の色を得る.
-	bool ShapeSheet::get_sheet_color(D2D1_COLOR_F& val) const noexcept
+	// ページの色を得る.
+	bool ShapePage::get_page_color(D2D1_COLOR_F& val) const noexcept
 	{
-		val = m_sheet_color;
+		val = m_page_color;
 		return true;
 	}
 
-	// 用紙の拡大率を得る.
-	bool ShapeSheet::get_sheet_scale(float& val) const noexcept
+	// ページ倍率を得る.
+	bool ShapePage::get_page_scale(float& val) const noexcept
 	{
-		val = m_sheet_scale;
+		val = m_page_scale;
 		return true;
 	}
 
-	// 用紙の寸法を得る.
-	bool ShapeSheet::get_sheet_size(D2D1_SIZE_F& val) const noexcept
+	// ページの大きさを得る.
+	bool ShapePage::get_page_size(D2D1_SIZE_F& val) const noexcept
 	{
-		val = m_sheet_size;
+		val = m_page_size;
 		return true;
 	}
 
 	// 端の形式を得る.
-	bool ShapeSheet::get_stroke_cap(CAP_STYLE& val) const noexcept
+	bool ShapePage::get_stroke_cap(CAP_STYLE& val) const noexcept
 	{
 		val = m_stroke_cap;
 		return true;
 	}
 
 	// 線枠の色を得る.
-	bool ShapeSheet::get_stroke_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapePage::get_stroke_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_stroke_color;
 		return true;
 	}
 
 	// 破線の端の形式を得る.
-	bool ShapeSheet::get_dash_cap(D2D1_CAP_STYLE& val) const noexcept
+	bool ShapePage::get_dash_cap(D2D1_CAP_STYLE& val) const noexcept
 	{
 		val = m_dash_cap;
 		return true;
 	}
 
 	// 破線の配置を得る.
-	bool ShapeSheet::get_dash_patt(DASH_PATT& val) const noexcept
+	bool ShapePage::get_dash_patt(DASH_PATT& val) const noexcept
 	{
 		val = m_dash_patt;
 		return true;
 	}
 
 	// 線枠の形式を得る.
-	bool ShapeSheet::get_dash_style(D2D1_DASH_STYLE& val) const noexcept
+	bool ShapePage::get_dash_style(D2D1_DASH_STYLE& val) const noexcept
 	{
 		val = m_dash_style;
 		return true;
 	}
 
 	// 線分の結合のマイター制限を得る.
-	bool ShapeSheet::get_join_miter_limit(float& val) const noexcept
+	bool ShapePage::get_join_miter_limit(float& val) const noexcept
 	{
 		val = m_join_miter_limit;
 		return true;
 	}
 
 	// 線分の結合を得る.
-	bool ShapeSheet::get_join_style(D2D1_LINE_JOIN& val) const noexcept
+	bool ShapePage::get_join_style(D2D1_LINE_JOIN& val) const noexcept
 	{
 		val = m_join_style;
 		return true;
 	}
 
 	// 線枠の太さを得る.
-	bool ShapeSheet::get_stroke_width(float& val) const noexcept
+	bool ShapePage::get_stroke_width(float& val) const noexcept
 	{
 		val = m_stroke_width;
 		return true;
 	}
 
 	// 段落の揃えを得る.
-	bool ShapeSheet::get_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept
+	bool ShapePage::get_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept
 	{
 		val = m_text_par_align;
 		return true;
 	}
 
 	// 文字列のそろえを得る.
-	bool ShapeSheet::get_text_align_t(DWRITE_TEXT_ALIGNMENT& val) const noexcept
+	bool ShapePage::get_text_align_t(DWRITE_TEXT_ALIGNMENT& val) const noexcept
 	{
 		val = m_text_align_t;
 		return true;
 	}
 
 	// 行間を得る.
-	bool ShapeSheet::get_text_line_sp(float& val) const noexcept
+	bool ShapePage::get_text_line_sp(float& val) const noexcept
 	{
 		val = m_text_line_sp;
 		return true;
 	}
 
 	// 文字列の余白を得る.
-	bool ShapeSheet::get_text_padding(D2D1_SIZE_F& val) const noexcept
+	bool ShapePage::get_text_padding(D2D1_SIZE_F& val) const noexcept
 	{
 		val = m_text_padding;
 		return true;
 	}
 
 	// 図形をデータリーダーから読み込む.
-	void ShapeSheet::read(DataReader const& dt_reader)
+	void ShapePage::read(DataReader const& dt_reader)
 	{
 		D2D1_COLOR_F dummy;
 		dt_read(dummy, dt_reader);
@@ -583,15 +573,15 @@ namespace winrt::GraphPaper::implementation
 		dt_read(m_grid_emph, dt_reader);
 		m_grid_show = static_cast<GRID_SHOW>(dt_reader.ReadUInt32());
 		m_grid_snap = dt_reader.ReadBoolean();
-		dt_read(m_sheet_color, dt_reader);
-		m_sheet_scale = dt_reader.ReadSingle();
-		m_sheet_scale = max(m_sheet_scale, 0.25f);
-		m_sheet_scale = min(m_sheet_scale, 4.0f);
-		dt_read(m_sheet_size, dt_reader);
-		m_sheet_size.width = min(m_sheet_size.width, ShapeSheet::size_max());
-		m_sheet_size.width = max(m_sheet_size.width, 1.0F);
-		m_sheet_size.height = min(m_sheet_size.height, ShapeSheet::size_max());
-		m_sheet_size.height = max(m_sheet_size.height, 1.0F);
+		dt_read(m_page_color, dt_reader);
+		m_page_scale = dt_reader.ReadSingle();
+		m_page_scale = max(m_page_scale, 0.25f);
+		m_page_scale = min(m_page_scale, 4.0f);
+		dt_read(m_page_size, dt_reader);
+		m_page_size.width = min(m_page_size.width, ShapePage::size_max());
+		m_page_size.width = max(m_page_size.width, 1.0F);
+		m_page_size.height = min(m_page_size.height, ShapePage::size_max());
+		m_page_size.height = max(m_page_size.height, 1.0F);
 
 		dt_read(m_arrow_size, dt_reader);	// 矢じるしの寸法
 		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());	// 矢じるしの形式
@@ -621,7 +611,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を矢じるしの寸法に格納する.
-	bool ShapeSheet::set_arrow_size(const ARROW_SIZE& val) noexcept
+	bool ShapePage::set_arrow_size(const ARROW_SIZE& val) noexcept
 	{
 		if (!equal(m_arrow_size, val)) {
 			m_arrow_size = val;
@@ -631,14 +621,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を矢じるしの形式に格納する.
-	bool ShapeSheet::set_arrow_style(const ARROW_STYLE val) noexcept
+	bool ShapePage::set_arrow_style(const ARROW_STYLE val) noexcept
 	{
 		const auto old_val = m_arrow_style;
 		return (m_arrow_style = val) != old_val;
 	}
 
 	// 値を画像の不透明度に格納する.
-	bool ShapeSheet::set_image_opacity(const float val) noexcept
+	bool ShapePage::set_image_opacity(const float val) noexcept
 	{
 		if (!equal(m_image_opac, val)) {
 			m_image_opac = val;
@@ -648,7 +638,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を角丸半径に格納する.
-	bool ShapeSheet::set_corner_radius(const D2D1_POINT_2F& val) noexcept
+	bool ShapePage::set_corner_radius(const D2D1_POINT_2F& val) noexcept
 	{
 		if (!equal(m_corner_rad, val)) {
 			m_corner_rad = val;
@@ -658,7 +648,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を塗りつぶしの色に格納する.
-	bool ShapeSheet::set_fill_color(const D2D1_COLOR_F& val) noexcept
+	bool ShapePage::set_fill_color(const D2D1_COLOR_F& val) noexcept
 	{
 		if (!equal(m_fill_color, val)) {
 			m_fill_color = val;
@@ -668,7 +658,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を書体の色に格納する.
-	bool ShapeSheet::set_font_color(const D2D1_COLOR_F& val) noexcept
+	bool ShapePage::set_font_color(const D2D1_COLOR_F& val) noexcept
 	{
 		if (!equal(m_font_color, val)) {
 			m_font_color = val;
@@ -678,7 +668,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を書体名に格納する.
-	bool ShapeSheet::set_font_family(wchar_t* const val) noexcept
+	bool ShapePage::set_font_family(wchar_t* const val) noexcept
 	{
 		if (!equal(m_font_family, val)) {
 			m_font_family = val;
@@ -688,7 +678,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を書体の大きさに格納する.
-	bool ShapeSheet::set_font_size(const float val) noexcept
+	bool ShapePage::set_font_size(const float val) noexcept
 	{
 		if (!equal(m_font_size, val)) {
 			m_font_size = val;
@@ -698,28 +688,28 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を書体の幅の伸縮に格納する.
-	bool ShapeSheet::set_font_stretch(const DWRITE_FONT_STRETCH val) noexcept
+	bool ShapePage::set_font_stretch(const DWRITE_FONT_STRETCH val) noexcept
 	{
 		const auto old_val = m_font_stretch;
 		return (m_font_stretch = val) != old_val;
 	}
 
 	// 書体の字体に格納する.
-	bool ShapeSheet::set_font_style(const DWRITE_FONT_STYLE val) noexcept
+	bool ShapePage::set_font_style(const DWRITE_FONT_STYLE val) noexcept
 	{
 		const auto old_val = m_font_style;
 		return (m_font_style = val) != old_val;
 	}
 
 	// 値を書体の太さに格納する.
-	bool ShapeSheet::set_font_weight(const DWRITE_FONT_WEIGHT val) noexcept
+	bool ShapePage::set_font_weight(const DWRITE_FONT_WEIGHT val) noexcept
 	{
 		const auto old_val = m_font_weight;
 		return (m_font_weight = val) != old_val;
 	}
 
 	// 値を方眼の基準の大きさに格納する.
-	bool ShapeSheet::set_grid_base(const float val) noexcept
+	bool ShapePage::set_grid_base(const float val) noexcept
 	{
 		if (!equal(m_grid_base, val)) {
 			m_grid_base = val;
@@ -729,7 +719,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を方眼の濃淡に格納する.
-	bool ShapeSheet::set_grid_color(const D2D1_COLOR_F& val) noexcept
+	bool ShapePage::set_grid_color(const D2D1_COLOR_F& val) noexcept
 	{
 		if (!equal(m_grid_color, val)) {
 			m_grid_color = val;
@@ -739,7 +729,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を方眼の強調に格納する.
-	bool ShapeSheet::set_grid_emph(const GRID_EMPH& val) noexcept
+	bool ShapePage::set_grid_emph(const GRID_EMPH& val) noexcept
 	{
 		if (!equal(m_grid_emph, val)) {
 			m_grid_emph = val;
@@ -749,52 +739,52 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を方眼の表示に格納する.
-	bool ShapeSheet::set_grid_show(const GRID_SHOW val) noexcept
+	bool ShapePage::set_grid_show(const GRID_SHOW val) noexcept
 	{
 		const auto old_val = m_grid_show;
 		return (m_grid_show = val) != old_val;
 	}
 
 	// 値を方眼に合わせるに格納する.
-	bool ShapeSheet::set_grid_snap(const bool val) noexcept
+	bool ShapePage::set_grid_snap(const bool val) noexcept
 	{
 		const auto old_val = m_grid_snap;
 		return (m_grid_snap = val) != old_val;
 	}
 
-	// 値を, 用紙, 方眼, 補助線の各色に格納する
-	bool ShapeSheet::set_sheet_color(const D2D1_COLOR_F& val) noexcept
+	// 値を, 表示, 方眼, 補助線の各色に格納する
+	bool ShapePage::set_page_color(const D2D1_COLOR_F& val) noexcept
 	{
-		if (!equal(m_sheet_color, val)) {
-			m_sheet_color = val;
-			m_sheet_color.a = 1.0f;
+		if (!equal(m_page_color, val)) {
+			m_page_color = val;
+			m_page_color.a = 1.0f;
 			return true;
 		}
 		return false;
 	}
 
-	// 値を用紙の拡大率に格納する.
-	bool ShapeSheet::set_sheet_scale(const float val) noexcept
+	// 値をページの倍率に格納する.
+	bool ShapePage::set_page_scale(const float val) noexcept
 	{
-		if (!equal(m_sheet_scale,val)) {
-			m_sheet_scale = val;
+		if (!equal(m_page_scale,val)) {
+			m_page_scale = val;
 			return true;
 		}
 		return false;
 	}
 
-	// 値を用紙の寸法に格納する.
-	bool ShapeSheet::set_sheet_size(const D2D1_SIZE_F val) noexcept
+	// 値を表示の大きさに格納する.
+	bool ShapePage::set_page_size(const D2D1_SIZE_F val) noexcept
 	{
-		if (!equal(m_sheet_size, val)) {
-			m_sheet_size = val;
+		if (!equal(m_page_size, val)) {
+			m_page_size = val;
 			return true;
 		}
 		return false;
 	}
 
 	// 値を端の形式に格納する.
-	bool ShapeSheet::set_stroke_cap(const CAP_STYLE& val) noexcept
+	bool ShapePage::set_stroke_cap(const CAP_STYLE& val) noexcept
 	{
 		if (!equal(m_stroke_cap, val)) {
 			m_stroke_cap = val;
@@ -804,7 +794,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠の色に格納する.
-	bool ShapeSheet::set_stroke_color(const D2D1_COLOR_F& val) noexcept
+	bool ShapePage::set_stroke_color(const D2D1_COLOR_F& val) noexcept
 	{
 		if (!equal(m_stroke_color, val)) {
 			m_stroke_color = val;
@@ -814,14 +804,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 破線の端の形式に格納する.
-	bool ShapeSheet::set_dash_cap(const D2D1_CAP_STYLE& val) noexcept
+	bool ShapePage::set_dash_cap(const D2D1_CAP_STYLE& val) noexcept
 	{
 		const auto old_val = m_dash_cap;
 		return (m_dash_cap = val) != old_val;
 	}
 
 	// 破線の配置に格納する.
-	bool ShapeSheet::set_dash_patt(const DASH_PATT& val) noexcept
+	bool ShapePage::set_dash_patt(const DASH_PATT& val) noexcept
 	{
 		if (!equal(m_dash_patt, val)) {
 			m_dash_patt = val;
@@ -831,14 +821,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 線枠の形式に格納する.
-	bool ShapeSheet::set_dash_style(const D2D1_DASH_STYLE val) noexcept
+	bool ShapePage::set_dash_style(const D2D1_DASH_STYLE val) noexcept
 	{
 		const auto old_val = m_dash_style;
 		return (m_dash_style = val) != old_val;
 	}
 
 	// 値を線分の結合のマイター制限に格納する.
-	bool ShapeSheet::set_join_miter_limit(const float& val) noexcept
+	bool ShapePage::set_join_miter_limit(const float& val) noexcept
 	{
 		if (!equal(m_join_miter_limit, val)) {
 			m_join_miter_limit = val;
@@ -848,14 +838,14 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を線分の結合に格納する.
-	bool ShapeSheet::set_join_style(const D2D1_LINE_JOIN& val) noexcept
+	bool ShapePage::set_join_style(const D2D1_LINE_JOIN& val) noexcept
 	{
 		const auto old_val = m_join_style;
 		return (m_join_style = val) != old_val;
 	}
 
 	// 線枠の太さに格納する.
-	bool ShapeSheet::set_stroke_width(const float val) noexcept
+	bool ShapePage::set_stroke_width(const float val) noexcept
 	{
 		if (!equal(m_stroke_width, val)) {
 			m_stroke_width = val;
@@ -865,21 +855,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を段落のそろえに格納する.
-	bool ShapeSheet::set_text_par_align(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept
+	bool ShapePage::set_text_par_align(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept
 	{
 		const auto old_val = m_text_par_align;
 		return (m_text_par_align = val) != old_val;
 	}
 
 	// 文字列のそろえに格納する.
-	bool ShapeSheet::set_text_align_t(const DWRITE_TEXT_ALIGNMENT val) noexcept
+	bool ShapePage::set_text_align_t(const DWRITE_TEXT_ALIGNMENT val) noexcept
 	{
 		const auto old_val = m_text_align_t;
 		return (m_text_align_t = val) != old_val;
 	}
 
 	// 値を行間に格納する.
-	bool ShapeSheet::set_text_line_sp(const float val) noexcept
+	bool ShapePage::set_text_line_sp(const float val) noexcept
 	{
 		if (!equal(m_text_line_sp, val)) {
 			m_text_line_sp = val;
@@ -889,7 +879,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を文字列の余白に格納する.
-	bool ShapeSheet::set_text_padding(const D2D1_SIZE_F val) noexcept
+	bool ShapePage::set_text_padding(const D2D1_SIZE_F val) noexcept
 	{
 		if (!equal(m_text_padding, val)) {
 			m_text_padding = val;
@@ -898,9 +888,9 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 図形の属性値を用紙に格納する.
+	// 図形の属性値を表示に格納する.
 	// s	図形
-	void ShapeSheet::set_attr_to(const Shape* s) noexcept
+	void ShapePage::set_attr_to(const Shape* s) noexcept
 	{
 		s->get_arrow_size(m_arrow_size);
 		s->get_arrow_style(m_arrow_style);
@@ -923,7 +913,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_image_opacity(m_image_opac);
 		s->get_join_miter_limit(m_join_miter_limit);
 		s->get_join_style(m_join_style);
-		s->get_sheet_color(m_sheet_color);
+		s->get_page_color(m_page_color);
 		s->get_stroke_cap(m_stroke_cap);
 		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_width(m_stroke_width);
@@ -935,7 +925,7 @@ namespace winrt::GraphPaper::implementation
 
 	// データリーダーに書き込む.
 	// dt_writer	データリーダー
-	void ShapeSheet::write(DataWriter const& dt_writer)
+	void ShapePage::write(DataWriter const& dt_writer)
 	{
 		D2D1_COLOR_F dummy;
 		dt_write(dummy, dt_writer);
@@ -944,9 +934,9 @@ namespace winrt::GraphPaper::implementation
 		dt_write(m_grid_emph, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_grid_show));
 		dt_writer.WriteBoolean(m_grid_snap);
-		dt_write(m_sheet_color, dt_writer);
-		dt_writer.WriteSingle(m_sheet_scale);
-		dt_write(m_sheet_size, dt_writer);
+		dt_write(m_page_color, dt_writer);
+		dt_writer.WriteSingle(m_page_scale);
+		dt_write(m_page_size, dt_writer);
 
 		dt_write(m_arrow_size, dt_writer);	// 矢じるしの寸法
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));	// 矢じるしの形式

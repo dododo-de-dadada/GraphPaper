@@ -143,7 +143,6 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	// sh	表示する用紙
 	void ShapeText::draw(void)
 	{
 		ID2D1Factory2* const factory = Shape::s_factory;
@@ -583,7 +582,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const uint32_t anc = ShapeRect::hit_test_anc(t_pos);
-		if (anc != ANC_TYPE::ANC_SHEET) {
+		if (anc != ANC_TYPE::ANC_VIEW) {
 			return anc;
 		}
 		const float descent = m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : (m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);
@@ -871,20 +870,20 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// text	文字列
-	// s_sheet	属性
-	ShapeText::ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const ShapeSheet* s_sheet) :
-		ShapeRect::ShapeRect(b_pos, b_vec, s_sheet),
-		m_font_color(s_sheet->m_font_color),
-		m_font_family(s_sheet->m_font_family),
-		m_font_size(s_sheet->m_font_size),
-		m_font_stretch(s_sheet->m_font_stretch),
-		m_font_style(s_sheet->m_font_style),
-		m_font_weight(s_sheet->m_font_weight),
-		m_text_line_sp(s_sheet->m_text_line_sp),
-		m_text_padding(s_sheet->m_text_padding),
+	// setting	属性
+	ShapeText::ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const ShapePage* setting) :
+		ShapeRect::ShapeRect(b_pos, b_vec, setting),
+		m_font_color(setting->m_font_color),
+		m_font_family(setting->m_font_family),
+		m_font_size(setting->m_font_size),
+		m_font_stretch(setting->m_font_stretch),
+		m_font_style(setting->m_font_style),
+		m_font_weight(setting->m_font_weight),
+		m_text_line_sp(setting->m_text_line_sp),
+		m_text_padding(setting->m_text_padding),
 		m_text(text),
-		m_text_align_t(s_sheet->m_text_align_t),
-		m_text_par_align(s_sheet->m_text_par_align),
+		m_text_align_t(setting->m_text_align_t),
+		m_text_par_align(setting->m_text_par_align),
 		m_text_selected_range(DWRITE_TEXT_RANGE{ 0, 0 })
 	{
 		ShapeText::is_available_font(m_font_family);
