@@ -246,24 +246,24 @@ namespace winrt::GraphPaper::implementation
 						anc_r = ANC_TYPE::ANC_R_SW;
 					}
 					else {
-						anc_r = ANC_TYPE::ANC_VIEW;
+						anc_r = ANC_TYPE::ANC_PAGE;
 					}
 				}
 			}
 		}
 		// 角丸の円弧の中心点に含まれる,
-		if (anc_r != ANC_TYPE::ANC_VIEW &&
+		if (anc_r != ANC_TYPE::ANC_PAGE &&
 			// かつ, 方形の大きさが図形の部位の大きさより大きいか判定する.
 			fabs(m_vec[0].x) > Shape::s_anc_len && fabs(m_vec[0].y) > Shape::s_anc_len) {
 			return anc_r;
 		}
 		// 方形の各頂点に含まれるか判定する.
 		const uint32_t anc_v = hit_test_anc(t_pos);
-		if (anc_v != ANC_TYPE::ANC_VIEW) {
+		if (anc_v != ANC_TYPE::ANC_PAGE) {
 			return anc_v;
 		}
 		// 頂点に含まれず, 角丸の円弧の中心点に含まれるか判定する.
-		else if (anc_r != ANC_TYPE::ANC_VIEW) {
+		else if (anc_r != ANC_TYPE::ANC_PAGE) {
 			return anc_r;
 		}
 
@@ -324,7 +324,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	// 値を, 部位の位置に格納する. 他の部位の位置も動く.

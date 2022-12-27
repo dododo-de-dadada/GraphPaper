@@ -14,7 +14,7 @@
 // shape.rect.cpp	方形
 // shape_rrect.cpp	角丸方形
 // shape_ruler.cpp	定規
-// shape_sheet.cpp	表示
+// shape_page.cpp	ページ
 // shape_slist.cpp	図形リスト
 // shape_stroke.cpp	線枠のひな型
 // shape_svg.cpp	SVG への書き込み
@@ -34,9 +34,9 @@
 //        +---------------+---------------+
 //        |               |               |
 // +------+------+ +------+------+ +------+------+
-// | ShapeSelect*| | ShapeGroup  | | ShapePage  |
-// +------+------+ +-------------+ | .D2D_UI -------------> SwapChainPanel
-//        |                        +-------------+
+// | ShapeSelect*| | ShapeGroup  | | ShapePage   |
+// +------+------+ +-------------+ +-------------+
+//        |
 //        +---------------+
 //        |               |
 // +------+------+ +------+------+
@@ -63,7 +63,7 @@
 // ShapePage はメンバに D2D_UI をもち, D2D_UI はスワップチェーンパネルへの参照を維持する.
 
 // SVG のためのテキスト改行コード
-#define SVG_NEW_LINE	"\n"
+//#define SVG_NEW_LINE	"\n"
 
 namespace winrt::GraphPaper::implementation
 {
@@ -114,10 +114,10 @@ namespace winrt::GraphPaper::implementation
 		D2D1_STROKE_TRANSFORM_TYPE::D2D1_STROKE_TRANSFORM_TYPE_NORMAL
 	};
 
-	// 図形の部位 (アンカーポイント)
+	// アンカーポイント (図形の部位)
 	// 数の定まっていない多角形の頂点をあらわすため, enum struct でなく enum を用いる.
 	enum ANC_TYPE {
-		ANC_VIEW,		// 図形の外部 (矢印カーソル)
+		ANC_PAGE,		// 図形の外部 (矢印カーソル)
 		ANC_FILL,		// 図形の内部 (移動カーソル)
 		ANC_STROKE,	// 線枠 (移動カーソル)
 		ANC_TEXT,		// 文字列 (移動カーソル)
@@ -136,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 		ANC_P0,	// パスの開始点 (十字カーソル)
 	};
 
-	// 矢じるしの寸法
+	// 矢じるしの大きさ
 	struct ARROW_SIZE {
 		float m_width;		// 返しの幅
 		float m_length;		// 先端から付け根までの長さ
@@ -499,7 +499,7 @@ namespace winrt::GraphPaper::implementation
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F /*v_pos*/[]) const noexcept { return 0; };
 		// 位置を含むか判定する.
-		virtual uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept { return ANC_TYPE::ANC_VIEW; }
+		virtual uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept { return ANC_TYPE::ANC_PAGE; }
 		// 範囲に含まれるか判定する.
 		virtual bool in_area(const D2D1_POINT_2F /*area_min*/, const D2D1_POINT_2F /*area_max*/) const noexcept { return false; }
 		// 消去されたか判定する.
@@ -620,7 +620,8 @@ namespace winrt::GraphPaper::implementation
 	// 画像
 	//------------------------------
 	struct ShapeImage : ShapeSelect {
-		static winrt::com_ptr<IWICImagingFactory2> wic_factory;
+		// WIC = ウィンドウズ・イメージング・コンポーネント
+		static winrt::com_ptr<IWICImagingFactory2> wic_factory;	// WIC ファクトリー
 
 		D2D1_POINT_2F m_pos;	// 始点の位置
 		D2D1_SIZE_F m_view;	// 表示寸法
@@ -631,7 +632,7 @@ namespace winrt::GraphPaper::implementation
 		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
 		winrt::com_ptr<ID2D1Bitmap1> m_d2d_bitmap{ nullptr };	// D2D ビットマップ
 
-		int m_pdf_obj = 0;
+		int m_pdf_obj = 0;	// PDF オブジェクト番号 (PDF として出力するときのみ使用)
 
 		// 図形を破棄する.
 		ShapeImage::~ShapeImage(void)
@@ -641,7 +642,6 @@ namespace winrt::GraphPaper::implementation
 				m_data = nullptr;
 			}
 			if (m_d2d_bitmap != nullptr) {
-				//m_d2d_bitmap->Release();
 				m_d2d_bitmap = nullptr;
 			}
 		} // ~Shape

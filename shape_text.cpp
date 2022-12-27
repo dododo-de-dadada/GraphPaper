@@ -582,7 +582,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const uint32_t anc = ShapeRect::hit_test_anc(t_pos);
-		if (anc != ANC_TYPE::ANC_VIEW) {
+		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
 		const float descent = m_dw_font_metrics.designUnitsPerEm == 0 ? 0.0f : (m_font_size * m_dw_font_metrics.descent / m_dw_font_metrics.designUnitsPerEm);

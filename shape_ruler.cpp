@@ -17,7 +17,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const uint32_t anc = ShapeRect::hit_test_anc(t_pos);
-		if (anc != ANC_TYPE::ANC_VIEW) {
+		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
 		if (is_opaque(m_stroke_color)) {
@@ -119,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	// ê}å`Çï\é¶Ç∑ÇÈ.

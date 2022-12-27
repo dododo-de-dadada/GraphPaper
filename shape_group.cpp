@@ -144,11 +144,11 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(t_pos) != ANC_TYPE::ANC_VIEW) {
+			if (s->hit_test(t_pos) != ANC_TYPE::ANC_PAGE) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	//------------------------------

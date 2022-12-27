@@ -296,7 +296,7 @@ namespace winrt::GraphPaper::implementation
 		// ポインターの押された状態を初期状態に戻す.
 		m_event_state = EVENT_STATE::BEGIN;
 		m_event_shape_pressed = nullptr;
-		m_event_anc_pressed = ANC_TYPE::ANC_VIEW;
+		m_event_anc_pressed = ANC_TYPE::ANC_PAGE;
 		page_draw();
 	}
 
@@ -518,7 +518,7 @@ namespace winrt::GraphPaper::implementation
 					ustack_push_move(vec);
 				}
 				// ポインターが押されたのが図形の外部以外か判定する.
-				else if (m_event_anc_pressed != ANC_TYPE::ANC_VIEW) {
+				else if (m_event_anc_pressed != ANC_TYPE::ANC_PAGE) {
 					// 図形を変形している状態に遷移する.
 					// ポインターの現在位置を前回位置に保存する.
 					m_event_state = EVENT_STATE::PRESS_FORM;
@@ -602,7 +602,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 			m_event_anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
 			// 押されたのが図形の外側か判定する.
-			if (m_event_anc_pressed == ANC_TYPE::ANC_VIEW) {
+			if (m_event_anc_pressed == ANC_TYPE::ANC_PAGE) {
 				m_event_shape_pressed = nullptr;
 				m_event_shape_prev = nullptr;
 				// 修飾キーが押されていないならば, すべての図形の選択を解除する.
@@ -830,7 +830,7 @@ namespace winrt::GraphPaper::implementation
 		// 初期状態に戻す.
 		m_event_state = EVENT_STATE::BEGIN;
 		m_event_shape_pressed = nullptr;
-		m_event_anc_pressed = ANC_TYPE::ANC_VIEW;
+		m_event_anc_pressed = ANC_TYPE::ANC_PAGE;
 		page_draw();
 	}
 
@@ -850,7 +850,7 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.unlock();
 			Shape* s;
 			const auto anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, s);
-			if (anc == ANC_TYPE::ANC_VIEW) {
+			if (anc == ANC_TYPE::ANC_PAGE) {
 				Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 			}
 			else if (m_list_sel_cnt > 1) {
@@ -919,7 +919,7 @@ namespace winrt::GraphPaper::implementation
 		// コンテキストメニューを解放する.
 		ContextFlyout(nullptr);
 		// 押された図形がヌル, または押された図形の部位が外側か判定する.
-		if (m_event_shape_pressed == nullptr || m_event_anc_pressed == ANC_TYPE::ANC_VIEW) {
+		if (m_event_shape_pressed == nullptr || m_event_anc_pressed == ANC_TYPE::ANC_PAGE) {
 			if (m_menu_page == nullptr) {
 				m_menu_page = MenuFlyout();
 				for (const auto item : mbi_grid().Items()) {

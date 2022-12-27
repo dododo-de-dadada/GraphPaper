@@ -366,7 +366,7 @@ namespace winrt::GraphPaper::implementation
 				if (pt_in_circle(t_vec, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
-				return ANC_TYPE::ANC_VIEW;
+				return ANC_TYPE::ANC_PAGE;
 			}
 			// 辺が閉じているか判定する.
 			if (s_closed) {
@@ -527,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	// 直行するベクトルを得る.

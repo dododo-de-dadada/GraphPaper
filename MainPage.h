@@ -243,7 +243,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_event_pos_curr{ 0.0F, 0.0F };	// ポインターの現在位置
 		D2D1_POINT_2F m_event_pos_prev{ 0.0F, 0.0F };	// ポインターの前回位置
 		EVENT_STATE m_event_state = EVENT_STATE::BEGIN;	// ポインターの押された状態
-		uint32_t m_event_anc_pressed = ANC_TYPE::ANC_VIEW;	// ポインターが押された図形の部位
+		uint32_t m_event_anc_pressed = ANC_TYPE::ANC_PAGE;	// ポインターが押された図形の部位
 		D2D1_POINT_2F m_event_pos_pressed{ 0.0F, 0.0F };	// ポインターが押された位置
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
 		Shape* m_event_shape_prev = nullptr;	// 前回ポインターが押された図形

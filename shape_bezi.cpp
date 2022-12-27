@@ -748,7 +748,7 @@ namespace winrt::GraphPaper::implementation
 			s_arr[s_cnt + 5] = b_pos[3];
 			s_cnt += 6;
 		}
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	//------------------------------

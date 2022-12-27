@@ -129,7 +129,7 @@ namespace winrt::GraphPaper::implementation
 	// val	得られた位置
 	void ShapeStroke::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
 	{
-		if (anc == ANC_TYPE::ANC_VIEW || anc == ANC_TYPE::ANC_P0) {
+		if (anc == ANC_TYPE::ANC_PAGE || anc == ANC_TYPE::ANC_P0) {
 			// 図形の部位が「外部」または「開始点」ならば, 開始位置を得る.
 			val = m_pos;
 		}
@@ -195,10 +195,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を含むか判定する.
-	// 戻り値	つねに ANC_VIEW
+	// 戻り値	つねに ANC_PAGE
 	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept
 	{
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	// 範囲に含まれるか判定する.

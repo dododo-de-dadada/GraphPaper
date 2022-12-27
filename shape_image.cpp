@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 			v_pos[0].y <= t_pos.y && t_pos.y <= v_pos[2].y) {
 			return ANC_TYPE::ANC_FILL;
 		}
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	// ”ÍˆÍ‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.

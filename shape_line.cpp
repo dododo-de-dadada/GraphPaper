@@ -244,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 		if (line_hit_test(t_pos, m_pos, e_pos, s_width, m_stroke_cap)) {
 			return ANC_TYPE::ANC_STROKE;
 		}
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	// ”ÍˆÍ‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.

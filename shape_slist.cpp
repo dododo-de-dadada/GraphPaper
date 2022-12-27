@@ -279,12 +279,12 @@ namespace winrt::GraphPaper::implementation
 			//	continue;
 			//}
 			const uint32_t anc = t->hit_test(t_pos);
-			if (anc != ANC_TYPE::ANC_VIEW) {
+			if (anc != ANC_TYPE::ANC_PAGE) {
 				s = t;
 				return anc;
 			}
 		}
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	// ê}å`Çë}ì¸Ç∑ÇÈ.

@@ -98,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 		if (pt_in_anc(t_pos, anc_n)) {
 			return ANC_TYPE::ANC_NORTH;
 		}
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	// à íuÇä‹ÇﬁÇ©îªíËÇ∑ÇÈ.
@@ -247,7 +247,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		return ANC_TYPE::ANC_VIEW;
+		return ANC_TYPE::ANC_PAGE;
 	}
 
 	// ìhÇËÇ¬Ç‘ÇµÇÃêFÇìæÇÈ.
@@ -330,7 +330,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool done = false;
 		switch (anc) {
-		case ANC_TYPE::ANC_VIEW:
+		case ANC_TYPE::ANC_PAGE:
 		{
 			D2D1_POINT_2F pos;
 			pt_round(val, PT_ROUND, pos);
