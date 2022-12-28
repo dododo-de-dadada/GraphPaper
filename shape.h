@@ -310,30 +310,6 @@ namespace winrt::GraphPaper::implementation
 	// shape_dt.cpp
 	// 読み込み, 書き込み.
 	//------------------------------
-	// データリーダーから矢じるしの寸法を読み込む.
-	//void dt_read(ARROW_SIZE& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから端の形式を読み込む.
-	//void dt_read(CAP_STYLE& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから色を読み込む.
-	//void dt_read(D2D1_COLOR_F& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから位置を読み込む.
-	//void dt_read(D2D1_POINT_2F& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから方形を読み込む.
-	//void dt_read(D2D1_RECT_F& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから寸法を読み込む.
-	//void dt_read(D2D1_SIZE_F& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから寸法を読み込む.
-	//void dt_read(D2D1_SIZE_U& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから破線の配置を読み込む.
-	//void dt_read(DASH_PATT& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから文字範囲を読み込む.
-	//void dt_read(DWRITE_TEXT_RANGE& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから方眼の形式を読み込む.
-	//void dt_read(GRID_EMPH& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから位置配列を読み込む.
-	//void dt_read(std::vector<D2D1_POINT_2F>& val, /*<---*/DataReader const& dt_reader);
-	// データリーダーから文字列を読み込む.
-	//void dt_read(wchar_t*& val, /*<---*/DataReader const& dt_reader);
 	// データライターに矢じるしの寸法を書き込む.
 	void dt_write(const ARROW_SIZE& val, /*--->*/DataWriter const& dt_writer);
 	// データライターに端の形式を書き込む.

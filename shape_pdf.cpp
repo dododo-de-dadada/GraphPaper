@@ -395,43 +395,43 @@ namespace winrt::GraphPaper::implementation
 	size_t ShapeStroke::export_pdf_stroke(DataWriter const& dt_writer) const
 	{
 		size_t n = 0;
-		char buf[1024];
+		wchar_t buf[1024];
 
 		// 線枠の太さ
-		sprintf_s(buf, "%f w\n", m_stroke_width);
-		n += dt_write(buf, dt_writer);
+		swprintf_s(buf, L"%f w\n", m_stroke_width);
+		n += dt_writer.WriteString(buf);
 
 		// 線枠の色
-		sprintf_s(buf, "%f %f %f RG\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);	// RG は線枠 (rg は塗りつぶし) 色
-		n += dt_write(buf, dt_writer);
+		swprintf_s(buf, L"%f %f %f RG\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);	// RG は線枠 (rg は塗りつぶし) 色
+		n += dt_writer.WriteString(buf);
 
 		// 線枠の端点
 		if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_ROUND })) {
-			n += dt_write("2 J\n", dt_writer);
+			n += dt_writer.WriteString(L"2 J\n");
 		}
 		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE_ROUND })) {
-			n += dt_write("1 J\n", dt_writer);
+			n += dt_writer.WriteString(L"1 J\n");
 		}
 		else {
-			n += dt_write("0 J\n", dt_writer);
+			n += dt_writer.WriteString(L"0 J\n");
 		}
 
 		// 線枠の結合
 		if (equal(m_join_style, D2D1_LINE_JOIN_BEVEL)) {
-			n += dt_write("2 j\n", dt_writer);
+			n += dt_writer.WriteString(L"2 j\n");
 		}
 		else if (equal(m_join_style, D2D1_LINE_JOIN_ROUND)) {
-			n += dt_write("1 j\n", dt_writer);
+			n += dt_writer.WriteString(L"1 j\n");
 		}
 		else {
 			//if (equal(m_join_style, D2D1_LINE_JOIN_MITER) ||
 			//equal(m_join_style, D2D1_LINE_JOIN_MITER_OR_BEVEL)) {
-			n += dt_write("0 j\n", dt_writer);
+			n += dt_writer.WriteString(L"0 j\n");
 		}
 
 		// マイター制限
-		sprintf_s(buf, "%f M\n", m_join_miter_limit);
-		n += dt_write(buf, dt_writer);
+		swprintf_s(buf, L"%f M\n", m_join_miter_limit);
+		n += dt_writer.WriteString(buf);
 
 		// 破線の種類
 		if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
@@ -442,20 +442,20 @@ namespace winrt::GraphPaper::implementation
 			// [2 1] 0	| **_**_ **_
 			// [3 5] 6	| __ ***_____***_____
 			// [2 3] 11	| *___ **___ **___
-			sprintf_s(buf, "[ %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1]);
-			n += dt_write(buf, dt_writer);
+			swprintf_s(buf, L"[ %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1]);
+			n += dt_writer.WriteString(buf);
 		}
 		else if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
-			sprintf_s(buf, "[ %f %f %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1], m_dash_patt.m_[2], m_dash_patt.m_[3]);
-			n += dt_write(buf, dt_writer);
+			swprintf_s(buf, L"[ %f %f %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1], m_dash_patt.m_[2], m_dash_patt.m_[3]);
+			n += dt_writer.WriteString(buf);
 		}
 		else if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
-			sprintf_s(buf, "[ %f %f %f %f %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1], m_dash_patt.m_[2], m_dash_patt.m_[3], m_dash_patt.m_[4], m_dash_patt.m_[5]);
-			n += dt_write(buf, dt_writer);
+			swprintf_s(buf, L"[ %f %f %f %f %f %f ] 0 d\n", m_dash_patt.m_[0], m_dash_patt.m_[1], m_dash_patt.m_[2], m_dash_patt.m_[3], m_dash_patt.m_[4], m_dash_patt.m_[5]);
+			n += dt_writer.WriteString(buf);
 		}
 		else {
 			// 実線
-			n += dt_write("[ ] 0 d\n", dt_writer);
+			n += dt_writer.WriteString(L"[ ] 0 d\n");
 		}
 		return n;
 	}
@@ -490,23 +490,23 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1RenderTarget> target;
 		sheet.m_d2d.m_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
 		*/
-		char buf[1024];
+		wchar_t buf[1024];
 
 		// 表示の大きさの規定値は 1 × 1.
 		// そもままでは, 画像全体が 1 × 1 にマッピングされる.
 		// 表示するには, 変換行列に表示する大きさを指定し, 拡大する.
 		// 表示する位置は, 左上でなく左下隅を指定する.
-		sprintf_s(buf,
-			"%% Image\n"
-			"q\n"
-			"%f 0 0 %f %f %f cm\n"
-			"/I%d Do\n"
-			"Q\n",
+		swprintf_s(buf,
+			L"%% Image\n"
+			L"q\n"
+			L"%f 0 0 %f %f %f cm\n"
+			L"/I%d Do\n"
+			L"Q\n",
 			m_view.width, m_view.height,
 			m_start.x, -(m_start.y + m_view.height) + page_size.height,
 			m_pdf_obj
 		);
-		return dt_write(buf, dt_writer);
+		return dt_writer.WriteString(buf);
 	}
 
 	//------------------------------
@@ -516,30 +516,30 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeText::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
-		size_t len = dt_write("% Text\n", dt_writer);
+		size_t len = dt_writer.WriteString(L"% Text\n");
 		len += ShapeRect::export_pdf(page_size, dt_writer);
 		/*
 		*/
 		//ShapeText::export_pdf(sheet, dt_writer);
-		char buf[1024];
+		wchar_t buf[1024];
 		// BT テキストオブジェクトの開始
 		// フォント名 サイズ Tf
 		// x座標 y座標 Td
 		// TLという行間を設定する演算子
-		sprintf_s(buf,
-			"%f %f %f rg\n"
-			"%f %f %f RG\n"
-			"BT\n"
-			"/F%d %f Tf\n"
-			"0 Tr\n"
-			"%f %f Td\n",
+		swprintf_s(buf,
+			L"%f %f %f rg\n"
+			L"%f %f %f RG\n"
+			L"BT\n"
+			L"/F%d %f Tf\n"
+			L"0 Tr\n"
+			L"%f %f Td\n",
 			m_font_color.r, m_font_color.g, m_font_color.b,
 			m_font_color.r, m_font_color.g, m_font_color.b,
 			m_pdf_font_num, m_font_size,
 			m_start.x + m_text_padding.width,
 			-(m_start.y + m_text_padding.height + m_dw_line_metrics[0].baseline) + page_size.height
 		);
-		len += dt_write(buf, dt_writer);
+		len += dt_writer.WriteString(buf);
 
 		std::vector<uint8_t> sjis{};
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
@@ -547,18 +547,18 @@ namespace winrt::GraphPaper::implementation
 			const uint32_t t_len = m_dw_test_metrics[i].length;	// 行の文字数
 			const float td_x = (i > 0 ? m_dw_test_metrics[i].left - m_dw_test_metrics[i - 1].left : m_dw_test_metrics[i].left);	// 行の x 方向のオフセット
 			const float td_y = (i > 0 ? m_dw_test_metrics[i].top - m_dw_test_metrics[i - 1].top : m_dw_test_metrics[i].top);	// 行の y 方向のオフセット
-			sprintf_s(buf,
-				"%f %f Td\n",
+			swprintf_s(buf,
+				L"%f %f Td\n",
 				td_x, -td_y);
-			len += dt_write(buf, dt_writer);
+			len += dt_writer.WriteString(buf);
 
 			// 文字列を書き込む.
 			dt_writer.WriteByte(L'<'); len++;
 			for (uint32_t j = 0; j < t_len; j++) {
-				sprintf_s(buf, "%04x", t[j]);
-				len += dt_write(buf, dt_writer);
+				swprintf_s(buf, L"%04x", t[j]);
+				len += dt_writer.WriteString(buf);
 			}
-			len += dt_write("> Tj\n", dt_writer);
+			len += dt_writer.WriteString(L"> Tj\n");
 			/*
 			const size_t sjis_len = WideCharToMultiByte(CP_ACP, 0, t, t_len, NULL, 0, NULL, NULL);
 			if (sjis.size() < sjis_len) {
@@ -579,7 +579,7 @@ namespace winrt::GraphPaper::implementation
 				dt_writer);
 			*/
 		}
-		len += dt_write("ET\n", dt_writer);
+		len += dt_writer.WriteString(L"ET\n");
 		return len;
 	}
 

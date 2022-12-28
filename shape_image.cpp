@@ -74,8 +74,11 @@ namespace winrt::GraphPaper::implementation
 		co_await winrt::resume_background();
 
 		// SoftwareBitmap を作成する.
+		const float clip_w = m_clip.right - m_clip.left;
+		const float clip_h = m_clip.bottom - m_clip.top;
 		SoftwareBitmap bmp{
-			SoftwareBitmap(BitmapPixelFormat::Bgra8, m_orig.width, m_orig.height, BitmapAlphaMode::Straight) 
+			SoftwareBitmap(BitmapPixelFormat::Bgra8, clip_w, clip_h, BitmapAlphaMode::Straight)
+			//SoftwareBitmap(BitmapPixelFormat::Bgra8, m_orig.width, m_orig.height, BitmapAlphaMode::Straight) 
 		};
 
 		// ビットマップのバッファをロックする.

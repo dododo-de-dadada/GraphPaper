@@ -749,17 +749,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// データリーダーから検索の値を読み込む.
-	//void MainPage::find_text_read(DataReader const& dt_reader)
-	//{
-	//	dt_read(m_find_text, dt_reader);
-	//	dt_read(m_find_repl, dt_reader);
-	//	uint16_t bit = dt_reader.ReadUInt16();
-	//	m_text_frame_fit_text = ((bit & 1) != 0);
-	//	m_find_text_case = ((bit & 2) != 0);
-	//	m_find_text_wrap = ((bit & 4) != 0);
-	//}
-
 	// 文字列検索パネルの値を保存する.
 	void MainPage::find_text_preserve(void)
 	{

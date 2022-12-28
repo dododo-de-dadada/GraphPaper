@@ -167,10 +167,6 @@ namespace winrt::GraphPaper::implementation
 				L"%PDF-1.7\n"
 				L"%\xff\xff\xff\xff\n"
 			);
-			//size_t len = dt_write(
-			//	"%PDF-1.7\n"
-			//	"%\xff\xff\xff\xff\n",
-			//	dt_writer);
 			std::vector<size_t> obj_len{};
 			obj_len.push_back(len);
 
@@ -178,7 +174,6 @@ namespace winrt::GraphPaper::implementation
 			// トレーラーから参照され,
 			// ページツリーを参照する.
 			len = dt_writer.WriteString(
-			// len = dt_write(
 				L"% Catalog Dictionary\n"
 				L"1 0 obj <<\n"
 				L"/Type /Catalog\n"
@@ -191,16 +186,13 @@ namespace winrt::GraphPaper::implementation
 			// カタログから参照され,
 			// ページを参照する.
 			len = dt_writer.WriteString(
-				//len = dt_write(
 				L"% Page Tree Dictionary\n"
 				L"2 0 obj <<\n"
 				L"/Type /Pages\n"
 				L"/Count 1\n"
 				L"/Kids[3 0 R]\n"
 				L">>\n"
-				L"endobj\n");// ,
-				//dt_writer
-			//);
+				L"endobj\n");
 			obj_len.push_back(obj_len.back() + len);
 
 			// ページオブジェクト
@@ -234,10 +226,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				if (typeid(*s) == typeid(ShapeText)) {
 					if (font_cnt == 0) {
-						len += dt_writer.WriteString(L"/Font <<\n");
-						//len += dt_write(
-						//	"/Font <<\n",
-						//	dt_writer);
+						len += dt_writer.WriteString(
+							L"/Font <<\n");
 					}
 					swprintf_s(buf,
 						L"/F%d %d 0 R\n",
@@ -249,7 +239,6 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (font_cnt > 0) {
 				len += dt_writer.WriteString(L">>\n");
-				//len += dt_write(">>\n", dt_writer);
 			}
 			// 画像
 			int image_cnt = 0;
@@ -259,31 +248,23 @@ namespace winrt::GraphPaper::implementation
 				}
 				if (typeid(*s) == typeid(ShapeImage)) {
 					if (image_cnt == 0) {
-						len += dt_writer.WriteString(L"/XObject <<\n");
-						//len += dt_write(
-						//	"/XObject <<\n",
-						//	dt_writer);
+						len += dt_writer.WriteString(
+							L"/XObject <<\n");
 					}
 					swprintf_s(buf,
 						L"/I%d %d 0 R\n",
 						image_cnt, 6 + 3 * font_cnt + image_cnt
 					);
 					len += dt_writer.WriteString(buf);
-					//len += dt_write(buf, dt_writer);
 					static_cast<ShapeImage*>(s)->m_pdf_obj = image_cnt++;
 				}
 			}
 			if (image_cnt > 0) {
 				len += dt_writer.WriteString(L">>\n");
-				//len += dt_write(">>\n", dt_writer);
 			}
 			len += dt_writer.WriteString(
 				L">>\n"
 				L"endobj\n");
-			//len += dt_write(
-			//	">>\n"
-			//	"endobj\n",
-			//	dt_writer);
 			obj_len.push_back(obj_len.back() + len);
 
 			// コンテントオブジェクト (ストリーム)
@@ -298,7 +279,6 @@ namespace winrt::GraphPaper::implementation
 				72.0f / 96.0f, 72.0f / 96.0f
 			);
 			len = dt_writer.WriteString(buf);
-			//len = dt_write(buf, dt_writer);
 
 			// 背景
 			swprintf_s(buf,
@@ -312,7 +292,6 @@ namespace winrt::GraphPaper::implementation
 				m_main_page.m_page_size.height
 			);
 			len += dt_writer.WriteString(buf);
-			//len += dt_write(buf, dt_writer);
 
 			// 図形を出力
 			const D2D1_SIZE_F page_size = m_main_page.m_page_size;
@@ -326,11 +305,6 @@ namespace winrt::GraphPaper::implementation
 				L"Q\n"
 				L"endstream\n"
 				L"endobj\n");
-			//len += dt_write(
-			//	"Q\n"
-			//	"endstream\n"
-			//	"endobj\n", dt_writer
-			//);
 			obj_len.push_back(obj_len.back() + len);
 
 			// 画像 XObject (ストリームオブジェクト) とフォント辞書
@@ -372,9 +346,7 @@ namespace winrt::GraphPaper::implementation
 						z_buf.size()
 					);
 					len += dt_writer.WriteString(buf);
-					//len += dt_write(buf, dt_writer);
 					len += dt_writer.WriteString(L"stream\n");
-					//len += dt_write("stream\n", dt_writer);
 					dt_writer.WriteBytes(z_buf);
 					len += z_buf.size();
 					z_buf.clear();
@@ -382,17 +354,17 @@ namespace winrt::GraphPaper::implementation
 					/*
 					for (uint32_t y = 0; y < t->m_orig.height; y++) {
 						if (y > 0) {
-							len += dt_write("\n", dt_writer);
+							len += dt_writer.WriteString(L"\n");
 						}
 						for (uint32_t x = 0; x < t->m_orig.width; x++) {
 							// BGRA -> RGB
-							sprintf_s(buf,
-								"%02x%02x%02x",
+							swprintf_s(buf,
+								L"%02x%02x%02x",
 								t->m_data[y * 4 * t->m_orig.width + 4 * x + 2],
 								t->m_data[y * 4 * t->m_orig.width + 4 * x + 1],
 								t->m_data[y * 4 * t->m_orig.width + 4 * x + 0]
 							);
-							len += dt_write(buf, dt_writer);
+							len += dt_writer.WriteString(buf);
 						}
 					}
 					*/
@@ -401,11 +373,6 @@ namespace winrt::GraphPaper::implementation
 						L">\n"
 						L"endstream\n"
 						L"endobj\n");
-					//len += dt_write(
-					//	">\n"
-					//	"endstream\n"
-					//	"endobj\n",
-					//	dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 				}
 				else if (typeid(*s) == typeid(ShapeText)) {
@@ -453,7 +420,6 @@ namespace winrt::GraphPaper::implementation
 						6 + 3 * n + 1
 					);
 					len += dt_writer.WriteString(buf);
-					//len += dt_write(buf, dt_writer);
 
 					// CID フォント辞書 (Type 0 の子孫となるフォント)
 					// フォント辞書から参照され,
@@ -475,25 +441,17 @@ namespace winrt::GraphPaper::implementation
 						6 + 3 * n + 2
 					);
 					len = dt_writer.WriteString(buf);
-					//len = dt_write(buf, dt_writer);
 					// 半角のグリフ幅を設定する
 					// 設定しなければ全て全角幅になってしまう.
 					len += dt_writer.WriteString(L"/W [1 [");	// CID 開始番号は 1 (半角空白)
-					//len += dt_write("/W [1 [", dt_writer);	// CID 開始番号は 1 (半角空白)
 					for (int i = 1; i <= g_met.size(); i++) {
 						swprintf_s(buf, L"%u ", 1000 * g_met[i - 1].advanceWidth / upem);
 						len += dt_writer.WriteString(buf);
-						//len += dt_write(buf, dt_writer);
 					}
 					len += dt_writer.WriteString(L"]]\n");
-					//len += dt_write("]]\n", dt_writer);
 					len += dt_writer.WriteString(
 						L">>\n"
 						L"endobj\n");
-					//len += dt_write(
-					//	">>\n"
-					//	"endobj\n",
-					//	dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// フォント詳細辞書
@@ -539,7 +497,6 @@ namespace winrt::GraphPaper::implementation
 						1000 * f_met.capHeight / upem
 					);
 					len = dt_writer.WriteString(buf);
-					//len = dt_write(buf, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 				}
 			}
@@ -554,14 +511,12 @@ namespace winrt::GraphPaper::implementation
 				obj_len.size()
 			);
 			dt_writer.WriteString(buf);
-			//dt_write(buf, dt_writer);
 			for (int i = 0; i < obj_len.size() - 1; i++) {
 				swprintf_s(buf,
 					L"%010zu 00000 n\n",
 					obj_len[i]
 				);
 				dt_writer.WriteString(buf);
-				//dt_write(buf, dt_writer);
 			}
 
 			// トレイラーと EOF
@@ -579,7 +534,6 @@ namespace winrt::GraphPaper::implementation
 				obj_len.back()
 			);
 			dt_writer.WriteString(buf);
-			//dt_write(buf, dt_writer);
 
 			// ストリームの現在位置をストリームの大きさに格納する.
 			pdf_stream.Size(pdf_stream.Position());

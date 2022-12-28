@@ -1022,14 +1022,21 @@ namespace winrt::GraphPaper::implementation
 				DataWriter(ra_stream.GetOutputStreamAt(0))
 			};
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_drawing_tool));
-			//dt_write(m_drawing_poly_opt, dt_writer);
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_drawing_poly_opt.m_vertex_cnt));
 			dt_writer.WriteBoolean(m_drawing_poly_opt.m_regular);
 			dt_writer.WriteBoolean(m_drawing_poly_opt.m_vertex_up);
 			dt_writer.WriteBoolean(m_drawing_poly_opt.m_end_closed);
 			dt_writer.WriteBoolean(m_drawing_poly_opt.m_clockwise);
-			dt_write(m_find_text, dt_writer);
-			dt_write(m_find_repl, dt_writer);
+			//dt_write(m_find_text, dt_writer);
+			const uint32_t find_text_len = wchar_len(m_find_text);
+			dt_writer.WriteUInt32(find_text_len);
+			const auto find_text_data = reinterpret_cast<const uint8_t*>(m_find_text);
+			dt_writer.WriteBytes(array_view(find_text_data, find_text_data + 2 * find_text_len));
+			//dt_write(m_find_repl, dt_writer);
+			const uint32_t find_repl_len = wchar_len(m_find_repl);
+			dt_writer.WriteUInt32(find_repl_len);
+			const auto find_repl_data = reinterpret_cast<const uint8_t*>(m_find_repl);
+			dt_writer.WriteBytes(array_view(find_repl_data, find_repl_data + 2 * find_repl_len));
 			uint16_t f_bit = 0;
 			if (m_text_frame_fit_text) {
 				f_bit |= 1;
