@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		D2D1_POINT_2F r_min;
-		pt_add(m_pos, min(m_vec[0].x, 0.0), min(m_vec[0].y, 0.0), r_min);
+		pt_add(m_start, min(m_vec[0].x, 0.0), min(m_vec[0].y, 0.0), r_min);
 		float rx = std::fabsf(m_corner_rad.x);
 		float ry = std::fabsf(m_corner_rad.y);
 		float vx = std::fabsf(m_vec[0].x);
@@ -139,19 +139,19 @@ namespace winrt::GraphPaper::implementation
 		switch (anc) {
 		case ANC_TYPE::ANC_R_NW:
 			// 左上の角丸中心点を求める
-			pt_add(m_pos, rx, ry, val);
+			pt_add(m_start, rx, ry, val);
 			break;
 		case ANC_TYPE::ANC_R_NE:
 			// 右上の角丸中心点を求める
-			pt_add(m_pos, dx - rx, ry, val);
+			pt_add(m_start, dx - rx, ry, val);
 			break;
 		case ANC_TYPE::ANC_R_SE:
 			// 右下の角丸中心点を求める
-			pt_add(m_pos, dx - rx, dy - ry, val);
+			pt_add(m_start, dx - rx, dy - ry, val);
 			break;
 		case ANC_TYPE::ANC_R_SW:
 			// 左下の角丸中心点を求める
-			pt_add(m_pos, rx, dy - ry, val);
+			pt_add(m_start, rx, dy - ry, val);
 			break;
 		default:
 			ShapeRect::get_pos_anc(anc, val);
@@ -226,12 +226,12 @@ namespace winrt::GraphPaper::implementation
 		const double my = m_vec[0].y * 0.5;	// 中点
 		const double rx = fabs(mx) < fabs(m_corner_rad.x) ? mx : m_corner_rad.x;	// 角丸
 		const double ry = fabs(my) < fabs(m_corner_rad.y) ? my : m_corner_rad.y;	// 角丸
-		const D2D1_POINT_2F anc_r_nw{ static_cast<FLOAT>(m_pos.x + rx), static_cast<FLOAT>(m_pos.y + ry) };
+		const D2D1_POINT_2F anc_r_nw{ static_cast<FLOAT>(m_start.x + rx), static_cast<FLOAT>(m_start.y + ry) };
 		if (pt_in_anc(t_pos, anc_r_nw)) {
 			anc_r = ANC_TYPE::ANC_R_NW;
 		}
 		else {
-			const D2D1_POINT_2F anc_r_se{ static_cast<FLOAT>(m_pos.x + m_vec[0].x - rx), static_cast<FLOAT>(m_pos.y + m_vec[0].y - ry) };
+			const D2D1_POINT_2F anc_r_se{ static_cast<FLOAT>(m_start.x + m_vec[0].x - rx), static_cast<FLOAT>(m_start.y + m_vec[0].y - ry) };
 			if (pt_in_anc(t_pos, anc_r_se)) {
 				anc_r = ANC_TYPE::ANC_R_SE;
 			}
@@ -272,20 +272,20 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F r_max;
 		D2D1_POINT_2F r_rad;
 		if (m_vec[0].x > 0.0f) {
-			r_min.x = m_pos.x;
-			r_max.x = m_pos.x + m_vec[0].x;
+			r_min.x = m_start.x;
+			r_max.x = m_start.x + m_vec[0].x;
 		}
 		else {
-			r_min.x = m_pos.x + m_vec[0].x;
-			r_max.x = m_pos.x;
+			r_min.x = m_start.x + m_vec[0].x;
+			r_max.x = m_start.x;
 		}
 		if (m_vec[0].y > 0.0f) {
-			r_min.y = m_pos.y;
-			r_max.y = m_pos.y + m_vec[0].y;
+			r_min.y = m_start.y;
+			r_max.y = m_start.y + m_vec[0].y;
 		}
 		else {
-			r_min.y = m_pos.y + m_vec[0].y;
-			r_max.y = m_pos.y;
+			r_min.y = m_start.y + m_vec[0].y;
+			r_max.y = m_start.y;
 		}
 		r_rad.x = std::abs(m_corner_rad.x);
 		r_rad.y = std::abs(m_corner_rad.y);
@@ -415,7 +415,10 @@ namespace winrt::GraphPaper::implementation
 	ShapeRRect::ShapeRRect(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader)
 	{
-		dt_read(m_corner_rad, dt_reader);
+		m_corner_rad = D2D1_POINT_2F{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		};
 	}
 
 	// 図形をデータライターに書き込む.

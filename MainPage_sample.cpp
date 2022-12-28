@@ -103,15 +103,16 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		co_await winrt::resume_background();
 		try {
-			const StorageFile samp_file{ co_await StorageFile::GetFileFromApplicationUriAsync(Uri{ L"ms-appx:///Assets/4.1.05.tiff" }) };
-			const IRandomAccessStream samp_stream{ co_await samp_file.OpenAsync(FileAccessMode::Read) };
-			const BitmapDecoder samp_decoder{ co_await BitmapDecoder::CreateAsync(samp_stream) };
-			const SoftwareBitmap samp_bmp{ co_await samp_decoder.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight) };
+			const StorageFile file{ co_await StorageFile::GetFileFromApplicationUriAsync(Uri{ L"ms-appx:///Assets/4.1.05.tiff" }) };
+			const IRandomAccessStream stream{ co_await file.OpenAsync(FileAccessMode::Read) };
+			const BitmapDecoder decoder{ co_await BitmapDecoder::CreateAsync(stream) };
+			const SoftwareBitmap bitmap{ co_await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight) };
 			const D2D1_POINT_2F pos{ static_cast<FLOAT>(panel_w * 0.125), static_cast<FLOAT>(panel_h * 0.125) };
 			const D2D1_SIZE_F size{ static_cast<float>(panel_w * 0.75), static_cast<FLOAT>(panel_h * 0.75) };
-			ShapeImage* samp_shape = new ShapeImage(pos, size, samp_bmp, m_dialog_page.m_image_opac);
-			samp_bmp.Close();
-			m_dialog_page.m_shape_list.push_back(samp_shape);
+			ShapeImage* s = new ShapeImage(pos, size, bitmap, m_dialog_page.m_image_opac);
+			bitmap.Close();
+
+			m_dialog_page.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif

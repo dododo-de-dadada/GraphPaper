@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapeBezi::export_svg(DataWriter const& dt_writer) const
 	{
 		D2D1_BEZIER_SEGMENT b_seg;
-		pt_add(m_pos, m_vec[0], b_seg.point1);
+		pt_add(m_start, m_vec[0], b_seg.point1);
 		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
 		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
 
@@ -53,7 +53,7 @@ namespace winrt::GraphPaper::implementation
 		swprintf_s(buf,
 			L"<path d=\"M%f %f C%f %f, %f %f, %f %f\" "
 			L"fill=\"none\" ",
-			m_pos.x, m_pos.y,
+			m_start.x, m_start.y,
 			b_seg.point1.x, b_seg.point1.y,
 			b_seg.point2.x, b_seg.point2.y,
 			b_seg.point3.x, b_seg.point3.y
@@ -65,7 +65,7 @@ namespace winrt::GraphPaper::implementation
 
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
-			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
+			bezi_calc_arrow(m_start, b_seg, m_arrow_size, barbs);
 			export_svg_barbs(buf, this, barbs, barbs[2]);
 			dt_writer.WriteString(buf);
 		}
@@ -77,7 +77,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F r;
 		pt_mul(m_vec[0], 0.5, r);
 		D2D1_POINT_2F c;
-		pt_add(m_pos, r, c);
+		pt_add(m_start, r, c);
 
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 			L"width=\"%f\" height=\"%f\" "
 			L"opacity=\"%f\" "
 			L"href=\"data:image/png;base64,",
-			m_pos.x, m_pos.y,
+			m_start.x, m_start.y,
 			m_view.width, m_view.height,
 			m_opac
 		);
@@ -147,11 +147,11 @@ namespace winrt::GraphPaper::implementation
 	void ShapeLine::export_svg(DataWriter const& dt_writer) const
 	{
 		D2D1_POINT_2F e_pos;
-		pt_add(m_pos, m_vec[0], e_pos);
+		pt_add(m_start, m_vec[0], e_pos);
 		wchar_t buf[1024];
 		swprintf_s(buf,
 			L"<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" ",
-			m_pos.x, m_pos.y, e_pos.x, e_pos.y
+			m_start.x, m_start.y, e_pos.x, e_pos.y
 		);
 		dt_writer.WriteString(buf);
 		export_svg_stroke(buf, this);
@@ -160,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[2];
 			D2D1_POINT_2F tip_pos;
-			if (ShapeLine::line_get_arrow_pos(m_pos, m_vec[0], m_arrow_size, barbs, tip_pos)) {
+			if (ShapeLine::line_get_arrow_pos(m_start, m_vec[0], m_arrow_size, barbs, tip_pos)) {
 				export_svg_barbs(buf, this, barbs, tip_pos);
 				dt_writer.WriteString(buf);
 			}
@@ -203,10 +203,10 @@ namespace winrt::GraphPaper::implementation
 		wchar_t buf[1024];
 		swprintf_s(buf,
 			L"<path d=\"M%f %f ",
-			m_pos.x, m_pos.y
+			m_start.x, m_start.y
 		);
 		dt_writer.WriteString(buf);
-		v_pos[0] = m_pos;
+		v_pos[0] = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
 			swprintf_s(buf,
 				L"l%f %f ", m_vec[i].x, m_vec[i].y);
@@ -240,7 +240,7 @@ namespace winrt::GraphPaper::implementation
 		swprintf_s(buf,
 			L"<rect x=\"%f\" y=\"%f\" "
 			L"width=\"%f\" height=\"%f\" ",
-			m_pos.x, m_pos.y, m_vec[0].x, m_vec[0].y);
+			m_start.x, m_start.y, m_vec[0].x, m_vec[0].y);
 		dt_writer.WriteString(buf);
 		export_svg_color(buf, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
@@ -258,7 +258,7 @@ namespace winrt::GraphPaper::implementation
 			L"<rect x=\"%f\" y=\"%f\" "
 			L"width=\"%f\" height=\"%f\" "
 			L"rx=\"%f\" ry=\"%f\" ",
-			m_pos.x, m_pos.y, m_vec[0].x, m_vec[0].y,
+			m_start.x, m_start.y, m_vec[0].x, m_vec[0].y,
 			m_corner_rad.x, m_corner_rad.y
 		);
 		dt_writer.WriteString(buf);
@@ -406,7 +406,7 @@ namespace winrt::GraphPaper::implementation
 
 		// ‘‘Ì‚ð•\Ž¦‚·‚é¶ãˆÊ’u‚É—]”’‚ð‰Á‚¦‚é.
 		D2D1_POINT_2F nw_pos;
-		pt_add(m_pos, m_text_padding.width, m_text_padding.height, nw_pos);
+		pt_add(m_start, m_text_padding.width, m_text_padding.height, nw_pos);
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 			const DWRITE_HIT_TEST_METRICS& tm = m_dw_test_metrics[i];
 			const wchar_t* t = m_text + tm.textPosition;

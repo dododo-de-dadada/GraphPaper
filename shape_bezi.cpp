@@ -516,19 +516,19 @@ namespace winrt::GraphPaper::implementation
 				if (m_d2d_arrow_geom != nullptr) {
 					m_d2d_arrow_geom = nullptr;
 				}
-				pt_add(m_pos, m_vec[0], b_seg.point1);
+				pt_add(m_start, m_vec[0], b_seg.point1);
 				pt_add(b_seg.point1, m_vec[1], b_seg.point2);
 				pt_add(b_seg.point2, m_vec[2], b_seg.point3);
 				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
 				m_d2d_path_geom->Open(sink.put());
 				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-				sink->BeginFigure(m_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				sink->BeginFigure(m_start, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 				sink->AddBezier(b_seg);
 				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 				winrt::check_hresult(sink->Close());
 				sink = nullptr;
 				if (m_arrow_style != ARROW_STYLE::NONE) {
-					bezi_create_arrow_geom(factory, m_pos, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+					bezi_create_arrow_geom(factory, m_start, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 				}
 			}
 		}
@@ -555,8 +555,8 @@ namespace winrt::GraphPaper::implementation
 			D2D1_MATRIX_3X2_F tran;
 			target->GetTransform(&tran);
 			const auto s_width = static_cast<FLOAT>(1.0 / tran.m11);
-			anc_draw_rect(m_pos, target, brush);
-			s_pos = m_pos;
+			anc_draw_rect(m_start, target, brush);
+			s_pos = m_start;
 			pt_add(s_pos, m_vec[0], e_pos);
 			brush->SetColor(Shape::s_background_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
@@ -591,11 +591,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto e_width = max(max(static_cast<double>(m_stroke_width), Shape::s_anc_len) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
-		pt_sub(t_pos, m_pos, tp);
+		pt_sub(t_pos, m_start, tp);
 		// 判定する位置によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
 		D2D1_POINT_2F c_pos[4];
 		c_pos[0].x = c_pos[0].y = 0.0;
-		//pt_sub(m_pos, t_pos, c_pos[0]);
+		//pt_sub(m_start, t_pos, c_pos[0]);
 		pt_add(c_pos[0], m_vec[0], c_pos[1]);
 		pt_add(c_pos[1], m_vec[1], c_pos[2]);
 		pt_add(c_pos[2], m_vec[2], c_pos[3]);
@@ -765,7 +765,7 @@ namespace winrt::GraphPaper::implementation
 		const double w = static_cast<double>(area_max.x) - area_min.x;
 		const double h = static_cast<double>(area_max.y) - area_min.y;
 		D2D1_POINT_2F c_pos[4];
-		pt_sub(m_pos, area_min, c_pos[0]);
+		pt_sub(m_start, area_min, c_pos[0]);
 		pt_add(c_pos[0], m_vec[0], c_pos[1]);
 		pt_add(c_pos[1], m_vec[1], c_pos[2]);
 		pt_add(c_pos[2], m_vec[2], c_pos[3]);
@@ -858,7 +858,7 @@ namespace winrt::GraphPaper::implementation
 	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
 		ShapePath::ShapePath(page, false)
 	{
-		m_pos = b_pos;
+		m_start = b_pos;
 		m_vec.resize(3);
 		m_vec.shrink_to_fit();
 		m_vec[0] = D2D1_POINT_2F{ b_vec.x , 0.0f };
@@ -902,15 +902,15 @@ namespace winrt::GraphPaper::implementation
 		bz[3].x = bz[2].x + m_vec_2.x;
 		bz[3].y = bz[2].y + m_vec_2.y;
 		// 線分 pq に外接する方形 pr を求める.
-		pb.x = p.x - m_pos.x;
-		pb.y = p.y - m_pos.y;
+		pb.x = p.x - m_start.x;
+		pb.y = p.y - m_start.y;
 		bezi_bound(p, q, pr);
-		pr[0].x -= m_pos.x;
-		pr[0].y -= m_pos.y;
-		pr[1].x -= m_pos.x;
-		pr[1].y -= m_pos.y;
+		pr[0].x -= m_start.x;
+		pr[0].y -= m_start.y;
+		pr[1].x -= m_start.x;
+		pr[1].y -= m_start.y;
 		pr_next = pr[0].nextafter(1.0);
-		pb = p - m_pos;
+		pb = p - m_start;
 		pq = q - pb;
 		a = pq.y / pq.x;
 		b = -1.0;

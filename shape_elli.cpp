@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 		pt_mul(m_vec[0], 0.5, rad);
 		// 中心点を求める.
 		D2D1_POINT_2F c_pos;
-		pt_add(m_pos, rad, c_pos);
+		pt_add(m_start, rad, c_pos);
 		// だ円構造体に格納する.
 		D2D1_ELLIPSE elli{ c_pos, rad.x, rad.y };
 		// 塗りつぶし色が不透明か判定する.
@@ -45,22 +45,22 @@ namespace winrt::GraphPaper::implementation
 		}
 		D2D1_POINT_2F a_pos[4];
 		// 南
-		a_pos[0].x = m_pos.x + m_vec[0].x * 0.5f;
-		a_pos[0].y = m_pos.y + m_vec[0].y;
+		a_pos[0].x = m_start.x + m_vec[0].x * 0.5f;
+		a_pos[0].y = m_start.y + m_vec[0].y;
 		// 東
-		a_pos[1].x = m_pos.x + m_vec[0].x;
-		a_pos[1].y = m_pos.y + m_vec[0].y * 0.5f;
+		a_pos[1].x = m_start.x + m_vec[0].x;
+		a_pos[1].y = m_start.y + m_vec[0].y * 0.5f;
 		// 西
-		a_pos[2].x = m_pos.x;
+		a_pos[2].x = m_start.x;
 		a_pos[2].y = a_pos[1].y;
 		// 北
 		a_pos[3].x = a_pos[0].x;
-		a_pos[3].y = m_pos.y;
+		a_pos[3].y = m_start.y;
 		for (uint32_t i = 0; i < 4; i++) {
 			anc_draw_rect(a_pos[i], target, brush);
 		}
-		a_pos[0] = m_pos;
-		pt_add(m_pos, m_vec[0], a_pos[3]);
+		a_pos[0] = m_start;
+		pt_add(m_start, m_vec[0], a_pos[3]);
 		a_pos[1].x = a_pos[0].x;
 		a_pos[1].y = a_pos[3].y;
 		a_pos[2].x = a_pos[3].x;
@@ -85,7 +85,7 @@ namespace winrt::GraphPaper::implementation
 		pt_mul(m_vec[0], 0.5, rad);
 		// 中心点を得る.
 		D2D1_POINT_2F c_pos;
-		pt_add(m_pos, rad, c_pos);
+		pt_add(m_start, rad, c_pos);
 		rad.x = fabsf(rad.x);
 		rad.y = fabsf(rad.y);
 		if (is_opaque(m_stroke_color)) {

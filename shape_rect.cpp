@@ -21,10 +21,10 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		const D2D1_RECT_F rect{
-			m_pos.x,
-			m_pos.y,
-			m_pos.x + m_vec[0].x,
-			m_pos.y + m_vec[0].y
+			m_start.x,
+			m_start.y,
+			m_start.x + m_vec[0].x,
+			m_start.y + m_vec[0].y
 		};
 		// 塗りつぶし色が不透明か判定する.
 		if (is_opaque(m_fill_color)) {
@@ -43,7 +43,7 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected()) {
 			// 部位を表示する.
 			D2D1_POINT_2F a_pos[4];	// 方形の頂点
-			a_pos[0] = m_pos;
+			a_pos[0] = m_start;
 			a_pos[1].y = rect.top;
 			a_pos[1].x = rect.right;
 			a_pos[2].x = rect.right;
@@ -67,34 +67,34 @@ namespace winrt::GraphPaper::implementation
 		// 7         6
 		// |         |
 		// 3----5----1
-		const D2D1_POINT_2F anc_se{ m_pos.x + m_vec[0].x, m_pos.y + m_vec[0].y };
+		const D2D1_POINT_2F anc_se{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
 		if (pt_in_anc(t_pos, anc_se)) {
 			return ANC_TYPE::ANC_SE;
 		}
-		const D2D1_POINT_2F anc_ne{ anc_se.x, m_pos.y };
+		const D2D1_POINT_2F anc_ne{ anc_se.x, m_start.y };
 		if (pt_in_anc(t_pos, anc_ne)) {
 			return ANC_TYPE::ANC_NE;
 		}
-		const D2D1_POINT_2F anc_sw{ m_pos.x, anc_se.y };
+		const D2D1_POINT_2F anc_sw{ m_start.x, anc_se.y };
 		if (pt_in_anc(t_pos, anc_sw)) {
 			return ANC_TYPE::ANC_SW;
 		}
-		if (pt_in_anc(t_pos, m_pos)) {
+		if (pt_in_anc(t_pos, m_start)) {
 			return ANC_TYPE::ANC_NW;
 		}
-		const D2D1_POINT_2F anc_s{ static_cast<FLOAT>(m_pos.x + m_vec[0].x * 0.5), anc_se.y };
+		const D2D1_POINT_2F anc_s{ static_cast<FLOAT>(m_start.x + m_vec[0].x * 0.5), anc_se.y };
 		if (pt_in_anc(t_pos, anc_s)) {
 			return ANC_TYPE::ANC_SOUTH;
 		}
-		const D2D1_POINT_2F anc_e{ anc_se.x, static_cast<FLOAT>(m_pos.y + m_vec[0].y * 0.5f) };
+		const D2D1_POINT_2F anc_e{ anc_se.x, static_cast<FLOAT>(m_start.y + m_vec[0].y * 0.5f) };
 		if (pt_in_anc(t_pos, anc_e)) {
 			return ANC_TYPE::ANC_EAST;
 		}
-		const D2D1_POINT_2F anc_w{ m_pos.x, anc_e.y };
+		const D2D1_POINT_2F anc_w{ m_start.x, anc_e.y };
 		if (pt_in_anc(t_pos, anc_w)) {
 			return ANC_TYPE::ANC_WEST;
 		}
-		const D2D1_POINT_2F anc_n{ anc_s.x, m_pos.y };
+		const D2D1_POINT_2F anc_n{ anc_s.x, m_start.y };
 		if (pt_in_anc(t_pos, anc_n)) {
 			return ANC_TYPE::ANC_NORTH;
 		}
@@ -107,19 +107,19 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		// 各頂点の部位に含まれるか判定する.
-		D2D1_POINT_2F v_pos[4]{ m_pos, };
-		v_pos[2].x = m_pos.x + m_vec[0].x;
-		v_pos[2].y = m_pos.y + m_vec[0].y;
+		D2D1_POINT_2F v_pos[4]{ m_start, };
+		v_pos[2].x = m_start.x + m_vec[0].x;
+		v_pos[2].y = m_start.y + m_vec[0].y;
 		if (pt_in_anc(t_pos, v_pos[2])) {
 			return ANC_TYPE::ANC_SE;
 		}
-		v_pos[3].x = m_pos.x;
-		v_pos[3].y = m_pos.y + m_vec[0].y;
+		v_pos[3].x = m_start.x;
+		v_pos[3].y = m_start.y + m_vec[0].y;
 		if (pt_in_anc(t_pos, v_pos[3])) {
 			return ANC_TYPE::ANC_SW;
 		}
-		v_pos[1].x = m_pos.x + m_vec[0].x;
-		v_pos[1].y = m_pos.y;
+		v_pos[1].x = m_start.x + m_vec[0].x;
+		v_pos[1].y = m_start.y;
 		if (pt_in_anc(t_pos, v_pos[1])) {
 			return ANC_TYPE::ANC_NE;
 		}
@@ -277,35 +277,35 @@ namespace winrt::GraphPaper::implementation
 	{
 		switch (anc) {
 		case ANC_TYPE::ANC_NORTH:
-			val.x = m_pos.x + m_vec[0].x * 0.5f;
-			val.y = m_pos.y;
+			val.x = m_start.x + m_vec[0].x * 0.5f;
+			val.y = m_start.y;
 			break;
 		case ANC_TYPE::ANC_NE:
-			val.x = m_pos.x + m_vec[0].x;
-			val.y = m_pos.y;
+			val.x = m_start.x + m_vec[0].x;
+			val.y = m_start.y;
 			break;
 		case ANC_TYPE::ANC_WEST:
-			val.x = m_pos.x;
-			val.y = m_pos.y + m_vec[0].y * 0.5f;
+			val.x = m_start.x;
+			val.y = m_start.y + m_vec[0].y * 0.5f;
 			break;
 		case ANC_TYPE::ANC_EAST:
-			val.x = m_pos.x + m_vec[0].x;
-			val.y = m_pos.y + m_vec[0].y * 0.5f;
+			val.x = m_start.x + m_vec[0].x;
+			val.y = m_start.y + m_vec[0].y * 0.5f;
 			break;
 		case ANC_TYPE::ANC_SW:
-			val.x = m_pos.x;
-			val.y = m_pos.y + m_vec[0].y;
+			val.x = m_start.x;
+			val.y = m_start.y + m_vec[0].y;
 			break;
 		case ANC_TYPE::ANC_SOUTH:
-			val.x = m_pos.x + m_vec[0].x * 0.5f;
-			val.y = m_pos.y + m_vec[0].y;
+			val.x = m_start.x + m_vec[0].x * 0.5f;
+			val.y = m_start.y + m_vec[0].y;
 			break;
 		case ANC_TYPE::ANC_SE:
-			val.x = m_pos.x + m_vec[0].x;
-			val.y = m_pos.y + m_vec[0].y;
+			val.x = m_start.x + m_vec[0].x;
+			val.y = m_start.y + m_vec[0].y;
 			break;
 		default:
-			val = m_pos;
+			val = m_start;
 			break;
 		}
 	}
@@ -318,8 +318,8 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeRect::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
 	{
 		D2D1_POINT_2F pos;
-		pt_add(m_pos, m_vec[0], pos);
-		return pt_in_rect(m_pos, area_min, area_max) && pt_in_rect(pos, area_min, area_max);
+		pt_add(m_start, m_vec[0], pos);
+		return pt_in_rect(m_start, area_min, area_max) && pt_in_rect(pos, area_min, area_max);
 	}
 
 	// 値を, 部位の位置に格納する. 他の部位の位置も動く.
@@ -335,9 +335,9 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F pos;
 			pt_round(val, PT_ROUND, pos);
 			D2D1_POINT_2F vec;
-			pt_sub(pos, m_pos, vec);
+			pt_sub(pos, m_start, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
-				pt_add(m_pos, vec, m_pos);
+				pt_add(m_start, vec, m_start);
 				done = true;
 			}
 		}
@@ -347,9 +347,9 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F pos;
 			pt_round(val, PT_ROUND, pos);
 			D2D1_POINT_2F vec;
-			pt_sub(pos, m_pos, vec);
+			pt_sub(pos, m_start, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
-				pt_add(m_pos, vec, m_pos);
+				pt_add(m_start, vec, m_start);
 				pt_sub(m_vec[0], vec, m_vec[0]);
 				done = true;
 			}
@@ -360,7 +360,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F pos;
 			pt_round(val, PT_ROUND, pos);
 			D2D1_POINT_2F vec;
-			pt_sub(pos, D2D1_POINT_2F{ m_pos.x + m_vec[0].x, m_pos.y + m_vec[0].y }, vec);
+			pt_sub(pos, D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y }, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
 				pt_add(m_vec[0], vec, m_vec[0]);
 				done = true;
@@ -372,9 +372,9 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F pos;
 			pt_round(val, PT_ROUND, pos);
 			D2D1_POINT_2F vec;
-			pt_sub(pos, D2D1_POINT_2F{ m_pos.x + m_vec[0].x, m_pos.y }, vec);
+			pt_sub(pos, D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y }, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
-				m_pos.y += vec.y;
+				m_start.y += vec.y;
 				pt_add(m_vec[0], vec.x, -vec.y, m_vec[0]);
 				done = true;
 			}
@@ -385,9 +385,9 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F pos;
 			pt_round(val, PT_ROUND, pos);
 			D2D1_POINT_2F vec;
-			pt_sub(pos, D2D1_POINT_2F{ m_pos.x, m_pos.y + m_vec[0].y }, vec);
+			pt_sub(pos, D2D1_POINT_2F{ m_start.x, m_start.y + m_vec[0].y }, vec);
 			if (pt_abs2(vec) >= FLT_MIN) {
-				m_pos.x += vec.x;
+				m_start.x += vec.x;
 				pt_add(m_vec[0], -vec.x, vec.y, m_vec[0]);
 				done = true;
 			}
@@ -395,17 +395,17 @@ namespace winrt::GraphPaper::implementation
 		break;
 		case ANC_TYPE::ANC_WEST:
 		{
-			const double vec_x = std::round((static_cast<double>(val.x) - m_pos.x) / PT_ROUND) * PT_ROUND;
+			const double vec_x = std::round((static_cast<double>(val.x) - m_start.x) / PT_ROUND) * PT_ROUND;
 			if (vec_x <= -FLT_MIN || vec_x >= FLT_MIN) {
 				m_vec[0].x = static_cast<FLOAT>(m_vec[0].x - vec_x);
-				m_pos.x = static_cast<FLOAT>(m_pos.x + vec_x);
+				m_start.x = static_cast<FLOAT>(m_start.x + vec_x);
 				done = true;
 			}
 		}
 		break;
 		case ANC_TYPE::ANC_EAST:
 		{
-			const double vec_x = std::round((static_cast<double>(val.x) - m_pos.x - m_vec[0].x) / PT_ROUND) * PT_ROUND;
+			const double vec_x = std::round((static_cast<double>(val.x) - m_start.x - m_vec[0].x) / PT_ROUND) * PT_ROUND;
 			if (vec_x <= -FLT_MIN || vec_x >= FLT_MIN) {
 				m_vec[0].x += static_cast<FLOAT>(vec_x);
 				done = true;
@@ -414,17 +414,17 @@ namespace winrt::GraphPaper::implementation
 		break;
 		case ANC_TYPE::ANC_NORTH:
 		{
-			const double vec_y = std::round((static_cast<double>(val.y) - m_pos.y) / PT_ROUND) * PT_ROUND;
+			const double vec_y = std::round((static_cast<double>(val.y) - m_start.y) / PT_ROUND) * PT_ROUND;
 			if (vec_y <= -FLT_MIN || vec_y >= FLT_MIN) {
 				m_vec[0].y = static_cast<FLOAT>(m_vec[0].y - vec_y);
-				m_pos.y = static_cast<FLOAT>(m_pos.y + vec_y);
+				m_start.y = static_cast<FLOAT>(m_start.y + vec_y);
 				done = true;
 			}
 		}
 		break;
 		case ANC_TYPE::ANC_SOUTH:
 		{
-			const double vec_y = std::round((static_cast<double>(val.y) - m_pos.y - m_vec[0].y) / PT_ROUND) * PT_ROUND;
+			const double vec_y = std::round((static_cast<double>(val.y) - m_start.y - m_vec[0].y) / PT_ROUND) * PT_ROUND;
 			if (vec_y <= -FLT_MIN || vec_y >= FLT_MIN) {
 				m_vec[0].y += static_cast<FLOAT>(vec_y);
 				done = true;
@@ -438,14 +438,14 @@ namespace winrt::GraphPaper::implementation
 			// 終点への差分の x 値が, 限界距離未満か判定する.
 			if (m_vec[0].x > -limit && m_vec[0].x < limit) {
 				if (anc == ANC_TYPE::ANC_NE) {
-					m_pos.x += m_vec[0].x;
+					m_start.x += m_vec[0].x;
 				}
 				m_vec[0].x = 0.0f;
 				done = true;
 			}
 			if (m_vec[0].y > -limit && m_vec[0].y < limit) {
 				if (anc == ANC_TYPE::ANC_NE) {
-					m_pos.y += m_vec[0].y;
+					m_start.y += m_vec[0].y;
 				}
 				m_vec[0].y = 0.0f;
 				done = true;
@@ -462,7 +462,7 @@ namespace winrt::GraphPaper::implementation
 		ShapeStroke::ShapeStroke(page),
 		m_fill_color(page->m_fill_color)
 	{
-		m_pos = b_pos;
+		m_start = b_pos;
 		m_vec.resize(1, b_vec);
 		m_vec.shrink_to_fit();
 	}
@@ -471,7 +471,16 @@ namespace winrt::GraphPaper::implementation
 	ShapeRect::ShapeRect(DataReader const& dt_reader) :
 		ShapeStroke::ShapeStroke(dt_reader)
 	{
-		dt_read(m_fill_color, dt_reader);
+		const D2D1_COLOR_F fill_color{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		};
+		m_fill_color.r = min(max(fill_color.r, 0.0f), 1.0f);
+		m_fill_color.g = min(max(fill_color.g, 0.0f), 1.0f);
+		m_fill_color.b = min(max(fill_color.b, 0.0f), 1.0f);
+		m_fill_color.a = min(max(fill_color.a, 0.0f), 1.0f);
 	}
 
 	// 図形をデータライターに書き込む.
@@ -512,15 +521,15 @@ namespace winrt::GraphPaper::implementation
 	size_t ShapeRect::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
 	{
 		// 左上
-		v_pos[0] = m_pos;
+		v_pos[0] = m_start;
 		// 右上
-		v_pos[1].x = m_pos.x + m_vec[0].x;
-		v_pos[1].y = m_pos.y;
+		v_pos[1].x = m_start.x + m_vec[0].x;
+		v_pos[1].y = m_start.y;
 		// 右下
 		v_pos[2].x = v_pos[1].x;
-		v_pos[2].y = m_pos.y + m_vec[0].y;
+		v_pos[2].y = m_start.y + m_vec[0].y;
 		// 右下
-		v_pos[3].x = m_pos.x;
+		v_pos[3].x = m_start.x;
 		v_pos[3].y = v_pos[2].y;
 		return 4;
 	}

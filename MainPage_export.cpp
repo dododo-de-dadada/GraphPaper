@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STRETCH& stretch,
 		DWRITE_FONT_STYLE& style,
 		DWRITE_FONT_METRICS1& f_met,
-		std::vector<char>& p_name,
+		std::vector<wchar_t>& p_name,
 		std::vector<DWRITE_GLYPH_METRICS>& g_met
 	)
 	{
@@ -88,9 +88,11 @@ namespace winrt::GraphPaper::implementation
 								if (str->GetStringLength(j, &wstr_len) == S_OK && wstr_len > 0) {
 									std::vector<wchar_t> wstr(wstr_len + 1);
 									if (str->GetString(j, std::data(wstr), wstr_len + 1) == S_OK) {
-										int p_name_len = WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, NULL, 0, NULL, NULL);
-										p_name.resize(p_name_len);
-										WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, std::data(p_name), p_name_len, NULL, NULL);
+										p_name.clear();
+										std::copy(wstr.begin(), wstr.end(), std::back_inserter(p_name));
+										//int p_name_len = WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, NULL, 0, NULL, NULL);
+										//p_name.resize(p_name_len);
+										//WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, std::data(p_name), p_name_len, NULL, NULL);
 										break;
 									}
 								}
@@ -107,9 +109,14 @@ namespace winrt::GraphPaper::implementation
 								}
 							}
 							wstr[wstr_len] = L'\0';
-							int p_name_len = WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, NULL, 0, NULL, NULL);
-							p_name.resize(p_name_len);
-							WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, std::data(p_name), p_name_len, NULL, NULL);
+							p_name.clear();
+							std::copy(wstr.begin(), wstr.end(), std::back_inserter(p_name));
+							//for (int i = 0; i < wstr_len + 1; i++) {
+							//	p_name[i] = wstr[i];
+							//}
+							//int p_name_len = WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, NULL, 0, NULL, NULL);
+							//p_name.resize(p_name_len);
+							//WideCharToMultiByte(CP_ACP, 0, std::data(wstr), wstr_len + 1, std::data(p_name), p_name_len, NULL, NULL);
 						}
 						str->Release();
 					}
@@ -138,7 +145,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		HRESULT hr = E_FAIL;
 		try {
-			char buf[1024];	// PDF
+			wchar_t buf[1024];	// PDF
 
 			// 表示の幅と高さを, D2D の固定 DPI (96dpi) から PDF の 72dpi に,
 			// 変換する (モニターに応じて変化する論理 DPI は用いない). 
@@ -156,63 +163,68 @@ namespace winrt::GraphPaper::implementation
 			// PDF ヘッダー
 			// ファイルにバイナリデータが含まれる場合は,
 			// ヘッダと改行の直後に, 4 つ以上のバイナリ文字を含むコメント行を置くことが推奨.
-			size_t len = dt_write(
-				"%PDF-1.7\n"
-				"%\xff\xff\xff\xff\n",
-				dt_writer);
+			size_t len = dt_writer.WriteString(
+				L"%PDF-1.7\n"
+				L"%\xff\xff\xff\xff\n"
+			);
+			//size_t len = dt_write(
+			//	"%PDF-1.7\n"
+			//	"%\xff\xff\xff\xff\n",
+			//	dt_writer);
 			std::vector<size_t> obj_len{};
 			obj_len.push_back(len);
 
 			// カタログ辞書.
 			// トレーラーから参照され,
 			// ページツリーを参照する.
-			len = dt_write(
-				"% Catalog Dictionary\n"
-				"1 0 obj <<\n"
-				"/Type /Catalog\n"
-				"/Pages 2 0 R\n"
-				">>\n"
-				"endobj\n", dt_writer);
+			len = dt_writer.WriteString(
+			// len = dt_write(
+				L"% Catalog Dictionary\n"
+				L"1 0 obj <<\n"
+				L"/Type /Catalog\n"
+				L"/Pages 2 0 R\n"
+				L">>\n"
+				L"endobj\n");// , dt_writer);
 			obj_len.push_back(obj_len.back() + len);
 
 			// ページツリー辞書
 			// カタログから参照され,
 			// ページを参照する.
-			len = dt_write(
-				"% Page Tree Dictionary\n"
-				"2 0 obj <<\n"
-				"/Type /Pages\n"
-				"/Count 1\n"
-				"/Kids[3 0 R]\n"
-				">>\n"
-				"endobj\n",
-				dt_writer
-			);
+			len = dt_writer.WriteString(
+				//len = dt_write(
+				L"% Page Tree Dictionary\n"
+				L"2 0 obj <<\n"
+				L"/Type /Pages\n"
+				L"/Count 1\n"
+				L"/Kids[3 0 R]\n"
+				L">>\n"
+				L"endobj\n");// ,
+				//dt_writer
+			//);
 			obj_len.push_back(obj_len.back() + len);
 
 			// ページオブジェクト
 			// ページツリーから参照され,
 			// リソースとコンテンツを参照する.
-			sprintf_s(buf,
-				"%% Page Object\n"
-				"3 0 obj <<\n"
-				"/Type /Page\n"
-				"/MediaBox [0 0 %f %f]\n"
-				"/Parent 2 0 R\n"
-				"/Resources 4 0 R\n"
-				"/Contents [5 0 R]\n"
-				">>\n"
-				"endobj\n",
+			swprintf_s(buf,
+				L"%% Page Object\n"
+				L"3 0 obj <<\n"
+				L"/Type /Page\n"
+				L"/MediaBox [0 0 %f %f]\n"
+				L"/Parent 2 0 R\n"
+				L"/Resources 4 0 R\n"
+				L"/Contents [5 0 R]\n"
+				L">>\n"
+				L"endobj\n",
 				w_pt, h_pt);
-			len = dt_write(buf, dt_writer);
+			len = dt_writer.WriteString(buf);
 			obj_len.push_back(obj_len.back() + len);
 
 			// リソース辞書
 			// ページとコンテンツから参照され, 辞書を参照する.
-			len = dt_write(
-				"% Resouces Dictionary\n"
-				"4 0 obj <<\n",
-				dt_writer);
+			len = dt_writer.WriteString(
+				L"% Resouces Dictionary\n"
+				L"4 0 obj <<\n");
 			// フォント
 			int font_cnt = 0;
 			std::vector<std::vector<char>> base_font;	// ベースフォント名
@@ -222,20 +234,22 @@ namespace winrt::GraphPaper::implementation
 				}
 				if (typeid(*s) == typeid(ShapeText)) {
 					if (font_cnt == 0) {
-						len += dt_write(
-							"/Font <<\n",
-							dt_writer);
+						len += dt_writer.WriteString(L"/Font <<\n");
+						//len += dt_write(
+						//	"/Font <<\n",
+						//	dt_writer);
 					}
-					sprintf_s(buf,
-						"/F%d %d 0 R\n",
+					swprintf_s(buf,
+						L"/F%d %d 0 R\n",
 						font_cnt, 6 + 3 * font_cnt
 					);
-					len += dt_write(buf, dt_writer);
+					len += dt_writer.WriteString(buf);
 					static_cast<ShapeText*>(s)->m_pdf_font_num = font_cnt++;
 				}
 			}
 			if (font_cnt > 0) {
-				len += dt_write(">>\n", dt_writer);
+				len += dt_writer.WriteString(L">>\n");
+				//len += dt_write(">>\n", dt_writer);
 			}
 			// 画像
 			int image_cnt = 0;
@@ -245,52 +259,60 @@ namespace winrt::GraphPaper::implementation
 				}
 				if (typeid(*s) == typeid(ShapeImage)) {
 					if (image_cnt == 0) {
-						len += dt_write(
-							"/XObject <<\n",
-							dt_writer);
+						len += dt_writer.WriteString(L"/XObject <<\n");
+						//len += dt_write(
+						//	"/XObject <<\n",
+						//	dt_writer);
 					}
-					sprintf_s(buf,
-						"/I%d %d 0 R\n",
+					swprintf_s(buf,
+						L"/I%d %d 0 R\n",
 						image_cnt, 6 + 3 * font_cnt + image_cnt
 					);
-					len += dt_write(buf, dt_writer);
+					len += dt_writer.WriteString(buf);
+					//len += dt_write(buf, dt_writer);
 					static_cast<ShapeImage*>(s)->m_pdf_obj = image_cnt++;
 				}
 			}
 			if (image_cnt > 0) {
-				len += dt_write(">>\n", dt_writer);
+				len += dt_writer.WriteString(L">>\n");
+				//len += dt_write(">>\n", dt_writer);
 			}
-			len += dt_write(
-				">>\n"
-				"endobj\n",
-				dt_writer);
+			len += dt_writer.WriteString(
+				L">>\n"
+				L"endobj\n");
+			//len += dt_write(
+			//	">>\n"
+			//	"endobj\n",
+			//	dt_writer);
 			obj_len.push_back(obj_len.back() + len);
 
 			// コンテントオブジェクト (ストリーム)
 			// 変換行列に 72dpi / 96dpi (=0.75) を指定する.   
-			sprintf_s(buf,
-				"%% Content Object\n"
-				"5 0 obj <<\n"
-				">>\n"
-				"stream\n"
-				"%f 0 0 %f 0 0 cm\n"
-				"q\n",
+			swprintf_s(buf,
+				L"%% Content Object\n"
+				L"5 0 obj <<\n"
+				L">>\n"
+				L"stream\n"
+				L"%f 0 0 %f 0 0 cm\n"
+				L"q\n",
 				72.0f / 96.0f, 72.0f / 96.0f
 			);
-			len = dt_write(buf, dt_writer);
+			len = dt_writer.WriteString(buf);
+			//len = dt_write(buf, dt_writer);
 
 			// 背景
-			sprintf_s(buf,
-				"%f %f %f rg\n"
-				"0 0 %f %f re\n"
-				"b\n",
+			swprintf_s(buf,
+				L"%f %f %f rg\n"
+				L"0 0 %f %f re\n"
+				L"b\n",
 				m_main_page.m_page_color.r,
 				m_main_page.m_page_color.g,
 				m_main_page.m_page_color.b,
 				m_main_page.m_page_size.width,
 				m_main_page.m_page_size.height
 			);
-			len += dt_write(buf, dt_writer);
+			len += dt_writer.WriteString(buf);
+			//len += dt_write(buf, dt_writer);
 
 			// 図形を出力
 			const D2D1_SIZE_F page_size = m_main_page.m_page_size;
@@ -300,11 +322,15 @@ namespace winrt::GraphPaper::implementation
 				}
 				len += s->export_pdf(page_size, dt_writer);
 			}
-			len += dt_write(
-				"Q\n"
-				"endstream\n"
-				"endobj\n", dt_writer
-			);
+			len += dt_writer.WriteString(
+				L"Q\n"
+				L"endstream\n"
+				L"endobj\n");
+			//len += dt_write(
+			//	"Q\n"
+			//	"endstream\n"
+			//	"endobj\n", dt_writer
+			//);
 			obj_len.push_back(obj_len.back() + len);
 
 			// 画像 XObject (ストリームオブジェクト) とフォント辞書
@@ -327,26 +353,28 @@ namespace winrt::GraphPaper::implementation
 					in_buf.clear();
 					in_buf.shrink_to_fit();
 
-					sprintf_s(buf,
-						"%% XObject\n"
-						"%d 0 obj <<\n"
-						"/Type /XObject\n"
-						"/Subtype /Image\n"
-						"/Width %u\n"
-						"/Height %u\n"
-						"/Length %zu\n"
-						"/ColorSpace /DeviceRGB\n"
-						"/BitsPerComponent 8\n"
-						//"/Filter /ASCIIHexDecode\n"
-						"/Filter /FlateDecode\n"
-						">>\n",
+					swprintf_s(buf,
+						L"%% XObject\n"
+						L"%d 0 obj <<\n"
+						L"/Type /XObject\n"
+						L"/Subtype /Image\n"
+						L"/Width %u\n"
+						L"/Height %u\n"
+						L"/Length %zu\n"
+						L"/ColorSpace /DeviceRGB\n"
+						L"/BitsPerComponent 8\n"
+						//L"/Filter /ASCIIHexDecode\n"
+						L"/Filter /FlateDecode\n"
+						L">>\n",
 						6 + 3 * font_cnt + t->m_pdf_obj,
 						t->m_orig.width,
 						t->m_orig.height,
 						z_buf.size()
 					);
-					len += dt_write(buf, dt_writer);
-					len += dt_write("stream\n", dt_writer);
+					len += dt_writer.WriteString(buf);
+					//len += dt_write(buf, dt_writer);
+					len += dt_writer.WriteString(L"stream\n");
+					//len += dt_write("stream\n", dt_writer);
 					dt_writer.WriteBytes(z_buf);
 					len += z_buf.size();
 					z_buf.clear();
@@ -369,11 +397,15 @@ namespace winrt::GraphPaper::implementation
 					}
 					*/
 					// ストリームの最後は '>'.
-					len += dt_write(
-						">\n"
-						"endstream\n"
-						"endobj\n",
-						dt_writer);
+					len += dt_writer.WriteString(
+						L">\n"
+						L"endstream\n"
+						L"endobj\n");
+					//len += dt_write(
+					//	">\n"
+					//	"endstream\n"
+					//	"endobj\n",
+					//	dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 				}
 				else if (typeid(*s) == typeid(ShapeText)) {
@@ -400,92 +432,100 @@ namespace winrt::GraphPaper::implementation
 					DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;
 					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;
 					DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;
-					std::vector<char> psn{};
+					std::vector<wchar_t> psn{};
 					std::vector<DWRITE_GLYPH_METRICS> g_met{};
 					DWRITE_FONT_METRICS1 f_met{};
 					pdf_get_font(t, weight, stretch, style, f_met, psn, g_met);
 					const int upem = f_met.designUnitsPerEm;
 
 					// フォント辞書
-					sprintf_s(buf,
-						"%% Font Dictionary\n"
-						"%d 0 obj <<\n"
-						"/Type /Font\n"
-						"/BaseFont /%s\n"
-						"/Subtype /Type0\n"
-						"/Encoding /UniJIS-UTF16-H\n"
-						"/DescendantFonts [%d 0 R]\n"
-						">>\n",
+					swprintf_s(buf,
+						L"%% Font Dictionary\n"
+						L"%d 0 obj <<\n"
+						L"/Type /Font\n"
+						L"/BaseFont /%s\n"
+						L"/Subtype /Type0\n"
+						L"/Encoding /UniJIS-UTF16-H\n"
+						L"/DescendantFonts [%d 0 R]\n"
+						L">>\n",
 						6 + 3 * n,
 						std::data(psn),
 						6 + 3 * n + 1
 					);
-					len += dt_write(buf, dt_writer);
+					len += dt_writer.WriteString(buf);
+					//len += dt_write(buf, dt_writer);
 
 					// CID フォント辞書 (Type 0 の子孫となるフォント)
 					// フォント辞書から参照され,
 					// フォント詳細辞書を参照する.
-					sprintf_s(buf,
-						"%% Descendant Font Dictionary\n"
-						"%d 0 obj <<\n"
-						"/Type /Font\n"
-						"/Subtype /CIDFontType2\n"
-						"/BaseFont /%s\n"
-						"/CIDSystemInfo <<\n"
-						"/Registry (Adobe)\n"
-						"/Ordering (Japan1)\n"
-						"/Supplement 7\n"
-						">>\n"
-						"/FontDescriptor %d 0 R\n",	// 間接参照で必須.
+					swprintf_s(buf,
+						L"%% Descendant Font Dictionary\n"
+						L"%d 0 obj <<\n"
+						L"/Type /Font\n"
+						L"/Subtype /CIDFontType2\n"
+						L"/BaseFont /%s\n"
+						L"/CIDSystemInfo <<\n"
+						L"/Registry (Adobe)\n"
+						L"/Ordering (Japan1)\n"
+						L"/Supplement 7\n"
+						L">>\n"
+						L"/FontDescriptor %d 0 R\n",	// 間接参照で必須.
 						6 + 3 * n + 1,
 						std::data(psn),
 						6 + 3 * n + 2
 					);
-					len = dt_write(buf, dt_writer);
+					len = dt_writer.WriteString(buf);
+					//len = dt_write(buf, dt_writer);
 					// 半角のグリフ幅を設定する
 					// 設定しなければ全て全角幅になってしまう.
-					len += dt_write("/W [1 [", dt_writer);	// CID 開始番号は 1 (半角空白)
+					len += dt_writer.WriteString(L"/W [1 [");	// CID 開始番号は 1 (半角空白)
+					//len += dt_write("/W [1 [", dt_writer);	// CID 開始番号は 1 (半角空白)
 					for (int i = 1; i <= g_met.size(); i++) {
-						sprintf_s(buf, "%u ", 1000 * g_met[i - 1].advanceWidth / upem);
-						len += dt_write(buf, dt_writer);
+						swprintf_s(buf, L"%u ", 1000 * g_met[i - 1].advanceWidth / upem);
+						len += dt_writer.WriteString(buf);
+						//len += dt_write(buf, dt_writer);
 					}
-					len += dt_write("]]\n", dt_writer);
-					len += dt_write(
-						">>\n"
-						"endobj\n",
-						dt_writer);
+					len += dt_writer.WriteString(L"]]\n");
+					//len += dt_write("]]\n", dt_writer);
+					len += dt_writer.WriteString(
+						L">>\n"
+						L"endobj\n");
+					//len += dt_write(
+					//	">>\n"
+					//	"endobj\n",
+					//	dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// フォント詳細辞書
 					// CID フォント辞書から参照される.
-					constexpr const char* FONT_STRETCH_NAME[] = {
-						"Normal",
-						"UltraCondensed",
-						"ExtraCondensed",
-						"Condensed",
-						"SemiCondensed",
-						"Normal",
-						"SemiExpanded",
-						"Expanded",
-						"ExtraExpanded",
-						"UltraExpanded"
+					constexpr const wchar_t* FONT_STRETCH_NAME[] = {
+						L"Normal",
+						L"UltraCondensed",
+						L"ExtraCondensed",
+						L"Condensed",
+						L"SemiCondensed",
+						L"Normal",
+						L"SemiExpanded",
+						L"Expanded",
+						L"ExtraExpanded",
+						L"UltraExpanded"
 					};
-					sprintf_s(buf,
-						"%% Font Descriptor Dictionary\n"
-						"%d 0 obj <<\n"
-						"/Type /FontDescriptor\n"
-						"/FontName /%s\n"
-						"/FontStretch /%s\n"
-						"/FontWeight /%d\n"
-						"/Flags 4\n"
-						"/FontBBox [%d %d %d %d]\n"
-						"/ItalicAngle 0\n"
-						"/Ascent %u\n"
-						"/Descent %u\n"
-						"/CapHeight %u\n"
-						"/StemV 0\n"
-						">>\n"
-						"endobj\n",
+					swprintf_s(buf,
+						L"%% Font Descriptor Dictionary\n"
+						L"%d 0 obj <<\n"
+						L"/Type /FontDescriptor\n"
+						L"/FontName /%s\n"
+						L"/FontStretch /%s\n"
+						L"/FontWeight /%d\n"
+						L"/Flags 4\n"
+						L"/FontBBox [%d %d %d %d]\n"
+						L"/ItalicAngle 0\n"
+						L"/Ascent %u\n"
+						L"/Descent %u\n"
+						L"/CapHeight %u\n"
+						L"/StemV 0\n"
+						L">>\n"
+						L"endobj\n",
 						6 + 3 * n + 2,
 						std::data(psn),
 						FONT_STRETCH_NAME[stretch < 10 ? stretch : 0],
@@ -498,44 +538,48 @@ namespace winrt::GraphPaper::implementation
 						1000 * f_met.descent / upem,
 						1000 * f_met.capHeight / upem
 					);
-					len = dt_write(buf, dt_writer);
+					len = dt_writer.WriteString(buf);
+					//len = dt_write(buf, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 				}
 			}
 
 			// 相互参照 (クロスリファレンス)
-			sprintf_s(
+			swprintf_s(
 				buf,
-				"%% Cross-reference Table\n"
-				"xref\n"
-				"0 %zu\n"
-				"0000000000 65535 f\n",
+				L"%% Cross-reference Table\n"
+				L"xref\n"
+				L"0 %zu\n"
+				L"0000000000 65535 f\n",
 				obj_len.size()
 			);
-			dt_write(buf, dt_writer);
+			dt_writer.WriteString(buf);
+			//dt_write(buf, dt_writer);
 			for (int i = 0; i < obj_len.size() - 1; i++) {
-				sprintf_s(buf,
-					"%010zu 00000 n\n",
+				swprintf_s(buf,
+					L"%010zu 00000 n\n",
 					obj_len[i]
 				);
-				dt_write(buf, dt_writer);
+				dt_writer.WriteString(buf);
+				//dt_write(buf, dt_writer);
 			}
 
 			// トレイラーと EOF
-			sprintf_s(
+			swprintf_s(
 				buf,
-				"%% Trailer\n"
-				"trailer <<\n"
-				"/Size %zu\n"
-				"/Root 1 0 R\n"
-				">>\n"
-				"startxref\n"
-				"%zu\n"
-				"%%%%EOF\n",
+				L"%% Trailer\n"
+				L"trailer <<\n"
+				L"/Size %zu\n"
+				L"/Root 1 0 R\n"
+				L">>\n"
+				L"startxref\n"
+				L"%zu\n"
+				L"%%%%EOF\n",
 				obj_len.size(),
 				obj_len.back()
 			);
-			dt_write(buf, dt_writer);
+			dt_writer.WriteString(buf);
+			//dt_write(buf, dt_writer);
 
 			// ストリームの現在位置をストリームの大きさに格納する.
 			pdf_stream.Size(pdf_stream.Position());

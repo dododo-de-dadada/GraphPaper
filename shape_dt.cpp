@@ -7,9 +7,7 @@
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
+	/*
 	// データリーダーから矢じるしの寸法を読み込む.
 	void dt_read(ARROW_SIZE& val, DataReader const& dt_reader)
 	{
@@ -21,21 +19,39 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから矢じるしの形式を読み込む.
 	void dt_read(CAP_STYLE& val, DataReader const& dt_reader)
 	{
-		val.m_start = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
-		val.m_end = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
+		const auto start = dt_reader.ReadUInt32();
+		if (start != D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT &&
+			start != D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND &&
+			start != D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE &&
+			start != D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+			val.m_start = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;
+		}
+		else {
+			val.m_start = static_cast<D2D1_CAP_STYLE>(start);
+		}
+		const auto end = dt_reader.ReadUInt32();
+		if (end != D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT &&
+			end != D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND &&
+			end != D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE &&
+			end != D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+			val.m_end = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;
+		}
+		else {
+			val.m_end = static_cast<D2D1_CAP_STYLE>(end);
+		}
 	}
 
 	// データリーダーから色を読み込む.
 	void dt_read(D2D1_COLOR_F& val, DataReader const& dt_reader)
 	{
-		val.r = dt_reader.ReadSingle();
-		val.g = dt_reader.ReadSingle();
-		val.b = dt_reader.ReadSingle();
-		val.a = dt_reader.ReadSingle();
-		val.r = min(max(val.r, 0.0F), 1.0F);
-		val.g = min(max(val.g, 0.0F), 1.0F);
-		val.b = min(max(val.b, 0.0F), 1.0F);
-		val.a = min(max(val.a, 0.0F), 1.0F);
+		const auto r = dt_reader.ReadSingle();
+		const auto g = dt_reader.ReadSingle();
+		const auto b = dt_reader.ReadSingle();
+		const auto a = dt_reader.ReadSingle();
+		val.r = min(max(r, 0.0F), 1.0F);
+		val.g = min(max(g, 0.0F), 1.0F);
+		val.b = min(max(b, 0.0F), 1.0F);
+		val.a = min(max(a, 0.0F), 1.0F);
 	}
 
 	// データリーダーから位置を読み込む.
@@ -91,23 +107,13 @@ namespace winrt::GraphPaper::implementation
 	{
 		val.m_gauge_1 = dt_reader.ReadUInt16();
 		val.m_gauge_2 = dt_reader.ReadUInt16();
-		if (equal(val, GRID_EMPH_0) || equal(val, GRID_EMPH_2) || equal(val, GRID_EMPH_3)) {
+		if (equal(val, GRID_EMPH_0) || 
+			equal(val, GRID_EMPH_2) || 
+			equal(val, GRID_EMPH_3)) {
 			return;
 		}
 		val = GRID_EMPH_0;
 	}
-
-	// データリーダーから多角形の選択肢を読み込む.
-	/*
-	void dt_read(POLY_OPTION& val, DataReader const& dt_reader)
-	{
-		val.m_vertex_cnt = dt_reader.ReadUInt32();
-		val.m_regular = dt_reader.ReadBoolean();
-		val.m_vertex_up = dt_reader.ReadBoolean();
-		val.m_end_closed = dt_reader.ReadBoolean();
-		val.m_clockwise = dt_reader.ReadBoolean();
-	}
-	*/
 
 	// データリーダーから位置配列を読み込む.
 	void dt_read(std::vector<D2D1_POINT_2F>& val, DataReader const& dt_reader)
@@ -115,27 +121,24 @@ namespace winrt::GraphPaper::implementation
 		const size_t v_cnt = dt_reader.ReadUInt32();	// 要素数
 		val.resize(v_cnt);
 		for (size_t i = 0; i < v_cnt; i++) {
-			dt_read(val[i], dt_reader);
+			val[i].x = dt_reader.ReadSingle();
+			val[i].y = dt_reader.ReadSingle();
 		}
 	}
 
 	// データリーダーから文字列を読み込む.
 	void dt_read(wchar_t*& val, DataReader const& dt_reader)
 	{
-		const size_t n = dt_reader.ReadUInt32();	// 文字数
-		//if (n > -1) {
-			val = new wchar_t[n + 1];
-			if (val != nullptr) {
-				for (size_t i = 0; i < n; i++) {
-					val[i] = dt_reader.ReadUInt16();
-				}
-				val[n] = L'\0';
-			}
+		const size_t len = dt_reader.ReadUInt32();	// 文字数
+		uint8_t* data = new uint8_t[2 * (len + 1)];
+		dt_reader.ReadBytes(array_view(data, data + 2 * len));
+		//for (size_t i = 0; i < len; i++) {
+		//	std::swap(data[2 * i], data[2 * i + 1]);
 		//}
-		//else {
-		//	val = nullptr;
-		//}
+		val = reinterpret_cast<wchar_t*>(data);
+		val[len] = L'\0';
 	}
+	*/
 
 	// データライターに矢じるしの寸法を書き込む.
 	void dt_write(const ARROW_SIZE& val, DataWriter const& dt_writer)
@@ -212,21 +215,10 @@ namespace winrt::GraphPaper::implementation
 	// データライターに方眼の形式を書き込む.
 	void dt_write(const GRID_EMPH val, DataWriter const& dt_writer)
 	{
-		dt_writer.WriteUInt16(val.m_gauge_1);
-		dt_writer.WriteUInt16(val.m_gauge_2);
+		dt_writer.WriteUInt32(val.m_gauge_1);
+		dt_writer.WriteUInt32(val.m_gauge_2);
 	}
 
-	// データライターに多角形の選択肢を書き込む.
-	/*
-	void dt_write(const POLY_OPTION& val, DataWriter const& dt_writer)
-	{
-		dt_writer.WriteUInt32(static_cast<uint32_t>(val.m_vertex_cnt));
-		dt_writer.WriteBoolean(val.m_regular);
-		dt_writer.WriteBoolean(val.m_vertex_up);
-		dt_writer.WriteBoolean(val.m_end_closed);
-		dt_writer.WriteBoolean(val.m_clockwise);
-	}
-	*/
 	// データライターに位置配列を書き込む.
 	void dt_write(const std::vector<D2D1_POINT_2F>& val, DataWriter const& dt_writer)
 	{
@@ -234,7 +226,8 @@ namespace winrt::GraphPaper::implementation
 
 		dt_writer.WriteUInt32(static_cast<uint32_t>(n));
 		for (uint32_t i = 0; i < n; i++) {
-			dt_write(val[i], dt_writer);
+			dt_writer.WriteSingle(val[i].x);
+			dt_writer.WriteSingle(val[i].y);
 		}
 	}
 
@@ -244,9 +237,8 @@ namespace winrt::GraphPaper::implementation
 		const uint32_t len = wchar_len(val);
 
 		dt_writer.WriteUInt32(len);
-		for (uint32_t i = 0; i < len; i++) {
-			dt_writer.WriteUInt16(val[i]);
-		}
+		const auto data = reinterpret_cast<const uint8_t*>(val);
+		dt_writer.WriteBytes(array_view(data, data + 2 * len));
 	}
 
 	// データライターに文字列を書き込む

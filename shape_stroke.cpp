@@ -12,12 +12,12 @@ namespace winrt::GraphPaper::implementation
 	// b_max	囲む領域の右下位置.
 	void ShapeStroke::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
-		b_min.x = m_pos.x < a_min.x ? m_pos.x : a_min.x;
-		b_min.y = m_pos.y < a_min.y ? m_pos.y : a_min.y;
-		b_max.x = m_pos.x > a_max.x ? m_pos.x : a_max.x;
-		b_max.y = m_pos.y > a_max.y ? m_pos.y : a_max.y;
+		b_min.x = m_start.x < a_min.x ? m_start.x : a_min.x;
+		b_min.y = m_start.y < a_min.y ? m_start.y : a_min.y;
+		b_max.x = m_start.x > a_max.x ? m_start.x : a_max.x;
+		b_max.y = m_start.y > a_max.y ? m_start.y : a_max.y;
 		const size_t d_cnt = m_vec.size();	// 差分の数
-		D2D1_POINT_2F pos = m_pos;
+		D2D1_POINT_2F pos = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(pos, m_vec[i], pos);
 			//pt_inc(e_pos, b_min, b_max);
@@ -99,16 +99,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool done = false;
 		D2D1_POINT_2F vec;
-		pt_sub(m_pos, pos, vec);
+		pt_sub(m_start, pos, vec);
 		float vv = static_cast<float>(pt_abs2(vec));
 		if (vv < dd) {
 			dd = vv;
-			val = m_pos;
+			val = m_start;
 			if (!done) {
 				done = true;
 			}
 		}
-		D2D1_POINT_2F v_pos{ m_pos };
+		D2D1_POINT_2F v_pos{ m_start };
 		for (const auto d_vec : m_vec) {
 			pt_add(v_pos, d_vec, v_pos);
 			pt_sub(v_pos, pos, vec);
@@ -131,12 +131,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (anc == ANC_TYPE::ANC_PAGE || anc == ANC_TYPE::ANC_P0) {
 			// 図形の部位が「外部」または「開始点」ならば, 開始位置を得る.
-			val = m_pos;
+			val = m_start;
 		}
 		else if (anc > ANC_TYPE::ANC_P0) {
 			const size_t a_cnt = anc - ANC_TYPE::ANC_P0;
 			if (a_cnt < m_vec.size() + 1) {
-				val = m_pos;
+				val = m_start;
 				for (size_t i = 0; i < a_cnt; i++) {
 					pt_add(val, m_vec[i], val);
 				}
@@ -149,8 +149,8 @@ namespace winrt::GraphPaper::implementation
 	void ShapeStroke::get_pos_min(D2D1_POINT_2F& val) const noexcept
 	{
 		const size_t d_cnt = m_vec.size();	// 差分の数
-		D2D1_POINT_2F v_pos = m_pos;	// 頂点の位置
-		val = m_pos;
+		D2D1_POINT_2F v_pos = m_start;	// 頂点の位置
+		val = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(v_pos, m_vec[i], v_pos);
 			//pt_min(val, v_pos, val);
@@ -163,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	つねに true
 	bool ShapeStroke::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
-		val = m_pos;
+		val = m_start;
 		return true;
 	}
 
@@ -186,7 +186,7 @@ namespace winrt::GraphPaper::implementation
 	// 頂点を得る.
 	size_t ShapeStroke::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
 	{
-		v_pos[0] = m_pos;
+		v_pos[0] = m_start;
 		const size_t d_cnt = m_vec.size();
 		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(v_pos[i], m_vec[i], v_pos[i + 1]);
@@ -213,7 +213,7 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeStroke::move(const D2D1_POINT_2F d_vec) noexcept
 	{
 		D2D1_POINT_2F new_pos;
-		pt_add(m_pos, d_vec, new_pos);
+		pt_add(m_start, d_vec, new_pos);
 		return set_pos_start(new_pos);
 	}
 
@@ -375,7 +375,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F v_pos[MAX_N_GON];	// 頂点の位置
 			const size_t a_cnt = anc - ANC_TYPE::ANC_P0;	// 変更する頂点
 			// 変更する頂点までの, 各頂点の位置を得る.
-			v_pos[0] = m_pos;
+			v_pos[0] = m_start;
 			for (size_t i = 0; i < a_cnt; i++) {
 				pt_add(v_pos[i], m_vec[i], v_pos[i + 1]);
 			}
@@ -388,7 +388,7 @@ namespace winrt::GraphPaper::implementation
 				// 変更する頂点が最初の頂点か判定する.
 				if (a_cnt == 0) {
 					// 最初の頂点の位置に変更分を加える.
-					pt_add(m_pos, vec, m_pos);
+					pt_add(m_start, vec, m_start);
 				}
 				else {
 					// 頂点の直前の差分に変更分を加える.
@@ -424,7 +424,7 @@ namespace winrt::GraphPaper::implementation
 					}
 					// 変更するのが最初の頂点か判定する.
 					if (a_cnt == 0) {
-						pt_add(m_pos, v_vec, m_pos);
+						pt_add(m_start, v_vec, m_start);
 					}
 					else {
 						pt_add(m_vec[a_cnt - 1], v_vec, m_vec[a_cnt - 1]);
@@ -448,8 +448,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F new_pos;
 		pt_round(val, PT_ROUND, new_pos);
-		if (!equal(m_pos, new_pos)) {
-			m_pos = new_pos;
+		if (!equal(m_start, new_pos)) {
+			m_start = new_pos;
 			return true;
 		}
 		return false;
@@ -496,30 +496,53 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_stroke_style(nullptr)
 	{}
 
-	template <typename T>
-	static std::vector<T> dt_read_vec(DataReader const& dt_reader)
+	static std::vector<D2D1_POINT_2F> dt_read_vec(DataReader const& dt_reader)
 	{
-		std::vector<T> vec;
-		dt_read(vec, dt_reader);
+		const size_t vec_cnt = dt_reader.ReadUInt32();	// 要素数
+		std::vector<D2D1_POINT_2F> vec(vec_cnt);
+		for (size_t i = 0; i < vec_cnt; i++) {
+			vec[i].x = dt_reader.ReadSingle();
+			vec[i].y = dt_reader.ReadSingle();
+		}
 		return vec;
 	}
-
+	/*
 	static CAP_STYLE dt_read_cap(DataReader const& dt_reader)
 	{
-		CAP_STYLE cap;
-		dt_read(cap, dt_reader);
-		return cap;
+		return CAP_STYLE{
+			static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32()),
+			static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())
+		};
 	}
+	*/
 
 	// 図形をデータリーダーから読み込む.
 	ShapeStroke::ShapeStroke(DataReader const& dt_reader) :
 		ShapeSelect(dt_reader),
-		m_pos(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
-		m_vec(dt_read_vec<D2D1_POINT_2F>(dt_reader)),
-		m_stroke_cap(dt_read_cap(dt_reader)),
-		m_stroke_color(D2D1_COLOR_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
+		m_start(D2D1_POINT_2F{
+			dt_reader.ReadSingle(), 
+			dt_reader.ReadSingle() 
+		}),
+		m_vec(dt_read_vec(dt_reader)),
+		m_stroke_cap(CAP_STYLE{
+			static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32()),
+			static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())
+		}),
+		m_stroke_color(D2D1_COLOR_F{
+			dt_reader.ReadSingle(), 
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		}),
 		m_dash_cap(static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())),
-		m_dash_patt(DASH_PATT{ dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
+		m_dash_patt(DASH_PATT{
+			dt_reader.ReadSingle(), 
+			dt_reader.ReadSingle(), 
+			dt_reader.ReadSingle(), 
+			dt_reader.ReadSingle(), 
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		}),
 		m_dash_style(static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32())),
 		m_join_miter_limit(dt_reader.ReadSingle()),
 		m_join_style(static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32())),
@@ -532,7 +555,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_writer.WriteBoolean(m_is_deleted);
 		dt_writer.WriteBoolean(m_is_selected);
-		dt_write(m_pos, dt_writer);
+		dt_write(m_start, dt_writer);
 		dt_write(m_vec, dt_writer);
 		dt_write(m_stroke_cap, dt_writer);
 		dt_write(m_stroke_color, dt_writer);

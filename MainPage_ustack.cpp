@@ -179,8 +179,8 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_OP::TEXT_MARGIN:
 			u = new UndoValue<UNDO_OP::TEXT_MARGIN>(dt_reader);
 			break;
-		case UNDO_OP::TEXT_SELECTED:
-			u = new UndoValue<UNDO_OP::TEXT_SELECTED>(dt_reader);
+		case UNDO_OP::TEXT_RANGE:
+			u = new UndoValue<UNDO_OP::TEXT_RANGE>(dt_reader);
 			break;
 		default:
 			throw winrt::hresult_invalid_argument();
@@ -653,7 +653,7 @@ namespace winrt::GraphPaper::implementation
 	// s	操作する図形
 	// val	文字範囲の値
 	// 戻り値	なし
-	template<> void MainPage::ustack_push_set<UNDO_OP::TEXT_SELECTED, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& val)
+	template<> void MainPage::ustack_push_set<UNDO_OP::TEXT_RANGE, DWRITE_TEXT_RANGE>(Shape* const s, DWRITE_TEXT_RANGE const& val)
 	{
 		auto flag = false;
 		// 元に戻す操作スタックの各操作について
@@ -663,7 +663,7 @@ namespace winrt::GraphPaper::implementation
 				// 操作がヌルの場合,
 				break;
 			}
-			else if (typeid(*u) != typeid(UndoValue<UNDO_OP::TEXT_SELECTED>)) {
+			else if (typeid(*u) != typeid(UndoValue<UNDO_OP::TEXT_RANGE>)) {
 				// 操作が文字範囲の選択する操作でない場合,
 				if (typeid(*u) != typeid(UndoSelect)) {
 					// 操作が図形の選択を反転する操作でない場合,
@@ -681,7 +681,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (!flag) {
-			m_ustack_undo.push_back(new UndoValue<UNDO_OP::TEXT_SELECTED>(s, val));
+			m_ustack_undo.push_back(new UndoValue<UNDO_OP::TEXT_RANGE>(s, val));
 		}
 
 	}

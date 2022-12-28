@@ -672,7 +672,7 @@ namespace winrt::GraphPaper::implementation
 				const auto r_len = wchar_len(m_find_repl);
 				const auto r_text = find_replace(t->m_text, w_pos, f_len, m_find_repl, r_len);
 				ustack_push_set<UNDO_OP::TEXT_CONTENT>(t, r_text);
-				ustack_push_set<UNDO_OP::TEXT_SELECTED>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
+				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 				ustack_push_null();
 				ustack_is_enable();
 			}
@@ -684,9 +684,9 @@ namespace winrt::GraphPaper::implementation
 			// ŒŸõ‚Å‚«‚½‚È‚ç‚Î,
 			// •¶š”ÍˆÍ‚ª‘I‘ğ‚³‚ê‚½}Œ`‚ª‚ ‚è, ‚»‚ê‚ªŸ‚Ì}Œ`‚ÆˆÙ‚È‚é‚©”»’è‚·‚é.
 			if (t != nullptr && s != t) {
-				ustack_push_set<UNDO_OP::TEXT_SELECTED>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			ustack_push_set<UNDO_OP::TEXT_SELECTED>(s, s_range);
+			ustack_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			flag = true;
 		}
@@ -736,9 +736,9 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_TEXT_RANGE s_range;
 		if (find_text(m_main_page.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			if (t != nullptr && s != t) {
-				ustack_push_set<UNDO_OP::TEXT_SELECTED>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			ustack_push_set<UNDO_OP::TEXT_SELECTED>(s, s_range);
+			ustack_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			page_draw();
 		}

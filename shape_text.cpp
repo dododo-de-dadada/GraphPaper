@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 {
 	wchar_t** ShapeText::s_available_fonts = nullptr;	//有効な書体名
 	D2D1_COLOR_F ShapeText::s_text_selected_background{ ACCENT_COLOR };	// 文字範囲の背景色
-	D2D1_COLOR_F ShapeText::s_text_selected_foreground{ COLOR_TEXT_SELECTED };	// 文字範囲の文字色
+	D2D1_COLOR_F ShapeText::s_text_selected_foreground{ COLOR_TEXT_RANGE };	// 文字範囲の文字色
 
 	// ヒットテストの計量を作成する.
 	static void tx_create_test_metrics(IDWriteTextLayout* text_lay, const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt);
@@ -135,7 +135,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形の大きさを変更する.
 		if (!equal(t_box, m_vec[0])) {
 			D2D1_POINT_2F se;
-			pt_add(m_pos, t_box, se);
+			pt_add(m_start, t_box, se);
 			set_pos_anc(se, ANC_TYPE::ANC_SE, 0.0f, false);
 			return true;
 		}
@@ -384,9 +384,9 @@ namespace winrt::GraphPaper::implementation
 
 			// 余白分をくわえて, 文字列の左上位置を計算する.
 			D2D1_POINT_2F t_min;
-			pt_add(m_pos, m_vec[0], t_min);
-			t_min.x = m_pos.x < t_min.x ? m_pos.x : t_min.x;
-			t_min.y = m_pos.y < t_min.y ? m_pos.y : t_min.y;
+			pt_add(m_start, m_vec[0], t_min);
+			t_min.x = m_start.x < t_min.x ? m_start.x : t_min.x;
+			t_min.y = m_start.y < t_min.y ? m_start.y : t_min.y;
 			const FLOAT pw = m_text_padding.width;
 			const FLOAT ph = m_text_padding.height;
 			const double hm = min(pw, fabs(m_vec[0].x) * 0.5);
@@ -893,18 +893,47 @@ namespace winrt::GraphPaper::implementation
 	ShapeText::ShapeText(DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(dt_reader)
 	{
-		dt_read(m_font_color, dt_reader);
-		dt_read(m_font_family, dt_reader);
+		// 書体の色
+		const D2D1_COLOR_F font_color{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		};
+		m_font_color.r = min(max(font_color.r, 0.0f), 1.0f);
+		m_font_color.g = min(max(font_color.g, 0.0f), 1.0f);
+		m_font_color.b = min(max(font_color.b, 0.0f), 1.0f);
+		m_font_color.a = min(max(font_color.a, 0.0f), 1.0f);
+		// 書体名
+		const size_t font_family_len = dt_reader.ReadUInt32();
+		uint8_t* font_family_data = new uint8_t[2 * (font_family_len + 1)];
+		dt_reader.ReadBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
+		m_font_family = reinterpret_cast<wchar_t*>(font_family_data);
+		m_font_family[font_family_len] = L'\0';
 		is_available_font(m_font_family);
+		// 書体の大きさ
 		m_font_size = dt_reader.ReadSingle();
+		// 書体の幅
 		m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());
+		// 字体
 		m_font_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());
+		// 書体の太さ
 		m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());
-		dt_read(m_text, dt_reader);
+		// 文字列
+		const size_t text_len = dt_reader.ReadUInt32();
+		uint8_t* text_data = new uint8_t[2 * (text_len + 1)];
+		dt_reader.ReadBytes(array_view(text_data, text_data + 2 * text_len));
+		m_text = reinterpret_cast<wchar_t*>(text_data);
+		m_text[text_len] = L'\0';
+
 		m_text_par_align = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
 		m_text_line_sp = dt_reader.ReadSingle();
-		dt_read(m_text_padding, dt_reader);
+		m_text_padding = D2D1_SIZE_F{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		};
+		//dt_read(m_text_padding, dt_reader);
 	}
 
 	// 図形をデータライターに書き込む.

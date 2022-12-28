@@ -479,7 +479,7 @@ namespace winrt::GraphPaper::implementation
 		tx_page_width().Text(buf);
 		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_page.m_page_size.height, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
 		tx_page_height().Text(buf);
-		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, ShapePage::size_max(), m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, PAGE_SIZE_MAX, m_main_d2d.m_logical_dpi, g_base + 1.0f, buf);
 		tx_page_size_max().Text(buf);
 		// この時点では, テキストボックスに正しい数値を格納しても, TextChanged は呼ばれない.
 		// プライマリーボタンは使用可能にしておく.
@@ -590,7 +590,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.get_grid_base(g_base);
 			val = conv_len_to_val(m_len_unit, val, dpi, g_base + 1.0);
 		}
-		cd_page_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && val >= 1.0 && val < ShapePage::size_max());
+		cd_page_size_dialog().IsPrimaryButtonEnabled(cnt == 1 && val >= 1.0 && val < PAGE_SIZE_MAX);
 	}
 
 	// 値をスライダーのヘッダーに格納する.

@@ -187,14 +187,14 @@ namespace winrt::GraphPaper::implementation
 		const auto s_width = m_stroke_width;
 
 		D2D1_POINT_2F e_pos;
-		pt_add(m_pos, m_vec[0], e_pos);
-		context->DrawLine(m_pos, e_pos, brush, s_width, s_style);
+		pt_add(m_start, m_vec[0], e_pos);
+		context->DrawLine(m_start, e_pos, brush, s_width, s_style);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			if (m_d2d_arrow_style == nullptr) {
 				line_create_arrow_style(factory, m_stroke_cap, m_join_style, m_join_miter_limit, m_d2d_arrow_style.put());
 			}
 			if (m_d2d_arrow_geom == nullptr) {
-				line_create_arrow_geom(factory, m_pos, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				line_create_arrow_geom(factory, m_start, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 			}
 			const auto a_geom = m_d2d_arrow_geom.get();
 			if (m_d2d_arrow_geom != nullptr) {
@@ -206,8 +206,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_selected()) {
 			D2D1_POINT_2F mid;
-			pt_mul_add(m_vec[0], 0.5, m_pos, mid);
-			anc_draw_rect(m_pos, context, brush);
+			pt_mul_add(m_vec[0], 0.5, m_start, mid);
+			anc_draw_rect(m_start, context, brush);
 			anc_draw_rect(mid, context, brush);
 			anc_draw_rect(e_pos, context, brush);
 		}
@@ -233,15 +233,15 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		D2D1_POINT_2F e_pos;
-		pt_add(m_pos, m_vec[0], e_pos);
+		pt_add(m_start, m_vec[0], e_pos);
 		if (pt_in_anc(t_pos, e_pos)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
-		if (pt_in_anc(t_pos, m_pos)) {
+		if (pt_in_anc(t_pos, m_start)) {
 			return ANC_TYPE::ANC_P0;
 		}
 		const float s_width = static_cast<float>(max(static_cast<double>(m_stroke_width), Shape::s_anc_len));
-		if (line_hit_test(t_pos, m_pos, e_pos, s_width, m_stroke_cap)) {
+		if (line_hit_test(t_pos, m_start, e_pos, s_width, m_stroke_cap)) {
 			return ANC_TYPE::ANC_STROKE;
 		}
 		return ANC_TYPE::ANC_PAGE;
@@ -254,9 +254,9 @@ namespace winrt::GraphPaper::implementation
 	// 線の太さは考慮されない.
 	bool ShapeLine::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
 	{
-		if (pt_in_rect(m_pos, area_min, area_max)) {
+		if (pt_in_rect(m_start, area_min, area_max)) {
 			D2D1_POINT_2F pos;
-			pt_add(m_pos, m_vec[0], pos);
+			pt_add(m_start, m_vec[0], pos);
 			return pt_in_rect(pos, area_min, area_max);
 		}
 		return false;
@@ -377,7 +377,7 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_arrow_geom(nullptr),
 		m_d2d_arrow_style(nullptr)
 	{
-		m_pos = b_pos;
+		m_start = b_pos;
 		m_vec.resize(1, b_vec);
 		m_vec.shrink_to_fit();
 	}
@@ -390,7 +390,9 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_arrow_geom(nullptr)
 	{
 		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadInt32());
-		dt_read(m_arrow_size, dt_reader);
+		m_arrow_size.m_width = dt_reader.ReadSingle();
+		m_arrow_size.m_length = dt_reader.ReadSingle();
+		m_arrow_size.m_offset = dt_reader.ReadSingle();
 	}
 
 	// 図形をデータライターに書き込む.

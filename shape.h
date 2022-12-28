@@ -86,13 +86,13 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeGroup;
 	struct ShapeImage;
 	struct ShapeLine;
+	struct ShapePage;
 	struct ShapePath;
 	struct ShapePoly;
 	struct ShapeRect;
 	struct ShapeRRect;
 	struct ShapeRuler;
 	struct ShapeSelect;
-	struct ShapePage;
 	struct ShapeStroke;
 	struct ShapeText;
 
@@ -116,6 +116,15 @@ namespace winrt::GraphPaper::implementation
 
 	// アンカーポイント (図形の部位)
 	// 数の定まっていない多角形の頂点をあらわすため, enum struct でなく enum を用いる.
+	// 
+	//  NW    N    NE
+	//   @----@----@
+	//   |         |
+	// W @         @ E
+	//   |         |
+	//   @----@----@
+	//  SW    S    SE
+	//
 	enum ANC_TYPE {
 		ANC_PAGE,		// 図形の外部 (矢印カーソル)
 		ANC_FILL,		// 図形の内部 (移動カーソル)
@@ -160,7 +169,7 @@ namespace winrt::GraphPaper::implementation
 
 	constexpr D2D1_COLOR_F COLOR_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
 	constexpr D2D1_COLOR_F COLOR_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
-	constexpr D2D1_COLOR_F COLOR_TEXT_SELECTED = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
+	constexpr D2D1_COLOR_F COLOR_TEXT_RANGE = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
 
 
 	// 破線の配置
@@ -171,12 +180,12 @@ namespace winrt::GraphPaper::implementation
 
 	// 方眼の強調
 	struct GRID_EMPH {
-		uint16_t m_gauge_1;	// 強調する間隔 (その1)
-		uint16_t m_gauge_2;	// 強調する間隔 (その2)
+		uint32_t m_gauge_1;	// 強調する間隔 (その1)
+		uint32_t m_gauge_2;	// 強調する間隔 (その2)
 	};
 	constexpr GRID_EMPH GRID_EMPH_0{ 0, 0 };	// 強調なし
-	constexpr GRID_EMPH GRID_EMPH_2{ 2, 0 };	// その2を強調
-	constexpr GRID_EMPH GRID_EMPH_3{ 2, 10 };	// その2と 10 番目を強調
+	constexpr GRID_EMPH GRID_EMPH_2{ 2, 0 };	// 2 番目の線を強調
+	constexpr GRID_EMPH GRID_EMPH_3{ 2, 10 };	// 2 番目と 10 番目の線を強調
 
 	// 方眼の表示
 	enum struct GRID_SHOW {
@@ -204,6 +213,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr float MITER_LIMIT_DEFVAL = 10.0f;	// マイター制限距離の既定値
 	constexpr D2D1_SIZE_F TEXT_MARGIN_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
 	constexpr size_t MAX_N_GON = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
+	constexpr float PAGE_SIZE_MAX = 32768.0f;	// ページの大きさの最大値
 
 	// COM インターフェイス IMemoryBufferByteAccess を初期化
 	MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
@@ -300,31 +310,30 @@ namespace winrt::GraphPaper::implementation
 	// shape_dt.cpp
 	// 読み込み, 書き込み.
 	//------------------------------
-
 	// データリーダーから矢じるしの寸法を読み込む.
-	void dt_read(ARROW_SIZE& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(ARROW_SIZE& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから端の形式を読み込む.
-	void dt_read(CAP_STYLE& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(CAP_STYLE& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから色を読み込む.
-	void dt_read(D2D1_COLOR_F& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(D2D1_COLOR_F& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
-	void dt_read(D2D1_POINT_2F& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(D2D1_POINT_2F& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから方形を読み込む.
-	void dt_read(D2D1_RECT_F& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(D2D1_RECT_F& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから寸法を読み込む.
-	void dt_read(D2D1_SIZE_F& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(D2D1_SIZE_F& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから寸法を読み込む.
-	void dt_read(D2D1_SIZE_U& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(D2D1_SIZE_U& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから破線の配置を読み込む.
-	void dt_read(DASH_PATT& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(DASH_PATT& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから文字範囲を読み込む.
-	void dt_read(DWRITE_TEXT_RANGE& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(DWRITE_TEXT_RANGE& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから方眼の形式を読み込む.
-	void dt_read(GRID_EMPH& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(GRID_EMPH& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから位置配列を読み込む.
-	void dt_read(std::vector<D2D1_POINT_2F>& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(std::vector<D2D1_POINT_2F>& val, /*<---*/DataReader const& dt_reader);
 	// データリーダーから文字列を読み込む.
-	void dt_read(wchar_t*& val, /*<---*/DataReader const& dt_reader);
+	//void dt_read(wchar_t*& val, /*<---*/DataReader const& dt_reader);
 	// データライターに矢じるしの寸法を書き込む.
 	void dt_write(const ARROW_SIZE& val, /*--->*/DataWriter const& dt_writer);
 	// データライターに端の形式を書き込む.
@@ -350,7 +359,7 @@ namespace winrt::GraphPaper::implementation
 	// データライターに文字列を書き込む.
 	void dt_write(const wchar_t* val, /*--->*/DataWriter const& dt_writer);
 	// データライターに文字列を書き込む.
-	size_t dt_write(const char val[], DataWriter const& dt_writer);
+	//size_t dt_write(const char val[], DataWriter const& dt_writer);
 
 	//------------------------------
 	// shape_slist.cpp
@@ -620,17 +629,17 @@ namespace winrt::GraphPaper::implementation
 	// 画像
 	//------------------------------
 	struct ShapeImage : ShapeSelect {
-		// WIC = ウィンドウズ・イメージング・コンポーネント
 		static winrt::com_ptr<IWICImagingFactory2> wic_factory;	// WIC ファクトリー
 
-		D2D1_POINT_2F m_pos;	// 始点の位置
-		D2D1_SIZE_F m_view;	// 表示寸法
-		D2D1_RECT_F m_clip;	// 表示されている矩形
-		D2D1_SIZE_U m_orig;	// ビットマップの原寸
-		uint8_t* m_data = nullptr;	// ビットマップのデータ
-		D2D1_SIZE_F m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
-		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
-		winrt::com_ptr<ID2D1Bitmap1> m_d2d_bitmap{ nullptr };	// D2D ビットマップ
+		D2D1_POINT_2F	m_start;	// 始点
+		D2D1_SIZE_F	m_view;	// 表示寸法
+		D2D1_RECT_F	m_clip;	// 表示されている矩形
+		D2D1_SIZE_U	m_orig;	// ビットマップの原寸
+		uint8_t*	m_data = nullptr;	// ビットマップのデータ
+		D2D1_SIZE_F	m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
+		float	m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
+
+		winrt::com_ptr<ID2D1Bitmap1>	m_d2d_bitmap{ nullptr };	// D2D ビットマップ
 
 		int m_pdf_obj = 0;	// PDF オブジェクト番号 (PDF として出力するときのみ使用)
 
@@ -688,18 +697,23 @@ namespace winrt::GraphPaper::implementation
 		ShapeImage(DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
+
+		//------------------------------
+		// shape_export.cpp
+		//------------------------------
+
 		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const final override;
 		// 図形をデータライターに SVG ファイルとして書き込む.
 		winrt::Windows::Foundation::IAsyncAction export_as_svg_async(const DataWriter& dt_writer) const;
-		// 図形をデータライターに SVG として書き込む.
-		//void export_svg(DataWriter const& dt_writer) const;
 	};
 
 	//------------------------------
 	// 表示
 	//------------------------------
 	struct ShapePage : Shape {
+		//static constexpr float size_max(void) noexcept { return 32767.0F; }
+
 		SHAPE_LIST m_shape_list;	// 図形リスト
 
 		// 矢じるし
@@ -758,10 +772,9 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1SolidColorBrush> m_color_brush{ nullptr };	// 図形の色ブラシ
 
 		//------------------------------
-		// shape_sheet.cpp
+		// shape_page.cpp
 		//------------------------------
 
-		static constexpr float size_max(void) noexcept { return 32767.0F; }
 		// 図形を表示する.
 		void draw(void) final override;
 		// 曲線の補助線を表示する.
@@ -964,7 +977,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠のひな型
 	//------------------------------
 	struct ShapeStroke : ShapeSelect {
-		D2D1_POINT_2F m_pos{ 0.0f, 0.0f };	// 開始位置
+		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_vec{};	// 次の位置への差分
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線枠の色

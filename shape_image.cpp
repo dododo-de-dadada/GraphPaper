@@ -157,10 +157,10 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		const D2D1_RECT_F dest_rect{
-			m_pos.x,
-			m_pos.y,
-			m_pos.x + m_view.width,
-			m_pos.y + m_view.height
+			m_start.x,
+			m_start.y,
+			m_start.x + m_view.width,
+			m_start.y + m_view.height
 		};
 		//context->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_clip);
 //		target->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_clip);
@@ -175,10 +175,10 @@ namespace winrt::GraphPaper::implementation
 			target->DrawRectangle(dest_rect, brush, 1.0f, Shape::m_aux_style.get());
 
 			const D2D1_POINT_2F v_pos[4]{
-				m_pos,
-				{ m_pos.x + m_view.width, m_pos.y },
-				{ m_pos.x + m_view.width, m_pos.y + m_view.height },
-				{ m_pos.x, m_pos.y + m_view.height },
+				m_start,
+				{ m_start.x + m_view.width, m_start.y },
+				{ m_start.x + m_view.width, m_start.y + m_view.height },
+				{ m_start.x, m_start.y + m_view.height },
 			};
 
 			//anc_draw_rect(v_pos[0], context, brush);
@@ -196,8 +196,8 @@ namespace winrt::GraphPaper::implementation
 	void ShapeImage::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
 	{
 		D2D1_POINT_2F b_pos[2]{
-			m_pos,
-			{ m_pos.x + m_view.width, m_pos.y + m_view.height }
+			m_start,
+			{ m_start.x + m_view.width, m_start.y + m_view.height }
 		};
 		//pt_bound(b_pos[0], b_pos[1], b_pos[0], b_pos[1]);
 		if (b_pos[0].x > b_pos[1].x) {
@@ -229,45 +229,45 @@ namespace winrt::GraphPaper::implementation
 	void ShapeImage::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
 	{
 		if (anc == ANC_TYPE::ANC_NW) {
-			val = m_pos;
+			val = m_start;
 		}
 		else if (anc == ANC_TYPE::ANC_NORTH) {
-			val.x = m_pos.x + m_view.width * 0.5f;
-			val.y = m_pos.y;
+			val.x = m_start.x + m_view.width * 0.5f;
+			val.y = m_start.y;
 		}
 		else if (anc == ANC_TYPE::ANC_NE) {
-			val.x = m_pos.x + m_view.width;
-			val.y = m_pos.y;
+			val.x = m_start.x + m_view.width;
+			val.y = m_start.y;
 		}
 		else if (anc == ANC_TYPE::ANC_EAST) {
-			val.x = m_pos.x + m_view.width;
-			val.y = m_pos.y + m_view.height * 0.5f;
+			val.x = m_start.x + m_view.width;
+			val.y = m_start.y + m_view.height * 0.5f;
 		}
 		else if (anc == ANC_TYPE::ANC_SE) {
-			val.x = m_pos.x + m_view.width;
-			val.y = m_pos.y + m_view.height;
+			val.x = m_start.x + m_view.width;
+			val.y = m_start.y + m_view.height;
 		}
 		else if (anc == ANC_TYPE::ANC_SOUTH) {
-			val.x = m_pos.x + m_view.width * 0.5f;
-			val.y = m_pos.y + m_view.height;
+			val.x = m_start.x + m_view.width * 0.5f;
+			val.y = m_start.y + m_view.height;
 		}
 		else if (anc == ANC_TYPE::ANC_SW) {
-			val.x = m_pos.x;
-			val.y = m_pos.y + m_view.height;
+			val.x = m_start.x;
+			val.y = m_start.y + m_view.height;
 		}
 		else if (anc == ANC_TYPE::ANC_WEST) {
-			val.x = m_pos.x;
-			val.y = m_pos.y + m_view.height * 0.5f;
+			val.x = m_start.x;
+			val.y = m_start.y + m_view.height * 0.5f;
 		}
 	}
 
 	// 図形を囲む領域の左上位置を得る.
 	void ShapeImage::get_pos_min(D2D1_POINT_2F& val) const noexcept
 	{
-		const float ax = m_pos.x;
-		const float ay = m_pos.y;
-		const float bx = m_pos.x + m_view.width;
-		const float by = m_pos.y + m_view.height;
+		const float ax = m_start.x;
+		const float ay = m_start.y;
+		const float bx = m_start.x + m_view.width;
+		const float by = m_start.y + m_view.height;
 		val.x = ax < bx ? ax : bx;
 		val.y = ay < by ? ay : by;
 	}
@@ -300,17 +300,17 @@ namespace winrt::GraphPaper::implementation
 	// 開始位置を得る.
 	bool ShapeImage::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
-		val = m_pos;
+		val = m_start;
 		return true;
 	}
 
 	// 頂点を得る.
 	size_t ShapeImage::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
 	{
-		v_pos[0] = m_pos;
-		v_pos[1] = D2D1_POINT_2F{ m_pos.x + m_view.width, m_pos.y };
-		v_pos[2] = D2D1_POINT_2F{ m_pos.x + m_view.width, m_pos.y + m_view.height };
-		v_pos[3] = D2D1_POINT_2F{ m_pos.x, m_pos.y + m_view.height };
+		v_pos[0] = m_start;
+		v_pos[1] = D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y };
+		v_pos[2] = D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height };
+		v_pos[3] = D2D1_POINT_2F{ m_start.x, m_start.y + m_view.height };
 		return 4;
 	}
 
@@ -391,14 +391,14 @@ namespace winrt::GraphPaper::implementation
 	bool ShapeImage::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
 	{
 		// 始点と終点とが範囲に含まれるか判定する.
-		return pt_in_rect(m_pos, area_min, area_max) &&
-			pt_in_rect(D2D1_POINT_2F{ m_pos.x + m_view.width, m_pos.y + m_view.height }, area_min, area_max);
+		return pt_in_rect(m_start, area_min, area_max) &&
+			pt_in_rect(D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height }, area_min, area_max);
 	}
 
 	// 差分だけ移動する.
 	bool ShapeImage::move(const D2D1_POINT_2F val) noexcept
 	{
-		pt_add(m_pos, val, m_pos);
+		pt_add(m_start, val, m_start);
 		return true;
 	}
 
@@ -442,7 +442,7 @@ namespace winrt::GraphPaper::implementation
 			const float image_w = m_clip.right - m_clip.left;	// 表示されている画像の幅 (原寸)
 			const float image_h = m_clip.bottom - m_clip.top;	// 表示されている画像の高さ (原寸)
 			if (image_w > 1.0f && image_h > 1.0f) {
-				const D2D1_POINT_2F s_pos{ m_pos };	// 始点 (図形の頂点)
+				const D2D1_POINT_2F s_pos{ m_start };	// 始点 (図形の頂点)
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x + image_w, s_pos.y + image_h };	// 終点 (始点と対角にある画像上の点)
@@ -461,7 +461,7 @@ namespace winrt::GraphPaper::implementation
 					if (page_w >= 1.0f && page_h >= 1.0f) {
 						m_view.width = page_w;
 						m_view.height = page_h;
-						m_pos = pos;
+						m_start = pos;
 						m_ratio.width = page_w / image_w;
 						m_ratio.height = page_h / image_h;
 						if (!flag) {
@@ -475,7 +475,7 @@ namespace winrt::GraphPaper::implementation
 			const float image_w = m_clip.right - m_clip.left;
 			const float image_h = m_clip.bottom - m_clip.top;
 			if (image_w > 1.0f && image_h > 1.0f) {
-				const D2D1_POINT_2F s_pos{ m_pos.x + m_view.width, m_pos.y };
+				const D2D1_POINT_2F s_pos{ m_start.x + m_view.width, m_start.y };
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x - image_w, s_pos.y + image_h };
@@ -487,12 +487,12 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F v_vec;
 				pt_sub(pos, s_pos, v_vec);
 				if (pt_abs2(v_vec) >= FLT_MIN) {
-					const float page_w = pos.x - m_pos.x;
-					const float page_h = m_pos.y + m_view.height - pos.y;
+					const float page_w = pos.x - m_start.x;
+					const float page_h = m_start.y + m_view.height - pos.y;
 					if (page_w >= 1.0f && page_h >= 1.0f) {
 						m_view.width = page_w;
 						m_view.height = page_h;
-						m_pos.y = pos.y;
+						m_start.y = pos.y;
 						m_ratio.width = page_w / image_w;
 						m_ratio.height = page_h / image_h;
 						if (!flag) {
@@ -506,7 +506,7 @@ namespace winrt::GraphPaper::implementation
 			const float image_w = m_clip.right - m_clip.left;
 			const float image_h = m_clip.bottom - m_clip.top;
 			if (image_w > 1.0f && image_h > 1.0f) {
-				const D2D1_POINT_2F s_pos{ m_pos.x + m_view.width, m_pos.y + m_view.height };
+				const D2D1_POINT_2F s_pos{ m_start.x + m_view.width, m_start.y + m_view.height };
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x - image_w, s_pos.y - image_h };
@@ -518,8 +518,8 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F v_vec;
 				pt_sub(pos, s_pos, v_vec);
 				if (pt_abs2(v_vec) >= FLT_MIN) {
-					const float page_w = pos.x - m_pos.x;
-					const float page_h = pos.y - m_pos.y;
+					const float page_w = pos.x - m_start.x;
+					const float page_h = pos.y - m_start.y;
 					if (page_w >= 1.0f && page_h >= 1.0f) {
 						m_view.width = page_w;
 						m_view.height = page_h;
@@ -536,7 +536,7 @@ namespace winrt::GraphPaper::implementation
 			const float image_w = m_clip.right - m_clip.left;
 			const float image_h = m_clip.bottom - m_clip.top;
 			if (image_w > 1.0f && image_h > 1.0f) {
-				const D2D1_POINT_2F s_pos{ m_pos.x, m_pos.y + m_view.height };
+				const D2D1_POINT_2F s_pos{ m_start.x, m_start.y + m_view.height };
 				D2D1_POINT_2F pos;
 				if (keep_aspect) {
 					const D2D1_POINT_2F e_pos{ s_pos.x + image_w, s_pos.y - image_h };
@@ -548,12 +548,12 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F v_vec;
 				pt_sub(pos, s_pos, v_vec);
 				if (pt_abs2(v_vec) >= FLT_MIN) {
-					const float page_w = m_pos.x + m_view.width - pos.x;
-					const float page_h = pos.y - m_pos.y;
+					const float page_w = m_start.x + m_view.width - pos.x;
+					const float page_h = pos.y - m_start.y;
 					if (page_w >= 1.0f && page_h >= 1.0f) {
 						m_view.width = page_w;
 						m_view.height = page_h;
-						m_pos.x = pos.x;
+						m_start.x = pos.x;
 						m_ratio.width = page_w / image_w;
 						m_ratio.height = page_h / image_h;
 						if (!flag) {
@@ -565,48 +565,48 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (anc == ANC_TYPE::ANC_NORTH) {
 			// 変更する差分を求める.
-			const float dy = (new_pos.y - m_pos.y);
+			const float dy = (new_pos.y - m_start.y);
 			if (fabs(dy) >= FLT_MIN) {
 				const float rect_top = min(m_clip.top + dy / m_ratio.height, m_clip.bottom - 1.0f);
 				m_clip.top = max(rect_top, 0.0f);
 				m_view.height = (m_clip.bottom - m_clip.top) * m_ratio.height;
-				m_pos.y = new_pos.y;
+				m_start.y = new_pos.y;
 				if (!flag) {
 					flag = true;
 				}
 			}
 		}
 		else if (anc == ANC_TYPE::ANC_EAST) {
-			const float dx = (new_pos.x - (m_pos.x + m_view.width));
+			const float dx = (new_pos.x - (m_start.x + m_view.width));
 			if (fabs(dx) >= FLT_MIN) {
 				const float rect_right = max(m_clip.right + dx / m_ratio.width, m_clip.left + 1.0f);
 				m_clip.right = min(rect_right, m_orig.width);
 				m_view.width = (m_clip.right - m_clip.left) * m_ratio.width;
-				m_pos.x = new_pos.x - m_view.width;
+				m_start.x = new_pos.x - m_view.width;
 				if (!flag) {
 					flag = true;
 				}
 			}
 		}
 		else if (anc == ANC_TYPE::ANC_SOUTH) {
-			const float dy = (new_pos.y - (m_pos.y + m_view.height));
+			const float dy = (new_pos.y - (m_start.y + m_view.height));
 			if (fabs(dy) >= FLT_MIN) {
 				const float rect_bottom = max(m_clip.bottom + dy / m_ratio.height, m_clip.top + 1.0f);
 				m_clip.bottom = min(rect_bottom, m_orig.height);
 				m_view.height = (m_clip.bottom - m_clip.top) * m_ratio.height;
-				m_pos.y = new_pos.y - m_view.height;
+				m_start.y = new_pos.y - m_view.height;
 				if (!flag) {
 					flag = true;
 				}
 			}
 		}
 		else if (anc == ANC_TYPE::ANC_WEST) {
-			const float dx = (new_pos.x - m_pos.x);
+			const float dx = (new_pos.x - m_start.x);
 			if (fabs(dx) >= FLT_MIN) {
 				const float rect_left = min(m_clip.left + dx / m_ratio.width, m_clip.right - 1.0f);
 				m_clip.left = max(rect_left, 0.0f);
 				m_view.width = (m_clip.right - m_clip.left) * m_ratio.width;
-				m_pos.x = new_pos.x;
+				m_start.x = new_pos.x;
 				if (!flag) {
 					flag = true;
 				}
@@ -620,8 +620,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F new_pos;
 		pt_round(val, PT_ROUND, new_pos);
-		if (!equal(m_pos, new_pos)) {
-			m_pos = new_pos;
+		if (!equal(m_start, new_pos)) {
+			m_start = new_pos;
 			return true;
 		}
 		return false;
@@ -640,7 +640,7 @@ namespace winrt::GraphPaper::implementation
 
 		m_orig.width = image_w;
 		m_orig.height = image_h;
-		m_pos = pos;
+		m_start = pos;
 		m_view = page_size;
 		m_clip.left = m_clip.top = 0;
 		m_clip.right = static_cast<FLOAT>(image_w);
@@ -674,7 +674,7 @@ namespace winrt::GraphPaper::implementation
 	// dt_reader	データリーダー
 	ShapeImage::ShapeImage(DataReader const& dt_reader) :
 		ShapeSelect(dt_reader),
-		m_pos(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
+		m_start(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_view(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_clip(D2D1_RECT_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_orig(D2D1_SIZE_U{ dt_reader.ReadUInt32(), dt_reader.ReadUInt32() }),
@@ -697,8 +697,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		dt_writer.WriteBoolean(m_is_deleted);
 		dt_writer.WriteBoolean(m_is_selected);
-		dt_write(m_pos, dt_writer);
-		dt_write(m_view, dt_writer);
+		dt_writer.WriteSingle(m_start.x);
+		dt_writer.WriteSingle(m_start.y);
+		//dt_write(m_start, dt_writer);
+		dt_writer.WriteSingle(m_view.width);
+		dt_writer.WriteSingle(m_view.height);
+		//dt_write(m_view, dt_writer);
 		dt_write(m_clip, dt_writer);
 		dt_write(m_orig, dt_writer);
 		dt_write(m_ratio, dt_writer);

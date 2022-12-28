@@ -624,8 +624,18 @@ namespace winrt::GraphPaper::implementation
 			m_drawing_poly_opt.m_clockwise = dt_reader.ReadBoolean();
 
 			// メインページの文字検索の属性を読み込む.
-			dt_read(m_find_text, dt_reader);
-			dt_read(m_find_repl, dt_reader);
+			const size_t find_text_len = dt_reader.ReadUInt32();	// 文字数
+			uint8_t* find_text_data = new uint8_t[2 * (find_text_len + 1)];
+			dt_reader.ReadBytes(array_view(find_text_data, find_text_data + 2 * find_text_len));
+			m_find_text = reinterpret_cast<wchar_t*>(find_text_data);
+			m_find_text[find_text_len] = L'\0';
+
+			const size_t find_repl_len = dt_reader.ReadUInt32();	// 文字数
+			uint8_t* find_repl_data = new uint8_t[2 * (find_repl_len + 1)];
+			dt_reader.ReadBytes(array_view(find_repl_data, find_repl_data + 2 * find_repl_len));
+			m_find_repl = reinterpret_cast<wchar_t*>(find_repl_data);
+			m_find_repl[find_repl_len] = L'\0';
+
 			const uint16_t f_bit = dt_reader.ReadUInt16();
 			m_text_frame_fit_text = ((f_bit & 1) != 0);
 			m_find_text_case = ((f_bit & 2) != 0);

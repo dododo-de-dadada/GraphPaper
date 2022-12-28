@@ -26,28 +26,29 @@ namespace winrt::GraphPaper::implementation
 			return 0;
 		}
 
-		size_t n = dt_write("% Bezier curve\n", dt_writer);
+		size_t n = dt_writer.WriteString(L"% Bezier curve\n");
+		//size_t n = dt_write("% Bezier curve\n", dt_writer);
 		n += export_pdf_stroke(dt_writer);
 
 		D2D1_BEZIER_SEGMENT b_seg;
-		pt_add(m_pos, m_vec[0], b_seg.point1);
+		pt_add(m_start, m_vec[0], b_seg.point1);
 		pt_add(b_seg.point1, m_vec[1], b_seg.point2);
 		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
 
-		char buf[1024];
-		sprintf_s(buf, "%f %f m\n", m_pos.x, -m_pos.y + page_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f ", b_seg.point1.x, -b_seg.point1.y + page_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f ", b_seg.point2.x, -b_seg.point2.y + page_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f c\n", b_seg.point3.x, -b_seg.point3.y + page_size.height);
-		n += dt_write(buf, dt_writer);
-		n += dt_write("S\n", dt_writer);
+		wchar_t buf[1024];
+		swprintf_s(buf, L"%f %f m\n", m_start.x, -m_start.y + page_size.height);
+		n += dt_writer.WriteString(buf);
+		swprintf_s(buf, L"%f %f ", b_seg.point1.x, -b_seg.point1.y + page_size.height);
+		n += dt_writer.WriteString(buf);
+		swprintf_s(buf, L"%f %f ", b_seg.point2.x, -b_seg.point2.y + page_size.height);
+		n += dt_writer.WriteString(buf);
+		swprintf_s(buf, L"%f %f c\n", b_seg.point3.x, -b_seg.point3.y + page_size.height);
+		n += dt_writer.WriteString(buf);
+		n += dt_writer.WriteString(L"S\n");
 		if (m_arrow_style == ARROW_STYLE::OPENED ||
 			m_arrow_style == ARROW_STYLE::FILLED) {
 			D2D1_POINT_2F barbs[3];
-			bezi_calc_arrow(m_pos, b_seg, m_arrow_size, barbs);
+			bezi_calc_arrow(m_start, b_seg, m_arrow_size, barbs);
 			n += export_pdf_barbs(this, page_size, barbs, barbs[2], dt_writer);
 		}
 		return n;
@@ -63,18 +64,18 @@ namespace winrt::GraphPaper::implementation
 		if (equal(m_stroke_color.a, 0.0f)) {
 			return 0;
 		}
-		size_t n = dt_write("% Line\n", dt_writer);
+		size_t n = dt_writer.WriteString(L"% Line\n");
 		n += export_pdf_stroke(dt_writer);
 
-		char buf[1024];
-		sprintf_s(buf, "%f %f m\n", m_pos.x, -m_pos.y + page_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f l\n", m_pos.x + m_vec[0].x, -(m_pos.y + m_vec[0].y) + page_size.height);
-		n += dt_write(buf, dt_writer);
-		n += dt_write("S\n", dt_writer);
+		wchar_t buf[1024];
+		swprintf_s(buf, L"%f %f m\n", m_start.x, -m_start.y + page_size.height);
+		n += dt_writer.WriteString(buf);
+		swprintf_s(buf, L"%f %f l\n", m_start.x + m_vec[0].x, -(m_start.y + m_vec[0].y) + page_size.height);
+		n += dt_writer.WriteString(buf);
+		n += dt_writer.WriteString(L"S\n");
 		if (m_arrow_style == ARROW_STYLE::OPENED || m_arrow_style == ARROW_STYLE::FILLED) {
 			D2D1_POINT_2F barbs[3];
-			if (line_get_arrow_pos(m_pos, m_vec[0], m_arrow_size, barbs, barbs[2])) {
+			if (line_get_arrow_pos(m_start, m_vec[0], m_arrow_size, barbs, barbs[2])) {
 				n += export_pdf_barbs(this, page_size, barbs, barbs[2], dt_writer);
 			}
 		}
@@ -88,32 +89,32 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	static size_t export_pdf_barbs(const ShapeLine* s, const D2D1_SIZE_F page_size, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer)
 	{
-		char buf[1024];
+		wchar_t buf[1024];
 		size_t n = 0;
 
 		// 破線ならば, 実線に戻す.
 		if (s->m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH ||
 			s->m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT ||
 			s->m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
-			n += dt_write("[ ] 0 d\n", dt_writer);
+			n += dt_writer.WriteString(L"[ ] 0 d\n");
 		}
 		if (s->m_arrow_style == ARROW_STYLE::FILLED) {
-			sprintf_s(buf, 
-				"%f %f %f rg\n", 
+			swprintf_s(buf, 
+				L"%f %f %f rg\n", 
 				s->m_stroke_color.r, s->m_stroke_color.g, s->m_stroke_color.b);
-			n += dt_write(buf, dt_writer);
+			n += dt_writer.WriteString(buf);
 		}
-		sprintf_s(buf, "%f %f m\n", barbs[0].x, -barbs[0].y + page_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f l\n", tip_pos.x, -tip_pos.y + page_size.height);
-		n += dt_write(buf, dt_writer);
-		sprintf_s(buf, "%f %f l\n", barbs[1].x, -barbs[1].y + page_size.height);
-		n += dt_write(buf, dt_writer);
+		swprintf_s(buf, L"%f %f m\n", barbs[0].x, -barbs[0].y + page_size.height);
+		n += dt_writer.WriteString(buf);
+		swprintf_s(buf, L"%f %f l\n", tip_pos.x, -tip_pos.y + page_size.height);
+		n += dt_writer.WriteString(buf);
+		swprintf_s(buf, L"%f %f l\n", barbs[1].x, -barbs[1].y + page_size.height);
+		n += dt_writer.WriteString(buf);
 		if (s->m_arrow_style == ARROW_STYLE::OPENED) {
-			n += dt_write("S\n", dt_writer);
+			n += dt_writer.WriteString(L"S\n");
 		}
 		else if (s->m_arrow_style == ARROW_STYLE::FILLED) {
-			n += dt_write("b\n", dt_writer);	// b はパスを閉じて (B は閉じずに) 塗りつぶす.
+			n += dt_writer.WriteString(L"b\n");	// b はパスを閉じて (B は閉じずに) 塗りつぶす.
 		}
 		return n;
 	}
@@ -125,45 +126,45 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapePoly::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
-		size_t n = dt_write("% Polyline\n", dt_writer);
+		size_t n = dt_writer.WriteString(L"% Polyline\n");
 		n += export_pdf_stroke(dt_writer);
 
-		char buf[1024];
-		sprintf_s(
+		wchar_t buf[1024];
+		swprintf_s(
 			buf,
-			"%f %f %f rg\n",
+			L"%f %f %f rg\n",
 			m_fill_color.r, m_fill_color.g, m_fill_color.b
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
 		const size_t v_cnt = m_vec.size() + 1;
 		D2D1_POINT_2F v_pos[MAX_N_GON];
-		v_pos[0] = m_pos;
-		sprintf_s(buf, "%f %f m\n", v_pos[0].x, -v_pos[0].y + page_size.height);
-		n += dt_write(buf, dt_writer);
+		v_pos[0] = m_start;
+		swprintf_s(buf, L"%f %f m\n", v_pos[0].x, -v_pos[0].y + page_size.height);
+		n += dt_writer.WriteString(buf);
 		for (size_t i = 1; i < v_cnt; i++) {
 			pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
-			sprintf_s(buf, "%f %f l\n", v_pos[i].x, -v_pos[i].y + page_size.height);
-			n += dt_write(buf, dt_writer);
+			swprintf_s(buf, L"%f %f l\n", v_pos[i].x, -v_pos[i].y + page_size.height);
+			n += dt_writer.WriteString(buf);
 		}
 		if (m_end_closed) {
 			if (equal(m_fill_color.a, 0.0f)) {
 				// s はパスを閉じて描画する.
-				n += dt_write("s\n", dt_writer);
+				n += dt_writer.WriteString(L"s\n");
 			}
 			else {
 				// b はパスを閉じて塗りつぶし, ストロークも描画する.
-				n += dt_write("b\n", dt_writer);
+				n += dt_writer.WriteString(L"b\n");
 			}
 		}
 		else {
 			if (equal(m_fill_color.a, 0.0f)) {
 				// S はパスを閉じずに描画する.
-				n += dt_write("S\n", dt_writer);
+				n += dt_writer.WriteString(L"S\n");
 			}
 			else {
 				// B はパスを閉じずに塗りつぶし, ストロークも描画する.
-				n += dt_write("B\n", dt_writer);
+				n += dt_writer.WriteString(L"B\n");
 			}
 		}
 		if (m_arrow_style == ARROW_STYLE::OPENED ||
@@ -180,75 +181,75 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに PDF として書き込む.
 	size_t ShapeElli::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
-		size_t n = dt_write("% Ellipse\n", dt_writer);
+		size_t n = dt_writer.WriteString(L"% Ellipse\n");
 		n += export_pdf_stroke(dt_writer);
 
-		char buf[1024];
-		sprintf_s(
+		wchar_t buf[1024];
+		swprintf_s(
 			buf,
-			"%f %f %f rg\n",
+			L"%f %f %f rg\n",
 			m_fill_color.r, m_fill_color.g, m_fill_color.b
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
 		const float ty = page_size.height;
 		const double a = 4.0 * (sqrt(2.0) - 1.0) / 3.0;
 		const float rx = 0.5f * m_vec[0].x;
 		const float ry = 0.5f * m_vec[0].y;
-		const float cx = m_pos.x + rx;
-		const float cy = m_pos.y + ry;
+		const float cx = m_start.x + rx;
+		const float cy = m_start.y + ry;
 
-		sprintf_s(buf,
-			"%f %f m\n",
+		swprintf_s(buf,
+			L"%f %f m\n",
 			cx + rx, -(cy)+ty
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
-		sprintf_s(buf,
-			"%f %f "
-			"%f %f "
-			"%f %f c\n",
+		swprintf_s(buf,
+			L"%f %f "
+			L"%f %f "
+			L"%f %f c\n",
 			cx + rx, -(cy + a * ry) + ty,
 			cx + a * rx, -(cy + ry) + ty,
 			cx, -(cy + ry) + ty
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
-		sprintf_s(buf,
-			"%f %f "
-			"%f %f "
-			"%f %f c\n",
+		swprintf_s(buf,
+			L"%f %f "
+			L"%f %f "
+			L"%f %f c\n",
 			cx - a * rx, -(cy + ry) + ty,
 			cx - rx, -(cy + a * ry) + ty,
 			cx - rx, -(cy)+ty
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
-		sprintf_s(buf,
-			"%f %f "
-			"%f %f "
-			"%f %f c\n",
+		swprintf_s(buf,
+			L"%f %f "
+			L"%f %f "
+			L"%f %f c\n",
 			cx - rx, -(cy - a * ry) + ty,
 			cx - a * rx, -(cy - ry) + ty,
 			cx, -(cy - ry) + ty
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
-		sprintf_s(buf,
-			"%f %f "
-			"%f %f "
-			"%f %f c\n",
+		swprintf_s(buf,
+			L"%f %f "
+			L"%f %f "
+			L"%f %f c\n",
 			cx + a * rx, -(cy - ry) + ty,
 			cx + rx, -(cy - a * ry) + ty,
 			cx + rx, -(cy)+ty
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
 		if (equal(m_fill_color.a, 0.0f)) {
-			n += dt_write("S\n", dt_writer);
+			n += dt_writer.WriteString(L"S\n");
 		}
 		else {
-			n += dt_write("B\n", dt_writer);
+			n += dt_writer.WriteString(L"B\n");
 		}
 		return n;
 	}
@@ -261,28 +262,28 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeRect::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
-		size_t n = dt_write("% Rectangle\n", dt_writer);
+		size_t n = dt_writer.WriteString(L"% Rectangle\n");
 		n += export_pdf_stroke(dt_writer);
 
-		char buf[1024];
-		sprintf_s(
+		wchar_t buf[1024];
+		swprintf_s(
 			buf,
-			"%f %f %f rg\n",
+			L"%f %f %f rg\n",
 			m_fill_color.r, m_fill_color.g, m_fill_color.b
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
-		sprintf_s(buf,
-			"%f %f %f %f re\n",
-			m_pos.x, -(m_pos.y) + page_size.height, m_vec[0].x, -m_vec[0].y
+		swprintf_s(buf,
+			L"%f %f %f %f re\n",
+			m_start.x, -(m_start.y) + page_size.height, m_vec[0].x, -m_vec[0].y
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
 		if (equal(m_fill_color.a, 0.0f)) {
-			n += dt_write("S\n", dt_writer);
+			n += dt_writer.WriteString(L"S\n");
 		}
 		else {
-			n += dt_write("B\n", dt_writer);
+			n += dt_writer.WriteString(L"B\n");
 		}
 		return n;
 	}
@@ -294,16 +295,16 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeRRect::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
-		char buf[1024];
-		size_t n = dt_write("% Rounded Rectangle\n", dt_writer);
+		wchar_t buf[1024];
+		size_t n = dt_writer.WriteString(L"% Rounded Rectangle\n");
 		n += export_pdf_stroke(dt_writer);
 
 		// 塗りつぶし色
-		sprintf_s(buf,
-			"%f %f %f rg\n",
+		swprintf_s(buf,
+			L"%f %f %f rg\n",
 			m_fill_color.r, m_fill_color.g, m_fill_color.b
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
 		const double a = 4.0 * (sqrt(2.0) - 1.0) / 3.0;	// ベジェでだ円を近似する係数
 		const float ty = page_size.height;	// D2D 座標を PDF ユーザー空間へ変換するため
@@ -311,77 +312,77 @@ namespace winrt::GraphPaper::implementation
 		const float ry = (m_vec[0].y >= 0.0f ? m_corner_rad.y : -m_corner_rad.y);	// だ円の y 方向の半径
 
 		// 上辺の開始位置に移動.
-		sprintf_s(buf,
-			"%f %f m\n",
-			m_pos.x + rx, -(m_pos.y) + ty
+		swprintf_s(buf,
+			L"%f %f m\n",
+			m_start.x + rx, -(m_start.y) + ty
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
 		// 上辺と右上の角を描く.
-		float cx = m_pos.x + m_vec[0].x - rx;	// 角丸の中心点 x
-		float cy = m_pos.y + ry;	// 角丸の中心点 y
-		sprintf_s(buf,
-			"%f %f l\n"
-			"%f %f "
-			"%f %f "
-			"%f %f c\n",
-			cx, -(m_pos.y) + ty,
+		float cx = m_start.x + m_vec[0].x - rx;	// 角丸の中心点 x
+		float cy = m_start.y + ry;	// 角丸の中心点 y
+		swprintf_s(buf,
+			L"%f %f l\n"
+			L"%f %f "
+			L"%f %f "
+			L"%f %f c\n",
+			cx, -(m_start.y) + ty,
 			cx + a * rx, -(cy - ry) + ty,
 			cx + rx, -(cy - a * ry) + ty,
 			cx + rx, -(cy)+ty
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
 		// 右辺と右下の角を描く.
-		cx = m_pos.x + m_vec[0].x - rx;
-		cy = m_pos.y + m_vec[0].y - ry;
-		sprintf_s(buf,
-			"%f %f l\n"
-			"%f %f "
-			"%f %f "
-			"%f %f c\n",
-			m_pos.x + m_vec[0].x, -(cy)+ty,
+		cx = m_start.x + m_vec[0].x - rx;
+		cy = m_start.y + m_vec[0].y - ry;
+		swprintf_s(buf,
+			L"%f %f l\n"
+			L"%f %f "
+			L"%f %f "
+			L"%f %f c\n",
+			m_start.x + m_vec[0].x, -(cy)+ty,
 			cx + rx, -(cy + a * ry) + ty,
 			cx + a * rx, -(cy + ry) + ty,
 			cx, -(cy + ry) + ty
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
 		//　下辺と左下の角を描く.
-		cx = m_pos.x + rx;
-		cy = m_pos.y + m_vec[0].y - ry;
-		sprintf_s(buf,
-			"%f %f l\n"
-			"%f %f "
-			"%f %f "
-			"%f %f c\n",
-			cx, -(m_pos.y + m_vec[0].y) + ty,
+		cx = m_start.x + rx;
+		cy = m_start.y + m_vec[0].y - ry;
+		swprintf_s(buf,
+			L"%f %f l\n"
+			L"%f %f "
+			L"%f %f "
+			L"%f %f c\n",
+			cx, -(m_start.y + m_vec[0].y) + ty,
 			cx - a * rx, -(cy + ry) + ty,
 			cx - rx, -(cy + a * ry) + ty,
 			cx - rx, -(cy)+ty
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
 		// 左辺と左上の角を描く.
-		cx = m_pos.x + rx;
-		cy = m_pos.y + ry;
-		sprintf_s(buf,
-			"%f %f l\n"
-			"%f %f "
-			"%f %f "
-			"%f %f c\n",
-			m_pos.x, -(cy)+ty,
+		cx = m_start.x + rx;
+		cy = m_start.y + ry;
+		swprintf_s(buf,
+			L"%f %f l\n"
+			L"%f %f "
+			L"%f %f "
+			L"%f %f c\n",
+			m_start.x, -(cy)+ty,
 			cx - rx, -(cy - a * ry) + ty,
 			cx - a * rx, -(cy - ry) + ty,
 			cx, -(cy - ry) + ty
 		);
-		n += dt_write(buf, dt_writer);
+		n += dt_writer.WriteString(buf);
 
 		if (equal(m_fill_color.a, 0.0f)) {
-			n += dt_write("S\n", dt_writer);
+			n += dt_writer.WriteString(L"S\n");
 		}
 		else {
-			n += dt_write("B\n", dt_writer);
+			n += dt_writer.WriteString(L"B\n");
 		}
 		return n;
 	}
@@ -502,7 +503,7 @@ namespace winrt::GraphPaper::implementation
 			"/I%d Do\n"
 			"Q\n",
 			m_view.width, m_view.height,
-			m_pos.x, -(m_pos.y + m_view.height) + page_size.height,
+			m_start.x, -(m_start.y + m_view.height) + page_size.height,
 			m_pdf_obj
 		);
 		return dt_write(buf, dt_writer);
@@ -535,8 +536,8 @@ namespace winrt::GraphPaper::implementation
 			m_font_color.r, m_font_color.g, m_font_color.b,
 			m_font_color.r, m_font_color.g, m_font_color.b,
 			m_pdf_font_num, m_font_size,
-			m_pos.x + m_text_padding.width,
-			-(m_pos.y + m_text_padding.height + m_dw_line_metrics[0].baseline) + page_size.height
+			m_start.x + m_text_padding.width,
+			-(m_start.y + m_text_padding.height + m_dw_line_metrics[0].baseline) + page_size.height
 		);
 		len += dt_write(buf, dt_writer);
 

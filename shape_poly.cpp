@@ -711,7 +711,7 @@ namespace winrt::GraphPaper::implementation
 			// 開始位置と, 差分の配列をもとに, 頂点を求める.
 			const size_t v_cnt = m_vec.size() + 1;	// 頂点の数 (差分の数 + 1)
 			D2D1_POINT_2F v_pos[MAX_N_GON];
-			v_pos[0] = m_pos;
+			v_pos[0] = m_start;
 			for (size_t i = 1; i < v_cnt; i++) {
 				pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
 			}
@@ -774,7 +774,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (is_selected()) {
-			D2D1_POINT_2F a_pos{ m_pos };	// 図形の部位の位置
+			D2D1_POINT_2F a_pos{ m_start };	// 図形の部位の位置
 			anc_draw_rect(a_pos, taget, brush);
 			const size_t d_cnt = m_vec.size();	// 差分の数
 			for (size_t i = 0; i < d_cnt; i++) {
@@ -799,7 +799,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		D2D1_POINT_2F t_vec;
-		pt_sub(t_pos, m_pos, t_vec);
+		pt_sub(t_pos, m_start, t_vec);
 		return stroke_hit_test(
 			t_vec,
 			m_vec.size(),
@@ -822,11 +822,11 @@ namespace winrt::GraphPaper::implementation
 	// 線の太さは考慮されない.
 	bool ShapePoly::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
 	{
-		if (!pt_in_rect(m_pos, a_min, a_max)) {
+		if (!pt_in_rect(m_start, a_min, a_max)) {
 			return false;
 		}
 		const size_t d_cnt = m_vec.size();	// 差分の数
-		D2D1_POINT_2F e_pos = m_pos;
+		D2D1_POINT_2F e_pos = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(e_pos, m_vec[i], e_pos);	// 次の位置
 			if (!pt_in_rect(e_pos, a_min, a_max)) {
@@ -869,7 +869,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F v_pos[MAX_N_GON];
 
 		poly_by_bbox(b_pos, b_vec, p_opt, v_pos);
-		m_pos = v_pos[0];
+		m_start = v_pos[0];
 		m_vec.resize(p_opt.m_vertex_cnt - 1);
 		m_vec.shrink_to_fit();
 		for (size_t i = 1; i < p_opt.m_vertex_cnt; i++) {
@@ -883,7 +883,16 @@ namespace winrt::GraphPaper::implementation
 		ShapePath::ShapePath(dt_reader)
 	{
 		m_end_closed = dt_reader.ReadBoolean();
-		dt_read(m_fill_color, dt_reader);
+		const D2D1_COLOR_F fill_color{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		};
+		m_fill_color.r = min(max(fill_color.r, 0.0f), 1.0f);
+		m_fill_color.g = min(max(fill_color.g, 0.0f), 1.0f);
+		m_fill_color.b = min(max(fill_color.b, 0.0f), 1.0f);
+		m_fill_color.a = min(max(fill_color.a, 0.0f), 1.0f);
 	}
 
 	// 図形をデータライターに書き込む.

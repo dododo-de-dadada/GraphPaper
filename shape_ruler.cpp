@@ -29,8 +29,8 @@ namespace winrt::GraphPaper::implementation
 			const double grad_x = vec_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
 			const uint32_t k = static_cast<uint32_t>(floor(vec_x / grad_x));
-			const double x0 = (x_ge_y ? m_pos.x : m_pos.y);
-			const double y0 = static_cast<double>(x_ge_y ? m_pos.y : m_pos.x) + vec_y;
+			const double x0 = (x_ge_y ? m_start.x : m_start.y);
+			const double y0 = static_cast<double>(x_ge_y ? m_start.y : m_start.x) + vec_y;
 			const double y1 = y0 - (vec_y >= 0.0 ? grad_y : -grad_y);
 			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? grad_y : -grad_y);
 			const double y2 = y1 - (vec_y >= 0.0 ? f_size : -f_size);
@@ -93,29 +93,29 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_opaque(m_fill_color)) {
 			D2D1_POINT_2F e_pos;
-			pt_add(m_pos, m_vec[0], e_pos);
+			pt_add(m_start, m_vec[0], e_pos);
 			//D2D1_POINT_2F r_min, r_max;
-			//pt_bound(m_pos, e_pos, r_min, r_max);
+			//pt_bound(m_start, e_pos, r_min, r_max);
 			/*
-			if (m_pos.x < e_pos.x) {
-				r_min.x = m_pos.x;
+			if (m_start.x < e_pos.x) {
+				r_min.x = m_start.x;
 				r_max.x = e_pos.x;
 			}
 			else {
 				r_min.x = e_pos.x;
-				r_max.x = m_pos.x;
+				r_max.x = m_start.x;
 			}
-			if (m_pos.y < e_pos.y) {
-				r_min.y = m_pos.y;
+			if (m_start.y < e_pos.y) {
+				r_min.y = m_start.y;
 				r_max.y = e_pos.y;
 			}
 			else {
 				r_min.y = e_pos.y;
-				r_max.y = m_pos.y;
+				r_max.y = m_start.y;
 			}
 			*/
 			//if (pt_in_rect(t_pos, r_min, r_max)) {
-			if (pt_in_rect(t_pos, m_pos, e_pos)) {
+			if (pt_in_rect(t_pos, m_start, e_pos)) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
@@ -154,10 +154,10 @@ namespace winrt::GraphPaper::implementation
 		constexpr wchar_t* D[10] = { L"0", L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9" };
 
 		const D2D1_RECT_F rect{
-			m_pos.x,
-			m_pos.y,
-			m_pos.x + m_vec[0].x,
-			m_pos.y + m_vec[0].y
+			m_start.x,
+			m_start.y,
+			m_start.x + m_vec[0].x,
+			m_start.y + m_vec[0].y
 		};
 		if (is_opaque(m_fill_color)) {
 			// 塗りつぶし色が不透明な場合,
@@ -175,8 +175,8 @@ namespace winrt::GraphPaper::implementation
 			const double grad_x = vec_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
 			const uint32_t k = static_cast<uint32_t>(floor(vec_x / grad_x));
-			const double x0 = (xy ? m_pos.x : m_pos.y);
-			const double y0 = static_cast<double>(xy ? m_pos.y : m_pos.x) + vec_y;
+			const double x0 = (xy ? m_start.x : m_start.y);
+			const double y0 = static_cast<double>(xy ? m_start.y : m_start.x) + vec_y;
 			const double y1 = y0 - (vec_y >= 0.0 ? grad_y : -grad_y);
 			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? grad_y : -grad_y);
 			const double y2 = y1 - (vec_y >= 0.0 ? f_size : -f_size);
@@ -225,7 +225,7 @@ namespace winrt::GraphPaper::implementation
 			// 選択フラグが立っている場合,
 			// 選択されているなら基準部位を表示する.
 			D2D1_POINT_2F r_pos[4];	// 方形の頂点
-			r_pos[0] = m_pos;
+			r_pos[0] = m_start;
 			r_pos[1].y = rect.top;
 			r_pos[1].x = rect.right;
 			r_pos[2].x = rect.right;
@@ -293,9 +293,12 @@ namespace winrt::GraphPaper::implementation
 
 	static wchar_t* dt_read_name(DataReader const& dt_reader)
 	{
-		wchar_t* name = nullptr;
-		dt_read(name, dt_reader);
-		return name;
+		const size_t len = dt_reader.ReadUInt32();	// 文字数
+		uint8_t* data = new uint8_t[2 * (len + 1)];
+		dt_reader.ReadBytes(array_view(data, data + 2 * len));
+		wchar_t* val = reinterpret_cast<wchar_t*>(data);
+		val[len] = L'\0';
+		return val;
 	}
 
 	// 図形をデータリーダーから読み込む.
