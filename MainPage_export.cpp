@@ -319,17 +319,18 @@ namespace winrt::GraphPaper::implementation
 				if (typeid(*s) == typeid(ShapeImage)) {
 					// 画像 XObject (ストリームオブジェクト)
 					const ShapeImage* t = static_cast<const ShapeImage*>(s);
-
+					/*
 					InMemoryRandomAccessStream image_stream{};
 					co_await t->copy<true>(BitmapEncoder::JpegEncoderId(), image_stream);
 					const auto image_len = static_cast<uint32_t>(image_stream.Size());
 					Buffer image_buf(image_len);
-					co_await image_stream.ReadAsync(/*--->*/image_buf, image_len, InputStreamOptions::None);
+					co_await image_stream.ReadAsync(image_buf, image_len, InputStreamOptions::None);
 					//co_await image_stream.FlushAsync();
 					image_stream.Close();
 					image_stream = nullptr;
+					*/
 
-					/*
+					// BGRA から RGB
 					std::vector<uint8_t> z_buf;
 					std::vector<uint8_t> in_buf(3ull * t->m_orig.width * t->m_orig.height);
 					for (size_t i = 0; i < t->m_orig.width * t->m_orig.height; i++) {
@@ -340,7 +341,6 @@ namespace winrt::GraphPaper::implementation
 					z_compress(z_buf, std::data(in_buf), std::size(in_buf));
 					in_buf.clear();
 					in_buf.shrink_to_fit();
-					*/
 
 					swprintf_s(buf,
 						L"%% XObject\n"
@@ -349,29 +349,32 @@ namespace winrt::GraphPaper::implementation
 						L"/Subtype /Image\n"
 						L"/Width %u\n"
 						L"/Height %u\n"
-						//L"/Length %zu\n"
-						L"/Length %u\n"
+						L"/Length %zu\n"
+						//L"/Length %u\n"
 						L"/ColorSpace /DeviceRGB\n"
 						L"/BitsPerComponent 8\n"
 						//L"/Filter /ASCIIHexDecode\n"
-						//L"/Filter /FlateDecode\n"
-						L"/Filter /JPXDecode \n"
+						L"/Filter /FlateDecode\n"
+						//L"/Filter /JPXDecode \n"
 						L">>\n",
 						6 + 3 * font_cnt + t->m_pdf_obj,
 						t->m_orig.width,
 						t->m_orig.height,
-						//z_buf.size()
-						image_len
+						z_buf.size()
+						//image_len
 					);
 					len += dt_writer.WriteString(buf);
+					/*
 					len += dt_writer.WriteString(L"stream\n");
 					dt_writer.WriteBuffer(image_buf);
 					len += image_len;
 					image_buf = nullptr;
-					//dt_writer.WriteBytes(z_buf);
-					//len += z_buf.size();
-					//z_buf.clear();
-					//z_buf.shrink_to_fit();
+					*/
+					len += dt_writer.WriteString(L"stream\n");
+					dt_writer.WriteBytes(z_buf);
+					len += z_buf.size();
+					z_buf.clear();
+					z_buf.shrink_to_fit();
 					/*
 					for (uint32_t y = 0; y < t->m_orig.height; y++) {
 						if (y > 0) {

@@ -140,13 +140,13 @@ namespace winrt::GraphPaper::implementation
 					const size_t dst_pitch = 4ull * clip_w;
 					size_t i = 0;
 					for (size_t y = clip_t; y < clip_b; y++) {
-						//memcpy(dst_data + dst_pitch * y, m_data + src_pitch * y + clip_l, dst_pitch);
-						for (size_t x = clip_l; x < clip_r; x++) {
-							dst_data[i++] = m_data[data_pitch * y + 4ull * x + 0ull];
-							dst_data[i++] = m_data[data_pitch * y + 4ull * x + 1ull];
-							dst_data[i++] = m_data[data_pitch * y + 4ull * x + 2ull];
-							dst_data[i++] = m_data[data_pitch * y + 4ull * x + 3ull];
-						}
+						memcpy(dst_data + dst_pitch * y, m_data + src_pitch * y + clip_l, dst_pitch);
+						//for (size_t x = clip_l; x < clip_r; x++) {
+						//	dst_data[i++] = m_data[src_pitch * y + 4ull * x + 0ull];
+						//	dst_data[i++] = m_data[src_pitch * y + 4ull * x + 1ull];
+						//	dst_data[i++] = m_data[src_pitch * y + 4ull * x + 2ull];
+						//	dst_data[i++] = m_data[src_pitch * y + 4ull * x + 3ull];
+						//}
 					}
 				}
 				else {
