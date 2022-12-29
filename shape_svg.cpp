@@ -121,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// メモリのランダムアクセスストリーム
 		InMemoryRandomAccessStream image_stream{};
-		co_await copy_to(BitmapEncoder::PngEncoderId(), image_stream);
+		co_await copy<true>(BitmapEncoder::PngEncoderId(), image_stream);
 		const auto image_len = static_cast<uint32_t>(image_stream.Size());
 		Buffer image_buf(image_len);
 		co_await image_stream.ReadAsync(/*--->*/image_buf, image_len, InputStreamOptions::None);

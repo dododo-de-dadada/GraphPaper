@@ -62,7 +62,7 @@ namespace winrt::GraphPaper::implementation
 				InMemoryRandomAccessStream img_stream{
 					InMemoryRandomAccessStream()
 				};
-				const bool ret = co_await static_cast<ShapeImage*>(*it)->copy_to(BitmapEncoder::BmpEncoderId(), img_stream);
+				const bool ret = co_await static_cast<ShapeImage*>(*it)->copy<false>(BitmapEncoder::BmpEncoderId(), img_stream);
 				if (ret && img_stream.Size() > 0) {
 					img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);
 				}
@@ -73,8 +73,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// メモリストリームを作成して, そのデータライターを得る.
-		InMemoryRandomAccessStream mem_stream{ InMemoryRandomAccessStream() };
-		IOutputStream out_stream{ mem_stream.GetOutputStreamAt(0) };
+		InMemoryRandomAccessStream mem_stream{
+			InMemoryRandomAccessStream()
+		};
+		IOutputStream out_stream{
+			mem_stream.GetOutputStreamAt(0)
+		};
 		DataWriter dt_writer{ DataWriter(out_stream) };
 		// データライターに選択された図形のリストを書き込む.
 		constexpr bool REDUCED = true;
@@ -364,13 +368,23 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 
 		// クリップボードから読み込むためのデータリーダーを得て, データを読み込む.
-		IInspectable dt_object{ co_await Clipboard::GetContent().GetDataAsync(CLIPBOARD_FORMAT_SHAPES) };
-		InMemoryRandomAccessStream ra_stream{ unbox_value<InMemoryRandomAccessStream>(dt_object) };
+		IInspectable dt_object{
+			co_await Clipboard::GetContent().GetDataAsync(CLIPBOARD_FORMAT_SHAPES)
+		};
+		InMemoryRandomAccessStream ra_stream{
+			unbox_value<InMemoryRandomAccessStream>(dt_object)
+		};
 		if (ra_stream.Size() <= static_cast<uint64_t>(UINT32_MAX)) {
-			IInputStream in_stream{ ra_stream.GetInputStreamAt(0) };
-			DataReader dt_reader{ DataReader(in_stream) };
+			IInputStream in_stream{
+				ra_stream.GetInputStreamAt(0)
+			};
+			DataReader dt_reader{
+				DataReader(in_stream)
+			};
 			uint32_t ra_size = static_cast<uint32_t>(ra_stream.Size());
-			uint32_t operation{ co_await dt_reader.LoadAsync(ra_size) };
+			uint32_t operation{
+				co_await dt_reader.LoadAsync(ra_size)
+			};
 			// データリーダーに読み込めたか判定する.
 			if (operation == ra_size) {
 				// 図形のためのメモリの確保が別スレッドで行われた場合, D2DERR_WRONG_STATE を引き起こすことがある.

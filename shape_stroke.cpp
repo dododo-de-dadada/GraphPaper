@@ -553,8 +553,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに書き込む.
 	void ShapeStroke::write(DataWriter const& dt_writer) const
 	{
-		dt_writer.WriteBoolean(m_is_deleted);
-		dt_writer.WriteBoolean(m_is_selected);
+		ShapeSelect::write(dt_writer);
 		dt_write(m_start, dt_writer);
 		dt_write(m_vec, dt_writer);
 		dt_write(m_stroke_cap, dt_writer);

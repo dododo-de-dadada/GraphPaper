@@ -12,12 +12,10 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
 
-	// D2D1_RECT_F から D2D1_RECT_U を作成する.
-	//static const D2D1_RECT_U image_conv_rect(const D2D1_RECT_F& f, const D2D1_SIZE_U s);
 	// 点に最も近い, 線分上の点を求める.
-	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& q) noexcept;
+	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, /*--->*/D2D1_POINT_2F& q) noexcept;
 
-	winrt::com_ptr<IWICImagingFactory2> ShapeImage::wic_factory{
+	winrt::com_ptr<IWICImagingFactory2> ShapeImage::wic_factory{	// WIC ファクトリ
 		[]() {
 			winrt::com_ptr<IWICImagingFactory2> factory;
 			winrt::check_hresult(
@@ -34,10 +32,10 @@ namespace winrt::GraphPaper::implementation
 
 	// 点に最も近い, 線分上の点を求める.
 	// p	点
-	// a	線分の端点
-	// b	線分のもう一方の端点
-	// q	線分上の点
-	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& q) noexcept
+	// a	線分の始点
+	// b	線分の終点
+	// q	最も近い点
+	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, /*--->*/D2D1_POINT_2F& q) noexcept
 	{
 		// 線分 ab が垂直か判定する.
 		if (a.x == b.x) {
@@ -60,77 +58,145 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// ストリームに格納する.
-	// enc_id	画像の形式 (BitmapEncoder に定義されている)
-	// ra_stream	画像を格納するストリーム
+	// ビットマップをストリームに格納する.
+	// C	true ならクリッピングする. false ならしない.
+	// enc_id	画像の形式
+	// stream	画像を格納するストリーム
 	// 戻り値	格納できたら true
-	IAsyncOperation<bool> ShapeImage::copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream) const
+	template <bool C>
+	IAsyncOperation<bool> ShapeImage::copy(const winrt::guid enc_id,
+		/*--->*/IRandomAccessStream& stream) const
 	{
+		// クリップボードに格納するなら, 元データのまま.
+		// 描画するときは DrawBitmap でクリッピングされる.
+		// エクスポートするなら, クリッピングしたデータ.
+		// PDF や SVG には, 画像をクリッピングして表示する機能がないか, あっても煩雑.
+		// ひょっとしたら, クリッピング矩形の小数点のせいで微妙に異なる画像になるかもしれない.
 		bool ret = false;	// 返値
-		// コルーチンの開始時のスレッドコンテキストを保存し,
-		// バックグラウンドに切替かえて再開する.
-		// UI スレッドのままでは, SoftwareBitmap が解放されるときエラーが起きる.
-		winrt::apartment_context context;
-		co_await winrt::resume_background();
-
-		// SoftwareBitmap を作成する.
-		const float clip_w = m_clip.right - m_clip.left;
-		const float clip_h = m_clip.bottom - m_clip.top;
-		SoftwareBitmap bmp{
-			SoftwareBitmap(BitmapPixelFormat::Bgra8, clip_w, clip_h, BitmapAlphaMode::Straight)
-			//SoftwareBitmap(BitmapPixelFormat::Bgra8, m_orig.width, m_orig.height, BitmapAlphaMode::Straight) 
-		};
-
-		// ビットマップのバッファをロックする.
-		auto bmp_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
-		auto bmp_ref{ bmp_buf.CreateReference() };
-		winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem = bmp_ref.as<IMemoryBufferByteAccess>();
-
-		// ロックされたバッファーを得る.
-		BYTE* bmp_data = nullptr;
-		UINT32 capacity = 0;
-		if (SUCCEEDED(bmp_mem->GetBuffer(&bmp_data, &capacity)))
-		{
-			// バッファに画像データをコピーする.
-			memcpy(bmp_data, m_data, capacity);
-
-			// バッファを解放する.
-			// SoftwareBitmap がロックされたままになるので,
-			// IMemoryBufferByteAccess は Release() する必要がある.
-			bmp_buf.Close();
-			bmp_buf = nullptr;
-			bmp_mem->Release();
-			bmp_mem = nullptr;
-
-			// ビットマップエンコーダーにビットマップを格納する.
-			BitmapEncoder bmp_enc{ co_await BitmapEncoder::CreateAsync(enc_id, ra_stream) };
-			// 新しいサムネイルを自動的に生成するよう true を格納する.
-			//bmp_enc.IsThumbnailGenerated(true);
-			bmp_enc.SetSoftwareBitmap(bmp);
-			try {
-				co_await bmp_enc.FlushAsync();
-				ret = true;
+		const int32_t clip_l = [=]() {	// クリッピング方形の左の値
+			if constexpr (C) {
+				return static_cast<int32_t>(std::floorf(m_clip.left)); 
 			}
-			catch (winrt::hresult_error&) {
-				// サムネイルの自動生成が出来ないなら, false を格納する.
-				//if (err.code() == WINCODEC_ERR_UNSUPPORTEDOPERATION) {
-				//	bmp_enc.IsThumbnailGenerated(false);
+			else {
+				return 0;
+			}
+		}();
+		const int32_t clip_t = [=]() {	// クリッピング方形の上の値
+			if constexpr (C) { 
+				return static_cast<int32_t>(std::floorf(m_clip.top)); 
+			}
+			else {
+				return 0;
+			}
+		}(); 
+		const int32_t clip_r = [=]() {	// クリッピング方形の右の値
+			if constexpr (C) {
+				return static_cast<int32_t>(std::ceilf(m_clip.right));
+			}
+			else {
+				return m_orig.width;
+			}
+		}(); 
+		const int32_t clip_b = [=]() {	// クリッピング方形の下の値
+			if constexpr (C) {
+				return static_cast<int32_t>(std::ceilf(m_clip.bottom));
+			}
+			else {
+				return m_orig.height;
+			}
+		}();
+		if (clip_l >= 0 && clip_t >= 0 && clip_r > clip_l && clip_b > clip_t) {
+			// バックグラウンドに切替かえて実行する.
+			// UI スレッドのままでは, SoftwareBitmap が解放されるときエラーが起きる.
+			winrt::apartment_context context;
+			co_await winrt::resume_background();
+
+			// SoftwareBitmap を作成する.
+			const int32_t clip_w = clip_r - clip_l;
+			const int32_t clip_h = clip_b - clip_t;
+			SoftwareBitmap bmp{
+				SoftwareBitmap(BitmapPixelFormat::Bgra8, clip_w, clip_h, BitmapAlphaMode::Straight)
+			};
+
+			// ビットマップのバッファをロックする.
+			auto bmp_buf{
+				bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite)
+			};
+			auto bmp_ref{
+				bmp_buf.CreateReference()
+			};
+			winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem{
+				bmp_ref.as<IMemoryBufferByteAccess>()
+			};
+
+			// ロックされたバッファーを得る.
+			BYTE* dst_data = nullptr;
+			UINT32 capacity = 0;
+			if (SUCCEEDED(bmp_mem->GetBuffer(&dst_data, &capacity)))
+			{
+				// バッファに画像データをコピーする.
+				if constexpr (C) {
+					const size_t src_pitch = 4ull * m_orig.width;
+					const size_t dst_pitch = 4ull * clip_w;
+					size_t i = 0;
+					for (size_t y = clip_t; y < clip_b; y++) {
+						//memcpy(dst_data + dst_pitch * y, m_data + src_pitch * y + clip_l, dst_pitch);
+						for (size_t x = clip_l; x < clip_r; x++) {
+							dst_data[i++] = m_data[data_pitch * y + 4ull * x + 0ull];
+							dst_data[i++] = m_data[data_pitch * y + 4ull * x + 1ull];
+							dst_data[i++] = m_data[data_pitch * y + 4ull * x + 2ull];
+							dst_data[i++] = m_data[data_pitch * y + 4ull * x + 3ull];
+						}
+					}
+				}
+				else {
+					memcpy(dst_data, m_data, capacity);
+				}
+
+				// バッファを解放する.
+				// SoftwareBitmap がロックされたままになるので,
+				// IMemoryBufferByteAccess は Release() する必要がある.
+				bmp_buf.Close();
+				bmp_buf = nullptr;
+				bmp_mem->Release();
+				bmp_mem = nullptr;
+
+				// ビットマップエンコーダーにビットマップを格納する.
+				BitmapEncoder bmp_enc{
+					co_await BitmapEncoder::CreateAsync(enc_id, stream) 
+				};
+				// 新しいサムネイルを自動的に生成するよう true を格納する.
+				//bmp_enc.IsThumbnailGenerated(true);
+				bmp_enc.SetSoftwareBitmap(bmp);
+				try {
+					co_await bmp_enc.FlushAsync();
+					ret = true;
+				}
+				catch (const winrt::hresult_error& e) {
+					// サムネイルの自動生成が出来ないなら, false を格納する.
+					//if (err.code() == WINCODEC_ERR_UNSUPPORTEDOPERATION) {
+					//	bmp_enc.IsThumbnailGenerated(false);
+					//}
+					//else
+					ret = e.code();
+				}
+				//if (!bmp_enc.IsThumbnailGenerated()) {
+					// 再度やり直す.
+				//	co_await bmp_enc.FlushAsync();
 				//}
+				bmp_enc = nullptr;
 			}
-			//if (!bmp_enc.IsThumbnailGenerated()) {
-				// 再度やり直す.
-			//	co_await bmp_enc.FlushAsync();
-			//}
-			bmp_enc = nullptr;
-		}
-		// ビットマップを破棄する.
-		bmp.Close();
-		bmp = nullptr;
+			// ビットマップを破棄する.
+			bmp.Close();
+			bmp = nullptr;
 
-		// スレッドコンテキストを復元する.
-		co_await context;
+			// スレッドコンテキストを復元する.
+			co_await context;
+		}
 		co_return ret;
 	}
+	template IAsyncOperation<bool> ShapeImage::copy<true>(const winrt::guid enc_id, IRandomAccessStream& ra_stream) const;
+	template IAsyncOperation<bool> ShapeImage::copy<false>(const winrt::guid enc_id, IRandomAccessStream& ra_stream) const;
 
 	// 図形を表示する.
 	void ShapeImage::draw(void)
@@ -150,11 +216,10 @@ namespace winrt::GraphPaper::implementation
 					D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
 				)
 			};
-			const UINT32 pitch = 4 * m_orig.width;
+			const UINT32 pitch = 4u * m_orig.width;
 			winrt::com_ptr<ID2D1Bitmap> bitmap;
 			target->CreateBitmap(m_orig, static_cast<void*>(m_data), pitch, b_prop, bitmap.put());
 			m_d2d_bitmap = bitmap.as<ID2D1Bitmap1>();
-			//winrt::check_hresult(target->CreateBitmap(m_orig, m_data, pitch, b_prop, m_d2d_bitmap.put_void()));
 			if (m_d2d_bitmap == nullptr) {
 				return;
 			}
@@ -165,16 +230,12 @@ namespace winrt::GraphPaper::implementation
 			m_start.x + m_view.width,
 			m_start.y + m_view.height
 		};
-		//context->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_clip);
-//		target->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, m_clip);
 		target->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, m_clip);
 
 		if (is_selected()) {
 			brush->SetColor(Shape::s_background_color);
-			//context->DrawRectangle(dest_rect, brush, 1.0f, nullptr);
 			target->DrawRectangle(dest_rect, brush, 1.0f, nullptr);
 			brush->SetColor(Shape::s_foreground_color);
-			//context->DrawRectangle(dest_rect, brush, 1.0f, Shape::m_aux_style.get());
 			target->DrawRectangle(dest_rect, brush, 1.0f, Shape::m_aux_style.get());
 
 			const D2D1_POINT_2F v_pos[4]{
@@ -184,10 +245,6 @@ namespace winrt::GraphPaper::implementation
 				{ m_start.x, m_start.y + m_view.height },
 			};
 
-			//anc_draw_rect(v_pos[0], context, brush);
-			//anc_draw_rect(v_pos[1], context, brush);
-			//anc_draw_rect(v_pos[2], context, brush);
-			//anc_draw_rect(v_pos[3], context, brush);
 			anc_draw_rect(v_pos[0], target, brush);
 			anc_draw_rect(v_pos[1], target, brush);
 			anc_draw_rect(v_pos[2], target, brush);
@@ -202,7 +259,6 @@ namespace winrt::GraphPaper::implementation
 			m_start,
 			{ m_start.x + m_view.width, m_start.y + m_view.height }
 		};
-		//pt_bound(b_pos[0], b_pos[1], b_pos[0], b_pos[1]);
 		if (b_pos[0].x > b_pos[1].x) {
 			const auto less_x = b_pos[1].x;
 			b_pos[1].x = b_pos[0].x;
@@ -213,10 +269,8 @@ namespace winrt::GraphPaper::implementation
 			b_pos[1].y = b_pos[0].y;
 			b_pos[0].y = less_y;
 		}
-		//pt_min(a_min, b_pos[0], b_min);
 		b_min.x = a_min.x < b_pos[0].x ? a_min.x : b_pos[0].x;
 		b_min.y = a_min.y < b_pos[0].y ? a_min.y : b_pos[0].y;
-		//pt_max(a_max, b_pos[1], b_max);
 		b_max.x = a_max.x > b_pos[1].x ? a_max.x : b_pos[1].x;
 		b_max.y = a_max.y > b_pos[1].y ? a_max.y : b_pos[1].y;
 	}
@@ -698,17 +752,19 @@ namespace winrt::GraphPaper::implementation
 	// dt_writer	データライター
 	void ShapeImage::write(DataWriter const& dt_writer) const
 	{
-		dt_writer.WriteBoolean(m_is_deleted);
-		dt_writer.WriteBoolean(m_is_selected);
+		ShapeSelect::write(dt_writer);
 		dt_writer.WriteSingle(m_start.x);
 		dt_writer.WriteSingle(m_start.y);
-		//dt_write(m_start, dt_writer);
 		dt_writer.WriteSingle(m_view.width);
 		dt_writer.WriteSingle(m_view.height);
-		//dt_write(m_view, dt_writer);
-		dt_write(m_clip, dt_writer);
-		dt_write(m_orig, dt_writer);
-		dt_write(m_ratio, dt_writer);
+		dt_writer.WriteSingle(m_clip.left);
+		dt_writer.WriteSingle(m_clip.top);
+		dt_writer.WriteSingle(m_clip.right);
+		dt_writer.WriteSingle(m_clip.bottom);
+		dt_writer.WriteUInt32(m_orig.width);
+		dt_writer.WriteUInt32(m_orig.height);
+		dt_writer.WriteSingle(m_ratio.width);
+		dt_writer.WriteSingle(m_ratio.height);
 		dt_writer.WriteSingle(m_opac);
 
 		const size_t pitch = 4ull * m_orig.width;

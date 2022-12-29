@@ -60,10 +60,6 @@
 // +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+
 //
 // * 印つきは抽象クラス.
-// ShapePage はメンバに D2D_UI をもち, D2D_UI はスワップチェーンパネルへの参照を維持する.
-
-// SVG のためのテキスト改行コード
-//#define SVG_NEW_LINE	"\n"
 
 namespace winrt::GraphPaper::implementation
 {
@@ -142,10 +138,21 @@ namespace winrt::GraphPaper::implementation
 		ANC_R_NE,		// 右上の角丸の中心点 (十字カーソル)
 		ANC_R_SE,		// 右下の角丸の中心点 (十字カーソル)
 		ANC_R_SW,		// 左下の角丸の中心点 (十字カーソル)
-		ANC_P0,	// パスの開始点 (十字カーソル)
+		ANC_P0,	// パスの始点 (十字カーソル)
 	};
 
 	// 矢じるしの大きさ
+	//           |
+	//  +--- +   |   +
+	//  |     \  |  /   
+	// length  \ | /
+	//  |       \|/
+	//  +---     +   ---+
+	//           |      offset
+	//           +   -- +
+	//        |      |
+	//        +------+
+	//          width
 	struct ARROW_SIZE {
 		float m_width;		// 返しの幅
 		float m_length;		// 先端から付け根までの長さ
@@ -170,7 +177,6 @@ namespace winrt::GraphPaper::implementation
 	constexpr D2D1_COLOR_F COLOR_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
 	constexpr D2D1_COLOR_F COLOR_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
 	constexpr D2D1_COLOR_F COLOR_TEXT_RANGE = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
-
 
 	// 破線の配置
 	union DASH_PATT {
@@ -599,6 +605,12 @@ namespace winrt::GraphPaper::implementation
 			m_is_deleted(dt_reader.ReadBoolean()),
 			m_is_selected(dt_reader.ReadBoolean())
 			{}
+		// 図形をデータライターに書き込む.
+		void write(DataWriter const& dt_writer) const
+		{
+			dt_writer.WriteBoolean(m_is_selected);
+			dt_writer.WriteBoolean(m_is_deleted);
+		}
 	};
 
 	//------------------------------
@@ -636,7 +648,8 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// ストリームに格納する.
-		IAsyncOperation<bool> copy_to(const winrt::guid enc_id, IRandomAccessStream& ra_stream) const;
+		template <bool CLIP>
+		IAsyncOperation<bool> copy(const winrt::guid enc_id, IRandomAccessStream& ra_stream) const;
 		// 図形を表示する.
 		void draw(void) final override;
 		// 図形を囲む領域を得る.
