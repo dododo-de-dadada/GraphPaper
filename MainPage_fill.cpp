@@ -35,30 +35,30 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val0);
-		fill_slider_set_header<UNDO_OP::FILL_COLOR, 0>(val0);
+		fill_slider_set_header<UNDO_ID::FILL_COLOR, 0>(val0);
 		dialog_slider_1().Maximum(255.0);
 		dialog_slider_1().TickFrequency(1.0);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(val1);
-		fill_slider_set_header<UNDO_OP::FILL_COLOR, 1>(val1);
+		fill_slider_set_header<UNDO_ID::FILL_COLOR, 1>(val1);
 		dialog_slider_2().Maximum(255.0);
 		dialog_slider_2().TickFrequency(1.0);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(val2);
-		fill_slider_set_header<UNDO_OP::FILL_COLOR, 2>(val2);
+		fill_slider_set_header<UNDO_ID::FILL_COLOR, 2>(val2);
 		dialog_slider_3().Maximum(255.0);
 		dialog_slider_3().TickFrequency(1.0);
 		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_3().Value(val3);
-		fill_slider_set_header<UNDO_OP::FILL_COLOR, 3>(val3);
+		fill_slider_set_header<UNDO_ID::FILL_COLOR, 3>(val3);
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_OP::FILL_COLOR, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_OP::FILL_COLOR, 1> });
-		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_OP::FILL_COLOR, 2> });
-		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_OP::FILL_COLOR, 3> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 3> });
 
 		const auto panel_w = scp_dialog_panel().Width();
 		const auto panel_h = scp_dialog_panel().Height();
@@ -75,7 +75,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F samp_val;
 			m_dialog_page.m_shape_list.back()->get_fill_color(samp_val);
-			if (ustack_push_set<UNDO_OP::FILL_COLOR>(samp_val)) {
+			if (ustack_push_set<UNDO_ID::FILL_COLOR>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -101,12 +101,12 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::fill_slider_set_header(const float val)
 	{
 		winrt::hstring text;
 
-		if constexpr (U == UNDO_OP::FILL_COLOR) {
+		if constexpr (U == UNDO_ID::FILL_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
@@ -120,10 +120,10 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::fill_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_OP::FILL_COLOR) {
+		if constexpr (U == UNDO_ID::FILL_COLOR) {
 			const float val = static_cast<float>(args.NewValue());
 			fill_slider_set_header<U, S>(val);
 			D2D1_COLOR_F f_color;
@@ -137,7 +137,7 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 2) {
 				f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
 			}
-			if constexpr (U != UNDO_OP::PAGE_COLOR && S == 3) {
+			if constexpr (U != UNDO_ID::PAGE_COLOR && S == 3) {
 				f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			//m_sample_shape->set_fill_color(f_color);

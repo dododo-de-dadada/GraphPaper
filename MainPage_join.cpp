@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		cap_style_is_checked(new_val);
-		if (ustack_push_set<UNDO_OP::STROKE_CAP>(new_val)) {
+		if (ustack_push_set<UNDO_ID::STROKE_CAP>(new_val)) {
 			ustack_push_null();
 			ustack_is_enable();
 			page_draw();
@@ -71,7 +71,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(j_limit);
 		dialog_slider_0().Visibility(Visibility::Visible);
-		join_slider_set_header<UNDO_OP::JOIN_LIMIT, 0>(j_limit);
+		join_slider_set_header<UNDO_ID::JOIN_LIMIT, 0>(j_limit);
 
 		float s_width;
 		m_dialog_page.get_stroke_width(s_width);
@@ -81,10 +81,10 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(s_width);
 		dialog_slider_1().Visibility(Visibility::Visible);
-		join_slider_set_header<UNDO_OP::STROKE_WIDTH, 1>(s_width);
+		join_slider_set_header<UNDO_ID::STROKE_WIDTH, 1>(s_width);
 
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_OP::JOIN_LIMIT, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_OP::STROKE_WIDTH, 1> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_ID::JOIN_LIMIT, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::join_slider_val_changed<UNDO_ID::STROKE_WIDTH, 1> });
 		const auto samp_w = scp_dialog_panel().Width();
 		const auto samp_h = scp_dialog_panel().Height();
 		const auto padd = samp_w * 0.125;
@@ -111,8 +111,8 @@ namespace winrt::GraphPaper::implementation
 			float samp_width;
 			m_dialog_page.m_shape_list.back()->get_join_miter_limit(samp_limit);
 			m_dialog_page.m_shape_list.back()->get_stroke_width(samp_width);
-			if (ustack_push_set<UNDO_OP::JOIN_LIMIT>(samp_limit) ||
-				ustack_push_set<UNDO_OP::STROKE_WIDTH>(samp_width)) {
+			if (ustack_push_set<UNDO_ID::JOIN_LIMIT>(samp_limit) ||
+				ustack_push_set<UNDO_ID::STROKE_WIDTH>(samp_width)) {
 				ustack_push_null();
 				ustack_is_enable();
 				page_draw();
@@ -131,19 +131,19 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::join_slider_set_header(const float val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
-		if constexpr (U == UNDO_OP::JOIN_LIMIT && S == 0) {
+		if constexpr (U == UNDO_ID::JOIN_LIMIT && S == 0) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
 			swprintf_s(buf, LEN, L"%.1lf", static_cast<double>(val) + 1.0);
 			const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_join_miter_limit") + L": " + buf;
 			dialog_slider_0().Header(box_value(text));
 		}
-		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
+		else if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 1) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
@@ -157,15 +157,15 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::join_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_OP::JOIN_LIMIT && S == 0) {
+		if constexpr (U == UNDO_ID::JOIN_LIMIT && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(val);
 			m_dialog_page.m_shape_list.back()->set_join_miter_limit(val + 1.0f);
 		}
-		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 1) {
+		else if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 1) {
 			const float val = static_cast<float>(args.NewValue());
 			join_slider_set_header<U, S>(val);
 			m_dialog_page.m_shape_list.back()->set_stroke_width(val);
@@ -195,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		join_style_is_checked(new_val);
-		if (ustack_push_set<UNDO_OP::JOIN_STYLE>(new_val)) {
+		if (ustack_push_set<UNDO_ID::JOIN_STYLE>(new_val)) {
 			ustack_push_null();
 			ustack_is_enable();
 			page_draw();

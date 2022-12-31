@@ -660,7 +660,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				// 図形を読み込む.
-				if (slist_read(m_main_page.m_shape_list, dt_reader)) {
+				if (slist_read(m_main_page.m_shape_list, m_main_page, dt_reader)) {
 					// 再開なら,
 					if constexpr (RESUME) {
 						// スタックも読み込む.
@@ -1027,12 +1027,12 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteBoolean(m_drawing_poly_opt.m_vertex_up);
 			dt_writer.WriteBoolean(m_drawing_poly_opt.m_end_closed);
 			dt_writer.WriteBoolean(m_drawing_poly_opt.m_clockwise);
-			//dt_write(m_find_text, dt_writer);
+			// 検索文字列
 			const uint32_t find_text_len = wchar_len(m_find_text);
 			dt_writer.WriteUInt32(find_text_len);
 			const auto find_text_data = reinterpret_cast<const uint8_t*>(m_find_text);
 			dt_writer.WriteBytes(array_view(find_text_data, find_text_data + 2 * find_text_len));
-			//dt_write(m_find_repl, dt_writer);
+			// 置換文字列
 			const uint32_t find_repl_len = wchar_len(m_find_repl);
 			dt_writer.WriteUInt32(find_repl_len);
 			const auto find_repl_data = reinterpret_cast<const uint8_t*>(m_find_repl);

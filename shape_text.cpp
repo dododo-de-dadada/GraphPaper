@@ -889,68 +889,140 @@ namespace winrt::GraphPaper::implementation
 		ShapeText::is_available_font(m_font_family);
 	}
 
+	static wchar_t* text_read_text(DataReader const& dt_reader)
+	{
+		const int text_len = dt_reader.ReadUInt32();
+		wchar_t* text = new wchar_t[text_len + 1];
+		dt_reader.ReadBytes(
+			winrt::array_view(
+				reinterpret_cast<uint8_t*>(text),
+				2 * text_len));
+		text[text_len] = L'\0';
+		return reinterpret_cast<wchar_t*>(text);
+	}
+
 	// 図形をデータライターから読み込む.
-	ShapeText::ShapeText(DataReader const& dt_reader) :
-		ShapeRect::ShapeRect(dt_reader)
+	ShapeText::ShapeText(const ShapePage& page, DataReader const& dt_reader) :
+		ShapeRect::ShapeRect(page, dt_reader),
+		m_font_color{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		},
+		m_font_family(text_read_text(dt_reader)),
+		m_font_size(dt_reader.ReadSingle()),
+		m_font_stretch(static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32())),
+		m_font_style(static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32())),
+		m_font_weight(static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32())),
+		m_text(text_read_text(dt_reader)),
+		m_text_par_align(static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32())),
+		m_text_align_t(static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32())),
+		m_text_line_sp(dt_reader.ReadSingle()),
+		m_text_padding(D2D1_SIZE_F{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+			})
 	{
 		// 書体の色
-		const D2D1_COLOR_F font_color{
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle()
-		};
-		m_font_color.r = min(max(font_color.r, 0.0f), 1.0f);
-		m_font_color.g = min(max(font_color.g, 0.0f), 1.0f);
-		m_font_color.b = min(max(font_color.b, 0.0f), 1.0f);
-		m_font_color.a = min(max(font_color.a, 0.0f), 1.0f);
+		if (m_font_color.r < 0.0f || m_font_color.r > 1.0f ||
+			m_font_color.g < 0.0f || m_font_color.g > 1.0f ||
+			m_font_color.b < 0.0f || m_font_color.b > 1.0f ||
+			m_font_color.a < 0.0f || m_font_color.a > 1.0f) {
+			m_font_color = page.m_font_color;
+		}
 		// 書体名
-		const size_t font_family_len = dt_reader.ReadUInt32();
-		uint8_t* font_family_data = new uint8_t[2 * (font_family_len + 1)];
-		dt_reader.ReadBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
-		m_font_family = reinterpret_cast<wchar_t*>(font_family_data);
-		m_font_family[font_family_len] = L'\0';
 		is_available_font(m_font_family);
 		// 書体の大きさ
-		m_font_size = dt_reader.ReadSingle();
+		if (m_font_size < 1.0f || m_font_size > 128.5f) {
+			m_font_size = page.m_font_size;
+		}
 		// 書体の幅
-		m_font_stretch = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());
+		if (!(m_font_stretch == DWRITE_FONT_STRETCH_CONDENSED ||
+			m_font_stretch == DWRITE_FONT_STRETCH_EXPANDED ||
+			m_font_stretch == DWRITE_FONT_STRETCH_EXTRA_CONDENSED ||
+			m_font_stretch == DWRITE_FONT_STRETCH_EXTRA_EXPANDED ||
+			m_font_stretch == DWRITE_FONT_STRETCH_NORMAL ||
+			m_font_stretch == DWRITE_FONT_STRETCH_SEMI_CONDENSED ||
+			m_font_stretch == DWRITE_FONT_STRETCH_SEMI_EXPANDED ||
+			m_font_stretch == DWRITE_FONT_STRETCH_ULTRA_CONDENSED ||
+			m_font_stretch == DWRITE_FONT_STRETCH_ULTRA_EXPANDED)) {
+			m_font_stretch = page.m_font_stretch;
+		}
 		// 字体
-		m_font_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());
+		if (!(m_font_style == DWRITE_FONT_STYLE_ITALIC ||
+			m_font_style == DWRITE_FONT_STYLE_NORMAL ||
+			m_font_style == DWRITE_FONT_STYLE_OBLIQUE)) {
+			m_font_style = page.m_font_style;
+		}
 		// 書体の太さ
-		m_font_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());
-		// 文字列
-		const size_t text_len = dt_reader.ReadUInt32();
-		uint8_t* text_data = new uint8_t[2 * (text_len + 1)];
-		dt_reader.ReadBytes(array_view(text_data, text_data + 2 * text_len));
-		m_text = reinterpret_cast<wchar_t*>(text_data);
-		m_text[text_len] = L'\0';
-
-		m_text_par_align = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
-		m_text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
-		m_text_line_sp = dt_reader.ReadSingle();
-		m_text_padding = D2D1_SIZE_F{
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle()
-		};
-		//dt_read(m_text_padding, dt_reader);
+		if (!(m_font_weight == DWRITE_FONT_WEIGHT_THIN ||
+			m_font_weight == DWRITE_FONT_WEIGHT_EXTRA_LIGHT ||
+			m_font_weight == DWRITE_FONT_WEIGHT_LIGHT ||
+			m_font_weight == DWRITE_FONT_WEIGHT_SEMI_LIGHT ||
+			m_font_weight == DWRITE_FONT_WEIGHT_NORMAL ||
+			m_font_weight == DWRITE_FONT_WEIGHT_MEDIUM ||
+			m_font_weight == DWRITE_FONT_WEIGHT_DEMI_BOLD ||
+			m_font_weight == DWRITE_FONT_WEIGHT_BOLD ||
+			m_font_weight == DWRITE_FONT_WEIGHT_EXTRA_BOLD ||
+			m_font_weight == DWRITE_FONT_WEIGHT_BLACK ||
+			m_font_weight == DWRITE_FONT_WEIGHT_EXTRA_BLACK)) {
+			m_font_weight = page.m_font_weight;
+		}
+		// 段落のそろえ
+		if (!(m_text_par_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER ||
+			m_text_par_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR ||
+			m_text_par_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR)) {
+			m_text_par_align = page.m_text_par_align;
+		}
+		// 文字列のそろえ
+		if (!(m_text_align_t == DWRITE_TEXT_ALIGNMENT_CENTER ||
+			m_text_align_t == DWRITE_TEXT_ALIGNMENT_JUSTIFIED ||
+			m_text_align_t == DWRITE_TEXT_ALIGNMENT_LEADING ||
+			m_text_align_t == DWRITE_TEXT_ALIGNMENT_TRAILING)) {
+			m_text_align_t = m_text_align_t;
+		}
+		// 行間
+		if (m_text_line_sp < 0.0f || m_text_line_sp > 127.5f) {
+			m_text_line_sp = page.m_text_line_sp;
+		}
+		// 文字列の余白
+		if (m_text_padding.width < 0.0f || m_text_padding.width > 127.5 ||
+			m_text_padding.height < 0.0f || m_text_padding.height > 127.5) {
+			m_text_padding = page.m_text_padding;
+		}
 	}
 
 	// 図形をデータライターに書き込む.
 	void ShapeText::write(DataWriter const& dt_writer) const
 	{
 		ShapeRect::write(dt_writer);
-		dt_write(m_font_color, dt_writer);
-		dt_write(m_font_family, dt_writer);
+
+		dt_writer.WriteSingle(m_font_color.r);
+		dt_writer.WriteSingle(m_font_color.g);
+		dt_writer.WriteSingle(m_font_color.b);
+		dt_writer.WriteSingle(m_font_color.a);
+
+		const uint32_t font_family_len = wchar_len(m_font_family);
+		dt_writer.WriteUInt32(font_family_len);
+		const auto font_family_data = reinterpret_cast<const uint8_t*>(m_font_family);
+		dt_writer.WriteBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
+
 		dt_writer.WriteSingle(m_font_size);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_stretch));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_style));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));
-		dt_write(m_text, dt_writer);
+
+		const uint32_t text_len = wchar_len(m_text);
+		dt_writer.WriteUInt32(text_len);
+		const auto text_data = reinterpret_cast<const uint8_t*>(m_text);
+		dt_writer.WriteBytes(array_view(text_data, text_data + 2 * text_len));
+
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_par_align));
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
 		dt_writer.WriteSingle(m_text_line_sp);
-		dt_write(m_text_padding, dt_writer);
+		dt_writer.WriteSingle(m_text_padding.width);
+		dt_writer.WriteSingle(m_text_padding.height);
 	}
 
 }

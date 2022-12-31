@@ -870,8 +870,8 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから図形を読み込む.
 	// dt_reader	データリーダー
 	//------------------------------
-	ShapeBezi::ShapeBezi(DataReader const& dt_reader) :
-		ShapePath::ShapePath(dt_reader)
+	ShapeBezi::ShapeBezi(const ShapePage& page, DataReader const& dt_reader) :
+		ShapePath::ShapePath(page, dt_reader)
 	{}
 
 	/*

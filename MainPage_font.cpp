@@ -10,15 +10,14 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr wchar_t DLG_TITLE[] = L"str_font";
 
+	//---------------------------------
 	// 書体の幅の伸縮の配列
+	//---------------------------------
 	constexpr std::underlying_type_t<DWRITE_FONT_STRETCH> FONT_STRETCH[] = {
 		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_UNDEFINED,
 		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED,
@@ -32,7 +31,9 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED,
 	};
 
+	//---------------------------------
 	// 書体の幅の伸縮の文字列配列
+	//---------------------------------
 	constexpr wchar_t* FONT_STRETCH_NAME[] = {
 		L"str_font_stretch_undefined",
 		L"str_font_stretch_ultra_condensed",
@@ -47,7 +48,9 @@ namespace winrt::GraphPaper::implementation
 		nullptr
 	};
 
+	//---------------------------------
 	// 書体の太さの文字列配列
+	//---------------------------------
 	constexpr wchar_t* FONT_WEIGHT_NAME[] = {
 		L"str_font_weight_thin",
 		L"str_font_weight_extra_light",
@@ -63,7 +66,9 @@ namespace winrt::GraphPaper::implementation
 		nullptr
 	};
 
+	//---------------------------------
 	// 書体の太さの配列
+	//---------------------------------
 	constexpr std::underlying_type_t<DWRITE_FONT_WEIGHT> FONT_WEIGHTS[] = {
 		DWRITE_FONT_WEIGHT_THIN,
 		DWRITE_FONT_WEIGHT_EXTRA_LIGHT,
@@ -78,7 +83,9 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_WEIGHT_EXTRA_BLACK
 	};
 
+	//---------------------------------
 	// 設定の図形を作成する.
+	//---------------------------------
 	static void font_create_sample_shape(const float panel_w, const float panel_h, ShapePage& setting);
 
 	// 見本の図形を作成する.
@@ -105,7 +112,9 @@ namespace winrt::GraphPaper::implementation
 #endif
 	}
 
+	//---------------------------------
 	// 書体メニューの「色」が選択された.
+	//---------------------------------
 	IAsyncAction MainPage::font_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_dialog_page.set_attr_to(&m_main_page);
@@ -120,38 +129,38 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val0);
-		font_slider_set_header<UNDO_OP::FONT_COLOR, 0>(val0);
+		font_slider_set_header<UNDO_ID::FONT_COLOR, 0>(val0);
 		dialog_slider_1().Maximum(255.0);
 		dialog_slider_1().TickFrequency(1.0);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(val1);
-		font_slider_set_header<UNDO_OP::FONT_COLOR, 1>(val1);
+		font_slider_set_header<UNDO_ID::FONT_COLOR, 1>(val1);
 		dialog_slider_2().Maximum(255.0);
 		dialog_slider_2().TickFrequency(1.0);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(val2);
-		font_slider_set_header<UNDO_OP::FONT_COLOR, 2>(val2);
+		font_slider_set_header<UNDO_ID::FONT_COLOR, 2>(val2);
 		dialog_slider_3().Maximum(255.0);
 		dialog_slider_3().TickFrequency(1.0);
 		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_3().Value(val3);
-		font_slider_set_header<UNDO_OP::FONT_COLOR, 3>(val3);
+		font_slider_set_header<UNDO_ID::FONT_COLOR, 3>(val3);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 1> });
-		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 2> });
-		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_COLOR, 3> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 3> });
 		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F samp_val;
 			m_dialog_page.m_shape_list.back()->get_font_color(samp_val);
-			if (ustack_push_set<UNDO_OP::FONT_COLOR>(samp_val)) {
+			if (ustack_push_set<UNDO_ID::FONT_COLOR>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -170,12 +179,15 @@ namespace winrt::GraphPaper::implementation
 
 	}
 
+	//---------------------------------
 	// 書体メニューの「書体名」が選択された.
+	//---------------------------------
 	IAsyncAction MainPage::font_family_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		//FindName(L"cd_setting_dialog");
 		m_dialog_page.set_attr_to(&m_main_page);
 		for (uint32_t i = 0; wchar_t* name = ShapeText::s_available_fonts[i]; i++) {
+			// ローカル名をリストアイテムに格納する.
 			auto item = box_value(winrt::hstring(name + wcslen(name) + 1));
 			lv_dialog_list().Items().Append(item);
 		}
@@ -211,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			wchar_t* samp_val;
 			m_dialog_page.m_shape_list.back()->get_font_family(samp_val);
-			if (ustack_push_set<UNDO_OP::FONT_FAMILY>(samp_val)) {
+			if (ustack_push_set<UNDO_ID::FONT_FAMILY>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -226,24 +238,26 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
+	//---------------------------------
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の種類
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_OP U, int S>
+	//---------------------------------
+	template <UNDO_ID U, int S>
 	void MainPage::font_slider_set_header(const float val)
 	{
 		winrt::hstring text;
 
-		if constexpr (U == UNDO_OP::FONT_SIZE) {
+		if constexpr (U == UNDO_ID::FONT_SIZE) {
 			wchar_t buf[32];
 			float g_base;
 			m_dialog_page.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_dialog_d2d.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val + 1.0, m_dialog_d2d.m_logical_dpi, g_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_size") + L": " + buf;
 		}
-		if constexpr (U == UNDO_OP::FONT_COLOR) {
+		if constexpr (U == UNDO_ID::FONT_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
 			//if constexpr (S == 0) {
 				wchar_t buf[32];
@@ -284,22 +298,24 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//---------------------------------
 	// スライダーの値が変更された.
 	// U	操作の種類
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
+	//---------------------------------
+	template <UNDO_ID U, int S>
 	void MainPage::font_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_OP::FONT_SIZE) {
+		if constexpr (U == UNDO_ID::FONT_SIZE) {
 			if constexpr (S == 0) {
 				const auto val = static_cast<float>(args.NewValue());
 				font_slider_set_header<U, S>(val);
-				m_dialog_page.m_shape_list.back()->set_font_size(val);
+				m_dialog_page.m_shape_list.back()->set_font_size(val + 1.0);
 			}
 		}
-		else if constexpr (U == UNDO_OP::FONT_COLOR) {
+		else if constexpr (U == UNDO_ID::FONT_COLOR) {
 			const auto val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F f_color;
 			//m_sample_shape->get_font_color(f_color);
@@ -327,29 +343,31 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//---------------------------------
 	// 書体メニューの「大きさ」が選択された.
+	//---------------------------------
 	IAsyncAction MainPage::font_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 		m_dialog_page.set_attr_to(&m_main_page);
-		float f_size;
-		m_dialog_page.get_font_size(f_size);
+		float font_size;
+		m_dialog_page.get_font_size(font_size);
 
 		dialog_slider_0().Maximum(MAX_VALUE);
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_0().Value(f_size);
-		font_slider_set_header<UNDO_OP::FONT_SIZE, 0>(f_size);
+		dialog_slider_0().Value(font_size - 1.0);
+		font_slider_set_header<UNDO_ID::FONT_SIZE, 0>(font_size - 1.0);
 		dialog_slider_0().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_OP::FONT_SIZE, 0> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_SIZE, 0> });
 		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
 			m_dialog_page.m_shape_list.back()->get_font_size(samp_val);
-			if (ustack_push_set<UNDO_OP::FONT_SIZE>(samp_val)) {
+			if (ustack_push_set<UNDO_ID::FONT_SIZE>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -361,7 +379,9 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
+	//---------------------------------
 	// 書体メニューの「幅の伸縮」が選択された.
+	//---------------------------------
 	IAsyncAction MainPage::font_stretch_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_dialog_page.set_attr_to(&m_main_page);
@@ -399,7 +419,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_STRETCH samp_val;
 			m_dialog_page.m_shape_list.back()->get_font_stretch(samp_val);
-			if (ustack_push_set<UNDO_OP::FONT_STRETCH>(samp_val)) {
+			if (ustack_push_set<UNDO_ID::FONT_STRETCH>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -429,7 +449,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「イタリック体」が選択された.
 	void MainPage::font_style_italic_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (ustack_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
+		if (ustack_push_set<UNDO_ID::FONT_STYLE>(DWRITE_FONT_STYLE_ITALIC)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
@@ -439,7 +459,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「標準」が選択された.
 	void MainPage::font_style_normal_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (ustack_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
+		if (ustack_push_set<UNDO_ID::FONT_STYLE>(DWRITE_FONT_STYLE_NORMAL)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
@@ -449,7 +469,7 @@ namespace winrt::GraphPaper::implementation
 	// 書体メニューの「斜体」が選択された.
 	void MainPage::font_style_oblique_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (ustack_push_set<UNDO_OP::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
+		if (ustack_push_set<UNDO_ID::FONT_STYLE>(DWRITE_FONT_STYLE_OBLIQUE)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
@@ -494,7 +514,7 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_WEIGHT samp_val;
 			m_dialog_page.m_shape_list.back()->get_font_weight(samp_val);
-			if (ustack_push_set<UNDO_OP::FONT_WEIGHT>(samp_val)) {
+			if (ustack_push_set<UNDO_ID::FONT_WEIGHT>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();

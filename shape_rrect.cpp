@@ -412,8 +412,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeRRect::ShapeRRect(DataReader const& dt_reader) :
-		ShapeRect::ShapeRect(dt_reader)
+	ShapeRRect::ShapeRRect(const ShapePage& page, DataReader const& dt_reader) :
+		ShapeRect::ShapeRect(page, dt_reader)
 	{
 		m_corner_rad = D2D1_POINT_2F{
 			dt_reader.ReadSingle(),

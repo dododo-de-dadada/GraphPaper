@@ -40,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 		GRID_EMPH g_emph;
 		m_main_page.get_grid_emph(g_emph);
 		if (!equal(g_emph, val)) {
-			ustack_push_set<UNDO_OP::GRID_EMPH>(&m_main_page, val);
+			ustack_push_set<UNDO_ID::GRID_EMPH>(&m_main_page, val);
 			ustack_is_enable();
 			page_draw();
 		}
@@ -68,37 +68,37 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val0);
-		grid_slider_set_header<UNDO_OP::GRID_COLOR, 0>(val0);
+		grid_slider_set_header<UNDO_ID::GRID_COLOR, 0>(val0);
 		dialog_slider_1().Maximum(255.0);
 		dialog_slider_1().TickFrequency(1.0);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(val1);
-		grid_slider_set_header<UNDO_OP::GRID_COLOR, 1>(val1);
+		grid_slider_set_header<UNDO_ID::GRID_COLOR, 1>(val1);
 		dialog_slider_2().Maximum(255.0);
 		dialog_slider_2().TickFrequency(1.0);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(val2);
-		grid_slider_set_header<UNDO_OP::GRID_COLOR, 2>(val2);
+		grid_slider_set_header<UNDO_ID::GRID_COLOR, 2>(val2);
 		dialog_slider_3().Maximum(255.0);
 		dialog_slider_3().TickFrequency(1.0);
 		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_3().Value(val3);
-		grid_slider_set_header<UNDO_OP::GRID_COLOR, 3>(val3);
+		grid_slider_set_header<UNDO_ID::GRID_COLOR, 3>(val3);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 1> });
-		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 2> });
-		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_OP::GRID_COLOR, 3> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 3> });
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			if (!equal(m_main_page.m_grid_color, m_dialog_page.m_grid_color)) {
-				ustack_push_set<UNDO_OP::GRID_COLOR>(&m_main_page, m_dialog_page.m_grid_color);
+				ustack_push_set<UNDO_ID::GRID_COLOR>(&m_main_page, m_dialog_page.m_grid_color);
 				ustack_is_enable();
 				page_draw();
 			}
@@ -127,9 +127,9 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(g_base);
-		grid_slider_set_header<UNDO_OP::GRID_BASE, 0>(g_base);
+		grid_slider_set_header<UNDO_ID::GRID_BASE, 0>(g_base);
 		dialog_slider_0().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed<UNDO_OP::GRID_BASE, 0> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed<UNDO_ID::GRID_BASE, 0> });
 		//const auto samp_w = scp_dialog_panel().Width();
 		//const auto samp_h = scp_dialog_panel().Height();
 
@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.get_grid_base(page_val);
 			m_dialog_page.get_grid_base(setting_val);
 			if (!equal(page_val, setting_val)) {
-				ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_page, setting_val);
+				ustack_push_set<UNDO_ID::GRID_BASE>(&m_main_page, setting_val);
 				ustack_is_enable();
 				xcvd_is_enabled();
 				page_draw();
@@ -160,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 		m_main_page.get_grid_base(g_base);
 		const float val = (g_base + 1.0f) * 0.5f - 1.0f;
 		if (val >= 1.0f) {
-			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_page, val);
+			ustack_push_set<UNDO_ID::GRID_BASE>(&m_main_page, val);
 			ustack_is_enable();
 			page_draw();
 		}
@@ -173,7 +173,7 @@ namespace winrt::GraphPaper::implementation
 		m_main_page.get_grid_base(g_base);
 		const float val = (g_base + 1.0f) * 2.0f - 1.0f;
 		if (val <= max(m_main_page.m_page_size.width, m_main_page.m_page_size.height)) {
-			ustack_push_set<UNDO_OP::GRID_BASE>(&m_main_page, val);
+			ustack_push_set<UNDO_ID::GRID_BASE>(&m_main_page, val);
 			ustack_is_enable();
 			page_draw();
 		}
@@ -184,12 +184,12 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::grid_slider_set_header(const float val)
 	{
 		winrt::hstring text;
 
-		if constexpr (U == UNDO_OP::GRID_BASE) {
+		if constexpr (U == UNDO_ID::GRID_BASE) {
 			float g_base;
 			m_main_page.get_grid_base(g_base);
 			const float g_len = g_base + 1.0f;
@@ -197,7 +197,7 @@ namespace winrt::GraphPaper::implementation
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val + 1.0f, m_main_d2d.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
 		}
-		if constexpr (U == UNDO_OP::GRID_COLOR) {
+		if constexpr (U == UNDO_ID::GRID_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
@@ -211,15 +211,15 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::grid_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_OP::GRID_BASE) {
+		if constexpr (U == UNDO_ID::GRID_BASE) {
 			const float val = static_cast<float>(args.NewValue());
 			grid_slider_set_header<U, S>(val);
 			m_dialog_page.set_grid_base(val);
 		}
-		else if constexpr (U == UNDO_OP::GRID_COLOR) {
+		else if constexpr (U == UNDO_ID::GRID_COLOR) {
 			const float val = static_cast<float>(args.NewValue());
 			grid_slider_set_header<U, S>(val);
 			D2D1_COLOR_F g_color;
@@ -261,7 +261,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		grid_show_is_checked(val);
 		if (m_main_page.m_grid_show != val) {
-			ustack_push_set<UNDO_OP::GRID_SHOW>(&m_main_page, val);
+			ustack_push_set<UNDO_ID::GRID_SHOW>(&m_main_page, val);
 			ustack_is_enable();
 			page_draw();
 		}

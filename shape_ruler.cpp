@@ -302,8 +302,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeRuler::ShapeRuler(DataReader const& dt_reader) :
-		ShapeRect::ShapeRect(dt_reader),
+	ShapeRuler::ShapeRuler(const ShapePage& page, DataReader const& dt_reader) :
+		ShapeRect::ShapeRect(page, dt_reader),
 		m_grid_base(dt_reader.ReadSingle()),
 		m_font_family(dt_read_name(dt_reader)),
 		m_font_size(dt_reader.ReadSingle())
@@ -321,7 +321,11 @@ namespace winrt::GraphPaper::implementation
 			__debugbreak();
 		}
 #endif // _DEBUG
-		dt_write(m_font_family, dt_writer);
+		const uint32_t font_family_len = wchar_len(m_font_family);
+		dt_writer.WriteUInt32(font_family_len);
+		const auto font_family_data = reinterpret_cast<const uint8_t*>(m_font_family);
+		dt_writer.WriteBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
+
 		dt_writer.WriteSingle(m_dw_text_format->GetFontSize());
 	}
 

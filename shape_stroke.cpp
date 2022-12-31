@@ -517,7 +517,7 @@ namespace winrt::GraphPaper::implementation
 	*/
 
 	// 図形をデータリーダーから読み込む.
-	ShapeStroke::ShapeStroke(DataReader const& dt_reader) :
+	ShapeStroke::ShapeStroke(const ShapePage& page, DataReader const& dt_reader) :
 		ShapeSelect(dt_reader),
 		m_start(D2D1_POINT_2F{
 			dt_reader.ReadSingle(), 
@@ -536,19 +536,51 @@ namespace winrt::GraphPaper::implementation
 		}),
 		m_dash_cap(static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())),
 		m_dash_patt(DASH_PATT{
-			dt_reader.ReadSingle(), 
-			dt_reader.ReadSingle(), 
-			dt_reader.ReadSingle(), 
-			dt_reader.ReadSingle(), 
+			{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
+			}
 		}),
 		m_dash_style(static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32())),
 		m_join_miter_limit(dt_reader.ReadSingle()),
 		m_join_style(static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32())),
 		m_stroke_width(dt_reader.ReadSingle()),
 		m_d2d_stroke_style(nullptr)
-	{}
+	{
+		if ((m_stroke_cap.m_start != D2D1_CAP_STYLE_FLAT &&
+			m_stroke_cap.m_start != D2D1_CAP_STYLE_ROUND &&
+			m_stroke_cap.m_start != D2D1_CAP_STYLE_SQUARE &&
+			m_stroke_cap.m_start != D2D1_CAP_STYLE_TRIANGLE) ||
+			m_stroke_cap.m_start != m_stroke_cap.m_end) {
+			m_stroke_cap = page.m_stroke_cap;
+		}
+		if (m_stroke_color.r < 0.0f || m_stroke_color.r > 1.0f ||
+			m_stroke_color.g < 0.0f || m_stroke_color.g > 1.0f ||
+			m_stroke_color.b < 0.0f || m_stroke_color.b > 1.0f ||
+			m_stroke_color.a < 0.0f || m_stroke_color.a > 1.0f) {
+			m_stroke_color = page.m_stroke_color;
+		}
+		if (m_dash_cap != D2D1_CAP_STYLE_FLAT &&
+			m_dash_cap != D2D1_CAP_STYLE_ROUND &&
+			m_dash_cap != D2D1_CAP_STYLE_SQUARE &&
+			m_dash_cap != D2D1_CAP_STYLE_TRIANGLE) {
+			m_dash_cap = page.m_dash_cap;
+		}
+		if (m_dash_style != D2D1_DASH_STYLE_SOLID &&
+			m_dash_style != D2D1_DASH_STYLE_CUSTOM) {
+			m_dash_style = page.m_dash_style;
+		}
+		if (m_join_style != D2D1_LINE_JOIN_BEVEL &&
+			m_join_style != D2D1_LINE_JOIN_ROUND &&
+			m_join_style != D2D1_LINE_JOIN_MITER &&
+			m_join_style != D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+			m_join_style = page.m_join_style;
+		}
+	}
 
 	// 図形をデータライターに書き込む.
 	void ShapeStroke::write(DataWriter const& dt_writer) const

@@ -468,8 +468,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeRect::ShapeRect(DataReader const& dt_reader) :
-		ShapeStroke::ShapeStroke(dt_reader)
+	ShapeRect::ShapeRect(const ShapePage& page, DataReader const& dt_reader) :
+		ShapeStroke::ShapeStroke(page, dt_reader)
 	{
 		const D2D1_COLOR_F fill_color{
 			dt_reader.ReadSingle(),
@@ -487,7 +487,10 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRect::write(DataWriter const& dt_writer) const
 	{
 		ShapeStroke::write(dt_writer);
-		dt_write(m_fill_color, dt_writer);
+		dt_writer.WriteSingle(m_fill_color.r);
+		dt_writer.WriteSingle(m_fill_color.g);
+		dt_writer.WriteSingle(m_fill_color.b);
+		dt_writer.WriteSingle(m_fill_color.a);
 	}
 
 	// 近傍の頂点を見つける.

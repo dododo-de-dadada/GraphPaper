@@ -738,6 +738,9 @@ namespace winrt::GraphPaper::implementation
 		m_ratio(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_opac(dt_reader.ReadSingle())
 	{
+		if (m_opac < 0.0f || m_opac > 1.0f) {
+			m_opac = 1.0f;
+		}
 		const size_t pitch = 4ull * m_orig.width;
 		m_data = new uint8_t[pitch * m_orig.height];
 		std::vector<uint8_t> line_buf(pitch);

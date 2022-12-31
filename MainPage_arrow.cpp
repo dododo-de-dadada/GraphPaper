@@ -24,10 +24,10 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	//------------------------------
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::arrow_slider_set_header(const float val)
 	{
-		if constexpr (U == UNDO_OP::ARROW_SIZE) {
+		if constexpr (U == UNDO_ID::ARROW_SIZE) {
 			constexpr wchar_t* SLIDER_HEADER[] = {
 				L"str_arrow_width",
 				L"str_arrow_length",
@@ -57,10 +57,10 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	//------------------------------
-	template <UNDO_OP U, int S> void MainPage::arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_ID U, int S> void MainPage::arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		// 値をスライダーのヘッダーに格納する.
-		if constexpr (U == UNDO_OP::ARROW_SIZE) {
+		if constexpr (U == UNDO_ID::ARROW_SIZE) {
 			const float val = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
 			//m_sample_shape->get_arrow_size(a_size);
@@ -101,29 +101,29 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(a_size.m_width);
-		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 0>(a_size.m_width);
+		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 0>(a_size.m_width);
 		dialog_slider_1().Maximum(MAX_VALUE);
 		dialog_slider_1().TickFrequency(TICK_FREQ);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(a_size.m_length);
-		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 1>(a_size.m_length);
+		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 1>(a_size.m_length);
 		dialog_slider_2().Maximum(MAX_VALUE);
 		dialog_slider_2().TickFrequency(TICK_FREQ);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(a_size.m_offset);
-		arrow_slider_set_header<UNDO_OP::ARROW_SIZE, 2>(a_size.m_offset);
+		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 2>(a_size.m_offset);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		const winrt::event_token slider_0_token{
-			dialog_slider_0().ValueChanged({ this, &MainPage::arrow_slider_val_changed<UNDO_OP::ARROW_SIZE, 0> })
+			dialog_slider_0().ValueChanged({ this, &MainPage::arrow_slider_val_changed<UNDO_ID::ARROW_SIZE, 0> })
 		};
 		const winrt::event_token slider_1_token{
-			dialog_slider_1().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_OP::ARROW_SIZE, 1> })
+			dialog_slider_1().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_ID::ARROW_SIZE, 1> })
 		};
 		const winrt::event_token slider_2_token{
-			dialog_slider_2().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_OP::ARROW_SIZE, 2> })
+			dialog_slider_2().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_ID::ARROW_SIZE, 2> })
 		};
 		const auto samp_w = scp_dialog_panel().Width();
 		const auto samp_h = scp_dialog_panel().Height();
@@ -143,7 +143,7 @@ namespace winrt::GraphPaper::implementation
 			ARROW_SIZE samp_val;
 			//m_sample_shape->get_arrow_size(samp_val);
 			m_dialog_page.m_shape_list.back()->get_arrow_size(samp_val);
-			if (ustack_push_set<UNDO_OP::ARROW_SIZE>(samp_val)) {
+			if (ustack_push_set<UNDO_ID::ARROW_SIZE>(samp_val)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -178,7 +178,7 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		arrow_style_is_checked(a_style);
-		if (ustack_push_set<UNDO_OP::ARROW_STYLE>(a_style)) {
+		if (ustack_push_set<UNDO_ID::ARROW_STYLE>(a_style)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();

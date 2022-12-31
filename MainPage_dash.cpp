@@ -31,22 +31,22 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(d_patt.m_[0]);
-		dash_slider_set_header<UNDO_OP::DASH_PATT, 0>(d_patt.m_[0]);
+		dash_slider_set_header<UNDO_ID::DASH_PATT, 0>(d_patt.m_[0]);
 		dialog_slider_1().Maximum(MAX_VALUE);
 		dialog_slider_1().TickFrequency(TICK_FREQ);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(d_patt.m_[1]);
-		dash_slider_set_header<UNDO_OP::DASH_PATT, 1>(d_patt.m_[1]);
+		dash_slider_set_header<UNDO_ID::DASH_PATT, 1>(d_patt.m_[1]);
 		dialog_slider_2().Maximum(MAX_VALUE);
 		dialog_slider_2().TickFrequency(TICK_FREQ);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(d_patt.m_[2]);
-		dash_slider_set_header<UNDO_OP::DASH_PATT, 2>(d_patt.m_[2]);
+		dash_slider_set_header<UNDO_ID::DASH_PATT, 2>(d_patt.m_[2]);
 		dialog_slider_3().Maximum(MAX_VALUE);
 		dialog_slider_3().TickFrequency(TICK_FREQ);
 		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_3().Value(d_patt.m_[3]);
-		dash_slider_set_header<UNDO_OP::DASH_PATT, 3>(d_patt.m_[3]);
+		dash_slider_set_header<UNDO_ID::DASH_PATT, 3>(d_patt.m_[3]);
 
 		float s_width;
 		m_main_page.get_stroke_width(s_width);
@@ -55,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_4().TickFrequency(TICK_FREQ);
 		dialog_slider_4().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_4().Value(s_width);
-		dash_slider_set_header<UNDO_OP::STROKE_WIDTH, 4>(s_width);
+		dash_slider_set_header<UNDO_ID::STROKE_WIDTH, 4>(s_width);
 
 		D2D1_DASH_STYLE s_style;
 		m_main_page.get_dash_style(s_style);
@@ -65,19 +65,19 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? Visibility::Visible : Visibility::Collapsed);
 		dialog_slider_4().Visibility(Visibility::Visible);
 		const winrt::event_token slider_0_token{
-			dialog_slider_0().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 0> })
+			dialog_slider_0().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::DASH_PATT, 0> })
 		};
 		const winrt::event_token slider_1_token{
-			dialog_slider_1().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 1> })
+			dialog_slider_1().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::DASH_PATT, 1> })
 		};
 		const winrt::event_token slider_2_token{
-			dialog_slider_2().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 2> })
+			dialog_slider_2().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::DASH_PATT, 2> })
 		};
 		const winrt::event_token slider_3_token{
-			dialog_slider_3().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::DASH_PATT, 3> })
+			dialog_slider_3().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::DASH_PATT, 3> })
 		};
 		const winrt::event_token slider_4_token{
-			dialog_slider_4().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_OP::STROKE_WIDTH, 4> })
+			dialog_slider_4().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::STROKE_WIDTH, 4> })
 		};
 		const auto panel_w = scp_dialog_panel().Width();
 		const auto panel_h = scp_dialog_panel().Height();
@@ -100,8 +100,8 @@ namespace winrt::GraphPaper::implementation
 			//m_sample_shape->get_stroke_width(sample_width);
 			m_dialog_page.m_shape_list.back()->get_dash_patt(sample_patt);
 			m_dialog_page.m_shape_list.back()->get_stroke_width(sample_width);
-			if (ustack_push_set<UNDO_OP::DASH_PATT>(sample_patt) ||
-				ustack_push_set<UNDO_OP::STROKE_WIDTH>(sample_width)) {
+			if (ustack_push_set<UNDO_ID::DASH_PATT>(sample_patt) ||
+				ustack_push_set<UNDO_ID::STROKE_WIDTH>(sample_width)) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -145,7 +145,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		mfi_dash_patt().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
 		//mfi_dash_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
-		if (ustack_push_set<UNDO_OP::DASH_STYLE>(d_style)) {
+		if (ustack_push_set<UNDO_ID::DASH_STYLE>(d_style)) {
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
@@ -176,17 +176,17 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::dash_slider_set_header(const float val)
 	{
-		if constexpr (U == UNDO_OP::DASH_PATT) {
+		if constexpr (U == UNDO_ID::DASH_PATT) {
 			constexpr wchar_t* R[]{ L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap" };
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
 			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf };
 			dialog_set_slider_header<S>(text);
 		}
-		if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
+		if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 4) {
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
 			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf };
@@ -199,9 +199,9 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S> void MainPage::dash_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_ID U, int S> void MainPage::dash_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_OP::DASH_PATT) {
+		if constexpr (U == UNDO_ID::DASH_PATT) {
 			const float val = static_cast<float>(args.NewValue());
 			DASH_PATT patt;
 			//m_sample_shape->get_dash_patt(patt);
@@ -225,7 +225,7 @@ namespace winrt::GraphPaper::implementation
 			//m_sample_shape->set_dash_patt(patt);
 			m_dialog_page.m_shape_list.back()->set_dash_patt(patt);
 		}
-		else if constexpr (U == UNDO_OP::STROKE_WIDTH && S == 4) {
+		else if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 4) {
 			const float val = static_cast<float>(args.NewValue());
 			dash_slider_set_header<U, S>(val);
 			m_dialog_page.m_shape_list.back()->set_stroke_width(val);

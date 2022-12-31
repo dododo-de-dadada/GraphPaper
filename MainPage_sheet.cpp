@@ -126,24 +126,24 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val0);
-		page_slider_set_header<UNDO_OP::PAGE_COLOR, 0>(val0);
+		page_slider_set_header<UNDO_ID::PAGE_COLOR, 0>(val0);
 		dialog_slider_1().Maximum(255.0);
 		dialog_slider_1().TickFrequency(1.0);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(val1);
-		page_slider_set_header<UNDO_OP::PAGE_COLOR, 1>(val1);
+		page_slider_set_header<UNDO_ID::PAGE_COLOR, 1>(val1);
 		dialog_slider_2().Maximum(255.0);
 		dialog_slider_2().TickFrequency(1.0);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(val2);
-		page_slider_set_header<UNDO_OP::PAGE_COLOR, 2>(val2);
+		page_slider_set_header<UNDO_ID::PAGE_COLOR, 2>(val2);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_OP::PAGE_COLOR, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_OP::PAGE_COLOR, 1> });
-		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_OP::PAGE_COLOR, 2> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 2> });
 		//m_sample_type = PROP_TYPE::NONE;
 		//m_dialog_page.m_d2d.SetSwapChainPanel(scp_dialog_panel());
 		//const auto samp_w = scp_dialog_panel().Width();
@@ -159,7 +159,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_COLOR_F page_val;
 			m_main_page.get_page_color(page_val);
 			if (!equal(page_val, setting_val)) {
-				ustack_push_set<UNDO_OP::PAGE_COLOR>(&m_main_page, setting_val);
+				ustack_push_set<UNDO_ID::PAGE_COLOR>(&m_main_page, setting_val);
 				ustack_push_null();
 				ustack_is_enable();
 				page_draw();
@@ -387,7 +387,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			m_main_page.set_text_align_t(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 			m_main_page.set_text_line_sp(0.0);
-			m_main_page.set_text_padding(TEXT_MARGIN_DEFVAL);
+			m_main_page.set_text_padding(TEXT_PADDING_DEFVAL);
 		}
 	}
 
@@ -513,7 +513,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			if (!equal(p_size, m_main_page.m_page_size)) {
 				// 変換された値が表示の大きさと異なる場合,
-				ustack_push_set<UNDO_OP::PAGE_SIZE>(&m_main_page, p_size);
+				ustack_push_set<UNDO_ID::PAGE_SIZE>(&m_main_page, p_size);
 				ustack_push_null();
 				ustack_is_enable();
 				page_bbox_update();
@@ -558,7 +558,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(b_max, b_min, p_max);
 			D2D1_SIZE_F p_size = { p_max.x, p_max.y };
 			if (!equal(m_main_page.m_page_size, p_size)) {
-				ustack_push_set<UNDO_OP::PAGE_SIZE>(&m_main_page, p_size);
+				ustack_push_set<UNDO_ID::PAGE_SIZE>(&m_main_page, p_size);
 				flag = true;
 			}
 			if (flag) {
@@ -598,13 +598,13 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::page_slider_set_header(const float val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		winrt::hstring text;
-		if constexpr (U == UNDO_OP::PAGE_COLOR) {
+		if constexpr (U == UNDO_ID::PAGE_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
@@ -618,10 +618,10 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::page_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_OP::PAGE_COLOR) {
+		if constexpr (U == UNDO_ID::PAGE_COLOR) {
 			const auto val = static_cast<float>(args.NewValue());
 			page_slider_set_header<U, S>(val);
 			D2D1_COLOR_F s_color;

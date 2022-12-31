@@ -681,6 +681,33 @@ namespace winrt::Zlib::implementation
 		new_ptr = ptr;
 	}
 
+	//---------------------------------
+	// なんちゃってリングバッファ
+	// 最大要素数は RING_BUF_MAX - 1
+	// RING_BUF_MAX は 2 の n 乗に限定
+	// 追加は先頭のみで, 削除はできない.
+	// 溢れた要素は自動的に削除される.
+	//---------------------------------
+	template <class T, T S, size_t N>
+	struct RING_BUF {
+		T buf[N]{};
+		size_t pos = 0;
+		size_t before(const size_t i) const noexcept
+		{
+			return (i + (N - 1)) & (N - 1);
+		}
+		void push_front(T val) noexcept
+		{
+			pos = before(pos);
+			buf[pos] = val;
+			buf[before(pos)] = S;
+		}
+		T operator[](int i) const noexcept
+		{
+			return buf[(pos + i) & (N - 1)];
+		}
+	};
+
 	// リテラル/長さアルファベットと距離アルファベットの出現回数を数える.
 	// または, 
 	// アルファベットに対応する符号をバッファに書き込む.
@@ -718,7 +745,8 @@ namespace winrt::Zlib::implementation
 		// |XYZ| ---->|addr0|addr1|addr2|addr3|...|addrM|
 		// +---+--+   +-----+-----+-----+-----+   +-----+
 		//   :   :       :     :
-		std::unordered_map<uint32_t, std::list<const uint8_t*>> xyz_hash;
+		std::unordered_map<uint32_t,
+			RING_BUF<const uint8_t*, nullptr, 32>> xyz_hash;
 
 		// 符号表の出現回数を初期化.
 		// 符号表はアルファベット順になっていること.
@@ -748,7 +776,7 @@ namespace winrt::Zlib::implementation
 		size_t win_len = 0;	// スライド窓幅
 		size_t word_len = 0;	// 単語長
 		size_t word_pos = 0;	// (スライド窓の中での) 単語位置
-		int lazy_cnt = 0;
+		//int lazy_cnt = 0;
 
 		// 一致する単語長は 3 バイト以上なので,
 		// 残りのバイト数が 3 バイト未満にならない間繰り返す.
@@ -793,16 +821,14 @@ namespace winrt::Zlib::implementation
 
 			// キーに合致する要素 (ペア) が XYZ ハッシュに中にあるなら,
 			if (xyz_hash.count(xyz_key) > 0) {
-				int cnt_out = 0;	// ウィンドウ窓の範囲外になった個数.
 				auto& chain = xyz_hash[xyz_key];	// ペアに格納されたチェイン
-
+				//int cnt = 0;
 				// チェインに格納された各位置について.
-				for (const auto ptr : chain) {
-					// 位置がウィンドウ窓の範囲外にだったなら,
+				for (int i = 0; chain[i] != nullptr; i++) {
+					const uint8_t* ptr = chain[i];
+					//for (const auto ptr : chain) {
 					if (ptr < win_ptr) {
-						// その個数を数え, 次の出現位置に進む.
-						cnt_out++;
-						continue;
+						break;
 					}
 					// 単語長を 1 バイトずつ増やしながら比較する.
 					// ハッシュによって 3 バイトは一致済み.
@@ -816,18 +842,21 @@ namespace winrt::Zlib::implementation
 						len++) {
 					}
 					// より後方にある最長一致を得る.
-					if (len >= word_len) {
+					if (len > word_len) {
 						word_len = len;
 						word_pos = ptr - win_ptr;
 					}
+					//cnt++;
 				}
-
+				/*
 				//------------------------------
 				// チェインから, 範囲外になった位置を削除する.
 				//------------------------------
-				for (; cnt_out > 0; cnt_out--) {
-					chain.pop_front();
+				for (int i = chain.size(); i > cnt; i--) {
+					chain.pop_back();
 				}
+				*/
+
 				/*
 				if (lazy_cnt > 0) {
 					lazy_cnt--;
@@ -1083,7 +1112,7 @@ namespace winrt::Zlib::implementation
 				// 得えられたペアに格納されたチェインに, 
 				// キーを生成したときの位置を格納する.
 				auto& chain = xyz_hash[XYZ_KEY(ptr)];
-				chain.push_back(ptr);
+				chain.push_front(ptr);
 			}
 		}
 

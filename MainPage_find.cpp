@@ -495,7 +495,7 @@ namespace winrt::GraphPaper::implementation
 		ck_text_frame_fit_text().IsChecked(m_text_frame_fit_text);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit_text().Text().c_str());
-			ustack_push_set<UNDO_OP::TEXT_CONTENT>(s, text);
+			ustack_push_set<UNDO_ID::TEXT_CONTENT>(s, text);
 			m_text_frame_fit_text = ck_text_frame_fit_text().IsChecked().GetBoolean();
 			if (m_text_frame_fit_text) {
 				ustack_push_position(s, ANC_TYPE::ANC_SE);
@@ -636,7 +636,7 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				if (done2) {
-					ustack_push_set<UNDO_OP::TEXT_CONTENT>(t, w_text);
+					ustack_push_set<UNDO_ID::TEXT_CONTENT>(t, w_text);
 				}
 			}
 		}
@@ -671,8 +671,8 @@ namespace winrt::GraphPaper::implementation
 				// àÍívÇµÇΩèÍçá
 				const auto r_len = wchar_len(m_find_repl);
 				const auto r_text = find_replace(t->m_text, w_pos, f_len, m_find_repl, r_len);
-				ustack_push_set<UNDO_OP::TEXT_CONTENT>(t, r_text);
-				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
+				ustack_push_set<UNDO_ID::TEXT_CONTENT>(t, r_text);
+				ustack_push_set<UNDO_ID::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ w_pos, r_len });
 				ustack_push_null();
 				ustack_is_enable();
 			}
@@ -684,9 +684,9 @@ namespace winrt::GraphPaper::implementation
 			// åüçıÇ≈Ç´ÇΩÇ»ÇÁÇŒ,
 			// ï∂éöîÕàÕÇ™ëIëÇ≥ÇÍÇΩê}å`Ç™Ç†ÇË, ÇªÇÍÇ™éüÇÃê}å`Ç∆àŸÇ»ÇÈÇ©îªíËÇ∑ÇÈ.
 			if (t != nullptr && s != t) {
-				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				ustack_push_set<UNDO_ID::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			ustack_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
+			ustack_push_set<UNDO_ID::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			flag = true;
 		}
@@ -736,9 +736,9 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_TEXT_RANGE s_range;
 		if (find_text(m_main_page.m_shape_list, m_find_text, m_find_text_case, m_find_text_wrap, t, s, s_range)) {
 			if (t != nullptr && s != t) {
-				ustack_push_set<UNDO_OP::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
+				ustack_push_set<UNDO_ID::TEXT_RANGE>(t, DWRITE_TEXT_RANGE{ 0, 0 });
 			}
-			ustack_push_set<UNDO_OP::TEXT_RANGE>(s, s_range);
+			ustack_push_set<UNDO_ID::TEXT_RANGE>(s, s_range);
 			scroll_to(s);
 			page_draw();
 		}

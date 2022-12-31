@@ -384,8 +384,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	読み込むデータリーダー
-	ShapeLine::ShapeLine(DataReader const& dt_reader) :
-		ShapeStroke::ShapeStroke(dt_reader),
+	ShapeLine::ShapeLine(const ShapePage& page, DataReader const& dt_reader) :
+		ShapeStroke::ShapeStroke(page, dt_reader),
 		m_d2d_arrow_style(nullptr),
 		m_d2d_arrow_geom(nullptr)
 	{
@@ -399,8 +399,12 @@ namespace winrt::GraphPaper::implementation
 	void ShapeLine::write(DataWriter const& dt_writer) const
 	{
 		ShapeStroke::write(dt_writer);
+
 		dt_writer.WriteInt32(static_cast<int32_t>(m_arrow_style));
-		dt_write(m_arrow_size, dt_writer);
+
+		dt_writer.WriteSingle(m_arrow_size.m_width);
+		dt_writer.WriteSingle(m_arrow_size.m_length);
+		dt_writer.WriteSingle(m_arrow_size.m_offset);
 	}
 
 }

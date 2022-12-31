@@ -50,12 +50,12 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val);
-		image_slider_set_header<UNDO_OP::IMAGE_OPAC, 0>(val);
+		image_slider_set_header<UNDO_ID::IMAGE_OPAC, 0>(val);
 		dialog_check_box().IsChecked(m_dialog_page.m_image_opac_importing);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_check_box().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::image_slider_val_changed<UNDO_OP::IMAGE_OPAC, 0> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::image_slider_val_changed<UNDO_ID::IMAGE_OPAC, 0> });
 
 		dialog_image_load_async(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()));
 
@@ -64,8 +64,8 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
 			m_dialog_page.m_shape_list.back()->get_image_opacity(samp_val);
-			ustack_push_set<UNDO_OP::IMAGE_OPAC>(&m_main_page, samp_val);
-			if (ustack_push_set<UNDO_OP::IMAGE_OPAC>(samp_val)) {
+			ustack_push_set<UNDO_ID::IMAGE_OPAC>(&m_main_page, samp_val);
+			if (ustack_push_set<UNDO_ID::IMAGE_OPAC>(samp_val)) {
 				ustack_push_null();
 				ustack_is_enable();
 				xcvd_is_enabled();
@@ -84,12 +84,12 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::image_slider_set_header(const float val)
 	{
 		winrt::hstring text;
 
-		if constexpr (U == UNDO_OP::IMAGE_OPAC) {
+		if constexpr (U == UNDO_ID::IMAGE_OPAC) {
 			constexpr wchar_t R[]{ L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
@@ -103,10 +103,10 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_OP U, int S>
+	template <UNDO_ID U, int S>
 	void MainPage::image_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_OP::IMAGE_OPAC) {
+		if constexpr (U == UNDO_ID::IMAGE_OPAC) {
 			if constexpr (S == 0) {
 				const float val = static_cast<float>(args.NewValue());
 				image_slider_set_header<U, S>(val);

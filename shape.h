@@ -121,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 	//   @----@----@
 	//  SW    S    SE
 	//
-	enum ANC_TYPE {
+	enum ANC_TYPE : uint32_t {
 		ANC_PAGE,		// 図形の外部 (矢印カーソル)
 		ANC_FILL,		// 図形の内部 (移動カーソル)
 		ANC_STROKE,	// 線枠 (移動カーソル)
@@ -159,9 +159,10 @@ namespace winrt::GraphPaper::implementation
 		float m_offset;		// 先端のずらし量
 	};
 	constexpr ARROW_SIZE ARROW_SIZE_DEFVAL{ 7.0, 16.0, 0.0 };	// 矢じるしの寸法の既定値
+	constexpr float ARROW_SIZE_MAX = 127.5f;
 
 	// 矢じるしの形式
-	enum struct ARROW_STYLE {
+	enum struct ARROW_STYLE : uint32_t {
 		NONE,	// なし
 		OPENED,	// 開いた矢じるし
 		FILLED	// 閉じた矢じるし
@@ -173,7 +174,6 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_start;	// 始点
 		D2D1_CAP_STYLE m_end;	// 終点
 	};
-
 	constexpr D2D1_COLOR_F COLOR_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
 	constexpr D2D1_COLOR_F COLOR_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
 	constexpr D2D1_COLOR_F COLOR_TEXT_RANGE = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
@@ -194,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr GRID_EMPH GRID_EMPH_3{ 2, 10 };	// 2 番目と 10 番目の線を強調
 
 	// 方眼の表示
-	enum struct GRID_SHOW {
+	enum struct GRID_SHOW : uint32_t {
 		HIDE,	// 表示なし
 		BACK,	// 最背面に表示
 		FRONT	// 最前面に表示
@@ -217,9 +217,10 @@ namespace winrt::GraphPaper::implementation
 	constexpr D2D1_COLOR_F GRID_COLOR_DEFVAL{ ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 0.5f };	// 方眼の色の既定値
 	constexpr float GRID_LEN_DEFVAL = 48.0f;	// 方眼の長さの既定値
 	constexpr float MITER_LIMIT_DEFVAL = 10.0f;	// マイター制限距離の既定値
-	constexpr D2D1_SIZE_F TEXT_MARGIN_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
+	constexpr D2D1_SIZE_F TEXT_PADDING_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
 	constexpr size_t MAX_N_GON = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 	constexpr float PAGE_SIZE_MAX = 32768.0f;	// ページの大きさの最大値
+	constexpr D2D1_SIZE_F PAGE_SIZE_DEF_VAL{ 8.0F * 96.0F, 11.0F * 96.0F };	// ページの大きさの既定値 (ピクセル)
 
 	// COM インターフェイス IMemoryBufferByteAccess を初期化
 	MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
@@ -379,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形のその前の図形を得る.
 	Shape* slist_prev(SHAPE_LIST const& slist, const Shape* s) noexcept;
 	// データリーダーから図形リストを読み込む.
-	bool slist_read(SHAPE_LIST& slist, DataReader const& dt_reader);
+	bool slist_read(SHAPE_LIST& slist, const ShapePage& page, DataReader const& dt_reader);
 	// 図形をリストから削除し, 削除した図形の次の図形を得る.
 	Shape* slist_remove(SHAPE_LIST& slist, const Shape* s) noexcept;
 	// 選択された図形のリストを得る.
@@ -608,8 +609,8 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const
 		{
-			dt_writer.WriteBoolean(m_is_selected);
 			dt_writer.WriteBoolean(m_is_deleted);
+			dt_writer.WriteBoolean(m_is_selected);
 		}
 	};
 
@@ -627,7 +628,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F	m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
 		float	m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
 
-		winrt::com_ptr<ID2D1Bitmap1>	m_d2d_bitmap{ nullptr };	// D2D ビットマップ
+		winrt::com_ptr<ID2D1Bitmap1> m_d2d_bitmap{ nullptr };	// D2D ビットマップ
 
 		int m_pdf_obj = 0;	// PDF オブジェクト番号 (PDF として出力するときのみ使用)
 
@@ -737,7 +738,7 @@ namespace winrt::GraphPaper::implementation
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_par_align = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落の揃え
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字列の揃え
-		D2D1_SIZE_F m_text_padding{ TEXT_MARGIN_DEFVAL };	// 文字列の左右と上下の余白
+		D2D1_SIZE_F m_text_padding{ TEXT_PADDING_DEFVAL };	// 文字列の左右と上下の余白
 
 		// 画像
 		float m_image_opac = 1.0f;	// 画像の不透明度
@@ -751,10 +752,10 @@ namespace winrt::GraphPaper::implementation
 		GRID_SHOW m_grid_show = GRID_SHOW::BACK;	// 方眼の表示
 		bool m_grid_snap = true;	// 方眼に合わせる
 
-		// 表示
+		// ページ
 		D2D1_COLOR_F m_page_color{ COLOR_WHITE };	// 背景色
 		float m_page_scale = 1.0f;	// 拡大率
-		D2D1_SIZE_F	m_page_size{ 0.0f, 0.0f };	// 大きさ (MainPage のコンストラクタで設定)
+		D2D1_SIZE_F	m_page_size{ PAGE_SIZE_DEF_VAL };	// 大きさ (MainPage のコンストラクタで設定)
 
 		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block{ nullptr };	// 描画状態の保存ブロック
 		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush{ nullptr };	// 選択された文字範囲の色ブラシ
@@ -955,7 +956,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
 		// 図形をデータリーダーから読み込む.
-		ShapeGroup(DataReader const& dt_reader);
+		ShapeGroup(const ShapePage& page, DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
@@ -1053,7 +1054,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeStroke(const ShapePage* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeStroke(DataReader const& dt_reader);
+		ShapeStroke(const ShapePage& page, DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに PDF として書き込む.
@@ -1099,7 +1100,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeLine(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page);
 		// データリーダーから図形を読み込む.
-		ShapeLine(DataReader const& dt_reader);
+		ShapeLine(const ShapePage& page, DataReader const& dt_reader);
 		// 図形を表示する.
 		virtual void draw(void) override;
 		// 矢じるしの寸法を得る.
@@ -1149,7 +1150,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page);
 		// データリーダーから図形を読み込む.
-		ShapeRect(DataReader const& dt_reader);
+		ShapeRect(const ShapePage& page, DataReader const& dt_reader);
 		// 図形を表示する.
 		virtual void draw(void) override;
 		// 近傍の頂点を見つける.
@@ -1223,7 +1224,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeRuler(DataReader const& dt_reader);
+		ShapeRuler(const ShapePage& page, DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
@@ -1239,8 +1240,8 @@ namespace winrt::GraphPaper::implementation
 			ShapeRect::ShapeRect(b_pos, b_vec, page)
 		{}
 		// 図形をデータリーダーから読み込む.
-		ShapeElli(DataReader const& dt_reader) :
-			ShapeRect::ShapeRect(dt_reader)
+		ShapeElli(const ShapePage& page, DataReader const& dt_reader) :
+			ShapeRect::ShapeRect(page, dt_reader)
 		{}
 
 		//------------------------------
@@ -1281,7 +1282,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeRRect(DataReader const& dt_reader);
+		ShapeRRect(const ShapePage& page, DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに PDF として書き込む.
@@ -1301,8 +1302,8 @@ namespace winrt::GraphPaper::implementation
 			ShapeLine::ShapeLine(page, s_closed)
 		{}
 		// 図形をデータリーダーから読み込む.
-		ShapePath(DataReader const& dt_reader) :
-			ShapeLine::ShapeLine(dt_reader)
+		ShapePath(const ShapePage& page, DataReader const& dt_reader) :
+			ShapeLine::ShapeLine(page, dt_reader)
 		{}
 
 		// 図形を破棄する.
@@ -1367,7 +1368,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page, const POLY_OPTION& p_opt);
 		// 図形をデータリーダーから読み込む.
-		ShapePoly(DataReader const& dt_reader);
+		ShapePoly(const ShapePage& page, DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに PDF として書き込む.
@@ -1398,7 +1399,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeBezi(DataReader const& dt_reader);
+		ShapeBezi(const ShapePage& page, DataReader const& dt_reader);
 		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const final override;
 		// 図形をデータライターに SVG として書き込む.
@@ -1425,7 +1426,7 @@ namespace winrt::GraphPaper::implementation
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_par_align = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落のそろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_t = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字のそろえ
-		D2D1_SIZE_F m_text_padding{ TEXT_MARGIN_DEFVAL };	// 文字列の上下と左右の余白
+		D2D1_SIZE_F m_text_padding{ TEXT_PADDING_DEFVAL };	// 文字列の上下と左右の余白
 		DWRITE_TEXT_RANGE m_text_selected_range{ 0, 0 };	// 選択された文字範囲
 
 		DWRITE_FONT_METRICS m_dw_font_metrics{};
@@ -1536,7 +1537,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を作成する.
 		ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const ShapePage* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeText(DataReader const& dt_reader);
+		ShapeText(const ShapePage& page, DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに PDF として書き込む.

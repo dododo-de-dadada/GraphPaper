@@ -879,8 +879,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	データリーダー
-	ShapePoly::ShapePoly(DataReader const& dt_reader) :
-		ShapePath::ShapePath(dt_reader)
+	ShapePoly::ShapePoly(const ShapePage& page, DataReader const& dt_reader) :
+		ShapePath::ShapePath(page, dt_reader)
 	{
 		m_end_closed = dt_reader.ReadBoolean();
 		const D2D1_COLOR_F fill_color{
@@ -900,7 +900,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		ShapePath::write(dt_writer);
 		dt_writer.WriteBoolean(m_end_closed);
-		dt_write(m_fill_color, dt_writer);
+		dt_writer.WriteSingle(m_fill_color.r);
+		dt_writer.WriteSingle(m_fill_color.g);
+		dt_writer.WriteSingle(m_fill_color.b);
+		dt_writer.WriteSingle(m_fill_color.a);
 	}
 
 }
