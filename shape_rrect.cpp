@@ -425,7 +425,8 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRRect::write(DataWriter const& dt_writer) const
 	{
 		ShapeRect::write(dt_writer);
-		dt_write(m_corner_rad, dt_writer);
+		dt_writer.WriteSingle(m_corner_rad.x);
+		dt_writer.WriteSingle(m_corner_rad.y);
 	}
 
 }

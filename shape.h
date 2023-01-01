@@ -220,7 +220,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr D2D1_SIZE_F TEXT_PADDING_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
 	constexpr size_t MAX_N_GON = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 	constexpr float PAGE_SIZE_MAX = 32768.0f;	// ページの大きさの最大値
-	constexpr D2D1_SIZE_F PAGE_SIZE_DEF_VAL{ 8.0F * 96.0F, 11.0F * 96.0F };	// ページの大きさの既定値 (ピクセル)
+	constexpr D2D1_SIZE_F PAGE_SIZE_DEFVAL{ 8.0F * 96.0F, 11.0F * 96.0F };	// ページの大きさの既定値 (ピクセル)
 
 	// COM インターフェイス IMemoryBufferByteAccess を初期化
 	MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
@@ -704,7 +704,7 @@ namespace winrt::GraphPaper::implementation
 	struct ShapePage : Shape {
 		//static constexpr float size_max(void) noexcept { return 32767.0F; }
 
-		SHAPE_LIST m_shape_list;	// 図形リスト
+		SHAPE_LIST m_shape_list{};	// 図形リスト
 
 		// 矢じるし
 		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
@@ -724,15 +724,15 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体 (システムリソースに値が無かった場合)
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ (システムリソースに値が無かった場合)
 
-		// 線枠
+		// 線・枠
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_join_miter_limit = MITER_LIMIT_DEFVAL;	// 線の結合のマイター制限距離
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線の結合
-		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
-		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線枠の色
-		float m_stroke_width = 1.0f;	// 線枠の太さ
+		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 線の端の形式
+		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
+		float m_stroke_width = 1.0f;	// 線・枠の太さ
 
 		// 文字列
 		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
@@ -755,7 +755,7 @@ namespace winrt::GraphPaper::implementation
 		// ページ
 		D2D1_COLOR_F m_page_color{ COLOR_WHITE };	// 背景色
 		float m_page_scale = 1.0f;	// 拡大率
-		D2D1_SIZE_F	m_page_size{ PAGE_SIZE_DEF_VAL };	// 大きさ (MainPage のコンストラクタで設定)
+		D2D1_SIZE_F	m_page_size{ PAGE_SIZE_DEFVAL };	// 大きさ (MainPage のコンストラクタで設定)
 
 		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block{ nullptr };	// 描画状態の保存ブロック
 		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush{ nullptr };	// 選択された文字範囲の色ブラシ
@@ -969,14 +969,15 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeStroke : ShapeSelect {
 		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 開始位置
 		std::vector<D2D1_POINT_2F> m_vec{};	// 次の位置への差分
-		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 端の形式
-		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線枠の色
+
+		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 線の端の形式
+		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
+		float m_stroke_width = 1.0f;	// 線・枠の太さ
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_miter_limit = MITER_LIMIT_DEFVAL;		// 線の結合のマイター制限距離
+		float m_join_miter_limit = MITER_LIMIT_DEFVAL;		// 線の結合のマイター制限
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線の結合
-		float m_stroke_width = 1.0f;	// 線枠の太さ
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
 

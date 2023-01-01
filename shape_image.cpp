@@ -68,10 +68,11 @@ namespace winrt::GraphPaper::implementation
 		/*--->*/IRandomAccessStream& stream) const
 	{
 		// クリップボードに格納するなら, 元データのまま.
-		// 描画するときは DrawBitmap でクリッピングされる.
+		// 描画するときに DrawBitmap でクリッピングされる.
 		// エクスポートするなら, クリッピングしたデータ.
-		// PDF や SVG には, 画像をクリッピングして表示する機能がないか, あっても煩雑.
+		// SVG には, 画像をクリッピングして表示する機能がないか, あっても煩雑.
 		// ひょっとしたら, クリッピング矩形の小数点のせいで微妙に異なる画像になるかもしれない.
+		// PDF には, 3 バイト RGB を提供できないので, 使えない.
 		bool ret = false;	// 返値
 		const int32_t clip_l = [=]() {	// クリッピング方形の左の値
 			if constexpr (C) {
@@ -112,63 +113,66 @@ namespace winrt::GraphPaper::implementation
 			co_await winrt::resume_background();
 
 			// SoftwareBitmap を作成する.
+			// Windows では, SoftwareBitmap にしろ WIC にしろ
+			// 3 バイトの RGB はサポートされてない.
 			const int32_t clip_w = clip_r - clip_l;
 			const int32_t clip_h = clip_b - clip_t;
-			SoftwareBitmap bmp{
+			SoftwareBitmap soft_bmp{
 				SoftwareBitmap(BitmapPixelFormat::Bgra8, clip_w, clip_h, BitmapAlphaMode::Straight)
 			};
 
 			// ビットマップのバッファをロックする.
-			auto bmp_buf{
-				bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite)
+			auto soft_bmp_buf{
+				soft_bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite)
 			};
-			auto bmp_ref{
-				bmp_buf.CreateReference()
+			// バッファの参照を得る.
+			auto soft_bmp_ref{
+				soft_bmp_buf.CreateReference()
 			};
-			winrt::com_ptr<IMemoryBufferByteAccess> bmp_mem{
-				bmp_ref.as<IMemoryBufferByteAccess>()
+			// 参照をメモリバッファアクセスに変換する.
+			winrt::com_ptr<IMemoryBufferByteAccess> soft_bmp_mem{
+				soft_bmp_ref.as<IMemoryBufferByteAccess>()
 			};
 
-			// ロックされたバッファーを得る.
-			BYTE* dst_data = nullptr;
+			// メモリバッファアクセスからロックされた生バッファーを得る.
+			BYTE* soft_bmp_ptr = nullptr;
 			UINT32 capacity = 0;
-			if (SUCCEEDED(bmp_mem->GetBuffer(&dst_data, &capacity)))
+			if (SUCCEEDED(soft_bmp_mem->GetBuffer(&soft_bmp_ptr, &capacity)))
 			{
-				// バッファに画像データをコピーする.
+				// 図形の画像データを
+				// SoftwareBitmap のバッファにコピーする.
 				if constexpr (C) {
 					const size_t src_pitch = 4ull * m_orig.width;
 					const size_t dst_pitch = 4ull * clip_w;
 					size_t i = 0;
 					for (size_t y = clip_t; y < clip_b; y++) {
-						memcpy(dst_data + dst_pitch * y, m_data + src_pitch * y + clip_l, dst_pitch);
-						//for (size_t x = clip_l; x < clip_r; x++) {
-						//	dst_data[i++] = m_data[src_pitch * y + 4ull * x + 0ull];
-						//	dst_data[i++] = m_data[src_pitch * y + 4ull * x + 1ull];
-						//	dst_data[i++] = m_data[src_pitch * y + 4ull * x + 2ull];
-						//	dst_data[i++] = m_data[src_pitch * y + 4ull * x + 3ull];
-						//}
+						memcpy(soft_bmp_ptr + dst_pitch * y, m_data + src_pitch * y + clip_l, dst_pitch);
 					}
 				}
 				else {
-					memcpy(dst_data, m_data, capacity);
+					memcpy(soft_bmp_ptr, m_data, capacity);
 				}
 
 				// バッファを解放する.
 				// SoftwareBitmap がロックされたままになるので,
 				// IMemoryBufferByteAccess は Release() する必要がある.
-				bmp_buf.Close();
-				bmp_buf = nullptr;
-				bmp_mem->Release();
-				bmp_mem = nullptr;
+				soft_bmp_buf.Close();
+				soft_bmp_buf = nullptr;
+				soft_bmp_ref.Close();
+				soft_bmp_ref = nullptr;
+				soft_bmp_mem->Release();
+				soft_bmp_mem = nullptr;
 
-				// ビットマップエンコーダーにビットマップを格納する.
+				// ビットマップ符号器を作成する.
 				BitmapEncoder bmp_enc{
-					co_await BitmapEncoder::CreateAsync(enc_id, stream) 
+					co_await BitmapEncoder::CreateAsync(enc_id, stream)
 				};
-				// 新しいサムネイルを自動的に生成するよう true を格納する.
+				// 符号器を, 新しいサムネイルを生成するよう設定する.
 				//bmp_enc.IsThumbnailGenerated(true);
-				bmp_enc.SetSoftwareBitmap(bmp);
+				// 符号器にソフトウェアビットマップを格納する.
+				bmp_enc.SetSoftwareBitmap(soft_bmp);
 				try {
+					// 符号化されたビットマップをストリームに書き出す.
 					co_await bmp_enc.FlushAsync();
 					ret = true;
 				}
@@ -184,11 +188,12 @@ namespace winrt::GraphPaper::implementation
 					// 再度やり直す.
 				//	co_await bmp_enc.FlushAsync();
 				//}
+				// 符号器を解放する.
 				bmp_enc = nullptr;
 			}
 			// ビットマップを破棄する.
-			bmp.Close();
-			bmp = nullptr;
+			soft_bmp.Close();
+			soft_bmp = nullptr;
 
 			// スレッドコンテキストを復元する.
 			co_await context;

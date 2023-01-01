@@ -375,7 +375,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_page_color(Shape::s_background_color);
 			m_main_page.set_page_scale(1.0);
 			//const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			m_main_page.m_page_size = PAGE_SIZE_DEF_VAL;
+			m_main_page.m_page_size = PAGE_SIZE_DEFVAL;
 			m_main_page.set_stroke_cap(CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT});
 			m_main_page.set_stroke_color(Shape::s_foreground_color);
 			m_main_page.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);

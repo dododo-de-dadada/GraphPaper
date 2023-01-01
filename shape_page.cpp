@@ -679,6 +679,11 @@ namespace winrt::GraphPaper::implementation
 			stroke_color.a >= 0.0f && stroke_color.a <= 1.0f) {
 			m_stroke_color = stroke_color;
 		}
+		// 線・枠の太さ
+		const float stroke_width = dt_reader.ReadSingle();
+		if (stroke_width >= 0.0f && stroke_width <= 127.5f) {
+			m_stroke_width = stroke_width;
+		}
 		// 破線の端の形式
 		const D2D1_CAP_STYLE dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
 		if (dash_cap == D2D1_CAP_STYLE_FLAT ||
@@ -714,11 +719,6 @@ namespace winrt::GraphPaper::implementation
 		const float join_miter_limit = dt_reader.ReadSingle();
 		if (join_miter_limit >= 1.0f && join_miter_limit <= 128.5f) {
 			m_join_miter_limit = join_miter_limit;
-		}
-		// 線・枠の太さ
-		const float stroke_width = dt_reader.ReadSingle();
-		if (stroke_width >= 0.0 && stroke_width <= 127.5) {
-			m_stroke_width = stroke_width;
 		}
 		// 塗りつぶしの色
 		const D2D1_COLOR_F fill_color{
@@ -1188,14 +1188,16 @@ namespace winrt::GraphPaper::implementation
 		// 角丸半径
 		dt_writer.WriteSingle(m_corner_rad.x);
 		dt_writer.WriteSingle(m_corner_rad.y);
-		// 端の形式
+		// 線の端の形式
 		dt_writer.WriteUInt32(m_stroke_cap.m_start);
 		dt_writer.WriteUInt32(m_stroke_cap.m_end);
-		// 線枠の色
+		// 線・枠の色
 		dt_writer.WriteSingle(m_stroke_color.r);
 		dt_writer.WriteSingle(m_stroke_color.g);
 		dt_writer.WriteSingle(m_stroke_color.b);
 		dt_writer.WriteSingle(m_stroke_color.a);
+		// 線・枠の太さ
+		dt_writer.WriteSingle(m_stroke_width);
 		// 破線の端の形式
 		dt_writer.WriteUInt32(m_dash_cap);
 		// 破線の配置
@@ -1205,14 +1207,12 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_dash_patt.m_[3]);
 		dt_writer.WriteSingle(m_dash_patt.m_[4]);
 		dt_writer.WriteSingle(m_dash_patt.m_[5]);
-		// 線枠の形式
+		// 破線の形式
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_style));
 		// 線分の結合
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_join_style));
-		// 線分のマイター制限
+		// 結合のマイター制限
 		dt_writer.WriteSingle(m_join_miter_limit);
-		// 線枠の太さ
-		dt_writer.WriteSingle(m_stroke_width);
 		// 塗りつぶしの色
 		dt_writer.WriteSingle(m_fill_color.r);
 		dt_writer.WriteSingle(m_fill_color.g);

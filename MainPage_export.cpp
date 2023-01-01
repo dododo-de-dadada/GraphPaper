@@ -677,6 +677,11 @@ namespace winrt::GraphPaper::implementation
 				D2D_UI d2d;
 
 				// ビットマップレンダーターゲットの作成
+				// サポートされているピクセル形式とアルファ モードの
+				// https://learn.microsoft.com/ja-jp/windows/win32/direct2d/supported-pixel-formats-and-alpha-modes#supported-formats-for-wic-bitmap-render-target
+				// ・WIC ビットマップ レンダー ターゲットでサポートされている形式
+				// ・ID2D1DCRenderTarget でサポートされる形式
+				// を参照.
 				const UINT32 page_w = static_cast<UINT32>(m_main_page.m_page_size.width);
 				const UINT32 page_h = static_cast<UINT32>(m_main_page.m_page_size.height);
 				winrt::com_ptr<ID2D1BitmapRenderTarget> target;

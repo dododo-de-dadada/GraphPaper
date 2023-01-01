@@ -518,6 +518,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	ShapeStroke::ShapeStroke(const ShapePage& page, DataReader const& dt_reader) :
+		// 読み込む順番は定義された順
 		ShapeSelect(dt_reader),
 		m_start(D2D1_POINT_2F{
 			dt_reader.ReadSingle(), 
@@ -534,6 +535,7 @@ namespace winrt::GraphPaper::implementation
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		}),
+		m_stroke_width(dt_reader.ReadSingle()),
 		m_dash_cap(static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())),
 		m_dash_patt(DASH_PATT{
 			{
@@ -548,7 +550,6 @@ namespace winrt::GraphPaper::implementation
 		m_dash_style(static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32())),
 		m_join_miter_limit(dt_reader.ReadSingle()),
 		m_join_style(static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32())),
-		m_stroke_width(dt_reader.ReadSingle()),
 		m_d2d_stroke_style(nullptr)
 	{
 		if ((m_stroke_cap.m_start != D2D1_CAP_STYLE_FLAT &&
@@ -586,10 +587,28 @@ namespace winrt::GraphPaper::implementation
 	void ShapeStroke::write(DataWriter const& dt_writer) const
 	{
 		ShapeSelect::write(dt_writer);
-		dt_write(m_start, dt_writer);
-		dt_write(m_vec, dt_writer);
-		dt_write(m_stroke_cap, dt_writer);
-		dt_write(m_stroke_color, dt_writer);
+
+		// 開始位置
+		dt_writer.WriteSingle(m_start.x);
+		dt_writer.WriteSingle(m_start.y);
+
+		// 次の位置への差分
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_vec.size()));
+		for (const D2D1_POINT_2F vec : m_vec) {
+			dt_writer.WriteSingle(vec.x);
+			dt_writer.WriteSingle(vec.y);
+		}
+		// 線の端の形式
+		dt_writer.WriteUInt32(m_stroke_cap.m_start);
+		dt_writer.WriteUInt32(m_stroke_cap.m_end);
+		// 線・枠の色
+		dt_writer.WriteSingle(m_stroke_color.r);
+		dt_writer.WriteSingle(m_stroke_color.g);
+		dt_writer.WriteSingle(m_stroke_color.b);
+		dt_writer.WriteSingle(m_stroke_color.a);
+		// 線・枠の太さ
+		dt_writer.WriteSingle(m_stroke_width);
+		//dt_writer.WriteUInt32(m_dash_cap);
 		dt_writer.WriteUInt32(m_dash_cap);
 		dt_writer.WriteSingle(m_dash_patt.m_[0]);
 		dt_writer.WriteSingle(m_dash_patt.m_[1]);
@@ -600,7 +619,6 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_style));
 		dt_writer.WriteSingle(m_join_miter_limit);
 		dt_writer.WriteUInt32(m_join_style);
-		dt_writer.WriteSingle(m_stroke_width);
 	}
 
 }
