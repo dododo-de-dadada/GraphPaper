@@ -1,6 +1,6 @@
 //-------------------------------
-// MainPage_sample.cpp
-// 属性
+// MainPage_dialog.cpp
+// 設定ダイアログ
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
@@ -16,7 +16,9 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
 	using winrt::Windows::Storage::FileAccessMode;
 
-	// 属性ダイアログのスライダーヘッダーに文字列を格納する.
+	// 設定ダイアログのスライダーヘッダーに文字列を格納する.
+	// S	スライダーの番号
+	// text	文字列
 	template<int S> void MainPage::dialog_set_slider_header(const winrt::hstring& text)
 	{
 		if constexpr (S == 0) {
@@ -38,7 +40,7 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::dialog_set_slider_header<3>(const winrt::hstring& text);
 
 
-	// 属性の見本を表示する
+	// 設定ダイアログのスワップチェーンパネルを表示する
 	void MainPage::dialog_draw(void)
 	{
 #if defined(_DEBUG)

@@ -1,5 +1,5 @@
 //-------------------------------
-// MainPage_sheet.cpp
+// MainPage_page.cpp
 // 表示の設定
 //-------------------------------
 #include "pch.h"
@@ -10,27 +10,16 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	//using winrt::Windows::Foundation::IAsyncAction;
-	//using winrt::Windows::Foundation::IAsyncOperation;
-	//using winrt::Windows::Graphics::Display::DisplayInformation;
-	//using winrt::Windows::Storage::ApplicationData;
 	using winrt::Windows::Storage::CreationCollisionOption;
-	//using winrt::Windows::Storage::StorageFile;
-	//using winrt::Windows::UI::Color;
 	using winrt::Windows::UI::Text::FontStretch;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::Controls::TextBlock;
 	using winrt::Windows::UI::Xaml::Controls::TextBox;
-	//using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 	using winrt::Windows::UI::Xaml::Setter;
-	//using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 	using winrt::Windows::Storage::ApplicationData;
 
-
-	constexpr wchar_t DLG_TITLE[] = L"str_page";	// 表示の表題
+	constexpr wchar_t DLG_TITLE[] = L"str_page_settings";	// 表示の表題
 	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI Variable";	// 書体名の規定値 (システムリソースに値が無かった場合)
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 

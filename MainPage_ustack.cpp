@@ -318,7 +318,7 @@ namespace winrt::GraphPaper::implementation
 		u->exec();
 		auto const& u_type = typeid(*u);
 		if (u_type == typeid(UndoValue<UNDO_ID::ARROW_STYLE>)) {
-			// 線枠メニューの「矢じるしの種類」に印をつける.
+			// 線枠メニューの「矢じるしの形式」に印をつける.
 			ARROW_STYLE val;
 			m_main_page.get_arrow_style(val);
 			arrow_style_is_checked(val);

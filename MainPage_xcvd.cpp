@@ -11,22 +11,16 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
 	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
-	//using winrt::Windows::Graphics::Imaging::BitmapEncoder;
 	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
 	using winrt::Windows::ApplicationModel::DataTransfer::Clipboard;
 	using winrt::Windows::ApplicationModel::DataTransfer::DataPackage;
 	using winrt::Windows::ApplicationModel::DataTransfer::DataPackageOperation;
 	using winrt::Windows::ApplicationModel::DataTransfer::DataPackageView;
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::Storage::Streams::IInputStream;
 	using winrt::Windows::Storage::Streams::InMemoryRandomAccessStream;
 	using winrt::Windows::Storage::Streams::IOutputStream;
 	using winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType;
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
-	//using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
 	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 
 	const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES{ L"graph_paper_shapes_data" };	// 図形データのクリップボード書式
@@ -241,7 +235,8 @@ namespace winrt::GraphPaper::implementation
 		mfi_bring_to_front().IsEnabled(enable_forward);
 		mfi_send_to_back().IsEnabled(enable_backward);
 		mfi_send_backward().IsEnabled(enable_backward);
-		mfi_summary_list().IsEnabled(exists_undeleted);
+		mfsi_order().IsEnabled(enable_forward || enable_backward);
+		//mfi_summary_list().IsEnabled(exists_undeleted);
 		mfi_image_revert_to_original().IsEnabled(exists_selected_image);
 		m_list_sel_cnt = selected_cnt;
 	}

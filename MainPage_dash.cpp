@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
-	constexpr wchar_t DLG_TITLE[] = L"str_dash_patt";
+	constexpr wchar_t DLG_TITLE[] = L"str_dash_pattern";
 
 	// 線枠メニューの「破線の配置」が選択された.
 	IAsyncAction MainPage::dash_patt_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -121,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 		page_draw();
 	}
 
-	// 線枠メニューの「種類」のサブ項目が選択された.
+	// 線枠メニューの「破線の形式」のサブ項目が選択された.
 	void MainPage::dash_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_DASH_STYLE d_style;
@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「種類」に印をつける.
+	// 線枠メニューの「破線の形式」に印をつける.
 	// d_style	破線の形式
 	void MainPage::dash_style_is_checked(const D2D1_DASH_STYLE d_style)
 	{

@@ -216,7 +216,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr float FONT_SIZE_DEFVAL = static_cast<float>(12.0 * 96.0 / 72.0);	// 書体の大きさの既定値 (システムリソースに値が無かった場合)
 	constexpr D2D1_COLOR_F GRID_COLOR_DEFVAL{ ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 0.5f };	// 方眼の色の既定値
 	constexpr float GRID_LEN_DEFVAL = 48.0f;	// 方眼の長さの既定値
-	constexpr float MITER_LIMIT_DEFVAL = 10.0f;	// マイター制限距離の既定値
+	constexpr float MITER_LIMIT_DEFVAL = 10.0f;	// マイター制限の既定値
 	constexpr D2D1_SIZE_F TEXT_PADDING_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
 	constexpr size_t MAX_N_GON = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 	constexpr float PAGE_SIZE_MAX = 32768.0f;	// ページの大きさの最大値
@@ -454,7 +454,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_image_opacity(float& /*val*/) const noexcept { return false; }
 		// 線分の結合のマイター制限を得る.
 		virtual bool get_join_miter_limit(float& /*val*/) const noexcept { return false; }
-		// 線分の結合を得る.
+		// 線分の結合の形式を得る.
 		virtual bool get_join_style(D2D1_LINE_JOIN& /*val*/) const noexcept { return false; }
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(const D2D1_POINT_2F /*pos*/, float& /*dd*/, D2D1_POINT_2F& /*val*/) const noexcept { return false; }
@@ -542,9 +542,9 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_grid_snap(const bool /*val*/) noexcept { return false; }
 		// 画像の不透明度を得る.
 		virtual bool set_image_opacity(const float /*val*/) noexcept { return false; }
-		// 値を線分の結合のマイター制限に格納する.
+		// 値を線の結合のマイター制限に格納する.
 		virtual bool set_join_miter_limit(const float& /*val*/) noexcept { return false; }
-		// 値を線分の結合に格納する.
+		// 値を線の結合の形式に格納する.
 		virtual bool set_join_style(const D2D1_LINE_JOIN& /*val*/) noexcept { return false; }
 		// 値を, 部位の位置に格納する.
 		virtual bool set_pos_anc(const D2D1_POINT_2F /*val*/, const uint32_t /*anc*/, const float /*limit*/, const bool /*keep_aspect*/) noexcept { return false; }
@@ -728,8 +728,8 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_miter_limit = MITER_LIMIT_DEFVAL;	// 線の結合のマイター制限距離
-		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線の結合
+		float m_join_miter_limit = MITER_LIMIT_DEFVAL;	// 線の結合のマイター制限
+		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線の結合の形式
 		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 線の端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
 		float m_stroke_width = 1.0f;	// 線・枠の太さ
@@ -819,9 +819,9 @@ namespace winrt::GraphPaper::implementation
 		bool get_grid_snap(bool& val) const noexcept final override;
 		// 画像の不透明度を得る.
 		bool get_image_opacity(float& val) const noexcept final override;
-		// 線分の結合のマイター制限を得る.
+		// 線の結合のマイター制限を得る.
 		bool get_join_miter_limit(float& val) const noexcept final override;
-		// 線分の結合を得る.
+		// 線の結合の形式を得る.
 		bool get_join_style(D2D1_LINE_JOIN& val) const noexcept final override;
 		// ページの色を得る.
 		bool get_page_color(D2D1_COLOR_F& val) const noexcept final override;
@@ -885,9 +885,9 @@ namespace winrt::GraphPaper::implementation
 		bool set_grid_show(const GRID_SHOW val) noexcept final override;
 		// 値を方眼に合わせるに格納する.
 		bool set_grid_snap(const bool val) noexcept final override;
-		// 値を線分の結合のマイター制限に格納する.
+		// 値を線の結合のマイター制限に格納する.
 		bool set_join_miter_limit(const float& val) noexcept final override;
-		// 値を線分の結合に格納する.
+		// 値を線の結合の形式に格納する.
 		bool set_join_style(const D2D1_LINE_JOIN& val) noexcept final override;
 		// 値をページの色に格納する.
 		bool set_page_color(const D2D1_COLOR_F& val) noexcept final override;
@@ -977,7 +977,7 @@ namespace winrt::GraphPaper::implementation
 		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_join_miter_limit = MITER_LIMIT_DEFVAL;		// 線の結合のマイター制限
-		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線の結合
+		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線の結合の形式
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
 
@@ -1008,9 +1008,9 @@ namespace winrt::GraphPaper::implementation
 		bool get_dash_patt(DASH_PATT& val) const noexcept final override;
 		// 破線の形式を得る.
 		bool get_dash_style(D2D1_DASH_STYLE& val) const noexcept final override;
-		// 線分の結合のマイター制限を得る.
+		// 線の結合のマイター制限を得る.
 		bool get_join_miter_limit(float& val) const noexcept final override;
-		// 線分の結合を得る.
+		// 線の結合の形式を得る.
 		bool get_join_style(D2D1_LINE_JOIN& val) const noexcept final override;
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& val) const noexcept override;
@@ -1040,9 +1040,9 @@ namespace winrt::GraphPaper::implementation
 		bool set_dash_patt(const DASH_PATT& val) noexcept final override;
 		// 値を線枠の形式に格納する.
 		bool set_dash_style(const D2D1_DASH_STYLE val) noexcept final override;
-		// 値を線分の結合のマイター制限に格納する.
+		// 値を線の結合のマイター制限に格納する.
 		virtual bool set_join_miter_limit(const float& val) noexcept override;
-		// 値を線分の結合に格納する.
+		// 値を線の結合の形式に格納する.
 		virtual bool set_join_style(const D2D1_LINE_JOIN& val) noexcept override;
 		// 値を, 部位の位置に格納する.
 		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept override;
@@ -1132,9 +1132,9 @@ namespace winrt::GraphPaper::implementation
 		//size_t export_pdf_barbs(const D2D1_SIZE_F page_size, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer) const;
 		// 値を端の形式に格納する.
 		bool set_stroke_cap(const CAP_STYLE& val) noexcept final override;
-		// 値を線分の結合のマイター制限に格納する.
+		// 値を線の結合のマイター制限に格納する.
 		bool set_join_miter_limit(const float& val) noexcept final override;
-		// 値を線分の結合に格納する.
+		// 値を線の結合の形式に格納する.
 		bool set_join_style(const D2D1_LINE_JOIN& val) noexcept final override;
 	};
 

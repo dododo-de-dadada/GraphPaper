@@ -140,7 +140,7 @@
 						<KeyboardAccelerator Key="A" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
-				<MenuFlyoutSubItem x:Uid="mfsi_order" Text="Order">
+                <MenuFlyoutSubItem x:Name="mfsi_order" x:Uid="mfsi_order" Text="Order">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_order}" />
 					</MenuFlyoutSubItem.Icon>
@@ -180,15 +180,6 @@
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="U" Modifiers="Control" />
-					</MenuFlyoutItem.KeyboardAccelerators>
-				</MenuFlyoutItem>
-				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Name="mfi_summary_list" x:Uid="mfi_summary_list" Click="summary_list_click" IsEnabled="false" Text="List Summary" >
-					<MenuFlyoutItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_list}"/>
-					</MenuFlyoutItem.Icon>
-					<MenuFlyoutItem.KeyboardAccelerators>
-						<KeyboardAccelerator Key="L" Modifiers="Control" />
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />
@@ -506,7 +497,15 @@
 			</muxc:MenuBarItem>
 			<!-- その他メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_misc" AccessKey="M" Title="Misc">
-				<MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
+                <MenuFlyoutItem x:Name="mfi_summary_list" x:Uid="mfi_summary_list" Click="summary_list_click" Text="List Summary" >
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_list}"/>
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="L" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_unit}" />
 					</MenuFlyoutSubItem.Icon>

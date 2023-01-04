@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-	constexpr wchar_t DLG_TITLE[] = L"str_font";
+	constexpr wchar_t DLG_TITLE[] = L"str_font_settings";
 
 	//---------------------------------
 	// ‘‘Ì‚Ì•‚ÌLk‚Ì”z—ñ

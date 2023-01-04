@@ -17,7 +17,7 @@
 // MainPage.cpp	メインページの作成, アプリの終了
 // MainPage_app.cpp	アプリケーションの中断と再開
 // MainPage_arrow.cpp	矢じるしの形式と寸法
-// MainPage_dash.cpp	線の種類
+// MainPage_dash.cpp	破線の形式
 // MainPage_display.cpp	表示デバイスのハンドラー
 // MainPage_drawing.cpp	作図ツール
 // MainPage_event.cpp	ポインターイベントのハンドラー
@@ -34,7 +34,7 @@
 // MainPage_prop.cpp	設定
 // MainPage_scroll.cpp	スクロールバー
 // MainPage_select.cpp	図形の選択
-// MainPage_sheet.cpp	ページの設定の保存とリセット
+// MainPage_page.cpp	ページの設定の保存とリセット
 // MainPage_status.cpp	ステータスバー
 // MainPage_stroke.cpp	線枠
 // MainPage_summary.cpp	図形の一覧
@@ -246,13 +246,13 @@ namespace winrt::GraphPaper::implementation
 		bool m_image_keep_aspect = true;	// 画像の縦横比の維持
 
 		// メインページ
-		ShapePage m_main_page;	// メインページ
+		ShapePage m_main_page;	// ページ
 		D2D_UI m_main_d2d;	// 描画環境
 		D2D1_POINT_2F m_main_min{ 0.0F, 0.0F };	// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
 		D2D1_POINT_2F m_main_max{ 0.0F, 0.0F };	// ページの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
 
-		// 設定ページ
-		ShapePage m_dialog_page;	// ダイアログページ
+		// 設定ダイアログのページ
+		ShapePage m_dialog_page;	// ページ
 		D2D_UI m_dialog_d2d;	// 描画環境
 
 		// 元に戻す・やり直し操作
@@ -274,13 +274,13 @@ namespace winrt::GraphPaper::implementation
 		bool m_thread_win_visible = false;	// ウィンドウが表示されてるか判定
 
 		// コンテキストメニュー
-		MenuFlyout m_menu_stroke{ nullptr };	// 線枠コンテキストメニュー
-		MenuFlyout m_menu_fill{ nullptr };	// 塗りつぶしコンテキストメニュー
-		MenuFlyout m_menu_font{ nullptr };	// 書体コンテキストメニュー
-		MenuFlyout m_menu_page{ nullptr };	// ページコンテキストメニュー
-		MenuFlyout m_menu_ungroup{ nullptr };	// グループ解除コンテキストメニュー
-		MenuFlyout m_menu_ruler{ nullptr };	// 定規コンテキストメニュー
-		MenuFlyout m_menu_image{ nullptr };	// 画像コンテキストメニュー
+		//MenuFlyout m_menu_stroke{ nullptr };	// 線枠コンテキストメニュー
+		//MenuFlyout m_menu_fill{ nullptr };	// 塗りつぶしコンテキストメニュー
+		//MenuFlyout m_menu_font{ nullptr };	// 書体コンテキストメニュー
+		//MenuFlyout m_menu_page{ nullptr };	// ページコンテキストメニュー
+		//MenuFlyout m_menu_ungroup{ nullptr };	// グループ解除コンテキストメニュー
+		//MenuFlyout m_menu_ruler{ nullptr };	// 定規コンテキストメニュー
+		//MenuFlyout m_menu_image{ nullptr };	// 画像コンテキストメニュー
 
 		// ハンドラートークン
 		winrt::event_token m_token_suspending;	// アプリケーションの中断ハンドラーのトークン
@@ -330,16 +330,16 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_join.cpp
-		// 線分の結合と端
+		// 線の結合と端
 		//-------------------------------
 
-		// 線枠メニューの「端の種類」に印をつける.
+		// 線枠メニューの「端の形式」に印をつける.
 		void cap_style_is_checked(const CAP_STYLE& s_cap);
-		// 線枠メニューの「端の種類」が選択された.
+		// 線枠メニューの「端の形式」が選択された.
 		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 線枠メニューの「結合の種類」>「額ぶちの制限」が選択された.
+		// 線枠メニューの「線の結合の形式」>「マイター制限」が選択された.
 		IAsyncAction join_miter_limit_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 線枠メニューの「結合の種類」に印をつける.
+		// 線枠メニューの「線の結合の形式」に印をつける.
 		void join_style_is_checked(const D2D1_LINE_JOIN s_join);
 		// 線枠メニューの「結合の形式」が選択された.
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
@@ -369,9 +369,9 @@ namespace winrt::GraphPaper::implementation
 		// 矢じるしの形式と寸法
 		//-------------------------------
 
-		// 線枠メニューの「矢じるしの種類」に印をつける.
+		// 線枠メニューの「矢じるしの形式」に印をつける.
 		void arrow_style_is_checked(const ARROW_STYLE val);
-		// 線枠メニューの「矢じるしの種類」が選択された.
+		// 線枠メニューの「矢じるしの形式」が選択された.
 		void arrow_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 線枠メニューの「矢じるしの大きさ」が選択された.
 		IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
@@ -426,9 +426,11 @@ namespace winrt::GraphPaper::implementation
 		// ポインターの現在位置を設定する.
 		void event_set_pos_cur(PointerRoutedEventArgs const& args);
 		// コンテキストメニューを表示する.
-		void event_show_context_menu(void);
+		void event_popup_menu(void);
 		// ポインターのホイールボタンが操作された.
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		// ポップアップメニューを表示する.
+		void event_popup_menu(const MenuFlyout& mf);
 
 		//-------------------------------
 		// MainPage_file.cpp
@@ -731,7 +733,7 @@ namespace winrt::GraphPaper::implementation
 		void select_tool_invoked(IInspectable const&, KeyboardAcceleratorInvokedEventArgs const&);
 
 		//-------------------------------
-		// MainPage_sheet.cpp
+		// MainPage_page.cpp
 		// ページ設定の保存と削除
 		//-------------------------------
 
@@ -804,9 +806,9 @@ namespace winrt::GraphPaper::implementation
 		// 破線
 		//------------------------------
 
-		// 線枠メニューの「種類」のサブ項目が選択された.
+		// 線枠メニューの「破線の形式」のサブ項目が選択された.
 		void dash_style_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 線枠メニューの「種類」に印をつける.
+		// 線枠メニューの「破線の形式」に印をつける.
 		void dash_style_is_checked(const D2D1_DASH_STYLE d_style);
 		// 線枠メニューの「破線の配列」が選択された.
 		IAsyncAction dash_patt_click_async(IInspectable const&, RoutedEventArgs const&);

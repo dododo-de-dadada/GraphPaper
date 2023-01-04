@@ -51,11 +51,11 @@
     <ClCompile Include="shape_text.cpp" />
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="shape_ruler.cpp" />
-    <ClCompile Include="MainPage_sample.cpp" />
+    <ClCompile Include="MainPage_dialog.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
     <ClCompile Include="MainPage_status.cpp" />
     <ClCompile Include="shape_page.cpp" />
-    <ClCompile Include="MainPage_sheet.cpp" />
+    <ClCompile Include="MainPage_page.cpp" />
     <ClCompile Include="shape_path.cpp" />
     <ClCompile Include="MainPage_join.cpp" />
     <ClCompile Include="MainPage_text.cpp" />

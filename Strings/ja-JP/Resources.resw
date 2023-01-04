@@ -522,7 +522,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfsi_arrow_style.Text" xml:space="preserve">
-    <value>矢じるしの種類</value>
+    <value>矢じるしの形式</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_font_style.Text" xml:space="preserve">
@@ -546,7 +546,7 @@
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_dash_style.Text" xml:space="preserve">
-    <value>種類</value>
+    <value>破線の形式</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_text_par_align.Text" xml:space="preserve">
@@ -797,8 +797,8 @@
     <value>塗りつぶし</value>
     <comment>String</comment>
   </data>
-  <data name="str_font" xml:space="preserve">
-    <value>書体</value>
+  <data name="str_font_settings" xml:space="preserve">
+    <value>書体の設定</value>
     <comment>String</comment>
   </data>
   <data name="str_grid" xml:space="preserve">
@@ -829,8 +829,8 @@
     <value>グレースケール</value>
     <comment>String</comment>
   </data>
-  <data name="str_page" xml:space="preserve">
-    <value>ページ</value>
+  <data name="str_page_settings" xml:space="preserve">
+    <value>ページ設定</value>
     <comment>String</comment>
   </data>
   <data name="str_pangram" xml:space="preserve">
@@ -846,7 +846,7 @@
     <value>線枠の色</value>
     <comment>String</comment>
   </data>
-  <data name="str_dash_patt" xml:space="preserve">
+  <data name="str_dash_pattern" xml:space="preserve">
     <value>破線の配置</value>
     <comment>String</comment>
   </data>
@@ -1050,10 +1050,6 @@
     <value>バージョン 0.0.2</value>
     <comment>TextBlock</comment>
   </data>
-  <data name="str_line_join" xml:space="preserve">
-    <value>線分の結合</value>
-    <comment>String</comment>
-  </data>
   <data name="str_text_line_sp" xml:space="preserve">
     <value>行間</value>
     <comment>String</comment>
@@ -1067,15 +1063,15 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfi_join_miter_limit.Text" xml:space="preserve">
-    <value>額ぶちの制限...</value>
+    <value>マイター制限...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_join_style_miter.Text" xml:space="preserve">
-    <value>額ぶち</value>
+    <value>マイター</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_join_style_miter_or_bevel.Text" xml:space="preserve">
-    <value>額ぶち|面取り</value>
+    <value>マイター あるいは 面取り</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_join_style_round.Text" xml:space="preserve">
@@ -1083,11 +1079,11 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfs_cap_style.Text" xml:space="preserve">
-    <value>端の種類</value>
+    <value>端の形式</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfs_join_style.Text" xml:space="preserve">
-    <value>線分の結合の種類</value>
+    <value>線の結合の形式</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfi_stick_to_vertex.Text" xml:space="preserve">

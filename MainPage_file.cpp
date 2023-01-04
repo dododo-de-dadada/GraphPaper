@@ -182,32 +182,8 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// コンテキストメニューが開いているなら閉じる.
-		if (m_menu_fill != nullptr && m_menu_fill.IsOpen()) {
-			m_menu_fill.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_font != nullptr && m_menu_font.IsOpen()) {
-			m_menu_font.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_image != nullptr && m_menu_image.IsOpen()) {
-			m_menu_image.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_ruler != nullptr && m_menu_ruler.IsOpen()) {
-			m_menu_ruler.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_page != nullptr && m_menu_page.IsOpen()) {
-			m_menu_page.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_stroke != nullptr && m_menu_stroke.IsOpen()) {
-			m_menu_stroke.Hide();
-			ContextFlyout(nullptr);
-		}
-		else if (m_menu_ungroup != nullptr && m_menu_ungroup.IsOpen()) {
-			m_menu_ungroup.Hide();
+		if (ContextFlyout() != nullptr) {
+			ContextFlyout().Hide();
 			ContextFlyout(nullptr);
 		}
 
@@ -239,16 +215,6 @@ namespace winrt::GraphPaper::implementation
 		// 一覧が表示されてるか判定する.
 		if (summary_is_visible()) {
 			summary_close_click(nullptr, nullptr);
-		}
-		// 静的リソースから読み込んだコンテキストメニューを破棄する.
-		{
-			m_menu_stroke = nullptr;
-			m_menu_fill = nullptr;
-			m_menu_font = nullptr;
-			m_menu_page = nullptr;
-			m_menu_ruler = nullptr;
-			m_menu_image = nullptr;
-			m_menu_ungroup = nullptr;
 		}
 
 		// コードビハインドで設定したハンドラーの設定を解除する.

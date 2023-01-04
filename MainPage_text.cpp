@@ -24,7 +24,7 @@ namespace winrt::GraphPaper::implementation
 	// 見本の図形を作成する.
 	// panel_w	見本を表示するパネルの幅
 	// panel_h	見本を表示するパネルの高さ
-	// prop_sheet	見本を表示するシート
+	// page	見本を表示するページ
 	static void text_create_sample_shape(const float panel_w, const float panel_h, ShapePage& setting)
 	{
 		const auto padd_w = panel_w * 0.125;

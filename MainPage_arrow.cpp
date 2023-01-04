@@ -160,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 線枠メニューの「矢じるしの種類」のサブ項目が選択された.
+	// 線枠メニューの「矢じるしの形式」のサブ項目が選択された.
 	//------------------------------
 	void MainPage::arrow_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
@@ -186,7 +186,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 線枠メニューの「矢じるしの種類」に印をつける.
+	// 線枠メニューの「矢じるしの形式」に印をつける.
 	// a_style	矢じるしの形式
 	//------------------------------
 	void MainPage::arrow_style_is_checked(const ARROW_STYLE val)

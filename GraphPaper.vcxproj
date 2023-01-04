@@ -157,10 +157,10 @@
     <ClCompile Include="MainPage_group.cpp" />
     <ClCompile Include="MainPage_image.cpp" />
     <ClCompile Include="MainPage_join.cpp" />
-    <ClCompile Include="MainPage_sheet.cpp" />
+    <ClCompile Include="MainPage_page.cpp" />
     <ClCompile Include="MainPage_misc.cpp" />
     <ClCompile Include="MainPage_event.cpp" />
-    <ClCompile Include="MainPage_sample.cpp" />
+    <ClCompile Include="MainPage_dialog.cpp" />
     <ClCompile Include="MainPage_scroll.cpp" />
     <ClCompile Include="MainPage_select.cpp" />
     <ClCompile Include="MainPage_status.cpp" />

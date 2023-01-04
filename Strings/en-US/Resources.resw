@@ -546,7 +546,7 @@
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_dash_style.Text" xml:space="preserve">
-    <value>Style</value>
+    <value>Dash Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
   <data name="mfsi_text_par_align.Text" xml:space="preserve">
@@ -797,8 +797,8 @@
     <value>Fill</value>
     <comment>String</comment>
   </data>
-  <data name="str_font" xml:space="preserve">
-    <value>Font</value>
+  <data name="str_font_settings" xml:space="preserve">
+    <value>Font Settings</value>
     <comment>String</comment>
   </data>
   <data name="tk_appname.Text" xml:space="preserve">
@@ -833,8 +833,8 @@
     <value>Gray Scale</value>
     <comment>String</comment>
   </data>
-  <data name="str_page" xml:space="preserve">
-    <value>Page</value>
+  <data name="str_page_settings" xml:space="preserve">
+    <value>Page Settings</value>
     <comment>String</comment>
   </data>
   <data name="str_pangram" xml:space="preserve">
@@ -850,7 +850,7 @@
     <value>Stroke Color</value>
     <comment>String</comment>
   </data>
-  <data name="str_dash_patt" xml:space="preserve">
+  <data name="str_dash_pattern" xml:space="preserve">
     <value>Dash Pattern</value>
     <comment>String</comment>
   </data>
@@ -1049,10 +1049,6 @@
   <data name="tb_version.Text" xml:space="preserve">
     <value>Version 0.0.2</value>
     <comment>TextBlock</comment>
-  </data>
-  <data name="str_line_join" xml:space="preserve">
-    <value>Line Join</value>
-    <comment>String</comment>
   </data>
   <data name="str_text_line_sp" xml:space="preserve">
     <value>Line Space</value>

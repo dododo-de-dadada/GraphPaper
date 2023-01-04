@@ -22,12 +22,12 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeBezi::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
-		if (equal(m_stroke_color.a, 0.0f)) {
+		if (equal(m_stroke_width, 0.0f) ||
+			!is_opaque(m_stroke_color)) {
 			return 0;
 		}
 
 		size_t n = dt_writer.WriteString(L"% Bezier curve\n");
-		//size_t n = dt_write("% Bezier curve\n", dt_writer);
 		n += export_pdf_stroke(dt_writer);
 
 		D2D1_BEZIER_SEGMENT b_seg;
@@ -61,7 +61,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeLine::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
-		if (equal(m_stroke_color.a, 0.0f)) {
+		if (equal(m_stroke_width, 0.0f) ||
+			!is_opaque(m_stroke_color)) {
 			return 0;
 		}
 		size_t n = dt_writer.WriteString(L"% Line\n");
@@ -89,6 +90,10 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	static size_t export_pdf_barbs(const ShapeLine* s, const D2D1_SIZE_F page_size, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer)
 	{
+		if (equal(s->m_stroke_width, 0.0f) ||
+			!is_opaque(s->m_stroke_color)) {
+			return 0;
+		}
 		wchar_t buf[1024];
 		size_t n = 0;
 
@@ -126,6 +131,12 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapePoly::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
+		if ((equal(m_stroke_width, 0.0f) ||
+			!is_opaque(m_stroke_color)) &&
+			!is_opaque(m_fill_color)) {
+			return 0;
+		}
+
 		size_t n = dt_writer.WriteString(L"% Polyline\n");
 		n += export_pdf_stroke(dt_writer);
 
@@ -181,6 +192,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに PDF として書き込む.
 	size_t ShapeElli::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
+		if ((equal(m_stroke_width, 0.0f) ||
+			!is_opaque(m_stroke_color)) &&
+			!is_opaque(m_fill_color)) {
+			return 0;
+		}
+
 		size_t n = dt_writer.WriteString(L"% Ellipse\n");
 		n += export_pdf_stroke(dt_writer);
 
@@ -262,6 +279,12 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeRect::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
+		if ((equal(m_stroke_width, 0.0f) ||
+			!is_opaque(m_stroke_color)) &&
+			!is_opaque(m_fill_color)) {
+			return 0;
+		}
+
 		size_t n = dt_writer.WriteString(L"% Rectangle\n");
 		n += export_pdf_stroke(dt_writer);
 
@@ -295,6 +318,12 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeRRect::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
+		if ((equal(m_stroke_width, 0.0f) ||
+			!is_opaque(m_stroke_color)) &&
+			!is_opaque(m_fill_color)) {
+			return 0;
+		}
+
 		wchar_t buf[1024];
 		size_t n = dt_writer.WriteString(L"% Rounded Rectangle\n");
 		n += export_pdf_stroke(dt_writer);
@@ -416,24 +445,26 @@ namespace winrt::GraphPaper::implementation
 			n += dt_writer.WriteString(L"0 J\n");
 		}
 
-		// 線枠の結合
+		// 線の結合の形式
+		// 面取り
 		if (equal(m_join_style, D2D1_LINE_JOIN_BEVEL)) {
 			n += dt_writer.WriteString(L"2 j\n");
 		}
+		// 丸い
 		else if (equal(m_join_style, D2D1_LINE_JOIN_ROUND)) {
 			n += dt_writer.WriteString(L"1 j\n");
 		}
+		// PDF にはマイターあるいは面取りしかない.
 		else {
 			//if (equal(m_join_style, D2D1_LINE_JOIN_MITER) ||
 			//equal(m_join_style, D2D1_LINE_JOIN_MITER_OR_BEVEL)) {
 			n += dt_writer.WriteString(L"0 j\n");
+			// マイター制限
+			swprintf_s(buf, L"%f M\n", m_join_miter_limit);
+			n += dt_writer.WriteString(buf);
 		}
 
-		// マイター制限
-		swprintf_s(buf, L"%f M\n", m_join_miter_limit);
-		n += dt_writer.WriteString(buf);
-
-		// 破線の種類
+		// 破線の形式
 		if (m_dash_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
 			// 最後の数値は配置 (破線パターン) を適用するオフセット.
 			// [] 0		| 実線
@@ -463,39 +494,11 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに PDF として書き込む.
 	size_t ShapeImage::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
-		/*
-		winrt::com_ptr<IWICImagingFactory2> wic_factory;
-		winrt::check_hresult(
-			CoCreateInstance(
-				CLSID_WICImagingFactory,
-				nullptr,
-				CLSCTX_INPROC_SERVER,
-				IID_PPV_ARGS(&wic_factory)
-			)
-		);
-		std::vector<uint8_t> vec(4 * m_orig.width * m_orig.height);
-		winrt::com_ptr<IWICBitmap> wic_bitmap;
-		wic_factory->CreateBitmapFromMemory(m_orig.width, m_orig.height, GUID_WICPixelFormat32bppBGRA, 4 * m_orig.width, 4 * m_orig.width * m_orig.height, vec.data(), wic_bitmap.put());
-		D2D1_RENDER_TARGET_PROPERTIES prop{
-			D2D1_RENDER_TARGET_TYPE::D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-			D2D1_PIXEL_FORMAT{
-				DXGI_FORMAT_B8G8R8A8_UNORM,
-				D2D1_ALPHA_MODE_STRAIGHT
-				},
-			96.0f,
-			96.0f,
-			D2D1_RENDER_TARGET_USAGE_FORCE_BITMAP_REMOTING,
-			D2D1_FEATURE_LEVEL_DEFAULT
-		};
-		winrt::com_ptr<ID2D1RenderTarget> target;
-		sheet.m_d2d.m_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
-		*/
-		wchar_t buf[1024];
-
-		// 表示の大きさの規定値は 1 × 1.
+		// PDF では表示の大きさの規定値は 1 × 1.
 		// そもままでは, 画像全体が 1 × 1 にマッピングされる.
 		// 表示するには, 変換行列に表示する大きさを指定し, 拡大する.
 		// 表示する位置は, 左上でなく左下隅を指定する.
+		wchar_t buf[1024];
 		swprintf_s(buf,
 			L"%% Image\n"
 			L"q\n"
@@ -516,11 +519,9 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeText::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const
 	{
-		size_t len = dt_writer.WriteString(L"% Text\n");
-		len += ShapeRect::export_pdf(page_size, dt_writer);
-		/*
-		*/
-		//ShapeText::export_pdf(sheet, dt_writer);
+		size_t len = ShapeRect::export_pdf(page_size, dt_writer);
+		len += dt_writer.WriteString(L"% Text\n");
+
 		wchar_t buf[1024];
 		// BT テキストオブジェクトの開始
 		// フォント名 サイズ Tf

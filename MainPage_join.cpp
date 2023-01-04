@@ -9,9 +9,9 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
-	constexpr wchar_t DLG_TITLE[] = L"str_line_join";
+	constexpr wchar_t DLG_TITLE[] = L"str_join_miter_limit";
 
-	// 線枠メニューの「端の種類」が選択された.
+	// 線枠メニューの「端の形式」が選択された.
 	void MainPage::cap_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		CAP_STYLE new_val;
@@ -38,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「端の種類」に印をつける.
+	// 線枠メニューの「端の形式」に印をつける.
 	// s_cap	端の形式
 	void MainPage::cap_style_is_checked(const CAP_STYLE& val)
 	{
@@ -52,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 		//rmfi_cap_style_triangle_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
 	}
 
-	// 線枠メニューの「結合の種類」>「額ぶちの制限」が選択された.
+	// 線枠メニューの「線の結合の結合」>「マイター制限」が選択された.
 	IAsyncAction MainPage::join_miter_limit_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
@@ -104,7 +104,7 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_line_join")));
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_join_miter_limit")));
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_limit;
@@ -175,7 +175,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 線枠メニューの「結合の種類」が選択された.
+	// 線枠メニューの「線の結合の形式」が選択された.
 	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		D2D1_LINE_JOIN new_val;
