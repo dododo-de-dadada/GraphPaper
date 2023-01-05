@@ -1,3 +1,7 @@
+//
+// MainPage_export.cpp
+// PDF または SVG にエクスポートする
+//
 #include "pch.h"
 #include <shcore.h>
 #include "MainPage.h"
@@ -38,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_font_weight(weight);
 		s->get_font_stretch(stretch);
 		s->get_font_style(style);
-
+		// https://github.com/adobe-type-tools/cmap-resources/blob/master/Adobe-Japan1-7/cid2code.txt
 		// 文字列レイアウトから書体コレクションを得る.
 		IDWriteFontCollection* coll = nullptr;
 		if (s->m_dw_text_layout->GetFontCollection(&coll) == S_OK) {
@@ -459,10 +463,12 @@ namespace winrt::GraphPaper::implementation
 						L"/Ordering (Japan1)\n"
 						L"/Supplement 7\n"
 						L">>\n"
-						L"/FontDescriptor %d 0 R\n",	// 間接参照で必須.
+						L"/FontDescriptor %d 0 R\n"	// 間接参照で必須.
+						L"/DW %f\n",
 						6 + 3 * n + 1,
 						std::data(psn),
-						6 + 3 * n + 2
+						6 + 3 * n + 2,
+						1000 * (f_met.glyphBoxRight - f_met.glyphBoxLeft) / upem
 					);
 					len = dt_writer.WriteString(buf);
 					// 半角のグリフ幅を設定する
