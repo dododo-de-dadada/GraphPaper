@@ -67,6 +67,7 @@
     <ClCompile Include="MainPage_export.cpp" />
     <ClCompile Include="shape_pdf.cpp" />
     <ClCompile Include="zlib.cpp" />
+    <ClCompile Include="MainPage_CMap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

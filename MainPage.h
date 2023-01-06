@@ -200,6 +200,9 @@ namespace winrt::GraphPaper::implementation
 	};
 	constexpr STATUS_BAR STATUS_BAR_DEF_VAL = static_cast<STATUS_BAR>(static_cast<uint32_t>(STATUS_BAR::DRAW) | static_cast<uint32_t>(STATUS_BAR::POS) | static_cast<uint32_t>(STATUS_BAR::ZOOM));
 
+	uint16_t cmap_getcid(const wchar_t code) noexcept;
+	std::vector<uint32_t> cmap_utf16_to_utf32(const wchar_t* wstr) noexcept;
+
 	//-------------------------------
 	// メインページ
 	//-------------------------------
