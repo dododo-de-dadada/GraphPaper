@@ -6,9 +6,11 @@
 #include <shcore.h>
 #include "MainPage.h"
 #include "zlib.h"
+#include "CMap.h"
 
 using namespace winrt;
 using namespace::Zlib::implementation;
+using namespace::CMap::implementation;
 
 namespace winrt::GraphPaper::implementation
 {
@@ -35,8 +37,10 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STRETCH& stretch,
 		DWRITE_FONT_STYLE& style,
 		DWRITE_FONT_METRICS1& f_met,
+		DWRITE_FONT_FACE_TYPE& f_type,
 		std::vector<wchar_t>& p_name,
 		std::vector<uint16_t>& cid,
+		std::vector<uint16_t>& gid,
 		std::vector<DWRITE_GLYPH_METRICS>& g_met
 	)
 	{
@@ -64,35 +68,18 @@ namespace winrt::GraphPaper::implementation
 					if (static_cast<IDWriteFont3*>(font)->GetFontFaceReference(&ref) == S_OK) {
 						IDWriteFontFace3* face = nullptr;
 						if (ref->CreateFontFace(&face) == S_OK) {
-							std::vector<uint32_t> utf32{ cmap_utf16_to_utf32(s->m_text) };
+							f_type = face->GetType();
+							std::vector<uint32_t> utf32{ cmap_utf16_to_utf32(s->m_text, wchar_len(s->m_text)) };
 							const auto last = std::unique(std::begin(utf32), std::end(utf32));
 							utf32.erase(last, utf32.end());
-							std::vector<uint16_t> gid(utf32.size());
+							cid.resize(utf32.size());
+							for (int i = 0; i < utf32.size(); i++) {
+								cid[i] = cmap_getcid(utf32[i]);
+							}
+							gid.resize(utf32.size());
 							winrt::check_hresult(face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(std::size(utf32)), std::data(gid)));
 							g_met.resize(utf32.size());
 							face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(g_met));
-							cid.resize(utf32.size());
-							for (int i = 0; i < cid.size(); i++) {
-								cid[i] = cmap_getcid(static_cast<wchar_t>(utf32[i]));
-							}
-
-							// CID の空白と図形文字 (0-94) に対応する
-							// アスキーコード  (32-126) 配列
-							//static constexpr uint32_t ASCII[]{
-							//	32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-							//	48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
-							//	64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-							//	80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
-							//	96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
-							//	112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126
-							//};
-							//static constexpr auto ASCII_SIZE = std::size(ASCII);
-							// アスキーコードに応じた GID (グリフインデックス) を得る.
-							//static uint16_t gid[ASCII_SIZE];
-							//winrt::check_hresult(face->GetGlyphIndices(std::data(ASCII), static_cast<UINT32>(ASCII_SIZE), std::data(gid)));
-							//g_met.resize(ASCII_SIZE);
-							//face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(ASCII_SIZE), std::data(g_met));
-
 							face->Release();
 						}
 						ref->Release();
@@ -442,19 +429,32 @@ namespace winrt::GraphPaper::implementation
 					DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;
 					DWRITE_FONT_METRICS1 f_met{};
 					std::vector<wchar_t> p_name{};	// ポストスクリプト名
+					std::vector<uint16_t> gid{};
 					std::vector<uint16_t> cid{};
 					std::vector<DWRITE_GLYPH_METRICS> g_met{};
-					pdf_get_font(t, weight, stretch, style, f_met, p_name, cid, g_met);
+					DWRITE_FONT_FACE_TYPE f_type;
+					pdf_get_font(t, weight, stretch, style, f_met, f_type, p_name, cid, gid, g_met);
 					const int upem = f_met.designUnitsPerEm;
 
+					//p_name.clear();
+					//for (int i = 0; t->m_font_family[i] != L'\0'; i++) {
+					//	if (t->m_font_family[i] != L' ') {
+					//		p_name.push_back(t->m_font_family[i]);
+					//	}
+					//}
+					//p_name.push_back(L'\0');
+
 					// フォント辞書
+					// OpenType の場合 ポストスクリプト名+'-'+CMap で CIDFontType0
 					swprintf_s(buf,
 						L"%% Font Dictionary\n"
 						L"%d 0 obj <<\n"
 						L"/Type /Font\n"
-						L"/BaseFont /%s\n"
 						L"/Subtype /Type0\n"
-						L"/Encoding /UniJIS-UCS2-H\n"
+						L"/BaseFont /%s-Identity-H\n"
+						//L"/Encoding /90ms-RKSJ-H\n"
+						//L"/Encoding /UniJIS-UTF16-H\n"
+						L"/Encoding /Identity-H\n"
 						L"/DescendantFonts [%d 0 R]\n"
 						L">>\n",
 						6 + 3 * n,
@@ -470,12 +470,14 @@ namespace winrt::GraphPaper::implementation
 						L"%% Descendant Font Dictionary\n"
 						L"%d 0 obj <<\n"
 						L"/Type /Font\n"
-						L"/Subtype /CIDFontType2\n"
+						L"/Subtype /CIDFontType0\n"
 						L"/BaseFont /%s\n"
 						L"/CIDSystemInfo <<\n"
 						L"/Registry (Adobe)\n"
-						L"/Ordering (Japan1)\n"
-						L"/Supplement 4\n"
+						//L"/Ordering (Japan1)\n"
+						//L"/Supplement 7\n"
+						L"/Ordering (Identity)\n"
+						L"/Supplement 0\n"
 						L">>\n"
 						L"/FontDescriptor %d 0 R\n",	// 間接参照で必須.
 						6 + 3 * n + 1,
@@ -489,7 +491,8 @@ namespace winrt::GraphPaper::implementation
 					for (int i = 0; i < g_met.size(); i++) {
 						swprintf_s(buf,
 							L"%u %u %u\n",
-							cid[i], cid[i],
+							//cid[i], cid[i],
+							gid[i], gid[i],
 							1000 * g_met[i].advanceWidth / upem);
 						len += dt_writer.WriteString(buf);
 					}

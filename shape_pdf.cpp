@@ -8,8 +8,10 @@
 
 #include "pch.h"
 #include "shape.h"
+#include "CMap.h"
 
 using namespace winrt;
+using namespace winrt::CMap::implementation;
 
 namespace winrt::GraphPaper::implementation
 {
@@ -512,6 +514,61 @@ namespace winrt::GraphPaper::implementation
 		return dt_writer.WriteString(buf);
 	}
 
+	static bool get_font_face(const ShapeText* s, IDWriteFontFace3** const face)
+	{
+		const auto family = s->m_font_family;
+		const auto weight = s->m_font_weight;
+		const auto stretch = s->m_font_stretch;
+		const auto style = s->m_font_style;
+		bool ret = false;
+
+		// 文字列を書き込む.
+		IDWriteFontCollection* coll = nullptr;
+		if (s->m_dw_text_layout->GetFontCollection(&coll) == S_OK) {
+			// 図形と一致する書体ファミリを得る.
+			IDWriteFontFamily* fam = nullptr;
+			UINT32 index;
+			BOOL exists;
+			if (coll->FindFamilyName(family, &index, &exists) == S_OK &&
+				exists &&
+				coll->GetFontFamily(index, &fam) == S_OK) {
+				// 書体ファミリから, 太さと幅, 字体が一致する書体を得る.
+				IDWriteFont* font = nullptr;
+				if (fam->GetFirstMatchingFont(weight, stretch, style, &font) == S_OK) {
+					IDWriteFontFaceReference* ref = nullptr;
+					if (static_cast<IDWriteFont3*>(font)->GetFontFaceReference(&ref) == S_OK) {
+						*face = nullptr;
+						if (ref->CreateFontFace(face) == S_OK) {
+							ret = true;
+						}
+						ref->Release();
+					}
+					font->Release();
+				}
+				fam->Release();
+			}
+			coll->Release();
+		}
+		return true;
+	}
+
+	static uint16_t get_uint16(const void* addr, size_t offs)
+	{
+		const uint8_t* a = static_cast<const uint8_t*>(addr) + offs;
+		return
+			(static_cast<uint16_t>(a[0]) << 8) |
+			(static_cast<uint16_t>(a[1]));
+	}
+	static uint32_t get_uint32(const void* addr, size_t offs)
+	{
+		const uint8_t* a = static_cast<const uint8_t*>(addr) + offs;
+		return 
+			(static_cast<uint32_t>(a[0]) << 24) | 
+			(static_cast<uint32_t>(a[1]) << 16) |
+			(static_cast<uint32_t>(a[2]) << 8) | 
+			(static_cast<uint32_t>(a[3]));
+	}
+
 	//------------------------------
 	// 図形をデータライターに PDF として書き込む.
 	// dt_weiter	データライター
@@ -542,7 +599,9 @@ namespace winrt::GraphPaper::implementation
 		);
 		len += dt_writer.WriteString(buf);
 
-		std::vector<uint8_t> sjis{};
+		IDWriteFontFace3* face;
+		get_font_face(static_cast<const ShapeText*>(this), &face);
+		std::vector<uint8_t> mb_text{};	// マルチバイト文字列
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 			const wchar_t* t = m_text + m_dw_test_metrics[i].textPosition;	// 行の先頭文字を指すポインター
 			const uint32_t t_len = m_dw_test_metrics[i].length;	// 行の文字数
@@ -553,33 +612,89 @@ namespace winrt::GraphPaper::implementation
 				td_x, -td_y);
 			len += dt_writer.WriteString(buf);
 
+			//
+//https://github.com/wine-mirror/wine/blob/master/dlls/dwrite/tests/font.c
+			const void* table_data;
+			UINT32 table_size;
+			void* table_context;
+			BOOL exists;
+			face->TryGetFontTable(DWRITE_MAKE_OPENTYPE_TAG('c', 'm', 'a', 'p'), &table_data, &table_size, &table_context, &exists);
+			struct EncodingRecord {
+				uint16_t platformID;
+				uint16_t encodingID;
+				uint32_t offset;
+			};
+			uint16_t version = get_uint16(table_data, 0);
+			uint16_t numTables = get_uint16(table_data, 2);
+			for (uint16_t i = 0; i < numTables; i++) {
+				uint16_t platformID = get_uint16(table_data, 4ull + 8ull * i + 0);
+				uint16_t encodingID = get_uint16(table_data, 4ull + 8ull * i + 2);
+				uint32_t offset = get_uint32(table_data, 4ull + 8ull * i + 4);
+			}
+			face->ReleaseFontTable(table_context);
+
 			// 文字列を書き込む.
-			dt_writer.WriteByte(L'<'); len++;
+			// GID
+			const auto utf32 = cmap_utf16_to_utf32(t, t_len);
+			const auto u_len = std::size(utf32);
+			std::vector<uint16_t> gid(u_len);
+			face->GetGlyphIndices(std::data(utf32), u_len, std::data(gid));
+			len += dt_writer.WriteString(L"<");
+			for (uint32_t j = 0; j < u_len; j++) {
+				swprintf_s(buf, L"%04x", gid[j]);
+				len += dt_writer.WriteString(buf);
+			}
+			len += dt_writer.WriteString(L"> Tj\n");
+			/*
+			// wchar_t を UTF-32 に変換して書き出す.
+			len += dt_writer.WriteString(L"% UTF-32\n<");
+			std::vector<uint32_t> utf32{ cmap_utf16_to_utf32(t, t_len) };
+			for (int i = 0; i < utf32.size(); i++) {
+				swprintf_s(buf, L"%06x", utf32[i]);
+				len += dt_writer.WriteString(buf);
+			}
+			len += dt_writer.WriteString(L"> Tj\n");
+			*/
+			/*
+			// wchar_t を CID に変換して書き出す.
+			len += dt_writer.WriteString(L"% CID\n<");
+			std::vector<uint32_t> utf32{ cmap_utf16_to_utf32(t, t_len) };
+			for (int i = 0; i < utf32.size(); i++) {
+				const auto cid = cmap_getcid(utf32[i]);
+				if (cid != 0) {
+					swprintf_s(buf, L"%04x", cid);
+					len += dt_writer.WriteString(buf);
+				}
+			}
+			len += dt_writer.WriteString(L"> Tj\n");
+			*/
+			/*
+			// wchar_t を UTF16 としてそのまま書き出す.
+			len += dt_writer.WriteString(L"<");
 			for (uint32_t j = 0; j < t_len; j++) {
 				swprintf_s(buf, L"%04x", t[j]);
 				len += dt_writer.WriteString(buf);
 			}
 			len += dt_writer.WriteString(L"> Tj\n");
+			*/
 			/*
-			const size_t sjis_len = WideCharToMultiByte(CP_ACP, 0, t, t_len, NULL, 0, NULL, NULL);
-			if (sjis.size() < sjis_len) {
-				sjis.resize(sjis_len);
+			const UINT CP = CP_ACP;	// コードページ
+			const size_t mb_len = WideCharToMultiByte(CP, 0, t, t_len, NULL, 0, NULL, NULL);
+			if (mb_text.size() < mb_len) {
+				mb_text.resize(mb_len);
 			}
-			WideCharToMultiByte(CP_ACP, 0, t, t_len, (LPSTR)sjis.data(), static_cast<int>(sjis_len), NULL, NULL);
-			len += dt_write(
-				"<",
-				dt_writer);
-			for (int j = 0; j < sjis_len; j++) {
+			WideCharToMultiByte(CP, 0, t, t_len, (LPSTR)std::data(mb_text), static_cast<int>(mb_len), NULL, NULL);
+			len += dt_writer.WriteString(L"<");
+			for (int j = 0; j < mb_len; j++) {
 				constexpr char* HEX = "0123456789abcdef";
-				dt_writer.WriteByte(HEX[sjis[j] >> 4]);
-				dt_writer.WriteByte(HEX[sjis[j] & 15]);
+				dt_writer.WriteByte(HEX[mb_text[j] >> 4]);
+				dt_writer.WriteByte(HEX[mb_text[j] & 15]);
 			}
-			len += 2 * sjis_len;
-			len += dt_write(
-				"> Tj\n",
-				dt_writer);
+			len += 2 * mb_len;
+			len += dt_writer.WriteString(L"> Tj\n");
 			*/
 		}
+		face->Release();
 		len += dt_writer.WriteString(L"ET\n");
 		return len;
 	}

@@ -78,6 +78,7 @@
     <ClInclude Include="undo.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="zlib.h" />
+    <ClInclude Include="CMap.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
