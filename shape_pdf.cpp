@@ -601,6 +601,109 @@ namespace winrt::GraphPaper::implementation
 
 		IDWriteFontFace3* face;
 		get_font_face(static_cast<const ShapeText*>(this), &face);
+
+		//https://learn.microsoft.com/en-us/typography/opentype/spec/cmap
+//https://github.com/wine-mirror/wine/blob/master/dlls/dwrite/tests/font.c
+		const void* table_data;
+		UINT32 table_size;
+		void* table_context;
+		BOOL exists;
+		face->TryGetFontTable(DWRITE_MAKE_OPENTYPE_TAG('c', 'm', 'a', 'p'), &table_data, &table_size, &table_context, &exists);
+		uint16_t version = get_uint16(table_data, 0);
+		uint16_t numTables = get_uint16(table_data, 2);
+		for (uint16_t i = 0; i < numTables; i++) {
+			uint16_t platformID = get_uint16(table_data, 4ull + 8ull * i + 0);
+			uint16_t encodingID = get_uint16(table_data, 4ull + 8ull * i + 2);
+			uint32_t offset = get_uint32(table_data, 4ull + 8ull * i + 4);
+			if (platformID == 0) {	// Unicode
+				if (encodingID == 3) {	// Unicode 2.0 (BMP のみ)
+					uint16_t format = get_uint16(table_data, offset);
+					if (format == 0) {
+
+					}
+					else if (format == 4) {
+
+					}
+					else if (format == 6) {
+
+					}
+				}
+				else if (encodingID == 4) {	// Unicode 2.0 (full repertoire)
+					uint16_t format = get_uint16(table_data, offset);
+					if (format == 0) {
+
+					}
+					else if (format == 4) {
+
+					}
+					else if (format == 6) {
+
+					}
+					else if (format == 10) {
+
+					}
+					else if (format == 12) {
+
+					}
+				}
+				else if (encodingID == 6) {	// Unicode full repertoire
+					uint16_t format = get_uint16(table_data, offset);
+					if (format == 0) {
+
+					}
+					else if (format == 4) {
+
+					}
+					else if (format == 6) {
+
+					}
+					else if (format == 10) {
+
+					}
+					else if (format == 12) {
+
+					}
+				}
+			}
+			else if (platformID == 3) {
+				if (encodingID == 0) {	// Symbol
+				}
+				else if (encodingID == 1) {	// Unicode BMP
+					// format-4
+				}
+				else if (encodingID == 2) {	// ShiftJIS
+
+				}
+				else if (encodingID == 3) {	// PRC
+
+				}
+				else if (encodingID == 4) {	// Big5
+				}
+				else if (encodingID == 5) {	// Wansung
+				}
+				else if (encodingID == 6) {	// Johab
+				}
+				else if (encodingID == 10) {	// Unicode full repertoire
+					uint16_t format = get_uint16(table_data, offset);
+					if (format == 0) {
+
+					}
+					else if (format == 12) {
+						uint16_t reserved = get_uint16(table_data, offset + 2);
+						uint32_t len = get_uint32(table_data, offset + 4);
+						uint32_t language = get_uint32(table_data, offset + 8);
+						uint32_t numGroups = get_uint32(table_data, offset + 12);
+
+
+						//uint32 startCharCode
+						//uint32 endCharCode
+						//uint32 startGlyphID
+					}
+				}
+			}
+		}
+		face->ReleaseFontTable(table_context);
+
 		std::vector<uint8_t> mb_text{};	// マルチバイト文字列
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 			const wchar_t* t = m_text + m_dw_test_metrics[i].textPosition;	// 行の先頭文字を指すポインター
@@ -612,26 +715,6 @@ namespace winrt::GraphPaper::implementation
 				td_x, -td_y);
 			len += dt_writer.WriteString(buf);
 
-			//
-			//https://github.com/wine-mirror/wine/blob/master/dlls/dwrite/tests/font.c
-			const void* table_data;
-			UINT32 table_size;
-			void* table_context;
-			BOOL exists;
-			face->TryGetFontTable(DWRITE_MAKE_OPENTYPE_TAG('c', 'm', 'a', 'p'), &table_data, &table_size, &table_context, &exists);
-			struct EncodingRecord {
-				uint16_t platformID;
-				uint16_t encodingID;
-				uint32_t offset;
-			};
-			uint16_t version = get_uint16(table_data, 0);
-			uint16_t numTables = get_uint16(table_data, 2);
-			for (uint16_t i = 0; i < numTables; i++) {
-				uint16_t platformID = get_uint16(table_data, 4ull + 8ull * i + 0);
-				uint16_t encodingID = get_uint16(table_data, 4ull + 8ull * i + 2);
-				uint32_t offset = get_uint32(table_data, 4ull + 8ull * i + 4);
-			}
-			face->ReleaseFontTable(table_context);
 
 			// 文字列を書き込む.
 			/*
