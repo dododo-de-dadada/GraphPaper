@@ -613,7 +613,7 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 
 			//
-//https://github.com/wine-mirror/wine/blob/master/dlls/dwrite/tests/font.c
+			//https://github.com/wine-mirror/wine/blob/master/dlls/dwrite/tests/font.c
 			const void* table_data;
 			UINT32 table_size;
 			void* table_context;
@@ -634,6 +634,7 @@ namespace winrt::GraphPaper::implementation
 			face->ReleaseFontTable(table_context);
 
 			// 文字列を書き込む.
+			/*
 			// GID
 			const auto utf32 = cmap_utf16_to_utf32(t, t_len);
 			const auto u_len = std::size(utf32);
@@ -645,6 +646,7 @@ namespace winrt::GraphPaper::implementation
 				len += dt_writer.WriteString(buf);
 			}
 			len += dt_writer.WriteString(L"> Tj\n");
+			*/
 			/*
 			// wchar_t を UTF-32 に変換して書き出す.
 			len += dt_writer.WriteString(L"% UTF-32\n<");
@@ -668,7 +670,6 @@ namespace winrt::GraphPaper::implementation
 			}
 			len += dt_writer.WriteString(L"> Tj\n");
 			*/
-			/*
 			// wchar_t を UTF16 としてそのまま書き出す.
 			len += dt_writer.WriteString(L"<");
 			for (uint32_t j = 0; j < t_len; j++) {
@@ -676,7 +677,6 @@ namespace winrt::GraphPaper::implementation
 				len += dt_writer.WriteString(buf);
 			}
 			len += dt_writer.WriteString(L"> Tj\n");
-			*/
 			/*
 			const UINT CP = CP_ACP;	// コードページ
 			const size_t mb_len = WideCharToMultiByte(CP, 0, t, t_len, NULL, 0, NULL, NULL);
