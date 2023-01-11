@@ -572,12 +572,12 @@ namespace winrt::GraphPaper::implementation
 					DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;
 					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;
 					DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;
-					DWRITE_FONT_METRICS1 f_met{};
+					DWRITE_FONT_METRICS1 f_met{};	// 書体の計量
 					winrt::hstring p_name{};	// ポストスクリプト名
-					std::vector<uint16_t> gid{};
-					std::vector<uint16_t> cid{};
-					std::vector<DWRITE_GLYPH_METRICS> g_met{};
-					DWRITE_FONT_FACE_TYPE f_type;
+					std::vector<uint16_t> gid{};	// グリフ ID
+					std::vector<uint16_t> cid{};	// 文字 ID
+					std::vector<DWRITE_GLYPH_METRICS> g_met{};	// グリフの計量
+					DWRITE_FONT_FACE_TYPE f_type;	// フォントフェイスの種類
 					float angle;
 					export_pdf_font_info(t, weight, stretch, style, f_met, f_type, p_name, cid, gid, g_met, angle);
 
@@ -676,6 +676,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		HRESULT hr = E_FAIL;
 
+		// ファイルのコンテントの種類をもとに GUID の WIC フォーマットを得る.
 		const GUID& wic_fmt = [](const winrt::hstring& c_type)
 		{
 			if (c_type == L"image/bmp") {
@@ -696,6 +697,7 @@ namespace winrt::GraphPaper::implementation
 			return GUID_NULL;
 		}(image_file.ContentType());
 
+		// WIC フォーマットが空でなければ,
 		if (wic_fmt != GUID_NULL) {
 
 			// Direct2D コンテンツを画像ファイルに保存する方法
