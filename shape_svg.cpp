@@ -280,7 +280,7 @@ namespace winrt::GraphPaper::implementation
 			const DASH_PATT& patt = s->m_dash_patt;	// 破線の配置
 			const CAP_STYLE cap = s->m_stroke_cap;	// 端の形式
 			const D2D1_LINE_JOIN join = s->m_join_style;	// 線の結合
-			const auto limit = s->m_join_miter_limit;	// 線の結合のマイター制限距離
+			const auto limit = s->m_join_miter_limit;	// 線の結合のマイター制限
 			wchar_t buf_color[256]{};
 			wchar_t buf_patt[256]{};
 			wchar_t* buf_cap = L"";
@@ -351,13 +351,13 @@ namespace winrt::GraphPaper::implementation
 	// データライターに SVG タグとして書き込む.
 	void ShapeText::export_svg(DataWriter const& dt_writer) const
 	{
-		static constexpr char* SVG_STYLE[] = {
-			"normal", "oblique", "italic"
+		static constexpr wchar_t* SVG_STYLE[] = {
+			L"normal", L"oblique", L"italic"
 		};
-		static constexpr char* SVG_STRETCH[] = {
-			"normal", "ultra-condensed", "extra-condensed",
-			"condensed", "semi-condensed", "normal", "semi-expanded",
-			"expanded", "extra-expanded", "ultra-expanded"
+		static constexpr wchar_t* SVG_STRETCH[] = {
+			L"normal", L"ultra-condensed", L"extra-condensed",
+			L"condensed", L"semi-condensed", L"normal", L"semi-expanded",
+			L"expanded", L"extra-expanded", L"ultra-expanded"
 		};
 		// 垂直方向のずらし量を求める.
 		//
@@ -371,7 +371,7 @@ namespace winrt::GraphPaper::implementation
 		// テキストレイアウトからフォントメトリックスを取得して, 以下のように求める.
 		// ちなみに, designUnitsPerEm は, 配置 (Em) ボックスの単位あたりの大きさ.
 		// デセントは, フォント文字の配置ボックスの下部からベースラインまでの長さ.
-		// dy = その行のヒットテストメトリックスの高さ - フォントの大きさ × (デセント ÷ 単位大きさ) となる, はず.
+		// dy = その行のヒットテストメトリックスの高さ - フォントの大きさ * (デセント / 単位大きさ) となる, はず.
 		//IDWriteFontCollection* fonts;
 		//m_dw_layout->GetFontCollection(&fonts);
 		//IDWriteFontFamily* family;
@@ -392,8 +392,8 @@ namespace winrt::GraphPaper::implementation
 			L"<g "
 			L"font-size=\"%f\" "
 			L"font-family=\"%s\" "
-			L"font-style=\"%hs\" "
-			L"font-stretch=\"%hs\" "
+			L"font-style=\"%s\" "
+			L"font-stretch=\"%s\" "
 			L"stroke=\"none\" >\n",
 			m_font_size,
 			m_font_family,

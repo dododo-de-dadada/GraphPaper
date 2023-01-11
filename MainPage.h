@@ -889,7 +889,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 図形データを SVG としてストレージファイルに非同期に書き込む.
 		// 図形をデータライターに PDF として書き込む.
-		IAsyncOperation<winrt::hresult> export_as_pdf_async(const StorageFile pdf_file) const noexcept;
+		IAsyncOperation<winrt::hresult> export_as_pdf_async(const StorageFile& pdf_file) const noexcept;
 		IAsyncOperation<winrt::hresult> export_as_svg_async(const StorageFile& svg_file) const noexcept;
 		IAsyncOperation<winrt::hresult> export_as_raster_async(const StorageFile& image_file) noexcept;
 

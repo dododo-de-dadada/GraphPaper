@@ -345,7 +345,7 @@ namespace winrt::GraphPaper::implementation
 			else if (image_file.ContentType() == L"application/pdf") {
 				hr = co_await export_as_pdf_async(image_file);
 			}
-			// ラスターファイル
+			// ラスター画像ファイル
 			else {
 				hr = co_await export_as_raster_async(image_file);
 			}
@@ -386,6 +386,7 @@ namespace winrt::GraphPaper::implementation
 
 		wchar_t* unavailable_font;	// 無効な書体名
 		if (!slist_test_avaiable_font(m_main_page.m_shape_list, unavailable_font)) {
+
 			// 「無効な書体が使用されています」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, L"str_err_font", unavailable_font);
 		}
@@ -399,6 +400,7 @@ namespace winrt::GraphPaper::implementation
 				summary_remake();
 			}
 			else {
+
 				// リソースから図形の一覧パネルを見つける.
 				auto _{
 					FindName(L"gd_summary_panel")
@@ -443,8 +445,10 @@ namespace winrt::GraphPaper::implementation
 			co_await open_picker.PickSingleFileAsync()
 		};
 		open_picker = nullptr;
+
 		// ストレージファイルがヌルポインターか判定する.
 		if (open_file != nullptr) {
+
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
 			const CoreCursor& prev_cur = file_wait_cursor();
 			unselect_all();
@@ -485,6 +489,7 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			ustack_is_enable();
+
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				summary_append(s);
@@ -515,7 +520,8 @@ namespace winrt::GraphPaper::implementation
 		// これはピッカーが 2 度目の Released を待たずにダブルクリックを成立させているためだと思われる.
 
 		m_mutex_event.lock();
-		// ファイル「オープン」ピッカーを取得して開く.
+
+		// ファイル「オープン」ピッカーを得る.
 		FileOpenPicker open_picker{
 			FileOpenPicker()
 		};
@@ -527,14 +533,18 @@ namespace winrt::GraphPaper::implementation
 			co_await open_picker.PickSingleFileAsync()
 		};
 		open_picker = nullptr;
+
 		// ストレージファイルがヌルポインターか判定する.
 		if (open_file != nullptr) {
+
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
 			const CoreCursor& prev_cur = file_wait_cursor();
+
 			// ストレージファイルを非同期に読む.
 			constexpr bool RESUME = true;
 			constexpr bool SETTING_ONLY = true;
 			co_await file_read_async<!RESUME, !SETTING_ONLY>(open_file);
+
 			// カーソルを元に戻す.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);
 			// ストレージファイルを解放する.
@@ -556,11 +566,13 @@ namespace winrt::GraphPaper::implementation
 		HRESULT hr = E_FAIL;
 		m_mutex_draw.lock();
 		try {
+
 			// 一覧が表示されてるか判定する.
 			if (summary_is_visible()) {
 				// 一覧を消去する.
 				summary_close_click(nullptr, nullptr);
 			}
+
 			// 操作スタックと図形リストを消去する.
 			ustack_clear();
 			slist_clear(m_main_page.m_shape_list);
@@ -589,13 +601,14 @@ namespace winrt::GraphPaper::implementation
 			m_drawing_poly_opt.m_end_closed = dt_reader.ReadBoolean();
 			m_drawing_poly_opt.m_clockwise = dt_reader.ReadBoolean();
 
-			// メインページの文字検索の属性を読み込む.
+			// メインページの検索文字列を読み込む.
 			const size_t find_text_len = dt_reader.ReadUInt32();	// 文字数
 			uint8_t* find_text_data = new uint8_t[2 * (find_text_len + 1)];
 			dt_reader.ReadBytes(array_view(find_text_data, find_text_data + 2 * find_text_len));
 			m_find_text = reinterpret_cast<wchar_t*>(find_text_data);
 			m_find_text[find_text_len] = L'\0';
 
+			// メインページの置換文字列を読み込む.
 			const size_t find_repl_len = dt_reader.ReadUInt32();	// 文字数
 			uint8_t* find_repl_data = new uint8_t[2 * (find_repl_len + 1)];
 			dt_reader.ReadBytes(array_view(find_repl_data, find_repl_data + 2 * find_repl_len));
@@ -625,6 +638,7 @@ namespace winrt::GraphPaper::implementation
 				hr = S_OK;
 			}
 			else {
+
 				// 図形を読み込む.
 				if (slist_read(m_main_page.m_shape_list, m_main_page, dt_reader)) {
 					// 再開なら,
@@ -642,10 +656,12 @@ namespace winrt::GraphPaper::implementation
 			hr = e.code();
 		}
 		m_mutex_draw.unlock();
+
 		// 読み込みに失敗した場合,
 		if (hr != S_OK) {
 			if constexpr (RESUME) {
 				message_show(ICON_ALERT, L"str_err_resume", s_file.Path());
+
 				// 表示設定を既定値に戻す.
 				page_setting_init();
 				m_len_unit = LEN_UNIT::PIXEL;

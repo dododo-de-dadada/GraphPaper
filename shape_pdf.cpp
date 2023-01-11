@@ -8,10 +8,10 @@
 
 #include "pch.h"
 #include "shape.h"
-#include "CMap.h"
+//#include "CMap.h"
 
 using namespace winrt;
-using namespace winrt::CMap::implementation;
+//using namespace winrt::CMap::implementation;
 
 namespace winrt::GraphPaper::implementation
 {
@@ -754,17 +754,12 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 
 			// •¶š—ñ‚ğ‘‚«‚Ş.
-			swprintf_s(buf,
-				L"%% %.*s\n",
-				static_cast<int>(min(t_len, 8)),
-				t);
-			len += dt_writer.WriteString(buf);
 
-			// GID
-			const auto utf32 = cmap_utf16_to_utf32(t, t_len);
+			// wchar_t ‚ğ GID ‚É•ÏŠ·‚µ‚Ä‘‚«o‚·.
+			const auto utf32{ conv_utf16_to_utf32(t, t_len) };
 			const auto u_len = std::size(utf32);
 			std::vector<uint16_t> gid(u_len);
-			face->GetGlyphIndices(std::data(utf32), u_len, std::data(gid));
+			face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(u_len), std::data(gid));
 			len += dt_writer.WriteString(L"<");
 			for (uint32_t j = 0; j < u_len; j++) {
 				if (gid[j] != 0) {
@@ -777,7 +772,7 @@ namespace winrt::GraphPaper::implementation
 			/*
 			// wchar_t ‚ğ UTF-32 ‚É•ÏŠ·‚µ‚Ä‘‚«o‚·.
 			len += dt_writer.WriteString(L"% UTF-32\n<");
-			std::vector<uint32_t> utf32{ cmap_utf16_to_utf32(t, t_len) };
+			std::vector<uint32_t> utf32{ conv_utf16_to_utf32(t, t_len) };
 			for (int i = 0; i < utf32.size(); i++) {
 				swprintf_s(buf, L"%06x", utf32[i]);
 				len += dt_writer.WriteString(buf);
@@ -788,7 +783,7 @@ namespace winrt::GraphPaper::implementation
 			/*
 			// wchar_t ‚ğ CID ‚É•ÏŠ·‚µ‚Ä‘‚«o‚·.
 			len += dt_writer.WriteString(L"% CID\n<");
-			std::vector<uint32_t> utf32{ cmap_utf16_to_utf32(t, t_len) };
+			std::vector<uint32_t> utf32{ conv_utf16_to_utf32(t, t_len) };
 			for (int i = 0; i < utf32.size(); i++) {
 				const auto cid = cmap_getcid(utf32[i]);
 				if (cid != 0) {

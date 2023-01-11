@@ -1,7 +1,27 @@
-//
+ï»¿//
 // MainPage_export.cpp
-// PDF ‚Ü‚½‚Í SVG ‚ÉƒGƒNƒXƒ|[ƒg‚·‚é
+// PDF ã¾ãŸã¯ SVG ã«ã‚¨ã‚¯ã‚¹ãƒãƒ¼ãƒˆã™ã‚‹
 //
+
+// PDF ã«ã‚¤ãƒ³ãƒãƒ¼ãƒˆæ™‚ã®åˆ¶é™
+// ä¸é€æ˜åº¦ãŒåæ˜ ã—ãªã„
+// æ–‡å­—åˆ—ã‚’ GID ã§å‡ºåŠ›, åŸ‹ã‚è¾¼ã¿ãƒ•ã‚©ãƒ³ãƒˆã¯ãªã— (Acrobat ã®ã¿æ–‡å­—è¡¨ç¤º)
+// 
+// PDF ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆ
+// https://aznote.jakou.com/prog/pdf/index.html
+// è©³ç´°PDFå…¥é–€ ãƒ¼ å®Ÿè£…ã—ã¦å­¦ã¼ã†ï¼PDFãƒ•ã‚¡ã‚¤ãƒ«ã®æ§‹é€ ã¨ãã®æ›¸ãæ–¹èª­ã¿æ–¹
+// https://itchyny.hatenablog.com/entry/2015/09/16/100000
+// PDFã‹ã‚‰ã€Œä½¿ãˆã‚‹ã€ãƒ†ã‚­ã‚¹ãƒˆã‚’å–ã‚Šå‡ºã™ï¼ˆç¬¬1å›ï¼‰
+// https://golden-lucky.hatenablog.com/entry/2019/12/01/001701
+// PDF æ§‹æ–‡è§£èª¬
+// https://www.pdf-tools.trustss.co.jp/Syntax/parsePdfProc.html#proc
+// è¦‹ã¦ä½œã£ã¦å­¦ã¶ã€PDFãƒ•ã‚¡ã‚¤ãƒ«ã®åŸºæœ¬æ§‹é€ 
+// https://techracho.bpsinc.jp/west/2018_12_07/65062
+// ã‚°ãƒªãƒ•ã¨ã‚°ãƒªãƒ•ã®å®Ÿè¡Œ
+// https://learn.microsoft.com/ja-JP/windows/win32/directwrite/glyphs-and-glyph-runs
+// cmap â€” Character to Glyph Index Mapping Table
+// https://learn.microsoft.com/en-us/typography/opentype/spec/cmap
+
 #include "pch.h"
 #include <shcore.h>
 #include "MainPage.h"
@@ -21,17 +41,168 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::Buffer;
 	using winrt::Windows::Storage::Streams::InputStreamOptions;
 
+	static size_t export_pdf_font_dict(const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const DataWriter& dt_writer);
+	static size_t export_pdf_descendant_font_dict(int o_num, DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* g_met, const int upem, const DataWriter& dt_writer);
+	static size_t export_pdf_font_descriptor(const int obj_num, const winrt::hstring& p_name, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_WEIGHT weight, const float angle, const DWRITE_FONT_METRICS1& f_met, const DataWriter& dt_writer);
+	static void export_pdf_font_info(const ShapeText* s, DWRITE_FONT_WEIGHT& weight, DWRITE_FONT_STRETCH& stretch, DWRITE_FONT_STYLE& style, DWRITE_FONT_METRICS1& f_met, DWRITE_FONT_FACE_TYPE& f_type, winrt::hstring& p_name, std::vector<uint16_t>& cid, std::vector<uint16_t>& gid, std::vector<DWRITE_GLYPH_METRICS>& g_met, FLOAT& angle);
+
 	//------------------------------
-	// •¶š—ñ}Œ`‚©‚çƒtƒHƒ“ƒg‚Ìî•ñ‚ğ“¾‚é.
-	// s	•¶š—ñ}Œ`
-	// weight	‘‘Ì‚Ì‘¾‚³
-	// stretch	‘‘Ì‚Ì•
-	// style	š‘Ì
-	// f_met	‘‘Ì‚ÌŒv—Ê
-	// p_name	‘‘Ì‚Ìƒ|ƒXƒgƒXƒNƒŠƒvƒg–¼
-	// g_met	š‘Ì‚ÌŒv—Ê
+	// PDF ã®ãƒ•ã‚©ãƒ³ãƒˆè¾æ›¸ã‚’å‡ºåŠ›ã™ã‚‹.
+	// o_num	ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç•ªå·
+	// f_type	ãƒ•ã‚©ãƒ³ãƒˆãƒ•ã‚§ã‚¤ã‚¹ã®ç¨®é¡
+	// p_name	æ›¸ä½“ã®ãƒã‚¹ãƒˆã‚¹ã‚¯ãƒªãƒ—ãƒˆå
+	// dt_writer	å‡ºåŠ›å…ˆ
 	//------------------------------
-	static void pdf_get_font(
+	static size_t export_pdf_font_dict(const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const DataWriter& dt_writer)
+	{
+		wchar_t buf[1024];
+		swprintf_s(buf,
+			L"%% Font Dictionary\n"
+			L"%d 0 obj <<\n"
+			L"/Type /Font\n"
+			L"/Subtype /Type0\n"
+			L"/BaseFont /%s\n"
+			//L"/Encoding /UniJIS-UTF16-H\n"
+			L"/Encoding /Identity-H\n"
+			L"/DescendantFonts [%d 0 R]\n"
+			L">>\n",
+			o_num,
+			//std::data(p_name),
+			// OpenType ã®å ´åˆ ãƒã‚¹ãƒˆã‚¹ã‚¯ãƒªãƒ—ãƒˆå+'-'+CMap åã§ CIDFontType0
+			f_type == DWRITE_FONT_FACE_TYPE_TRUETYPE ?
+			//std::data(p_name) : std::data(p_name + L"-UniJIS-UTF16-H"),
+			std::data(p_name) : std::data(p_name + L"-Identity-H"),
+			o_num + 1
+		);
+		return dt_writer.WriteString(buf);
+	}
+
+	//------------------------------
+	// PDF ã®å­å­«ãƒ•ã‚©ãƒ³ãƒˆè¾æ›¸ã‚’å‡ºåŠ›ã™ã‚‹.
+	// o_num	ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç•ªå·
+	// f_type	ãƒ•ã‚©ãƒ³ãƒˆãƒ•ã‚§ã‚¤ã‚¹ã®ç¨®é¡
+	// p_name	æ›¸ä½“ã®ãƒã‚¹ãƒˆã‚¹ã‚¯ãƒªãƒ—ãƒˆå
+	// cid_len	CID é…åˆ—ã®å¤§ãã•
+	// cid_arr	CID é…åˆ—
+	// g_met	å­—å½¢ (ã‚°ãƒªãƒ•) ã®è¨ˆé‡
+	// g_unit	è¨ˆé‡ã®å€¤ã®å˜ä½
+	// dt_writer	å‡ºåŠ›å…ˆ
+	//------------------------------
+	static size_t export_pdf_descendant_font_dict(const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* g_met, const int g_unit, const DataWriter& dt_writer)
+	{
+		wchar_t buf[1024];
+		swprintf_s(buf,
+			L"%% Descendant Font Dictionary\n"
+			L"%d 0 obj <<\n"
+			L"/Type /Font\n"
+			L"/Subtype /%s\n"
+			L"/BaseFont /%s\n"
+			L"/CIDSystemInfo <<\n"
+			L"/Registry (Adobe)\n"
+			//L"/Ordering (Japan1)\n"
+			//L"/Supplement 7\n"
+			L"/Ordering (Identity)\n"
+			L"/Supplement 0\n"
+			L">>\n"
+			L"/FontDescriptor %d 0 R\n",	// é–“æ¥å‚ç…§ã§å¿…é ˆ.
+			o_num,
+			f_type == DWRITE_FONT_FACE_TYPE_TRUETYPE ?
+			L"CIDFontType2" : L"CIDFontType0",
+			std::data(p_name),
+			o_num + 1
+		);
+		size_t len = dt_writer.WriteString(buf);
+		// åŠè§’ã®ã‚°ãƒªãƒ•å¹…ã‚’è¨­å®šã™ã‚‹
+		// è¨­å®šã—ãªã‘ã‚Œã°å…¨ã¦å…¨è§’å¹…ã«ãªã£ã¦ã—ã¾ã†.
+		len += dt_writer.WriteString(L"/W [\n");	// CID é–‹å§‹ç•ªå·ã¯ 1 (åŠè§’ç©ºç™½)
+		for (int i = 0; i < cid_len; i++) {
+			swprintf_s(buf,
+				L"%u %u %u\n",
+				cid_arr[i], cid_arr[i],
+				1000 * g_met[i].advanceWidth / g_unit);
+			len += dt_writer.WriteString(buf);
+		}
+		len += dt_writer.WriteString(L"]\n");
+		len += dt_writer.WriteString(
+			L">>\n"
+			L"endobj\n");
+		return len;
+	}
+
+	static size_t export_pdf_font_descriptor(const int obj_num, const winrt::hstring& p_name,
+		const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_WEIGHT weight, const float angle, const DWRITE_FONT_METRICS1& f_met, const DataWriter& dt_writer)
+	{
+		// PDF ã® FontBBox (Black Box) ã®ã‚¤ãƒ¡ãƒ¼ã‚¸
+		//     y
+		//     ^
+		//     |
+		//   +-+--------+
+		//   | |   /\   |
+		//   | |  /__\  |
+		//   | | /    \ |
+		// --+-+--------+--> x
+		//   | |        |
+		//   +-+--------+
+		//     |
+		const int f_unit = f_met.designUnitsPerEm;
+		constexpr const wchar_t* FONT_STRETCH_NAME[] = {
+			L"Normal",
+			L"UltraCondensed",
+			L"ExtraCondensed",
+			L"Condensed",
+			L"SemiCondensed",
+			L"Normal",
+			L"SemiExpanded",
+			L"Expanded",
+			L"ExtraExpanded",
+			L"UltraExpanded"
+		};
+		wchar_t buf[1024];
+		swprintf_s(buf,
+			L"%% Font Descriptor Dictionary\n"
+			L"%d 0 obj <<\n"
+			L"/Type /FontDescriptor\n"
+			L"/FontName /%s\n"
+			L"/FontStretch /%s\n"
+			L"/FontWeight /%d\n"
+			L"/Flags 4\n"
+			L"/FontBBox [%d %d %d %d]\n"
+			L"/ItalicAngle %d\n"
+			L"/Ascent %u\n"
+			L"/Descent %u\n"
+			L"/CapHeight %u\n"
+			L"/StemV 0\n"
+			L">>\n"
+			L"endobj\n",
+			obj_num,
+			std::data(p_name),
+			FONT_STRETCH_NAME[stretch < 10 ? stretch : 0],
+			weight <= 900 ? weight : 900,
+			1000 * f_met.glyphBoxLeft / f_unit,
+			(1000 * f_met.glyphBoxBottom / f_unit),
+			1000 * f_met.glyphBoxRight / f_unit,
+			(1000 * f_met.glyphBoxTop / f_unit),
+			static_cast<int>(std::ceil(angle)),
+			1000 * f_met.ascent / f_unit,
+			1000 * f_met.descent / f_unit,
+			1000 * f_met.capHeight / f_unit
+		);
+		return dt_writer.WriteString(buf);
+	}
+
+	//------------------------------
+	// æ–‡å­—åˆ—å›³å½¢ã‹ã‚‰ãƒ•ã‚©ãƒ³ãƒˆã®æƒ…å ±ã‚’å¾—ã‚‹.
+	// s	æ–‡å­—åˆ—å›³å½¢
+	// weight	æ›¸ä½“ã®å¤ªã•
+	// stretch	æ›¸ä½“ã®å¹…
+	// style	å­—ä½“
+	// f_met	æ›¸ä½“ã®è¨ˆé‡
+	// f_type	ãƒ•ã‚©ãƒ³ãƒˆãƒ•ã‚§ã‚¤ã‚¹ã®å½¢å¼
+	// p_name	æ›¸ä½“ã®ãƒã‚¹ãƒˆã‚¹ã‚¯ãƒªãƒ—ãƒˆå
+	// g_met	å­—å½¢ã®è¨ˆé‡
+	// angle	ã‚¤ã‚¿ãƒªãƒƒã‚¯ã®æœ€å¤§è§’åº¦ (ãµã¤ã†ãŒãƒã‚¤ãƒŠã‚¹)
+	//------------------------------
+	static void export_pdf_font_info(
 		const ShapeText* s,
 		DWRITE_FONT_WEIGHT& weight,
 		DWRITE_FONT_STRETCH& stretch,
@@ -50,27 +221,34 @@ namespace winrt::GraphPaper::implementation
 		s->get_font_style(style);
 		IDWriteFontFace3* face = nullptr;
 		if (s->get_font_face(face)) {
-			// ‘‘Ì‚ÌŒv—Ê‚ğ“¾‚é.
+
+			// æ›¸ä½“ã®è¨ˆé‡ã‚’å¾—ã‚‹.
 			face->GetMetrics(&f_met);
-			// ƒtƒHƒ“ƒgƒtƒFƒCƒX‚ÌŒ`®‚ğ“¾‚é.
+
+			// ãƒ•ã‚©ãƒ³ãƒˆãƒ•ã‚§ã‚¤ã‚¹ã®å½¢å¼ã‚’å¾—ã‚‹.
 			f_type = face->GetType();
-			// •¶š—ñ‚ğ UTF32 ‚É•ÏŠ·‚µ, d•¡‚µ‚½ƒR[ƒh‚ğíœ‚·‚é.
-			std::vector<uint32_t> utf32{ cmap_utf16_to_utf32(s->m_text, wchar_len(s->m_text)) };
+
+			// æ–‡å­—åˆ—ã‚’ UTF32 ã«å¤‰æ›ã—é‡è¤‡ã—ãŸã‚³ãƒ¼ãƒ‰ã‚’å‰Šé™¤ã™ã‚‹.
+			std::vector<uint32_t> utf32{ conv_utf16_to_utf32(s->m_text, wchar_len(s->m_text)) };
 			const auto last = std::unique(std::begin(utf32), std::end(utf32));
 			utf32.erase(last, utf32.end());
-			// UTF32 •¶š—ñ‚©‚ç CID ‚ğ“¾‚é.
+
+			// UTF32 æ–‡å­—åˆ—ã‹ã‚‰ CID ã‚’å¾—ã‚‹.
 			cid.resize(utf32.size());
 			for (int i = 0; i < utf32.size(); i++) {
 				//cid[i] = cmap_getcid(utf32[i]);
 			}
-			// UTF32 •¶š—ñ‚©‚ç GID ‚ğ“¾‚é.
+
+			// UTF32 æ–‡å­—åˆ—ã‹ã‚‰ GID ã‚’å¾—ã‚‹.
 			gid.resize(utf32.size());
 			winrt::check_hresult(face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(std::size(utf32)), std::data(gid)));
-			// GID •¶š—ñ‚©‚çšŒ` (ƒOƒŠƒt) ‚ÌŒv—Ê‚ğ“¾‚é.
+
+			// GID æ–‡å­—åˆ—ã‹ã‚‰å­—å½¢ (ã‚°ãƒªãƒ•) ã®è¨ˆé‡ã‚’å¾—ã‚‹.
 			g_met.resize(utf32.size());
 			face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(g_met));
 			//face->Release();
-			// ƒtƒHƒ“ƒgƒtƒFƒCƒX‚©‚çƒ|ƒXƒgƒXƒNƒŠƒvƒg–¼‚ğ“¾‚é.
+
+			// ãƒ•ã‚©ãƒ³ãƒˆãƒ•ã‚§ã‚¤ã‚¹ã‹ã‚‰ãƒã‚¹ãƒˆã‚¹ã‚¯ãƒªãƒ—ãƒˆåã‚’å¾—ã‚‹.
 			IDWriteLocalizedStrings* str = nullptr;
 			BOOL exists = false;
 			//if (font->GetInformationalStrings(DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_CID_NAME, &str, &exists) == S_OK) {
@@ -78,7 +256,7 @@ namespace winrt::GraphPaper::implementation
 				if (exists) {
 					const UINT32 str_cnt = str->GetCount();
 					for (uint32_t j = 0; j < str_cnt; j++) {
-						UINT32 wstr_len = 0;	// I’[ƒkƒ‹‚ğœ‚­•¶š—ñ’·
+						UINT32 wstr_len = 0;	// çµ‚ç«¯ãƒŒãƒ«ã‚’é™¤ãæ–‡å­—åˆ—é•·
 						if (str->GetStringLength(j, &wstr_len) == S_OK && wstr_len > 0) {
 							std::vector<wchar_t> wstr(wstr_len + 1);
 							if (str->GetString(j, std::data(wstr), wstr_len + 1) == S_OK) {
@@ -91,10 +269,10 @@ namespace winrt::GraphPaper::implementation
 					}
 					str->Release();
 				}
-				// ‚½‚Æ‚¦‚Î 'Windows Himaraya' ‚Ì‚Æ‚«,
-				// ƒ|ƒXƒgƒXƒNƒŠƒvƒg–¼‚ğ—v‹‚µ‚½‚É‚à‚©‚©‚í‚ç‚¸‹ó”’‚Ì“ü‚Á‚½•¶š—ñ‚ğ•Ô‚·ê‡‚ª‚ ‚é.
-				// ƒ|ƒXƒgƒXƒNƒŠƒvƒg–¼‚ª‘¶İ‚µ‚È‚¢, ‚ ‚é‚¢‚Íã‹L‚Ì‚æ‚¤‚Èê‡‚Í,
-				// ‘‘Ì–¼‚©‚ç‹ó”’•¶š‚ğæ‚èœ‚¢‚½•¶š—ñ‚ğ, ƒ|ƒXƒgƒXƒNƒŠƒvƒg–¼‚Æ‚·‚é.
+				// ãŸã¨ãˆã° 'Windows Himaraya' ã®ã¨ã,
+				// ãƒã‚¹ãƒˆã‚¹ã‚¯ãƒªãƒ—ãƒˆåã‚’è¦æ±‚ã—ãŸã«ã‚‚ã‹ã‹ã‚ã‚‰ãšç©ºç™½ã®å…¥ã£ãŸæ–‡å­—åˆ—ã‚’è¿”ã™å ´åˆãŒã‚ã‚‹.
+				// ãƒã‚¹ãƒˆã‚¹ã‚¯ãƒªãƒ—ãƒˆåãŒå­˜åœ¨ã—ãªã„, ã‚ã‚‹ã„ã¯ä¸Šè¨˜ã®ã‚ˆã†ãªå ´åˆã¯,
+				// æ›¸ä½“åã‹ã‚‰ç©ºç™½æ–‡å­—ã‚’å–ã‚Šé™¤ã„ãŸæ–‡å­—åˆ—ã‚’, ãƒã‚¹ãƒˆã‚¹ã‚¯ãƒªãƒ—ãƒˆåã¨ã™ã‚‹.
 				if (!exists || std::find(std::begin(p_name), std::end(p_name), L' ') != std::end(p_name)) {
 					const auto k = wchar_len(s->m_font_family);
 					std::vector<wchar_t> wstr(k + 1);
@@ -109,11 +287,14 @@ namespace winrt::GraphPaper::implementation
 					p_name = std::data(wstr);
 				}
 			}
-			// ƒtƒHƒ“ƒgƒtƒFƒCƒX‚©‚çŒX‚«‚ğ“¾‚é.
+
+			// ãƒ•ã‚©ãƒ³ãƒˆãƒ•ã‚§ã‚¤ã‚¹ã‹ã‚‰å‚¾ãã‚’å¾—ã‚‹.
+			// ãŸã ã—, PDF ã¯, ãƒ•ã‚©ãƒ³ãƒˆãƒ•ã‚§ã‚¤ã‚¹ã®å¤‰å½¢ã¯ã‚µãƒãƒ¼ãƒˆã—ã¦ãªã„ã®ã§, ãƒ•ã‚§ã‚¤ã‚¹ãã®ã‚‚ã®ãŒ
+			// ã‚¤ã‚¿ãƒªãƒƒã‚¯ã§ãªã„é™ã‚Š, æ–œä½“ã«ã¯ãªã‚‰ãªã„.
 			const auto axis_cnt = static_cast<IDWriteFontFace5*>(face)->GetFontAxisValueCount();
 			std::vector<DWRITE_FONT_AXIS_VALUE> axis_val(axis_cnt);
 			if (static_cast<IDWriteFontFace5*>(face)->GetFontAxisValues(std::data(axis_val), axis_cnt) == S_OK) {
-				for (int i = 0; i < axis_cnt; i++) {
+				for (uint32_t i = 0; i < axis_cnt; i++) {
 					if (axis_val[i].axisTag == DWRITE_FONT_AXIS_TAG_SLANT) {
 						angle = axis_val[i].value;
 					}
@@ -123,9 +304,10 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// ç”»åƒã‚’ PDF ã® XObject ã¨ã—ã¦æ›¸ãå‡ºã™.
 	static size_t export_pdf_image(const ShapeImage* t, int obj_num, DataWriter& dt_writer)
 	{
-		// ‰æ‘œ XObject (ƒXƒgƒŠ[ƒ€ƒIƒuƒWƒFƒNƒg)
+		// ç”»åƒ XObject (ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ)
 		/*
 		InMemoryRandomAccessStream image_stream{};
 		co_await t->copy<true>(BitmapEncoder::JpegEncoderId(), image_stream);
@@ -137,9 +319,9 @@ namespace winrt::GraphPaper::implementation
 		image_stream = nullptr;
 		*/
 
-		// PDF ‚ÍƒAƒ‹ƒtƒ@’l‚ğƒTƒ|[ƒg‚µ‚Ä‚¨‚ç‚¸, ‹t‚É WIC ƒrƒbƒgƒ}ƒbƒv‚Í 3 ƒoƒCƒgƒsƒNƒZƒ‹‚ğ
-		// ƒTƒ|[ƒg‚µ‚Ä‚¢‚È‚¢.
-		// BGRA ‚ğ RGB ‚ÉƒRƒs[.
+		// PDF ã¯ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã‚’ã‚µãƒãƒ¼ãƒˆã—ã¦ãŠã‚‰ãš, é€†ã« WIC ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ã¯ 3 ãƒã‚¤ãƒˆãƒ”ã‚¯ã‚»ãƒ«ã‚’
+		// ã‚µãƒãƒ¼ãƒˆã—ã¦ã„ãªã„.
+		// BGRA ã‚’ RGB ã«ã‚³ãƒ”ãƒ¼.
 		std::vector<uint8_t> z_buf;
 		std::vector<uint8_t> in_buf(3ull * t->m_orig.width * t->m_orig.height);
 		for (size_t i = 0; i < t->m_orig.width * t->m_orig.height; i++) {
@@ -198,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		*/
-		// ƒXƒgƒŠ[ƒ€‚ÌÅŒã‚Í '>'.
+		// ã‚¹ãƒˆãƒªãƒ¼ãƒ ã®æœ€å¾Œã¯ '>'.
 		len += dt_writer.WriteString(
 			L">\n"
 			L"endstream\n"
@@ -206,156 +388,19 @@ namespace winrt::GraphPaper::implementation
 		return len;
 	}
 
-	static size_t export_pdf_font_dict(int obj_num, DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, DataWriter& dt_writer)
-	{
-		wchar_t buf[1024];
-		swprintf_s(buf,
-			L"%% Font Dictionary\n"
-			L"%d 0 obj <<\n"
-			L"/Type /Font\n"
-			L"/Subtype /Type0\n"
-			L"/BaseFont /%s\n"
-			//L"/Encoding /UniJIS-UTF16-H\n"
-			L"/Encoding /Identity-H\n"
-			L"/DescendantFonts [%d 0 R]\n"
-			L">>\n",
-			obj_num,
-			//std::data(p_name),
-			f_type == DWRITE_FONT_FACE_TYPE_TRUETYPE ?
-			//std::data(p_name) : std::data(p_name + L"-UniJIS-UTF16-H"),
-			std::data(p_name) : std::data(p_name + L"-Identity-H"),
-			obj_num + 1
-		);
-		return dt_writer.WriteString(buf);
-	}
-
-	static size_t export_pdf_descendant_font_dict(int obj_num, DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const size_t cid_size, uint16_t* cid, DWRITE_GLYPH_METRICS* g_met, const int upem, DataWriter& dt_writer)
-	{
-		wchar_t buf[1024];
-		swprintf_s(buf,
-			L"%% Descendant Font Dictionary\n"
-			L"%d 0 obj <<\n"
-			L"/Type /Font\n"
-			L"/Subtype /%s\n"
-			L"/BaseFont /%s\n"
-			L"/CIDSystemInfo <<\n"
-			L"/Registry (Adobe)\n"
-			//L"/Ordering (Japan1)\n"
-			//L"/Supplement 7\n"
-			L"/Ordering (Identity)\n"
-			L"/Supplement 0\n"
-			L">>\n"
-			L"/FontDescriptor %d 0 R\n",	// ŠÔÚQÆ‚Å•K{.
-			obj_num,
-			f_type == DWRITE_FONT_FACE_TYPE_TRUETYPE ?
-			L"CIDFontType2" : L"CIDFontType0",
-			std::data(p_name),
-			obj_num + 1
-		);
-		size_t len = dt_writer.WriteString(buf);
-		// ”¼Šp‚ÌƒOƒŠƒt•‚ğİ’è‚·‚é
-		// İ’è‚µ‚È‚¯‚ê‚Î‘S‚Ä‘SŠp•‚É‚È‚Á‚Ä‚µ‚Ü‚¤.
-		len += dt_writer.WriteString(L"/W [\n");	// CID ŠJn”Ô†‚Í 1 (”¼Šp‹ó”’)
-		for (int i = 0; i < cid_size; i++) {
-			swprintf_s(buf,
-				L"%u %u %u\n",
-				cid[i], cid[i],
-				1000 * g_met[i].advanceWidth / upem);
-			len += dt_writer.WriteString(buf);
-		}
-		len += dt_writer.WriteString(L"]\n");
-		len += dt_writer.WriteString(
-			L">>\n"
-			L"endobj\n");
-		return len;
-	}
-
-	static size_t export_pdf_font_descriptor(const int obj_num, winrt::hstring& p_name,
-		DWRITE_FONT_STRETCH stretch, DWRITE_FONT_WEIGHT weight, float angle, DWRITE_FONT_METRICS1& f_met, DataWriter& dt_writer)
-	{
-		// PDF ‚Ì FontBBox (Black Box) ‚ÌƒCƒ[ƒW
-		//     y
-		//     ^
-		//     |
-		//   +-+--------+
-		//   | |   /\   |
-		//   | |  /__\  |
-		//   | | /    \ |
-		// --+-+--------+--> x
-		//   | |        |
-		//   +-+--------+
-		//     |
-		const int upem = f_met.designUnitsPerEm;
-		constexpr const wchar_t* FONT_STRETCH_NAME[] = {
-	L"Normal",
-	L"UltraCondensed",
-	L"ExtraCondensed",
-	L"Condensed",
-	L"SemiCondensed",
-	L"Normal",
-	L"SemiExpanded",
-	L"Expanded",
-	L"ExtraExpanded",
-	L"UltraExpanded"
-		};
-		wchar_t buf[1024];
-		swprintf_s(buf,
-			L"%% Font Descriptor Dictionary\n"
-			L"%d 0 obj <<\n"
-			L"/Type /FontDescriptor\n"
-			L"/FontName /%s\n"
-			L"/FontStretch /%s\n"
-			L"/FontWeight /%d\n"
-			L"/Flags 4\n"
-			L"/FontBBox [%d %d %d %d]\n"
-			L"/ItalicAngle %d\n"
-			L"/Ascent %u\n"
-			L"/Descent %u\n"
-			L"/CapHeight %u\n"
-			L"/StemV 0\n"
-			L">>\n"
-			L"endobj\n",
-			obj_num,
-			std::data(p_name),
-			FONT_STRETCH_NAME[stretch < 10 ? stretch : 0],
-			weight <= 900 ? weight : 900,
-			1000 * f_met.glyphBoxLeft / upem,
-			(1000 * f_met.glyphBoxBottom / upem),
-			1000 * f_met.glyphBoxRight / upem,
-			(1000 * f_met.glyphBoxTop / upem),
-			static_cast<int>(std::ceil(angle)),
-			1000 * f_met.ascent / upem,
-			1000 * f_met.descent / upem,
-			1000 * f_met.capHeight / upem
-		);
-		return dt_writer.WriteString(buf);
-	}
-
-	// }Œ`‚ğƒf[ƒ^ƒ‰ƒCƒ^[‚É PDF ‚Æ‚µ‚Ä‘‚«‚Ş.
-	// PDF ƒtƒH[ƒ}ƒbƒg
-	// https://aznote.jakou.com/prog/pdf/index.html
-	// Ú×PDF“ü–å [ À‘•‚µ‚ÄŠw‚Ú‚¤IPDFƒtƒ@ƒCƒ‹‚Ì\‘¢‚Æ‚»‚Ì‘‚«•û“Ç‚İ•û
-	// https://itchyny.hatenablog.com/entry/2015/09/16/100000
-	// PDF‚©‚çug‚¦‚évƒeƒLƒXƒg‚ğæ‚èo‚·i‘æ1‰ñj
-	// https://golden-lucky.hatenablog.com/entry/2019/12/01/001701
-	// PDF \•¶‰ğà
-	// https://www.pdf-tools.trustss.co.jp/Syntax/parsePdfProc.html#proc
-	// Œ©‚Äì‚Á‚ÄŠw‚ÔAPDFƒtƒ@ƒCƒ‹‚ÌŠî–{\‘¢
-	// https://techracho.bpsinc.jp/west/2018_12_07/65062
-	// ƒOƒŠƒt‚ÆƒOƒŠƒt‚ÌÀs
-	// https://learn.microsoft.com/ja-JP/windows/win32/directwrite/glyphs-and-glyph-runs
-	IAsyncOperation<winrt::hresult> MainPage::export_as_pdf_async(const StorageFile pdf_file) const noexcept
+	// å›³å½¢ã‚’ãƒ‡ãƒ¼ã‚¿ãƒ©ã‚¤ã‚¿ãƒ¼ã« PDF ã¨ã—ã¦æ›¸ãè¾¼ã‚€.
+	IAsyncOperation<winrt::hresult> MainPage::export_as_pdf_async(const StorageFile& pdf_file) const noexcept
 	{
 		HRESULT hr = E_FAIL;
 		try {
 			wchar_t buf[1024];	// PDF
 
-			// •\¦‚Ì•‚Æ‚‚³‚ğ, D2D ‚ÌŒÅ’è DPI (96dpi) ‚©‚ç PDF ‚Ì 72dpi ‚É,
-			// •ÏŠ·‚·‚é (ƒ‚ƒjƒ^[‚É‰‚¶‚Ä•Ï‰»‚·‚é˜_— DPI ‚Í—p‚¢‚È‚¢). 
-			const float w_pt = m_main_page.m_page_size.width * 72.0f / 96.0f;	// •ÏŠ·‚³‚ê‚½•
-			const float h_pt = m_main_page.m_page_size.height * 72.0f / 96.0f;	// •ÏŠ·‚³‚ê‚½‚‚³
+			// è¡¨ç¤ºã®å¹…ã¨é«˜ã•ã‚’, D2D ã®å›ºå®š DPI (96dpi) ã‹ã‚‰ PDF ã® 72dpi ã«,
+			// å¤‰æ›ã™ã‚‹ (ãƒ¢ãƒ‹ã‚¿ãƒ¼ã«å¿œã˜ã¦å¤‰åŒ–ã™ã‚‹è«–ç† DPI ã¯ç”¨ã„ãªã„). 
+			const float w_pt = m_main_page.m_page_size.width * 72.0f / 96.0f;	// å¤‰æ›ã•ã‚ŒãŸå¹…
+			const float h_pt = m_main_page.m_page_size.height * 72.0f / 96.0f;	// å¤‰æ›ã•ã‚ŒãŸé«˜ã•
 
-			// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğŠJ‚¢‚Ä, ƒXƒgƒŠ[ƒ€‚Æ‚»‚Ìƒf[ƒ^ƒ‰ƒCƒ^[‚ğ“¾‚é.
+			// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã„ã¦, ã‚¹ãƒˆãƒªãƒ¼ãƒ ã¨ãã®ãƒ‡ãƒ¼ã‚¿ãƒ©ã‚¤ã‚¿ãƒ¼ã‚’å¾—ã‚‹.
 			const IRandomAccessStream& pdf_stream{
 				co_await pdf_file.OpenAsync(FileAccessMode::ReadWrite)
 			};
@@ -363,19 +408,19 @@ namespace winrt::GraphPaper::implementation
 				DataWriter(pdf_stream.GetOutputStreamAt(0))
 			};
 
-			// PDF ƒwƒbƒ_[
-			// ƒtƒ@ƒCƒ‹‚ÉƒoƒCƒiƒŠƒf[ƒ^‚ªŠÜ‚Ü‚ê‚éê‡‚Í,
-			// ƒwƒbƒ_‚Æ‰üs‚Ì’¼Œã‚É, 4 ‚ÂˆÈã‚ÌƒoƒCƒiƒŠ•¶š‚ğŠÜ‚ŞƒRƒƒ“ƒgs‚ğ’u‚­‚±‚Æ‚ª„§.
+			// PDF ãƒ˜ãƒƒãƒ€ãƒ¼
+			// ãƒ•ã‚¡ã‚¤ãƒ«ã«ãƒã‚¤ãƒŠãƒªãƒ‡ãƒ¼ã‚¿ãŒå«ã¾ã‚Œã‚‹å ´åˆã¯,
+			// ãƒ˜ãƒƒãƒ€ã¨æ”¹è¡Œã®ç›´å¾Œã«, 4 ã¤ä»¥ä¸Šã®ãƒã‚¤ãƒŠãƒªæ–‡å­—ã‚’å«ã‚€ã‚³ãƒ¡ãƒ³ãƒˆè¡Œã‚’ç½®ãã“ã¨ãŒæ¨å¥¨.
 			size_t len = dt_writer.WriteString(
 				L"%PDF-1.7\n"
-				L"%‚ ‚ \n"
+				L"%ã‚ã‚\n"
 			);
 			std::vector<size_t> obj_len{};
 			obj_len.push_back(len);
 
-			// ƒJƒ^ƒƒO«‘.
-			// ƒgƒŒ[ƒ‰[‚©‚çQÆ‚³‚ê,
-			// ƒy[ƒWƒcƒŠ[‚ğQÆ‚·‚é.
+			// ã‚«ã‚¿ãƒ­ã‚°è¾æ›¸.
+			// ãƒˆãƒ¬ãƒ¼ãƒ©ãƒ¼ã‹ã‚‰å‚ç…§ã•ã‚Œ,
+			// ãƒšãƒ¼ã‚¸ãƒ„ãƒªãƒ¼ã‚’å‚ç…§ã™ã‚‹.
 			len = dt_writer.WriteString(
 				L"% Catalog Dictionary\n"
 				L"1 0 obj <<\n"
@@ -385,9 +430,9 @@ namespace winrt::GraphPaper::implementation
 				L"endobj\n");// , dt_writer);
 			obj_len.push_back(obj_len.back() + len);
 
-			// ƒy[ƒWƒcƒŠ[«‘
-			// ƒJƒ^ƒƒO‚©‚çQÆ‚³‚ê,
-			// ƒy[ƒW‚ğQÆ‚·‚é.
+			// ãƒšãƒ¼ã‚¸ãƒ„ãƒªãƒ¼è¾æ›¸
+			// ã‚«ã‚¿ãƒ­ã‚°ã‹ã‚‰å‚ç…§ã•ã‚Œ,
+			// ãƒšãƒ¼ã‚¸ã‚’å‚ç…§ã™ã‚‹.
 			len = dt_writer.WriteString(
 				L"% Page Tree Dictionary\n"
 				L"2 0 obj <<\n"
@@ -398,9 +443,9 @@ namespace winrt::GraphPaper::implementation
 				L"endobj\n");
 			obj_len.push_back(obj_len.back() + len);
 
-			// ƒy[ƒWƒIƒuƒWƒFƒNƒg
-			// ƒy[ƒWƒcƒŠ[‚©‚çQÆ‚³‚ê,
-			// ƒŠƒ\[ƒX‚ÆƒRƒ“ƒeƒ“ƒc‚ğQÆ‚·‚é.
+			// ãƒšãƒ¼ã‚¸ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+			// ãƒšãƒ¼ã‚¸ãƒ„ãƒªãƒ¼ã‹ã‚‰å‚ç…§ã•ã‚Œ,
+			// ãƒªã‚½ãƒ¼ã‚¹ã¨ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã‚’å‚ç…§ã™ã‚‹.
 			swprintf_s(buf,
 				L"%% Page Object\n"
 				L"3 0 obj <<\n"
@@ -415,14 +460,14 @@ namespace winrt::GraphPaper::implementation
 			len = dt_writer.WriteString(buf);
 			obj_len.push_back(obj_len.back() + len);
 
-			// ƒŠƒ\[ƒX«‘
-			// ƒy[ƒW‚ÆƒRƒ“ƒeƒ“ƒc‚©‚çQÆ‚³‚ê, «‘‚ğQÆ‚·‚é.
+			// ãƒªã‚½ãƒ¼ã‚¹è¾æ›¸
+			// ãƒšãƒ¼ã‚¸ã¨ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã‹ã‚‰å‚ç…§ã•ã‚Œ, è¾æ›¸ã‚’å‚ç…§ã™ã‚‹.
 			len = dt_writer.WriteString(
 				L"% Resouces Dictionary\n"
 				L"4 0 obj <<\n");
-			// ƒtƒHƒ“ƒg
+			// ãƒ•ã‚©ãƒ³ãƒˆ
 			int font_cnt = 0;
-			std::vector<std::vector<char>> base_font;	// ƒx[ƒXƒtƒHƒ“ƒg–¼
+			std::vector<std::vector<char>> base_font;	// ãƒ™ãƒ¼ã‚¹ãƒ•ã‚©ãƒ³ãƒˆå
 			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
@@ -442,7 +487,7 @@ namespace winrt::GraphPaper::implementation
 			if (font_cnt > 0) {
 				len += dt_writer.WriteString(L">>\n");
 			}
-			// ‰æ‘œ
+			// ç”»åƒ
 			int image_cnt = 0;
 			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
@@ -468,8 +513,8 @@ namespace winrt::GraphPaper::implementation
 				L"endobj\n");
 			obj_len.push_back(obj_len.back() + len);
 
-			// ƒRƒ“ƒeƒ“ƒgƒIƒuƒWƒFƒNƒg (ƒXƒgƒŠ[ƒ€)
-			// •ÏŠ·s—ñ‚É 72dpi / 96dpi (=0.75) ‚ğw’è‚·‚é.   
+			// ã‚³ãƒ³ãƒ†ãƒ³ãƒˆã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ (ã‚¹ãƒˆãƒªãƒ¼ãƒ )
+			// å¤‰æ›è¡Œåˆ—ã« 72dpi / 96dpi (=0.75) ã‚’æŒ‡å®šã™ã‚‹.   
 			swprintf_s(buf,
 				L"%% Content Object\n"
 				L"5 0 obj <<\n"
@@ -481,7 +526,7 @@ namespace winrt::GraphPaper::implementation
 			);
 			len = dt_writer.WriteString(buf);
 
-			// ”wŒi
+			// èƒŒæ™¯
 			swprintf_s(buf,
 				L"%f %f %f rg\n"
 				L"0 0 %f %f re\n"
@@ -494,7 +539,7 @@ namespace winrt::GraphPaper::implementation
 			);
 			len += dt_writer.WriteString(buf);
 
-			// }Œ`‚ğo—Í
+			// å›³å½¢ã‚’å‡ºåŠ›
 			const D2D1_SIZE_F page_size = m_main_page.m_page_size;
 			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
@@ -508,7 +553,7 @@ namespace winrt::GraphPaper::implementation
 				L"endobj\n");
 			obj_len.push_back(obj_len.back() + len);
 
-			// ƒtƒHƒ“ƒg«‘
+			// ãƒ•ã‚©ãƒ³ãƒˆè¾æ›¸
 			font_cnt = 0;
 			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
@@ -516,10 +561,10 @@ namespace winrt::GraphPaper::implementation
 				}
 
 				if (typeid(*s) == typeid(ShapeText)) {
-					// ƒtƒHƒ“ƒg«‘ (Type0), CID ƒtƒHƒ“ƒg«‘, ƒtƒHƒ“ƒgÚ×«‘
-					// ƒOƒŠƒt‚É‚¨‚¯‚éÀ•W’l‚â•‚ğw’è‚·‚éê‡APDF “à‚Å‚ÍAí‚É 1 em = 1000 ‚Å‚ ‚é‚à‚Ì‚Æ‚µ‚ÄA
-					// ’l‚ğİ’è‚µ‚Ü‚·BÀÛ‚ÌƒtƒHƒ“ƒg‚Å 1 em = 1024 ‚È‚Ç‚Æ‚È‚Á‚Ä‚¢‚éê‡‚ÍAn / 1024 * 1000 
-					// ‚Æ‚¢‚¤‚æ‚¤‚É‚µ‚ÄA’l‚ğ 1 em = 1000 ‚É‡‚í‚¹‚Ü‚·.
+					// ãƒ•ã‚©ãƒ³ãƒˆè¾æ›¸ (Type0), CID ãƒ•ã‚©ãƒ³ãƒˆè¾æ›¸, ãƒ•ã‚©ãƒ³ãƒˆè©³ç´°è¾æ›¸
+					// ã‚°ãƒªãƒ•ã«ãŠã‘ã‚‹åº§æ¨™å€¤ã‚„å¹…ã‚’æŒ‡å®šã™ã‚‹å ´åˆã€PDF å†…ã§ã¯ã€å¸¸ã« 1 em = 1000 ã§ã‚ã‚‹ã‚‚ã®ã¨ã—ã¦ã€
+					// å€¤ã‚’è¨­å®šã—ã¾ã™ã€‚å®Ÿéš›ã®ãƒ•ã‚©ãƒ³ãƒˆã§ 1 em = 1024 ãªã©ã¨ãªã£ã¦ã„ã‚‹å ´åˆã¯ã€n / 1024 * 1000 
+					// ã¨ã„ã†ã‚ˆã†ã«ã—ã¦ã€å€¤ã‚’ 1 em = 1000 ã«åˆã‚ã›ã¾ã™.
 					// 
 					const auto t = static_cast<ShapeText*>(s);
 					//int n = t->m_pdf_font_num;
@@ -528,48 +573,39 @@ namespace winrt::GraphPaper::implementation
 					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;
 					DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;
 					DWRITE_FONT_METRICS1 f_met{};
-					winrt::hstring p_name{};	// ƒ|ƒXƒgƒXƒNƒŠƒvƒg–¼
+					winrt::hstring p_name{};	// ãƒã‚¹ãƒˆã‚¹ã‚¯ãƒªãƒ—ãƒˆå
 					std::vector<uint16_t> gid{};
 					std::vector<uint16_t> cid{};
 					std::vector<DWRITE_GLYPH_METRICS> g_met{};
 					DWRITE_FONT_FACE_TYPE f_type;
 					float angle;
-					pdf_get_font(t, weight, stretch, style, f_met, f_type, p_name, cid, gid, g_met, angle);
+					export_pdf_font_info(t, weight, stretch, style, f_met, f_type, p_name, cid, gid, g_met, angle);
 
-					const int upem = f_met.designUnitsPerEm;
-
-					const auto f_name = t->m_font_family;
-					//p_name.clear();
-					//for (int i = 0; f_name[i] != L'\0'; i++) {
-					//	if (f_name[i] != L' ') {
-					//		p_name.push_back(f_name[i]);
-					//	}
-					//}
-					//p_name.push_back(L'\0');
-
-					// ƒtƒHƒ“ƒg«‘
-					// OpenType ‚Ìê‡ ƒ|ƒXƒgƒXƒNƒŠƒvƒg–¼+'-'+CMap –¼‚Å CIDFontType0
-					len = export_pdf_font_dict(6 + 3 * font_cnt, f_type, p_name, dt_writer);
+					// ãƒ•ã‚©ãƒ³ãƒˆè¾æ›¸
+					len = export_pdf_font_dict(
+						6 + 3 * font_cnt, f_type, p_name, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
-					// CID ƒtƒHƒ“ƒg«‘ (Type 0 ‚Ìq‘·‚Æ‚È‚éƒtƒHƒ“ƒg)
-					// ƒtƒHƒ“ƒg«‘‚©‚çQÆ‚³‚ê,
-					// ƒtƒHƒ“ƒgÚ×«‘‚ğQÆ‚·‚é.
-					len = export_pdf_descendant_font_dict(6 + 3 * font_cnt + 1,
+					// CID ãƒ•ã‚©ãƒ³ãƒˆè¾æ›¸ (Type 0 ã®å­å­«ã¨ãªã‚‹ãƒ•ã‚©ãƒ³ãƒˆ)
+					// ãƒ•ã‚©ãƒ³ãƒˆè¾æ›¸ã‹ã‚‰å‚ç…§ã•ã‚Œ,
+					// ãƒ•ã‚©ãƒ³ãƒˆè©³ç´°è¾æ›¸ã‚’å‚ç…§ã™ã‚‹.
+					len = export_pdf_descendant_font_dict(
+						6 + 3 * font_cnt + 1,
 						//f_type, p_name, std::size(cid), std::data(cid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
 						f_type, p_name, std::size(gid), std::data(gid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
-					// ƒtƒHƒ“ƒgÚ×«‘
-					// CID ƒtƒHƒ“ƒg«‘‚©‚çQÆ‚³‚ê‚é.
-					len = export_pdf_font_descriptor(6 + 3 * font_cnt + 2,
+					// ãƒ•ã‚©ãƒ³ãƒˆè©³ç´°è¾æ›¸
+					// CID ãƒ•ã‚©ãƒ³ãƒˆè¾æ›¸ã‹ã‚‰å‚ç…§ã•ã‚Œã‚‹.
+					len = export_pdf_font_descriptor(
+						6 + 3 * font_cnt + 2,
 						p_name, stretch, weight, angle, f_met, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 					font_cnt++;
 				}
 			}
 
-			// ‰æ‘œ XObject
+			// ç”»åƒ XObject
 			image_cnt = 0;
 			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
@@ -583,7 +619,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 
-			// ‘ŠŒİQÆ (ƒNƒƒXƒŠƒtƒ@ƒŒƒ“ƒX)
+			// ç›¸äº’å‚ç…§ (ã‚¯ãƒ­ã‚¹ãƒªãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹)
 			swprintf_s(
 				buf,
 				L"%% Cross-reference Table\n"
@@ -601,7 +637,7 @@ namespace winrt::GraphPaper::implementation
 				dt_writer.WriteString(buf);
 			}
 
-			// ƒgƒŒƒCƒ‰[‚Æ EOF
+			// ãƒˆãƒ¬ã‚¤ãƒ©ãƒ¼ã¨ EOF
 			swprintf_s(
 				buf,
 				L"%% Trailer\n"
@@ -617,11 +653,11 @@ namespace winrt::GraphPaper::implementation
 			);
 			dt_writer.WriteString(buf);
 
-			// ƒXƒgƒŠ[ƒ€‚ÌŒ»İˆÊ’u‚ğƒXƒgƒŠ[ƒ€‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
+			// ã‚¹ãƒˆãƒªãƒ¼ãƒ ã®ç¾åœ¨ä½ç½®ã‚’ã‚¹ãƒˆãƒªãƒ¼ãƒ ã®å¤§ãã•ã«æ ¼ç´ã™ã‚‹.
 			pdf_stream.Size(pdf_stream.Position());
-			// ƒoƒbƒtƒ@“à‚Ìƒf[ƒ^‚ğƒXƒgƒŠ[ƒ€‚Éo—Í‚·‚é.
+			// ãƒãƒƒãƒ•ã‚¡å†…ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¹ãƒˆãƒªãƒ¼ãƒ ã«å‡ºåŠ›ã™ã‚‹.
 			co_await dt_writer.StoreAsync();
-			// ƒXƒgƒŠ[ƒ€‚ğƒtƒ‰ƒbƒVƒ…‚·‚é.
+			// ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ã™ã‚‹.
 			co_await pdf_stream.FlushAsync();
 			hr = S_OK;
 		}
@@ -632,9 +668,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//-------------------------------
-	// }Œ`ƒf[ƒ^‚ğ SVG ‚Æ‚µ‚ÄƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚É”ñ“¯Šú‚É‘‚«‚Ş.
-	// svg_file	‘‚«‚İæ‚Ìƒtƒ@ƒCƒ‹
-	// –ß‚è’l	‘‚«‚ß‚½ê‡ S_OK
+	// å›³å½¢ãƒ‡ãƒ¼ã‚¿ã‚’ SVG ã¨ã—ã¦ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã«éåŒæœŸã«æ›¸ãè¾¼ã‚€.
+	// svg_file	æ›¸ãè¾¼ã¿å…ˆã®ãƒ•ã‚¡ã‚¤ãƒ«
+	// æˆ»ã‚Šå€¤	æ›¸ãè¾¼ã‚ãŸå ´åˆ S_OK
 	//-------------------------------
 	IAsyncOperation<winrt::hresult> MainPage::export_as_raster_async(const StorageFile& image_file) noexcept
 	{
@@ -662,14 +698,14 @@ namespace winrt::GraphPaper::implementation
 
 		if (wic_fmt != GUID_NULL) {
 
-			// Direct2D ƒRƒ“ƒeƒ“ƒc‚ğ‰æ‘œƒtƒ@ƒCƒ‹‚É•Û‘¶‚·‚é•û–@
+			// Direct2D ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã‚’ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã«ä¿å­˜ã™ã‚‹æ–¹æ³•
 			try {
-				// ƒtƒ@ƒCƒ‹‚Ìƒ‰ƒ“ƒ_ƒ€ƒAƒNƒZƒXƒXƒgƒŠ[ƒ€
+				// ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ©ãƒ³ãƒ€ãƒ ã‚¢ã‚¯ã‚»ã‚¹ã‚¹ãƒˆãƒªãƒ¼ãƒ 
 				IRandomAccessStream image_stream{
 					co_await image_file.OpenAsync(FileAccessMode::ReadWrite)
 				};
 
-				// WIC ‚Ìƒ‰ƒ“ƒ_ƒ€ƒAƒNƒZƒXƒXƒgƒŠ[ƒ€
+				// WIC ã®ãƒ©ãƒ³ãƒ€ãƒ ã‚¢ã‚¯ã‚»ã‚¹ã‚¹ãƒˆãƒªãƒ¼ãƒ 
 				winrt::com_ptr<IStream> wic_stream;
 				winrt::hresult(
 					CreateStreamOverRandomAccessStream(
@@ -707,7 +743,7 @@ namespace winrt::GraphPaper::implementation
 					wic_frm->Initialize(nullptr)
 				);
 
-				// ƒfƒoƒCƒX‚Ìì¬
+				// ãƒ‡ãƒã‚¤ã‚¹ã®ä½œæˆ
 				/*
 				const UINT w = m_main_page.m_page_size.width;
 				const UINT h = m_main_page.m_page_size.height;
@@ -731,15 +767,15 @@ namespace winrt::GraphPaper::implementation
 				Shape::s_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
 				*/
 
-				// ƒfƒoƒCƒX‚ÆƒfƒoƒCƒXƒRƒ“ƒeƒLƒXƒg‚Ìì¬
+				// ãƒ‡ãƒã‚¤ã‚¹ã¨ãƒ‡ãƒã‚¤ã‚¹ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã®ä½œæˆ
 				D2D_UI d2d;
 
-				// ƒrƒbƒgƒ}ƒbƒvƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg‚Ìì¬
-				// ƒTƒ|[ƒg‚³‚ê‚Ä‚¢‚éƒsƒNƒZƒ‹Œ`®‚ÆƒAƒ‹ƒtƒ@ ƒ‚[ƒh‚Ì
+				// ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ä½œæˆ
+				// ã‚µãƒãƒ¼ãƒˆã•ã‚Œã¦ã„ã‚‹ãƒ”ã‚¯ã‚»ãƒ«å½¢å¼ã¨ã‚¢ãƒ«ãƒ•ã‚¡ ãƒ¢ãƒ¼ãƒ‰ã®
 				// https://learn.microsoft.com/ja-jp/windows/win32/direct2d/supported-pixel-formats-and-alpha-modes#supported-formats-for-wic-bitmap-render-target
-				// EWIC ƒrƒbƒgƒ}ƒbƒv ƒŒƒ“ƒ_[ ƒ^[ƒQƒbƒg‚ÅƒTƒ|[ƒg‚³‚ê‚Ä‚¢‚éŒ`®
-				// EID2D1DCRenderTarget ‚ÅƒTƒ|[ƒg‚³‚ê‚éŒ`®
-				// ‚ğQÆ.
+				// ãƒ»WIC ãƒ“ãƒƒãƒˆãƒãƒƒãƒ— ãƒ¬ãƒ³ãƒ€ãƒ¼ ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã§ã‚µãƒãƒ¼ãƒˆã•ã‚Œã¦ã„ã‚‹å½¢å¼
+				// ãƒ»ID2D1DCRenderTarget ã§ã‚µãƒãƒ¼ãƒˆã•ã‚Œã‚‹å½¢å¼
+				// ã‚’å‚ç…§.
 				const UINT32 page_w = static_cast<UINT32>(m_main_page.m_page_size.width);
 				const UINT32 page_h = static_cast<UINT32>(m_main_page.m_page_size.height);
 				winrt::com_ptr<ID2D1BitmapRenderTarget> target;
@@ -756,7 +792,7 @@ namespace winrt::GraphPaper::implementation
 						)
 				);
 
-				// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgˆË‘¶‚ÌƒIƒuƒWƒFƒNƒg‚ğÁ‹
+				// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä¾å­˜ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æ¶ˆå»
 				for (const auto s : m_main_page.m_shape_list) {
 					if (typeid(*s) == typeid(ShapeImage)) {
 						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
@@ -775,7 +811,7 @@ namespace winrt::GraphPaper::implementation
 				Shape::s_color_brush = cb.get();
 				Shape::s_range_brush = rb.get();
 
-				// ƒrƒbƒgƒ}ƒbƒv‚Ö‚Ì•`‰æ
+				// ãƒ“ãƒƒãƒˆãƒãƒƒãƒ—ã¸ã®æç”»
 				m_mutex_draw.lock();
 				Shape::s_target->SaveDrawingState(m_main_page.m_state_block.get());
 				Shape::s_target->BeginDraw();
@@ -786,7 +822,7 @@ namespace winrt::GraphPaper::implementation
 				Shape::s_target->RestoreDrawingState(m_main_page.m_state_block.get());
 				m_mutex_draw.unlock();
 
-				// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgˆË‘¶‚ÌƒIƒuƒWƒFƒNƒg‚ğÁ‹
+				// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆä¾å­˜ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’æ¶ˆå»
 				for (const auto s : m_main_page.m_shape_list) {
 					if (typeid(*s) == typeid(ShapeImage)) {
 						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
@@ -797,7 +833,7 @@ namespace winrt::GraphPaper::implementation
 				winrt::com_ptr<ID2D1Device> dev;
 				d2d.m_d2d_context->GetDevice(dev.put());
 
-				// IWICImageEncoder ‚ğg—p‚µ‚Ä Direct2D ƒRƒ“ƒeƒ“ƒc‚ğ‘‚«‚Ş
+				// IWICImageEncoder ã‚’ä½¿ç”¨ã—ã¦ Direct2D ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã‚’æ›¸ãè¾¼ã‚€
 				winrt::com_ptr<IWICImageEncoder> image_enc;
 				winrt::check_hresult(
 					ShapeImage::wic_factory->CreateImageEncoder(
@@ -832,38 +868,41 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//-------------------------------
-	// }Œ`ƒf[ƒ^‚ğ SVG ‚Æ‚µ‚ÄƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚É”ñ“¯Šú‚É‘‚«‚Ş.
-	// svg_file	‘‚«‚İæ‚Ìƒtƒ@ƒCƒ‹
-	// –ß‚è’l	‘‚«‚ß‚½ê‡ S_OK
+	// å›³å½¢ãƒ‡ãƒ¼ã‚¿ã‚’ SVG ã¨ã—ã¦ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã«éåŒæœŸã«æ›¸ãè¾¼ã‚€.
+	// svg_file	æ›¸ãè¾¼ã¿å…ˆã®ãƒ•ã‚¡ã‚¤ãƒ«
+	// æˆ»ã‚Šå€¤	æ›¸ãè¾¼ã‚ãŸå ´åˆ S_OK
 	//-------------------------------
 	IAsyncOperation<winrt::hresult> MainPage::export_as_svg_async(const StorageFile& svg_file) const noexcept
 	{
 		HRESULT hr = E_FAIL;
 		try {
-			// ƒXƒgƒŒ[ƒWƒtƒ@ƒCƒ‹‚ğŠJ‚¢‚Ä, ƒXƒgƒŠ[ƒ€‚Æ‚»‚Ìƒf[ƒ^ƒ‰ƒCƒ^[‚ğ“¾‚é.
+
+			// ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã„ã¦, ã‚¹ãƒˆãƒªãƒ¼ãƒ ã¨ãã®ãƒ‡ãƒ¼ã‚¿ãƒ©ã‚¤ã‚¿ãƒ¼ã‚’å¾—ã‚‹.
 			const IRandomAccessStream& svg_stream{
 				co_await svg_file.OpenAsync(FileAccessMode::ReadWrite)
 			};
 			DataWriter dt_writer{
 				DataWriter(svg_stream.GetOutputStreamAt(0))
 			};
-			// XML éŒ¾‚Æ DOCTYPE ‚ğ‘‚«‚Ş.
+
+			// XML å®£è¨€ã¨ DOCTYPE ã‚’æ›¸ãè¾¼ã‚€.
 			dt_writer.WriteString(
 				L"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
 				L"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
 				L"\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
-			// SVG ŠJnƒ^ƒO‚ğ‘‚«‚Ş.
-			{
-				const auto size = m_main_page.m_page_size;	// •\¦‚Ì‘å‚«‚³
-				const auto unit = m_len_unit;	// ’·‚³‚Ì’PˆÊ
-				const auto dpi = m_main_d2d.m_logical_dpi;	// ˜_— DPI
-				const auto color = m_main_page.m_page_color;	// ”wŒiF
 
-				// ’PˆÊ•t‚«‚Å•‚Æ‚‚³‚Ì‘®«‚ğ‘‚«‚Ş.
-				wchar_t buf[1024];	// o—Íƒoƒbƒtƒ@
-				double w;	// ’PˆÊ•ÏŠ·Œã‚Ì•
-				double h;	// ’PˆÊ•ÏŠ·Œã‚Ì‚‚³
-				wchar_t* u;	// ’PˆÊ
+			// SVG é–‹å§‹ã‚¿ã‚°ã‚’æ›¸ãè¾¼ã‚€.
+			{
+				const auto size = m_main_page.m_page_size;	// è¡¨ç¤ºã®å¤§ãã•
+				const auto unit = m_len_unit;	// é•·ã•ã®å˜ä½
+				const auto dpi = m_main_d2d.m_logical_dpi;	// è«–ç† DPI
+				const auto color = m_main_page.m_page_color;	// èƒŒæ™¯è‰²
+
+				// å˜ä½ä»˜ãã§å¹…ã¨é«˜ã•ã®å±æ€§ã‚’æ›¸ãè¾¼ã‚€.
+				wchar_t buf[1024];	// å‡ºåŠ›ãƒãƒƒãƒ•ã‚¡
+				double w;	// å˜ä½å¤‰æ›å¾Œã®å¹…
+				double h;	// å˜ä½å¤‰æ›å¾Œã®é«˜ã•
+				wchar_t* u;	// å˜ä½
 				if (unit == LEN_UNIT::INCH) {
 					w = size.width / dpi;
 					h = size.height / dpi;
@@ -879,16 +918,16 @@ namespace winrt::GraphPaper::implementation
 					h = size.height * PT_PER_INCH / dpi;
 					u = L"pt";
 				}
-				// SVG ‚Åg—p‚Å‚«‚éã‹L‚Ì’PˆÊˆÈŠO‚Í‚·‚×‚ÄƒsƒNƒZƒ‹.
+				// SVG ã§ä½¿ç”¨ã§ãã‚‹ä¸Šè¨˜ã®å˜ä½ä»¥å¤–ã¯ã™ã¹ã¦ãƒ”ã‚¯ã‚»ãƒ«.
 				else {
 					w = size.width;
 					h = size.height;
 					u = L"px";
 				}
 
-				// ƒsƒNƒZƒ‹’PˆÊ‚Ì•‚Æ‚‚³‚ğ viewBox ‘®«‚Æ‚µ‚Ä‘‚«‚Ş.
-				// ”wŒiF‚ğƒXƒ^ƒCƒ‹‘®«‚Æ‚µ‚Ä‘‚«‚Ş.
-				// svg ŠJnƒ^ƒO‚ÌI—¹‚ğ‘‚«‚Ş.
+				// ãƒ”ã‚¯ã‚»ãƒ«å˜ä½ã®å¹…ã¨é«˜ã•ã‚’ viewBox å±æ€§ã¨ã—ã¦æ›¸ãè¾¼ã‚€.
+				// èƒŒæ™¯è‰²ã‚’ã‚¹ã‚¿ã‚¤ãƒ«å±æ€§ã¨ã—ã¦æ›¸ãè¾¼ã‚€.
+				// svg é–‹å§‹ã‚¿ã‚°ã®çµ‚äº†ã‚’æ›¸ãè¾¼ã‚€.
 				swprintf_s(buf,
 					L"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" "
 					L"width=\"%f%s\" height=\"%f%s\" "
@@ -903,7 +942,7 @@ namespace winrt::GraphPaper::implementation
 				dt_writer.WriteString(buf);
 			}
 
-			// }Œ`ƒŠƒXƒg‚ÌŠe}Œ`‚É‚Â‚¢‚ÄˆÈ‰º‚ğŒJ‚è•Ô‚·.
+			// å›³å½¢ãƒªã‚¹ãƒˆã®å„å›³å½¢ã«ã¤ã„ã¦ä»¥ä¸‹ã‚’ç¹°ã‚Šè¿”ã™.
 			for (auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
@@ -911,7 +950,7 @@ namespace winrt::GraphPaper::implementation
 				if (typeid(*s) == typeid(ShapeGroup)) {
 					co_await static_cast<const ShapeGroup*>(s)->export_as_svg_async(dt_writer);
 				}
-				// }Œ`‚ª‰æ‘œ‚©”»’è‚·‚é.
+				// å›³å½¢ãŒç”»åƒã‹åˆ¤å®šã™ã‚‹.
 				else if (typeid(*s) == typeid(ShapeImage)) {
 					co_await static_cast<const ShapeImage*>(s)->export_as_svg_async(dt_writer);
 				}
@@ -919,18 +958,18 @@ namespace winrt::GraphPaper::implementation
 					s->export_svg(dt_writer);
 				}
 			}
-			// SVG I—¹ƒ^ƒO‚ğ‘‚«‚Ş.
+			// SVG çµ‚äº†ã‚¿ã‚°ã‚’æ›¸ãè¾¼ã‚€.
 			dt_writer.WriteString(L"</svg>\n");
-			// ƒXƒgƒŠ[ƒ€‚ÌŒ»İˆÊ’u‚ğƒXƒgƒŠ[ƒ€‚Ì‘å‚«‚³‚ÉŠi”[‚·‚é.
+			// ã‚¹ãƒˆãƒªãƒ¼ãƒ ã®ç¾åœ¨ä½ç½®ã‚’ã‚¹ãƒˆãƒªãƒ¼ãƒ ã®å¤§ãã•ã«æ ¼ç´ã™ã‚‹.
 			svg_stream.Size(svg_stream.Position());
-			// ƒoƒbƒtƒ@“à‚Ìƒf[ƒ^‚ğƒXƒgƒŠ[ƒ€‚Éo—Í‚·‚é.
+			// ãƒãƒƒãƒ•ã‚¡å†…ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¹ãƒˆãƒªãƒ¼ãƒ ã«å‡ºåŠ›ã™ã‚‹.
 			co_await dt_writer.StoreAsync();
-			// ƒXƒgƒŠ[ƒ€‚ğƒtƒ‰ƒbƒVƒ…‚·‚é.
+			// ã‚¹ãƒˆãƒªãƒ¼ãƒ ã‚’ãƒ•ãƒ©ãƒƒã‚·ãƒ¥ã™ã‚‹.
 			co_await svg_stream.FlushAsync();
 			hr = S_OK;
 		}
 		catch (winrt::hresult_error const& e) {
-			// ƒGƒ‰[‚ª”­¶‚µ‚½ê‡, ƒGƒ‰[ƒR[ƒh‚ğŒ‹‰Ê‚ÉŠi”[‚·‚é.
+			// ã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ãŸå ´åˆ, ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’çµæœã«æ ¼ç´ã™ã‚‹.
 			hr = e.code();
 		}
 		co_return hr;

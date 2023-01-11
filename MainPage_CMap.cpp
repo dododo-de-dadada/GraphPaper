@@ -9002,7 +9002,8 @@ namespace winrt::CMap::implementation
 	}
 	*/
 
-	// wchar_t Œ^‚Ì•¶Žš—ñ (UTF-16) ‚ð uint32_t Œ^‚Ì•¶Žš—ñ (USC4) ‚É•ÏŠ·‚·‚é.
+	/*
+	// wchar_t Œ^‚Ì•¶Žš—ñ (UTF-16) ‚ð uint32_t Œ^‚Ì”z—ñ‚É•ÏŠ·‚·‚é.
 	std::vector<uint32_t> cmap_utf16_to_utf32(const wchar_t* wstr, size_t wlen)
 	{
 		const auto utf16 = winrt::array_view<const wchar_t>(wstr, wstr + wlen);
@@ -9025,4 +9026,5 @@ namespace winrt::CMap::implementation
 		}
 		return utf32;
 	}
+	*/
 }

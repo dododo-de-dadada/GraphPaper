@@ -312,6 +312,8 @@ namespace winrt::GraphPaper::implementation
 	inline wchar_t* wchar_cpy(const wchar_t* const s) noexcept;
 	// 文字列の長さ. 引数がヌルポインタの場合, 0 を返す.
 	inline uint32_t wchar_len(const wchar_t* const t) noexcept;
+	// wchar_t 型の文字列 (UTF-16) を uint32_t 型の配列に変換する.
+	inline std::vector<uint32_t> conv_utf16_to_utf32(const wchar_t* w, const size_t w_len) noexcept;
 
 	//------------------------------
 	// shape_dt.cpp
@@ -1922,4 +1924,26 @@ namespace winrt::GraphPaper::implementation
 		return nullptr;
 	}
 
+	// wchar_t 型の文字列 (UTF-16) を uint32_t 型の配列に変換する.
+	inline std::vector<uint32_t> conv_utf16_to_utf32(const wchar_t* w, const size_t w_len) noexcept
+	{
+		const auto utf16 = winrt::array_view<const wchar_t>(w, w + w_len);
+		std::vector<uint32_t> utf32{};
+		for (uint32_t i = 0; i < std::size(utf16); i++) {
+			// サロゲートペアの処理
+			// 上位が範囲内で
+			if (utf16[i] >= 0xD800 && utf16[i] <= 0xDBFF) {
+				// 下位も範囲内なら
+				if (i + 1 < std::size(utf16) && utf16[i + 1] >= 0xDC00 && utf16[i + 1] <= 0xDFFF) {
+					// 32 ビット値を取り出し格納する.
+					utf32.push_back(0x10000 + (utf16[i] - 0xD800) * 0x400 + (utf16[i + 1] - 0xDC00));
+					i++;
+				}
+			}
+			else if (utf16[i] < 0xDC00 || utf16[i] > 0xDFFF) {
+				utf32.push_back(utf16[i]);
+			}
+		}
+		return utf32;
+	}
 }

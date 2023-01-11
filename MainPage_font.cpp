@@ -254,7 +254,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			float g_base;
 			m_dialog_page.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val + 1.0, m_dialog_d2d.m_logical_dpi, g_base + 1.0f, buf);
+			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val + 1.0f, m_dialog_d2d.m_logical_dpi, g_base + 1.0f, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_ID::FONT_COLOR) {
@@ -358,7 +358,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(font_size - 1.0);
-		font_slider_set_header<UNDO_ID::FONT_SIZE, 0>(font_size - 1.0);
+		font_slider_set_header<UNDO_ID::FONT_SIZE, 0>(font_size - 1.0f);
 		dialog_slider_0().Visibility(Visibility::Visible);
 		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_SIZE, 0> });
 		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
