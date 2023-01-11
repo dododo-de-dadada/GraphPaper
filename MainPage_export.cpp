@@ -50,7 +50,7 @@ namespace winrt::GraphPaper::implementation
 	// PDF のフォント辞書を出力する.
 	// o_num	オブジェクト番号
 	// f_type	フォントフェイスの種類
-	// p_name	書体のポストスクリプト名
+	// p_name	ポストスクリプト名
 	// dt_writer	出力先
 	//------------------------------
 	static size_t export_pdf_font_dict(const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const DataWriter& dt_writer)
@@ -569,9 +569,9 @@ namespace winrt::GraphPaper::implementation
 					const auto t = static_cast<ShapeText*>(s);
 					//int n = t->m_pdf_font_num;
 
-					DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;
-					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;
-					DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;
+					DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
+					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;	// 書体の幅
+					DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;	// 字体
 					DWRITE_FONT_METRICS1 f_met{};	// 書体の計量
 					winrt::hstring p_name{};	// ポストスクリプト名
 					std::vector<uint16_t> gid{};	// グリフ ID
