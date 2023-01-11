@@ -1477,6 +1477,8 @@ namespace winrt::GraphPaper::implementation
 		void draw(void) final override;
 		// 書体の色を得る.
 		bool get_font_color(D2D1_COLOR_F& val) const noexcept final override;
+		// フォントフェースを得る (使用後は Release する).
+		bool get_font_face(IDWriteFontFace3*& face) const;
 		// 書体名を得る.
 		bool get_font_family(wchar_t*& val) const noexcept final override;
 		// 書体の大きさを得る.

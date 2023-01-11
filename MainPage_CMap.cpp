@@ -1,3 +1,5 @@
+// https://github.com/adobe-type-tools/cmap-resources/blob/master/Adobe-Japan1-7/cid2code.txt
+
 #include <winrt/base.h>
 #include <algorithm>
 
@@ -5,6 +7,7 @@ using namespace winrt;
 
 namespace winrt::CMap::implementation
 {
+	/*
 	struct CMAP {
 		uint32_t from;
 		uint32_t to;
@@ -8972,8 +8975,6 @@ namespace winrt::CMap::implementation
 		{ 0xd87edddf, 0, 14069 },
 		{ 0xd87eddf4, 0, 15269 }
 	};
-	/*
-	*/
 
 	uint16_t cmap_getcid(uint32_t utf32) noexcept
 	{
@@ -8999,6 +9000,7 @@ namespace winrt::CMap::implementation
 		));
 		return c != nullptr ? c->val + (utf32 - c->from) : 0;
 	}
+	*/
 
 	// wchar_t Œ^‚Ì•¶Žš—ñ (UTF-16) ‚ð uint32_t Œ^‚Ì•¶Žš—ñ (USC4) ‚É•ÏŠ·‚·‚é.
 	std::vector<uint32_t> cmap_utf16_to_utf32(const wchar_t* wstr, size_t wlen)

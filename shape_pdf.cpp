@@ -514,17 +514,17 @@ namespace winrt::GraphPaper::implementation
 		return dt_writer.WriteString(buf);
 	}
 
-	static bool get_font_face(const ShapeText* s, IDWriteFontFace3** const face)
+	bool ShapeText::get_font_face(IDWriteFontFace3*& face) const
 	{
-		const auto family = s->m_font_family;
-		const auto weight = s->m_font_weight;
-		const auto stretch = s->m_font_stretch;
-		const auto style = s->m_font_style;
+		const auto family = m_font_family;
+		const auto weight = m_font_weight;
+		const auto stretch = m_font_stretch;
+		const auto style = m_font_style;
 		bool ret = false;
 
 		// 文字列を書き込む.
 		IDWriteFontCollection* coll = nullptr;
-		if (s->m_dw_text_layout->GetFontCollection(&coll) == S_OK) {
+		if (m_dw_text_layout->GetFontCollection(&coll) == S_OK) {
 			// 図形と一致する書体ファミリを得る.
 			IDWriteFontFamily* fam = nullptr;
 			UINT32 index;
@@ -537,8 +537,8 @@ namespace winrt::GraphPaper::implementation
 				if (fam->GetFirstMatchingFont(weight, stretch, style, &font) == S_OK) {
 					IDWriteFontFaceReference* ref = nullptr;
 					if (static_cast<IDWriteFont3*>(font)->GetFontFaceReference(&ref) == S_OK) {
-						*face = nullptr;
-						if (ref->CreateFontFace(face) == S_OK) {
+						face = nullptr;
+						if (ref->CreateFontFace(&face) == S_OK) {
 							ret = true;
 						}
 						ref->Release();
@@ -567,6 +567,39 @@ namespace winrt::GraphPaper::implementation
 			(static_cast<uint32_t>(a[1]) << 16) |
 			(static_cast<uint32_t>(a[2]) << 8) | 
 			(static_cast<uint32_t>(a[3]));
+	}
+
+	static void export_subtable(const void* table_data, const size_t offset)
+	{
+		uint16_t format = get_uint16(table_data, offset);
+		//Format 0: Byte encoding table
+		if (format == 0) {
+
+		}
+		// Format 2: High-byte mapping through table
+		else if (format == 2) {
+
+		}
+		// Format 4: Segment mapping to delta values
+		else if (format == 4) {
+
+		}
+		// Format 6: Trimmed table mapping
+		else if (format == 6) {
+
+		}
+		// Format 8: mixed 16-bit and 32-bit coverage
+		else if (format == 8) {
+
+		}
+		// Format 10: Trimmed array
+		else if (format == 10) {
+
+		}
+		// Format 12: Segmented coverage
+		else if (format == 12) {
+
+		}
 	}
 
 	//------------------------------
@@ -600,10 +633,16 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(buf);
 
 		IDWriteFontFace3* face;
-		get_font_face(static_cast<const ShapeText*>(this), &face);
+		get_font_face(face);
 
 		//https://learn.microsoft.com/en-us/typography/opentype/spec/cmap
 //https://github.com/wine-mirror/wine/blob/master/dlls/dwrite/tests/font.c
+		struct CMAP {
+			uint32_t startCharCode;
+			uint32_t endCharCode;
+			uint32_t startGlyphID;
+		};
+
 		const void* table_data;
 		UINT32 table_size;
 		void* table_context;
@@ -666,6 +705,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			else if (platformID == 3) {
+				uint16_t format = get_uint16(table_data, offset);
 				if (encodingID == 0) {	// Symbol
 				}
 				else if (encodingID == 1) {	// Unicode BMP
@@ -684,7 +724,6 @@ namespace winrt::GraphPaper::implementation
 				else if (encodingID == 6) {	// Johab
 				}
 				else if (encodingID == 10) {	// Unicode full repertoire
-					uint16_t format = get_uint16(table_data, offset);
 					if (format == 0) {
 
 					}
@@ -693,7 +732,6 @@ namespace winrt::GraphPaper::implementation
 						uint32_t len = get_uint32(table_data, offset + 4);
 						uint32_t language = get_uint32(table_data, offset + 8);
 						uint32_t numGroups = get_uint32(table_data, offset + 12);
-
 
 						//uint32 startCharCode
 						//uint32 endCharCode
@@ -715,9 +753,13 @@ namespace winrt::GraphPaper::implementation
 				td_x, -td_y);
 			len += dt_writer.WriteString(buf);
 
-
 			// 文字列を書き込む.
-			/*
+			swprintf_s(buf,
+				L"%% %.*s\n",
+				static_cast<int>(min(t_len, 8)),
+				t);
+			len += dt_writer.WriteString(buf);
+
 			// GID
 			const auto utf32 = cmap_utf16_to_utf32(t, t_len);
 			const auto u_len = std::size(utf32);
@@ -725,11 +767,13 @@ namespace winrt::GraphPaper::implementation
 			face->GetGlyphIndices(std::data(utf32), u_len, std::data(gid));
 			len += dt_writer.WriteString(L"<");
 			for (uint32_t j = 0; j < u_len; j++) {
-				swprintf_s(buf, L"%04x", gid[j]);
-				len += dt_writer.WriteString(buf);
+				if (gid[j] != 0) {
+					swprintf_s(buf, L"%04x", gid[j]);
+					len += dt_writer.WriteString(buf);
+				}
 			}
 			len += dt_writer.WriteString(L"> Tj\n");
-			*/
+
 			/*
 			// wchar_t を UTF-32 に変換して書き出す.
 			len += dt_writer.WriteString(L"% UTF-32\n<");
@@ -740,6 +784,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			len += dt_writer.WriteString(L"> Tj\n");
 			*/
+
 			/*
 			// wchar_t を CID に変換して書き出す.
 			len += dt_writer.WriteString(L"% CID\n<");
@@ -753,6 +798,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			len += dt_writer.WriteString(L"> Tj\n");
 			*/
+
+			/*
 			// wchar_t を UTF16 としてそのまま書き出す.
 			len += dt_writer.WriteString(L"<");
 			for (uint32_t j = 0; j < t_len; j++) {
@@ -760,6 +807,8 @@ namespace winrt::GraphPaper::implementation
 				len += dt_writer.WriteString(buf);
 			}
 			len += dt_writer.WriteString(L"> Tj\n");
+			*/
+
 			/*
 			const UINT CP = CP_ACP;	// コードページ
 			const size_t mb_len = WideCharToMultiByte(CP, 0, t, t_len, NULL, 0, NULL, NULL);
