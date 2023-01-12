@@ -97,9 +97,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 属性の画像を読み込む
-	// panel_w	表示の幅
-	// panel_h	表示の高さ
-	IAsyncAction MainPage::dialog_image_load_async(const float panel_w, const float panel_h)
+	// p_width	表示の幅
+	// p_height	表示の高さ
+	IAsyncAction MainPage::dialog_image_load_async(const float p_width, const float p_height)
 	{
 		bool ok;
 		winrt::apartment_context context;
@@ -109,8 +109,8 @@ namespace winrt::GraphPaper::implementation
 			const IRandomAccessStream stream{ co_await file.OpenAsync(FileAccessMode::Read) };
 			const BitmapDecoder decoder{ co_await BitmapDecoder::CreateAsync(stream) };
 			const SoftwareBitmap bitmap{ co_await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight) };
-			const D2D1_POINT_2F pos{ static_cast<FLOAT>(panel_w * 0.125), static_cast<FLOAT>(panel_h * 0.125) };
-			const D2D1_SIZE_F size{ static_cast<float>(panel_w * 0.75), static_cast<FLOAT>(panel_h * 0.75) };
+			const D2D1_POINT_2F pos{ static_cast<FLOAT>(p_width * 0.125), static_cast<FLOAT>(p_height * 0.125) };
+			const D2D1_SIZE_F size{ static_cast<float>(p_width * 0.75), static_cast<FLOAT>(p_height * 0.75) };
 			ShapeImage* s = new ShapeImage(pos, size, bitmap, m_dialog_page.m_image_opac);
 			bitmap.Close();
 

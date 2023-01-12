@@ -79,11 +79,11 @@ namespace winrt::GraphPaper::implementation
 		const winrt::event_token slider_4_token{
 			dialog_slider_4().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::STROKE_WIDTH, 4> })
 		};
-		const auto panel_w = scp_dialog_panel().Width();
-		const auto panel_h = scp_dialog_panel().Height();
-		const auto padd = panel_w * 0.125;
+		const auto p_width = scp_dialog_panel().Width();
+		const auto p_height = scp_dialog_panel().Height();
+		const auto padd = p_width * 0.125;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(panel_w - 2.0 * padd), static_cast<FLOAT>(panel_h - 2.0 * padd) };
+		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd) };
 		m_dialog_page.m_shape_list.push_back(new ShapeLine(b_pos, b_vec, &m_dialog_page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;

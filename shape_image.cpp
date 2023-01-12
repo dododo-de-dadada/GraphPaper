@@ -60,12 +60,11 @@ namespace winrt::GraphPaper::implementation
 
 	// ビットマップをストリームに格納する.
 	// C	true ならクリッピングする. false ならしない.
-	// enc_id	画像の形式
+	// enc_id	符号化方式
 	// stream	画像を格納するストリーム
 	// 戻り値	格納できたら true
 	template <bool C>
-	IAsyncOperation<bool> ShapeImage::copy(const winrt::guid enc_id,
-		/*--->*/IRandomAccessStream& stream) const
+	IAsyncOperation<bool> ShapeImage::copy(const winrt::guid enc_id, IRandomAccessStream& stream) const
 	{
 		// クリップボードに格納するなら, 元データのまま.
 		// 描画するときに DrawBitmap でクリッピングされる.
@@ -74,7 +73,7 @@ namespace winrt::GraphPaper::implementation
 		// ひょっとしたら, クリッピング矩形の小数点のせいで微妙に異なる画像になるかもしれない.
 		// PDF には, 3 バイト RGB を提供できないので, 使えない.
 		bool ret = false;	// 返値
-		const int32_t clip_l = [=]() {	// クリッピング方形の左の値
+		const int32_t c_left = [=]() {	// クリッピング方形の左の値
 			if constexpr (C) {
 				return static_cast<int32_t>(std::floorf(m_clip.left)); 
 			}
@@ -82,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 				return 0;
 			}
 		}();
-		const int32_t clip_t = [=]() {	// クリッピング方形の上の値
+		const int32_t c_top = [=]() {	// クリッピング方形の上の値
 			if constexpr (C) { 
 				return static_cast<int32_t>(std::floorf(m_clip.top)); 
 			}
@@ -90,7 +89,7 @@ namespace winrt::GraphPaper::implementation
 				return 0;
 			}
 		}(); 
-		const int32_t clip_r = [=]() {	// クリッピング方形の右の値
+		const int32_t c_right = [=]() {	// クリッピング方形の右の値
 			if constexpr (C) {
 				return static_cast<int32_t>(std::ceilf(m_clip.right));
 			}
@@ -98,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 				return m_orig.width;
 			}
 		}(); 
-		const int32_t clip_b = [=]() {	// クリッピング方形の下の値
+		const int32_t c_bottom = [=]() {	// クリッピング方形の下の値
 			if constexpr (C) {
 				return static_cast<int32_t>(std::ceilf(m_clip.bottom));
 			}
@@ -106,7 +105,7 @@ namespace winrt::GraphPaper::implementation
 				return m_orig.height;
 			}
 		}();
-		if (clip_l >= 0 && clip_t >= 0 && clip_r > clip_l && clip_b > clip_t) {
+		if (c_left >= 0 && c_top >= 0 && c_right > c_left && c_bottom > c_top) {
 			// バックグラウンドに切替かえて実行する.
 			// UI スレッドのままでは, SoftwareBitmap が解放されるときエラーが起きる.
 			winrt::apartment_context context;
@@ -115,10 +114,10 @@ namespace winrt::GraphPaper::implementation
 			// SoftwareBitmap を作成する.
 			// Windows では, SoftwareBitmap にしろ WIC にしろ
 			// 3 バイトの RGB はサポートされてない.
-			const int32_t clip_w = clip_r - clip_l;
-			const int32_t clip_h = clip_b - clip_t;
+			const int32_t c_width = c_right - c_left;
+			const int32_t c_height = c_bottom - c_top;
 			SoftwareBitmap soft_bmp{
-				SoftwareBitmap(BitmapPixelFormat::Bgra8, clip_w, clip_h, BitmapAlphaMode::Straight)
+				SoftwareBitmap(BitmapPixelFormat::Bgra8, c_width, c_height, BitmapAlphaMode::Straight)
 			};
 
 			// ビットマップのバッファをロックする.
@@ -142,14 +141,15 @@ namespace winrt::GraphPaper::implementation
 				// 図形の画像データを
 				// SoftwareBitmap のバッファにコピーする.
 				if constexpr (C) {
-					const size_t src_pitch = 4ull * m_orig.width;
-					const size_t dst_pitch = 4ull * clip_w;
-					size_t i = 0;
-					for (size_t y = clip_t; y < clip_b; y++) {
-						memcpy(soft_bmp_ptr + dst_pitch * y, m_data + src_pitch * y + clip_l, dst_pitch);
+					// クリッピングあり
+					for (size_t y = c_top; y < c_bottom; y++) {
+						memcpy(soft_bmp_ptr + 4ull * c_width * y, 
+							m_data + 4ull * m_orig.width * y + c_left, 
+							4ull * c_width);
 					}
 				}
 				else {
+					// クリッピングなし
 					memcpy(soft_bmp_ptr, m_data, capacity);
 				}
 
@@ -200,8 +200,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		co_return ret;
 	}
-	template IAsyncOperation<bool> ShapeImage::copy<true>(const winrt::guid enc_id, IRandomAccessStream& ra_stream) const;
-	template IAsyncOperation<bool> ShapeImage::copy<false>(const winrt::guid enc_id, IRandomAccessStream& ra_stream) const;
+	template IAsyncOperation<bool> ShapeImage::copy<true>(const winrt::guid enc_id, IRandomAccessStream& stream) const;
+	template IAsyncOperation<bool> ShapeImage::copy<false>(const winrt::guid enc_id, IRandomAccessStream& stream) const;
 
 	// 図形を表示する.
 	void ShapeImage::draw(void)
@@ -446,15 +446,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれるか判定する.
-	// area_min	範囲の左上位置
-	// area_max	範囲の右下位置
+	// area_nw	範囲の左上位置
+	// area_se	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeImage::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
+	bool ShapeImage::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
 	{
 		// 始点と終点とが範囲に含まれるか判定する.
-		return pt_in_rect(m_start, area_min, area_max) &&
-			pt_in_rect(D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height }, area_min, area_max);
+		return pt_in_rect(m_start, area_nw, area_se) &&
+			pt_in_rect(D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height }, area_nw, area_se);
 	}
 
 	// 差分だけ移動する.

@@ -195,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 		// スクロールの変分に拡大率を掛けた値を
 		// 変換行列の平行移動の成分に格納する.
 		D2D1_POINT_2F t_pos;
-		pt_add(m_main_min, sb_horz().Value(), sb_vert().Value(), t_pos);
+		pt_add(m_main_nw, sb_horz().Value(), sb_vert().Value(), t_pos);
 		pt_mul(t_pos, page_scale, t_pos);
 		tran.dx = -t_pos.x;
 		tran.dy = -t_pos.y;
@@ -635,13 +635,13 @@ namespace winrt::GraphPaper::implementation
 	// s	図形
 	void MainPage::page_bbox_update(const Shape* s) noexcept
 	{
-		s->get_bound(m_main_min, m_main_max, m_main_min, m_main_max);
+		s->get_bound(m_main_nw, m_main_se, m_main_nw, m_main_se);
 	}
 
 	// 表示の左上位置と右下位置を設定する.
 	void MainPage::page_bbox_update(void) noexcept
 	{
-		slist_bound_view(m_main_page.m_shape_list, m_main_page.m_page_size, m_main_min, m_main_max);
+		slist_bound_view(m_main_page.m_shape_list, m_main_page.m_page_size, m_main_nw, m_main_se);
 	}
 
 	void MainPage::page_zoom_is_checked(float scale)

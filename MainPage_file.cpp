@@ -1195,8 +1195,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 表示の左上位置と右下位置を初期化する.
 		{
-			m_main_min = D2D1_POINT_2F{ 0.0F, 0.0F };
-			m_main_max = D2D1_POINT_2F{ m_main_page.m_page_size.width, m_main_page.m_page_size.height };
+			m_main_nw = D2D1_POINT_2F{ 0.0F, 0.0F };
+			m_main_se = D2D1_POINT_2F{ m_main_page.m_page_size.width, m_main_page.m_page_size.height };
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();

@@ -579,10 +579,10 @@ namespace winrt::GraphPaper::implementation
 #endif
 		m_composition_scale_x = swap_chain_panel.CompositionScaleX();
 		m_composition_scale_y = swap_chain_panel.CompositionScaleY();
-		const auto panel_w = swap_chain_panel.Width();
-		const auto panel_h = swap_chain_panel.Height();
-		m_logical_width = static_cast<FLOAT>(panel_w >= 1.0 ? panel_w : swap_chain_panel.ActualWidth());
-		m_logical_height = static_cast<FLOAT>(panel_h >= 1.0 ? panel_h : swap_chain_panel.ActualHeight());
+		const auto p_width = swap_chain_panel.Width();
+		const auto p_height = swap_chain_panel.Height();
+		m_logical_width = static_cast<FLOAT>(p_width >= 1.0 ? p_width : swap_chain_panel.ActualWidth());
+		m_logical_height = static_cast<FLOAT>(p_height >= 1.0 ? p_height : swap_chain_panel.ActualHeight());
 		if (m_logical_width > 0.0 && m_logical_height > 0.0) {
 			CreateWindowSizeDependentResources();
 		}

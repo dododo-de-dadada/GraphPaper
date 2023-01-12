@@ -190,7 +190,7 @@ namespace winrt::GraphPaper::implementation
 		);
 
 		// 消去されていない図形がひとつ以上ある場合.
-		const auto exists_undeleted = (undeleted_cnt > 0);
+		//const auto exists_undeleted = (undeleted_cnt > 0);
 		// 選択された図形がひとつ以上ある場合.
 		const auto exists_selected = (selected_cnt > 0);
 		// 選択された文字列がひとつ以上ある場合.
@@ -287,8 +287,8 @@ namespace winrt::GraphPaper::implementation
 		const float win_h = static_cast<float>(scp_page_panel().ActualHeight());
 		const float win_x = static_cast<float>(sb_horz().Value());
 		const float win_y = static_cast<float>(sb_vert().Value());
-		const float min_x = m_main_min.x;
-		const float min_y = m_main_min.y;
+		const float nw_x = m_main_nw.x;
+		const float nw_y = m_main_nw.y;
 
 		// resume_background しないと GetBitmapAsync が失敗することがある.
 		co_await winrt::resume_background();
@@ -305,8 +305,8 @@ namespace winrt::GraphPaper::implementation
 		const float img_h = static_cast<float>(bmp.PixelHeight());
 		const float scale = m_main_page.m_page_scale;
 		D2D1_POINT_2F pos{
-			static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - img_w * 0.5),
-			static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - img_h * 0.5)
+			static_cast<FLOAT>(nw_x + (win_x + win_w * 0.5) / scale - img_w * 0.5),
+			static_cast<FLOAT>(nw_y + (win_y + win_h * 0.5) / scale - img_h * 0.5)
 		};
 		const D2D1_SIZE_F page_size{ img_w, img_h };
 
@@ -437,8 +437,8 @@ namespace winrt::GraphPaper::implementation
 			const float win_y = static_cast<float>(sb_vert().Value());
 			const float win_w = static_cast<float>(scp_page_panel().ActualWidth());
 			const float win_h = static_cast<float>(scp_page_panel().ActualHeight());
-			const float min_x = m_main_min.x;
-			const float min_y = m_main_min.y;
+			const float nw_x = m_main_nw.x;
+			const float nw_y = m_main_nw.y;
 			ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w / scale, win_h / scale }, wchar_cpy(text.c_str()), &m_main_page);
 #if (_DEBUG)
 			debug_leak_cnt++;
@@ -447,8 +447,8 @@ namespace winrt::GraphPaper::implementation
 			t->frame_fit(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			// パネルの中央になるよう左上位置を求める.
 			D2D1_POINT_2F pos{
-				static_cast<FLOAT>(min_x + (win_x + win_w * 0.5) / scale - t->m_vec[0].x * 0.5),
-				static_cast<FLOAT>(min_y + (win_y + win_h * 0.5) / scale - t->m_vec[0].y * 0.5)
+				static_cast<FLOAT>(nw_x + (win_x + win_w * 0.5) / scale - t->m_vec[0].x * 0.5),
+				static_cast<FLOAT>(nw_y + (win_y + win_h * 0.5) / scale - t->m_vec[0].y * 0.5)
 			};
 			const double grid_len = (m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0 : 0.0);
 			const float vert_stick = m_vert_stick / m_main_page.m_page_scale;

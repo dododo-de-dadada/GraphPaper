@@ -190,7 +190,6 @@
     <ClCompile Include="shape.cpp" />
     <ClCompile Include="shape_bezi.cpp" />
     <ClCompile Include="shape_image.cpp" />
-    <ClCompile Include="shape_dt.cpp" />
     <ClCompile Include="d2d_ui.cpp" />
     <ClCompile Include="shape_elli.cpp" />
     <ClCompile Include="shape_group.cpp" />

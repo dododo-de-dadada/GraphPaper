@@ -151,7 +151,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 対角にある頂点をもとに, 方形を得る.
 		D2D1_POINT_2F t_min, t_max;
-		//pt_bound(v_pos[0], v_pos[2], r_min, r_max);
+		//pt_bound(v_pos[0], v_pos[2], r_nw, r_sw);
 		if (v_pos[0].x < v_pos[2].x) {
 			t_min.x = v_pos[0].x;
 			t_max.x = v_pos[2].x;
@@ -311,15 +311,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれるか判定する.
-	// area_min	範囲の左上位置
-	// area_max	範囲の右下位置
+	// area_nw	範囲の左上位置
+	// area_se	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeRect::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
+	bool ShapeRect::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
 	{
 		D2D1_POINT_2F pos;
 		pt_add(m_start, m_vec[0], pos);
-		return pt_in_rect(m_start, area_min, area_max) && pt_in_rect(pos, area_min, area_max);
+		return pt_in_rect(m_start, area_nw, area_se) && pt_in_rect(pos, area_nw, area_se);
 	}
 
 	// 値を, 部位の位置に格納する. 他の部位の位置も動く.

@@ -49,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F v_pos[2 + MAX_N_GON];
 		D2D1_POINT_2F g_pos;
 		D2D1_POINT_2F g_sub;
-		double d_min = FLT_MAX;
+		double d_min = FLT_MAX;	// 最短距離
 		for (const auto s : slist) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
@@ -519,49 +519,49 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 修飾キーがコントロールか判定する.
 		if (k_mod == VirtualKeyModifiers::Control) {
-			D2D1_POINT_2F area_min{};
-			D2D1_POINT_2F area_max{};
+			D2D1_POINT_2F area_nw{};
+			D2D1_POINT_2F area_se{};
 			if (m_event_pos_pressed.x < m_event_pos_curr.x) {
-				area_min.x = m_event_pos_pressed.x;
-				area_max.x = m_event_pos_curr.x;
+				area_nw.x = m_event_pos_pressed.x;
+				area_se.x = m_event_pos_curr.x;
 			}
 			else {
-				area_min.x = m_event_pos_curr.x;
-				area_max.x = m_event_pos_pressed.x;
+				area_nw.x = m_event_pos_curr.x;
+				area_se.x = m_event_pos_pressed.x;
 			}
 			if (m_event_pos_pressed.y < m_event_pos_curr.y) {
-				area_min.y = m_event_pos_pressed.y;
-				area_max.y = m_event_pos_curr.y;
+				area_nw.y = m_event_pos_pressed.y;
+				area_se.y = m_event_pos_curr.y;
 			}
 			else {
-				area_min.y = m_event_pos_curr.y;
-				area_max.y = m_event_pos_pressed.y;
+				area_nw.y = m_event_pos_curr.y;
+				area_se.y = m_event_pos_pressed.y;
 			}
-			if (toggle_area(area_min, area_max)) {
+			if (toggle_area(area_nw, area_se)) {
 				xcvd_is_enabled();
 			}
 		}
 		// 修飾キーが押されてないか判定する.
 		else if (k_mod == VirtualKeyModifiers::None) {
-			D2D1_POINT_2F area_min{};
-			D2D1_POINT_2F area_max{};
+			D2D1_POINT_2F area_nw{};
+			D2D1_POINT_2F area_se{};
 			if (m_event_pos_pressed.x < m_event_pos_curr.x) {
-				area_min.x = m_event_pos_pressed.x;
-				area_max.x = m_event_pos_curr.x;
+				area_nw.x = m_event_pos_pressed.x;
+				area_se.x = m_event_pos_curr.x;
 			}
 			else {
-				area_min.x = m_event_pos_curr.x;
-				area_max.x = m_event_pos_pressed.x;
+				area_nw.x = m_event_pos_curr.x;
+				area_se.x = m_event_pos_pressed.x;
 			}
 			if (m_event_pos_pressed.y < m_event_pos_curr.y) {
-				area_min.y = m_event_pos_pressed.y;
-				area_max.y = m_event_pos_curr.y;
+				area_nw.y = m_event_pos_pressed.y;
+				area_se.y = m_event_pos_curr.y;
 			}
 			else {
-				area_min.y = m_event_pos_curr.y;
-				area_max.y = m_event_pos_pressed.y;
+				area_nw.y = m_event_pos_curr.y;
+				area_se.y = m_event_pos_pressed.y;
 			}
-			if (select_area(area_min, area_max)) {
+			if (select_area(area_nw, area_se)) {
 				xcvd_is_enabled();
 			}
 		}
@@ -1028,7 +1028,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// スワップチェーンパネル上でのポインターの位置を表示座標系に変換する.
 		D2D1_POINT_2F page_pos;
-		pt_add(m_main_min, sb_horz().Value(), sb_vert().Value(), page_pos);
+		pt_add(m_main_nw, sb_horz().Value(), sb_vert().Value(), page_pos);
 		pt_mul_add(args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / m_main_page.m_page_scale, page_pos, m_event_pos_curr);
 	}
 

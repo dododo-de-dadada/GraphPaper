@@ -41,7 +41,7 @@
 // MainPage_text.cpp	文字列の編集と検索/置換
 // MainPage_thread.cpp	ウィンドウ切り替えのハンドラー
 // MainPage_ustack.cpp	元に戻すとやり直し操作
-// MainPage_xcvd.cpp	切り取りとコピー, 文字列の編集など
+// MainPage_xcvd.cpp	切り取りとコピー, 貼り付け, 削除
 //------------------------------
 #include <ppltasks.h>
 #include <winrt/Windows.ApplicationModel.ExtendedExecution.h>
@@ -248,8 +248,8 @@ namespace winrt::GraphPaper::implementation
 		// メインページ
 		ShapePage m_main_page;	// ページ
 		D2D_UI m_main_d2d;	// 描画環境
-		D2D1_POINT_2F m_main_min{ 0.0F, 0.0F };	// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
-		D2D1_POINT_2F m_main_max{ 0.0F, 0.0F };	// ページの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_main_nw{ 0.0F, 0.0F };	// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_main_se{ 0.0F, 0.0F };	// ページの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
 
 		// 設定ダイアログのページ
 		ShapePage m_dialog_page;	// ページ
@@ -710,7 +710,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「すべて選択」が選択された.
 		void select_all_click(IInspectable const&,RoutedEventArgs const&);
 		// 領域に含まれる図形を選択し, 含まれない図形の選択を解除する.
-		bool select_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max);
+		bool select_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se);
 		// 次の図形を選択する.
 		//template <VirtualKeyModifiers M, VirtualKey K> void select_next_shape(void);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
@@ -718,7 +718,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を選択する.
 		void select_shape(Shape* const s, const VirtualKeyModifiers k_mod);
 		// 領域に含まれる図形の選択を反転する.
-		bool toggle_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max);
+		bool toggle_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se);
 		// すべての図形の選択を解除する.
 		bool unselect_all(const bool t_range_only = false);
 		//　Shft + 下矢印キーが押された.
@@ -993,7 +993,7 @@ namespace winrt::GraphPaper::implementation
 
 		//-------------------------------
 		// MainPage_xcvd.cpp
-		// 切り取りとコピー, 文字列の編集など
+		// 切り取りとコピー, 貼り付け, 削除
 		//-------------------------------
 
 		// 編集メニューの「コピー」が選択された.

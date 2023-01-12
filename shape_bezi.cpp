@@ -28,19 +28,19 @@ namespace winrt::GraphPaper::implementation
 		double x;
 		double y;
 		// この位置を含むよう方形を拡張する.
-		inline void exp(BZP& r_min, BZP& r_max) const noexcept
+		inline void exp(BZP& r_nw, BZP& r_sw) const noexcept
 		{
-			if (x < r_min.x) {
-				r_min.x = x;
+			if (x < r_nw.x) {
+				r_nw.x = x;
 			}
-			if (x > r_max.x) {
-				r_max.x = x;
+			if (x > r_sw.x) {
+				r_sw.x = x;
 			}
-			if (y < r_min.y) {
-				r_min.y = y;
+			if (y < r_nw.y) {
+				r_nw.y = y;
 			}
-			if (y > r_max.y) {
-				r_max.y = y;
+			if (y > r_sw.y) {
+				r_sw.y = y;
 			}
 		}
 		inline BZP nextafter(const double d) const noexcept { return { std::nextafter(x, x + d), std::nextafter(y, y + d) }; }
@@ -754,18 +754,18 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 範囲に含まれるか判定する.
 	// 線の太さは考慮されない.
-	// area_min	範囲の左上位置
-	// area_max	範囲の右下位置
+	// area_nw	範囲の左上位置
+	// area_se	範囲の右下位置
 	// 戻り値	含まれるなら true
 	//------------------------------
-	bool ShapeBezi::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
+	bool ShapeBezi::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,
 		// 範囲の左上が原点となるよう平行移動した制御点を得る.
-		const double w = static_cast<double>(area_max.x) - area_min.x;
-		const double h = static_cast<double>(area_max.y) - area_min.y;
+		const double w = static_cast<double>(area_se.x) - area_nw.x;
+		const double h = static_cast<double>(area_se.y) - area_nw.y;
 		D2D1_POINT_2F c_pos[4];
-		pt_sub(m_start, area_min, c_pos[0]);
+		pt_sub(m_start, area_nw, c_pos[0]);
 		pt_add(c_pos[0], m_vec[0], c_pos[1]);
 		pt_add(c_pos[1], m_vec[1], c_pos[2]);
 		pt_add(c_pos[2], m_vec[2], c_pos[3]);
@@ -853,7 +853,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// setting	属性
+	// page	属性
 	//------------------------------
 	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
 		ShapePath::ShapePath(page, false)

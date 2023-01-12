@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 
 	// ”ÍˆÍ‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
 	// –ß‚è’l	‚Â‚Ë‚É false
-	bool ShapeStroke::in_area(const D2D1_POINT_2F /*area_min*/, const D2D1_POINT_2F /*area_max*/) const noexcept
+	bool ShapeStroke::in_area(const D2D1_POINT_2F /*area_nw*/, const D2D1_POINT_2F /*area_se*/) const noexcept
 	{
 		return false;
 	}
@@ -482,7 +482,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚ðì¬‚·‚é.
-	// setting	Ý’è
+	// page	Ý’è
 	ShapeStroke::ShapeStroke(const ShapePage* page) :
 		//ShapeSelect(),
 		m_dash_cap(page->m_dash_cap),

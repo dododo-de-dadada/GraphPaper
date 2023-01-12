@@ -61,8 +61,8 @@ namespace winrt::GraphPaper::implementation
 			create_stroke_style(factory);
 		}
 
-		D2D1_POINT_2F r_min;
-		pt_add(m_start, min(m_vec[0].x, 0.0), min(m_vec[0].y, 0.0), r_min);
+		D2D1_POINT_2F r_nw;
+		pt_add(m_start, min(m_vec[0].x, 0.0), min(m_vec[0].y, 0.0), r_nw);
 		float rx = std::fabsf(m_corner_rad.x);
 		float ry = std::fabsf(m_corner_rad.y);
 		float vx = std::fabsf(m_vec[0].x);
@@ -74,10 +74,10 @@ namespace winrt::GraphPaper::implementation
 			ry = vy * 0.5f;
 		}
 		D2D1_ROUNDED_RECT r_rec;
-		r_rec.rect.left = r_min.x;
-		r_rec.rect.top = r_min.y;
-		r_rec.rect.right = r_min.x + vx;
-		r_rec.rect.bottom = r_min.y + vy;
+		r_rec.rect.left = r_nw.x;
+		r_rec.rect.top = r_nw.y;
+		r_rec.rect.right = r_nw.x + vx;
+		r_rec.rect.bottom = r_nw.y + vy;
 		r_rec.radiusX = rx;
 		r_rec.radiusY = ry;
 		if (is_opaque(m_fill_color)) {
@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 		target->DrawRoundedRectangle(r_rec, brush, m_stroke_width, m_d2d_stroke_style.get());
 		if (is_selected()) {
 			D2D1_POINT_2F r_pos[4];
-			r_pos[0] = r_min;
+			r_pos[0] = r_nw;
 			r_pos[1].x = r_rec.rect.right;
 			r_pos[1].y = r_rec.rect.top;
 			r_pos[2].x = r_rec.rect.right;
@@ -105,13 +105,13 @@ namespace winrt::GraphPaper::implementation
 			}
 			//if (!zero) {
 				D2D1_POINT_2F c_pos;
-				pt_add(r_min, rx, ry, c_pos);
+				pt_add(r_nw, rx, ry, c_pos);
 				anc_draw_ellipse(c_pos, target, brush);
 				c_pos.x = r_rec.rect.right - rx;
 				anc_draw_ellipse(c_pos, target, brush);
 				c_pos.y = r_rec.rect.bottom - ry;
 				anc_draw_ellipse(c_pos, target, brush);
-				c_pos.x = r_min.x + rx;
+				c_pos.x = r_nw.x + rx;
 				anc_draw_ellipse(c_pos, target, brush);
 			//}
 		}
@@ -161,47 +161,47 @@ namespace winrt::GraphPaper::implementation
 
 	// à íuÇ™äpä€ï˚å`Ç…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
 	// t_pos	îªíËÇ∑ÇÈà íu
-	// r_min	äpä€ï˚å`ÇÃç∂è„à íu
-	// r_max	äpä€ï˚å`ÇÃâEâ∫à íu
+	// r_nw	äpä€ï˚å`ÇÃç∂è„à íu
+	// r_sw	äpä€ï˚å`ÇÃâEâ∫à íu
 	// r_rad	äpä€ÇÃîºåa
 	// ñﬂÇËíl	ä‹Ç‹ÇÍÇÈÇ»ÇÁ true Çï‘Ç∑.
-	static bool pt_in_rrect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max, const D2D1_POINT_2F r_rad)
+	static bool pt_in_rrect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_nw, const D2D1_POINT_2F r_sw, const D2D1_POINT_2F r_rad)
 	{
-		if (t_pos.x < r_min.x) {
+		if (t_pos.x < r_nw.x) {
 			return false;
 		}
-		if (t_pos.x > r_max.x) {
+		if (t_pos.x > r_sw.x) {
 			return false;
 		}
-		if (t_pos.y < r_min.y) {
+		if (t_pos.y < r_nw.y) {
 			return false;
 		}
-		if (t_pos.y > r_max.y) {
+		if (t_pos.y > r_sw.y) {
 			return false;
 		}
 		D2D1_POINT_2F c_pos;
-		pt_add(r_min, r_rad, c_pos);
+		pt_add(r_nw, r_rad, c_pos);
 		if (t_pos.x < c_pos.x) {
 			if (t_pos.y < c_pos.y) {
 				return pt_in_ellipse(t_pos, c_pos, r_rad.x, r_rad.y);
 			}
 		}
-		c_pos.x = r_max.x - r_rad.x;
-		c_pos.y = r_min.y + r_rad.y;
+		c_pos.x = r_sw.x - r_rad.x;
+		c_pos.y = r_nw.y + r_rad.y;
 		if (t_pos.x > c_pos.x) {
 			if (t_pos.y < c_pos.y) {
 				return pt_in_ellipse(t_pos, c_pos, r_rad.x, r_rad.y);
 			}
 		}
-		c_pos.x = r_max.x - r_rad.x;
-		c_pos.y = r_max.y - r_rad.y;
+		c_pos.x = r_sw.x - r_rad.x;
+		c_pos.y = r_sw.y - r_rad.y;
 		if (t_pos.x > c_pos.x) {
 			if (t_pos.y > c_pos.y) {
 				return pt_in_ellipse(t_pos, c_pos, r_rad.x, r_rad.y);
 			}
 		}
-		c_pos.x = r_min.x + r_rad.x;
-		c_pos.y = r_max.y - r_rad.y;
+		c_pos.x = r_nw.x + r_rad.x;
+		c_pos.y = r_sw.y - r_rad.y;
 		if (t_pos.x < c_pos.x) {
 			if (t_pos.y > c_pos.y) {
 				return pt_in_ellipse(t_pos, c_pos, r_rad.x, r_rad.y);
@@ -268,24 +268,24 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// äpä€ï˚å`Çê≥ãKâªÇ∑ÇÈ.
-		D2D1_POINT_2F r_min;
-		D2D1_POINT_2F r_max;
+		D2D1_POINT_2F r_nw;
+		D2D1_POINT_2F r_sw;
 		D2D1_POINT_2F r_rad;
 		if (m_vec[0].x > 0.0f) {
-			r_min.x = m_start.x;
-			r_max.x = m_start.x + m_vec[0].x;
+			r_nw.x = m_start.x;
+			r_sw.x = m_start.x + m_vec[0].x;
 		}
 		else {
-			r_min.x = m_start.x + m_vec[0].x;
-			r_max.x = m_start.x;
+			r_nw.x = m_start.x + m_vec[0].x;
+			r_sw.x = m_start.x;
 		}
 		if (m_vec[0].y > 0.0f) {
-			r_min.y = m_start.y;
-			r_max.y = m_start.y + m_vec[0].y;
+			r_nw.y = m_start.y;
+			r_sw.y = m_start.y + m_vec[0].y;
 		}
 		else {
-			r_min.y = m_start.y + m_vec[0].y;
-			r_max.y = m_start.y;
+			r_nw.y = m_start.y + m_vec[0].y;
+			r_sw.y = m_start.y;
 		}
 		r_rad.x = std::abs(m_corner_rad.x);
 		r_rad.y = std::abs(m_corner_rad.y);
@@ -293,7 +293,7 @@ namespace winrt::GraphPaper::implementation
 		// ê¸ògÇ™ìßñæÇ‹ÇΩÇÕëæÇ≥ 0 Ç©îªíËÇ∑ÇÈ.
 		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
 			// ìhÇËÇ¬Ç‘ÇµêFÇ™ïsìßñæ, Ç©Ç¬äpä€ï˚å`ÇªÇÃÇ‡ÇÃÇ…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
-			if (is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_min, r_max, r_rad)) {
+			if (is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_nw, r_sw, r_rad)) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
@@ -303,8 +303,8 @@ namespace winrt::GraphPaper::implementation
 			// ägëÂÇµÇΩäpä€ï˚å`Ç…ä‹Ç‹ÇÍÇÈÇ©îªíË
 			const double s_thick = max(m_stroke_width, Shape::s_anc_len);
 			D2D1_POINT_2F s_min, s_max, s_rad;
-			pt_add(r_min, -s_thick * 0.5, s_min);
-			pt_add(r_max, s_thick * 0.5, s_max);
+			pt_add(r_nw, -s_thick * 0.5, s_min);
+			pt_add(r_sw, s_thick * 0.5, s_max);
 			pt_add(r_rad, s_thick * 0.5, s_rad);
 			if (pt_in_rrect(t_pos, s_min, s_max, s_rad)) {
 				// èkè¨ÇµÇΩäpä€ï˚å`Ç™ãtì]ÇµÇƒÇ»Ç¢, Ç©Ç¬à íuÇ™èkè¨ÇµÇΩäpä€ï˚å`Ç…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.

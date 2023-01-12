@@ -59,7 +59,6 @@
     <ClCompile Include="shape_path.cpp" />
     <ClCompile Include="MainPage_join.cpp" />
     <ClCompile Include="MainPage_text.cpp" />
-    <ClCompile Include="shape_dt.cpp" />
     <ClCompile Include="MainPage_dash.cpp" />
     <ClCompile Include="shape_image.cpp" />
     <ClCompile Include="MainPage_image.cpp" />

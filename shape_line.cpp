@@ -248,16 +248,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれるか判定する.
-	// area_min	範囲の左上位置
-	// area_max	範囲の右下位置
+	// area_nw	範囲の左上位置
+	// area_se	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeLine::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
+	bool ShapeLine::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
 	{
-		if (pt_in_rect(m_start, area_min, area_max)) {
+		if (pt_in_rect(m_start, area_nw, area_se)) {
 			D2D1_POINT_2F pos;
 			pt_add(m_start, m_vec[0], pos);
-			return pt_in_rect(pos, area_min, area_max);
+			return pt_in_rect(pos, area_nw, area_se);
 		}
 		return false;
 	}
@@ -369,7 +369,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
-	// setting	既定の属性値
+	// page	既定の属性値
 	ShapeLine::ShapeLine(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
 		ShapeStroke::ShapeStroke(page),
 		m_arrow_style(page->m_arrow_style),

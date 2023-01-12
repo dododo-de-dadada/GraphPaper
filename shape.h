@@ -3,7 +3,6 @@
 // shape.h
 // shape.cpp	図形のひな型, その他
 // shape_bezi.cpp	ベジェ曲線
-// shape_dt.cpp	読み込み, 書き込み.
 // shape_elli.cpp	だ円
 // shape_group.cpp	グループ
 // shape_image.cpp	画像
@@ -291,9 +290,9 @@ namespace winrt::GraphPaper::implementation
 	// 多角形が位置を含むか判定する.
 	inline bool pt_in_poly(const D2D1_POINT_2F t_pos, const size_t p_cnt, const D2D1_POINT_2F p_pos[]) noexcept;
 	// 方形が位置を含むか判定する.
-	inline bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept;
+	inline bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_nw, const D2D1_POINT_2F r_sw) noexcept;
 	// 方形が位置を含むか判定する.
-	inline bool pt_in_rect2(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept;
+	inline bool pt_in_rect2(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_nw, const D2D1_POINT_2F r_sw) noexcept;
 	// 位置をスカラー倍に丸める.
 	inline void pt_round(const D2D1_POINT_2F a, const double b, D2D1_POINT_2F& round) noexcept;
 	// 位置にスカラー値を掛け, 別の位置を足す.
@@ -319,32 +318,34 @@ namespace winrt::GraphPaper::implementation
 	// shape_dt.cpp
 	// 読み込み, 書き込み.
 	//------------------------------
+	/*
 	// データライターに矢じるしの寸法を書き込む.
-	void dt_write(const ARROW_SIZE& val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const ARROW_SIZE& val, DataWriter const& dt_writer);
 	// データライターに端の形式を書き込む.
-	void dt_write(const CAP_STYLE& val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const CAP_STYLE& val, DataWriter const& dt_writer);
 	// データライターに色を書き込む.
-	void dt_write(const D2D1_COLOR_F& val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const D2D1_COLOR_F& val, DataWriter const& dt_writer);
 	// データライターに位置を書き込む.
-	void dt_write(const D2D1_POINT_2F val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const D2D1_POINT_2F val, DataWriter const& dt_writer);
 	// データライターに方形を書き込む.
-	void dt_write(const D2D1_RECT_F val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const D2D1_RECT_F val, DataWriter const& dt_writer);
 	// データライターに寸法を書き込む.
-	void dt_write(const D2D1_SIZE_F val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const D2D1_SIZE_F val, DataWriter const& dt_writer);
 	// データライターに寸法を書き込む.
-	void dt_write(const D2D1_SIZE_U val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const D2D1_SIZE_U val, DataWriter const& dt_writer);
 	// データライターに破線の配置を書き込む.
-	void dt_write(const DASH_PATT& val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const DASH_PATT& val, DataWriter const& dt_writer);
 	// データライターに文字列範囲を書き込む.
-	void dt_write(const DWRITE_TEXT_RANGE val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const DWRITE_TEXT_RANGE val, DataWriter const& dt_writer);
 	// データライターに方眼の形式を書き込む.
-	void dt_write(const GRID_EMPH val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const GRID_EMPH val, DataWriter const& dt_writer);
 	// データライターに位置配列を書き込む.
-	void dt_write(const std::vector<D2D1_POINT_2F>& val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const std::vector<D2D1_POINT_2F>& val, DataWriter const& dt_writer);
 	// データライターに文字列を書き込む.
-	void dt_write(const wchar_t* val, /*--->*/DataWriter const& dt_writer);
+	void dt_write(const wchar_t* val, DataWriter const& dt_writer);
 	// データライターに文字列を書き込む.
 	//size_t dt_write(const char val[], DataWriter const& dt_writer);
+	*/
 
 	//------------------------------
 	// shape_slist.cpp
@@ -495,7 +496,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept { return ANC_TYPE::ANC_PAGE; }
 		// 範囲に含まれるか判定する.
-		virtual bool in_area(const D2D1_POINT_2F /*area_min*/, const D2D1_POINT_2F /*area_max*/) const noexcept { return false; }
+		virtual bool in_area(const D2D1_POINT_2F /*area_nw*/, const D2D1_POINT_2F /*area_se*/) const noexcept { return false; }
 		// 消去されたか判定する.
 		virtual bool is_deleted(void) const noexcept { return false; }
 		// 選択されてるか判定する.
@@ -672,7 +673,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept final override;
 		// 範囲に含まれるか判定する.
-		bool in_area(const D2D1_POINT_2F /*area_min*/, const D2D1_POINT_2F /*area_max*/) const noexcept final override;
+		bool in_area(const D2D1_POINT_2F /*area_nw*/, const D2D1_POINT_2F /*area_se*/) const noexcept final override;
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F val) noexcept final override;
 		// 原画像に戻す.
@@ -944,7 +945,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
 		// 範囲に含まれるか判定する.
-		bool in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept final override;
+		bool in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept final override;
 		// 消去されているか判定する.
 		bool is_deleted(void) const noexcept final override { return m_list_grouped.size() == 0 || m_list_grouped.back()->is_deleted(); }
 		// 選択されているか判定する.
@@ -1031,7 +1032,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept override;
 		// 範囲に含まれるか判定する.
-		virtual bool in_area(const D2D1_POINT_2F /*area_min*/, const D2D1_POINT_2F /*area_max*/) const noexcept override;
+		virtual bool in_area(const D2D1_POINT_2F /*area_nw*/, const D2D1_POINT_2F /*area_se*/) const noexcept override;
 		// 差分だけ移動する.
 		virtual	bool move(const D2D1_POINT_2F val) noexcept override;
 		// 値を端の形式に格納する.
@@ -1113,7 +1114,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept override;
 		// 範囲に含まれるか判定する.
-		virtual bool in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept override;
+		virtual bool in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept override;
 		// 値を矢じるしの寸法に格納する.
 		virtual bool set_arrow_size(const ARROW_SIZE& val) noexcept override;
 		// 値を矢じるしの形式に格納する.
@@ -1165,7 +1166,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形の部位が位置を含むか判定する.
 		uint32_t hit_test_anc(const D2D1_POINT_2F t_pos) const noexcept;
 		// 範囲に含まれるか判定する.
-		virtual bool in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept override;
+		virtual bool in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept override;
 		// 塗りつぶしの色を得る.
 		bool get_fill_color(D2D1_COLOR_F& val) const noexcept final override;
 		// 値を塗りつぶしの色に格納する.
@@ -1363,7 +1364,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
 		// 範囲に含まれるか判定する.
-		virtual bool in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept override;
+		virtual bool in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept override;
 		// 値を矢じるしの形式に格納する.
 		bool set_arrow_style(const ARROW_STYLE val) noexcept final override;
 		// 値を塗りつぶし色に格納する.
@@ -1398,7 +1399,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
 		// 範囲に含まれるか判定する.
-		bool in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept final override;
+		bool in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept final override;
 		// 図形を作成する.
 		ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page);
 		// 図形をデータリーダーから読み込む.
@@ -1506,7 +1507,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
 		// 範囲に含まれるか判定する.
-		bool in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept final override;
+		bool in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept final override;
 		// 書体名が有効か判定し, 有効なら, 引数の書体名は破棄し, 有効な書体名の配列の要素と置き換える.
 		static bool is_available_font(wchar_t*& font) noexcept;
 		// 有効な書体名の配列を破棄する.
@@ -1570,11 +1571,11 @@ namespace winrt::GraphPaper::implementation
 	// brush	色ブラシ
 	inline void anc_draw_rect(const D2D1_POINT_2F a_pos, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
 	{
-		D2D1_POINT_2F r_min;
-		D2D1_POINT_2F r_max;
-		pt_add(a_pos, -0.5 * Shape::s_anc_len, r_min);
-		pt_add(r_min, Shape::s_anc_len, r_max);
-		const D2D1_RECT_F rect{ r_min.x, r_min.y, r_max.x, r_max.y };
+		D2D1_POINT_2F r_nw;
+		D2D1_POINT_2F r_sw;
+		pt_add(a_pos, -0.5 * Shape::s_anc_len, r_nw);
+		pt_add(r_nw, Shape::s_anc_len, r_sw);
+		const D2D1_RECT_F rect{ r_nw.x, r_nw.y, r_sw.x, r_sw.y };
 		brush->SetColor(Shape::s_background_color);
 		target->DrawRectangle(rect, brush, 2.0, nullptr);
 		brush->SetColor(Shape::s_foreground_color);
@@ -1815,26 +1816,26 @@ namespace winrt::GraphPaper::implementation
 
 	// 方形が位置を含むか判定する.
 	// t_pos	判定する位置
-	// r_min	方形の左上位置
-	// r_max	方形の右下位置
+	// r_nw	方形の左上位置
+	// r_sw	方形の右下位置
 	// 戻り値	含む場合 true
-	inline bool pt_in_rect2(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept
+	inline bool pt_in_rect2(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_nw, const D2D1_POINT_2F r_sw) noexcept
 	{
-		return r_min.x <= t_pos.x && t_pos.x <= r_max.x && r_min.y <= t_pos.y && t_pos.y <= r_max.y;
+		return r_nw.x <= t_pos.x && t_pos.x <= r_sw.x && r_nw.y <= t_pos.y && t_pos.y <= r_sw.y;
 	}
 
 	// 方形が位置を含むか判定する.
 	// t_pos	判定する位置
-	// r_min	方形のいずれかの頂点
-	// r_max	r_min に対して対角にある頂点
+	// r_nw	方形のいずれかの頂点
+	// r_sw	r_nw に対して対角にある頂点
 	// 戻り値	含む場合 true
-	inline bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_min, const D2D1_POINT_2F r_max) noexcept
+	inline bool pt_in_rect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_nw, const D2D1_POINT_2F r_sw) noexcept
 	{
-		const double min_x = r_min.x < r_max.x ? r_min.x : r_max.x;
-		const double max_x = r_min.x < r_max.x ? r_max.x : r_min.x;
-		const double min_y = r_min.y < r_max.y ? r_min.y : r_max.y;
-		const double max_y = r_min.y < r_max.y ? r_max.y : r_min.y;
-		return min_x <= t_pos.x && t_pos.x <= max_x && min_y <= t_pos.y && t_pos.y <= max_y;
+		const double nw_x = r_nw.x < r_sw.x ? r_nw.x : r_sw.x;	// 左上の x
+		const double nw_y = r_nw.y < r_sw.y ? r_nw.y : r_sw.y;	// 左上の y
+		const double se_x = r_nw.x < r_sw.x ? r_sw.x : r_nw.x;	// 右下の x
+		const double se_y = r_nw.y < r_sw.y ? r_sw.y : r_nw.y;	// 右下の y
+		return nw_x <= t_pos.x && t_pos.x <= se_x && nw_y <= t_pos.y && t_pos.y <= se_y;
 	}
 
 	// 位置にスカラーを掛けて, 位置を加える.

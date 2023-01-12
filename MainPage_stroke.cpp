@@ -17,18 +17,18 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// 見本の図形を作成する.
-	static void stroke_create_sample_shape(const float panel_w, const float panel_h, ShapePage& setting);
+	static void stroke_create_sample_shape(const float p_width, const float p_height, ShapePage& page);
 
 	// 見本の図形を作成する.
-	// panel_w	見本を表示するパネルの幅
-	// panel_h	見本を表示するパネルの高さ
-	// setting	見本を表示するシート
-	static void stroke_create_sample_shape(const float panel_w, const float panel_h, ShapePage& setting)
+	// p_width	見本を表示するパネルの幅
+	// p_height	見本を表示するパネルの高さ
+	// page	見本を表示するシート
+	static void stroke_create_sample_shape(const float p_width, const float p_height, ShapePage& page)
 	{
-		const auto padd = panel_w * 0.125;
+		const auto padd = p_width * 0.125;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(panel_w - 2.0 * padd), static_cast<FLOAT>(panel_h - 2.0 * padd) };
-		setting.m_shape_list.push_back(new ShapeLine(b_pos, b_vec, &setting));
+		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd) };
+		page.m_shape_list.push_back(new ShapeLine(b_pos, b_vec, &page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif

@@ -48,10 +48,10 @@ namespace winrt::GraphPaper::implementation
 		const double ss = m_main_page.m_page_scale;	// ページの倍率
 		const double vw = act_w / ss;	// 見えている部分の幅
 		const double vh = act_h / ss;	// 見えている部分の高さ
-		const auto s_min = m_main_min;
-		const auto s_max = m_main_max;
-		const auto mw = static_cast<double>(s_max.x) - static_cast<double>(s_min.x) - vw;
-		const auto mh = static_cast<double>(s_max.y) - static_cast<double>(s_min.y) - vh;
+		const auto nw = m_main_nw;
+		const auto se = m_main_se;
+		const auto mw = static_cast<double>(se.x) - static_cast<double>(nw.x) - vw;
+		const auto mh = static_cast<double>(se.y) - static_cast<double>(nw.y) - vh;
 		const auto w_gt0 = mw > 0.0;
 		const auto h_gt0 = mh > 0.0;
 		sb_horz().ViewportSize(vw);
@@ -101,8 +101,8 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::scroll_to(const Shape* s)
 	{
 		// スクロールビューアのビューポートの座標を, 表示座標で求める.
-		const double ox = m_main_min.x;	// 原点 x
-		const double oy = m_main_min.y;	// 原点 y
+		const double ox = m_main_nw.x;	// 原点 x
+		const double oy = m_main_nw.y;	// 原点 y
 		const double ho = sb_horz().Value();	// 横のスクロール値
 		const double vo = sb_vert().Value();	// 縦のスクロール値
 		const double vw = sb_horz().ViewportSize();	// 表示の幅
@@ -117,8 +117,8 @@ namespace winrt::GraphPaper::implementation
 		};
 		// テスト行列の方形が, ビューポートに含まれるか判定し,
 		// 含まれる方形がひとつでもあれば false を返す.
-		D2D1_POINT_2F r_min{};
-		D2D1_POINT_2F r_max{};
+		D2D1_POINT_2F r_nw{};
+		D2D1_POINT_2F r_sw{};
 		DWRITE_TEXT_RANGE t_range;
 		if (s->get_text_selected(t_range) && t_range.length > 0) {
 			const auto s_text = static_cast<const ShapeText*>(s);
@@ -127,12 +127,12 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F t_pos;
 			s->get_pos_start(t_pos);
 			for (auto i = cnt; i > 0; i--) {
-				r_min.x = t_pos.x + mtx[i - 1].left;
-				r_min.y = t_pos.y + mtx[i - 1].top;
-				r_max.x = r_min.x + mtx[i - 1].width;
-				r_max.y = r_min.y + mtx[i - 1].height;
-				if (pt_in_rect(r_min, v_min, v_max)
-					|| pt_in_rect(r_max, v_min, v_max)) {
+				r_nw.x = t_pos.x + mtx[i - 1].left;
+				r_nw.y = t_pos.y + mtx[i - 1].top;
+				r_sw.x = r_nw.x + mtx[i - 1].width;
+				r_sw.y = r_nw.y + mtx[i - 1].height;
+				if (pt_in_rect(r_nw, v_min, v_max)
+					|| pt_in_rect(r_sw, v_min, v_max)) {
 					return false;
 				}
 			}
@@ -141,15 +141,15 @@ namespace winrt::GraphPaper::implementation
 			if (s->in_area(v_min, v_max)) {
 				return false;
 			}
-			s->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, r_min, r_max);
+			s->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, r_nw, r_sw);
 		}
 
 		// 最初の方形の水平位置と垂直位置について, ビューポートの範囲外の場合, スクロールする.
-		if (r_max.x < v_min.x || v_max.x < r_min.x) {
-			sb_horz().Value(r_min.x - ox);
+		if (r_sw.x < v_min.x || v_max.x < r_nw.x) {
+			sb_horz().Value(r_nw.x - ox);
 		}
-		if (r_max.y < v_min.y || v_max.y < r_min.y) {
-			sb_vert().Value(r_min.y - oy);
+		if (r_sw.y < v_min.y || v_max.y < r_nw.y) {
+			sb_vert().Value(r_nw.y - oy);
 		}
 		return true;
 	}

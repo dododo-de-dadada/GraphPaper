@@ -10,27 +10,26 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr float TEXT_LINE_SP_DELTA = 2.0f;	// 行の高さの変分 (DPIs)
 
 	// 見本の図形を作成する.
-	static void text_create_sample_shape(const float panel_w, const float panel_h, ShapePage& setting);
+	static void text_create_sample_shape(const float p_width, const float p_height, ShapePage& page);
 
+	//------------------------------
 	// 見本の図形を作成する.
-	// panel_w	見本を表示するパネルの幅
-	// panel_h	見本を表示するパネルの高さ
+	// p_width	見本を表示するパネルの幅
+	// p_height	見本を表示するパネルの高さ
 	// page	見本を表示するページ
-	static void text_create_sample_shape(const float panel_w, const float panel_h, ShapePage& setting)
+	//------------------------------
+	static void text_create_sample_shape(const float p_width, const float p_height, ShapePage& page)
 	{
-		const auto padd_w = panel_w * 0.125;
-		const auto padd_h = panel_h * 0.25;
+		const auto padd_w = p_width * 0.125;
+		const auto padd_h = p_height * 0.25;
 		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(panel_w - 2.0 * padd_w), static_cast<FLOAT>(panel_w - 2.0 * padd_h) };
+		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd_w), static_cast<FLOAT>(p_width - 2.0 * padd_h) };
 		const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 		const wchar_t* text = nullptr;
 		if (pang.empty()) {
@@ -39,7 +38,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			text = pang.c_str();
 		}
-		setting.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &setting));
+		page.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif

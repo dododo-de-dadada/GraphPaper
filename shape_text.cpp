@@ -594,9 +594,9 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
 			DWRITE_HIT_TEST_METRICS const& tm = m_dw_test_metrics[i];
 			DWRITE_LINE_METRICS const& lm = m_dw_line_metrics[i];
-			const D2D1_POINT_2F r_max{ tm.left + tm.width, tm.top + lm.baseline + descent };
-			const D2D1_POINT_2F r_min{ tm.left, r_max.y - m_font_size };
-			if (pt_in_rect(p_min, r_min, r_max)) {
+			const D2D1_POINT_2F r_sw{ tm.left + tm.width, tm.top + lm.baseline + descent };
+			const D2D1_POINT_2F r_nw{ tm.left, r_sw.y - m_font_size };
+			if (pt_in_rect(p_min, r_nw, r_sw)) {
 				return ANC_TYPE::ANC_TEXT;
 			}
 		}
@@ -604,11 +604,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれるか判定する.
-	// area_min	範囲の左上位置
-	// area_max	範囲の右下位置
+	// area_nw	範囲の左上位置
+	// area_se	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeText::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
+	bool ShapeText::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
 	{
 		D2D1_POINT_2F p_min;
 		D2D1_POINT_2F h_min;
@@ -623,16 +623,16 @@ namespace winrt::GraphPaper::implementation
 				DWRITE_LINE_METRICS const& lm = m_dw_line_metrics[i];
 				const double top = static_cast<double>(tm.top) + lm.baseline + descent - m_font_size;
 				pt_add(p_min, tm.left, top, h_min);
-				if (!pt_in_rect(h_min, area_min, area_max)) {
+				if (!pt_in_rect(h_min, area_nw, area_se)) {
 					return false;
 				}
 				pt_add(h_min, tm.width, m_font_size, h_max);
-				if (!pt_in_rect(h_max, area_min, area_max)) {
+				if (!pt_in_rect(h_max, area_nw, area_se)) {
 					return false;
 				}
 			}
 		}
-		return ShapeRect::in_area(area_min, area_max);
+		return ShapeRect::in_area(area_nw, area_se);
 	}
 
 	// 書体名が有効か判定する.
@@ -870,20 +870,20 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// text	文字列
-	// setting	属性
-	ShapeText::ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const ShapePage* setting) :
-		ShapeRect::ShapeRect(b_pos, b_vec, setting),
-		m_font_color(setting->m_font_color),
-		m_font_family(setting->m_font_family),
-		m_font_size(setting->m_font_size),
-		m_font_stretch(setting->m_font_stretch),
-		m_font_style(setting->m_font_style),
-		m_font_weight(setting->m_font_weight),
-		m_text_line_sp(setting->m_text_line_sp),
-		m_text_padding(setting->m_text_padding),
+	// page	属性
+	ShapeText::ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const ShapePage* page) :
+		ShapeRect::ShapeRect(b_pos, b_vec, page),
+		m_font_color(page->m_font_color),
+		m_font_family(page->m_font_family),
+		m_font_size(page->m_font_size),
+		m_font_stretch(page->m_font_stretch),
+		m_font_style(page->m_font_style),
+		m_font_weight(page->m_font_weight),
+		m_text_line_sp(page->m_text_line_sp),
+		m_text_padding(page->m_text_padding),
 		m_text(text),
-		m_text_align_t(setting->m_text_align_t),
-		m_text_par_align(setting->m_text_par_align),
+		m_text_align_t(page->m_text_align_t),
+		m_text_par_align(page->m_text_par_align),
 		m_text_selected_range(DWRITE_TEXT_RANGE{ 0, 0 })
 	{
 		ShapeText::is_available_font(m_font_family);

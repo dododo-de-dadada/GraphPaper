@@ -153,15 +153,15 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 範囲に含まれるか判定する.
-	// area_min	範囲の左上位置
-	// area_max	範囲の右下位置
+	// area_nw	範囲の左上位置
+	// area_se	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
 	//------------------------------
-	bool ShapeGroup::in_area(const D2D1_POINT_2F area_min, const D2D1_POINT_2F area_max) const noexcept
+	bool ShapeGroup::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
 	{
 		for (const Shape* s : m_list_grouped) {
-			if (!s->in_area(area_min, area_max)) {
+			if (!s->in_area(area_nw, area_se)) {
 				return false;
 			}
 		}
