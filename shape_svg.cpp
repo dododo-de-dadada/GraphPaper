@@ -167,7 +167,8 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 矢じりをデータライターに SVG タグとしてバッファに書き込む.
+	// バッファに矢じりを SVG タグとして書き込む.
+	// N	バッファの長さ
 	// buf	バッファ
 	// s	直線図形
 	// barbs	矢じりの両端の位置 [2]
@@ -197,9 +198,9 @@ namespace winrt::GraphPaper::implementation
 	// データライターに SVG タグとして書き込む.
 	void ShapePoly::export_svg(DataWriter const& dt_writer) const
 	{
-		const auto d_cnt = m_vec.size();	// 差分の数
-		const auto v_cnt = d_cnt + 1;
-		D2D1_POINT_2F v_pos[MAX_N_GON];
+		const auto d_cnt = m_vec.size();	// 始点を除くの頂点数
+		//const auto v_cnt = d_cnt + 1;	// 
+		D2D1_POINT_2F v_pos[N_GON_MAX];
 		wchar_t buf[1024];
 		swprintf_s(buf,
 			L"<path d=\"M%f %f ",
@@ -225,7 +226,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F h_tip;
 			D2D1_POINT_2F h_barbs[2];
-			if (ShapePoly::poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
+			if (ShapePoly::poly_get_arrow_barbs(d_cnt + 1, v_pos, m_arrow_size, h_tip, h_barbs)) {
 				export_svg_barbs(buf, this, h_barbs, h_tip);
 				dt_writer.WriteString(buf);
 			}
@@ -269,7 +270,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(L"/>\n");
 	}
 
-	// データライターに SVG タグとして書き込む.
+	// バッファに SVG タグとして書き込む.
 	template<bool ARROW, size_t N>
 	static void export_svg_stroke(wchar_t (&buf)[N], /*<---*/const ShapeStroke* s)
 	{
@@ -373,7 +374,7 @@ namespace winrt::GraphPaper::implementation
 		// デセントは, フォント文字の配置ボックスの下部からベースラインまでの長さ.
 		// dy = その行のヒットテストメトリックスの高さ - フォントの大きさ * (デセント / 単位大きさ) となる, はず.
 		//IDWriteFontCollection* fonts;
-		//m_dw_layout->GetFontCollection(&fonts);
+		//m_dwrite_layout->GetFontCollection(&fonts);
 		//IDWriteFontFamily* family;
 		//fonts->GetFontFamily(0, &family);
 		//IDWriteFont* font;
@@ -407,8 +408,8 @@ namespace winrt::GraphPaper::implementation
 		// 書体を表示する左上位置に余白を加える.
 		D2D1_POINT_2F nw_pos;
 		pt_add(m_start, m_text_padding.width, m_text_padding.height, nw_pos);
-		for (uint32_t i = 0; i < m_dw_test_cnt; i++) {
-			const DWRITE_HIT_TEST_METRICS& tm = m_dw_test_metrics[i];
+		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
+			const DWRITE_HIT_TEST_METRICS& tm = m_dwrite_test_metrics[i];
 			const wchar_t* t = m_text + tm.textPosition;
 			const uint32_t t_len = tm.length;
 			const double px = static_cast<double>(nw_pos.x);
@@ -416,7 +417,7 @@ namespace winrt::GraphPaper::implementation
 			const double py = static_cast<double>(nw_pos.y);
 			const double qy = static_cast<double>(tm.top);
 			// 文字列を表示する垂直なずらし位置を求める.
-			const double dy = static_cast<double>(m_dw_line_metrics[i].baseline);
+			const double dy = static_cast<double>(m_dwrite_line_metrics[i].baseline);
 			// 文字列を書き込む.
 			swprintf_s(buf,
 				L"<text x=\"%f\" y=\"%f\" dy=\"%f\" >",

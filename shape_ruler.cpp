@@ -22,7 +22,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_opaque(m_stroke_color)) {
 			const double g_len = m_grid_base + 1.0;
-			const double f_size = m_dw_text_format->GetFontSize();
+			const double f_size = m_dwrite_text_format->GetFontSize();
 			const bool x_ge_y = fabs(m_vec[0].x) >= fabs(m_vec[0].y);
 			const double vec_x = (x_ge_y ? m_vec[0].x : m_vec[0].y);
 			const double vec_y = (x_ge_y ? m_vec[0].y : m_vec[0].x);
@@ -122,23 +122,63 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_PAGE;
 	}
 
+	/*
+	bool ShapeRuler::get_font_face(IDWriteFontFace3*& face) const
+	{
+		const auto family = m_font_family;
+		const auto weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;
+		const auto stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;
+		const auto style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;
+		bool ret = false;
+
+		// 文字列を書き込む.
+		IDWriteFontCollection* coll = nullptr;
+		if (m_dwrite_text_format->GetFontCollection(&coll) == S_OK) {
+			// 図形と一致する書体ファミリを得る.
+			IDWriteFontFamily* fam = nullptr;
+			UINT32 index;
+			BOOL exists;
+			if (coll->FindFamilyName(family, &index, &exists) == S_OK &&
+				exists &&
+				coll->GetFontFamily(index, &fam) == S_OK) {
+				// 書体ファミリから, 太さと幅, 字体が一致する書体を得る.
+				IDWriteFont* font = nullptr;
+				if (fam->GetFirstMatchingFont(weight, stretch, style, &font) == S_OK) {
+					IDWriteFontFaceReference* ref = nullptr;
+					if (static_cast<IDWriteFont3*>(font)->GetFontFaceReference(&ref) == S_OK) {
+						face = nullptr;
+						if (ref->CreateFontFace(&face) == S_OK) {
+							ret = true;
+						}
+						ref->Release();
+					}
+					font->Release();
+				}
+				fam->Release();
+			}
+			coll->Release();
+		}
+		return true;
+	}
+	*/
+
 	// 図形を表示する.
 	void ShapeRuler::draw(void)
 	{
-		ID2D1Factory* const factory = Shape::s_factory;
-		IDWriteFactory* const dw_factory = Shape::s_dw_factory;
-		ID2D1RenderTarget* const target = Shape::s_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+		ID2D1Factory* const factory = Shape::s_d2d_factory;
+		IDWriteFactory* const dwrite_factory = Shape::s_dwrite_factory;
+		ID2D1RenderTarget* const target = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
 		}
-		if (m_dw_text_format == nullptr) {
+		if (m_dwrite_text_format == nullptr) {
 			wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 			GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
 			const float font_size = min(m_font_size, m_grid_base + 1.0f);
 			winrt::check_hresult(
-				dw_factory->CreateTextFormat(
+				dwrite_factory->CreateTextFormat(
 					m_font_family,
 					static_cast<IDWriteFontCollection*>(nullptr),
 					DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL,
@@ -146,10 +186,10 @@ namespace winrt::GraphPaper::implementation
 					DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
 					font_size,
 					locale_name,
-					m_dw_text_format.put()
+					m_dwrite_text_format.put()
 				)
 			);
-			m_dw_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+			m_dwrite_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
 		}
 		constexpr wchar_t* D[10] = { L"0", L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9" };
 
@@ -167,21 +207,21 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_opaque(m_stroke_color)) {
 			// 線枠の色が不透明な場合,
-			const double g_len = m_grid_base + 1.0;
-			const double f_size = m_dw_text_format->GetFontSize();
-			const bool xy = fabs(m_vec[0].x) >= fabs(m_vec[0].y);
-			const double vec_x = (xy ? m_vec[0].x : m_vec[0].y);
-			const double vec_y = (xy ? m_vec[0].y : m_vec[0].x);
-			const double grad_x = vec_x >= 0.0 ? g_len : -g_len;
-			const double grad_y = min(f_size, g_len);
-			const uint32_t k = static_cast<uint32_t>(floor(vec_x / grad_x));
-			const double x0 = (xy ? m_start.x : m_start.y);
-			const double y0 = static_cast<double>(xy ? m_start.y : m_start.x) + vec_y;
-			const double y1 = y0 - (vec_y >= 0.0 ? grad_y : -grad_y);
-			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? grad_y : -grad_y);
+			const double g_len = m_grid_base + 1.0;	// 方眼の大きさ
+			const double f_size = m_dwrite_text_format->GetFontSize();	// 書体の大きさ
+			const bool w_ge_h = fabs(m_vec[0].x) >= fabs(m_vec[0].y);	// 高さより幅の方が大きい
+			const double vec_x = (w_ge_h ? m_vec[0].x : m_vec[0].y);	// 大きい方の値を x
+			const double vec_y = (w_ge_h ? m_vec[0].y : m_vec[0].x);	// 小さい方の値を y
+			const double intvl_x = vec_x >= 0.0 ? g_len : -g_len;	// 目盛りの間隔
+			const double intvl_y = min(f_size, g_len);	// 目盛りの間隔
+			const uint32_t k = static_cast<uint32_t>(floor(vec_x / intvl_x));	// 目盛りの数
+			const double x0 = (w_ge_h ? m_start.x : m_start.y);
+			const double y0 = static_cast<double>(w_ge_h ? m_start.y : m_start.x) + vec_y;
+			const double y1 = y0 - (vec_y >= 0.0 ? intvl_y : -intvl_y);
+			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? intvl_y : -intvl_y);
 			const double y2 = y1 - (vec_y >= 0.0 ? f_size : -f_size);
 			DWRITE_PARAGRAPH_ALIGNMENT p_align;
-			if (xy) {
+			if (w_ge_h) {
 				// 横のほうが大きい場合,
 				// 高さが 0 以上の場合下よせ、ない場合上よせを段落のそろえに格納する.
 				// 文字列を配置する方形が小さい (書体の大きさと同じ) ため,
@@ -194,31 +234,31 @@ namespace winrt::GraphPaper::implementation
 				p_align = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 			}
 			// 段落のそろえをテキストフォーマットに格納する.
-			m_dw_text_format->SetParagraphAlignment(p_align);
+			m_dwrite_text_format->SetParagraphAlignment(p_align);
 			brush->SetColor(m_stroke_color);
 			for (uint32_t i = 0; i <= k; i++) {
 				// 方眼の大きさごとに目盛りを表示する.
-				const double x = x0 + i * grad_x;
+				const double x = x0 + i * intvl_x;
 				D2D1_POINT_2F p0{
-					xy ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
-					xy ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
+					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
+					w_ge_h ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
 				};
 				const auto y = ((i % 5) == 0 ? y1 : y1_5);
 				D2D1_POINT_2F p1{
-					xy ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
-					xy ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
+					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
+					w_ge_h ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				target->DrawLine(p0, p1, brush);
 				// 目盛りの値を表示する.
 				const double x1 = x + f_size * 0.5;
 				const double x2 = x1 - f_size;
 				D2D1_RECT_F t_rect{
-					xy ? static_cast<FLOAT>(x2) : static_cast<FLOAT>(y2),
-					xy ? static_cast<FLOAT>(y2) : static_cast<FLOAT>(x2),
-					xy ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
-					xy ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
+					w_ge_h ? static_cast<FLOAT>(x2) : static_cast<FLOAT>(y2),
+					w_ge_h ? static_cast<FLOAT>(y2) : static_cast<FLOAT>(x2),
+					w_ge_h ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
+					w_ge_h ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
 				};
-				target->DrawText(D[i % 10], 1u, m_dw_text_format.get(), t_rect, brush);
+				target->DrawText(D[i % 10], 1u, m_dwrite_text_format.get(), t_rect, brush);
 			}
 		}
 		if (is_selected()) {
@@ -261,7 +301,7 @@ namespace winrt::GraphPaper::implementation
 		// 値が書体名と同じか判定する.
 		if (!equal(m_font_family, val)) {
 			m_font_family = val;
-			m_dw_text_format = nullptr;
+			m_dwrite_text_format = nullptr;
 			return true;
 		}
 		return false;
@@ -272,7 +312,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (m_font_size != val) {
 			m_font_size = val;
-			m_dw_text_format = nullptr;
+			m_dwrite_text_format = nullptr;
 			return true;
 		}
 		return false;
@@ -326,7 +366,7 @@ namespace winrt::GraphPaper::implementation
 		const auto font_family_data = reinterpret_cast<const uint8_t*>(m_font_family);
 		dt_writer.WriteBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
 
-		dt_writer.WriteSingle(m_dw_text_format->GetFontSize());
+		dt_writer.WriteSingle(m_dwrite_text_format->GetFontSize());
 	}
 
 }

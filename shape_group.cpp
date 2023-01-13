@@ -15,13 +15,13 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void ShapeGroup::draw(void)
 	{
-		ID2D1RenderTarget* const context = Shape::s_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+		ID2D1RenderTarget* const context = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		// 選択フラグが立ってるか判定する.
 		if (is_selected()) {
-			D2D1_POINT_2F b_min{ FLT_MAX, FLT_MAX };
-			D2D1_POINT_2F b_max{ -FLT_MAX, -FLT_MAX };
+			D2D1_POINT_2F b_lt { FLT_MAX, FLT_MAX };
+			D2D1_POINT_2F b_rb{ -FLT_MAX, -FLT_MAX };
 			// グループ化された各図形について以下を繰り返す.
 			for (const auto s : m_list_grouped) {
 				// 消去フラグが立っているか判定する.
@@ -29,9 +29,9 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				s->draw();
-				s->get_bound(b_min, b_max, b_min, b_max);
+				s->get_bound(b_lt, b_rb, b_lt, b_rb);
 			}
-			context->DrawRectangle(D2D1_RECT_F{ b_min.x, b_min.y, b_max.x, b_max.y }, brush, 1.0f, Shape::m_aux_style.get());
+			context->DrawRectangle(D2D1_RECT_F{ b_lt.x, b_lt.y, b_rb.x, b_rb.y }, brush, 1.0f, Shape::m_aux_style.get());
 		}
 		else {
 			for (const auto s : m_list_grouped) {
@@ -45,20 +45,20 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 図形を囲む領域を得る.
-	// a_min	元の領域の左上位置.
-	// a_man	元の領域の右下位置.
-	// b_min	得られた領域の左上位置.
-	// b_max	得られた領域の右下位置.
+	// a_lt	元の領域の左上位置.
+	// a_rb	元の領域の右下位置.
+	// b_lt	得られた領域の左上位置.
+	// b_rb	得られた領域の右下位置.
 	//------------------------------
-	void ShapeGroup::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
+	void ShapeGroup::get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
 	{
-		b_min = a_min;
-		b_max = a_max;
+		b_lt = a_lt;
+		b_rb = a_rb;
 		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->get_bound(b_min, b_max, b_min, b_max);
+			s->get_bound(b_lt, b_rb, b_lt, b_rb);
 		}
 	}
 
@@ -66,7 +66,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を囲む領域の左上位置を得る.
 	// val	領域の左上位置
 	//------------------------------
-	void ShapeGroup::get_pos_min(D2D1_POINT_2F& val) const noexcept
+	void ShapeGroup::get_pos_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		get_pos_start(val);
 	}
@@ -87,7 +87,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			D2D1_POINT_2F pos;
-			s->get_pos_min(pos);
+			s->get_pos_lt(pos);
 			if (!flag) {
 				val = pos;
 				flag = true;
@@ -153,15 +153,15 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 範囲に含まれるか判定する.
-	// area_nw	範囲の左上位置
-	// area_se	範囲の右下位置
+	// area_lt	範囲の左上位置
+	// area_rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
 	//------------------------------
-	bool ShapeGroup::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
+	bool ShapeGroup::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
 	{
 		for (const Shape* s : m_list_grouped) {
-			if (!s->in_area(area_nw, area_se)) {
+			if (!s->in_area(area_lt, area_rb)) {
 				return false;
 			}
 		}
@@ -200,10 +200,10 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	bool ShapeGroup::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
-		D2D1_POINT_2F b_min;
-		if (get_pos_start(b_min) && !equal(val, b_min)) {
+		D2D1_POINT_2F old_val;
+		if (get_pos_start(old_val) && !equal(val, old_val)) {
 			D2D1_POINT_2F d_vec;
-			pt_sub(val, b_min, d_vec);
+			pt_sub(val, old_val, d_vec);
 			move(d_vec);
 			return true;
 		}

@@ -14,9 +14,9 @@ namespace winrt::GraphPaper::implementation
 	// ê}å`Çï\é¶Ç∑ÇÈ.
 	void ShapeElli::draw(void)
 	{
-		ID2D1Factory* const factory = Shape::s_factory;
-		ID2D1RenderTarget* const target = Shape::s_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+		ID2D1Factory* const factory = Shape::s_d2d_factory;
+		ID2D1RenderTarget* const target = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);

@@ -72,50 +72,50 @@ namespace winrt::GraphPaper::implementation
 	// 図形と表示を囲む領域を得る.
 	// slist	図形リスト
 	// page_size	表示の大きさ
-	// b_min	領域の左上位置
-	// b_max	領域の右下位置
-	void slist_bound_view(SHAPE_LIST const& slist, const D2D1_SIZE_F page_size, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	// b_lt	領域の左上位置
+	// b_rb	領域の右下位置
+	void slist_bound_view(SHAPE_LIST const& slist, const D2D1_SIZE_F page_size, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
-		b_min = { 0.0F, 0.0F };	// 左上位置
-		b_max = { page_size.width, page_size.height };	// 右下位置
+		b_lt = { 0.0F, 0.0F };	// 左上位置
+		b_rb = { page_size.width, page_size.height };	// 右下位置
 		for (const Shape* s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->get_bound(b_min, b_max, b_min, b_max);
+			s->get_bound(b_lt, b_rb, b_lt, b_rb);
 		}
 	}
 
 	// すべての図形を囲む領域を得る.
 	// slist	図形リスト
-	// b_min	領域の左上位置
-	// b_max	領域の右下位置
-	void slist_bound_all(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	// b_lt	領域の左上位置
+	// b_rb	領域の右下位置
+	void slist_bound_all(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
-		b_min = { FLT_MAX, FLT_MAX };	// 左上位置
-		b_max = { -FLT_MAX, -FLT_MAX };	// 右下位置
+		b_lt = { FLT_MAX, FLT_MAX };	// 左上位置
+		b_rb = { -FLT_MAX, -FLT_MAX };	// 右下位置
 		for (const Shape* s : slist) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			s->get_bound(b_min, b_max, b_min, b_max);
+			s->get_bound(b_lt, b_rb, b_lt, b_rb);
 		}
 	}
 
 	// 選択された図形を囲む領域を得る.
 	// slist	図形リスト
-	// b_min	領域の左上位置
-	// b_max	領域の右下位置
-	bool slist_bound_selected(SHAPE_LIST const& slist, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) noexcept
+	// b_lt	領域の左上位置
+	// b_rb	領域の右下位置
+	bool slist_bound_selected(SHAPE_LIST const& slist, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) noexcept
 	{
 		bool done = false;
-		b_min = D2D1_POINT_2F{ FLT_MAX, FLT_MAX };	// 左上位置
-		b_max = D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX };	// 右下位置
+		b_lt = D2D1_POINT_2F{ FLT_MAX, FLT_MAX };	// 左上位置
+		b_rb = D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX };	// 右下位置
 		for (const Shape* s : slist) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
-			s->get_bound(b_min, b_max, b_min, b_max);
+			s->get_bound(b_lt, b_rb, b_lt, b_rb);
 			if (!done) {
 				done = true;
 			}

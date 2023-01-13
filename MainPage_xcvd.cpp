@@ -287,8 +287,8 @@ namespace winrt::GraphPaper::implementation
 		const float win_h = static_cast<float>(scp_page_panel().ActualHeight());
 		const float win_x = static_cast<float>(sb_horz().Value());
 		const float win_y = static_cast<float>(sb_vert().Value());
-		const float nw_x = m_main_nw.x;
-		const float nw_y = m_main_nw.y;
+		const float nw_x = m_main_lt.x;
+		const float nw_y = m_main_lt.y;
 
 		// resume_background ‚µ‚È‚¢‚Æ GetBitmapAsync ‚ªŽ¸”s‚·‚é‚±‚Æ‚ª‚ ‚é.
 		co_await winrt::resume_background();
@@ -437,8 +437,8 @@ namespace winrt::GraphPaper::implementation
 			const float win_y = static_cast<float>(sb_vert().Value());
 			const float win_w = static_cast<float>(scp_page_panel().ActualWidth());
 			const float win_h = static_cast<float>(scp_page_panel().ActualHeight());
-			const float nw_x = m_main_nw.x;
-			const float nw_y = m_main_nw.y;
+			const float nw_x = m_main_lt.x;
+			const float nw_y = m_main_lt.y;
 			ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w / scale, win_h / scale }, wchar_cpy(text.c_str()), &m_main_page);
 #if (_DEBUG)
 			debug_leak_cnt++;

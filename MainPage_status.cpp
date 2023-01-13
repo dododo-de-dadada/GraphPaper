@@ -165,8 +165,8 @@ namespace winrt::GraphPaper::implementation
 			const double wy = wp.Y;
 			const double ty = tp.Y;
 			const double by = wb.Y;
-			const double px = m_main_nw.x;
-			const double py = m_main_nw.y;
+			const double px = m_main_lt.x;
+			const double py = m_main_lt.y;
 			const double ps = m_main_page.m_page_scale;
 			const float fx = static_cast<FLOAT>((wx - bx - tx) / ps + sx + px);
 			const float fy = static_cast<FLOAT>((wy - by - ty) / ps + sy + py);

@@ -121,16 +121,16 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値として com_ptr を返す関数は参照不可.
 	static winrt::com_ptr<IDWriteFactory3> create_dwrite_factory(void)
 	{
-		winrt::com_ptr<IDWriteFactory3> dw_factory;
+		winrt::com_ptr<IDWriteFactory3> dwrite_factory;
 		// ファクトリタイプには DWRITE_FACTORY_TYPE_SHARED を指定する.
 		winrt::check_hresult(
 			DWriteCreateFactory(
 				DWRITE_FACTORY_TYPE_SHARED,
 				__uuidof(IDWriteFactory3),
-				reinterpret_cast<::IUnknown**>(dw_factory.put())
+				reinterpret_cast<::IUnknown**>(dwrite_factory.put())
 			)
 		);
-		return dw_factory;
+		return dwrite_factory;
 	};
 
 #if WIN_UI == 3
@@ -297,7 +297,7 @@ namespace winrt::GraphPaper::implementation
 			// バッファの大きさには D3D ターゲットの幅と高さを,
 			// バッファの数には 2 (ダブル バッファー) を, 
 			// フォーマットには DXGI_FORMAT_B8G8R8A8_UNORM を指定する.
-			HRESULT hr = m_dxgi_swap_chain->ResizeBuffers(
+			HRESULT hres = m_dxgi_swap_chain->ResizeBuffers(
 				2,
 				lround(d3d_target_width),
 				lround(d3d_target_height),
@@ -306,13 +306,13 @@ namespace winrt::GraphPaper::implementation
 			);
 
 			// 結果が DXGI_ERROR_DEVICE_REMOVED または DXGI_ERROR_DEVICE_RESET か判定する.
-			if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
+			if (hres == DXGI_ERROR_DEVICE_REMOVED || hres == DXGI_ERROR_DEVICE_RESET) {
 				// すべてのデバイス リソースを再作成し, 現在の状態に再設定する.
 				HandleDeviceLost();
 				return;
 			}
 			else {
-				winrt::check_hresult(hr);
+				winrt::check_hresult(hres);
 			}
 		}
 		else {
@@ -486,12 +486,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		//if (m_dxgi_swap_chain != nullptr) {
 		DXGI_PRESENT_PARAMETERS param{ 0 };
-		const HRESULT hr = m_dxgi_swap_chain->Present1(1, 0, &param);
-		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET) {
+		const HRESULT hres = m_dxgi_swap_chain->Present1(1, 0, &param);
+		if (hres == DXGI_ERROR_DEVICE_REMOVED || hres == DXGI_ERROR_DEVICE_RESET) {
 			HandleDeviceLost();
 		}
 		else {
-			winrt::check_hresult(hr);
+			winrt::check_hresult(hres);
 		}
 		//}
 	}
@@ -604,7 +604,7 @@ namespace winrt::GraphPaper::implementation
 		// D3D_DRIVER_TYPE_NULL は, 実際のハードウェアデバイスを作成しない.
 		// D3D11_CREATE_DEVICE_DEBUG は, SDK レイヤーの確認.
 		// D3D11_SDK_VERSION は, Windows ストアアプリでは常に必要.
-		HRESULT hr = D3D11CreateDevice(
+		HRESULT hres = D3D11CreateDevice(
 			nullptr,
 			D3D_DRIVER_TYPE_NULL,
 			0,
@@ -616,7 +616,7 @@ namespace winrt::GraphPaper::implementation
 			nullptr,
 			nullptr
 		);
-		if (SUCCEEDED(hr)) {
+		if (SUCCEEDED(hres)) {
 			// 作成できるなら,
 			// D3D11_CREATE_DEVICE_DEBUG を作成フラグに追加する.
 			creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
@@ -647,7 +647,7 @@ namespace winrt::GraphPaper::implementation
 #if !defined(_DEBUG)
 		HRESULT
 #endif
-			hr = D3D11CreateDevice(
+			hres = D3D11CreateDevice(
 				nullptr,
 				D3D_DRIVER_TYPE_HARDWARE,
 				0,
@@ -659,7 +659,7 @@ namespace winrt::GraphPaper::implementation
 				&d3d_feature_level,
 				context.put()
 			);
-		if (SUCCEEDED(hr)) {
+		if (SUCCEEDED(hres)) {
 			// 作成できたなら, D3D_DRIVER_TYPE_HARDWARE を D3D ドライバータイプに格納する.
 			m_d3d_driver_type = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE;
 		}

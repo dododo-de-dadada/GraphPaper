@@ -75,7 +75,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれる図形を選択し, 含まれない図形の選択を解除する.
-	bool MainPage::select_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se)
+	bool MainPage::select_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb)
 	{
 		bool done = false;
 		//uint32_t i = 0u;
@@ -83,7 +83,7 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->in_area(area_nw, area_se)) {
+			if (s->in_area(area_lt, area_rb)) {
 				if (!s->is_selected()) {
 					ustack_push_select(s);
 					// 一覧が表示されてるか判定する.
@@ -286,13 +286,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれる図形の選択を反転する.
-	// area_nw	範囲の左上位置
-	// area_se	範囲の右下位置
-	bool MainPage::toggle_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se)
+	// area_lt	範囲の左上位置
+	// area_rb	範囲の右下位置
+	bool MainPage::toggle_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb)
 	{
 		bool done = false;
 		for (auto s : m_main_page.m_shape_list) {
-			if (s->is_deleted() || !s->in_area(area_nw, area_se)) {
+			if (s->is_deleted() || !s->in_area(area_lt, area_rb)) {
 				continue;
 			}
 			ustack_push_select(s);

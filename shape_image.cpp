@@ -206,8 +206,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeImage::draw(void)
 	{
-		ID2D1RenderTarget* const target = Shape::s_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+		ID2D1RenderTarget* const target = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		if (m_d2d_bitmap == nullptr) {
 			//const D2D1_BITMAP_PROPERTIES1 b_prop{
@@ -258,7 +258,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を囲む領域を得る.
-	void ShapeImage::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
+	void ShapeImage::get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
 	{
 		D2D1_POINT_2F b_pos[2]{
 			m_start,
@@ -274,10 +274,10 @@ namespace winrt::GraphPaper::implementation
 			b_pos[1].y = b_pos[0].y;
 			b_pos[0].y = less_y;
 		}
-		b_min.x = a_min.x < b_pos[0].x ? a_min.x : b_pos[0].x;
-		b_min.y = a_min.y < b_pos[0].y ? a_min.y : b_pos[0].y;
-		b_max.x = a_max.x > b_pos[1].x ? a_max.x : b_pos[1].x;
-		b_max.y = a_max.y > b_pos[1].y ? a_max.y : b_pos[1].y;
+		b_lt.x = a_lt.x < b_pos[0].x ? a_lt.x : b_pos[0].x;
+		b_lt.y = a_lt.y < b_pos[0].y ? a_lt.y : b_pos[0].y;
+		b_rb.x = a_rb.x > b_pos[1].x ? a_rb.x : b_pos[1].x;
+		b_rb.y = a_rb.y > b_pos[1].y ? a_rb.y : b_pos[1].y;
 	}
 
 	// 画像の不透明度を得る.
@@ -324,7 +324,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を囲む領域の左上位置を得る.
-	void ShapeImage::get_pos_min(D2D1_POINT_2F& val) const noexcept
+	void ShapeImage::get_pos_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		const float ax = m_start.x;
 		const float ay = m_start.y;
@@ -446,15 +446,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれるか判定する.
-	// area_nw	範囲の左上位置
-	// area_se	範囲の右下位置
+	// area_lt	範囲の左上位置
+	// area_rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeImage::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
+	bool ShapeImage::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
 	{
 		// 始点と終点とが範囲に含まれるか判定する.
-		return pt_in_rect(m_start, area_nw, area_se) &&
-			pt_in_rect(D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height }, area_nw, area_se);
+		return pt_in_rect(m_start, area_lt, area_rb) &&
+			pt_in_rect(D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height }, area_lt, area_rb);
 	}
 
 	// 差分だけ移動する.

@@ -12,9 +12,9 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeRect::draw(void)
 	{
-		ID2D1Factory* const factory = Shape::s_factory;
-		ID2D1RenderTarget* const target = Shape::s_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+		ID2D1Factory* const factory = Shape::s_d2d_factory;
+		ID2D1RenderTarget* const target = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
@@ -150,27 +150,27 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 対角にある頂点をもとに, 方形を得る.
-		D2D1_POINT_2F t_min, t_max;
+		D2D1_POINT_2F r_lt, r_rb;
 		//pt_bound(v_pos[0], v_pos[2], r_nw, r_sw);
 		if (v_pos[0].x < v_pos[2].x) {
-			t_min.x = v_pos[0].x;
-			t_max.x = v_pos[2].x;
+			r_lt.x = v_pos[0].x;
+			r_rb.x = v_pos[2].x;
 		}
 		else {
-			t_min.x = v_pos[2].x;
-			t_max.x = v_pos[0].x;
+			r_lt.x = v_pos[2].x;
+			r_rb.x = v_pos[0].x;
 		}
 		if (v_pos[0].y < v_pos[2].y) {
-			t_min.y = v_pos[0].y;
-			t_max.y = v_pos[2].y;
+			r_lt.y = v_pos[0].y;
+			r_rb.y = v_pos[2].y;
 		}
 		else {
-			t_min.y = v_pos[2].y;
-			t_max.y = v_pos[0].y;
+			r_lt.y = v_pos[2].y;
+			r_rb.y = v_pos[0].y;
 		}
 
 		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
-			if (is_opaque(m_fill_color) && pt_in_rect2(t_pos, t_min, t_max)) {
+			if (is_opaque(m_fill_color) && pt_in_rect2(t_pos, r_lt, r_rb)) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
@@ -185,27 +185,27 @@ namespace winrt::GraphPaper::implementation
 			//      |                |
 			// 線枠の太さの半分の大きさだけ外側に, 方形を拡大する.
 			// ただし太さがアンカーポイントの大きさ未満なら, 太さはアンカーポイントの大きさに調整する.
-			D2D1_POINT_2F s_min, s_max;	// 拡大した方形
+			D2D1_POINT_2F e_lb, e_rb;	// 拡大した方形
 			const double s_thick = max(m_stroke_width, Shape::s_anc_len);
 			const double e_thick = s_thick * 0.5;
-			pt_add(t_min, -e_thick, s_min);
-			pt_add(t_max, e_thick, s_max);
+			pt_add(r_lt, -e_thick, e_lb);
+			pt_add(r_rb, e_thick, e_rb);
 			// 拡大した方形に含まれるか判定する.
-			if (pt_in_rect2(t_pos, s_min, s_max)) {
+			if (pt_in_rect2(t_pos, e_lb, e_rb)) {
 				// 太さの大きさだけ内側に, 拡大した方形を縮小する.
-				D2D1_POINT_2F u_min, u_max;	// 縮小した方形
-				pt_add(s_min, s_thick, u_min);
-				pt_add(s_max, -s_thick, u_max);
+				D2D1_POINT_2F s_lb, s_rb;	// 縮小した方形
+				pt_add(e_lb, s_thick, s_lb);
+				pt_add(e_rb, -s_thick, s_rb);
 				// 縮小した方形に含まれる (辺に含まれない) か判定する.
-				if (pt_in_rect2(t_pos, u_min, u_max)) {
+				if (pt_in_rect2(t_pos, s_lb, s_rb)) {
 					if (is_opaque(m_fill_color)) {
 						return ANC_TYPE::ANC_FILL;
 					}
 				}
 				// 縮小した方形が反転する (枠が太すぎて図形を覆う),
 				// または, 方形の角に含まれてない (辺に含まれる) か判定する.
-				else if (u_max.x <= u_min.x || u_max.y <= u_min.y ||
-					t_min.x <= t_pos.x && t_pos.x <= t_max.x || t_min.y <= t_pos.y && t_pos.y <= t_max.y) {
+				else if (s_rb.x <= s_lb.x || s_rb.y <= s_lb.y ||
+					r_lt.x <= t_pos.x && t_pos.x <= r_rb.x || r_lt.y <= t_pos.y && t_pos.y <= r_rb.y) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 				// 線枠の結合が丸めか判定する.
@@ -311,15 +311,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれるか判定する.
-	// area_nw	範囲の左上位置
-	// area_se	範囲の右下位置
+	// area_lt	範囲の左上位置
+	// area_rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeRect::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
+	bool ShapeRect::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
 	{
 		D2D1_POINT_2F pos;
 		pt_add(m_start, m_vec[0], pos);
-		return pt_in_rect(m_start, area_nw, area_se) && pt_in_rect(pos, area_nw, area_se);
+		return pt_in_rect(m_start, area_lt, area_rb) && pt_in_rect(pos, area_lt, area_rb);
 	}
 
 	// 値を, 部位の位置に格納する. 他の部位の位置も動く.

@@ -170,11 +170,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// 線の太さ
-		D2D1_POINT_2F v_pos[MAX_N_GON];	// 頂点の配列
+		D2D1_POINT_2F v_pos[N_GON_MAX];	// 頂点の配列
 
 		D2D1_POINT_2F p_vec;
 		pt_sub(c_pos, p_pos, p_vec);
-		//D2D1_POINT_2F v_vec;
 		ShapePoly::poly_by_bbox(p_pos, p_vec, p_opt, v_pos);
 		const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
 		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
@@ -244,8 +243,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapePage::draw(void)
 	{
-		ID2D1RenderTarget* const target = Shape::s_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+		ID2D1RenderTarget* const target = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		// ページの色で塗りつぶす.
 		target->Clear(m_page_color);

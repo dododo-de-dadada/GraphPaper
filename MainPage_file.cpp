@@ -333,33 +333,33 @@ namespace winrt::GraphPaper::implementation
 		if (image_file != nullptr) {
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
 			const CoreCursor& prev_cur = file_wait_cursor();
-			HRESULT hr;
+			HRESULT hres;
 			// ファイル更新の遅延を設定する.
 			CachedFileManager::DeferUpdates(image_file);
 
 			// SVG ファイル
 			if (image_file.ContentType() == L"image/svg+xml") {
-				hr = co_await export_as_svg_async(image_file);
+				hres = co_await export_as_svg_async(image_file);
 			}
 			// PDF ファイル
 			else if (image_file.ContentType() == L"application/pdf") {
-				hr = co_await export_as_pdf_async(image_file);
+				hres = co_await export_as_pdf_async(image_file);
 			}
 			// ラスター画像ファイル
 			else {
-				hr = co_await export_as_raster_async(image_file);
+				hres = co_await export_as_raster_async(image_file);
 			}
 			// 遅延させたファイル更新を完了し, 結果を判定する.
 			if (co_await CachedFileManager::CompleteUpdatesAsync(image_file) != 
 				FileUpdateStatus::Complete) {
 				// 完了しなかったなら E_FAIL.
-				hr = E_FAIL;
+				hres = E_FAIL;
 			}
 
 			// カーソルを元に戻す.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);
 			// 結果が S_OK 以外か判定する.
-			if (hr != S_OK) {
+			if (hres != S_OK) {
 				// 「ファイルの書き込みに失敗しました」メッセージダイアログを表示する.
 				message_show(ICON_ALERT, L"str_err_write", image_file.Path());
 			}
@@ -563,7 +563,7 @@ namespace winrt::GraphPaper::implementation
 	template <bool RESUME, bool SETTING_ONLY>
 	IAsyncOperation<winrt::hresult> MainPage::file_read_async(StorageFile s_file) noexcept
 	{
-		HRESULT hr = E_FAIL;
+		HRESULT hres = E_FAIL;
 		m_mutex_draw.lock();
 		try {
 
@@ -580,7 +580,7 @@ namespace winrt::GraphPaper::implementation
 			if (debug_leak_cnt != 0) {
 				message_show(ICON_DEBUG, DEBUG_MSG, {});
 				m_mutex_draw.unlock();
-				co_return hr;
+				co_return hres;
 			}
 #endif
 
@@ -635,7 +635,7 @@ namespace winrt::GraphPaper::implementation
 
 			// メイン表示のみの読み込みか判定する.
 			if constexpr (SETTING_ONLY) {
-				hr = S_OK;
+				hres = S_OK;
 			}
 			else {
 
@@ -646,19 +646,19 @@ namespace winrt::GraphPaper::implementation
 						// スタックも読み込む.
 						ustack_read(dt_reader);
 					}
-					hr = S_OK;
+					hres = S_OK;
 				}
 			}
 			dt_reader.Close();
 			ra_stream.Close();
 		}
 		catch (winrt::hresult_error const& e) {
-			hr = e.code();
+			hres = e.code();
 		}
 		m_mutex_draw.unlock();
 
 		// 読み込みに失敗した場合,
-		if (hr != S_OK) {
+		if (hres != S_OK) {
 			if constexpr (RESUME) {
 				message_show(ICON_ALERT, L"str_err_resume", s_file.Path());
 
@@ -683,7 +683,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 結果を返し終了する.
-		co_return hr;
+		co_return hres;
 	}
 
 	template IAsyncOperation<winrt::hresult> MainPage::file_read_async<false, false>(StorageFile s_file) noexcept;
@@ -992,7 +992,7 @@ namespace winrt::GraphPaper::implementation
 		// スレッドを変更する前に, 排他制御をロック
 		m_mutex_exit.lock();
 		// E_FAIL を結果に格納する.
-		HRESULT hr = E_FAIL;
+		HRESULT hres = E_FAIL;
 		try {
 			// ファイル更新の遅延を設定する.
 			// ストレージファイル->ランダムアクセスストリーム->データライターを作成する.
@@ -1062,16 +1062,16 @@ namespace winrt::GraphPaper::implementation
 			if (co_await CachedFileManager::CompleteUpdatesAsync(s_file) == FileUpdateStatus::Complete) {
 				// 完了した場合, 
 				// S_OK を結果に格納する.
-				hr = S_OK;
+				hres = S_OK;
 			}
 		}
 		// エラーが発生した場合, 
 		catch (winrt::hresult_error const& err) {
-			hr = err.code();
+			hres = err.code();
 		}
 
 		// 結果が S_OK 以外か判定する.
-		if (hr != S_OK) {
+		if (hres != S_OK) {
 			if constexpr (SUSPEND) {
 				// 「ファイルに書き込めません」メッセージダイアログを表示する.
 				message_show(ICON_ALERT, L"str_err_suspend", s_file.Path());
@@ -1110,7 +1110,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_mutex_exit.unlock();
 		// 結果を返し終了する.
-		co_return hr;
+		co_return hres;
 	}
 	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, false>(StorageFile s_file);
 	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<true, false>(StorageFile s_file);
@@ -1195,8 +1195,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 表示の左上位置と右下位置を初期化する.
 		{
-			m_main_nw = D2D1_POINT_2F{ 0.0F, 0.0F };
-			m_main_se = D2D1_POINT_2F{ m_main_page.m_page_size.width, m_main_page.m_page_size.height };
+			m_main_lt = D2D1_POINT_2F{ 0.0F, 0.0F };
+			m_main_rb = D2D1_POINT_2F{ m_main_page.m_page_size.width, m_main_page.m_page_size.height };
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();

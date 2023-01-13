@@ -373,7 +373,7 @@ namespace winrt::GraphPaper::implementation
 			/* その結果を切り上げて整数値する. */
 			/* 整数値を区間の半数 n に格納する. */
 			n = (int)std::ceil(t_vec * (double)s_cnt);
-			/* t_vec÷2n を階差 h に格納する. */
+			/* t_vec / 2n を階差 h に格納する. */
 			h = t_vec / (2.0 * n);
 			/* 0 を奇数番目の部分区間の合計値 a に格納する. */
 			a = 0.0;
@@ -400,7 +400,7 @@ namespace winrt::GraphPaper::implementation
 			b0 = bezi_deriv_by_param(b_pos, t_min);
 			/* 2n 番目の部分区間での微分値を求め, b2 に格納する. */
 			b2 = bezi_deriv_by_param(b_pos, t_max);
-			/* (b0+4×a+2×b+b2)×h/3 を求め, 積分値 s に格納する. */
+			/* (b0+4a+2b+b2)h/3 を求め, 積分値 s に格納する. */
 			s = (b0 + 4.0 * a + 2.0 * b + b2) * h / 3.0f;
 		}
 		else {
@@ -492,9 +492,9 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void ShapeBezi::draw(void)
 	{
-		ID2D1Factory3* const factory = Shape::s_factory;
-		ID2D1RenderTarget* const target = Shape::s_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+		ID2D1Factory3* const factory = Shape::s_d2d_factory;
+		ID2D1RenderTarget* const target = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
@@ -651,15 +651,15 @@ namespace winrt::GraphPaper::implementation
 			s_cnt -= 4 - 1;
 			// 制御点の組から凸包 c0 を得る (実際は方形で代用する).
 			// 制御点の組から, 重複するものを除いた点の集合を得る.
-			BZP c0_min = b_pos[0];	// 凸包 c0 (を含む方形の左上点)
-			BZP c0_max = b_pos[0];	// 凸包 c0 (を含む方形の右下点)
+			BZP c0_lt = b_pos[0];	// 凸包 c0 (を含む方形の左上点)
+			BZP c0_rb = b_pos[0];	// 凸包 c0 (を含む方形の右下点)
 			BZP d_pos[4];	// 重複しない点の集合.
 			uint32_t d_cnt = 0;	// 重複しない点の集合の要素数
 			d_pos[d_cnt++] = b_pos[0];
 			for (uint32_t i = 1; i < 4; i++) {
 				if (d_pos[d_cnt - 1] != b_pos[i]) {
 					d_pos[d_cnt++] = b_pos[i];
-					b_pos[i].exp(c0_min, c0_max);
+					b_pos[i].exp(c0_lt, c0_rb);
 				}
 			}
 			// 重複しない点の集合の要素数が 2 未満か判定する.
@@ -711,7 +711,7 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 凸包 c0 の大きさが 1 以下か判定する.
-			BZP c0 = c0_max - c0_min;
+			BZP c0 = c0_rb - c0_lt;
 			if (c0.x <= 1.0 && c0.y <= 1.0) {
 				// 現在の制御点の組 (凸包 c0) をこれ以上分割する必要はない.
 				// 凸包 c1 は判定する位置を含んでいるので, 図形の部位を返す.
@@ -754,18 +754,18 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 範囲に含まれるか判定する.
 	// 線の太さは考慮されない.
-	// area_nw	範囲の左上位置
-	// area_se	範囲の右下位置
+	// area_lt	範囲の左上位置
+	// area_rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	//------------------------------
-	bool ShapeBezi::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
+	bool ShapeBezi::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,
 		// 範囲の左上が原点となるよう平行移動した制御点を得る.
-		const double w = static_cast<double>(area_se.x) - area_nw.x;
-		const double h = static_cast<double>(area_se.y) - area_nw.y;
+		const double w = static_cast<double>(area_rb.x) - area_lt.x;
+		const double h = static_cast<double>(area_rb.y) - area_lt.y;
 		D2D1_POINT_2F c_pos[4];
-		pt_sub(m_start, area_nw, c_pos[0]);
+		pt_sub(m_start, area_lt, c_pos[0]);
 		pt_add(c_pos[0], m_vec[0], c_pos[1]);
 		pt_add(c_pos[1], m_vec[1], c_pos[2]);
 		pt_add(c_pos[2], m_vec[2], c_pos[3]);
@@ -808,12 +808,12 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			// 制御点を含む領域を得る.
-			BZP b_min = b_pos[0];
-			BZP b_max = b_pos[0];
-			b_pos[1].exp(b_min, b_max);
-			b_pos[2].exp(b_min, b_max);
-			b_pos[3].exp(b_min, b_max);
-			BZP d = b_max - b_min;
+			BZP b_lt = b_pos[0];
+			BZP b_rb = b_pos[0];
+			b_pos[1].exp(b_lt, b_rb);
+			b_pos[2].exp(b_lt, b_rb);
+			b_pos[3].exp(b_lt, b_rb);
+			BZP d = b_rb - b_lt;
 			if (d.x <= 1.0 && d.y <= 1.0) {
 				// 領域の各辺の大きさが 1 以下ならば, 
 				// これ以上分割する必要はない.

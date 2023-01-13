@@ -175,14 +175,14 @@ namespace winrt::GraphPaper::implementation
 			// ロックできない場合
 			return;
 		}
-		Shape::s_factory = m_main_d2d.m_d2d_factory.get();
-		Shape::s_target = m_main_d2d.m_d2d_context.get();
-		Shape::s_dw_factory = m_main_d2d.m_dwrite_factory.get();
-		Shape::s_color_brush = m_main_page.m_color_brush.get();
-		Shape::s_range_brush = m_main_page.m_range_brush.get();
+		Shape::s_d2d_factory = m_main_d2d.m_d2d_factory.get();
+		Shape::s_d2d_target = m_main_d2d.m_d2d_context.get();
+		Shape::s_dwrite_factory = m_main_d2d.m_dwrite_factory.get();
+		Shape::s_d2d_color_brush = m_main_page.m_color_brush.get();
+		Shape::s_d2d_range_brush = m_main_page.m_range_brush.get();
 
-		ID2D1RenderTarget* const target = Shape::s_target;
-		ID2D1SolidColorBrush * const brush = Shape::s_color_brush;
+		ID2D1RenderTarget* const target = Shape::s_d2d_target;
+		ID2D1SolidColorBrush * const brush = Shape::s_d2d_color_brush;
 
 		// デバイスコンテキストの描画状態を保存ブロックに保持する.
 		target->SaveDrawingState(m_main_page.m_state_block.get());
@@ -195,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 		// スクロールの変分に拡大率を掛けた値を
 		// 変換行列の平行移動の成分に格納する.
 		D2D1_POINT_2F t_pos;
-		pt_add(m_main_nw, sb_horz().Value(), sb_vert().Value(), t_pos);
+		pt_add(m_main_lt, sb_horz().Value(), sb_vert().Value(), t_pos);
 		pt_mul(t_pos, page_scale, t_pos);
 		tran.dx = -t_pos.x;
 		tran.dy = -t_pos.y;
@@ -229,10 +229,10 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		// 描画を終了する.
-		HRESULT hr = target->EndDraw();
+		const HRESULT hres = target->EndDraw();
 		// 保存された描画環境を元に戻す.
 		target->RestoreDrawingState(m_main_page.m_state_block.get());
-		if (hr != S_OK) {
+		if (hres != S_OK) {
 			// 結果が S_OK でない場合,
 			// 「描画できません」メッセージダイアログを表示する.
 			message_show(ICON_ALERT, L"str_err_draw", {});
@@ -515,26 +515,26 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (d_result == ContentDialogResult::Secondary) {
-			D2D1_POINT_2F b_min = { FLT_MAX, FLT_MAX };
-			D2D1_POINT_2F b_max = { -FLT_MAX, -FLT_MAX };
+			D2D1_POINT_2F b_lt = { FLT_MAX, FLT_MAX };
+			D2D1_POINT_2F b_rb = { -FLT_MAX, -FLT_MAX };
 			D2D1_POINT_2F b_size;
 
-			slist_bound_all(m_main_page.m_shape_list, b_min, b_max);
-			pt_sub(b_max, b_min, b_size);
+			slist_bound_all(m_main_page.m_shape_list, b_lt, b_rb);
+			pt_sub(b_rb, b_lt, b_size);
 			if (b_size.x < 1.0F || b_size.y < 1.0F) {
 				co_return;
 			}
 			float dx = 0.0F;
 			float dy = 0.0F;
-			if (b_min.x < 0.0F) {
-				dx = -b_min.x;
-				b_min.x = 0.0F;
-				b_max.x += dx;
+			if (b_lt.x < 0.0F) {
+				dx = -b_lt.x;
+				b_lt.x = 0.0F;
+				b_rb.x += dx;
 			}
-			if (b_min.y < 0.0F) {
-				dy = -b_min.y;
-				b_min.y = 0.0F;
-				b_max.y += dy;
+			if (b_lt.y < 0.0F) {
+				dy = -b_lt.y;
+				b_lt.y = 0.0F;
+				b_rb.y += dy;
 			}
 			bool flag = false;
 			if (dx > 0.0F || dy > 0.0F) {
@@ -542,9 +542,8 @@ namespace winrt::GraphPaper::implementation
 				ustack_push_move({ dx, dy }, ANY);
 				flag = true;
 			}
-			D2D1_POINT_2F p_min = { 0.0F, 0.0F };
 			D2D1_POINT_2F p_max;
-			pt_add(b_max, b_min, p_max);
+			pt_add(b_rb, b_lt, p_max);
 			D2D1_SIZE_F p_size = { p_max.x, p_max.y };
 			if (!equal(m_main_page.m_page_size, p_size)) {
 				ustack_push_set<UNDO_ID::PAGE_SIZE>(&m_main_page, p_size);
@@ -583,7 +582,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	// U	操作の種類
+	// U	操作の識別子
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
@@ -603,7 +602,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// スライダーの値が変更された.
-	// U	操作の種類
+	// U	操作の識別子
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
@@ -635,13 +634,13 @@ namespace winrt::GraphPaper::implementation
 	// s	図形
 	void MainPage::page_bbox_update(const Shape* s) noexcept
 	{
-		s->get_bound(m_main_nw, m_main_se, m_main_nw, m_main_se);
+		s->get_bound(m_main_lt, m_main_rb, m_main_lt, m_main_rb);
 	}
 
 	// 表示の左上位置と右下位置を設定する.
 	void MainPage::page_bbox_update(void) noexcept
 	{
-		slist_bound_view(m_main_page.m_shape_list, m_main_page.m_page_size, m_main_nw, m_main_se);
+		slist_bound_view(m_main_page.m_shape_list, m_main_page.m_page_size, m_main_lt, m_main_rb);
 	}
 
 	void MainPage::page_zoom_is_checked(float scale)
@@ -727,16 +726,16 @@ namespace winrt::GraphPaper::implementation
 		if (setting_item != nullptr) {
 			auto delete_file = setting_item.try_as<StorageFile>();
 			if (delete_file != nullptr) {
-				HRESULT hr = E_FAIL;
+				HRESULT hres = E_FAIL;
 				try {
 					co_await delete_file.DeleteAsync(StorageDeleteOption::PermanentDelete);
 					mfi_page_setting_reset().IsEnabled(false);
-					hr = S_OK;
+					hres = S_OK;
 				}
 				catch (winrt::hresult_error const& e) {
-					hr = e.code();
+					hres = e.code();
 				}
-				if (hr != S_OK) {
+				if (hres != S_OK) {
 
 				}
 				delete_file = nullptr;

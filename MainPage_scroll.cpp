@@ -48,8 +48,8 @@ namespace winrt::GraphPaper::implementation
 		const double ss = m_main_page.m_page_scale;	// ページの倍率
 		const double vw = act_w / ss;	// 見えている部分の幅
 		const double vh = act_h / ss;	// 見えている部分の高さ
-		const auto nw = m_main_nw;
-		const auto se = m_main_se;
+		const auto nw = m_main_lt;
+		const auto se = m_main_rb;
 		const auto mw = static_cast<double>(se.x) - static_cast<double>(nw.x) - vw;
 		const auto mh = static_cast<double>(se.y) - static_cast<double>(nw.y) - vh;
 		const auto w_gt0 = mw > 0.0;
@@ -98,58 +98,59 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が表示されるよう表示をスクロールする.
 	// s	表示される図形
-	bool MainPage::scroll_to(const Shape* s)
+	bool MainPage::scroll_to(Shape* const s)
 	{
 		// スクロールビューアのビューポートの座標を, 表示座標で求める.
-		const double ox = m_main_nw.x;	// 原点 x
-		const double oy = m_main_nw.y;	// 原点 y
+		const double ox = m_main_lt.x;	// 原点 x
+		const double oy = m_main_lt.y;	// 原点 y
 		const double ho = sb_horz().Value();	// 横のスクロール値
 		const double vo = sb_vert().Value();	// 縦のスクロール値
 		const double vw = sb_horz().ViewportSize();	// 表示の幅
 		const double vh = sb_vert().ViewportSize();	// 表示の高さ
-		const D2D1_POINT_2F v_min{
+		const D2D1_POINT_2F v_lt{
 			static_cast<FLOAT>(ox + ho),
 			static_cast<FLOAT>(oy + vo)
 		};
-		const D2D1_POINT_2F v_max{
-			static_cast<FLOAT>(v_min.x + vw),
-			static_cast<FLOAT>(v_min.y + vh)
+		const D2D1_POINT_2F v_rb{
+			static_cast<FLOAT>(v_lt.x + vw),
+			static_cast<FLOAT>(v_lt.y + vh)
 		};
 		// テスト行列の方形が, ビューポートに含まれるか判定し,
 		// 含まれる方形がひとつでもあれば false を返す.
-		D2D1_POINT_2F r_nw{};
-		D2D1_POINT_2F r_sw{};
+		D2D1_POINT_2F t_lt{};
+		D2D1_POINT_2F t_rb{};
 		DWRITE_TEXT_RANGE t_range;
 		if (s->get_text_selected(t_range) && t_range.length > 0) {
-			const auto s_text = static_cast<const ShapeText*>(s);
-			const auto cnt = s_text->m_dw_selected_cnt;
-			const auto mtx = s_text->m_dw_selected_metrics;
+			const auto s_text = static_cast<ShapeText*>(s);
+			s_text->create_text_layout();
+			const auto cnt = s_text->m_dwrite_selected_cnt;
+			const auto mtx = s_text->m_dwrite_selected_metrics;
 			D2D1_POINT_2F t_pos;
 			s->get_pos_start(t_pos);
 			for (auto i = cnt; i > 0; i--) {
-				r_nw.x = t_pos.x + mtx[i - 1].left;
-				r_nw.y = t_pos.y + mtx[i - 1].top;
-				r_sw.x = r_nw.x + mtx[i - 1].width;
-				r_sw.y = r_nw.y + mtx[i - 1].height;
-				if (pt_in_rect(r_nw, v_min, v_max)
-					|| pt_in_rect(r_sw, v_min, v_max)) {
+				t_lt.x = t_pos.x + mtx[i - 1].left;
+				t_lt.y = t_pos.y + mtx[i - 1].top;
+				t_rb.x = t_lt.x + mtx[i - 1].width;
+				t_rb.y = t_lt.y + mtx[i - 1].height;
+				if (pt_in_rect(t_lt, v_lt, v_rb)
+					|| pt_in_rect(t_rb, v_lt, v_rb)) {
 					return false;
 				}
 			}
 		}
 		else {
-			if (s->in_area(v_min, v_max)) {
+			if (s->in_area(v_lt, v_rb)) {
 				return false;
 			}
-			s->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, r_nw, r_sw);
+			s->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, t_lt, t_rb);
 		}
 
 		// 最初の方形の水平位置と垂直位置について, ビューポートの範囲外の場合, スクロールする.
-		if (r_sw.x < v_min.x || v_max.x < r_nw.x) {
-			sb_horz().Value(r_nw.x - ox);
+		if (t_rb.x < v_lt.x || v_rb.x < t_lt.x) {
+			sb_horz().Value(t_lt.x - ox);
 		}
-		if (r_sw.y < v_min.y || v_max.y < r_nw.y) {
-			sb_vert().Value(r_nw.y - oy);
+		if (t_rb.y < v_lt.y || v_rb.y < t_lt.y) {
+			sb_vert().Value(t_lt.y - oy);
 		}
 		return true;
 	}

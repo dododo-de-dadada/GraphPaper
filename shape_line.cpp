@@ -174,9 +174,9 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeLine::draw(void)
 	{
-		ID2D1Factory3* const factory = Shape::s_factory;
-		ID2D1RenderTarget* const context = Shape::s_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+		ID2D1Factory3* const factory = Shape::s_d2d_factory;
+		ID2D1RenderTarget* const context = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
@@ -248,16 +248,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれるか判定する.
-	// area_nw	範囲の左上位置
-	// area_se	範囲の右下位置
+	// area_lt	範囲の左上位置
+	// area_rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeLine::in_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se) const noexcept
+	bool ShapeLine::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
 	{
-		if (pt_in_rect(m_start, area_nw, area_se)) {
+		if (pt_in_rect(m_start, area_lt, area_rb)) {
 			D2D1_POINT_2F pos;
 			pt_add(m_start, m_vec[0], pos);
-			return pt_in_rect(pos, area_nw, area_se);
+			return pt_in_rect(pos, area_lt, area_rb);
 		}
 		return false;
 	}

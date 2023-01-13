@@ -20,10 +20,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
-
 	// ヌルで区切られる一連の操作を, 操作の組とみなし, その数を組数とする.
 	// スタックに積むことができる最大の組数.
 	constexpr uint32_t MAX_UCNT = 32;
@@ -191,7 +187,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 操作をデータリーダーに書き込む.
 	// u	操作
-	// dt_writer	データライター
+	// dt_writer	出力先
 	static void ustack_write_op(Undo* u, DataWriter const& dt_writer)
 	{
 		if (u != nullptr) {
@@ -586,7 +582,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を選択された図形に格納して, その操作をスタックに積む.
-	// U	操作の種類.
+	// U	操作の識別子.
 	// T	格納する型.
 	// val	格納する値
 	// 戻り値	格納される前の値と異なっており, 値が格納されたら true.

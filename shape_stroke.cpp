@@ -6,32 +6,31 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	// 図形を囲む領域を得る.
-	// a_min	元の領域の左上位置.
-	// a_max	元の領域の右下位置.
-	// b_min	囲む領域の左上位置.
-	// b_max	囲む領域の右下位置.
-	void ShapeStroke::get_bound(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max, D2D1_POINT_2F& b_min, D2D1_POINT_2F& b_max) const noexcept
+	// a_lt	元の領域の左上位置.
+	// a_rb	元の領域の右下位置.
+	// b_lt	囲む領域の左上位置.
+	// b_rb	囲む領域の右下位置.
+	void ShapeStroke::get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
 	{
-		b_min.x = m_start.x < a_min.x ? m_start.x : a_min.x;
-		b_min.y = m_start.y < a_min.y ? m_start.y : a_min.y;
-		b_max.x = m_start.x > a_max.x ? m_start.x : a_max.x;
-		b_max.y = m_start.y > a_max.y ? m_start.y : a_max.y;
+		b_lt.x = m_start.x < a_lt.x ? m_start.x : a_lt.x;
+		b_lt.y = m_start.y < a_lt.y ? m_start.y : a_lt.y;
+		b_rb.x = m_start.x > a_rb.x ? m_start.x : a_rb.x;
+		b_rb.y = m_start.y > a_rb.y ? m_start.y : a_rb.y;
 		const size_t d_cnt = m_vec.size();	// 差分の数
 		D2D1_POINT_2F pos = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(pos, m_vec[i], pos);
-			//pt_inc(e_pos, b_min, b_max);
-			if (pos.x < b_min.x) {
-				b_min.x = pos.x;
+			if (pos.x < b_lt.x) {
+				b_lt.x = pos.x;
 			}
-			if (pos.x > b_max.x) {
-				b_max.x = pos.x;
+			if (pos.x > b_rb.x) {
+				b_rb.x = pos.x;
 			}
-			if (pos.y < b_min.y) {
-				b_min.y = pos.y;
+			if (pos.y < b_lt.y) {
+				b_lt.y = pos.y;
 			}
-			if (pos.y > b_max.y) {
-				b_max.y = pos.y;
+			if (pos.y > b_rb.y) {
+				b_rb.y = pos.y;
 			}
 		}
 	}
@@ -146,14 +145,13 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を囲む領域の左上位置を得る.
 	// val	領域の左上位置
-	void ShapeStroke::get_pos_min(D2D1_POINT_2F& val) const noexcept
+	void ShapeStroke::get_pos_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		const size_t d_cnt = m_vec.size();	// 差分の数
 		D2D1_POINT_2F v_pos = m_start;	// 頂点の位置
 		val = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(v_pos, m_vec[i], v_pos);
-			//pt_min(val, v_pos, val);
 			val.x = val.x < v_pos.x ? val.x : v_pos.x;
 			val.y = val.y < v_pos.y ? val.y : v_pos.y;
 		}
@@ -203,7 +201,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 範囲に含まれるか判定する.
 	// 戻り値	つねに false
-	bool ShapeStroke::in_area(const D2D1_POINT_2F /*area_nw*/, const D2D1_POINT_2F /*area_se*/) const noexcept
+	bool ShapeStroke::in_area(const D2D1_POINT_2F /*area_lt*/, const D2D1_POINT_2F /*area_rb*/) const noexcept
 	{
 		return false;
 	}
@@ -372,7 +370,7 @@ namespace winrt::GraphPaper::implementation
 		// 変更する頂点がどの頂点か判定する.
 		const size_t d_cnt = m_vec.size();	// 差分の数
 		if (anc >= ANC_TYPE::ANC_P0 && anc <= ANC_TYPE::ANC_P0 + d_cnt) {
-			D2D1_POINT_2F v_pos[MAX_N_GON];	// 頂点の位置
+			D2D1_POINT_2F v_pos[N_GON_MAX];	// 頂点の位置
 			const size_t a_cnt = anc - ANC_TYPE::ANC_P0;	// 変更する頂点
 			// 変更する頂点までの, 各頂点の位置を得る.
 			v_pos[0] = m_start;

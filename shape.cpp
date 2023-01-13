@@ -16,32 +16,10 @@ namespace winrt::GraphPaper::implementation
 	D2D1_COLOR_F Shape::s_background_color = COLOR_WHITE;	// 前景色 (アンカーの背景色)
 	D2D1_COLOR_F Shape::s_foreground_color = COLOR_BLACK;	// 背景色 (アンカーの前景色)
 	winrt::com_ptr<ID2D1StrokeStyle1> Shape::m_aux_style = nullptr;	// 補助線の形式
-	ID2D1Factory3* Shape::s_factory = nullptr;
-	ID2D1RenderTarget* Shape::s_target = nullptr;
-	ID2D1SolidColorBrush* Shape::s_color_brush = nullptr;
-	IDWriteFactory* Shape::s_dw_factory = nullptr;
-	ID2D1SolidColorBrush* Shape::s_range_brush = nullptr;
+	ID2D1Factory3* Shape::s_d2d_factory = nullptr;
+	ID2D1RenderTarget* Shape::s_d2d_target = nullptr;
+	ID2D1SolidColorBrush* Shape::s_d2d_color_brush = nullptr;
+	ID2D1SolidColorBrush* Shape::s_d2d_range_brush = nullptr;
+	IDWriteFactory* Shape::s_dwrite_factory = nullptr;
 
-	// 二点で囲まれた方形を得る.
-	/*
-	void pt_bound(const D2D1_POINT_2F a, const D2D1_POINT_2F b, D2D1_POINT_2F& c_min, D2D1_POINT_2F& c_max) noexcept
-	{
-		if (a.x < b.x) {
-			c_min.x = a.x;
-			c_max.x = b.x;
-		}
-		else {
-			c_min.x = b.x;
-			c_max.x = a.x;
-		}
-		if (a.y < b.y) {
-			c_min.y = a.y;
-			c_max.y = b.y;
-		}
-		else {
-			c_min.y = b.y;
-			c_max.y = a.y;
-		}
-	}
-	*/
 }

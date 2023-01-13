@@ -53,11 +53,11 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 
-		Shape::s_factory = m_dialog_d2d.m_d2d_factory.get();
-		Shape::s_target = m_dialog_d2d.m_d2d_context.get();
-		Shape::s_dw_factory = m_dialog_d2d.m_dwrite_factory.get();
-		Shape::s_color_brush = m_dialog_page.m_color_brush.get();
-		Shape::s_range_brush = m_dialog_page.m_range_brush.get();
+		Shape::s_d2d_factory = m_dialog_d2d.m_d2d_factory.get();
+		Shape::s_d2d_target = m_dialog_d2d.m_d2d_context.get();
+		Shape::s_dwrite_factory = m_dialog_d2d.m_dwrite_factory.get();
+		Shape::s_d2d_color_brush = m_dialog_page.m_color_brush.get();
+		Shape::s_d2d_range_brush = m_dialog_page.m_range_brush.get();
 
 		m_dialog_d2d.m_d2d_context->SaveDrawingState(m_dialog_page.m_state_block.get());
 		m_dialog_d2d.m_d2d_context->BeginDraw();
@@ -97,8 +97,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 属性の画像を読み込む
-	// p_width	表示の幅
-	// p_height	表示の高さ
+	// p_width	パネルの幅
+	// p_height	パネルの高さ
 	IAsyncAction MainPage::dialog_image_load_async(const float p_width, const float p_height)
 	{
 		bool ok;

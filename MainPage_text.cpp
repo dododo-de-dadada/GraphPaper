@@ -242,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値をスライダーのヘッダーに格納する.
-	// U	操作の種類
+	// U	操作の識別子
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
@@ -274,7 +274,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// スライダーの値が変更された.
-	// U	操作の種類
+	// U	操作の識別子
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし

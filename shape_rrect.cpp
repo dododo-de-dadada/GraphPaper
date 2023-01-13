@@ -53,9 +53,9 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚ğ•\¦‚·‚é.
 	void ShapeRRect::draw(void)
 	{
-		ID2D1Factory* const factory = Shape::s_factory;
-		ID2D1RenderTarget* const target = Shape::s_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+		ID2D1Factory* const factory = Shape::s_d2d_factory;
+		ID2D1RenderTarget* const target = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
@@ -268,24 +268,24 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// ŠpŠÛ•ûŒ`‚ğ³‹K‰»‚·‚é.
-		D2D1_POINT_2F r_nw;
-		D2D1_POINT_2F r_sw;
+		D2D1_POINT_2F r_lt;
+		D2D1_POINT_2F r_rb;
 		D2D1_POINT_2F r_rad;
 		if (m_vec[0].x > 0.0f) {
-			r_nw.x = m_start.x;
-			r_sw.x = m_start.x + m_vec[0].x;
+			r_lt.x = m_start.x;
+			r_rb.x = m_start.x + m_vec[0].x;
 		}
 		else {
-			r_nw.x = m_start.x + m_vec[0].x;
-			r_sw.x = m_start.x;
+			r_lt.x = m_start.x + m_vec[0].x;
+			r_rb.x = m_start.x;
 		}
 		if (m_vec[0].y > 0.0f) {
-			r_nw.y = m_start.y;
-			r_sw.y = m_start.y + m_vec[0].y;
+			r_lt.y = m_start.y;
+			r_rb.y = m_start.y + m_vec[0].y;
 		}
 		else {
-			r_nw.y = m_start.y + m_vec[0].y;
-			r_sw.y = m_start.y;
+			r_lt.y = m_start.y + m_vec[0].y;
+			r_rb.y = m_start.y;
 		}
 		r_rad.x = std::abs(m_corner_rad.x);
 		r_rad.y = std::abs(m_corner_rad.y);
@@ -293,7 +293,7 @@ namespace winrt::GraphPaper::implementation
 		// ü˜g‚ª“§–¾‚Ü‚½‚Í‘¾‚³ 0 ‚©”»’è‚·‚é.
 		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
 			// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾, ‚©‚ÂŠpŠÛ•ûŒ`‚»‚Ì‚à‚Ì‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
-			if (is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_nw, r_sw, r_rad)) {
+			if (is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_lt, r_rb, r_rad)) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
@@ -302,17 +302,17 @@ namespace winrt::GraphPaper::implementation
 			// ˆÈ‰º‚Ìè‡‚Í, k¬‚µ‚½ŠpŠÛ•ûŒ`‚ÌŠO‘¤‚É, ŠpŠÛŒğ“_‚ª‚ ‚éƒP[ƒX‚Å‚¤‚Ü‚­‚¢‚©‚È‚¢.
 			// Šg‘å‚µ‚½ŠpŠÛ•ûŒ`‚ÉŠÜ‚Ü‚ê‚é‚©”»’è
 			const double s_thick = max(m_stroke_width, Shape::s_anc_len);
-			D2D1_POINT_2F s_min, s_max, s_rad;
-			pt_add(r_nw, -s_thick * 0.5, s_min);
-			pt_add(r_sw, s_thick * 0.5, s_max);
-			pt_add(r_rad, s_thick * 0.5, s_rad);
-			if (pt_in_rrect(t_pos, s_min, s_max, s_rad)) {
+			D2D1_POINT_2F e_lt, e_rb, e_rad;	// Šg‘å‚µ‚½ŠpŠÛ•ûŒ`
+			pt_add(r_lt, -s_thick * 0.5, e_lt);
+			pt_add(r_rb, s_thick * 0.5, e_rb);
+			pt_add(r_rad, s_thick * 0.5, e_rad);
+			if (pt_in_rrect(t_pos, e_lt, e_rb, e_rad)) {
 				// k¬‚µ‚½ŠpŠÛ•ûŒ`‚ª‹t“]‚µ‚Ä‚È‚¢, ‚©‚ÂˆÊ’u‚ªk¬‚µ‚½ŠpŠÛ•ûŒ`‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
-				D2D1_POINT_2F u_min, u_max, u_rad;
-				pt_add(s_min, s_thick, u_min);
-				pt_add(s_max, -s_thick, u_max);
-				pt_add(s_rad, -s_thick, u_rad);
-				if (u_min.x < u_max.x && u_min.y < u_max.y && pt_in_rrect(t_pos, u_min, u_max, u_rad)) {
+				D2D1_POINT_2F s_lt, s_rb, s_rad;	// k¬‚µ‚½ŠpŠÛ•ûŒ`
+				pt_add(e_lt, s_thick, s_lt);
+				pt_add(e_rb, -s_thick, s_rb);
+				pt_add(e_rad, -s_thick, s_rad);
+				if (s_lt.x < s_rb.x && s_lt.y < s_rb.y && pt_in_rrect(t_pos, s_lt, s_rb, s_rad)) {
 					// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚È‚ç, ANC_FILL ‚ğ•Ô‚·.
 					if (is_opaque(m_fill_color)) {
 						return ANC_TYPE::ANC_FILL;

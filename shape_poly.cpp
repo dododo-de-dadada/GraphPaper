@@ -329,9 +329,9 @@ namespace winrt::GraphPaper::implementation
 		const bool f_opa)
 	{
 		// 始点は { 0, 0 }
-		D2D1_POINT_2F v_pos[MAX_N_GON]{ { 0.0f, 0.0f }, };	// 頂点の位置
+		D2D1_POINT_2F v_pos[N_GON_MAX]{ { 0.0f, 0.0f }, };	// 頂点の位置
 		// 各頂点の位置と辺の長さを求める.
-		double s_len[MAX_N_GON];	// 辺の長さ
+		double s_len[N_GON_MAX];	// 辺の長さ
 		size_t nz_cnt = 0;	// 長さのある辺の数
 		size_t k = static_cast<size_t>(-1);	// 見つかった頂点
 		for (size_t i = 0; i < d_cnt; i++) {
@@ -391,7 +391,7 @@ namespace winrt::GraphPaper::implementation
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
-			D2D1_POINT_2F e_side[MAX_N_GON][4 + 1];	// 拡張された辺 (+頂点)
+			D2D1_POINT_2F e_side[N_GON_MAX][4 + 1];	// 拡張された辺 (+頂点)
 			size_t e_cnt = 0;
 			for (size_t i = 0; i < d_cnt; i++) {
 				// 辺 i の長さがないか判定する.
@@ -583,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 		// 重複しない頂点の数を求める.
 		//std::vector<double> side_len(v_cnt);	// 各辺の長さ
 		//const auto s_len = reinterpret_cast<double*>(side_len.data());
-		double s_len[MAX_N_GON];	// 各辺の長さ
+		double s_len[N_GON_MAX];	// 各辺の長さ
 		int q_cnt = 1;
 		for (size_t i = 0; i < v_cnt; i++) {
 			// 次の頂点との差分を求める.
@@ -648,38 +648,37 @@ namespace winrt::GraphPaper::implementation
 		const auto v_clock = p_opt.m_clockwise;
 
 		// 原点を中心とする半径 1 の円をもとに正多角形を作成する.
-		D2D1_POINT_2F v_min{ 0.0, 0.0 };	// 多角形を囲む領域の左上点
-		D2D1_POINT_2F v_max{ 0.0, 0.0 };	// 多角形を囲む領域の右下点
+		D2D1_POINT_2F v_lt{ 0.0, 0.0 };	// 多角形を囲む領域の左上点
+		D2D1_POINT_2F v_rb{ 0.0, 0.0 };	// 多角形を囲む領域の右下点
 		const double s = v_up ? (M_PI / 2.0) : (M_PI / 2.0 + M_PI / v_cnt);	// 始点の角度
 		const double pi2 = v_clock ? -2 * M_PI : 2 * M_PI;	// 回す全周
 		for (uint32_t i = 0; i < v_cnt; i++) {
 			const double t = s + pi2 * i / v_cnt;	// i 番目の頂点の角度
 			v_pos[i].x = static_cast<FLOAT>(cos(t));
 			v_pos[i].y = static_cast<FLOAT>(-sin(t));
-			//pt_inc(v_pos[i], v_min, v_max);
-			if (v_pos[i].x < v_min.x) {
-				v_min.x = v_pos[i].x;
+			if (v_pos[i].x < v_lt.x) {
+				v_lt.x = v_pos[i].x;
 			}
-			if (v_pos[i].y < v_min.y) {
-				v_min.y = v_pos[i].y;
+			if (v_pos[i].y < v_lt.y) {
+				v_lt.y = v_pos[i].y;
 			}
-			if (v_pos[i].x > v_max.x) {
-				v_max.x = v_pos[i].x;
+			if (v_pos[i].x > v_rb.x) {
+				v_rb.x = v_pos[i].x;
 			}
-			if (v_pos[i].y > v_max.y) {
-				v_max.y = v_pos[i].y;
+			if (v_pos[i].y > v_rb.y) {
+				v_rb.y = v_pos[i].y;
 			}
 		}
 
 		// 正多角形を領域の大きさに合わせる.
 		D2D1_POINT_2F v_vec;
-		pt_sub(v_max, v_min, v_vec);
+		pt_sub(v_rb, v_lt, v_vec);
 		const double rate_x = v_reg ? fmin(b_vec.x, b_vec.y) / fmax(v_vec.x, v_vec.y) : b_vec.x / v_vec.x;
 		const double rate_y = v_reg ? rate_x : b_vec.y / v_vec.y;
 		v_vec.x = static_cast<FLOAT>(roundl(v_vec.x * rate_x));
 		v_vec.y = static_cast<FLOAT>(roundl(v_vec.y * rate_y));
 		for (uint32_t i = 0; i < v_cnt; i++) {
-			pt_sub(v_pos[i], v_min, v_pos[i]);
+			pt_sub(v_pos[i], v_lt, v_pos[i]);
 			v_pos[i].x = static_cast<FLOAT>(roundl(v_pos[i].x * rate_x));
 			v_pos[i].y = static_cast<FLOAT>(roundl(v_pos[i].y * rate_y));
 			pt_add(v_pos[i], b_pos, v_pos[i]);
@@ -689,9 +688,9 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapePoly::draw(void)
 	{
-		ID2D1Factory3* const factory = Shape::s_factory;
-		ID2D1RenderTarget* const taget = Shape::s_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_color_brush;
+		ID2D1Factory3* const factory = Shape::s_d2d_factory;
+		ID2D1RenderTarget* const taget = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
@@ -710,7 +709,7 @@ namespace winrt::GraphPaper::implementation
 
 			// 開始位置と, 差分の配列をもとに, 頂点を求める.
 			const size_t v_cnt = m_vec.size() + 1;	// 頂点の数 (差分の数 + 1)
-			D2D1_POINT_2F v_pos[MAX_N_GON];
+			D2D1_POINT_2F v_pos[N_GON_MAX];
 			v_pos[0] = m_start;
 			for (size_t i = 1; i < v_cnt; i++) {
 				pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
@@ -816,20 +815,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 範囲に含まれるか判定する.
-	// a_min	範囲の左上位置
-	// a_max	範囲の右下位置
+	// a_lt	範囲の左上位置
+	// a_rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapePoly::in_area(const D2D1_POINT_2F a_min, const D2D1_POINT_2F a_max) const noexcept
+	bool ShapePoly::in_area(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb) const noexcept
 	{
-		if (!pt_in_rect(m_start, a_min, a_max)) {
+		if (!pt_in_rect(m_start, a_lt, a_rb)) {
 			return false;
 		}
 		const size_t d_cnt = m_vec.size();	// 差分の数
 		D2D1_POINT_2F e_pos = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
 			pt_add(e_pos, m_vec[i], e_pos);	// 次の位置
-			if (!pt_in_rect(e_pos, a_min, a_max)) {
+			if (!pt_in_rect(e_pos, a_lt, a_rb)) {
 				return false;
 			}
 		}
@@ -866,7 +865,7 @@ namespace winrt::GraphPaper::implementation
 		m_end_closed(p_opt.m_end_closed),
 		m_fill_color(p_opt.m_end_closed ? page->m_fill_color : D2D1_COLOR_F{ page->m_fill_color.r, page->m_fill_color.g, page->m_fill_color.b, 0.0f })
 	{
-		D2D1_POINT_2F v_pos[MAX_N_GON];
+		D2D1_POINT_2F v_pos[N_GON_MAX];
 
 		poly_by_bbox(b_pos, b_vec, p_opt, v_pos);
 		m_start = v_pos[0];

@@ -108,7 +108,6 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 
-		//HRESULT hr = E_FAIL;
 		// 延長実行セッションを要求し, その結果を得る.
 		switch (co_await ext_session.RequestExtensionAsync()) {
 		// 延長実行セッションが許可された場合.

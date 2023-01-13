@@ -7,7 +7,7 @@
 // 	(MicroSoft.UI.Xaml の MenuBar には、Windows 10 Version 1809 (SDK 17763) 以降、または Windows UI ライブラリが必要)
 //
 // デバッガーの停止で終了したときはすべて 0 になるが,
-// アプリケーションを「×」ボタンなどで終了したとき「スレッド 0xXXXX はコード 1 (0x1) で終了しました。」が表示される.
+// アプリケーションを「X」ボタンなどで終了したとき「スレッド 0xXXXX はコード 1 (0x1) で終了しました。」が表示される.
 // とりわけ Application::Current().Exit で終了した場合, すべてのスレッドで 1 が表示される.
 // Blank App (c++/winrt) でまっさらなアプリケーションを作成したときも同じ表示なので, とりあえず気にしないようにする.
 // Microsoft.UI.Xaml のバージョンによっては不具合 (例えばコンパイルできないとか, サブメニューの RadiMenuFlyout のチェックマークが最初はつかない) が出る.
@@ -248,8 +248,8 @@ namespace winrt::GraphPaper::implementation
 		// メインページ
 		ShapePage m_main_page;	// ページ
 		D2D_UI m_main_d2d;	// 描画環境
-		D2D1_POINT_2F m_main_nw{ 0.0F, 0.0F };	// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
-		D2D1_POINT_2F m_main_se{ 0.0F, 0.0F };	// ページの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_main_lt{ 0.0F, 0.0F };	// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_main_rb{ 0.0F, 0.0F };	// ページの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
 
 		// 設定ダイアログのページ
 		ShapePage m_dialog_page;	// ページ
@@ -272,15 +272,6 @@ namespace winrt::GraphPaper::implementation
 		// スレッド
 		bool m_thread_activated = false;	// アクティベートされた初回を判定
 		bool m_thread_win_visible = false;	// ウィンドウが表示されてるか判定
-
-		// コンテキストメニュー
-		//MenuFlyout m_menu_stroke{ nullptr };	// 線枠コンテキストメニュー
-		//MenuFlyout m_menu_fill{ nullptr };	// 塗りつぶしコンテキストメニュー
-		//MenuFlyout m_menu_font{ nullptr };	// 書体コンテキストメニュー
-		//MenuFlyout m_menu_page{ nullptr };	// ページコンテキストメニュー
-		//MenuFlyout m_menu_ungroup{ nullptr };	// グループ解除コンテキストメニュー
-		//MenuFlyout m_menu_ruler{ nullptr };	// 定規コンテキストメニュー
-		//MenuFlyout m_menu_image{ nullptr };	// 画像コンテキストメニュー
 
 		// ハンドラートークン
 		winrt::event_token m_token_suspending;	// アプリケーションの中断ハンドラーのトークン
@@ -376,11 +367,9 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「矢じるしの大きさ」が選択された.
 		IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_ID U, int S> 
-		void arrow_slider_set_header(const float val);
+		template <UNDO_ID U, int S> void arrow_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_ID U, int S> 
-		void arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		template <UNDO_ID U, int S> void arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_disp.cpp
@@ -426,11 +415,9 @@ namespace winrt::GraphPaper::implementation
 		// ポインターの現在位置を設定する.
 		void event_set_pos_cur(PointerRoutedEventArgs const& args);
 		// コンテキストメニューを表示する.
-		void event_popup_menu(void);
+		void event_show_popup(void);
 		// ポインターのホイールボタンが操作された.
 		void event_wheel_changed(IInspectable const& sender, PointerRoutedEventArgs const& args);
-		// ポップアップメニューを表示する.
-		void event_popup_menu(const MenuFlyout& mf);
 
 		//-------------------------------
 		// MainPage_file.cpp
@@ -700,7 +687,7 @@ namespace winrt::GraphPaper::implementation
 		// スクロールバーの値を設定する.
 		void scroll_set(const double aw, const double ah);
 		// 図形が表示されるようパネルをスクロールする.
-		bool scroll_to(const Shape* s);
+		bool scroll_to(Shape* const s);
 
 		//-------------------------------
 		// MainPage_select.cpp
@@ -710,7 +697,7 @@ namespace winrt::GraphPaper::implementation
 		// 編集メニューの「すべて選択」が選択された.
 		void select_all_click(IInspectable const&,RoutedEventArgs const&);
 		// 領域に含まれる図形を選択し, 含まれない図形の選択を解除する.
-		bool select_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se);
+		bool select_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// 次の図形を選択する.
 		//template <VirtualKeyModifiers M, VirtualKey K> void select_next_shape(void);
 		// 範囲の中の図形を選択して, それ以外の図形の選択をはずす.
@@ -718,7 +705,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を選択する.
 		void select_shape(Shape* const s, const VirtualKeyModifiers k_mod);
 		// 領域に含まれる図形の選択を反転する.
-		bool toggle_area(const D2D1_POINT_2F area_nw, const D2D1_POINT_2F area_se);
+		bool toggle_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb);
 		// すべての図形の選択を解除する.
 		bool unselect_all(const bool t_range_only = false);
 		//　Shft + 下矢印キーが押された.

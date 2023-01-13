@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 	static size_t export_pdf_font_dict(const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const DataWriter& dt_writer);
 	static size_t export_pdf_descendant_font_dict(int o_num, DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* g_met, const int upem, const DataWriter& dt_writer);
 	static size_t export_pdf_font_descriptor(const int obj_num, const winrt::hstring& p_name, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_WEIGHT weight, const float angle, const DWRITE_FONT_METRICS1& f_met, const DataWriter& dt_writer);
-	static void export_pdf_font_info(const ShapeText* s, DWRITE_FONT_WEIGHT& weight, DWRITE_FONT_STRETCH& stretch, DWRITE_FONT_STYLE& style, DWRITE_FONT_METRICS1& f_met, DWRITE_FONT_FACE_TYPE& f_type, winrt::hstring& p_name, std::vector<uint16_t>& cid, std::vector<uint16_t>& gid, std::vector<DWRITE_GLYPH_METRICS>& g_met, FLOAT& angle);
+	static void export_pdf_font_info(IDWriteFontFace3* face, const wchar_t* t, const size_t t_len, const wchar_t* family, DWRITE_FONT_METRICS1& f_met, DWRITE_FONT_FACE_TYPE& f_type, winrt::hstring& p_name, std::vector<uint16_t>& cid, std::vector<uint16_t>& gid, std::vector<DWRITE_GLYPH_METRICS>& g_met, FLOAT& angle);
 
 	//------------------------------
 	// PDF のフォント辞書を出力する.
@@ -203,10 +203,13 @@ namespace winrt::GraphPaper::implementation
 	// angle	イタリックの最大角度 (ふつうがマイナス)
 	//------------------------------
 	static void export_pdf_font_info(
-		const ShapeText* s,
-		DWRITE_FONT_WEIGHT& weight,
-		DWRITE_FONT_STRETCH& stretch,
-		DWRITE_FONT_STYLE& style,
+		IDWriteFontFace3* face,
+		const wchar_t *t,
+		const size_t t_len,
+		const wchar_t *family,
+		//const DWRITE_FONT_WEIGHT weight,
+		//const DWRITE_FONT_STRETCH stretch,
+		//const DWRITE_FONT_STYLE style,
 		DWRITE_FONT_METRICS1& f_met,
 		DWRITE_FONT_FACE_TYPE& f_type,
 		winrt::hstring& p_name,
@@ -216,91 +219,83 @@ namespace winrt::GraphPaper::implementation
 		FLOAT& angle
 	)
 	{
-		s->get_font_weight(weight);
-		s->get_font_stretch(stretch);
-		s->get_font_style(style);
-		IDWriteFontFace3* face = nullptr;
-		if (s->get_font_face(face)) {
+		// 書体の計量を得る.
+		face->GetMetrics(&f_met);
 
-			// 書体の計量を得る.
-			face->GetMetrics(&f_met);
+		// フォントフェイスの形式を得る.
+		f_type = face->GetType();
 
-			// フォントフェイスの形式を得る.
-			f_type = face->GetType();
+		// 文字列を UTF32 に変換し重複したコードを削除する.
+		std::vector<uint32_t> utf32{ conv_utf16_to_utf32(t, t_len) };
+		const auto last = std::unique(std::begin(utf32), std::end(utf32));
+		utf32.erase(last, utf32.end());
 
-			// 文字列を UTF32 に変換し重複したコードを削除する.
-			std::vector<uint32_t> utf32{ conv_utf16_to_utf32(s->m_text, wchar_len(s->m_text)) };
-			const auto last = std::unique(std::begin(utf32), std::end(utf32));
-			utf32.erase(last, utf32.end());
+		// UTF32 文字列から CID を得る.
+		cid.resize(utf32.size());
+		for (int i = 0; i < utf32.size(); i++) {
+			//cid[i] = cmap_getcid(utf32[i]);
+		}
 
-			// UTF32 文字列から CID を得る.
-			cid.resize(utf32.size());
-			for (int i = 0; i < utf32.size(); i++) {
-				//cid[i] = cmap_getcid(utf32[i]);
-			}
+		// UTF32 文字列から GID を得る.
+		gid.resize(utf32.size());
+		winrt::check_hresult(face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(std::size(utf32)), std::data(gid)));
 
-			// UTF32 文字列から GID を得る.
-			gid.resize(utf32.size());
-			winrt::check_hresult(face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(std::size(utf32)), std::data(gid)));
+		// GID 文字列から字形 (グリフ) の計量を得る.
+		g_met.resize(utf32.size());
+		face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(g_met));
+		//face->Release();
 
-			// GID 文字列から字形 (グリフ) の計量を得る.
-			g_met.resize(utf32.size());
-			face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(g_met));
-			//face->Release();
-
-			// フォントフェイスからポストスクリプト名を得る.
-			IDWriteLocalizedStrings* str = nullptr;
-			BOOL exists = false;
-			//if (font->GetInformationalStrings(DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_CID_NAME, &str, &exists) == S_OK) {
-			if (face->GetInformationalStrings(DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_NAME, &str, &exists) == S_OK) {
-				if (exists) {
-					const UINT32 str_cnt = str->GetCount();
-					for (uint32_t j = 0; j < str_cnt; j++) {
-						UINT32 wstr_len = 0;	// 終端ヌルを除く文字列長
-						if (str->GetStringLength(j, &wstr_len) == S_OK && wstr_len > 0) {
-							std::vector<wchar_t> wstr(wstr_len + 1);
-							if (str->GetString(j, std::data(wstr), wstr_len + 1) == S_OK) {
-								p_name.clear();
-								p_name = std::data(wstr);
-								//std::copy(wstr.begin(), wstr.end(), std::back_inserter(p_name));
-								break;
-							}
+		// フォントフェイスからポストスクリプト名を得る.
+		IDWriteLocalizedStrings* str = nullptr;
+		BOOL exists = false;
+		//if (font->GetInformationalStrings(DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_CID_NAME, &str, &exists) == S_OK) {
+		if (face->GetInformationalStrings(DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_NAME, &str, &exists) == S_OK) {
+			if (exists) {
+				const UINT32 str_cnt = str->GetCount();
+				for (uint32_t j = 0; j < str_cnt; j++) {
+					UINT32 wstr_len = 0;	// 終端ヌルを除く文字列長
+					if (str->GetStringLength(j, &wstr_len) == S_OK && wstr_len > 0) {
+						std::vector<wchar_t> wstr(wstr_len + 1);
+						if (str->GetString(j, std::data(wstr), wstr_len + 1) == S_OK) {
+							p_name.clear();
+							p_name = std::data(wstr);
+							//std::copy(wstr.begin(), wstr.end(), std::back_inserter(p_name));
+							break;
 						}
 					}
-					str->Release();
 				}
-				// たとえば 'Windows Himaraya' のとき,
-				// ポストスクリプト名を要求したにもかかわらず空白の入った文字列を返す場合がある.
-				// ポストスクリプト名が存在しない, あるいは上記のような場合は,
-				// 書体名から空白文字を取り除いた文字列を, ポストスクリプト名とする.
-				if (!exists || std::find(std::begin(p_name), std::end(p_name), L' ') != std::end(p_name)) {
-					const auto k = wchar_len(s->m_font_family);
-					std::vector<wchar_t> wstr(k + 1);
-					int wstr_len = 0;
-					for (uint32_t i = 0; i < k; i++) {
-						if (!iswspace(s->m_font_family[i])) {
-							wstr[wstr_len++] = s->m_font_family[i];
-						}
-					}
-					wstr[wstr_len] = L'\0';
-					p_name.clear();
-					p_name = std::data(wstr);
-				}
+				str->Release();
 			}
+			// たとえば 'Windows Himaraya' のとき,
+			// ポストスクリプト名を要求したにもかかわらず空白の入った文字列を返す場合がある.
+			// ポストスクリプト名が存在しない, あるいは上記のような場合は,
+			// 書体名から空白文字を取り除いた文字列を, ポストスクリプト名とする.
+			if (!exists || std::find(std::begin(p_name), std::end(p_name), L' ') != std::end(p_name)) {
+				const auto k = wchar_len(family);
+				std::vector<wchar_t> wstr(k + 1);
+				int wstr_len = 0;
+				for (uint32_t i = 0; i < k; i++) {
+					if (!iswspace(family[i])) {
+						wstr[wstr_len++] = family[i];
+					}
+				}
+				wstr[wstr_len] = L'\0';
+				p_name.clear();
+				p_name = std::data(wstr);
+			}
+		}
 
-			// フォントフェイスから傾きを得る.
-			// ただし, PDF は, フォントフェイスの変形はサポートしてないので, フェイスそのものが
-			// イタリックでない限り, 斜体にはならない.
-			const auto axis_cnt = static_cast<IDWriteFontFace5*>(face)->GetFontAxisValueCount();
-			std::vector<DWRITE_FONT_AXIS_VALUE> axis_val(axis_cnt);
-			if (static_cast<IDWriteFontFace5*>(face)->GetFontAxisValues(std::data(axis_val), axis_cnt) == S_OK) {
-				for (uint32_t i = 0; i < axis_cnt; i++) {
-					if (axis_val[i].axisTag == DWRITE_FONT_AXIS_TAG_SLANT) {
-						angle = axis_val[i].value;
-					}
+		// フォントフェイスから傾きを得る.
+		// ただし, PDF は, フォントフェイスの変形はサポートしてないので, フェイスそのものが
+		// イタリックでない限り, 斜体にはならない.
+		const auto axis_cnt = static_cast<IDWriteFontFace5*>(face)->GetFontAxisValueCount();
+		std::vector<DWRITE_FONT_AXIS_VALUE> axis_val(axis_cnt);
+		if (static_cast<IDWriteFontFace5*>(face)->GetFontAxisValues(std::data(axis_val), axis_cnt) == S_OK) {
+			for (uint32_t i = 0; i < axis_cnt; i++) {
+				if (axis_val[i].axisTag == DWRITE_FONT_AXIS_TAG_SLANT) {
+					angle = axis_val[i].value;
 				}
 			}
-			face->Release();
 		}
 	}
 
@@ -391,11 +386,11 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに PDF として書き込む.
 	IAsyncOperation<winrt::hresult> MainPage::export_as_pdf_async(const StorageFile& pdf_file) const noexcept
 	{
-		HRESULT hr = E_FAIL;
+		HRESULT hres = E_FAIL;
 		try {
 			wchar_t buf[1024];	// PDF
 
-			// 表示の幅と高さを, D2D の固定 DPI (96dpi) から PDF の 72dpi に,
+			// ページの幅と高さを, D2D の固定 DPI (96dpi) から PDF の 72dpi に,
 			// 変換する (モニターに応じて変化する論理 DPI は用いない). 
 			const float w_pt = m_main_page.m_page_size.width * 72.0f / 96.0f;	// 変換された幅
 			const float h_pt = m_main_page.m_page_size.height * 72.0f / 96.0f;	// 変換された高さ
@@ -483,6 +478,17 @@ namespace winrt::GraphPaper::implementation
 					len += dt_writer.WriteString(buf);
 					static_cast<ShapeText*>(s)->m_pdf_font_num = font_cnt++;
 				}
+				else if (typeid(*s) == typeid(ShapeRuler)) {
+					if (font_cnt == 0) {
+						len += dt_writer.WriteString(L"/Font <<\n");
+					}
+					swprintf_s(buf,
+						L"/F%d %d 0 R\n",
+						font_cnt, 6 + 3 * font_cnt
+					);
+					len += dt_writer.WriteString(buf);
+					static_cast<ShapeRuler*>(s)->m_pdf_font_num = font_cnt++;
+				}
 			}
 			if (font_cnt > 0) {
 				len += dt_writer.WriteString(L">>\n");
@@ -567,7 +573,6 @@ namespace winrt::GraphPaper::implementation
 					// というようにして、値を 1 em = 1000 に合わせます.
 					// 
 					const auto t = static_cast<ShapeText*>(s);
-					//int n = t->m_pdf_font_num;
 
 					DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;	// 書体の幅
@@ -579,7 +584,50 @@ namespace winrt::GraphPaper::implementation
 					std::vector<DWRITE_GLYPH_METRICS> g_met{};	// グリフの計量
 					DWRITE_FONT_FACE_TYPE f_type;	// フォントフェイスの種類
 					float angle;
-					export_pdf_font_info(t, weight, stretch, style, f_met, f_type, p_name, cid, gid, g_met, angle);
+					s->get_font_weight(weight);
+					s->get_font_stretch(stretch);
+					s->get_font_style(style);
+					IDWriteFontFace3* face;
+					t->get_font_face(face);
+					export_pdf_font_info(face, t->m_text, wchar_len(t->m_text), t->m_font_family, f_met, f_type, p_name, cid, gid, g_met, angle);
+
+					// フォント辞書
+					len = export_pdf_font_dict(
+						6 + 3 * font_cnt, f_type, p_name, dt_writer);
+					obj_len.push_back(obj_len.back() + len);
+
+					// CID フォント辞書 (Type 0 の子孫となるフォント)
+					// フォント辞書から参照され,
+					// フォント詳細辞書を参照する.
+					len = export_pdf_descendant_font_dict(
+						6 + 3 * font_cnt + 1,
+						//f_type, p_name, std::size(cid), std::data(cid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
+						f_type, p_name, std::size(gid), std::data(gid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
+					obj_len.push_back(obj_len.back() + len);
+
+					// フォント詳細辞書
+					// CID フォント辞書から参照される.
+					len = export_pdf_font_descriptor(
+						6 + 3 * font_cnt + 2,
+						p_name, stretch, weight, angle, f_met, dt_writer);
+					obj_len.push_back(obj_len.back() + len);
+					font_cnt++;
+				}
+				if (typeid(*s) == typeid(ShapeRuler)) {
+					ShapeRuler* r = static_cast<ShapeRuler*>(s);
+					IDWriteFontFace3* face;
+					r->get_font_face(face);
+					DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
+					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;	// 書体の幅
+					DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;	// 字体
+					DWRITE_FONT_METRICS1 f_met;
+					DWRITE_FONT_FACE_TYPE f_type;
+					winrt::hstring p_name{};
+					std::vector<uint16_t> gid{};	// グリフ ID
+					std::vector<uint16_t> cid{};	// 文字 ID
+					std::vector<DWRITE_GLYPH_METRICS> g_met{};	// グリフの計量
+					float angle;
+					export_pdf_font_info(face, L"0123456789", 10, r->m_font_family, f_met, f_type, p_name, cid, gid, g_met, angle);
 
 					// フォント辞書
 					len = export_pdf_font_dict(
@@ -659,12 +707,12 @@ namespace winrt::GraphPaper::implementation
 			co_await dt_writer.StoreAsync();
 			// ストリームをフラッシュする.
 			co_await pdf_stream.FlushAsync();
-			hr = S_OK;
+			hres = S_OK;
 		}
 		catch (winrt::hresult_error const& e) {
-			hr = e.code();
+			hres = e.code();
 		}
-		co_return hr;
+		co_return hres;
 	}
 
 	//-------------------------------
@@ -674,7 +722,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	IAsyncOperation<winrt::hresult> MainPage::export_as_raster_async(const StorageFile& image_file) noexcept
 	{
-		HRESULT hr = E_FAIL;
+		HRESULT hres = E_FAIL;
 
 		// ファイルのコンテントの種類をもとに GUID の WIC フォーマットを得る.
 		const GUID& wic_fmt = [](const winrt::hstring& c_type)
@@ -766,7 +814,7 @@ namespace winrt::GraphPaper::implementation
 					D2D1_FEATURE_LEVEL_DEFAULT
 				};
 				winrt::com_ptr<ID2D1RenderTarget> target;
-				Shape::s_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
+				Shape::s_d2d_factory->CreateWicBitmapRenderTarget(wic_bitmap.get(), prop, target.put());
 				*/
 
 				// デバイスとデバイスコンテキストの作成
@@ -809,19 +857,19 @@ namespace winrt::GraphPaper::implementation
 				winrt::check_hresult(
 					target->CreateSolidColorBrush(D2D1_COLOR_F{}, rb.put())
 				);
-				Shape::s_target = target.get();
-				Shape::s_color_brush = cb.get();
-				Shape::s_range_brush = rb.get();
+				Shape::s_d2d_target = target.get();
+				Shape::s_d2d_color_brush = cb.get();
+				Shape::s_d2d_range_brush = rb.get();
 
 				// ビットマップへの描画
 				m_mutex_draw.lock();
-				Shape::s_target->SaveDrawingState(m_main_page.m_state_block.get());
-				Shape::s_target->BeginDraw();
+				Shape::s_d2d_target->SaveDrawingState(m_main_page.m_state_block.get());
+				Shape::s_d2d_target->BeginDraw();
 				m_main_page.draw();
 				winrt::check_hresult(
-					Shape::s_target->EndDraw()
+					Shape::s_d2d_target->EndDraw()
 				);
-				Shape::s_target->RestoreDrawingState(m_main_page.m_state_block.get());
+				Shape::s_d2d_target->RestoreDrawingState(m_main_page.m_state_block.get());
 				m_mutex_draw.unlock();
 
 				// レンダーターゲット依存のオブジェクトを消去
@@ -860,13 +908,13 @@ namespace winrt::GraphPaper::implementation
 				);
 
 				d2d.Trim();
-				hr = S_OK;
+				hres = S_OK;
 			}
 			catch (const winrt::hresult_error& e) {
-				hr = e.code();
+				hres = e.code();
 			}
 		}
-		co_return hr;
+		co_return hres;
 	}
 
 	//-------------------------------
@@ -876,7 +924,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	IAsyncOperation<winrt::hresult> MainPage::export_as_svg_async(const StorageFile& svg_file) const noexcept
 	{
-		HRESULT hr = E_FAIL;
+		HRESULT hres = E_FAIL;
 		try {
 
 			// ストレージファイルを開いて, ストリームとそのデータライターを得る.
@@ -968,13 +1016,13 @@ namespace winrt::GraphPaper::implementation
 			co_await dt_writer.StoreAsync();
 			// ストリームをフラッシュする.
 			co_await svg_stream.FlushAsync();
-			hr = S_OK;
+			hres = S_OK;
 		}
 		catch (winrt::hresult_error const& e) {
 			// エラーが発生した場合, エラーコードを結果に格納する.
-			hr = e.code();
+			hres = e.code();
 		}
-		co_return hr;
+		co_return hres;
 	}
 
 }
