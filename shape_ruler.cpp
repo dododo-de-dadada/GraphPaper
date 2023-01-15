@@ -144,7 +144,6 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRuler::draw(void)
 	{
 		ID2D1Factory* const factory = Shape::s_d2d_factory;
-		//IDWriteFactory* const dwrite_factory = Shape::s_dwrite_factory;
 		ID2D1RenderTarget* const target = Shape::s_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
