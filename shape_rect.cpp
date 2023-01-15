@@ -59,46 +59,51 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 図形の部位が位置を含むか判定する.
-	uint32_t ShapeRect::hit_test_anc(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t rect_hit_test_anc(const D2D1_POINT_2F start, const D2D1_POINT_2F vec, const D2D1_POINT_2F t_pos) noexcept
 	{
 		// 4----8----2
 		// |         |
 		// 7         6
 		// |         |
 		// 3----5----1
-		const D2D1_POINT_2F anc_se{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
+		const D2D1_POINT_2F anc_se{ start.x + vec.x, start.y + vec.y };
 		if (pt_in_anc(t_pos, anc_se)) {
 			return ANC_TYPE::ANC_SE;
 		}
-		const D2D1_POINT_2F anc_ne{ anc_se.x, m_start.y };
+		const D2D1_POINT_2F anc_ne{ anc_se.x, start.y };
 		if (pt_in_anc(t_pos, anc_ne)) {
 			return ANC_TYPE::ANC_NE;
 		}
-		const D2D1_POINT_2F anc_sw{ m_start.x, anc_se.y };
+		const D2D1_POINT_2F anc_sw{ start.x, anc_se.y };
 		if (pt_in_anc(t_pos, anc_sw)) {
 			return ANC_TYPE::ANC_SW;
 		}
-		if (pt_in_anc(t_pos, m_start)) {
+		if (pt_in_anc(t_pos, start)) {
 			return ANC_TYPE::ANC_NW;
 		}
-		const D2D1_POINT_2F anc_s{ static_cast<FLOAT>(m_start.x + m_vec[0].x * 0.5), anc_se.y };
+		const D2D1_POINT_2F anc_s{ static_cast<FLOAT>(start.x + vec.x * 0.5), anc_se.y };
 		if (pt_in_anc(t_pos, anc_s)) {
 			return ANC_TYPE::ANC_SOUTH;
 		}
-		const D2D1_POINT_2F anc_e{ anc_se.x, static_cast<FLOAT>(m_start.y + m_vec[0].y * 0.5f) };
+		const D2D1_POINT_2F anc_e{ anc_se.x, static_cast<FLOAT>(start.y + vec.y * 0.5f) };
 		if (pt_in_anc(t_pos, anc_e)) {
 			return ANC_TYPE::ANC_EAST;
 		}
-		const D2D1_POINT_2F anc_w{ m_start.x, anc_e.y };
+		const D2D1_POINT_2F anc_w{ start.x, anc_e.y };
 		if (pt_in_anc(t_pos, anc_w)) {
 			return ANC_TYPE::ANC_WEST;
 		}
-		const D2D1_POINT_2F anc_n{ anc_s.x, m_start.y };
+		const D2D1_POINT_2F anc_n{ anc_s.x, start.y };
 		if (pt_in_anc(t_pos, anc_n)) {
 			return ANC_TYPE::ANC_NORTH;
 		}
 		return ANC_TYPE::ANC_PAGE;
+	}
+
+	// 図形の部位が位置を含むか判定する.
+	uint32_t ShapeRect::hit_test_anc(const D2D1_POINT_2F t_pos) const noexcept
+	{
+		return rect_hit_test_anc(m_start, m_vec[0], t_pos);
 	}
 
 	// 位置を含むか判定する.

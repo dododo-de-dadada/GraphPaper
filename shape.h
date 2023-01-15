@@ -318,7 +318,14 @@ namespace winrt::GraphPaper::implementation
 
 	// wchar_t 型の文字列 (UTF-16) を uint32_t 型の配列に変換する.
 	std::vector<uint32_t> conv_utf16_to_utf32(const wchar_t* w, const size_t w_len) noexcept;
+	// フォントフェイスを得る.
 	template <typename T> bool get_font_face(T* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face);
+
+	//------------------------------
+	// shape_rect.cpp
+	//------------------------------
+
+	uint32_t rect_hit_test_anc(const D2D1_POINT_2F start, const D2D1_POINT_2F vec, const D2D1_POINT_2F t_pos) noexcept;
 
 	//------------------------------
 	// shape_dt.cpp
@@ -1220,12 +1227,15 @@ namespace winrt::GraphPaper::implementation
 		// shape_ruler.cpp
 		//------------------------------
 
+		// 文字列レイアウトを作成する.
+		void create_text_format(void);
 		// 図形を表示する.
 		void draw(void) final override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
 		// フォントフェースを得る (使用後は Release する).
-		bool get_font_face(IDWriteFontFace3*& face) const {
+		bool get_font_face(IDWriteFontFace3*& face) const
+		{
 			return winrt::GraphPaper::implementation::get_font_face<IDWriteTextFormat>(m_dwrite_text_format.get(), 
 				m_font_family,
 				DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL, face);
@@ -1246,7 +1256,7 @@ namespace winrt::GraphPaper::implementation
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
 		void export_svg(DataWriter const& /*dt_writer*/) const {}
-
+		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) const final override;
 	};
 

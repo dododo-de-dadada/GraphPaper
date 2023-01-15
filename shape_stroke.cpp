@@ -482,7 +482,6 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚ðì¬‚·‚é.
 	// page	Ý’è
 	ShapeStroke::ShapeStroke(const ShapePage* page) :
-		//ShapeSelect(),
 		m_dash_cap(page->m_dash_cap),
 		m_stroke_cap(page->m_stroke_cap),
 		m_stroke_color(page->m_stroke_color),

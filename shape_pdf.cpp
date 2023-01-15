@@ -273,7 +273,6 @@ namespace winrt::GraphPaper::implementation
 		return n;
 	}
 
-
 	//------------------------------
 	// 図形をデータライターに PDF として書き込む.
 	// dt_weiter	データライター
@@ -498,7 +497,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		// PDF では表示の大きさの規定値は 1 x 1.
 		// そもままでは, 画像全体が 1 x 1 にマッピングされる.
-		// 表示するには, 変換行列に表示する大きさを指定し, 拡大する.
+		// きちんと表示するには, 変換行列に大きさを指定し, 拡大する.
 		// 表示する位置は, 左上でなく左下隅を指定する.
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -513,46 +512,6 @@ namespace winrt::GraphPaper::implementation
 		);
 		return dt_writer.WriteString(buf);
 	}
-
-	/*
-	bool ShapeText::get_font_face(IDWriteFontFace3*& face) const
-	{
-		const auto family = m_font_family;
-		const auto weight = m_font_weight;
-		const auto stretch = m_font_stretch;
-		const auto style = m_font_style;
-		bool ret = false;
-
-		// 文字列を書き込む.
-		IDWriteFontCollection* coll = nullptr;
-		if (m_dwrite_text_layout->GetFontCollection(&coll) == S_OK) {
-			// 図形と一致する書体ファミリを得る.
-			IDWriteFontFamily* fam = nullptr;
-			UINT32 index;
-			BOOL exists;
-			if (coll->FindFamilyName(family, &index, &exists) == S_OK &&
-				exists &&
-				coll->GetFontFamily(index, &fam) == S_OK) {
-				// 書体ファミリから, 太さと幅, 字体が一致する書体を得る.
-				IDWriteFont* font = nullptr;
-				if (fam->GetFirstMatchingFont(weight, stretch, style, &font) == S_OK) {
-					IDWriteFontFaceReference* ref = nullptr;
-					if (static_cast<IDWriteFont3*>(font)->GetFontFaceReference(&ref) == S_OK) {
-						face = nullptr;
-						if (ref->CreateFontFace(&face) == S_OK) {
-							ret = true;
-						}
-						ref->Release();
-					}
-					font->Release();
-				}
-				fam->Release();
-			}
-			coll->Release();
-		}
-		return true;
-	}
-	*/
 
 	static uint16_t get_uint16(const void* addr, size_t offs)
 	{
@@ -614,24 +573,18 @@ namespace winrt::GraphPaper::implementation
 	{
 		size_t len = ShapeRect::export_pdf(page_size, dt_writer);
 		len += dt_writer.WriteString(L"% Text\n");
-
+		double oblique = (m_font_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE ? tan(0.349066) : 0.0);
 		wchar_t buf[1024];
-		// BT テキストオブジェクトの開始
-		// フォント名 サイズ Tf
-		// x座標 y座標 Td
-		// TLという行間を設定する演算子
+
 		swprintf_s(buf,
 			L"%f %f %f rg\n"
 			L"%f %f %f RG\n"
 			L"BT\n"
 			L"/F%d %f Tf\n"
-			L"0 Tr\n"
-			L"%f %f Td\n",
+			L"0 Tr\n",
 			m_font_color.r, m_font_color.g, m_font_color.b,
 			m_font_color.r, m_font_color.g, m_font_color.b,
-			m_pdf_font_num, m_font_size,
-			m_start.x + m_text_padding.width,
-			-(m_start.y + m_text_padding.height + m_dwrite_line_metrics[0].baseline) + page_size.height
+			m_pdf_font_num, m_font_size
 		);
 		len += dt_writer.WriteString(buf);
 
@@ -639,7 +592,7 @@ namespace winrt::GraphPaper::implementation
 		get_font_face(face);
 
 		//https://learn.microsoft.com/en-us/typography/opentype/spec/cmap
-//https://github.com/wine-mirror/wine/blob/master/dlls/dwrite/tests/font.c
+		//https://github.com/wine-mirror/wine/blob/master/dlls/dwrite/tests/font.c
 		struct CMAP {
 			uint32_t startCharCode;
 			uint32_t endCharCode;
@@ -749,11 +702,11 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 			const wchar_t* t = m_text + m_dwrite_test_metrics[i].textPosition;	// 行の先頭文字を指すポインター
 			const uint32_t t_len = m_dwrite_test_metrics[i].length;	// 行の文字数
-			const float td_x = (i > 0 ? m_dwrite_test_metrics[i].left - m_dwrite_test_metrics[i - 1].left : m_dwrite_test_metrics[i].left);	// 行の x 方向のオフセット
-			const float td_y = (i > 0 ? m_dwrite_test_metrics[i].top - m_dwrite_test_metrics[i - 1].top : m_dwrite_test_metrics[i].top);	// 行の y 方向のオフセット
 			swprintf_s(buf,
-				L"%f %f Td\n",
-				td_x, -td_y);
+				L"1 0 %f 1 %f %f Tm\n",
+				oblique,
+				m_start.x + m_text_padding.width + m_dwrite_test_metrics[i].left,
+				-(m_start.y + m_text_padding.height + m_dwrite_test_metrics[i].top + m_dwrite_line_metrics[0].baseline) + page_size.height);
 			len += dt_writer.WriteString(buf);
 
 			// 文字列を書き込む.
@@ -765,10 +718,11 @@ namespace winrt::GraphPaper::implementation
 			face->GetGlyphIndices(std::data(utf32), static_cast<UINT32>(u_len), std::data(gid));
 			len += dt_writer.WriteString(L"<");
 			for (uint32_t j = 0; j < u_len; j++) {
-				if (gid[j] != 0) {
-					swprintf_s(buf, L"%04x", gid[j]);
-					len += dt_writer.WriteString(buf);
+				if (gid[j] == 0) {
+					continue;
 				}
+				swprintf_s(buf, L"%04x", gid[j]);
+				len += dt_writer.WriteString(buf);
 			}
 			len += dt_writer.WriteString(L"> Tj\n");
 
@@ -833,29 +787,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		wchar_t buf[1024];
 		size_t len = 0;
-		/*
-		if (m_d2d_stroke_style == nullptr) {
-			create_stroke_style(factory);
-		}
-		if (m_dwrite_text_format == nullptr) {
-			wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
-			GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-			const float font_size = min(m_font_size, m_grid_base + 1.0f);
-			winrt::check_hresult(
-				dwrite_factory->CreateTextFormat(
-					m_font_family,
-					static_cast<IDWriteFontCollection*>(nullptr),
-					DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL,
-					DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL,
-					DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
-					font_size,
-					locale_name,
-					m_dwrite_text_format.put()
-				)
-			);
-			m_dwrite_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		}
-		*/
 		constexpr wchar_t D[10] = { L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9' };
 		IDWriteFontFace3* face;
 		get_font_face(face);
@@ -864,6 +795,8 @@ namespace winrt::GraphPaper::implementation
 		face->GetGlyphIndices(std::data(utf32), 10, gid);
 		DWRITE_FONT_METRICS f_met;
 		face->GetMetrics(&f_met);
+		int32_t g_adv[10];
+		face->GetDesignGlyphAdvances(10, gid, g_adv);
 		face->Release();
 
 		const D2D1_RECT_F rect{
@@ -873,10 +806,10 @@ namespace winrt::GraphPaper::implementation
 			m_start.y + m_vec[0].y
 		};
 		if (is_opaque(m_fill_color)) {
+
 			// 塗りつぶし色が不透明な場合,
 			// 方形を塗りつぶす.
-			swprintf_s(
-				buf,
+			swprintf_s(buf,
 				L"%f %f %f rg\n",
 				m_fill_color.r, m_fill_color.g, m_fill_color.b
 			);
@@ -892,12 +825,12 @@ namespace winrt::GraphPaper::implementation
 			const double vec_y = (w_ge_h ? m_vec[0].y : m_vec[0].x);	// 小さい方の値を y
 			const double intvl_x = vec_x >= 0.0 ? g_len : -g_len;	// 目盛りの間隔
 			const double intvl_y = min(f_size, g_len);	// 目盛りの間隔
-			const uint32_t k = static_cast<uint32_t>(floor(vec_x / intvl_x));	// 目盛りの数
 			const double x0 = (w_ge_h ? m_start.x : m_start.y);
 			const double y0 = static_cast<double>(w_ge_h ? m_start.y : m_start.x) + vec_y;
 			const double y1 = y0 - (vec_y >= 0.0 ? intvl_y : -intvl_y);
 			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? intvl_y : -intvl_y);
 			const double y2 = y1 - (vec_y >= 0.0 ? f_size : -f_size);
+			/*
 			DWRITE_PARAGRAPH_ALIGNMENT p_align;
 			if (w_ge_h) {
 				// 横のほうが大きい場合,
@@ -911,72 +844,87 @@ namespace winrt::GraphPaper::implementation
 				// 中段を段落のそろえに格納する.
 				p_align = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 			}
+			*/
+			//len += export_pdf_stroke(dt_writer);
 
-			len += export_pdf_stroke(dt_writer);
-			// 段落のそろえをテキストフォーマットに格納する.
+			// 線枠の太さ
+			swprintf_s(buf, L"%f w\n", 1.0f);
+			len += dt_writer.WriteString(buf);
+
+			// 線枠の色
+			swprintf_s(buf, L"%f %f %f RG\n", m_stroke_color.r, m_stroke_color.g, m_stroke_color.b);	// RG は線枠 (rg は塗りつぶし) 色
+			len += dt_writer.WriteString(buf);
+
+			// 線枠の端点
+			len += dt_writer.WriteString(L"0 J\n");
+
+			// 線の結合の形式
+			// 面取り
+			len += dt_writer.WriteString(L"2 j\n");
+
+			// 破線の形式
+			// 実線
+			len += dt_writer.WriteString(L"[ ] 0 d\n");
+
+			const uint32_t k = static_cast<uint32_t>(floor(vec_x / intvl_x));	// 目盛りの数
 			for (uint32_t i = 0; i <= k; i++) {
+
 				// 方眼の大きさごとに目盛りを表示する.
 				const double x = x0 + i * intvl_x;
-				D2D1_POINT_2F p0{
+				const D2D1_POINT_2F p{
 					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
 					w_ge_h ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
 				};
 				const auto y = ((i % 5) == 0 ? y1 : y1_5);
-				D2D1_POINT_2F p1{
+				const D2D1_POINT_2F q{
 					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
 					w_ge_h ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
-
-				wchar_t buf[1024];
-				swprintf_s(buf, L"%f %f m\n", p0.x, -p0.y + page_size.height);
+				swprintf_s(buf, L"%f %f m\n",
+					p.x, -p.y + page_size.height);
 				len += dt_writer.WriteString(buf);
-				swprintf_s(buf, L"%f %f l\n", p1.x, -p1.y + page_size.height);
+				swprintf_s(buf, L"%f %f l\n",
+					q.x, -q.y + page_size.height);
 				len += dt_writer.WriteString(buf);
 				len += dt_writer.WriteString(L"S\n");
 			}
+
 			swprintf_s(buf,
 				L"%f %f %f rg\n"
 				L"%f %f %f RG\n"
 				L"BT\n"
 				L"/F%d %f Tf\n"
-				L"0 Tr\n"
-				L"%f %f Td\n",
+				L"0 Tr\n",
 				m_stroke_color.r, m_stroke_color.g, m_stroke_color.b,
 				m_stroke_color.r, m_stroke_color.g, m_stroke_color.b,
-				m_pdf_font_num, m_font_size,
-				m_start.x,
-				-(m_start.y + f_met.ascent) + page_size.height
+				m_pdf_font_num, m_font_size
 			);
 			len += dt_writer.WriteString(buf);
+			float before = 0;
 			for (uint32_t i = 0; i <= k; i++) {
 				// 方眼の大きさごとに目盛りを表示する.
+				// 中央寄せなど指定できないので, 文字ごとの幅から
+				// 位置を計算しなくてはならない.
 				const double x = x0 + i * intvl_x;
-				/*
-				D2D1_POINT_2F p0{
-					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
-					w_ge_h ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
-				};
-				const auto y = ((i % 5) == 0 ? y1 : y1_5);
-				D2D1_POINT_2F p1{
-					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
-					w_ge_h ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
-				};
-				*/
-
-				// 目盛りの値を表示する.
-				const double x1 = x + f_size * 0.5;
-				const double x2 = x1 - f_size;
-				D2D1_RECT_F t_rect{
-					w_ge_h ? static_cast<FLOAT>(x2) : static_cast<FLOAT>(y2),
-					w_ge_h ? static_cast<FLOAT>(y2) : static_cast<FLOAT>(x2),
-					w_ge_h ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
-					w_ge_h ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
-				};
-
-				swprintf_s(buf,
-					L"%f %f Td <%04x> Tj\n",
-					t_rect.left, -t_rect.top + page_size.height,
-					gid[i % 10]);
+				if (w_ge_h) {
+					const float d = f_size * f_met.descent / f_met.designUnitsPerEm;
+					const float w = f_size * g_adv[i % 10] / f_met.designUnitsPerEm;
+					swprintf_s(buf,
+						L"%f %f Td <%04x> Tj\n",
+						x - w / 2 - before,
+						i == 0 ? -(m_vec[0].y >= 0.0f ? y1 - d : y1 + d / 2 + f_size) + page_size.height : 0.0f,
+						gid[i % 10]);
+					before = x - w / 2;
+				}
+				else {
+					const float d = f_size - f_size * f_met.descent / f_met.designUnitsPerEm;
+					const float w = f_size - f_size * g_adv[i % 10] / f_met.designUnitsPerEm;
+					swprintf_s(buf,
+						L"%f %f Td <%04x> Tj\n",
+						i == 0 ? (m_vec[0].x >= 0.0f ? y1 - f_size + w / 2 : y1 + w / 2) : 0,
+						i == 0 ? -(x + d / 2) + page_size.height : -intvl_x,
+						gid[i % 10]);
+				}
 				len += dt_writer.WriteString(buf);
 			}
 			len += dt_writer.WriteString(L"ET\n");

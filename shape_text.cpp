@@ -15,18 +15,20 @@ namespace winrt::GraphPaper::implementation
 	D2D1_COLOR_F ShapeText::s_text_selected_foreground{ COLOR_TEXT_RANGE };	// 文字範囲の文字色
 
 	// ヒットテストの計量を作成する.
-	static void tx_create_test_metrics(IDWriteTextLayout* text_lay, const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt);
+	static void text_create_test_metrics(IDWriteTextLayout* text_lay, const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt);
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を作成する.
-	static void tx_create_text_metrics(IDWriteTextLayout* text_lay, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, DWRITE_LINE_METRICS*& line_met, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met, const DWRITE_TEXT_RANGE& sele_rng);
-	// 書体の計量を得る
-	static void tx_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met);
+	static void text_create_text_metrics(IDWriteTextLayout* text_lay, const uint32_t text_len, UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, DWRITE_LINE_METRICS*& line_met, UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met, const DWRITE_TEXT_RANGE& sele_rng);
+	// 書体の計量を得る.
+	static void text_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met);
 
+	//------------------------------
 	// ヒットテストの計量を作成する.
 	// text_lay	文字列レイアウト
 	// text_rng	文字範囲
 	// test_met	ヒットテストの計量
 	// test_cnt	計量の要素数
-	static void tx_create_test_metrics(IDWriteTextLayout* text_lay, const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt)
+	//------------------------------
+	static void text_create_test_metrics(IDWriteTextLayout* text_lay, const DWRITE_TEXT_RANGE text_rng, DWRITE_HIT_TEST_METRICS*& test_met, UINT32& test_cnt)
 	{
 		const uint32_t pos = text_rng.startPosition;
 		const uint32_t len = text_rng.length;
@@ -40,8 +42,12 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(text_lay->HitTestTextRange(pos, len, 0, 0, test_met, test_cnt, &test_cnt));
 	}
 
+	//------------------------------
 	// 書体の計量を得る
-	static void tx_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met)
+	// text_lay	テキストレイアウト
+	// font_met 書体の計量
+	//------------------------------
+	static void text_get_font_metrics(IDWriteTextLayout* text_lay, DWRITE_FONT_METRICS* font_met)
 	{
 		// 文字列レイアウト ---> 書体リスト ---> 書体ファミリー ---> 書体を得る.
 		winrt::com_ptr<IDWriteFontCollection> fonts;
@@ -57,12 +63,14 @@ namespace winrt::GraphPaper::implementation
 		font = nullptr;
 	}
 
+	//------------------------------
 	// ヒットテストの計量, 行の計量, 選択された文字範囲の計量を破棄する.
 	// test_cnt	ヒットテストと行の計量の各要素数
 	// test_met	ヒットテストの計量
 	// line_met 行の計量
 	// sele_cnt	選択された文字範囲の計量の要素数
 	// sele_met 選択された文字範囲の計量
+	//------------------------------
 	void ShapeText::relese_metrics(void) noexcept
 	{
 		m_dwrite_test_cnt = 0;
@@ -81,6 +89,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	//------------------------------
 	// ヒットテストの計量, 行の計量, 文字列選択の計量を得る.
 	// text_lay	文字列レイアウト
 	// text_len	文字列の長さ
@@ -90,7 +99,8 @@ namespace winrt::GraphPaper::implementation
 	// sele_cnt	選択された文字範囲の計量の要素数
 	// sele_met 選択された文字範囲の計量
 	// sele_rng	選択された文字範囲
-	static void tx_create_text_metrics(
+	//------------------------------
+	static void text_create_text_metrics(
 		IDWriteTextLayout* text_lay, const uint32_t text_len,
 		UINT32& test_cnt, DWRITE_HIT_TEST_METRICS*& test_met, DWRITE_LINE_METRICS*& line_met,
 		UINT32& sele_cnt, DWRITE_HIT_TEST_METRICS*& sele_met,
@@ -98,7 +108,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (text_lay != nullptr) {
 			// ヒットテストの計量を作成する.
-			tx_create_test_metrics(text_lay, { 0, text_len }, test_met, test_cnt);
+			text_create_test_metrics(text_lay, { 0, text_len }, test_met, test_cnt);
 
 			// 行の計量を作成する.
 			UINT32 line_cnt;
@@ -108,14 +118,16 @@ namespace winrt::GraphPaper::implementation
 
 			// 選択された文字範囲の計量を作成する.
 			if (sele_rng.length > 0) {
-				tx_create_test_metrics(text_lay, sele_rng, sele_met, sele_cnt);
+				text_create_test_metrics(text_lay, sele_rng, sele_met, sele_cnt);
 			}
 		}
 	}
 
+	//------------------------------
 	// 枠を文字列に合わせる.
 	// g_len	方眼の大きさ (1 以上ならば方眼の大きさに合わせる)
 	// 戻り値	大きさが調整されたならば真.
+	//------------------------------
 	bool ShapeText::frame_fit(const float g_len) noexcept
 	{
 		// 文字列の大きさを計算し, 枠に格納する.
@@ -142,7 +154,9 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	//------------------------------
 	// 文字列レイアウトを作成する.
+	//------------------------------
 	void ShapeText::create_text_layout(void)
 	{
 		IDWriteFactory* const dwrite_factory = Shape::s_dwrite_factory;
@@ -188,7 +202,7 @@ namespace winrt::GraphPaper::implementation
 				// 行間がゼロより大きいなら, 行間を設定する.
 				if (m_text_line_sp >= FLT_MIN) {
 					if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
-						tx_get_font_metrics(t3.get(), &m_dwrite_font_metrics);
+						text_get_font_metrics(t3.get(), &m_dwrite_font_metrics);
 					}
 					const float descent = (m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
@@ -207,7 +221,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
 			relese_metrics();
-			tx_create_text_metrics(m_dwrite_text_layout.get(), wchar_len(m_text), m_dwrite_test_cnt, m_dwrite_test_metrics, m_dwrite_line_metrics, m_dwrite_selected_cnt, m_dwrite_selected_metrics, m_text_selected_range);
+			text_create_text_metrics(m_dwrite_text_layout.get(), wchar_len(m_text), m_dwrite_test_cnt, m_dwrite_test_metrics, m_dwrite_line_metrics, m_dwrite_selected_cnt, m_dwrite_selected_metrics, m_text_selected_range);
 		}
 
 		// 変更.
@@ -312,7 +326,7 @@ namespace winrt::GraphPaper::implementation
 				// 行間がゼロより大きいなら, 行間を設定する.
 				if (m_text_line_sp >= FLT_MIN) {
 					if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
-						tx_get_font_metrics(t3.get(), &m_dwrite_font_metrics);
+						text_get_font_metrics(t3.get(), &m_dwrite_font_metrics);
 					}
 					const float descent = (m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
@@ -361,7 +375,7 @@ namespace winrt::GraphPaper::implementation
 			if (updated) {
 				// 位置の計量, 行の計量, 文字列選択の計量を破棄する.
 				relese_metrics();
-				tx_create_text_metrics(m_dwrite_text_layout.get(), wchar_len(m_text), m_dwrite_test_cnt, m_dwrite_test_metrics, m_dwrite_line_metrics, m_dwrite_selected_cnt, m_dwrite_selected_metrics, m_text_selected_range);
+				text_create_text_metrics(m_dwrite_text_layout.get(), wchar_len(m_text), m_dwrite_test_cnt, m_dwrite_test_metrics, m_dwrite_line_metrics, m_dwrite_selected_cnt, m_dwrite_selected_metrics, m_text_selected_range);
 			}
 		}
 	}
@@ -402,7 +416,7 @@ namespace winrt::GraphPaper::implementation
 			// 選択された文字範囲があるなら, 背景を塗りつぶす.
 			if (m_text_selected_range.length > 0) {
 				if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
-					tx_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
+					text_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
 				}
 				const float descent = (m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 				const uint32_t rc = m_dwrite_selected_cnt;
@@ -462,7 +476,7 @@ namespace winrt::GraphPaper::implementation
 					mod += d_arr[i];
 				}
 				if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
-					tx_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
+					text_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
 				}
 				const float descent = (m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 				for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
@@ -1059,6 +1073,7 @@ namespace winrt::GraphPaper::implementation
 		return utf32;
 	}
 
+	// フォントフェイスを得る.
 	template <typename T>
 	bool get_font_face(T* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face)
 	{

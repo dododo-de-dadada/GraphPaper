@@ -9,14 +9,11 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const uint32_t anc = ShapeRect::hit_test_anc(t_pos);
+		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], t_pos);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
@@ -122,51 +119,32 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_PAGE;
 	}
 
-	/*
-	bool ShapeRuler::get_font_face(IDWriteFontFace3*& face) const
+	void ShapeRuler::create_text_format(void)
 	{
-		const auto family = m_font_family;
-		const auto weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;
-		const auto stretch = DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL;
-		const auto style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;
-		bool ret = false;
-
-		// 文字列を書き込む.
-		IDWriteFontCollection* coll = nullptr;
-		if (m_dwrite_text_format->GetFontCollection(&coll) == S_OK) {
-			// 図形と一致する書体ファミリを得る.
-			IDWriteFontFamily* fam = nullptr;
-			UINT32 index;
-			BOOL exists;
-			if (coll->FindFamilyName(family, &index, &exists) == S_OK &&
-				exists &&
-				coll->GetFontFamily(index, &fam) == S_OK) {
-				// 書体ファミリから, 太さと幅, 字体が一致する書体を得る.
-				IDWriteFont* font = nullptr;
-				if (fam->GetFirstMatchingFont(weight, stretch, style, &font) == S_OK) {
-					IDWriteFontFaceReference* ref = nullptr;
-					if (static_cast<IDWriteFont3*>(font)->GetFontFaceReference(&ref) == S_OK) {
-						face = nullptr;
-						if (ref->CreateFontFace(&face) == S_OK) {
-							ret = true;
-						}
-						ref->Release();
-					}
-					font->Release();
-				}
-				fam->Release();
-			}
-			coll->Release();
-		}
-		return true;
+		IDWriteFactory* const dwrite_factory = Shape::s_dwrite_factory;
+		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
+		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
+		const float font_size = min(m_font_size, m_grid_base + 1.0f);
+		winrt::check_hresult(
+			dwrite_factory->CreateTextFormat(
+				m_font_family,
+				static_cast<IDWriteFontCollection*>(nullptr),
+				DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL,
+				DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL,
+				DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
+				font_size,
+				locale_name,
+				m_dwrite_text_format.put()
+			)
+		);
+		m_dwrite_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
 	}
-	*/
 
 	// 図形を表示する.
 	void ShapeRuler::draw(void)
 	{
 		ID2D1Factory* const factory = Shape::s_d2d_factory;
-		IDWriteFactory* const dwrite_factory = Shape::s_dwrite_factory;
+		//IDWriteFactory* const dwrite_factory = Shape::s_dwrite_factory;
 		ID2D1RenderTarget* const target = Shape::s_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
@@ -174,22 +152,7 @@ namespace winrt::GraphPaper::implementation
 			create_stroke_style(factory);
 		}
 		if (m_dwrite_text_format == nullptr) {
-			wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
-			GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-			const float font_size = min(m_font_size, m_grid_base + 1.0f);
-			winrt::check_hresult(
-				dwrite_factory->CreateTextFormat(
-					m_font_family,
-					static_cast<IDWriteFontCollection*>(nullptr),
-					DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL,
-					DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL,
-					DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL,
-					font_size,
-					locale_name,
-					m_dwrite_text_format.put()
-				)
-			);
-			m_dwrite_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+			create_text_format();
 		}
 		constexpr wchar_t* D[10] = { L"0", L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8", L"9" };
 
@@ -356,16 +319,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		ShapeRect::write(dt_writer);
 		dt_writer.WriteSingle(m_grid_base);
-#ifdef _DEBUG
-		if (!equal(m_font_family, L"Yu Gothic UI")) {
-			__debugbreak();
-		}
-#endif // _DEBUG
 		const uint32_t font_family_len = wchar_len(m_font_family);
 		dt_writer.WriteUInt32(font_family_len);
 		const auto font_family_data = reinterpret_cast<const uint8_t*>(m_font_family);
 		dt_writer.WriteBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
-
 		dt_writer.WriteSingle(m_dwrite_text_format->GetFontSize());
 	}
 

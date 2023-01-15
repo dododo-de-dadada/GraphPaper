@@ -551,6 +551,16 @@ namespace winrt::GraphPaper::implementation
 				if (s->is_deleted()) {
 					continue;
 				}
+				if (typeid(*s) == typeid(ShapeRuler)) {
+					if (static_cast<const ShapeRuler*>(s)->m_dwrite_text_format == nullptr) {
+						static_cast<ShapeRuler*>(s)->create_text_format();
+					}
+				}
+				else if (typeid(*s) == typeid(ShapeText)) {
+					if (static_cast<const ShapeText*>(s)->m_dwrite_text_layout == nullptr) {
+						static_cast<ShapeText*>(s)->create_text_layout();
+					}
+				}
 				len += s->export_pdf(page_size, dt_writer);
 			}
 			len += dt_writer.WriteString(
@@ -619,7 +629,7 @@ namespace winrt::GraphPaper::implementation
 					r->get_font_face(face);
 					DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 					DWRITE_FONT_STRETCH stretch = DWRITE_FONT_STRETCH_NORMAL;	// 書体の幅
-					DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;	// 字体
+					//DWRITE_FONT_STYLE style = DWRITE_FONT_STYLE_NORMAL;	// 字体
 					DWRITE_FONT_METRICS1 f_met;
 					DWRITE_FONT_FACE_TYPE f_type;
 					winrt::hstring p_name{};
