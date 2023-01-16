@@ -424,33 +424,35 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteString(L">\n");
 			const uint32_t k = static_cast<uint32_t>(floor(vec_x / intvl_x));	// 目盛りの数
 			for (uint32_t i = 0; i <= k; i++) {
-
-				// 方眼の大きさごとに目盛りを表示する.
 				const double x = x0 + i * intvl_x;
-				const D2D1_POINT_2F p{
+				const D2D1_POINT_2F p{	// 目盛りの始点
 					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
 					w_ge_h ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
 				};
 				const auto y = ((i % 5) == 0 ? y1 : y1_5);
-				const D2D1_POINT_2F q{
+				const D2D1_POINT_2F q{	// 目盛りの終点
 					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
 					w_ge_h ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				const float d = f_size * f_met.descent / f_met.designUnitsPerEm;
-				const D2D1_POINT_2F r{
-					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y1) + (vec_y >= 0.0f ? -d : d),
-					w_ge_h ? static_cast<FLOAT>(y1) + (vec_y >= 0.0f ? -d : f_size) : static_cast<FLOAT>(x)
+				const float w = f_size * g_adv[i % 10] / f_met.designUnitsPerEm;
+				const D2D1_POINT_2F r{	// 数字ラベルの終点
+					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y1),
+					w_ge_h ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x)
+				};
+				const D2D1_POINT_2F s{	// 数字ラベルの差分
+					w_ge_h ? (m_vec[0].x >= 0.0f ? -w / 2 : w / 2) : (m_vec[0].x >= 0.0f ? -f_size + (f_size - w) / 2 : (f_size - w) / 2),
+					w_ge_h ? (m_vec[0].y >= 0.0f ? -d : f_size) : f_size / 2
 				};
 				swprintf_s(buf,
 					L"<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\"/>\n",
 					p.x, p.y, q.x, q.y
 				);
 				dt_writer.WriteString(buf);
-				const float w = f_size * g_adv[i % 10] / f_met.designUnitsPerEm;
 				swprintf_s(buf,
 					L"<text x=\"%f\" y=\"%f\" dx=\"%f\" dy=\"%f\" stroke=\"none\" >%c</text>\n",
-					r.x, r.y,
-					0.0f, 0.0f, D[i % 10]);
+					r.x, r.y, s.x, s.y,
+					D[i % 10]);
 				dt_writer.WriteString(buf);
 			}
 			dt_writer.WriteString(L"</g>\n");

@@ -220,6 +220,7 @@ namespace winrt::GraphPaper::implementation
 					w_ge_h ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
 					w_ge_h ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
 				};
+				target->DrawRectangle(t_rect, brush);
 				target->DrawText(D[i % 10], 1u, m_dwrite_text_format.get(), t_rect, brush);
 			}
 		}
@@ -288,7 +289,8 @@ namespace winrt::GraphPaper::implementation
 		ShapeRect::ShapeRect(b_pos, b_vec, page),
 		m_grid_base(page->m_grid_base),
 		m_font_family(page->m_font_family),
-		m_font_size(min(page->m_font_size, page->m_grid_base + 1.0f))
+		//m_font_size(min(page->m_font_size, page->m_grid_base + 1.0f))
+		m_font_size(page->m_font_size)
 	{
 		ShapeText::is_available_font(m_font_family);
 	}
