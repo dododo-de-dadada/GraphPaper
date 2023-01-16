@@ -258,7 +258,7 @@ namespace winrt::GraphPaper::implementation
 			return anc_r;
 		}
 		// •ûŒ`‚ÌŠe’¸“_‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
-		const uint32_t anc_v = hit_test_anc(t_pos);
+		const uint32_t anc_v = rect_hit_test_anc(m_start, m_vec[0], t_pos);
 		if (anc_v != ANC_TYPE::ANC_PAGE) {
 			return anc_v;
 		}

@@ -101,10 +101,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形の部位が位置を含むか判定する.
-	uint32_t ShapeRect::hit_test_anc(const D2D1_POINT_2F t_pos) const noexcept
-	{
-		return rect_hit_test_anc(m_start, m_vec[0], t_pos);
-	}
+	//uint32_t ShapeRect::hit_test_anc(const D2D1_POINT_2F t_pos) const noexcept
+	//{
+	//	const auto anc = rect_hit_test_anc(m_start, m_vec[0], t_pos);
+	//}
 
 	// 位置を含むか判定する.
 	// t_pos	判定される位置
@@ -255,6 +255,36 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_PAGE;
 	}
 
+	// 図形を囲む領域を得る.
+	// a_lt	元の領域の左上位置.
+	// a_rb	元の領域の右下位置.
+	// b_lt	囲む領域の左上位置.
+	// b_rb	囲む領域の右下位置.
+	void ShapeRect::get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
+	{
+		b_lt.x = m_start.x < a_lt.x ? m_start.x : a_lt.x;
+		b_lt.y = m_start.y < a_lt.y ? m_start.y : a_lt.y;
+		b_rb.x = m_start.x > a_rb.x ? m_start.x : a_rb.x;
+		b_rb.y = m_start.y > a_rb.y ? m_start.y : a_rb.y;
+		const size_t d_cnt = m_vec.size();	// 差分の数
+		D2D1_POINT_2F pos = m_start;
+		for (size_t i = 0; i < d_cnt; i++) {
+			pt_add(pos, m_vec[i], pos);
+			if (pos.x < b_lt.x) {
+				b_lt.x = pos.x;
+			}
+			if (pos.x > b_rb.x) {
+				b_rb.x = pos.x;
+			}
+			if (pos.y < b_lt.y) {
+				b_lt.y = pos.y;
+			}
+			if (pos.y > b_rb.y) {
+				b_rb.y = pos.y;
+			}
+		}
+	}
+
 	// 塗りつぶしの色を得る.
 	// val	得られた値.
 	bool ShapeRect::get_fill_color(D2D1_COLOR_F& val) const noexcept
@@ -315,6 +345,28 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	// 図形を囲む領域の左上位置を得る.
+	// val	領域の左上位置
+	void ShapeRect::get_pos_lt(D2D1_POINT_2F& val) const noexcept
+	{
+		const size_t d_cnt = m_vec.size();	// 差分の数
+		D2D1_POINT_2F v_pos = m_start;	// 頂点の位置
+		val = m_start;
+		for (size_t i = 0; i < d_cnt; i++) {
+			pt_add(v_pos, m_vec[i], v_pos);
+			val.x = val.x < v_pos.x ? val.x : v_pos.x;
+			val.y = val.y < v_pos.y ? val.y : v_pos.y;
+		}
+	}
+
+	// 開始位置を得る
+	// 戻り値	つねに true
+	bool ShapeRect::get_pos_start(D2D1_POINT_2F& val) const noexcept
+	{
+		val = m_start;
+		return true;
+	}
+
 	// 範囲に含まれるか判定する.
 	// area_lt	範囲の左上位置
 	// area_rb	範囲の右下位置
@@ -325,6 +377,18 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F pos;
 		pt_add(m_start, m_vec[0], pos);
 		return pt_in_rect(m_start, area_lt, area_rb) && pt_in_rect(pos, area_lt, area_rb);
+	}
+
+	// 差分だけ移動する.
+	// val	差分ベクトル
+	bool ShapeRect::move(const D2D1_POINT_2F val) noexcept
+	{
+		D2D1_POINT_2F new_pos;
+		pt_add(m_start, val, new_pos);
+		if (set_pos_start(new_pos)) {
+			return true;
+		}
+		return false;
 	}
 
 	// 値を, 部位の位置に格納する. 他の部位の位置も動く.
@@ -459,6 +523,18 @@ namespace winrt::GraphPaper::implementation
 		return done;
 	}
 
+	// 始点に値を格納する. 他の部位の位置も動く.
+	bool ShapeRect::set_pos_start(const D2D1_POINT_2F val) noexcept
+	{
+		D2D1_POINT_2F new_pos;
+		pt_round(val, PT_ROUND, new_pos);
+		if (!equal(m_start, new_pos)) {
+			m_start = new_pos;
+			return true;
+		}
+		return false;
+	}
+
 	// 図形を作成する.
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
@@ -476,6 +552,15 @@ namespace winrt::GraphPaper::implementation
 	ShapeRect::ShapeRect(const ShapePage& page, DataReader const& dt_reader) :
 		ShapeStroke::ShapeStroke(page, dt_reader)
 	{
+		m_start.x = dt_reader.ReadSingle();
+		m_start.y = dt_reader.ReadSingle();
+		const size_t vec_cnt = dt_reader.ReadUInt32();	// 要素数
+		m_vec.resize(vec_cnt);
+		for (size_t i = 0; i < vec_cnt; i++) {
+			m_vec[i].x = dt_reader.ReadSingle();
+			m_vec[i].y = dt_reader.ReadSingle();
+		}
+
 		const D2D1_COLOR_F fill_color{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
@@ -492,6 +577,18 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRect::write(DataWriter const& dt_writer) const
 	{
 		ShapeStroke::write(dt_writer);
+
+		// 開始位置
+		dt_writer.WriteSingle(m_start.x);
+		dt_writer.WriteSingle(m_start.y);
+
+		// 次の位置への差分
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_vec.size()));
+		for (const D2D1_POINT_2F vec : m_vec) {
+			dt_writer.WriteSingle(vec.x);
+			dt_writer.WriteSingle(vec.y);
+		}
+
 		dt_writer.WriteSingle(m_fill_color.r);
 		dt_writer.WriteSingle(m_fill_color.g);
 		dt_writer.WriteSingle(m_fill_color.b);

@@ -601,7 +601,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const uint32_t anc = ShapeRect::hit_test_anc(t_pos);
+		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], t_pos);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
@@ -609,7 +609,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 文字列の範囲の左上が原点になるよう, 判定する位置を移動する.
 		D2D1_POINT_2F t_lt;
-		ShapeStroke::get_pos_lt(t_lt);
+		ShapeRect::get_pos_lt(t_lt);
 		pt_sub(t_pos, t_lt, t_lt);
 		pt_sub(t_lt, m_text_padding, t_lt);
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
@@ -636,7 +636,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_dwrite_test_cnt > 0 && m_dwrite_test_cnt < UINT32_MAX) {
 			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : (m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
-			ShapeStroke::get_pos_lt(p_lt);
+			ShapeRect::get_pos_lt(p_lt);
 			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 				DWRITE_HIT_TEST_METRICS const& t_met = m_dwrite_test_metrics[i];
 				DWRITE_LINE_METRICS const& l_met = m_dwrite_line_metrics[i];

@@ -15,7 +15,7 @@ namespace winrt::GraphPaper::implementation
 	// d_vec	差分
 	bool ShapePath::move(const D2D1_POINT_2F d_vec) noexcept
 	{
-		if (ShapeStroke::move(d_vec)) {
+		if (ShapeLine::move(d_vec)) {
 			m_d2d_path_geom = nullptr;
 			return true;
 		}
@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
 	bool ShapePath::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept
 	{
-		if (ShapeStroke::set_pos_anc(val, anc, limit, keep_aspect)) {
+		if (ShapeLine::set_pos_anc(val, anc, limit, keep_aspect)) {
 			m_d2d_path_geom = nullptr;
 			return true;
 		}
@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 	// val	格納する値
 	bool ShapePath::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
-		if (ShapeStroke::set_pos_start(val)) {
+		if (ShapeLine::set_pos_start(val)) {
 			m_d2d_path_geom = nullptr;
 			return true;
 		}
