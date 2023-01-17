@@ -560,9 +560,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		virtual void write(DataWriter const& /*dt_writer*/) const {}
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F /*page_size*/, DataWriter const& /*dt_writer*/) const { return 0; }
+		virtual size_t export_pdf(const D2D1_SIZE_F /*page_size*/, DataWriter const& /*dt_writer*/) { return 0; }
 		// 図形をデータライターに SVG として書き込む.
-		virtual void export_svg(DataWriter const& /*dt_writer*/) const {}
+		virtual void export_svg(DataWriter const& /*dt_writer*/) {}
 	};
 
 	//------------------------------
@@ -676,9 +676,9 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const final override;
+		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG ファイルとして書き込む.
-		winrt::Windows::Foundation::IAsyncAction export_as_svg_async(const DataWriter& dt_writer) const;
+		winrt::Windows::Foundation::IAsyncAction export_as_svg_async(const DataWriter& dt_writer);
 	};
 
 	//------------------------------
@@ -943,7 +943,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(const DataWriter& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		winrt::Windows::Foundation::IAsyncAction export_as_svg_async(const DataWriter& dt_writer) const;
+		winrt::Windows::Foundation::IAsyncAction export_as_svg_async(const DataWriter& dt_writer);
 	};
 
 	//------------------------------
@@ -1100,9 +1100,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const;
+		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer);
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer) const;
+		void export_svg(DataWriter const& dt_writer);
 		// 値を端の形式に格納する.
 		bool set_stroke_cap(const CAP_STYLE& val) noexcept final override;
 		// 値を線の結合のマイター制限に格納する.
@@ -1158,9 +1158,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		virtual void export_svg(DataWriter const& dt_writer) const;
+		virtual void export_svg(DataWriter const& dt_writer);
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const;
+		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer);
 	};
 
 	//------------------------------
@@ -1216,9 +1216,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(const DataWriter& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(const DataWriter& /*dt_writer*/) const;
+		void export_svg(const DataWriter& dt_writer);
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) const final override;
+		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
 	};
 
 	//------------------------------
@@ -1243,9 +1243,9 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const final override;
+		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer) const;
+		void export_svg(DataWriter const& dt_writer);
 	};
 
 	//------------------------------
@@ -1276,9 +1276,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const final override;
+		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer) const;
+		void export_svg(DataWriter const& dt_writer);
 	};
 
 	//------------------------------
@@ -1362,9 +1362,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const final override;
+		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& /*dt_writer*/) const;
+		void export_svg(DataWriter const& dt_writer);
 	};
 
 	//------------------------------
@@ -1391,9 +1391,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータリーダーから読み込む.
 		ShapeBezi(const ShapePage& page, DataReader const& dt_reader);
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const final override;
+		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer) const;
+		void export_svg(DataWriter const& dt_writer);
 	};
 
 	//------------------------------
@@ -1538,9 +1538,9 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 		// データライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) const final override;
+		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
 		// データライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer) const;
+		void export_svg(DataWriter const& dt_writer);
 	};
 
 	// 図形の部位（円形）を表示する.

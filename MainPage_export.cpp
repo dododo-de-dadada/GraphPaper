@@ -384,7 +384,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに PDF として書き込む.
-	IAsyncOperation<winrt::hresult> MainPage::export_as_pdf_async(const StorageFile& pdf_file) const noexcept
+	IAsyncOperation<winrt::hresult> MainPage::export_as_pdf_async(const StorageFile& pdf_file) noexcept
 	{
 		HRESULT hres = E_FAIL;
 		try {
@@ -550,16 +550,6 @@ namespace winrt::GraphPaper::implementation
 			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
-				}
-				if (typeid(*s) == typeid(ShapeRuler)) {
-					if (static_cast<const ShapeRuler*>(s)->m_dwrite_text_format == nullptr) {
-						static_cast<ShapeRuler*>(s)->create_text_format();
-					}
-				}
-				else if (typeid(*s) == typeid(ShapeText)) {
-					if (static_cast<const ShapeText*>(s)->m_dwrite_text_layout == nullptr) {
-						static_cast<ShapeText*>(s)->create_text_layout();
-					}
 				}
 				len += s->export_pdf(page_size, dt_writer);
 			}
@@ -932,7 +922,7 @@ namespace winrt::GraphPaper::implementation
 	// svg_file	書き込み先のファイル
 	// 戻り値	書き込めた場合 S_OK
 	//-------------------------------
-	IAsyncOperation<winrt::hresult> MainPage::export_as_svg_async(const StorageFile& svg_file) const noexcept
+	IAsyncOperation<winrt::hresult> MainPage::export_as_svg_async(const StorageFile& svg_file) noexcept
 	{
 		HRESULT hres = E_FAIL;
 		try {
@@ -1008,11 +998,11 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				if (typeid(*s) == typeid(ShapeGroup)) {
-					co_await static_cast<const ShapeGroup*>(s)->export_as_svg_async(dt_writer);
+					co_await static_cast<ShapeGroup*>(s)->export_as_svg_async(dt_writer);
 				}
 				// 図形が画像か判定する.
 				else if (typeid(*s) == typeid(ShapeImage)) {
-					co_await static_cast<const ShapeImage*>(s)->export_as_svg_async(dt_writer);
+					co_await static_cast<ShapeImage*>(s)->export_as_svg_async(dt_writer);
 				}
 				else {
 					s->export_svg(dt_writer);

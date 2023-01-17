@@ -124,7 +124,8 @@ namespace winrt::GraphPaper::implementation
 		IDWriteFactory* const dwrite_factory = Shape::s_dwrite_factory;
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
-		const float font_size = min(m_font_size, m_grid_base + 1.0f);
+		//const float font_size = min(m_font_size, m_grid_base + 1.0f);
+		const float font_size = m_font_size;
 		winrt::check_hresult(
 			dwrite_factory->CreateTextFormat(
 				m_font_family,
@@ -138,6 +139,7 @@ namespace winrt::GraphPaper::implementation
 			)
 		);
 		m_dwrite_text_format->SetTextAlignment(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		m_dwrite_text_format->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
 	// 図形を表示する.
@@ -182,6 +184,7 @@ namespace winrt::GraphPaper::implementation
 			const double y1 = y0 - (vec_y >= 0.0 ? intvl_y : -intvl_y);
 			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? intvl_y : -intvl_y);
 			const double y2 = y1 - (vec_y >= 0.0 ? f_size : -f_size);
+			/*
 			DWRITE_PARAGRAPH_ALIGNMENT p_align;
 			if (w_ge_h) {
 				// 横のほうが大きい場合,
@@ -197,6 +200,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 段落のそろえをテキストフォーマットに格納する.
 			m_dwrite_text_format->SetParagraphAlignment(p_align);
+			*/
 			brush->SetColor(m_stroke_color);
 			for (uint32_t i = 0; i <= k; i++) {
 				// 方眼の大きさごとに目盛りを表示する.
@@ -211,7 +215,7 @@ namespace winrt::GraphPaper::implementation
 					w_ge_h ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				target->DrawLine(p0, p1, brush);
-				// 目盛りの値を表示する.
+				// 目盛りラベルを表示する.
 				const double x1 = x + f_size * 0.5;
 				const double x2 = x1 - f_size;
 				D2D1_RECT_F t_rect{

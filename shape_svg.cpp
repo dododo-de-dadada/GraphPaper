@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 	// データライターに SVG として書き込む.
 	// dt_reader	データリーダー
 	//------------------------------
-	void ShapeBezi::export_svg(DataWriter const& dt_writer) const
+	void ShapeBezi::export_svg(DataWriter const& dt_writer)
 	{
 		D2D1_BEZIER_SEGMENT b_seg;
 		pt_add(m_start, m_vec[0], b_seg.point1);
@@ -72,7 +72,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeElli::export_svg(DataWriter const& dt_writer) const
+	void ShapeElli::export_svg(DataWriter const& dt_writer)
 	{
 		D2D1_POINT_2F r;
 		pt_mul(m_vec[0], 0.5, r);
@@ -95,18 +95,18 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// データライターに SVG として書き込む.
 	//------------------------------
-	winrt::Windows::Foundation::IAsyncAction ShapeGroup::export_as_svg_async(const DataWriter& dt_writer) const
+	winrt::Windows::Foundation::IAsyncAction ShapeGroup::export_as_svg_async(const DataWriter& dt_writer)
 	{
 		dt_writer.WriteString(L"<g>\n");
-		for (const Shape* s : m_list_grouped) {
+		for (Shape* s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
 			if (typeid(*s) == typeid(ShapeImage)) {
-				co_await static_cast<const ShapeImage*>(s)->export_as_svg_async(dt_writer);
+				co_await static_cast<ShapeImage*>(s)->export_as_svg_async(dt_writer);
 			}
 			else if (typeid(*s) == typeid(ShapeGroup)) {
-				co_await static_cast<const ShapeGroup*>(s)->export_as_svg_async(dt_writer);
+				co_await static_cast<ShapeGroup*>(s)->export_as_svg_async(dt_writer);
 			}
 			else {
 				s->export_svg(dt_writer);
@@ -117,7 +117,7 @@ namespace winrt::GraphPaper::implementation
 
 	// データライターに SVG として書き込む.
 	// dt_write		データライター
-	winrt::Windows::Foundation::IAsyncAction ShapeImage::export_as_svg_async(const DataWriter& dt_writer) const
+	winrt::Windows::Foundation::IAsyncAction ShapeImage::export_as_svg_async(const DataWriter& dt_writer)
 	{
 		// メモリのランダムアクセスストリーム
 		InMemoryRandomAccessStream image_stream{};
@@ -144,8 +144,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeLine::export_svg(DataWriter const& dt_writer) const
+	void ShapeLine::export_svg(DataWriter const& dt_writer)
 	{
+		// 線・枠も無いなら,
+		if (equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) {
+			return;
+		}
+
 		D2D1_POINT_2F e_pos;
 		pt_add(m_start, m_vec[0], e_pos);
 		wchar_t buf[1024];
@@ -196,8 +201,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapePoly::export_svg(DataWriter const& dt_writer) const
+	void ShapePoly::export_svg(DataWriter const& dt_writer)
 	{
+		// 線・枠も塗りつぶしも無いなら,
+		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && !is_opaque(m_fill_color)) {
+			return;
+		}
+
 		const auto d_cnt = m_vec.size();	// 始点を除くの頂点数
 		//const auto v_cnt = d_cnt + 1;	// 
 		D2D1_POINT_2F v_pos[N_GON_MAX];
@@ -234,8 +244,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeRect::export_svg(DataWriter const& dt_writer) const
+	void ShapeRect::export_svg(DataWriter const& dt_writer)
 	{
+		// 線・枠も塗りつぶしも無いなら,
+		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && !is_opaque(m_fill_color)) {
+			return;
+		}
 		wchar_t buf[1024];
 
 		swprintf_s(buf,
@@ -251,8 +265,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeRRect::export_svg(DataWriter const& dt_writer) const
+	void ShapeRRect::export_svg(DataWriter const& dt_writer)
 	{
+		// 線・枠も塗りつぶしも無いなら,
+		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && !is_opaque(m_fill_color)) {
+			return;
+		}
+
 		wchar_t buf[1024];
 
 		swprintf_s(buf,
@@ -276,75 +295,84 @@ namespace winrt::GraphPaper::implementation
 	{
 		//const float width = s->m_stroke_width;
 		//const D2D1_COLOR_F& color = s->m_stroke_color;
-		if (width >= FLT_MIN && color.a >= FLT_MIN) {
-			//const D2D1_DASH_STYLE dash = s->m_dash_style;	// 破線の形式
-			//const DASH_PATT& patt = s->m_dash_patt;	// 破線の配置
-			//const CAP_STYLE cap = s->m_stroke_cap;	// 端の形式
-			//const D2D1_LINE_JOIN join = s->m_join_style;	// 線の結合
-			//const float limit = s->m_join_miter_limit;	// 線の結合のマイター制限
-			wchar_t buf_color[256]{};
-			wchar_t buf_patt[256]{};
-			wchar_t* buf_cap = L"";
-			wchar_t buf_join[256]{};
+		//if (equal(width, 0.0f) || !is_opaque(color)) {
+		//	return;
+		//}
+		//const D2D1_DASH_STYLE dash = s->m_dash_style;	// 破線の形式
+		//const DASH_PATT& patt = s->m_dash_patt;	// 破線の配置
+		//const CAP_STYLE cap = s->m_stroke_cap;	// 端の形式
+		//const D2D1_LINE_JOIN join = s->m_join_style;	// 線の結合
+		//const float limit = s->m_join_miter_limit;	// 線の結合のマイター制限
+		wchar_t buf_color[256]{};
+		wchar_t buf_patt[256]{};
+		wchar_t* buf_cap = L"";
+		wchar_t buf_join[256]{};
 
-			export_svg_color(buf_color, color, L"stroke");
-			if (dash == D2D1_DASH_STYLE_DASH) {
-				swprintf_s(buf_patt,
-					L"stroke-dasharray=\"%.0f %.0f\" ", patt.m_[0], patt.m_[1]);
-			}
-			else if (dash == D2D1_DASH_STYLE_DOT) {
-				swprintf_s(buf_patt,
-					L"stroke-dasharray=\"%.0f %.0f\" ", patt.m_[2], patt.m_[3]);
-			}
-			else if (dash == D2D1_DASH_STYLE_DASH_DOT) {
-				swprintf_s(buf_patt,
-					L"stroke-dasharray=\"%.0f %.0f %.0f %.0f\" ",
-					patt.m_[0], patt.m_[1], patt.m_[2], patt.m_[3]);
-			}
-			else if (dash == D2D1_DASH_STYLE_DASH_DOT_DOT) {
-				swprintf_s(buf_patt,
-					L"stroke-dasharray=\"%.0f %.0f %.0f %.0f %.0f %.0f\" ",
-					patt.m_[0], patt.m_[1], patt.m_[2], patt.m_[3], patt.m_[2], patt.m_[3]);
-			}
-			else {
-				wcscpy_s(buf_patt, L"stroke-dasharray=\"none\" ");
-			}
-			if (equal(cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
-				buf_cap = L"stroke-linecap=\"butt\" ";
-			}
-			else if (equal(cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
-				buf_cap = L"stroke-linecap=\"round\" ";
-			}
-			else if (equal(cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
-				buf_cap = L"stroke-linecap=\"square\" ";
-			}
-			else if (equal(cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
-				// SVG に三角はない.
-				buf_cap = L"stroke-linecap=\"butt\" ";
-			}
-
-			if (join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
-				wcscpy_s(buf_join, L"stroke-linejoin=\"bevel\" ");
-			}
-			else if (join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
-				join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-				swprintf_s(buf_join,
-					L"stroke-linejoin=\"miter\" stroke-miterlimit=\"%f\" ", limit);
-			}
-			else if (join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-				wcscpy_s(buf_join, L"stroke-linejoin=\"round\" ");
-			}
-			swprintf_s(buf,
-				L"stroke-width=\"%f\" %s%s%s%s",
-				width,
-				buf_color, buf_patt, buf_cap, buf_join
-			);
+		export_svg_color(buf_color, color, L"stroke");
+		if (dash == D2D1_DASH_STYLE_DASH) {
+			swprintf_s(buf_patt,
+				L"stroke-dasharray=\"%.0f %.0f\" ", patt.m_[0], patt.m_[1]);
+		}
+		else if (dash == D2D1_DASH_STYLE_DOT) {
+			swprintf_s(buf_patt,
+				L"stroke-dasharray=\"%.0f %.0f\" ", patt.m_[2], patt.m_[3]);
+		}
+		else if (dash == D2D1_DASH_STYLE_DASH_DOT) {
+			swprintf_s(buf_patt,
+				L"stroke-dasharray=\"%.0f %.0f %.0f %.0f\" ",
+				patt.m_[0], patt.m_[1], patt.m_[2], patt.m_[3]);
+		}
+		else if (dash == D2D1_DASH_STYLE_DASH_DOT_DOT) {
+			swprintf_s(buf_patt,
+				L"stroke-dasharray=\"%.0f %.0f %.0f %.0f %.0f %.0f\" ",
+				patt.m_[0], patt.m_[1], patt.m_[2], patt.m_[3], patt.m_[2], patt.m_[3]);
+		}
+		else {
+			wcscpy_s(buf_patt, L"stroke-dasharray=\"none\" ");
+		}
+		if (equal(cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT })) {
+			buf_cap = L"stroke-linecap=\"butt\" ";
+		}
+		else if (equal(cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+			buf_cap = L"stroke-linecap=\"round\" ";
+		}
+		else if (equal(cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+			buf_cap = L"stroke-linecap=\"square\" ";
+		}
+		else if (equal(cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+			// SVG に三角はない.
+			buf_cap = L"stroke-linecap=\"butt\" ";
 		}
 
+		if (join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
+			wcscpy_s(buf_join, L"stroke-linejoin=\"bevel\" ");
+		}
+		else if (join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
+			join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+			swprintf_s(buf_join,
+				L"stroke-linejoin=\"miter\" stroke-miterlimit=\"%f\" ", limit);
+		}
+		else if (join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+			wcscpy_s(buf_join, L"stroke-linejoin=\"round\" ");
+		}
+		swprintf_s(buf,
+			L"stroke-width=\"%f\" %s%s%s%s",
+			width,
+			buf_color, buf_patt, buf_cap, buf_join
+		);
 	}
 
-	void ShapeRuler::export_svg(const DataWriter& dt_writer) const
+	void ShapeRuler::export_svg(const DataWriter& dt_writer)
 	{
+		// 線・枠も塗りつぶしも無いなら,
+		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && !is_opaque(m_fill_color)) {
+			return;
+		}
+
+		if (m_dwrite_text_format == nullptr) {
+			create_text_format();
+		}
+
 		constexpr wchar_t D[10] = { L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9' };
 		wchar_t buf[1024];
 		size_t len = 0;
@@ -358,6 +386,9 @@ namespace winrt::GraphPaper::implementation
 		int32_t g_adv[10];
 		face->GetDesignGlyphAdvances(10, gid, g_adv);
 		face->Release();
+		const double f_size = m_font_size;	// 書体の大きさ
+		const double l_height = f_size * (f_met.ascent + f_met.descent + f_met.lineGap) / f_met.designUnitsPerEm;
+		const double b_line = f_size * (f_met.ascent) / f_met.designUnitsPerEm;
 
 		const D2D1_RECT_F rect{
 			m_start.x,
@@ -379,10 +410,8 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteString(L"/>\n");
 		}
 		if (is_opaque(m_stroke_color)) {
-
 			// 線枠の色が不透明な場合,
 			const double g_len = m_grid_base + 1.0;	// 方眼の大きさ
-			const double f_size = m_dwrite_text_format->GetFontSize();	// 書体の大きさ
 			const bool w_ge_h = fabs(m_vec[0].x) >= fabs(m_vec[0].y);	// 高さより幅の方が大きい
 			const double vec_x = (w_ge_h ? m_vec[0].x : m_vec[0].y);	// 大きい方の値を x
 			const double vec_y = (w_ge_h ? m_vec[0].y : m_vec[0].x);	// 小さい方の値を y
@@ -393,21 +422,7 @@ namespace winrt::GraphPaper::implementation
 			const double y1 = y0 - (vec_y >= 0.0 ? intvl_y : -intvl_y);
 			const double y1_5 = y0 - 0.625 * (vec_y >= 0.0 ? intvl_y : -intvl_y);
 			const double y2 = y1 - (vec_y >= 0.0 ? f_size : -f_size);
-			/*
-			DWRITE_PARAGRAPH_ALIGNMENT p_align;
-			if (w_ge_h) {
-				// 横のほうが大きい場合,
-				// 高さが 0 以上の場合下よせ、ない場合上よせを段落のそろえに格納する.
-				// 文字列を配置する方形が小さい (書体の大きさと同じ) ため,
-				// DWRITE_PARAGRAPH_ALIGNMENT は, 逆の効果をもたらす.
-				p_align = (m_vec[0].y >= 0.0f ? DWRITE_PARAGRAPH_ALIGNMENT_FAR : DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-			}
-			else {
-				// 縦のほうが小さい場合,
-				// 中段を段落のそろえに格納する.
-				p_align = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
-			}
-			*/
+
 			dt_writer.WriteString(L"<g ");
 			export_svg_stroke(buf, 1.0f, m_stroke_color, D2D1_DASH_STYLE_SOLID, DASH_PATT{}, CAP_STYLE{}, D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL);
 			dt_writer.WriteString(buf);
@@ -434,24 +449,43 @@ namespace winrt::GraphPaper::implementation
 					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
 					w_ge_h ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
-				const float d = f_size * f_met.descent / f_met.designUnitsPerEm;
-				const float w = f_size * g_adv[i % 10] / f_met.designUnitsPerEm;
-				const D2D1_POINT_2F r{	// 数字ラベルの終点
-					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y1),
-					w_ge_h ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x)
-				};
-				const D2D1_POINT_2F s{	// 数字ラベルの差分
-					w_ge_h ? (m_vec[0].x >= 0.0f ? -w / 2 : w / 2) : (m_vec[0].x >= 0.0f ? -f_size + (f_size - w) / 2 : (f_size - w) / 2),
-					w_ge_h ? (m_vec[0].y >= 0.0f ? -d : f_size) : f_size / 2
+				// .left top
+				// |                |      |
+				// |       /\       |      |
+				// |      /  \      |      |
+				//b_line /    \     f_size |
+				// |    /      \    |     l_height
+				// |   /--------\   |      |
+				// |  /          \  |      |
+				//                  |      |
+				//   |--g_adv[A]--|        |
+				// |-----f_size-----|
+				const double w = f_size * g_adv[i % 10] / f_met.designUnitsPerEm;
+				const D2D1_POINT_2F r{
+					w_ge_h ?
+					// 目盛りの位置から字体の幅の半分だけずらし, 文字の基点とする.
+					static_cast<FLOAT>(x - w / 2) :
+					// 目盛りの位置から, 書体の半分の大きさだけずらし, 文字の中央位置を求め,
+					// その位置から字体の幅の半分だけずらして, 文字の基点とする.
+					static_cast<FLOAT>(m_vec[0].x >= 0.0f ? y1 - f_size / 2 - w / 2 : y1 + f_size / 2 - w / 2),
+				w_ge_h ?
+					// 目盛りの位置から, 書体大きさの半分だけずらし, さらに行の高さの半分だけずらし,
+					// 文字の上位置を求めたあと, その位置からベースラインの距離だけずらし,
+					// 文字の基点とする.
+					static_cast<FLOAT>(m_vec[0].y >= 0.0f ? y1 - f_size / 2 - l_height / 2 + b_line : y1 + f_size / 2 - l_height / 2 + b_line) :
+					// 目盛りの位置から, 行の高さの半分だけずらして, 文字の上位置を求め,
+					// その位置からベースラインまでの距離を加え, 文字の基点とする.
+					static_cast<FLOAT>(x - l_height / 2 + b_line)
 				};
 				swprintf_s(buf,
 					L"<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\"/>\n",
 					p.x, p.y, q.x, q.y
 				);
 				dt_writer.WriteString(buf);
+				// stroke が指定されると線の太さ分, 文字が太る.
 				swprintf_s(buf,
 					L"<text x=\"%f\" y=\"%f\" dx=\"%f\" dy=\"%f\" stroke=\"none\" >%c</text>\n",
-					r.x, r.y, s.x, s.y,
+					r.x, r.y, 0.0f, 0.0f,
 					D[i % 10]);
 				dt_writer.WriteString(buf);
 			}
@@ -460,7 +494,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeText::export_svg(DataWriter const& dt_writer) const
+	void ShapeText::export_svg(DataWriter const& dt_writer)
 	{
 		static constexpr wchar_t* SVG_STYLE[] = {
 			L"normal", L"oblique", L"italic"
@@ -470,32 +504,15 @@ namespace winrt::GraphPaper::implementation
 			L"condensed", L"semi-condensed", L"normal", L"semi-expanded",
 			L"expanded", L"extra-expanded", L"ultra-expanded"
 		};
-		// 垂直方向のずらし量を求める.
-		//
-		// Chrome では, テキストタグに属性 alignment-baseline="text-before-edge" 
-		// を指定するだけで, 左上位置を基準にして Dwrite と同じように表示される.
-		// しかし, IE や Edge では, alignment-baseline 属性は期待した働きをしないので,
-		// 上部からのベースラインまで値である, 垂直方向のずらし量 dy を
-		// 行ごとに計算を必要がある.
-		// このとき, 上部からのベースラインの高さ = アセントにはならないので
-		// デセントを用いて計算する必要もある.
-		// テキストレイアウトからフォントメトリックスを取得して, 以下のように求める.
-		// ちなみに, designUnitsPerEm は, 配置 (Em) ボックスの単位あたりの大きさ.
-		// デセントは, フォント文字の配置ボックスの下部からベースラインまでの長さ.
-		// dy = その行のヒットテストメトリックスの高さ - フォントの大きさ * (デセント / 単位大きさ) となる, はず.
-		//IDWriteFontCollection* fonts;
-		//m_dwrite_layout->GetFontCollection(&fonts);
-		//IDWriteFontFamily* family;
-		//fonts->GetFontFamily(0, &family);
-		//IDWriteFont* font;
-		//family->GetFont(0, &font);
-		//DWRITE_FONT_METRICS metrics;
-		//font->GetMetrics(&metrics);
-		//const double descent = m_font_size * ((static_cast<double>(metrics.descent)) / metrics.designUnitsPerEm);
-
-		if (is_opaque(m_fill_color) || is_opaque(m_stroke_color) || m_stroke_width >= FLT_MIN) {
-			ShapeRect::export_svg(dt_writer);
+		// 線・枠も塗りつぶしも, 書体の色も無いなら,
+		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && !is_opaque(m_fill_color) && !is_opaque(m_font_color)) {
+			return;
 		}
+		if (m_dwrite_text_layout == nullptr) {
+			create_text_layout();
+		}
+		ShapeRect::export_svg(dt_writer);
+
 		wchar_t buf[1024];
 		// %s はマルチバイトはそのままマルチバイト.
 		// %hs はシングルバイトをマルチバイトにする.
@@ -518,7 +535,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(buf);
 
 		// 書体を表示する左上位置に余白を加える.
-		D2D1_POINT_2F lt_pos;	// 左上位置
+		D2D1_POINT_2F lt_pos{};	// 左上位置
 		pt_add(m_start, m_text_padding.width, m_text_padding.height, lt_pos);
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 			const DWRITE_HIT_TEST_METRICS& tm = m_dwrite_test_metrics[i];
