@@ -28,13 +28,17 @@ namespace winrt::GraphPaper::implementation
 	template <size_t N>
 	static void export_svg_color(wchar_t(&buf)[N], const D2D1_COLOR_F color, const wchar_t* name)
 	{
+		const int32_t r = static_cast<int32_t>(std::round(color.r * 255.0));
+		const int32_t g = static_cast<int32_t>(std::round(color.g * 255.0));
+		const int32_t b = static_cast<int32_t>(std::round(color.b * 255.0));
 		swprintf_s(buf,
 			L"%s=\"#%02x%02x%02x\" %s-opacity=\"%f\" ",
 			name,
-			static_cast<uint32_t>(std::round(color.r) * 255.0),
-			static_cast<uint32_t>(std::round(color.g) * 255.0),
-			static_cast<uint32_t>(std::round(color.b) * 255.0),
-			name, color.a
+			min(max(r, 0), 255),
+			min(max(g, 0), 255),
+			min(max(b, 0), 255),
+			name, 
+			color.a
 		);
 	}
 
