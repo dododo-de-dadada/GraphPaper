@@ -719,7 +719,7 @@ namespace winrt::GraphPaper::implementation
 			winrt::com_ptr<ID2D1GeometrySink> sink;
 			winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
 			winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
-			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
+			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			const auto figure_begin = is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
 			sink->BeginFigure(v_pos[0], figure_begin);
 			for (size_t i = 1; i < v_cnt; i++) {
@@ -783,6 +783,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	/*
 	// “h‚è‚Â‚Ô‚µF‚ð“¾‚é.
 	// val	“¾‚ç‚ê‚½’l
 	// –ß‚è’l	“¾‚ç‚ê‚½‚È‚ç true
@@ -791,6 +792,7 @@ namespace winrt::GraphPaper::implementation
 		val = m_fill_color;
 		return true;
 	}
+	*/
 
 	// ˆÊ’u‚ðŠÜ‚Þ‚©”»’è‚·‚é.
 	// t_pos	”»’è‚·‚éˆÊ’u
@@ -843,6 +845,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	/*
 	// “h‚è‚Â‚Ô‚µ‚ÌF‚ÉŠi”[‚·‚é.
 	bool ShapePoly::set_fill_color(const D2D1_COLOR_F& val) noexcept
 	{
@@ -854,6 +857,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		return false;
 	}
+	*/
 
 	// }Œ`‚ðì¬‚·‚é.
 	// b_pos	ˆÍ‚Þ—Ìˆæ‚ÌŽn“_

@@ -499,7 +499,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
 		}
-		if (m_d2d_arrow_geom == nullptr || m_d2d_path_geom == nullptr) {
+		if (m_d2d_arrow_geom == nullptr ||
+			m_d2d_path_geom == nullptr) {
 			if (m_d2d_path_geom != nullptr) {
 				m_d2d_path_geom = nullptr;
 			}
@@ -532,9 +533,12 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
+		if (is_opaque(m_fill_color)) {
+			brush->SetColor(m_fill_color);
+			target->FillGeometry(m_d2d_path_geom.get(), brush, nullptr);
+		}
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
-
 		if (is_opaque(m_stroke_color)) {
 			const auto s_width = m_stroke_width;
 			brush->SetColor(m_stroke_color);
@@ -585,6 +589,9 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
+		//const auto f_opaque = is_opaque(m_fill_color);
+const auto f_opaque = true;
+		bool f_test = false;	// 位置が塗りつぶしに含まれるか判定
 		const auto e_width = max(max(static_cast<double>(m_stroke_width), Shape::s_anc_len) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
 		pt_sub(t_pos, m_start, tp);
@@ -730,6 +737,15 @@ namespace winrt::GraphPaper::implementation
 			b_pos[7] = (b_pos[4] + b_pos[5]) * 0.5;
 			b_pos[8] = (b_pos[5] + b_pos[6]) * 0.5;
 			b_pos[9] = (b_pos[7] + b_pos[8]) * 0.5;
+			if (f_opaque && !f_test) {
+				// 分割された凸包のあいだにできた三角形は, 塗りつぶしの領域.
+				// この領域に点が含まれるか, 分割するたびに判定する.
+				// ただし 1 度でも含まれるなら, それ以上の判定は必要ない.
+				const BZP f_pos[3]{ 
+					b_pos[0], b_pos[9], b_pos[3] 
+				};
+				f_test = bezi_in_convex(tp.x, tp.y, 3, f_pos);
+			}
 			// 一方の組をプッシュする.
 			// 始点 (0) はスタックに残っているので, 
 			// 残りの 3 つの制御点をプッシュする.
@@ -743,6 +759,9 @@ namespace winrt::GraphPaper::implementation
 			s_arr[s_cnt + 4] = b_pos[6];
 			s_arr[s_cnt + 5] = b_pos[3];
 			s_cnt += 6;
+		}
+		if (f_opaque && f_test) {
+			return ANC_TYPE::ANC_FILL;
 		}
 		return ANC_TYPE::ANC_PAGE;
 	}

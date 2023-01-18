@@ -11,6 +11,15 @@ namespace winrt::GraphPaper::implementation
 {
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
+	// “h‚è‚Â‚Ô‚µF‚ğ“¾‚é.
+	// val	“¾‚ç‚ê‚½’l
+	// –ß‚è’l	“¾‚ç‚ê‚½‚È‚ç true
+	bool ShapePath::get_fill_color(D2D1_COLOR_F& val) const noexcept
+	{
+		val = m_fill_color;
+		return true;
+	}
+
 	// ·•ª‚¾‚¯ˆÚ“®‚·‚é.
 	// d_vec	·•ª
 	bool ShapePath::move(const D2D1_POINT_2F d_vec) noexcept
@@ -54,6 +63,18 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_path_geom != nullptr) {
 				m_d2d_path_geom = nullptr;
 			}
+			return true;
+		}
+		return false;
+	}
+
+	// “h‚è‚Â‚Ô‚µ‚ÌF‚ÉŠi”[‚·‚é.
+	bool ShapePath::set_fill_color(const D2D1_COLOR_F& val) noexcept
+	{
+		if (!equal(m_fill_color, val)) {
+			m_fill_color = val;
+			m_d2d_path_geom = nullptr;
+			m_d2d_arrow_geom = nullptr;
 			return true;
 		}
 		return false;

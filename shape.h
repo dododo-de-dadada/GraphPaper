@@ -1316,8 +1316,8 @@ namespace winrt::GraphPaper::implementation
 		// 折れ線のひな型
 		//------------------------------
 
-		// パスジオメトリを作成する.
-		//virtual void create_path_geometry(ID2D1Factory3* const /*factory*/) = 0;
+		// 塗りつぶし色を得る.
+		bool get_fill_color(D2D1_COLOR_F& val) const noexcept final override;
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F val) noexcept final override;
 		// 値を, 部位の位置に格納する.
@@ -1326,6 +1326,8 @@ namespace winrt::GraphPaper::implementation
 		bool set_arrow_size(const ARROW_SIZE& val) noexcept final override;
 		// 値を矢じるしの形式に格納する.
 		virtual bool set_arrow_style(const ARROW_STYLE val) noexcept override;
+		// 値を塗りつぶし色に格納する.
+		bool set_fill_color(const D2D1_COLOR_F& val) noexcept final override;
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
 		// 図形をデータライターに書き込む.
@@ -1350,7 +1352,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する
 		void draw(void) final override;
 		// 塗りつぶし色を得る.
-		bool get_fill_color(D2D1_COLOR_F& val) const noexcept final override;
+		//bool get_fill_color(D2D1_COLOR_F& val) const noexcept final override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
 		// 範囲に含まれるか判定する.
@@ -1358,7 +1360,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を矢じるしの形式に格納する.
 		bool set_arrow_style(const ARROW_STYLE val) noexcept final override;
 		// 値を塗りつぶし色に格納する.
-		bool set_fill_color(const D2D1_COLOR_F& val) noexcept final override;
+		//bool set_fill_color(const D2D1_COLOR_F& val) noexcept final override;
 		// 図形を作成する.
 		ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page, const POLY_OPTION& p_opt);
 		// 図形をデータリーダーから読み込む.
@@ -1375,7 +1377,6 @@ namespace winrt::GraphPaper::implementation
 	// 曲線
 	//------------------------------
 	struct ShapeBezi : ShapePath {
-		D2D1_COLOR_F m_fill_color{ 1.0f, 1.0f, 1.0f, 0.0f };
 
 		//------------------------------
 		// shape_bezi.cpp
