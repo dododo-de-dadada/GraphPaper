@@ -224,7 +224,7 @@ namespace winrt::GraphPaper::implementation
 				throw winrt::hresult_invalid_argument();
 			}
 			pi_draw().Data(nullptr);
-			pi_draw().Data(Summary::Data(data));
+			pi_draw().Data(Summary::Geom(data));
 			if (sp_status_bar_draw().Visibility() != Visibility::Visible) {
 				sp_status_bar_draw().Visibility(Visibility::Visible);
 			}

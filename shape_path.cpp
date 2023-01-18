@@ -70,10 +70,29 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
+	ShapePath::ShapePath(const ShapePage& page, const DataReader& dt_reader) :
+		ShapeLine::ShapeLine(page, dt_reader)
+	{
+		const D2D1_COLOR_F fill_color{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		};
+		m_fill_color.r = min(max(fill_color.r, 0.0f), 1.0f);
+		m_fill_color.g = min(max(fill_color.g, 0.0f), 1.0f);
+		m_fill_color.b = min(max(fill_color.b, 0.0f), 1.0f);
+		m_fill_color.a = min(max(fill_color.a, 0.0f), 1.0f);
+	}
+
 	// 図形をデータライターに書き込む.
-	void ShapePath::write(DataWriter const& dt_writer) const
+	void ShapePath::write(const DataWriter& dt_writer) const
 	{
 		ShapeLine::write(dt_writer);
+		dt_writer.WriteSingle(m_fill_color.r);
+		dt_writer.WriteSingle(m_fill_color.g);
+		dt_writer.WriteSingle(m_fill_color.b);
+		dt_writer.WriteSingle(m_fill_color.a);
 	}
 
 }

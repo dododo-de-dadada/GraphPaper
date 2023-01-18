@@ -580,7 +580,7 @@
 				<ItemsControl.ItemTemplate>
 					<DataTemplate x:DataType="local:Summary">
 						<StackPanel Orientation="Horizontal">
-							<PathIcon Data="{x:Bind Data}" Height="16" Width="16" HorizontalAlignment="Center" Margin="8,4,8,4" VerticalAlignment="Center" />
+							<PathIcon Data="{x:Bind Geom}" Height="16" Width="16" HorizontalAlignment="Center" Margin="8,4,8,4" VerticalAlignment="Center" />
 							<StackPanel>
 								<TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Name, Mode=OneWay}"/>
 								<TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Hexa, Mode=OneWay}"/>

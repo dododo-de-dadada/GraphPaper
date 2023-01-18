@@ -203,29 +203,30 @@ namespace winrt::GraphPaper::implementation
 			*/
 			brush->SetColor(m_stroke_color);
 			for (uint32_t i = 0; i <= k; i++) {
-				// 方眼の大きさごとに目盛りを表示する.
+
+				// 目盛りを表示する.
 				const double x = x0 + i * intvl_x;
-				D2D1_POINT_2F p0{
+				D2D1_POINT_2F p{
 					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y0),
 					w_ge_h ? static_cast<FLOAT>(y0) : static_cast<FLOAT>(x)
 				};
 				const auto y = ((i % 5) == 0 ? y1 : y1_5);
-				D2D1_POINT_2F p1{
+				D2D1_POINT_2F q{
 					w_ge_h ? static_cast<FLOAT>(x) : static_cast<FLOAT>(y),
 					w_ge_h ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
-				target->DrawLine(p0, p1, brush);
+				target->DrawLine(p, q, brush);
+
 				// 目盛りラベルを表示する.
 				const double x1 = x + f_size * 0.5;
 				const double x2 = x1 - f_size;
-				D2D1_RECT_F t_rect{
+				D2D1_RECT_F r{
 					w_ge_h ? static_cast<FLOAT>(x2) : static_cast<FLOAT>(y2),
 					w_ge_h ? static_cast<FLOAT>(y2) : static_cast<FLOAT>(x2),
 					w_ge_h ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
 					w_ge_h ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
 				};
-				target->DrawRectangle(t_rect, brush);
-				target->DrawText(D[i % 10], 1u, m_dwrite_text_format.get(), t_rect, brush);
+				target->DrawText(D[i % 10], 1u, m_dwrite_text_format.get(), r, brush);
 			}
 		}
 		if (is_selected()) {

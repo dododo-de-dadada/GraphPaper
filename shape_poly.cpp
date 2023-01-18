@@ -374,19 +374,19 @@ namespace winrt::GraphPaper::implementation
 				s_len[d_cnt] = sqrt(pt_abs2(v_pos[d_cnt]));
 			}
 			// 閉じてないなら, 端の形式が円形か判定する.
-			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+			else if (equal(s_cap, CAP_ROUND)) {
 				if (pt_in_circle(t_vec, e_width) || pt_in_circle(t_vec, v_pos[d_cnt], e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が正方形か判定する.
-			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+			else if (equal(s_cap, CAP_SQUARE)) {
 				if (stroke_test_cap_square(t_vec, v_pos[d_cnt], d_cnt, d_vec, s_len, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が三角形か判定する.
-			else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+			else if (equal(s_cap, CAP_TRIANGLE)) {
 				if (stroke_test_cap_triangle(t_vec, v_pos[d_cnt], d_cnt, d_vec, s_len, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
@@ -862,8 +862,7 @@ namespace winrt::GraphPaper::implementation
 	// p_opt	多角形の選択肢
 	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page, const POLY_OPTION& p_opt) :
 		ShapePath::ShapePath(page, p_opt.m_end_closed),
-		m_end_closed(p_opt.m_end_closed),
-		m_fill_color(p_opt.m_end_closed ? page->m_fill_color : D2D1_COLOR_F{ page->m_fill_color.r, page->m_fill_color.g, page->m_fill_color.b, 0.0f })
+		m_end_closed(p_opt.m_end_closed)
 	{
 		D2D1_POINT_2F v_pos[N_GON_MAX];
 
@@ -882,27 +881,12 @@ namespace winrt::GraphPaper::implementation
 		ShapePath::ShapePath(page, dt_reader)
 	{
 		m_end_closed = dt_reader.ReadBoolean();
-		const D2D1_COLOR_F fill_color{
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle()
-		};
-		m_fill_color.r = min(max(fill_color.r, 0.0f), 1.0f);
-		m_fill_color.g = min(max(fill_color.g, 0.0f), 1.0f);
-		m_fill_color.b = min(max(fill_color.b, 0.0f), 1.0f);
-		m_fill_color.a = min(max(fill_color.a, 0.0f), 1.0f);
 	}
 
 	// 図形をデータライターに書き込む.
 	void ShapePoly::write(DataWriter const& dt_writer) const
 	{
 		ShapePath::write(dt_writer);
-		dt_writer.WriteBoolean(m_end_closed);
-		dt_writer.WriteSingle(m_fill_color.r);
-		dt_writer.WriteSingle(m_fill_color.g);
-		dt_writer.WriteSingle(m_fill_color.b);
-		dt_writer.WriteSingle(m_fill_color.a);
 	}
 
 }

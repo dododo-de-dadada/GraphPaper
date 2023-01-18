@@ -23,54 +23,54 @@ namespace winrt::GraphPaper::implementation
 		// s	表示する図形.
 		// r	メインページのリソースディクショナリ.
 		// 図形の名前と, パスアイコンの移動と描画のコマンド文字列を設定する.
-		Summary(Shape* const s, ResourceDictionary const& r) :
+		Summary(Shape* s, const ResourceDictionary& r) :
 			m_shape(s)
 		{
 			using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 			auto const& t_id = typeid(*s);
 			if (t_id == typeid(ShapeBezi)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_bezi")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_bezi")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_bezi/Text");
 			}
 			else if (t_id == typeid(ShapeElli)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_elli")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_elli")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_elli/Text");
 			}
 			else if (t_id == typeid(ShapeGroup)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_group")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_group")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_grouped");
 			}
 			else if (t_id == typeid(ShapeLine)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_line/Text");
 			}
 			else if (t_id == typeid(ShapePoly)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_tri")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_tri")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_poly/Text");
 			}
 			else if (t_id == typeid(ShapeRect)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rect")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rect")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_rect/Text");
 			}
 			else if (t_id == typeid(ShapeRRect)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rrect")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rrect")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_rrect/Text");
 			}
 			else if (t_id == typeid(ShapeRuler)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ruler")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ruler")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_ruler/Text");
 			}
 			else if (t_id == typeid(ShapeText)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_text/Text");
 			}
 			else if (t_id == typeid(ShapeImage)) {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_image")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_image")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_image");
 			}
 			else {
-				m_data = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_select")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_select")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_unknown");
 			}
 		}
@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 移動と描画のコマンド文字列をジオメトリに変換する.
-		static winrt::Windows::UI::Xaml::Media::Geometry Data(winrt::hstring const& move_and_draw_command)
+		static winrt::Windows::UI::Xaml::Media::Geometry Geom(winrt::hstring const& move_and_draw_command)
 		{
 			using winrt::Windows::UI::Xaml::Markup::XamlReader;
 			using winrt::Windows::UI::Xaml::Controls::PathIcon;
@@ -97,12 +97,13 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// ジオメトリを得る.
-		winrt::Windows::UI::Xaml::Media::Geometry Data()
+		winrt::Windows::UI::Xaml::Media::Geometry Geom()
 		{
-			return Data(m_data);
+			return Geom(m_icon);
 		}
 
-		void Data(winrt::Windows::UI::Xaml::Media::Geometry const& /*geo*/)
+		// ジオメトリに格納する.
+		void Geom(winrt::Windows::UI::Xaml::Media::Geometry const& /*geo*/)
 		{
 		}
 
@@ -154,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 
 	private:
 		Shape* m_shape;	// 図形
-		winrt::hstring m_data;	// 移動と描画のコマンド文字列
+		winrt::hstring m_icon;	// パスアイコンのデータ
 		winrt::hstring m_name;	// 図形の名前
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_changed;
 	};

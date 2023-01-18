@@ -92,6 +92,10 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeText;
 
 	constexpr D2D1_COLOR_F ACCENT_COLOR{ 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// 文字範囲の背景色 SystemAccentColor
+	constexpr D2D1_COLOR_F COLOR_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
+	constexpr D2D1_COLOR_F COLOR_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
+	constexpr D2D1_COLOR_F COLOR_TEXT_RANGE = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
+
 
 	// 補助線
 	constexpr FLOAT AUXILIARY_SEG_DASHES[]{ 4.0f, 4.0f };	// 補助線の破線の配置
@@ -173,9 +177,10 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_start;	// 始点
 		D2D1_CAP_STYLE m_end;	// 終点
 	};
-	constexpr D2D1_COLOR_F COLOR_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
-	constexpr D2D1_COLOR_F COLOR_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
-	constexpr D2D1_COLOR_F COLOR_TEXT_RANGE = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
+	constexpr CAP_STYLE CAP_FLAT{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };
+	constexpr CAP_STYLE CAP_ROUND{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND };
+	constexpr CAP_STYLE CAP_SQUARE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE };
+	constexpr CAP_STYLE CAP_TRIANGLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE };
 
 	// 破線の配置
 	union DASH_PATT {
@@ -316,7 +321,7 @@ namespace winrt::GraphPaper::implementation
 	// shape_text.cpp
 	//------------------------------
 
-	// wchar_t 型の文字列 (UTF-16) を uint32_t 型の配列に変換する.
+	// wchar_t 型の文字列 (UTF-16) を uint32_t 型の配列 (UTF-32) に変換する. 
 	std::vector<uint32_t> conv_utf16_to_utf32(const wchar_t* w, const size_t w_len) noexcept;
 	// フォントフェイスを得る.
 	template <typename T> bool get_font_face(T* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face);
@@ -607,20 +612,20 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_F	m_view;	// 表示寸法
 		D2D1_RECT_F	m_clip;	// 表示されている矩形
 		D2D1_SIZE_U	m_orig;	// ビットマップの原寸
-		uint8_t*	m_data = nullptr;	// ビットマップのデータ
+		uint8_t* m_bgra = nullptr;	// ビットマップのデータ
 		D2D1_SIZE_F	m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
 		float	m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
 
 		winrt::com_ptr<ID2D1Bitmap1> m_d2d_bitmap{ nullptr };	// D2D ビットマップ
 
-		int m_pdf_obj = 0;	// PDF オブジェクト番号 (PDF として出力するときのみ使用)
+		int m_pdf_image_cnt = 0;	// 画像オブジェクトの計数 (PDF として出力するときのみ使用)
 
 		// 図形を破棄する.
 		ShapeImage::~ShapeImage(void)
 		{
-			if (m_data != nullptr) {
-				delete m_data;
-				m_data = nullptr;
+			if (m_bgra != nullptr) {
+				delete m_bgra;
+				m_bgra = nullptr;
 			}
 			if (m_d2d_bitmap != nullptr) {
 				m_d2d_bitmap = nullptr;
@@ -713,7 +718,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_join_miter_limit = MITER_LIMIT_DEFVAL;	// 線の結合のマイター制限
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線の結合の形式
-		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 線の端の形式
+		CAP_STYLE m_stroke_cap{ CAP_FLAT };	// 線の端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
 		float m_stroke_width = 1.0f;	// 線・枠の太さ
 
@@ -950,7 +955,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠のひな型
 	//------------------------------
 	struct ShapeStroke : ShapeSelect {
-		CAP_STYLE m_stroke_cap{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };	// 線の端の形式
+		CAP_STYLE m_stroke_cap{ CAP_FLAT };	// 線の端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
 		float m_stroke_width = 1.0f;	// 線・枠の太さ
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
@@ -1173,7 +1178,7 @@ namespace winrt::GraphPaper::implementation
 		float m_font_size = FONT_SIZE_DEFVAL;	// 書体の大きさ
 
 		winrt::com_ptr<IDWriteTextFormat> m_dwrite_text_format{};	// テキストフォーマット
-		int m_pdf_font_num = 0;
+		int m_pdf_text_cnt = 0;
 
 		// 図形を破棄する.
 		ShapeRuler::~ShapeRuler(void)
@@ -1285,16 +1290,16 @@ namespace winrt::GraphPaper::implementation
 	// 折れ線のひな型
 	//------------------------------
 	struct ShapePath : ShapeLine {
+		D2D1_COLOR_F m_fill_color{ 1.0f, 1.0f, 1.0f, 0.0f };
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_path_geom{ nullptr };	// 折れ線の D2D パスジオメトリ
 
 		// 図形を作成する.
 		ShapePath(const ShapePage* page, const bool s_closed) :
-			ShapeLine::ShapeLine(page, s_closed)
+			ShapeLine::ShapeLine(page, s_closed),
+			m_fill_color(s_closed ? page->m_fill_color : D2D1_COLOR_F{ page->m_fill_color.r, page->m_fill_color.g, page->m_fill_color.b, 0.0f })
 		{}
 		// 図形をデータリーダーから読み込む.
-		ShapePath(const ShapePage& page, DataReader const& dt_reader) :
-			ShapeLine::ShapeLine(page, dt_reader)
-		{}
+		ShapePath(const ShapePage& page, const DataReader& dt_reader);
 
 		// 図形を破棄する.
 		virtual ~ShapePath(void)
@@ -1332,7 +1337,6 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	struct ShapePoly : ShapePath {
 		bool m_end_closed;	// 辺が閉じているか判定
-		D2D1_COLOR_F m_fill_color;
 
 		//------------------------------
 		// shape_poly.cpp
@@ -1371,6 +1375,7 @@ namespace winrt::GraphPaper::implementation
 	// 曲線
 	//------------------------------
 	struct ShapeBezi : ShapePath {
+		D2D1_COLOR_F m_fill_color{ 1.0f, 1.0f, 1.0f, 0.0f };
 
 		//------------------------------
 		// shape_bezi.cpp
@@ -1378,8 +1383,6 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		static bool bezi_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
-		// パスジオメトリを作成する.
-		//void create_path_geometry(ID2D1Factory3* const factory) final override;
 		// 図形を表示する.
 		void draw(void) final override;
 		// 位置を含むか判定する.
@@ -1391,9 +1394,11 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータリーダーから読み込む.
 		ShapeBezi(const ShapePage& page, DataReader const& dt_reader);
 		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer) final override;
+		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer);
+		void export_svg(const DataWriter& dt_writer);
+
+		void write(const DataWriter& dt_writer) const final override;
 	};
 
 	//------------------------------
@@ -1425,7 +1430,7 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_HIT_TEST_METRICS* m_dwrite_test_metrics = nullptr;	// 位置の計量
 		winrt::com_ptr<IDWriteTextLayout> m_dwrite_text_layout{ nullptr };	// 文字列レイアウト
 
-		int m_pdf_font_num = 0;	// PDF のフォント番号 (PDF 出力時のみ利用)
+		int m_pdf_text_cnt = 0;	// PDF のフォント番号 (PDF 出力時のみ利用)
 
 		// 図形を破棄する.
 		~ShapeText(void)

@@ -144,13 +144,13 @@ namespace winrt::GraphPaper::implementation
 					// クリッピングあり
 					for (size_t y = c_top; y < c_bottom; y++) {
 						memcpy(soft_bmp_ptr + 4ull * c_width * y, 
-							m_data + 4ull * m_orig.width * y + c_left, 
+							m_bgra + 4ull * m_orig.width * y + c_left,
 							4ull * c_width);
 					}
 				}
 				else {
 					// クリッピングなし
-					memcpy(soft_bmp_ptr, m_data, capacity);
+					memcpy(soft_bmp_ptr, m_bgra, capacity);
 				}
 
 				// バッファを解放する.
@@ -223,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			const UINT32 pitch = 4u * m_orig.width;
 			winrt::com_ptr<ID2D1Bitmap> bitmap;
-			target->CreateBitmap(m_orig, static_cast<void*>(m_data), pitch, b_prop, bitmap.put());
+			target->CreateBitmap(m_orig, static_cast<void*>(m_bgra), pitch, b_prop, bitmap.put());
 			m_d2d_bitmap = bitmap.as<ID2D1Bitmap1>();
 			if (m_d2d_bitmap == nullptr) {
 				return;
@@ -708,9 +708,9 @@ namespace winrt::GraphPaper::implementation
 		m_clip.right = static_cast<FLOAT>(image_w);
 		m_clip.bottom = static_cast<FLOAT>(image_h);
 		m_opac = opac < 0.0f ? 0.0f : (opac > 1.0f ? 1.0f : opac);
-		const size_t data_size = 4ull * image_w * image_h;
-		if (data_size > 0) {
-			m_data = new uint8_t[data_size];
+		const size_t bgra_size = 4ull * image_w * image_h;
+		if (bgra_size > 0) {
+			m_bgra = new uint8_t[bgra_size];
 			// SoftwareBitmap のバッファをロックする.
 			auto image_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
 			auto image_ref{ image_buf.CreateReference() };
@@ -719,7 +719,7 @@ namespace winrt::GraphPaper::implementation
 			UINT32 capacity = 0;
 			if (SUCCEEDED(image_mem->GetBuffer(&image_data, &capacity))) {
 				// ロックしたバッファに画像データをコピーする.
-				memcpy(m_data, image_data, capacity);
+				memcpy(m_bgra, image_data, capacity);
 				// ロックしたバッファを解放する.
 				image_buf.Close();
 				image_buf = nullptr;
@@ -728,7 +728,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			m_data = nullptr;
+			m_bgra = nullptr;
 		}
 	}
 
@@ -747,12 +747,12 @@ namespace winrt::GraphPaper::implementation
 			m_opac = 1.0f;
 		}
 		const size_t pitch = 4ull * m_orig.width;
-		m_data = new uint8_t[pitch * m_orig.height];
+		m_bgra = new uint8_t[pitch * m_orig.height];
 		std::vector<uint8_t> line_buf(pitch);
 		const size_t height = m_orig.height;
 		for (size_t i = 0; i < height; i++) {
 			dt_reader.ReadBytes(line_buf);
-			memcpy(m_data + pitch * i, line_buf.data(), pitch);
+			memcpy(m_bgra + pitch * i, line_buf.data(), pitch);
 		}
 	}
 
@@ -779,7 +779,7 @@ namespace winrt::GraphPaper::implementation
 		std::vector<uint8_t> line_buf(pitch);
 		const size_t height = m_orig.height;
 		for (size_t i = 0; i < height; i++) {
-			memcpy(line_buf.data(), m_data + pitch * i, pitch);
+			memcpy(line_buf.data(), m_bgra + pitch * i, pitch);
 			dt_writer.WriteBytes(line_buf);
 		}
 	}

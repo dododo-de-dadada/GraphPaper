@@ -299,6 +299,7 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_stroke_style(nullptr)
 	{}
 
+	/*
 	static std::vector<D2D1_POINT_2F> dt_read_vec(DataReader const& dt_reader)
 	{
 		const size_t vec_cnt = dt_reader.ReadUInt32();	// óvëfêî
@@ -308,14 +309,6 @@ namespace winrt::GraphPaper::implementation
 			vec[i].y = dt_reader.ReadSingle();
 		}
 		return vec;
-	}
-	/*
-	static CAP_STYLE dt_read_cap(DataReader const& dt_reader)
-	{
-		return CAP_STYLE{
-			static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32()),
-			static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())
-		};
 	}
 	*/
 

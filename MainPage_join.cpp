@@ -16,16 +16,16 @@ namespace winrt::GraphPaper::implementation
 	{
 		CAP_STYLE new_val;
 		if (sender == rmfi_cap_style_flat()) {
-			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };
+			new_val = CAP_FLAT;
 		}
 		else if (sender == rmfi_cap_style_square()) {
-			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE };
+			new_val = CAP_SQUARE;
 		}
 		else if (sender == rmfi_cap_style_round()) {
-			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND };
+			new_val = CAP_ROUND;
 		}
 		else if (sender == rmfi_cap_style_triangle()) {
-			new_val = CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE };
+			new_val = CAP_TRIANGLE;
 		}
 		else {
 			return;
@@ -42,14 +42,10 @@ namespace winrt::GraphPaper::implementation
 	// s_cap	端の形式
 	void MainPage::cap_style_is_checked(const CAP_STYLE& val)
 	{
-		rmfi_cap_style_flat().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
-		//rmfi_cap_style_flat_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT }));
-		rmfi_cap_style_square().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
-		//rmfi_cap_style_square_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE }));
-		rmfi_cap_style_round().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
-		//rmfi_cap_style_round_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND }));
-		rmfi_cap_style_triangle().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
-		//rmfi_cap_style_triangle_2().IsChecked(equal(val, { D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE }));
+		rmfi_cap_style_flat().IsChecked(equal(val, CAP_FLAT));
+		rmfi_cap_style_square().IsChecked(equal(val, CAP_SQUARE));
+		rmfi_cap_style_round().IsChecked(equal(val, CAP_ROUND));
+		rmfi_cap_style_triangle().IsChecked(equal(val, CAP_TRIANGLE));
 	}
 
 	// 線枠メニューの「線の結合の結合」>「マイター制限」が選択された.

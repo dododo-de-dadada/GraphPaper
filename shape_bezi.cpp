@@ -537,12 +537,8 @@ namespace winrt::GraphPaper::implementation
 
 		if (is_opaque(m_stroke_color)) {
 			const auto s_width = m_stroke_width;
-			const auto s_style = m_d2d_stroke_style.get();
-			if (s_style == nullptr) {
-				
-			}
 			brush->SetColor(m_stroke_color);
-			target->DrawGeometry(m_d2d_path_geom.get(), brush, s_width, s_style);
+			target->DrawGeometry(m_d2d_path_geom.get(), brush, s_width, m_d2d_stroke_style.get());
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
@@ -611,7 +607,7 @@ namespace winrt::GraphPaper::implementation
 		if (pt_in_anc(tp, c_pos[0])) {
 			return ANC_TYPE::ANC_P0 + 0;
 		}
-		if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+		if (equal(m_stroke_cap, CAP_ROUND)) {
 			if (pt_in_circle(tp, e_width)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
@@ -619,12 +615,12 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
-		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+		else if (equal(m_stroke_cap, CAP_SQUARE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, c_pos, m_vec.data(), e_width)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
-		else if (equal(m_stroke_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+		else if (equal(m_stroke_cap, CAP_TRIANGLE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, c_pos, m_vec.data(), e_width)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
@@ -872,7 +868,13 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	ShapeBezi::ShapeBezi(const ShapePage& page, DataReader const& dt_reader) :
 		ShapePath::ShapePath(page, dt_reader)
-	{}
+	{
+	}
+
+	void ShapeBezi::write(const DataWriter& dt_writer) const
+	{
+		ShapePath::write(dt_writer);
+	}
 
 	/*
 	static uint32_t clipping(const BZP& p, const BZP& q, double* t)

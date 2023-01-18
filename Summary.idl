@@ -5,7 +5,7 @@ namespace GraphPaper
 {
 	runtimeclass Summary : Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
-		Windows.UI.Xaml.Media.Geometry Data;
+		Windows.UI.Xaml.Media.Geometry Geom;
 		String Hexa;
 		String Name;
 	}

@@ -107,7 +107,7 @@ namespace winrt::GraphPaper::implementation
 	static bool line_hit_test(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const CAP_STYLE& s_cap) noexcept
 	{
 		const double e_width = max(s_width * 0.5, 0.5);
-		if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE })) {
+		if (equal(s_cap, CAP_SQUARE)) {
 			D2D1_POINT_2F d_vec;	// 差分線分のベクトル
 			pt_sub(e_pos, s_pos, d_vec);
 			const double abs2 = pt_abs2(d_vec);
@@ -126,7 +126,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(e_pos, dx + ox, dy + oy, e_side[3]);
 			return pt_in_poly(t_pos, 4, e_side);
 		}
-		else if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE })) {
+		else if (equal(s_cap, CAP_TRIANGLE)) {
 			D2D1_POINT_2F d_vec;	// 差分線分のベクトル
 			pt_sub(e_pos, s_pos, d_vec);
 			const double abs2 = pt_abs2(d_vec);
@@ -148,7 +148,7 @@ namespace winrt::GraphPaper::implementation
 			return pt_in_poly(t_pos, 6, e_side);
 		}
 		else {
-			if (equal(s_cap, CAP_STYLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND })) {
+			if (equal(s_cap, CAP_ROUND)) {
 				if (pt_in_circle(t_pos, s_pos, e_width) || pt_in_circle(t_pos, e_pos, e_width)) {
 					return true;
 				}

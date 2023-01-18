@@ -225,16 +225,18 @@ namespace winrt::GraphPaper::implementation
 		// フォントフェイスの形式を得る.
 		f_type = face->GetType();
 
-		// 文字列を UTF32 に変換し重複したコードを削除する.
+		// 文字列を UTF-32 に変換する.
 		std::vector<uint32_t> utf32{ conv_utf16_to_utf32(t, t_len) };
+
+		// UTF-32 文字列から重複したコードを削除する.
 		const auto last = std::unique(std::begin(utf32), std::end(utf32));
 		utf32.erase(last, utf32.end());
 
 		// UTF32 文字列から CID を得る.
-		cid.resize(utf32.size());
-		for (int i = 0; i < utf32.size(); i++) {
-			//cid[i] = cmap_getcid(utf32[i]);
-		}
+		//cid.resize(utf32.size());
+		//for (int i = 0; i < utf32.size(); i++) {
+		//	cid[i] = cmap_getcid(utf32[i]);
+		//}
 
 		// UTF32 文字列から GID を得る.
 		gid.resize(utf32.size());
@@ -300,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 画像を PDF の XObject として書き出す.
-	static size_t export_pdf_image(const ShapeImage* t, int obj_num, DataWriter& dt_writer)
+	static size_t export_pdf_image(const uint8_t* bgra, const size_t width, const size_t height, const int obj_num, DataWriter& dt_writer)
 	{
 		// 画像 XObject (ストリームオブジェクト)
 		/*
@@ -318,11 +320,12 @@ namespace winrt::GraphPaper::implementation
 		// サポートしていない.
 		// BGRA を RGB にコピー.
 		std::vector<uint8_t> z_buf;
-		std::vector<uint8_t> in_buf(3ull * t->m_orig.width * t->m_orig.height);
-		for (size_t i = 0; i < t->m_orig.width * t->m_orig.height; i++) {
-			in_buf[3 * i + 2] = t->m_data[4 * i + 0];	// B
-			in_buf[3 * i + 1] = t->m_data[4 * i + 1];	// G
-			in_buf[3 * i + 0] = t->m_data[4 * i + 2];	// R
+		std::vector<uint8_t> in_buf(3ull * width * height);
+		//std::vector<uint8_t> in_buf(3ull * t->m_orig.width * t->m_orig.height);
+		for (size_t i = 0; i < width * height; i++) {
+			in_buf[3 * i + 2] = bgra[4 * i + 0];	// B
+			in_buf[3 * i + 1] = bgra[4 * i + 1];	// G
+			in_buf[3 * i + 0] = bgra[4 * i + 2];	// R
 		}
 		z_compress(z_buf, std::data(in_buf), std::size(in_buf));
 		in_buf.clear();
@@ -334,16 +337,16 @@ namespace winrt::GraphPaper::implementation
 			L"%d 0 obj <<\n"
 			L"/Type /XObject\n"
 			L"/Subtype /Image\n"
-			L"/Width %u\n"
-			L"/Height %u\n"
+			L"/Width %zu\n"
+			L"/Height %zu\n"
 			L"/Length %zu\n"
 			L"/ColorSpace /DeviceRGB\n"
 			L"/BitsPerComponent 8\n"
 			L"/Filter /FlateDecode\n"
 			L">>\n",
 			obj_num,
-			t->m_orig.width,
-			t->m_orig.height,
+			width,
+			height,
 			z_buf.size()
 		);
 		size_t len = dt_writer.WriteString(buf);
@@ -367,9 +370,9 @@ namespace winrt::GraphPaper::implementation
 				// BGRA -> RGB
 				swprintf_s(buf,
 					L"%02x%02x%02x",
-					t->m_data[y * 4 * t->m_orig.width + 4 * x + 2],
-					t->m_data[y * 4 * t->m_orig.width + 4 * x + 1],
-					t->m_data[y * 4 * t->m_orig.width + 4 * x + 0]
+					t->m_bgra[y * 4 * t->m_orig.width + 4 * x + 2],
+					t->m_bgra[y * 4 * t->m_orig.width + 4 * x + 1],
+					t->m_bgra[y * 4 * t->m_orig.width + 4 * x + 0]
 				);
 				len += dt_writer.WriteString(buf);
 			}
@@ -392,8 +395,8 @@ namespace winrt::GraphPaper::implementation
 
 			// ページの幅と高さを, D2D の固定 DPI (96dpi) から PDF の 72dpi に,
 			// 変換する (モニターに応じて変化する論理 DPI は用いない). 
-			const float w_pt = m_main_page.m_page_size.width * 72.0f / 96.0f;	// 変換された幅
-			const float h_pt = m_main_page.m_page_size.height * 72.0f / 96.0f;	// 変換された高さ
+			const float w_pt = m_main_page.m_page_size.width * 72.0f / 96.0f;	// ポイントに変換された幅
+			const float h_pt = m_main_page.m_page_size.height * 72.0f / 96.0f;	// ポイントに変換された高さ
 
 			// ストレージファイルを開いて, ストリームとそのデータライターを得る.
 			const IRandomAccessStream& pdf_stream{
@@ -461,36 +464,36 @@ namespace winrt::GraphPaper::implementation
 				L"% Resouces Dictionary\n"
 				L"4 0 obj <<\n");
 			// フォント
-			int font_cnt = 0;
+			int text_cnt = 0;	// 文字列オブジェクトの計数
 			std::vector<std::vector<char>> base_font;	// ベースフォント名
 			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
 				}
 				if (typeid(*s) == typeid(ShapeText)) {
-					if (font_cnt == 0) {
+					if (text_cnt == 0) {
 						len += dt_writer.WriteString(L"/Font <<\n");
 					}
 					swprintf_s(buf,
-						L"/F%d %d 0 R\n",
-						font_cnt, 6 + 3 * font_cnt
+						L"/Font%d %d 0 R\n",
+						text_cnt, 6 + 3 * text_cnt
 					);
 					len += dt_writer.WriteString(buf);
-					static_cast<ShapeText*>(s)->m_pdf_font_num = font_cnt++;
+					static_cast<ShapeText*>(s)->m_pdf_text_cnt = text_cnt++;
 				}
 				else if (typeid(*s) == typeid(ShapeRuler)) {
-					if (font_cnt == 0) {
+					if (text_cnt == 0) {
 						len += dt_writer.WriteString(L"/Font <<\n");
 					}
 					swprintf_s(buf,
-						L"/F%d %d 0 R\n",
-						font_cnt, 6 + 3 * font_cnt
+						L"/Font%d %d 0 R\n",
+						text_cnt, 6 + 3 * text_cnt
 					);
 					len += dt_writer.WriteString(buf);
-					static_cast<ShapeRuler*>(s)->m_pdf_font_num = font_cnt++;
+					static_cast<ShapeRuler*>(s)->m_pdf_text_cnt = text_cnt++;
 				}
 			}
-			if (font_cnt > 0) {
+			if (text_cnt > 0) {
 				len += dt_writer.WriteString(L">>\n");
 			}
 			// 画像
@@ -504,11 +507,11 @@ namespace winrt::GraphPaper::implementation
 						len += dt_writer.WriteString(L"/XObject <<\n");
 					}
 					swprintf_s(buf,
-						L"/I%d %d 0 R\n",
-						image_cnt, 6 + 3 * font_cnt + image_cnt
+						L"/Image%d %d 0 R\n",
+						image_cnt, 6 + 3 * text_cnt + image_cnt
 					);
 					len += dt_writer.WriteString(buf);
-					static_cast<ShapeImage*>(s)->m_pdf_obj = image_cnt++;
+					static_cast<ShapeImage*>(s)->m_pdf_image_cnt = image_cnt++;
 				}
 			}
 			if (image_cnt > 0) {
@@ -560,7 +563,7 @@ namespace winrt::GraphPaper::implementation
 			obj_len.push_back(obj_len.back() + len);
 
 			// フォント辞書
-			font_cnt = 0;
+			text_cnt = 0;
 			for (const auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
 					continue;
@@ -571,7 +574,6 @@ namespace winrt::GraphPaper::implementation
 					// グリフにおける座標値や幅を指定する場合、PDF 内では、常に 1 em = 1000 であるものとして、
 					// 値を設定します。実際のフォントで 1 em = 1024 などとなっている場合は、n / 1024 * 1000 
 					// というようにして、値を 1 em = 1000 に合わせます.
-					// 
 					const auto t = static_cast<ShapeText*>(s);
 
 					DWRITE_FONT_WEIGHT weight = DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
@@ -592,26 +594,23 @@ namespace winrt::GraphPaper::implementation
 					export_pdf_font_info(face, t->m_text, wchar_len(t->m_text), t->m_font_family, f_met, f_type, p_name, cid, gid, g_met, angle);
 
 					// フォント辞書
-					len = export_pdf_font_dict(
-						6 + 3 * font_cnt, f_type, p_name, dt_writer);
+					len = export_pdf_font_dict(6 + 3 * text_cnt, f_type, p_name, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// CID フォント辞書 (Type 0 の子孫となるフォント)
 					// フォント辞書から参照され,
 					// フォント詳細辞書を参照する.
-					len = export_pdf_descendant_font_dict(
-						6 + 3 * font_cnt + 1,
+					len = export_pdf_descendant_font_dict(6 + 3 * text_cnt + 1,
 						//f_type, p_name, std::size(cid), std::data(cid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
 						f_type, p_name, std::size(gid), std::data(gid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// フォント詳細辞書
 					// CID フォント辞書から参照される.
-					len = export_pdf_font_descriptor(
-						6 + 3 * font_cnt + 2,
+					len = export_pdf_font_descriptor(6 + 3 * text_cnt + 2,
 						p_name, stretch, weight, angle, f_met, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
-					font_cnt++;
+					text_cnt++;
 				}
 				if (typeid(*s) == typeid(ShapeRuler)) {
 					ShapeRuler* r = static_cast<ShapeRuler*>(s);
@@ -631,14 +630,14 @@ namespace winrt::GraphPaper::implementation
 
 					// フォント辞書
 					len = export_pdf_font_dict(
-						6 + 3 * font_cnt, f_type, p_name, dt_writer);
+						6 + 3 * text_cnt, f_type, p_name, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// CID フォント辞書 (Type 0 の子孫となるフォント)
 					// フォント辞書から参照され,
 					// フォント詳細辞書を参照する.
 					len = export_pdf_descendant_font_dict(
-						6 + 3 * font_cnt + 1,
+						6 + 3 * text_cnt + 1,
 						//f_type, p_name, std::size(cid), std::data(cid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
 						f_type, p_name, std::size(gid), std::data(gid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
@@ -646,10 +645,10 @@ namespace winrt::GraphPaper::implementation
 					// フォント詳細辞書
 					// CID フォント辞書から参照される.
 					len = export_pdf_font_descriptor(
-						6 + 3 * font_cnt + 2,
+						6 + 3 * text_cnt + 2,
 						p_name, stretch, weight, angle, f_met, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
-					font_cnt++;
+					text_cnt++;
 				}
 			}
 
@@ -661,7 +660,10 @@ namespace winrt::GraphPaper::implementation
 				}
 
 				if (typeid(*s) == typeid(ShapeImage)) {
-					len = export_pdf_image(static_cast<const ShapeImage*>(s), 6 + 3 * font_cnt + image_cnt, dt_writer);
+					const uint8_t* bgra = static_cast<ShapeImage*>(s)->m_bgra;
+					const size_t w = static_cast<ShapeImage*>(s)->m_orig.width;
+					const size_t h = static_cast<ShapeImage*>(s)->m_orig.height;
+					len = export_pdf_image(bgra, w, h, 6 + 3 * text_cnt + image_cnt, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 					image_cnt++;
 				}
