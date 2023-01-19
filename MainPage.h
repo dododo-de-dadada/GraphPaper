@@ -51,34 +51,35 @@
 
 namespace winrt::GraphPaper::implementation
 {
-	using winrt::Windows::UI::Xaml::Visibility;
-	using winrt::Windows::UI::Color;
-	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
-	using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
-	using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
 	using winrt::Windows::ApplicationModel::SuspendingEventArgs;
-	using winrt::Windows::Foundation::IInspectable;
-	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 	using winrt::Windows::ApplicationModel::EnteredBackgroundEventArgs;
 	using winrt::Windows::ApplicationModel::LeavingBackgroundEventArgs;
-	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
-	using winrt::Windows::Graphics::Display::DisplayInformation;
-	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
-	using winrt::Windows::System::VirtualKeyModifiers;
 	using winrt::Windows::Foundation::IAsyncAction;
+	using winrt::Windows::Foundation::IInspectable;
+	using winrt::Windows::Graphics::Display::DisplayInformation;
+	using winrt::Windows::Graphics::Imaging::BitmapEncoder;
 	using winrt::Windows::Storage::StorageFile;
-	using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
+	using winrt::Windows::System::VirtualKeyModifiers;
+	using winrt::Windows::UI::Color;
+	using winrt::Windows::UI::Core::CoreWindow;
+	using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
+	using winrt::Windows::UI::Core::VisibilityChangedEventArgs;
+	using winrt::Windows::UI::Core::WindowActivatedEventArgs;
+	using winrt::Windows::UI::Xaml::Controls::MenuFlyout;
+	using winrt::Windows::UI::Xaml::Visibility;
+	using winrt::Windows::UI::Xaml::RoutedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialog;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogClosedEventArgs;
-	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
-	using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollEventArgs;
-	using winrt::Windows::UI::Xaml::Input::KeyboardAcceleratorInvokedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::ItemClickEventArgs;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
+	using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs;
-	using winrt::Windows::UI::Core::WindowActivatedEventArgs;
-	using winrt::Windows::UI::Core::CoreWindow;
-	using winrt::Windows::UI::Core::VisibilityChangedEventArgs;
+	using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
+	using winrt::Windows::UI::Xaml::Input::KeyboardAcceleratorInvokedEventArgs;
+	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
+	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
+	using winrt::Windows::UI::Xaml::UIElement;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
@@ -284,6 +285,8 @@ namespace winrt::GraphPaper::implementation
 		winrt::event_token m_token_orientation_changed;	// ディスプレーの方向切り替えハンドラーのトークン
 		winrt::event_token m_token_contents_invalidated;	// ディスプレーの表示内容切り替えハンドラーのトークン
 		winrt::event_token m_token_close_requested;	// アプリケーションを閉じるハンドラーのトークン
+
+		winrt::com_ptr<UIElement> m_print_preview;
 
 		//-------------------------------
 		// MainPage.cpp

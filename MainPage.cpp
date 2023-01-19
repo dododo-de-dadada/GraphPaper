@@ -244,14 +244,35 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	using winrt::Windows::UI::Xaml::Printing::PrintDocument;
+	using winrt::Windows::UI::Xaml::Printing::GetPreviewPageEventArgs;
+	using winrt::Windows::UI::Xaml::Printing::AddPagesEventArgs;
 	using winrt::Windows::UI::Xaml::Printing::PaginateEventArgs;
+	using winrt::Windows::Graphics::Printing::PrintTaskOptions;
+	using winrt::Windows::Graphics::Printing::PrintPageDescription:
 
+	// アプリからの印刷
+	// https://learn.microsoft.com/ja-jp/windows/uwp/devices-sensors/print-from-your-app
+	// https://github.com/microsoft/Windows-universal-samples/tree/main/Samples/Printing/cpp
 	void MainPage::print_click(const IInspectable&, const RoutedEventArgs&)
 	{
 __debugbreak();
 		auto p_doc = PrintDocument();
 		auto d_src = p_doc.DocumentSource();
-		p_doc.Paginate([](const IInspectable& sender, const PaginateEventArgs& args) {
+		p_doc.Paginate([this](const IInspectable& sender, const PaginateEventArgs& args) {
+			m_print_preview = nullptr;
+			PrintTaskOptions opt = args.PrintTaskOptions();
+			PrintPageDescription desc = opt.GetPageDescription();
+			}
+		);
+		p_doc.AddPages([this](const IInspectable& sender, AddPagesEventArgs& args) {
+			PrintDocument p_doc = winrt::unbox_value<PrintDocument>(sender);
+			p_doc.AddPage(m_print_preview);
+			p_dec.AddPagesComplete();
+			}
+		);
+		p_doc.GetPreviewPage([this](const IInspectable& sender, const GetPreviewPageEventArgs& args) {
+			PrintDocument p_doc = winrt::unbox_value<PrintDocument>(sender);
+			p_doc.SetPreviewPage(args.PageNumber(), m_print_preview.get());
 			}
 		);
 
