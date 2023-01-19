@@ -243,8 +243,17 @@ namespace winrt::GraphPaper::implementation
 		});
 	}
 
+	using winrt::Windows::UI::Xaml::Printing::PrintDocument;
+	using winrt::Windows::UI::Xaml::Printing::PaginateEventArgs;
+
 	void MainPage::print_click(const IInspectable&, const RoutedEventArgs&)
 	{
 __debugbreak();
+		auto p_doc = PrintDocument();
+		auto d_src = p_doc.DocumentSource();
+		p_doc.Paginate([](const IInspectable& sender, const PaginateEventArgs& args) {
+			}
+		);
+
 	}
 }
