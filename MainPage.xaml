@@ -98,7 +98,12 @@
 					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Uid="mfi_exit" Click="file_exit_click_async" Icon="Cancel" Text="Exit" />
+                <MenuFlyoutItem x:Uid="mfi_print" Click="print_click" Icon="Print" Text="Print..." >
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="P" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Uid="mfi_exit" Click="file_exit_click_async" Icon="Cancel" Text="Exit" />
 			</muxc:MenuBarItem>
 			<!-- 編集メニュー -->
 			<muxc:MenuBarItem x:Name="mbi_edit" x:Uid="mbi_edit" AccessKey="E" Title="Edit">

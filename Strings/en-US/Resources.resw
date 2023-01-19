@@ -385,7 +385,11 @@
     <value>Import Image...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_find_text.Text" xml:space="preserve">
+  <data name="mfi_file_open.Text" xml:space="preserve">
+    <value>Open...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+	<data name="mfi_find_text.Text" xml:space="preserve">
     <value>Find/Replace Text...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -433,10 +437,6 @@
     <value>New</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_file_open.Text" xml:space="preserve">
-    <value>Open...</value>
-    <comment>MenuFlyoutItem</comment>
-  </data>
   <data name="mfi_page_color.Text" xml:space="preserve">
     <value>Sheet Color...</value>
     <comment>MenuFlyoutItem</comment>
@@ -445,7 +445,11 @@
     <value>Sheet Size...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_xcvd_paste.Text" xml:space="preserve">
+  <data name="mfi_print.Text" xml:space="preserve">
+    <value>Print...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+	<data name="mfi_xcvd_paste.Text" xml:space="preserve">
     <value>Paste</value>
     <comment>MenuFlyoutItem</comment>
   </data>

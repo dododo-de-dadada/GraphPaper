@@ -300,10 +300,7 @@ namespace winrt::GraphPaper::implementation
 			args.Handled(true);
 			auto _{ file_exit_click_async(nullptr, nullptr) };
 		}
-		// ファイルメニューの「新規」が選択された
-		IAsyncAction file_new_click_async(IInspectable const&, RoutedEventArgs const&);
-		// ページのスワップチェーンパネルのロードが始まった.
-		void page_panel_loading(IInspectable const& sender, IInspectable const&);
+		void MainPage::print_click(const IInspectable&, const RoutedEventArgs&);
 
 		//-------------------------------
 		// MainPage_app.cpp
@@ -434,6 +431,8 @@ namespace winrt::GraphPaper::implementation
 		void file_finish_reading(void);
 		// ファイルメニューの「画像を図形としてインポートする」が選択された
 		IAsyncAction file_import_image_click_async(IInspectable const&, RoutedEventArgs const&);
+		// ファイルメニューの「新規」が選択された
+		IAsyncAction file_new_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「開く」が選択された
 		IAsyncAction file_open_click_async(IInspectable const&, RoutedEventArgs const&);
 		// ファイルメニューの「名前を付けて保存」が選択された
@@ -648,8 +647,7 @@ namespace winrt::GraphPaper::implementation
 		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
-		// MainPage_pdf.cpp
-		// PDF
+		// MainPage_page.cpp
 		//-------------------------------
 
 		//-------------------------------
@@ -750,6 +748,8 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_ID U, int S> void page_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 表示のスワップチェーンパネルがロードされた.
 		void page_panel_loaded(IInspectable const& sender, RoutedEventArgs const& args);
+		// ページのスワップチェーンパネルのロードが始まった.
+		void page_panel_loading(IInspectable const& sender, IInspectable const&);
 		// 表示のスワップチェーンパネルの寸法が変わった.
 		void page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args);
 		// 表示のスワップチェーンパネルの寸法が変わった.

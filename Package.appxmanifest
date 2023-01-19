@@ -43,6 +43,6 @@ IgnorableNamespaces="uap mp rescap"
     <!-- これを追加 -->
     <rescap:Capability Name="confirmAppClose" />
     <!-- さらに追加 -->
-		<rescap:Capability Name="broadFileSystemAccess" />
+	<rescap:Capability Name="broadFileSystemAccess" />
   </Capabilities>
 </Package>

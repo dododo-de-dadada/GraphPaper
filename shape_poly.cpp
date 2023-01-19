@@ -10,9 +10,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
 	// 線分の交点と, その助変数を求める.
 	// a	線分 ab の始点
 	// b	線分 ab の終点
@@ -22,22 +19,14 @@ namespace winrt::GraphPaper::implementation
 	// t	線分 cd に対する交点の助変数
 	// e	交点
 	// 戻り値	交点が求まれば true, そうでなければ false.
-	static bool stroke_find_intersection(const D2D1_POINT_2F a, const D2D1_POINT_2F b, const D2D1_POINT_2F c, const D2D1_POINT_2F d, double& s, double& t, D2D1_POINT_2F& e)
+	static bool poly_find_intersection(const D2D1_POINT_2F a, const D2D1_POINT_2F b, const D2D1_POINT_2F c, const D2D1_POINT_2F d, double& s, double& t, D2D1_POINT_2F& e)
 	{
-		const double ax = a.x;
-		const double ay = a.y;
-		//const double bx = b.x;
-		//const double by = b.y;
-		const double cx = c.x;
-		const double cy = c.y;
-		//const double dx = d.x;
-		//const double dy = d.y;
-		const double ab_x = static_cast<double>(b.x) - ax;
-		const double ab_y = static_cast<double>(b.y) - ay;
-		const double cd_x = static_cast<double>(d.x) - cx;
-		const double cd_y = static_cast<double>(d.y) - cy;
-		const double ac_x = cx - ax;
-		const double ac_y = cy - ay;
+		const double ab_x = static_cast<double>(b.x) - static_cast<double>(a.x);
+		const double ab_y = static_cast<double>(b.y) - static_cast<double>(a.y);
+		const double cd_x = static_cast<double>(d.x) - static_cast<double>(c.x);
+		const double cd_y = static_cast<double>(d.y) - static_cast<double>(c.y);
+		const double ac_x = static_cast<double>(c.x) - static_cast<double>(a.x);
+		const double ac_y = static_cast<double>(c.y) - static_cast<double>(a.y);
 		const double r = ab_x * cd_y - ab_y * cd_x;
 		if (fabs(r) < FLT_MIN) {
 			return false;
@@ -52,8 +41,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		s = sr / r;
 		t = tr / r;
-		e.x = static_cast<FLOAT>(ax + ab_x * s);
-		e.y = static_cast<FLOAT>(ay + ab_y * s);
+		e.x = static_cast<FLOAT>(static_cast<double>(a.x) + ab_x * s);
+		e.y = static_cast<FLOAT>(static_cast<double>(a.y) + ab_y * s);
 		return true;
 	}
 
@@ -66,7 +55,7 @@ namespace winrt::GraphPaper::implementation
 	//	return pt_in_circle(t_vec, e_width) || pt_in_circle(t_vec, v_end, e_width);
 	//}
 
-	static bool stroke_test_cap_square(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F v_end, const size_t d_cnt, const D2D1_POINT_2F d_vec[], const double s_len[], const double e_width)
+	static bool poly_test_cap_square(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F v_end, const size_t d_cnt, const D2D1_POINT_2F d_vec[], const double s_len[], const double e_width)
 	{
 		for (size_t i = 0; i < d_cnt; i++) {
 			if (s_len[i] >= FLT_MIN) {
@@ -109,7 +98,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	static bool stroke_test_cap_triangle(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F v_end, const size_t d_cnt, const D2D1_POINT_2F d_vec[], const double s_len[], const double e_width)
+	static bool poly_test_cap_triangle(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F v_end, const size_t d_cnt, const D2D1_POINT_2F d_vec[], const double s_len[], const double e_width)
 	{
 		for (size_t i = 0; i < d_cnt; i++) {
 			if (s_len[i] >= FLT_MIN) {
@@ -151,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 多角形の角が位置を含むか判定する (面取り)
-	static bool stroke_test_join_bevel(
+	static bool poly_test_join_bevel(
 		const D2D1_POINT_2F t_pos,
 		const size_t v_cnt,
 		const bool v_close,
@@ -178,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 	// exp_side	拡張した辺の配列 [exp_cnt][4+1]
 	// mit_limit	線のマイター制限
 	// s_join	線の結合方法
-	static bool stroke_test_join_miter(
+	static bool poly_test_join_miter(
 		const D2D1_POINT_2F t_pos,
 		const size_t exp_cnt,
 		const bool exp_close,
@@ -229,11 +218,11 @@ namespace winrt::GraphPaper::implementation
 			// 1..2 側に交点があって, 拡張された辺の外側ならば, 四辺形 { 交点, j2, v[i], i1 } を得る.
 			double s, t;	// 交点の助変数
 			D2D1_POINT_2F q_pos[4 + 1];	// 四辺形 (マイター制限を超えるならば五角形)
-			if (!stroke_find_intersection(exp_side[j][0], exp_side[j][3], exp_side[i][0], exp_side[i][3], s, t, q_pos[0])) {
+			if (!poly_find_intersection(exp_side[j][0], exp_side[j][3], exp_side[i][0], exp_side[i][3], s, t, q_pos[0])) {
 				continue;
 			}
 			if (s < 1.0 || t > 0.0) {
-				if (!stroke_find_intersection(exp_side[j][1], exp_side[j][2], exp_side[i][1], exp_side[i][2], s, t, q_pos[0])) {
+				if (!poly_find_intersection(exp_side[j][1], exp_side[j][2], exp_side[i][1], exp_side[i][2], s, t, q_pos[0])) {
 					continue;
 				}
 				if (s < 1.0 || t > 0.0) {
@@ -282,8 +271,8 @@ namespace winrt::GraphPaper::implementation
 			pt_mul_add(d_vec, limit_len / sqrt(d_abs2), exp_side[i][4], mit_pos);
 			D2D1_POINT_2F nor_pos;
 			pt_add(mit_pos, D2D1_POINT_2F{ d_vec.y, -d_vec.x }, nor_pos);
-			stroke_find_intersection(q_pos[3], q_pos[0], mit_pos, nor_pos, s, t, q_pos[4]);
-			stroke_find_intersection(q_pos[0], q_pos[1], mit_pos, nor_pos, s, t, q_pos[0]);
+			poly_find_intersection(q_pos[3], q_pos[0], mit_pos, nor_pos, s, t, q_pos[4]);
+			poly_find_intersection(q_pos[0], q_pos[1], mit_pos, nor_pos, s, t, q_pos[0]);
 			const D2D1_POINT_2F* pen_pos = q_pos;
 			if (pt_in_poly(t_pos, 5, pen_pos)) {
 				// 位置を含むなら true を返す.
@@ -294,7 +283,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 多角形の角が位置を含むか判定する (丸まった角)
-	static bool stroke_test_join_round(const D2D1_POINT_2F& t_pos, const size_t v_cnt, const D2D1_POINT_2F v_pos[], const double exp_width)
+	static bool poly_test_join_round(const D2D1_POINT_2F& t_pos, const size_t v_cnt, const D2D1_POINT_2F v_pos[], const double exp_width)
 	{
 		for (size_t i = 0; i < v_cnt; i++) {
 			if (pt_in_circle(t_pos, v_pos[i], exp_width)) {
@@ -315,12 +304,12 @@ namespace winrt::GraphPaper::implementation
 	// s_join	線の結合
 	// s_limit	マイター制限
 	// f_opa	塗りつぶしが不透明か判定
-	static uint32_t stroke_hit_test(
+	static uint32_t poly_hit_test(
 		const D2D1_POINT_2F t_vec,
 		const size_t d_cnt,
 		const D2D1_POINT_2F d_vec[],
-		const bool t_anc,
-		const bool s_opa,
+		//const bool t_anc,
+		const bool s_opaque,
 		const double s_width,
 		const bool s_closed,
 		const CAP_STYLE& s_cap,
@@ -328,15 +317,13 @@ namespace winrt::GraphPaper::implementation
 		const double s_limit,
 		const bool f_opa)
 	{
-		// 始点は { 0, 0 }
 		D2D1_POINT_2F v_pos[N_GON_MAX]{ { 0.0f, 0.0f }, };	// 頂点の位置
-		// 各頂点の位置と辺の長さを求める.
 		double s_len[N_GON_MAX];	// 辺の長さ
 		size_t nz_cnt = 0;	// 長さのある辺の数
 		size_t k = static_cast<size_t>(-1);	// 見つかった頂点
 		for (size_t i = 0; i < d_cnt; i++) {
 			// 判定する位置が, 頂点の部位に含まれるか判定する.
-			if (t_anc && pt_in_anc(t_vec, v_pos[i])) {
+			if (/*t_anc &&*/pt_in_anc(t_vec, v_pos[i])) {
 				k = i;
 			}
 			// 辺の長さを求める.
@@ -357,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 			return ANC_TYPE::ANC_P0 + static_cast<uint32_t>(k);
 		}
 		// 線が不透明か判定する.
-		if (s_opa) {
+		if (s_opaque) {
 			// 不透明ならば, 線の太さの半分の幅を求め, 拡張する幅に格納する.
 			const auto e_width = max(max(static_cast<double>(s_width), Shape::s_anc_len) * 0.5, 0.5);	// 拡張する幅
 			// 全ての辺の長さがゼロか判定する.
@@ -381,13 +368,13 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 閉じてないなら, 端の形式が正方形か判定する.
 			else if (equal(s_cap, CAP_SQUARE)) {
-				if (stroke_test_cap_square(t_vec, v_pos[d_cnt], d_cnt, d_vec, s_len, e_width)) {
+				if (poly_test_cap_square(t_vec, v_pos[d_cnt], d_cnt, d_vec, s_len, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			// 閉じてないなら, 端の形式が三角形か判定する.
 			else if (equal(s_cap, CAP_TRIANGLE)) {
-				if (stroke_test_cap_triangle(t_vec, v_pos[d_cnt], d_cnt, d_vec, s_len, e_width)) {
+				if (poly_test_cap_triangle(t_vec, v_pos[d_cnt], d_cnt, d_vec, s_len, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
@@ -506,18 +493,18 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL) {
-				if (stroke_test_join_bevel(t_vec, e_cnt, s_closed, e_side)) {
+				if (poly_test_join_bevel(t_vec, e_cnt, s_closed, e_side)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER
 				|| s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-				if (stroke_test_join_miter(t_vec, e_cnt, s_closed, e_width, e_side, s_limit, s_join)) {
+				if (poly_test_join_miter(t_vec, e_cnt, s_closed, e_width, e_side, s_limit, s_join)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
 			else if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
-				if (stroke_test_join_round(t_vec, d_cnt + 1, v_pos, e_width)) {
+				if (poly_test_join_round(t_vec, d_cnt + 1, v_pos, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
@@ -530,40 +517,39 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_PAGE;
 	}
 
-	// 直行するベクトルを得る.
-	//static D2D1_POINT_2F poly_pt_orth(const D2D1_POINT_2F vec) { return { -vec.y, vec.x }; }
-
+	// 矢じりの返しと先端の位置を得る.
 	bool ShapePoly::poly_get_arrow_barbs(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROW_SIZE& a_size, D2D1_POINT_2F& h_tip, D2D1_POINT_2F h_barbs[]) noexcept
 	{
-		double b_offset = a_size.m_offset;	// 矢じるし先端のオフセット
+		double a_offset = a_size.m_offset;	// 矢じりの先端のオフセット
 		for (size_t i = v_cnt - 1; i > 0; i--) {
-			D2D1_POINT_2F a_vec;
-			pt_sub(v_pos[i], v_pos[i - 1], a_vec);
-			// 差分から矢軸とその長さを求める.
+
+			// 頂点間の差分から矢軸とその長さを求める.
 			// 矢軸の長さがほぼゼロか判定する.
-			//const auto a_vec = m_vec[i - 1];	// 矢軸のベクトル
+			// 長さゼロならこの頂点は無視する.
+			D2D1_POINT_2F a_vec;
+			pt_sub(v_pos[i], v_pos[i - 1], a_vec);	// 頂点間の差分
 			const auto a_len = sqrt(pt_abs2(a_vec));	// 矢軸の長さ
 			if (a_len < FLT_MIN) {
 				continue;
 			}
 
 			// 矢軸の長さが矢じるし先端のオフセットより短いか判定する.
-			if (a_len < b_offset) {
+			if (a_len < a_offset) {
 				// 次の差分があるか判定する.
 				if (i > 1) {
 					// オフセットを矢軸の長さだけ短くする.
-					b_offset -= a_len;
+					a_offset -= a_len;
 					continue;
 				}
-				b_offset = a_len;
+				a_offset = a_len;
 			}
 
-			// 矢じるしの返しの位置を求める.
+			// 矢じりの返しの位置を求める.
 			const auto a_end = v_pos[i - 1];		// 矢軸の終端
-			const auto b_len = a_size.m_length;	// 矢じるしの長さ
-			const auto b_width = a_size.m_width;	// 矢じるしの幅
+			const auto b_len = a_size.m_length;	// 矢じりの長さ
+			const auto b_width = a_size.m_width;	// 矢じりの返しの幅
 			get_arrow_barbs(a_vec, a_len, b_width, b_len, h_barbs);
-			pt_mul_add(a_vec, 1.0 - b_offset / a_len, a_end, h_tip);
+			pt_mul_add(a_vec, 1.0 - a_offset / a_len, a_end, h_tip);
 			pt_add(h_barbs[0], h_tip, h_barbs[0]);
 			pt_add(h_barbs[1], h_tip, h_barbs[1]);
 			return true;
@@ -695,7 +681,8 @@ namespace winrt::GraphPaper::implementation
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
 		}
-		if (m_d2d_arrow_geom == nullptr || m_d2d_path_geom == nullptr) {
+		if ((m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) ||
+			m_d2d_path_geom == nullptr) {
 			if (m_d2d_path_geom != nullptr) {
 				m_d2d_path_geom = nullptr;
 			}
@@ -716,12 +703,12 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 折れ線のパスジオメトリを作成する.
+			const auto f_begin = is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
 			winrt::com_ptr<ID2D1GeometrySink> sink;
 			winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
 			winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-			const auto figure_begin = is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
-			sink->BeginFigure(v_pos[0], figure_begin);
+			sink->BeginFigure(v_pos[0], f_begin);
 			for (size_t i = 1; i < v_cnt; i++) {
 				sink->AddLine(v_pos[i]);
 			}
@@ -732,15 +719,18 @@ namespace winrt::GraphPaper::implementation
 			// 矢じるしの形式がなしか判定する.
 			const auto a_style = m_arrow_style;
 			if (a_style != ARROW_STYLE::NONE) {
+
 				// 矢じるしの位置を求める.
 				D2D1_POINT_2F h_tip;
 				D2D1_POINT_2F h_barbs[2];
 				if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
+
 					// 矢じるしのパスジオメトリを作成する.
+					const auto a_begin = (a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 					winrt::check_hresult(factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
 					winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
 					sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-					sink->BeginFigure(h_barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+					sink->BeginFigure(h_barbs[0], a_begin);
 					sink->AddLine(h_tip);
 					sink->AddLine(h_barbs[1]);
 					sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
@@ -801,11 +791,11 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F t_vec;
 		pt_sub(t_pos, m_start, t_vec);
-		return stroke_hit_test(
+		return poly_hit_test(
 			t_vec,
 			m_vec.size(),
 			m_vec.data(),
-			true,
+			//true,
 			is_opaque(m_stroke_color),
 			m_stroke_width,
 			m_end_closed,

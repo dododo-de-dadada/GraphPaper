@@ -381,7 +381,11 @@
     <value>画像をインポートする...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_fill_color.Text" xml:space="preserve">
+  <data name="mfi_file_open.Text" xml:space="preserve">
+    <value>開く...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+	<data name="mfi_fill_color.Text" xml:space="preserve">
     <value>塗りつぶし色...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
@@ -433,10 +437,6 @@
     <value>新規</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_file_open.Text" xml:space="preserve">
-    <value>開く...</value>
-    <comment>MenuFlyoutItem</comment>
-  </data>
   <data name="mfi_page_color.Text" xml:space="preserve">
     <value>ページの色...</value>
     <comment>MenuFlyoutItem</comment>
@@ -445,7 +445,11 @@
     <value>ページの大きさ...</value>
     <comment>MenuFlyoutItem</comment>
   </data>
-  <data name="mfi_xcvd_paste.Text" xml:space="preserve">
+  <data name="mfi_print.Text" xml:space="preserve">
+    <value>印刷...</value>
+    <comment>MenuFlyoutItem</comment>
+  </data>
+	<data name="mfi_xcvd_paste.Text" xml:space="preserve">
     <value>貼り付け</value>
     <comment>MenuFlyoutItem</comment>
   </data>

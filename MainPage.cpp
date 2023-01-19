@@ -243,4 +243,8 @@ namespace winrt::GraphPaper::implementation
 		});
 	}
 
+	void MainPage::print_click(const IInspectable&, const RoutedEventArgs&)
+	{
+__debugbreak();
+	}
 }

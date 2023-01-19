@@ -9,9 +9,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
 	// セグメントを区切る助変数の値
 	constexpr double T0 = 0.0;	// 区間の開始
 	constexpr double T1 = 1.0 / 3.0;	// 1 番目の区切り
@@ -499,7 +496,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
 		}
-		if (m_d2d_arrow_geom == nullptr ||
+		if ((m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) ||
 			m_d2d_path_geom == nullptr) {
 			if (m_d2d_path_geom != nullptr) {
 				m_d2d_path_geom = nullptr;
@@ -509,21 +506,16 @@ namespace winrt::GraphPaper::implementation
 			}
 			{
 				D2D1_BEZIER_SEGMENT b_seg;
-				winrt::com_ptr<ID2D1GeometrySink> sink;
-
-				if (m_d2d_path_geom != nullptr) {
-					m_d2d_path_geom = nullptr;
-				}
-				if (m_d2d_arrow_geom != nullptr) {
-					m_d2d_arrow_geom = nullptr;
-				}
 				pt_add(m_start, m_vec[0], b_seg.point1);
 				pt_add(b_seg.point1, m_vec[1], b_seg.point2);
 				pt_add(b_seg.point2, m_vec[2], b_seg.point3);
+
+				winrt::com_ptr<ID2D1GeometrySink> sink;
 				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
 				m_d2d_path_geom->Open(sink.put());
 				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-				sink->BeginFigure(m_start, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				const auto f_begin = (is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				sink->BeginFigure(m_start, f_begin);
 				sink->AddBezier(b_seg);
 				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 				winrt::check_hresult(sink->Close());
@@ -537,8 +529,6 @@ namespace winrt::GraphPaper::implementation
 			brush->SetColor(m_fill_color);
 			target->FillGeometry(m_d2d_path_geom.get(), brush, nullptr);
 		}
-		D2D1_POINT_2F s_pos;
-		D2D1_POINT_2F e_pos;
 		if (is_opaque(m_stroke_color)) {
 			const auto s_width = m_stroke_width;
 			brush->SetColor(m_stroke_color);
@@ -552,6 +542,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (is_selected()) {
+			D2D1_POINT_2F s_pos;
+			D2D1_POINT_2F e_pos;
 			D2D1_MATRIX_3X2_F tran;
 			target->GetTransform(&tran);
 			const auto s_width = static_cast<FLOAT>(1.0 / tran.m11);
