@@ -6,6 +6,7 @@
 	xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Loaded="Page_Loaded"
 	mc:Ignorable="d">
 	<!-- x:Name はコードビハインドのためのオブジェクトをつくる. x:Uid はリソースの参照をつくる. -->
 	<Page.Resources>
@@ -98,7 +99,7 @@
 					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Uid="mfi_print" Click="print_click" Icon="Print" Text="Print..." >
+                <MenuFlyoutItem x:Name="mfi_print" x:Uid="mfi_print" Click="print_click_async" Icon="Print" Text="Print..." >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="P" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
@@ -753,5 +754,7 @@
 				<CheckBox x:Name="dialog_check_box" x:Uid="dialog_check_box" Content="Check Box" IsChecked="False" RelativePanel.Below="dialog_slider_0" RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
 			</RelativePanel>
 		</ContentDialog>
-	</Grid>
+        <!-- 印刷のための透明なキャンバス -->
+        <Canvas x:Name="PrintCanvas" Opacity="0" />
+    </Grid>
 </Page>

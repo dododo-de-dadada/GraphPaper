@@ -79,7 +79,20 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Input::KeyboardAcceleratorInvokedEventArgs;
 	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
-	using winrt::Windows::UI::Xaml::UIElement;
+
+	using winrt::Windows::Graphics::Printing::IPrintDocumentSource;
+	using winrt::Windows::UI::Xaml::Printing::PrintDocument;
+	using winrt::Windows::Graphics::Printing::PrintManager;
+	using winrt::Windows::UI::Xaml::Printing::GetPreviewPageEventArgs;
+	using winrt::Windows::UI::Xaml::Printing::PaginateEventArgs;
+	using winrt::Windows::Graphics::Printing::PrintTaskOptions;
+	using winrt::Windows::Graphics::Printing::PrintPageDescription;
+	using winrt::Windows::UI::Xaml::Printing::AddPagesEventArgs;
+	using winrt::Windows::Graphics::Printing::PrintTaskRequestedEventArgs;
+	using winrt::Windows::Graphics::Printing::PrintTask;
+	using winrt::Windows::Graphics::Printing::PrintTaskSourceRequestedArgs;
+	using winrt::Windows::Graphics::Printing::PrintTaskCompletedEventArgs;
+	using winrt::Windows::Graphics::Printing::PrintTaskCompletion;
 
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
@@ -286,7 +299,8 @@ namespace winrt::GraphPaper::implementation
 		winrt::event_token m_token_contents_invalidated;	// ディスプレーの表示内容切り替えハンドラーのトークン
 		winrt::event_token m_token_close_requested;	// アプリケーションを閉じるハンドラーのトークン
 
-		winrt::com_ptr<UIElement> m_print_preview;
+		PrintDocument m_print_doc;
+		IPrintDocumentSource m_print_source;
 
 		//-------------------------------
 		// MainPage.cpp
@@ -303,7 +317,7 @@ namespace winrt::GraphPaper::implementation
 			args.Handled(true);
 			auto _{ file_exit_click_async(nullptr, nullptr) };
 		}
-		void MainPage::print_click(const IInspectable&, const RoutedEventArgs&);
+		IAsyncAction MainPage::print_click_async(const IInspectable&, const RoutedEventArgs&);
 
 		//-------------------------------
 		// MainPage_app.cpp
@@ -1002,7 +1016,46 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction xcvd_paste_shape(void);
 		// 文字列を貼り付ける.
 		IAsyncAction xcvd_paste_text(void);
-	};
+		void Page_Loaded(const IInspectable& sender, const RoutedEventArgs& args)
+		{
+			m_print_doc = PrintDocument();
+			m_print_source = m_print_doc.DocumentSource();
+			m_print_doc.Paginate([=](const IInspectable& sender, const PaginateEventArgs& args) {
+				PrintTaskOptions opt = args.PrintTaskOptions();
+			PrintPageDescription desc = opt.GetPageDescription(0);
+				}
+			);
+			m_print_doc.AddPages([=](const IInspectable& sender, const AddPagesEventArgs& args) {
+				PrintDocument m_print_doc = winrt::unbox_value<PrintDocument>(sender);
+			m_print_doc.AddPage(PrintPage());
+			m_print_doc.AddPagesComplete();
+				}
+			);
+			m_print_doc.GetPreviewPage([=](const IInspectable& sender, const GetPreviewPageEventArgs& args) {
+				PrintDocument m_print_doc = winrt::unbox_value<PrintDocument>(sender);
+			m_print_doc.SetPreviewPage(args.PageNumber(), PrintPage());
+				}
+			);
+
+			PrintManager& mgr = PrintManager::GetForCurrentView();
+			mgr.PrintTaskRequested([=](const IInspectable& /*PrintManager&*/ sender, const PrintTaskRequestedEventArgs& args) {
+				PrintTask p_task = nullptr;
+			p_task = args.Request().CreatePrintTask(L"Print", [=](const PrintTaskSourceRequestedArgs& args) {
+				p_task.Completed([=](const IInspectable& sender, const PrintTaskCompletedEventArgs& args) {
+					if (args.Completion() == PrintTaskCompletion::Failed) {
+
+					}
+					});
+			args.SetSource(m_print_source);
+				});
+				});
+			// Add the (newly created) page to the print canvas which is part of the visual tree and force it to go
+			// through layout so that the linked containers correctly distribute the content inside them.
+			PrintCanvas().Children().Append(PrintPage());
+			PrintCanvas().InvalidateMeasure();
+			PrintCanvas().UpdateLayout();
+		}
+};
 
 }
 

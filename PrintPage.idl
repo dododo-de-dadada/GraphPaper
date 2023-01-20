@@ -1,0 +1,9 @@
+namespace GraphPaper
+{
+    [default_interface]
+    runtimeclass PrintPage : Windows.UI.Xaml.Controls.Page
+    {
+        PrintPage();
+        Int32 MyProperty;
+    }
+}
