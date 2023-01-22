@@ -25,19 +25,19 @@ namespace winrt::GraphPaper::implementation
 		double x;
 		double y;
 		// この位置を含むよう方形を拡張する.
-		inline void exp(BZP& r_nw, BZP& r_sw) const noexcept
+		inline void exp(BZP& r_lt, BZP& r_rb) const noexcept
 		{
-			if (x < r_nw.x) {
-				r_nw.x = x;
+			if (x < r_lt.x) {
+				r_lt.x = x;
 			}
-			if (x > r_sw.x) {
-				r_sw.x = x;
+			if (x > r_rb.x) {
+				r_rb.x = x;
 			}
-			if (y < r_nw.y) {
-				r_nw.y = y;
+			if (y < r_lt.y) {
+				r_lt.y = y;
 			}
-			if (y > r_sw.y) {
-				r_sw.y = y;
+			if (y > r_rb.y) {
+				r_rb.y = y;
 			}
 		}
 		inline BZP nextafter(const double d) const noexcept { return { std::nextafter(x, x + d), std::nextafter(y, y + d) }; }
@@ -57,9 +57,6 @@ namespace winrt::GraphPaper::implementation
 		inline bool operator !=(const BZP& q) const noexcept { return x != q.x || y != q.y; }
 		inline double opro(const BZP& q) const noexcept { return x * q.y - y * q.x; }
 	};
-
-	// 曲線の矢じるしの端点を求める.
-	//static bool bezi_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
 
 	// 曲線の矢じるしのジオメトリを作成する.
 	static void bezi_create_arrow_geom(ID2D1Factory3* const factory, const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
@@ -103,9 +100,11 @@ namespace winrt::GraphPaper::implementation
 		BZP seg[3]{};
 		BZP b_pos[4]{};
 
+		// 制御点を配列に格納する.
 		seg[0] = b_seg.point1;
 		seg[1] = b_seg.point2;
 		seg[2] = b_seg.point3;
+
 		// 座標値による誤差を少なくできる, と思われるので,
 		// ベジェ曲線を始点が原点となるように平行移動.
 		b_pos[3] = 0.0;
@@ -114,17 +113,22 @@ namespace winrt::GraphPaper::implementation
 		b_pos[0] = seg[2] - b_start;
 		auto b_len = bezi_len_by_param(b_pos, 0.0, 1.0, SIMPSON_CNT);
 		if (b_len >= FLT_MIN) {
+
 			// 矢じるしの先端のオフセット, または曲線の長さ, 
 			// どちらか短い方で, 助変数を求める.
 			const auto t = bezi_param_by_len(b_pos, min(b_len, a_size.m_offset));
+
 			// 助変数をもとに曲線の接線ベクトルを得る.
 			BZP t_vec;
 			bezi_tvec_by_param(b_pos, t, t_vec);
+
 			// 矢じるしの返しの位置を計算する
 			get_arrow_barbs(-t_vec, sqrt(t_vec * t_vec), a_size.m_width, a_size.m_length, a_barbs);
+
 			// 助変数で曲線上の位置を得る.
 			BZP t_pos;	// 終点を原点とする, 矢じるしの先端の位置
 			bezi_point_by_param(b_pos, t, t_pos);
+
 			// 曲線上の位置を矢じるしの先端とし, 返しの位置も並行移動する.
 			pt_add(a_barbs[0], t_pos.x, t_pos.y, a_barbs[0]);
 			pt_add(a_barbs[1], t_pos.x, t_pos.y, a_barbs[1]);

@@ -690,8 +690,6 @@ namespace winrt::GraphPaper::implementation
 	// 表示
 	//------------------------------
 	struct ShapePage : Shape {
-		//static constexpr float size_max(void) noexcept { return 32767.0F; }
-
 		SHAPE_LIST m_shape_list{};	// 図形リスト
 
 		// 矢じるし
@@ -897,6 +895,9 @@ namespace winrt::GraphPaper::implementation
 		bool set_text_padding(const D2D1_SIZE_F val) noexcept final override;
 		// 図形をデータリーダーに書き込む.
 		void write(DataWriter const& dt_writer);
+		size_t export_pdf(const D2D1_SIZE_F /*page_size*/, DataWriter const& dt_writer);
+		// 図形をデータライターに SVG として書き込む.
+		void export_svg(DataWriter const& dt_writer);
 	};
 
 	//------------------------------
@@ -949,6 +950,8 @@ namespace winrt::GraphPaper::implementation
 		void write(const DataWriter& dt_writer) const;
 		// 図形をデータライターに SVG として書き込む.
 		winrt::Windows::Foundation::IAsyncAction export_as_svg_async(const DataWriter& dt_writer);
+		// 図形をデータライターに PDF として書き込む.
+		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer);
 	};
 
 	//------------------------------

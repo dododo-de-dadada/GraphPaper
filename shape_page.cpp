@@ -5,9 +5,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
 	// 方眼を表示する.
 	static void page_draw_grid(
 		ID2D1RenderTarget* const target,
@@ -19,9 +16,6 @@ namespace winrt::GraphPaper::implementation
 		const float page_scale,
 		const D2D1_SIZE_F sh_size
 	);
-
-	// 指定した色と不透明度から反対色を得る.
-	//static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept;
 
 	// 指定した色と不透明度から反対色を得る.
 	// src	指定した色
@@ -280,7 +274,6 @@ namespace winrt::GraphPaper::implementation
 				m_page_scale,
 				m_page_size);
 		}
-
 	}
 
 	// 方眼を表示する.
@@ -298,7 +291,7 @@ namespace winrt::GraphPaper::implementation
 	)
 	{
 		// 拡大されても 1 ピクセルになるよう拡大率の逆数を線枠の太さに格納する.
-		const FLOAT grid_w = static_cast<FLOAT>(1.0 / page_scale);	// 方眼の太さ
+		const FLOAT grid_width = static_cast<FLOAT>(1.0 / page_scale);	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
 		brush->SetColor(grid_color);
@@ -315,13 +308,13 @@ namespace winrt::GraphPaper::implementation
 		double x;
 		for (uint32_t i = 0; (x = round((grid_len * i + grid_offset.x) / PT_ROUND) * PT_ROUND) < page_w; i++) {
 			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
-				w = 2.0F * grid_w;
+				w = 2.0F * grid_width;
 			}
 			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
-				w = grid_w;
+				w = grid_width;
 			}
 			else {
-				w = 0.5F * grid_w;
+				w = 0.5F * grid_width;
 			}
 			v_start.x = v_end.x = static_cast<FLOAT>(x);
 			target->DrawLine(v_start, v_end, brush, w, nullptr);
@@ -330,13 +323,13 @@ namespace winrt::GraphPaper::implementation
 		double y;
 		for (uint32_t i = 0; (y = round((grid_len * i + grid_offset.y) / PT_ROUND) * PT_ROUND) < page_h; i++) {
 			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
-				w = 2.0F * grid_w;
+				w = 2.0F * grid_width;
 			}
 			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
-				w = grid_w;
+				w = grid_width;
 			}
 			else {
-				w = 0.5F * grid_w;
+				w = 0.5F * grid_width;
 			}
 			h_start.y = h_end.y = static_cast<FLOAT>(y);
 			target->DrawLine(h_start, h_end, brush, w, nullptr);

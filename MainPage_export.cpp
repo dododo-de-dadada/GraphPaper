@@ -114,7 +114,8 @@ namespace winrt::GraphPaper::implementation
 		size_t len = dt_writer.WriteString(buf);
 		// 半角のグリフ幅を設定する
 		// 設定しなければ全て全角幅になってしまう.
-		len += dt_writer.WriteString(L"/W [\n");	// CID 開始番号は 1 (半角空白)
+		len += dt_writer.WriteString(
+			L"/W [\n");	// CID 開始番号は 1 (半角空白)
 		for (int i = 0; i < cid_len; i++) {
 			swprintf_s(buf,
 				L"%u %u %u\n",
@@ -122,7 +123,8 @@ namespace winrt::GraphPaper::implementation
 				1000 * g_met[i].advanceWidth / g_unit);
 			len += dt_writer.WriteString(buf);
 		}
-		len += dt_writer.WriteString(L"]\n");
+		len += dt_writer.WriteString(
+			L"]\n");
 		len += dt_writer.WriteString(
 			L">>\n"
 			L"endobj\n");
@@ -226,7 +228,9 @@ namespace winrt::GraphPaper::implementation
 		f_type = face->GetType();
 
 		// 文字列を UTF-32 に変換する.
-		std::vector<uint32_t> utf32{ conv_utf16_to_utf32(t, t_len) };
+		std::vector<uint32_t> utf32{
+			conv_utf16_to_utf32(t, t_len)
+		};
 
 		// UTF-32 文字列から重複したコードを削除する.
 		const auto last = std::unique(std::begin(utf32), std::end(utf32));
@@ -472,7 +476,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				if (typeid(*s) == typeid(ShapeText)) {
 					if (text_cnt == 0) {
-						len += dt_writer.WriteString(L"/Font <<\n");
+						len += dt_writer.WriteString(
+							L"/Font <<\n");
 					}
 					swprintf_s(buf,
 						L"/Font%d %d 0 R\n",
@@ -483,7 +488,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				else if (typeid(*s) == typeid(ShapeRuler)) {
 					if (text_cnt == 0) {
-						len += dt_writer.WriteString(L"/Font <<\n");
+						len += dt_writer.WriteString(
+							L"/Font <<\n");
 					}
 					swprintf_s(buf,
 						L"/Font%d %d 0 R\n",
@@ -494,7 +500,8 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			if (text_cnt > 0) {
-				len += dt_writer.WriteString(L">>\n");
+				len += dt_writer.WriteString(
+					L">>\n");
 			}
 			// 画像
 			int image_cnt = 0;
@@ -504,7 +511,8 @@ namespace winrt::GraphPaper::implementation
 				}
 				if (typeid(*s) == typeid(ShapeImage)) {
 					if (image_cnt == 0) {
-						len += dt_writer.WriteString(L"/XObject <<\n");
+						len += dt_writer.WriteString(
+							L"/XObject <<\n");
 					}
 					swprintf_s(buf,
 						L"/Image%d %d 0 R\n",
@@ -523,7 +531,7 @@ namespace winrt::GraphPaper::implementation
 			obj_len.push_back(obj_len.back() + len);
 
 			// コンテントオブジェクト (ストリーム)
-			// 変換行列に 72dpi / 96dpi (=0.75) を指定する.   
+			// 変換行列に 72dpi / 96dpi (=0.75) を指定する.
 			swprintf_s(buf,
 				L"%% Content Object\n"
 				L"5 0 obj <<\n"
@@ -548,6 +556,10 @@ namespace winrt::GraphPaper::implementation
 			);
 			len += dt_writer.WriteString(buf);
 
+			if (m_main_page.m_grid_show == GRID_SHOW::BACK) {
+				len += m_main_page.export_pdf(m_main_page.m_page_size, dt_writer);
+			}
+
 			// 図形を出力
 			const D2D1_SIZE_F page_size = m_main_page.m_page_size;
 			for (const auto s : m_main_page.m_shape_list) {
@@ -555,6 +567,9 @@ namespace winrt::GraphPaper::implementation
 					continue;
 				}
 				len += s->export_pdf(page_size, dt_writer);
+			}
+			if (m_main_page.m_grid_show == GRID_SHOW::FRONT) {
+				len += m_main_page.export_pdf(m_main_page.m_page_size, dt_writer);
 			}
 			len += dt_writer.WriteString(
 				L"Q\n"
@@ -594,20 +609,24 @@ namespace winrt::GraphPaper::implementation
 					export_pdf_font_info(face, t->m_text, wchar_len(t->m_text), t->m_font_family, f_met, f_type, p_name, cid, gid, g_met, angle);
 
 					// フォント辞書
-					len = export_pdf_font_dict(6 + 3 * text_cnt, f_type, p_name, dt_writer);
+					len = export_pdf_font_dict(
+						6 + 3 * text_cnt,
+						f_type, p_name, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// CID フォント辞書 (Type 0 の子孫となるフォント)
 					// フォント辞書から参照され,
 					// フォント詳細辞書を参照する.
-					len = export_pdf_descendant_font_dict(6 + 3 * text_cnt + 1,
+					len = export_pdf_descendant_font_dict(
+						6 + 3 * text_cnt + 1,
 						//f_type, p_name, std::size(cid), std::data(cid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
 						f_type, p_name, std::size(gid), std::data(gid), std::data(g_met), f_met.designUnitsPerEm, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 
 					// フォント詳細辞書
 					// CID フォント辞書から参照される.
-					len = export_pdf_font_descriptor(6 + 3 * text_cnt + 2,
+					len = export_pdf_font_descriptor(
+						6 + 3 * text_cnt + 2,
 						p_name, stretch, weight, angle, f_met, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 					text_cnt++;
@@ -670,8 +689,7 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 相互参照 (クロスリファレンス)
-			swprintf_s(
-				buf,
+			swprintf_s(buf,
 				L"%% Cross-reference Table\n"
 				L"xref\n"
 				L"0 %zu\n"
@@ -688,8 +706,7 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// トレイラーと EOF
-			swprintf_s(
-				buf,
+			swprintf_s(buf,
 				L"%% Trailer\n"
 				L"trailer <<\n"
 				L"/Size %zu\n"
@@ -762,7 +779,10 @@ namespace winrt::GraphPaper::implementation
 				winrt::hresult(
 					CreateStreamOverRandomAccessStream(
 						winrt::get_unknown(image_stream),
-						IID_PPV_ARGS(&wic_stream))
+						__uuidof(IStream),
+						wic_stream.put_void()
+						//IID_PPV_ARGS(&wic_stream)
+					)
 				);
 
 				//winrt::com_ptr<IWICImagingFactory2> wic_factory;
@@ -994,6 +1014,10 @@ namespace winrt::GraphPaper::implementation
 				dt_writer.WriteString(buf);
 			}
 
+			if (m_main_page.m_grid_show == GRID_SHOW::BACK) {
+				m_main_page.export_svg(dt_writer);
+			}
+
 			// 図形リストの各図形について以下を繰り返す.
 			for (auto s : m_main_page.m_shape_list) {
 				if (s->is_deleted()) {
@@ -1010,6 +1034,11 @@ namespace winrt::GraphPaper::implementation
 					s->export_svg(dt_writer);
 				}
 			}
+
+			if (m_main_page.m_grid_show == GRID_SHOW::FRONT) {
+				m_main_page.export_svg(dt_writer);
+			}
+
 			// SVG 終了タグを書き込む.
 			dt_writer.WriteString(L"</svg>\n");
 			// ストリームの現在位置をストリームの大きさに格納する.

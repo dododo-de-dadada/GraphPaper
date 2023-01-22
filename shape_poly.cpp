@@ -881,6 +881,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapePoly::write(DataWriter const& dt_writer) const
 	{
 		ShapePath::write(dt_writer);
+		dt_writer.WriteBoolean(m_end_closed);
 	}
 
 }

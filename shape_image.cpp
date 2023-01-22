@@ -23,7 +23,9 @@ namespace winrt::GraphPaper::implementation
 					CLSID_WICImagingFactory,
 					nullptr,
 					CLSCTX_INPROC_SERVER,
-					IID_PPV_ARGS(&factory)
+					__uuidof(IWICImagingFactory2),
+					factory.put_void()
+					//IID_PPV_ARGS(&factory)
 				)
 			);
 			return factory;

@@ -45,11 +45,14 @@ namespace winrt::GraphPaper::implementation
 				stroke.r, stroke.g, stroke.b);
 			len += dt_writer.WriteString(buf);
 		}
-		swprintf_s(buf, L"%f %f m\n", barbs[0].x, -barbs[0].y + page_size.height);
-		len += dt_writer.WriteString(buf);
-		swprintf_s(buf, L"%f %f l\n", tip_pos.x, -tip_pos.y + page_size.height);
-		len += dt_writer.WriteString(buf);
-		swprintf_s(buf, L"%f %f l\n", barbs[1].x, -barbs[1].y + page_size.height);
+		swprintf_s(buf,
+			L"%f %f m\n" 
+			L"%f %f l\n"
+			L"%f %f l\n",
+			barbs[0].x, -barbs[0].y + page_size.height,
+			tip_pos.x, -tip_pos.y + page_size.height,
+			barbs[1].x, -barbs[1].y + page_size.height
+		);
 		len += dt_writer.WriteString(buf);
 		if (style == ARROW_STYLE::OPENED) {
 			len += dt_writer.WriteString(L"S\n");
@@ -62,6 +65,7 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// PDF のパス描画命令を得る.
+	// C	パスを閉じるなら true, 開いたままなら false
 	// width	線・枠の太さ
 	// stroke	線・枠の色
 	// fill	塗りつぶしの色
@@ -148,9 +152,11 @@ namespace winrt::GraphPaper::implementation
 		else {
 			//if (equal(m_join_style, D2D1_LINE_JOIN_MITER) ||
 			//equal(m_join_style, D2D1_LINE_JOIN_MITER_OR_BEVEL)) {
-			len += dt_writer.WriteString(L"0 j\n");
 			// マイター制限
-			swprintf_s(buf, L"%f M\n", miter_limit);
+			swprintf_s(buf, 
+				L"0 j\n"
+				L"%f M\n", 
+				miter_limit);
 			len += dt_writer.WriteString(buf);
 		}
 
@@ -188,7 +194,11 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	size_t ShapeBezi::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer)
 	{
-		if (equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) {
+		//if (equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) {
+		//	return 0;
+		//}
+		wchar_t* cmd;
+		if (!export_pdf_cmd<false>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
 			return 0;
 		}
 
@@ -201,15 +211,19 @@ namespace winrt::GraphPaper::implementation
 		pt_add(b_seg.point2, m_vec[2], b_seg.point3);
 
 		wchar_t buf[1024];
-		swprintf_s(buf, L"%f %f m\n", m_start.x, -m_start.y + page_size.height);
+		swprintf_s(buf, 
+			L"%f %f m\n"
+			L"%f %f "
+			L"%f %f "
+			L"%f %f c\n"
+			L"%s\n",
+			m_start.x, -m_start.y + page_size.height,
+			b_seg.point1.x, -b_seg.point1.y + page_size.height,
+			b_seg.point2.x, -b_seg.point2.y + page_size.height,
+			b_seg.point3.x, -b_seg.point3.y + page_size.height,
+			cmd
+		);
 		len += dt_writer.WriteString(buf);
-		swprintf_s(buf, L"%f %f ", b_seg.point1.x, -b_seg.point1.y + page_size.height);
-		len += dt_writer.WriteString(buf);
-		swprintf_s(buf, L"%f %f ", b_seg.point2.x, -b_seg.point2.y + page_size.height);
-		len += dt_writer.WriteString(buf);
-		swprintf_s(buf, L"%f %f c\n", b_seg.point3.x, -b_seg.point3.y + page_size.height);
-		len += dt_writer.WriteString(buf);
-		len += dt_writer.WriteString(L"S\n");
 		if (m_arrow_style == ARROW_STYLE::OPENED ||
 			m_arrow_style == ARROW_STYLE::FILLED) {
 			D2D1_POINT_2F barbs[3];
@@ -327,7 +341,7 @@ namespace winrt::GraphPaper::implementation
 
 		swprintf_s(buf,
 			L"%f %f m\n",
-			cx + rx, -(cy)+ty
+			cx + rx, -(cy) + ty
 		);
 		len += dt_writer.WriteString(buf);
 
@@ -966,6 +980,98 @@ namespace winrt::GraphPaper::implementation
 				len += dt_writer.WriteString(buf);
 			}
 			len += dt_writer.WriteString(L"ET\n");
+		}
+		return len;
+	}
+
+	// 図形をデータライターに PDF として書き込む.
+	size_t ShapePage::export_pdf(const D2D1_SIZE_F /*page_size*/, DataWriter const& dt_writer)
+	{
+		const float grid_base = m_grid_base;
+		const D2D1_COLOR_F grid_color = m_grid_color;
+		const GRID_EMPH grid_emph = m_grid_emph;
+		const D2D1_POINT_2F grid_offset = m_grid_offset;
+		const float page_scale = m_page_scale;
+		const D2D1_SIZE_F page_size = m_page_size;
+		// 拡大されても 1 ピクセルになるよう拡大率の逆数を線枠の太さに格納する.
+		const FLOAT grid_width = static_cast<FLOAT>(1.0 / page_scale);	// 方眼の太さ
+		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
+		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
+		v_start.y = 0.0f;
+		h_start.x = 0.0f;
+		const auto page_h = page_size.height;
+		const auto page_w = page_size.width;
+		v_end.y = page_size.height;
+		h_end.x = page_size.width;
+		const double grid_len = max(grid_base + 1.0, 1.0);
+
+		size_t len = dt_writer.WriteString(L"% Grid Lines\n");	// 書き込んだバイト数
+		len += export_pdf_stroke(
+			0.0f,
+			grid_color,
+			CAP_FLAT,
+			D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PATT{},
+			D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL, dt_writer);
+
+		// 垂直な方眼を表示する.
+		float w;
+		double x;
+		for (uint32_t i = 0; (x = round((grid_len * i + grid_offset.x) / PT_ROUND) * PT_ROUND) < page_w; i++) {
+			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
+				w = 2.0F * grid_width;
+			}
+			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
+				w = grid_width;
+			}
+			else {
+				w = 0.5F * grid_width;
+			}
+			v_start.x = v_end.x = static_cast<FLOAT>(x);
+
+			wchar_t buf[1024];
+			swprintf_s(buf, L"%f w\n", w);
+			len += dt_writer.WriteString(buf);
+			swprintf_s(buf, L"%f %f m\n", v_start.x, -v_start.y + page_size.height);
+			len += dt_writer.WriteString(buf);
+			swprintf_s(buf, L"%f %f l\n", v_end.x, -(v_end.y) + page_size.height);
+			len += dt_writer.WriteString(buf);
+			len += dt_writer.WriteString(L"S\n");
+		}
+		// 水平な方眼を表示する.
+		double y;
+		for (uint32_t i = 0; (y = round((grid_len * i + grid_offset.y) / PT_ROUND) * PT_ROUND) < page_h; i++) {
+			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
+				w = 2.0F * grid_width;
+			}
+			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
+				w = grid_width;
+			}
+			else {
+				w = 0.5F * grid_width;
+			}
+			h_start.y = h_end.y = static_cast<FLOAT>(y);
+
+			wchar_t buf[1024];
+			swprintf_s(buf, L"%f w\n", w);
+			len += dt_writer.WriteString(buf);
+			swprintf_s(buf, L"%f %f m\n", h_start.x, -h_start.y + page_size.height);
+			len += dt_writer.WriteString(buf);
+			swprintf_s(buf, L"%f %f l\n", h_end.x, -(h_end.y) + page_size.height);
+			len += dt_writer.WriteString(buf);
+			len += dt_writer.WriteString(L"S\n");
+		}
+
+		return len;
+	}
+
+	size_t ShapeGroup::export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer)
+	{
+		size_t len = 0;
+		for (Shape* s : m_list_grouped) {
+			if (s->is_deleted()) {
+				continue;
+			}
+			len += s->export_pdf(page_size, dt_writer);
 		}
 		return len;
 	}
