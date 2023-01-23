@@ -253,6 +253,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::MOVE>::UndoValue(Shape* s, const D2D1_POINT_2F& val);
 	template UndoValue<UNDO_ID::PAGE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
+	template UndoValue<UNDO_ID::POLY_END>::UndoValue(Shape* s, const bool &val);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
 	template UndoValue<UNDO_ID::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_ID::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
@@ -332,6 +333,11 @@ namespace winrt::GraphPaper::implementation
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
 		else if constexpr (
+			U == UNDO_ID::POLY_END
+			) {
+			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadBoolean());
+		}
+		else if constexpr (
 			U == UNDO_ID::GRID_EMPH ||
 			U == UNDO_ID::TEXT_RANGE) {
 			m_value = U_TYPE<U>::type{
@@ -386,6 +392,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::MOVE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::POLY_END>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_WIDTH>::UndoValue(DataReader const& dt_reader);
@@ -510,6 +517,11 @@ namespace winrt::GraphPaper::implementation
 	void UndoValue<UNDO_ID::PAGE_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& val)
 	{
 		s->set_page_size(val);
+	}
+
+	void UndoValue<UNDO_ID::POLY_END>::SET(Shape* const s, const bool& val)
+	{
+		s->set_poly_end(val);
 	}
 
 	void UndoValue<UNDO_ID::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
@@ -672,6 +684,11 @@ namespace winrt::GraphPaper::implementation
 		return s->get_page_size(val);
 	}
 
+	bool UndoValue<UNDO_ID::POLY_END>::GET(const Shape* s, bool& val) noexcept
+	{
+		return s->get_poly_end(val);
+	}
+
 	bool UndoValue<UNDO_ID::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& val) noexcept
 	{
 		return s->get_stroke_cap(val);
@@ -801,6 +818,11 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_ID::MOVE) {
 			dt_writer.WriteSingle(m_value.x);
 			dt_writer.WriteSingle(m_value.y);
+		}
+		else if constexpr (
+			U == UNDO_ID::POLY_END
+			) {
+			dt_writer.WriteBoolean(m_value);
 		}
 		else if constexpr (
 			U == UNDO_ID::TEXT_PADDING ||

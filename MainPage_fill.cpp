@@ -16,9 +16,9 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
-	constexpr wchar_t TITLE_FILL[] = L"str_fill";
+	constexpr wchar_t TITLE_FILL[] = L"str_fill_color";
 
-	// 塗りつぶしメニューの「色」が選択された.
+	// 塗りつぶしメニューの「塗りつぶし色」が選択された.
 	IAsyncAction MainPage::fill_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_dialog_page.set_attr_to(&m_main_page);

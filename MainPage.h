@@ -80,6 +80,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
+	/*
 	using winrt::Windows::Graphics::Printing::IPrintDocumentSource;
 	using winrt::Windows::UI::Xaml::Printing::PrintDocument;
 	using winrt::Windows::Graphics::Printing::PrintManager;
@@ -93,7 +94,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Graphics::Printing::PrintTaskSourceRequestedArgs;
 	using winrt::Windows::Graphics::Printing::PrintTaskCompletedEventArgs;
 	using winrt::Windows::Graphics::Printing::PrintTaskCompletion;
-
+	*/
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
 
@@ -147,6 +148,7 @@ namespace winrt::GraphPaper::implementation
 		RRECT,	// 角丸方形
 		TEXT,	// 文字列
 		RULER,	// 定規
+		ARC	// 円弧
 	};
 
 	//-------------------------------
@@ -299,8 +301,8 @@ namespace winrt::GraphPaper::implementation
 		winrt::event_token m_token_contents_invalidated;	// ディスプレーの表示内容切り替えハンドラーのトークン
 		winrt::event_token m_token_close_requested;	// アプリケーションを閉じるハンドラーのトークン
 
-		PrintDocument m_print_doc;
-		IPrintDocumentSource m_print_source;
+		//PrintDocument m_print_doc;
+		//IPrintDocumentSource m_print_source;
 
 		//-------------------------------
 		// MainPage.cpp
@@ -426,7 +428,7 @@ namespace winrt::GraphPaper::implementation
 		void event_released(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターの形状を設定する.
 		void event_set_curs_style(void);
-		// ポインターの現在位置を設定する.
+		// ポインターの現在位置に, イベント引数の値を格納する.
 		void event_set_pos_cur(PointerRoutedEventArgs const& args);
 		// コンテキストメニューを表示する.
 		void event_show_popup(void);
@@ -478,7 +480,7 @@ namespace winrt::GraphPaper::implementation
 		// 塗りつぶし
 		//-------------------------------
 
-		// 塗りつぶしメニューの「色」が選択された.
+		// 塗りつぶしメニューの「塗りつぶし色」が選択された.
 		IAsyncAction fill_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// スライダーの値が変更された.
 		template <UNDO_ID U, int S> void fill_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
@@ -526,9 +528,9 @@ namespace winrt::GraphPaper::implementation
 		void font_style_normal_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「斜体」が選択された.
 		void font_style_oblique_click(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「大きさ」が選択された.
+		// 書体メニューの「書体の大きさ」が選択された.
 		IAsyncAction font_size_click_async(IInspectable const&, RoutedEventArgs const&);
-		// 書体メニューの「幅の伸縮」が選択された.
+		// 書体メニューの「書体の幅」が選択された.
 		IAsyncAction font_stretch_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「太さ」が選択された.
 		IAsyncAction font_weight_click_async(IInspectable const&, RoutedEventArgs const&);
@@ -1016,8 +1018,9 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction xcvd_paste_shape(void);
 		// 文字列を貼り付ける.
 		IAsyncAction xcvd_paste_text(void);
-		void Page_Loaded(const IInspectable& sender, const RoutedEventArgs& args)
+		void Page_Loaded(const IInspectable& /*sender*/, const RoutedEventArgs& /*args*/)
 		{
+			/*
 			m_print_doc = PrintDocument();
 			m_print_source = m_print_doc.DocumentSource();
 			m_print_doc.Paginate([=](const IInspectable& sender, const PaginateEventArgs& args) {
@@ -1037,8 +1040,8 @@ namespace winrt::GraphPaper::implementation
 				}
 			);
 
-			PrintManager& mgr = PrintManager::GetForCurrentView();
-			mgr.PrintTaskRequested([=](const IInspectable& /*PrintManager&*/ sender, const PrintTaskRequestedEventArgs& args) {
+			PrintManager mgr = PrintManager::GetForCurrentView();
+			mgr.PrintTaskRequested([=](const IInspectable& PrintManager& sender, const PrintTaskRequestedEventArgs& args) {
 				PrintTask p_task = nullptr;
 			p_task = args.Request().CreatePrintTask(L"Print", [=](const PrintTaskSourceRequestedArgs& args) {
 				p_task.Completed([=](const IInspectable& sender, const PrintTaskCompletedEventArgs& args) {
@@ -1054,6 +1057,7 @@ namespace winrt::GraphPaper::implementation
 			PrintCanvas().Children().Append(PrintPage());
 			PrintCanvas().InvalidateMeasure();
 			PrintCanvas().UpdateLayout();
+			*/
 		}
 };
 

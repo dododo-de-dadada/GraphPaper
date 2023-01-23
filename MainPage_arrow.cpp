@@ -189,13 +189,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::arrow_style_is_checked(const ARROW_STYLE val)
 	{
 		rmfi_arrow_style_none().IsChecked(val == ARROW_STYLE::NONE);
-		//rmfi_arrow_style_none_2().IsChecked(val == ARROW_STYLE::NONE);
 		rmfi_arrow_style_opened().IsChecked(val == ARROW_STYLE::OPENED);
-		//rmfi_arrow_style_opened_2().IsChecked(val == ARROW_STYLE::OPENED);
 		rmfi_arrow_style_filled().IsChecked(val == ARROW_STYLE::FILLED);
-		//rmfi_arrow_style_filled_2().IsChecked(val == ARROW_STYLE::FILLED);
-		mfi_arrow_size().IsEnabled(val != ARROW_STYLE::NONE);
-		//mfi_arrow_size_2().IsEnabled(val != ARROW_STYLE::NONE);
 		mfi_arrow_size().IsEnabled(val != ARROW_STYLE::NONE);
 	}
 

@@ -43,6 +43,8 @@ namespace winrt::GraphPaper::implementation
 		if (!is_selected()) {
 			return;
 		}
+		draw_anc();
+		/*
 		D2D1_POINT_2F a_pos[4];
 		// “ì
 		a_pos[0].x = m_start.x + m_vec[0].x * 0.5f;
@@ -68,6 +70,7 @@ namespace winrt::GraphPaper::implementation
 		for (uint32_t i = 0; i < 4; i++) {
 			anc_draw_ellipse(a_pos[i], target, brush);
 		}
+		*/
 	}
 
 	// ˆÊ’u‚ðŠÜ‚Þ‚©”»’è‚·‚é.

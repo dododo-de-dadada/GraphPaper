@@ -585,8 +585,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		//const auto f_opaque = is_opaque(m_fill_color);
-const auto f_opaque = true;
+		const auto f_opaque = is_opaque(m_fill_color);
 		bool f_test = false;	// ˆÊ’u‚ª“h‚è‚Â‚Ô‚µ‚ÉŠÜ‚Ü‚ê‚é‚©”»’è
 		const auto e_width = max(max(static_cast<double>(m_stroke_width), Shape::s_anc_len) * 0.5, 0.5);	// ü˜g‚Ì‘¾‚³‚Ì”¼•ª‚Ì’l
 		D2D1_POINT_2F tp;

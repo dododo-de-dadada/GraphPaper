@@ -220,6 +220,9 @@ namespace winrt::GraphPaper::implementation
 			else if (m_drawing_tool == DRAWING_TOOL::TEXT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 			}
+			else if (m_drawing_tool == DRAWING_TOOL::ARC) {
+				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_arc")));
+			}
 			else {
 				throw winrt::hresult_invalid_argument();
 			}

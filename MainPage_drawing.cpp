@@ -44,6 +44,9 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_drawing_tool_ruler()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RULER);
 		}
+		else if (sender == rmfi_drawing_tool_arc()) {
+			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ARC);
+		}
 		else {
 			if (sender == rmfi_drawing_poly_line()) {
 				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 2);
@@ -105,6 +108,7 @@ namespace winrt::GraphPaper::implementation
 		rmfi_drawing_tool_bezi().IsChecked(val == DRAWING_TOOL::BEZI);
 		rmfi_drawing_tool_text().IsChecked(val == DRAWING_TOOL::TEXT);
 		rmfi_drawing_tool_ruler().IsChecked(val == DRAWING_TOOL::RULER);
+		rmfi_drawing_tool_arc().IsChecked(val == DRAWING_TOOL::ARC);
 	}
 
 	// 多角形の選択肢メニューにチェックをつける.

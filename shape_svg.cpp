@@ -169,7 +169,7 @@ namespace winrt::GraphPaper::implementation
 				wcscpy_s(buf + len3, len - len3, L"stroke-linecap=\"square\" ");
 			}
 			else if (equal(cap, CAP_TRIANGLE)) {
-				// SVG に三角はない.
+				// SVG に三角はないので, かわりに stroke-linecap="butt"
 				wcscpy_s(buf + len3, len - len3, L"stroke-linecap=\"butt\" ");
 			}
 
@@ -179,6 +179,11 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 				join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+				// D2D では, マイターを指定すると, マイター制限は常に無視され, すべてマイターになる.
+				// D2D では, マイターまたはベベルを指定すると, マイター制限が有効になり, これを超える角がベベルになる.
+				// SVG では, マイターを指定すると, マイター制限は常に有効で, これを超える角はベベルになる.
+				// つまり, D2D のマイターまたはベベルは, SVG のマイターと同じ.
+				// D2D のマイターは, SVG にはない.
 				swprintf_s(buf + len4, len - len4,
 					L"stroke-linejoin=\"miter\" stroke-miterlimit=\"%f\" ", limit);
 			}
@@ -202,13 +207,15 @@ namespace winrt::GraphPaper::implementation
 		// パスの始点と制御点
 		wchar_t buf[1024];
 		swprintf_s(buf,
-			L"<path d=\"M%f %f C%f %f, %f %f, %f %f\" "
-			L"fill=\"none\" ",
+			L"<path d=\"M%f %f C%f %f, %f %f, %f %f\" ",
 			m_start.x, m_start.y,
 			b_seg.point1.x, b_seg.point1.y,
 			b_seg.point2.x, b_seg.point2.y,
 			b_seg.point3.x, b_seg.point3.y
 		);
+		dt_writer.WriteString(buf);
+
+		export_svg_color(buf, 1024, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
 
 		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap, m_join_style, m_join_miter_limit);
@@ -256,6 +263,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	winrt::Windows::Foundation::IAsyncAction ShapeGroup::export_as_svg_async(const DataWriter& dt_writer)
 	{
+		dt_writer.WriteString(L"<!-- Group -->\n");
 		dt_writer.WriteString(L"<g>\n");
 		for (Shape* s : m_list_grouped) {
 			if (s->is_deleted()) {

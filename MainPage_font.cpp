@@ -16,7 +16,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t DLG_TITLE[] = L"str_font_settings";
 
 	//---------------------------------
-	// 書体の幅の伸縮の配列
+	// 書体の幅の配列
 	//---------------------------------
 	constexpr std::underlying_type_t<DWRITE_FONT_STRETCH> FONT_STRETCH[] = {
 		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_UNDEFINED,
@@ -32,7 +32,7 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//---------------------------------
-	// 書体の幅の伸縮の文字列配列
+	// 書体の幅の文字列配列
 	//---------------------------------
 	constexpr wchar_t* FONT_STRETCH_NAME[] = {
 		L"str_font_stretch_undefined",
@@ -255,7 +255,7 @@ namespace winrt::GraphPaper::implementation
 			float g_base;
 			m_dialog_page.get_grid_base(g_base);
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val + 1.0f, m_dialog_d2d.m_logical_dpi, g_base + 1.0f, buf);
-			text = ResourceLoader::GetForCurrentView().GetString(L"str_size") + L": " + buf;
+			text = ResourceLoader::GetForCurrentView().GetString(L"str_font_size") + L": " + buf;
 		}
 		if constexpr (U == UNDO_ID::FONT_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//---------------------------------
-	// 書体メニューの「幅の伸縮」が選択された.
+	// 書体メニューの「書体の幅」が選択された.
 	//---------------------------------
 	IAsyncAction MainPage::font_stretch_click_async(IInspectable const&, RoutedEventArgs const&)
 	{

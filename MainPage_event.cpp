@@ -580,7 +580,7 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		// ファイル開くピッカーが返値を戻すまでの排他処理.
+		// ピッカーが返値を戻すまで, イベント処理をさせないための排他.
 		if (!m_mutex_event.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
 			return;
@@ -724,11 +724,11 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 				// 押された図形の部位が内側か判定する.
-				else if (anc_pressed == ANC_TYPE::ANC_FILL) {
-					for (const auto item : mbi_fill().Items()) {
-						popup.Items().Append(item);
-					}
-				}
+				//else if (anc_pressed == ANC_TYPE::ANC_FILL) {
+				//	for (const auto item : mbi_fill().Items()) {
+				//		popup.Items().Append(item);
+				//	}
+				//}
 				// 押された図形の部位が文字列か判定する.
 				else if (anc_pressed == ANC_TYPE::ANC_TEXT) {
 					for (const auto item : mbi_font().Items()) {
@@ -737,8 +737,15 @@ namespace winrt::GraphPaper::implementation
 				}
 				// 上記以外の場合 (線枠か, その他の図形の部位),
 				else {
-					for (const auto item : mbi_stroke().Items()) {
-						popup.Items().Append(item);
+					if (shape_pressed->is_strokable()) {
+						for (const auto item : mbi_stroke().Items()) {
+							popup.Items().Append(item);
+						}
+					}
+					if (shape_pressed->is_fillable()) {
+						for (const auto item : mbi_fill().Items()) {
+							popup.Items().Append(item);
+						}
 					}
 				}
 			}
@@ -760,7 +767,7 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		// ファイル開くピッカーが返値を戻すまでの排他処理.
+		// ピッカーが返値を戻すまで, イベント処理をさせないための排他.
 		if (!m_mutex_event.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
 			return;
@@ -853,15 +860,16 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 #endif
-		// ファイル開くピッカーが返値を戻すまでの排他処理.
+		// ピッカーが返値を戻すまで, イベント処理をさせないための排他.
 		if (!m_mutex_event.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
 			return;
 		}
 		m_mutex_event.unlock();
 
-		// ポインターの追跡を停止する.
 		auto const& panel = sender.as<SwapChainPanel>();
+
+		// ポインターの追跡を停止する.
 		panel.ReleasePointerCaptures();
 		event_set_pos_cur(args);
 		// 状態が, 左ボタンが押された状態か判定する.
@@ -1045,7 +1053,7 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 #endif
-		// ファイル開くピッカーが返値を戻すまでの排他処理.
+		// ピッカーが返値を戻すまで, イベント処理をさせないための排他.
 		if (!m_mutex_event.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
 			return;

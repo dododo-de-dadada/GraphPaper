@@ -384,18 +384,21 @@ namespace winrt::GraphPaper::implementation
 	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		D2D1_POINT_2F v_pos[4];
+		// 0---1
+		// |   |
+		// 3---2
 		get_verts(v_pos);
-		if (pt_in_anc(t_pos, v_pos[0])) {
-			return ANC_TYPE::ANC_NW;
-		}
-		else if (pt_in_anc(t_pos, v_pos[1])) {
-			return ANC_TYPE::ANC_NE;
-		}
-		else if (pt_in_anc(t_pos, v_pos[2])) {
+		if (pt_in_anc(t_pos, v_pos[2])) {
 			return ANC_TYPE::ANC_SE;
 		}
 		else if (pt_in_anc(t_pos, v_pos[3])) {
 			return ANC_TYPE::ANC_SW;
+		}
+		else if (pt_in_anc(t_pos, v_pos[1])) {
+			return ANC_TYPE::ANC_NE;
+		}
+		else if (pt_in_anc(t_pos, v_pos[0])) {
+			return ANC_TYPE::ANC_NW;
 		}
 		else {
 			const auto e_width = Shape::s_anc_len * 0.5f;

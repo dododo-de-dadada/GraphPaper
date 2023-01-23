@@ -99,11 +99,13 @@
 					</MenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
+                <!---
                 <MenuFlyoutItem x:Name="mfi_print" x:Uid="mfi_print" Click="print_click_async" Icon="Print" Text="Print..." >
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="P" Modifiers="Control" />
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
+                -->
                 <MenuFlyoutItem x:Uid="mfi_exit" Click="file_exit_click_async" Icon="Cancel" Text="Exit" />
 			</muxc:MenuBarItem>
 			<!-- 編集メニュー -->
@@ -234,7 +236,12 @@
 						<PathIcon Data="{StaticResource data_elli}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_line" x:Uid="rmfi_drawing_tool_line" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Line" >
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_arc" x:Uid="rmfi_drawing_tool_arc" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Arc">
+                    <muxc:RadioMenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_arc}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
+                </muxc:RadioMenuFlyoutItem>
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_line" x:Uid="rmfi_drawing_tool_line" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Line" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_line}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
@@ -309,7 +316,7 @@
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Name="mfi_dash_patt" x:Uid="mfi_dash_patt" Click="dash_patt_click_async" IsEnabled="False" Text="Dash Pattern..." />
-				<MenuFlyoutSubItem x:Uid="mfsi_stroke_width" Text="Width" >
+				<MenuFlyoutSubItem x:Uid="mfsi_stroke_width" Text="Stroke Width" >
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_stroke_width}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</MenuFlyoutSubItem.Icon>
@@ -381,10 +388,10 @@
 			<!-- 書体メニュー -->
 			<muxc:MenuBarItem x:Name="mbi_font" x:Uid="mbi_font" AccessKey="T" Title="Font">
 				<!-- 字体メニュー -->
-				<MenuFlyoutItem x:Name="mfi_font_family" x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Family..." />
-				<MenuFlyoutItem x:Name="mfi_font_size" x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Size..." />
-				<MenuFlyoutItem x:Uid="mfi_font_weight" Click="font_weight_click_async" Icon="Bold" Text="Weight..." />
-				<MenuFlyoutItem x:Uid="mfi_font_stretch" Click="font_stretch_click_async" Text="Stretch..."/>
+				<MenuFlyoutItem x:Name="mfi_font_family" x:Uid="mfi_font_family" Click="font_family_click_async" Icon="Font" Text="Font Family..." />
+				<MenuFlyoutItem x:Name="mfi_font_size" x:Uid="mfi_font_size" Click="font_size_click_async" Icon="FontSize" Text="Font Size..." />
+				<MenuFlyoutItem x:Uid="mfi_font_weight" Click="font_weight_click_async" Icon="Bold" Text="Font Weight..." />
+				<MenuFlyoutItem x:Uid="mfi_font_stretch" Click="font_stretch_click_async" Text="Font Stretch..."/>
 				<MenuFlyoutSubItem x:Uid="mfsi_font_style" Text="Style">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_italic}" />
@@ -422,7 +429,7 @@
 				<ToggleMenuFlyoutItem x:Name="tmfi_image_keep_aspect" x:Uid="tmfi_image_keep_aspect" Click="image_keep_aspect_click" IsChecked="True" Text="Keep Aspect Ratio" />
 				<MenuFlyoutItem x:Name="mfi_image_revert_to_original" x:Uid="mfi_image_revert_to_original" Click="image_revert_to_original_click" Text="Resize to Original" />
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Name="mfi_image_opac" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Opacity..." />
+				<MenuFlyoutItem x:Name="mfi_image_opac" x:Uid="mfi_image_opac" Click="image_opac_click_async" Text="Image Opacity..." />
 			</muxc:MenuBarItem>
             <!-- 方眼メニュー -->
             <muxc:MenuBarItem x:Name="mbi_grid" x:Uid="mbi_grid" AccessKey="G" Title="Grid">
@@ -434,11 +441,11 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_grid_show_front" x:Uid="rmfi_grid_show_front" Click="grid_show_click" Text="Front" GroupName="gn_grid_show"/>
 				</MenuFlyoutSubItem>
 				<ToggleMenuFlyoutItem x:Name="tmfi_grid_snap" x:Uid="tmfi_grid_snap" Click="grid_snap_click" Text="Snap to Grid" />
-				<MenuFlyoutSubItem x:Uid="mfsi_grid_len" Text="Size Grid">
+				<MenuFlyoutSubItem x:Uid="mfsi_grid_len" Text="Grid Size">
 					<MenuFlyoutItem x:Uid="mfi_grid_len_con" Click="grid_len_con_click" Text="Condense" />
 					<MenuFlyoutItem x:Uid="mfi_grid_len_exp" Click="grid_len_exp_click" Text="Expand" />
 					<MenuFlyoutSeparator />
-					<MenuFlyoutItem x:Uid="mfi_grid_len" Click="grid_len_click_async" Text="Length..." />
+					<MenuFlyoutItem x:Uid="mfi_grid_len" Click="grid_len_click_async" Text="Grid Size..." />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Uid="mfi_grid_color" Click="grid_color_click_async" Text="Grid Color..." />
 				<MenuFlyoutSubItem x:Uid="mfsi_grid_emph" Text="Grid Emphasis">
@@ -499,7 +506,6 @@
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
 				</MenuFlyoutSubItem>
-				<MenuFlyoutSeparator />
 			</muxc:MenuBarItem>
 			<!-- その他メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_misc" AccessKey="M" Title="Misc">
@@ -717,7 +723,7 @@
 			<StackPanel >
 				<TextBox x:Name="tx_page_width" x:Uid="tx_page_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="page_size_text_changed" />
 				<TextBox x:Name="tx_page_height" x:Uid="tx_page_height" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="page_size_text_changed" />
-				<TextBox x:Name="tx_page_size_max" x:Uid="tx_page_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum size" IsEnabled="false" />
+                <TextBox x:Name="tx_page_size_max" x:Uid="tx_page_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum Page Size" IsEnabled="false" />
 			</StackPanel>
 		</ContentDialog>
 		<!-- 頂点をくっつける閾値 -->

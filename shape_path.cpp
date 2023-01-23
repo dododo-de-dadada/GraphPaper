@@ -68,7 +68,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// “h‚è‚Â‚Ô‚µ‚ÌF‚ÉŠi”[‚·‚é.
+	// “h‚è‚Â‚Ô‚µF‚ÉŠi”[‚·‚é.
 	bool ShapePath::set_fill_color(const D2D1_COLOR_F& val) noexcept
 	{
 		if (!equal(m_fill_color, val)) {

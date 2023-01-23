@@ -10,6 +10,37 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形を表示する.
+	void ShapeRect::draw_anc(void)
+	{
+		ID2D1RenderTarget* const target = Shape::s_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
+
+		// 部位を表示する.
+		// 0---1
+		// |   |
+		// 3---2
+		D2D1_POINT_2F a_pos[4]{	// 方形の頂点
+			{ m_start.x, m_start.y },
+			{ m_start.x + m_vec[0].x, m_start.y },
+			{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y },
+			{ m_start.x, m_start.y + m_vec[0].y }
+		};
+		D2D1_POINT_2F a_mid;	// 方形の辺の中点
+		pt_avg(a_pos[0], a_pos[3], a_mid);
+		anc_draw_rect(a_mid, target, brush);
+		pt_avg(a_pos[0], a_pos[1], a_mid);
+		anc_draw_rect(a_mid, target, brush);
+		pt_avg(a_pos[1], a_pos[2], a_mid);
+		anc_draw_rect(a_mid, target, brush);
+		pt_avg(a_pos[2], a_pos[3], a_mid);
+		anc_draw_rect(a_mid, target, brush);
+		anc_draw_rect(a_pos[0], target, brush);
+		anc_draw_rect(a_pos[1], target, brush);
+		anc_draw_rect(a_pos[3], target, brush);
+		anc_draw_rect(a_pos[2], target, brush);
+	}
+
+	// 図形を表示する.
 	void ShapeRect::draw(void)
 	{
 		ID2D1Factory* const factory = Shape::s_d2d_factory;
@@ -41,21 +72,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// この図形が選択されてるか判定する.
 		if (is_selected()) {
-			// 部位を表示する.
-			D2D1_POINT_2F a_pos[4];	// 方形の頂点
-			a_pos[0] = m_start;
-			a_pos[1].y = rect.top;
-			a_pos[1].x = rect.right;
-			a_pos[2].x = rect.right;
-			a_pos[2].y = rect.bottom;
-			a_pos[3].y = rect.bottom;
-			a_pos[3].x = rect.left;
-			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-				anc_draw_rect(a_pos[i], target, brush);
-				D2D1_POINT_2F a_mid;	// 方形の辺の中点
-				pt_avg(a_pos[j], a_pos[i], a_mid);
-				anc_draw_rect(a_mid, target, brush);
-			}
+			draw_anc();
 		}
 	}
 
@@ -156,7 +173,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 対角にある頂点をもとに, 方形を得る.
 		D2D1_POINT_2F r_lt, r_rb;
-		//pt_bound(v_pos[0], v_pos[2], r_nw, r_sw);
+		//pt_bound(v_pos[0], v_pos[2], r_lt, r_rb);
 		if (v_pos[0].x < v_pos[2].x) {
 			r_lt.x = v_pos[0].x;
 			r_rb.x = v_pos[2].x;
@@ -285,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	// 塗りつぶしの色を得る.
+	// 塗りつぶし色を得る.
 	// val	得られた値.
 	bool ShapeRect::get_fill_color(D2D1_COLOR_F& val) const noexcept
 	{
@@ -293,7 +310,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 塗りつぶしの色に格納する.
+	// 塗りつぶし色に格納する.
 	// val	格納する値.
 	bool ShapeRect::set_fill_color(const D2D1_COLOR_F& val) noexcept
 	{

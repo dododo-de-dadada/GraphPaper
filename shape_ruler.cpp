@@ -62,28 +62,28 @@ namespace winrt::GraphPaper::implementation
 				// 目盛りの値を表示する.
 				const double x1 = x + f_size * 0.5;
 				const double x2 = x1 - f_size;
-				D2D1_POINT_2F r_nw = {
+				D2D1_POINT_2F r_lt = {
 					x_ge_y ? static_cast<FLOAT>(x2) : static_cast<FLOAT>(y2),
 					x_ge_y ? static_cast<FLOAT>(y2) : static_cast<FLOAT>(x2)
 				};
-				D2D1_POINT_2F r_sw = {
+				D2D1_POINT_2F r_rb = {
 					x_ge_y ? static_cast<FLOAT>(x1) : static_cast<FLOAT>(y1),
 					x_ge_y ? static_cast<FLOAT>(y1) : static_cast<FLOAT>(x1)
 				};
-				//pt_bound(r_nw, r_sw, r_nw, r_sw);
+				//pt_bound(r_lt, r_rb, r_lt, r_rb);
 				/*
-				if (r_nw.x > r_sw.x) {
-					const auto less_x = r_sw.x;
-					r_sw.x = r_nw.x;
-					r_nw.x = less_x;
+				if (r_lt.x > r_rb.x) {
+					const auto less_x = r_rb.x;
+					r_rb.x = r_lt.x;
+					r_lt.x = less_x;
 				}
-				if (r_nw.y > r_sw.y) {
-					const auto less_y = r_sw.y;
-					r_sw.y = r_nw.y;
-					r_nw.y = less_y;
+				if (r_lt.y > r_rb.y) {
+					const auto less_y = r_rb.y;
+					r_rb.y = r_lt.y;
+					r_lt.y = less_y;
 				}
 				*/
-				if (pt_in_rect(t_pos, r_nw, r_sw)) {
+				if (pt_in_rect(t_pos, r_lt, r_rb)) {
 					return ANC_TYPE::ANC_STROKE;
 				}
 			}
@@ -91,27 +91,27 @@ namespace winrt::GraphPaper::implementation
 		if (is_opaque(m_fill_color)) {
 			D2D1_POINT_2F e_pos;
 			pt_add(m_start, m_vec[0], e_pos);
-			//D2D1_POINT_2F r_nw, r_sw;
-			//pt_bound(m_start, e_pos, r_nw, r_sw);
+			//D2D1_POINT_2F r_lt, r_rb;
+			//pt_bound(m_start, e_pos, r_lt, r_rb);
 			/*
 			if (m_start.x < e_pos.x) {
-				r_nw.x = m_start.x;
-				r_sw.x = e_pos.x;
+				r_lt.x = m_start.x;
+				r_rb.x = e_pos.x;
 			}
 			else {
-				r_nw.x = e_pos.x;
-				r_sw.x = m_start.x;
+				r_lt.x = e_pos.x;
+				r_rb.x = m_start.x;
 			}
 			if (m_start.y < e_pos.y) {
-				r_nw.y = m_start.y;
-				r_sw.y = e_pos.y;
+				r_lt.y = m_start.y;
+				r_rb.y = e_pos.y;
 			}
 			else {
-				r_nw.y = e_pos.y;
-				r_sw.y = m_start.y;
+				r_lt.y = e_pos.y;
+				r_rb.y = m_start.y;
 			}
 			*/
-			//if (pt_in_rect(t_pos, r_nw, r_sw)) {
+			//if (pt_in_rect(t_pos, r_lt, r_rb)) {
 			if (pt_in_rect(t_pos, m_start, e_pos)) {
 				return ANC_TYPE::ANC_FILL;
 			}
@@ -230,22 +230,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (is_selected()) {
-			// 選択フラグが立っている場合,
-			// 選択されているなら基準部位を表示する.
-			D2D1_POINT_2F r_pos[4];	// 方形の頂点
-			r_pos[0] = m_start;
-			r_pos[1].y = rect.top;
-			r_pos[1].x = rect.right;
-			r_pos[2].x = rect.right;
-			r_pos[2].y = rect.bottom;
-			r_pos[3].y = rect.bottom;
-			r_pos[3].x = rect.left;
-			for (uint32_t i = 0, j = 3; i < 4; j = i++) {
-				anc_draw_rect(r_pos[i], target, brush);
-				D2D1_POINT_2F r_mid;	// 方形の辺の中点
-				pt_avg(r_pos[j], r_pos[i], r_mid);
-				anc_draw_rect(r_mid, target, brush);
-			}
+			draw_anc();
 		}
 	}
 

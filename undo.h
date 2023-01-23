@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 		FONT_COLOR,	// 書体の色の操作
 		FONT_FAMILY,	// 書体名の操作
 		FONT_SIZE,	// 書体の大きさの操作
-		FONT_STRETCH,	// 書体の幅の伸縮の操作
+		FONT_STRETCH,	// 書体の幅の操作
 		FONT_STYLE,	// 書体の字体の操作
 		FONT_WEIGHT,	// 書体の太さの操作
 		GRID_BASE,	// 方眼の基準の大さの操作
@@ -51,6 +51,7 @@ namespace winrt::GraphPaper::implementation
 		SELECT,	// 図形の選択を切り替え
 		PAGE_COLOR,	// ページの色の操作
 		PAGE_SIZE,	// ページの寸法の操作
+		POLY_END,	// 多角形の終端の操作
 		STROKE_CAP,	// 端の形式の操作
 		STROKE_COLOR,	// 線枠の色の操作
 		STROKE_WIDTH,	// 線枠の太さの操作
@@ -94,6 +95,7 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_ID::MOVE> { using type = D2D1_POINT_2F; };
 	template <> struct U_TYPE<UNDO_ID::PAGE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_ID::PAGE_SIZE> { using type = D2D1_SIZE_F; };
+	template <> struct U_TYPE<UNDO_ID::POLY_END> { using type = bool; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_CAP> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_WIDTH> { using type = float; };

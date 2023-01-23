@@ -234,6 +234,36 @@ namespace winrt::GraphPaper::implementation
 		target->DrawRoundedRectangle(&r_rect, brush, s_width, Shape::m_aux_style.get());
 	}
 
+	void ShapePage::draw_auxiliary_arc(
+		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
+		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+	{
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// ü‚Ì‘¾‚³
+		D2D1_ARC_SEGMENT arc{
+			c_pos,
+			D2D1_SIZE_F{ fabsf(c_pos.x - p_pos.x), fabsf(c_pos.y - p_pos.y) },
+			0.0f,
+			D2D1_SWEEP_DIRECTION_CLOCKWISE,
+			D2D1_ARC_SIZE_SMALL
+		};
+		ID2D1Factory* factory = Shape::s_d2d_factory;
+		winrt::com_ptr<ID2D1PathGeometry> geom;
+		winrt::com_ptr<ID2D1GeometrySink> sink;
+		winrt::check_hresult(factory->CreatePathGeometry(geom.put()));
+		winrt::check_hresult(geom->Open(sink.put()));
+		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+		sink->BeginFigure(p_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+		sink->AddArc(arc);
+		sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+		winrt::check_hresult(sink->Close());
+		sink = nullptr;
+		brush->SetColor(Shape::s_background_color);
+		target->DrawGeometry(geom.get(), brush, s_width, nullptr);
+		brush->SetColor(Shape::s_foreground_color);
+		target->DrawGeometry(geom.get(), brush, s_width, Shape::m_aux_style.get());
+		geom = nullptr;
+	}
+
 	// }Œ`‚ğ•\¦‚·‚é.
 	void ShapePage::draw(void)
 	{
@@ -365,7 +395,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// “h‚è‚Â‚Ô‚µ‚ÌF‚ğ“¾‚é.
+	// “h‚è‚Â‚Ô‚µF‚ğ“¾‚é.
 	bool ShapePage::get_fill_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_fill_color;
@@ -393,7 +423,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// ‘‘Ì‚Ì•‚ÌLk‚ğ“¾‚é.
+	// ‘‘Ì‚Ì•‚ğ“¾‚é.
 	bool ShapePage::get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept
 	{
 		val = m_font_stretch;
@@ -712,7 +742,7 @@ namespace winrt::GraphPaper::implementation
 		if (join_miter_limit >= 1.0f && join_miter_limit <= 128.5f) {
 			m_join_miter_limit = join_miter_limit;
 		}
-		// “h‚è‚Â‚Ô‚µ‚ÌF
+		// “h‚è‚Â‚Ô‚µF
 		const D2D1_COLOR_F fill_color{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
@@ -752,7 +782,7 @@ namespace winrt::GraphPaper::implementation
 			m_font_size = font_size;
 		}
 
-		// ‘‘Ì‚Ì•‚ÌLk
+		// ‘‘Ì‚Ì•
 		const DWRITE_FONT_STRETCH font_stretch = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());
 		if (font_stretch == DWRITE_FONT_STRETCH_CONDENSED ||
 			font_stretch == DWRITE_FONT_STRETCH_EXPANDED ||
@@ -861,7 +891,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// ’l‚ğ“h‚è‚Â‚Ô‚µ‚ÌF‚ÉŠi”[‚·‚é.
+	// ’l‚ğ“h‚è‚Â‚Ô‚µF‚ÉŠi”[‚·‚é.
 	bool ShapePage::set_fill_color(const D2D1_COLOR_F& val) noexcept
 	{
 		if (!equal(m_fill_color, val)) {
@@ -901,7 +931,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// ’l‚ğ‘‘Ì‚Ì•‚ÌLk‚ÉŠi”[‚·‚é.
+	// ’l‚ğ‘‘Ì‚Ì•‚ÉŠi”[‚·‚é.
 	bool ShapePage::set_font_stretch(const DWRITE_FONT_STRETCH val) noexcept
 	{
 		const auto old_val = m_font_stretch;
@@ -1205,7 +1235,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_join_style));
 		// Œ‹‡‚Ìƒ}ƒCƒ^[§ŒÀ
 		dt_writer.WriteSingle(m_join_miter_limit);
-		// “h‚è‚Â‚Ô‚µ‚ÌF
+		// “h‚è‚Â‚Ô‚µF
 		dt_writer.WriteSingle(m_fill_color.r);
 		dt_writer.WriteSingle(m_fill_color.g);
 		dt_writer.WriteSingle(m_fill_color.b);
@@ -1222,7 +1252,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteBytes(array_view(font_family_data, font_family_data + 2 * font_family_len));
 		// ‘‘Ì‚Ì‘å‚«‚³
 		dt_writer.WriteSingle(m_font_size);
-		// ‘‘Ì‚Ì•‚ÌLk
+		// ‘‘Ì‚Ì•
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_stretch));
 		// ‘‘Ì‚Ìš‘Ì
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_style));

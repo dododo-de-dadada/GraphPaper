@@ -194,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 			// 文字列フォーマットを破棄する.
 			t_format = nullptr;
 
-			// 文字の幅の伸縮, 文字のそろえ, 段落のそろえを文字列レイアウトに格納する.
+			// 文字の幅, 文字のそろえ, 段落のそろえを文字列レイアウトに格納する.
 			winrt::check_hresult(m_dwrite_text_layout->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len }));
 			winrt::check_hresult(m_dwrite_text_layout->SetTextAlignment(m_text_align_t));
 			winrt::check_hresult(m_dwrite_text_layout->SetParagraphAlignment(m_text_par_align));
@@ -256,7 +256,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 
-			// 書体の幅の伸縮が変更されたなら文字列レイアウトに格納する.
+			// 書体の幅が変更されたなら文字列レイアウトに格納する.
 			DWRITE_FONT_STRETCH font_stretch;
 			winrt::check_hresult(m_dwrite_text_layout->GetFontStretch(0, &font_stretch));
 			if (!equal(font_stretch, m_font_stretch)) {
@@ -539,7 +539,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 書体の幅の伸縮を得る.
+	// 書体の幅を得る.
 	bool ShapeText::get_font_stretch(DWRITE_FONT_STRETCH& val) const noexcept
 	{
 		val = m_font_stretch;

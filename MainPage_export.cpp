@@ -306,7 +306,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 画像を PDF の XObject として書き出す.
-	static size_t export_pdf_image(const uint8_t* bgra, const size_t width, const size_t height, const int obj_num, DataWriter& dt_writer)
+	static size_t export_pdf_image(const uint8_t* bgra,
+		const size_t o_width,
+		const size_t o_height,
+		const D2D1_RECT_F clip,
+		const int obj_num, DataWriter& dt_writer)
 	{
 		// 画像 XObject (ストリームオブジェクト)
 		/*
@@ -320,16 +324,26 @@ namespace winrt::GraphPaper::implementation
 		image_stream = nullptr;
 		*/
 
+		// クリッピングしながら画像データをコピーする.
 		// PDF はアルファ値をサポートしておらず, 逆に WIC ビットマップは 3 バイトピクセルを
 		// サポートしていない.
 		// BGRA を RGB にコピー.
 		std::vector<uint8_t> z_buf;
-		std::vector<uint8_t> in_buf(3ull * width * height);
-		//std::vector<uint8_t> in_buf(3ull * t->m_orig.width * t->m_orig.height);
-		for (size_t i = 0; i < width * height; i++) {
-			in_buf[3 * i + 2] = bgra[4 * i + 0];	// B
-			in_buf[3 * i + 1] = bgra[4 * i + 1];	// G
-			in_buf[3 * i + 0] = bgra[4 * i + 2];	// R
+		const size_t cl = max(static_cast<int>(round(clip.left)), 0);
+		const size_t ct = max(static_cast<int>(round(clip.top)), 0);
+		const size_t cr = min(static_cast<int>(round(clip.right)), o_width);
+		const size_t cb = min(static_cast<int>(round(clip.bottom)), o_height);
+		if (cr <= cl || cb <= ct) {
+			return 0;
+		}
+		std::vector<uint8_t> in_buf(3ull * (cr - cl) * (cb - ct));
+		size_t i = 0;
+		for (size_t y = ct; y < cb; y++) {
+			for (size_t x = cl; x < cr; x++) {
+				in_buf[i++] = bgra[4 * o_width * y + 4 * x + 2];	// R
+				in_buf[i++] = bgra[4 * o_width * y + 4 * x + 1];	// G
+				in_buf[i++] = bgra[4 * o_width * y + 4 * x + 0];	// B
+			}
 		}
 		z_compress(z_buf, std::data(in_buf), std::size(in_buf));
 		in_buf.clear();
@@ -349,8 +363,8 @@ namespace winrt::GraphPaper::implementation
 			L"/Filter /FlateDecode\n"
 			L">>\n",
 			obj_num,
-			width,
-			height,
+			cr - cl,
+			cb - ct,
 			z_buf.size()
 		);
 		size_t len = dt_writer.WriteString(buf);
@@ -682,7 +696,8 @@ namespace winrt::GraphPaper::implementation
 					const uint8_t* bgra = static_cast<ShapeImage*>(s)->m_bgra;
 					const size_t w = static_cast<ShapeImage*>(s)->m_orig.width;
 					const size_t h = static_cast<ShapeImage*>(s)->m_orig.height;
-					len = export_pdf_image(bgra, w, h, 6 + 3 * text_cnt + image_cnt, dt_writer);
+					const auto c = static_cast<ShapeImage*>(s)->m_clip;
+					len = export_pdf_image(bgra, w, h, c, 6 + 3 * text_cnt + image_cnt, dt_writer);
 					obj_len.push_back(obj_len.back() + len);
 					image_cnt++;
 				}

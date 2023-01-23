@@ -142,7 +142,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 「印刷」メニューの可否を設定する.
 		{
-			mfi_print().IsEnabled(PrintManager::IsSupported());
+			//mfi_print().IsEnabled(PrintManager::IsSupported());
 		}
 
 		// アプリケーションの中断・継続などのイベントハンドラーを設定する.
@@ -255,14 +255,14 @@ namespace winrt::GraphPaper::implementation
 	// https://github.com/microsoft/Windows-universal-samples/tree/main/Samples/Printing/cpp
 	IAsyncAction MainPage::print_click_async(const IInspectable&, const RoutedEventArgs&)
 	{
+		co_return;
+		/*
 		if (!PrintManager::IsSupported()) {
 			__debugbreak();
 		}
-//		if (m_print_source == nullptr) {
-
-//		}
 		if (!co_await PrintManager::ShowPrintUIAsync()) {
 			message_show(ICON_ALERT, L"File to Print", {});
 		}
+		*/
 	}
 }

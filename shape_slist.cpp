@@ -25,7 +25,8 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_RECT,	// 方形
 		SHAPE_RRECT,	// 角丸方形
 		SHAPE_RULER,	// 定規
-		SHAPE_TEXT	// 文字列
+		SHAPE_TEXT,	// 文字列
+		SHAPE_ARC	// 円弧
 	};
 
 	// データリーダーから図形を読み込む.
@@ -497,6 +498,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_RULER) {
 			s = new ShapeRuler(page, dt_reader);
+		}
+		else if (s_type == SHAPE_TYPE::SHAPE_ARC) {
+			s = new ShapeArc(page, dt_reader);
 		}
 		else {
 			s = reinterpret_cast<Shape*>(-1);
