@@ -1203,7 +1203,6 @@ namespace winrt::GraphPaper::implementation
 		ShapeRuler::~ShapeRuler(void)
 		{
 			if (m_dwrite_text_format != nullptr) {
-				//m_dwrite_text_format->Release();
 				m_dwrite_text_format = nullptr;
 			}
 		} // ~ShapeStroke
@@ -1324,7 +1323,6 @@ namespace winrt::GraphPaper::implementation
 		virtual ~ShapePath(void)
 		{
 			if (m_d2d_path_geom != nullptr) {
-				//m_d2d_path_geom->Release();
 				m_d2d_path_geom = nullptr;
 			}
 			// ~ShapePath
@@ -1401,10 +1399,109 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SWEEP_DIRECTION m_sweep_flag;
 		D2D1_ARC_SIZE m_larg_flag;
 
-		/*
-		ShapeArc(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page)
-		{}
-		*/
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override
+		{
+			D2D1_POINT_2F a_pos[3];
+			get_verts(a_pos);
+			if (pt_in_anc(t_pos, a_pos[0])) {
+				return ANC_TYPE::ANC_P0;
+			}
+			else if (pt_in_anc(t_pos, a_pos[1])) {
+				return ANC_TYPE::ANC_P0 + 1;
+			}
+			else if (pt_in_anc(t_pos, a_pos[2])) {
+				return ANC_TYPE::ANC_P0 + 2;
+			}
+			// テスト位置を平行移動.
+			D2D1_POINT_2F t{ t_pos.x - m_start.x, t_pos.y - m_start.y };
+			// m_vec[0] を軸とする座標に回転.
+			const auto c = cos(static_cast<double>(m_rotation));
+			const auto s = sin(static_cast<double>(m_rotation));
+			const D2D1_POINT_2F q{ t.x * c + t.y * s, -t.x * s + t.y * c };
+			const D2D1_POINT_2F v0{ m_vec[0] };
+			const D2D1_POINT_2F v1{ m_vec[0].x + m_vec[1].x, m_vec[0].y + m_vec[1].y };
+			//if (pt_in_ellipse(q, D2D1_POINT_2F{ 0.0f, 0.0f }, sqrt(pt_abs2(v0)), sqrt(pt_abs2(v1)))) {
+			//	__debugbreak();
+			//}
+			return ANC_TYPE::ANC_PAGE;
+		}
+
+		void draw(void) final override
+		{
+			ID2D1Factory* factory = Shape::s_d2d_factory;
+			ID2D1SolidColorBrush* brush = Shape::s_d2d_color_brush;
+			ID2D1RenderTarget* target = Shape::s_d2d_target;
+			if (m_d2d_stroke_style == nullptr) {
+				create_stroke_style(factory);
+			}
+			if (m_d2d_path_geom == nullptr) {
+				const D2D1_POINT_2F v0{ m_vec[0] };
+				const D2D1_POINT_2F v1{ m_vec[0].x + m_vec[1].x, m_vec[0].y + m_vec[1].y };
+				if (equal(pt_abs2(v0), 0.0) || 
+					equal(pt_abs2(v1), 0.0)) {
+					// 直線.
+					m_rotation = 0.0f;
+				}
+				if (equal(m_vec[0].x, 0.0f)) {
+					m_rotation = M_PI / 2.0f;
+				}
+				else {
+					m_rotation = atan(static_cast<double>(v0.y) / static_cast<double>(v0.x));
+				}
+
+				D2D1_ARC_SEGMENT arc{
+					D2D1_POINT_2F{ m_start.x + v1.x, m_start.y + v1.y },
+					D2D1_SIZE_F{ sqrtf(pt_abs2(v0)), sqrtf(pt_abs2(v1))},
+					m_rotation,
+					D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE,
+					v0.x * v1.y - v1.x * v0.y <= 0.0f ?
+						D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL :
+						D2D1_ARC_SIZE::D2D1_ARC_SIZE_LARGE
+				};
+				winrt::com_ptr<ID2D1GeometrySink> sink;
+				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
+				winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
+				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+				const auto f_begin = (is_opaque(m_fill_color) ?
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				sink->BeginFigure(D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y }, f_begin);
+				sink->AddArc(arc);
+				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+				winrt::check_hresult(sink->Close());
+				sink = nullptr;
+			}
+			if (is_opaque(m_fill_color)) {
+				brush->SetColor(m_fill_color);
+				target->FillGeometry(m_d2d_path_geom.get(), brush);
+			}
+			if (is_opaque(m_stroke_color)) {
+				brush->SetColor(m_stroke_color);
+				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
+			}
+			if (is_selected()) {
+				D2D1_POINT_2F a_pos[3];
+				get_verts(a_pos);
+				anc_draw_rect(a_pos[0], target, brush);
+				anc_draw_rect(a_pos[1], target, brush);
+				anc_draw_rect(a_pos[2], target, brush);
+			}
+		}
+
+		ShapeArc(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+			ShapePath(page, false),
+			m_rotation(0.0),
+			m_sweep_flag(D2D1_SWEEP_DIRECTION_CLOCKWISE),
+			m_larg_flag(D2D1_ARC_SIZE_SMALL)
+		{
+			// m_start は, だ円の中心点.
+			m_start.x = b_pos.x;
+			m_start.y = b_pos.y + b_vec.y;
+			// m_vec には, だ円上の 2 点
+			m_vec.push_back(D2D1_POINT_2F{ b_vec.x, 0.0f });
+			m_vec.push_back(D2D1_POINT_2F{ -b_vec.x, -b_vec.y });
+		}
+
 		ShapeArc(const ShapePage& page, const DataReader& dt_reader) :
 			ShapePath(page, dt_reader),
 			m_rotation(dt_reader.ReadSingle()),

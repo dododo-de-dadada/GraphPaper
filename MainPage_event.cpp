@@ -369,6 +369,9 @@ namespace winrt::GraphPaper::implementation
 		else if (d_tool == DRAWING_TOOL::RULER) {
 			s = new ShapeRuler(b_pos, b_vec, &m_main_page);
 		}
+		else if (d_tool == DRAWING_TOOL::ARC) {
+			s = new ShapeArc(b_pos, b_vec, &m_main_page);
+		}
 		else {
 			return;
 		}
@@ -1018,7 +1021,11 @@ namespace winrt::GraphPaper::implementation
 				default:
 					// }Œ`‚ÌƒNƒ‰ƒX‚ª, ‘½ŠpŒ`‚Ü‚½‚Í‹Èü‚Å‚ ‚é‚©”»’è‚·‚é.
 					if (s != nullptr &&
-						(typeid(*s) == typeid(ShapeLine) || typeid(*s) == typeid(ShapePoly) || typeid(*s) == typeid(ShapeBezi))) {
+						(typeid(*s) == typeid(ShapeLine) || 
+							typeid(*s) == typeid(ShapePoly) || 
+							typeid(*s) == typeid(ShapeBezi) || 
+							typeid(*s) == typeid(ShapeArc)
+						)) {
 						// }Œ`‚Ì•”ˆÊ‚ª, ’¸“_‚Ì”‚ð’´‚¦‚È‚¢‚©”»’è‚·‚é.
 						if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 + static_cast<ShapePath*>(s)->m_vec.size() + 1) {
 							Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
