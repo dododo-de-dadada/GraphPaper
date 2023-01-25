@@ -1394,7 +1394,10 @@ namespace winrt::GraphPaper::implementation
 		void export_svg(DataWriter const& dt_writer);
 	};
 
+	// 円弧を描画する 3 つの方法 - 楕円の円弧
+	// https://learn.microsoft.com/ja-jp/xamarin/xamarin-forms/user-interface/graphics/skiasharp/curves/arcs
 	struct ShapeArc : ShapePath {
+		D2D1_SIZE_F m_radius;
 		float m_rotation;
 		D2D1_SWEEP_DIRECTION m_sweep_flag;
 		D2D1_ARC_SIZE m_larg_flag;
@@ -1402,6 +1405,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override
 		{
 			D2D1_POINT_2F a_pos[3];
+
 			get_verts(a_pos);
 			if (pt_in_anc(t_pos, a_pos[0])) {
 				return ANC_TYPE::ANC_P0;
@@ -1435,28 +1439,29 @@ namespace winrt::GraphPaper::implementation
 				create_stroke_style(factory);
 			}
 			if (m_d2d_path_geom == nullptr) {
-				const D2D1_POINT_2F v0{ m_vec[0] };
-				const D2D1_POINT_2F v1{ m_vec[0].x + m_vec[1].x, m_vec[0].y + m_vec[1].y };
-				if (equal(pt_abs2(v0), 0.0) || 
-					equal(pt_abs2(v1), 0.0)) {
+				//const D2D1_POINT_2F v0{ m_vec[0] };
+				//const D2D1_POINT_2F v1{ m_vec[0].x + m_vec[1].x, m_vec[0].y + m_vec[1].y };
+				//if (equal(pt_abs2(v0), 0.0) || 
+				//	equal(pt_abs2(v1), 0.0)) {
 					// 直線.
-					m_rotation = 0.0f;
-				}
-				if (equal(m_vec[0].x, 0.0f)) {
-					m_rotation = M_PI / 2.0f;
-				}
-				else {
-					m_rotation = atan(static_cast<double>(v0.y) / static_cast<double>(v0.x));
-				}
+				//	m_rotation = 0.0f;
+				//}
+				//if (equal(m_vec[0].x, 0.0f)) {
+				//	m_rotation = M_PI / 2.0f;
+				//}
+				//else {
+				//	m_rotation = atan(static_cast<double>(v0.y) / static_cast<double>(v0.x));
+				//}
 
 				D2D1_ARC_SEGMENT arc{
-					D2D1_POINT_2F{ m_start.x + v1.x, m_start.y + v1.y },
-					D2D1_SIZE_F{ sqrtf(pt_abs2(v0)), sqrtf(pt_abs2(v1))},
+					D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y },
+					m_radius,
 					m_rotation,
-					D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE,
-					v0.x * v1.y - v1.x * v0.y <= 0.0f ?
-						D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL :
-						D2D1_ARC_SIZE::D2D1_ARC_SIZE_LARGE
+					D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE,
+					//v0.x * v1.y - v1.x * v0.y <= 0.0f ?
+					//	D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL :
+					//	D2D1_ARC_SIZE::D2D1_ARC_SIZE_LARGE
+					D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL
 				};
 				winrt::com_ptr<ID2D1GeometrySink> sink;
 				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
@@ -1465,7 +1470,7 @@ namespace winrt::GraphPaper::implementation
 				const auto f_begin = (is_opaque(m_fill_color) ?
 					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
 					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-				sink->BeginFigure(D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y }, f_begin);
+				sink->BeginFigure(D2D1_POINT_2F{ m_start.x, m_start.y }, f_begin);
 				sink->AddArc(arc);
 				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 				winrt::check_hresult(sink->Close());
@@ -1480,30 +1485,102 @@ namespace winrt::GraphPaper::implementation
 				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
 			}
 			if (is_selected()) {
-				D2D1_POINT_2F a_pos[3];
-				get_verts(a_pos);
-				anc_draw_rect(a_pos[0], target, brush);
-				anc_draw_rect(a_pos[1], target, brush);
-				anc_draw_rect(a_pos[2], target, brush);
+				// だ円の中心点を求める.
+				// A = 1 / (rx/2)^2
+				// B = 1 / (ry/2)^2
+				// C = cos(θ)
+				// S = sin(θ)
+				// 点 p (px, py) を円の中心 (ox, oy) を原点とする座標に平行移動して, 回転する.
+				// x = C・(px - ox) + S・(py - oy)
+				// y = S・(px - ox) - C・(py - oy)
+				// 点 q についても同様.
+				// これらを, だ円の標準式 A・x^2 + B・y^2 = 1 に代入する.
+				// A・{ C・(px - ox) + S・(py - oy) }^2 + B・{ S・(px - ox) - C・(py - oy) }^2 = 1 ...[1]
+				// A・{ C・(qx - ox) + S・(qy - oy) }^2 + B・{ S・(qx - ox) - C・(qy - oy) }^2 = 1 ...[2]
+				// [1] 式の第 1 項は,
+				// A・{  C・(px - ox) + S・(py - oy) }^2 =
+				// A・{  C・px - C・ox + S・py - S・oy }^2 = 
+				// A・{ -C・ox - S・oy + (C・px + S・py) }^2 =
+				// A・C^2・ox^2 + 2A・C・S・ox・oy + A・S^2・oy^2 - 2A・C・(C・px + S・py)・ox - 2A・S・(C・px + S・py)・oy + A・(C・px + S・py)^2
+				// [1] 式の第 2 項は,
+				// B・{  S・(px - ox) - C・(py - oy) }^2 =
+				// B・{  S・px - S・ox - C・py + C・oy }^2 = 
+				// B・{ -S・ox + C・oy + (S・px - C・py) }^2 =
+				// B・S^2・ox^2 - 2B・S・C・ox・oy + B・C^2・oy^2 - 2B・S・(S・px - C・py)・ox + 2B・C・(S・px - C・py)・oy + B・(S・px - C・py)^2
+				// したがって [1] 式は,
+				// (A・C^2 + B・S^2)・ox^2 + (2A・C・S - 2B・S・C)・ox・oy + (A・S^2 + B・C^2)・oy^2 - (2A・C・(C・px + S・py) + 2B・S・(S・px - C・py))・ox - (2A・S・(C・px + S・py) - 2B・C・(S・px - C・py))・oy + (A・(C・px + S・py)^2 + B・(S・px - C・py)^2)
+				// [2] 式は, [2] 式に含まれる px, py を qx, qy に置き換えるだけ.
+				// ox^2, ox・oy, oy^2 の係数は　px, py を含まない.
+				// したがってこれらの係数は [1] 式も [2] 式も同じ.
+				// [1]=[2] なので, それらの項は消え, 1 次の項である ox と oy が残る.
+				// d = -2A・C・(C・px + S・py) + 2B・S・(S・px - C・py) ... ox の項
+				// e = -2A・S・(C・px + S・py) - 2B・C・(S・px - C・py) ... oy の項
+				// f = A・(C・px + S・py)^2 - B・(S・px - C・py)^2 ... 定数項
+				// d・ox + e・oy + f = g・ox + h・oy + i
+				// (e - h)・oy = (g - d)・ox + (i - f)
+				// oy = (g - d)/(e - h)・ox + (i - f)/(e - h)
+				// oy = j・ox + k
+				// これを [1] 式に代入して, 
+				// A・{ C・(px - ox) + S・(py - j・ox - k) }^2 + B・{ S(px - ox) - C(py - j・ox - k) }^2 = 1 ...[1']
+				// [1'] 式の第 1 項は,
+				// A・{ C・px - C・ox + S・py - S・j・ox - S・k }^2 =
+				// A・{-(C + S・j)・ox + (C・px + S・py - S・k) }^2 =
+				// A・(C + S・j)^2・ox^2 - 2A・(C + S・j)(C・px + S・py - S・k)・ox + A・(C・px + S・py - S・k)^2
+				// [1'] 式の第 2 項は,
+				// B・{ S・(px - ox) - C・(py - oy) }^2 =
+				// B・{ S・px - S・ox - C・py + C・j・ox + C・k) }^2 =
+				// B・{-(S - C・j)・ox + (S・px - C・py + C・k) }^2 =
+				// B・(S - C・j)^2・ox^2 - 2B・(S - C・j)(S・px - C・py + C・k)・ox + B・(S・px - C・py + C・k)^2
+				// a = A・(C + S・j)^2 +  B・(S - C・j)^2
+				// b = -2A・(C + S・j)(C・px + S・py - S・k) - 2B・(S - C・j)(S・px - C・py + C・k)
+				// c = A・(C・px + S・py - S・k)^2 + B・(S・px - C・py + C・k)^2 
+				// 第 1 項と第 2 項を 2 次方程式の解公式に代入すれば, ox が求まる.
+				const double px = m_start.x;
+				const double py = m_start.y;
+				const double qx = m_start.x + m_vec[0].x;
+				const double qy = m_start.y + m_vec[0].y;
+				const double A = 1.0 / (m_radius.width / 2.0 * m_radius.width / 2.0);
+				const double B = 1.0 / (m_radius.height / 2.0 * m_radius.height / 2.0);
+				const double C = cos(static_cast<double>(-m_rotation));
+				const double S = sin(static_cast<double>(-m_rotation));
+				const double d = -2 * A * C * (C * px + S * py) + 2 * B * S * (S * px - C * py);
+				const double e = -2 * A * S * (C * px + S * py) - 2 * B * C * (S * px - C * py);
+				const double f = A * (C * px + S * py) * (C * px + S * py) - B * (S * px - C * py) * (S * px - C * py);
+				const double g = -2 * A * C * (C * qx + S * qy) + 2 * B * S * (S * qx - C * qy);
+				const double h = -2 * A * S * (C * qx + S * qy) - 2 * B * C * (S * qx - C * qy);
+				const double i = A * (C * qx + S * qy) * (C * qx + S * qy) - B * (S * qx - C * qy) * (S * qx - C * qy);
+				const double j = (g - d) / (e - h);
+				const double k = (i - f) / (e - h);
+				const double a = A * (C + S * j) * (C + S * j) + B * (S - C * j) * (S - C * j);
+				const double b = -2 * A * (C + S * j) * (C * px + S * py - S * k) - 2 * B * (S - C * j) * (S * px - C * py + C * k);
+				const double c = A * (C * px + S * py - S * k) * (C * px + S * py - S * k) + B * (S * px - C * py + C * k) * (S * px - C * py + C * k);
+				const double bb_4ac = b * b - 4 * a * c;
+				const double s = bb_4ac <= FLT_MIN ? 0.0f : sqrt(b * b - 4 * a * c);
+				const double ox = (- b + s) / (2 * a);
+				const double oy = j * ox + k;
+				D2D1_POINT_2F p{ m_start.x, m_start.y };
+				D2D1_POINT_2F q{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
+
+				anc_draw_rect(p, target, brush);
+				anc_draw_rect(q, target, brush);
+				anc_draw_rect(D2D1_POINT_2F{ static_cast<FLOAT>(ox), static_cast<FLOAT>(oy) }, target, brush);
 			}
 		}
 
 		ShapeArc(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
 			ShapePath(page, false),
+			m_radius({ b_vec.x, b_vec.y }),
 			m_rotation(0.0),
 			m_sweep_flag(D2D1_SWEEP_DIRECTION_CLOCKWISE),
 			m_larg_flag(D2D1_ARC_SIZE_SMALL)
 		{
-			// m_start は, だ円の中心点.
-			m_start.x = b_pos.x;
-			m_start.y = b_pos.y + b_vec.y;
-			// m_vec には, だ円上の 2 点
-			m_vec.push_back(D2D1_POINT_2F{ b_vec.x, 0.0f });
-			m_vec.push_back(D2D1_POINT_2F{ -b_vec.x, -b_vec.y });
+			m_start = b_pos;	// 始点
+			m_vec.push_back(b_vec);	// 終点
 		}
 
 		ShapeArc(const ShapePage& page, const DataReader& dt_reader) :
 			ShapePath(page, dt_reader),
+			m_radius({ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 			m_rotation(dt_reader.ReadSingle()),
 			m_sweep_flag(static_cast<D2D1_SWEEP_DIRECTION>(dt_reader.ReadUInt32())),
 			m_larg_flag(static_cast<D2D1_ARC_SIZE>(dt_reader.ReadUInt32()))
@@ -1511,6 +1588,8 @@ namespace winrt::GraphPaper::implementation
 		void write(const DataWriter& dt_writer) const final override
 		{
 			ShapePath::write(dt_writer);
+			dt_writer.WriteSingle(m_radius.width);
+			dt_writer.WriteSingle(m_radius.height);
 			dt_writer.WriteSingle(m_rotation);
 			dt_writer.WriteUInt32(m_sweep_flag);
 			dt_writer.WriteUInt32(m_larg_flag);
