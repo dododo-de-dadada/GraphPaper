@@ -1498,8 +1498,8 @@ namespace winrt::GraphPaper::implementation
 				// A・{ C・(px - ox) + S・(py - oy) }^2 + B・{ S・(px - ox) - C・(py - oy) }^2 = 1 ...[1]
 				// A・{ C・(qx - ox) + S・(qy - oy) }^2 + B・{ S・(qx - ox) - C・(qy - oy) }^2 = 1 ...[2]
 				// [1] 式の第 1 項は,
-				// A・{  C・(px - ox) + S・(py - oy) }^2 =
-				// A・{  C・px - C・ox + S・py - S・oy }^2 = 
+				// A・{ C・(px - ox) + S・(py - oy) }^2 =
+				// A・{ C・px - C・ox + S・py - S・oy }^2 = 
 				// A・{ -C・ox - S・oy + (C・px + S・py) }^2 =
 				// A・C^2・ox^2 + 2A・C・S・ox・oy + A・S^2・oy^2 - 2A・C・(C・px + S・py)・ox - 2A・S・(C・px + S・py)・oy + A・(C・px + S・py)^2
 				// [1] 式の第 2 項は,
@@ -1521,13 +1521,14 @@ namespace winrt::GraphPaper::implementation
 				// oy = (g - d)/(e - h)・ox + (i - f)/(e - h)
 				// oy = j・ox + k
 				// これを [1] 式に代入して, 
-				// A・{ C・(px - ox) + S・(py - j・ox - k) }^2 + B・{ S(px - ox) - C(py - j・ox - k) }^2 = 1 ...[1']
+				// A・{ C・(px - ox) + S・(py - j・ox - k) }^2 + B・{ S・(px - ox) - C・(py - j・ox - k) }^2 = 1 ...[1']
 				// [1'] 式の第 1 項は,
+				// A・{ C・(px - ox) + S・(py - j・ox - k) }^2 =
 				// A・{ C・px - C・ox + S・py - S・j・ox - S・k }^2 =
 				// A・{-(C + S・j)・ox + (C・px + S・py - S・k) }^2 =
 				// A・(C + S・j)^2・ox^2 - 2A・(C + S・j)(C・px + S・py - S・k)・ox + A・(C・px + S・py - S・k)^2
 				// [1'] 式の第 2 項は,
-				// B・{ S・(px - ox) - C・(py - oy) }^2 =
+				// B・{ S・(px - ox) - C・(py - j・ox - k) }^2 =
 				// B・{ S・px - S・ox - C・py + C・j・ox + C・k) }^2 =
 				// B・{-(S - C・j)・ox + (S・px - C・py + C・k) }^2 =
 				// B・(S - C・j)^2・ox^2 - 2B・(S - C・j)(S・px - C・py + C・k)・ox + B・(S・px - C・py + C・k)^2
@@ -1555,8 +1556,8 @@ namespace winrt::GraphPaper::implementation
 				const double b = -2 * A * (C + S * j) * (C * px + S * py - S * k) - 2 * B * (S - C * j) * (S * px - C * py + C * k);
 				const double c = A * (C * px + S * py - S * k) * (C * px + S * py - S * k) + B * (S * px - C * py + C * k) * (S * px - C * py + C * k);
 				const double bb_4ac = b * b - 4 * a * c;
-				const double s = bb_4ac <= FLT_MIN ? 0.0f : sqrt(b * b - 4 * a * c);
-				const double ox = (- b + s) / (2 * a);
+				const double s = bb_4ac <= FLT_MIN ? 0.0f : sqrt(bb_4ac);
+				const double ox = (-b + s) / (2 * a);
 				const double oy = j * ox + k;
 				D2D1_POINT_2F p{ m_start.x, m_start.y };
 				D2D1_POINT_2F q{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
