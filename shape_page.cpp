@@ -243,8 +243,8 @@ namespace winrt::GraphPaper::implementation
 			c_pos,
 			D2D1_SIZE_F{ fabsf(c_pos.x - p_pos.x), fabsf(c_pos.y - p_pos.y) },
 			0.0f,
-			D2D1_SWEEP_DIRECTION_CLOCKWISE,
-			D2D1_ARC_SIZE_SMALL
+			D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE,
+			D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL
 		};
 		ID2D1Factory* factory = Shape::s_d2d_factory;
 		winrt::com_ptr<ID2D1PathGeometry> geom;

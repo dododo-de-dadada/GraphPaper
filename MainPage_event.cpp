@@ -991,6 +991,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				switch (anc) {
+				case ANC_TYPE::ANC_CENTER:
 				case ANC_TYPE::ANC_R_NW:
 				case ANC_TYPE::ANC_R_NE:
 				case ANC_TYPE::ANC_R_SE:
@@ -1020,16 +1021,17 @@ namespace winrt::GraphPaper::implementation
 					break;
 				default:
 					// }Œ`‚ÌƒNƒ‰ƒX‚ª, ‘½ŠpŒ`‚Ü‚½‚Í‹Èü‚Å‚ ‚é‚©”»’è‚·‚é.
-					if (s != nullptr &&
-						(typeid(*s) == typeid(ShapeLine) || 
-							typeid(*s) == typeid(ShapePoly) || 
-							typeid(*s) == typeid(ShapeBezi) || 
+					if (s != nullptr) {
+						if (typeid(*s) == typeid(ShapeLine) ||
+							typeid(*s) == typeid(ShapePoly) ||
+							typeid(*s) == typeid(ShapeBezi) ||
 							typeid(*s) == typeid(ShapeArc)
-						)) {
-						// }Œ`‚Ì•”ˆÊ‚ª, ’¸“_‚Ì”‚ð’´‚¦‚È‚¢‚©”»’è‚·‚é.
-						if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 + static_cast<ShapePath*>(s)->m_vec.size() + 1) {
-							Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
-							break;
+							) {
+							// }Œ`‚Ì•”ˆÊ‚ª, ’¸“_‚Ì”‚ð’´‚¦‚È‚¢‚©”»’è‚·‚é.
+							if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 + static_cast<ShapePath*>(s)->m_vec.size() + 1) {
+								Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
+								break;
+							}
 						}
 					}
 					throw winrt::hresult_invalid_argument();

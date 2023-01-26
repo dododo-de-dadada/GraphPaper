@@ -141,6 +141,7 @@ namespace winrt::GraphPaper::implementation
 		ANC_R_NE,		// 右上の角丸の中心点 (十字カーソル)
 		ANC_R_SE,		// 右下の角丸の中心点 (十字カーソル)
 		ANC_R_SW,		// 左下の角丸の中心点 (十字カーソル)
+		ANC_CENTER,	// 円弧の中心点
 		ANC_P0,	// パスの始点 (十字カーソル)
 	};
 
@@ -1340,7 +1341,7 @@ namespace winrt::GraphPaper::implementation
 		// 塗りつぶし可能か判定する.
 		bool is_fillable(void) const noexcept final override { return true; }
 		// 値を, 部位の位置に格納する.
-		bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept final override;
+		bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept override;
 		// 値を矢じるしの寸法に格納する.
 		bool set_arrow_size(const ARROW_SIZE& val) noexcept final override;
 		// 値を矢じるしの形式に格納する.
@@ -1402,6 +1403,150 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SWEEP_DIRECTION m_sweep_flag;
 		D2D1_ARC_SIZE m_larg_flag;
 
+		void get_pos_center(D2D1_POINT_2F& val) const noexcept
+		{
+			// だ円の中心点を求める.
+			// A = 1 / (rx^2)
+			// B = 1 / (ry^2)
+			// C = cos(θ)
+			// S = sin(θ)
+			// 点 p (px, py) を円の中心 (ox, oy) を原点とする座標に平行移動して, 回転する.
+			// x = C・(px - ox) + S・(py - oy)
+			// y = S・(px - ox) - C・(py - oy)
+			// 点 q についても同様.
+			// これらを, だ円の標準式 A・x^2 + B・y^2 = 1 に代入する.
+			// A・{ C・(px - ox) + S・(py - oy) }^2 + B・{ S・(px - ox) - C・(py - oy) }^2 = 1 ...[1]
+			// A・{ C・(qx - ox) + S・(qy - oy) }^2 + B・{ S・(qx - ox) - C・(qy - oy) }^2 = 1 ...[2]
+			// [1] 式の第 1 項を ox, oy について展開する.
+			// A・{ C・(px - ox) + S・(py - oy) }^2 =
+			// A・{ C・px - C・ox + S・py - S・oy }^2 = 
+			// A・{ -C・ox - S・oy + (C・px + S・py) }^2 =
+			// A・C^2・ox^2 + 2A・C・S・ox・oy + A・S^2・oy^2 - 2A・C・(C・px + S・py)・ox - 2A・S・(C・px + S・py)・oy + A・(C・px + S・py)^2
+			// [1] 式の第 2 項も同様.
+			// B・{ S・(px - ox) - C・(py - oy) }^2 =
+			// B・{ S・px - S・ox - C・py + C・oy }^2 = 
+			// B・{ -S・ox + C・oy + (S・px - C・py) }^2 =
+			// B・S^2・ox^2 - 2B・S・C・ox・oy + B・C^2・oy^2 - 2B・S・(S・px - C・py)・ox + 2B・C・(S・px - C・py)・oy + B・(S・px - C・py)^2
+			// したがって [1] 式は,
+			// (A・C^2 + B・S^2)・ox^2 + (2A・C・S - 2B・S・C)・ox・oy + (A・S^2 + B・C^2)・oy^2 - (2A・C・(C・px + S・py) + 2B・S・(S・px - C・py))・ox - (2A・S・(C・px + S・py) - 2B・C・(S・px - C・py))・oy + (A・(C・px + S・py)^2 + B・(S・px - C・py)^2)
+			//  (A・(C・px + S・py)^2 + B・(S・px - C・py)^2)
+			// [2] 式は, [1] 式に含まれる px, py を, qx, qy に置き換えるだけ.
+			// ox^2, ox・oy, oy^2 の係数は　px, py を含まない.
+			// したがってこれらの係数は [1]-[2] で消え, 1 次の項である ox と oy, 定数項が残る.
+			// d = -(2A・C・(C・px + S・py) + 2B・S・(S・px - C・py)) ... [1] 式の ox の項
+			// e = -(2A・S・(C・px + S・py) - 2B・C・(S・px - C・py)) ... [1] 式の oy の項
+			// f = A・(C・px + S・py)^2 + B・(S・px - C・py)^2 ... [1] 定数項
+			// d・ox + e・oy + f = g・ox + h・oy + i
+			// oy = (g - d)/(e - h)・ox + (i - f)/(e - h)
+			// oy = j・ox + k
+			// これを [1] 式に代入して,
+			// A・{ C・(px - ox) + S・(py - oy) }^2 = 1
+			// A・{ C・(px - ox) + S・(py - j・ox - k) }^2 + B・{ S・(px - ox) - C・(py - j・ox - k) }^2 - 1 = 0 ...[3]
+			// [3] 式を ox について展開する
+			// [3] 式の第 1 項は,
+			// A・{ C・(px - ox) + S・(py - j・ox - k) }^2 =
+			// A・{ C・px - C・ox + S・py - S・j・ox - S・k }^2 =
+			// A・{-(C + S・j)・ox + (C・px + S・py - S・k) }^2 =
+			// A・(C + S・j)^2・ox^2 - 2A・(C + S・j)(C・px + S・py - S・k)・ox + A・(C・px + S・py - S・k)^2
+			// [3] 式の第 2 項は,
+			// B・{ S・(px - ox) - C・(py - j・ox - k) }^2 =
+			// B・{ S・px - S・ox - C・py + C・j・ox + C・k) }^2 =
+			// B・{-(S - C・j)・ox + (S・px - C・py + C・k) }^2 =
+			// B・(S - C・j)^2・ox^2 - 2B・(S - C・j)(S・px - C・py + C・k)・ox + B・(S・px - C・py + C・k)^2
+			// [3] 式を a・ox^2 + b・ox + c = 0 とすると,
+			// a = A・(C + S・j)^2 + B・(S - C・j)^2
+			// b = -2A・(C + S・j)(C・px + S・py - S・k) - 2B・(S - C・j)(S・px - C・py + C・k)
+			// c = A・(C・px + S・py - S・k)^2 + B・(S・px - C・py + C・k)^2 - 1
+			// 2 次方程式の解公式に代入すれば, ox が求まる.
+			const double px = m_start.x;
+			const double py = m_start.y;
+			const double qx = m_start.x + m_vec[0].x;
+			const double qy = m_start.y + m_vec[0].y;
+			const double A = 1.0 / (m_radius.width * m_radius.width);
+			const double B = 1.0 / (m_radius.height * m_radius.height);
+			const double C = cos(static_cast<double>(-m_rotation));
+			const double S = sin(static_cast<double>(-m_rotation));
+			const double d = -2 * A * C * (C * px + S * py) - 2 * B * S * (S * px - C * py);
+			const double e = -2 * A * S * (C * px + S * py) + 2 * B * C * (S * px - C * py);
+			const double f = A * (C * px + S * py) * (C * px + S * py) + B * (S * px - C * py) * (S * px - C * py);
+			const double g = -2 * A * C * (C * qx + S * qy) - 2 * B * S * (S * qx - C * qy);
+			const double h = -2 * A * S * (C * qx + S * qy) + 2 * B * C * (S * qx - C * qy);
+			const double i = A * (C * qx + S * qy) * (C * qx + S * qy) + B * (S * qx - C * qy) * (S * qx - C * qy);
+			const double j = (g - d) / (e - h);
+			const double k = (i - f) / (e - h);
+			const double a = A * (C + S * j) * (C + S * j) + B * (S - C * j) * (S - C * j);
+			const double b = -2 * A * (C + S * j) * (C * px + S * py - S * k) - 2 * B * (S - C * j) * (S * px - C * py + C * k);
+			const double c = A * (C * px + S * py - S * k) * (C * px + S * py - S * k) + B * (S * px - C * py + C * k) * (S * px - C * py + C * k) - 1;
+			const double bb_4ac = b * b - 4 * a * c;
+			const double s = bb_4ac <= FLT_MIN ? 0.0f : sqrt(bb_4ac);
+			const double ox = (-b + s) / (a + a);
+			const double oy = j * ox + k;
+			const double vx = px - ox;
+			const double vy = py - oy;
+			const double wx = qx - ox;
+			const double wy = qy - oy;
+			if (vx * wy - vy * wx >= 0.0) {
+				val.x = static_cast<FLOAT>(ox);
+				val.y = static_cast<FLOAT>(oy);
+			}
+			else {
+				const double x = (-b - s) / (a + a);
+				val.x = static_cast<FLOAT>(x);
+				val.y = static_cast<FLOAT>(j * x + k);
+			}
+		}
+
+		// 値を, 部位の位置に格納する.
+		bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept
+		{
+			if (anc != ANC_TYPE::ANC_CENTER) {
+				if (ShapeLine::set_pos_anc(val, anc, limit, keep_aspect)) {
+					if (m_d2d_path_geom != nullptr) {
+						m_d2d_path_geom = nullptr;
+					}
+					return true;
+				}
+			}
+			D2D1_POINT_2F c_pos;
+			get_pos_center(c_pos);
+			if (!equal(c_pos, val)) {
+
+				// 中心点が c_pos で 2 点 p, q を通るだ円
+				// A・x^2 + B・y^2 = 1
+				// A・px^2 + B・py^2 = 1
+				// A・qx^2 + B・qy^2 = 1
+				// B = (1 - A・qx^2) / qy^2
+				// A・px^2 + { (1 - A・qx^2) / qy^2 }・py^2 = 1
+				// A・px^2・qy^2 + (1 - A・qx^2)・py^2 = qy^2
+				// A・px^2・qy^2 + py^2 - A・qx^2・py^2 = qy^2
+				// (px^2・qy^2 - py^2・qx^2) A = qy^2 - py^2
+				// A = (qy^2 - py^2) / (px^2・qy^2 - py^2・qx^2)
+				const double px = m_start.x - c_pos.x;
+				const double py = m_start.y - c_pos.y;
+				const double qx = m_start.x + m_vec[0].x - c_pos.x;
+				const double qy = m_start.y + m_vec[0].y - c_pos.y;
+				if (abs(px * px + py * py - (qx * qx + qy * qy)) <= FLT_MIN) {
+					m_radius.width = m_radius.height = sqrt(px * px + py * py);
+					m_rotation = 0;
+				}
+				else {
+					const double A = (qy * qy - py * py) / (px * px * qy * qy - py * py * qx * qx);
+					if (A <= FLT_MIN || 1 / A <= FLT_MIN) {
+						return false;
+					}
+					// B = (1 - A・qx^2) / qy^2
+					const double B = (1 - A * qx * qx) / (qy * qy);
+					m_radius.width = sqrt(1 / A);
+					m_radius.height = sqrt(1 / B);
+					if (m_d2d_path_geom != nullptr) {
+						m_d2d_path_geom = nullptr;
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+
 		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override
 		{
 			D2D1_POINT_2F a_pos[3];
@@ -1413,20 +1558,10 @@ namespace winrt::GraphPaper::implementation
 			else if (pt_in_anc(t_pos, a_pos[1])) {
 				return ANC_TYPE::ANC_P0 + 1;
 			}
-			else if (pt_in_anc(t_pos, a_pos[2])) {
-				return ANC_TYPE::ANC_P0 + 2;
+			get_pos_center(a_pos[2]);
+			if (pt_in_anc(t_pos, a_pos[2])) {
+				return ANC_TYPE::ANC_CENTER;
 			}
-			// テスト位置を平行移動.
-			D2D1_POINT_2F t{ t_pos.x - m_start.x, t_pos.y - m_start.y };
-			// m_vec[0] を軸とする座標に回転.
-			const auto c = cos(static_cast<double>(m_rotation));
-			const auto s = sin(static_cast<double>(m_rotation));
-			const D2D1_POINT_2F q{ t.x * c + t.y * s, -t.x * s + t.y * c };
-			const D2D1_POINT_2F v0{ m_vec[0] };
-			const D2D1_POINT_2F v1{ m_vec[0].x + m_vec[1].x, m_vec[0].y + m_vec[1].y };
-			//if (pt_in_ellipse(q, D2D1_POINT_2F{ 0.0f, 0.0f }, sqrt(pt_abs2(v0)), sqrt(pt_abs2(v1)))) {
-			//	__debugbreak();
-			//}
 			return ANC_TYPE::ANC_PAGE;
 		}
 
@@ -1455,9 +1590,9 @@ namespace winrt::GraphPaper::implementation
 
 				D2D1_ARC_SEGMENT arc{
 					D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y },
-					m_radius,
+					D2D1_SIZE_F{ fabsf(m_radius.width), fabsf(m_radius.height) },
 					m_rotation,
-					D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE,
+					m_sweep_flag,
 					//v0.x * v1.y - v1.x * v0.y <= 0.0f ?
 					//	D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL :
 					//	D2D1_ARC_SIZE::D2D1_ARC_SIZE_LARGE
@@ -1485,86 +1620,16 @@ namespace winrt::GraphPaper::implementation
 				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
 			}
 			if (is_selected()) {
-				// だ円の中心点を求める.
-				// A = 1 / (rx/2)^2
-				// B = 1 / (ry/2)^2
-				// C = cos(θ)
-				// S = sin(θ)
-				// 点 p (px, py) を円の中心 (ox, oy) を原点とする座標に平行移動して, 回転する.
-				// x = C・(px - ox) + S・(py - oy)
-				// y = S・(px - ox) - C・(py - oy)
-				// 点 q についても同様.
-				// これらを, だ円の標準式 A・x^2 + B・y^2 = 1 に代入する.
-				// A・{ C・(px - ox) + S・(py - oy) }^2 + B・{ S・(px - ox) - C・(py - oy) }^2 = 1 ...[1]
-				// A・{ C・(qx - ox) + S・(qy - oy) }^2 + B・{ S・(qx - ox) - C・(qy - oy) }^2 = 1 ...[2]
-				// [1] 式の第 1 項は,
-				// A・{ C・(px - ox) + S・(py - oy) }^2 =
-				// A・{ C・px - C・ox + S・py - S・oy }^2 = 
-				// A・{ -C・ox - S・oy + (C・px + S・py) }^2 =
-				// A・C^2・ox^2 + 2A・C・S・ox・oy + A・S^2・oy^2 - 2A・C・(C・px + S・py)・ox - 2A・S・(C・px + S・py)・oy + A・(C・px + S・py)^2
-				// [1] 式の第 2 項は,
-				// B・{  S・(px - ox) - C・(py - oy) }^2 =
-				// B・{  S・px - S・ox - C・py + C・oy }^2 = 
-				// B・{ -S・ox + C・oy + (S・px - C・py) }^2 =
-				// B・S^2・ox^2 - 2B・S・C・ox・oy + B・C^2・oy^2 - 2B・S・(S・px - C・py)・ox + 2B・C・(S・px - C・py)・oy + B・(S・px - C・py)^2
-				// したがって [1] 式は,
-				// (A・C^2 + B・S^2)・ox^2 + (2A・C・S - 2B・S・C)・ox・oy + (A・S^2 + B・C^2)・oy^2 - (2A・C・(C・px + S・py) + 2B・S・(S・px - C・py))・ox - (2A・S・(C・px + S・py) - 2B・C・(S・px - C・py))・oy + (A・(C・px + S・py)^2 + B・(S・px - C・py)^2)
-				// [2] 式は, [2] 式に含まれる px, py を qx, qy に置き換えるだけ.
-				// ox^2, ox・oy, oy^2 の係数は　px, py を含まない.
-				// したがってこれらの係数は [1] 式も [2] 式も同じ.
-				// [1]=[2] なので, それらの項は消え, 1 次の項である ox と oy が残る.
-				// d = -2A・C・(C・px + S・py) + 2B・S・(S・px - C・py) ... ox の項
-				// e = -2A・S・(C・px + S・py) - 2B・C・(S・px - C・py) ... oy の項
-				// f = A・(C・px + S・py)^2 - B・(S・px - C・py)^2 ... 定数項
-				// d・ox + e・oy + f = g・ox + h・oy + i
-				// (e - h)・oy = (g - d)・ox + (i - f)
-				// oy = (g - d)/(e - h)・ox + (i - f)/(e - h)
-				// oy = j・ox + k
-				// これを [1] 式に代入して, 
-				// A・{ C・(px - ox) + S・(py - j・ox - k) }^2 + B・{ S・(px - ox) - C・(py - j・ox - k) }^2 = 1 ...[1']
-				// [1'] 式の第 1 項は,
-				// A・{ C・(px - ox) + S・(py - j・ox - k) }^2 =
-				// A・{ C・px - C・ox + S・py - S・j・ox - S・k }^2 =
-				// A・{-(C + S・j)・ox + (C・px + S・py - S・k) }^2 =
-				// A・(C + S・j)^2・ox^2 - 2A・(C + S・j)(C・px + S・py - S・k)・ox + A・(C・px + S・py - S・k)^2
-				// [1'] 式の第 2 項は,
-				// B・{ S・(px - ox) - C・(py - j・ox - k) }^2 =
-				// B・{ S・px - S・ox - C・py + C・j・ox + C・k) }^2 =
-				// B・{-(S - C・j)・ox + (S・px - C・py + C・k) }^2 =
-				// B・(S - C・j)^2・ox^2 - 2B・(S - C・j)(S・px - C・py + C・k)・ox + B・(S・px - C・py + C・k)^2
-				// a = A・(C + S・j)^2 +  B・(S - C・j)^2
-				// b = -2A・(C + S・j)(C・px + S・py - S・k) - 2B・(S - C・j)(S・px - C・py + C・k)
-				// c = A・(C・px + S・py - S・k)^2 + B・(S・px - C・py + C・k)^2 
-				// 第 1 項と第 2 項を 2 次方程式の解公式に代入すれば, ox が求まる.
-				const double px = m_start.x;
-				const double py = m_start.y;
-				const double qx = m_start.x + m_vec[0].x;
-				const double qy = m_start.y + m_vec[0].y;
-				const double A = 1.0 / (m_radius.width / 2.0 * m_radius.width / 2.0);
-				const double B = 1.0 / (m_radius.height / 2.0 * m_radius.height / 2.0);
-				const double C = cos(static_cast<double>(-m_rotation));
-				const double S = sin(static_cast<double>(-m_rotation));
-				const double d = -2 * A * C * (C * px + S * py) + 2 * B * S * (S * px - C * py);
-				const double e = -2 * A * S * (C * px + S * py) - 2 * B * C * (S * px - C * py);
-				const double f = A * (C * px + S * py) * (C * px + S * py) - B * (S * px - C * py) * (S * px - C * py);
-				const double g = -2 * A * C * (C * qx + S * qy) + 2 * B * S * (S * qx - C * qy);
-				const double h = -2 * A * S * (C * qx + S * qy) - 2 * B * C * (S * qx - C * qy);
-				const double i = A * (C * qx + S * qy) * (C * qx + S * qy) - B * (S * qx - C * qy) * (S * qx - C * qy);
-				const double j = (g - d) / (e - h);
-				const double k = (i - f) / (e - h);
-				const double a = A * (C + S * j) * (C + S * j) + B * (S - C * j) * (S - C * j);
-				const double b = -2 * A * (C + S * j) * (C * px + S * py - S * k) - 2 * B * (S - C * j) * (S * px - C * py + C * k);
-				const double c = A * (C * px + S * py - S * k) * (C * px + S * py - S * k) + B * (S * px - C * py + C * k) * (S * px - C * py + C * k);
-				const double bb_4ac = b * b - 4 * a * c;
-				const double s = bb_4ac <= FLT_MIN ? 0.0f : sqrt(bb_4ac);
-				const double ox = (-b + s) / (2 * a);
-				const double oy = j * ox + k;
 				D2D1_POINT_2F p{ m_start.x, m_start.y };
 				D2D1_POINT_2F q{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
+				D2D1_POINT_2F c_pos;
+				get_pos_center(c_pos);
+				D2D1_POINT_2F x_pos;
+				D2D1_POINT_2F y_pos;
 
 				anc_draw_rect(p, target, brush);
 				anc_draw_rect(q, target, brush);
-				anc_draw_rect(D2D1_POINT_2F{ static_cast<FLOAT>(ox), static_cast<FLOAT>(oy) }, target, brush);
+				anc_draw_rect(c_pos, target, brush);
 			}
 		}
 
