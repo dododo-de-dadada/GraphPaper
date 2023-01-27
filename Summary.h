@@ -31,11 +31,11 @@ namespace winrt::GraphPaper::implementation
 			auto const& t_id = typeid(*s);
 			if (t_id == typeid(ShapeBezi)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_bezi")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_bezi/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_bezi/Text");
 			}
 			else if (t_id == typeid(ShapeElli)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_elli")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_elli/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_elli/Text");
 			}
 			else if (t_id == typeid(ShapeGroup)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_group")));
@@ -43,27 +43,27 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (t_id == typeid(ShapeLine)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_line/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_line/Text");
 			}
 			else if (t_id == typeid(ShapePoly)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_tri")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_poly/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_poly/Text");
 			}
 			else if (t_id == typeid(ShapeRect)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rect")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_rect/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_rect/Text");
 			}
 			else if (t_id == typeid(ShapeRRect)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rrect")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_rrect/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_rrect/Text");
 			}
 			else if (t_id == typeid(ShapeRuler)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ruler")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_ruler/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_ruler/Text");
 			}
 			else if (t_id == typeid(ShapeText)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_tool_text/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_text/Text");
 			}
 			else if (t_id == typeid(ShapeImage)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_image")));

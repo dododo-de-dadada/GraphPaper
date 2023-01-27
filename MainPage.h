@@ -148,7 +148,8 @@ namespace winrt::GraphPaper::implementation
 		RRECT,	// 角丸方形
 		TEXT,	// 文字列
 		RULER,	// 定規
-		ARC	// 円弧
+		ARC,	// 円弧
+		DROPPER	// スポイトツール
 	};
 
 	//-------------------------------

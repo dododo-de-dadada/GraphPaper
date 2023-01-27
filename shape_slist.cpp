@@ -565,7 +565,10 @@ namespace winrt::GraphPaper::implementation
 			}
 			auto const& s_type = typeid(*s);
 			uint32_t s_int;
-			if (s_type == typeid(ShapeBezi)) {
+			if (s_type == typeid(ShapeArc)) {
+				s_int = SHAPE_TYPE::SHAPE_ARC;
+			}
+			else if (s_type == typeid(ShapeBezi)) {
 				s_int = SHAPE_TYPE::SHAPE_BEZI;
 			}
 			else if (s_type == typeid(ShapeImage)) {

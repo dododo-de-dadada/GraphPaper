@@ -969,8 +969,11 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_set_curs_style(void)
 	{
+		if (m_drawing_tool == DRAWING_TOOL::DROPPER) {
+
+		}
 		// 作図ツールが選択ツール以外か判定する.
-		if (m_drawing_tool != DRAWING_TOOL::SELECT &&
+		else if (m_drawing_tool != DRAWING_TOOL::SELECT &&
 			m_event_state != EVENT_STATE::PRESS_RBTN) {
 			Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 		}

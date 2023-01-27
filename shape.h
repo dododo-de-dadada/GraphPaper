@@ -288,7 +288,7 @@ namespace winrt::GraphPaper::implementation
 	// 位置が図形の部位に含まれるか判定する.
 	inline bool pt_in_anc(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F a_pos) noexcept;
 	// 位置がだ円に含まれるか判定する.
-	inline bool pt_in_ellipse(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept;
+	inline bool pt_in_ellipse(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y, const double rot = 0.0) noexcept;
 	// 位置が円に含まれるか判定する.
 	inline bool pt_in_circle(const D2D1_POINT_2F t_vec, const double rad) noexcept;
 	// 位置が円に含まれるか判定する.
@@ -1190,7 +1190,6 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 定規
-	// 作成したあとで文字列の属性の変更はできない.
 	//------------------------------
 	struct ShapeRuler : ShapeRect {
 		float m_grid_base = GRID_LEN_DEFVAL - 1.0f;	// 方眼の大きさ (を -1 した値)
@@ -1349,7 +1348,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を塗りつぶし色に格納する.
 		bool set_fill_color(const D2D1_COLOR_F& val) noexcept final override;
 		// 値を始点に格納する. 他の部位の位置も動く.
-		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
+		bool set_pos_start(const D2D1_POINT_2F val) noexcept override;
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& dt_writer) const;
 	};
@@ -1402,6 +1401,7 @@ namespace winrt::GraphPaper::implementation
 		float m_rotation;
 		D2D1_SWEEP_DIRECTION m_sweep_flag;
 		D2D1_ARC_SIZE m_larg_flag;
+		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom;
 
 		void get_pos_center(D2D1_POINT_2F& val) const noexcept
 		{
@@ -1414,7 +1414,7 @@ namespace winrt::GraphPaper::implementation
 			// x = C・(px - ox) + S・(py - oy)
 			// y = S・(px - ox) - C・(py - oy)
 			// 点 q についても同様.
-			// これらを, だ円の標準式 A・x^2 + B・y^2 = 1 に代入する.
+			// これらを, だ円の標準形 A・x^2 + B・y^2 = 1 に代入する.
 			// A・{ C・(px - ox) + S・(py - oy) }^2 + B・{ S・(px - ox) - C・(py - oy) }^2 = 1 ...[1]
 			// A・{ C・(qx - ox) + S・(qy - oy) }^2 + B・{ S・(qx - ox) - C・(qy - oy) }^2 = 1 ...[2]
 			// [1] 式の第 1 項を ox, oy について展開する.
@@ -1501,47 +1501,40 @@ namespace winrt::GraphPaper::implementation
 		{
 			if (anc != ANC_TYPE::ANC_CENTER) {
 				if (ShapeLine::set_pos_anc(val, anc, limit, keep_aspect)) {
+					m_radius.width = fabs(m_vec[0].x);
+					m_radius.height = fabs(m_vec[0].y);
 					if (m_d2d_path_geom != nullptr) {
 						m_d2d_path_geom = nullptr;
+					}
+					if (m_d2d_fill_geom != nullptr) {
+						m_d2d_fill_geom = nullptr;
 					}
 					return true;
 				}
 			}
-			D2D1_POINT_2F c_pos;
-			get_pos_center(c_pos);
-			if (!equal(c_pos, val)) {
-
-				// 中心点が c_pos で 2 点 p, q を通るだ円
-				// A・x^2 + B・y^2 = 1
-				// A・px^2 + B・py^2 = 1
-				// A・qx^2 + B・qy^2 = 1
-				// B = (1 - A・qx^2) / qy^2
-				// A・px^2 + { (1 - A・qx^2) / qy^2 }・py^2 = 1
-				// A・px^2・qy^2 + (1 - A・qx^2)・py^2 = qy^2
-				// A・px^2・qy^2 + py^2 - A・qx^2・py^2 = qy^2
-				// (px^2・qy^2 - py^2・qx^2) A = qy^2 - py^2
-				// A = (qy^2 - py^2) / (px^2・qy^2 - py^2・qx^2)
-				const double px = m_start.x - c_pos.x;
-				const double py = m_start.y - c_pos.y;
-				const double qx = m_start.x + m_vec[0].x - c_pos.x;
-				const double qy = m_start.y + m_vec[0].y - c_pos.y;
-				if (abs(px * px + py * py - (qx * qx + qy * qy)) <= FLT_MIN) {
-					m_radius.width = m_radius.height = sqrt(px * px + py * py);
-					m_rotation = 0;
-				}
-				else {
-					const double A = (qy * qy - py * py) / (px * px * qy * qy - py * py * qx * qx);
-					if (A <= FLT_MIN || 1 / A <= FLT_MIN) {
-						return false;
-					}
-					// B = (1 - A・qx^2) / qy^2
-					const double B = (1 - A * qx * qx) / (qy * qy);
-					m_radius.width = sqrt(1 / A);
-					m_radius.height = sqrt(1 / B);
+			else {
+				D2D1_POINT_2F c_pos;
+				get_pos_center(c_pos);
+				if (!equal(c_pos, val)) {
+					m_start.x += val.x - c_pos.x;
+					m_start.y += val.y - c_pos.y;
 					if (m_d2d_path_geom != nullptr) {
 						m_d2d_path_geom = nullptr;
 					}
+					if (m_d2d_fill_geom != nullptr) {
+						m_d2d_fill_geom = nullptr;
+					}
+					return true;
 				}
+			}
+			return false;
+		}
+
+		// 値を始点に格納する. 他の部位の位置も動く.
+		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override
+		{
+			if (ShapePath::set_pos_start(val)) {
+				m_d2d_fill_geom = nullptr;
 				return true;
 			}
 			return false;
@@ -1558,9 +1551,25 @@ namespace winrt::GraphPaper::implementation
 			else if (pt_in_anc(t_pos, a_pos[1])) {
 				return ANC_TYPE::ANC_P0 + 1;
 			}
-			get_pos_center(a_pos[2]);
-			if (pt_in_anc(t_pos, a_pos[2])) {
+			D2D1_POINT_2F c_pos;
+			get_pos_center(c_pos);
+			if (pt_in_anc(t_pos, c_pos)) {
 				return ANC_TYPE::ANC_CENTER;
+			}
+			const double sw = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) ? 
+				max(s_anc_len, m_stroke_width) / 2.0: 0.0);
+			const double rx = abs(m_radius.width);
+			const double ry = abs(m_radius.height);
+			if (pt_in_ellipse(t_pos, c_pos, rx - sw, ry - sw, m_rotation)) {
+				if (is_opaque(m_fill_color) &&
+					pt_in_rect(t_pos, m_start, D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y })) {
+					return ANC_TYPE::ANC_FILL;
+				}
+			}
+			else if (pt_in_ellipse(t_pos, c_pos, rx + sw, ry + sw, m_rotation)) {
+				if (pt_in_rect(t_pos, m_start, D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y })) {
+					return ANC_TYPE::ANC_STROKE;
+				}
 			}
 			return ANC_TYPE::ANC_PAGE;
 		}
@@ -1570,32 +1579,16 @@ namespace winrt::GraphPaper::implementation
 			ID2D1Factory* factory = Shape::s_d2d_factory;
 			ID2D1SolidColorBrush* brush = Shape::s_d2d_color_brush;
 			ID2D1RenderTarget* target = Shape::s_d2d_target;
+
 			if (m_d2d_stroke_style == nullptr) {
 				create_stroke_style(factory);
 			}
-			if (m_d2d_path_geom == nullptr) {
-				//const D2D1_POINT_2F v0{ m_vec[0] };
-				//const D2D1_POINT_2F v1{ m_vec[0].x + m_vec[1].x, m_vec[0].y + m_vec[1].y };
-				//if (equal(pt_abs2(v0), 0.0) || 
-				//	equal(pt_abs2(v1), 0.0)) {
-					// 直線.
-				//	m_rotation = 0.0f;
-				//}
-				//if (equal(m_vec[0].x, 0.0f)) {
-				//	m_rotation = M_PI / 2.0f;
-				//}
-				//else {
-				//	m_rotation = atan(static_cast<double>(v0.y) / static_cast<double>(v0.x));
-				//}
-
+			if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && m_d2d_path_geom == nullptr) {
 				D2D1_ARC_SEGMENT arc{
 					D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y },
 					D2D1_SIZE_F{ fabsf(m_radius.width), fabsf(m_radius.height) },
 					m_rotation,
 					m_sweep_flag,
-					//v0.x * v1.y - v1.x * v0.y <= 0.0f ?
-					//	D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL :
-					//	D2D1_ARC_SIZE::D2D1_ARC_SIZE_LARGE
 					D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL
 				};
 				winrt::com_ptr<ID2D1GeometrySink> sink;
@@ -1611,11 +1604,35 @@ namespace winrt::GraphPaper::implementation
 				winrt::check_hresult(sink->Close());
 				sink = nullptr;
 			}
-			if (is_opaque(m_fill_color)) {
-				brush->SetColor(m_fill_color);
-				target->FillGeometry(m_d2d_path_geom.get(), brush);
+			D2D1_POINT_2F c_pos;
+			if (is_opaque(m_fill_color) && m_d2d_fill_geom == nullptr) {
+				D2D1_ARC_SEGMENT arc{
+					D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y },
+					D2D1_SIZE_F{ fabsf(m_radius.width), fabsf(m_radius.height) },
+					m_rotation,
+					m_sweep_flag,
+					D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL
+				};
+				get_pos_center(c_pos);
+				winrt::com_ptr<ID2D1GeometrySink> sink;
+				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_fill_geom.put()));
+				winrt::check_hresult(m_d2d_fill_geom->Open(sink.put()));
+				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+				const auto f_begin = (is_opaque(m_fill_color) ?
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				sink->BeginFigure(D2D1_POINT_2F{ m_start.x, m_start.y }, f_begin);
+				sink->AddArc(arc);
+				sink->AddLine(c_pos);
+				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
+				winrt::check_hresult(sink->Close());
+				sink = nullptr;
 			}
-			if (is_opaque(m_stroke_color)) {
+			if (m_d2d_fill_geom != nullptr) {
+				brush->SetColor(m_fill_color);
+				target->FillGeometry(m_d2d_fill_geom.get(), brush);
+			}
+			if (m_d2d_path_geom != nullptr) {
 				brush->SetColor(m_stroke_color);
 				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
 			}
@@ -1624,8 +1641,6 @@ namespace winrt::GraphPaper::implementation
 				D2D1_POINT_2F q{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
 				D2D1_POINT_2F c_pos;
 				get_pos_center(c_pos);
-				D2D1_POINT_2F x_pos;
-				D2D1_POINT_2F y_pos;
 
 				anc_draw_rect(p, target, brush);
 				anc_draw_rect(q, target, brush);
@@ -2054,15 +2069,21 @@ namespace winrt::GraphPaper::implementation
 	// だ円にが位置を含むか判定する.
 	// t_pos	判定する位置
 	// c_pos	だ円の中心
-	// rad	だ円の径
+	// rad_x	だ円の径
+	// rad_y	だ円の径
+	// rot	だ円の傾き
 	// 戻り値	含む場合 true
-	inline bool pt_in_ellipse(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y) noexcept
+	inline bool pt_in_ellipse(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y, const double rot) noexcept
 	{
-		const double dx = static_cast<double>(t_pos.x) - c_pos.x;
-		const double dy = static_cast<double>(t_pos.y) - c_pos.y;
+		const double dx = static_cast<double>(t_pos.x) - static_cast<double>(c_pos.x);
+		const double dy = static_cast<double>(t_pos.y) - static_cast<double>(c_pos.y);
+		const double c = cos(-rot);
+		const double s = sin(-rot);
+		const double tx = c * dx + s * dy;
+		const double ty = s * dx + c * dy;
 		const double xx = rad_x * rad_x;
 		const double yy = rad_y * rad_y;
-		return dx * dx * yy + dy * dy * xx <= xx * yy;
+		return tx * tx * yy + ty * ty * xx <= xx * yy;
 	}
 
 	// 多角形が位置を含むか判定する.

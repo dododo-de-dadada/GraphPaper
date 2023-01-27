@@ -237,6 +237,7 @@
     <Midl Include="SummaryViewModel.idl" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cursor1.cur" />
     <None Include="packages.config" />
     <None Include="PropertySheet.props" />
     <Text Include="readme.txt">

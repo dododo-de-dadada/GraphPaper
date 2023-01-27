@@ -206,8 +206,8 @@
 				</MenuFlyoutItem>
 			</muxc:MenuBarItem>
 			<!-- 作図メニュー -->
-			<muxc:MenuBarItem x:Uid="mbi_drawing" AccessKey="D" Title="Draw">
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_select_tool" x:Uid="rmfi_select_tool" Click="drawing_tool_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Select">
+			<muxc:MenuBarItem x:Uid="mbi_tool_drawing" AccessKey="D" Title="Drawing">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_selecting" x:Uid="rmfi_tool_selecting" Click="drawing_tool_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Selecting Tool">
 					<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Escape" />
 					</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
@@ -216,52 +216,57 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_rect" x:Uid="rmfi_drawing_tool_rect" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rectangle">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_rect" x:Uid="rmfi_tool_drawing_rect" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rectangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_rect}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_rrect" x:Uid="rmfi_drawing_tool_rrect" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_rrect" x:Uid="rmfi_tool_drawing_rrect" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_rrect}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_poly" x:Uid="rmfi_drawing_tool_poly" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quadrangle">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_poly" x:Uid="rmfi_tool_drawing_poly" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quadrangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_tri}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_elli" x:Uid="rmfi_drawing_tool_elli" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ellipse">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_elli" x:Uid="rmfi_tool_drawing_elli" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ellipse">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_elli}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_arc" x:Uid="rmfi_drawing_tool_arc" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Arc">
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_arc" x:Uid="rmfi_tool_drawing_arc" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quater Circle">
                     <muxc:RadioMenuFlyoutItem.Icon>
                         <PathIcon Data="{StaticResource data_arc}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_line" x:Uid="rmfi_drawing_tool_line" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Line" >
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_line" x:Uid="rmfi_tool_drawing_line" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Line" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_line}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_bezi" x:Uid="rmfi_drawing_tool_bezi" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Curve" >
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_bezi" x:Uid="rmfi_tool_drawing_bezi" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Curve" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_bezi}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_text" x:Uid="rmfi_drawing_tool_text" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Text" >
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_text" x:Uid="rmfi_tool_drawing_text" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Text" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_text}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_tool_ruler" x:Uid="rmfi_drawing_tool_ruler" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Major" >
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_ruler" x:Uid="rmfi_tool_drawing_ruler" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ruler" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_ruler}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<MenuFlyoutSeparator />
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_eyedropper" x:Uid="rmfi_tool_eyedropper" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Eyedropper" >
+                    <muxc:RadioMenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_ruler}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </muxc:RadioMenuFlyoutItem.Icon>
+                </muxc:RadioMenuFlyoutItem>
+                <MenuFlyoutSeparator />
 				<MenuFlyoutSubItem x:Uid="mfsi_drawing_poly_opt" Text="Polygon Option">
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_draw}"/>
@@ -540,12 +545,12 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_info}" />
 					</MenuFlyoutSubItem.Icon>
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_draw" x:Uid="tmfi_status_bar_draw" Click="status_bar_click" Text="Draw Tool" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_draw" x:Uid="tmfi_status_bar_draw" Click="status_bar_click" Text="Drawing Tool" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_unit" x:Uid="tmfi_status_bar_unit" Click="status_bar_click" Text="Unit Name" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_pos" x:Uid="tmfi_status_bar_pos" Click="status_bar_click" Text="Cursor Pos" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_grid" x:Uid="tmfi_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_pos" x:Uid="tmfi_status_bar_pos" Click="status_bar_click" Text="Cursor Position" />
+                    <ToggleMenuFlyoutItem x:Name="tmfi_status_bar_grid" x:Uid="tmfi_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_page" x:Uid="tmfi_status_bar_page" Click="status_bar_click" Text="Page Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Scale" />
+					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Page Scale" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Name="mfi_stick_to_vertex" x:Uid="mfi_stick_to_vertex" Click="stick_to_vertex_click_async" Text="Stick to Vertex..." />
 				<MenuFlyoutSeparator />

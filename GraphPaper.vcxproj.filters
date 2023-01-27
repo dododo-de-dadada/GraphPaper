@@ -120,6 +120,7 @@
   <ItemGroup>
     <None Include="PropertySheet.props" />
     <None Include="packages.config" />
+    <None Include="cursor1.cur" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />

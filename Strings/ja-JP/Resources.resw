@@ -333,7 +333,7 @@
     <value>線枠(S)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_drawing.Title" xml:space="preserve">
+  <data name="mbi_tool_drawing.Title" xml:space="preserve">
     <value>作図(D)</value>
     <comment>MenuBarItem</comment>
   </data>
@@ -653,36 +653,40 @@
     <value>上よせ</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_tool_bezi.Text" xml:space="preserve">
+  <data name="rmfi_tool_drawing_bezi.Text" xml:space="preserve">
     <value>曲線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_tool_elli.Text" xml:space="preserve">
+  <data name="rmfi_tool_drawing_elli.Text" xml:space="preserve">
     <value>だ円形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_tool_line.Text" xml:space="preserve">
+  <data name="rmfi_tool_drawing_line.Text" xml:space="preserve">
     <value>直線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_tool_poly.Text" xml:space="preserve">
+  <data name="rmfi_tool_drawing_poly.Text" xml:space="preserve">
     <value>多角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_tool_rect.Text" xml:space="preserve">
+  <data name="rmfi_tool_drawing_rect.Text" xml:space="preserve">
     <value>方形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_tool_rrect.Text" xml:space="preserve">
+  <data name="rmfi_tool_drawing_rrect.Text" xml:space="preserve">
     <value>角丸方形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_tool_ruler.Text" xml:space="preserve">
+  <data name="rmfi_tool_drawing_ruler.Text" xml:space="preserve">
     <value>定規</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_select_tool.Text" xml:space="preserve">
-    <value>図形を選択</value>
+  <data name="rmfi_tool_eyedropper.Text" xml:space="preserve">
+    <value>スポイトツール</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_tool_selecting.Text" xml:space="preserve">
+    <value>選択する</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="str_arrow_size" xml:space="preserve">
@@ -1002,7 +1006,7 @@
     <value>並び替え</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="rmfi_drawing_tool_text.Text" xml:space="preserve">
+  <data name="rmfi_tool_drawing_text.Text" xml:space="preserve">
     <value>文字列</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>

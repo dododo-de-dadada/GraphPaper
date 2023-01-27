@@ -22,7 +22,7 @@ namespace winrt::GraphPaper::implementation
 			page_draw();
 		}
 		else {
-			drawing_tool_click(rmfi_select_tool(), nullptr);
+			drawing_tool_click(rmfi_tool_selecting(), nullptr);
 		}
 	}
 
