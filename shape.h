@@ -1529,12 +1529,12 @@ namespace winrt::GraphPaper::implementation
 		bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept
 		{
 			if (anc != ANC_TYPE::ANC_CENTER) {
-				if (ShapeLine::set_pos_anc(val, anc, limit, keep_aspect)) {
+				if (ShapePath::set_pos_anc(val, anc, limit, keep_aspect)) {
 					m_radius.width = fabs(m_vec[0].x);
 					m_radius.height = fabs(m_vec[0].y);
-					if (m_d2d_path_geom != nullptr) {
-						m_d2d_path_geom = nullptr;
-					}
+					//if (m_d2d_path_geom != nullptr) {
+					//	m_d2d_path_geom = nullptr;
+					//}
 					if (m_d2d_fill_geom != nullptr) {
 						m_d2d_fill_geom = nullptr;
 					}
@@ -1544,12 +1544,11 @@ namespace winrt::GraphPaper::implementation
 			else {
 				D2D1_POINT_2F c_pos;
 				get_pos_center(c_pos);
-				if (!equal(c_pos, val)) {
-					m_start.x += val.x - c_pos.x;
-					m_start.y += val.y - c_pos.y;
-					if (m_d2d_path_geom != nullptr) {
-						m_d2d_path_geom = nullptr;
-					}
+				const D2D1_POINT_2F s_pos{
+					m_start.x + val.x - c_pos.x,
+					m_start.y + val.y - c_pos.y
+				};
+				if (ShapePath::set_pos_start(s_pos)) {
 					if (m_d2d_fill_geom != nullptr) {
 						m_d2d_fill_geom = nullptr;
 					}
@@ -1563,7 +1562,6 @@ namespace winrt::GraphPaper::implementation
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override
 		{
 			if (ShapePath::set_pos_start(val)) {
-				m_d2d_fill_geom = nullptr;
 				m_d2d_fill_geom = nullptr;
 				return true;
 			}
