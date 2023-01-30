@@ -197,7 +197,7 @@ namespace winrt::GraphPaper::implementation
 	// データライターに SVG として書き込む.
 	// dt_reader	データリーダー
 	//------------------------------
-	void ShapeBezi::export_svg(DataWriter const& dt_writer)
+	void ShapeBezier::export_svg(DataWriter const& dt_writer)
 	{
 		D2D1_BEZIER_SEGMENT b_seg;
 		pt_add(m_start, m_vec[0], b_seg.point1);
@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapeElli::export_svg(DataWriter const& dt_writer)
+	void ShapeEllipse::export_svg(DataWriter const& dt_writer)
 	{
 		D2D1_POINT_2F r;
 		pt_mul(m_vec[0], 0.5, r);
@@ -341,7 +341,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapePoly::export_svg(DataWriter const& dt_writer)
+	void ShapePolygon::export_svg(DataWriter const& dt_writer)
 	{
 		// 線・枠も塗りつぶしも無いなら,
 		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && !is_opaque(m_fill_color)) {
@@ -380,7 +380,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F h_tip;
 			D2D1_POINT_2F h_barbs[2];
-			if (ShapePoly::poly_get_arrow_barbs(d_cnt + 1, std::data(v_pos), m_arrow_size, h_tip, h_barbs)) {
+			if (ShapePolygon::poly_get_arrow_barbs(d_cnt + 1, std::data(v_pos), m_arrow_size, h_tip, h_barbs)) {
 				export_svg_barbs(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, h_barbs, h_tip);
 				dt_writer.WriteString(buf);
 			}
@@ -745,6 +745,46 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteString(buf);
 		}
 		dt_writer.WriteString(L"</g>\n");
-
 	}
+
+	// 図形をデータライターに SVG として書き込む.
+	void ShapeQCircle::export_svg(const DataWriter& dt_writer)
+	{
+		wchar_t buf[1024];
+		if (is_opaque(m_fill_color)) {
+			D2D1_POINT_2F c_pos;
+			get_pos_center(c_pos);
+			swprintf_s(buf,
+				L"<path d=\"M %f %f "
+				L"A %f %f 0 0 1 %f %f "
+				L"L %f %f"
+				L"\" stroke=\"none\" ",
+				m_start.x, m_start.y,
+				m_radius.width, m_radius.height,
+				m_start.x + m_vec[0].x, m_start.y + m_vec[0].y,
+				c_pos.x, c_pos.y
+			);
+			dt_writer.WriteString(buf);
+			export_svg_color(buf, 1024, m_fill_color, L"fill");
+			dt_writer.WriteString(buf);
+			dt_writer.WriteString(L"/>\n");
+		}
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
+			swprintf_s(buf,
+				L"<path d=\"M %f %f "
+				L"A %f %f 0 0 1 %f %f "
+				L"\" fill=\"none\" ",
+				m_start.x, m_start.y,
+				m_radius.width, m_radius.height,
+				m_start.x + m_vec[0].x, m_start.y + m_vec[0].y
+			);
+			dt_writer.WriteString(buf);
+			export_svg_stroke(buf, 1024,
+				m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap, m_join_style, m_join_miter_limit);
+			dt_writer.WriteString(buf);
+			dt_writer.WriteString(L"/>\n");
+		}
+	}
+
+
 }

@@ -2,8 +2,8 @@
 //------------------------------
 // shape.h
 // shape.cpp	図形のひな型, その他
-// shape_bezi.cpp	ベジェ曲線
-// shape_elli.cpp	だ円
+// shape_bezier.cpp	ベジェ曲線
+// shape_ellipse.cpp	だ円
 // shape_group.cpp	グループ
 // shape_image.cpp	画像
 // shape_line.cpp	直線 (矢じるしつき)
@@ -55,7 +55,7 @@
 //        +---------------+---------------+               +---------------+---------------+---------------+
 //        |               |               |               |               |               |               |
 // +------+------+ +------+------+ +------+------+ +------+------+ +------+------+ +------+------+ +------+------+
-// | ShapePoly   | | ShapeBezi   | | ShapeArc    | | ShapeElli   | | ShapeRRect  | | ShapeText   | | ShapeRuler  |
+// | ShapePolygon| | ShapeBezier | | ShapeQCircle| | ShapeEllipse| | ShapeRRect  | | ShapeText   | | ShapeRuler  |
 // +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+
 //
 // * 印つきは抽象クラス.
@@ -76,14 +76,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 前方宣言
 	struct Shape;
-	struct ShapeBezi;
-	struct ShapeElli;
+	struct ShapeBezier;
+	struct ShapeEllipse;
 	struct ShapeGroup;
 	struct ShapeImage;
 	struct ShapeLine;
 	struct ShapePage;
 	struct ShapePath;
-	struct ShapePoly;
+	struct ShapePolygon;
 	struct ShapeRect;
 	struct ShapeRRect;
 	struct ShapeRuler;
@@ -774,8 +774,8 @@ namespace winrt::GraphPaper::implementation
 		void draw_auxiliary_poly(ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos, const POLY_OPTION& p_opt);
 		// 角丸方形の補助線を表示する.
 		void draw_auxiliary_rrect(ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
-		// 角丸方形の補助線を表示する.
-		void draw_auxiliary_arc(ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
+		// 四分円の補助線を表示する.
+		void draw_auxiliary_qcircle(ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const D2D1_POINT_2F b_pos, const D2D1_POINT_2F c_pos);
 		// 矢じるしの寸法を得る.
 		bool get_arrow_size(ARROW_SIZE& val) const noexcept final override;
 		// 矢じるしの形式を得る.
@@ -1247,13 +1247,13 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// だ円
 	//------------------------------
-	struct ShapeElli : ShapeRect {
+	struct ShapeEllipse : ShapeRect {
 		// 図形を作成する.
-		ShapeElli(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+		ShapeEllipse(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
 			ShapeRect::ShapeRect(b_pos, b_vec, page)
 		{}
 		// 図形をデータリーダーから読み込む.
-		ShapeElli(const ShapePage& page, DataReader const& dt_reader) :
+		ShapeEllipse(const ShapePage& page, DataReader const& dt_reader) :
 			ShapeRect::ShapeRect(page, dt_reader)
 		{}
 
@@ -1356,7 +1356,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 多角形
 	//------------------------------
-	struct ShapePoly : ShapePath {
+	struct ShapePolygon : ShapePath {
 		bool m_end_closed;	// 辺が閉じているか判定
 
 		//------------------------------
@@ -1383,9 +1383,9 @@ namespace winrt::GraphPaper::implementation
 			if (m_end_closed != val) { m_end_closed = val; return true; } return false;
 		}
 		// 図形を作成する.
-		ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page, const POLY_OPTION& p_opt);
+		ShapePolygon(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page, const POLY_OPTION& p_opt);
 		// 図形をデータリーダーから読み込む.
-		ShapePoly(const ShapePage& page, DataReader const& dt_reader);
+		ShapePolygon(const ShapePage& page, DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに PDF として書き込む.
@@ -1394,9 +1394,38 @@ namespace winrt::GraphPaper::implementation
 		void export_svg(DataWriter const& dt_writer);
 	};
 
+	//------------------------------
+	// 曲線
+	//------------------------------
+	struct ShapeBezier : ShapePath {
+
+		//------------------------------
+		// SHAPE_BEZIERER.cpp
+		// ベジェ曲線
+		//------------------------------
+
+		static bool bezi_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
+		// 図形を表示する.
+		void draw(void) final override;
+		// 位置を含むか判定する.
+		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
+		// 範囲に含まれるか判定する.
+		bool in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept final override;
+		// 図形を作成する.
+		ShapeBezier(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page);
+		// 図形をデータリーダーから読み込む.
+		ShapeBezier(const ShapePage& page, DataReader const& dt_reader);
+		// 図形をデータライターに PDF として書き込む.
+		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
+		// 図形をデータライターに SVG として書き込む.
+		void export_svg(const DataWriter& dt_writer);
+
+		void write(const DataWriter& dt_writer) const final override;
+	};
+
 	// 円弧を描画する 3 つの方法 - 楕円の円弧
-	// https://learn.microsoft.com/ja-jp/xamarin/xamarin-forms/user-interface/graphics/skiasharp/curves/arcs
-	struct ShapeArc : ShapePath {
+// https://learn.microsoft.com/ja-jp/xamarin/xamarin-forms/user-interface/graphics/skiasharp/curves/arcs
+	struct ShapeQCircle : ShapePath {
 		D2D1_SIZE_F m_radius;
 		float m_rotation;
 		D2D1_SWEEP_DIRECTION m_sweep_flag;
@@ -1535,6 +1564,7 @@ namespace winrt::GraphPaper::implementation
 		{
 			if (ShapePath::set_pos_start(val)) {
 				m_d2d_fill_geom = nullptr;
+				m_d2d_fill_geom = nullptr;
 				return true;
 			}
 			return false;
@@ -1556,8 +1586,8 @@ namespace winrt::GraphPaper::implementation
 			if (pt_in_anc(t_pos, c_pos)) {
 				return ANC_TYPE::ANC_CENTER;
 			}
-			const double sw = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) ? 
-				max(s_anc_len, m_stroke_width) / 2.0: 0.0);
+			const double sw = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) ?
+				max(s_anc_len, m_stroke_width) / 2.0 : 0.0);
 			const double rx = abs(m_radius.width);
 			const double ry = abs(m_radius.height);
 			if (pt_in_ellipse(t_pos, c_pos, rx - sw, ry - sw, m_rotation)) {
@@ -1603,8 +1633,75 @@ namespace winrt::GraphPaper::implementation
 				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 				winrt::check_hresult(sink->Close());
 				sink = nullptr;
+				if (m_arrow_style != ARROW_STYLE::NONE) {
+					if (m_d2d_arrow_geom == nullptr) {
+						// だ円の弧長を求めるのはしんどいので, ベジェで近似
+						const double a = 4.0 * (sqrt(2) - 1.0) / 3.0;
+						const double rx = m_radius.width;
+						const double ry = m_radius.height;
+						const ARROW_SIZE a_size{ m_arrow_size };
+						D2D1_POINT_2F c_pos;
+						get_pos_center(c_pos);
+						//const D2D1_POINT_2F b_pos{
+						//	static_cast<FLOAT>(c_pos.x + rx), static_cast<FLOAT>(c_pos.y) };
+						const D2D1_POINT_2F b_pos{
+							static_cast<FLOAT>(c_pos.x), static_cast<FLOAT>(c_pos.y - ry) };
+						const D2D1_BEZIER_SEGMENT b_seg{
+							//{ static_cast<FLOAT>(c_pos.x + rx), static_cast<FLOAT>(c_pos.y + a * ry) },
+							//{ static_cast<FLOAT>(c_pos.x + a * rx), static_cast<FLOAT>(c_pos.y + ry) },
+							//{ static_cast<FLOAT>(c_pos.x), static_cast<FLOAT>(c_pos.y + ry) }
+							{ static_cast<FLOAT>(c_pos.x + a * rx), static_cast<FLOAT>(c_pos.y - ry) },
+							{ static_cast<FLOAT>(c_pos.x + rx), static_cast<FLOAT>(c_pos.y - a * ry) },
+							{ static_cast<FLOAT>(c_pos.x + rx), static_cast<FLOAT>(c_pos.y) }
+						};
+						D2D1_POINT_2F barbs[3];
+						if (ShapeBezier::bezi_calc_arrow(b_pos, b_seg, a_size, barbs)) {
+							const ARROW_STYLE a_style{ m_arrow_style };
+							// ジオメトリパスを作成する.
+							winrt::check_hresult(factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
+							winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
+							sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+							sink->BeginFigure(
+								barbs[0],
+								a_style == ARROW_STYLE::FILLED
+								? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
+								: D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW
+							);
+							sink->AddLine(barbs[2]);
+							sink->AddLine(barbs[1]);
+							sink->EndFigure(
+								a_style == ARROW_STYLE::FILLED
+								? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED
+								: D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN
+							);
+							winrt::check_hresult(sink->Close());
+							sink = nullptr;
+						}
+					}
+					if (m_d2d_arrow_style == nullptr) {
+						const CAP_STYLE c_style{ m_stroke_cap };
+						const D2D1_LINE_JOIN j_style{ m_join_style };
+						const double j_miter_limit = m_join_miter_limit;
+						// 矢じるしの破線の形式はかならずソリッドとする.
+						const D2D1_STROKE_STYLE_PROPERTIES s_prop{
+							c_style.m_start,	// startCap
+							c_style.m_end,	// endCap
+							D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// dashCap
+							j_style,	// lineJoin
+							static_cast<FLOAT>(j_miter_limit),	// miterLimit
+							D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
+							0.0f	// dashOffset
+						};
+						winrt::check_hresult(
+							factory->CreateStrokeStyle(s_prop, nullptr, 0, m_d2d_arrow_style.put())
+						);
+					}
+				}
 			}
-			D2D1_POINT_2F c_pos;
+			D2D1_POINT_2F c_pos{};
+			if (is_opaque(m_fill_color) && m_d2d_fill_geom == nullptr || is_selected()) {
+				get_pos_center(c_pos);
+			}
 			if (is_opaque(m_fill_color) && m_d2d_fill_geom == nullptr) {
 				D2D1_ARC_SEGMENT arc{
 					D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y },
@@ -1613,7 +1710,6 @@ namespace winrt::GraphPaper::implementation
 					m_sweep_flag,
 					D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL
 				};
-				get_pos_center(c_pos);
 				winrt::com_ptr<ID2D1GeometrySink> sink;
 				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_fill_geom.put()));
 				winrt::check_hresult(m_d2d_fill_geom->Open(sink.put()));
@@ -1635,12 +1731,18 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_path_geom != nullptr) {
 				brush->SetColor(m_stroke_color);
 				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
+				if (m_d2d_arrow_geom != nullptr) {
+					if (m_arrow_style == ARROW_STYLE::FILLED) {
+						target->FillGeometry(m_d2d_arrow_geom.get(), brush);
+					}
+					if (m_arrow_style == ARROW_STYLE::OPENED) {
+						target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_style.get());
+					}
+				}
 			}
 			if (is_selected()) {
 				D2D1_POINT_2F p{ m_start.x, m_start.y };
 				D2D1_POINT_2F q{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
-				D2D1_POINT_2F c_pos;
-				get_pos_center(c_pos);
 
 				anc_draw_rect(p, target, brush);
 				anc_draw_rect(q, target, brush);
@@ -1648,7 +1750,10 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 
-		ShapeArc(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+		// 図形をデータライターに SVG として書き込む.
+		void export_svg(const DataWriter& dt_writer);
+
+		ShapeQCircle(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
 			ShapePath(page, false),
 			m_radius({ b_vec.x, b_vec.y }),
 			m_rotation(0.0),
@@ -1659,7 +1764,7 @@ namespace winrt::GraphPaper::implementation
 			m_vec.push_back(b_vec);	// 終点
 		}
 
-		ShapeArc(const ShapePage& page, const DataReader& dt_reader) :
+		ShapeQCircle(const ShapePage& page, const DataReader& dt_reader) :
 			ShapePath(page, dt_reader),
 			m_radius({ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 			m_rotation(dt_reader.ReadSingle()),
@@ -1675,35 +1780,6 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteUInt32(m_sweep_flag);
 			dt_writer.WriteUInt32(m_larg_flag);
 		}
-	};
-
-	//------------------------------
-	// 曲線
-	//------------------------------
-	struct ShapeBezi : ShapePath {
-
-		//------------------------------
-		// shape_bezi.cpp
-		// ベジェ曲線
-		//------------------------------
-
-		static bool bezi_calc_arrow(const D2D1_POINT_2F b_pos, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[3]) noexcept;
-		// 図形を表示する.
-		void draw(void) final override;
-		// 位置を含むか判定する.
-		uint32_t hit_test(const D2D1_POINT_2F t_pos) const noexcept final override;
-		// 範囲に含まれるか判定する.
-		bool in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept final override;
-		// 図形を作成する.
-		ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page);
-		// 図形をデータリーダーから読み込む.
-		ShapeBezi(const ShapePage& page, DataReader const& dt_reader);
-		// 図形をデータライターに PDF として書き込む.
-		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
-		// 図形をデータライターに SVG として書き込む.
-		void export_svg(const DataWriter& dt_writer);
-
-		void write(const DataWriter& dt_writer) const final override;
 	};
 
 	//------------------------------

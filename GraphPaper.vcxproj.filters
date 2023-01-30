@@ -39,9 +39,9 @@
     <ClCompile Include="MainPage_ustack.cpp" />
     <ClCompile Include="MainPage_xcvd.cpp" />
     <ClCompile Include="shape.cpp" />
-    <ClCompile Include="shape_bezi.cpp" />
+    <ClCompile Include="shape_bezier.cpp" />
     <ClCompile Include="d2d_ui.cpp" />
-    <ClCompile Include="shape_elli.cpp" />
+    <ClCompile Include="shape_ellipse.cpp" />
     <ClCompile Include="shape_group.cpp" />
     <ClCompile Include="shape_line.cpp" />
     <ClCompile Include="shape_slist.cpp" />

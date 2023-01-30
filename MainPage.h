@@ -148,8 +148,8 @@ namespace winrt::GraphPaper::implementation
 		RRECT,	// 角丸方形
 		TEXT,	// 文字列
 		RULER,	// 定規
-		ARC,	// 円弧
-		DROPPER	// スポイトツール
+		QCIRCLE,	// 円弧
+		EYEDROPPER	// スポイトツール
 	};
 
 	//-------------------------------
@@ -251,6 +251,7 @@ namespace winrt::GraphPaper::implementation
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
 		uint64_t m_event_click_time = 0ULL;	// クリックの判定時間 (マイクロ秒)
 		double m_event_click_dist = 6.0;	// クリックの判定距離 (DIPs)
+		D2D1_COLOR_F m_event_eyedropper = COLOR_BLACK;	// 抽出された色.
 
 		// 作図ツール
 		DRAWING_TOOL m_drawing_tool = DRAWING_TOOL::SELECT;	// 作図ツール

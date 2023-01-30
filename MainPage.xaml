@@ -228,17 +228,17 @@
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_poly" x:Uid="rmfi_tool_drawing_poly" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quadrangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_tri}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+						<PathIcon Data="{StaticResource data_polygon}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_elli" x:Uid="rmfi_tool_drawing_elli" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ellipse">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_ellipse" x:Uid="rmfi_tool_drawing_ellipse" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ellipse">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon Data="{StaticResource data_elli}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_arc" x:Uid="rmfi_tool_drawing_arc" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quater Circle">
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_qcircle" x:Uid="rmfi_tool_drawing_qcircle" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quater Circle">
                     <muxc:RadioMenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_arc}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        <PathIcon Data="{StaticResource data_qcircle}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
                 <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_line" x:Uid="rmfi_tool_drawing_line" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Line" >
@@ -246,9 +246,9 @@
 						<PathIcon Data="{StaticResource data_line}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_bezi" x:Uid="rmfi_tool_drawing_bezi" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Curve" >
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_bezier" x:Uid="rmfi_tool_drawing_bezier" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Curve" >
 					<muxc:RadioMenuFlyoutItem.Icon>
-						<PathIcon Data="{StaticResource data_bezi}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+						<PathIcon Data="{StaticResource data_bezier}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_text" x:Uid="rmfi_tool_drawing_text" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Text" >
@@ -263,7 +263,7 @@
 				</muxc:RadioMenuFlyoutItem>
                 <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_eyedropper" x:Uid="rmfi_tool_eyedropper" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Eyedropper" >
                     <muxc:RadioMenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_ruler}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        <PathIcon Data="{StaticResource data_eyedropper}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
                 <MenuFlyoutSeparator />

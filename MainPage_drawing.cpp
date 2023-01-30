@@ -29,13 +29,13 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_tool_drawing_poly()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
 		}
-		else if (sender == rmfi_tool_drawing_elli()) {
+		else if (sender == rmfi_tool_drawing_ellipse()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ELLI);
 		}
 		else if (sender == rmfi_tool_drawing_line()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::LINE);
 		}
-		else if (sender == rmfi_tool_drawing_bezi()) {
+		else if (sender == rmfi_tool_drawing_bezier()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::BEZI);
 		}
 		else if (sender == rmfi_tool_drawing_text()) {
@@ -44,8 +44,11 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_tool_drawing_ruler()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RULER);
 		}
-		else if (sender == rmfi_tool_drawing_arc()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ARC);
+		else if (sender == rmfi_tool_drawing_qcircle()) {
+			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::QCIRCLE);
+		}
+		else if (sender == rmfi_tool_eyedropper()) {
+			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::EYEDROPPER);
 		}
 		else {
 			if (sender == rmfi_drawing_poly_line()) {
@@ -103,12 +106,13 @@ namespace winrt::GraphPaper::implementation
 		rmfi_tool_drawing_rect().IsChecked(val == DRAWING_TOOL::RECT);
 		rmfi_tool_drawing_rrect().IsChecked(val == DRAWING_TOOL::RRECT);
 		rmfi_tool_drawing_poly().IsChecked(val == DRAWING_TOOL::POLY);
-		rmfi_tool_drawing_elli().IsChecked(val == DRAWING_TOOL::ELLI);
+		rmfi_tool_drawing_ellipse().IsChecked(val == DRAWING_TOOL::ELLI);
 		rmfi_tool_drawing_line().IsChecked(val == DRAWING_TOOL::LINE);
-		rmfi_tool_drawing_bezi().IsChecked(val == DRAWING_TOOL::BEZI);
+		rmfi_tool_drawing_bezier().IsChecked(val == DRAWING_TOOL::BEZI);
 		rmfi_tool_drawing_text().IsChecked(val == DRAWING_TOOL::TEXT);
 		rmfi_tool_drawing_ruler().IsChecked(val == DRAWING_TOOL::RULER);
-		rmfi_tool_drawing_arc().IsChecked(val == DRAWING_TOOL::ARC);
+		rmfi_tool_drawing_qcircle().IsChecked(val == DRAWING_TOOL::QCIRCLE);
+		rmfi_tool_eyedropper().IsChecked(val == DRAWING_TOOL::EYEDROPPER);
 	}
 
 	// 多角形の選択肢メニューにチェックをつける.

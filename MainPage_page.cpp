@@ -227,8 +227,8 @@ namespace winrt::GraphPaper::implementation
 			else if (t_draw == DRAWING_TOOL::POLY) {
 				m_main_page.draw_auxiliary_poly(target, brush, m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
 			}
-			else if (t_draw == DRAWING_TOOL::ARC) {
-				m_main_page.draw_auxiliary_arc(target, brush, m_event_pos_pressed, m_event_pos_curr);
+			else if (t_draw == DRAWING_TOOL::QCIRCLE) {
+				m_main_page.draw_auxiliary_qcircle(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 		}
 		// ï`âÊÇèIóπÇ∑ÇÈ.

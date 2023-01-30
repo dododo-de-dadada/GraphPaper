@@ -4,6 +4,7 @@
 //-------------------------------
 #include "pch.h"
 #include "MainPage.h"
+#include "resource.h"
 
 using namespace winrt;
 
@@ -26,6 +27,7 @@ namespace winrt::GraphPaper::implementation
 	static auto const& CURS_SIZE_NWSE = CoreCursor(CoreCursorType::SizeNorthwestSoutheast, 0);	// 左上右下カーソル
 	static auto const& CURS_SIZE_WE = CoreCursor(CoreCursorType::SizeWestEast, 0);	// 左右カーソル
 	static auto const& CURS_WAIT = CoreCursor(CoreCursorType::Wait , 0);	// 左右カーソル
+	static auto const& CURS_EYEDROPPER = CoreCursor(CoreCursorType::Custom, IDC_CURSOR1);	// スポイトカーソル
 
 	// 選択された図形の頂点に最も近い方眼を見つけ, 頂点と方眼との差分を求める.
 	static bool event_get_vec_nearby_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_vec) noexcept;
@@ -355,22 +357,22 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (d_tool == DRAWING_TOOL::POLY) {
 			const auto poly_opt = m_drawing_poly_opt;
-			s = new ShapePoly(b_pos, b_vec, &m_main_page, poly_opt);
+			s = new ShapePolygon(b_pos, b_vec, &m_main_page, poly_opt);
 		}
 		else if (d_tool == DRAWING_TOOL::ELLI) {
-			s = new ShapeElli(b_pos, b_vec, &m_main_page);
+			s = new ShapeEllipse(b_pos, b_vec, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::LINE) {
 			s = new ShapeLine(b_pos, b_vec, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::BEZI) {
-			s = new ShapeBezi(b_pos, b_vec, &m_main_page);
+			s = new ShapeBezier(b_pos, b_vec, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::RULER) {
 			s = new ShapeRuler(b_pos, b_vec, &m_main_page);
 		}
-		else if (d_tool == DRAWING_TOOL::ARC) {
-			s = new ShapeArc(b_pos, b_vec, &m_main_page);
+		else if (d_tool == DRAWING_TOOL::QCIRCLE) {
+			s = new ShapeQCircle(b_pos, b_vec, &m_main_page);
 		}
 		else {
 			return;
@@ -682,11 +684,6 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_show_popup(void)
 	{
-		// コンテキストメニューを解放する.
-		if (ContextFlyout() != nullptr) {
-			ContextFlyout(nullptr);
-		}
-
 		Shape* shape_pressed;
 		const uint32_t anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, shape_pressed);
 
@@ -756,6 +753,9 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_attr_to(shape_pressed);
 			page_setting_is_checked();
 		}
+		popup.Closed([=](IInspectable const&, IInspectable const&) {
+			ContextFlyout(nullptr);
+			});
 		ContextFlyout(popup);
 	}
 
@@ -880,10 +880,34 @@ namespace winrt::GraphPaper::implementation
 			// ボタンが離れた時刻と押された時刻の差が, クリックの判定時間以下か判定する.
 			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
 			if (t_stamp - m_event_time_pressed <= m_event_click_time) {
-				// クリックした状態に遷移する.
-				m_event_state = EVENT_STATE::CLICK;
-				event_set_curs_style();
-				return;
+				if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
+					Shape* s;
+					uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
+					if (anc == ANC_TYPE::ANC_PAGE) {
+						ustack_push_set<UNDO_ID::PAGE_COLOR>(&m_main_page, m_event_eyedropper);
+						ustack_push_null();
+					}
+					else if (s != nullptr) {
+						if (anc == ANC_TYPE::ANC_FILL) {
+							ustack_push_set<UNDO_ID::FILL_COLOR>(s, m_event_eyedropper);
+							ustack_push_null();
+						}
+						else if (anc == ANC_TYPE::ANC_TEXT) {
+							ustack_push_set<UNDO_ID::FONT_COLOR>(s, m_event_eyedropper);
+							ustack_push_null();
+						}
+						else {
+							ustack_push_set<UNDO_ID::STROKE_COLOR>(s, m_event_eyedropper);
+							ustack_push_null();
+						}
+					}
+				}
+				else {
+					// クリックした状態に遷移する.
+					m_event_state = EVENT_STATE::CLICK;
+					event_set_curs_style();
+					return;
+				}
 			}
 		}
 		// 状態が, クリック後に左ボタンが押した状態か判定する.
@@ -949,7 +973,31 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 状態が, 右ボタンを押した状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_RBTN) {
-			event_show_popup();
+			// コンテキストメニューを解放する.
+			if (ContextFlyout() != nullptr) {
+				ContextFlyout(nullptr);
+			}
+			if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
+				Shape* s;
+				uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
+				if (anc == ANC_TYPE::ANC_PAGE) {
+					m_event_eyedropper = m_main_page.m_page_color;
+				}
+				else if (s != nullptr) {
+					if (anc == ANC_TYPE::ANC_FILL) {
+						s->get_fill_color(m_event_eyedropper);
+					}
+					else if (anc == ANC_TYPE::ANC_TEXT) {
+						s->get_font_color(m_event_eyedropper);
+					}
+					else {
+						s->get_stroke_color(m_event_eyedropper);
+					}
+				}
+			}
+			else {
+				event_show_popup();
+			}
 		}
 		// 状態が, 初期状態か判定する.
 		else if (m_event_state == EVENT_STATE::BEGIN) {
@@ -969,8 +1017,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_set_curs_style(void)
 	{
-		if (m_drawing_tool == DRAWING_TOOL::DROPPER) {
-
+		if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
+			Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER);
 		}
 		// 作図ツールが選択ツール以外か判定する.
 		else if (m_drawing_tool != DRAWING_TOOL::SELECT &&
@@ -1026,9 +1074,9 @@ namespace winrt::GraphPaper::implementation
 					// 図形のクラスが, 多角形または曲線であるか判定する.
 					if (s != nullptr) {
 						if (typeid(*s) == typeid(ShapeLine) ||
-							typeid(*s) == typeid(ShapePoly) ||
-							typeid(*s) == typeid(ShapeBezi) ||
-							typeid(*s) == typeid(ShapeArc)
+							typeid(*s) == typeid(ShapePolygon) ||
+							typeid(*s) == typeid(ShapeBezier) ||
+							typeid(*s) == typeid(ShapeQCircle)
 							) {
 							// 図形の部位が, 頂点の数を超えないか判定する.
 							if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 + static_cast<ShapePath*>(s)->m_vec.size() + 1) {

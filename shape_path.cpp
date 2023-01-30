@@ -47,8 +47,7 @@ namespace winrt::GraphPaper::implementation
 	// –î‚¶‚é‚µ‚ÌŒ`Ž®‚ÉŠi”[‚·‚é.
 	bool ShapePath::set_arrow_size(const ARROW_SIZE& val) noexcept
 	{
-		if (!equal(m_arrow_size, val)) {
-			m_arrow_size = val;
+		if (ShapeLine::set_arrow_size(val)) {
 			m_d2d_path_geom = nullptr;
 			return true;
 		}

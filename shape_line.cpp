@@ -55,20 +55,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じるしの D2D ストローク特性を作成する.
-	static void line_create_arrow_style(ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, const D2D1_LINE_JOIN s_join_style, const double s_join_miter_limit, ID2D1StrokeStyle** s_arrow_style)
+	static void line_create_arrow_style(ID2D1Factory3* const factory, const CAP_STYLE c_style, const D2D1_LINE_JOIN j_style, const double j_miter_limit, ID2D1StrokeStyle** a_style)
 	{
 		// 矢じるしの破線の形式はかならずソリッドとする.
 		const D2D1_STROKE_STYLE_PROPERTIES s_prop{
-			s_cap_style.m_start,	// startCap
-			s_cap_style.m_end,	// endCap
+			c_style.m_start,	// startCap
+			c_style.m_end,	// endCap
 			D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// dashCap
-			s_join_style,	// lineJoin
-			static_cast<FLOAT>(s_join_miter_limit),	// miterLimit
+			j_style,	// lineJoin
+			static_cast<FLOAT>(j_miter_limit),	// miterLimit
 			D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
 			0.0f	// dashOffset
 		};
 		winrt::check_hresult(
-			d_factory->CreateStrokeStyle(s_prop, nullptr, 0, s_arrow_style)
+			factory->CreateStrokeStyle(s_prop, nullptr, 0, a_style)
 		);
 	}
 

@@ -194,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 		if (status_and(m_status_bar, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
 			winrt::hstring data;
 			if (m_drawing_tool == DRAWING_TOOL::BEZI) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezi")));
+				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezier")));
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ELLI) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_elli")));
@@ -203,7 +203,7 @@ namespace winrt::GraphPaper::implementation
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_tri")));
+				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_polygon")));
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RECT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
@@ -220,10 +220,17 @@ namespace winrt::GraphPaper::implementation
 			else if (m_drawing_tool == DRAWING_TOOL::TEXT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::ARC) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_arc")));
+			else if (m_drawing_tool == DRAWING_TOOL::QCIRCLE) {
+				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_qcircle")));
+			}
+			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
+				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_eyedropper")));
 			}
 			else {
+#ifdef _DEBUG
+				__debugbreak();
+#endif // _DEBUG
+
 				throw winrt::hresult_invalid_argument();
 			}
 			pi_draw().Data(nullptr);

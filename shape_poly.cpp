@@ -518,7 +518,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの返しと先端の位置を得る.
-	bool ShapePoly::poly_get_arrow_barbs(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROW_SIZE& a_size, D2D1_POINT_2F& h_tip, D2D1_POINT_2F h_barbs[]) noexcept
+	bool ShapePolygon::poly_get_arrow_barbs(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROW_SIZE& a_size, D2D1_POINT_2F& h_tip, D2D1_POINT_2F h_barbs[]) noexcept
 	{
 		double a_offset = a_size.m_offset;	// 矢じりの先端のオフセット
 		for (size_t i = v_cnt - 1; i > 0; i--) {
@@ -619,7 +619,7 @@ namespace winrt::GraphPaper::implementation
 	// b_vec	領域の終点への差分
 	// p_opt	多角形の作成方法
 	// v_pos	頂点の配列 [v_cnt]
-	void ShapePoly::poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt, D2D1_POINT_2F v_pos[]) noexcept//, D2D1_POINT_2F& v_vec) noexcept
+	void ShapePolygon::poly_by_bbox(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt, D2D1_POINT_2F v_pos[]) noexcept//, D2D1_POINT_2F& v_vec) noexcept
 	{
 		// v_cnt	多角形の頂点の数
 		// v_up	頂点を上に作成するか判定
@@ -672,7 +672,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapePoly::draw(void)
+	void ShapePolygon::draw(void)
 	{
 		ID2D1Factory3* const factory = Shape::s_d2d_factory;
 		ID2D1RenderTarget* const taget = Shape::s_d2d_target;
@@ -777,7 +777,7 @@ namespace winrt::GraphPaper::implementation
 	// 塗りつぶし色を得る.
 	// val	得られた値
 	// 戻り値	得られたなら true
-	bool ShapePoly::get_fill_color(D2D1_COLOR_F& val) const noexcept
+	bool ShapePolygon::get_fill_color(D2D1_COLOR_F& val) const noexcept
 	{
 		val = m_fill_color;
 		return true;
@@ -787,7 +787,7 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapePolygon::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		D2D1_POINT_2F t_vec;
 		pt_sub(t_pos, m_start, t_vec);
@@ -811,7 +811,7 @@ namespace winrt::GraphPaper::implementation
 	// a_rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapePoly::in_area(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb) const noexcept
+	bool ShapePolygon::in_area(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb) const noexcept
 	{
 		if (!pt_in_rect(m_start, a_lt, a_rb)) {
 			return false;
@@ -827,7 +827,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	bool ShapePoly::set_arrow_style(const ARROW_STYLE val) noexcept
+	bool ShapePolygon::set_arrow_style(const ARROW_STYLE val) noexcept
 	{
 		if (!m_end_closed) {
 			return ShapePath::set_arrow_style(val);
@@ -837,7 +837,7 @@ namespace winrt::GraphPaper::implementation
 
 	/*
 	// 塗りつぶし色に格納する.
-	bool ShapePoly::set_fill_color(const D2D1_COLOR_F& val) noexcept
+	bool ShapePolygon::set_fill_color(const D2D1_COLOR_F& val) noexcept
 	{
 		if (!equal(m_fill_color, val)) {
 			m_fill_color = val;
@@ -854,7 +854,7 @@ namespace winrt::GraphPaper::implementation
 	// b_vec	囲む領域の終点への差分
 	// page	ページ
 	// p_opt	多角形の選択肢
-	ShapePoly::ShapePoly(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page, const POLY_OPTION& p_opt) :
+	ShapePolygon::ShapePolygon(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page, const POLY_OPTION& p_opt) :
 		ShapePath::ShapePath(page, p_opt.m_end_closed),
 		m_end_closed(p_opt.m_end_closed)
 	{
@@ -871,14 +871,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	データリーダー
-	ShapePoly::ShapePoly(const ShapePage& page, DataReader const& dt_reader) :
+	ShapePolygon::ShapePolygon(const ShapePage& page, DataReader const& dt_reader) :
 		ShapePath::ShapePath(page, dt_reader)
 	{
 		m_end_closed = dt_reader.ReadBoolean();
 	}
 
 	// 図形をデータライターに書き込む.
-	void ShapePoly::write(DataWriter const& dt_writer) const
+	void ShapePolygon::write(DataWriter const& dt_writer) const
 	{
 		ShapePath::write(dt_writer);
 		dt_writer.WriteBoolean(m_end_closed);

@@ -1,5 +1,5 @@
 //------------------------------
-// Shape_bezi.cpp
+// SHAPE_BEZIER.cpp
 // ベジェ曲線
 //------------------------------
 #include "pch.h"
@@ -95,7 +95,7 @@ namespace winrt::GraphPaper::implementation
 	// a_size	矢じるしの寸法
 	// a_barbs[3]	計算された返しの端点と先端点
 	//------------------------------
-	bool ShapeBezi::bezi_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F a_barbs[3]) noexcept
+	bool ShapeBezier::bezi_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F a_barbs[3]) noexcept
 	{
 		BZP seg[3]{};
 		BZP b_pos[4]{};
@@ -158,7 +158,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F barbs[3];	// 矢じるしの返しの端点	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (ShapeBezi::bezi_calc_arrow(b_pos, b_seg, a_size, barbs)) {
+		if (ShapeBezier::bezi_calc_arrow(b_pos, b_seg, a_size, barbs)) {
 			// ジオメトリシンクに追加する.
 			winrt::check_hresult(factory->CreatePathGeometry(a_geom));
 			winrt::check_hresult((*a_geom)->Open(sink.put()));
@@ -491,7 +491,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形を表示する.
 	//------------------------------
-	void ShapeBezi::draw(void)
+	void ShapeBezier::draw(void)
 	{
 		ID2D1Factory3* const factory = Shape::s_d2d_factory;
 		ID2D1RenderTarget* const target = Shape::s_d2d_target;
@@ -583,7 +583,7 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
 	//------------------------------
-	uint32_t ShapeBezi::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const auto f_opaque = is_opaque(m_fill_color);
 		bool f_test = false;	// 位置が塗りつぶしに含まれるか判定
@@ -768,7 +768,7 @@ namespace winrt::GraphPaper::implementation
 	// area_rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	//------------------------------
-	bool ShapeBezi::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
+	bool ShapeBezier::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,
 		// 範囲の左上が原点となるよう平行移動した制御点を得る.
@@ -865,7 +865,7 @@ namespace winrt::GraphPaper::implementation
 	// b_vec	囲む領域の終点への差分
 	// page	属性
 	//------------------------------
-	ShapeBezi::ShapeBezi(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+	ShapeBezier::ShapeBezier(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
 		ShapePath::ShapePath(page, false)
 	{
 		m_start = b_pos;
@@ -880,12 +880,12 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから図形を読み込む.
 	// dt_reader	データリーダー
 	//------------------------------
-	ShapeBezi::ShapeBezi(const ShapePage& page, DataReader const& dt_reader) :
+	ShapeBezier::ShapeBezier(const ShapePage& page, DataReader const& dt_reader) :
 		ShapePath::ShapePath(page, dt_reader)
 	{
 	}
 
-	void ShapeBezi::write(const DataWriter& dt_writer) const
+	void ShapeBezier::write(const DataWriter& dt_writer) const
 	{
 		ShapePath::write(dt_writer);
 	}

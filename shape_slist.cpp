@@ -16,17 +16,17 @@ namespace winrt::GraphPaper::implementation
 	// ファイルへの書き込みで使用する.
 	enum SHAPE_TYPE : uint32_t {
 		SHAPE_NULL,	// ヌル
-		SHAPE_BEZI,	// 曲線
+		SHAPE_BEZIER,	// 曲線
 		SHAPE_IMAGE,	// 画像
-		SHAPE_ELLI,	// だ円
+		SHAPE_ELLIPSE,	// だ円
 		SHAPE_GROUP,	// グループ
 		SHAPE_LINE,	// 線分
-		SHAPE_POLY,	// 多角形
+		SHAPE_POLYGON,	// 多角形
 		SHAPE_RECT,	// 方形
 		SHAPE_RRECT,	// 角丸方形
 		SHAPE_RULER,	// 定規
 		SHAPE_TEXT,	// 文字列
-		SHAPE_ARC	// 円弧
+		SHAPE_QCIRCLE	// 四分円
 	};
 
 	// データリーダーから図形を読み込む.
@@ -469,20 +469,20 @@ namespace winrt::GraphPaper::implementation
 		auto s_type = dt_reader.ReadUInt32();
 		if (s_type == SHAPE_TYPE::SHAPE_NULL) {
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_BEZI) {
-			s = new ShapeBezi(page, dt_reader);
+		else if (s_type == SHAPE_TYPE::SHAPE_BEZIER) {
+			s = new ShapeBezier(page, dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_IMAGE) {
 			s = new ShapeImage(dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_ELLI) {
-			s = new ShapeElli(page, dt_reader);
+		else if (s_type == SHAPE_TYPE::SHAPE_ELLIPSE) {
+			s = new ShapeEllipse(page, dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_LINE) {
 			s = new ShapeLine(page, dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_POLY) {
-			s = new ShapePoly(page, dt_reader);
+		else if (s_type == SHAPE_TYPE::SHAPE_POLYGON) {
+			s = new ShapePolygon(page, dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_RECT) {
 			s = new ShapeRect(page, dt_reader);
@@ -499,8 +499,8 @@ namespace winrt::GraphPaper::implementation
 		else if (s_type == SHAPE_TYPE::SHAPE_RULER) {
 			s = new ShapeRuler(page, dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_ARC) {
-			s = new ShapeArc(page, dt_reader);
+		else if (s_type == SHAPE_TYPE::SHAPE_QCIRCLE) {
+			s = new ShapeQCircle(page, dt_reader);
 		}
 		else {
 			s = reinterpret_cast<Shape*>(-1);
@@ -565,17 +565,17 @@ namespace winrt::GraphPaper::implementation
 			}
 			auto const& s_type = typeid(*s);
 			uint32_t s_int;
-			if (s_type == typeid(ShapeArc)) {
-				s_int = SHAPE_TYPE::SHAPE_ARC;
+			if (s_type == typeid(ShapeQCircle)) {
+				s_int = SHAPE_TYPE::SHAPE_QCIRCLE;
 			}
-			else if (s_type == typeid(ShapeBezi)) {
-				s_int = SHAPE_TYPE::SHAPE_BEZI;
+			else if (s_type == typeid(ShapeBezier)) {
+				s_int = SHAPE_TYPE::SHAPE_BEZIER;
 			}
 			else if (s_type == typeid(ShapeImage)) {
 				s_int = SHAPE_TYPE::SHAPE_IMAGE;
 			}
-			else if (s_type == typeid(ShapeElli)) {
-				s_int = SHAPE_TYPE::SHAPE_ELLI;
+			else if (s_type == typeid(ShapeEllipse)) {
+				s_int = SHAPE_TYPE::SHAPE_ELLIPSE;
 			}
 			else if (s_type == typeid(ShapeGroup)) {
 				s_int = SHAPE_TYPE::SHAPE_GROUP;
@@ -583,8 +583,8 @@ namespace winrt::GraphPaper::implementation
 			else if (s_type == typeid(ShapeLine)) {
 				s_int = SHAPE_TYPE::SHAPE_LINE;
 			}
-			else if (s_type == typeid(ShapePoly)) {
-				s_int = SHAPE_TYPE::SHAPE_POLY;
+			else if (s_type == typeid(ShapePolygon)) {
+				s_int = SHAPE_TYPE::SHAPE_POLYGON;
 			}
 			else if (s_type == typeid(ShapeRect)) {
 				s_int = SHAPE_TYPE::SHAPE_RECT;

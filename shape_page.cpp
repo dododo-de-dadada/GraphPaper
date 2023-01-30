@@ -168,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_POINT_2F p_vec;
 		pt_sub(c_pos, p_pos, p_vec);
-		ShapePoly::poly_by_bbox(p_pos, p_vec, p_opt, v_pos);
+		ShapePolygon::poly_by_bbox(p_pos, p_vec, p_opt, v_pos);
 		const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
 		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 		target->DrawRoundedRectangle(&r_rect, brush, s_width, Shape::m_aux_style.get());
 	}
 
-	void ShapePage::draw_auxiliary_arc(
+	void ShapePage::draw_auxiliary_qcircle(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{

@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形を表示する.
-	void ShapeElli::draw(void)
+	void ShapeEllipse::draw(void)
 	{
 		ID2D1Factory* const factory = Shape::s_d2d_factory;
 		ID2D1RenderTarget* const target = Shape::s_d2d_target;
@@ -76,7 +76,7 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeElli::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const auto anc = rect_hit_test_anc(m_start, m_vec[0], t_pos);
 		if (anc != ANC_TYPE::ANC_PAGE) {

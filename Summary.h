@@ -14,6 +14,7 @@
 
 namespace winrt::GraphPaper::implementation
 {
+	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::UI::Xaml::ResourceDictionary;
 
 	// ˆê——‚Ì—v‘f
@@ -26,16 +27,14 @@ namespace winrt::GraphPaper::implementation
 		Summary(Shape* s, const ResourceDictionary& r) :
 			m_shape(s)
 		{
-			using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 			auto const& t_id = typeid(*s);
-			if (t_id == typeid(ShapeBezi)) {
-				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_bezi")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_bezi/Text");
+			if (t_id == typeid(ShapeBezier)) {
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_bezier")));
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_bezier/Text");
 			}
-			else if (t_id == typeid(ShapeElli)) {
+			else if (t_id == typeid(ShapeEllipse)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_elli")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_elli/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_ellipse/Text");
 			}
 			else if (t_id == typeid(ShapeGroup)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_group")));
@@ -45,8 +44,8 @@ namespace winrt::GraphPaper::implementation
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_line/Text");
 			}
-			else if (t_id == typeid(ShapePoly)) {
-				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_tri")));
+			else if (t_id == typeid(ShapePolygon)) {
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_polygon")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_poly/Text");
 			}
 			else if (t_id == typeid(ShapeRect)) {
@@ -68,6 +67,10 @@ namespace winrt::GraphPaper::implementation
 			else if (t_id == typeid(ShapeImage)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_image")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_image");
+			}
+			else if (t_id == typeid(ShapeQCircle)) {
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_qcircle")));
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_qcircle/Text");
 			}
 			else {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_select")));

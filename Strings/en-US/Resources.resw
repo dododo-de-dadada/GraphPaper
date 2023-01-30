@@ -653,11 +653,11 @@
     <value>Top</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_bezi.Text" xml:space="preserve">
+  <data name="rmfi_tool_drawing_bezier.Text" xml:space="preserve">
     <value>Curve</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_elli.Text" xml:space="preserve">
+  <data name="rmfi_tool_drawing_ellipse.Text" xml:space="preserve">
     <value>Ellipse</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -891,7 +891,7 @@
     <comment>String</comment>
   </data>
   <data name="str_unknown" xml:space="preserve">
-    <value>?</value>
+    <value>Unknown</value>
     <comment>String</comment>
   </data>
   <data name="str_untitled" xml:space="preserve">
