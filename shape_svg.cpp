@@ -751,9 +751,12 @@ namespace winrt::GraphPaper::implementation
 	void ShapeQCircle::export_svg(const DataWriter& dt_writer)
 	{
 		wchar_t buf[1024];
+		D2D1_POINT_2F c_pos{};
+		if (is_opaque(m_fill_color) || 
+			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && m_arrow_style != ARROW_STYLE::NONE)) {
+			get_pos_center(m_start, m_vec[0], m_radius, m_rotation, c_pos);
+		}
 		if (is_opaque(m_fill_color)) {
-			D2D1_POINT_2F c_pos;
-			get_pos_center(c_pos);
 			swprintf_s(buf,
 				L"<path d=\"M %f %f "
 				L"A %f %f 0 0 1 %f %f "
@@ -783,8 +786,13 @@ namespace winrt::GraphPaper::implementation
 				m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap, m_join_style, m_join_miter_limit);
 			dt_writer.WriteString(buf);
 			dt_writer.WriteString(L"/>\n");
+			if (m_arrow_style != ARROW_STYLE::NONE) {
+				D2D1_POINT_2F barbs[3];
+				qcircle_calc_arrow(c_pos, m_radius, m_rotation, m_arrow_size, barbs);
+				export_svg_barbs(buf, 1024,
+					m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, barbs, barbs[2]);
+				dt_writer.WriteString(buf);
+			}
 		}
 	}
-
-
 }

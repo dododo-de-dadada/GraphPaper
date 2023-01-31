@@ -199,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 			const auto a_geom = m_d2d_arrow_geom.get();
 			if (m_d2d_arrow_geom != nullptr) {
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
-					context->FillGeometry(a_geom, brush, nullptr);
+					context->FillGeometry(a_geom, brush);
 				}
 				context->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_style.get());
 			}

@@ -37,6 +37,7 @@
 #include <winrt/Windows.UI.ViewManagement.h>
 #include <winrt/Windows.UI.Xaml.Input.h>
 #include <winrt/Windows.UI.Xaml.Media.Imaging.h>
+#include <winrt/Windows.UI.Xaml.Shapes.h>
 // 印刷関係
 #include <winrt/Windows.Graphics.Printing.h>
 #include <winrt/Windows.UI.Xaml.Printing.h>

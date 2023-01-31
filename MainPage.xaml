@@ -27,7 +27,7 @@
 			<ColumnDefinition Width="*" />
 			<ColumnDefinition Width="Auto" />
 		</Grid.ColumnDefinitions>
-		<!-- メインメニュー -->
+        <!-- メインメニュー -->
 		<muxc:MenuBar Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="{ThemeResource AppBarBackgroundThemeBrush}" Height="Auto">
 			<!-- ファイルメニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_file" AccessKey="F" Title="File" >

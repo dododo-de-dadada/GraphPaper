@@ -52,6 +52,8 @@ END
 
 IDC_CURSOR1             CURSOR                  "cursor1.cur"
 
+IDC_CURSOR2             CURSOR                  "cursor2.cur"
+
 #endif    // “ú–{Œê (“ú–{) resources
 /////////////////////////////////////////////////////////////////////////////
 

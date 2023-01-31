@@ -27,7 +27,8 @@ namespace winrt::GraphPaper::implementation
 	static auto const& CURS_SIZE_NWSE = CoreCursor(CoreCursorType::SizeNorthwestSoutheast, 0);	// 左上右下カーソル
 	static auto const& CURS_SIZE_WE = CoreCursor(CoreCursorType::SizeWestEast, 0);	// 左右カーソル
 	static auto const& CURS_WAIT = CoreCursor(CoreCursorType::Wait , 0);	// 左右カーソル
-	static auto const& CURS_EYEDROPPER = CoreCursor(CoreCursorType::Custom, IDC_CURSOR1);	// スポイトカーソル
+	static auto const& CURS_EYEDROPPER1 = CoreCursor(CoreCursorType::Custom, IDC_CURSOR1);	// スポイトカーソル
+	static auto const& CURS_EYEDROPPER2 = CoreCursor(CoreCursorType::Custom, IDC_CURSOR2);	// スポイトカーソル
 
 	// 選択された図形の頂点に最も近い方眼を見つけ, 頂点と方眼との差分を求める.
 	static bool event_get_vec_nearby_grid(const SHAPE_LIST& slist, const float g_len, D2D1_POINT_2F& g_vec) noexcept;
@@ -594,6 +595,11 @@ namespace winrt::GraphPaper::implementation
 
 		event_set_pos_cur(args);
 		status_bar_set_pos();
+
+		if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
+			page_draw();
+		}
+
 		// ポインターの押された状態が, 初期状態か判定する.
 		if (m_event_state == EVENT_STATE::BEGIN) {
 			event_set_curs_style();
@@ -884,20 +890,20 @@ namespace winrt::GraphPaper::implementation
 					Shape* s;
 					uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
 					if (anc == ANC_TYPE::ANC_PAGE) {
-						ustack_push_set<UNDO_ID::PAGE_COLOR>(&m_main_page, m_event_eyedropper);
+						ustack_push_set<UNDO_ID::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
 						ustack_push_null();
 					}
 					else if (s != nullptr) {
 						if (anc == ANC_TYPE::ANC_FILL) {
-							ustack_push_set<UNDO_ID::FILL_COLOR>(s, m_event_eyedropper);
+							ustack_push_set<UNDO_ID::FILL_COLOR>(s, m_eyedropper_color);
 							ustack_push_null();
 						}
 						else if (anc == ANC_TYPE::ANC_TEXT) {
-							ustack_push_set<UNDO_ID::FONT_COLOR>(s, m_event_eyedropper);
+							ustack_push_set<UNDO_ID::FONT_COLOR>(s, m_eyedropper_color);
 							ustack_push_null();
 						}
 						else {
-							ustack_push_set<UNDO_ID::STROKE_COLOR>(s, m_event_eyedropper);
+							ustack_push_set<UNDO_ID::STROKE_COLOR>(s, m_eyedropper_color);
 							ustack_push_null();
 						}
 					}
@@ -981,17 +987,25 @@ namespace winrt::GraphPaper::implementation
 				Shape* s;
 				uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
 				if (anc == ANC_TYPE::ANC_PAGE) {
-					m_event_eyedropper = m_main_page.m_page_color;
+					m_eyedropper_color = m_main_page.m_page_color;
+					m_eyedropper_filled = true;
+					Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER2);
 				}
 				else if (s != nullptr) {
 					if (anc == ANC_TYPE::ANC_FILL) {
-						s->get_fill_color(m_event_eyedropper);
+						s->get_fill_color(m_eyedropper_color);
+						m_eyedropper_filled = true;
+						Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER2);
 					}
 					else if (anc == ANC_TYPE::ANC_TEXT) {
-						s->get_font_color(m_event_eyedropper);
+						s->get_font_color(m_eyedropper_color);
+						m_eyedropper_filled = true;
+						Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER2);
 					}
 					else {
-						s->get_stroke_color(m_event_eyedropper);
+						s->get_stroke_color(m_eyedropper_color);
+						m_eyedropper_filled = true;
+						Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER2);
 					}
 				}
 			}
@@ -1018,7 +1032,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_set_curs_style(void)
 	{
 		if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
-			Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER);
+			Window::Current().CoreWindow().PointerCursor(m_eyedropper_filled ? CURS_EYEDROPPER2 : CURS_EYEDROPPER1);
 		}
 		// 作図ツールが選択ツール以外か判定する.
 		else if (m_drawing_tool != DRAWING_TOOL::SELECT &&

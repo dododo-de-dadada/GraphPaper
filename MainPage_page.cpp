@@ -205,31 +205,58 @@ namespace winrt::GraphPaper::implementation
 		target->BeginDraw();
 		m_main_page.draw();
 		if (m_event_state == EVENT_STATE::PRESS_AREA) {
-			const auto t_draw = m_drawing_tool;
-			if (t_draw == DRAWING_TOOL::SELECT ||
-				t_draw == DRAWING_TOOL::RECT ||
-				t_draw == DRAWING_TOOL::TEXT ||
-				t_draw == DRAWING_TOOL::RULER) {
+			if (m_drawing_tool == DRAWING_TOOL::SELECT ||
+				m_drawing_tool == DRAWING_TOOL::RECT ||
+				m_drawing_tool == DRAWING_TOOL::TEXT ||
+				m_drawing_tool == DRAWING_TOOL::RULER) {
 				m_main_page.draw_auxiliary_rect(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (t_draw == DRAWING_TOOL::BEZI) {
+			else if (m_drawing_tool == DRAWING_TOOL::BEZI) {
 				m_main_page.draw_auxiliary_bezi(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (t_draw == DRAWING_TOOL::ELLI) {
+			else if (m_drawing_tool == DRAWING_TOOL::ELLI) {
 				m_main_page.draw_auxiliary_elli(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (t_draw == DRAWING_TOOL::LINE) {
+			else if (m_drawing_tool == DRAWING_TOOL::LINE) {
 				m_main_page.draw_auxiliary_line(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (t_draw == DRAWING_TOOL::RRECT) {
+			else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
 				m_main_page.draw_auxiliary_rrect(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (t_draw == DRAWING_TOOL::POLY) {
+			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
 				m_main_page.draw_auxiliary_poly(target, brush, m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
 			}
-			else if (t_draw == DRAWING_TOOL::QCIRCLE) {
+			else if (m_drawing_tool == DRAWING_TOOL::QCIRCLE) {
 				m_main_page.draw_auxiliary_qcircle(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
+		}
+		if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
+			ID2D1Factory* factory = Shape::s_d2d_factory;
+			winrt::com_ptr<ID2D1PathGeometry> geom;
+			winrt::check_hresult(factory->CreatePathGeometry(geom.put()));
+			winrt::com_ptr<ID2D1GeometrySink> sink;
+			geom->Open(sink.put());
+			D2D1_POINT_2F p{
+				m_event_pos_curr.x + 2.0f,
+				m_event_pos_curr.y - 2.0f
+			};
+			sink->BeginFigure(p, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED);
+			p.y -= 5.0f;
+			sink->AddLine(p);
+			p.x += 4.0f;
+			p.y -= 4.0f;
+			sink->AddLine(p);
+			p.x += 10.0f;
+			sink->AddLine(p);
+			p.x -= 8.0f;
+			p.y += 8.0f;
+			sink->AddLine(p);
+			sink->EndFigure(D2D1_FIGURE_END_CLOSED);
+			sink->Close();
+			sink = nullptr;
+			brush->SetColor(m_eyedropper_color);
+			target->FillGeometry(geom.get(), brush);
+			geom = nullptr;
 		}
 		// •`‰æ‚ðI—¹‚·‚é.
 		const HRESULT hres = target->EndDraw();

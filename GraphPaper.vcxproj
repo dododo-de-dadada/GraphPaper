@@ -200,6 +200,9 @@
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="shape.cpp" />
+    <ClCompile Include="shape_arc.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="shape_bezier.cpp" />
     <ClCompile Include="shape_image.cpp" />
     <ClCompile Include="d2d_ui.cpp" />
@@ -238,6 +241,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cursor1.cur" />
+    <None Include="cursor2.cur" />
     <None Include="packages.config" />
     <None Include="PropertySheet.props" />
     <Text Include="readme.txt">

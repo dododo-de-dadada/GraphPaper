@@ -232,8 +232,7 @@ namespace winrt::GraphPaper::implementation
 			cmd
 		);
 		len += dt_writer.WriteString(buf);
-		if (m_arrow_style == ARROW_STYLE::OPENED ||
-			m_arrow_style == ARROW_STYLE::FILLED) {
+		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bezi_calc_arrow(m_start, b_seg, m_arrow_size, barbs);
 			len += export_pdf_barbs(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
@@ -265,8 +264,7 @@ namespace winrt::GraphPaper::implementation
 		);
 		len += dt_writer.WriteString(buf);
 
-		if (m_arrow_style == ARROW_STYLE::OPENED ||
-			m_arrow_style == ARROW_STYLE::FILLED) {
+		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			if (line_get_arrow_pos(m_start, m_vec[0], m_arrow_size, barbs, barbs[2])) {
 				len += export_pdf_barbs(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
@@ -318,8 +316,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		len += dt_writer.WriteString(cmd);
 
-		if (m_arrow_style == ARROW_STYLE::OPENED ||
-			m_arrow_style == ARROW_STYLE::FILLED) {
+		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F h_tip;
 			D2D1_POINT_2F h_barbs[2];
 			if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
@@ -338,7 +335,7 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		const float ty = page_size.height;
-		const double a = 4.0 * (sqrt(2.0) - 1.0) / 3.0;
+		constexpr double a = 4.0 * (M_SQRT2 - 1.0) / 3.0;
 		const float rx = 0.5f * m_vec[0].x;
 		const float ry = 0.5f * m_vec[0].y;
 		const float cx = m_start.x + rx;
@@ -449,7 +446,7 @@ namespace winrt::GraphPaper::implementation
 
 		len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap, m_dash_style, m_dash_patt, m_join_style, m_join_miter_limit, dt_writer);
 
-		const double a = 4.0 * (sqrt(2.0) - 1.0) / 3.0;	// ベジェでだ円を近似する係数
+		constexpr double a = 4.0 * (M_SQRT2 - 1.0) / 3.0;	// ベジェでだ円を近似する係数
 		const float ty = page_size.height;	// D2D 座標を PDF ユーザー空間へ変換するため
 		const float rx = (m_vec[0].x >= 0.0f ? m_corner_rad.x : -m_corner_rad.x);	// だ円の x 方向の半径
 		const float ry = (m_vec[0].y >= 0.0f ? m_corner_rad.y : -m_corner_rad.y);	// だ円の y 方向の半径
@@ -1081,4 +1078,67 @@ namespace winrt::GraphPaper::implementation
 		return len;
 	}
 
+	// 図形をデータライターに PDF として書き込む.
+	size_t ShapeQCircle::export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer)
+	{
+		//wchar_t* cmd;
+		//if (!export_pdf_cmd<false>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
+		//	return 0;
+		//}
+		D2D1_POINT_2F c_pos{};
+		D2D1_POINT_2F b_pos;
+		D2D1_BEZIER_SEGMENT b_seg;
+		if (is_opaque(m_fill_color) ||
+			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && m_arrow_style != ARROW_STYLE::NONE)) {
+			get_pos_center(m_start, m_vec[0], m_radius, m_rotation, c_pos);
+			qcircle_calc_beizer(m_radius, m_rotation, b_pos, b_seg);
+			b_pos.x += c_pos.x;
+			b_pos.y += c_pos.y;
+			b_seg.point1.x += c_pos.x;
+			b_seg.point1.y += c_pos.y;
+			b_seg.point2.x += c_pos.x;
+			b_seg.point2.y += c_pos.y;
+			b_seg.point3.x += c_pos.x;
+			b_seg.point3.y += c_pos.y;
+		}
+		size_t len = 0;
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
+			len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap,
+				m_dash_style, m_dash_patt, m_join_style, m_join_miter_limit, dt_writer);
+		}
+		if (is_opaque(m_fill_color)) {
+			// f* = 偶奇規則を使用してパスを塗りつぶす。
+			// パスは自動的に閉じられる
+			wchar_t buf[1024];
+			swprintf_s(buf,
+				L"%f %f m %f %f %f %f %f %f c %f %f l f*\n",
+				b_pos.x, -b_pos.y + page_size.height,
+				b_seg.point1.x, -b_seg.point1.y + page_size.height,
+				b_seg.point2.x, -b_seg.point2.y + page_size.height,
+				b_seg.point3.x, -b_seg.point3.y + page_size.height,
+				c_pos.x, -c_pos.y + page_size.height
+			);
+			len += dt_writer.WriteString(buf);
+		}
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
+			// S = パスをストロークで描画
+			// パスは開いたまま.
+			wchar_t buf[1024];
+			swprintf_s(buf,
+				L"%f %f m %f %f %f %f %f %f c S\n",
+				b_pos.x, -b_pos.y + page_size.height,
+				b_seg.point1.x, -b_seg.point1.y + page_size.height,
+				b_seg.point2.x, -b_seg.point2.y + page_size.height,
+				b_seg.point3.x, -b_seg.point3.y + page_size.height
+			);
+			len += dt_writer.WriteString(buf);
+			if (m_arrow_style != ARROW_STYLE::NONE) {
+				D2D1_POINT_2F barbs[3];
+				qcircle_calc_arrow(c_pos, m_radius, m_rotation, m_arrow_size, barbs);
+				len += export_pdf_barbs(
+					m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
+			}
+		}
+		return len;
+	}
 }
