@@ -110,6 +110,7 @@ namespace winrt::GraphPaper::implementation
 		const float val0 = m_dialog_page.m_page_color.r * COLOR_MAX;
 		const float val1 = m_dialog_page.m_page_color.g * COLOR_MAX;
 		const float val2 = m_dialog_page.m_page_color.b * COLOR_MAX;
+		const float val3 = m_dialog_page.m_page_color.a * COLOR_MAX;
 
 		dialog_slider_0().Maximum(255.0);
 		dialog_slider_0().TickFrequency(1.0);
@@ -126,13 +127,20 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(val2);
 		page_slider_set_header<UNDO_ID::PAGE_COLOR, 2>(val2);
+		dialog_slider_3().Maximum(255.0);
+		dialog_slider_3().TickFrequency(1.0);
+		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_3().Value(val3);
+		page_slider_set_header<UNDO_ID::PAGE_COLOR, 3>(val3);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
+		dialog_slider_3().Visibility(Visibility::Visible);
 		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 0> });
 		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 1> });
 		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 3> });
 		//m_sample_type = PROP_TYPE::NONE;
 		//m_dialog_page.m_d2d.SetSwapChainPanel(scp_dialog_panel());
 		//const auto samp_w = scp_dialog_panel().Width();
@@ -158,9 +166,11 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		dialog_slider_2().Visibility(Visibility::Collapsed);
+		dialog_slider_3().Visibility(Visibility::Collapsed);
 		dialog_slider_0().ValueChanged(slider_0_token);
 		dialog_slider_1().ValueChanged(slider_1_token);
 		dialog_slider_2().ValueChanged(slider_2_token);
+		dialog_slider_3().ValueChanged(slider_3_token);
 		status_bar_set_pos();
 	}
 
@@ -653,6 +663,9 @@ namespace winrt::GraphPaper::implementation
 			}
 			if constexpr (S == 2) {
 				s_color.b = static_cast<FLOAT>(val / COLOR_MAX);
+			}
+			if constexpr (S == 3) {
+				s_color.a = static_cast<FLOAT>(val / COLOR_MAX);
 			}
 			m_dialog_page.set_page_color(s_color);
 		}
