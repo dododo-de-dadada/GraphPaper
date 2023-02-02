@@ -34,7 +34,7 @@ namespace winrt::GraphPaper::implementation
 			val = GRID_EMPH_3;
 		}
 		else {
-			return;
+			winrt::hresult_not_implemented();
 		}
 		grid_emph_is_checked(val);
 		GRID_EMPH g_emph;
@@ -44,6 +44,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_is_enable();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 方眼メニューの「方眼の強調」に印をつける.
@@ -112,6 +113,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().ValueChanged(slider_1_token);
 		dialog_slider_2().ValueChanged(slider_2_token);
 		dialog_slider_3().ValueChanged(slider_3_token);
+		status_bar_set_pos();
 	}
 
 	// 方眼メニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -151,6 +153,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_0().ValueChanged(slider_0_token);
+		status_bar_set_pos();
 	}
 
 	// 方眼メニューの「方眼の大きさ」>「狭める」が選択された.
@@ -164,6 +167,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_is_enable();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 方眼メニューの「方眼の大きさ」>「広げる」が選択された.
@@ -177,6 +181,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_is_enable();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -246,25 +251,27 @@ namespace winrt::GraphPaper::implementation
 	// 方眼メニューの「方眼の表示」>「最背面」が選択された.
 	void MainPage::grid_show_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		GRID_SHOW val;
+		GRID_SHOW new_val;
 		if (sender == rmfi_grid_show_back()) {
-			val = GRID_SHOW::BACK;
+			new_val = GRID_SHOW::BACK;
 		}
 		else if (sender == rmfi_grid_show_front()) {
-			val = GRID_SHOW::FRONT;
+			new_val = GRID_SHOW::FRONT;
 		}
 		else if (sender == rmfi_grid_show_hide()) {
-			val = GRID_SHOW::HIDE;
+			new_val = GRID_SHOW::HIDE;
 		}
 		else {
+			winrt::hresult_not_implemented();
 			return;
 		}
-		grid_show_is_checked(val);
-		if (m_main_page.m_grid_show != val) {
-			ustack_push_set<UNDO_ID::GRID_SHOW>(&m_main_page, val);
+		grid_show_is_checked(new_val);
+		if (m_main_page.m_grid_show != new_val) {
+			ustack_push_set<UNDO_ID::GRID_SHOW>(&m_main_page, new_val);
 			ustack_is_enable();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 方眼メニューの「方眼の表示」に印をつける.
@@ -283,6 +290,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::grid_snap_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		m_main_page.m_grid_snap = unbox_value<ToggleMenuFlyoutItem>(sender).IsChecked();
+		status_bar_set_pos();
 	}
 
 }

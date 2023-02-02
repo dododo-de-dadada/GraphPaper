@@ -48,8 +48,8 @@ namespace winrt::GraphPaper::implementation
 		const double ss = m_main_page.m_page_scale;	// ページの倍率
 		const double vw = act_w / ss;	// 見えている部分の幅
 		const double vh = act_h / ss;	// 見えている部分の高さ
-		const auto nw = m_main_lt;
-		const auto se = m_main_rb;
+		const auto nw = m_main_bbox_lt;
+		const auto se = m_main_bbox_rb;
 		const auto mw = static_cast<double>(se.x) - static_cast<double>(nw.x) - vw;
 		const auto mh = static_cast<double>(se.y) - static_cast<double>(nw.y) - vh;
 		const auto w_gt0 = mw > 0.0;
@@ -101,8 +101,8 @@ namespace winrt::GraphPaper::implementation
 	bool MainPage::scroll_to(Shape* const s)
 	{
 		// スクロールビューアのビューポートの座標を, 表示座標で求める.
-		const double ox = m_main_lt.x;	// 原点 x
-		const double oy = m_main_lt.y;	// 原点 y
+		const double ox = m_main_bbox_lt.x;	// 原点 x
+		const double oy = m_main_bbox_lt.y;	// 原点 y
 		const double ho = sb_horz().Value();	// 横のスクロール値
 		const double vo = sb_vert().Value();	// 縦のスクロール値
 		const double vw = sb_horz().ViewportSize();	// 表示の幅

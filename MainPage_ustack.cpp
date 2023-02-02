@@ -201,46 +201,45 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「やり直し」が選択された.
 	void MainPage::ustack_redo_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_ustack_rcnt == 0) {
-			return;
-		}
-		auto flag = false;
-		// 元に戻す操作スタックからヌルで区切られていない (選択などの) 操作を取り除く.
-		while (!m_ustack_undo.empty()) {
-			auto u = m_ustack_undo.back();
-			if (u == nullptr) {
-				break;
+		if (m_ustack_rcnt > 0) {
+			auto flag = false;
+			// 元に戻す操作スタックからヌルで区切られていない (選択などの) 操作を取り除く.
+			while (!m_ustack_undo.empty()) {
+				auto u = m_ustack_undo.back();
+				if (u == nullptr) {
+					break;
+				}
+				m_ustack_undo.pop_back();
+				ustack_exec(u);
+				flag = true;
 			}
-			m_ustack_undo.pop_back();
-			ustack_exec(u);
-			flag = true;
-		}
-		// やり直し操作スタックから操作を取り出し, 実行して, 元に戻す操作に積む.
-		// 操作がヌルでないあいだこれを繰り返す.
-		while (m_ustack_redo.size() > 0) {
-			auto r = m_ustack_redo.back();
-			m_ustack_redo.pop_back();
-			m_ustack_undo.push_back(r);
-			if (r == nullptr) {
-				// 実行された操作があった場合, スタックの組数を変更する.
-				m_ustack_rcnt--;
-				m_ustack_ucnt++;
-				break;
+			// やり直し操作スタックから操作を取り出し, 実行して, 元に戻す操作に積む.
+			// 操作がヌルでないあいだこれを繰り返す.
+			while (m_ustack_redo.size() > 0) {
+				auto r = m_ustack_redo.back();
+				m_ustack_redo.pop_back();
+				m_ustack_undo.push_back(r);
+				if (r == nullptr) {
+					// 実行された操作があった場合, スタックの組数を変更する.
+					m_ustack_rcnt--;
+					m_ustack_ucnt++;
+					break;
+				}
+				ustack_exec(r);
+				flag = true;
 			}
-			ustack_exec(r);
-			flag = true;
+			if (flag) {
+				xcvd_is_enabled();
+				page_bbox_update();
+				page_panel_size();
+				page_draw();
+				// 一覧が表示されてるか判定する.
+				if (summary_is_visible()) {
+					summary_update();
+				}
+			}
 		}
-		if (!flag) {
-			return;
-		}
-		xcvd_is_enabled();
-		page_bbox_update();
-		page_panel_size();
-		page_draw();
-		// 一覧が表示されてるか判定する.
-		if (summary_is_visible()) {
-			summary_update();
-		}
+		status_bar_set_pos();
 	}
 
 	// 操作スタックを消去し, 含まれる操作を破棄する.
@@ -264,46 +263,46 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「元に戻す」が選択された.
 	void MainPage::ustack_undo_click(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (m_ustack_ucnt == 0) {
-			return;
-		}
-		auto st = 0;
-		while (!m_ustack_undo.empty()) {
-			auto u = m_ustack_undo.back();
-			if (st == 0) {
+		if (m_ustack_ucnt > 0) {
+			auto st = 0;
+			while (!m_ustack_undo.empty()) {
+				auto u = m_ustack_undo.back();
+				if (st == 0) {
+					m_ustack_undo.pop_back();
+					if (u != nullptr) {
+						ustack_exec(u);
+					}
+					else {
+						st = 1;
+					}
+					continue;
+				}
+				if (u == nullptr) {
+					break;
+				}
 				m_ustack_undo.pop_back();
-				if (u != nullptr) {
-					ustack_exec(u);
+				ustack_exec(u);
+				if (st == 1) {
+					m_ustack_redo.push_back(nullptr);
+					st = 2;
 				}
-				else {
-					st = 1;
-				}
-				continue;
+				m_ustack_redo.push_back(u);
 			}
-			if (u == nullptr) {
-				break;
+			if (st == 2) {
+				// 実行された操作があった場合, スタックの組数を変更する.
+				m_ustack_ucnt--;
+				m_ustack_rcnt++;
 			}
-			m_ustack_undo.pop_back();
-			ustack_exec(u);
-			if (st == 1) {
-				m_ustack_redo.push_back(nullptr);
-				st = 2;
+			xcvd_is_enabled();
+			page_bbox_update();
+			page_panel_size();
+			page_draw();
+			// 一覧が表示されてるか判定する.
+			if (summary_is_visible()) {
+				summary_update();
 			}
-			m_ustack_redo.push_back(u);
 		}
-		if (st == 2) {
-			// 実行された操作があった場合, スタックの組数を変更する.
-			m_ustack_ucnt--;
-			m_ustack_rcnt++;
-		}
-		xcvd_is_enabled();
-		page_bbox_update();
-		page_panel_size();
-		page_draw();
-		// 一覧が表示されてるか判定する.
-		if (summary_is_visible()) {
-			summary_update();
-		}
+		status_bar_set_pos();
 	}
 
 	// 操作を実行する.

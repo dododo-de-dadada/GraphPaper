@@ -185,6 +185,7 @@ namespace winrt::GraphPaper::implementation
 				UnloadObject(gd_summary_panel());
 			}
 		}
+		status_bar_set_pos();
 	}
 
 	// 図形の一覧の添え字の位置に図形を挿入する.
@@ -223,17 +224,19 @@ namespace winrt::GraphPaper::implementation
 		if (m_summary_atomic.load(std::memory_order_acquire)) {
 			// 図形の一覧を閉じる.
 			summary_close_click(nullptr, nullptr);
-			return;
 		}
-		// 検索パネルが表示されてるか判定する.
-		if (sp_find_text_panel().Visibility() == Visibility::Visible) {
-			// 検索パネルを非表示にする.
-			find_text_click(nullptr, nullptr);
+		else {
+			// 検索パネルが表示されてるか判定する.
+			if (sp_find_text_panel().Visibility() == Visibility::Visible) {
+				// 検索パネルを非表示にする.
+				find_text_click(nullptr, nullptr);
+			}
+			// リソースから図形の一覧パネルを見つける.
+			auto _{ FindName(L"gd_summary_panel") };
+			gd_summary_panel().Visibility(Visibility::Visible);
+			m_summary_atomic.store(true, std::memory_order_release);
 		}
-		// リソースから図形の一覧パネルを見つける.
-		auto _{ FindName(L"gd_summary_panel") };
-		gd_summary_panel().Visibility(Visibility::Visible);
-		m_summary_atomic.store(true, std::memory_order_release);
+		status_bar_set_pos();
 	}
 
 	// 図形の一覧がロードされた.

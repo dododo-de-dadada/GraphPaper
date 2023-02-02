@@ -45,9 +45,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「枠を文字列に合わせる」が選択された.
-	void MainPage::text_frame_fit_text_click(IInspectable const&, RoutedEventArgs const&)
+	void MainPage::text_fit_frame_to_text_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto flag = false;
+		const auto g_len = (m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;
@@ -59,7 +60,7 @@ namespace winrt::GraphPaper::implementation
 				continue;
 			}
 			auto u = new UndoForm(s, ANC_TYPE::ANC_SE);
-			if (static_cast<ShapeText*>(s)->frame_fit(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f)) {
+			if (static_cast<ShapeText*>(s)->fit_frame_to_text(g_len)) {
 				m_ustack_undo.push_back(u);
 				if (!flag) {
 					flag = true;
@@ -74,6 +75,7 @@ namespace winrt::GraphPaper::implementation
 			page_panel_size();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 書体メニューの「段落のそろえ」が選択された.
@@ -90,7 +92,7 @@ namespace winrt::GraphPaper::implementation
 			val = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 		}
 		else {
-			return;
+			winrt::hresult_not_implemented();
 		}
 		text_par_align_is_checked(val);
 		if (ustack_push_set<UNDO_ID::TEXT_PAR_ALIGN>(val)) {
@@ -98,6 +100,7 @@ namespace winrt::GraphPaper::implementation
 			xcvd_is_enabled();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 書体メニューの「段落のそろえ」に印をつける.
@@ -129,7 +132,7 @@ namespace winrt::GraphPaper::implementation
 			val = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
 		}
 		else {
-			return;
+			winrt::hresult_not_implemented();
 		}
 		text_align_t_is_checked(val);
 		if (ustack_push_set<UNDO_ID::TEXT_ALIGN_T>(val)) {
@@ -137,6 +140,7 @@ namespace winrt::GraphPaper::implementation
 			xcvd_is_enabled();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 書体メニューの「文字列のそろえ」に印をつける.

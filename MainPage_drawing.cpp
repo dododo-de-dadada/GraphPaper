@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	// 作図ツールのメニュー項目が選択された.
 	void MainPage::drawing_tool_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == rmfi_tool_selecting()) {
+		if (sender == rmfi_tool_selection()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::SELECT);
 			m_event_state = EVENT_STATE::BEGIN;
 			m_event_shape_pressed = nullptr;
@@ -91,18 +91,19 @@ namespace winrt::GraphPaper::implementation
 				m_drawing_poly_opt.m_clockwise = !m_drawing_poly_opt.m_clockwise;
 			}
 			else {
-				return;
+				winrt::hresult_not_implemented();
 			}
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
 		}
 		status_bar_set_draw();
-		event_set_curs_style();
+		status_bar_set_pos();
+		event_set_cursor();
 	}
 
 	// 作図ツールのメニューに印をつける.
 	void MainPage::drawing_tool_is_checked(const DRAWING_TOOL val)
 	{
-		rmfi_tool_selecting().IsChecked(val == DRAWING_TOOL::SELECT);
+		rmfi_tool_selection().IsChecked(val == DRAWING_TOOL::SELECT);
 		rmfi_tool_drawing_rect().IsChecked(val == DRAWING_TOOL::RECT);
 		rmfi_tool_drawing_rrect().IsChecked(val == DRAWING_TOOL::RRECT);
 		rmfi_tool_drawing_poly().IsChecked(val == DRAWING_TOOL::POLY);

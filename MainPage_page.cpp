@@ -161,16 +161,15 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().ValueChanged(slider_0_token);
 		dialog_slider_1().ValueChanged(slider_1_token);
 		dialog_slider_2().ValueChanged(slider_2_token);
+		status_bar_set_pos();
 	}
 
 	// 表示する.
 	void MainPage::page_draw(void)
 	{
-#if defined(_DEBUG)
 		if (!scp_page_panel().IsLoaded()) {
 			return;
 		}
-#endif
 		if (!m_mutex_draw.try_lock()) {
 			// ロックできない場合
 			return;
@@ -195,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 		// スクロールの変分に拡大率を掛けた値を
 		// 変換行列の平行移動の成分に格納する.
 		D2D1_POINT_2F t_pos;
-		pt_add(m_main_lt, sb_horz().Value(), sb_vert().Value(), t_pos);
+		pt_add(m_main_bbox_lt, sb_horz().Value(), sb_vert().Value(), t_pos);
 		pt_mul(t_pos, page_scale, t_pos);
 		tran.dx = -t_pos.x;
 		tran.dy = -t_pos.y;
@@ -230,12 +229,17 @@ namespace winrt::GraphPaper::implementation
 				m_main_page.draw_auxiliary_qcircle(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 		}
+		/*
 		if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 			ID2D1Factory* factory = Shape::s_d2d_factory;
 			winrt::com_ptr<ID2D1PathGeometry> geom;
-			winrt::check_hresult(factory->CreatePathGeometry(geom.put()));
+			winrt::check_hresult(
+				factory->CreatePathGeometry(geom.put())
+			);
 			winrt::com_ptr<ID2D1GeometrySink> sink;
-			geom->Open(sink.put());
+			winrt::check_hresult(
+				geom->Open(sink.put())
+			);
 			D2D1_POINT_2F p{
 				m_event_pos_curr.x + 2.0f,
 				m_event_pos_curr.y - 2.0f
@@ -258,6 +262,7 @@ namespace winrt::GraphPaper::implementation
 			target->FillGeometry(geom.get(), brush);
 			geom = nullptr;
 		}
+		*/
 		// 描画を終了する.
 		const HRESULT hres = target->EndDraw();
 		// 保存された描画環境を元に戻す.
@@ -271,8 +276,6 @@ namespace winrt::GraphPaper::implementation
 			// 結果が S_OK の場合,
 			// スワップチェーンの内容を画面に表示する.
 			m_main_d2d.Present();
-			// ポインターの位置をステータスバーに格納する.
-			status_bar_set_pos();
 		}
 		m_mutex_draw.unlock();
 	}
@@ -462,6 +465,7 @@ namespace winrt::GraphPaper::implementation
 			m_main_d2d.SetLogicalSize2(D2D1_SIZE_F{ w, h });
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	//------------------------------
@@ -505,11 +509,7 @@ namespace winrt::GraphPaper::implementation
 		cd_page_size_dialog().IsPrimaryButtonEnabled(true);
 		cd_page_size_dialog().IsSecondaryButtonEnabled(m_main_page.m_shape_list.size() > 0);
 		const auto d_result = co_await cd_page_size_dialog().ShowAsync();
-		if (d_result == ContentDialogResult::None) {
-			// 「キャンセル」が押された場合,
-			co_return;
-		}
-		else if (d_result == ContentDialogResult::Primary) {
+		if (d_result == ContentDialogResult::Primary) {
 			constexpr wchar_t INVALID_NUM[] = L"str_err_number";
 
 			// 本来, 無効な数値が入力されている場合, 「適用」ボタンは不可になっているので
@@ -588,6 +588,7 @@ namespace winrt::GraphPaper::implementation
 			page_draw();
 			status_bar_set_page();
 		}
+		status_bar_set_pos();
 	}
 
 	//------------------------------
@@ -664,13 +665,13 @@ namespace winrt::GraphPaper::implementation
 	// s	図形
 	void MainPage::page_bbox_update(const Shape* s) noexcept
 	{
-		s->get_bound(m_main_lt, m_main_rb, m_main_lt, m_main_rb);
+		s->get_bound(m_main_bbox_lt, m_main_bbox_rb, m_main_bbox_lt, m_main_bbox_rb);
 	}
 
 	// 表示の左上位置と右下位置を設定する.
 	void MainPage::page_bbox_update(void) noexcept
 	{
-		slist_bound_view(m_main_page.m_shape_list, m_main_page.m_page_size, m_main_lt, m_main_rb);
+		slist_bound_view(m_main_page.m_shape_list, m_main_page.m_page_size, m_main_bbox_lt, m_main_bbox_rb);
 	}
 
 	void MainPage::page_zoom_is_checked(float scale)
@@ -723,6 +724,7 @@ namespace winrt::GraphPaper::implementation
 			page_draw();
 			status_bar_set_zoom();
 		}
+		status_bar_set_pos();
 	}
 
 	// 表示を拡大または縮小する.
@@ -741,6 +743,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		page_panel_size();
 		page_draw();
+		status_bar_set_pos();
 		status_bar_set_zoom();
 	}
 
@@ -774,6 +777,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		page_setting_init();
 		page_draw();
+		status_bar_set_pos();
 	}
 
 	// 方眼メニューの「ページ設定を保存」が選択された

@@ -53,6 +53,7 @@ namespace winrt::GraphPaper::implementation
 		slist_clear(m_dialog_page.m_shape_list);
 		// バージョン情報のメッセージダイアログを表示する.
 		//message_show(ICON_INFO, L"str_appname", L"str_version");
+		status_bar_set_pos();
 	}
 
 	// その他メニューの「色の表記」のサブ項目が選択された.
@@ -71,9 +72,10 @@ namespace winrt::GraphPaper::implementation
 			m_color_code = COLOR_CODE::REAL;
 		}
 		else {
-			return;
+			winrt::hresult_not_implemented();
 		}
 		color_code_is_checked(m_color_code);
+		status_bar_set_pos();
 	}
 
 	// その他メニューの「色の表記」に印をつける.
@@ -88,33 +90,34 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「長さの単位」のサブ項目が選択された.
 	void MainPage::len_unit_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		LEN_UNIT l_unit;
+		const auto old_unit = m_len_unit;
+		LEN_UNIT new_val;
 		if (sender == rmfi_len_unit_grid()) {
-			l_unit = LEN_UNIT::GRID;
+			new_val = LEN_UNIT::GRID;
 		}
 		else if (sender == rmfi_len_unit_inch()) {
-			l_unit = LEN_UNIT::INCH;
+			new_val = LEN_UNIT::INCH;
 		}
 		else if (sender == rmfi_len_unit_milli()) {
-			l_unit = LEN_UNIT::MILLI;
+			new_val = LEN_UNIT::MILLI;
 		}
 		else if (sender == rmfi_len_unit_pixel()) {
-			l_unit = LEN_UNIT::PIXEL;
+			new_val = LEN_UNIT::PIXEL;
 		}
 		else if (sender == rmfi_len_unit_point()) {
-			l_unit = LEN_UNIT::POINT;
+			new_val = LEN_UNIT::POINT;
 		}
 		else {
+			winrt::hresult_not_implemented();
 			return;
 		}
-		if (m_len_unit == l_unit) {
-			return;
-		}
-		m_len_unit = l_unit;
+		m_len_unit = new_val;
 		status_bar_set_pos();
-		status_bar_set_grid();
-		status_bar_set_page();
-		status_bar_set_unit();
+		if (old_unit != new_val) {
+			status_bar_set_grid();
+			status_bar_set_page();
+			status_bar_set_unit();
+		}
 	}
 
 	// その他メニューの「長さの単位」に印をつける.

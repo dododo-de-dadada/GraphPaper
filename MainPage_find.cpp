@@ -485,6 +485,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形が持つ文字列を編集する.
 	// s	文字列図形
+	/*
 	IAsyncAction MainPage::edit_text_async(ShapeText* s)
 	{
 		static winrt::event_token primary_token;
@@ -492,23 +493,24 @@ namespace winrt::GraphPaper::implementation
 
 		tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
 		tx_edit_text().SelectAll();
-		ck_text_frame_fit_text().IsChecked(m_text_frame_fit_text);
+		ck_text_fit_frame_to_text().IsChecked(m_text_fit_frame_to_text);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit_text().Text().c_str());
 			ustack_push_set<UNDO_ID::TEXT_CONTENT>(s, text);
-			m_text_frame_fit_text = ck_text_frame_fit_text().IsChecked().GetBoolean();
-			if (m_text_frame_fit_text) {
+			m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
+			if (m_text_fit_frame_to_text) {
 				ustack_push_position(s, ANC_TYPE::ANC_SE);
-				s->frame_fit(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
+				s->fit_frame_to_text(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			}
 			ustack_push_null();
 			xcvd_is_enabled();
 			page_draw();
 		}
 	}
+	*/
 
 	// 編集メニューの「文字列の編集」が選択された.
-	void MainPage::edit_text_click(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::edit_text_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		ShapeText* s = static_cast<ShapeText*>(nullptr);
 		if (m_event_shape_prev != nullptr && typeid(*m_event_shape_prev) == typeid(ShapeText)) {
@@ -532,7 +534,27 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (s != nullptr) {
-			edit_text_async(s);
+			static winrt::event_token primary_token;
+			static winrt::event_token closed_token;
+
+			tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
+			tx_edit_text().SelectAll();
+			ck_text_fit_frame_to_text().IsChecked(m_text_fit_frame_to_text);
+			if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
+				auto text = wchar_cpy(tx_edit_text().Text().c_str());
+				ustack_push_set<UNDO_ID::TEXT_CONTENT>(s, text);
+				m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
+				if (m_text_fit_frame_to_text) {
+					ustack_push_position(s, ANC_TYPE::ANC_SE);
+					s->fit_frame_to_text(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
+				}
+				ustack_push_null();
+				xcvd_is_enabled();
+				page_draw();
+			}
+		}
+		else {
+			status_bar_set_pos();
 		}
 
 	}
@@ -643,6 +665,7 @@ namespace winrt::GraphPaper::implementation
 		ustack_push_null();
 		ustack_is_enable();
 		page_draw();
+		status_bar_set_pos();
 	}
 
 	// 文字列検索パネルの「置換して次に」ボタンが押された.
@@ -697,6 +720,7 @@ namespace winrt::GraphPaper::implementation
 			// 検索できない, かつ置換もされてない場合,
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
 		}
+		status_bar_set_pos();
 	}
 
 	// 編集メニューの「文字列の検索/置換」が選択された.
@@ -718,6 +742,7 @@ namespace winrt::GraphPaper::implementation
 			ck_find_text_wrap().IsChecked(m_find_text_wrap);
 			sp_find_text_panel().Visibility(Visibility::Visible);
 		}
+		status_bar_set_pos();
 	}
 
 	// 文字列検索パネルの「閉じる」ボタンが押された.
@@ -725,6 +750,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		find_text_preserve();
 		sp_find_text_panel().Visibility(Visibility::Collapsed);
+		status_bar_set_pos();
 	}
 
 	// 文字列検索パネルの「次を検索」ボタンが押された.
@@ -747,6 +773,7 @@ namespace winrt::GraphPaper::implementation
 			// 「文字列は見つかりません」メッセージダイアログを表示する.
 			message_show(ICON_INFO, NOT_FOUND, tx_find_text_what().Text());
 		}
+		status_bar_set_pos();
 	}
 
 	// 文字列検索パネルの値を保存する.
@@ -779,7 +806,7 @@ namespace winrt::GraphPaper::implementation
 	//	dt_write(m_find_text, dt_writer);
 	//	dt_write(m_find_repl, dt_writer);
 	//	uint16_t bit = 0;
-	//	if (m_text_frame_fit_text) {
+	//	if (m_text_fit_frame_to_text) {
 	//		bit |= 1;
 	//	}
 	//	if (m_find_text_case) {

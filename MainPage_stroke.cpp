@@ -46,8 +46,6 @@ namespace winrt::GraphPaper::implementation
 		const float val2 = s_color.b * COLOR_MAX;
 		const float val3 = s_color.a * COLOR_MAX;
 
-		//FindName(L"cd_setting_dialog");
-
 		dialog_slider_0().Maximum(255.0);
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
@@ -187,7 +185,10 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::stroke_width_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		float s_width;
-		if (sender == rmfi_stroke_width_1px()) {
+		if (sender == rmfi_stroke_width_0px()) {
+			s_width = 0.0f;
+		}
+		else if (sender == rmfi_stroke_width_1px()) {
 			s_width = 1.0f;
 		}
 		else if (sender == rmfi_stroke_width_2px()) {
@@ -200,7 +201,7 @@ namespace winrt::GraphPaper::implementation
 			s_width = 4.0f;
 		}
 		else {
-			return;
+			winrt::hresult_not_implemented();
 		}
 		stroke_width_is_checked(s_width);
 		if (ustack_push_set<UNDO_ID::STROKE_WIDTH>(s_width)) {
@@ -208,10 +209,12 @@ namespace winrt::GraphPaper::implementation
 			xcvd_is_enabled();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	void MainPage::stroke_width_is_checked(const float s_width) noexcept
 	{
+		rmfi_stroke_width_0px().IsChecked(s_width == 0.0f);
 		rmfi_stroke_width_1px().IsChecked(s_width == 1.0f);
 		rmfi_stroke_width_2px().IsChecked(s_width == 2.0f);
 		rmfi_stroke_width_3px().IsChecked(s_width == 3.0f);
@@ -225,8 +228,6 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 		using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 		using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-
-		//FindName(L"cd_setting_dialog");
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;

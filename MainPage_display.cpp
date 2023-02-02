@@ -38,6 +38,7 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.unlock();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 表示デバイスの DPI が変わった
@@ -63,6 +64,7 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.unlock();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 表示デバイスの向きが変わった
@@ -88,6 +90,7 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_draw.unlock();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 }

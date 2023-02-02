@@ -45,6 +45,7 @@ namespace winrt::GraphPaper::implementation
 		if (summary_is_visible()) {
 			summary_append(g);
 		}
+		status_bar_set_pos();
 	}
 
 	// 編集メニューの「グループの解除」が選択された.
@@ -90,6 +91,7 @@ namespace winrt::GraphPaper::implementation
 		ustack_push_null();
 		xcvd_is_enabled();
 		page_draw();
+		status_bar_set_pos();
 	}
 
 }

@@ -454,6 +454,7 @@ namespace winrt::GraphPaper::implementation
 			xcvd_is_enabled();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 書体メニューの「標準」が選択された.
@@ -464,6 +465,7 @@ namespace winrt::GraphPaper::implementation
 			xcvd_is_enabled();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 書体メニューの「斜体」が選択された.
@@ -474,6 +476,7 @@ namespace winrt::GraphPaper::implementation
 			xcvd_is_enabled();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 書体メニューの「太さ」が選択された.
@@ -525,7 +528,6 @@ namespace winrt::GraphPaper::implementation
 		lv_dialog_list().SelectionChanged(changed_token);
 		lv_dialog_list().Visibility(Visibility::Collapsed);
 		lv_dialog_list().Items().Clear();
-		page_draw();
+		status_bar_set_pos();
 	}
-
 }

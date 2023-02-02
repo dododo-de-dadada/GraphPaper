@@ -234,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 		std::mutex m_mutex_event;	// イベント処理させないための排他制御
 
 		// 文字列の編集, 検索と置換
-		bool m_text_frame_fit_text = false;	// 枠を文字列に合わせる
+		bool m_text_fit_frame_to_text = false;	// 枠を文字列に合わせる
 		wchar_t* m_find_text = nullptr;	// 検索の検索文字列
 		wchar_t* m_find_repl = nullptr;	// 検索の置換文字列
 		bool m_find_text_case = false;	// 英文字の区別するか
@@ -267,8 +267,8 @@ namespace winrt::GraphPaper::implementation
 		// メインページ
 		ShapePage m_main_page;	// ページ
 		D2D_UI m_main_d2d;	// 描画環境
-		D2D1_POINT_2F m_main_lt{ 0.0F, 0.0F };	// ページの左上位置 (値がマイナスのときは, 図形がページの外側にある)
-		D2D1_POINT_2F m_main_rb{ 0.0F, 0.0F };	// ページの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// 境界ボックスの左上位置 (値がマイナスのときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// 境界ボックスの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
 
 		// 設定ダイアログのページ
 		ShapePage m_dialog_page;	// ページ
@@ -430,9 +430,9 @@ namespace winrt::GraphPaper::implementation
 		// ポインターのボタンが上げられた.
 		void event_released(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターの形状を設定する.
-		void event_set_curs_style(void);
+		void event_set_cursor(void);
 		// ポインターの現在位置に, イベント引数の値を格納する.
-		void event_set_pos_cur(PointerRoutedEventArgs const& args);
+		void event_set_position(PointerRoutedEventArgs const& args);
 		// コンテキストメニューを表示する.
 		void event_show_popup(void);
 		// ポインターのホイールボタンが操作された.
@@ -496,9 +496,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 図形が持つ文字列を編集する.
-		IAsyncAction edit_text_async(ShapeText* s);
+		//IAsyncAction edit_text_async(ShapeText* s);
 		// 編集メニューの「文字列の編集」が選択された.
-		void edit_text_click(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction edit_text_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の検索/置換」が選択された.
 		void find_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「閉じる」ボタンが押された.
@@ -912,7 +912,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「段落のそろえ」に印をつける.
 		void text_par_align_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val);
 		// 書体メニューの「枠を文字列に合わせる」が選択された.
-		void text_frame_fit_text_click(IInspectable const&, RoutedEventArgs const&);
+		void text_fit_frame_to_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行間...」が選択された.
 		IAsyncAction text_line_sp_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「余白...」が選択された.

@@ -28,7 +28,7 @@ namespace winrt::GraphPaper::implementation
 			new_val = CAP_TRIANGLE;
 		}
 		else {
-			return;
+			winrt::hresult_not_implemented();
 		}
 		cap_style_is_checked(new_val);
 		if (ustack_push_set<UNDO_ID::STROKE_CAP>(new_val)) {
@@ -36,6 +36,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_is_enable();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 線枠メニューの「端の形式」に印をつける.
@@ -188,6 +189,7 @@ namespace winrt::GraphPaper::implementation
 			new_val = D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND;
 		}
 		else {
+			winrt::hresult_not_implemented();
 			return;
 		}
 		join_style_is_checked(new_val);
@@ -196,6 +198,7 @@ namespace winrt::GraphPaper::implementation
 			ustack_is_enable();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 線枠メニューの「結合」に印をつける.

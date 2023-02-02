@@ -191,7 +191,7 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="edit_text_click" Text="Edit Text" >
+				<MenuFlyoutItem x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="edit_text_click_async" Text="Edit Text" >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_ibeam}"/>
 					</MenuFlyoutItem.Icon>
@@ -207,7 +207,7 @@
 			</muxc:MenuBarItem>
 			<!-- 作図メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_tool_drawing" AccessKey="D" Title="Drawing">
-				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_selecting" x:Uid="rmfi_tool_selecting" Click="drawing_tool_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Selecting Tool">
+				<muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_selection" x:Uid="rmfi_tool_selection" Click="drawing_tool_click" GroupName="gn_tool_type" IsChecked="True" KeyboardAcceleratorTextOverride="Esc" Text="Selection Tool">
 					<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="Escape" />
 					</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
@@ -325,7 +325,8 @@
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_stroke_width}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</MenuFlyoutSubItem.Icon>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_width_1px" x:Uid="rmfi_stroke_width_1px" Click="stroke_width_click" IsChecked="true" Text="1 px" >
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_width_0px" x:Uid="rmfi_stroke_width_0px" Click="stroke_width_click" IsChecked="true" Text="0 px" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_width_1px" x:Uid="rmfi_stroke_width_1px" Click="stroke_width_click" IsChecked="true" Text="1 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_stroke_width_1px}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -421,7 +422,7 @@
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
 				<MenuFlyoutItem x:Uid="mfi_text_padding" Click="text_padding_click_async" Text="Margin..." />
-				<MenuFlyoutItem x:Name="mfi_text_frame_fit_text" x:Uid="mfi_text_frame_fit_text" Click="text_frame_fit_text_click" Text="Fit Frame Size to Text" >
+				<MenuFlyoutItem x:Name="mfi_text_fit_frame_to_text" x:Uid="mfi_text_fit_frame_to_text" Click="text_fit_frame_to_text_click" Text="Fit Frame Size to Text" >
 					<MenuFlyoutItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_fit_page}"/>
 					</MenuFlyoutItem.Icon>
@@ -566,7 +567,6 @@
 				<TextBox x:Name="tx_find_replace_with" x:Uid="tx_find_replace_with" Header="Replace width" Margin="0,4" Width="128" />
 				<CheckBox x:Name="ck_find_text_case" x:Uid="ck_find_text_case" Content="Match case." Margin="0,4" />
 				<CheckBox x:Name="ck_find_text_wrap" x:Uid="ck_find_text_wrap" Content="Wrap around." Margin="0,4" />
-				<!--<CheckBox x:Name="ck_find_text_escs" x:Uid="ck_find_text_escs" Content="Use escape sequences." Margin="0,4" />-->
 				<Button x:Name="btn_find_text_next" x:Uid="btn_find_text_next" Click="find_text_next_click" Content="Find Next" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
 				<Button x:Name="btn_find_replace" x:Uid="btn_find_replace" Click="find_replace_click" Content="Replace" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
 				<Button x:Name="btn_find_replace_all" x:Uid="btn_find_replace_all" Click="find_replace_all_click" Content="Replace All" HorizontalAlignment="Stretch" Margin="0,4" VerticalAlignment="Bottom" />
@@ -608,7 +608,6 @@
 			</ListView>
 		</Grid>
 
-		<!--</Grid>-->
         <!-- 表示パネル -->
 		<RelativePanel Grid.Row="1" Grid.Column="0" >
 			<SwapChainPanel
@@ -661,12 +660,13 @@
 			</StackPanel.ContextFlyout>
 			<StackPanel x:Name="sp_status_bar_draw" Margin="0,0,12,0" Orientation="Horizontal">
 				<TextBlock  Margin="0,0,0,0" Text="draw:"/>
-				<PathIcon   x:Name="pi_draw" Data="M0,0" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16">
+				<PathIcon x:Name="pi_tool_icon" Data="M0,0" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16">
 					<PathIcon.RenderTransform>
 						<ScaleTransform CenterX="8" CenterY="8" ScaleX="0.875" ScaleY="0.875" />
 					</PathIcon.RenderTransform>
 				</PathIcon>
-			</StackPanel>
+                <Rectangle x:Name="r_eyedropper" Width="16" Height="16" Stroke="Black" Fill="Black" Visibility="Collapsed" />
+            </StackPanel>
 			<StackPanel x:Name="sp_status_bar_unit" Margin="0,0,12,0" Orientation="Horizontal">
 				<TextBlock x:Uid="tk_status_bar_unit" Text="unit:"/>
 				<TextBlock x:Name="tk_status_bar_unit" Text="0"/>
@@ -697,7 +697,7 @@
 		<ContentDialog x:Name="cd_edit_text_dialog" x:Uid="cd_edit_text_dialog" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
 			<StackPanel>
 				<TextBox x:Name="tx_edit_text" AcceptsReturn="True" Height="128" HorizontalAlignment="Stretch" PlaceholderText="Text" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-				<CheckBox x:Name="ck_text_frame_fit_text" x:Uid="ck_text_frame_fit_text" Content="Fit Frame Size to Text" Margin="4,4" />
+				<CheckBox x:Name="ck_text_fit_frame_to_text" x:Uid="ck_text_fit_frame_to_text" Content="Fit Frame Size to Text" Margin="4,4" />
 			</StackPanel>
 		</ContentDialog>
 		<!-- 貼り付け確認ダイアログ -->

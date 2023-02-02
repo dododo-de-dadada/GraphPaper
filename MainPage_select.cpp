@@ -22,7 +22,7 @@ namespace winrt::GraphPaper::implementation
 			page_draw();
 		}
 		else {
-			drawing_tool_click(rmfi_tool_selecting(), nullptr);
+			drawing_tool_click(rmfi_tool_selection(), nullptr);
 		}
 	}
 
@@ -72,13 +72,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		xcvd_is_enabled();
 		page_draw();
+		status_bar_set_pos();
 	}
 
-	// 範囲に含まれる図形を選択し, 含まれない図形の選択を解除する.
+	// 範囲選択
 	bool MainPage::select_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb)
 	{
 		bool done = false;
-		//uint32_t i = 0u;
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted()) {
 				continue;

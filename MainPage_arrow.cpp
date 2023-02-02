@@ -153,7 +153,8 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().ValueChanged(slider_0_token);
 		dialog_slider_1().ValueChanged(slider_1_token);
 		dialog_slider_2().ValueChanged(slider_2_token);
-		page_draw();
+		//page_draw();
+		status_bar_set_pos();
 	}
 
 	//------------------------------
@@ -180,6 +181,7 @@ namespace winrt::GraphPaper::implementation
 			xcvd_is_enabled();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	//------------------------------

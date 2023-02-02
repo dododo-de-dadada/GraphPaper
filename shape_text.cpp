@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 	// g_len	•ûŠá‚Ì‘å‚«‚³ (1 ˆÈã‚È‚ç‚Î•ûŠá‚Ì‘å‚«‚³‚É‡‚í‚¹‚é)
 	// –ß‚è’l	‘å‚«‚³‚ª’²®‚³‚ê‚½‚È‚ç‚Î^.
 	//------------------------------
-	bool ShapeText::frame_fit(const float g_len) noexcept
+	bool ShapeText::fit_frame_to_text(const float g_len) noexcept
 	{
 		// •¶š—ñ‚Ì‘å‚«‚³‚ğŒvZ‚µ, ˜g‚ÉŠi”[‚·‚é.
 		D2D1_POINT_2F t_box{ 0.0f, 0.0f };	// ˜g

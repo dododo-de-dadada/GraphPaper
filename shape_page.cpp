@@ -17,72 +17,9 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_SIZE_F sh_size
 	);
 
-	// 指定した色と不透明度から反対色を得る.
-	// src	指定した色
-	// opa	指定した不透明度
-	// dst	反対色
-	/*
-	static void get_opposite_color(const D2D1_COLOR_F& src, const double opa, D2D1_COLOR_F& dst) noexcept
-	{
-		dst.r = 1.0f - src.r;
-		dst.g = 1.0f - src.g;
-		dst.b = 1.0f - src.b;
-		dst.a = opa;
-		const D3DCOLORVALUE cmp{
-			dst.r * opa + src.r * (1.0 - opa),
-			dst.g * opa + src.g * (1.0 - opa),
-			dst.b * opa + src.b * (1.0 - opa),
-			1.0f
-		};
-		const auto gray_src = src.r * 0.3f + src.g * 0.59f + src.b * 0.11f;
-		const auto gray_dst = cmp.r * 0.3f + cmp.g * 0.59f + cmp.b * 0.11f;
-		if (abs(gray_src - gray_dst) < 0.5f) {
-			dst.r = dst.g = dst.b = gray_src < 0.5f ? 1.0 : 0.0f;
-			dst.a = opa;
-		}
-		return;
-
-		dst.r = (src.r <= 0.5f ? 1.0f : 0.0f);
-		dst.g = (src.g <= 0.5f ? 1.0f : 0.0f);
-		dst.b = (src.b <= 0.5f ? 1.0f : 0.0f);
-		dst.a = static_cast<FLOAT>(opa);
-		return;
-
-		const auto R = src.r;
-		const auto G = src.g;
-		const auto B = src.b;
-		const auto X = max(R, max(G, B)) + min(R, min(G, B));
-		const auto Y = 0.29900 * R + 0.58700 * G + 0.11400 * B;
-		const auto Cb = -0.168736 * R - 0.331264 * G + 0.5 * B;
-		const auto Cr = 0.5 * R - 0.418688 * G - 0.081312 * B;
-		//const auto _Y = 1.0 - Y;
-		const auto _Cb = Cr;
-		const auto _Cr = Cb;
-		//const auto _R = _Y + 1.402 * _Cr;
-		//const auto _G = _Y - 0.344136 * _Cb - 0.714136 * _Cr;
-		//const auto _B = _Y + 1.772 * _Cb;
-
-		const auto _R = (X - R);
-		const auto _G = (X - G);
-		const auto _B = (X - B);
-		const auto _Y = 0.29900 * _R + 0.58700 * _G + 0.11400 * _B;
-		if (abs(_Y - Y) > 0.2) {
-			dst.r = _R;
-			dst.g = _G;
-			dst.b = _B;
-		}
-		else {
-			dst.r = Y < 0.5 ? 1.0 : 0.0;
-			dst.g = Y < 0.5 ? 1.0 : 0.0;
-			dst.b = Y < 0.5 ? 1.0 : 0.0;
-		}
-		dst.a = opa;
-		return;
-
-	}
-	*/
-
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
+	// target	レンダーターゲット
+	// brush	色ブラシ
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	void ShapePage::draw_auxiliary_bezi(
@@ -116,6 +53,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// だ円の補助線を表示する.
+	// target	レンダーターゲット
+	// brush	色ブラシ
 	// p_pos	ポインターが押された位置
 	// c_pos	ポインターの現在位置
 	void ShapePage::draw_auxiliary_elli(

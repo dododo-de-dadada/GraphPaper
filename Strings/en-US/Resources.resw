@@ -165,7 +165,7 @@
     <value>Page Size</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_text_frame_fit_text.Content" xml:space="preserve">
+  <data name="ck_text_fit_frame_to_text.Content" xml:space="preserve">
     <value>Text Frame Fit Text</value>
     <comment>CheckBox</comment>
   </data>
@@ -685,8 +685,8 @@
     <value>Eyedropper</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-	<data name="rmfi_tool_selecting.Text" xml:space="preserve">
-    <value>Selecting</value>
+	<data name="rmfi_tool_selection.Text" xml:space="preserve">
+    <value>Selection Tool</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_drawing_text.Text" xml:space="preserve">
@@ -1010,7 +1010,7 @@
     <value>Order</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfi_text_frame_fit_text.Text" xml:space="preserve">
+  <data name="mfi_text_fit_frame_to_text.Text" xml:space="preserve">
     <value>Fit Frame Size to Text</value>
     <comment>MenuFlyoutItem</comment>
   </data>

@@ -1516,7 +1516,7 @@ namespace winrt::GraphPaper::implementation
 		// •¶š—ñƒŒƒCƒAƒEƒg‚ğì¬‚·‚é.
 		void create_text_layout(void);
 		// ˜g‚ğ•¶š—ñ‚É‡‚í‚¹‚é.
-		bool frame_fit(const float g_len) noexcept;
+		bool fit_frame_to_text(const float g_len) noexcept;
 		// }Œ`‚ğ•\¦‚·‚é.
 		void draw(void) final override;
 		// ‘‘Ì‚ÌF‚ğ“¾‚é.
@@ -1816,19 +1816,24 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	‚¾‰~‚Ì’†S
 	// rad_x	‚¾‰~‚ÌŒa
 	// rad_y	‚¾‰~‚ÌŒa
-	// rot	‚¾‰~‚ÌŒX‚«
+	// rot	‚¾‰~‚ÌŒX‚« (ƒ‰ƒWƒAƒ“)
 	// –ß‚è’l	ŠÜ‚Şê‡ true
 	inline bool pt_in_ellipse(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y, const double rot) noexcept
 	{
+		// ‚¾‰~‚Ì’†S‚ğŒ´“_‚Æ‚·‚éÀ•W‚É•½sˆÚ“®.
 		const double dx = static_cast<double>(t_pos.x) - static_cast<double>(c_pos.x);
 		const double dy = static_cast<double>(t_pos.y) - static_cast<double>(c_pos.y);
-		const double c = cos(-rot);
-		const double s = sin(-rot);
+		// ‚¾‰~‚ÌŒX‚«‚É‡‚í‚¹‚Ä‰ñ“].
+		const double c = cos(rot);
+		const double s = sin(rot);
 		const double tx = c * dx + s * dy;
-		const double ty = s * dx + c * dy;
-		const double xx = rad_x * rad_x;
-		const double yy = rad_y * rad_y;
-		return tx * tx * yy + ty * ty * xx <= xx * yy;
+		const double ty = -s * dx + c * dy;
+
+		const double aa = rad_x * rad_x;
+		const double bb = rad_y * rad_y;
+		const double nnnn = bb * tx * tx + aa * ty * ty;
+		const double aabb = aa * bb;
+		return tx * tx / aa + ty * ty / bb <= 1.0;
 	}
 
 	// ‘½ŠpŒ`‚ªˆÊ’u‚ğŠÜ‚Ş‚©”»’è‚·‚é.

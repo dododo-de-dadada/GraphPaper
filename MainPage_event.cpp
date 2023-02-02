@@ -321,8 +321,8 @@ namespace winrt::GraphPaper::implementation
 			Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 		}
 		else {
-			event_set_pos_cur(args);
-			event_set_curs_style();
+			event_set_position(args);
+			event_set_cursor();
 			status_bar_set_pos();
 		}
 	}
@@ -395,6 +395,7 @@ namespace winrt::GraphPaper::implementation
 			summary_append(s);
 			summary_select(s);
 		}
+		status_bar_set_pos();
 	}
 
 	//------------------------------
@@ -402,9 +403,9 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	IAsyncAction MainPage::event_finish_creating_text_async(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec)
 	{
-		const auto fit_text = m_text_frame_fit_text;
+		const auto fit_text = m_text_fit_frame_to_text;
 		tx_edit_text().Text(L"");
-		ck_text_frame_fit_text().IsChecked(fit_text);
+		ck_text_fit_frame_to_text().IsChecked(fit_text);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit_text().Text().c_str());
 			auto s = new ShapeText(b_pos, b_vec, text, &m_main_page);
@@ -412,9 +413,9 @@ namespace winrt::GraphPaper::implementation
 			debug_leak_cnt++;
 #endif
 			if (fit_text) {
-				s->frame_fit(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
+				s->fit_frame_to_text(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
 			}
-			m_text_frame_fit_text = ck_text_frame_fit_text().IsChecked().GetBoolean();
+			m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
 			event_slist_reduce(m_main_page.m_shape_list, m_ustack_undo, m_ustack_redo);
 			ustack_push_append(s);
 			ustack_push_select(s);
@@ -434,6 +435,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_shape_pressed = nullptr;
 		m_event_anc_pressed = ANC_TYPE::ANC_PAGE;
 		page_draw();
+		status_bar_set_pos();
 	}
 
 	//------------------------------
@@ -593,16 +595,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		m_mutex_event.unlock();
 
-		event_set_pos_cur(args);
+		event_set_position(args);
 		status_bar_set_pos();
-
-		if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
-			page_draw();
-		}
 
 		// ポインターの押された状態が, 初期状態か判定する.
 		if (m_event_state == EVENT_STATE::BEGIN) {
-			event_set_curs_style();
+			event_set_cursor();
 		}
 		// 状態が. クリックした状態か判定する.
 		else if (m_event_state == EVENT_STATE::CLICK) {
@@ -613,7 +611,7 @@ namespace winrt::GraphPaper::implementation
 			if (pt_abs2(vec) > m_event_click_dist) {
 				// 初期状態に戻る.
 				m_event_state = EVENT_STATE::BEGIN;
-				event_set_curs_style();
+				event_set_cursor();
 			}
 		}
 		// 状態が, 範囲を選択している状態か判定する.
@@ -791,7 +789,7 @@ namespace winrt::GraphPaper::implementation
 		swap_chain_panel.CapturePointer(args.Pointer());
 		const uint64_t t_stamp = args.GetCurrentPoint(swap_chain_panel).Timestamp();
 		const PointerPointProperties& p_prop = args.GetCurrentPoint(swap_chain_panel).Properties();
-		event_set_pos_cur(args);
+		event_set_position(args);
 
 		// ポインターのデバイスタイプを判定する.
 		switch (args.GetCurrentPoint(swap_chain_panel).PointerDevice().PointerDeviceType()) {
@@ -864,11 +862,11 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_released(IInspectable const& sender, PointerRoutedEventArgs const& args)
 	{
-#if defined(_DEBUG)
+//#if defined(_DEBUG)
 		if (sender != scp_page_panel()) {
 			return;
 		}
-#endif
+//#endif
 		// ピッカーが返値を戻すまで, イベント処理をさせないための排他.
 		if (!m_mutex_event.try_lock()) {
 			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
@@ -880,7 +878,7 @@ namespace winrt::GraphPaper::implementation
 
 		// ポインターの追跡を停止する.
 		panel.ReleasePointerCaptures();
-		event_set_pos_cur(args);
+		event_set_position(args);
 		// 状態が, 左ボタンが押された状態か判定する.
 		if (m_event_state == EVENT_STATE::PRESS_LBTN) {
 			// ボタンが離れた時刻と押された時刻の差が, クリックの判定時間以下か判定する.
@@ -911,7 +909,7 @@ namespace winrt::GraphPaper::implementation
 				else {
 					// クリックした状態に遷移する.
 					m_event_state = EVENT_STATE::CLICK;
-					event_set_curs_style();
+					event_set_cursor();
 					return;
 				}
 			}
@@ -922,8 +920,13 @@ namespace winrt::GraphPaper::implementation
 			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
 			// 差分がクリックの判定時間以下, かつ押された図形が文字列図形か判定する.
 			if (t_stamp - m_event_time_pressed <= m_event_click_time &&
-				m_event_shape_pressed != nullptr && typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
-				edit_text_async(static_cast<ShapeText*>(m_event_shape_pressed));
+				m_event_shape_pressed != nullptr) {
+				if (typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
+					edit_text_click_async(nullptr, nullptr);
+				}
+				//if (typeid(*m_event_shape_pressed) == typeid(ShapeQCircle)) {
+				//	edit_text_async(static_cast<ShapeQCircle*>(m_event_shape_pressed));
+				//}
 			}
 		}
 		// 状態が, 図形を移動している状態か判定する.
@@ -1008,6 +1011,7 @@ namespace winrt::GraphPaper::implementation
 						Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER2);
 					}
 				}
+				status_bar_set_draw();
 			}
 			else {
 				event_show_popup();
@@ -1027,14 +1031,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// ポインターの形状を設定する.
+	// カーソルを設定する.
 	//------------------------------
-	void MainPage::event_set_curs_style(void)
+	void MainPage::event_set_cursor(void)
 	{
+		// 作図ツールが色抽出.
 		if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
-			Window::Current().CoreWindow().PointerCursor(m_eyedropper_filled ? CURS_EYEDROPPER2 : CURS_EYEDROPPER1);
+			const CoreCursor& cur = m_eyedropper_filled ? CURS_EYEDROPPER2 : CURS_EYEDROPPER1;
+			Window::Current().CoreWindow().PointerCursor(cur);
 		}
-		// 作図ツールが選択ツール以外か判定する.
+		// 作図ツールが選択ツール以外かつ状態が右ボタン押下でない.
 		else if (m_drawing_tool != DRAWING_TOOL::SELECT &&
 			m_event_state != EVENT_STATE::PRESS_RBTN) {
 			Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
@@ -1109,12 +1115,16 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// ポインターの現在位置に格納する.
 	//------------------------------
-	void MainPage::event_set_pos_cur(PointerRoutedEventArgs const& args)
+	void MainPage::event_set_position(PointerRoutedEventArgs const& args)
 	{
-		// スワップチェーンパネル上でのポインターの位置を表示座標系に変換する.
-		D2D1_POINT_2F page_pos;
-		pt_add(m_main_lt, sb_horz().Value(), sb_vert().Value(), page_pos);
-		pt_mul_add(args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / m_main_page.m_page_scale, page_pos, m_event_pos_curr);
+		const auto p_scale = m_main_page.m_page_scale;
+		// 境界ボックスの左上位置にスクロールの値を加え, 境界ボックスの表示されている左上位置を得る
+		D2D1_POINT_2F bbox_lt;
+		pt_add(m_main_bbox_lt, sb_horz().Value(), sb_vert().Value(), bbox_lt);
+		// 引数として渡された位置をスワップチェーンパネル上の位置として得る.
+		// 得られた位置に拡大率の逆数を乗じて, 境界ボックスの表示されている左上位置を加えた値を,
+		// ポインターの現在位置に格納する.
+		pt_mul_add(args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / p_scale, bbox_lt, m_event_pos_curr);
 	}
 
 	//------------------------------

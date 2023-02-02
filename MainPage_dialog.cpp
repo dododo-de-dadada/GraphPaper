@@ -43,11 +43,9 @@ namespace winrt::GraphPaper::implementation
 	// 設定ダイアログのスワップチェーンパネルを表示する
 	void MainPage::dialog_draw(void)
 	{
-#if defined(_DEBUG)
 		if (!scp_dialog_panel().IsLoaded()) {
 			return;
 		}
-#endif
 		if (!m_mutex_draw.try_lock()) {
 			// ロックできない場合
 			return;
@@ -172,7 +170,9 @@ namespace winrt::GraphPaper::implementation
 	// 属性のスワップチェーンパネルの倍率が変わった.
 	void MainPage::dialog_panel_scale_changed(IInspectable const&, IInspectable const&)
 	{
-		m_dialog_d2d.SetCompositionScale(scp_dialog_panel().CompositionScaleX(), scp_dialog_panel().CompositionScaleY());
+		const float comp_x = scp_dialog_panel().CompositionScaleX();
+		const float comp_y = scp_dialog_panel().CompositionScaleY();
+		m_dialog_d2d.SetCompositionScale(comp_x, comp_y);
 	}
 
 }

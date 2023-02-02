@@ -616,7 +616,7 @@ namespace winrt::GraphPaper::implementation
 			m_find_repl[find_repl_len] = L'\0';
 
 			const uint16_t f_bit = dt_reader.ReadUInt16();
-			m_text_frame_fit_text = ((f_bit & 1) != 0);
+			m_text_fit_frame_to_text = ((f_bit & 1) != 0);
 			m_find_text_case = ((f_bit & 2) != 0);
 			m_find_text_wrap = ((f_bit & 4) != 0);
 
@@ -1020,7 +1020,7 @@ namespace winrt::GraphPaper::implementation
 			const auto find_repl_data = reinterpret_cast<const uint8_t*>(m_find_repl);
 			dt_writer.WriteBytes(array_view(find_repl_data, find_repl_data + 2 * find_repl_len));
 			uint16_t f_bit = 0;
-			if (m_text_frame_fit_text) {
+			if (m_text_fit_frame_to_text) {
 				f_bit |= 1;
 			}
 			if (m_find_text_case) {
@@ -1195,8 +1195,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 表示の左上位置と右下位置を初期化する.
 		{
-			m_main_lt = D2D1_POINT_2F{ 0.0F, 0.0F };
-			m_main_rb = D2D1_POINT_2F{ m_main_page.m_page_size.width, m_main_page.m_page_size.height };
+			m_main_bbox_lt = D2D1_POINT_2F{ 0.0F, 0.0F };
+			m_main_bbox_rb = D2D1_POINT_2F{ m_main_page.m_page_size.width, m_main_page.m_page_size.height };
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();

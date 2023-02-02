@@ -17,6 +17,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		m_image_keep_aspect = !m_image_keep_aspect;
+		status_bar_set_pos();
 	}
 
 	// 画像メニューの「縦横比を変えない」に印をつける.
@@ -39,6 +40,7 @@ namespace winrt::GraphPaper::implementation
 		ustack_push_null();
 		page_panel_size();
 		page_draw();
+		status_bar_set_pos();
 	}
 
 	// 画像メニューの「不透明度...」が選択された.

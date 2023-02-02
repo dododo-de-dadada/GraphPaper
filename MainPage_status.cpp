@@ -54,13 +54,11 @@ namespace winrt::GraphPaper::implementation
 			const bool is_checked = tmfi_status_bar_pos().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::POS) : status_and(m_status_bar, status_not(STATUS_BAR::POS));
 			tmfi_status_bar_pos_2().IsChecked(is_checked);
-			status_bar_set_pos();
 		}
 		else if (sender == tmfi_status_bar_pos_2()) {
 			const bool is_checked = tmfi_status_bar_pos_2().IsChecked();
 			m_status_bar = is_checked ? status_or(m_status_bar, STATUS_BAR::POS) : status_and(m_status_bar, status_not(STATUS_BAR::POS));
 			tmfi_status_bar_pos().IsChecked(is_checked);
-			status_bar_set_pos();
 		}
 		else if (sender == tmfi_status_bar_grid()) {
 			const bool is_checked = tmfi_status_bar_grid().IsChecked();
@@ -123,12 +121,19 @@ namespace winrt::GraphPaper::implementation
 			status_bar_set_unit();
 		}
 		else {
-			return;
+			winrt::hresult_not_implemented();
 		}
-		const bool is_not_checked = (m_status_bar != static_cast<STATUS_BAR>(0));
-		if (sp_status_bar_panel().Visibility() == (is_not_checked ? Visibility::Collapsed : Visibility::Visible)) {
-			sp_status_bar_panel().Visibility(is_not_checked ? Visibility::Visible : Visibility::Collapsed);
+		if (m_status_bar == static_cast<STATUS_BAR>(0)) {
+			if (sp_status_bar_panel().Visibility() == Visibility::Visible) {
+				sp_status_bar_panel().Visibility(Visibility::Collapsed);
+			}
 		}
+		else {
+			if (sp_status_bar_panel().Visibility() == Visibility::Collapsed) {
+				sp_status_bar_panel().Visibility(Visibility::Visible);
+			}
+		}
+		status_bar_set_pos();
 	}
 
 	// ステータスバーのメニュー項目に印をつける.
@@ -165,8 +170,8 @@ namespace winrt::GraphPaper::implementation
 			const double wy = wp.Y;
 			const double ty = tp.Y;
 			const double by = wb.Y;
-			const double px = m_main_lt.x;
-			const double py = m_main_lt.y;
+			const double px = m_main_bbox_lt.x;
+			const double py = m_main_bbox_lt.y;
 			const double ps = m_main_page.m_page_scale;
 			const float fx = static_cast<FLOAT>((wx - bx - tx) / ps + sx + px);
 			const float fy = static_cast<FLOAT>((wy - by - ty) / ps + sy + py);
@@ -195,36 +200,54 @@ namespace winrt::GraphPaper::implementation
 			winrt::hstring data;
 			if (m_drawing_tool == DRAWING_TOOL::BEZI) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezier")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ELLI) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_elli")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::LINE) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_line")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_polygon")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RECT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rect")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_rrect")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RULER) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_ruler")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::SELECT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_select")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::TEXT) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::QCIRCLE) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_qcircle")));
+				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_eyedropper")));
+				winrt::Windows::UI::Color c{
+					min(static_cast<uint8_t>(round(m_eyedropper_color.a * 255.0f)), static_cast<uint8_t>(255)),
+					min(static_cast<uint8_t>(round(m_eyedropper_color.r * 255.0f)), static_cast<uint8_t>(255)),
+					min(static_cast<uint8_t>(round(m_eyedropper_color.g * 255.0f)), static_cast<uint8_t>(255)),
+					min(static_cast<uint8_t>(round(m_eyedropper_color.b * 255.0f)), static_cast<uint8_t>(255))
+				};
+				r_eyedropper().Fill(winrt::Windows::UI::Xaml::Media::SolidColorBrush{ c });
+				r_eyedropper().Visibility(Visibility::Visible);
 			}
 			else {
 #ifdef _DEBUG
@@ -233,8 +256,8 @@ namespace winrt::GraphPaper::implementation
 
 				throw winrt::hresult_invalid_argument();
 			}
-			pi_draw().Data(nullptr);
-			pi_draw().Data(Summary::Geom(data));
+			pi_tool_icon().Data(nullptr);
+			pi_tool_icon().Data(Summary::Geom(data));
 			if (sp_status_bar_draw().Visibility() != Visibility::Visible) {
 				sp_status_bar_draw().Visibility(Visibility::Visible);
 			}

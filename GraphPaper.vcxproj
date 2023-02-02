@@ -157,6 +157,7 @@
     <ClCompile Include="MainPage_app.cpp" />
     <ClCompile Include="MainPage_CMap.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="MainPage_order.cpp" />
     <ClCompile Include="MainPage_arrow.cpp" />
@@ -223,6 +224,7 @@
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="zlib.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

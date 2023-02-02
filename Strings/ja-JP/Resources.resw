@@ -165,7 +165,7 @@
     <value>ページの大きさ</value>
     <comment>ContentDialog</comment>
   </data>
-  <data name="ck_text_frame_fit_text.Content" xml:space="preserve">
+  <data name="ck_text_fit_frame_to_text.Content" xml:space="preserve">
     <value>枠を文字列に合わせる</value>
     <comment>CheckBox</comment>
   </data>
@@ -682,11 +682,11 @@
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_tool_eyedropper.Text" xml:space="preserve">
-    <value>スポイトツール</value>
+    <value>色の抽出</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_selecting.Text" xml:space="preserve">
-    <value>選択する</value>
+  <data name="rmfi_tool_selection.Text" xml:space="preserve">
+    <value>選択</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="str_arrow_size" xml:space="preserve">
@@ -1010,7 +1010,7 @@
     <value>文字列</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="mfi_text_frame_fit_text.Text" xml:space="preserve">
+  <data name="mfi_text_fit_frame_to_text.Text" xml:space="preserve">
     <value>枠を文字列に合わせる</value>
     <comment>MenuFlyoutItem</comment>
   </data>

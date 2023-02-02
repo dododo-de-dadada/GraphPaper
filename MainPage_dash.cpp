@@ -118,7 +118,8 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().ValueChanged(slider_2_token);
 		dialog_slider_3().ValueChanged(slider_3_token);
 		dialog_slider_4().ValueChanged(slider_4_token);
-		page_draw();
+		//page_draw();
+		status_bar_set_pos();
 	}
 
 	// 線枠メニューの「破線の形式」のサブ項目が選択された.
@@ -150,6 +151,7 @@ namespace winrt::GraphPaper::implementation
 			xcvd_is_enabled();
 			page_draw();
 		}
+		status_bar_set_pos();
 	}
 
 	// 線枠メニューの「破線の形式」に印をつける.
