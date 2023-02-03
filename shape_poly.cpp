@@ -315,7 +315,9 @@ namespace winrt::GraphPaper::implementation
 		const CAP_STYLE& s_cap,
 		const D2D1_LINE_JOIN s_join,
 		const double s_limit,
-		const bool f_opa)
+		const bool f_opa,
+		const double a_len
+	)
 	{
 		D2D1_POINT_2F v_pos[N_GON_MAX]{ { 0.0f, 0.0f }, };	// 頂点の位置
 		double s_len[N_GON_MAX];	// 辺の長さ
@@ -323,7 +325,7 @@ namespace winrt::GraphPaper::implementation
 		size_t k = static_cast<size_t>(-1);	// 見つかった頂点
 		for (size_t i = 0; i < d_cnt; i++) {
 			// 判定する位置が, 頂点の部位に含まれるか判定する.
-			if (/*t_anc &&*/pt_in_anc(t_vec, v_pos[i])) {
+			if (/*t_anc &&*/pt_in_anc(t_vec, v_pos[i], a_len)) {
 				k = i;
 			}
 			// 辺の長さを求める.
@@ -336,7 +338,7 @@ namespace winrt::GraphPaper::implementation
 			pt_add(v_pos[i], d_vec[i], v_pos[i + 1]);
 		}
 		// 判定する位置が, 終点の部位に含まれるか判定する.
-		if (pt_in_anc(t_vec, v_pos[d_cnt])) {
+		if (pt_in_anc(t_vec, v_pos[d_cnt], a_len)) {
 			k = d_cnt;
 		}
 		// 頂点が見つかったか判定する.
@@ -346,7 +348,7 @@ namespace winrt::GraphPaper::implementation
 		// 線が不透明か判定する.
 		if (s_opaque) {
 			// 不透明ならば, 線の太さの半分の幅を求め, 拡張する幅に格納する.
-			const auto e_width = max(max(static_cast<double>(s_width), Shape::s_anc_len) * 0.5, 0.5);	// 拡張する幅
+			const auto e_width = max(max(static_cast<double>(s_width), a_len) * 0.5, 0.5);	// 拡張する幅
 			// 全ての辺の長さがゼロか判定する.
 			if (nz_cnt == 0) {
 				// ゼロならば, 判定する位置が, 拡張する幅を半径とする円に含まれるか判定する.
@@ -675,7 +677,7 @@ namespace winrt::GraphPaper::implementation
 	void ShapePolygon::draw(void)
 	{
 		ID2D1Factory3* const factory = Shape::s_d2d_factory;
-		ID2D1RenderTarget* const taget = Shape::s_d2d_target;
+		ID2D1RenderTarget* const target = Shape::s_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		if (m_d2d_stroke_style == nullptr) {
@@ -743,7 +745,7 @@ namespace winrt::GraphPaper::implementation
 			const auto p_geom = m_d2d_path_geom.get();
 			if (p_geom != nullptr) {
 				brush->SetColor(m_fill_color);
-				taget->FillGeometry(p_geom, brush, nullptr);
+				target->FillGeometry(p_geom, brush, nullptr);
 			}
 		}
 		if (is_opaque(m_stroke_color)) {
@@ -751,24 +753,26 @@ namespace winrt::GraphPaper::implementation
 			const auto s_width = m_stroke_width;	// 折れ線の太さ
 			const auto s_style = m_d2d_stroke_style.get();	// 折れ線の形式
 			brush->SetColor(m_stroke_color);
-			taget->DrawGeometry(p_geom, brush, s_width, s_style);
+			target->DrawGeometry(p_geom, brush, s_width, s_style);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				const auto a_geom = m_d2d_arrow_geom.get();
 				if (a_geom != nullptr) {
-					taget->FillGeometry(a_geom, brush, nullptr);
+					target->FillGeometry(a_geom, brush, nullptr);
 					if (m_arrow_style != ARROW_STYLE::FILLED) {
-						taget->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_style.get());
+						target->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_style.get());
 					}
 				}
 			}
 		}
 		if (is_selected()) {
+			D2D1_MATRIX_3X2_F t32;
+			target->GetTransform(&t32);
 			D2D1_POINT_2F a_pos{ m_start };	// 図形の部位の位置
-			anc_draw_rect(a_pos, taget, brush);
+			anc_draw_rect(a_pos, Shape::s_anc_len / t32._11, target, brush);
 			const size_t d_cnt = m_vec.size();	// 差分の数
 			for (size_t i = 0; i < d_cnt; i++) {
 				pt_add(a_pos, m_vec[i], a_pos);
-				anc_draw_rect(a_pos, taget, brush);
+				anc_draw_rect(a_pos, Shape::s_anc_len / t32._11, target, brush);
 			}
 		}
 	}
@@ -786,8 +790,9 @@ namespace winrt::GraphPaper::implementation
 
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
+	// a_len	アンカーの大きさ
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapePolygon::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapePolygon::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		D2D1_POINT_2F t_vec;
 		pt_sub(t_pos, m_start, t_vec);
@@ -802,7 +807,8 @@ namespace winrt::GraphPaper::implementation
 			m_stroke_cap,
 			m_join_style,
 			m_join_miter_limit,
-			is_opaque(m_fill_color)
+			is_opaque(m_fill_color),
+			a_len
 		);
 	}
 

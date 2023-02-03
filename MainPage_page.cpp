@@ -78,13 +78,13 @@ namespace winrt::GraphPaper::implementation
 		m_main_page.get_stroke_width(s_width);
 		stroke_width_is_checked(s_width);
 
-		DWRITE_TEXT_ALIGNMENT t_align_t;
-		m_main_page.get_text_align_t(t_align_t);
-		text_align_t_is_checked(t_align_t);
+		DWRITE_TEXT_ALIGNMENT t_align_horz;
+		m_main_page.get_text_align_horz(t_align_horz);
+		text_align_horz_is_checked(t_align_horz);
 
-		DWRITE_PARAGRAPH_ALIGNMENT t_par_align;
-		m_main_page.get_text_par_align(t_par_align);
-		text_par_align_is_checked(t_par_align);
+		DWRITE_PARAGRAPH_ALIGNMENT t_align_vert;
+		m_main_page.get_text_align_vert(t_align_vert);
+		text_align_vert_is_checked(t_align_vert);
 
 		GRID_EMPH g_emph;
 		m_main_page.get_grid_emph(g_emph);
@@ -416,8 +416,8 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_join_miter_limit(MITER_LIMIT_DEFVAL);
 			m_main_page.set_join_style(D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER);
 			m_main_page.set_stroke_width(1.0);
-			m_main_page.set_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-			m_main_page.set_text_align_t(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+			m_main_page.set_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+			m_main_page.set_text_align_horz(DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 			m_main_page.set_text_line_sp(0.0);
 			m_main_page.set_text_padding(TEXT_PADDING_DEFVAL);
 		}
@@ -520,16 +520,19 @@ namespace winrt::GraphPaper::implementation
 		cd_page_size_dialog().IsSecondaryButtonEnabled(m_main_page.m_shape_list.size() > 0);
 		const auto d_result = co_await cd_page_size_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
+			const D2D1_SIZE_F old_val = m_main_page.m_page_size;
 			constexpr wchar_t INVALID_NUM[] = L"str_err_number";
 
 			// 本来, 無効な数値が入力されている場合, 「適用」ボタンは不可になっているので
 			// 必要ないエラーチェックだが, 念のため.
-			if (swscanf_s(tx_page_width().Text().c_str(), L"%f", &m_main_page.m_page_size.width) != 1) {
+			float new_width;
+			if (swscanf_s(tx_page_width().Text().c_str(), L"%f", &new_width) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
 				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_width/Header");
 				co_return;
 			}
-			if (swscanf_s(tx_page_height().Text().c_str(), L"%f", &m_main_page.m_page_size.height) != 1) {
+			float new_height;
+			if (swscanf_s(tx_page_height().Text().c_str(), L"%f", &new_height) != 1) {
 				// 「無効な数値です」メッセージダイアログを表示する.
 				message_show(ICON_ALERT, INVALID_NUM, L"tx_page_height/Header");
 				co_return;
@@ -537,8 +540,8 @@ namespace winrt::GraphPaper::implementation
 			// 表示の縦横の長さの値をピクセル単位の値に変換する.
 			const float g_len = g_base + 1.0f;
 			D2D1_SIZE_F p_size{
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_main_page.m_page_size.width, m_main_d2d.m_logical_dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, m_main_page.m_page_size.height, m_main_d2d.m_logical_dpi, g_len))
+				static_cast<FLOAT>(conv_len_to_val(m_len_unit, new_width, m_main_d2d.m_logical_dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_val(m_len_unit, new_height, m_main_d2d.m_logical_dpi, g_len))
 			};
 			if (!equal(p_size, m_main_page.m_page_size)) {
 				// 変換された値が表示の大きさと異なる場合,
@@ -744,7 +747,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::page_zoom_delta(const int32_t delta) noexcept
 	{
 		if (delta > 0 &&
-			m_main_page.m_page_scale < 4.f / 1.1f - FLT_MIN) {
+			m_main_page.m_page_scale < 16.f / 1.1f - FLT_MIN) {
 			m_main_page.m_page_scale *= 1.1f;
 		}
 		else if (delta < 0 &&
@@ -754,6 +757,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			return;
 		}
+		page_zoom_is_checked(m_main_page.m_page_scale);
 		page_panel_size();
 		page_draw();
 		status_bar_set_pos();

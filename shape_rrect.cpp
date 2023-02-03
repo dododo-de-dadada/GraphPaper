@@ -87,17 +87,20 @@ namespace winrt::GraphPaper::implementation
 		brush->SetColor(m_stroke_color);
 		target->DrawRoundedRectangle(r_rec, brush, m_stroke_width, m_d2d_stroke_style.get());
 		if (is_selected()) {
+			D2D1_MATRIX_3X2_F t32;
+			target->GetTransform(&t32);
+			const auto a_len = Shape::s_anc_len / t32._11;
 			D2D1_POINT_2F c_pos[4]{
 				{ r_lt.x + rx, r_lt.y + ry },
 				{ r_lt.x + vx - rx, r_lt.y + ry },
 				{ r_lt.x + vx - rx, r_lt.y + vy - ry },
 				{ r_lt.x + rx, r_lt.y + vy - ry }
 			};
-			anc_draw_ellipse(c_pos[2], target, brush);
-			anc_draw_ellipse(c_pos[3], target, brush);
-			anc_draw_ellipse(c_pos[1], target, brush);
-			anc_draw_ellipse(c_pos[0], target, brush);
-			draw_anc();
+			anc_draw_ellipse(c_pos[2], a_len, target, brush);
+			anc_draw_ellipse(c_pos[3], a_len, target, brush);
+			anc_draw_ellipse(c_pos[1], a_len, target, brush);
+			anc_draw_ellipse(c_pos[0], a_len, target, brush);
+			draw_anc(a_len);
 		}
 	}
 
@@ -198,7 +201,7 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		// 角丸の円弧の中心点に含まれるか判定する.
 		// +---------+
@@ -215,7 +218,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(m_start.x + rx), 
 			static_cast<FLOAT>(m_start.y + ry)
 		};
-		if (pt_in_anc(t_pos, anc_r_nw)) {
+		if (pt_in_anc(t_pos, anc_r_nw, a_len)) {
 			anc_r = ANC_TYPE::ANC_R_NW;
 		}
 		else {
@@ -223,17 +226,17 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(m_start.x + m_vec[0].x - rx),
 				static_cast<FLOAT>(m_start.y + m_vec[0].y - ry)
 			};
-			if (pt_in_anc(t_pos, anc_r_se)) {
+			if (pt_in_anc(t_pos, anc_r_se, a_len)) {
 				anc_r = ANC_TYPE::ANC_R_SE;
 			}
 			else {
 				const D2D1_POINT_2F anc_r_ne{ anc_r_se.x, anc_r_nw.y };
-				if (pt_in_anc(t_pos, anc_r_ne)) {
+				if (pt_in_anc(t_pos, anc_r_ne, a_len)) {
 					anc_r = ANC_TYPE::ANC_R_NE;
 				}
 				else {
 					const D2D1_POINT_2F anc_r_sw{ anc_r_nw.x, anc_r_se.y };
-					if (pt_in_anc(t_pos, anc_r_sw)) {
+					if (pt_in_anc(t_pos, anc_r_sw, a_len)) {
 						anc_r = ANC_TYPE::ANC_R_SW;
 					}
 					else {
@@ -245,11 +248,11 @@ namespace winrt::GraphPaper::implementation
 		// 角丸の円弧の中心点に含まれる,
 		if (anc_r != ANC_TYPE::ANC_PAGE &&
 			// かつ, 方形の大きさが図形の部位の大きさより大きいか判定する.
-			fabs(m_vec[0].x) > Shape::s_anc_len && fabs(m_vec[0].y) > Shape::s_anc_len) {
+			fabs(m_vec[0].x) > a_len && fabs(m_vec[0].y) > a_len) {
 			return anc_r;
 		}
 		// 方形の各頂点に含まれるか判定する.
-		const uint32_t anc_v = rect_hit_test_anc(m_start, m_vec[0], t_pos);
+		const uint32_t anc_v = rect_hit_test_anc(m_start, m_vec[0], t_pos, a_len);
 		if (anc_v != ANC_TYPE::ANC_PAGE) {
 			return anc_v;
 		}
@@ -292,7 +295,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			// 以下の手順は, 縮小した角丸方形の外側に, 角丸交点があるケースでうまくいかない.
 			// 拡大した角丸方形に含まれるか判定
-			const double s_thick = max(m_stroke_width, Shape::s_anc_len);
+			const double s_thick = max(m_stroke_width, a_len);
 			D2D1_POINT_2F e_lt, e_rb, e_rad;	// 拡大した角丸方形
 			pt_add(r_lt, -s_thick * 0.5, e_lt);
 			pt_add(r_rb, s_thick * 0.5, e_rb);
@@ -399,7 +402,10 @@ namespace winrt::GraphPaper::implementation
 	ShapeRRect::ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
 		ShapeRect::ShapeRect(b_pos, b_vec, page)
 	{
-		calc_corner_radius(m_vec[0], page->m_corner_rad, m_corner_rad);
+		D2D1_POINT_2F c_rad{
+			page->m_grid_base + 1.0, page->m_grid_base + 1.0
+		};
+		calc_corner_radius(m_vec[0], c_rad, m_corner_rad);
 	}
 
 	// 図形をデータリーダーから読み込む.

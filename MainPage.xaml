@@ -350,11 +350,31 @@
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_stroke_width_other" x:Uid="rmfi_stroke_width_other" Click="stroke_width_click_async" Text="Others..." />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_flat" x:Uid="rmfi_cap_style_flat" Click="cap_style_click" GroupName="gn_cap_style" IsChecked="true" Text="Flat" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_square" x:Uid="rmfi_cap_style_square" Click="cap_style_click" GroupName="gn_cap_style" Text="Square" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_round" x:Uid="rmfi_cap_style_round" Click="cap_style_click" GroupName="gn_cap_style" Text="Round" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_triangle" x:Uid="rmfi_cap_style_triangle" Click="cap_style_click" GroupName="gn_cap_style" Text="Triangle" />
-				</MenuFlyoutSubItem>
+                    <MenuFlyoutSubItem.Icon>
+                        <PathIcon Data="{StaticResource data_cap_square}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutSubItem.Icon>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_flat" x:Uid="rmfi_cap_style_flat" Click="cap_style_click" GroupName="gn_cap_style" IsChecked="true" Text="Flat" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_cap_flat}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_square" x:Uid="rmfi_cap_style_square" Click="cap_style_click" GroupName="gn_cap_style" Text="Square" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_cap_square}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_round" x:Uid="rmfi_cap_style_round" Click="cap_style_click" GroupName="gn_cap_style" Text="Round" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_cap_round}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_cap_style_triangle" x:Uid="rmfi_cap_style_triangle" Click="cap_style_click" GroupName="gn_cap_style" Text="Triangle">
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_cap_triangle}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+
+                   </muxc:RadioMenuFlyoutItem>
+                </MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfs_join_style" Text="Join Style ">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_round" x:Uid="rmfi_join_style_round" Click="join_style_click" GroupName="gn_join_style" Text="Rounded" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_bevel" x:Uid="rmfi_join_style_bevel" Click="join_style_click" GroupName="gn_join_style" Text="Beveled" />
@@ -409,16 +429,16 @@
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<!-- 配置メニュー -->
-				<MenuFlyoutSubItem x:Uid="mfsi_text_align_t" Icon="AlignLeft" Text="Text Alignment">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left" x:Uid="rmfi_text_align_left" Click="text_align_t_click" IsChecked="True" Text="Left" GroupName="gn_text_align_t" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="text_align_t_click" Text="Right" GroupName="gn_text_align_t" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="text_align_t_click" Text="Center" GroupName="gn_text_align_t" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just" x:Uid="rmfi_text_align_just" Click="text_align_t_click" Text="Justified" GroupName="gn_text_align_t" />
+				<MenuFlyoutSubItem x:Uid="mfsi_text_align_horz" Icon="AlignLeft" Text="Text Alignment">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left" x:Uid="rmfi_text_align_left" Click="text_align_horz_click" IsChecked="True" Text="Left" GroupName="gn_text_align_horz" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="text_align_horz_click" Text="Right" GroupName="gn_text_align_horz" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="text_align_horz_click" Text="Center" GroupName="gn_text_align_horz" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just" x:Uid="rmfi_text_align_just" Click="text_align_horz_click" Text="Justified" GroupName="gn_text_align_horz" />
 				</MenuFlyoutSubItem>
-				<MenuFlyoutSubItem x:Uid="mfsi_text_par_align" Text="Paragraph Alignment">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="text_par_align_click" IsChecked="True" Text="Top" GroupName="gn_text_par_align" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot" x:Uid="rmfi_text_align_bot" Click="text_par_align_click" Text="Bottom" GroupName="gn_text_par_align" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid" x:Uid="rmfi_text_align_mid" Click="text_par_align_click" Text="Middle" GroupName="gn_text_par_align" />
+				<MenuFlyoutSubItem x:Uid="mfsi_text_align_vert" Text="Paragraph Alignment">
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="text_align_vert_click" IsChecked="True" Text="Top" GroupName="gn_text_align_vert" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot" x:Uid="rmfi_text_align_bot" Click="text_align_vert_click" Text="Bottom" GroupName="gn_text_align_vert" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_mid" x:Uid="rmfi_text_align_mid" Click="text_align_vert_click" Text="Middle" GroupName="gn_text_align_vert" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Uid="mfi_text_line_sp" Click="text_line_sp_click_async" Text="Line Space" />
 				<MenuFlyoutItem x:Uid="mfi_text_padding" Click="text_padding_click_async" Text="Margin..." />
@@ -511,7 +531,7 @@
 							<KeyboardAccelerator Key="NumberPad4" Modifiers="Control"/>
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
-				</MenuFlyoutSubItem>
+                </MenuFlyoutSubItem>
 			</muxc:MenuBarItem>
 			<!-- その他メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_misc" AccessKey="M" Title="Misc">

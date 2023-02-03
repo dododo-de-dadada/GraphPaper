@@ -1,3 +1,9 @@
+
+// â~å Çï`âÊÇ∑ÇÈ 3 Ç¬ÇÃï˚ñ@ - ë»â~ÇÃâ~å 
+// https://learn.microsoft.com/ja-jp/xamarin/xamarin-forms/user-interface/graphics/skiasharp/curves/arcs
+// ÉpÉX - â~å 
+// https://developer.mozilla.org/ja/docs/Web/SVG/Tutorial/Paths
+
 #include "pch.h"
 #include "shape.h"
 
@@ -5,7 +11,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	void ShapeQCircle::get_pos_center(const D2D1_POINT_2F start, const D2D1_POINT_2F vec, const D2D1_SIZE_F rad, const float rot, D2D1_POINT_2F& val) noexcept
+	bool ShapeQCircle::get_pos_center(const D2D1_POINT_2F start, const D2D1_POINT_2F vec, const D2D1_SIZE_F rad, const float rot, D2D1_POINT_2F& val) noexcept
 	{
 		// Çæâ~ÇÃíÜêSì_ÇãÅÇﬂÇÈ.
 		// A = 1 / (rx^2)
@@ -80,6 +86,10 @@ namespace winrt::GraphPaper::implementation
 		const double b = -2 * A * (C + S * j) * (C * px + S * py - S * k) - 2 * B * (S - C * j) * (S * px - C * py + C * k);
 		const double c = A * (C * px + S * py - S * k) * (C * px + S * py - S * k) + B * (S * px - C * py + C * k) * (S * px - C * py + C * k) - 1;
 		const double bb_4ac = b * b - 4 * a * c;
+		if (bb_4ac <= FLT_MIN) {
+			return false;
+			//__debugbreak();
+		}
 		const double s = bb_4ac <= FLT_MIN ? 0.0f : sqrt(bb_4ac);
 		const double ox = (-b + s) / (a + a);
 		const double oy = j * ox + k;
@@ -96,6 +106,7 @@ namespace winrt::GraphPaper::implementation
 			val.x = static_cast<FLOAT>(x);
 			val.y = static_cast<FLOAT>(j * x + k);
 		}
+		return true;
 	}
 
 	// ílÇ, ïîà ÇÃà íuÇ…äiî[Ç∑ÇÈ.
@@ -103,11 +114,15 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (anc != ANC_TYPE::ANC_CENTER) {
 			if (ShapePath::set_pos_anc(val, anc, limit, keep_aspect)) {
-				m_radius.width = fabs(m_vec[0].x);
-				m_radius.height = fabs(m_vec[0].y);
-				//if (m_d2d_path_geom != nullptr) {
-				//	m_d2d_path_geom = nullptr;
-				//}
+				const double r = M_PI * m_rotation / 180.0;
+				const double c = cos(r);
+				const double s = sin(r);
+				const double x = m_vec[0].x;
+				const double y = m_vec[0].y;
+				const double w =  c * x + s * y;
+				const double h = -s * x + c * y;
+				m_radius.width = static_cast<FLOAT>(fabs(w));
+				m_radius.height = static_cast<FLOAT>(fabs(h));
 				if (m_d2d_fill_geom != nullptr) {
 					m_d2d_fill_geom = nullptr;
 				}
@@ -116,16 +131,17 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			D2D1_POINT_2F c_pos;
-			get_pos_center(m_start, m_vec[0], m_radius, m_rotation * M_PI / 180.0, c_pos);
-			const D2D1_POINT_2F s_pos{
-				m_start.x + val.x - c_pos.x,
-				m_start.y + val.y - c_pos.y
-			};
-			if (ShapePath::set_pos_start(s_pos)) {
-				if (m_d2d_fill_geom != nullptr) {
-					m_d2d_fill_geom = nullptr;
+			if (get_pos_center(m_start, m_vec[0], m_radius, m_rotation * M_PI / 180.0, c_pos)) {
+				const D2D1_POINT_2F s_pos{
+					m_start.x + val.x - c_pos.x,
+					m_start.y + val.y - c_pos.y
+				};
+				if (ShapePath::set_pos_start(s_pos)) {
+					if (m_d2d_fill_geom != nullptr) {
+						m_d2d_fill_geom = nullptr;
+					}
+					return true;
 				}
-				return true;
 			}
 		}
 		return false;
@@ -141,21 +157,21 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	uint32_t ShapeQCircle::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeQCircle::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		// ÉAÉìÉJÅ[É|ÉCÉìÉgÇ…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
-		if (pt_in_anc(t_pos, m_start)) {
+		if (pt_in_anc(t_pos, m_start, a_len)) {
 			return ANC_TYPE::ANC_P0;
 		}
-		else if (pt_in_anc(t_pos, D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y })) {
+		else if (pt_in_anc(t_pos, D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y }, a_len)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
 		// Çæâ~ÇÃíÜêSì_Ç…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
 		const double rot = m_rotation * M_PI / 180.0;
 		D2D1_POINT_2F c_pos;
 		get_pos_center(m_start, m_vec[0], m_radius, rot, c_pos);
-		if (pt_in_anc(t_pos, c_pos)) {
-			return ANC_TYPE::ANC_CENTER;
+		if (pt_in_anc(t_pos, c_pos, a_len)) {
+			return  ANC_TYPE::ANC_CENTER;
 		}
 		/*
 		const double px = m_start.x - c_pos.x;
@@ -227,7 +243,7 @@ namespace winrt::GraphPaper::implementation
 		// p Ç∆ t ÇÃäOêœÇ∆ q Ç∆ t ÇÃäOêœÇÃïÑçÜÇ™ãtÇ»ÇÁÇŒì‡ë§
 		if (pt > 0 && qt < 0) {
 			const double sw = (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) ?
-				max(s_anc_len, m_stroke_width) / 2.0 : 0.0);
+				max(a_len, m_stroke_width) / 2.0 : 0.0);
 			// ì‡â~ÇÃì‡ë§Ç…Ç†ÇÈÇ©îªíË
 			if (pt_in_ellipse(t_pos, c_pos, rx - sw, ry - sw, rot)) {
 				if (is_opaque(m_fill_color)) {
@@ -593,10 +609,11 @@ namespace winrt::GraphPaper::implementation
 		if (is_selected()) {
 			D2D1_POINT_2F p{ m_start.x, m_start.y };
 			D2D1_POINT_2F q{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
-
-			anc_draw_rect(p, target, brush);
-			anc_draw_rect(q, target, brush);
-			anc_draw_rect(c_pos, target, brush);
+			D2D1_MATRIX_3X2_F t32;
+			target->GetTransform(&t32);
+			anc_draw_rect(p, Shape::s_anc_len / t32._11, target, brush);
+			anc_draw_rect(q, Shape::s_anc_len / t32._11, target, brush);
+			anc_draw_rect(c_pos, Shape::s_anc_len / t32._11, target, brush);
 		}
 	}
 

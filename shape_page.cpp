@@ -152,7 +152,8 @@ namespace winrt::GraphPaper::implementation
 		const double py = p_pos.y;
 		const double qx = cx - px;
 		const double qy = cy - py;
-		auto c_rad = m_corner_rad;
+		//auto c_rad = m_corner_rad;
+		D2D1_POINT_2F c_rad{ m_grid_base + 1.0f, m_grid_base + 1.0f };
 		double rx = c_rad.x;
 		double ry = c_rad.y;
 
@@ -268,8 +269,8 @@ namespace winrt::GraphPaper::implementation
 		h_start.x = 0.0f;
 		const auto page_h = page_size.height;
 		const auto page_w = page_size.width;
-		v_end.y = page_size.height;
-		h_end.x = page_size.width;
+		v_end.y = page_size.height - 1.0f;
+		h_end.x = page_size.width - 1.0f;
 		const double grid_len = max(grid_base + 1.0, 1.0);
 
 		// êÇíºÇ»ï˚ä·Çï\é¶Ç∑ÇÈ.
@@ -328,11 +329,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// äpä€îºåaÇìæÇÈ.
+	/*
 	bool ShapePage::get_corner_radius(D2D1_POINT_2F& val) const noexcept
 	{
 		val = m_corner_rad;
 		return true;
 	}
+	*/
 
 	// ìhÇËÇ¬Ç‘ÇµêFÇìæÇÈ.
 	bool ShapePage::get_fill_color(D2D1_COLOR_F& val) const noexcept
@@ -496,16 +499,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// íióéÇÃëµÇ¶ÇìæÇÈ.
-	bool ShapePage::get_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept
+	bool ShapePage::get_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept
 	{
-		val = m_text_par_align;
+		val = m_text_align_vert;
 		return true;
 	}
 
 	// ï∂éöóÒÇÃÇªÇÎÇ¶ÇìæÇÈ.
-	bool ShapePage::get_text_align_t(DWRITE_TEXT_ALIGNMENT& val) const noexcept
+	bool ShapePage::get_text_align_horz(DWRITE_TEXT_ALIGNMENT& val) const noexcept
 	{
-		val = m_text_align_t;
+		val = m_text_align_horz;
 		return true;
 	}
 
@@ -614,7 +617,7 @@ namespace winrt::GraphPaper::implementation
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		m_corner_rad = corner_rad;
+		//m_corner_rad = corner_rad;
 		// í[ÇÃå`éÆ
 		const CAP_STYLE stroke_cap{
 			static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32()),
@@ -757,19 +760,19 @@ namespace winrt::GraphPaper::implementation
 			m_font_weight = font_weight;
 		}
 		// íióéÇÃÇªÇÎÇ¶
-		const DWRITE_PARAGRAPH_ALIGNMENT text_par_align = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
-		if (text_par_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER ||
-			text_par_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR ||
-			text_par_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR) {
-			m_text_par_align = text_par_align;
+		const DWRITE_PARAGRAPH_ALIGNMENT text_align_vert = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
+		if (text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_CENTER ||
+			text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_FAR ||
+			text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_NEAR) {
+			m_text_align_vert = text_align_vert;
 		}
 		// ï∂éöóÒÇÃÇªÇÎÇ¶
-		const DWRITE_TEXT_ALIGNMENT text_align_t = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
-		if (text_align_t == DWRITE_TEXT_ALIGNMENT_CENTER ||
-			text_align_t == DWRITE_TEXT_ALIGNMENT_JUSTIFIED ||
-			text_align_t == DWRITE_TEXT_ALIGNMENT_LEADING ||
-			text_align_t == DWRITE_TEXT_ALIGNMENT_TRAILING) {
-			m_text_align_t = text_align_t;
+		const DWRITE_TEXT_ALIGNMENT text_align_horz = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
+		if (text_align_horz == DWRITE_TEXT_ALIGNMENT_CENTER ||
+			text_align_horz == DWRITE_TEXT_ALIGNMENT_JUSTIFIED ||
+			text_align_horz == DWRITE_TEXT_ALIGNMENT_LEADING ||
+			text_align_horz == DWRITE_TEXT_ALIGNMENT_TRAILING) {
+			m_text_align_horz = text_align_horz;
 		}
 		// çsä‘
 		const float text_line_sp = dt_reader.ReadSingle();
@@ -821,6 +824,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ílÇäpä€îºåaÇ…äiî[Ç∑ÇÈ.
+	/*
 	bool ShapePage::set_corner_radius(const D2D1_POINT_2F& val) noexcept
 	{
 		if (!equal(m_corner_rad, val)) {
@@ -829,6 +833,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		return false;
 	}
+	*/
 
 	// ílÇìhÇËÇ¬Ç‘ÇµêFÇ…äiî[Ç∑ÇÈ.
 	bool ShapePage::set_fill_color(const D2D1_COLOR_F& val) noexcept
@@ -1044,17 +1049,17 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ílÇíióéÇÃÇªÇÎÇ¶Ç…äiî[Ç∑ÇÈ.
-	bool ShapePage::set_text_par_align(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept
+	bool ShapePage::set_text_align_vert(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept
 	{
-		const auto old_val = m_text_par_align;
-		return (m_text_par_align = val) != old_val;
+		const auto old_val = m_text_align_vert;
+		return (m_text_align_vert = val) != old_val;
 	}
 
 	// ï∂éöóÒÇÃÇªÇÎÇ¶Ç…äiî[Ç∑ÇÈ.
-	bool ShapePage::set_text_align_t(const DWRITE_TEXT_ALIGNMENT val) noexcept
+	bool ShapePage::set_text_align_horz(const DWRITE_TEXT_ALIGNMENT val) noexcept
 	{
-		const auto old_val = m_text_align_t;
-		return (m_text_align_t = val) != old_val;
+		const auto old_val = m_text_align_horz;
+		return (m_text_align_horz = val) != old_val;
 	}
 
 	// ílÇçsä‘Ç…äiî[Ç∑ÇÈ.
@@ -1086,7 +1091,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_dash_cap(m_dash_cap);
 		s->get_dash_patt(m_dash_patt);
 		s->get_dash_style(m_dash_style);
-		s->get_corner_radius(m_corner_rad);
+		//s->get_corner_radius(m_corner_rad);
 		s->get_fill_color(m_fill_color);
 		s->get_font_color(m_font_color);
 		s->get_font_family(m_font_family);
@@ -1106,8 +1111,8 @@ namespace winrt::GraphPaper::implementation
 		s->get_stroke_cap(m_stroke_cap);
 		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_width(m_stroke_width);
-		s->get_text_align_t(m_text_align_t);
-		s->get_text_par_align(m_text_par_align);
+		s->get_text_align_horz(m_text_align_horz);
+		s->get_text_align_vert(m_text_align_vert);
 		s->get_text_line_sp(m_text_line_sp);
 		s->get_text_padding(m_text_padding);
 	}
@@ -1147,8 +1152,8 @@ namespace winrt::GraphPaper::implementation
 		// ñÓÇ∂ÇÈÇµÇÃå`éÆ
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));
 		// äpä€îºåa
-		dt_writer.WriteSingle(m_corner_rad.x);
-		dt_writer.WriteSingle(m_corner_rad.y);
+		//dt_writer.WriteSingle(m_corner_rad.x);
+		//dt_writer.WriteSingle(m_corner_rad.y);
 		// ê¸ÇÃí[ÇÃå`éÆ
 		dt_writer.WriteUInt32(m_stroke_cap.m_start);
 		dt_writer.WriteUInt32(m_stroke_cap.m_end);
@@ -1198,9 +1203,9 @@ namespace winrt::GraphPaper::implementation
 		// èëëÃÇÃëæÇ≥
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_font_weight));
 		// íióéÇÃÇªÇÎÇ¶
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_par_align));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_vert));
 		// ï∂éöóÒÇÃÇªÇÎÇ¶
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_horz));
 		// çsä‘
 		dt_writer.WriteSingle(m_text_line_sp);
 		// ï∂éöóÒÇÃó]îí

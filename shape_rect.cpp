@@ -10,7 +10,7 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形を表示する.
-	void ShapeRect::draw_anc(void)
+	void ShapeRect::draw_anc(const double a_len)
 	{
 		ID2D1RenderTarget* const target = Shape::s_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
@@ -27,17 +27,17 @@ namespace winrt::GraphPaper::implementation
 		};
 		D2D1_POINT_2F a_mid;	// 方形の辺の中点
 		pt_avg(a_pos[0], a_pos[3], a_mid);
-		anc_draw_rect(a_mid, target, brush);
+		anc_draw_rect(a_mid, a_len, target, brush);
 		pt_avg(a_pos[0], a_pos[1], a_mid);
-		anc_draw_rect(a_mid, target, brush);
+		anc_draw_rect(a_mid, a_len, target, brush);
 		pt_avg(a_pos[1], a_pos[2], a_mid);
-		anc_draw_rect(a_mid, target, brush);
+		anc_draw_rect(a_mid, a_len, target, brush);
 		pt_avg(a_pos[2], a_pos[3], a_mid);
-		anc_draw_rect(a_mid, target, brush);
-		anc_draw_rect(a_pos[0], target, brush);
-		anc_draw_rect(a_pos[1], target, brush);
-		anc_draw_rect(a_pos[3], target, brush);
-		anc_draw_rect(a_pos[2], target, brush);
+		anc_draw_rect(a_mid, a_len, target, brush);
+		anc_draw_rect(a_pos[0], a_len, target, brush);
+		anc_draw_rect(a_pos[1], a_len, target, brush);
+		anc_draw_rect(a_pos[3], a_len, target, brush);
+		anc_draw_rect(a_pos[2], a_len, target, brush);
 	}
 
 	// 図形を表示する.
@@ -72,11 +72,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		// この図形が選択されてるか判定する.
 		if (is_selected()) {
-			draw_anc();
+			D2D1_MATRIX_3X2_F t32;
+			target->GetTransform(&t32);
+			draw_anc(Shape::s_anc_len / t32._11);
 		}
 	}
 
-	uint32_t rect_hit_test_anc(const D2D1_POINT_2F start, const D2D1_POINT_2F vec, const D2D1_POINT_2F t_pos) noexcept
+	uint32_t rect_hit_test_anc(const D2D1_POINT_2F start, const D2D1_POINT_2F vec, const D2D1_POINT_2F t_pos, const double a_len) noexcept
 	{
 		// 4----8----2
 		// |         |
@@ -84,34 +86,34 @@ namespace winrt::GraphPaper::implementation
 		// |         |
 		// 3----5----1
 		const D2D1_POINT_2F anc_se{ start.x + vec.x, start.y + vec.y };
-		if (pt_in_anc(t_pos, anc_se)) {
+		if (pt_in_anc(t_pos, anc_se, a_len)) {
 			return ANC_TYPE::ANC_SE;
 		}
 		const D2D1_POINT_2F anc_ne{ anc_se.x, start.y };
-		if (pt_in_anc(t_pos, anc_ne)) {
+		if (pt_in_anc(t_pos, anc_ne, a_len)) {
 			return ANC_TYPE::ANC_NE;
 		}
 		const D2D1_POINT_2F anc_sw{ start.x, anc_se.y };
-		if (pt_in_anc(t_pos, anc_sw)) {
+		if (pt_in_anc(t_pos, anc_sw, a_len)) {
 			return ANC_TYPE::ANC_SW;
 		}
-		if (pt_in_anc(t_pos, start)) {
+		if (pt_in_anc(t_pos, start, a_len)) {
 			return ANC_TYPE::ANC_NW;
 		}
 		const D2D1_POINT_2F anc_s{ static_cast<FLOAT>(start.x + vec.x * 0.5), anc_se.y };
-		if (pt_in_anc(t_pos, anc_s)) {
+		if (pt_in_anc(t_pos, anc_s, a_len)) {
 			return ANC_TYPE::ANC_SOUTH;
 		}
 		const D2D1_POINT_2F anc_e{ anc_se.x, static_cast<FLOAT>(start.y + vec.y * 0.5f) };
-		if (pt_in_anc(t_pos, anc_e)) {
+		if (pt_in_anc(t_pos, anc_e, a_len)) {
 			return ANC_TYPE::ANC_EAST;
 		}
 		const D2D1_POINT_2F anc_w{ start.x, anc_e.y };
-		if (pt_in_anc(t_pos, anc_w)) {
+		if (pt_in_anc(t_pos, anc_w, a_len)) {
 			return ANC_TYPE::ANC_WEST;
 		}
 		const D2D1_POINT_2F anc_n{ anc_s.x, start.y };
-		if (pt_in_anc(t_pos, anc_n)) {
+		if (pt_in_anc(t_pos, anc_n, a_len)) {
 			return ANC_TYPE::ANC_NORTH;
 		}
 		return ANC_TYPE::ANC_PAGE;
@@ -126,48 +128,48 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含むか判定する.
 	// t_pos	判定される位置
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeRect::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		// 各頂点の部位に含まれるか判定する.
 		D2D1_POINT_2F v_pos[4]{ m_start, };
 		v_pos[2].x = m_start.x + m_vec[0].x;
 		v_pos[2].y = m_start.y + m_vec[0].y;
-		if (pt_in_anc(t_pos, v_pos[2])) {
+		if (pt_in_anc(t_pos, v_pos[2], a_len)) {
 			return ANC_TYPE::ANC_SE;
 		}
 		v_pos[3].x = m_start.x;
 		v_pos[3].y = m_start.y + m_vec[0].y;
-		if (pt_in_anc(t_pos, v_pos[3])) {
+		if (pt_in_anc(t_pos, v_pos[3], a_len)) {
 			return ANC_TYPE::ANC_SW;
 		}
 		v_pos[1].x = m_start.x + m_vec[0].x;
 		v_pos[1].y = m_start.y;
-		if (pt_in_anc(t_pos, v_pos[1])) {
+		if (pt_in_anc(t_pos, v_pos[1], a_len)) {
 			return ANC_TYPE::ANC_NE;
 		}
-		if (pt_in_anc(t_pos, v_pos[0])) {
+		if (pt_in_anc(t_pos, v_pos[0], a_len)) {
 			return ANC_TYPE::ANC_NW;
 		}
 
 		// 各辺の中点の部位に含まれるか判定する.
 		D2D1_POINT_2F s_pos;
 		pt_avg(v_pos[2], v_pos[3], s_pos);
-		if (pt_in_anc(t_pos, s_pos)) {
+		if (pt_in_anc(t_pos, s_pos, a_len)) {
 			return ANC_TYPE::ANC_SOUTH;
 		}
 		D2D1_POINT_2F e_pos;
 		pt_avg(v_pos[1], v_pos[2], e_pos);
-		if (pt_in_anc(t_pos, e_pos)) {
+		if (pt_in_anc(t_pos, e_pos, a_len)) {
 			return ANC_TYPE::ANC_EAST;
 		}
 		D2D1_POINT_2F w_pos;
 		pt_avg(v_pos[0], v_pos[3], w_pos);
-		if (pt_in_anc(t_pos, w_pos)) {
+		if (pt_in_anc(t_pos, w_pos, a_len)) {
 			return ANC_TYPE::ANC_WEST;
 		}
 		D2D1_POINT_2F n_pos;
 		pt_avg(v_pos[0], v_pos[1], n_pos);
-		if (pt_in_anc(t_pos, n_pos)) {
+		if (pt_in_anc(t_pos, n_pos, a_len)) {
 			return ANC_TYPE::ANC_NORTH;
 		}
 
@@ -208,7 +210,7 @@ namespace winrt::GraphPaper::implementation
 			// 線枠の太さの半分の大きさだけ外側に, 方形を拡大する.
 			// ただし太さがアンカーポイントの大きさ未満なら, 太さはアンカーポイントの大きさに調整する.
 			D2D1_POINT_2F e_lb, e_rb;	// 拡大した方形
-			const double s_thick = max(m_stroke_width, Shape::s_anc_len);
+			const double s_thick = max(m_stroke_width, a_len);
 			const double e_thick = s_thick * 0.5;
 			pt_add(r_lt, -e_thick, e_lb);
 			pt_add(r_rb, e_thick, e_rb);

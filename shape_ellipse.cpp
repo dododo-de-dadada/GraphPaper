@@ -43,7 +43,9 @@ namespace winrt::GraphPaper::implementation
 		if (!is_selected()) {
 			return;
 		}
-		draw_anc();
+		D2D1_MATRIX_3X2_F t32;
+		target->GetTransform(&t32);
+		draw_anc(Shape::s_anc_len / t32._11);
 		/*
 		D2D1_POINT_2F a_pos[4];
 		// “ì
@@ -76,9 +78,9 @@ namespace winrt::GraphPaper::implementation
 	// ˆÊ’u‚ğŠÜ‚Ş‚©”»’è‚·‚é.
 	// t_pos	”»’è‚·‚éˆÊ’u
 	// –ß‚è’l	ˆÊ’u‚ğŠÜ‚Ş}Œ`‚Ì•”ˆÊ
-	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		const auto anc = rect_hit_test_anc(m_start, m_vec[0], t_pos);
+		const auto anc = rect_hit_test_anc(m_start, m_vec[0], t_pos, a_len);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
@@ -95,7 +97,7 @@ namespace winrt::GraphPaper::implementation
 			// ˆÊ’u‚ª‚¾‰~‚ÌŠO‘¤‚É‚ ‚é‚©”»’è‚·‚é.
 			// ˜g‚Ì‘¾‚³‚ª•”ˆÊ‚Ì‘å‚«‚³–¢–‚È‚ç‚Î,
 			// •”ˆÊ‚Ì‘å‚«‚³‚ğ˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-			const double s_width = max(static_cast<double>(m_stroke_width), Shape::s_anc_len);
+			const double s_width = max(static_cast<double>(m_stroke_width), a_len);
 			// ”¼Œa‚É˜g‚Ì‘¾‚³‚Ì”¼•ª‚ğ‰Á‚¦‚½’l‚ğŠOŒa‚ÉŠi”[‚·‚é.
 			D2D1_POINT_2F r_outer;
 			pt_add(rad, s_width * 0.5, r_outer);

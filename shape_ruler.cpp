@@ -11,9 +11,9 @@ namespace winrt::GraphPaper::implementation
 {
 	// ˆÊ’u‚ðŠÜ‚Þ‚©”»’è‚·‚é.
 	// t_pos	”»’è‚·‚éˆÊ’u
-	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], t_pos);
+		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], t_pos, a_len);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
@@ -44,17 +44,15 @@ namespace winrt::GraphPaper::implementation
 					x_ge_y ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				if (x_ge_y) {
-					const float a_len = s_anc_len * 0.5f;
-					const D2D1_POINT_2F p_min{ p0.x - a_len, min(p0.y, p1.y) };
-					const D2D1_POINT_2F p_max{ p0.x + a_len, max(p0.y, p1.y) };
+					const D2D1_POINT_2F p_min{ p0.x - a_len * 0.5, min(p0.y, p1.y) };
+					const D2D1_POINT_2F p_max{ p0.x + a_len * 0.5f, max(p0.y, p1.y) };
 					if (pt_in_rect(t_pos, p_min, p_max)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
 				else {
-					const float a_len = s_anc_len * 0.5f;
-					const D2D1_POINT_2F p_min{ min(p0.x, p1.x), p0.y - a_len };
-					const D2D1_POINT_2F p_max{ max(p0.x, p1.x), p0.y + a_len };
+					const D2D1_POINT_2F p_min{ min(p0.x, p1.x), p0.y - a_len * 0.5 };
+					const D2D1_POINT_2F p_max{ max(p0.x, p1.x), p0.y + a_len * 0.5 };
 					if (pt_in_rect(t_pos, p_min, p_max)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
@@ -230,7 +228,9 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (is_selected()) {
-			draw_anc();
+			D2D1_MATRIX_3X2_F t32;
+			target->GetTransform(&t32);
+			draw_anc(Shape::s_anc_len / t32._11);
 		}
 	}
 

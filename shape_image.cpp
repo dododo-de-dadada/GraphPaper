@@ -251,11 +251,12 @@ namespace winrt::GraphPaper::implementation
 				{ m_start.x + m_view.width, m_start.y + m_view.height },
 				{ m_start.x, m_start.y + m_view.height },
 			};
-
-			anc_draw_rect(v_pos[0], target, brush);
-			anc_draw_rect(v_pos[1], target, brush);
-			anc_draw_rect(v_pos[2], target, brush);
-			anc_draw_rect(v_pos[3], target, brush);
+			D2D1_MATRIX_3X2_F t32;
+			target->GetTransform(&t32);
+			anc_draw_rect(v_pos[0], Shape::s_anc_len / t32._11, target, brush);
+			anc_draw_rect(v_pos[1], Shape::s_anc_len / t32._11, target, brush);
+			anc_draw_rect(v_pos[2], Shape::s_anc_len / t32._11, target, brush);
+			anc_draw_rect(v_pos[3], Shape::s_anc_len / t32._11, target, brush);
 		}
 	}
 
@@ -381,27 +382,27 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
-	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		D2D1_POINT_2F v_pos[4];
 		// 0---1
 		// |   |
 		// 3---2
 		get_verts(v_pos);
-		if (pt_in_anc(t_pos, v_pos[2])) {
+		if (pt_in_anc(t_pos, v_pos[2], a_len)) {
 			return ANC_TYPE::ANC_SE;
 		}
-		else if (pt_in_anc(t_pos, v_pos[3])) {
+		else if (pt_in_anc(t_pos, v_pos[3], a_len)) {
 			return ANC_TYPE::ANC_SW;
 		}
-		else if (pt_in_anc(t_pos, v_pos[1])) {
+		else if (pt_in_anc(t_pos, v_pos[1], a_len)) {
 			return ANC_TYPE::ANC_NE;
 		}
-		else if (pt_in_anc(t_pos, v_pos[0])) {
+		else if (pt_in_anc(t_pos, v_pos[0], a_len)) {
 			return ANC_TYPE::ANC_NW;
 		}
 		else {
-			const auto e_width = Shape::s_anc_len * 0.5f;
+			const auto e_width = a_len * 0.5;
 			D2D1_POINT_2F e_pos[2];
 			e_pos[0].x = v_pos[0].x;
 			e_pos[0].y = v_pos[0].y - e_width;

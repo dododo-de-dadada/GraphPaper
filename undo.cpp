@@ -541,12 +541,12 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoValue<UNDO_ID::TEXT_PAR_ALIGN>::SET(Shape* const s, const DWRITE_PARAGRAPH_ALIGNMENT& val)
 	{
-		s->set_text_par_align(val);
+		s->set_text_align_vert(val);
 	}
 
 	void UndoValue<UNDO_ID::TEXT_ALIGN_T>::SET(Shape* const s, const DWRITE_TEXT_ALIGNMENT& val)
 	{
-		s->set_text_align_t(val);
+		s->set_text_align_horz(val);
 	}
 
 	void UndoValue<UNDO_ID::TEXT_CONTENT>::SET(Shape* const s, wchar_t* const& val)
@@ -706,12 +706,12 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_ID::TEXT_PAR_ALIGN>::GET(const Shape* s, DWRITE_PARAGRAPH_ALIGNMENT& val) noexcept
 	{
-		return s->get_text_par_align(val);
+		return s->get_text_align_vert(val);
 	}
 
 	bool UndoValue<UNDO_ID::TEXT_ALIGN_T>::GET(const Shape* s, DWRITE_TEXT_ALIGNMENT& val) noexcept
 	{
-		return s->get_text_align_t(val);
+		return s->get_text_align_horz(val);
 	}
 
 	bool UndoValue<UNDO_ID::TEXT_CONTENT>::GET(const Shape* s, wchar_t*& val) noexcept

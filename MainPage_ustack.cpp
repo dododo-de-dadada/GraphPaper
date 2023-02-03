@@ -370,13 +370,13 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (u_type == typeid(UndoValue<UNDO_ID::TEXT_ALIGN_T>)) {
 			DWRITE_TEXT_ALIGNMENT val;
-			m_main_page.get_text_align_t(val);
-			text_align_t_is_checked(val);
+			m_main_page.get_text_align_horz(val);
+			text_align_horz_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_ID::TEXT_PAR_ALIGN>)) {
 			DWRITE_PARAGRAPH_ALIGNMENT val;
-			m_main_page.get_text_par_align(val);
-			text_par_align_is_checked(val);
+			m_main_page.get_text_align_vert(val);
+			text_align_vert_is_checked(val);
 		}
 	}
 

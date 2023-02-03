@@ -196,8 +196,8 @@ namespace winrt::GraphPaper::implementation
 
 			// 文字の幅, 文字のそろえ, 段落のそろえを文字列レイアウトに格納する.
 			winrt::check_hresult(m_dwrite_text_layout->SetFontStretch(m_font_stretch, DWRITE_TEXT_RANGE{ 0, text_len }));
-			winrt::check_hresult(m_dwrite_text_layout->SetTextAlignment(m_text_align_t));
-			winrt::check_hresult(m_dwrite_text_layout->SetParagraphAlignment(m_text_par_align));
+			winrt::check_hresult(m_dwrite_text_layout->SetTextAlignment(m_text_align_horz));
+			winrt::check_hresult(m_dwrite_text_layout->SetParagraphAlignment(m_text_align_vert));
 
 			// 行間を文字列レイアウトに格納する.
 			winrt::com_ptr<IDWriteTextLayout3> t3;
@@ -304,8 +304,8 @@ namespace winrt::GraphPaper::implementation
 
 			// 段落のそろえが変更されたなら文字列レイアウトに格納する.
 			DWRITE_PARAGRAPH_ALIGNMENT para_align = m_dwrite_text_layout->GetParagraphAlignment();
-			if (!equal(para_align, m_text_par_align)) {
-				winrt::check_hresult(m_dwrite_text_layout->SetParagraphAlignment(m_text_par_align));
+			if (!equal(para_align, m_text_align_vert)) {
+				winrt::check_hresult(m_dwrite_text_layout->SetParagraphAlignment(m_text_align_vert));
 				if (!updated) {
 					updated = true;
 				}
@@ -313,8 +313,8 @@ namespace winrt::GraphPaper::implementation
 
 			// 文字のそろえが変更されたなら文字列レイアウトに格納する.
 			DWRITE_TEXT_ALIGNMENT text_align = m_dwrite_text_layout->GetTextAlignment();
-			if (!equal(text_align, m_text_align_t)) {
-				winrt::check_hresult(m_dwrite_text_layout->SetTextAlignment(m_text_align_t));
+			if (!equal(text_align, m_text_align_horz)) {
+				winrt::check_hresult(m_dwrite_text_layout->SetTextAlignment(m_text_align_horz));
 				if (!updated) {
 					updated = true;
 				}
@@ -561,16 +561,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 段落のそろえを得る.
-	bool ShapeText::get_text_par_align(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept
+	bool ShapeText::get_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT& val) const noexcept
 	{
-		val = m_text_par_align;
+		val = m_text_align_vert;
 		return true;
 	}
 
 	// 文字列のそろえを得る.
-	bool ShapeText::get_text_align_t(DWRITE_TEXT_ALIGNMENT& val) const noexcept
+	bool ShapeText::get_text_align_horz(DWRITE_TEXT_ALIGNMENT& val) const noexcept
 	{
-		val = m_text_align_t;
+		val = m_text_align_horz;
 		return true;
 	}
 
@@ -605,9 +605,9 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], t_pos);
+		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], t_pos, a_len);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
@@ -630,7 +630,7 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_TEXT;
 			}
 		}
-		return ShapeRect::hit_test(t_pos);
+		return ShapeRect::hit_test(t_pos, a_len);
 	}
 
 	// 範囲に含まれるか判定する.
@@ -855,20 +855,20 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 値を段落のそろえに格納する.
-	bool ShapeText::set_text_par_align(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept
+	bool ShapeText::set_text_align_vert(const DWRITE_PARAGRAPH_ALIGNMENT val) noexcept
 	{
-		if (m_text_par_align != val) {
-			m_text_par_align = val;
+		if (m_text_align_vert != val) {
+			m_text_align_vert = val;
 			return true;
 		}
 		return false;
 	}
 
 	// 値を文字列のそろえに格納する.
-	bool ShapeText::set_text_align_t(const DWRITE_TEXT_ALIGNMENT val) noexcept
+	bool ShapeText::set_text_align_horz(const DWRITE_TEXT_ALIGNMENT val) noexcept
 	{
-		if (m_text_align_t != val) {
-			m_text_align_t = val;
+		if (m_text_align_horz != val) {
+			m_text_align_horz = val;
 			return true;
 		}
 		return false;
@@ -920,8 +920,8 @@ namespace winrt::GraphPaper::implementation
 		m_text_line_sp(page->m_text_line_sp),
 		m_text_padding(page->m_text_padding),
 		m_text(text),
-		m_text_align_t(page->m_text_align_t),
-		m_text_par_align(page->m_text_par_align),
+		m_text_align_horz(page->m_text_align_horz),
+		m_text_align_vert(page->m_text_align_vert),
 		m_text_selected_range(DWRITE_TEXT_RANGE{ 0, 0 })
 	{
 		ShapeText::is_available_font(m_font_family);
@@ -954,8 +954,8 @@ namespace winrt::GraphPaper::implementation
 		m_font_style(static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32())),
 		m_font_weight(static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32())),
 		m_text(text_read_text(dt_reader)),
-		m_text_par_align(static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32())),
-		m_text_align_t(static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32())),
+		m_text_align_vert(static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32())),
+		m_text_align_horz(static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32())),
 		m_text_line_sp(dt_reader.ReadSingle()),
 		m_text_padding(D2D1_SIZE_F{
 			dt_reader.ReadSingle(),
@@ -1008,17 +1008,17 @@ namespace winrt::GraphPaper::implementation
 			m_font_weight = page.m_font_weight;
 		}
 		// 段落のそろえ
-		if (!(m_text_par_align == DWRITE_PARAGRAPH_ALIGNMENT_CENTER ||
-			m_text_par_align == DWRITE_PARAGRAPH_ALIGNMENT_FAR ||
-			m_text_par_align == DWRITE_PARAGRAPH_ALIGNMENT_NEAR)) {
-			m_text_par_align = page.m_text_par_align;
+		if (!(m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_CENTER ||
+			m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_FAR ||
+			m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_NEAR)) {
+			m_text_align_vert = page.m_text_align_vert;
 		}
 		// 文字列のそろえ
-		if (!(m_text_align_t == DWRITE_TEXT_ALIGNMENT_CENTER ||
-			m_text_align_t == DWRITE_TEXT_ALIGNMENT_JUSTIFIED ||
-			m_text_align_t == DWRITE_TEXT_ALIGNMENT_LEADING ||
-			m_text_align_t == DWRITE_TEXT_ALIGNMENT_TRAILING)) {
-			m_text_align_t = m_text_align_t;
+		if (!(m_text_align_horz == DWRITE_TEXT_ALIGNMENT_CENTER ||
+			m_text_align_horz == DWRITE_TEXT_ALIGNMENT_JUSTIFIED ||
+			m_text_align_horz == DWRITE_TEXT_ALIGNMENT_LEADING ||
+			m_text_align_horz == DWRITE_TEXT_ALIGNMENT_TRAILING)) {
+			m_text_align_horz = m_text_align_horz;
 		}
 		// 行間
 		if (m_text_line_sp < 0.0f || m_text_line_sp > 127.5f) {
@@ -1056,8 +1056,8 @@ namespace winrt::GraphPaper::implementation
 		const auto text_data = reinterpret_cast<const uint8_t*>(m_text);
 		dt_writer.WriteBytes(array_view(text_data, text_data + 2 * text_len));
 
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_par_align));
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_t));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_vert));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_text_align_horz));
 		dt_writer.WriteSingle(m_text_line_sp);
 		dt_writer.WriteSingle(m_text_padding.width);
 		dt_writer.WriteSingle(m_text_padding.height);

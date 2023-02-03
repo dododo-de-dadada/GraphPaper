@@ -12,7 +12,7 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
-	using winrt::Windows::UI::ViewManagement::UISettings;
+	//using winrt::Windows::UI::ViewManagement::UISettings;
 	using winrt::Windows::UI::Xaml::Application;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
@@ -186,7 +186,7 @@ namespace winrt::GraphPaper::implementation
 
 		// クリックの判定時間と判定距離をシステムから得る.
 		{
-			m_event_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
+			//m_event_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
 			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_event_click_dist = 6.0 * raw_dpi / log_dpi;

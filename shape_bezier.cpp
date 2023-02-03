@@ -551,14 +551,14 @@ namespace winrt::GraphPaper::implementation
 			D2D1_MATRIX_3X2_F tran;
 			target->GetTransform(&tran);
 			const auto s_width = static_cast<FLOAT>(1.0 / tran.m11);
-			anc_draw_rect(m_start, target, brush);
+			anc_draw_rect(m_start, Shape::s_anc_len / tran._11, target, brush);
 			s_pos = m_start;
 			pt_add(s_pos, m_vec[0], e_pos);
 			brush->SetColor(Shape::s_background_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
 			brush->SetColor(Shape::s_foreground_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_ellipse(e_pos, target, brush);
+			anc_draw_ellipse(e_pos, Shape::s_anc_len / tran._11, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[1], e_pos);
@@ -566,7 +566,7 @@ namespace winrt::GraphPaper::implementation
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
 			brush->SetColor(Shape::s_foreground_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_ellipse(e_pos, target, brush);
+			anc_draw_ellipse(e_pos, Shape::s_anc_len / tran._11, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[2], e_pos);
@@ -574,7 +574,7 @@ namespace winrt::GraphPaper::implementation
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
 			brush->SetColor(Shape::s_foreground_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_rect(e_pos, target, brush);
+			anc_draw_rect(e_pos, Shape::s_anc_len / tran._11, target, brush);
 		}
 	}
 
@@ -583,11 +583,11 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
 	//------------------------------
-	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
 		const auto f_opaque = is_opaque(m_fill_color);
 		bool f_test = false;	// 位置が塗りつぶしに含まれるか判定
-		const auto e_width = max(max(static_cast<double>(m_stroke_width), Shape::s_anc_len) * 0.5, 0.5);	// 線枠の太さの半分の値
+		const auto e_width = max(max(static_cast<double>(m_stroke_width), a_len) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
 		pt_sub(t_pos, m_start, tp);
 		// 判定する位置によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
@@ -597,16 +597,16 @@ namespace winrt::GraphPaper::implementation
 		pt_add(c_pos[0], m_vec[0], c_pos[1]);
 		pt_add(c_pos[1], m_vec[1], c_pos[2]);
 		pt_add(c_pos[2], m_vec[2], c_pos[3]);
-		if (pt_in_anc(tp, c_pos[3])) {
+		if (pt_in_anc(tp, c_pos[3], a_len)) {
 			return ANC_TYPE::ANC_P0 + 3;
 		}
-		if (pt_in_anc(tp, c_pos[2])) {
+		if (pt_in_anc(tp, c_pos[2], a_len)) {
 			return ANC_TYPE::ANC_P0 + 2;
 		}
-		if (pt_in_anc(tp, c_pos[1])) {
+		if (pt_in_anc(tp, c_pos[1], a_len)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
-		if (pt_in_anc(tp, c_pos[0])) {
+		if (pt_in_anc(tp, c_pos[0], a_len)) {
 			return ANC_TYPE::ANC_P0 + 0;
 		}
 		if (equal(m_stroke_cap, CAP_ROUND)) {

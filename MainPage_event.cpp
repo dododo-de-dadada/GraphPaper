@@ -18,6 +18,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::Primitives::ScrollBar;
 	using winrt::Windows::UI::Xaml::Window;
 	using winrt::Windows::UI::Xaml::Controls::MenuFlyoutSeparator;
+	using winrt::Windows::UI::ViewManagement::UISettings;
 
 	static auto const& CURS_ARROW = CoreCursor(CoreCursorType::Arrow, 0);	// 矢印カーソル
 	static auto const& CURS_CROSS = CoreCursor(CoreCursorType::Cross, 0);	// 十字カーソル
@@ -608,7 +609,7 @@ namespace winrt::GraphPaper::implementation
 			// 長さがクリック判定距離を超えるか判定する.
 			D2D1_POINT_2F vec;
 			pt_sub(m_event_pos_curr, m_event_pos_pressed, vec);
-			if (pt_abs2(vec) > m_event_click_dist) {
+			if (pt_abs2(vec) > m_event_click_dist / m_main_page.m_page_scale) {
 				// 初期状態に戻る.
 				m_event_state = EVENT_STATE::BEGIN;
 				event_set_cursor();
@@ -644,7 +645,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F vec;
 			pt_sub(m_event_pos_curr, m_event_pos_pressed, vec);
 			// 差分がクリックの判定距離を超えるか判定する.
-			if (pt_abs2(vec) > m_event_click_dist) {
+			if (pt_abs2(vec) > m_event_click_dist / m_main_page.m_page_scale) {
 				// 作図ツールが選択ツール以外か判定する.
 				if (m_drawing_tool != DRAWING_TOOL::SELECT) {
 					// 範囲を選択している状態に遷移する.
@@ -689,7 +690,7 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_show_popup(void)
 	{
 		Shape* shape_pressed;
-		const uint32_t anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, shape_pressed);
+		const uint32_t anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, Shape::s_anc_len / m_main_page.m_page_scale, shape_pressed);
 
 		MenuFlyout popup{};
 		// 押された図形がヌル, または押された図形の部位が外側か判定する.
@@ -792,6 +793,7 @@ namespace winrt::GraphPaper::implementation
 		event_set_position(args);
 
 		// ポインターのデバイスタイプを判定する.
+		const auto c_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
 		switch (args.GetCurrentPoint(swap_chain_panel).PointerDevice().PointerDeviceType()) {
 		// デバイスタイプがマウスの場合
 		case PointerDeviceType::Mouse:
@@ -810,7 +812,7 @@ namespace winrt::GraphPaper::implementation
 				// 状態がクリックした状態の場合
 				case EVENT_STATE::CLICK:
 					// イベント発生時刻と前回ポインターが押された時刻の差がクリック判定時間以下か判定する.
-					if (t_stamp - m_event_time_pressed <= m_event_click_time) {
+					if (t_stamp - m_event_time_pressed <= c_time) {
 						m_event_state = EVENT_STATE::CLICK_LBTN;
 					}
 					else {
@@ -835,7 +837,7 @@ namespace winrt::GraphPaper::implementation
 		m_event_pos_pressed = m_event_pos_curr;
 		// 作図ツールが選択ツールか判定する.
 		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
-			m_event_anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, m_event_shape_pressed);
+			m_event_anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, Shape::s_anc_len / m_main_page.m_page_scale, m_event_shape_pressed);
 			// 押されたのが図形の外側か判定する.
 			if (m_event_anc_pressed == ANC_TYPE::ANC_PAGE) {
 				m_event_shape_pressed = nullptr;
@@ -883,10 +885,11 @@ namespace winrt::GraphPaper::implementation
 		if (m_event_state == EVENT_STATE::PRESS_LBTN) {
 			// ボタンが離れた時刻と押された時刻の差が, クリックの判定時間以下か判定する.
 			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
-			if (t_stamp - m_event_time_pressed <= m_event_click_time) {
+			const auto c_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
+			if (t_stamp - m_event_time_pressed <= c_time) {
 				if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 					Shape* s;
-					uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
+					uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, Shape::s_anc_len / m_main_page.m_page_scale, s);
 					if (anc == ANC_TYPE::ANC_PAGE) {
 						ustack_push_set<UNDO_ID::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
 						ustack_push_null();
@@ -918,8 +921,9 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::CLICK_LBTN) {
 			// ボタンが離された時刻と押された時刻の差分を得る.
 			const auto t_stamp = args.GetCurrentPoint(panel).Timestamp();
+			const auto c_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
 			// 差分がクリックの判定時間以下, かつ押された図形が文字列図形か判定する.
-			if (t_stamp - m_event_time_pressed <= m_event_click_time &&
+			if (t_stamp - m_event_time_pressed <= c_time &&
 				m_event_shape_pressed != nullptr) {
 				if (typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
 					edit_text_click_async(nullptr, nullptr);
@@ -988,7 +992,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 				Shape* s;
-				uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
+				uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, Shape::s_anc_len / m_main_page.m_page_scale, s);
 				if (anc == ANC_TYPE::ANC_PAGE) {
 					m_eyedropper_color = m_main_page.m_page_color;
 					m_eyedropper_filled = true;
@@ -1053,7 +1057,7 @@ namespace winrt::GraphPaper::implementation
 			// 描画の排他制御をロックできたなら, ただちに解除する.
 			m_mutex_draw.unlock();
 			Shape* s;
-			const auto anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, s);
+			const auto anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, Shape::s_anc_len / m_main_page.m_page_scale, s);
 			if (anc == ANC_TYPE::ANC_PAGE) {
 				Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 			}

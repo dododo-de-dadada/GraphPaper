@@ -249,7 +249,7 @@ namespace winrt::GraphPaper::implementation
 		Shape* m_event_shape_pressed = nullptr;	// ポインターが押された図形
 		Shape* m_event_shape_prev = nullptr;	// 前回ポインターが押された図形
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
-		uint64_t m_event_click_time = 0ULL;	// クリックの判定時間 (マイクロ秒)
+		//uint64_t m_event_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;	// クリックの判定時間 (マイクロ秒)
 		double m_event_click_dist = 6.0;	// クリックの判定距離 (DIPs)
 		D2D1_COLOR_F m_eyedropper_color = COLOR_BLACK;	// 抽出された色.
 		bool m_eyedropper_filled = false;
@@ -669,10 +669,6 @@ namespace winrt::GraphPaper::implementation
 		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
-		// MainPage_page.cpp
-		//-------------------------------
-
-		//-------------------------------
 		// MainPage_sample.cpp
 		// 属性
 		//-------------------------------
@@ -908,9 +904,9 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 書体メニューの「文字列のそろえ」に印をつける.
-		void text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT val);
+		void text_align_horz_is_checked(const DWRITE_TEXT_ALIGNMENT val);
 		// 書体メニューの「段落のそろえ」に印をつける.
-		void text_par_align_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val);
+		void text_align_vert_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val);
 		// 書体メニューの「枠を文字列に合わせる」が選択された.
 		void text_fit_frame_to_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「行間...」が選択された.
@@ -918,9 +914,9 @@ namespace winrt::GraphPaper::implementation
 		// 書体メニューの「余白...」が選択された.
 		IAsyncAction text_padding_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 書体メニューの「段落のそろえ」が選択された.
-		void text_par_align_click(IInspectable const& sender, RoutedEventArgs const&);
+		void text_align_vert_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 書体メニューの「文字列のそろえ」が選択された.
-		void text_align_t_click(IInspectable const& sender, RoutedEventArgs const&);
+		void text_align_horz_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_ID U, int S> void text_slider_set_header(const float val);
 		// スライダーの値が変更された.

@@ -553,11 +553,11 @@
     <value>Dash Style</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_text_par_align.Text" xml:space="preserve">
+  <data name="mfsi_text_align_vert.Text" xml:space="preserve">
     <value>Paragraph Alignment</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="mfsi_text_align_t.Text" xml:space="preserve">
+  <data name="mfsi_text_align_horz.Text" xml:space="preserve">
     <value>Text Alignment</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>

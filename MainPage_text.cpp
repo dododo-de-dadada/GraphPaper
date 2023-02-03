@@ -79,7 +79,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「段落のそろえ」が選択された.
-	void MainPage::text_par_align_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::text_align_vert_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_PARAGRAPH_ALIGNMENT val;
 		if (sender == rmfi_text_align_top()) {
@@ -94,7 +94,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			winrt::hresult_not_implemented();
 		}
-		text_par_align_is_checked(val);
+		text_align_vert_is_checked(val);
 		if (ustack_push_set<UNDO_ID::TEXT_PAR_ALIGN>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
@@ -105,7 +105,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 書体メニューの「段落のそろえ」に印をつける.
 	// val	段落のそろえ
-	void MainPage::text_par_align_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val)
+	void MainPage::text_align_vert_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val)
 	{
 		rmfi_text_align_top().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 		//rmfi_text_align_top_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
@@ -116,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 書体メニューの「文字列のそろえ」が選択された.
-	void MainPage::text_align_t_click(IInspectable const& sender, RoutedEventArgs const&)
+	void MainPage::text_align_horz_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		DWRITE_TEXT_ALIGNMENT val;
 		if (sender == rmfi_text_align_left()) {
@@ -134,7 +134,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			winrt::hresult_not_implemented();
 		}
-		text_align_t_is_checked(val);
+		text_align_horz_is_checked(val);
 		if (ustack_push_set<UNDO_ID::TEXT_ALIGN_T>(val)) {
 			ustack_push_null();
 			xcvd_is_enabled();
@@ -145,7 +145,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 書体メニューの「文字列のそろえ」に印をつける.
 	// t_align	文字列のそろえ
-	void MainPage::text_align_t_is_checked(const DWRITE_TEXT_ALIGNMENT val)
+	void MainPage::text_align_horz_is_checked(const DWRITE_TEXT_ALIGNMENT val)
 	{
 		rmfi_text_align_left().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 		//rmfi_text_align_left_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);

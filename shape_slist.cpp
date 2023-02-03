@@ -268,7 +268,7 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	判定する位置
 	// s	位置を含む図形
 	// 戻り値	位置を含む図形の部位
-	uint32_t slist_hit_test(SHAPE_LIST const& slist, const D2D1_POINT_2F t_pos, Shape*& s) noexcept
+	uint32_t slist_hit_test(SHAPE_LIST const& slist, const D2D1_POINT_2F t_pos, const double a_len, Shape*& s) noexcept
 	{
 		// 前面にある図形が先にヒットするように, リストを逆順に検索する.
 		for (auto it = slist.rbegin(); it != slist.rend(); it++) {
@@ -279,7 +279,7 @@ namespace winrt::GraphPaper::implementation
 			//if (!t->is_selected()) {
 			//	continue;
 			//}
-			const uint32_t anc = t->hit_test(t_pos);
+			const uint32_t anc = t->hit_test(t_pos, a_len);
 			if (anc != ANC_TYPE::ANC_PAGE) {
 				s = t;
 				return anc;
