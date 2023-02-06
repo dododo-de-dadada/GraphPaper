@@ -5,9 +5,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataReader;
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
 	constexpr auto INDEX_NIL = static_cast<uint32_t>(-2);	// ÉkÉãê}å`ÇÃìYÇ¶éö
 	constexpr auto INDEX_PAGE = static_cast<uint32_t>(-1);	// ï\é¶ê}å`ÇÃìYÇ¶éö
 
@@ -185,7 +182,7 @@ namespace winrt::GraphPaper::implementation
 		m_dst_shape(t)
 	{
 		//m_dst_shape = t;
-		exec();
+		UndoOrder::exec();
 	}
 
 	// ê}å`ÇÃì¸ÇÍë÷Ç¶ëÄçÏÇÉfÅ[É^ÉâÉCÉ^Å[Ç…èëÇ´çûÇﬁ.
@@ -202,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		using winrt::GraphPaper::implementation::equal;
 		U_TYPE<U>::type val{};
-		return GET(m_shape, val) && !equal(val, m_value);
+		return UndoValue<U>::GET(m_shape, val) && !equal(val, m_value);
 	}
 
 	// ëÄçÏÇé¿çsÇ∑ÇÈ.
@@ -210,8 +207,8 @@ namespace winrt::GraphPaper::implementation
 	void UndoValue<U>::exec(void)
 	{
 		U_TYPE<U>::type old_val{};
-		if (GET(m_shape, old_val)) {
-			SET(m_shape, m_value);
+		if (UndoValue<U>::GET(m_shape, old_val)) {
+			UndoValue<U>::SET(m_shape, m_value);
 			m_value = old_val;
 		}
 	}
@@ -221,12 +218,12 @@ namespace winrt::GraphPaper::implementation
 	UndoValue<U>::UndoValue(Shape* s) :
 		Undo(s)
 	{
-		GET(m_shape, m_value);
+		UndoValue<U>::GET(m_shape, m_value);
 	}
 
 	// ê}å`ÇÃëÆê´ílÇï€ë∂ÇµÇΩÇ†Ç∆ílÇäiî[Ç∑ÇÈ.
 	template <UNDO_ID U>
-	UndoValue<U>::UndoValue(Shape* s, U_TYPE<U>::type const& val) :
+	UndoValue<U>::UndoValue(Shape* s, const U_TYPE<U>::type& val) :
 		UndoValue(s)
 	{
 		UndoValue<U>::SET(m_shape, val);
@@ -254,6 +251,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::PAGE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
 	template UndoValue<UNDO_ID::POLY_END>::UndoValue(Shape* s, const bool &val);
+	template UndoValue<UNDO_ID::ROTATION>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
 	template UndoValue<UNDO_ID::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_ID::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
@@ -274,6 +272,7 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_ID::GRID_BASE ||
 			U == UNDO_ID::IMAGE_OPAC ||
 			U == UNDO_ID::JOIN_LIMIT ||
+			U == UNDO_ID::ROTATION ||
 			U == UNDO_ID::STROKE_WIDTH ||
 			U == UNDO_ID::TEXT_LINE_SP) {
 			m_value = dt_reader.ReadSingle();
@@ -393,6 +392,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::PAGE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::POLY_END>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::ROTATION>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_WIDTH>::UndoValue(DataReader const& dt_reader);
@@ -522,6 +522,11 @@ namespace winrt::GraphPaper::implementation
 	void UndoValue<UNDO_ID::POLY_END>::SET(Shape* const s, const bool& val)
 	{
 		s->set_poly_end(val);
+	}
+
+	void UndoValue<UNDO_ID::ROTATION>::SET(Shape* const s, const float& val)
+	{
+		s->set_rotation(val);
 	}
 
 	void UndoValue<UNDO_ID::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
@@ -689,6 +694,11 @@ namespace winrt::GraphPaper::implementation
 		return s->get_poly_end(val);
 	}
 
+	bool UndoValue<UNDO_ID::ROTATION>::GET(const Shape* s, float& val) noexcept
+	{
+		return s->get_rotation(val);
+	}
+
 	bool UndoValue<UNDO_ID::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& val) noexcept
 	{
 		return s->get_stroke_cap(val);
@@ -744,6 +754,7 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_ID::GRID_BASE ||
 			U == UNDO_ID::IMAGE_OPAC ||
 			U == UNDO_ID::JOIN_LIMIT ||
+			U == UNDO_ID::ROTATION ||
 			U == UNDO_ID::STROKE_WIDTH ||
 			U == UNDO_ID::TEXT_LINE_SP) {
 			dt_writer.WriteSingle(m_value);

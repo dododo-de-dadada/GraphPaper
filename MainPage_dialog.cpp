@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 		m_dialog_page.m_grid_offset.x = offset;
 		m_dialog_page.m_grid_offset.y = offset;
 		m_dialog_page.draw();
-		m_dialog_d2d.m_d2d_context->EndDraw();
+		const auto hr = m_dialog_d2d.m_d2d_context->EndDraw();
 		m_dialog_d2d.m_d2d_context->RestoreDrawingState(m_dialog_page.m_state_block.get());
 		m_dialog_d2d.Present();
 		m_mutex_draw.unlock();

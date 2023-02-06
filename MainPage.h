@@ -307,6 +307,10 @@ namespace winrt::GraphPaper::implementation
 		//PrintDocument m_print_doc;
 		//IPrintDocumentSource m_print_source;
 
+		template <UNDO_ID U, int S> void rotation_slider_set_header(const float val);
+		template <UNDO_ID U, int S> void rotation_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
+		IAsyncAction rotation_click_async(IInspectable const&, RoutedEventArgs const&);
+
 		//-------------------------------
 		// MainPage.cpp
 		// メインページの作成, アプリの終了

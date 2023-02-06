@@ -112,8 +112,48 @@ namespace winrt::GraphPaper::implementation
 	// 値を, 部位の位置に格納する.
 	bool ShapeQCircle::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept
 	{
-		if (anc != ANC_TYPE::ANC_CENTER) {
+		if (anc == ANC_TYPE::ANC_P0) {
+			D2D1_POINT_2F c_pos{ NAN, NAN };
+			get_pos_center(m_start, m_vec[0], m_radius, M_PI * m_rotation / 180.0, c_pos);
+			if (isnan(c_pos.x) || isnan(c_pos.y)) {
+				__debugbreak();
+			}
+			const D2D1_POINT_2F h_vec{ 0.0, -1.0f };
+			const auto px = val.x - c_pos.x;
+			const auto py = val.y - c_pos.y;
+			const auto c = min(max((h_vec.x * px + h_vec.y * py) / sqrt(px * px + py * py), -1.0), 1.0);
+			const auto s = min(max((h_vec.x * py - h_vec.y * px) / sqrt(px * px + py * py), -1.0), 1.0);
+			const auto qx = c * m_radius.width - s * 0.0;
+			const auto qy = s * m_radius.width + c * 0.0;
+			m_rotation = 180.0 * asin(s) / M_PI;
+			m_vec[0].x = qx + c_pos.x - val.x;
+			m_vec[0].y = qy + c_pos.y - val.y;
+			m_start = val;
+			m_radius.height = sqrt(px * px + py * py);
+			m_d2d_arrow_geom = nullptr;
+			m_d2d_fill_geom = nullptr;
+			m_d2d_path_geom = nullptr;
+			return true;
+		}
+		else if (anc != ANC_TYPE::ANC_CENTER) {
 			if (ShapePath::set_pos_anc(val, anc, limit, keep_aspect)) {
+				/*
+				const double px = m_start.x;
+				const double py = m_start.y;
+				const double qx = m_start.x + m_vec[0].x;
+				const double qy = m_start.y + m_vec[0].y;
+				const auto a = 1.0;
+				const auto b0 = -(px + qx);
+				const auto c0 = px * qx;
+				const auto b1 = -(py + qy);
+				const auto c1 = py + qy;
+				const auto bb_4ac0 = b0 * b0 - 4.0 * a * c0;
+				const auto bb_4ac1 = b1 * b1 - 4.0 * a * c1;
+				const auto rx = (-b0 - sqrt(bb_4ac0)) / (2.0 * a);
+				const auto ry = (-b1 - sqrt(bb_4ac1)) / (2.0 * a);
+				m_radius.width = sqrt((qx - rx) * (qx - rx) + (qy - ry) * (qy - ry));
+				m_radius.height = sqrt((px - rx) * (px - rx) + (py - ry) * (py - ry));
+				*/
 				const double r = M_PI * m_rotation / 180.0;
 				const double c = cos(r);
 				const double s = sin(r);
@@ -618,22 +658,43 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	constexpr double DEGREE = 15;
-	ShapeQCircle::ShapeQCircle(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+	ShapeQCircle::ShapeQCircle(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const float rot, const ShapePage* page) :
 		ShapePath(page, false),
 		m_radius({ b_vec.x, b_vec.y }),
-		m_rotation(DEGREE),
+		m_rotation(rot),
 		m_sweep_flag(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE),
 		m_larg_flag(D2D1_ARC_SIZE_SMALL)
 	{
-		m_start = b_pos;	// 始点
-		m_vec.push_back(b_vec);	// 終点
-
+		/*
+		// (p - r)・(q - r) = 0
+		// pq - pr - qr + r^2 = 0
+		// r^2 - (p + q)・r + pq = 0
+		const double px = b_pos.x;
+		const double py = b_pos.y;
+		const double qx = b_pos.x + b_vec.x;
+		const double qy = b_pos.y + b_vec.y;
+		const auto a = 1.0;
+		const auto b0 = -(px + qx);
+		const auto c0 =   px * qx;
+		const auto b1 = -(py + qy);
+		const auto c1 = py + qy;
+		const auto bb_4ac0 = b0 * b0 - 4.0 * a * c0;
+		const auto bb_4ac1 = b1 * b1 - 4.0 * a * c1;
+		const auto rx = (-b0 - sqrt(bb_4ac0)) / 2.0;
+		const auto ry = (-b1 - sqrt(bb_4ac1)) / 2.0;
+		m_radius.width = sqrt((qx - rx) * (qx - rx) + (qy - ry) * (qy - ry));
+		m_radius.height = sqrt((px - rx) * (px - rx) + (py - ry) * (py - ry));
+		*/
+		// m_start = b_pos;	// 始点
+		// m_vec.push_back(b_vec);	// 終点
 		D2D1_POINT_2F c_pos;
 		get_pos_center(b_pos, b_vec, m_radius, 0.0, c_pos);
-		const auto c = cos(-(DEGREE * M_PI / 180.0));
-		const auto s = sin(-(DEGREE * M_PI / 180.0));
+		const auto c = cos(-(rot * M_PI / 180.0));
+		const auto s = sin(-(rot * M_PI / 180.0));
+
 		m_start.x =  c * (b_pos.x - c_pos.x) + s * (b_pos.y - c_pos.y) + c_pos.x;
 		m_start.y = -s * (b_pos.x - c_pos.x) + c * (b_pos.y - c_pos.y) + c_pos.y;
+		m_vec.resize(1);
 		m_vec[0].x =  c * (b_pos.x + b_vec.x - c_pos.x) + s * (b_pos.y + b_vec.y - c_pos.y) + c_pos.x - m_start.x;
 		m_vec[0].y = -s * (b_pos.x + b_vec.x - c_pos.x) + c * (b_pos.y + b_vec.y - c_pos.y) + c_pos.y - m_start.y;
 	}

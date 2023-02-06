@@ -622,6 +622,7 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_ID::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
 	template void MainPage::ustack_push_set<UNDO_ID::PAGE_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
 	template void MainPage::ustack_push_set<UNDO_ID::PAGE_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
+	template void MainPage::ustack_push_set<UNDO_ID::ROTATION>(Shape* const s, float const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_CAP>(CAP_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_WIDTH>(float const& val);

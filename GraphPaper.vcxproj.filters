@@ -69,6 +69,7 @@
     <ClCompile Include="zlib.cpp" />
     <ClCompile Include="MainPage_CMap.cpp" />
     <ClCompile Include="shape_arc.cpp" />
+    <ClCompile Include="MainPage_rotation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

@@ -374,7 +374,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeRuler(b_pos, b_vec, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::QCIRCLE) {
-			s = new ShapeQCircle(b_pos, b_vec, &m_main_page);
+			s = new ShapeQCircle(b_pos, b_vec, 0.0f, &m_main_page);
 		}
 		else {
 			return;
@@ -928,9 +928,9 @@ namespace winrt::GraphPaper::implementation
 				if (typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
 					edit_text_click_async(nullptr, nullptr);
 				}
-				//if (typeid(*m_event_shape_pressed) == typeid(ShapeQCircle)) {
-				//	edit_text_async(static_cast<ShapeQCircle*>(m_event_shape_pressed));
-				//}
+				else if (typeid(*m_event_shape_pressed) == typeid(ShapeQCircle)) {
+					rotation_click_async(nullptr, nullptr);
+				}
 			}
 		}
 		// ó‘Ô‚ª, }Œ`‚ğˆÚ“®‚µ‚Ä‚¢‚éó‘Ô‚©”»’è‚·‚é.

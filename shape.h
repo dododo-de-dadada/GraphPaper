@@ -477,6 +477,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_text_padding(D2D1_SIZE_F& /*val*/) const noexcept { return false; }
 		// 文字範囲を得る
 		virtual bool get_text_selected(DWRITE_TEXT_RANGE& /*val*/) const noexcept { return false; }
+		// 回転角度を得る.
+		virtual bool get_rotation(float& /*val*/) const noexcept { return false; }
 		// 文字範囲を得る
 		//virtual bool get_font_collection(IDWriteFontCollection** /*val*/) const noexcept { return false; }
 		// 頂点を得る.
@@ -553,6 +555,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_page_scale(const float /*val*/) noexcept { return false; }
 		// 値をページの大きさに格納する.
 		virtual bool set_page_size(const D2D1_SIZE_F /*val*/) noexcept { return false; }
+		// 値を回転角度に格納する.
+		virtual bool set_rotation(const float /*val*/) noexcept { return false; }
 		// 値を選択されてるか判定に格納する.
 		virtual bool set_select(const bool /*val*/) noexcept { return false; }
 		// 値を線枠の色に格納する.
@@ -1444,9 +1448,35 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに SVG として書き込む.
 		void export_svg(const DataWriter& dt_writer);
 		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer);
-		ShapeQCircle(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page);
+		ShapeQCircle(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const float rot, const ShapePage* page);
 		ShapeQCircle(const ShapePage& page, const DataReader& dt_reader);
 		void write(const DataWriter& dt_writer) const final override;
+		bool get_rotation(float& val) const noexcept final override {
+			val = m_rotation;
+			return true;
+		}
+		bool set_rotation(const float val) noexcept final override {
+			if (!equal(m_rotation, val)) {
+				m_rotation = val;
+				D2D1_POINT_2F c_pos;
+				D2D1_POINT_2F b_pos{ m_start };
+				D2D1_POINT_2F b_vec{ m_vec[0] };
+				get_pos_center(b_pos, b_vec, m_radius, val, c_pos);
+				const auto c = cos(-(val * M_PI / 180.0));
+				const auto s = sin(-(val * M_PI / 180.0));
+
+				m_start.x = c * (b_pos.x - c_pos.x) + s * (b_pos.y - c_pos.y) + c_pos.x;
+				m_start.y = -s * (b_pos.x - c_pos.x) + c * (b_pos.y - c_pos.y) + c_pos.y;
+				m_vec.resize(1);
+				m_vec[0].x = c * (b_pos.x + b_vec.x - c_pos.x) + s * (b_pos.y + b_vec.y - c_pos.y) + c_pos.x - m_start.x;
+				m_vec[0].y = -s * (b_pos.x + b_vec.x - c_pos.x) + c * (b_pos.y + b_vec.y - c_pos.y) + c_pos.y - m_start.y;
+				m_d2d_fill_geom = nullptr;
+				m_d2d_path_geom = nullptr;
+				m_d2d_arrow_geom = nullptr;
+				return true;
+			}
+			return false;
+		}
 	};
 
 	//------------------------------
@@ -1825,10 +1855,11 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	含む場合 true
 	inline bool pt_in_ellipse(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F c_pos, const double rad_x, const double rad_y, const double rot) noexcept
 	{
-		// だ円の中心を原点とする座標に平行移動.
+		// 標準形のだ円に合致するよう変換した位置を判定する.
+		// だ円の中心を原点とする座標に判定する位置を平行移動.
 		const double dx = static_cast<double>(t_pos.x) - static_cast<double>(c_pos.x);
 		const double dy = static_cast<double>(t_pos.y) - static_cast<double>(c_pos.y);
-		// だ円の傾きに合わせて回転.
+		// だ円の傾きに合わせて判定する位置を回転.
 		const double c = cos(rot);
 		const double s = sin(rot);
 		const double tx = c * dx + s * dy;
