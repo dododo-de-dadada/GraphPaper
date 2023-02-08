@@ -36,7 +36,7 @@ namespace winrt::GraphPaper::implementation
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::LINE);
 		}
 		else if (sender == rmfi_tool_drawing_bezier()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::BEZI);
+			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::BEZIER);
 		}
 		else if (sender == rmfi_tool_drawing_text()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::TEXT);
@@ -44,8 +44,8 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_tool_drawing_ruler()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RULER);
 		}
-		else if (sender == rmfi_tool_drawing_qcircle()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::QCIRCLE);
+		else if (sender == rmfi_tool_drawing_qellipse()) {
+			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::QELLIPSE);
 		}
 		else if (sender == rmfi_tool_eyedropper()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::EYEDROPPER);
@@ -109,10 +109,10 @@ namespace winrt::GraphPaper::implementation
 		rmfi_tool_drawing_poly().IsChecked(val == DRAWING_TOOL::POLY);
 		rmfi_tool_drawing_ellipse().IsChecked(val == DRAWING_TOOL::ELLI);
 		rmfi_tool_drawing_line().IsChecked(val == DRAWING_TOOL::LINE);
-		rmfi_tool_drawing_bezier().IsChecked(val == DRAWING_TOOL::BEZI);
+		rmfi_tool_drawing_bezier().IsChecked(val == DRAWING_TOOL::BEZIER);
 		rmfi_tool_drawing_text().IsChecked(val == DRAWING_TOOL::TEXT);
 		rmfi_tool_drawing_ruler().IsChecked(val == DRAWING_TOOL::RULER);
-		rmfi_tool_drawing_qcircle().IsChecked(val == DRAWING_TOOL::QCIRCLE);
+		rmfi_tool_drawing_qellipse().IsChecked(val == DRAWING_TOOL::QELLIPSE);
 		rmfi_tool_eyedropper().IsChecked(val == DRAWING_TOOL::EYEDROPPER);
 	}
 

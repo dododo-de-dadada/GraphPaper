@@ -520,7 +520,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの返しと先端の位置を得る.
-	bool ShapePolygon::poly_get_arrow_barbs(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROW_SIZE& a_size, D2D1_POINT_2F& h_tip, D2D1_POINT_2F h_barbs[]) noexcept
+	// v_cnt	折れ線の頂点 (端点を含む) の数
+	// v_pos	頂点の位置
+	// a_size	矢じりの大きさ
+	// tip	矢じりの先端の位置
+	// barb	矢じりの返しの位置
+	bool ShapePolygon::poly_get_pos_arrow(const size_t v_cnt, const D2D1_POINT_2F v_pos[], const ARROW_SIZE& a_size, D2D1_POINT_2F& tip, D2D1_POINT_2F barb[]) noexcept
 	{
 		double a_offset = a_size.m_offset;	// 矢じりの先端のオフセット
 		for (size_t i = v_cnt - 1; i > 0; i--) {
@@ -550,10 +555,10 @@ namespace winrt::GraphPaper::implementation
 			const auto a_end = v_pos[i - 1];		// 矢軸の終端
 			const auto b_len = a_size.m_length;	// 矢じりの長さ
 			const auto b_width = a_size.m_width;	// 矢じりの返しの幅
-			get_arrow_barbs(a_vec, a_len, b_width, b_len, h_barbs);
-			pt_mul_add(a_vec, 1.0 - a_offset / a_len, a_end, h_tip);
-			pt_add(h_barbs[0], h_tip, h_barbs[0]);
-			pt_add(h_barbs[1], h_tip, h_barbs[1]);
+			get_pos_barbs(a_vec, a_len, b_width, b_len, barb);
+			pt_mul_add(a_vec, 1.0 - a_offset / a_len, a_end, tip);
+			pt_add(barb[0], tip, barb[0]);
+			pt_add(barb[1], tip, barb[1]);
 			return true;
 		}
 		return false;
@@ -723,18 +728,18 @@ namespace winrt::GraphPaper::implementation
 			if (a_style != ARROW_STYLE::NONE) {
 
 				// 矢じるしの位置を求める.
-				D2D1_POINT_2F h_tip;
-				D2D1_POINT_2F h_barbs[2];
-				if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
+				D2D1_POINT_2F tip;
+				D2D1_POINT_2F barb[2];
+				if (poly_get_pos_arrow(v_cnt, v_pos, m_arrow_size, tip, barb)) {
 
 					// 矢じるしのパスジオメトリを作成する.
 					const auto a_begin = (a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 					winrt::check_hresult(factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
 					winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
 					sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-					sink->BeginFigure(h_barbs[0], a_begin);
-					sink->AddLine(h_tip);
-					sink->AddLine(h_barbs[1]);
+					sink->BeginFigure(barb[0], a_begin);
+					sink->AddLine(tip);
+					sink->AddLine(barb[1]);
 					sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 					winrt::check_hresult(sink->Close());
 					sink = nullptr;
@@ -860,7 +865,7 @@ namespace winrt::GraphPaper::implementation
 	// b_vec	囲む領域の終点への差分
 	// page	ページ
 	// p_opt	多角形の選択肢
-	ShapePolygon::ShapePolygon(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page, const POLY_OPTION& p_opt) :
+	ShapePolygon::ShapePolygon(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const Shape* page, const POLY_OPTION& p_opt) :
 		ShapePath::ShapePath(page, p_opt.m_end_closed),
 		m_end_closed(p_opt.m_end_closed)
 	{
@@ -877,7 +882,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	データリーダー
-	ShapePolygon::ShapePolygon(const ShapePage& page, DataReader const& dt_reader) :
+	ShapePolygon::ShapePolygon(const Shape& page, DataReader const& dt_reader) :
 		ShapePath::ShapePath(page, dt_reader)
 	{
 		m_end_closed = dt_reader.ReadBoolean();

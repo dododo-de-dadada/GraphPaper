@@ -174,7 +174,7 @@ namespace winrt::GraphPaper::implementation
 		target->DrawRoundedRectangle(&r_rect, brush, s_width, Shape::m_aux_style.get());
 	}
 
-	void ShapePage::draw_auxiliary_qcircle(
+	void ShapePage::draw_auxiliary_qellipse(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{

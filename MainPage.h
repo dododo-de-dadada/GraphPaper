@@ -140,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	enum struct DRAWING_TOOL : uint32_t {
 		SELECT,	// 選択ツール
-		BEZI,	// 曲線
+		BEZIER,	// 曲線
 		ELLI,	// だ円
 		LINE,	// 線分
 		POLY,	// 多角形
@@ -148,7 +148,7 @@ namespace winrt::GraphPaper::implementation
 		RRECT,	// 角丸方形
 		TEXT,	// 文字列
 		RULER,	// 定規
-		QCIRCLE,	// 円弧
+		QELLIPSE,	// 四分だ円
 		EYEDROPPER	// スポイトツール
 	};
 
@@ -309,7 +309,7 @@ namespace winrt::GraphPaper::implementation
 
 		template <UNDO_ID U, int S> void rotation_slider_set_header(const float val);
 		template <UNDO_ID U, int S> void rotation_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
-		IAsyncAction rotation_click_async(IInspectable const&, RoutedEventArgs const&);
+		IAsyncAction rotation_click_async(Shape* s);
 
 		//-------------------------------
 		// MainPage.cpp

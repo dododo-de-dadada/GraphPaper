@@ -198,7 +198,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (status_and(m_status_bar, STATUS_BAR::DRAW) == STATUS_BAR::DRAW) {
 			winrt::hstring data;
-			if (m_drawing_tool == DRAWING_TOOL::BEZI) {
+			if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezier")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
@@ -234,8 +234,8 @@ namespace winrt::GraphPaper::implementation
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::QCIRCLE) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_qcircle")));
+			else if (m_drawing_tool == DRAWING_TOOL::QELLIPSE) {
+				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_qellipse")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {

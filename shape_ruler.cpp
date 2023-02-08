@@ -44,15 +44,23 @@ namespace winrt::GraphPaper::implementation
 					x_ge_y ? static_cast<FLOAT>(y) : static_cast<FLOAT>(x)
 				};
 				if (x_ge_y) {
-					const D2D1_POINT_2F p_min{ p0.x - a_len * 0.5, min(p0.y, p1.y) };
-					const D2D1_POINT_2F p_max{ p0.x + a_len * 0.5f, max(p0.y, p1.y) };
+					const D2D1_POINT_2F p_min{
+						static_cast<FLOAT>(p0.x - a_len * 0.5), min(p0.y, p1.y)
+					};
+					const D2D1_POINT_2F p_max{
+						static_cast<FLOAT>(p0.x + a_len * 0.5f), max(p0.y, p1.y)
+					};
 					if (pt_in_rect(t_pos, p_min, p_max)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
 				else {
-					const D2D1_POINT_2F p_min{ min(p0.x, p1.x), p0.y - a_len * 0.5 };
-					const D2D1_POINT_2F p_max{ max(p0.x, p1.x), p0.y + a_len * 0.5 };
+					const D2D1_POINT_2F p_min{
+						min(p0.x, p1.x), static_cast<FLOAT>(p0.y - a_len * 0.5)
+					};
+					const D2D1_POINT_2F p_max{
+						max(p0.x, p1.x), static_cast<FLOAT>(p0.y + a_len * 0.5)
+					};
 					if (pt_in_rect(t_pos, p_min, p_max)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
@@ -275,14 +283,13 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// page	属性
-	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
-		ShapeRect::ShapeRect(b_pos, b_vec, page),
-		m_grid_base(page->m_grid_base),
-		m_font_family(page->m_font_family),
-		//m_font_size(min(page->m_font_size, page->m_grid_base + 1.0f))
-		m_font_size(page->m_font_size)
+	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const Shape* page) :
+		ShapeRect::ShapeRect(b_pos, b_vec, page)
 	{
 		ShapeText::is_available_font(m_font_family);
+		page->get_grid_base(m_grid_base);
+		page->get_font_family(m_font_family);
+		page->get_font_size(m_font_size);
 	}
 
 	static wchar_t* dt_read_name(DataReader const& dt_reader)
@@ -295,8 +302,16 @@ namespace winrt::GraphPaper::implementation
 		return val;
 	}
 
+	// 字面を得る (使用後は Release する).
+	bool ShapeRuler::get_font_face(IDWriteFontFace3*& face) const noexcept
+	{
+		return winrt::GraphPaper::implementation::get_font_face<IDWriteTextFormat>(m_dwrite_text_format.get(),
+			m_font_family,
+			DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STRETCH_NORMAL, DWRITE_FONT_STYLE_NORMAL, face);
+	}
+
 	// 図形をデータリーダーから読み込む.
-	ShapeRuler::ShapeRuler(const ShapePage& page, DataReader const& dt_reader) :
+	ShapeRuler::ShapeRuler(const Shape& page, DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(page, dt_reader),
 		m_grid_base(dt_reader.ReadSingle()),
 		m_font_family(dt_read_name(dt_reader)),

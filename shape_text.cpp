@@ -909,22 +909,29 @@ namespace winrt::GraphPaper::implementation
 	// b_vec	囲む領域の終点への差分
 	// text	文字列
 	// page	属性
-	ShapeText::ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const ShapePage* page) :
-		ShapeRect::ShapeRect(b_pos, b_vec, page),
-		m_font_color(page->m_font_color),
-		m_font_family(page->m_font_family),
-		m_font_size(page->m_font_size),
-		m_font_stretch(page->m_font_stretch),
-		m_font_style(page->m_font_style),
-		m_font_weight(page->m_font_weight),
-		m_text_line_sp(page->m_text_line_sp),
-		m_text_padding(page->m_text_padding),
-		m_text(text),
-		m_text_align_horz(page->m_text_align_horz),
-		m_text_align_vert(page->m_text_align_vert),
-		m_text_selected_range(DWRITE_TEXT_RANGE{ 0, 0 })
+	ShapeText::ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const Shape* page) :
+		ShapeRect::ShapeRect(b_pos, b_vec, page)
 	{
+		page->get_font_color(m_font_color),
+		page->get_font_family(m_font_family),
+		page->get_font_size(m_font_size),
+		page->get_font_stretch(m_font_stretch),
+		page->get_font_style(m_font_style),
+		page->get_font_weight(m_font_weight),
+		page->get_text_line_sp(m_text_line_sp),
+		page->get_text_padding(m_text_padding),
+		m_text = text;
+		page->get_text_align_horz(m_text_align_horz);
+		page->get_text_align_vert(m_text_align_vert);
+		m_text_selected_range = DWRITE_TEXT_RANGE{ 0, 0 };
 		ShapeText::is_available_font(m_font_family);
+	}
+
+	bool ShapeText::get_font_face(IDWriteFontFace3*& face) const noexcept
+	{
+		return winrt::GraphPaper::implementation::get_font_face<IDWriteTextLayout>(
+			m_dwrite_text_layout.get(),
+			m_font_family, m_font_weight, m_font_stretch, m_font_style, face);
 	}
 
 	static wchar_t* text_read_text(DataReader const& dt_reader)
@@ -940,7 +947,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターから読み込む.
-	ShapeText::ShapeText(const ShapePage& page, DataReader const& dt_reader) :
+	ShapeText::ShapeText(const Shape& page, DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(page, dt_reader),
 		m_font_color{
 			dt_reader.ReadSingle(),
@@ -967,13 +974,13 @@ namespace winrt::GraphPaper::implementation
 			m_font_color.g < 0.0f || m_font_color.g > 1.0f ||
 			m_font_color.b < 0.0f || m_font_color.b > 1.0f ||
 			m_font_color.a < 0.0f || m_font_color.a > 1.0f) {
-			m_font_color = page.m_font_color;
+			page.get_font_color(m_font_color);
 		}
 		// 書体名
 		is_available_font(m_font_family);
 		// 書体の大きさ
 		if (m_font_size < 1.0f || m_font_size > 128.5f) {
-			m_font_size = page.m_font_size;
+			page.get_font_size(m_font_size);
 		}
 		// 書体の幅
 		if (!(m_font_stretch == DWRITE_FONT_STRETCH_CONDENSED ||
@@ -985,13 +992,13 @@ namespace winrt::GraphPaper::implementation
 			m_font_stretch == DWRITE_FONT_STRETCH_SEMI_EXPANDED ||
 			m_font_stretch == DWRITE_FONT_STRETCH_ULTRA_CONDENSED ||
 			m_font_stretch == DWRITE_FONT_STRETCH_ULTRA_EXPANDED)) {
-			m_font_stretch = page.m_font_stretch;
+			page.get_font_stretch(m_font_stretch);
 		}
 		// 字体
 		if (!(m_font_style == DWRITE_FONT_STYLE_ITALIC ||
 			m_font_style == DWRITE_FONT_STYLE_NORMAL ||
 			m_font_style == DWRITE_FONT_STYLE_OBLIQUE)) {
-			m_font_style = page.m_font_style;
+			page.get_font_style(m_font_style);
 		}
 		// 書体の太さ
 		if (!(m_font_weight == DWRITE_FONT_WEIGHT_THIN ||
@@ -1005,29 +1012,29 @@ namespace winrt::GraphPaper::implementation
 			m_font_weight == DWRITE_FONT_WEIGHT_EXTRA_BOLD ||
 			m_font_weight == DWRITE_FONT_WEIGHT_BLACK ||
 			m_font_weight == DWRITE_FONT_WEIGHT_EXTRA_BLACK)) {
-			m_font_weight = page.m_font_weight;
+			page.get_font_weight(m_font_weight);
 		}
 		// 段落のそろえ
 		if (!(m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_CENTER ||
 			m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_FAR ||
 			m_text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_NEAR)) {
-			m_text_align_vert = page.m_text_align_vert;
+			page.get_text_align_vert(m_text_align_vert);
 		}
 		// 文字列のそろえ
 		if (!(m_text_align_horz == DWRITE_TEXT_ALIGNMENT_CENTER ||
 			m_text_align_horz == DWRITE_TEXT_ALIGNMENT_JUSTIFIED ||
 			m_text_align_horz == DWRITE_TEXT_ALIGNMENT_LEADING ||
 			m_text_align_horz == DWRITE_TEXT_ALIGNMENT_TRAILING)) {
-			m_text_align_horz = m_text_align_horz;
+			page.get_text_align_horz(m_text_align_horz);
 		}
 		// 行間
 		if (m_text_line_sp < 0.0f || m_text_line_sp > 127.5f) {
-			m_text_line_sp = page.m_text_line_sp;
+			page.get_text_line_sp(m_text_line_sp);
 		}
 		// 文字列の余白
 		if (m_text_padding.width < 0.0f || m_text_padding.width > 127.5 ||
 			m_text_padding.height < 0.0f || m_text_padding.height > 127.5) {
-			m_text_padding = page.m_text_padding;
+			page.get_text_padding(m_text_padding);
 		}
 	}
 
@@ -1086,9 +1093,9 @@ namespace winrt::GraphPaper::implementation
 		return utf32;
 	}
 
-	// フォントフェイスを得る.
+	// 字面を得る.
 	template <typename T>
-	bool get_font_face(T* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face)
+	bool get_font_face(T* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face) noexcept
 	{
 		bool ret = false;
 
@@ -1119,8 +1126,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			coll->Release();
 		}
-		return true;
+		return ret;
 	}
-	template bool get_font_face<IDWriteTextFormat>(IDWriteTextFormat* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face);
-	template bool get_font_face<IDWriteTextLayout>(IDWriteTextLayout* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face);
+	template bool get_font_face<IDWriteTextFormat>(IDWriteTextFormat* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face) noexcept;
+	template bool get_font_face<IDWriteTextLayout>(IDWriteTextLayout* t, const wchar_t* family, const DWRITE_FONT_WEIGHT weight, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_STYLE style, IDWriteFontFace3*& face) noexcept;
 }

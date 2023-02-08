@@ -399,17 +399,16 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// page	属性
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const Shape* page) :
 		ShapeRect::ShapeRect(b_pos, b_vec, page)
 	{
-		D2D1_POINT_2F c_rad{
-			page->m_grid_base + 1.0, page->m_grid_base + 1.0
-		};
-		calc_corner_radius(m_vec[0], c_rad, m_corner_rad);
+		float g_base;
+		page->get_grid_base(g_base);
+		calc_corner_radius(m_vec[0], D2D1_POINT_2F{ g_base + 1.0f, g_base + 1.0f }, m_corner_rad);
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeRRect::ShapeRRect(const ShapePage& page, DataReader const& dt_reader) :
+	ShapeRRect::ShapeRRect(const Shape& page, DataReader const& dt_reader) :
 		ShapeRect::ShapeRect(page, dt_reader)
 	{
 		m_corner_rad = D2D1_POINT_2F{

@@ -351,7 +351,6 @@ namespace winrt::GraphPaper::implementation
 		else if (u_type == typeid(UndoValue<UNDO_ID::DASH_CAP>)) {
 			D2D1_CAP_STYLE val;
 			m_main_page.get_dash_cap(val);
-			//cap_style_is_checked(val);
 		}
 		else if (u_type == typeid(UndoValue<UNDO_ID::DASH_STYLE>)) {
 			D2D1_DASH_STYLE val;
@@ -523,46 +522,6 @@ namespace winrt::GraphPaper::implementation
 		// 図形の選択を反転して, その操作をスタックに積む.
 		m_ustack_undo.push_back(new UndoSelect(s));
 	}
-	/*
-	void MainPage::ustack_push_select(Shape* s)
-	{
-		auto it_end = m_ustack_undo.rend();
-		// 逆順で, 操作スタックの反復子を得る.
-		// 反復子の操作が終端でない場合, 以下を処理する.
-		auto it = m_ustack_undo.rbegin();
-		if (it != it_end) {
-			if (*it == nullptr) {
-				// スタックトップの操作がヌルの場合,
-				// 反復子を次に進める.
-				//it++;
-			}
-			else {
-				// 反復子の操作が図形の選択操作の場合, 以下を繰り返す.
-				bool flag = false;
-				Undo* u;
-				while (it != it_end && (u = *it) != nullptr && typeid(*u) == typeid(UndoSelect)) {
-					if (u->shape() == s) {
-						// 操作の図形が指定された図形と一致した場合,
-						// フラグを立てて中断する.
-						flag = true;
-						break;
-					}
-					it++;
-				}
-				// 処理が中断されたか判定する.
-				if (flag) {
-					// 操作スタックを介せずに図形の選択を反転させ, 
-					// 操作をスタックから取り除き, 終了する.
-					s->set_select(!s->is_selected());
-					m_ustack_undo.remove(*it);
-					return;
-				}
-			}
-		}
-		// 図形の選択を反転して, その操作をスタックに積む.
-		m_ustack_undo.push_back(new UndoSelect(s));
-	}
-	*/
 
 	// 値を図形へ格納して, その操作をスタックに積む.
 	// ただし, 図形がその値を持たない場合, またはすでに同値の場合は何もしない.
@@ -600,9 +559,17 @@ namespace winrt::GraphPaper::implementation
 		return flag;
 	}
 
+	// 図形の値の保存を実行して, その操作をスタックに積む.
+	// U	操作の種類.
+	// s	値を保存する図形
+	// 戻り値	なし
+	template <UNDO_ID U> void MainPage::ustack_push_set(Shape* const s)
+	{
+		m_ustack_undo.push_back(new UndoValue<U>(s));
+	}
+
 	template bool MainPage::ustack_push_set<UNDO_ID::ARROW_SIZE>(ARROW_SIZE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::ARROW_STYLE>(ARROW_STYLE const& val);
-	//template bool MainPage::ustack_push_set<UNDO_ID::IMAGE_ASPECT>(bool const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::IMAGE_OPAC>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::DASH_CAP>(D2D1_CAP_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::DASH_PATT>(DASH_PATT const& val);
@@ -622,7 +589,6 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_ID::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
 	template void MainPage::ustack_push_set<UNDO_ID::PAGE_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
 	template void MainPage::ustack_push_set<UNDO_ID::PAGE_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
-	template void MainPage::ustack_push_set<UNDO_ID::ROTATION>(Shape* const s, float const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_CAP>(CAP_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_WIDTH>(float const& val);
@@ -631,17 +597,26 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::ustack_push_set<UNDO_ID::TEXT_CONTENT>(Shape* const s, wchar_t* const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::TEXT_LINE_SP>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::TEXT_PADDING>(D2D1_SIZE_F const& val);
-
-	// 図形の値の保存を実行して, その操作をスタックに積む.
-	// s	値を保存する図形
-	// 戻り値	なし
-	template <UNDO_ID U> void MainPage::ustack_push_set(Shape* const s)
-	{
-		m_ustack_undo.push_back(new UndoValue<U>(s));
-	}
 	template void MainPage::ustack_push_set<UNDO_ID::MOVE>(Shape* const s);
 	template void MainPage::ustack_push_set<UNDO_ID::IMAGE_OPAC>(Shape* const s);
 
+	// 完全特殊化
+	// 選択されている四分だ円を回転し, その操作をスタックに積む.
+	template<> bool MainPage::ustack_push_set<UNDO_ID::ROTATION, float>(float const& val)
+	{
+		auto flag = false;
+		for (auto s : m_main_page.m_shape_list) {
+			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeQEllipse)) {
+				continue;
+			}
+			m_ustack_undo.push_back(new UndoValue<UNDO_ID::MOVE>(s));
+			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ROTATION>(s, val));
+			flag = true;
+		}
+		return flag;
+	}
+
+	// 完全特殊化
 	// 文字範囲の値を図形に格納して, その操作をスタックに積む.
 	// スタックの一番上の操作の組の中に、すでに文字範囲の操作が積まれている場合,
 	// その値が書き換えられる.

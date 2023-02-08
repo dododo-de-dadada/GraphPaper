@@ -26,11 +26,11 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_RRECT,	// 角丸方形
 		SHAPE_RULER,	// 定規
 		SHAPE_TEXT,	// 文字列
-		SHAPE_QCIRCLE	// 四分円
+		SHAPE_QELLIPSE	// 四分円
 	};
 
 	// データリーダーから図形を読み込む.
-	static Shape* slist_read_shape(const ShapePage& page, DataReader const& dt_reader);
+	static Shape* slist_read_shape(const Shape& page, DataReader const& dt_reader);
 	// 次の図形を得る.
 	template <typename T>
 	static Shape* slist_next(T const& it_beg, T const& it_end, const Shape* s) noexcept;
@@ -447,7 +447,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから図形リストを読み込む.
-	bool slist_read(SHAPE_LIST& slist, const ShapePage& page, DataReader const& dt_reader)
+	bool slist_read(SHAPE_LIST& slist, const Shape& page, DataReader const& dt_reader)
 	{
 		Shape* s;
 		while ((s = slist_read_shape(page, dt_reader)) != static_cast<Shape*>(nullptr)) {
@@ -460,7 +460,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから図形を読み込む.
-	static Shape* slist_read_shape(const ShapePage& page, DataReader const& dt_reader)
+	static Shape* slist_read_shape(const Shape& page, DataReader const& dt_reader)
 	{
 		if (dt_reader.UnconsumedBufferLength() < sizeof(uint32_t)) {
 			return nullptr;
@@ -499,8 +499,8 @@ namespace winrt::GraphPaper::implementation
 		else if (s_type == SHAPE_TYPE::SHAPE_RULER) {
 			s = new ShapeRuler(page, dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_QCIRCLE) {
-			s = new ShapeQCircle(page, dt_reader);
+		else if (s_type == SHAPE_TYPE::SHAPE_QELLIPSE) {
+			s = new ShapeQEllipse(page, dt_reader);
 		}
 		else {
 			s = reinterpret_cast<Shape*>(-1);
@@ -565,8 +565,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			auto const& s_type = typeid(*s);
 			uint32_t s_int;
-			if (s_type == typeid(ShapeQCircle)) {
-				s_int = SHAPE_TYPE::SHAPE_QCIRCLE;
+			if (s_type == typeid(ShapeQEllipse)) {
+				s_int = SHAPE_TYPE::SHAPE_QELLIPSE;
 			}
 			else if (s_type == typeid(ShapeBezier)) {
 				s_int = SHAPE_TYPE::SHAPE_BEZIER;

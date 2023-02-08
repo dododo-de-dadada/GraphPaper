@@ -367,14 +367,14 @@ namespace winrt::GraphPaper::implementation
 		else if (d_tool == DRAWING_TOOL::LINE) {
 			s = new ShapeLine(b_pos, b_vec, &m_main_page);
 		}
-		else if (d_tool == DRAWING_TOOL::BEZI) {
+		else if (d_tool == DRAWING_TOOL::BEZIER) {
 			s = new ShapeBezier(b_pos, b_vec, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::RULER) {
 			s = new ShapeRuler(b_pos, b_vec, &m_main_page);
 		}
-		else if (d_tool == DRAWING_TOOL::QCIRCLE) {
-			s = new ShapeQCircle(b_pos, b_vec, 0.0f, &m_main_page);
+		else if (d_tool == DRAWING_TOOL::QELLIPSE) {
+			s = new ShapeQEllipse(b_pos, b_vec, 0.0f, &m_main_page);
 		}
 		else {
 			return;
@@ -928,8 +928,8 @@ namespace winrt::GraphPaper::implementation
 				if (typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
 					edit_text_click_async(nullptr, nullptr);
 				}
-				else if (typeid(*m_event_shape_pressed) == typeid(ShapeQCircle)) {
-					rotation_click_async(nullptr, nullptr);
+				else if (typeid(*m_event_shape_pressed) == typeid(ShapeQEllipse)) {
+					rotation_click_async(m_event_shape_pressed);
 				}
 			}
 		}
@@ -1100,7 +1100,7 @@ namespace winrt::GraphPaper::implementation
 						if (typeid(*s) == typeid(ShapeLine) ||
 							typeid(*s) == typeid(ShapePolygon) ||
 							typeid(*s) == typeid(ShapeBezier) ||
-							typeid(*s) == typeid(ShapeQCircle)
+							typeid(*s) == typeid(ShapeQEllipse)
 							) {
 							// }Œ`‚Ì•”ˆÊ‚ª, ’¸“_‚Ì”‚ð’´‚¦‚È‚¢‚©”»’è‚·‚é.
 							if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 + static_cast<ShapePath*>(s)->m_vec.size() + 1) {

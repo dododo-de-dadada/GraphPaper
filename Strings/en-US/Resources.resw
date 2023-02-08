@@ -809,6 +809,10 @@
     <value>Font Settings</value>
     <comment>String</comment>
   </data>
+  <data name="str_font_size" xml:space="preserve">
+    <value>Font Size</value>
+    <comment>String</comment>
+  </data>
   <data name="tk_appname.Text" xml:space="preserve">
     <value>Graph Paper</value>
     <comment>String</comment>
@@ -850,8 +854,8 @@
 0123456789</value>
     <comment>String</comment>
   </data>
-  <data name="str_font_size" xml:space="preserve">
-    <value>Font Size</value>
+  <data name="str_rotation" xml:space="preserve">
+    <value>Rotation</value>
     <comment>String</comment>
   </data>
   <data name="str_stroke_color" xml:space="preserve">

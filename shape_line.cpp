@@ -14,7 +14,7 @@ namespace winrt::GraphPaper::implementation
 	// 矢じるしの D2D ストローク特性を作成する.
 	static void line_create_arrow_style(ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, const D2D1_LINE_JOIN s_join_style, const double s_join_miter_limit, ID2D1StrokeStyle** s_arrow_style);
 	// 矢じるしの先端と返しの位置を求める.
-	//static bool line_get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
+	//static bool line_get_pos_arrow(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
 	// 線分が位置を含むか, 太さも考慮して判定する.
 	static bool line_hit_test(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const CAP_STYLE& s_cap) noexcept;
 
@@ -31,7 +31,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F tip_pos;	// 矢じるしの先端点
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (ShapeLine::line_get_arrow_pos(s_pos, d_vec, a_size, barbs, tip_pos)) {
+		if (ShapeLine::line_get_pos_arrow(s_pos, d_vec, a_size, barbs, tip_pos)) {
 			// ジオメトリパスを作成する.
 			winrt::check_hresult(d_factory->CreatePathGeometry(geo));
 			winrt::check_hresult((*geo)->Open(sink.put()));
@@ -76,13 +76,13 @@ namespace winrt::GraphPaper::implementation
 	// a_pos	矢軸の後端の位置
 	// a_vec	矢軸の先端へのベクトル
 	// a_size	矢じるしの寸法
-	// barbs	返しの位置
+	// barb	返しの位置
 	// tip		先端の位置
-	bool ShapeLine::line_get_arrow_pos(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept
+	bool ShapeLine::line_get_pos_arrow(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barb[2], D2D1_POINT_2F& tip) noexcept
 	{
 		const auto a_len = std::sqrt(pt_abs2(a_vec));	// 矢軸の長さ
 		if (a_len >= FLT_MIN) {
-			get_arrow_barbs(a_vec, a_len, a_size.m_width, a_size.m_length, barbs);
+			get_pos_barbs(a_vec, a_len, a_size.m_width, a_size.m_length, barb);
 			if (a_size.m_offset >= a_len) {
 				// 矢じるしの先端
 				tip = a_pos;
@@ -90,8 +90,8 @@ namespace winrt::GraphPaper::implementation
 			else {
 				pt_mul_add(a_vec, 1.0 - a_size.m_offset / a_len, a_pos, tip);
 			}
-			pt_add(barbs[0], tip, barbs[0]);
-			pt_add(barbs[1], tip, barbs[1]);
+			pt_add(barb[0], tip, barb[0]);
+			pt_add(barb[1], tip, barb[1]);
 			return true;
 		}
 		return false;
@@ -546,21 +546,21 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// page	既定の属性値
-	ShapeLine::ShapeLine(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
-		ShapeStroke::ShapeStroke(page),
-		m_arrow_style(page->m_arrow_style),
-		m_arrow_size(page->m_arrow_size),
-		m_d2d_arrow_geom(nullptr),
-		m_d2d_arrow_style(nullptr)
+	ShapeLine::ShapeLine(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const Shape* page) :
+		ShapeStroke::ShapeStroke(page)
 	{
 		m_start = b_pos;
 		m_vec.resize(1, b_vec);
 		m_vec.shrink_to_fit();
+		page->get_arrow_style(m_arrow_style);
+		page->get_arrow_size(m_arrow_size);
+		m_d2d_arrow_geom = nullptr;
+		m_d2d_arrow_style = nullptr;
 	}
 
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	読み込むデータリーダー
-	ShapeLine::ShapeLine(const ShapePage& page, DataReader const& dt_reader) :
+	ShapeLine::ShapeLine(const Shape& page, DataReader const& dt_reader) :
 		ShapeStroke::ShapeStroke(page, dt_reader),
 		m_d2d_arrow_style(nullptr),
 		m_d2d_arrow_geom(nullptr)

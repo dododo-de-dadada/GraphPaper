@@ -49,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// PDF のフォント辞書を出力する.
 	// o_num	オブジェクト番号
-	// f_type	フォントフェイスの種類
+	// f_type	字面の種類
 	// p_name	ポストスクリプト名
 	// dt_writer	出力先
 	//------------------------------
@@ -80,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// PDF の子孫フォント辞書を出力する.
 	// o_num	オブジェクト番号
-	// f_type	フォントフェイスの種類
+	// f_type	字面の種類
 	// p_name	書体のポストスクリプト名
 	// cid_len	CID 配列の大きさ
 	// cid_arr	CID 配列
@@ -199,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 	// stretch	書体の幅
 	// style	字体
 	// f_met	書体の計量
-	// f_type	フォントフェイスの形式
+	// f_type	字面の形式
 	// p_name	書体のポストスクリプト名
 	// g_met	字形の計量
 	// angle	イタリックの最大角度 (ふつうがマイナス)
@@ -224,7 +224,7 @@ namespace winrt::GraphPaper::implementation
 		// 書体の計量を得る.
 		face->GetMetrics(&f_met);
 
-		// フォントフェイスの形式を得る.
+		// 字面の形式を得る.
 		f_type = face->GetType();
 
 		// 文字列を UTF-32 に変換する.
@@ -251,7 +251,7 @@ namespace winrt::GraphPaper::implementation
 		face->GetDesignGlyphMetrics(std::data(gid), static_cast<UINT32>(std::size(gid)), std::data(g_met));
 		//face->Release();
 
-		// フォントフェイスからポストスクリプト名を得る.
+		// 字面からポストスクリプト名を得る.
 		IDWriteLocalizedStrings* str = nullptr;
 		BOOL exists = false;
 		//if (font->GetInformationalStrings(DWRITE_INFORMATIONAL_STRING_POSTSCRIPT_CID_NAME, &str, &exists) == S_OK) {
@@ -291,8 +291,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 
-		// フォントフェイスから傾きを得る.
-		// ただし, PDF は, フォントフェイスの変形はサポートしてないので, フェイスそのものが
+		// 字面から傾きを得る.
+		// ただし, PDF は, 字面の変形はサポートしてないので, 字体そのものが
 		// イタリックでない限り, 斜体にはならない.
 		const auto axis_cnt = static_cast<IDWriteFontFace5*>(face)->GetFontAxisValueCount();
 		std::vector<DWRITE_FONT_AXIS_VALUE> axis_val(axis_cnt);
@@ -613,7 +613,7 @@ namespace winrt::GraphPaper::implementation
 					std::vector<uint16_t> gid{};	// グリフ ID
 					std::vector<uint16_t> cid{};	// 文字 ID
 					std::vector<DWRITE_GLYPH_METRICS> g_met{};	// グリフの計量
-					DWRITE_FONT_FACE_TYPE f_type;	// フォントフェイスの種類
+					DWRITE_FONT_FACE_TYPE f_type;	// 字面の種類
 					float angle;
 					s->get_font_weight(weight);
 					s->get_font_stretch(stretch);

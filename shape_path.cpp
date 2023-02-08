@@ -9,8 +9,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Storage::Streams::DataWriter;
-
 	// “h‚è‚Â‚Ô‚µF‚ğ“¾‚é.
 	// val	“¾‚ç‚ê‚½’l
 	// –ß‚è’l	“¾‚ç‚ê‚½‚È‚ç true
@@ -90,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	ShapePath::ShapePath(const ShapePage& page, const DataReader& dt_reader) :
+	ShapePath::ShapePath(const Shape& page, const DataReader& dt_reader) :
 		ShapeLine::ShapeLine(page, dt_reader)
 	{
 		const D2D1_COLOR_F fill_color{

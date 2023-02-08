@@ -202,6 +202,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			winrt::hresult_not_implemented();
+			return;
 		}
 		stroke_width_is_checked(s_width);
 		if (ustack_push_set<UNDO_ID::STROKE_WIDTH>(s_width)) {

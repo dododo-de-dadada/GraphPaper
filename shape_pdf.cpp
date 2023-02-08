@@ -15,7 +15,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	static size_t export_pdf_barbs(const float width, const D2D1_COLOR_F& color, const ARROW_STYLE style, const D2D1_SIZE_F page_size, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer);
+	static size_t export_pdf_arrow(const float width, const D2D1_COLOR_F& color, const ARROW_STYLE style, const D2D1_SIZE_F page_size, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer);
 	static size_t export_pdf_stroke(const float width, const D2D1_COLOR_F& color, const CAP_STYLE& cap, const D2D1_DASH_STYLE dash, const DASH_PATT& patt, const D2D1_LINE_JOIN join, const float miter_limit, const DataWriter& dt_writer);
 
 	//------------------------------
@@ -29,7 +29,7 @@ namespace winrt::GraphPaper::implementation
 	// tip_pos	矢じりの先端の位置
 	// 戻り値	書き込んだバイト数
 	//------------------------------
-	static size_t export_pdf_barbs(const float width, const D2D1_COLOR_F& stroke, const ARROW_STYLE style, const D2D1_SIZE_F page_size, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer)
+	static size_t export_pdf_arrow(const float width, const D2D1_COLOR_F& stroke, const ARROW_STYLE style, const D2D1_SIZE_F page_size, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer)
 	{
 		if (equal(width, 0.0f) || !is_opaque(stroke)) {
 			return 0;
@@ -235,7 +235,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
 			bezi_calc_arrow(m_start, b_seg, m_arrow_size, barbs);
-			len += export_pdf_barbs(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
+			len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
 		}
 		return len;
 	}
@@ -266,8 +266,8 @@ namespace winrt::GraphPaper::implementation
 
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
-			if (line_get_arrow_pos(m_start, m_vec[0], m_arrow_size, barbs, barbs[2])) {
-				len += export_pdf_barbs(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
+			if (line_get_pos_arrow(m_start, m_vec[0], m_arrow_size, barbs, barbs[2])) {
+				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
 			}
 		}
 		return len;
@@ -317,10 +317,10 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(cmd);
 
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			D2D1_POINT_2F h_tip;
-			D2D1_POINT_2F h_barbs[2];
-			if (poly_get_arrow_barbs(v_cnt, v_pos, m_arrow_size, h_tip, h_barbs)) {
-				len += export_pdf_barbs(m_stroke_width, m_stroke_color, m_arrow_style, page_size, h_barbs, h_tip, dt_writer);
+			D2D1_POINT_2F tip;
+			D2D1_POINT_2F barb[2];
+			if (poly_get_pos_arrow(v_cnt, v_pos, m_arrow_size, tip, barb)) {
+				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barb, tip, dt_writer);
 			}
 		}
 		return len;
@@ -725,7 +725,7 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(buf);
 
 
-		IDWriteFontFace3* face;	// フォントフェイス
+		IDWriteFontFace3* face;	// 字面
 		get_font_face(face);
 		/*
 		const void* table_data;
@@ -836,7 +836,7 @@ namespace winrt::GraphPaper::implementation
 		constexpr wchar_t D[10] = { L'0', L'1', L'2', L'3', L'4', L'5', L'6', L'7', L'8', L'9' };
 		wchar_t buf[1024];
 		size_t len = 0;
-		IDWriteFontFace3* face;	// フォントフェイス
+		IDWriteFontFace3* face;	// 字面
 		get_font_face(face);
 		std::vector utf32{ conv_utf16_to_utf32(D, 10) };	// UINT-32 文字列
 		uint16_t gid[10];	// グリフ識別子
@@ -1079,19 +1079,27 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに PDF として書き込む.
-	size_t ShapeQCircle::export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer)
+	size_t ShapeQEllipse::export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer)
 	{
-		//wchar_t* cmd;
-		//if (!export_pdf_cmd<false>(m_stroke_width, m_stroke_color, m_fill_color, cmd)) {
-		//	return 0;
-		//}
 		D2D1_POINT_2F c_pos{};
-		D2D1_POINT_2F b_pos;
-		D2D1_BEZIER_SEGMENT b_seg;
+		D2D1_POINT_2F b_pos{};
+		D2D1_BEZIER_SEGMENT b_seg{};
 		if (is_opaque(m_fill_color) ||
-			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && m_arrow_style != ARROW_STYLE::NONE)) {
-			get_pos_center(m_start, m_vec[0], m_radius, m_rotation, c_pos);
-			qcircle_calc_beizer(m_radius, m_rotation, b_pos, b_seg);
+			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color))) {
+			const double rot = M_PI * m_rot_degree / 180.0;
+			get_pos_center(m_start, m_vec[0], m_radius, rot, c_pos);
+			if (m_vec[0].x >= 0.0f && m_vec[0].y >= 0.0f) {
+				qellipse_alternate(1, m_radius, rot, b_pos, b_seg);
+			}
+			else if (m_vec[0].x < 0.0f && m_vec[0].y >= 0.0f) {
+				qellipse_alternate(2, m_radius, rot, b_pos, b_seg);
+			}
+			else if (m_vec[0].x < 0.0f && m_vec[0].y < 0.0f) {
+				qellipse_alternate(3, m_radius, rot, b_pos, b_seg);
+			}
+			else {
+				qellipse_alternate(4, m_radius, rot, b_pos, b_seg);
+			}
 			b_pos.x += c_pos.x;
 			b_pos.y += c_pos.y;
 			b_seg.point1.x += c_pos.x;
@@ -1133,10 +1141,21 @@ namespace winrt::GraphPaper::implementation
 			);
 			len += dt_writer.WriteString(buf);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
-				D2D1_POINT_2F barbs[3];
-				qcircle_calc_arrow(c_pos, m_radius, m_rotation, m_arrow_size, barbs);
-				len += export_pdf_barbs(
-					m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
+				D2D1_POINT_2F arrow[3];
+				if (m_vec[0].x >= 0.0f && m_vec[0].y >= 0.0f) {
+					qellipse_calc_arrow(1, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
+				}
+				else if (m_vec[0].x < 0.0f && m_vec[0].y >= 0.0f) {
+					qellipse_calc_arrow(2, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
+				}
+				else if (m_vec[0].x < 0.0f && m_vec[0].y < 0.0f) {
+					qellipse_calc_arrow(3, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
+				}
+				else {
+					qellipse_calc_arrow(4, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
+				}
+				len += export_pdf_arrow(
+					m_stroke_width, m_stroke_color, m_arrow_style, page_size, arrow, arrow[2], dt_writer);
 			}
 		}
 		return len;

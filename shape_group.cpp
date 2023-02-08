@@ -229,7 +229,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形をデータリーダーから読み込む.
 	//------------------------------
-	ShapeGroup::ShapeGroup(const ShapePage& page, DataReader const& dt_reader)
+	ShapeGroup::ShapeGroup(const Shape& page, DataReader const& dt_reader)
 	{
 		slist_read(m_list_grouped, page, dt_reader);
 	}

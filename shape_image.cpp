@@ -405,29 +405,29 @@ namespace winrt::GraphPaper::implementation
 			const auto e_width = a_len * 0.5;
 			D2D1_POINT_2F e_pos[2];
 			e_pos[0].x = v_pos[0].x;
-			e_pos[0].y = v_pos[0].y - e_width;
+			e_pos[0].y = static_cast<FLOAT>(v_pos[0].y - e_width);
 			e_pos[1].x = v_pos[1].x;
-			e_pos[1].y = v_pos[1].y + e_width;
+			e_pos[1].y = static_cast<FLOAT>(v_pos[1].y + e_width);
 			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
 				return ANC_TYPE::ANC_NORTH;
 			}
-			e_pos[0].x = v_pos[1].x - e_width;
+			e_pos[0].x = static_cast<FLOAT>(v_pos[1].x - e_width);
 			e_pos[0].y = v_pos[1].y;
-			e_pos[1].x = v_pos[2].x + e_width;
+			e_pos[1].x = static_cast<FLOAT>(v_pos[2].x + e_width);
 			e_pos[1].y = v_pos[2].y;
 			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
 				return ANC_TYPE::ANC_EAST;
 			}
 			e_pos[0].x = v_pos[3].x;
-			e_pos[0].y = v_pos[3].y - e_width;
+			e_pos[0].y = static_cast<FLOAT>(v_pos[3].y - e_width);
 			e_pos[1].x = v_pos[2].x;
-			e_pos[1].y = v_pos[2].y + e_width;
+			e_pos[1].y = static_cast<FLOAT>(v_pos[2].y + e_width);
 			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
 				return ANC_TYPE::ANC_SOUTH;
 			}
-			e_pos[0].x = v_pos[0].x - e_width;
+			e_pos[0].x = static_cast<FLOAT>(v_pos[0].x - e_width);
 			e_pos[0].y = v_pos[0].y;
-			e_pos[1].x = v_pos[3].x + e_width;
+			e_pos[1].x = static_cast<FLOAT>(v_pos[3].x + e_width);
 			e_pos[1].y = v_pos[3].y;
 			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
 				return ANC_TYPE::ANC_WEST;

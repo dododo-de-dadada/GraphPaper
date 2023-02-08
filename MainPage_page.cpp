@@ -220,7 +220,7 @@ namespace winrt::GraphPaper::implementation
 				m_drawing_tool == DRAWING_TOOL::RULER) {
 				m_main_page.draw_auxiliary_rect(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::BEZI) {
+			else if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
 				m_main_page.draw_auxiliary_bezi(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ELLI) {
@@ -235,8 +235,8 @@ namespace winrt::GraphPaper::implementation
 			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
 				m_main_page.draw_auxiliary_poly(target, brush, m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::QCIRCLE) {
-				m_main_page.draw_auxiliary_qcircle(target, brush, m_event_pos_pressed, m_event_pos_curr);
+			else if (m_drawing_tool == DRAWING_TOOL::QELLIPSE) {
+				m_main_page.draw_auxiliary_qellipse(target, brush, m_event_pos_pressed, m_event_pos_curr);
 			}
 		}
 		/*

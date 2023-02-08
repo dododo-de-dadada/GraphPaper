@@ -94,34 +94,48 @@ namespace winrt::GraphPaper::implementation
 		ARROW_SIZE a_size;
 		m_dialog_page.get_arrow_size(a_size);
 
+		const auto ds0_max = dialog_slider_0().Maximum();
+		const auto ds0_freq = dialog_slider_0().TickFrequency();
+		const auto ds0_snap = dialog_slider_0().SnapsTo();
+		const auto ds0_val = dialog_slider_0().Value();
+		const auto ds0_vis = dialog_slider_0().Visibility();
+		const auto ds1_max = dialog_slider_1().Maximum();
+		const auto ds1_freq = dialog_slider_1().TickFrequency();
+		const auto ds1_snap = dialog_slider_1().SnapsTo();
+		const auto ds1_val = dialog_slider_1().Value();
+		const auto ds1_vis = dialog_slider_1().Visibility();
+		const auto ds2_max = dialog_slider_2().Maximum();
+		const auto ds2_freq = dialog_slider_2().TickFrequency();
+		const auto ds2_snap = dialog_slider_2().SnapsTo();
+		const auto ds2_val = dialog_slider_2().Value();
+		const auto ds2_vis = dialog_slider_2().Visibility();
 		dialog_slider_0().Maximum(MAX_VALUE);
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(a_size.m_width);
-		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 0>(a_size.m_width);
+		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Maximum(MAX_VALUE);
 		dialog_slider_1().TickFrequency(TICK_FREQ);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(a_size.m_length);
-		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 1>(a_size.m_length);
+		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Maximum(MAX_VALUE);
 		dialog_slider_2().TickFrequency(TICK_FREQ);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(a_size.m_offset);
-		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 2>(a_size.m_offset);
-
-		dialog_slider_0().Visibility(Visibility::Visible);
-		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
-		const winrt::event_token slider_0_token{
+		const winrt::event_token ds0_tok{
 			dialog_slider_0().ValueChanged({ this, &MainPage::arrow_slider_val_changed<UNDO_ID::ARROW_SIZE, 0> })
 		};
-		const winrt::event_token slider_1_token{
+		const winrt::event_token ds1_tok{
 			dialog_slider_1().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_ID::ARROW_SIZE, 1> })
 		};
-		const winrt::event_token slider_2_token{
+		const winrt::event_token ds2_tok{
 			dialog_slider_2().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_ID::ARROW_SIZE, 2> })
 		};
+		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 0>(a_size.m_width);
+		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 1>(a_size.m_length);
+		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 2>(a_size.m_offset);
 		const auto samp_w = scp_dialog_panel().Width();
 		const auto samp_h = scp_dialog_panel().Height();
 		const auto padd = samp_w * 0.125;
@@ -147,12 +161,24 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_dialog_page.m_shape_list);
-		dialog_slider_0().Visibility(Visibility::Collapsed);
-		dialog_slider_1().Visibility(Visibility::Collapsed);
-		dialog_slider_2().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
-		dialog_slider_1().ValueChanged(slider_1_token);
-		dialog_slider_2().ValueChanged(slider_2_token);
+		dialog_slider_0().ValueChanged(ds0_tok);
+		dialog_slider_1().ValueChanged(ds1_tok);
+		dialog_slider_2().ValueChanged(ds2_tok);
+		dialog_slider_0().Maximum(ds0_max);
+		dialog_slider_0().TickFrequency(ds0_freq);
+		dialog_slider_0().SnapsTo(ds0_snap);
+		dialog_slider_0().Value(ds0_val);
+		dialog_slider_0().Visibility(ds0_vis);
+		dialog_slider_1().Maximum(ds1_max);
+		dialog_slider_1().TickFrequency(ds1_freq);
+		dialog_slider_1().SnapsTo(ds1_snap);
+		dialog_slider_1().Value(ds1_val);
+		dialog_slider_1().Visibility(ds1_vis);
+		dialog_slider_2().Maximum(ds2_max);
+		dialog_slider_2().TickFrequency(ds2_freq);
+		dialog_slider_2().SnapsTo(ds2_snap);
+		dialog_slider_2().Value(ds2_val);
+		dialog_slider_2().Visibility(ds2_vis);
 		//page_draw();
 		status_bar_set_pos();
 	}

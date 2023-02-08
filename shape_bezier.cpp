@@ -1,5 +1,5 @@
 //------------------------------
-// SHAPE_BEZIER.cpp
+// shape_bezier.cpp
 // ベジェ曲線
 //------------------------------
 #include "pch.h"
@@ -89,13 +89,13 @@ namespace winrt::GraphPaper::implementation
 	static inline void bezi_tvec_by_param(const BZP b_pos[4], const double t_val, BZP& t_vec) noexcept;
 
 	//------------------------------
-	// 曲線の矢じるしの端点を求める.
+	// 矢じりの返しと先端の位置を得る
 	// b_start	曲線の開始位置
 	// b_seg	曲線の制御点
 	// a_size	矢じるしの寸法
-	// a_barbs[3]	計算された返しの端点と先端点
+	// arrow[3]	計算された返しの端点と先端点
 	//------------------------------
-	bool ShapeBezier::bezi_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F a_barbs[3]) noexcept
+	bool ShapeBezier::bezi_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[3]) noexcept
 	{
 		BZP seg[3]{};
 		BZP b_pos[4]{};
@@ -123,19 +123,19 @@ namespace winrt::GraphPaper::implementation
 			bezi_tvec_by_param(b_pos, t, t_vec);
 
 			// 矢じるしの返しの位置を計算する
-			get_arrow_barbs(-t_vec, sqrt(t_vec * t_vec), a_size.m_width, a_size.m_length, a_barbs);
+			get_pos_barbs(-t_vec, sqrt(t_vec * t_vec), a_size.m_width, a_size.m_length, arrow);
 
 			// 助変数で曲線上の位置を得る.
 			BZP t_pos;	// 終点を原点とする, 矢じるしの先端の位置
 			bezi_point_by_param(b_pos, t, t_pos);
 
 			// 曲線上の位置を矢じるしの先端とし, 返しの位置も並行移動する.
-			pt_add(a_barbs[0], t_pos.x, t_pos.y, a_barbs[0]);
-			pt_add(a_barbs[1], t_pos.x, t_pos.y, a_barbs[1]);
-			a_barbs[2] = t_pos;
-			pt_add(a_barbs[0], b_start, a_barbs[0]);
-			pt_add(a_barbs[1], b_start, a_barbs[1]);
-			pt_add(a_barbs[2], b_start, a_barbs[2]);
+			pt_add(arrow[0], t_pos.x, t_pos.y, arrow[0]);
+			pt_add(arrow[1], t_pos.x, t_pos.y, arrow[1]);
+			arrow[2] = t_pos;
+			pt_add(arrow[0], b_start, arrow[0]);
+			pt_add(arrow[1], b_start, arrow[1]);
+			pt_add(arrow[2], b_start, arrow[2]);
 			return true;
 		}
 		return false;
@@ -865,7 +865,7 @@ namespace winrt::GraphPaper::implementation
 	// b_vec	囲む領域の終点への差分
 	// page	属性
 	//------------------------------
-	ShapeBezier::ShapeBezier(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
+	ShapeBezier::ShapeBezier(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const Shape* page) :
 		ShapePath::ShapePath(page, false)
 	{
 		m_start = b_pos;
@@ -880,10 +880,9 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから図形を読み込む.
 	// dt_reader	データリーダー
 	//------------------------------
-	ShapeBezier::ShapeBezier(const ShapePage& page, DataReader const& dt_reader) :
+	ShapeBezier::ShapeBezier(const Shape& page, DataReader const& dt_reader) :
 		ShapePath::ShapePath(page, dt_reader)
-	{
-	}
+	{}
 
 	void ShapeBezier::write(const DataWriter& dt_writer) const
 	{

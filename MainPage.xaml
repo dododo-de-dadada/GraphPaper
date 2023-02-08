@@ -236,9 +236,9 @@
 						<PathIcon Data="{StaticResource data_elli}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
-                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_qcircle" x:Uid="rmfi_tool_drawing_qcircle" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quater Circle">
+                <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_qellipse" x:Uid="rmfi_tool_drawing_qellipse" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quater Ellipse">
                     <muxc:RadioMenuFlyoutItem.Icon>
-                        <PathIcon Data="{StaticResource data_qcircle}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        <PathIcon Data="{StaticResource data_qellipse}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                     </muxc:RadioMenuFlyoutItem.Icon>
                 </muxc:RadioMenuFlyoutItem>
                 <muxc:RadioMenuFlyoutItem x:Name="rmfi_tool_drawing_line" x:Uid="rmfi_tool_drawing_line" Click="drawing_tool_click" GroupName="gn_tool_type" Text="Line" >

@@ -287,17 +287,18 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// page	設定
-	ShapeStroke::ShapeStroke(const ShapePage* page) :
-		m_dash_cap(page->m_dash_cap),
-		m_stroke_cap(page->m_stroke_cap),
-		m_stroke_color(page->m_stroke_color),
-		m_dash_patt(page->m_dash_patt),
-		m_dash_style(page->m_dash_style),
-		m_join_miter_limit(page->m_join_miter_limit),
-		m_join_style(page->m_join_style),
-		m_stroke_width(page->m_stroke_width),
-		m_d2d_stroke_style(nullptr)
-	{}
+	ShapeStroke::ShapeStroke(const Shape* page)
+	{
+		page->get_dash_cap(m_dash_cap);
+		page->get_stroke_cap(m_stroke_cap);
+		page->get_stroke_color(m_stroke_color);
+		page->get_dash_patt(m_dash_patt);
+		page->get_dash_style(m_dash_style);
+		page->get_join_miter_limit(m_join_miter_limit);
+		page->get_join_style(m_join_style);
+		page->get_stroke_width(m_stroke_width);
+		m_d2d_stroke_style = nullptr;
+	}
 
 	/*
 	static std::vector<D2D1_POINT_2F> dt_read_vec(DataReader const& dt_reader)
@@ -313,7 +314,7 @@ namespace winrt::GraphPaper::implementation
 	*/
 
 	// 図形をデータリーダーから読み込む.
-	ShapeStroke::ShapeStroke(const ShapePage& page, DataReader const& dt_reader) :
+	ShapeStroke::ShapeStroke(const Shape& page, DataReader const& dt_reader) :
 		// 読み込む順番は定義された順
 		ShapeSelect(dt_reader),
 		m_stroke_cap(CAP_STYLE{
@@ -348,29 +349,29 @@ namespace winrt::GraphPaper::implementation
 			m_stroke_cap.m_start != D2D1_CAP_STYLE_SQUARE &&
 			m_stroke_cap.m_start != D2D1_CAP_STYLE_TRIANGLE) ||
 			m_stroke_cap.m_start != m_stroke_cap.m_end) {
-			m_stroke_cap = page.m_stroke_cap;
+			page.get_stroke_cap(m_stroke_cap);
 		}
 		if (m_stroke_color.r < 0.0f || m_stroke_color.r > 1.0f ||
 			m_stroke_color.g < 0.0f || m_stroke_color.g > 1.0f ||
 			m_stroke_color.b < 0.0f || m_stroke_color.b > 1.0f ||
 			m_stroke_color.a < 0.0f || m_stroke_color.a > 1.0f) {
-			m_stroke_color = page.m_stroke_color;
+			page.get_stroke_color(m_stroke_color);
 		}
 		if (m_dash_cap != D2D1_CAP_STYLE_FLAT &&
 			m_dash_cap != D2D1_CAP_STYLE_ROUND &&
 			m_dash_cap != D2D1_CAP_STYLE_SQUARE &&
 			m_dash_cap != D2D1_CAP_STYLE_TRIANGLE) {
-			m_dash_cap = page.m_dash_cap;
+			page.get_dash_cap(m_dash_cap);
 		}
 		if (m_dash_style != D2D1_DASH_STYLE_SOLID &&
 			m_dash_style != D2D1_DASH_STYLE_CUSTOM) {
-			m_dash_style = page.m_dash_style;
+			page.get_dash_style(m_dash_style);
 		}
 		if (m_join_style != D2D1_LINE_JOIN_BEVEL &&
 			m_join_style != D2D1_LINE_JOIN_ROUND &&
 			m_join_style != D2D1_LINE_JOIN_MITER &&
 			m_join_style != D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-			m_join_style = page.m_join_style;
+			page.get_join_style(m_join_style);
 		}
 	}
 

@@ -68,9 +68,9 @@ namespace winrt::GraphPaper::implementation
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_image")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"str_image");
 			}
-			else if (t_id == typeid(ShapeQCircle)) {
-				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_qcircle")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_qcircle/Text");
+			else if (t_id == typeid(ShapeQEllipse)) {
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_qellipse")));
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_qellipse/Text");
 			}
 			else {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_select")));

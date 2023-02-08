@@ -558,17 +558,17 @@ namespace winrt::GraphPaper::implementation
 	// b_pos	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// page	属性
-	ShapeRect::ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const ShapePage* page) :
-		ShapeStroke::ShapeStroke(page),
-		m_fill_color(page->m_fill_color)
+	ShapeRect::ShapeRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const Shape* page) :
+		ShapeStroke::ShapeStroke(page)
 	{
 		m_start = b_pos;
 		m_vec.resize(1, b_vec);
 		m_vec.shrink_to_fit();
+		page->get_fill_color(m_fill_color);
 	}
 
 	// 図形をデータリーダーから読み込む.
-	ShapeRect::ShapeRect(const ShapePage& page, DataReader const& dt_reader) :
+	ShapeRect::ShapeRect(const Shape& page, DataReader const& dt_reader) :
 		ShapeStroke::ShapeStroke(page, dt_reader)
 	{
 		m_start.x = dt_reader.ReadSingle();
