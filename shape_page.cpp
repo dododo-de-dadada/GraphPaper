@@ -529,9 +529,10 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータリーダーから読み込む.
 	void ShapePage::read(DataReader const& dt_reader)
 	{
+		constexpr double GRID_BASE_MAX = 127;
 		// 方眼の大きさ
 		const auto grid_base = dt_reader.ReadSingle();
-		if (grid_base >= 0.0f && grid_base <= 127.5) {
+		if (grid_base >= 0.0f && grid_base <= GRID_BASE_MAX) {
 			m_grid_base = grid_base;
 		}
 		// 方眼の色
@@ -613,10 +614,10 @@ namespace winrt::GraphPaper::implementation
 			m_arrow_style = arrow_style;
 		}
 		// 角丸半径
-		const D2D1_POINT_2F corner_rad{
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle()
-		};
+		//const D2D1_POINT_2F corner_rad{
+		//	dt_reader.ReadSingle(),
+		//	dt_reader.ReadSingle()
+		//};
 		//m_corner_rad = corner_rad;
 		// 端の形式
 		const CAP_STYLE stroke_cap{

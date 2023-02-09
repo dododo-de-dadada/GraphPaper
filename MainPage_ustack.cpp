@@ -609,7 +609,8 @@ namespace winrt::GraphPaper::implementation
 			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeQEllipse)) {
 				continue;
 			}
-			m_ustack_undo.push_back(new UndoValue<UNDO_ID::MOVE>(s));
+			//m_ustack_undo.push_back(new UndoValue<UNDO_ID::MOVE>(s));
+			//m_ustack_undo.push_back(new UndoForm(s, ANC_TYPE::ANC_P0 + 1));
 			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ROTATION>(s, val));
 			flag = true;
 		}

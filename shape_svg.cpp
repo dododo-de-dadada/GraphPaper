@@ -801,18 +801,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteString(L"/>\n");
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
-				if (m_vec[0].x >= 0.0f && m_vec[0].y >= 0.0f) {
-					qellipse_calc_arrow(1, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-				}
-				else if (m_vec[0].x < 0.0f && m_vec[0].y >= 0.0f) {
-					qellipse_calc_arrow(2, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-				}
-				else if (m_vec[0].x < 0.0f && m_vec[0].y < 0.0f) {
-					qellipse_calc_arrow(3, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-				}
-				else {
-					qellipse_calc_arrow(4, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-				}
+				qellipse_calc_arrow(m_vec[0], c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
 				export_svg_arrow(buf, 1024,
 					m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, arrow, arrow[2]);
 				dt_writer.WriteString(buf);

@@ -669,6 +669,10 @@
     <value>多角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
+  <data name="rmfi_tool_drawing_qellipse.Text" xml:space="preserve">
+    <value>四分だ円</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
   <data name="rmfi_tool_drawing_rect.Text" xml:space="preserve">
     <value>方形</value>
     <comment>RadioMenuFlyoutItem</comment>
@@ -844,6 +848,10 @@
   <data name="str_pangram" xml:space="preserve">
     <value>windowsでコンピューターの世界が広がります。
 1234567890</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_rotation" xml:space="preserve">
+    <value>傾き</value>
     <comment>String</comment>
   </data>
   <data name="str_font_size" xml:space="preserve">

@@ -48,6 +48,10 @@ namespace winrt::GraphPaper::implementation
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_polygon")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_poly/Text");
 			}
+			else if (t_id == typeid(ShapeQEllipse)) {
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_qellipse")));
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_qellipse/Text");
+			}
 			else if (t_id == typeid(ShapeRect)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rect")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_rect/Text");

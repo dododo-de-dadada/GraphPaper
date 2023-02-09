@@ -1088,18 +1088,7 @@ namespace winrt::GraphPaper::implementation
 			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color))) {
 			const double rot = M_PI * m_rot_degree / 180.0;
 			get_pos_center(m_start, m_vec[0], m_radius, rot, c_pos);
-			if (m_vec[0].x >= 0.0f && m_vec[0].y >= 0.0f) {
-				qellipse_alternate(1, m_radius, rot, b_pos, b_seg);
-			}
-			else if (m_vec[0].x < 0.0f && m_vec[0].y >= 0.0f) {
-				qellipse_alternate(2, m_radius, rot, b_pos, b_seg);
-			}
-			else if (m_vec[0].x < 0.0f && m_vec[0].y < 0.0f) {
-				qellipse_alternate(3, m_radius, rot, b_pos, b_seg);
-			}
-			else {
-				qellipse_alternate(4, m_radius, rot, b_pos, b_seg);
-			}
+			qellipse_alternate(m_vec[0], m_radius, rot, b_pos, b_seg);
 			b_pos.x += c_pos.x;
 			b_pos.y += c_pos.y;
 			b_seg.point1.x += c_pos.x;
@@ -1142,18 +1131,7 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
-				if (m_vec[0].x >= 0.0f && m_vec[0].y >= 0.0f) {
-					qellipse_calc_arrow(1, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-				}
-				else if (m_vec[0].x < 0.0f && m_vec[0].y >= 0.0f) {
-					qellipse_calc_arrow(2, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-				}
-				else if (m_vec[0].x < 0.0f && m_vec[0].y < 0.0f) {
-					qellipse_calc_arrow(3, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-				}
-				else {
-					qellipse_calc_arrow(4, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-				}
+				qellipse_calc_arrow(m_vec[0], c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
 				len += export_pdf_arrow(
 					m_stroke_width, m_stroke_color, m_arrow_style, page_size, arrow, arrow[2], dt_writer);
 			}

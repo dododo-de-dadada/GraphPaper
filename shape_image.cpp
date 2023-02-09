@@ -290,6 +290,33 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
+	// 画素の色を得る.
+	// pos	ページ座標での位置
+	// val	画素の色
+	// 戻り値	色を得られたなら true, そうでなければ false.
+	bool ShapeImage::get_pixcel(const D2D1_POINT_2F pos, D2D1_COLOR_F& val) const noexcept
+	{
+		// ページ座標での位置を, 元画像での位置に変換する.
+		const double fx = round(m_clip.left + (pos.x - m_start.x) * (m_clip.right - m_clip.left) / m_view.width);
+		const double fy = round(m_clip.top + (pos.y - m_start.y) * (m_clip.bottom - m_clip.top) / m_view.height);
+		// 変換された位置が, 画像に収まるなら,
+		if (fx >= 0.0 && fx <= m_orig.width && fy >= 0.0 && fy <= m_orig.height) {
+			// 生データでの画素あたりの添え字に変換.
+			const size_t i = m_orig.width * static_cast<size_t>(fy) + static_cast<size_t>(fx);
+			// 色成分を D2D1_COLOR_F に変換.
+			const uint8_t b = m_bgra[i * 4 + 0];
+			const uint8_t g = m_bgra[i * 4 + 1];
+			const uint8_t r = m_bgra[i * 4 + 2];
+			const uint8_t a = m_bgra[i * 4 + 3];
+			val.b = static_cast<float>(b) / 255.0f;
+			val.g = static_cast<float>(g) / 255.0f;
+			val.r = static_cast<float>(r) / 255.0f;
+			val.a = static_cast<float>(a) / 255.0f;
+			return true;
+		}
+		return false;
+	}
+
 	// 部位の位置を得る.
 	void ShapeImage::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
 	{

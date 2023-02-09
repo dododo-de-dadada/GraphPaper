@@ -669,6 +669,10 @@
     <value>Quadrilateral</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
+  <data name="rmfi_tool_drawing_qellipse.Text" xml:space="preserve">
+    <value>Quater Ellipse</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
   <data name="rmfi_tool_drawing_rect.Text" xml:space="preserve">
     <value>Rectangle</value>
     <comment>RadioMenuFlyoutItem</comment>

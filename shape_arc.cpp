@@ -122,14 +122,19 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 元のだ円での中心点を得る.
 		const double old_r = M_PI * m_rot_degree / 180.0;
+		const auto old_c = cos(-old_r);
+		const auto old_s = sin(-old_r);
 		D2D1_POINT_2F c_pos;
 		get_pos_center(m_start, m_vec[0], m_radius, old_r, c_pos);
 		// 新しいだ円の軸を得る.
 		const double new_r = M_PI * val / 180.0;
 		const auto c = cos(-new_r);
 		const auto s = sin(-new_r);
-		double px, py, qx, qy;
-		if (m_vec[0].x >= 0.0f && m_vec[0].y >= 0.0f) {
+		// 終点ベクトルの傾きを戻す.
+		const double vx = old_c * m_vec[0].x - old_s * m_vec[0].y;
+		const double vy = old_s * m_vec[0].x + old_c * m_vec[0].y;
+		double px = 0.0, py = 0.0, qx = 0.0, qy = 0.0;
+		if (vx > 0.0f && vy > 0.0f) {
 			px = 0.0;
 			py = -m_radius.height;
 			qx = m_radius.width;
@@ -140,7 +145,7 @@ namespace winrt::GraphPaper::implementation
 			m_vec[0].x = static_cast<FLOAT>(c * qx + s * qy + c_pos.x - m_start.x);
 			m_vec[0].y = static_cast<FLOAT>(-s * qx + c * qy + c_pos.y - m_start.y);
 		}
-		else if (m_vec[0].x < 0.0f && m_vec[0].y >= 0.0f) {
+		else if (vx < 0.0f && vy > 0.0f) {
 			px = m_radius.width;
 			py = 0.0f;
 			qx = 0.0f;
@@ -151,7 +156,7 @@ namespace winrt::GraphPaper::implementation
 			m_vec[0].x = static_cast<FLOAT>(c * qx + s * qy + c_pos.x - m_start.x);
 			m_vec[0].y = static_cast<FLOAT>(-s * qx + c * qy + c_pos.y - m_start.y);
 		}
-		else if (m_vec[0].x < 0.0f && m_vec[0].y < 0.0f) {
+		else if (vx < 0.0f && vy < 0.0f) {
 			px = 0.0;
 			py = m_radius.height;
 			qx = -m_radius.width;
@@ -162,7 +167,7 @@ namespace winrt::GraphPaper::implementation
 			m_vec[0].x = static_cast<FLOAT>(c * qx + s * qy + c_pos.x - m_start.x);
 			m_vec[0].y = static_cast<FLOAT>(-s * qx + c * qy + c_pos.y - m_start.y);
 		}
-		else {
+		else if (vx > 0.0f && vy < 0.0f) {
 			px = -m_radius.width;
 			py = 0.0f;
 			qx = 0.0f;
@@ -269,7 +274,10 @@ namespace winrt::GraphPaper::implementation
 		if (pt_in_anc(t_pos, c_pos, a_len)) {
 			return  ANC_TYPE::ANC_CENTER;
 		}
-		// 扇形の内側にあるか判定する.
+		// 位置 t が, 扇形の内側にあるか判定する.
+		// 円弧の端点を p, q とする.
+		// 時計周りの場合, p と t の外積が 0 以上で,
+		// q と t の外積が 0 以下なら, 内側. 
 		const double px = m_start.x - c_pos.x;
 		const double py = m_start.y - c_pos.y;
 		const double qx = px + m_vec[0].x;
@@ -280,27 +288,30 @@ namespace winrt::GraphPaper::implementation
 		const double qt = qx * ty - qy * tx;
 		const double rx = abs(m_radius.width);
 		const double ry = abs(m_radius.height);
-		// p と t の外積と q と t の外積の符号が逆ならば内側
 		if (pt >= 0.0 && qt <= 0.0) {
-			// 線枠が可視なら,
+			// 線枠が可視で,
 			if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
+				// 判定する位置が, 内側と外側のだ円の中にあるなら,
 				const double e_width = m_stroke_width * 0.5;
 				if (!pt_in_ellipse(t_pos, c_pos, rx - e_width, ry - e_width, rot)) {
 					if (pt_in_ellipse(t_pos, c_pos, rx + e_width, ry + e_width, rot)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
+				// 判定する位置が, 内側のだ円の中にあるなら
 				else if (is_opaque(m_fill_color)) {
 					return ANC_TYPE::ANC_FILL;
 				}
 			}
+			// 塗りつぶし色が不透明で,
 			else if (is_opaque(m_fill_color)) {
+				// 判定する位置が, だ円の内にあるなら,
 				if (pt_in_ellipse(t_pos, c_pos, rx, ry, rot)) {
 					return ANC_TYPE::ANC_FILL;
 				}
 			}
 		}
-		// 扇の外側にあり, かつ線枠が可視なら,
+		// 判定する位置が, 扇形の外側にあり, かつ線枠が可視なら,
 		else if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			// 端点に含まれるか判定する.
 			// 時計回りに対してのみ判定しているので要注意.
@@ -378,7 +389,8 @@ namespace winrt::GraphPaper::implementation
 			if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
 				// 判定する位置を, 端点を原点とする座標に平行移動する.
 				const D2D1_POINT_2F t{
-					t_pos.x - (m_start.x + m_vec[0].x), t_pos.y - (m_start.y + m_vec[0].y)
+					t_pos.x - (m_start.x + m_vec[0].x),
+					t_pos.y - (m_start.y + m_vec[0].y)
 				};
 				if (pt_in_circle(t, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
@@ -449,17 +461,22 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_PAGE;
 	}
 
-	// だ円をベジェ曲線で近似する.
-	// q	象限 (1, 2, 3, 4)
+	// 四分だ円をベジェ曲線で近似する.
+	// vec	始点からの終点ベクトル
+	// rad	X 軸方向の半径と, Y 軸方向の半径.
+	// b_pos	四分だ円を囲む領域の始点.
+	// b_vec	四分だ円を囲む領域の終点ベクトル.
 	// 得られたベジェ曲線の開始点と制御点は, だ円の中心点を原点とする座標で得られる.
-	void ShapeQEllipse::qellipse_alternate(const int q, const D2D1_SIZE_F rad, const double rot, D2D1_POINT_2F& b_pos, D2D1_BEZIER_SEGMENT& b_seg)
+	// 3次ベジェ曲線を用いた楕円の近似
+	// https://clown.cube-soft.jp/entry/20090606/p1
+	void ShapeQEllipse::qellipse_alternate(const D2D1_POINT_2F vec, const D2D1_SIZE_F rad, const double rot, D2D1_POINT_2F& b_pos, D2D1_BEZIER_SEGMENT& b_seg)
 	{
-		// 3次ベジェ曲線を用いた楕円の近似
-		// https://clown.cube-soft.jp/entry/20090606/p1
-		// p0(x+r, y),  p1(x+r, y+a*r'),  p2(x+a*r, y+r'),  p3(x, y+r') ... (0 <= θ <= π/2)
-		// p3(x, y + r'), p4(x-a*r, y+r'), p5(x - r, y + a * r'),  p6(x-r, y)  ... (π/2 <= θ <= π)
-		// p6(x - r, y), p7(x - r, y - a * r'),  p8(x-a*r, y-r'), p9(x, y - r') ... (π <= θ <= 3π/2)
-		// p9(x, y - r'), p10(x+a*r, y-r'), p11(x + r, y - a * r'), p12(x+r, y) ... (3π/2 <= θ <= 2π)
+		const double c = cos(-rot);
+		const double s = sin(-rot);
+		// 終点ベクトルの傾きを戻す.
+		const double vx = c * vec.x - s * vec.y;
+		const double vy = s * vec.x + c * vec.y;
+
 		constexpr double a = 4.0 * (M_SQRT2 - 1.0) / 3.0;
 		const double rx = rad.width;
 		const double ry = rad.height;
@@ -471,7 +488,8 @@ namespace winrt::GraphPaper::implementation
 		double b_seg2y;
 		double b_seg3x;
 		double b_seg3y;
-		if (q == 1) {
+		// 第一象限
+		if (vx >= 0.0 && vy >= 0.0) {
 			b_pos_x = 0.0f;
 			b_pos_y = -ry;
 			b_seg1x = a * rx;
@@ -481,7 +499,7 @@ namespace winrt::GraphPaper::implementation
 			b_seg3x = rx;
 			b_seg3y = 0.0f;
 		}
-		else if (q == 2) {
+		else if (vx < 0.0 && vy >= 0.0) {
 			b_pos_x = rx;
 			b_pos_y = 0.0f;
 			b_seg1x = rx;
@@ -491,7 +509,7 @@ namespace winrt::GraphPaper::implementation
 			b_seg3x = 0.0f;
 			b_seg3y = ry;
 		}
-		else if (q == 3) {
+		else if (vx < 0.0 && vy < 0.0) {
 			b_pos_x = 0.0f;
 			b_pos_y = ry;
 			b_seg1x = -a * rx;
@@ -501,7 +519,7 @@ namespace winrt::GraphPaper::implementation
 			b_seg3x = -rx;
 			b_seg3y = 0.0f;
 		}
-		else if (q == 4) {
+		else if (vx >= 0.0 && vy < 0.0) {
 			b_pos_x = -rx;
 			b_pos_y = 0.0f;
 			b_seg1x = -rx;
@@ -514,8 +532,6 @@ namespace winrt::GraphPaper::implementation
 		else {
 			return;
 		}
-		const double c = cos(-rot);
-		const double s = sin(-rot);
 		b_pos.x = static_cast<FLOAT>(c * b_pos_x + s * b_pos_y);
 		b_pos.y = static_cast<FLOAT>(-s * b_pos_x + c * b_pos_y);
 		b_seg.point1.x = static_cast<FLOAT>(c * b_seg1x + s * b_seg1y);
@@ -527,20 +543,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じりの返しと先端の位置を得る
-	bool ShapeQEllipse::qellipse_calc_arrow(const int q, const D2D1_POINT_2F c_pos, const D2D1_SIZE_F rad, const double rot, const ARROW_SIZE a_size, D2D1_POINT_2F barbs[])
+	// vec	始点からの終点ベクトル.
+	// c_pos	四分だ円の中心点
+	// rad	X 軸方向の半径と, Y 軸方向の半径.
+	// rot	だ円の傾き (時計回りのラジアン)
+	// a_size	矢じりの大きさ
+	// arrow	矢じりの返しと先端の位置
+	bool ShapeQEllipse::qellipse_calc_arrow(const D2D1_POINT_2F vec, const D2D1_POINT_2F c_pos, const D2D1_SIZE_F rad, const double rot, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[])
 	{
-		D2D1_POINT_2F b_pos{};
-		D2D1_BEZIER_SEGMENT b_seg{};
-		qellipse_alternate(q, rad, rot, b_pos, b_seg);
-		D2D1_POINT_2F h[3];
-		if (ShapeBezier::bezi_calc_arrow(b_pos, b_seg, a_size, h)) {
-			// 平行移動.
-			barbs[0].x = h[0].x + c_pos.x;
-			barbs[0].y = h[0].y + c_pos.y;
-			barbs[1].x = h[1].x + c_pos.x;
-			barbs[1].y = h[1].y + c_pos.y;
-			barbs[2].x = h[2].x + c_pos.x;
-			barbs[2].y = h[2].y + c_pos.y;
+		D2D1_POINT_2F b_pos{};	// ベジェ曲線の始点
+		D2D1_BEZIER_SEGMENT b_seg{};	// ベジェ曲線の制御点
+		qellipse_alternate(vec, rad, rot, b_pos, b_seg);
+		if (ShapeBezier::bezi_calc_arrow(b_pos, b_seg, a_size, arrow)) {
+			// 得られた各位置を, だ円の中心点を原点とする座標から, もとの座標へ平行移動.
+			arrow[0].x += c_pos.x;
+			arrow[0].y += c_pos.y;
+			arrow[1].x += c_pos.x;
+			arrow[1].y += c_pos.y;
+			arrow[2].x += c_pos.x;
+			arrow[2].y += c_pos.y;
 			return true;
 		}
 		return false;
@@ -595,18 +616,7 @@ namespace winrt::GraphPaper::implementation
 				if (m_d2d_arrow_geom == nullptr) {
 					// だ円の弧長を求めるのはしんどいので, ベジェで近似
 					D2D1_POINT_2F arrow[3];
-					if (m_vec[0].x >= 0.0f && m_vec[0].y >= 0.0f) {
-						qellipse_calc_arrow(1, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-					}
-					else if (m_vec[0].x < 0.0f && m_vec[0].y >= 0.0f) {
-						qellipse_calc_arrow(2, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-					}
-					else if (m_vec[0].x < 0.0f && m_vec[0].y < 0.0f) {
-						qellipse_calc_arrow(3, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-					}
-					else {
-						qellipse_calc_arrow(4, c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-					}
+					qellipse_calc_arrow(m_vec[0], c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
 					winrt::com_ptr<ID2D1GeometrySink> sink;
 					const ARROW_STYLE a_style{ m_arrow_style };
 					// ジオメトリパスを作成する.
@@ -705,7 +715,6 @@ namespace winrt::GraphPaper::implementation
 	ShapeQEllipse::ShapeQEllipse(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const float rot, const Shape* page) :
 		ShapePath(page, false),
 		m_rot_degree(rot),
-		// 軸半径は図形が作成されたときの象限を保持するため, 正負そのままで格納される.
 		m_radius(D2D1_SIZE_F{ fabs(b_vec.x), fabs(b_vec.y) }),
 		m_sweep_flag(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE),
 		m_larg_flag(D2D1_ARC_SIZE_SMALL

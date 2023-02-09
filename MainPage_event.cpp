@@ -128,10 +128,10 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F b_pos[4]{	// 押された位置と離された位置で囲まれた方形の頂点
 			p_pos, { r_pos.x, p_pos.y }, r_pos, { p_pos.x, r_pos.y },
 		};
+		double v_abs[4];	// 位置と頂点との距離 (の自乗).
+		D2D1_POINT_2F v_pos[4];	// 頂点の位置
 
 		// 左上位置に最も近い頂点とその距離を得る.
-		double v_abs[4];	// 位置と頂点との距離.
-		D2D1_POINT_2F v_pos[4];
 		if (slist_find_vertex_closest(slist, b_pos[0], limit, v_pos[0])) {
 			D2D1_POINT_2F v_sub;
 			pt_sub(v_pos[0], b_pos[0], v_sub);
@@ -150,6 +150,8 @@ namespace winrt::GraphPaper::implementation
 		else {
 			v_abs[1] = FLT_MAX;
 		}
+
+		// 右下位置に最も近い頂点とその距離を得る.
 		if (slist_find_vertex_closest(slist, b_pos[2], limit, v_pos[2])) {
 			D2D1_POINT_2F v_sub;
 			pt_sub(v_pos[2], b_pos[2], v_sub);
@@ -158,6 +160,8 @@ namespace winrt::GraphPaper::implementation
 		else {
 			v_abs[2] = FLT_MAX;
 		}
+
+		// 調整の対象が領域なら, 左下位置に最も近い頂点とその距離を得る.
 		if (boxed && slist_find_vertex_closest(slist, b_pos[3], limit, v_pos[3])) {
 			D2D1_POINT_2F v_sub;
 			pt_sub(v_pos[3], b_pos[3], v_sub);
@@ -167,7 +171,9 @@ namespace winrt::GraphPaper::implementation
 			v_abs[3] = FLT_MAX;
 		}
 
-		double g_abs[2];	// 方眼との距離の自乗
+		// 方眼にそろえる場合,
+		// 押された位置と離された位置に, 最も近い格子の位置を得る.
+		double g_abs[2];	// 方眼の格子との距離 (の自乗)
 		D2D1_POINT_2F g_pos[2];
 		if (g_snap) {
 			D2D1_POINT_2F g_sub[2];
@@ -178,6 +184,9 @@ namespace winrt::GraphPaper::implementation
 			g_abs[0] = pt_abs2(g_sub[0]);
 			g_abs[1] = pt_abs2(g_sub[1]);
 		}
+		// 方眼にそろえない場合,
+		// 押された位置と離された位置を, 最も近い格子の位置に格納し,
+		// その距離は最大値とする.
 		else {
 			g_pos[0] = p_pos;
 			g_pos[1] = r_pos;
@@ -893,19 +902,23 @@ namespace winrt::GraphPaper::implementation
 					if (anc == ANC_TYPE::ANC_PAGE) {
 						ustack_push_set<UNDO_ID::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
 						ustack_push_null();
+						xcvd_is_enabled();
 					}
 					else if (s != nullptr) {
 						if (anc == ANC_TYPE::ANC_FILL) {
 							ustack_push_set<UNDO_ID::FILL_COLOR>(s, m_eyedropper_color);
 							ustack_push_null();
+							xcvd_is_enabled();
 						}
 						else if (anc == ANC_TYPE::ANC_TEXT) {
 							ustack_push_set<UNDO_ID::FONT_COLOR>(s, m_eyedropper_color);
 							ustack_push_null();
+							xcvd_is_enabled();
 						}
-						else {
+						else if (anc == ANC_TYPE::ANC_STROKE) {
 							ustack_push_set<UNDO_ID::STROKE_COLOR>(s, m_eyedropper_color);
 							ustack_push_null();
+							xcvd_is_enabled();
 						}
 					}
 				}
@@ -1000,8 +1013,15 @@ namespace winrt::GraphPaper::implementation
 				}
 				else if (s != nullptr) {
 					if (anc == ANC_TYPE::ANC_FILL) {
-						s->get_fill_color(m_eyedropper_color);
-						m_eyedropper_filled = true;
+						if (typeid(*s) == typeid(ShapeImage)) {
+							if (static_cast<ShapeImage*>(s)->get_pixcel(m_event_pos_pressed, m_eyedropper_color)) {
+								m_eyedropper_filled = true;
+							}
+						}
+						else {
+							s->get_fill_color(m_eyedropper_color);
+							m_eyedropper_filled = true;
+						}
 						Window::Current().CoreWindow().PointerCursor(CURS_EYEDROPPER2);
 					}
 					else if (anc == ANC_TYPE::ANC_TEXT) {

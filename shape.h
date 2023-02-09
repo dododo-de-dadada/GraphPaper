@@ -627,7 +627,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_SIZE_U	m_orig;	// ビットマップの原寸
 		uint8_t* m_bgra = nullptr;	// ビットマップのデータ
 		D2D1_SIZE_F	m_ratio{ 1.0, 1.0 };	// 表示寸法と原寸の縦横比
-		float	m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
+		float m_opac = 1.0f;	// ビットマップの不透明度 (アルファ値と乗算)
 
 		winrt::com_ptr<ID2D1Bitmap1> m_d2d_bitmap{ nullptr };	// D2D ビットマップ
 
@@ -658,6 +658,8 @@ namespace winrt::GraphPaper::implementation
 		void get_bound(const D2D1_POINT_2F /*a_lt*/, const D2D1_POINT_2F /*a_rb*/, D2D1_POINT_2F& /*b_lt*/, D2D1_POINT_2F& /*b_rb*/) const noexcept final override;
 		// 画像の不透明度を得る.
 		bool get_image_opacity(float& /*val*/) const noexcept final override;
+		// 画素の色を得る.
+		bool get_pixcel(const D2D1_POINT_2F pos, D2D1_COLOR_F& val) const noexcept;
 		// 近傍の頂点を見つける.
 		bool get_pos_nearest(const D2D1_POINT_2F /*pos*/, float& /*dd*/, D2D1_POINT_2F& /*val*/) const noexcept final override;
 		// 部位の位置を得る.
@@ -1457,9 +1459,9 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept final override;
 		// 円弧をベジェ曲線で近似する.
-		static void qellipse_alternate(const int q, const D2D1_SIZE_F rad, const double rot, D2D1_POINT_2F& b_pos, D2D1_BEZIER_SEGMENT& b_seg);
+		static void qellipse_alternate(const D2D1_POINT_2F vec, const D2D1_SIZE_F rad, const double rot, D2D1_POINT_2F& b_pos, D2D1_BEZIER_SEGMENT& b_seg);
 		// 矢じりの返しと先端の位置を得る.
-		static bool qellipse_calc_arrow(const int q, const D2D1_POINT_2F c_pos, const D2D1_SIZE_F rad, const double rot, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
+		static bool qellipse_calc_arrow(const D2D1_POINT_2F vec, const D2D1_POINT_2F c_pos, const D2D1_SIZE_F rad, const double rot, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
 		void draw(void) final override;
 		// 図形をデータライターに SVG として書き込む.
 		void export_svg(const DataWriter& dt_writer);

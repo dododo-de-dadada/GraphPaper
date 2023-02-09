@@ -228,18 +228,16 @@
 				M11,5 L15,5 L15,15 L5,15 L5,11 L6,11 L6,14 L14,14 L14,6 L11,6 Z
 	</x:String>
 	<!-- 開いた矢印アイコンの描画コマンド -->
-	<x:String x:Key="data_arrow_opened">
+	<x:String x:Key="data_arrow_opened2">
 		M0, 8 L9.3, 8 L2.75, 6.52 L3, 5.48 L16, 8.5 L3, 11.52 L2.75, 10.48 L9.3, 9 L0, 9 Z
 	</x:String>
-	<!-- 閉じた矢印アイコンの描画コマンド -->
-	<PathIcon x:Key="icon_arrow_filled" Width="16" Height="16" VerticalAlignment="Center" >
-		<PathIcon.Data>
-			M0, 8 L3, 8 L3, 5.48 L16, 8.5 L3, 11.52 L3,9 L0, 9 Z
-		</PathIcon.Data>
-	</PathIcon>
+    <x:String x:Key="data_arrow_opened">
+        M0, 7 L 12.5,7 L 5.958, 2.391 L 6.5, 1.5 L 15, 7.5 L 6.5, 13.5 L 5.891,12.664 L 12.5,8 L 0,8 Z
+    </x:String>
+    <!-- 閉じた矢印アイコンの描画コマンド -->
 	<x:String x:Key="data_arrow_filled">
-		M0, 8 L3, 8 L3, 5.48 L16, 8.5 L3, 11.52 L3,9 L0, 9 Z
-	</x:String>
+        M0, 7 L 6.5,7 L 6.5,1.5 L 15, 7.5 L 6.5, 13.5 L 6.5,8 L 0,8 Z
+    </x:String>
 	<!-- アプリケーションデータを格納するファイル名 -->
 	<!--
 			<x:String x:Key="file_app_data">app_data</x:String>

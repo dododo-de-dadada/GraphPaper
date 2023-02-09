@@ -80,7 +80,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 属性ダイアログが開かれた.
-	void MainPage::setting_dialog_opened(ContentDialog const&, ContentDialogOpenedEventArgs const&)
+	void MainPage::setting_dialog_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const&)
 	{
 	}
 
@@ -92,6 +92,10 @@ namespace winrt::GraphPaper::implementation
 	// 属性ダイアログが閉じられた.
 	void MainPage::setting_dialog_unloaded(IInspectable const&, RoutedEventArgs const&)
 	{
+		m_dialog_page.m_state_block = nullptr;
+		m_dialog_page.m_color_brush = nullptr;
+		m_dialog_page.m_range_brush = nullptr;
+		m_dialog_d2d.Trim();
 	}
 
 	// 属性の画像を読み込む
@@ -127,20 +131,13 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-#if defined(_DEBUG)
 	// 属性のスワップチェーンパネルが読み込まれた.
 	void MainPage::dialog_panel_loaded(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		if (sender != scp_dialog_panel()) {
 			return;
 		}
-#else
-	// 属性のスワップチェーンパネルが読み込まれた.
-	void MainPage::dialog_panel_loaded(IInspectable const&, RoutedEventArgs const& args)
-	{
-#endif // _DEBUG
-		const auto& swap_chain_panel = scp_dialog_panel();
-		m_dialog_d2d.SetSwapChainPanel(swap_chain_panel);
+		m_dialog_d2d.SetSwapChainPanel(scp_dialog_panel());
 		m_dialog_d2d.m_d2d_factory->CreateDrawingStateBlock(m_dialog_page.m_state_block.put());
 		m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_color_brush.put());
 		m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_range_brush.put());
@@ -148,18 +145,12 @@ namespace winrt::GraphPaper::implementation
 		dialog_draw();
 	}
 
-#if defined(_DEBUG)
 	// 属性のスワップチェーンパネルの寸法が変わった.
 	void MainPage::dialog_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
 	{
 		if (sender != scp_dialog_panel()) {
 			return;
 		}
-#else
-	// 属性のスワップチェーンパネルの寸法が変わった.
-	void MainPage::dialog_panel_size_changed(IInspectable const&, SizeChangedEventArgs const& args)
-	{
-#endif	// _DEBUG
 		m_dialog_page.m_page_size.width = static_cast<FLOAT>(args.NewSize().Width);
 		m_dialog_page.m_page_size.height = static_cast<FLOAT>(args.NewSize().Height);
 		m_dialog_d2d.SetLogicalSize2(m_dialog_page.m_page_size);
@@ -173,6 +164,8 @@ namespace winrt::GraphPaper::implementation
 		const float comp_x = scp_dialog_panel().CompositionScaleX();
 		const float comp_y = scp_dialog_panel().CompositionScaleY();
 		m_dialog_d2d.SetCompositionScale(comp_x, comp_y);
+
+		dialog_draw();
 	}
 
 }

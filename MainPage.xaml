@@ -386,7 +386,10 @@
 				<MenuFlyoutSeparator />
 				<!-- 矢じるしメニュー -->
 				<MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_arrow_style_none" x:Uid="rmfi_arrow_style_none" Click="arrow_style_click" IsChecked="True" Text="None" GroupName="gn_arrow_style">
+                    <MenuFlyoutSubItem.Icon>
+                        <PathIcon Data="{StaticResource data_arrow_opened}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutSubItem.Icon>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_arrow_style_none" x:Uid="rmfi_arrow_style_none" Click="arrow_style_click" IsChecked="True" Text="None" GroupName="gn_arrow_style">
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_line}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
