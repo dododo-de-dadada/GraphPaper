@@ -128,55 +128,55 @@ namespace winrt::GraphPaper::implementation
 		get_pos_center(m_start, m_vec[0], m_radius, old_r, c_pos);
 		// 新しいだ円の軸を得る.
 		const double new_r = M_PI * val / 180.0;
-		const auto c = cos(-new_r);
-		const auto s = sin(-new_r);
+		const auto new_c = cos(-new_r);
+		const auto new_s = sin(-new_r);
 		// 終点ベクトルの傾きを戻す.
 		const double vx = old_c * m_vec[0].x - old_s * m_vec[0].y;
 		const double vy = old_s * m_vec[0].x + old_c * m_vec[0].y;
 		double px = 0.0, py = 0.0, qx = 0.0, qy = 0.0;
-		if (vx > 0.0f && vy > 0.0f) {
+		if (vx > FLT_MIN && vy > FLT_MIN) {
 			px = 0.0;
 			py = -m_radius.height;
 			qx = m_radius.width;
 			qy = 0.0;
-			m_start.x = static_cast<FLOAT>(c * px + s * py + c_pos.x);
-			m_start.y = static_cast<FLOAT>(-s * px + c * py + c_pos.y);
+			m_start.x = static_cast<FLOAT>(new_c * px + new_s * py + c_pos.x);
+			m_start.y = static_cast<FLOAT>(-new_s * px + new_c * py + c_pos.y);
 			m_vec.resize(1);
-			m_vec[0].x = static_cast<FLOAT>(c * qx + s * qy + c_pos.x - m_start.x);
-			m_vec[0].y = static_cast<FLOAT>(-s * qx + c * qy + c_pos.y - m_start.y);
+			m_vec[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + c_pos.x - m_start.x);
+			m_vec[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + c_pos.y - m_start.y);
 		}
-		else if (vx < 0.0f && vy > 0.0f) {
+		else if (vx < -FLT_MIN && vy > FLT_MIN) {
 			px = m_radius.width;
 			py = 0.0f;
 			qx = 0.0f;
 			qy = m_radius.height;
-			m_start.x = static_cast<FLOAT>(c * px + s * py + c_pos.x);
-			m_start.y = static_cast<FLOAT>(-s * px + c * py + c_pos.y);
+			m_start.x = static_cast<FLOAT>(new_c * px + new_s * py + c_pos.x);
+			m_start.y = static_cast<FLOAT>(-new_s * px + new_c * py + c_pos.y);
 			m_vec.resize(1);
-			m_vec[0].x = static_cast<FLOAT>(c * qx + s * qy + c_pos.x - m_start.x);
-			m_vec[0].y = static_cast<FLOAT>(-s * qx + c * qy + c_pos.y - m_start.y);
+			m_vec[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + c_pos.x - m_start.x);
+			m_vec[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + c_pos.y - m_start.y);
 		}
-		else if (vx < 0.0f && vy < 0.0f) {
+		else if (vx < -FLT_MIN && vy < -FLT_MIN) {
 			px = 0.0;
 			py = m_radius.height;
 			qx = -m_radius.width;
 			qy = 0.0;
-			m_start.x = static_cast<FLOAT>(c * px + s * py + c_pos.x);
-			m_start.y = static_cast<FLOAT>(-s * px + c * py + c_pos.y);
+			m_start.x = static_cast<FLOAT>(new_c * px + new_s * py + c_pos.x);
+			m_start.y = static_cast<FLOAT>(-new_s * px + new_c * py + c_pos.y);
 			m_vec.resize(1);
-			m_vec[0].x = static_cast<FLOAT>(c * qx + s * qy + c_pos.x - m_start.x);
-			m_vec[0].y = static_cast<FLOAT>(-s * qx + c * qy + c_pos.y - m_start.y);
+			m_vec[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + c_pos.x - m_start.x);
+			m_vec[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + c_pos.y - m_start.y);
 		}
-		else if (vx > 0.0f && vy < 0.0f) {
+		else if (vx > FLT_MIN && vy < -FLT_MIN) {
 			px = -m_radius.width;
 			py = 0.0f;
 			qx = 0.0f;
 			qy = -m_radius.height;
-			m_start.x = static_cast<FLOAT>(c * px + s * py + c_pos.x);
-			m_start.y = static_cast<FLOAT>(-s * px + c * py + c_pos.y);
+			m_start.x = static_cast<FLOAT>(new_c * px + new_s * py + c_pos.x);
+			m_start.y = static_cast<FLOAT>(-new_s * px + new_c * py + c_pos.y);
 			m_vec.resize(1);
-			m_vec[0].x = static_cast<FLOAT>(c * qx + s * qy + c_pos.x - m_start.x);
-			m_vec[0].y = static_cast<FLOAT>(-s * qx + c * qy + c_pos.y - m_start.y);
+			m_vec[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + c_pos.x - m_start.x);
+			m_vec[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + c_pos.y - m_start.y);
 		}
 		m_rot_degree = val;
 		if (m_d2d_fill_geom != nullptr) {
@@ -489,7 +489,7 @@ namespace winrt::GraphPaper::implementation
 		double b_seg3x;
 		double b_seg3y;
 		// 第一象限
-		if (vx >= 0.0 && vy >= 0.0) {
+		if (vx > FLT_MIN && vy > FLT_MIN) {
 			b_pos_x = 0.0f;
 			b_pos_y = -ry;
 			b_seg1x = a * rx;
