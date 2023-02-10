@@ -144,15 +144,15 @@ namespace winrt::GraphPaper::implementation
 		if (equal(join, D2D1_LINE_JOIN_BEVEL)) {
 			len += dt_writer.WriteString(L"2 j\n");
 		}
-		// 丸い
+		// 丸まり
 		else if (equal(join, D2D1_LINE_JOIN_ROUND)) {
 			len += dt_writer.WriteString(L"1 j\n");
 		}
-		// PDF には留め継ぎ (マイター) あるいは面取り (ベベル) しかない.
+		// PDF には尖り (マイター) または面取り (ベベル) しかない.
 		else {
 			//if (equal(m_join_style, D2D1_LINE_JOIN_MITER) ||
 			//equal(m_join_style, D2D1_LINE_JOIN_MITER_OR_BEVEL)) {
-			// マイター制限
+			// 尖り制限
 			swprintf_s(buf, 
 				L"0 j\n"
 				L"%f M\n", 
@@ -448,8 +448,8 @@ namespace winrt::GraphPaper::implementation
 
 		constexpr double a = 4.0 * (M_SQRT2 - 1.0) / 3.0;	// ベジェでだ円を近似する係数
 		const float ty = page_size.height;	// D2D 座標を PDF ユーザー空間へ変換するため
-		const float rx = (m_vec[0].x >= 0.0f ? m_corner_rad.x : -m_corner_rad.x);	// だ円の x 方向の半径
-		const float ry = (m_vec[0].y >= 0.0f ? m_corner_rad.y : -m_corner_rad.y);	// だ円の y 方向の半径
+		const float rx = (m_vec[0].x >= 0.0f ? m_corner_radius.x : -m_corner_radius.x);	// だ円の x 方向の半径
+		const float ry = (m_vec[0].y >= 0.0f ? m_corner_radius.y : -m_corner_radius.y);	// だ円の y 方向の半径
 
 		// 上辺の開始位置に移動.
 		swprintf_s(buf,

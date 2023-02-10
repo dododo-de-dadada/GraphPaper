@@ -447,7 +447,7 @@ namespace winrt::GraphPaper::implementation
 			debug_leak_cnt++;
 #endif
 			// ˜g‚ğ•¶š—ñ‚É‡‚í‚¹‚é.
-			t->fit_frame_to_text(g_len);
+			t->fit_frame_to_text(static_cast<FLOAT>(g_len));
 			// ƒpƒlƒ‹‚Ì’†‰›‚É‚È‚é‚æ‚¤¶ãˆÊ’u‚ğ‹‚ß‚é.
 			D2D1_POINT_2F pos{
 				static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) - t->m_vec[0].x * 0.5),

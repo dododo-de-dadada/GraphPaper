@@ -68,11 +68,12 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Foundation::Point;
 	using winrt::Windows::Storage::Streams::IRandomAccessStream;
 	using winrt::Windows::Graphics::Imaging::SoftwareBitmap;
+
 #if defined(_DEBUG)
 	extern uint32_t debug_leak_cnt;
 	constexpr wchar_t DEBUG_MSG[] = L"Memory leak occurs";
 #endif
-	constexpr double PT_ROUND = 1.0 / 16.0;
+	constexpr double PT_ROUND = 1.0 / 16.0;	// 位置を丸めるときの倍数
 
 	// 前方宣言
 	struct Shape;
@@ -221,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr float FONT_SIZE_DEFVAL = static_cast<float>(12.0 * 96.0 / 72.0);	// 書体の大きさの既定値 (システムリソースに値が無かった場合)
 	constexpr D2D1_COLOR_F GRID_COLOR_DEFVAL{ ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 0.5f };	// 方眼の色の既定値
 	constexpr float GRID_LEN_DEFVAL = 48.0f;	// 方眼の長さの既定値
-	constexpr float MITER_LIMIT_DEFVAL = 10.0f;	// マイター制限の既定値
+	constexpr float MITER_LIMIT_DEFVAL = 10.0f;	// 尖り制限の既定値
 	constexpr D2D1_SIZE_F TEXT_PADDING_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
 	constexpr size_t N_GON_MAX = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 	constexpr float PAGE_SIZE_MAX = 32768.0f;	// 最大のページ大きさ
@@ -238,7 +239,7 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 図形の部位（円形）を表示する.
-	inline void anc_draw_ellipse(const D2D1_POINT_2F a_pos, const double a_len, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush);
+	inline void anc_draw_circle(const D2D1_POINT_2F a_pos, const double a_len, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush);
 	// 図形の部位 (方形) を表示する.
 	inline void anc_draw_rect(const D2D1_POINT_2F a_pos, const double a_len, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush);
 	// 単精度浮動小数が同じか判定する.
@@ -272,7 +273,7 @@ namespace winrt::GraphPaper::implementation
 	// 色の成分が同じか判定する.
 	inline bool equal_color_comp(const FLOAT a, const FLOAT b) noexcept;
 	// 矢じりの返しの位置を求める.
-	inline void get_pos_barbs(const D2D1_POINT_2F a_vec, const double a_len, const double h_width, const double h_len, D2D1_POINT_2F barb[]) noexcept;
+	inline void get_pos_barbs(const D2D1_POINT_2F a_vec, const double a_len, const double width, const double len, D2D1_POINT_2F barb[]) noexcept;
 	// 色が不透明か判定する.
 	inline bool is_opaque(const D2D1_COLOR_F& color) noexcept;
 	// ベクトルの長さ (の自乗値) を得る
@@ -335,7 +336,6 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// shape_slist.cpp
-	// 図形リスト
 	//------------------------------
 
 	using SHAPE_LIST = std::list<struct Shape*>;
@@ -441,7 +441,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_grid_snap(bool& /*val*/) const noexcept { return false; }
 		// 画像の不透明度を得る.
 		virtual bool get_image_opacity(float& /*val*/) const noexcept { return false; }
-		// 線分の結合のマイター制限を得る.
+		// 線分の結合の尖り制限を得る.
 		virtual bool get_join_miter_limit(float& /*val*/) const noexcept { return false; }
 		// 線分の結合の形式を得る.
 		virtual bool get_join_style(D2D1_LINE_JOIN& /*val*/) const noexcept { return false; }
@@ -491,10 +491,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool is_deleted(void) const noexcept { return false; }
 		// 選択されてるか判定する.
 		virtual bool is_selected(void) const noexcept { return false; }
-		// 塗りつぶし可能か判定する.
-		virtual bool is_fillable(void) const noexcept { return false; }
-		// 線枠可能か判定する.
-		virtual bool is_strokable(void) const noexcept { return false; }
 		// 差分だけ移動する.
 		virtual	bool move(const D2D1_POINT_2F /*val*/) noexcept { return false; }
 		// 値を矢じるしの寸法に格納する.
@@ -539,7 +535,7 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_grid_snap(const bool /*val*/) noexcept { return false; }
 		// 画像の不透明度を得る.
 		virtual bool set_image_opacity(const float /*val*/) noexcept { return false; }
-		// 値を線の結合のマイター制限に格納する.
+		// 値を線の結合の尖り制限に格納する.
 		virtual bool set_join_miter_limit(const float& /*val*/) noexcept { return false; }
 		// 値を線の結合の形式に格納する.
 		virtual bool set_join_style(const D2D1_LINE_JOIN& /*val*/) noexcept { return false; }
@@ -712,7 +708,7 @@ namespace winrt::GraphPaper::implementation
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
 
 		// 角丸
-		//D2D1_POINT_2F m_corner_rad{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL };	// 角丸半径
+		//D2D1_POINT_2F m_corner_radius{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL };	// 角丸半径
 
 		// 塗りつぶし
 		D2D1_COLOR_F m_fill_color{ COLOR_WHITE };	// 塗りつぶし色
@@ -729,7 +725,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_miter_limit = MITER_LIMIT_DEFVAL;	// 線の結合のマイター制限
+		float m_join_miter_limit = MITER_LIMIT_DEFVAL;	// 線の結合の尖り制限
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線の結合の形式
 		CAP_STYLE m_stroke_cap{ CAP_FLAT };	// 線の端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
@@ -822,7 +818,7 @@ namespace winrt::GraphPaper::implementation
 		bool get_grid_snap(bool& val) const noexcept final override;
 		// 画像の不透明度を得る.
 		bool get_image_opacity(float& val) const noexcept final override;
-		// 線の結合のマイター制限を得る.
+		// 線の結合の尖り制限を得る.
 		bool get_join_miter_limit(float& val) const noexcept final override;
 		// 線の結合の形式を得る.
 		bool get_join_style(D2D1_LINE_JOIN& val) const noexcept final override;
@@ -888,7 +884,7 @@ namespace winrt::GraphPaper::implementation
 		bool set_grid_show(const GRID_SHOW val) noexcept final override;
 		// 値を方眼に合わせるに格納する.
 		bool set_grid_snap(const bool val) noexcept final override;
-		// 値を線の結合のマイター制限に格納する.
+		// 値を線の結合の尖り制限に格納する.
 		bool set_join_miter_limit(const float& val) noexcept final override;
 		// 値を線の結合の形式に格納する.
 		bool set_join_style(const D2D1_LINE_JOIN& val) noexcept final override;
@@ -981,7 +977,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
 		DASH_PATT m_dash_patt{ DASH_PATT_DEFVAL };	// 破線の配置
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
-		float m_join_miter_limit = MITER_LIMIT_DEFVAL;		// 線の結合のマイター制限
+		float m_join_miter_limit = MITER_LIMIT_DEFVAL;		// 線の結合の尖り制限
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL;	// 線の結合の形式
 
 		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_stroke_style{};	// D2D ストロークスタイル
@@ -990,7 +986,6 @@ namespace winrt::GraphPaper::implementation
 		virtual ~ShapeStroke(void)
 		{
 			if (m_d2d_stroke_style != nullptr) {
-				//m_d2d_stroke_style->Release();
 				m_d2d_stroke_style = nullptr;
 			}
 		} // ~Shape
@@ -1013,7 +1008,7 @@ namespace winrt::GraphPaper::implementation
 		bool get_dash_patt(DASH_PATT& val) const noexcept final override;
 		// 破線の形式を得る.
 		bool get_dash_style(D2D1_DASH_STYLE& val) const noexcept final override;
-		// 線の結合のマイター制限を得る.
+		// 線の結合の尖り制限を得る.
 		bool get_join_miter_limit(float& val) const noexcept final override;
 		// 線の結合の形式を得る.
 		bool get_join_style(D2D1_LINE_JOIN& val) const noexcept final override;
@@ -1023,8 +1018,6 @@ namespace winrt::GraphPaper::implementation
 		bool get_stroke_width(float& val) const noexcept final override;
 		// 位置を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept override;
-		// 線枠可能か判定する.
-		bool is_strokable(void) const noexcept final override { return true; }
 		// 値を端の形式に格納する.
 		virtual	bool set_stroke_cap(const CAP_STYLE& val) noexcept override;
 		// 値を破線の端の形式に格納する.
@@ -1033,7 +1026,7 @@ namespace winrt::GraphPaper::implementation
 		bool set_dash_patt(const DASH_PATT& val) noexcept final override;
 		// 値を線枠の形式に格納する.
 		bool set_dash_style(const D2D1_DASH_STYLE val) noexcept final override;
-		// 値を線の結合のマイター制限に格納する.
+		// 値を線の結合の尖り制限に格納する.
 		virtual bool set_join_miter_limit(const float& val) noexcept override;
 		// 値を線の結合の形式に格納する.
 		virtual bool set_join_style(const D2D1_LINE_JOIN& val) noexcept override;
@@ -1144,7 +1137,7 @@ namespace winrt::GraphPaper::implementation
 		void export_svg(DataWriter const& dt_writer);
 		// 値を端の形式に格納する.
 		bool set_stroke_cap(const CAP_STYLE& val) noexcept final override;
-		// 値を線の結合のマイター制限に格納する.
+		// 値を線の結合の尖り制限に格納する.
 		bool set_join_miter_limit(const float& val) noexcept final override;
 		// 値を線の結合の形式に格納する.
 		bool set_join_style(const D2D1_LINE_JOIN& val) noexcept final override;
@@ -1180,8 +1173,6 @@ namespace winrt::GraphPaper::implementation
 		virtual uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept override;
 		// 範囲に含まれるか判定する.
 		virtual bool in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept override;
-		// 塗りつぶし可能か判定する.
-		bool is_fillable(void) const noexcept final override { return true; }
 		// 塗りつぶし色を得る.
 		bool get_fill_color(D2D1_COLOR_F& val) const noexcept final override;
 		// 値を塗りつぶし色に格納する.
@@ -1271,7 +1262,7 @@ namespace winrt::GraphPaper::implementation
 		{}
 
 		//------------------------------
-		// shape_elli.cpp
+		// shape_ellipse.cpp
 		//------------------------------
 
 		// 図形を表示する.
@@ -1288,7 +1279,7 @@ namespace winrt::GraphPaper::implementation
 	// 角丸方形
 	//------------------------------
 	struct ShapeRRect : ShapeRect {
-		D2D1_POINT_2F m_corner_rad{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL };		// 角丸部分の半径
+		D2D1_POINT_2F m_corner_radius{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL };		// 角丸部分の半径
 
 		//------------------------------
 		// shape_rrect.cpp
@@ -1354,8 +1345,6 @@ namespace winrt::GraphPaper::implementation
 		bool get_fill_color(D2D1_COLOR_F& val) const noexcept final override;
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F val) noexcept final override;
-		// 塗りつぶし可能か判定する.
-		bool is_fillable(void) const noexcept final override { return true; }
 		// 値を, 部位の位置に格納する.
 		bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept override;
 		// 値を矢じるしの寸法に格納する.
@@ -1438,10 +1427,11 @@ namespace winrt::GraphPaper::implementation
 		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer) final override;
 		// 図形をデータライターに SVG として書き込む.
 		void export_svg(const DataWriter& dt_writer);
-
+		// 図形をデータライターに書き込む.
 		void write(const DataWriter& dt_writer) const final override;
 	};
 
+	// 四分だ円 (円弧)
 	struct ShapeQEllipse : ShapePath {
 		D2D1_SIZE_F m_radius{};
 		float m_rot_degree = 0.0f;
@@ -1452,28 +1442,35 @@ namespace winrt::GraphPaper::implementation
 
 		// だ円の中心点を得る.
 		static bool get_pos_center(const D2D1_POINT_2F start, const D2D1_POINT_2F vec, const D2D1_SIZE_F rad, const double rot, D2D1_POINT_2F& val) noexcept;
+		// だ円の傾きを得る.
+		bool get_rotation(float& val) const noexcept final override {
+			val = m_rot_degree;
+			return true;
+		}
 		// 値を, 部位の位置に格納する.
 		bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept;
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
+		// だ円の傾きに格納する.
+		bool set_rotation(const float val) noexcept final override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept final override;
 		// 円弧をベジェ曲線で近似する.
 		static void qellipse_alternate(const D2D1_POINT_2F vec, const D2D1_SIZE_F rad, const double rot, D2D1_POINT_2F& b_pos, D2D1_BEZIER_SEGMENT& b_seg);
 		// 矢じりの返しと先端の位置を得る.
 		static bool qellipse_calc_arrow(const D2D1_POINT_2F vec, const D2D1_POINT_2F c_pos, const D2D1_SIZE_F rad, const double rot, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
+		// 図形を描く
 		void draw(void) final override;
 		// 図形をデータライターに SVG として書き込む.
 		void export_svg(const DataWriter& dt_writer);
+		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer);
+		// 図形を作成する.
 		ShapeQEllipse(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const float rot, const Shape* page);
+		// 図形をデータリーダーから読み込む.
 		ShapeQEllipse(const Shape& page, const DataReader& dt_reader);
+		// 図形をデータライターに書き込む.
 		void write(const DataWriter& dt_writer) const final override;
-		bool get_rotation(float& val) const noexcept final override {
-			val = m_rot_degree;
-			return true;
-		}
-		bool set_rotation(const float val) noexcept final override;
 	};
 
 	//------------------------------
@@ -1622,7 +1619,7 @@ namespace winrt::GraphPaper::implementation
 	// a_pos	部位の位置
 	// target	描画ターゲット
 	// brush	色ブラシ
-	inline void anc_draw_ellipse(const D2D1_POINT_2F a_pos, const double a_len, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
+	inline void anc_draw_circle(const D2D1_POINT_2F a_pos, const double a_len, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
 	{
 		D2D1_MATRIX_3X2_F t32;
 		target->GetTransform(&t32);
@@ -1743,10 +1740,10 @@ namespace winrt::GraphPaper::implementation
 	// 矢じりの返しの位置を求める.
 	// a_vec	矢軸ベクトル.
 	// a_len	矢軸ベクトルの長さ
-	// h_width	矢じりの幅 (返しの間の長さ)
-	// h_len	矢じりの長さ (先端から返しまでの軸ベクトル上での長さ)
+	// width	矢じりの幅 (返しの間の長さ)
+	// len	矢じりの長さ (先端から返しまでの軸ベクトル上での長さ)
 	// barb[2]	矢じりの返しの位置
-	inline void get_pos_barbs(const D2D1_POINT_2F a_vec, const double a_len, const double h_width, const double h_len, D2D1_POINT_2F barbs[]) noexcept
+	inline void get_pos_barbs(const D2D1_POINT_2F a_vec, const double a_len, const double width, const double len, D2D1_POINT_2F barbs[]) noexcept
 	{
 		if (a_len <= DBL_MIN) {
 			constexpr D2D1_POINT_2F Z{ 0.0f, 0.0f };
@@ -1754,10 +1751,10 @@ namespace winrt::GraphPaper::implementation
 			barbs[1] = Z;
 		}
 		else {
-			const double hf = h_width * 0.5;	// 矢じるしの幅の半分の大きさ
-			const double sx = a_vec.x * -h_len;	// 矢軸ベクトルを矢じるしの長さ分反転
+			const double hf = width * 0.5;	// 矢じるしの幅の半分の大きさ
+			const double sx = a_vec.x * -len;	// 矢軸ベクトルを矢じるしの長さ分反転
 			const double sy = a_vec.x * hf;
-			const double tx = a_vec.y * -h_len;
+			const double tx = a_vec.y * -len;
 			const double ty = a_vec.y * hf;
 			const double ax = 1.0 / a_len;
 			barbs[0].x = static_cast<FLOAT>((sx - ty) * ax);
@@ -1838,7 +1835,7 @@ namespace winrt::GraphPaper::implementation
 		return dx * dx + dy * dy <= r * r;
 	}
 
-	// だ円にが位置を含むか判定する.
+	// だ円が位置を含むか判定する.
 	// t_pos	判定する位置
 	// c_pos	だ円の中心
 	// rad_x	だ円の径

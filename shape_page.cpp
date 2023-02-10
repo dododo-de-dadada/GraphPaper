@@ -152,7 +152,7 @@ namespace winrt::GraphPaper::implementation
 		const double py = p_pos.y;
 		const double qx = cx - px;
 		const double qy = cy - py;
-		//auto c_rad = m_corner_rad;
+		//auto c_rad = m_corner_radius;
 		D2D1_POINT_2F c_rad{ m_grid_base + 1.0f, m_grid_base + 1.0f };
 		double rx = c_rad.x;
 		double ry = c_rad.y;
@@ -332,7 +332,7 @@ namespace winrt::GraphPaper::implementation
 	/*
 	bool ShapePage::get_corner_radius(D2D1_POINT_2F& val) const noexcept
 	{
-		val = m_corner_rad;
+		val = m_corner_radius;
 		return true;
 	}
 	*/
@@ -477,7 +477,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 線分の結合のマイター制限を得る.
+	// 線分の結合の尖り制限を得る.
 	bool ShapePage::get_join_miter_limit(float& val) const noexcept
 	{
 		val = m_join_miter_limit;
@@ -618,7 +618,7 @@ namespace winrt::GraphPaper::implementation
 		//	dt_reader.ReadSingle(),
 		//	dt_reader.ReadSingle()
 		//};
-		//m_corner_rad = corner_rad;
+		//m_corner_radius = corner_rad;
 		// 端の形式
 		const CAP_STYLE stroke_cap{
 			static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32()),
@@ -680,7 +680,7 @@ namespace winrt::GraphPaper::implementation
 			join_style == D2D1_LINE_JOIN_ROUND) {
 			m_join_style = join_style;
 		}
-		// 線の結合のマイター制限距離
+		// 線の結合の尖り制限距離
 		const float join_miter_limit = dt_reader.ReadSingle();
 		if (join_miter_limit >= 1.0f && join_miter_limit <= 128.5f) {
 			m_join_miter_limit = join_miter_limit;
@@ -828,8 +828,8 @@ namespace winrt::GraphPaper::implementation
 	/*
 	bool ShapePage::set_corner_radius(const D2D1_POINT_2F& val) noexcept
 	{
-		if (!equal(m_corner_rad, val)) {
-			m_corner_rad = val;
+		if (!equal(m_corner_radius, val)) {
+			m_corner_radius = val;
 			return true;
 		}
 		return false;
@@ -1022,7 +1022,7 @@ namespace winrt::GraphPaper::implementation
 		return (m_dash_style = val) != old_val;
 	}
 
-	// 値を線分の結合のマイター制限に格納する.
+	// 値を線分の結合の尖り制限に格納する.
 	bool ShapePage::set_join_miter_limit(const float& val) noexcept
 	{
 		if (!equal(m_join_miter_limit, val)) {
@@ -1092,7 +1092,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_dash_cap(m_dash_cap);
 		s->get_dash_patt(m_dash_patt);
 		s->get_dash_style(m_dash_style);
-		//s->get_corner_radius(m_corner_rad);
+		//s->get_corner_radius(m_corner_radius);
 		s->get_fill_color(m_fill_color);
 		s->get_font_color(m_font_color);
 		s->get_font_family(m_font_family);
@@ -1153,8 +1153,8 @@ namespace winrt::GraphPaper::implementation
 		// 矢じるしの形式
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_arrow_style));
 		// 角丸半径
-		//dt_writer.WriteSingle(m_corner_rad.x);
-		//dt_writer.WriteSingle(m_corner_rad.y);
+		//dt_writer.WriteSingle(m_corner_radius.x);
+		//dt_writer.WriteSingle(m_corner_radius.y);
 		// 線の端の形式
 		dt_writer.WriteUInt32(m_stroke_cap.m_start);
 		dt_writer.WriteUInt32(m_stroke_cap.m_end);
@@ -1178,7 +1178,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_dash_style));
 		// 線分の結合
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_join_style));
-		// 結合のマイター制限
+		// 結合の尖り制限
 		dt_writer.WriteSingle(m_join_miter_limit);
 		// 塗りつぶし色
 		dt_writer.WriteSingle(m_fill_color.r);

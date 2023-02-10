@@ -241,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
-				// 線枠の結合が面取り, または, マイター・面取りでかつマイター制限が√2 未満か判定する.
+				// 線枠の結合が面取り, または, 尖り・面取りでかつ尖り制限が√2 未満か判定する.
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
 					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL && m_join_miter_limit < M_SQRT2)) {
 					const auto limit = static_cast<FLOAT>(e_thick);
@@ -255,7 +255,7 @@ namespace winrt::GraphPaper::implementation
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
-				// 線枠の結合がマイター, または, マイター/面取りでかつマイター制限が√2 以上か判定する.
+				// 線枠の結合が尖り, または, 尖り/面取りでかつ尖り制限が√2 以上か判定する.
 				else if (m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 					(m_join_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL && m_join_miter_limit >= M_SQRT2)) {
 					const auto limit = static_cast<FLOAT>(m_stroke_width * M_SQRT2 * 0.5 * m_join_miter_limit);

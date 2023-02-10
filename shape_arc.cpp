@@ -1,9 +1,11 @@
-
-// ‰~ŒÊ‚ğ•`‰æ‚·‚é 3 ‚Â‚Ì•û–@ - ‘È‰~‚Ì‰~ŒÊ
+ï»¿//------------------------------
+// å››åˆ†ã å†† (å††å¼§)
+// 
+// å††å¼§ã‚’æç”»ã™ã‚‹ 3 ã¤ã®æ–¹æ³• - æ¥•å††ã®å††å¼§
 // https://learn.microsoft.com/ja-jp/xamarin/xamarin-forms/user-interface/graphics/skiasharp/curves/arcs
-// ƒpƒX - ‰~ŒÊ
+// ãƒ‘ã‚¹ - å††å¼§
 // https://developer.mozilla.org/ja/docs/Web/SVG/Tutorial/Paths
-
+//------------------------------
 #include "pch.h"
 #include "shape.h"
 
@@ -11,67 +13,112 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	// ‚¾‰~‚Ì’†S“_‚ğ“¾‚é.
-	// start	‰~ŒÊ‚ÌŠJn“_
-	// vec	‰~ŒÊ‚ÌI“_‚Ö‚ÌƒxƒNƒgƒ‹
-	// rad	‚¾‰~‚Ì”¼Œa (•W€Œ`‚É‚¨‚¯‚é X ²•ûŒü‚Æ Y ²•ûŒü)
-	// rot	‚¾‰~‚ÌŒX‚« (ƒ‰ƒWƒAƒ“)
-	// val	“¾‚ç‚ê‚½’†S“_.
+	// å††å¼§ã®çµ‚ç‚¹ãƒ™ã‚¯ãƒˆãƒ«ã‹ã‚‰, å††å¼§ãŒå«ã¾ã‚Œã‚‹è±¡é™ã‚’å¾—ã‚‹.
+	// vx, vy	å††å¼§ã®çµ‚ç‚¹ãƒ™ã‚¯ãƒˆãƒ«
+	// æˆ»ã‚Šå€¤	è±¡é™ã®ç•ªå· (1,2,3,4). çµ‚ç‚¹ãƒ™ã‚¯ãƒˆãƒ«ãŒã‚¼ãƒ­ãƒ™ã‚¯ãƒˆãƒ«ãªã‚‰ 0.
+	// Y è»¸ã¯ä¸‹å‘ãã ãŒ, å‘ã‹ã£ã¦å³ä¸ŠãŒç¬¬ 1 è±¡é™.
+	static int qellipse_quadrant(const double vx, const double vy)
+	{
+		// ç¬¬ 1 è±¡é™ (æ­£æ–¹å‘ã® Yè»¸ã‚’å«ã¿, X è»¸ã¯å«ã¾ãªã„)
+		//       â€–-   \
+		// -     â€–  1  \
+		// ------+------
+		//       |     +
+		//      +|
+		if (vx >= 0.0 && vy > 0.0) {
+			return 1;
+		}
+		// ç¬¬ 2 è±¡é™ (æ­£æ–¹å‘ã® Xè»¸ã‚’å«ã¿, Y è»¸ã¯å«ã¾ãªã„)
+		//      -|
+		//       |     +
+		// ------+======
+		// -     |  2  /
+		//       |+   /
+		else if (vx < 0.0 && vy >= 0.0) {
+			return 2;
+		}
+		// ç¬¬ 3 è±¡é™ (è² æ–¹å‘ã® Yè»¸ã‚’å«ã¿, X è»¸ã¯å«ã¾ãªã„)
+		//       |-
+		// -     |
+		// ------+------
+		// \  3  â€–     +
+		//  \   +â€–
+		else if (vx <= 0.0 && vy < 0.0) {
+			return 3;
+		}
+		// ç¬¬ 4 è±¡é™ (è² æ–¹å‘ã® Xè»¸ã‚’å«ã¿, Y è»¸ã¯å«ã¾ãªã„)
+		//  /   -|
+		// /  4  |
+		// ======+------
+		// -     |     +
+		//      +|
+		else if (vx > 0.0 && vy <= 0.0) {
+			return 4;
+		}
+		return 0;
+	}
+
+	// ã å††ã®ä¸­å¿ƒç‚¹ã‚’å¾—ã‚‹.
+	// start	å††å¼§ã®é–‹å§‹ç‚¹
+	// vec	å††å¼§ã®çµ‚ç‚¹ã¸ã®ãƒ™ã‚¯ãƒˆãƒ«
+	// rad	ã å††ã®åŠå¾„ (æ¨™æº–å½¢ã«ãŠã‘ã‚‹ X è»¸æ–¹å‘ã¨ Y è»¸æ–¹å‘)
+	// rot	ã å††ã®å‚¾ã (ãƒ©ã‚¸ã‚¢ãƒ³)
+	// val	å¾—ã‚‰ã‚ŒãŸä¸­å¿ƒç‚¹.
 	bool ShapeQEllipse::get_pos_center(const D2D1_POINT_2F start, const D2D1_POINT_2F vec, const D2D1_SIZE_F rad, const double rot, D2D1_POINT_2F& val) noexcept
 	{
-		// ‚¾‰~‚Ì’†S“_‚ğ‹‚ß‚é.
+		// ã å††ã®ä¸­å¿ƒç‚¹ã‚’æ±‚ã‚ã‚‹.
 		// A = 1 / (rx^2)
 		// B = 1 / (ry^2)
-		// C = cos(ƒÆ)
-		// S = sin(ƒÆ)
-		// “_ p (px, py) ‚ğ‰~‚Ì’†S (ox, oy) ‚ğŒ´“_‚Æ‚·‚éÀ•W‚É•½sˆÚ“®‚µ‚Ä, ‰ñ“]‚·‚é.
-		// x = CE(px - ox) + SE(py - oy)
-		// y =-SE(px - ox) + CE(py - oy)
-		// “_ q ‚É‚Â‚¢‚Ä‚à“¯—l.
-		// ‚±‚ê‚ç‚ğ, ‚¾‰~‚Ì•W€Œ` AEx^2 + BEy^2 = 1 ‚É‘ã“ü‚·‚é.
-		// AE{ CE(px - ox) + SE(py - oy) }^2 + BE{ -SE(px - ox) + CE(py - oy) }^2 = 1 ...[1]
-		// AE{ CE(qx - ox) + SE(qy - oy) }^2 + BE{ -SE(qx - ox) + CE(qy - oy) }^2 = 1 ...[2]
-		// [1] ®‚Ì‘æ 1 €‚ğ ox, oy ‚É‚Â‚¢‚Ä“WŠJ‚·‚é.
-		// AE{ CE(px - ox) + SE(py - oy) }^2 =
-		// AE{ CEpx - CEox + SEpy - SEoy }^2 = 
-		// AE{ -CEox - SEoy + (CEpx + SEpy) }^2 =
-		// AEC^2Eox^2 + 2AECESEoxEoy + AES^2Eoy^2 - 2AECE(CEpx + SEpy)Eox - 2AESE(CEpx + SEpy)Eoy + AE(CEpx + SEpy)^2
-		// [1] ®‚Ì‘æ 2 €‚à“¯—l.
-		// BE{ -SE(px - ox) + CE(py - oy) }^2 =
-		// BE{ -SEpx + SEox + CEpy - CEoy }^2 = 
-		// BE{  SEox - CEoy - (SEpx - CEpy) }^2 =
-		// BES^2Eox^2 - 2BESECEoxEoy + BEC^2Eoy^2 - 2BESE(SEpx - CEpy)Eox + 2BECE(SEpx - CEpy)Eoy + BE(SEpx - CEpy)^2
-		// ‚µ‚½‚ª‚Á‚Ä [1] ®‚Í,
-		// (AEC^2 + BES^2)Eox^2 + (2AECES - 2BESEC)EoxEoy + (AES^2 + BEC^2)Eoy^2 - (2AECE(CEpx + SEpy) + 2BESE(SEpx - CEpy))Eox - (2AESE(CEpx + SEpy) - 2BECE(SEpx - CEpy))Eoy + (AE(CEpx + SEpy)^2 + BE(SEpx - CEpy)^2)
-		//  (AE(CEpx + SEpy)^2 + BE(SEpx - CEpy)^2)
-		// [2] ®‚Í, [1] ®‚ÉŠÜ‚Ü‚ê‚é px, py ‚ğ, qx, qy ‚É’u‚«Š·‚¦‚é‚¾‚¯.
-		// ox^2, oxEoy, oy^2 ‚ÌŒW”‚Í@px, py ‚ğŠÜ‚Ü‚È‚¢.
-		// ‚µ‚½‚ª‚Á‚Ä‚±‚ê‚ç‚ÌŒW”‚Í [1]-[2] ‚ÅÁ‚¦, 1 Ÿ‚Ì€‚Å‚ ‚é ox ‚Æ oy, ’è”€‚ªc‚é.
-		// d = -(2AECE(CEpx + SEpy) + 2BESE(SEpx - CEpy)) ... [1] ®‚Ì ox ‚Ì€
-		// e = -(2AESE(CEpx + SEpy) - 2BECE(SEpx - CEpy)) ... [1] ®‚Ì oy ‚Ì€
-		// f = AE(CEpx + SEpy)^2 + BE(SEpx - CEpy)^2 ... [1] ’è”€
-		// dEox + eEoy + f = gEox + hEoy + i
-		// oy = (g - d)/(e - h)Eox + (i - f)/(e - h)
-		// oy = jEox + k
-		// ‚±‚ê‚ğ [1] ®‚É‘ã“ü‚µ‚Ä,
-		// AE{ CE(px - ox) + SE(py - oy) }^2 = 1
-		// AE{ CE(px - ox) + SE(py - jEox - k) }^2 + BE{ SE(px - ox) - CE(py - jEox - k) }^2 - 1 = 0 ...[3]
-		// [3] ®‚ğ ox ‚É‚Â‚¢‚Ä“WŠJ‚·‚é
-		// [3] ®‚Ì‘æ 1 €‚Í,
-		// AE{ CE(px - ox) + SE(py - jEox - k) }^2 =
-		// AE{ CEpx - CEox + SEpy - SEjEox - SEk }^2 =
-		// AE{-(C + SEj)Eox + (CEpx + SEpy - SEk) }^2 =
-		// AE(C + SEj)^2Eox^2 - 2AE(C + SEj)(CEpx + SEpy - SEk)Eox + AE(CEpx + SEpy - SEk)^2
-		// [3] ®‚Ì‘æ 2 €‚Í,
-		// BE{ SE(px - ox) - CE(py - jEox - k) }^2 =
-		// BE{ SEpx - SEox - CEpy + CEjEox + CEk) }^2 =
-		// BE{-(S - CEj)Eox + (SEpx - CEpy + CEk) }^2 =
-		// BE(S - CEj)^2Eox^2 - 2BE(S - CEj)(SEpx - CEpy + CEk)Eox + BE(SEpx - CEpy + CEk)^2
-		// [3] ®‚ğ aEox^2 + bEox + c = 0 ‚Æ‚·‚é‚Æ,
-		// a = AE(C + SEj)^2 + BE(S - CEj)^2
-		// b = -2AE(C + SEj)(CEpx + SEpy - SEk) - 2BE(S - CEj)(SEpx - CEpy + CEk)
-		// c = AE(CEpx + SEpy - SEk)^2 + BE(SEpx - CEpy + CEk)^2 - 1
-		// 2 Ÿ•û’ö®‚Ì‰ğŒö®‚É‘ã“ü‚·‚ê‚Î, ox ‚ª‹‚Ü‚é.
+		// C = cos(Î¸)
+		// S = sin(Î¸)
+		// ç‚¹ p (px, py) ã‚’å††ã®ä¸­å¿ƒ (ox, oy) ã‚’åŸç‚¹ã¨ã™ã‚‹åº§æ¨™ã«å¹³è¡Œç§»å‹•ã—ã¦, å›è»¢ã™ã‚‹.
+		// x = Cãƒ»(px - ox) + Sãƒ»(py - oy)
+		// y =-Sãƒ»(px - ox) + Cãƒ»(py - oy)
+		// ç‚¹ q ã«ã¤ã„ã¦ã‚‚åŒæ§˜.
+		// ã“ã‚Œã‚‰ã‚’, ã å††ã®æ¨™æº–å½¢ Aãƒ»x^2 + Bãƒ»y^2 = 1 ã«ä»£å…¥ã™ã‚‹.
+		// Aãƒ»{ Cãƒ»(px - ox) + Sãƒ»(py - oy) }^2 + Bãƒ»{ -Sãƒ»(px - ox) + Cãƒ»(py - oy) }^2 = 1 ...[1]
+		// Aãƒ»{ Cãƒ»(qx - ox) + Sãƒ»(qy - oy) }^2 + Bãƒ»{ -Sãƒ»(qx - ox) + Cãƒ»(qy - oy) }^2 = 1 ...[2]
+		// [1] å¼ã®ç¬¬ 1 é …ã‚’ ox, oy ã«ã¤ã„ã¦å±•é–‹ã™ã‚‹.
+		// Aãƒ»{ Cãƒ»(px - ox) + Sãƒ»(py - oy) }^2 =
+		// Aãƒ»{ Cãƒ»px - Cãƒ»ox + Sãƒ»py - Sãƒ»oy }^2 = 
+		// Aãƒ»{ -Cãƒ»ox - Sãƒ»oy + (Cãƒ»px + Sãƒ»py) }^2 =
+		// Aãƒ»C^2ãƒ»ox^2 + 2Aãƒ»Cãƒ»Sãƒ»oxãƒ»oy + Aãƒ»S^2ãƒ»oy^2 - 2Aãƒ»Cãƒ»(Cãƒ»px + Sãƒ»py)ãƒ»ox - 2Aãƒ»Sãƒ»(Cãƒ»px + Sãƒ»py)ãƒ»oy + Aãƒ»(Cãƒ»px + Sãƒ»py)^2
+		// [1] å¼ã®ç¬¬ 2 é …ã‚‚åŒæ§˜.
+		// Bãƒ»{ -Sãƒ»(px - ox) + Cãƒ»(py - oy) }^2 =
+		// Bãƒ»{ -Sãƒ»px + Sãƒ»ox + Cãƒ»py - Cãƒ»oy }^2 = 
+		// Bãƒ»{  Sãƒ»ox - Cãƒ»oy - (Sãƒ»px - Cãƒ»py) }^2 =
+		// Bãƒ»S^2ãƒ»ox^2 - 2Bãƒ»Sãƒ»Cãƒ»oxãƒ»oy + Bãƒ»C^2ãƒ»oy^2 - 2Bãƒ»Sãƒ»(Sãƒ»px - Cãƒ»py)ãƒ»ox + 2Bãƒ»Cãƒ»(Sãƒ»px - Cãƒ»py)ãƒ»oy + Bãƒ»(Sãƒ»px - Cãƒ»py)^2
+		// ã—ãŸãŒã£ã¦ [1] å¼ã¯,
+		// (Aãƒ»C^2 + Bãƒ»S^2)ãƒ»ox^2 + (2Aãƒ»Cãƒ»S - 2Bãƒ»Sãƒ»C)ãƒ»oxãƒ»oy + (Aãƒ»S^2 + Bãƒ»C^2)ãƒ»oy^2 - (2Aãƒ»Cãƒ»(Cãƒ»px + Sãƒ»py) + 2Bãƒ»Sãƒ»(Sãƒ»px - Cãƒ»py))ãƒ»ox - (2Aãƒ»Sãƒ»(Cãƒ»px + Sãƒ»py) - 2Bãƒ»Cãƒ»(Sãƒ»px - Cãƒ»py))ãƒ»oy + (Aãƒ»(Cãƒ»px + Sãƒ»py)^2 + Bãƒ»(Sãƒ»px - Cãƒ»py)^2)
+		//  (Aãƒ»(Cãƒ»px + Sãƒ»py)^2 + Bãƒ»(Sãƒ»px - Cãƒ»py)^2)
+		// [2] å¼ã¯, [1] å¼ã«å«ã¾ã‚Œã‚‹ px, py ã‚’, qx, qy ã«ç½®ãæ›ãˆã‚‹ã ã‘.
+		// ox^2, oxãƒ»oy, oy^2 ã®ä¿‚æ•°ã¯ã€€px, py ã‚’å«ã¾ãªã„.
+		// ã—ãŸãŒã£ã¦ã“ã‚Œã‚‰ã®ä¿‚æ•°ã¯ [1]-[2] ã§æ¶ˆãˆ, 1 æ¬¡ã®é …ã§ã‚ã‚‹ ox ã¨ oy, å®šæ•°é …ãŒæ®‹ã‚‹.
+		// d = -(2Aãƒ»Cãƒ»(Cãƒ»px + Sãƒ»py) + 2Bãƒ»Sãƒ»(Sãƒ»px - Cãƒ»py)) ... [1] å¼ã® ox ã®é …
+		// e = -(2Aãƒ»Sãƒ»(Cãƒ»px + Sãƒ»py) - 2Bãƒ»Cãƒ»(Sãƒ»px - Cãƒ»py)) ... [1] å¼ã® oy ã®é …
+		// f = Aãƒ»(Cãƒ»px + Sãƒ»py)^2 + Bãƒ»(Sãƒ»px - Cãƒ»py)^2 ... [1] å®šæ•°é …
+		// dãƒ»ox + eãƒ»oy + f = gãƒ»ox + hãƒ»oy + i
+		// oy = (g - d)/(e - h)ãƒ»ox + (i - f)/(e - h)
+		// oy = jãƒ»ox + k
+		// ã“ã‚Œã‚’ [1] å¼ã«ä»£å…¥ã—ã¦,
+		// Aãƒ»{ Cãƒ»(px - ox) + Sãƒ»(py - oy) }^2 = 1
+		// Aãƒ»{ Cãƒ»(px - ox) + Sãƒ»(py - jãƒ»ox - k) }^2 + Bãƒ»{ Sãƒ»(px - ox) - Cãƒ»(py - jãƒ»ox - k) }^2 - 1 = 0 ...[3]
+		// [3] å¼ã‚’ ox ã«ã¤ã„ã¦å±•é–‹ã™ã‚‹
+		// [3] å¼ã®ç¬¬ 1 é …ã¯,
+		// Aãƒ»{ Cãƒ»(px - ox) + Sãƒ»(py - jãƒ»ox - k) }^2 =
+		// Aãƒ»{ Cãƒ»px - Cãƒ»ox + Sãƒ»py - Sãƒ»jãƒ»ox - Sãƒ»k }^2 =
+		// Aãƒ»{-(C + Sãƒ»j)ãƒ»ox + (Cãƒ»px + Sãƒ»py - Sãƒ»k) }^2 =
+		// Aãƒ»(C + Sãƒ»j)^2ãƒ»ox^2 - 2Aãƒ»(C + Sãƒ»j)(Cãƒ»px + Sãƒ»py - Sãƒ»k)ãƒ»ox + Aãƒ»(Cãƒ»px + Sãƒ»py - Sãƒ»k)^2
+		// [3] å¼ã®ç¬¬ 2 é …ã¯,
+		// Bãƒ»{ Sãƒ»(px - ox) - Cãƒ»(py - jãƒ»ox - k) }^2 =
+		// Bãƒ»{ Sãƒ»px - Sãƒ»ox - Cãƒ»py + Cãƒ»jãƒ»ox + Cãƒ»k) }^2 =
+		// Bãƒ»{-(S - Cãƒ»j)ãƒ»ox + (Sãƒ»px - Cãƒ»py + Cãƒ»k) }^2 =
+		// Bãƒ»(S - Cãƒ»j)^2ãƒ»ox^2 - 2Bãƒ»(S - Cãƒ»j)(Sãƒ»px - Cãƒ»py + Cãƒ»k)ãƒ»ox + Bãƒ»(Sãƒ»px - Cãƒ»py + Cãƒ»k)^2
+		// [3] å¼ã‚’ aãƒ»ox^2 + bãƒ»ox + c = 0 ã¨ã™ã‚‹ã¨,
+		// a = Aãƒ»(C + Sãƒ»j)^2 + Bãƒ»(S - Cãƒ»j)^2
+		// b = -2Aãƒ»(C + Sãƒ»j)(Cãƒ»px + Sãƒ»py - Sãƒ»k) - 2Bãƒ»(S - Cãƒ»j)(Sãƒ»px - Cãƒ»py + Cãƒ»k)
+		// c = Aãƒ»(Cãƒ»px + Sãƒ»py - Sãƒ»k)^2 + Bãƒ»(Sãƒ»px - Cãƒ»py + Cãƒ»k)^2 - 1
+		// 2 æ¬¡æ–¹ç¨‹å¼ã®è§£å…¬å¼ã«ä»£å…¥ã™ã‚Œã°, ox ãŒæ±‚ã¾ã‚‹.
 		const double px = start.x;
 		const double py = start.y;
 		const double qx = start.x + vec.x;
@@ -115,26 +162,28 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
+	// å€¤ã‚’å‚¾ãè§’åº¦ã«æ ¼ç´ã™ã‚‹.
 	bool ShapeQEllipse::set_rotation(const float val) noexcept
 	{
 		if (equal(m_rot_degree, val)) {
 			return false;
 		}
-		// Œ³‚Ì‚¾‰~‚Å‚Ì’†S“_‚ğ“¾‚é.
+		// çµ‚ç‚¹ãƒ™ã‚¯ãƒˆãƒ«ã®å‚¾ãã‚’æˆ»ã™.
 		const double old_r = M_PI * m_rot_degree / 180.0;
 		const auto old_c = cos(-old_r);
 		const auto old_s = sin(-old_r);
+		const double vx = old_c * m_vec[0].x - old_s * m_vec[0].y;
+		const double vy = old_s * m_vec[0].x + old_c * m_vec[0].y;
+		// ã å††ã§ã®ä¸­å¿ƒç‚¹ã‚’å¾—ã‚‹.
 		D2D1_POINT_2F c_pos;
 		get_pos_center(m_start, m_vec[0], m_radius, old_r, c_pos);
-		// V‚µ‚¢‚¾‰~‚Ì²‚ğ“¾‚é.
+		// æ–°ã—ã„ã å††ã®è»¸ã‚’å¾—ã‚‹.
 		const double new_r = M_PI * val / 180.0;
 		const auto new_c = cos(-new_r);
 		const auto new_s = sin(-new_r);
-		// I“_ƒxƒNƒgƒ‹‚ÌŒX‚«‚ğ–ß‚·.
-		const double vx = old_c * m_vec[0].x - old_s * m_vec[0].y;
-		const double vy = old_s * m_vec[0].x + old_c * m_vec[0].y;
-		double px = 0.0, py = 0.0, qx = 0.0, qy = 0.0;
-		if (vx > FLT_MIN && vy > FLT_MIN) {
+		double px, py, qx, qy;
+		const int qn = qellipse_quadrant(vx, vy);	// è±¡é™ã®ç•ªå·
+		if (qn == 1) {
 			px = 0.0;
 			py = -m_radius.height;
 			qx = m_radius.width;
@@ -145,7 +194,7 @@ namespace winrt::GraphPaper::implementation
 			m_vec[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + c_pos.x - m_start.x);
 			m_vec[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + c_pos.y - m_start.y);
 		}
-		else if (vx < -FLT_MIN && vy > FLT_MIN) {
+		else if (qn == 2) {
 			px = m_radius.width;
 			py = 0.0f;
 			qx = 0.0f;
@@ -156,7 +205,7 @@ namespace winrt::GraphPaper::implementation
 			m_vec[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + c_pos.x - m_start.x);
 			m_vec[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + c_pos.y - m_start.y);
 		}
-		else if (vx < -FLT_MIN && vy < -FLT_MIN) {
+		else if (qn == 3) {
 			px = 0.0;
 			py = m_radius.height;
 			qx = -m_radius.width;
@@ -167,7 +216,7 @@ namespace winrt::GraphPaper::implementation
 			m_vec[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + c_pos.x - m_start.x);
 			m_vec[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + c_pos.y - m_start.y);
 		}
-		else if (vx > FLT_MIN && vy < -FLT_MIN) {
+		else if (qn == 4) {
 			px = -m_radius.width;
 			py = 0.0f;
 			qx = 0.0f;
@@ -177,6 +226,10 @@ namespace winrt::GraphPaper::implementation
 			m_vec.resize(1);
 			m_vec[0].x = static_cast<FLOAT>(new_c * qx + new_s * qy + c_pos.x - m_start.x);
 			m_vec[0].y = static_cast<FLOAT>(-new_s * qx + new_c * qy + c_pos.y - m_start.y);
+		}
+		else {
+			m_start = c_pos;
+			m_vec[0] = c_pos;
 		}
 		m_rot_degree = val;
 		if (m_d2d_fill_geom != nullptr) {
@@ -191,7 +244,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// ’l‚ğ, •”ˆÊ‚ÌˆÊ’u‚ÉŠi”[‚·‚é.
+	// å€¤ã‚’, éƒ¨ä½ã®ä½ç½®ã«æ ¼ç´ã™ã‚‹.
 	bool ShapeQEllipse::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept
 	{
 		if (anc != ANC_TYPE::ANC_CENTER) {
@@ -248,7 +301,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// ’l‚ğn“_‚ÉŠi”[‚·‚é. ‘¼‚Ì•”ˆÊ‚ÌˆÊ’u‚à“®‚­.
+	// å€¤ã‚’å§‹ç‚¹ã«æ ¼ç´ã™ã‚‹. ä»–ã®éƒ¨ä½ã®ä½ç½®ã‚‚å‹•ã.
 	bool ShapeQEllipse::set_pos_start(const D2D1_POINT_2F val) noexcept
 	{
 		if (ShapePath::set_pos_start(val)) {
@@ -260,24 +313,24 @@ namespace winrt::GraphPaper::implementation
 
 	uint32_t ShapeQEllipse::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
 	{
-		// ƒAƒ“ƒJ[ƒ|ƒCƒ“ƒg‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
+		// ã‚¢ãƒ³ã‚«ãƒ¼ãƒã‚¤ãƒ³ãƒˆã«å«ã¾ã‚Œã‚‹ã‹åˆ¤å®šã™ã‚‹.
 		if (pt_in_anc(t_pos, m_start, a_len)) {
 			return ANC_TYPE::ANC_P0;
 		}
 		else if (pt_in_anc(t_pos, D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y }, a_len)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
-		// ‚¾‰~‚Ì’†S“_‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
+		// ã å††ã®ä¸­å¿ƒç‚¹ã«å«ã¾ã‚Œã‚‹ã‹åˆ¤å®šã™ã‚‹.
 		const double rot = M_PI * m_rot_degree / 180.0;
 		D2D1_POINT_2F c_pos;
 		get_pos_center(m_start, m_vec[0], m_radius, rot, c_pos);
 		if (pt_in_anc(t_pos, c_pos, a_len)) {
 			return  ANC_TYPE::ANC_CENTER;
 		}
-		// ˆÊ’u t ‚ª, îŒ`‚Ì“à‘¤‚É‚ ‚é‚©”»’è‚·‚é.
-		// ‰~ŒÊ‚Ì’[“_‚ğ p, q ‚Æ‚·‚é.
-		// Œvü‚è‚Ìê‡, p ‚Æ t ‚ÌŠOÏ‚ª 0 ˆÈã‚Å,
-		// q ‚Æ t ‚ÌŠOÏ‚ª 0 ˆÈ‰º‚È‚ç, “à‘¤. 
+		// ä½ç½® t ãŒ, æ‰‡å½¢ã®å†…å´ã«ã‚ã‚‹ã‹åˆ¤å®šã™ã‚‹.
+		// å††å¼§ã®ç«¯ç‚¹ã‚’ p, q ã¨ã™ã‚‹.
+		// æ™‚è¨ˆå‘¨ã‚Šã®å ´åˆ, p ã¨ t ã®å¤–ç©ãŒ 0 ä»¥ä¸Šã§,
+		// q ã¨ t ã®å¤–ç©ãŒ 0 ä»¥ä¸‹ãªã‚‰, å†…å´. 
 		const double px = m_start.x - c_pos.x;
 		const double py = m_start.y - c_pos.y;
 		const double qx = px + m_vec[0].x;
@@ -289,36 +342,36 @@ namespace winrt::GraphPaper::implementation
 		const double rx = abs(m_radius.width);
 		const double ry = abs(m_radius.height);
 		if (pt >= 0.0 && qt <= 0.0) {
-			// ü˜g‚ª‰Â‹‚Å,
+			// ç·šæ ãŒå¯è¦–ã§,
 			if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
-				// ”»’è‚·‚éˆÊ’u‚ª, “à‘¤‚ÆŠO‘¤‚Ì‚¾‰~‚Ì’†‚É‚ ‚é‚È‚ç,
-				const double e_width = m_stroke_width * 0.5;
+				// åˆ¤å®šã™ã‚‹ä½ç½®ãŒ, å†…å´ã¨å¤–å´ã®ã å††ã®ä¸­ã«ã‚ã‚‹ãªã‚‰,
+				const double e_width = max(m_stroke_width, Shape::s_anc_len) * 0.5;
 				if (!pt_in_ellipse(t_pos, c_pos, rx - e_width, ry - e_width, rot)) {
 					if (pt_in_ellipse(t_pos, c_pos, rx + e_width, ry + e_width, rot)) {
 						return ANC_TYPE::ANC_STROKE;
 					}
 				}
-				// ”»’è‚·‚éˆÊ’u‚ª, “à‘¤‚Ì‚¾‰~‚Ì’†‚É‚ ‚é‚È‚ç
+				// åˆ¤å®šã™ã‚‹ä½ç½®ãŒ, å†…å´ã®ã å††ã®ä¸­ã«ã‚ã‚‹ãªã‚‰
 				else if (is_opaque(m_fill_color)) {
 					return ANC_TYPE::ANC_FILL;
 				}
 			}
-			// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚Å,
+			// å¡—ã‚Šã¤ã¶ã—è‰²ãŒä¸é€æ˜ã§,
 			else if (is_opaque(m_fill_color)) {
-				// ”»’è‚·‚éˆÊ’u‚ª, ‚¾‰~‚Ì“à‚É‚ ‚é‚È‚ç,
+				// åˆ¤å®šã™ã‚‹ä½ç½®ãŒ, ã å††ã®å†…ã«ã‚ã‚‹ãªã‚‰,
 				if (pt_in_ellipse(t_pos, c_pos, rx, ry, rot)) {
 					return ANC_TYPE::ANC_FILL;
 				}
 			}
 		}
-		// ”»’è‚·‚éˆÊ’u‚ª, îŒ`‚ÌŠO‘¤‚É‚ ‚è, ‚©‚Âü˜g‚ª‰Â‹‚È‚ç,
+		// åˆ¤å®šã™ã‚‹ä½ç½®ãŒ, æ‰‡å½¢ã®å¤–å´ã«ã‚ã‚Š, ã‹ã¤ç·šæ ãŒå¯è¦–ãªã‚‰,
 		else if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
-			// ’[“_‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
-			// Œv‰ñ‚è‚É‘Î‚µ‚Ä‚Ì‚İ”»’è‚µ‚Ä‚¢‚é‚Ì‚Å—v’ˆÓ.
+			// ç«¯ç‚¹ã«å«ã¾ã‚Œã‚‹ã‹åˆ¤å®šã™ã‚‹.
+			// æ™‚è¨ˆå›ã‚Šã«å¯¾ã—ã¦ã®ã¿åˆ¤å®šã—ã¦ã„ã‚‹ã®ã§è¦æ³¨æ„.
 			auto c_style = m_stroke_cap.m_start;
-			const double e_width = m_stroke_width * 0.5;	// •Ó‚Ì”¼•ª‚Ì•.
+			const double e_width = m_stroke_width * 0.5;	// è¾ºã®åŠåˆ†ã®å¹….
 			if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
-				// ”»’è‚·‚éˆÊ’u‚ğ, ’[“_‚ğŒ´“_‚Æ‚·‚éÀ•W‚É•½sˆÚ“®‚·‚é.
+				// åˆ¤å®šã™ã‚‹ä½ç½®ã‚’, ç«¯ç‚¹ã‚’åŸç‚¹ã¨ã™ã‚‹åº§æ¨™ã«å¹³è¡Œç§»å‹•ã™ã‚‹.
 				const D2D1_POINT_2F t{
 					t_pos.x - m_start.x, t_pos.y - m_start.y
 				};
@@ -330,19 +383,19 @@ namespace winrt::GraphPaper::implementation
 				const D2D1_POINT_2F t{
 					static_cast<FLOAT>(tx), static_cast<FLOAT>(ty)
 				};
-				// ‚¾‰~ AEx^2 + BEy^2 = 1 ‚É‚¨‚¯‚é“_ p { x0, y0 } ‚ÌÚü‚Í
-				// (AEx0)Ex + (BEy0)Ey = 1
+				// ã å†† Aãƒ»x^2 + Bãƒ»y^2 = 1 ã«ãŠã‘ã‚‹ç‚¹ p { x0, y0 } ã®æ¥ç·šã¯
+				// (Aãƒ»x0)ãƒ»x + (Bãƒ»y0)ãƒ»y = 1
 				const double x0 = px;
 				const double y0 = py;
-				// p ‚ğ‰ñ“]ˆÚ“®‚µ, ‚¾‰~‚Ì•W€Œ`‚Å‚ÌÚü‚ÌŒW”‚ğ“¾‚é.
+				// p ã‚’å›è»¢ç§»å‹•ã—, ã å††ã®æ¨™æº–å½¢ã§ã®æ¥ç·šã®ä¿‚æ•°ã‚’å¾—ã‚‹.
 				const double c = cos(rot);
 				const double s = sin(rot);
 				const double Ax0 = ( c * x0 + s * y0) / (rx * rx);
 				const double By0 = (-s * x0 + c * y0) / (ry * ry);
-				// “¾‚ç‚ê‚½Úü‚ğ‹t‚É‰ñ“]ˆÚ“®‚µ, ŒX‚¢‚½‚¾‰~‚É‚¨‚¯‚éÚü‚ğ“¾‚é.
+				// å¾—ã‚‰ã‚ŒãŸæ¥ç·šã‚’é€†ã«å›è»¢ç§»å‹•ã—, å‚¾ã„ãŸã å††ã«ãŠã‘ã‚‹æ¥ç·šã‚’å¾—ã‚‹.
 				const double a = c * Ax0 - s * By0;
 				const double b = s * Ax0 + c * By0;
-				// “¾‚ç‚ê‚½Úü‚©‚ç, Úü‚É‚’¼‚ÈƒxƒNƒgƒ‹ e (’·‚³‚Í•Ó‚Ì”¼•ª‚Ì•) ‚ğ“¾‚é.
+				// å¾—ã‚‰ã‚ŒãŸæ¥ç·šã‹ã‚‰, æ¥ç·šã«å‚ç›´ãªãƒ™ã‚¯ãƒˆãƒ« e (é•·ã•ã¯è¾ºã®åŠåˆ†ã®å¹…) ã‚’å¾—ã‚‹.
 				const double ab = sqrt(a * a + b * b);
 				const double ex = e_width * a / ab;
 				const double ey = e_width * b / ab;
@@ -387,7 +440,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			if (c_style == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND) {
-				// ”»’è‚·‚éˆÊ’u‚ğ, ’[“_‚ğŒ´“_‚Æ‚·‚éÀ•W‚É•½sˆÚ“®‚·‚é.
+				// åˆ¤å®šã™ã‚‹ä½ç½®ã‚’, ç«¯ç‚¹ã‚’åŸç‚¹ã¨ã™ã‚‹åº§æ¨™ã«å¹³è¡Œç§»å‹•ã™ã‚‹.
 				const D2D1_POINT_2F t{
 					t_pos.x - (m_start.x + m_vec[0].x),
 					t_pos.y - (m_start.y + m_vec[0].y)
@@ -400,20 +453,20 @@ namespace winrt::GraphPaper::implementation
 				const D2D1_POINT_2F t{
 					static_cast<FLOAT>(tx), static_cast<FLOAT>(ty)
 				};
-				// ‚¾‰~ AEx^2 + BEy^2 = 1 ‚É‚¨‚¯‚é“_ p { x0, y0 } ‚ÌÚü‚Í
-				// (AEx0)Ex + (BEy0)Ey = 1
+				// ã å†† Aãƒ»x^2 + Bãƒ»y^2 = 1 ã«ãŠã‘ã‚‹ç‚¹ p { x0, y0 } ã®æ¥ç·šã¯
+				// (Aãƒ»x0)ãƒ»x + (Bãƒ»y0)ãƒ»y = 1
 				const double x0 = qx;
 				const double y0 = qy;
-				// p ‚ğ‰ñ“]ˆÚ“®‚µ, ‚¾‰~‚Ì•W€Œ`‚Å‚ÌÚü‚ÌŒW”‚ğ“¾‚é.
+				// p ã‚’å›è»¢ç§»å‹•ã—, ã å††ã®æ¨™æº–å½¢ã§ã®æ¥ç·šã®ä¿‚æ•°ã‚’å¾—ã‚‹.
 				const double c = cos(rot);
 				const double s = sin(rot);
 				const double Ax0 = (c * x0 + s * y0) / (rx * rx);
 				const double By0 = (-s * x0 + c * y0) / (ry * ry);
-				// “¾‚ç‚ê‚½Úü‚ğ‹t‚É‰ñ“]ˆÚ“®‚µ, ŒX‚¢‚½‚¾‰~‚É‚¨‚¯‚éÚü‚ğ“¾‚é.
+				// å¾—ã‚‰ã‚ŒãŸæ¥ç·šã‚’é€†ã«å›è»¢ç§»å‹•ã—, å‚¾ã„ãŸã å††ã«ãŠã‘ã‚‹æ¥ç·šã‚’å¾—ã‚‹.
 				const double a = c * Ax0 - s * By0;
 				const double b = s * Ax0 + c * By0;
-				// “¾‚ç‚ê‚½Úü‚©‚ç, Úü‚É‚’¼‚ÈƒxƒNƒgƒ‹ e (’·‚³‚Í•Ó‚Ì”¼•ª‚Ì•) ‚ğ“¾‚é.
-				// e ‚Í, ‚¾‰~‚ÌŠO‘¤Œü‚«.
+				// å¾—ã‚‰ã‚ŒãŸæ¥ç·šã‹ã‚‰, æ¥ç·šã«å‚ç›´ãªãƒ™ã‚¯ãƒˆãƒ« e (é•·ã•ã¯è¾ºã®åŠåˆ†ã®å¹…) ã‚’å¾—ã‚‹.
+				// e ã¯, ã å††ã®å¤–å´å‘ã.
 				const double ab = sqrt(a * a + b * b);
 				const double ex = e_width * a / ab;
 				const double ey = e_width * b / ab;
@@ -461,35 +514,35 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_PAGE;
 	}
 
-	// l•ª‚¾‰~‚ğƒxƒWƒF‹Èü‚Å‹ß—‚·‚é.
-	// vec	n“_‚©‚ç‚ÌI“_ƒxƒNƒgƒ‹
-	// rad	X ²•ûŒü‚Ì”¼Œa‚Æ, Y ²•ûŒü‚Ì”¼Œa.
-	// b_pos	l•ª‚¾‰~‚ğˆÍ‚Ş—Ìˆæ‚Ìn“_.
-	// b_vec	l•ª‚¾‰~‚ğˆÍ‚Ş—Ìˆæ‚ÌI“_ƒxƒNƒgƒ‹.
-	// “¾‚ç‚ê‚½ƒxƒWƒF‹Èü‚ÌŠJn“_‚Æ§Œä“_‚Í, ‚¾‰~‚Ì’†S“_‚ğŒ´“_‚Æ‚·‚éÀ•W‚Å“¾‚ç‚ê‚é.
-	// 3ŸƒxƒWƒF‹Èü‚ğ—p‚¢‚½‘È‰~‚Ì‹ß—
+	// å››åˆ†ã å††ã‚’ãƒ™ã‚¸ã‚§æ›²ç·šã§è¿‘ä¼¼ã™ã‚‹.
+	// vec	å§‹ç‚¹ã‹ã‚‰ã®çµ‚ç‚¹ãƒ™ã‚¯ãƒˆãƒ«
+	// rad	X è»¸æ–¹å‘ã®åŠå¾„ã¨, Y è»¸æ–¹å‘ã®åŠå¾„.
+	// b_pos	å››åˆ†ã å††ã‚’å›²ã‚€é ˜åŸŸã®å§‹ç‚¹.
+	// b_vec	å››åˆ†ã å††ã‚’å›²ã‚€é ˜åŸŸã®çµ‚ç‚¹ãƒ™ã‚¯ãƒˆãƒ«.
+	// å¾—ã‚‰ã‚ŒãŸãƒ™ã‚¸ã‚§æ›²ç·šã®é–‹å§‹ç‚¹ã¨åˆ¶å¾¡ç‚¹ã¯, ã å††ã®ä¸­å¿ƒç‚¹ã‚’åŸç‚¹ã¨ã™ã‚‹åº§æ¨™ã§å¾—ã‚‰ã‚Œã‚‹.
+	// 3æ¬¡ãƒ™ã‚¸ã‚§æ›²ç·šã‚’ç”¨ã„ãŸæ¥•å††ã®è¿‘ä¼¼
 	// https://clown.cube-soft.jp/entry/20090606/p1
 	void ShapeQEllipse::qellipse_alternate(const D2D1_POINT_2F vec, const D2D1_SIZE_F rad, const double rot, D2D1_POINT_2F& b_pos, D2D1_BEZIER_SEGMENT& b_seg)
 	{
 		const double c = cos(-rot);
 		const double s = sin(-rot);
-		// I“_ƒxƒNƒgƒ‹‚ÌŒX‚«‚ğ–ß‚·.
+		// çµ‚ç‚¹ãƒ™ã‚¯ãƒˆãƒ«ã®å‚¾ãã‚’æˆ»ã™.
 		const double vx = c * vec.x - s * vec.y;
 		const double vy = s * vec.x + c * vec.y;
 
 		constexpr double a = 4.0 * (M_SQRT2 - 1.0) / 3.0;
 		const double rx = rad.width;
 		const double ry = rad.height;
-		double b_pos_x;
-		double b_pos_y;
-		double b_seg1x;
-		double b_seg1y;
-		double b_seg2x;
-		double b_seg2y;
-		double b_seg3x;
-		double b_seg3y;
-		// ‘æˆêÛŒÀ
-		if (vx > FLT_MIN && vy > FLT_MIN) {
+		double b_pos_x = 0.0f;
+		double b_pos_y = 0.0f;
+		double b_seg1x = 0.0f;
+		double b_seg1y = 0.0f;
+		double b_seg2x = 0.0f;
+		double b_seg2y = 0.0f;
+		double b_seg3x = 0.0f;
+		double b_seg3y = 0.0f;
+		const int qn = qellipse_quadrant(vx, vy);	// è±¡é™ã®ç•ªå·
+		if (qn == 1) {
 			b_pos_x = 0.0f;
 			b_pos_y = -ry;
 			b_seg1x = a * rx;
@@ -499,7 +552,7 @@ namespace winrt::GraphPaper::implementation
 			b_seg3x = rx;
 			b_seg3y = 0.0f;
 		}
-		else if (vx < 0.0 && vy >= 0.0) {
+		else if (qn == 2) {
 			b_pos_x = rx;
 			b_pos_y = 0.0f;
 			b_seg1x = rx;
@@ -509,7 +562,7 @@ namespace winrt::GraphPaper::implementation
 			b_seg3x = 0.0f;
 			b_seg3y = ry;
 		}
-		else if (vx < 0.0 && vy < 0.0) {
+		else if (qn == 3) {
 			b_pos_x = 0.0f;
 			b_pos_y = ry;
 			b_seg1x = -a * rx;
@@ -519,7 +572,7 @@ namespace winrt::GraphPaper::implementation
 			b_seg3x = -rx;
 			b_seg3y = 0.0f;
 		}
-		else if (vx >= 0.0 && vy < 0.0) {
+		else if (qn == 4) {
 			b_pos_x = -rx;
 			b_pos_y = 0.0f;
 			b_seg1x = -rx;
@@ -530,6 +583,14 @@ namespace winrt::GraphPaper::implementation
 			b_seg3y = -ry;
 		}
 		else {
+			b_pos_x = 0.0f;
+			b_pos_y = 0.0f;
+			b_seg1x = 0.0f;
+			b_seg1y = 0.0f;
+			b_seg2x = 0.0f;
+			b_seg2y = 0.0f;
+			b_seg3x = 0.0f;
+			b_seg3y = 0.0f;
 			return;
 		}
 		b_pos.x = static_cast<FLOAT>(c * b_pos_x + s * b_pos_y);
@@ -542,20 +603,20 @@ namespace winrt::GraphPaper::implementation
 		b_seg.point3.y = static_cast<FLOAT>(-s * b_seg3x + c * b_seg3y);
 	}
 
-	// –î‚¶‚è‚Ì•Ô‚µ‚Ææ’[‚ÌˆÊ’u‚ğ“¾‚é
-	// vec	n“_‚©‚ç‚ÌI“_ƒxƒNƒgƒ‹.
-	// c_pos	l•ª‚¾‰~‚Ì’†S“_
-	// rad	X ²•ûŒü‚Ì”¼Œa‚Æ, Y ²•ûŒü‚Ì”¼Œa.
-	// rot	‚¾‰~‚ÌŒX‚« (Œv‰ñ‚è‚Ìƒ‰ƒWƒAƒ“)
-	// a_size	–î‚¶‚è‚Ì‘å‚«‚³
-	// arrow	–î‚¶‚è‚Ì•Ô‚µ‚Ææ’[‚ÌˆÊ’u
+	// çŸ¢ã˜ã‚Šã®è¿”ã—ã¨å…ˆç«¯ã®ä½ç½®ã‚’å¾—ã‚‹
+	// vec	å§‹ç‚¹ã‹ã‚‰ã®çµ‚ç‚¹ãƒ™ã‚¯ãƒˆãƒ«.
+	// c_pos	å››åˆ†ã å††ã®ä¸­å¿ƒç‚¹
+	// rad	X è»¸æ–¹å‘ã®åŠå¾„ã¨, Y è»¸æ–¹å‘ã®åŠå¾„.
+	// rot	ã å††ã®å‚¾ã (æ™‚è¨ˆå›ã‚Šã®ãƒ©ã‚¸ã‚¢ãƒ³)
+	// a_size	çŸ¢ã˜ã‚Šã®å¤§ãã•
+	// arrow	çŸ¢ã˜ã‚Šã®è¿”ã—ã¨å…ˆç«¯ã®ä½ç½®
 	bool ShapeQEllipse::qellipse_calc_arrow(const D2D1_POINT_2F vec, const D2D1_POINT_2F c_pos, const D2D1_SIZE_F rad, const double rot, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[])
 	{
-		D2D1_POINT_2F b_pos{};	// ƒxƒWƒF‹Èü‚Ìn“_
-		D2D1_BEZIER_SEGMENT b_seg{};	// ƒxƒWƒF‹Èü‚Ì§Œä“_
+		D2D1_POINT_2F b_pos{};	// ãƒ™ã‚¸ã‚§æ›²ç·šã®å§‹ç‚¹
+		D2D1_BEZIER_SEGMENT b_seg{};	// ãƒ™ã‚¸ã‚§æ›²ç·šã®åˆ¶å¾¡ç‚¹
 		qellipse_alternate(vec, rad, rot, b_pos, b_seg);
 		if (ShapeBezier::bezi_calc_arrow(b_pos, b_seg, a_size, arrow)) {
-			// “¾‚ç‚ê‚½ŠeˆÊ’u‚ğ, ‚¾‰~‚Ì’†S“_‚ğŒ´“_‚Æ‚·‚éÀ•W‚©‚ç, ‚à‚Æ‚ÌÀ•W‚Ö•½sˆÚ“®.
+			// å¾—ã‚‰ã‚ŒãŸå„ä½ç½®ã¯, ã å††ä¸­å¿ƒç‚¹ã‚’åŸç‚¹ã¨ã™ã‚‹åº§æ¨™ãªã®ã§, ã‚‚ã¨ã®åº§æ¨™ã¸æˆ»ã™.
 			arrow[0].x += c_pos.x;
 			arrow[0].y += c_pos.y;
 			arrow[1].x += c_pos.x;
@@ -591,7 +652,7 @@ namespace winrt::GraphPaper::implementation
 					D2D1_SIZE_F{ fabsf(m_radius.width), fabsf(m_radius.height) },
 					m_rot_degree,
 					m_sweep_flag,
-					D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL
+					m_larg_flag
 				};
 				winrt::com_ptr<ID2D1GeometrySink> sink;
 				winrt::check_hresult(
@@ -614,12 +675,12 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				if (m_d2d_arrow_geom == nullptr) {
-					// ‚¾‰~‚ÌŒÊ’·‚ğ‹‚ß‚é‚Ì‚Í‚µ‚ñ‚Ç‚¢‚Ì‚Å, ƒxƒWƒF‚Å‹ß—
+					// ã å††ã®å¼§é•·ã‚’æ±‚ã‚ã‚‹ã®ã¯ã—ã‚“ã©ã„ã®ã§, ãƒ™ã‚¸ã‚§ã§è¿‘ä¼¼
 					D2D1_POINT_2F arrow[3];
 					qellipse_calc_arrow(m_vec[0], c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
 					winrt::com_ptr<ID2D1GeometrySink> sink;
 					const ARROW_STYLE a_style{ m_arrow_style };
-					// ƒWƒIƒƒgƒŠƒpƒX‚ğì¬‚·‚é.
+					// ã‚¸ã‚ªãƒ¡ãƒˆãƒªãƒ‘ã‚¹ã‚’ä½œæˆã™ã‚‹.
 					winrt::check_hresult(
 						factory->CreatePathGeometry(m_d2d_arrow_geom.put())
 					);
@@ -646,7 +707,7 @@ namespace winrt::GraphPaper::implementation
 					const CAP_STYLE c_style{ m_stroke_cap };
 					const D2D1_LINE_JOIN j_style{ m_join_style };
 					const double j_miter_limit = m_join_miter_limit;
-					// –î‚¶‚é‚µ‚Ì”jü‚ÌŒ`®‚Í‚©‚È‚ç‚¸Àü.
+					// çŸ¢ã˜ã‚‹ã—ã®ç ´ç·šã®å½¢å¼ã¯ã‹ãªã‚‰ãšå®Ÿç·š.
 					const D2D1_STROKE_STYLE_PROPERTIES s_prop{
 						c_style.m_start,	// startCap
 						c_style.m_end,	// endCap
@@ -668,7 +729,7 @@ namespace winrt::GraphPaper::implementation
 				D2D1_SIZE_F{ fabsf(m_radius.width), fabsf(m_radius.height) },
 				m_rot_degree,
 				m_sweep_flag,
-				D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL
+				m_larg_flag
 			};
 			winrt::com_ptr<ID2D1GeometrySink> sink;
 			winrt::check_hresult(factory->CreatePathGeometry(m_d2d_fill_geom.put()));
@@ -717,43 +778,10 @@ namespace winrt::GraphPaper::implementation
 		m_rot_degree(rot),
 		m_radius(D2D1_SIZE_F{ fabs(b_vec.x), fabs(b_vec.y) }),
 		m_sweep_flag(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE),
-		m_larg_flag(D2D1_ARC_SIZE_SMALL
-	)
+		m_larg_flag(D2D1_ARC_SIZE_SMALL)
 	{
-		m_start = b_pos;	// n“_
-		m_vec.push_back(b_vec);	// I“_
-		/*
-		// (p - r)E(q - r) = 0
-		// pq - pr - qr + r^2 = 0
-		// r^2 - (p + q)Er + pq = 0
-		const double px = b_pos.x;
-		const double py = b_pos.y;
-		const double qx = b_pos.x + b_vec.x;
-		const double qy = b_pos.y + b_vec.y;
-		const auto a = 1.0;
-		const auto b0 = -(px + qx);
-		const auto c0 =   px * qx;
-		const auto b1 = -(py + qy);
-		const auto c1 = py + qy;
-		const auto bb_4ac0 = b0 * b0 - 4.0 * a * c0;
-		const auto bb_4ac1 = b1 * b1 - 4.0 * a * c1;
-		const auto rx = (-b0 - sqrt(bb_4ac0)) / 2.0;
-		const auto ry = (-b1 - sqrt(bb_4ac1)) / 2.0;
-		m_radius.width = sqrt((qx - rx) * (qx - rx) + (qy - ry) * (qy - ry));
-		m_radius.height = sqrt((px - rx) * (px - rx) + (py - ry) * (py - ry));
-		*/
-		/*
-		D2D1_POINT_2F c_pos;
-		get_pos_center(b_pos, b_vec, m_radius, 0.0, c_pos);
-		const auto c = cos(-(rot * M_PI / 180.0));
-		const auto s = sin(-(rot * M_PI / 180.0));
-
-		m_start.x = static_cast<FLOAT>(c * (b_pos.x - c_pos.x) + s * (b_pos.y - c_pos.y) + c_pos.x);
-		m_start.y = static_cast<FLOAT>(-s * (b_pos.x - c_pos.x) + c * (b_pos.y - c_pos.y) + c_pos.y);
-		m_vec.resize(1);
-		m_vec[0].x = static_cast<FLOAT>(c * (b_pos.x + b_vec.x - c_pos.x) + s * (b_pos.y + b_vec.y - c_pos.y) + c_pos.x - m_start.x);
-		m_vec[0].y = static_cast<FLOAT>(-s * (b_pos.x + b_vec.x - c_pos.x) + c * (b_pos.y + b_vec.y - c_pos.y) + c_pos.y - m_start.y);
-		*/
+		m_start = b_pos;	// å§‹ç‚¹
+		m_vec.push_back(b_vec);	// çµ‚ç‚¹
 	}
 
 	ShapeQEllipse::ShapeQEllipse(const Shape& page, const DataReader& dt_reader) :

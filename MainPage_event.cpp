@@ -749,17 +749,10 @@ namespace winrt::GraphPaper::implementation
 						popup.Items().Append(item);
 					}
 				}
-				// 上記以外の場合 (線枠か, その他の図形の部位),
+				// 上記以外の場合,
 				else {
-					if (shape_pressed->is_strokable()) {
-						for (const auto item : mbi_stroke().Items()) {
-							popup.Items().Append(item);
-						}
-					}
-					if (shape_pressed->is_fillable()) {
-						for (const auto item : mbi_fill().Items()) {
-							popup.Items().Append(item);
-						}
+					for (const auto item : mbi_properties().Items()) {
+						popup.Items().Append(item);
 					}
 				}
 			}

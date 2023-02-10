@@ -351,7 +351,7 @@ namespace winrt::GraphPaper::implementation
 		void cap_style_is_checked(const CAP_STYLE& s_cap);
 		// 線枠メニューの「端の形式」が選択された.
 		void cap_style_click(IInspectable const& sender, RoutedEventArgs const&);
-		// 線枠メニューの「線の結合の形式」>「マイター制限」が選択された.
+		// 線枠メニューの「線の結合の形式」>「尖り制限」が選択された.
 		IAsyncAction join_miter_limit_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 線枠メニューの「線の結合の形式」に印をつける.
 		void join_style_is_checked(const D2D1_LINE_JOIN s_join);

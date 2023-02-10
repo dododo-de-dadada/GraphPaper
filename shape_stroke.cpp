@@ -73,7 +73,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 線分の結合のマイター制限を得る.
+	// 線分の結合の尖り制限を得る.
 	// val	得られた値
 	// 戻り値	つねに true
 	bool ShapeStroke::get_join_miter_limit(float& val) const noexcept
@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を線分の結合のマイター制限に格納する.
+	// 値を線分の結合の尖り制限に格納する.
 	// val	格納する値
 	bool ShapeStroke::set_join_miter_limit(const float& val) noexcept
 	{

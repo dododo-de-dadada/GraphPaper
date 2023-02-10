@@ -558,7 +558,7 @@ namespace winrt::GraphPaper::implementation
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
 			brush->SetColor(Shape::s_foreground_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_ellipse(e_pos, Shape::s_anc_len / tran._11, target, brush);
+			anc_draw_circle(e_pos, Shape::s_anc_len / tran._11, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[1], e_pos);
@@ -566,7 +566,7 @@ namespace winrt::GraphPaper::implementation
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
 			brush->SetColor(Shape::s_foreground_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_ellipse(e_pos, Shape::s_anc_len / tran._11, target, brush);
+			anc_draw_circle(e_pos, Shape::s_anc_len / tran._11, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[2], e_pos);

@@ -70,7 +70,7 @@ namespace winrt::GraphPaper::implementation
 		a_pos[2].x = a_pos[3].x;
 		a_pos[2].y = a_pos[0].y;
 		for (uint32_t i = 0; i < 4; i++) {
-			anc_draw_ellipse(a_pos[i], target, brush);
+			anc_draw_circle(a_pos[i], target, brush);
 		}
 		*/
 	}

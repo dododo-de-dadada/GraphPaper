@@ -390,7 +390,7 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 値を線分の結合のマイター制限に格納する.
+	// 値を線分の結合の尖り制限に格納する.
 	bool ShapeLine::set_join_miter_limit(const float& val) noexcept
 	{
 		if (ShapeStroke::set_join_miter_limit(val)) {

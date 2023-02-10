@@ -165,16 +165,16 @@ namespace winrt::GraphPaper::implementation
 	// exp_close	拡張した辺が閉じているか判定
 	// exp_width	辺の太さの半分.
 	// exp_side	拡張した辺の配列 [exp_cnt][4+1]
-	// mit_limit	線のマイター制限
-	// s_join	線の結合方法
+	// miter_limit	線の尖り制限
+	// j_style	線の結合方法
 	static bool poly_test_join_miter(
 		const D2D1_POINT_2F t_pos,
 		const size_t exp_cnt,
 		const bool exp_close,
 		const double exp_width,
 		const D2D1_POINT_2F exp_side[][4 + 1],
-		const double s_limit,
-		const D2D1_LINE_JOIN s_join) noexcept
+		const double miter_limit,
+		const D2D1_LINE_JOIN j_style) noexcept
 	{
 		for (size_t i = (exp_close ? 0 : 1), j = (exp_close ? exp_cnt - 1 : 0); i < exp_cnt; j = i++) {
 			// 拡張された辺について角の部分を求める.
@@ -191,12 +191,12 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 拡張された辺 j と i が重なるか判定する.
 			if (equal(exp_side[j][3], exp_side[i][1])) {
-				// 線の結合がマイターか判定する.
-				if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
-					// マイターならば, 辺 j をマイター制限の長さだけ延長した四辺形を求める.
+				// 線の結合が尖りか判定する.
+				if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER) {
+					//尖りならば, 辺 j を尖り制限の長さだけ延長した四辺形を求める.
 					D2D1_POINT_2F e_vec;	// 辺ベクトル
 					pt_sub(exp_side[j][3], exp_side[j][0], e_vec);
-					pt_mul(e_vec, exp_width * s_limit / sqrt(pt_abs2(e_vec)), e_vec);
+					pt_mul(e_vec, exp_width * miter_limit / sqrt(pt_abs2(e_vec)), e_vec);
 					D2D1_POINT_2F q_pos[4];
 					q_pos[0] = exp_side[j][3];
 					q_pos[1] = exp_side[j][2];
@@ -217,7 +217,7 @@ namespace winrt::GraphPaper::implementation
 			// 1..2 側に交点がない, または, 交点があっても拡張された辺の内側ならば, 次の拡張された辺を試す.
 			// 1..2 側に交点があって, 拡張された辺の外側ならば, 四辺形 { 交点, j2, v[i], i1 } を得る.
 			double s, t;	// 交点の助変数
-			D2D1_POINT_2F q_pos[4 + 1];	// 四辺形 (マイター制限を超えるならば五角形)
+			D2D1_POINT_2F q_pos[4 + 1];	// 四辺形 (尖り制限を超えるならば五角形)
 			if (!poly_find_intersection(exp_side[j][0], exp_side[j][3], exp_side[i][0], exp_side[i][3], s, t, q_pos[0])) {
 				continue;
 			}
@@ -239,22 +239,22 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 頂点と交点との差分ベクトルとその長さを求める.
-			// 差分ベクトルの長さが, マイター制限以下か判定する.
+			// 差分ベクトルの長さが, 尖り制限以下か判定する.
 			D2D1_POINT_2F d_vec;	// 差分ベクトル
 			pt_sub(q_pos[0], exp_side[i][4], d_vec);
 			const double d_abs2 = pt_abs2(d_vec);	// 差分ベクトルの長さ
-			const double limit_len = exp_width * s_limit;
+			const double limit_len = exp_width * miter_limit;
 			if (d_abs2 <= limit_len * limit_len) {
-				// マイター制限以下ならば, 調べる位置を四辺形 { q0, q1, q2, q3 } が含むか判定する.
+				// 尖り制限以下ならば, 調べる位置を四辺形 { q0, q1, q2, q3 } が含むか判定する.
 				if (pt_in_poly(t_pos, 4, q_pos)) {
 					// 位置を含むなら true を返す.
 					return true;
 				}
 				continue;
 			}
-			// マイター制限を超えるならば, 線の結合がマイターまたは面取りか判定する.
-			if (s_join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-				// 線の結合がマイターまたは面取りならば, 調べる位置を三角形 { q1, q2, q3 } が含むか判定する.
+			// 尖り制限を超えるならば, 線の結合が尖りまたは面取りか判定する.
+			if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
+				// 線の結合が尖りまたは面取りならば, 調べる位置を三角形 { q1, q2, q3 } が含むか判定する.
 				const D2D1_POINT_2F* tri_pos = q_pos + 1;
 				if (pt_in_poly(t_pos, 3, tri_pos)) {
 					// 位置を含むなら true を返す.
@@ -262,7 +262,7 @@ namespace winrt::GraphPaper::implementation
 				}
 				continue;
 			}
-			// 差分ベクトル上にあって, 交点との距離がちょうどマイター制限の長さになる点 m と,
+			// 差分ベクトル上にあって, 交点との距離がちょうど尖り制限の長さになる点 m と,
 			// 差分ベクトルと直行するベクトル上にあって, 点 m を通る直線上の点 n を求める.
 			// 線分 q3 q0 と m n との交点を求め, q4 に格納する.
 			// 線分 q0 q1 と m n との交点を求め, これを新たな q0 とする.
@@ -302,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 	// s_width	線の太さ
 	// s_closed	線が閉じているか判定
 	// s_join	線の結合
-	// s_limit	マイター制限
+	// s_limit	尖り制限
 	// f_opa	塗りつぶしが不透明か判定
 	static uint32_t poly_hit_test(
 		const D2D1_POINT_2F t_vec,

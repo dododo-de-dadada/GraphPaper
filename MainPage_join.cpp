@@ -49,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 		rmfi_cap_style_triangle().IsChecked(equal(val, CAP_TRIANGLE));
 	}
 
-	// 線枠メニューの「線の結合の結合」>「マイター制限」が選択された.
+	// 線枠メニューの「線の結合の結合」>「尖り制限」が選択された.
 	IAsyncAction MainPage::join_miter_limit_click_async(IInspectable const& sender, RoutedEventArgs const&)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;

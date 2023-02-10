@@ -93,6 +93,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			winrt::hresult_not_implemented();
+			return;
 		}
 		text_align_vert_is_checked(val);
 		if (ustack_push_set<UNDO_ID::TEXT_PAR_ALIGN>(val)) {
@@ -133,6 +134,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			winrt::hresult_not_implemented();
+			return;
 		}
 		text_align_horz_is_checked(val);
 		if (ustack_push_set<UNDO_ID::TEXT_ALIGN_T>(val)) {

@@ -30,7 +30,7 @@ namespace winrt::GraphPaper::implementation
 	// color	線・枠の色
 	// cap	線分の端点の形式
 	// join	線分の連結の形式
-	// miter_limit	マイター制限
+	// miter_limit	尖り制限
 	// barbs[]	矢じりの返しの位置
 	// tip_pos	矢じりの先端の位置
 	//------------------------------
@@ -42,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_COLOR_F& color,	// 線・枠の色
 		const CAP_STYLE& cap,	// 線分の端点の形式
 		const D2D1_LINE_JOIN join,	// 線分の連結の形式
-		const float miter_limit,	// マイター制限
+		const float miter_limit,	// 尖り制限
 		const D2D1_POINT_2F barbs[],	// 矢じりの両端の位置
 		const D2D1_POINT_2F tip_pos)	// 矢じりの先端の位置
 	{
@@ -86,9 +86,9 @@ namespace winrt::GraphPaper::implementation
 			swprintf_s(buf, len, L"%s=\"none\" ", name);
 		}
 		else {
-			const int32_t r = static_cast<int32_t>(std::round(color.r * 255.0));
-			const int32_t g = static_cast<int32_t>(std::round(color.g * 255.0));
-			const int32_t b = static_cast<int32_t>(std::round(color.b * 255.0));
+			const int32_t r = static_cast<int32_t>(std::round(color.r * 255.0));	// Red
+			const int32_t g = static_cast<int32_t>(std::round(color.g * 255.0));	// Green
+			const int32_t b = static_cast<int32_t>(std::round(color.b * 255.0));	// Blue
 			swprintf_s(buf,
 				len,
 				L"%s=\"#%02x%02x%02x\" %s-opacity=\"%f\" ",
@@ -112,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 	// patt	破線の配置
 	// cap	線分の端の形式
 	// join	線分の連結の形式
-	// limit	マイター制限
+	// limit	尖り制限
 	//------------------------------
 	static void export_svg_stroke(
 		wchar_t* buf, // 出力先
@@ -179,11 +179,11 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
 				join == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL) {
-				// D2D では, マイターを指定すると, マイター制限は常に無視され, すべてマイターになる.
-				// D2D では, マイターまたはベベルを指定すると, マイター制限が有効になり, これを超える角がベベルになる.
-				// SVG では, マイターを指定すると, マイター制限は常に有効で, これを超える角はベベルになる.
-				// つまり, D2D のマイターまたはベベルは, SVG のマイターと同じ.
-				// D2D のマイターは, SVG にはない.
+				// D2D では, 尖りを指定すると, 尖り制限は常に無視され, すべて尖りになる.
+				// D2D では, 尖り/面取りを指定すると, 尖り制限が有効になり, これを超える角が面取りになる.
+				// SVG では, 尖りを指定すると, 尖り制限は常に有効で, これを超える角は面取りになる.
+				// つまり, SVG の尖りは, D2D の尖り/面取りと同じ.
+				// なお, SVG2 には, arcs と miter-clip というプロパティ値があるが D2D にはない.
 				swprintf_s(buf + len4, len - len4,
 					L"stroke-linejoin=\"miter\" stroke-miterlimit=\"%f\" ", limit);
 			}
@@ -430,8 +430,8 @@ namespace winrt::GraphPaper::implementation
 		const auto y = min(m_start.y, m_start.y + m_vec[0].y);
 		const auto w = fabsf(m_vec[0].x);
 		const auto h = fabsf(m_vec[0].y);
-		const auto rx = fabsf(m_corner_rad.x);
-		const auto ry = fabsf(m_corner_rad.y);
+		const auto rx = fabsf(m_corner_radius.x);
+		const auto ry = fabsf(m_corner_radius.y);
 		swprintf_s(buf,
 			L"<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" "
 			L"rx=\"%f\" ry=\"%f\" ",

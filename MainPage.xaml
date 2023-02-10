@@ -288,7 +288,7 @@
 				</MenuFlyoutSubItem>
 			</muxc:MenuBarItem>
 			<!-- 線枠メニュー -->
-			<muxc:MenuBarItem x:Name="mbi_stroke" x:Uid="mbi_stroke" AccessKey="S" Title="Stroke">
+            <muxc:MenuBarItem x:Name="mbi_properties" x:Uid="mbi_properties" AccessKey="P" Title="Properties">
 				<MenuFlyoutSubItem x:Name="mfsi_dash_style" x:Uid="mfsi_dash_style" Text="Style">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_dash_style}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
@@ -372,15 +372,30 @@
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_cap_triangle}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
                         </muxc:RadioMenuFlyoutItem.Icon>
-
-                   </muxc:RadioMenuFlyoutItem>
+                    </muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfs_join_style" Text="Join Style ">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_round" x:Uid="rmfi_join_style_round" Click="join_style_click" GroupName="gn_join_style" Text="Rounded" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_bevel" x:Uid="rmfi_join_style_bevel" Click="join_style_click" GroupName="gn_join_style" Text="Beveled" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_miter" x:Uid="rmfi_join_style_miter" Click="join_style_click" GroupName="gn_join_style" IsChecked="true" Text="Shape" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_miter_or_bevel" x:Uid="rmfi_join_style_miter_or_bevel" Click="join_style_click" GroupName="gn_join_style" Text="Miter or Bevel" />
-					<MenuFlyoutSeparator />
+                    <MenuFlyoutSubItem.Icon>
+                        <PathIcon Data="{StaticResource data_join_bevel}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutSubItem.Icon>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_round" x:Uid="rmfi_join_style_round" Click="join_style_click" GroupName="gn_join_style" Text="Rounded" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_join_round}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_bevel" x:Uid="rmfi_join_style_bevel" Click="join_style_click" GroupName="gn_join_style" Text="Beveled" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_join_bevel}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_miter" x:Uid="rmfi_join_style_miter" Click="join_style_click" GroupName="gn_join_style" IsChecked="true" Text="Shape" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_join_miter}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_join_style_miter_or_bevel" x:Uid="rmfi_join_style_miter_or_bevel" Click="join_style_click" GroupName="gn_join_style" Text="Miter or Bevel" >
+                    </muxc:RadioMenuFlyoutItem>
+                    <MenuFlyoutSeparator />
 					<MenuFlyoutItem x:Name="mfi_join_miter_limit" x:Uid="mfi_join_miter_limit" Click="join_miter_limit_click_async" Text="Miter Limit..." />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
@@ -408,12 +423,23 @@
 				</MenuFlyoutSubItem>
 				<MenuFlyoutItem x:Name="mfi_arrow_size" x:Uid="mfi_arrow_size" Click="arrow_size_click_async" IsEnabled="False" Text="Arrowhead Size..." />
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem x:Name="mfi_stroke_color" x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." />
-			</muxc:MenuBarItem>
+                <MenuFlyoutItem x:Name="mfi_stroke_color" x:Uid="mfi_stroke_color" Click="stroke_color_click_async" Text="Stroke Color..." >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_stroke_color}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="mfi_fill_color" x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon Data="{StaticResource data_fill_color}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutItem.Icon>
+                </MenuFlyoutItem>
+            </muxc:MenuBarItem>
 			<!-- 塗りつぶしメニュー -->
+            <!--
 			<muxc:MenuBarItem x:Name="mbi_fill" x:Uid="mbi_fill" AccessKey="L" Title="Fill">
 				<MenuFlyoutItem x:Name="mfi_fill_color" x:Uid="mfi_fill_color" Click="fill_color_click_async" Text="Fill Color..." />
 			</muxc:MenuBarItem>
+            -->
 			<!-- 書体メニュー -->
 			<muxc:MenuBarItem x:Name="mbi_font" x:Uid="mbi_font" AccessKey="T" Title="Font">
 				<!-- 字体メニュー -->
