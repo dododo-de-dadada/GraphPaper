@@ -1086,17 +1086,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_BEZIER_SEGMENT b_seg{};
 		if (is_opaque(m_fill_color) ||
 			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color))) {
-			const double rot = M_PI * m_rot_degree / 180.0;
-			get_pos_center(m_start, m_vec[0], m_radius, rot, c_pos);
-			qellipse_alternate(m_vec[0], m_radius, rot, b_pos, b_seg);
-			b_pos.x += c_pos.x;
-			b_pos.y += c_pos.y;
-			b_seg.point1.x += c_pos.x;
-			b_seg.point1.y += c_pos.y;
-			b_seg.point2.x += c_pos.x;
-			b_seg.point2.y += c_pos.y;
-			b_seg.point3.x += c_pos.x;
-			b_seg.point3.y += c_pos.y;
+			alternate_bezier(b_pos, b_seg);
 		}
 		size_t len = 0;
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {

@@ -57,7 +57,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1DeviceContext2> m_d2d_context{ nullptr };
 
 		// XAML コントロール
-		SwapChainPanel m_swap_chain_panel{};	// パネルへの保持された参照
+		SwapChainPanel m_swap_chain_panel;	// パネルへの保持された参照
 
 		// デバイス属性
 

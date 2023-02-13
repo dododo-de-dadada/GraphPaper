@@ -1441,7 +1441,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom;
 
 		// だ円の中心点を得る.
-		static bool get_pos_center(const D2D1_POINT_2F start, const D2D1_POINT_2F vec, const D2D1_SIZE_F rad, const double rot, D2D1_POINT_2F& val) noexcept;
+		bool get_pos_center(D2D1_POINT_2F& val) const noexcept;
 		// だ円の傾きを得る.
 		bool get_rotation(float& val) const noexcept final override {
 			val = m_rot_degree;
@@ -1456,7 +1456,7 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept final override;
 		// 円弧をベジェ曲線で近似する.
-		static void qellipse_alternate(const D2D1_POINT_2F vec, const D2D1_SIZE_F rad, const double rot, D2D1_POINT_2F& b_pos, D2D1_BEZIER_SEGMENT& b_seg);
+		void alternate_bezier(D2D1_POINT_2F& b_pos, D2D1_BEZIER_SEGMENT& b_seg) const noexcept;
 		// 矢じりの返しと先端の位置を得る.
 		static bool qellipse_calc_arrow(const D2D1_POINT_2F vec, const D2D1_POINT_2F c_pos, const D2D1_SIZE_F rad, const double rot, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
 		// 図形を描く

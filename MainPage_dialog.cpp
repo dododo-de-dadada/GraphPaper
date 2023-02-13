@@ -9,6 +9,25 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
+	// ふつうは次の順序で呼ばれる.
+	// 1. opend
+	// 2. size_changed
+	// 3. loaded
+	// 4. scale_changed
+	// 5. closed
+	// ちなみに, unloaded は呼ばれない.
+	// ところが, デバッグを続けていると, たまに,
+	// 1. size_changed
+	// 2. opened
+	// 3. loaded
+	// あるいは,
+	// 1. size_changed
+	// 2. loaded
+	// 3. opened
+	// の順番で呼ばれることがあり, 
+	// ふつうと違う順番で呼び出されたとき, スワップチェーンパネルには何も表示されないにも関わらず, 
+	// Direct2D はエラーを返さない.
+	// loaded で, スワップチェーンパネルの UpdateLayout を呼び出すことでこれを回避できるかも.
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::Foundation::Uri;
 	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
@@ -39,6 +58,18 @@ namespace winrt::GraphPaper::implementation
 	template void MainPage::dialog_set_slider_header<2>(const winrt::hstring& text);
 	template void MainPage::dialog_set_slider_header<3>(const winrt::hstring& text);
 
+//#ifdef _DEBUG
+//	enum struct DEBUG_DIALOG {
+//		NIL,
+//		LOADED,
+//		OPENED,
+//		CLOSED,
+//		UNLOADED,
+//		SIZE_CHANGED,
+//		SCALE_CHANGED
+//	} debug_dialog[124]{};
+//	int debug_dialog_cnt = 0;
+//#endif
 
 	// 設定ダイアログのスワップチェーンパネルを表示する
 	void MainPage::dialog_draw(void)
@@ -50,7 +81,6 @@ namespace winrt::GraphPaper::implementation
 			// ロックできない場合
 			return;
 		}
-
 		Shape::s_d2d_factory = m_dialog_d2d.m_d2d_factory.get();
 		Shape::s_d2d_target = m_dialog_d2d.m_d2d_context.get();
 		Shape::s_dwrite_factory = m_dialog_d2d.m_dwrite_factory.get();
@@ -82,16 +112,29 @@ namespace winrt::GraphPaper::implementation
 	// 属性ダイアログが開かれた.
 	void MainPage::setting_dialog_opened(ContentDialog const& sender, ContentDialogOpenedEventArgs const&)
 	{
+//#ifdef _DEBUG
+//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::OPENED;
+//#endif
 	}
 
 	// 属性ダイアログが閉じられた.
 	void MainPage::setting_dialog_closed(ContentDialog const&, ContentDialogClosedEventArgs const&)
 	{
+//#ifdef _DEBUG
+//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::CLOSED;
+//		debug_dialog_cnt = 0;
+//		if (debug_dialog[0] != DEBUG_DIALOG::OPENED) {
+//			__debugbreak();
+//		}
+//#endif
 	}
 
 	// 属性ダイアログが閉じられた.
 	void MainPage::setting_dialog_unloaded(IInspectable const&, RoutedEventArgs const&)
 	{
+//#ifdef _DEBUG
+//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::UNLOADED;
+//#endif
 		m_dialog_page.m_state_block = nullptr;
 		m_dialog_page.m_color_brush = nullptr;
 		m_dialog_page.m_range_brush = nullptr;
@@ -107,12 +150,24 @@ namespace winrt::GraphPaper::implementation
 		winrt::apartment_context context;
 		co_await winrt::resume_background();
 		try {
-			const StorageFile file{ co_await StorageFile::GetFileFromApplicationUriAsync(Uri{ L"ms-appx:///Assets/4.1.05.tiff" }) };
-			const IRandomAccessStream stream{ co_await file.OpenAsync(FileAccessMode::Read) };
-			const BitmapDecoder decoder{ co_await BitmapDecoder::CreateAsync(stream) };
-			const SoftwareBitmap bitmap{ co_await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight) };
-			const D2D1_POINT_2F pos{ static_cast<FLOAT>(p_width * 0.125), static_cast<FLOAT>(p_height * 0.125) };
-			const D2D1_SIZE_F size{ static_cast<float>(p_width * 0.75), static_cast<FLOAT>(p_height * 0.75) };
+			const StorageFile file{
+				co_await StorageFile::GetFileFromApplicationUriAsync(Uri{ L"ms-appx:///Assets/4.1.05.tiff" })
+			};
+			const IRandomAccessStream stream{
+				co_await file.OpenAsync(FileAccessMode::Read)
+			};
+			const BitmapDecoder decoder{
+				co_await BitmapDecoder::CreateAsync(stream)
+			};
+			const SoftwareBitmap bitmap{
+				co_await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight)
+			};
+			const D2D1_POINT_2F pos{
+				static_cast<FLOAT>(p_width * 0.125), static_cast<FLOAT>(p_height * 0.125)
+			};
+			const D2D1_SIZE_F size{
+				static_cast<float>(p_width * 0.75), static_cast<FLOAT>(p_height * 0.75)
+			};
 			ShapeImage* s = new ShapeImage(pos, size, bitmap, m_dialog_page.m_image_opac);
 			bitmap.Close();
 
@@ -137,6 +192,11 @@ namespace winrt::GraphPaper::implementation
 		if (sender != scp_dialog_panel()) {
 			return;
 		}
+//#ifdef _DEBUG
+//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::LOADED;
+//#endif
+		// UpdateLayout を明示的に呼び出すのは, そうしなかった場合, スワップチェーンパネルが表示
+		// されないケースがあるため.
 		m_dialog_d2d.SetSwapChainPanel(scp_dialog_panel());
 		m_dialog_d2d.m_d2d_factory->CreateDrawingStateBlock(m_dialog_page.m_state_block.put());
 		m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_color_brush.put());
@@ -151,16 +211,24 @@ namespace winrt::GraphPaper::implementation
 		if (sender != scp_dialog_panel()) {
 			return;
 		}
-		m_dialog_page.m_page_size.width = static_cast<FLOAT>(args.NewSize().Width);
-		m_dialog_page.m_page_size.height = static_cast<FLOAT>(args.NewSize().Height);
-		m_dialog_d2d.SetLogicalSize2(m_dialog_page.m_page_size);
+//#ifdef _DEBUG
+//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::SIZE_CHANGED;
+//#endif
+		const float w = args.NewSize().Width;
+		const float h = args.NewSize().Height;
+		m_dialog_page.m_page_size.width = w;
+		m_dialog_page.m_page_size.height = h;
+		m_dialog_d2d.SetLogicalSize2({ w, h });
 
-		dialog_draw();
+		//dialog_draw();
 	}
 
 	// 属性のスワップチェーンパネルの倍率が変わった.
 	void MainPage::dialog_panel_scale_changed(IInspectable const&, IInspectable const&)
 	{
+//#ifdef _DEBUG
+//		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::SCALE_CHANGED;
+//#endif
 		const float comp_x = scp_dialog_panel().CompositionScaleX();
 		const float comp_y = scp_dialog_panel().CompositionScaleY();
 		m_dialog_d2d.SetCompositionScale(comp_x, comp_y);

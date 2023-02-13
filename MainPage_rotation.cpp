@@ -91,9 +91,8 @@ namespace winrt::GraphPaper::implementation
 			debug_leak_cnt++;
 #endif
 			cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_rotation")));
-			const ContentDialogResult d_result{
-				co_await cd_setting_dialog().ShowAsync()
-			};
+			cd_setting_dialog().UpdateLayout();
+			const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 			if (d_result == ContentDialogResult::Primary) {
 				float samp_val;
 				m_dialog_page.m_shape_list.back()->get_rotation(samp_val);

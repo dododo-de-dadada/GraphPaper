@@ -755,7 +755,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F c_pos{};
 		if (is_opaque(m_fill_color) || 
 			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && m_arrow_style != ARROW_STYLE::NONE)) {
-			get_pos_center(m_start, m_vec[0], m_radius, M_PI * m_rot_degree / 180.0, c_pos);
+			get_pos_center(c_pos);
 		}
 		if (is_opaque(m_fill_color)) {
 			// A rx ry x-axis-rotation large-arc-flag sweep-flag x y

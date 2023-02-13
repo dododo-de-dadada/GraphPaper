@@ -12,7 +12,6 @@ namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
-	//using winrt::Windows::UI::ViewManagement::UISettings;
 	using winrt::Windows::UI::Xaml::Application;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
