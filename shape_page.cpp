@@ -952,7 +952,6 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (!equal(m_page_color, val)) {
 			m_page_color = val;
-			m_page_color.a = 1.0f;
 			return true;
 		}
 		return false;

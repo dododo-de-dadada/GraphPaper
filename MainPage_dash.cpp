@@ -90,9 +90,8 @@ namespace winrt::GraphPaper::implementation
 #endif
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
-		const ContentDialogResult d_result{
-			co_await cd_setting_dialog().ShowAsync()
-		};
+		m_mutex_event.lock();
+		const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			DASH_PATT sample_patt;
 			float sample_width;
@@ -120,6 +119,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_4().ValueChanged(slider_4_token);
 		//page_draw();
 		status_bar_set_pos();
+		m_mutex_event.unlock();
 	}
 
 	// 線枠メニューの「破線の形式」のサブ項目が選択された.

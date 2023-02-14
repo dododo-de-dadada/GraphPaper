@@ -156,6 +156,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 3> });
 		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F samp_val;
@@ -177,6 +178,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_3().ValueChanged(slider_3_token);
 		page_draw();
 
+		m_mutex_event.unlock();
 	}
 
 	//---------------------------------
@@ -219,6 +221,7 @@ namespace winrt::GraphPaper::implementation
 		lv_dialog_list().Visibility(Visibility::Visible);
 		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			wchar_t* samp_val;
@@ -236,6 +239,7 @@ namespace winrt::GraphPaper::implementation
 		lv_dialog_list().Items().Clear();
 		//UnloadObject(cd_setting_dialog());
 		page_draw();
+		m_mutex_event.unlock();
 	}
 
 	//---------------------------------
@@ -348,13 +352,13 @@ namespace winrt::GraphPaper::implementation
 	//---------------------------------
 	IAsyncAction MainPage::font_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		constexpr auto MAX_VALUE = 127.5;
-		constexpr auto TICK_FREQ = 0.5;
+		//constexpr auto MAX_VALUE = 256.0;
+		constexpr auto TICK_FREQ = 1.0;
 		m_dialog_page.set_attr_to(&m_main_page);
 		float font_size;
 		m_dialog_page.get_font_size(font_size);
 
-		dialog_slider_0().Maximum(MAX_VALUE);
+		dialog_slider_0().Maximum(FONT_SIZE_MAX - 1.0f);
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(font_size - 1.0);
@@ -363,6 +367,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_SIZE, 0> });
 		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
@@ -377,6 +382,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_0().ValueChanged(slider_0_token);
 		page_draw();
+		m_mutex_event.unlock();
 	}
 
 	//---------------------------------
@@ -415,6 +421,7 @@ namespace winrt::GraphPaper::implementation
 		lv_dialog_list().Visibility(Visibility::Visible);
 		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_STRETCH samp_val;
@@ -431,6 +438,7 @@ namespace winrt::GraphPaper::implementation
 		lv_dialog_list().Visibility(Visibility::Collapsed);
 		lv_dialog_list().Items().Clear();
 		page_draw();
+		m_mutex_event.unlock();
 	}
 
 	// 書体メニューの「字体」に印をつける.
@@ -513,6 +521,7 @@ namespace winrt::GraphPaper::implementation
 		lv_dialog_list().Visibility(Visibility::Visible);
 		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			DWRITE_FONT_WEIGHT samp_val;
@@ -529,5 +538,6 @@ namespace winrt::GraphPaper::implementation
 		lv_dialog_list().Visibility(Visibility::Collapsed);
 		lv_dialog_list().Items().Clear();
 		status_bar_set_pos();
+		m_mutex_event.unlock();
 	}
 }

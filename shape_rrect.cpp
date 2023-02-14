@@ -87,20 +87,20 @@ namespace winrt::GraphPaper::implementation
 		brush->SetColor(m_stroke_color);
 		target->DrawRoundedRectangle(r_rec, brush, m_stroke_width, m_d2d_stroke_style.get());
 		if (is_selected()) {
-			D2D1_MATRIX_3X2_F t32;
-			target->GetTransform(&t32);
-			const auto a_len = Shape::s_anc_len / t32._11;
+			//D2D1_MATRIX_3X2_F t32;
+			//target->GetTransform(&t32);
+			//const auto a_len = Shape::s_anc_len / t32._11;
 			D2D1_POINT_2F c_pos[4]{
 				{ r_lt.x + rx, r_lt.y + ry },
 				{ r_lt.x + vx - rx, r_lt.y + ry },
 				{ r_lt.x + vx - rx, r_lt.y + vy - ry },
 				{ r_lt.x + rx, r_lt.y + vy - ry }
 			};
-			anc_draw_circle(c_pos[2], a_len, target, brush);
-			anc_draw_circle(c_pos[3], a_len, target, brush);
-			anc_draw_circle(c_pos[1], a_len, target, brush);
-			anc_draw_circle(c_pos[0], a_len, target, brush);
-			draw_anc(a_len);
+			anc_draw_circle(c_pos[2], Shape::s_anc_len, target, brush);
+			anc_draw_circle(c_pos[3], Shape::s_anc_len, target, brush);
+			anc_draw_circle(c_pos[1], Shape::s_anc_len, target, brush);
+			anc_draw_circle(c_pos[0], Shape::s_anc_len, target, brush);
+			draw_anc();
 		}
 	}
 

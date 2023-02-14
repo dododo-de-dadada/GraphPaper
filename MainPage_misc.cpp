@@ -9,16 +9,13 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// その他メニューの「バージョン情報」が選択された.
 	IAsyncAction MainPage::about_graph_paper_click(IInspectable const&, RoutedEventArgs const&)
 	{
 		tb_version().Visibility(Visibility::Visible);
-		const auto def_btn = cd_setting_dialog().DefaultButton();
+		const auto def_text = cd_setting_dialog().DefaultButton();
 		const auto pri_text = cd_setting_dialog().PrimaryButtonText();
 		const auto close_text = cd_setting_dialog().CloseButtonText();
 		cd_setting_dialog().PrimaryButtonText(L"");
@@ -27,6 +24,7 @@ namespace winrt::GraphPaper::implementation
 
 		const auto samp_w = scp_dialog_panel().Width();
 		const auto samp_h = scp_dialog_panel().Height();
+
 		constexpr uint32_t misc_min = 3;
 		constexpr uint32_t misc_max = 12;
 		static uint32_t misc_cnt = misc_min;
@@ -45,15 +43,16 @@ namespace winrt::GraphPaper::implementation
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
+		m_mutex_event.lock();
 		co_await cd_setting_dialog().ShowAsync();
+
 		cd_setting_dialog().PrimaryButtonText(pri_text);
 		cd_setting_dialog().CloseButtonText(close_text);
-		cd_setting_dialog().DefaultButton(def_btn);
+		cd_setting_dialog().DefaultButton(def_text);
 		tb_version().Visibility(Visibility::Collapsed);
 		slist_clear(m_dialog_page.m_shape_list);
-		// バージョン情報のメッセージダイアログを表示する.
-		//message_show(ICON_INFO, L"str_appname", L"str_version");
 		status_bar_set_pos();
+		m_mutex_event.unlock();
 	}
 
 	// その他メニューの「色の表記」のサブ項目が選択された.
@@ -133,29 +132,30 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「頂点をくっつける...」が選択された.
 	IAsyncAction MainPage::stick_to_vertex_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
-		misc_vert_stick_set_header(m_vert_stick);
-		sd_misc_vert_stick().Value(static_cast<double>(m_vert_stick));
-		const auto d_result{ co_await cd_misc_vert_stick().ShowAsync() };
+		vert_stick_set_header(m_vert_stick);
+		sd_vert_stick().Value(static_cast<double>(m_vert_stick));
+		m_mutex_event.lock();
+		const auto d_result = co_await cd_vert_stick().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			m_vert_stick = static_cast<float>(sd_misc_vert_stick().Value());
+			m_vert_stick = static_cast<float>(sd_vert_stick().Value());
 		}
+		m_mutex_event.unlock();
 	}
 
-	void MainPage::misc_vert_stick_set_header(const float val) noexcept
+	void MainPage::vert_stick_set_header(const float val) noexcept
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		wchar_t buf[32];
 		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_dialog_page.m_grid_base + 1.0f, buf);
-		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_misc_vert_stick") + L": " + buf;
-		sd_misc_vert_stick().Header(box_value(text));
+		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_vert_stick") + L": " + buf;
+		sd_vert_stick().Header(box_value(text));
 	}
 
 	// スライダーの値が変更された.
-	void MainPage::misc_vert_stick_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept
+	void MainPage::vert_stick_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept
 	{
-		misc_vert_stick_set_header(static_cast<float>(args.NewValue()));
+		vert_stick_set_header(static_cast<float>(args.NewValue()));
 	}
-
 
 }

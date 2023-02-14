@@ -773,11 +773,11 @@ namespace winrt::GraphPaper::implementation
 			D2D1_MATRIX_3X2_F t32;
 			target->GetTransform(&t32);
 			D2D1_POINT_2F a_pos{ m_start };	// }Œ`‚Ì•”ˆÊ‚ÌˆÊ’u
-			anc_draw_rect(a_pos, Shape::s_anc_len / t32._11, target, brush);
+			anc_draw_rect(a_pos, Shape::s_anc_len, target, brush);
 			const size_t d_cnt = m_vec.size();	// ·•ª‚Ì”
 			for (size_t i = 0; i < d_cnt; i++) {
 				pt_add(a_pos, m_vec[i], a_pos);
-				anc_draw_rect(a_pos, Shape::s_anc_len / t32._11, target, brush);
+				anc_draw_rect(a_pos, Shape::s_anc_len, target, brush);
 			}
 		}
 	}

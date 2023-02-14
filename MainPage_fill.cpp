@@ -71,6 +71,7 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FILL)));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F samp_val;
@@ -94,6 +95,7 @@ namespace winrt::GraphPaper::implementation
 		//UnloadObject(cd_setting_dialog());
 
 		page_draw();
+		m_mutex_event.unlock();
 	}
 
 	// 値をスライダーのヘッダーに格納する.

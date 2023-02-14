@@ -10,10 +10,11 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// 図形を表示する.
-	void ShapeRect::draw_anc(const double a_len)
+	void ShapeRect::draw_anc(void)
 	{
 		ID2D1RenderTarget* const target = Shape::s_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
+		const auto a_len = Shape::s_anc_len;
 
 		// 部位を表示する.
 		// 0---1
@@ -72,9 +73,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// この図形が選択されてるか判定する.
 		if (is_selected()) {
-			D2D1_MATRIX_3X2_F t32;
-			target->GetTransform(&t32);
-			draw_anc(Shape::s_anc_len / t32._11);
+			draw_anc();
 		}
 	}
 

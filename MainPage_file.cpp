@@ -191,7 +191,7 @@ namespace winrt::GraphPaper::implementation
 		cd_conf_save_dialog().Hide();
 		cd_edit_text_dialog().Hide();
 		cd_message_dialog().Hide();
-		cd_misc_vert_stick().Hide();
+		cd_vert_stick().Hide();
 		cd_setting_dialog().Hide();
 		cd_page_size_dialog().Hide();
 

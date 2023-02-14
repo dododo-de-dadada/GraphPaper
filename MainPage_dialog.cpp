@@ -138,6 +138,7 @@ namespace winrt::GraphPaper::implementation
 		m_dialog_page.m_state_block = nullptr;
 		m_dialog_page.m_color_brush = nullptr;
 		m_dialog_page.m_range_brush = nullptr;
+		m_dialog_page.m_bitmap_brush = nullptr;
 		m_dialog_d2d.Trim();
 	}
 
@@ -195,11 +196,11 @@ namespace winrt::GraphPaper::implementation
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::LOADED;
 //#endif
-		// UpdateLayout を明示的に呼び出すのは, そうしなかった場合, スワップチェーンパネルが表示
-		// されないケースがあるため.
+		scp_dialog_panel().UpdateLayout();
 		m_dialog_d2d.SetSwapChainPanel(scp_dialog_panel());
 		m_dialog_d2d.m_d2d_factory->CreateDrawingStateBlock(m_dialog_page.m_state_block.put());
 		m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_color_brush.put());
+		m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_range_brush.put());
 		m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_range_brush.put());
 
 		dialog_draw();

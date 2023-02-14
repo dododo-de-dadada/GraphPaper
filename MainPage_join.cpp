@@ -102,6 +102,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_join_miter_limit")));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_limit;
@@ -120,7 +121,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().ValueChanged(slider_0_token);
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		dialog_slider_1().ValueChanged(slider_1_token);
-		co_return;
+		m_mutex_event.unlock();
 	}
 
 	// 値をスライダーのヘッダーに格納する.

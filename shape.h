@@ -227,6 +227,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr size_t N_GON_MAX = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 	constexpr float PAGE_SIZE_MAX = 32768.0f;	// 最大のページ大きさ
 	constexpr D2D1_SIZE_F PAGE_SIZE_DEFVAL{ 8.0F * 96.0F, 11.0F * 96.0F };	// ページの大きさの既定値 (ピクセル)
+	constexpr float FONT_SIZE_MAX = 512.0f;	// 書体の大きさの最大値
 
 	// COM インターフェイス IMemoryBufferByteAccess を初期化
 	MIDL_INTERFACE("5b0d3235-4dba-4d44-865e-8f1d0e4fd04d")
@@ -757,6 +758,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::com_ptr<ID2D1DrawingStateBlock1> m_state_block{ nullptr };	// 描画状態の保存ブロック
 		winrt::com_ptr<ID2D1SolidColorBrush> m_range_brush{ nullptr };	// 選択された文字範囲の色ブラシ
 		winrt::com_ptr<ID2D1SolidColorBrush> m_color_brush{ nullptr };	// 図形の色ブラシ
+		winrt::com_ptr<ID2D1BitmapBrush> m_bitmap_brush{ nullptr };
 
 		//------------------------------
 		// shape_page.cpp
@@ -1160,7 +1162,7 @@ namespace winrt::GraphPaper::implementation
 		// データリーダーから図形を読み込む.
 		ShapeRect(const Shape& page, DataReader const& dt_reader);
 		// 図形を表示する.
-		virtual void draw_anc(const double a_len);
+		virtual void draw_anc(void);
 		// 図形を表示する.
 		virtual void draw(void) override;
 		// 図形を囲む領域を得る.
@@ -1433,9 +1435,9 @@ namespace winrt::GraphPaper::implementation
 
 	// 四分だ円 (円弧)
 	struct ShapeQEllipse : ShapePath {
-		D2D1_SIZE_F m_radius{};
-		float m_rot_degree = 0.0f;
-		D2D1_SWEEP_DIRECTION m_sweep_flag = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;
+		D2D1_SIZE_F m_radius{};	// 標準形にしたときの X 軸 Y 軸方向の半径
+		float m_rot_degree = 0.0f;	// 時計回りの傾き
+		D2D1_SWEEP_DIRECTION m_sweep_flag = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;	// 円弧の方向
 		D2D1_ARC_SIZE m_larg_flag = D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL;
 		uint32_t m_quadrant = 0;
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom;
@@ -1443,7 +1445,8 @@ namespace winrt::GraphPaper::implementation
 		// だ円の中心点を得る.
 		bool get_pos_center(D2D1_POINT_2F& val) const noexcept;
 		// だ円の傾きを得る.
-		bool get_rotation(float& val) const noexcept final override {
+		bool get_rotation(float& val) const noexcept final override
+		{
 			val = m_rot_degree;
 			return true;
 		}
@@ -1488,9 +1491,9 @@ namespace winrt::GraphPaper::implementation
 		DWRITE_FONT_STYLE m_font_style = DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL;	// 書体の字体
 		DWRITE_FONT_WEIGHT m_font_weight = DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL;	// 書体の太さ
 		wchar_t* m_text = nullptr;	// 文字列
-		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		DWRITE_PARAGRAPH_ALIGNMENT m_text_align_vert = DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR;	// 段落のそろえ
 		DWRITE_TEXT_ALIGNMENT m_text_align_horz = DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING;	// 文字のそろえ
+		float m_text_line_sp = 0.0f;	// 行間 (DIPs 96dpi固定)
 		D2D1_SIZE_F m_text_padding{ TEXT_PADDING_DEFVAL };	// 文字列の上下と左右の余白
 		DWRITE_TEXT_RANGE m_text_selected_range{ 0, 0 };	// 選択された文字範囲
 
@@ -1621,15 +1624,22 @@ namespace winrt::GraphPaper::implementation
 	// brush	色ブラシ
 	inline void anc_draw_circle(const D2D1_POINT_2F a_pos, const double a_len, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
 	{
+		// 図形の部位 (方形) と面積が同じなるような円の半径.
 		D2D1_MATRIX_3X2_F t32;
 		target->GetTransform(&t32);
-		//const auto a_len = static_cast<double>(Shape::s_anc_len) / t32._11;
-		const auto a_border = a_len / 6.0;
-		const auto r = a_len * 0.5 + a_border;	// 半径
+		const auto r = sqrt(a_len * a_len / M_PI);
+		const auto r_inner = r / t32._11;	// 内側の半径
+		const auto r_outer = (r + 2.0) / t32._11;	// 外側の半径
+		const D2D1_ELLIPSE e_outer{	// 外側のだ円
+			a_pos, static_cast<FLOAT>(r_outer), static_cast<FLOAT>(r_outer)
+		};
+		const D2D1_ELLIPSE e_inner{	// 内側のだ円
+			a_pos, static_cast<FLOAT>(r_inner), static_cast<FLOAT>(r_inner)
+		};
 		brush->SetColor(Shape::s_background_color);
-		target->FillEllipse(D2D1_ELLIPSE{ a_pos, static_cast<FLOAT>(r), static_cast<FLOAT>(r) }, brush);
+		target->FillEllipse(e_outer, brush);
 		brush->SetColor(Shape::s_foreground_color);
-		target->FillEllipse(D2D1_ELLIPSE{ a_pos, static_cast<FLOAT>(r - a_border), static_cast<FLOAT>(r - a_border) }, brush);
+		target->FillEllipse(e_inner, brush);
 	}
 
 	// 図形の部位 (方形) を表示する.
@@ -1638,19 +1648,22 @@ namespace winrt::GraphPaper::implementation
 	// brush	色ブラシ
 	inline void anc_draw_rect(const D2D1_POINT_2F a_pos, const double a_len, ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush)
 	{
-		D2D1_POINT_2F r_lt;
-		D2D1_POINT_2F r_rb;
 		D2D1_MATRIX_3X2_F t32;
 		target->GetTransform(&t32);
-		const auto a_border = a_len / 3.0;	// アンカーの白枠
-		//const auto a_len = Shape::s_anc_len / t32._11;
-		pt_add(a_pos, -0.5 * a_len, r_lt);
-		pt_add(r_lt, a_len, r_rb);
-		const D2D1_RECT_F rect{ r_lt.x, r_lt.y, r_rb.x, r_rb.y };
+		const auto w_inner = 0.5 * a_len / t32._11;
+		const auto w_outer = (0.5 * a_len + 2.0) / t32._11;
+		const D2D1_RECT_F r_inner{
+			static_cast<FLOAT>(a_pos.x - w_inner), static_cast<FLOAT>(a_pos.y - w_inner),
+			static_cast<FLOAT>(a_pos.x + w_inner), static_cast<FLOAT>(a_pos.y + w_inner)
+		};
+		const D2D1_RECT_F r_outer{
+			static_cast<FLOAT>(a_pos.x - w_outer), static_cast<FLOAT>(a_pos.y - w_outer),
+			static_cast<FLOAT>(a_pos.x + w_outer), static_cast<FLOAT>(a_pos.y + w_outer)
+		};
 		brush->SetColor(Shape::s_background_color);
-		target->DrawRectangle(rect, brush, static_cast<FLOAT>(a_border), nullptr);
+		target->FillRectangle(r_outer, brush);
 		brush->SetColor(Shape::s_foreground_color);
-		target->FillRectangle(rect, brush);
+		target->FillRectangle(r_inner, brush);
 	}
 
 	// 矢じるしの寸法が同じか判定する.

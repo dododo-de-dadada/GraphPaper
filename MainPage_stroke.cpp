@@ -82,6 +82,7 @@ namespace winrt::GraphPaper::implementation
 		stroke_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_stroke_color")));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F samp_val;
@@ -107,6 +108,7 @@ namespace winrt::GraphPaper::implementation
 		//UnloadObject(cd_setting_dialog());
 
 		page_draw();
+		m_mutex_event.unlock();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -246,6 +248,7 @@ namespace winrt::GraphPaper::implementation
 		stroke_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width")));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
@@ -262,11 +265,8 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().ValueChanged(slider_0_token);
 		dialog_slider_0().StepFrequency(1.0);
 		dialog_slider_0().Maximum(255.0);
+		m_mutex_event.unlock();
 
-		//m_dialog_page.m_d2d.Trim();
-		//UnloadObject(cd_setting_dialog());
-
-		page_draw();
 	}
 
 }

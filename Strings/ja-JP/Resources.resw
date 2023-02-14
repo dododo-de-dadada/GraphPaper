@@ -1122,7 +1122,7 @@
     <value>三角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="str_misc_vert_stick" xml:space="preserve">
+  <data name="str_vert_stick" xml:space="preserve">
     <value>しきい値</value>
     <comment>String</comment>
   </data>

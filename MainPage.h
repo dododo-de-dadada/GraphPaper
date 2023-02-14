@@ -664,9 +664,9 @@ namespace winrt::GraphPaper::implementation
 		// その他メニューの「頂点をくっつける...」が選択された.
 		IAsyncAction stick_to_vertex_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// 値をスライダーのヘッダーに格納する.
-		void misc_vert_stick_set_header(const float val) noexcept;
+		void vert_stick_set_header(const float val) noexcept;
 		// スライダーの値が変更された.
-		void misc_vert_stick_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept;
+		void vert_stick_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args) noexcept;
 		// その他メニューの「長さの単位」に印をつける.
 		void len_unit_is_checked(const LEN_UNIT l_unit);
 		// その他メニューの「長さの単位」のサブ項目が選択された.

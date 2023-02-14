@@ -253,10 +253,10 @@ namespace winrt::GraphPaper::implementation
 			};
 			D2D1_MATRIX_3X2_F t32;
 			target->GetTransform(&t32);
-			anc_draw_rect(v_pos[0], Shape::s_anc_len / t32._11, target, brush);
-			anc_draw_rect(v_pos[1], Shape::s_anc_len / t32._11, target, brush);
-			anc_draw_rect(v_pos[2], Shape::s_anc_len / t32._11, target, brush);
-			anc_draw_rect(v_pos[3], Shape::s_anc_len / t32._11, target, brush);
+			anc_draw_rect(v_pos[0], Shape::s_anc_len, target, brush);
+			anc_draw_rect(v_pos[1], Shape::s_anc_len, target, brush);
+			anc_draw_rect(v_pos[2], Shape::s_anc_len, target, brush);
+			anc_draw_rect(v_pos[3], Shape::s_anc_len, target, brush);
 		}
 	}
 

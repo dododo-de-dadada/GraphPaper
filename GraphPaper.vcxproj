@@ -196,6 +196,7 @@
     <Image Include="Assets\Wide310x150Logo.scale-150.png" />
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
+    <Image Include="bitmap1.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainPage_app.cpp" />

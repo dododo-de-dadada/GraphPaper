@@ -787,13 +787,15 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (is_selected()) {
-			D2D1_POINT_2F p{ m_start.x, m_start.y };
-			D2D1_POINT_2F q{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
+			const D2D1_POINT_2F p{ m_start };
+			const D2D1_POINT_2F q{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
 			D2D1_MATRIX_3X2_F t32;
 			target->GetTransform(&t32);
-			anc_draw_rect(p, Shape::s_anc_len / t32._11, target, brush);
-			anc_draw_rect(q, Shape::s_anc_len / t32._11, target, brush);
-			anc_draw_rect(c_pos, Shape::s_anc_len / t32._11, target, brush);
+			anc_draw_rect(p, Shape::s_anc_len, target, brush);
+			anc_draw_rect(q, Shape::s_anc_len, target, brush);
+			const auto s_len = 1.0 / t32._11;
+			target->DrawLine(c_pos, p, brush, s_len, Shape::m_aux_style.get());
+			target->DrawLine(c_pos, q, brush, s_len, Shape::m_aux_style.get());
 		}
 	}
 

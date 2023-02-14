@@ -67,31 +67,36 @@ namespace winrt::GraphPaper::implementation
 			const auto ds0_snap = dialog_slider_0().SnapsTo();
 			const auto ds0_val = dialog_slider_0().Value();
 			const auto ds0_vis = dialog_slider_0().Visibility();
+
 			dialog_slider_0().Minimum(-44.9);
 			dialog_slider_0().Maximum(44.9);
 			dialog_slider_0().TickFrequency(0.5);
 			dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 			dialog_slider_0().Value(rot);
 			dialog_slider_0().Visibility(Visibility::Visible);
+
 			const winrt::event_token ds0_tok{
 				dialog_slider_0().ValueChanged({ this, &MainPage::rotation_slider_val_changed<UNDO_ID::ROTATION, 0> })
 			};
 			rotation_slider_set_header<UNDO_ID::ROTATION, 0>(rot);
 			const auto samp_w = scp_dialog_panel().Width();
 			const auto samp_h = scp_dialog_panel().Height();
+			const auto center = samp_w * 0.5;
 			const auto padd = samp_w * 0.125;
+			const auto rx = (samp_w - padd) * 0.5;
+			const auto ry = (samp_h - padd) * 0.5;
 			const D2D1_POINT_2F b_pos{
-				static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
+				static_cast<FLOAT>(center), static_cast<FLOAT>(padd)
 			};
 			const D2D1_POINT_2F b_vec{
-				static_cast<FLOAT>(samp_w - padd * 2.0), static_cast<FLOAT>(samp_h - padd * 2.0)
+				static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)
 			};
 			m_dialog_page.m_shape_list.push_back(new ShapeQEllipse(b_pos, b_vec, rot, s));
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
 			cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_rotation")));
-			cd_setting_dialog().UpdateLayout();
+			m_mutex_event.lock();
 			const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 			if (d_result == ContentDialogResult::Primary) {
 				float samp_val;
@@ -110,6 +115,7 @@ namespace winrt::GraphPaper::implementation
 			dialog_slider_0().Value(ds0_val);
 			dialog_slider_0().Visibility(ds0_vis);
 			status_bar_set_pos();
+			m_mutex_event.unlock();
 		}
 	}
 }

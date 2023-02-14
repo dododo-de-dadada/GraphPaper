@@ -470,11 +470,6 @@ namespace winrt::GraphPaper::implementation
 					return;
 				}
 
-				D2D1_MATRIX_3X2_F tran;
-				target->GetTransform(&tran);
-				FLOAT s_width = static_cast<FLOAT>(1.0 / tran.m11);
-				D2D1_STROKE_STYLE_PROPERTIES1 s_prop{ AUXILIARY_SEG_STYLE };
-
 				FLOAT d_arr[6];
 				Shape::m_aux_style->GetDashes(d_arr, d_cnt);
 				double mod = d_arr[0];
@@ -484,6 +479,12 @@ namespace winrt::GraphPaper::implementation
 				if (m_dwrite_font_metrics.designUnitsPerEm == 0) {
 					text_get_font_metrics(m_dwrite_text_layout.get(), &m_dwrite_font_metrics);
 				}
+
+				D2D1_MATRIX_3X2_F tran;
+				target->GetTransform(&tran);
+				const auto s_width = 1.0 / tran.m11;
+				D2D1_STROKE_STYLE_PROPERTIES1 s_prop{ AUXILIARY_SEG_STYLE };
+
 				const float descent = (m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 				for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 					DWRITE_HIT_TEST_METRICS const& tm = m_dwrite_test_metrics[i];
@@ -499,19 +500,23 @@ namespace winrt::GraphPaper::implementation
 					p[1].y = p[0].y;
 					p[3].x = p[0].x;
 					p[3].y = p[2].y;
+					const D2D1_RECT_F r{
+						p[0].x, p[0].y, p[2].x, p[2].y
+					};
+
 					color_brush->SetColor(ShapeText::s_text_selected_foreground);
-					target->DrawRectangle({ p[0].x, p[0].y, p[2].x, p[2].y }, color_brush, s_width, nullptr);
+					target->DrawRectangle(r, color_brush, static_cast<FLOAT>(s_width), nullptr);
 					color_brush->SetColor(ShapeText::s_text_selected_background);
 					s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].x, mod));
 					winrt::com_ptr<ID2D1StrokeStyle1> s_style;
 					factory->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
-					target->DrawLine(p[0], p[1], color_brush, s_width, s_style.get());
-					target->DrawLine(p[3], p[2], color_brush, s_width, s_style.get());
+					target->DrawLine(p[0], p[1], color_brush, static_cast<FLOAT>(s_width), s_style.get());
+					target->DrawLine(p[3], p[2], color_brush, static_cast<FLOAT>(s_width), s_style.get());
 					s_style = nullptr;
 					s_prop.dashOffset = static_cast<FLOAT>(std::fmod(p[0].y, mod));
 					factory->CreateStrokeStyle(&s_prop, d_arr, d_cnt, s_style.put());
-					target->DrawLine(p[1], p[2], color_brush, s_width, s_style.get());
-					target->DrawLine(p[0], p[3], color_brush, s_width, s_style.get());
+					target->DrawLine(p[1], p[2], color_brush, static_cast<FLOAT>(s_width), s_style.get());
+					target->DrawLine(p[0], p[3], color_brush, static_cast<FLOAT>(s_width), s_style.get());
 					s_style = nullptr;
 				}
 			}
@@ -979,7 +984,7 @@ namespace winrt::GraphPaper::implementation
 		// èëëÃñº
 		is_available_font(m_font_family);
 		// èëëÃÇÃëÂÇ´Ç≥
-		if (m_font_size < 1.0f || m_font_size > 128.5f) {
+		if (m_font_size < 1.0f || m_font_size > FONT_SIZE_MAX) {
 			page.get_font_size(m_font_size);
 		}
 		// èëëÃÇÃïù

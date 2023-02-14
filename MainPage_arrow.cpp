@@ -147,9 +147,8 @@ namespace winrt::GraphPaper::implementation
 #endif
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
-		const ContentDialogResult d_result{
-			co_await cd_setting_dialog().ShowAsync()
-		};
+		m_mutex_event.lock();
+		const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			ARROW_SIZE samp_val;
 			//m_sample_shape->get_arrow_size(samp_val);
@@ -181,6 +180,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().Visibility(ds2_vis);
 		//page_draw();
 		status_bar_set_pos();
+		m_mutex_event.unlock();
 	}
 
 	//------------------------------

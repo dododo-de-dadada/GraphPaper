@@ -209,9 +209,9 @@ namespace winrt::GraphPaper::implementation
 			target->GetTransform(&t32);
 			D2D1_POINT_2F mid;
 			pt_mul_add(m_vec[0], 0.5, m_start, mid);
-			anc_draw_rect(m_start, Shape::s_anc_len / t32._11, target, brush);
-			anc_draw_rect(mid, Shape::s_anc_len / t32._11, target, brush);
-			anc_draw_rect(e_pos, Shape::s_anc_len / t32._11, target, brush);
+			anc_draw_rect(m_start, Shape::s_anc_len, target, brush);
+			anc_draw_rect(mid, Shape::s_anc_len, target, brush);
+			anc_draw_rect(e_pos, Shape::s_anc_len, target, brush);
 		}
 	}
 

@@ -551,14 +551,14 @@ namespace winrt::GraphPaper::implementation
 			D2D1_MATRIX_3X2_F tran;
 			target->GetTransform(&tran);
 			const auto s_width = static_cast<FLOAT>(1.0 / tran.m11);
-			anc_draw_rect(m_start, Shape::s_anc_len / tran._11, target, brush);
+			anc_draw_rect(m_start, Shape::s_anc_len, target, brush);
 			s_pos = m_start;
 			pt_add(s_pos, m_vec[0], e_pos);
 			brush->SetColor(Shape::s_background_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
 			brush->SetColor(Shape::s_foreground_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_circle(e_pos, Shape::s_anc_len / tran._11, target, brush);
+			anc_draw_circle(e_pos, Shape::s_anc_len, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[1], e_pos);
@@ -566,7 +566,7 @@ namespace winrt::GraphPaper::implementation
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
 			brush->SetColor(Shape::s_foreground_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_circle(e_pos, Shape::s_anc_len / tran._11, target, brush);
+			anc_draw_circle(e_pos, Shape::s_anc_len, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[2], e_pos);
@@ -574,7 +574,7 @@ namespace winrt::GraphPaper::implementation
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
 			brush->SetColor(Shape::s_foreground_color);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_rect(e_pos, Shape::s_anc_len / tran._11, target, brush);
+			anc_draw_rect(e_pos, Shape::s_anc_len, target, brush);
 		}
 	}
 

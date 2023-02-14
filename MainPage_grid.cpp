@@ -96,6 +96,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 3> });
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			if (!equal(m_main_page.m_grid_color, m_dialog_page.m_grid_color)) {
@@ -114,6 +115,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().ValueChanged(slider_2_token);
 		dialog_slider_3().ValueChanged(slider_3_token);
 		status_bar_set_pos();
+		m_mutex_event.unlock();
 	}
 
 	// 方眼メニューの「方眼の大きさ」>「大きさ」が選択された.
@@ -136,6 +138,7 @@ namespace winrt::GraphPaper::implementation
 		//const auto samp_h = scp_dialog_panel().Height();
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float setting_val;
@@ -154,6 +157,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_0().ValueChanged(slider_0_token);
 		status_bar_set_pos();
+		m_mutex_event.unlock();
 	}
 
 	// 方眼メニューの「方眼の大きさ」>「狭める」が選択された.

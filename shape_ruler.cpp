@@ -236,9 +236,9 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (is_selected()) {
-			D2D1_MATRIX_3X2_F t32;
-			target->GetTransform(&t32);
-			draw_anc(Shape::s_anc_len / t32._11);
+			//D2D1_MATRIX_3X2_F t32;
+			//target->GetTransform(&t32);
+			draw_anc();
 		}
 	}
 

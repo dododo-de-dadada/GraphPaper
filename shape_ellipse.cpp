@@ -43,36 +43,7 @@ namespace winrt::GraphPaper::implementation
 		if (!is_selected()) {
 			return;
 		}
-		D2D1_MATRIX_3X2_F t32;
-		target->GetTransform(&t32);
-		draw_anc(Shape::s_anc_len / t32._11);
-		/*
-		D2D1_POINT_2F a_pos[4];
-		// ìÏ
-		a_pos[0].x = m_start.x + m_vec[0].x * 0.5f;
-		a_pos[0].y = m_start.y + m_vec[0].y;
-		// ìå
-		a_pos[1].x = m_start.x + m_vec[0].x;
-		a_pos[1].y = m_start.y + m_vec[0].y * 0.5f;
-		// êº
-		a_pos[2].x = m_start.x;
-		a_pos[2].y = a_pos[1].y;
-		// ñk
-		a_pos[3].x = a_pos[0].x;
-		a_pos[3].y = m_start.y;
-		for (uint32_t i = 0; i < 4; i++) {
-			anc_draw_rect(a_pos[i], target, brush);
-		}
-		a_pos[0] = m_start;
-		pt_add(m_start, m_vec[0], a_pos[3]);
-		a_pos[1].x = a_pos[0].x;
-		a_pos[1].y = a_pos[3].y;
-		a_pos[2].x = a_pos[3].x;
-		a_pos[2].y = a_pos[0].y;
-		for (uint32_t i = 0; i < 4; i++) {
-			anc_draw_circle(a_pos[i], target, brush);
-		}
-		*/
+		draw_anc();
 	}
 
 	// à íuÇä‹ÇﬁÇ©îªíËÇ∑ÇÈ.

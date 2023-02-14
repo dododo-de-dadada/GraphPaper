@@ -149,6 +149,7 @@ namespace winrt::GraphPaper::implementation
 		//m_dialog_page.m_page_size.height = static_cast<FLOAT>(samp_h);
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_COLOR_F setting_val;
@@ -172,6 +173,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().ValueChanged(slider_2_token);
 		dialog_slider_3().ValueChanged(slider_3_token);
 		status_bar_set_pos();
+		m_mutex_event.unlock();
 	}
 
 	// •\Ž¦‚·‚é.
@@ -445,6 +447,7 @@ namespace winrt::GraphPaper::implementation
 		m_main_d2d.m_d2d_factory->CreateDrawingStateBlock(m_main_page.m_state_block.put());
 		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_page.m_color_brush.put());
 		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_page.m_range_brush.put());
+		const auto bmp = winrt::Windows::ApplicationModel::Resources::ResourceLoader::GetForCurrentView()..GetString(L"bitmap1.bmp");
 		page_draw();
 	}
 

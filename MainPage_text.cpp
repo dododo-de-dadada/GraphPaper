@@ -150,14 +150,9 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::text_align_horz_is_checked(const DWRITE_TEXT_ALIGNMENT val)
 	{
 		rmfi_text_align_left().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-		//rmfi_text_align_left_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
 		rmfi_text_align_right().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
-		//rmfi_text_align_right_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
 		rmfi_text_align_center().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		//rmfi_text_align_center_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
 		rmfi_text_align_just().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-		//rmfi_text_align_just_2().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
-
 	}
 
 	// 書体メニューの「行間」>「行間...」が選択された.
@@ -180,6 +175,7 @@ namespace winrt::GraphPaper::implementation
 		text_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_line_sp")));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			float samp_val;
@@ -193,7 +189,7 @@ namespace winrt::GraphPaper::implementation
 		slist_clear(m_dialog_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_0().ValueChanged(slider_0_token);
-		page_draw();
+		m_mutex_event.unlock();
 	}
 
 	// 書体メニューの「余白」が選択された.
@@ -229,6 +225,7 @@ namespace winrt::GraphPaper::implementation
 		text_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_padding")));
+		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
 			D2D1_SIZE_F samp_val;
@@ -244,7 +241,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		dialog_slider_0().ValueChanged(slider_0_token);
 		dialog_slider_1().ValueChanged(slider_1_token);
-		page_draw();
+		m_mutex_event.unlock();
 	}
 
 	// 値をスライダーのヘッダーに格納する.
