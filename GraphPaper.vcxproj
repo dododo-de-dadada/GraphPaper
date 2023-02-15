@@ -143,6 +143,7 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\Documents\background.bmp" />
     <Image Include="Assets\4.1.05.tiff" />
     <Image Include="Assets\LargeTile.scale-100.png" />
     <Image Include="Assets\LargeTile.scale-125.png" />
@@ -196,7 +197,6 @@
     <Image Include="Assets\Wide310x150Logo.scale-150.png" />
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
     <Image Include="Assets\Wide310x150Logo.scale-400.png" />
-    <Image Include="bitmap1.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainPage_app.cpp" />
@@ -204,6 +204,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="MainPage_import.cpp" />
     <ClCompile Include="MainPage_order.cpp" />
     <ClCompile Include="MainPage_arrow.cpp" />
     <ClCompile Include="MainPage_dash.cpp" />

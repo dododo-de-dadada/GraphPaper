@@ -240,10 +240,14 @@ namespace winrt::GraphPaper::implementation
 		target->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, m_clip);
 
 		if (is_selected()) {
-			brush->SetColor(Shape::s_background_color);
-			target->DrawRectangle(dest_rect, brush, 1.0f, nullptr);
-			brush->SetColor(Shape::s_foreground_color);
-			target->DrawRectangle(dest_rect, brush, 1.0f, Shape::m_aux_style.get());
+			D2D1_MATRIX_3X2_F tran;
+			target->GetTransform(&tran);
+			const auto a_width = 1.0 / tran._11;
+			const auto a_len = Shape::s_anc_len;
+			brush->SetColor(COLOR_WHITE);
+			target->DrawRectangle(dest_rect, brush, static_cast<FLOAT>(a_width), nullptr);
+			brush->SetColor(COLOR_BLACK);
+			target->DrawRectangle(dest_rect, brush, static_cast<FLOAT>(a_width), Shape::m_aux_style.get());
 
 			const D2D1_POINT_2F v_pos[4]{
 				m_start,
@@ -253,10 +257,10 @@ namespace winrt::GraphPaper::implementation
 			};
 			D2D1_MATRIX_3X2_F t32;
 			target->GetTransform(&t32);
-			anc_draw_rect(v_pos[0], Shape::s_anc_len, target, brush);
-			anc_draw_rect(v_pos[1], Shape::s_anc_len, target, brush);
-			anc_draw_rect(v_pos[2], Shape::s_anc_len, target, brush);
-			anc_draw_rect(v_pos[3], Shape::s_anc_len, target, brush);
+			anc_draw_rect(v_pos[0], a_len, target, brush);
+			anc_draw_rect(v_pos[1], a_len, target, brush);
+			anc_draw_rect(v_pos[2], a_len, target, brush);
+			anc_draw_rect(v_pos[3], a_len, target, brush);
 		}
 	}
 

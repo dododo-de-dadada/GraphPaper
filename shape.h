@@ -386,15 +386,15 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚Ì‚Ğ‚ÈŒ^
 	//------------------------------
 	struct Shape {
-		static float s_anc_len;	// }Œ`‚Ì•”ˆÊ‚Ì‘å‚«‚³
-		static D2D1_COLOR_F s_background_color;	// ‘OŒiF
-		static D2D1_COLOR_F s_foreground_color;	// ”wŒiF
-		static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// •â•ü‚ÌŒ`®
-		static ID2D1Factory3* s_d2d_factory;
-		static ID2D1RenderTarget* s_d2d_target;
-		static ID2D1SolidColorBrush* s_d2d_color_brush;
-		static IDWriteFactory* s_dwrite_factory;
-		static ID2D1SolidColorBrush* s_d2d_range_brush;
+		//static float s_anc_len;	// }Œ`‚Ì•”ˆÊ‚Ì‘å‚«‚³
+		//static D2D1_COLOR_F s_background_color;	// ‘OŒiF
+		//static D2D1_COLOR_F s_foreground_color;	// ”wŒiF
+		//static winrt::com_ptr<ID2D1StrokeStyle1> m_aux_style;	// •â•ü‚ÌŒ`®
+		//static ID2D1Factory3* s_d2d_factory;
+		//static ID2D1RenderTarget* s_d2d_target;
+		//static ID2D1SolidColorBrush* s_d2d_color_brush;
+		//static IDWriteFactory* s_dwrite_factory;
+		//static ID2D1SolidColorBrush* s_d2d_range_brush;
 
 		// }Œ`‚ğ”jŠü‚·‚é.
 		virtual ~Shape(void) noexcept {}	// ”h¶ƒNƒ‰ƒX‚ª‚ ‚é‚Ì‚Å•K—v
@@ -1636,9 +1636,9 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_ELLIPSE e_inner{	// “à‘¤‚Ì‚¾‰~
 			a_pos, static_cast<FLOAT>(r_inner), static_cast<FLOAT>(r_inner)
 		};
-		brush->SetColor(Shape::s_background_color);
+		brush->SetColor(COLOR_WHITE);
 		target->FillEllipse(e_outer, brush);
-		brush->SetColor(Shape::s_foreground_color);
+		brush->SetColor(COLOR_BLACK);
 		target->FillEllipse(e_inner, brush);
 	}
 
@@ -1660,9 +1660,9 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(a_pos.x - w_outer), static_cast<FLOAT>(a_pos.y - w_outer),
 			static_cast<FLOAT>(a_pos.x + w_outer), static_cast<FLOAT>(a_pos.y + w_outer)
 		};
-		brush->SetColor(Shape::s_background_color);
+		brush->SetColor(COLOR_WHITE);
 		target->FillRectangle(r_outer, brush);
-		brush->SetColor(Shape::s_foreground_color);
+		brush->SetColor(COLOR_BLACK);
 		target->FillRectangle(r_inner, brush);
 	}
 

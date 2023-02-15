@@ -12,6 +12,7 @@ namespace winrt::GraphPaper::implementation
 	uint32_t debug_leak_cnt = 0;
 	uint32_t debug_shape_cnt = 0;
 #endif
+	/*
 	float Shape::s_anc_len = 6.0f;	// アンカーポイントの大きさ
 	D2D1_COLOR_F Shape::s_background_color = COLOR_WHITE;	// 前景色 (アンカーの背景色)
 	D2D1_COLOR_F Shape::s_foreground_color = COLOR_BLACK;	// 背景色 (アンカーの前景色)
@@ -21,5 +22,5 @@ namespace winrt::GraphPaper::implementation
 	ID2D1SolidColorBrush* Shape::s_d2d_color_brush = nullptr;
 	ID2D1SolidColorBrush* Shape::s_d2d_range_brush = nullptr;
 	IDWriteFactory* Shape::s_dwrite_factory = nullptr;
-
+	*/
 }

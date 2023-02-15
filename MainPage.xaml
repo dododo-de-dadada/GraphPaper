@@ -11,11 +11,10 @@
 	<!-- x:Name はコードビハインドのためのオブジェクトをつくる. x:Uid はリソースの参照をつくる. -->
 	<Page.Resources>
 		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="Dictionary.xaml" />
-			</ResourceDictionary.MergedDictionaries>
-			
-		</ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Dictionary.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
 	</Page.Resources>
 	<Grid Margin="0,0,0,0">
 		<Grid.RowDefinitions>
@@ -658,8 +657,8 @@
 		</Grid>
 
         <!-- 表示パネル -->
-		<RelativePanel Grid.Row="1" Grid.Column="0" >
-			<SwapChainPanel
+        <RelativePanel Grid.Row="1" Grid.Column="0" >
+            <SwapChainPanel
 				x:Name="scp_page_panel"
 				CompositionScaleChanged="page_panel_scale_changed"
 				Loading="page_panel_loading"
@@ -676,8 +675,7 @@
 				RelativePanel.AlignTopWithPanel="True"
 				RelativePanel.AlignRightWithPanel="True"
 				RelativePanel.AlignBottomWithPanel="True"
-				SizeChanged="page_panel_size_changed"
-				>
+				SizeChanged="page_panel_size_changed">
 				<!--
 				通常は, MenuFlyoutItem でキーボードアクセラレータを指定すべきだが,
 				そうすると SwapChainPanel をクリックしたあとアクセラレーターが機能しなくなる.

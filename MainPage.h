@@ -61,6 +61,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::StorageFile;
 	using winrt::Windows::System::VirtualKeyModifiers;
 	using winrt::Windows::UI::Color;
+	using winrt::Windows::UI::Core::CoreCursor;
+	using winrt::Windows::UI::Core::CoreCursorType;
 	using winrt::Windows::UI::Core::CoreWindow;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationCloseRequestedPreviewEventArgs;
 	using winrt::Windows::UI::Core::VisibilityChangedEventArgs;
@@ -216,6 +218,9 @@ namespace winrt::GraphPaper::implementation
 		ZOOM = 128,	// 拡大率
 	};
 	constexpr STATUS_BAR STATUS_BAR_DEF_VAL = static_cast<STATUS_BAR>(static_cast<uint32_t>(STATUS_BAR::DRAW) | static_cast<uint32_t>(STATUS_BAR::POS) | static_cast<uint32_t>(STATUS_BAR::ZOOM));
+
+	// 待機カーソルを表示, 表示する前のカーソルを得る.
+	const CoreCursor wait_cursor_show(void);
 
 	//-------------------------------
 	// メインページ
@@ -759,7 +764,7 @@ namespace winrt::GraphPaper::implementation
 		// ページを表示する.
 		void page_draw(void);
 		// 前景色を得る.
-		const D2D1_COLOR_F& page_foreground(void) const noexcept;
+		//const D2D1_COLOR_F& page_foreground(void) const noexcept;
 		// 方眼メニューの「ページ設定をリセット」が選択された.
 		IAsyncAction page_setting_reset_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 方眼メニューの「ページ設定を保存」が選択された.
@@ -1062,7 +1067,7 @@ namespace winrt::GraphPaper::implementation
 			PrintCanvas().UpdateLayout();
 			*/
 		}
-};
+	};
 
 }
 

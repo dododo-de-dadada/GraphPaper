@@ -493,9 +493,11 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void ShapeBezier::draw(void)
 	{
-		ID2D1Factory3* const factory = Shape::s_d2d_factory;
+		//ID2D1Factory3* const factory = Shape::s_d2d_factory;
 		ID2D1RenderTarget* const target = Shape::s_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
+		ID2D1Factory* factory;
+		target->GetFactory(&factory);
 
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
@@ -525,7 +527,7 @@ namespace winrt::GraphPaper::implementation
 				winrt::check_hresult(sink->Close());
 				sink = nullptr;
 				if (m_arrow_style != ARROW_STYLE::NONE) {
-					bezi_create_arrow_geom(factory, m_start, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+					bezi_create_arrow_geom(static_cast<ID2D1Factory3*>(factory), m_start, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 				}
 			}
 		}
@@ -546,35 +548,36 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (is_selected()) {
+			const auto a_len = Shape::s_anc_len;
 			D2D1_POINT_2F s_pos;
 			D2D1_POINT_2F e_pos;
 			D2D1_MATRIX_3X2_F tran;
 			target->GetTransform(&tran);
 			const auto s_width = static_cast<FLOAT>(1.0 / tran.m11);
-			anc_draw_rect(m_start, Shape::s_anc_len, target, brush);
+			anc_draw_rect(m_start, a_len, target, brush);
 			s_pos = m_start;
 			pt_add(s_pos, m_vec[0], e_pos);
-			brush->SetColor(Shape::s_background_color);
+			brush->SetColor(COLOR_WHITE);
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
-			brush->SetColor(Shape::s_foreground_color);
+			brush->SetColor(COLOR_BLACK);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_circle(e_pos, Shape::s_anc_len, target, brush);
+			anc_draw_circle(e_pos, a_len, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[1], e_pos);
-			brush->SetColor(Shape::s_background_color);
+			brush->SetColor(COLOR_WHITE);
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
-			brush->SetColor(Shape::s_foreground_color);
+			brush->SetColor(COLOR_BLACK);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_circle(e_pos, Shape::s_anc_len, target, brush);
+			anc_draw_circle(e_pos, a_len, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[2], e_pos);
-			brush->SetColor(Shape::s_background_color);
+			brush->SetColor(COLOR_WHITE);
 			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
-			brush->SetColor(Shape::s_foreground_color);
+			brush->SetColor(COLOR_BLACK);
 			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_rect(e_pos, Shape::s_anc_len, target, brush);
+			anc_draw_rect(e_pos, a_len, target, brush);
 		}
 	}
 

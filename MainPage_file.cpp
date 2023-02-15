@@ -24,7 +24,7 @@ file_export_as_click_async
 file_finish_reading
 
 file_import_image_click_async
-	+---file_wait_cursor
+	+---wait_cursor_show
 
 file_new_click_async
 	+---file_confirm_dialog
@@ -33,7 +33,7 @@ file_new_click_async
 
 file_open_click_async
 	+---file_confirm_dialog
-	+---file_wait_cursor
+	+---wait_cursor_show
 	+---file_read_async
 
 file_read_async
@@ -46,7 +46,7 @@ file_recent_add
 file_recent_click_async
 	+---file_confirm_dialog
 	+---file_recent_token_async
-	+---file_wait_cursor
+	+---wait_cursor_show
 
 file_recent_token_async
 	+---file_recent_menu_update
@@ -55,13 +55,13 @@ file_recent_menu_update
 
 file_save_as_click_async
 	+---file_recent_token_async
-	+---file_wait_cursor
+	+---wait_cursor_show
 	+---file_write_gpf_async
 
 file_save_click_async
 	+---file_recent_token_async
 	+---file_save_as_click_async
-	+---file_wait_cursor
+	+---wait_cursor_show
 	+---file_write_gpf_async
 
 file_write_gpf_async
@@ -73,16 +73,11 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Application;
 	using winrt::Windows::Storage::AccessCache::AccessListEntry;
 	using winrt::Windows::UI::ViewManagement::ApplicationView;
-	using winrt::Windows::Graphics::Imaging::BitmapAlphaMode;
-	using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
-	using winrt::Windows::Graphics::Imaging::BitmapDecoder;
-	using winrt::Windows::Graphics::Imaging::BitmapInterpolationMode;
-	using winrt::Windows::Graphics::Imaging::BitmapPixelFormat;
-	using winrt::Windows::Graphics::Imaging::BitmapRotation;
+	//using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
+	//using winrt::Windows::Graphics::Imaging::BitmapInterpolationMode;
+	//using winrt::Windows::Graphics::Imaging::BitmapRotation;
 	using winrt::Windows::Storage::CachedFileManager;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	using winrt::Windows::UI::Core::CoreCursor;
-	using winrt::Windows::UI::Core::CoreCursorType;
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::UI::Core::Preview::SystemNavigationManagerPreview;
 	using winrt::Windows::Foundation::Collections::IVector;
@@ -95,8 +90,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Provider::FileUpdateStatus;
 	using winrt::Windows::Storage::StorageFolder;
 	using winrt::Windows::System::Launcher;
-	using winrt::Windows::UI::Xaml::Window;
 	using winrt::Windows::Storage::ApplicationData;
+	using winrt::Windows::UI::Xaml::Window;
 
 	static const CoreCursor& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 待機カーソル.
 	constexpr static uint32_t MRU_MAX = 25;	// 最近使ったリストの最大数.
@@ -124,21 +119,6 @@ namespace winrt::GraphPaper::implementation
 	static const IVector<winrt::hstring> TYPE_PDF{
 		winrt::single_threaded_vector<winrt::hstring>({ L".pdf" })
 	};
-
-	inline static CoreCursor file_wait_cursor(void);
-
-	//-------------------------------
-	// 待機カーソルを表示, 表示する前のカーソルを得る.
-	//-------------------------------
-	inline static CoreCursor file_wait_cursor(void)
-	{
-		CoreWindow const& core_win = Window::Current().CoreWindow();
-		CoreCursor const& prev_cur = core_win.PointerCursor();
-		if (prev_cur.Type() != CURS_WAIT.Type()) {
-			core_win.PointerCursor(CURS_WAIT);
-		}
-		return prev_cur;
-	}
 
 	//-------------------------------
 	// ファイルへの更新を確認する.
@@ -332,7 +312,7 @@ namespace winrt::GraphPaper::implementation
 
 		if (image_file != nullptr) {
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
-			const CoreCursor& prev_cur = file_wait_cursor();
+			const CoreCursor& prev_cur = wait_cursor_show();
 			HRESULT hres;
 			// ファイル更新の遅延を設定する.
 			CachedFileManager::DeferUpdates(image_file);
@@ -421,92 +401,6 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//-------------------------------
-	// ファイルメニューの「画像をインポートする...」が選択された.
-	//-------------------------------
-	IAsyncAction MainPage::file_import_image_click_async(IInspectable const&, RoutedEventArgs const&)
-	{
-		// co_await してるにもかかわらず, ファイル開くピッカーが返値を戻すまで時間がかかる.
-		// その間フォアグランドのスレッドが動作してしまう.
-		m_mutex_event.lock();
-
-		// ファイルオープンピッカーを取得して開く.
-		FileOpenPicker open_picker{ FileOpenPicker() };
-		open_picker.FileTypeFilter().Append(L".bmp");
-		open_picker.FileTypeFilter().Append(L".gif");
-		open_picker.FileTypeFilter().Append(L".jpg");
-		open_picker.FileTypeFilter().Append(L".jpeg");
-		open_picker.FileTypeFilter().Append(L".png");
-		open_picker.FileTypeFilter().Append(L".tif");
-		open_picker.FileTypeFilter().Append(L".tiff");
-
-		// ピッカーを非同期に表示してストレージファイルを取得する.
-		// (「閉じる」ボタンが押された場合ストレージファイルは nullptr.)
-		StorageFile open_file{
-			co_await open_picker.PickSingleFileAsync()
-		};
-		open_picker = nullptr;
-
-		// ストレージファイルがヌルポインターか判定する.
-		if (open_file != nullptr) {
-
-			// 待機カーソルを表示, 表示する前のカーソルを得る.
-			const CoreCursor& prev_cur = file_wait_cursor();
-			unselect_all();
-
-			IRandomAccessStream stream{ co_await open_file.OpenAsync(FileAccessMode::Read) };
-			BitmapDecoder decoder{ co_await BitmapDecoder::CreateAsync(stream) };
-			SoftwareBitmap bitmap{ SoftwareBitmap::Convert(co_await decoder.GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8) };
-
-			// 表示された部分の中心の位置を求める.
-			const double scale = m_main_page.m_page_scale;
-			const double win_x = sb_horz().Value();
-			const double win_y = sb_vert().Value();
-			const double win_w = scp_page_panel().ActualWidth();
-			const double win_h = scp_page_panel().ActualHeight();
-			const double image_w = bitmap.PixelWidth();
-			const double image_h = bitmap.PixelHeight();
-			const D2D1_POINT_2F center_pos{
-				static_cast<FLOAT>((win_x + (win_w - image_w) * 0.5) / scale),
-				static_cast<FLOAT>((win_y + (win_h - image_h) * 0.5) / scale)
-			};
-			const D2D1_SIZE_F page_size{ static_cast<FLOAT>(image_w), static_cast<FLOAT>(image_h) };
-			ShapeImage* s = new ShapeImage(center_pos, page_size, bitmap, m_main_page.m_image_opac);
-#if (_DEBUG)
-			debug_leak_cnt++;
-#endif
-			bitmap.Close();
-			bitmap = nullptr;
-			decoder = nullptr;
-			stream.Close();
-			stream = nullptr;
-
-			{
-				m_mutex_draw.lock();
-				ustack_push_append(s);
-				ustack_push_select(s);
-				ustack_push_null();
-				m_mutex_draw.unlock();
-			}
-
-			ustack_is_enable();
-
-			// 一覧が表示されてるか判定する.
-			if (summary_is_visible()) {
-				summary_append(s);
-				summary_select(s);
-			}
-			xcvd_is_enabled();
-			page_bbox_update(s);
-			page_panel_size();
-			page_draw();
-
-			// カーソルを元に戻す.
-			Window::Current().CoreWindow().PointerCursor(prev_cur);
-		}
-		m_mutex_event.unlock();
-	};
-
-	//-------------------------------
 	// ファイルメニューの「開く...」が選択された
 	//-------------------------------
 	IAsyncAction MainPage::file_open_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -538,7 +432,7 @@ namespace winrt::GraphPaper::implementation
 		if (open_file != nullptr) {
 
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
-			const CoreCursor& prev_cur = file_wait_cursor();
+			const CoreCursor& prev_cur = wait_cursor_show();
 
 			// ストレージファイルを非同期に読む.
 			constexpr bool RESUME = true;
@@ -760,7 +654,7 @@ namespace winrt::GraphPaper::implementation
 			// 空でないなら
 			if (s_file != nullptr) {
 				// 待機カーソルを表示, 表示する前のカーソルを得る.
-				const CoreCursor& prev_cur = file_wait_cursor();
+				const CoreCursor& prev_cur = wait_cursor_show();
 				constexpr bool RESUME = true;
 				constexpr bool SETTING_ONLY = true;
 				co_await file_read_async<!RESUME, !SETTING_ONLY>(s_file);
@@ -878,7 +772,7 @@ namespace winrt::GraphPaper::implementation
 		// ストレージファイルを取得したか判定する.
 		if (save_file != nullptr) {
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
-			const CoreCursor& prev_cur = file_wait_cursor();
+			const CoreCursor& prev_cur = wait_cursor_show();
 			// ファイルタイプが方眼紙ファイルか判定する.
 			if (save_file.FileType() == L".gpf") {
 				// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
@@ -909,7 +803,7 @@ namespace winrt::GraphPaper::implementation
 		// ストレージファイルを得た場合,
 		else {
 			// 待機カーソルを表示, 表示する前のカーソルを得る.
-			const CoreCursor& prev_cur = file_wait_cursor();	// 前のカーソル
+			const CoreCursor& prev_cur = wait_cursor_show();	// 前のカーソル
 			// 図形データをストレージファイルに非同期に書き込み, 結果を得る.
 			co_await file_write_gpf_async<false, false>(recent_file);
 			recent_file = nullptr;
@@ -1162,8 +1056,8 @@ namespace winrt::GraphPaper::implementation
 				conv_uwp_to_color(unbox_value<Brush>(fore_theme), Shape::s_foreground_color);
 			}
 			else {*/
-			Shape::s_background_color = COLOR_WHITE;
-			Shape::s_foreground_color = COLOR_BLACK;
+			//Shape::s_background_color = COLOR_WHITE;
+			//Shape::s_foreground_color = COLOR_BLACK;
 			//}
 		}
 

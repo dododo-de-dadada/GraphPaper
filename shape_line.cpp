@@ -174,9 +174,11 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚ð•\Ž¦‚·‚é.
 	void ShapeLine::draw(void)
 	{
-		ID2D1Factory3* const factory = Shape::s_d2d_factory;
+		//ID2D1Factory3* const factory = Shape::s_d2d_factory;
 		ID2D1RenderTarget* const target = Shape::s_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
+		ID2D1Factory* factory;
+		target->GetFactory(&factory);
 
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
@@ -191,10 +193,10 @@ namespace winrt::GraphPaper::implementation
 		target->DrawLine(m_start, e_pos, brush, s_width, s_style);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			if (m_d2d_arrow_style == nullptr) {
-				line_create_arrow_style(factory, m_stroke_cap, m_join_style, m_join_miter_limit, m_d2d_arrow_style.put());
+				line_create_arrow_style(static_cast<ID2D1Factory3*>(factory), m_stroke_cap, m_join_style, m_join_miter_limit, m_d2d_arrow_style.put());
 			}
 			if (m_d2d_arrow_geom == nullptr) {
-				line_create_arrow_geom(factory, m_start, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				line_create_arrow_geom(static_cast<ID2D1Factory3*>(factory), m_start, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 			}
 			const auto a_geom = m_d2d_arrow_geom.get();
 			if (m_d2d_arrow_geom != nullptr) {
@@ -205,13 +207,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (is_selected()) {
-			D2D1_MATRIX_3X2_F t32;
-			target->GetTransform(&t32);
+			const auto a_len = Shape::s_anc_len;
 			D2D1_POINT_2F mid;
 			pt_mul_add(m_vec[0], 0.5, m_start, mid);
-			anc_draw_rect(m_start, Shape::s_anc_len, target, brush);
-			anc_draw_rect(mid, Shape::s_anc_len, target, brush);
-			anc_draw_rect(e_pos, Shape::s_anc_len, target, brush);
+			anc_draw_rect(m_start, a_len, target, brush);
+			anc_draw_rect(mid, a_len, target, brush);
+			anc_draw_rect(e_pos, a_len, target, brush);
 		}
 	}
 

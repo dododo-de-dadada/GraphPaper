@@ -793,9 +793,9 @@ namespace winrt::GraphPaper::implementation
 			target->GetTransform(&t32);
 			anc_draw_rect(p, Shape::s_anc_len, target, brush);
 			anc_draw_rect(q, Shape::s_anc_len, target, brush);
-			const auto s_len = 1.0 / t32._11;
-			target->DrawLine(c_pos, p, brush, s_len, Shape::m_aux_style.get());
-			target->DrawLine(c_pos, q, brush, s_len, Shape::m_aux_style.get());
+			const auto s_width = 1.0 / t32._11;
+			target->DrawLine(c_pos, p, brush, static_cast<FLOAT>(s_width), Shape::m_aux_style.get());
+			target->DrawLine(c_pos, q, brush, static_cast<FLOAT>(s_width), Shape::m_aux_style.get());
 		}
 	}
 

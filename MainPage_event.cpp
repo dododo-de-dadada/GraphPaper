@@ -27,7 +27,6 @@ namespace winrt::GraphPaper::implementation
 	static auto const& CURS_SIZE_NS = CoreCursor(CoreCursorType::SizeNorthSouth, 0);	// 上下カーソル
 	static auto const& CURS_SIZE_NWSE = CoreCursor(CoreCursorType::SizeNorthwestSoutheast, 0);	// 左上右下カーソル
 	static auto const& CURS_SIZE_WE = CoreCursor(CoreCursorType::SizeWestEast, 0);	// 左右カーソル
-	static auto const& CURS_WAIT = CoreCursor(CoreCursorType::Wait , 0);	// 左右カーソル
 	static auto const& CURS_EYEDROPPER1 = CoreCursor(CoreCursorType::Custom, IDC_CURSOR1);	// スポイトカーソル
 	static auto const& CURS_EYEDROPPER2 = CoreCursor(CoreCursorType::Custom, IDC_CURSOR2);	// スポイトカーソル
 
@@ -600,7 +599,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		// ピッカーが返値を戻すまで, イベント処理をさせないための排他.
 		if (!m_mutex_event.try_lock()) {
-			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
+			wait_cursor_show();
 			return;
 		}
 		m_mutex_event.unlock();
@@ -779,7 +778,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		// ピッカーが返値を戻すまで, イベント処理をさせないための排他.
 		if (!m_mutex_event.try_lock()) {
-			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
+			wait_cursor_show();
 			return;
 		}
 		m_mutex_event.unlock();
@@ -873,7 +872,7 @@ namespace winrt::GraphPaper::implementation
 //#endif
 		// ピッカーが返値を戻すまで, イベント処理をさせないための排他.
 		if (!m_mutex_event.try_lock()) {
-			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
+			wait_cursor_show();
 			return;
 		}
 		m_mutex_event.unlock();
@@ -1156,7 +1155,7 @@ namespace winrt::GraphPaper::implementation
 #endif
 		// ピッカーが返値を戻すまで, イベント処理をさせないための排他.
 		if (!m_mutex_event.try_lock()) {
-			Window::Current().CoreWindow().PointerCursor(CURS_WAIT);
+			wait_cursor_show();
 			return;
 		}
 		m_mutex_event.unlock();

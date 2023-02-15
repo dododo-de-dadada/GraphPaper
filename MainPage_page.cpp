@@ -210,10 +210,14 @@ namespace winrt::GraphPaper::implementation
 		pt_mul(t_pos, page_scale, t_pos);
 		tran.dx = -t_pos.x;
 		tran.dy = -t_pos.y;
-		// 変換行列をデバイスコンテキストに格納する.
-		target->SetTransform(&tran);
 		// 描画を開始する.
 		target->BeginDraw();
+		const D2D1_RECT_F w_rect{
+			0, 0, m_main_d2d.m_logical_width, m_main_d2d.m_logical_height
+		};
+		target->FillRectangle(w_rect, m_main_page.m_bitmap_brush.get());
+		// 変換行列をデバイスコンテキストに格納する.
+		target->SetTransform(&tran);
 		m_main_page.draw();
 		if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			if (m_drawing_tool == DRAWING_TOOL::SELECT ||
@@ -293,10 +297,10 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 前景色を得る.
-	const D2D1_COLOR_F& MainPage::page_foreground(void) const noexcept
-	{
-		return Shape::s_foreground_color;
-	}
+	//const D2D1_COLOR_F& MainPage::page_foreground(void) const noexcept
+	//{
+	//	return Shape::s_foreground_color;
+	//}
 
 	// 表示の設定を初期化する.
 	void MainPage::page_setting_init(void) noexcept
@@ -399,19 +403,19 @@ namespace winrt::GraphPaper::implementation
 			m_main_page.set_arrow_size(ARROW_SIZE_DEFVAL);
 			m_main_page.set_arrow_style(ARROW_STYLE::NONE);
 			m_main_page.set_corner_radius(D2D1_POINT_2F{ GRID_LEN_DEFVAL, GRID_LEN_DEFVAL });
-			m_main_page.set_fill_color(Shape::s_background_color);
-			m_main_page.set_font_color(Shape::s_foreground_color);
+			m_main_page.set_fill_color(COLOR_WHITE);
+			m_main_page.set_font_color(COLOR_BLACK);
 			m_main_page.set_grid_base(GRID_LEN_DEFVAL - 1.0);
 			m_main_page.set_grid_color(grid_color);
 			m_main_page.set_grid_emph(GRID_EMPH_0);
 			m_main_page.set_grid_show(GRID_SHOW::BACK);
 			m_main_page.set_grid_snap(true);
-			m_main_page.set_page_color(Shape::s_background_color);
+			m_main_page.set_page_color(COLOR_WHITE);
 			m_main_page.set_page_scale(1.0);
 			//const double dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_main_page.m_page_size = PAGE_SIZE_DEFVAL;
 			m_main_page.set_stroke_cap(CAP_FLAT);
-			m_main_page.set_stroke_color(Shape::s_foreground_color);
+			m_main_page.set_stroke_color(COLOR_BLACK);
 			m_main_page.set_dash_cap(D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT);
 			m_main_page.set_dash_patt(DASH_PATT_DEFVAL);
 			m_main_page.set_dash_style(D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID);
@@ -447,29 +451,58 @@ namespace winrt::GraphPaper::implementation
 		m_main_d2d.m_d2d_factory->CreateDrawingStateBlock(m_main_page.m_state_block.put());
 		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_page.m_color_brush.put());
 		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_page.m_range_brush.put());
-		const auto bmp = winrt::Windows::ApplicationModel::Resources::ResourceLoader::GetForCurrentView()..GetString(L"bitmap1.bmp");
+
+		winrt::com_ptr<IWICImagingFactory2> wic_factory;
+		winrt::check_hresult(
+			CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wic_factory))
+		);
+		winrt::com_ptr<IWICBitmapDecoder> wic_decoder;
+		winrt::check_hresult(
+			wic_factory->CreateDecoderFromFilename(L"background.bmp", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put())
+		);
+		UINT f_cnt;
+		winrt::check_hresult(
+			wic_decoder->GetFrameCount(&f_cnt)
+		);
+		winrt::com_ptr<IWICBitmapFrameDecode> wic_frame;
+		winrt::check_hresult(
+			wic_decoder->GetFrame(f_cnt - 1, wic_frame.put())
+		);
+		wic_decoder = nullptr;
+		winrt::com_ptr<IWICFormatConverter> wic_converter;
+		winrt::check_hresult(
+			wic_factory->CreateFormatConverter(wic_converter.put())
+		);
+		wic_factory = nullptr;
+		winrt::check_hresult(
+			wic_converter->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom)
+		);
+		wic_frame = nullptr;
+		winrt::com_ptr<ID2D1Bitmap> d2d_bitmap;
+		winrt::check_hresult(
+			m_main_d2d.m_d2d_context->CreateBitmapFromWicBitmap(wic_converter.get(), d2d_bitmap.put())
+		);
+		wic_converter = nullptr;
+		const auto a = d2d_bitmap->GetPixelFormat();
+		winrt::check_hresult(
+			m_main_d2d.m_d2d_context->CreateBitmapBrush(d2d_bitmap.get(), m_main_page.m_bitmap_brush.put())
+		);
+		d2d_bitmap = nullptr;
+		m_main_page.m_bitmap_brush->SetExtendModeX(D2D1_EXTEND_MODE_WRAP);
+		m_main_page.m_bitmap_brush->SetExtendModeY(D2D1_EXTEND_MODE_WRAP);
+
 		page_draw();
 	}
 
-#if defined(_DEBUG)
 	//------------------------------
 	// 表示のスワップチェーンパネルの寸法が変わった.
 	// args	イベントの引数
 	//------------------------------
 	void MainPage::page_panel_size_changed(IInspectable const& sender, SizeChangedEventArgs const& args)
-#else
-	//------------------------------
-	// 表示のスワップチェーンパネルの寸法が変わった.
-	// args	イベントの引数
-	//------------------------------
-	void MainPage::page_panel_size_changed(IInspectable const&, SizeChangedEventArgs const& args)
-#endif	// _DEBUG
 	{
-#if defined(_DEBUG)
 		if (sender != scp_page_panel()) {
 			return;
 		}
-#endif	// _DEBUG
 		const auto z = args.NewSize();
 		const float w = z.Width;
 		const float h = z.Height;

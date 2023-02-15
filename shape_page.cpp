@@ -27,28 +27,30 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		// ƒy[ƒW‚Ì”{—¦‚É‚©‚©‚í‚ç‚¸Œ©‚½–Ú‚Ì‘¾‚³‚ğ•Ï‚¦‚È‚¢‚½‚ß, ‚»‚Ì‹t”‚ğü‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// ü‚Ì‘¾‚³
+		D2D1_MATRIX_3X2_F tran;
+		target->GetTransform(&tran);
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// ü‚Ì‘¾‚³
 		ID2D1StrokeStyle1* const a_style = Shape::m_aux_style.get();
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
 
 		e_pos.x = c_pos.x;
 		e_pos.y = p_pos.y;
-		brush->SetColor(Shape::s_background_color);
+		brush->SetColor(COLOR_WHITE);
 		target->DrawLine(p_pos, e_pos, brush, s_width, nullptr);
-		brush->SetColor(Shape::s_foreground_color);
+		brush->SetColor(COLOR_BLACK);
 		target->DrawLine(p_pos, e_pos, brush, s_width, a_style);
 		s_pos = e_pos;
 		e_pos.x = p_pos.x;
 		e_pos.y = c_pos.y;
-		brush->SetColor(Shape::s_background_color);
+		brush->SetColor(COLOR_WHITE);
 		target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
-		brush->SetColor(Shape::s_foreground_color);
+		brush->SetColor(COLOR_BLACK);
 		target->DrawLine(s_pos, e_pos, brush, s_width, a_style);
 		s_pos = e_pos;
-		brush->SetColor(Shape::s_background_color);
+		brush->SetColor(COLOR_WHITE);
 		target->DrawLine(s_pos, c_pos, brush, s_width, nullptr);
-		brush->SetColor(Shape::s_foreground_color);
+		brush->SetColor(COLOR_BLACK);
 		target->DrawLine(s_pos, c_pos, brush, s_width, a_style);
 	}
 
@@ -62,7 +64,9 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		// ƒy[ƒW‚Ì”{—¦‚É‚©‚©‚í‚ç‚¸Œ©‚½–Ú‚Ì‘¾‚³‚ğ•Ï‚¦‚È‚¢‚½‚ß, ‚»‚Ì‹t”‚ğü‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// ü‚Ì‘¾‚³
+		D2D1_MATRIX_3X2_F tran;
+		target->GetTransform(&tran);
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// ü‚Ì‘¾‚³
 		//const D2D_UI& d2d = sh.m_d2d;
 		D2D1_POINT_2F rect;	// •ûŒ`
 		D2D1_ELLIPSE elli;		// ‚¾‰~
@@ -72,9 +76,9 @@ namespace winrt::GraphPaper::implementation
 		pt_add(p_pos, rect, elli.point);
 		elli.radiusX = rect.x;
 		elli.radiusY = rect.y;
-		brush->SetColor(Shape::s_background_color);
+		brush->SetColor(COLOR_WHITE);
 		target->DrawEllipse(elli, brush, s_width, nullptr);
-		brush->SetColor(Shape::s_foreground_color);
+		brush->SetColor(COLOR_BLACK);
 		target->DrawEllipse(elli, brush, s_width, Shape::m_aux_style.get());
 	}
 
@@ -86,10 +90,12 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		// ƒy[ƒW‚Ì”{—¦‚É‚©‚©‚í‚ç‚¸Œ©‚½–Ú‚Ì‘¾‚³‚ğ•Ï‚¦‚È‚¢‚½‚ß, ‚»‚Ì‹t”‚ğü‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// ü‚Ì‘¾‚³
-		brush->SetColor(Shape::s_background_color);
+		D2D1_MATRIX_3X2_F tran;
+		target->GetTransform(&tran);
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// ü‚Ì‘¾‚³
+		brush->SetColor(COLOR_WHITE);
 		target->DrawLine(p_pos, c_pos, brush, s_width, nullptr);
-		brush->SetColor(Shape::s_foreground_color);
+		brush->SetColor(COLOR_BLACK);
 		target->DrawLine(p_pos, c_pos, brush, s_width, Shape::m_aux_style.get());
 	}
 
@@ -102,7 +108,9 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos, const POLY_OPTION& p_opt)
 	{
 		// ƒy[ƒW‚Ì”{—¦‚É‚©‚©‚í‚ç‚¸Œ©‚½–Ú‚Ì‘¾‚³‚ğ•Ï‚¦‚È‚¢‚½‚ß, ‚»‚Ì‹t”‚ğü‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// ü‚Ì‘¾‚³
+		D2D1_MATRIX_3X2_F tran;
+		target->GetTransform(&tran);
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// ü‚Ì‘¾‚³
 		D2D1_POINT_2F v_pos[N_GON_MAX];	// ’¸“_‚Ì”z—ñ
 
 		D2D1_POINT_2F p_vec;
@@ -111,9 +119,9 @@ namespace winrt::GraphPaper::implementation
 		const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
 		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
-			brush->SetColor(Shape::s_background_color);
+			brush->SetColor(COLOR_WHITE);
 			target->DrawLine(v_pos[i], v_pos[j], brush, s_width, nullptr);
-			brush->SetColor(Shape::s_foreground_color);
+			brush->SetColor(COLOR_BLACK);
 			target->DrawLine(v_pos[i], v_pos[j], brush, s_width, Shape::m_aux_style.get());
 		}
 	}
@@ -126,13 +134,15 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		// ƒy[ƒW‚Ì”{—¦‚É‚©‚©‚í‚ç‚¸Œ©‚½–Ú‚Ì‘¾‚³‚ğ•Ï‚¦‚È‚¢‚½‚ß, ‚»‚Ì‹t”‚ğü‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// ü‚Ì‘¾‚³
+		D2D1_MATRIX_3X2_F tran;
+		target->GetTransform(&tran);
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// ü‚Ì‘¾‚³
 		const D2D1_RECT_F rc = {
 			p_pos.x, p_pos.y, c_pos.x, c_pos.y
 		};
-		brush->SetColor(Shape::s_background_color);
+		brush->SetColor(COLOR_WHITE);
 		target->DrawRectangle(&rc, brush, s_width, nullptr);
-		brush->SetColor(Shape::s_foreground_color);
+		brush->SetColor(COLOR_BLACK);
 		target->DrawRectangle(&rc, brush, s_width, Shape::m_aux_style.get());
 	}
 
@@ -144,8 +154,10 @@ namespace winrt::GraphPaper::implementation
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
+		D2D1_MATRIX_3X2_F tran;
+		target->GetTransform(&tran);
 		// ƒy[ƒW‚Ì”{—¦‚É‚©‚©‚í‚ç‚¸Œ©‚½–Ú‚Ì‘¾‚³‚ğ•Ï‚¦‚È‚¢‚½‚ß, ‚»‚Ì‹t”‚ğü‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// ü‚Ì‘¾‚³
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// ü‚Ì‘¾‚³
 		const double cx = c_pos.x;
 		const double cy = c_pos.y;
 		const double px = p_pos.x;
@@ -168,9 +180,9 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(rx),
 			static_cast<FLOAT>(ry)
 		};
-		brush->SetColor(Shape::s_background_color);
+		brush->SetColor(COLOR_WHITE);
 		target->DrawRoundedRectangle(&r_rect, brush, s_width, nullptr);
-		brush->SetColor(Shape::s_foreground_color);
+		brush->SetColor(COLOR_BLACK);
 		target->DrawRoundedRectangle(&r_rect, brush, s_width, Shape::m_aux_style.get());
 	}
 
@@ -178,7 +190,9 @@ namespace winrt::GraphPaper::implementation
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / m_page_scale);	// ü‚Ì‘¾‚³
+		D2D1_MATRIX_3X2_F tran;
+		target->GetTransform(&tran);
+		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// ü‚Ì‘¾‚³
 		D2D1_ARC_SEGMENT arc{
 			c_pos,
 			D2D1_SIZE_F{ fabsf(c_pos.x - p_pos.x), fabsf(c_pos.y - p_pos.y) },
@@ -197,9 +211,9 @@ namespace winrt::GraphPaper::implementation
 		sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
-		brush->SetColor(Shape::s_background_color);
+		brush->SetColor(COLOR_WHITE);
 		target->DrawGeometry(geom.get(), brush, s_width, nullptr);
-		brush->SetColor(Shape::s_foreground_color);
+		brush->SetColor(COLOR_BLACK);
 		target->DrawGeometry(geom.get(), brush, s_width, Shape::m_aux_style.get());
 		geom = nullptr;
 	}
@@ -211,7 +225,8 @@ namespace winrt::GraphPaper::implementation
 		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
 
 		// ƒy[ƒW‚ÌF‚Å“h‚è‚Â‚Ô‚·.
-		target->Clear(m_page_color);
+		brush->SetColor(m_page_color);
+		target->FillRectangle(D2D1_RECT_F{ 0, 0, m_page_size.width, m_page_size.height }, brush);
 		if (m_grid_show == GRID_SHOW::BACK) {
 			// •ûŠá‚Ì•\¦‚ªÅ”w–Ê‚É•\¦‚Ìê‡,
 			// •ûŠá‚ğ•\¦‚·‚é.

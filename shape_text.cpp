@@ -163,10 +163,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 文字列レイアウトを作成する.
 	//------------------------------
-	void ShapeText::create_text_layout(void)
+	void ShapeText::create_text_layout(IDWriteFactory* const dwrite_factory)
 	{
-		IDWriteFactory* const dwrite_factory = Shape::s_dwrite_factory;
-
 		// 新規作成
 		// 文字列レイアウトが空か判定する.
 		if (m_dwrite_text_layout == nullptr) {

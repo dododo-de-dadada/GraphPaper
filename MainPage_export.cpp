@@ -895,18 +895,18 @@ namespace winrt::GraphPaper::implementation
 					target->CreateSolidColorBrush(D2D1_COLOR_F{}, rb.put())
 				);
 				Shape::s_d2d_target = target.get();
-				Shape::s_d2d_color_brush = cb.get();
-				Shape::s_d2d_range_brush = rb.get();
+//				Shape::s_d2d_color_brush = cb.get();
+//				Shape::s_d2d_range_brush = rb.get();
 
 				// ビットマップへの描画
 				m_mutex_draw.lock();
-				Shape::s_d2d_target->SaveDrawingState(m_main_page.m_state_block.get());
-				Shape::s_d2d_target->BeginDraw();
+				target->SaveDrawingState(m_main_page.m_state_block.get());
+				target->BeginDraw();
 				m_main_page.draw();
 				winrt::check_hresult(
-					Shape::s_d2d_target->EndDraw()
+					target->EndDraw()
 				);
-				Shape::s_d2d_target->RestoreDrawingState(m_main_page.m_state_block.get());
+				target->RestoreDrawingState(m_main_page.m_state_block.get());
 				m_mutex_draw.unlock();
 
 				// レンダーターゲット依存のオブジェクトを消去

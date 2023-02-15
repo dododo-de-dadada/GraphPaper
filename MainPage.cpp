@@ -16,6 +16,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogButton;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Media::Brush;
+	using winrt::Windows::UI::Xaml::Window;
 
 	// 書式文字列
 	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
@@ -29,6 +30,21 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto FMT_ZOOM = L"%.f%%";	// 倍率の書式
 	constexpr auto FMT_GRID = L"%.3f";	// グリッド単位の書式
 	constexpr auto FMT_GRID_UNIT = L"%.3f gd";	// グリッド単位の書式
+	static const auto& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 左右カーソル
+
+	//-------------------------------
+	// 待機カーソルを表示, 表示する前のカーソルを得る.
+	//-------------------------------
+	const CoreCursor wait_cursor_show(void)
+	{
+		const CoreWindow& core_win = Window::Current().CoreWindow();
+		const CoreCursor& prev_cur = core_win.PointerCursor();
+		if (prev_cur.Type() != CURS_WAIT.Type()) {
+			core_win.PointerCursor(CURS_WAIT);
+		}
+		return prev_cur;
+	}
+
 
 	// 色成分を文字列に変換する.
 	void conv_col_to_str(const COLOR_CODE c_code, const double val, const size_t t_len, wchar_t t_buf[]) noexcept;
