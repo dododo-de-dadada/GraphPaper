@@ -175,8 +175,8 @@ namespace winrt::GraphPaper::implementation
 	void ShapeLine::draw(void)
 	{
 		//ID2D1Factory3* const factory = Shape::s_d2d_factory;
-		ID2D1RenderTarget* const target = Shape::s_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 		ID2D1Factory* factory;
 		target->GetFactory(&factory);
 
@@ -206,13 +206,12 @@ namespace winrt::GraphPaper::implementation
 				target->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_style.get());
 			}
 		}
-		if (is_selected()) {
-			const auto a_len = Shape::s_anc_len;
+		if (m_anc_show && is_selected()) {
 			D2D1_POINT_2F mid;
 			pt_mul_add(m_vec[0], 0.5, m_start, mid);
-			anc_draw_rect(m_start, a_len, target, brush);
-			anc_draw_rect(mid, a_len, target, brush);
-			anc_draw_rect(e_pos, a_len, target, brush);
+			anc_draw_square(m_start, target, brush);
+			anc_draw_square(mid, target, brush);
+			anc_draw_square(e_pos, target, brush);
 		}
 	}
 
@@ -316,17 +315,17 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		D2D1_POINT_2F e_pos;
 		pt_add(m_start, m_vec[0], e_pos);
-		if (pt_in_anc(t_pos, e_pos, a_len)) {
+		if (pt_in_anc(t_pos, e_pos, m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
-		if (pt_in_anc(t_pos, m_start, a_len)) {
+		if (pt_in_anc(t_pos, m_start, m_anc_width)) {
 			return ANC_TYPE::ANC_P0;
 		}
-		const float s_width = static_cast<float>(max(static_cast<double>(m_stroke_width), a_len));
+		const float s_width = static_cast<float>(max(static_cast<double>(m_stroke_width), m_anc_width));
 		if (line_hit_test(t_pos, m_start, e_pos, s_width, m_stroke_cap)) {
 			return ANC_TYPE::ANC_STROKE;
 		}

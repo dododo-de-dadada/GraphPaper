@@ -11,9 +11,9 @@ namespace winrt::GraphPaper::implementation
 {
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
-	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], t_pos, a_len);
+		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], t_pos, m_anc_width);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
@@ -45,10 +45,10 @@ namespace winrt::GraphPaper::implementation
 				};
 				if (x_ge_y) {
 					const D2D1_POINT_2F p_min{
-						static_cast<FLOAT>(p0.x - a_len * 0.5), min(p0.y, p1.y)
+						static_cast<FLOAT>(p0.x - m_anc_width * 0.5), min(p0.y, p1.y)
 					};
 					const D2D1_POINT_2F p_max{
-						static_cast<FLOAT>(p0.x + a_len * 0.5f), max(p0.y, p1.y)
+						static_cast<FLOAT>(p0.x + m_anc_width * 0.5f), max(p0.y, p1.y)
 					};
 					if (pt_in_rect(t_pos, p_min, p_max)) {
 						return ANC_TYPE::ANC_STROKE;
@@ -56,10 +56,10 @@ namespace winrt::GraphPaper::implementation
 				}
 				else {
 					const D2D1_POINT_2F p_min{
-						min(p0.x, p1.x), static_cast<FLOAT>(p0.y - a_len * 0.5)
+						min(p0.x, p1.x), static_cast<FLOAT>(p0.y - m_anc_width * 0.5)
 					};
 					const D2D1_POINT_2F p_max{
-						max(p0.x, p1.x), static_cast<FLOAT>(p0.y + a_len * 0.5)
+						max(p0.x, p1.x), static_cast<FLOAT>(p0.y + m_anc_width * 0.5)
 					};
 					if (pt_in_rect(t_pos, p_min, p_max)) {
 						return ANC_TYPE::ANC_STROKE;
@@ -127,7 +127,8 @@ namespace winrt::GraphPaper::implementation
 
 	void ShapeRuler::create_text_format(void)
 	{
-		IDWriteFactory* const dwrite_factory = Shape::s_dwrite_factory;
+		IDWriteFactory* const dwrite_factory = Shape::m_dwrite_factory.get();
+
 		wchar_t locale_name[LOCALE_NAME_MAX_LENGTH];
 		GetUserDefaultLocaleName(locale_name, LOCALE_NAME_MAX_LENGTH);
 		//const float font_size = min(m_font_size, m_grid_base + 1.0f);
@@ -151,11 +152,12 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeRuler::draw(void)
 	{
-		ID2D1Factory* const factory = Shape::s_d2d_factory;
-		ID2D1RenderTarget* const target = Shape::s_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 
 		if (m_d2d_stroke_style == nullptr) {
+			ID2D1Factory* factory;
+			target->GetFactory(&factory);
 			create_stroke_style(factory);
 		}
 		if (m_dwrite_text_format == nullptr) {
@@ -235,9 +237,7 @@ namespace winrt::GraphPaper::implementation
 				target->DrawText(D[i % 10], 1u, m_dwrite_text_format.get(), r, brush);
 			}
 		}
-		if (is_selected()) {
-			//D2D1_MATRIX_3X2_F t32;
-			//target->GetTransform(&t32);
+		if (m_anc_show && is_selected()) {
 			draw_anc();
 		}
 	}

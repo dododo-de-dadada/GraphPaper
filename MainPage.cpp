@@ -192,10 +192,6 @@ namespace winrt::GraphPaper::implementation
 		// D2D/DWRITE ファクトリを図形クラスに, 
 		// 図形リストとページをアンドゥ操作に格納する.
 		{
-			Shape::m_aux_style = nullptr;
-			winrt::check_hresult(
-				m_main_d2d.m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
-			);
 			Undo::set(&m_main_page.m_shape_list, &m_main_page);
 		}
 
@@ -205,6 +201,42 @@ namespace winrt::GraphPaper::implementation
 			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			m_event_click_dist = 6.0 * raw_dpi / log_dpi;
+		}
+
+		// 背景パターン画像の読み込み.
+		{
+			// WIC ファクトリを作成する.
+			winrt::com_ptr<IWICImagingFactory2> wic_factory;
+			winrt::check_hresult(
+				CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wic_factory))
+			);
+			// WIC ファクトリを使って, 画像ファイルを読み込み WIC デコーダーを作成する.
+			winrt::com_ptr<IWICBitmapDecoder> wic_decoder;
+			winrt::check_hresult(
+				wic_factory->CreateDecoderFromFilename(L"background.png", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put())
+			);
+			// 読み込まれた画像のフレーム数を得る (通常は 1 フレーム).
+			UINT f_cnt;
+			winrt::check_hresult(
+				wic_decoder->GetFrameCount(&f_cnt)
+			);
+			// 最後のフレームを得る.
+			winrt::com_ptr<IWICBitmapFrameDecode> wic_frame;
+			winrt::check_hresult(
+				wic_decoder->GetFrame(f_cnt - 1, wic_frame.put())
+			);
+			wic_decoder = nullptr;
+			// WIC ファクトリを使って, WIC フォーマットコンバーターを作成する.
+			winrt::check_hresult(
+				wic_factory->CreateFormatConverter(m_background.put())
+			);
+			wic_factory = nullptr;
+			// WIC フォーマットコンバーターに, 得たフレームを格納する.
+			winrt::check_hresult(
+				m_background->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA,
+					WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom)
+			);
+			wic_frame = nullptr;
 		}
 
 		auto _{ file_new_click_async(nullptr, nullptr) };

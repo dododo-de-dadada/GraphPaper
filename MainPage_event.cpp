@@ -698,7 +698,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::event_show_popup(void)
 	{
 		Shape* shape_pressed;
-		const uint32_t anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, Shape::s_anc_len / m_main_page.m_page_scale, shape_pressed);
+		const uint32_t anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr,
+			shape_pressed);
 
 		MenuFlyout popup{};
 		// ‰Ÿ‚³‚ê‚½}Œ`‚ªƒkƒ‹, ‚Ü‚½‚Í‰Ÿ‚³‚ê‚½}Œ`‚Ì•”ˆÊ‚ªŠO‘¤‚©”»’è‚·‚é.
@@ -838,7 +839,8 @@ namespace winrt::GraphPaper::implementation
 		m_event_pos_pressed = m_event_pos_curr;
 		// ì}ƒc[ƒ‹‚ª‘I‘ğƒc[ƒ‹‚©”»’è‚·‚é.
 		if (m_drawing_tool == DRAWING_TOOL::SELECT) {
-			m_event_anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, Shape::s_anc_len / m_main_page.m_page_scale, m_event_shape_pressed);
+			m_event_anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed,
+				m_event_shape_pressed);
 			// ‰Ÿ‚³‚ê‚½‚Ì‚ª}Œ`‚ÌŠO‘¤‚©”»’è‚·‚é.
 			if (m_event_anc_pressed == ANC_TYPE::ANC_PAGE) {
 				m_event_shape_pressed = nullptr;
@@ -890,7 +892,7 @@ namespace winrt::GraphPaper::implementation
 			if (t_stamp - m_event_time_pressed <= c_time) {
 				if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 					Shape* s;
-					uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, Shape::s_anc_len / m_main_page.m_page_scale, s);
+					uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
 					if (anc == ANC_TYPE::ANC_PAGE) {
 						ustack_push_set<UNDO_ID::PAGE_COLOR>(&m_main_page, m_eyedropper_color);
 						ustack_push_null();
@@ -997,7 +999,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 				Shape* s;
-				uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, Shape::s_anc_len / m_main_page.m_page_scale, s);
+				uint32_t anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_pressed, s);
 				if (anc == ANC_TYPE::ANC_PAGE) {
 					m_eyedropper_color = m_main_page.m_page_color;
 					m_eyedropper_filled = true;
@@ -1069,7 +1071,7 @@ namespace winrt::GraphPaper::implementation
 			// •`‰æ‚Ì”r‘¼§Œä‚ğƒƒbƒN‚Å‚«‚½‚È‚ç, ‚½‚¾‚¿‚É‰ğœ‚·‚é.
 			m_mutex_draw.unlock();
 			Shape* s;
-			const auto anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, Shape::s_anc_len / m_main_page.m_page_scale, s);
+			const auto anc = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr, s);
 			if (anc == ANC_TYPE::ANC_PAGE) {
 				Window::Current().CoreWindow().PointerCursor(CURS_ARROW);
 			}

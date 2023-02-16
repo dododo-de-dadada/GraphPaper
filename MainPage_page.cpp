@@ -176,6 +176,28 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 	}
 
+	void MainPage::page_background_pattern_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		if (sender == tmfi_page_background_pattern()) {
+			if (m_background_show != tmfi_page_background_pattern().IsChecked()) {
+				m_background_show = tmfi_page_background_pattern().IsChecked();
+				page_draw();
+			}
+		}
+		else if (sender == rmfi_page_background_white()) {
+			if (!equal(m_background_color, COLOR_WHITE)) {
+				m_background_color = COLOR_WHITE;
+				page_draw();
+			}
+		}
+		else if (sender == rmfi_page_background_black()) {
+			if (!equal(m_background_color, COLOR_BLACK)) {
+				m_background_color = COLOR_BLACK;
+				page_draw();
+			}
+		}
+	}
+
 	// 表示する.
 	void MainPage::page_draw(void)
 	{
@@ -186,63 +208,73 @@ namespace winrt::GraphPaper::implementation
 			// ロックできない場合
 			return;
 		}
-		Shape::s_d2d_factory = m_main_d2d.m_d2d_factory.get();
-		Shape::s_d2d_target = m_main_d2d.m_d2d_context.get();
-		Shape::s_dwrite_factory = m_main_d2d.m_dwrite_factory.get();
-		Shape::s_d2d_color_brush = m_main_page.m_color_brush.get();
-		Shape::s_d2d_range_brush = m_main_page.m_range_brush.get();
+		//Shape::s_d2d_factory = m_main_d2d.m_d2d_factory.get();
+		//Shape::s_d2d_target = m_main_d2d.m_d2d_context.get();
+		//Shape::s_dwrite_factory = m_main_d2d.m_dwrite_factory.get();
+		//Shape::s_d2d_color_brush = m_main_page.m_color_brush.get();
+		//Shape::s_d2d_range_brush = m_main_page.m_range_brush.get();
 
-		ID2D1RenderTarget* const target = Shape::s_d2d_target;
-		ID2D1SolidColorBrush * const brush = Shape::s_d2d_color_brush;
+		//ID2D1RenderTarget* const target = m_main_d2d.m_d2d_context.get();
+		//ID2D1SolidColorBrush * const brush = Shape::s_d2d_color_brush;
 
-		// デバイスコンテキストの描画状態を保存ブロックに保持する.
-		target->SaveDrawingState(m_main_page.m_state_block.get());
-		// デバイスコンテキストから変換行列を得る.
-		D2D1_MATRIX_3X2_F tran;
-		target->GetTransform(&tran);
-		// 拡大率を変換行列の拡大縮小の成分に格納する.
 		const auto page_scale = max(m_main_page.m_page_scale, 0.0f);
+		m_main_page.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_background.get(), page_scale);
+		// デバイスコンテキストの描画状態を保存ブロックに保持する.
+		m_main_d2d.m_d2d_context->SaveDrawingState(Shape::m_d2d_state_block.get());
+
+		// 描画を開始する.
+		m_main_d2d.m_d2d_context->BeginDraw();
+		m_main_d2d.m_d2d_context->Clear(m_background_color);
+		// 背景パターンを描画する,
+		if (m_background_show) {
+			const D2D1_RECT_F w_rect{
+				0, 0, m_main_d2d.m_logical_width, m_main_d2d.m_logical_height
+			};
+			m_main_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_bitmap_brush.get());
+		}
+		// 変換行列に, 拡大率の値とスクロールの変分に拡大率を掛けた値を格納する.
+		D2D1_MATRIX_3X2_F tran{};
 		tran.m11 = tran.m22 = page_scale;
-		// スクロールの変分に拡大率を掛けた値を
-		// 変換行列の平行移動の成分に格納する.
 		D2D1_POINT_2F t_pos;
 		pt_add(m_main_bbox_lt, sb_horz().Value(), sb_vert().Value(), t_pos);
 		pt_mul(t_pos, page_scale, t_pos);
 		tran.dx = -t_pos.x;
 		tran.dy = -t_pos.y;
-		// 描画を開始する.
-		target->BeginDraw();
-		const D2D1_RECT_F w_rect{
-			0, 0, m_main_d2d.m_logical_width, m_main_d2d.m_logical_height
-		};
-		target->FillRectangle(w_rect, m_main_page.m_bitmap_brush.get());
 		// 変換行列をデバイスコンテキストに格納する.
-		target->SetTransform(&tran);
+		m_main_d2d.m_d2d_context->SetTransform(&tran);
+
 		m_main_page.draw();
 		if (m_event_state == EVENT_STATE::PRESS_AREA) {
 			if (m_drawing_tool == DRAWING_TOOL::SELECT ||
 				m_drawing_tool == DRAWING_TOOL::RECT ||
 				m_drawing_tool == DRAWING_TOOL::TEXT ||
 				m_drawing_tool == DRAWING_TOOL::RULER) {
-				m_main_page.draw_auxiliary_rect(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_rect(m_main_d2d.m_d2d_context.get(),
+					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
-				m_main_page.draw_auxiliary_bezi(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_bezi(m_main_d2d.m_d2d_context.get(),
+					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ELLI) {
-				m_main_page.draw_auxiliary_elli(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_elli(m_main_d2d.m_d2d_context.get(),
+					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::LINE) {
-				m_main_page.draw_auxiliary_line(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_line(m_main_d2d.m_d2d_context.get(),
+					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
-				m_main_page.draw_auxiliary_rrect(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_rrect(m_main_d2d.m_d2d_context.get(),
+					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
-				m_main_page.draw_auxiliary_poly(target, brush, m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
+				m_main_page.draw_auxiliary_poly(m_main_d2d.m_d2d_context.get(),
+					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::QELLIPSE) {
-				m_main_page.draw_auxiliary_qellipse(target, brush, m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_qellipse(m_main_d2d.m_d2d_context.get(),
+					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
 			}
 		}
 		/*
@@ -280,9 +312,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		*/
 		// 描画を終了する.
-		const HRESULT hres = target->EndDraw();
+		const HRESULT hres = m_main_d2d.m_d2d_context->EndDraw();
 		// 保存された描画環境を元に戻す.
-		target->RestoreDrawingState(m_main_page.m_state_block.get());
+		m_main_d2d.m_d2d_context->RestoreDrawingState(Shape::m_d2d_state_block.get());
 		if (hres != S_OK) {
 			// 結果が S_OK でない場合,
 			// 「描画できません」メッセージダイアログを表示する.
@@ -448,49 +480,6 @@ namespace winrt::GraphPaper::implementation
 #endif // _DEBUG
 
 		m_main_d2d.SetSwapChainPanel(scp_page_panel());
-		m_main_d2d.m_d2d_factory->CreateDrawingStateBlock(m_main_page.m_state_block.put());
-		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_page.m_color_brush.put());
-		m_main_d2d.m_d2d_context->CreateSolidColorBrush({}, m_main_page.m_range_brush.put());
-
-		winrt::com_ptr<IWICImagingFactory2> wic_factory;
-		winrt::check_hresult(
-			CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wic_factory))
-		);
-		winrt::com_ptr<IWICBitmapDecoder> wic_decoder;
-		winrt::check_hresult(
-			wic_factory->CreateDecoderFromFilename(L"background.bmp", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put())
-		);
-		UINT f_cnt;
-		winrt::check_hresult(
-			wic_decoder->GetFrameCount(&f_cnt)
-		);
-		winrt::com_ptr<IWICBitmapFrameDecode> wic_frame;
-		winrt::check_hresult(
-			wic_decoder->GetFrame(f_cnt - 1, wic_frame.put())
-		);
-		wic_decoder = nullptr;
-		winrt::com_ptr<IWICFormatConverter> wic_converter;
-		winrt::check_hresult(
-			wic_factory->CreateFormatConverter(wic_converter.put())
-		);
-		wic_factory = nullptr;
-		winrt::check_hresult(
-			wic_converter->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom)
-		);
-		wic_frame = nullptr;
-		winrt::com_ptr<ID2D1Bitmap> d2d_bitmap;
-		winrt::check_hresult(
-			m_main_d2d.m_d2d_context->CreateBitmapFromWicBitmap(wic_converter.get(), d2d_bitmap.put())
-		);
-		wic_converter = nullptr;
-		const auto a = d2d_bitmap->GetPixelFormat();
-		winrt::check_hresult(
-			m_main_d2d.m_d2d_context->CreateBitmapBrush(d2d_bitmap.get(), m_main_page.m_bitmap_brush.put())
-		);
-		d2d_bitmap = nullptr;
-		m_main_page.m_bitmap_brush->SetExtendModeX(D2D1_EXTEND_MODE_WRAP);
-		m_main_page.m_bitmap_brush->SetExtendModeY(D2D1_EXTEND_MODE_WRAP);
-
 		page_draw();
 	}
 

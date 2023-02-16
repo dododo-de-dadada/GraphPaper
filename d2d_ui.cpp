@@ -81,10 +81,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::SwapChainPanel;
 #endif
 	static winrt::com_ptr<ID2D1Factory3> create_d2d_factory(void);
-	static winrt::com_ptr<IDWriteFactory3> create_dwrite_factory(void);
 
 	winrt::com_ptr<ID2D1Factory3> D2D_UI::m_d2d_factory{ create_d2d_factory() };
-	winrt::com_ptr<IDWriteFactory3> D2D_UI::m_dwrite_factory{ create_dwrite_factory() };
 
 	// デバイスに依存しないピクセル単位 (DIP) の長さを物理的なピクセルの長さに変換します。
 	inline float ConvertDipsToPixels(float dips, float dpi)
@@ -101,8 +99,7 @@ namespace winrt::GraphPaper::implementation
 		// プロジェクトがデバッグ ビルドなら,
 		// ファクトリオプションは D2D1_DEBUG_LEVEL_INFORMATION を指定する.
 		// ファクトリータイプは D2D1_FACTORY_TYPE_SINGLE_THREADED を指定する.
-		D2D1_FACTORY_OPTIONS options;
-		ZeroMemory(&options, sizeof(D2D1_FACTORY_OPTIONS));
+		D2D1_FACTORY_OPTIONS options{};
 #if defined(_DEBUG)
 		options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
 #endif
@@ -116,22 +113,6 @@ namespace winrt::GraphPaper::implementation
 		);
 		return d2d_factory;
 	}
-
-	// DWrite ファクトリを初期化する.
-	// 戻り値として com_ptr を返す関数は参照不可.
-	static winrt::com_ptr<IDWriteFactory3> create_dwrite_factory(void)
-	{
-		winrt::com_ptr<IDWriteFactory3> dwrite_factory;
-		// ファクトリタイプには DWRITE_FACTORY_TYPE_SHARED を指定する.
-		winrt::check_hresult(
-			DWriteCreateFactory(
-				DWRITE_FACTORY_TYPE_SHARED,
-				__uuidof(IDWriteFactory3),
-				reinterpret_cast<::IUnknown**>(dwrite_factory.put())
-			)
-		);
-		return dwrite_factory;
-	};
 
 #if WIN_UI == 3
 #else

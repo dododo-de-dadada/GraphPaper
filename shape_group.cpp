@@ -15,11 +15,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void ShapeGroup::draw(void)
 	{
-		ID2D1RenderTarget* const context = Shape::s_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
-
 		// 選択フラグが立ってるか判定する.
-		if (is_selected()) {
+		if (m_anc_show && is_selected()) {
 			D2D1_POINT_2F b_lt { FLT_MAX, FLT_MAX };
 			D2D1_POINT_2F b_rb{ -FLT_MAX, -FLT_MAX };
 			// グループ化された各図形について以下を繰り返す.
@@ -31,7 +28,10 @@ namespace winrt::GraphPaper::implementation
 				s->draw();
 				s->get_bound(b_lt, b_rb, b_lt, b_rb);
 			}
-			context->DrawRectangle(D2D1_RECT_F{ b_lt.x, b_lt.y, b_rb.x, b_rb.y }, brush, 1.0f, Shape::m_aux_style.get());
+			ID2D1RenderTarget* const target = Shape::m_d2d_target;
+			ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+			target->DrawRectangle(D2D1_RECT_F{ b_lt.x, b_lt.y, b_rb.x, b_rb.y }, brush,
+				m_aux_width, m_aux_style.get());
 		}
 		else {
 			for (const auto s : m_list_grouped) {
@@ -138,13 +138,13 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位
 	//------------------------------
-	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeGroup::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		for (const Shape* s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			if (s->hit_test(t_pos, a_len) != ANC_TYPE::ANC_PAGE) {
+			if (s->hit_test(t_pos) != ANC_TYPE::ANC_PAGE) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}

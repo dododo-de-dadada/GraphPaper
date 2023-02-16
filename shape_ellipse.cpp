@@ -14,12 +14,12 @@ namespace winrt::GraphPaper::implementation
 	// }Œ`‚ğ•\¦‚·‚é.
 	void ShapeEllipse::draw(void)
 	{
-		ID2D1RenderTarget* const target = Shape::s_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
-		ID2D1Factory* factory;
-		target->GetFactory(&factory);
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 
 		if (m_d2d_stroke_style == nullptr) {
+			ID2D1Factory* factory;
+			target->GetFactory(&factory);
 			create_stroke_style(factory);
 		}
 
@@ -50,9 +50,9 @@ namespace winrt::GraphPaper::implementation
 	// ˆÊ’u‚ğŠÜ‚Ş‚©”»’è‚·‚é.
 	// t_pos	”»’è‚·‚éˆÊ’u
 	// –ß‚è’l	ˆÊ’u‚ğŠÜ‚Ş}Œ`‚Ì•”ˆÊ
-	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const auto anc = rect_hit_test_anc(m_start, m_vec[0], t_pos, a_len);
+		const auto anc = rect_hit_test_anc(m_start, m_vec[0], t_pos, m_anc_width);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
@@ -69,7 +69,7 @@ namespace winrt::GraphPaper::implementation
 			// ˆÊ’u‚ª‚¾‰~‚ÌŠO‘¤‚É‚ ‚é‚©”»’è‚·‚é.
 			// ˜g‚Ì‘¾‚³‚ª•”ˆÊ‚Ì‘å‚«‚³–¢–‚È‚ç‚Î,
 			// •”ˆÊ‚Ì‘å‚«‚³‚ğ˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
-			const double s_width = max(static_cast<double>(m_stroke_width), a_len);
+			const double s_width = max(static_cast<double>(m_stroke_width), m_anc_width);
 			// ”¼Œa‚É˜g‚Ì‘¾‚³‚Ì”¼•ª‚ğ‰Á‚¦‚½’l‚ğŠOŒa‚ÉŠi”[‚·‚é.
 			D2D1_POINT_2F r_outer;
 			pt_add(rad, s_width * 0.5, r_outer);

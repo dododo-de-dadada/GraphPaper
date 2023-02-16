@@ -681,9 +681,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapePolygon::draw(void)
 	{
-		//ID2D1Factory3* const factory = Shape::s_d2d_factory;
-		ID2D1RenderTarget* const target = Shape::s_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 		ID2D1Factory* factory;
 		target->GetFactory(&factory);
 
@@ -771,14 +770,13 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		if (is_selected()) {
-			const auto a_len = Shape::s_anc_len;
+		if (m_anc_show && is_selected()) {
 			D2D1_POINT_2F a_pos{ m_start };	// 図形の部位の位置
-			anc_draw_rect(a_pos, a_len, target, brush);
+			anc_draw_square(a_pos, target, brush);
 			const size_t d_cnt = m_vec.size();	// 差分の数
 			for (size_t i = 0; i < d_cnt; i++) {
 				pt_add(a_pos, m_vec[i], a_pos);
-				anc_draw_rect(a_pos, a_len, target, brush);
+				anc_draw_square(a_pos, target, brush);
 			}
 		}
 	}
@@ -798,7 +796,7 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	判定する位置
 	// a_len	アンカーの大きさ
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapePolygon::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapePolygon::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		D2D1_POINT_2F t_vec;
 		pt_sub(t_pos, m_start, t_vec);
@@ -814,7 +812,7 @@ namespace winrt::GraphPaper::implementation
 			m_join_style,
 			m_join_miter_limit,
 			is_opaque(m_fill_color),
-			a_len
+			m_anc_width
 		);
 	}
 

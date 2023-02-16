@@ -238,7 +238,8 @@ namespace winrt::GraphPaper::implementation
 	// c_pos	凸包 (四辺形) の頂点の配列
 	// 戻り値	含むなら true
 	//------------------------------
-	template<D2D1_CAP_STYLE S> static bool bezi_hit_test_cap(const D2D1_POINT_2F& t_pos, const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F d_vec[3], const double e_width)
+	template<D2D1_CAP_STYLE S> static bool bezi_hit_test_cap(const D2D1_POINT_2F& t_pos, 
+		const D2D1_POINT_2F c_pos[4], const D2D1_POINT_2F d_vec[3], const double e_width)
 	{
 		size_t i;
 		for (i = 0; i < 3; i++) {
@@ -493,9 +494,8 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void ShapeBezier::draw(void)
 	{
-		//ID2D1Factory3* const factory = Shape::s_d2d_factory;
-		ID2D1RenderTarget* const target = Shape::s_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 		ID2D1Factory* factory;
 		target->GetFactory(&factory);
 
@@ -547,37 +547,33 @@ namespace winrt::GraphPaper::implementation
 				target->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_style.get());
 			}
 		}
-		if (is_selected()) {
-			const auto a_len = Shape::s_anc_len;
+		if (m_anc_show && is_selected()) {
 			D2D1_POINT_2F s_pos;
 			D2D1_POINT_2F e_pos;
-			D2D1_MATRIX_3X2_F tran;
-			target->GetTransform(&tran);
-			const auto s_width = static_cast<FLOAT>(1.0 / tran.m11);
-			anc_draw_rect(m_start, a_len, target, brush);
+			anc_draw_square(m_start, target, brush);
 			s_pos = m_start;
 			pt_add(s_pos, m_vec[0], e_pos);
 			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
+			target->DrawLine(s_pos, e_pos, brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_circle(e_pos, a_len, target, brush);
+			target->DrawLine(s_pos, e_pos, brush, m_aux_width, m_aux_style.get());
+			anc_draw_circle(e_pos, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[1], e_pos);
 			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
+			target->DrawLine(s_pos, e_pos, brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_circle(e_pos, a_len, target, brush);
+			target->DrawLine(s_pos, e_pos, brush, m_aux_width, m_aux_style.get());
+			anc_draw_circle(e_pos, target, brush);
 
 			s_pos = e_pos;
 			pt_add(s_pos, m_vec[2], e_pos);
 			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
+			target->DrawLine(s_pos, e_pos, brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(s_pos, e_pos, brush, s_width, Shape::m_aux_style.get());
-			anc_draw_rect(e_pos, a_len, target, brush);
+			target->DrawLine(s_pos, e_pos, brush, m_aux_width, m_aux_style.get());
+			anc_draw_square(e_pos, target, brush);
 		}
 	}
 
@@ -586,11 +582,11 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
 	//------------------------------
-	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeBezier::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		const auto f_opaque = is_opaque(m_fill_color);
 		bool f_test = false;	// 位置が塗りつぶしに含まれるか判定
-		const auto e_width = max(max(static_cast<double>(m_stroke_width), a_len) * 0.5, 0.5);	// 線枠の太さの半分の値
+		const auto e_width = max(max(static_cast<double>(m_stroke_width), m_anc_width) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
 		pt_sub(t_pos, m_start, tp);
 		// 判定する位置によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
@@ -600,16 +596,16 @@ namespace winrt::GraphPaper::implementation
 		pt_add(c_pos[0], m_vec[0], c_pos[1]);
 		pt_add(c_pos[1], m_vec[1], c_pos[2]);
 		pt_add(c_pos[2], m_vec[2], c_pos[3]);
-		if (pt_in_anc(tp, c_pos[3], a_len)) {
+		if (pt_in_anc(tp, c_pos[3], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 3;
 		}
-		if (pt_in_anc(tp, c_pos[2], a_len)) {
+		if (pt_in_anc(tp, c_pos[2], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 2;
 		}
-		if (pt_in_anc(tp, c_pos[1], a_len)) {
+		if (pt_in_anc(tp, c_pos[1], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
-		if (pt_in_anc(tp, c_pos[0], a_len)) {
+		if (pt_in_anc(tp, c_pos[0], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 0;
 		}
 		if (equal(m_stroke_cap, CAP_ROUND)) {

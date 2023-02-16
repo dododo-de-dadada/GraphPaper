@@ -558,13 +558,17 @@ namespace winrt::GraphPaper::implementation
 			len = dt_writer.WriteString(buf);
 
 			// 背景
+			const double page_a = m_main_page.m_page_color.a;
+			const double page_r = page_a * m_main_page.m_page_color.r + (1.0 - page_a) * m_background_color.r;
+			const double page_g = page_a * m_main_page.m_page_color.g + (1.0 - page_a) * m_background_color.g;
+			const double page_b = page_a * m_main_page.m_page_color.b + (1.0 - page_a) * m_background_color.b;
 			swprintf_s(buf,
 				L"%f %f %f rg\n"
 				L"0 0 %f %f re\n"
 				L"b\n",
-				m_main_page.m_page_color.r,
-				m_main_page.m_page_color.g,
-				m_main_page.m_page_color.b,
+				min(max(page_r, 0.0), 1.0),
+				min(max(page_g, 0.0), 1.0),
+				min(max(page_b, 0.0), 1.0),
 				m_main_page.m_page_size.width,
 				m_main_page.m_page_size.height
 			);
@@ -885,28 +889,16 @@ namespace winrt::GraphPaper::implementation
 						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
 					}
 				}
-
-				winrt::com_ptr<ID2D1SolidColorBrush> cb;
-				winrt::com_ptr<ID2D1SolidColorBrush> rb;
-				winrt::check_hresult(
-					target->CreateSolidColorBrush(D2D1_COLOR_F{}, cb.put())
-				);
-				winrt::check_hresult(
-					target->CreateSolidColorBrush(D2D1_COLOR_F{}, rb.put())
-				);
-				Shape::s_d2d_target = target.get();
-//				Shape::s_d2d_color_brush = cb.get();
-//				Shape::s_d2d_range_brush = rb.get();
-
 				// ビットマップへの描画
 				m_mutex_draw.lock();
-				target->SaveDrawingState(m_main_page.m_state_block.get());
+				m_main_page.begin_draw(target.get(), false, nullptr, 1.0f);
+				target->SaveDrawingState(Shape::m_d2d_state_block.get());
 				target->BeginDraw();
 				m_main_page.draw();
 				winrt::check_hresult(
 					target->EndDraw()
 				);
-				target->RestoreDrawingState(m_main_page.m_state_block.get());
+				target->RestoreDrawingState(Shape::m_d2d_state_block.get());
 				m_mutex_draw.unlock();
 
 				// レンダーターゲット依存のオブジェクトを消去

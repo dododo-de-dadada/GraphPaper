@@ -82,28 +82,27 @@ namespace winrt::GraphPaper::implementation
 			// ƒƒbƒN‚Å‚«‚È‚¢ê‡
 			return;
 		}
-		/*
-		Shape::s_d2d_factory = m_dialog_d2d.m_d2d_factory.get();
-		Shape::s_d2d_target = m_dialog_d2d.m_d2d_context.get();
-		Shape::s_dwrite_factory = m_dialog_d2d.m_dwrite_factory.get();
-		Shape::s_d2d_color_brush = m_dialog_page.m_color_brush.get();
-		Shape::s_d2d_range_brush = m_dialog_page.m_range_brush.get();
-		*/
-		m_dialog_d2d.m_d2d_context->SaveDrawingState(m_dialog_page.m_state_block.get());
+		// •`‰æŠÂ‹«‚ÌÝ’è.
+		m_dialog_page.begin_draw(m_dialog_d2d.m_d2d_context.get(), true, m_background.get(), 1.0f);
+		m_dialog_d2d.m_d2d_context->SaveDrawingState(Shape::m_d2d_state_block.get());
 		m_dialog_d2d.m_d2d_context->BeginDraw();
+		m_dialog_d2d.m_d2d_context->Clear(m_background_color);
 		const D2D1_RECT_F w_rect{
 			0, 0, m_dialog_d2d.m_logical_width, m_dialog_d2d.m_logical_height
 		};
-		m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, m_dialog_page.m_bitmap_brush.get());
-		m_dialog_page.m_range_brush->SetColor(m_dialog_page.m_page_color);
-		m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, m_dialog_page.m_range_brush.get());
+		if (m_background_show) {
+			// ”wŒiƒpƒ^[ƒ“‚ð•`‰æ‚·‚é,
+			m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_bitmap_brush.get());
+		}
+		Shape::m_d2d_color_brush->SetColor(m_dialog_page.m_page_color);
+		m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_color_brush.get());
 
 		const float offset = static_cast<FLOAT>(std::fmod(m_dialog_page.m_page_size.width * 0.5, m_dialog_page.m_grid_base + 1.0));
 		m_dialog_page.m_grid_offset.x = offset;
 		m_dialog_page.m_grid_offset.y = offset;
 		m_dialog_page.draw();
 		const auto hr = m_dialog_d2d.m_d2d_context->EndDraw();
-		m_dialog_d2d.m_d2d_context->RestoreDrawingState(m_dialog_page.m_state_block.get());
+		m_dialog_d2d.m_d2d_context->RestoreDrawingState(Shape::m_d2d_state_block.get());
 		m_dialog_d2d.Present();
 		m_mutex_draw.unlock();
 	}
@@ -143,10 +142,6 @@ namespace winrt::GraphPaper::implementation
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::UNLOADED;
 //#endif
-		m_dialog_page.m_state_block = nullptr;
-		m_dialog_page.m_color_brush = nullptr;
-		m_dialog_page.m_range_brush = nullptr;
-		m_dialog_page.m_bitmap_brush = nullptr;
 		m_dialog_d2d.Trim();
 	}
 
@@ -206,48 +201,9 @@ namespace winrt::GraphPaper::implementation
 //#endif
 		scp_dialog_panel().UpdateLayout();
 		m_dialog_d2d.SetSwapChainPanel(scp_dialog_panel());
-		m_dialog_d2d.m_d2d_factory->CreateDrawingStateBlock(m_dialog_page.m_state_block.put());
-		m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_color_brush.put());
-		m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_range_brush.put());
-
-		winrt::com_ptr<IWICImagingFactory2> wic_factory;
-		winrt::check_hresult(
-			CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wic_factory))
-		);
-		winrt::com_ptr<IWICBitmapDecoder> wic_decoder;
-		winrt::check_hresult(
-			wic_factory->CreateDecoderFromFilename(L"background.bmp", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put())
-		);
-		UINT f_cnt;
-		winrt::check_hresult(
-			wic_decoder->GetFrameCount(&f_cnt)
-		);
-		winrt::com_ptr<IWICBitmapFrameDecode> wic_frame;
-		winrt::check_hresult(
-			wic_decoder->GetFrame(f_cnt - 1, wic_frame.put())
-		);
-		wic_decoder = nullptr;
-		winrt::com_ptr<IWICFormatConverter> wic_converter;
-		winrt::check_hresult(
-			wic_factory->CreateFormatConverter(wic_converter.put())
-		);
-		wic_factory = nullptr;
-		winrt::check_hresult(
-			wic_converter->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, nullptr, 0.0f, WICBitmapPaletteTypeCustom)
-		);
-		wic_frame = nullptr;
-		winrt::com_ptr<ID2D1Bitmap> d2d_bitmap;
-		winrt::check_hresult(
-			m_dialog_d2d.m_d2d_context->CreateBitmapFromWicBitmap(wic_converter.get(), d2d_bitmap.put())
-		);
-		wic_converter = nullptr;
-		const auto a = d2d_bitmap->GetPixelFormat();
-		winrt::check_hresult(
-			m_dialog_d2d.m_d2d_context->CreateBitmapBrush(d2d_bitmap.get(), m_dialog_page.m_bitmap_brush.put())
-		);
-		d2d_bitmap = nullptr;
-		m_dialog_page.m_bitmap_brush->SetExtendModeX(D2D1_EXTEND_MODE_WRAP);
-		m_dialog_page.m_bitmap_brush->SetExtendModeY(D2D1_EXTEND_MODE_WRAP);
+		//m_dialog_d2d.m_d2d_factory->CreateDrawingStateBlock(m_dialog_page.m_state_block.put());
+		//m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_color_brush.put());
+		//m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_range_brush.put());
 
 		dialog_draw();
 	}

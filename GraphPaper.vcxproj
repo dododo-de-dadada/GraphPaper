@@ -143,7 +143,7 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\Documents\background.bmp" />
+    <Image Include="..\..\..\Documents\background.png" />
     <Image Include="Assets\4.1.05.tiff" />
     <Image Include="Assets\LargeTile.scale-100.png" />
     <Image Include="Assets\LargeTile.scale-125.png" />

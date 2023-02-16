@@ -109,7 +109,7 @@ namespace winrt::GraphPaper::implementation
 
 	// ˆÊ’u‚ðŠÜ‚Þ‚©”»’è‚·‚é.
 	// –ß‚è’l	‚Â‚Ë‚É ANC_PAGE
-	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/, const double /*a_len*/) const noexcept
+	uint32_t ShapeStroke::hit_test(const D2D1_POINT_2F /*t_pos*/) const noexcept
 	{
 		return ANC_TYPE::ANC_PAGE;
 	}

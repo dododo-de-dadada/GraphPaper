@@ -931,7 +931,7 @@ namespace winrt::GraphPaper::implementation
 				m_pdf_text_cnt, m_font_size
 			);
 			len += dt_writer.WriteString(buf);
-			float before = 0;
+			//float before = 0;
 			for (uint32_t i = 0; i <= k; i++) {
 				// 方眼の大きさごとに目盛りを表示する.
 				const double x = x0 + i * intvl_x;
@@ -985,6 +985,7 @@ namespace winrt::GraphPaper::implementation
 	size_t ShapePage::export_pdf(const D2D1_SIZE_F /*page_size*/, DataWriter const& dt_writer)
 	{
 		const float grid_base = m_grid_base;
+		// PDF はアルファ値をサポートしないので混色
 		const float grid_a = m_grid_color.a;
 		const D2D1_COLOR_F grid_color{
 			grid_a * m_grid_color.r + (1.0f - grid_a) * m_page_color.r,

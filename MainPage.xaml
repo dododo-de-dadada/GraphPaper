@@ -560,6 +560,16 @@
 						</muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
 					</muxc:RadioMenuFlyoutItem>
                 </MenuFlyoutSubItem>
+                <MenuFlyoutSeparator />
+                <MenuFlyoutSubItem x:Uid="mfsi_page_background_pattern" Text="Background Pattern">
+                    <ToggleMenuFlyoutItem x:Name="tmfi_page_background_pattern" x:Uid="tmfi_page_background_pattern" IsChecked="False" Click="page_background_pattern_click" Text="Show Checker Board Pattern">
+                    </ToggleMenuFlyoutItem>
+                    <MenuFlyoutSeparator />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_page_background_white" x:Uid="rmfi_page_background_white" IsChecked="True" Click="page_background_pattern_click" Text="Make Background White" GroupName="background_color">
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_page_background_black" x:Uid="rmfi_page_background_black" IsChecked="False" Click="page_background_pattern_click" Text="Make Background Black" GroupName="background_color">
+                    </muxc:RadioMenuFlyoutItem>
+                </MenuFlyoutSubItem>
 			</muxc:MenuBarItem>
 			<!-- その他メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_misc" AccessKey="M" Title="Misc">

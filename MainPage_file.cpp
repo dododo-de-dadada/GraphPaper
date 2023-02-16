@@ -222,25 +222,19 @@ namespace winrt::GraphPaper::implementation
 			// winrt::com_ptr で確保されたオブジェクトは Release するとエラーになる.
 			// 例えば, m_main_page.m_state_block->Release();
 			m_mutex_draw.lock();
-			if (m_main_page.m_state_block != nullptr) {
-				m_main_page.m_state_block = nullptr;
+			if (Shape::m_d2d_state_block != nullptr) {
+				Shape::m_d2d_state_block = nullptr;
 			}
-			if (m_main_page.m_color_brush != nullptr) {
-				m_main_page.m_color_brush = nullptr;
+			if (Shape::m_d2d_color_brush != nullptr) {
+				Shape::m_d2d_color_brush = nullptr;
 			}
-			if (m_main_page.m_range_brush != nullptr) {
-				m_main_page.m_range_brush = nullptr;
+			if (Shape::m_d2d_range_brush != nullptr) {
+				Shape::m_d2d_range_brush = nullptr;
+			}
+			if (Shape::m_d2d_bitmap_brush != nullptr) {
+				Shape::m_d2d_bitmap_brush = nullptr;
 			}
 			m_main_d2d.Trim();
-			if (m_dialog_page.m_state_block != nullptr) {
-				m_dialog_page.m_state_block = nullptr;
-			}
-			if (m_dialog_page.m_color_brush != nullptr) {
-				m_dialog_page.m_color_brush = nullptr;
-			}
-			if (m_dialog_page.m_range_brush != nullptr) {
-				m_dialog_page.m_range_brush = nullptr;
-			}
 			m_dialog_d2d.Trim();
 		}
 

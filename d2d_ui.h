@@ -53,7 +53,6 @@ namespace winrt::GraphPaper::implementation
 		// D2D/DWeite 描画コンポーネント
 
 		static winrt::com_ptr<ID2D1Factory3> m_d2d_factory;
-		static winrt::com_ptr<IDWriteFactory3> m_dwrite_factory;
 		winrt::com_ptr<ID2D1DeviceContext2> m_d2d_context{ nullptr };
 
 		// XAML コントロール

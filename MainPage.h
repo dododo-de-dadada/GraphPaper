@@ -275,6 +275,11 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// 境界ボックスの左上位置 (値がマイナスのときは, 図形がページの外側にある)
 		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// 境界ボックスの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
 
+		// 背景パターン
+		winrt::com_ptr<IWICFormatConverter> m_background{ nullptr };
+		bool m_background_show = false;
+		D2D1_COLOR_F m_background_color{ COLOR_WHITE };
+
 		// 設定ダイアログのページ
 		ShapePage m_dialog_page;	// ページ
 		D2D_UI m_dialog_d2d;	// 描画環境
@@ -790,6 +795,7 @@ namespace winrt::GraphPaper::implementation
 		// ページを拡大または縮小する.
 		void page_zoom_delta(const int32_t delta) noexcept;
 		void page_zoom_is_checked(float scale);
+		void page_background_pattern_click(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_status.cpp

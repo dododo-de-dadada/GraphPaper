@@ -407,20 +407,20 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	uint32_t ShapeQEllipse::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeQEllipse::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		// アンカーポイントに含まれるか判定する.
-		if (pt_in_anc(t_pos, m_start, a_len)) {
+		if (pt_in_anc(t_pos, m_start, m_anc_width)) {
 			return ANC_TYPE::ANC_P0;
 		}
-		else if (pt_in_anc(t_pos, D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y }, a_len)) {
+		else if (pt_in_anc(t_pos, D2D1_POINT_2F{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y }, m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
 		// だ円の中心点に含まれるか判定する.
 		const double rot = M_PI * m_rot_degree / 180.0;
 		D2D1_POINT_2F c_pos;
 		qellipse_center(m_start, m_vec[0], m_radius, rot, c_pos);
-		if (pt_in_anc(t_pos, c_pos, a_len)) {
+		if (pt_in_anc(t_pos, c_pos, m_anc_width)) {
 			return  ANC_TYPE::ANC_CENTER;
 		}
 		// 位置 t が, 扇形の内側にあるか判定する.
@@ -441,7 +441,7 @@ namespace winrt::GraphPaper::implementation
 			// 線枠が可視で,
 			if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 				// 判定する位置が, 内側と外側のだ円の中にあるなら,
-				const double e_width = max(m_stroke_width, Shape::s_anc_len) * 0.5;
+				const double e_width = max(m_stroke_width, m_anc_width) * 0.5;
 				if (!pt_in_ellipse(t_pos, c_pos, rx - e_width, ry - e_width, rot)) {
 					if (pt_in_ellipse(t_pos, c_pos, rx + e_width, ry + e_width, rot)) {
 						return ANC_TYPE::ANC_STROKE;
@@ -654,9 +654,10 @@ namespace winrt::GraphPaper::implementation
 
 	void ShapeQEllipse::draw(void)
 	{
-		ID2D1Factory* factory = Shape::s_d2d_factory;
-		ID2D1SolidColorBrush* brush = Shape::s_d2d_color_brush;
-		ID2D1RenderTarget* target = Shape::s_d2d_target;
+		ID2D1RenderTarget* target = Shape::m_d2d_target;
+		ID2D1Factory* factory;
+		target->GetFactory(&factory);
+		ID2D1SolidColorBrush* brush = Shape::m_d2d_color_brush.get();
 
 		D2D1_POINT_2F c_pos{};
 		if ((!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
@@ -786,16 +787,19 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
-		if (is_selected()) {
+		if (m_anc_show && is_selected()) {
 			const D2D1_POINT_2F p{ m_start };
 			const D2D1_POINT_2F q{ m_start.x + m_vec[0].x, m_start.y + m_vec[0].y };
-			D2D1_MATRIX_3X2_F t32;
-			target->GetTransform(&t32);
-			anc_draw_rect(p, Shape::s_anc_len, target, brush);
-			anc_draw_rect(q, Shape::s_anc_len, target, brush);
-			const auto s_width = 1.0 / t32._11;
-			target->DrawLine(c_pos, p, brush, static_cast<FLOAT>(s_width), Shape::m_aux_style.get());
-			target->DrawLine(c_pos, q, brush, static_cast<FLOAT>(s_width), Shape::m_aux_style.get());
+			brush->SetColor(COLOR_WHITE);
+			target->DrawLine(c_pos, p, brush, m_aux_width, nullptr);
+			brush->SetColor(COLOR_BLACK);
+			target->DrawLine(c_pos, p, brush, m_aux_width, m_aux_style.get());
+			brush->SetColor(COLOR_WHITE);
+			target->DrawLine(c_pos, q, brush, m_aux_width, nullptr);
+			brush->SetColor(COLOR_BLACK);
+			target->DrawLine(c_pos, q, brush, m_aux_width, m_aux_style.get());
+			anc_draw_square(p, target, brush);
+			anc_draw_square(q, target, brush);
 		}
 	}
 

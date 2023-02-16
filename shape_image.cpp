@@ -208,8 +208,8 @@ namespace winrt::GraphPaper::implementation
 	// 図形を表示する.
 	void ShapeImage::draw(void)
 	{
-		ID2D1RenderTarget* const target = Shape::s_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 
 		if (m_d2d_bitmap == nullptr) {
 			//const D2D1_BITMAP_PROPERTIES1 b_prop{
@@ -239,28 +239,21 @@ namespace winrt::GraphPaper::implementation
 		};
 		target->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, m_clip);
 
-		if (is_selected()) {
-			D2D1_MATRIX_3X2_F tran;
-			target->GetTransform(&tran);
-			const auto a_width = 1.0 / tran._11;
-			const auto a_len = Shape::s_anc_len;
-			brush->SetColor(COLOR_WHITE);
-			target->DrawRectangle(dest_rect, brush, static_cast<FLOAT>(a_width), nullptr);
-			brush->SetColor(COLOR_BLACK);
-			target->DrawRectangle(dest_rect, brush, static_cast<FLOAT>(a_width), Shape::m_aux_style.get());
-
+		if (m_anc_show && is_selected()) {
 			const D2D1_POINT_2F v_pos[4]{
 				m_start,
 				{ m_start.x + m_view.width, m_start.y },
 				{ m_start.x + m_view.width, m_start.y + m_view.height },
 				{ m_start.x, m_start.y + m_view.height },
 			};
-			D2D1_MATRIX_3X2_F t32;
-			target->GetTransform(&t32);
-			anc_draw_rect(v_pos[0], a_len, target, brush);
-			anc_draw_rect(v_pos[1], a_len, target, brush);
-			anc_draw_rect(v_pos[2], a_len, target, brush);
-			anc_draw_rect(v_pos[3], a_len, target, brush);
+			anc_draw_square(v_pos[0], target, brush);
+			anc_draw_square(v_pos[1], target, brush);
+			anc_draw_square(v_pos[2], target, brush);
+			anc_draw_square(v_pos[3], target, brush);
+			brush->SetColor(COLOR_WHITE);
+			target->DrawRectangle(dest_rect, brush, Shape::m_aux_width, nullptr);
+			brush->SetColor(COLOR_BLACK);
+			target->DrawRectangle(dest_rect, brush, Shape::m_aux_width, Shape::m_aux_style.get());
 		}
 	}
 
@@ -413,27 +406,27 @@ namespace winrt::GraphPaper::implementation
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
-	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F t_pos, const double a_len) const noexcept
+	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
 		D2D1_POINT_2F v_pos[4];
 		// 0---1
 		// |   |
 		// 3---2
 		get_verts(v_pos);
-		if (pt_in_anc(t_pos, v_pos[2], a_len)) {
+		if (pt_in_anc(t_pos, v_pos[2], m_anc_width)) {
 			return ANC_TYPE::ANC_SE;
 		}
-		else if (pt_in_anc(t_pos, v_pos[3], a_len)) {
+		else if (pt_in_anc(t_pos, v_pos[3], m_anc_width)) {
 			return ANC_TYPE::ANC_SW;
 		}
-		else if (pt_in_anc(t_pos, v_pos[1], a_len)) {
+		else if (pt_in_anc(t_pos, v_pos[1], m_anc_width)) {
 			return ANC_TYPE::ANC_NE;
 		}
-		else if (pt_in_anc(t_pos, v_pos[0], a_len)) {
+		else if (pt_in_anc(t_pos, v_pos[0], m_anc_width)) {
 			return ANC_TYPE::ANC_NW;
 		}
 		else {
-			const auto e_width = a_len * 0.5;
+			const auto e_width = m_anc_width * 0.5;
 			D2D1_POINT_2F e_pos[2];
 			e_pos[0].x = v_pos[0].x;
 			e_pos[0].y = static_cast<FLOAT>(v_pos[0].y - e_width);

@@ -27,31 +27,27 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		D2D1_MATRIX_3X2_F tran;
-		target->GetTransform(&tran);
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// 線の太さ
-		ID2D1StrokeStyle1* const a_style = Shape::m_aux_style.get();
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
 
 		e_pos.x = c_pos.x;
 		e_pos.y = p_pos.y;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(p_pos, e_pos, brush, s_width, nullptr);
+		target->DrawLine(p_pos, e_pos, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(p_pos, e_pos, brush, s_width, a_style);
+		target->DrawLine(p_pos, e_pos, brush, m_aux_width, m_aux_style.get());
 		s_pos = e_pos;
 		e_pos.x = p_pos.x;
 		e_pos.y = c_pos.y;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(s_pos, e_pos, brush, s_width, nullptr);
+		target->DrawLine(s_pos, e_pos, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(s_pos, e_pos, brush, s_width, a_style);
+		target->DrawLine(s_pos, e_pos, brush, m_aux_width, m_aux_style.get());
 		s_pos = e_pos;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(s_pos, c_pos, brush, s_width, nullptr);
+		target->DrawLine(s_pos, c_pos, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(s_pos, c_pos, brush, s_width, a_style);
+		target->DrawLine(s_pos, c_pos, brush, m_aux_width, m_aux_style.get());
 	}
 
 	// だ円の補助線を表示する.
@@ -63,6 +59,12 @@ namespace winrt::GraphPaper::implementation
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
+		if (Shape::m_aux_style == nullptr) {
+			winrt::check_hresult(
+				D2D_UI::m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE,
+					AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
+			);
+		}
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		D2D1_MATRIX_3X2_F tran;
 		target->GetTransform(&tran);
@@ -90,13 +92,10 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		D2D1_MATRIX_3X2_F tran;
-		target->GetTransform(&tran);
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// 線の太さ
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(p_pos, c_pos, brush, s_width, nullptr);
+		target->DrawLine(p_pos, c_pos, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(p_pos, c_pos, brush, s_width, Shape::m_aux_style.get());
+		target->DrawLine(p_pos, c_pos, brush, m_aux_width, m_aux_style.get());
 	}
 
 	// 多角形の補助線を表示する.
@@ -108,9 +107,6 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos, const POLY_OPTION& p_opt)
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		D2D1_MATRIX_3X2_F tran;
-		target->GetTransform(&tran);
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// 線の太さ
 		D2D1_POINT_2F v_pos[N_GON_MAX];	// 頂点の配列
 
 		D2D1_POINT_2F p_vec;
@@ -120,9 +116,9 @@ namespace winrt::GraphPaper::implementation
 		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
 			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(v_pos[i], v_pos[j], brush, s_width, nullptr);
+			target->DrawLine(v_pos[i], v_pos[j], brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(v_pos[i], v_pos[j], brush, s_width, Shape::m_aux_style.get());
+			target->DrawLine(v_pos[i], v_pos[j], brush, m_aux_width, m_aux_style.get());
 		}
 	}
 
@@ -134,16 +130,13 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		D2D1_MATRIX_3X2_F tran;
-		target->GetTransform(&tran);
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// 線の太さ
 		const D2D1_RECT_F rc = {
 			p_pos.x, p_pos.y, c_pos.x, c_pos.y
 		};
 		brush->SetColor(COLOR_WHITE);
-		target->DrawRectangle(&rc, brush, s_width, nullptr);
+		target->DrawRectangle(&rc, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawRectangle(&rc, brush, s_width, Shape::m_aux_style.get());
+		target->DrawRectangle(&rc, brush, m_aux_width, m_aux_style.get());
 	}
 
 	// 角丸方形の補助線を表示する.
@@ -154,10 +147,6 @@ namespace winrt::GraphPaper::implementation
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		D2D1_MATRIX_3X2_F tran;
-		target->GetTransform(&tran);
-		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// 線の太さ
 		const double cx = c_pos.x;
 		const double cy = c_pos.y;
 		const double px = p_pos.x;
@@ -181,18 +170,18 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(ry)
 		};
 		brush->SetColor(COLOR_WHITE);
-		target->DrawRoundedRectangle(&r_rect, brush, s_width, nullptr);
+		target->DrawRoundedRectangle(&r_rect, brush, Shape::m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawRoundedRectangle(&r_rect, brush, s_width, Shape::m_aux_style.get());
+		target->DrawRoundedRectangle(&r_rect, brush, Shape::m_aux_width, Shape::m_aux_style.get());
 	}
 
 	void ShapePage::draw_auxiliary_qellipse(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
 	{
-		D2D1_MATRIX_3X2_F tran;
-		target->GetTransform(&tran);
-		const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// 線の太さ
+		//D2D1_MATRIX_3X2_F tran;
+		//target->GetTransform(&tran);
+		//const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// 線の太さ
 		D2D1_ARC_SEGMENT arc{
 			c_pos,
 			D2D1_SIZE_F{ fabsf(c_pos.x - p_pos.x), fabsf(c_pos.y - p_pos.y) },
@@ -200,7 +189,8 @@ namespace winrt::GraphPaper::implementation
 			D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE,
 			D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL
 		};
-		ID2D1Factory* factory = Shape::s_d2d_factory;
+		ID2D1Factory* factory;
+		target->GetFactory(&factory);
 		winrt::com_ptr<ID2D1PathGeometry> geom;
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 		winrt::check_hresult(factory->CreatePathGeometry(geom.put()));
@@ -212,27 +202,24 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(sink->Close());
 		sink = nullptr;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawGeometry(geom.get(), brush, s_width, nullptr);
+		target->DrawGeometry(geom.get(), brush, Shape::m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawGeometry(geom.get(), brush, s_width, Shape::m_aux_style.get());
+		target->DrawGeometry(geom.get(), brush, Shape::m_aux_width, Shape::m_aux_style.get());
 		geom = nullptr;
 	}
 
 	// 図形を表示する.
 	void ShapePage::draw(void)
 	{
-		ID2D1RenderTarget* const target = Shape::s_d2d_target;
-		ID2D1SolidColorBrush* const brush = Shape::s_d2d_color_brush;
-
-		// ページの色で塗りつぶす.
-		brush->SetColor(m_page_color);
-		target->FillRectangle(D2D1_RECT_F{ 0, 0, m_page_size.width, m_page_size.height }, brush);
+		// ページの色でページを塗りつぶす.
+		m_d2d_color_brush->SetColor(m_page_color);
+		m_d2d_target->FillRectangle(D2D1_RECT_F{ 0, 0, m_page_size.width, m_page_size.height }, m_d2d_color_brush.get());
+		// 方眼の表示が最背景に表示なら,
 		if (m_grid_show == GRID_SHOW::BACK) {
-			// 方眼の表示が最背面に表示の場合,
 			// 方眼を表示する.
 			page_draw_grid(
-				target,
-				brush,
+				m_d2d_target,
+				m_d2d_color_brush.get(),
 				m_grid_base,
 				m_grid_color,
 				m_grid_emph,
@@ -250,8 +237,8 @@ namespace winrt::GraphPaper::implementation
 			// 方眼の表示が最前面に表示の場合,
 			// 方眼を表示する.
 			page_draw_grid(
-				target,
-				brush,
+				m_d2d_target,
+				m_d2d_color_brush.get(),
 				m_grid_base,
 				m_grid_color,
 				m_grid_emph,
