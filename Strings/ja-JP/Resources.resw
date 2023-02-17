@@ -1023,39 +1023,47 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_deca.Text" xml:space="preserve">
-    <value>10:十角形</value>
+    <value>十角形 (10)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_line.Text" xml:space="preserve">
-    <value>2:直線</value>
+  <data name="rmfi_drawing_poly_hendeca.Text" xml:space="preserve">
+    <value>十一角形 (11)</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_drawing_poly_dodeca.Text" xml:space="preserve">
+    <value>十二角形 (12)</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_drawing_poly_di.Text" xml:space="preserve">
+    <value>二角形 (2)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_hept.Text" xml:space="preserve">
-    <value>7:七角形</value>
+    <value>七角形 (7)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_hexa.Text" xml:space="preserve">
-    <value>6:六角形</value>
+    <value>六角形 (6)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_nona.Text" xml:space="preserve">
-    <value>9:九角形</value>
+    <value>九角形 (9)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_octa.Text" xml:space="preserve">
-    <value>8:八角形</value>
+    <value>八角形 (8)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_pent.Text" xml:space="preserve">
-    <value>5:五角形</value>
+    <value>五角形 (5)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_quad.Text" xml:space="preserve">
-    <value>4:四辺形</value>
+    <value>四辺形 (4)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_tri.Text" xml:space="preserve">
-    <value>3:三角形</value>
+    <value>三角形 (3)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfsi_drawing_poly_opt.Text" xml:space="preserve">

@@ -60,10 +60,10 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::grid_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_dialog_page.set_attr_to(&m_main_page);
-		const auto val0 = m_dialog_page.m_grid_color.r * COLOR_MAX;
-		const auto val1 = m_dialog_page.m_grid_color.g * COLOR_MAX;
-		const auto val2 = m_dialog_page.m_grid_color.b * COLOR_MAX;
-		const auto val3 = m_dialog_page.m_grid_color.a * COLOR_MAX;
+		const auto val0 = static_cast<float>(conv_color_comp(m_dialog_page.m_grid_color.r));
+		const auto val1 = static_cast<float>(conv_color_comp(m_dialog_page.m_grid_color.g));
+		const auto val2 = static_cast<float>(conv_color_comp(m_dialog_page.m_grid_color.b));
+		const auto val3 = static_cast<float>(conv_color_comp(m_dialog_page.m_grid_color.a));
 
 		dialog_slider_0().Maximum(255.0);
 		dialog_slider_0().TickFrequency(1.0);
@@ -205,14 +205,15 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val + 1.0f, m_main_d2d.m_logical_dpi, g_len, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
+			dialog_set_slider_header<S>(text);
 		}
 		if constexpr (U == UNDO_ID::GRID_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
 			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
+			dialog_set_slider_header<S>(text);
 		}
-		dialog_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.

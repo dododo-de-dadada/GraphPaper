@@ -47,7 +47,7 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::image_opac_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_dialog_page.set_attr_to(&m_main_page);
-		const auto val = m_dialog_page.m_image_opac * COLOR_MAX;
+		const float val = static_cast<float>(conv_color_comp(m_dialog_page.m_image_opac));
 		dialog_slider_0().Maximum(255.0);
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
@@ -91,15 +91,13 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_ID U, int S>
 	void MainPage::image_slider_set_header(const float val)
 	{
-		winrt::hstring text;
-
 		if constexpr (U == UNDO_ID::IMAGE_OPAC) {
 			constexpr wchar_t R[]{ L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
-			text = ResourceLoader::GetForCurrentView().GetString(R) + L": " + buf;
+			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(R) + L": " + buf;
+			dialog_set_slider_header<S>(text);
 		}
-		dialog_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.

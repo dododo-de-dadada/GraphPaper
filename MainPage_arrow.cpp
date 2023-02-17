@@ -33,6 +33,8 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
 			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf;
+			dialog_set_slider_header<S>(text);
+			/*
 			if constexpr (S == 0) {
 				dialog_slider_0().Header(box_value(text));
 			}
@@ -45,6 +47,7 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 3) {
 				dialog_slider_3().Header(box_value(text));
 			}
+			*/
 		}
 	}
 

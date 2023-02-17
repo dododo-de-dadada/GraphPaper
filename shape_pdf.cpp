@@ -982,21 +982,45 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに PDF として書き込む.
-	size_t ShapePage::export_pdf(const D2D1_SIZE_F /*page_size*/, DataWriter const& dt_writer)
+	size_t ShapePage::export_pdf_page(const D2D1_COLOR_F& background, DataWriter const& dt_writer)
+	{
+		wchar_t buf[1024];
+		// PDF はアルファに対応してないので, 背景色と混ぜて, ページを塗りつぶす.
+		const double page_a =m_page_color.a;
+		const double page_r = page_a * m_page_color.r + (1.0 - page_a) * background.r;
+		const double page_g = page_a * m_page_color.g + (1.0 - page_a) * background.g;
+		const double page_b = page_a * m_page_color.b + (1.0 - page_a) * background.b;
+		swprintf_s(buf,
+			L"%f %f %f rg\n"
+			L"0 0 %f %f re\n"
+			L"b\n",
+			min(max(page_r, 0.0), 1.0),
+			min(max(page_g, 0.0), 1.0),
+			min(max(page_b, 0.0), 1.0),
+			m_page_size.width,
+			m_page_size.height
+		);
+		return dt_writer.WriteString(buf);
+	}
+
+	// 図形をデータライターに PDF として書き込む.
+	size_t ShapePage::export_pdf_grid(const D2D1_COLOR_F& background, DataWriter const& dt_writer)
 	{
 		const float grid_base = m_grid_base;
-		// PDF はアルファ値をサポートしないので混色
-		const float grid_a = m_grid_color.a;
-		const D2D1_COLOR_F grid_color{
-			grid_a * m_grid_color.r + (1.0f - grid_a) * m_page_color.r,
-			grid_a * m_grid_color.g + (1.0f - grid_a) * m_page_color.g,
-			grid_a * m_grid_color.b + (1.0f - grid_a) * m_page_color.b,
-			1.0f
-		};
+		// PDF はアルファに対応してないので, 背景色, ページ色と混ぜる.
+		const double page_a = m_page_color.a;
+		const double page_r = page_a * m_page_color.r + (1.0 - page_a) * background.r;
+		const double page_g = page_a * m_page_color.g + (1.0 - page_a) * background.g;
+		const double page_b = page_a * m_page_color.b + (1.0 - page_a) * background.b;
+		const double grid_a = m_grid_color.a;
+		const double grid_r = grid_a * m_grid_color.r + (1.0f - grid_a) * page_r;
+		const double grid_g = grid_a * m_grid_color.g + (1.0f - grid_a) * page_g;
+		const double grid_b = grid_a * m_grid_color.b + (1.0f - grid_a) * page_b;
 		const GRID_EMPH grid_emph = m_grid_emph;
 		const D2D1_POINT_2F grid_offset = m_grid_offset;
 		const float page_scale = m_page_scale;
 		const D2D1_SIZE_F page_size = m_page_size;
+
 		// 拡大されても 1 ピクセルになるよう拡大率の逆数を線枠の太さに格納する.
 		const FLOAT grid_width = static_cast<FLOAT>(1.0 / page_scale);	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
@@ -1010,11 +1034,9 @@ namespace winrt::GraphPaper::implementation
 		const double grid_len = max(grid_base + 1.0, 1.0);
 
 		size_t len = dt_writer.WriteString(L"% Grid Lines\n");	// 書き込んだバイト数
-		len += export_pdf_stroke(
-			0.0f,
-			grid_color,
-			CAP_FLAT,
-			D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PATT{},
+		len += export_pdf_stroke(0.0f,
+			D2D1_COLOR_F{ static_cast<FLOAT>(grid_r), static_cast<FLOAT>(grid_g), static_cast<FLOAT>(grid_b), 1.0f },
+			CAP_FLAT, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PATT{},
 			D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL, dt_writer);
 
 		// 垂直な方眼を表示する.
@@ -1082,24 +1104,30 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータライターに PDF として書き込む.
 	size_t ShapeQEllipse::export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer)
 	{
-		D2D1_POINT_2F c_pos{};
+		if (!is_opaque(m_fill_color) && (equal(m_stroke_width, 0.0f) ||
+			!is_opaque(m_stroke_color))) {
+			return 0;
+		}
+
 		D2D1_POINT_2F b_pos{};
 		D2D1_BEZIER_SEGMENT b_seg{};
-		if (is_opaque(m_fill_color) ||
-			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color))) {
-			alternate_bezier(b_pos, b_seg);
+		alternate_bezier(b_pos, b_seg);
+
+		D2D1_POINT_2F c_pos{};
+		if (is_opaque(m_fill_color) || m_arrow_style != ARROW_STYLE::NONE) {
+			get_pos_center(c_pos);
 		}
+
 		size_t len = 0;
-		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
-			len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap,
-				m_dash_style, m_dash_patt, m_join_style, m_join_miter_limit, dt_writer);
-		}
 		if (is_opaque(m_fill_color)) {
+			// rg = 塗りつぶし色
 			// f* = 偶奇規則を使用してパスを塗りつぶす。
 			// パスは自動的に閉じられる
 			wchar_t buf[1024];
 			swprintf_s(buf,
+				L"%f %f %f rg\n"
 				L"%f %f m %f %f %f %f %f %f c %f %f l f*\n",
+				m_fill_color.r, m_fill_color.g, m_fill_color.b,
 				b_pos.x, -b_pos.y + page_size.height,
 				b_seg.point1.x, -b_seg.point1.y + page_size.height,
 				b_seg.point2.x, -b_seg.point2.y + page_size.height,
@@ -1109,6 +1137,8 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 		}
 		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
+			len += export_pdf_stroke(m_stroke_width, m_stroke_color, m_stroke_cap,
+				m_dash_style, m_dash_patt, m_join_style, m_join_miter_limit, dt_writer);
 			// S = パスをストロークで描画
 			// パスは開いたまま.
 			wchar_t buf[1024];
@@ -1122,9 +1152,10 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
-				qellipse_calc_arrow(m_vec[0], c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-				len += export_pdf_arrow(
-					m_stroke_width, m_stroke_color, m_arrow_style, page_size, arrow, arrow[2], dt_writer);
+				qellipse_calc_arrow(m_vec[0], c_pos, m_radius, M_PI * m_rot_degree / 180.0, 
+					m_arrow_size, arrow);
+				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size,
+					arrow, arrow[2], dt_writer);
 			}
 		}
 		return len;

@@ -107,10 +107,10 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::page_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_dialog_page.set_attr_to(&m_main_page);
-		const float val0 = m_dialog_page.m_page_color.r * COLOR_MAX;
-		const float val1 = m_dialog_page.m_page_color.g * COLOR_MAX;
-		const float val2 = m_dialog_page.m_page_color.b * COLOR_MAX;
-		const float val3 = m_dialog_page.m_page_color.a * COLOR_MAX;
+		const float val0 = static_cast<float>(conv_color_comp(m_dialog_page.m_page_color.r));
+		const float val1 = static_cast<float>(conv_color_comp(m_dialog_page.m_page_color.g));
+		const float val2 = static_cast<float>(conv_color_comp(m_dialog_page.m_page_color.b));
+		const float val3 = static_cast<float>(conv_color_comp(m_dialog_page.m_page_color.a));
 
 		dialog_slider_0().Maximum(255.0);
 		dialog_slider_0().TickFrequency(1.0);
@@ -658,16 +658,15 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_ID U, int S>
 	void MainPage::page_slider_set_header(const float val)
 	{
-		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
+		//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
-		winrt::hstring text;
 		if constexpr (U == UNDO_ID::PAGE_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
-			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
+			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf };
+			dialog_set_slider_header<S>(text);
 		}
-		dialog_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.

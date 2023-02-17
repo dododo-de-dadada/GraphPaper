@@ -921,7 +921,8 @@ namespace winrt::GraphPaper::implementation
 		bool set_text_padding(const D2D1_SIZE_F val) noexcept final override;
 		// 図形をデータリーダーに書き込む.
 		void write(DataWriter const& dt_writer);
-		size_t export_pdf(const D2D1_SIZE_F /*page_size*/, DataWriter const& dt_writer);
+		size_t export_pdf_page(const D2D1_COLOR_F& background, DataWriter const& dt_writer);
+		size_t export_pdf_grid(const D2D1_COLOR_F& background, DataWriter const& dt_writer);
 		// 図形をデータライターに SVG として書き込む.
 		void export_svg(DataWriter const& dt_writer);
 	};
@@ -1649,6 +1650,11 @@ namespace winrt::GraphPaper::implementation
 		target->FillEllipse(e_inner, brush);
 	}
 
+	inline uint32_t conv_color_comp(const double c)
+	{
+		return min(static_cast<uint32_t>(floor(c * 256.0)), 255);
+	}
+
 	// 図形の部位 (正方形) を表示する.
 	// a_pos	部位の位置
 	// target	描画ターゲット
@@ -1686,7 +1692,8 @@ namespace winrt::GraphPaper::implementation
 	// 色が同じか判定する.
 	inline bool equal(const D2D1_COLOR_F& a, const D2D1_COLOR_F& b) noexcept
 	{
-		return equal_color_comp(a.a, b.a) && equal_color_comp(a.r, b.r) && equal_color_comp(a.g, b.g) && equal_color_comp(a.b, b.b);
+		return equal_color_comp(a.a, b.a) && equal_color_comp(a.r, b.r) && 
+			equal_color_comp(a.g, b.g) && equal_color_comp(a.b, b.b);
 	}
 
 	// 位置が同じか判定する.
@@ -1752,7 +1759,7 @@ namespace winrt::GraphPaper::implementation
 	// 色の成分が同じか判定する.
 	inline bool equal_color_comp(const FLOAT a, const FLOAT b) noexcept
 	{
-		return fabs(b - a) * 128.0f < 1.0f;
+		return conv_color_comp(a) == conv_color_comp(b);
 	}
 
 	// 矢じりの返しの位置を求める.
@@ -1787,8 +1794,8 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	不透明ならば true, 透明ならば false.
 	inline bool is_opaque(const D2D1_COLOR_F& val) noexcept
 	{
-		const uint32_t a = static_cast<uint32_t>(round(val.a * 255.0f));
-		return (a & 0xff) > 0;
+		//return conv_color_comp(val.a);
+		return val.a * 256.0 >= 1.0;
 	}
 
 	// ベクトルの長さ (の自乗値) を得る

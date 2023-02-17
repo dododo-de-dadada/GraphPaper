@@ -105,6 +105,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto ICON_DEBUG = L"\uEBE8";	// デバッグアイコン
 	constexpr auto VERT_STICK_DEF_VAL = 2.0f * 6.0f;	// 頂点をくっつける閾値の既定値
 	constexpr wchar_t PAGE_SETTING[] = L"page_setting.dat";	// ページ設定を格納するファイル名
+	constexpr uint32_t VERT_CNT_MAX = 12;	// 折れ線の頂点の最大数.
 	//-------------------------------
 	// 色の表記
 	//-------------------------------

@@ -72,7 +72,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 色の表記がパーセントか判定する.
 		else if (c_code == COLOR_CODE::CENT) {
-			swprintf_s(t_buf, t_len, L"%.1lf%%", c_val / COLOR_MAX * 100.0);
+			swprintf_s(t_buf, t_len, L"%.1lf%%", c_val * 100.0 / COLOR_MAX);
 		}
 		else {
 			swprintf_s(t_buf, t_len, L"?");
@@ -195,25 +195,26 @@ namespace winrt::GraphPaper::implementation
 			Undo::set(&m_main_page.m_shape_list, &m_main_page);
 		}
 
-		// クリックの判定時間と判定距離をシステムから得る.
-		{
-			//m_event_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;
-			auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
-			auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			m_event_click_dist = 6.0 * raw_dpi / log_dpi;
-		}
+		// クリックの判定距離をシステムから得る.
+		//{
+		//	auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
+		//	auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
+		//	m_event_click_dist = 6.0 * raw_dpi / log_dpi;
+		//}
 
 		// 背景パターン画像の読み込み.
 		{
 			// WIC ファクトリを作成する.
 			winrt::com_ptr<IWICImagingFactory2> wic_factory;
 			winrt::check_hresult(
-				CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wic_factory))
+				CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER,
+					IID_PPV_ARGS(&wic_factory))
 			);
 			// WIC ファクトリを使って, 画像ファイルを読み込み WIC デコーダーを作成する.
 			winrt::com_ptr<IWICBitmapDecoder> wic_decoder;
 			winrt::check_hresult(
-				wic_factory->CreateDecoderFromFilename(L"background.png", nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put())
+				wic_factory->CreateDecoderFromFilename(L"Assets/background.png", nullptr,
+					GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put())
 			);
 			// 読み込まれた画像のフレーム数を得る (通常は 1 フレーム).
 			UINT f_cnt;

@@ -270,16 +270,18 @@
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_draw}"/>
 					</MenuFlyoutSubItem.Icon>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_line" x:Uid="rmfi_drawing_poly_line" Click="drawing_tool_click" GroupName="gn_poly_type" Text="2-Line" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_tri" x:Uid="rmfi_drawing_poly_tri" Click="drawing_tool_click" IsChecked="True" GroupName="gn_poly_type" Text="3-Triangle" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_quad" x:Uid="rmfi_drawing_poly_quad" Click="drawing_tool_click" GroupName="gn_poly_type" Text="4-Quadrilateral" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_pent" x:Uid="rmfi_drawing_poly_pent" Click="drawing_tool_click" GroupName="gn_poly_type" Text="5-Pentagon" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_hexa" x:Uid="rmfi_drawing_poly_hexa" Click="drawing_tool_click" GroupName="gn_poly_type" Text="6-Hexagon" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_hept" x:Uid="rmfi_drawing_poly_hept" Click="drawing_tool_click" GroupName="gn_poly_type" Text="7-Heptagon" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_octa" x:Uid="rmfi_drawing_poly_octa" Click="drawing_tool_click" GroupName="gn_poly_type" Text="8-Octagon" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_nona" x:Uid="rmfi_drawing_poly_nona" Click="drawing_tool_click" GroupName="gn_poly_type" Text="9-Nonagon" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_deca" x:Uid="rmfi_drawing_poly_deca" Click="drawing_tool_click" GroupName="gn_poly_type" Text="10-Decagon" />
-					<MenuFlyoutSeparator />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_di" x:Uid="rmfi_drawing_poly_di" Click="drawing_tool_click" GroupName="gn_poly_type" Text="Digon (2)" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_tri" x:Uid="rmfi_drawing_poly_tri" Click="drawing_tool_click" IsChecked="True" GroupName="gn_poly_type" Text="Triangle (3)" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_quad" x:Uid="rmfi_drawing_poly_quad" Click="drawing_tool_click" GroupName="gn_poly_type" Text="Quadrilateral (4)" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_pent" x:Uid="rmfi_drawing_poly_pent" Click="drawing_tool_click" GroupName="gn_poly_type" Text="Pentagon (5)" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_hexa" x:Uid="rmfi_drawing_poly_hexa" Click="drawing_tool_click" GroupName="gn_poly_type" Text="Hexagon (6)" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_hept" x:Uid="rmfi_drawing_poly_hept" Click="drawing_tool_click" GroupName="gn_poly_type" Text="Heptagon (7)" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_octa" x:Uid="rmfi_drawing_poly_octa" Click="drawing_tool_click" GroupName="gn_poly_type" Text="Octagon (8)" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_nona" x:Uid="rmfi_drawing_poly_nona" Click="drawing_tool_click" GroupName="gn_poly_type" Text="Nonagon (9)" />
+					<muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_deca" x:Uid="rmfi_drawing_poly_deca" Click="drawing_tool_click" GroupName="gn_poly_type" Text="Decagon (10)" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_hendeca" x:Uid="rmfi_drawing_poly_hendeca" Click="drawing_tool_click" GroupName="gn_poly_type" Text="Hendecagon (11)" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_drawing_poly_dodeca" x:Uid="rmfi_drawing_poly_dodeca" Click="drawing_tool_click" GroupName="gn_poly_type" Text="Dedecagon (12)" />
+                    <MenuFlyoutSeparator />
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_regular" x:Uid="tmfi_tool_poly_regular" Click="drawing_tool_click" IsChecked="true" Text="Reguler Polygon" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_vertex_up" x:Uid="tmfi_tool_poly_vertex_up" Click="drawing_tool_click" IsChecked="true" Text="Vertex Up" />
 					<ToggleMenuFlyoutItem x:Name="tmfi_tool_poly_end_close" x:Uid="tmfi_tool_poly_end_close" Click="drawing_tool_click" IsChecked="true" Text="End Close" />

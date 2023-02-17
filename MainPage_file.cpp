@@ -482,8 +482,11 @@ namespace winrt::GraphPaper::implementation
 			co_await dt_reader.LoadAsync(static_cast<uint32_t>(ra_stream.Size()));
 
 			// メインページの作図の属性を読み込む.
-			m_drawing_tool = static_cast<DRAWING_TOOL>(dt_reader.ReadUInt32());			
+			m_drawing_tool = static_cast<DRAWING_TOOL>(dt_reader.ReadUInt32());
 			m_drawing_poly_opt.m_vertex_cnt = dt_reader.ReadUInt32();
+			if (m_drawing_poly_opt.m_vertex_cnt < 2 || m_drawing_poly_opt.m_vertex_cnt > 12) {
+				m_drawing_poly_opt.m_vertex_cnt = 3;
+			}
 			m_drawing_poly_opt.m_regular = dt_reader.ReadBoolean();
 			m_drawing_poly_opt.m_vertex_up = dt_reader.ReadBoolean();
 			m_drawing_poly_opt.m_end_closed = dt_reader.ReadBoolean();
@@ -508,7 +511,15 @@ namespace winrt::GraphPaper::implementation
 			m_find_text_case = ((f_bit & 2) != 0);
 			m_find_text_wrap = ((f_bit & 4) != 0);
 
-			// メインページのその他の属性を読み込む.
+			// 背景パターン
+			m_background_show = dt_reader.ReadBoolean();
+			m_background_color.r = dt_reader.ReadSingle();
+			m_background_color.g = dt_reader.ReadSingle();
+			m_background_color.b = dt_reader.ReadSingle();
+			m_background_color.a = dt_reader.ReadSingle();
+			m_background_color.a = 1.0f;
+
+			// その他の属性を読み込む.
 			m_len_unit = static_cast<LEN_UNIT>(dt_reader.ReadUInt32());
 			m_color_code = static_cast<COLOR_CODE>(dt_reader.ReadUInt16());
 			m_vert_stick = dt_reader.ReadSingle();
@@ -891,6 +902,7 @@ namespace winrt::GraphPaper::implementation
 			DataWriter dt_writer{
 				DataWriter(ra_stream.GetOutputStreamAt(0))
 			};
+			// 作図
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_drawing_tool));
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_drawing_poly_opt.m_vertex_cnt));
 			dt_writer.WriteBoolean(m_drawing_poly_opt.m_regular);
@@ -918,6 +930,13 @@ namespace winrt::GraphPaper::implementation
 				f_bit |= 4;
 			}
 			dt_writer.WriteUInt16(f_bit);
+			// 背景パターン
+			dt_writer.WriteBoolean(m_background_show);
+			dt_writer.WriteSingle(m_background_color.r);
+			dt_writer.WriteSingle(m_background_color.g);
+			dt_writer.WriteSingle(m_background_color.b);
+			dt_writer.WriteSingle(1.0f);
+			// その他
 			dt_writer.WriteUInt32(static_cast<uint32_t>(m_len_unit));
 			dt_writer.WriteUInt16(static_cast<uint16_t>(m_color_code));
 			dt_writer.WriteSingle(m_vert_stick);

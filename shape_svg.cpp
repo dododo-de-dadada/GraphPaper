@@ -86,16 +86,14 @@ namespace winrt::GraphPaper::implementation
 			swprintf_s(buf, len, L"%s=\"none\" ", name);
 		}
 		else {
-			const int32_t r = static_cast<int32_t>(std::round(color.r * 255.0));	// Red
-			const int32_t g = static_cast<int32_t>(std::round(color.g * 255.0));	// Green
-			const int32_t b = static_cast<int32_t>(std::round(color.b * 255.0));	// Blue
+			const int32_t r = static_cast<int32_t>(min(floor(color.r * 256.0), 255.0));	// Red
+			const int32_t g = static_cast<int32_t>(min(floor(color.g * 256.0), 255.0));	// Green
+			const int32_t b = static_cast<int32_t>(min(floor(color.b * 256.0), 255.0));	// Blue
 			swprintf_s(buf,
 				len,
 				L"%s=\"#%02x%02x%02x\" %s-opacity=\"%f\" ",
 				name,
-				min(max(r, 0), 255),
-				min(max(g, 0), 255),
-				min(max(b, 0), 255),
+				r, g, b,
 				name,
 				color.a
 			);
@@ -676,6 +674,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F grid_offset = m_grid_offset;
 		const float page_scale = m_page_scale;
 		const D2D1_SIZE_F page_size = m_page_size;
+
 		// Šg‘å‚³‚ê‚Ä‚à 1 ƒsƒNƒZƒ‹‚É‚È‚é‚æ‚¤Šg‘å—¦‚Ì‹t”‚ğü˜g‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
 		const FLOAT grid_width = static_cast<FLOAT>(1.0 / page_scale);	// •ûŠá‚Ì‘¾‚³
 		D2D1_POINT_2F h_start, h_end;	// ‰¡‚Ì•ûŠá‚ÌŠJnEI—¹ˆÊ’u

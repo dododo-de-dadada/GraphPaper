@@ -241,10 +241,10 @@ namespace winrt::GraphPaper::implementation
 			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_eyedropper")));
 				winrt::Windows::UI::Color c{
-					min(static_cast<uint8_t>(round(m_eyedropper_color.a * 255.0f)), static_cast<uint8_t>(255)),
-					min(static_cast<uint8_t>(round(m_eyedropper_color.r * 255.0f)), static_cast<uint8_t>(255)),
-					min(static_cast<uint8_t>(round(m_eyedropper_color.g * 255.0f)), static_cast<uint8_t>(255)),
-					min(static_cast<uint8_t>(round(m_eyedropper_color.b * 255.0f)), static_cast<uint8_t>(255))
+					static_cast<uint8_t>(conv_color_comp(m_eyedropper_color.a)),
+					static_cast<uint8_t>(conv_color_comp(m_eyedropper_color.r)),
+					static_cast<uint8_t>(conv_color_comp(m_eyedropper_color.g)),
+					static_cast<uint8_t>(conv_color_comp(m_eyedropper_color.b))
 				};
 				r_eyedropper().Fill(winrt::Windows::UI::Xaml::Media::SolidColorBrush{ c });
 				r_eyedropper().Visibility(Visibility::Visible);

@@ -243,9 +243,7 @@
     <Image Include="Assets\StoreLogo.scale-400.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="..\..\..\Documents\background.png">
-      <Filter>Assets</Filter>
-    </Image>
+    <Image Include="Assets\background.png" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

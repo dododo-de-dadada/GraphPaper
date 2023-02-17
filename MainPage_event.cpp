@@ -615,9 +615,11 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::CLICK) {
 			// ポインターの現在位置と押された位置の長さを求め,
 			// 長さがクリック判定距離を超えるか判定する.
+			const auto raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
+			const auto log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
 			D2D1_POINT_2F vec;
 			pt_sub(m_event_pos_curr, m_event_pos_pressed, vec);
-			if (pt_abs2(vec) > m_event_click_dist / m_main_page.m_page_scale) {
+			if (pt_abs2(vec) * m_main_page.m_page_scale  > m_event_click_dist * raw_dpi / log_dpi) {
 				// 初期状態に戻る.
 				m_event_state = EVENT_STATE::BEGIN;
 				event_set_cursor();

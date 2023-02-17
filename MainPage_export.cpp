@@ -557,25 +557,9 @@ namespace winrt::GraphPaper::implementation
 			);
 			len = dt_writer.WriteString(buf);
 
-			// 背景
-			const double page_a = m_main_page.m_page_color.a;
-			const double page_r = page_a * m_main_page.m_page_color.r + (1.0 - page_a) * m_background_color.r;
-			const double page_g = page_a * m_main_page.m_page_color.g + (1.0 - page_a) * m_background_color.g;
-			const double page_b = page_a * m_main_page.m_page_color.b + (1.0 - page_a) * m_background_color.b;
-			swprintf_s(buf,
-				L"%f %f %f rg\n"
-				L"0 0 %f %f re\n"
-				L"b\n",
-				min(max(page_r, 0.0), 1.0),
-				min(max(page_g, 0.0), 1.0),
-				min(max(page_b, 0.0), 1.0),
-				m_main_page.m_page_size.width,
-				m_main_page.m_page_size.height
-			);
-			len += dt_writer.WriteString(buf);
-
+			len += m_main_page.export_pdf_page(m_background_color, dt_writer);
 			if (m_main_page.m_grid_show == GRID_SHOW::BACK) {
-				len += m_main_page.export_pdf(m_main_page.m_page_size, dt_writer);
+				len += m_main_page.export_pdf_grid(m_background_color, dt_writer);
 			}
 
 			// 図形を出力
@@ -587,7 +571,7 @@ namespace winrt::GraphPaper::implementation
 				len += s->export_pdf(page_size, dt_writer);
 			}
 			if (m_main_page.m_grid_show == GRID_SHOW::FRONT) {
-				len += m_main_page.export_pdf(m_main_page.m_page_size, dt_writer);
+				len += m_main_page.export_pdf_grid(m_background_color, dt_writer);
 			}
 			len += dt_writer.WriteString(
 				L"Q\n"
@@ -1014,9 +998,9 @@ namespace winrt::GraphPaper::implementation
 					L"style=\"background-color:#%02x%02x%02x\">\n",
 					w, u, h, u,
 					size.width, size.height,
-					static_cast<uint32_t>(std::round(color.r * 255.0)),
-					static_cast<uint32_t>(std::round(color.g * 255.0)),
-					static_cast<uint32_t>(std::round(color.b * 255.0))
+					conv_color_comp(color.r),
+					conv_color_comp(color.g),
+					conv_color_comp(color.b)
 				);
 				dt_writer.WriteString(buf);
 			}

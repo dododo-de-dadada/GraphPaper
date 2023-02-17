@@ -119,12 +119,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		m_dialog_page.set_attr_to(&m_main_page);
 
-		D2D1_COLOR_F f_color;
-		m_dialog_page.get_font_color(f_color);
-		const float val0 = f_color.r * COLOR_MAX;
-		const float val1 = f_color.g * COLOR_MAX;
-		const float val2 = f_color.b * COLOR_MAX;
-		const float val3 = f_color.a * COLOR_MAX;
+		D2D1_COLOR_F val;
+		m_dialog_page.get_font_color(val);
+		const float val0 = static_cast<float>(conv_color_comp(val.r));
+		const float val1 = static_cast<float>(conv_color_comp(val.g));
+		const float val2 = static_cast<float>(conv_color_comp(val.b));
+		const float val3 = static_cast<float>(conv_color_comp(val.a));
 		dialog_slider_0().Maximum(255.0);
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
@@ -252,14 +252,13 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_ID U, int S>
 	void MainPage::font_slider_set_header(const float val)
 	{
-		winrt::hstring text;
-
 		if constexpr (U == UNDO_ID::FONT_SIZE) {
 			wchar_t buf[32];
 			float g_base;
 			m_dialog_page.get_grid_base(g_base);
 			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val + 1.0f, m_dialog_d2d.m_logical_dpi, g_base + 1.0f, buf);
-			text = ResourceLoader::GetForCurrentView().GetString(L"str_font_size") + L": " + buf;
+			const auto text{ ResourceLoader::GetForCurrentView().GetString(L"str_font_size") + L": " + buf };
+			dialog_set_slider_header<S>(text);
 		}
 		if constexpr (U == UNDO_ID::FONT_COLOR) {
 			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
@@ -267,7 +266,8 @@ namespace winrt::GraphPaper::implementation
 				wchar_t buf[32];
 				// êFê¨ï™ÇÃílÇï∂éöóÒÇ…ïœä∑Ç∑ÇÈ.
 				conv_col_to_str(m_color_code, val, buf);
-				text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
+				const auto text{ ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf };
+				dialog_set_slider_header<S>(text);
 			//}
 			//if constexpr (S == 1) {
 			//	wchar_t buf[32];
@@ -288,6 +288,7 @@ namespace winrt::GraphPaper::implementation
 			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
 			//}
 		}
+		/*
 		if constexpr (S == 0) {
 			dialog_slider_0().Header(box_value(text));
 		}
@@ -300,6 +301,7 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (S == 3) {
 			dialog_slider_3().Header(box_value(text));
 		}
+		*/
 	}
 
 	//---------------------------------

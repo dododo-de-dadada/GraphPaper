@@ -10,11 +10,8 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr wchar_t TITLE_FILL[] = L"str_fill_color";
 
@@ -24,10 +21,10 @@ namespace winrt::GraphPaper::implementation
 		m_dialog_page.set_attr_to(&m_main_page);
 		D2D1_COLOR_F val;
 		m_dialog_page.get_fill_color(val);
-		const float val0 = val.r * COLOR_MAX;
-		const float val1 = val.g * COLOR_MAX;
-		const float val2 = val.b * COLOR_MAX;
-		const float val3 = val.a * COLOR_MAX;
+		const float val0 = static_cast<float>(conv_color_comp(val.r));
+		const float val1 = static_cast<float>(conv_color_comp(val.g));
+		const float val2 = static_cast<float>(conv_color_comp(val.b));
+		const float val3 = static_cast<float>(conv_color_comp(val.a));
 
 		//FindName(L"cd_setting_dialog");
 
@@ -106,15 +103,13 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_ID U, int S>
 	void MainPage::fill_slider_set_header(const float val)
 	{
-		winrt::hstring text;
-
 		if constexpr (U == UNDO_ID::FILL_COLOR) {
-			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
+			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g", L"str_color_b", L"str_opacity" };
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
-			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
+			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf };
+			dialog_set_slider_header<S>(text);
 		}
-		dialog_set_slider_header<S>(text);
 	}
 
 	// スライダーの値が変更された.
@@ -139,10 +134,9 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (S == 2) {
 				f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
 			}
-			if constexpr (U != UNDO_ID::PAGE_COLOR && S == 3) {
+			if constexpr (S == 3) {
 				f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
 			}
-			//m_sample_shape->set_fill_color(f_color);
 			m_dialog_page.m_shape_list.back()->set_fill_color(f_color);
 			if (scp_dialog_panel().IsLoaded()) {
 				dialog_draw();

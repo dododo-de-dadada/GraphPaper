@@ -51,7 +51,7 @@ namespace winrt::GraphPaper::implementation
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::EYEDROPPER);
 		}
 		else {
-			if (sender == rmfi_drawing_poly_line()) {
+			if (sender == rmfi_drawing_poly_di()) {
 				drawing_poly_vtx_is_checked(m_drawing_poly_opt.m_vertex_cnt = 2);
 			}
 			else if (sender == rmfi_drawing_poly_tri()) {
@@ -129,7 +129,7 @@ namespace winrt::GraphPaper::implementation
 	// 多角形の頂点数メニューにチェックをつける.
 	void MainPage::drawing_poly_vtx_is_checked(const uint32_t val)
 	{
-		rmfi_drawing_poly_line().IsChecked(val == 2);
+		rmfi_drawing_poly_di().IsChecked(val == 2);
 		rmfi_drawing_poly_tri().IsChecked(val == 3);
 		rmfi_drawing_poly_quad().IsChecked(val == 4);
 		rmfi_drawing_poly_pent().IsChecked(val == 5);

@@ -1023,39 +1023,47 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_deca.Text" xml:space="preserve">
-    <value>Decagon</value>
+    <value>Decagon (10)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_poly_line.Text" xml:space="preserve">
-    <value>Line</value>
+  <data name="rmfi_drawing_poly_hendeca.Text" xml:space="preserve">
+    <value>Hendecagon (11)</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_drawing_poly_dodeca.Text" xml:space="preserve">
+    <value>Hendecagon (12)</value>
+    <comment>RadioMenuFlyoutItem</comment>
+  </data>
+  <data name="rmfi_drawing_poly_di.Text" xml:space="preserve">
+    <value>Digon (2)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_hept.Text" xml:space="preserve">
-    <value>Heptagon</value>
+    <value>Heptagon (7)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_hexa.Text" xml:space="preserve">
-    <value>Hexagon</value>
+    <value>Hexagon (6)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_nona.Text" xml:space="preserve">
-    <value>Nonagon</value>
+    <value>Nonagon (9)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_octa.Text" xml:space="preserve">
-    <value>Octagon</value>
+    <value>Octagon (8)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_pent.Text" xml:space="preserve">
-    <value>Pentagon</value>
+    <value>Pentagon (5)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_quad.Text" xml:space="preserve">
-    <value>Quadrilateral</value>
+    <value>Quadrilateral (4)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_poly_tri.Text" xml:space="preserve">
-    <value>Triangle</value>
+    <value>Triangle (3)</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="mfsi_drawing_poly_opt.Text" xml:space="preserve">

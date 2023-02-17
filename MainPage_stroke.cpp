@@ -38,13 +38,13 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::stroke_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_dialog_page.set_attr_to(&m_main_page);
-		D2D1_COLOR_F s_color;
-		m_dialog_page.get_stroke_color(s_color);
+		D2D1_COLOR_F val;
+		m_dialog_page.get_stroke_color(val);
 
-		const float val0 = s_color.r * COLOR_MAX;
-		const float val1 = s_color.g * COLOR_MAX;
-		const float val2 = s_color.b * COLOR_MAX;
-		const float val3 = s_color.a * COLOR_MAX;
+		const float val0 = static_cast<float>(conv_color_comp(val.r));
+		const float val1 = static_cast<float>(conv_color_comp(val.g));
+		const float val2 = static_cast<float>(conv_color_comp(val.b));
+		const float val3 = static_cast<float>(conv_color_comp(val.a));
 
 		dialog_slider_0().Maximum(255.0);
 		dialog_slider_0().TickFrequency(1.0);
