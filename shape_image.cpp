@@ -13,7 +13,8 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::RandomAccessStreamReference;
 
 	// 点に最も近い, 線分上の点を求める.
-	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, const D2D1_POINT_2F b, /*--->*/D2D1_POINT_2F& q) noexcept;
+	static void image_get_pos_on_line(const D2D1_POINT_2F p, const D2D1_POINT_2F a, 
+		const D2D1_POINT_2F b, /*--->*/D2D1_POINT_2F& q) noexcept;
 
 	winrt::com_ptr<IWICImagingFactory2> ShapeImage::wic_factory{	// WIC ファクトリ
 		[]() {
@@ -522,7 +523,7 @@ namespace winrt::GraphPaper::implementation
 	// val	値
 	// anc	図形の部位
 	// limit	他の頂点との限界距離 (この値未満になるなら, 図形の部位が指定する頂点を他の頂点に位置に合わせる)
-	// keep_aspect	画像図形の縦横比を維持
+	// keep_aspect	画像の縦横比を維持
 	bool ShapeImage::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float /*limit*/, const bool keep_aspect) noexcept
 	{
 		D2D1_POINT_2F new_pos;
@@ -721,11 +722,11 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// pos	左上位置
-	// page_size	表示される大きさ
+	// view	表示される大きさ
 	// bmp	ビットマップ
 	// opac	不透明度
-	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F page_size, const SoftwareBitmap& bmp, const float opac) //:
-		//ShapeSelect()
+	ShapeImage::ShapeImage(const D2D1_POINT_2F pos, const D2D1_SIZE_F view, 
+		const SoftwareBitmap& bmp, const float opac)
 	{
 		const uint32_t image_w = bmp.PixelWidth();
 		const uint32_t image_h = bmp.PixelHeight();
@@ -733,7 +734,7 @@ namespace winrt::GraphPaper::implementation
 		m_orig.width = image_w;
 		m_orig.height = image_h;
 		m_start = pos;
-		m_view = page_size;
+		m_view = view;
 		m_clip.left = m_clip.top = 0;
 		m_clip.right = static_cast<FLOAT>(image_w);
 		m_clip.bottom = static_cast<FLOAT>(image_h);
@@ -742,9 +743,14 @@ namespace winrt::GraphPaper::implementation
 		if (bgra_size > 0) {
 			m_bgra = new uint8_t[bgra_size];
 			// SoftwareBitmap のバッファをロックする.
-			auto image_buf{ bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite) };
-			auto image_ref{ image_buf.CreateReference() };
-			winrt::com_ptr<IMemoryBufferByteAccess> image_mem = image_ref.as<IMemoryBufferByteAccess>();
+			auto image_buf{
+				bmp.LockBuffer(BitmapBufferAccessMode::ReadWrite)
+			};
+			auto image_ref{
+				image_buf.CreateReference()
+			};
+			winrt::com_ptr<IMemoryBufferByteAccess> image_mem = 
+				image_ref.as<IMemoryBufferByteAccess>();
 			BYTE* image_data = nullptr;
 			UINT32 capacity = 0;
 			if (SUCCEEDED(image_mem->GetBuffer(&image_data, &capacity))) {
@@ -753,9 +759,8 @@ namespace winrt::GraphPaper::implementation
 				// ロックしたバッファを解放する.
 				image_buf.Close();
 				image_buf = nullptr;
-				//image_mem->Release();
-				image_mem = nullptr;
 			}
+			image_mem = nullptr;
 		}
 		else {
 			m_bgra = nullptr;
@@ -768,7 +773,8 @@ namespace winrt::GraphPaper::implementation
 		ShapeSelect(dt_reader),
 		m_start(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_view(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
-		m_clip(D2D1_RECT_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
+		m_clip(D2D1_RECT_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle(), 
+			dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_orig(D2D1_SIZE_U{ dt_reader.ReadUInt32(), dt_reader.ReadUInt32() }),
 		m_ratio(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_opac(dt_reader.ReadSingle())

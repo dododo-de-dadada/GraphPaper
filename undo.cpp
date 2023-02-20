@@ -141,7 +141,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形の形の操作をデータライターに書き込む.
 	void UndoForm::write(DataWriter const& dt_writer)
 	{
-		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_ID::FORM));
+		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_ID::DEFORM));
 		undo_write_shape(m_shape, dt_writer);
 		dt_writer.WriteUInt32(static_cast<uint32_t>(m_anc));
 		dt_writer.WriteSingle(m_start.x);

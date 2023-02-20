@@ -195,25 +195,13 @@ namespace winrt::GraphPaper::implementation
 			Undo::set(&m_main_page.m_shape_list, &m_main_page);
 		}
 
-		// クリックの判定距離をシステムから得る.
-		//{
-		//	auto const raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
-		//	auto const log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-		//	m_event_click_dist = 6.0 * raw_dpi / log_dpi;
-		//}
-
 		// 背景パターン画像の読み込み.
 		{
-			// WIC ファクトリを作成する.
-			winrt::com_ptr<IWICImagingFactory2> wic_factory;
-			winrt::check_hresult(
-				CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER,
-					IID_PPV_ARGS(&wic_factory))
-			);
 			// WIC ファクトリを使って, 画像ファイルを読み込み WIC デコーダーを作成する.
+			// WIC ファクトリは ShapeImage が確保しているものを使用する.
 			winrt::com_ptr<IWICBitmapDecoder> wic_decoder;
 			winrt::check_hresult(
-				wic_factory->CreateDecoderFromFilename(L"Assets/background.png", nullptr,
+				ShapeImage::wic_factory->CreateDecoderFromFilename(L"Assets/background.png", nullptr,
 					GENERIC_READ, WICDecodeMetadataCacheOnDemand, wic_decoder.put())
 			);
 			// 読み込まれた画像のフレーム数を得る (通常は 1 フレーム).
@@ -229,9 +217,8 @@ namespace winrt::GraphPaper::implementation
 			wic_decoder = nullptr;
 			// WIC ファクトリを使って, WIC フォーマットコンバーターを作成する.
 			winrt::check_hresult(
-				wic_factory->CreateFormatConverter(m_background.put())
+				ShapeImage::wic_factory->CreateFormatConverter(m_background.put())
 			);
-			wic_factory = nullptr;
 			// WIC フォーマットコンバーターに, 得たフレームを格納する.
 			winrt::check_hresult(
 				m_background->Initialize(wic_frame.get(), GUID_WICPixelFormat32bppPBGRA,

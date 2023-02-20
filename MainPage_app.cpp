@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 			if (app_data_file != nullptr) {
 				constexpr bool RESUME = true;
 				constexpr bool SETTING_ONLY = true;
-				co_await file_read_async<RESUME, !SETTING_ONLY>(app_data_file);
+				co_await file_read_gpf_async<RESUME, !SETTING_ONLY>(app_data_file);
 				app_data_file = nullptr;
 			}
 			app_data_item = nullptr;

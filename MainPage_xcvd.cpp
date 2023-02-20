@@ -288,8 +288,8 @@ namespace winrt::GraphPaper::implementation
 		const float win_h = static_cast<float>(scp_page_panel().ActualHeight());
 		const float win_x = static_cast<float>(sb_horz().Value());
 		const float win_y = static_cast<float>(sb_vert().Value());
-		const float nw_x = m_main_bbox_lt.x;
-		const float nw_y = m_main_bbox_lt.y;
+		const float lt_x = m_main_bbox_lt.x;
+		const float lt_y = m_main_bbox_lt.y;
 
 		// resume_background ‚µ‚È‚¢‚Æ GetBitmapAsync ‚ªŽ¸”s‚·‚é‚±‚Æ‚ª‚ ‚é.
 		co_await winrt::resume_background();
@@ -306,8 +306,8 @@ namespace winrt::GraphPaper::implementation
 		const float img_h = static_cast<float>(bmp.PixelHeight());
 		const float scale = m_main_page.m_page_scale;
 		D2D1_POINT_2F pos{
-			static_cast<FLOAT>(nw_x + (win_x + win_w * 0.5) / scale - img_w * 0.5),
-			static_cast<FLOAT>(nw_y + (win_y + win_h * 0.5) / scale - img_h * 0.5)
+			static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) / scale - img_w * 0.5),
+			static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) / scale - img_h * 0.5)
 		};
 		const D2D1_SIZE_F page_size{ img_w, img_h };
 

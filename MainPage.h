@@ -164,7 +164,7 @@ namespace winrt::GraphPaper::implementation
 		PRESS_RBTN,	// 右ボタンを押している状態
 		PRESS_AREA,	// 左ボタンを押して, 範囲を選択している状態
 		PRESS_MOVE,	// 左ボタンを押して, 図形を移動している状態
-		PRESS_FORM,	// 左ボタンを押して, 図形を変形している状態
+		PRESS_DEFORM,	// 左ボタンを押して, 図形を変形している状態
 		CLICK,	// クリックした状態
 		CLICK_LBTN,	// クリック後に左ボタンを押した状態
 	};
@@ -257,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 		uint64_t m_event_time_pressed = 0ULL;	// ポインターが押された時刻
 		//uint64_t m_event_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;	// クリックの判定時間 (マイクロ秒)
 		double m_event_click_dist = 6.0;	// クリックの判定距離 (DIPs)
-		D2D1_COLOR_F m_eyedropper_color = COLOR_BLACK;	// 抽出された色.
+		D2D1_COLOR_F m_eyedropper_color{};	// 抽出された色.
 		bool m_eyedropper_filled = false;
 
 		// 作図ツール
@@ -273,8 +273,8 @@ namespace winrt::GraphPaper::implementation
 		// メインページ
 		ShapePage m_main_page;	// ページ
 		D2D_UI m_main_d2d;	// 描画環境
-		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// 境界ボックスの左上位置 (値がマイナスのときは, 図形がページの外側にある)
-		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// 境界ボックスの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_main_bbox_lt{ 0.0f, 0.0f };	// ページを含めた図形全体の境界ボックスの左上位置 (値がマイナスのときは, 図形がページの外側にある)
+		D2D1_POINT_2F m_main_bbox_rb{ 0.0f, 0.0f };	// ページを含めた図形全体の境界ボックスの右下位置 (値がページの大きさより大きいときは, 図形がページの外側にある)
 
 		// 背景パターン
 		winrt::com_ptr<IWICFormatConverter> m_background{ nullptr };
@@ -428,6 +428,8 @@ namespace winrt::GraphPaper::implementation
 		void event_entered(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターがページのスワップチェーンパネルから出た.
 		void event_exited(IInspectable const& sender, PointerRoutedEventArgs const& args);
+		// 色を検出する.
+		void event_eyedropper_detect(const Shape* s, const uint32_t anc);
 		// 図形の作成を終了する.
 		void event_finish_creating(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec);
 		// 文字列図形の作成を終了する.
@@ -478,7 +480,7 @@ namespace winrt::GraphPaper::implementation
 		IAsyncAction file_save_click_async(IInspectable const&, RoutedEventArgs const&) noexcept;
 		// ストレージファイルを非同期に読む.
 		template <bool RESUME, bool SETTING_ONLY>
-		IAsyncOperation<winrt::hresult> file_read_async(StorageFile s_file) noexcept;
+		IAsyncOperation<winrt::hresult> file_read_gpf_async(StorageFile s_file) noexcept;
 		// ファイルメニューの「最近使ったファイル 」のサブ項目が選択された
 		IAsyncAction file_recent_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 最近使ったファイルにストレージファイルを追加する.
@@ -648,13 +650,13 @@ namespace winrt::GraphPaper::implementation
 		// 画像
 		//-----------------------------
 
-		// 画像メニューの「縦横比を変えない」が選択された.
+		// 画像メニューの「画像の縦横比を維持」が選択された.
 		void image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept;
-		// 画像メニューの「縦横比を変えない」に印をつける.
+		// 画像メニューの「画像の縦横比を維持」に印をつける.
 		void image_keep_aspect_is_checked(const bool keep_aspect);
 		// 画像メニューの「原画像に戻す」が選択された.
 		void image_revert_to_original_click(IInspectable const&, RoutedEventArgs const&) noexcept;
-		// 画像メニューの「不透明度...」が選択された.
+		// 画像メニューの「画像の不透明度...」が選択された.
 		IAsyncAction image_opac_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_ID U, int S> void image_slider_set_header(const float val);

@@ -911,7 +911,7 @@
     <comment>TextBox</comment>
   </data>
   <data name="tmfi_grid_snap.Text" xml:space="preserve">
-    <value>方眼に合わせる</value>
+    <value>方眼にくっつける</value>
     <comment>TextBlock</comment>
   </data>
   <data name="tmfi_status_bar_pos.Text" xml:space="preserve">
@@ -1167,7 +1167,7 @@
     <comment>String</comment>
   </data>
   <data name="tmfi_image_keep_aspect.Text" xml:space="preserve">
-    <value>縦横比を維持</value>
+    <value>画像の縦横比を維持</value>
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="dialog_check_box.Content" xml:space="preserve">

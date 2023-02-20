@@ -13,14 +13,14 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-	// 画像メニューの「縦横比を変えない」が選択された.
+	// 画像メニューの「画像の縦横比を維持」が選択された.
 	void MainPage::image_keep_aspect_click(IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		m_image_keep_aspect = !m_image_keep_aspect;
 		status_bar_set_pos();
 	}
 
-	// 画像メニューの「縦横比を変えない」に印をつける.
+	// 画像メニューの「画像の縦横比を維持」に印をつける.
 	void MainPage::image_keep_aspect_is_checked(const bool keep_aspect)
 	{
 		tmfi_image_keep_aspect().IsChecked(keep_aspect);

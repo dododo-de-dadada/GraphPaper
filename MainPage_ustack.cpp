@@ -64,7 +64,7 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_ID::NIL:
 			u = nullptr;
 			break;
-		case UNDO_ID::FORM:
+		case UNDO_ID::DEFORM:
 			u = new UndoForm(dt_reader);
 			break;
 		case UNDO_ID::ORDER:

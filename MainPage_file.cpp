@@ -34,9 +34,9 @@ file_new_click_async
 file_open_click_async
 	+---file_confirm_dialog
 	+---wait_cursor_show
-	+---file_read_async
+	+---file_read_gpf_async
 
-file_read_async
+file_read_gpf_async
 	+---file_recent_add
 	+---file_finish_reading
 
@@ -348,14 +348,12 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::file_finish_reading(void)
 	{
 		xcvd_is_enabled();
-
 		drawing_tool_is_checked(m_drawing_tool);
 		drawing_poly_opt_is_checked(m_drawing_poly_opt);
 		color_code_is_checked(m_color_code);
 		status_bar_is_checked(m_status_bar);
 		len_unit_is_checked(m_len_unit);
 		image_keep_aspect_is_checked(m_image_keep_aspect);
-		
 		page_setting_is_checked();
 
 		wchar_t* unavailable_font;	// 無効な書体名
@@ -382,10 +380,8 @@ namespace winrt::GraphPaper::implementation
 				gd_summary_panel().Visibility(Visibility::Visible);
 			}
 		}
-
 		page_bbox_update();
 		page_panel_size();
-		page_draw();
 		status_bar_set_pos();
 		status_bar_set_draw();
 		status_bar_set_grid();
@@ -431,7 +427,7 @@ namespace winrt::GraphPaper::implementation
 			// ストレージファイルを非同期に読む.
 			constexpr bool RESUME = true;
 			constexpr bool SETTING_ONLY = true;
-			co_await file_read_async<!RESUME, !SETTING_ONLY>(open_file);
+			co_await file_read_gpf_async<!RESUME, !SETTING_ONLY>(open_file);
 
 			// カーソルを元に戻す.
 			Window::Current().CoreWindow().PointerCursor(prev_cur);
@@ -449,10 +445,13 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	読み込めたら S_OK.
 	//-------------------------------
 	template <bool RESUME, bool SETTING_ONLY>
-	IAsyncOperation<winrt::hresult> MainPage::file_read_async(StorageFile s_file) noexcept
+	IAsyncOperation<winrt::hresult> MainPage::file_read_gpf_async(StorageFile s_file) noexcept
 	{
 		HRESULT hres = E_FAIL;
 		m_mutex_draw.lock();
+
+		double scroll_h = 0.0;
+		double scroll_v = 0.0;
 		try {
 
 			// 一覧が表示されてるか判定する.
@@ -537,7 +536,9 @@ namespace winrt::GraphPaper::implementation
 				hres = S_OK;
 			}
 			else {
-
+				// ファイルが保存されたときのスクロールバーの値.
+				scroll_h = dt_reader.ReadSingle();
+				scroll_v = dt_reader.ReadSingle();
 				// 図形を読み込む.
 				if (slist_read(m_main_page.m_shape_list, m_main_page, dt_reader)) {
 					// 再開なら,
@@ -579,15 +580,27 @@ namespace winrt::GraphPaper::implementation
 			if constexpr (!RESUME && !SETTING_ONLY) {
 				file_recent_add(s_file);
 				file_finish_reading();
+				// 保存されたスクロールバーの値が, 表示できる範囲ならば, 
+				// 値をスクロールバーに格納する.
+				if (scroll_h >= sb_horz().Minimum() && scroll_h <= sb_horz().Maximum()) {
+					sb_horz().Value(scroll_h);
+				}
+				if (scroll_v >= sb_vert().Minimum() && scroll_v <= sb_vert().Maximum()) {
+					sb_vert().Value(scroll_v);
+				}
+				page_draw();
 			}
 		}
 		// 結果を返し終了する.
 		co_return hres;
 	}
 
-	template IAsyncOperation<winrt::hresult> MainPage::file_read_async<false, false>(StorageFile s_file) noexcept;
-	template IAsyncOperation<winrt::hresult> MainPage::file_read_async<false, true>(StorageFile s_file) noexcept;
-	template IAsyncOperation<winrt::hresult> MainPage::file_read_async<true, false>(StorageFile s_file) noexcept;
+	template IAsyncOperation<winrt::hresult>
+		MainPage::file_read_gpf_async<false, false>(StorageFile s_file) noexcept;
+	template IAsyncOperation<winrt::hresult>
+		MainPage::file_read_gpf_async<false, true>(StorageFile s_file) noexcept;
+	template IAsyncOperation<winrt::hresult>
+		MainPage::file_read_gpf_async<true, false>(StorageFile s_file) noexcept;
 
 	//-------------------------------
 	// ストレージファイルを最近使ったファイルに登録する.
@@ -662,7 +675,7 @@ namespace winrt::GraphPaper::implementation
 				const CoreCursor& prev_cur = wait_cursor_show();
 				constexpr bool RESUME = true;
 				constexpr bool SETTING_ONLY = true;
-				co_await file_read_async<!RESUME, !SETTING_ONLY>(s_file);
+				co_await file_read_gpf_async<!RESUME, !SETTING_ONLY>(s_file);
 				// ストレージファイルを破棄する.
 				s_file = nullptr;
 				// カーソルを元に戻す.
@@ -947,12 +960,20 @@ namespace winrt::GraphPaper::implementation
 
 			m_main_page.write(dt_writer);
 			if constexpr (SUSPEND) {
+				// ファイルを開いたとき可能であればスクロールの位置を回復するよう,
+				// 現在のスクロールバーの値 (ページ座標) を保存する. 
+				dt_writer.WriteSingle(static_cast<float>(sb_horz().Value()));
+				dt_writer.WriteSingle(static_cast<float>(sb_vert().Value()));
 				// 消去された図形も含めて書き込む.
 				// 操作スタックも書き込む.
 				slist_write<!REDUCE>(m_main_page.m_shape_list, dt_writer);
 				ustack_write(dt_writer);
 			}
 			else if constexpr (!SETTING_ONLY) {
+				// ファイルを開いたとき可能であればスクロールの位置を回復するよう,
+				// 現在のスクロールバーの値 (ページ座標) を保存する. 
+				dt_writer.WriteSingle(static_cast<float>(sb_horz().Value()));
+				dt_writer.WriteSingle(static_cast<float>(sb_vert().Value()));
 				// 消去された図形は省いて書き込む.
 				// 操作スタックは消去する.
 				slist_write<REDUCE>(m_main_page.m_shape_list, dt_writer);
@@ -1093,7 +1114,7 @@ namespace winrt::GraphPaper::implementation
 			if (setting_file != nullptr) {
 				constexpr bool RESUME = true;
 				constexpr bool SETTING_ONLY = true;
-				co_await file_read_async<!RESUME, SETTING_ONLY>(setting_file);
+				co_await file_read_gpf_async<!RESUME, SETTING_ONLY>(setting_file);
 				setting_file = nullptr;
 				mfi_page_setting_reset().IsEnabled(true);
 			}
@@ -1107,6 +1128,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();
+		page_draw();
 
 	}
 
