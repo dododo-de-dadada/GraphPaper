@@ -30,11 +30,11 @@ namespace winrt::GraphPaper::implementation
 			auto const& t_id = typeid(*s);
 			if (t_id == typeid(ShapeBezier)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_bezier")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_bezier/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_bezier/Text");
 			}
 			else if (t_id == typeid(ShapeEllipse)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_elli")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_ellipse/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_ellipse/Text");
 			}
 			else if (t_id == typeid(ShapeGroup)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_group")));
@@ -42,31 +42,31 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (t_id == typeid(ShapeLine)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_line/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_line/Text");
 			}
 			else if (t_id == typeid(ShapePolygon)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_polygon")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_poly/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_poly/Text");
 			}
 			else if (t_id == typeid(ShapeQEllipse)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_qellipse")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_qellipse/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_qellipse/Text");
 			}
 			else if (t_id == typeid(ShapeRect)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rect")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_rect/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_rect/Text");
 			}
 			else if (t_id == typeid(ShapeRRect)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_rrect")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_rrect/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_rrect/Text");
 			}
 			else if (t_id == typeid(ShapeRuler)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ruler")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_ruler/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_ruler/Text");
 			}
 			else if (t_id == typeid(ShapeText)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_text")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_text/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_text/Text");
 			}
 			else if (t_id == typeid(ShapeImage)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_image")));
@@ -74,7 +74,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else if (t_id == typeid(ShapeQEllipse)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_qellipse")));
-				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_tool_drawing_qellipse/Text");
+				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_qellipse/Text");
 			}
 			else {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_select")));

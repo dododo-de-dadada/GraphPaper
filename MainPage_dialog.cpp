@@ -199,13 +199,7 @@ namespace winrt::GraphPaper::implementation
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::LOADED;
 //#endif
-		scp_dialog_panel().UpdateLayout();
-		m_dialog_d2d.SetSwapChainPanel(scp_dialog_panel());
-		//m_dialog_d2d.m_d2d_factory->CreateDrawingStateBlock(m_dialog_page.m_state_block.put());
-		//m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_color_brush.put());
-		//m_dialog_d2d.m_d2d_context->CreateSolidColorBrush({}, m_dialog_page.m_range_brush.put());
-
-		dialog_draw();
+//		dialog_draw();
 	}
 
 	// 属性のスワップチェーンパネルの寸法が変わった.
@@ -217,13 +211,13 @@ namespace winrt::GraphPaper::implementation
 //#ifdef _DEBUG
 //		debug_dialog[debug_dialog_cnt++] = DEBUG_DIALOG::SIZE_CHANGED;
 //#endif
+		m_dialog_d2d.SetSwapChainPanel(scp_dialog_panel());
 		const float w = args.NewSize().Width;
 		const float h = args.NewSize().Height;
 		m_dialog_page.m_page_size.width = w;
 		m_dialog_page.m_page_size.height = h;
 		m_dialog_d2d.SetLogicalSize2({ w, h });
-
-		//dialog_draw();
+		dialog_draw();
 	}
 
 	// 属性のスワップチェーンパネルの倍率が変わった.

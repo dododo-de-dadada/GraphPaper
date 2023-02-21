@@ -68,7 +68,7 @@
     <ClCompile Include="shape_pdf.cpp" />
     <ClCompile Include="zlib.cpp" />
     <ClCompile Include="MainPage_CMap.cpp" />
-    <ClCompile Include="shape_arc.cpp" />
+    <ClCompile Include="shape_qellipse.cpp" />
     <ClCompile Include="MainPage_rotation.cpp" />
     <ClCompile Include="MainPage_import.cpp" />
   </ItemGroup>

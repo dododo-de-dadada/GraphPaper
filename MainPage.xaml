@@ -276,9 +276,10 @@
 				</MenuFlyoutItem>
 			</muxc:MenuBarItem>
 			<!-- 作図メニュー -->
-			<muxc:MenuBarItem x:Uid="mbi_tool_drawing" AccessKey="D" Title="Drawing">
+			<muxc:MenuBarItem x:Uid="mbi_drawing" AccessKey="D" Title="Drawing">
+                <!-- 選択ツール -->
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_tool_selection" x:Uid="rmfi_tool_selection"
+					x:Name="rmfi_selection_tool" x:Uid="rmfi_selection_tool"
 					Click="drawing_tool_click" GroupName="gn_tool_type" IsChecked="True"
 					KeyboardAcceleratorTextOverride="Esc" Text="Selection Tool">
 					<muxc:RadioMenuFlyoutItem.KeyboardAccelerators>
@@ -291,8 +292,9 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
+                <!-- 方形 -->
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_tool_drawing_rect" x:Uid="rmfi_tool_drawing_rect"
+					x:Name="rmfi_drawing_rect" x:Uid="rmfi_drawing_rect"
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rectangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
@@ -301,7 +303,7 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_tool_drawing_rrect" x:Uid="rmfi_tool_drawing_rrect"
+					x:Name="rmfi_drawing_rrect" x:Uid="rmfi_drawing_rrect"
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rounded Rectangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
@@ -310,7 +312,7 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_tool_drawing_poly" x:Uid="rmfi_tool_drawing_poly"
+					x:Name="rmfi_drawing_poly" x:Uid="rmfi_drawing_poly"
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quadrangle">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
@@ -319,7 +321,7 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_tool_drawing_ellipse" x:Uid="rmfi_tool_drawing_ellipse"
+					x:Name="rmfi_drawing_ellipse" x:Uid="rmfi_drawing_ellipse"
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ellipse">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
@@ -328,7 +330,7 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_tool_drawing_qellipse" x:Uid="rmfi_tool_drawing_qellipse"
+					x:Name="rmfi_drawing_qellipse" x:Uid="rmfi_drawing_qellipse"
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quater Ellipse">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
@@ -337,7 +339,7 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_tool_drawing_line" x:Uid="rmfi_tool_drawing_line"
+					x:Name="rmfi_drawing_line" x:Uid="rmfi_drawing_line"
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Line" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
@@ -346,7 +348,7 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_tool_drawing_bezier" x:Uid="rmfi_tool_drawing_bezier"
+					x:Name="rmfi_drawing_bezier" x:Uid="rmfi_drawing_bezier"
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Curve" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
@@ -355,7 +357,7 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem 
-					x:Name="rmfi_tool_drawing_text" x:Uid="rmfi_tool_drawing_text"
+					x:Name="rmfi_drawing_text" x:Uid="rmfi_drawing_text"
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Text" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon 
@@ -364,7 +366,7 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_tool_drawing_ruler" x:Uid="rmfi_tool_drawing_ruler"
+					x:Name="rmfi_drawing_ruler" x:Uid="rmfi_drawing_ruler"
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ruler" >
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon

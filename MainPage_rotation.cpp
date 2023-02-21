@@ -59,6 +59,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		float rot;
 		if (s != nullptr && s->get_rotation(rot)) {
+			m_mutex_event.lock();
 			m_dialog_page.set_attr_to(&m_main_page);
 
 			const auto ds0_min = dialog_slider_0().Minimum();
@@ -96,7 +97,6 @@ namespace winrt::GraphPaper::implementation
 			debug_leak_cnt++;
 #endif
 			cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_rotation")));
-			m_mutex_event.lock();
 			const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 			if (d_result == ContentDialogResult::Primary) {
 				float samp_val;

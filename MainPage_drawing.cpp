@@ -14,37 +14,37 @@ namespace winrt::GraphPaper::implementation
 	// 作図ツールのメニュー項目が選択された.
 	void MainPage::drawing_tool_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == rmfi_tool_selection()) {
+		if (sender == rmfi_selection_tool()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::SELECT);
 			m_event_state = EVENT_STATE::BEGIN;
 			m_event_shape_pressed = nullptr;
 			m_event_anc_pressed = ANC_TYPE::ANC_PAGE;
 		}
-		else if (sender == rmfi_tool_drawing_rect()) {
+		else if (sender == rmfi_drawing_rect()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RECT);
 		}
-		else if (sender == rmfi_tool_drawing_rrect()) {
+		else if (sender == rmfi_drawing_rrect()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RRECT);
 		}
-		else if (sender == rmfi_tool_drawing_poly()) {
+		else if (sender == rmfi_drawing_poly()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
 		}
-		else if (sender == rmfi_tool_drawing_ellipse()) {
+		else if (sender == rmfi_drawing_ellipse()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ELLI);
 		}
-		else if (sender == rmfi_tool_drawing_line()) {
+		else if (sender == rmfi_drawing_line()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::LINE);
 		}
-		else if (sender == rmfi_tool_drawing_bezier()) {
+		else if (sender == rmfi_drawing_bezier()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::BEZIER);
 		}
-		else if (sender == rmfi_tool_drawing_text()) {
+		else if (sender == rmfi_drawing_text()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::TEXT);
 		}
-		else if (sender == rmfi_tool_drawing_ruler()) {
+		else if (sender == rmfi_drawing_ruler()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RULER);
 		}
-		else if (sender == rmfi_tool_drawing_qellipse()) {
+		else if (sender == rmfi_drawing_qellipse()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::QELLIPSE);
 		}
 		else if (sender == rmfi_tool_eyedropper()) {
@@ -103,16 +103,16 @@ namespace winrt::GraphPaper::implementation
 	// 作図ツールのメニューに印をつける.
 	void MainPage::drawing_tool_is_checked(const DRAWING_TOOL val)
 	{
-		rmfi_tool_selection().IsChecked(val == DRAWING_TOOL::SELECT);
-		rmfi_tool_drawing_rect().IsChecked(val == DRAWING_TOOL::RECT);
-		rmfi_tool_drawing_rrect().IsChecked(val == DRAWING_TOOL::RRECT);
-		rmfi_tool_drawing_poly().IsChecked(val == DRAWING_TOOL::POLY);
-		rmfi_tool_drawing_ellipse().IsChecked(val == DRAWING_TOOL::ELLI);
-		rmfi_tool_drawing_line().IsChecked(val == DRAWING_TOOL::LINE);
-		rmfi_tool_drawing_bezier().IsChecked(val == DRAWING_TOOL::BEZIER);
-		rmfi_tool_drawing_text().IsChecked(val == DRAWING_TOOL::TEXT);
-		rmfi_tool_drawing_ruler().IsChecked(val == DRAWING_TOOL::RULER);
-		rmfi_tool_drawing_qellipse().IsChecked(val == DRAWING_TOOL::QELLIPSE);
+		rmfi_selection_tool().IsChecked(val == DRAWING_TOOL::SELECT);
+		rmfi_drawing_rect().IsChecked(val == DRAWING_TOOL::RECT);
+		rmfi_drawing_rrect().IsChecked(val == DRAWING_TOOL::RRECT);
+		rmfi_drawing_poly().IsChecked(val == DRAWING_TOOL::POLY);
+		rmfi_drawing_ellipse().IsChecked(val == DRAWING_TOOL::ELLI);
+		rmfi_drawing_line().IsChecked(val == DRAWING_TOOL::LINE);
+		rmfi_drawing_bezier().IsChecked(val == DRAWING_TOOL::BEZIER);
+		rmfi_drawing_text().IsChecked(val == DRAWING_TOOL::TEXT);
+		rmfi_drawing_ruler().IsChecked(val == DRAWING_TOOL::RULER);
+		rmfi_drawing_qellipse().IsChecked(val == DRAWING_TOOL::QELLIPSE);
 		rmfi_tool_eyedropper().IsChecked(val == DRAWING_TOOL::EYEDROPPER);
 	}
 

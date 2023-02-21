@@ -333,7 +333,7 @@
     <value>属性(P)</value>
     <comment>MenuBarItem</comment>
   </data>
-  <data name="mbi_tool_drawing.Title" xml:space="preserve">
+  <data name="mbi_drawing.Title" xml:space="preserve">
     <value>作図(D)</value>
     <comment>MenuBarItem</comment>
   </data>
@@ -653,35 +653,35 @@
     <value>上よせ</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_bezier.Text" xml:space="preserve">
+  <data name="rmfi_drawing_bezier.Text" xml:space="preserve">
     <value>曲線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_ellipse.Text" xml:space="preserve">
+  <data name="rmfi_drawing_ellipse.Text" xml:space="preserve">
     <value>だ円形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_line.Text" xml:space="preserve">
+  <data name="rmfi_drawing_line.Text" xml:space="preserve">
     <value>直線</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_poly.Text" xml:space="preserve">
+  <data name="rmfi_drawing_poly.Text" xml:space="preserve">
     <value>多角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_qellipse.Text" xml:space="preserve">
+  <data name="rmfi_drawing_qellipse.Text" xml:space="preserve">
     <value>四分だ円</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_rect.Text" xml:space="preserve">
+  <data name="rmfi_drawing_rect.Text" xml:space="preserve">
     <value>方形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_rrect.Text" xml:space="preserve">
+  <data name="rmfi_drawing_rrect.Text" xml:space="preserve">
     <value>角丸方形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_ruler.Text" xml:space="preserve">
+  <data name="rmfi_drawing_ruler.Text" xml:space="preserve">
     <value>定規</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -689,7 +689,7 @@
     <value>色の抽出</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_tool_selection.Text" xml:space="preserve">
+  <data name="rmfi_selection_tool.Text" xml:space="preserve">
     <value>選択</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
@@ -1014,7 +1014,7 @@
     <value>並び替え</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
-  <data name="rmfi_tool_drawing_text.Text" xml:space="preserve">
+  <data name="rmfi_drawing_text.Text" xml:space="preserve">
     <value>文字列</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>

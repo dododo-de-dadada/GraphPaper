@@ -780,10 +780,12 @@ namespace winrt::GraphPaper::implementation
 			if (m_d2d_arrow_geom != nullptr) {
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
 					target->FillGeometry(m_d2d_arrow_geom.get(), brush);
-					target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_style.get());
+					target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, 
+						m_d2d_arrow_style.get());
 				}
 				if (m_arrow_style == ARROW_STYLE::OPENED) {
-					target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_style.get());
+					target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, 
+						m_d2d_arrow_style.get());
 				}
 			}
 		}

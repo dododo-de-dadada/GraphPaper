@@ -424,9 +424,9 @@ namespace winrt::GraphPaper::implementation
 
 		// ポインターのボタンが上げられた.
 		void event_canceled(IInspectable const& sender, PointerRoutedEventArgs const& args);
-		// ポインターがページのスワップチェーンパネルの中に入った.
+		// ポインターがスワップチェーンパネルの中に入った.
 		void event_entered(IInspectable const& sender, PointerRoutedEventArgs const& args);
-		// ポインターがページのスワップチェーンパネルから出た.
+		// ポインターがスワップチェーンパネルから出た.
 		void event_exited(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// 色を検出する.
 		void event_eyedropper_detect(const Shape* s, const uint32_t anc);
