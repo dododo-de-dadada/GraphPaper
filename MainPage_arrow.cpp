@@ -142,9 +142,13 @@ namespace winrt::GraphPaper::implementation
 		const auto samp_w = scp_dialog_panel().Width();
 		const auto samp_h = scp_dialog_panel().Height();
 		const auto padd = samp_w * 0.125;
-		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
-		m_dialog_page.m_shape_list.push_back(new ShapeLine(b_pos, b_vec, &m_dialog_page));
+		const D2D1_POINT_2F start{
+			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
+		};
+		const D2D1_POINT_2F b_vec{
+			static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd)
+		};
+		m_dialog_page.m_shape_list.push_back(new ShapeLine(start, b_vec, &m_dialog_page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif

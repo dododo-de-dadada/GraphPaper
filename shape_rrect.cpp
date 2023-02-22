@@ -88,16 +88,16 @@ namespace winrt::GraphPaper::implementation
 		brush->SetColor(m_stroke_color);
 		target->DrawRoundedRectangle(r_rec, brush, m_stroke_width, m_d2d_stroke_style.get());
 		if (m_anc_show && is_selected()) {
-			D2D1_POINT_2F c_pos[4]{
+			D2D1_POINT_2F circle[4]{	// 円上の点
 				{ r_lt.x + rx, r_lt.y + ry },
 				{ r_lt.x + vx - rx, r_lt.y + ry },
 				{ r_lt.x + vx - rx, r_lt.y + vy - ry },
 				{ r_lt.x + rx, r_lt.y + vy - ry }
 			};
-			anc_draw_circle(c_pos[2], target, brush);
-			anc_draw_circle(c_pos[3], target, brush);
-			anc_draw_circle(c_pos[1], target, brush);
-			anc_draw_circle(c_pos[0], target, brush);
+			anc_draw_circle(circle[2], target, brush);
+			anc_draw_circle(circle[3], target, brush);
+			anc_draw_circle(circle[1], target, brush);
+			anc_draw_circle(circle[0], target, brush);
 			draw_anc();
 		}
 	}
@@ -146,60 +146,60 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置が角丸方形に含まれるか判定する.
-	// t_pos	判定する位置
+	// test	判定する位置
 	// r_lt	角丸方形の左上位置
 	// r_rb	角丸方形の右下位置
 	// r_rad	角丸の半径
 	// 戻り値	含まれるなら true を返す.
-	static bool pt_in_rrect(const D2D1_POINT_2F t_pos, const D2D1_POINT_2F r_lt, const D2D1_POINT_2F r_rb, const D2D1_POINT_2F r_rad)
+	static bool pt_in_rrect(const D2D1_POINT_2F test, const D2D1_POINT_2F r_lt, const D2D1_POINT_2F r_rb, const D2D1_POINT_2F r_rad)
 	{
-		if (t_pos.x < r_lt.x) {
+		if (test.x < r_lt.x) {
 			return false;
 		}
-		if (t_pos.x > r_rb.x) {
+		if (test.x > r_rb.x) {
 			return false;
 		}
-		if (t_pos.y < r_lt.y) {
+		if (test.y < r_lt.y) {
 			return false;
 		}
-		if (t_pos.y > r_rb.y) {
+		if (test.y > r_rb.y) {
 			return false;
 		}
-		D2D1_POINT_2F c_pos;
-		pt_add(r_lt, r_rad, c_pos);
-		if (t_pos.x < c_pos.x) {
-			if (t_pos.y < c_pos.y) {
-				return pt_in_ellipse(t_pos, c_pos, r_rad.x, r_rad.y);
+		D2D1_POINT_2F center;	// 角丸の中心点
+		pt_add(r_lt, r_rad, center);
+		if (test.x < center.x) {
+			if (test.y < center.y) {
+				return pt_in_ellipse(test, center, r_rad.x, r_rad.y);
 			}
 		}
-		c_pos.x = r_rb.x - r_rad.x;
-		c_pos.y = r_lt.y + r_rad.y;
-		if (t_pos.x > c_pos.x) {
-			if (t_pos.y < c_pos.y) {
-				return pt_in_ellipse(t_pos, c_pos, r_rad.x, r_rad.y);
+		center.x = r_rb.x - r_rad.x;
+		center.y = r_lt.y + r_rad.y;
+		if (test.x > center.x) {
+			if (test.y < center.y) {
+				return pt_in_ellipse(test, center, r_rad.x, r_rad.y);
 			}
 		}
-		c_pos.x = r_rb.x - r_rad.x;
-		c_pos.y = r_rb.y - r_rad.y;
-		if (t_pos.x > c_pos.x) {
-			if (t_pos.y > c_pos.y) {
-				return pt_in_ellipse(t_pos, c_pos, r_rad.x, r_rad.y);
+		center.x = r_rb.x - r_rad.x;
+		center.y = r_rb.y - r_rad.y;
+		if (test.x > center.x) {
+			if (test.y > center.y) {
+				return pt_in_ellipse(test, center, r_rad.x, r_rad.y);
 			}
 		}
-		c_pos.x = r_lt.x + r_rad.x;
-		c_pos.y = r_rb.y - r_rad.y;
-		if (t_pos.x < c_pos.x) {
-			if (t_pos.y > c_pos.y) {
-				return pt_in_ellipse(t_pos, c_pos, r_rad.x, r_rad.y);
+		center.x = r_lt.x + r_rad.x;
+		center.y = r_rb.y - r_rad.y;
+		if (test.x < center.x) {
+			if (test.y > center.y) {
+				return pt_in_ellipse(test, center, r_rad.x, r_rad.y);
 			}
 		}
 		return true;
 	}
 
 	// 位置を含むか判定する.
-	// t_pos	判定する位置
+	// test	判定する位置
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeRRect::hit_test(const D2D1_POINT_2F test) const noexcept
 	{
 		// 角丸の円弧の中心点に含まれるか判定する.
 		// +---------+
@@ -216,7 +216,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(m_start.x + rx), 
 			static_cast<FLOAT>(m_start.y + ry)
 		};
-		if (pt_in_anc(t_pos, anc_r_nw, m_anc_width)) {
+		if (pt_in_anc(test, anc_r_nw, m_anc_width)) {
 			anc_r = ANC_TYPE::ANC_R_NW;
 		}
 		else {
@@ -224,17 +224,17 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(m_start.x + m_vec[0].x - rx),
 				static_cast<FLOAT>(m_start.y + m_vec[0].y - ry)
 			};
-			if (pt_in_anc(t_pos, anc_r_se, m_anc_width)) {
+			if (pt_in_anc(test, anc_r_se, m_anc_width)) {
 				anc_r = ANC_TYPE::ANC_R_SE;
 			}
 			else {
 				const D2D1_POINT_2F anc_r_ne{ anc_r_se.x, anc_r_nw.y };
-				if (pt_in_anc(t_pos, anc_r_ne, m_anc_width)) {
+				if (pt_in_anc(test, anc_r_ne, m_anc_width)) {
 					anc_r = ANC_TYPE::ANC_R_NE;
 				}
 				else {
 					const D2D1_POINT_2F anc_r_sw{ anc_r_nw.x, anc_r_se.y };
-					if (pt_in_anc(t_pos, anc_r_sw, m_anc_width)) {
+					if (pt_in_anc(test, anc_r_sw, m_anc_width)) {
 						anc_r = ANC_TYPE::ANC_R_SW;
 					}
 					else {
@@ -250,7 +250,7 @@ namespace winrt::GraphPaper::implementation
 			return anc_r;
 		}
 		// 方形の各頂点に含まれるか判定する.
-		const uint32_t anc_v = rect_hit_test_anc(m_start, m_vec[0], t_pos, m_anc_width);
+		const uint32_t anc_v = rect_hit_test_anc(m_start, m_vec[0], test, m_anc_width);
 		if (anc_v != ANC_TYPE::ANC_PAGE) {
 			return anc_v;
 		}
@@ -285,7 +285,7 @@ namespace winrt::GraphPaper::implementation
 		// 線枠が透明または太さ 0 か判定する.
 		if (!is_opaque(m_stroke_color) || m_stroke_width < FLT_MIN) {
 			// 塗りつぶし色が不透明, かつ角丸方形そのものに含まれるか判定する.
-			if (is_opaque(m_fill_color) && pt_in_rrect(t_pos, r_lt, r_rb, r_rad)) {
+			if (is_opaque(m_fill_color) && pt_in_rrect(test, r_lt, r_rb, r_rad)) {
 				return ANC_TYPE::ANC_FILL;
 			}
 		}
@@ -298,13 +298,13 @@ namespace winrt::GraphPaper::implementation
 			pt_add(r_lt, -s_thick * 0.5, e_lt);
 			pt_add(r_rb, s_thick * 0.5, e_rb);
 			pt_add(r_rad, s_thick * 0.5, e_rad);
-			if (pt_in_rrect(t_pos, e_lt, e_rb, e_rad)) {
+			if (pt_in_rrect(test, e_lt, e_rb, e_rad)) {
 				// 縮小した角丸方形が逆転してない, かつ位置が縮小した角丸方形に含まれるか判定する.
 				D2D1_POINT_2F s_lt, s_rb, s_rad;	// 縮小した角丸方形
 				pt_add(e_lt, s_thick, s_lt);
 				pt_add(e_rb, -s_thick, s_rb);
 				pt_add(e_rad, -s_thick, s_rad);
-				if (s_lt.x < s_rb.x && s_lt.y < s_rb.y && pt_in_rrect(t_pos, s_lt, s_rb, s_rad)) {
+				if (s_lt.x < s_rb.x && s_lt.y < s_rb.y && pt_in_rrect(test, s_lt, s_rb, s_rad)) {
 					// 塗りつぶし色が不透明なら, ANC_FILL を返す.
 					if (is_opaque(m_fill_color)) {
 						return ANC_TYPE::ANC_FILL;
@@ -325,54 +325,54 @@ namespace winrt::GraphPaper::implementation
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
 	bool ShapeRRect::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool /*keep_aspect*/) noexcept
 	{
-		D2D1_POINT_2F c_pos;
-		D2D1_POINT_2F vec;
-		D2D1_POINT_2F rad;
-		D2D1_POINT_2F new_pos;
+		D2D1_POINT_2F a_point;	// 図形の部位の位置
+		D2D1_POINT_2F posotion;	// 位置ベクトル
+		D2D1_POINT_2F new_radius;
+		D2D1_POINT_2F new_point;
 
 		switch (anc) {
 		case ANC_TYPE::ANC_R_NW:
-			ShapeRRect::get_pos_anc(anc, c_pos);
-			pt_round(val, PT_ROUND, new_pos);
-			pt_sub(new_pos, c_pos, vec);
-			if (pt_abs2(vec) < FLT_MIN) {
+			ShapeRRect::get_pos_anc(anc, a_point);
+			pt_round(val, PT_ROUND, new_point);
+			pt_sub(new_point, a_point, posotion);
+			if (pt_abs2(posotion) < FLT_MIN) {
 				return false;
 			}
-			pt_add(m_corner_radius, vec, rad);
-			calc_corner_radius(m_vec[0], rad, m_corner_radius);
+			pt_add(m_corner_radius, posotion, new_radius);
+			calc_corner_radius(m_vec[0], new_radius, m_corner_radius);
 			break;
 		case ANC_TYPE::ANC_R_NE:
-			ShapeRRect::get_pos_anc(anc, c_pos);
-			pt_round(val, PT_ROUND, new_pos);
-			pt_sub(new_pos, c_pos, vec);
-			if (pt_abs2(vec) < FLT_MIN) {
+			ShapeRRect::get_pos_anc(anc, a_point);
+			pt_round(val, PT_ROUND, new_point);
+			pt_sub(new_point, a_point, posotion);
+			if (pt_abs2(posotion) < FLT_MIN) {
 				return false;
 			}
-			rad.x = m_corner_radius.x - vec.x;
-			rad.y = m_corner_radius.y + vec.y;
-			calc_corner_radius(m_vec[0], rad, m_corner_radius);
+			new_radius.x = m_corner_radius.x - posotion.x;
+			new_radius.y = m_corner_radius.y + posotion.y;
+			calc_corner_radius(m_vec[0], new_radius, m_corner_radius);
 			break;
 		case ANC_TYPE::ANC_R_SE:
-			ShapeRRect::get_pos_anc(anc, c_pos);
-			pt_round(val, PT_ROUND, new_pos);
-			pt_sub(new_pos, c_pos, vec);
-			if (pt_abs2(vec) < FLT_MIN) {
+			ShapeRRect::get_pos_anc(anc, a_point);
+			pt_round(val, PT_ROUND, new_point);
+			pt_sub(new_point, a_point, posotion);
+			if (pt_abs2(posotion) < FLT_MIN) {
 				return false;
 			}
-			rad.x = m_corner_radius.x - vec.x;
-			rad.y = m_corner_radius.y - vec.y;
-			calc_corner_radius(m_vec[0], rad, m_corner_radius);
+			new_radius.x = m_corner_radius.x - posotion.x;
+			new_radius.y = m_corner_radius.y - posotion.y;
+			calc_corner_radius(m_vec[0], new_radius, m_corner_radius);
 			break;
 		case ANC_TYPE::ANC_R_SW:
-			ShapeRRect::get_pos_anc(anc, c_pos);
-			pt_round(val, PT_ROUND, new_pos);
-			pt_sub(new_pos, c_pos, vec);
-			if (pt_abs2(vec) < FLT_MIN) {
+			ShapeRRect::get_pos_anc(anc, a_point);
+			pt_round(val, PT_ROUND, new_point);
+			pt_sub(new_point, a_point, posotion);
+			if (pt_abs2(posotion) < FLT_MIN) {
 				return false;
 			}
-			rad.x = m_corner_radius.x + vec.x;
-			rad.y = m_corner_radius.y - vec.y;
-			calc_corner_radius(m_vec[0], rad, m_corner_radius);
+			new_radius.x = m_corner_radius.x + posotion.x;
+			new_radius.y = m_corner_radius.y - posotion.y;
+			calc_corner_radius(m_vec[0], new_radius, m_corner_radius);
 			break;
 		default:
 			if (!ShapeRect::set_pos_anc(val, anc, limit, false)) {
@@ -394,11 +394,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// b_pos	囲む領域の始点
+	// start	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// page	属性
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const Shape* page) :
-		ShapeRect::ShapeRect(b_pos, b_vec, page)
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec, const Shape* page) :
+		ShapeRect::ShapeRect(start, b_vec, page)
 	{
 		float g_base;
 		page->get_grid_base(g_base);

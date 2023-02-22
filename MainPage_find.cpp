@@ -344,7 +344,7 @@ namespace winrt::GraphPaper::implementation
 		stack.push_back(slist.begin());
 		stack.push_back(slist.end());
 		t = static_cast<ShapeText*>(nullptr);
-		uint32_t t_pos = 0;
+		uint32_t t_pos = 0;	// •¶Žš—ñ’†‚ÌˆÊ’u
 		while (!stack.empty()) {
 			auto j = stack.back();
 			stack.pop_back();

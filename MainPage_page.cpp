@@ -235,16 +235,16 @@ namespace winrt::GraphPaper::implementation
 		// 変換行列に, 拡大率の値とスクロールの変分に拡大率を掛けた値を格納する.
 		D2D1_MATRIX_3X2_F tran{};
 		tran.m11 = tran.m22 = page_scale;
-		D2D1_POINT_2F t_pos;
-		pt_add(m_main_bbox_lt, sb_horz().Value(), sb_vert().Value(), t_pos);
-		pt_mul(t_pos, page_scale, t_pos);
-		tran.dx = -t_pos.x;
-		tran.dy = -t_pos.y;
+		D2D1_POINT_2F lt;	// 表示されている左上位置
+		pt_add(m_main_bbox_lt, sb_horz().Value(), sb_vert().Value(), lt);
+		pt_mul(lt, page_scale, lt);
+		tran.dx = -lt.x;
+		tran.dy = -lt.y;
 		// 変換行列をデバイスコンテキストに格納する.
 		m_main_d2d.m_d2d_context->SetTransform(&tran);
 
 		m_main_page.draw();
-		if (m_event_state == EVENT_STATE::PRESS_AREA) {
+		if (m_event_state == EVENT_STATE::PRESS_RECT) {
 			if (m_drawing_tool == DRAWING_TOOL::SELECT ||
 				m_drawing_tool == DRAWING_TOOL::RECT ||
 				m_drawing_tool == DRAWING_TOOL::TEXT ||
@@ -256,7 +256,7 @@ namespace winrt::GraphPaper::implementation
 				m_main_page.draw_auxiliary_bezi(m_main_d2d.m_d2d_context.get(),
 					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::ELLI) {
+			else if (m_drawing_tool == DRAWING_TOOL::ELLIPSE) {
 				m_main_page.draw_auxiliary_elli(m_main_d2d.m_d2d_context.get(),
 					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
 			}

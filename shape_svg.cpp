@@ -751,10 +751,10 @@ namespace winrt::GraphPaper::implementation
 	void ShapeQEllipse::export_svg(const DataWriter& dt_writer)
 	{
 		wchar_t buf[1024];
-		D2D1_POINT_2F c_pos{};
+		D2D1_POINT_2F center{};
 		if (is_opaque(m_fill_color) || 
 			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && m_arrow_style != ARROW_STYLE::NONE)) {
-			get_pos_center(c_pos);
+			get_pos_center(center);
 		}
 		if (is_opaque(m_fill_color)) {
 			// A rx ry x-axis-rotation large-arc-flag sweep-flag x y
@@ -774,7 +774,7 @@ namespace winrt::GraphPaper::implementation
 				m_larg_flag != 0 ? 1 : 0,
 				m_sweep_flag != 0 ? 1 : 0,
 				m_start.x + m_vec[0].x, m_start.y + m_vec[0].y,
-				c_pos.x, c_pos.y
+				center.x, center.y
 			);
 			dt_writer.WriteString(buf);
 			export_svg_color(buf, 1024, m_fill_color, L"fill");
@@ -794,15 +794,18 @@ namespace winrt::GraphPaper::implementation
 				m_start.x + m_vec[0].x, m_start.y + m_vec[0].y
 			);
 			dt_writer.WriteString(buf);
-			export_svg_stroke(buf, 1024,
-				m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap, m_join_style, m_join_miter_limit);
+			export_svg_stroke(
+				buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap,
+				m_join_style, m_join_miter_limit);
 			dt_writer.WriteString(buf);
 			dt_writer.WriteString(L"/>\n");
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
-				qellipse_calc_arrow(m_vec[0], c_pos, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
-				export_svg_arrow(buf, 1024,
-					m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, arrow, arrow[2]);
+				qellipse_calc_arrow(
+					m_vec[0], center, m_radius, M_PI * m_rot_degree / 180.0, m_arrow_size, arrow);
+				export_svg_arrow(
+					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
+					m_join_style, m_join_miter_limit, arrow, arrow[2]);
 				dt_writer.WriteString(buf);
 			}
 		}

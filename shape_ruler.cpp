@@ -280,11 +280,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// b_pos	囲む領域の始点
+	// start	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// page	属性
-	ShapeRuler::ShapeRuler(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, const Shape* page) :
-		ShapeRect::ShapeRect(b_pos, b_vec, page)
+	ShapeRuler::ShapeRuler(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec, const Shape* page) :
+		ShapeRect::ShapeRect(start, b_vec, page)
 	{
 		ShapeText::is_available_font(m_font_family);
 		page->get_grid_base(m_grid_base);

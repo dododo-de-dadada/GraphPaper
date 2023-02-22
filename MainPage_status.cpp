@@ -202,8 +202,8 @@ namespace winrt::GraphPaper::implementation
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_bezier")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::ELLI) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_elli")));
+			else if (m_drawing_tool == DRAWING_TOOL::ELLIPSE) {
+				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_ellipse")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::LINE) {

@@ -144,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 	enum struct DRAWING_TOOL : uint32_t {
 		SELECT,	// 選択ツール
 		BEZIER,	// 曲線
-		ELLI,	// だ円
+		ELLIPSE,	// だ円
 		LINE,	// 線分
 		POLY,	// 多角形
 		RECT,	// 方形
@@ -162,7 +162,7 @@ namespace winrt::GraphPaper::implementation
 		BEGIN,	// 初期状態
 		PRESS_LBTN,	// 左ボタンを押している状態
 		PRESS_RBTN,	// 右ボタンを押している状態
-		PRESS_AREA,	// 左ボタンを押して, 範囲を選択している状態
+		PRESS_RECT,	// 左ボタンを押して, 矩形選択している状態
 		PRESS_MOVE,	// 左ボタンを押して, 図形を移動している状態
 		PRESS_DEFORM,	// 左ボタンを押して, 図形を変形している状態
 		CLICK,	// クリックした状態
@@ -431,15 +431,15 @@ namespace winrt::GraphPaper::implementation
 		// 色を検出する.
 		void event_eyedropper_detect(const Shape* s, const uint32_t anc);
 		// 図形の作成を終了する.
-		void event_finish_creating(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec);
+		void event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec);
 		// 文字列図形の作成を終了する.
-		IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec);
-		// 押された図形の変形を終了する.
-		void event_finish_forming(void);
-		// 選択された図形の移動を終了する.
+		IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec);
+		// 図形の変形を終了する.
+		void event_finish_deforming(void);
+		// 図形の移動を終了する.
 		void event_finish_moving(void);
 		// 範囲選択を終了する.
-		void event_finish_selecting_area(const VirtualKeyModifiers k_mod);
+		void event_finish_rect_selection(const VirtualKeyModifiers k_mod);
 		// ポインターが動いた.
 		void event_moved(IInspectable const& sender, PointerRoutedEventArgs const& args);
 		// ポインターのボタンが押された.

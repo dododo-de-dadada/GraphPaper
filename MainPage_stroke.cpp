@@ -26,9 +26,9 @@ namespace winrt::GraphPaper::implementation
 	static void stroke_create_sample_shape(const float p_width, const float p_height, ShapePage& page)
 	{
 		const auto padd = p_width * 0.125;
-		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
+		const D2D1_POINT_2F start{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
 		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd) };
-		page.m_shape_list.push_back(new ShapeLine(b_pos, b_vec, &page));
+		page.m_shape_list.push_back(new ShapeLine(start, b_vec, &page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif

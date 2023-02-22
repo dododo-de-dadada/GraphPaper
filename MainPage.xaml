@@ -325,7 +325,7 @@
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Ellipse">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_elli}" HorizontalAlignment="Center"
+							Data="{StaticResource data_ellipse}" HorizontalAlignment="Center"
 							VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>

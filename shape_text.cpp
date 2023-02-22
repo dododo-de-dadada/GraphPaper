@@ -617,11 +617,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を含むか判定する.
-	// t_pos	判定する位置
+	// test	判定する位置
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapeText::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeText::hit_test(const D2D1_POINT_2F test) const noexcept
 	{
-		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], t_pos, m_anc_width);
+		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], test, m_anc_width);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
@@ -629,22 +629,22 @@ namespace winrt::GraphPaper::implementation
 			(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
 		// 文字列の範囲の左上が原点になるよう, 判定する位置を移動する.
-		D2D1_POINT_2F t_lt;
-		ShapeRect::get_pos_lt(t_lt);
-		pt_sub(t_pos, t_lt, t_lt);
-		pt_sub(t_lt, m_text_padding, t_lt);
+		D2D1_POINT_2F lt;
+		ShapeRect::get_pos_lt(lt);
+		pt_sub(test, lt, lt);
+		pt_sub(lt, m_text_padding, lt);
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 			const auto tl = m_dwrite_test_metrics[i].left;
 			const auto tw = m_dwrite_test_metrics[i].width;
 			const auto tt = m_dwrite_test_metrics[i].top;
 			const auto bl = m_dwrite_line_metrics[i].baseline;
-			if (pt_in_rect(t_lt, 
-				D2D1_POINT_2F{ tl, tt + bl + descent - m_font_size },
+			if (pt_in_rect(
+				lt, D2D1_POINT_2F{ tl, tt + bl + descent - m_font_size },
 				D2D1_POINT_2F{ tl + tw, tt + bl + descent })) {
 				return ANC_TYPE::ANC_TEXT;
 			}
 		}
-		return ShapeRect::hit_test(t_pos);
+		return ShapeRect::hit_test(test);
 	}
 
 	// 範囲に含まれるか判定する.
@@ -726,7 +726,7 @@ namespace winrt::GraphPaper::implementation
 	// 'en-us' と GetUserDefaultLocaleName で得られたロケールと, 2 つの書体名を得る.
 	// 次のように格納される.
 	// "ＭＳ ゴシック\0MS Gothic\0"
-	void ShapeText::set_available_fonts(const D2D_UI& d2d)
+	void ShapeText::set_available_fonts(void)
 	{
 		//s_d2d_factory = d2d.m_d2d_factory.get();
 		// 既定の地域・言語名を得る.
@@ -919,12 +919,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// b_pos	囲む領域の始点
+	// start	囲む領域の始点
 	// b_vec	囲む領域の終点への差分
 	// text	文字列
 	// page	属性
-	ShapeText::ShapeText(const D2D1_POINT_2F b_pos, const D2D1_POINT_2F b_vec, wchar_t* const text, const Shape* page) :
-		ShapeRect::ShapeRect(b_pos, b_vec, page)
+	ShapeText::ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec, wchar_t* const text, const Shape* page) :
+		ShapeRect::ShapeRect(start, b_vec, page)
 	{
 		page->get_font_color(m_font_color),
 		page->get_font_family(m_font_family),

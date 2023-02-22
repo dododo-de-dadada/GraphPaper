@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto padd_w = p_width * 0.125;
 		const auto padd_h = p_height * 0.25;
-		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h) };
+		const D2D1_POINT_2F start{ static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h) };
 		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd_w), static_cast<FLOAT>(p_width - 2.0 * padd_h) };
 		const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 		const wchar_t* text = nullptr;
@@ -106,7 +106,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			text = pang.c_str();
 		}
-		page.m_shape_list.push_back(new ShapeText(b_pos, b_vec, wchar_cpy(text), &page));
+		page.m_shape_list.push_back(new ShapeText(start, b_vec, wchar_cpy(text), &page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif

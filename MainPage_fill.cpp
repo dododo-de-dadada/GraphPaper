@@ -60,10 +60,10 @@ namespace winrt::GraphPaper::implementation
 		const auto p_width = scp_dialog_panel().Width();
 		const auto p_height = scp_dialog_panel().Height();
 		const auto padd = p_width * 0.125;
-		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
+		const D2D1_POINT_2F start{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
 		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd) };
-		//m_sample_shape = new ShapeRect(b_pos, b_vec, &m_dialog_page);
-		m_dialog_page.m_shape_list.push_back(new ShapeRect(b_pos, b_vec, &m_dialog_page));
+		//m_sample_shape = new ShapeRect(start, b_vec, &m_dialog_page);
+		m_dialog_page.m_shape_list.push_back(new ShapeRect(start, b_vec, &m_dialog_page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif

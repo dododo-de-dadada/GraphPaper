@@ -33,7 +33,7 @@ namespace winrt::GraphPaper::implementation
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_bezier/Text");
 			}
 			else if (t_id == typeid(ShapeEllipse)) {
-				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_elli")));
+				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_ellipse")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_ellipse/Text");
 			}
 			else if (t_id == typeid(ShapeGroup)) {

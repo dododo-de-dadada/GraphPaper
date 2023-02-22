@@ -614,24 +614,24 @@ namespace winrt::GraphPaper::implementation
 	// 消去された図形は省いて, 図形リストを書き込む.
 	template void slist_write<REDUCE>(SHAPE_LIST const& slist, DataWriter const& dt_writer);
 
-	// 選択されてない図形から, 指定した位置に最も近い頂点を得る.
+	// 選択されてない図形から, 指定した距離以下で, 指定した位置に最も近い頂点を得る.
 	// slist	図形リスト
-	// c_pos	位置
-	// limit	距離の制限
-	// val	最も近い頂点
-	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& c_pos, const float limit, D2D1_POINT_2F& val) noexcept
+	// p	位置
+	// d	距離
+	// v	最も近い頂点
+	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& p, const float d, D2D1_POINT_2F& v) noexcept
 	{
-		bool done = false;
-		float dd = limit * limit;
+		bool flag = false;	// 頂点があったかどうかのフラグ
+		float dd = d * d;	// 距離の二乗
 		for (const auto s : slist) {
 			if (s->is_deleted() || s->is_selected()) {
 				continue;
 			}
-			if (s->get_pos_nearest(c_pos, dd, val) && !done) {
-				done = true;
+			if (s->get_pos_nearest(p, dd, v) && !flag) {
+				flag = true;
 			}
 		}
-		return done;
+		return flag;
 	}
 
 }

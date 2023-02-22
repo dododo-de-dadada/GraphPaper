@@ -480,35 +480,36 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 貼り付ける位置を求める.
+	// p	求める位置
 	// grid_len	方眼の大きさ
 	// vert_stick	頂点をくっつける距離
-	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float vert_stick)
+	static void xcvd_paste_pos(D2D1_POINT_2F& p, const SHAPE_LIST& slist, const double grid_len, const float vert_stick)
 	{
-		D2D1_POINT_2F v_pos;
+		D2D1_POINT_2F v;	// 最も近い頂点
 		if (grid_len >= 1.0f && vert_stick >= FLT_MIN &&
-			slist_find_vertex_closest(slist, pos, vert_stick, v_pos)) {
+			slist_find_vertex_closest(slist, p, vert_stick, v)) {
 			// 図形の左上位置を方眼の大きさで丸め, 元の値との距離 (の自乗) を求める.
 			D2D1_POINT_2F g_pos;
-			pt_round(pos, grid_len, g_pos);
+			pt_round(p, grid_len, g_pos);
 			D2D1_POINT_2F g_vec;
-			pt_sub(g_pos, pos, g_vec);
+			pt_sub(g_pos, p, g_vec);
 			const double g_abs = pt_abs2(g_vec);
 			// 近傍の頂点との距離 (の自乗) を求める.
 			D2D1_POINT_2F v_vec;
-			pt_sub(v_pos, pos, v_vec);
+			pt_sub(v, p, v_vec);
 			const double v_abs = pt_abs2(v_vec);
 			if (g_abs < v_abs) {
-				pos = g_pos;
+				p = g_pos;
 			}
 			else {
-				pos = v_pos;
+				p = v;
 			}
 		}
 		else if (grid_len >= 1.0f) {
-			pt_round(pos, grid_len, pos);
+			pt_round(p, grid_len, p);
 		}
 		else if (vert_stick >= FLT_MIN) {
-			slist_find_vertex_closest(slist, pos, vert_stick, pos);
+			slist_find_vertex_closest(slist, p, vert_stick, p);
 		}
 	}
 

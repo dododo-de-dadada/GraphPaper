@@ -261,24 +261,24 @@ namespace winrt::GraphPaper::implementation
 	// 図形を囲む領域を得る.
 	void ShapeImage::get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
 	{
-		D2D1_POINT_2F b_pos[2]{
+		D2D1_POINT_2F b[2]{
 			m_start,
 			{ m_start.x + m_view.width, m_start.y + m_view.height }
 		};
-		if (b_pos[0].x > b_pos[1].x) {
-			const auto less_x = b_pos[1].x;
-			b_pos[1].x = b_pos[0].x;
-			b_pos[0].x = less_x;
+		if (b[0].x > b[1].x) {
+			const auto less_x = b[1].x;
+			b[1].x = b[0].x;
+			b[0].x = less_x;
 		}
-		if (b_pos[0].y > b_pos[1].y) {
-			const auto less_y = b_pos[1].y;
-			b_pos[1].y = b_pos[0].y;
-			b_pos[0].y = less_y;
+		if (b[0].y > b[1].y) {
+			const auto less_y = b[1].y;
+			b[1].y = b[0].y;
+			b[0].y = less_y;
 		}
-		b_lt.x = a_lt.x < b_pos[0].x ? a_lt.x : b_pos[0].x;
-		b_lt.y = a_lt.y < b_pos[0].y ? a_lt.y : b_pos[0].y;
-		b_rb.x = a_rb.x > b_pos[1].x ? a_rb.x : b_pos[1].x;
-		b_rb.y = a_rb.y > b_pos[1].y ? a_rb.y : b_pos[1].y;
+		b_lt.x = a_lt.x < b[0].x ? a_lt.x : b[0].x;
+		b_lt.y = a_lt.y < b[0].y ? a_lt.y : b[0].y;
+		b_rb.x = a_rb.x > b[1].x ? a_rb.x : b[1].x;
+		b_rb.y = a_rb.y > b[1].y ? a_rb.y : b[1].y;
 	}
 
 	// 画像の不透明度を得る.
@@ -405,25 +405,25 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 位置を含むか判定する.
-	// t_pos	判定する位置
+	// test	判定する位置
 	// 戻り値	位置を含む図形の部位. 含まないときは「図形の外側」を返す.
-	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F t_pos) const noexcept
+	uint32_t ShapeImage::hit_test(const D2D1_POINT_2F test) const noexcept
 	{
 		D2D1_POINT_2F v_pos[4];
 		// 0---1
 		// |   |
 		// 3---2
 		get_verts(v_pos);
-		if (pt_in_anc(t_pos, v_pos[2], m_anc_width)) {
+		if (pt_in_anc(test, v_pos[2], m_anc_width)) {
 			return ANC_TYPE::ANC_SE;
 		}
-		else if (pt_in_anc(t_pos, v_pos[3], m_anc_width)) {
+		else if (pt_in_anc(test, v_pos[3], m_anc_width)) {
 			return ANC_TYPE::ANC_SW;
 		}
-		else if (pt_in_anc(t_pos, v_pos[1], m_anc_width)) {
+		else if (pt_in_anc(test, v_pos[1], m_anc_width)) {
 			return ANC_TYPE::ANC_NE;
 		}
-		else if (pt_in_anc(t_pos, v_pos[0], m_anc_width)) {
+		else if (pt_in_anc(test, v_pos[0], m_anc_width)) {
 			return ANC_TYPE::ANC_NW;
 		}
 		else {
@@ -433,28 +433,28 @@ namespace winrt::GraphPaper::implementation
 			e_pos[0].y = static_cast<FLOAT>(v_pos[0].y - e_width);
 			e_pos[1].x = v_pos[1].x;
 			e_pos[1].y = static_cast<FLOAT>(v_pos[1].y + e_width);
-			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
+			if (pt_in_rect(test, e_pos[0], e_pos[1])) {
 				return ANC_TYPE::ANC_NORTH;
 			}
 			e_pos[0].x = static_cast<FLOAT>(v_pos[1].x - e_width);
 			e_pos[0].y = v_pos[1].y;
 			e_pos[1].x = static_cast<FLOAT>(v_pos[2].x + e_width);
 			e_pos[1].y = v_pos[2].y;
-			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
+			if (pt_in_rect(test, e_pos[0], e_pos[1])) {
 				return ANC_TYPE::ANC_EAST;
 			}
 			e_pos[0].x = v_pos[3].x;
 			e_pos[0].y = static_cast<FLOAT>(v_pos[3].y - e_width);
 			e_pos[1].x = v_pos[2].x;
 			e_pos[1].y = static_cast<FLOAT>(v_pos[2].y + e_width);
-			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
+			if (pt_in_rect(test, e_pos[0], e_pos[1])) {
 				return ANC_TYPE::ANC_SOUTH;
 			}
 			e_pos[0].x = static_cast<FLOAT>(v_pos[0].x - e_width);
 			e_pos[0].y = v_pos[0].y;
 			e_pos[1].x = static_cast<FLOAT>(v_pos[3].x + e_width);
 			e_pos[1].y = v_pos[3].y;
-			if (pt_in_rect(t_pos, e_pos[0], e_pos[1])) {
+			if (pt_in_rect(test, e_pos[0], e_pos[1])) {
 				return ANC_TYPE::ANC_WEST;
 			}
 		}
@@ -469,8 +469,8 @@ namespace winrt::GraphPaper::implementation
 			v_pos[2].y = v_pos[0].y;
 			v_pos[0].y = less_y;
 		}
-		if (v_pos[0].x <= t_pos.x && t_pos.x <= v_pos[2].x &&
-			v_pos[0].y <= t_pos.y && t_pos.y <= v_pos[2].y) {
+		if (v_pos[0].x <= test.x && test.x <= v_pos[2].x &&
+			v_pos[0].y <= test.y && test.y <= v_pos[2].y) {
 			return ANC_TYPE::ANC_FILL;
 		}
 		return ANC_TYPE::ANC_PAGE;

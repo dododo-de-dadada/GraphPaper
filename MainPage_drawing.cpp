@@ -30,7 +30,7 @@ namespace winrt::GraphPaper::implementation
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::POLY);
 		}
 		else if (sender == rmfi_drawing_ellipse()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ELLI);
+			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ELLIPSE);
 		}
 		else if (sender == rmfi_drawing_line()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::LINE);
@@ -107,7 +107,7 @@ namespace winrt::GraphPaper::implementation
 		rmfi_drawing_rect().IsChecked(val == DRAWING_TOOL::RECT);
 		rmfi_drawing_rrect().IsChecked(val == DRAWING_TOOL::RRECT);
 		rmfi_drawing_poly().IsChecked(val == DRAWING_TOOL::POLY);
-		rmfi_drawing_ellipse().IsChecked(val == DRAWING_TOOL::ELLI);
+		rmfi_drawing_ellipse().IsChecked(val == DRAWING_TOOL::ELLIPSE);
 		rmfi_drawing_line().IsChecked(val == DRAWING_TOOL::LINE);
 		rmfi_drawing_bezier().IsChecked(val == DRAWING_TOOL::BEZIER);
 		rmfi_drawing_text().IsChecked(val == DRAWING_TOOL::TEXT);

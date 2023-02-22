@@ -1109,13 +1109,13 @@ namespace winrt::GraphPaper::implementation
 			return 0;
 		}
 
-		D2D1_POINT_2F b_pos{};
+		D2D1_POINT_2F start{};
 		D2D1_BEZIER_SEGMENT b_seg{};
-		alternate_bezier(b_pos, b_seg);
+		alternate_bezier(start, b_seg);
 
-		D2D1_POINT_2F c_pos{};
+		D2D1_POINT_2F center{};
 		if (is_opaque(m_fill_color) || m_arrow_style != ARROW_STYLE::NONE) {
-			get_pos_center(c_pos);
+			get_pos_center(center);
 		}
 
 		size_t len = 0;
@@ -1128,11 +1128,11 @@ namespace winrt::GraphPaper::implementation
 				L"%f %f %f rg\n"
 				L"%f %f m %f %f %f %f %f %f c %f %f l f*\n",
 				m_fill_color.r, m_fill_color.g, m_fill_color.b,
-				b_pos.x, -b_pos.y + page_size.height,
+				start.x, -start.y + page_size.height,
 				b_seg.point1.x, -b_seg.point1.y + page_size.height,
 				b_seg.point2.x, -b_seg.point2.y + page_size.height,
 				b_seg.point3.x, -b_seg.point3.y + page_size.height,
-				c_pos.x, -c_pos.y + page_size.height
+				center.x, -center.y + page_size.height
 			);
 			len += dt_writer.WriteString(buf);
 		}
@@ -1144,7 +1144,7 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[1024];
 			swprintf_s(buf,
 				L"%f %f m %f %f %f %f %f %f c S\n",
-				b_pos.x, -b_pos.y + page_size.height,
+				start.x, -start.y + page_size.height,
 				b_seg.point1.x, -b_seg.point1.y + page_size.height,
 				b_seg.point2.x, -b_seg.point2.y + page_size.height,
 				b_seg.point3.x, -b_seg.point3.y + page_size.height
@@ -1152,7 +1152,7 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
-				qellipse_calc_arrow(m_vec[0], c_pos, m_radius, M_PI * m_rot_degree / 180.0, 
+				qellipse_calc_arrow(m_vec[0], center, m_radius, M_PI * m_rot_degree / 180.0,
 					m_arrow_size, arrow);
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size,
 					arrow, arrow[2], dt_writer);

@@ -20,44 +20,44 @@ namespace winrt::GraphPaper::implementation
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
 	// target	レンダーターゲット
 	// brush	色ブラシ
-	// p_pos	ポインターが押された位置
-	// c_pos	ポインターの現在位置
+	// pressed	ポインターが押された位置
+	// current	ポインターの現在位置
 	void ShapePage::draw_auxiliary_bezi(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		D2D1_POINT_2F s_pos;
 		D2D1_POINT_2F e_pos;
 
-		e_pos.x = c_pos.x;
-		e_pos.y = p_pos.y;
+		e_pos.x = current.x;
+		e_pos.y = pressed.y;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(p_pos, e_pos, brush, m_aux_width, nullptr);
+		target->DrawLine(pressed, e_pos, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(p_pos, e_pos, brush, m_aux_width, m_aux_style.get());
+		target->DrawLine(pressed, e_pos, brush, m_aux_width, m_aux_style.get());
 		s_pos = e_pos;
-		e_pos.x = p_pos.x;
-		e_pos.y = c_pos.y;
+		e_pos.x = pressed.x;
+		e_pos.y = current.y;
 		brush->SetColor(COLOR_WHITE);
 		target->DrawLine(s_pos, e_pos, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
 		target->DrawLine(s_pos, e_pos, brush, m_aux_width, m_aux_style.get());
 		s_pos = e_pos;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(s_pos, c_pos, brush, m_aux_width, nullptr);
+		target->DrawLine(s_pos, current, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(s_pos, c_pos, brush, m_aux_width, m_aux_style.get());
+		target->DrawLine(s_pos, current, brush, m_aux_width, m_aux_style.get());
 	}
 
 	// だ円の補助線を表示する.
 	// target	レンダーターゲット
 	// brush	色ブラシ
-	// p_pos	ポインターが押された位置
-	// c_pos	ポインターの現在位置
+	// pressed	ポインターが押された位置
+	// current	ポインターの現在位置
 	void ShapePage::draw_auxiliary_elli(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
 		if (Shape::m_aux_style == nullptr) {
 			winrt::check_hresult(
@@ -73,9 +73,9 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F rect;	// 方形
 		D2D1_ELLIPSE elli;		// だ円
 
-		pt_sub(c_pos, p_pos, rect);
+		pt_sub(current, pressed, rect);
 		pt_mul(rect, 0.5, rect);
-		pt_add(p_pos, rect, elli.point);
+		pt_add(pressed, rect, elli.point);
 		elli.radiusX = rect.x;
 		elli.radiusY = rect.y;
 		brush->SetColor(COLOR_WHITE);
@@ -85,33 +85,33 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 直線の補助線を表示する.
-	// p_pos	ポインターが押された位置
-	// c_pos	ポインターの現在位置
+	// pressed	ポインターが押された位置
+	// current	ポインターの現在位置
 	void ShapePage::draw_auxiliary_line(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(p_pos, c_pos, brush, m_aux_width, nullptr);
+		target->DrawLine(pressed, current, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(p_pos, c_pos, brush, m_aux_width, m_aux_style.get());
+		target->DrawLine(pressed, current, brush, m_aux_width, m_aux_style.get());
 	}
 
 	// 多角形の補助線を表示する.
-	// p_pos	ポインターが押された位置
-	// c_pos	ポインターの現在位置
+	// pressed	ポインターが押された位置
+	// current	ポインターの現在位置
 	// p_opt	多角形の選択肢
 	void ShapePage::draw_auxiliary_poly(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos, const POLY_OPTION& p_opt)
+		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current, const POLY_OPTION& p_opt)
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		D2D1_POINT_2F v_pos[N_GON_MAX];	// 頂点の配列
 
 		D2D1_POINT_2F p_vec;
-		pt_sub(c_pos, p_pos, p_vec);
-		ShapePolygon::poly_by_bbox(p_pos, p_vec, p_opt, v_pos);
+		pt_sub(current, pressed, p_vec);
+		ShapePolygon::poly_by_bbox(pressed, p_vec, p_opt, v_pos);
 		const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
 		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
@@ -123,15 +123,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 方形の補助線を表示する.
-	// p_pos	ポインターが押された位置
-	// c_pos	ポインターの現在位置
+	// pressed	ポインターが押された位置
+	// current	ポインターの現在位置
 	void ShapePage::draw_auxiliary_rect(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		const D2D1_RECT_F rc = {
-			p_pos.x, p_pos.y, c_pos.x, c_pos.y
+			pressed.x, pressed.y, current.x, current.y
 		};
 		brush->SetColor(COLOR_WHITE);
 		target->DrawRectangle(&rc, brush, m_aux_width, nullptr);
@@ -141,16 +141,15 @@ namespace winrt::GraphPaper::implementation
 
 	// 角丸方形の補助線を表示する.
 	// p_pos	ポインターが押された位置
-	// c_pos	ポインターの現在位置
-	// c_rad	角丸半径
+	// current	ポインターの現在位置
 	void ShapePage::draw_auxiliary_rrect(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
-		const double cx = c_pos.x;
-		const double cy = c_pos.y;
-		const double px = p_pos.x;
-		const double py = p_pos.y;
+		const double cx = current.x;
+		const double cy = current.y;
+		const double px = pressed.x;
+		const double py = pressed.y;
 		const double qx = cx - px;
 		const double qy = cy - py;
 		//auto c_rad = m_corner_radius;
@@ -165,7 +164,7 @@ namespace winrt::GraphPaper::implementation
 			ry = -ry;
 		}
 		const D2D1_ROUNDED_RECT r_rect = {
-			{ p_pos.x, p_pos.y, c_pos.x, c_pos.y },
+			{ pressed.x, pressed.y, current.x, current.y },
 			static_cast<FLOAT>(rx),
 			static_cast<FLOAT>(ry)
 		};
@@ -177,14 +176,14 @@ namespace winrt::GraphPaper::implementation
 
 	void ShapePage::draw_auxiliary_qellipse(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
-		const D2D1_POINT_2F p_pos, const D2D1_POINT_2F c_pos)
+		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
 		//D2D1_MATRIX_3X2_F tran;
 		//target->GetTransform(&tran);
 		//const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// 線の太さ
 		D2D1_ARC_SEGMENT arc{
-			c_pos,
-			D2D1_SIZE_F{ fabsf(c_pos.x - p_pos.x), fabsf(c_pos.y - p_pos.y) },
+			current,
+			D2D1_SIZE_F{ fabsf(current.x - pressed.x), fabsf(current.y - pressed.y) },
 			0.0f,
 			D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE,
 			D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL
@@ -196,7 +195,7 @@ namespace winrt::GraphPaper::implementation
 		winrt::check_hresult(factory->CreatePathGeometry(geom.put()));
 		winrt::check_hresult(geom->Open(sink.put()));
 		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-		sink->BeginFigure(p_pos, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+		sink->BeginFigure(pressed, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 		sink->AddArc(arc);
 		sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 		winrt::check_hresult(sink->Close());

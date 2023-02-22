@@ -52,7 +52,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		winrt::apartment_context context;
 
-		ShapeText::set_available_fonts(m_main_d2d);
+		ShapeText::set_available_fonts();
 
 		// アプリケーションデータを読み込む.
 		IStorageItem app_data_item{

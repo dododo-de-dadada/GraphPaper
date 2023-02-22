@@ -1068,7 +1068,7 @@ namespace winrt::GraphPaper::implementation
 
 		ShapeText::release_available_fonts();
 
-		ShapeText::set_available_fonts(m_main_d2d);
+		ShapeText::set_available_fonts();
 
 		// 背景色, 前景色, 選択された文字範囲の背景色, 文字色をリソースから得る.
 		{

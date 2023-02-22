@@ -124,14 +124,14 @@ namespace winrt::GraphPaper::implementation
 			const auto s_text = static_cast<ShapeText*>(s);
 			s_text->create_text_layout();
 			const auto cnt = s_text->m_dwrite_selected_cnt;
-			const auto mtx = s_text->m_dwrite_selected_metrics;
-			D2D1_POINT_2F t_pos;
-			s->get_pos_start(t_pos);
+			const auto met = s_text->m_dwrite_selected_metrics;
+			D2D1_POINT_2F start;
+			s->get_pos_start(start);
 			for (auto i = cnt; i > 0; i--) {
-				t_lt.x = t_pos.x + mtx[i - 1].left;
-				t_lt.y = t_pos.y + mtx[i - 1].top;
-				t_rb.x = t_lt.x + mtx[i - 1].width;
-				t_rb.y = t_lt.y + mtx[i - 1].height;
+				t_lt.x = start.x + met[i - 1].left;
+				t_lt.y = start.y + met[i - 1].top;
+				t_rb.x = t_lt.x + met[i - 1].width;
+				t_rb.y = t_lt.y + met[i - 1].height;
 				if (pt_in_rect(t_lt, v_lt, v_rb)
 					|| pt_in_rect(t_rb, v_lt, v_rb)) {
 					return false;

@@ -94,7 +94,6 @@ namespace winrt::GraphPaper::implementation
 
 		}
 		m_anc_show = anc_show;
-		constexpr double a_len = 6.0;
 		m_aux_width = static_cast<FLOAT>(1.0 / scale);
 		m_anc_width = static_cast<FLOAT>(a_len / scale);
 		m_anc_square_inner = static_cast<FLOAT>(0.5 * a_len / scale);

@@ -85,10 +85,10 @@ namespace winrt::GraphPaper::implementation
 		const auto samp_w = scp_dialog_panel().Width();
 		const auto samp_h = scp_dialog_panel().Height();
 		const auto padd = samp_w * 0.125;
-		const D2D1_POINT_2F b_pos{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
+		const D2D1_POINT_2F start{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
 		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
 		POLY_OPTION p_opt{ 3, true, true, false, true };
-		auto s = new ShapePolygon(b_pos, b_vec, &m_dialog_page, p_opt);
+		auto s = new ShapePolygon(start, b_vec, &m_dialog_page, p_opt);
 		const float offset = static_cast<float>(samp_h / 16.0);
 		const float samp_x = static_cast<float>(samp_w * 0.25);
 		const float samp_y = static_cast<float>(samp_h * 0.5);

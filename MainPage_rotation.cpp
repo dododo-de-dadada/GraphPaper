@@ -86,13 +86,13 @@ namespace winrt::GraphPaper::implementation
 			const auto padd = samp_w * 0.125;
 			const auto rx = (samp_w - padd) * 0.5;
 			const auto ry = (samp_h - padd) * 0.5;
-			const D2D1_POINT_2F b_pos{
+			const D2D1_POINT_2F start{
 				static_cast<FLOAT>(center), static_cast<FLOAT>(padd)
 			};
 			const D2D1_POINT_2F b_vec{
 				static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)
 			};
-			m_dialog_page.m_shape_list.push_back(new ShapeQEllipse(b_pos, b_vec, rot, s));
+			m_dialog_page.m_shape_list.push_back(new ShapeQEllipse(start, b_vec, rot, s));
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
