@@ -66,7 +66,7 @@ namespace winrt::GraphPaper::implementation
 	// 図形を囲む領域の左上位置を得る.
 	// val	領域の左上位置
 	//------------------------------
-	void ShapeGroup::get_pos_lt(D2D1_POINT_2F& val) const noexcept
+	void ShapeGroup::get_bound_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		get_pos_start(val);
 	}
@@ -78,23 +78,20 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	bool ShapeGroup::get_pos_start(D2D1_POINT_2F& val) const noexcept
 	{
-		//if (m_list_grouped.empty()) {
-		//	return false;
-		//}
 		auto flag = false;
 		for (const auto s : m_list_grouped) {
 			if (s->is_deleted()) {
 				continue;
 			}
-			D2D1_POINT_2F pos;
-			s->get_pos_lt(pos);
+			D2D1_POINT_2F lt;
+			s->get_bound_lt(lt);
 			if (!flag) {
-				val = pos;
+				val = lt;
 				flag = true;
 			}
 			else {
-				val.x = pos.x < val.x ? pos.x : val.x;
-				val.y = pos.y < val.y ? pos.y : val.y;
+				val.x = lt.x < val.x ? lt.x : val.x;
+				val.y = lt.y < val.y ? lt.y : val.y;
 			}
 		}
 		return flag;
@@ -169,12 +166,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 差分だけ移動する
-	// d_vec	差分ベクトル
+	// 位置を移動する
+	// pos	移動する位置ベクトル
 	//------------------------------
-	bool ShapeGroup::move(const D2D1_POINT_2F d_vec) noexcept
+	bool ShapeGroup::move(const D2D1_POINT_2F pos) noexcept
 	{
-		return slist_move(m_list_grouped, d_vec);
+		return slist_move_selected(m_list_grouped, pos);
 	}
 
 	//------------------------------
@@ -202,9 +199,9 @@ namespace winrt::GraphPaper::implementation
 	{
 		D2D1_POINT_2F old_val;
 		if (get_pos_start(old_val) && !equal(val, old_val)) {
-			D2D1_POINT_2F d_vec;
-			pt_sub(val, old_val, d_vec);
-			move(d_vec);
+			D2D1_POINT_2F pos;
+			pt_sub(val, old_val, pos);
+			move(pos);
 			return true;
 		}
 		return false;

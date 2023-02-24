@@ -410,37 +410,37 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 図形の作成を終了する.
-	// start	囲む領域の開始位置
-	// b_vec	終了位置への差分
+	// start	始点
+	// pos	終点への位置ベクトル
 	//------------------------------
-	void MainPage::event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec)
+	void MainPage::event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F pos)
 	{
 		const auto d_tool = m_drawing_tool;
 		Shape* s;
 		if (d_tool == DRAWING_TOOL::RECT) {
-			s = new ShapeRect(start, b_vec, &m_main_page);
+			s = new ShapeRect(start, pos, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::RRECT) {
-			s = new ShapeRRect(start, b_vec, &m_main_page);
+			s = new ShapeRRect(start, pos, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::POLY) {
 			const auto poly_opt = m_drawing_poly_opt;
-			s = new ShapePolygon(start, b_vec, &m_main_page, poly_opt);
+			s = new ShapePolygon(start, pos, &m_main_page, poly_opt);
 		}
 		else if (d_tool == DRAWING_TOOL::ELLIPSE) {
-			s = new ShapeEllipse(start, b_vec, &m_main_page);
+			s = new ShapeEllipse(start, pos, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::LINE) {
-			s = new ShapeLine(start, b_vec, &m_main_page);
+			s = new ShapeLine(start, pos, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::BEZIER) {
-			s = new ShapeBezier(start, b_vec, &m_main_page);
+			s = new ShapeBezier(start, pos, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::RULER) {
-			s = new ShapeRuler(start, b_vec, &m_main_page);
+			s = new ShapeRuler(start, pos, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::QELLIPSE) {
-			s = new ShapeQEllipse(start, b_vec, 0.0f, &m_main_page);
+			s = new ShapeQEllipse(start, pos, 0.0f, &m_main_page);
 		}
 		else {
 			return;
@@ -467,16 +467,18 @@ namespace winrt::GraphPaper::implementation
 
 	//------------------------------
 	// 文字列図形の作成を終了する.
+	// start	始点
+	// pos	終点への位置ベクトル
 	//------------------------------
 	IAsyncAction MainPage::event_finish_creating_text_async(
-		const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec)
+		const D2D1_POINT_2F start, const D2D1_POINT_2F pos)
 	{
 		const auto fit_text = m_text_fit_frame_to_text;
 		tx_edit_text().Text(L"");
 		ck_text_fit_frame_to_text().IsChecked(fit_text);
 		if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
 			auto text = wchar_cpy(tx_edit_text().Text().c_str());
-			auto s = new ShapeText(start, b_vec, text, &m_main_page);
+			auto s = new ShapeText(start, pos, text, &m_main_page);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
@@ -577,14 +579,14 @@ namespace winrt::GraphPaper::implementation
 					pos = v_pos;
 				}
 				// 得られた差分の分だけ, 選択された図形を移動する.
-				slist_move(m_main_page.m_shape_list, pos);
+				slist_move_selected(m_main_page.m_shape_list, pos);
 			}
 		}
 		// 方眼にくっつける
 		else if (g_snap) {
 			D2D1_POINT_2F pos{};	// 差分
 			if (event_get_nearby_grid(m_main_page.m_shape_list, g_base + 1.0f, pos)) {
-				slist_move(m_main_page.m_shape_list, pos);
+				slist_move_selected(m_main_page.m_shape_list, pos);
 			}
 		} 
 		// 頂点にくっつける
@@ -592,7 +594,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F pos{};	// 頂点との差分
 			if (event_get_nearby_vertex(
 				m_main_page.m_shape_list, v_stick / p_scale, pos)) {
-				slist_move(m_main_page.m_shape_list, pos);
+				slist_move_selected(m_main_page.m_shape_list, pos);
 			}
 		}
 		if (!ustack_pop_if_invalid()) {
@@ -690,9 +692,9 @@ namespace winrt::GraphPaper::implementation
 			// 長さがクリック判定距離を超えるか判定する.
 			const auto raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			const auto log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			D2D1_POINT_2F vec;
-			pt_sub(m_event_pos_curr, m_event_pos_pressed, vec);
-			if (pt_abs2(vec) * m_main_page.m_page_scale > m_event_click_dist * raw_dpi / log_dpi) {
+			D2D1_POINT_2F pos;	// 位置ベクトル
+			pt_sub(m_event_pos_curr, m_event_pos_pressed, pos);
+			if (pt_abs2(pos) * m_main_page.m_page_scale > m_event_click_dist * raw_dpi / log_dpi) {
 				// 初期状態に戻る.
 				m_event_state = EVENT_STATE::BEGIN;
 				event_set_cursor();
@@ -705,9 +707,9 @@ namespace winrt::GraphPaper::implementation
 		// 状態が, 図形を移動している状態か判定する.
 		else if (m_event_state == EVENT_STATE::PRESS_MOVE) {
 			// ポインターの現在位置と前回位置の差分を得る.
-			D2D1_POINT_2F vec;
-			pt_sub(m_event_pos_curr, m_event_pos_prev, vec);
-			slist_move(m_main_page.m_shape_list, vec);
+			D2D1_POINT_2F pos;
+			pt_sub(m_event_pos_curr, m_event_pos_prev, pos);
+			slist_move_selected(m_main_page.m_shape_list, pos);
 			// ポインターの現在位置を前回位置に格納する.
 			m_event_pos_prev = m_event_pos_curr;
 			page_draw();
@@ -726,10 +728,10 @@ namespace winrt::GraphPaper::implementation
 		else if (m_event_state == EVENT_STATE::PRESS_LBTN || 
 			m_event_state == EVENT_STATE::CLICK_LBTN) {
 			// ポインターの現在位置と押された位置との差分を得る.
-			D2D1_POINT_2F vec;
-			pt_sub(m_event_pos_curr, m_event_pos_pressed, vec);
+			D2D1_POINT_2F pos;
+			pt_sub(m_event_pos_curr, m_event_pos_pressed, pos);
 			// 差分がクリックの判定距離を超えるか判定する.
-			if (pt_abs2(vec) > m_event_click_dist / m_main_page.m_page_scale) {
+			if (pt_abs2(pos) > m_event_click_dist / m_main_page.m_page_scale) {
 				// 作図ツールが選択ツール以外か判定する.
 				if (m_drawing_tool != DRAWING_TOOL::SELECT) {
 					// 矩形選択している状態に遷移する.
@@ -752,7 +754,7 @@ namespace winrt::GraphPaper::implementation
 					m_event_state = EVENT_STATE::PRESS_MOVE;
 					// ポインターの現在位置を前回位置に保存する.
 					m_event_pos_prev = m_event_pos_curr;
-					ustack_push_move(vec);
+					ustack_push_move(pos);
 				}
 				// ポインターが押されたのが図形の外部以外か判定する.
 				else if (m_event_anc_pressed != ANC_TYPE::ANC_PAGE) {
@@ -1030,15 +1032,15 @@ namespace winrt::GraphPaper::implementation
 				}
 
 				// ポインターの現在位置と押された位置の差分を求める.
-				D2D1_POINT_2F c_vec;	// 現在位置への差分
-				pt_sub(m_event_pos_curr, m_event_pos_pressed, c_vec);
+				D2D1_POINT_2F pos;	// 現在位置への位置ベクトル
+				pt_sub(m_event_pos_curr, m_event_pos_pressed, pos);
 				// 差分の x 値または y 値のいずれかが 1 以上か判定する.
-				if (fabs(c_vec.x) >= 1.0f || fabs(c_vec.y) >= 1.0f) {
+				if (fabs(pos.x) >= 1.0f || fabs(pos.y) >= 1.0f) {
 					if (m_drawing_tool == DRAWING_TOOL::TEXT) {
-						event_finish_creating_text_async(m_event_pos_pressed, c_vec);
+						event_finish_creating_text_async(m_event_pos_pressed, pos);
 						return;
 					}
-					event_finish_creating(m_event_pos_pressed, c_vec);
+					event_finish_creating(m_event_pos_pressed, pos);
 				}
 			}
 		}
@@ -1182,12 +1184,15 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto p_scale = m_main_page.m_page_scale;
 		// 境界ボックスの左上位置にスクロールの値を加え, 境界ボックスの表示されている左上位置を得る
-		D2D1_POINT_2F bbox_lt;
-		pt_add(m_main_bbox_lt, sb_horz().Value(), sb_vert().Value(), bbox_lt);
+		D2D1_POINT_2F lt;
+		pt_add(m_main_bbox_lt, sb_horz().Value() - m_main_page.m_page_padding.left,
+			sb_vert().Value() - m_main_page.m_page_padding.top, lt);
 		// 引数として渡された位置をスワップチェーンパネル上の位置として得る.
 		// 得られた位置に拡大率の逆数を乗じて, 境界ボックスの表示されている左上位置を加えた値を,
 		// ポインターの現在位置に格納する.
-		pt_mul_add(args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / p_scale, bbox_lt, m_event_pos_curr);
+		pt_mul_add(
+			args.GetCurrentPoint(scp_page_panel()).Position(), 1.0 / p_scale, lt,
+			m_event_pos_curr);
 	}
 
 	//------------------------------

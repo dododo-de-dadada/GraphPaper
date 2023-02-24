@@ -374,22 +374,22 @@ namespace winrt::GraphPaper::implementation
 	template bool winrt::GraphPaper::implementation::slist_match<Shape* const, uint32_t>(SHAPE_LIST const& slist, Shape* const s, uint32_t& t);
 	template bool winrt::GraphPaper::implementation::slist_match<const uint32_t, Shape*>(SHAPE_LIST const& slist, const uint32_t s, Shape*& t);
 
-	// 選択フラグの立つすべての図形を差分だけ移動する.
+	// 選択された図形を移動する.
 	// slist	図形リスト
-	// d_vec	移動する差分
+	// pos	位置ベクトル
 	// 戻り値	移動した図形があるなら true
-	bool slist_move(SHAPE_LIST const& slist, const D2D1_POINT_2F d_vec) noexcept
+	bool slist_move_selected(SHAPE_LIST const& slist, const D2D1_POINT_2F pos) noexcept
 	{
-		bool done = false;
+		bool flag = false;
 		for (auto s : slist) {
 			if (s->is_deleted() || !s->is_selected()) {
 				continue;
 			}
-			if (s->move(d_vec) && !done) {
-				done = true;
+			if (s->move(pos) && !flag) {
+				flag = true;
 			}
 		}
-		return done;
+		return flag;
 	}
 
 	// 図形のその次の図形をリストから得る.

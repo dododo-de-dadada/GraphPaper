@@ -18,11 +18,11 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 差分だけ移動する.
-	// d_vec	差分
-	bool ShapePath::move(const D2D1_POINT_2F d_vec) noexcept
+	// 位置を移動する.
+	// pos	位置ベクトル
+	bool ShapePath::move(const D2D1_POINT_2F pos) noexcept
 	{
-		if (ShapeLine::move(d_vec)) {
+		if (ShapeLine::move(pos)) {
 			m_d2d_path_geom = nullptr;
 			return true;
 		}

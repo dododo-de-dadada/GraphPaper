@@ -27,27 +27,27 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		D2D1_POINT_2F s_pos;
-		D2D1_POINT_2F e_pos;
+		D2D1_POINT_2F s;
+		D2D1_POINT_2F e;
 
-		e_pos.x = current.x;
-		e_pos.y = pressed.y;
+		e.x = current.x;
+		e.y = pressed.y;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(pressed, e_pos, brush, m_aux_width, nullptr);
+		target->DrawLine(pressed, e, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(pressed, e_pos, brush, m_aux_width, m_aux_style.get());
-		s_pos = e_pos;
-		e_pos.x = pressed.x;
-		e_pos.y = current.y;
+		target->DrawLine(pressed, e, brush, m_aux_width, m_aux_style.get());
+		s = e;
+		e.x = pressed.x;
+		e.y = current.y;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(s_pos, e_pos, brush, m_aux_width, nullptr);
+		target->DrawLine(s, e, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(s_pos, e_pos, brush, m_aux_width, m_aux_style.get());
-		s_pos = e_pos;
+		target->DrawLine(s, e, brush, m_aux_width, m_aux_style.get());
+		s = e;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(s_pos, current, brush, m_aux_width, nullptr);
+		target->DrawLine(s, current, brush, m_aux_width, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(s_pos, current, brush, m_aux_width, m_aux_style.get());
+		target->DrawLine(s, current, brush, m_aux_width, m_aux_style.get());
 	}
 
 	// だ円の補助線を表示する.
@@ -107,18 +107,18 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current, const POLY_OPTION& p_opt)
 	{
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
-		D2D1_POINT_2F v_pos[N_GON_MAX];	// 頂点の配列
+		D2D1_POINT_2F p[N_GON_MAX];	// 頂点の配列
 
-		D2D1_POINT_2F p_vec;
-		pt_sub(current, pressed, p_vec);
-		ShapePolygon::poly_by_bbox(pressed, p_vec, p_opt, v_pos);
+		D2D1_POINT_2F pos;	// 位置ベクトル
+		pt_sub(current, pressed, pos);
+		ShapePolygon::poly_by_box(pressed, pos, p_opt, p);
 		const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
 		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
 			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(v_pos[i], v_pos[j], brush, m_aux_width, nullptr);
+			target->DrawLine(p[i], p[j], brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(v_pos[i], v_pos[j], brush, m_aux_width, m_aux_style.get());
+			target->DrawLine(p[i], p[j], brush, m_aux_width, m_aux_style.get());
 		}
 	}
 
@@ -140,7 +140,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 角丸方形の補助線を表示する.
-	// p_pos	ポインターが押された位置
+	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
 	void ShapePage::draw_auxiliary_rrect(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
@@ -213,8 +213,18 @@ namespace winrt::GraphPaper::implementation
 		// ページの色でページを塗りつぶす.
 		m_d2d_color_brush->SetColor(m_page_color);
 		m_d2d_target->FillRectangle(D2D1_RECT_F{ 0, 0, m_page_size.width, m_page_size.height }, m_d2d_color_brush.get());
+		D2D1_MATRIX_3X2_F s;
+		m_d2d_target->GetTransform(&s);
+		D2D1_MATRIX_3X2_F t{ s };
+		t.dx += m_page_padding.left * m_page_scale;
+		t.dy += m_page_padding.right * m_page_scale;
+		m_d2d_target->SetTransform(&t);
 		// 方眼の表示が最背景に表示なら,
 		if (m_grid_show == GRID_SHOW::BACK) {
+			D2D1_SIZE_F g_size{
+				m_page_size.width - (m_page_padding.left + m_page_padding.right),
+				m_page_size.height - (m_page_padding.top + m_page_padding.bottom)
+			};
 			// 方眼を表示する.
 			page_draw_grid(
 				m_d2d_target,
@@ -224,7 +234,7 @@ namespace winrt::GraphPaper::implementation
 				m_grid_emph,
 				m_grid_offset,
 				m_page_scale,
-				m_page_size);
+				g_size);
 		}
 		for (auto s : m_shape_list) {
 			if (!s->is_deleted()) {
@@ -235,6 +245,10 @@ namespace winrt::GraphPaper::implementation
 		if (m_grid_show == GRID_SHOW::FRONT) {
 			// 方眼の表示が最前面に表示の場合,
 			// 方眼を表示する.
+			D2D1_SIZE_F g_size{
+				m_page_size.width - (m_page_padding.left + m_page_padding.right),
+				m_page_size.height - (m_page_padding.top + m_page_padding.bottom)
+			};
 			page_draw_grid(
 				m_d2d_target,
 				m_d2d_color_brush.get(),
@@ -243,7 +257,7 @@ namespace winrt::GraphPaper::implementation
 				m_grid_emph,
 				m_grid_offset,
 				m_page_scale,
-				m_page_size);
+				g_size);
 		}
 	}
 

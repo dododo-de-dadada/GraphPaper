@@ -371,7 +371,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を囲む領域の左上位置を得る.
 	// val	領域の左上位置
-	void ShapeRect::get_pos_lt(D2D1_POINT_2F& val) const noexcept
+	void ShapeRect::get_bound_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		const size_t n = m_vec.size();	// 差分の数
 		D2D1_POINT_2F p = m_start;	// 頂点
@@ -404,13 +404,13 @@ namespace winrt::GraphPaper::implementation
 		return pt_in_rect(m_start, area_lt, area_rb) && pt_in_rect(pos, area_lt, area_rb);
 	}
 
-	// 差分だけ移動する.
-	// val	差分ベクトル
-	bool ShapeRect::move(const D2D1_POINT_2F val) noexcept
+	// 位置を移動する.
+	// pos	位置ベクトル
+	bool ShapeRect::move(const D2D1_POINT_2F pos) noexcept
 	{
-		D2D1_POINT_2F new_pos;
-		pt_add(m_start, val, new_pos);
-		if (set_pos_start(new_pos)) {
+		D2D1_POINT_2F start;
+		pt_add(m_start, pos, start);
+		if (set_pos_start(start)) {
 			return true;
 		}
 		return false;

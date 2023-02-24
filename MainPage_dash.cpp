@@ -82,9 +82,13 @@ namespace winrt::GraphPaper::implementation
 		const auto p_width = scp_dialog_panel().Width();
 		const auto p_height = scp_dialog_panel().Height();
 		const auto padd = p_width * 0.125;
-		const D2D1_POINT_2F start{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd) };
-		m_dialog_page.m_shape_list.push_back(new ShapeLine(start, b_vec, &m_dialog_page));
+		const D2D1_POINT_2F start{
+			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
+		};
+		const D2D1_POINT_2F pos{
+			static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd)
+		};
+		m_dialog_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -117,7 +121,6 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().ValueChanged(slider_2_token);
 		dialog_slider_3().ValueChanged(slider_3_token);
 		dialog_slider_4().ValueChanged(slider_4_token);
-		//page_draw();
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}

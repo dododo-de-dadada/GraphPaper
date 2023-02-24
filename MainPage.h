@@ -258,7 +258,7 @@ namespace winrt::GraphPaper::implementation
 		//uint64_t m_event_click_time = static_cast<uint64_t>(UISettings().DoubleClickTime()) * 1000L;	// クリックの判定時間 (マイクロ秒)
 		double m_event_click_dist = 6.0;	// クリックの判定距離 (DIPs)
 		D2D1_COLOR_F m_eyedropper_color{};	// 抽出された色.
-		bool m_eyedropper_filled = false;
+		bool m_eyedropper_filled = false;	// 抽出されたか判定
 
 		// 作図ツール
 		DRAWING_TOOL m_drawing_tool = DRAWING_TOOL::SELECT;	// 作図ツール
@@ -319,7 +319,8 @@ namespace winrt::GraphPaper::implementation
 		//IPrintDocumentSource m_print_source;
 
 		template <UNDO_ID U, int S> void rotation_slider_set_header(const float val);
-		template <UNDO_ID U, int S> void rotation_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
+		template <UNDO_ID U, int S> void rotation_slider_val_changed(
+			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 		IAsyncAction rotation_click_async(Shape* s);
 
 		//-------------------------------
@@ -330,9 +331,12 @@ namespace winrt::GraphPaper::implementation
 		// メインページを作成する.
 		MainPage(void);
 		// メッセージダイアログを表示する.
-		void message_show(winrt::hstring const& glyph_key, winrt::hstring const& message_key, winrt::hstring const& desc_key);
+		void message_show(
+			winrt::hstring const& glyph_key, winrt::hstring const& message_key,
+			winrt::hstring const& desc_key);
 		// ウィンドウの閉じるボタンが押された.
-		void navi_close_requested(IInspectable const&, SystemNavigationCloseRequestedPreviewEventArgs const& args)
+		void navi_close_requested(
+			IInspectable const&, SystemNavigationCloseRequestedPreviewEventArgs const& args)
 		{
 			args.Handled(true);
 			auto _{ file_exit_click_async(nullptr, nullptr) };
@@ -345,9 +349,11 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// アプリケーションがバックグラウンドに移った.
-		void app_entered_background(IInspectable const& sender, EnteredBackgroundEventArgs const& args);
+		void app_entered_background(
+			IInspectable const& sender, EnteredBackgroundEventArgs const& args);
 		// アプリケーションがバックグラウンドに移った.
-		void app_leaving_background(IInspectable const& sender, LeavingBackgroundEventArgs const& args);
+		void app_leaving_background(
+			IInspectable const& sender, LeavingBackgroundEventArgs const& args);
 		// アプリケーションが再開された.
 		IAsyncAction app_resuming_async(IInspectable const&, IInspectable const&);
 		// アプリケーションが中断された.
@@ -431,9 +437,9 @@ namespace winrt::GraphPaper::implementation
 		// 色を検出する.
 		void event_eyedropper_detect(const Shape* s, const uint32_t anc);
 		// 図形の作成を終了する.
-		void event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec);
+		void event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 文字列図形の作成を終了する.
-		IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec);
+		IAsyncAction event_finish_creating_text_async(const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 図形の変形を終了する.
 		void event_finish_deforming(void);
 		// 図形の移動を終了する.
@@ -914,7 +920,8 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに PDF として書き込む.
 		IAsyncOperation<winrt::hresult> export_as_pdf_async(const StorageFile& pdf_file) noexcept;
 		IAsyncOperation<winrt::hresult> export_as_svg_async(const StorageFile& svg_file) noexcept;
-		IAsyncOperation<winrt::hresult> export_as_raster_async(const StorageFile& image_file) noexcept;
+		IAsyncOperation<winrt::hresult> export_as_raster_async(
+			const StorageFile& image_file) noexcept;
 
 		//-------------------------------
 		//　MainPage_text.cpp
@@ -994,7 +1001,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を挿入して, その操作をスタックに積む.
 		void ustack_push_insert(Shape* const s, Shape* const s_pos);
 		// 選択された (あるいは全ての) 図形の位置をスタックに保存してから差分だけ移動する.
-		void ustack_push_move(const D2D1_POINT_2F d_vec, const bool any = false);
+		void ustack_push_move(const D2D1_POINT_2F pos, const bool any = false);
 		// 一連の操作の区切としてヌル操作をスタックに積む.
 		void ustack_push_null(void);
 		// 図形をグループから取り去り, その操作をスタックに積む.

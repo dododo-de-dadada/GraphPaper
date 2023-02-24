@@ -142,13 +142,13 @@ namespace winrt::GraphPaper::implementation
 		const auto samp_w = scp_dialog_panel().Width();
 		const auto samp_h = scp_dialog_panel().Height();
 		const auto padd = samp_w * 0.125;
-		const D2D1_POINT_2F start{
+		const D2D1_POINT_2F start{	// 始点
 			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
 		};
-		const D2D1_POINT_2F b_vec{
+		const D2D1_POINT_2F pos{	// 終点の位置ベクトル
 			static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd)
 		};
-		m_dialog_page.m_shape_list.push_back(new ShapeLine(start, b_vec, &m_dialog_page));
+		m_dialog_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -185,7 +185,6 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().SnapsTo(ds2_snap);
 		dialog_slider_2().Value(ds2_val);
 		dialog_slider_2().Visibility(ds2_vis);
-		//page_draw();
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}

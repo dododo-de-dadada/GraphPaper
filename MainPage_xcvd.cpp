@@ -481,35 +481,36 @@ namespace winrt::GraphPaper::implementation
 
 	// 貼り付ける位置を求める.
 	// p	求める位置
-	// grid_len	方眼の大きさ
-	// vert_stick	頂点をくっつける距離
-	static void xcvd_paste_pos(D2D1_POINT_2F& p, const SHAPE_LIST& slist, const double grid_len, const float vert_stick)
+	// g_len	方眼の大きさ
+	// v_limit	頂点をくっつける距離
+	static void xcvd_paste_pos(
+		D2D1_POINT_2F& p, const SHAPE_LIST& slist, const double g_len, const float v_limit)
 	{
 		D2D1_POINT_2F v;	// 最も近い頂点
-		if (grid_len >= 1.0f && vert_stick >= FLT_MIN &&
-			slist_find_vertex_closest(slist, p, vert_stick, v)) {
+		if (g_len >= 1.0f && v_limit >= FLT_MIN &&
+			slist_find_vertex_closest(slist, p, v_limit, v)) {
 			// 図形の左上位置を方眼の大きさで丸め, 元の値との距離 (の自乗) を求める.
-			D2D1_POINT_2F g_pos;
-			pt_round(p, grid_len, g_pos);
-			D2D1_POINT_2F g_vec;
-			pt_sub(g_pos, p, g_vec);
-			const double g_abs = pt_abs2(g_vec);
+			D2D1_POINT_2F g;	// 方眼の位置
+			pt_round(p, g_len, g);
+			D2D1_POINT_2F g_pos;	// 方眼への位置ベクトル
+			pt_sub(g, p, g_pos);
+			const double g_abs = pt_abs2(g_pos);
 			// 近傍の頂点との距離 (の自乗) を求める.
-			D2D1_POINT_2F v_vec;
-			pt_sub(v, p, v_vec);
-			const double v_abs = pt_abs2(v_vec);
+			D2D1_POINT_2F v_pos;	// 最も近い頂点への位置ベクトル
+			pt_sub(v, p, v_pos);
+			const double v_abs = pt_abs2(v_pos);
 			if (g_abs < v_abs) {
-				p = g_pos;
+				p = g;
 			}
 			else {
 				p = v;
 			}
 		}
-		else if (grid_len >= 1.0f) {
-			pt_round(p, grid_len, p);
+		else if (g_len >= 1.0f) {
+			pt_round(p, g_len, p);
 		}
-		else if (vert_stick >= FLT_MIN) {
-			slist_find_vertex_closest(slist, p, vert_stick, p);
+		else if (v_limit >= FLT_MIN) {
+			slist_find_vertex_closest(slist, p, v_limit, p);
 		}
 	}
 

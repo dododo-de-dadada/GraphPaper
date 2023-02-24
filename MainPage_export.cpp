@@ -41,10 +41,20 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::Storage::Streams::Buffer;
 	using winrt::Windows::Storage::Streams::InputStreamOptions;
 
-	static size_t export_pdf_font_dict(const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const DataWriter& dt_writer);
-	static size_t export_pdf_descendant_font_dict(int o_num, DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* g_met, const int upem, const DataWriter& dt_writer);
-	static size_t export_pdf_font_descriptor(const int obj_num, const winrt::hstring& p_name, const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_WEIGHT weight, const float angle, const DWRITE_FONT_METRICS1& f_met, const DataWriter& dt_writer);
-	static void export_pdf_font_info(IDWriteFontFace3* face, const wchar_t* t, const size_t t_len, const wchar_t* family, DWRITE_FONT_METRICS1& f_met, DWRITE_FONT_FACE_TYPE& f_type, winrt::hstring& p_name, std::vector<uint16_t>& cid, std::vector<uint16_t>& gid, std::vector<DWRITE_GLYPH_METRICS>& g_met, FLOAT& angle);
+	static size_t export_pdf_font_dict(
+		const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name,
+		const DataWriter& dt_writer);
+	static size_t export_pdf_descendant_font_dict(
+		int o_num, DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name,
+		const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* g_met,
+		const int upem, const DataWriter& dt_writer);
+	static size_t export_pdf_font_descriptor(const int obj_num, const winrt::hstring& p_name,
+		const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_WEIGHT weight, const float angle,
+		const DWRITE_FONT_METRICS1& f_met, const DataWriter& dt_writer);
+	static void export_pdf_font_info(IDWriteFontFace3* face, const wchar_t* t, const size_t t_len,
+		const wchar_t* family, DWRITE_FONT_METRICS1& f_met, DWRITE_FONT_FACE_TYPE& f_type,
+		winrt::hstring& p_name, std::vector<uint16_t>& cid, std::vector<uint16_t>& gid,
+		std::vector<DWRITE_GLYPH_METRICS>& g_met, FLOAT& angle);
 
 	//------------------------------
 	// PDF のフォント辞書を出力する.
@@ -53,7 +63,9 @@ namespace winrt::GraphPaper::implementation
 	// p_name	ポストスクリプト名
 	// dt_writer	出力先
 	//------------------------------
-	static size_t export_pdf_font_dict(const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const DataWriter& dt_writer)
+	static size_t export_pdf_font_dict(
+		const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name,
+		const DataWriter& dt_writer)
 	{
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -88,7 +100,10 @@ namespace winrt::GraphPaper::implementation
 	// g_unit	計量の値の単位
 	// dt_writer	出力先
 	//------------------------------
-	static size_t export_pdf_descendant_font_dict(const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name, const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* g_met, const int g_unit, const DataWriter& dt_writer)
+	static size_t export_pdf_descendant_font_dict(
+		const int o_num, const DWRITE_FONT_FACE_TYPE f_type, const winrt::hstring& p_name,
+		const size_t cid_len, const uint16_t* cid_arr, const DWRITE_GLYPH_METRICS* g_met, 
+		const int g_unit, const DataWriter& dt_writer)
 	{
 		wchar_t buf[1024];
 		swprintf_s(buf,
@@ -131,8 +146,10 @@ namespace winrt::GraphPaper::implementation
 		return len;
 	}
 
-	static size_t export_pdf_font_descriptor(const int obj_num, const winrt::hstring& p_name,
-		const DWRITE_FONT_STRETCH stretch, const DWRITE_FONT_WEIGHT weight, const float angle, const DWRITE_FONT_METRICS1& f_met, const DataWriter& dt_writer)
+	static size_t export_pdf_font_descriptor(
+		const int obj_num, const winrt::hstring& p_name, const DWRITE_FONT_STRETCH stretch,
+		const DWRITE_FONT_WEIGHT weight, const float angle, const DWRITE_FONT_METRICS1& f_met,
+		const DataWriter& dt_writer)
 	{
 		// PDF の FontBBox (Black Box) のイメージ
 		//     y
@@ -205,21 +222,10 @@ namespace winrt::GraphPaper::implementation
 	// angle	イタリックの最大角度 (ふつうがマイナス)
 	//------------------------------
 	static void export_pdf_font_info(
-		IDWriteFontFace3* face,
-		const wchar_t *t,
-		const size_t t_len,
-		const wchar_t *family,
-		//const DWRITE_FONT_WEIGHT weight,
-		//const DWRITE_FONT_STRETCH stretch,
-		//const DWRITE_FONT_STYLE style,
-		DWRITE_FONT_METRICS1& f_met,
-		DWRITE_FONT_FACE_TYPE& f_type,
-		winrt::hstring& p_name,
-		std::vector<uint16_t>& cid,
-		std::vector<uint16_t>& gid,
-		std::vector<DWRITE_GLYPH_METRICS>& g_met,
-		FLOAT& angle
-	)
+		IDWriteFontFace3* face, const wchar_t *t, const size_t t_len, const wchar_t *family,
+		DWRITE_FONT_METRICS1& f_met, DWRITE_FONT_FACE_TYPE& f_type,
+		winrt::hstring& p_name, std::vector<uint16_t>& cid, std::vector<uint16_t>& gid, 
+		std::vector<DWRITE_GLYPH_METRICS>& g_met, FLOAT& angle)
 	{
 		// 書体の計量を得る.
 		face->GetMetrics(&f_met);
@@ -405,7 +411,8 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに PDF として書き込む.
-	IAsyncOperation<winrt::hresult> MainPage::export_as_pdf_async(const StorageFile& pdf_file) noexcept
+	IAsyncOperation<winrt::hresult> MainPage::export_as_pdf_async(
+		const StorageFile& pdf_file) noexcept
 	{
 		HRESULT hres = E_FAIL;
 		try {
@@ -545,7 +552,7 @@ namespace winrt::GraphPaper::implementation
 			obj_len.push_back(obj_len.back() + len);
 
 			// コンテントオブジェクト (ストリーム)
-			// 変換行列に 72dpi / 96dpi (=0.75) を指定する.
+			// 変換行列 cm に 72dpi / 96dpi (=0.75) を指定する.
 			swprintf_s(buf,
 				L"%% Content Object\n"
 				L"5 0 obj <<\n"
@@ -558,6 +565,7 @@ namespace winrt::GraphPaper::implementation
 			len = dt_writer.WriteString(buf);
 
 			len += m_main_page.export_pdf_page(m_background_color, dt_writer);
+
 			if (m_main_page.m_grid_show == GRID_SHOW::BACK) {
 				len += m_main_page.export_pdf_grid(m_background_color, dt_writer);
 			}
@@ -954,53 +962,58 @@ namespace winrt::GraphPaper::implementation
 				L"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
 				L"\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n");
 
+			wchar_t buf[1024];	// 出力バッファ
+
 			// SVG 開始タグを書き込む.
 			{
-				const auto size = m_main_page.m_page_size;	// 表示の大きさ
-				const auto unit = m_len_unit;	// 長さの単位
 				const auto dpi = m_main_d2d.m_logical_dpi;	// 論理 DPI
-				const auto color = m_main_page.m_page_color;	// 背景色
 
 				// 単位付きで幅と高さの属性を書き込む.
-				wchar_t buf[1024];	// 出力バッファ
 				double w;	// 単位変換後の幅
 				double h;	// 単位変換後の高さ
 				wchar_t* u;	// 単位
-				if (unit == LEN_UNIT::INCH) {
-					w = size.width / dpi;
-					h = size.height / dpi;
+				if (m_len_unit == LEN_UNIT::INCH) {
+					w = m_main_page.m_page_size.width / dpi;
+					h = m_main_page.m_page_size.height / dpi;
 					u = L"in";
 				}
-				else if (unit == LEN_UNIT::MILLI) {
-					w = size.width * MM_PER_INCH / dpi;
-					h = size.height * MM_PER_INCH / dpi;
+				else if (m_len_unit == LEN_UNIT::MILLI) {
+					w = m_main_page.m_page_size.width * MM_PER_INCH / dpi;
+					h = m_main_page.m_page_size.height * MM_PER_INCH / dpi;
 					u = L"mm";
 				}
-				else if (unit == LEN_UNIT::POINT) {
-					w = size.width * PT_PER_INCH / dpi;
-					h = size.height * PT_PER_INCH / dpi;
+				else if (m_len_unit == LEN_UNIT::POINT) {
+					w = m_main_page.m_page_size.width * PT_PER_INCH / dpi;
+					h = m_main_page.m_page_size.height * PT_PER_INCH / dpi;
 					u = L"pt";
 				}
 				// SVG で使用できる上記の単位以外はすべてピクセル.
 				else {
-					w = size.width;
-					h = size.height;
+					w = m_main_page.m_page_size.width;
+					h = m_main_page.m_page_size.height;
 					u = L"px";
 				}
 
-				// ピクセル単位の幅と高さを viewBox 属性として書き込む.
-				// 背景色をスタイル属性として書き込む.
 				// svg 開始タグの終了を書き込む.
+				// ピクセル単位の幅と高さを viewBox 属性として書き込む.
 				swprintf_s(buf,
 					L"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" "
-					L"width=\"%f%s\" height=\"%f%s\" "
-					L"viewBox=\"0 0 %f %f\" "
-					L"style=\"background-color:#%02x%02x%02x\">\n",
-					w, u, h, u,
-					size.width, size.height,
-					conv_color_comp(color.r),
-					conv_color_comp(color.g),
-					conv_color_comp(color.b)
+					L"width=\"%f%s\" height=\"%f%s\" viewBox=\"0 0 %f %f\" >",
+					w, u, h, u, m_main_page.m_page_size.width, m_main_page.m_page_size.height
+				);
+				dt_writer.WriteString(buf);
+				// ページの塗りつぶしと, 余白の平行移動.
+				swprintf_s(buf,
+					L"<rect width=\"%f\" height=\"%f\" "
+					L"fill=\"#%02x%02x%02x\" opacity=\"%f\" />\n"
+					L"<g transform=\"translate(%f,%f)\" >\n",
+					m_main_page.m_page_size.width, m_main_page.m_page_size.height,
+					conv_color_comp(m_main_page.m_page_color.r),
+					conv_color_comp(m_main_page.m_page_color.g),
+					conv_color_comp(m_main_page.m_page_color.b),
+					m_main_page.m_page_color.a,
+					m_main_page.m_page_padding.left,
+					m_main_page.m_page_padding.top
 				);
 				dt_writer.WriteString(buf);
 			}
@@ -1031,7 +1044,7 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// SVG 終了タグを書き込む.
-			dt_writer.WriteString(L"</svg>\n");
+			dt_writer.WriteString(L"</g>\n</svg>\n");
 			// ストリームの現在位置をストリームの大きさに格納する.
 			svg_stream.Size(svg_stream.Position());
 			// バッファ内のデータをストリームに出力する.

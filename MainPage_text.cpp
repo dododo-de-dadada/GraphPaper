@@ -28,8 +28,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto padd_w = p_width * 0.125;
 		const auto padd_h = p_height * 0.25;
-		const D2D1_POINT_2F start{ static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd_w), static_cast<FLOAT>(p_width - 2.0 * padd_h) };
+		const D2D1_POINT_2F start{
+			static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h)
+		};
+		const D2D1_POINT_2F pos{
+			static_cast<FLOAT>(p_width - 2.0 * padd_w), static_cast<FLOAT>(p_width - 2.0 * padd_h) 
+		};
 		const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 		const wchar_t* text = nullptr;
 		if (pang.empty()) {
@@ -38,7 +42,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			text = pang.c_str();
 		}
-		page.m_shape_list.push_back(new ShapeText(start, b_vec, wchar_cpy(text), &page));
+		page.m_shape_list.push_back(new ShapeText(start, pos, wchar_cpy(text), &page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -108,12 +112,12 @@ namespace winrt::GraphPaper::implementation
 	// val	段落のそろえ
 	void MainPage::text_align_vert_is_checked(const DWRITE_PARAGRAPH_ALIGNMENT val)
 	{
-		rmfi_text_align_top().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		//rmfi_text_align_top_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-		rmfi_text_align_bot().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		//rmfi_text_align_bot_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
-		rmfi_text_align_mid().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-		//rmfi_text_align_mid_2().IsChecked(val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+		rmfi_text_align_top().IsChecked(
+			val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+		rmfi_text_align_bot().IsChecked(
+			val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR);
+		rmfi_text_align_mid().IsChecked(
+			val == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	}
 
 	// 書体メニューの「文字列のそろえ」が選択された.
@@ -149,10 +153,14 @@ namespace winrt::GraphPaper::implementation
 	// t_align	文字列のそろえ
 	void MainPage::text_align_horz_is_checked(const DWRITE_TEXT_ALIGNMENT val)
 	{
-		rmfi_text_align_left().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
-		rmfi_text_align_right().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
-		rmfi_text_align_center().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
-		rmfi_text_align_just().IsChecked(val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
+		rmfi_text_align_left().IsChecked(
+			val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING);
+		rmfi_text_align_right().IsChecked(
+			val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING);
+		rmfi_text_align_center().IsChecked(
+			val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER);
+		rmfi_text_align_just().IsChecked(
+			val == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED);
 	}
 
 	// 書体メニューの「行間」>「行間...」が選択された.
@@ -171,10 +179,14 @@ namespace winrt::GraphPaper::implementation
 		text_slider_set_header<UNDO_ID::TEXT_LINE_SP, 0>(val);
 		dialog_slider_0().Visibility(Visibility::Visible);
 
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_LINE_SP, 0> });
-		text_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		const auto slider_0_token = dialog_slider_0().ValueChanged(
+			{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_LINE_SP, 0> });
+		text_create_sample_shape(
+			static_cast<float>(scp_dialog_panel().Width()), 
+			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_line_sp")));
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_line_sp")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -219,12 +231,17 @@ namespace winrt::GraphPaper::implementation
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PADDING, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PADDING, 1> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged(
+			{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PADDING, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged(
+			{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PADDING, 1> });
 
-		text_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		text_create_sample_shape(
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_padding")));
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_text_padding")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

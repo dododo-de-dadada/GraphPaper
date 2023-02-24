@@ -208,18 +208,9 @@ namespace winrt::GraphPaper::implementation
 			// ロックできない場合
 			return;
 		}
-		//Shape::s_d2d_factory = m_main_d2d.m_d2d_factory.get();
-		//Shape::s_d2d_target = m_main_d2d.m_d2d_context.get();
-		//Shape::s_dwrite_factory = m_main_d2d.m_dwrite_factory.get();
-		//Shape::s_d2d_color_brush = m_main_page.m_color_brush.get();
-		//Shape::s_d2d_range_brush = m_main_page.m_range_brush.get();
 
-		//ID2D1RenderTarget* const target = m_main_d2d.m_d2d_context.get();
-		//ID2D1SolidColorBrush * const brush = Shape::s_d2d_color_brush;
-
-		const auto page_scale = max(m_main_page.m_page_scale, 0.0f);
-		m_main_page.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_background.get(), page_scale);
-		// デバイスコンテキストの描画状態を保存ブロックに保持する.
+		const auto p_scale = max(m_main_page.m_page_scale, 0.0f);
+		m_main_page.begin_draw(m_main_d2d.m_d2d_context.get(), true, m_background.get(), p_scale);
 		m_main_d2d.m_d2d_context->SaveDrawingState(Shape::m_d2d_state_block.get());
 
 		// 描画を開始する.
@@ -234,10 +225,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		// 変換行列に, 拡大率の値とスクロールの変分に拡大率を掛けた値を格納する.
 		D2D1_MATRIX_3X2_F tran{};
-		tran.m11 = tran.m22 = page_scale;
+		tran.m11 = tran.m22 = p_scale;
 		D2D1_POINT_2F lt;	// 表示されている左上位置
 		pt_add(m_main_bbox_lt, sb_horz().Value(), sb_vert().Value(), lt);
-		pt_mul(lt, page_scale, lt);
+		pt_mul(lt, p_scale, lt);
 		tran.dx = -lt.x;
 		tran.dy = -lt.y;
 		// 変換行列をデバイスコンテキストに格納する.
@@ -249,32 +240,39 @@ namespace winrt::GraphPaper::implementation
 				m_drawing_tool == DRAWING_TOOL::RECT ||
 				m_drawing_tool == DRAWING_TOOL::TEXT ||
 				m_drawing_tool == DRAWING_TOOL::RULER) {
-				m_main_page.draw_auxiliary_rect(m_main_d2d.m_d2d_context.get(),
-					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_rect(
+					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
-				m_main_page.draw_auxiliary_bezi(m_main_d2d.m_d2d_context.get(),
-					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_bezi(
+					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ELLIPSE) {
-				m_main_page.draw_auxiliary_elli(m_main_d2d.m_d2d_context.get(),
-					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_elli(
+					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::LINE) {
-				m_main_page.draw_auxiliary_line(m_main_d2d.m_d2d_context.get(),
-					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_line(
+					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
-				m_main_page.draw_auxiliary_rrect(m_main_d2d.m_d2d_context.get(),
-					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_rrect(
+					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(), 
+					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
-				m_main_page.draw_auxiliary_poly(m_main_d2d.m_d2d_context.get(),
-					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
+				m_main_page.draw_auxiliary_poly(
+					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::QELLIPSE) {
-				m_main_page.draw_auxiliary_qellipse(m_main_d2d.m_d2d_context.get(),
-					Shape::m_d2d_color_brush.get(), m_event_pos_pressed, m_event_pos_curr);
+				m_main_page.draw_auxiliary_qellipse(
+					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					m_event_pos_pressed, m_event_pos_curr);
 			}
 		}
 		/*

@@ -17,18 +17,24 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// 見本の図形を作成する.
-	static void stroke_create_sample_shape(const float p_width, const float p_height, ShapePage& page);
+	static void stroke_create_sample_shape(
+		const float p_width, const float p_height, ShapePage& page);
 
 	// 見本の図形を作成する.
 	// p_width	見本を表示するパネルの幅
 	// p_height	見本を表示するパネルの高さ
 	// page	見本を表示するシート
-	static void stroke_create_sample_shape(const float p_width, const float p_height, ShapePage& page)
+	static void stroke_create_sample_shape(
+		const float p_width, const float p_height, ShapePage& page)
 	{
 		const auto padd = p_width * 0.125;
-		const D2D1_POINT_2F start{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd) };
-		page.m_shape_list.push_back(new ShapeLine(start, b_vec, &page));
+		const D2D1_POINT_2F start{
+			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
+		};
+		const D2D1_POINT_2F pos{
+			static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd)
+		};
+		page.m_shape_list.push_back(new ShapeLine(start, pos, &page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -74,14 +80,21 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_ID::STROKE_COLOR, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_ID::STROKE_COLOR, 1> });
-		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_ID::STROKE_COLOR, 2> });
-		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::stroke_slider_val_changed<UNDO_ID::STROKE_COLOR, 3> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged(
+			{ this, &MainPage::stroke_slider_val_changed<UNDO_ID::STROKE_COLOR, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged(
+			{ this, &MainPage::stroke_slider_val_changed<UNDO_ID::STROKE_COLOR, 1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged(
+			{ this, &MainPage::stroke_slider_val_changed<UNDO_ID::STROKE_COLOR, 2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged(
+			{ this, &MainPage::stroke_slider_val_changed<UNDO_ID::STROKE_COLOR, 3> });
 
-		stroke_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		stroke_create_sample_shape(
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_stroke_color")));
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_stroke_color")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

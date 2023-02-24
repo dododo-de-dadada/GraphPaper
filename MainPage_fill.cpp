@@ -52,22 +52,30 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 1> });
-		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 2> });
-		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 3> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged(
+			{ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged(
+			{ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged(
+			{ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged(
+			{ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 3> });
 
 		const auto p_width = scp_dialog_panel().Width();
 		const auto p_height = scp_dialog_panel().Height();
 		const auto padd = p_width * 0.125;
-		const D2D1_POINT_2F start{ static_cast<FLOAT>(padd), static_cast<FLOAT>(padd) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd) };
-		//m_sample_shape = new ShapeRect(start, b_vec, &m_dialog_page);
-		m_dialog_page.m_shape_list.push_back(new ShapeRect(start, b_vec, &m_dialog_page));
+		const D2D1_POINT_2F start{
+			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
+		};
+		const D2D1_POINT_2F pos{
+			static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd)
+		};
+		m_dialog_page.m_shape_list.push_back(new ShapeRect(start, pos, &m_dialog_page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FILL)));
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FILL)));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -104,10 +112,14 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::fill_slider_set_header(const float val)
 	{
 		if constexpr (U == UNDO_ID::FILL_COLOR) {
-			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g", L"str_color_b", L"str_opacity" };
+			constexpr wchar_t* HEADER[]{ 
+				L"str_color_r", L"str_color_g", L"str_color_b", L"str_opacity"
+			};
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
-			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf };
+			const winrt::hstring text{
+				ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf
+			};
 			dialog_set_slider_header<S>(text);
 		}
 	}
@@ -118,7 +130,8 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged Ç≈ìnÇ≥ÇÍÇΩà¯êî
 	// ñﬂÇËíl	Ç»Çµ
 	template <UNDO_ID U, int S>
-	void MainPage::fill_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::fill_slider_val_changed(
+		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_ID::FILL_COLOR) {
 			const float val = static_cast<float>(args.NewValue());

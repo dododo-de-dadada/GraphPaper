@@ -558,62 +558,62 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 領域をもとに多角形を作成する.
+	// 矩形をもとに多角形を作成する.
 	// start	領域の始点
 	// b_vec	領域の終点への差分
 	// p_opt	多角形の作成方法
-	// v_pos	頂点の配列 [v_cnt]
-	void ShapePolygon::poly_by_bbox(
+	// p	頂点の配列
+	void ShapePolygon::poly_by_box(
 		const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt,
-		D2D1_POINT_2F v_pos[]) noexcept
+		D2D1_POINT_2F p[]) noexcept
 	{
 		// v_cnt	多角形の頂点の数
 		// v_up	頂点を上に作成するか判定
 		// v_reg	正多角形を作成するか判定
 		// v_clock	時計周りで作成するか判定
-		const auto v_cnt = p_opt.m_vertex_cnt;
-		if (v_cnt == 0) {
+		const auto p_cnt = p_opt.m_vertex_cnt;
+		if (p_cnt == 0) {
 			return;
 		}
-		const auto v_up = p_opt.m_vertex_up;
-		const auto v_reg = p_opt.m_regular;
-		const auto v_clock = p_opt.m_clockwise;
+		const auto p_up = p_opt.m_vertex_up;
+		const auto p_reg = p_opt.m_regular;
+		const auto p_clock = p_opt.m_clockwise;
 
 		// 原点を中心とする半径 1 の円をもとに正多角形を作成する.
-		D2D1_POINT_2F v_lt{ 0.0, 0.0 };	// 多角形を囲む領域の左上点
-		D2D1_POINT_2F v_rb{ 0.0, 0.0 };	// 多角形を囲む領域の右下点
-		const double s = v_up ? (M_PI / 2.0) : (M_PI / 2.0 + M_PI / v_cnt);	// 始点の角度
-		const double pi2 = v_clock ? -2 * M_PI : 2 * M_PI;	// 回す全周
-		for (uint32_t i = 0; i < v_cnt; i++) {
-			const double t = s + pi2 * i / v_cnt;	// i 番目の頂点の角度
-			v_pos[i].x = static_cast<FLOAT>(cos(t));
-			v_pos[i].y = static_cast<FLOAT>(-sin(t));
-			if (v_pos[i].x < v_lt.x) {
-				v_lt.x = v_pos[i].x;
+		D2D1_POINT_2F box_lt{ 0.0, 0.0 };	// 多角形を囲む領域の左上点
+		D2D1_POINT_2F box_rb{ 0.0, 0.0 };	// 多角形を囲む領域の右下点
+		const double s = p_up ? (M_PI_2) : (M_PI_2 + M_PI / p_cnt);	// 始点の角度
+		const double pi2 = p_clock ? -M_2_PI : M_2_PI;	// 回す全周
+		for (uint32_t i = 0; i < p_cnt; i++) {
+			const double t = s + pi2 * i / p_cnt;	// i 番目の頂点の角度
+			p[i].x = static_cast<FLOAT>(cos(t));
+			p[i].y = static_cast<FLOAT>(-sin(t));
+			if (p[i].x < box_lt.x) {
+				box_lt.x = p[i].x;
 			}
-			if (v_pos[i].y < v_lt.y) {
-				v_lt.y = v_pos[i].y;
+			if (p[i].y < box_lt.y) {
+				box_lt.y = p[i].y;
 			}
-			if (v_pos[i].x > v_rb.x) {
-				v_rb.x = v_pos[i].x;
+			if (p[i].x > box_rb.x) {
+				box_rb.x = p[i].x;
 			}
-			if (v_pos[i].y > v_rb.y) {
-				v_rb.y = v_pos[i].y;
+			if (p[i].y > box_rb.y) {
+				box_rb.y = p[i].y;
 			}
 		}
 
 		// 正多角形を領域の大きさに合わせる.
-		D2D1_POINT_2F v_vec;
-		pt_sub(v_rb, v_lt, v_vec);
-		const double rate_x = v_reg ? fmin(b_vec.x, b_vec.y) / fmax(v_vec.x, v_vec.y) : b_vec.x / v_vec.x;
-		const double rate_y = v_reg ? rate_x : b_vec.y / v_vec.y;
-		v_vec.x = static_cast<FLOAT>(roundl(v_vec.x * rate_x));
-		v_vec.y = static_cast<FLOAT>(roundl(v_vec.y * rate_y));
-		for (uint32_t i = 0; i < v_cnt; i++) {
-			pt_sub(v_pos[i], v_lt, v_pos[i]);
-			v_pos[i].x = static_cast<FLOAT>(roundl(v_pos[i].x * rate_x));
-			v_pos[i].y = static_cast<FLOAT>(roundl(v_pos[i].y * rate_y));
-			pt_add(v_pos[i], start, v_pos[i]);
+		D2D1_POINT_2F b_dir;
+		pt_sub(box_rb, box_lt, b_dir);
+		const double ratio_x = p_reg ? fmin(b_vec.x, b_vec.y) / fmax(b_dir.x, b_dir.y) : b_dir.x / b_dir.x;
+		const double ratio_y = p_reg ? ratio_x : b_dir.y / b_dir.y;
+		b_dir.x = static_cast<FLOAT>(roundl(b_dir.x * ratio_x));
+		b_dir.y = static_cast<FLOAT>(roundl(b_dir.y * ratio_y));
+		for (uint32_t i = 0; i < p_cnt; i++) {
+			pt_sub(p[i], box_lt, p[i]);
+			p[i].x = static_cast<FLOAT>(roundl(p[i].x * ratio_x));
+			p[i].y = static_cast<FLOAT>(roundl(p[i].y * ratio_y));
+			pt_add(p[i], start, p[i]);
 		}
 	}
 
@@ -641,11 +641,11 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 開始位置と, 差分の配列をもとに, 頂点を求める.
-			const size_t v_cnt = m_vec.size() + 1;	// 頂点の数 (差分の数 + 1)
-			D2D1_POINT_2F v_pos[N_GON_MAX];
-			v_pos[0] = m_start;
-			for (size_t i = 1; i < v_cnt; i++) {
-				pt_add(v_pos[i - 1], m_vec[i - 1], v_pos[i]);
+			const size_t p_cnt = m_vec.size() + 1;	// 頂点の数 (差分の数 + 1)
+			D2D1_POINT_2F p[N_GON_MAX];
+			p[0] = m_start;
+			for (size_t i = 1; i < p_cnt; i++) {
+				pt_add(p[i - 1], m_vec[i - 1], p[i]);
 			}
 
 			// 折れ線のパスジオメトリを作成する.
@@ -659,9 +659,9 @@ namespace winrt::GraphPaper::implementation
 			winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
 			winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-			sink->BeginFigure(v_pos[0], f_begin);
-			for (size_t i = 1; i < v_cnt; i++) {
-				sink->AddLine(v_pos[i]);
+			sink->BeginFigure(p[0], f_begin);
+			for (size_t i = 1; i < p_cnt; i++) {
+				sink->AddLine(p[i]);
 			}
 			sink->EndFigure(f_end);
 			winrt::check_hresult(sink->Close());
@@ -674,7 +674,7 @@ namespace winrt::GraphPaper::implementation
 				// 矢じるしの位置を求める.
 				D2D1_POINT_2F tip;
 				D2D1_POINT_2F barb[2];
-				if (poly_get_pos_arrow(v_cnt, v_pos, m_arrow_size, tip, barb)) {
+				if (poly_get_pos_arrow(p_cnt, p, m_arrow_size, tip, barb)) {
 
 					// 矢じるしのパスジオメトリを作成する.
 					const auto a_begin = (a_style == ARROW_STYLE::FILLED ?
@@ -719,12 +719,12 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (m_anc_show && is_selected()) {
-			D2D1_POINT_2F a_pos{ m_start };	// 図形の部位の位置
-			anc_draw_square(a_pos, target, brush);
+			D2D1_POINT_2F a{ m_start };	// 図形の部位の位置
+			anc_draw_square(a, target, brush);
 			const size_t d_cnt = m_vec.size();	// 差分の数
 			for (size_t i = 0; i < d_cnt; i++) {
-				pt_add(a_pos, m_vec[i], a_pos);
-				anc_draw_square(a_pos, target, brush);
+				pt_add(a, m_vec[i], a);
+				anc_draw_square(a, target, brush);
 			}
 		}
 	}
@@ -798,22 +798,22 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を作成する.
 	// start	囲む領域の始点
-	// b_vec	囲む領域の終点への差分
+	// pos	囲む領域の終点への位置ベクトル
 	// page	ページ
 	// p_opt	多角形の選択肢
 	ShapePolygon::ShapePolygon(
-		const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec, const Shape* page, const POLY_OPTION& p_opt) :
+		const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page, const POLY_OPTION& p_opt) :
 		ShapePath::ShapePath(page, p_opt.m_end_closed),
 		m_end_closed(p_opt.m_end_closed)
 	{
-		D2D1_POINT_2F v_pos[N_GON_MAX];
+		D2D1_POINT_2F p[N_GON_MAX];
 
-		poly_by_bbox(start, b_vec, p_opt, v_pos);
-		m_start = v_pos[0];
+		poly_by_box(start, pos, p_opt, p);
+		m_start = p[0];
 		m_vec.resize(p_opt.m_vertex_cnt - 1);
 		m_vec.shrink_to_fit();
 		for (size_t i = 1; i < p_opt.m_vertex_cnt; i++) {
-			pt_sub(v_pos[i], v_pos[i - 1], m_vec[i - 1]);
+			pt_sub(p[i], p[i - 1], m_vec[i - 1]);
 		}
 	}
 

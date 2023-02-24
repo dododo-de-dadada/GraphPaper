@@ -29,16 +29,21 @@ namespace winrt::GraphPaper::implementation
 		constexpr uint32_t misc_max = 12;
 		static uint32_t misc_cnt = misc_min;
 		const auto padd = samp_w * 0.125;
-		const D2D1_POINT_2F samp_vec{ static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd) };
+		const D2D1_POINT_2F pos{
+			static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd)
+		};
 		POLY_OPTION p_opt{ m_drawing_poly_opt };
 		p_opt.m_vertex_cnt = (misc_cnt >= misc_max ? misc_min : misc_cnt++);
-		Shape* s = new ShapePolygon(D2D1_POINT_2F{ 0.0f, 0.0f }, samp_vec, &m_dialog_page, p_opt);
+		Shape* s = new ShapePolygon(D2D1_POINT_2F{ 0.0f, 0.0f }, pos, &m_dialog_page, p_opt);
 		D2D1_POINT_2F b_lt;
 		D2D1_POINT_2F b_rb;
-		D2D1_POINT_2F b_vec;
-		s->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, b_lt, b_rb);
-		pt_sub(b_rb, b_lt, b_vec);
-		s->move(D2D1_POINT_2F{ static_cast<FLOAT>((samp_w - b_vec.x) * 0.5), static_cast<FLOAT>((samp_h - b_vec.y) * 0.5) });
+		D2D1_POINT_2F b_pos;
+		s->get_bound(
+			D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, b_lt, b_rb);
+		pt_sub(b_rb, b_lt, b_pos);
+		s->move(
+			D2D1_POINT_2F{ static_cast<FLOAT>((samp_w - b_pos.x) * 0.5),
+			static_cast<FLOAT>((samp_h - b_pos.y) * 0.5) });
 		m_dialog_page.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 		debug_leak_cnt++;

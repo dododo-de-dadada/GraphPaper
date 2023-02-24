@@ -668,49 +668,44 @@ namespace winrt::GraphPaper::implementation
 
 	void ShapePage::export_svg(const DataWriter& dt_writer)
 	{
-		const float grid_base = m_grid_base;
-		const D2D1_COLOR_F grid_color = m_grid_color;
-		const GRID_EMPH grid_emph = m_grid_emph;
-		const D2D1_POINT_2F grid_offset = m_grid_offset;
-		const float page_scale = m_page_scale;
-		const D2D1_SIZE_F page_size = m_page_size;
+		const D2D1_SIZE_F g_size{	// グリッドを表示する大きさ (ページの内余白の分を除く)
+			m_page_size.width - (m_page_padding.left + m_page_padding.right),
+			m_page_size.height - (m_page_padding.top + m_page_padding.bottom)
+		};
 
-		// 拡大されても 1 ピクセルになるよう拡大率の逆数を線枠の太さに格納する.
-		const FLOAT grid_width = static_cast<FLOAT>(1.0 / page_scale);	// 方眼の太さ
+		const FLOAT g_width = 1.0f;	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
-		const auto page_h = page_size.height;
-		const auto page_w = page_size.width;
+		const auto sh = g_size.height;
+		const auto sw = g_size.width;
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
-		v_end.y = page_size.height;
-		h_end.x = page_size.width;
-		const double grid_len = max(grid_base + 1.0, 1.0);
+		v_end.y = g_size.height;
+		h_end.x = g_size.width;
+		const double grid_len = max(m_grid_base + 1.0, 1.0);
 
-		dt_writer.WriteString(L"<!-- Grids -->\n");
 		wchar_t buf[1024];
+		dt_writer.WriteString(L"<!-- Grids -->\n");
 		dt_writer.WriteString(L"<g ");
-		export_svg_stroke(buf, 1024,
-			grid_width,
-			grid_color,
-			D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PATT{},
-			CAP_FLAT,
-			D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL);
+		export_svg_stroke(
+			buf, 1024, g_width, m_grid_color, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PATT{},
+			CAP_FLAT, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L">\n");
 
 		// 垂直な方眼を表示する.
-		float w;
+		float gw;
 		double x;
-		for (uint32_t i = 0; (x = round((grid_len * i + grid_offset.x) / PT_ROUND) * PT_ROUND) < page_w; i++) {
-			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
-				w = 2.0F * grid_width;
+		for (uint32_t i = 0;
+			(x = round((grid_len * i + m_grid_offset.x) / PT_ROUND) * PT_ROUND) < sw; i++) {
+			if (m_grid_emph.m_gauge_2 != 0 && (i % m_grid_emph.m_gauge_2) == 0) {
+				gw = 2.0F * g_width;
 			}
-			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
-				w = grid_width;
+			else if (m_grid_emph.m_gauge_1 != 0 && (i % m_grid_emph.m_gauge_1) == 0) {
+				gw = g_width;
 			}
 			else {
-				w = 0.5F * grid_width;
+				gw = 0.5F * g_width;
 			}
 			v_start.x = v_end.x = static_cast<FLOAT>(x);
 
@@ -719,20 +714,21 @@ namespace winrt::GraphPaper::implementation
 				L"x2 = \"%f\" y2=\"%f\" "
 				L"stroke-width=\"%f\" />\n",
 				v_start.x, v_start.y,
-				v_end.x, v_end.y, w);
+				v_end.x, v_end.y, gw);
 			dt_writer.WriteString(buf);
 		}
 		// 水平な方眼を表示する.
 		double y;
-		for (uint32_t i = 0; (y = round((grid_len * i + grid_offset.y) / PT_ROUND) * PT_ROUND) < page_h; i++) {
-			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
-				w = 2.0F * grid_width;
+		for (uint32_t i = 0;
+			(y = round((grid_len * i + m_grid_offset.y) / PT_ROUND) * PT_ROUND) < sh; i++) {
+			if (m_grid_emph.m_gauge_2 != 0 && (i % m_grid_emph.m_gauge_2) == 0) {
+				gw = 2.0F * g_width;
 			}
-			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
-				w = grid_width;
+			else if (m_grid_emph.m_gauge_1 != 0 && (i % m_grid_emph.m_gauge_1) == 0) {
+				gw = g_width;
 			}
 			else {
-				w = 0.5F * grid_width;
+				gw = 0.5F * g_width;
 			}
 			h_start.y = h_end.y = static_cast<FLOAT>(y);
 
@@ -741,7 +737,7 @@ namespace winrt::GraphPaper::implementation
 				L"x2 = \"%f\" y2=\"%f\" "
 				L"stroke-width=\"%f\" />\n",
 				h_start.x, h_start.y,
-				h_end.x, h_end.y, w);
+				h_end.x, h_end.y, gw);
 			dt_writer.WriteString(buf);
 		}
 		dt_writer.WriteString(L"</g>\n");

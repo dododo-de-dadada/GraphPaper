@@ -80,13 +80,13 @@ namespace winrt::GraphPaper::implementation
 	static double bezi_param_by_len(const POINT_2D c[4], const double b_len) noexcept;
 
 	// 曲線上の助変数をもとに位置を求める.
-	static inline void bezi_point_by_param(const POINT_2D c[4], const double t_val, POINT_2D& p) noexcept;
+	static inline void bezi_point_by_param(const POINT_2D c[4], const double t, POINT_2D& p) noexcept;
 
 	// 2 つの助変数が区間 0-1 の間で正順か判定する.
 	static inline bool bezi_test_param(const double t_min, const double t_max) noexcept;
 
 	// 曲線上の助変数をもとに接線ベクトルを求める.
-	static inline void bezi_tvec_by_param(const POINT_2D c[4], const double t_val, POINT_2D& t_vec) noexcept;
+	static inline void bezi_tvec_by_param(const POINT_2D c[4], const double t, POINT_2D& v) noexcept;
 
 	//------------------------------
 	// 矢じりの返しと先端の位置を得る
@@ -95,7 +95,9 @@ namespace winrt::GraphPaper::implementation
 	// a_size	矢じるしの寸法
 	// arrow[3]	計算された返しの端点と先端点
 	//------------------------------
-	bool ShapeBezier::bezi_calc_arrow(const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[3]) noexcept
+	bool ShapeBezier::bezi_calc_arrow(
+		const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, 
+		D2D1_POINT_2F arrow[3]) noexcept
 	{
 		POINT_2D seg[3]{};
 		POINT_2D c[4]{};	// 制御点
@@ -119,11 +121,11 @@ namespace winrt::GraphPaper::implementation
 			const auto t = bezi_param_by_len(c, min(b_len, a_size.m_offset));
 
 			// 助変数をもとに曲線の接線ベクトルを得る.
-			POINT_2D t_vec;
-			bezi_tvec_by_param(c, t, t_vec);
+			POINT_2D v;
+			bezi_tvec_by_param(c, t, v);
 
 			// 矢じるしの返しの位置を計算する
-			get_pos_barbs(-t_vec, sqrt(t_vec * t_vec), a_size.m_width, a_size.m_length, arrow);
+			get_pos_barbs(-v, sqrt(v * v), a_size.m_width, a_size.m_length, arrow);
 
 			// 助変数で曲線上の位置を得る.
 			POINT_2D tip;	// 終点を原点とする, 矢じるしの先端の位置
@@ -235,33 +237,35 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 位置を曲線の端が含むか判定する.
 	// test	判定される位置
-	// c	凸包 (四辺形) の頂点の配列
+	// c[4]	凸包 (四辺形) の頂点の配列
+	// c_pos[4]	凸包の次の頂点への位置ベクトル
+	// e_width	凸包の辺の半分の太さ
 	// 戻り値	含むなら true
 	//------------------------------
 	template<D2D1_CAP_STYLE S> static bool bezi_hit_test_cap(
-		const D2D1_POINT_2F& test, const D2D1_POINT_2F c[4], const D2D1_POINT_2F d_vec[3],
+		const D2D1_POINT_2F& test, const D2D1_POINT_2F c[4], const D2D1_POINT_2F c_pos[3],
 		const double e_width)
 	{
 		size_t i;
 		for (i = 0; i < 3; i++) {
-			const double abs2 = pt_abs2(d_vec[i]);
-			if (abs2 >= FLT_MIN) {
-				D2D1_POINT_2F e_vec;
-				pt_mul(d_vec[i], -e_width / sqrt(abs2), e_vec);
-				D2D1_POINT_2F e_nor{ e_vec.y, -e_vec.x };
-				D2D1_POINT_2F e_pos[4];
-				pt_add(c[i], e_nor, e_pos[0]);
-				pt_sub(c[i], e_nor, e_pos[1]);
+			const double c_abs = pt_abs2(c_pos[i]);
+			if (c_abs >= FLT_MIN) {
+				D2D1_POINT_2F e_dir;	// 方向ベクトル
+				pt_mul(c_pos[i], -e_width / sqrt(c_abs), e_dir);
+				D2D1_POINT_2F e_orth{ e_dir.y, -e_dir.x };	// 直交ベクトル
+				D2D1_POINT_2F e[4];
+				pt_add(c[i], e_orth, e[0]);
+				pt_sub(c[i], e_orth, e[1]);
 				if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
-					pt_add(e_pos[1], e_vec, e_pos[2]);
-					pt_add(e_pos[0], e_vec, e_pos[3]);
-					if (pt_in_poly(test, 4, e_pos)) {
+					pt_add(e[1], e_dir, e[2]);
+					pt_add(e[0], e_dir, e[3]);
+					if (pt_in_poly(test, 4, e)) {
 						return true;
 					}
 				}
 				else if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
-					pt_add(c[i], e_vec, e_pos[2]);
-					if (pt_in_poly(test, 3, e_pos)) {
+					pt_add(c[i], e_dir, e[2]);
+					if (pt_in_poly(test, 3, e)) {
 						return true;
 					}
 				}
@@ -269,46 +273,46 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (i == 3) {
-			D2D1_POINT_2F e_pos[4];
+			D2D1_POINT_2F e[4]{};
 			if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
-				pt_add(c[0], -e_width, e_pos[0]);
-				pt_add(c[0], e_width, -e_width, e_pos[1]);
-				pt_add(c[0], e_width, e_pos[2]);
-				pt_add(c[0], -e_width, e_width, e_pos[3]);
-				if (pt_in_poly(test, 4, e_pos)) {
+				pt_add(c[0], -e_width, e[0]);
+				pt_add(c[0], e_width, -e_width, e[1]);
+				pt_add(c[0], e_width, e[2]);
+				pt_add(c[0], -e_width, e_width, e[3]);
+				if (pt_in_poly(test, 4, e)) {
 					return true;
 				}
 			}
 			else if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
-				pt_add(c[0], 0.0, -e_width, e_pos[0]);
-				pt_add(c[0], -e_width, 0.0, e_pos[1]);
-				pt_add(c[0], 0.0, e_width, e_pos[2]);
-				pt_add(c[0], e_width, 0.0, e_pos[3]);
-				if (pt_in_poly(test, 4, e_pos)) {
+				pt_add(c[0], 0.0, -e_width, e[0]);
+				pt_add(c[0], -e_width, 0.0, e[1]);
+				pt_add(c[0], 0.0, e_width, e[2]);
+				pt_add(c[0], e_width, 0.0, e[3]);
+				if (pt_in_poly(test, 4, e)) {
 					return true;
 				}
 			}
 		}
 		else {
 			for (size_t j = 3; j > 0; j--) {
-				const double abs2 = pt_abs2(d_vec[j - 1]);
-				if (abs2 >= FLT_MIN) {
-					D2D1_POINT_2F e_vec;
-					pt_mul(d_vec[j - 1], e_width / sqrt(abs2), e_vec);
-					D2D1_POINT_2F e_nor{ e_vec.y, -e_vec.x };
-					D2D1_POINT_2F e_pos[4];
-					pt_add(c[j], e_nor, e_pos[0]);
-					pt_sub(c[j], e_nor, e_pos[1]);
+				const double c_abs = pt_abs2(c_pos[j - 1]);
+				if (c_abs >= FLT_MIN) {
+					D2D1_POINT_2F e_dir;
+					pt_mul(c_pos[j - 1], e_width / sqrt(c_abs), e_dir);
+					D2D1_POINT_2F e_orth{ e_dir.y, -e_dir.x };
+					D2D1_POINT_2F e[4];
+					pt_add(c[j], e_orth, e[0]);
+					pt_sub(c[j], e_orth, e[1]);
 					if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
-						pt_add(e_pos[1], e_vec, e_pos[2]);
-						pt_add(e_pos[0], e_vec, e_pos[3]);
-						if (pt_in_poly(test, 4, e_pos)) {
+						pt_add(e[1], e_dir, e[2]);
+						pt_add(e[0], e_dir, e[3]);
+						if (pt_in_poly(test, 4, e)) {
 							return true;
 						}
 					}
 					else if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
-						pt_add(c[j], e_vec, e_pos[2]);
-						if (pt_in_poly(test, 3, e_pos)) {
+						pt_add(c[j], e_dir, e[2]);
+						if (pt_in_poly(test, 3, e)) {
 							return true;
 						}
 					}
@@ -358,7 +362,8 @@ namespace winrt::GraphPaper::implementation
 	// s_cnt	シンプソン法の回数
 	// 戻り値	求まった長さ
 	//------------------------------
-	static double bezi_len_by_param(const POINT_2D c[4], const double t_min, const double t_max, const uint32_t s_cnt) noexcept
+	static double bezi_len_by_param(
+		const POINT_2D c[4], const double t_min, const double t_max, const uint32_t s_cnt) noexcept
 	{
 		double t_vec;
 		uint32_t n;
@@ -479,16 +484,16 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 曲線上の助変数をもとに接線ベクトルを求める.
 	// c	制御点
-	// t_val	助変数
-	// t_vec	接線ベクトル
+	// t	助変数
+	// v	t における接線ベクトル
 	//------------------------------
-	static inline void bezi_tvec_by_param(const POINT_2D c[4], const double t_val, POINT_2D& t_vec) noexcept
+	static inline void bezi_tvec_by_param(const POINT_2D c[4], const double t, POINT_2D& v) noexcept
 	{
-		const double a = -3.0 * (1.0 - t_val) * (1.0 - t_val);
-		const double b = 3.0 * (1.0 - t_val) * (1.0 - 3.0 * t_val);
-		const double d = 3.0 * t_val * (2.0 - 3.0 * t_val);
-		const double e = (3.0 * t_val * t_val);
-		t_vec = c[0] * a + c[1] * b + c[2] * d + c[3] * e;
+		const double a = -3.0 * (1.0 - t) * (1.0 - t);
+		const double b = 3.0 * (1.0 - t) * (1.0 - 3.0 * t);
+		const double d = 3.0 * t * (2.0 - 3.0 * t);
+		const double e = (3.0 * t * t);
+		v = c[0] * a + c[1] * b + c[2] * d + c[3] * e;
 	}
 
 	//------------------------------
@@ -513,7 +518,7 @@ namespace winrt::GraphPaper::implementation
 				m_d2d_arrow_geom = nullptr;
 			}
 			{
-				D2D1_BEZIER_SEGMENT b_seg;
+				D2D1_BEZIER_SEGMENT b_seg{};
 				pt_add(m_start, m_vec[0], b_seg.point1);
 				pt_add(b_seg.point1, m_vec[1], b_seg.point2);
 				pt_add(b_seg.point2, m_vec[2], b_seg.point3);
@@ -522,14 +527,18 @@ namespace winrt::GraphPaper::implementation
 				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
 				m_d2d_path_geom->Open(sink.put());
 				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-				const auto f_begin = (is_opaque(m_fill_color) ? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				const auto f_begin = (is_opaque(m_fill_color) ? 
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 				sink->BeginFigure(m_start, f_begin);
 				sink->AddBezier(b_seg);
 				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 				winrt::check_hresult(sink->Close());
 				sink = nullptr;
 				if (m_arrow_style != ARROW_STYLE::NONE) {
-					bezi_create_arrow_geom(static_cast<ID2D1Factory3*>(factory), m_start, b_seg, m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+					bezi_create_arrow_geom(
+						static_cast<ID2D1Factory3*>(factory), m_start, b_seg, m_arrow_style,
+						m_arrow_size, m_d2d_arrow_geom.put());
 				}
 			}
 		}
@@ -550,32 +559,32 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (m_anc_show && is_selected()) {
-			D2D1_POINT_2F s_pos;
-			D2D1_POINT_2F e_pos;
+			D2D1_POINT_2F s;	// 始点
+			D2D1_POINT_2F e;	// 終点
 			anc_draw_square(m_start, target, brush);
-			s_pos = m_start;
-			pt_add(s_pos, m_vec[0], e_pos);
+			s = m_start;
+			pt_add(s, m_vec[0], e);
 			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(s_pos, e_pos, brush, m_aux_width, nullptr);
+			target->DrawLine(s, e, brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(s_pos, e_pos, brush, m_aux_width, m_aux_style.get());
-			anc_draw_circle(e_pos, target, brush);
+			target->DrawLine(s, e, brush, m_aux_width, m_aux_style.get());
+			anc_draw_circle(e, target, brush);
 
-			s_pos = e_pos;
-			pt_add(s_pos, m_vec[1], e_pos);
+			s = e;
+			pt_add(s, m_vec[1], e);
 			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(s_pos, e_pos, brush, m_aux_width, nullptr);
+			target->DrawLine(s, e, brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(s_pos, e_pos, brush, m_aux_width, m_aux_style.get());
-			anc_draw_circle(e_pos, target, brush);
+			target->DrawLine(s, e, brush, m_aux_width, m_aux_style.get());
+			anc_draw_circle(e, target, brush);
 
-			s_pos = e_pos;
-			pt_add(s_pos, m_vec[2], e_pos);
+			s = e;
+			pt_add(s, m_vec[2], e);
 			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(s_pos, e_pos, brush, m_aux_width, nullptr);
+			target->DrawLine(s, e, brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(s_pos, e_pos, brush, m_aux_width, m_aux_style.get());
-			anc_draw_square(e_pos, target, brush);
+			target->DrawLine(s, e, brush, m_aux_width, m_aux_style.get());
+			anc_draw_square(e, target, brush);
 		}
 	}
 
@@ -630,33 +639,33 @@ namespace winrt::GraphPaper::implementation
 		// 最初の制御点の組をプッシュする.
 		// ４つの点のうち端点は, 次につまれる組と共有するので, 1 + 3 * D_MAX 個の配列を確保する.
 		constexpr int32_t D_MAX = 64;	// 分割する深さの最大値
-		POINT_2D s_arr[1 + D_MAX * 3] {};	// 制御点のスタック
+		POINT_2D s[1 + D_MAX * 3] {};	// 制御点のスタック
 		int32_t s_cnt = 0;	// スタックに積まれた点の数
-		s_arr[0] = cp[0];
-		s_arr[1] = cp[1];
-		s_arr[2] = cp[2];
-		s_arr[3] = cp[3];
+		s[0] = cp[0];
+		s[1] = cp[1];
+		s[2] = cp[2];
+		s[3] = cp[3];
 		s_cnt += 4;
 		// スタックに 一組以上の制御点が残っているか判定する.
 		while (s_cnt >= 4) {
 			// 制御点をポップする.
 			POINT_2D c[10];
-			c[3] = s_arr[s_cnt - 1];
-			c[2] = s_arr[s_cnt - 2];
-			c[1] = s_arr[s_cnt - 3];
-			c[0] = s_arr[s_cnt - 4];
+			c[3] = s[s_cnt - 1];
+			c[2] = s[s_cnt - 2];
+			c[1] = s[s_cnt - 3];
+			c[0] = s[s_cnt - 4];
 			// 端点は共有なのでピークする;
 			s_cnt -= 4 - 1;
 			// 制御点の組から凸包 c0 を得る (実際は方形で代用する).
 			// 制御点の組から, 重複するものを除いた点の集合を得る.
 			POINT_2D c0_lt = c[0];	// 凸包 c0 (を含む方形の左上点)
 			POINT_2D c0_rb = c[0];	// 凸包 c0 (を含む方形の右下点)
-			POINT_2D d_pos[4];	// 重複しない点の集合.
+			POINT_2D d[4];	// 重複しない点の集合.
 			uint32_t d_cnt = 0;	// 重複しない点の集合の要素数
-			d_pos[d_cnt++] = c[0];
+			d[d_cnt++] = c[0];
 			for (uint32_t i = 1; i < 4; i++) {
-				if (d_pos[d_cnt - 1] != c[i]) {
-					d_pos[d_cnt++] = c[i];
+				if (d[d_cnt - 1] != c[i]) {
+					d[d_cnt++] = c[i];
 					c[i].exp(c0_lt, c0_rb);
 				}
 			}
@@ -669,40 +678,39 @@ namespace winrt::GraphPaper::implementation
 			// 拡張・延長された線分を得る.
 			//   e[i][0]             e[i][1]
 			//        + - - - - - - - - - +
-			//        |          d_nor|         
-			//   d[i] +---------------+---> d_vec
+			//        |           orth|
+			//   d[i] +---------------+---> dir
 			//        |           d[i+1]
 			//        + - - - - - - - - - +
 			//   e[i][3]             e[i][2]
-			POINT_2D e_pos[3 * 4];	// 拡張・延長された線分の配列
+			POINT_2D e[3 * 4];	// 拡張・延長された線分の配列
 			for (uint32_t i = 0, j = 0; i < d_cnt - 1; i++, j += 4) {
-				auto d_vec = d_pos[i + 1] - d_pos[i];	// 線分のベクトル
-				// 線分のベクトルの長さを, 太さの半分にする.
-				d_vec = d_vec * (e_width / std::sqrt(d_vec * d_vec));
-				const POINT_2D d_nor{ d_vec.y, -d_vec.x };	// 線分の法線ベクトル
+				auto e_dir = d[i + 1] - d[i];	// 次の頂点への位置ベクトル
+				e_dir = e_dir * (e_width / std::sqrt(e_dir * e_dir));
+				const POINT_2D e_orth{ e_dir.y, -e_dir.x };	// 線分の直交ベクトル
 
 				// 法線ベクトルにそって正逆の方向に線分を拡張する.
-				e_pos[j + 0] = d_pos[i] + d_nor;
-				e_pos[j + 1] = d_pos[i + 1] + d_nor;
-				e_pos[j + 2] = d_pos[i + 1] - d_nor;
-				e_pos[j + 3] = d_pos[i] - d_nor;
+				e[j + 0] = d[i] + e_orth;
+				e[j + 1] = d[i + 1] + e_orth;
+				e[j + 2] = d[i + 1] - e_orth;
+				e[j + 3] = d[i] - e_orth;
 				if (i > 0) {
 					// 最初の制御点以外は, 線分ベクトルの方向に延長する.
-					e_pos[j + 0] = e_pos[j + 0] - d_vec;
-					e_pos[j + 3] = e_pos[j + 3] - d_vec;
+					e[j + 0] = e[j + 0] - e_dir;
+					e[j + 3] = e[j + 3] - e_dir;
 				}
 				if (i + 1 < d_cnt - 1) {
 					// 最後の制御点以外は, 線分ベクトルの逆方向に延長する.
-					e_pos[j + 1] = e_pos[j + 1] + d_vec;
-					e_pos[j + 2] = e_pos[j + 2] + d_vec;
+					e[j + 1] = e[j + 1] + e_dir;
+					e[j + 2] = e[j + 2] + e_dir;
 				}
 			}
 			// 拡張・延長された線分から, 凸包 c1 を得る.
 			uint32_t c1_cnt;
-			POINT_2D c1_pos[3 * 4];
-			bezi_get_convex((d_cnt - 1) * 4, e_pos, c1_cnt, c1_pos);
+			POINT_2D c1[3 * 4];
+			bezi_get_convex((d_cnt - 1) * 4, e, c1_cnt, c1);
 			// 点が凸包 c1 に含まれないか判定する.
-			if (!bezi_in_convex(tp.x, tp.y, c1_cnt, c1_pos)) {
+			if (!bezi_in_convex(tp.x, tp.y, c1_cnt, c1)) {
 				// これ以上この制御点の組を分割する必要はない.
 				// スタックに残った他の制御点の組を試す.
 				continue;
@@ -744,15 +752,15 @@ namespace winrt::GraphPaper::implementation
 			// 一方の組をプッシュする.
 			// 始点 (0) はスタックに残っているので, 
 			// 残りの 3 つの制御点をプッシュする.
-			s_arr[s_cnt] = c[4];
-			s_arr[s_cnt + 1] = c[7];
-			s_arr[s_cnt + 2] = c[9];
+			s[s_cnt] = c[4];
+			s[s_cnt + 1] = c[7];
+			s[s_cnt + 2] = c[9];
 			// もう一方の組をプッシュする.
 			// 始点 (9) はプッシュ済みなので,
 			// 残りの 3 つの制御点をプッシュする.
-			s_arr[s_cnt + 3] = c[8];
-			s_arr[s_cnt + 4] = c[6];
-			s_arr[s_cnt + 5] = c[3];
+			s[s_cnt + 3] = c[8];
+			s[s_cnt + 4] = c[6];
+			s[s_cnt + 5] = c[3];
 			s_cnt += 6;
 		}
 		if (f_opaque && f_test) {

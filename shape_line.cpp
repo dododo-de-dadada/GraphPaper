@@ -78,22 +78,24 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じるしの先端と返しの位置を求める.
-	// a_pos	矢軸の後端の位置
-	// a_vec	矢軸の先端へのベクトル
+	// a_end	矢軸の後端の位置
+	// a_dir	矢軸の先端へのベクトル
 	// a_size	矢じるしの寸法
 	// barb	返しの位置
 	// tip		先端の位置
-	bool ShapeLine::line_get_pos_arrow(const D2D1_POINT_2F a_pos, const D2D1_POINT_2F a_vec, const ARROW_SIZE& a_size, D2D1_POINT_2F barb[2], D2D1_POINT_2F& tip) noexcept
+	bool ShapeLine::line_get_pos_arrow(
+		const D2D1_POINT_2F a_end, const D2D1_POINT_2F a_dir, const ARROW_SIZE& a_size,
+		/*--->*/D2D1_POINT_2F barb[2], D2D1_POINT_2F& tip) noexcept
 	{
-		const auto a_len = std::sqrt(pt_abs2(a_vec));	// 矢軸の長さ
+		const auto a_len = std::sqrt(pt_abs2(a_dir));	// 矢軸の長さ
 		if (a_len >= FLT_MIN) {
-			get_pos_barbs(a_vec, a_len, a_size.m_width, a_size.m_length, barb);
+			get_pos_barbs(a_dir, a_len, a_size.m_width, a_size.m_length, barb);
 			if (a_size.m_offset >= a_len) {
 				// 矢じるしの先端
-				tip = a_pos;
+				tip = a_end;
 			}
 			else {
-				pt_mul_add(a_vec, 1.0 - a_size.m_offset / a_len, a_pos, tip);
+				pt_mul_add(a_dir, 1.0 - a_size.m_offset / a_len, a_end, tip);
 			}
 			pt_add(barb[0], tip, barb[0]);
 			pt_add(barb[1], tip, barb[1]);
@@ -241,7 +243,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形を囲む領域の左上位置を得る.
 	// val	領域の左上位置
-	void ShapeLine::get_pos_lt(D2D1_POINT_2F& val) const noexcept
+	void ShapeLine::get_bound_lt(D2D1_POINT_2F& val) const noexcept
 	{
 		const size_t d_cnt = m_vec.size();	// 差分の数
 		D2D1_POINT_2F v_pos = m_start;	// 頂点の位置
@@ -350,20 +352,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		return false;
 	}
-
-	// 差分だけ移動する.
-	/*
-	bool ShapeLine::move(const D2D1_POINT_2F d_vec) noexcept
-	{
-		if (ShapeStroke::move(d_vec)) {
-			if (m_d2d_arrow_geom != nullptr) {
-				m_d2d_arrow_geom = nullptr;
-			}
-			return true;
-		}
-		return false;
-	}
-	*/
 
 	// 値を矢じるしの寸法に格納する.
 	bool ShapeLine::set_arrow_size(const ARROW_SIZE& val) noexcept
@@ -533,13 +521,13 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 差分だけ移動する.
-	// d_vec	差分ベクトル
-	bool ShapeLine::move(const D2D1_POINT_2F d_vec) noexcept
+	// 位置を移動する.
+	// pos	位置ベクトル
+	bool ShapeLine::move(const D2D1_POINT_2F pos) noexcept
 	{
-		D2D1_POINT_2F new_pos;
-		pt_add(m_start, d_vec, new_pos);
-		if (set_pos_start(new_pos)) {
+		D2D1_POINT_2F start;
+		pt_add(m_start, pos, start);
+		if (set_pos_start(start)) {
 			if (m_d2d_arrow_geom != nullptr) {
 				m_d2d_arrow_geom = nullptr;
 			}
@@ -610,31 +598,31 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 近傍の頂点を見つける.
-// pos	ある位置
-// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
-// val	ある位置の近傍にある頂点
-// 戻り値	見つかったら true
-	bool ShapeLine::get_pos_nearest(const D2D1_POINT_2F pos, float& dd, D2D1_POINT_2F& val) const noexcept
+	// pos	ある位置
+	// dd	近傍とみなす距離 (の二乗値), これより離れた頂点は近傍とはみなさない.
+	// val	ある位置の近傍にある頂点
+	// 戻り値	見つかったら true
+	bool ShapeLine::get_pos_nearest(const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept
 	{
 		bool done = false;
-		D2D1_POINT_2F vec;
-		pt_sub(m_start, pos, vec);
-		float vv = static_cast<float>(pt_abs2(vec));
-		if (vv < dd) {
-			dd = vv;
+		D2D1_POINT_2F r;
+		pt_sub(m_start, p, r);
+		float r_abs = static_cast<float>(pt_abs2(r));
+		if (r_abs < dd) {
+			dd = r_abs;
 			val = m_start;
 			if (!done) {
 				done = true;
 			}
 		}
-		D2D1_POINT_2F v_pos{ m_start };
-		for (const auto d_vec : m_vec) {
-			pt_add(v_pos, d_vec, v_pos);
-			pt_sub(v_pos, pos, vec);
-			vv = static_cast<float>(pt_abs2(vec));
-			if (vv < dd) {
-				dd = vv;
-				val = v_pos;
+		D2D1_POINT_2F q{ m_start };	// 次の点
+		for (const D2D1_POINT_2F pos : m_vec) {
+			pt_add(q, pos, q);
+			pt_sub(q, p, r);
+			r_abs = static_cast<float>(pt_abs2(r));
+			if (r_abs < dd) {
+				dd = r_abs;
+				val = q;
 				if (!done) {
 					done = true;
 				}

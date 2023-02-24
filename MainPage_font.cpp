@@ -96,8 +96,12 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto padd_w = p_width * 0.125;
 		const auto padd_h = p_height * 0.25;
-		const D2D1_POINT_2F start{ static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h) };
-		const D2D1_POINT_2F b_vec{ static_cast<FLOAT>(p_width - 2.0 * padd_w), static_cast<FLOAT>(p_width - 2.0 * padd_h) };
+		const D2D1_POINT_2F start{
+			static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h)
+		};
+		const D2D1_POINT_2F pos{
+			static_cast<FLOAT>(p_width - 2.0 * padd_w), static_cast<FLOAT>(p_width - 2.0 * padd_h)
+		};
 		const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 		const wchar_t* text = nullptr;
 		if (pang.empty()) {
@@ -106,7 +110,7 @@ namespace winrt::GraphPaper::implementation
 		else {
 			text = pang.c_str();
 		}
-		page.m_shape_list.push_back(new ShapeText(start, b_vec, wchar_cpy(text), &page));
+		page.m_shape_list.push_back(new ShapeText(start, pos, wchar_cpy(text), &page));
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -150,12 +154,19 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 1> });
-		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 2> });
-		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 3> });
-		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto slider_0_token = dialog_slider_0().ValueChanged(
+			{ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged(
+			{ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged(
+			{ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged(
+			{ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 3> });
+		font_create_sample_shape(
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

@@ -630,7 +630,7 @@ namespace winrt::GraphPaper::implementation
 
 		// •¶š—ñ‚Ì”ÍˆÍ‚Ì¶ã‚ªŒ´“_‚É‚È‚é‚æ‚¤, ”»’è‚·‚éˆÊ’u‚ğˆÚ“®‚·‚é.
 		D2D1_POINT_2F lt;
-		ShapeRect::get_pos_lt(lt);
+		ShapeRect::get_bound_lt(lt);
 		pt_sub(test, lt, lt);
 		pt_sub(lt, m_text_padding, lt);
 		for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
@@ -659,7 +659,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_dwrite_test_cnt > 0 && m_dwrite_test_cnt < UINT32_MAX) {
 			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : (m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
-			ShapeRect::get_pos_lt(p_lt);
+			ShapeRect::get_bound_lt(p_lt);
 			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
 				//const DWRITE_HIT_TEST_METRICS& t_met = m_dwrite_test_metrics[i];
 				const auto tl = m_dwrite_test_metrics[i].left;

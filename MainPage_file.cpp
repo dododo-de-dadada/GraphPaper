@@ -73,9 +73,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Application;
 	using winrt::Windows::Storage::AccessCache::AccessListEntry;
 	using winrt::Windows::UI::ViewManagement::ApplicationView;
-	//using winrt::Windows::Graphics::Imaging::BitmapBufferAccessMode;
-	//using winrt::Windows::Graphics::Imaging::BitmapInterpolationMode;
-	//using winrt::Windows::Graphics::Imaging::BitmapRotation;
 	using winrt::Windows::Storage::CachedFileManager;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
@@ -211,7 +208,8 @@ namespace winrt::GraphPaper::implementation
 			//disp.DpiChanged(m_token_dpi_changed);
 			//disp.OrientationChanged(m_token_orientation_changed);
 			//disp.DisplayContentsInvalidated(m_token_contents_invalidated);
-			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(m_token_close_requested);
+			SystemNavigationManagerPreview::GetForCurrentView().CloseRequested(
+				m_token_close_requested);
 		}
 
 		// DirectX のオブジェクトを破棄する.
@@ -504,7 +502,6 @@ namespace winrt::GraphPaper::implementation
 			dt_reader.ReadBytes(array_view(find_repl_data, find_repl_data + 2 * find_repl_len));
 			m_find_repl = reinterpret_cast<wchar_t*>(find_repl_data);
 			m_find_repl[find_repl_len] = L'\0';
-
 			const uint16_t f_bit = dt_reader.ReadUInt16();
 			m_text_fit_frame_to_text = ((f_bit & 1) != 0);
 			m_find_text_case = ((f_bit & 2) != 0);
@@ -595,12 +592,12 @@ namespace winrt::GraphPaper::implementation
 		co_return hres;
 	}
 
-	template IAsyncOperation<winrt::hresult>
-		MainPage::file_read_gpf_async<false, false>(StorageFile s_file) noexcept;
-	template IAsyncOperation<winrt::hresult>
-		MainPage::file_read_gpf_async<false, true>(StorageFile s_file) noexcept;
-	template IAsyncOperation<winrt::hresult>
-		MainPage::file_read_gpf_async<true, false>(StorageFile s_file) noexcept;
+	template IAsyncOperation<winrt::hresult> MainPage::file_read_gpf_async<false, false>(
+		StorageFile s_file) noexcept;
+	template IAsyncOperation<winrt::hresult> MainPage::file_read_gpf_async<false, true>(
+		StorageFile s_file) noexcept;
+	template IAsyncOperation<winrt::hresult> MainPage::file_read_gpf_async<true, false>(
+		StorageFile s_file) noexcept;
 
 	//-------------------------------
 	// ストレージファイルを最近使ったファイルに登録する.
@@ -611,7 +608,8 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::file_recent_add(StorageFile const& s_file)
 	{
 		if (s_file != nullptr) {
-			m_file_token_mru = StorageApplicationPermissions::MostRecentlyUsedList().Add(s_file, s_file.Path());
+			m_file_token_mru = StorageApplicationPermissions::MostRecentlyUsedList().Add(
+				s_file, s_file.Path());
 			ApplicationView::GetForCurrentView().Title(s_file.Name());
 		}
 		else {
@@ -667,7 +665,9 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 最近使ったファイルのトークンからストレージファイルを得る.
-			StorageFile s_file{ co_await file_recent_token_async(item[0].Token) };	// ストレージファイル
+			StorageFile s_file{
+				co_await file_recent_token_async(item[0].Token) 
+			};
 			// ストレージファイルが空でないか判定する.
 			// 空でないなら
 			if (s_file != nullptr) {
@@ -743,7 +743,8 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// 名前を付けてファイルに非同期に保存する.
 	//-------------------------------
-	IAsyncAction MainPage::file_save_as_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
+	IAsyncAction MainPage::file_save_as_click_async(
+		IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		m_mutex_event.lock();
 
@@ -807,7 +808,8 @@ namespace winrt::GraphPaper::implementation
 	//-------------------------------
 	// ファイルメニューの「上書き保存」が選択された
 	//-------------------------------
-	IAsyncAction MainPage::file_save_click_async(IInspectable const&, RoutedEventArgs const&) noexcept
+	IAsyncAction MainPage::file_save_click_async(
+		IInspectable const&, RoutedEventArgs const&) noexcept
 	{
 		// 最近使ったファイルのトークンからストレージファイルを得る.
 		StorageFile recent_file{
@@ -829,65 +831,6 @@ namespace winrt::GraphPaper::implementation
 			Window::Current().CoreWindow().PointerCursor(prev_cur);
 		}
 	}
-
-	//-------------------------------
-	// 画像用のファイル保存ピッカーを開いて, ストレージファイルを得る.
-	//-------------------------------
-	/*
-	IAsyncOperation <StorageFile> MainPage::file_pick_save_image_async(const wchar_t sug_name[])
-	{
-		// ResourceLoader::GetForCurrentView はフォアグラウンド.
-		const ResourceLoader& res_loader = ResourceLoader::GetForCurrentView();
-		const winrt::hstring desc_bmp{ res_loader.GetString(L"str_desc_bmp") };
-		const winrt::hstring desc_gif{ res_loader.GetString(L"str_desc_gif") };
-		const winrt::hstring desc_jpg{ res_loader.GetString(L"str_desc_jpg") };
-		const winrt::hstring desc_pdf{ res_loader.GetString(L"str_desc_pdf") };
-		const winrt::hstring desc_png{ res_loader.GetString(L"str_desc_png") };
-		const winrt::hstring desc_svg{ res_loader.GetString(L"str_desc_svg") };
-		const winrt::hstring desc_tif{ res_loader.GetString(L"str_desc_tif") };
-
-		FileSavePicker image_picker{ FileSavePicker() };
-		image_picker.FileTypeChoices().Insert(desc_svg, TYPE_SVG);
-		image_picker.FileTypeChoices().Insert(desc_pdf, TYPE_PDF);
-		image_picker.FileTypeChoices().Insert(desc_bmp, TYPE_BMP);
-		image_picker.FileTypeChoices().Insert(desc_gif, TYPE_GIF);
-		image_picker.FileTypeChoices().Insert(desc_jpg, TYPE_JPG);
-		image_picker.FileTypeChoices().Insert(desc_png, TYPE_PNG);
-		image_picker.FileTypeChoices().Insert(desc_tif, TYPE_TIF);
-
-		// 画像ライブラリーを保管場所に設定する.
-		const PickerLocationId loc_id = PickerLocationId::PicturesLibrary;
-		image_picker.SuggestedStartLocation(loc_id);
-
-		// ピッカーに, あらかじめ表示されるファイル名を設定する.
-		if (m_file_token_mru.empty()) {
-			// 提案されたファイル名に拡張子を格納する.
-			image_picker.SuggestedFileName(L"");
-		}
-		else {
-			// 最近使ったファイルのトークンからストレージファイルを得る.
-			StorageFile recent_file{
-				co_await file_recent_token_async(m_file_token_mru)
-			};
-			// ストレージファイルを得たなら,
-			if (recent_file != nullptr) {
-				if (recent_file.FileType() == L".gpf") {
-					// ファイル名を, 提案するファイル名に格納する.
-					image_picker.SuggestedFileName(recent_file.Name());
-				}
-				recent_file = nullptr;
-			}
-		}
-
-		// ピッカーを表示しストレージファイルを得る.
-		StorageFile img_file{
-			co_await image_picker.PickSaveFileAsync()
-		};
-
-		image_picker = nullptr;
-		co_return img_file;
-	}
-	*/
 
 	//-------------------------------
 	// 図形データをストレージファイルに非同期に書き込む.
@@ -987,7 +930,9 @@ namespace winrt::GraphPaper::implementation
 			// ストリームを閉じる.
 			ra_stream.Close();
 			// 遅延させたファイル更新を完了する.
-			if (co_await CachedFileManager::CompleteUpdatesAsync(s_file) == FileUpdateStatus::Complete) {
+			const FileUpdateStatus status = co_await CachedFileManager::CompleteUpdatesAsync(
+				s_file);
+			if (status == FileUpdateStatus::Complete) {
 				// 完了した場合, 
 				// S_OK を結果に格納する.
 				hres = S_OK;
@@ -1040,9 +985,12 @@ namespace winrt::GraphPaper::implementation
 		// 結果を返し終了する.
 		co_return hres;
 	}
-	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, false>(StorageFile s_file);
-	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<true, false>(StorageFile s_file);
-	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, true>(StorageFile s_file);
+	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, false>(
+		StorageFile s_file);
+	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<true, false>(
+		StorageFile s_file);
+	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, true>(
+		StorageFile s_file);
 
 	// ファイルメニューの「新規」が選択された
 	IAsyncAction MainPage::file_new_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -1072,27 +1020,21 @@ namespace winrt::GraphPaper::implementation
 
 		// 背景色, 前景色, 選択された文字範囲の背景色, 文字色をリソースから得る.
 		{
-			const IInspectable sel_back_color = Resources().TryLookup(box_value(L"SystemAccentColor"));
-			const IInspectable sel_text_color = Resources().TryLookup(box_value(L"SystemColorHighlightTextColor"));
+			const IInspectable sel_back_color = Resources().TryLookup(
+				box_value(L"SystemAccentColor"));
+			const IInspectable sel_text_color = Resources().TryLookup(
+				box_value(L"SystemColorHighlightTextColor"));
 			if (sel_back_color != nullptr && sel_text_color != nullptr) {
-				conv_uwp_to_color(unbox_value<Color>(sel_back_color), ShapeText::s_text_selected_background);
-				conv_uwp_to_color(unbox_value<Color>(sel_text_color), ShapeText::s_text_selected_foreground);
+				conv_uwp_to_color(
+					unbox_value<Color>(sel_back_color), ShapeText::s_text_selected_background);
+				conv_uwp_to_color(
+					unbox_value<Color>(sel_text_color), ShapeText::s_text_selected_foreground);
 			}
 			else {
-				ShapeText::s_text_selected_background = { 0.0f, 0x00 / COLOR_MAX, 0x78 / COLOR_MAX, 0xD4 / COLOR_MAX };
+				ShapeText::s_text_selected_background =
+				{ 0.0f, 0x00 / COLOR_MAX, 0x78 / COLOR_MAX, 0xD4 / COLOR_MAX };
 				ShapeText::s_text_selected_foreground = COLOR_WHITE;
 			}
-			/*
-			auto const& back_theme = Resources().TryLookup(box_value(L"ApplicationPageBackgroundThemeBrush"));
-			auto const& fore_theme = Resources().TryLookup(box_value(L"ApplicationForegroundThemeBrush"));
-			if (back_theme != nullptr && fore_theme != nullptr) {
-				conv_uwp_to_color(unbox_value<Brush>(back_theme), Shape::s_background_color);
-				conv_uwp_to_color(unbox_value<Brush>(fore_theme), Shape::s_foreground_color);
-			}
-			else {*/
-			//Shape::s_background_color = COLOR_WHITE;
-			//Shape::s_foreground_color = COLOR_BLACK;
-			//}
 		}
 
 		// 設定データを保存するフォルダーを得る.
@@ -1124,7 +1066,9 @@ namespace winrt::GraphPaper::implementation
 		// 表示の左上位置と右下位置を初期化する.
 		{
 			m_main_bbox_lt = D2D1_POINT_2F{ 0.0F, 0.0F };
-			m_main_bbox_rb = D2D1_POINT_2F{ m_main_page.m_page_size.width, m_main_page.m_page_size.height };
+			m_main_bbox_rb = D2D1_POINT_2F{
+				m_main_page.m_page_size.width, m_main_page.m_page_size.height
+			};
 		}
 		file_recent_add(nullptr);
 		file_finish_reading();

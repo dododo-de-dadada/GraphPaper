@@ -77,7 +77,8 @@ namespace winrt::GraphPaper::implementation
 			dialog_slider_0().Visibility(Visibility::Visible);
 
 			const winrt::event_token ds0_tok{
-				dialog_slider_0().ValueChanged({ this, &MainPage::rotation_slider_val_changed<UNDO_ID::ROTATION, 0> })
+				dialog_slider_0().ValueChanged(
+					{ this, &MainPage::rotation_slider_val_changed<UNDO_ID::ROTATION, 0> })
 			};
 			rotation_slider_set_header<UNDO_ID::ROTATION, 0>(rot);
 			const auto samp_w = scp_dialog_panel().Width();
@@ -89,14 +90,15 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_POINT_2F start{
 				static_cast<FLOAT>(center), static_cast<FLOAT>(padd)
 			};
-			const D2D1_POINT_2F b_vec{
+			const D2D1_POINT_2F pos{
 				static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)
 			};
-			m_dialog_page.m_shape_list.push_back(new ShapeQEllipse(start, b_vec, rot, s));
+			m_dialog_page.m_shape_list.push_back(new ShapeQEllipse(start, pos, rot, s));
 #if defined(_DEBUG)
 			debug_leak_cnt++;
 #endif
-			cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_rotation")));
+			cd_setting_dialog().Title(
+				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_rotation")));
 			const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 			if (d_result == ContentDialogResult::Primary) {
 				float samp_val;
