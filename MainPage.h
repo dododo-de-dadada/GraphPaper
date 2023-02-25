@@ -82,21 +82,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs;
 	using winrt::Windows::UI::Xaml::SizeChangedEventArgs;
 
-	/*
-	using winrt::Windows::Graphics::Printing::IPrintDocumentSource;
-	using winrt::Windows::UI::Xaml::Printing::PrintDocument;
-	using winrt::Windows::Graphics::Printing::PrintManager;
-	using winrt::Windows::UI::Xaml::Printing::GetPreviewPageEventArgs;
-	using winrt::Windows::UI::Xaml::Printing::PaginateEventArgs;
-	using winrt::Windows::Graphics::Printing::PrintTaskOptions;
-	using winrt::Windows::Graphics::Printing::PrintPageDescription;
-	using winrt::Windows::UI::Xaml::Printing::AddPagesEventArgs;
-	using winrt::Windows::Graphics::Printing::PrintTaskRequestedEventArgs;
-	using winrt::Windows::Graphics::Printing::PrintTask;
-	using winrt::Windows::Graphics::Printing::PrintTaskSourceRequestedArgs;
-	using winrt::Windows::Graphics::Printing::PrintTaskCompletedEventArgs;
-	using winrt::Windows::Graphics::Printing::PrintTaskCompletion;
-	*/
 	extern const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES;	// 図形データのクリップボード書式
 	//extern const winrt::param::hstring CLIPBOARD_TIFF;	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
 
@@ -106,6 +91,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr auto VERT_STICK_DEF_VAL = 2.0f * 6.0f;	// 頂点をくっつける閾値の既定値
 	constexpr wchar_t PAGE_SETTING[] = L"page_setting.dat";	// ページ設定を格納するファイル名
 	constexpr uint32_t VERT_CNT_MAX = 12;	// 折れ線の頂点の最大数.
+
 	//-------------------------------
 	// 色の表記
 	//-------------------------------
@@ -113,7 +99,7 @@ namespace winrt::GraphPaper::implementation
 		DEC,	// 10 進数
 		HEX,	// 16 進数	
 		REAL,	// 実数
-		CENT	// パーセント
+		PCT	// パーセント
 	};
 
 	// 色成分を文字列に変換する.
@@ -183,21 +169,19 @@ namespace winrt::GraphPaper::implementation
 	constexpr bool LEN_UNIT_HIDE = false;	// 単位名の非表示
 
 	// 長さを文字列に変換する.
-	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
+	template <bool B> void conv_len_to_str(
+		const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len,
+		const uint32_t t_len, wchar_t* t_buf) noexcept;
 
-	//-------------------------------
-	// 長さを文字列に変換する.
-	// B	単位名を付加するか判定する.
-	// len_unit	長さの単位
-	// val_pixel	ピクセル単位の長さ
-	// dpi	DPI
-	// g_len	グリッドの大きさ
-	// t_buf	文字列を格納した固定配列
-	//-------------------------------
-	template <bool B, size_t Z> inline void conv_len_to_str(const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len, wchar_t(&t_buf)[Z]) noexcept
+	template <bool B, size_t Z> inline void conv_len_to_str(
+		const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len,
+		wchar_t(&t_buf)[Z]) noexcept
 	{
 		conv_len_to_str<B>(len_unit, val_pixel, dpi, g_len, Z, t_buf);
 	}
+
+	double conv_len_to_val(
+		const LEN_UNIT l_unit, const double l_val, const double dpi, const double g_len) noexcept;
 
 	//-------------------------------
 	// メッセージダイアログのアイコン
@@ -691,6 +675,8 @@ namespace winrt::GraphPaper::implementation
 		// その他メニューの「長さの単位」のサブ項目が選択された.
 		void len_unit_click(IInspectable const&, RoutedEventArgs const&);
 
+		void len_unit_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
+
 		//-------------------------------
 		// MainPage_sample.cpp
 		// 属性
@@ -903,7 +889,7 @@ namespace winrt::GraphPaper::implementation
 		// 一覧の最後の項目を選択する.
 		void summary_select_tail(void);
 		// 一覧の項目が選択された.
-		void summary_selection_changed(IInspectable const& sender, SelectionChangedEventArgs const& e);
+		void summary_selection_changed(IInspectable const& sender, SelectionChangedEventArgs const& args);
 		// 一覧の図形を選択解除する.
 		void summary_unselect(Shape* const s);
 		// 一覧の項目を全て選択解除する.

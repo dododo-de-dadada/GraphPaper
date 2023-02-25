@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-	constexpr wchar_t DLG_TITLE[] = L"str_font_settings";
+	constexpr wchar_t DLG_TITLE[] = L"str_font_color";
 
 	//---------------------------------
 	// 書体の幅の配列
@@ -86,16 +86,18 @@ namespace winrt::GraphPaper::implementation
 	//---------------------------------
 	// 設定の図形を作成する.
 	//---------------------------------
-	static void font_create_sample_shape(const float p_width, const float p_height, ShapePage& page);
+	static void font_create_sample_shape(
+		const float p_width, const float p_height, ShapePage& page);
 
 	// 見本の図形を作成する.
 	// p_width	見本を表示するパネルの幅
 	// p_height	見本を表示するパネルの高さ
 	// page	見本を表示するシート
-	static void font_create_sample_shape(const float p_width, const float p_height, ShapePage& page)
+	static void font_create_sample_shape(
+		const float p_width, const float p_height, ShapePage& page)
 	{
 		const auto padd_w = p_width * 0.125;
-		const auto padd_h = p_height * 0.25;
+		const auto padd_h = p_height * 0.125;
 		const D2D1_POINT_2F start{
 			static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h)
 		};
@@ -377,8 +379,11 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Value(font_size - 1.0);
 		font_slider_set_header<UNDO_ID::FONT_SIZE, 0>(font_size - 1.0f);
 		dialog_slider_0().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_SIZE, 0> });
-		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		const auto slider_0_token = dialog_slider_0().ValueChanged(
+			{ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_SIZE, 0> });
+		font_create_sample_shape(
+			static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), 
+			m_dialog_page);
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
@@ -432,7 +437,9 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_dialog_list().Visibility(Visibility::Visible);
-		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		font_create_sample_shape(
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
@@ -525,14 +532,17 @@ namespace winrt::GraphPaper::implementation
 		const auto changed_token = lv_dialog_list().SelectionChanged(
 			[this](auto, auto args) {
 				uint32_t i = lv_dialog_list().SelectedIndex();
-				m_dialog_page.m_shape_list.back()->set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
+				m_dialog_page.m_shape_list.back()->set_font_weight(
+					static_cast<DWRITE_FONT_WEIGHT>(FONT_WEIGHTS[i]));
 				if (scp_dialog_panel().IsLoaded()) {
 					dialog_draw();
 				}
 			}
 		);
 		lv_dialog_list().Visibility(Visibility::Visible);
-		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		font_create_sample_shape(
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();

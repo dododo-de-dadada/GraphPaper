@@ -226,7 +226,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr D2D1_SIZE_F TEXT_PADDING_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
 	constexpr size_t N_GON_MAX = 256;	// 多角形の頂点の最大数 (ヒット判定でスタックを利用するため, オーバーフローしないよう制限する)
 	constexpr float PAGE_SIZE_MAX = 32768.0f;	// 最大のページ大きさ
-	constexpr D2D1_SIZE_F PAGE_SIZE_DEFVAL{ 8.0F * 96.0F, 11.0F * 96.0F };	// ページの大きさの既定値 (ピクセル)
+	constexpr D2D1_SIZE_F PAGE_SIZE_DEFVAL{ 8.0f * 96.0f, 11.0f * 96.0f };	// ページの大きさの既定値 (ピクセル)
 	constexpr float FONT_SIZE_MAX = 512.0f;	// 書体の大きさの最大値
 
 	// COM インターフェイス IMemoryBufferByteAccess を初期化
@@ -784,10 +784,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_COLOR_F m_page_color{ COLOR_WHITE };	// 背景色
 		float m_page_scale = 1.0f;	// 拡大率
 		D2D1_SIZE_F	m_page_size{ PAGE_SIZE_DEFVAL };	// 大きさ (MainPage のコンストラクタで設定)
-		D2D1_RECT_F m_page_padding{	// ページの内余白
-			0.5f * GRID_LEN_DEFVAL, 0.5f * GRID_LEN_DEFVAL,
-			0.5f * GRID_LEN_DEFVAL, 0.5f * GRID_LEN_DEFVAL
-		};
+		D2D1_RECT_F m_page_padding{ 0.0f, 0.0f, 0.0f, 0.0f };	// ページの内余白
 
 		//------------------------------
 		// shape_page.cpp
@@ -796,31 +793,31 @@ namespace winrt::GraphPaper::implementation
 		// 図形を表示する.
 		void draw(void);
 		// 曲線の補助線を表示する.
-		void draw_auxiliary_bezi(
+		void auxiliary_draw_bezi(
 			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec);
 		// だ円の補助線を表示する.
-		void draw_auxiliary_elli(
+		void auxiliary_draw_elli(
 			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec);
 		// 直線の補助線を表示する.
-		void draw_auxiliary_line(
+		void auxiliary_draw_line(
 			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec);
 		// 方形の補助線を表示する.
-		void draw_auxiliary_rect(
+		void auxiliary_draw_rect(
 			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec);
 		// 多角形の補助線を表示する.
-		void draw_auxiliary_poly(
+		void auxiliary_draw_poly(
 			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec, const POLY_OPTION& p_opt);
 		// 角丸方形の補助線を表示する.
-		void draw_auxiliary_rrect(
+		void auxiliary_draw_rrect(
 			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec);
 		// 四分円の補助線を表示する.
-		void draw_auxiliary_qellipse(
+		void auxiliary_draw_qellipse(
 			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, 
 			const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec);
 		// 矢じるしの寸法を得る.

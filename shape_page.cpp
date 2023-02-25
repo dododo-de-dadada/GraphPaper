@@ -7,22 +7,16 @@ namespace winrt::GraphPaper::implementation
 {
 	// 方眼を表示する.
 	static void page_draw_grid(
-		ID2D1RenderTarget* const target,
-		ID2D1SolidColorBrush* const brush,
-		const float grid_base,
-		const D2D1_COLOR_F grid_color,
-		const GRID_EMPH grid_emph,
-		const D2D1_POINT_2F grid_offset,
-		const float page_scale,
-		const D2D1_SIZE_F sh_size
-	);
+		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len,
+		const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset,
+		const float p_scale, const D2D1_SIZE_F g_size);
 
 	// 曲線の補助線(制御点を結ぶ折れ線)を表示する.
 	// target	レンダーターゲット
 	// brush	色ブラシ
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
-	void ShapePage::draw_auxiliary_bezi(
+	void ShapePage::auxiliary_draw_bezi(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
@@ -55,7 +49,7 @@ namespace winrt::GraphPaper::implementation
 	// brush	色ブラシ
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
-	void ShapePage::draw_auxiliary_elli(
+	void ShapePage::auxiliary_draw_elli(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
@@ -87,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 	// 直線の補助線を表示する.
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
-	void ShapePage::draw_auxiliary_line(
+	void ShapePage::auxiliary_draw_line(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
@@ -102,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
 	// p_opt	多角形の選択肢
-	void ShapePage::draw_auxiliary_poly(
+	void ShapePage::auxiliary_draw_poly(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current, const POLY_OPTION& p_opt)
 	{
@@ -125,7 +119,7 @@ namespace winrt::GraphPaper::implementation
 	// 方形の補助線を表示する.
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
-	void ShapePage::draw_auxiliary_rect(
+	void ShapePage::auxiliary_draw_rect(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
@@ -142,7 +136,7 @@ namespace winrt::GraphPaper::implementation
 	// 角丸方形の補助線を表示する.
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
-	void ShapePage::draw_auxiliary_rrect(
+	void ShapePage::auxiliary_draw_rrect(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
@@ -174,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 		target->DrawRoundedRectangle(&r_rect, brush, Shape::m_aux_width, Shape::m_aux_style.get());
 	}
 
-	void ShapePage::draw_auxiliary_qellipse(
+	void ShapePage::auxiliary_draw_qellipse(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
@@ -229,7 +223,7 @@ namespace winrt::GraphPaper::implementation
 			page_draw_grid(
 				m_d2d_target,
 				m_d2d_color_brush.get(),
-				m_grid_base,
+				m_grid_base + 1.0f,
 				m_grid_color,
 				m_grid_emph,
 				m_grid_offset,
@@ -252,7 +246,7 @@ namespace winrt::GraphPaper::implementation
 			page_draw_grid(
 				m_d2d_target,
 				m_d2d_color_brush.get(),
-				m_grid_base,
+				m_grid_base + 1.0f,
 				m_grid_color,
 				m_grid_emph,
 				m_grid_offset,
@@ -264,57 +258,51 @@ namespace winrt::GraphPaper::implementation
 	// 方眼を表示する.
 	// d2d	描画環境
 	// g_offset	方眼のずらし量
+	// g_size	方眼を表示する領域の大きさ
 	static void page_draw_grid(
-		ID2D1RenderTarget* const target,
-		ID2D1SolidColorBrush* const brush,
-		const float grid_base,
-		const D2D1_COLOR_F grid_color,
-		const GRID_EMPH grid_emph,
-		const D2D1_POINT_2F grid_offset,
-		const float page_scale,
-		const D2D1_SIZE_F page_size
-	)
+		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, const float g_len,
+		const D2D1_COLOR_F g_color, const GRID_EMPH g_emph, const D2D1_POINT_2F g_offset,
+		const float p_scale, const D2D1_SIZE_F g_size)
 	{
 		// 拡大されても 1 ピクセルになるよう拡大率の逆数を線枠の太さに格納する.
-		const FLOAT grid_width = static_cast<FLOAT>(1.0 / page_scale);	// 方眼の太さ
+		const FLOAT g_width = static_cast<FLOAT>(1.0 / p_scale);	// 方眼の太さ
 		D2D1_POINT_2F h_start, h_end;	// 横の方眼の開始・終了位置
 		D2D1_POINT_2F v_start, v_end;	// 縦の方眼の開始・終了位置
-		brush->SetColor(grid_color);
+		brush->SetColor(g_color);
 		v_start.y = 0.0f;
 		h_start.x = 0.0f;
-		const auto page_h = page_size.height;
-		const auto page_w = page_size.width;
-		v_end.y = page_size.height - 1.0f;
-		h_end.x = page_size.width - 1.0f;
-		const double grid_len = max(grid_base + 1.0, 1.0);
+		const auto page_h = g_size.height;
+		const auto page_w = g_size.width;
+		v_end.y = g_size.height - 1.0f;
+		h_end.x = g_size.width - 1.0f;
 
 		// 垂直な方眼を表示する.
 		float w;
 		double x;
-		for (uint32_t i = 0; (x = round((grid_len * i + grid_offset.x) / PT_ROUND) * PT_ROUND) < page_w; i++) {
-			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
-				w = 2.0F * grid_width;
+		for (uint32_t i = 0; (x = round((g_len * i + g_offset.x) / PT_ROUND) * PT_ROUND) <= page_w; i++) {
+			if (g_emph.m_gauge_2 != 0 && (i % g_emph.m_gauge_2) == 0) {
+				w = 2.0f * g_width;
 			}
-			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
-				w = grid_width;
+			else if (g_emph.m_gauge_1 != 0 && (i % g_emph.m_gauge_1) == 0) {
+				w = g_width;
 			}
 			else {
-				w = 0.5F * grid_width;
+				w = 0.5f * g_width;
 			}
 			v_start.x = v_end.x = static_cast<FLOAT>(x);
 			target->DrawLine(v_start, v_end, brush, w, nullptr);
 		}
 		// 水平な方眼を表示する.
 		double y;
-		for (uint32_t i = 0; (y = round((grid_len * i + grid_offset.y) / PT_ROUND) * PT_ROUND) < page_h; i++) {
-			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
-				w = 2.0F * grid_width;
+		for (uint32_t i = 0; (y = round((g_len * i + g_offset.y) / PT_ROUND) * PT_ROUND) <= page_h; i++) {
+			if (g_emph.m_gauge_2 != 0 && (i % g_emph.m_gauge_2) == 0) {
+				w = 2.0f * g_width;
 			}
-			else if (grid_emph.m_gauge_1 != 0 && (i % grid_emph.m_gauge_1) == 0) {
-				w = grid_width;
+			else if (g_emph.m_gauge_1 != 0 && (i % g_emph.m_gauge_1) == 0) {
+				w = g_width;
 			}
 			else {
-				w = 0.5F * grid_width;
+				w = 0.5f * g_width;
 			}
 			h_start.y = h_end.y = static_cast<FLOAT>(y);
 			target->DrawLine(h_start, h_end, brush, w, nullptr);
@@ -544,57 +532,49 @@ namespace winrt::GraphPaper::implementation
 	// 図形をデータリーダーから読み込む.
 	void ShapePage::read(DataReader const& dt_reader)
 	{
-		constexpr double GRID_BASE_MAX = 127;
 		// 方眼の大きさ
-		const auto grid_base = dt_reader.ReadSingle();
-		if (grid_base >= 0.0f && grid_base <= GRID_BASE_MAX) {
-			m_grid_base = grid_base;
+		const auto g_base = dt_reader.ReadSingle();
+		if (g_base >= 0.0f && g_base <= 127.5f) {
+			m_grid_base = g_base;
 		}
 		// 方眼の色
-		const D2D1_COLOR_F grid_color{
+		const D2D1_COLOR_F g_color{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if ((grid_color.r >= 0.0f && grid_color.r <= 1.0f) &&
-			(grid_color.g >= 0.0f && grid_color.g <= 1.0f) &&
-			(grid_color.b >= 0.0f && grid_color.b <= 1.0f) &&
-			(grid_color.a >= 0.0f && grid_color.a <= 1.0f)) {
-			m_grid_color = grid_color;
+		if ((g_color.r >= 0.0f && g_color.r <= 1.0f) && (g_color.g >= 0.0f && g_color.g <= 1.0f) &&
+			(g_color.b >= 0.0f && g_color.b <= 1.0f) && (g_color.a >= 0.0f && g_color.a <= 1.0f)) {
+			m_grid_color = g_color;
 		}
 
 		// 方眼の強調
-		const GRID_EMPH grid_emph{
+		const GRID_EMPH g_emph{
 			dt_reader.ReadUInt32(),
 			dt_reader.ReadUInt32()
 		};
-		if (equal(grid_emph, GRID_EMPH_0) ||
-			equal(grid_emph, GRID_EMPH_2) ||
-			equal(grid_emph, GRID_EMPH_3)) {
-			m_grid_emph = grid_emph;
+		if (equal(g_emph, GRID_EMPH_0) || equal(g_emph, GRID_EMPH_2) || 
+			equal(g_emph, GRID_EMPH_3)) {
+			m_grid_emph = g_emph;
 		}
 		// 方眼の表示
-		const GRID_SHOW grid_show = static_cast<GRID_SHOW>(dt_reader.ReadUInt32());
-		if (m_grid_show == GRID_SHOW::HIDE ||
-			m_grid_show == GRID_SHOW::BACK ||
-			m_grid_show == GRID_SHOW::FRONT) {
-			m_grid_show = grid_show;
+		const GRID_SHOW g_show = static_cast<GRID_SHOW>(dt_reader.ReadUInt32());
+		if (g_show == GRID_SHOW::HIDE || g_show == GRID_SHOW::BACK || g_show == GRID_SHOW::FRONT) {
+			m_grid_show = g_show;
 		}
 		// 方眼に合わせる.
 		m_grid_snap = dt_reader.ReadBoolean();
 		// ページの色
-		const D2D1_COLOR_F page_color{
+		const D2D1_COLOR_F p_color{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (page_color.r >= 0.0f && page_color.r <= 1.0f &&
-			page_color.g >= 0.0f && page_color.g <= 1.0f &&
-			page_color.b >= 0.0f && page_color.b <= 1.0f &&
-			page_color.a >= 0.0f && page_color.a <= 1.0f) {
-			m_page_color = page_color;
+		if (p_color.r >= 0.0f && p_color.r <= 1.0f && p_color.g >= 0.0f && p_color.g <= 1.0f &&
+			p_color.b >= 0.0f && p_color.b <= 1.0f && p_color.a >= 0.0f && p_color.a <= 1.0f) {
+			m_page_color = p_color;
 		}
 		// ページの倍率
 		const float page_scale = dt_reader.ReadSingle();
@@ -602,116 +582,121 @@ namespace winrt::GraphPaper::implementation
 			m_page_scale = page_scale;
 		}
 		// ページの大きさ
-		const D2D1_SIZE_F page_size{
+		const D2D1_SIZE_F p_size{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (page_size.width >= 1.0f && page_size.width <= PAGE_SIZE_MAX &&
-			page_size.height >= 1.0f && page_size.height <= PAGE_SIZE_MAX) {
-			m_page_size = page_size;
+		if (p_size.width >= 1.0f && p_size.width <= PAGE_SIZE_MAX && p_size.height >= 1.0f &&
+			p_size.height <= PAGE_SIZE_MAX) {
+			m_page_size = p_size;
+		}
+		// ページの内余白
+		const D2D1_RECT_F p_padd{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+		};
+		if (p_padd.left >= 0.0f && p_padd.right >= 0.0f && 
+			p_padd.left + p_padd.right < m_page_size.width &&
+			p_padd.top >= 0.0f && p_padd.bottom >= 0.0f &&
+			p_padd.top + p_padd.bottom < m_page_size.height) {
+			m_page_padding = p_padd;
 		}
 		// 矢じるしの寸法
-		const ARROW_SIZE arrow_size{
+		const ARROW_SIZE a_size{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (arrow_size.m_width >= 0.0f && arrow_size.m_width <= 127.5f &&
-			arrow_size.m_length >= 0.0f && arrow_size.m_length <= 127.5f &&
-			arrow_size.m_offset >= 0.0f && arrow_size.m_offset <= 127.5f) {
-			m_arrow_size = arrow_size;
+		if (a_size.m_width >= 0.0f && a_size.m_width <= 127.5f &&
+			a_size.m_length >= 0.0f && a_size.m_length <= 127.5f &&
+			a_size.m_offset >= 0.0f && a_size.m_offset <= 127.5f) {
+			m_arrow_size = a_size;
 		}
 		// 矢じるしの形式
-		const ARROW_STYLE arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
-		if (arrow_style == ARROW_STYLE::NONE ||
-			arrow_style == ARROW_STYLE::OPENED ||
-			arrow_style == ARROW_STYLE::FILLED) {
-			m_arrow_style = arrow_style;
+		const ARROW_STYLE a_style = static_cast<ARROW_STYLE>(dt_reader.ReadUInt32());
+		if (a_style == ARROW_STYLE::NONE || a_style == ARROW_STYLE::OPENED ||
+			a_style == ARROW_STYLE::FILLED) {
+			m_arrow_style = a_style;
 		}
-		// 角丸半径
-		//const D2D1_POINT_2F corner_rad{
-		//	dt_reader.ReadSingle(),
-		//	dt_reader.ReadSingle()
-		//};
-		//m_corner_radius = corner_rad;
 		// 端の形式
-		const CAP_STYLE stroke_cap{
+		const CAP_STYLE s_cap{
 			static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32()),
 			static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32())
 		};
-		if ((stroke_cap.m_start == D2D1_CAP_STYLE_FLAT ||
-			stroke_cap.m_start == D2D1_CAP_STYLE_ROUND ||
-			stroke_cap.m_start == D2D1_CAP_STYLE_SQUARE ||
-			stroke_cap.m_start == D2D1_CAP_STYLE_TRIANGLE) &&
-			stroke_cap.m_start == m_stroke_cap.m_end) {
-			m_stroke_cap = stroke_cap;
+		if ((s_cap.m_start == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT ||
+			s_cap.m_start == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND ||
+			s_cap.m_start == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE ||
+			s_cap.m_start == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) &&
+			s_cap.m_start == m_stroke_cap.m_end) {
+			m_stroke_cap = s_cap;
 		}
 		// 線・枠の色
-		const D2D1_COLOR_F stroke_color{
+		const D2D1_COLOR_F s_color{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (stroke_color.r >= 0.0f && stroke_color.r <= 1.0f &&
-			stroke_color.g >= 0.0f && stroke_color.g <= 1.0f &&
-			stroke_color.b >= 0.0f && stroke_color.b <= 1.0f &&
-			stroke_color.a >= 0.0f && stroke_color.a <= 1.0f) {
-			m_stroke_color = stroke_color;
+		if (s_color.r >= 0.0f && s_color.r <= 1.0f && s_color.g >= 0.0f && s_color.g <= 1.0f &&
+			s_color.b >= 0.0f && s_color.b <= 1.0f && s_color.a >= 0.0f && s_color.a <= 1.0f) {
+			m_stroke_color = s_color;
 		}
 		// 線・枠の太さ
-		const float stroke_width = dt_reader.ReadSingle();
-		if (stroke_width >= 0.0f && stroke_width <= 127.5f) {
-			m_stroke_width = stroke_width;
+		const float s_width = dt_reader.ReadSingle();
+		if (s_width >= 0.0f && s_width <= 127.5f) {
+			m_stroke_width = s_width;
 		}
 		// 破線の端の形式
-		const D2D1_CAP_STYLE dash_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
-		if (dash_cap == D2D1_CAP_STYLE_FLAT ||
-			dash_cap == D2D1_CAP_STYLE_ROUND ||
-			dash_cap == D2D1_CAP_STYLE_SQUARE ||
-			dash_cap == D2D1_CAP_STYLE_TRIANGLE) {
-			m_dash_cap = dash_cap;
+		const D2D1_CAP_STYLE d_cap = static_cast<D2D1_CAP_STYLE>(dt_reader.ReadUInt32());
+		if (d_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT ||
+			d_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND ||
+			d_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE ||
+			d_cap == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
+			m_dash_cap = d_cap;
 		}
 		// 破線の配置
-		const DASH_PATT dash_patt{
+		const DASH_PATT d_patt{
 			{
 				dt_reader.ReadSingle(), dt_reader.ReadSingle(),
 				dt_reader.ReadSingle(), dt_reader.ReadSingle(),
 				dt_reader.ReadSingle(), dt_reader.ReadSingle()
 			}
 		};
-		m_dash_patt = dash_patt;
+		if (d_patt.m_[0] >= 0.0f && d_patt.m_[1] >= 0.0f && d_patt.m_[2] >= 0.0f &&
+			d_patt.m_[3] >= 0.0f && d_patt.m_[4] >= 0.0f && d_patt.m_[5] >= 0.0f) {
+			m_dash_patt = d_patt;
+		}
 		// 破線の形式
-		const D2D1_DASH_STYLE dash_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());
-		if (dash_style == D2D1_DASH_STYLE_SOLID ||
-			dash_style == D2D1_DASH_STYLE_CUSTOM) {
-			m_dash_style = dash_style;
+		const D2D1_DASH_STYLE d_style = static_cast<D2D1_DASH_STYLE>(dt_reader.ReadUInt32());
+		if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID ||
+			d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_CUSTOM) {
+			m_dash_style = d_style;
 		}
 		// 線の結合の形状
-		const D2D1_LINE_JOIN join_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());
-		if (join_style == D2D1_LINE_JOIN_BEVEL ||
-			join_style == D2D1_LINE_JOIN_MITER ||
-			join_style == D2D1_LINE_JOIN_MITER_OR_BEVEL ||
-			join_style == D2D1_LINE_JOIN_ROUND) {
-			m_join_style = join_style;
+		const D2D1_LINE_JOIN j_style = static_cast<D2D1_LINE_JOIN>(dt_reader.ReadUInt32());
+		if (j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL ||
+			j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER ||
+			j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER_OR_BEVEL ||
+			j_style == D2D1_LINE_JOIN::D2D1_LINE_JOIN_ROUND) {
+			m_join_style = j_style;
 		}
 		// 線の結合の尖り制限距離
-		const float join_miter_limit = dt_reader.ReadSingle();
-		if (join_miter_limit >= 1.0f && join_miter_limit <= 128.5f) {
-			m_join_miter_limit = join_miter_limit;
+		const float j_limit = dt_reader.ReadSingle();
+		if (j_limit >= 1.0f && j_limit <= 128.5f) {
+			m_join_miter_limit = j_limit;
 		}
 		// 塗りつぶし色
-		const D2D1_COLOR_F fill_color{
+		const D2D1_COLOR_F f_color{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (fill_color.r >= 0.0f && fill_color.r <= 1.0f &&
-			fill_color.g >= 0.0f && fill_color.g <= 1.0f &&
-			fill_color.b >= 0.0f && fill_color.b <= 1.0f &&
-			fill_color.a >= 0.0f && fill_color.a <= 1.0f) {
-			m_fill_color = fill_color;
+		if (f_color.r >= 0.0f && f_color.r <= 1.0f && f_color.g >= 0.0f && f_color.g <= 1.0f &&
+			f_color.b >= 0.0f && f_color.b <= 1.0f && f_color.a >= 0.0f && f_color.a <= 1.0f) {
+			m_fill_color = f_color;
 		}
 		// 書体の色
 		const D2D1_COLOR_F font_color{
@@ -726,6 +711,7 @@ namespace winrt::GraphPaper::implementation
 			font_color.a >= 0.0f && font_color.a <= 1.0f) {
 			m_font_color = font_color;
 		}
+
 		// 書体名
 		const size_t font_family_len = dt_reader.ReadUInt32();
 		uint8_t* font_family_data = new uint8_t[2 * (font_family_len + 1)];
@@ -741,73 +727,77 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		// 書体の幅
-		const DWRITE_FONT_STRETCH font_stretch = static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());
-		if (font_stretch == DWRITE_FONT_STRETCH_CONDENSED ||
-			font_stretch == DWRITE_FONT_STRETCH_EXPANDED ||
-			font_stretch == DWRITE_FONT_STRETCH_EXTRA_CONDENSED ||
-			font_stretch == DWRITE_FONT_STRETCH_EXTRA_EXPANDED ||
-			font_stretch == DWRITE_FONT_STRETCH_NORMAL ||
-			font_stretch == DWRITE_FONT_STRETCH_SEMI_CONDENSED ||
-			font_stretch == DWRITE_FONT_STRETCH_SEMI_EXPANDED ||
-			font_stretch == DWRITE_FONT_STRETCH_ULTRA_CONDENSED ||
-			font_stretch == DWRITE_FONT_STRETCH_ULTRA_EXPANDED) {
-			m_font_stretch = font_stretch;
+		const DWRITE_FONT_STRETCH f_stretch =
+			static_cast<DWRITE_FONT_STRETCH>(dt_reader.ReadUInt32());
+		if (f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED ||
+			f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXPANDED ||
+			f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED ||
+			f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_EXPANDED ||
+			f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_NORMAL ||
+			f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_CONDENSED ||
+			f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_SEMI_EXPANDED ||
+			f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED ||
+			f_stretch == DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_EXPANDED) {
+			m_font_stretch = f_stretch;
 		}
 		// 書体の字体
-		const DWRITE_FONT_STYLE font_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());
-		if (font_style == DWRITE_FONT_STYLE_ITALIC ||
-			font_style == DWRITE_FONT_STYLE_NORMAL ||
-			font_style == DWRITE_FONT_STYLE_OBLIQUE) {
-			m_font_style = font_style;
+		const DWRITE_FONT_STYLE f_style = static_cast<DWRITE_FONT_STYLE>(dt_reader.ReadUInt32());
+		if (f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_ITALIC ||
+			f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_NORMAL ||
+			f_style == DWRITE_FONT_STYLE::DWRITE_FONT_STYLE_OBLIQUE) {
+			m_font_style = f_style;
 		}
 		// 書体の太さ
-		const DWRITE_FONT_WEIGHT font_weight = static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());
-		if (font_weight == DWRITE_FONT_WEIGHT_THIN || 
-			font_weight == DWRITE_FONT_WEIGHT_EXTRA_LIGHT ||
-			font_weight == DWRITE_FONT_WEIGHT_LIGHT ||
-			font_weight == DWRITE_FONT_WEIGHT_SEMI_LIGHT ||
-			font_weight == DWRITE_FONT_WEIGHT_NORMAL ||
-			font_weight == DWRITE_FONT_WEIGHT_MEDIUM ||
-			font_weight == DWRITE_FONT_WEIGHT_DEMI_BOLD ||
-			font_weight == DWRITE_FONT_WEIGHT_BOLD ||
-			font_weight == DWRITE_FONT_WEIGHT_EXTRA_BOLD ||
-			font_weight == DWRITE_FONT_WEIGHT_BLACK ||
-			font_weight == DWRITE_FONT_WEIGHT_EXTRA_BLACK) {
-			m_font_weight = font_weight;
+		const DWRITE_FONT_WEIGHT f_weight = 
+			static_cast<DWRITE_FONT_WEIGHT>(dt_reader.ReadUInt32());
+		if (f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_THIN ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_LIGHT ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_LIGHT ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_SEMI_LIGHT ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_NORMAL ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_MEDIUM ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_DEMI_BOLD ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BOLD ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BOLD ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_BLACK ||
+			f_weight == DWRITE_FONT_WEIGHT::DWRITE_FONT_WEIGHT_EXTRA_BLACK) {
+			m_font_weight = f_weight;
 		}
 		// 段落のそろえ
-		const DWRITE_PARAGRAPH_ALIGNMENT text_align_vert = static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
-		if (text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_CENTER ||
-			text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_FAR ||
-			text_align_vert == DWRITE_PARAGRAPH_ALIGNMENT_NEAR) {
-			m_text_align_vert = text_align_vert;
+		const DWRITE_PARAGRAPH_ALIGNMENT t_align_vert =
+			static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(dt_reader.ReadUInt32());
+		if (t_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_CENTER ||
+			t_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_FAR ||
+			t_align_vert == DWRITE_PARAGRAPH_ALIGNMENT::DWRITE_PARAGRAPH_ALIGNMENT_NEAR) {
+			m_text_align_vert = t_align_vert;
 		}
 		// 文字列のそろえ
-		const DWRITE_TEXT_ALIGNMENT text_align_horz = static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
-		if (text_align_horz == DWRITE_TEXT_ALIGNMENT_CENTER ||
-			text_align_horz == DWRITE_TEXT_ALIGNMENT_JUSTIFIED ||
-			text_align_horz == DWRITE_TEXT_ALIGNMENT_LEADING ||
-			text_align_horz == DWRITE_TEXT_ALIGNMENT_TRAILING) {
-			m_text_align_horz = text_align_horz;
+		const DWRITE_TEXT_ALIGNMENT t_align_horz = 
+			static_cast<DWRITE_TEXT_ALIGNMENT>(dt_reader.ReadUInt32());
+		if (t_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_CENTER ||
+			t_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_JUSTIFIED ||
+			t_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_LEADING ||
+			t_align_horz == DWRITE_TEXT_ALIGNMENT::DWRITE_TEXT_ALIGNMENT_TRAILING) {
+			m_text_align_horz = t_align_horz;
 		}
 		// 行間
-		const float text_line_sp = dt_reader.ReadSingle();
-		if (text_line_sp >= 0.0f && text_line_sp <= 127.5f) {
-			m_text_line_sp = text_line_sp;
+		const float t_line_sp = dt_reader.ReadSingle();
+		if (t_line_sp >= 0.0f && t_line_sp <= 127.5f) {
+			m_text_line_sp = t_line_sp;
 		}
 		// 文字列の余白
-		const D2D1_SIZE_F text_padding{
+		const D2D1_SIZE_F t_padd{
 			dt_reader.ReadSingle(),
 			dt_reader.ReadSingle()
 		};
-		if (text_padding.width >= 0.0 && text_padding.width <= 127.5 &&
-			text_padding.height >= 0.0 && text_padding.height <= 127.5) {
-			m_text_padding = text_padding;
+		if (t_padd.width >= 0.0 && t_padd.width <= 127.5 &&
+			t_padd.height >= 0.0 && t_padd.height <= 127.5) {
+			m_text_padding = t_padd;
 		}
 		// 画像の不透明率
-		const float image_opac = dt_reader.ReadSingle();
-		if (image_opac >= 0.0f && image_opac <= 1.0f) {
-			m_image_opac = image_opac;
+		const float i_opac = dt_reader.ReadSingle();
+		if (i_opac >= 0.0f && i_opac <= 1.0f) {
+			m_image_opac = i_opac;
 		}
 		ShapeText::is_available_font(m_font_family);
 	}
@@ -1106,7 +1096,6 @@ namespace winrt::GraphPaper::implementation
 		s->get_dash_cap(m_dash_cap);
 		s->get_dash_patt(m_dash_patt);
 		s->get_dash_style(m_dash_style);
-		//s->get_corner_radius(m_corner_radius);
 		s->get_fill_color(m_fill_color);
 		s->get_font_color(m_font_color);
 		s->get_font_family(m_font_family);
@@ -1123,6 +1112,7 @@ namespace winrt::GraphPaper::implementation
 		s->get_join_miter_limit(m_join_miter_limit);
 		s->get_join_style(m_join_style);
 		s->get_page_color(m_page_color);
+		s->get_page_padding(m_page_padding);
 		s->get_stroke_cap(m_stroke_cap);
 		s->get_stroke_color(m_stroke_color);
 		s->get_stroke_width(m_stroke_width);
@@ -1160,6 +1150,11 @@ namespace winrt::GraphPaper::implementation
 		// ページの大きさ
 		dt_writer.WriteSingle(m_page_size.width);
 		dt_writer.WriteSingle(m_page_size.height);
+		// ページの内余白
+		dt_writer.WriteSingle(m_page_padding.left);
+		dt_writer.WriteSingle(m_page_padding.top);
+		dt_writer.WriteSingle(m_page_padding.right);
+		dt_writer.WriteSingle(m_page_padding.bottom);
 		// 矢じるしの大きさ
 		dt_writer.WriteSingle(m_arrow_size.m_width);
 		dt_writer.WriteSingle(m_arrow_size.m_length);

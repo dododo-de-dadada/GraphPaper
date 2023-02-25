@@ -63,8 +63,8 @@ namespace winrt::GraphPaper::implementation
 	// その他メニューの「色の表記」のサブ項目が選択された.
 	void MainPage::color_code_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
-		if (sender == rmfi_color_code_cent()) {
-			m_color_code = COLOR_CODE::CENT;
+		if (sender == rmfi_color_code_pct()) {
+			m_color_code = COLOR_CODE::PCT;
 		}
 		else if (sender == rmfi_color_code_dec()) {
 			m_color_code = COLOR_CODE::DEC;
@@ -88,7 +88,7 @@ namespace winrt::GraphPaper::implementation
 		rmfi_color_code_dec().IsChecked(val == COLOR_CODE::DEC);
 		rmfi_color_code_hex().IsChecked(val == COLOR_CODE::HEX);
 		rmfi_color_code_real().IsChecked(val == COLOR_CODE::REAL);
-		rmfi_color_code_cent().IsChecked(val == COLOR_CODE::CENT);
+		rmfi_color_code_pct().IsChecked(val == COLOR_CODE::PCT);
 	}
 
 	// その他メニューの「長さの単位」のサブ項目が選択された.
@@ -132,6 +132,99 @@ namespace winrt::GraphPaper::implementation
 		rmfi_len_unit_milli().IsChecked(val == LEN_UNIT::MILLI);
 		rmfi_len_unit_pixel().IsChecked(val == LEN_UNIT::PIXEL);
 		rmfi_len_unit_point().IsChecked(val == LEN_UNIT::POINT);
+		cbi_len_unit_grid().IsSelected(val == LEN_UNIT::GRID);
+		cbi_len_unit_inch().IsSelected(val == LEN_UNIT::INCH);
+		cbi_len_unit_milli().IsSelected(val == LEN_UNIT::MILLI);
+		cbi_len_unit_pixel().IsSelected(val == LEN_UNIT::PIXEL);
+		cbi_len_unit_point().IsSelected(val == LEN_UNIT::POINT);
+	}
+
+	void MainPage::len_unit_selection_changed(
+		IInspectable const&, SelectionChangedEventArgs const& args) noexcept
+	{
+		LEN_UNIT old_unit = LEN_UNIT::PIXEL;
+		for (const auto i : args.RemovedItems()) {
+			if (i == cbi_len_unit_grid()) {
+				old_unit = LEN_UNIT::GRID;
+			}
+			else if (i == cbi_len_unit_inch()) {
+				old_unit = LEN_UNIT::INCH;
+			}
+			else if (i == cbi_len_unit_milli()) {
+				old_unit = LEN_UNIT::MILLI;
+			}
+			else if (i == cbi_len_unit_pixel()) {
+				old_unit = LEN_UNIT::PIXEL;
+			}
+			else if (i == cbi_len_unit_point()) {
+				old_unit = LEN_UNIT::POINT;
+			}
+			else {
+				return;
+			}
+		}
+		LEN_UNIT new_unit = LEN_UNIT::PIXEL;
+		for (const auto i : args.AddedItems()) {
+			if (i == cbi_len_unit_grid()) {
+				new_unit = LEN_UNIT::GRID;
+			}
+			else if (i == cbi_len_unit_inch()) {
+				new_unit = LEN_UNIT::INCH;
+			}
+			else if (i == cbi_len_unit_milli()) {
+				new_unit = LEN_UNIT::MILLI;
+			}
+			else if (i == cbi_len_unit_pixel()) {
+				new_unit = LEN_UNIT::PIXEL;
+			}
+			else if (i == cbi_len_unit_point()) {
+				new_unit = LEN_UNIT::POINT;
+			}
+			else {
+				return;
+			}
+		}
+		if (old_unit != new_unit) {
+			const auto dpi = m_main_d2d.m_logical_dpi;
+			const auto g_len = m_main_page.m_grid_base + 1.0;
+			double val;
+			if (swscanf_s(tx_page_size_width().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_size_width().Text(buf);
+			}
+			if (swscanf_s(tx_page_size_height().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_size_height().Text(buf);
+			}
+			if (swscanf_s(tx_page_padd_left().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_padd_left().Text(buf);
+			}
+			if (swscanf_s(tx_page_padd_top().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_padd_top().Text(buf);
+			}
+			if (swscanf_s(tx_page_padd_right().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_padd_right().Text(buf);
+			}
+			if (swscanf_s(tx_page_padd_bottom().Text().data(), L"%lf", &val)) {
+				wchar_t buf[128];
+				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
+				tx_page_padd_bottom().Text(buf);
+			}
+		}
 	}
 
 	// その他メニューの「頂点をくっつける...」が選択された.

@@ -277,7 +277,7 @@
 			</muxc:MenuBarItem>
 			<!-- 作図メニュー -->
 			<muxc:MenuBarItem x:Uid="mbi_drawing" AccessKey="D" Title="Drawing">
-                <!-- 選択ツール -->
+				<!-- 選択ツール -->
 				<muxc:RadioMenuFlyoutItem
 					x:Name="rmfi_selection_tool" x:Uid="rmfi_selection_tool"
 					Click="drawing_tool_click" GroupName="gn_tool_type" IsChecked="True"
@@ -292,7 +292,7 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<MenuFlyoutSeparator />
-                <!-- 方形 -->
+				<!-- 方形 -->
 				<muxc:RadioMenuFlyoutItem
 					x:Name="rmfi_drawing_rect" x:Uid="rmfi_drawing_rect"
 					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Rectangle">
@@ -533,40 +533,40 @@
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_stroke_width_3px" x:Uid="rmfi_stroke_width_3px"
-                        Click="stroke_width_click" Text="3 px" >
+						x:Name="rmfi_stroke_width_3px" x:Uid="rmfi_stroke_width_3px"
+						Click="stroke_width_click" Text="3 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon
-                                Data="{StaticResource data_stroke_width_3px}"
-                                HorizontalAlignment="Center" VerticalAlignment="Center" Width="16"
-                                Height="16" />
+								Data="{StaticResource data_stroke_width_3px}"
+								HorizontalAlignment="Center" VerticalAlignment="Center" Width="16"
+								Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_stroke_width_4px" x:Uid="rmfi_stroke_width_4px"
-                        Click="stroke_width_click" Text="4 px" >
+						x:Name="rmfi_stroke_width_4px" x:Uid="rmfi_stroke_width_4px"
+						Click="stroke_width_click" Text="4 px" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon
-                                Data="{StaticResource data_stroke_width_4px}" 
-                                HorizontalAlignment="Center" VerticalAlignment="Center" Width="16"
-                                Height="16" />
+								Data="{StaticResource data_stroke_width_4px}" 
+								HorizontalAlignment="Center" VerticalAlignment="Center" Width="16"
+								Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<MenuFlyoutSeparator />
 					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_stroke_width_other" x:Uid="rmfi_stroke_width_other"
-                        Click="stroke_width_click_async" Text="Others..." />
+						x:Name="rmfi_stroke_width_other" x:Uid="rmfi_stroke_width_other"
+						Click="stroke_width_click_async" Text="Others..." />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon
-                            Data="{StaticResource data_cap_square}" HorizontalAlignment="Center"
-                            VerticalAlignment="Center" Width="16" Height="16" />
+							Data="{StaticResource data_cap_square}" HorizontalAlignment="Center"
+							VerticalAlignment="Center" Width="16" Height="16" />
 					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem
-                        x:Name="rmfi_cap_style_flat" x:Uid="rmfi_cap_style_flat"
-                        Click="cap_style_click" GroupName="gn_cap_style" IsChecked="true"
-                        Text="Flat" >
+						x:Name="rmfi_cap_style_flat" x:Uid="rmfi_cap_style_flat"
+						Click="cap_style_click" GroupName="gn_cap_style" IsChecked="true"
+						Text="Flat" >
 						<muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon Data="{StaticResource data_cap_flat}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 						</muxc:RadioMenuFlyoutItem.Icon>
@@ -798,7 +798,9 @@
 			<muxc:MenuBarItem x:Uid="mbi_misc" AccessKey="M" Title="Misc">
 				<MenuFlyoutItem x:Name="mfi_summary_list" x:Uid="mfi_summary_list" Click="summary_list_click" Text="List Summary" >
 					<MenuFlyoutItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_list}"/>
+						<FontIcon
+							FontFamily="{StaticResource SymbolThemeFontFamily}"
+							Glyph="{StaticResource glyph_list}"/>
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
 						<KeyboardAccelerator Key="L" Modifiers="Control" />
@@ -806,38 +808,78 @@
 				</MenuFlyoutItem>
 				<MenuFlyoutSubItem x:Uid="mfsi_len_unit" Text="Length unit">
 					<MenuFlyoutSubItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_unit}" />
+						<FontIcon
+							FontFamily="{StaticResource SymbolThemeFontFamily}"
+							Glyph="{StaticResource glyph_unit}" />
 					</MenuFlyoutSubItem.Icon>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_pixel" x:Uid="rmfi_len_unit_pixel" IsChecked="True" Click="len_unit_click" GroupName="gn_len_unit" Text="Pixel" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_inch" x:Uid="rmfi_len_unit_inch" Click="len_unit_click" GroupName="gn_len_unit" Text="Inch" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_milli" x:Uid="rmfi_len_unit_milli" Click="len_unit_click" GroupName="gn_len_unit" Text="Millimeter" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_point" x:Uid="rmfi_len_unit_point" Click="len_unit_click" GroupName="gn_len_unit" Text="Point" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_len_unit_grid" x:Uid="rmfi_len_unit_grid" Click="len_unit_click" GroupName="gn_len_unit" Text="Per Grid" />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_len_unit_pixel" x:Uid="rmfi_len_unit_pixel" IsChecked="True"
+						Click="len_unit_click" GroupName="gn_len_unit" Text="Pixel" />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_len_unit_inch" x:Uid="rmfi_len_unit_inch"
+						Click="len_unit_click" GroupName="gn_len_unit" Text="Inch" />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_len_unit_milli" x:Uid="rmfi_len_unit_milli" 
+						Click="len_unit_click" GroupName="gn_len_unit" Text="Millimeter" />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_len_unit_point" x:Uid="rmfi_len_unit_point"
+						Click="len_unit_click" GroupName="gn_len_unit" Text="Point" />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_len_unit_grid" x:Uid="rmfi_len_unit_grid"
+						Click="len_unit_click" GroupName="gn_len_unit" Text="Grid" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfsi_color_code" Text="Color Code">
 					<MenuFlyoutSubItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_color}" />
+						<FontIcon
+							FontFamily="{StaticResource SymbolThemeFontFamily}"
+							Glyph="{StaticResource glyph_color}" />
 					</MenuFlyoutSubItem.Icon>
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_dec" x:Uid="rmfi_color_code_dec" Click="color_code_click" IsChecked="True" Text="Decimal" GroupName="gn_misc_color_code" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_hex" x:Uid="rmfi_color_code_hex" Click="color_code_click" Text="Hexadecimal" GroupName="gn_misc_color_code" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_real" x:Uid="rmfi_color_code_real" Click="color_code_click" Text="Real" GroupName="gn_misc_color_code" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_color_code_cent" x:Uid="rmfi_color_code_cent" Click="color_code_click" Text="Percent" GroupName="gn_misc_color_code" />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_color_code_dec" x:Uid="rmfi_color_code_dec" IsChecked="True" 
+						Click="color_code_click" Text="Decimal" GroupName="gn_color_code" />
+					<muxc:RadioMenuFlyoutItem 
+						x:Name="rmfi_color_code_hex" x:Uid="rmfi_color_code_hex"
+						Click="color_code_click" Text="Hexadecimal" GroupName="gn_color_code" />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_color_code_real" x:Uid="rmfi_color_code_real"
+						Click="color_code_click" Text="Real" GroupName="gn_color_code" />
+					<muxc:RadioMenuFlyoutItem
+						x:Name="rmfi_color_code_pct" x:Uid="rmfi_color_code_pct"
+						Click="color_code_click" Text="Percent" GroupName="gn_color_code" />
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfsi_status_bar" Text="Status Bar">
 					<MenuFlyoutSubItem.Icon>
-						<FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{StaticResource glyph_info}" />
+						<FontIcon
+							FontFamily="{StaticResource SymbolThemeFontFamily}"
+							Glyph="{StaticResource glyph_info}" />
 					</MenuFlyoutSubItem.Icon>
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_draw" x:Uid="tmfi_status_bar_draw" Click="status_bar_click" Text="Drawing Tool" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_unit" x:Uid="tmfi_status_bar_unit" Click="status_bar_click" Text="Unit Name" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_pos" x:Uid="tmfi_status_bar_pos" Click="status_bar_click" Text="Cursor Position" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_grid" x:Uid="tmfi_status_bar_grid" Click="status_bar_click" Text="Grid Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_page" x:Uid="tmfi_status_bar_page" Click="status_bar_click" Text="Page Size" />
-					<ToggleMenuFlyoutItem x:Name="tmfi_status_bar_zoom" x:Uid="tmfi_status_bar_zoom" Click="status_bar_click" Text="Page Scale" />
+					<ToggleMenuFlyoutItem
+						x:Name="tmfi_status_bar_draw" x:Uid="tmfi_status_bar_draw"
+						Click="status_bar_click" Text="Drawing Tool" />
+					<ToggleMenuFlyoutItem
+						x:Name="tmfi_status_bar_unit" x:Uid="tmfi_status_bar_unit"
+						Click="status_bar_click" Text="Unit Name" />
+					<ToggleMenuFlyoutItem
+						x:Name="tmfi_status_bar_pos" x:Uid="tmfi_status_bar_pos"
+						Click="status_bar_click" Text="Cursor Position" />
+					<ToggleMenuFlyoutItem
+						x:Name="tmfi_status_bar_grid" x:Uid="tmfi_status_bar_grid"
+						Click="status_bar_click" Text="Grid Size" />
+					<ToggleMenuFlyoutItem
+						x:Name="tmfi_status_bar_page" x:Uid="tmfi_status_bar_page"
+						Click="status_bar_click" Text="Page Size" />
+					<ToggleMenuFlyoutItem
+						x:Name="tmfi_status_bar_zoom" x:Uid="tmfi_status_bar_zoom"
+						Click="status_bar_click" Text="Page Scale" />
 				</MenuFlyoutSubItem>
-				<MenuFlyoutItem x:Name="mfi_stick_to_vertex" x:Uid="mfi_stick_to_vertex" Click="stick_to_vertex_click_async" Text="Stick to Vertex..." />
+				<MenuFlyoutItem
+					x:Name="mfi_stick_to_vertex" x:Uid="mfi_stick_to_vertex"
+					Click="stick_to_vertex_click_async" Text="Stick to Vertex..." />
 				<MenuFlyoutSeparator />
 				<!-- バージョン情報メニュー -->
-				<MenuFlyoutItem x:Uid="mfi_about_this" Click="about_graph_paper_click" Text="About GraphPaper" />
+				<MenuFlyoutItem 
+					x:Uid="mfi_about_this" Click="about_graph_paper_click"
+					Text="About GraphPaper" />
 			</muxc:MenuBarItem>
 		</muxc:MenuBar>
 		<!-- 文字列検索パネル -->
@@ -892,22 +934,14 @@
 		<!-- 表示パネル -->
 		<RelativePanel Grid.Row="1" Grid.Column="0" >
 			<SwapChainPanel
-				x:Name="scp_page_panel"
-				CompositionScaleChanged="page_panel_scale_changed"
-				Loading="page_panel_loading"
-				Loaded="page_panel_loaded"
-				KeyboardAcceleratorPlacementMode="Hidden"
-				PointerCanceled="event_canceled"
-				PointerEntered="event_entered"
-				PointerExited="event_exited"
-				PointerMoved="event_moved"
-				PointerPressed="event_pressed"
-				PointerReleased="event_released"
-				PointerWheelChanged="event_wheel_changed"
-				RelativePanel.AlignLeftWithPanel="True"
-				RelativePanel.AlignTopWithPanel="True"
-				RelativePanel.AlignRightWithPanel="True"
-				RelativePanel.AlignBottomWithPanel="True"
+				x:Name="scp_page_panel" CompositionScaleChanged="page_panel_scale_changed"
+				KeyboardAcceleratorPlacementMode="Hidden" Loading="page_panel_loading"
+				Loaded="page_panel_loaded" PointerCanceled="event_canceled"
+                PointerEntered="event_entered" PointerExited="event_exited"
+                PointerMoved="event_moved" PointerPressed="event_pressed"
+				PointerReleased="event_released" PointerWheelChanged="event_wheel_changed"
+				RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True"
+				RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True"
 				SizeChanged="page_panel_size_changed">
 				<!--
 				通常は, MenuFlyoutItem でキーボードアクセラレータを指定すべきだが,
@@ -976,7 +1010,10 @@
 		<!-- 文字列入力ダイアログ -->
 		<ContentDialog x:Name="cd_edit_text_dialog" x:Uid="cd_edit_text_dialog" DefaultButton="Primary" CloseButtonText="Cancel" PrimaryButtonText="Ok">
 			<StackPanel>
-				<TextBox x:Name="tx_edit_text" AcceptsReturn="True" Height="128" HorizontalAlignment="Stretch" PlaceholderText="Text" ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+				<TextBox
+					x:Name="tx_edit_text" AcceptsReturn="True" Height="128"
+					HorizontalAlignment="Stretch" PlaceholderText="Text"
+					ScrollViewer.VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
 				<CheckBox x:Name="ck_text_fit_frame_to_text" x:Uid="ck_text_fit_frame_to_text" Content="Fit Frame Size to Text" Margin="4,4" />
 			</StackPanel>
 		</ContentDialog>
@@ -1004,12 +1041,56 @@
 			</StackPanel>
 		</ContentDialog>
 		<!-- 表示の大きさ入力ダイアログ -->
-		<ContentDialog x:Name="cd_page_size_dialog" x:Uid="cd_page_size_dialog" CloseButtonText="Close" DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
-			<StackPanel >
-				<TextBox x:Name="tx_page_width" x:Uid="tx_page_width" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width" TextChanged="page_size_text_changed" />
-				<TextBox x:Name="tx_page_height" x:Uid="tx_page_height" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height" TextChanged="page_size_text_changed" />
-				<TextBox x:Name="tx_page_size_max" x:Uid="tx_page_size_max" Margin="0,0,0,4" HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Maximum Page Size" IsEnabled="false" />
-			</StackPanel>
+		<ContentDialog
+			x:Name="cd_page_size_dialog" x:Uid="cd_page_size_dialog" CloseButtonText="Close"
+			DefaultButton="Close" PrimaryButtonText="Apply" SecondaryButtonText="Adjust to Shapes">
+			<StackPanel>
+				<TextBox
+					x:Name="tx_page_size_width" x:Uid="tx_page_size_width" Margin="0,0,0,12"
+					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Width"
+					PlaceholderText="Must be between 1 and 32767."
+					TextChanged="page_size_text_changed" />
+				<TextBox
+					x:Name="tx_page_size_height" x:Uid="tx_page_size_height" Margin="0,0,0,12"
+					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Height"
+					PlaceholderText="Must be between 1 and 32767."
+					TextChanged="page_size_text_changed" />
+				<TextBox
+					x:Name="tx_page_padd_left" x:Uid="tx_page_padd_left" Margin="0,0,0,12"
+					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Left Padding"
+					PlaceholderText="Must be between 0 and 32767."
+					TextChanged="page_size_text_changed" />
+				<TextBox
+					x:Name="tx_page_padd_top" x:Uid="tx_page_padd_top" Margin="0,0,0,12"
+					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Top Padding"
+					PlaceholderText="Must be between 0 and 32767."
+					TextChanged="page_size_text_changed" />
+				<TextBox
+					x:Name="tx_page_padd_right" x:Uid="tx_page_padd_right" Margin="0,0,0,12"
+					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Right Padding"
+					PlaceholderText="Must be between 0 and 32767."
+					TextChanged="page_size_text_changed" />
+				<TextBox
+					x:Name="tx_page_padd_bottom" x:Uid="tx_page_padd_bottom" Margin="0,0,0,12"
+					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Bottom Padding"
+					PlaceholderText="Must be between 0 and 32767."
+					TextChanged="page_size_text_changed" />
+                <ComboBox
+					x:Name="cb_len_unit" x:Uid="cb_len_unit" Header="Length Unit" Margin="0,0,0,12"
+					SelectionChanged="len_unit_selection_changed">
+                    <ComboBoxItem 
+						x:Name="cbi_len_unit_pixel" x:Uid="cbi_len_unit_pixel" Content="Pixel"
+						IsSelected="True"/>
+                    <ComboBoxItem 
+						x:Name="cbi_len_unit_inch" x:Uid="cbi_len_unit_inch" Content="Inch"/>
+                    <ComboBoxItem 
+						x:Name="cbi_len_unit_milli" x:Uid="cbi_len_unit_milli" Content="Millimeter"/>
+                    <ComboBoxItem
+						x:Name="cbi_len_unit_point" x:Uid="cbi_len_unit_point" Content="Point"/>
+                    <ComboBoxItem
+						x:Name="cbi_len_unit_grid" x:Uid="cbi_len_unit_grid" Content="Grid" />
+                </ComboBox>
+            </StackPanel>
 		</ContentDialog>
 		<!-- 頂点をくっつける閾値 -->
 		<ContentDialog
@@ -1033,7 +1114,7 @@
 					BorderBrush="{ThemeResource ButtonBackgroundThemeBrush}" BorderThickness="1"
 					CornerRadius="1" Padding="1"
 					CompositionScaleChanged="dialog_panel_scale_changed" Height="170"
-					Loaded="dialog_panel_loaded" Margin="0,0,0,8" MaxHeight="170" MaxWidth="170"
+					Loaded="dialog_panel_loaded" Margin="0,0,0,12" MaxHeight="170" MaxWidth="170"
 					RelativePanel.AlignTopWithPanel="True" 
 					RelativePanel.AlignHorizontalCenterWithPanel="True"
 					SizeChanged="dialog_panel_size_changed" Width="170"

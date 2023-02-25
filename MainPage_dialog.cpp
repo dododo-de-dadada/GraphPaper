@@ -39,7 +39,8 @@ namespace winrt::GraphPaper::implementation
 	// 設定ダイアログのスライダーヘッダーに文字列を格納する.
 	// S	スライダーの番号
 	// text	文字列
-	template<int S> void MainPage::dialog_set_slider_header(const winrt::hstring& text)
+	template<int S> 
+	void MainPage::dialog_set_slider_header(const winrt::hstring& text)
 	{
 		if constexpr (S == 0) {
 			dialog_slider_0().Header(box_value(text));
@@ -97,9 +98,14 @@ namespace winrt::GraphPaper::implementation
 		Shape::m_d2d_color_brush->SetColor(m_dialog_page.m_page_color);
 		m_dialog_d2d.m_d2d_context->FillRectangle(w_rect, Shape::m_d2d_color_brush.get());
 
-		const float offset = static_cast<FLOAT>(std::fmod(m_dialog_page.m_page_size.width * 0.5, m_dialog_page.m_grid_base + 1.0));
+		const float offset = static_cast<FLOAT>(std::fmod(
+			m_dialog_page.m_page_size.width * 0.5, m_dialog_page.m_grid_base + 1.0));
 		m_dialog_page.m_grid_offset.x = offset;
 		m_dialog_page.m_grid_offset.y = offset;
+		m_dialog_page.m_page_padding.left = 0.0f;
+		m_dialog_page.m_page_padding.top = 0.0f;
+		m_dialog_page.m_page_padding.right = 0.0f;
+		m_dialog_page.m_page_padding.bottom = 0.0f;
 		m_dialog_page.draw();
 		const auto hr = m_dialog_d2d.m_d2d_context->EndDraw();
 		m_dialog_d2d.m_d2d_context->RestoreDrawingState(Shape::m_d2d_state_block.get());

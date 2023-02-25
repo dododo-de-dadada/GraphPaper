@@ -133,6 +133,9 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_ID::PAGE_SIZE:
 			u = new UndoValue<UNDO_ID::PAGE_SIZE>(dt_reader);
 			break;
+		case UNDO_ID::PAGE_PADD:
+			u = new UndoValue<UNDO_ID::PAGE_PADD>(dt_reader);
+			break;
 		case UNDO_ID::MOVE:
 			u = new UndoValue<UNDO_ID::MOVE>(dt_reader);
 			break;
@@ -589,6 +592,7 @@ namespace winrt::GraphPaper::implementation
 	template bool MainPage::ustack_push_set<UNDO_ID::JOIN_STYLE>(D2D1_LINE_JOIN const& val);
 	template void MainPage::ustack_push_set<UNDO_ID::PAGE_COLOR>(Shape* const s, D2D1_COLOR_F const& val);
 	template void MainPage::ustack_push_set<UNDO_ID::PAGE_SIZE>(Shape* const s, D2D1_SIZE_F const& val);
+	template void MainPage::ustack_push_set<UNDO_ID::PAGE_PADD>(Shape* const s, D2D1_RECT_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_CAP>(CAP_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_COLOR>(D2D1_COLOR_F const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::STROKE_WIDTH>(float const& val);

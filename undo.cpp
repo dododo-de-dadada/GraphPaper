@@ -250,6 +250,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::MOVE>::UndoValue(Shape* s, const D2D1_POINT_2F& val);
 	template UndoValue<UNDO_ID::PAGE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
+	template UndoValue<UNDO_ID::PAGE_PADD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
 	template UndoValue<UNDO_ID::POLY_END>::UndoValue(Shape* s, const bool &val);
 	template UndoValue<UNDO_ID::ROTATION>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
@@ -299,7 +300,9 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_ID::FONT_COLOR ||
 			U == UNDO_ID::GRID_COLOR ||
 			U == UNDO_ID::PAGE_COLOR ||
-			U == UNDO_ID::STROKE_COLOR) {
+			U == UNDO_ID::STROKE_COLOR ||
+			U == UNDO_ID::PAGE_PADD
+			) {
 			m_value = U_TYPE<U>::type{
 				dt_reader.ReadSingle(),
 				dt_reader.ReadSingle(),
@@ -391,6 +394,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::MOVE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::PAGE_PADD>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::POLY_END>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::ROTATION>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(DataReader const& dt_reader);
@@ -517,6 +521,11 @@ namespace winrt::GraphPaper::implementation
 	void UndoValue<UNDO_ID::PAGE_SIZE>::SET(Shape* const s, const D2D1_SIZE_F& val)
 	{
 		s->set_page_size(val);
+	}
+
+	void UndoValue<UNDO_ID::PAGE_PADD>::SET(Shape* const s, const D2D1_RECT_F& val)
+	{
+		s->set_page_padding(val);
 	}
 
 	void UndoValue<UNDO_ID::POLY_END>::SET(Shape* const s, const bool& val)
@@ -689,6 +698,11 @@ namespace winrt::GraphPaper::implementation
 		return s->get_page_size(val);
 	}
 
+	bool UndoValue<UNDO_ID::PAGE_PADD>::GET(const Shape* s, D2D1_RECT_F& val) noexcept
+	{
+		return s->get_page_padding(val);
+	}
+
 	bool UndoValue<UNDO_ID::POLY_END>::GET(const Shape* s, bool& val) noexcept
 	{
 		return s->get_poly_end(val);
@@ -801,6 +815,12 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(static_cast<D2D1_COLOR_F>(m_value).g);
 			dt_writer.WriteSingle(static_cast<D2D1_COLOR_F>(m_value).b);
 			dt_writer.WriteSingle(static_cast<D2D1_COLOR_F>(m_value).a);
+		}
+		else if constexpr (U == UNDO_ID::PAGE_PADD) {
+			dt_writer.WriteSingle(static_cast<D2D1_RECT_F>(m_value).left);
+			dt_writer.WriteSingle(static_cast<D2D1_RECT_F>(m_value).top);
+			dt_writer.WriteSingle(static_cast<D2D1_RECT_F>(m_value).right);
+			dt_writer.WriteSingle(static_cast<D2D1_RECT_F>(m_value).bottom);
 		}
 		else if constexpr (
 			U == UNDO_ID::FONT_FAMILY ||

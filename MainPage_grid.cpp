@@ -18,8 +18,6 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	//constexpr float SLIDER_STEP = 0.5f;
-	constexpr wchar_t TITLE_GRID[] = L"str_grid";
-
 	// 方眼メニューの「方眼の強調」が選択された.
 	void MainPage::grid_emph_click(IInspectable const& sender, RoutedEventArgs const&)
 	{
@@ -95,7 +93,7 @@ namespace winrt::GraphPaper::implementation
 		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 2> });
 		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 3> });
 
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_grid_color")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -137,7 +135,7 @@ namespace winrt::GraphPaper::implementation
 		//const auto samp_w = scp_dialog_panel().Width();
 		//const auto samp_h = scp_dialog_panel().Height();
 
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_GRID)));
+		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_grid_length")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

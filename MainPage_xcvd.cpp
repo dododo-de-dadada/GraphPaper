@@ -24,10 +24,11 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats;
 
 	const winrt::param::hstring CLIPBOARD_FORMAT_SHAPES{ L"graph_paper_shapes_data" };	// 図形データのクリップボード書式
-	//const winrt::param::hstring CLIPBOARD_TIFF{ L"TaggedImageFileFormat" };	// TIFF のクリップボード書式 (Windows10 ではたぶん使われない)
 
 	// 貼り付ける位置を求める.
-	static void xcvd_paste_pos(D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len, const float vert_stick);
+	static void xcvd_paste_pos(
+		D2D1_POINT_2F& pos, const SHAPE_LIST& slist, const double grid_len,
+		const float vert_stick);
 
 	//------------------------------
 	// 編集メニューの「コピー」が選択された.
@@ -53,7 +54,8 @@ namespace winrt::GraphPaper::implementation
 					InMemoryRandomAccessStream img_stream{
 						InMemoryRandomAccessStream()
 					};
-					const bool ret = co_await static_cast<ShapeImage*>(*it)->copy<false>(BitmapEncoder::BmpEncoderId(), img_stream);
+					const bool ret = co_await static_cast<ShapeImage*>(*it)->copy<false>(
+						BitmapEncoder::BmpEncoderId(), img_stream);
 					if (ret && img_stream.Size() > 0) {
 						img_ref = RandomAccessStreamReference::CreateFromStream(img_stream);
 					}
@@ -255,14 +257,14 @@ namespace winrt::GraphPaper::implementation
 				status_bar_set_pos();
 				return;
 			}
-			// クリップボードにテキストが含まれているか判定する.
+			// クリップボードに文字列が含まれているか判定する.
 			else if (dp_view.Contains(StandardDataFormats::Text())) {
 				xcvd_paste_text();
 				status_bar_set_pos();
 				return;
 			}
-			// クリップボードに画像が含まれているか判定する.
-			else if (dp_view.Contains(StandardDataFormats::Bitmap())) {// || dp_view.Contains(CLIPBOARD_TIFF)) {
+			// クリップボードにビットマップが含まれているか判定する.
+			else if (dp_view.Contains(StandardDataFormats::Bitmap())) {
 				xcvd_paste_image();
 				status_bar_set_pos();
 				return;
@@ -295,10 +297,19 @@ namespace winrt::GraphPaper::implementation
 		co_await winrt::resume_background();
 
 		// クリップボードからビットマップ SoftwareBitmap を取り出す.
-		RandomAccessStreamReference reference{ co_await Clipboard::GetContent().GetBitmapAsync() };
-		IRandomAccessStreamWithContentType stream{ co_await reference.OpenReadAsync() };
-		BitmapDecoder bmp_dec{ co_await BitmapDecoder::CreateAsync(stream) };
-		SoftwareBitmap bmp{ co_await bmp_dec.GetSoftwareBitmapAsync(BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight) };
+		RandomAccessStreamReference reference{
+			co_await Clipboard::GetContent().GetBitmapAsync()
+		};
+		IRandomAccessStreamWithContentType stream{
+			co_await reference.OpenReadAsync()
+		};
+		BitmapDecoder bmp_dec{
+			co_await BitmapDecoder::CreateAsync(stream)
+		};
+		SoftwareBitmap bmp{
+			co_await bmp_dec.GetSoftwareBitmapAsync(
+				BitmapPixelFormat::Bgra8, BitmapAlphaMode::Straight)
+		};
 
 		// ウィンドウの真ん中に表示されるよう位置を求める.
 		// 図形の大きさは元画像と同じにする.
@@ -383,7 +394,8 @@ namespace winrt::GraphPaper::implementation
 			};
 			// データリーダーに読み込めたか判定する.
 			if (operation == ra_size) {
-				// 図形のためのメモリの確保が別スレッドで行われた場合, D2DERR_WRONG_STATE を引き起こすことがある.
+				// 図形のためのメモリの確保が別スレッドで行われた場合, 
+				// D2DERR_WRONG_STATE を引き起こすことがある.
 				// 図形を貼り付ける前に, スレッドをメインページの UI スレッドに変える.
 				co_await winrt::resume_foreground(Dispatcher());
 				// データリーダーから貼り付けリストを読み込み, それが空でないか判定する.
@@ -436,13 +448,17 @@ namespace winrt::GraphPaper::implementation
 			const float scale = m_main_page.m_page_scale;
 			const float win_x = static_cast<float>(sb_horz().Value()) / scale;	// ページの表示されている左位置
 			const float win_y = static_cast<float>(sb_vert().Value()) / scale;	// ページの表示されている上位置
-			const float win_w = min(static_cast<float>(scp_page_panel().ActualWidth()) / scale, m_main_page.m_page_size.width); // ページの表示されている幅
-			const float win_h = min(static_cast<float>(scp_page_panel().ActualHeight()) / scale, m_main_page.m_page_size.height); // ページの表示されている高さ
+			const float win_w = min(static_cast<float>(scp_page_panel().ActualWidth()) / scale,
+				m_main_page.m_page_size.width); // ページの表示されている幅
+			const float win_h = min(static_cast<float>(scp_page_panel().ActualHeight()) / scale,
+				m_main_page.m_page_size.height); // ページの表示されている高さ
 			const float lt_x = m_main_bbox_lt.x;
 			const float lt_y = m_main_bbox_lt.y;
 			const double g_len = (m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0 : 0.0);
 			const float v_stick = m_vert_stick / scale;
-			ShapeText* t = new ShapeText(D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h }, wchar_cpy(text.c_str()), &m_main_page);
+			ShapeText* t = new ShapeText(
+				D2D1_POINT_2F{ 0.0f, 0.0f }, D2D1_POINT_2F{ win_w, win_h },
+				wchar_cpy(text.c_str()), &m_main_page);
 #if (_DEBUG)
 			debug_leak_cnt++;
 #endif

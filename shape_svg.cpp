@@ -682,7 +682,7 @@ namespace winrt::GraphPaper::implementation
 		h_start.x = 0.0f;
 		v_end.y = g_size.height;
 		h_end.x = g_size.width;
-		const double grid_len = max(m_grid_base + 1.0, 1.0);
+		const double g_len = max(m_grid_base + 1.0, 1.0);
 
 		wchar_t buf[1024];
 		dt_writer.WriteString(L"<!-- Grids -->\n");
@@ -697,7 +697,7 @@ namespace winrt::GraphPaper::implementation
 		float gw;
 		double x;
 		for (uint32_t i = 0;
-			(x = round((grid_len * i + m_grid_offset.x) / PT_ROUND) * PT_ROUND) < sw; i++) {
+			(x = round((g_len * i + m_grid_offset.x) / PT_ROUND) * PT_ROUND) <= sw; i++) {
 			if (m_grid_emph.m_gauge_2 != 0 && (i % m_grid_emph.m_gauge_2) == 0) {
 				gw = 2.0F * g_width;
 			}
@@ -720,7 +720,7 @@ namespace winrt::GraphPaper::implementation
 		// …•½‚È•ûŠá‚ð•\Ž¦‚·‚é.
 		double y;
 		for (uint32_t i = 0;
-			(y = round((grid_len * i + m_grid_offset.y) / PT_ROUND) * PT_ROUND) < sh; i++) {
+			(y = round((g_len * i + m_grid_offset.y) / PT_ROUND) * PT_ROUND) <= sh; i++) {
 			if (m_grid_emph.m_gauge_2 != 0 && (i % m_grid_emph.m_gauge_2) == 0) {
 				gw = 2.0F * g_width;
 			}

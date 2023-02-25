@@ -13,8 +13,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-	constexpr wchar_t TITLE_ARROWHEAD[] = L"str_arrow_size";
-
 	//------------------------------
 	// 値をスライダーのヘッダーに格納する.
 	// U	操作の識別子
@@ -31,23 +29,12 @@ namespace winrt::GraphPaper::implementation
 				L"str_arrow_offset"
 			};
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
-			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf;
+			conv_len_to_str<LEN_UNIT_SHOW>(
+				m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
+			const winrt::hstring text{
+				ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf
+			};
 			dialog_set_slider_header<S>(text);
-			/*
-			if constexpr (S == 0) {
-				dialog_slider_0().Header(box_value(text));
-			}
-			if constexpr (S == 1) {
-				dialog_slider_1().Header(box_value(text));
-			}
-			if constexpr (S == 2) {
-				dialog_slider_2().Header(box_value(text));
-			}
-			if constexpr (S == 3) {
-				dialog_slider_3().Header(box_value(text));
-			}
-			*/
 		}
 	}
 
@@ -57,7 +44,9 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	//------------------------------
-	template <UNDO_ID U, int S> void MainPage::arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <UNDO_ID U, int S>
+	void MainPage::arrow_slider_val_changed(
+		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		// 値をスライダーのヘッダーに格納する.
 		if constexpr (U == UNDO_ID::ARROW_SIZE) {
@@ -128,13 +117,16 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().Value(a_size.m_offset);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		const winrt::event_token ds0_tok{
-			dialog_slider_0().ValueChanged({ this, &MainPage::arrow_slider_val_changed<UNDO_ID::ARROW_SIZE, 0> })
+			dialog_slider_0().ValueChanged(
+				{ this, &MainPage::arrow_slider_val_changed<UNDO_ID::ARROW_SIZE, 0> })
 		};
 		const winrt::event_token ds1_tok{
-			dialog_slider_1().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_ID::ARROW_SIZE, 1> })
+			dialog_slider_1().ValueChanged(
+				{ this, &MainPage::arrow_slider_val_changed< UNDO_ID::ARROW_SIZE, 1> })
 		};
 		const winrt::event_token ds2_tok{
-			dialog_slider_2().ValueChanged({ this, &MainPage::arrow_slider_val_changed< UNDO_ID::ARROW_SIZE, 2> })
+			dialog_slider_2().ValueChanged(
+				{ this, &MainPage::arrow_slider_val_changed< UNDO_ID::ARROW_SIZE, 2> })
 		};
 		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 0>(a_size.m_width);
 		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 1>(a_size.m_length);
@@ -153,7 +145,8 @@ namespace winrt::GraphPaper::implementation
 		debug_leak_cnt++;
 #endif
 
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_ARROWHEAD)));
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arrow_size")));
 		m_mutex_event.lock();
 		const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

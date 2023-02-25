@@ -1054,7 +1054,7 @@ namespace winrt::GraphPaper::implementation
 		float gw;
 		double x;
 		for (uint32_t i = 0;
-			(x = round((grid_len * i + grid_offset.x) / PT_ROUND) * PT_ROUND) < w; i++) {
+			(x = round((grid_len * i + grid_offset.x) / PT_ROUND) * PT_ROUND) <= w; i++) {
 			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
 				gw = 2.0F * g_width;
 			}
@@ -1077,7 +1077,7 @@ namespace winrt::GraphPaper::implementation
 		// …•½‚È•ûŠá‚ð•\Ž¦‚·‚é.
 		double y;
 		for (uint32_t i = 0; 
-			(y = round((grid_len * i + grid_offset.y) / PT_ROUND) * PT_ROUND) < h; i++) {
+			(y = round((grid_len * i + grid_offset.y) / PT_ROUND) * PT_ROUND) <= h; i++) {
 			if (grid_emph.m_gauge_2 != 0 && (i % grid_emph.m_gauge_2) == 0) {
 				gw = 2.0F * g_width;
 			}

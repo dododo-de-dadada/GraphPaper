@@ -71,7 +71,7 @@ namespace winrt::GraphPaper::implementation
 			swprintf_s(t_buf, t_len, L"%.4lf", c_val / COLOR_MAX);
 		}
 		// 色の表記がパーセントか判定する.
-		else if (c_code == COLOR_CODE::CENT) {
+		else if (c_code == COLOR_CODE::PCT) {
 			swprintf_s(t_buf, t_len, L"%.1lf%%", c_val * 100.0 / COLOR_MAX);
 		}
 		else {
@@ -89,7 +89,9 @@ namespace winrt::GraphPaper::implementation
 	// t_len	文字列の最大長 ('\0' を含む長さ)
 	// t_buf	文字列の配列
 	//-------------------------------
-	template <bool B> void conv_len_to_str(const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len, const uint32_t t_len, wchar_t *t_buf) noexcept
+	template <bool B> void conv_len_to_str(
+		const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len,
+		const uint32_t t_len, wchar_t *t_buf) noexcept
 	{
 		// 長さの単位がピクセルか判定する.
 		if (len_unit == LEN_UNIT::PIXEL) {
@@ -142,10 +144,43 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 長さを文字列に変換する (単位なし).
-	template void conv_len_to_str<LEN_UNIT_HIDE>(const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
+	template void conv_len_to_str<LEN_UNIT_HIDE>(
+		const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len,
+		const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さを文字列に変換する (単位つき).
-	template void conv_len_to_str<LEN_UNIT_SHOW>(const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len, const uint32_t t_len, wchar_t* t_buf) noexcept;
+	template void conv_len_to_str<LEN_UNIT_SHOW>(
+		const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len,
+		const uint32_t t_len, wchar_t* t_buf) noexcept;
+
+	// 長さををピクセル単位の値に変換する.
+// 変換された値は, 0.5 ピクセル単位に丸められる.
+// l_unit	長さの単位
+// l_val	長さの値
+// dpi	DPI
+// g_len	方眼の大きさ
+// 戻り値	ピクセル単位の値
+	double conv_len_to_val(const LEN_UNIT l_unit, const double l_val, const double dpi, const double g_len) noexcept
+	{
+		double ret;
+
+		if (l_unit == LEN_UNIT::INCH) {
+			ret = l_val * dpi;
+		}
+		else if (l_unit == LEN_UNIT::MILLI) {
+			ret = l_val * dpi / MM_PER_INCH;
+		}
+		else if (l_unit == LEN_UNIT::POINT) {
+			ret = l_val * dpi / PT_PER_INCH;
+		}
+		else if (l_unit == LEN_UNIT::GRID) {
+			ret = l_val * g_len;
+		}
+		else {
+			ret = l_val;
+		}
+		return std::round(2.0 * ret) * 0.5;
+	}
 
 	//-------------------------------
 	// メインページを作成する.
