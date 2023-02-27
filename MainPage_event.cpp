@@ -191,8 +191,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 図形を囲む領域の左上位置, 右下位置を得る.
 			s->get_bound(
-				D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX },
-				p[0], p[1]);
+				D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, p[0], 
+				p[1]);
 			const auto p_cnt = s->get_verts(p + 2);
 			for (size_t i = 0; i < 2 + p_cnt; i++) {
 				pt_round(p[i], g_len, g);
@@ -214,7 +214,7 @@ namespace winrt::GraphPaper::implementation
 	// 最も近い頂点を得る.
 	// slist	図形リスト
 	// limit	制限距離 (これ以上離れた頂点は対象としない)
-	// v_pos	最も近い頂点間の位置ベクトル
+	// v_pos	最も近い頂点への位置ベクトル
 	// 戻り値	見つかったなら true
 	//------------------------------
 	static bool event_get_nearby_vertex(
@@ -411,7 +411,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 図形の作成を終了する.
 	// start	始点
-	// pos	終点への位置ベクトル
+	// pos	対角点への位置ベクトル
 	//------------------------------
 	void MainPage::event_finish_creating(const D2D1_POINT_2F start, const D2D1_POINT_2F pos)
 	{
@@ -440,7 +440,7 @@ namespace winrt::GraphPaper::implementation
 			s = new ShapeRuler(start, pos, &m_main_page);
 		}
 		else if (d_tool == DRAWING_TOOL::QELLIPSE) {
-			s = new ShapeQEllipse(start, pos, 0.0f, &m_main_page);
+			s = new ShapeQEllipse(start, pos, &m_main_page);
 		}
 		else {
 			return;
@@ -468,7 +468,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 文字列図形の作成を終了する.
 	// start	始点
-	// pos	終点への位置ベクトル
+	// pos	対角点への位置ベクトル
 	//------------------------------
 	IAsyncAction MainPage::event_finish_creating_text_async(
 		const D2D1_POINT_2F start, const D2D1_POINT_2F pos)
@@ -569,9 +569,9 @@ namespace winrt::GraphPaper::implementation
 
 		// 方眼にくっつける, かつ頂点にくっつける.
 		if (g_snap && v_stick >= FLT_MIN) {
-			D2D1_POINT_2F pos{};	// 位置ベクトル
+			D2D1_POINT_2F pos{};	// 近傍への位置ベクトル
 			if (event_get_nearby_grid(m_main_page.m_shape_list, g_base + 1.0f, pos)) {
-				D2D1_POINT_2F v_pos{};	// 頂点への差分
+				D2D1_POINT_2F v_pos{};	// 頂点への位置ベクトル
 				if (event_get_nearby_vertex(
 					m_main_page.m_shape_list, v_stick / p_scale, v_pos) &&
 					pt_abs2(v_pos) < pt_abs2(pos)) {
@@ -692,7 +692,7 @@ namespace winrt::GraphPaper::implementation
 			// 長さがクリック判定距離を超えるか判定する.
 			const auto raw_dpi = DisplayInformation::GetForCurrentView().RawDpiX();
 			const auto log_dpi = DisplayInformation::GetForCurrentView().LogicalDpi();
-			D2D1_POINT_2F pos;	// 位置ベクトル
+			D2D1_POINT_2F pos;	// 近傍への位置ベクトル
 			pt_sub(m_event_pos_curr, m_event_pos_pressed, pos);
 			if (pt_abs2(pos) * m_main_page.m_page_scale > m_event_click_dist * raw_dpi / log_dpi) {
 				// 初期状態に戻る.
@@ -1126,7 +1126,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				switch (anc) {
-				case ANC_TYPE::ANC_CENTER:
+				case ANC_TYPE::ANC_A_CENTER:
 				case ANC_TYPE::ANC_R_NW:
 				case ANC_TYPE::ANC_R_NE:
 				case ANC_TYPE::ANC_R_SE:
@@ -1164,7 +1164,7 @@ namespace winrt::GraphPaper::implementation
 							) {
 							// 図形の部位が, 頂点の数を超えないか判定する.
 							if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 +
-								static_cast<ShapePath*>(s)->m_vec.size() + 1) {
+								static_cast<ShapePath*>(s)->m_pos.size() + 1) {
 								Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 								break;
 							}

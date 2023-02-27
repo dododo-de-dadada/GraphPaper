@@ -165,23 +165,25 @@ namespace winrt::GraphPaper::implementation
 		POINT,	// ポイント
 		GRID	// 方眼 (グリッド)
 	};
-	constexpr bool LEN_UNIT_SHOW = true;	// 単位名の表示
-	constexpr bool LEN_UNIT_HIDE = false;	// 単位名の非表示
+	constexpr bool LEN_UNIT_NAME_APPEND = true;	// 単位名を付加する
+	constexpr bool LEN_UNIT_NAME_NOT_APPEND = false;	// 単位名を付加しない
 
-	// 長さを文字列に変換する.
+	// ピクセル長さをある単位の文字列に変換する.
 	template <bool B> void conv_len_to_str(
-		const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len,
+		const LEN_UNIT len_unit, const double val, const double dpi, const double g_len,
 		const uint32_t t_len, wchar_t* t_buf) noexcept;
 
+	// ピクセル長さをある単位の文字列に変換する.
 	template <bool B, size_t Z> inline void conv_len_to_str(
-		const LEN_UNIT len_unit, const float val_pixel, const float dpi, const float g_len,
+		const LEN_UNIT len_unit, const double val, const double dpi, const double g_len,
 		wchar_t(&t_buf)[Z]) noexcept
 	{
-		conv_len_to_str<B>(len_unit, val_pixel, dpi, g_len, Z, t_buf);
+		conv_len_to_str<B>(len_unit, val, dpi, g_len, Z, t_buf);
 	}
 
-	double conv_len_to_val(
-		const LEN_UNIT l_unit, const double l_val, const double dpi, const double g_len) noexcept;
+	// ある長さをピクセル単位の長さに変換する.
+	double conv_len_to_pixel(
+		const LEN_UNIT l_unit, const double val, const double dpi, const double g_len) noexcept;
 
 	//-------------------------------
 	// メッセージダイアログのアイコン

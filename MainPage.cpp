@@ -19,17 +19,17 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Window;
 
 	// 書式文字列
-	constexpr auto FMT_INCH = L"%.3f";	// インチ単位の書式
-	constexpr auto FMT_INCH_UNIT = L"%.3f \u33CC";	// インチ単位の書式
-	constexpr auto FMT_MILLI = L"%.3f";	// ミリメートル単位の書式
-	constexpr auto FMT_MILLI_UNIT = L"%.3f \u339C";	// ミリメートル単位の書式
-	constexpr auto FMT_POINT = L"%.2f";	// ポイント単位の書式
-	constexpr auto FMT_POINT_UNIT = L"%.2f pt";	// ポイント単位の書式
-	constexpr auto FMT_PIXEL = L"%.1f";	// ピクセル単位の書式
-	constexpr auto FMT_PIXEL_UNIT = L"%.1f px";	// ピクセル単位の書式
-	constexpr auto FMT_ZOOM = L"%.f%%";	// 倍率の書式
-	constexpr auto FMT_GRID = L"%.3f";	// グリッド単位の書式
-	constexpr auto FMT_GRID_UNIT = L"%.3f gd";	// グリッド単位の書式
+	constexpr auto FMT_INCH = L"%.3lf";	// インチ単位の書式
+	constexpr auto FMT_INCH_UNIT = L"%.3lf \u33CC";	// インチ単位の書式
+	constexpr auto FMT_MILLI = L"%.3lf";	// ミリメートル単位の書式
+	constexpr auto FMT_MILLI_UNIT = L"%.3lf \u339C";	// ミリメートル単位の書式
+	constexpr auto FMT_POINT = L"%.2lf";	// ポイント単位の書式
+	constexpr auto FMT_POINT_UNIT = L"%.2lf pt";	// ポイント単位の書式
+	constexpr auto FMT_PIXEL = L"%.1lf";	// ピクセル単位の書式
+	constexpr auto FMT_PIXEL_UNIT = L"%.1lf px";	// ピクセル単位の書式
+	constexpr auto FMT_ZOOM = L"%.lf%%";	// 倍率の書式
+	constexpr auto FMT_GRID = L"%.3lf";	// グリッド単位の書式
+	constexpr auto FMT_GRID_UNIT = L"%.3lf g";	// グリッド単位の書式
 	static const auto& CURS_WAIT = CoreCursor(CoreCursorType::Wait, 0);	// 左右カーソル
 
 	//-------------------------------
@@ -90,52 +90,52 @@ namespace winrt::GraphPaper::implementation
 	// t_buf	文字列の配列
 	//-------------------------------
 	template <bool B> void conv_len_to_str(
-		const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len,
+		const LEN_UNIT len_unit, const double val, const double dpi, const double g_len,
 		const uint32_t t_len, wchar_t *t_buf) noexcept
 	{
 		// 長さの単位がピクセルか判定する.
 		if (len_unit == LEN_UNIT::PIXEL) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_PIXEL_UNIT, len_val);
+				swprintf_s(t_buf, t_len, FMT_PIXEL_UNIT, val);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_PIXEL, len_val);
+				swprintf_s(t_buf, t_len, FMT_PIXEL, val);
 			}
 		}
 		// 長さの単位がインチか判定する.
 		else if (len_unit == LEN_UNIT::INCH) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_INCH_UNIT, len_val / dpi);
+				swprintf_s(t_buf, t_len, FMT_INCH_UNIT, val / dpi);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_INCH, len_val / dpi);
+				swprintf_s(t_buf, t_len, FMT_INCH, val / dpi);
 			}
 		}
 		// 長さの単位がミリメートルか判定する.
 		else if (len_unit == LEN_UNIT::MILLI) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_MILLI_UNIT, len_val * MM_PER_INCH / dpi);
+				swprintf_s(t_buf, t_len, FMT_MILLI_UNIT, val * MM_PER_INCH / dpi);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_MILLI, len_val * MM_PER_INCH / dpi);
+				swprintf_s(t_buf, t_len, FMT_MILLI, val * MM_PER_INCH / dpi);
 			}
 		}
 		// 長さの単位がポイントか判定する.
 		else if (len_unit == LEN_UNIT::POINT) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_POINT_UNIT, len_val * PT_PER_INCH / dpi);
+				swprintf_s(t_buf, t_len, FMT_POINT_UNIT, val * PT_PER_INCH / dpi);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_POINT, len_val * PT_PER_INCH / dpi);
+				swprintf_s(t_buf, t_len, FMT_POINT, val * PT_PER_INCH / dpi);
 			}
 		}
 		// 長さの単位が方眼か判定する.
 		else if (len_unit == LEN_UNIT::GRID) {
 			if constexpr (B) {
-				swprintf_s(t_buf, t_len, FMT_GRID_UNIT, len_val / g_len);
+				swprintf_s(t_buf, t_len, FMT_GRID_UNIT, val / g_len);
 			}
 			else {
-				swprintf_s(t_buf, t_len, FMT_GRID, len_val / g_len);
+				swprintf_s(t_buf, t_len, FMT_GRID, val / g_len);
 			}
 		}
 		else {
@@ -144,13 +144,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 長さを文字列に変換する (単位なし).
-	template void conv_len_to_str<LEN_UNIT_HIDE>(
-		const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len,
+	template void conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
+		const LEN_UNIT len_unit, const double len_val, const double dpi, const double g_len,
 		const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さを文字列に変換する (単位つき).
-	template void conv_len_to_str<LEN_UNIT_SHOW>(
-		const LEN_UNIT len_unit, const float len_val, const float dpi, const float g_len,
+	template void conv_len_to_str<LEN_UNIT_NAME_APPEND>(
+		const LEN_UNIT len_unit, const double len_val, const double dpi, const double g_len,
 		const uint32_t t_len, wchar_t* t_buf) noexcept;
 
 	// 長さををピクセル単位の値に変換する.
@@ -160,7 +160,7 @@ namespace winrt::GraphPaper::implementation
 // dpi	DPI
 // g_len	方眼の大きさ
 // 戻り値	ピクセル単位の値
-	double conv_len_to_val(const LEN_UNIT l_unit, const double l_val, const double dpi, const double g_len) noexcept
+	double conv_len_to_pixel(const LEN_UNIT l_unit, const double l_val, const double dpi, const double g_len) noexcept
 	{
 		double ret;
 

@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 			t_box.y = floor((t_box.y + g_len - 1.0f) / g_len) * g_len;
 		}
 		// 図形の大きさを変更する.
-		if (!equal(t_box, m_vec[0])) {
+		if (!equal(t_box, m_pos)) {
 			D2D1_POINT_2F se;
 			pt_add(m_start, t_box, se);
 			set_pos_anc(se, ANC_TYPE::ANC_SE, 0.0f, false);
@@ -190,8 +190,8 @@ namespace winrt::GraphPaper::implementation
 			);
 
 			// 文字列フォーマットから文字列レイアウトを作成する.
-			const double text_w = std::fabs(m_vec[0].x) - 2.0 * m_text_padding.width;
-			const double text_h = std::fabs(m_vec[0].y) - 2.0 * m_text_padding.height;
+			const double text_w = std::fabs(m_pos.x) - 2.0 * m_text_padding.width;
+			const double text_h = std::fabs(m_pos.y) - 2.0 * m_text_padding.height;
 			const UINT32 text_len = wchar_len(m_text);
 			winrt::check_hresult(dwrite_factory->CreateTextLayout(m_text, text_len, t_format.get(), static_cast<FLOAT>(max(text_w, 0.0)), static_cast<FLOAT>(max(text_h, 0.0)), m_dwrite_text_layout.put()));
 
@@ -293,8 +293,8 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			// 文字列のパディングが変更されたなら文字列レイアウトに格納する.
-			const FLOAT text_w = static_cast<FLOAT>(max(std::fabs(m_vec[0].x) - m_text_padding.width * 2.0, 0.0));
-			const FLOAT text_h = static_cast<FLOAT>(max(std::fabs(m_vec[0].y) - m_text_padding.height * 2.0, 0.0));
+			const FLOAT text_w = static_cast<FLOAT>(max(std::fabs(m_pos.x) - m_text_padding.width * 2.0, 0.0));
+			const FLOAT text_h = static_cast<FLOAT>(max(std::fabs(m_pos.y) - m_text_padding.height * 2.0, 0.0));
 			if (!equal(text_w, m_dwrite_text_layout->GetMaxWidth())) {
 				winrt::check_hresult(m_dwrite_text_layout->SetMaxWidth(text_w));
 				if (!updated) {
@@ -419,13 +419,13 @@ namespace winrt::GraphPaper::implementation
 
 			// 余白分をくわえて, 文字列の左上位置を計算する.
 			D2D1_POINT_2F t_lt;
-			pt_add(m_start, m_vec[0], t_lt);
+			pt_add(m_start, m_pos, t_lt);
 			t_lt.x = m_start.x < t_lt.x ? m_start.x : t_lt.x;
 			t_lt.y = m_start.y < t_lt.y ? m_start.y : t_lt.y;
 			const FLOAT pw = m_text_padding.width;
 			const FLOAT ph = m_text_padding.height;
-			const double hm = min(pw, fabs(m_vec[0].x) * 0.5);
-			const double vm = min(ph, fabs(m_vec[0].y) * 0.5);
+			const double hm = min(pw, fabs(m_pos.x) * 0.5);
+			const double vm = min(ph, fabs(m_pos.y) * 0.5);
 			pt_add(t_lt, hm, vm, t_lt);
 
 			// 選択された文字範囲があるなら, 背景を塗りつぶす.
@@ -621,7 +621,7 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeText::hit_test(const D2D1_POINT_2F test) const noexcept
 	{
-		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], test, m_anc_width);
+		const uint32_t anc = rect_hit_test_anc(m_start, m_pos, test, m_anc_width);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
@@ -919,12 +919,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// start	囲む領域の始点
-	// b_vec	囲む領域の終点への差分
+	// start	始点
+	// pos	対角点への位置ベクトル
 	// text	文字列
 	// page	属性
-	ShapeText::ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec, wchar_t* const text, const Shape* page) :
-		ShapeRect::ShapeRect(start, b_vec, page)
+	ShapeText::ShapeText(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, wchar_t* const text, const Shape* page) :
+		ShapeRect::ShapeRect(start, pos, page)
 	{
 		page->get_font_color(m_font_color),
 		page->get_font_family(m_font_family),

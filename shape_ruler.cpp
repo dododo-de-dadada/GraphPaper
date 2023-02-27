@@ -13,16 +13,16 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	判定する位置
 	uint32_t ShapeRuler::hit_test(const D2D1_POINT_2F t_pos) const noexcept
 	{
-		const uint32_t anc = rect_hit_test_anc(m_start, m_vec[0], t_pos, m_anc_width);
+		const uint32_t anc = rect_hit_test_anc(m_start, m_pos, t_pos, m_anc_width);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
 		if (is_opaque(m_stroke_color)) {
 			const double g_len = m_grid_base + 1.0;
 			const double f_size = m_dwrite_text_format->GetFontSize();
-			const bool x_ge_y = fabs(m_vec[0].x) >= fabs(m_vec[0].y);
-			const double vec_x = (x_ge_y ? m_vec[0].x : m_vec[0].y);
-			const double vec_y = (x_ge_y ? m_vec[0].y : m_vec[0].x);
+			const bool x_ge_y = fabs(m_pos.x) >= fabs(m_pos.y);
+			const double vec_x = (x_ge_y ? m_pos.x : m_pos.y);
+			const double vec_y = (x_ge_y ? m_pos.y : m_pos.x);
 			const double grad_x = vec_x >= 0.0 ? g_len : -g_len;
 			const double grad_y = min(f_size, g_len);
 			const uint32_t k = static_cast<uint32_t>(floor(vec_x / grad_x));
@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (is_opaque(m_fill_color)) {
 			D2D1_POINT_2F e_pos;
-			pt_add(m_start, m_vec[0], e_pos);
+			pt_add(m_start, m_pos, e_pos);
 			//D2D1_POINT_2F r_lt, r_rb;
 			//pt_bound(m_start, e_pos, r_lt, r_rb);
 			/*
@@ -168,8 +168,8 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_RECT_F rect{
 			m_start.x,
 			m_start.y,
-			m_start.x + m_vec[0].x,
-			m_start.y + m_vec[0].y
+			m_start.x + m_pos.x,
+			m_start.y + m_pos.y
 		};
 		if (is_opaque(m_fill_color)) {
 			// 塗りつぶし色が不透明な場合,
@@ -181,9 +181,9 @@ namespace winrt::GraphPaper::implementation
 			// 線枠の色が不透明な場合,
 			const double g_len = m_grid_base + 1.0;	// 方眼の大きさ
 			const double f_size = m_dwrite_text_format->GetFontSize();	// 書体の大きさ
-			const bool w_ge_h = fabs(m_vec[0].x) >= fabs(m_vec[0].y);	// 高さより幅の方が大きい
-			const double vec_x = (w_ge_h ? m_vec[0].x : m_vec[0].y);	// 大きい方の値を x
-			const double vec_y = (w_ge_h ? m_vec[0].y : m_vec[0].x);	// 小さい方の値を y
+			const bool w_ge_h = fabs(m_pos.x) >= fabs(m_pos.y);	// 高さより幅の方が大きい
+			const double vec_x = (w_ge_h ? m_pos.x : m_pos.y);	// 大きい方の値を x
+			const double vec_y = (w_ge_h ? m_pos.y : m_pos.x);	// 小さい方の値を y
 			const double intvl_x = vec_x >= 0.0 ? g_len : -g_len;	// 目盛りの間隔
 			const double intvl_y = min(f_size, g_len);	// 目盛りの間隔
 			const uint32_t k = static_cast<uint32_t>(floor(vec_x / intvl_x));	// 目盛りの数
@@ -199,7 +199,7 @@ namespace winrt::GraphPaper::implementation
 				// 高さが 0 以上の場合下よせ、ない場合上よせを段落のそろえに格納する.
 				// 文字列を配置する方形が小さい (書体の大きさと同じ) ため,
 				// DWRITE_PARAGRAPH_ALIGNMENT は, 逆の効果をもたらす.
-				p_align = (m_vec[0].y >= 0.0f ? DWRITE_PARAGRAPH_ALIGNMENT_FAR : DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+				p_align = (m_pos[0].y >= 0.0f ? DWRITE_PARAGRAPH_ALIGNMENT_FAR : DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 			}
 			else {
 				// 縦のほうが小さい場合,
@@ -280,11 +280,11 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// start	囲む領域の始点
-	// b_vec	囲む領域の終点への差分
+	// start	始点
+	// pos	対角点への位置ベクトル
 	// page	属性
-	ShapeRuler::ShapeRuler(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec, const Shape* page) :
-		ShapeRect::ShapeRect(start, b_vec, page)
+	ShapeRuler::ShapeRuler(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
+		ShapeRect::ShapeRect(start, pos, page)
 	{
 		ShapeText::is_available_font(m_font_family);
 		page->get_grid_base(m_grid_base);

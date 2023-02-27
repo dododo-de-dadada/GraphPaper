@@ -535,7 +535,7 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoValue<UNDO_ID::ROTATION>::SET(Shape* const s, const float& val)
 	{
-		s->set_rotation(val);
+		s->set_deg_rotation(val);
 	}
 
 	void UndoValue<UNDO_ID::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
@@ -710,7 +710,7 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_ID::ROTATION>::GET(const Shape* s, float& val) noexcept
 	{
-		return s->get_rotation(val);
+		return s->get_deg_rotation(val);
 	}
 
 	bool UndoValue<UNDO_ID::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& val) noexcept

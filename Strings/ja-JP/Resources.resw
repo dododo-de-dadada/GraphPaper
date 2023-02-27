@@ -846,7 +846,15 @@
 1234567890</value>
     <comment>String</comment>
   </data>
-  <data name="str_rotation" xml:space="preserve">
+  <data name="str_deg_start" xml:space="preserve">
+    <value>始点</value>
+    <comment>String</comment>
+  </data>
+	<data name="str_deg_end" xml:space="preserve">
+    <value>終点</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_deg_rot" xml:space="preserve">
     <value>傾き</value>
     <comment>String</comment>
   </data>

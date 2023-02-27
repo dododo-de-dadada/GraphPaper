@@ -155,7 +155,7 @@ namespace winrt::GraphPaper::implementation
 		else if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 1) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
-			conv_len_to_str<LEN_UNIT_SHOW>(
+			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
 				m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
 			const auto text = ResourceLoader::GetForCurrentView().GetString(
 				L"str_stroke_width") + L": " + buf;

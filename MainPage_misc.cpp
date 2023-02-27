@@ -185,42 +185,42 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (old_unit != new_unit) {
-			const auto dpi = m_main_d2d.m_logical_dpi;
-			const auto g_len = m_main_page.m_grid_base + 1.0;
+			const double dpi = m_main_d2d.m_logical_dpi;
+			const double g_len = m_main_page.m_grid_base + 1.0;
 			double val;
 			if (swscanf_s(tx_page_size_width().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
-				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
 				tx_page_size_width().Text(buf);
 			}
 			if (swscanf_s(tx_page_size_height().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
-				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
 				tx_page_size_height().Text(buf);
 			}
 			if (swscanf_s(tx_page_padd_left().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
-				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
 				tx_page_padd_left().Text(buf);
 			}
 			if (swscanf_s(tx_page_padd_top().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
-				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
 				tx_page_padd_top().Text(buf);
 			}
 			if (swscanf_s(tx_page_padd_right().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
-				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
 				tx_page_padd_right().Text(buf);
 			}
 			if (swscanf_s(tx_page_padd_bottom().Text().data(), L"%lf", &val)) {
 				wchar_t buf[128];
-				val = conv_len_to_val(old_unit, val, dpi, g_len);
+				val = conv_len_to_pixel(old_unit, val, dpi, g_len);
 				conv_len_to_str<false>(new_unit, val, dpi, g_len, buf);
 				tx_page_padd_bottom().Text(buf);
 			}
@@ -245,7 +245,8 @@ namespace winrt::GraphPaper::implementation
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_dialog_page.m_grid_base + 1.0f, buf);
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(
+			m_len_unit, val, m_main_d2d.m_logical_dpi, m_dialog_page.m_grid_base + 1.0f, buf);
 		const auto text = ResourceLoader::GetForCurrentView().GetString(L"str_vert_stick") + L": " + buf;
 		sd_vert_stick().Header(box_value(text));
 	}

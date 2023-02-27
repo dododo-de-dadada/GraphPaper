@@ -103,9 +103,9 @@ namespace winrt::GraphPaper::implementation
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		D2D1_POINT_2F p[N_GON_MAX];	// 頂点の配列
 
-		D2D1_POINT_2F pos;	// 位置ベクトル
+		D2D1_POINT_2F pos;	// 現在位置への位置ベクトル
 		pt_sub(current, pressed, pos);
-		ShapePolygon::poly_by_box(pressed, pos, p_opt, p);
+		ShapePolygon::poly_create_by_box(pressed, pos, p_opt, p);
 		const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
 		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
@@ -206,10 +206,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		// ページの色でページを塗りつぶす.
 		m_d2d_color_brush->SetColor(m_page_color);
-		m_d2d_target->FillRectangle(D2D1_RECT_F{ 0, 0, m_page_size.width, m_page_size.height }, m_d2d_color_brush.get());
-		D2D1_MATRIX_3X2_F s;
-		m_d2d_target->GetTransform(&s);
-		D2D1_MATRIX_3X2_F t{ s };
+		m_d2d_target->FillRectangle(
+			D2D1_RECT_F{ 0, 0, m_page_size.width, m_page_size.height }, m_d2d_color_brush.get());
+		D2D1_MATRIX_3X2_F t{};
+		m_d2d_target->GetTransform(&t);
 		t.dx += m_page_padding.left * m_page_scale;
 		t.dy += m_page_padding.right * m_page_scale;
 		m_d2d_target->SetTransform(&t);

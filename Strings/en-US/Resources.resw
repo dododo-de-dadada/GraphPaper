@@ -854,7 +854,15 @@
 0123456789</value>
     <comment>String</comment>
   </data>
-  <data name="str_rotation" xml:space="preserve">
+  <data name="str_deg_start" xml:space="preserve">
+    <value>Start Point</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_deg_end" xml:space="preserve">
+    <value>End Point</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_deg_rot" xml:space="preserve">
     <value>Rotation</value>
     <comment>String</comment>
   </data>

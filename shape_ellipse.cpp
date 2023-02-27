@@ -25,7 +25,7 @@ namespace winrt::GraphPaper::implementation
 
 		// 半径を求める.
 		D2D1_POINT_2F rad;
-		pt_mul(m_vec[0], 0.5, rad);
+		pt_mul(m_pos, 0.5, rad);
 		// 中心点を求める.
 		D2D1_POINT_2F c;
 		pt_add(m_start, rad, c);
@@ -52,14 +52,14 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeEllipse::hit_test(const D2D1_POINT_2F test) const noexcept
 	{
-		const auto anc = rect_hit_test_anc(m_start, m_vec[0], test, m_anc_width);
+		const auto anc = rect_hit_test_anc(m_start, m_pos, test, m_anc_width);
 		if (anc != ANC_TYPE::ANC_PAGE) {
 			return anc;
 		}
 
 		// 半径を得る.
 		D2D1_POINT_2F r;
-		pt_mul(m_vec[0], 0.5, r);
+		pt_mul(m_pos, 0.5, r);
 		// 中心点を得る.
 		D2D1_POINT_2F c;
 		pt_add(m_start, r, c);

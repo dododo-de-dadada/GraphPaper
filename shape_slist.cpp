@@ -149,18 +149,10 @@ namespace winrt::GraphPaper::implementation
 	// back_selected	最背面の図形の選択フラグ
 	// prev_selected	ひとつ背面の図形の選択フラグ
 	void slist_count(
-		const SHAPE_LIST& slist,
-		uint32_t& undeleted_cnt,
-		uint32_t& selected_cnt,
-		uint32_t& selected_group_cnt,
-		uint32_t& runlength_cnt,
-		uint32_t& selected_text_cnt,
-		uint32_t& text_cnt,
-		uint32_t& selected_image_cnt,
-		bool& fore_selected,
-		bool& back_selected,
-		bool& prev_selected
-	) noexcept
+		const SHAPE_LIST& slist, uint32_t& undeleted_cnt, uint32_t& selected_cnt,
+		uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt,
+		uint32_t& text_cnt, uint32_t& selected_image_cnt, bool& fore_selected, bool& back_selected,
+		bool& prev_selected) noexcept
 	{
 		undeleted_cnt = 0;	// 消去フラグがない図形の数
 		selected_cnt = 0;	// 選択された図形の数

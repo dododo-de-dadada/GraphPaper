@@ -179,16 +179,24 @@ namespace winrt::GraphPaper::implementation
 	void MainPage::dash_slider_set_header(const float val)
 	{
 		if constexpr (U == UNDO_ID::DASH_PATT) {
-			constexpr wchar_t* R[]{ L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap" };
+			constexpr wchar_t* R[]{
+				L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap"
+			};
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
-			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf };
+			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
+				m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
+			const winrt::hstring text{
+				ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf
+			};
 			dialog_set_slider_header<S>(text);
 		}
 		if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 4) {
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
-			const winrt::hstring text{ ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf };
+			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
+				m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
+			const winrt::hstring text{
+				ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf
+			};
 			dialog_slider_4().Header(box_value(text));
 		}
 	}

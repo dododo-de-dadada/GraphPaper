@@ -466,8 +466,8 @@ namespace winrt::GraphPaper::implementation
 			t->fit_frame_to_text(static_cast<FLOAT>(g_len));
 			// パネルの中央になるよう左上位置を求める.
 			D2D1_POINT_2F pos{
-				static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) - t->m_vec[0].x * 0.5),
-				static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) - t->m_vec[0].y * 0.5)
+				static_cast<FLOAT>(lt_x + (win_x + win_w * 0.5) - t->m_pos.x * 0.5),
+				static_cast<FLOAT>(lt_y + (win_y + win_h * 0.5) - t->m_pos.y * 0.5)
 			};
 			xcvd_paste_pos(pos, /*<---*/m_main_page.m_shape_list, g_len, v_stick);
 			t->set_pos_start(pos);
@@ -508,7 +508,7 @@ namespace winrt::GraphPaper::implementation
 			// 図形の左上位置を方眼の大きさで丸め, 元の値との距離 (の自乗) を求める.
 			D2D1_POINT_2F g;	// 方眼の位置
 			pt_round(p, g_len, g);
-			D2D1_POINT_2F g_pos;	// 方眼への位置ベクトル
+			D2D1_POINT_2F g_pos;	// 最も近い方眼への位置ベクトル
 			pt_sub(g, p, g_pos);
 			const double g_abs = pt_abs2(g_pos);
 			// 近傍の頂点との距離 (の自乗) を求める.

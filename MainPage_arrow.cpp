@@ -29,7 +29,7 @@ namespace winrt::GraphPaper::implementation
 				L"str_arrow_offset"
 			};
 			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_SHOW>(
+			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
 				m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
 			const winrt::hstring text{
 				ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf
@@ -137,7 +137,7 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F start{	// 始点
 			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
 		};
-		const D2D1_POINT_2F pos{	// 終点の位置ベクトル
+		const D2D1_POINT_2F pos{	// 対角点の位置ベクトル
 			static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd)
 		};
 		m_dialog_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_page));

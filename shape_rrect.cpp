@@ -13,19 +13,19 @@ namespace winrt::GraphPaper::implementation
 	//using winrt::Windows::Storage::Streams::DataWriter;
 
 	// äpä€îºåaÇåvéZÇ∑ÇÈ.
-	static void calc_corner_radius(const D2D1_POINT_2F d_vec, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad);
+	static void calc_corner_radius(const D2D1_POINT_2F pos, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad);
 
 	// äpä€îºåaÇÃècÇ‹ÇΩÇÕâ°ÇÃê¨ï™ÇåvéZÇ∑ÇÈ.
 	static void calc_corner_radius(const FLOAT r_len, const FLOAT d_rad, FLOAT& c_rad);
 
 	// äpä€îºåaÇåvéZÇ∑ÇÈ.
-	// d_vec	äpä€ï˚å`ÇÃëŒäpÉxÉNÉgÉã
+	// pos	ëŒäpì_Ç÷ÇÃà íuÉxÉNÉgÉã
 	// d_rad	ä˘íËÇÃäpä€îºåa
 	// c_rad	åvéZÇ≥ÇÍÇΩäpä€îºåa
-	static void calc_corner_radius(const D2D1_POINT_2F d_vec, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad)
+	static void calc_corner_radius(const D2D1_POINT_2F pos, const D2D1_POINT_2F d_rad, D2D1_POINT_2F& c_rad)
 	{
-		calc_corner_radius(d_vec.x, d_rad.x, c_rad.x);
-		calc_corner_radius(d_vec.y, d_rad.y, c_rad.y);
+		calc_corner_radius(pos.x, d_rad.x, c_rad.x);
+		calc_corner_radius(pos.y, d_rad.y, c_rad.y);
 	}
 
 	// äpä€îºåaÇÃècÇ‹ÇΩÇÕâ°ÇÃê¨ï™ÇåvéZÇ∑ÇÈ.
@@ -63,11 +63,11 @@ namespace winrt::GraphPaper::implementation
 		}
 
 		D2D1_POINT_2F r_lt;
-		pt_add(m_start, min(m_vec[0].x, 0.0), min(m_vec[0].y, 0.0), r_lt);
+		pt_add(m_start, min(m_pos.x, 0.0), min(m_pos.y, 0.0), r_lt);
 		float rx = std::fabsf(m_corner_radius.x);
 		float ry = std::fabsf(m_corner_radius.y);
-		float vx = std::fabsf(m_vec[0].x);
-		float vy = std::fabsf(m_vec[0].y);
+		float vx = std::fabsf(m_pos.x);
+		float vy = std::fabsf(m_pos.y);
 		if (rx > vx * 0.5f) {
 			rx = vx * 0.5f;
 		}
@@ -115,8 +115,8 @@ namespace winrt::GraphPaper::implementation
 	//	ñﬂÇËíl	Ç»Çµ
 	void ShapeRRect::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
 	{
-		const double dx = m_vec[0].x;	// ç∑ï™ x
-		const double dy = m_vec[0].y;	// ç∑ï™ y
+		const double dx = m_pos.x;	// ç∑ï™ x
+		const double dy = m_pos.y;	// ç∑ï™ y
 		const double mx = dx * 0.5;	// íÜì_ x
 		const double my = dy * 0.5;	// íÜì_ y
 		const double rx = fabs(mx) < fabs(m_corner_radius.x) ? mx : m_corner_radius.x;	// äpä€ x
@@ -208,8 +208,8 @@ namespace winrt::GraphPaper::implementation
 		// | 4     2 |
 		// +---------+
 		uint32_t anc_r;
-		const double mx = m_vec[0].x * 0.5;	// íÜì_
-		const double my = m_vec[0].y * 0.5;	// íÜì_
+		const double mx = m_pos.x * 0.5;	// íÜì_
+		const double my = m_pos.y * 0.5;	// íÜì_
 		const double rx = fabs(mx) < fabs(m_corner_radius.x) ? mx : m_corner_radius.x;	// äpä€
 		const double ry = fabs(my) < fabs(m_corner_radius.y) ? my : m_corner_radius.y;	// äpä€
 		const D2D1_POINT_2F anc_r_nw{
@@ -221,8 +221,8 @@ namespace winrt::GraphPaper::implementation
 		}
 		else {
 			const D2D1_POINT_2F anc_r_se{
-				static_cast<FLOAT>(m_start.x + m_vec[0].x - rx),
-				static_cast<FLOAT>(m_start.y + m_vec[0].y - ry)
+				static_cast<FLOAT>(m_start.x + m_pos.x - rx),
+				static_cast<FLOAT>(m_start.y + m_pos.y - ry)
 			};
 			if (pt_in_anc(test, anc_r_se, m_anc_width)) {
 				anc_r = ANC_TYPE::ANC_R_SE;
@@ -246,11 +246,11 @@ namespace winrt::GraphPaper::implementation
 		// äpä€ÇÃâ~å ÇÃíÜêSì_Ç…ä‹Ç‹ÇÍÇÈ,
 		if (anc_r != ANC_TYPE::ANC_PAGE &&
 			// Ç©Ç¬, ï˚å`ÇÃëÂÇ´Ç≥Ç™ê}å`ÇÃïîà ÇÃëÂÇ´Ç≥ÇÊÇËëÂÇ´Ç¢Ç©îªíËÇ∑ÇÈ.
-			fabs(m_vec[0].x) > m_anc_width && fabs(m_vec[0].y) > m_anc_width) {
+			fabs(m_pos.x) > m_anc_width && fabs(m_pos.y) > m_anc_width) {
 			return anc_r;
 		}
 		// ï˚å`ÇÃäeí∏ì_Ç…ä‹Ç‹ÇÍÇÈÇ©îªíËÇ∑ÇÈ.
-		const uint32_t anc_v = rect_hit_test_anc(m_start, m_vec[0], test, m_anc_width);
+		const uint32_t anc_v = rect_hit_test_anc(m_start, m_pos, test, m_anc_width);
 		if (anc_v != ANC_TYPE::ANC_PAGE) {
 			return anc_v;
 		}
@@ -263,20 +263,20 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F r_lt;
 		D2D1_POINT_2F r_rb;
 		D2D1_POINT_2F r_rad;
-		if (m_vec[0].x > 0.0f) {
+		if (m_pos.x > 0.0f) {
 			r_lt.x = m_start.x;
-			r_rb.x = m_start.x + m_vec[0].x;
+			r_rb.x = m_start.x + m_pos.x;
 		}
 		else {
-			r_lt.x = m_start.x + m_vec[0].x;
+			r_lt.x = m_start.x + m_pos.x;
 			r_rb.x = m_start.x;
 		}
-		if (m_vec[0].y > 0.0f) {
+		if (m_pos.y > 0.0f) {
 			r_lt.y = m_start.y;
-			r_rb.y = m_start.y + m_vec[0].y;
+			r_rb.y = m_start.y + m_pos.y;
 		}
 		else {
-			r_lt.y = m_start.y + m_vec[0].y;
+			r_lt.y = m_start.y + m_pos.y;
 			r_rb.y = m_start.y;
 		}
 		r_rad.x = std::abs(m_corner_radius.x);
@@ -339,7 +339,7 @@ namespace winrt::GraphPaper::implementation
 				return false;
 			}
 			pt_add(m_corner_radius, posotion, new_radius);
-			calc_corner_radius(m_vec[0], new_radius, m_corner_radius);
+			calc_corner_radius(m_pos, new_radius, m_corner_radius);
 			break;
 		case ANC_TYPE::ANC_R_NE:
 			ShapeRRect::get_pos_anc(anc, a_point);
@@ -350,7 +350,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			new_radius.x = m_corner_radius.x - posotion.x;
 			new_radius.y = m_corner_radius.y + posotion.y;
-			calc_corner_radius(m_vec[0], new_radius, m_corner_radius);
+			calc_corner_radius(m_pos, new_radius, m_corner_radius);
 			break;
 		case ANC_TYPE::ANC_R_SE:
 			ShapeRRect::get_pos_anc(anc, a_point);
@@ -361,7 +361,7 @@ namespace winrt::GraphPaper::implementation
 			}
 			new_radius.x = m_corner_radius.x - posotion.x;
 			new_radius.y = m_corner_radius.y - posotion.y;
-			calc_corner_radius(m_vec[0], new_radius, m_corner_radius);
+			calc_corner_radius(m_pos, new_radius, m_corner_radius);
 			break;
 		case ANC_TYPE::ANC_R_SW:
 			ShapeRRect::get_pos_anc(anc, a_point);
@@ -372,16 +372,16 @@ namespace winrt::GraphPaper::implementation
 			}
 			new_radius.x = m_corner_radius.x + posotion.x;
 			new_radius.y = m_corner_radius.y - posotion.y;
-			calc_corner_radius(m_vec[0], new_radius, m_corner_radius);
+			calc_corner_radius(m_pos, new_radius, m_corner_radius);
 			break;
 		default:
 			if (!ShapeRect::set_pos_anc(val, anc, limit, false)) {
 				return false;
 			}
-			if (m_vec[0].x * m_corner_radius.x < 0.0f) {
+			if (m_pos.x * m_corner_radius.x < 0.0f) {
 				m_corner_radius.x = -m_corner_radius.x;
 			}
-			if (m_vec[0].y * m_corner_radius.y < 0.0f) {
+			if (m_pos.y * m_corner_radius.y < 0.0f) {
 				m_corner_radius.y = -m_corner_radius.y;
 			}
 			break;
@@ -394,15 +394,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ê}å`ÇçÏê¨Ç∑ÇÈ.
-	// start	àÕÇﬁóÃàÊÇÃénì_
-	// b_vec	àÕÇﬁóÃàÊÇÃèIì_Ç÷ÇÃç∑ï™
+	// start	énì_
+	// pos	ëŒäpì_Ç÷ÇÃà íuÉxÉNÉgÉã
 	// page	ëÆê´
-	ShapeRRect::ShapeRRect(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec, const Shape* page) :
-		ShapeRect::ShapeRect(start, b_vec, page)
+	ShapeRRect::ShapeRRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
+		ShapeRect::ShapeRect(start, pos, page)
 	{
 		float g_base;
 		page->get_grid_base(g_base);
-		calc_corner_radius(m_vec[0], D2D1_POINT_2F{ g_base + 1.0f, g_base + 1.0f }, m_corner_radius);
+		calc_corner_radius(pos, D2D1_POINT_2F{ g_base + 1.0f, g_base + 1.0f }, m_corner_radius);
 	}
 
 	// ê}å`ÇÉfÅ[É^ÉäÅ[É_Å[Ç©ÇÁì«Ç›çûÇﬁ.

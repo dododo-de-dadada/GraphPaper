@@ -11,32 +11,30 @@ namespace winrt::GraphPaper::implementation
 {
 	// 矢じるしの D2D1 パスジオメトリを作成する.
 	static void line_create_arrow_geom(
-		ID2D1Factory3* const d_factory, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F d_vec,
+		ID2D1Factory3* const d_factory, const D2D1_POINT_2F start, const D2D1_POINT_2F pos,
 		ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo);
 	// 矢じるしの D2D ストローク特性を作成する.
 	static void line_create_arrow_style(
 		ID2D1Factory3* const d_factory, const CAP_STYLE s_cap_style, 
 		const D2D1_LINE_JOIN s_join_style, const double s_join_miter_limit,
 		ID2D1StrokeStyle** s_arrow_style);
-	// 線分が位置を含むか, 太さも考慮して判定する.
-	static bool line_hit_test(const D2D1_POINT_2F test, const D2D1_POINT_2F s_pos, const D2D1_POINT_2F e_pos, const double s_width, const CAP_STYLE& s_cap) noexcept;
 
 	// 矢じるしの D2D1 パスジオメトリを作成する
 	// d_factory	D2D ファクトリー
 	// start	軸の始点
-	// e_pos	軸の終端への位置ベクトル
+	// pos	軸の終端への位置ベクトル
 	// style	矢じるしの形式
 	// size	矢じるしの寸法
 	// geo	作成されたパスジオメトリ
 	static void line_create_arrow_geom(
-		ID2D1Factory3* const d_factory, const D2D1_POINT_2F start, const D2D1_POINT_2F e_pos,
+		ID2D1Factory3* const d_factory, const D2D1_POINT_2F start, const D2D1_POINT_2F pos,
 		ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo)
 	{
 		D2D1_POINT_2F barbs[2];	// 矢じるしの返しの端点
 		D2D1_POINT_2F tip;	// 矢じるしの先端点
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (ShapeLine::line_get_pos_arrow(start, e_pos, a_size, barbs, tip)) {
+		if (ShapeLine::line_get_pos_arrow(start, pos, a_size, barbs, tip)) {
 			// ジオメトリパスを作成する.
 			winrt::check_hresult(d_factory->CreatePathGeometry(geo));
 			winrt::check_hresult((*geo)->Open(sink.put()));
@@ -104,80 +102,6 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	// 線分が位置を含むか, 太さも考慮して判定する.
-	// test	判定する位置
-	// start	線分の始点
-	// e_pos	線分の終点の位置ベクトル
-	// s_width	線分の太さ
-	// s_cap	線分の端の形式
-	// 戻り値	含む場合 true
-	static bool line_hit_test(const D2D1_POINT_2F test, const D2D1_POINT_2F start, const D2D1_POINT_2F e_pos, const double s_width, const CAP_STYLE& s_cap) noexcept
-	{
-		const double e_width = max(s_width * 0.5, 0.5);
-		if (equal(s_cap, CAP_SQUARE)) {
-			D2D1_POINT_2F d_vec;	// 差分線分のベクトル
-			pt_sub(e_pos, start, d_vec);
-			const double abs2 = pt_abs2(d_vec);
-			pt_mul(
-				abs2 >= FLT_MIN ? d_vec : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
-				abs2 >= FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
-				d_vec);
-			const double dx = d_vec.x;
-			const double dy = d_vec.y;
-			const double ox = dy;
-			const double oy = -dx;
-			D2D1_POINT_2F e_side[4]{};
-			pt_add(start, -dx + ox, -dy + oy, e_side[0]);
-			pt_add(start, -dx - ox, -dy - oy, e_side[1]);
-			pt_add(e_pos, dx - ox, dy - oy, e_side[2]);
-			pt_add(e_pos, dx + ox, dy + oy, e_side[3]);
-			return pt_in_poly(test, 4, e_side);
-		}
-		else if (equal(s_cap, CAP_TRIANGLE)) {
-			D2D1_POINT_2F d_vec;	// 差分線分のベクトル
-			pt_sub(e_pos, start, d_vec);
-			const double abs2 = pt_abs2(d_vec);
-			pt_mul(
-				abs2 >= FLT_MIN ? d_vec : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
-				abs2 >= FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
-				d_vec);
-			const double dx = d_vec.x;
-			const double dy = d_vec.y;
-			const double ox = dy;
-			const double oy = -dx;
-			D2D1_POINT_2F e_side[6]{};
-			pt_add(start, ox, oy, e_side[0]);
-			pt_add(start, -dx, -dy, e_side[1]);
-			pt_add(start, -ox, -oy, e_side[2]);
-			pt_add(e_pos, -ox, -oy, e_side[3]);
-			pt_add(e_pos, dx, dy, e_side[4]);
-			pt_add(e_pos, ox, oy, e_side[5]);
-			return pt_in_poly(test, 6, e_side);
-		}
-		else {
-			if (equal(s_cap, CAP_ROUND)) {
-				if (pt_in_circle(test, start, e_width) || pt_in_circle(test, e_pos, e_width)) {
-					return true;
-				}
-			}
-			D2D1_POINT_2F d_vec;	// 差分ベクトル
-			pt_sub(e_pos, start, d_vec);
-			const double abs2 = pt_abs2(d_vec);
-			if (abs2 >= FLT_MIN) {
-				pt_mul(d_vec, e_width / sqrt(abs2), d_vec);
-				const double ox = d_vec.y;
-				const double oy = -d_vec.x;
-				D2D1_POINT_2F e_side[4];
-				pt_add(start, ox, oy, e_side[0]);
-				pt_add(start, -ox, -oy, e_side[1]);
-				pt_add(e_pos, -ox, -oy, e_side[2]);
-				pt_add(e_pos, ox, oy, e_side[3]);
-				return pt_in_poly(test, 4, e_side);
-			}
-		}
-		return false;
-	}
-
 	// 図形を表示する.
 	void ShapeLine::draw(void)
 	{
@@ -195,14 +119,14 @@ namespace winrt::GraphPaper::implementation
 		const auto s_width = m_stroke_width;
 
 		D2D1_POINT_2F end;	// 終点
-		pt_add(m_start, m_vec[0], end);
+		pt_add(m_start, m_pos[0], end);
 		target->DrawLine(m_start, end, brush, s_width, s_style);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			if (m_d2d_arrow_style == nullptr) {
 				line_create_arrow_style(static_cast<ID2D1Factory3*>(factory), m_stroke_cap, m_join_style, m_join_miter_limit, m_d2d_arrow_style.put());
 			}
 			if (m_d2d_arrow_geom == nullptr) {
-				line_create_arrow_geom(static_cast<ID2D1Factory3*>(factory), m_start, m_vec[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				line_create_arrow_geom(static_cast<ID2D1Factory3*>(factory), m_start, m_pos[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
 			}
 			const auto a_geom = m_d2d_arrow_geom.get();
 			if (m_d2d_arrow_geom != nullptr) {
@@ -214,7 +138,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		if (m_anc_show && is_selected()) {
 			D2D1_POINT_2F mid;	// 中点
-			pt_mul_add(m_vec[0], 0.5, m_start, mid);
+			pt_mul_add(m_pos[0], 0.5, m_start, mid);
 			anc_draw_square(m_start, target, brush);
 			anc_draw_square(mid, target, brush);
 			anc_draw_square(end, target, brush);
@@ -232,10 +156,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (anc > ANC_TYPE::ANC_P0) {
 			const size_t a_cnt = anc - ANC_TYPE::ANC_P0;
-			if (a_cnt < m_vec.size() + 1) {
+			if (a_cnt < m_pos.size() + 1) {
 				val = m_start;
 				for (size_t i = 0; i < a_cnt; i++) {
-					pt_add(val, m_vec[i], val);
+					pt_add(val, m_pos[i], val);
 				}
 			}
 		}
@@ -245,11 +169,11 @@ namespace winrt::GraphPaper::implementation
 	// val	領域の左上位置
 	void ShapeLine::get_bound_lt(D2D1_POINT_2F& val) const noexcept
 	{
-		const size_t d_cnt = m_vec.size();	// 差分の数
+		const size_t d_cnt = m_pos.size();	// 差分の数
 		D2D1_POINT_2F v_pos = m_start;	// 頂点の位置
 		val = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(v_pos, m_vec[i], v_pos);
+			pt_add(v_pos, m_pos[i], v_pos);
 			val.x = val.x < v_pos.x ? val.x : v_pos.x;
 			val.y = val.y < v_pos.y ? val.y : v_pos.y;
 		}
@@ -282,16 +206,18 @@ namespace winrt::GraphPaper::implementation
 // a_rb	元の領域の右下位置.
 // b_lt	囲む領域の左上位置.
 // b_rb	囲む領域の右下位置.
-	void ShapeLine::get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
+	void ShapeLine::get_bound(
+		const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
+		D2D1_POINT_2F& b_rb) const noexcept
 	{
 		b_lt.x = m_start.x < a_lt.x ? m_start.x : a_lt.x;
 		b_lt.y = m_start.y < a_lt.y ? m_start.y : a_lt.y;
 		b_rb.x = m_start.x > a_rb.x ? m_start.x : a_rb.x;
 		b_rb.y = m_start.y > a_rb.y ? m_start.y : a_rb.y;
-		const size_t d_cnt = m_vec.size();	// 差分の数
+		const size_t d_cnt = m_pos.size();	// 差分の数
 		D2D1_POINT_2F pos = m_start;
 		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(pos, m_vec[i], pos);
+			pt_add(pos, m_pos[i], pos);
 			if (pos.x < b_lt.x) {
 				b_lt.x = pos.x;
 			}
@@ -311,9 +237,9 @@ namespace winrt::GraphPaper::implementation
 	size_t ShapeLine::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
 	{
 		v_pos[0] = m_start;
-		const size_t d_cnt = m_vec.size();
+		const size_t d_cnt = m_pos.size();
 		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(v_pos[i], m_vec[i], v_pos[i + 1]);
+			pt_add(v_pos[i], m_pos[i], v_pos[i + 1]);
 		}
 		return d_cnt + 1;
 	}
@@ -323,17 +249,76 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	位置を含む図形の部位
 	uint32_t ShapeLine::hit_test(const D2D1_POINT_2F test) const noexcept
 	{
-		D2D1_POINT_2F e_pos;
-		pt_add(m_start, m_vec[0], e_pos);
-		if (pt_in_anc(test, e_pos, m_anc_width)) {
+		D2D1_POINT_2F end;	// 終点
+		pt_add(m_start, m_pos[0], end);
+		if (pt_in_anc(test, end, m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 1;
 		}
 		if (pt_in_anc(test, m_start, m_anc_width)) {
 			return ANC_TYPE::ANC_P0;
 		}
-		const float s_width = static_cast<float>(max(static_cast<double>(m_stroke_width), m_anc_width));
-		if (line_hit_test(test, m_start, e_pos, s_width, m_stroke_cap)) {
-			return ANC_TYPE::ANC_STROKE;
+		const double e_width = 0.5 * max(m_stroke_width, m_anc_width);
+		if (equal(m_stroke_cap, CAP_SQUARE)) {
+			D2D1_POINT_2F pos{ m_pos[0] };
+			const double abs2 = pt_abs2(pos);
+			pt_mul(
+				abs2 >= FLT_MIN ? pos : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
+				abs2 >= FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
+				pos);
+			const double dx = pos.x;	// 辺の方向ベクトル X 軸
+			const double dy = pos.y;	// 辺の方向ベクトル Y 軸
+			const double ox = dy;	// 辺の直交ベクトル X 軸
+			const double oy = -dx;	// 辺の直交ベクトル Y 軸
+			D2D1_POINT_2F s[4]{};	// 太らせた辺の四辺形
+			pt_add(m_start, -dx + ox, -dy + oy, s[0]);
+			pt_add(m_start, -dx - ox, -dy - oy, s[1]);
+			pt_add(end, dx - ox, dy - oy, s[2]);
+			pt_add(end, dx + ox, dy + oy, s[3]);
+			if (pt_in_poly(test, 4, s)) {
+				return ANC_TYPE::ANC_STROKE;
+			}
+		}
+		else if (equal(m_stroke_cap, CAP_TRIANGLE)) {
+			D2D1_POINT_2F pos{ m_pos[0] };
+			const double abs2 = pt_abs2(pos);
+			pt_mul(
+				abs2 >= FLT_MIN ? pos : D2D1_POINT_2F{ 0.0f, static_cast<FLOAT>(e_width) },
+				abs2 >= FLT_MIN ? e_width / sqrt(abs2) : 1.0f,
+				pos);
+			const double dx = pos.x;	// 辺の方向ベクトル X 座標
+			const double dy = pos.y;	// 辺の方向ベクトル Y 座標
+			const double ox = dy;	// 辺の直交ベクトル X 座標
+			const double oy = -dx;	// 辺の直交ベクトル Y 座標
+			D2D1_POINT_2F s[6]{};	// 太らせた辺の六角形
+			pt_add(m_start, ox, oy, s[0]);
+			pt_add(m_start, -dx, -dy, s[1]);
+			pt_add(m_start, -ox, -oy, s[2]);
+			pt_add(end, -ox, -oy, s[3]);
+			pt_add(end, dx, dy, s[4]);
+			pt_add(end, ox, oy, s[5]);
+			if (pt_in_poly(test, 6, s)) {
+				return ANC_TYPE::ANC_STROKE;
+			}
+		}
+		else {
+			if (equal(m_stroke_cap, CAP_ROUND)) {
+				if (pt_in_circle(test, m_start, e_width) || pt_in_circle(test, end, e_width)) {
+					return ANC_TYPE::ANC_STROKE;
+				}
+			}
+			D2D1_POINT_2F pos{ m_pos[0] };
+			const double abs2 = pt_abs2(pos);
+			if (abs2 >= FLT_MIN) {
+				pt_mul(pos, e_width / sqrt(abs2), pos);
+				const double ox = pos.y;	// 辺の直交ベクトル X 座標
+				const double oy = -pos.x;	// 辺の直交ベクトル Y 座標
+				D2D1_POINT_2F s[4];	// 太らせた辺の四辺形
+				pt_add(m_start, ox, oy, s[0]);
+				pt_add(m_start, -ox, -oy, s[1]);
+				pt_add(end, -ox, -oy, s[2]);
+				pt_add(end, ox, oy, s[3]);
+				return pt_in_poly(test, 4, s);
+			}
 		}
 		return ANC_TYPE::ANC_PAGE;
 	}
@@ -347,7 +332,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		if (pt_in_rect(m_start, area_lt, area_rb)) {
 			D2D1_POINT_2F pos;
-			pt_add(m_start, m_vec[0], pos);
+			pt_add(m_start, m_pos[0], pos);
 			return pt_in_rect(pos, area_lt, area_rb);
 		}
 		return false;
@@ -416,14 +401,14 @@ namespace winrt::GraphPaper::implementation
 	{
 		bool flag = false;
 		// 変更する頂点がどの頂点か判定する.
-		const size_t d_cnt = m_vec.size();	// 差分の数
+		const size_t d_cnt = m_pos.size();	// 差分の数
 		if (anc >= ANC_TYPE::ANC_P0 && anc <= ANC_TYPE::ANC_P0 + d_cnt) {
 			D2D1_POINT_2F p[N_GON_MAX];	// 頂点の位置
 			const size_t a_cnt = anc - ANC_TYPE::ANC_P0;	// 変更する頂点
 			// 変更する頂点までの, 各頂点の位置を得る.
 			p[0] = m_start;
 			for (size_t i = 0; i < a_cnt; i++) {
-				pt_add(p[i], m_vec[i], p[i + 1]);
+				pt_add(p[i], m_pos[i], p[i + 1]);
 			}
 			// 値から変更前の位置を引き, 変更する差分を得る.
 			D2D1_POINT_2F d;
@@ -438,13 +423,13 @@ namespace winrt::GraphPaper::implementation
 				}
 				else {
 					// 頂点の直前の差分に変更分を加える.
-					pt_add(m_vec[a_cnt - 1], d, m_vec[a_cnt - 1]);
+					pt_add(m_pos[a_cnt - 1], d, m_pos[a_cnt - 1]);
 				}
 				// 変更するのが最後の頂点以外か判定する.
 				if (a_cnt < d_cnt) {
 					// 次の頂点が動かないように,
 					// 変更する頂点の次の頂点への差分から変更分を引く.
-					pt_sub(m_vec[a_cnt], d, m_vec[a_cnt]);
+					pt_sub(m_pos[a_cnt], d, m_pos[a_cnt]);
 				}
 				if (!flag) {
 					flag = true;
@@ -454,7 +439,7 @@ namespace winrt::GraphPaper::implementation
 			if (limit >= FLT_MIN) {
 				// 残りの頂点の位置を得る.
 				for (size_t i = a_cnt; i < d_cnt; i++) {
-					pt_add(p[i], m_vec[i], p[i + 1]);
+					pt_add(p[i], m_pos[i], p[i + 1]);
 				}
 				const double dd = static_cast<double>(limit) * static_cast<double>(limit);
 				for (size_t i = 0; i < d_cnt + 1; i++) {
@@ -463,7 +448,6 @@ namespace winrt::GraphPaper::implementation
 						continue;
 					}
 					// 頂点と変更する頂点との距離が限界距離以上か判定する.
-					//D2D1_POINT_2F v_vec;
 					pt_sub(p[i], p[a_cnt], d);
 					if (pt_abs2(d) >= dd) {
 						continue;
@@ -473,11 +457,11 @@ namespace winrt::GraphPaper::implementation
 						pt_add(m_start, d, m_start);
 					}
 					else {
-						pt_add(m_vec[a_cnt - 1], d, m_vec[a_cnt - 1]);
+						pt_add(m_pos[a_cnt - 1], d, m_pos[a_cnt - 1]);
 					}
 					// 変更するのが最後の頂点以外か判定する.
 					if (a_cnt < d_cnt) {
-						pt_sub(m_vec[a_cnt], d, m_vec[a_cnt]);
+						pt_sub(m_pos[a_cnt], d, m_pos[a_cnt]);
 					}
 					if (!flag) {
 						flag = true;
@@ -537,15 +521,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を作成する.
-	// start	囲む領域の始点
-	// b_vec	囲む領域の終点への差分
+	// start	始点
+	// pos	終点への位置ベクトル
 	// page	既定の属性値
-	ShapeLine::ShapeLine(const D2D1_POINT_2F start, const D2D1_POINT_2F b_vec, const Shape* page) :
+	ShapeLine::ShapeLine(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page) :
 		ShapeStroke::ShapeStroke(page)
 	{
 		m_start = start;
-		m_vec.resize(1, b_vec);
-		m_vec.shrink_to_fit();
+		m_pos.resize(1, pos);
+		m_pos.shrink_to_fit();
 		page->get_arrow_style(m_arrow_style);
 		page->get_arrow_size(m_arrow_size);
 		m_d2d_arrow_geom = nullptr;
@@ -562,10 +546,10 @@ namespace winrt::GraphPaper::implementation
 		m_start.x = dt_reader.ReadSingle();
 		m_start.y = dt_reader.ReadSingle();
 		const size_t vec_cnt = dt_reader.ReadUInt32();	// 要素数
-		m_vec.resize(vec_cnt);
+		m_pos.resize(vec_cnt);
 		for (size_t i = 0; i < vec_cnt; i++) {
-			m_vec[i].x = dt_reader.ReadSingle();
-			m_vec[i].y = dt_reader.ReadSingle();
+			m_pos[i].x = dt_reader.ReadSingle();
+			m_pos[i].y = dt_reader.ReadSingle();
 		}
 
 		m_arrow_style = static_cast<ARROW_STYLE>(dt_reader.ReadInt32());
@@ -584,8 +568,8 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_start.y);
 
 		// 次の位置への差分
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_vec.size()));
-		for (const D2D1_POINT_2F vec : m_vec) {
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_pos.size()));
+		for (const D2D1_POINT_2F vec : m_pos) {
 			dt_writer.WriteSingle(vec.x);
 			dt_writer.WriteSingle(vec.y);
 		}
@@ -616,7 +600,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		D2D1_POINT_2F q{ m_start };	// 次の点
-		for (const D2D1_POINT_2F pos : m_vec) {
+		for (const D2D1_POINT_2F pos : m_pos) {
 			pt_add(q, pos, q);
 			pt_sub(q, p, r);
 			r_abs = static_cast<float>(pt_abs2(r));

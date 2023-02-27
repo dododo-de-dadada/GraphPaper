@@ -142,7 +142,9 @@ namespace winrt::GraphPaper::implementation
 			if (s->in_area(v_lt, v_rb)) {
 				return false;
 			}
-			s->get_bound(D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX }, t_lt, t_rb);
+			s->get_bound(
+				D2D1_POINT_2F{ FLT_MAX, FLT_MAX }, D2D1_POINT_2F{ -FLT_MAX, -FLT_MAX },
+				t_lt, t_rb);
 		}
 
 		// 最初の方形の水平位置と垂直位置について, ビューポートの範囲外の場合, スクロールする.

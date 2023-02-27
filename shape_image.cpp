@@ -262,11 +262,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// }Œ`‚ðˆÍ‚Þ—Ìˆæ‚ð“¾‚é.
-	void ShapeImage::get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
+	void ShapeImage::get_bound(
+		const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
+		D2D1_POINT_2F& b_rb) const noexcept
 	{
 		D2D1_POINT_2F b[2]{
-			m_start,
-			{ m_start.x + m_view.width, m_start.y + m_view.height }
+			m_start, D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height }
 		};
 		if (b[0].x > b[1].x) {
 			const auto less_x = b[1].x;

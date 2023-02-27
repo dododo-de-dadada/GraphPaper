@@ -5,38 +5,6 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	/*
-	// 図形を囲む領域を得る.
-	// a_lt	元の領域の左上位置.
-	// a_rb	元の領域の右下位置.
-	// b_lt	囲む領域の左上位置.
-	// b_rb	囲む領域の右下位置.
-	void ShapeStroke::get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
-	{
-		b_lt.x = m_start.x < a_lt.x ? m_start.x : a_lt.x;
-		b_lt.y = m_start.y < a_lt.y ? m_start.y : a_lt.y;
-		b_rb.x = m_start.x > a_rb.x ? m_start.x : a_rb.x;
-		b_rb.y = m_start.y > a_rb.y ? m_start.y : a_rb.y;
-		const size_t d_cnt = m_vec.size();	// 差分の数
-		D2D1_POINT_2F pos = m_start;
-		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(pos, m_vec[i], pos);
-			if (pos.x < b_lt.x) {
-				b_lt.x = pos.x;
-			}
-			if (pos.x > b_rb.x) {
-				b_rb.x = pos.x;
-			}
-			if (pos.y < b_lt.y) {
-				b_lt.y = pos.y;
-			}
-			if (pos.y > b_rb.y) {
-				b_rb.y = pos.y;
-			}
-		}
-	}
-	*/
-
 	// 端の形式を得る.
 	// val	得られた値
 	// 戻り値	つねに true
@@ -300,19 +268,6 @@ namespace winrt::GraphPaper::implementation
 		m_d2d_stroke_style = nullptr;
 	}
 
-	/*
-	static std::vector<D2D1_POINT_2F> dt_read_vec(DataReader const& dt_reader)
-	{
-		const size_t vec_cnt = dt_reader.ReadUInt32();	// 要素数
-		std::vector<D2D1_POINT_2F> vec(vec_cnt);
-		for (size_t i = 0; i < vec_cnt; i++) {
-			vec[i].x = dt_reader.ReadSingle();
-			vec[i].y = dt_reader.ReadSingle();
-		}
-		return vec;
-	}
-	*/
-
 	// 図形をデータリーダーから読み込む.
 	ShapeStroke::ShapeStroke(const Shape& page, DataReader const& dt_reader) :
 		// 読み込む順番は定義された順
@@ -385,8 +340,8 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteSingle(m_start.y);
 
 		// 次の位置への差分
-		dt_writer.WriteUInt32(static_cast<uint32_t>(m_vec.size()));
-		for (const D2D1_POINT_2F vec : m_vec) {
+		dt_writer.WriteUInt32(static_cast<uint32_t>(m_pos.size()));
+		for (const D2D1_POINT_2F vec : m_pos) {
 			dt_writer.WriteSingle(vec.x);
 			dt_writer.WriteSingle(vec.y);
 		}

@@ -233,6 +233,11 @@ namespace winrt::GraphPaper::implementation
 					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
+				//D2D1_POINT_2F debug;
+				//pt_sub(m_event_pos_curr, m_event_pos_pressed, debug);
+				//if (pt_abs2(debug) > 96.0 * 96.0 + 96.0 * 96.0) {
+				//	__debugbreak();
+				//}
 				m_main_page.auxiliary_draw_poly(
 					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
 					m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
@@ -499,20 +504,26 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::page_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_dialog_page.set_attr_to(&m_main_page);
-		const auto g_len = m_main_page.m_grid_base + 1.0;
-		const auto dpi = m_main_d2d.m_logical_dpi;
+		const double g_len = m_main_page.m_grid_base + 1.0;
+		const double dpi = m_main_d2d.m_logical_dpi;
 		wchar_t buf[32];
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_page.m_page_size.width, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
+			m_len_unit, m_main_page.m_page_size.width, dpi, g_len, buf);
 		tx_page_size_width().Text(buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_page.m_page_size.height, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
+			m_len_unit, m_main_page.m_page_size.height, dpi, g_len, buf);
 		tx_page_size_height().Text(buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_page.m_page_padding.left, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
+			m_len_unit, m_main_page.m_page_padding.left, dpi, g_len, buf);
 		tx_page_padd_left().Text(buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_page.m_page_padding.top, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
+			m_len_unit, m_main_page.m_page_padding.top, dpi, g_len, buf);
 		tx_page_padd_top().Text(buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_page.m_page_padding.right, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
+			m_len_unit, m_main_page.m_page_padding.right, dpi, g_len, buf);
 		tx_page_padd_right().Text(buf);
-		conv_len_to_str<LEN_UNIT_HIDE>(m_len_unit, m_main_page.m_page_padding.bottom, dpi, g_len, buf);
+		conv_len_to_str<LEN_UNIT_NAME_NOT_APPEND>(
+			m_len_unit, m_main_page.m_page_padding.bottom, dpi, g_len, buf);
 		tx_page_padd_bottom().Text(buf);
 
 		if (m_len_unit == LEN_UNIT::GRID) {
@@ -599,14 +610,14 @@ namespace winrt::GraphPaper::implementation
 			}
 			// 表示の縦横の長さの値をピクセル単位の値に変換する.
 			D2D1_SIZE_F p_size{
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, new_width, dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, new_height, dpi, g_len))
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_width, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_height, dpi, g_len))
 			};
 			D2D1_RECT_F p_padd{
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, new_left, dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, new_top, dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, new_right, dpi, g_len)),
-				static_cast<FLOAT>(conv_len_to_val(m_len_unit, new_bottom, dpi, g_len))
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_left, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_top, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_right, dpi, g_len)),
+				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_bottom, dpi, g_len))
 			};
 			if (!equal(p_size, m_main_page.m_page_size) || 
 				!equal(p_padd, m_main_page.m_page_padding)) {
@@ -722,14 +733,12 @@ namespace winrt::GraphPaper::implementation
 			u = LEN_UNIT::PIXEL;
 		}
 		if (u != LEN_UNIT::PIXEL) {
-			const auto dpi = m_main_d2d.m_logical_dpi;
-			const auto g_len = m_main_page.m_grid_base + 1.0;
-			w = conv_len_to_val(LEN_UNIT::GRID, w, dpi, g_len);
-			h = conv_len_to_val(LEN_UNIT::GRID, h, dpi, g_len);
-			l = conv_len_to_val(LEN_UNIT::GRID, l, dpi, g_len);
-			t = conv_len_to_val(LEN_UNIT::GRID, t, dpi, g_len);
-			r = conv_len_to_val(LEN_UNIT::GRID, r, dpi, g_len);
-			b = conv_len_to_val(LEN_UNIT::GRID, b, dpi, g_len);
+			w = conv_len_to_pixel(LEN_UNIT::GRID, w, dpi, g_len);
+			h = conv_len_to_pixel(LEN_UNIT::GRID, h, dpi, g_len);
+			l = conv_len_to_pixel(LEN_UNIT::GRID, l, dpi, g_len);
+			t = conv_len_to_pixel(LEN_UNIT::GRID, t, dpi, g_len);
+			r = conv_len_to_pixel(LEN_UNIT::GRID, r, dpi, g_len);
+			b = conv_len_to_pixel(LEN_UNIT::GRID, b, dpi, g_len);
 		}
 		if (w >= 1.0 && w < PAGE_SIZE_MAX && l + r < w &&
 			h >= 1.0 && h < PAGE_SIZE_MAX && t + b < h) {
@@ -749,16 +758,14 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_ID U, int S>
 	void MainPage::page_slider_set_header(const float val)
 	{
-		//using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-
 		if constexpr (U == UNDO_ID::PAGE_COLOR) {
-			constexpr wchar_t* HEADER[]{
+			constexpr wchar_t* T[]{
 				L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity"
 			};
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
 			const winrt::hstring text{
-				ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf
+				ResourceLoader::GetForCurrentView().GetString(T[S]) + L": " + buf
 			};
 			dialog_set_slider_header<S>(text);
 		}

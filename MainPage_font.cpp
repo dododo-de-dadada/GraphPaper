@@ -267,54 +267,26 @@ namespace winrt::GraphPaper::implementation
 	{
 		if constexpr (U == UNDO_ID::FONT_SIZE) {
 			wchar_t buf[32];
-			float g_base;
-			m_dialog_page.get_grid_base(g_base);
-			conv_len_to_str<LEN_UNIT_SHOW>(m_len_unit, val + 1.0f, m_dialog_d2d.m_logical_dpi, g_base + 1.0f, buf);
-			const auto text{ ResourceLoader::GetForCurrentView().GetString(L"str_font_size") + L": " + buf };
+			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
+				m_len_unit, val + 1.0f, m_dialog_d2d.m_logical_dpi, 
+				m_dialog_page.m_grid_base + 1.0f, buf);
+			const auto text{
+				ResourceLoader::GetForCurrentView().GetString(L"str_font_size") + L": " + buf
+			};
 			dialog_set_slider_header<S>(text);
 		}
-		if constexpr (U == UNDO_ID::FONT_COLOR) {
-			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
-			//if constexpr (S == 0) {
-				wchar_t buf[32];
-				// 色成分の値を文字列に変換する.
-				conv_col_to_str(m_color_code, val, buf);
-				const auto text{ ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf };
-				dialog_set_slider_header<S>(text);
-			//}
-			//if constexpr (S == 1) {
-			//	wchar_t buf[32];
-			//	// 色成分の値を文字列に変換する.
-			//	conv_col_to_str(m_color_code, val, buf);
-			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_color_g") + L": " + buf;
-			//}
-			//if constexpr (S == 2) {
-			//	wchar_t buf[32];
-			//	// 色成分の値を文字列に変換する.
-			//	conv_col_to_str(m_color_code, val, buf);
-			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_color_b") + L": " + buf;
-			//}
-			//if constexpr (S == 3) {
-			//	wchar_t buf[32];
-			//	// 色成分の値を文字列に変換する.
-			//	conv_col_to_str(m_color_code, val, buf);
-			//	text = ResourceLoader::GetForCurrentView().GetString(L"str_opacity") + L": " + buf;
-			//}
+		else if constexpr (U == UNDO_ID::FONT_COLOR) {
+			constexpr wchar_t* HEADER[]{ 
+				L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity"
+			};
+			wchar_t buf[32];
+			// 色成分の値を文字列に変換する.
+			conv_col_to_str(m_color_code, val, buf);
+			const auto text{
+				ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf
+			};
+			dialog_set_slider_header<S>(text);
 		}
-		/*
-		if constexpr (S == 0) {
-			dialog_slider_0().Header(box_value(text));
-		}
-		if constexpr (S == 1) {
-			dialog_slider_1().Header(box_value(text));
-		}
-		if constexpr (S == 2) {
-			dialog_slider_2().Header(box_value(text));
-		}
-		if constexpr (S == 3) {
-			dialog_slider_3().Header(box_value(text));
-		}
-		*/
 	}
 
 	//---------------------------------

@@ -50,7 +50,9 @@ namespace winrt::GraphPaper::implementation
 	// b_lt	“¾‚ç‚ê‚½—Ìˆæ‚Ì¶ãˆÊ’u.
 	// b_rb	“¾‚ç‚ê‚½—Ìˆæ‚Ì‰E‰ºˆÊ’u.
 	//------------------------------
-	void ShapeGroup::get_bound(const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt, D2D1_POINT_2F& b_rb) const noexcept
+	void ShapeGroup::get_bound(
+		const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
+		D2D1_POINT_2F& b_rb) const noexcept
 	{
 		b_lt = a_lt;
 		b_rb = a_rb;
