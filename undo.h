@@ -53,7 +53,9 @@ namespace winrt::GraphPaper::implementation
 		PAGE_SIZE,	// ページの大きさの操作
 		PAGE_PADD,	// ページの内余白の操作
 		POLY_END,	// 多角形の終端の操作
-		ROTATION,	// 回転角度の操作
+		DEG_START,
+		DEG_END,
+		DEG_ROT,	// 傾き角度の操作
 		STROKE_CAP,	// 端の形式の操作
 		STROKE_COLOR,	// 線枠の色の操作
 		STROKE_WIDTH,	// 線枠の太さの操作
@@ -99,7 +101,9 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_ID::PAGE_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_ID::PAGE_PADD> { using type = D2D1_RECT_F; };
 	template <> struct U_TYPE<UNDO_ID::POLY_END> { using type = bool; };
-	template <> struct U_TYPE<UNDO_ID::ROTATION> { using type = float; };
+	template <> struct U_TYPE<UNDO_ID::DEG_START> { using type = float; };
+	template <> struct U_TYPE<UNDO_ID::DEG_END> { using type = float; };
+	template <> struct U_TYPE<UNDO_ID::DEG_ROT> { using type = float; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_CAP> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_WIDTH> { using type = float; };

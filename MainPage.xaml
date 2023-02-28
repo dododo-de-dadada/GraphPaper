@@ -255,7 +255,19 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutItem
+                <MenuFlyoutItem
+					x:Name="mfi_edit_arc" x:Uid="mfi_edit_arc" Click="edit_arc_click_async"
+					Text="Edit Arc" >
+                    <MenuFlyoutItem.Icon>
+                        <PathIcon
+                            Data="{StaticResource data_qellipse}" HorizontalAlignment="Center"
+                            VerticalAlignment="Center" Width="16" Height="16" />
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="R" Modifiers="Control" />
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem
 					x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="edit_text_click_async"
 					Text="Edit Text" >
 					<MenuFlyoutItem.Icon>

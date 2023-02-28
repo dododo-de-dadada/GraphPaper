@@ -144,6 +144,7 @@ namespace winrt::GraphPaper::implementation
 	// runlength_cnt	選択された図形のランレングスの数
 	// selected_text_cnt	選択された文字列図形の数
 	// selected_image_cnt	選択された画像図形の数
+	// selected_image_cnt	選択された円弧図形の数
 	// text_cnt	文字列図形の数
 	// fore_selected	最前面の図形の選択フラグ
 	// back_selected	最背面の図形の選択フラグ
@@ -151,8 +152,8 @@ namespace winrt::GraphPaper::implementation
 	void slist_count(
 		const SHAPE_LIST& slist, uint32_t& undeleted_cnt, uint32_t& selected_cnt,
 		uint32_t& selected_group_cnt, uint32_t& runlength_cnt, uint32_t& selected_text_cnt,
-		uint32_t& text_cnt, uint32_t& selected_image_cnt, bool& fore_selected, bool& back_selected,
-		bool& prev_selected) noexcept
+		uint32_t& text_cnt, uint32_t& selected_image_cnt, uint32_t& selected_arc_cnt,
+		bool& fore_selected, bool& back_selected, bool& prev_selected) noexcept
 	{
 		undeleted_cnt = 0;	// 消去フラグがない図形の数
 		selected_cnt = 0;	// 選択された図形の数
@@ -160,6 +161,7 @@ namespace winrt::GraphPaper::implementation
 		runlength_cnt = 0;	// 選択された図形のランレングスの数
 		selected_text_cnt = 0;	// 選択された文字列図形の数
 		selected_image_cnt = 0;
+		selected_arc_cnt = 0;
 		text_cnt = 0;	// 文字列図形の数
 		fore_selected = false;	// 最前面の図形の選択フラグ
 		back_selected = false;	// 最背面の図形の選択フラグ
@@ -203,6 +205,11 @@ namespace winrt::GraphPaper::implementation
 				if (s_type == typeid(ShapeImage)) {
 					selected_image_cnt++;
 				}
+				// 図形の型が画像か判定する.,
+				if (s_type == typeid(ShapeQEllipse)) {
+					selected_arc_cnt++;
+				}
+				// 図形の型がグループ図形か判定する.,
 				else if (s_type == typeid(ShapeGroup)) {
 					// 図形の型がグループ図形の場合,
 					// 選択されたグループ図形の数をインクリメントする.

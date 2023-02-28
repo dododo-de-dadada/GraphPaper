@@ -606,16 +606,49 @@ namespace winrt::GraphPaper::implementation
 
 	// 完全特殊化
 	// 選択されている四分だ円を回転し, その操作をスタックに積む.
-	template<> bool MainPage::ustack_push_set<UNDO_ID::ROTATION, float>(float const& val)
+	template<> bool MainPage::ustack_push_set<UNDO_ID::DEG_ROT, float>(float const& val)
 	{
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
-			if (s->is_deleted() || !s->is_selected() || typeid(*s) != typeid(ShapeQEllipse)) {
+			if (s->is_deleted() || !s->is_selected() || 
+				typeid(*s) != typeid(ShapeQEllipse)) {
 				continue;
 			}
 			//m_ustack_undo.push_back(new UndoValue<UNDO_ID::MOVE>(s));
 			//m_ustack_undo.push_back(new UndoForm(s, ANC_TYPE::ANC_P0 + 1));
-			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ROTATION>(s, val));
+			m_ustack_undo.push_back(new UndoValue<UNDO_ID::DEG_ROT>(s, val));
+			flag = true;
+		}
+		return flag;
+	}
+
+	// 完全特殊化
+	// 選択されている四分だ円を回転し, その操作をスタックに積む.
+	template<> bool MainPage::ustack_push_set<UNDO_ID::DEG_START, float>(float const& val)
+	{
+		auto flag = false;
+		for (auto s : m_main_page.m_shape_list) {
+			if (s->is_deleted() || !s->is_selected() ||
+				typeid(*s) != typeid(ShapeQEllipse)) {
+				continue;
+			}
+			m_ustack_undo.push_back(new UndoValue<UNDO_ID::DEG_START>(s, val));
+			flag = true;
+		}
+		return flag;
+	}
+
+	// 完全特殊化
+	// 選択されている四分だ円を回転し, その操作をスタックに積む.
+	template<> bool MainPage::ustack_push_set<UNDO_ID::DEG_END, float>(float const& val)
+	{
+		auto flag = false;
+		for (auto s : m_main_page.m_shape_list) {
+			if (s->is_deleted() || !s->is_selected() ||
+				typeid(*s) != typeid(ShapeQEllipse)) {
+				continue;
+			}
+			m_ustack_undo.push_back(new UndoValue<UNDO_ID::DEG_END>(s, val));
 			flag = true;
 		}
 		return flag;

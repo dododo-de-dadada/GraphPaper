@@ -172,6 +172,7 @@ namespace winrt::GraphPaper::implementation
 		uint32_t selected_text_cnt = 0;	// 選択された文字列図形の数
 		uint32_t text_cnt = 0;	// 文字列図形の数
 		uint32_t selected_image_cnt = 0;	// 選択された画像図形の数
+		uint32_t selected_arc_cnt = 0;	// 選択された円弧図形の数
 		bool fore_selected = false;	// 最前面の図形の選択フラグ
 		bool back_selected = false;	// 最背面の図形の選択フラグ
 		bool prev_selected = false;	// ひとつ背面の図形の選択フラグ
@@ -184,13 +185,12 @@ namespace winrt::GraphPaper::implementation
 			selected_text_cnt,
 			text_cnt,
 			selected_image_cnt,
+			selected_arc_cnt,
 			fore_selected,
 			back_selected,
 			prev_selected
 		);
 
-		// 消去されていない図形がひとつ以上ある場合.
-		//const auto exists_undeleted = (undeleted_cnt > 0);
 		// 選択された図形がひとつ以上ある場合.
 		const auto exists_selected = (selected_cnt > 0);
 		// 選択された文字列がひとつ以上ある場合.
@@ -199,6 +199,8 @@ namespace winrt::GraphPaper::implementation
 		const auto exists_text = (text_cnt > 0);
 		// 選択された画像がひとつ以上ある場合.
 		const auto exists_selected_image = (selected_image_cnt > 0);
+		// 選択された円弧がひとつ以上ある場合.
+		const auto exists_selected_arc = (selected_arc_cnt > 0);
 		// 選択されてない図形がひとつ以上ある場合.
 		const auto exists_unselected = (selected_cnt < undeleted_cnt);
 		// 選択された図形がふたつ以上ある場合.

@@ -18,7 +18,8 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_ID U, int S>
 	void MainPage::rotation_slider_set_header(const float val)
 	{
-		if constexpr (U == UNDO_ID::ROTATION) {
+		if constexpr (U == UNDO_ID::DEG_ROT || U == UNDO_ID::DEG_START ||
+			U == UNDO_ID::DEG_END) {
 			wchar_t buf[32];
 			swprintf_s(buf, 32, L"%f°", val);
 			if constexpr (S == 0) {
@@ -49,7 +50,8 @@ namespace winrt::GraphPaper::implementation
 		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		// 値をスライダーのヘッダーに格納する.
-		if constexpr (U == UNDO_ID::ROTATION) {
+		if constexpr (U == UNDO_ID::DEG_ROT || U == UNDO_ID::DEG_START || 
+			U == UNDO_ID::DEG_END) {
 			const float val = static_cast<float>(args.NewValue());
 			if constexpr (S == 0) {
 				rotation_slider_set_header<U, S>(val);
@@ -69,10 +71,11 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	IAsyncAction MainPage::rotation_click_async(Shape* s)
+	IAsyncAction MainPage::edit_arc_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		if (s != nullptr && typeid(*s) == typeid(ShapeQEllipse)) {
-			ShapeQEllipse* t = static_cast<ShapeQEllipse*>(s);
+		if (m_event_shape_pressed != nullptr &&
+			typeid(*m_event_shape_pressed) == typeid(ShapeQEllipse)) {
+			ShapeQEllipse* t = static_cast<ShapeQEllipse*>(m_event_shape_pressed);
 			float deg_start;
 			t->get_deg_start(deg_start);
 			float deg_end;
@@ -122,19 +125,19 @@ namespace winrt::GraphPaper::implementation
 
 			const winrt::event_token ds0_tok{
 				dialog_slider_0().ValueChanged(
-					{ this, &MainPage::rotation_slider_val_changed<UNDO_ID::ROTATION, 0> })
+					{ this, &MainPage::rotation_slider_val_changed<UNDO_ID::DEG_START, 0> })
 			};
 			const winrt::event_token ds1_tok{
 				dialog_slider_1().ValueChanged(
-					{ this, &MainPage::rotation_slider_val_changed<UNDO_ID::ROTATION, 1> })
+					{ this, &MainPage::rotation_slider_val_changed<UNDO_ID::DEG_END, 1> })
 			};
 			const winrt::event_token ds2_tok{
 				dialog_slider_2().ValueChanged(
-					{ this, &MainPage::rotation_slider_val_changed<UNDO_ID::ROTATION, 2> })
+					{ this, &MainPage::rotation_slider_val_changed<UNDO_ID::DEG_ROT, 2> })
 			};
-			rotation_slider_set_header<UNDO_ID::ROTATION, 0>(deg_start);
-			rotation_slider_set_header<UNDO_ID::ROTATION, 1>(deg_end);
-			rotation_slider_set_header<UNDO_ID::ROTATION, 2>(deg_rot);
+			rotation_slider_set_header<UNDO_ID::DEG_START, 0>(deg_start);
+			rotation_slider_set_header<UNDO_ID::DEG_END, 1>(deg_end);
+			rotation_slider_set_header<UNDO_ID::DEG_ROT, 2>(deg_rot);
 			const auto samp_w = scp_dialog_panel().Width();
 			const auto samp_h = scp_dialog_panel().Height();
 			const auto center = samp_w * 0.5;
@@ -147,7 +150,7 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_POINT_2F pos{
 				static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)
 			};
-			m_dialog_page.m_shape_list.push_back(new ShapeQEllipse(start, pos, s));
+			m_dialog_page.m_shape_list.push_back(new ShapeQEllipse(start, pos, t));
 			static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->set_deg_start(deg_start);
 			static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->set_deg_end(deg_end);
 			static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->set_deg_rotation(deg_rot);
@@ -159,8 +162,12 @@ namespace winrt::GraphPaper::implementation
 			const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 			if (d_result == ContentDialogResult::Primary) {
 				float samp_val;
+				static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->get_deg_start(samp_val);
+				ustack_push_set<UNDO_ID::DEG_START>(samp_val);
+				static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->get_deg_end(samp_val);
+				ustack_push_set<UNDO_ID::DEG_END>(samp_val);
 				m_dialog_page.m_shape_list.back()->get_deg_rotation(samp_val);
-				ustack_push_set<UNDO_ID::ROTATION>(samp_val);
+				ustack_push_set<UNDO_ID::DEG_ROT>(samp_val);
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();

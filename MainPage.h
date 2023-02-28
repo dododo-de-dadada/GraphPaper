@@ -307,7 +307,7 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_ID U, int S> void rotation_slider_set_header(const float val);
 		template <UNDO_ID U, int S> void rotation_slider_val_changed(
 			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
-		IAsyncAction rotation_click_async(Shape* s);
+		IAsyncAction edit_arc_click_async(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage.cpp

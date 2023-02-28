@@ -987,7 +987,7 @@ namespace winrt::GraphPaper::implementation
 					edit_text_click_async(nullptr, nullptr);
 				}
 				else if (typeid(*m_event_shape_pressed) == typeid(ShapeQEllipse)) {
-					rotation_click_async(m_event_shape_pressed);
+					edit_arc_click_async(nullptr, nullptr);
 				}
 			}
 		}
@@ -1127,6 +1127,8 @@ namespace winrt::GraphPaper::implementation
 			else {
 				switch (anc) {
 				case ANC_TYPE::ANC_A_CENTER:
+				case ANC_TYPE::ANC_A_START:
+				case ANC_TYPE::ANC_A_END:
 				case ANC_TYPE::ANC_R_NW:
 				case ANC_TYPE::ANC_R_NE:
 				case ANC_TYPE::ANC_R_SE:

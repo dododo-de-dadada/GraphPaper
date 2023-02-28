@@ -325,14 +325,18 @@ namespace winrt::GraphPaper::implementation
 		);
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap, m_join_style, m_join_miter_limit);
+		export_svg_stroke(
+			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap,
+			m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[2];
 			D2D1_POINT_2F tip_pos;
 			if (ShapeLine::line_get_pos_arrow(m_start, m_pos[0], m_arrow_size, barbs, tip_pos)) {
-				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, barbs, tip_pos);
+				export_svg_arrow(
+					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
+					m_join_style, m_join_miter_limit, barbs, tip_pos);
 				dt_writer.WriteString(buf);
 			}
 		}
@@ -379,8 +383,11 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F tip;
 			D2D1_POINT_2F barb[2];
-			if (ShapePolygon::poly_get_pos_arrow(d_cnt + 1, std::data(v_pos), m_arrow_size, tip, barb)) {
-				export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, barb, tip);
+			if (ShapePolygon::poly_get_pos_arrow(
+				d_cnt + 1, std::data(v_pos), m_arrow_size, tip, barb)) {
+				export_svg_arrow(
+					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
+					m_join_style, m_join_miter_limit, barb, tip);
 				dt_writer.WriteString(buf);
 			}
 		}
@@ -408,7 +415,9 @@ namespace winrt::GraphPaper::implementation
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap, m_join_style, m_join_miter_limit);
+		export_svg_stroke(
+			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap,
+			m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		dt_writer.WriteString(L"/>\n");
@@ -441,7 +450,9 @@ namespace winrt::GraphPaper::implementation
 		export_svg_color(buf, 1024, m_fill_color, L"fill");
 		dt_writer.WriteString(buf);
 
-		export_svg_stroke(buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap, m_join_style, m_join_miter_limit);
+		export_svg_stroke(
+			buf, 1024, m_stroke_width, m_stroke_color, m_dash_style, m_dash_patt, m_stroke_cap,
+			m_join_style, m_join_miter_limit);
 		dt_writer.WriteString(buf);
 
 		dt_writer.WriteString(L"/>\n");
@@ -450,7 +461,8 @@ namespace winrt::GraphPaper::implementation
 	void ShapeRuler::export_svg(const DataWriter& dt_writer)
 	{
 		// 線・枠の色も塗りつぶしの色も透明なら
-		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && !is_opaque(m_fill_color)) {
+		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) &&
+			!is_opaque(m_fill_color)) {
 			return;
 		}
 
@@ -471,7 +483,8 @@ namespace winrt::GraphPaper::implementation
 		f_face->GetDesignGlyphAdvances(10, gid, g_adv);
 		f_face->Release();
 		const double f_size = m_font_size;	// 書体の大きさ
-		const double l_height = f_size * (f_met.ascent + f_met.descent + f_met.lineGap) / f_met.designUnitsPerEm;	// 行の高さ
+		const double l_height = 	// 行の高さ
+			f_size * (f_met.ascent + f_met.descent + f_met.lineGap) / f_met.designUnitsPerEm;
 		const double b_line = f_size * (f_met.ascent) / f_met.designUnitsPerEm;	// (文字の上端からの) ベースラインまでの距離
 
 		if (is_opaque(m_fill_color)) {
@@ -747,10 +760,10 @@ namespace winrt::GraphPaper::implementation
 	void ShapeQEllipse::export_svg(const DataWriter& dt_writer)
 	{
 		wchar_t buf[1024];
-		D2D1_POINT_2F center{};
+		D2D1_POINT_2F p[5]{};
 		if (is_opaque(m_fill_color) || 
 			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && m_arrow_style != ARROW_STYLE::NONE)) {
-			get_pos_center(center);
+			get_verts(p);
 		}
 		if (is_opaque(m_fill_color)) {
 			// A rx ry x-axis-rotation large-arc-flag sweep-flag x y
@@ -764,13 +777,13 @@ namespace winrt::GraphPaper::implementation
 				L"A %f %f %f %d %d %f %f "
 				L"L %f %f"
 				L"\" stroke=\"none\" ",
-				m_start.x, m_start.y,
+				p[3].x, p[3].y,
 				fabs(m_radius.width), fabs(m_radius.height),
 				m_deg_rot,
 				m_larg_flag != 0 ? 1 : 0,
 				m_sweep_flag != 0 ? 1 : 0,
-				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y,
-				center.x, center.y
+				p[4].x, p[4].y,
+				p[2].x, p[2].y
 			);
 			dt_writer.WriteString(buf);
 			export_svg_color(buf, 1024, m_fill_color, L"fill");
@@ -782,12 +795,12 @@ namespace winrt::GraphPaper::implementation
 				L"<path d=\"M %f %f "
 				L"A %f %f %f %d %d %f %f "
 				L"\" fill=\"none\" ",
-				m_start.x, m_start.y,
+				p[3].x, p[3].y,
 				fabs(m_radius.width), fabs(m_radius.height),
 				m_deg_rot,
 				m_larg_flag != 0 ? 1 : 0,
 				m_sweep_flag != 0 ? 1 : 0,
-				m_start.x + m_pos[0].x, m_start.y + m_pos[0].y
+				p[4].x, p[4].y
 			);
 			dt_writer.WriteString(buf);
 			export_svg_stroke(
@@ -798,7 +811,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
 				qellipse_calc_arrow(
-					m_pos[0], center, m_radius, M_PI * m_deg_rot / 180.0, m_arrow_size, arrow);
+					m_pos[0], p[2], m_radius, M_PI * m_deg_rot / 180.0, m_arrow_size, arrow);
 				export_svg_arrow(
 					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
 					m_join_style, m_join_miter_limit, arrow, arrow[2]);

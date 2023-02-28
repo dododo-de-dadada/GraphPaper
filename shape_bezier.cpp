@@ -40,32 +40,83 @@ namespace winrt::GraphPaper::implementation
 				r_rb.y = y;
 			}
 		}
-		inline POINT_2D nextafter(const double d) const noexcept { return { std::nextafter(x, x + d), std::nextafter(y, y + d) }; }
-		inline operator D2D1_POINT_2F(void) const noexcept { return { static_cast<FLOAT>(x), static_cast<FLOAT>(y) }; }
-		inline POINT_2D operator -(const POINT_2D& q) const noexcept { return { x - q.x, y - q.y }; }
-		inline POINT_2D operator -(const D2D1_POINT_2F q) const noexcept { return { x - q.x, y - q.y }; }
-		inline POINT_2D operator -(void) const noexcept { return { -x, -y }; }
-		inline POINT_2D operator *(const double s) const noexcept { return { x * s, y * s }; }
-		inline double operator *(const POINT_2D& q) const noexcept { return x * q.x + y * q.y; }
-		inline POINT_2D operator +(const POINT_2D& q) const noexcept { return { x + q.x, y + q.y }; }
-		inline POINT_2D operator +(const D2D1_POINT_2F p) const noexcept { return { x + p.x, y + p.y }; }
-		inline bool operator <(const POINT_2D& q) const noexcept { return x < q.x && y < q.y; }
-		inline POINT_2D operator =(const D2D1_POINT_2F p) noexcept { return { x = p.x, y = p.y }; }
-		inline POINT_2D operator =(const double s) noexcept { return { x = s, y = s }; }
-		inline bool operator >(const POINT_2D& q) const noexcept { return x > q.x && y > q.y; }
-		inline bool operator ==(const POINT_2D& q) const noexcept { return x == q.x && y == q.y; }
-		inline bool operator !=(const POINT_2D& q) const noexcept { return x != q.x || y != q.y; }
-		inline double opro(const POINT_2D& q) const noexcept { return x * q.y - y * q.x; }
+		inline POINT_2D nextafter(const double d) const noexcept 
+		{
+			return POINT_2D{ std::nextafter(x, x + d), std::nextafter(y, y + d) };
+		}
+		inline operator D2D1_POINT_2F(void) const noexcept
+		{
+			return D2D1_POINT_2F{ static_cast<FLOAT>(x), static_cast<FLOAT>(y) };
+		}
+		inline POINT_2D operator -(const POINT_2D& q) const noexcept
+		{
+			return POINT_2D{ x - q.x, y - q.y };
+		}
+		inline POINT_2D operator -(const D2D1_POINT_2F q) const noexcept
+		{
+			return POINT_2D{ x - q.x, y - q.y };
+		}
+		inline POINT_2D operator -(void) const noexcept
+		{
+			return POINT_2D{ -x, -y };
+		}
+		inline POINT_2D operator *(const double s) const noexcept
+		{
+			return POINT_2D{ x * s, y * s };
+		}
+		inline double operator *(const POINT_2D& q) const noexcept
+		{
+			return x * q.x + y * q.y;
+		}
+		inline POINT_2D operator +(const POINT_2D& q) const noexcept
+		{
+			return POINT_2D{ x + q.x, y + q.y };
+		}
+		inline POINT_2D operator +(const D2D1_POINT_2F p) const noexcept 
+		{
+			return POINT_2D{ x + p.x, y + p.y };
+		}
+		inline bool operator <(const POINT_2D& q) const noexcept
+		{
+			return x < q.x && y < q.y;
+		}
+		inline POINT_2D operator =(const D2D1_POINT_2F p) noexcept
+		{
+			return POINT_2D{ x = p.x, y = p.y };
+		}
+		inline POINT_2D operator =(const double s) noexcept
+		{
+			return POINT_2D{ x = s, y = s };
+		}
+		inline bool operator >(const POINT_2D& q) const noexcept
+		{
+			return x > q.x && y > q.y;
+		}
+		inline bool operator ==(const POINT_2D& q) const noexcept
+		{
+			return x == q.x && y == q.y;
+		}
+		inline bool operator !=(const POINT_2D& q) const noexcept 
+		{
+			return x != q.x || y != q.y;
+		}
+		inline double opro(const POINT_2D& q) const noexcept
+		{
+			return x * q.y - y * q.x;
+		}
 	};
 
 	// 曲線の矢じるしのジオメトリを作成する.
-	static void bezi_create_arrow_geom(ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
+	static void bezi_create_arrow_geom(
+		ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg,
+		const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
 
 	// 曲線上の助変数をもとに微分値を求める.
 	static inline double bezi_deriv_by_param(const POINT_2D c[4], const double t_val) noexcept;
 
 	// 点の配列をもとにそれらをすべて含む凸包を求める.
-	static void bezi_get_convex(const uint32_t p_cnt, const POINT_2D p[], uint32_t& c_cnt, POINT_2D c[]);
+	static void bezi_get_convex(
+		const uint32_t p_cnt, const POINT_2D p[], uint32_t& c_cnt, POINT_2D c[]);
 
 	// 位置を曲線の端点が含むか判定する.
 	template<D2D1_CAP_STYLE S>
@@ -74,22 +125,27 @@ namespace winrt::GraphPaper::implementation
 		const double e_width);
 
 	// 点が凸包に含まれるか判定する.
-	static bool bezi_in_convex(const double tx, const double ty, const size_t c_cnt, const POINT_2D c[]) noexcept;
+	static bool bezi_in_convex(
+		const double tx, const double ty, const size_t c_cnt, const POINT_2D c[]) noexcept;
 
 	// 曲線上の助変数の区間をもとに長さを求める.
-	static double bezi_len_by_param(const POINT_2D c[4], const double t_min, const double t_max, const uint32_t s_cnt) noexcept;
+	static double bezi_len_by_param(
+		const POINT_2D c[4], const double t_min, const double t_max, const uint32_t s_cnt) 
+		noexcept;
 
 	// 曲線上の長さをもとに助変数を求める.
 	static double bezi_param_by_len(const POINT_2D c[4], const double b_len) noexcept;
 
 	// 曲線上の助変数をもとに位置を求める.
-	static inline void bezi_point_by_param(const POINT_2D c[4], const double t, POINT_2D& p) noexcept;
+	static inline void bezi_point_by_param(
+		const POINT_2D c[4], const double t, POINT_2D& p) noexcept;
 
 	// 2 つの助変数が区間 0-1 の間で正順か判定する.
 	static inline bool bezi_test_param(const double t_min, const double t_max) noexcept;
 
 	// 曲線上の助変数をもとに接線ベクトルを求める.
-	static inline void bezi_tvec_by_param(const POINT_2D c[4], const double t, POINT_2D& v) noexcept;
+	static inline void bezi_tvec_by_param(
+		const POINT_2D c[4], const double t, POINT_2D& v) noexcept;
 
 	//------------------------------
 	// 矢じりの返しと先端の位置を得る
@@ -156,22 +212,27 @@ namespace winrt::GraphPaper::implementation
 	// a_geo	矢じるしが追加されたジオメトリ
 	//------------------------------
 	static void bezi_create_arrow_geom(
-		ID2D1Factory3* const factory,
-		const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_STYLE a_style, const ARROW_SIZE a_size, 
-		ID2D1PathGeometry** a_geom)
+		ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, 
+		const ARROW_STYLE a_style,const ARROW_SIZE a_size, ID2D1PathGeometry** a_geom)
 	{
 		D2D1_POINT_2F barbs[3];	// 矢じるしの返しの端点	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
 		if (ShapeBezier::bezi_calc_arrow(start, b_seg, a_size, barbs)) {
 			// ジオメトリシンクに追加する.
+			const D2D1_FIGURE_BEGIN f_begin = a_style == ARROW_STYLE::FILLED ?
+				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
+				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW;
+			const D2D1_FIGURE_END f_end = a_style == ARROW_STYLE::FILLED ?
+				D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
+				D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN;
 			winrt::check_hresult(factory->CreatePathGeometry(a_geom));
 			winrt::check_hresult((*a_geom)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
-			sink->BeginFigure(barbs[0], a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_BEGIN_FILLED : D2D1_FIGURE_BEGIN_HOLLOW);
+			sink->BeginFigure(barbs[0], f_begin);
 			sink->AddLine(barbs[2]);
 			sink->AddLine(barbs[1]);
-			sink->EndFigure(a_style == ARROW_STYLE::FILLED ? D2D1_FIGURE_END_CLOSED : D2D1_FIGURE_END_OPEN);
+			sink->EndFigure(f_end);
 			winrt::check_hresult(sink->Close());
 			sink = nullptr;
 		}
@@ -199,7 +260,8 @@ namespace winrt::GraphPaper::implementation
 	// c_cnt	凸包の頂点の数
 	// c	凸包の頂点の配列
 	//------------------------------
-	static void bezi_get_convex(const uint32_t p_cnt, const POINT_2D p[], uint32_t& c_cnt, POINT_2D c[])
+	static void bezi_get_convex(
+		const uint32_t p_cnt, const POINT_2D p[], uint32_t& c_cnt, POINT_2D c[])
 	{
 		// e のうち, y 値が最も小さい点の集合から, x 値が最も小さい点の添え字 k を得る.
 		uint32_t k = 0;
@@ -242,19 +304,19 @@ namespace winrt::GraphPaper::implementation
 	// test	判定される位置
 	// c[4]	凸包 (四辺形) の頂点の配列
 	// s[4]	凸包の辺のベクトル
-	// e_width	凸包の辺の半分の太さ
+	// ew	凸包の辺の半分の太さ
 	// 戻り値	含むなら true
 	//------------------------------
 	template<D2D1_CAP_STYLE S> static bool bezi_hit_test_cap(
 		const D2D1_POINT_2F& test, const D2D1_POINT_2F c[4], const D2D1_POINT_2F s[3],
-		const double e_width)
+		const double ew)
 	{
 		size_t i;
 		for (i = 0; i < 3; i++) {
 			const double s_abs = pt_abs2(s[i]);
 			if (s_abs >= FLT_MIN) {
 				D2D1_POINT_2F s_dir;	// 辺の方向ベクトル
-				pt_mul(s[i], -e_width / sqrt(s_abs), s_dir);
+				pt_mul(s[i], -ew / sqrt(s_abs), s_dir);
 				D2D1_POINT_2F s_orth{ s_dir.y, -s_dir.x };	// 辺の直交ベクトル
 				D2D1_POINT_2F q[4];	// 端点の四辺形.
 				pt_add(c[i], s_orth, q[0]);
@@ -278,19 +340,19 @@ namespace winrt::GraphPaper::implementation
 		if (i == 3) {
 			D2D1_POINT_2F q[4]{};
 			if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE) {
-				pt_add(c[0], -e_width, q[0]);
-				pt_add(c[0], e_width, -e_width, q[1]);
-				pt_add(c[0], e_width, q[2]);
-				pt_add(c[0], -e_width, e_width, q[3]);
+				pt_add(c[0], -ew, q[0]);
+				pt_add(c[0], ew, -ew, q[1]);
+				pt_add(c[0], ew, q[2]);
+				pt_add(c[0], -ew, ew, q[3]);
 				if (pt_in_poly(test, 4, q)) {
 					return true;
 				}
 			}
 			else if constexpr (S == D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE) {
-				pt_add(c[0], 0.0, -e_width, q[0]);
-				pt_add(c[0], -e_width, 0.0, q[1]);
-				pt_add(c[0], 0.0, e_width, q[2]);
-				pt_add(c[0], e_width, 0.0, q[3]);
+				pt_add(c[0], 0.0, -ew, q[0]);
+				pt_add(c[0], -ew, 0.0, q[1]);
+				pt_add(c[0], 0.0, ew, q[2]);
+				pt_add(c[0], ew, 0.0, q[3]);
 				if (pt_in_poly(test, 4, q)) {
 					return true;
 				}
@@ -301,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 				const double s_abs = pt_abs2(s[j - 1]);
 				if (s_abs >= FLT_MIN) {
 					D2D1_POINT_2F s_dir;	// 辺の方向ベクトル
-					pt_mul(s[j - 1], e_width / sqrt(s_abs), s_dir);
+					pt_mul(s[j - 1], ew / sqrt(s_abs), s_dir);
 					D2D1_POINT_2F s_orth{ s_dir.y, -s_dir.x };	// 辺の直交ベクトル
 					D2D1_POINT_2F q[4];
 					pt_add(c[j], s_orth, q[0]);
@@ -466,7 +528,8 @@ namespace winrt::GraphPaper::implementation
 	// t	助変数
 	// p	求まった位置
 	//------------------------------
-	static inline void bezi_point_by_param(const POINT_2D c[4], const double t, POINT_2D& p) noexcept
+	static inline void bezi_point_by_param(
+		const POINT_2D c[4], const double t, POINT_2D& p) noexcept
 	{
 		const double s = 1.0 - t;
 		const double ss = s * s;
@@ -481,7 +544,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		// 範囲の上限 t_max は 1+DBL_EPSILON より小 ?
 		// t_min より大きくて最も近い値は t_max より小 ?
-		return -DBL_MIN < t_min && t_max < 1.0 + DBL_EPSILON && std::nextafter(t_min, t_min + 1.0) < t_max;
+		return -DBL_MIN < t_min && t_max < 1.0 + DBL_EPSILON &&
+			std::nextafter(t_min, t_min + 1.0) < t_max;
 	}
 
 	//------------------------------
@@ -600,7 +664,7 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto f_opaque = is_opaque(m_fill_color);
 		bool f_test = false;	// 位置が塗りつぶしに含まれるか判定
-		const auto e_width = max(max(static_cast<double>(m_stroke_width), m_anc_width) * 0.5, 0.5);	// 線枠の太さの半分の値
+		const auto ew = max(max(static_cast<double>(m_stroke_width), m_anc_width) * 0.5, 0.5);	// 線枠の太さの半分の値
 		D2D1_POINT_2F tp;
 		pt_sub(test, m_start, tp);
 		// 判定する位置によって精度が落ちないよう, 開始位置が原点となるよう平行移動し, 制御点を得る.
@@ -622,20 +686,22 @@ namespace winrt::GraphPaper::implementation
 			return ANC_TYPE::ANC_P0 + 0;
 		}
 		if (equal(m_stroke_cap, CAP_ROUND)) {
-			if (pt_in_circle(tp, e_width)) {
+			if (pt_in_circle(tp, ew)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
-			if (pt_in_circle(tp, cp[3], e_width)) {
+			if (pt_in_circle(tp, cp[3], ew)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_SQUARE)) {
-			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(tp, cp, m_pos.data(), e_width)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(
+				tp, cp, m_pos.data(), ew)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
 		else if (equal(m_stroke_cap, CAP_TRIANGLE)) {
-			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(tp, cp, m_pos.data(), e_width)) {
+			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(
+				tp, cp, m_pos.data(), ew)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
@@ -689,7 +755,7 @@ namespace winrt::GraphPaper::implementation
 			POINT_2D e[3 * 4];	// 拡張・延長された線分の配列
 			for (uint32_t i = 0, j = 0; i < d_cnt - 1; i++, j += 4) {
 				auto e_dir = d[i + 1] - d[i];	// 次の頂点への位置ベクトル
-				e_dir = e_dir * (e_width / std::sqrt(e_dir * e_dir));
+				e_dir = e_dir * (ew / std::sqrt(e_dir * e_dir));
 				const POINT_2D e_orth{ e_dir.y, -e_dir.x };	// 線分の直交ベクトル
 
 				// 法線ベクトルにそって正逆の方向に線分を拡張する.
@@ -779,7 +845,8 @@ namespace winrt::GraphPaper::implementation
 	// area_rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	//------------------------------
-	bool ShapeBezier::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
+	bool ShapeBezier::in_area(
+		const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,
 		// 範囲の左上が原点となるよう平行移動した制御点を得る.

@@ -1121,9 +1121,11 @@ namespace winrt::GraphPaper::implementation
 			return 0;
 		}
 
-		D2D1_POINT_2F start{};
-		D2D1_BEZIER_SEGMENT b_seg{};
-		alternate_bezier(start, b_seg);
+		D2D1_POINT_2F start1{};
+		D2D1_BEZIER_SEGMENT b_seg1{};
+		D2D1_POINT_2F start2{};
+		D2D1_BEZIER_SEGMENT b_seg2{};
+		alternate_bezier(1.0, start1, b_seg1, start2, b_seg2);
 
 		D2D1_POINT_2F center{};
 		if (is_opaque(m_fill_color) || m_arrow_style != ARROW_STYLE::NONE) {
@@ -1140,10 +1142,10 @@ namespace winrt::GraphPaper::implementation
 				L"%f %f %f rg\n"
 				L"%f %f m %f %f %f %f %f %f c %f %f l f*\n",
 				m_fill_color.r, m_fill_color.g, m_fill_color.b,
-				start.x, -start.y + page_size.height,
-				b_seg.point1.x, -b_seg.point1.y + page_size.height,
-				b_seg.point2.x, -b_seg.point2.y + page_size.height,
-				b_seg.point3.x, -b_seg.point3.y + page_size.height,
+				start1.x, -start1.y + page_size.height,
+				b_seg1.point1.x, -b_seg1.point1.y + page_size.height,
+				b_seg1.point2.x, -b_seg1.point2.y + page_size.height,
+				b_seg1.point3.x, -b_seg1.point3.y + page_size.height,
 				center.x, -center.y + page_size.height
 			);
 			len += dt_writer.WriteString(buf);
@@ -1156,10 +1158,10 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[1024];
 			swprintf_s(buf,
 				L"%f %f m %f %f %f %f %f %f c S\n",
-				start.x, -start.y + page_size.height,
-				b_seg.point1.x, -b_seg.point1.y + page_size.height,
-				b_seg.point2.x, -b_seg.point2.y + page_size.height,
-				b_seg.point3.x, -b_seg.point3.y + page_size.height
+				start1.x, -start1.y + page_size.height,
+				b_seg1.point1.x, -b_seg1.point1.y + page_size.height,
+				b_seg1.point2.x, -b_seg1.point2.y + page_size.height,
+				b_seg1.point3.x, -b_seg1.point3.y + page_size.height
 			);
 			len += dt_writer.WriteString(buf);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
