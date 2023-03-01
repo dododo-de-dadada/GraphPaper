@@ -1123,9 +1123,7 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_POINT_2F start1{};
 		D2D1_BEZIER_SEGMENT b_seg1{};
-		D2D1_POINT_2F start2{};
-		D2D1_BEZIER_SEGMENT b_seg2{};
-		alternate_bezier(1.0, start1, b_seg1, start2, b_seg2);
+		alternate_bezier(start1, b_seg1);
 
 		D2D1_POINT_2F center{};
 		if (is_opaque(m_fill_color) || m_arrow_style != ARROW_STYLE::NONE) {
@@ -1166,8 +1164,9 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
-				qellipse_calc_arrow(m_pos[0], center, m_radius, M_PI * m_deg_rot / 180.0,
-					m_arrow_size, arrow);
+				qellipse_calc_arrow(
+					m_pos[0], center, m_radius, m_deg_start, m_deg_end, m_deg_rot, m_arrow_size,
+					arrow);
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size,
 					arrow, arrow[2], dt_writer);
 			}

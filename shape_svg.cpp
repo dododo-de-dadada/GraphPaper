@@ -811,7 +811,7 @@ namespace winrt::GraphPaper::implementation
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
 				qellipse_calc_arrow(
-					m_pos[0], p[2], m_radius, M_PI * m_deg_rot / 180.0, m_arrow_size, arrow);
+					m_pos[0], p[2], m_radius, m_deg_start, m_deg_end, m_deg_rot, m_arrow_size, arrow);
 				export_svg_arrow(
 					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
 					m_join_style, m_join_miter_limit, arrow, arrow[2]);

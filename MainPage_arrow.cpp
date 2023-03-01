@@ -52,7 +52,6 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (U == UNDO_ID::ARROW_SIZE) {
 			const float val = static_cast<float>(args.NewValue());
 			ARROW_SIZE a_size;
-			//m_sample_shape->get_arrow_size(a_size);
 			m_dialog_page.m_shape_list.back()->get_arrow_size(a_size);
 			if constexpr (S == 0) {
 				arrow_slider_set_header<U, S>(val);
@@ -66,7 +65,6 @@ namespace winrt::GraphPaper::implementation
 				arrow_slider_set_header<U, S>(val);
 				a_size.m_offset = static_cast<FLOAT>(val);
 			}
-			//m_sample_shape->set_arrow_size(a_size);
 			m_dialog_page.m_shape_list.back()->set_arrow_size(a_size);
 		}
 		if (scp_dialog_panel().IsLoaded()) {

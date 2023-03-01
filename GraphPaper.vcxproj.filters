@@ -69,7 +69,7 @@
     <ClCompile Include="zlib.cpp" />
     <ClCompile Include="MainPage_CMap.cpp" />
     <ClCompile Include="shape_qellipse.cpp" />
-    <ClCompile Include="MainPage_rotation.cpp" />
+    <ClCompile Include="MainPage_edit.cpp" />
     <ClCompile Include="MainPage_import.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -20,6 +20,7 @@
 // MainPage_dash.cpp	破線の形式
 // MainPage_display.cpp	表示デバイスのハンドラー
 // MainPage_drawing.cpp	作図ツール
+// MainPage_edit.cpp	円弧や文字列の編集
 // MainPage_event.cpp	ポインターイベントのハンドラー
 // MainPage_file.cpp	ファイルの読み書き
 // MainPage_fill.cpp	塗りつぶし
@@ -304,10 +305,6 @@ namespace winrt::GraphPaper::implementation
 		//PrintDocument m_print_doc;
 		//IPrintDocumentSource m_print_source;
 
-		template <UNDO_ID U, int S> void rotation_slider_set_header(const float val);
-		template <UNDO_ID U, int S> void rotation_slider_val_changed(
-			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
-		IAsyncAction edit_arc_click_async(IInspectable const&, RoutedEventArgs const&);
 
 		//-------------------------------
 		// MainPage.cpp
@@ -500,14 +497,25 @@ namespace winrt::GraphPaper::implementation
 		template <UNDO_ID U, int S> void fill_slider_set_header(const float val);
 
 		//-------------------------------
+		// MainPage_edit.cpp
+		// 文字列の編集, 円弧の編集
+		//-------------------------------
+
+		// 値をスライダーのヘッダーに格納する.
+		template <UNDO_ID U, int S> void edit_arc_slider_set_header(const float val);
+		// スライダーの値が変更された.
+		template <UNDO_ID U, int S> void edit_arc_slider_val_changed(
+			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
+		// 編集メニューの「円弧の編集」が選択された.
+		IAsyncAction edit_arc_click_async(IInspectable const&, RoutedEventArgs const&);
+		// 編集メニューの「文字列の編集」が選択された.
+		IAsyncAction edit_text_click_async(IInspectable const&, RoutedEventArgs const&);
+
+		//-------------------------------
 		// MainPage_find.cpp
 		// 文字列の編集と, 検索/置換
 		//-------------------------------
 
-		// 図形が持つ文字列を編集する.
-		//IAsyncAction edit_text_async(ShapeText* s);
-		// 編集メニューの「文字列の編集」が選択された.
-		IAsyncAction edit_text_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の検索/置換」が選択された.
 		void find_text_click(IInspectable const&, RoutedEventArgs const&);
 		// 文字列検索パネルの「閉じる」ボタンが押された.
@@ -549,7 +557,8 @@ namespace winrt::GraphPaper::implementation
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_ID U, int S> void font_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_ID U, int S> void font_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		template <UNDO_ID U, int S> void font_slider_val_changed(
+			IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_grid.cpp
@@ -577,7 +586,8 @@ namespace winrt::GraphPaper::implementation
 		// 値をスライダーのヘッダーと図形に格納する.
 		template <UNDO_ID U, int S> void grid_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_ID U, int S> void grid_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		template <UNDO_ID U, int S> void grid_slider_val_changed(
+			IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_group.cpp

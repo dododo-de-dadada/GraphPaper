@@ -1627,11 +1627,12 @@ namespace winrt::GraphPaper::implementation
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F test) const noexcept final override;
 		// 円弧をベジェ曲線で近似する.
-		void alternate_bezier(
-			const double t, D2D1_POINT_2F& start1, D2D1_BEZIER_SEGMENT& b_seg1,
-			D2D1_POINT_2F& start2, D2D1_BEZIER_SEGMENT& b_seg2) const noexcept;
+		void alternate_bezier(D2D1_POINT_2F& start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept;
 		// 矢じりの返しと先端の位置を得る.
-		static bool qellipse_calc_arrow(const D2D1_POINT_2F vec, const D2D1_POINT_2F center, const D2D1_SIZE_F rad, const double rot, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
+		static bool qellipse_calc_arrow(
+			const D2D1_POINT_2F vec, const D2D1_POINT_2F center, const D2D1_SIZE_F rad,
+			const double deg_start, const double deg_end, const double deg_rot,
+			const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
 		// 図形を描く
 		void draw(void) final override;
 		// 図形をデータライターに SVG として書き込む.

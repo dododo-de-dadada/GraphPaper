@@ -52,7 +52,9 @@ namespace winrt::GraphPaper::implementation
 	float Shape::m_anc_circle_inner = static_cast<FLOAT>(sqrt(a_len * a_len / M_PI));	// 内側の半径
 	float Shape::m_anc_circle_outer = static_cast<FLOAT>(sqrt(a_len * a_len / M_PI) + 2.0);	// 外側の半径
 
-	void Shape::begin_draw(ID2D1RenderTarget* target, const bool anc_show, IWICFormatConverter* const background, const double scale)
+	void Shape::begin_draw(
+		ID2D1RenderTarget* target, const bool anc_show, IWICFormatConverter* const background, 
+		const double scale)
 	{
 		// レンダーターゲットが変わるたびに,
 		if (m_d2d_target != target) {

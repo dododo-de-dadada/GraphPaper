@@ -144,7 +144,7 @@ namespace winrt::GraphPaper::implementation
 	// runlength_cnt	選択された図形のランレングスの数
 	// selected_text_cnt	選択された文字列図形の数
 	// selected_image_cnt	選択された画像図形の数
-	// selected_image_cnt	選択された円弧図形の数
+	// selected_arc_cnt	選択された円弧図形の数
 	// text_cnt	文字列図形の数
 	// fore_selected	最前面の図形の選択フラグ
 	// back_selected	最背面の図形の選択フラグ
@@ -160,8 +160,8 @@ namespace winrt::GraphPaper::implementation
 		selected_group_cnt = 0;	// 選択されたグループ図形の数
 		runlength_cnt = 0;	// 選択された図形のランレングスの数
 		selected_text_cnt = 0;	// 選択された文字列図形の数
-		selected_image_cnt = 0;
-		selected_arc_cnt = 0;
+		selected_image_cnt = 0;	// 選択された画像図形の数
+		selected_arc_cnt = 0;	// 選択された円弧図形の数
 		text_cnt = 0;	// 文字列図形の数
 		fore_selected = false;	// 最前面の図形の選択フラグ
 		back_selected = false;	// 最背面の図形の選択フラグ
@@ -370,8 +370,10 @@ namespace winrt::GraphPaper::implementation
 		stack.clear();
 		return f;
 	}
-	template bool winrt::GraphPaper::implementation::slist_match<Shape* const, uint32_t>(SHAPE_LIST const& slist, Shape* const s, uint32_t& t);
-	template bool winrt::GraphPaper::implementation::slist_match<const uint32_t, Shape*>(SHAPE_LIST const& slist, const uint32_t s, Shape*& t);
+	template bool winrt::GraphPaper::implementation::slist_match<Shape* const, uint32_t>(
+		SHAPE_LIST const& slist, Shape* const s, uint32_t& t);
+	template bool winrt::GraphPaper::implementation::slist_match<const uint32_t, Shape*>(
+		SHAPE_LIST const& slist, const uint32_t s, Shape*& t);
 
 	// 選択された図形を移動する.
 	// slist	図形リスト
@@ -405,7 +407,8 @@ namespace winrt::GraphPaper::implementation
 	// it_end	リストの終端
 	// s	図形
 	// 戻り値	次の図形. ヌルならば次の図形はない.
-	template <typename T> static Shape* slist_next(T const& it_beg, T const& it_end, const Shape* s) noexcept
+	template <typename T> static Shape* slist_next(
+		T const& it_beg, T const& it_end, const Shape* s) noexcept
 	{
 		auto it{ std::find(it_beg, it_end, s) };
 		if (it != it_end) {
@@ -414,8 +417,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		return static_cast<Shape*>(nullptr);
 	}
-	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, const Shape* s) noexcept;
-	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend, const Shape* s) noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(
+		SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, const Shape* s)
+		noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(
+		SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend,
+		const Shape* s) noexcept;
 
 	// 図形の次の図形と, その間隔をリストから得る.
 	// it_beg	リストの始端
@@ -436,8 +443,12 @@ namespace winrt::GraphPaper::implementation
 		}
 		return static_cast<Shape*>(nullptr);
 	}
-	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, uint32_t& distance) noexcept;
-	template Shape* winrt::GraphPaper::implementation::slist_next(SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend, uint32_t& distance) noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(
+		SHAPE_LIST::iterator const& it_beg, SHAPE_LIST::iterator const& it_end, uint32_t& distance)
+		noexcept;
+	template Shape* winrt::GraphPaper::implementation::slist_next(
+		SHAPE_LIST::reverse_iterator const& it_rbeg, SHAPE_LIST::reverse_iterator const& it_rend,
+		uint32_t& distance) noexcept;
 
 	// 前の図形をリストから得る.
 	Shape* slist_prev(SHAPE_LIST const& slist, const Shape* s) noexcept
@@ -618,7 +629,8 @@ namespace winrt::GraphPaper::implementation
 	// p	位置
 	// d	距離
 	// v	最も近い頂点
-	bool slist_find_vertex_closest(const SHAPE_LIST& slist, const D2D1_POINT_2F& p, const float d, D2D1_POINT_2F& v) noexcept
+	bool slist_find_vertex_closest(
+		const SHAPE_LIST& slist, const D2D1_POINT_2F& p, const float d, D2D1_POINT_2F& v) noexcept
 	{
 		bool flag = false;	// 頂点があったかどうかのフラグ
 		float dd = d * d;	// 距離の二乗

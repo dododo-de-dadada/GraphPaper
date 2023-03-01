@@ -232,6 +232,7 @@ namespace winrt::GraphPaper::implementation
 		mfi_ungroup().IsEnabled(exists_selected_group);
 		mfi_edit_text().IsEnabled(exists_selected_text);
 		mfi_find_text().IsEnabled(exists_text);
+		mfi_edit_arc().IsEnabled(exists_selected_arc);
 		mfi_text_fit_frame_to_text().IsEnabled(exists_selected_text);
 		mfi_bring_forward().IsEnabled(enable_forward);
 		mfi_bring_to_front().IsEnabled(enable_forward);

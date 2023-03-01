@@ -9,10 +9,7 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	//using winrt::Windows::UI::Xaml::Controls::TextChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	constexpr wchar_t NOT_FOUND[] = L"str_info_not_found";	// 「文字列が見つかりません」メッセージのリソースキー
 
@@ -508,56 +505,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 	*/
-
-	// 編集メニューの「文字列の編集」が選択された.
-	IAsyncAction MainPage::edit_text_click_async(IInspectable const&, RoutedEventArgs const&)
-	{
-		ShapeText* s = static_cast<ShapeText*>(nullptr);
-		if (m_event_shape_prev != nullptr && typeid(*m_event_shape_prev) == typeid(ShapeText)) {
-			// 前回ポインターが押されたのが文字列図形の場合,
-			s = static_cast<ShapeText*>(m_event_shape_prev);
-		}
-		else {
-			// 選択された図形のうち最前面にある文字列図形を得る.
-			for (auto it = m_main_page.m_shape_list.rbegin(); it != m_main_page.m_shape_list.rend(); it++) {
-				auto t = *it;
-				if (t->is_deleted()) {
-					continue;
-				}
-				if (!t->is_selected()) {
-					continue;
-				}
-				if (typeid(*t) == typeid(ShapeText)) {
-					s = static_cast<ShapeText*>(t);
-					break;
-				}
-			}
-		}
-		if (s != nullptr) {
-			static winrt::event_token primary_token;
-			static winrt::event_token closed_token;
-
-			tx_edit_text().Text(s->m_text == nullptr ? L"" : s->m_text);
-			tx_edit_text().SelectAll();
-			ck_text_fit_frame_to_text().IsChecked(m_text_fit_frame_to_text);
-			if (co_await cd_edit_text_dialog().ShowAsync() == ContentDialogResult::Primary) {
-				auto text = wchar_cpy(tx_edit_text().Text().c_str());
-				ustack_push_set<UNDO_ID::TEXT_CONTENT>(s, text);
-				m_text_fit_frame_to_text = ck_text_fit_frame_to_text().IsChecked().GetBoolean();
-				if (m_text_fit_frame_to_text) {
-					ustack_push_position(s, ANC_TYPE::ANC_SE);
-					s->fit_frame_to_text(m_main_page.m_grid_snap ? m_main_page.m_grid_base + 1.0f : 0.0f);
-				}
-				ustack_push_null();
-				xcvd_is_enabled();
-				page_draw();
-			}
-		}
-		else {
-			status_bar_set_pos();
-		}
-
-	}
 
 	// 文字列検索パネルの「すべて置換」ボタンが押された.
 	void MainPage::find_replace_all_click(IInspectable const&, RoutedEventArgs const&)
