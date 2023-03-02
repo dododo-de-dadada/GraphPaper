@@ -1165,8 +1165,8 @@ namespace winrt::GraphPaper::implementation
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
 				qellipse_calc_arrow(
-					m_pos[0], center, m_radius, m_deg_start, m_deg_end, m_deg_rot, m_arrow_size,
-					arrow);
+					m_pos[0], center, m_radius, m_deg_start, m_deg_end, m_deg_rot, m_sweep_dir,
+					m_arrow_size, arrow);
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size,
 					arrow, arrow[2], dt_writer);
 			}

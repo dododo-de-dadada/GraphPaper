@@ -781,7 +781,7 @@ namespace winrt::GraphPaper::implementation
 				fabs(m_radius.width), fabs(m_radius.height),
 				m_deg_rot,
 				m_larg_flag != 0 ? 1 : 0,
-				m_sweep_flag != 0 ? 1 : 0,
+				m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE ? 0 : 1,
 				p[4].x, p[4].y,
 				p[2].x, p[2].y
 			);
@@ -799,7 +799,7 @@ namespace winrt::GraphPaper::implementation
 				fabs(m_radius.width), fabs(m_radius.height),
 				m_deg_rot,
 				m_larg_flag != 0 ? 1 : 0,
-				m_sweep_flag != 0 ? 1 : 0,
+				m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE ? 0 : 1,
 				p[4].x, p[4].y
 			);
 			dt_writer.WriteString(buf);
@@ -811,7 +811,8 @@ namespace winrt::GraphPaper::implementation
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
 				qellipse_calc_arrow(
-					m_pos[0], p[2], m_radius, m_deg_start, m_deg_end, m_deg_rot, m_arrow_size, arrow);
+					m_pos[0], p[2], m_radius, m_deg_start, m_deg_end, m_deg_rot, m_sweep_dir,
+					m_arrow_size, arrow);
 				export_svg_arrow(
 					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
 					m_join_style, m_join_miter_limit, arrow, arrow[2]);

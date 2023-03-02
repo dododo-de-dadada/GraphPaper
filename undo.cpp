@@ -14,13 +14,13 @@ namespace winrt::GraphPaper::implementation
 	// 部位の位置を得る.
 	static D2D1_POINT_2F undo_get_pos_anc(const Shape* s, const uint32_t anc) noexcept;
 	// データリーダーから位置を読み込む.
-	static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader);
+	//static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
-	static D2D1_RECT_F undo_read_rect(DataReader const& dt_reader);
+	//static D2D1_RECT_F undo_read_rect(DataReader const& dt_reader);
 	// データリーダーから添え字を読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
-	static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader);
+	//static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader);
 	// 図形をデータライターに書き込む.
 	static void undo_write_shape(Shape* const s, DataWriter const& dt_writer);
 
@@ -33,25 +33,13 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから位置を読み込む.
-	static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader)
-	{
-		return D2D1_POINT_2F{
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle()
-		};
-	}
-
-	// データリーダーから位置を読み込む.
-	// dt_reader	データリーダー
-	static D2D1_RECT_F undo_read_rect(DataReader const& dt_reader)
-	{
-		return D2D1_RECT_F{
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle()
-		};
-	}
+	//static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader)
+	//{
+	//	return D2D1_POINT_2F{
+	//		dt_reader.ReadSingle(),
+	//		dt_reader.ReadSingle()
+	//	};
+	//}
 
 	// データリーダーから添え字を読み込んで図形を得る.
 	// dt_reader	データリーダー
@@ -73,13 +61,13 @@ namespace winrt::GraphPaper::implementation
 
 	// データリーダーから位置を読み込む.
 	// dt_reader	データリーダー
-	static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader)
-	{
-		return D2D1_SIZE_F{
-			dt_reader.ReadSingle(),
-			dt_reader.ReadSingle()
-		};
-	}
+	//static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader)
+	//{
+	//	return D2D1_SIZE_F{
+	//		dt_reader.ReadSingle(),
+	//		dt_reader.ReadSingle()
+	//	};
+	//}
 
 	// 図形をデータライターに書き込む.
 	// dt_reader	データリーダー
@@ -128,7 +116,7 @@ namespace winrt::GraphPaper::implementation
 	UndoForm::UndoForm(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_anc(static_cast<ANC_TYPE>(dt_reader.ReadUInt32())),
-		m_start(undo_read_pos(dt_reader))
+		m_start(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() })
 	{}
 
 	// 図形の形を保存する.
@@ -252,9 +240,10 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
 	template UndoValue<UNDO_ID::PAGE_PADD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
 	template UndoValue<UNDO_ID::POLY_END>::UndoValue(Shape* s, const bool &val);
-	template UndoValue<UNDO_ID::DEG_START>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_ID::DEG_END>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_ID::DEG_ROT>::UndoValue(Shape* s, const float& val);
+	template UndoValue<UNDO_ID::ARC_START>::UndoValue(Shape* s, const float& val);
+	template UndoValue<UNDO_ID::ARC_END>::UndoValue(Shape* s, const float& val);
+	template UndoValue<UNDO_ID::ARC_ROT>::UndoValue(Shape* s, const float& val);
+	template UndoValue<UNDO_ID::ARC_DIR>::UndoValue(Shape* s, const D2D1_SWEEP_DIRECTION& val);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
 	template UndoValue<UNDO_ID::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_ID::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
@@ -275,9 +264,9 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_ID::GRID_BASE ||
 			U == UNDO_ID::IMAGE_OPAC ||
 			U == UNDO_ID::JOIN_LIMIT ||
-			U == UNDO_ID::DEG_START ||
-			U == UNDO_ID::DEG_END ||
-			U == UNDO_ID::DEG_ROT ||
+			U == UNDO_ID::ARC_START ||
+			U == UNDO_ID::ARC_END ||
+			U == UNDO_ID::ARC_ROT ||
 			U == UNDO_ID::STROKE_WIDTH ||
 			U == UNDO_ID::TEXT_LINE_SP) {
 			m_value = dt_reader.ReadSingle();
@@ -326,6 +315,7 @@ namespace winrt::GraphPaper::implementation
 			};
 		}
 		else if constexpr (
+			U == UNDO_ID::ARC_DIR ||
 			U == UNDO_ID::ARROW_STYLE ||
 			U == UNDO_ID::DASH_CAP ||
 			U == UNDO_ID::DASH_STYLE ||
@@ -400,9 +390,10 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_PADD>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::POLY_END>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::DEG_START>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::DEG_END>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::DEG_ROT>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::ARC_START>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::ARC_END>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::ARC_ROT>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::ARC_DIR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_WIDTH>::UndoValue(DataReader const& dt_reader);
@@ -539,19 +530,24 @@ namespace winrt::GraphPaper::implementation
 		s->set_poly_end(val);
 	}
 
-	void UndoValue<UNDO_ID::DEG_START>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_ID::ARC_START>::SET(Shape* const s, const float& val)
 	{
 		static_cast<ShapeQEllipse*>(s)->set_deg_start(val);
 	}
 
-	void UndoValue<UNDO_ID::DEG_END>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_ID::ARC_END>::SET(Shape* const s, const float& val)
 	{
 		static_cast<ShapeQEllipse*>(s)->set_deg_end(val);
 	}
 
-	void UndoValue<UNDO_ID::DEG_ROT>::SET(Shape* const s, const float& val)
+	void UndoValue<UNDO_ID::ARC_ROT>::SET(Shape* const s, const float& val)
 	{
 		s->set_deg_rotation(val);
+	}
+
+	void UndoValue<UNDO_ID::ARC_DIR>::SET(Shape* const s, const D2D1_SWEEP_DIRECTION& val)
+	{
+		s->set_sweep(val);
 	}
 
 	void UndoValue<UNDO_ID::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
@@ -724,19 +720,24 @@ namespace winrt::GraphPaper::implementation
 		return s->get_poly_end(val);
 	}
 
-	bool UndoValue<UNDO_ID::DEG_START>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_ID::ARC_START>::GET(const Shape* s, float& val) noexcept
 	{
 		return static_cast<const ShapeQEllipse*>(s)->get_deg_start(val);
 	}
 
-	bool UndoValue<UNDO_ID::DEG_END>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_ID::ARC_END>::GET(const Shape* s, float& val) noexcept
 	{
 		return static_cast<const ShapeQEllipse*>(s)->get_deg_end(val);
 	}
 
-	bool UndoValue<UNDO_ID::DEG_ROT>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_ID::ARC_ROT>::GET(const Shape* s, float& val) noexcept
 	{
 		return s->get_deg_rotation(val);
+	}
+
+	bool UndoValue<UNDO_ID::ARC_DIR>::GET(const Shape* s, D2D1_SWEEP_DIRECTION& val) noexcept
+	{
+		return s->get_sweep(val);
 	}
 
 	bool UndoValue<UNDO_ID::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& val) noexcept
@@ -794,14 +795,15 @@ namespace winrt::GraphPaper::implementation
 			U == UNDO_ID::GRID_BASE ||
 			U == UNDO_ID::IMAGE_OPAC ||
 			U == UNDO_ID::JOIN_LIMIT ||
-			U == UNDO_ID::DEG_START ||
-			U == UNDO_ID::DEG_END ||
-			U == UNDO_ID::DEG_ROT ||
+			U == UNDO_ID::ARC_START ||
+			U == UNDO_ID::ARC_END ||
+			U == UNDO_ID::ARC_ROT ||
 			U == UNDO_ID::STROKE_WIDTH ||
 			U == UNDO_ID::TEXT_LINE_SP) {
 			dt_writer.WriteSingle(m_value);
 		}
 		else if constexpr (
+			U == UNDO_ID::ARC_DIR ||
 			U == UNDO_ID::ARROW_STYLE ||
 			U == UNDO_ID::DASH_CAP ||
 			U == UNDO_ID::DASH_STYLE ||
@@ -931,10 +933,16 @@ namespace winrt::GraphPaper::implementation
 	// データリーダーから操作を読み込む.
 	UndoImage::UndoImage(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
-		m_start(undo_read_pos(dt_reader)),
-		m_view(undo_read_size(dt_reader)),
-		m_clip(undo_read_rect(dt_reader)),
-		m_ratio(undo_read_size(dt_reader)),
+		m_start(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
+		m_view(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
+		m_clip(D2D1_RECT_F{
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle(),
+			dt_reader.ReadSingle()
+			}
+		),
+		m_ratio(D2D1_SIZE_F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() }),
 		m_opac(dt_reader.ReadSingle())
 	{}
 

@@ -64,6 +64,18 @@ namespace winrt::GraphPaper::implementation
 		case UNDO_ID::NIL:
 			u = nullptr;
 			break;
+		case UNDO_ID::ARC_DIR:
+			u = new UndoValue<UNDO_ID::ARC_DIR>(dt_reader);
+			break;
+		case UNDO_ID::ARC_END:
+			u = new UndoValue<UNDO_ID::ARC_END>(dt_reader);
+			break;
+		case UNDO_ID::ARC_ROT:
+			u = new UndoValue<UNDO_ID::ARC_ROT>(dt_reader);
+			break;
+		case UNDO_ID::ARC_START:
+			u = new UndoValue<UNDO_ID::ARC_START>(dt_reader);
+			break;
 		case UNDO_ID::DEFORM:
 			u = new UndoForm(dt_reader);
 			break;
@@ -571,6 +583,8 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_undo.push_back(new UndoValue<U>(s));
 	}
 
+	template bool MainPage::ustack_push_set<UNDO_ID::ARC_ROT>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_ID::ARC_DIR>(D2D1_SWEEP_DIRECTION const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::ARROW_SIZE>(ARROW_SIZE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::ARROW_STYLE>(ARROW_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::IMAGE_OPAC>(float const& val);
@@ -606,7 +620,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 完全特殊化
 	// 選択されている四分だ円を回転し, その操作をスタックに積む.
-	template<> bool MainPage::ustack_push_set<UNDO_ID::DEG_ROT, float>(float const& val)
+	/*
+	template<> bool MainPage::ustack_push_set<UNDO_ID::ARC_ROT, float>(float const& val)
 	{
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
@@ -614,17 +629,16 @@ namespace winrt::GraphPaper::implementation
 				typeid(*s) != typeid(ShapeQEllipse)) {
 				continue;
 			}
-			//m_ustack_undo.push_back(new UndoValue<UNDO_ID::MOVE>(s));
-			//m_ustack_undo.push_back(new UndoForm(s, ANC_TYPE::ANC_P0 + 1));
-			m_ustack_undo.push_back(new UndoValue<UNDO_ID::DEG_ROT>(s, val));
+			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ARC_ROT>(s, val));
 			flag = true;
 		}
 		return flag;
 	}
+	*/
 
 	// 完全特殊化
 	// 選択されている四分だ円を回転し, その操作をスタックに積む.
-	template<> bool MainPage::ustack_push_set<UNDO_ID::DEG_START, float>(float const& val)
+	template<> bool MainPage::ustack_push_set<UNDO_ID::ARC_START, float>(float const& val)
 	{
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
@@ -632,7 +646,7 @@ namespace winrt::GraphPaper::implementation
 				typeid(*s) != typeid(ShapeQEllipse)) {
 				continue;
 			}
-			m_ustack_undo.push_back(new UndoValue<UNDO_ID::DEG_START>(s, val));
+			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ARC_START>(s, val));
 			flag = true;
 		}
 		return flag;
@@ -640,7 +654,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 完全特殊化
 	// 選択されている四分だ円を回転し, その操作をスタックに積む.
-	template<> bool MainPage::ustack_push_set<UNDO_ID::DEG_END, float>(float const& val)
+	template<> bool MainPage::ustack_push_set<UNDO_ID::ARC_END, float>(float const& val)
 	{
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
@@ -648,7 +662,7 @@ namespace winrt::GraphPaper::implementation
 				typeid(*s) != typeid(ShapeQEllipse)) {
 				continue;
 			}
-			m_ustack_undo.push_back(new UndoValue<UNDO_ID::DEG_END>(s, val));
+			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ARC_END>(s, val));
 			flag = true;
 		}
 		return flag;

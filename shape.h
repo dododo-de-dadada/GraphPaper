@@ -513,6 +513,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_stroke_color(D2D1_COLOR_F& /*val*/) const noexcept { return false; }
 		// ‘‘Ì‚Ì‘¾‚³‚ğ“¾‚é
 		virtual bool get_stroke_width(float& /*val*/) const noexcept { return false; }
+		// ‰~ŒÊ‚Ì•ûŒü‚ğ“¾‚é
+		virtual bool get_sweep(D2D1_SWEEP_DIRECTION& /*val*/) const noexcept { return false; }
 		// ’i—‚Ì‚»‚ë‚¦‚ğ“¾‚é.
 		virtual bool get_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT& /*val*/) const noexcept
 		{ return false; }
@@ -612,6 +614,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool set_stroke_color(const D2D1_COLOR_F& /*val*/) noexcept { return false; }
 		// ’l‚ğ‘‘Ì‚Ì‘¾‚³‚ÉŠi”[‚·‚é.
 		virtual bool set_stroke_width(const float /*val*/) noexcept { return false; }
+		// ’l‚ğ‰~ŒÊ‚Ì•ûŒü‚ÉŠi”[‚·‚é.
+		virtual bool set_sweep(const D2D1_SWEEP_DIRECTION /*val*/) noexcept { return false; }
 		// ’l‚ğ’i—‚Ì‚»‚ë‚¦‚ÉŠi”[‚·‚é.
 		virtual bool set_text_align_vert(const DWRITE_PARAGRAPH_ALIGNMENT /*val*/) noexcept
 		{ return false; }
@@ -1568,10 +1572,15 @@ namespace winrt::GraphPaper::implementation
 		float m_deg_rot = 0.0f;	// ‚¾‰~‚ÌŒX‚«
 		float m_deg_start = 0.0f;	// n“_‚ÌŠp“x
 		float m_deg_end = 0.0f;	// I“_‚ÌŠp“x
-		D2D1_SWEEP_DIRECTION m_sweep_flag = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;	// ‰~ŒÊ‚Ì•ûŒü
+		D2D1_SWEEP_DIRECTION m_sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;	// ‰~ŒÊ‚Ì•ûŒü
 		D2D1_ARC_SIZE m_larg_flag = D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL;
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom;
 
+		bool get_sweep(D2D1_SWEEP_DIRECTION& val) const noexcept final override
+		{
+			val = m_sweep_dir;
+			return true;
+		}
 		// ‚¾‰~‚Ì’†S“_‚ğ“¾‚é.
 		bool get_pos_center(D2D1_POINT_2F& val) const noexcept;
 		// ‚¾‰~‚Ìn“_‚ÌŠp“x‚ğ“¾‚é.
@@ -1622,6 +1631,17 @@ namespace winrt::GraphPaper::implementation
 			}
 			return false;
 		}
+		bool set_sweep(const D2D1_SWEEP_DIRECTION val) noexcept final override
+		{
+			if (m_sweep_dir != val) {
+				m_sweep_dir = val;
+				m_d2d_fill_geom = nullptr;
+				m_d2d_path_geom = nullptr;
+				m_d2d_arrow_geom = nullptr;
+				return true;
+			}
+			return false;
+		}
 		// ‚¾‰~‚ÌŒX‚«‚ÉŠi”[‚·‚é.
 		bool set_deg_rotation(const float val) noexcept final override;
 		// ˆÊ’u‚ğŠÜ‚Ş‚©”»’è‚·‚é.
@@ -1632,7 +1652,7 @@ namespace winrt::GraphPaper::implementation
 		static bool qellipse_calc_arrow(
 			const D2D1_POINT_2F vec, const D2D1_POINT_2F center, const D2D1_SIZE_F rad,
 			const double deg_start, const double deg_end, const double deg_rot,
-			const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
+			const D2D1_SWEEP_DIRECTION dir, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
 		// }Œ`‚ğ•`‚­
 		void draw(void) final override;
 		// }Œ`‚ğƒf[ƒ^ƒ‰ƒCƒ^[‚É SVG ‚Æ‚µ‚Ä‘‚«‚Ş.
