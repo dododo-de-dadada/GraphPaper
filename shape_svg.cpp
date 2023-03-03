@@ -762,7 +762,8 @@ namespace winrt::GraphPaper::implementation
 		wchar_t buf[1024];
 		D2D1_POINT_2F p[5]{};
 		if (is_opaque(m_fill_color) || 
-			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && m_arrow_style != ARROW_STYLE::NONE)) {
+			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
+				m_arrow_style != ARROW_STYLE::NONE)) {
 			get_verts(p);
 		}
 		if (is_opaque(m_fill_color)) {
@@ -781,7 +782,7 @@ namespace winrt::GraphPaper::implementation
 				fabs(m_radius.width), fabs(m_radius.height),
 				m_deg_rot,
 				m_larg_flag != 0 ? 1 : 0,
-				m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE ? 0 : 1,
+				1,//m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE ? 0 : 1,
 				p[4].x, p[4].y,
 				p[2].x, p[2].y
 			);
@@ -799,7 +800,7 @@ namespace winrt::GraphPaper::implementation
 				fabs(m_radius.width), fabs(m_radius.height),
 				m_deg_rot,
 				m_larg_flag != 0 ? 1 : 0,
-				m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE ? 0 : 1,
+				1,//m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE ? 0 : 1,
 				p[4].x, p[4].y
 			);
 			dt_writer.WriteString(buf);

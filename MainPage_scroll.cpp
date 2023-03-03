@@ -107,11 +107,11 @@ namespace winrt::GraphPaper::implementation
 		const double vo = sb_vert().Value();	// 縦のスクロール値
 		const double vw = sb_horz().ViewportSize();	// 表示の幅
 		const double vh = sb_vert().ViewportSize();	// 表示の高さ
-		const D2D1_POINT_2F v_lt{
+		const D2D1_POINT_2F v_lt{	// 表示の左上位置
 			static_cast<FLOAT>(ox + ho),
 			static_cast<FLOAT>(oy + vo)
 		};
-		const D2D1_POINT_2F v_rb{
+		const D2D1_POINT_2F v_rb{	// 表示の右下位置
 			static_cast<FLOAT>(v_lt.x + vw),
 			static_cast<FLOAT>(v_lt.y + vh)
 		};

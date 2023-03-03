@@ -1127,7 +1127,7 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_POINT_2F center{};
 		if (is_opaque(m_fill_color) || m_arrow_style != ARROW_STYLE::NONE) {
-			get_pos_center(center);
+			get_pos_anc(ANC_TYPE::ANC_A_CENTER, center);
 		}
 
 		size_t len = 0;

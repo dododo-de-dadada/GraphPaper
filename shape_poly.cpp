@@ -806,21 +806,21 @@ namespace winrt::GraphPaper::implementation
 			m_stroke_cap, m_join_style, m_join_miter_limit, is_opaque(m_fill_color), m_anc_width);
 	}
 
-	// 範囲に含まれるか判定する.
-	// a_lt	範囲の左上位置
-	// a_rb	範囲の右下位置
+	// 矩形範囲に含まれるか判定する.
+	// lt	矩形の左上位置
+	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapePolygon::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
+	bool ShapePolygon::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
-		if (!pt_in_rect(m_start, area_lt, area_rb)) {
+		if (!pt_in_rect(m_start, lt, rb)) {
 			return false;
 		}
-		const size_t d_cnt = m_pos.size();	// 差分の数
-		D2D1_POINT_2F e_pos = m_start;
-		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(e_pos, m_pos[i], e_pos);	// 次の位置
-			if (!pt_in_rect(e_pos, area_lt, area_rb)) {
+		const size_t p_cnt = m_pos.size();	// 差分の数
+		D2D1_POINT_2F p = m_start;
+		for (size_t i = 0; i < p_cnt; i++) {
+			pt_add(p, m_pos[i], p);	// 次の位置
+			if (!pt_in_rect(p, lt, rb)) {
 				return false;
 			}
 		}

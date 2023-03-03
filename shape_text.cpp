@@ -647,17 +647,19 @@ namespace winrt::GraphPaper::implementation
 		return ShapeRect::hit_test(test);
 	}
 
-	// 範囲に含まれるか判定する.
-	// area_lt	範囲の左上位置
-	// area_rb	範囲の右下位置
+	// 矩形範囲に含まれるか判定する.
+	// lt	矩形の左上位置
+	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeText::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
+	bool ShapeText::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		D2D1_POINT_2F p_lt;	// 左上位置
 
 		if (m_dwrite_test_cnt > 0 && m_dwrite_test_cnt < UINT32_MAX) {
-			const float descent = m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f : (m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
+			const float descent = 
+				m_dwrite_font_metrics.designUnitsPerEm == 0 ? 0.0f :
+				(m_font_size * m_dwrite_font_metrics.descent / m_dwrite_font_metrics.designUnitsPerEm);
 
 			ShapeRect::get_bound_lt(p_lt);
 			for (uint32_t i = 0; i < m_dwrite_test_cnt; i++) {
@@ -670,17 +672,17 @@ namespace winrt::GraphPaper::implementation
 				const double top = static_cast<double>(tt) + bl + descent - m_font_size;
 				D2D1_POINT_2F t_lt;	// 文字列の左上位置
 				pt_add(p_lt, tl, top, t_lt);
-				if (!pt_in_rect(t_lt, area_lt, area_rb)) {
+				if (!pt_in_rect(t_lt, lt, rb)) {
 					return false;
 				}
 				D2D1_POINT_2F t_rb;	// 文字列の右下位置
 				pt_add(t_lt, tw, m_font_size, t_rb);
-				if (!pt_in_rect(t_rb, area_lt, area_rb)) {
+				if (!pt_in_rect(t_rb, lt, rb)) {
 					return false;
 				}
 			}
 		}
-		return ShapeRect::in_area(area_lt, area_rb);
+		return ShapeRect::in_area(lt, rb);
 	}
 
 	// 書体名が有効か判定する.

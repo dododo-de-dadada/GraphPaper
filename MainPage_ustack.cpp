@@ -524,7 +524,8 @@ namespace winrt::GraphPaper::implementation
 	{
 		const auto it_end = m_ustack_undo.rend();
 		Undo* u;
-		for (auto it = m_ustack_undo.rbegin(); it != it_end && (u = *it) != nullptr && typeid(*u) == typeid(UndoSelect); it++) {
+		for (auto it = m_ustack_undo.rbegin();
+			it != it_end && (u = *it) != nullptr && typeid(*u) == typeid(UndoSelect); it++) {
 			if (u->shape() == s) {
 				// 操作の図形が指定された図形と一致した場合,
 				// 操作スタックを介せずに図形の選択を反転させ, 
@@ -583,8 +584,10 @@ namespace winrt::GraphPaper::implementation
 		m_ustack_undo.push_back(new UndoValue<U>(s));
 	}
 
-	template bool MainPage::ustack_push_set<UNDO_ID::ARC_ROT>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::ARC_DIR>(D2D1_SWEEP_DIRECTION const& val);
+	template bool MainPage::ustack_push_set<UNDO_ID::ARC_END>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_ID::ARC_ROT>(float const& val);
+	template bool MainPage::ustack_push_set<UNDO_ID::ARC_START>(float const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::ARROW_SIZE>(ARROW_SIZE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::ARROW_STYLE>(ARROW_STYLE const& val);
 	template bool MainPage::ustack_push_set<UNDO_ID::IMAGE_OPAC>(float const& val);
@@ -638,6 +641,7 @@ namespace winrt::GraphPaper::implementation
 
 	// 完全特殊化
 	// 選択されている四分だ円を回転し, その操作をスタックに積む.
+	/*
 	template<> bool MainPage::ustack_push_set<UNDO_ID::ARC_START, float>(float const& val)
 	{
 		auto flag = false;
@@ -651,9 +655,11 @@ namespace winrt::GraphPaper::implementation
 		}
 		return flag;
 	}
+	*/
 
 	// 完全特殊化
 	// 選択されている四分だ円を回転し, その操作をスタックに積む.
+	/*
 	template<> bool MainPage::ustack_push_set<UNDO_ID::ARC_END, float>(float const& val)
 	{
 		auto flag = false;
@@ -667,6 +673,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		return flag;
 	}
+	*/
 
 	// 完全特殊化
 	// 文字範囲の値を図形に格納して, その操作をスタックに積む.

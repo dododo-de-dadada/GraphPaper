@@ -323,17 +323,17 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_PAGE;
 	}
 
-	// 範囲に含まれるか判定する.
-	// area_lt	範囲の左上位置
-	// area_rb	範囲の右下位置
+	// 矩形範囲に含まれるか判定する.
+	// lt	矩形の左上位置
+	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeLine::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
+	bool ShapeLine::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
-		if (pt_in_rect(m_start, area_lt, area_rb)) {
+		if (pt_in_rect(m_start, lt, rb)) {
 			D2D1_POINT_2F pos;
 			pt_add(m_start, m_pos[0], pos);
-			return pt_in_rect(pos, area_lt, area_rb);
+			return pt_in_rect(pos, lt, rb);
 		}
 		return false;
 	}

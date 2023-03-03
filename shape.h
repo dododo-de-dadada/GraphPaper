@@ -446,8 +446,8 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_arrow_style(ARROW_STYLE& /*val*/) const noexcept { return false; }
 		// 図形を囲む領域を得る.
 		virtual void get_bound(
-			const D2D1_POINT_2F /*a_lt*/, const D2D1_POINT_2F /*a_rb*/, D2D1_POINT_2F& /*b_lt*/,
-			D2D1_POINT_2F& /*b_rb*/) const noexcept {}
+			const D2D1_POINT_2F/*a_lt*/, const D2D1_POINT_2F/*a_rb*/, D2D1_POINT_2F&/*b_lt*/,
+			D2D1_POINT_2F&/*b_rb*/) const noexcept {}
 		// 端の形式を得る.
 		virtual bool get_stroke_cap(CAP_STYLE& /*val*/) const noexcept { return false; }
 		// 角丸半径を得る.
@@ -465,175 +465,183 @@ namespace winrt::GraphPaper::implementation
 		// 書体名を得る.
 		virtual bool get_font_family(wchar_t*& /*val*/) const noexcept { return false; }
 		// 書体の大きさを得る.
-		virtual bool get_font_size(float& /*val*/) const noexcept { return false; }
+		virtual bool get_font_size(float&/*val*/) const noexcept { return false; }
 		// 書体の幅を得る.
-		virtual bool get_font_stretch(DWRITE_FONT_STRETCH& /*val*/) const noexcept 
-		{ return false; }
+		virtual bool get_font_stretch(DWRITE_FONT_STRETCH&/*val*/) const noexcept { return false; }
 		// 書体の字体を得る.
-		virtual bool get_font_style(DWRITE_FONT_STYLE& /*val*/) const noexcept { return false; }
+		virtual bool get_font_style(DWRITE_FONT_STYLE&/*val*/) const noexcept { return false; }
 		// 書体の太さを得る.
-		virtual bool get_font_weight(DWRITE_FONT_WEIGHT& /*val*/) const noexcept { return false; }
+		virtual bool get_font_weight(DWRITE_FONT_WEIGHT&/*val*/) const noexcept { return false; }
 		// 方眼の基準の大きさを得る.
-		virtual bool get_grid_base(float& /*val*/) const noexcept { return false; }
+		virtual bool get_grid_base(float&/*val*/) const noexcept { return false; }
 		// 方眼の色を得る.
-		virtual bool get_grid_color(D2D1_COLOR_F& /*val*/) const noexcept { return false; }
+		virtual bool get_grid_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
 		// 方眼を強調を得る.
-		virtual bool get_grid_emph(GRID_EMPH& /*val*/) const noexcept { return false; }
+		virtual bool get_grid_emph(GRID_EMPH&/*val*/) const noexcept { return false; }
 		// 方眼の表示を得る.
-		virtual bool get_grid_show(GRID_SHOW& /*val*/) const noexcept { return false; }
+		virtual bool get_grid_show(GRID_SHOW&/*val*/) const noexcept { return false; }
 		// 方眼に合わせるを得る.
-		virtual bool get_grid_snap(bool& /*val*/) const noexcept { return false; }
+		virtual bool get_grid_snap(bool&/*val*/) const noexcept { return false; }
 		// 画像の不透明度を得る.
-		virtual bool get_image_opacity(float& /*val*/) const noexcept { return false; }
+		virtual bool get_image_opacity(float&/*val*/) const noexcept { return false; }
 		// 線分の結合の尖り制限を得る.
-		virtual bool get_join_miter_limit(float& /*val*/) const noexcept { return false; }
+		virtual bool get_join_miter_limit(float&/*val*/) const noexcept { return false; }
 		// 線分の結合の形式を得る.
-		virtual bool get_join_style(D2D1_LINE_JOIN& /*val*/) const noexcept { return false; }
+		virtual bool get_join_style(D2D1_LINE_JOIN&/*val*/) const noexcept { return false; }
 		// 多角形の終端を得る.
 		virtual bool get_poly_end(bool& /*val*/) const noexcept { return false; }
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(
-			const D2D1_POINT_2F /*p*/, float& /*dd*/, D2D1_POINT_2F& /*val*/) const noexcept
+			const D2D1_POINT_2F/*p*/, float&/*dd*/, D2D1_POINT_2F&/*val*/) const noexcept
 		{ return false; }
 		// 部位の位置を得る.
-		virtual	void get_pos_anc(const uint32_t /*anc*/, D2D1_POINT_2F&/*val*/) const noexcept {}
+		virtual	void get_pos_anc(const uint32_t/*anc*/, D2D1_POINT_2F&/*val*/) const noexcept {}
 		// 図形を囲む領域の左上位置を得る.
-		virtual void get_bound_lt(D2D1_POINT_2F& /*val*/) const noexcept {}
+		virtual void get_bound_lt(D2D1_POINT_2F&/*val*/) const noexcept {}
 		// 開始位置を得る.
-		virtual bool get_pos_start(D2D1_POINT_2F& /*val*/) const noexcept { return false; }
+		virtual bool get_pos_start(D2D1_POINT_2F&/*val*/) const noexcept { return false; }
 		// ページの色を得る.
-		virtual bool get_page_color(D2D1_COLOR_F& /*val*/) const noexcept { return false; }
+		virtual bool get_page_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
 		// ページの余白を得る.
-		virtual bool get_page_padding(D2D1_RECT_F& /*val*/) const noexcept { return false; }
+		virtual bool get_page_padding(D2D1_RECT_F&/*val*/) const noexcept { return false; }
 		// ページ倍率を得る.
-		virtual bool get_page_scale(float& /*val*/) const noexcept { return false; }
+		virtual bool get_page_scale(float&/*val*/) const noexcept { return false; }
 		// ページの大きさを得る.
-		virtual bool get_page_size(D2D1_SIZE_F& /*val*/) const noexcept { return false; }
+		virtual bool get_page_size(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 線枠の色を得る.
-		virtual bool get_stroke_color(D2D1_COLOR_F& /*val*/) const noexcept { return false; }
+		virtual bool get_stroke_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
 		// 書体の太さを得る
-		virtual bool get_stroke_width(float& /*val*/) const noexcept { return false; }
+		virtual bool get_stroke_width(float&/*val*/) const noexcept { return false; }
 		// 円弧の方向を得る
-		virtual bool get_sweep(D2D1_SWEEP_DIRECTION& /*val*/) const noexcept { return false; }
+		virtual bool get_sweep(D2D1_SWEEP_DIRECTION&/*val*/) const noexcept { return false; }
 		// 段落のそろえを得る.
-		virtual bool get_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT& /*val*/) const noexcept
+		virtual bool get_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT&/*val*/) const noexcept
 		{ return false; }
 		// 文字列のそろえを得る.
-		virtual bool get_text_align_horz(DWRITE_TEXT_ALIGNMENT& /*val*/) const noexcept 
+		virtual bool get_text_align_horz(DWRITE_TEXT_ALIGNMENT&/*val*/) const noexcept 
 		{ return false; }
 		// 文字列を得る.
-		virtual bool get_text_content(wchar_t*& /*val*/) const noexcept { return false; }
+		virtual bool get_text_content(wchar_t*&/*val*/) const noexcept { return false; }
 		// 行間を得る.
-		virtual bool get_text_line_sp(float& /*val*/) const noexcept { return false; }
+		virtual bool get_text_line_sp(float&/*val*/) const noexcept { return false; }
 		// 文字列の周囲の余白を得る.
-		virtual bool get_text_padding(D2D1_SIZE_F& /*val*/) const noexcept { return false; }
+		virtual bool get_text_padding(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 文字範囲を得る
-		virtual bool get_text_selected(DWRITE_TEXT_RANGE& /*val*/) const noexcept { return false; }
+		virtual bool get_text_selected(DWRITE_TEXT_RANGE&/*val*/) const noexcept { return false; }
+		// 円弧の始点の角度を得る.
+		virtual bool get_deg_start(float&/*val*/) const noexcept { return false; }
+		// 円弧の終点の角度を得る.
+		virtual bool get_deg_end(float&/*val*/) const noexcept { return false; }
 		// 傾斜度を得る.
-		virtual bool get_deg_rotation(float& /*val*/) const noexcept { return false; }
+		virtual bool get_deg_rotation(float&/*val*/) const noexcept { return false; }
 		// 頂点を得る.
-		virtual size_t get_verts(D2D1_POINT_2F /*p*/[]) const noexcept { return 0; };
+		virtual size_t get_verts(D2D1_POINT_2F/*p*/[]) const noexcept { return 0; };
 		// 位置を含むか判定する.
-		virtual uint32_t hit_test(const D2D1_POINT_2F /*test*/) const noexcept
+		virtual uint32_t hit_test(const D2D1_POINT_2F/*test*/) const noexcept
 		{ return ANC_TYPE::ANC_PAGE; }
-		// 範囲に含まれるか判定する.
-		virtual bool in_area(const D2D1_POINT_2F /*area_lt*/, const D2D1_POINT_2F /*area_rb*/)
-			const noexcept { return false; }
+		// 矩形範囲に含まれるか判定する.
+		virtual bool in_area(
+			const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept { return false; }
 		// 消去されたか判定する.
 		virtual bool is_deleted(void) const noexcept { return false; }
 		// 選択されてるか判定する.
 		virtual bool is_selected(void) const noexcept { return false; }
 		// 位置を移動する.
 		virtual	bool move(const D2D1_POINT_2F /*pos*/) noexcept { return false; }
+		// 値を円弧の始点の角度に格納する.
+		virtual bool set_deg_start(const float/* val*/) noexcept { return false; }
+		// 値を円弧の終点の角度に格納する.
+		virtual bool set_deg_end(const float/* val*/) noexcept { return false; }
+		// 値を円弧の角度に格納する.
+		virtual bool set_deg_rotation(const float/*val*/) noexcept { return false; }
 		// 値を矢じるしの寸法に格納する.
-		virtual bool set_arrow_size(const ARROW_SIZE& /*val*/) noexcept { return false; }
+		virtual bool set_arrow_size(const ARROW_SIZE&/*val*/) noexcept { return false; }
 		// 値を矢じるしの形式に格納する.
-		virtual bool set_arrow_style(const ARROW_STYLE /*val*/) noexcept { return false; }
+		virtual bool set_arrow_style(const ARROW_STYLE/*val*/) noexcept { return false; }
 		// 値を端の形式に格納する.
-		virtual bool set_stroke_cap(const CAP_STYLE& /*val*/) noexcept { return false; }
+		virtual bool set_stroke_cap(const CAP_STYLE&/*val*/) noexcept { return false; }
 		// 値を角丸半径に格納する.
-		virtual bool set_corner_radius(const D2D1_POINT_2F& /*alue*/) noexcept { return false; }
+		virtual bool set_corner_radius(const D2D1_POINT_2F&/*alue*/) noexcept { return false; }
 		// 値を破線の端の形式に格納する.
-		virtual bool set_dash_cap(const D2D1_CAP_STYLE& /*val*/) noexcept { return false; }
+		virtual bool set_dash_cap(const D2D1_CAP_STYLE&/*val*/) noexcept { return false; }
 		// 値を破線の配置に格納する.
-		virtual bool set_dash_patt(const DASH_PATT& /*val*/) noexcept { return false; }
+		virtual bool set_dash_patt(const DASH_PATT&/*val*/) noexcept { return false; }
 		// 値を線枠の形式に格納する.
-		virtual bool set_dash_style(const D2D1_DASH_STYLE /*val*/) noexcept { return false; }
+		virtual bool set_dash_style(const D2D1_DASH_STYLE/*val*/) noexcept { return false; }
 		// 値を消去されたか判定に格納する.
-		virtual bool set_delete(const bool /*val*/) noexcept { return false; }
+		virtual bool set_delete(const bool/*val*/) noexcept { return false; }
 		// 値を塗りつぶし色に格納する.
-		virtual bool set_fill_color(const D2D1_COLOR_F& /*val*/) noexcept { return false; }
+		virtual bool set_fill_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
 		// 値を書体の色に格納する.
-		virtual bool set_font_color(const D2D1_COLOR_F& /*val*/) noexcept { return false; }
+		virtual bool set_font_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
 		// 値を書体名に格納する.
-		virtual bool set_font_family(wchar_t* const /*val*/) noexcept { return false; }
+		virtual bool set_font_family(wchar_t* const/*val*/) noexcept { return false; }
 		// 値を書体の大きさに格納する.
-		virtual bool set_font_size(const float /*val*/) noexcept { return false; }
+		virtual bool set_font_size(const float/*val*/) noexcept { return false; }
 		// 値を書体の幅に格納する.
-		virtual bool set_font_stretch(const DWRITE_FONT_STRETCH /*val*/) noexcept { return false; }
+		virtual bool set_font_stretch(const DWRITE_FONT_STRETCH/*val*/) noexcept { return false; }
 		// 値を書体の字体に格納する.
-		virtual bool set_font_style(const DWRITE_FONT_STYLE /*val*/) noexcept { return false; }
+		virtual bool set_font_style(const DWRITE_FONT_STYLE/*val*/) noexcept { return false; }
 		// 値を書体の太さに格納する.
-		virtual bool set_font_weight(const DWRITE_FONT_WEIGHT /*val*/) noexcept { return false; }
+		virtual bool set_font_weight(const DWRITE_FONT_WEIGHT/*val*/) noexcept { return false; }
 		// 値を方眼の大きさに格納する.
-		virtual bool set_grid_base(const float /*val*/) noexcept { return false; }
+		virtual bool set_grid_base(const float/*val*/) noexcept { return false; }
 		// 値を方眼の色に格納する.
-		virtual bool set_grid_color(const D2D1_COLOR_F& /*val*/) noexcept { return false; }
+		virtual bool set_grid_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
 		// 値を方眼の強調に格納する.
-		virtual bool set_grid_emph(const GRID_EMPH& /*val*/) noexcept { return false; }
+		virtual bool set_grid_emph(const GRID_EMPH&/*val*/) noexcept { return false; }
 		// 値を方眼の表示に格納する.
-		virtual bool set_grid_show(const GRID_SHOW /*val*/) noexcept { return false; }
+		virtual bool set_grid_show(const GRID_SHOW/*val*/) noexcept { return false; }
 		// 値を方眼に合わせるに格納する.
-		virtual bool set_grid_snap(const bool /*val*/) noexcept { return false; }
+		virtual bool set_grid_snap(const bool/*val*/) noexcept { return false; }
 		// 画像の不透明度を得る.
-		virtual bool set_image_opacity(const float /*val*/) noexcept { return false; }
+		virtual bool set_image_opacity(const float/*val*/) noexcept { return false; }
 		// 値を線の結合の尖り制限に格納する.
-		virtual bool set_join_miter_limit(const float& /*val*/) noexcept { return false; }
+		virtual bool set_join_miter_limit(const float&/*val*/) noexcept { return false; }
 		// 値を線の結合の形式に格納する.
-		virtual bool set_join_style(const D2D1_LINE_JOIN& /*val*/) noexcept { return false; }
+		virtual bool set_join_style(const D2D1_LINE_JOIN&/*val*/) noexcept { return false; }
 		// 多角形の終端を得る.
-		virtual bool set_poly_end(const bool /*val*/) noexcept { return false; }
+		virtual bool set_poly_end(const bool/*val*/) noexcept { return false; }
 		// 値を, 部位の位置に格納する.
-		virtual bool set_pos_anc(const D2D1_POINT_2F /*val*/, const uint32_t /*anc*/, 
-			const float /*limit*/, const bool /*keep_aspect*/) noexcept { return false; }
+		virtual bool set_pos_anc(const D2D1_POINT_2F/*val*/, const uint32_t/*anc*/,
+			const float/*limit*/, const bool/*keep_aspect*/) noexcept { return false; }
 		// 値を始点に格納する. 他の部位の位置も動く.
-		virtual bool set_pos_start(const D2D1_POINT_2F /*val*/) noexcept { return false; }
+		virtual bool set_pos_start(const D2D1_POINT_2F/*val*/) noexcept { return false; }
 		// 値をページの色に格納する.
-		virtual bool set_page_color(const D2D1_COLOR_F& /*val*/) noexcept { return false; }
+		virtual bool set_page_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
 		// ページの余白に格納する.
-		virtual bool set_page_padding(const D2D1_RECT_F& /*val*/) noexcept { return false; }
+		virtual bool set_page_padding(const D2D1_RECT_F&/*val*/) noexcept { return false; }
 		// 値をページ倍率に格納する.
-		virtual bool set_page_scale(const float /*val*/) noexcept { return false; }
+		virtual bool set_page_scale(const float/*val*/) noexcept { return false; }
 		// 値をページの大きさに格納する.
-		virtual bool set_page_size(const D2D1_SIZE_F /*val*/) noexcept { return false; }
-		// 値を傾斜度に格納する.
-		virtual bool set_deg_rotation(const float /*val*/) noexcept { return false; }
+		virtual bool set_page_size(const D2D1_SIZE_F/*val*/) noexcept { return false; }
 		// 値を選択されてるか判定に格納する.
-		virtual bool set_select(const bool /*val*/) noexcept { return false; }
+		virtual bool set_select(const bool/*val*/) noexcept { return false; }
 		// 値を線枠の色に格納する.
-		virtual bool set_stroke_color(const D2D1_COLOR_F& /*val*/) noexcept { return false; }
+		virtual bool set_stroke_color(const D2D1_COLOR_F&/*val*/) noexcept { return false; }
 		// 値を書体の太さに格納する.
-		virtual bool set_stroke_width(const float /*val*/) noexcept { return false; }
+		virtual bool set_stroke_width(const float/*val*/) noexcept { return false; }
 		// 値を円弧の方向に格納する.
-		virtual bool set_sweep(const D2D1_SWEEP_DIRECTION /*val*/) noexcept { return false; }
+		virtual bool set_sweep(const D2D1_SWEEP_DIRECTION/*val*/) noexcept { return false; }
 		// 値を段落のそろえに格納する.
-		virtual bool set_text_align_vert(const DWRITE_PARAGRAPH_ALIGNMENT /*val*/) noexcept
+		virtual bool set_text_align_vert(const DWRITE_PARAGRAPH_ALIGNMENT/*val*/) noexcept
 		{ return false; }
 		// 値を文字列のそろえに格納する.
-		virtual bool set_text_align_horz(const DWRITE_TEXT_ALIGNMENT /*val*/) noexcept { return false; }
+		virtual bool set_text_align_horz(
+			const DWRITE_TEXT_ALIGNMENT/*val*/) noexcept { return false; }
 		// 値を文字列に格納する.
-		virtual bool set_text_content(wchar_t* const /*val*/) noexcept { return false; }
+		virtual bool set_text_content(wchar_t* const/*val*/) noexcept { return false; }
 		// 値を行間に格納する.
-		virtual bool set_text_line_sp(const float /*val*/) noexcept { return false; }
+		virtual bool set_text_line_sp(const float/*val*/) noexcept { return false; }
 		// 値を文字列の余白に格納する.
-		virtual bool set_text_padding(const D2D1_SIZE_F /*val*/) noexcept { return false; }
+		virtual bool set_text_padding(const D2D1_SIZE_F/*val*/) noexcept { return false; }
 		// 値を文字範囲に格納する.
-		virtual bool set_text_selected(const DWRITE_TEXT_RANGE /*val*/) noexcept { return false; }
+		virtual bool set_text_selected(const DWRITE_TEXT_RANGE/*val*/) noexcept { return false; }
 		// 図形をデータライターに書き込む.
-		virtual void write(DataWriter const& /*dt_writer*/) const {}
+		virtual void write(DataWriter const&/*dt_writer*/) const {}
 		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F /*page_size*/, DataWriter const& /*dt_writer*/)
-		{ return 0; }
+		virtual size_t export_pdf(
+			const D2D1_SIZE_F/*page_size*/, DataWriter const&/*dt_writer*/) { return 0; }
 		// 図形をデータライターに SVG として書き込む.
 		virtual void export_svg(DataWriter const& /*dt_writer*/) {}
 	};
@@ -745,8 +753,9 @@ namespace winrt::GraphPaper::implementation
 		size_t get_verts(D2D1_POINT_2F /*p*/[]) const noexcept final override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F /*test*/) const noexcept final override;
-		// 範囲に含まれるか判定する.
-		bool in_area(const D2D1_POINT_2F /*area_lt*/, const D2D1_POINT_2F /*area_rb*/) const noexcept final override;
+		// 矩形範囲に含まれるか判定する.
+		bool in_area(
+			const D2D1_POINT_2F/*lt*/, const D2D1_POINT_2F/*rb*/) const noexcept final override;
 		// 位置を移動する.
 		bool move(const D2D1_POINT_2F pos) noexcept final override;
 		// 原画像に戻す.
@@ -1055,10 +1064,8 @@ namespace winrt::GraphPaper::implementation
 		bool has_text(void) noexcept;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F test) const noexcept final override;
-		// 範囲に含まれるか判定する.
-		bool in_area(
-			const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept final 
-			override;
+		// 矩形範囲に含まれるか判定する.
+		bool in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept final override;
 		// 消去されているか判定する.
 		bool is_deleted(void) const noexcept final override 
 		{
@@ -1176,11 +1183,9 @@ namespace winrt::GraphPaper::implementation
 		virtual ~ShapeLine(void)
 		{
 			if (m_d2d_arrow_geom != nullptr) {
-				//m_d2d_arrow_geom->Release();
 				m_d2d_arrow_geom = nullptr;
 			}
 			if (m_d2d_arrow_style != nullptr) {
-				//m_d2d_arrow_style->Release();
 				m_d2d_arrow_style = nullptr;
 			}
 		} // ~ShapeStroke
@@ -1239,14 +1244,17 @@ namespace winrt::GraphPaper::implementation
 		virtual size_t get_verts(D2D1_POINT_2F p[]) const noexcept override;
 		// 位置を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F test) const noexcept override;
-		// 範囲に含まれるか判定する.
-		virtual bool in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept override;
+		// 矩形範囲に含まれるか判定する.
+		virtual bool in_area(
+			const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
 		// 値を矢じるしの寸法に格納する.
 		virtual bool set_arrow_size(const ARROW_SIZE& val) noexcept override;
 		// 値を矢じるしの形式に格納する.
 		virtual bool set_arrow_style(const ARROW_STYLE val) noexcept override;
 		// 値を, 部位の位置に格納する. 
-		virtual bool set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept override;
+		virtual bool set_pos_anc(
+			const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect)
+			noexcept override;
 		// 値を始点に格納する.
 		virtual bool set_pos_start(const D2D1_POINT_2F val) noexcept override;
 		// 差分だけ移動する.
@@ -1296,8 +1304,9 @@ namespace winrt::GraphPaper::implementation
 		size_t get_verts(D2D1_POINT_2F p[]) const noexcept final override;
 		// 位置を含むか判定する.
 		virtual uint32_t hit_test(const D2D1_POINT_2F test) const noexcept override;
-		// 範囲に含まれるか判定する.
-		virtual bool in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept override;
+		// 矩形範囲に含まれるか判定する.
+		virtual bool in_area(
+			const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
 		// 塗りつぶし色を得る.
 		bool get_fill_color(D2D1_COLOR_F& val) const noexcept final override;
 		// 値を塗りつぶし色に格納する.
@@ -1510,8 +1519,9 @@ namespace winrt::GraphPaper::implementation
 		{ val = m_end_closed; return true; }
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F test) const noexcept final override;
-		// 範囲に含まれるか判定する.
-		virtual bool in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept override;
+		// 矩形範囲に含まれるか判定する.
+		virtual bool in_area(
+			const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
 		// 値を矢じるしの形式に格納する.
 		bool set_arrow_style(const ARROW_STYLE val) noexcept final override;
 		// 多角形の終端に格納する.
@@ -1547,13 +1557,14 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 矢じりの返しと先端の位置を得る
-		static bool bezi_calc_arrow(const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[3]) noexcept;
+		static bool bezi_calc_arrow(
+			const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[3]) noexcept;
 		// 図形を表示する.
 		void draw(void) final override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F test) const noexcept final override;
-		// 範囲に含まれるか判定する.
-		bool in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept final override;
+		// 矩形範囲に含まれるか判定する.
+		bool in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept final override;
 		// 図形を作成する.
 		ShapeBezier(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// 図形をデータリーダーから読み込む.
@@ -1582,68 +1593,50 @@ namespace winrt::GraphPaper::implementation
 			return true;
 		}
 		// だ円の中心点を得る.
-		bool get_pos_center(D2D1_POINT_2F& val) const noexcept;
-		// だ円の始点の角度を得る.
-		bool get_deg_start(float& val) const noexcept
+		//bool get_pos_center(D2D1_POINT_2F& val) const noexcept;
+		// 円弧の始点の角度を得る.
+		bool get_deg_start(float& val) const noexcept final override
 		{
-			val = m_deg_start;
+			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+				val = m_deg_start;
+			}
+			else {
+				val = -m_deg_end;
+			}
 			return true;
 		}
-		// だ円の終点の角度を得る.
-		bool get_deg_end(float& val) const noexcept
+		// 円弧の終点の角度を得る.
+		bool get_deg_end(float& val) const noexcept final override
 		{
-			val = m_deg_end;
+			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+				val = m_deg_end;
+			}
+			else {
+				val = -m_deg_start;
+			}
 			return true;
 		}
-		// だ円の傾きを得る.
+		// 円弧の傾きを得る.
 		bool get_deg_rotation(float& val) const noexcept final override
 		{
 			val = m_deg_rot;
 			return true;
 		}
+		void get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept final override;
 		// 値を, 部位の位置に格納する.
 		bool set_pos_anc(
 			const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect)
 			noexcept;
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
-		// だ円の始点の角度に格納する.
-		bool set_deg_start(const float val) noexcept
-		{
-			if (!equal(m_deg_start, val)) {
-				m_deg_start = val;
-				m_d2d_fill_geom = nullptr;
-				m_d2d_path_geom = nullptr;
-				m_d2d_arrow_geom = nullptr;
-				return true;
-			}
-			return false;
-		}
-		// だ円の始点の角度に格納する.
-		bool set_deg_end(const float val) noexcept
-		{
-			if (!equal(m_deg_end, val)) {
-				m_deg_end = val;
-				m_d2d_fill_geom = nullptr;
-				m_d2d_path_geom = nullptr;
-				m_d2d_arrow_geom = nullptr;
-				return true;
-			}
-			return false;
-		}
-		bool set_sweep(const D2D1_SWEEP_DIRECTION val) noexcept final override
-		{
-			if (m_sweep_dir != val) {
-				m_sweep_dir = val;
-				m_d2d_fill_geom = nullptr;
-				m_d2d_path_geom = nullptr;
-				m_d2d_arrow_geom = nullptr;
-				return true;
-			}
-			return false;
-		}
-		// だ円の傾きに格納する.
+		// 値を円弧の始点の角度に格納する.
+		bool set_deg_start(const float val) noexcept final override;
+		// 値を円弧の終点の角度に格納する.
+		bool set_deg_end(const float val) noexcept final override;
+		// 値を円弧の傾きに格納する.
 		bool set_deg_rotation(const float val) noexcept final override;
+		// 値を円弧を描く方向に格納する.
+		bool set_sweep(const D2D1_SWEEP_DIRECTION val) noexcept final override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F test) const noexcept final override;
 		// 円弧をベジェ曲線で近似する.
@@ -1764,8 +1757,8 @@ namespace winrt::GraphPaper::implementation
 		bool get_text_selected(DWRITE_TEXT_RANGE& val) const noexcept final override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F test) const noexcept final override;
-		// 範囲に含まれるか判定する.
-		bool in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept final override;
+		// 矩形範囲に含まれるか判定する.
+		bool in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept final override;
 		// 書体名が有効か判定し, 有効なら, 引数の書体名は破棄し, 有効な書体名の配列の要素と置き換える.
 		static bool is_available_font(wchar_t*& font) noexcept;
 		// 有効な書体名の配列を破棄する.

@@ -151,16 +151,16 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 範囲に含まれるか判定する.
-	// area_lt	範囲の左上位置
-	// area_rb	範囲の右下位置
+	// 矩形範囲に含まれるか判定する.
+	// lt	矩形の左上位置
+	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
 	//------------------------------
-	bool ShapeGroup::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
+	bool ShapeGroup::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		for (const Shape* s : m_list_grouped) {
-			if (!s->in_area(area_lt, area_rb)) {
+			if (!s->in_area(lt, rb)) {
 				return false;
 			}
 		}

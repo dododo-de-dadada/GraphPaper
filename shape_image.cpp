@@ -481,16 +481,16 @@ namespace winrt::GraphPaper::implementation
 		return ANC_TYPE::ANC_PAGE;
 	}
 
-	// 範囲に含まれるか判定する.
-	// area_lt	範囲の左上位置
-	// area_rb	範囲の右下位置
+	// 矩形範囲に含まれるか判定する.
+	// lt	矩形の左上位置
+	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeImage::in_area(const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
+	bool ShapeImage::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		// 始点と終点とが範囲に含まれるか判定する.
-		return pt_in_rect(m_start, area_lt, area_rb) &&
-			pt_in_rect(D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height }, area_lt, area_rb);
+		return pt_in_rect(m_start, lt, rb) &&pt_in_rect(
+				D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height }, lt, rb);
 	}
 
 	// 位置を移動する.

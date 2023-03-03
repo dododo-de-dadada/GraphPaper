@@ -378,17 +378,16 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	// 範囲に含まれるか判定する.
-	// area_lt	範囲の左上位置
-	// area_rb	範囲の右下位置
+	// 矩形範囲に含まれるか判定する.
+	// lt	矩形の左上位置
+	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapeRect::in_area(
-		const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
+	bool ShapeRect::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		D2D1_POINT_2F pos;
 		pt_add(m_start, m_pos, pos);
-		return pt_in_rect(m_start, area_lt, area_rb) && pt_in_rect(pos, area_lt, area_rb);
+		return pt_in_rect(m_start, lt, rb) && pt_in_rect(pos, lt, rb);
 	}
 
 	// 位置を移動する.

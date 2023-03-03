@@ -841,19 +841,18 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 範囲に含まれるか判定する.
 	// 線の太さは考慮されない.
-	// area_lt	範囲の左上位置
-	// area_rb	範囲の右下位置
+	// lt	範囲の左上位置
+	// rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	//------------------------------
-	bool ShapeBezier::in_area(
-		const D2D1_POINT_2F area_lt, const D2D1_POINT_2F area_rb) const noexcept
+	bool ShapeBezier::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,
 		// 範囲の左上が原点となるよう平行移動した制御点を得る.
-		const double w = static_cast<double>(area_rb.x) - area_lt.x;
-		const double h = static_cast<double>(area_rb.y) - area_lt.y;
+		const double w = static_cast<double>(rb.x) - lt.x;
+		const double h = static_cast<double>(rb.y) - lt.y;
 		D2D1_POINT_2F cp[4];
-		pt_sub(m_start, area_lt, cp[0]);
+		pt_sub(m_start, lt, cp[0]);
 		pt_add(cp[0], m_pos[0], cp[1]);
 		pt_add(cp[1], m_pos[1], cp[2]);
 		pt_add(cp[2], m_pos[2], cp[3]);

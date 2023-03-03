@@ -13,10 +13,6 @@ namespace winrt::GraphPaper::implementation
 
 	// 部位の位置を得る.
 	static D2D1_POINT_2F undo_get_pos_anc(const Shape* s, const uint32_t anc) noexcept;
-	// データリーダーから位置を読み込む.
-	//static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader);
-	// データリーダーから位置を読み込む.
-	//static D2D1_RECT_F undo_read_rect(DataReader const& dt_reader);
 	// データリーダーから添え字を読み込んで図形を得る.
 	static Shape* undo_read_shape(DataReader const& dt_reader);
 	// データリーダーから位置を読み込む.
@@ -31,15 +27,6 @@ namespace winrt::GraphPaper::implementation
 		s->get_pos_anc(anc, pos);
 		return pos;
 	}
-
-	// データリーダーから位置を読み込む.
-	//static D2D1_POINT_2F undo_read_pos(DataReader const& dt_reader)
-	//{
-	//	return D2D1_POINT_2F{
-	//		dt_reader.ReadSingle(),
-	//		dt_reader.ReadSingle()
-	//	};
-	//}
 
 	// データリーダーから添え字を読み込んで図形を得る.
 	// dt_reader	データリーダー
@@ -58,16 +45,6 @@ namespace winrt::GraphPaper::implementation
 		}
 		return s;
 	}
-
-	// データリーダーから位置を読み込む.
-	// dt_reader	データリーダー
-	//static D2D1_SIZE_F undo_read_size(DataReader const& dt_reader)
-	//{
-	//	return D2D1_SIZE_F{
-	//		dt_reader.ReadSingle(),
-	//		dt_reader.ReadSingle()
-	//	};
-	//}
 
 	// 図形をデータライターに書き込む.
 	// dt_reader	データリーダー
@@ -160,16 +137,13 @@ namespace winrt::GraphPaper::implementation
 	UndoOrder::UndoOrder(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_dst_shape(undo_read_shape(dt_reader))
-	{
-		//m_dst_shape = undo_read_shape(dt_reader);
-	}
+	{}
 
 	// 操作を作成する.
 	UndoOrder::UndoOrder(Shape* const s, Shape* const t) :
 		Undo(s),
 		m_dst_shape(t)
 	{
-		//m_dst_shape = t;
 		UndoOrder::exec();
 	}
 
@@ -532,12 +506,12 @@ namespace winrt::GraphPaper::implementation
 
 	void UndoValue<UNDO_ID::ARC_START>::SET(Shape* const s, const float& val)
 	{
-		static_cast<ShapeQEllipse*>(s)->set_deg_start(val);
+		s->set_deg_start(val);
 	}
 
 	void UndoValue<UNDO_ID::ARC_END>::SET(Shape* const s, const float& val)
 	{
-		static_cast<ShapeQEllipse*>(s)->set_deg_end(val);
+		s->set_deg_end(val);
 	}
 
 	void UndoValue<UNDO_ID::ARC_ROT>::SET(Shape* const s, const float& val)
@@ -722,12 +696,12 @@ namespace winrt::GraphPaper::implementation
 
 	bool UndoValue<UNDO_ID::ARC_START>::GET(const Shape* s, float& val) noexcept
 	{
-		return static_cast<const ShapeQEllipse*>(s)->get_deg_start(val);
+		return s->get_deg_start(val);
 	}
 
 	bool UndoValue<UNDO_ID::ARC_END>::GET(const Shape* s, float& val) noexcept
 	{
-		return static_cast<const ShapeQEllipse*>(s)->get_deg_end(val);
+		return s->get_deg_end(val);
 	}
 
 	bool UndoValue<UNDO_ID::ARC_ROT>::GET(const Shape* s, float& val) noexcept
@@ -906,7 +880,8 @@ namespace winrt::GraphPaper::implementation
 		const auto clip = s->m_clip;
 		const auto ratio = s->m_ratio;
 		const auto opac = s->m_opac;
-		return !equal(pos, m_start) || !equal(view, m_view) || !equal(clip, m_clip) || !equal(ratio, m_ratio) || !equal(opac, m_opac);
+		return !equal(pos, m_start) || !equal(view, m_view) || !equal(clip, m_clip) ||
+			!equal(ratio, m_ratio) || !equal(opac, m_opac);
 	}
 
 	// 元に戻す操作を実行する.
