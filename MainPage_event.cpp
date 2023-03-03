@@ -1126,7 +1126,6 @@ namespace winrt::GraphPaper::implementation
 			}
 			else {
 				switch (anc) {
-				case ANC_TYPE::ANC_A_CENTER:
 				case ANC_TYPE::ANC_A_START:
 				case ANC_TYPE::ANC_A_END:
 				case ANC_TYPE::ANC_R_NW:
@@ -1135,6 +1134,7 @@ namespace winrt::GraphPaper::implementation
 				case ANC_TYPE::ANC_R_SW:
 					Window::Current().CoreWindow().PointerCursor(CURS_CROSS);
 					break;
+				case ANC_TYPE::ANC_A_CENTER:
 				case ANC_TYPE::ANC_FILL:
 				case ANC_TYPE::ANC_STROKE:
 				case ANC_TYPE::ANC_TEXT:

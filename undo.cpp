@@ -71,7 +71,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 操作を実行すると値が変わるか判定する.
-	bool UndoForm::changed(void) const noexcept
+	bool UndoDeform::changed(void) const noexcept
 	{
 		using winrt::GraphPaper::implementation::equal;
 
@@ -81,7 +81,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 元に戻す操作を実行する.
-	void UndoForm::exec(void)
+	void UndoDeform::exec(void)
 	{
 		D2D1_POINT_2F pos;
 		m_shape->get_pos_anc(m_anc, pos);
@@ -90,21 +90,21 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データリーダーから操作を読み込む.
-	UndoForm::UndoForm(DataReader const& dt_reader) :
+	UndoDeform::UndoDeform(DataReader const& dt_reader) :
 		Undo(undo_read_shape(dt_reader)),
 		m_anc(static_cast<ANC_TYPE>(dt_reader.ReadUInt32())),
 		m_start(D2D1_POINT_2F{ dt_reader.ReadSingle(), dt_reader.ReadSingle() })
 	{}
 
 	// 図形の形を保存する.
-	UndoForm::UndoForm(Shape* const s, const uint32_t anc) :
+	UndoDeform::UndoDeform(Shape* const s, const uint32_t anc) :
 		Undo(s),
 		m_anc(anc),
 		m_start(undo_get_pos_anc(s, anc))
 	{}
 
 	// 図形の形の操作をデータライターに書き込む.
-	void UndoForm::write(DataWriter const& dt_writer)
+	void UndoDeform::write(DataWriter const& dt_writer)
 	{
 		dt_writer.WriteUInt32(static_cast<uint32_t>(UNDO_ID::DEFORM));
 		undo_write_shape(m_shape, dt_writer);
@@ -213,7 +213,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::PAGE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
 	template UndoValue<UNDO_ID::PAGE_PADD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
-	template UndoValue<UNDO_ID::POLY_END>::UndoValue(Shape* s, const bool &val);
+	template UndoValue<UNDO_ID::POLY_CLOSED>::UndoValue(Shape* s, const bool &val);
 	template UndoValue<UNDO_ID::ARC_START>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_ID::ARC_END>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_ID::ARC_ROT>::UndoValue(Shape* s, const float& val);
@@ -303,7 +303,7 @@ namespace winrt::GraphPaper::implementation
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadUInt32());
 		}
 		else if constexpr (
-			U == UNDO_ID::POLY_END
+			U == UNDO_ID::POLY_CLOSED
 			) {
 			m_value = static_cast<U_TYPE<U>::type>(dt_reader.ReadBoolean());
 		}
@@ -363,7 +363,7 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::PAGE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_PADD>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::POLY_END>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::POLY_CLOSED>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::ARC_START>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::ARC_END>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::ARC_ROT>::UndoValue(DataReader const& dt_reader);
@@ -499,29 +499,29 @@ namespace winrt::GraphPaper::implementation
 		s->set_page_padding(val);
 	}
 
-	void UndoValue<UNDO_ID::POLY_END>::SET(Shape* const s, const bool& val)
+	void UndoValue<UNDO_ID::POLY_CLOSED>::SET(Shape* const s, const bool& val)
 	{
-		s->set_poly_end(val);
+		s->set_poly_closed(val);
 	}
 
 	void UndoValue<UNDO_ID::ARC_START>::SET(Shape* const s, const float& val)
 	{
-		s->set_deg_start(val);
+		s->set_arc_start(val);
 	}
 
 	void UndoValue<UNDO_ID::ARC_END>::SET(Shape* const s, const float& val)
 	{
-		s->set_deg_end(val);
+		s->set_arc_end(val);
 	}
 
 	void UndoValue<UNDO_ID::ARC_ROT>::SET(Shape* const s, const float& val)
 	{
-		s->set_deg_rotation(val);
+		s->set_arc_rot(val);
 	}
 
 	void UndoValue<UNDO_ID::ARC_DIR>::SET(Shape* const s, const D2D1_SWEEP_DIRECTION& val)
 	{
-		s->set_sweep(val);
+		s->set_arc_dir(val);
 	}
 
 	void UndoValue<UNDO_ID::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
@@ -689,29 +689,29 @@ namespace winrt::GraphPaper::implementation
 		return s->get_page_padding(val);
 	}
 
-	bool UndoValue<UNDO_ID::POLY_END>::GET(const Shape* s, bool& val) noexcept
+	bool UndoValue<UNDO_ID::POLY_CLOSED>::GET(const Shape* s, bool& val) noexcept
 	{
-		return s->get_poly_end(val);
+		return s->get_poly_closed(val);
 	}
 
 	bool UndoValue<UNDO_ID::ARC_START>::GET(const Shape* s, float& val) noexcept
 	{
-		return s->get_deg_start(val);
+		return s->get_arc_start(val);
 	}
 
 	bool UndoValue<UNDO_ID::ARC_END>::GET(const Shape* s, float& val) noexcept
 	{
-		return s->get_deg_end(val);
+		return s->get_arc_end(val);
 	}
 
 	bool UndoValue<UNDO_ID::ARC_ROT>::GET(const Shape* s, float& val) noexcept
 	{
-		return s->get_deg_rotation(val);
+		return s->get_arc_rot(val);
 	}
 
 	bool UndoValue<UNDO_ID::ARC_DIR>::GET(const Shape* s, D2D1_SWEEP_DIRECTION& val) noexcept
 	{
-		return s->get_sweep(val);
+		return s->get_arc_dir(val);
 	}
 
 	bool UndoValue<UNDO_ID::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& val) noexcept
@@ -855,7 +855,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteSingle(m_value.y);
 		}
 		else if constexpr (
-			U == UNDO_ID::POLY_END
+			U == UNDO_ID::POLY_CLOSED
 			) {
 			dt_writer.WriteBoolean(m_value);
 		}

@@ -77,7 +77,7 @@ namespace winrt::GraphPaper::implementation
 			u = new UndoValue<UNDO_ID::ARC_START>(dt_reader);
 			break;
 		case UNDO_ID::DEFORM:
-			u = new UndoForm(dt_reader);
+			u = new UndoDeform(dt_reader);
 			break;
 		case UNDO_ID::ORDER:
 			u = new UndoOrder(dt_reader);
@@ -428,7 +428,7 @@ namespace winrt::GraphPaper::implementation
 	// anc	図形の部位
 	void MainPage::ustack_push_position(Shape* const s, const uint32_t anc)
 	{
-		m_ustack_undo.push_back(new UndoForm(s, anc));
+		m_ustack_undo.push_back(new UndoDeform(s, anc));
 	}
 
 	// 図形を追加して, その操作をスタックに積む.

@@ -440,6 +440,14 @@ namespace winrt::GraphPaper::implementation
 		virtual ~Shape(void) noexcept {}	// 派生クラスがあるので必要
 		// 図形を表示する.
 		virtual void draw(void) = 0;
+		// 円弧の方向を得る
+		virtual bool get_arc_dir(D2D1_SWEEP_DIRECTION&/*val*/) const noexcept { return false; }
+		// 円弧の始点の角度を得る.
+		virtual bool get_arc_start(float&/*val*/) const noexcept { return false; }
+		// 円弧の終点の角度を得る.
+		virtual bool get_arc_end(float&/*val*/) const noexcept { return false; }
+		// 傾斜度を得る.
+		virtual bool get_arc_rot(float&/*val*/) const noexcept { return false; }
 		// 矢じるしの寸法を得る
 		virtual bool get_arrow_size(ARROW_SIZE& /*val*/) const noexcept { return false; }
 		// 矢じるしの形式を得る.
@@ -489,7 +497,7 @@ namespace winrt::GraphPaper::implementation
 		// 線分の結合の形式を得る.
 		virtual bool get_join_style(D2D1_LINE_JOIN&/*val*/) const noexcept { return false; }
 		// 多角形の終端を得る.
-		virtual bool get_poly_end(bool& /*val*/) const noexcept { return false; }
+		virtual bool get_poly_closed(bool& /*val*/) const noexcept { return false; }
 		// 近傍の頂点を見つける.
 		virtual bool get_pos_nearest(
 			const D2D1_POINT_2F/*p*/, float&/*dd*/, D2D1_POINT_2F&/*val*/) const noexcept
@@ -512,8 +520,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_stroke_color(D2D1_COLOR_F&/*val*/) const noexcept { return false; }
 		// 書体の太さを得る
 		virtual bool get_stroke_width(float&/*val*/) const noexcept { return false; }
-		// 円弧の方向を得る
-		virtual bool get_sweep(D2D1_SWEEP_DIRECTION&/*val*/) const noexcept { return false; }
 		// 段落のそろえを得る.
 		virtual bool get_text_align_vert(DWRITE_PARAGRAPH_ALIGNMENT&/*val*/) const noexcept
 		{ return false; }
@@ -528,12 +534,6 @@ namespace winrt::GraphPaper::implementation
 		virtual bool get_text_padding(D2D1_SIZE_F&/*val*/) const noexcept { return false; }
 		// 文字範囲を得る
 		virtual bool get_text_selected(DWRITE_TEXT_RANGE&/*val*/) const noexcept { return false; }
-		// 円弧の始点の角度を得る.
-		virtual bool get_deg_start(float&/*val*/) const noexcept { return false; }
-		// 円弧の終点の角度を得る.
-		virtual bool get_deg_end(float&/*val*/) const noexcept { return false; }
-		// 傾斜度を得る.
-		virtual bool get_deg_rotation(float&/*val*/) const noexcept { return false; }
 		// 頂点を得る.
 		virtual size_t get_verts(D2D1_POINT_2F/*p*/[]) const noexcept { return 0; };
 		// 位置を含むか判定する.
@@ -549,11 +549,11 @@ namespace winrt::GraphPaper::implementation
 		// 位置を移動する.
 		virtual	bool move(const D2D1_POINT_2F /*pos*/) noexcept { return false; }
 		// 値を円弧の始点の角度に格納する.
-		virtual bool set_deg_start(const float/* val*/) noexcept { return false; }
+		virtual bool set_arc_start(const float/* val*/) noexcept { return false; }
 		// 値を円弧の終点の角度に格納する.
-		virtual bool set_deg_end(const float/* val*/) noexcept { return false; }
+		virtual bool set_arc_end(const float/* val*/) noexcept { return false; }
 		// 値を円弧の角度に格納する.
-		virtual bool set_deg_rotation(const float/*val*/) noexcept { return false; }
+		virtual bool set_arc_rot(const float/*val*/) noexcept { return false; }
 		// 値を矢じるしの寸法に格納する.
 		virtual bool set_arrow_size(const ARROW_SIZE&/*val*/) noexcept { return false; }
 		// 値を矢じるしの形式に格納する.
@@ -601,7 +601,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を線の結合の形式に格納する.
 		virtual bool set_join_style(const D2D1_LINE_JOIN&/*val*/) noexcept { return false; }
 		// 多角形の終端を得る.
-		virtual bool set_poly_end(const bool/*val*/) noexcept { return false; }
+		virtual bool set_poly_closed(const bool/*val*/) noexcept { return false; }
 		// 値を, 部位の位置に格納する.
 		virtual bool set_pos_anc(const D2D1_POINT_2F/*val*/, const uint32_t/*anc*/,
 			const float/*limit*/, const bool/*keep_aspect*/) noexcept { return false; }
@@ -622,7 +622,7 @@ namespace winrt::GraphPaper::implementation
 		// 値を書体の太さに格納する.
 		virtual bool set_stroke_width(const float/*val*/) noexcept { return false; }
 		// 値を円弧の方向に格納する.
-		virtual bool set_sweep(const D2D1_SWEEP_DIRECTION/*val*/) noexcept { return false; }
+		virtual bool set_arc_dir(const D2D1_SWEEP_DIRECTION/*val*/) noexcept { return false; }
 		// 値を段落のそろえに格納する.
 		virtual bool set_text_align_vert(const DWRITE_PARAGRAPH_ALIGNMENT/*val*/) noexcept
 		{ return false; }
@@ -1506,16 +1506,14 @@ namespace winrt::GraphPaper::implementation
 		static bool poly_get_pos_arrow(
 			const size_t p_cnt, const D2D1_POINT_2F p[], const ARROW_SIZE& a_size, 
 			D2D1_POINT_2F& tip, /*--->*/D2D1_POINT_2F barb[]) noexcept;
-		// パスジオメトリを作成する.
-		//void create_path_geometry(ID2D1Factory3* const factory) final override;
 		// 矩形をもとに多角形を作成する.
 		static void poly_create_by_box(
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt,
 			D2D1_POINT_2F p[]) noexcept;
 		// 図形を表示する
 		void draw(void) final override;
-		// 多角形の終端を得る.
-		bool get_poly_end(bool& val) const noexcept final override 
+		// 辺が閉じているかを得る.
+		bool get_poly_closed(bool& val) const noexcept final override 
 		{ val = m_end_closed; return true; }
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F test) const noexcept final override;
@@ -1524,8 +1522,8 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
 		// 値を矢じるしの形式に格納する.
 		bool set_arrow_style(const ARROW_STYLE val) noexcept final override;
-		// 多角形の終端に格納する.
-		bool set_poly_end(const bool val) noexcept final override 
+		// 値を辺が閉じているかに格納する.
+		bool set_poly_closed(const bool val) noexcept final override 
 		{
 			if (m_end_closed != val) {
 				m_end_closed = val;
@@ -1558,7 +1556,8 @@ namespace winrt::GraphPaper::implementation
 
 		// 矢じりの返しと先端の位置を得る
 		static bool bezi_calc_arrow(
-			const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[3]) noexcept;
+			const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size,
+			D2D1_POINT_2F arrow[3]) noexcept;
 		// 図形を表示する.
 		void draw(void) final override;
 		// 位置を含むか判定する.
@@ -1587,7 +1586,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_ARC_SIZE m_larg_flag = D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL;
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom;
 
-		bool get_sweep(D2D1_SWEEP_DIRECTION& val) const noexcept final override
+		bool get_arc_dir(D2D1_SWEEP_DIRECTION& val) const noexcept final override
 		{
 			val = m_sweep_dir;
 			return true;
@@ -1595,7 +1594,7 @@ namespace winrt::GraphPaper::implementation
 		// だ円の中心点を得る.
 		//bool get_pos_center(D2D1_POINT_2F& val) const noexcept;
 		// 円弧の始点の角度を得る.
-		bool get_deg_start(float& val) const noexcept final override
+		bool get_arc_start(float& val) const noexcept final override
 		{
 			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 				val = m_deg_start;
@@ -1606,7 +1605,7 @@ namespace winrt::GraphPaper::implementation
 			return true;
 		}
 		// 円弧の終点の角度を得る.
-		bool get_deg_end(float& val) const noexcept final override
+		bool get_arc_end(float& val) const noexcept final override
 		{
 			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 				val = m_deg_end;
@@ -1617,7 +1616,7 @@ namespace winrt::GraphPaper::implementation
 			return true;
 		}
 		// 円弧の傾きを得る.
-		bool get_deg_rotation(float& val) const noexcept final override
+		bool get_arc_rot(float& val) const noexcept final override
 		{
 			val = m_deg_rot;
 			return true;
@@ -1630,13 +1629,13 @@ namespace winrt::GraphPaper::implementation
 		// 値を始点に格納する. 他の部位の位置も動く.
 		bool set_pos_start(const D2D1_POINT_2F val) noexcept final override;
 		// 値を円弧の始点の角度に格納する.
-		bool set_deg_start(const float val) noexcept final override;
+		bool set_arc_start(const float val) noexcept final override;
 		// 値を円弧の終点の角度に格納する.
-		bool set_deg_end(const float val) noexcept final override;
+		bool set_arc_end(const float val) noexcept final override;
 		// 値を円弧の傾きに格納する.
-		bool set_deg_rotation(const float val) noexcept final override;
+		bool set_arc_rot(const float val) noexcept final override;
 		// 値を円弧を描く方向に格納する.
-		bool set_sweep(const D2D1_SWEEP_DIRECTION val) noexcept final override;
+		bool set_arc_dir(const D2D1_SWEEP_DIRECTION val) noexcept final override;
 		// 位置を含むか判定する.
 		uint32_t hit_test(const D2D1_POINT_2F test) const noexcept final override;
 		// 円弧をベジェ曲線で近似する.

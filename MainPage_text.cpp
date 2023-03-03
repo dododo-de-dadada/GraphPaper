@@ -63,7 +63,7 @@ namespace winrt::GraphPaper::implementation
 			else if (typeid(*s) != typeid(ShapeText)) {
 				continue;
 			}
-			auto u = new UndoForm(s, ANC_TYPE::ANC_SE);
+			auto u = new UndoDeform(s, ANC_TYPE::ANC_SE);
 			if (static_cast<ShapeText*>(s)->fit_frame_to_text(g_len)) {
 				m_ustack_undo.push_back(u);
 				if (!flag) {

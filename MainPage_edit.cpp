@@ -108,15 +108,15 @@ namespace winrt::GraphPaper::implementation
 			const float val = static_cast<float>(args.NewValue());
 			if constexpr (S == 0) {
 				edit_arc_slider_set_header<U, S>(val);
-				static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->set_deg_start(val);
+				static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->set_arc_start(val);
 			}
 			else if constexpr (S == 1) {
 				edit_arc_slider_set_header<U, S>(val);
-				static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->set_deg_end(val);
+				static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->set_arc_end(val);
 			}
 			else if constexpr (S == 2) {
 				edit_arc_slider_set_header<U, S>(val);
-				m_dialog_page.m_shape_list.back()->set_deg_rotation(val);
+				m_dialog_page.m_shape_list.back()->set_arc_rot(val);
 			}
 		}
 		if (scp_dialog_panel().IsLoaded()) {
@@ -152,13 +152,13 @@ namespace winrt::GraphPaper::implementation
 			m_mutex_event.lock();
 
 			float deg_start;
-			t->get_deg_start(deg_start);
+			t->get_arc_start(deg_start);
 			float deg_end;
-			t->get_deg_end(deg_end);
+			t->get_arc_end(deg_end);
 			float deg_rot;
-			t->get_deg_rotation(deg_rot);
+			t->get_arc_rot(deg_rot);
 			D2D1_SWEEP_DIRECTION dir;
-			t->get_sweep(dir);
+			t->get_arc_dir(dir);
 			m_dialog_page.set_attr_to(&m_main_page);
 
 			const auto samp_w = scp_dialog_panel().Width();
@@ -174,10 +174,10 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)
 			};
 			ShapeQEllipse* s = new ShapeQEllipse(start, pos, t);
-			s->set_deg_start(deg_start);
-			s->set_deg_end(deg_end);
-			s->set_deg_rotation(deg_rot);
-			s->set_sweep(dir);
+			s->set_arc_start(deg_start);
+			s->set_arc_end(deg_end);
+			s->set_arc_rot(deg_rot);
+			s->set_arc_dir(dir);
 
 			const auto ds0_min = dialog_slider_0().Minimum();
 			const auto ds0_max = dialog_slider_0().Maximum();
@@ -237,7 +237,7 @@ namespace winrt::GraphPaper::implementation
 				dialog_check_box().Checked(
 					[=](IInspectable const& sender,  RoutedEventArgs const& args) {
 						ShapeQEllipse* s = static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back());
-						if (s->set_sweep(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
+						if (s->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
 							dialog_draw();
 						}
 					}
@@ -247,7 +247,7 @@ namespace winrt::GraphPaper::implementation
 				dialog_check_box().Unchecked(
 					[=](IInspectable const& sender,  RoutedEventArgs const& args) {
 						ShapeQEllipse* s = static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back());
-						if (s->set_sweep(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
+						if (s->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
 							dialog_draw();
 						}
 					}
@@ -264,16 +264,17 @@ namespace winrt::GraphPaper::implementation
 				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_deg_rot")));
 			const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 			if (d_result == ContentDialogResult::Primary) {
-				float samp_val;
-				s->get_deg_start(samp_val);
-				ustack_push_set<UNDO_ID::ARC_START>(samp_val);
-				s->get_deg_end(samp_val);
-				ustack_push_set<UNDO_ID::ARC_END>(samp_val);
-				s->get_deg_rotation(samp_val);
-				ustack_push_set<UNDO_ID::ARC_ROT>(samp_val);
+				// ’ˆÓ: ‡”Ô‚ª OK ‚©‚Ç‚¤‚©.
 				D2D1_SWEEP_DIRECTION dir;
-				s->get_sweep(dir);
+				s->get_arc_dir(dir);
 				ustack_push_set<UNDO_ID::ARC_DIR>(dir);
+				float samp_val;
+				s->get_arc_start(samp_val);
+				ustack_push_set<UNDO_ID::ARC_START>(samp_val);
+				s->get_arc_end(samp_val);
+				ustack_push_set<UNDO_ID::ARC_END>(samp_val);
+				s->get_arc_rot(samp_val);
+				ustack_push_set<UNDO_ID::ARC_ROT>(samp_val);
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
