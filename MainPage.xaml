@@ -255,19 +255,19 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />
-                <MenuFlyoutItem
+				<MenuFlyoutItem
 					x:Name="mfi_edit_arc" x:Uid="mfi_edit_arc" Click="edit_arc_click_async"
 					Text="Edit Arc" >
-                    <MenuFlyoutItem.Icon>
-                        <PathIcon
-                            Data="{StaticResource data_qellipse}" HorizontalAlignment="Center"
-                            VerticalAlignment="Center" Width="16" Height="16" />
-                    </MenuFlyoutItem.Icon>
-                    <MenuFlyoutItem.KeyboardAccelerators>
-                        <KeyboardAccelerator Key="R" Modifiers="Control" />
-                    </MenuFlyoutItem.KeyboardAccelerators>
-                </MenuFlyoutItem>
-                <MenuFlyoutItem
+					<MenuFlyoutItem.Icon>
+						<PathIcon
+							Data="{StaticResource data_qellipse}" HorizontalAlignment="Center"
+							VerticalAlignment="Center" Width="16" Height="16" />
+					</MenuFlyoutItem.Icon>
+					<MenuFlyoutItem.KeyboardAccelerators>
+						<KeyboardAccelerator Key="R" Modifiers="Control" />
+					</MenuFlyoutItem.KeyboardAccelerators>
+				</MenuFlyoutItem>
+				<MenuFlyoutItem
 					x:Name="mfi_edit_text" x:Uid="mfi_edit_text" Click="edit_text_click_async"
 					Text="Edit Text" >
 					<MenuFlyoutItem.Icon>
@@ -949,8 +949,8 @@
 				x:Name="scp_page_panel" CompositionScaleChanged="page_panel_scale_changed"
 				KeyboardAcceleratorPlacementMode="Hidden" Loading="page_panel_loading"
 				Loaded="page_panel_loaded" PointerCanceled="event_canceled"
-                PointerEntered="event_entered" PointerExited="event_exited"
-                PointerMoved="event_moved" PointerPressed="event_pressed"
+				PointerEntered="event_entered" PointerExited="event_exited"
+				PointerMoved="event_moved" PointerPressed="event_pressed"
 				PointerReleased="event_released" PointerWheelChanged="event_wheel_changed"
 				RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignTopWithPanel="True"
 				RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True"
@@ -1087,22 +1087,22 @@
 					HorizontalAlignment="Stretch" VerticalAlignment="Top" Header="Bottom Padding"
 					PlaceholderText="Must be between 0 and 32767."
 					TextChanged="page_size_text_changed" />
-                <ComboBox
+				<ComboBox
 					x:Name="cb_len_unit" x:Uid="cb_len_unit" Header="Length Unit" Margin="0,0,0,12"
 					SelectionChanged="len_unit_selection_changed">
-                    <ComboBoxItem 
+					<ComboBoxItem 
 						x:Name="cbi_len_unit_pixel" x:Uid="cbi_len_unit_pixel" Content="Pixel"
 						IsSelected="True"/>
-                    <ComboBoxItem 
+					<ComboBoxItem 
 						x:Name="cbi_len_unit_inch" x:Uid="cbi_len_unit_inch" Content="Inch"/>
-                    <ComboBoxItem 
+					<ComboBoxItem 
 						x:Name="cbi_len_unit_milli" x:Uid="cbi_len_unit_milli" Content="Millimeter"/>
-                    <ComboBoxItem
+					<ComboBoxItem
 						x:Name="cbi_len_unit_point" x:Uid="cbi_len_unit_point" Content="Point"/>
-                    <ComboBoxItem
+					<ComboBoxItem
 						x:Name="cbi_len_unit_grid" x:Uid="cbi_len_unit_grid" Content="Grid" />
-                </ComboBox>
-            </StackPanel>
+				</ComboBox>
+			</StackPanel>
 		</ContentDialog>
 		<!-- 頂点をくっつける閾値 -->
 		<ContentDialog
@@ -1162,8 +1162,11 @@
 					RelativePanel.AlignRightWithPanel="True" StepFrequency="1"
 					Visibility="Collapsed" />
 				<Slider x:Name="dialog_slider_4" x:Uid = "dialog_slider_4" IsThumbToolTipEnabled="False" Maximum="255" Minimum="0" RelativePanel.Below="dialog_slider_3" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" StepFrequency="1" Visibility="Collapsed" />
-				<TextBlock x:Name="tb_version" x:Uid="tb_version" RelativePanel.Below="scp_dialog_panel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Visibility="Collapsed" />
-				<CheckBox x:Name="dialog_check_box" x:Uid="dialog_check_box" Content="Check Box" IsChecked="False" RelativePanel.Below="dialog_slider_0" RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
+				<TextBlock x:Name="tb_version" x:Uid="tb_version" RelativePanel.Below="dialog_slider_4" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Visibility="Collapsed" />
+				<CheckBox
+					x:Name="dialog_check_box" x:Uid="dialog_check_box" Content="Check Box"
+					IsChecked="False" RelativePanel.Below="dialog_slider_4"
+                    RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
 			</RelativePanel>
 		</ContentDialog>
 		<!-- 印刷のための透明なキャンバス -->

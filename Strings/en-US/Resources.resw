@@ -1195,7 +1195,7 @@
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="dialog_check_box.Content" xml:space="preserve">
-    <value>Apply when importing.</value>
+    <value>Draw clockwise.</value>
     <comment>CheckBox</comment>
   </data>
   <data name="str_desc_pdf" xml:space="preserve">

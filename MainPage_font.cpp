@@ -157,13 +157,56 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
 		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			{ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 0> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const auto val = static_cast<float>(args.NewValue());
+				font_slider_set_header<UNDO_ID::FONT_COLOR, 0>(val);
+				D2D1_COLOR_F f_color;
+				m_dialog_page.m_shape_list.back()->get_font_color(f_color);
+				f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
+				if (scp_dialog_panel().IsLoaded() &&
+					m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
+					dialog_draw();
+				}
+			}
+		);
 		const auto slider_1_token = dialog_slider_1().ValueChanged(
-			{ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 1> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const auto val = static_cast<float>(args.NewValue());
+				font_slider_set_header<UNDO_ID::FONT_COLOR, 1>(val);
+				D2D1_COLOR_F f_color;
+				m_dialog_page.m_shape_list.back()->get_font_color(f_color);
+				f_color.g = static_cast<FLOAT>(val / COLOR_MAX);
+				if (scp_dialog_panel().IsLoaded() &&
+					m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
+					dialog_draw();
+				}
+			}
+		);
 		const auto slider_2_token = dialog_slider_2().ValueChanged(
-			{ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 2> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const auto val = static_cast<float>(args.NewValue());
+				font_slider_set_header<UNDO_ID::FONT_COLOR, 2>(val);
+				D2D1_COLOR_F f_color;
+				f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
+				if (scp_dialog_panel().IsLoaded() &&
+					m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
+					dialog_draw();
+				}
+			}
+		);
 		const auto slider_3_token = dialog_slider_3().ValueChanged(
-			{ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_COLOR, 3> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const auto val = static_cast<float>(args.NewValue());
+				font_slider_set_header<UNDO_ID::FONT_COLOR, 3>(val);
+				D2D1_COLOR_F f_color;
+				m_dialog_page.m_shape_list.back()->get_font_color(f_color);
+				f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
+				if (scp_dialog_panel().IsLoaded() &&
+					m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
+					dialog_draw();
+				}
+			}
+		);
 		font_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
 			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
@@ -289,6 +332,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	/*
 	//---------------------------------
 	// スライダーの値が変更された.
 	// U	操作の識別子
@@ -333,6 +377,7 @@ namespace winrt::GraphPaper::implementation
 			dialog_draw();
 		}
 	}
+	*/
 
 	//---------------------------------
 	// 書体メニューの「大きさ」が選択された.
@@ -352,7 +397,14 @@ namespace winrt::GraphPaper::implementation
 		font_slider_set_header<UNDO_ID::FONT_SIZE, 0>(font_size - 1.0f);
 		dialog_slider_0().Visibility(Visibility::Visible);
 		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			{ this, &MainPage::font_slider_val_changed<UNDO_ID::FONT_SIZE, 0> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const auto val = static_cast<float>(args.NewValue());
+				font_slider_set_header<UNDO_ID::FONT_SIZE, 0>(val);
+				if (m_dialog_page.m_shape_list.back()->set_font_size(val + 1.0f)) {
+					dialog_draw();
+				}
+			}
+		);
 		font_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), 
 			m_dialog_page);

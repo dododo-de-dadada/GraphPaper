@@ -19,25 +19,24 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	//------------------------------
-	template <UNDO_ID U, int S>
+	template <int S>
 	void MainPage::arrow_slider_set_header(const float val)
 	{
-		if constexpr (U == UNDO_ID::ARROW_SIZE) {
-			constexpr wchar_t* SLIDER_HEADER[] = {
-				L"str_arrow_width",
-				L"str_arrow_length",
-				L"str_arrow_offset"
-			};
-			wchar_t buf[32];
-			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
-				m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
-			const winrt::hstring text{
-				ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf
-			};
-			dialog_set_slider_header<S>(text);
-		}
+		constexpr wchar_t* SLIDER_HEADER[] = {
+			L"str_arrow_width",
+			L"str_arrow_length",
+			L"str_arrow_offset"
+		};
+		wchar_t buf[32];
+		conv_len_to_str<LEN_UNIT_NAME_APPEND>(
+			m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
+		const winrt::hstring text{
+			ResourceLoader::GetForCurrentView().GetString(SLIDER_HEADER[S]) + L": " + buf
+		};
+		dialog_set_slider_header<S>(text);
 	}
 
+	/*
 	//------------------------------
 	// スライダーの値が変更された.
 	// U	操作の識別子
@@ -71,6 +70,7 @@ namespace winrt::GraphPaper::implementation
 			dialog_draw();
 		}
 	}
+	*/
 
 	//------------------------------
 	// 線枠メニューの「矢じるしの寸法...」が選択された.
@@ -116,19 +116,52 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().Visibility(Visibility::Visible);
 		const winrt::event_token ds0_tok{
 			dialog_slider_0().ValueChanged(
-				{ this, &MainPage::arrow_slider_val_changed<UNDO_ID::ARROW_SIZE, 0> })
+				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const float val = static_cast<float>(args.NewValue());
+					arrow_slider_set_header<0>(val);
+					ARROW_SIZE a_size;
+					if (m_dialog_page.m_shape_list.back()->get_arrow_size(a_size)) {
+						a_size.m_width = static_cast<FLOAT>(val);
+						if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
+							dialog_draw();
+						}
+					}
+				}
+			)
 		};
 		const winrt::event_token ds1_tok{
 			dialog_slider_1().ValueChanged(
-				{ this, &MainPage::arrow_slider_val_changed< UNDO_ID::ARROW_SIZE, 1> })
+				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const float val = static_cast<float>(args.NewValue());
+					arrow_slider_set_header<1>(val);
+					ARROW_SIZE a_size;
+					if (m_dialog_page.m_shape_list.back()->get_arrow_size(a_size)) {
+						a_size.m_length = static_cast<FLOAT>(val);
+						if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
+							dialog_draw();
+						}
+					}
+				}
+			)
 		};
 		const winrt::event_token ds2_tok{
 			dialog_slider_2().ValueChanged(
-				{ this, &MainPage::arrow_slider_val_changed< UNDO_ID::ARROW_SIZE, 2> })
+				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const float val = static_cast<float>(args.NewValue());
+					arrow_slider_set_header<2>(val);
+					ARROW_SIZE a_size;
+					if (m_dialog_page.m_shape_list.back()->get_arrow_size(a_size)) {
+						a_size.m_offset = static_cast<FLOAT>(val);
+						if (m_dialog_page.m_shape_list.back()->set_arrow_size(a_size)) {
+							dialog_draw();
+						}
+					}
+				}
+			)
 		};
-		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 0>(a_size.m_width);
-		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 1>(a_size.m_length);
-		arrow_slider_set_header<UNDO_ID::ARROW_SIZE, 2>(a_size.m_offset);
+		arrow_slider_set_header<0>(a_size.m_width);
+		arrow_slider_set_header<1>(a_size.m_length);
+		arrow_slider_set_header<2>(a_size.m_offset);
 		const auto samp_w = scp_dialog_panel().Width();
 		const auto samp_h = scp_dialog_panel().Height();
 		const auto padd = samp_w * 0.125;

@@ -77,6 +77,10 @@ namespace winrt::GraphPaper::implementation
 	// 操作から値の型を得るテンプレート
 	//------------------------------
 	template <UNDO_ID U> struct U_TYPE { using type = int; };
+	template <> struct U_TYPE<UNDO_ID::ARC_START> { using type = float; };
+	template <> struct U_TYPE<UNDO_ID::ARC_DIR> { using type = D2D1_SWEEP_DIRECTION; };
+	template <> struct U_TYPE<UNDO_ID::ARC_END> { using type = float; };
+	template <> struct U_TYPE<UNDO_ID::ARC_ROT> { using type = float; };
 	template <> struct U_TYPE<UNDO_ID::ARROW_SIZE> { using type = ARROW_SIZE; };
 	template <> struct U_TYPE<UNDO_ID::ARROW_STYLE> { using type = ARROW_STYLE; };
 	template <> struct U_TYPE<UNDO_ID::DASH_CAP> { using type = D2D1_CAP_STYLE; };
@@ -102,10 +106,6 @@ namespace winrt::GraphPaper::implementation
 	template <> struct U_TYPE<UNDO_ID::PAGE_SIZE> { using type = D2D1_SIZE_F; };
 	template <> struct U_TYPE<UNDO_ID::PAGE_PADD> { using type = D2D1_RECT_F; };
 	template <> struct U_TYPE<UNDO_ID::POLY_CLOSED> { using type = bool; };
-	template <> struct U_TYPE<UNDO_ID::ARC_START> { using type = float; };
-	template <> struct U_TYPE<UNDO_ID::ARC_END> { using type = float; };
-	template <> struct U_TYPE<UNDO_ID::ARC_ROT> { using type = float; };
-	template <> struct U_TYPE<UNDO_ID::ARC_DIR> { using type = D2D1_SWEEP_DIRECTION; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_CAP> { using type = CAP_STYLE; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_COLOR> { using type = D2D1_COLOR_F; };
 	template <> struct U_TYPE<UNDO_ID::STROKE_WIDTH> { using type = float; };

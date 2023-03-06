@@ -850,7 +850,7 @@
     <value>始点</value>
     <comment>String</comment>
   </data>
-	<data name="str_deg_end" xml:space="preserve">
+  <data name="str_deg_end" xml:space="preserve">
     <value>終点</value>
     <comment>String</comment>
   </data>
@@ -1187,7 +1187,7 @@
     <comment>ToggleMenuFlyoutItem</comment>
   </data>
   <data name="dialog_check_box.Content" xml:space="preserve">
-    <value>インポートするとき適用.</value>
+    <value>時計回りに描く</value>
     <comment>CheckBox</comment>
   </data>
   <data name="cbi_len_unit_grid.Content" xml:space="preserve">

@@ -401,12 +401,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// ’¸“_‚ð“¾‚é.
-	size_t ShapeImage::get_verts(D2D1_POINT_2F val[]) const noexcept
+	size_t ShapeImage::get_verts(D2D1_POINT_2F p[]) const noexcept
 	{
-		val[0] = m_start;
-		val[1] = D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y };
-		val[2] = D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height };
-		val[3] = D2D1_POINT_2F{ m_start.x, m_start.y + m_view.height };
+		p[0] = m_start;
+		p[1] = D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y };
+		p[2] = D2D1_POINT_2F{ m_start.x + m_view.width, m_start.y + m_view.height };
+		p[3] = D2D1_POINT_2F{ m_start.x, m_start.y + m_view.height };
 		return 4;
 	}
 

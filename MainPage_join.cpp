@@ -68,7 +68,7 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(j_limit);
 		dialog_slider_0().Visibility(Visibility::Visible);
-		join_slider_set_header<UNDO_ID::JOIN_LIMIT, 0>(j_limit);
+		join_slider_set_header<0>(j_limit);
 
 		float s_width;
 		m_dialog_page.get_stroke_width(s_width);
@@ -78,12 +78,26 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(s_width);
 		dialog_slider_1().Visibility(Visibility::Visible);
-		join_slider_set_header<UNDO_ID::STROKE_WIDTH, 1>(s_width);
+		join_slider_set_header<1>(s_width);
 
 		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			{ this, &MainPage::join_slider_val_changed<UNDO_ID::JOIN_LIMIT, 0> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const float val = static_cast<float>(args.NewValue());
+				join_slider_set_header<0>(val);
+				if (m_dialog_page.m_shape_list.back()->set_join_miter_limit(val + 1.0f)) {
+					dialog_draw();
+				}
+			}
+		);
 		const auto slider_1_token = dialog_slider_1().ValueChanged(
-			{ this, &MainPage::join_slider_val_changed<UNDO_ID::STROKE_WIDTH, 1> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const float val = static_cast<float>(args.NewValue());
+				join_slider_set_header<1>(val);
+				if (m_dialog_page.m_shape_list.back()->set_stroke_width(val)) {
+					dialog_draw();
+				}
+			}
+		);
 		const auto samp_w = scp_dialog_panel().Width();
 		const auto samp_h = scp_dialog_panel().Height();
 		const auto padd = samp_w * 0.125;
@@ -139,12 +153,12 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_ID U, int S>
+	template <int S>
 	void MainPage::join_slider_set_header(const float val)
 	{
 		using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 
-		if constexpr (U == UNDO_ID::JOIN_LIMIT && S == 0) {
+		if constexpr (S == 0) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
 			swprintf_s(buf, LEN, L"%.1lf", static_cast<double>(val) + 1.0);
@@ -152,7 +166,7 @@ namespace winrt::GraphPaper::implementation
 				L"str_join_miter_limit") + L": " + buf;
 			dialog_slider_0().Header(box_value(text));
 		}
-		else if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 1) {
+		else if constexpr (S == 1) {
 			constexpr size_t LEN = 32;
 			wchar_t buf[LEN + 1];
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
@@ -163,6 +177,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	/*
 	// スライダーの値が変更された.
 	// U	操作の識別子
 	// S	スライダーの番号
@@ -174,18 +189,19 @@ namespace winrt::GraphPaper::implementation
 	{
 		if constexpr (U == UNDO_ID::JOIN_LIMIT && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
-			join_slider_set_header<U, S>(val);
+			join_slider_set_header<0>(val);
 			m_dialog_page.m_shape_list.back()->set_join_miter_limit(val + 1.0f);
 		}
 		else if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 1) {
 			const float val = static_cast<float>(args.NewValue());
-			join_slider_set_header<U, S>(val);
+			join_slider_set_header<1>(val);
 			m_dialog_page.m_shape_list.back()->set_stroke_width(val);
 		}
 		if (scp_dialog_panel().IsLoaded()) {
 			dialog_draw();
 		}
 	}
+	*/
 
 	// 線枠メニューの「線の結合の形式」が選択された.
 	void MainPage::join_style_click(IInspectable const& sender, RoutedEventArgs const&)

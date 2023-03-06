@@ -58,7 +58,9 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 矢じるしの D2D ストローク特性を作成する.
-	static void line_create_arrow_style(ID2D1Factory3* const factory, const CAP_STYLE c_style, const D2D1_LINE_JOIN j_style, const double j_miter_limit, ID2D1StrokeStyle** a_style)
+	static void line_create_arrow_style(
+		ID2D1Factory3* const factory, const CAP_STYLE c_style, const D2D1_LINE_JOIN j_style,
+		const double j_miter_limit, ID2D1StrokeStyle** a_style)
 	{
 		// 矢じるしの破線の形式はかならずソリッドとする.
 		const D2D1_STROKE_STYLE_PROPERTIES s_prop{
@@ -123,10 +125,14 @@ namespace winrt::GraphPaper::implementation
 		target->DrawLine(m_start, end, brush, s_width, s_style);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			if (m_d2d_arrow_style == nullptr) {
-				line_create_arrow_style(static_cast<ID2D1Factory3*>(factory), m_stroke_cap, m_join_style, m_join_miter_limit, m_d2d_arrow_style.put());
+				line_create_arrow_style(
+					static_cast<ID2D1Factory3*>(factory), m_stroke_cap, m_join_style,
+					m_join_miter_limit, m_d2d_arrow_style.put());
 			}
 			if (m_d2d_arrow_geom == nullptr) {
-				line_create_arrow_geom(static_cast<ID2D1Factory3*>(factory), m_start, m_pos[0], m_arrow_style, m_arrow_size, m_d2d_arrow_geom.put());
+				line_create_arrow_geom(
+					static_cast<ID2D1Factory3*>(factory), m_start, m_pos[0], m_arrow_style,
+					m_arrow_size, m_d2d_arrow_geom.put());
 			}
 			const auto a_geom = m_d2d_arrow_geom.get();
 			if (m_d2d_arrow_geom != nullptr) {
@@ -150,8 +156,8 @@ namespace winrt::GraphPaper::implementation
 	// val	得られた位置
 	void ShapeLine::get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept
 	{
+		// 図形の部位が「図形の外部」または「開始点」ならば, 開始位置を得る.
 		if (anc == ANC_TYPE::ANC_PAGE || anc == ANC_TYPE::ANC_P0) {
-			// 図形の部位が「外部」または「開始点」ならば, 開始位置を得る.
 			val = m_start;
 		}
 		else if (anc > ANC_TYPE::ANC_P0) {
@@ -169,14 +175,20 @@ namespace winrt::GraphPaper::implementation
 	// val	領域の左上位置
 	void ShapeLine::get_bound_lt(D2D1_POINT_2F& val) const noexcept
 	{
-		const size_t d_cnt = m_pos.size();	// 差分の数
-		D2D1_POINT_2F v_pos = m_start;	// 頂点の位置
-		val = m_start;
-		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(v_pos, m_pos[i], v_pos);
-			val.x = val.x < v_pos.x ? val.x : v_pos.x;
-			val.y = val.y < v_pos.y ? val.y : v_pos.y;
+		const size_t p_cnt = m_pos.size();	// 位置の数
+		D2D1_POINT_2F p = m_start;	// 頂点
+		D2D1_POINT_2F lt;	// 左上位置
+		lt = m_start;
+		for (size_t i = 0; i < p_cnt; i++) {
+			pt_add(p, m_pos[i], p);
+			if (lt.x > p.x) {
+				lt.x = p.x;
+			}
+			if (lt.y > p.y) {
+				lt.y = p.y;
+			}
 		}
+		val = lt;
 	}
 
 	// 開始位置を得る
@@ -234,14 +246,15 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 頂点を得る.
-	size_t ShapeLine::get_verts(D2D1_POINT_2F v_pos[]) const noexcept
+	size_t ShapeLine::get_verts(D2D1_POINT_2F p[]) const noexcept
 	{
-		v_pos[0] = m_start;
-		const size_t d_cnt = m_pos.size();
-		for (size_t i = 0; i < d_cnt; i++) {
-			pt_add(v_pos[i], m_pos[i], v_pos[i + 1]);
+		const size_t p_cnt = m_pos.size();
+		p[0] = m_start;
+		for (size_t i = 0; i < p_cnt; i++) {
+			p[i + 1].x = p[i].x + m_pos[i].x;
+			p[i + 1].y = p[i].y + m_pos[i].y;
 		}
-		return d_cnt + 1;
+		return p_cnt + 1;
 	}
 
 	// 位置を含むか判定する.

@@ -782,17 +782,6 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	/*
-	// 塗りつぶし色を得る.
-	// val	得られた値
-	// 戻り値	得られたなら true
-	bool ShapePolygon::get_fill_color(D2D1_COLOR_F& val) const noexcept
-	{
-		val = m_fill_color;
-		return true;
-	}
-	*/
-
 	// 位置を含むか判定する.
 	// t_pos	判定する位置
 	// a_len	アンカーの大きさ
@@ -817,9 +806,10 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 		const size_t p_cnt = m_pos.size();	// 差分の数
-		D2D1_POINT_2F p = m_start;
+		D2D1_POINT_2F p{ m_start };
 		for (size_t i = 0; i < p_cnt; i++) {
-			pt_add(p, m_pos[i], p);	// 次の位置
+			p.x += m_pos[i].x;
+			p.y += m_pos[i].y;
 			if (!pt_in_rect(p, lt, rb)) {
 				return false;
 			}
@@ -835,20 +825,6 @@ namespace winrt::GraphPaper::implementation
 		return false;
 	}
 
-	/*
-	// 塗りつぶし色に格納する.
-	bool ShapePolygon::set_fill_color(const D2D1_COLOR_F& val) noexcept
-	{
-		if (!equal(m_fill_color, val)) {
-			m_fill_color = val;
-			m_d2d_path_geom = nullptr;
-			m_d2d_arrow_geom = nullptr;
-			return true;
-		}
-		return false;
-	}
-	*/
-
 	// 図形を作成する.
 	// start	囲む領域の始点
 	// pos	囲む領域の終点への位置ベクトル
@@ -860,13 +836,14 @@ namespace winrt::GraphPaper::implementation
 		m_end_closed(p_opt.m_end_closed)
 	{
 		D2D1_POINT_2F p[N_GON_MAX];
-
 		poly_create_by_box(start, pos, p_opt, p);
+
 		m_start = p[0];
 		m_pos.resize(p_opt.m_vertex_cnt - 1);
 		m_pos.shrink_to_fit();
 		for (size_t i = 1; i < p_opt.m_vertex_cnt; i++) {
-			pt_sub(p[i], p[i - 1], m_pos[i - 1]);
+			m_pos[i - 1].x = p[i].x - p[i - 1].x;
+			m_pos[i - 1].y = p[i].y - p[i - 1].y;
 		}
 	}
 

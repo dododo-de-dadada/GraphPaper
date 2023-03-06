@@ -358,9 +358,9 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「結合の形式」が選択された.
 		void join_style_click(IInspectable const& sender, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_ID U, int S> void join_slider_set_header(const float val);
+		template <int S> void join_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_ID U, int S> void join_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
+		//template <UNDO_ID U, int S> void join_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_order.cpp
@@ -390,9 +390,9 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「矢じるしの大きさ」が選択された.
 		IAsyncAction arrow_size_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_ID U, int S> void arrow_slider_set_header(const float val);
+		template <int S> void arrow_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_ID U, int S> void arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		//template <UNDO_ID U, int S> void arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_disp.cpp
@@ -492,9 +492,9 @@ namespace winrt::GraphPaper::implementation
 		// 塗りつぶしメニューの「塗りつぶし色」が選択された.
 		IAsyncAction fill_color_click_async(IInspectable const&, RoutedEventArgs const&);
 		// スライダーの値が変更された.
-		template <UNDO_ID U, int S> void fill_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		//template <UNDO_ID U, int S> void fill_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_ID U, int S> void fill_slider_set_header(const float val);
+		template <int S> void fill_slider_set_header(const float val);
 
 		//-------------------------------
 		// MainPage_edit.cpp
@@ -502,10 +502,7 @@ namespace winrt::GraphPaper::implementation
 		//-------------------------------
 
 		// 値をスライダーのヘッダーに格納する.
-		template <UNDO_ID U, int S> void edit_arc_slider_set_header(const float val);
-		// スライダーの値が変更された.
-		template <UNDO_ID U, int S> void edit_arc_slider_val_changed(
-			IInspectable const&, RangeBaseValueChangedEventArgs const& args);
+		template <int S> void edit_arc_slider_set_header(const float val);
 		// 編集メニューの「円弧の編集」が選択された.
 		IAsyncAction edit_arc_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 編集メニューの「文字列の編集」が選択された.
@@ -557,8 +554,8 @@ namespace winrt::GraphPaper::implementation
 		// 値をスライダーのヘッダーに格納する.
 		template <UNDO_ID U, int S> void font_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template <UNDO_ID U, int S> void font_slider_val_changed(
-			IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		//template <UNDO_ID U, int S> void font_slider_val_changed(
+		//	IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//-------------------------------
 		// MainPage_grid.cpp
@@ -840,9 +837,9 @@ namespace winrt::GraphPaper::implementation
 		// 線枠メニューの「破線の配列」が選択された.
 		IAsyncAction dash_patt_click_async(IInspectable const&, RoutedEventArgs const&);
 		// 値をスライダーのヘッダーに格納する.
-		template<UNDO_ID U, int S> void dash_slider_set_header(const float val);
+		template<int S> void dash_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template<UNDO_ID U, int S> void dash_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		//template<UNDO_ID U, int S> void dash_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
 
 		//------------------------------
 		// MainPage_stroke.cpp
@@ -858,7 +855,8 @@ namespace winrt::GraphPaper::implementation
 		// 値をスライダーのヘッダーに格納する.
 		template<UNDO_ID U, int S> void stroke_slider_set_header(const float val);
 		// スライダーの値が変更された.
-		template<UNDO_ID U, int S> void stroke_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		//template<UNDO_ID U, int S> void stroke_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		// 線枠メニューの「太さ」が選択された.
 		void stroke_width_is_checked(const float s_width) noexcept;
 
 		//-------------------------------

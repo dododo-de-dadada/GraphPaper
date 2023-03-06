@@ -831,7 +831,6 @@ namespace winrt::GraphPaper::implementation
 
 		// 画像
 		float m_image_opac = 1.0f;	// 画像の不透明度
-		bool m_image_opac_importing = false;	// 画像をインポートするときに不透明度を適用する.
 
 		// 方眼
 		float m_grid_base = GRID_LEN_DEFVAL - 1.0f;	// 方眼の基準の大きさ (を -1 した値)
@@ -1596,23 +1595,23 @@ namespace winrt::GraphPaper::implementation
 		// 円弧の始点の角度を得る.
 		bool get_arc_start(float& val) const noexcept final override
 		{
-			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+			//if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 				val = m_deg_start;
-			}
-			else {
-				val = -m_deg_end;
-			}
+			//}
+			//else {
+			//	val = -m_deg_end;
+			//}
 			return true;
 		}
 		// 円弧の終点の角度を得る.
 		bool get_arc_end(float& val) const noexcept final override
 		{
-			if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+			//if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
 				val = m_deg_end;
-			}
-			else {
-				val = -m_deg_start;
-			}
+			//}
+			//else {
+			//	val = -m_deg_start;
+			//}
 			return true;
 		}
 		// 円弧の傾きを得る.

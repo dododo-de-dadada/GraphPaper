@@ -59,7 +59,6 @@ namespace winrt::GraphPaper::implementation
 		else {
 			status_bar_set_pos();
 		}
-
 	}
 
 	//------------------------------
@@ -68,59 +67,29 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	//------------------------------
-	template <UNDO_ID U, int S>
+	template <int S>
 	void MainPage::edit_arc_slider_set_header(const float val)
 	{
-		if constexpr (U == UNDO_ID::ARC_ROT || U == UNDO_ID::ARC_START ||
-			U == UNDO_ID::ARC_END) {
+		if constexpr (S == 0) {
 			wchar_t buf[32];
 			swprintf_s(buf, 32, L"%f°", val);
-			if constexpr (S == 0) {
-				const winrt::hstring text =
-					ResourceLoader::GetForCurrentView().GetString(L"str_deg_start") + L": " + buf;
-				dialog_slider_0().Header(box_value(text));
-			}
-			if constexpr (S == 1) {
-				const winrt::hstring text =
-					ResourceLoader::GetForCurrentView().GetString(L"str_deg_end") + L": " + buf;
-				dialog_slider_1().Header(box_value(text));
-			}
-			else if constexpr (S == 2) {
-				const winrt::hstring text =
-					ResourceLoader::GetForCurrentView().GetString(L"str_deg_rot") + L": " + buf;
-				dialog_slider_2().Header(box_value(text));
-			}
+			const winrt::hstring text =
+				ResourceLoader::GetForCurrentView().GetString(L"str_deg_start") + L": " + buf;
+			dialog_slider_0().Header(box_value(text));
 		}
-	}
-
-	//------------------------------
-	// スライダーの値が変更された.
-	// U	操作の識別子
-	// S	スライダーの番号
-	// args	ValueChanged で渡された引数
-	//------------------------------
-	template <UNDO_ID U, int S> void MainPage::edit_arc_slider_val_changed(
-		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
-	{
-		// 値をスライダーのヘッダーに格納する.
-		if constexpr (U == UNDO_ID::ARC_ROT || U == UNDO_ID::ARC_START || 
-			U == UNDO_ID::ARC_END) {
-			const float val = static_cast<float>(args.NewValue());
-			if constexpr (S == 0) {
-				edit_arc_slider_set_header<U, S>(val);
-				static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->set_arc_start(val);
-			}
-			else if constexpr (S == 1) {
-				edit_arc_slider_set_header<U, S>(val);
-				static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back())->set_arc_end(val);
-			}
-			else if constexpr (S == 2) {
-				edit_arc_slider_set_header<U, S>(val);
-				m_dialog_page.m_shape_list.back()->set_arc_rot(val);
-			}
+		else if constexpr (S == 1) {
+			wchar_t buf[32];
+			swprintf_s(buf, 32, L"%f°", val);
+			const winrt::hstring text =
+				ResourceLoader::GetForCurrentView().GetString(L"str_deg_end") + L": " + buf;
+			dialog_slider_1().Header(box_value(text));
 		}
-		if (scp_dialog_panel().IsLoaded()) {
-			dialog_draw();
+		else if constexpr (S == 2) {
+			wchar_t buf[32];
+			swprintf_s(buf, 32, L"%f°", val);
+			const winrt::hstring text =
+				ResourceLoader::GetForCurrentView().GetString(L"str_deg_rot") + L": " + buf;
+			dialog_slider_2().Header(box_value(text));
 		}
 	}
 
@@ -173,11 +142,11 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_POINT_2F pos{
 				static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)
 			};
-			ShapeQEllipse* s = new ShapeQEllipse(start, pos, t);
+			Shape* s = new ShapeQEllipse(start, pos, t);
+			s->set_arc_dir(dir);
 			s->set_arc_start(deg_start);
 			s->set_arc_end(deg_end);
 			s->set_arc_rot(deg_rot);
-			s->set_arc_dir(dir);
 
 			const auto ds0_min = dialog_slider_0().Minimum();
 			const auto ds0_max = dialog_slider_0().Maximum();
@@ -204,40 +173,91 @@ namespace winrt::GraphPaper::implementation
 			dialog_slider_0().Maximum(45.0);
 			dialog_slider_0().TickFrequency(0.5);
 			dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-			dialog_slider_0().Value(deg_start);
+			if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+				dialog_slider_0().Value(deg_start);
+				edit_arc_slider_set_header<0>(deg_start);
+			}
+			else {
+				dialog_slider_0().Value(-deg_end);
+				edit_arc_slider_set_header<0>(-deg_end);
+			}
 			dialog_slider_0().Visibility(Visibility::Visible);
 			dialog_slider_1().Minimum(-45.0);
 			dialog_slider_1().Maximum(0.0);
 			dialog_slider_1().TickFrequency(0.5);
 			dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-			dialog_slider_1().Value(deg_end);
+			if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+				dialog_slider_1().Value(deg_end);
+				edit_arc_slider_set_header<1>(deg_end);
+			}
+			else {
+				dialog_slider_1().Value(-deg_start);
+				edit_arc_slider_set_header<1>(-deg_start);
+			}
 			dialog_slider_1().Visibility(Visibility::Visible);
 			dialog_slider_2().Minimum(-44.5);
 			dialog_slider_2().Maximum(44.5);
 			dialog_slider_2().TickFrequency(0.5);
 			dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 			dialog_slider_2().Value(deg_rot);
+			edit_arc_slider_set_header<2>(deg_rot);
 			dialog_slider_2().Visibility(Visibility::Visible);
 			dialog_check_box().IsChecked(dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE);
 			dialog_check_box().Visibility(Visibility::Visible);
 
 			const winrt::event_token ds0_tok{
 				dialog_slider_0().ValueChanged(
-					{ this, &MainPage::edit_arc_slider_val_changed<UNDO_ID::ARC_START, 0> })
+					[=](IInspectable const& sender, RangeBaseValueChangedEventArgs const& args) {
+						const float val = static_cast<float>(args.NewValue());
+						edit_arc_slider_set_header<0>(val);
+						D2D1_SWEEP_DIRECTION dir;
+						m_dialog_page.m_shape_list.back()->get_arc_dir(dir);
+						if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+							m_dialog_page.m_shape_list.back()->set_arc_start(val);
+						}
+						else {
+							m_dialog_page.m_shape_list.back()->set_arc_end(-val);
+						}
+						dialog_draw();
+					}
+				)
 			};
 			const winrt::event_token ds1_tok{
 				dialog_slider_1().ValueChanged(
-					{ this, &MainPage::edit_arc_slider_val_changed<UNDO_ID::ARC_END, 1> })
+					[=](IInspectable const& sender, RangeBaseValueChangedEventArgs const& args) {
+						const float val = static_cast<float>(args.NewValue());
+						edit_arc_slider_set_header<1>(val);
+						D2D1_SWEEP_DIRECTION dir;
+						m_dialog_page.m_shape_list.back()->get_arc_dir(dir);
+						if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+							m_dialog_page.m_shape_list.back()->set_arc_end(val);
+						}
+						else {
+							m_dialog_page.m_shape_list.back()->set_arc_start(-val);
+						}
+						dialog_draw();
+					}
+				)
 			};
 			const winrt::event_token ds2_tok{
 				dialog_slider_2().ValueChanged(
-					{ this, &MainPage::edit_arc_slider_val_changed<UNDO_ID::ARC_ROT, 2> })
+					[=](IInspectable const& sender, RangeBaseValueChangedEventArgs const& args) {
+						const float val = static_cast<float>(args.NewValue());
+						edit_arc_slider_set_header<2>(val);
+						m_dialog_page.m_shape_list.back()->set_arc_rot(val);
+						dialog_draw();
+					}
+				)
 			};
 			const winrt::event_token dcb_tok_checked{
 				dialog_check_box().Checked(
 					[=](IInspectable const& sender,  RoutedEventArgs const& args) {
-						ShapeQEllipse* s = static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back());
+						Shape* s = m_dialog_page.m_shape_list.back();
 						if (s->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
+							const auto val0 = dialog_slider_0().Value();
+							const auto val1 = dialog_slider_1().Value();
+							dialog_slider_0().Value(-val1);
+							dialog_slider_1().Value(-val0);
 							dialog_draw();
 						}
 					}
@@ -246,16 +266,18 @@ namespace winrt::GraphPaper::implementation
 			const winrt::event_token dcb_tok_unchecked{
 				dialog_check_box().Unchecked(
 					[=](IInspectable const& sender,  RoutedEventArgs const& args) {
-						ShapeQEllipse* s = static_cast<ShapeQEllipse*>(m_dialog_page.m_shape_list.back());
-						if (s->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
+						Shape* s = m_dialog_page.m_shape_list.back();
+						if (s->set_arc_dir(
+							D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
+							const auto val0 = dialog_slider_0().Value();
+							const auto val1 = dialog_slider_1().Value();
+							dialog_slider_0().Value(-val1);
+							dialog_slider_1().Value(-val0);
 							dialog_draw();
 						}
 					}
 				)
 			};
-			edit_arc_slider_set_header<UNDO_ID::ARC_START, 0>(deg_start);
-			edit_arc_slider_set_header<UNDO_ID::ARC_END, 1>(deg_end);
-			edit_arc_slider_set_header<UNDO_ID::ARC_ROT, 2>(deg_rot);
 			m_dialog_page.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
@@ -264,6 +286,7 @@ namespace winrt::GraphPaper::implementation
 				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_deg_rot")));
 			const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 			if (d_result == ContentDialogResult::Primary) {
+				s = m_dialog_page.m_shape_list.back();
 				// 注意: 順番が OK かどうか.
 				D2D1_SWEEP_DIRECTION dir;
 				s->get_arc_dir(dir);

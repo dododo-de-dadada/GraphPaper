@@ -190,6 +190,10 @@ namespace winrt::GraphPaper::implementation
 	{
 		UndoValue<U>::SET(m_shape, val);
 	}
+	template UndoValue<UNDO_ID::ARC_DIR>::UndoValue(Shape* s, const D2D1_SWEEP_DIRECTION& val);
+	template UndoValue<UNDO_ID::ARC_END>::UndoValue(Shape* s, const float& val);
+	template UndoValue<UNDO_ID::ARC_ROT>::UndoValue(Shape* s, const float& val);
+	template UndoValue<UNDO_ID::ARC_START>::UndoValue(Shape* s, const float& val);
 	template UndoValue<UNDO_ID::ARROW_SIZE>::UndoValue(Shape* s, const ARROW_SIZE& val);
 	template UndoValue<UNDO_ID::ARROW_STYLE>::UndoValue(Shape* s, const ARROW_STYLE& val);
 	template UndoValue<UNDO_ID::DASH_CAP>::UndoValue(Shape* s, const D2D1_CAP_STYLE& val);
@@ -214,10 +218,6 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(Shape* s, const D2D1_SIZE_F& val);
 	template UndoValue<UNDO_ID::PAGE_PADD>::UndoValue(Shape* s, const D2D1_RECT_F& val);
 	template UndoValue<UNDO_ID::POLY_CLOSED>::UndoValue(Shape* s, const bool &val);
-	template UndoValue<UNDO_ID::ARC_START>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_ID::ARC_END>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_ID::ARC_ROT>::UndoValue(Shape* s, const float& val);
-	template UndoValue<UNDO_ID::ARC_DIR>::UndoValue(Shape* s, const D2D1_SWEEP_DIRECTION& val);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(Shape* s, const CAP_STYLE& val);
 	template UndoValue<UNDO_ID::STROKE_COLOR>::UndoValue(Shape* s, const D2D1_COLOR_F& val);
 	template UndoValue<UNDO_ID::STROKE_WIDTH>::UndoValue(Shape* s, const float& val);
@@ -234,13 +234,13 @@ namespace winrt::GraphPaper::implementation
 		m_value()
 	{
 		if constexpr (
+			U == UNDO_ID::ARC_END ||
+			U == UNDO_ID::ARC_ROT ||
+			U == UNDO_ID::ARC_START ||
 			U == UNDO_ID::FONT_SIZE ||
 			U == UNDO_ID::GRID_BASE ||
 			U == UNDO_ID::IMAGE_OPAC ||
 			U == UNDO_ID::JOIN_LIMIT ||
-			U == UNDO_ID::ARC_START ||
-			U == UNDO_ID::ARC_END ||
-			U == UNDO_ID::ARC_ROT ||
 			U == UNDO_ID::STROKE_WIDTH ||
 			U == UNDO_ID::TEXT_LINE_SP) {
 			m_value = dt_reader.ReadSingle();
@@ -339,7 +339,10 @@ namespace winrt::GraphPaper::implementation
 			throw winrt::hresult_not_implemented();
 		}
 	}
-
+	template UndoValue<UNDO_ID::ARC_DIR>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::ARC_END>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::ARC_ROT>::UndoValue(DataReader const& dt_reader);
+	template UndoValue<UNDO_ID::ARC_START>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::ARROW_SIZE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::ARROW_STYLE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::DASH_CAP>::UndoValue(DataReader const& dt_reader);
@@ -364,10 +367,6 @@ namespace winrt::GraphPaper::implementation
 	template UndoValue<UNDO_ID::PAGE_SIZE>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::PAGE_PADD>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::POLY_CLOSED>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::ARC_START>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::ARC_END>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::ARC_ROT>::UndoValue(DataReader const& dt_reader);
-	template UndoValue<UNDO_ID::ARC_DIR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_CAP>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_COLOR>::UndoValue(DataReader const& dt_reader);
 	template UndoValue<UNDO_ID::STROKE_WIDTH>::UndoValue(DataReader const& dt_reader);
@@ -382,6 +381,26 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_ID U> void UndoValue<U>::SET(Shape* const s, const U_TYPE<U>::type& val)
 	{
 		throw winrt::hresult_not_implemented();
+	}
+
+	void UndoValue<UNDO_ID::ARC_DIR>::SET(Shape* const s, const D2D1_SWEEP_DIRECTION& val)
+	{
+		s->set_arc_dir(val);
+	}
+
+	void UndoValue<UNDO_ID::ARC_END>::SET(Shape* const s, const float& val)
+	{
+		s->set_arc_end(val);
+	}
+
+	void UndoValue<UNDO_ID::ARC_ROT>::SET(Shape* const s, const float& val)
+	{
+		s->set_arc_rot(val);
+	}
+
+	void UndoValue<UNDO_ID::ARC_START>::SET(Shape* const s, const float& val)
+	{
+		s->set_arc_start(val);
 	}
 
 	void UndoValue<UNDO_ID::ARROW_SIZE>::SET(Shape* const s, const ARROW_SIZE& val)
@@ -502,26 +521,6 @@ namespace winrt::GraphPaper::implementation
 	void UndoValue<UNDO_ID::POLY_CLOSED>::SET(Shape* const s, const bool& val)
 	{
 		s->set_poly_closed(val);
-	}
-
-	void UndoValue<UNDO_ID::ARC_START>::SET(Shape* const s, const float& val)
-	{
-		s->set_arc_start(val);
-	}
-
-	void UndoValue<UNDO_ID::ARC_END>::SET(Shape* const s, const float& val)
-	{
-		s->set_arc_end(val);
-	}
-
-	void UndoValue<UNDO_ID::ARC_ROT>::SET(Shape* const s, const float& val)
-	{
-		s->set_arc_rot(val);
-	}
-
-	void UndoValue<UNDO_ID::ARC_DIR>::SET(Shape* const s, const D2D1_SWEEP_DIRECTION& val)
-	{
-		s->set_arc_dir(val);
 	}
 
 	void UndoValue<UNDO_ID::STROKE_CAP>::SET(Shape* const s, const CAP_STYLE& val)
@@ -694,9 +693,9 @@ namespace winrt::GraphPaper::implementation
 		return s->get_poly_closed(val);
 	}
 
-	bool UndoValue<UNDO_ID::ARC_START>::GET(const Shape* s, float& val) noexcept
+	bool UndoValue<UNDO_ID::ARC_DIR>::GET(const Shape* s, D2D1_SWEEP_DIRECTION& val) noexcept
 	{
-		return s->get_arc_start(val);
+		return s->get_arc_dir(val);
 	}
 
 	bool UndoValue<UNDO_ID::ARC_END>::GET(const Shape* s, float& val) noexcept
@@ -709,9 +708,9 @@ namespace winrt::GraphPaper::implementation
 		return s->get_arc_rot(val);
 	}
 
-	bool UndoValue<UNDO_ID::ARC_DIR>::GET(const Shape* s, D2D1_SWEEP_DIRECTION& val) noexcept
+	bool UndoValue<UNDO_ID::ARC_START>::GET(const Shape* s, float& val) noexcept
 	{
-		return s->get_arc_dir(val);
+		return s->get_arc_start(val);
 	}
 
 	bool UndoValue<UNDO_ID::STROKE_CAP>::GET(const Shape* s, CAP_STYLE& val) noexcept

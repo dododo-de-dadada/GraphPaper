@@ -562,8 +562,11 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	格納される前の値と異なっており, 値が格納されたら true.
 	template<UNDO_ID U, typename T> bool MainPage::ustack_push_set(T const& val)
 	{
-		// 格納する型 T は明示しなくても引数の型から推定できる
-		m_ustack_undo.push_back(new UndoValue<U>(&m_main_page, val));
+		// メインページに属性ありなら, メインページの属性も変更する.
+		T page_val;
+		if (UndoValue<U>::GET(&m_main_page, page_val)) {
+			m_ustack_undo.push_back(new UndoValue<U>(&m_main_page, val));
+		}
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected()) {

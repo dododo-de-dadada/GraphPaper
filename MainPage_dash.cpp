@@ -31,22 +31,22 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(TICK_FREQ);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(d_patt.m_[0]);
-		dash_slider_set_header<UNDO_ID::DASH_PATT, 0>(d_patt.m_[0]);
+		dash_slider_set_header<0>(d_patt.m_[0]);
 		dialog_slider_1().Maximum(MAX_VALUE);
 		dialog_slider_1().TickFrequency(TICK_FREQ);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(d_patt.m_[1]);
-		dash_slider_set_header<UNDO_ID::DASH_PATT, 1>(d_patt.m_[1]);
+		dash_slider_set_header<1>(d_patt.m_[1]);
 		dialog_slider_2().Maximum(MAX_VALUE);
 		dialog_slider_2().TickFrequency(TICK_FREQ);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(d_patt.m_[2]);
-		dash_slider_set_header<UNDO_ID::DASH_PATT, 2>(d_patt.m_[2]);
+		dash_slider_set_header<2>(d_patt.m_[2]);
 		dialog_slider_3().Maximum(MAX_VALUE);
 		dialog_slider_3().TickFrequency(TICK_FREQ);
 		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_3().Value(d_patt.m_[3]);
-		dash_slider_set_header<UNDO_ID::DASH_PATT, 3>(d_patt.m_[3]);
+		dash_slider_set_header<3>(d_patt.m_[3]);
 
 		float s_width;
 		m_main_page.get_stroke_width(s_width);
@@ -55,29 +55,82 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_4().TickFrequency(TICK_FREQ);
 		dialog_slider_4().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_4().Value(s_width);
-		dash_slider_set_header<UNDO_ID::STROKE_WIDTH, 4>(s_width);
+		dash_slider_set_header<4>(s_width);
 
 		D2D1_DASH_STYLE s_style;
 		m_main_page.get_dash_style(s_style);
-		dialog_slider_0().Visibility(s_style != D2D1_DASH_STYLE_DOT ? Visibility::Visible : Visibility::Collapsed);
-		dialog_slider_1().Visibility(s_style != D2D1_DASH_STYLE_DOT ? Visibility::Visible : Visibility::Collapsed);
-		dialog_slider_2().Visibility(s_style != D2D1_DASH_STYLE_DASH ? Visibility::Visible : Visibility::Collapsed);
-		dialog_slider_3().Visibility(s_style != D2D1_DASH_STYLE_DASH ? Visibility::Visible : Visibility::Collapsed);
+		const auto visible = (s_style != D2D1_DASH_STYLE_DOT ? Visibility::Visible : Visibility::Collapsed);
+		dialog_slider_0().Visibility(Visibility::Visible);
+		dialog_slider_1().Visibility(Visibility::Visible);
+		dialog_slider_2().Visibility(Visibility::Visible);
+		dialog_slider_3().Visibility(Visibility::Visible);
 		dialog_slider_4().Visibility(Visibility::Visible);
 		const winrt::event_token slider_0_token{
-			dialog_slider_0().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::DASH_PATT, 0> })
+			dialog_slider_0().ValueChanged(
+				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const float val = static_cast<float>(args.NewValue());
+					DASH_PATT patt;
+					m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
+					dash_slider_set_header<0>(val);
+					patt.m_[0] = static_cast<FLOAT>(val);
+					if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
+						dialog_draw();
+					}
+				}
+			)
 		};
 		const winrt::event_token slider_1_token{
-			dialog_slider_1().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::DASH_PATT, 1> })
+			dialog_slider_1().ValueChanged(
+				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const float val = static_cast<float>(args.NewValue());
+					DASH_PATT patt;
+					m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
+					dash_slider_set_header<1>(val);
+					patt.m_[1] = static_cast<FLOAT>(val);
+					if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
+						dialog_draw();
+					}
+				}
+			)
 		};
 		const winrt::event_token slider_2_token{
-			dialog_slider_2().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::DASH_PATT, 2> })
+			dialog_slider_0().ValueChanged(
+				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const float val = static_cast<float>(args.NewValue());
+					DASH_PATT patt;
+					m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
+					dash_slider_set_header<2>(val);
+					patt.m_[2] = patt.m_[4] = static_cast<FLOAT>(val);
+					if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
+						dialog_draw();
+					}
+				}
+			)
 		};
 		const winrt::event_token slider_3_token{
-			dialog_slider_3().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::DASH_PATT, 3> })
+			dialog_slider_0().ValueChanged(
+				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const float val = static_cast<float>(args.NewValue());
+					DASH_PATT patt;
+					m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
+					dash_slider_set_header<3>(val);
+					patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(val);
+					if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
+						dialog_draw();
+					}
+				}
+			)
 		};
 		const winrt::event_token slider_4_token{
-			dialog_slider_4().ValueChanged({ this, &MainPage::dash_slider_val_changed<UNDO_ID::STROKE_WIDTH, 4> })
+			dialog_slider_4().ValueChanged(
+				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+					const float val = static_cast<float>(args.NewValue());
+					dash_slider_set_header<4>(val);
+					if (m_dialog_page.m_shape_list.back()->set_stroke_width(val)) {
+						dialog_draw();
+					}
+				}
+			)
 		};
 		const auto p_width = scp_dialog_panel().Width();
 		const auto p_height = scp_dialog_panel().Height();
@@ -99,12 +152,11 @@ namespace winrt::GraphPaper::implementation
 		if (d_result == ContentDialogResult::Primary) {
 			DASH_PATT sample_patt;
 			float sample_width;
-			//m_sample_shape->get_dash_patt(sample_patt);
-			//m_sample_shape->get_stroke_width(sample_width);
 			m_dialog_page.m_shape_list.back()->get_dash_patt(sample_patt);
 			m_dialog_page.m_shape_list.back()->get_stroke_width(sample_width);
-			if (ustack_push_set<UNDO_ID::DASH_PATT>(sample_patt) ||
-				ustack_push_set<UNDO_ID::STROKE_WIDTH>(sample_width)) {
+			bool flag = ustack_push_set<UNDO_ID::DASH_PATT>(sample_patt);
+			flag = (ustack_push_set<UNDO_ID::STROKE_WIDTH>(sample_width) || flag);
+			if (flag) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -175,10 +227,10 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_ID U, int S>
+	template <int S>
 	void MainPage::dash_slider_set_header(const float val)
 	{
-		if constexpr (U == UNDO_ID::DASH_PATT) {
+		if constexpr (S == 0 || S == 1 || S == 2 || S == 3) {
 			constexpr wchar_t* R[]{
 				L"str_dash_len", L"str_dash_gap", L"str_dot_len", L"str_dot_gap"
 			};
@@ -190,7 +242,7 @@ namespace winrt::GraphPaper::implementation
 			};
 			dialog_set_slider_header<S>(text);
 		}
-		if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 4) {
+		else if constexpr (S == 4) {
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
 				m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
@@ -201,6 +253,7 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
+	/*
 	// スライダーの値が変更された.
 	// U	操作の識別子
 	// S	スライダーの番号
@@ -241,5 +294,6 @@ namespace winrt::GraphPaper::implementation
 			dialog_draw();
 		}
 	}
+	*/
 
 }

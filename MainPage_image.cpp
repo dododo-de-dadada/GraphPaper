@@ -53,15 +53,17 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val);
 		image_slider_set_header<UNDO_ID::IMAGE_OPAC, 0>(val);
-		dialog_check_box().IsChecked(m_dialog_page.m_image_opac_importing);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
-		dialog_check_box().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::image_slider_val_changed<UNDO_ID::IMAGE_OPAC, 0> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged(
+			{ this, &MainPage::image_slider_val_changed<UNDO_ID::IMAGE_OPAC, 0> });
 
-		dialog_image_load_async(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()));
+		dialog_image_load_async(
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()));
 
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_image_opac")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -78,7 +80,6 @@ namespace winrt::GraphPaper::implementation
 		slist_clear(m_dialog_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_0().ValueChanged(slider_0_token);
-		dialog_check_box().Visibility(Visibility::Collapsed);
 		page_draw();
 		m_mutex_event.unlock();
 	}

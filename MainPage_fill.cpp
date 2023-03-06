@@ -32,34 +32,79 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val0);
-		fill_slider_set_header<UNDO_ID::FILL_COLOR, 0>(val0);
+		fill_slider_set_header<0>(val0);
 		dialog_slider_1().Maximum(255.0);
 		dialog_slider_1().TickFrequency(1.0);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(val1);
-		fill_slider_set_header<UNDO_ID::FILL_COLOR, 1>(val1);
+		fill_slider_set_header<1>(val1);
 		dialog_slider_2().Maximum(255.0);
 		dialog_slider_2().TickFrequency(1.0);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(val2);
-		fill_slider_set_header<UNDO_ID::FILL_COLOR, 2>(val2);
+		fill_slider_set_header<2>(val2);
 		dialog_slider_3().Maximum(255.0);
 		dialog_slider_3().TickFrequency(1.0);
 		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_3().Value(val3);
-		fill_slider_set_header<UNDO_ID::FILL_COLOR, 3>(val3);
+		fill_slider_set_header<3>(val3);
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
 		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			{ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 0> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const float val = static_cast<float>(args.NewValue());
+				fill_slider_set_header<0>(val);
+				D2D1_COLOR_F f_color;
+				m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
+				f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
+				if (scp_dialog_panel().IsLoaded() &&
+					m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
+					dialog_draw();
+				}
+			}
+		);
 		const auto slider_1_token = dialog_slider_1().ValueChanged(
-			{ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 1> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const float val = static_cast<float>(args.NewValue());
+				fill_slider_set_header<1>(val);
+				D2D1_COLOR_F f_color;
+				m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
+				f_color.g = static_cast<FLOAT>(val / COLOR_MAX);
+				if (scp_dialog_panel().IsLoaded() &&
+					m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
+					dialog_draw();
+				}
+			}
+		);
 		const auto slider_2_token = dialog_slider_2().ValueChanged(
-			{ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 2> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const float val = static_cast<float>(args.NewValue());
+				fill_slider_set_header<2>(val);
+				D2D1_COLOR_F f_color;
+				m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
+				f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
+				if (scp_dialog_panel().IsLoaded() &&
+					m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
+					dialog_draw();
+				}
+			}
+		);
 		const auto slider_3_token = dialog_slider_3().ValueChanged(
-			{ this, &MainPage::fill_slider_val_changed<UNDO_ID::FILL_COLOR, 3> });
+			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
+				const float val = static_cast<float>(args.NewValue());
+				fill_slider_set_header<3>(val);
+				D2D1_COLOR_F f_color;
+				m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
+				f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
+				if (scp_dialog_panel().IsLoaded() &&
+					m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
+					dialog_draw();
+				}
+
+			}
+		);
 
 		const auto p_width = scp_dialog_panel().Width();
 		const auto p_height = scp_dialog_panel().Height();
@@ -108,22 +153,21 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_ID U, int S>
+	template <int S>
 	void MainPage::fill_slider_set_header(const float val)
 	{
-		if constexpr (U == UNDO_ID::FILL_COLOR) {
-			constexpr wchar_t* HEADER[]{ 
-				L"str_color_r", L"str_color_g", L"str_color_b", L"str_opacity"
-			};
-			wchar_t buf[32];
-			conv_col_to_str(m_color_code, val, buf);
-			const winrt::hstring text{
-				ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf
-			};
-			dialog_set_slider_header<S>(text);
-		}
+		constexpr wchar_t* HEADER[]{ 
+			L"str_color_r", L"str_color_g", L"str_color_b", L"str_opacity"
+		};
+		wchar_t buf[32];
+		conv_col_to_str(m_color_code, val, buf);
+		const winrt::hstring text{
+			ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf
+		};
+		dialog_set_slider_header<S>(text);
 	}
 
+	/*
 	// スライダーの値が変更された.
 	// U	操作の識別子
 	// S	スライダーの番号
@@ -156,5 +200,6 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 	}
+	*/
 
 }
