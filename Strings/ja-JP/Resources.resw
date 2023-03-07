@@ -221,6 +221,10 @@
     <value>長さの単位</value>
     <comment>MenuFlyoutSubItem</comment>
   </data>
+  <data name="str_font_stretch" xml:space="preserve">
+    <value>書体の幅</value>
+    <comment>String</comment>
+  </data>
   <data name="str_font_stretch_condensed" xml:space="preserve">
     <value>狭め</value>
     <comment>ListViewItem</comment>
@@ -669,8 +673,8 @@
     <value>多角形</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
-  <data name="rmfi_drawing_qellipse.Text" xml:space="preserve">
-    <value>四分だ円</value>
+  <data name="rmfi_drawing_arc.Text" xml:space="preserve">
+    <value>円弧</value>
     <comment>RadioMenuFlyoutItem</comment>
   </data>
   <data name="rmfi_drawing_rect.Text" xml:space="preserve">
@@ -846,20 +850,28 @@
 1234567890</value>
     <comment>String</comment>
   </data>
-  <data name="str_deg_start" xml:space="preserve">
+  <data name="str_arc_start" xml:space="preserve">
     <value>始点</value>
     <comment>String</comment>
   </data>
-  <data name="str_deg_end" xml:space="preserve">
+  <data name="str_arc_end" xml:space="preserve">
     <value>終点</value>
     <comment>String</comment>
   </data>
-  <data name="str_deg_rot" xml:space="preserve">
+  <data name="str_arc_rot" xml:space="preserve">
     <value>傾き</value>
     <comment>String</comment>
   </data>
   <data name="str_font_size" xml:space="preserve">
     <value>書体の大きさ</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_font_weight" xml:space="preserve">
+    <value>書体の太さ</value>
+    <comment>String</comment>
+  </data>
+  <data name="str_font_family" xml:space="preserve">
+    <value>書体</value>
     <comment>String</comment>
   </data>
   <data name="str_stroke_color" xml:space="preserve">

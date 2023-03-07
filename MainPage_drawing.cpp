@@ -44,8 +44,8 @@ namespace winrt::GraphPaper::implementation
 		else if (sender == rmfi_drawing_ruler()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::RULER);
 		}
-		else if (sender == rmfi_drawing_qellipse()) {
-			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::QELLIPSE);
+		else if (sender == rmfi_drawing_arc()) {
+			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::ARC);
 		}
 		else if (sender == rmfi_tool_eyedropper()) {
 			drawing_tool_is_checked(m_drawing_tool = DRAWING_TOOL::EYEDROPPER);
@@ -112,7 +112,7 @@ namespace winrt::GraphPaper::implementation
 		rmfi_drawing_bezier().IsChecked(val == DRAWING_TOOL::BEZIER);
 		rmfi_drawing_text().IsChecked(val == DRAWING_TOOL::TEXT);
 		rmfi_drawing_ruler().IsChecked(val == DRAWING_TOOL::RULER);
-		rmfi_drawing_qellipse().IsChecked(val == DRAWING_TOOL::QELLIPSE);
+		rmfi_drawing_arc().IsChecked(val == DRAWING_TOOL::ARC);
 		rmfi_tool_eyedropper().IsChecked(val == DRAWING_TOOL::EYEDROPPER);
 	}
 

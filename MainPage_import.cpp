@@ -48,9 +48,16 @@ namespace winrt::GraphPaper::implementation
 			const CoreCursor& prev_cur = wait_cursor_show();
 			unselect_all();
 
-			IRandomAccessStream stream{ co_await open_file.OpenAsync(FileAccessMode::Read) };
-			BitmapDecoder decoder{ co_await BitmapDecoder::CreateAsync(stream) };
-			SoftwareBitmap bitmap{ SoftwareBitmap::Convert(co_await decoder.GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8) };
+			IRandomAccessStream stream{
+				co_await open_file.OpenAsync(FileAccessMode::Read) 
+			};
+			BitmapDecoder decoder{
+				co_await BitmapDecoder::CreateAsync(stream) 
+			};
+			SoftwareBitmap bitmap{ 
+				SoftwareBitmap::Convert(
+					co_await decoder.GetSoftwareBitmapAsync(), BitmapPixelFormat::Bgra8) 
+			};
 
 			// ï\é¶Ç≥ÇÍÇΩïîï™ÇÃíÜêSÇÃà íuÇãÅÇﬂÇÈ.
 			const double scale = m_main_page.m_page_scale;
@@ -64,8 +71,10 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>((win_x + (win_w - image_w) * 0.5) / scale),
 				static_cast<FLOAT>((win_y + (win_h - image_h) * 0.5) / scale)
 			};
-			const D2D1_SIZE_F page_size{ static_cast<FLOAT>(image_w), static_cast<FLOAT>(image_h) };
-			ShapeImage* s = new ShapeImage(center_pos, page_size, bitmap, m_main_page.m_image_opac);
+			const D2D1_SIZE_F p_size{ 
+				static_cast<FLOAT>(image_w), static_cast<FLOAT>(image_h)
+			};
+			ShapeImage* s = new ShapeImage(center_pos, p_size, bitmap, 1.0);
 #if (_DEBUG)
 			debug_leak_cnt++;
 #endif

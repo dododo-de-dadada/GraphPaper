@@ -27,7 +27,7 @@ namespace winrt::GraphPaper::implementation
 	static void text_create_sample_shape(const float p_width, const float p_height, ShapePage& page)
 	{
 		const auto padd_w = p_width * 0.125;
-		const auto padd_h = p_height * 0.25;
+		const auto padd_h = p_height * 0.125;
 		const D2D1_POINT_2F start{
 			static_cast<FLOAT>(padd_w), static_cast<FLOAT>(padd_h)
 		};
@@ -179,8 +179,10 @@ namespace winrt::GraphPaper::implementation
 		text_slider_set_header<UNDO_ID::TEXT_LINE_SP, 0>(val);
 		dialog_slider_0().Visibility(Visibility::Visible);
 
-		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_LINE_SP, 0> });
+		const auto token0{
+			dialog_slider_0().ValueChanged(
+				{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_LINE_SP, 0> })
+		};
 		text_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()), 
 			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
@@ -200,7 +202,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		slist_clear(m_dialog_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
+		dialog_slider_0().ValueChanged(token0);
 		m_mutex_event.unlock();
 	}
 
@@ -231,11 +233,14 @@ namespace winrt::GraphPaper::implementation
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PADDING, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged(
-			{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PADDING, 1> });
-
+		const auto token0{
+			dialog_slider_0().ValueChanged(
+				{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PADDING, 0> })
+		};
+		const auto token1{
+			dialog_slider_1().ValueChanged(
+				{ this, &MainPage::text_slider_val_changed<UNDO_ID::TEXT_PADDING, 1> })
+		};
 		text_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
 			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
@@ -256,8 +261,8 @@ namespace winrt::GraphPaper::implementation
 		slist_clear(m_dialog_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_1().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
-		dialog_slider_1().ValueChanged(slider_1_token);
+		dialog_slider_0().ValueChanged(token0);
+		dialog_slider_1().ValueChanged(token1);
 		m_mutex_event.unlock();
 	}
 
@@ -301,29 +306,35 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged Ç≈ìnÇ≥ÇÍÇΩà¯êî
 	// ñﬂÇËíl	Ç»Çµ
 	template <UNDO_ID U, int S>
-	void MainPage::text_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::text_slider_val_changed(
+		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_ID::TEXT_LINE_SP) {
+		if constexpr (U == UNDO_ID::TEXT_LINE_SP && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
-			text_slider_set_header<U, S>(val);
-			//m_sample_shape->set_text_line_sp(val);
-			m_dialog_page.m_shape_list.back()->set_text_line_sp(val);
+			text_slider_set_header<UNDO_ID::TEXT_LINE_SP, 0>(val);
+			if (m_dialog_page.m_shape_list.back()->set_text_line_sp(val)) {
+				dialog_draw();
+			}
 		}
-		if constexpr (U == UNDO_ID::TEXT_PADDING) {
+		else if constexpr (U == UNDO_ID::TEXT_PADDING && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
-			text_slider_set_header<U, S>(val);
+			text_slider_set_header<UNDO_ID::TEXT_PADDING, 0>(val);
 			D2D1_SIZE_F padding;
 			m_dialog_page.m_shape_list.back()->get_text_padding(padding);
-			if constexpr (S == 0) {
-				padding.width = static_cast<FLOAT>(val);
+			padding.width = static_cast<FLOAT>(val);
+			if (m_dialog_page.m_shape_list.back()->set_text_padding(padding)) {
+				dialog_draw();
 			}
-			if constexpr (S == 1) {
-				padding.height = static_cast<FLOAT>(val);
-			}
-			m_dialog_page.m_shape_list.back()->set_text_padding(padding);
 		}
-		if (scp_dialog_panel().IsLoaded()) {
-			dialog_draw();
+		else if constexpr (U == UNDO_ID::TEXT_PADDING && S == 1) {
+			const float val = static_cast<float>(args.NewValue());
+			text_slider_set_header<UNDO_ID::TEXT_PADDING, 1>(val);
+			D2D1_SIZE_F padding;
+			m_dialog_page.m_shape_list.back()->get_text_padding(padding);
+			padding.height = static_cast<FLOAT>(val);
+			if (m_dialog_page.m_shape_list.back()->set_text_padding(padding)) {
+				dialog_draw();
+			}
 		}
 	}
 

@@ -52,11 +52,11 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val);
-		image_slider_set_header<UNDO_ID::IMAGE_OPAC, 0>(val);
+		image_slider_set_header(val);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			{ this, &MainPage::image_slider_val_changed<UNDO_ID::IMAGE_OPAC, 0> });
+			{ this, &MainPage::image_slider_val_changed });
 
 		dialog_image_load_async(
 			static_cast<float>(scp_dialog_panel().Width()),
@@ -89,16 +89,13 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_ID U, int S>
 	void MainPage::image_slider_set_header(const float val)
 	{
-		if constexpr (U == UNDO_ID::IMAGE_OPAC) {
-			constexpr wchar_t R[]{ L"str_opacity" };
-			wchar_t buf[32];
-			conv_col_to_str(m_color_code, val, buf);
-			const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(R) + L": " + buf;
-			dialog_set_slider_header<S>(text);
-		}
+		constexpr wchar_t R[]{ L"str_opacity" };
+		wchar_t buf[32];
+		conv_col_to_str(m_color_code, val, buf);
+		const winrt::hstring text = ResourceLoader::GetForCurrentView().GetString(R) + L": " + buf;
+		dialog_set_slider_header<0>(text);
 	}
 
 	// スライダーの値が変更された.
@@ -106,17 +103,11 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_ID U, int S>
 	void MainPage::image_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_ID::IMAGE_OPAC) {
-			if constexpr (S == 0) {
-				const float val = static_cast<float>(args.NewValue());
-				image_slider_set_header<U, S>(val);
-				m_dialog_page.m_shape_list.back()->set_image_opacity(val / COLOR_MAX);
-			}
-		}
-		if (scp_dialog_panel().IsLoaded()) {
+		const float val = static_cast<float>(args.NewValue());
+		image_slider_set_header(val);
+		if (m_dialog_page.m_shape_list.back()->set_image_opacity(val / COLOR_MAX)) {
 			dialog_draw();
 		}
 	}

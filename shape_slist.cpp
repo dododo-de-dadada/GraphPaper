@@ -26,7 +26,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_RRECT,	// 角丸方形
 		SHAPE_RULER,	// 定規
 		SHAPE_TEXT,	// 文字列
-		SHAPE_QELLIPSE	// 四分円
+		SHAPE_ARC	// 四分円
 	};
 
 	// データリーダーから図形を読み込む.
@@ -206,7 +206,7 @@ namespace winrt::GraphPaper::implementation
 					selected_image_cnt++;
 				}
 				// 図形の型が画像か判定する.,
-				if (s_type == typeid(ShapeQEllipse)) {
+				if (s_type == typeid(ShapeArc)) {
 					selected_arc_cnt++;
 				}
 				// 図形の型がグループ図形か判定する.,
@@ -509,8 +509,8 @@ namespace winrt::GraphPaper::implementation
 		else if (s_type == SHAPE_TYPE::SHAPE_RULER) {
 			s = new ShapeRuler(page, dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_QELLIPSE) {
-			s = new ShapeQEllipse(page, dt_reader);
+		else if (s_type == SHAPE_TYPE::SHAPE_ARC) {
+			s = new ShapeArc(page, dt_reader);
 		}
 		else {
 			s = reinterpret_cast<Shape*>(-1);
@@ -575,8 +575,8 @@ namespace winrt::GraphPaper::implementation
 			}
 			auto const& s_type = typeid(*s);
 			uint32_t s_int;
-			if (s_type == typeid(ShapeQEllipse)) {
-				s_int = SHAPE_TYPE::SHAPE_QELLIPSE;
+			if (s_type == typeid(ShapeArc)) {
+				s_int = SHAPE_TYPE::SHAPE_ARC;
 			}
 			else if (s_type == typeid(ShapeBezier)) {
 				s_int = SHAPE_TYPE::SHAPE_BEZIER;

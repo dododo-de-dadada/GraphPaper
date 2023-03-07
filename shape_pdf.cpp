@@ -1114,7 +1114,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに PDF として書き込む.
-	size_t ShapeQEllipse::export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer)
+	size_t ShapeArc::export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer)
 	{
 		if (!is_opaque(m_fill_color) && (equal(m_stroke_width, 0.0f) ||
 			!is_opaque(m_stroke_color))) {
@@ -1164,7 +1164,7 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
-				qellipse_calc_arrow(
+				arc_calc_arrow(
 					m_pos[0], center, m_radius, m_deg_start, m_deg_end, m_deg_rot, m_sweep_dir,
 					m_arrow_size, arrow);
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size,

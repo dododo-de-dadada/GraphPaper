@@ -13,8 +13,6 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-	constexpr wchar_t DLG_TITLE[] = L"str_font_color";
-
 	//---------------------------------
 	// 書体の幅の配列
 	//---------------------------------
@@ -104,13 +102,13 @@ namespace winrt::GraphPaper::implementation
 		const D2D1_POINT_2F pos{
 			static_cast<FLOAT>(p_width - 2.0 * padd_w), static_cast<FLOAT>(p_width - 2.0 * padd_h)
 		};
-		const auto pang = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
+		const auto pangram = ResourceLoader::GetForCurrentView().GetString(L"str_pangram");
 		const wchar_t* text = nullptr;
-		if (pang.empty()) {
+		if (pangram.empty()) {
 			text = L"The quick brown fox jumps over a lazy dog.";
 		}
 		else {
-			text = pang.c_str();
+			text = pangram.c_str();
 		}
 		page.m_shape_list.push_back(new ShapeText(start, pos, wchar_cpy(text), &page));
 #if defined(_DEBUG)
@@ -123,118 +121,103 @@ namespace winrt::GraphPaper::implementation
 	//---------------------------------
 	IAsyncAction MainPage::font_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		constexpr auto TICK_FREQ = 1.0;
 		m_dialog_page.set_attr_to(&m_main_page);
+		font_create_sample_shape(
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
 
-		D2D1_COLOR_F val;
-		m_dialog_page.get_font_color(val);
-		const float val0 = static_cast<float>(conv_color_comp(val.r));
-		const float val1 = static_cast<float>(conv_color_comp(val.g));
-		const float val2 = static_cast<float>(conv_color_comp(val.b));
-		const float val3 = static_cast<float>(conv_color_comp(val.a));
+		D2D1_COLOR_F f_color;
+		m_dialog_page.get_font_color(f_color);
+		const float val0 = static_cast<float>(conv_color_comp(f_color.r));
+		const float val1 = static_cast<float>(conv_color_comp(f_color.g));
+		const float val2 = static_cast<float>(conv_color_comp(f_color.b));
+		const float val3 = static_cast<float>(conv_color_comp(f_color.a));
+		float f_size;
+		m_dialog_page.get_font_size(f_size);
+		const float val4 = f_size;
 		dialog_slider_0().Maximum(255.0);
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val0);
-		font_slider_set_header<UNDO_ID::FONT_COLOR, 0>(val0);
+		font_slider_set_header<0>(val0);
 		dialog_slider_1().Maximum(255.0);
 		dialog_slider_1().TickFrequency(1.0);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(val1);
-		font_slider_set_header<UNDO_ID::FONT_COLOR, 1>(val1);
+		font_slider_set_header<1>(val1);
 		dialog_slider_2().Maximum(255.0);
 		dialog_slider_2().TickFrequency(1.0);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(val2);
-		font_slider_set_header<UNDO_ID::FONT_COLOR, 2>(val2);
+		font_slider_set_header<2>(val2);
 		dialog_slider_3().Maximum(255.0);
 		dialog_slider_3().TickFrequency(1.0);
 		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_3().Value(val3);
-		font_slider_set_header<UNDO_ID::FONT_COLOR, 3>(val3);
+		font_slider_set_header<3>(val3);
+		dialog_slider_4().Maximum(FONT_SIZE_MAX - 1.0f);
+		dialog_slider_4().TickFrequency(TICK_FREQ);
+		dialog_slider_4().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_4().Value(val4 - 1.0);
+		font_slider_set_header<4>(val4 - 1.0f);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const auto val = static_cast<float>(args.NewValue());
-				font_slider_set_header<UNDO_ID::FONT_COLOR, 0>(val);
-				D2D1_COLOR_F f_color;
-				m_dialog_page.m_shape_list.back()->get_font_color(f_color);
-				f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
-					dialog_draw();
-				}
-			}
-		);
-		const auto slider_1_token = dialog_slider_1().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const auto val = static_cast<float>(args.NewValue());
-				font_slider_set_header<UNDO_ID::FONT_COLOR, 1>(val);
-				D2D1_COLOR_F f_color;
-				m_dialog_page.m_shape_list.back()->get_font_color(f_color);
-				f_color.g = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
-					dialog_draw();
-				}
-			}
-		);
-		const auto slider_2_token = dialog_slider_2().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const auto val = static_cast<float>(args.NewValue());
-				font_slider_set_header<UNDO_ID::FONT_COLOR, 2>(val);
-				D2D1_COLOR_F f_color;
-				f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
-					dialog_draw();
-				}
-			}
-		);
-		const auto slider_3_token = dialog_slider_3().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const auto val = static_cast<float>(args.NewValue());
-				font_slider_set_header<UNDO_ID::FONT_COLOR, 3>(val);
-				D2D1_COLOR_F f_color;
-				m_dialog_page.m_shape_list.back()->get_font_color(f_color);
-				f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
-					dialog_draw();
-				}
-			}
-		);
-		font_create_sample_shape(
-			static_cast<float>(scp_dialog_panel().Width()),
-			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		dialog_slider_4().Visibility(Visibility::Visible);
+		const auto token0{
+			dialog_slider_0().ValueChanged(
+				{ this, &MainPage::font_slider_value_changed<0> })
+		};
+		const auto token1{
+			dialog_slider_1().ValueChanged(
+				{ this, &MainPage::font_slider_value_changed<1> })
+		};
+		const auto token2{
+			dialog_slider_2().ValueChanged(
+				{ this, &MainPage::font_slider_value_changed<2> })
+		};
+		const auto token3{
+			dialog_slider_3().ValueChanged(
+				{ this, &MainPage::font_slider_value_changed<3> })
+		};
+		const auto token4{
+			dialog_slider_4().ValueChanged(
+				{ this, &MainPage::font_slider_value_changed<4> })
+		};
 		cd_setting_dialog().Title(
-			box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_color")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F samp_val;
-			m_dialog_page.m_shape_list.back()->get_font_color(samp_val);
-			if (ustack_push_set<UNDO_ID::FONT_COLOR>(samp_val)) {
+			D2D1_COLOR_F new_color;
+			m_dialog_page.m_shape_list.back()->get_font_color(new_color);
+			float new_size;
+			m_dialog_page.m_shape_list.back()->get_font_size(new_size);
+			const bool flag_color = ustack_push_set<UNDO_ID::FONT_COLOR>(new_color);
+			const bool flag_size = ustack_push_set<UNDO_ID::FONT_SIZE>(new_size);
+			if (flag_color || flag_size) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		dialog_slider_2().Visibility(Visibility::Collapsed);
 		dialog_slider_3().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
-		dialog_slider_1().ValueChanged(slider_1_token);
-		dialog_slider_2().ValueChanged(slider_2_token);
-		dialog_slider_3().ValueChanged(slider_3_token);
+		dialog_slider_4().Visibility(Visibility::Collapsed);
+		dialog_slider_0().ValueChanged(token0);
+		dialog_slider_1().ValueChanged(token1);
+		dialog_slider_2().ValueChanged(token2);
+		dialog_slider_3().ValueChanged(token3);
+		dialog_slider_4().ValueChanged(token4);
 		page_draw();
 
 		m_mutex_event.unlock();
+		slist_clear(m_dialog_page.m_shape_list);
 	}
 
 	//---------------------------------
@@ -275,8 +258,11 @@ namespace winrt::GraphPaper::implementation
 			}
 		);
 		lv_dialog_list().Visibility(Visibility::Visible);
-		font_create_sample_shape(static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		font_create_sample_shape(
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_family")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -300,15 +286,14 @@ namespace winrt::GraphPaper::implementation
 
 	//---------------------------------
 	// 値をスライダーのヘッダーに格納する.
-	// U	操作の識別子
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
 	//---------------------------------
-	template <UNDO_ID U, int S>
+	template <int S>
 	void MainPage::font_slider_set_header(const float val)
 	{
-		if constexpr (U == UNDO_ID::FONT_SIZE) {
+		if constexpr (S == 4) {
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
 				m_len_unit, val + 1.0f, m_dialog_d2d.m_logical_dpi, 
@@ -316,99 +301,102 @@ namespace winrt::GraphPaper::implementation
 			const auto text{
 				ResourceLoader::GetForCurrentView().GetString(L"str_font_size") + L": " + buf
 			};
-			dialog_set_slider_header<S>(text);
+			dialog_set_slider_header<4>(text);
 		}
-		else if constexpr (U == UNDO_ID::FONT_COLOR) {
+		else if constexpr (S == 0 || S == 1 || S == 2 || S == 3) {
 			constexpr wchar_t* HEADER[]{ 
 				L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity"
 			};
 			wchar_t buf[32];
-			// 色成分の値を文字列に変換する.
 			conv_col_to_str(m_color_code, val, buf);
-			const auto text{
-				ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf
-			};
-			dialog_set_slider_header<S>(text);
+			dialog_set_slider_header<S>(
+				ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf);
 		}
 	}
 
-	/*
 	//---------------------------------
 	// スライダーの値が変更された.
-	// U	操作の識別子
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	//---------------------------------
-	template <UNDO_ID U, int S>
-	void MainPage::font_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <int S>
+	void MainPage::font_slider_value_changed(
+		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_ID::FONT_SIZE) {
-			if constexpr (S == 0) {
-				const auto val = static_cast<float>(args.NewValue());
-				font_slider_set_header<U, S>(val);
-				m_dialog_page.m_shape_list.back()->set_font_size(val + 1.0f);
+		if constexpr (S == 4) {
+			const auto val = static_cast<float>(args.NewValue());
+			font_slider_set_header<4>(val);
+			if (m_dialog_page.m_shape_list.back()->set_font_size(val + 1.0f)) {
+				dialog_draw();
 			}
 		}
-		else if constexpr (U == UNDO_ID::FONT_COLOR) {
+		else if constexpr (S == 0) {
 			const auto val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F f_color;
-			//m_sample_shape->get_font_color(f_color);
 			m_dialog_page.m_shape_list.back()->get_font_color(f_color);
-			if constexpr (S == 0) {
-				font_slider_set_header<U, S>(val);
-				f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
+			font_slider_set_header<0>(val);
+			f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
+				dialog_draw();
 			}
-			else if constexpr (S == 1) {
-				font_slider_set_header<U, S>(val);
-				f_color.g = static_cast<FLOAT>(val / COLOR_MAX);
-			}
-			else if constexpr (S == 2) {
-				font_slider_set_header<U, S>(val);
-				f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
-			}
-			else if constexpr (S == 3) {
-				font_slider_set_header<U, S>(val);
-				f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
-			}
-			m_dialog_page.m_shape_list.back()->set_font_color(f_color);
 		}
-		if (scp_dialog_panel().IsLoaded()) {
-			dialog_draw();
+		else if constexpr (S == 1) {
+			const auto val = static_cast<float>(args.NewValue());
+			D2D1_COLOR_F f_color;
+			m_dialog_page.m_shape_list.back()->get_font_color(f_color);
+			font_slider_set_header<1>(val);
+			f_color.g = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
+				dialog_draw();
+			}
+		}
+		else if constexpr (S == 2) {
+			const auto val = static_cast<float>(args.NewValue());
+			D2D1_COLOR_F f_color;
+			m_dialog_page.m_shape_list.back()->get_font_color(f_color);
+			font_slider_set_header<2>(val);
+			f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
+				dialog_draw();
+			}
+		}
+		else if constexpr (S == 3) {
+			const auto val = static_cast<float>(args.NewValue());
+			D2D1_COLOR_F f_color;
+			m_dialog_page.m_shape_list.back()->get_font_color(f_color);
+			font_slider_set_header<3>(val);
+			f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_font_color(f_color)) {
+				dialog_draw();
+			}
 		}
 	}
-	*/
 
 	//---------------------------------
 	// 書体メニューの「大きさ」が選択された.
 	//---------------------------------
 	IAsyncAction MainPage::font_size_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		//constexpr auto MAX_VALUE = 256.0;
 		constexpr auto TICK_FREQ = 1.0;
 		m_dialog_page.set_attr_to(&m_main_page);
-		float font_size;
-		m_dialog_page.get_font_size(font_size);
-
-		dialog_slider_0().Maximum(FONT_SIZE_MAX - 1.0f);
-		dialog_slider_0().TickFrequency(TICK_FREQ);
-		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-		dialog_slider_0().Value(font_size - 1.0);
-		font_slider_set_header<UNDO_ID::FONT_SIZE, 0>(font_size - 1.0f);
-		dialog_slider_0().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const auto val = static_cast<float>(args.NewValue());
-				font_slider_set_header<UNDO_ID::FONT_SIZE, 0>(val);
-				if (m_dialog_page.m_shape_list.back()->set_font_size(val + 1.0f)) {
-					dialog_draw();
-				}
-			}
-		);
 		font_create_sample_shape(
-			static_cast<float>(scp_dialog_panel().Width()), static_cast<float>(scp_dialog_panel().Height()), 
-			m_dialog_page);
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+			static_cast<float>(scp_dialog_panel().Width()),
+			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
+		float f_size;
+		m_dialog_page.get_font_size(f_size);
+		dialog_slider_4().Maximum(FONT_SIZE_MAX - 1.0f);
+		dialog_slider_4().TickFrequency(TICK_FREQ);
+		dialog_slider_4().SnapsTo(SliderSnapsTo::Ticks);
+		dialog_slider_4().Value(f_size - 1.0);
+		font_slider_set_header<4>(f_size - 1.0f);
+		dialog_slider_4().Visibility(Visibility::Visible);
+		const auto token4{
+			dialog_slider_4().ValueChanged(
+				{ this, &MainPage::font_slider_value_changed<4> })
+		};
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_size")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -421,8 +409,8 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		slist_clear(m_dialog_page.m_shape_list);
-		dialog_slider_0().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
+		dialog_slider_4().Visibility(Visibility::Collapsed);
+		dialog_slider_4().ValueChanged(token4);
 		page_draw();
 		m_mutex_event.unlock();
 	}
@@ -454,7 +442,8 @@ namespace winrt::GraphPaper::implementation
 		const auto changed_token = lv_dialog_list().SelectionChanged(
 			[this](auto, auto args) {
 				uint32_t i = lv_dialog_list().SelectedIndex();
-				m_dialog_page.m_shape_list.back()->set_font_stretch(static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
+				m_dialog_page.m_shape_list.back()->set_font_stretch(
+					static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
 				if (scp_dialog_panel().IsLoaded()) {
 					dialog_draw();
 				}
@@ -464,7 +453,8 @@ namespace winrt::GraphPaper::implementation
 		font_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
 			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_stretch")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -567,7 +557,8 @@ namespace winrt::GraphPaper::implementation
 		font_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
 			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_font_weight")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {

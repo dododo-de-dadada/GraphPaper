@@ -439,8 +439,8 @@ namespace winrt::GraphPaper::implementation
 		else if (d_tool == DRAWING_TOOL::RULER) {
 			s = new ShapeRuler(start, pos, &m_main_page);
 		}
-		else if (d_tool == DRAWING_TOOL::QELLIPSE) {
-			s = new ShapeQEllipse(start, pos, &m_main_page);
+		else if (d_tool == DRAWING_TOOL::ARC) {
+			s = new ShapeArc(start, pos, &m_main_page);
 		}
 		else {
 			return;
@@ -986,7 +986,7 @@ namespace winrt::GraphPaper::implementation
 				if (typeid(*m_event_shape_pressed) == typeid(ShapeText)) {
 					edit_text_click_async(nullptr, nullptr);
 				}
-				else if (typeid(*m_event_shape_pressed) == typeid(ShapeQEllipse)) {
+				else if (typeid(*m_event_shape_pressed) == typeid(ShapeArc)) {
 					edit_arc_click_async(nullptr, nullptr);
 				}
 			}
@@ -1162,7 +1162,7 @@ namespace winrt::GraphPaper::implementation
 						if (typeid(*s) == typeid(ShapeLine) ||
 							typeid(*s) == typeid(ShapePolygon) ||
 							typeid(*s) == typeid(ShapeBezier) ||
-							typeid(*s) == typeid(ShapeQEllipse)
+							typeid(*s) == typeid(ShapeArc)
 							) {
 							// }Œ`‚Ì•”ˆÊ‚ª, ’¸“_‚Ì”‚ð’´‚¦‚È‚¢‚©”»’è‚·‚é.
 							if (anc >= ANC_TYPE::ANC_P0 && anc < ANC_TYPE::ANC_P0 +

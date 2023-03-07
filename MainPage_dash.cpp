@@ -10,22 +10,48 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
-
-	constexpr wchar_t DLG_TITLE[] = L"str_dash_pattern";
 
 	// 線枠メニューの「破線の配置」が選択された.
 	IAsyncAction MainPage::dash_patt_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		// まず, ダイアログページの属性を, メインページと同じにする.
+		m_dialog_page.set_attr_to(&m_main_page);
+		// 見本図形の作成
+		const auto p_width = scp_dialog_panel().Width();
+		const auto p_height = scp_dialog_panel().Height();
+		const auto padd = p_width * 0.125;
+		const D2D1_POINT_2F start{
+			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
+		};
+		const D2D1_POINT_2F pos{
+			static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd)
+		};
+		m_dialog_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_page));
+#if defined(_DEBUG)
+		debug_leak_cnt++;
+#endif
+		const winrt::event_token token0{
+			dialog_slider_0().ValueChanged({ this, &MainPage::dash_slider_value_changed<0> })
+		};
+		const winrt::event_token token1{
+			dialog_slider_1().ValueChanged({ this, &MainPage::dash_slider_value_changed<1> })
+		};
+		const winrt::event_token token2{
+			dialog_slider_2().ValueChanged({ this, &MainPage::dash_slider_value_changed<2> })
+		};
+		const winrt::event_token token3{
+			dialog_slider_3().ValueChanged({ this, &MainPage::dash_slider_value_changed<3> })
+		};
+		const winrt::event_token token4{
+			dialog_slider_4().ValueChanged({ this, &MainPage::dash_slider_value_changed<4> })
+		};
+
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
-		m_dialog_page.set_attr_to(&m_main_page);
 		DASH_PATT d_patt;
-		m_main_page.get_dash_patt(d_patt);
+		m_dialog_page.get_dash_patt(d_patt);
 
 		dialog_slider_0().Maximum(MAX_VALUE);
 		dialog_slider_0().TickFrequency(TICK_FREQ);
@@ -59,122 +85,41 @@ namespace winrt::GraphPaper::implementation
 
 		D2D1_DASH_STYLE s_style;
 		m_main_page.get_dash_style(s_style);
-		const auto visible = (s_style != D2D1_DASH_STYLE_DOT ? Visibility::Visible : Visibility::Collapsed);
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
 		dialog_slider_4().Visibility(Visibility::Visible);
-		const winrt::event_token slider_0_token{
-			dialog_slider_0().ValueChanged(
-				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-					const float val = static_cast<float>(args.NewValue());
-					DASH_PATT patt;
-					m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
-					dash_slider_set_header<0>(val);
-					patt.m_[0] = static_cast<FLOAT>(val);
-					if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
-						dialog_draw();
-					}
-				}
-			)
-		};
-		const winrt::event_token slider_1_token{
-			dialog_slider_1().ValueChanged(
-				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-					const float val = static_cast<float>(args.NewValue());
-					DASH_PATT patt;
-					m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
-					dash_slider_set_header<1>(val);
-					patt.m_[1] = static_cast<FLOAT>(val);
-					if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
-						dialog_draw();
-					}
-				}
-			)
-		};
-		const winrt::event_token slider_2_token{
-			dialog_slider_0().ValueChanged(
-				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-					const float val = static_cast<float>(args.NewValue());
-					DASH_PATT patt;
-					m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
-					dash_slider_set_header<2>(val);
-					patt.m_[2] = patt.m_[4] = static_cast<FLOAT>(val);
-					if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
-						dialog_draw();
-					}
-				}
-			)
-		};
-		const winrt::event_token slider_3_token{
-			dialog_slider_0().ValueChanged(
-				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-					const float val = static_cast<float>(args.NewValue());
-					DASH_PATT patt;
-					m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
-					dash_slider_set_header<3>(val);
-					patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(val);
-					if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
-						dialog_draw();
-					}
-				}
-			)
-		};
-		const winrt::event_token slider_4_token{
-			dialog_slider_4().ValueChanged(
-				[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-					const float val = static_cast<float>(args.NewValue());
-					dash_slider_set_header<4>(val);
-					if (m_dialog_page.m_shape_list.back()->set_stroke_width(val)) {
-						dialog_draw();
-					}
-				}
-			)
-		};
-		const auto p_width = scp_dialog_panel().Width();
-		const auto p_height = scp_dialog_panel().Height();
-		const auto padd = p_width * 0.125;
-		const D2D1_POINT_2F start{
-			static_cast<FLOAT>(padd), static_cast<FLOAT>(padd)
-		};
-		const D2D1_POINT_2F pos{
-			static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd)
-		};
-		m_dialog_page.m_shape_list.push_back(new ShapeLine(start, pos, &m_dialog_page));
-#if defined(_DEBUG)
-		debug_leak_cnt++;
-#endif
-
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_dash_pattern")));
 		m_mutex_event.lock();
 		const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			DASH_PATT sample_patt;
-			float sample_width;
-			m_dialog_page.m_shape_list.back()->get_dash_patt(sample_patt);
-			m_dialog_page.m_shape_list.back()->get_stroke_width(sample_width);
-			bool flag = ustack_push_set<UNDO_ID::DASH_PATT>(sample_patt);
-			flag = (ustack_push_set<UNDO_ID::STROKE_WIDTH>(sample_width) || flag);
-			if (flag) {
+			DASH_PATT val_patt;
+			float val_width;
+			m_dialog_page.m_shape_list.back()->get_dash_patt(val_patt);
+			m_dialog_page.m_shape_list.back()->get_stroke_width(val_width);
+			const bool flag_patt = ustack_push_set<UNDO_ID::DASH_PATT>(val_patt);
+			const bool flag_width = ustack_push_set<UNDO_ID::STROKE_WIDTH>(val_width);
+			if (flag_patt || flag_width) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
+		dialog_slider_0().ValueChanged(token0);
+		dialog_slider_1().ValueChanged(token1);
+		dialog_slider_2().ValueChanged(token2);
+		dialog_slider_3().ValueChanged(token3);
+		dialog_slider_4().ValueChanged(token4);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		dialog_slider_2().Visibility(Visibility::Collapsed);
 		dialog_slider_3().Visibility(Visibility::Collapsed);
 		dialog_slider_4().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
-		dialog_slider_1().ValueChanged(slider_1_token);
-		dialog_slider_2().ValueChanged(slider_2_token);
-		dialog_slider_3().ValueChanged(slider_3_token);
-		dialog_slider_4().ValueChanged(slider_4_token);
 		status_bar_set_pos();
 		m_mutex_event.unlock();
+		slist_clear(m_dialog_page.m_shape_list);
 	}
 
 	// 線枠メニューの「破線の形式」のサブ項目が選択された.
@@ -200,7 +145,6 @@ namespace winrt::GraphPaper::implementation
 			return;
 		}
 		mfi_dash_patt().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
-		//mfi_dash_patt_2().IsEnabled(d_style != D2D1_DASH_STYLE_SOLID);
 		if (ustack_push_set<UNDO_ID::DASH_STYLE>(d_style)) {
 			ustack_push_null();
 			xcvd_is_enabled();
@@ -237,63 +181,72 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
 				m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
-			const winrt::hstring text{
-				ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf
-			};
-			dialog_set_slider_header<S>(text);
+			dialog_set_slider_header<S>(
+				ResourceLoader::GetForCurrentView().GetString(R[S]) + L": " + buf);
 		}
 		else if constexpr (S == 4) {
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
 				m_len_unit, val, m_main_d2d.m_logical_dpi, m_main_page.m_grid_base + 1.0f, buf);
-			const winrt::hstring text{
-				ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf
-			};
-			dialog_slider_4().Header(box_value(text));
+			dialog_set_slider_header<4>(
+				ResourceLoader::GetForCurrentView().GetString(L"str_stroke_width") + L": " + buf);
 		}
 	}
 
-	/*
 	// スライダーの値が変更された.
-	// U	操作の識別子
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_ID U, int S> void MainPage::dash_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	template <int S>
+	void MainPage::dash_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_ID::DASH_PATT) {
+		if constexpr (S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			DASH_PATT patt;
-			//m_sample_shape->get_dash_patt(patt);
 			m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
-			if constexpr (S == 0) {
-				dash_slider_set_header<U, S>(val);
-				patt.m_[0] = static_cast<FLOAT>(val);
+			dash_slider_set_header<S>(val);
+			patt.m_[0] = static_cast<FLOAT>(val);
+			if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
+				dialog_draw();
 			}
-			else if constexpr (S == 1) {
-				dash_slider_set_header<U, S>(val);
-				patt.m_[1] = static_cast<FLOAT>(val);
-			}
-			else if constexpr (S == 2) {
-				dash_slider_set_header<U, S>(val);
-				patt.m_[2] = patt.m_[4] = static_cast<FLOAT>(val);
-			}
-			else if constexpr (S == 3) {
-				dash_slider_set_header<U, S>(val);
-				patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(val);
-			}
-			//m_sample_shape->set_dash_patt(patt);
-			m_dialog_page.m_shape_list.back()->set_dash_patt(patt);
 		}
-		else if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 4) {
+		else if constexpr (S == 1) {
 			const float val = static_cast<float>(args.NewValue());
-			dash_slider_set_header<U, S>(val);
-			m_dialog_page.m_shape_list.back()->set_stroke_width(val);
+			DASH_PATT patt;
+			m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
+			dash_slider_set_header<S>(val);
+			patt.m_[1] = static_cast<FLOAT>(val);
+			if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
+				dialog_draw();
+			}
 		}
-		if (scp_dialog_panel().IsLoaded()) {
-			dialog_draw();
+		else if constexpr (S == 2) {
+			const float val = static_cast<float>(args.NewValue());
+			DASH_PATT patt;
+			m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
+			dash_slider_set_header<S>(val);
+			patt.m_[2] = patt.m_[4] = static_cast<FLOAT>(val);
+			if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
+				dialog_draw();
+			}
+		}
+		else if constexpr (S == 3) {
+			const float val = static_cast<float>(args.NewValue());
+			DASH_PATT patt;
+			m_dialog_page.m_shape_list.back()->get_dash_patt(patt);
+			dash_slider_set_header<S>(val);
+			patt.m_[3] = patt.m_[5] = static_cast<FLOAT>(val);
+			if (m_dialog_page.m_shape_list.back()->set_dash_patt(patt)) {
+				dialog_draw();
+			}
+		}
+		else if constexpr (S == 4) {
+			const float val = static_cast<float>(args.NewValue());
+			dash_slider_set_header<S>(val);
+			if (m_dialog_page.m_shape_list.back()->set_stroke_width(val)) {
+				dialog_draw();
+			}
 		}
 	}
-	*/
 
 }

@@ -13,7 +13,7 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
-	constexpr wchar_t TITLE_FILL[] = L"str_fill_color";
+	//constexpr wchar_t TITLE_FILL[] = L"str_fill_color";
 
 	// 塗りつぶしメニューの「塗りつぶし色」が選択された.
 	IAsyncAction MainPage::fill_color_click_async(IInspectable const&, RoutedEventArgs const&)
@@ -52,60 +52,18 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const float val = static_cast<float>(args.NewValue());
-				fill_slider_set_header<0>(val);
-				D2D1_COLOR_F f_color;
-				m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
-				f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
-					dialog_draw();
-				}
-			}
-		);
-		const auto slider_1_token = dialog_slider_1().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const float val = static_cast<float>(args.NewValue());
-				fill_slider_set_header<1>(val);
-				D2D1_COLOR_F f_color;
-				m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
-				f_color.g = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
-					dialog_draw();
-				}
-			}
-		);
-		const auto slider_2_token = dialog_slider_2().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const float val = static_cast<float>(args.NewValue());
-				fill_slider_set_header<2>(val);
-				D2D1_COLOR_F f_color;
-				m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
-				f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
-					dialog_draw();
-				}
-			}
-		);
-		const auto slider_3_token = dialog_slider_3().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const float val = static_cast<float>(args.NewValue());
-				fill_slider_set_header<3>(val);
-				D2D1_COLOR_F f_color;
-				m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
-				f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
-					dialog_draw();
-				}
-
-			}
-		);
-
+		const auto token0{
+			dialog_slider_0().ValueChanged({ this, &MainPage::fill_slider_val_changed<0> })
+		};
+		const auto token1{
+			dialog_slider_1().ValueChanged({ this, &MainPage::fill_slider_val_changed<1> })
+		};
+		const auto token2{
+			dialog_slider_2().ValueChanged({ this, &MainPage::fill_slider_val_changed<2> })
+		};
+		const auto token3{
+			dialog_slider_3().ValueChanged({ this, &MainPage::fill_slider_val_changed<3> })
+		};
 		const auto p_width = scp_dialog_panel().Width();
 		const auto p_height = scp_dialog_panel().Height();
 		const auto padd = p_width * 0.125;
@@ -116,11 +74,12 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd)
 		};
 		m_dialog_page.m_shape_list.push_back(new ShapeRect(start, pos, &m_dialog_page));
+		m_dialog_page.m_shape_list.back()->set_select(true);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
 		cd_setting_dialog().Title(
-			box_value(ResourceLoader::GetForCurrentView().GetString(TITLE_FILL)));
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_fill_color")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -137,10 +96,10 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		dialog_slider_2().Visibility(Visibility::Collapsed);
 		dialog_slider_3().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
-		dialog_slider_1().ValueChanged(slider_1_token);
-		dialog_slider_2().ValueChanged(slider_2_token);
-		dialog_slider_3().ValueChanged(slider_3_token);
+		dialog_slider_0().ValueChanged(token0);
+		dialog_slider_1().ValueChanged(token1);
+		dialog_slider_2().ValueChanged(token2);
+		dialog_slider_3().ValueChanged(token3);
 
 		//UnloadObject(cd_setting_dialog());
 
@@ -167,39 +126,54 @@ namespace winrt::GraphPaper::implementation
 		dialog_set_slider_header<S>(text);
 	}
 
-	/*
 	// スライダーの値が変更された.
-	// U	操作の識別子
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_ID U, int S>
+	template <int S>
 	void MainPage::fill_slider_val_changed(
 		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_ID::FILL_COLOR) {
+		if constexpr (S == 0) {
 			const float val = static_cast<float>(args.NewValue());
-			fill_slider_set_header<U, S>(val);
+			fill_slider_set_header<S>(val);
 			D2D1_COLOR_F f_color;
 			m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
-			if constexpr (S == 0) {
-				f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
+			f_color.r = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
+				dialog_draw();
 			}
-			if constexpr (S == 1) {
-				f_color.g = static_cast<FLOAT>(val / COLOR_MAX);
+		}
+		else if constexpr (S == 1) {
+			const float val = static_cast<float>(args.NewValue());
+			fill_slider_set_header<S>(val);
+			D2D1_COLOR_F f_color;
+			m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
+			f_color.g = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
+				dialog_draw();
 			}
-			if constexpr (S == 2) {
-				f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
+		}
+		else if constexpr (S == 2) {
+			const float val = static_cast<float>(args.NewValue());
+			fill_slider_set_header<S>(val);
+			D2D1_COLOR_F f_color;
+			m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
+			f_color.b = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
+				dialog_draw();
 			}
-			if constexpr (S == 3) {
-				f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
-			}
-			m_dialog_page.m_shape_list.back()->set_fill_color(f_color);
-			if (scp_dialog_panel().IsLoaded()) {
+		}
+		else if constexpr (S == 3) {
+			const float val = static_cast<float>(args.NewValue());
+			fill_slider_set_header<S>(val);
+			D2D1_COLOR_F f_color;
+			m_dialog_page.m_shape_list.back()->get_fill_color(f_color);
+			f_color.a = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_fill_color(f_color)) {
 				dialog_draw();
 			}
 		}
 	}
-	*/
 
 }

@@ -236,8 +236,8 @@ namespace winrt::GraphPaper::implementation
 				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_text")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::QELLIPSE) {
-				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_qellipse")));
+			else if (m_drawing_tool == DRAWING_TOOL::ARC) {
+				data = unbox_value<winrt::hstring>(Resources().Lookup(box_value(L"data_arc")));
 				r_eyedropper().Visibility(Visibility::Collapsed);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::EYEDROPPER) {

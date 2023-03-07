@@ -260,7 +260,7 @@
 					Text="Edit Arc" >
 					<MenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_qellipse}" HorizontalAlignment="Center"
+							Data="{StaticResource data_arc}" HorizontalAlignment="Center"
 							VerticalAlignment="Center" Width="16" Height="16" />
 					</MenuFlyoutItem.Icon>
 					<MenuFlyoutItem.KeyboardAccelerators>
@@ -342,11 +342,11 @@
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>
 				<muxc:RadioMenuFlyoutItem
-					x:Name="rmfi_drawing_qellipse" x:Uid="rmfi_drawing_qellipse"
-					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Quater Ellipse">
+					x:Name="rmfi_drawing_arc" x:Uid="rmfi_drawing_arc"
+					Click="drawing_tool_click" GroupName="gn_tool_type" Text="Arc">
 					<muxc:RadioMenuFlyoutItem.Icon>
 						<PathIcon
-							Data="{StaticResource data_qellipse}" HorizontalAlignment="Center"
+							Data="{StaticResource data_arc}" HorizontalAlignment="Center"
 							VerticalAlignment="Center" Width="16" Height="16" />
 					</muxc:RadioMenuFlyoutItem.Icon>
 				</muxc:RadioMenuFlyoutItem>

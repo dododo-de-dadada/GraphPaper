@@ -632,7 +632,7 @@ namespace winrt::GraphPaper::implementation
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() || 
-				typeid(*s) != typeid(ShapeQEllipse)) {
+				typeid(*s) != typeid(ShapeArc)) {
 				continue;
 			}
 			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ARC_ROT>(s, val));
@@ -650,7 +650,7 @@ namespace winrt::GraphPaper::implementation
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() ||
-				typeid(*s) != typeid(ShapeQEllipse)) {
+				typeid(*s) != typeid(ShapeArc)) {
 				continue;
 			}
 			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ARC_START>(s, val));
@@ -668,7 +668,7 @@ namespace winrt::GraphPaper::implementation
 		auto flag = false;
 		for (auto s : m_main_page.m_shape_list) {
 			if (s->is_deleted() || !s->is_selected() ||
-				typeid(*s) != typeid(ShapeQEllipse)) {
+				typeid(*s) != typeid(ShapeArc)) {
 				continue;
 			}
 			m_ustack_undo.push_back(new UndoValue<UNDO_ID::ARC_END>(s, val));

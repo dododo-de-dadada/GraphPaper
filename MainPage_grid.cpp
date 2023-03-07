@@ -10,12 +10,9 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 	using winrt::Windows::UI::Xaml::Controls::ToggleMenuFlyoutItem;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	//constexpr float SLIDER_STEP = 0.5f;
 	// 方眼メニューの「方眼の強調」が選択された.
@@ -88,12 +85,25 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 1> });
-		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 2> });
-		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::grid_slider_val_changed< UNDO_ID::GRID_COLOR, 3> });
+		const auto token0{
+			dialog_slider_0().ValueChanged(
+				{ this, &MainPage::grid_slider_value_changed<UNDO_ID::GRID_COLOR, 0> })
+		};
+		const auto token1{
+			dialog_slider_1().ValueChanged(
+				{ this, &MainPage::grid_slider_value_changed<UNDO_ID::GRID_COLOR, 1>})
+		};
+		const auto token2{
+			dialog_slider_2().ValueChanged(
+				{ this, &MainPage::grid_slider_value_changed<UNDO_ID::GRID_COLOR, 2> })
+		};
+		const auto token3{
+			dialog_slider_3().ValueChanged(
+				{ this, &MainPage::grid_slider_value_changed<UNDO_ID::GRID_COLOR, 3> })
+		};
 
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_grid_color")));
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_grid_color")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -108,10 +118,10 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		dialog_slider_2().Visibility(Visibility::Collapsed);
 		dialog_slider_3().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
-		dialog_slider_1().ValueChanged(slider_1_token);
-		dialog_slider_2().ValueChanged(slider_2_token);
-		dialog_slider_3().ValueChanged(slider_3_token);
+		dialog_slider_0().ValueChanged(token0);
+		dialog_slider_1().ValueChanged(token1);
+		dialog_slider_2().ValueChanged(token2);
+		dialog_slider_3().ValueChanged(token3);
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}
@@ -131,11 +141,12 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Value(g_base);
 		grid_slider_set_header<UNDO_ID::GRID_BASE, 0>(g_base);
 		dialog_slider_0().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::grid_slider_val_changed<UNDO_ID::GRID_BASE, 0> });
-		//const auto samp_w = scp_dialog_panel().Width();
-		//const auto samp_h = scp_dialog_panel().Height();
-
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(L"str_grid_length")));
+		const auto token0{
+			dialog_slider_0().ValueChanged(
+				{ this, &MainPage::grid_slider_value_changed<UNDO_ID::GRID_BASE, 0> })
+		};
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_grid_length")));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -153,7 +164,7 @@ namespace winrt::GraphPaper::implementation
 
 		}
 		dialog_slider_0().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
+		dialog_slider_0().ValueChanged(token0);
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}
@@ -194,24 +205,21 @@ namespace winrt::GraphPaper::implementation
 	template <UNDO_ID U, int S>
 	void MainPage::grid_slider_set_header(const float val)
 	{
-		winrt::hstring text;
-
 		if constexpr (U == UNDO_ID::GRID_BASE) {
-			float g_base;
-			m_main_page.get_grid_base(g_base);
-			const float g_len = g_base + 1.0f;
 			wchar_t buf[32];
 			conv_len_to_str<LEN_UNIT_NAME_APPEND>(
-				m_len_unit, val + 1.0f, m_main_d2d.m_logical_dpi, g_len, buf);
-			text = ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf;
-			dialog_set_slider_header<S>(text);
+				m_len_unit, val + 1.0f, m_main_d2d.m_logical_dpi, val + 1.0, buf);
+			dialog_set_slider_header<S>(
+				ResourceLoader::GetForCurrentView().GetString(L"str_grid_length") + L": " + buf);
 		}
 		if constexpr (U == UNDO_ID::GRID_COLOR) {
-			constexpr wchar_t* HEADER[]{ L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity" };
+			constexpr wchar_t* HEADER[]{
+				L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity"
+			};
 			wchar_t buf[32];
 			conv_col_to_str(m_color_code, val, buf);
-			text = ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf;
-			dialog_set_slider_header<S>(text);
+			dialog_set_slider_header<S>(
+				ResourceLoader::GetForCurrentView().GetString(HEADER[S]) + L": " + buf);
 		}
 	}
 
@@ -221,34 +229,55 @@ namespace winrt::GraphPaper::implementation
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	template <UNDO_ID U, int S>
-	void MainPage::grid_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::grid_slider_value_changed(
+		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
 		if constexpr (U == UNDO_ID::GRID_BASE) {
 			const float val = static_cast<float>(args.NewValue());
 			grid_slider_set_header<U, S>(val);
-			m_dialog_page.set_grid_base(val);
+			if (m_dialog_page.set_grid_base(val)) {
+				dialog_draw();
+			}
 		}
-		else if constexpr (U == UNDO_ID::GRID_COLOR) {
+		else if constexpr (U == UNDO_ID::GRID_COLOR && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			grid_slider_set_header<U, S>(val);
 			D2D1_COLOR_F g_color;
 			m_dialog_page.get_grid_color(g_color);
-			if constexpr (S == 0) {
-				g_color.r = val / COLOR_MAX;
+			g_color.r = val / COLOR_MAX;
+			if (m_dialog_page.set_grid_color(g_color)) {
+				dialog_draw();
 			}
-			else if constexpr (S == 1) {
-				g_color.g = val / COLOR_MAX;
-			}
-			else if constexpr (S == 2) {
-				g_color.b = val / COLOR_MAX;
-			}
-			else if constexpr (S == 3) {
-				g_color.a = val / COLOR_MAX;
-			}
-			m_dialog_page.set_grid_color(g_color);
 		}
-		if (scp_dialog_panel().IsLoaded()) {
-			dialog_draw();
+		else if constexpr (U == UNDO_ID::GRID_COLOR && S == 1) {
+			const float val = static_cast<float>(args.NewValue());
+			grid_slider_set_header<U, S>(val);
+			D2D1_COLOR_F g_color;
+			m_dialog_page.get_grid_color(g_color);
+			g_color.g = val / COLOR_MAX;
+			if (m_dialog_page.set_grid_color(g_color)) {
+				dialog_draw();
+			}
+		}
+		else if constexpr (U == UNDO_ID::GRID_COLOR && S == 2) {
+			const float val = static_cast<float>(args.NewValue());
+			grid_slider_set_header<U, S>(val);
+			D2D1_COLOR_F g_color;
+			m_dialog_page.get_grid_color(g_color);
+			g_color.b = val / COLOR_MAX;
+			if (m_dialog_page.set_grid_color(g_color)) {
+				dialog_draw();
+			}
+		}
+		else if constexpr (U == UNDO_ID::GRID_COLOR && S == 3) {
+			const float val = static_cast<float>(args.NewValue());
+			grid_slider_set_header<U, S>(val);
+			D2D1_COLOR_F g_color;
+			m_dialog_page.get_grid_color(g_color);
+			g_color.a = val / COLOR_MAX;
+			if (m_dialog_page.set_grid_color(g_color)) {
+				dialog_draw();
+			}
 		}
 	}
 

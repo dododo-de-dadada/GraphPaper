@@ -84,31 +84,31 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().TickFrequency(1.0);
 		dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_0().Value(val0);
-		page_slider_set_header<UNDO_ID::PAGE_COLOR, 0>(val0);
+		page_slider_set_header<0>(val0);
 		dialog_slider_1().Maximum(255.0);
 		dialog_slider_1().TickFrequency(1.0);
 		dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_1().Value(val1);
-		page_slider_set_header<UNDO_ID::PAGE_COLOR, 1>(val1);
+		page_slider_set_header<1>(val1);
 		dialog_slider_2().Maximum(255.0);
 		dialog_slider_2().TickFrequency(1.0);
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(val2);
-		page_slider_set_header<UNDO_ID::PAGE_COLOR, 2>(val2);
+		page_slider_set_header<2>(val2);
 		dialog_slider_3().Maximum(255.0);
 		dialog_slider_3().TickFrequency(1.0);
 		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_3().Value(val3);
-		page_slider_set_header<UNDO_ID::PAGE_COLOR, 3>(val3);
+		page_slider_set_header<3>(val3);
 
 		dialog_slider_0().Visibility(Visibility::Visible);
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 1> });
-		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 2> });
-		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::page_slider_val_changed<UNDO_ID::PAGE_COLOR, 3> });
+		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::page_slider_val_changed<0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::page_slider_val_changed<1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::page_slider_val_changed<2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::page_slider_val_changed<3> });
 		//m_sample_type = PROP_TYPE::NONE;
 		//m_dialog_page.m_d2d.SetSwapChainPanel(scp_dialog_panel());
 		//const auto samp_w = scp_dialog_panel().Width();
@@ -242,8 +242,8 @@ namespace winrt::GraphPaper::implementation
 					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
 					m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
 			}
-			else if (m_drawing_tool == DRAWING_TOOL::QELLIPSE) {
-				m_main_page.auxiliary_draw_qellipse(
+			else if (m_drawing_tool == DRAWING_TOOL::ARC) {
+				m_main_page.auxiliary_draw_arc(
 					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
 					m_event_pos_pressed, m_event_pos_curr);
 			}
@@ -755,20 +755,16 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// val	格納する値
 	// 戻り値	なし.
-	template <UNDO_ID U, int S>
+	template <int S>
 	void MainPage::page_slider_set_header(const float val)
 	{
-		if constexpr (U == UNDO_ID::PAGE_COLOR) {
-			constexpr wchar_t* T[]{
-				L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity"
-			};
-			wchar_t buf[32];
-			conv_col_to_str(m_color_code, val, buf);
-			const winrt::hstring text{
-				ResourceLoader::GetForCurrentView().GetString(T[S]) + L": " + buf
-			};
-			dialog_set_slider_header<S>(text);
-		}
+		constexpr wchar_t* T[]{
+			L"str_color_r", L"str_color_g",L"str_color_b", L"str_opacity"
+		};
+		wchar_t buf[32];
+		conv_col_to_str(m_color_code, val, buf);
+		dialog_set_slider_header<S>(
+			ResourceLoader::GetForCurrentView().GetString(T[S]) + L": " + buf);
 	}
 
 	// スライダーの値が変更された.
@@ -776,31 +772,49 @@ namespace winrt::GraphPaper::implementation
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
-	template <UNDO_ID U, int S>
+	template <int S>
 	void MainPage::page_slider_val_changed(
 		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_ID::PAGE_COLOR) {
+		if constexpr (S == 0) {
 			const auto val = static_cast<float>(args.NewValue());
-			page_slider_set_header<U, S>(val);
+			page_slider_set_header<S>(val);
 			D2D1_COLOR_F s_color;
 			m_dialog_page.get_page_color(s_color);
-			if constexpr (S == 0) {
-				s_color.r = static_cast<FLOAT>(val / COLOR_MAX);
+			s_color.r = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.set_page_color(s_color)) {
+				dialog_draw();
 			}
-			if constexpr (S == 1) {
-				s_color.g = static_cast<FLOAT>(val / COLOR_MAX);
-			}
-			if constexpr (S == 2) {
-				s_color.b = static_cast<FLOAT>(val / COLOR_MAX);
-			}
-			if constexpr (S == 3) {
-				s_color.a = static_cast<FLOAT>(val / COLOR_MAX);
-			}
-			m_dialog_page.set_page_color(s_color);
 		}
-		if (scp_dialog_panel().IsLoaded()) {
-			dialog_draw();
+		else if constexpr (S == 1) {
+			const auto val = static_cast<float>(args.NewValue());
+			page_slider_set_header<S>(val);
+			D2D1_COLOR_F s_color;
+			m_dialog_page.get_page_color(s_color);
+			s_color.g = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.set_page_color(s_color)) {
+				dialog_draw();
+			}
+		}
+		else if constexpr (S == 2) {
+			const auto val = static_cast<float>(args.NewValue());
+			page_slider_set_header<S>(val);
+			D2D1_COLOR_F s_color;
+			m_dialog_page.get_page_color(s_color);
+			s_color.b = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.set_page_color(s_color)) {
+				dialog_draw();
+			}
+		}
+		else if constexpr (S == 3) {
+			const auto val = static_cast<float>(args.NewValue());
+			page_slider_set_header<S>(val);
+			D2D1_COLOR_F s_color;
+			m_dialog_page.get_page_color(s_color);
+			s_color.a = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.set_page_color(s_color)) {
+				dialog_draw();
+			}
 		}
 	}
 

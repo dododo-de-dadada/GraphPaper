@@ -10,11 +10,8 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
-	//using winrt::Windows::Foundation::IAsyncAction;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
-	//using winrt::Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
-	//using winrt::Windows::UI::Xaml::RoutedEventArgs;
 
 	// 見本の図形を作成する.
 	static void stroke_create_sample_shape(
@@ -35,6 +32,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(p_width - 2.0 * padd), static_cast<FLOAT>(p_height - 2.0 * padd)
 		};
 		page.m_shape_list.push_back(new ShapeLine(start, pos, &page));
+		page.m_shape_list.back()->set_select(true);
 #if defined(_DEBUG)
 		debug_leak_cnt++;
 #endif
@@ -44,13 +42,13 @@ namespace winrt::GraphPaper::implementation
 	IAsyncAction MainPage::stroke_color_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
 		m_dialog_page.set_attr_to(&m_main_page);
-		D2D1_COLOR_F val;
-		m_dialog_page.get_stroke_color(val);
+		D2D1_COLOR_F s_color;
+		m_dialog_page.get_stroke_color(s_color);
 
-		const float val0 = static_cast<float>(conv_color_comp(val.r));
-		const float val1 = static_cast<float>(conv_color_comp(val.g));
-		const float val2 = static_cast<float>(conv_color_comp(val.b));
-		const float val3 = static_cast<float>(conv_color_comp(val.a));
+		const float val0 = static_cast<float>(conv_color_comp(s_color.r));
+		const float val1 = static_cast<float>(conv_color_comp(s_color.g));
+		const float val2 = static_cast<float>(conv_color_comp(s_color.b));
+		const float val3 = static_cast<float>(conv_color_comp(s_color.a));
 
 		dialog_slider_0().Maximum(255.0);
 		dialog_slider_0().TickFrequency(1.0);
@@ -80,59 +78,22 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const float val = static_cast<float>(args.NewValue());
-				stroke_slider_set_header<UNDO_ID::STROKE_COLOR, 0>(val);
-				D2D1_COLOR_F color;
-				m_dialog_page.m_shape_list.back()->get_stroke_color(color);
-				color.r = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_stroke_color(color)) {
-					dialog_draw();
-				}
-			}
-		);
-		const auto slider_1_token = dialog_slider_1().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const float val = static_cast<float>(args.NewValue());
-				stroke_slider_set_header<UNDO_ID::STROKE_COLOR, 1>(val);
-				D2D1_COLOR_F color;
-				m_dialog_page.m_shape_list.back()->get_stroke_color(color);
-				color.g = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_stroke_color(color)) {
-					dialog_draw();
-				}
-			}
-		);
-		const auto slider_2_token = dialog_slider_2().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const float val = static_cast<float>(args.NewValue());
-				stroke_slider_set_header<UNDO_ID::STROKE_COLOR, 2>(val);
-				D2D1_COLOR_F color;
-				m_dialog_page.m_shape_list.back()->get_stroke_color(color);
-				color.b = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_stroke_color(color)) {
-					dialog_draw();
-				}
-			}
-		);
-		const auto slider_3_token = dialog_slider_3().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const float val = static_cast<float>(args.NewValue());
-				stroke_slider_set_header<UNDO_ID::STROKE_COLOR, 3>(val);
-				D2D1_COLOR_F color;
-				m_dialog_page.m_shape_list.back()->get_stroke_color(color);
-				color.a = static_cast<FLOAT>(val / COLOR_MAX);
-				if (scp_dialog_panel().IsLoaded() &&
-					m_dialog_page.m_shape_list.back()->set_stroke_color(color)) {
-					dialog_draw();
-				}
-			}
-		);
-
+		const auto token0{
+			dialog_slider_0().ValueChanged(
+				{ this, &MainPage::stroke_slider_value_changed<UNDO_ID::STROKE_COLOR, 0> })
+		};
+		const auto token1{
+			dialog_slider_1().ValueChanged(
+				{ this, &MainPage::stroke_slider_value_changed<UNDO_ID::STROKE_COLOR, 1> })
+		};
+		const auto token2{
+			dialog_slider_2().ValueChanged(
+				{ this, &MainPage::stroke_slider_value_changed<UNDO_ID::STROKE_COLOR, 2> })
+		};
+		const auto token3{
+			dialog_slider_3().ValueChanged(
+				{ this, &MainPage::stroke_slider_value_changed<UNDO_ID::STROKE_COLOR, 3> })
+		};
 		stroke_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
 			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
@@ -142,30 +103,27 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			D2D1_COLOR_F samp_val;
-			//m_sample_shape->get_stroke_color(samp_val);
-			m_dialog_page.m_shape_list.back()->get_stroke_color(samp_val);
-			if (ustack_push_set<UNDO_ID::STROKE_COLOR>(samp_val)) {
+			D2D1_COLOR_F val;
+			m_dialog_page.m_shape_list.back()->get_stroke_color(val);
+			if (ustack_push_set<UNDO_ID::STROKE_COLOR>(val)) {
 				ustack_push_null();
 				ustack_is_enable();
 				xcvd_is_enabled();
 				page_draw();
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		dialog_slider_2().Visibility(Visibility::Collapsed);
 		dialog_slider_3().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
-		dialog_slider_1().ValueChanged(slider_1_token);
-		dialog_slider_2().ValueChanged(slider_2_token);
-		dialog_slider_3().ValueChanged(slider_3_token);
-
-		//UnloadObject(cd_setting_dialog());
+		dialog_slider_0().ValueChanged(token0);
+		dialog_slider_1().ValueChanged(token1);
+		dialog_slider_2().ValueChanged(token2);
+		dialog_slider_3().ValueChanged(token3);
 
 		page_draw();
 		m_mutex_event.unlock();
+		slist_clear(m_dialog_page.m_shape_list);
 	}
 
 	// 値をスライダーのヘッダーに格納する.
@@ -199,52 +157,63 @@ namespace winrt::GraphPaper::implementation
 		}
 	}
 
-	/*
 	// スライダーの値が変更された.
 	// U	操作の識別子
 	// S	スライダーの番号
 	// args	ValueChanged で渡された引数
 	// 戻り値	なし
 	template <UNDO_ID U, int S>
-	void MainPage::stroke_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	void MainPage::stroke_slider_value_changed(
+		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
 	{
-		if constexpr (U == UNDO_ID::STROKE_WIDTH) {
+		if constexpr (U == UNDO_ID::STROKE_WIDTH && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
-			if constexpr (S == 0) {
-				stroke_slider_set_header<U, S>(val);
-				//m_sample_shape->set_stroke_width(val);
-				m_dialog_page.m_shape_list.back()->set_stroke_width(val);
+			stroke_slider_set_header<UNDO_ID::STROKE_WIDTH, 0>(val);
+			if (m_dialog_page.m_shape_list.back()->set_stroke_width(val)) {
+				dialog_draw();
 			}
 		}
-		if constexpr (U == UNDO_ID::STROKE_COLOR) {
+		else if constexpr (U == UNDO_ID::STROKE_COLOR && S == 0) {
 			const float val = static_cast<float>(args.NewValue());
 			D2D1_COLOR_F color;
-			//m_sample_shape->get_stroke_color(color);
 			m_dialog_page.m_shape_list.back()->get_stroke_color(color);
-			if constexpr (S == 0) {
-				stroke_slider_set_header<U, S>(val);
-				color.r = static_cast<FLOAT>(val / COLOR_MAX);
+			stroke_slider_set_header<U, S>(val);
+			color.r = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_stroke_color(color)) {
+				dialog_draw();
 			}
-			if constexpr (S == 1) {
-				stroke_slider_set_header<U, S>(val);
-				color.g = static_cast<FLOAT>(val / COLOR_MAX);
-			}
-			if constexpr (S == 2) {
-				stroke_slider_set_header<U, S>(val);
-				color.b = static_cast<FLOAT>(val / COLOR_MAX);
-			}
-			if constexpr (S == 3) {
-				stroke_slider_set_header<U, S>(val);
-				color.a = static_cast<FLOAT>(val / COLOR_MAX);
-			}
-			//m_sample_shape->set_stroke_color(color);
-			m_dialog_page.m_shape_list.back()->set_stroke_color(color);
 		}
-		if (scp_dialog_panel().IsLoaded()) {
-			dialog_draw();
+		else if constexpr (U == UNDO_ID::STROKE_COLOR && S == 1) {
+			const float val = static_cast<float>(args.NewValue());
+			D2D1_COLOR_F color;
+			m_dialog_page.m_shape_list.back()->get_stroke_color(color);
+			stroke_slider_set_header<U, S>(val);
+			color.g = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_stroke_color(color)) {
+				dialog_draw();
+			}
+		}
+		else if constexpr (U == UNDO_ID::STROKE_COLOR && S == 2) {
+			const float val = static_cast<float>(args.NewValue());
+			D2D1_COLOR_F color;
+			m_dialog_page.m_shape_list.back()->get_stroke_color(color);
+			stroke_slider_set_header<U, S>(val);
+			color.b = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_stroke_color(color)) {
+				dialog_draw();
+			}
+		}
+		else if constexpr (U == UNDO_ID::STROKE_COLOR && S == 3) {
+			const float val = static_cast<float>(args.NewValue());
+			D2D1_COLOR_F color;
+			m_dialog_page.m_shape_list.back()->get_stroke_color(color);
+			stroke_slider_set_header<U, S>(val);
+			color.a = static_cast<FLOAT>(val / COLOR_MAX);
+			if (m_dialog_page.m_shape_list.back()->set_stroke_color(color)) {
+				dialog_draw();
+			}
 		}
 	}
-	*/
 
 	// 線枠メニューの「太さ」のサブ項目が選択された.
 	void MainPage::stroke_width_click(IInspectable const& sender, RoutedEventArgs const&)
@@ -306,15 +275,10 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_0().Value(s_width);
 		stroke_slider_set_header<UNDO_ID::STROKE_WIDTH, 0>(s_width);
 		dialog_slider_0().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged(
-			[=](IInspectable const&, RangeBaseValueChangedEventArgs const& args) {
-				const float val = static_cast<float>(args.NewValue());
-				stroke_slider_set_header<UNDO_ID::STROKE_WIDTH, 0>(val);
-				if (m_dialog_page.m_shape_list.back()->set_stroke_width(val)) {
-					dialog_draw();
-				}
-			}
-		);
+		const auto token0{
+			dialog_slider_0().ValueChanged(
+				{ this, &MainPage::stroke_slider_value_changed<UNDO_ID::STROKE_WIDTH, 0> })
+		};
 		stroke_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),
 			static_cast<float>(scp_dialog_panel().Height()), m_dialog_page);
@@ -335,7 +299,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		slist_clear(m_dialog_page.m_shape_list);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
-		dialog_slider_0().ValueChanged(slider_0_token);
+		dialog_slider_0().ValueChanged(token0);
 		dialog_slider_0().StepFrequency(1.0);
 		dialog_slider_0().Maximum(255.0);
 		m_mutex_event.unlock();

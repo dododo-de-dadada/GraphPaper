@@ -74,31 +74,102 @@ namespace winrt::GraphPaper::implementation
 			wchar_t buf[32];
 			swprintf_s(buf, 32, L"%fÅã", val);
 			const winrt::hstring text =
-				ResourceLoader::GetForCurrentView().GetString(L"str_deg_start") + L": " + buf;
+				ResourceLoader::GetForCurrentView().GetString(L"str_arc_start") + L": " + buf;
 			dialog_slider_0().Header(box_value(text));
 		}
 		else if constexpr (S == 1) {
 			wchar_t buf[32];
 			swprintf_s(buf, 32, L"%fÅã", val);
 			const winrt::hstring text =
-				ResourceLoader::GetForCurrentView().GetString(L"str_deg_end") + L": " + buf;
+				ResourceLoader::GetForCurrentView().GetString(L"str_arc_end") + L": " + buf;
 			dialog_slider_1().Header(box_value(text));
 		}
 		else if constexpr (S == 2) {
 			wchar_t buf[32];
 			swprintf_s(buf, 32, L"%fÅã", val);
 			const winrt::hstring text =
-				ResourceLoader::GetForCurrentView().GetString(L"str_deg_rot") + L": " + buf;
+				ResourceLoader::GetForCurrentView().GetString(L"str_arc_rot") + L": " + buf;
 			dialog_slider_2().Header(box_value(text));
 		}
 	}
 
+	template<int S>
+	void MainPage::edit_arc_slider_value_changed(
+		IInspectable const&, RangeBaseValueChangedEventArgs const& args)
+	{
+		if constexpr (S == 0) {
+			const float val = static_cast<float>(args.NewValue());
+			edit_arc_slider_set_header<0>(val);
+			D2D1_SWEEP_DIRECTION dir;
+			m_dialog_page.m_shape_list.back()->get_arc_dir(dir);
+			if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+				if (m_dialog_page.m_shape_list.back()->set_arc_start(val)) {
+					dialog_draw();
+				}
+			}
+			else {
+				if (m_dialog_page.m_shape_list.back()->set_arc_end(-val)) {
+					dialog_draw();
+				}
+			}
+		}
+		else if constexpr (S == 1) {
+			const float val = static_cast<float>(args.NewValue());
+			edit_arc_slider_set_header<1>(val);
+			D2D1_SWEEP_DIRECTION dir;
+			m_dialog_page.m_shape_list.back()->get_arc_dir(dir);
+			if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+				if (m_dialog_page.m_shape_list.back()->set_arc_end(val)) {
+					dialog_draw();
+				}
+			}
+			else {
+				if (m_dialog_page.m_shape_list.back()->set_arc_start(-val)) {
+					dialog_draw();
+				}
+			}
+		}
+		else if constexpr (S == 2) {
+			const float val = static_cast<float>(args.NewValue());
+			edit_arc_slider_set_header<2>(val);
+			m_dialog_page.m_shape_list.back()->set_arc_rot(val);
+			dialog_draw();
+
+		}
+	}
+
+	template<int S>
+	void MainPage::edit_arc_checkbox_checked(IInspectable const&, RoutedEventArgs const&)
+	{
+		if constexpr (S == 0) {
+			if (m_dialog_page.m_shape_list.back()->set_arc_dir(
+				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
+				const auto val0 = dialog_slider_0().Value();
+				const auto val1 = dialog_slider_1().Value();
+				dialog_slider_0().Value(-val1);
+				dialog_slider_1().Value(-val0);
+				dialog_draw();
+			}
+		}
+		else if constexpr (S == 1) {
+			if (m_dialog_page.m_shape_list.back()->set_arc_dir(
+				D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
+				const auto val0 = dialog_slider_0().Value();
+				const auto val1 = dialog_slider_1().Value();
+				dialog_slider_0().Value(-val1);
+				dialog_slider_1().Value(-val0);
+				dialog_draw();
+			}
+		}
+	}
+
+
 	IAsyncAction MainPage::edit_arc_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		ShapeQEllipse* t;
+		ShapeArc* t;
 		if (m_event_shape_prev != nullptr &&
-			typeid(*m_event_shape_prev) == typeid(ShapeQEllipse)) {
-			t = static_cast<ShapeQEllipse*>(m_event_shape_prev);
+			typeid(*m_event_shape_prev) == typeid(ShapeArc)) {
+			t = static_cast<ShapeArc*>(m_event_shape_prev);
 		}
 		else {
 			// ëIëÇ≥ÇÍÇΩê}å`ÇÃÇ§Çøç≈ëOñ Ç…Ç†ÇÈâ~å ê}å`ÇìæÇÈ.
@@ -111,24 +182,24 @@ namespace winrt::GraphPaper::implementation
 				if (!(*it)->is_selected()) {
 					continue;
 				}
-				if (typeid(*(*it)) == typeid(ShapeQEllipse)) {
-					t = static_cast<ShapeQEllipse*>(*it);
+				if (typeid(*(*it)) == typeid(ShapeArc)) {
+					t = static_cast<ShapeArc*>(*it);
 					break;
 				}
 			}
 		}
 		if (t != nullptr) {
 			m_mutex_event.lock();
-
-			float deg_start;
-			t->get_arc_start(deg_start);
-			float deg_end;
-			t->get_arc_end(deg_end);
-			float deg_rot;
-			t->get_arc_rot(deg_rot);
-			D2D1_SWEEP_DIRECTION dir;
-			t->get_arc_dir(dir);
 			m_dialog_page.set_attr_to(&m_main_page);
+
+			float a_start;
+			t->get_arc_start(a_start);
+			float a_end;
+			t->get_arc_end(a_end);
+			float a_rot;
+			t->get_arc_rot(a_rot);
+			D2D1_SWEEP_DIRECTION a_dir;
+			t->get_arc_dir(a_dir);
 
 			const auto samp_w = scp_dialog_panel().Width();
 			const auto samp_h = scp_dialog_panel().Height();
@@ -142,194 +213,147 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_POINT_2F pos{
 				static_cast<FLOAT>(rx), static_cast<FLOAT>(ry)
 			};
-			Shape* s = new ShapeQEllipse(start, pos, t);
-			s->set_arc_dir(dir);
-			s->set_arc_start(deg_start);
-			s->set_arc_end(deg_end);
-			s->set_arc_rot(deg_rot);
+			Shape* s = new ShapeArc(start, pos, t);
+			s->set_select(true);
+			s->set_arc_dir(a_dir);
+			s->set_arc_start(a_start);
+			s->set_arc_end(a_end);
+			s->set_arc_rot(a_rot);
+			m_dialog_page.m_shape_list.push_back(s);
+#if defined(_DEBUG)
+			debug_leak_cnt++;
+#endif
 
-			const auto ds0_min = dialog_slider_0().Minimum();
-			const auto ds0_max = dialog_slider_0().Maximum();
-			const auto ds0_freq = dialog_slider_0().TickFrequency();
-			const auto ds0_snap = dialog_slider_0().SnapsTo();
-			const auto ds0_val = dialog_slider_0().Value();
-			const auto ds0_vis = dialog_slider_0().Visibility();
-			const auto ds1_min = dialog_slider_1().Minimum();
-			const auto ds1_max = dialog_slider_1().Maximum();
-			const auto ds1_freq = dialog_slider_1().TickFrequency();
-			const auto ds1_snap = dialog_slider_1().SnapsTo();
-			const auto ds1_val = dialog_slider_1().Value();
-			const auto ds1_vis = dialog_slider_1().Visibility();
-			const auto ds2_min = dialog_slider_2().Minimum();
-			const auto ds2_max = dialog_slider_2().Maximum();
-			const auto ds2_freq = dialog_slider_2().TickFrequency();
-			const auto ds2_snap = dialog_slider_2().SnapsTo();
-			const auto ds2_val = dialog_slider_2().Value();
-			const auto ds2_vis = dialog_slider_2().Visibility();
-			const auto dcb_val = dialog_check_box().IsChecked();
-			const auto dcb_vis = dialog_check_box().Visibility();
+			const winrt::event_token token0{
+				dialog_slider_0().ValueChanged(
+					{ this, &MainPage::edit_arc_slider_value_changed<0> })
+			};
+			const winrt::event_token token1{
+				dialog_slider_1().ValueChanged(
+					{ this, &MainPage::edit_arc_slider_value_changed<1> })
+			};
+			const winrt::event_token token2{
+				dialog_slider_2().ValueChanged(
+					{ this, &MainPage::edit_arc_slider_value_changed<2> })
+			};
+			const winrt::event_token token3{
+				dialog_check_box().Checked({ this, &MainPage::edit_arc_checkbox_checked<0> })
+			};
+			const winrt::event_token token4{
+				dialog_check_box().Unchecked({ this, &MainPage::edit_arc_checkbox_checked<1> })
+			};
+
+			const auto min0 = dialog_slider_0().Minimum();
+			const auto max0 = dialog_slider_0().Maximum();
+			const auto freq0 = dialog_slider_0().TickFrequency();
+			const auto snap0 = dialog_slider_0().SnapsTo();
+			const auto val0 = dialog_slider_0().Value();
+			const auto vis0 = dialog_slider_0().Visibility();
+			const auto min1 = dialog_slider_1().Minimum();
+			const auto max1 = dialog_slider_1().Maximum();
+			const auto freq1 = dialog_slider_1().TickFrequency();
+			const auto snap1 = dialog_slider_1().SnapsTo();
+			const auto val1 = dialog_slider_1().Value();
+			const auto vis1 = dialog_slider_1().Visibility();
+			const auto min2 = dialog_slider_2().Minimum();
+			const auto max2 = dialog_slider_2().Maximum();
+			const auto freq2 = dialog_slider_2().TickFrequency();
+			const auto snap2 = dialog_slider_2().SnapsTo();
+			const auto val2 = dialog_slider_2().Value();
+			const auto vis2 = dialog_slider_2().Visibility();
+			const auto val3 = dialog_check_box().IsChecked();
+			const auto vis3 = dialog_check_box().Visibility();
 
 			dialog_slider_0().Minimum(0.0);
 			dialog_slider_0().Maximum(45.0);
 			dialog_slider_0().TickFrequency(0.5);
 			dialog_slider_0().SnapsTo(SliderSnapsTo::Ticks);
-			if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-				dialog_slider_0().Value(deg_start);
-				edit_arc_slider_set_header<0>(deg_start);
+			if (a_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+				dialog_slider_0().Value(a_start);
+				edit_arc_slider_set_header<0>(a_start);
 			}
 			else {
-				dialog_slider_0().Value(-deg_end);
-				edit_arc_slider_set_header<0>(-deg_end);
+				dialog_slider_0().Value(-a_end);
+				edit_arc_slider_set_header<0>(-a_end);
 			}
 			dialog_slider_0().Visibility(Visibility::Visible);
 			dialog_slider_1().Minimum(-45.0);
 			dialog_slider_1().Maximum(0.0);
 			dialog_slider_1().TickFrequency(0.5);
 			dialog_slider_1().SnapsTo(SliderSnapsTo::Ticks);
-			if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-				dialog_slider_1().Value(deg_end);
-				edit_arc_slider_set_header<1>(deg_end);
+			if (a_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+				dialog_slider_1().Value(a_end);
+				edit_arc_slider_set_header<1>(a_end);
 			}
 			else {
-				dialog_slider_1().Value(-deg_start);
-				edit_arc_slider_set_header<1>(-deg_start);
+				dialog_slider_1().Value(-a_start);
+				edit_arc_slider_set_header<1>(-a_start);
 			}
 			dialog_slider_1().Visibility(Visibility::Visible);
 			dialog_slider_2().Minimum(-44.5);
 			dialog_slider_2().Maximum(44.5);
 			dialog_slider_2().TickFrequency(0.5);
 			dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
-			dialog_slider_2().Value(deg_rot);
-			edit_arc_slider_set_header<2>(deg_rot);
+			dialog_slider_2().Value(a_rot);
+			edit_arc_slider_set_header<2>(a_rot);
 			dialog_slider_2().Visibility(Visibility::Visible);
-			dialog_check_box().IsChecked(dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE);
+			if (a_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
+				dialog_check_box().IsChecked(true);
+			}
+			else {
+				dialog_check_box().IsChecked(false);
+			}
 			dialog_check_box().Visibility(Visibility::Visible);
 
-			const winrt::event_token ds0_tok{
-				dialog_slider_0().ValueChanged(
-					[=](IInspectable const& sender, RangeBaseValueChangedEventArgs const& args) {
-						const float val = static_cast<float>(args.NewValue());
-						edit_arc_slider_set_header<0>(val);
-						D2D1_SWEEP_DIRECTION dir;
-						m_dialog_page.m_shape_list.back()->get_arc_dir(dir);
-						if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-							m_dialog_page.m_shape_list.back()->set_arc_start(val);
-						}
-						else {
-							m_dialog_page.m_shape_list.back()->set_arc_end(-val);
-						}
-						dialog_draw();
-					}
-				)
-			};
-			const winrt::event_token ds1_tok{
-				dialog_slider_1().ValueChanged(
-					[=](IInspectable const& sender, RangeBaseValueChangedEventArgs const& args) {
-						const float val = static_cast<float>(args.NewValue());
-						edit_arc_slider_set_header<1>(val);
-						D2D1_SWEEP_DIRECTION dir;
-						m_dialog_page.m_shape_list.back()->get_arc_dir(dir);
-						if (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-							m_dialog_page.m_shape_list.back()->set_arc_end(val);
-						}
-						else {
-							m_dialog_page.m_shape_list.back()->set_arc_start(-val);
-						}
-						dialog_draw();
-					}
-				)
-			};
-			const winrt::event_token ds2_tok{
-				dialog_slider_2().ValueChanged(
-					[=](IInspectable const& sender, RangeBaseValueChangedEventArgs const& args) {
-						const float val = static_cast<float>(args.NewValue());
-						edit_arc_slider_set_header<2>(val);
-						m_dialog_page.m_shape_list.back()->set_arc_rot(val);
-						dialog_draw();
-					}
-				)
-			};
-			const winrt::event_token dcb_tok_checked{
-				dialog_check_box().Checked(
-					[=](IInspectable const& sender,  RoutedEventArgs const& args) {
-						Shape* s = m_dialog_page.m_shape_list.back();
-						if (s->set_arc_dir(D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE)) {
-							const auto val0 = dialog_slider_0().Value();
-							const auto val1 = dialog_slider_1().Value();
-							dialog_slider_0().Value(-val1);
-							dialog_slider_1().Value(-val0);
-							dialog_draw();
-						}
-					}
-				)
-			};
-			const winrt::event_token dcb_tok_unchecked{
-				dialog_check_box().Unchecked(
-					[=](IInspectable const& sender,  RoutedEventArgs const& args) {
-						Shape* s = m_dialog_page.m_shape_list.back();
-						if (s->set_arc_dir(
-							D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE)) {
-							const auto val0 = dialog_slider_0().Value();
-							const auto val1 = dialog_slider_1().Value();
-							dialog_slider_0().Value(-val1);
-							dialog_slider_1().Value(-val0);
-							dialog_draw();
-						}
-					}
-				)
-			};
-			m_dialog_page.m_shape_list.push_back(s);
-#if defined(_DEBUG)
-			debug_leak_cnt++;
-#endif
 			cd_setting_dialog().Title(
-				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_deg_rot")));
+				box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arc_rot")));
 			const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 			if (d_result == ContentDialogResult::Primary) {
 				s = m_dialog_page.m_shape_list.back();
 				// íçà”: èáî‘Ç™ OK Ç©Ç«Ç§Ç©.
-				D2D1_SWEEP_DIRECTION dir;
-				s->get_arc_dir(dir);
-				ustack_push_set<UNDO_ID::ARC_DIR>(dir);
-				float samp_val;
-				s->get_arc_start(samp_val);
-				ustack_push_set<UNDO_ID::ARC_START>(samp_val);
-				s->get_arc_end(samp_val);
-				ustack_push_set<UNDO_ID::ARC_END>(samp_val);
-				s->get_arc_rot(samp_val);
-				ustack_push_set<UNDO_ID::ARC_ROT>(samp_val);
+				D2D1_SWEEP_DIRECTION new_dir;
+				s->get_arc_dir(new_dir);
+				ustack_push_set<UNDO_ID::ARC_DIR>(new_dir);
+				float new_val;
+				s->get_arc_start(new_val);
+				ustack_push_set<UNDO_ID::ARC_START>(new_val);
+				s->get_arc_end(new_val);
+				ustack_push_set<UNDO_ID::ARC_END>(new_val);
+				s->get_arc_rot(new_val);
+				ustack_push_set<UNDO_ID::ARC_ROT>(new_val);
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
 			}
 			slist_clear(m_dialog_page.m_shape_list);
-			dialog_slider_0().ValueChanged(ds0_tok);
-			dialog_slider_0().Minimum(ds0_min);
-			dialog_slider_0().Maximum(ds0_max);
-			dialog_slider_0().TickFrequency(ds0_freq);
-			dialog_slider_0().SnapsTo(ds0_snap);
-			dialog_slider_0().Value(ds0_val);
-			dialog_slider_0().Visibility(ds0_vis);
-			dialog_slider_1().ValueChanged(ds1_tok);
-			dialog_slider_1().Minimum(ds1_min);
-			dialog_slider_1().Maximum(ds1_max);
-			dialog_slider_1().TickFrequency(ds1_freq);
-			dialog_slider_1().SnapsTo(ds1_snap);
-			dialog_slider_1().Value(ds1_val);
-			dialog_slider_1().Visibility(ds1_vis);
-			dialog_slider_2().ValueChanged(ds2_tok);
-			dialog_slider_2().Minimum(ds2_min);
-			dialog_slider_2().Maximum(ds2_max);
-			dialog_slider_2().TickFrequency(ds2_freq);
-			dialog_slider_2().SnapsTo(ds2_snap);
-			dialog_slider_2().Value(ds2_val);
-			dialog_slider_2().Visibility(ds2_vis);
-			dialog_check_box().Checked(dcb_tok_checked);
-			dialog_check_box().Unchecked(dcb_tok_unchecked);
-			dialog_check_box().IsChecked(dcb_val);
-			dialog_check_box().Visibility(dcb_vis);
+			dialog_slider_0().ValueChanged(token0);
+			dialog_slider_0().Minimum(min0);
+			dialog_slider_0().Maximum(max0);
+			dialog_slider_0().TickFrequency(freq0);
+			dialog_slider_0().SnapsTo(snap0);
+			dialog_slider_0().Value(val0);
+			dialog_slider_0().Visibility(vis0);
+			dialog_slider_1().ValueChanged(token1);
+			dialog_slider_1().Minimum(min1);
+			dialog_slider_1().Maximum(max1);
+			dialog_slider_1().TickFrequency(freq1);
+			dialog_slider_1().SnapsTo(snap1);
+			dialog_slider_1().Value(val1);
+			dialog_slider_1().Visibility(vis1);
+			dialog_slider_2().ValueChanged(token2);
+			dialog_slider_2().Minimum(min2);
+			dialog_slider_2().Maximum(max2);
+			dialog_slider_2().TickFrequency(freq2);
+			dialog_slider_2().SnapsTo(snap2);
+			dialog_slider_2().Value(val2);
+			dialog_slider_2().Visibility(vis2);
+			dialog_check_box().Checked(token3);
+			dialog_check_box().Unchecked(token4);
+			dialog_check_box().IsChecked(val3);
+			dialog_check_box().Visibility(vis3);
 			status_bar_set_pos();
 			m_mutex_event.unlock();
+			slist_clear(m_dialog_page.m_shape_list);
 		}
 	}
 }

@@ -757,13 +757,12 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形をデータライターに SVG として書き込む.
-	void ShapeQEllipse::export_svg(const DataWriter& dt_writer)
+	void ShapeArc::export_svg(const DataWriter& dt_writer)
 	{
 		wchar_t buf[1024];
 		D2D1_POINT_2F p[5]{};
 		if (is_opaque(m_fill_color) || 
-			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
-				m_arrow_style != ARROW_STYLE::NONE)) {
+			(!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color))) {
 			get_verts(p);
 		}
 		if (is_opaque(m_fill_color)) {
@@ -811,7 +810,7 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteString(L"/>\n");
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
-				qellipse_calc_arrow(
+				arc_calc_arrow(
 					m_pos[0], p[2], m_radius, m_deg_start, m_deg_end, m_deg_rot, m_sweep_dir,
 					m_arrow_size, arrow);
 				export_svg_arrow(

@@ -168,7 +168,7 @@ namespace winrt::GraphPaper::implementation
 		target->DrawRoundedRectangle(&r_rect, brush, Shape::m_aux_width, Shape::m_aux_style.get());
 	}
 
-	void ShapePage::auxiliary_draw_qellipse(
+	void ShapePage::auxiliary_draw_arc(
 		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
@@ -330,15 +330,6 @@ namespace winrt::GraphPaper::implementation
 		val = m_image_opac;
 		return true;
 	}
-
-	// ŠpŠÛ”¼Œa‚ğ“¾‚é.
-	/*
-	bool ShapePage::get_corner_radius(D2D1_POINT_2F& val) const noexcept
-	{
-		val = m_corner_radius;
-		return true;
-	}
-	*/
 
 	// “h‚è‚Â‚Ô‚µF‚ğ“¾‚é.
 	bool ShapePage::get_fill_color(D2D1_COLOR_F& val) const noexcept

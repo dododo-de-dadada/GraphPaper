@@ -55,7 +55,7 @@
 //        +---------------+---------------+               +---------------+---------------+---------------+
 //        |               |               |               |               |               |               |
 // +------+------+ +------+------+ +------+------+ +------+------+ +------+------+ +------+------+ +------+------+
-// | ShapePolygon| | ShapeBezier | |ShapeQEllipse| | ShapeEllipse| | ShapeRRect  | | ShapeText   | | ShapeRuler  |
+// | ShapePolygon| | ShapeBezier | | ShapeArc    | | ShapeEllipse| | ShapeRRect  | | ShapeText   | | ShapeRuler  |
 // +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+
 //
 // * 印つきは抽象クラス.
@@ -877,7 +877,7 @@ namespace winrt::GraphPaper::implementation
 			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 四分円の補助線を表示する.
-		void auxiliary_draw_qellipse(
+		void auxiliary_draw_arc(
 			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, 
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 矢じるしの寸法を得る.
@@ -1575,43 +1575,32 @@ namespace winrt::GraphPaper::implementation
 		void write(const DataWriter& dt_writer) const final override;
 	};
 
-	// 四分だ円 (円弧)
-	struct ShapeQEllipse : ShapePath {
+	// 円弧
+	struct ShapeArc : ShapePath {
 		D2D1_SIZE_F m_radius{};	// 標準形にしたときの X 軸 Y 軸方向の半径
-		float m_deg_rot = 0.0f;	// だ円の傾き
-		float m_deg_start = 0.0f;	// 始点の角度
-		float m_deg_end = 0.0f;	// 終点の角度
+		float m_deg_rot = 0.0f;	// 円弧の傾き (度数)
+		float m_deg_start = 0.0f;	// 円弧の始点の角度 (度数)
+		float m_deg_end = 0.0f;	// 円弧の終点の角度 (度数)
 		D2D1_SWEEP_DIRECTION m_sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;	// 円弧の方向
 		D2D1_ARC_SIZE m_larg_flag = D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL;
-		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom;
+
+		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom{ nullptr };
 
 		bool get_arc_dir(D2D1_SWEEP_DIRECTION& val) const noexcept final override
 		{
 			val = m_sweep_dir;
 			return true;
 		}
-		// だ円の中心点を得る.
-		//bool get_pos_center(D2D1_POINT_2F& val) const noexcept;
 		// 円弧の始点の角度を得る.
 		bool get_arc_start(float& val) const noexcept final override
 		{
-			//if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-				val = m_deg_start;
-			//}
-			//else {
-			//	val = -m_deg_end;
-			//}
+			val = m_deg_start;
 			return true;
 		}
 		// 円弧の終点の角度を得る.
 		bool get_arc_end(float& val) const noexcept final override
 		{
-			//if (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE) {
-				val = m_deg_end;
-			//}
-			//else {
-			//	val = -m_deg_start;
-			//}
+			val = m_deg_end;
 			return true;
 		}
 		// 円弧の傾きを得る.
@@ -1640,7 +1629,7 @@ namespace winrt::GraphPaper::implementation
 		// 円弧をベジェ曲線で近似する.
 		void alternate_bezier(D2D1_POINT_2F& start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept;
 		// 矢じりの返しと先端の位置を得る.
-		static bool qellipse_calc_arrow(
+		static bool arc_calc_arrow(
 			const D2D1_POINT_2F vec, const D2D1_POINT_2F center, const D2D1_SIZE_F rad,
 			const double deg_start, const double deg_end, const double deg_rot,
 			const D2D1_SWEEP_DIRECTION dir, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
@@ -1651,12 +1640,13 @@ namespace winrt::GraphPaper::implementation
 		// 図形をデータライターに PDF として書き込む.
 		size_t export_pdf(const D2D1_SIZE_F page_size, const DataWriter& dt_writer);
 		// 図形を作成する.
-		ShapeQEllipse(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
+		ShapeArc(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// 図形をデータリーダーから読み込む.
-		ShapeQEllipse(const Shape& page, const DataReader& dt_reader);
+		ShapeArc(const Shape& page, const DataReader& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(const DataWriter& dt_writer) const final override;
-		size_t get_verts(D2D1_POINT_2F /*p*/[]) const noexcept final override;
+		// 頂点を得る.
+		size_t get_verts(D2D1_POINT_2F p[]) const noexcept final override;
 	};
 
 	//------------------------------

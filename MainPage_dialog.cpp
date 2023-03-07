@@ -54,11 +54,15 @@ namespace winrt::GraphPaper::implementation
 		if constexpr (S == 3) {
 			dialog_slider_3().Header(box_value(text));
 		}
+		if constexpr (S == 4) {
+			dialog_slider_4().Header(box_value(text));
+		}
 	}
 	template void MainPage::dialog_set_slider_header<0>(const winrt::hstring& text);
 	template void MainPage::dialog_set_slider_header<1>(const winrt::hstring& text);
 	template void MainPage::dialog_set_slider_header<2>(const winrt::hstring& text);
 	template void MainPage::dialog_set_slider_header<3>(const winrt::hstring& text);
+	template void MainPage::dialog_set_slider_header<4>(const winrt::hstring& text);
 
 //#ifdef _DEBUG
 //	enum struct DEBUG_DIALOG {
