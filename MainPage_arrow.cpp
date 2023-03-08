@@ -12,6 +12,21 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::ApplicationModel::Resources::ResourceLoader;
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
+	using winrt::Windows::UI::Xaml::Controls::ComboBoxItem;
+
+	void MainPage::arrow_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept
+	{
+		if (dialog_combo_box().SelectedIndex() == 0) {
+			if (m_dialog_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::OPENED)) {
+				dialog_draw();
+			}
+		}
+		else if (dialog_combo_box().SelectedIndex() == 1) {
+			if (m_dialog_page.m_shape_list.back()->set_arrow_style(ARROW_STYLE::FILLED)) {
+				dialog_draw();
+			}
+		}
+	}
 
 	//------------------------------
 	// 値をスライダーのヘッダーに格納する.
@@ -86,9 +101,12 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 
+		m_mutex_event.lock();
 		m_dialog_page.set_attr_to(&m_main_page);
 		ARROW_SIZE a_size;
 		m_dialog_page.get_arrow_size(a_size);
+		ARROW_STYLE a_style;
+		m_dialog_page.get_arrow_style(a_style);
 
 		const auto max0 = dialog_slider_0().Maximum();
 		const auto freq0 = dialog_slider_0().TickFrequency();
@@ -120,6 +138,16 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_2().Value(a_size.m_offset);
 		dialog_slider_2().Visibility(Visibility::Visible);
+		dialog_combo_box().Header(box_value(mfsi_arrow_style().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_arrow_style_opened().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_arrow_style_filled().Text()));
+		dialog_combo_box().Visibility(Visibility::Visible);
+		if (a_style == ARROW_STYLE::OPENED) {
+			dialog_combo_box().SelectedIndex(0);
+		}
+		else if (a_style == ARROW_STYLE::FILLED) {
+			dialog_combo_box().SelectedIndex(1);
+		}
 		const winrt::event_token token0{
 			dialog_slider_0().ValueChanged({ this, &MainPage::arrow_slider_val_changed<0> })
 		};
@@ -128,6 +156,9 @@ namespace winrt::GraphPaper::implementation
 		};
 		const winrt::event_token token2{
 			dialog_slider_2().ValueChanged({ this, &MainPage::arrow_slider_val_changed<2> })
+		};
+		const winrt::event_token token3{
+			dialog_combo_box().SelectionChanged({ this, &MainPage::arrow_selection_changed })
 		};
 		arrow_slider_set_header<0>(a_size.m_width);
 		arrow_slider_set_header<1>(a_size.m_length);
@@ -148,22 +179,25 @@ namespace winrt::GraphPaper::implementation
 
 		cd_setting_dialog().Title(
 			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_arrow_size")));
-		m_mutex_event.lock();
 		const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			ARROW_SIZE samp_val;
-			//m_sample_shape->get_arrow_size(samp_val);
-			m_dialog_page.m_shape_list.back()->get_arrow_size(samp_val);
-			if (ustack_push_set<UNDO_ID::ARROW_SIZE>(samp_val)) {
+			ARROW_SIZE new_size;
+			ARROW_STYLE new_style;
+			m_dialog_page.m_shape_list.back()->get_arrow_size(new_size);
+			m_dialog_page.m_shape_list.back()->get_arrow_style(new_style);
+			arrow_style_is_checked(new_style);
+			const bool flag_size = ustack_push_set<UNDO_ID::ARROW_SIZE>(new_size);
+			const bool flag_style = ustack_push_set<UNDO_ID::ARROW_STYLE>(new_style);
+			if (flag_size || flag_style) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
 			}
 		}
-		slist_clear(m_dialog_page.m_shape_list);
 		dialog_slider_0().ValueChanged(token0);
 		dialog_slider_1().ValueChanged(token1);
 		dialog_slider_2().ValueChanged(token2);
+		dialog_combo_box().SelectionChanged(token3);
 		dialog_slider_0().Maximum(max0);
 		dialog_slider_0().TickFrequency(freq0);
 		dialog_slider_0().SnapsTo(snap0);
@@ -179,6 +213,9 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().SnapsTo(snap2);
 		dialog_slider_2().Value(val2);
 		dialog_slider_2().Visibility(vis2);
+		dialog_combo_box().Visibility(Visibility::Collapsed);
+		dialog_combo_box().Items().Clear();
+		slist_clear(m_dialog_page.m_shape_list);
 		status_bar_set_pos();
 		m_mutex_event.unlock();
 	}

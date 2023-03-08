@@ -625,7 +625,7 @@
 				</MenuFlyoutSubItem>
 				<MenuFlyoutSeparator />
 				<!-- 矢じるしメニュー -->
-				<MenuFlyoutSubItem x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
+                <MenuFlyoutSubItem x:Name="mfsi_arrow_style" x:Uid="mfsi_arrow_style" Text="Arrowhead Style">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon Data="{StaticResource data_arrow_opened}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="16" Height="16" />
 					</MenuFlyoutSubItem.Icon>
@@ -685,10 +685,15 @@
 				<!-- 配置メニュー -->
 				<MenuFlyoutSubItem x:Uid="mfsi_text_align_horz" Icon="AlignLeft" Text="Text Alignment">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left" x:Uid="rmfi_text_align_left" Click="text_align_horz_click" IsChecked="True" Text="Left" GroupName="gn_text_align_horz" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="text_align_horz_click" Text="Right" GroupName="gn_text_align_horz" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="text_align_horz_click" Text="Center" GroupName="gn_text_align_horz" />
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just" x:Uid="rmfi_text_align_just" Click="text_align_horz_click" Text="Justified" GroupName="gn_text_align_horz" />
-				</MenuFlyoutSubItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="text_align_horz_click" Text="Right" GroupName="gn_text_align_horz" >
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="text_align_horz_click" Text="Center" GroupName="gn_text_align_horz" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just" x:Uid="rmfi_text_align_just" Click="text_align_horz_click" Text="Justified" GroupName="gn_text_align_horz">
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <PathIcon Data="{StaticResource data_align_just}" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                </MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfsi_text_align_vert" Text="Paragraph Alignment">
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_top" x:Uid="rmfi_text_align_top" Click="text_align_vert_click" IsChecked="True" Text="Top" GroupName="gn_text_align_vert" />
 					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_bot" x:Uid="rmfi_text_align_bot" Click="text_align_vert_click" Text="Bottom" GroupName="gn_text_align_vert" />
@@ -915,12 +920,18 @@
 				<RowDefinition Height="*"/>
 				<RowDefinition Height="Auto"/>
 			</Grid.RowDefinitions>
-			<Button x:Name="btn_summary_close" x:Uid="btn_summary_close" Click="summary_close_click" Content="Close" Grid.Row="2" HorizontalAlignment="Stretch" Margin="12,12,12,12" />
-			<Button Click="summary_close_click" Background="{ThemeResource ButtonBackgroundThemeBrush}" Content="{StaticResource glyph_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt" Grid.Row="0" HorizontalAlignment="Right" />
-			<ListView x:Name="lv_summary_list" Grid.Row="1"
-			Transitions="{x:Null}"
-			ItemContainerTransitions="{x:Null}"
-			IsItemClickEnabled="True" ItemClick="summary_item_click" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >
+			<Button
+				x:Name="btn_summary_close" x:Uid="btn_summary_close" Click="summary_close_click"
+				Content="Close" Grid.Row="2" HorizontalAlignment="Stretch" Margin="12,12,12,12" />
+			<Button
+				Click="summary_close_click" Background="{ThemeResource ButtonBackgroundThemeBrush}"
+				Content="{StaticResource glyph_close}" FontFamily="Segoe MDL2 Assets" FontSize="10pt"
+				Grid.Row="0" HorizontalAlignment="Right" />
+			<ListView
+				x:Name="lv_summary_list" Grid.Row="1" Transitions="{x:Null}"
+				ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True"
+				ItemClick="summary_item_click" Loaded="summary_loaded"
+				SelectionChanged="summary_selection_changed" SelectionMode="Extended" >
 				<!--<ListView x:Name="lv_summary_list" Grid.Row="1" IsItemClickEnabled="False" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
 				<!--<ListView x:Name="lv_summary_list" IsItemClickEnabled="False" Loaded="summary_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_summary_close" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
 				<ListView.Header>
@@ -932,7 +943,9 @@
 				<ItemsControl.ItemTemplate>
 					<DataTemplate x:DataType="local:Summary">
 						<StackPanel Orientation="Horizontal">
-							<PathIcon Data="{x:Bind Geom}" Height="16" Width="16" HorizontalAlignment="Center" Margin="8,4,8,4" VerticalAlignment="Center" />
+							<PathIcon
+								Data="{x:Bind Geom}" Height="16" Width="16" Margin="8,4,8,4"
+								HorizontalAlignment="Center" VerticalAlignment="Center" />
 							<StackPanel>
 								<TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Name, Mode=OneWay}"/>
 								<TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Hexa, Mode=OneWay}"/>
@@ -1165,8 +1178,12 @@
 				<TextBlock x:Name="tb_version" x:Uid="tb_version" RelativePanel.Below="dialog_slider_4" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" Visibility="Collapsed" />
 				<CheckBox
 					x:Name="dialog_check_box" x:Uid="dialog_check_box" Content="Check Box"
-					IsChecked="False" RelativePanel.Below="dialog_slider_4"
-                    RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
+					IsChecked="False" Margin="0,0,0,4" RelativePanel.Below="dialog_slider_4"
+					RelativePanel.AlignLeftWithPanel="True" Visibility="Collapsed" />
+				<ComboBox
+					x:Name="dialog_combo_box" x:Uid="dialog_combo_box" Header="Length Unit" Margin="0,0,0,4"
+                    RelativePanel.Below="dialog_check_box" RelativePanel.AlignLeftWithPanel="True"
+					Visibility="Collapsed" />
 			</RelativePanel>
 		</ContentDialog>
 		<!-- 印刷のための透明なキャンバス -->

@@ -36,8 +36,10 @@ namespace winrt::GraphPaper::implementation
 
 		if (ShapeLine::line_get_pos_arrow(start, pos, a_size, barbs, tip)) {
 			// ジオメトリパスを作成する.
-			winrt::check_hresult(d_factory->CreatePathGeometry(geo));
-			winrt::check_hresult((*geo)->Open(sink.put()));
+			winrt::check_hresult(
+				d_factory->CreatePathGeometry(geo));
+			winrt::check_hresult(
+				(*geo)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(
 				barbs[0],
@@ -52,7 +54,8 @@ namespace winrt::GraphPaper::implementation
 				? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED
 				: D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN
 			);
-			winrt::check_hresult(sink->Close());
+			winrt::check_hresult(
+				sink->Close());
 			sink = nullptr;
 		}
 	}

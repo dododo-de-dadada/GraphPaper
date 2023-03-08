@@ -709,15 +709,18 @@ namespace winrt::GraphPaper::implementation
 				D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
 				D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
 			winrt::com_ptr<ID2D1GeometrySink> sink;
-			winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
-			winrt::check_hresult(m_d2d_path_geom->Open(sink.put()));
+			winrt::check_hresult(
+				factory->CreatePathGeometry(m_d2d_path_geom.put()));
+			winrt::check_hresult(
+				m_d2d_path_geom->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(p[0], f_begin);
 			for (size_t i = 1; i < p_cnt; i++) {
 				sink->AddLine(p[i]);
 			}
 			sink->EndFigure(f_end);
-			winrt::check_hresult(sink->Close());
+			winrt::check_hresult(
+				sink->Close());
 			sink = nullptr;
 
 			// –î‚¶‚é‚µ‚ÌŒ`Ž®‚ª‚È‚µ‚©”»’è‚·‚é.
@@ -736,14 +739,17 @@ namespace winrt::GraphPaper::implementation
 					const auto a_end = (a_style == ARROW_STYLE::FILLED ?
 						D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
 						D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-					winrt::check_hresult(factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
-					winrt::check_hresult(m_d2d_arrow_geom->Open(sink.put()));
+					winrt::check_hresult(
+						factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
+					winrt::check_hresult(
+						m_d2d_arrow_geom->Open(sink.put()));
 					sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 					sink->BeginFigure(barb[0], a_begin);
 					sink->AddLine(tip);
 					sink->AddLine(barb[1]);
 					sink->EndFigure(a_end);
-					winrt::check_hresult(sink->Close());
+					winrt::check_hresult(
+						sink->Close());
 					sink = nullptr;
 				}
 			}

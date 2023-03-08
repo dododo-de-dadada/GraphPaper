@@ -194,7 +194,8 @@ namespace winrt::GraphPaper::implementation
 		default:
 			throw winrt::hresult_invalid_argument();
 		}
-		winrt::check_hresult(dxgi_swap_chain->SetRotation(display_rotation));
+		winrt::check_hresult(
+			dxgi_swap_chain->SetRotation(display_rotation));
 	}
 #endif
 
@@ -345,13 +346,16 @@ namespace winrt::GraphPaper::implementation
 
 			// このシーケンスは、上の Direct3D デバイスを作成する際に使用された DXGI ファクトリを取得する.
 			winrt::com_ptr<IDXGIDevice3> dxgi_device;
-			winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
+			winrt::check_hresult(
+				m_d3d_device.try_as(dxgi_device));
 
 			winrt::com_ptr<IDXGIAdapter> dxgi_adapter;
-			winrt::check_hresult(dxgi_device->GetAdapter(dxgi_adapter.put()));
+			winrt::check_hresult(
+				dxgi_device->GetAdapter(dxgi_adapter.put()));
 
 			winrt::com_ptr<IDXGIFactory4> dxgi_factory;
-			winrt::check_hresult(dxgi_adapter->GetParent(_uuidof(&dxgi_factory), dxgi_factory.put_void()));
+			winrt::check_hresult(
+				dxgi_adapter->GetParent(_uuidof(&dxgi_factory), dxgi_factory.put_void()));
 
 			// XAML 相互運用機能の使用時に, 合成用にスワップ チェーンを作成する必要あり.
 			winrt::com_ptr<IDXGISwapChain1> swapChain;
@@ -364,7 +368,8 @@ namespace winrt::GraphPaper::implementation
 				)
 			);
 
-			winrt::check_hresult(swapChain.try_as(m_dxgi_swap_chain));
+			winrt::check_hresult(
+				swapChain.try_as(m_dxgi_swap_chain));
 
 			// スワップ チェーンと SwapChainPanel を関連付ける.
 			// UI の変更は、UI スレッドにディスパッチして戻す必要あり.
@@ -375,8 +380,10 @@ namespace winrt::GraphPaper::implementation
 					{
 						// SwapChainPanel のネイティブ インターフェイスに戻す.
 						winrt::com_ptr<ISwapChainPanelNative> scp_native{ nullptr };
-						winrt::check_hresult(winrt::get_unknown(m_swap_chain_panel)->QueryInterface(__uuidof(scp_native), scp_native.put_void()));
-						winrt::check_hresult(scp_native->SetSwapChain(m_dxgi_swap_chain.get()));
+						winrt::check_hresult(
+							winrt::get_unknown(m_swap_chain_panel)->QueryInterface(__uuidof(scp_native), scp_native.put_void()));
+						winrt::check_hresult(
+							scp_native->SetSwapChain(m_dxgi_swap_chain.get()));
 					})
 			);
 #else
@@ -385,14 +392,18 @@ namespace winrt::GraphPaper::implementation
 					{
 					// SwapChainPanel のネイティブ インターフェイスに戻す.
 					winrt::com_ptr<ISwapChainPanelNative> scpNative{ nullptr };
-					winrt::check_hresult(winrt::get_unknown(m_swap_chain_panel)->QueryInterface(__uuidof(scpNative), scpNative.put_void()));
-					winrt::check_hresult(scpNative->SetSwapChain(m_dxgi_swap_chain.get()));
+					winrt::check_hresult(
+						winrt::get_unknown(m_swap_chain_panel)->QueryInterface(
+							__uuidof(scpNative), scpNative.put_void()));
+					winrt::check_hresult(
+						scpNative->SetSwapChain(m_dxgi_swap_chain.get()));
 				})
 			};
 #endif // WIN_UI
 			// DXGI が 1 度に複数のフレームをキュー処理していないことを確認します。これにより、遅延が減少し、
 			// アプリケーションが各 VSync の後でのみレンダリングすることが保証され、消費電力が最小限に抑えられます。
-			winrt::check_hresult(dxgi_device->SetMaximumFrameLatency(1));
+			winrt::check_hresult(
+				dxgi_device->SetMaximumFrameLatency(1));
 		}
 
 		// スワップ チェーンの適切な方向を設定し、回転されたスワップ チェーンにレンダリングするための
@@ -410,8 +421,10 @@ namespace winrt::GraphPaper::implementation
 		inverse_scale._11 = 1.0f / m_effectiveCompositionScaleX;
 		inverse_scale._22 = 1.0f / m_effectiveCompositionScaleY;
 		winrt::com_ptr<IDXGISwapChain2> dxgi_swap_chain2;
-		winrt::check_hresult(m_dxgi_swap_chain.try_as(dxgi_swap_chain2));//As<IDXGISwapChain2>(&dxgi_swap_chain2));		
-		winrt::check_hresult(dxgi_swap_chain2->SetMatrixTransform(&inverse_scale));
+		winrt::check_hresult(
+			m_dxgi_swap_chain.try_as(dxgi_swap_chain2));//As<IDXGISwapChain2>(&dxgi_swap_chain2));		
+		winrt::check_hresult(
+			dxgi_swap_chain2->SetMatrixTransform(&inverse_scale));
 
 		// スワップ チェーンのバック バッファーのレンダリング ターゲット ビューを作成します。
 		winrt::com_ptr<ID3D11Texture2D1> texture_buffer;
@@ -665,21 +678,26 @@ namespace winrt::GraphPaper::implementation
 			);
 			m_d3d_driver_type = D3D_DRIVER_TYPE_WARP;
 		}
-		winrt::check_hresult(device.try_as(m_d3d_device));
-		winrt::check_hresult(context.try_as(m_d3d_context));
+		winrt::check_hresult(
+			device.try_as(m_d3d_device));
+		winrt::check_hresult(
+			context.try_as(m_d3d_context));
 
 		// D3D デバイスを DXGI デバイスに格納する.
 		winrt::com_ptr<IDXGIDevice3> dxgi_device{ nullptr };
-		winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
+		winrt::check_hresult(
+			m_d3d_device.try_as(dxgi_device));
 
 		// DXGI デバイスから D2D デバイスを作成する.
 		winrt::com_ptr<ID2D1Device2> d2d_device{ nullptr };
-		winrt::check_hresult(m_d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put()));
+		winrt::check_hresult(
+			m_d2d_factory->CreateDevice(dxgi_device.get(), d2d_device.put()));
 
 		// D2D デバイスをもとに D2D コンテキストを作成する.
 		// オプションは D2D1_DEVICE_CONTEXT_OPTIONS_NONE を指定する.
 		m_d2d_context = nullptr;
-		winrt::check_hresult(d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, m_d2d_context.put()));
+		winrt::check_hresult(
+			d2d_device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, m_d2d_context.put()));
 
 	};
 
@@ -704,30 +722,38 @@ namespace winrt::GraphPaper::implementation
 		// まず、デバイスが作成された時点から、既定のアダプターに関する情報を取得します。
 
 		winrt::com_ptr<IDXGIDevice3> dxgi_device;
-		winrt::check_hresult(m_d3d_device.try_as(dxgi_device));
+		winrt::check_hresult(
+			m_d3d_device.try_as(dxgi_device));
 
 		winrt::com_ptr<IDXGIAdapter> deviceAdapter;
-		winrt::check_hresult(dxgi_device->GetAdapter(deviceAdapter.put()));
+		winrt::check_hresult(
+			dxgi_device->GetAdapter(deviceAdapter.put()));
 
 		winrt::com_ptr<IDXGIFactory2> deviceFactory;
-		winrt::check_hresult(deviceAdapter->GetParent(__uuidof(IDXGIFactory2), deviceFactory.put_void()));//IID_PPV_ARGS(&deviceFactory)));
+		winrt::check_hresult(
+			deviceAdapter->GetParent(__uuidof(IDXGIFactory2), deviceFactory.put_void()));//IID_PPV_ARGS(&deviceFactory)));
 
 		winrt::com_ptr<IDXGIAdapter1> previousDefaultAdapter;
-		winrt::check_hresult(deviceFactory->EnumAdapters1(0, previousDefaultAdapter.put()));
+		winrt::check_hresult(
+			deviceFactory->EnumAdapters1(0, previousDefaultAdapter.put()));
 
 		DXGI_ADAPTER_DESC1 previousDesc;
-		winrt::check_hresult(previousDefaultAdapter->GetDesc1(&previousDesc));
+		winrt::check_hresult(
+			previousDefaultAdapter->GetDesc1(&previousDesc));
 
 		// 次に、現在の既定のアダプターの情報を取得します。
 
 		winrt::com_ptr<IDXGIFactory4> currentFactory;
-		winrt::check_hresult(CreateDXGIFactory1(__uuidof(IDXGIFactory4), currentFactory.put_void()));// IID_PPV_ARGS(&currentFactory)));
+		winrt::check_hresult(
+			CreateDXGIFactory1(__uuidof(IDXGIFactory4), currentFactory.put_void()));// IID_PPV_ARGS(&currentFactory)));
 
 		winrt::com_ptr<IDXGIAdapter1> currentDefaultAdapter;
-		winrt::check_hresult(currentFactory->EnumAdapters1(0, currentDefaultAdapter.put()));// &currentDefaultAdapter));
+		winrt::check_hresult(
+			currentFactory->EnumAdapters1(0, currentDefaultAdapter.put()));// &currentDefaultAdapter));
 
 		DXGI_ADAPTER_DESC1 currentDesc;
-		winrt::check_hresult(currentDefaultAdapter->GetDesc1(&currentDesc));
+		winrt::check_hresult(
+			currentDefaultAdapter->GetDesc1(&currentDesc));
 
 		// アダプターの LUID が一致しない、またはデバイスで LUID が削除されたとの報告があった場合は、
 		// 新しい D3D デバイスを作成する必要があります。

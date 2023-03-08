@@ -226,14 +226,17 @@ namespace winrt::GraphPaper::implementation
 			const D2D1_FIGURE_END f_end = a_style == ARROW_STYLE::FILLED ?
 				D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
 				D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN;
-			winrt::check_hresult(factory->CreatePathGeometry(a_geom));
-			winrt::check_hresult((*a_geom)->Open(sink.put()));
+			winrt::check_hresult(
+				factory->CreatePathGeometry(a_geom));
+			winrt::check_hresult(
+				(*a_geom)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(barbs[0], f_begin);
 			sink->AddLine(barbs[2]);
 			sink->AddLine(barbs[1]);
 			sink->EndFigure(f_end);
-			winrt::check_hresult(sink->Close());
+			winrt::check_hresult(
+				sink->Close());
 			sink = nullptr;
 		}
 	}
@@ -591,7 +594,8 @@ namespace winrt::GraphPaper::implementation
 				pt_add(b_seg.point2, m_pos[2], b_seg.point3);
 
 				winrt::com_ptr<ID2D1GeometrySink> sink;
-				winrt::check_hresult(factory->CreatePathGeometry(m_d2d_path_geom.put()));
+				winrt::check_hresult(
+					factory->CreatePathGeometry(m_d2d_path_geom.put()));
 				m_d2d_path_geom->Open(sink.put());
 				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 				const auto f_begin = (is_opaque(m_fill_color) ? 
@@ -600,7 +604,8 @@ namespace winrt::GraphPaper::implementation
 				sink->BeginFigure(m_start, f_begin);
 				sink->AddBezier(b_seg);
 				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-				winrt::check_hresult(sink->Close());
+				winrt::check_hresult(
+					sink->Close());
 				sink = nullptr;
 				if (m_arrow_style != ARROW_STYLE::NONE) {
 					bezi_create_arrow_geom(

@@ -13,9 +13,51 @@ namespace winrt::GraphPaper::implementation
 	using winrt::Windows::UI::Xaml::Controls::ContentDialogResult;
 	using winrt::Windows::UI::Xaml::Controls::Primitives::SliderSnapsTo;
 
+	void MainPage::dash_combo_box_selection_changed(
+		IInspectable const&, SelectionChangedEventArgs const& args) noexcept
+	{
+		if (dialog_combo_box().SelectedIndex() == 0) {
+			if (m_dialog_page.m_shape_list.back()->set_dash_style(D2D1_DASH_STYLE_DASH)) {
+				dialog_slider_0().Visibility(Visibility::Visible);
+				dialog_slider_1().Visibility(Visibility::Visible);
+				dialog_slider_2().Visibility(Visibility::Collapsed);
+				dialog_slider_3().Visibility(Visibility::Collapsed);
+				dialog_draw();
+			}
+		}
+		else if (dialog_combo_box().SelectedIndex() == 1) {
+			if (m_dialog_page.m_shape_list.back()->set_dash_style(D2D1_DASH_STYLE_DOT)) {
+				dialog_slider_0().Visibility(Visibility::Collapsed);
+				dialog_slider_1().Visibility(Visibility::Collapsed);
+				dialog_slider_2().Visibility(Visibility::Visible);
+				dialog_slider_3().Visibility(Visibility::Visible);
+				dialog_draw();
+			}
+		}
+		else if (dialog_combo_box().SelectedIndex() == 2) {
+			if (m_dialog_page.m_shape_list.back()->set_dash_style(D2D1_DASH_STYLE_DASH_DOT)) {
+				dialog_slider_0().Visibility(Visibility::Visible);
+				dialog_slider_1().Visibility(Visibility::Visible);
+				dialog_slider_2().Visibility(Visibility::Visible);
+				dialog_slider_3().Visibility(Visibility::Visible);
+				dialog_draw();
+			}
+		}
+		else if (dialog_combo_box().SelectedIndex() == 3) {
+			if (m_dialog_page.m_shape_list.back()->set_dash_style(D2D1_DASH_STYLE_DASH_DOT_DOT)) {
+				dialog_slider_0().Visibility(Visibility::Visible);
+				dialog_slider_1().Visibility(Visibility::Visible);
+				dialog_slider_2().Visibility(Visibility::Visible);
+				dialog_slider_3().Visibility(Visibility::Visible);
+				dialog_draw();
+			}
+		}
+	}
+
 	// 線枠メニューの「破線の配置」が選択された.
 	IAsyncAction MainPage::dash_patt_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
+		m_mutex_event.lock();
 		// まず, ダイアログページの属性を, メインページと同じにする.
 		m_dialog_page.set_attr_to(&m_main_page);
 		// 見本図形の作成
@@ -47,11 +89,19 @@ namespace winrt::GraphPaper::implementation
 		const winrt::event_token token4{
 			dialog_slider_4().ValueChanged({ this, &MainPage::dash_slider_value_changed<4> })
 		};
+		const winrt::event_token token5{
+			dialog_combo_box().SelectionChanged(
+				{ this, &MainPage::dash_combo_box_selection_changed })
+		};
 
 		constexpr auto MAX_VALUE = 127.5;
 		constexpr auto TICK_FREQ = 0.5;
 		DASH_PATT d_patt;
 		m_dialog_page.get_dash_patt(d_patt);
+		float s_width;
+		m_dialog_page.get_stroke_width(s_width);
+		D2D1_DASH_STYLE d_style;
+		m_dialog_page.get_dash_style(d_style);
 
 		dialog_slider_0().Maximum(MAX_VALUE);
 		dialog_slider_0().TickFrequency(TICK_FREQ);
@@ -73,35 +123,57 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_3().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_3().Value(d_patt.m_[3]);
 		dash_slider_set_header<3>(d_patt.m_[3]);
-
-		float s_width;
-		m_main_page.get_stroke_width(s_width);
-
 		dialog_slider_4().Maximum(MAX_VALUE);
 		dialog_slider_4().TickFrequency(TICK_FREQ);
 		dialog_slider_4().SnapsTo(SliderSnapsTo::Ticks);
 		dialog_slider_4().Value(s_width);
 		dash_slider_set_header<4>(s_width);
-
-		D2D1_DASH_STYLE s_style;
-		m_main_page.get_dash_style(s_style);
-		dialog_slider_0().Visibility(Visibility::Visible);
-		dialog_slider_1().Visibility(Visibility::Visible);
-		dialog_slider_2().Visibility(Visibility::Visible);
-		dialog_slider_3().Visibility(Visibility::Visible);
+		dialog_combo_box().Header(box_value(mfsi_dash_style().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dash().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dot().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dash_dot().Text()));
+		dialog_combo_box().Items().Append(box_value(rmfi_dash_style_dash_dot_dot().Text()));
+		if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH) {
+			dialog_combo_box().SelectedIndex(0);
+			dialog_slider_0().Visibility(Visibility::Visible);
+			dialog_slider_1().Visibility(Visibility::Visible);
+		}
+		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DOT) {
+			dialog_combo_box().SelectedIndex(1);
+			dialog_slider_2().Visibility(Visibility::Visible);
+			dialog_slider_3().Visibility(Visibility::Visible);
+		}
+		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT) {
+			dialog_combo_box().SelectedIndex(2);
+			dialog_slider_0().Visibility(Visibility::Visible);
+			dialog_slider_1().Visibility(Visibility::Visible);
+			dialog_slider_2().Visibility(Visibility::Visible);
+			dialog_slider_3().Visibility(Visibility::Visible);
+		}
+		else if (d_style == D2D1_DASH_STYLE::D2D1_DASH_STYLE_DASH_DOT_DOT) {
+			dialog_combo_box().SelectedIndex(3);
+			dialog_slider_0().Visibility(Visibility::Visible);
+			dialog_slider_1().Visibility(Visibility::Visible);
+			dialog_slider_2().Visibility(Visibility::Visible);
+			dialog_slider_3().Visibility(Visibility::Visible);
+		}
 		dialog_slider_4().Visibility(Visibility::Visible);
+		dialog_combo_box().Visibility(Visibility::Visible);
 		cd_setting_dialog().Title(
 			box_value(ResourceLoader::GetForCurrentView().GetString(L"str_dash_pattern")));
-		m_mutex_event.lock();
 		const ContentDialogResult d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
-			DASH_PATT val_patt;
-			float val_width;
-			m_dialog_page.m_shape_list.back()->get_dash_patt(val_patt);
-			m_dialog_page.m_shape_list.back()->get_stroke_width(val_width);
-			const bool flag_patt = ustack_push_set<UNDO_ID::DASH_PATT>(val_patt);
-			const bool flag_width = ustack_push_set<UNDO_ID::STROKE_WIDTH>(val_width);
-			if (flag_patt || flag_width) {
+			DASH_PATT new_patt;
+			float new_width;
+			D2D1_DASH_STYLE new_style;
+			m_dialog_page.m_shape_list.back()->get_dash_patt(new_patt);
+			m_dialog_page.m_shape_list.back()->get_stroke_width(new_width);
+			m_dialog_page.m_shape_list.back()->get_dash_style(new_style);
+			dash_style_is_checked(new_style);
+			const bool flag_patt = ustack_push_set<UNDO_ID::DASH_PATT>(new_patt);
+			const bool flag_width = ustack_push_set<UNDO_ID::STROKE_WIDTH>(new_width);
+			const bool flag_style = ustack_push_set<UNDO_ID::DASH_STYLE>(new_style);
+			if (flag_patt || flag_width || flag_style) {
 				ustack_push_null();
 				xcvd_is_enabled();
 				page_draw();
@@ -112,14 +184,17 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_2().ValueChanged(token2);
 		dialog_slider_3().ValueChanged(token3);
 		dialog_slider_4().ValueChanged(token4);
+		dialog_combo_box().SelectionChanged(token5);
 		dialog_slider_0().Visibility(Visibility::Collapsed);
 		dialog_slider_1().Visibility(Visibility::Collapsed);
 		dialog_slider_2().Visibility(Visibility::Collapsed);
 		dialog_slider_3().Visibility(Visibility::Collapsed);
 		dialog_slider_4().Visibility(Visibility::Collapsed);
+		dialog_combo_box().Visibility(Visibility::Collapsed);
+		dialog_combo_box().Items().Clear();
 		status_bar_set_pos();
-		m_mutex_event.unlock();
 		slist_clear(m_dialog_page.m_shape_list);
+		m_mutex_event.unlock();
 	}
 
 	// 線枠メニューの「破線の形式」のサブ項目が選択された.

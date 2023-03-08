@@ -1207,8 +1207,10 @@ namespace winrt::GraphPaper::implementation
 				m_larg_flag
 			};
 			winrt::com_ptr<ID2D1GeometrySink> sink;
-			winrt::check_hresult(factory->CreatePathGeometry(m_d2d_fill_geom.put()));
-			winrt::check_hresult(m_d2d_fill_geom->Open(sink.put()));
+			winrt::check_hresult(
+				factory->CreatePathGeometry(m_d2d_fill_geom.put()));
+			winrt::check_hresult(
+				m_d2d_fill_geom->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			const auto f_begin = (is_opaque(m_fill_color) ?
 				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
@@ -1217,7 +1219,8 @@ namespace winrt::GraphPaper::implementation
 			sink->AddArc(arc);
 			sink->AddLine(p[CENTER]);
 			sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED);
-			winrt::check_hresult(sink->Close());
+			winrt::check_hresult(
+				sink->Close());
 			sink = nullptr;
 		}
 		if (m_d2d_fill_geom != nullptr) {

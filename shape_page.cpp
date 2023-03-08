@@ -186,13 +186,16 @@ namespace winrt::GraphPaper::implementation
 		target->GetFactory(&factory);
 		winrt::com_ptr<ID2D1PathGeometry> geom;
 		winrt::com_ptr<ID2D1GeometrySink> sink;
-		winrt::check_hresult(factory->CreatePathGeometry(geom.put()));
-		winrt::check_hresult(geom->Open(sink.put()));
+		winrt::check_hresult(
+			factory->CreatePathGeometry(geom.put()));
+		winrt::check_hresult(
+			geom->Open(sink.put()));
 		sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 		sink->BeginFigure(pressed, D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
 		sink->AddArc(arc);
 		sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-		winrt::check_hresult(sink->Close());
+		winrt::check_hresult(
+			sink->Close());
 		sink = nullptr;
 		brush->SetColor(COLOR_WHITE);
 		target->DrawGeometry(geom.get(), brush, Shape::m_aux_width, nullptr);

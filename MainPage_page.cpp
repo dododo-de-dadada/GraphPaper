@@ -23,6 +23,36 @@ namespace winrt::GraphPaper::implementation
 	constexpr wchar_t FONT_FAMILY_DEFVAL[] = L"Segoe UI Variable";	// 書体名の規定値 (システムリソースに値が無かった場合)
 	constexpr wchar_t FONT_STYLE_DEFVAL[] = L"BodyTextBlockStyle";	// 文字列の規定値を得るシステムリソース
 
+	void MainPage::page_background_pattern_click(IInspectable const& sender, RoutedEventArgs const&)
+	{
+		if (sender == tmfi_page_background_pattern()) {
+			if (m_background_show != tmfi_page_background_pattern().IsChecked()) {
+				m_background_show = tmfi_page_background_pattern().IsChecked();
+				page_draw();
+			}
+		}
+		else if (sender == rmfi_page_background_white()) {
+			if (!equal(m_background_color, COLOR_WHITE)) {
+				m_background_color = COLOR_WHITE;
+				page_draw();
+			}
+		}
+		else if (sender == rmfi_page_background_black()) {
+			if (!equal(m_background_color, COLOR_BLACK)) {
+				m_background_color = COLOR_BLACK;
+				page_draw();
+			}
+		}
+	}
+
+	// 図形が含まれるよう表示の左上位置と右下位置を更新する.
+	// s	図形
+	void MainPage::page_bbox_update(const Shape* s) noexcept
+	{
+		s->get_bound(m_main_bbox_lt, m_main_bbox_rb, m_main_bbox_lt, m_main_bbox_rb);
+	}
+
+
 	// チェックマークを図形の属性関連のメニュー項目につける.
 	void MainPage::page_setting_is_checked(void) noexcept
 	{
@@ -105,18 +135,16 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_1().Visibility(Visibility::Visible);
 		dialog_slider_2().Visibility(Visibility::Visible);
 		dialog_slider_3().Visibility(Visibility::Visible);
-		const auto slider_0_token = dialog_slider_0().ValueChanged({ this, &MainPage::page_slider_val_changed<0> });
-		const auto slider_1_token = dialog_slider_1().ValueChanged({ this, &MainPage::page_slider_val_changed<1> });
-		const auto slider_2_token = dialog_slider_2().ValueChanged({ this, &MainPage::page_slider_val_changed<2> });
-		const auto slider_3_token = dialog_slider_3().ValueChanged({ this, &MainPage::page_slider_val_changed<3> });
-		//m_sample_type = PROP_TYPE::NONE;
-		//m_dialog_page.m_d2d.SetSwapChainPanel(scp_dialog_panel());
-		//const auto samp_w = scp_dialog_panel().Width();
-		//const auto samp_h = scp_dialog_panel().Height();
-		//m_dialog_page.m_page_size.width = static_cast<FLOAT>(samp_w);
-		//m_dialog_page.m_page_size.height = static_cast<FLOAT>(samp_h);
-
-		cd_setting_dialog().Title(box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
+		const auto slider_0_token = dialog_slider_0().ValueChanged(
+			{ this, &MainPage::page_slider_val_changed<0> });
+		const auto slider_1_token = dialog_slider_1().ValueChanged(
+			{ this, &MainPage::page_slider_val_changed<1> });
+		const auto slider_2_token = dialog_slider_2().ValueChanged(
+			{ this, &MainPage::page_slider_val_changed<2> });
+		const auto slider_3_token = dialog_slider_3().ValueChanged(
+			{ this, &MainPage::page_slider_val_changed<3> });
+		cd_setting_dialog().Title(
+			box_value(ResourceLoader::GetForCurrentView().GetString(DLG_TITLE)));
 		m_mutex_event.lock();
 		const auto d_result = co_await cd_setting_dialog().ShowAsync();
 		if (d_result == ContentDialogResult::Primary) {
@@ -142,28 +170,6 @@ namespace winrt::GraphPaper::implementation
 		dialog_slider_3().ValueChanged(slider_3_token);
 		status_bar_set_pos();
 		m_mutex_event.unlock();
-	}
-
-	void MainPage::page_background_pattern_click(IInspectable const& sender, RoutedEventArgs const&)
-	{
-		if (sender == tmfi_page_background_pattern()) {
-			if (m_background_show != tmfi_page_background_pattern().IsChecked()) {
-				m_background_show = tmfi_page_background_pattern().IsChecked();
-				page_draw();
-			}
-		}
-		else if (sender == rmfi_page_background_white()) {
-			if (!equal(m_background_color, COLOR_WHITE)) {
-				m_background_color = COLOR_WHITE;
-				page_draw();
-			}
-		}
-		else if (sender == rmfi_page_background_black()) {
-			if (!equal(m_background_color, COLOR_BLACK)) {
-				m_background_color = COLOR_BLACK;
-				page_draw();
-			}
-		}
 	}
 
 	// 表示する.
@@ -370,15 +376,6 @@ namespace winrt::GraphPaper::implementation
 								// セッターの値から, 書体の太さを得る.
 								const auto val = unbox_value<int32_t>(setter.Value());
 								m_main_page.set_font_weight(static_cast<DWRITE_FONT_WEIGHT>(val));
-								//Determine the type of a boxed value
-								//auto prop = setter.Value().try_as<winrt::Windows::Foundation::IPropertyValue>();
-								//auto prop_type = prop.Type();
-								//if (prop_type == winrt::Windows::Foundation::PropertyType::Inspectable) {
-								// ...
-								//}
-								//else if (prop_type == winrt::Windows::Foundation::PropertyType::Int32) {
-								// ...
-								//}
 							}
 						}
 					}
@@ -608,6 +605,8 @@ namespace winrt::GraphPaper::implementation
 			else {
 				m_len_unit = LEN_UNIT::PIXEL;
 			}
+			len_unit_is_checked(m_len_unit);
+
 			// 表示の縦横の長さの値をピクセル単位の値に変換する.
 			D2D1_SIZE_F p_size{
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_width, dpi, g_len)),
@@ -619,12 +618,13 @@ namespace winrt::GraphPaper::implementation
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_right, dpi, g_len)),
 				static_cast<FLOAT>(conv_len_to_pixel(m_len_unit, new_bottom, dpi, g_len))
 			};
-			if (!equal(p_size, m_main_page.m_page_size) || 
-				!equal(p_padd, m_main_page.m_page_padding)) {
-				if (!equal(p_size, m_main_page.m_page_size)) {
+			const bool flag_size = !equal(p_size, m_main_page.m_page_size);
+			const bool flag_padd = !equal(p_padd, m_main_page.m_page_padding);
+			if (flag_size || flag_padd) {
+				if (flag_size) {
 					ustack_push_set<UNDO_ID::PAGE_SIZE>(&m_main_page, p_size);
 				}
-				if (!equal(p_padd, m_main_page.m_page_padding)) {
+				if (flag_padd) {
 					ustack_push_set<UNDO_ID::PAGE_PADD>(&m_main_page, p_padd);
 				}
 				ustack_push_null();
@@ -816,13 +816,6 @@ namespace winrt::GraphPaper::implementation
 				dialog_draw();
 			}
 		}
-	}
-
-	// 図形が含まれるよう表示の左上位置と右下位置を更新する.
-	// s	図形
-	void MainPage::page_bbox_update(const Shape* s) noexcept
-	{
-		s->get_bound(m_main_bbox_lt, m_main_bbox_rb, m_main_bbox_lt, m_main_bbox_rb);
 	}
 
 	// 表示の左上位置と右下位置を設定する.

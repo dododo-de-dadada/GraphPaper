@@ -17,7 +17,6 @@ namespace winrt::GraphPaper::implementation
 	// 書体の幅の配列
 	//---------------------------------
 	constexpr std::underlying_type_t<DWRITE_FONT_STRETCH> FONT_STRETCH[] = {
-		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_UNDEFINED,
 		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_ULTRA_CONDENSED,
 		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_EXTRA_CONDENSED,
 		DWRITE_FONT_STRETCH::DWRITE_FONT_STRETCH_CONDENSED,
@@ -33,7 +32,6 @@ namespace winrt::GraphPaper::implementation
 	// 書体の幅の文字列配列
 	//---------------------------------
 	constexpr wchar_t* FONT_STRETCH_NAME[] = {
-		L"str_font_stretch_undefined",
 		L"str_font_stretch_ultra_condensed",
 		L"str_font_stretch_extra_condensed",
 		L"str_font_stretch_condensed",
@@ -415,6 +413,15 @@ namespace winrt::GraphPaper::implementation
 		m_mutex_event.unlock();
 	}
 
+	void MainPage::font_stretch_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args)
+	{
+		uint32_t i = lv_dialog_list().SelectedIndex();
+		if (m_dialog_page.m_shape_list.back()->set_font_stretch(
+			static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]))) {
+			dialog_draw();
+		}
+	}
+
 	//---------------------------------
 	// 書体メニューの「書体の幅」が選択された.
 	//---------------------------------
@@ -438,17 +445,12 @@ namespace winrt::GraphPaper::implementation
 				break;
 			}
 		}
-		const auto loaded_token = lv_dialog_list().Loaded({ this, &MainPage::dialog_list_loaded });
-		const auto changed_token = lv_dialog_list().SelectionChanged(
-			[this](auto, auto args) {
-				uint32_t i = lv_dialog_list().SelectedIndex();
-				m_dialog_page.m_shape_list.back()->set_font_stretch(
-					static_cast<DWRITE_FONT_STRETCH>(FONT_STRETCH[i]));
-				if (scp_dialog_panel().IsLoaded()) {
-					dialog_draw();
-				}
-			}
-		);
+		const auto loaded_token{
+			lv_dialog_list().Loaded({ this, &MainPage::dialog_list_loaded })
+		};
+		const auto changed_token{
+			lv_dialog_list().SelectionChanged({ this, &MainPage::font_stretch_selection_changed })
+		};
 		lv_dialog_list().Visibility(Visibility::Visible);
 		font_create_sample_shape(
 			static_cast<float>(scp_dialog_panel().Width()),

@@ -261,10 +261,6 @@
     <value>超々広め</value>
     <comment>ListViewItem</comment>
   </data>
-  <data name="str_font_stretch_undefined" xml:space="preserve">
-    <value>未定義</value>
-    <comment>ListViewItem</comment>
-  </data>
   <data name="str_font_weight_black" xml:space="preserve">
     <value>超ごく太</value>
     <comment>ListViewItem</comment>

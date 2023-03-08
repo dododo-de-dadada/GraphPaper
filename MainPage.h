@@ -396,6 +396,7 @@ namespace winrt::GraphPaper::implementation
 		// スライダーの値が変更された.
 		template <int S>
 		void arrow_slider_val_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		void arrow_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
 
 		//-------------------------------
 		// MainPage_disp.cpp
@@ -567,6 +568,7 @@ namespace winrt::GraphPaper::implementation
 		// スライダーの値が変更された.
 		template <int S>
 		void font_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		void font_stretch_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args);
 
 		//-------------------------------
 		// MainPage_grid.cpp
@@ -855,6 +857,7 @@ namespace winrt::GraphPaper::implementation
 		// スライダーの値が変更された.
 		template<int S>
 		void dash_slider_value_changed(IInspectable const&, RangeBaseValueChangedEventArgs const&);
+		void dash_combo_box_selection_changed(IInspectable const&, SelectionChangedEventArgs const& args) noexcept;
 
 		//------------------------------
 		// MainPage_stroke.cpp

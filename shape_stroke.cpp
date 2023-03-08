@@ -142,7 +142,8 @@ namespace winrt::GraphPaper::implementation
 			d_style,	// dashStyle
 			0.0f,
 		};
-		winrt::check_hresult(factory->CreateStrokeStyle(s_prop, d_ptr, d_cnt, m_d2d_stroke_style.put()));
+		winrt::check_hresult(
+			factory->CreateStrokeStyle(s_prop, d_ptr, d_cnt, m_d2d_stroke_style.put()));
 	}
 
 	// ’l‚ð’[‚ÌŒ`Ž®‚ÉŠi”[‚·‚é.
