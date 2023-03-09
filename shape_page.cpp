@@ -17,9 +17,20 @@ namespace winrt::GraphPaper::implementation
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
 	void ShapePage::auxiliary_draw_bezi(
-		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		if (Shape::m_aux_style == nullptr) {
+			ID2D1Factory* factory;
+			target->GetFactory(&factory);
+			winrt::check_hresult(
+				static_cast<ID2D1Factory3*>(factory)->CreateStrokeStyle(
+					AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT,
+					Shape::m_aux_style.put())
+			);
+		}
+		const FLOAT aw = m_aux_width;
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		D2D1_POINT_2F s;
 		D2D1_POINT_2F e;
@@ -27,21 +38,21 @@ namespace winrt::GraphPaper::implementation
 		e.x = current.x;
 		e.y = pressed.y;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(pressed, e, brush, m_aux_width, nullptr);
+		target->DrawLine(pressed, e, brush, aw, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(pressed, e, brush, m_aux_width, m_aux_style.get());
+		target->DrawLine(pressed, e, brush, aw, m_aux_style.get());
 		s = e;
 		e.x = pressed.x;
 		e.y = current.y;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(s, e, brush, m_aux_width, nullptr);
+		target->DrawLine(s, e, brush, aw, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(s, e, brush, m_aux_width, m_aux_style.get());
+		target->DrawLine(s, e, brush, aw, m_aux_style.get());
 		s = e;
 		brush->SetColor(COLOR_WHITE);
-		target->DrawLine(s, current, brush, m_aux_width, nullptr);
+		target->DrawLine(s, current, brush, aw, nullptr);
 		brush->SetColor(COLOR_BLACK);
-		target->DrawLine(s, current, brush, m_aux_width, m_aux_style.get());
+		target->DrawLine(s, current, brush, aw, m_aux_style.get());
 	}
 
 	// だ円の補助線を表示する.
@@ -50,13 +61,17 @@ namespace winrt::GraphPaper::implementation
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
 	void ShapePage::auxiliary_draw_elli(
-		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 		if (Shape::m_aux_style == nullptr) {
+			ID2D1Factory* factory;
+			target->GetFactory(&factory);
 			winrt::check_hresult(
-				D2D_UI::m_d2d_factory->CreateStrokeStyle(AUXILIARY_SEG_STYLE,
-					AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT, Shape::m_aux_style.put())
+				static_cast<ID2D1Factory3*>(factory)->CreateStrokeStyle(
+					AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT,
+					Shape::m_aux_style.put())
 			);
 		}
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
@@ -82,9 +97,19 @@ namespace winrt::GraphPaper::implementation
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
 	void ShapePage::auxiliary_draw_line(
-		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		if (Shape::m_aux_style == nullptr) {
+			ID2D1Factory* factory;
+			target->GetFactory(&factory);
+			winrt::check_hresult(
+				static_cast<ID2D1Factory3*>(factory)->CreateStrokeStyle(
+					AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT,
+					Shape::m_aux_style.put())
+			);
+		}
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		brush->SetColor(COLOR_WHITE);
 		target->DrawLine(pressed, current, brush, m_aux_width, nullptr);
@@ -97,15 +122,25 @@ namespace winrt::GraphPaper::implementation
 	// current	ポインターの現在位置
 	// p_opt	多角形の選択肢
 	void ShapePage::auxiliary_draw_poly(
-		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current, const POLY_OPTION& p_opt)
 	{
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		if (Shape::m_aux_style == nullptr) {
+			ID2D1Factory* factory;
+			target->GetFactory(&factory);
+			winrt::check_hresult(
+				static_cast<ID2D1Factory3*>(factory)->CreateStrokeStyle(
+					AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT,
+					Shape::m_aux_style.put())
+			);
+		}
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		D2D1_POINT_2F p[N_GON_MAX];	// 頂点の配列
 
 		D2D1_POINT_2F pos;	// 現在位置への位置ベクトル
 		pt_sub(current, pressed, pos);
-		ShapePolygon::poly_create_by_box(pressed, pos, p_opt, p);
+		ShapePoly::poly_create_by_box(pressed, pos, p_opt, p);
 		const auto i_start = (p_opt.m_end_closed ? p_opt.m_vertex_cnt - 1 : 0);
 		const auto j_start = (p_opt.m_end_closed ? 0 : 1);
 		for (size_t i = i_start, j = j_start; j < p_opt.m_vertex_cnt; i = j++) {
@@ -120,9 +155,19 @@ namespace winrt::GraphPaper::implementation
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
 	void ShapePage::auxiliary_draw_rect(
-		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		if (Shape::m_aux_style == nullptr) {
+			ID2D1Factory* factory;
+			target->GetFactory(&factory);
+			winrt::check_hresult(
+				static_cast<ID2D1Factory3*>(factory)->CreateStrokeStyle(
+					AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT,
+					Shape::m_aux_style.put())
+			);
+		}
 		// ページの倍率にかかわらず見た目の太さを変えないため, その逆数を線の太さに格納する.
 		const D2D1_RECT_F rc = {
 			pressed.x, pressed.y, current.x, current.y
@@ -137,9 +182,19 @@ namespace winrt::GraphPaper::implementation
 	// pressed	ポインターが押された位置
 	// current	ポインターの現在位置
 	void ShapePage::auxiliary_draw_rrect(
-		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		if (Shape::m_aux_style == nullptr) {
+			ID2D1Factory* factory;
+			target->GetFactory(&factory);
+			winrt::check_hresult(
+				static_cast<ID2D1Factory3*>(factory)->CreateStrokeStyle(
+					AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT,
+					Shape::m_aux_style.put())
+			);
+		}
 		const double cx = current.x;
 		const double cy = current.y;
 		const double px = pressed.x;
@@ -169,9 +224,19 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	void ShapePage::auxiliary_draw_arc(
-		ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 		const D2D1_POINT_2F pressed, const D2D1_POINT_2F current)
 	{
+		ID2D1RenderTarget* const target = Shape::m_d2d_target;
+		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
+		ID2D1Factory* factory;
+		target->GetFactory(&factory);
+		if (Shape::m_aux_style == nullptr) {
+			winrt::check_hresult(
+				static_cast<ID2D1Factory3*>(factory)->CreateStrokeStyle(
+					AUXILIARY_SEG_STYLE, AUXILIARY_SEG_DASHES, AUXILIARY_SEG_DASHES_CONT,
+					Shape::m_aux_style.put())
+			);
+		}
 		//D2D1_MATRIX_3X2_F tran;
 		//target->GetTransform(&tran);
 		//const FLOAT s_width = static_cast<FLOAT>(1.0 / tran._11);	// 線の太さ
@@ -182,8 +247,6 @@ namespace winrt::GraphPaper::implementation
 			D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE,
 			D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL
 		};
-		ID2D1Factory* factory;
-		target->GetFactory(&factory);
 		winrt::com_ptr<ID2D1PathGeometry> geom;
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 		winrt::check_hresult(

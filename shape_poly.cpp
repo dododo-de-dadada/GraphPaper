@@ -529,7 +529,7 @@ namespace winrt::GraphPaper::implementation
 	// a_size	矢じりの大きさ
 	// tip	矢じりの先端の位置
 	// barb	矢じりの返しの位置
-	bool ShapePolygon::poly_get_pos_arrow(
+	bool ShapePoly::poly_get_pos_arrow(
 		const size_t p_cnt, const D2D1_POINT_2F p[], const ARROW_SIZE& a_size, D2D1_POINT_2F& tip,
 		D2D1_POINT_2F barb[]) noexcept
 	{
@@ -575,7 +575,7 @@ namespace winrt::GraphPaper::implementation
 	// pos	終点の位置ベクトル
 	// p_opt	多角形の作成方法
 	// p	頂点の配列
-	void ShapePolygon::poly_create_by_box(
+	void ShapePoly::poly_create_by_box(
 		const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt,
 		D2D1_POINT_2F p[]) noexcept
 	{
@@ -671,35 +671,26 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// 図形を表示する.
-	void ShapePolygon::draw(void)
+	void ShapePoly::draw(void)
 	{
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 		ID2D1Factory* factory;
 		target->GetFactory(&factory);
 
+		D2D1_POINT_2F p[N_GON_MAX];
+		size_t p_cnt = 0;
+		if ((m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) ||
+			m_d2d_path_geom == nullptr || (m_anc_show && is_selected())) {
+			p_cnt = get_verts(p);
+		}
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
 		}
 		if ((m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) ||
 			m_d2d_path_geom == nullptr) {
-			if (m_d2d_path_geom != nullptr) {
-				m_d2d_path_geom = nullptr;
-			}
-			else if (m_d2d_arrow_geom != nullptr) {
-				m_d2d_arrow_geom = nullptr;
-			}
-			if (m_pos.size() < 1) {
-				return;
-			}
-
-			// 開始位置と, 差分の配列をもとに, 頂点を求める.
-			const size_t p_cnt = m_pos.size() + 1;	// 頂点の数 (差分の数 + 1)
-			D2D1_POINT_2F p[N_GON_MAX];
-			p[0] = m_start;
-			for (size_t i = 1; i < p_cnt; i++) {
-				pt_add(p[i - 1], m_pos[i - 1], p[i]);
-			}
+			m_d2d_path_geom = nullptr;
+			m_d2d_arrow_geom = nullptr;
 
 			// 折れ線のパスジオメトリを作成する.
 			const auto f_begin = is_opaque(m_fill_color) ?
@@ -778,12 +769,17 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (m_anc_show && is_selected()) {
-			D2D1_POINT_2F a{ m_start };	// 図形の部位の位置
-			anc_draw_square(a, target, brush);
-			const size_t d_cnt = m_pos.size();	// 差分の数
-			for (size_t i = 0; i < d_cnt; i++) {
-				pt_add(a, m_pos[i], a);
-				anc_draw_square(a, target, brush);
+			// 補助線を描く
+			if (m_stroke_width >= Shape::m_anc_square_inner) {
+				const auto p_geom = m_d2d_path_geom.get();	// パスのジオメトリ
+				brush->SetColor(COLOR_WHITE);
+				target->DrawGeometry(p_geom, brush, 2.0 * m_aux_width, nullptr);
+				brush->SetColor(COLOR_BLACK);
+				target->DrawGeometry(p_geom, brush, m_aux_width, m_aux_style.get());
+			}
+			// 図形の部位を描く.
+			for (size_t i = 0; i < p_cnt; i++) {
+				anc_draw_square(p[i], target, brush);
 			}
 		}
 	}
@@ -792,7 +788,7 @@ namespace winrt::GraphPaper::implementation
 	// t_pos	判定する位置
 	// a_len	アンカーの大きさ
 	// 戻り値	位置を含む図形の部位
-	uint32_t ShapePolygon::hit_test(const D2D1_POINT_2F test) const noexcept
+	uint32_t ShapePoly::hit_test(const D2D1_POINT_2F test) const noexcept
 	{
 		D2D1_POINT_2F t;
 		pt_sub(test, m_start, t);
@@ -806,7 +802,7 @@ namespace winrt::GraphPaper::implementation
 	// rb	矩形の右下位置
 	// 戻り値	含まれるなら true
 	// 線の太さは考慮されない.
-	bool ShapePolygon::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
+	bool ShapePoly::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		if (!pt_in_rect(m_start, lt, rb)) {
 			return false;
@@ -823,7 +819,7 @@ namespace winrt::GraphPaper::implementation
 		return true;
 	}
 
-	bool ShapePolygon::set_arrow_style(const ARROW_STYLE val) noexcept
+	bool ShapePoly::set_arrow_style(const ARROW_STYLE val) noexcept
 	{
 		if (!m_end_closed) {
 			return ShapePath::set_arrow_style(val);
@@ -836,7 +832,7 @@ namespace winrt::GraphPaper::implementation
 	// pos	囲む領域の終点への位置ベクトル
 	// page	ページ
 	// p_opt	多角形の選択肢
-	ShapePolygon::ShapePolygon(
+	ShapePoly::ShapePoly(
 		const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page, const POLY_OPTION& p_opt) :
 		ShapePath::ShapePath(page, p_opt.m_end_closed),
 		m_end_closed(p_opt.m_end_closed)
@@ -855,14 +851,14 @@ namespace winrt::GraphPaper::implementation
 
 	// 図形をデータリーダーから読み込む.
 	// dt_reader	データリーダー
-	ShapePolygon::ShapePolygon(const Shape& page, DataReader const& dt_reader) :
+	ShapePoly::ShapePoly(const Shape& page, DataReader const& dt_reader) :
 		ShapePath::ShapePath(page, dt_reader)
 	{
 		m_end_closed = dt_reader.ReadBoolean();
 	}
 
 	// 図形をデータライターに書き込む.
-	void ShapePolygon::write(DataWriter const& dt_writer) const
+	void ShapePoly::write(DataWriter const& dt_writer) const
 	{
 		ShapePath::write(dt_writer);
 		dt_writer.WriteBoolean(m_end_closed);

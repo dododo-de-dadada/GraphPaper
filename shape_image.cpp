@@ -206,8 +206,10 @@ namespace winrt::GraphPaper::implementation
 		}
 		co_return ret;
 	}
-	template IAsyncOperation<bool> ShapeImage::copy<true>(const winrt::guid enc_id, IRandomAccessStream& stream) const;
-	template IAsyncOperation<bool> ShapeImage::copy<false>(const winrt::guid enc_id, IRandomAccessStream& stream) const;
+	template IAsyncOperation<bool> ShapeImage::copy<true>(
+		const winrt::guid enc_id, IRandomAccessStream& stream) const;
+	template IAsyncOperation<bool> ShapeImage::copy<false>(
+		const winrt::guid enc_id, IRandomAccessStream& stream) const;
 
 	// 図形を表示する.
 	void ShapeImage::draw(void)
@@ -235,15 +237,25 @@ namespace winrt::GraphPaper::implementation
 				return;
 			}
 		}
-		const D2D1_RECT_F dest_rect{
+		const D2D1_RECT_F rect{
 			m_start.x,
 			m_start.y,
 			m_start.x + m_view.width,
 			m_start.y + m_view.height
 		};
-		target->DrawBitmap(m_d2d_bitmap.get(), dest_rect, m_opac, D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, m_clip);
+		target->DrawBitmap(
+			m_d2d_bitmap.get(), rect, m_opac,
+			D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
+			m_clip);
 
 		if (m_anc_show && is_selected()) {
+			D2D1_MATRIX_3X2_F t;
+			target->GetTransform(&t);
+			const double scale = t.m11;
+			brush->SetColor(COLOR_WHITE);
+			target->DrawRectangle(rect, brush, 1.0 / scale, nullptr);
+			brush->SetColor(COLOR_BLACK);
+			target->DrawRectangle(rect, brush, 1.0 / scale, m_aux_style.get());
 			const D2D1_POINT_2F a[4]{
 				m_start,
 				{ m_start.x + m_view.width, m_start.y },
@@ -254,10 +266,6 @@ namespace winrt::GraphPaper::implementation
 			anc_draw_square(a[1], target, brush);
 			anc_draw_square(a[2], target, brush);
 			anc_draw_square(a[3], target, brush);
-			brush->SetColor(COLOR_WHITE);
-			target->DrawRectangle(dest_rect, brush, Shape::m_aux_width, nullptr);
-			brush->SetColor(COLOR_BLACK);
-			target->DrawRectangle(dest_rect, brush, Shape::m_aux_width, Shape::m_aux_style.get());
 		}
 	}
 
@@ -665,14 +673,23 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else if (anc == ANC_TYPE::ANC_NORTH) {
-			// 変更する差分を求める.
 			const float dy = (new_p.y - m_start.y);
 			if (fabs(dy) >= FLT_MIN) {
-				const float rect_top = min(m_clip.top + dy / m_ratio.height, m_clip.bottom - 1.0f);
-				m_clip.top = max(rect_top, 0.0f);
-				m_view.height = (m_clip.bottom - m_clip.top) * m_ratio.height;
-				m_start.y = new_p.y;
-				if (!flag) {
+				if (keep_aspect) {
+					const float t = min(m_clip.top + dy / m_ratio.height, m_clip.bottom - 1.0f);	// 上辺
+					m_clip.top = max(t, 0.0f);
+					m_view.height = (m_clip.bottom - m_clip.top) * m_ratio.height;
+					m_start.y = new_p.y;
+					flag = true;
+				}
+				else {
+					if (m_view.height > dy) {
+						m_view.height -= dy;
+					}
+					else {
+						m_view.height = 0.0f;
+					}
+					m_start.y = new_p.y;
 					flag = true;
 				}
 			}
@@ -680,11 +697,21 @@ namespace winrt::GraphPaper::implementation
 		else if (anc == ANC_TYPE::ANC_EAST) {
 			const float dx = (new_p.x - (m_start.x + m_view.width));
 			if (fabs(dx) >= FLT_MIN) {
-				const float rect_right = max(m_clip.right + dx / m_ratio.width, m_clip.left + 1.0f);
-				m_clip.right = min(rect_right, m_orig.width);
-				m_view.width = (m_clip.right - m_clip.left) * m_ratio.width;
-				m_start.x = new_p.x - m_view.width;
-				if (!flag) {
+				if (keep_aspect) {
+					const float r = max(m_clip.right + dx / m_ratio.width, m_clip.left + 1.0f);	// 右辺
+					m_clip.right = min(r, m_orig.width);
+					m_view.width = (m_clip.right - m_clip.left) * m_ratio.width;
+					m_start.x = new_p.x - m_view.width;
+					flag = true;
+				}
+				else {
+					if (new_p.x > m_start.x) {
+						m_view.width = new_p.x - m_start.x;
+					}
+					else {
+						m_view.width = 0.0f;
+						m_start.x = new_p.x;
+					}
 					flag = true;
 				}
 			}
@@ -692,11 +719,21 @@ namespace winrt::GraphPaper::implementation
 		else if (anc == ANC_TYPE::ANC_SOUTH) {
 			const float dy = (new_p.y - (m_start.y + m_view.height));
 			if (fabs(dy) >= FLT_MIN) {
-				const float rect_bottom = max(m_clip.bottom + dy / m_ratio.height, m_clip.top + 1.0f);
-				m_clip.bottom = min(rect_bottom, m_orig.height);
-				m_view.height = (m_clip.bottom - m_clip.top) * m_ratio.height;
-				m_start.y = new_p.y - m_view.height;
-				if (!flag) {
+				if (keep_aspect) {
+					const float b = max(m_clip.bottom + dy / m_ratio.height, m_clip.top + 1.0f);	// 下辺
+					m_clip.bottom = min(b, m_orig.height);
+					m_view.height = (m_clip.bottom - m_clip.top) * m_ratio.height;
+					m_start.y = new_p.y - m_view.height;
+					flag = true;
+				}
+				else {
+					if (new_p.y > m_start.y) {
+						m_view.height = new_p.y - m_start.y;
+					}
+					else {
+						m_view.height = 0.0f;
+						m_start.y = new_p.y;
+					}
 					flag = true;
 				}
 			}
@@ -704,11 +741,21 @@ namespace winrt::GraphPaper::implementation
 		else if (anc == ANC_TYPE::ANC_WEST) {
 			const float dx = (new_p.x - m_start.x);
 			if (fabs(dx) >= FLT_MIN) {
-				const float rect_left = min(m_clip.left + dx / m_ratio.width, m_clip.right - 1.0f);
-				m_clip.left = max(rect_left, 0.0f);
-				m_view.width = (m_clip.right - m_clip.left) * m_ratio.width;
-				m_start.x = new_p.x;
-				if (!flag) {
+				if (keep_aspect) {
+					const float l = min(m_clip.left + dx / m_ratio.width, m_clip.right - 1.0f);
+					m_clip.left = max(l , 0.0f);
+					m_view.width = (m_clip.right - m_clip.left) * m_ratio.width;
+					m_start.x = new_p.x;
+					flag = true;
+				}
+				else {
+					if (m_view.width > dx) {
+						m_view.width -= dx;
+					}
+					else {
+						m_view.width = 0.0f;
+					}
+					m_start.x = new_p.x;
 					flag = true;
 				}
 			}

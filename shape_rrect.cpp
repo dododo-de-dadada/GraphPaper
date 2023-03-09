@@ -74,20 +74,36 @@ namespace winrt::GraphPaper::implementation
 		if (ry > vy * 0.5f) {
 			ry = vy * 0.5f;
 		}
-		D2D1_ROUNDED_RECT r_rec;
+		const D2D1_ROUNDED_RECT r_rec{
+			{ r_lt.x, r_lt.y, r_lt.x + vx,  r_lt.y + vy },
+			rx, ry
+		};
+		/*
 		r_rec.rect.left = r_lt.x;
 		r_rec.rect.top = r_lt.y;
 		r_rec.rect.right = r_lt.x + vx;
 		r_rec.rect.bottom = r_lt.y + vy;
 		r_rec.radiusX = rx;
 		r_rec.radiusY = ry;
+		*/
 		if (is_opaque(m_fill_color)) {
 			brush->SetColor(m_fill_color);
 			target->FillRoundedRectangle(r_rec, brush);
 		}
-		brush->SetColor(m_stroke_color);
-		target->DrawRoundedRectangle(r_rec, brush, m_stroke_width, m_d2d_stroke_style.get());
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
+			brush->SetColor(m_stroke_color);
+			target->DrawRoundedRectangle(r_rec, brush, m_stroke_width, m_d2d_stroke_style.get());
+		}
+
 		if (m_anc_show && is_selected()) {
+			// •â•ü‚ğ•`‚­
+			if (m_stroke_width >= Shape::m_anc_square_inner) {
+				brush->SetColor(COLOR_WHITE);
+				target->DrawRoundedRectangle(r_rec, brush, 2.0 * Shape::m_aux_width, nullptr);
+				brush->SetColor(COLOR_BLACK);
+				target->DrawRoundedRectangle(r_rec, brush, Shape::m_aux_width, m_aux_style.get());
+			}
+			// ŠpŠÛ‚Ì’†S“_‚ğ•`‚­.
 			D2D1_POINT_2F circle[4]{	// ‰~ã‚Ì“_
 				{ r_lt.x + rx, r_lt.y + ry },
 				{ r_lt.x + vx - rx, r_lt.y + ry },
@@ -98,6 +114,7 @@ namespace winrt::GraphPaper::implementation
 			anc_draw_circle(circle[3], target, brush);
 			anc_draw_circle(circle[1], target, brush);
 			anc_draw_circle(circle[0], target, brush);
+			// }Œ`‚Ì•”ˆÊ‚ğ•`‚­.
 			draw_anc();
 		}
 	}
@@ -208,8 +225,8 @@ namespace winrt::GraphPaper::implementation
 		// | 4     2 |
 		// +---------+
 		uint32_t anc_r;
-		const double mx = m_pos.x * 0.5;	// ’†“_
-		const double my = m_pos.y * 0.5;	// ’†“_
+		const double mx = m_pos.x * 0.5;	// ’†ŠÔ“_
+		const double my = m_pos.y * 0.5;	// ’†ŠÔ“_
 		const double rx = fabs(mx) < fabs(m_corner_radius.x) ? mx : m_corner_radius.x;	// ŠpŠÛ
 		const double ry = fabs(my) < fabs(m_corner_radius.y) ? my : m_corner_radius.y;	// ŠpŠÛ
 		const D2D1_POINT_2F anc_r_nw{
@@ -249,7 +266,6 @@ namespace winrt::GraphPaper::implementation
 			fabs(m_pos.x) > m_anc_width && fabs(m_pos.y) > m_anc_width) {
 			return anc_r;
 		}
-		// •ûŒ`‚ÌŠe’¸“_‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
 		const uint32_t anc_v = rect_hit_test_anc(m_start, m_pos, test, m_anc_width);
 		if (anc_v != ANC_TYPE::ANC_PAGE) {
 			return anc_v;
@@ -259,10 +275,9 @@ namespace winrt::GraphPaper::implementation
 			return anc_r;
 		}
 
-		// ŠpŠÛ•ûŒ`‚ğ³‹K‰»‚·‚é.
-		D2D1_POINT_2F r_lt;
-		D2D1_POINT_2F r_rb;
-		D2D1_POINT_2F r_rad;
+		D2D1_POINT_2F r_lt;	// ¶ãˆÊ’u
+		D2D1_POINT_2F r_rb;	// ‰E‰ºˆÊ’u
+		D2D1_POINT_2F r_rad;	// ŠpŠÛ‚Ì”¼Œa
 		if (m_pos.x > 0.0f) {
 			r_lt.x = m_start.x;
 			r_rb.x = m_start.x + m_pos.x;
@@ -291,19 +306,18 @@ namespace winrt::GraphPaper::implementation
 		}
 		// ü˜g‚ÌF‚ª•s“§–¾, ‚©‚Â‘¾‚³‚ª 0 ‚æ‚è‘å‚«‚¢.
 		else {
-			// ˆÈ‰º‚Ìè‡‚Í, k¬‚µ‚½ŠpŠÛ•ûŒ`‚ÌŠO‘¤‚É, ŠpŠÛŒğ“_‚ª‚ ‚éƒP[ƒX‚Å‚¤‚Ü‚­‚¢‚©‚È‚¢.
 			// Šg‘å‚µ‚½ŠpŠÛ•ûŒ`‚ÉŠÜ‚Ü‚ê‚é‚©”»’è
-			const double s_thick = max(m_stroke_width, m_anc_width);
+			const double ew = max(m_stroke_width, m_anc_width);
 			D2D1_POINT_2F e_lt, e_rb, e_rad;	// Šg‘å‚µ‚½ŠpŠÛ•ûŒ`
-			pt_add(r_lt, -s_thick * 0.5, e_lt);
-			pt_add(r_rb, s_thick * 0.5, e_rb);
-			pt_add(r_rad, s_thick * 0.5, e_rad);
+			pt_add(r_lt, -ew * 0.5, e_lt);
+			pt_add(r_rb, ew * 0.5, e_rb);
+			pt_add(r_rad, ew * 0.5, e_rad);
 			if (pt_in_rrect(test, e_lt, e_rb, e_rad)) {
 				// k¬‚µ‚½ŠpŠÛ•ûŒ`‚ª‹t“]‚µ‚Ä‚È‚¢, ‚©‚ÂˆÊ’u‚ªk¬‚µ‚½ŠpŠÛ•ûŒ`‚ÉŠÜ‚Ü‚ê‚é‚©”»’è‚·‚é.
 				D2D1_POINT_2F s_lt, s_rb, s_rad;	// k¬‚µ‚½ŠpŠÛ•ûŒ`
-				pt_add(e_lt, s_thick, s_lt);
-				pt_add(e_rb, -s_thick, s_rb);
-				pt_add(e_rad, -s_thick, s_rad);
+				pt_add(e_lt, ew, s_lt);
+				pt_add(e_rb, -ew, s_rb);
+				pt_add(e_rad, -ew, s_rad);
 				if (s_lt.x < s_rb.x && s_lt.y < s_rb.y && pt_in_rrect(test, s_lt, s_rb, s_rad)) {
 					// “h‚è‚Â‚Ô‚µF‚ª•s“§–¾‚È‚ç, ANC_FILL ‚ğ•Ô‚·.
 					if (is_opaque(m_fill_color)) {

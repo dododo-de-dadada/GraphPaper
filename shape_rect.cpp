@@ -73,10 +73,19 @@ namespace winrt::GraphPaper::implementation
 		}
 		// この図形が選択されてるか判定する.
 		if (m_anc_show && is_selected()) {
+			// 補助線を描く
+			if (m_stroke_width >= Shape::m_anc_square_inner) {
+				brush->SetColor(COLOR_WHITE);
+				target->DrawRectangle(rect, brush, 2.0 * m_aux_width, nullptr);
+				brush->SetColor(COLOR_BLACK);
+				target->DrawRectangle(rect, brush, m_aux_width, m_aux_style.get());
+			}
+			// 図形の部位を描く.
 			draw_anc();
 		}
 	}
 
+	// 方形の頂点とそれらの中間点のうち, どの部位に含まれるかを判定する.
 	uint32_t rect_hit_test_anc(const D2D1_POINT_2F start, const D2D1_POINT_2F vec,
 		const D2D1_POINT_2F test, const double a_len) noexcept
 	{

@@ -811,12 +811,10 @@ namespace winrt::GraphPaper::implementation
 				// Create and initialize WIC Bitmap Encoder.
 				winrt::com_ptr<IWICBitmapEncoder> wic_enc;
 				winrt::check_hresult(
-					ShapeImage::wic_factory->CreateEncoder(
-						wic_fmt, nullptr, wic_enc.put())
+					ShapeImage::wic_factory->CreateEncoder(wic_fmt, nullptr, wic_enc.put())
 				);
 				winrt::check_hresult(
-					wic_enc->Initialize(
-						wic_stream.get(), WICBitmapEncoderNoCache)
+					wic_enc->Initialize(wic_stream.get(), WICBitmapEncoderNoCache)
 				);
 
 				// Create and initialize WIC Frame Encoder.
@@ -874,15 +872,16 @@ namespace winrt::GraphPaper::implementation
 						},
 						D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS::D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_NONE,
 						target.put()
-						)
+					)
 				);
 
-				// レンダーターゲット依存のオブジェクトを消去
+				// ビットマップオブジェクトを, レンダーターゲット依存するため全て消去
 				for (const auto s : m_main_page.m_shape_list) {
 					if (typeid(*s) == typeid(ShapeImage)) {
 						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;
 					}
 				}
+
 				// ビットマップへの描画
 				m_mutex_draw.lock();
 				m_main_page.begin_draw(target.get(), false, nullptr, 1.0f);
@@ -890,12 +889,11 @@ namespace winrt::GraphPaper::implementation
 				target->BeginDraw();
 				m_main_page.draw();
 				winrt::check_hresult(
-					target->EndDraw()
-				);
+					target->EndDraw());
 				target->RestoreDrawingState(Shape::m_d2d_state_block.get());
 				m_mutex_draw.unlock();
 
-				// レンダーターゲット依存のオブジェクトを消去
+				// ビットマップオブジェクトを, レンダーターゲット依存するため全て消去
 				for (const auto s : m_main_page.m_shape_list) {
 					if (typeid(*s) == typeid(ShapeImage)) {
 						static_cast<ShapeImage*>(s)->m_d2d_bitmap = nullptr;

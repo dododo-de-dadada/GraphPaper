@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 			static_cast<FLOAT>(samp_w - 2.0 * padd), static_cast<FLOAT>(samp_h - 2.0 * padd)
 		};
 		POLY_OPTION p_opt{ 3, true, true, false, true };
-		auto s = new ShapePolygon(start, pos, &m_dialog_page, p_opt);
+		auto s = new ShapePoly(start, pos, &m_dialog_page, p_opt);
 		const float offset = static_cast<float>(samp_h / 16.0);
 		const float samp_x = static_cast<float>(samp_w * 0.25);
 		const float samp_y = static_cast<float>(samp_h * 0.5);

@@ -1100,7 +1100,7 @@ namespace winrt::GraphPaper::implementation
 			PrintCanvas().UpdateLayout();
 			*/
 		}
-	};
+};
 
 }
 

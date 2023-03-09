@@ -1191,7 +1191,7 @@
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="mfi_image_revert_to_original.Text" xml:space="preserve">
-    <value>Revert to Original</value>
+    <value>Revert to Original Image</value>
     <comment>MenuFlyoutItem</comment>
   </data>
   <data name="str_image_opac" xml:space="preserve">

@@ -33,7 +33,8 @@ namespace winrt::GraphPaper::implementation
 	// val	値
 	// anc	図形の部位
 	// limit	限界距離 (他の頂点との距離がこの値未満になるなら, その頂点に位置に合わせる)
-	bool ShapePath::set_pos_anc(const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept
+	bool ShapePath::set_pos_anc(
+		const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect) noexcept
 	{
 		if (ShapeLine::set_pos_anc(val, anc, limit, keep_aspect)) {
 			m_d2d_path_geom = nullptr;

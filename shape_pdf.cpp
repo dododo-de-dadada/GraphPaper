@@ -278,7 +278,7 @@ namespace winrt::GraphPaper::implementation
 	// dt_weiter	データライター
 	// 戻り値	書き込んだバイト数
 	//------------------------------
-	size_t ShapePolygon::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer)
+	size_t ShapePoly::export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer)
 	{
 		wchar_t* cmd;	// パス描画命令
 		if (m_end_closed) {

@@ -215,42 +215,37 @@ namespace winrt::GraphPaper::implementation
 				m_drawing_tool == DRAWING_TOOL::TEXT ||
 				m_drawing_tool == DRAWING_TOOL::RULER) {
 				m_main_page.auxiliary_draw_rect(
-					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					//m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
 					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::BEZIER) {
 				m_main_page.auxiliary_draw_bezi(
-					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					//m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
 					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ELLIPSE) {
 				m_main_page.auxiliary_draw_elli(
-					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					//m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
 					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::LINE) {
 				m_main_page.auxiliary_draw_line(
-					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					//m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
 					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::RRECT) {
 				m_main_page.auxiliary_draw_rrect(
-					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(), 
+					//m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(), 
 					m_event_pos_pressed, m_event_pos_curr);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::POLY) {
-				//D2D1_POINT_2F debug;
-				//pt_sub(m_event_pos_curr, m_event_pos_pressed, debug);
-				//if (pt_abs2(debug) > 96.0 * 96.0 + 96.0 * 96.0) {
-				//	__debugbreak();
-				//}
 				m_main_page.auxiliary_draw_poly(
-					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					//m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
 					m_event_pos_pressed, m_event_pos_curr, m_drawing_poly_opt);
 			}
 			else if (m_drawing_tool == DRAWING_TOOL::ARC) {
 				m_main_page.auxiliary_draw_arc(
-					m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
+					//m_main_d2d.m_d2d_context.get(), Shape::m_d2d_color_brush.get(),
 					m_event_pos_pressed, m_event_pos_curr);
 			}
 		}

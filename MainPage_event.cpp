@@ -425,7 +425,7 @@ namespace winrt::GraphPaper::implementation
 		}
 		else if (d_tool == DRAWING_TOOL::POLY) {
 			const auto poly_opt = m_drawing_poly_opt;
-			s = new ShapePolygon(start, pos, &m_main_page, poly_opt);
+			s = new ShapePoly(start, pos, &m_main_page, poly_opt);
 		}
 		else if (d_tool == DRAWING_TOOL::ELLIPSE) {
 			s = new ShapeEllipse(start, pos, &m_main_page);
@@ -1160,7 +1160,7 @@ namespace winrt::GraphPaper::implementation
 					// 図形のクラスが, 多角形または曲線であるか判定する.
 					if (s != nullptr) {
 						if (typeid(*s) == typeid(ShapeLine) ||
-							typeid(*s) == typeid(ShapePolygon) ||
+							typeid(*s) == typeid(ShapePoly) ||
 							typeid(*s) == typeid(ShapeBezier) ||
 							typeid(*s) == typeid(ShapeArc)
 							) {

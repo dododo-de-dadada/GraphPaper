@@ -27,13 +27,16 @@ namespace winrt::GraphPaper::implementation
 	// px, py	終点への位置ベクトル
 	// rx, ry	X 軸方向の半径と, Y 軸方向の半径.
 	// c, s	円弧の傾きのコサインとサイン.
-	// t_min, t_max	円弧の始点と終点の角度
-	// b_start	ベジェ曲線の始点
-	// b_vec	ベジェ曲線の制御点.
+	// t_min, t_max ベジェ曲線の助変数
+	// b_start, b_seg	ベジェ曲線の制御点.
+	// 
 	// 得られたベジェ曲線の始点と制御点は, だ円の中心点を原点とする座標で得られる.
+	// 助変数にちょうど 0-1 を与えると, 1/4 円弧が得られる.
+	// 助変数を外挿できるが, 近似精度は悪くなる.
+	//
 	// 3次ベジェ曲線を用いた楕円の近似
 	// https://clown.cube-soft.jp/entry/20090606/p1
-	static void arc_alternate(
+	static void arc_alternate_bezier(
 		const double px, const double py, const double rx, const double ry, const double c,
 		const double s, const double t_min, const double t_max, const bool dir,
 		D2D1_POINT_2F& b_start, D2D1_BEZIER_SEGMENT& b_seg)
@@ -288,7 +291,7 @@ namespace winrt::GraphPaper::implementation
 
 	// だ円の中心点を得る.
 	// start	円弧の開始点
-	// vec	円弧の終点へのベクトル
+	// end	円弧の終点
 	// rad	だ円の半径 (標準形における X 軸方向と Y 軸方向)
 	// c	cos(だ円の傾き)
 	// s	sin(だ円の傾き)
@@ -591,15 +594,9 @@ namespace winrt::GraphPaper::implementation
 			m_pos[0] = center;
 		}
 		m_deg_rot = val;
-		if (m_d2d_fill_geom != nullptr) {
-			m_d2d_fill_geom = nullptr;
-		}
-		if (m_d2d_path_geom != nullptr) {
-			m_d2d_path_geom = nullptr;
-		}
-		if (m_d2d_arrow_geom != nullptr) {
-			m_d2d_arrow_geom = nullptr;
-		}
+		m_d2d_fill_geom = nullptr;
+		m_d2d_path_geom = nullptr;
+		m_d2d_arrow_geom = nullptr;
 		return true;
 	}
 
@@ -664,10 +661,6 @@ namespace winrt::GraphPaper::implementation
 			m_start.y += m_pos[0].y;
 			m_pos[0].x = -m_pos[0].x;
 			m_pos[0].y = -m_pos[0].y;
-			// 始点と終点の角度を正負反転して交換.
-			//const auto a = -m_deg_start;
-			//m_deg_start = -m_deg_end;
-			//m_deg_end = a;
 			m_sweep_dir = val;
 			m_d2d_fill_geom = nullptr;
 			m_d2d_path_geom = nullptr;
@@ -703,15 +696,9 @@ namespace winrt::GraphPaper::implementation
 						const double d = 180.0 * r / M_PI;
 						if (d >= 0.0 && d <= 45.0) {
 							m_deg_start = static_cast<float>(d);
-							if (m_d2d_arrow_geom != nullptr) {
-								m_d2d_arrow_geom = nullptr;
-							}
-							if (m_d2d_path_geom != nullptr) {
-								m_d2d_path_geom = nullptr;
-							}
-							if (m_d2d_fill_geom != nullptr) {
-								m_d2d_fill_geom = nullptr;
-							}
+							m_d2d_arrow_geom = nullptr;
+							m_d2d_path_geom = nullptr;
+							m_d2d_fill_geom = nullptr;
 							return true;
 						}
 					}
@@ -726,15 +713,9 @@ namespace winrt::GraphPaper::implementation
 						const double d = 180.0 * r / M_PI;
 						if (d >= 0.0 && d <= 45.0) {
 							m_deg_start = static_cast<float>(d);
-							if (m_d2d_arrow_geom != nullptr) {
-								m_d2d_arrow_geom = nullptr;
-							}
-							if (m_d2d_path_geom != nullptr) {
-								m_d2d_path_geom = nullptr;
-							}
-							if (m_d2d_fill_geom != nullptr) {
-								m_d2d_fill_geom = nullptr;
-							}
+							m_d2d_arrow_geom = nullptr;
+							m_d2d_path_geom = nullptr;
+							m_d2d_fill_geom = nullptr;
 							return true;
 						}
 					}
@@ -762,15 +743,9 @@ namespace winrt::GraphPaper::implementation
 						const double d = 180.0 * r / M_PI;
 						if (d >= -45.0 && d <= 0.0) {
 							m_deg_end = static_cast<float>(d);
-							if (m_d2d_arrow_geom != nullptr) {
-								m_d2d_arrow_geom = nullptr;
-							}
-							if (m_d2d_path_geom != nullptr) {
-								m_d2d_path_geom = nullptr;
-							}
-							if (m_d2d_fill_geom != nullptr) {
-								m_d2d_fill_geom = nullptr;
-							}
+							m_d2d_arrow_geom = nullptr;
+							m_d2d_path_geom = nullptr;
+							m_d2d_fill_geom = nullptr;
 							return true;
 						}
 					}
@@ -785,15 +760,9 @@ namespace winrt::GraphPaper::implementation
 						const double d = 180.0 * r / M_PI;
 						if (d >= -45.0 && d <= 0.0) {
 							m_deg_end = static_cast<float>(d);
-							if (m_d2d_arrow_geom != nullptr) {
-								m_d2d_arrow_geom = nullptr;
-							}
-							if (m_d2d_path_geom != nullptr) {
-								m_d2d_path_geom = nullptr;
-							}
-							if (m_d2d_fill_geom != nullptr) {
-								m_d2d_fill_geom = nullptr;
-							}
+							m_d2d_arrow_geom = nullptr;
+							m_d2d_path_geom = nullptr;
+							m_d2d_fill_geom = nullptr;
 							return true;
 						}
 					}
@@ -815,9 +784,7 @@ namespace winrt::GraphPaper::implementation
 					m_start.y + val.y - center.y
 				};
 				if (ShapePath::set_pos_start(start)) {
-					if (m_d2d_fill_geom != nullptr) {
-						m_d2d_fill_geom = nullptr;
-					}
+					m_d2d_fill_geom = nullptr;
 					return true;
 				}
 			}
@@ -833,9 +800,7 @@ namespace winrt::GraphPaper::implementation
 				const double h = -s * x + c * y;
 				m_radius.width = static_cast<FLOAT>(fabs(w));
 				m_radius.height = static_cast<FLOAT>(fabs(h));
-				if (m_d2d_fill_geom != nullptr) {
-					m_d2d_fill_geom = nullptr;
-				}
+				m_d2d_fill_geom = nullptr;
 				return true;
 			}
 		}
@@ -1041,7 +1006,8 @@ namespace winrt::GraphPaper::implementation
 
 	// 円弧をベジェ曲線で近似する.
 	// ただし, 始点の終点の角度が 180 度に近くなるとズレる.
-	void ShapeArc::alternate_bezier(D2D1_POINT_2F& start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept
+	void ShapeArc::alternate_bezier(
+		D2D1_POINT_2F& start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept
 	{
 		D2D1_POINT_2F center;
 		const double rot = M_PI * m_deg_rot / 180.0;
@@ -1056,8 +1022,8 @@ namespace winrt::GraphPaper::implementation
 		const double t_max = 1.0 + m_deg_end / 90.0;
 		const double d = (m_sweep_dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE);
 		D2D1_POINT_2F pos = m_pos[0];
-		arc_alternate(pos.x, pos.y, m_radius.width, m_radius.height, c, s, t_min, t_max, d,
-			start, b_seg);
+		arc_alternate_bezier(
+			pos.x, pos.y, m_radius.width, m_radius.height, c, s, t_min, t_max, d, start, b_seg);
 		start.x += center.x;
 		start.y += center.y;
 		b_seg.point1.x += center.x;
@@ -1083,11 +1049,13 @@ namespace winrt::GraphPaper::implementation
 		D2D1_POINT_2F start{};	// ベジェ曲線の始点
 		D2D1_BEZIER_SEGMENT b_seg{};	// ベジェ曲線の制御点
 		const double rot = M_PI * deg_rot / 180.0;
-		const double t_min = 0.0 + deg_start / 90.0;
-		const double t_max = 1.0 + deg_end / 90.0;
+		const double t_min = 0.0 + deg_start / 90.0;	// 助変数の下限
+		const double t_max = 1.0 + deg_end / 90.0;	// 助変数の上限
 		const double d = (dir == D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE);
-		arc_alternate(pos.x, pos.y, rad.width, rad.height, cos(rot), sin(rot), t_min, t_max,
-			d, start, b_seg);
+		const double c = cos(rot);
+		const double s = sin(rot);
+		arc_alternate_bezier(
+			pos.x, pos.y, rad.width, rad.height, c, s, t_min, t_max, d, start, b_seg);
 		if (ShapeBezier::bezi_calc_arrow(start, b_seg, a_size, arrow)) {
 			// 得られた各位置は, だ円中心点を原点とする座標なので, もとの座標へ戻す.
 			arrow[0].x += center.x;
@@ -1244,6 +1212,14 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (m_anc_show && is_selected()) {
+			// 補助線を描く
+			if (m_stroke_width >= Shape::m_anc_square_inner) {
+				brush->SetColor(COLOR_WHITE);
+				target->DrawGeometry(m_d2d_path_geom.get(), brush, 2.0 * m_aux_width, nullptr);
+				brush->SetColor(COLOR_BLACK);
+				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_aux_width, m_aux_style.get());
+			}
+			// 軸の補助線を描く.
 			brush->SetColor(COLOR_WHITE);
 			target->DrawLine(p[CENTER], p[AXIS1], brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
@@ -1252,6 +1228,7 @@ namespace winrt::GraphPaper::implementation
 			target->DrawLine(p[CENTER], p[AXIS2], brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
 			target->DrawLine(p[CENTER], p[AXIS2], brush, m_aux_width, m_aux_style.get());
+			// 図形の部位を描く.
 			anc_draw_circle(p[START], target, brush);
 			anc_draw_circle(p[END], target, brush);
 			anc_draw_square(p[AXIS1], target, brush);
@@ -1299,4 +1276,5 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteUInt32(m_sweep_dir);
 		dt_writer.WriteUInt32(m_larg_flag);
 	}
+
 }

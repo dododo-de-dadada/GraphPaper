@@ -3,9 +3,9 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:muxc="using:Microsoft.UI.Xaml.Controls">
 	<!-- フォントアイコンのグリフ -->
-    <x:String x:Key="glyph_align_right">&#xeE8E2;</x:String>
-    <x:String x:Key="glyph_align_center">&#xeE8E3;</x:String>
-    <x:String x:Key="glyph_align_left">&#xeE8E4;</x:String>
+    <x:String x:Key="glyph_align_right">&#xE8E2;</x:String>
+    <x:String x:Key="glyph_align_center">&#xE8E3;</x:String>
+    <x:String x:Key="glyph_align_left">&#xE8E4;</x:String>
     <x:String x:Key="glyph_update_restore">&#xe777;</x:String>
 	<x:String x:Key="glyph_info">&#xE946;</x:String>
 	<x:String x:Key="glyph_block">&#xF140;</x:String>

@@ -13,9 +13,9 @@ namespace winrt::GraphPaper::implementation
 	// 編集メニューの「文字列の編集」が選択された.
 	IAsyncAction MainPage::edit_text_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		ShapeText* s = static_cast<ShapeText*>(nullptr);
+		ShapeText* s = static_cast<ShapeText*>(nullptr);	// 編集する文字列図形
 		if (m_event_shape_prev != nullptr && typeid(*m_event_shape_prev) == typeid(ShapeText)) {
-			// 前回ポインターが押されたのが文字列図形の場合,
+			// 前回ポインターが押されたのが文字列図形ならその図形.
 			s = static_cast<ShapeText*>(m_event_shape_prev);
 		}
 		else {
@@ -35,6 +35,7 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 		}
+
 		if (s != nullptr) {
 			static winrt::event_token primary_token;
 			static winrt::event_token closed_token;
@@ -56,17 +57,13 @@ namespace winrt::GraphPaper::implementation
 				page_draw();
 			}
 		}
-		else {
-			status_bar_set_pos();
-		}
+		status_bar_set_pos();
 	}
 
 	//------------------------------
 	// 値をスライダーのヘッダーに格納する.
-	// U	操作の識別子
 	// S	スライダーの番号
 	// val	格納する値
-	//------------------------------
 	template <int S>
 	void MainPage::edit_arc_slider_set_header(const float val)
 	{
@@ -166,7 +163,7 @@ namespace winrt::GraphPaper::implementation
 
 	IAsyncAction MainPage::edit_arc_click_async(IInspectable const&, RoutedEventArgs const&)
 	{
-		ShapeArc* t;
+		ShapeArc* t;	// 編集する円弧図形
 		if (m_event_shape_prev != nullptr &&
 			typeid(*m_event_shape_prev) == typeid(ShapeArc)) {
 			t = static_cast<ShapeArc*>(m_event_shape_prev);
@@ -351,9 +348,9 @@ namespace winrt::GraphPaper::implementation
 			dialog_check_box().Unchecked(token4);
 			dialog_check_box().IsChecked(val3);
 			dialog_check_box().Visibility(vis3);
-			status_bar_set_pos();
 			m_mutex_event.unlock();
 			slist_clear(m_dialog_page.m_shape_list);
 		}
+		status_bar_set_pos();
 	}
 }

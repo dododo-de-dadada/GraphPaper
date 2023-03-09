@@ -102,10 +102,10 @@ namespace winrt::GraphPaper::implementation
 		constexpr auto TICK_FREQ = 0.5;
 
 		m_mutex_event.lock();
-		m_dialog_page.set_attr_to(&m_main_page);
 		ARROW_SIZE a_size;
-		m_dialog_page.get_arrow_size(a_size);
 		ARROW_STYLE a_style;
+		m_dialog_page.set_attr_to(&m_main_page);
+		m_dialog_page.get_arrow_size(a_size);
 		m_dialog_page.get_arrow_style(a_style);
 
 		const auto max0 = dialog_slider_0().Maximum();

@@ -44,7 +44,7 @@ namespace winrt::GraphPaper::implementation
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_line")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_line/Text");
 			}
-			else if (t_id == typeid(ShapePolygon)) {
+			else if (t_id == typeid(ShapePoly)) {
 				m_icon = unbox_value<winrt::hstring>(r.Lookup(box_value(L"data_polygon")));
 				m_name = ResourceLoader::GetForCurrentView().GetString(L"rmfi_drawing_poly/Text");
 			}

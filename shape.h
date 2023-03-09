@@ -55,7 +55,7 @@
 //        +---------------+---------------+               +---------------+---------------+---------------+
 //        |               |               |               |               |               |               |
 // +------+------+ +------+------+ +------+------+ +------+------+ +------+------+ +------+------+ +------+------+
-// | ShapePolygon| | ShapeBezier | | ShapeArc    | | ShapeEllipse| | ShapeRRect  | | ShapeText   | | ShapeRuler  |
+// | ShapePoly   | | ShapeBezier | | ShapeArc    | | ShapeEllipse| | ShapeRRect  | | ShapeText   | | ShapeRuler  |
 // +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+ +-------------+
 //
 // * 印つきは抽象クラス.
@@ -84,7 +84,7 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeLine;
 	struct ShapePage;
 	struct ShapePath;
-	struct ShapePolygon;
+	struct ShapePoly;
 	struct ShapeRect;
 	struct ShapeRRect;
 	struct ShapeRuler;
@@ -175,15 +175,24 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	// 線分の端点
-	// (SVG や PDF は, 始点終点の区別ができない)
+	// D2D は始点と終点に異なる形式をもてるが, ここでは両端が同じとする.
+	// ただし, 念のため両端点の形式を保持.
 	struct CAP_STYLE {
 		D2D1_CAP_STYLE m_start;	// 始点
 		D2D1_CAP_STYLE m_end;	// 終点
 	};
-	constexpr CAP_STYLE CAP_FLAT{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT };
-	constexpr CAP_STYLE CAP_ROUND{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND };
-	constexpr CAP_STYLE CAP_SQUARE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE };
-	constexpr CAP_STYLE CAP_TRIANGLE{ D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE };
+	constexpr CAP_STYLE CAP_FLAT{
+		D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT
+	};
+	constexpr CAP_STYLE CAP_ROUND{
+		D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND
+	};
+	constexpr CAP_STYLE CAP_SQUARE{
+		D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE
+	};
+	constexpr CAP_STYLE CAP_TRIANGLE{
+		D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE
+	};
 
 	// 破線の配置
 	union DASH_PATT {
@@ -352,6 +361,7 @@ namespace winrt::GraphPaper::implementation
 	// shape_rect.cpp
 	//------------------------------
 
+	// 方形の頂点とそれらの中間点のうち, どの部位に含まれるかを判定する.
 	uint32_t rect_hit_test_anc(
 		const D2D1_POINT_2F start, const D2D1_POINT_2F vec, const D2D1_POINT_2F test, 
 		const double a_len) noexcept;
@@ -854,31 +864,31 @@ namespace winrt::GraphPaper::implementation
 		void draw(void);
 		// 曲線の補助線を表示する.
 		void auxiliary_draw_bezi(
-			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
+			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// だ円の補助線を表示する.
 		void auxiliary_draw_elli(
-			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
+			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 直線の補助線を表示する.
 		void auxiliary_draw_line(
-			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
+			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 方形の補助線を表示する.
 		void auxiliary_draw_rect(
-			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
+			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 多角形の補助線を表示する.
 		void auxiliary_draw_poly(
-			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
+			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt);
 		// 角丸方形の補助線を表示する.
 		void auxiliary_draw_rrect(
-			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
+			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush,
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 四分円の補助線を表示する.
 		void auxiliary_draw_arc(
-			ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, 
+			//ID2D1RenderTarget* const target, ID2D1SolidColorBrush* const brush, 
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos);
 		// 矢じるしの寸法を得る.
 		bool get_arrow_size(ARROW_SIZE& val) const noexcept final override;
@@ -1181,12 +1191,8 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		virtual ~ShapeLine(void)
 		{
-			if (m_d2d_arrow_geom != nullptr) {
-				m_d2d_arrow_geom = nullptr;
-			}
-			if (m_d2d_arrow_style != nullptr) {
-				m_d2d_arrow_style = nullptr;
-			}
+			m_d2d_arrow_geom = nullptr;
+			m_d2d_arrow_style = nullptr;
 		} // ~ShapeStroke
 
 		//------------------------------
@@ -1288,8 +1294,8 @@ namespace winrt::GraphPaper::implementation
 		ShapeRect(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
 		// データリーダーから図形を読み込む.
 		ShapeRect(const Shape& page, DataReader const& dt_reader);
-		// 図形を表示する.
-		virtual void draw_anc(void);
+		// 図形の部位を表示する.
+		void draw_anc(void);
 		// 図形を表示する.
 		virtual void draw(void) override;
 		// 図形を囲む領域を得る.
@@ -1494,7 +1500,7 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	// 多角形
 	//------------------------------
-	struct ShapePolygon : ShapePath {
+	struct ShapePoly : ShapePath {
 		bool m_end_closed;	// 辺が閉じているか判定
 
 		//------------------------------
@@ -1531,10 +1537,10 @@ namespace winrt::GraphPaper::implementation
 			return false;
 		}
 		// 図形を作成する.
-		ShapePolygon(
+		ShapePoly(
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page, const POLY_OPTION& p_opt);
 		// 図形をデータリーダーから読み込む.
-		ShapePolygon(const Shape& page, DataReader const& dt_reader);
+		ShapePoly(const Shape& page, DataReader const& dt_reader);
 		// 図形をデータライターに書き込む.
 		void write(DataWriter const& /*dt_writer*/) const;
 		// 図形をデータライターに PDF として書き込む.

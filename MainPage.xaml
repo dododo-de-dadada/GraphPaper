@@ -81,7 +81,8 @@
 					</MenuFlyoutItem.KeyboardAccelerators>
 				</MenuFlyoutItem>
 				<MenuFlyoutSeparator />
-				<MenuFlyoutSubItem x:Uid="mfsi_file_recent" Text="Recent Files">
+				<MenuFlyoutSubItem
+                    x:Uid="mfsi_file_recent" Text="Recent Files" >
 					<MenuFlyoutSubItem.Icon>
 						<FontIcon
 							FontFamily="{StaticResource SymbolThemeFontFamily}"
@@ -684,10 +685,27 @@
 				<MenuFlyoutSeparator />
 				<!-- 配置メニュー -->
 				<MenuFlyoutSubItem x:Uid="mfsi_text_align_horz" Icon="AlignLeft" Text="Text Alignment">
-					<muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left" x:Uid="rmfi_text_align_left" Click="text_align_horz_click" IsChecked="True" Text="Left" GroupName="gn_text_align_horz" />
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="text_align_horz_click" Text="Right" GroupName="gn_text_align_horz" >
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_left" x:Uid="rmfi_text_align_left" Click="text_align_horz_click" IsChecked="True" Text="Left" GroupName="gn_text_align_horz">
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <FontIcon
+								FontFamily="{StaticResource SymbolThemeFontFamily}"
+								Glyph="{StaticResource glyph_align_left}"/>
+                        </muxc:RadioMenuFlyoutItem.Icon>
                     </muxc:RadioMenuFlyoutItem>
-                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="text_align_horz_click" Text="Center" GroupName="gn_text_align_horz" />
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_right" x:Uid="rmfi_text_align_right" Click="text_align_horz_click" Text="Right" GroupName="gn_text_align_horz" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <FontIcon
+								FontFamily="{StaticResource SymbolThemeFontFamily}"
+								Glyph="{StaticResource glyph_align_right}"/>
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
+                    <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_center" x:Uid="rmfi_text_align_center" Click="text_align_horz_click" Text="Center" GroupName="gn_text_align_horz" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
+                            <FontIcon
+								FontFamily="{StaticResource SymbolThemeFontFamily}"
+								Glyph="{StaticResource glyph_align_center}"/>
+                        </muxc:RadioMenuFlyoutItem.Icon>
+                    </muxc:RadioMenuFlyoutItem>
                     <muxc:RadioMenuFlyoutItem x:Name="rmfi_text_align_just" x:Uid="rmfi_text_align_just" Click="text_align_horz_click" Text="Justified" GroupName="gn_text_align_horz">
                         <muxc:RadioMenuFlyoutItem.Icon>
                             <PathIcon Data="{StaticResource data_align_just}" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -931,7 +949,7 @@
 				x:Name="lv_summary_list" Grid.Row="1" Transitions="{x:Null}"
 				ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True"
 				ItemClick="summary_item_click" Loaded="summary_loaded"
-				SelectionChanged="summary_selection_changed" SelectionMode="Extended" >
+				SelectionChanged="summary_selection_changed" SelectionMode="Extended" Width="144">
 				<!--<ListView x:Name="lv_summary_list" Grid.Row="1" IsItemClickEnabled="False" Loaded="summary_loaded" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
 				<!--<ListView x:Name="lv_summary_list" IsItemClickEnabled="False" Loaded="summary_loaded" Margin="4,4" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.Below="btn_summary_close" SelectionChanged="summary_selection_changed" SelectionMode="Extended" >-->
 				<ListView.Header>

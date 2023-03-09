@@ -574,25 +574,24 @@ namespace winrt::GraphPaper::implementation
 		ID2D1RenderTarget* const target = Shape::m_d2d_target;
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 		ID2D1Factory* factory;
-		target->GetFactory(&factory);
+		m_d2d_target->GetFactory(&factory);
 
 		if (m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
 		}
+		D2D1_BEZIER_SEGMENT b_seg{};
+		if ((m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) ||
+			m_d2d_path_geom == nullptr || (m_anc_show && is_selected())) {
+			pt_add(m_start, m_pos[0], b_seg.point1);
+			pt_add(b_seg.point1, m_pos[1], b_seg.point2);
+			pt_add(b_seg.point2, m_pos[2], b_seg.point3);
+
+		}
 		if ((m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) ||
 			m_d2d_path_geom == nullptr) {
-			if (m_d2d_path_geom != nullptr) {
-				m_d2d_path_geom = nullptr;
-			}
-			if (m_d2d_arrow_geom != nullptr) {
-				m_d2d_arrow_geom = nullptr;
-			}
+			m_d2d_path_geom = nullptr;
+			m_d2d_arrow_geom = nullptr;
 			{
-				D2D1_BEZIER_SEGMENT b_seg{};
-				pt_add(m_start, m_pos[0], b_seg.point1);
-				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
-				pt_add(b_seg.point2, m_pos[2], b_seg.point3);
-
 				winrt::com_ptr<ID2D1GeometrySink> sink;
 				winrt::check_hresult(
 					factory->CreatePathGeometry(m_d2d_path_geom.put()));
@@ -631,32 +630,31 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (m_anc_show && is_selected()) {
-			D2D1_POINT_2F s;	// 始点
-			D2D1_POINT_2F e;	// 終点
+			// 補助線を描く
+			if (m_stroke_width >= Shape::m_anc_square_inner) {
+				brush->SetColor(COLOR_WHITE);
+				target->DrawGeometry(m_d2d_path_geom.get(), brush, 2.0 * m_aux_width, nullptr);
+				brush->SetColor(COLOR_BLACK);
+				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_aux_width, m_aux_style.get());
+			}
+			// 制御点への補助線を描く.
+			brush->SetColor(COLOR_WHITE);
+			target->DrawLine(m_start, b_seg.point1, brush, m_aux_width, nullptr);
+			brush->SetColor(COLOR_BLACK);
+			target->DrawLine(m_start, b_seg.point1, brush, m_aux_width, m_aux_style.get());
+			brush->SetColor(COLOR_WHITE);
+			target->DrawLine(b_seg.point1, b_seg.point2, brush, m_aux_width, nullptr);
+			brush->SetColor(COLOR_BLACK);
+			target->DrawLine(b_seg.point1, b_seg.point2, brush, m_aux_width, m_aux_style.get());
+			brush->SetColor(COLOR_WHITE);
+			target->DrawLine(b_seg.point2, b_seg.point3, brush, m_aux_width, nullptr);
+			brush->SetColor(COLOR_BLACK);
+			target->DrawLine(b_seg.point2, b_seg.point3, brush, m_aux_width, m_aux_style.get());
+			// 図形の部位を描く.
+			anc_draw_circle(b_seg.point2, target, brush);
+			anc_draw_circle(b_seg.point1, target, brush);
 			anc_draw_square(m_start, target, brush);
-			s = m_start;
-			pt_add(s, m_pos[0], e);
-			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(s, e, brush, m_aux_width, nullptr);
-			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(s, e, brush, m_aux_width, m_aux_style.get());
-			anc_draw_circle(e, target, brush);
-
-			s = e;
-			pt_add(s, m_pos[1], e);
-			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(s, e, brush, m_aux_width, nullptr);
-			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(s, e, brush, m_aux_width, m_aux_style.get());
-			anc_draw_circle(e, target, brush);
-
-			s = e;
-			pt_add(s, m_pos[2], e);
-			brush->SetColor(COLOR_WHITE);
-			target->DrawLine(s, e, brush, m_aux_width, nullptr);
-			brush->SetColor(COLOR_BLACK);
-			target->DrawLine(s, e, brush, m_aux_width, m_aux_style.get());
-			anc_draw_square(e, target, brush);
+			anc_draw_square(b_seg.point3, target, brush);
 		}
 	}
 
@@ -850,7 +848,8 @@ namespace winrt::GraphPaper::implementation
 	// rb	範囲の右下位置
 	// 戻り値	含まれるなら true
 	//------------------------------
-	bool ShapeBezier::in_area(const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
+	bool ShapeBezier::in_area(
+		const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept
 	{
 		// 計算精度がなるべく変わらないよう,
 		// 範囲の左上が原点となるよう平行移動した制御点を得る.

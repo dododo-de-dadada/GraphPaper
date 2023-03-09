@@ -343,7 +343,7 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	// データライターに SVG タグとして書き込む.
-	void ShapePolygon::export_svg(DataWriter const& dt_writer)
+	void ShapePoly::export_svg(DataWriter const& dt_writer)
 	{
 		// 線・枠も塗りつぶしも無いなら,
 		if ((equal(m_stroke_width, 0.0f) || !is_opaque(m_stroke_color)) && 
@@ -383,7 +383,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F tip;
 			D2D1_POINT_2F barb[2];
-			if (ShapePolygon::poly_get_pos_arrow(
+			if (ShapePoly::poly_get_pos_arrow(
 				d_cnt + 1, std::data(v_pos), m_arrow_size, tip, barb)) {
 				export_svg_arrow(
 					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,

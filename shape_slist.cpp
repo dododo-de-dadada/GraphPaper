@@ -21,7 +21,7 @@ namespace winrt::GraphPaper::implementation
 		SHAPE_ELLIPSE,	// Çæâ~
 		SHAPE_GROUP,	// ÉOÉãÅ[Év
 		SHAPE_LINE,	// ê¸ï™
-		SHAPE_POLYGON,	// ëΩäpå`
+		SHAPE_POLY,	// ëΩäpå`
 		SHAPE_RECT,	// ï˚å`
 		SHAPE_RRECT,	// äpä€ï˚å`
 		SHAPE_RULER,	// íËãK
@@ -491,8 +491,8 @@ namespace winrt::GraphPaper::implementation
 		else if (s_type == SHAPE_TYPE::SHAPE_LINE) {
 			s = new ShapeLine(page, dt_reader);
 		}
-		else if (s_type == SHAPE_TYPE::SHAPE_POLYGON) {
-			s = new ShapePolygon(page, dt_reader);
+		else if (s_type == SHAPE_TYPE::SHAPE_POLY) {
+			s = new ShapePoly(page, dt_reader);
 		}
 		else if (s_type == SHAPE_TYPE::SHAPE_RECT) {
 			s = new ShapeRect(page, dt_reader);
@@ -593,8 +593,8 @@ namespace winrt::GraphPaper::implementation
 			else if (s_type == typeid(ShapeLine)) {
 				s_int = SHAPE_TYPE::SHAPE_LINE;
 			}
-			else if (s_type == typeid(ShapePolygon)) {
-				s_int = SHAPE_TYPE::SHAPE_POLYGON;
+			else if (s_type == typeid(ShapePoly)) {
+				s_int = SHAPE_TYPE::SHAPE_POLY;
 			}
 			else if (s_type == typeid(ShapeRect)) {
 				s_int = SHAPE_TYPE::SHAPE_RECT;

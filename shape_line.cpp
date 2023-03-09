@@ -146,10 +146,18 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		if (m_anc_show && is_selected()) {
+			// •â•ü‚ğ•`‚­
+			if (m_stroke_width >= Shape::m_anc_square_inner) {
+				brush->SetColor(COLOR_WHITE);
+				target->DrawLine(m_start, end, brush, 2.0 * m_aux_width, nullptr);
+				brush->SetColor(COLOR_BLACK);
+				target->DrawLine(m_start, end, brush, m_aux_width, m_aux_style.get());
+			}
+			// }Œ`‚Ì•”ˆÊ‚ğ•`‚­.
 			D2D1_POINT_2F mid;	// ’†“_
 			pt_mul_add(m_pos[0], 0.5, m_start, mid);
-			anc_draw_square(m_start, target, brush);
 			anc_draw_square(mid, target, brush);
+			anc_draw_square(m_start, target, brush);
 			anc_draw_square(end, target, brush);
 		}
 	}
