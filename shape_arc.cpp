@@ -1145,23 +1145,8 @@ namespace winrt::GraphPaper::implementation
 					);
 					sink = nullptr;
 				}
-				if (m_d2d_arrow_style == nullptr) {
-					const CAP_STYLE c_style{ m_stroke_cap };
-					const D2D1_LINE_JOIN j_style{ m_join_style };
-					const double j_miter_limit = m_join_miter_limit;
-					// 矢じるしの破線の形式はかならず実線.
-					const D2D1_STROKE_STYLE_PROPERTIES s_prop{
-						c_style.m_start,	// startCap
-						c_style.m_end,	// endCap
-						D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// dashCap
-						j_style,	// lineJoin
-						static_cast<FLOAT>(j_miter_limit),	// miterLimit
-						D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
-						0.0f	// dashOffset
-					};
-					winrt::check_hresult(
-						factory->CreateStrokeStyle(s_prop, nullptr, 0, m_d2d_arrow_style.put())
-					);
+				if (m_d2d_arrow_stroke == nullptr) {
+					create_arrow_stroke();
 				}
 			}
 		}
@@ -1203,11 +1188,11 @@ namespace winrt::GraphPaper::implementation
 				if (m_arrow_style == ARROW_STYLE::FILLED) {
 					target->FillGeometry(m_d2d_arrow_geom.get(), brush);
 					target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, 
-						m_d2d_arrow_style.get());
+						m_d2d_arrow_stroke.get());
 				}
 				if (m_arrow_style == ARROW_STYLE::OPENED) {
 					target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, 
-						m_d2d_arrow_style.get());
+						m_d2d_arrow_stroke.get());
 				}
 			}
 		}

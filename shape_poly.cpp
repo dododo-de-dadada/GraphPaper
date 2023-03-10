@@ -677,21 +677,22 @@ namespace winrt::GraphPaper::implementation
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 		ID2D1Factory* factory;
 		target->GetFactory(&factory);
-
 		D2D1_POINT_2F p[N_GON_MAX];
-		size_t p_cnt = 0;
-		if ((m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) ||
-			m_d2d_path_geom == nullptr || (m_anc_show && is_selected())) {
-			p_cnt = get_verts(p);
-		}
-		if (m_d2d_stroke_style == nullptr) {
+		size_t p_cnt = -1;
+
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
+			m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
 		}
-		if ((m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) ||
-			m_d2d_path_geom == nullptr) {
-			m_d2d_path_geom = nullptr;
-			m_d2d_arrow_geom = nullptr;
-
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
+			m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_stroke == nullptr) {
+			create_arrow_stroke();
+		}
+		if (((!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) ||
+			is_opaque(m_fill_color)) && m_d2d_path_geom == nullptr) {
+			if (p_cnt == -1) {
+				p_cnt = get_verts(p);
+			}
 			// 折れ線のパスジオメトリを作成する.
 			const auto f_begin = is_opaque(m_fill_color) ?
 				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
@@ -713,62 +714,61 @@ namespace winrt::GraphPaper::implementation
 			winrt::check_hresult(
 				sink->Close());
 			sink = nullptr;
-
-			// 矢じるしの形式がなしか判定する.
-			const auto a_style = m_arrow_style;
-			if (a_style != ARROW_STYLE::NONE) {
-
-				// 矢じるしの位置を求める.
-				D2D1_POINT_2F tip;
-				D2D1_POINT_2F barb[2];
-				if (poly_get_pos_arrow(p_cnt, p, m_arrow_size, tip, barb)) {
-
-					// 矢じるしのパスジオメトリを作成する.
-					const auto a_begin = (a_style == ARROW_STYLE::FILLED ?
-						D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
-						D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-					const auto a_end = (a_style == ARROW_STYLE::FILLED ?
-						D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
-						D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-					winrt::check_hresult(
-						factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
-					winrt::check_hresult(
-						m_d2d_arrow_geom->Open(sink.put()));
-					sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-					sink->BeginFigure(barb[0], a_begin);
-					sink->AddLine(tip);
-					sink->AddLine(barb[1]);
-					sink->EndFigure(a_end);
-					winrt::check_hresult(
-						sink->Close());
-					sink = nullptr;
-				}
+		}
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && 
+			m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) {
+			if (p_cnt == -1) {
+				p_cnt = get_verts(p);
+			}
+			// 矢じるしの位置を求める.
+			D2D1_POINT_2F tip;
+			D2D1_POINT_2F barb[2];
+			if (poly_get_pos_arrow(p_cnt, p, m_arrow_size, tip, barb)) {
+				winrt::com_ptr<ID2D1GeometrySink> sink;
+				// 矢じるしのパスジオメトリを作成する.
+				const auto a_begin = (m_arrow_style == ARROW_STYLE::FILLED ?
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
+					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+				const auto a_end = (m_arrow_style == ARROW_STYLE::FILLED ?
+					D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED :
+					D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+				winrt::check_hresult(
+					factory->CreatePathGeometry(m_d2d_arrow_geom.put()));
+				winrt::check_hresult(
+					m_d2d_arrow_geom->Open(sink.put()));
+				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+				sink->BeginFigure(barb[0], a_begin);
+				sink->AddLine(tip);
+				sink->AddLine(barb[1]);
+				sink->EndFigure(a_end);
+				winrt::check_hresult(
+					sink->Close());
+				sink = nullptr;
 			}
 		}
 		if (is_opaque(m_fill_color)) {
-			const auto p_geom = m_d2d_path_geom.get();
-			if (p_geom != nullptr) {
+			if (m_d2d_path_geom != nullptr) {
 				brush->SetColor(m_fill_color);
-				target->FillGeometry(p_geom, brush, nullptr);
+				target->FillGeometry(m_d2d_path_geom.get(), brush, nullptr);
 			}
 		}
-		if (is_opaque(m_stroke_color)) {
-			const auto p_geom = m_d2d_path_geom.get();	// パスのジオメトリ
-			const auto s_width = m_stroke_width;	// 折れ線の太さ
-			const auto s_style = m_d2d_stroke_style.get();	// 折れ線の形式
-			brush->SetColor(m_stroke_color);
-			target->DrawGeometry(p_geom, brush, s_width, s_style);
-			if (m_arrow_style != ARROW_STYLE::NONE) {
-				const auto a_geom = m_d2d_arrow_geom.get();
-				if (a_geom != nullptr) {
-					target->FillGeometry(a_geom, brush, nullptr);
-					if (m_arrow_style != ARROW_STYLE::FILLED) {
-						target->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_style.get());
-					}
-				}
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
+			if (m_d2d_path_geom != nullptr) {
+				brush->SetColor(m_stroke_color);
+				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
+			}
+			if (m_d2d_arrow_geom != nullptr && m_arrow_style == ARROW_STYLE::OPENED) {
+				target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_stroke.get());
+			}
+			else if (m_d2d_arrow_geom != nullptr && m_arrow_style == ARROW_STYLE::FILLED) {
+				target->FillGeometry(m_d2d_arrow_geom.get(), brush, nullptr);
+				target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_stroke.get());
 			}
 		}
 		if (m_anc_show && is_selected()) {
+			if (p_cnt == -1) {
+				p_cnt = get_verts(p);
+			}
 			// 補助線を描く
 			if (m_stroke_width >= Shape::m_anc_square_inner) {
 				const auto p_geom = m_d2d_path_geom.get();	// パスのジオメトリ

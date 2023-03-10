@@ -575,61 +575,75 @@ namespace winrt::GraphPaper::implementation
 		ID2D1SolidColorBrush* const brush = Shape::m_d2d_color_brush.get();
 		ID2D1Factory* factory;
 		m_d2d_target->GetFactory(&factory);
+		bool b_flag = false;
+		D2D1_BEZIER_SEGMENT b_seg{};
 
-		if (m_d2d_stroke_style == nullptr) {
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
+			m_d2d_stroke_style == nullptr) {
 			create_stroke_style(factory);
 		}
-		D2D1_BEZIER_SEGMENT b_seg{};
-		if ((m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) ||
-			m_d2d_path_geom == nullptr || (m_anc_show && is_selected())) {
-			pt_add(m_start, m_pos[0], b_seg.point1);
-			pt_add(b_seg.point1, m_pos[1], b_seg.point2);
-			pt_add(b_seg.point2, m_pos[2], b_seg.point3);
-
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) && 
+			m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_stroke == nullptr) {
+			create_arrow_stroke();
 		}
-		if ((m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) ||
+		if (((!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) || is_opaque(m_fill_color)) &&
 			m_d2d_path_geom == nullptr) {
-			m_d2d_path_geom = nullptr;
-			m_d2d_arrow_geom = nullptr;
-			{
-				winrt::com_ptr<ID2D1GeometrySink> sink;
-				winrt::check_hresult(
-					factory->CreatePathGeometry(m_d2d_path_geom.put()));
-				m_d2d_path_geom->Open(sink.put());
-				sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
-				const auto f_begin = (is_opaque(m_fill_color) ? 
-					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
-					D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
-				sink->BeginFigure(m_start, f_begin);
-				sink->AddBezier(b_seg);
-				sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
-				winrt::check_hresult(
-					sink->Close());
-				sink = nullptr;
-				if (m_arrow_style != ARROW_STYLE::NONE) {
-					bezi_create_arrow_geom(
-						static_cast<ID2D1Factory3*>(factory), m_start, b_seg, m_arrow_style,
-						m_arrow_size, m_d2d_arrow_geom.put());
-				}
+			if (!b_flag) {
+				pt_add(m_start, m_pos[0], b_seg.point1);
+				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
+				pt_add(b_seg.point2, m_pos[2], b_seg.point3);
+				b_flag = true;
 			}
+			winrt::com_ptr<ID2D1GeometrySink> sink;
+			winrt::check_hresult(
+				factory->CreatePathGeometry(m_d2d_path_geom.put()));
+			m_d2d_path_geom->Open(sink.put());
+			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
+			const auto f_begin = (is_opaque(m_fill_color) ?
+				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
+				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW);
+			sink->BeginFigure(m_start, f_begin);
+			sink->AddBezier(b_seg);
+			sink->EndFigure(D2D1_FIGURE_END::D2D1_FIGURE_END_OPEN);
+			winrt::check_hresult(
+				sink->Close());
+			sink = nullptr;
+		}
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color) &&
+			m_arrow_style != ARROW_STYLE::NONE && m_d2d_arrow_geom == nullptr) {
+			if (!b_flag) {
+				pt_add(m_start, m_pos[0], b_seg.point1);
+				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
+				pt_add(b_seg.point2, m_pos[2], b_seg.point3);
+				b_flag = true;
+			}
+			bezi_create_arrow_geom(
+				static_cast<ID2D1Factory3*>(factory), m_start, b_seg, m_arrow_style,
+				m_arrow_size, m_d2d_arrow_geom.put());
+
 		}
 		if (is_opaque(m_fill_color)) {
 			brush->SetColor(m_fill_color);
 			target->FillGeometry(m_d2d_path_geom.get(), brush, nullptr);
 		}
-		if (is_opaque(m_stroke_color)) {
-			const auto s_width = m_stroke_width;
+		if (!equal(m_stroke_width, 0.0f) && is_opaque(m_stroke_color)) {
 			brush->SetColor(m_stroke_color);
-			target->DrawGeometry(m_d2d_path_geom.get(), brush, s_width, m_d2d_stroke_style.get());
-			if (m_arrow_style != ARROW_STYLE::NONE) {
-				const auto a_geom = m_d2d_arrow_geom.get();
-				if (m_arrow_style == ARROW_STYLE::FILLED) {
-					target->FillGeometry(a_geom, brush, nullptr);
-				}
-				target->DrawGeometry(a_geom, brush, s_width, m_d2d_arrow_style.get());
+			target->DrawGeometry(m_d2d_path_geom.get(), brush, m_stroke_width, m_d2d_stroke_style.get());
+			if (m_arrow_style == ARROW_STYLE::FILLED) {
+				target->FillGeometry(m_d2d_arrow_geom.get(), brush, nullptr);
+				target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_stroke.get());
+			}
+			else if (m_arrow_style == ARROW_STYLE::OPENED) {
+				target->DrawGeometry(m_d2d_arrow_geom.get(), brush, m_stroke_width, m_d2d_arrow_stroke.get());
 			}
 		}
 		if (m_anc_show && is_selected()) {
+			if (!b_flag) {
+				pt_add(m_start, m_pos[0], b_seg.point1);
+				pt_add(b_seg.point1, m_pos[1], b_seg.point2);
+				pt_add(b_seg.point2, m_pos[2], b_seg.point3);
+				b_flag = true;
+			}
 			// •â•ü‚ð•`‚­
 			if (m_stroke_width >= Shape::m_anc_square_inner) {
 				brush->SetColor(COLOR_WHITE);

@@ -776,19 +776,30 @@ namespace winrt::GraphPaper::implementation
 	//------------------------------
 	void MainPage::event_show_popup(void)
 	{
-		Shape* shape_pressed;
+		Shape* pressed;
 		const uint32_t anc_pressed = slist_hit_test(m_main_page.m_shape_list, m_event_pos_curr,
-			shape_pressed);
+			pressed);
 
 		MenuFlyout popup{};
 		// 押された図形がヌル, または押された図形の部位が外側か判定する.
-		if (shape_pressed == nullptr ||
+		if (pressed == nullptr ||
 			anc_pressed == ANC_TYPE::ANC_PAGE) {
 			for (const auto item : mbi_grid().Items()) {
 				popup.Items().Append(item);
 			}
 		}
 		else {
+			// 押された図形の属性値を表示に格納する.
+			m_main_page.set_attr_to(pressed);
+			arrow_style_is_checked(m_main_page.m_arrow_style);
+			cap_style_is_checked(m_main_page.m_stroke_cap);
+			dash_style_is_checked(m_main_page.m_dash_style);
+			font_style_is_checked(m_main_page.m_font_style);
+			join_style_is_checked(m_main_page.m_join_style);
+			stroke_width_is_checked(m_main_page.m_stroke_width);
+			text_align_horz_is_checked(m_main_page.m_text_align_horz);
+			text_align_vert_is_checked(m_main_page.m_text_align_vert);
+
 			// 「編集」メニューをコンテキストメニューに追加
 			xcvd_is_enabled();
 			for (const auto item : mbi_edit().Items()) {
@@ -797,13 +808,13 @@ namespace winrt::GraphPaper::implementation
 				}
 			}
 			// 押された図形がグループ以外か判定する.
-			if (typeid(*shape_pressed) != typeid(ShapeGroup)) {
+			if (typeid(*pressed) != typeid(ShapeGroup)) {
 				if (popup.Items().Size() > 0) {
 					// セパレーターを追加する.
 					popup.Items().Append(MenuFlyoutSeparator{});
 				}
 				// 押された図形が定規か判定する.
-				if (typeid(*shape_pressed) == typeid(ShapeRuler)) {
+				if (typeid(*pressed) == typeid(ShapeRuler)) {
 					popup.Items().Append(mfi_stroke_color());
 					popup.Items().Append(mfi_fill_color());
 					popup.Items().Append(MenuFlyoutSeparator());
@@ -811,7 +822,7 @@ namespace winrt::GraphPaper::implementation
 					popup.Items().Append(mfi_font_size());
 				}
 				// 押された図形が画像か判定する.
-				else if (typeid(*shape_pressed) == typeid(ShapeImage)) {
+				else if (typeid(*pressed) == typeid(ShapeImage)) {
 					for (const auto item : mbi_image().Items()) {
 						popup.Items().Append(item);
 					}
@@ -829,8 +840,6 @@ namespace winrt::GraphPaper::implementation
 					}
 				}
 			}
-			// 押された図形の属性値を表示に格納する.
-			m_main_page.set_attr_to(shape_pressed);
 			page_setting_is_checked();
 		}
 		popup.Closed([=](IInspectable const&, IInspectable const&) {

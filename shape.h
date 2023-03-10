@@ -1121,9 +1121,7 @@ namespace winrt::GraphPaper::implementation
 		// 図形を破棄する.
 		virtual ~ShapeStroke(void)
 		{
-			if (m_d2d_stroke_style != nullptr) {
-				m_d2d_stroke_style = nullptr;
-			}
+			m_d2d_stroke_style = nullptr;
 		} // ~Shape
 
 		//------------------------------
@@ -1185,19 +1183,40 @@ namespace winrt::GraphPaper::implementation
 		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
 		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
 
-		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_style{ nullptr };	// 矢じるしの D2D ストロークスタイル
+		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_stroke{ nullptr };	// 矢じるしの D2D ストロークスタイル
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_arrow_geom{ nullptr };	// 矢じるしの D2D パスジオメトリ
 
 		// 図形を破棄する.
 		virtual ~ShapeLine(void)
 		{
 			m_d2d_arrow_geom = nullptr;
-			m_d2d_arrow_style = nullptr;
+			m_d2d_arrow_stroke = nullptr;
 		} // ~ShapeStroke
 
 		//------------------------------
 		// shape_line.cpp
 		//------------------------------
+
+		void create_arrow_stroke(void)
+		{
+			m_d2d_arrow_stroke = nullptr;
+			ID2D1Factory* factory;
+			Shape::m_d2d_target->GetFactory(&factory);
+			// 矢じるしの破線の形式はかならずソリッドとする.
+			const D2D1_STROKE_STYLE_PROPERTIES s_prop{
+				m_stroke_cap.m_start,	// startCap
+				m_stroke_cap.m_end,	// endCap
+				D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// dashCap
+				m_join_style,	// lineJoin
+				static_cast<FLOAT>(m_join_miter_limit),	// miterLimit
+				D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
+				0.0f	// dashOffset
+			};
+			winrt::check_hresult(
+				factory->CreateStrokeStyle(s_prop, nullptr, 0, m_d2d_arrow_stroke.put())
+			);
+		}
+
 
 		// 矢じるしの先端と返しの位置を求める.
 		static bool line_get_pos_arrow(

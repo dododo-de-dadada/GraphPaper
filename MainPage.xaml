@@ -524,11 +524,13 @@
 					</MenuFlyoutSubItem.Icon>
 					<muxc:RadioMenuFlyoutItem
 						x:Name="rmfi_stroke_width_0px" x:Uid="rmfi_stroke_width_0px"
-						Click="stroke_width_click" IsChecked="true" Text="0 px" />
-					<muxc:RadioMenuFlyoutItem
+						Click="stroke_width_click" IsChecked="true" Text="0 px"
+                        GroupName="gn_stroke_width"/>
+                    <muxc:RadioMenuFlyoutItem
 						x:Name="rmfi_stroke_width_1px" x:Uid="rmfi_stroke_width_1px"
-						Click="stroke_width_click" IsChecked="true" Text="1 px" >
-						<muxc:RadioMenuFlyoutItem.Icon>
+						Click="stroke_width_click" IsChecked="true" Text="1 px"
+                        GroupName="gn_stroke_width" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon
 								Data="{StaticResource data_stroke_width_1px}"
 								HorizontalAlignment="Center" VerticalAlignment="Center" Width="16"
@@ -537,8 +539,9 @@
 					</muxc:RadioMenuFlyoutItem>
 					<muxc:RadioMenuFlyoutItem
 						x:Name="rmfi_stroke_width_2px" x:Uid="rmfi_stroke_width_2px"
-						Click="stroke_width_click" Text="2 px" >
-						<muxc:RadioMenuFlyoutItem.Icon>
+						Click="stroke_width_click" Text="2 px"
+                        GroupName="gn_stroke_width" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon
 								Data="{StaticResource data_stroke_width_2px}"
 								HorizontalAlignment="Center" VerticalAlignment="Center" Width="16"
@@ -547,8 +550,9 @@
 					</muxc:RadioMenuFlyoutItem>
 					<muxc:RadioMenuFlyoutItem
 						x:Name="rmfi_stroke_width_3px" x:Uid="rmfi_stroke_width_3px"
-						Click="stroke_width_click" Text="3 px" >
-						<muxc:RadioMenuFlyoutItem.Icon>
+						Click="stroke_width_click" Text="3 px"
+                        GroupName="gn_stroke_width" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon
 								Data="{StaticResource data_stroke_width_3px}"
 								HorizontalAlignment="Center" VerticalAlignment="Center" Width="16"
@@ -557,8 +561,9 @@
 					</muxc:RadioMenuFlyoutItem>
 					<muxc:RadioMenuFlyoutItem
 						x:Name="rmfi_stroke_width_4px" x:Uid="rmfi_stroke_width_4px"
-						Click="stroke_width_click" Text="4 px" >
-						<muxc:RadioMenuFlyoutItem.Icon>
+						Click="stroke_width_click" Text="4 px"
+                        GroupName="gn_stroke_width" >
+                        <muxc:RadioMenuFlyoutItem.Icon>
 							<PathIcon
 								Data="{StaticResource data_stroke_width_4px}" 
 								HorizontalAlignment="Center" VerticalAlignment="Center" Width="16"
@@ -566,10 +571,11 @@
 						</muxc:RadioMenuFlyoutItem.Icon>
 					</muxc:RadioMenuFlyoutItem>
 					<MenuFlyoutSeparator />
-					<muxc:RadioMenuFlyoutItem
+                    <muxc:RadioMenuFlyoutItem
 						x:Name="rmfi_stroke_width_other" x:Uid="rmfi_stroke_width_other"
-						Click="stroke_width_click_async" Text="Others..." />
-				</MenuFlyoutSubItem>
+						Click="stroke_width_click_async" Text="Others..."
+						GroupName="gn_stroke_width" />
+                </MenuFlyoutSubItem>
 				<MenuFlyoutSubItem x:Uid="mfs_cap_style" Text="Cap Style ">
 					<MenuFlyoutSubItem.Icon>
 						<PathIcon
