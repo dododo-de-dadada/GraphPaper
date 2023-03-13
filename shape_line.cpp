@@ -30,11 +30,11 @@ namespace winrt::GraphPaper::implementation
 		ID2D1Factory3* const d_factory, const D2D1_POINT_2F start, const D2D1_POINT_2F pos,
 		ARROW_STYLE style, ARROW_SIZE& a_size, ID2D1PathGeometry** geo)
 	{
-		D2D1_POINT_2F barbs[2];	// 矢じるしの返しの端点
+		D2D1_POINT_2F barb[2];	// 矢じるしの返しの端点
 		D2D1_POINT_2F tip;	// 矢じるしの先端点
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (ShapeLine::line_get_pos_arrow(start, pos, a_size, barbs, tip)) {
+		if (ShapeLine::line_get_pos_arrow(start, pos, a_size, barb, tip)) {
 			// ジオメトリパスを作成する.
 			winrt::check_hresult(
 				d_factory->CreatePathGeometry(geo));
@@ -42,13 +42,13 @@ namespace winrt::GraphPaper::implementation
 				(*geo)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE::D2D1_FILL_MODE_ALTERNATE);
 			sink->BeginFigure(
-				barbs[0],
+				barb[0],
 				style == ARROW_STYLE::FILLED
 				? D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED
 				: D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_HOLLOW
 			);
 			sink->AddLine(tip);
-			sink->AddLine(barbs[1]);
+			sink->AddLine(barb[1]);
 			sink->EndFigure(
 				style == ARROW_STYLE::FILLED
 				? D2D1_FIGURE_END::D2D1_FIGURE_END_CLOSED
@@ -149,7 +149,7 @@ namespace winrt::GraphPaper::implementation
 			// 補助線を描く
 			if (m_stroke_width >= Shape::m_anc_square_inner) {
 				brush->SetColor(COLOR_WHITE);
-				target->DrawLine(m_start, end, brush, 2.0 * m_aux_width, nullptr);
+				target->DrawLine(m_start, end, brush, 2.0f * m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
 				target->DrawLine(m_start, end, brush, m_aux_width, m_aux_style.get());
 			}
@@ -282,7 +282,7 @@ namespace winrt::GraphPaper::implementation
 			return ANC_TYPE::ANC_P0;
 		}
 		const double e_width = 0.5 * max(m_stroke_width, m_anc_width);
-		if (equal(m_stroke_cap, CAP_SQUARE)) {
+		if (equal(m_stroke_cap, CAP_STYLE_SQUARE)) {
 			D2D1_POINT_2F pos{ m_pos[0] };
 			const double abs2 = pt_abs2(pos);
 			pt_mul(
@@ -302,7 +302,7 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
-		else if (equal(m_stroke_cap, CAP_TRIANGLE)) {
+		else if (equal(m_stroke_cap, CAP_STYLE_TRIANGLE)) {
 			D2D1_POINT_2F pos{ m_pos[0] };
 			const double abs2 = pt_abs2(pos);
 			pt_mul(
@@ -325,7 +325,7 @@ namespace winrt::GraphPaper::implementation
 			}
 		}
 		else {
-			if (equal(m_stroke_cap, CAP_ROUND)) {
+			if (equal(m_stroke_cap, CAP_STYLE_ROUND)) {
 				if (pt_in_circle(test, m_start, e_width) || pt_in_circle(test, end, e_width)) {
 					return ANC_TYPE::ANC_STROKE;
 				}

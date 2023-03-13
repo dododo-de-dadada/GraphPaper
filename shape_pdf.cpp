@@ -15,8 +15,13 @@ using namespace winrt;
 
 namespace winrt::GraphPaper::implementation
 {
-	static size_t export_pdf_arrow(const float width, const D2D1_COLOR_F& color, const ARROW_STYLE style, const D2D1_SIZE_F page_size, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer);
-	static size_t export_pdf_stroke(const float width, const D2D1_COLOR_F& color, const CAP_STYLE& cap, const D2D1_DASH_STYLE dash, const DASH_PATT& patt, const D2D1_LINE_JOIN join, const float miter_limit, const DataWriter& dt_writer);
+	static size_t export_pdf_arrow(const float width, const D2D1_COLOR_F& color,
+		const ARROW_STYLE style, const D2D1_SIZE_F page_size, const D2D1_POINT_2F barb[],
+		const D2D1_POINT_2F tip, DataWriter const& dt_writer);
+	static size_t export_pdf_stroke(const float width, const D2D1_COLOR_F& color,
+		const CAP_STYLE& cap, const D2D1_DASH_STYLE dash, const DASH_PATT& patt,
+		const D2D1_LINE_JOIN join, const float miter_limit,
+		const DataWriter& dt_writer);
 
 	//------------------------------
 	// 矢じるしをデータライターに PDF として書き込む.
@@ -26,10 +31,13 @@ namespace winrt::GraphPaper::implementation
 	// styke	矢じるしの形式
 	// page_size	ページの大きさ
 	// barbs	矢じりの返しの位置
-	// tip_pos	矢じりの先端の位置
+	// tip	矢じりの先端の位置
 	// 戻り値	書き込んだバイト数
 	//------------------------------
-	static size_t export_pdf_arrow(const float width, const D2D1_COLOR_F& stroke, const ARROW_STYLE style, const D2D1_SIZE_F page_size, const D2D1_POINT_2F barbs[], const D2D1_POINT_2F tip_pos, DataWriter const& dt_writer)
+	static size_t export_pdf_arrow(
+		const float width, const D2D1_COLOR_F& stroke, const ARROW_STYLE style,
+		const D2D1_SIZE_F page_size, const D2D1_POINT_2F barb[], const D2D1_POINT_2F tip,
+		DataWriter const& dt_writer)
 	{
 		if (equal(width, 0.0f) || !is_opaque(stroke)) {
 			return 0;
@@ -47,9 +55,9 @@ namespace winrt::GraphPaper::implementation
 		}
 		swprintf_s(buf,
 			L"%f %f m %f %f l %f %f l\n",
-			barbs[0].x, -barbs[0].y + page_size.height,
-			tip_pos.x, -tip_pos.y + page_size.height,
-			barbs[1].x, -barbs[1].y + page_size.height
+			barb[0].x, -barb[0].y + page_size.height,
+			tip.x, -tip.y + page_size.height,
+			barb[1].x, -barb[1].y + page_size.height
 		);
 		len += dt_writer.WriteString(buf);
 		if (style == ARROW_STYLE::OPENED) {
@@ -71,7 +79,8 @@ namespace winrt::GraphPaper::implementation
 	// 戻り値	命令が得られたなら true, なければ false
 	//------------------------------
 	template <bool C>
-	static bool export_pdf_cmd(const float width, const D2D1_COLOR_F& stroke, const D2D1_COLOR_F& fill, wchar_t*& cmd)
+	static bool export_pdf_cmd(
+		const float width, const D2D1_COLOR_F& stroke, const D2D1_COLOR_F& fill, wchar_t*& cmd)
 	{
 		if (!equal(width, 0.0f) && is_opaque(stroke)) {
 			if (is_opaque(fill)) {
@@ -129,10 +138,10 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(buf);
 
 		// 線枠の端の形式
-		if (equal(cap, CAP_SQUARE)) {
+		if (equal(cap, CAP_STYLE_SQUARE)) {
 			len += dt_writer.WriteString(L"2 J\n");
 		}
-		else if (equal(cap, CAP_ROUND)) {
+		else if (equal(cap, CAP_STYLE_ROUND)) {
 			len += dt_writer.WriteString(L"1 J\n");
 		}
 		else {
@@ -234,7 +243,7 @@ namespace winrt::GraphPaper::implementation
 		len += dt_writer.WriteString(buf);
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
-			bezi_calc_arrow(m_start, b_seg, m_arrow_size, barbs);
+			bezi_get_pos_arrow(m_start, b_seg, m_arrow_size, barbs);
 			len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barbs, barbs[2], dt_writer);
 		}
 		return len;
@@ -319,7 +328,7 @@ namespace winrt::GraphPaper::implementation
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F tip;
 			D2D1_POINT_2F barb[2];
-			if (poly_get_pos_arrow(v_cnt, v_pos, m_arrow_size, tip, barb)) {
+			if (poly_get_pos_arrow(v_cnt, v_pos, m_arrow_size, barb, tip)) {
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size, barb, tip, dt_writer);
 			}
 		}
@@ -894,7 +903,7 @@ namespace winrt::GraphPaper::implementation
 				p_align = DWRITE_PARAGRAPH_ALIGNMENT_CENTER;
 			}
 			*/
-			len += export_pdf_stroke(1.0f, m_stroke_color, CAP_FLAT, D2D1_DASH_STYLE_SOLID, DASH_PATT{}, D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL, dt_writer);
+			len += export_pdf_stroke(1.0f, m_stroke_color, CAP_STYLE_FLAT, D2D1_DASH_STYLE_SOLID, DASH_PATT{}, D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL, dt_writer);
 
 			const uint32_t k = static_cast<uint32_t>(floor(vec_x / intvl_x));	// 目盛りの数
 			for (uint32_t i = 0; i <= k; i++) {
@@ -1046,7 +1055,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_COLOR_F{
 				static_cast<FLOAT>(grid_r), static_cast<FLOAT>(grid_g), static_cast<FLOAT>(grid_b), 1.0f 
 			},
-			CAP_FLAT, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PATT{},
+			CAP_STYLE_FLAT, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PATT{},
 			D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL, dt_writer);
 
 		// 垂直な方眼を表示する.
@@ -1164,8 +1173,8 @@ namespace winrt::GraphPaper::implementation
 			len += dt_writer.WriteString(buf);
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
-				arc_calc_arrow(
-					m_pos[0], center, m_radius, m_deg_start, m_deg_end, m_deg_rot, m_sweep_dir,
+				arc_get_pos_arrow(
+					m_pos[0], center, m_radius, m_angle_start, m_angle_end, m_angle_rot, m_sweep_dir,
 					m_arrow_size, arrow);
 				len += export_pdf_arrow(m_stroke_width, m_stroke_color, m_arrow_style, page_size,
 					arrow, arrow[2], dt_writer);

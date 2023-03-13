@@ -4,6 +4,7 @@
 //------------------------------
 #include "pch.h"
 #include "shape.h"
+#include "shape_bezier.h"
 
 using namespace winrt;
 
@@ -15,104 +16,10 @@ namespace winrt::GraphPaper::implementation
 	constexpr double T2 = 2.0 / 3.0;	// 2 番目の区切り
 	constexpr double T3 = 1.0;	// 区間の終端
 
-	constexpr uint32_t SIMPSON_CNT = 30;	// シンプソン法の回数
-
-	//------------------------------
-	// double 型の値をもつ位置
-	// ShapeBase 内でのみ使用する.
-	//------------------------------
-	struct POINT_2D {
-		double x;
-		double y;
-		// この位置を含むよう方形を拡張する.
-		inline void exp(POINT_2D& r_lt, POINT_2D& r_rb) const noexcept
-		{
-			if (x < r_lt.x) {
-				r_lt.x = x;
-			}
-			if (x > r_rb.x) {
-				r_rb.x = x;
-			}
-			if (y < r_lt.y) {
-				r_lt.y = y;
-			}
-			if (y > r_rb.y) {
-				r_rb.y = y;
-			}
-		}
-		inline POINT_2D nextafter(const double d) const noexcept 
-		{
-			return POINT_2D{ std::nextafter(x, x + d), std::nextafter(y, y + d) };
-		}
-		inline operator D2D1_POINT_2F(void) const noexcept
-		{
-			return D2D1_POINT_2F{ static_cast<FLOAT>(x), static_cast<FLOAT>(y) };
-		}
-		inline POINT_2D operator -(const POINT_2D& q) const noexcept
-		{
-			return POINT_2D{ x - q.x, y - q.y };
-		}
-		inline POINT_2D operator -(const D2D1_POINT_2F q) const noexcept
-		{
-			return POINT_2D{ x - q.x, y - q.y };
-		}
-		inline POINT_2D operator -(void) const noexcept
-		{
-			return POINT_2D{ -x, -y };
-		}
-		inline POINT_2D operator *(const double s) const noexcept
-		{
-			return POINT_2D{ x * s, y * s };
-		}
-		inline double operator *(const POINT_2D& q) const noexcept
-		{
-			return x * q.x + y * q.y;
-		}
-		inline POINT_2D operator +(const POINT_2D& q) const noexcept
-		{
-			return POINT_2D{ x + q.x, y + q.y };
-		}
-		inline POINT_2D operator +(const D2D1_POINT_2F p) const noexcept 
-		{
-			return POINT_2D{ x + p.x, y + p.y };
-		}
-		inline bool operator <(const POINT_2D& q) const noexcept
-		{
-			return x < q.x && y < q.y;
-		}
-		inline POINT_2D operator =(const D2D1_POINT_2F p) noexcept
-		{
-			return POINT_2D{ x = p.x, y = p.y };
-		}
-		inline POINT_2D operator =(const double s) noexcept
-		{
-			return POINT_2D{ x = s, y = s };
-		}
-		inline bool operator >(const POINT_2D& q) const noexcept
-		{
-			return x > q.x && y > q.y;
-		}
-		inline bool operator ==(const POINT_2D& q) const noexcept
-		{
-			return x == q.x && y == q.y;
-		}
-		inline bool operator !=(const POINT_2D& q) const noexcept 
-		{
-			return x != q.x || y != q.y;
-		}
-		inline double opro(const POINT_2D& q) const noexcept
-		{
-			return x * q.y - y * q.x;
-		}
-	};
-
 	// 曲線の矢じるしのジオメトリを作成する.
 	static void bezi_create_arrow_geom(
 		ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg,
 		const ARROW_STYLE a_style, const ARROW_SIZE a_size, ID2D1PathGeometry** a_geo);
-
-	// 曲線上の助変数をもとに微分値を求める.
-	static inline double bezi_deriv_by_param(const POINT_2D c[4], const double t_val) noexcept;
 
 	// 点の配列をもとにそれらをすべて含む凸包を求める.
 	static void bezi_get_convex(
@@ -128,24 +35,9 @@ namespace winrt::GraphPaper::implementation
 	static bool bezi_in_convex(
 		const double tx, const double ty, const size_t c_cnt, const POINT_2D c[]) noexcept;
 
-	// 曲線上の助変数の区間をもとに長さを求める.
-	static double bezi_len_by_param(
-		const POINT_2D c[4], const double t_min, const double t_max, const uint32_t s_cnt) 
-		noexcept;
-
-	// 曲線上の長さをもとに助変数を求める.
-	static double bezi_param_by_len(const POINT_2D c[4], const double b_len) noexcept;
-
 	// 曲線上の助変数をもとに位置を求める.
 	static inline void bezi_point_by_param(
 		const POINT_2D c[4], const double t, POINT_2D& p) noexcept;
-
-	// 2 つの助変数が区間 0-1 の間で正順か判定する.
-	static inline bool bezi_test_param(const double t_min, const double t_max) noexcept;
-
-	// 曲線上の助変数をもとに接線ベクトルを求める.
-	static inline void bezi_tvec_by_param(
-		const POINT_2D c[4], const double t, POINT_2D& v) noexcept;
 
 	//------------------------------
 	// 矢じりの返しと先端の位置を得る
@@ -154,7 +46,7 @@ namespace winrt::GraphPaper::implementation
 	// a_size	矢じるしの寸法
 	// arrow[3]	計算された返しの端点と先端点
 	//------------------------------
-	bool ShapeBezier::bezi_calc_arrow(
+	bool ShapeBezier::bezi_get_pos_arrow(
 		const D2D1_POINT_2F b_start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size, 
 		D2D1_POINT_2F arrow[3]) noexcept
 	{
@@ -215,10 +107,10 @@ namespace winrt::GraphPaper::implementation
 		ID2D1Factory3* const factory, const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, 
 		const ARROW_STYLE a_style,const ARROW_SIZE a_size, ID2D1PathGeometry** a_geom)
 	{
-		D2D1_POINT_2F barbs[3];	// 矢じるしの返しの端点	
+		D2D1_POINT_2F barb[3];	// 矢じるしの返しの端点	
 		winrt::com_ptr<ID2D1GeometrySink> sink;
 
-		if (ShapeBezier::bezi_calc_arrow(start, b_seg, a_size, barbs)) {
+		if (ShapeBezier::bezi_get_pos_arrow(start, b_seg, a_size, barb)) {
 			// ジオメトリシンクに追加する.
 			const D2D1_FIGURE_BEGIN f_begin = a_style == ARROW_STYLE::FILLED ?
 				D2D1_FIGURE_BEGIN::D2D1_FIGURE_BEGIN_FILLED :
@@ -231,28 +123,14 @@ namespace winrt::GraphPaper::implementation
 			winrt::check_hresult(
 				(*a_geom)->Open(sink.put()));
 			sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
-			sink->BeginFigure(barbs[0], f_begin);
-			sink->AddLine(barbs[2]);
-			sink->AddLine(barbs[1]);
+			sink->BeginFigure(barb[0], f_begin);
+			sink->AddLine(barb[2]);
+			sink->AddLine(barb[1]);
 			sink->EndFigure(f_end);
 			winrt::check_hresult(
 				sink->Close());
 			sink = nullptr;
 		}
-	}
-
-	//------------------------------
-	// 曲線上の助変数をもとに微分値を求める.
-	// c	制御点 (コントロールポイント)
-	// t	助変数
-	// 戻り値	求まった微分値
-	//------------------------------
-	static inline double bezi_deriv_by_param(const POINT_2D c[4], const double t) noexcept
-	{
-		// 助変数をもとにベジェ曲線上の接線ベクトルを求め, その接線ベクトルの長さを返す.
-		POINT_2D v;	// t における接線ベクトル
-		bezi_tvec_by_param(c, t, v);
-		return sqrt(v * v);
 	}
 
 	//------------------------------
@@ -422,110 +300,6 @@ namespace winrt::GraphPaper::implementation
 	}
 
 	//------------------------------
-	// 曲線上の助変数の区間をもとに長さを求める.
-	// シンプソン法を用いる.
-	// c	制御点
-	// t_min	区間の始端
-	// t_max	区間の終端
-	// s_cnt	シンプソン法の回数
-	// 戻り値	求まった長さ
-	//------------------------------
-	static double bezi_len_by_param(
-		const POINT_2D c[4], const double t_min, const double t_max, const uint32_t s_cnt) noexcept
-	{
-		double t_len;
-		uint32_t n;
-		double h;
-		double a, b;
-		double t;
-		double b0, b2;
-		double s;
-
-		/* 範囲の上限下限は正順か判定する. */
-		/* 正順 ? */
-		if (bezi_test_param(t_min, t_max)) {
-			/* 範囲上限 t_max -範囲下限 t_min を差分 t_len に格納する. */
-			t_len = t_max - t_min;
-			/* 区間の分割数 s_cnt と t_len を乗算する. */
-			/* その結果を切り上げて整数値する. */
-			/* 整数値を区間の半数 n に格納する. */
-			n = (int)std::ceil(t_len * (double)s_cnt);
-			/* t_len / 2n を階差 h に格納する. */
-			h = t_len / (2.0 * n);
-			/* 0 を奇数番目の部分区間の合計値 a に格納する. */
-			a = 0.0;
-			/* 0 を偶数番目の部分区間の合計値 b に格納する. */
-			b = 0.0;
-			/* t_min+h を助変数 t に格納する. */
-			t = t_min + h;
-			/* 1 を添え字 i に格納する. */
-			/* i は n より小 ? */
-			for (uint32_t i = 1; i < n; i++) {
-				/* 2i-1 番目の部分区間の微分値を求め, a に加える. */
-				a += bezi_deriv_by_param(c, t);
-				/* 階差 h を助変数 t に加える. */
-				t += h;
-				/* 2i 番目の部分区間の微分値を求め, b に加える. */
-				b += bezi_deriv_by_param(c, t);
-				/* 階差 h を助変数 t に加える. */
-				t += h;
-				/* i をインクリメントする. */
-			}
-			/* 2n-1 番目の部分区間の微分値を求め, a に加える. */
-			a += bezi_deriv_by_param(c, t);
-			/* 0 番目の部分区間での微分値を求め, b0 に格納する. */
-			b0 = bezi_deriv_by_param(c, t_min);
-			/* 2n 番目の部分区間での微分値を求め, b2 に格納する. */
-			b2 = bezi_deriv_by_param(c, t_max);
-			/* (b0+4a+2b+b2)h/3 を求め, 積分値 s に格納する. */
-			s = (b0 + 4.0 * a + 2.0 * b + b2) * h / 3.0f;
-		}
-		else {
-			/* 0 を積分値 s に格納する. */
-			s = 0.0;
-		}
-		/* s を返す. */
-		return s;
-	}
-
-	//------------------------------
-	// 曲線上の長さをもとに助変数を求める.
-	// c	制御点
-	// len	長さ
-	// 戻り値	得られた助変数の値
-	//------------------------------
-	static double bezi_param_by_len(const POINT_2D c[4], const double len) noexcept
-	{
-		double t;	// 助変数
-		double d;	// 助変数の変分
-		double e;	// 誤差
-
-		/* 区間の中間値 0.5 を助変数に格納する. */
-		t = 0.5;
-		/* 0.25 を助変数の変分に格納する. */
-		/* 助変数の変分は 0.001953125 以上 ? */
-		for (d = 0.25; d >= 0.001953125; d *= 0.5) {
-			/* 0-助変数の範囲を合成シンプソン公式で積分し, 曲線の長さを求める. */
-			/* 求めた長さと指定された長さの差分を誤差に格納する. */
-			e = bezi_len_by_param(c, 0.0, t, SIMPSON_CNT) - len;
-			/* 誤差の絶対は 0.125 より小 ? */
-			if (fabs(e) < 0.125) {
-				break;
-			}
-			/* 誤差は 0 より大 ? */
-			else if (e > 0.0) {
-				/* 変分を助変数から引く. */
-				t -= d;
-			}
-			else {
-				/* 変分を助変数に足す. */
-				t += d;
-			}
-		}
-		return t;
-	}
-
-	//------------------------------
 	// 曲線上の助変数をもとに位置を求める.
 	// c	制御点
 	// t	助変数
@@ -538,32 +312,6 @@ namespace winrt::GraphPaper::implementation
 		const double ss = s * s;
 		const double tt = t * t;
 		p = c[0] * s * ss + c[1] * 3.0 * ss * t + c[2] * 3.0 * s * tt + c[3] * t * tt;
-	}
-
-	// 2 つの助変数が区間 0-1 の間で正順か判定する.
-	// t_min	小さい方の助変数
-	// t_max	大きい方の助変数
-	static inline bool bezi_test_param(const double t_min, const double t_max) noexcept
-	{
-		// 範囲の上限 t_max は 1+DBL_EPSILON より小 ?
-		// t_min より大きくて最も近い値は t_max より小 ?
-		return -DBL_MIN < t_min && t_max < 1.0 + DBL_EPSILON &&
-			std::nextafter(t_min, t_min + 1.0) < t_max;
-	}
-
-	//------------------------------
-	// 曲線上の助変数をもとに接線ベクトルを求める.
-	// c	制御点
-	// t	助変数
-	// v	t における接線ベクトル
-	//------------------------------
-	static inline void bezi_tvec_by_param(const POINT_2D c[4], const double t, POINT_2D& v) noexcept
-	{
-		const double a = -3.0 * (1.0 - t) * (1.0 - t);
-		const double b = 3.0 * (1.0 - t) * (1.0 - 3.0 * t);
-		const double d = 3.0 * t * (2.0 - 3.0 * t);
-		const double e = (3.0 * t * t);
-		v = c[0] * a + c[1] * b + c[2] * d + c[3] * e;
 	}
 
 	//------------------------------
@@ -647,7 +395,7 @@ namespace winrt::GraphPaper::implementation
 			// 補助線を描く
 			if (m_stroke_width >= Shape::m_anc_square_inner) {
 				brush->SetColor(COLOR_WHITE);
-				target->DrawGeometry(m_d2d_path_geom.get(), brush, 2.0 * m_aux_width, nullptr);
+				target->DrawGeometry(m_d2d_path_geom.get(), brush, 2.0f * m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
 				target->DrawGeometry(m_d2d_path_geom.get(), brush, m_aux_width, m_aux_style.get());
 			}
@@ -702,7 +450,7 @@ namespace winrt::GraphPaper::implementation
 		if (pt_in_anc(tp, cp[0], m_anc_width)) {
 			return ANC_TYPE::ANC_P0 + 0;
 		}
-		if (equal(m_stroke_cap, CAP_ROUND)) {
+		if (equal(m_stroke_cap, CAP_STYLE_ROUND)) {
 			if (pt_in_circle(tp, ew)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
@@ -710,13 +458,13 @@ namespace winrt::GraphPaper::implementation
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
-		else if (equal(m_stroke_cap, CAP_SQUARE)) {
+		else if (equal(m_stroke_cap, CAP_STYLE_SQUARE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE>(
 				tp, cp, m_pos.data(), ew)) {
 				return ANC_TYPE::ANC_STROKE;
 			}
 		}
-		else if (equal(m_stroke_cap, CAP_TRIANGLE)) {
+		else if (equal(m_stroke_cap, CAP_STYLE_TRIANGLE)) {
 			if (bezi_hit_test_cap<D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE>(
 				tp, cp, m_pos.data(), ew)) {
 				return ANC_TYPE::ANC_STROKE;

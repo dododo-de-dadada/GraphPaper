@@ -92,10 +92,10 @@ namespace winrt::GraphPaper::implementation
 	struct ShapeStroke;
 	struct ShapeText;
 
-	constexpr D2D1_COLOR_F ACCENT_COLOR{ 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// 文字範囲の背景色 SystemAccentColor
+	constexpr D2D1_COLOR_F COLOR_ACCENT{ 0.0f, 0x78 / 255.0f, 0xD4 / 255.0f, 1.0f };	// 文字範囲の背景色 SystemAccentColor
 	constexpr D2D1_COLOR_F COLOR_BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };	// 黒
 	constexpr D2D1_COLOR_F COLOR_WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 白
-	constexpr D2D1_COLOR_F COLOR_TEXT_RANGE = { 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
+	constexpr D2D1_COLOR_F COLOR_TEXT_RANGE{ 1.0f, 1.0f, 1.0f, 1.0f };	// 文字範囲の文字色
 
 	// 補助線
 	constexpr FLOAT AUXILIARY_SEG_DASHES[]{ 4.0f, 4.0f };	// 補助線の破線の配置
@@ -181,16 +181,16 @@ namespace winrt::GraphPaper::implementation
 		D2D1_CAP_STYLE m_start;	// 始点
 		D2D1_CAP_STYLE m_end;	// 終点
 	};
-	constexpr CAP_STYLE CAP_FLAT{
+	constexpr CAP_STYLE CAP_STYLE_FLAT{
 		D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT
 	};
-	constexpr CAP_STYLE CAP_ROUND{
+	constexpr CAP_STYLE CAP_STYLE_ROUND{
 		D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND, D2D1_CAP_STYLE::D2D1_CAP_STYLE_ROUND
 	};
-	constexpr CAP_STYLE CAP_SQUARE{
+	constexpr CAP_STYLE CAP_STYLE_SQUARE{
 		D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_SQUARE
 	};
-	constexpr CAP_STYLE CAP_TRIANGLE{
+	constexpr CAP_STYLE CAP_STYLE_TRIANGLE{
 		D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE, D2D1_CAP_STYLE::D2D1_CAP_STYLE_TRIANGLE
 	};
 
@@ -231,7 +231,7 @@ namespace winrt::GraphPaper::implementation
 	constexpr double MM_PER_INCH = 25.4;	// 1 インチあたりのミリメートル数
 	constexpr float FONT_SIZE_DEFVAL = static_cast<float>(12.0 * 96.0 / 72.0);	// 書体の大きさの既定値 (システムリソースに値が無かった場合)
 	constexpr D2D1_COLOR_F GRID_COLOR_DEFVAL{	// 方眼の色の既定値
-		ACCENT_COLOR.r, ACCENT_COLOR.g, ACCENT_COLOR.b, 192.0f / 255.0f };
+		COLOR_ACCENT.r, COLOR_ACCENT.g, COLOR_ACCENT.b, 192.0f / 255.0f };
 	constexpr float GRID_LEN_DEFVAL = 48.0f;	// 方眼の長さの既定値
 	constexpr float MITER_LIMIT_DEFVAL = 10.0f;	// 尖り制限の既定値
 	constexpr D2D1_SIZE_F TEXT_PADDING_DEFVAL{ FONT_SIZE_DEFVAL / 4.0, FONT_SIZE_DEFVAL / 4.0 };	// 文字列の余白の既定値
@@ -827,7 +827,7 @@ namespace winrt::GraphPaper::implementation
 		D2D1_DASH_STYLE m_dash_style = D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID;	// 破線の形式
 		float m_join_miter_limit = MITER_LIMIT_DEFVAL;	// 線の結合の尖り制限
 		D2D1_LINE_JOIN m_join_style = D2D1_LINE_JOIN::D2D1_LINE_JOIN_MITER;	// 線の結合の形式
-		CAP_STYLE m_stroke_cap{ CAP_FLAT };	// 線の端の形式
+		CAP_STYLE m_stroke_cap{ CAP_STYLE_FLAT };	// 線の端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
 		float m_stroke_width = 1.0f;	// 線・枠の太さ
 
@@ -1107,7 +1107,7 @@ namespace winrt::GraphPaper::implementation
 	// 線枠のひな型
 	//------------------------------
 	struct ShapeStroke : ShapeSelect {
-		CAP_STYLE m_stroke_cap{ CAP_FLAT };	// 線の端の形式
+		CAP_STYLE m_stroke_cap{ CAP_STYLE_FLAT };	// 線の端の形式
 		D2D1_COLOR_F m_stroke_color{ COLOR_BLACK };	// 線・枠の色
 		float m_stroke_width = 1.0f;	// 線・枠の太さ
 		D2D1_CAP_STYLE m_dash_cap = D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT;	// 破線の端の形式
@@ -1529,7 +1529,7 @@ namespace winrt::GraphPaper::implementation
 		// 矢じりの先端と返しの位置を得る.
 		static bool poly_get_pos_arrow(
 			const size_t p_cnt, const D2D1_POINT_2F p[], const ARROW_SIZE& a_size, 
-			D2D1_POINT_2F& tip, /*--->*/D2D1_POINT_2F barb[]) noexcept;
+			D2D1_POINT_2F barb[], D2D1_POINT_2F& tip) noexcept;
 		// 矩形をもとに多角形を作成する.
 		static void poly_create_by_box(
 			const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const POLY_OPTION& p_opt,
@@ -1579,7 +1579,7 @@ namespace winrt::GraphPaper::implementation
 		//------------------------------
 
 		// 矢じりの返しと先端の位置を得る
-		static bool bezi_calc_arrow(
+		static bool bezi_get_pos_arrow(
 			const D2D1_POINT_2F start, const D2D1_BEZIER_SEGMENT& b_seg, const ARROW_SIZE a_size,
 			D2D1_POINT_2F arrow[3]) noexcept;
 		// 図形を表示する.
@@ -1602,12 +1602,13 @@ namespace winrt::GraphPaper::implementation
 
 	// 円弧
 	struct ShapeArc : ShapePath {
+		// ラディアンなら精度が不足がちになるので度で保持する.
 		D2D1_SIZE_F m_radius{};	// 標準形にしたときの X 軸 Y 軸方向の半径
-		float m_deg_rot = 0.0f;	// 円弧の傾き (度数)
-		float m_deg_start = 0.0f;	// 円弧の始点の角度 (度数)
-		float m_deg_end = 0.0f;	// 円弧の終点の角度 (度数)
-		D2D1_SWEEP_DIRECTION m_sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;	// 円弧の方向
-		D2D1_ARC_SIZE m_larg_flag = D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL;
+		float m_angle_rot = 0.0f;	// 円弧の傾き (度)
+		float m_angle_start = 0.0f;	// 円弧の始点 (度)
+		float m_angle_end = 0.0f;	// 円弧の終点 (度)
+		D2D1_SWEEP_DIRECTION m_sweep_dir = D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE;	// 円弧の描画方向
+		D2D1_ARC_SIZE m_larg_flag = D2D1_ARC_SIZE::D2D1_ARC_SIZE_SMALL;	// 円弧の大きさ
 
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_fill_geom{ nullptr };
 
@@ -1619,21 +1620,27 @@ namespace winrt::GraphPaper::implementation
 		// 円弧の始点の角度を得る.
 		bool get_arc_start(float& val) const noexcept final override
 		{
-			val = m_deg_start;
+			val = m_angle_start;
 			return true;
 		}
 		// 円弧の終点の角度を得る.
 		bool get_arc_end(float& val) const noexcept final override
 		{
-			val = m_deg_end;
+			val = m_angle_end;
 			return true;
 		}
 		// 円弧の傾きを得る.
 		bool get_arc_rot(float& val) const noexcept final override
 		{
-			val = m_deg_rot;
+			val = m_angle_rot;
 			return true;
 		}
+
+		//------------------------------
+		// SHAPE_arc.cpp
+		// 円弧
+		//------------------------------
+
 		void get_pos_anc(const uint32_t anc, D2D1_POINT_2F& val) const noexcept final override;
 		// 値を, 部位の位置に格納する.
 		bool set_pos_anc(
@@ -1654,7 +1661,7 @@ namespace winrt::GraphPaper::implementation
 		// 円弧をベジェ曲線で近似する.
 		void alternate_bezier(D2D1_POINT_2F& start, D2D1_BEZIER_SEGMENT& b_seg) const noexcept;
 		// 矢じりの返しと先端の位置を得る.
-		static bool arc_calc_arrow(
+		static bool arc_get_pos_arrow(
 			const D2D1_POINT_2F vec, const D2D1_POINT_2F center, const D2D1_SIZE_F rad,
 			const double deg_start, const double deg_end, const double deg_rot,
 			const D2D1_SWEEP_DIRECTION dir, const ARROW_SIZE a_size, D2D1_POINT_2F arrow[]);
@@ -1961,12 +1968,12 @@ namespace winrt::GraphPaper::implementation
 	// barb[2]	矢じりの返しの位置
 	inline void get_pos_barbs(
 		const D2D1_POINT_2F a, const double a_len, const double width, const double len,
-		D2D1_POINT_2F barbs[]) noexcept
+		D2D1_POINT_2F barb[]) noexcept
 	{
 		if (a_len <= DBL_MIN) {
 			constexpr D2D1_POINT_2F Z{ 0.0f, 0.0f };
-			barbs[0] = Z;
-			barbs[1] = Z;
+			barb[0] = Z;
+			barb[1] = Z;
 		}
 		else {
 			const double bw = width * 0.5;	// 矢じるしの幅の半分の大きさ
@@ -1975,10 +1982,10 @@ namespace winrt::GraphPaper::implementation
 			const double tx = a.y * -len;
 			const double ty = a.y * bw;
 			const double ax = 1.0 / a_len;
-			barbs[0].x = static_cast<FLOAT>((sx - ty) * ax);
-			barbs[0].y = static_cast<FLOAT>((tx + sy) * ax);
-			barbs[1].x = static_cast<FLOAT>((sx + ty) * ax);
-			barbs[1].y = static_cast<FLOAT>((tx - sy) * ax);
+			barb[0].x = static_cast<FLOAT>((sx - ty) * ax);
+			barb[0].y = static_cast<FLOAT>((tx + sy) * ax);
+			barb[1].x = static_cast<FLOAT>((sx + ty) * ax);
+			barb[1].y = static_cast<FLOAT>((tx - sy) * ax);
 		}
 	}
 

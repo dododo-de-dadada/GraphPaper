@@ -157,16 +157,16 @@ namespace winrt::GraphPaper::implementation
 			}
 
 			const auto len3 = wcslen(buf);
-			if (equal(cap, CAP_FLAT)) {
+			if (equal(cap, CAP_STYLE_FLAT)) {
 				wcscpy_s(buf + len3, len - len3, L"stroke-linecap=\"butt\" ");
 			}
-			else if (equal(cap, CAP_ROUND)) {
+			else if (equal(cap, CAP_STYLE_ROUND)) {
 				wcscpy_s(buf + len3, len - len3, L"stroke-linecap=\"round\" ");
 			}
-			else if (equal(cap, CAP_SQUARE)) {
+			else if (equal(cap, CAP_STYLE_SQUARE)) {
 				wcscpy_s(buf + len3, len - len3, L"stroke-linecap=\"square\" ");
 			}
-			else if (equal(cap, CAP_TRIANGLE)) {
+			else if (equal(cap, CAP_STYLE_TRIANGLE)) {
 				// SVG ‚ÉŽOŠp‚Í‚È‚¢‚Ì‚Å, ‚©‚í‚è‚É stroke-linecap="butt"
 				wcscpy_s(buf + len3, len - len3, L"stroke-linecap=\"butt\" ");
 			}
@@ -222,7 +222,7 @@ namespace winrt::GraphPaper::implementation
 
 		if (m_arrow_style != ARROW_STYLE::NONE) {
 			D2D1_POINT_2F barbs[3];
-			bezi_calc_arrow(m_start, b_seg, m_arrow_size, barbs);
+			bezi_get_pos_arrow(m_start, b_seg, m_arrow_size, barbs);
 			export_svg_arrow(buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap, m_join_style, m_join_miter_limit, barbs, barbs[2]);
 			dt_writer.WriteString(buf);
 		}
@@ -331,12 +331,12 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L"/>\n");
 		if (m_arrow_style != ARROW_STYLE::NONE) {
-			D2D1_POINT_2F barbs[2];
-			D2D1_POINT_2F tip_pos;
-			if (ShapeLine::line_get_pos_arrow(m_start, m_pos[0], m_arrow_size, barbs, tip_pos)) {
+			D2D1_POINT_2F barb[2];
+			D2D1_POINT_2F tip;
+			if (ShapeLine::line_get_pos_arrow(m_start, m_pos[0], m_arrow_size, barb, tip)) {
 				export_svg_arrow(
 					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
-					m_join_style, m_join_miter_limit, barbs, tip_pos);
+					m_join_style, m_join_miter_limit, barb, tip);
 				dt_writer.WriteString(buf);
 			}
 		}
@@ -384,7 +384,7 @@ namespace winrt::GraphPaper::implementation
 			D2D1_POINT_2F tip;
 			D2D1_POINT_2F barb[2];
 			if (ShapePoly::poly_get_pos_arrow(
-				d_cnt + 1, std::data(v_pos), m_arrow_size, tip, barb)) {
+				d_cnt + 1, std::data(v_pos), m_arrow_size, barb, tip)) {
 				export_svg_arrow(
 					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,
 					m_join_style, m_join_miter_limit, barb, tip);
@@ -522,7 +522,7 @@ namespace winrt::GraphPaper::implementation
 
 			dt_writer.WriteString(L"<g ");
 			export_svg_stroke(buf, 1024,
-				1.0f, m_stroke_color, D2D1_DASH_STYLE_SOLID, DASH_PATT{}, CAP_FLAT, D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL);
+				1.0f, m_stroke_color, D2D1_DASH_STYLE_SOLID, DASH_PATT{}, CAP_STYLE_FLAT, D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL);
 			dt_writer.WriteString(buf);
 			swprintf_s(buf,
 				L"font-size=\"%f\" "
@@ -702,7 +702,7 @@ namespace winrt::GraphPaper::implementation
 		dt_writer.WriteString(L"<g ");
 		export_svg_stroke(
 			buf, 1024, g_width, m_grid_color, D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID, DASH_PATT{},
-			CAP_FLAT, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL);
+			CAP_STYLE_FLAT, D2D1_LINE_JOIN::D2D1_LINE_JOIN_BEVEL, MITER_LIMIT_DEFVAL);
 		dt_writer.WriteString(buf);
 		dt_writer.WriteString(L">\n");
 
@@ -779,7 +779,7 @@ namespace winrt::GraphPaper::implementation
 				L"\" stroke=\"none\" ",
 				p[3].x, p[3].y,
 				fabs(m_radius.width), fabs(m_radius.height),
-				m_deg_rot,
+				m_angle_rot,
 				m_larg_flag != 0 ? 1 : 0,
 				1,//m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE ? 0 : 1,
 				p[4].x, p[4].y,
@@ -797,7 +797,7 @@ namespace winrt::GraphPaper::implementation
 				L"\" fill=\"none\" ",
 				p[3].x, p[3].y,
 				fabs(m_radius.width), fabs(m_radius.height),
-				m_deg_rot,
+				m_angle_rot,
 				m_larg_flag != 0 ? 1 : 0,
 				1,//m_sweep_dir != D2D1_SWEEP_DIRECTION::D2D1_SWEEP_DIRECTION_CLOCKWISE ? 0 : 1,
 				p[4].x, p[4].y
@@ -810,8 +810,8 @@ namespace winrt::GraphPaper::implementation
 			dt_writer.WriteString(L"/>\n");
 			if (m_arrow_style != ARROW_STYLE::NONE) {
 				D2D1_POINT_2F arrow[3];
-				arc_calc_arrow(
-					m_pos[0], p[2], m_radius, m_deg_start, m_deg_end, m_deg_rot, m_sweep_dir,
+				arc_get_pos_arrow(
+					m_pos[0], p[2], m_radius, m_angle_start, m_angle_end, m_angle_rot, m_sweep_dir,
 					m_arrow_size, arrow);
 				export_svg_arrow(
 					buf, 1024, m_arrow_style, m_stroke_width, m_stroke_color, m_stroke_cap,

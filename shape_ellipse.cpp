@@ -45,7 +45,7 @@ namespace winrt::GraphPaper::implementation
 			// •â•ü‚ð•`‚­
 			if (m_stroke_width >= Shape::m_anc_square_inner) {
 				brush->SetColor(COLOR_WHITE);
-				target->DrawEllipse(elli, brush, 2.0 * m_aux_width, nullptr);
+				target->DrawEllipse(elli, brush, 2.0f * m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
 				target->DrawEllipse(elli, brush, m_aux_width, m_aux_style.get());
 			}

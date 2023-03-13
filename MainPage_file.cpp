@@ -1031,8 +1031,7 @@ namespace winrt::GraphPaper::implementation
 					unbox_value<Color>(sel_text_color), ShapeText::s_text_selected_foreground);
 			}
 			else {
-				ShapeText::s_text_selected_background =
-				{ 0.0f, 0x00 / COLOR_MAX, 0x78 / COLOR_MAX, 0xD4 / COLOR_MAX };
+				ShapeText::s_text_selected_background = COLOR_ACCENT;
 				ShapeText::s_text_selected_foreground = COLOR_WHITE;
 			}
 		}

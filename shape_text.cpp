@@ -11,7 +11,7 @@ using namespace winrt;
 namespace winrt::GraphPaper::implementation
 {
 	wchar_t** ShapeText::s_available_fonts = nullptr;	//有効な書体名
-	D2D1_COLOR_F ShapeText::s_text_selected_background{ ACCENT_COLOR };	// 文字範囲の背景色
+	D2D1_COLOR_F ShapeText::s_text_selected_background{ COLOR_ACCENT };	// 文字範囲の背景色
 	D2D1_COLOR_F ShapeText::s_text_selected_foreground{ COLOR_TEXT_RANGE };	// 文字範囲の文字色
 
 	// ヒットテストの計量を作成する.

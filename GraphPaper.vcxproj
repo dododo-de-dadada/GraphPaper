@@ -118,6 +118,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="shape.h" />
     <ClInclude Include="d2d_ui.h" />
+    <ClInclude Include="shape_bezier.h" />
     <ClInclude Include="Summary.h" />
     <ClInclude Include="SummaryViewModel.h" />
     <ClInclude Include="undo.h" />

@@ -212,10 +212,6 @@ namespace winrt::GraphPaper::implementation
 			};
 			Shape* s = new ShapeArc(start, pos, t);
 			s->set_select(true);
-			s->set_arc_dir(a_dir);
-			s->set_arc_start(a_start);
-			s->set_arc_end(a_end);
-			s->set_arc_rot(a_rot);
 			m_dialog_page.m_shape_list.push_back(s);
 #if defined(_DEBUG)
 			debug_leak_cnt++;
