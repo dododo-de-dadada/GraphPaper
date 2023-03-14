@@ -985,12 +985,12 @@ namespace winrt::GraphPaper::implementation
 		// 結果を返し終了する.
 		co_return hres;
 	}
-	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, false>(
-		StorageFile s_file);
-	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<true, false>(
-		StorageFile s_file);
-	template IAsyncOperation<winrt::hresult> MainPage::file_write_gpf_async<false, true>(
-		StorageFile s_file);
+	template IAsyncOperation<winrt::hresult>
+		MainPage::file_write_gpf_async<false, false>(StorageFile s_file);
+	template IAsyncOperation<winrt::hresult>
+		MainPage::file_write_gpf_async<true, false>(StorageFile s_file);
+	template IAsyncOperation<winrt::hresult>
+		MainPage::file_write_gpf_async<false, true>(StorageFile s_file);
 
 	// ファイルメニューの「新規」が選択された
 	IAsyncAction MainPage::file_new_click_async(IInspectable const&, RoutedEventArgs const&)
