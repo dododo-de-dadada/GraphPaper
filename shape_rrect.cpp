@@ -96,7 +96,7 @@ namespace winrt::GraphPaper::implementation
 			// •â•ü‚ð•`‚­
 			if (m_stroke_width >= Shape::m_anc_square_inner) {
 				brush->SetColor(COLOR_WHITE);
-				target->DrawRoundedRectangle(r_rec, brush, 2.0 * Shape::m_aux_width, nullptr);
+				target->DrawRoundedRectangle(r_rec, brush, 2.0f * Shape::m_aux_width, nullptr);
 				brush->SetColor(COLOR_BLACK);
 				target->DrawRoundedRectangle(r_rec, brush, Shape::m_aux_width, m_aux_style.get());
 			}

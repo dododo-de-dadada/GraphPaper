@@ -41,7 +41,7 @@ namespace winrt::GraphPaper::implementation
 			brush->SetColor(m_stroke_color);
 			target->DrawEllipse(elli, brush, m_stroke_width, m_d2d_stroke_style.get());
 		}
-		if (is_selected()) {
+		if (m_anc_show && is_selected()) {
 			// •â•ü‚ð•`‚­
 			if (m_stroke_width >= Shape::m_anc_square_inner) {
 				brush->SetColor(COLOR_WHITE);

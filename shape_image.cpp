@@ -249,13 +249,10 @@ namespace winrt::GraphPaper::implementation
 			m_clip);
 
 		if (m_anc_show && is_selected()) {
-			D2D1_MATRIX_3X2_F t;
-			target->GetTransform(&t);
-			const double scale = t.m11;
 			brush->SetColor(COLOR_WHITE);
-			target->DrawRectangle(rect, brush, 1.0 / scale, nullptr);
+			target->DrawRectangle(rect, brush, m_aux_width, nullptr);
 			brush->SetColor(COLOR_BLACK);
-			target->DrawRectangle(rect, brush, 1.0 / scale, m_aux_style.get());
+			target->DrawRectangle(rect, brush, m_aux_width, m_aux_style.get());
 			const D2D1_POINT_2F a[4]{
 				m_start,
 				{ m_start.x + m_view.width, m_start.y },

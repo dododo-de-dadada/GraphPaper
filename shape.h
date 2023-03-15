@@ -1175,129 +1175,6 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
-	// 矢印つき直線
-	//------------------------------
-	struct ShapeLine : ShapeStroke {
-		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 始点
-		std::vector<D2D1_POINT_2F> m_pos{};	// 次の点への位置ベクトル
-		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
-		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
-
-		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_stroke{ nullptr };	// 矢じるしの D2D ストロークスタイル
-		winrt::com_ptr<ID2D1PathGeometry> m_d2d_arrow_geom{ nullptr };	// 矢じるしの D2D パスジオメトリ
-
-		// 図形を破棄する.
-		virtual ~ShapeLine(void)
-		{
-			m_d2d_arrow_geom = nullptr;
-			m_d2d_arrow_stroke = nullptr;
-		} // ~ShapeStroke
-
-		//------------------------------
-		// shape_line.cpp
-		//------------------------------
-
-		void create_arrow_stroke(void)
-		{
-			m_d2d_arrow_stroke = nullptr;
-			ID2D1Factory* factory;
-			Shape::m_d2d_target->GetFactory(&factory);
-			// 矢じるしの破線の形式はかならずソリッドとする.
-			const D2D1_STROKE_STYLE_PROPERTIES s_prop{
-				m_stroke_cap.m_start,	// startCap
-				m_stroke_cap.m_end,	// endCap
-				D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// dashCap
-				m_join_style,	// lineJoin
-				static_cast<FLOAT>(m_join_miter_limit),	// miterLimit
-				D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
-				0.0f	// dashOffset
-			};
-			winrt::check_hresult(
-				factory->CreateStrokeStyle(s_prop, nullptr, 0, m_d2d_arrow_stroke.put())
-			);
-		}
-
-
-		// 矢じるしの先端と返しの位置を求める.
-		static bool line_get_pos_arrow(
-			const D2D1_POINT_2F a_end, const D2D1_POINT_2F a_pos, const ARROW_SIZE& a_size, 
-			/*--->*/D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
-
-		// 図形を作成する.
-		ShapeLine(const Shape* page, const bool e_close) :
-			ShapeStroke(page)
-		{
-			if (e_close) {
-				m_arrow_style = ARROW_STYLE::NONE;
-			}
-			else {
-				page->get_arrow_style(m_arrow_style);
-			}
-			page->get_arrow_size(m_arrow_size);
-		}
-		// 図形を作成する.
-		ShapeLine(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
-		// データリーダーから図形を読み込む.
-		ShapeLine(const Shape& page, DataReader const& dt_reader);
-		// 図形を表示する.
-		virtual void draw(void) override;
-		// 矢じるしの寸法を得る.
-		bool get_arrow_size(ARROW_SIZE& size) const noexcept final override;
-		// 矢じるしの形式を得る.
-		bool get_arrow_style(ARROW_STYLE& val) const noexcept final override;
-		// 図形を囲む領域を得る.
-		void get_bound(
-			const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
-			D2D1_POINT_2F& b_rb) const noexcept final override;
-		// 塗りつぶし色を得る.
-		virtual bool get_fill_color(D2D1_COLOR_F& val) const noexcept
-		{
-			val.a = 0.0f;
-			return true;
-		}
-		// 部位の位置を得る.
-		virtual void get_pos_anc(const uint32_t /*anc*/, D2D1_POINT_2F& val) const noexcept override;
-		// 図形を囲む領域の左上位置を得る.
-		void get_bound_lt(D2D1_POINT_2F& val) const noexcept final override;
-		// 開始位置を得る.
-		bool get_pos_start(D2D1_POINT_2F& val) const noexcept final override;
-		// 近傍の頂点を見つける.
-		virtual bool get_pos_nearest(
-			const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept override;
-		// 頂点を得る.
-		virtual size_t get_verts(D2D1_POINT_2F p[]) const noexcept override;
-		// 位置を含むか判定する.
-		virtual uint32_t hit_test(const D2D1_POINT_2F test) const noexcept override;
-		// 矩形範囲に含まれるか判定する.
-		virtual bool in_area(
-			const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
-		// 値を矢じるしの寸法に格納する.
-		virtual bool set_arrow_size(const ARROW_SIZE& val) noexcept override;
-		// 値を矢じるしの形式に格納する.
-		virtual bool set_arrow_style(const ARROW_STYLE val) noexcept override;
-		// 値を, 部位の位置に格納する. 
-		virtual bool set_pos_anc(
-			const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect)
-			noexcept override;
-		// 値を始点に格納する.
-		virtual bool set_pos_start(const D2D1_POINT_2F val) noexcept override;
-		// 差分だけ移動する.
-		virtual bool move(const D2D1_POINT_2F pos) noexcept override;
-		// 図形をデータライターに書き込む.
-		void write(DataWriter const& dt_writer) const;
-		// 図形をデータライターに PDF として書き込む.
-		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer);
-		// 図形をデータライターに SVG として書き込む.
-		void export_svg(DataWriter const& dt_writer);
-		// 値を端の形式に格納する.
-		bool set_stroke_cap(const CAP_STYLE& val) noexcept final override;
-		// 値を線の結合の尖り制限に格納する.
-		bool set_join_miter_limit(const float& val) noexcept final override;
-		// 値を線の結合の形式に格納する.
-		bool set_join_style(const D2D1_LINE_JOIN& val) noexcept final override;
-	};
-
-	//------------------------------
 	// 方形
 	//------------------------------
 	struct ShapeRect : ShapeStroke {
@@ -1467,12 +1344,152 @@ namespace winrt::GraphPaper::implementation
 	};
 
 	//------------------------------
+	// 矢印つき直線
+	//------------------------------
+	struct ShapeLine : ShapeStroke {
+		D2D1_POINT_2F m_start{ 0.0f, 0.0f };	// 始点
+		std::vector<D2D1_POINT_2F> m_pos{};	// 次の点への位置ベクトル
+		ARROW_STYLE m_arrow_style = ARROW_STYLE::NONE;	// 矢じるしの形式
+		ARROW_SIZE m_arrow_size{ ARROW_SIZE_DEFVAL };	// 矢じるしの寸法
+
+		winrt::com_ptr<ID2D1StrokeStyle> m_d2d_arrow_stroke{ nullptr };	// 矢じるしの D2D ストロークスタイル
+		winrt::com_ptr<ID2D1PathGeometry> m_d2d_arrow_geom{ nullptr };	// 矢じるしの D2D パスジオメトリ
+
+		// 図形を破棄する.
+		virtual ~ShapeLine(void)
+		{
+			m_d2d_arrow_geom = nullptr;
+			m_d2d_arrow_stroke = nullptr;
+		} // ~ShapeStroke
+
+		//------------------------------
+		// shape_line.cpp
+		//------------------------------
+
+		void create_arrow_stroke(void)
+		{
+			m_d2d_arrow_stroke = nullptr;
+			ID2D1Factory* factory;
+			Shape::m_d2d_target->GetFactory(&factory);
+			// 矢じるしの破線の形式はかならずソリッドとする.
+			const D2D1_STROKE_STYLE_PROPERTIES s_prop{
+				m_stroke_cap.m_start,	// startCap
+				m_stroke_cap.m_end,	// endCap
+				D2D1_CAP_STYLE::D2D1_CAP_STYLE_FLAT,	// dashCap
+				m_join_style,	// lineJoin
+				static_cast<FLOAT>(m_join_miter_limit),	// miterLimit
+				D2D1_DASH_STYLE::D2D1_DASH_STYLE_SOLID,	// dashStyle
+				0.0f	// dashOffset
+			};
+			winrt::check_hresult(
+				factory->CreateStrokeStyle(s_prop, nullptr, 0, m_d2d_arrow_stroke.put())
+			);
+		}
+
+
+		// 矢じるしの先端と返しの位置を求める.
+		static bool line_get_pos_arrow(
+			const D2D1_POINT_2F a_end, const D2D1_POINT_2F a_pos, const ARROW_SIZE& a_size,
+			/*--->*/D2D1_POINT_2F barbs[2], D2D1_POINT_2F& tip) noexcept;
+
+		// 図形を作成する.
+		ShapeLine(const Shape* page, const bool e_close) :
+			ShapeStroke(page)
+		{
+			if (e_close) {
+				m_arrow_style = ARROW_STYLE::NONE;
+			}
+			else {
+				page->get_arrow_style(m_arrow_style);
+			}
+			page->get_arrow_size(m_arrow_size);
+		}
+		// 図形を作成する.
+		ShapeLine(const D2D1_POINT_2F start, const D2D1_POINT_2F pos, const Shape* page);
+		// データリーダーから図形を読み込む.
+		ShapeLine(const Shape& page, DataReader const& dt_reader);
+		// 図形を表示する.
+		virtual void draw(void) override;
+		// 矢じるしの寸法を得る.
+		bool get_arrow_size(ARROW_SIZE& size) const noexcept final override;
+		// 矢じるしの形式を得る.
+		bool get_arrow_style(ARROW_STYLE& val) const noexcept final override;
+		// 図形を囲む領域を得る.
+		virtual void get_bound(
+			const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
+			D2D1_POINT_2F& b_rb) const noexcept override;
+		// 塗りつぶし色を得る.
+		virtual bool get_fill_color(D2D1_COLOR_F& val) const noexcept
+		{
+			val.a = 0.0f;
+			return true;
+		}
+		// 部位の位置を得る.
+		virtual void get_pos_anc(const uint32_t /*anc*/, D2D1_POINT_2F& val) const noexcept override;
+		// 図形を囲む領域の左上位置を得る.
+		virtual void get_bound_lt(D2D1_POINT_2F& val) const noexcept override;
+		// 開始位置を得る.
+		bool get_pos_start(D2D1_POINT_2F& val) const noexcept final override;
+		// 近傍の頂点を見つける.
+		virtual bool get_pos_nearest(
+			const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept override;
+		// 頂点を得る.
+		virtual size_t get_verts(D2D1_POINT_2F p[]) const noexcept override;
+		// 位置を含むか判定する.
+		virtual uint32_t hit_test(const D2D1_POINT_2F test) const noexcept override;
+		// 矩形範囲に含まれるか判定する.
+		virtual bool in_area(
+			const D2D1_POINT_2F lt, const D2D1_POINT_2F rb) const noexcept override;
+		// 値を矢じるしの寸法に格納する.
+		virtual bool set_arrow_size(const ARROW_SIZE& val) noexcept override;
+		// 値を矢じるしの形式に格納する.
+		virtual bool set_arrow_style(const ARROW_STYLE val) noexcept override;
+		// 値を, 部位の位置に格納する.
+		virtual bool set_pos_anc(
+			const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect)
+			noexcept override;
+		// 値を始点に格納する.
+		virtual bool set_pos_start(const D2D1_POINT_2F val) noexcept override;
+		// 差分だけ移動する.
+		virtual bool move(const D2D1_POINT_2F pos) noexcept override;
+		// 図形をデータライターに書き込む.
+		void write(DataWriter const& dt_writer) const;
+		// 図形をデータライターに PDF として書き込む.
+		virtual size_t export_pdf(const D2D1_SIZE_F page_size, DataWriter const& dt_writer);
+		// 図形をデータライターに SVG として書き込む.
+		void export_svg(DataWriter const& dt_writer);
+		// 値を端の形式に格納する.
+		bool set_stroke_cap(const CAP_STYLE& val) noexcept final override;
+		// 値を線の結合の尖り制限に格納する.
+		bool set_join_miter_limit(const float& val) noexcept final override;
+		// 値を線の結合の形式に格納する.
+		bool set_join_style(const D2D1_LINE_JOIN& val) noexcept final override;
+	};
+
+	//------------------------------
 	// 折れ線のひな型
 	//------------------------------
 	struct ShapePath : ShapeLine {
 		D2D1_COLOR_F m_fill_color{ 1.0f, 1.0f, 1.0f, 0.0f };
 		winrt::com_ptr<ID2D1PathGeometry> m_d2d_path_geom{ nullptr };	// 折れ線の D2D パスジオメトリ
 
+		// 近傍の頂点を見つける.
+		virtual bool get_pos_nearest(
+			const D2D1_POINT_2F p, float& dd, D2D1_POINT_2F& val) const noexcept override;
+		// 値を, 部位の位置に格納する.
+		virtual bool set_pos_anc(
+			const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect)
+			noexcept override;
+		// 頂点を得る.
+		virtual size_t get_verts(D2D1_POINT_2F p[]) const noexcept override;
+		// 図形を囲む領域を得る.
+		void get_bound(
+			const D2D1_POINT_2F a_lt, const D2D1_POINT_2F a_rb, D2D1_POINT_2F& b_lt,
+			D2D1_POINT_2F& b_rb) const noexcept final override;
+		// 図形を囲む領域の左上位置を得る.
+		void get_bound_lt(D2D1_POINT_2F& val) const noexcept final override;
+		// 部位の位置を得る.
+		virtual void get_pos_anc(const uint32_t /*anc*/, D2D1_POINT_2F& val) const noexcept override;
 		// 図形を作成する.
 		ShapePath(const Shape* page, const bool e_closed) :
 			ShapeLine::ShapeLine(page, e_closed)
@@ -1500,10 +1517,6 @@ namespace winrt::GraphPaper::implementation
 		bool get_fill_color(D2D1_COLOR_F& val) const noexcept final override;
 		// 差分だけ移動する.
 		bool move(const D2D1_POINT_2F pos) noexcept final override;
-		// 値を, 部位の位置に格納する.
-		bool set_pos_anc(
-			const D2D1_POINT_2F val, const uint32_t anc, const float limit, const bool keep_aspect)
-			noexcept override;
 		// 値を矢じるしの寸法に格納する.
 		bool set_arrow_size(const ARROW_SIZE& val) noexcept final override;
 		// 値を矢じるしの形式に格納する.
